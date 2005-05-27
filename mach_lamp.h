@@ -1,0 +1,70 @@
+
+#ifndef _MACH_LAMP_H
+#define _MACH_LAMP_H
+
+#define LM_GUM						0
+#define LM_BALL					1
+#define LM_LOCK1					2
+#define LM_LOCK2					3
+#define LM_SPIRAL_2M				4
+#define LM_SPIRAL_3M				5
+#define LM_SPIRAL_4M				6
+#define LM_SPIRAL_5M				7
+#define LM_SPIRAL_10M			8
+#define LM_SPIRAL_EB				9
+#define LM_LEFT_INLANE1			10
+#define LM_LEFT_INLANE2			11
+#define LM_RIGHT_INLANE			12
+#define LM_SHOOT_AGAIN			13
+#define LM_LL_5M					14
+#define LM_ML_5M					15
+#define LM_UL_5M					16
+#define LM_UR_5M					17
+#define LM_MR1_5M					18
+#define LM_MR2_5M					19
+#define LM_LR_5M					20
+#define LM_DEAD_END				21
+#define LM_LEFT_OUTLANE			22
+#define LM_RIGHT_OUTLANE 		23
+#define LM_PANEL_TSM				24
+#define LM_PANEL_EB				25
+#define LM_PANEL_SUPER_SLOT	26
+#define LM_PANEL_CLOCK_MIL		27
+#define LM_PANEL_SPIRAL			28
+#define LM_PANEL_BATTLE_POWER 29
+#define LM_PANEL_10M				30
+#define LM_PANEL_GREED			31
+#define LM_PANEL_CAMERA			32
+#define LM_PANEL_HH				33
+#define LM_PANEL_CLOCK_CHAOS	34
+#define LM_PANEL_SUPER_SKILL	35
+#define LM_PANEL_FAST_LOCK		36
+#define LM_PANEL_GUMBALL		37
+#define LM_PANEL_LITZ			38
+#define LM_LEFT_JET				39
+#define LM_RIGHT_JET				40
+#define LM_LOWER_JET				41
+#define LM_SUPER_SKILL			42
+#define LM_MULTIBALL				43
+#define LM_BONUS_X				44
+#define LM_LEFT_POWERBALL		45
+#define LM_MPF_1M					46
+#define LM_MPF_750K				47
+#define LM_MPF_500K				48
+#define LM_GUMBALL_LANE			49
+#define LM_RIGHT_POWERBALL		50
+#define LM_LOCK_EB				51
+#define LM_LOCK_ARROW			52
+#define LM_RAMP_BATTLE			53
+#define LM_CAMERA					54
+#define LM_POWER_PAYOFF			55
+#define LM_BUYIN_BUTTON			56
+#define LM_START_BUTTON			57
+#define LM_LEFT_SPIRAL			58
+#define LM_RIGHT_SPIRAL			59
+#define LM_CLOCK_MILLIONS		60
+#define LM_PIANO_JACKPOT		61
+#define LM_SLOT_MACHINE			62
+#define LM_PIANO_PANEL			63
+
+#endif /* _MACH_LAMP_H */

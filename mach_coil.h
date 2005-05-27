@@ -1,0 +1,35 @@
+
+
+#ifndef _MACH_COIL_H
+#define _MACH_COIL_H
+
+
+#define SOL_SLOT				0
+#define SOL_ROCKET			1
+#define SOL_AUTOFIRE			2
+#define SOL_POPPER			3
+#define SOL_RIGHT_RAMP_DIV	4
+#define SOL_GUMBALL_DIV		5
+#define SOL_KNOCKER			6
+#define SOL_OUTHOLE			7
+
+#define SOL_BALL_SERVE		8
+#define SOL_RIGHT_SLING		9
+#define SOL_LEFT_SLING		10
+#define SOL_LOWER_JET		11
+#define SOL_LEFT_JET			12
+#define SOL_RIGHT_JET		13
+#define SOL_LOCK_RELEASE	14
+#define SOL_SHOOTER_DIV		15
+
+#define SOL_CLOCK_REVERSE	42
+#define SOL_CLOCK_FORWARD	43
+#define SOL_CLOCK_STROBE	44
+
+#define FLASH_UR_FLIPPER	26
+#define FLASH_GUMBALL_HIGH	27
+#define FLASH_GUMBALL_MID	28
+#define FLASH_GUMBALL_LOW	29
+
+
+#endif /* _MACH_COIL_H */

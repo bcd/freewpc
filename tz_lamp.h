@@ -1,0 +1,81 @@
+divert(-1)
+
+changequote([,])
+
+define(enum,[define([__enumval], $1)])
+
+define(enumvalue, [ifelse($#, 1, ,$1 = __enumval
+   [define([__enumval], incr(__enumval))][enumvalue(shift($@))]
+)])
+
+divert
+
+enum(0)
+enumvalue(
+   LM_PANEL_GUM,
+   LM_PANEL_BALL,
+   LM_LOCK1,
+   LM_LOCK2,
+   LM_SPIRAL_2M,
+   LM_SPIRAL_3M,
+   LM_SPIRAL_4M,
+   LM_SPIRAL_5M,
+   LM_SPIRAL_10M,
+   LM_SPIRAL_EB,
+   LM_LEFT_INLANE_1,
+   LM_LEFT_INLANE_2,
+   LM_RIGHT_INLANE,
+   LM_SHOOT_AGAIN,
+   LM_LL_5M,
+   LM_ML_5M,
+   LM_UL_5M,
+   LM_UR_5M,
+   LM_MR1_5M,
+   LM_MR2_5M,
+   LM_LR_5M,
+   LM_DEAD_END,
+   LM_LEFT_OUTLANE,
+   LM_RIGHT_OUTLANE,
+   LM_PANEL_TSM,
+   LM_PANEL_EB,
+   LM_PANEL_SUPER_SLOT,
+   LM_PANEL_CLOCK_MIL,
+   LM_PANEL_SPIRAL,
+   LM_PANEL_POWER,
+   LM_PANEL_10M,
+   LM_PANEL_GREED,
+   LM_PANEL_CAMERA,
+   LM_PANEL_HITCH,
+   LM_PANEL_CHAOS,
+   LM_PANEL_SSS,
+   LM_PANEL_FAST_LOCK,
+   LM_PANEL_GUMBALL,
+   LM_DOOR_HANDLE,
+   LM_LEFT_JET,
+   LM_RIGHT_JET,
+   LM_LOWER_JET,
+   LM_LRAMP_SSS,
+   LM_LRAMP_MB,
+   LM_LRAMP_BONUSX,
+   LM_LEFT_POWERBALL,
+   LM_MPF_1M,
+   LM_MPF_750K,
+   LM_MPF_500K,
+   LM_GUMBALL_LIT,
+   LM_RIGHT_POWERBALL,
+   LM_LOCK_EB,
+   LM_LOCK,
+   LM_RRAMP_POWER,
+   LM_CAMERA,
+   LM_POWER_PAYOFF,
+   LM_BUYIN,
+   LM_START,
+   LM_LEFT_SPIRAL,
+   LM_RIGHT_SPIRAL,
+   LM_CLOCK,
+   LM_PIANO_RED,
+   LM_SLOT,
+   LM_PIANO_YELLOW,
+)
+
+

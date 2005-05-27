@@ -1,0 +1,81 @@
+#!/bin/bash
+
+TRANSLATE_ERRORS=1
+
+SAVE_TEMPS=0
+
+while [ "$1" != "" ]; do
+	arg=$1; shift
+	case $arg in
+		--translate)
+			head -n $3 $2 | tail -1 | grep -o "// __SASMLINE.*$" | 
+				awk "{print \"Error at line \" \$2 \":\" }"
+			head -n $3 $2 | tail -1
+			exit 0
+			;;
+		--save-temps)
+			SAVE_TEMPS=1
+			;;
+		-N)
+			TRANSLATE_ERRORS=0
+			;;
+		*)
+			F=$arg
+			;;
+	esac
+done
+
+F1=${F}1
+F2=${F}2
+F3=${F}3
+F4=${F}4
+
+function finish
+{
+	if [ "$SAVE_TEMPS" != "1" ]; then
+		rm -f $F1 $F2 $F3 $F4
+	fi
+	exit $1;
+}
+
+#
+# Mark the source file with original line number information
+#
+cat $F | awk '{print $$0 "   //__SASMLINE " ++line; }' > $F1
+if [ "$?" != "0" ]; then finish $?; fi
+
+#
+# Preprocess C style macros using cpp
+#
+cpp -nostdinc -P $F1 > $F2
+if [ "$?" != "0" ]; then finish $?; fi
+
+#
+# Preprocess the structured assembly macros
+#
+cpp -nostdinc -P m6809.m4 > m6809.m41
+cpp -nostdinc -P syscall.m4 > syscall.m41
+m4 m6809.m41 syscall.m41 $F2 > $F4
+if [ "$?" != "0" ]; then finish $?; fi
+
+
+#
+# Pass to the actual assembler
+#
+if [ "$TRANSLATE_ERRORS" = "1" ]; then
+as6809 -aglxoz $F4 2>&1 | awk "
+	/* Every line */
+	{
+		if (\$3 == \"line\") {
+			system(\"./sasm09 --translate $F4 \" \$4);
+		}
+		else
+		{
+			print \$0;
+		}
+	}" -
+else
+as6809 -aglxoz $F4 2>&1
+fi
+finish $?
+
