@@ -1,6 +1,6 @@
 
 #include "wpc.h"
-#include "mach_coil.h"
+#include "mach/coil.h"
 
 
 /*

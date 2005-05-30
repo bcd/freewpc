@@ -15,26 +15,18 @@
 #define SEG_MID			0x40
 #define SEG_VERT			0x80
 
-SEG_RIGHT = (SEG_UPR_RIGHT+SEG_LWR_RIGHT)
-SEG_LEFT = (SEG_UPR_LEFT+SEG_LWR_LEFT)
+#define SEG_RIGHT			(SEG_UPR_RIGHT+SEG_LWR_RIGHT)
+#define SEG_LEFT			(SEG_UPR_LEFT+SEG_LWR_LEFT)
 
-SEG_ROWS = 4
-SEG_COLS = 16
-SEG_DATA_SIZE = (SEG_ROWS * SEG_COLS)
-SEG_PAGES = 4
+#define SEG_ROWS			4
+#define SEG_COLS			16
+#define SEG_DATA_SIZE	(SEG_ROWS * SEG_COLS)
+#define SEG_PAGES			4
 
 .area ram
 
-// seg_data::					.blkb	SEG_DATA_SIZE * SEG_PAGES
-// seg_active_offset::		.blkb 1
-// seg_allocated::			.blkb 1
-
 
 .area sysrom
-
-msg_hello_world::
-	.asciz "FREEWPC"
-
 
 seg_row_offset::
    .dw   128 * 0
@@ -84,9 +76,9 @@ seg_alpha_table::
    .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; Z
 
 
+#if 0
 proc(seg_init)
-	uses(a,x,y)
-
+	//uses(a,x,y)
 	//ldx	#seg_data
 	//ldy	#SEG_DATA_SIZE * SEG_PAGES
 	//jsr	bzerol
@@ -94,15 +86,11 @@ proc(seg_init)
 	//sta	seg_active_offset
 	//lda	#0x01
 	//sta	seg_allocated
-	ldy	#msg_hello_world
-	jsr	seg_write_string
-	
 	//ldx	#seg_update
 	//jsr	task_create
 endp
 
 
-#if 0
 	; A = active page code
 proc(seg_set_active)
 	uses(a)

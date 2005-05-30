@@ -180,11 +180,6 @@ endp
 proc(switch_sched)
 	tfr	a,b
 
-#if 0
-	lda	#SEG_ROW_3+SEG_COL_1
-	jsr	seg_write_bcd
-#endif
-
 	pshs	b
 	ldx	#switch_handlers
 	aslb
@@ -193,13 +188,7 @@ proc(switch_sched)
 	ifnz
 		jsr	task_create
 	endif
-
 	jsr	c_task_sleep(TIME_100MS * 4)
-
-#if 0
-	clrb
-	jsr	seg_write_bcd
-#endif	
 	puls	b
 
 	jsr	c_task_sleep(TIME_100MS)

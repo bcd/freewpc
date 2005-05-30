@@ -1,16 +1,49 @@
+#
+# FreeWPC makefile
+#
 
+#######################################################################
+###	Configuration
+#######################################################################
+
+# Set this to the name of the machine for which you are targetting.
+TARGET_MACHINE = tz92
+
+# Set this to the path where the final ROM image should be installed
+TARGET_ROMPATH = /home/bcd/eptools/mameroms
+
+#######################################################################
+###	Filenames
+#######################################################################
+
+# Where to write errors
 ERR = err
+TMPFILES += $(ERR)
 
-EPTOOLS_DIR=/home/bcd/eptools
+# The linker command file (generated dynamically)
+LINKCMD = sys.lnk
+TMPFILES += $(LINKCMD)
 
-EPTOOLS_ROM_DIR=$(EPTOOLS_DIR)/roms
+# Preloaded macro files
+DEFMACROS = m6809.m4 syscall.m4
 
-MAME_ROMDIR=/home/bcd/eptools/mameroms
+#######################################################################
+###	Programs
+#######################################################################
 
-DEFAULT_TARGET=install_as_tz92
+# Name of the assembler to use
+AS = ./sasm09
+REQUIRED += $(AS)
 
-DEPS = m6809.m4 syscall.m4 wpc.h Makefile
+# Name of the rommer to use
+ROMMER = srec_cat
+PATH_REQUIRED += $(ROMMER)
 
+# Name of the blanker to use
+BLANKER = dd
+PATH_REQUIRED += $(BLANKER)
+
+# Source files for the core OS
 OS_SRCS = sys.s clib.s math.s trace.s heap.s \
 	switch.s lamp.s sol.s sound.s task.s \
 	dmd.s segment.s lampset.s test.s \
@@ -19,16 +52,29 @@ OS_SRCS = sys.s clib.s math.s trace.s heap.s \
 	service.s sysinfo.s timer.s \
 	vector.s
 
+OS_INCLUDES = wpc.h
+
+
 GAME_SRCS = clock.s
 
+GAME_INCLUDES =
+
 SRCS = $(OS_SRCS) $(GAME_SRCS)
+INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
-ASMFLAGS = $(A)
+ASMFLAGS = $(A) -Iinclude
 
-PREPROCS = $(SRCS:.s=.sp)
 OBJS = $(SRCS:.s=.rel)
 
-default_target : clean_err check_prereqs $(DEFAULT_TARGET)
+DEPS = $(DEFMACROS) $(AS) $(INCLUDES) Makefile
+
+INSTALL_TARGET=install_$(TARGET_MACHINE)
+
+#######################################################################
+###	Begin Makefile Targets
+#######################################################################
+
+default_target : clean_err check_prereqs $(INSTALL_TARGET)
 
 debug: clean_err check_prereqs
 	$(MAKE) $(DEFAULT_TARGET) A="-N --save-temps"
@@ -38,15 +84,12 @@ clean_err:
 
 check_prereqs :
 
-install_as_tz92 : install
+install_tz92 : freewpc.rom
 	@echo Copying to mame directory ...; \
-	cp -p freewpc.rom $(MAME_ROMDIR)/tzone9_2.rom; \
-	cd $(MAME_ROMDIR); \
+	cp -p freewpc.rom $(TARGET_ROMPATH)/tzone9_2.rom; \
+	cd $(TARGET_ROMPATH); \
 	rm -f tz_92.zip; \
 	zip -9 tz_92.zip tzone9_2.rom tzu*.rom
-
-install : freewpc.rom
-	@echo Copying to ROM directory ... && cp -p $< $(EPTOOLS_ROM_DIR)
 
 freewpc.rom : blank256.bin blank128.bin blank64.bin blank32.bin sys.bin
 	@echo Padding ... && cat blank256.bin blank128.bin blank64.bin blank32.bin sys.bin > $@
@@ -55,35 +98,25 @@ blank%.bin:
 	@echo Creating blank file ... && dd if=/dev/zero of=$@ bs=1k count=$*
 
 sys.bin : sys.s19
-	@echo Converting to binary ... && srec_cat sys.s19 --motorola --output - --binary | dd of=sys.bin bs=1k skip=32
+	@echo Converting to binary ... && $(ROMMER) sys.s19 --motorola --output - --binary | dd of=sys.bin bs=1k skip=32
 
-sys.s19 : sys.lnk $(OBJS)
+sys.s19 : $(LINKCMD) $(OBJS)
 	@echo Linking... && aslink -f sys >> $(ERR) 2>&1
 
 $(OBJS) : %.rel : %.s $(DEPS)
-	./sasm09 $(ASMFLAGS) $<
+	$(AS) $(ASMFLAGS) $<
 
-#$(OBJS) : %.rel : %.sp
-#	@echo -n Assembling $*.s ... && \
-#	as6809 -aglxoz $*.sp; \
-#	(if [ "$$?" != "0" ]; then rm -f $*.rel; exit 1; fi) \
-#	>> $(ERR) 2>&1
-#
-#$(PREPROCS) : %.sp : %.s $(DEPS)
-#	@echo Preprocessing $*.s ... && \
-#		cat $*.s | awk '{print $$0 "   ;;__SASMLINE " line++; }' - | m4 m6809.m4 syscall.m4 - > $*.sp
-
-sys.lnk : $(DEPS)
+$(LINKCMD) : $(DEPS)
 	@echo Creating linker command file...
-	@rm -f sys.lnk
-	@echo "-mxswz" >> sys.lnk
-	@echo "-b fastram = 0x0" >> sys.lnk
-	@echo "-b ram = 0x100" >> sys.lnk
-	#@echo "-b rom = 0x4000" >> sys.lnk
-	@echo "-b sysrom = 0x8000" >> sys.lnk
-	@echo "-b vector = 0xFFF0" >> sys.lnk
-	@for f in `echo $(OBJS)`; do echo $$f >> sys.lnk; done
-	@echo "-e" >> sys.lnk
+	@rm -f $(LINKCMD)
+	@echo "-mxswz" >> $(LINKCMD)
+	@echo "-b fastram = 0x0" >> $(LINKCMD)
+	@echo "-b ram = 0x100" >> $(LINKCMD)
+	#@echo "-b rom = 0x4000" >> $(LINKCMD)
+	@echo "-b sysrom = 0x8000" >> $(LINKCMD)
+	@echo "-b vector = 0xFFF0" >> $(LINKCMD)
+	@for f in `echo $(OBJS)`; do echo $$f >> $(LINKCMD); done
+	@echo "-e" >> $(LINKCMD)
 
 clean:
-	rm -f *.sp *.o *.rel *.lnk *.s19 *.map *.bin *.rom *.lst *.s2 *.s3 *.s4 err
+	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s2 *.s3 *.s4 $(ERR)

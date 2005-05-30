@@ -1,15 +1,18 @@
 
 #include "wpc.h"
-#include "mach_coil.h"
+#include "mach/coil.h"
 
 .area fastram
 
+coil_states_begin:
 high_power_coils::		.blkb 1
 low_power_coils::			.blkb 1
 flash1_coils::				.blkb 1
 flash2_coils::				.blkb 1
 aux_coils1::				.blkb 1
 aux_coils2::				.blkb 1
+coil_states_end:
+
 coils_cksum::				.blkb 1
 
 

@@ -91,10 +91,23 @@ endp
 
 
 proc(lamp_flash)
+	uses(b,x)
+	bsr	lamp_range_check
+	ldx	#lamp_flash_select
+	bitshift
+	orb	,x
+	stb	,x
 endp
 
 
 proc(lamp_noflash)
+	uses(b,x)
+	bsr	lamp_range_check
+	ldx	#lamp_flash_select
+	bitshift
+	comb
+	andb	,x
+	stb	,x
 endp
 
 

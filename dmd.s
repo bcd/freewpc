@@ -82,6 +82,15 @@ proc(dmd_show_high)
 endp
 
 
+proc(dmd_flip_low_high)
+	lda	high_page
+	ldb	low_page
+	exg	a,b
+	sta	high_page
+	stb	low_page
+endp
+
+
 proc(dmd_clean_page)	; X = page pointer
 	uses(a,u,x)
 	ldu	#0
@@ -200,6 +209,24 @@ endp
 
 
 proc(dmd_shift_up)	; X = pointer to display page
+	uses(d,u,x,y)
+	leay	16,x			; Y = pointer one line below current
+	ldd	#(31*16)/2	; D = number of words to be transferred
+	loop
+		ldu	,y++
+		stu	,x++
+		subd	#1
+		cmpd	#0
+	while(nz)
+	ldu	#0
+	stu	,x++
+	stu	,x++
+	stu	,x++
+	stu	,x++
+	stu	,x++
+	stu	,x++
+	stu	,x++
+	stu	,x++
 endp
 
 

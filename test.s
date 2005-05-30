@@ -102,7 +102,7 @@ proc(test_loop)
 				ldx	test_info
 				ldx	TEST_ENTER_PROC_OFFSET,x
 				jsr	task_create
-				jsr	c_task_sleep(TIME_100MS * 5)
+				jsr	c_task_sleep(TIME_1S * 2)
 			endcase
 		endswitch
 
@@ -162,24 +162,45 @@ endp
 proc(sol_enter_proc)
 	tfr	b,a
 	jsr	sol_on
+	jsr	c_deff_start(sol_deff, 10)
 	jsr	c_task_sleep(TIME_100MS)
 	jsr	sol_off
+	jsr	c_deff_stop(sol_deff)
 	jmp	task_exit
+endp
+
+
+proc(sol_deff)
+	jsr	dmd_alloc_low_clean
+	jsr	dmd_show_low
+	jsr	c_task_sleep(TIME_1S * 2)
+	jmp	deff_exit
 endp
 
 
 proc(rtc_enter_proc)
 	jsr	dmd_alloc_low_clean
 
-	lda	#SEG_ADDR(0,3,6)
+	lda	#SEG_ADDR(0,2,4)
 	ldb	WPC_CLK_HOURS_DAYS
 	jsr	seg_write_short
 
-	lda	#SEG_ADDR(0,3,9)
+	lda	#SEG_ADDR(0,2,8)
 	ldb	WPC_CLK_MINS
 	jsr	seg_write_short
 
+	jsr	dmd_draw_border_low
+
 	jsr	dmd_show_low
+
+	lda	#32
+	ldx	#DMD_LOW_BASE
+	loop
+		jsr	dmd_shift_up
+		jsr	c_task_sleep(TIME_33MS)
+		deca
+	while(nz)
+
 	jsr	c_task_sleep(TIME_1S * 2)
 	jmp	task_exit
 endp

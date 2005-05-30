@@ -35,3 +35,12 @@ define(c_sound_send, [sound_send_const
 	.db	$1
 ])
 
+define(c_deff_start, [deff_start_const
+	.dw	$1
+	.db	$2
+])
+
+define(c_deff_stop, [deff_stop_const
+	.dw	$1
+])
+

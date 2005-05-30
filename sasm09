@@ -1,9 +1,17 @@
 #!/bin/bash
+#
+# sasm09 - a frontend wrapper to the as09 assembler that adds structured macros and other
+# niceties.
+#
+#
 
 TRANSLATE_ERRORS=1
-
 SAVE_TEMPS=0
+CPP_INCLUDES=""
 
+#
+# Parse command line arguments
+#
 while [ "$1" != "" ]; do
 	arg=$1; shift
 	case $arg in
@@ -19,6 +27,9 @@ while [ "$1" != "" ]; do
 		-N)
 			TRANSLATE_ERRORS=0
 			;;
+		-I*)
+			CPP_INCLUDES=`echo $CPP_INCLUDES $arg`
+			;;
 		*)
 			F=$arg
 			;;
@@ -29,6 +40,7 @@ F1=${F}1
 F2=${F}2
 F3=${F}3
 F4=${F}4
+
 
 function finish
 {
@@ -47,14 +59,14 @@ if [ "$?" != "0" ]; then finish $?; fi
 #
 # Preprocess C style macros using cpp
 #
-cpp -nostdinc -P $F1 > $F2
+cpp $CPP_INCLUDES -nostdinc -P $F1 > $F2
 if [ "$?" != "0" ]; then finish $?; fi
 
 #
 # Preprocess the structured assembly macros
 #
-cpp -nostdinc -P m6809.m4 > m6809.m41
-cpp -nostdinc -P syscall.m4 > syscall.m41
+cpp $CPP_INCLUDES -nostdinc -P m6809.m4 > m6809.m41
+cpp $CPP_INCLUDES -nostdinc -P syscall.m4 > syscall.m41
 m4 m6809.m41 syscall.m41 $F2 > $F4
 if [ "$?" != "0" ]; then finish $?; fi
 

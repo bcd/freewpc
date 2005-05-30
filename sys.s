@@ -105,7 +105,7 @@ ram_loop:
 	jsr	irq_init
 	jsr	heap_init
 	jsr	task_init
-	jsr	seg_init
+	jsr	deff_init
 
 	lda	#0x06
 	sta	WPC_ZEROCROSS_IRQ_CLEAR
@@ -178,7 +178,7 @@ interrupt proc(sys_irq)
 		;;;;;;;;;;; Execute tasks every 8ms ;;;;;;;;;;;;;;;
 		inc	tick_count
 
-		ldb	#1
+		incb
 	endif
 	stb	irq_shift_count
 endp
