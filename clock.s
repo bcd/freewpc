@@ -2,6 +2,7 @@
 #include "wpc.h"
 #include "mach/coil.h"
 
+.area sysrom
 
 /*
  * Twilight Zone Clock Driver

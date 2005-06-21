@@ -97,7 +97,7 @@ ram_loop:
 	jsr	dmd_init
 	checkpoint(5)
 	jsr	switch_init
-	jsr	sound_init
+	jsr	_sound_init
 
 	;;; Initialize subsystems
 	led_toggle
@@ -106,6 +106,7 @@ ram_loop:
 	jsr	heap_init
 	jsr	task_init
 	jsr	deff_init
+	jsr	_c_try_init
 
 	lda	#0x06
 	sta	WPC_ZEROCROSS_IRQ_CLEAR

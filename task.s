@@ -18,14 +18,15 @@
 #define TASK_OFF_STATE		16
 #define TASK_OFF_A			17
 #define TASK_OFF_B			18
-#define TASK_OFF_STACK		19
+#define TASK_OFF_ARG			19
+#define TASK_OFF_STACK		21
 #define TASK_SIZE 			64
 
 /* Number of tasks to create */
 #define NUM_TASKS				16
 
-/* Size of the task stack - uses all of the remaining
- * bytes of the task structure after the fixed values */
+;;; Size of the task stack - uses all of the remaining
+;;; bytes of the task structure after the fixed values
 #define TASK_STACK_SIZE		(TASK_SIZE - TASK_OFF_STACK - 1)
 
 /* Task states */
@@ -36,18 +37,18 @@
 .area ram
 
 ;;; Temporary memory locations needed during save/restore
-task_save_U::				.BLKW 1
-task_save_X::				.BLKW 1
+task_save_U:				.BLKW 1
+task_save_X:				.BLKW 1
 
 ;;; Declaration of task buffers
-task_buffer::		.BLKB	(NUM_TASKS * TASK_SIZE)
+task_buffer:				.BLKB	(NUM_TASKS * TASK_SIZE)
 task_buffer_end = .
 
 ;;; The task that is currently running
-task_current::				.BLKW 1
+task_current:				.BLKW 1
 
 ;;; The time of the last dispatch
-task_dispatch_tick::		.BLKB 1
+task_dispatch_tick:		.BLKB 1
 
 
 
@@ -129,25 +130,26 @@ proc(task_free)
 endp
 
 
+_task_yield::
 task_yield::
 task_save::
 	stu	task_save_U		/* save U first since it's needed as a temp */
 	stx	task_save_X		; same goes for X
 	puls	u					; U = PC
 	ldx	task_current	; get pointer to current task structure
-	stu	TASK_OFF_PC,X	; save PC
+	stu	TASK_OFF_PC,x	; save PC
 	ldu	task_save_U
-	stu	TASK_OFF_U,X	; save U
+	stu	TASK_OFF_U,x	; save U
 	ldu	task_save_X
-	stu	TASK_OFF_X,X	; save X
-	sta	TASK_OFF_A,X	; save A
-	stb	TASK_OFF_B,X	; save B
-	sty	TASK_OFF_Y,X	; save Y
+	stu	TASK_OFF_X,x	; save X
+	sta	TASK_OFF_A,x	; save A
+	stb	TASK_OFF_B,x	; save B
+	sty	TASK_OFF_Y,x	; save Y
 	leau	,s					; get current stack pointer
-	stu	TASK_OFF_S,X	; save S
+	stu	TASK_OFF_S,x	; save S
 
 	leay	TASK_OFF_STACK,x	; get lowest valid stack address
-	cmpy	TASK_OFF_S,X		; compare with current pointer
+	cmpy	TASK_OFF_S,x		; compare with current pointer
 	ifgt
 		jsr	c_sys_error(ERR_TASK_STACK_OVERFLOW)	
 	endif
@@ -157,14 +159,14 @@ task_save::
 
 task_restore::	; X = address of task block to restore
 	stx	task_current
-	lds	TASK_OFF_S,X
-	ldu	TASK_OFF_PC,X
+	lds	TASK_OFF_S,x
+	ldu	TASK_OFF_PC,x
 	pshs	u
-	ldy	TASK_OFF_Y,X
-	lda	TASK_OFF_A,X
-	ldb	TASK_OFF_B,X
-	ldu	TASK_OFF_U,X
-	clr	TASK_OFF_DELAY,X
+	ldy	TASK_OFF_Y,x
+	lda	TASK_OFF_A,x
+	ldb	TASK_OFF_B,x
+	ldu	TASK_OFF_U,x
+	clr	TASK_OFF_DELAY,x
 	ldx	TASK_OFF_X,x
 	puls	pc
 
@@ -179,6 +181,7 @@ task_restore::	; X = address of task block to restore
 	; Outputs:
 	;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 proc(task_create_const)
 	definline(y,x)
 	jsr	task_create
@@ -371,6 +374,7 @@ endp
 	; Outputs:
 	;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+_task_exit::
 proc(task_exit)
 	ldx	task_current
 	cmpx	#0000

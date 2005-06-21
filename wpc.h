@@ -11,6 +11,13 @@
 
 #define DEBUG
 
+/* For the thomson assembler */
+#define BLKB	blkb
+#define BLKW	blkw
+
+#define S(x)	#x
+#define STR(x)	S(x)
+
 /***************************************************************
  * WPC generations
  ***************************************************************/
@@ -51,15 +58,6 @@
 /* Offset of the offset and page parts of a far pointer */
 #define FP_OFFSET			0
 #define FP_PAGE			2
-
-/* const_far is a macro which defines a far constant 
- * pointer.  It requires two arguments, the offset and
- * the page number.
- */
-define(const_far, [
-	.dw	$1
-	.db	$2
-])
 
 /***************************************************************
  * Memory usage
@@ -343,17 +341,9 @@ define(const_far, [
 
 
 /****************  Macros  ***************************/
-
-
-	/* Input: X = address of buffer, A = bit position */
-   /* Output: X = address of byte, B = bitmask */
-macro(bitshift)
-	stx	WPC_SHIFTADDR
-	sta	WPC_SHIFTBIT
-	ldx	WPC_SHIFTADDR
-	ldb	WPC_SHIFTBIT
-endmacro
-
+#if defined(__SASM__)
+#include "wpc.m4"
+#endif
 
 
 #endif /* _WPC_H */

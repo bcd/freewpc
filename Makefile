@@ -35,6 +35,9 @@ DEFMACROS = m6809.m4 syscall.m4
 AS = ./sasm09
 REQUIRED += $(AS)
 
+CC = /usr/local/bin/gcc09
+REQUIRED += $(CC)
+
 # Name of the rommer to use
 ROMMER = srec_cat
 PATH_REQUIRED += $(ROMMER)
@@ -45,7 +48,7 @@ PATH_REQUIRED += $(BLANKER)
 
 # Source files for the core OS
 OS_SRCS = sys.s clib.s math.s trace.s heap.s \
-	switch.s lamp.s sol.s sound.s task.s \
+	switch.s lamp.s sol.s task.s \
 	dmd.s segment.s lampset.s test.s \
 	deff.s table.s \
 	tz.s \
@@ -62,11 +65,16 @@ GAME_INCLUDES =
 SRCS = $(OS_SRCS) $(GAME_SRCS)
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
-ASMFLAGS = $(A) -Iinclude
+ASMFLAGS = $(A) -I. -Iinclude -D__SASM__
+CFLAGS = -I. -Iinclude
 
-OBJS = $(SRCS:.s=.rel)
+AS_OBJS = $(SRCS:.s=.o) 
 
-DEPS = $(DEFMACROS) $(AS) $(INCLUDES) Makefile
+C_OBJS = ctry.o switches.o sound.o
+
+OBJS = $(AS_OBJS) $(C_OBJS)
+
+DEPS = $(DEFMACROS) $(INCLUDES) Makefile
 
 INSTALL_TARGET=install_$(TARGET_MACHINE)
 
@@ -103,8 +111,12 @@ sys.bin : sys.s19
 sys.s19 : $(LINKCMD) $(OBJS)
 	@echo Linking... && aslink -f sys >> $(ERR) 2>&1
 
-$(OBJS) : %.rel : %.s $(DEPS)
+$(AS_OBJS) : %.o : %.s $(AS) $(DEPS)
 	$(AS) $(ASMFLAGS) $<
+
+$(C_OBJS) : %.o : %.c $(CC) $(DEPS)
+	$(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
+	$(CC) -o $@ -c $(CFLAGS) $<
 
 $(LINKCMD) : $(DEPS)
 	@echo Creating linker command file...
@@ -112,10 +124,12 @@ $(LINKCMD) : $(DEPS)
 	@echo "-mxswz" >> $(LINKCMD)
 	@echo "-b fastram = 0x0" >> $(LINKCMD)
 	@echo "-b ram = 0x100" >> $(LINKCMD)
+	@echo "-b _DATA = 0x800" >> $(LINKCMD)
 	#@echo "-b rom = 0x4000" >> $(LINKCMD)
 	@echo "-b sysrom = 0x8000" >> $(LINKCMD)
 	@echo "-b vector = 0xFFF0" >> $(LINKCMD)
 	@for f in `echo $(OBJS)`; do echo $$f >> $(LINKCMD); done
+	@echo "/home/bcd/src/coco/libc-coco/libc.a" >> $(LINKCMD)
 	@echo "-e" >> $(LINKCMD)
 
 clean:

@@ -228,7 +228,10 @@ proc(sw_fourth_coin)
 endp
 
 proc(do_coin)
-	jsr	c_sound_send(SND_SCROLL)
+	lda	#SND_SCROLL
+	sta	,-s
+	jsr	_sound_send
+	leas	1,s
 	jmp	task_exit
 endp
 

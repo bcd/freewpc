@@ -16,9 +16,9 @@ while [ "$1" != "" ]; do
 	arg=$1; shift
 	case $arg in
 		--translate)
-			head -n $3 $2 | tail -1 | grep -o "// __SASMLINE.*$" | 
+			head -n $3 $2 | tail -n 1 | grep -o "// __SASMLINE.*$" | 
 				awk "{print \"Error at line \" \$2 \":\" }"
-			head -n $3 $2 | tail -1
+			head -n $3 $2 | tail -n 1
 			exit 0
 			;;
 		--save-temps)
@@ -30,6 +30,9 @@ while [ "$1" != "" ]; do
 		-I*)
 			CPP_INCLUDES=`echo $CPP_INCLUDES $arg`
 			;;
+		-D*)
+			CPPFLAGS=`echo $CPPFLAGS $arg`
+			;;
 		*)
 			F=$arg
 			;;
@@ -40,7 +43,7 @@ F1=${F}1
 F2=${F}2
 F3=${F}3
 F4=${F}4
-
+FO=`echo ${F} | sed -e "s/s$/o/"`
 
 function finish
 {
@@ -59,14 +62,14 @@ if [ "$?" != "0" ]; then finish $?; fi
 #
 # Preprocess C style macros using cpp
 #
-cpp $CPP_INCLUDES -nostdinc -P $F1 > $F2
+cpp $CPP_INCLUDES $CPPFLAGS -nostdinc -P $F1 > $F2
 if [ "$?" != "0" ]; then finish $?; fi
 
 #
 # Preprocess the structured assembly macros
 #
-cpp $CPP_INCLUDES -nostdinc -P m6809.m4 > m6809.m41
-cpp $CPP_INCLUDES -nostdinc -P syscall.m4 > syscall.m41
+cpp $CPP_INCLUDES $CPPFLAGS -nostdinc -P m6809.m4 > m6809.m41
+cpp $CPP_INCLUDES $CPPFLAGS -nostdinc -P syscall.m4 > syscall.m41
 m4 m6809.m41 syscall.m41 $F2 > $F4
 if [ "$?" != "0" ]; then finish $?; fi
 
@@ -75,7 +78,7 @@ if [ "$?" != "0" ]; then finish $?; fi
 # Pass to the actual assembler
 #
 if [ "$TRANSLATE_ERRORS" = "1" ]; then
-as6809 -aglxoz $F4 2>&1 | awk "
+/usr/local/bin/as09 -o $FO -aglx $F4 2>&1 | awk "
 	/* Every line */
 	{
 		if (\$3 == \"line\") {
@@ -87,7 +90,7 @@ as6809 -aglxoz $F4 2>&1 | awk "
 		}
 	}" -
 else
-as6809 -aglxoz $F4 2>&1
+/usr/local/bin/as09 -aglx -o $FO $F4 2>&1
 fi
 finish $?
 

@@ -64,12 +64,16 @@ endp
 
 proc(test_start)
 	uses(a,b,x)
+	ldb	#SND_ENTER
+	stb	,-s
+	jsr	_sound_send
+	leas	1,s
+
 	ldx	test_info
 	ldx	TEST_NEXT_OFFSET,x
 	stx	test_info
 	ldb	TEST_START_OFFSET,x
 	stb	test_item
-	jsr	c_sound_send(SND_ENTER)
 	jsr	c_task_recreate_gid(test_loop, GID_TEST_LOOP)
 endp
 
@@ -88,12 +92,23 @@ proc(test_loop)
 			endcase
 
 			case(SW_ROWMASK(SW_DOWN))
-				jsr	c_sound_send(SND_DOWN)
+
+				pshs	b
+				ldb	#SND_DOWN
+				stb	,-s
+				jsr	_sound_send
+				leas	1,s
+				puls	b
 				decb
 			endcase
 
 			case(SW_ROWMASK(SW_UP))
-				jsr	c_sound_send(SND_UP)
+				pshs	b
+				ldb	#SND_DOWN
+				stb	,-s
+				jsr	_sound_send
+				leas	1,s
+				puls	b
 				incb
 			endcase
 
