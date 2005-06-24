@@ -2,127 +2,42 @@
 #include "wpc.h"
 
 
-.area fastram
-
-lamp_matrix:			.blkb NUM_LAMP_COLS
-lamp_flash_select:	.blkb NUM_LAMP_COLS
-
-lamp_flash_max:		.blkb 1
-lamp_flash_count:		.blkb 1
-
-
-.area ram
-
-lamp_apply_delay:		.blkb 1
+.globl _lamp_matrix
+.globl _lamp_flash_select
+.globl _lamp_flash_max
+.globl _lamp_flash_count
+.globl _lamp_apply_delay
 
 
 .area sysrom
 
-proc(lamp_init)
-	uses(a,x)
-	ldx	#lamp_matrix
-	lda	#NUM_LAMP_COLS * 2
-	jsr	memset
-	lda	#LAMP_DEFAULT_FLASH_RATE
-	sta	lamp_flash_max
-	sta	lamp_flash_count
-	clr	lamp_apply_delay
-endp
-
 
 proc(lamp_rtt)
-	lda	irq_shift_count
+	lda	_irq_shift_count
 	sta	WPC_LAMP_COL_STROBE
-	lda	irq_count
+	lda	_irq_count
 	anda	#0x07
-	ldx	#lamp_matrix
+	ldx	#_lamp_matrix
 	lda	a,x
 	sta	WPC_LAMP_ROW_OUTPUT
 endp
 
 
 
-proc(lamp_on)	; A = lamp number
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_matrix
-	bitshift
-	orb	,x
-	stb	,x
-endp
-
-
-proc(lamp_off)	; A = lamp number
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_matrix
-	bitshift
-	comb
-	andb	,x
-	stb	,x
-endp
-
-
-proc(lamp_range_check)
-	cmpa	#64
-	ifgt
-		jsr	c_sys_error(ERR_INVALID_LAMP_NUM)
-	endif
-endp
-
-
-proc(lamp_toggle)
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_matrix
-	bitshift
-	eorb	,x	
-	stb	,x
-endp
-
-
-proc(lamp_test)
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_matrix
-	bitshift
-	bitb	,x	
-endp
-
-
-proc(lamp_flash)
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_flash_select
-	bitshift
-	orb	,x
-	stb	,x
-endp
-
-
-proc(lamp_noflash)
-	uses(b,x)
-	bsr	lamp_range_check
-	ldx	#lamp_flash_select
-	bitshift
-	comb
-	andb	,x
-	stb	,x
-endp
-
-
 proc(lamp_set_delay)
 	requires(a)
-	sta	lamp_apply_delay
+	sta	_lamp_apply_delay
 endp
 
 
 proc(lamp_apply_single)
 	uses(a)
-	lda	lamp_apply_delay
+	lda	_lamp_apply_delay
 	jsr	task_sleep
 	lda	saved(a)
+	sta	,-s
 	jsr	,x
+	leas	1,s
 endp
 
 	; X = function to apply
@@ -172,13 +87,13 @@ global(lampset_second_half)
 	.db	LAMP_OP_SKIP_RANGE, 0x01, 0x20, LAMP_OP_EXIT
 
 
-proc(lamp_demo)
+proc(_lamp_demo)
 	loop /* main */
 
 		lda	#TIME_33MS
 		jsr	lamp_set_delay
 	
-		ldx	#lamp_toggle
+		ldx	#_lamp_toggle
 		ldy	#lampset_all
 		repeat(a,4)
 			jsr	lamp_apply
@@ -187,7 +102,7 @@ proc(lamp_demo)
 	
 		clr	lamp_set_delay
 	
-		ldx	#lamp_toggle
+		ldx	#_lamp_toggle
 		ldy	#lampset_first_half
 		jsr	lamp_apply
 		repeat(a,4)

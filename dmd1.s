@@ -5,89 +5,85 @@
 
 .area ram
 
-free_page:			.blkb 1
-low_page:			.blkb 1
-high_page:			.blkb 1
-visible_page:		.blkb 1
+.globl _dmd_free_page
+.globl _dmd_low_page
+.globl _dmd_high_page
+.globl _dmd_visible_page
 
 .area sysrom
 
 
-proc(dmd_init)
-	lda	#0xFF
-	sta	WPC_DMD_FIRQ_ROW_VALUE
-
-	clra
-	sta	low_page
-	sta	WPC_DMD_LOW_PAGE
-	sta	high_page
-	sta	WPC_DMD_HIGH_PAGE
-	sta	visible_page
-	sta	WPC_DMD_ACTIVE_PAGE
-	inca
-	sta	free_page
-endp
-
-
-proc(dmd_rtt)
-endp
-
-
-proc(dmd_alloc)
-	returns(a)
-	lda	free_page
-	pshs	a
-	inca
-	anda	#(DMD_PAGE_COUNT - 1)
-	sta	free_page
-	puls	a
-endp
-
-
-proc(dmd_alloc_low)
-	uses(a)
-	bsr	dmd_alloc
-	sta	low_page
-	sta	WPC_DMD_LOW_PAGE
-endp
-
-
-proc(dmd_alloc_high)
-	uses(a)
-	bsr	dmd_alloc
-	sta	high_page
-	sta	WPC_DMD_HIGH_PAGE
-endp
-
-
-proc(dmd_alloc_low_high)
-	bsr	dmd_alloc_low
-	bsr	dmd_alloc_high
-endp
+;;;;; proc(dmd_init)
+;;;;; 	lda	#0xFF
+;;;;; 	sta	WPC_DMD_FIRQ_ROW_VALUE
+;;;;; 
+;;;;; 	clra
+;;;;; 	sta	_dmd_low_page
+;;;;; 	sta	WPC_DMD_LOW_PAGE
+;;;;; 	sta	_dmd_high_page
+;;;;; 	sta	WPC_DMD_HIGH_PAGE
+;;;;; 	sta	_dmd_visible_page
+;;;;; 	sta	WPC_DMD_ACTIVE_PAGE
+;;;;; 	inca
+;;;;; 	sta	_dmd_free_page
+;;;;; endp
+;;;;;
+;;;;;
+;;;;;proc(dmd_alloc)
+;;;;;	returns(a)
+;;;;;	lda	_dmd_free_page
+;;;;;	pshs	a
+;;;;;	inca
+;;;;;	anda	#(DMD_PAGE_COUNT - 1)
+;;;;;	sta	_dmd_free_page
+;;;;;	puls	a
+;;;;;endp
+;;;;;
+;;;;;
+;;;;; proc(dmd_alloc_low)
+;;;;; 	uses(a)
+;;;;; 	bsr	dmd_alloc
+;;;;; 	sta	_dmd_low_page
+;;;;; 	sta	WPC_DMD_LOW_PAGE
+;;;;; endp
+;;;;; 
+;;;;; 
+;;;;; proc(dmd_alloc_high)
+;;;;; 	uses(a)
+;;;;; 	bsr	dmd_alloc
+;;;;; 	sta	_dmd_high_page
+;;;;; 	sta	WPC_DMD_HIGH_PAGE
+;;;;; endp
+;;;;; 
+;;;;; 
+;;;;; proc(dmd_alloc_low_high)
+;;;;; 	bsr	dmd_alloc_low
+;;;;; 	bsr	dmd_alloc_high
+;;;;; endp
 
 
 proc(dmd_show_low)
 	uses(a)
-	lda	low_page
-	sta	visible_page
+	lda	_dmd_low_page
+	sta	_dmd_visible_page
 	sta	WPC_DMD_ACTIVE_PAGE
 endp
 
 
 proc(dmd_show_high)
 	uses(a)
-	lda	high_page
-	sta	visible_page
+	lda	_dmd_high_page
+	sta	_dmd_visible_page
 	sta	WPC_DMD_ACTIVE_PAGE
 endp
 
 
 proc(dmd_flip_low_high)
-	lda	high_page
-	ldb	low_page
+	lda	_dmd_high_page
+	ldb	_dmd_low_page
 	exg	a,b
-	sta	high_page
-	stb	low_page
+	sta	_dmd_high_page
+	stb	_dmd_low_page
 endp
 
 
@@ -167,7 +163,7 @@ endp
 
 proc(dmd_alloc_low_clean)
 	uses(x)
-	jsr	dmd_alloc_low
+	jsr	_dmd_alloc_low
 	ldx	#DMD_LOW_BASE
 	jsr	dmd_clean_page
 endp
@@ -175,7 +171,7 @@ endp
 
 proc(dmd_alloc_high_clean)
 	uses(x)
-	jsr	dmd_alloc_high
+	jsr	_dmd_alloc_high
 	ldx	#DMD_HIGH_BASE
 	jsr	dmd_clean_page
 endp

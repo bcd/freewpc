@@ -3,19 +3,8 @@
 #include "wpc.h"
 
 
-.area fastram
-
-irq_count::			.blkb 1
-irq_shift_count::	.blkb	1
-tick_count::		.blkb 1
-
 .area ram
 
-#ifdef DEBUG
-checkpoint_value:		.blkb 1
-#endif
-sys_init_complete:	.blkb 1
-errno:					.blkb 1
 err_pc:					.blkw 1
 err_a:					.blkb 1
 err_b:					.blkb 1
@@ -32,18 +21,6 @@ macro(led_toggle)
 	eora	#0x80
 	sta	WPC_LEDS
 endmacro
-
-
-#ifdef DEBUG
-macro(checkpoint)
-	pshs	a
-	lda	#$1
-	sta	checkpoint_value
-	puls	a
-endmacro
-#else
-#define checkpoint(x)
-#endif
 
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,46 +57,44 @@ ram_loop:
 
 	;;; Set up the stack
 	lds	#STACK_BASE
-	checkpoint(1)
 
-	;;; Test the RAM
-	led_toggle
-	checkpoint(2)
+	;;; Jump to C initialization
+	jmp	_init
 
-	;;; TODO : Checksum the ROM
-
-	;;; Initialize I/O devices
-	led_toggle
-	clr	sys_init_complete
-	checkpoint(3)
-	jsr	sol_init
-	checkpoint(4)
-	jsr	dmd_init
-	checkpoint(5)
-	jsr	switch_init
-	jsr	_sound_init
-
-	;;; Initialize subsystems
-	led_toggle
-	jsr	trace_init
-	jsr	irq_init
-	jsr	heap_init
-	jsr	task_init
-	jsr	deff_init
-	jsr	_c_try_init
-
-	lda	#0x06
-	sta	WPC_ZEROCROSS_IRQ_CLEAR
-
-	;;; Mark initialization complete
-	inc	sys_init_complete
-
-	;;; Enable interrupts
-	led_toggle
-	andcc	#~(CC_IRQ+CC_FIRQ)
-
-	jsr	test_init
-	jsr	c_task_create(lamp_demo)
+;;;;;	;;; Test the RAM
+;;;;;	led_toggle
+;;;;;
+;;;;;	;;; TODO : Checksum the ROM
+;;;;;
+;;;;;	;;; Initialize I/O devices
+;;;;;	led_toggle
+;;;;;	clr	_sys_init_complete
+;;;;;	jsr	_sol_init
+;;;;;	jsr	dmd_init
+;;;;;	jsr	switch_init
+;;;;;	jsr	_sound_init
+;;;;;
+;;;;;	;;; Initialize subsystems
+;;;;;	led_toggle
+;;;;;	jsr	trace_init
+;;;;;	jsr	_irq_init
+;;;;;	jsr	heap_init
+;;;;;	jsr	_task_init
+;;;;;	jsr	deff_init
+;;;;;	jsr	_c_try_init
+;;;;;
+;;;;;	lda	#0x06
+;;;;;	sta	WPC_ZEROCROSS_IRQ_CLEAR
+;;;;;
+;;;;;	;;; Mark initialization complete
+;;;;;	inc	_sys_init_complete
+;;;;;
+;;;;;	;;; Enable interrupts
+;;;;;	led_toggle
+;;;;;	andcc	#~(CC_IRQ+CC_FIRQ)
+;;;;;
+;;;;;	jsr	test_init
+;;;;;	jsr	c_task_create(_lamp_demo)
 
 	ldd	#0x1234
 	ldu	#0x5678
@@ -153,11 +128,11 @@ ram_loop:
 endp
 
 
-proc(irq_init)
-	ldb	#1
-	stb	irq_shift_count
-	clr	irq_count
-endp
+;;;;;proc(irq_init)
+;;;;;	ldb	#1
+;;;;;	stb	_irq_shift_count
+;;;;;	clr	_irq_count
+;;;;;endp
 
 
 interrupt proc(sys_irq)
@@ -168,20 +143,20 @@ interrupt proc(sys_irq)
 	led_toggle
 	jsr	switch_rtt
 	jsr	lamp_rtt
-	jsr	sol_rtt
+	jsr	_sol_rtt
 
-	inc	irq_count
+	inc	_irq_count
 
-	ldb	irq_shift_count
+	ldb	_irq_shift_count
 	lslb
 	tstb
 	ifz
 		;;;;;;;;;;; Execute tasks every 8ms ;;;;;;;;;;;;;;;
-		inc	tick_count
+		inc	_tick_count
 
 		incb
 	endif
-	stb	irq_shift_count
+	stb	_irq_shift_count
 endp
 
 
@@ -190,7 +165,7 @@ interrupt proc(sys_firq)
 	bmi	timer_int
 
 dmd_int:
-	jsr	dmd_rtt
+	jsr	_dmd_rtt
 	bra	end_firq
 
 timer_int:
@@ -200,21 +175,21 @@ end_firq:
 endp
 
 
-interrupt proc(sys_nmi)
-	jsr	c_sys_error(ERR_NMI)
-endp
-
-interrupt proc(sys_swi)
-	jsr	c_sys_error(ERR_SWI)
-endp
-
-interrupt proc(sys_swi2)
-	jsr	c_sys_error(ERR_SWI2)
-endp
-
-interrupt proc(sys_swi3)
-	jsr	c_sys_error(ERR_SWI3)
-endp
+;;;;interrupt proc(sys_nmi)
+;;;;	jsr	c_sys_error(ERR_NMI)
+;;;;endp
+;;;;
+;;;;interrupt proc(sys_swi)
+;;;;	jsr	c_sys_error(ERR_SWI)
+;;;;endp
+;;;;
+;;;;interrupt proc(sys_swi2)
+;;;;	jsr	c_sys_error(ERR_SWI2)
+;;;;endp
+;;;;
+;;;;interrupt proc(sys_swi3)
+;;;;	jsr	c_sys_error(ERR_SWI3)
+;;;;endp
 
 
 sys_error_const::
@@ -222,7 +197,7 @@ sys_error_const::
 	pshs	a,x
 	ldx	3,s
 	lda	,x+
-	sta	errno
+	sta	_errcode
 	stx	3,s
 	stx	err_pc
 	puls	a,x

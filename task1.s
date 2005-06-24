@@ -40,103 +40,22 @@
 task_save_U:				.BLKW 1
 task_save_X:				.BLKW 1
 
-;;; Declaration of task buffers
-task_buffer:				.BLKB	(NUM_TASKS * TASK_SIZE)
-task_buffer_end = .
 
-;;; The task that is currently running
-task_current:				.BLKW 1
-
-;;; The time of the last dispatch
-task_dispatch_tick:		.BLKB 1
+.globl _task_buffer
+.globl _task_current
+.globl _task_dispatch_tick
 
 
 
 .area sysrom
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_init)
-	uses(x,y)
-	ldx	#task_buffer
-	loop
-		jsr	task_free
-		leax	TASK_SIZE,x
-		cmpx	#task_buffer_end
-	while(ne)
-
-	jsr	task_allocate
-	stx	task_current
-
-	lda	tick_count
-	sta	task_dispatch_tick
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_allocate)
-	uses(a)
-	ldx	#task_buffer
-	loop
-		tst	TASK_OFF_STATE,x
-		ifz
-			lda	#TASK_USED
-			sta	TASK_OFF_STATE,x
-			clr	TASK_OFF_DELAY,x
-			return
-		endif
-
-		leax	TASK_SIZE,x
-		cmpx	#task_buffer_end
-	while(nz)
-
-	jsr	c_sys_error(ERR_NO_FREE_TASKS)
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_free)
-	clr	TASK_OFF_STATE,x
-endp
-
-
-_task_yield::
 task_yield::
 task_save::
 	stu	task_save_U		/* save U first since it's needed as a temp */
 	stx	task_save_X		; same goes for X
 	puls	u					; U = PC
-	ldx	task_current	; get pointer to current task structure
+	ldx	_task_current	; get pointer to current task structure
 	stu	TASK_OFF_PC,x	; save PC
 	ldu	task_save_U
 	stu	TASK_OFF_U,x	; save U
@@ -158,7 +77,7 @@ task_save::
 
 
 task_restore::	; X = address of task block to restore
-	stx	task_current
+	stx	_task_current
 	lds	TASK_OFF_S,x
 	ldu	TASK_OFF_PC,x
 	pshs	u
@@ -192,11 +111,12 @@ proc(task_create)
 	requires(x)
 	returns(x)
 	uses(a,y,u)
-	pshs	u
+	pshs	d,u
 	tfr	x,u
-	jsr	task_allocate
+	jsr	_task_allocate
+	tfr	d,x
 	stu	TASK_OFF_PC,x
-	puls	u
+	puls	d,u
 	clr	TASK_OFF_GID,x
 	sta	TASK_OFF_A,x
 	stb	TASK_OFF_B,x
@@ -292,7 +212,7 @@ endp
 proc(task_getgid)
 	uses(x)
 	returns(a)
-	ldx	task_current
+	ldx	_task_current
 	lda	TASK_OFF_GID,x
 endp
 
@@ -316,13 +236,13 @@ endp
 proc(task_sleep)
 	uses(a,x)
 task_sleep1::
-	ldx	task_current
+	ldx	_task_current
 	cmpx	#0000
 	ifz
 		jsr	c_sys_error(ERR_IDLE_CANNOT_SLEEP)
 	endif
 	sta	TASK_OFF_DELAY,x
-	lda	tick_count
+	lda	_tick_count
 	sta	TASK_OFF_ASLEEP,x
 	lda	#TASK_BLOCKED
 	ora	TASK_OFF_STATE,x
@@ -374,16 +294,15 @@ endp
 	; Outputs:
 	;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-_task_exit::
 proc(task_exit)
-	ldx	task_current
+	ldx	_task_current
 	cmpx	#0000
 	ifz
 		jsr	c_sys_error(ERR_IDLE_CANNOT_EXIT)
 	endif
-	jsr	task_free
+	clr	TASK_OFF_STATE,x
 	ldu	#0000
-	stu	task_current
+	stu	_task_current
 	jmp	task_dispatcher
 endp
 
@@ -401,9 +320,9 @@ endp
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proc(task_kill_pid)
 	requires(x)
-	cmpx	task_current
+	cmpx	_task_current
 	ifne
-		jsr	task_free
+		clr	TASK_OFF_STATE,x
 	else
 		jsr	c_sys_error(ERR_TASK_KILL_CURRENT)
 	endif
@@ -424,13 +343,13 @@ endp
 proc(task_find_gid)
 	requires(a)
 	uses(x)
-	ldx	#task_buffer
+	ldx	#_task_buffer
 	loop
 		tst	TASK_OFF_STATE,x
 		ifnz
 			cmpa	TASK_OFF_GID,x
 			ifeq
-				cmpx	task_current
+				cmpx	_task_current
 				ifne
 					true
 					return
@@ -439,7 +358,7 @@ proc(task_find_gid)
 		endif
 
 		leax	TASK_SIZE,x
-		cmpx	#task_buffer_end
+		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
 	while(nz)
 	false
 endp
@@ -464,13 +383,13 @@ endp
 proc(task_kill_gid)
 	requires(a)
 	uses(x)
-	ldx	#task_buffer
+	ldx	#_task_buffer
 	loop
 		tst	TASK_OFF_STATE,x
 		ifnz
 			cmpa	TASK_OFF_GID,x
 			ifeq
-				cmpx	task_current
+				cmpx	_task_current
 				ifne
 					jsr	task_kill_pid	
 				endif
@@ -478,7 +397,7 @@ proc(task_kill_gid)
 		endif
 
 		leax	TASK_SIZE,x
-		cmpx	#task_buffer_end
+		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
 	while(nz)
 endp
 
@@ -506,7 +425,7 @@ task_dispatcher::
 dispatch_loop:
 	leax	TASK_SIZE,x
 dispatch_check:
-	cmpx	#task_buffer_end
+	cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
 	beq	task_list_end
 
 	; Skip empty slots
@@ -523,7 +442,7 @@ dispatch_check:
 	bita	TASK_OFF_STATE,x
 	beq	dispatch_loop			; No, continue scanning
 
-	lda	tick_count
+	lda	_tick_count
 	suba	TASK_OFF_ASLEEP,x		; Compute time spent asleep so far
 	cmpa	TASK_OFF_DELAY,x		; Compare against scheduled delay
 	blt	dispatch_loop			; Not ready yet, continue
@@ -540,7 +459,7 @@ task_list_end:
 	jsr	switch_idle_task
 
 	; Start scanning from beginning of table again
-	ldx	#task_buffer			; Reset to beginning of buffer
+	ldx	#_task_buffer			; Reset to beginning of buffer
 	lbra	dispatch_check
 
 

@@ -47,32 +47,37 @@ BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
 
 # Source files for the core OS
-OS_SRCS = sys.s clib.s math.s trace.s heap.s \
-	switch.s lamp.s sol.s task.s \
-	dmd.s segment.s lampset.s test.s \
-	deff.s table.s \
-	tz.s \
-	service.s sysinfo.s timer.s \
-	vector.s
+AS_OS_OBJS = sys.o clib.o trace.o heap.o \
+	switch.o lamp1.o task1.o \
+	dmd1.o segment.o lampset.o test1.o \
+	deff.o table.o \
+	tz.o \
+	service.o \
+	vector.o \
+
+OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
+	ctry.o switches.o sound.o
 
 OS_INCLUDES = wpc.h
 
 
-GAME_SRCS = clock.s
+GAME_OBJS = clock.o
+AS_GAME_OBJS =
 
 GAME_INCLUDES =
 
-SRCS = $(OS_SRCS) $(GAME_SRCS)
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
 ASMFLAGS = $(A) -I. -Iinclude -D__SASM__
-CFLAGS = -I. -Iinclude
+CFLAGS = -I. -Iinclude -I../../coco/libc-coco/include
 
-AS_OBJS = $(SRCS:.s=.o) 
+CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas
+CFLAGS += -da
+CFLAGS += -Wall
+CFLAGS += -Werror-implicit-function-declaration
 
-C_OBJS = ctry.o switches.o sound.o
-
-OBJS = $(AS_OBJS) $(C_OBJS)
+OBJS = $(OS_OBJS) $(GAME_OBJS)
+AS_OBJS = $(AS_OS_OBJS) $(AS_GAME_OBJS)
 
 DEPS = $(DEFMACROS) $(INCLUDES) Makefile
 
@@ -108,15 +113,15 @@ blank%.bin:
 sys.bin : sys.s19
 	@echo Converting to binary ... && $(ROMMER) sys.s19 --motorola --output - --binary | dd of=sys.bin bs=1k skip=32
 
-sys.s19 : $(LINKCMD) $(OBJS)
+sys.s19 : $(LINKCMD) $(OBJS) $(AS_OBJS)
 	@echo Linking... && aslink -f sys >> $(ERR) 2>&1
 
 $(AS_OBJS) : %.o : %.s $(AS) $(DEPS)
 	$(AS) $(ASMFLAGS) $<
 
-$(C_OBJS) : %.o : %.c $(CC) $(DEPS)
-	$(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
-	$(CC) -o $@ -c $(CFLAGS) $<
+$(OBJS) : %.o : %.c $(CC) $(DEPS)
+	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
+	@$(CC) -o $@ -c $(CFLAGS) $< > /dev/null 2>&1
 
 $(LINKCMD) : $(DEPS)
 	@echo Creating linker command file...
@@ -128,9 +133,9 @@ $(LINKCMD) : $(DEPS)
 	#@echo "-b rom = 0x4000" >> $(LINKCMD)
 	@echo "-b sysrom = 0x8000" >> $(LINKCMD)
 	@echo "-b vector = 0xFFF0" >> $(LINKCMD)
-	@for f in `echo $(OBJS)`; do echo $$f >> $(LINKCMD); done
+	@for f in `echo $(AS_OBJS) $(OBJS)`; do echo $$f >> $(LINKCMD); done
 	@echo "/home/bcd/src/coco/libc-coco/libc.a" >> $(LINKCMD)
 	@echo "-e" >> $(LINKCMD)
 
 clean:
-	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s2 *.s3 *.s4 $(ERR)
+	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst $(ERR)

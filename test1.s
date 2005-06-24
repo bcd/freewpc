@@ -64,8 +64,8 @@ endp
 
 proc(test_start)
 	uses(a,b,x)
-	ldb	#SND_ENTER
-	stb	,-s
+	lda	#SND_ENTER
+	sta	,-s
 	jsr	_sound_send
 	leas	1,s
 
@@ -93,22 +93,22 @@ proc(test_loop)
 
 			case(SW_ROWMASK(SW_DOWN))
 
-				pshs	b
-				ldb	#SND_DOWN
-				stb	,-s
+				pshs	d
+				lda	#SND_DOWN
+				sta	,-s
 				jsr	_sound_send
 				leas	1,s
-				puls	b
+				puls	d
 				decb
 			endcase
 
 			case(SW_ROWMASK(SW_UP))
-				pshs	b
-				ldb	#SND_DOWN
-				stb	,-s
+				pshs	d
+				lda	#SND_DOWN
+				sta	,-s
 				jsr	_sound_send
 				leas	1,s
-				puls	b
+				puls	d
 				incb
 			endcase
 
@@ -137,7 +137,7 @@ endp
 
 
 proc(test_deff_proc)
-	jsr	dmd_alloc_low_high
+	jsr	_dmd_alloc_low_high
 	jsr	dmd_clean_low
 
 	lda	#SEG_ADDR(0, 2, 1)
@@ -175,11 +175,17 @@ endp
 
 
 proc(sol_enter_proc)
-	tfr	b,a
-	jsr	sol_on
-	jsr	c_deff_start(sol_deff, 10)
+	pshs	b
+	pshs	b
+	jsr	_sol_on
+	leas	1,s
+
+	;;; jsr	c_deff_start(sol_deff, 10)
 	jsr	c_task_sleep(TIME_100MS)
-	jsr	sol_off
+	
+	jsr	_sol_off
+	leas	1,s
+
 	jsr	c_deff_stop(sol_deff)
 	jmp	task_exit
 endp
@@ -224,13 +230,13 @@ endp
 proc(clock_enter_proc)
 	switch(a)
 		case(0)
-			jsr	tz_clock_stop
+			jsr	_tz_clock_stop
 		endcase
 		case(1)
-			jsr	tz_clock_start_forward
+			jsr	_tz_clock_start_forward
 		endcase
 		case(2)
-			jsr	tz_clock_start_backward
+			jsr	_tz_clock_start_backward
 		endcase
 	endswitch
 	jmp	task_exit

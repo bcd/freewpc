@@ -9,6 +9,23 @@
 #ifndef _WPC_H
 #define _WPC_H
 
+#ifndef __SASM__
+
+typedef char bool;
+typedef char int8_t;
+typedef unsigned char uint8_t;
+typedef int int16_t;
+typedef unsigned int uint16_t;
+
+#include <stdlib.h>
+#include <string.h>
+#include <env.h>
+/* Including sys/types.h is almost always wrong! */
+
+#endif
+
+#include <sys/errno.h>
+
 #define DEBUG
 
 /* For the thomson assembler */
@@ -303,23 +320,6 @@
 #define SEG_COL_14 0xD
 #define SEG_COL_15 0xE
 
-
-/***************************************************************
- * System error codes
- ***************************************************************/
-
-#define ERR_NO_FREE_TASKS 			1
-#define ERR_TASK_STACK_OVERFLOW 	2
-#define ERR_TASK_KILL_CURRENT 	3
-#define ERR_TASK_REGISTER_SAVE 	4
-#define ERR_NMI 						5
-#define ERR_SWI 						6
-#define ERR_SWI2 						7
-#define ERR_SWI3 						8
-#define ERR_IDLE_CANNOT_SLEEP 	9
-#define ERR_IDLE_CANNOT_EXIT 		10
-#define ERR_INVALID_LAMP_NUM		11
-#define ERR_NO_FREE_TIMERS			12
 
 /***************************************************************
  * Task Groups

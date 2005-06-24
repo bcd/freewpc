@@ -7,14 +7,6 @@ char c2 (char x) { return x-2; }
 int c3 (int x) { return x-3; }
 long c4 (long x) { return x-4; }
 
-short c5 (short x1, short x2, int x3)
-{
-	x1 = c1(x1);
-	x2 = c2(x2);
-	x3 = c3(x3);
-	return x1 + x2 + x3;
-}
-
 inline void wpc_shift (void **addr, uint8_t *bit)
 {
 	*(uint16_t *)WPC_SHIFTADDR = (uint16_t)*addr;
@@ -32,35 +24,6 @@ test_shifter (void)
 }
 
 
-void
-task_create (
-	task_function_t fn, 
-	uint16_t arg,
-	task_gid_t gid )
-{
-	/* Note: field offsets are hardcoded here! */
-	asm (
-		"ldx	2,u\n"
-		"jsr	task_create\n"
-		"ldy	4,u\n"
-		"sty	19,x\n"
-		"ldy	6,u\n"
-		"sty	,x\n"
-		::: "x", "y"
-	);
-}
-
-
-void
-task_sleep (
-	task_ticks_t ticks )
-{
-	asm (
-		"ldd	2,u\n"
-		"jsr	task_sleepl\n"
-		::: "d"
-	);
-}
 
 
 void
@@ -70,7 +33,7 @@ test_task (uint16_t arg)
 	for (i=0; i < 10; i++)
 	{
 		*(uint8_t *)WPCS_DATA = 0x81;
-		task_sleep (TIME_1S * 3);
+		task_sleep (TIME_1S * 2);
 	}
 }
 

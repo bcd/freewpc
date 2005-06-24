@@ -1,11 +1,10 @@
-
 #include <wpc.h>
 #include <env.h>
 #include <sys/types.h>
+#include <sys/sound.h>
 
 #define MUSIC_STACK_SIZE 8
 
-typedef uint8_t music_code_t, sound_code_t;
 
 __fastram__ music_code_t music_stack[MUSIC_STACK_SIZE];
 __fastram__ music_code_t *music_head;

@@ -71,6 +71,16 @@ proc(bzerol)	; X = pointer, Y = length
 	while(ne)
 endp
 
+	; C language interface to bzero
+proc(_bzero)
+	pshs	x,y,u
+	ldu	6,s
+	ldx	2,u
+	ldy	4,u
+	bsr	bzerol
+	puls	x,y,u,pc
+endp
+
 
 	; X = pointer, Y = count
 	; Returns checksum in A

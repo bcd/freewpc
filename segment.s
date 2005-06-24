@@ -341,7 +341,10 @@ proc(seg_write_short)
 	endlocal
 
 	tfr	b,a
-	jsr	div10						/* A = first digit, B = second digit */
+	pshs	a
+	jsr	_div10					/* A = first digit, B = second digit */
+	leas	1,s
+
 	exg	a,b						/* B = first digit, A = second digit */
 	sta	tmp						/* Save second digit for later */
 	lda	saved(a)
