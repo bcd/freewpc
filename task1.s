@@ -360,6 +360,7 @@ proc(task_find_gid)
 		leax	TASK_SIZE,x
 		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
 	while(nz)
+	ldx	#0
 	false
 endp
 

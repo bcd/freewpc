@@ -96,6 +96,7 @@ void idle (void)
 void init (void) __noreturn__
 {
 	extern void lamp_demo ();
+	extern void test_init (void);
 
 	sys_init_complete = 0;
 	
@@ -120,7 +121,7 @@ void init (void) __noreturn__
 
 	task_create_gid (0, lamp_demo, 0);
 
-	asm ("jsr test_init");
+	test_init ();
 	task_exit ();
 }
 

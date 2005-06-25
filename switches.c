@@ -1,10 +1,7 @@
 
 
-#include <wpc.h>
-#include <sys/task.h>
+#include <freewpc.h>
 #include <sys/irq.h>
-
-#define SWITCH_BITS_SIZE	(NUM_SWITCHES / BITS_PER_BYTE)
 
 #define AR_RAW			0
 #define AR_CHANGED 	1

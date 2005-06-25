@@ -11,7 +11,8 @@
 
 #ifndef __SASM__
 
-typedef char bool;
+typedef unsigned char bool;
+typedef unsigned char bcd_t;
 typedef char int8_t;
 typedef unsigned char uint8_t;
 typedef int int16_t;
@@ -136,65 +137,6 @@ typedef unsigned int uint16_t;
 /* When the lock register contains this value, the memory
  * protection circuit is disabled */
 #define RAM_UNLOCKED			0xB4
-
-/***************************************************************
- * Lamps
- ***************************************************************/
-
-#define NUM_LAMPS 64
-
-#define NUM_LAMP_COLS	8
-
-#define LAMP_DEFAULT_FLASH_RATE 8
-
-
-/* Lamp effect opcodes
- */
-#define LAMP_OP_SKIP_RANGE	0xFD
-#define LAMP_OP_RANGE		0xFE
-#define LAMP_OP_EXIT			0xFF
-
-
-/***************************************************************
- * Switches
- ***************************************************************/
-
-#define NUM_PF_SWITCHES 64
-#define NUM_DEDICATED_SWITCHES 8
-#define NUM_SWITCHES (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES)
-
-#define SW_COL(x)			((x) >> 3)
-#define SW_ROW(x)			((x) & 0x07)
-#define SW_ROWMASK(x)	(1 << SW_ROW(x))
-
-#define MAKE_SW(row,col)	((row * 8) + col - 1)
-
-/* Coin Door Switch Numbers */
-#define SW_LEFT_COIN				0
-#define SW_CENTER_COIN			1
-#define SW_RIGHT_COIN			2
-#define SW_FOURTH_COIN			3
-#define SW_ESCAPE					4
-#define SW_DOWN					5
-#define SW_UP						6
-#define SW_ENTER					7
-
-#define SW_ALWAYS_CLOSED		MAKE_SWITCH(2,4)
-
-/***************************************************************
- * Sounds
- ***************************************************************/
-
-/* Predefined, fixed system sound values */
-#define SND_DOWN					0x50
-#define SND_UP						0x51
-#define SND_ABORT					0x52
-#define SND_CONFIRM				0x53
-#define SND_ALERT					0x54
-#define SND_ENTER					0x57
-#define SND_EXIT					0x58
-#define SND_SCROLL				0x59
-
 
 /***************************************************************
  * ASIC / DMD memory map

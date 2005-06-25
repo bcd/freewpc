@@ -1,8 +1,6 @@
 
-#include <wpc.h>
-#include <sys/bitarray.h>
+#include <freewpc.h>
 
-typedef uint8_t lampnum_t;
 
 
 __fastram__ uint8_t lamp_matrix[NUM_LAMP_COLS];

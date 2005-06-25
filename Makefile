@@ -12,6 +12,9 @@ TARGET_MACHINE = tz92
 # Set this to the path where the final ROM image should be installed
 TARGET_ROMPATH = /home/bcd/eptools/mameroms
 
+# Set this to the path where libc can be found
+LIBC_PATH = /home/bcd/src/coco/libc-coco
+
 #######################################################################
 ###	Filenames
 #######################################################################
@@ -49,14 +52,14 @@ PATH_REQUIRED += $(BLANKER)
 # Source files for the core OS
 AS_OS_OBJS = sys.o clib.o trace.o heap.o \
 	switch.o lamp1.o task1.o \
-	dmd1.o segment.o lampset.o test1.o \
-	deff.o table.o \
+	dmd1.o segment1.o lampset1.o test1.o \
+	deff1.o table.o \
 	tz.o \
-	service.o \
 	vector.o \
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
-	ctry.o switches.o sound.o
+	ctry.o switches.o sound.o coin.o service.o game.o test.o \
+	segment.o device.o lampset.o score.o deff.o
 
 OS_INCLUDES = wpc.h
 
@@ -68,8 +71,10 @@ GAME_INCLUDES =
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
-ASMFLAGS = $(A) -I. -Iinclude -D__SASM__
-CFLAGS = -I. -Iinclude -I../../coco/libc-coco/include
+ASMFLAGS = -I. -Iinclude -D__SASM__
+ASMFLAGS += -N --save-temps
+
+CFLAGS = -I. -Iinclude -I$(LIBC_PATH)/include
 
 CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas
 CFLAGS += -da
@@ -88,9 +93,6 @@ INSTALL_TARGET=install_$(TARGET_MACHINE)
 #######################################################################
 
 default_target : clean_err check_prereqs $(INSTALL_TARGET)
-
-debug: clean_err check_prereqs
-	$(MAKE) $(DEFAULT_TARGET) A="-N --save-temps"
 
 clean_err:
 	rm -f $(ERR)
@@ -134,7 +136,7 @@ $(LINKCMD) : $(DEPS)
 	@echo "-b sysrom = 0x8000" >> $(LINKCMD)
 	@echo "-b vector = 0xFFF0" >> $(LINKCMD)
 	@for f in `echo $(AS_OBJS) $(OBJS)`; do echo $$f >> $(LINKCMD); done
-	@echo "/home/bcd/src/coco/libc-coco/libc.a" >> $(LINKCMD)
+	@echo "$(LIBC_PATH)/libc.a" >> $(LINKCMD)
 	@echo "-e" >> $(LINKCMD)
 
 clean:

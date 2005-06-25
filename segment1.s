@@ -76,113 +76,111 @@ seg_alpha_table::
    .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; Z
 
 
-#if 0
-proc(seg_init)
-	//uses(a,x,y)
-	//ldx	#seg_data
-	//ldy	#SEG_DATA_SIZE * SEG_PAGES
-	//jsr	bzerol
-	//clra
-	//sta	seg_active_offset
-	//lda	#0x01
-	//sta	seg_allocated
-	//ldx	#seg_update
-	//jsr	task_create
-endp
-
-
-	; A = active page code
-proc(seg_set_active)
-	uses(a)
-	anda	#0xC0
-	sta	seg_active_offset
-endp
-
-	; Returns A = active page code
-proc(seg_get_active)
-	lda	seg_active_offset
-endp
-
-	; Returns A = free page code
-proc(seg_alloc)
-	lda	seg_allocated
-
-	bita	#0x01
-	ifz	
-		ora	#0x01
-		sta	seg_allocated
-		lda	#0
-		return
-	endif
-
-	bita	#0x02
-	ifz
-		ora	#0x02
-		sta	seg_allocated
-		lda	#0x40
-		return
-	endif
-
-	bita	#0x04
-	ifz
-		ora	#0x04
-		sta	seg_allocated
-		lda	#0x80
-		return
-	endif
-
-	bita	#0x08
-	ifz
-		ora	#0x08
-		sta	seg_allocated
-		lda	#0xC0
-	endif
-endp
-
-
-proc(seg_free)
-	uses(a)
-	switch(a)
-		case(0x0)
-			lda	#0x01
-		endcase
-		case(0x40)
-			lda	#0x02
-		endcase
-		case(0x80)
-			lda	#0x04
-		endcase
-		case(0xC0)
-			lda	#0x08
-		endcase
-	endswitch
-	coma
-	anda	seg_allocated
-	sta	seg_allocated
-endp
-
-
-proc(seg_update)
-	loop
-		jsr	c_task_sleep(TIME_66MS)
-		
-		ldy	#seg_data
-		lda	seg_active_offset
-		leay	a,y
-
-		ldx	#DMD_LOW_BASE
-
-		clra
-		loop
-			ldb	,y+
-			jsr	seg_set
-			inca
-			cmpa	#SEG_DATA_SIZE
-		while(lt)
-
-	endloop
-endp
-#endif
+;;;;;#if 0
+;;;;;proc(seg_init)
+;;;;;	//uses(a,x,y)
+;;;;;	//ldx	#seg_data
+;;;;;	//ldy	#SEG_DATA_SIZE * SEG_PAGES
+;;;;;	//jsr	bzerol
+;;;;;	//clra
+;;;;;	//sta	seg_active_offset
+;;;;;	//lda	#0x01
+;;;;;	//sta	seg_allocated
+;;;;;	//ldx	#seg_update
+;;;;;	//jsr	task_create
+;;;;;endp
+;;;;;	; A = active page code
+;;;;;proc(seg_set_active)
+;;;;;	uses(a)
+;;;;;	anda	#0xC0
+;;;;;	sta	seg_active_offset
+;;;;;endp
+;;;;;
+;;;;;	; Returns A = active page code
+;;;;;proc(seg_get_active)
+;;;;;	lda	seg_active_offset
+;;;;;endp
+;;;;;
+;;;;;	; Returns A = free page code
+;;;;;proc(seg_alloc)
+;;;;;	lda	seg_allocated
+;;;;;
+;;;;;	bita	#0x01
+;;;;;	ifz	
+;;;;;		ora	#0x01
+;;;;;		sta	seg_allocated
+;;;;;		lda	#0
+;;;;;		return
+;;;;;	endif
+;;;;;
+;;;;;	bita	#0x02
+;;;;;	ifz
+;;;;;		ora	#0x02
+;;;;;		sta	seg_allocated
+;;;;;		lda	#0x40
+;;;;;		return
+;;;;;	endif
+;;;;;
+;;;;;	bita	#0x04
+;;;;;	ifz
+;;;;;		ora	#0x04
+;;;;;		sta	seg_allocated
+;;;;;		lda	#0x80
+;;;;;		return
+;;;;;	endif
+;;;;;
+;;;;;	bita	#0x08
+;;;;;	ifz
+;;;;;		ora	#0x08
+;;;;;		sta	seg_allocated
+;;;;;		lda	#0xC0
+;;;;;	endif
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;proc(seg_free)
+;;;;;	uses(a)
+;;;;;	switch(a)
+;;;;;		case(0x0)
+;;;;;			lda	#0x01
+;;;;;		endcase
+;;;;;		case(0x40)
+;;;;;			lda	#0x02
+;;;;;		endcase
+;;;;;		case(0x80)
+;;;;;			lda	#0x04
+;;;;;		endcase
+;;;;;		case(0xC0)
+;;;;;			lda	#0x08
+;;;;;		endcase
+;;;;;	endswitch
+;;;;;	coma
+;;;;;	anda	seg_allocated
+;;;;;	sta	seg_allocated
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;proc(seg_update)
+;;;;;	loop
+;;;;;		jsr	c_task_sleep(TIME_66MS)
+;;;;;		
+;;;;;		ldy	#seg_data
+;;;;;		lda	seg_active_offset
+;;;;;		leay	a,y
+;;;;;
+;;;;;		ldx	#DMD_LOW_BASE
+;;;;;
+;;;;;		clra
+;;;;;		loop
+;;;;;			ldb	,y+
+;;;;;			jsr	seg_set
+;;;;;			inca
+	;;;;;		cmpa	#SEG_DATA_SIZE
+;;;;;		while(lt)
+;;;;;
+;;;;;	endloop
+;;;;;endp
+;;;;;#endif
 
 
    ; A = segment number (row in upper nibble, col in lower nibble)

@@ -1,5 +1,5 @@
 
-#include "wpc.h"
+#include <freewpc.h>
 
 
 .globl _lamp_matrix

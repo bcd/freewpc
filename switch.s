@@ -1,9 +1,7 @@
 
-#include "wpc.h"
+#include <freewpc.h>
 
 .area fastram
-
-SWITCH_BITS_SIZE = (NUM_SWITCHES / BITS_PER_BYTE)
 
 /* The raw current state of the switches */
 switch_raw_bits::			.BLKB SWITCH_BITS_SIZE
@@ -36,17 +34,17 @@ switch_properties::
 
 switch_handlers::
 	/* Column 0 */
-	.dw	sw_left_coin 
-	.dw	sw_center_coin
-	.dw	sw_right_coin
-	.dw	sw_fourth_coin
-	.dw	sw_escape
-	.dw	sw_down
-	.dw	sw_up
-	.dw	sw_enter
+	.dw	_sw_left_coin 
+	.dw	_sw_center_coin
+	.dw	_sw_right_coin
+	.dw	_sw_fourth_coin
+	.dw	_sw_escape_button
+	.dw	_sw_down_button
+	.dw	_sw_up_button
+	.dw	_sw_enter_button
 
 	/* Column 1 */
-	.dw	0, 0, sw_start, 0, 0, 0, 0, 0
+	.dw	0, 0, _sw_start_button, 0, 0, 0, 0, 0
 
 	/* Column 2 */
 	.dw	0, 0, 0, 0, 0, 0, 0, 0
@@ -207,57 +205,56 @@ proc(switch_sched)
 endp
 
 
-proc(sw_left_coin)
-	clra
-	jmp	do_coin
-endp
-
-proc(sw_center_coin)
-	lda	#1
-	jmp	do_coin
-endp
-
-proc(sw_right_coin)
-	lda	#2
-	jmp	do_coin
-endp
-
-proc(sw_fourth_coin)
-	lda	#3
-	jmp	do_coin
-endp
-
-proc(do_coin)
-	lda	#SND_SCROLL
-	sta	,-s
-	jsr	_sound_send
-	leas	1,s
-	jmp	task_exit
-endp
-
-proc(sw_escape)
-	jsr	service_escape
-	jmp	task_exit
-endp
-
-proc(sw_down)
-	jsr	service_down
-	jmp	task_exit
-endp
-
-proc(sw_up)
-	jsr	service_up
-	jmp	task_exit
-endp
-
-proc(sw_enter)
-	jsr	service_enter
-	jmp	task_exit
-endp
-
-
-proc(sw_start)
-	jsr	test_start
-	jmp	task_exit
-endp
+;;;;;proc(sw_left_coin)
+;;;;;	clra
+;;;;;	jmp	do_coin
+;;;;;endp
+;;;;;
+;;;;;proc(sw_center_coin)
+;;;;;	lda	#1
+;;;;;	jmp	do_coin
+;;;;;endp
+;;;;;
+;;;;;proc(sw_right_coin)
+;;;;;	lda	#2
+;;;;;	jmp	do_coin
+;;;;;endp
+;;;;;
+;;;;;proc(sw_fourth_coin)
+;;;;;	lda	#3
+;;;;;	jmp	do_coin
+;;;;;endp
+;;;;;
+;;;;;proc(do_coin)
+;;;;;	lda	#SND_SCROLL
+;;;;;	sta	,-s
+;;;;;	jsr	_sound_send
+;;;;;	leas	1,s
+;;;;;	jmp	task_exit
+;;;;;endp
+;;;;; proc(sw_escape)
+;;;;; 	jsr	service_escape
+;;;;; 	jmp	task_exit
+;;;;; endp
+;;;;; 
+;;;;; proc(sw_down)
+;;;;; 	jsr	service_down
+;;;;; 	jmp	task_exit
+;;;;; endp
+;;;;; 
+;;;;; proc(sw_up)
+;;;;; 	jsr	service_up
+;;;;; 	jmp	task_exit
+;;;;; endp
+;;;;; 
+;;;;; proc(sw_enter)
+;;;;; 	jsr	service_enter
+;;;;; 	jmp	task_exit
+;;;;; endp
+;;;;;
+;;;;;
+;;;;;proc(sw_start)
+;;;;;	jsr	test_start
+;;;;;	jmp	task_exit
+;;;;;endp
 

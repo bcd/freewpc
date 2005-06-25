@@ -89,10 +89,13 @@ void task_exit (void) __noreturn__
 
 task_t *task_find_gid (task_gid_t gid)
 {
-	register task_t *tp asm ("x");
+	register short t;
+	register task_t *tp;
 
-	__asm__ volatile ("tfr b,a\njsr task_find_gid\n" : "=r" (tp) : "q" (gid));
-	return (tp);
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if (tp->state != TASK_FREE)
+			return (tp);
+	return (NULL);
 }
 
 void task_kill_pid (task_t *tp)
@@ -104,9 +107,12 @@ void task_kill_pid (task_t *tp)
 
 void task_kill_gid (task_gid_t gid)
 {
-	task_t *tp = task_find_gid (gid);
-	if (tp)
-		task_kill_pid (tp);
+	register short t;
+	register task_t *tp;
+
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if (tp->gid == gid)
+			task_kill_pid (tp);
 }
 
 
