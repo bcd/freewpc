@@ -13,6 +13,8 @@ dmd_pagenum_t dmd_free_page,
 #define wpc_dmd_high_page		*(uint8_t *)WPC_DMD_HIGH_PAGE
 #define wpc_dmd_visible_page	*(uint8_t *)WPC_DMD_ACTIVE_PAGE
 
+#define dmd_low_buffer		((dmd_buffer_t *)DMD_LOW_BASE)
+#define dmd_high_buffer		((dmd_buffer_t *)DMD_HIGH_BASE)
 
 void dmd_init (void)
 {
@@ -74,23 +76,78 @@ void dmd_flip_low_high (void)
 
 void dmd_clean_page (dmd_buffer_t *dbuf)
 {
-	memset (dbuf, 0, 0x200);
+	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
+	register uint16_t *dbuf16 = (uint16_t *)dbuf;
+	register uint16_t zero = 0;
+	while (--count >= 0)
+	{
+		*dbuf16++ = zero;
+		*dbuf16++ = zero;
+		*dbuf16++ = zero;
+		*dbuf16++ = zero;
+	}
 }
+
+
+void dmd_clean_page_low (void)
+{
+	dmd_clean_page (dmd_low_buffer);
+}
+
+
+void dmd_clean_page_high (void)
+{
+	dmd_clean_page (dmd_high_buffer);
+}
+
 
 void dmd_invert_page (dmd_buffer_t *dbuf)
 {
+	register int16_t count asm ("u") = DMD_PAGE_SIZE / (2 * 4);
+	register uint16_t *dbuf16 = (uint16_t *)dbuf;
+	while (--count >= 0)
+	{
+		*dbuf16 = ~*dbuf16;
+		dbuf16++;
+		*dbuf16 = ~*dbuf16;
+		dbuf16++;
+		*dbuf16 = ~*dbuf16;
+		dbuf16++;
+		*dbuf16 = ~*dbuf16;
+		dbuf16++;
+	}
+}
+
+
+static inline void dmd_copy_page (dmd_buffer_t *dst, dmd_buffer_t *src)
+{
+	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
+	register uint16_t *dst16 = (uint16_t *)dst;
+	register uint16_t *src16 = (uint16_t *)src;
+	while (--count >= 0)
+	{
+		*dst16++ = *src16++;
+		*dst16++ = *src16++;
+		*dst16++ = *src16++;
+		*dst16++ = *src16++;
+	}
 }
 
 void dmd_copy_low_to_high (void)
 {
+	dmd_copy_page (dmd_high_buffer, dmd_low_buffer);
 }
 
 void dmd_alloc_low_clean (void)
 {
+	dmd_alloc_low ();
+	dmd_clean_page (dmd_low_buffer);
 }
 
 void dmd_alloc_high_clean (void)
 {
+	dmd_alloc_high ();
+	dmd_clean_page (dmd_high_buffer);
 }
 
 void dmd_draw_border (dmd_buffer_t *dbuf)

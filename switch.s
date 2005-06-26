@@ -69,7 +69,7 @@ switch_handlers::
 proc(switch_init)
 	uses(x,y)
 	ldx	#switch_raw_bits
-	ldy	#mach_opto_mask
+	ldy	#_mach_opto_mask
 	lda	#SWITCH_BITS_SIZE
 	jsr	memcpy
 

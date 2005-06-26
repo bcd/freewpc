@@ -7,6 +7,7 @@
 #######################################################################
 
 # Set this to the name of the machine for which you are targetting.
+MACHINE = tz
 TARGET_MACHINE = tz92
 
 # Set this to the path where the final ROM image should be installed
@@ -50,12 +51,10 @@ BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
 
 # Source files for the core OS
-AS_OS_OBJS = sys.o clib.o trace.o heap.o \
+AS_OS_OBJS = sys.o clib.o heap.o \
 	switch.o lamp1.o task1.o \
 	dmd1.o segment1.o lampset1.o test1.o \
-	deff1.o table.o \
-	tz.o \
-	vector.o \
+	deff1.o vector.o table.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	ctry.o switches.o sound.o coin.o service.o game.o test.o \
@@ -64,7 +63,7 @@ OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 OS_INCLUDES = wpc.h
 
 
-GAME_OBJS = clock.o
+GAME_OBJS = config.o clock.o
 AS_GAME_OBJS =
 
 GAME_INCLUDES =
@@ -81,7 +80,7 @@ CFLAGS += -da
 CFLAGS += -Wall
 CFLAGS += -Werror-implicit-function-declaration
 
-OBJS = $(OS_OBJS) $(GAME_OBJS)
+OBJS = $(OS_OBJS) $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 AS_OBJS = $(AS_OS_OBJS) $(AS_GAME_OBJS)
 
 DEPS = $(DEFMACROS) $(INCLUDES) Makefile
@@ -139,5 +138,8 @@ $(LINKCMD) : $(DEPS)
 	@echo "$(LIBC_PATH)/libc.a" >> $(LINKCMD)
 	@echo "-e" >> $(LINKCMD)
 
+show_objs:
+	echo $(OBJS)
+
 clean:
-	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst $(ERR)
+	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst $(ERR)

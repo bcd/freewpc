@@ -1,7 +1,5 @@
 
-#include <wpc.h>
-#include <sys/sol.h>
-#include <mach/coil.h>
+#include <freewpc.h>
 
 /*
  * Twilight Zone Clock Driver

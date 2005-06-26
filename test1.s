@@ -138,13 +138,13 @@ endp
 
 proc(test_deff_proc)
 	jsr	_dmd_alloc_low_high
-	jsr	dmd_clean_low
+	jsr	_dmd_clean_page_low
 
 	lda	#SEG_ADDR(0, 2, 1)
 	ldb	_test_index
 	jsr	seg_write_bcd
 
-	jsr	dmd_copy_low_to_high
+	jsr	_dmd_copy_low_to_high
 
 	lda	#SEG_ADDR(0, 1, 1)
 	ldy	_test_menu
@@ -152,9 +152,9 @@ proc(test_deff_proc)
 	jsr	seg_write_string
 
 	loop
-		jsr	dmd_show_high
+		jsr	_dmd_show_high
 		jsr	c_task_sleep(TIME_100MS)
-		jsr	dmd_show_low
+		jsr	_dmd_show_low
 		jsr	c_task_sleep(TIME_100MS)
 	endloop
 endp
@@ -190,15 +190,15 @@ endp
 
 
 proc(sol_deff)
-	jsr	dmd_alloc_low_clean
-	jsr	dmd_show_low
+	jsr	_dmd_alloc_low_clean
+	jsr	_dmd_show_low
 	jsr	c_task_sleep(TIME_1S * 2)
-	jmp	deff_exit
+	jmp	_deff_exit
 endp
 
 
 proc(rtc_enter_proc)
-	jsr	dmd_alloc_low_clean
+	jsr	_dmd_alloc_low_clean
 
 	lda	#SEG_ADDR(0,2,4)
 	ldb	WPC_CLK_HOURS_DAYS
@@ -210,7 +210,7 @@ proc(rtc_enter_proc)
 
 	jsr	dmd_draw_border_low
 
-	jsr	dmd_show_low
+	jsr	_dmd_show_low
 
 	lda	#32
 	ldx	#DMD_LOW_BASE

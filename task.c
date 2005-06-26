@@ -85,6 +85,7 @@ void task_exit (void) __noreturn__
 	task_current->state = 0;
 	task_current = 0;
 	asm ("jmp task_dispatcher");
+	for (;;);
 }
 
 task_t *task_find_gid (task_gid_t gid)

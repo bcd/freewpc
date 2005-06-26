@@ -14,7 +14,7 @@
 #define ERR_IDLE_CANNOT_EXIT 		10
 #define ERR_INVALID_LAMP_NUM		11
 #define ERR_NO_FREE_TIMERS			12
-
+#define ERR_DEFF_QUEUE_FULL		13
 
 #ifndef __SASM__
 

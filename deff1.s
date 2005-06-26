@@ -204,7 +204,7 @@ endp
 
 
 
-proc(deff_exit)
-	jmp	task_exit
-endp
+;;;;;proc(deff_exit)
+;;;;;	jmp	task_exit
+;;;;;endp
 

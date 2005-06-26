@@ -107,7 +107,6 @@ void init (void) __noreturn__
 	sound_init ();
 
 	wpc_led_toggle ();
-	asm ("jsr trace_init");
 	irq_init ();
 	asm ("jsr heap_init");
 	task_init ();
