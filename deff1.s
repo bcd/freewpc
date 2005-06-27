@@ -203,8 +203,3 @@ proc(deff_popup)
 endp
 
 
-
-;;;;;proc(deff_exit)
-;;;;;	jmp	task_exit
-;;;;;endp
-
