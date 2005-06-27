@@ -1,29 +1,5 @@
 
-;;; Simulated 7-segment displays on the dot matrix controller
-
-#include "wpc.h"
-
-/*
- * Segment names
- */
-#define SEG_TOP			0x1
-#define SEG_UPR_RIGHT	0x2
-#define SEG_LWR_RIGHT	0x4
-#define SEG_BOT			0x8
-#define SEG_LWR_LEFT		0x10
-#define SEG_UPR_LEFT		0x20
-#define SEG_MID			0x40
-#define SEG_VERT			0x80
-
-#define SEG_RIGHT			(SEG_UPR_RIGHT+SEG_LWR_RIGHT)
-#define SEG_LEFT			(SEG_UPR_LEFT+SEG_LWR_LEFT)
-
-#define SEG_ROWS			4
-#define SEG_COLS			16
-#define SEG_DATA_SIZE	(SEG_ROWS * SEG_COLS)
-#define SEG_PAGES			4
-
-.area ram
+#include <freewpc.h>
 
 
 .area sysrom
@@ -35,46 +11,46 @@ seg_row_offset::
    .dw   128 * 3
 
 
-seg_digit_table::
-   .db   SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT							; 0
-   .db   SEG_RIGHT															; 1
-   .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; 2
-   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_RIGHT							; 3
-   .db   SEG_UPR_LEFT+SEG_MID+SEG_RIGHT								; 4
-   .db   SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT		; 5
-   .db   SEG_TOP+SEG_LEFT+SEG_BOT+SEG_LWR_RIGHT+SEG_MID			; 6
-   .db   SEG_TOP+SEG_RIGHT													; 7
-   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_LEFT+SEG_RIGHT				; 8
-   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_UPR_LEFT+SEG_RIGHT			; 9
-
-seg_alpha_table::
-   .db   SEG_LEFT+SEG_TOP+SEG_MID+SEG_RIGHT							; A
-   .db   SEG_LEFT+SEG_MID+SEG_BOT+SEG_LWR_RIGHT						; B
-   .db   SEG_TOP+SEG_LEFT+SEG_BOT										; C
-   .db   SEG_RIGHT+SEG_BOT+SEG_LWR_LEFT+SEG_MID						; D
-   .db   SEG_LEFT+SEG_TOP+SEG_MID+SEG_BOT								; E
-   .db   SEG_LEFT+SEG_TOP+SEG_MID										; F
-   .db   SEG_TOP+SEG_LEFT+SEG_BOT+SEG_LWR_RIGHT+SEG_MID			; G
-	.db	SEG_LEFT+SEG_RIGHT+SEG_MID										; H
-	.db	SEG_TOP+SEG_VERT+SEG_BOT										; I
-	.db	SEG_RIGHT+SEG_BOT													; J
-	.db	0																		; K
-	.db	SEG_LEFT+SEG_BOT													; L
-	.db	SEG_LEFT+SEG_TOP+SEG_VERT+SEG_RIGHT							; M
-	.db	SEG_LEFT+SEG_TOP+SEG_RIGHT										; N
-   .db   SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT							; O
-	.db	SEG_LEFT+SEG_TOP+SEG_UPR_RIGHT+SEG_MID						; P
-	.db	SEG_UPR_LEFT+SEG_TOP+SEG_MID+SEG_RIGHT						; Q
-	.db	SEG_LEFT+SEG_TOP													; R
-   .db   SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT		; S
-	.db	SEG_TOP+SEG_VERT													; T
-	.db	SEG_LEFT+SEG_BOT+SEG_RIGHT										; U
-	.db	0																		; V
-	.db	SEG_LEFT+SEG_BOT+SEG_VERT+SEG_RIGHT							; W
-	.db	0																		; X
-	.db	SEG_UPR_LEFT+SEG_MID+SEG_BOT+SEG_RIGHT						; Y 
-   .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; Z
-
+;;;;;seg_digit_table::
+;;;;;   .db   SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT							; 0
+;;;;;   .db   SEG_RIGHT															; 1
+;;;;;   .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; 2
+;;;;;   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_RIGHT							; 3
+;;;;;   .db   SEG_UPR_LEFT+SEG_MID+SEG_RIGHT								; 4
+;;;;;   .db   SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT		; 5
+;;;;;   .db   SEG_TOP+SEG_LEFT+SEG_BOT+SEG_LWR_RIGHT+SEG_MID			; 6
+;;;;;   .db   SEG_TOP+SEG_RIGHT													; 7
+;;;;;   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_LEFT+SEG_RIGHT				; 8
+;;;;;   .db   SEG_TOP+SEG_MID+SEG_BOT+SEG_UPR_LEFT+SEG_RIGHT			; 9
+;;;;;
+;;;;;seg_alpha_table::
+;;;;;   .db   SEG_LEFT+SEG_TOP+SEG_MID+SEG_RIGHT							; A
+;;;;;   .db   SEG_LEFT+SEG_MID+SEG_BOT+SEG_LWR_RIGHT						; B
+;;;;;   .db   SEG_TOP+SEG_LEFT+SEG_BOT										; C
+;;;;;   .db   SEG_RIGHT+SEG_BOT+SEG_LWR_LEFT+SEG_MID						; D
+;;;;;   .db   SEG_LEFT+SEG_TOP+SEG_MID+SEG_BOT								; E
+;;;;;   .db   SEG_LEFT+SEG_TOP+SEG_MID										; F
+;;;;;   .db   SEG_TOP+SEG_LEFT+SEG_BOT+SEG_LWR_RIGHT+SEG_MID			; G
+;;;;;	.db	SEG_LEFT+SEG_RIGHT+SEG_MID										; H
+;;;;;	.db	SEG_TOP+SEG_VERT+SEG_BOT										; I
+;;;;;	.db	SEG_RIGHT+SEG_BOT													; J
+;;;;;	.db	0																		; K
+;;;;;	.db	SEG_LEFT+SEG_BOT													; L
+;;;;;	.db	SEG_LEFT+SEG_TOP+SEG_VERT+SEG_RIGHT							; M
+;;;;;	.db	SEG_LEFT+SEG_TOP+SEG_RIGHT										; N
+;;;;;   .db   SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT							; O
+;;;;;	.db	SEG_LEFT+SEG_TOP+SEG_UPR_RIGHT+SEG_MID						; P
+;;;;;	.db	SEG_UPR_LEFT+SEG_TOP+SEG_MID+SEG_RIGHT						; Q
+;;;;;	.db	SEG_LEFT+SEG_TOP													; R
+;;;;;   .db   SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT		; S
+;;;;;	.db	SEG_TOP+SEG_VERT													; T
+;;;;;	.db	SEG_LEFT+SEG_BOT+SEG_RIGHT										; U
+;;;;;	.db	0																		; V
+;;;;;	.db	SEG_LEFT+SEG_BOT+SEG_VERT+SEG_RIGHT							; W
+;;;;;	.db	0																		; X
+;;;;;	.db	SEG_UPR_LEFT+SEG_MID+SEG_BOT+SEG_RIGHT						; Y 
+;;;;;   .db   SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT		; Z
+;;;;;
 
 
    ; A = segment number (row in upper nibble, col in lower nibble)
@@ -161,12 +137,6 @@ proc(seg_set)
 endp
 
 
-	;A = segment number
-	; Returns pointer to data bits in X
-proc(seg_get_data)
-	uses(a,b)
-endp
-
 	; B = character
 	; X = display page pointer
 	; Returns segment data in B
@@ -179,7 +149,7 @@ proc(seg_translate_char)
 		ifls
 			;;; Digit (0-9)
 			subb 	#'0;'
-			ldu	#seg_digit_table
+			ldu	#_seg_digit_table
 			leau	b,u
 			ldb	,u
 			return
@@ -192,7 +162,7 @@ proc(seg_translate_char)
 		ifls
 			;;; Alphabetic (A-Z)
 			subb	#'A;'
-			ldu	#seg_alpha_table
+			ldu	#_seg_alpha_table
 			leau	b,u
 			ldb	,u
 			return
@@ -306,10 +276,4 @@ proc(seg_erase)
 	while(nz)
 endp
 
-
-	; A = source segment
-	; B = destination segment
-	; Y = length
-proc(seg_copy)
-endp
 

@@ -18,6 +18,14 @@ void lamp_init (void)
 	lamp_apply_delay = 0;
 }
 
+void lamp_rtt (void)
+{
+	extern uint8_t irq_count, irq_shift_count;
+
+	*(uint8_t *)WPC_LAMP_COL_STROBE = irq_shift_count;
+	*(uint8_t *)WPC_LAMP_ROW_OUTPUT = lamp_matrix[irq_count % 8];
+}
+
 void lamp_on (lampnum_t lamp)
 {
 	register bitset p = lamp_matrix;

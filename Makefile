@@ -51,16 +51,15 @@ BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
 
 # Source files for the core OS
-AS_OS_OBJS = sys.o clib.o heap.o \
-	switch.o lamp1.o task1.o \
-	dmd1.o segment1.o lampset1.o test1.o \
-	deff1.o vector.o table.o
+AS_OS_OBJS = sys.o heap.o \
+	switch.o task1.o \
+	dmd1.o segment1.o vector.o \
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	ctry.o switches.o sound.o coin.o service.o game.o test.o \
 	segment.o device.o lampset.o score.o deff.o
 
-OS_INCLUDES = wpc.h
+OS_INCLUDES = include/freewpc.h
 
 
 GAME_OBJS = config.o clock.o
@@ -75,7 +74,7 @@ ASMFLAGS += -N --save-temps
 
 CFLAGS = -I. -Iinclude -I$(LIBC_PATH)/include
 
-CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas
+CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls
 CFLAGS += -da
 CFLAGS += -Wall
 CFLAGS += -Werror-implicit-function-declaration

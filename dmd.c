@@ -8,13 +8,6 @@ dmd_pagenum_t dmd_free_page,
 	dmd_high_page, 
 	dmd_visible_page;
 
-#define wpc_dmd_firq_row		*(uint8_t *)WPC_DMD_FIRQ_ROW_VALUE
-#define wpc_dmd_low_page		*(uint8_t *)WPC_DMD_LOW_PAGE
-#define wpc_dmd_high_page		*(uint8_t *)WPC_DMD_HIGH_PAGE
-#define wpc_dmd_visible_page	*(uint8_t *)WPC_DMD_ACTIVE_PAGE
-
-#define dmd_low_buffer		((dmd_buffer_t *)DMD_LOW_BASE)
-#define dmd_high_buffer		((dmd_buffer_t *)DMD_HIGH_BASE)
 
 void dmd_init (void)
 {

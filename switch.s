@@ -3,34 +3,28 @@
 
 .area fastram
 
-/* The raw current state of the switches */
-switch_raw_bits::			.BLKB SWITCH_BITS_SIZE
+;;;;;/* The raw current state of the switches */
+;;;;;switch_raw_bits::			.BLKB SWITCH_BITS_SIZE
+;;;;;
+;;;;;/* 0 if different from last reading, 1 if the same */
+;;;;;switch_changed_bits::	.BLKB SWITCH_BITS_SIZE
+;;;;;
+;;;;;/* Latched version of above, 1 if switch still needs service */
+;;;;;switch_pending_bits::	.BLKB	SWITCH_BITS_SIZE
+;;;;;
+;;;;;/* 1 if switch is scheduled for service but hasn't run yet
+;;;;;	These bits are set when the idle task scans the pending bits
+;;;;;	and finds work to be done */
+;;;;;switch_queued_bits::		.BLKB	SWITCH_BITS_SIZE
+;;;;;
 
-/* 0 if different from last reading, 1 if the same */
-switch_changed_bits::	.BLKB SWITCH_BITS_SIZE
-
-/* Latched version of above, 1 if switch still needs service */
-switch_pending_bits::	.BLKB	SWITCH_BITS_SIZE
-
-/* 1 if switch is scheduled for service but hasn't run yet
-	These bits are set when the idle task scans the pending bits
-	and finds work to be done */
-switch_queued_bits::		.BLKB	SWITCH_BITS_SIZE
-
-.area ram
+#define switch_raw_bits			_switch_bits
+#define switch_changed_bits	_switch_bits + (1 * SWITCH_BITS_SIZE)
+#define switch_pending_bits	_switch_bits + (2 * SWITCH_BITS_SIZE)
+#define switch_queued_bits		_switch_bits + (3 * SWITCH_BITS_SIZE)
 
 
 .area sysrom
-
-switch_properties::
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
 
 switch_handlers::
 	/* Column 0 */
@@ -66,18 +60,18 @@ switch_handlers::
 
 
 
-proc(switch_init)
-	uses(x,y)
-	ldx	#switch_raw_bits
-	ldy	#_mach_opto_mask
-	lda	#SWITCH_BITS_SIZE
-	jsr	memcpy
-
-	ldx	#switch_changed_bits
-	ldy	#SWITCH_BITS_SIZE * 3
-	jsr	bzerol
-endp
-
+;;;;;proc(switch_init)
+;;;;;	uses(x,y)
+;;;;;	ldx	#switch_raw_bits
+;;;;;	ldy	#_mach_opto_mask
+;;;;;	lda	#SWITCH_BITS_SIZE
+;;;;;	jsr	memcpy
+;;;;;
+;;;;;	ldx	#switch_changed_bits
+;;;;;	ldy	#SWITCH_BITS_SIZE * 3
+;;;;;	jsr	bzerol
+;;;;;endp
+;;;;;
 
 proc(switch_rtt)
 	ldb	#0x1
@@ -204,57 +198,4 @@ proc(switch_sched)
 	jsr	task_exit
 endp
 
-
-;;;;;proc(sw_left_coin)
-;;;;;	clra
-;;;;;	jmp	do_coin
-;;;;;endp
-;;;;;
-;;;;;proc(sw_center_coin)
-;;;;;	lda	#1
-;;;;;	jmp	do_coin
-;;;;;endp
-;;;;;
-;;;;;proc(sw_right_coin)
-;;;;;	lda	#2
-;;;;;	jmp	do_coin
-;;;;;endp
-;;;;;
-;;;;;proc(sw_fourth_coin)
-;;;;;	lda	#3
-;;;;;	jmp	do_coin
-;;;;;endp
-;;;;;
-;;;;;proc(do_coin)
-;;;;;	lda	#SND_SCROLL
-;;;;;	sta	,-s
-;;;;;	jsr	_sound_send
-;;;;;	leas	1,s
-;;;;;	jmp	task_exit
-;;;;;endp
-;;;;; proc(sw_escape)
-;;;;; 	jsr	service_escape
-;;;;; 	jmp	task_exit
-;;;;; endp
-;;;;; 
-;;;;; proc(sw_down)
-;;;;; 	jsr	service_down
-;;;;; 	jmp	task_exit
-;;;;; endp
-;;;;; 
-;;;;; proc(sw_up)
-;;;;; 	jsr	service_up
-;;;;; 	jmp	task_exit
-;;;;; endp
-;;;;; 
-;;;;; proc(sw_enter)
-;;;;; 	jsr	service_enter
-;;;;; 	jmp	task_exit
-;;;;; endp
-;;;;;
-;;;;;
-;;;;;proc(sw_start)
-;;;;;	jsr	test_start
-;;;;;	jmp	task_exit
-;;;;;endp
 

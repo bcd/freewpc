@@ -7,6 +7,7 @@
 #ifndef __SASM__
 typedef uint8_t solnum_t;
 
+void sol_rtt (void);
 void sol_on (solnum_t sol);
 void sol_off (solnum_t sol);
 void sol_serve (void);

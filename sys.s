@@ -61,41 +61,6 @@ ram_loop:
 	;;; Jump to C initialization
 	jmp	_init
 
-;;;;;	;;; Test the RAM
-;;;;;	led_toggle
-;;;;;
-;;;;;	;;; TODO : Checksum the ROM
-;;;;;
-;;;;;	;;; Initialize I/O devices
-;;;;;	led_toggle
-;;;;;	clr	_sys_init_complete
-;;;;;	jsr	_sol_init
-;;;;;	jsr	dmd_init
-;;;;;	jsr	switch_init
-;;;;;	jsr	_sound_init
-;;;;;
-;;;;;	;;; Initialize subsystems
-;;;;;	led_toggle
-;;;;;	jsr	trace_init
-;;;;;	jsr	_irq_init
-;;;;;	jsr	heap_init
-;;;;;	jsr	_task_init
-;;;;;	jsr	deff_init
-;;;;;	jsr	_c_try_init
-;;;;;
-;;;;;	lda	#0x06
-;;;;;	sta	WPC_ZEROCROSS_IRQ_CLEAR
-;;;;;
-;;;;;	;;; Mark initialization complete
-;;;;;	inc	_sys_init_complete
-;;;;;
-;;;;;	;;; Enable interrupts
-;;;;;	led_toggle
-;;;;;	andcc	#~(CC_IRQ+CC_FIRQ)
-;;;;;
-;;;;;	jsr	test_init
-;;;;;	jsr	c_task_create(_lamp_demo)
-
 	ldd	#0x1234
 	ldu	#0x5678
 	ldx	#0x9ABC
@@ -128,51 +93,44 @@ ram_loop:
 endp
 
 
-;;;;;proc(irq_init)
-;;;;;	ldb	#1
+;;;;;interrupt proc(sys_irq)
+;;;;;	lda	#0x96
+;;;;;	sta	WPC_ZEROCROSS_IRQ_CLEAR
+;;;;;
+;;;;;	;;;;;;;;;; Execute tasks every 1ms ;;;;;;;;;;;;;;
+;;;;;	led_toggle
+;;;;;	jsr	switch_rtt
+;;;;;	jsr	lamp_rtt
+;;;;;	jsr	_sol_rtt
+;;;;;
+;;;;;	inc	_irq_count
+;;;;;
+;;;;;	ldb	_irq_shift_count
+;;;;;	lslb
+;;;;;	tstb
+;;;;;	ifz
+;;;;;		;;;;;;;;;;; Execute tasks every 8ms ;;;;;;;;;;;;;;;
+;;;;;		inc	_tick_count
+;;;;;
+;;;;;		incb
+;;;;;	endif
 ;;;;;	stb	_irq_shift_count
-;;;;;	clr	_irq_count
 ;;;;;endp
-
-
-interrupt proc(sys_irq)
-	lda	#0x96
-	sta	WPC_ZEROCROSS_IRQ_CLEAR
-
-	;;;;;;;;;; Execute tasks every 1ms ;;;;;;;;;;;;;;
-	led_toggle
-	jsr	switch_rtt
-	jsr	lamp_rtt
-	jsr	_sol_rtt
-
-	inc	_irq_count
-
-	ldb	_irq_shift_count
-	lslb
-	tstb
-	ifz
-		;;;;;;;;;;; Execute tasks every 8ms ;;;;;;;;;;;;;;;
-		inc	_tick_count
-
-		incb
-	endif
-	stb	_irq_shift_count
-endp
-
-
-interrupt proc(sys_firq)
-	tst	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
-	bmi	timer_int
-
-dmd_int:
-	jsr	_dmd_rtt
-	bra	end_firq
-
-timer_int:
-
-end_firq:
-	clr	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
-endp
+;;;;;
+;;;;;
+;;;;;interrupt proc(sys_firq)
+;;;;;	tst	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
+;;;;;	bmi	timer_int
+;;;;;
+;;;;;dmd_int:
+;;;;;	jsr	_dmd_rtt
+;;;;;	bra	end_firq
+;;;;;
+;;;;;timer_int:
+;;;;;
+;;;;;end_firq:
+;;;;;	clr	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
+;;;;;endp
 
 
 ;;;;interrupt proc(sys_nmi)

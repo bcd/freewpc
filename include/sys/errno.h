@@ -19,7 +19,8 @@
 #ifndef __SASM__
 
 typedef uint8_t errcode_t;
-void fatal (errcode_t errcode);
+void fatal (errcode_t errcode) __noreturn__;
+void nonfatal (errcode_t errcode);
 
 #endif /* __SASM__ */
 

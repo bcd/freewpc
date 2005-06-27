@@ -62,6 +62,11 @@ task_gid_t task_getgid (void)
 	return task_current->gid;
 }
 
+void task_setgid (task_gid_t gid)
+{
+	task_current->gid = gid;
+}
+
 void task_sleep (task_ticks_t ticks)
 {
 	extern uint8_t tick_count;

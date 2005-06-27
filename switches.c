@@ -1,15 +1,9 @@
 
-
 #include <freewpc.h>
 #include <sys/irq.h>
 
-#define AR_RAW			0
-#define AR_CHANGED 	1
-#define AR_PENDING 	2
-#define AR_QUEUED 	3
-#define NUM_ARRAYS 	4
 
-uint8_t switch_bits[NUM_ARRAYS][SWITCH_BITS_SIZE];
+uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
 typedef struct
@@ -22,9 +16,16 @@ typedef struct
 switch_info_t switch_info[NUM_SWITCHES] = {
 };
 
+
 void switch_init (void)
 {
-	memset ((uint8_t *)switch_bits, 0, SWITCH_BITS_SIZE * NUM_ARRAYS);
+	memset ((uint8_t *)&switch_bits[0][0], 0, sizeof (switch_bits));
+	memcpy ((uint8_t *)&switch_bits[0][0], mach_opto_mask, SWITCH_BITS_SIZE);
+}
+
+
+void switch_rtt (void)
+{
 }
 
 

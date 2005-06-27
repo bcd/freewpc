@@ -272,6 +272,7 @@ typedef unsigned int uint16_t;
 #define GID_DEFF						2
 #define GID_DEFF_POPUP				3
 #define GID_TEST_LOOP				4
+#define GID_DEFF_EXITING			5
 
 /***************************************************************
  * Timers

@@ -8,9 +8,9 @@
 	vector_swi2:
 		.dw	_do_swi2
 	vector_firq:
-		.dw	sys_firq
+		.dw	_do_firq
 	vector_irq:
-		.dw	sys_irq
+		.dw	_do_irq
 	vector_swi:
 		.dw	_do_swi
 	vector_nmi:

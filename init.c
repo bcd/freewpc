@@ -1,12 +1,6 @@
 
-#include <wpc.h>
+#include <freewpc.h>
 
-#include <sys/sol.h>
-#include <sys/dmd.h>
-#include <sys/sound.h>
-
-#include <sys/task.h>
-#include <sys/errno.h>
 
 uint8_t errcode;
 
@@ -51,12 +45,40 @@ void irq_init (void)
 #pragma interrupt
 void do_irq (void)
 {
+	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x96;
+
+	/* Execute rtts every 1ms */
+	wpc_led_toggle ();
+	asm ("jsr switch_rtt");
+	lamp_rtt ();
+	sol_rtt ();
+	irq_count++;
+
+	irq_shift_count <<= 1;
+	if (irq_shift_count == 0)
+	{
+		irq_shift_count = 1;
+
+		/* Execute rtts every 8ms */
+		tick_count++;
+	}
 }
 
 
 #pragma interrupt
 void do_firq (void)
 {
+	if (*(int8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR < 0)
+	{
+		/* Timer interrupt */
+	}
+	else
+	{
+		/* DMD interrupt */
+		dmd_rtt ();
+	}
+
+	*(uint8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR  = 0;
 }
 
 
@@ -93,6 +115,19 @@ void idle (void)
 }
 
 
+void lamp_c_demo (void) __taskentry__
+{
+	lampset_set_apply_delay (0);
+	lampset_apply_on (LAMPSET_ALL);
+
+	lampset_set_apply_delay (TIME_33MS);
+	for (;;)
+	{
+		lampset_apply_toggle (LAMPSET_ALL);
+	}
+}
+
+
 void init (void) __noreturn__
 {
 	extern void lamp_demo ();
@@ -103,14 +138,14 @@ void init (void) __noreturn__
 	wpc_led_toggle ();
 	sol_init ();
 	dmd_init ();
-	asm ("jsr switch_init");
+	switch_init ();
 	sound_init ();
 
 	wpc_led_toggle ();
 	irq_init ();
 	asm ("jsr heap_init");
 	task_init ();
-	asm ("jsr deff_init");
+	deff_init ();
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;
 
@@ -118,7 +153,8 @@ void init (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	task_create_gid (0, lamp_demo, 0);
+	//task_create_gid (0, lamp_demo, 0);
+	task_create_gid (0, lamp_c_demo, 0);
 
 	test_init ();
 	task_exit ();
