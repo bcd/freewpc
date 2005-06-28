@@ -82,6 +82,13 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
+void task_sleep_sec (int8_t secs)
+{
+	while (--secs >= 0)
+		task_sleep (TIME_1S);
+}
+
+
 void task_exit (void) __noreturn__
 {
 	if (task_current == 0)

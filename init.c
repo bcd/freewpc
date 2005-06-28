@@ -143,7 +143,6 @@ void init (void) __noreturn__
 
 	wpc_led_toggle ();
 	irq_init ();
-	asm ("jsr heap_init");
 	task_init ();
 	deff_init ();
 

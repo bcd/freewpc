@@ -79,9 +79,10 @@ void stop_game (void)
 int verify_start_ok (void)
 {
 	// check enough credits
+	return (has_credits_p ());
+
 	// check balls stable
 	// check game not already in progress
-	return 1;
 }
 
 void sw_start_button (void) __taskentry__

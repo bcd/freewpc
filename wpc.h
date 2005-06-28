@@ -29,7 +29,6 @@ typedef unsigned int uint16_t;
 
 #define DEBUG
 
-/* For the thomson assembler */
 #define BLKB	blkb
 #define BLKW	blkw
 
@@ -92,16 +91,6 @@ typedef unsigned int uint16_t;
 
 /* The usable, nonprotected area of RAM */
 #define USER_RAM_SIZE	0x1000
-
-/***************************************************************
- * Dot matrix display
- ***************************************************************/
-
-/* The size of each DMD page */
-#define DMD_PAGE_SIZE 0x200
-
-/* The number of DMD pages */
-#define DMD_PAGE_COUNT 16
 
 
 /***************************************************************
@@ -229,39 +218,6 @@ typedef unsigned int uint16_t;
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
-/***************************************************************
- * Segmented display simulation
- ***************************************************************/
-
-#define SEG_ADDR(p,r,c)		((p * 0x40) + (r * 0x10) + c)
-
-#define SEG_PAGE_0 0x0
-#define SEG_PAGE_1 0x40
-#define SEG_PAGE_2 0x80
-#define SEG_PAGE_3 0xC0
-
-#define SEG_ROW_0 0x00
-#define SEG_ROW_1 0x10
-#define SEG_ROW_2 0x20
-#define SEG_ROW_3 0x30
-
-#define SEG_COL_0 0x0
-#define SEG_COL_1 0x1
-#define SEG_COL_2 0x2
-#define SEG_COL_3 0x3
-#define SEG_COL_4 0x4
-#define SEG_COL_5 0x5
-#define SEG_COL_6 0x6
-#define SEG_COL_7 0x7
-#define SEG_COL_8 0x8
-#define SEG_COL_9 0x9
-#define SEG_COL_10 0x9
-#define SEG_COL_11 0xA
-#define SEG_COL_12 0xB
-#define SEG_COL_13 0xC
-#define SEG_COL_14 0xD
-#define SEG_COL_15 0xE
-
 
 /***************************************************************
  * Task Groups
@@ -273,14 +229,6 @@ typedef unsigned int uint16_t;
 #define GID_DEFF_POPUP				3
 #define GID_TEST_LOOP				4
 #define GID_DEFF_EXITING			5
-
-/***************************************************************
- * Timers
- ***************************************************************/
-
-#define MAX_TIMERS					32
-
-#define TMR_NONE						0
 
 
 /****************  Macros  ***************************/

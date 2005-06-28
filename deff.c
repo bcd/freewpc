@@ -4,11 +4,13 @@
 extern void coin_deff (void) __taskentry__;
 extern void test_menu_deff (void) __taskentry__;
 extern void rtc_print_deff (void) __taskentry__;
+extern void credit_added_deff (void) __taskentry__;
 
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
-	[DEFF_COIN_INSERT] = { D_NORMAL, 10, coin_deff },
 	[DEFF_TEST_MENU] = { D_RUNNING, 1, test_menu_deff },
+	[DEFF_COIN_INSERT] = { D_NORMAL, 10, coin_deff },
+	[DEFF_CREDIT_ADDED] = { D_NORMAL, 100, credit_added_deff },
 	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },
 };
 
@@ -132,11 +134,34 @@ void deff_restart (deffnum_t dn)
 
 void deff_exit (void) __noreturn__
 {
-	deffnum_t dn = deff_get_highest_priority ();
-	const deff_t *deff = &deff_table[dn];
+	deffnum_t dn;
+	const deff_t *deff;
+
+	deff_remove_queue (deff_active);
+
+	dn = deff_get_highest_priority ();
+	deff = &deff_table[dn];
+
 	task_setgid (GID_DEFF_EXITING);
 	task_recreate_gid (GID_DEFF, deff->fn, 0);
 	task_exit ();
+}
+
+
+void deff_delay_and_exit (task_ticks_t ticks)
+{
+	task_sleep (ticks);
+	deff_exit ();
+}
+
+
+void deff_swap_low_high (int8_t count, task_ticks_t delay)
+{
+	while (--count >= 0)
+	{
+		dmd_show_other ();
+		task_sleep (delay);
+	}
 }
 
 

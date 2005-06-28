@@ -1,6 +1,6 @@
 
 
-#include "wpc.h"
+#include <freewpc.h>
 
 
 /*
@@ -127,107 +127,50 @@ proc(task_create)
 endp
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	; X = address of function
-	; A = new group ID
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_create_gid_const)
-	definline(y,x,a)
-	bsr	task_create_gid
-endp
+;;;proc(task_create_gid_const)
+;;;	definline(y,x,a)
+;;;	bsr	task_create_gid
+;;;endp
+;;;
+;;;
+;;;proc(task_create_gid)
+;;;	bsr	task_create
+;;;	sta	TASK_OFF_GID,x
+;;;endp
+;;;
+;;;
+;;;proc(task_create_gid1_const)
+;;;	definline(y,x,a)
+;;;	bsr	task_create_gid1
+;;;endp
+;;;
+;;;proc(task_create_gid1)
+;;;	jsr	task_find_gid
+;;;	iffalse
+;;;		jsr	task_create_gid
+;;;	endif
+;;;endp
+;;;
+;;;
+;;;proc(task_recreate_gid_const)
+;;;	definline(y,x,a)
+;;;	bsr	task_recreate_gid
+;;;endp
+;;;
+;;;proc(task_recreate_gid)
+;;;	jsr	task_kill_gid
+;;;	jsr	task_create_gid
+;;;endp
+;;;
+;;;proc(task_getgid)
+;;;	uses(x)
+;;;	returns(a)
+;;;	ldx	_task_current
+;;;	lda	TASK_OFF_GID,x
+;;;endp
+;;;
+;;;
 
-
-proc(task_create_gid)
-	bsr	task_create
-	sta	TASK_OFF_GID,x
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_create_gid1_const)
-	definline(y,x,a)
-	bsr	task_create_gid1
-endp
-
-proc(task_create_gid1)
-	jsr	task_find_gid
-	iffalse
-		jsr	task_create_gid
-	endif
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_recreate_gid_const)
-	definline(y,x,a)
-	bsr	task_recreate_gid
-endp
-
-proc(task_recreate_gid)
-	jsr	task_kill_gid
-	jsr	task_create_gid
-endp
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	; X = task handle (pid)
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_getgid)
-	uses(x)
-	returns(a)
-	ldx	_task_current
-	lda	TASK_OFF_GID,x
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proc(task_sleep_const)
 	definline(x,a)
 	bra	task_sleep1	
@@ -252,17 +195,6 @@ task_sleep1::
 endp
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proc(task_sleepl_const)
 	definline(x,d)
 	jsr	task_sleepl
@@ -283,17 +215,6 @@ proc(task_sleepl)
 endp
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 proc(task_exit)
 	ldx	_task_current
 	cmpx	#0000
@@ -307,112 +228,68 @@ proc(task_exit)
 endp
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_kill_pid)
-	requires(x)
-	cmpx	_task_current
-	ifne
-		clr	TASK_OFF_STATE,x
-	else
-		jsr	c_sys_error(ERR_TASK_KILL_CURRENT)
-	endif
-endp
+;;;proc(task_kill_pid)
+;;;	requires(x)
+;;;	cmpx	_task_current
+;;;	ifne
+;;;		clr	TASK_OFF_STATE,x
+;;;	else
+;;;		jsr	c_sys_error(ERR_TASK_KILL_CURRENT)
+;;;	endif
+;;;endp
+;;;
+
+;;;proc(task_find_gid)
+;;;	requires(a)
+;;;	uses(x)
+;;;	ldx	#_task_buffer
+;;;	loop
+;;;		tst	TASK_OFF_STATE,x
+;;;		ifnz
+;;;			cmpa	TASK_OFF_GID,x
+;;;			ifeq
+;;;				cmpx	_task_current
+;;;				ifne
+;;;					true
+;;;					return
+;;;				endif
+;;;			endif
+;;;		endif
+;;;
+;;;		leax	TASK_SIZE,x
+;;;		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
+;;;	while(nz)
+;;;	ldx	#0
+;;;	false
+;;;endp
 
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_find_gid)
-	requires(a)
-	uses(x)
-	ldx	#_task_buffer
-	loop
-		tst	TASK_OFF_STATE,x
-		ifnz
-			cmpa	TASK_OFF_GID,x
-			ifeq
-				cmpx	_task_current
-				ifne
-					true
-					return
-				endif
-			endif
-		endif
+;;;proc(task_kill_gid_const)
+;;;	definline(x,a)
+;;;	bsr	task_kill_gid
+;;;endp
+;;;
+;;;proc(task_kill_gid)
+;;;	requires(a)
+;;;	uses(x)
+;;;	ldx	#_task_buffer
+;;;	loop
+;;;		tst	TASK_OFF_STATE,x
+;;;		ifnz
+;;;			cmpa	TASK_OFF_GID,x
+;;;			ifeq
+;;;				cmpx	_task_current
+;;;				ifne
+;;;					jsr	task_kill_pid	
+;;;				endif
+;;;			endif
+;;;		endif
+;;;
+;;;		leax	TASK_SIZE,x
+;;;		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
+;;;	while(nz)
+;;;endp
 
-		leax	TASK_SIZE,x
-		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
-	while(nz)
-	ldx	#0
-	false
-endp
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:	
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(task_kill_gid_const)
-	definline(x,a)
-	bsr	task_kill_gid
-endp
-
-proc(task_kill_gid)
-	requires(a)
-	uses(x)
-	ldx	#_task_buffer
-	loop
-		tst	TASK_OFF_STATE,x
-		ifnz
-			cmpa	TASK_OFF_GID,x
-			ifeq
-				cmpx	_task_current
-				ifne
-					jsr	task_kill_pid	
-				endif
-			endif
-		endif
-
-		leax	TASK_SIZE,x
-		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
-	while(nz)
-endp
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Label:
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 task_dispatcher::
 	;;; Pseudocode:
 	;;;  if time tick has advanced:

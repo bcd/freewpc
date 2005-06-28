@@ -1,0 +1,23 @@
+#!/bin/sh
+
+case $1 in
+
+	unpack)
+		cd .. && bzcat gcc-3.1.1.tar.bz2 | tar xvf -
+		;;
+
+	patch)
+		cd .. && patch -p0 < m6809-gcc.diff
+		;;
+
+	config)
+		../gcc-3.1.1/configure --target=m6809 --program-suffix=09 --nfp --enable-obsolete
+		;;
+
+	*)
+		make cross LANGUAGES="c proto c++"
+		cd gcc && sudo make LANGUAGES="c proto c++" install
+		echo "Copying new executable ... installation complete!"
+		sudo cp xgcc /usr/local/m6809/bin/gcc
+		echo "Done building"
+		;;

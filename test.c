@@ -67,6 +67,7 @@ void test_loop (uint16_t unused_arg) __taskentry__
 				break;
 		}
 
+		task_sleep (TIME_100MS);
 		while (switch_bits[AR_RAW][0] != 0)
 			task_sleep (TIME_33MS);
 	}
@@ -109,6 +110,7 @@ void sol_enter_proc (void) __taskentry__
 void rtc_print_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
+	seg_write_string (SEG_ADDR(0,1,3), "CURRENT TIME");
 	seg_write_uint8 (SEG_ADDR(0,2,4), *(uint8_t *)WPC_CLK_HOURS_DAYS);
 	seg_write_uint8 (SEG_ADDR(0,2,8), *(uint8_t *)WPC_CLK_MINS);
 	asm ("jsr dmd_draw_border_low");

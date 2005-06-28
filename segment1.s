@@ -137,143 +137,143 @@ proc(seg_set)
 endp
 
 
-	; B = character
-	; X = display page pointer
-	; Returns segment data in B
-proc(seg_translate_char)
-	returns(b)
-	uses(u)
-	cmpb	#'0;'
-	ifhs
-		cmpb	#'9;'
-		ifls
-			;;; Digit (0-9)
-			subb 	#'0;'
-			ldu	#_seg_digit_table
-			leau	b,u
-			ldb	,u
-			return
-		endif
-	endif
-
-	cmpb	#'A;'
-	ifhs
-		cmpb	#'Z;'
-		ifls
-			;;; Alphabetic (A-Z)
-			subb	#'A;'
-			ldu	#_seg_alpha_table
-			leau	b,u
-			ldb	,u
-			return
-		endif
-	endif
-
-	cmpb	#0x20
-	ifeq
-		clrb
-		return
-	endif
-
-	ldb	#SEG_MID
-endp
-
-
-	; A = segment number
-	; B = binary decimal number (two hex digits)
-proc(seg_write_bcd)
-   uses(a,b)
-   lsrb
-   lsrb
-   lsrb
-   lsrb                 ; B = upper nibble of byte value
-   jsr   seg_write_digit
-   inca                 ; Advance to next column position
-   ldb   saved(b)       ; Reload original byte value
-   andb  #0x0f          ; B = lower nibble of byte value
-   jsr   seg_write_digit
-endp
-
-
-	; A = segment number
-	; B = integer value (0-99)
-proc(seg_write_short)
-	uses(a,b)
-	local(byte,tmp)
-	endlocal
-
-	tfr	b,a
-	pshs	a
-	jsr	_div10					/* A = first digit, B = second digit */
-	leas	1,s
-
-	exg	a,b						/* B = first digit, A = second digit */
-	sta	tmp						/* Save second digit for later */
-	lda	saved(a)
-	jsr	seg_write_digit		/* Write first digit */
-	inca
-	ldb	tmp
-	jsr	seg_write_digit		/* Write second digit */
-endp
-
-
-	; A = starting segment number
-	; B = hex digit
-proc(seg_write_digit)
-	uses(b)
-
-	cmpb	#10
-	iflt
-		addb	#'0;'
-	else
-		subb	#10
-		addb	#'A;'
-	endif
-	bsr	seg_write_char
-endp
-
-
-	; A = starting segment number
-	; B = character
-proc(seg_write_char)
-	uses(b,x)
-	tstb
-	ifnz
-		jsr	seg_translate_char
-		jsr	seg_set
-	endif
-endp
-
-
-	; A = starting segment number
-	; Y = string pointer
-proc(seg_write_string)
-	uses(a,b,y)
-	loop
-		ldb	,y+
-
-		tstb
-		ifz
-			return
-		endif
-
-		jsr	seg_translate_char
-		jsr	seg_set
-		inca
-	endloop
-endp
-
-	; A = starting segment number
-	; Y = length
-proc(seg_erase)
-	uses(a,b,y)
-	clrb
-	loop
-		jsr	seg_set
-		inca
-		leay	-1,y
-		cmpy	#0
-	while(nz)
-endp
-
-
+;;;;;	; B = character
+;;;;;	; X = display page pointer
+;;;;;	; Returns segment data in B
+;;;;;proc(seg_translate_char)
+;;;;;	returns(b)
+;;;;;	uses(u)
+;;;;;	cmpb	#'0;'
+;;;;;	ifhs
+;;;;;		cmpb	#'9;'
+;;;;;		ifls
+;;;;;			;;; Digit (0-9)
+;;;;;			subb 	#'0;'
+;;;;;			ldu	#_seg_digit_table
+;;;;;			leau	b,u
+;;;;;			ldb	,u
+;;;;;			return
+;;;;;		endif
+;;;;;	endif
+;;;;;
+;;;;;	cmpb	#'A;'
+;;;;;	ifhs
+;;;;;		cmpb	#'Z;'
+;;;;;		ifls
+;;;;;			;;; Alphabetic (A-Z)
+;;;;;			subb	#'A;'
+;;;;;			ldu	#_seg_alpha_table
+;;;;;			leau	b,u
+;;;;;			ldb	,u
+;;;;;			return
+;;;;;		endif
+;;;;;	endif
+;;;;;
+;;;;;	cmpb	#0x20
+;;;;;	ifeq
+;;;;;		clrb
+;;;;;		return
+;;;;;	endif
+;;;;;
+;;;;;	ldb	#SEG_MID
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;	; A = segment number
+;;;;;	; B = binary decimal number (two hex digits)
+;;;;;proc(seg_write_bcd)
+;;;;;   uses(a,b)
+;;;;;   lsrb
+;;;;;   lsrb
+;;;;;   lsrb
+;;;;;   lsrb                 ; B = upper nibble of byte value
+;;;;;   jsr   seg_write_digit
+;;;;;   inca                 ; Advance to next column position
+;;;;;   ldb   saved(b)       ; Reload original byte value
+;;;;;   andb  #0x0f          ; B = lower nibble of byte value
+;;;;;   jsr   seg_write_digit
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;	; A = segment number
+;;;;;	; B = integer value (0-99)
+;;;;;proc(seg_write_short)
+;;;;;	uses(a,b)
+;;;;;	local(byte,tmp)
+;;;;;	endlocal
+;;;;;
+;;;;;	tfr	b,a
+;;;;;	pshs	a
+;;;;;	jsr	_div10					/* A = first digit, B = second digit */
+;;;;;	leas	1,s
+;;;;;
+;;;;;	exg	a,b						/* B = first digit, A = second digit */
+;;;;;	sta	tmp						/* Save second digit for later */
+;;;;;	lda	saved(a)
+;;;;;	jsr	seg_write_digit		/* Write first digit */
+;;;;;	inca
+;;;;;	ldb	tmp
+;;;;;	jsr	seg_write_digit		/* Write second digit */
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;	; A = starting segment number
+;;;;;	; B = hex digit
+;;;;;proc(seg_write_digit)
+;;;;;	uses(b)
+;;;;;
+;;;;;	cmpb	#10
+;;;;;	iflt
+;;;;;		addb	#'0;'
+;;;;;	else
+;;;;;		subb	#10
+;;;;;		addb	#'A;'
+;;;;;	endif
+;;;;;	bsr	seg_write_char
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;	; A = starting segment number
+;;;;;	; B = character
+;;;;;proc(seg_write_char)
+;;;;;	uses(b,x)
+;;;;;	tstb
+;;;;;	ifnz
+;;;;;		jsr	seg_translate_char
+;;;;;		jsr	seg_set
+;;;;;	endif
+;;;;;endp
+;;;;;
+;;;;;
+;;;;;	; A = starting segment number
+;;;;;	; Y = string pointer
+;;;;;proc(seg_write_string)
+;;;;;	uses(a,b,y)
+;;;;;	loop
+;;;;;		ldb	,y+
+;;;;;
+;;;;;		tstb
+;;;;;		ifz
+;;;;;			return
+;;;;;		endif
+;;;;;
+;;;;;		jsr	seg_translate_char
+;;;;;		jsr	seg_set
+;;;;;		inca
+;;;;;	endloop
+;;;;;endp
+;;;;;
+;;;;;	; A = starting segment number
+;;;;;	; Y = length
+;;;;;proc(seg_erase)
+;;;;;	uses(a,b,y)
+;;;;;	clrb
+;;;;;	loop
+;;;;;		jsr	seg_set
+;;;;;		inca
+;;;;;		leay	-1,y
+;;;;;		cmpy	#0
+;;;;;	while(nz)
+;;;;;endp
+;;;;;
+;;;;;

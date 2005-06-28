@@ -18,9 +18,11 @@ void dmd_init (void)
 	dmd_free_page = 1;
 }
 
+
 void dmd_rtt (void)
 {
 }
+
 
 static dmd_pagenum_t dmd_alloc (void)
 {
@@ -66,6 +68,16 @@ void dmd_flip_low_high (void)
 	dmd_high_page = tmp;
 	/* TODO - shouldn't this always rewrite the I/O registers */
 }
+
+
+void dmd_show_other (void)
+{
+	if (dmd_visible_page == dmd_low_page)
+		dmd_show_high ();
+	else
+		dmd_show_low ();
+}
+
 
 void dmd_clean_page (dmd_buffer_t *dbuf)
 {

@@ -2,6 +2,13 @@
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
+/* The size of each DMD page */
+#define DMD_PAGE_SIZE 0x200
+
+/* The number of DMD pages */
+#define DMD_PAGE_COUNT 16
+
+
 #ifndef __SASM__
 typedef uint8_t dmd_pagenum_t;
 
@@ -22,6 +29,7 @@ void dmd_alloc_high (void);
 void dmd_alloc_low_high (void);
 void dmd_show_low (void);
 void dmd_show_high (void);
+void dmd_show_other (void);
 void dmd_flip_low_high (void);
 void dmd_clean_page (dmd_buffer_t *dbuf);
 void dmd_invert_page (dmd_buffer_t *dbuf);

@@ -51,12 +51,11 @@ BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
 
 # Source files for the core OS
-AS_OS_OBJS = sys.o heap.o \
-	switch.o task1.o \
+AS_OS_OBJS = sys.o switch.o task1.o \
 	dmd1.o segment1.o vector.o \
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
-	ctry.o switches.o sound.o coin.o service.o game.o test.o \
+	switches.o sound.o coin.o service.o game.o test.o \
 	segment.o device.o lampset.o score.o deff.o
 
 OS_INCLUDES = include/freewpc.h
@@ -141,4 +140,4 @@ show_objs:
 	echo $(OBJS)
 
 clean:
-	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst $(ERR)
+	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out $(ERR)
