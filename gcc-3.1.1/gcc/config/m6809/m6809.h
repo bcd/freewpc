@@ -799,14 +799,10 @@ enum reg_class {
 /* #define CASE_DROPS_THROUGH */
 
 /* Specify the tree operation to be used to convert reals to integers. */
-#ifdef ORIG
-#define IMPLICIT_FIX_EXPR FIX_ROUND_EXPR
-#endif
+/* #define IMPLICIT_FIX_EXPR FIX_ROUND_EXPR */
 
 /* This is the kind of divide that is easiest to do in the general case.  */
-#ifdef ORIG
-#define EASY_DIV_EXPR TRUNC_DIV_EXPR
-#endif
+/* #define EASY_DIV_EXPR TRUNC_DIV_EXPR */
 
 /* Define this as 1 if `char' should by default be signed; else as 0.  */
 #define DEFAULT_SIGNED_CHAR 1
