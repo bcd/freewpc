@@ -6,6 +6,8 @@ __fastram__ task_t *task_current;
 
 __fastram__ uint8_t task_dispatch_tick;
 
+__fastram__ uint16_t task_save_U, task_save_X;
+
 task_t task_buffer[NUM_TASKS];
 
 
@@ -23,6 +25,34 @@ task_t *task_allocate (void)
 			return tp;
 		}
 	fatal (ERR_NO_FREE_TASKS);
+}
+
+void task_save (void)
+{
+#if 0
+	asm ("stu	_task_save_U");
+	asm ("stx	_task_save_X");
+	asm ("puls	u");
+	asm ("ldx	_task_current");
+	asm ("stu	%0" :: "o" (task_current->pc));
+	asm ("ldu	_task_save_U");
+	asm ("stu	%0" :: "o" (task_current->u));
+	asm ("ldu	_task_save_X");
+	asm ("stu	%0" :: "o" (task_current->x));
+	asm ("sta	%0" :: "o" (task_current->a));
+	asm ("stb	%0" :: "o" (task_current->b));
+	asm ("sty	%0" :: "o" (task_current->y));
+	asm ("leau	,s");
+	asm ("stu	TASK_OFF_S,x");
+
+	asm ("leay	TASK_OFF_STACK,x");
+	asm ("cmpy	TASK_OFF_S,x");
+	ifgt
+		jsr	c_sys_error(ERR_TASK_STACK_OVERFLOW)	
+	endif
+#endif
+
+	asm ("jmp	task_dispatcher");
 }
 
 

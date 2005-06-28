@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# The first time you build, you need to specify 'unpack' to extract
+# the main gcc sources, and then 'patch' to apply a patch that tells
+# the compiler about our new target.  Thereafter just run this script
+# to build and install the compiler.
+#
+
 case $1 in
 
 	unpack)
@@ -10,7 +16,7 @@ case $1 in
 		cd .. && patch -p0 < m6809-gcc.diff
 		;;
 
-	config)
+	config|configure)
 		../gcc-3.1.1/configure --target=m6809 --program-suffix=09 --nfp --enable-obsolete
 		;;
 
@@ -21,3 +27,4 @@ case $1 in
 		sudo cp xgcc /usr/local/m6809/bin/gcc
 		echo "Done building"
 		;;
+esac

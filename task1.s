@@ -34,11 +34,10 @@
 #define TASK_USED			0x1
 #define TASK_BLOCKED		0x2
 
-.area ram
 
 ;;; Temporary memory locations needed during save/restore
-task_save_U:				.BLKW 1
-task_save_X:				.BLKW 1
+;;;;;task_save_U:				.BLKW 1
+;;;;;task_save_X:				.BLKW 1
 
 
 .globl _task_buffer
@@ -52,14 +51,14 @@ task_save_X:				.BLKW 1
 
 task_yield::
 task_save::
-	stu	task_save_U		/* save U first since it's needed as a temp */
-	stx	task_save_X		; same goes for X
+	stu	_task_save_U		/* save U first since it's needed as a temp */
+	stx	_task_save_X		; same goes for X
 	puls	u					; U = PC
 	ldx	_task_current	; get pointer to current task structure
 	stu	TASK_OFF_PC,x	; save PC
-	ldu	task_save_U
+	ldu	_task_save_U
 	stu	TASK_OFF_U,x	; save U
-	ldu	task_save_X
+	ldu	_task_save_X
 	stu	TASK_OFF_X,x	; save X
 	sta	TASK_OFF_A,x	; save A
 	stb	TASK_OFF_B,x	; save B
@@ -89,17 +88,6 @@ task_restore::	; X = address of task block to restore
 	ldx	TASK_OFF_X,x
 	puls	pc
 
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Function:		
-	;
-	; Description:
-	;
-	; Inputs:
-	;
-	; Outputs:
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 proc(task_create_const)
 	definline(y,x)
@@ -126,50 +114,6 @@ proc(task_create)
 	sty	TASK_OFF_S,x
 endp
 
-
-;;;proc(task_create_gid_const)
-;;;	definline(y,x,a)
-;;;	bsr	task_create_gid
-;;;endp
-;;;
-;;;
-;;;proc(task_create_gid)
-;;;	bsr	task_create
-;;;	sta	TASK_OFF_GID,x
-;;;endp
-;;;
-;;;
-;;;proc(task_create_gid1_const)
-;;;	definline(y,x,a)
-;;;	bsr	task_create_gid1
-;;;endp
-;;;
-;;;proc(task_create_gid1)
-;;;	jsr	task_find_gid
-;;;	iffalse
-;;;		jsr	task_create_gid
-;;;	endif
-;;;endp
-;;;
-;;;
-;;;proc(task_recreate_gid_const)
-;;;	definline(y,x,a)
-;;;	bsr	task_recreate_gid
-;;;endp
-;;;
-;;;proc(task_recreate_gid)
-;;;	jsr	task_kill_gid
-;;;	jsr	task_create_gid
-;;;endp
-;;;
-;;;proc(task_getgid)
-;;;	uses(x)
-;;;	returns(a)
-;;;	ldx	_task_current
-;;;	lda	TASK_OFF_GID,x
-;;;endp
-;;;
-;;;
 
 proc(task_sleep_const)
 	definline(x,a)
@@ -228,67 +172,6 @@ proc(task_exit)
 endp
 
 
-;;;proc(task_kill_pid)
-;;;	requires(x)
-;;;	cmpx	_task_current
-;;;	ifne
-;;;		clr	TASK_OFF_STATE,x
-;;;	else
-;;;		jsr	c_sys_error(ERR_TASK_KILL_CURRENT)
-;;;	endif
-;;;endp
-;;;
-
-;;;proc(task_find_gid)
-;;;	requires(a)
-;;;	uses(x)
-;;;	ldx	#_task_buffer
-;;;	loop
-;;;		tst	TASK_OFF_STATE,x
-;;;		ifnz
-;;;			cmpa	TASK_OFF_GID,x
-;;;			ifeq
-;;;				cmpx	_task_current
-;;;				ifne
-;;;					true
-;;;					return
-;;;				endif
-;;;			endif
-;;;		endif
-;;;
-;;;		leax	TASK_SIZE,x
-;;;		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
-;;;	while(nz)
-;;;	ldx	#0
-;;;	false
-;;;endp
-
-
-;;;proc(task_kill_gid_const)
-;;;	definline(x,a)
-;;;	bsr	task_kill_gid
-;;;endp
-;;;
-;;;proc(task_kill_gid)
-;;;	requires(a)
-;;;	uses(x)
-;;;	ldx	#_task_buffer
-;;;	loop
-;;;		tst	TASK_OFF_STATE,x
-;;;		ifnz
-;;;			cmpa	TASK_OFF_GID,x
-;;;			ifeq
-;;;				cmpx	_task_current
-;;;				ifne
-;;;					jsr	task_kill_pid	
-;;;				endif
-;;;			endif
-;;;		endif
-;;;
-;;;		leax	TASK_SIZE,x
-;;;		cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
-;;;	while(nz)
-;;;endp
 
 task_dispatcher::
 	;;; Pseudocode:

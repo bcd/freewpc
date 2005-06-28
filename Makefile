@@ -14,7 +14,7 @@ TARGET_MACHINE = tz92
 TARGET_ROMPATH = /home/bcd/eptools/mameroms
 
 # Set this to the path where libc can be found
-LIBC_PATH = /home/bcd/src/coco/libc-coco
+LIBC_PATH = ./libc
 
 #######################################################################
 ###	Filenames
@@ -71,11 +71,24 @@ INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 ASMFLAGS = -I. -Iinclude -D__SASM__
 ASMFLAGS += -N --save-temps
 
+# Default CFLAGS
 CFLAGS = -I. -Iinclude -I$(LIBC_PATH)/include
 
+# Default optimizations.  These are the only optimizations that
+# are known to work OK; using -O2 is almost guaranteed to fail.
 CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls
+
+# Turn on compiler debug.  This will cause a bunch of compiler
+# debug files to get written out during every phase of the build.
 CFLAGS += -da
+
+# Please, turn on all warnings!
 CFLAGS += -Wall
+
+# I've been burned by not having a prototype for a function
+# that takes a 'char' sized argument.  The compiler implicitly
+# converts this to 'int', which is a different size, and bad
+# things happen...
 CFLAGS += -Werror-implicit-function-declaration
 
 OBJS = $(OS_OBJS) $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
