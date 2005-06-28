@@ -1,0 +1,7 @@
+// The -*- C++ -*- setjmp/longjmp header.
+
+#ifndef __CSETJMP__
+#define __CSETJMP__
+#include <setjmp.h>
+#endif
+

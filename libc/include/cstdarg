@@ -1,0 +1,6 @@
+// -*- C++ -*- forwarding header.
+
+#ifndef __CSTDARG__
+#define __CSTDARG__
+#include <stdarg.h>
+#endif
