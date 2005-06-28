@@ -1,0 +1,35 @@
+Return-Path: help-gcc-request@prep.ai.mit.edu
+Received: from life.ai.mit.edu (ai.mit.edu) by toad.com id AA02920; Mon, 5 Oct 92 16:50:33 PDT
+Received: by life.ai.mit.edu (4.1/AI-4.10) id AA19117; Mon, 5 Oct 92 18:08:57 EDT
+Return-Path: <help-gcc-request@prep.ai.mit.edu>
+Received: from news.cis.ohio-state.edu by life.ai.mit.edu (4.1/AI-4.10) id AA19086; Mon, 5 Oct 92 18:07:51 EDT
+Received: by news.cis.ohio-state.edu (5.61-kk/5.911008)
+	id AA26856; Mon, 5 Oct 92 17:59:38 -0400
+Received: from USENET by news.cis.ohio-state.edu with netnews
+	for help-gcc@prep.ai.mit.edu (help-gcc@prep.ai.mit.edu);
+	contact usenet@news.cis.ohio-state.edu if you have questions.
+To: help-gcc@prep.ai.mit.edu
+Date: Mon, 5 Oct 1992 20:38:17 GMT
+Message-Id: <1992Oct5.203817.8131@sal.wisc.edu>
+Organization: Space Astronomy Lab, Madison WI
+From: jones@bernie.sal.wisc.edu (Tom Jones)
+Sender: help-gcc-request@prep.ai.mit.edu
+Subject: gcc for 68XX
+
+I noticed renewed interest in a version of gcc for Motorola
+68XX micros.  I still have a gcc configuration for the 6809
+available via ananymous ftp from larry.sal.wisc.edu.  The
+directory is /pub/gcc/MC6809 and it contains the usual gcc
+configuaration files.  It will take some work to rewrite this
+for the MC68HC11, etc. but at least you get to see an example
+of a gcc cross-compiler for 8-bit Motorola micros.
+
+I'm looking forward to my next issue of Circuit Cellar Ink.
+
+-- Tom
+
+-- 
+Thomas E. Jones               | internet:  jones@sal.wisc.edu
+UW Space Astronomy Laboratory | DECNET:    UWSAL::JONES
+1150 University Avenue        |
+Madison, WI 53706             | Ma Bell:    (608)263-4683
