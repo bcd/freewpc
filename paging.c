@@ -1,12 +1,20 @@
 
-.area fastram
+#include <freewpc.h>
 
-page_loaded    .blkb 1
-
-
-.area sysrom
+__fastram__ uint8_t page_loaded;
 
 
+
+uint8_t paged_read_byte (uint8_t *byte_ptr, uint8_t page)
+{
+}
+
+
+uint16_t paged_read_word (uint16_t *word_ptr, uint8_t page)
+{
+}
+
+#if 0
 proc(paged_lda)   ; X/B = far pointer
    local(prev_page)
    uses(b)
@@ -30,19 +38,4 @@ proc(paged_lda)   ; X/B = far pointer
 endp
 
 
-proc(paged_ldy)	; X/B = far pointer
-endp
-
-
-proc(paged_sta)
-endp
-
-
-proc(paged_sty)
-endp
-
-
-proc(paged_jsr)
-endp
-
-
+#endif

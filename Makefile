@@ -57,7 +57,7 @@ SAS_OS_OBJS = switch.o task1.o dmd1.o segment1.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o sound.o coin.o service.o game.o test.o \
-	segment.o device.o lampset.o score.o deff.o
+	segment.o device.o lampset.o score.o deff.o paging.o
 
 OS_INCLUDES = include/freewpc.h
 

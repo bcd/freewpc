@@ -91,10 +91,10 @@ task_restore::	; X = address of task block to restore
 	puls	pc
 
 
-proc(task_create_const)
-	definline(y,x)
-	jsr	task_create
-endp
+;;;;proc(task_create_const)
+;;;;	definline(y,x)
+;;;;	jsr	task_create
+;;;;endp
 
 	; X = address of function
 proc(task_create)
@@ -163,20 +163,20 @@ proc(task_sleepl)
 endp
 
 
-proc(task_exit)
-	ldx	_task_current
-	cmpx	#0000
-	ifz
-		ldb	#ERR_IDLE_CANNOT_EXIT
-		pshb
-		jmp	_fatal
-	endif
-	clr	TASK_OFF_STATE,x
-	ldu	#0000
-	stu	_task_current
-	jmp	task_dispatcher
-endp
-
+;;;;proc(task_exit)
+;;;;	ldx	_task_current
+;;;;	cmpx	#0000
+;;;;	ifz
+;;;;		ldb	#ERR_IDLE_CANNOT_EXIT
+;;;;		pshb
+;;;;		jmp	_fatal
+;;;;	endif
+;;;;	clr	TASK_OFF_STATE,x
+;;;;	ldu	#0000
+;;;;	stu	_task_current
+;;;;	jmp	task_dispatcher
+;;;;endp
+;;;;
 
 
 task_dispatcher::

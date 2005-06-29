@@ -25,6 +25,7 @@
 #include <score.h>
 #include <coin.h>
 #include <game.h>
+#include <stdadj.h>
 #include <mach/config.h>
 #endif
 

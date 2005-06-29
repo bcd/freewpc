@@ -195,7 +195,7 @@ proc(switch_sched)
 	andb	,x
 	stb	,x
 
-	jsr	task_exit
+	jsr	_task_exit
 endp
 
 

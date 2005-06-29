@@ -35,7 +35,8 @@ int has_credits_p (void)
 
 void remove_credit (void)
 {
-	credit_count--;
+	if (credit_count > 0)
+		credit_count--;
 }
 
 

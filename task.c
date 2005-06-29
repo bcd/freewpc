@@ -159,6 +159,12 @@ void task_kill_gid (task_gid_t gid)
 }
 
 
+void *task_get_parms (void)
+{
+	return task_current;
+}
+
+
 void task_init (void)
 {
 	int t;
