@@ -1,7 +1,6 @@
 
 
-#include "wpc.h"
-
+#include <freewpc.h>
 
 .area ram
 
@@ -34,121 +33,64 @@ endmacro
 	; Outputs:
 	;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-proc(sys_reset)
-	;;; Initialize CPU
-	clra									; Initialize zero page to 0000h
-	tfr	a, dp
-
-	;;; Initialize RAM
-	led_toggle
-	clra
-	ldx	#USER_RAM_SIZE
-ram_loop:
-	sta	,x
-	leax	-1,x
-	bne	ram_loop
-
-	/* Initialize the RAM protection circuit */
-	lda	#RAM_UNLOCKED
-	sta	WPC_RAM_LOCK
-	lda	#RAM_LOCK_512
-	sta	WPC_RAM_LOCKSIZE
-	sta	WPC_RAM_LOCK
-
-	;;; Set up the stack
-	lds	#STACK_BASE
-
-	;;; Jump to C initialization
-	jmp	_init
-
-	ldd	#0x1234
-	ldu	#0x5678
-	ldx	#0x9ABC
-	ldy	#0xDEF0
-	loop
-		inc	0x0043
-
-		cmpd	#0x1234
-		ifne
-			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
-		endif
-
-		cmpu	#0x5678
-		ifne
-			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
-		endif
-
-		cmpx	#0x9ABC
-		ifne
-			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
-		endif
-
-		cmpy	#0xDEF0
-		ifne
-			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
-		endif
-	
-		jsr	task_yield
-	endloop
-endp
-
-
-;;;;;interrupt proc(sys_irq)
-;;;;;	lda	#0x96
-;;;;;	sta	WPC_ZEROCROSS_IRQ_CLEAR
+;;;;;proc(sys_reset)
+;;;;;	;;; Initialize CPU
+;;;;;	clra									; Initialize zero page to 0000h
+;;;;;	tfr	a, dp
 ;;;;;
-;;;;;	;;;;;;;;;; Execute tasks every 1ms ;;;;;;;;;;;;;;
+;;;;;	;;; Initialize RAM
 ;;;;;	led_toggle
-;;;;;	jsr	switch_rtt
-;;;;;	jsr	lamp_rtt
-;;;;;	jsr	_sol_rtt
+;;;;;	clra
+;;;;;	ldx	#USER_RAM_SIZE
+;;;;;ram_loop:
+;;;;;	sta	,x
+;;;;;	leax	-1,x
+;;;;;	bne	ram_loop
 ;;;;;
-;;;;;	inc	_irq_count
+;;;;;	/* Initialize the RAM protection circuit */
+;;;;;	lda	#RAM_UNLOCKED
+;;;;;	sta	WPC_RAM_LOCK
+;;;;;	lda	#RAM_LOCK_512
+;;;;;	sta	WPC_RAM_LOCKSIZE
+;;;;;	sta	WPC_RAM_LOCK
 ;;;;;
-;;;;;	ldb	_irq_shift_count
-;;;;;	lslb
-;;;;;	tstb
-;;;;;	ifz
-;;;;;		;;;;;;;;;;; Execute tasks every 8ms ;;;;;;;;;;;;;;;
-;;;;;		inc	_tick_count
+;;;;;	;;; Set up the stack
+;;;;;	lds	#STACK_BASE
 ;;;;;
-;;;;;		incb
-;;;;;	endif
-;;;;;	stb	_irq_shift_count
+;;;;;	;;; Jump to C initialization
+;;;;;	jmp	_init
+;;;;;
+;;;;;	ldd	#0x1234
+;;;;;	ldu	#0x5678
+;;;;;	ldx	#0x9ABC
+;;;;;	ldy	#0xDEF0
+;;;;;	loop
+;;;;;		inc	0x0043
+;;;;;
+;;;;;		cmpd	#0x1234
+;;;;;		ifne
+;;;;;			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
+;;;;;		endif
+;;;;;
+;;;;;		cmpu	#0x5678
+;;;;;		ifne
+;;;;;			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
+;;;;;		endif
+;;;;;
+;;;;;		cmpx	#0x9ABC
+;;;;;		ifne
+;;;;;			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
+;;;;;		endif
+;;;;;
+;;;;;		cmpy	#0xDEF0
+;;;;;		ifne
+;;;;;			jsr	c_sys_error(ERR_TASK_REGISTER_SAVE)
+;;;;;		endif
+;;;;;	
+;;;;;		jsr	task_yield
+;;;;;	endloop
 ;;;;;endp
 ;;;;;
-;;;;;
-;;;;;interrupt proc(sys_firq)
-;;;;;	tst	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
-;;;;;	bmi	timer_int
-;;;;;
-;;;;;dmd_int:
-;;;;;	jsr	_dmd_rtt
-;;;;;	bra	end_firq
-;;;;;
-;;;;;timer_int:
-;;;;;
-;;;;;end_firq:
-;;;;;	clr	WPC_PERIPHERAL_TIMER_FIRQ_CLEAR
-;;;;;endp
-
-
-;;;;interrupt proc(sys_nmi)
-;;;;	jsr	c_sys_error(ERR_NMI)
-;;;;endp
-;;;;
-;;;;interrupt proc(sys_swi)
-;;;;	jsr	c_sys_error(ERR_SWI)
-;;;;endp
-;;;;
-;;;;interrupt proc(sys_swi2)
-;;;;	jsr	c_sys_error(ERR_SWI2)
-;;;;endp
-;;;;
-;;;;interrupt proc(sys_swi3)
-;;;;	jsr	c_sys_error(ERR_SWI3)
-;;;;endp
-
 
 sys_error_const::
 	orcc	#CC_IRQ

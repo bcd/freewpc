@@ -105,6 +105,11 @@ typedef unsigned int uint16_t;
  * We define this to be 8 now, which means that every 8 IRQs,
  * we increment our "tick counter" by 1.  The tick then
  * represents about 8.33ms of actual time.
+ *
+ * The tick count is stored in a single byte field of the
+ * task structure, so it can store up to about 1 second.
+ * If you need to sleep longer than this, use 'task_sleep_sec'
+ * instead of 'task_sleep'.
  */
 #define IRQS_PER_TICK 8
 
@@ -147,16 +152,6 @@ typedef unsigned int uint16_t;
 #define WPC_SERIAL_CONTROL_OUTPUT	0x3FC4
 #define WPC_SERIAL_BAUD_SELECT 		0x3FC5
 #define WPC_TICKET_DISPENSE 			0x3FC6
-
-#define WPC_RESERVED1					0x3FC7
-#define WPC_RESERVED2					0x3FC8
-#define WPC_RESERVED3					0x3FC9
-#define WPC_RESERVED4					0x3FCA
-#define WPC_RESERVED5					0x3FCB
-#define WPC_RESERVED6					0x3FCC
-#define WPC_RESERVED7					0x3FCD
-#define WPC_RESERVED8					0x3FCE
-#define WPC_RESERVED9					0x3FCF
 
 #define WPC_DCS_SOUND_DATA_OUT 		0x3FD0
 #define WPC_DCS_SOUND_DATA_IN 		0x3FD1

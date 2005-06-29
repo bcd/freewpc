@@ -127,6 +127,11 @@ TESTS = $(addsuffix $(BIN), $(basename $(TEST_FILES)))
 VPATH = src/conio src/ctype src/errno src/fcntl src/setjmp src/signal src/stdio src/stdlib \
         src/string src/sys src/time src/unistd
 
+all : c.a libc.a
+
+c.a : $(OBJECTS)
+	find . -name "*.o" > c.a
+
 libc.a: $(OBJECTS)
 	$(AR) rc libc.a $(OBJECTS)
 

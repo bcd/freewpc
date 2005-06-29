@@ -1,11 +1,27 @@
 
 #include <freewpc.h>
 
-/** Define the number of digits contained in standard-length scores. */
-#define MAX_SCORE_DIGITS 10
 
-/** The standard score type, kept in packed BCD, 2 digits per byte */
-typedef bcd_t score_t[(MAX_SCORE_DIGITS + 1)/2];
+volatile uint8_t score_change;
+
+
+void score_deff (void)
+{
+	for (;;)
+	{
+		/* Stop any score effects (i.e. flashing) */
+
+		/* Redraw the scores on the screen */
+		
+		/* Restart score effects */
+
+		/* Clear score change flag */
+		score_change = 0;
+
+		/* Wait for a score change */
+		while (score_change == 0);
+	}
+}
 
 
 void score_zero (score_t *s)
@@ -32,4 +48,5 @@ int score_compare (score_t *s1, score_t *s2)
 {
 	return (0);
 }
+
 

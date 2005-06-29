@@ -111,6 +111,9 @@ static int last_mem_size;	/* operand size (bytes) */
 /* True if a #pragma interrupt has been seen for the current function.  */
 static int in_interrupt;
 
+/* True if a #pragma naked preceded the current function */
+static int in_naked_function;
+
 /* Section names.  The defaults here are used until a #pragma is seen
  * that changes it. */
 char code_section_op[128] = "\t.area sysrom"; /* was _CODE */
@@ -512,6 +515,10 @@ void output_function_prologue ( file, size )
 { register int regno;
   int offset = 0; 
   char reglist[30]; 
+
+  if (in_naked_function)
+	 return;
+
   /* TODO : if function does not return, this can be optimized not to
 	* save away all the regs */
   fprintf (file, ";;;-----------------------------------------\n"); 
@@ -557,6 +564,9 @@ void output_function_epilogue ( file, size )
     int tmp_inh_def_pop;
 
     fprintf (file, ";;;EPILOGUE\n"); 
+
+	 if (in_naked_function)
+		 return;
 
 /*
  *   tmp_inh_def_pop = inhibit_defer_pop;
@@ -629,6 +639,10 @@ void pragma_interrupt (void *pfile)
    in_interrupt = 1;
 }
 
+void pragma_naked (void *pfile)
+{
+	in_naked_function = 1;
+}
 
 
 /* Check a `double' value for validity for a particular machine mode.

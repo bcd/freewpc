@@ -69,7 +69,9 @@ task_save::
 	leay	TASK_OFF_STACK,x	; get lowest valid stack address
 	cmpy	TASK_OFF_S,x		; compare with current pointer
 	ifgt
-		jsr	c_sys_error(ERR_TASK_STACK_OVERFLOW)	
+		ldb	#ERR_TASK_STACK_OVERFLOW
+		pshb
+		jmp	_fatal
 	endif
 
 	jmp	task_dispatcher	; ok, find a new task to run
@@ -126,7 +128,9 @@ task_sleep1::
 	ldx	_task_current
 	cmpx	#0000
 	ifz
-		jsr	c_sys_error(ERR_IDLE_CANNOT_SLEEP)
+		ldb	#ERR_IDLE_CANNOT_SLEEP
+		pshb
+		jmp	_fatal
 	endif
 	sta	TASK_OFF_DELAY,x
 	lda	_tick_count
@@ -163,7 +167,9 @@ proc(task_exit)
 	ldx	_task_current
 	cmpx	#0000
 	ifz
-		jsr	c_sys_error(ERR_IDLE_CANNOT_EXIT)
+		ldb	#ERR_IDLE_CANNOT_EXIT
+		pshb
+		jmp	_fatal
 	endif
 	clr	TASK_OFF_STATE,x
 	ldu	#0000

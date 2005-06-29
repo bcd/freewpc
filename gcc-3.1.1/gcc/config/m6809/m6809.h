@@ -981,11 +981,13 @@ enum reg_class {
 extern void pragma_short_branch PARAMS ((void *));
 extern void pragma_long_branch PARAMS ((void *));
 extern void pragma_interrupt PARAMS ((void *));
+extern void pragma_naked PARAMS ((void *));
 #define REGISTER_TARGET_PRAGMAS(PFILE) \
 do { \
 	cpp_register_pragma (PFILE, 0, "short_branch", pragma_short_branch); \
 	cpp_register_pragma (PFILE, 0, "long_branch", pragma_long_branch); \
 	cpp_register_pragma (PFILE, 0, "interrupt", pragma_interrupt); \
+	cpp_register_pragma (PFILE, 0, "naked", pragma_naked); \
 } while (0)
 
 /*--------------------------------------------------------------

@@ -1,6 +1,6 @@
 
 #include <freewpc.h>
-
+#include <asm-6809.h>
 
 uint8_t errcode;
 
@@ -128,10 +128,27 @@ void lamp_c_demo (void) __taskentry__
 }
 
 
-void init (void) __noreturn__
+#pragma naked
+void do_reset (void) __noreturn__
 {
+	register uint8_t *ramptr asm ("x");
+
 	extern void lamp_demo ();
 	extern void test_init (void);
+
+	set_direct_page_pointer (0);
+
+	set_stack_pointer (STACK_BASE);
+
+	ramptr = (uint8_t *)USER_RAM_SIZE;
+	do
+	{
+		*ramptr-- = 0;
+	} while (ramptr != 0);
+
+	*(volatile uint8_t *)WPC_RAM_LOCK = RAM_UNLOCKED;
+	*(uint8_t *)WPC_RAM_LOCKSIZE = RAM_LOCK_512;
+	*(volatile uint8_t *)WPC_RAM_LOCK = RAM_LOCK_512;
 
 	sys_init_complete = 0;
 	
@@ -152,7 +169,6 @@ void init (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	//task_create_gid (0, lamp_demo, 0);
 	task_create_gid (0, lamp_c_demo, 0);
 
 	test_init ();
