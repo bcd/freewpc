@@ -48,7 +48,7 @@
 
 .area sysrom
 
-
+lblreset
 task_yield::
 task_save::
 	stu	_task_save_U		/* save U first since it's needed as a temp */
@@ -71,7 +71,8 @@ task_save::
 	ifgt
 		ldb	#ERR_TASK_STACK_OVERFLOW
 		pshb
-		jmp	_fatal
+		leas	-2,s
+		jmp	_do_fatal
 	endif
 
 	jmp	task_dispatcher	; ok, find a new task to run
@@ -130,7 +131,8 @@ task_sleep1::
 	ifz
 		ldb	#ERR_IDLE_CANNOT_SLEEP
 		pshb
-		jmp	_fatal
+		leas	-2,s
+		jmp	_do_fatal
 	endif
 	sta	TASK_OFF_DELAY,x
 	lda	_tick_count
@@ -161,22 +163,6 @@ proc(task_sleepl)
 		deca
 	endloop
 endp
-
-
-;;;;proc(task_exit)
-;;;;	ldx	_task_current
-;;;;	cmpx	#0000
-;;;;	ifz
-;;;;		ldb	#ERR_IDLE_CANNOT_EXIT
-;;;;		pshb
-;;;;		jmp	_fatal
-;;;;	endif
-;;;;	clr	TASK_OFF_STATE,x
-;;;;	ldu	#0000
-;;;;	stu	_task_current
-;;;;	jmp	task_dispatcher
-;;;;endp
-;;;;
 
 
 task_dispatcher::

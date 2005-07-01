@@ -15,12 +15,18 @@
 #define ERR_INVALID_LAMP_NUM		11
 #define ERR_NO_FREE_TIMERS			12
 #define ERR_DEFF_QUEUE_FULL		13
+#define ERR_TASK_KILL_FAILED		14
+#define ERR_NOT_IMPLEMENTED_YET	15
+
 
 #ifndef __SASM__
 
 typedef uint8_t errcode_t;
-void fatal (errcode_t errcode) __noreturn__;
-void nonfatal (errcode_t errcode);
+void do_fatal (uint16_t pc, errcode_t errcode) __noreturn__;
+void do_nonfatal (uint16_t pc, errcode_t errcode);
+
+#define fatal(err)		do_fatal(0x1234, err)
+#define nonfatal(err)	do_nonfatal(0x5678, err)
 
 #endif /* __SASM__ */
 

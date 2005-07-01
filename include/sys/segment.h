@@ -58,6 +58,7 @@ void seg_write_char (segaddr_t sa, char c);
 void seg_write_digit (segaddr_t sa, uint8_t digit);
 void seg_write_bcd (segaddr_t sa, bcd_t bcd);
 void seg_write_uint8 (segaddr_t sa, uint8_t u8);
+void seg_write_hex16 (segaddr_t sa, uint16_t u16);
 void seg_write_string (segaddr_t sa, const char *s);
 void seg_erase (segaddr_t sa, int8_t len);
 

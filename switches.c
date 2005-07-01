@@ -81,6 +81,7 @@ void switch_sched (uint8_t sw)
 
 void switch_idle_task (void)
 {
+#if 0
 	uint8_t rawbits, pendbits;
 	uint8_t col;
 
@@ -105,5 +106,6 @@ void switch_idle_task (void)
 		}
 	}
 	task_exit ();
+#endif
 }
 

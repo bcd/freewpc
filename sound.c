@@ -1,7 +1,5 @@
-#include <wpc.h>
-#include <env.h>
-#include <sys/types.h>
-#include <sys/sound.h>
+
+#include <freewpc.h>
 
 #define MUSIC_STACK_SIZE 8
 

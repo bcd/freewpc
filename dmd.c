@@ -1,7 +1,5 @@
 
-#include <wpc.h>
-#include <sys/dmd.h>
-
+#include <freewpc.h>
 
 dmd_pagenum_t dmd_free_page, 
 	dmd_low_page, 

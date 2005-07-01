@@ -19,7 +19,7 @@ static const deff_t deff_table[] = {
 static uint8_t deff_active;
 
 /** Indicates the priority of the deff currently running */
-static uint8_t deff_prio;
+uint8_t deff_prio;
 
 /** Queue of all deffs that have been scheduled to run, even
  * if they are low in priority.  The actively running deff
@@ -31,11 +31,15 @@ static void deff_add_queue (deffnum_t dn)
 {
 	uint8_t i;
 	for (i=0; i < MAX_QUEUED_DEFFS; i++)
-		if (deff_queue[i] == 0)
+	{
+		if (deff_queue[i] == dn)
+			return;
+		else if (deff_queue[i] == 0)
 		{
 			deff_queue[i] = dn;
 			return;
 		}
+	}
 	fatal (ERR_DEFF_QUEUE_FULL);
 }
 
@@ -56,6 +60,7 @@ static deffnum_t deff_get_highest_priority (void)
 	uint8_t best = 0;
 
 	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+	{
 		if (deff_queue[i] != 0)
 		{
 			const deff_t *deff = &deff_table[deff_queue[i]];
@@ -65,8 +70,7 @@ static deffnum_t deff_get_highest_priority (void)
 				best = deff_queue[i];
 			}
 		}
-		else
-			break;
+	}
 
 	/* Save the priority of the best deff here */
 	deff_prio = prio;
@@ -86,8 +90,8 @@ void deff_start (deffnum_t dn)
 		if (dn == deff_get_highest_priority ())
 		{
 			/* This is the new active running deff */
-			task_recreate_gid (GID_DEFF, deff->fn, 0);
 			deff_active = dn;
+			task_recreate_gid (GID_DEFF, deff->fn);
 		}
 		else
 		{
@@ -99,8 +103,8 @@ void deff_start (deffnum_t dn)
 	{
 		if (deff->prio > deff_prio)
 		{
-			task_recreate_gid (GID_DEFF, deff->fn, 0);
 			deff_active = dn;
+			task_recreate_gid (GID_DEFF, deff->fn);
 		}
 	}
 }
@@ -112,9 +116,9 @@ void deff_stop (deffnum_t dn)
 	if (deff->flags & D_RUNNING)
 	{
 		/* If this deff is active, then stop it */
-
 		deff_remove_queue (dn);
 	}
+	fatal (ERR_NOT_IMPLEMENTED_YET);
 }
 
 
@@ -122,28 +126,24 @@ void deff_restart (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
 	if ((deff->flags & D_RUNNING) && (dn == deff_active))
-	{
-		task_recreate_gid (GID_DEFF, deff->fn, 0);
-	}
-	else
-	{
-		deff_start (dn);
-	}
+		task_kill_gid (GID_DEFF);
+	deff_start (dn);
 }
 
 
 void deff_exit (void) __noreturn__
 {
-	deffnum_t dn;
 	const deff_t *deff;
 
 	deff_remove_queue (deff_active);
 
-	dn = deff_get_highest_priority ();
-	deff = &deff_table[dn];
-
-	task_setgid (GID_DEFF_EXITING);
-	task_recreate_gid (GID_DEFF, deff->fn, 0);
+	deff_active = deff_get_highest_priority ();
+	if (deff_active != 0)
+	{
+		deff = &deff_table[deff_active];
+		task_setgid (GID_DEFF_EXITING);
+		task_recreate_gid (GID_DEFF, deff->fn);
+	}
 	task_exit ();
 }
 

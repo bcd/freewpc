@@ -1,5 +1,5 @@
 
-#include <wpc.h>
+#include <freewpc.h>
 
 /*
  * Division by 10 table.

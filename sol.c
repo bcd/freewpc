@@ -1,9 +1,5 @@
 
-#include <wpc.h>
-#include <sys/bitarray.h>
-#include <sys/sol.h>
-#include <mach/coil.h>
-#include <sys/task.h>
+#include <freewpc.h>
 
 
 __fastram__ struct {

@@ -1,5 +1,5 @@
 
-#include <wpc.h>
+#include <freewpc.h>
 
 const char copyright[] = "FreeWPC System ROM.  Written by Brian Dominy.  Licensed under the GNU General Public License (GPL)";
 

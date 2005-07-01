@@ -62,14 +62,15 @@ void add_player (void)
 
 void start_game (void)
 {
-	in_game = 1;
-	in_bonus = 0;
-	in_tilt = 0;
+	in_game = TRUE;
+	in_bonus = FALSE;
+	in_tilt = FALSE;
 	num_players = 0;
 
 	add_player ();
 	player_up = 1;
 	ball_up = 1;
+	extra_balls = 0;
 }
 
 void stop_game (void)
@@ -89,6 +90,7 @@ void sw_start_button (void) __taskentry__
 {
 	extern void test_start (void);
 	test_start ();
+	task_exit ();
 
 	if (!in_game)
 	{
@@ -134,9 +136,9 @@ void sw_slam_tilt (void) __taskentry__
 void game_init (void)
 {
 	num_players = 1;
-	in_game = 0;
-	in_bonus = 0;
-	in_tilt = 0;
+	in_game = FALSE;
+	in_bonus = FALSE;
+	in_tilt = FALSE;
 }
 
 

@@ -36,6 +36,8 @@ typedef struct device_ops
 } device_ops_t;
 
 
+/** The device structure is a read-only descriptor that
+ * contains various device properties. */
 typedef struct device
 {
 	device_ops_t ops;
@@ -44,8 +46,19 @@ typedef struct device
 } device_t;
 
 
+/*
+ * Device states.  Each device is governed by a state
+ * machine; these values dictate the various states that
+ * a device can be in.
+ */
 #define DEV_STATE_IDLE	0
 
+
+/** The device info structure.  This is a read-write
+ * structure that maintains the current state of a device.
+ * Included is the state machine state, as well as other
+ * properties like how many balls are currently in the
+ * device. */
 typedef struct device_info
 {
 	uint8_t size;

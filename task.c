@@ -1,6 +1,18 @@
 
-#include <wpc.h>
-#include <sys/task.h>
+#include <freewpc.h>
+
+/*
+ * This module implements a round-robin, non-realtime, non-preemptive
+ * task scheduler.
+ *
+ * A "task" is analogous to a process.  Tasks can be created, stopped,
+ * killed, etc. as one would expect.  All tasks are "peers", as no
+ * parent/child relationship exists among the tasks.
+ *
+ * Most of the module is written in portable C.  The task structure
+ * and the register save/restore routines are written in assembler.
+ *
+ */
 
 __fastram__ task_t *task_current;
 
@@ -10,6 +22,11 @@ __fastram__ uint16_t task_save_U, task_save_X;
 
 task_t task_buffer[NUM_TASKS];
 
+#define DEBUG_TASKS
+
+#ifdef DEBUG_TASKS
+uint8_t task_count;
+#endif
 
 
 task_t *task_allocate (void)
@@ -61,30 +78,32 @@ void task_yield (void)
 	__asm__ volatile ("jsr task_save");
 }
 
-void task_create (task_function_t fn, uint16_t arg)
-{
-}
 
-void task_create_gid (task_gid_t gid, task_function_t fn, uint16_t arg)
+void task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
 	__asm__ volatile ("jsr task_create\n" : "=r" (tp) : "0" (fn_x));
 	tp->gid = gid;
-	tp->arg = arg;
+	tp->arg = 0;
+#ifdef DEBUG_TASKS
+	task_count++;
+#endif
 }
 
-void task_create_gid1 (task_gid_t gid, task_function_t fn, uint16_t arg)
+void task_create_gid1 (task_gid_t gid, task_function_t fn)
 {
 	if (!task_find_gid (gid))
-		task_create_gid (gid, fn, arg);
+		task_create_gid (gid, fn);
 }
 
-void task_recreate_gid (task_gid_t gid, task_function_t fn, uint16_t arg)
+void task_recreate_gid (task_gid_t gid, task_function_t fn)
 {
 	task_kill_gid (gid);
-	task_create_gid (gid, fn, arg);
+	if (task_find_gid (gid))
+		fatal (ERR_TASK_KILL_FAILED);
+	task_create_gid (gid, fn);
 }
 
 task_gid_t task_getgid (void)
@@ -124,8 +143,11 @@ void task_exit (void) __noreturn__
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
-	task_current->state = 0;
+	task_current->state = TASK_FREE;
 	task_current = 0;
+#ifdef DEBUG_TASKS
+	task_count--;
+#endif
 	asm ("jmp task_dispatcher");
 	for (;;);
 }
@@ -136,7 +158,7 @@ task_t *task_find_gid (task_gid_t gid)
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (tp->state != TASK_FREE)
+		if ((tp->state != TASK_FREE) && (tp->gid == gid))
 			return (tp);
 	return (NULL);
 }
@@ -146,6 +168,10 @@ void task_kill_pid (task_t *tp)
 	if (tp == task_current)
 		fatal (ERR_TASK_KILL_CURRENT);
 	tp->state = TASK_FREE;
+	tp->gid = 0;
+#ifdef DEBUG_TASKS
+	task_count--;
+#endif
 }
 
 void task_kill_gid (task_gid_t gid)
@@ -154,26 +180,32 @@ void task_kill_gid (task_gid_t gid)
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (tp->gid == gid)
+		if ((tp->state != TASK_FREE) && (tp->gid == gid))
 			task_kill_pid (tp);
 }
 
 
-void *task_get_parms (void)
+uint16_t task_get_arg (void)
 {
-	return task_current;
+	return task_current->arg;
+}
+
+
+void task_set_arg (task_t *tp, uint16_t arg)
+{
+	tp->arg = arg;
 }
 
 
 void task_init (void)
 {
-	int t;
 	extern uint8_t tick_count;
 
-	for (t=0; t < NUM_TASKS; t++)
-	{
-		task_buffer[t].state = TASK_FREE;
-	}
+	memset (task_buffer, 0, sizeof (task_buffer));
+
+#ifdef DEBUG_TASKS
+	task_count = 0;
+#endif
 
 	task_current = task_allocate ();
 	__asm__ volatile ("st%0 _task_dispatch_tick" :: "q" (tick_count));

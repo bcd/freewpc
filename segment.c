@@ -147,6 +147,13 @@ void seg_write_uint8 (segaddr_t sa, uint8_t u8)
 }
 
 
+void seg_write_hex16 (segaddr_t sa, uint16_t u16)
+{
+	seg_write_bcd (sa, u16 >> 8);
+	seg_write_bcd (sa+2, u16 & 0xFF);
+}
+
+
 void seg_write_string (segaddr_t sa, const char *s)
 {
 	while (*s != '\0')

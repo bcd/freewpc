@@ -34,7 +34,35 @@
 /* Define as 1 if the machine uses the WPC95 hardware */
 #define MACHINE_WPC95 0
 
-/* Define the number of digits to use for "standard" score values. */
+/* Define the number of digits to use for "standard" score values.
+ * Note that for alphanumeric games, setting this to any value
+ * higher than 8 will not work because of the way that the score
+ * segments are drawn. */
 #define MACHINE_SCORE_DIGITS 8
+
+/* Define the locations of standard switches within the switch matrix.
+ * These switches _must_ be defined */
+#define MACHINE_SHOOTER_SWITCH
+#define MACHINE_TILT_SWITCH
+#define MACHINE_SLAM_TILT_SWITCH
+#define MACHINE_START_SWITCH
+
+/* Define the locations of optional switches.  These may not be
+ * defined for all games. */
+#define MACHINE_BUYIN_SWITCH
+#define MACHINE_LAUNCH_SWITCH
+
+/* Define the standard solenoids */
+#define MACHINE_BALL_SERVE_SOLENOID
+
+/* Define optional solenoids */
+#define MACHINE_LAUNCH_SOLENOID
+
+/* Define the standard lamps */
+#define MACHINE_START_LAMP
+
+/* Define optional lamps */
+#define MACHINE_BUYIN_LAMP
+
 
 #endif /* MACH_CONFIG_H */

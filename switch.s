@@ -149,6 +149,7 @@ proc(switch_idle_task)
 					pshs	x
 					ldx	#switch_sched
 					jsr	task_create
+					inc	_task_count
 					puls	x
 				endif
 				inca
@@ -178,7 +179,8 @@ proc(switch_sched)
 	ldx	b,x
 	cmpx	#0
 	ifnz
-		jsr	task_create
+		; jsr	task_create
+		jsr	,x
 	endif
 	jsr	c_task_sleep(TIME_100MS * 4)
 	puls	b

@@ -1,22 +1,7 @@
-
-/*
- * WPC platform definitions
- *
- * This file contains definitions that are common to the WPC platform.
- *
- */
-
 #ifndef _WPC_H
 #define _WPC_H
 
 #ifndef __SASM__
-
-typedef unsigned char bool;
-typedef unsigned char bcd_t;
-typedef char int8_t;
-typedef unsigned char uint8_t;
-typedef int int16_t;
-typedef unsigned int uint16_t;
 
 #include <stdlib.h>
 #include <string.h>
@@ -29,8 +14,8 @@ typedef unsigned int uint16_t;
 
 #define DEBUG
 
-#define BLKB	blkb
-#define BLKW	blkw
+//#define BLKB	blkb
+//#define BLKW	blkw
 
 #define S(x)	#x
 #define STR(x)	S(x)
@@ -48,22 +33,6 @@ typedef unsigned int uint16_t;
 #define WPC_FAMILY 		WPC_DMD
 #endif
 
-/***************************************************************
- * Properties of the the 6809 CPU
- ***************************************************************/
-
-#define BITS_PER_BYTE 8
-#define BITS_PER_WORD 16
-
-#define CC_CARRY 		0x1
-#define CC_OVERFLOW 	0x2
-#define CC_ZERO 		0x4
-#define CC_NEGATIVE 	0x8
-#define CC_IRQ 		0x10
-#define CC_HALF 		0x20
-#define CC_FIRQ 		0x40
-#define CC_E 			0x80
-
 /* The FIRQ clear/peripheral timer register bits */
 #define FIRQ_CLEAR_BIT 0x80
 
@@ -80,17 +49,20 @@ typedef unsigned int uint16_t;
  * Memory usage
  ***************************************************************/
 
+/* The total size of RAM  -- 8K */
+#define RAM_SIZE 			0x2000
+
+/* The usable, nonprotected area of RAM -- the first 6K */
+#define USER_RAM_SIZE	0x1800
+
+/* The protected RAM size -- whatever is left */
+#define PROT_RAM_SIZE	(RAM_SIZE - USER_RAM_SIZE)
+
 /* The base address of the (dynamic) heap */
 #define HEAP_BASE 		0x800
 
 /* The base address of the stack */
 #define STACK_BASE 		0x1800
-
-/* The total size of RAM */
-#define RAM_SIZE 			0x2000
-
-/* The usable, nonprotected area of RAM */
-#define USER_RAM_SIZE	0x1000
 
 
 /***************************************************************
@@ -127,6 +99,16 @@ typedef unsigned int uint16_t;
 /* When the lock register(s) contain these values, the upper
  * N bytes of the RAM are write protected. */
 #define RAM_LOCK_512			0x1
+
+#if 0
+#define RAM_LOCK_4K			0x0
+#define RAM_LOCK_2K			0x1
+#define RAM_LOCK_1K			0x3
+#define RAM_LOCK_512			0x7
+#define RAM_LOCK_256			0xF
+#endif
+
+#define RAM_LOCKED			0x0
 
 /* When the lock register contains this value, the memory
  * protection circuit is disabled */
@@ -213,6 +195,12 @@ typedef unsigned int uint16_t;
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
+#define LED_DIAGNOSTIC		0x80
+
+/* 0x4 | 0x2 are always set when writing this register.
+ * 0x80 and 0x10 are also set when clearing the IRQ from the
+ * IRQ handler.
+ */
 
 /***************************************************************
  * Task Groups
@@ -224,13 +212,12 @@ typedef unsigned int uint16_t;
 #define GID_DEFF_POPUP				3
 #define GID_TEST_LOOP				4
 #define GID_DEFF_EXITING			5
-
+#define GID_TEST_PROC				6
 
 /****************  Macros  ***************************/
 #if defined(__SASM__)
 #include "wpc.m4"
 #endif
-
 
 #endif /* _WPC_H */
 

@@ -25,12 +25,17 @@ do {											\
 } while (0)
 
 
-void fatal (errcode_t error_code) __noreturn__
+void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 {
+	dmd_alloc_low_clean ();
+	seg_write_uint8 (SEG_ADDR(0,0,0), error_code);
+	seg_write_hex16 (SEG_ADDR(0,1,0), pc);
+	dmd_show_low ();
+	for (;;);
 }
 
 
-void nonfatal (errcode_t error_code)
+void do_nonfatal (uint16_t pc, errcode_t error_code)
 {
 }
 
@@ -52,6 +57,7 @@ void do_irq (void)
 	asm ("jsr switch_rtt");
 	lamp_rtt ();
 	sol_rtt ();
+	triac_rtt ();
 	irq_count++;
 
 	irq_shift_count <<= 1;
@@ -154,6 +160,7 @@ void do_reset (void) __noreturn__
 	
 	wpc_led_toggle ();
 	sol_init ();
+	triac_init ();
 	dmd_init ();
 	switch_init ();
 	sound_init ();
@@ -169,7 +176,7 @@ void do_reset (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	task_create_gid (0, lamp_c_demo, 0);
+	task_create_gid (0, lamp_c_demo);
 
 	test_init ();
 	task_exit ();

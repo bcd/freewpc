@@ -1,7 +1,5 @@
 
-#include <wpc.h>
-#include <sys/task.h>
-#include <sys/sound.h>
+#include <freewpc.h>
 
 
 void sw_escape_button (void) __taskentry__

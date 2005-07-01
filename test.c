@@ -21,6 +21,12 @@ void test_menu_deff (void) __taskentry__ __noreturn__
 
 	seg_write_bcd (SEG_ADDR (0,2,1), test_index);
 
+	{
+		extern uint8_t task_count, deff_prio;
+		seg_write_bcd (SEG_ADDR (0,2,9), task_count);
+		seg_write_bcd (SEG_ADDR (0,2,12), deff_prio);
+	}
+
 	dmd_copy_low_to_high ();
 
 	seg_write_string (SEG_ADDR (0,1,1), test_menu->banner);
@@ -35,12 +41,12 @@ void test_menu_deff (void) __taskentry__ __noreturn__
 }
 
 
-void test_loop (uint16_t unused_arg) __taskentry__
+void test_loop (void) __taskentry__
 {
-	deff_restart (DEFF_TEST_MENU);
-
 	for (;;)
 	{
+		deff_restart (DEFF_TEST_MENU);
+
 		while (switch_bits[AR_RAW][0] == 0)
 			task_sleep (TIME_33MS);
 
@@ -52,18 +58,15 @@ void test_loop (uint16_t unused_arg) __taskentry__
 			case SW_ROWMASK (SW_DOWN):
 				sound_send (SND_DOWN);
 				test_index--;
-				deff_restart (DEFF_TEST_MENU);
 				break;
 
 			case SW_ROWMASK (SW_UP):
 				sound_send (SND_UP);
 				test_index++;
-				deff_restart (DEFF_TEST_MENU);
 				break;
 
 			case SW_ROWMASK (SW_ENTER):
-				task_create_gid (0, test_menu->enter_proc, 0);
-				task_sleep (TIME_1S * 2);
+				task_create_gid1 (GID_TEST_PROC, test_menu->enter_proc);
 				break;
 		}
 
@@ -79,7 +82,7 @@ void test_start (void)
 	sound_send (SND_ENTER);
 	test_menu = test_menu->next;
 	test_index = test_menu->start_index;
-	task_recreate_gid (GID_TEST_LOOP, test_loop, 0);
+	task_recreate_gid (GID_TEST_LOOP, test_loop);
 }
 
 
@@ -115,7 +118,7 @@ void rtc_print_deff (void) __taskentry__
 	seg_write_uint8 (SEG_ADDR(0,2,8), *(uint8_t *)WPC_CLK_MINS);
 	asm ("jsr dmd_draw_border_low");
 	dmd_show_low ();
-	task_sleep (TIME_1S * 3);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 

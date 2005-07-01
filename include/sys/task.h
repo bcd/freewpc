@@ -17,7 +17,7 @@ typedef uint8_t task_gid_t;
 
 typedef uint8_t task_ticks_t;
 
-typedef void (*task_function_t) (uint16_t) __NORETURN__;
+typedef void (*task_function_t) (void);
 
 typedef struct
 {
@@ -46,10 +46,10 @@ typedef task_t *task_pid_t;
 
 void task_init (void);
 void task_yield (void);
-void task_create (task_function_t fn, uint16_t arg);
-void task_create_gid (task_gid_t, task_function_t fn, uint16_t arg);
-void task_create_gid1 (task_gid_t, task_function_t fn, uint16_t arg);
-void task_recreate_gid (task_gid_t, task_function_t fn, uint16_t arg);
+void task_create (task_function_t fn);
+void task_create_gid (task_gid_t, task_function_t fn);
+void task_create_gid1 (task_gid_t, task_function_t fn);
+void task_recreate_gid (task_gid_t, task_function_t fn);
 task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
@@ -57,5 +57,7 @@ void task_sleep_sec (int8_t secs);
 void task_exit (void) __NORETURN__;
 task_t *task_find_gid (task_gid_t);
 void task_kill_gid (task_gid_t);
+uint16_t task_get_arg (void);
+void task_set_arg (task_t *tp, uint16_t arg);
 
 #endif /* _SYS_TASK_H */
