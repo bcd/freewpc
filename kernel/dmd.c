@@ -77,6 +77,16 @@ void dmd_show_other (void)
 }
 
 
+void dmd_swap_low_high (void)
+{
+	__lda (dmd_high_page);
+	__ldb (dmd_low_page);
+	__asm__ volatile ("exg a,b");
+	__sta (&dmd_high_page);
+	__stb (&dmd_low_page);
+}
+
+
 void dmd_clean_page (dmd_buffer_t *dbuf)
 {
 	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
@@ -153,8 +163,18 @@ void dmd_alloc_high_clean (void)
 	dmd_clean_page (dmd_high_buffer);
 }
 
-void dmd_draw_border (dmd_buffer_t *dbuf)
+void dmd_draw_border (char *dbuf)
 {
+	dmd_buffer_t *dbuf_bot = (char *)dbuf + 480;
+	uint16_t i;
+	for (i=0; i < 16; i++)
+		*((uint16_t *)dbuf_bot)++ = *((uint16_t *)dbuf)++ = 0xFFFF;
+	for (i=0; i < 28; i++)
+	{
+		dbuf[0] = 0x03;
+		dbuf[15] = 0xC0;
+		dbuf += 16;
+	}
 }
 
 void dmd_shift_up (dmd_buffer_t *dbuf)

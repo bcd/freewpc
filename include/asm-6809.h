@@ -14,15 +14,59 @@
 #define CC_E 			0x80
 
 #ifndef __SASM__
+extern inline void __lda (uint8_t i)
+{
+	asm __volatile__ ("\tlda %0" :: "g" (i) : "d");
+}
+
+extern inline void __ldb (uint8_t i)
+{
+	asm __volatile__ ("\tldb %0" :: "g" (i) : "d");
+}
+
+extern inline void __sta (uint8_t *i)
+{
+	asm __volatile__ ("\tsta %0" : "=m" (*i));
+}
+
+extern inline void __stb (uint8_t *i)
+{
+	asm __volatile__ ("\tstb %0" : "=m" (*i));
+}
+
+extern inline void __bytecopy (uint8_t *dst, uint8_t src)
+{
+	__lda (src);
+	__sta (dst);
+}
+
+#if 0
+extern inline uint8_t __highbyte (uint16_t val)
+{
+	asm __volatile__ ("\ttfr a,b\n\tclra\n");
+}
+
+
+extern inline uint8_t __lowbyte (uint16_t val)
+{
+	asm __volatile__ ("\tclra\n");
+}
+#endif
+
+extern inline void __swapbyte (uint8_t *v1, uint8_t *v2)
+{
+}
+
+
 extern inline void set_stack_pointer (const uint16_t s)
 {
-	asm ("\tlds %0" :: "g" (s));
+	asm __volatile__ ("\tlds %0" :: "g" (s) : "d");
 }
 
 
 extern inline void set_direct_page_pointer (const uint8_t dp)
 {
-	asm ("\ttfr b, dp" :: "d" (dp));
+	asm __volatile__ ("\ttfr b, dp" :: "d" (dp));
 }
 
 #endif

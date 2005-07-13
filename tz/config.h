@@ -8,6 +8,9 @@
  * This file contains tons of definitions used by the main kernel
  * to implement machine-specific behavior.
  *
+ * This file is always included _after_ all of the standard system
+ * files, so you can reference types, macros, etc. from there just
+ * fine.
  */
 
 #define MACHINE_NAME "TWILIGHT ZONE"

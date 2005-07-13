@@ -100,7 +100,8 @@ CFLAGS += -Wall
 # things happen...
 CFLAGS += -Werror-implicit-function-declaration
 
-OBJS = $(OS_OBJS) $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
+OBJS = $(patsubst %,kernel/%,$(OS_OBJS)) \
+	$(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 AS_OBJS = $(AS_OS_OBJS) $(AS_GAME_OBJS)
 SAS_OBJS = $(SAS_OS_OBJS) $(SAS_GAME_OBJS)
 
@@ -188,3 +189,5 @@ show_objs:
 
 clean:
 	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+	cd kernel && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+	cd $(MACHINE) && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)

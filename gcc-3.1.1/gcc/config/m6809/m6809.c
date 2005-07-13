@@ -65,11 +65,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 -------------------------------------------------------------------*/
 void
 abort_2 ( file, line)
-char *file;
-int line;
+	char *file;
+	int line;
 {
     fprintf (stderr, "ABORT in file %s, line %d \n", file, line );
-    /* *(int *)11L = *(int *)11L; */
     exit (1);
 }
 
@@ -104,9 +103,10 @@ override_options ()
 {
 }
 
-extern int reload_completed;		/* set in toplev.c */
+extern int reload_completed;   /* set in toplev.c */
 extern FILE *asm_out_file;
-static int last_mem_size;	/* operand size (bytes) */
+
+static int last_mem_size;   /* operand size (bytes) */
 
 /* True if a #pragma interrupt has been seen for the current function.  */
 static int in_interrupt;
@@ -125,22 +125,21 @@ char bss_section_op[128] = "\t.area ram"; /* was _BSS */
 -------------------------------------------------------------------*/
 int
 data_reg_operand (op, mode)
-rtx op;
-enum machine_mode mode;
+	rtx op;
+	enum machine_mode mode;
 {
-    int code = 0;
+	int code = 0;
 
-    if (reg_operand (op, mode)) {
-	if (reload_completed) {
-	    if (REGNO (op) == HARD_D_REGNUM) {
-		code = 1;
-	    }
-	}
-	else {
-	    code = 1;
-	}
+	if (reg_operand (op, mode)) {
+		if (reload_completed) {
+			if (REGNO (op) == HARD_D_REGNUM) {
+				code = 1;
+			}
+		}
+		else {
+			code = 1;
+		}
     }
-
     return (code);
 }
 
@@ -149,13 +148,13 @@ enum machine_mode mode;
 -------------------------------------------------------------------*/
 int
 byte_operand (op, mode)
-rtx op;
-enum machine_mode mode;
+	rtx op;
+	enum machine_mode mode;
 {
-    if ((GET_CODE (op) == REG) || (GET_CODE (op) == SUBREG))
-	return (byte_reg_operand (op, mode));
-    else
-	return (general_operand (op, mode));
+	if ((GET_CODE (op) == REG) || (GET_CODE (op) == SUBREG))
+		return (byte_reg_operand (op, mode));
+	else
+		return (general_operand (op, mode));
 }
 
 /*-------------------------------------------------------------------
@@ -163,25 +162,24 @@ enum machine_mode mode;
 -------------------------------------------------------------------*/
 int
 byte_reg_operand (op, mode)
-rtx op;
-enum machine_mode mode;
+	rtx op;
+	enum machine_mode mode;
 {
-    int code = 0;
+	int code = 0;
 
-    if (reg_operand (op, mode)) {
-	if (reload_completed) {
-	    if ((REGNO (op) == HARD_D_REGNUM)
-		|| (REGNO (op) == HARD_A_REGNUM)
-		|| (REGNO (op) == HARD_B_REGNUM)) {
-		code = 1;
-	    }
+	if (reg_operand (op, mode)) {
+		if (reload_completed) {
+			if ((REGNO (op) == HARD_D_REGNUM) ||
+				(REGNO (op) == HARD_A_REGNUM) ||
+				(REGNO (op) == HARD_B_REGNUM)) {
+				code = 1;
+			}
+		}
+		else {
+			code = 1;
+		}
 	}
-	else {
-	    code = 1;
-	}
-    }
-
-    return (code);
+	return (code);
 }
 
 /*-------------------------------------------------------------------
@@ -191,17 +189,17 @@ enum machine_mode mode;
 -------------------------------------------------------------------*/
 int
 reg_operand (op, mode)
-rtx op;
-enum machine_mode mode;
+	rtx op;
+	enum machine_mode mode;
 {
-  if (mode == VOIDmode)
-    return 1;
+	if (mode == VOIDmode)
+		return 1;
 
-  if ((GET_CODE (op) == SUBREG) && (! reload_completed))
-	return general_operand (op, mode);
+	if ((GET_CODE (op) == SUBREG) && (!reload_completed))
+		return general_operand (op, mode);
 
-  while (GET_CODE (op) == SUBREG)
-    op = SUBREG_REG (op);
+	while (GET_CODE (op) == SUBREG)
+		op = SUBREG_REG (op);
 
   return GET_CODE (op) == REG;
 }
@@ -211,42 +209,52 @@ enum machine_mode mode;
 -------------------------------------------------------------------*/
 void
 print_operand (file, x, code)
-FILE *file;
-rtx x;
-int code;
+	FILE *file;
+	rtx x;
+	int code;
 {
-    extern void print_operand_address ();
+	extern void print_operand_address ();
 
-    if (GET_CODE (x) == REG) {
-	if ((BYTE_MODE (x)) && (REGNO (x) == HARD_D_REGNUM))
-	    fputs ("b", file);
-	else
-	    fputs (reg_names[REGNO (x)], file);
-    }
-    else if (GET_CODE (x) == MEM) {
-	last_mem_size = GET_MODE_SIZE (GET_MODE (x));
-	if (code == 'L') {	/* LSH of word address */
-	    x = adjust_address (x, SImode, 1);
+	if (GET_CODE (x) == REG) {
+		/* gcc currently allocates the entire 16-bit 'd' register
+		 * even when it only needs an 8-bit value.  So here it
+		 * is tricked into printing only the lower 8-bit 'b'
+		 * register into the assembly output.
+		 *
+		 * Eventually gcc should be modified to allocate a/b
+		 * independently and this hack can be removed.
+		 */
+		if ((BYTE_MODE (x)) && (REGNO (x) == HARD_D_REGNUM))
+			fputs ("b", file);
+		else
+			fputs (reg_names[REGNO (x)], file);
 	}
-	output_address (XEXP (x, 0));
-    }
-    else if (GET_CODE (x) == CONST_DOUBLE && GET_MODE (x) != DImode)
-    {
-	union { double d; int i[2]; } u;
-	u.i[0] = CONST_DOUBLE_LOW (x);
-	u.i[1] = CONST_DOUBLE_HIGH (x);
-	fprintf (file, "#%.9#g", u.d);
-    }
-    else {
-	if (code == 'L') {	/* LSH of word address */
-	    x = gen_rtx (CONST_INT, VOIDmode, (INTVAL(x) & 0xff));
+
+	else if (GET_CODE (x) == MEM) {
+		last_mem_size = GET_MODE_SIZE (GET_MODE (x));
+		if (code == 'L') {	/* LSH of word address */
+			x = adjust_address (x, SImode, 1);
+		}
+		output_address (XEXP (x, 0));
 	}
-	else if (code == 'M') {	/* MSH of word address */
-	    x = gen_rtx (CONST_INT, VOIDmode, ((INTVAL(x) >> 8) & 0xff));
+
+	else if (GET_CODE (x) == CONST_DOUBLE && GET_MODE (x) != DImode) {
+		union { double d; int i[2]; } u;
+		u.i[0] = CONST_DOUBLE_LOW (x);
+		u.i[1] = CONST_DOUBLE_HIGH (x);
+		fprintf (file, "#%.9#g", u.d);
 	}
-	putc ('#', file);
-	output_addr_const (file, x);
-    }
+
+	else {
+		if (code == 'L') {	/* LSH of word address */
+			x = gen_rtx (CONST_INT, VOIDmode, (INTVAL(x) & 0xff));
+		}
+		else if (code == 'M') {	/* MSH of word address */
+			x = gen_rtx (CONST_INT, VOIDmode, ((INTVAL(x) >> 8) & 0xff));
+		}
+		putc ('#', file);
+		output_addr_const (file, x);
+	}
 }
 
 /*-------------------------------------------------------------------
@@ -257,102 +265,107 @@ print_operand_address (file, addr)
 FILE *file;
 register rtx addr;
 {
-    extern void debug_rtx ();		/* DEBUG */
-    register rtx base = 0;
-    register rtx offset = 0;
-    int regno;
-    int indirect_flag = 0;
+	extern void debug_rtx ();   /* DEBUG */
+	register rtx base = 0;
+	register rtx offset = 0;
+	int regno;
+	int indirect_flag = 0;
 
-    /*** check for indirect addressing ***/
-    if (GET_CODE (addr) == MEM) {
-	last_mem_size = GET_MODE_SIZE (GET_MODE (addr));
-	indirect_flag = 1;
-	fprintf (file, "[");
-	addr = XEXP (addr, 0);
-    }
-
-    switch (GET_CODE (addr)) {
-    case REG:
-	regno = REGNO (addr);
-	if ((BYTE_MODE (addr)) && (REGNO (addr) == HARD_D_REGNUM))
-	    fprintf (file, ",b");
-	else
-	    fprintf (file, ",%s", reg_names[regno]);
-	break;
-
-    case PRE_DEC:
-	regno = REGNO (XEXP (addr, 0));
-	fputs (((last_mem_size == 1) ? ",-" : ",--"), file);
-	fprintf (file, "%s", reg_names[regno]);
-	break;
-
-    case POST_INC:
-	regno = REGNO (XEXP (addr, 0));
-	fprintf (file, ",%s", reg_names[regno]);
-	fputs (((last_mem_size == 1) ? "+" : "++"), file);
-	break;
-
-    case PLUS:
-	base = XEXP (addr, 0);
-	if (GET_CODE (base) == MEM)
-	    base = XEXP (base, 0);
-	offset = XEXP (addr, 1);
-	if (GET_CODE (offset) == MEM)
-	    offset = XEXP (offset, 0);
-
-	if ((CONSTANT_ADDRESS_P (base))
-	    && (CONSTANT_ADDRESS_P (offset))) {
-	    output_addr_const (file, base);
-	    fputs ("+", file);
-	    output_addr_const (file, offset);
+	/*** check for indirect addressing ***/
+	if (GET_CODE (addr) == MEM) {
+		last_mem_size = GET_MODE_SIZE (GET_MODE (addr));
+		indirect_flag = 1;
+		fprintf (file, "[");
+		addr = XEXP (addr, 0);
 	}
 
-	else if ((CONSTANT_ADDRESS_P (base)) && (A_REG_P (offset))) {
-	    output_addr_const (file, base);
-	    fprintf (file, ",%s", reg_names[REGNO (offset)]);
-	}
+	switch (GET_CODE (addr)) {
+		case REG:
+			regno = REGNO (addr);
+			/* Not sure about the following: you can't index from b
+			 * anyway, so I don't think this is valid. */
+			if ((BYTE_MODE (addr)) && (REGNO (addr) == HARD_D_REGNUM))
+				fprintf (file, ",b");
+			else
+				fprintf (file, ",%s", reg_names[regno]);
+			break;
 
-	else if ((CONSTANT_ADDRESS_P (offset)) && (A_REG_P (base))) {
-	    output_addr_const (file, offset);
-	    fprintf (file, ",%s", reg_names[REGNO (base)]);
-	}
+		case PRE_DEC:
+			regno = REGNO (XEXP (addr, 0));
+			fputs (((last_mem_size == 1) ? ",-" : ",--"), file);
+			fprintf (file, "%s", reg_names[regno]);
+			break;
 
-	/*** accumulator offset ***/
-	else if (((D_REG_P (offset)) || (Q_REG_P (offset)))
-	&& (A_REG_P (base))) {
-	    fprintf (file, "%s,%s",
-		reg_names[REGNO (offset)], reg_names[REGNO (base)]);
-	}
+		case POST_INC:
+			regno = REGNO (XEXP (addr, 0));
+			fprintf (file, ",%s", reg_names[regno]);
+			fputs (((last_mem_size == 1) ? "+" : "++"), file);
+			break;
 
-	else if (((D_REG_P (base)) || (Q_REG_P (base)))
-	&& (A_REG_P (offset))) {
-	    fprintf (file, "%s,%s",
-		reg_names[REGNO (base)], reg_names[REGNO (offset)]);
-	}
+		case PLUS:
+			base = XEXP (addr, 0);
+			if (GET_CODE (base) == MEM)
+				base = XEXP (base, 0);
 
-	else if (GET_CODE (base) == PRE_DEC) {
-	    regno = REGNO (XEXP (base, 0));
-	    fputs (((last_mem_size == 1) ? ",-" : ",--"), file);
-	    fprintf (file, "%s", reg_names[regno]);
-	}
-	else if ((REG_P (base)) && (REG_P (offset))) {
-	    fprintf (file, "%s,%s ;BOGUS",
-		reg_names[REGNO (offset)], reg_names[REGNO (base)]);
-	    debug_rtx (addr);		/* DEBUG */
-	}
-	else {
-	    fprintf (file, "BOGUS+");
-	    debug_rtx (addr);		/* DEBUG */
-	}
-	break;
+			offset = XEXP (addr, 1);
+			if (GET_CODE (offset) == MEM)
+				offset = XEXP (offset, 0);
+
+			if ((CONSTANT_ADDRESS_P (base))
+			&& (CONSTANT_ADDRESS_P (offset))) {
+				output_addr_const (file, base);
+				fputs ("+", file);
+				output_addr_const (file, offset);
+			}
+
+			else if ((CONSTANT_ADDRESS_P (base)) && (A_REG_P (offset))) {
+				output_addr_const (file, base);
+				fprintf (file, ",%s", reg_names[REGNO (offset)]);
+			}
+
+			else if ((CONSTANT_ADDRESS_P (offset)) && (A_REG_P (base))) {
+				output_addr_const (file, offset);
+				fprintf (file, ",%s", reg_names[REGNO (base)]);
+			}
+
+			/*** accumulator offset ***/
+			else if (((D_REG_P (offset)) || (Q_REG_P (offset)))
+			&& (A_REG_P (base))) {
+				fprintf (file, "%s,%s",
+				reg_names[REGNO (offset)], reg_names[REGNO (base)]);
+			}
+
+			else if (((D_REG_P (base)) || (Q_REG_P (base)))
+			&& (A_REG_P (offset))) {
+				fprintf (file, "%s,%s",
+				reg_names[REGNO (base)], reg_names[REGNO (offset)]);
+			}
+
+			else if (GET_CODE (base) == PRE_DEC) {
+				regno = REGNO (XEXP (base, 0));
+				fputs (((last_mem_size == 1) ? ",-" : ",--"), file);
+				fprintf (file, "%s", reg_names[regno]);
+			}
+
+			else if ((REG_P (base)) && (REG_P (offset))) {
+				fprintf (file, "%s,%s ;BOGUS",
+				reg_names[REGNO (offset)], reg_names[REGNO (base)]);
+				debug_rtx (addr);   /* DEBUG */
+			}
+
+			else {
+				fprintf (file, "BOGUS+");
+				debug_rtx (addr);   /* DEBUG */
+			}
+			break;
 
 	default:
-	    output_addr_const (file, addr);
-	    break;
-    }
+		output_addr_const (file, addr);
+		break;
+	}
 
-    if (indirect_flag)
-	fprintf (file, "]");
+	if (indirect_flag)
+		fprintf (file, "]");
 }
 
 /*-------------------------------------------------------------------
@@ -365,9 +378,10 @@ register rtx addr;
    We assume that ALL add, minus, etc. instructions effect the condition
    codes.
 -------------------------------------------------------------------*/
+void
 notice_update_cc (exp, insn)
-rtx exp;
-rtx insn;
+	rtx exp;
+	rtx insn;
 {
     /*** recognize SET insn's ***/
     if (GET_CODE (exp) == SET) {
@@ -481,83 +495,91 @@ my_basename (filename)
 
 
 void
-print_options (out)
-     FILE *out;
+print_options (file)
+	FILE *file;
 {
-  char *a_time;
-  long c_time;
+	char *a_time;
+	long c_time;
 
-  fprintf (out, ";;; Source:\t%s\n", main_input_filename);
-  fprintf (out, ";;; Destination:\t%s\n", asm_file_name);
-  c_time = time (0);
-  a_time = ctime (&c_time);
-  fprintf (out, ";;; Compiled:\t%s", a_time);
+	fprintf (file, ";;; Source:\t%s\n", main_input_filename);
+	fprintf (file, ";;; Destination:\t%s\n", asm_file_name);
+
+	c_time = time (0);
+	a_time = ctime (&c_time);
+	fprintf (file, ";;; Compiled:\t%s", a_time);
+
 #ifdef __GNUC__
 #ifndef __VERSION__
 #define __VERSION__ "[unknown]"
 #endif
-  fprintf (out, ";;; (META)compiled by GNU C version %s.\n", __VERSION__);
+	fprintf (file, ";;; (META)compiled by GNU C version %s.\n", __VERSION__);
 #else
-  fprintf (out, ";;; (META)compiled by CC.\n");
+	fprintf (file, ";;; (META)compiled by CC.\n");
 #endif
-  fprintf (out, ";;; OPTIONS:\t%s%s\n",
-	   (TARGET_SHORT_INT ? " -mshort_int":" -mlong_int"),
-	   (TARGET_SHORT_BRANCH ? " -mshort_branch":" -mlong_branch"));
-  fprintf (out, ";;; OPTIONS:\t%s\n",
-	   (flag_signed_char ? " signed-char" : " !signed-char"));
-  fprintf (out, "\t.module\t%s\n", my_basename(main_input_filename));
+
+	fprintf (file, ";;; OPTIONS:\t%s%s\n",
+		(TARGET_SHORT_INT ? " -mshort_int":" -mlong_int"),
+		(TARGET_SHORT_BRANCH ? " -mshort_branch":" -mlong_branch"));
+	fprintf (file, ";;; OPTIONS:\t%s\n",
+		(flag_signed_char ? " signed-char" : " !signed-char"));
+	fprintf (file, "\t.module\t%s\n", my_basename(main_input_filename));
 }
 
 
-void output_function_prologue ( file, size )
-	 FILE *file;
-        int size;
-{ register int regno;
-  int offset = 0; 
-  char reglist[30]; 
-
-  if (in_naked_function)
-	 return;
-
-  /* TODO : if function does not return, this can be optimized not to
-	* save away all the regs */
-  fprintf (file, ";;;-----------------------------------------\n"); 
-  fprintf (file, ";;;  PROLOGUE for %s\n", current_function_name); 
-  fprintf (file, ";;;-----------------------------------------\n"); 
-  reglist[0] = '\0'; 
-    if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
-          strcat (reglist, reg_names[HARD_U_REGNUM]); 
-          offset += 2; 
-    } 
-    for  (regno = HARD_X_REGNUM; regno <= HARD_U_REGNUM; regno++) 
-        { if  (regs_ever_live[regno]) 
-            { 
-              if (reglist[0] != '\0') 
-                  strcat (reglist, ","); 
-              strcat (reglist, reg_names[regno]); 
-              offset += 2; 
-            } 
-        } 
-    if ((size) != 0) 
-        fprintf (file, "\tleas\t-(%d),s\t; allocate auto variables\n", 
-            (size)); 
-    if (offset != 0) 
-        fprintf (file, "\tpshs\t%s\t;save registers\n", reglist); 
-    if (frame_pointer_needed) { 
-        fprintf (file, "\tleau\t%d,s\t;use U-reg as frame pointer\n", 
-            offset+size); 
-    } 
-  fprintf (file, ";;;END PROLOGUE\n"); 
-}
-
-
-void output_function_epilogue ( file, size )
+void
+output_function_prologue ( file, size )
 	FILE *file;
-        int size;
+	int size;
+{ 
+	register int regno;
+	int offset = 0; 
+	char reglist[30]; 
+
+	if (in_naked_function)
+		return;
+
+	/* TODO : if function does not return, this can be optimized not to
+	* save away all the regs */
+	fprintf (file, ";;;-----------------------------------------\n"); 
+	fprintf (file, ";;;  PROLOGUE for %s\n", current_function_name); 
+	fprintf (file, ";;;-----------------------------------------\n"); 
+
+	reglist[0] = '\0'; 
+
+	if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
+		strcat (reglist, reg_names[HARD_U_REGNUM]); 
+		offset += 2; 
+	} 
+
+	for (regno = HARD_X_REGNUM; regno <= HARD_U_REGNUM; regno++) {
+		if  (regs_ever_live[regno]) { 
+			if (reglist[0] != '\0') 
+				strcat (reglist, ","); 
+			strcat (reglist, reg_names[regno]); 
+			offset += 2; 
+		} 
+	} 
+
+	if (size != 0) 
+		fprintf (file, "\tleas\t-(%d),s\t; allocate auto variables\n", size);
+	if (offset != 0) 
+		fprintf (file, "\tpshs\t%s\t;save registers\n", reglist); 
+	if (frame_pointer_needed) { 
+		fprintf (file, 
+			"\tleau\t%d,s\t;use U-reg as frame pointer\n", offset+size); 
+	} 
+	fprintf (file, ";;;END PROLOGUE\n"); 
+}
+
+
+void
+output_function_epilogue ( file, size )
+	FILE *file;
+	int size;
 {
-    register int regno; 
-    int offset = 0; 
-    char reglist[30]; 
+	register int regno; 
+	int offset = 0; 
+	char reglist[30]; 
     /*    extern int inhibit_defer_pop;
     extern int pending_stack_adjust;
     extern int current_function_pops_args; */
@@ -574,7 +596,6 @@ void output_function_epilogue ( file, size )
  *   do_pending_stack_adjust();
  *   inhibit_defer_pop = tmp_inh_def_pop;
  */
-
 
     reglist[0] = '\0'; 
     if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
@@ -599,24 +620,23 @@ void output_function_epilogue ( file, size )
  */
 
     if (offset != 0)
-      if((size)==0 && !in_interrupt)
+      if ((size == 0) && !in_interrupt)
         fprintf (file, "\tpuls\t%s,pc\t;restore registers\n", reglist);
       else
         fprintf (file, "\tpuls\t%s\t;restore registers\n", reglist);
-    if ((size) != 0)
+    if (size != 0)
         fprintf (file, "\tleas\t%d,s\t; deallocate auto variables\n",
-            (size));
+            size);
     if (in_interrupt)
       fprintf (file, "\trti\t\t; return from interrupt\n");
-    else if(offset==0 || (size)!=0)
+    else if (offset==0 || (size != 0))
       fprintf (file, "\trts\t\t; return from function\n");
 
-    fprintf (file, ";;;-----------------------------------------\n"); 
-    fprintf (file, ";;; END EPILOGUE for %s\n", current_function_name); 
-    fprintf (file, ";;;-----------------------------------------\n\n\n"); 
+	fprintf (file, ";;;-----------------------------------------\n"); 
+	fprintf (file, ";;; END EPILOGUE for %s\n", current_function_name); 
+	fprintf (file, ";;;-----------------------------------------\n\n\n"); 
     
-    in_interrupt = 0;
-    
+	in_interrupt = 0;
 }
 
 
@@ -624,22 +644,30 @@ void output_function_epilogue ( file, size )
  * Handle pragmas.  Note that only the last branch pragma seen in the 
  * source has any affect on code generation.  
  */
-void pragma_short_branch (void *pfile)
+void
+pragma_short_branch (pfile)
+	void *pfile;
 {
 	target_flags |= 1;
 }
 
-void pragma_long_branch (void *pfile)
+void 
+pragma_long_branch (pfile)
+	void *pfile;
 {
    target_flags &= ~1;
 }
 
-void pragma_interrupt (void *pfile)
+void 
+pragma_interrupt (pfile)
+	void *pfile;
 {
    in_interrupt = 1;
 }
 
-void pragma_naked (void *pfile)
+void 
+pragma_naked (pfile)
+	void *pfile;
 {
 	in_naked_function = 1;
 }
@@ -649,29 +677,29 @@ void pragma_naked (void *pfile)
  * Called by the CHECK_FLOAT_VALUE() machine-dependent macro.
  */
 int
-check_float_value(mode, d, overflow)
-   enum machine_mode mode;
-   double *d;
-   int overflow;
+check_float_value (mode, d, overflow)
+	enum machine_mode mode;
+	double *d;
+	int overflow;
 {
-  if (mode == SFmode) {
-    if (*d > 1.7014117331926443e+38) {
-      error("magnitude of constant too large for `float'");
-      *d = 1.7014117331926443e+38;
-    }
-    else if (*d < -1.7014117331926443e+38) {
-       error("magnitude of constant too large for `float'");
-       *d = -1.7014117331926443e+38;
-    }
-    else if ((*d > 0) && (*d < 2.9387358770557188e-39)) {
-      warning("`float' constant truncated to zero");
-      *d = 0.0;
-    }
-    else if ((*d < 0) && (*d > -2.9387358770557188e-39)) {
-      warning("`float' constant truncated to zero");
-      *d = 0.0;
-    }
-  }
-
-  return overflow;
+	if (mode == SFmode) {
+		if (*d > 1.7014117331926443e+38) {
+			error("magnitude of constant too large for `float'");
+			*d = 1.7014117331926443e+38;
+		}
+		else if (*d < -1.7014117331926443e+38) {
+			error("magnitude of constant too large for `float'");
+			*d = -1.7014117331926443e+38;
+		}
+		else if ((*d > 0) && (*d < 2.9387358770557188e-39)) {
+			warning("`float' constant truncated to zero");
+			*d = 0.0;
+		}
+		else if ((*d < 0) && (*d > -2.9387358770557188e-39)) {
+			warning("`float' constant truncated to zero");
+			*d = 0.0;
+		}
+	}
+	return overflow;
 }
+

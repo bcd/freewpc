@@ -164,16 +164,16 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 	 Standard register usage.
 --------------------------------------------------------------*/
 /* assign names to real MC6809 registers -- tej */
-#define HARD_D_REGNUM	0
-#define HARD_X_REGNUM	1
-#define HARD_Y_REGNUM	2
-#define HARD_U_REGNUM	3
-#define HARD_S_REGNUM	4
-#define HARD_PC_REGNUM	5
-#define HARD_A_REGNUM	8
-#define HARD_B_REGNUM	9
-#define HARD_CC_REGNUM 10
-#define HARD_DP_REGNUM 11
+#define HARD_D_REGNUM	0   /* bit value = 0x01 */
+#define HARD_X_REGNUM	1   /* bit value = 0x02 */
+#define HARD_Y_REGNUM	2   /* bit value = 0x04 */
+#define HARD_U_REGNUM	3   /* bit value = 0x08 */
+#define HARD_S_REGNUM	4   /* bit value = 0x10 */
+#define HARD_PC_REGNUM	5   /* bit value = 0x20 */
+#define HARD_A_REGNUM	8   /* bit value = 0x100 */
+#define HARD_B_REGNUM	9   /* bit value = 0x200 */
+#define HARD_CC_REGNUM 10   /* bit value = 0x400 */
+#define HARD_DP_REGNUM 11   /* bit value = 0x800 */
 
 /* Number of actual hardware registers.
    The hardware registers are assigned numbers for the compiler
@@ -301,10 +301,19 @@ of machine-mode MODE.  */
 /* Define 3 classes A (address) and D (data), and Q (byte). */
 enum reg_class {
     NO_REGS,
-    D_REGS,		/* 16-bit (word (SI)) data */
-    Q_REGS,		/* 8-bit (byte (HI)) data */
-    A_REGS,		/* 16-bit addresses */
-    G_REGS,		/* 16-bit data and address */
+
+	 /* 16-bit (word (SI)) data (D) */
+    D_REGS,
+
+	 /* 8-bit (byte (HI)) data (D) */
+    Q_REGS,
+
+	 /* 16-bit addresses (X,Y,U,S,PC) */
+    A_REGS,
+
+	 /* 16-bit data and address (D,X,Y,U,S,PC) */
+    G_REGS,
+
     ALL_REGS,
     LIM_REG_CLASSES
 };

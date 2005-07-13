@@ -6,15 +6,6 @@
 .area sysrom
 
 
-proc(dmd_flip_low_high)
-	lda	_dmd_high_page
-	ldb	_dmd_low_page
-	exg	a,b
-	sta	_dmd_high_page
-	stb	_dmd_low_page
-endp
-
-
    ; X = pointer to display page
 proc(dmd_draw_border)
    uses(a,b,u,x,y)
