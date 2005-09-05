@@ -2,10 +2,10 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
-#define switch_raw_bits			_switch_bits
-#define switch_changed_bits	_switch_bits + (1 * SWITCH_BITS_SIZE)
-#define switch_pending_bits	_switch_bits + (2 * SWITCH_BITS_SIZE)
-#define switch_queued_bits		_switch_bits + (3 * SWITCH_BITS_SIZE)
+#define switch_raw_bits			switch_bits
+#define switch_changed_bits	switch_bits + (1 * SWITCH_BITS_SIZE)
+#define switch_pending_bits	switch_bits + (2 * SWITCH_BITS_SIZE)
+#define switch_queued_bits		switch_bits + (3 * SWITCH_BITS_SIZE)
 
 uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
@@ -41,7 +41,7 @@ static const switch_info_t switch_info[NUM_SWITCHES] = {
 void switch_init (void)
 {
 	memset ((uint8_t *)&switch_bits[0][0], 0, sizeof (switch_bits));
-	memcpy ((uint8_t *)&switch_bits[0][0], mach_opto_mask, SWITCH_BITS_SIZE);
+	//memcpy ((uint8_t *)&switch_bits[0][0], mach_opto_mask, SWITCH_BITS_SIZE);
 }
 
 
@@ -57,6 +57,27 @@ extern inline void switch_rowpoll(const uint8_t col)
 	asm ("\torb "	STR(switch_pending_bits) "+%0\n" :: "q" (col));
 	asm ("\tstb "	STR(switch_pending_bits) "+%0\n" :: "q" (col));
 #endif
+}
+
+bool switch_poll (const switchnum_t sw)
+{
+	register bitset p = switch_raw_bits;
+	register uint8_t v = sw;
+	__testbit(p, v);
+	return v;
+}
+
+bool switch_is_opto (const switchnum_t sw)
+{
+	register bitset p = mach_opto_mask;
+	register uint8_t v = sw;
+	__testbit(p, v);
+	return v;
+}
+
+bool switch_poll_logical (const switchnum_t sw)
+{
+	return switch_poll (sw) ^ switch_is_opto (sw);
 }
 
 void switch_rtt (void)

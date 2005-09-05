@@ -54,6 +54,7 @@ void do_irq (void)
 
 	/* Execute rtts every 1ms */
 	wpc_led_toggle ();
+	db_rtt ();
 	asm ("jsr switch_rtt");
 	lamp_rtt ();
 	sol_rtt ();
@@ -159,11 +160,15 @@ void do_reset (void) __noreturn__
 	sys_init_complete = 0;
 	
 	wpc_led_toggle ();
+	db_init ();
 	sol_init ();
 	triac_init ();
 	dmd_init ();
 	switch_init ();
 	sound_init ();
+
+	device_init ();
+	trough_init ();
 
 	wpc_led_toggle ();
 	irq_init ();
@@ -177,6 +182,7 @@ void do_reset (void) __noreturn__
 	wpc_led_toggle ();
 
 	task_create_gid (0, lamp_c_demo);
+	task_create_gid (0, device_probe);
 
 	test_init ();
 	task_exit ();

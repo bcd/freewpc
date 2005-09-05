@@ -25,8 +25,9 @@ typedef struct
 #define DEFF_TEST_MENU		2
 #define DEFF_PRINT_RTC		3
 #define DEFF_CREDIT_ADDED	4
+#define DEFF_SCORES			5
 
-
+uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);
 void deff_restart (deffnum_t dn);

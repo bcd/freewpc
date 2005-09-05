@@ -38,10 +38,10 @@ switch_handlers::
 	.dw	_sw_enter_button
 
 	/* Column 1 */
-	.dw	0, 0, _sw_start_button, 0, 0, 0, 0, 0
+	.dw	0, 0, _sw_start_button, 0, _sw_trough, _sw_trough, _sw_trough, _sw_outhole
 
 	/* Column 2 */
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
+	.dw	0, 0, 0, 0, 0, 0, 0, _sw_rocket
 
 	/* Column 3 */
 	.dw	0, 0, 0, 0, 0, 0, 0, 0
@@ -50,13 +50,16 @@ switch_handlers::
 	.dw	0, 0, 0, 0, 0, 0, 0, 0
 
 	/* Column 5 */
-	.dw	0, 0, 0, 0, 0, 0, 0, 0
+	.dw	0, 0, 0, 0, 0, 0, 0, _sw_slot
 
 	/* Column 6 */
 	.dw	0, 0, 0, 0, 0, 0, 0, 0
 
 	/* Column 7 */
 	.dw	0, 0, 0, 0, 0, 0, 0, 0
+
+	/* Column 8 */
+	.dw	0, 0, 0, _sw_lock, _sw_lock, 0, 0, _sw_lock
 
 
 
@@ -115,6 +118,11 @@ proc(switch_idle_task)
 	local(byte,rawbits)
 	endlocal
 
+	tst	_sys_init_complete
+	ifeq
+		return;
+	endif
+
 	; Checking the pending bits on each switch column
 	ldx	#0000
 
@@ -124,6 +132,8 @@ proc(switch_idle_task)
 	
 		orcc	#CC_IRQ								; Disable interrupts
 		ldb	switch_raw_bits,x					; Grab the raw bits
+		eorb	_mach_opto_mask,x					; Invert for optos
+		orb	_mach_edge_switches,x			; Convert to active level
 		stb	rawbits
 		ldb	switch_pending_bits,x			; Grab the pending bits
 		andb	rawbits								; Only service 'active' bits
@@ -154,7 +164,7 @@ proc(switch_idle_task)
 				endif
 				inca
 				lsrb
-				lsr	rawbits
+				;;; lsr	rawbits
 				tstb
 			while(ne)
 
@@ -173,10 +183,17 @@ endp
 proc(switch_sched)
 	tfr	a,b
 
+	;;;pshs	a
+	;;;pshs	b
+	;;;jsr	_db_puti
+	;;;puls	b
+	;;;puls	a
+
 	pshs	b
 	ldx	#switch_handlers
-	aslb
-	ldx	b,x
+	leax	b,x
+	leax	b,x
+	ldx	,x
 	cmpx	#0
 	ifnz
 		; jsr	task_create

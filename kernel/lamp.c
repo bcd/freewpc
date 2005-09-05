@@ -4,9 +4,9 @@
 
 
 __fastram__ uint8_t lamp_matrix[NUM_LAMP_COLS];
-__fastram__ uint8_t lamp_flash_alloc[NUM_LAMP_COLS];
+__fastram__ uint8_t lamp_flash_allocated[NUM_LAMP_COLS];
 __fastram__ uint8_t lamp_flash_matrix[NUM_LAMP_COLS];
-__fastram__ uint8_t lamp_leff_alloc[NUM_LAMP_COLS];
+__fastram__ uint8_t lamp_leff_allocated[NUM_LAMP_COLS];
 __fastram__ uint8_t lamp_leff_matrix[NUM_LAMP_COLS];
 
 uint8_t lamp_flash_max;
@@ -78,7 +78,7 @@ int lamp_test (lampnum_t lamp)
 
 void lamp_flash (lampnum_t lamp)
 {
-	register bitset p = lamp_flash_alloc;
+	register bitset p = lamp_flash_allocated;
 	register uint8_t v = lamp;
 	__setbit(p, v);
 }
@@ -86,7 +86,7 @@ void lamp_flash (lampnum_t lamp)
 
 void lamp_noflash (lampnum_t lamp)
 {
-	register bitset p = lamp_flash_alloc;
+	register bitset p = lamp_flash_allocated;
 	register uint8_t v = lamp;
 	__clearbit(p, v);
 }

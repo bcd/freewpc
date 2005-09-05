@@ -67,5 +67,7 @@
 /* Define optional lamps */
 #define MACHINE_BUYIN_LAMP
 
+/* Declare the array of opto bits, defined elsewhere */
+extern const uint8_t mach_opto_mask[];
 
 #endif /* MACH_CONFIG_H */

@@ -20,7 +20,7 @@ void start_ball (void);
 void add_player (void);
 void start_game (void);
 void stop_game (void);
-int verify_start_ok (void);
+bool verify_start_ok (void);
 void sw_start_button (void) __taskentry__;
 void sw_buy_in_button (void) __taskentry__;
 void sw_tilt (void) __taskentry__;

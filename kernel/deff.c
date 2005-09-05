@@ -1,6 +1,8 @@
 
 #include <freewpc.h>
 
+
+extern void scores_deff (void) __taskentry__;
 extern void coin_deff (void) __taskentry__;
 extern void test_menu_deff (void) __taskentry__;
 extern void rtc_print_deff (void) __taskentry__;
@@ -9,8 +11,9 @@ extern void credit_added_deff (void) __taskentry__;
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
 	[DEFF_TEST_MENU] = { D_RUNNING, 1, test_menu_deff },
-	[DEFF_COIN_INSERT] = { D_NORMAL, 10, coin_deff },
-	[DEFF_CREDIT_ADDED] = { D_NORMAL, 100, credit_added_deff },
+	[DEFF_SCORES] = { D_RUNNING, 10, scores_deff },
+	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
+	[DEFF_CREDIT_ADDED] = { D_NORMAL, 120, credit_added_deff },
 	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },
 };
 
@@ -26,6 +29,11 @@ uint8_t deff_prio;
  * is also in this queue. */
 static uint8_t deff_queue[MAX_QUEUED_DEFFS];
 
+
+uint8_t deff_get_active (void)
+{
+	return deff_active;
+}
 
 static void deff_add_queue (deffnum_t dn)
 {
@@ -84,12 +92,18 @@ void deff_start (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
 
+	db_puts ("Deff start request for # ");
+	db_puti (dn);
+	db_putc ('\n');
+
 	if (deff->flags & D_RUNNING)
 	{
+		db_puts ("Adding running deff to queue\n");
 		deff_add_queue (dn);
 		if (dn == deff_get_highest_priority ())
 		{
 			/* This is the new active running deff */
+			db_puts ("Requested deff is now highest priority\n");
 			deff_active = dn;
 			task_recreate_gid (GID_DEFF, deff->fn);
 		}
@@ -97,14 +111,20 @@ void deff_start (deffnum_t dn)
 		{
 			/* This deff cannot run now, because there is a
 			 * higher priority deff running. */
+			db_puts ("Can't run because higher priority active\n");
 		}
 	}
 	else
 	{
 		if (deff->prio > deff_prio)
 		{
+			db_puts ("Restarting quick deff with high pri\n");
 			deff_active = dn;
 			task_recreate_gid (GID_DEFF, deff->fn);
+		}
+		else
+		{
+			db_puts ("Quick deff lacks pri to run\n");
 		}
 	}
 }

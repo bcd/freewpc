@@ -29,6 +29,33 @@ uint8_t task_count;
 #endif
 
 
+void task_dump (void)
+{
+	register short t;
+	register task_t *tp;
+
+	db_puts ("Current ");
+	db_put4x ((uint16_t)task_current);
+	db_puts ("\n----------------------\n");
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+	{
+		if (tp->state != TASK_FREE)
+		{
+			db_puts ("PID ");
+			db_put4x ((uint16_t)tp);
+			db_puts ("  State ");
+			db_puti (tp->state);
+			db_puts ("  GID ");
+			db_puti (tp->gid);
+			db_puts ("  PC ");
+			db_put4x ((uint16_t)tp->pc);
+			db_putc ('\n');
+		}
+	}
+	db_puts ("----------------------\n");
+}
+
+
 task_t *task_allocate (void)
 {
 	register short t;
@@ -42,6 +69,7 @@ task_t *task_allocate (void)
 			return tp;
 		}
 	fatal (ERR_NO_FREE_TASKS);
+	return 0;
 }
 
 void task_save (void)
@@ -90,6 +118,10 @@ void task_create_gid (task_gid_t gid, task_function_t fn)
 #ifdef DEBUG_TASKS
 	task_count++;
 #endif
+	db_puts ("Created task : GID ");
+	db_puti (gid);
+	db_putc ('\n');
+	/// task_dump ();
 }
 
 void task_create_gid1 (task_gid_t gid, task_function_t fn)

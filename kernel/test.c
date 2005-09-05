@@ -40,7 +40,32 @@ void test_menu_deff (void) __taskentry__ __noreturn__
 	}
 }
 
+void test_up_button (void)
+{
+	sound_send (SND_UP);
+	test_index++;
+	deff_restart (DEFF_TEST_MENU);
+}
 
+void test_down_button (void)
+{
+	sound_send (SND_DOWN);
+	test_index--;
+	deff_restart (DEFF_TEST_MENU);
+}
+
+void test_enter_button (void)
+{
+	(*test_menu->enter_proc) ();
+	deff_restart (DEFF_TEST_MENU);
+}
+
+void test_escape_button (void)
+{
+	deff_restart (DEFF_TEST_MENU);
+}
+
+#if 1
 void test_loop (void) __taskentry__
 {
 	for (;;)
@@ -53,6 +78,9 @@ void test_loop (void) __taskentry__
 		switch (switch_bits[AR_RAW][0])
 		{
 			case SW_ROWMASK (SW_ESCAPE):
+				sound_send (SND_ENTER);
+				test_menu = test_menu->next;
+				test_index = test_menu->start_index;
 				break;
 
 			case SW_ROWMASK (SW_DOWN):
@@ -75,14 +103,17 @@ void test_loop (void) __taskentry__
 			task_sleep (TIME_33MS);
 	}
 }
+#endif
 
-
-void test_start (void)
+void test_start_button (void)
 {
+#if 0
 	sound_send (SND_ENTER);
 	test_menu = test_menu->next;
 	test_index = test_menu->start_index;
+	deff_restart (DEFF_TEST_MENU);
 	task_recreate_gid (GID_TEST_LOOP, test_loop);
+#endif
 }
 
 
@@ -105,7 +136,6 @@ void sol_enter_proc (void) __taskentry__
 	sol_on (test_index);
 	task_sleep (TIME_100MS);
 	sol_off (test_index);
-
 	task_exit ();
 }
 
@@ -118,7 +148,7 @@ void rtc_print_deff (void) __taskentry__
 	seg_write_uint8 (SEG_ADDR(0,2,8), *(uint8_t *)WPC_CLK_MINS);
 	asm ("jsr dmd_draw_border_low");
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -126,6 +156,20 @@ void rtc_print_deff (void) __taskentry__
 void rtc_enter_proc (void) __taskentry__
 {
 	deff_start (DEFF_PRINT_RTC);
+
+#if 0
+	do {
+		task_sleep (TIME_33MS);
+	} while (deff_get_active () != DEFF_PRINT_RTC);
+#endif
+
+	task_exit ();
+}
+
+
+void device_enter_proc (void) __taskentry__
+{
+	device_request_kick (device_entry (test_index));
 	task_exit ();
 }
 
@@ -134,6 +178,7 @@ const test_menu_t menus[] = {
 	{ "SOUND TEST    ", sound_enter_proc, menus + 1, 0x00 },
 	{ "MUSIC TEST    ", music_enter_proc, menus + 2, 0x00 },
 	{ "SOLENOID TEST ", sol_enter_proc, menus + 3, 0x00 },
+	{ "DEVICE TEST ", device_enter_proc, menus + 4, 0x00 },
 	{ "RTC TEST      ", rtc_enter_proc, menus, 0x00 },
 };
 
@@ -142,7 +187,8 @@ const test_menu_t menus[] = {
 void test_init (void)
 {
 	test_menu = menus;
-	test_start ();	
+	deff_restart (DEFF_TEST_MENU);
+	task_recreate_gid (GID_TEST_LOOP, test_loop);
 }
 
 

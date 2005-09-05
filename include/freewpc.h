@@ -50,11 +50,17 @@ typedef unsigned int uint16_t;
 #include <sys/segment.h>
 #ifndef __SASM__
 #include <sys/deff.h>
+#include <sys/debug.h>
+#include <sys/device.h>
 #include <score.h>
 #include <coin.h>
 #include <game.h>
 #include <stdadj.h>
+
 #include <mach/config.h>
+#include <mach/switch.h>
+#include <mach/coil.h>
+#include <mach/sound.h>
 #endif
 
 #endif /* _FREEWPC_H */

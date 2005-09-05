@@ -27,7 +27,7 @@ void add_credit (void)
 }
 
 
-int has_credits_p (void)
+bool has_credits_p (void)
 {
 	return (credit_count > 0);
 }

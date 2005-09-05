@@ -4,7 +4,7 @@
 
 void credit_added_deff (void);
 void add_credit (void);
-int has_credits_p (void);
+bool has_credits_p (void);
 void remove_credit (void);
 void coin_deff (void) __taskentry__;
 void sw_left_coin (void) __taskentry__;

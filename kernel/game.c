@@ -15,29 +15,69 @@ uint8_t extra_balls;
 
 void start_ball (void);
 
+void dump_game (void)
+{
+	db_puts ("Game : "); db_puti (in_game); db_putc ('\n');
+	db_puts ("Bonus : "); db_puti (in_bonus); db_putc ('\n');
+	db_puts ("Tilt : "); db_puti (in_tilt); db_putc ('\n');
+	db_puts ("In Play : "); db_puti (ball_in_play); db_putc ('\n');
+	db_puts ("Players : "); db_puti (num_players); db_putc ('\n');
+	db_puts ("Up : "); db_puti (player_up); db_putc ('\n');
+	db_puts ("Ball : "); db_puti (ball_up); db_putc ('\n');
+	db_puts ("EBs : "); db_puti (extra_balls); db_putc ('\n');
+}
+
+void scores_deff (void) __taskentry__
+{
+	for (;;)
+	{
+		dmd_alloc_low_clean ();
+
+		seg_write_string (SEG_ADDR (0,0,0), "PLAYER");
+		seg_write_uint8 (SEG_ADDR (0,0,8), ball_up);
+		seg_write_string (SEG_ADDR (0,1,0), "BALL");
+		seg_write_uint8 (SEG_ADDR (0,1,5), ball_up);
+
+		dmd_show_low ();
+		task_sleep (TIME_100MS * 5);
+
+#if 0
+		dmd_alloc_low_clean ();
+		dmd_show_low ();
+		task_sleep (TIME_100MS * 2);
+#endif
+	}
+}
+
 
 void end_game (void)
 {
 	in_game = 0;
+
 	// check high scores
 	// do match sequence
 	// return to attract mode
+
+	deff_stop (DEFF_SCORES);
 }
 
 void end_ball (void)
 {
+	if (!in_game)
+		goto done;
+
 	if (extra_balls > 0)
 	{
 		extra_balls--;
 		start_ball ();
-		return;
+		goto done;
 	}
 
 	player_up++;
 	if (player_up <= num_players)
 	{
 		start_ball ();
-		return;
+		goto done;
 	}
 
 	player_up = 1;
@@ -45,14 +85,18 @@ void end_ball (void)
 	if (ball_up <= MAX_BALLS_PER_GAME)
 	{
 		start_ball ();
-		return;
+		goto done;
 	}
 
 	end_game ();
+
+done:
+	dump_game ();
 }
 
 void start_ball (void)
 {
+	device_request_kick (device_entry (DEV_TROUGH));
 }
 
 void add_player (void)
@@ -71,13 +115,16 @@ void start_game (void)
 	player_up = 1;
 	ball_up = 1;
 	extra_balls = 0;
+	start_ball ();
+	//deff_start (DEFF_SCORES);
 }
 
 void stop_game (void)
 {
+	deff_stop (DEFF_SCORES);
 }
 
-int verify_start_ok (void)
+bool verify_start_ok (void)
 {
 	// check enough credits
 	return (has_credits_p ());
@@ -88,15 +135,21 @@ int verify_start_ok (void)
 
 void sw_start_button (void) __taskentry__
 {
-	extern void test_start (void);
-	test_start ();
-	task_exit ();
+	extern void test_start_button (void);
 
-	if (!in_game)
+	if (0) /* in_test_mode */
+	{
+		test_start_button ();
+	}
+	else if (!in_game)
 	{
 		if (verify_start_ok ())
 		{
 			start_game ();
+		}
+		else
+		{
+			db_puts ("Can't start game now\n");
 		}
 	}
 	else
@@ -112,6 +165,7 @@ void sw_start_button (void) __taskentry__
 			start_game ();
 		}
 	}
+	dump_game ();
 	task_exit ();
 }
 

@@ -15,7 +15,8 @@ typedef uint8_t switchnum_t;
 #define SW_ROW(x)			((x) & 0x07)
 #define SW_ROWMASK(x)	(1 << SW_ROW(x))
 
-#define MAKE_SWITCH(row,col)	((row * 8) + col - 1)
+#define MAKE_SWITCH(col,row)	((col * 8) + row - 1)
+#define MAKE_SW(row,col)  MAKE_SWITCH(row,col)
 
 /* Coin Door Switch Numbers */
 #define SW_LEFT_COIN				0
@@ -36,28 +37,15 @@ typedef uint8_t switchnum_t;
 #define SW_TROUGH5				0
 #define SW_TROUGH6				0
 
-/* Outhole switch */
-#define SW_OUTHOLE				MAKE_SWITCH(1,8)
-
-/* Start button */
-#define SW_START					MAKE_SWITCH(1,3)
-
-/* Buy in button */
-#define SW_BUYIN					MAKE_SWITCH(2,3)
-
-/* Tilt and slam tilt */
-#define SW_TILT					MAKE_SWITCH(1,4)
-#define SW_SLAM_TILT				MAKE_SWITCH(2,1)
-
 /* Always closed switch */
+#ifndef SW_ALWAYS_CLOSED
 #define SW_ALWAYS_CLOSED		MAKE_SWITCH(2,4)
+#endif
 
 /* Coin door closed switch */
+#ifndef SW_COINDOOR_CLOSED
 #define SW_COINDOOR_CLOSED		MAKE_SWITCH(2,2)
-
-/* Shooter switch */
-#define SW_SHOOTER				MAKE_SWITCH(2,7)
-
+#endif
 
 #define AR_RAW			0
 #define AR_CHANGED 	1
@@ -71,6 +59,9 @@ extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 void switch_init (void);
 void switch_sched (uint8_t sw);
 void switch_idle_task (void);
+bool switch_poll (const switchnum_t sw);
+bool switch_is_opto (const switchnum_t sw);
+bool switch_poll_logical (const switchnum_t sw);
 
 #endif
 
