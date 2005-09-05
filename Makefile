@@ -67,7 +67,10 @@ SAS_OS_OBJS = switch.o task1.o dmd1.o segment1.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o sound.o coin.o service.o game.o test.o \
-	segment.o device.o lampset.o score.o deff.o triac.o paging.o
+	segment.o device.o lampset.o score.o deff.o triac.o paging.o db.o \
+	trough.o
+
+FONT_OBJS = 5x5.o
 
 OS_INCLUDES = include/freewpc.h
 
@@ -101,7 +104,8 @@ CFLAGS += -Wall
 CFLAGS += -Werror-implicit-function-declaration
 
 OBJS = $(patsubst %,kernel/%,$(OS_OBJS)) \
-	$(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
+	$(patsubst %,$(MACHINE)/%,$(GAME_OBJS)) \
+	$(patsubst %,fonts/%,$(FONT_OBJS))
 AS_OBJS = $(AS_OS_OBJS) $(AS_GAME_OBJS)
 SAS_OBJS = $(SAS_OS_OBJS) $(SAS_GAME_OBJS)
 
@@ -110,7 +114,7 @@ DEPS = $(DEFMACROS) $(INCLUDES) Makefile
 #######################################################################
 ###	Include User Settings
 #######################################################################
-include user.make
+-include user.make
 
 #######################################################################
 ###	Set Default Target
@@ -135,12 +139,15 @@ check_prereqs :
 
 # TODO : change zip to do a replace of the existing ROM.  Also make
 # a backup of the existing zip so we can run the real game again :-)
-mame_install : build
+mame_install : $(PINMAME_GAME_ROM)
 	@echo Copying to mame directory ...; \
-	cp -p $(GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_ROM); \
+	cp -p $(PINMAME_GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_ROM); \
 	cd $(TARGET_ROMPATH); \
 	rm -f $(PINMAME_MACHINE).zip; \
-	zip -9 $(PINMAME_MACHINE).zip $(GAME_ROM) $(PINMAME_OTHER_ROMS)
+	zip -9 $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
+
+$(PINMAME_GAME_ROM) : $(GAME_ROM)
+	cp -p $(GAME_ROM) $(PINMAME_GAME_ROM)
 
 build : $(GAME_ROM)
 
