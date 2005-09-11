@@ -672,6 +672,22 @@ pragma_naked (pfile)
 	in_naked_function = 1;
 }
 
+void pragma_code_section (pfile)
+	void *pfile;
+{
+
+}
+
+void pragma_data_section (pfile)
+	void *pfile;
+{
+}
+
+void pragma_bss_section (pfile)
+	void *pfile;
+{
+}
+
 
 /* Check a `double' value for validity for a particular machine mode.
  * Called by the CHECK_FLOAT_VALUE() machine-dependent macro.
