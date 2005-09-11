@@ -11,8 +11,6 @@
 
 #define NUM_TASKS				16
 
-#define TASK_STACK_SIZE		43
-
 typedef uint8_t task_gid_t;
 
 typedef uint8_t task_ticks_t;
@@ -44,12 +42,14 @@ typedef task_t *task_pid_t;
 /*     Function Prototypes      */
 /********************************/
 
+void task_dump (void);
 void task_init (void);
 void task_yield (void);
 void task_create (task_function_t fn);
 void task_create_gid (task_gid_t, task_function_t fn);
 void task_create_gid1 (task_gid_t, task_function_t fn);
 void task_recreate_gid (task_gid_t, task_function_t fn);
+task_t *task_getpid (void);
 task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);

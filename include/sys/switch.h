@@ -56,6 +56,16 @@ typedef uint8_t switchnum_t;
 #ifndef __SASM__
 extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
+typedef void (*switch_handler_t) (switchnum_t sw);
+
+typedef struct switch_props
+{
+	switch_handler_t handler;
+	uint8_t flags;
+	uint8_t min_activation_time;
+	uint8_t min_deactivation_time;
+} switch_props_t;
+
 void switch_init (void);
 void switch_sched (uint8_t sw);
 void switch_idle_task (void);

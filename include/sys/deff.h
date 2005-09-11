@@ -24,13 +24,16 @@ typedef struct
 #define DEFF_COIN_INSERT	1
 #define DEFF_TEST_MENU		2
 #define DEFF_PRINT_RTC		3
-#define DEFF_CREDIT_ADDED	4
+#define DEFF_CREDITS			4
 #define DEFF_SCORES			5
+#define DEFF_FONT_TEST		6
+#define DEFF_AMODE			7
 
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);
 void deff_restart (deffnum_t dn);
+void deff_start_highest_priority (void);
 void deff_exit (void) __noreturn__;
 void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (int8_t count, task_ticks_t delay);

@@ -12,7 +12,7 @@
 #define SND_SCROLL				0x59
 
 #ifndef __SASM__
-typedef uint8_t music_code_t, sound_code_t;
+typedef uint16_t music_code_t, sound_code_t;
 
 void music_off (void);
 void music_set (music_code_t code);

@@ -30,6 +30,16 @@ typedef unsigned int uint16_t;
 #define FALSE 0
 
 
+/*
+ * Define the size of the process stack (currently here
+ * because the assembler code needs it.
+ *
+ * This value + 21 should be a nice round number.
+ * Original : 43 ==> Total size of 64
+ */
+/// #define TASK_STACK_SIZE		43   /* sometimes fails with deffs */
+#define TASK_STACK_SIZE		75
+
 /* Include the standard header files that are needed
  * by most modules */
 #include <asm-6809.h>
@@ -39,6 +49,7 @@ typedef unsigned int uint16_t;
 #include <sys/bitarray.h>
 #include <sys/errno.h>
 #include <sys/task.h>
+#include <sys/font.h>
 #endif
 #include <sys/sol.h>
 #include <sys/lamp.h>
@@ -47,7 +58,7 @@ typedef unsigned int uint16_t;
 #include <sys/dmd.h>
 #include <sys/triac.h>
 
-#include <sys/segment.h>
+//// #include <sys/segment.h>
 #ifndef __SASM__
 #include <sys/deff.h>
 #include <sys/debug.h>
@@ -56,6 +67,8 @@ typedef unsigned int uint16_t;
 #include <coin.h>
 #include <game.h>
 #include <stdadj.h>
+#include <printf.h>
+#include <amode.h>
 
 #include <mach/config.h>
 #include <mach/switch.h>

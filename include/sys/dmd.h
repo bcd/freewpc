@@ -8,6 +8,12 @@
 /* The number of DMD pages */
 #define DMD_PAGE_COUNT 16
 
+/* The width of a DMD page, in pixel */
+#define DMD_PIXEL_WIDTH	128
+#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / 8)
+
+/* The height of a DMD page, in pixel */
+#define DMD_PIXEL_HEIGHT 32
 
 #ifndef __SASM__
 typedef uint8_t dmd_pagenum_t;
@@ -32,6 +38,8 @@ void dmd_show_high (void);
 void dmd_show_other (void);
 void dmd_flip_low_high (void);
 void dmd_clean_page (dmd_buffer_t *dbuf);
+void dmd_clean_page_low (void);
+void dmd_clean_page_high (void);
 void dmd_invert_page (dmd_buffer_t *dbuf);
 void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
