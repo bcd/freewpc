@@ -14,8 +14,6 @@
 
 #define DEBUG
 
-//#define BLKB	blkb
-//#define BLKW	blkw
 
 #define S(x)	#x
 #define STR(x)	S(x)
@@ -198,6 +196,50 @@
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
+#ifndef __SASM__
+
+extern inline void wpc_led_toggle (void)
+{
+	asm (										\
+		"lda " STR(WPC_LEDS) "\n"		\
+		"\teora #0x80\n"					\
+		"\tsta " STR(WPC_LEDS) "\n"	\
+		:										\
+		: 										\
+		: "a" 								\
+	);
+}
+
+/********************************************/
+/* RAM Protection Circuit                   */
+/********************************************/
+
+extern inline void wpc_set_ram_protect (uint8_t prot)
+{
+	*(volatile uint8_t *)WPC_RAM_LOCK = prot;
+}
+
+extern inline void wpc_set_ram_protect_size (uint8_t sz)
+{
+	*(volatile uint8_t *)WPC_RAM_LOCKSIZE = sz;
+}
+
+/********************************************/
+/* ROM Paging                               */
+/********************************************/
+
+extern inline uint8_t wpc_get_rom_page (void)
+{
+	return *(volatile uint8_t *)WPC_ROM_BANK;
+}
+
+extern inline void wpc_set_rom_page (uint8_t page)
+{
+	*(volatile uint8_t *)WPC_ROM_BANK = page;
+}
+
+#endif
+
 #define LED_DIAGNOSTIC		0x80
 
 /* 0x4 | 0x2 are always set when writing this register.
@@ -216,6 +258,10 @@
 #define GID_TEST_LOOP				4
 #define GID_DEFF_EXITING			5
 #define GID_TEST_PROC				6
+#define GID_DEVICE_PROBE			7
+#define GID_LAMP_DEMO				8
+#define GID_SW_HANDLER				9
+#define GID_FIRST_TASK				10
 
 /****************  Macros  ***************************/
 #if defined(__SASM__)
