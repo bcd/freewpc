@@ -20,10 +20,14 @@ void db_puti (uint8_t v)
 {
 	uint8_t quot;
 	uint8_t rem;
-	volatile uint16_t quot_rem = div10 (v);
 
+	DIV10 (v, quot, rem);
+
+#if 0
+	volatile uint16_t quot_rem = div10 (v);
 	asm ("sta %0" :: "m" (quot));
 	asm ("stb %0" :: "m" (rem));
+#endif
 
 	db_putc (quot + '0');
 	db_putc (rem + '0');
@@ -50,6 +54,7 @@ void db_put4x (uint16_t v)
 	db_put2x (v >> 8);
 	db_put2x (v & 0xFF);
 }
+
 
 void db_printf (const char *s)
 {

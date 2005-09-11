@@ -8,11 +8,13 @@ extern void test_menu_deff (void) __taskentry__;
 extern void rtc_print_deff (void) __taskentry__;
 extern void credits_deff (void) __taskentry__;
 extern void font_test_deff (void) __taskentry__;
+extern void amode_deff (void) __taskentry__;
 
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
 	[DEFF_TEST_MENU] = { D_RUNNING, 5, test_menu_deff },
 	[DEFF_SCORES] = { D_RUNNING, 10, scores_deff },
+	[DEFF_AMODE] = { D_RUNNING, 20, amode_deff },
 	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
 	[DEFF_CREDITS] = { D_NORMAL, 120, credits_deff },
 	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },

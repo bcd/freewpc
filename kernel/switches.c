@@ -61,7 +61,7 @@ extern inline void switch_rowpoll(const uint8_t col)
 
 bool switch_poll (const switchnum_t sw)
 {
-	register bitset p = switch_raw_bits;
+	register bitset p = (bitset)switch_raw_bits;
 	register uint8_t v = sw;
 	__testbit(p, v);
 	return v;
@@ -69,7 +69,7 @@ bool switch_poll (const switchnum_t sw)
 
 bool switch_is_opto (const switchnum_t sw)
 {
-	register bitset p = mach_opto_mask;
+	register bitset p = (bitset)mach_opto_mask;
 	register uint8_t v = sw;
 	__testbit(p, v);
 	return v;

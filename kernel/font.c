@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 
+static uint8_t font_space[32] = { 0, };
 
 uint8_t *font_lookup (const font_t *font, char c)
 {
@@ -16,6 +17,11 @@ uint8_t *font_lookup (const font_t *font, char c)
 	{
 		entry = (uint8_t *)font->digits;
 		index = c - '0';
+	}
+	else if (c == ' ')
+	{
+		entry = font_space;
+		index = 0;
 	}
 	else
 	{

@@ -11,6 +11,7 @@ __fastram__ uint8_t tick_count;
 uint8_t sys_init_complete;
 
 
+#if 0
 /* Macro for toggling the runtime LED */
 #define wpc_led_toggle() \
 do {											\
@@ -23,13 +24,16 @@ do {											\
 		: "a" 								\
 	);											\
 } while (0)
-
+#endif
 
 void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 {
 	dmd_alloc_low_clean ();
-	seg_write_uint8 (SEG_ADDR(0,0,0), error_code);
-	seg_write_hex16 (SEG_ADDR(0,1,0), pc);
+
+	sprintf ("ERRNO %i", error_code);
+	font_render_string_center (&font_5x5, 64, 4, sprintf_buffer);
+	sprintf ("PC %04x", pc);
+	font_render_string_center (&font_5x5, 64, 4, sprintf_buffer);
 	dmd_show_low ();
 	task_dump ();
 	for (;;);
@@ -142,6 +146,7 @@ void do_reset (void) __noreturn__
 	register uint8_t *ramptr asm ("x");
 
 	extern void lamp_demo ();
+	extern void test_start (void);
 	extern void test_init (void);
 
 	set_direct_page_pointer (0);
@@ -154,9 +159,14 @@ void do_reset (void) __noreturn__
 		*ramptr-- = 0;
 	} while (ramptr != 0);
 
-	*(volatile uint8_t *)WPC_RAM_LOCK = RAM_UNLOCKED;
-	*(uint8_t *)WPC_RAM_LOCKSIZE = RAM_LOCK_512;
-	*(volatile uint8_t *)WPC_RAM_LOCK = RAM_LOCK_512;
+	// *(volatile uint8_t *)WPC_RAM_LOCK = RAM_UNLOCKED;
+	// *(uint8_t *)WPC_RAM_LOCKSIZE = RAM_LOCK_512;
+	// *(volatile uint8_t *)WPC_RAM_LOCK = RAM_LOCK_512;
+	wpc_set_ram_protect (RAM_UNLOCKED);
+	wpc_set_ram_protect_size (RAM_LOCK_512);
+	wpc_set_ram_protect (RAM_LOCK_512);
+
+	wpc_set_rom_page (0x3D);
 
 	sys_init_complete = 0;
 	
@@ -175,6 +185,7 @@ void do_reset (void) __noreturn__
 	irq_init ();
 	task_init ();
 	deff_init ();
+	test_init ();
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;
 
@@ -185,7 +196,7 @@ void do_reset (void) __noreturn__
 	task_create_gid (GID_LAMP_DEMO, lamp_c_demo);
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
-	test_init ();
+	amode_start ();
 	task_exit ();
 }
 

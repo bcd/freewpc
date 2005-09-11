@@ -4,8 +4,7 @@
 uint8_t credit_count;
 uint8_t unit_count;
 
-
-void credits_deff (void)
+void credits_draw (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_alloc_high_clean ();
@@ -25,8 +24,14 @@ void credits_deff (void)
 	}
 	font_render_string_center (&font_5x5, 64, 20, sprintf_buffer);
 
-	deff_swap_low_high (16, TIME_100MS);
-	deff_delay_and_exit (TIME_100MS * 5);
+	deff_swap_low_high (25, TIME_100MS);
+}
+
+
+void credits_deff (void)
+{
+	credits_draw ();
+	deff_delay_and_exit (TIME_100MS * 10);
 }
 
 

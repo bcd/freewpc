@@ -2,7 +2,7 @@
 #include <freewpc.h>
 #include <m6809_math.h>
 
-char sprintf_buffer[24];
+char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
 uint8_t sprintf_width;
 
@@ -15,6 +15,35 @@ char digit2char (uint8_t digit)
 		return digit + '0';
 	else
 		return digit - 10 + 'A';
+}
+
+
+char *do_sprintf_decimal (char *buf, uint16_t w)
+{
+	uint8_t quot;
+	uint8_t rem;
+
+	DIV10 (w & 0xFF, quot, rem);
+
+	*buf++ = quot + '0';
+	*buf++ = rem + '0';
+	return buf;
+}
+
+
+char *do_sprintf_hex_byte (char *buf, uint8_t b)
+{
+	*buf++ = digit2char (b >> 4);
+	*buf++ = digit2char (b & 0x0F);
+	return buf;
+}
+
+
+char *do_sprintf_hex (char *buf, uint16_t w)
+{
+	buf = do_sprintf_hex_byte (buf, w >> 8);
+	buf = do_sprintf_hex_byte (buf, w & 0xFF);
+	return buf;
 }
 
 
@@ -51,27 +80,31 @@ do_format_chars:
 				case 'i':
 				{
 					uint16_t w = va_arg (va, uint16_t);
-					uint8_t quot;
-					uint8_t rem;
-					uint16_t quot_rem = div10 (w & 0xFF);
-
-					asm ("sta %0" :: "m" (quot));
-					asm ("stb %0" :: "m" (rem));
-
-					*buf++ = quot + '0';
-					*buf++ = rem + '0';
+					buf = do_sprintf_decimal (buf, w);
 					break;
 				}
 
-#if 0
 				case 'x':
 				{
-					uint16_t w = va_arg (va, uint16_t);
-					*buf++ = digit2char (w & 0xFF);
-					*buf++ = digit2char (w >> 8);
+					register uint16_t w  = va_arg (va, uint16_t);
+					if (sprintf_width <= 2)
+						buf = do_sprintf_hex_byte (buf, w & 0xFF);
+					else
+						buf = do_sprintf_hex (buf, w);
 					break;
 				}
-#endif
+
+				case 'b':
+				{
+					register bcd_t *bcd  = va_arg (va, bcd_t *);
+					db_putp (bcd);
+					while (sprintf_width-- != 0)
+					{
+						db_put2x (*bcd);
+						buf = do_sprintf_hex_byte (buf, *bcd++);
+					}
+					break;
+				}
 
 				case 's':
 				{
@@ -98,9 +131,11 @@ do_format_chars:
 	va_end (va);
 
 	*buf = '\0';
+#if 0
 	db_puts ("sprintf: ");
 	db_puts (sprintf_buffer);
 	db_putc ('\n');
+#endif
 }
 
 

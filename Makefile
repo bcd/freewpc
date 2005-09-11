@@ -63,16 +63,16 @@ GAME_ROM = freewpc.rom
 
 # Source files for the core OS
 AS_OS_OBJS = system.o vector.o
-SAS_OS_OBJS = switch.o task1.o dmd1.o segment1.o
+SAS_OS_OBJS = switch.o task1.o dmd1.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o sound.o coin.o service.o game.o test.o \
-	segment.o device.o lampset.o score.o deff.o triac.o paging.o db.o \
-	trough.o
+	device.o lampset.o score.o deff.o triac.o paging.o db.o \
+	trough.o font.o printf.o
 
 FONT_OBJS = 5x5.o
 
-OS_INCLUDES = include/freewpc.h
+OS_INCLUDES = include/freewpc.h wpc.h
 
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
@@ -102,6 +102,9 @@ CFLAGS += -Wall
 # converts this to 'int', which is a different size, and bad
 # things happen...
 CFLAGS += -Werror-implicit-function-declaration
+
+# I'd like to use this sometimes, but some things don't compile with it...
+# CFLAGS += -fno-defer-pop
 
 OBJS = $(patsubst %,kernel/%,$(OS_OBJS)) \
 	$(patsubst %,$(MACHINE)/%,$(GAME_OBJS)) \
@@ -195,6 +198,7 @@ show_objs:
 	echo $(OBJS)
 
 clean:
-	rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
-	cd kernel && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
-	cd $(MACHINE) && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+	@echo Cleaning top-level directory ... && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+	@echo Cleaning 'kernel' ... && cd kernel && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+	@echo Cleaning $(MACHINE) ... && cd $(MACHINE) && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+
