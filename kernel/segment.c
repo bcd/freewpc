@@ -137,10 +137,15 @@ void seg_write_uint8 (segaddr_t sa, uint8_t u8)
 {
 	uint8_t quot;
 	uint8_t rem;
+
+	DIV10 (u8, quot, rem);
+
+#if 0
 	uint16_t quot_rem = div10 (u8);
 
 	asm ("sta %0" :: "m" (quot));
 	asm ("stb %0" :: "m" (rem));
+#endif
 
 	seg_write_digit (sa, quot);
 	seg_write_digit (sa+1, rem);
