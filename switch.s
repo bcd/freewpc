@@ -24,6 +24,9 @@
 #define switch_queued_bits		_switch_bits + (3 * SWITCH_BITS_SIZE)
 
 
+#define TASK_OFF_GID			0
+#define TASK_OFF_ARG 19
+
 .area sysrom
 
 switch_handlers::
@@ -160,6 +163,12 @@ proc(switch_idle_task)
 					ldx	#switch_sched
 					jsr	task_create
 					inc	_task_count
+					clr	TASK_OFF_ARG,x
+					sta	TASK_OFF_ARG+1,x
+					pshs	a
+					lda	#GID_SW_HANDLER
+					sta	TASK_OFF_GID,x
+					puls	a
 					puls	x
 				endif
 				inca
