@@ -34,7 +34,7 @@ void task_dump (void)
 	register short t;
 	register task_t *tp;
 
-	db_puts ("Current ");
+	db_puts ("\nCurrent ");
 	db_put4x ((uint16_t)task_current);
 	db_puts ("\n----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
@@ -44,11 +44,21 @@ void task_dump (void)
 			db_puts ("PID ");
 			db_put4x ((uint16_t)tp);
 			db_puts ("  State ");
-			db_puti (tp->state);
+			db_put2x (tp->state);
 			db_puts ("  GID ");
-			db_puti (tp->gid);
+			db_put2x (tp->gid);
 			db_puts ("  PC ");
 			db_put4x ((uint16_t)tp->pc);
+			db_puts ("  S ");
+			db_put4x ((uint16_t)tp->s);
+			db_puts ("  Stack ");
+			db_put4x ((uint16_t)tp->stack);
+			db_puts ("-");
+			db_put4x ((uint16_t)tp->stack + TASK_STACK_SIZE);
+			db_puts ("  ARG ");
+			db_put4x ((uint16_t)tp->arg);
+			db_puts ("  SB ");
+			db_put4x ((uint16_t)*(uint16_t *)tp->stack);
 			db_putc ('\n');
 		}
 	}
@@ -118,10 +128,6 @@ void task_create_gid (task_gid_t gid, task_function_t fn)
 #ifdef DEBUG_TASKS
 	task_count++;
 #endif
-	db_puts ("Created task : GID ");
-	db_puti (gid);
-	db_putc ('\n');
-	/// task_dump ();
 }
 
 void task_create_gid1 (task_gid_t gid, task_function_t fn)
@@ -136,6 +142,11 @@ void task_recreate_gid (task_gid_t gid, task_function_t fn)
 	if (task_find_gid (gid))
 		fatal (ERR_TASK_KILL_FAILED);
 	task_create_gid (gid, fn);
+}
+
+task_t *task_getpid (void)
+{
+	return task_current;
 }
 
 task_gid_t task_getgid (void)
@@ -155,9 +166,23 @@ void task_sleep (task_ticks_t ticks)
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
+#if 0 /* doesn't work for the first task created */
+	if (task_current->state != TASK_USED)
+		fatal (ERR_TASK_STACK_OVERFLOW);
+#endif
+
+	if (task_current->state != TASK_USED)
+	{
+		db_puts ("*** Warning: task_current = ");
+		db_put4x ((uint16_t)task_current);
+		db_puts (" state = ");
+		db_put2x (task_current->state);
+		db_putc ('\n');
+	}
+
 	task_current->delay = ticks;
 	task_current->asleep = tick_count;
-	task_current->state |= TASK_BLOCKED;
+	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
 	__asm__ volatile ("jsr task_save");
 }
@@ -240,6 +265,9 @@ void task_init (void)
 #endif
 
 	task_current = task_allocate ();
+	task_current->state = TASK_USED;
+	task_current->arg = 0;
+	task_current->gid = GID_FIRST_TASK;
 	__asm__ volatile ("st%0 _task_dispatch_tick" :: "q" (tick_count));
 }
 

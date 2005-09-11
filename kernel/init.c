@@ -31,6 +31,7 @@ void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 	seg_write_uint8 (SEG_ADDR(0,0,0), error_code);
 	seg_write_hex16 (SEG_ADDR(0,1,0), pc);
 	dmd_show_low ();
+	task_dump ();
 	for (;;);
 }
 
@@ -181,8 +182,8 @@ void do_reset (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	task_create_gid (0, lamp_c_demo);
-	task_create_gid (0, device_probe);
+	task_create_gid (GID_LAMP_DEMO, lamp_c_demo);
+	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
 	test_init ();
 	task_exit ();

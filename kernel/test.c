@@ -1,15 +1,30 @@
 
 #include <freewpc.h>
 
-typedef struct test_menu
+
+typedef struct test
 {
 	const char *banner;
-	void (*enter_proc) (void) __taskentry__;
-	const struct test_menu *next;
+	const struct test *up;
 	uint8_t start_index;
-} test_menu_t;
+	uint8_t child_count;
+	union {
+		struct {
+			const struct test *first_child;
+		} menu;
 
-const test_menu_t *test_menu;
+		struct {
+			void (*enter_proc) (void) __taskentry__;
+		} item;
+	} u;
+} test_t;
+
+
+
+#define TEST_MENU_COUNT(m)	(sizeof (m) / sizeof (struct test))
+
+
+const test_t *test_menu;
 
 uint8_t test_index;
 
@@ -19,17 +34,19 @@ void test_menu_deff (void) __taskentry__ __noreturn__
 	dmd_alloc_low_high ();
 	dmd_clean_page (dmd_low_buffer);
 
-	seg_write_bcd (SEG_ADDR (0,2,1), test_index);
-
-	{
-		extern uint8_t task_count, deff_prio;
-		seg_write_bcd (SEG_ADDR (0,2,9), task_count);
-		seg_write_bcd (SEG_ADDR (0,2,12), deff_prio);
-	}
+	font_render_string_center (&font_5x5, 64, 4, test_menu->banner);
 
 	dmd_copy_low_to_high ();
 
-	seg_write_string (SEG_ADDR (0,1,1), test_menu->banner);
+	sprintf ("%d", test_index);
+	font_render_string (&font_5x5, 8, 14, sprintf_buffer);
+
+	if (test_menu->child_count)
+	{
+		font_render_string (&font_5x5, 32, 14, 
+			test_menu->u.menu.first_child[test_index].banner);
+	}
+
 
 	for (;;)
 	{
@@ -44,6 +61,9 @@ void test_up_button (void)
 {
 	sound_send (SND_UP);
 	test_index++;
+	if ((test_menu->child_count) && (test_index >= test_menu->child_count))
+		test_index = test_menu->start_index;
+
 	deff_restart (DEFF_TEST_MENU);
 }
 
@@ -51,69 +71,41 @@ void test_down_button (void)
 {
 	sound_send (SND_DOWN);
 	test_index--;
+	if ((test_menu->child_count) && (test_index < test_menu->start_index))
+		test_index = test_menu->child_count - 1;
+
 	deff_restart (DEFF_TEST_MENU);
 }
 
 void test_enter_button (void)
 {
-	(*test_menu->enter_proc) ();
-	deff_restart (DEFF_TEST_MENU);
+	if ((test_menu->child_count > 0) && (test_menu->u.menu.first_child))
+	{
+		test_menu = &test_menu->u.menu.first_child[test_index];
+		test_index = test_menu->start_index;
+		sound_send (SND_ENTER);
+		deff_restart (DEFF_TEST_MENU);
+	}
+	else
+	{
+		(*test_menu->u.item.enter_proc) ();
+	}
 }
 
 void test_escape_button (void)
 {
-	deff_restart (DEFF_TEST_MENU);
-}
-
-#if 1
-void test_loop (void) __taskentry__
-{
-	for (;;)
+	sound_send (SND_TEST_ESCAPE);
+	if (test_menu->up)
 	{
+		test_menu = test_menu->up;
+		test_index = test_menu->start_index;
 		deff_restart (DEFF_TEST_MENU);
-
-		while (switch_bits[AR_RAW][0] == 0)
-			task_sleep (TIME_33MS);
-
-		switch (switch_bits[AR_RAW][0])
-		{
-			case SW_ROWMASK (SW_ESCAPE):
-				sound_send (SND_ENTER);
-				test_menu = test_menu->next;
-				test_index = test_menu->start_index;
-				break;
-
-			case SW_ROWMASK (SW_DOWN):
-				sound_send (SND_DOWN);
-				test_index--;
-				break;
-
-			case SW_ROWMASK (SW_UP):
-				sound_send (SND_UP);
-				test_index++;
-				break;
-
-			case SW_ROWMASK (SW_ENTER):
-				task_create_gid1 (GID_TEST_PROC, test_menu->enter_proc);
-				break;
-		}
-
-		task_sleep (TIME_100MS);
-		while (switch_bits[AR_RAW][0] != 0)
-			task_sleep (TIME_33MS);
 	}
 }
-#endif
+
 
 void test_start_button (void)
 {
-#if 0
-	sound_send (SND_ENTER);
-	test_menu = test_menu->next;
-	test_index = test_menu->start_index;
-	deff_restart (DEFF_TEST_MENU);
-	task_recreate_gid (GID_TEST_LOOP, test_loop);
-#endif
 }
 
 
@@ -125,11 +117,6 @@ void sound_enter_proc (void) __taskentry__
 	task_exit ();
 }
 
-void music_enter_proc (void) __taskentry__
-{
-	*(uint8_t *)WPCS_DATA = test_index;
-	task_exit ();
-}
 
 void sol_enter_proc (void) __taskentry__
 {
@@ -143,12 +130,13 @@ void sol_enter_proc (void) __taskentry__
 void rtc_print_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
-	seg_write_string (SEG_ADDR(0,1,3), "CURRENT TIME");
+	font_render_string (&font_5x5, 16, 4, "CURRENT TIME");
+	// seg_write_string (SEG_ADDR(0,1,3), "CURRENT TIME");
 	seg_write_uint8 (SEG_ADDR(0,2,4), *(uint8_t *)WPC_CLK_HOURS_DAYS);
 	seg_write_uint8 (SEG_ADDR(0,2,8), *(uint8_t *)WPC_CLK_MINS);
 	asm ("jsr dmd_draw_border_low");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (5);
 	deff_exit ();
 }
 
@@ -156,39 +144,64 @@ void rtc_print_deff (void) __taskentry__
 void rtc_enter_proc (void) __taskentry__
 {
 	deff_start (DEFF_PRINT_RTC);
-
-#if 0
-	do {
-		task_sleep (TIME_33MS);
-	} while (deff_get_active () != DEFF_PRINT_RTC);
-#endif
-
 	task_exit ();
 }
 
 
 void device_enter_proc (void) __taskentry__
 {
-	device_request_kick (device_entry (test_index));
+	if (test_index < 0x10)
+		device_request_kick (device_entry (test_index));
+	else
+		device_request_empty (device_entry (test_index - 0x10));
 	task_exit ();
 }
 
 
-const test_menu_t menus[] = {
-	{ "SOUND TEST    ", sound_enter_proc, menus + 1, 0x00 },
-	{ "MUSIC TEST    ", music_enter_proc, menus + 2, 0x00 },
-	{ "SOLENOID TEST ", sol_enter_proc, menus + 3, 0x00 },
-	{ "DEVICE TEST ", device_enter_proc, menus + 4, 0x00 },
-	{ "RTC TEST      ", rtc_enter_proc, menus, 0x00 },
+void font_test_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string (&font_5x5, 0, 0, "ABCDEFGHIJKLM");
+	font_render_string (&font_5x5, 0, 8, "NOPQRSTUVWXYZ");
+	font_render_string (&font_5x5, 0, 16, "0123456789");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	while (switch_poll_logical (SW_ESCAPE) == FALSE)
+		task_sleep (TIME_66MS);
+	deff_exit ();
+}
+
+void font_enter_proc (void) __taskentry__
+{
+	deff_start (DEFF_FONT_TEST);
+	task_exit ();
+}
+
+
+extern const test_t main_menu;
+
+
+#define TEST_ITEM(p)	.u = { .item = { p } }
+#define TEST_MENU(m)	TEST_MENU_COUNT(m), .u = { .menu = { m } }
+
+
+const test_t main_menu_items[] = {
+	{ "SOUNDS", &main_menu, 0, 0, TEST_ITEM(sound_enter_proc) },
+	{ "SOLENOIDS", &main_menu, 0, 0, TEST_ITEM(sol_enter_proc) },
+	{ "BALL DEVICES", &main_menu, 0, 0, TEST_ITEM(device_enter_proc) },
+	{ "RT CLOCK", &main_menu, 0, 0, TEST_ITEM(rtc_enter_proc) },
+	{ "FONT TEST", &main_menu, 0, 0, TEST_ITEM(font_enter_proc) },
 };
 
+const test_t main_menu = {
+	"MAIN MENU", NULL, 0, TEST_MENU(main_menu_items)
+};
 
 
 void test_init (void)
 {
-	test_menu = menus;
+	test_menu = &main_menu;
 	deff_restart (DEFF_TEST_MENU);
-	task_recreate_gid (GID_TEST_LOOP, test_loop);
 }
 
 

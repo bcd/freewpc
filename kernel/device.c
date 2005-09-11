@@ -11,7 +11,6 @@ static uint8_t counted_balls;
 static uint8_t missing_balls;
 static uint8_t live_balls;
 
-
 void device_debug (void)
 {
 	devicenum_t devno;
@@ -27,31 +26,26 @@ void device_debug (void)
 		db_puti (dev->previous_count); 
 		db_puts (" -> ");
 		db_puti (dev->actual_count); 
-		db_puts (", desire ");
-		db_puti (dev->desired_count); 
+		db_puts (", max ");
+		db_puti (dev->max_count); 
+		db_puts (", pending kicks ");
+		db_puti (dev->kicks_needed); 
 		db_puts (", state ");
 		db_puts ((dev->state == DEV_STATE_IDLE) ? "IDLE" : "RELEASING");
 		db_putc ('\n');
 	}
 
-	db_puts ("Counted ");
-	db_puti (counted_balls);
-	db_putc (' ');
-	
-	db_puts ("Missing ");
-	db_puti (missing_balls);
-	db_putc (' ');
-
-	db_puts ("Live ");
-	db_puti (live_balls);
-	db_putc ('\n');
+	dbprintf ("Counted %d Missing %d Live %d\n", 
+		counted_balls, missing_balls, live_balls);
 }
 
 void device_clear (device_t *dev)
 {
 	dev->size = 0;
 	dev->actual_count = 0;
-	dev->desired_count = 0;
+	dev->previous_count = 0;
+	dev->max_count = 0;
+	dev->kicks_needed = 0;
 	dev->state = DEV_STATE_IDLE;
 	dev->props = NULL;
 }
@@ -62,11 +56,10 @@ void device_register (devicenum_t devno, device_properties_t *props)
 	dev->devno = devno;
 	dev->props = props;
 	dev->size = props->sw_count;
+	dev->max_count = props->init_max_count;
 	device_count++;
 
-	db_puts ("Registering device, total count is now ");
-	db_puti (device_count);
-	db_putc ('\n');
+	dbprintf ("Registering device, total count is now %d\n", device_count);
 }
 
 /* Return the number of balls currently present in the device */
@@ -95,9 +88,11 @@ void device_update (void)
 	uint8_t devno;
 	device_t *dev;
 
-	db_puts ("In device update\n");
+	db_puts ("In device update (");
 	devno = task_getgid () - DEVICE_GID_BASE;
 	dev = &device_table[devno];
+	db_put4x ((uint16_t)task_getpid ());
+	db_puts (")\n");
 
 wait_and_recount:
 	task_sleep_sec (1);
@@ -105,58 +100,7 @@ wait_and_recount:
 	device_update_globals ();
 	device_debug ();
 
-	db_puts ("Updating device ");
-	db_puts (dev->props->name);
-	db_putc ('\n');
-	db_puti (dev->previous_count);
-	db_putc (' ');
-	db_puti (dev->actual_count);
-	db_putc (' ');
-	db_puti (dev->desired_count);
-	db_putc ('\n');
-
-	/*****************************************
-	 * Handle counts that are different from
-	 * what the system wants
-	 *****************************************/
-	if (dev->actual_count < dev->desired_count)
-	{
-		/* Container has fewer balls in it than we
-		 * would like */
-	}
-	else if (dev->actual_count > dev->desired_count)
-	{
-		/* Container has more balls than desired, so
-		 * we need to kick one.
-		 */
-		if (dev->state == DEV_STATE_IDLE)
-		{
-			/* Device is idle, so kick is allowed */
-			dev->state = DEV_STATE_RELEASING;
-			device_call_op (dev, kick_attempt);
-	
-			sol_on (dev->props->sol);
-			task_sleep (TIME_100MS);
-			sol_off (dev->props->sol);
-			goto wait_and_recount;
-		}
-		else
-		{
-			/* Device is already kicking, so don't do
-			 * anything; we'll come around eventually
-			 * and do this later. */
-		}
-	}
-	else
-	{
-		/* Container has exactly how many balls we
-		 * want it to */
-		if (dev->state == DEV_STATE_RELEASING)
-		{
-			/* Kick operation must have succeeded */
-			device_call_op (dev, kick_success);
-		}
-	}
+	dbprintf ("Updating device %s\n", dev->props->name);
 
 	/*****************************************
 	 * Handle "count" changes
@@ -186,7 +130,7 @@ wait_and_recount:
 			device_call_op (dev, enter);
 		}
 	}
-	else if (dev->state == DEV_STATE_RELEASING)
+	else if ((dev->state == DEV_STATE_RELEASING) && (dev->kicks_needed > 0))
 	{
 		/* Device is in the middle of a release cycle */
 		if (dev->actual_count == dev->previous_count)
@@ -202,7 +146,13 @@ wait_and_recount:
 			{
 				/* Well done */
 				db_puts ("Kick succeeded\n");
-				dev->state = DEV_STATE_IDLE;
+				device_call_op (dev, kick_success);
+				dev->kicks_needed--;
+				if (dev->kicks_needed == 0)
+				{
+					/* All kicks done */
+					dev->state = DEV_STATE_IDLE;
+				}
 			}
 			else
 			{
@@ -225,47 +175,45 @@ wait_and_recount:
 	/*****************************************
 	 * Handle "count" limits (empty & full)
 	 *****************************************/
-	if (dev->actual_count == 0)
-		device_call_op (dev, empty);
-	else if (dev->actual_count == dev->size)
-		device_call_op (dev, full);
-
-#if 0
-	while (dev->actual_count != dev->desired_count)
+	if (dev->actual_count != dev->previous_count)
 	{
-		if (dev->actual_count > dev->desired_count)
+		if (dev->actual_count == 0)
+			device_call_op (dev, empty);
+		else if (dev->actual_count > dev->max_count)
 		{
-			/* Count increased, need to kick a ball */
-			db_puts ("Kicking a ball\n");
+			device_call_op (dev, full);
+			dev->kicks_needed++;
+		}
+	}
+
+	/*****************************************
+	 * Handle counts that are different from
+	 * what the system wants
+	 *****************************************/
+	if (dev->kicks_needed > 0)
+	{
+		if (dev->actual_count == 0)
+		{
+			/* Container has fewer balls in it than we
+			 * would like */
+			db_puts ("Can't kick when no balls available!\n");
+		}
+		else 
+		{
+			/* Container has balls ready to kick */
+
+			/* Mark state as releasing if still idle */
+			if (dev->state == DEV_STATE_IDLE)
+				dev->state = DEV_STATE_RELEASING;
 
 			device_call_op (dev, kick_attempt);
+		
 			sol_on (dev->props->sol);
 			task_sleep (TIME_100MS);
 			sol_off (dev->props->sol);
-			
-			task_sleep (TIME_1S);
-
-			device_recount (dev);
-			if (dev->actual_count == dev->desired_count)
-			{
-				db_puts ("Kick succeeded\n");
-				device_call_op (dev, kick_success);
-				goto done;
-			}
-			else
-			{
-				db_puts ("Kick failed\n");
-				device_call_op (dev, kick_failure);
-				break;
-			}
-		}
-		else
-		{
-			/* Count decreased, enable a lock or kick successful
-			 * or ball magically disappeared from device */
+			goto wait_and_recount;
 		}
 	}
-#endif
 
 	device_debug ();
 	task_exit ();
@@ -275,20 +223,26 @@ wait_and_recount:
 /* Request that a device eject 1 ball */
 void device_request_kick (device_t *dev)
 {
-	if (dev->desired_count > 0)
+	if ((dev->actual_count - dev->kicks_needed) > 0)
 	{
 		task_gid_t gid = DEVICE_GID (device_devno (dev));
 		
-		db_puts ("Request to kick from ");
-		db_puts (dev->props->name);
-		db_putc ('\n');
+		dbprintf ("Request to kick from %s\n", dev->props->name);
 
-		dev->desired_count--;
-
+		dev->kicks_needed++;
 		task_create_gid1 (gid, device_update);
 	}
-	else
+}
+
+
+void device_request_empty (device_t *dev)
+{
+	if ((dev->actual_count - dev->kicks_needed) > 0)
 	{
+		task_gid_t gid = DEVICE_GID (device_devno (dev));
+
+		dev->kicks_needed += dev->actual_count;
+		task_create_gid1 (gid, device_update);
 	}
 }
 
@@ -296,7 +250,7 @@ void device_request_kick (device_t *dev)
 void device_update_globals (void)
 {
 	devicenum_t devno;
-	uint8_t previous_counted_balls = counted_balls;
+	// uint8_t previous_counted_balls = counted_balls;
 
 	counted_balls = 0;
 	for (devno = 0; devno < device_count; devno++)
@@ -305,6 +259,18 @@ void device_update_globals (void)
 		counted_balls += dev->actual_count;
 	}
 
+	missing_balls = max_balls - counted_balls;
+	if (missing_balls == live_balls)
+	{
+		/* Number of balls not accounted for is what we expect */
+	}
+	else
+	{
+		/* Number of balls not accounted for is NOT what we expect */
+		db_puts ("Missing != Live\n");
+	}
+
+#if 0
 	if (counted_balls == previous_counted_balls)
 	{
 		/* No change in total count, so nothing to update */
@@ -329,8 +295,7 @@ void device_update_globals (void)
 			down_count--;
 		}
 	}
-
-	/* missing_balls = max_balls - counted_balls - live_balls; */
+#endif
 }
 
 
@@ -344,7 +309,7 @@ void device_probe (void)
 	{
 		device_t *dev = device_entry (devno);
 		device_recount (dev);
-		dev->desired_count = dev->previous_count = dev->actual_count;
+		dev->previous_count = dev->actual_count;
 	}
 
 	device_update_globals ();
@@ -361,19 +326,17 @@ void device_sw_handler (uint8_t devno)
 {
 	device_t *dev = device_entry (devno);
 
-	db_puts ("Device switch handler for ");
-	db_puts (dev->props->name);
-	db_putc ('\n');
+	dbprintf ("Device switch handler for %s\n", dev->props->name);
 
 	if (device_ss_state == 0)
 	{
-		db_puts ("Aborting because haven't probed yet\n");
+		dbprintf ("Aborting because haven't probed yet\n");
 		return;
 	}
 
 	if (task_find_gid (DEVICE_GID (devno)))
 	{
-		db_puts ("Aborting because update already running\n");
+		dbprintf ("Aborting because update already running\n");
 		return;
 	}
 
@@ -396,7 +359,6 @@ void device_remove_live (void)
 	if (live_balls > 0)
 	{
 		live_balls--;
-		missing_balls++;
 		if (live_balls == 0)
 		{
 			end_ball ();

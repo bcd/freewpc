@@ -1,0 +1,105 @@
+
+#include <freewpc.h>
+
+
+uint8_t *font_lookup (const font_t *font, char c)
+{
+	uint8_t *entry;
+	uint8_t index;
+
+	if ((c >= 'A') && (c <= 'Z'))
+	{
+		entry = (uint8_t *)font->chars;
+		index = c - 'A';
+	}
+	else if ((c >= '0') && (c <= '9'))
+	{
+		entry = (uint8_t *)font->digits;
+		index = c - '0';
+	}
+	else
+	{
+		return NULL;
+	}
+	return entry + index * 5; // font->height;
+}
+
+
+void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s)
+{
+	static uint8_t *dmd_base;
+
+	dmd_base = ((uint8_t *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
+
+	while (*s != '\0')
+	{
+		static uint8_t *data;
+		static uint8_t i;
+		static uint8_t xb;
+		static uint8_t xr;
+
+#if 11111
+	x &= ~7;
+#endif
+
+#ifdef DB_FONT
+		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
+#endif
+
+		data = font_lookup (font, *s);
+		xb = x / 8;
+		xr = x % 8;
+
+		if (xr == 0)
+		{
+			for (i=0; i <font->height; i++)
+				dmd_base[i * DMD_BYTE_WIDTH + xb] = *data++;
+		}
+		else
+		{
+			for (i=0; i <font->height; i++)
+			{
+				db_put2x (xr);
+				db_putc (' ');
+				db_put2x (*data);
+				db_putc (' ');
+				db_put2x (*data << xr);
+				db_putc (' ');
+				db_put2x (*data >> (8 - xr));
+				db_putc ('\n');
+
+				dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
+				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
+				data++;
+			}
+		}
+
+		x += font->width + font->spacing; /* advance by 1 char ... font->width */
+		s++;
+	}
+}
+
+
+uint8_t font_get_string_width (const font_t *font, const char *s)
+{
+	uint8_t width = 0;
+	while (*s++ != '\0')
+		width += (font->width + font->spacing);
+	return (width);
+}
+
+void font_render_string_center (const font_t *font, uint8_t x, uint8_t y, const char *s)
+{
+	x -= (font_get_string_width (font, s) / 2);
+	font_render_string (font, x, y, s);
+}
+
+
+void font_render_string_right (const font_t *font, uint8_t x, uint8_t y, const char *s)
+{
+	x -= font_get_string_width (font, s);
+	font_render_string (font, x, y, s);
+}
+
+
+

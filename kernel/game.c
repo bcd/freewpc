@@ -17,12 +17,13 @@ void start_ball (void);
 
 void dump_game (void)
 {
-	db_puts ("Game : "); db_puti (in_game); db_putc ('\n');
-	db_puts ("Bonus : "); db_puti (in_bonus); db_putc ('\n');
-	db_puts ("Tilt : "); db_puti (in_tilt); db_putc ('\n');
+	db_puts ("Game : "); db_puti (in_game);
+	db_puts ("   Bonus : "); db_puti (in_bonus);
+	db_puts ("   Tilt : "); db_puti (in_tilt);
+	db_putc ('\n');
 	db_puts ("In Play : "); db_puti (ball_in_play); db_putc ('\n');
-	db_puts ("Players : "); db_puti (num_players); db_putc ('\n');
-	db_puts ("Up : "); db_puti (player_up); db_putc ('\n');
+	db_puts ("Player Up : "); db_puti (player_up);
+	db_puts (" of "); db_puti (num_players); db_putc ('\n');
 	db_puts ("Ball : "); db_puti (ball_up); db_putc ('\n');
 	db_puts ("EBs : "); db_puti (extra_balls); db_putc ('\n');
 }
@@ -34,7 +35,7 @@ void scores_deff (void) __taskentry__
 		dmd_alloc_low_clean ();
 
 		seg_write_string (SEG_ADDR (0,0,0), "PLAYER");
-		seg_write_uint8 (SEG_ADDR (0,0,8), ball_up);
+		seg_write_uint8 (SEG_ADDR (0,0,8), player_up);
 		seg_write_string (SEG_ADDR (0,1,0), "BALL");
 		seg_write_uint8 (SEG_ADDR (0,1,5), ball_up);
 
@@ -53,6 +54,7 @@ void scores_deff (void) __taskentry__
 void end_game (void)
 {
 	in_game = 0;
+	ball_up = 0;
 
 	// check high scores
 	// do match sequence
@@ -63,6 +65,8 @@ void end_game (void)
 
 void end_ball (void)
 {
+	db_puts ("In endball\n");
+
 	if (!in_game)
 		goto done;
 
@@ -96,11 +100,13 @@ done:
 
 void start_ball (void)
 {
+	db_puts ("In startball\n");
 	device_request_kick (device_entry (DEV_TROUGH));
 }
 
 void add_player (void)
 {
+	remove_credit ();
 	num_players++;
 }
 
@@ -116,7 +122,7 @@ void start_game (void)
 	ball_up = 1;
 	extra_balls = 0;
 	start_ball ();
-	//deff_start (DEFF_SCORES);
+	deff_start (DEFF_SCORES);
 }
 
 void stop_game (void)
@@ -140,8 +146,15 @@ void sw_start_button (void) __taskentry__
 	if (0) /* in_test_mode */
 	{
 		test_start_button ();
+		return;
 	}
-	else if (!in_game)
+
+	if (!has_credits_p)
+	{
+		return;
+	}
+
+	if (!in_game)
 	{
 		if (verify_start_ok ())
 		{
@@ -165,6 +178,7 @@ void sw_start_button (void) __taskentry__
 			start_game ();
 		}
 	}
+
 	dump_game ();
 	task_exit ();
 }

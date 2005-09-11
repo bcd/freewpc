@@ -5,15 +5,26 @@ uint8_t credit_count;
 uint8_t unit_count;
 
 
-void credit_added_deff (void)
+void credits_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_alloc_high_clean ();
 
-	seg_write_string (SEG_ADDR(0,1,3), "CREDITS");
-	seg_write_uint8 (SEG_ADDR(0,1,11), credit_count);
+	sprintf ("CREDITS %d", credit_count);
+	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
 
-	dmd_show_low ();
+	dmd_copy_low_to_high ();
+
+	if (credit_count == 0)
+	{
+		sprintf ("INSERT COINS");
+	}
+	else
+	{
+		sprintf ("PRESS START");
+	}
+	font_render_string_center (&font_5x5, 64, 20, sprintf_buffer);
+
 	deff_swap_low_high (16, TIME_100MS);
 	deff_delay_and_exit (TIME_100MS * 5);
 }
@@ -22,7 +33,7 @@ void credit_added_deff (void)
 void add_credit (void)
 {
 	sound_send (SND_SCROLL);
-	deff_restart (DEFF_CREDIT_ADDED);
+	deff_restart (DEFF_CREDITS);
 	credit_count++;
 }
 
