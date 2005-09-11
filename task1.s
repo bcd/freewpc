@@ -2,6 +2,7 @@
 
 #include <freewpc.h>
 
+;;; TODO : instead of saving S, save offset within local stack (save 1 byte)
 
 /*
  * Task structure
@@ -20,14 +21,10 @@
 #define TASK_OFF_B			18
 #define TASK_OFF_ARG			19
 #define TASK_OFF_STACK		21
-#define TASK_SIZE 			64
+#define TASK_SIZE 			(TASK_OFF_STACK + TASK_STACK_SIZE)
 
 /* Number of tasks to create */
 #define NUM_TASKS				16
-
-;;; Size of the task stack - uses all of the remaining
-;;; bytes of the task structure after the fixed values
-#define TASK_STACK_SIZE		(TASK_SIZE - TASK_OFF_STACK - 1)
 
 /* Task states */
 #define TASK_FREE			0x0
@@ -109,11 +106,15 @@ proc(task_create)
 	stu	TASK_OFF_PC,x
 	puls	d,u
 	clr	TASK_OFF_GID,x
+	clr	TASK_OFF_ARG,x
+	clr	TASK_OFF_ARG+1,x
 	sta	TASK_OFF_A,x
 	stb	TASK_OFF_B,x
 	sty	TASK_OFF_Y,x
 	stu	TASK_OFF_U,x
-	leay	TASK_OFF_STACK+TASK_STACK_SIZE,x
+	ldy	#0xEEEE
+	sty	TASK_OFF_STACK,x
+	leay	TASK_OFF_STACK+TASK_STACK_SIZE-1,x
 	sty	TASK_OFF_S,x
 endp
 
@@ -191,9 +192,9 @@ dispatch_check:
 	lbeq	task_restore			; Yes, restore it
 
 	; No, check to see if it is asleep
-	lda	#TASK_BLOCKED
-	bita	TASK_OFF_STATE,x
-	beq	dispatch_loop			; No, continue scanning
+	lda	#TASK_BLOCKED+TASK_USED
+	cmpa	TASK_OFF_STATE,x
+	bne	dispatch_loop			; No, continue scanning
 
 	lda	_tick_count
 	suba	TASK_OFF_ASLEEP,x		; Compute time spent asleep so far
