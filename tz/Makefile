@@ -43,7 +43,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 
 
 
-GAME_OBJS = config.o clock.o
+GAME_OBJS = config.o clock.o amode.o
 AS_GAME_OBJS =
 
 GAME_INCLUDES =
