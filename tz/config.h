@@ -70,4 +70,7 @@
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
 
+/* Declare the array of edge switches, defined elsewhere */
+extern const uint8_t mach_edge_switches[];
+
 #endif /* MACH_CONFIG_H */
