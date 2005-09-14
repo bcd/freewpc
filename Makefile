@@ -29,8 +29,8 @@ ERR = err
 TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
-LINKCMD = system.lnk
-BINFILES = system.bin
+LINKCMD = freewpc.lnk
+BINFILES = freewpc.bin
 TMPFILES += $(LINKCMD)
 
 # Preloaded macro files
@@ -62,15 +62,15 @@ PATH_REQUIRED += $(BLANKER)
 GAME_ROM = freewpc.rom
 
 # Source files for the core OS
-AS_OS_OBJS = system.o vector.o
-SAS_OS_OBJS = switch.o task1.o dmd1.o
+AS_OS_OBJS = vector.o
+SAS_OS_OBJS = task1.o ### dmd1.o switch.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o sound.o coin.o service.o game.o test.o \
 	device.o lampset.o score.o deff.o triac.o paging.o db.o \
-	trough.o font.o printf.o
+	trough.o font.o printf.o tilt.o
 
-FONT_OBJS = 5x5.o
+FONT_OBJS = mono5x5.o
 
 OS_INCLUDES = include/freewpc.h wpc.h
 
@@ -94,6 +94,10 @@ ifdef DEBUG_COMPILER
 CFLAGS += -da
 endif
 
+ifdef UNROLL_LOOPS  # this doesn't work!
+CFLAGS += -funroll-loops
+endif
+
 # Please, turn on all warnings!
 CFLAGS += -Wall
 
@@ -109,7 +113,7 @@ CFLAGS += -Werror-implicit-function-declaration
 OBJS = $(patsubst %,kernel/%,$(OS_OBJS)) \
 	$(patsubst %,$(MACHINE)/%,$(GAME_OBJS)) \
 	$(patsubst %,fonts/%,$(FONT_OBJS))
-AS_OBJS = $(AS_OS_OBJS) $(AS_GAME_OBJS)
+AS_OBJS = freewpc.o $(patsubst %,kernel/%,$(AS_OS_OBJS)) $(AS_GAME_OBJS)
 SAS_OBJS = $(SAS_OS_OBJS) $(SAS_GAME_OBJS)
 
 DEPS = $(DEFMACROS) $(INCLUDES) Makefile
@@ -154,8 +158,8 @@ $(PINMAME_GAME_ROM) : $(GAME_ROM)
 
 build : $(GAME_ROM)
 
-$(GAME_ROM) : blank256.bin blank128.bin blank64.bin blank32.bin system.bin
-	@echo Padding ... && cat blank256.bin blank128.bin blank64.bin blank32.bin system.bin > $@
+$(GAME_ROM) : blank256.bin blank128.bin blank64.bin blank32.bin $(BINFILES)
+	@echo Padding ... && cat blank256.bin blank128.bin blank64.bin blank32.bin $(BINFILES) > $@
 
 blank%.bin:
 	@echo Creating $*KB blank file ... && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
@@ -166,24 +170,26 @@ $(BINFILES) : %.bin : %.s19
 $(BINFILES:.bin=.s19) : %.s19 : $(LD) $(OBJS) $(AS_OBJS) $(SAS_OBJS) $(LINKCMD)
 	@echo Linking $@... && aslink -f $@ >> $(ERR) 2>&1
 
-new_link:
-	@echo Linking $@... && $(LD) -mxs -b _DATA=0x800 -b sysrom=0x8000 -b vector=0xFFF0  -b fastram=0x0 -o $@ $(OBJS) $(AS_OBJS) $(SAS_OBJS) -L$(LIBC_DIR) -lc >> $(ERR) 2>&1
+### 
+### new_link:
+### 	@echo Linking $@... && $(LD) -mxs -b _DATA=0x800 -b sysrom=0x8000 -b vector=0xFFF0  -b fastram=0x0 -o $@ $(OBJS) $(AS_OBJS) $(SAS_OBJS) -L$(LIBC_DIR) -lc >> $(ERR) 2>&1
+### 
 
 $(SAS_OBJS) : %.o : %.s $(AS) $(DEPS)
 	$(AS) $(ASMFLAGS) $<
 
 $(AS_OBJS) : %.o : %.s $(CC) $(DEPS)
-	@echo Assembling $< ... && $(CC) -c -x assembler-with-cpp $<
+	@echo Assembling $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
 
 $(OBJS) : %.o : %.c $(CC) $(DEPS)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
-	@$(CC) -o $@ -c $(CFLAGS) $< > err 2>&1
+	@$(CC) -o $@ -c $(CFLAGS) $< 2>&1 | tee -a err
 
 $(LINKCMD) : $(DEPS)
 	@echo Creating linker command file...
 	@rm -f $(LINKCMD)
 	@echo "-mxswz" >> $(LINKCMD)
-	@echo "-b fastram = 0x0" >> $(LINKCMD)
+	@#echo "-b fastram = 0x0" >> $(LINKCMD)
 	@echo "-b ram = 0x100" >> $(LINKCMD)
 	@#echo "-b _DATA = 0x800" >> $(LINKCMD)
 	@#echo "-b rom = 0x4000" >> $(LINKCMD)
@@ -196,6 +202,9 @@ $(LINKCMD) : $(DEPS)
 
 show_objs:
 	echo $(OBJS)
+
+gcc:
+	cd gccbuild && ./gccbuild
 
 clean:
 	@echo Cleaning top-level directory ... && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
