@@ -86,6 +86,7 @@
 /* Primitive time constants */
 #define TIME_16MS 	2
 #define TIME_33MS 	4
+#define TIME_50MS 	6
 #define TIME_66MS 	(TIME_33MS * 2)
 #define TIME_100MS 	(TIME_33MS * 3)
 #define TIME_1S 		(TIME_100MS * 10)

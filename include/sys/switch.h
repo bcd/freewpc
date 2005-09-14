@@ -1,10 +1,29 @@
 #ifndef _SYS_SWITCH_H
 #define _SYS_SWITCH_H
 
-/** Small integer typedef for a switch number */
 #ifndef __SASM__
+
+/** Small integer typedef for a switch number */
 typedef uint8_t switchnum_t;
-#endif
+
+/** Switch flags */
+#define SW_OPTICAL	0x01 /* Switch is active when it is _open_ */
+#define SW_EDGE		0x02 /* Switch is handled on any edge */
+#define SW_PLAY		0x04 /* Switch marks a ball as 'in play' */
+
+/** Switch handler prototype form */
+typedef void (*switch_handler_t) (void);
+
+/** A switch descriptor.  Contains all of the static information
+ * about a particular switch */
+typedef struct
+{
+	void (*fn) (void);
+	uint8_t flags;
+	uint8_t pad[1]; /* Keep this aligned to a power of 2! */
+} switch_info_t;
+
+#endif /* __SASM__ */
 
 #define NUM_PF_SWITCHES 64
 #define NUM_DEDICATED_SWITCHES 8
@@ -56,8 +75,7 @@ typedef uint8_t switchnum_t;
 #ifndef __SASM__
 extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
-typedef void (*switch_handler_t) (switchnum_t sw);
-
+#if 0
 typedef struct switch_props
 {
 	switch_handler_t handler;
@@ -65,9 +83,11 @@ typedef struct switch_props
 	uint8_t min_activation_time;
 	uint8_t min_deactivation_time;
 } switch_props_t;
+#endif
 
 void switch_init (void);
-void switch_sched (uint8_t sw);
+void switch_rtt (void);
+void switch_sched (void);
 void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);

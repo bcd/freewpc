@@ -11,6 +11,9 @@
 #define SND_EXIT					0x58
 #define SND_SCROLL				0x59
 
+#define MIN_VOLUME				0
+#define MAX_VOLUME				32
+
 #ifndef __SASM__
 typedef uint16_t music_code_t, sound_code_t;
 
@@ -19,6 +22,8 @@ void music_set (music_code_t code);
 void music_change (music_code_t code);
 void sound_init (void);
 void sound_send (sound_code_t code);
+void volume_down (void);
+void volume_up (void);
 #endif /* __SASM__ */
 
 #endif /* _SYS_SOUND_H */

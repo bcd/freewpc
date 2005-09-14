@@ -28,6 +28,10 @@ typedef struct
 #define DEFF_SCORES			5
 #define DEFF_FONT_TEST		6
 #define DEFF_AMODE			7
+#define DEFF_VOLUME_CHANGE	8
+#define DEFF_TILT				9
+#define DEFF_TILT_WARNING	10
+#define DEFF_SLAM_TILT		11
 
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);

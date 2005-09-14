@@ -7,6 +7,7 @@
 extern uint8_t in_game;
 extern uint8_t in_bonus;
 extern uint8_t in_tilt;
+extern uint8_t in_test;
 extern uint8_t ball_in_play;
 extern uint8_t num_players;
 extern uint8_t player_up;

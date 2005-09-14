@@ -28,6 +28,10 @@ typedef uint8_t *dmd_buffer_t;
 #define dmd_low_buffer		((dmd_buffer_t *)DMD_LOW_BASE)
 #define dmd_high_buffer		((dmd_buffer_t *)DMD_HIGH_BASE)
 
+#define dmd_low_bytes		((uint8_t *)DMD_LOW_BASE)
+#define dmd_high_bytes		((uint8_t *)DMD_HIGH_BASE)
+
+
 void dmd_init (void);
 void dmd_rtt (void);
 void dmd_alloc_low (void);
