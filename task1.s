@@ -210,7 +210,7 @@ dispatch_check:
 task_list_end:
 	; Execute idle tasks on system stack
 	lds	#STACK_BASE
-	jsr	switch_idle_task
+	jsr	_switch_idle_task
 
 	; Start scanning from beginning of table again
 	ldx	#_task_buffer			; Reset to beginning of buffer
