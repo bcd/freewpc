@@ -1,0 +1,18 @@
+
+This is FreeWPC, an open source operating system for the Williams
+Pinball Controller (WPC) family of pinball machines.
+
+The sources for the common routines are located in 'kernel', while
+the game-specific code can be found in a subdirectory based on the
+machine name.
+
+Also included is a patch for gcc for building a 6809 cross compiler,
+based on earlier works but modified significantly; and sources for
+a small libc taken mostly as-is from similar work done for the CoCo
+computer series.
+
+You will need several other tools in order to make final ROM images.
+The venerable Unix 'dd' utility is used to pad files to the correct
+size.  A tool called 'srec_cat' is used to convert from S-records into
+binary.
+
