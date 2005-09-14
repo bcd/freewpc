@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 
+uint8_t free_play;
 uint8_t credit_count;
 uint8_t unit_count;
 
@@ -97,4 +98,5 @@ void coin_init (void)
 {
 	credit_count = 0;
 	unit_count = 0;
+	free_play = 0;
 }

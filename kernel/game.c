@@ -65,6 +65,7 @@ void end_game (void)
 	// return to attract mode
 
 	deff_stop (DEFF_SCORES);
+	deff_start (DEFF_AMODE);
 }
 
 void end_ball (void)
@@ -170,6 +171,7 @@ void sw_start_button (void) __taskentry__
 		if (verify_start_ok ())
 		{
 			start_game ();
+			call_hook (start_game);
 		}
 		else
 		{
@@ -181,7 +183,10 @@ void sw_start_button (void) __taskentry__
 		if (ball_up == 1)
 		{
 			if (num_players < MAX_PLAYERS)
+			{
 				add_player ();
+				call_hook (add_player);
+			}
 		}
 		else if (verify_start_ok ())
 		{
@@ -195,18 +200,6 @@ void sw_start_button (void) __taskentry__
 }
 
 void sw_buy_in_button (void) __taskentry__
-{
-	task_exit ();
-}
-
-
-void sw_tilt (void) __taskentry__
-{
-	task_exit ();
-}
-
-
-void sw_slam_tilt (void) __taskentry__
 {
 	task_exit ();
 }

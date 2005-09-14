@@ -117,7 +117,7 @@ void task_yield (void)
 }
 
 
-void task_create_gid (task_gid_t gid, task_function_t fn)
+task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
@@ -128,20 +128,25 @@ void task_create_gid (task_gid_t gid, task_function_t fn)
 #ifdef DEBUG_TASKS
 	task_count++;
 #endif
+	return (tp);
 }
 
-void task_create_gid1 (task_gid_t gid, task_function_t fn)
+
+task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
 {
-	if (!task_find_gid (gid))
-		task_create_gid (gid, fn);
+	task_t *tp = task_find_gid (gid);
+	if (tp) 
+		return (tp);
+	return task_create_gid (gid, fn);
 }
 
-void task_recreate_gid (task_gid_t gid, task_function_t fn)
+
+task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
 {
 	task_kill_gid (gid);
 	if (task_find_gid (gid))
 		fatal (ERR_TASK_KILL_FAILED);
-	task_create_gid (gid, fn);
+	return task_create_gid (gid, fn);
 }
 
 task_t *task_getpid (void)

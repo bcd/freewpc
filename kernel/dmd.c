@@ -1,6 +1,8 @@
 
 #include <freewpc.h>
 
+#if (MACHINE_DMD == 1)
+
 dmd_pagenum_t dmd_free_page, 
 	dmd_low_page, 
 	dmd_high_page, 
@@ -179,5 +181,22 @@ void dmd_draw_border (char *dbuf)
 
 void dmd_shift_up (dmd_buffer_t *dbuf)
 {
+	uint16_t i;
+	for (i=(31 * 16 / 2); i != 0; --i)
+	{
+		dbuf[0] = dbuf[8];
+		dbuf++;
+	}
+
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
+	*dbuf++ = 0;
 }
+
+#endif /* MACHINE_DMD */
 

@@ -33,7 +33,7 @@ void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 	sprintf ("ERRNO %i", error_code);
 	font_render_string_center (&font_5x5, 64, 4, sprintf_buffer);
 	sprintf ("PC %04x", pc);
-	font_render_string_center (&font_5x5, 64, 4, sprintf_buffer);
+	font_render_string_center (&font_5x5, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_dump ();
 	for (;;);
@@ -60,7 +60,8 @@ void do_irq (void)
 	/* Execute rtts every 1ms */
 	wpc_led_toggle ();
 	db_rtt ();
-	asm ("jsr switch_rtt");
+	switch_rtt ();
+/////	asm ("jsr switch_rtt");
 	lamp_rtt ();
 	sol_rtt ();
 	triac_rtt ();

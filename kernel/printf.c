@@ -8,6 +8,11 @@ uint8_t sprintf_width;
 
 bool sprintf_leading_zeroes;
 
+uint8_t leading_zero_count;
+
+uint8_t number_length;
+
+
 
 char digit2char (uint8_t digit)
 {
@@ -49,20 +54,22 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 
 void sprintf (const char *format, ...)
 {
-	va_list va;
-	uint8_t *buf = sprintf_buffer;
+	static va_list va;
+	static uint8_t *buf;
+	static uint8_t *endbuf;
+	
+	buf = sprintf_buffer;
 
 	va_start (va, format);
 	while (*format)
 	{
 		if (*format == '%')
 		{
-do_format_chars:
-			format++;
-			
 			sprintf_width = 0;
 			sprintf_leading_zeroes = FALSE;
 
+do_format_chars:
+			format++;
 			switch (*format)
 			{
 				case '0':
@@ -73,14 +80,38 @@ do_format_chars:
 				case '2':
 				case '3':
 				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
 					sprintf_width = *format - '0';
 					goto do_format_chars;
 
 				case 'd':
 				case 'i':
 				{
-					uint16_t w = va_arg (va, uint16_t);
-					buf = do_sprintf_decimal (buf, w);
+					register uint16_t w = va_arg (va, uint16_t);
+					endbuf = do_sprintf_decimal (buf, w);
+fixup_number:
+					leading_zero_count = 0;
+					while ((buf[leading_zero_count] == '0') &&
+						(buf + leading_zero_count < endbuf))
+					{
+						leading_zero_count++;
+					}
+					number_length = endbuf - buf;
+
+					if (sprintf_leading_zeroes)
+					{
+						/* OK to display leading zeroes */
+					}
+					else
+					{
+						/* Not OK to display leading zeroes */
+					}
+
+					buf = endbuf;
 					break;
 				}
 
@@ -88,27 +119,29 @@ do_format_chars:
 				{
 					register uint16_t w  = va_arg (va, uint16_t);
 					if (sprintf_width <= 2)
-						buf = do_sprintf_hex_byte (buf, w & 0xFF);
+						endbuf = do_sprintf_hex_byte (buf, w & 0xFF);
 					else
-						buf = do_sprintf_hex (buf, w);
+						endbuf = do_sprintf_hex (buf, w);
+					goto fixup_number;
 					break;
 				}
 
 				case 'b':
 				{
 					register bcd_t *bcd  = va_arg (va, bcd_t *);
-					db_putp (bcd);
-					while (sprintf_width-- != 0)
+					// db_putp (bcd);
+					while (sprintf_width != 0)
 					{
-						db_put2x (*bcd);
+						// db_put2x (*bcd);
 						buf = do_sprintf_hex_byte (buf, *bcd++);
+						sprintf_width -= 2;
 					}
 					break;
 				}
 
 				case 's':
 				{
-					const char *s = va_arg (va, const char *);
+					register const char *s = va_arg (va, const char *);
 					while (*s)
 						*buf++ = *s++;
 					break;
@@ -116,7 +149,7 @@ do_format_chars:
 
 				case 'p':
 				{
-					void *p = va_arg (va, void *);
+					register void *p = va_arg (va, void *);
 					p = p;
 					break;
 				}
@@ -131,6 +164,7 @@ do_format_chars:
 	va_end (va);
 
 	*buf = '\0';
+
 #if 0
 	db_puts ("sprintf: ");
 	db_puts (sprintf_buffer);

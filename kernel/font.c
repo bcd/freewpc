@@ -3,6 +3,7 @@
 
 static uint8_t font_space[32] = { 0, };
 
+
 uint8_t *font_lookup (const font_t *font, char c)
 {
 	uint8_t *entry;
@@ -65,6 +66,7 @@ void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s
 		{
 			for (i=0; i <font->height; i++)
 			{
+#if 0
 				db_put2x (xr);
 				db_putc (' ');
 				db_put2x (*data);
@@ -73,7 +75,7 @@ void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s
 				db_putc (' ');
 				db_put2x (*data >> (8 - xr));
 				db_putc ('\n');
-
+#endif
 				dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
 				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
 				data++;

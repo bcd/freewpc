@@ -192,7 +192,7 @@ void rtc_print_deff (void) __taskentry__
 	sprintf ("%d %d", *(uint8_t *)WPC_CLK_HOURS_DAYS, *(uint8_t *)WPC_CLK_MINS);
 	font_render_string_center (&font_5x5, 64, 16, sprintf_buffer);
 
-	asm ("jsr dmd_draw_border_low");
+	dmd_draw_border (dmd_low_bytes);
 	dmd_show_low ();
 	task_sleep_sec (5);
 	deff_exit ();

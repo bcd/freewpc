@@ -9,6 +9,10 @@ extern void rtc_print_deff (void) __taskentry__;
 extern void credits_deff (void) __taskentry__;
 extern void font_test_deff (void) __taskentry__;
 extern void amode_deff (void) __taskentry__;
+extern void volume_deff (void) __taskentry__;
+extern void tilt_deff (void) __taskentry__;
+extern void tilt_warning_deff (void) __taskentry__;
+extern void slam_tilt_deff (void) __taskentry__;
 
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
@@ -17,8 +21,12 @@ static const deff_t deff_table[] = {
 	[DEFF_AMODE] = { D_RUNNING, 20, amode_deff },
 	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
 	[DEFF_CREDITS] = { D_NORMAL, 120, credits_deff },
+	[DEFF_TILT_WARNING] = { D_NORMAL, 200, tilt_warning_deff },
+	[DEFF_TILT] = { D_NORMAL, 205, tilt_deff }, /* should be D_RUNNING */
+	[DEFF_SLAM_TILT] = { D_NORMAL, 210, tilt_deff },
 	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },
 	[DEFF_FONT_TEST] = { D_RUNNING, 250, font_test_deff },
+	[DEFF_VOLUME_CHANGE] = { D_RUNNING, 250, volume_deff },
 };
 
 
