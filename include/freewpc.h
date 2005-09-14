@@ -58,7 +58,6 @@ typedef unsigned int uint16_t;
 #include <sys/dmd.h>
 #include <sys/triac.h>
 
-//// #include <sys/segment.h>
 #ifndef __SASM__
 #include <sys/deff.h>
 #include <sys/debug.h>
@@ -69,11 +68,14 @@ typedef unsigned int uint16_t;
 #include <stdadj.h>
 #include <printf.h>
 #include <amode.h>
-
 #include <mach/config.h>
 #include <mach/switch.h>
 #include <mach/coil.h>
 #include <mach/sound.h>
+
+/* From here on are any headers that are dependent on machine
+ * specific features being defined */
+#include <hook.h>
 #endif
 
 #endif /* _FREEWPC_H */

@@ -19,6 +19,7 @@ case $1 in
 
 	patch)
 		cd .. && patch -p0 < m6809-gcc.diff
+		# TODO : copy all files from ROOT/gcc-patch into ROOT/gcc-3.1.1/gcc
 		;;
 
 	config|configure)
