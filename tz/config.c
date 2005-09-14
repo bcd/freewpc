@@ -29,3 +29,22 @@ const uint8_t mach_opto_mask[] = {
 const uint8_t mach_edge_switches[] = {
 	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98,
 };
+
+
+void tz_start_game (void)
+{
+	sound_send (SND_YOU_UNLOCK_THIS_DOOR);
+}
+
+
+void tz_add_player (void)
+{
+	sound_send (SND_PLAYER_ONE + num_players - 1);
+}
+
+
+machine_hooks_t tz_hooks = {
+	.start_game = tz_start_game,
+	.add_player = tz_add_player,
+};
+
