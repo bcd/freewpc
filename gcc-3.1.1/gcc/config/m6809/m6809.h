@@ -43,6 +43,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 
+/* Enable new convention for argument passing:
+ * Can use the 'B' register for the first 8-bit argument, or the 'D'
+ * register for the first 16-bit argument.  Only the first argument
+ * is eligible.
+ *
+ * This does not work yet.
+ */
+/*** #define CONFIG_REG_ARGS ***/
+
 /* Names to predefine in the preprocessor for this target machine.  */
 #define CPP_PREDEFINES "-Dmc6809 -DMC6809"
 
@@ -56,6 +65,8 @@ extern short *reg_renumber;	/* def in local_alloc.c */
 /* Runtime current values of section names */
 extern char code_section_op[], data_section_op[], bss_section_op[];
 
+/* Function prototypes (defined in m6809.c) */
+
 /* Macros used in the machine description to test the flags.  */
 /* 
    -margcount		use standard calling sequence, with arg count word
@@ -65,17 +76,21 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    -mshort_branch	use short branch instructions
 */
 
-#define TARGET_ARGCOUNT (target_flags & 4)
+#define TARGET_FLAG_SHORT_BRANCH      0x1
+#define TARGET_FLAG_ARGCOUNT          0x4
+#define TARGET_FLAG_SHORT_INT         0x8
+
+#define TARGET_ARGCOUNT (target_flags & TARGET_FLAG_ARGCOUNT)
 
 /* Compile with 16-bit `int'.  */
-#define TARGET_SHORT_INT (target_flags & 8)
+#define TARGET_SHORT_INT (target_flags & TARGET_FLAG_SHORT_INT)
 
 /* Compile with short (+-255) branch instructions */
-#define TARGET_SHORT_BRANCH (target_flags & 1)
+#define TARGET_SHORT_BRANCH (target_flags & TARGET_FLAG_SHORT_BRANCH)
 
 /* Default target_flags if no switches specified.  */
 #ifndef TARGET_DEFAULT
-#define TARGET_DEFAULT 8
+#define TARGET_DEFAULT TARGET_FLAG_SHORT_INT
 #endif
 
 /* Macro to define tables used to set the flags.
@@ -85,14 +100,14 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    An empty string NAME is used to identify the default VALUE.  */
 
 #define TARGET_SWITCHES \
-  { { "short_branch", 1 }, \
-    { "long_branch", -1 }, \
+  { { "short_branch", TARGET_FLAG_SHORT_BRANCH }, \
+    { "long_branch", -TARGET_FLAG_SHORT_BRANCH }, \
     { "c2", 2 }, \
     { "noc2", -2 }, \
-    { "argcount", 4 }, \
-    { "noargcount", -4 }, \
-    { "short_int", 8}, \
-    { "long_int", -8}, \
+    { "argcount", TARGET_FLAG_ARGCOUNT }, \
+    { "noargcount", -TARGET_FLAG_ARGCOUNT }, \
+    { "short_int", TARGET_FLAG_SHORT_INT }, \
+    { "long_int", -TARGET_FLAG_SHORT_INT }, \
     { "", TARGET_DEFAULT }}
 
 /* Pick a target if none was specified */
@@ -174,6 +189,18 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 #define HARD_B_REGNUM	9   /* bit value = 0x200 */
 #define HARD_CC_REGNUM 10   /* bit value = 0x400 */
 #define HARD_DP_REGNUM 11   /* bit value = 0x800 */
+
+/* Same values, but in bitset form */
+#define D_REGBIT			(1 << HARD_D_REGNUM)
+#define X_REGBIT			(1 << HARD_X_REGNUM)
+#define Y_REGBIT			(1 << HARD_Y_REGNUM)
+#define U_REGBIT			(1 << HARD_U_REGNUM)
+#define S_REGBIT			(1 << HARD_S_REGNUM)
+#define PC_REGBIT			(1 << HARD_PC_REGNUM)
+#define A_REGBIT			(1 << HARD_A_REGNUM)
+#define B_REGBIT			(1 << HARD_B_REGNUM)
+#define CC_REGBIT			(1 << HARD_CC_REGNUM)
+#define DP_REGBIT			(1 << HARD_DP_REGNUM)
 
 /* Number of actual hardware registers.
    The hardware registers are assigned numbers for the compiler
@@ -302,10 +329,10 @@ of machine-mode MODE.  */
 enum reg_class {
     NO_REGS,
 
-	 /* 16-bit (word (SI)) data (D) */
+	 /* 16-bit (word (HI)) data (D) */
     D_REGS,
 
-	 /* 8-bit (byte (HI)) data (D) */
+	 /* 8-bit (byte (QI)) data (D) */
     Q_REGS,
 
 	 /* 16-bit addresses (X,Y,U,S,PC) */
@@ -332,8 +359,17 @@ enum reg_class {
    This is an initializer for a vector of HARD_REG_SET
    of length N_REG_CLASSES.  */
 
-  /* -, -, -, -, | DP,C, B, A, | -, -, PC,S, | U, Y, X, D */
-#define REG_CLASS_CONTENTS {0, 0x0001, 0x0001, 0x003e, 0x003f, 0x033f}
+#define Q_REG_CLASS_CONTENTS	(D_REGBIT)
+
+#define REG_CLASS_CONTENTS { \
+	0, \
+	D_REGBIT, \
+	Q_REG_CLASS_CONTENTS, \
+	X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT, \
+	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT, \
+	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT |  \
+		A_REGBIT | B_REGBIT, \
+}
 
 /* The same information, inverted:
    Return the class number of the smallest class containing
@@ -343,12 +379,16 @@ enum reg_class {
 #define REGNO_REG_CLASS(REGNO) \
   (D_REGNO_P (REGNO) ? D_REGS : \
   (Q_REGNO_P (REGNO) ? Q_REGS : \
-  (A_REGNO_P (REGNO) ? A_REGS : ALL_REGS)))
+  (A_REGNO_P (REGNO) ? A_REGS : \
+  (G_REGNO_P (REGNO) ? G_REGS : ALL_REGS))))
 
 #define D_REGNO_P(REGNO) ((REGNO) == HARD_D_REGNUM)
+
 #define Q_REGNO_P(REGNO) ((REGNO) == HARD_D_REGNUM)
+
 #define A_REGNO_P(REGNO) (((REGNO) >= HARD_X_REGNUM) \
     && ((REGNO) <= HARD_PC_REGNUM))
+
 #define G_REGNO_P(REGNO) ((REGNO) <= HARD_PC_REGNUM)
 
 #define D_REG_P(X) (REG_P (X) && D_REGNO_P (REGNO (X)))
@@ -360,9 +400,9 @@ enum reg_class {
 #define BASE_REG_CLASS A_REGS
 
 /* Get reg_class from a letter in the machine description.  */
-/* 'a' -- Address (SI) class */
-/* 'd' -- Data (SI) class */
-/* 'q' -- Data class for byte mode */
+/* 'a' -- Address (HI) class */
+/* 'd' -- Data (HI) class */
+/* 'q' -- Data class for byte mode (QI) */
 
 #define REG_CLASS_FROM_LETTER(C) \
   (((C) == 'a' ? A_REGS : \
@@ -426,11 +466,10 @@ enum reg_class {
    makes the stack pointer a smaller address.  */
 #define STACK_GROWS_DOWNWARD
 
-/* in m68k.h definiert: */
 /* Nonzero if we need to generate stack-probe insns.
    On most systems they are not needed.
    When they are needed, define this as the stack offset to probe at.  */
-/*#define NEED_PROBE 0*/
+/*#define NEED_PROBE 0*/  /* Not required for 6809 */
 
 /* Define this if the nominal address of the stack frame
    is at the high-address end of the local variables;
@@ -471,13 +510,13 @@ enum reg_class {
 
 /* All return values are in the D-register (register 0) */
 #define FUNCTION_VALUE(VALTYPE, FUNC) \
-  gen_rtx (REG, TYPE_MODE (VALTYPE), 0)
+  gen_rtx (REG, TYPE_MODE (VALTYPE), HARD_D_REGNUM)
 
 /* Define how to find the value returned by a library function
    assuming the value has mode MODE.  */
 
 /* All return values are in the D-register (register 0) */
-#define LIBCALL_VALUE(MODE)  gen_rtx (REG, MODE, 0)
+#define LIBCALL_VALUE(MODE)  gen_rtx (REG, MODE, HARD_D_REGNUM)
 
 /* Define this if PCC uses the nonreentrant convention for returning
    structure and union values.  */
@@ -488,10 +527,18 @@ enum reg_class {
 
 /* Define this to be true when FUNCTION_VALUE_REGNO_P is true for
    more than one register.  */
+#ifdef CONFIG_REG_ARGS
+#define NEEDS_UNTYPED_CALL 1
+#else
 #define NEEDS_UNTYPED_CALL 0
+#endif
 
 /* 1 if N is a possible register number for function argument passing. */
+#ifdef CONFIG_REG_ARGS
+#define FUNCTION_ARG_REGNO_P(N) (((N) == HARD_B_REGNUM) || ((N) == HARD_D_REGNUM))
+#else
 #define FUNCTION_ARG_REGNO_P(N) 0
+#endif
 
 /*--------------------------------------------------------------
 	Argument Lists
@@ -507,25 +554,41 @@ enum reg_class {
 
 #define CUMULATIVE_ARGS int
 
+
 /* Initialize a variable CUM of type CUMULATIVE_ARGS
    for a call to a function whose data type is FNTYPE.
    For a library call, FNTYPE is 0.  */
 
-#define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) \
- ((CUM) = 0)
+#ifdef CONFIG_REG_ARGS
+#define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) ((CUM) = -1)
+#else
+#define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) ((CUM) = 0)
+#endif
+
 
 /* Update the data in CUM to advance over an argument
    of mode MODE and data type TYPE.
    (TYPE is null for libcalls where that information may not be available.)  */
 
+#ifdef CONFIG_REG_ARGS
+#define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED) \
+	(((CUM) == -1) ?  \
+		((CUM) = 0) : \
+		((CUM) += ((MODE) != BLKmode \
+			? (GET_MODE_SIZE (MODE)) \
+			: (int_size_in_bytes (TYPE)))))
+#else
 #define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED) \
  ((CUM) += ((MODE) != BLKmode \
 	    ? (GET_MODE_SIZE (MODE)) \
 	    : (int_size_in_bytes (TYPE))))
+#endif
+
 
 /* Define where to put the arguments to a function.
    Value is zero to push the argument on the stack,
    or a hard register in which to store the argument.
+	This macro is used _before_ FUNCTION_ARG_ADVANCE.
 
    MODE is the argument's machine mode.
    TYPE is the data type of the argument (as a tree).
@@ -536,8 +599,14 @@ enum reg_class {
    NAMED is nonzero if this argument is a named parameter
     (otherwise it is an extra parameter matching an ellipsis).  */
 
-/* For now all args are pushed. -- tej */
+#ifdef CONFIG_REG_ARGS
+#define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
+	((((CUM) >= 0) || (MODE == BLKmode)) ? 0 : \
+		((MODE == HImode) ? HARD_D_REGNUM : HARD_B_REGNUM))
+#else
+/* Old style : all args are pushed. */
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) 0
+#endif
 
 /* This macro generates the assembly code for function entry.
    FILE is a stdio stream to output the code to.
@@ -586,8 +655,6 @@ enum reg_class {
    function when it is called.  */
 #define INITIALIZE_TRAMPOLINE(TRAMP, FNADDR, CXT) { \
         }
-
-
 
 
 /*--------------------------------------------------------------
@@ -643,7 +710,7 @@ enum reg_class {
 
 /* 1 if X is an rtx for a constant that is a valid address.  */
 #define CONSTANT_ADDRESS_P(X) (CONSTANT_P (X))
-/* much better on m68k:
+/* Note: much better on m68k:
 #define CONSTANT_ADDRESS_P(X)   \
   (GET_CODE (X) == LABEL_REF || GET_CODE (X) == SYMBOL_REF              \
    || GET_CODE (X) == CONST_INT || GET_CODE (X) == CONST                \
@@ -652,7 +719,6 @@ enum reg_class {
 
 /* Nonzero if the constant value X is a legitimate general operand.
    It is given that X satisfies CONSTANT_P or is a CONST_DOUBLE.  */
-
 /* Any single-word constant is ok; the only contexts
    allowing general_operand of mode DI or DF are movdi and movdf. */
 #define LEGITIMATE_CONSTANT_P(X) (GET_CODE (X) != CONST_DOUBLE)
@@ -973,7 +1039,7 @@ enum reg_class {
    after execution of an instruction whose pattern is EXP.
    Do not alter them if the instruction would not alter the cc's.  */
 
-/* On the 6809, most the insns to store in an address register
+/* On the 6809, most of the insns to store in an address register
    fail to set the cc's.  However, in some cases these instructions
    can make it possibly invalid to use the saved cc's.  In those
    cases we clear out some or all of the saved cc's so they won't be used.  */
