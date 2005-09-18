@@ -161,10 +161,8 @@ void sw_start_button (void) __taskentry__
 		return;
 	}
 
-	if (!has_credits_p)
-	{
+	if (!has_credits_p ())
 		return;
-	}
 
 	if (!in_game)
 	{
