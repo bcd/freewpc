@@ -72,7 +72,7 @@ task_save::
 		jmp	_do_fatal
 	endif
 
-	jmp	task_dispatcher	; ok, find a new task to run
+	jmp	_task_dispatcher	; ok, find a new task to run
 
 
 task_restore::	; X = address of task block to restore
@@ -94,11 +94,13 @@ task_restore::	; X = address of task block to restore
 ;;;;	jsr	task_create
 ;;;;endp
 
-	; X = address of function
+ 
+ ; X = address of function
 proc(task_create)
 	requires(x)
 	returns(x)
 	uses(a,y,u)
+
 	pshs	d,u
 	tfr	x,u
 	jsr	_task_allocate
@@ -119,101 +121,100 @@ proc(task_create)
 endp
 
 
-proc(task_sleep_const)
-	definline(x,a)
-	bra	task_sleep1	
-endp
+;;;;; proc(task_sleep_const)
+;;;;; 	definline(x,a)
+;;;;; 	bra	task_sleep1	
+;;;;; endp
 
-proc(task_sleep)
-	uses(a,x)
-task_sleep1::
-	ldx	_task_current
-	cmpx	#0000
-	ifz
-		ldb	#ERR_IDLE_CANNOT_SLEEP
-		pshb
-		leas	-2,s
-		jmp	_do_fatal
-	endif
-	sta	TASK_OFF_DELAY,x
-	lda	_tick_count
-	sta	TASK_OFF_ASLEEP,x
-	lda	#TASK_BLOCKED
-	ora	TASK_OFF_STATE,x
-	sta	TASK_OFF_STATE,x
-	puls	a,x
-	jmp	task_save
-endp
-
-
-proc(task_sleepl_const)
-	definline(x,d)
-	jsr	task_sleepl
-endp
-
-proc(task_sleepl)
-	uses(d)
-	loop
-		tsta
-		ifz
-			tfr	b,a
-			jsr	task_sleep
-			return
-		endif
-		jsr	task_sleep
-		deca
-	endloop
-endp
+;;; proc(task_sleep)
+;;; 	uses(a,x)
+;;; task_sleep1::
+;;; 	ldx	_task_current
+;;; 	cmpx	#0000
+;;; 	ifz
+;;; 		ldb	#ERR_IDLE_CANNOT_SLEEP
+;;; 		pshb
+;;; 		leas	-2,s
+;;; 		jmp	_do_fatal
+;;; 	endif
+;;; 	sta	TASK_OFF_DELAY,x
+;;; 	lda	_tick_count
+;;; 	sta	TASK_OFF_ASLEEP,x
+;;; 	lda	#TASK_BLOCKED
+;;; 	ora	TASK_OFF_STATE,x
+;;; 	sta	TASK_OFF_STATE,x
+;;; 	puls	a,x
+;;; 	jmp	task_save
+;;; endp
 
 
-task_dispatcher::
-	;;; Pseudocode:
-	;;;  if time tick has advanced:
-	;;;     check to see if any tasks have expired
-	;;;     if so move them to the ready queue
-	;;;  move next ready task to current
-	;;;  restore context of current task, starting it
-	;;;  (does not return)
-
-	; Advance current pointer to next block
-dispatch_loop:
-	leax	TASK_SIZE,x
-dispatch_check:
-	cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
-	beq	task_list_end
-
-	; Skip empty slots
-	tst	TASK_OFF_STATE,x
-	beq	dispatch_loop
-
-	; Can this task be executed?
-	lda	#TASK_USED
-	cmpa	TASK_OFF_STATE,x
-	lbeq	task_restore			; Yes, restore it
-
-	; No, check to see if it is asleep
-	lda	#TASK_BLOCKED+TASK_USED
-	cmpa	TASK_OFF_STATE,x
-	bne	dispatch_loop			; No, continue scanning
-
-	lda	_tick_count
-	suba	TASK_OFF_ASLEEP,x		; Compute time spent asleep so far
-	cmpa	TASK_OFF_DELAY,x		; Compare against scheduled delay
-	blt	dispatch_loop			; Not ready yet, continue
-
-	lda	#TASK_BLOCKED
-	coma
-	anda	TASK_OFF_STATE,x
-	sta	TASK_OFF_STATE,x
-	lbra	task_restore
-
-task_list_end:
-	; Execute idle tasks on system stack
-	lds	#STACK_BASE
-	jsr	_switch_idle_task
-
-	; Start scanning from beginning of table again
-	ldx	#_task_buffer			; Reset to beginning of buffer
-	lbra	dispatch_check
+;;; proc(task_sleepl_const)
+;;; 	definline(x,d)
+;;; 	jsr	task_sleepl
+;;; endp
+;;; 
+;;; proc(task_sleepl)
+;;; 	uses(d)
+;;; 	loop
+;;; 		tsta
+;;; 		ifz
+;;; 			tfr	b,a
+;;; 			jsr	task_sleep
+;;; 			return
+;;; 		endif
+;;; 		jsr	task_sleep
+;;; 		deca
+;;; 	endloop
+;;; endp
 
 
+;;; task_dispatcher::
+;;; 	;;; Pseudocode:
+;;; 	;;;  if time tick has advanced:
+;;; 	;;;     check to see if any tasks have expired
+;;; 	;;;     if so move them to the ready queue
+;;; 	;;;  move next ready task to current
+;;; 	;;;  restore context of current task, starting it
+;;; 	;;;  (does not return)
+;;; 
+;;; 	; Advance current pointer to next block
+;;; dispatch_loop:
+;;; 	leax	TASK_SIZE,x
+;;; dispatch_check:
+;;; 	cmpx	#_task_buffer + (NUM_TASKS * TASK_SIZE)
+;;; 	beq	task_list_end
+;;; 
+;;; 	; Skip empty slots
+;;; 	tst	TASK_OFF_STATE,x
+;;; 	beq	dispatch_loop
+;;; 
+;;; 	; Can this task be executed?
+;;; 	lda	#TASK_USED
+;;; 	cmpa	TASK_OFF_STATE,x
+;;; 	lbeq	task_restore			; Yes, restore it
+;;; 
+;;; 	; No, check to see if it is asleep
+;;; 	lda	#TASK_BLOCKED+TASK_USED
+;;; 	cmpa	TASK_OFF_STATE,x
+;;; 	bne	dispatch_loop			; No, continue scanning
+;;; 
+;;; 	lda	_tick_count
+;;; 	suba	TASK_OFF_ASLEEP,x		; Compute time spent asleep so far
+;;; 	cmpa	TASK_OFF_DELAY,x		; Compare against scheduled delay
+;;; 	blt	dispatch_loop			; Not ready yet, continue
+;;; 
+;;; 	lda	#TASK_BLOCKED
+;;; 	coma
+;;; 	anda	TASK_OFF_STATE,x
+;;; 	sta	TASK_OFF_STATE,x
+;;; 	lbra	task_restore
+;;; 
+;;; task_list_end:
+;;; 	; Execute idle tasks on system stack
+;;; 	lds	#STACK_BASE
+;;; 	jsr	_switch_idle_task
+;;; 
+;;; ; Start scanning from beginning of table again
+;;; 	ldx	#_task_buffer			; Reset to beginning of buffer
+;;; 	lbra	dispatch_check
+;;; 

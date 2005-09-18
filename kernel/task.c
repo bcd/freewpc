@@ -82,37 +82,37 @@ task_t *task_allocate (void)
 	return 0;
 }
 
+#pragma naked
 void task_save (void)
 {
 #if 0
-	asm ("stu	_task_save_U");
-	asm ("stx	_task_save_X");
-	asm ("puls	u");
-	asm ("ldx	_task_current");
-	asm ("stu	%0" :: "o" (task_current->pc));
-	asm ("ldu	_task_save_U");
-	asm ("stu	%0" :: "o" (task_current->u));
-	asm ("ldu	_task_save_X");
-	asm ("stu	%0" :: "o" (task_current->x));
-	asm ("sta	%0" :: "o" (task_current->a));
-	asm ("stb	%0" :: "o" (task_current->b));
-	asm ("sty	%0" :: "o" (task_current->y));
-	asm ("leau	,s");
-	asm ("stu	TASK_OFF_S,x");
-
-	asm ("leay	TASK_OFF_STACK,x");
-	asm ("cmpy	TASK_OFF_S,x");
-	ifgt
-		jsr	c_sys_error(ERR_TASK_STACK_OVERFLOW)	
-	endif
+	asm __volatile__ ("stu	_task_save_U");
+	asm __volatile__ ("stx	_task_save_X");
+	asm __volatile__ ("puls	u");
+	asm __volatile__ ("ldx	_task_current");
+	asm __volatile__ ("stu	%0" :: "o" (task_current->pc));
+	asm __volatile__ ("ldu	_task_save_U");
+	asm __volatile__ ("stu	%0" :: "o" (task_current->u));
+	asm __volatile__ ("ldu	_task_save_X");
+	asm __volatile__ ("stu	%0" :: "o" (task_current->x));
+	asm __volatile__ ("sta	%0" :: "o" (task_current->a));
+	asm __volatile__ ("stb	%0" :: "o" (task_current->b));
+	asm __volatile__ ("sty	%0" :: "o" (task_current->y));
+	asm __volatile__ ("leau	,s");
+	/* asm __volatile__ ("stu	TASK_OFF_S,x"); */
+	__asm__ volatile ("jmp _task_dispatcher");
 #endif
-
-	asm ("jmp	task_dispatcher");
 }
 
 
+#pragma naked
+void task_restore (void)
+{
+}
+
 void task_yield (void)
 {
+	/* TODO : this could just be a jmp, right? */
 	__asm__ volatile ("jsr task_save");
 }
 
@@ -130,6 +130,23 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 #endif
 	return (tp);
 }
+
+#if 00000
+struct task_create_gid_args
+{
+	task_gid_t gid;
+	task_function_t fn;
+};
+task_t *task_create_gid_const (uint8_t unused)
+{
+	typedef struct task_create_gid_args *argptr;
+	volatile argptr *args = (argptr *)(&unused - 2);
+	argptr arg = *args;
+	task_t *tp = task_create_gid (arg->gid, arg->fn);
+	*args = arg + 3;
+	return tp;
+}
+#endif
 
 
 task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
@@ -210,7 +227,8 @@ void task_exit (void) __noreturn__
 #ifdef DEBUG_TASKS
 	task_count--;
 #endif
-	asm ("jmp task_dispatcher");
+
+	__asm__ volatile ("jmp _task_dispatcher");
 	for (;;);
 }
 
@@ -258,6 +276,52 @@ void task_set_arg (task_t *tp, uint16_t arg)
 	tp->arg = arg;
 }
 
+#pragma naked
+void task_dispatcher (void)
+{
+	extern __fastram__ uint8_t tick_count;
+	register task_t *tp asm ("x");
+
+	for (tp++;; tp++)
+	{
+		/* If at the end of the list, execute some special
+		 * system code before starting at the top again. */
+		if (tp == &task_buffer[NUM_TASKS])
+		{
+			/* Execute idle tasks on system stack */
+			set_stack_pointer (STACK_BASE);
+
+			/* Call idle tasks */
+			switch_idle_task ();
+
+			tp = &task_buffer[0];
+		}
+
+		if (tp->state == TASK_FREE)
+		{
+			continue;
+		}
+		else if (tp->state == TASK_USED)
+		{
+			asm volatile ("jmp task_restore");
+		}
+		else if (tp->state != TASK_USED+TASK_BLOCKED)
+		{
+			continue;
+		}
+		else 
+		{
+			register uint8_t ticks_elapsed = tick_count - tp->asleep;
+			if (ticks_elapsed < tp->delay)
+				continue;
+			else
+			{
+				tp->state &= ~TASK_BLOCKED;
+				asm volatile ("jmp task_restore");
+			}
+		}
+	}
+}
 
 void task_init (void)
 {
@@ -275,4 +339,5 @@ void task_init (void)
 	task_current->gid = GID_FIRST_TASK;
 	__asm__ volatile ("st%0 _task_dispatch_tick" :: "q" (tick_count));
 }
+
 
