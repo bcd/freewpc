@@ -1,13 +1,18 @@
 #
 # FreeWPC makefile
 #
+#
+# This Makefile can be used to build an entire, FreeWPC game ROM
+# from source code.
+#
+#
 
 #######################################################################
 ###	Configuration
 #######################################################################
 
 # Set this to the name of the machine for which you are targetting.
-MACHINE = tz
+MACHINE ?= tz
 
 # Set this to the path where the final ROM image should be installed
 TARGET_ROMPATH = /home/bcd/eptools/mameroms
@@ -36,6 +41,11 @@ TMPFILES += $(LINKCMD)
 # Preloaded macro files
 DEFMACROS = m6809.m4 syscall.m4
 
+TMPFILES = *.sp		# Intermediate sasm assmebler files
+TMPFILES += *.o		# Intermediate object files
+TMPFILES += *.rel		# ???
+# rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
+
 #######################################################################
 ###	Programs
 #######################################################################
@@ -63,7 +73,7 @@ GAME_ROM = freewpc.rom
 
 # Source files for the core OS
 AS_OS_OBJS = vector.o
-SAS_OS_OBJS = task1.o ### dmd1.o switch.o
+SAS_OS_OBJS = task1.o
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o sound.o coin.o service.o game.o test.o \
@@ -72,7 +82,7 @@ OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 
 FONT_OBJS = mono5x5.o
 
-OS_INCLUDES = include/freewpc.h wpc.h
+OS_INCLUDES = include/freewpc.h include/wpc.h
 
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
@@ -81,21 +91,20 @@ ASMFLAGS = -I. -Iinclude -D__SASM__
 ASMFLAGS += -N --save-temps
 
 # Default CFLAGS
-# TODO - remove -I. and put all includes into subdirectories
-CFLAGS = -I$(LIBC_DIR)/include -I. -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
+CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
 # Default optimizations.  These are the only optimizations that
 # are known to work OK; using -O2 is almost guaranteed to fail.
 CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls
 
+# This didn't work before, but now it does!
+# implies -fstrength-reduce and -frerun-cse-after-loop
+CFLAGS += -funroll-loops
+
 # Turn on compiler debug.  This will cause a bunch of compiler
 # debug files to get written out during every phase of the build.
 ifdef DEBUG_COMPILER
 CFLAGS += -da
-endif
-
-ifdef UNROLL_LOOPS  # this doesn't work!
-CFLAGS += -funroll-loops
 endif
 
 # Please, turn on all warnings!
@@ -178,10 +187,10 @@ $(BINFILES:.bin=.s19) : %.s19 : $(LD) $(OBJS) $(AS_OBJS) $(SAS_OBJS) $(LINKCMD)
 $(SAS_OBJS) : %.o : %.s $(AS) $(DEPS)
 	$(AS) $(ASMFLAGS) $<
 
-$(AS_OBJS) : %.o : %.s $(CC) $(DEPS)
+$(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
 	@echo Assembling $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
 
-$(OBJS) : %.o : %.c $(CC) $(DEPS)
+$(OBJS) : %.o : %.c $(REQUIRED) $(DEPS)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
 	@$(CC) -o $@ -c $(CFLAGS) $< 2>&1 | tee -a err
 
@@ -204,7 +213,7 @@ show_objs:
 	echo $(OBJS)
 
 gcc:
-	cd gccbuild && ./gccbuild
+	cd gcc-build && ./gccbuild
 
 clean:
 	@echo Cleaning top-level directory ... && rm -f *.sp *.o *.rel $(LINKCMD) *.s19 *.map *.bin *.rom *.lst *.s1 *.s2 *.s3 *.s4 *.S *.c.[0-9]*.* *.lst *.out *.m41 $(ERR)
