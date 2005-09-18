@@ -103,6 +103,7 @@ override_options ()
 {
 }
 
+/* External variables used */
 extern int reload_completed;   /* set in toplev.c */
 extern FILE *asm_out_file;
 
@@ -169,7 +170,8 @@ byte_reg_operand (op, mode)
 
 	if (reg_operand (op, mode)) {
 		if (reload_completed) {
-			if ((REGNO (op) == HARD_D_REGNUM) ||
+			if (
+				(REGNO (op) == HARD_D_REGNUM) ||
 				(REGNO (op) == HARD_A_REGNUM) ||
 				(REGNO (op) == HARD_B_REGNUM)) {
 				code = 1;
@@ -536,7 +538,10 @@ output_function_prologue ( file, size )
 	char reglist[30]; 
 
 	if (in_naked_function)
+	{
+		fprintf (file, ";;;;; prologue omitted for naked function\n");
 		return;
+	}
 
 	/* TODO : if function does not return, this can be optimized not to
 	* save away all the regs */
@@ -588,7 +593,11 @@ output_function_epilogue ( file, size )
     fprintf (file, ";;;EPILOGUE\n"); 
 
 	 if (in_naked_function)
-		 return;
+	 {
+		fprintf (file, ";;;;; epilogue omitted for naked function\n\n\n");
+		in_naked_function = 0;
+		return;
+	 }
 
 /*
  *   tmp_inh_def_pop = inhibit_defer_pop;
@@ -718,4 +727,19 @@ check_float_value (mode, d, overflow)
 	}
 	return overflow;
 }
+
+
+/* TBD */
+void
+m6809_gen_register_shift (operands)
+	rtx *operands;
+{
+    output_asm_insn ("lea%2 -1,%2		;decr shift count", operands);
+    output_asm_insn ("cmp%2 -1", operands);
+    output_asm_insn ("bmi .+9", operands);
+    output_asm_insn ("aslb", operands);
+    output_asm_insn ("rola", operands);
+    output_asm_insn ("bra .-9			   ;loop", operands);
+}
+
 
