@@ -74,25 +74,50 @@ static void do_coin (uint8_t slot)
 	task_exit ();
 }
 
-void sw_left_coin (void) __taskentry__
+void sw_left_coin_handler (void) __taskentry__
 {
 	do_coin (0);
 }
 
-void sw_center_coin (void) __taskentry__
+void sw_center_coin_handler (void) __taskentry__
 {
 	do_coin (1);
 }
 
-void sw_right_coin (void) __taskentry__
+void sw_right_coin_handler (void) __taskentry__
 {
 	do_coin (2);
 }
 
-void sw_fourth_coin (void) __taskentry__
+void sw_fourth_coin_handler (void) __taskentry__
 {
 	do_coin (3);
 }
+
+
+DECLARE_SWITCH_DRIVER (sw_left_coin)
+{
+	.fn = sw_left_coin_handler,
+};
+
+
+DECLARE_SWITCH_DRIVER (sw_center_coin)
+{
+	.fn = sw_center_coin_handler,
+};
+
+
+DECLARE_SWITCH_DRIVER (sw_right_coin)
+{
+	.fn = sw_right_coin_handler,
+};
+
+
+DECLARE_SWITCH_DRIVER (sw_fourth_coin)
+{
+	.fn = sw_fourth_coin_handler,
+};
+
 
 void coin_init (void)
 {

@@ -11,20 +11,6 @@ __fastram__ uint8_t tick_count;
 uint8_t sys_init_complete;
 
 
-#if 0
-/* Macro for toggling the runtime LED */
-#define wpc_led_toggle() \
-do {											\
-	asm (										\
-		"lda " STR(WPC_LEDS) "\n"		\
-		"eora #0x80\n"						\
-		"sta " STR(WPC_LEDS) "\n"		\
-		:										\
-		: 										\
-		: "a" 								\
-	);											\
-} while (0)
-#endif
 
 void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 {
@@ -61,7 +47,6 @@ void do_irq (void)
 	wpc_led_toggle ();
 	db_rtt ();
 	switch_rtt ();
-/////	asm ("jsr switch_rtt");
 	lamp_rtt ();
 	sol_rtt ();
 	triac_rtt ();
@@ -201,4 +186,8 @@ void do_reset (void) __noreturn__
 	task_exit ();
 }
 
+#pragma section ("junk")
+void different_section (void)
+{
+}
 

@@ -1,66 +1,379 @@
+/**
+ * kernel/switches.c
+ *
+ * (C) Copyright 2005 by Brian Dominy.
+ */
 
 #include <freewpc.h>
 #include <sys/irq.h>
 
+/* Define shorthand names for the various arrays of switch bits */
 #define switch_raw_bits			switch_bits[AR_RAW]
 #define switch_changed_bits	switch_bits[AR_CHANGED]
 #define switch_pending_bits	switch_bits[AR_PENDING]
 #define switch_queued_bits		switch_bits[AR_QUEUED]
 
+/** The global array of switch bits, all in one place */
 uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
-extern void sw_left_coin (void);
-extern void sw_right_coin (void);
-extern void sw_center_coin (void);
-extern void sw_fourth_coin (void);
-extern void sw_escape_button (void);
-extern void sw_down_button (void);
-extern void sw_up_button (void);
-extern void sw_enter_button (void);
+extern void sw_left_coin_handler (void);
+extern void sw_right_coin_handler (void);
+extern void sw_center_coin_handler (void);
+extern void sw_fourth_coin_handler (void);
+extern void sw_escape_button_handler  (void);
+extern void sw_down_button_handler  (void);
+extern void sw_up_button_handler  (void);
+extern void sw_enter_button_handler  (void);
 
-extern void sw_start_button (void);
-extern void sw_trough (void);
-extern void sw_outhole (void);
+extern void sw_start_button_handler  (void);
+extern void sw_trough_handler  (void);
+extern void sw_outhole_handler  (void);
 
-extern void sw_rocket (void);
-extern void sw_slot (void);
-extern void sw_lock (void);
+extern void sw_rocket_handler  (void);
+extern void sw_slot_handler  (void);
+extern void sw_lock_handler  (void);
 
-extern void sw_tilt (void);
-extern void sw_slam_tilt (void);
+extern void sw_tilt_handler  (void);
+extern void sw_slam_tilt_handler  (void);
 
-static const switch_info_t switch_info[NUM_SWITCHES] = {
-	[SW_LEFT_COIN] = { .fn = sw_left_coin, },
-	[SW_CENTER_COIN] = { .fn = sw_center_coin, },
-	[SW_RIGHT_COIN] = { .fn = sw_right_coin, },
-	[SW_FOURTH_COIN] = { .fn = sw_fourth_coin, },
-	[SW_ESCAPE] = { .fn = sw_escape_button, },
-	[SW_DOWN] = { .fn = sw_down_button, },
-	[SW_UP] = { .fn = sw_up_button, },
-	[SW_ENTER] = { .fn = sw_enter_button, },
 
-	[SW_START_BUTTON] = { .fn = sw_start_button },
-	[SW_TILT] = { .fn = sw_tilt },
-	[SW_RIGHT_TROUGH] = { .fn = sw_trough },
-	[SW_CENTER_TROUGH] = { .fn = sw_trough },
-	[SW_LEFT_TROUGH] = { .fn = sw_trough },
-	[SW_OUTHOLE] = { .fn = sw_outhole },
+/*
+ * Entry for unused switches.
+ */
 
-	[SW_SLAM_TILT] = { .fn = sw_slam_tilt },
+void sw_unused_handler (void)
+{
+}
 
-	[SW_ROCKET] = { .fn = sw_rocket },
+const switch_info_t sw_unused =
+{
+	.fn = sw_unused_handler,
+	.flags = 0,
+};
 
-	[SW_SLOT] = { .fn = sw_slot },
-	[SW_LOCK_CENTER] = { .fn = sw_lock },
-	[SW_LOCK_UPPER] = { .fn = sw_lock },
-	[SW_LOCK_LOWER] = { .fn = sw_lock },
+/*
+ * If any switch entries are still undefined, then fill
+ * their slots with the "unused" switch.
+ */
+#ifndef MACHINE_SW01
+#define MACHINE_SW01 sw_unused
+#endif
+#ifndef MACHINE_SW02
+#define MACHINE_SW02 sw_unused
+#endif
+#ifndef MACHINE_SW03
+#define MACHINE_SW03 sw_unused
+#endif
+#ifndef MACHINE_SW04
+#define MACHINE_SW04 sw_unused
+#endif
+#ifndef MACHINE_SW05
+#define MACHINE_SW05 sw_unused
+#endif
+#ifndef MACHINE_SW06
+#define MACHINE_SW06 sw_unused
+#endif
+#ifndef MACHINE_SW07
+#define MACHINE_SW07 sw_unused
+#endif
+#ifndef MACHINE_SW08
+#define MACHINE_SW08 sw_unused
+#endif
+
+#ifndef MACHINE_SW11
+#define MACHINE_SW11 sw_unused
+#endif
+#ifndef MACHINE_SW12
+#define MACHINE_SW12 sw_unused
+#endif
+#ifndef MACHINE_SW13
+#define MACHINE_SW13 sw_unused
+#endif
+#ifndef MACHINE_SW14
+#define MACHINE_SW14 sw_unused
+#endif
+#ifndef MACHINE_SW15
+#define MACHINE_SW15 sw_unused
+#endif
+#ifndef MACHINE_SW16
+#define MACHINE_SW16 sw_unused
+#endif
+#ifndef MACHINE_SW17
+#define MACHINE_SW17 sw_unused
+#endif
+#ifndef MACHINE_SW18
+#define MACHINE_SW18 sw_unused
+#endif
+
+#ifndef MACHINE_SW21
+#define MACHINE_SW21 sw_unused
+#endif
+#ifndef MACHINE_SW22
+#define MACHINE_SW22 sw_unused
+#endif
+#ifndef MACHINE_SW23
+#define MACHINE_SW23 sw_unused
+#endif
+#ifndef MACHINE_SW24
+#define MACHINE_SW24 sw_unused
+#endif
+#ifndef MACHINE_SW25
+#define MACHINE_SW25 sw_unused
+#endif
+#ifndef MACHINE_SW26
+#define MACHINE_SW26 sw_unused
+#endif
+#ifndef MACHINE_SW27
+#define MACHINE_SW27 sw_unused
+#endif
+#ifndef MACHINE_SW28
+#define MACHINE_SW28 sw_unused
+#endif
+
+#ifndef MACHINE_SW31
+#define MACHINE_SW31 sw_unused
+#endif
+#ifndef MACHINE_SW32
+#define MACHINE_SW32 sw_unused
+#endif
+#ifndef MACHINE_SW33
+#define MACHINE_SW33 sw_unused
+#endif
+#ifndef MACHINE_SW34
+#define MACHINE_SW34 sw_unused
+#endif
+#ifndef MACHINE_SW35
+#define MACHINE_SW35 sw_unused
+#endif
+#ifndef MACHINE_SW36
+#define MACHINE_SW36 sw_unused
+#endif
+#ifndef MACHINE_SW37
+#define MACHINE_SW37 sw_unused
+#endif
+#ifndef MACHINE_SW38
+#define MACHINE_SW38 sw_unused
+#endif
+#ifndef MACHINE_SW41
+#define MACHINE_SW41 sw_unused
+#endif
+#ifndef MACHINE_SW42
+#define MACHINE_SW42 sw_unused
+#endif
+#ifndef MACHINE_SW43
+#define MACHINE_SW43 sw_unused
+#endif
+#ifndef MACHINE_SW44
+#define MACHINE_SW44 sw_unused
+#endif
+#ifndef MACHINE_SW45
+#define MACHINE_SW45 sw_unused
+#endif
+#ifndef MACHINE_SW46
+#define MACHINE_SW46 sw_unused
+#endif
+#ifndef MACHINE_SW47
+#define MACHINE_SW47 sw_unused
+#endif
+#ifndef MACHINE_SW48
+#define MACHINE_SW48 sw_unused
+#endif
+
+#ifndef MACHINE_SW51
+#define MACHINE_SW51 sw_unused
+#endif
+#ifndef MACHINE_SW52
+#define MACHINE_SW52 sw_unused
+#endif
+#ifndef MACHINE_SW53
+#define MACHINE_SW53 sw_unused
+#endif
+#ifndef MACHINE_SW54
+#define MACHINE_SW54 sw_unused
+#endif
+#ifndef MACHINE_SW55
+#define MACHINE_SW55 sw_unused
+#endif
+#ifndef MACHINE_SW56
+#define MACHINE_SW56 sw_unused
+#endif
+#ifndef MACHINE_SW57
+#define MACHINE_SW57 sw_unused
+#endif
+#ifndef MACHINE_SW58
+#define MACHINE_SW58 sw_unused
+#endif
+#ifndef MACHINE_SW61
+#define MACHINE_SW61 sw_unused
+#endif
+#ifndef MACHINE_SW62
+#define MACHINE_SW62 sw_unused
+#endif
+#ifndef MACHINE_SW63
+#define MACHINE_SW63 sw_unused
+#endif
+#ifndef MACHINE_SW64
+#define MACHINE_SW64 sw_unused
+#endif
+#ifndef MACHINE_SW65
+#define MACHINE_SW65 sw_unused
+#endif
+#ifndef MACHINE_SW66
+#define MACHINE_SW66 sw_unused
+#endif
+#ifndef MACHINE_SW67
+#define MACHINE_SW67 sw_unused
+#endif
+#ifndef MACHINE_SW68
+#define MACHINE_SW68 sw_unused
+#endif
+
+#ifndef MACHINE_SW71
+#define MACHINE_SW71 sw_unused
+#endif
+#ifndef MACHINE_SW72
+#define MACHINE_SW72 sw_unused
+#endif
+#ifndef MACHINE_SW73
+#define MACHINE_SW73 sw_unused
+#endif
+#ifndef MACHINE_SW74
+#define MACHINE_SW74 sw_unused
+#endif
+#ifndef MACHINE_SW75
+#define MACHINE_SW75 sw_unused
+#endif
+#ifndef MACHINE_SW76
+#define MACHINE_SW76 sw_unused
+#endif
+#ifndef MACHINE_SW77
+#define MACHINE_SW77 sw_unused
+#endif
+#ifndef MACHINE_SW78
+#define MACHINE_SW78 sw_unused
+#endif
+#ifndef MACHINE_SW81
+#define MACHINE_SW81 sw_unused
+#endif
+#ifndef MACHINE_SW82
+#define MACHINE_SW82 sw_unused
+#endif
+#ifndef MACHINE_SW83
+#define MACHINE_SW83 sw_unused
+#endif
+#ifndef MACHINE_SW84
+#define MACHINE_SW84 sw_unused
+#endif
+#ifndef MACHINE_SW85
+#define MACHINE_SW85 sw_unused
+#endif
+#ifndef MACHINE_SW86
+#define MACHINE_SW86 sw_unused
+#endif
+#ifndef MACHINE_SW87
+#define MACHINE_SW87 sw_unused
+#endif
+#ifndef MACHINE_SW88
+#define MACHINE_SW88 sw_unused
+#endif
+
+/* Declare external references for each of the switch
+ * table entries.
+ */
+extern const switch_info_t 
+	MACHINE_SW01, MACHINE_SW02, MACHINE_SW03, MACHINE_SW04,
+	MACHINE_SW05, MACHINE_SW06, MACHINE_SW07, MACHINE_SW08,
+
+	MACHINE_SW11, MACHINE_SW12, MACHINE_SW13, MACHINE_SW14,
+	MACHINE_SW15, MACHINE_SW16, MACHINE_SW17, MACHINE_SW18,
+
+	MACHINE_SW21, MACHINE_SW22, MACHINE_SW23, MACHINE_SW24,
+	MACHINE_SW25, MACHINE_SW26, MACHINE_SW27, MACHINE_SW28,
+
+	MACHINE_SW31, MACHINE_SW32, MACHINE_SW33, MACHINE_SW34,
+	MACHINE_SW35, MACHINE_SW36, MACHINE_SW37, MACHINE_SW38,
+
+	MACHINE_SW41, MACHINE_SW42, MACHINE_SW43, MACHINE_SW44,
+	MACHINE_SW45, MACHINE_SW46, MACHINE_SW47, MACHINE_SW48,
+
+	MACHINE_SW51, MACHINE_SW52, MACHINE_SW53, MACHINE_SW54,
+	MACHINE_SW55, MACHINE_SW56, MACHINE_SW57, MACHINE_SW58,
+
+	MACHINE_SW61, MACHINE_SW62, MACHINE_SW63, MACHINE_SW64,
+	MACHINE_SW65, MACHINE_SW66, MACHINE_SW67, MACHINE_SW68,
+
+	MACHINE_SW71, MACHINE_SW72, MACHINE_SW73, MACHINE_SW74,
+	MACHINE_SW75, MACHINE_SW76, MACHINE_SW77, MACHINE_SW78,
+
+	MACHINE_SW81, MACHINE_SW82, MACHINE_SW83, MACHINE_SW84,
+	MACHINE_SW85, MACHINE_SW86, MACHINE_SW87, MACHINE_SW88;
+
+
+static const switch_info_t *switch_table[NUM_SWITCHES] = {
+	&MACHINE_SW01, &MACHINE_SW02, &MACHINE_SW03, &MACHINE_SW04,
+	&MACHINE_SW05, &MACHINE_SW06, &MACHINE_SW07, &MACHINE_SW08,
+
+	&MACHINE_SW11, &MACHINE_SW12, &MACHINE_SW13, &MACHINE_SW14,
+	&MACHINE_SW15, &MACHINE_SW16, &MACHINE_SW17, &MACHINE_SW18,
+
+	&MACHINE_SW21, &MACHINE_SW22, &MACHINE_SW23, &MACHINE_SW24,
+	&MACHINE_SW25, &MACHINE_SW26, &MACHINE_SW27, &MACHINE_SW28,
+
+	&MACHINE_SW31, &MACHINE_SW32, &MACHINE_SW33, &MACHINE_SW34,
+	&MACHINE_SW35, &MACHINE_SW36, &MACHINE_SW37, &MACHINE_SW38,
+
+	&MACHINE_SW41, &MACHINE_SW42, &MACHINE_SW43, &MACHINE_SW44,
+	&MACHINE_SW45, &MACHINE_SW46, &MACHINE_SW47, &MACHINE_SW48,
+
+	&MACHINE_SW51, &MACHINE_SW52, &MACHINE_SW53, &MACHINE_SW54,
+	&MACHINE_SW55, &MACHINE_SW56, &MACHINE_SW57, &MACHINE_SW58,
+
+	&MACHINE_SW61, &MACHINE_SW62, &MACHINE_SW63, &MACHINE_SW64,
+	&MACHINE_SW65, &MACHINE_SW66, &MACHINE_SW67, &MACHINE_SW68,
+
+	&MACHINE_SW71, &MACHINE_SW72, &MACHINE_SW73, &MACHINE_SW74,
+	&MACHINE_SW75, &MACHINE_SW76, &MACHINE_SW77, &MACHINE_SW78,
+
+	&MACHINE_SW81, &MACHINE_SW82, &MACHINE_SW83, &MACHINE_SW84,
+	&MACHINE_SW85, &MACHINE_SW86, &MACHINE_SW87, &MACHINE_SW88,
+
 };
 
 
-extern inline switch_info_t *switch_lookup (uint8_t sw)
+#if 00000
+static const switch_info_t switch_info[NUM_SWITCHES] = {
+	[SW_LEFT_COIN] = { .fn = sw_left_coin_handler, },
+	[SW_CENTER_COIN] = { .fn = sw_center_coin_handler, },
+	[SW_RIGHT_COIN] = { .fn = sw_right_coin_handler, },
+	[SW_FOURTH_COIN] = { .fn = sw_fourth_coin_handler, },
+	[SW_ESCAPE] = { .fn = sw_escape_button_handler, },
+	[SW_DOWN] = { .fn = sw_down_button_handler, },
+	[SW_UP] = { .fn = sw_up_button_handler, },
+	[SW_ENTER] = { .fn = sw_enter_button_handler, },
+
+	[SW_START_BUTTON] = { .fn = sw_start_button_handler },
+	[SW_TILT] = { .fn = sw_tilt_handler },
+	[SW_RIGHT_TROUGH] = { .fn = sw_trough_handler },
+	[SW_CENTER_TROUGH] = { .fn = sw_trough_handler },
+	[SW_LEFT_TROUGH] = { .fn = sw_trough_handler },
+	[SW_OUTHOLE] = { .fn = sw_outhole_handler },
+
+	[SW_SLAM_TILT] = { .fn = sw_slam_tilt_handler },
+
+	[SW_ROCKET] = { .fn = sw_rocket_handler },
+
+	[SW_SLOT] = { .fn = sw_slot_handler },
+	[SW_LOCK_CENTER] = { .fn = sw_lock_handler },
+	[SW_LOCK_UPPER] = { .fn = sw_lock_handler },
+	[SW_LOCK_LOWER] = { .fn = sw_lock_handler },
+};
+#endif
+
+extern inline const switch_info_t *switch_lookup (uint8_t sw)
 {
-	return (switch_info_t *)((uint8_t *)switch_info + (sw << 2));
+	return switch_table[sw];
+	/// return (switch_info_t *)((uint8_t *)switch_info + (sw << 2));
 }
 
 

@@ -28,13 +28,22 @@ void slam_tilt_deff (void) __taskentry__
 }
 
 
-void sw_tilt (void)
+void sw_tilt_handler (void)
 {
 }
 
 
-void sw_slam_tilt (void)
+void sw_slam_tilt_handler (void)
 {
 }
 
+DECLARE_SWITCH_DRIVER (sw_tilt)
+{
+	.fn = sw_tilt_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_slam_tilt)
+{
+	.fn = sw_slam_tilt_handler,
+};
 

@@ -4,6 +4,58 @@
 static uint8_t font_space[32] = { 0, };
 
 
+extern inline uint8_t lsrqi3 (uint8_t data, uint8_t count)
+{
+	switch (count)
+	{
+		default:
+		case 7:
+			data >>= 1;
+		case 6:
+			data >>= 1;
+		case 5:
+			data >>= 1;
+		case 4:
+			data >>= 1;
+		case 3:
+			data >>= 1;
+		case 2:
+			data >>= 1;
+		case 1:
+			data >>= 1;
+		case 0:
+			break;
+	}
+	return (data);
+}
+
+
+extern inline uint8_t aslqi3 (uint8_t data, uint8_t count)
+{
+	switch (count)
+	{
+		default:
+		case 7:
+			data <<= 1;
+		case 6:
+			data <<= 1;
+		case 5:
+			data <<= 1;
+		case 4:
+			data <<= 1;
+		case 3:
+			data <<= 1;
+		case 2:
+			data <<= 1;
+		case 1:
+			data <<= 1;
+		case 0:
+			break;
+	}
+	return (data);
+}
+
+
 uint8_t *font_lookup (const font_t *font, char c)
 {
 	uint8_t *entry;
@@ -28,7 +80,7 @@ uint8_t *font_lookup (const font_t *font, char c)
 	{
 		return NULL;
 	}
-	return entry + index * 5; // font->height;
+	return entry + index * font->height;
 }
 
 
@@ -77,7 +129,9 @@ void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s
 				db_putc ('\n');
 #endif
 				dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
+				// dmd_base[i * DMD_BYTE_WIDTH + xb] = aslqi3 (*data, xr);
 				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
+				// dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = lsrqi3 (*data, (8 - xr));
 				data++;
 			}
 		}

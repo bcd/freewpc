@@ -2,19 +2,19 @@
 #include <freewpc.h>
 
 
-void sw_escape_button (void) __taskentry__
+void sw_escape_button_handler (void) __taskentry__
 {
 	extern void test_escape_button (void);
 
-	test_escape_button ();
-
 	if (!in_test)
 		add_credit ();
+	else
+		test_escape_button ();
 
 	task_exit ();
 }
 
-void sw_down_button (void) __taskentry__
+void sw_down_button_handler (void) __taskentry__
 {
 	extern void test_down_button (void);
 
@@ -26,7 +26,7 @@ void sw_down_button (void) __taskentry__
 	task_exit ();
 }
 
-void sw_up_button (void) __taskentry__
+void sw_up_button_handler (void) __taskentry__
 {
 	extern void test_up_button (void);
 
@@ -38,11 +38,32 @@ void sw_up_button (void) __taskentry__
 	task_exit ();
 }
 
-void sw_enter_button (void) __taskentry__
+void sw_enter_button_handler (void) __taskentry__
 {
 	extern void test_enter_button (void);
 
 	test_enter_button ();
 	task_exit ();
 }
+
+
+DECLARE_SWITCH_DRIVER (sw_escape_button)
+{
+	.fn = sw_escape_button_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_down_button)
+{
+	.fn = sw_down_button_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_up_button)
+{
+	.fn = sw_up_button_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_enter_button)
+{
+	.fn = sw_enter_button_handler,
+};
 

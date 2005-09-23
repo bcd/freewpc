@@ -3,10 +3,10 @@
 
 #if (MACHINE_DMD == 1)
 
-dmd_pagenum_t dmd_free_page, 
-	dmd_low_page, 
-	dmd_high_page, 
-	dmd_visible_page;
+dmd_pagenum_t dmd_free_page;
+dmd_pagenum_t dmd_low_page;
+dmd_pagenum_t dmd_high_page;
+dmd_pagenum_t dmd_visible_page;
 
 
 void dmd_init (void)
@@ -17,7 +17,6 @@ void dmd_init (void)
 	dmd_visible_page = wpc_dmd_visible_page = 0;
 	dmd_free_page = 1;
 }
-
 
 void dmd_rtt (void)
 {

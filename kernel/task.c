@@ -10,7 +10,8 @@
  * parent/child relationship exists among the tasks.
  *
  * Most of the module is written in portable C.  The task structure
- * and the register save/restore routines are written in assembler.
+ * and the register save/restore routines are written in lots of
+ * assembler.
  *
  */
 
@@ -85,35 +86,105 @@ task_t *task_allocate (void)
 #pragma naked
 void task_save (void)
 {
-#if 0
-	asm __volatile__ ("stu	_task_save_U");
-	asm __volatile__ ("stx	_task_save_X");
-	asm __volatile__ ("puls	u");
-	asm __volatile__ ("ldx	_task_current");
-	asm __volatile__ ("stu	%0" :: "o" (task_current->pc));
-	asm __volatile__ ("ldu	_task_save_U");
-	asm __volatile__ ("stu	%0" :: "o" (task_current->u));
-	asm __volatile__ ("ldu	_task_save_X");
-	asm __volatile__ ("stu	%0" :: "o" (task_current->x));
-	asm __volatile__ ("sta	%0" :: "o" (task_current->a));
-	asm __volatile__ ("stb	%0" :: "o" (task_current->b));
-	asm __volatile__ ("sty	%0" :: "o" (task_current->y));
-	asm __volatile__ ("leau	,s");
-	/* asm __volatile__ ("stu	TASK_OFF_S,x"); */
+	register uint16_t __u asm ("u");
+	register task_t * __x asm ("x");
+
+	/* Save U, X immediately to memory to free up some regs for
+	 * the rest of the function */
+	task_save_U = (uint16_t)__u;
+	task_save_X = (uint16_t)__x;
+
+	/* Get the PC by popping it off the stack */
+	__asm__ volatile ("puls\tu");
+
+	/* Force load of the current task structure into X */
+	__x = task_current;
+
+	/* Save PC (in U) */
+	__x->pc = __u;
+
+	/* Save U (in task_save_U).  Use U to hold the data. */
+	__x->u = __u = task_save_U;
+
+	/* Save X (in task_save_X).  Use U to hold the data. */
+	__x->x = __u = task_save_X;
+
+	/* Save D and Y, already in registers */
+	__asm__ volatile ("sta	%0" :: "m" (__x->a));
+	__asm__ volatile ("stb	%0" :: "m" (__x->b));
+	__asm__ volatile ("sty	%0" :: "m" (__x->y));
+
+	/* Save current stack pointer */
+	__asm__ volatile ("leau\t,s");
+	__x->s = __u;
+
+	/* TODO : add test for stack overflow */
+
+	/* Jump to the task dispatcher */
 	__asm__ volatile ("jmp _task_dispatcher");
-#endif
 }
 
 
 #pragma naked
 void task_restore (void)
 {
+	register task_t * __x asm ("x");
+	register uint16_t __u asm ("u");
+
+	task_current = __x;
+	set_stack_pointer (__x->s);
+
+	__asm__ volatile ("ldu	%0" :: "m" (__x->pc));
+	__asm__ volatile ("pshs\tu");
+
+	__asm__ volatile ("ldy	%0" :: "m" (__x->y));
+	__asm__ volatile ("lda	%0" :: "m" (__x->a));
+	__asm__ volatile ("ldb	%0" :: "m" (__x->b));
+	__asm__ volatile ("ldu	%0" :: "m" (__x->u));
+
+	__x->delay = 0;
+
+	__asm__ volatile ("ldx	%0" :: "m" (__x->x));
+
+	__asm__ volatile ("rts");
 }
+
+
+#pragma naked
+void task_create (void)
+{
+	register task_t *tp asm ("x");
+
+	__asm__ volatile ("pshs\td,u,y");
+	
+	__asm__ volatile ("pshs\td,u");
+	__asm__ volatile ("tfr\tx,u");
+
+	tp = task_allocate ();
+
+	__asm__ volatile ("stu	%0" :: "m" (tp->pc));
+
+	__asm__ volatile ("puls\td,u");
+
+	__asm__ volatile ("sta	%0" :: "m" (tp->a));
+	__asm__ volatile ("stb	%0" :: "m" (tp->b));
+	__asm__ volatile ("sty	%0" :: "m" (tp->y));
+	__asm__ volatile ("stu	%0" :: "m" (tp->u));
+
+	tp->gid = 0;
+	tp->arg = 0;
+	*(uint16_t *)&tp->stack = 0xEEEE;
+
+	tp->s = (uint16_t)(tp->stack + TASK_STACK_SIZE - 1);
+	
+	__asm__ volatile ("puls\td,u,y,pc");
+}
+
 
 void task_yield (void)
 {
 	/* TODO : this could just be a jmp, right? */
-	__asm__ volatile ("jsr task_save");
+	__asm__ volatile ("jsr _task_save");
 }
 
 
@@ -122,7 +193,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
-	__asm__ volatile ("jsr task_create\n" : "=r" (tp) : "0" (fn_x));
+	__asm__ volatile ("jsr _task_create\n" : "=r" (tp) : "0" (fn_x));
 	tp->gid = gid;
 	tp->arg = 0;
 #ifdef DEBUG_TASKS
@@ -206,7 +277,7 @@ void task_sleep (task_ticks_t ticks)
 	task_current->asleep = tick_count;
 	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
-	__asm__ volatile ("jsr task_save");
+	__asm__ volatile ("jsr _task_save");
 }
 
 
@@ -303,7 +374,7 @@ void task_dispatcher (void)
 		}
 		else if (tp->state == TASK_USED)
 		{
-			asm volatile ("jmp task_restore");
+			asm volatile ("jmp _task_restore");
 		}
 		else if (tp->state != TASK_USED+TASK_BLOCKED)
 		{
@@ -317,7 +388,7 @@ void task_dispatcher (void)
 			else
 			{
 				tp->state &= ~TASK_BLOCKED;
-				asm volatile ("jmp task_restore");
+				asm volatile ("jmp _task_restore");
 			}
 		}
 	}

@@ -151,7 +151,7 @@ bool verify_start_ok (void)
 	// check game not already in progress
 }
 
-void sw_start_button (void) __taskentry__
+void sw_start_button_handler (void) __taskentry__
 {
 	extern void test_start_button (void);
 
@@ -197,10 +197,24 @@ void sw_start_button (void) __taskentry__
 	task_exit ();
 }
 
-void sw_buy_in_button (void) __taskentry__
+void sw_buy_in_button_handler (void) __taskentry__
 {
 	task_exit ();
 }
+
+/*
+ * Switches declared by the game module:
+ * start & buy-in buttons
+ */
+DECLARE_SWITCH_DRIVER (sw_start_button)
+{
+	.fn = sw_start_button_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_buyin_button)
+{
+	.fn = sw_buy_in_button_handler,
+};
 
 
 void game_init (void)
