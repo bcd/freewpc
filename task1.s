@@ -45,48 +45,48 @@
 
 .area sysrom
 
-lblreset
-task_yield::
-task_save::
-	stu	_task_save_U		/* save U first since it's needed as a temp */
-	stx	_task_save_X		; same goes for X
-	puls	u					; U = PC
-	ldx	_task_current	; get pointer to current task structure
-	stu	TASK_OFF_PC,x	; save PC
-	ldu	_task_save_U
-	stu	TASK_OFF_U,x	; save U
-	ldu	_task_save_X
-	stu	TASK_OFF_X,x	; save X
-	sta	TASK_OFF_A,x	; save A
-	stb	TASK_OFF_B,x	; save B
-	sty	TASK_OFF_Y,x	; save Y
-	leau	,s					; get current stack pointer
-	stu	TASK_OFF_S,x	; save S
+;;; lblreset
+;;; task_yield::
+;;; task_save::
+;;; 	stu	_task_save_U		/* save U first since it's needed as a temp */
+;;; 	stx	_task_save_X		; same goes for X
+;;; 	puls	u					; U = PC
+;;; 	ldx	_task_current	; get pointer to current task structure
+;;; 	stu	TASK_OFF_PC,x	; save PC
+;;; 	ldu	_task_save_U
+;;; 	stu	TASK_OFF_U,x	; save U
+;;; 	ldu	_task_save_X
+;;; 	stu	TASK_OFF_X,x	; save X
+;;; 	sta	TASK_OFF_A,x	; save A
+;;; 	stb	TASK_OFF_B,x	; save B
+;;; 	sty	TASK_OFF_Y,x	; save Y
+;;; 	leau	,s					; get current stack pointer
+;;; 	stu	TASK_OFF_S,x	; save S
+;;; 
+;;; 	leay	TASK_OFF_STACK,x	; get lowest valid stack address
+;;; 	cmpy	TASK_OFF_S,x		; compare with current pointer
+;;; 	ifgt
+;;; 		ldb	#ERR_TASK_STACK_OVERFLOW
+;;; 		pshb
+;;; 		leas	-2,s
+;;; 		jmp	_do_fatal
+;;; 	endif
+;;; 
+;;; 	jmp	_task_dispatcher	; ok, find a new task to run
+;;; 
 
-	leay	TASK_OFF_STACK,x	; get lowest valid stack address
-	cmpy	TASK_OFF_S,x		; compare with current pointer
-	ifgt
-		ldb	#ERR_TASK_STACK_OVERFLOW
-		pshb
-		leas	-2,s
-		jmp	_do_fatal
-	endif
-
-	jmp	_task_dispatcher	; ok, find a new task to run
-
-
-task_restore::	; X = address of task block to restore
-	stx	_task_current
-	lds	TASK_OFF_S,x
-	ldu	TASK_OFF_PC,x
-	pshs	u
-	ldy	TASK_OFF_Y,x
-	lda	TASK_OFF_A,x
-	ldb	TASK_OFF_B,x
-	ldu	TASK_OFF_U,x
-	clr	TASK_OFF_DELAY,x
-	ldx	TASK_OFF_X,x
-	puls	pc
+;;; task_restore::	; X = address of task block to restore
+;;; 	stx	_task_current
+;;; 	lds	TASK_OFF_S,x
+;;; 	ldu	TASK_OFF_PC,x
+;;; 	pshs	u
+;;; 	ldy	TASK_OFF_Y,x
+;;; 	lda	TASK_OFF_A,x
+;;; 	ldb	TASK_OFF_B,x
+;;; 	ldu	TASK_OFF_U,x
+;;; 	clr	TASK_OFF_DELAY,x
+;;; 	ldx	TASK_OFF_X,x
+;;; 	puls	pc
 
 
 ;;;;proc(task_create_const)
@@ -95,30 +95,30 @@ task_restore::	; X = address of task block to restore
 ;;;;endp
 
  
- ; X = address of function
-proc(task_create)
-	requires(x)
-	returns(x)
-	uses(a,y,u)
-
-	pshs	d,u
-	tfr	x,u
-	jsr	_task_allocate
-	tfr	d,x
-	stu	TASK_OFF_PC,x
-	puls	d,u
-	clr	TASK_OFF_GID,x
-	clr	TASK_OFF_ARG,x
-	clr	TASK_OFF_ARG+1,x
-	sta	TASK_OFF_A,x
-	stb	TASK_OFF_B,x
-	sty	TASK_OFF_Y,x
-	stu	TASK_OFF_U,x
-	ldy	#0xEEEE
-	sty	TASK_OFF_STACK,x
-	leay	TASK_OFF_STACK+TASK_STACK_SIZE-1,x
-	sty	TASK_OFF_S,x
-endp
+;;; ; X = address of function
+;;;proc(task_create)
+;;;	requires(x)
+;;;	returns(x)
+;;;	uses(a,y,u)
+;;;
+;;;	pshs	d,u
+;;;	tfr	x,u
+;;;	jsr	_task_allocate
+;;;	tfr	d,x
+;;;	stu	TASK_OFF_PC,x
+;;;	puls	d,u
+;;;	clr	TASK_OFF_GID,x
+;;;	clr	TASK_OFF_ARG,x
+;;;	clr	TASK_OFF_ARG+1,x
+;;;	sta	TASK_OFF_A,x
+;;;	stb	TASK_OFF_B,x
+;;;	sty	TASK_OFF_Y,x
+;;;	stu	TASK_OFF_U,x
+;;;	ldy	#0xEEEE
+;;;	sty	TASK_OFF_STACK,x
+;;;	leay	TASK_OFF_STACK+TASK_STACK_SIZE-1,x
+;;;	sty	TASK_OFF_S,x
+;;;endp
 
 
 ;;;;; proc(task_sleep_const)
