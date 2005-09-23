@@ -23,10 +23,10 @@ void add_player (void);
 void start_game (void);
 void stop_game (void);
 bool verify_start_ok (void);
-void sw_start_button (void) __taskentry__;
-void sw_buy_in_button (void) __taskentry__;
-void sw_tilt (void) __taskentry__;
-void sw_slam_tilt (void) __taskentry__;
+void sw_start_button_handler (void) __taskentry__;
+void sw_buy_in_button_handler (void) __taskentry__;
+void sw_tilt_handler (void) __taskentry__;
+void sw_slam_tilt_handler (void) __taskentry__;
 void game_init (void);
 
 

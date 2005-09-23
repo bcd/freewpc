@@ -5,6 +5,7 @@
 
 typedef struct machine_hooks
 {
+	void (*init) (void);
 	void (*start_game) (void);
 	void (*add_player) (void);
 } machine_hooks_t;

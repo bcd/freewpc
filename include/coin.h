@@ -8,10 +8,10 @@ void add_credit (void);
 bool has_credits_p (void);
 void remove_credit (void);
 void coin_deff (void) __taskentry__;
-void sw_left_coin (void) __taskentry__;
-void sw_center_coin (void) __taskentry__;
-void sw_right_coin (void) __taskentry__;
-void sw_fourth_coin (void) __taskentry__;
+void sw_left_coin_handler (void) __taskentry__;
+void sw_center_coin_handler (void) __taskentry__;
+void sw_right_coin_handler (void) __taskentry__;
+void sw_fourth_coin_handler (void) __taskentry__;
 void coin_init (void);
 
 #endif /* _COIN_H */

@@ -12,14 +12,12 @@
 /*
  * Standard types
  */
-#ifndef __SASM__
 typedef unsigned char bool;
 typedef unsigned char bcd_t;
-typedef char int8_t;
-typedef unsigned char uint8_t;
-typedef int int16_t;
-typedef unsigned int uint16_t;
-#endif
+typedef char int8_t, I8;
+typedef unsigned char uint8_t, U8;
+typedef int int16_t, I16;
+typedef unsigned int uint16_t, U16;
 
 /*
  * Define TRUE and FALSE to suitable values.
@@ -45,12 +43,10 @@ typedef unsigned int uint16_t;
 #include <asm-6809.h>
 #include <wpc.h>
 #include <version.h>
-#ifndef __SASM__
 #include <sys/bitarray.h>
 #include <sys/errno.h>
 #include <sys/task.h>
 #include <sys/font.h>
-#endif
 #include <sys/sol.h>
 #include <sys/lamp.h>
 #include <sys/switch.h>
@@ -58,7 +54,6 @@ typedef unsigned int uint16_t;
 #include <sys/dmd.h>
 #include <sys/triac.h>
 
-#ifndef __SASM__
 #include <sys/deff.h>
 #include <sys/debug.h>
 #include <sys/device.h>
@@ -76,6 +71,5 @@ typedef unsigned int uint16_t;
 /* From here on are any headers that are dependent on machine
  * specific features being defined */
 #include <hook.h>
-#endif
 
 #endif /* _FREEWPC_H */

@@ -48,7 +48,6 @@
 #define SEG_COL_14 0xD
 #define SEG_COL_15 0xE
 
-#ifndef __SASM__
 typedef uint8_t segaddr_t;
 typedef uint8_t segbits_t;
 
@@ -61,8 +60,6 @@ void seg_write_uint8 (segaddr_t sa, uint8_t u8);
 void seg_write_hex16 (segaddr_t sa, uint16_t u16);
 void seg_write_string (segaddr_t sa, const char *s);
 void seg_erase (segaddr_t sa, int8_t len);
-
-#endif
 
 #endif
 

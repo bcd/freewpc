@@ -2,8 +2,6 @@
 #ifndef _SYS_DEBUG_H
 #define _SYS_DEBUG_H
 
-#ifndef __SASM__
-
 /* Include ASIC address definitions */
 #include <wpc.h>
 
@@ -30,5 +28,4 @@ void db_init (void);
 void db_dump_switches (void);
 void db_rtt (void);
 
-#endif /* !__SASM__ */
 #endif /* _SYS_DEBUG_H */

@@ -15,8 +15,6 @@
 #define LAMP_OP_EXIT			0xFF
 
 
-#ifndef __SASM__
-
 /* Small integer type for a lamp number */
 typedef uint8_t lampnum_t;
 
@@ -87,8 +85,6 @@ void lampset_build_increment (lampset_id_t id);
 void lampset_build_decrement (lampset_id_t id);
 void lampset_rotate_next (lampset_id_t id);
 void lampset_rotate_previous (lampset_id_t id);
-
-#endif
 
 
 #endif /* _SYS_LAMP_H */

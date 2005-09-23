@@ -9,14 +9,11 @@
 #define TRIAC_COIN_INTERLOCK	0x20
 #define TRIAC_FLIPPER_ENABLE	0x80
 
-#ifndef __SASM__
 typedef uint8_t triacbits_t;
 
 void triac_rtt (void);
 void triac_on (triacbits_t bits);
 void triac_off (triacbits_t bits);
 void triac_init (void);
-
-#endif
 
 #endif /* _SYS_TRIAC_H */

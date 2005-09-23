@@ -19,15 +19,11 @@
 #define ERR_NOT_IMPLEMENTED_YET	15
 
 
-#ifndef __SASM__
-
 typedef uint8_t errcode_t;
 void do_fatal (uint16_t pc, errcode_t errcode) __noreturn__;
 void do_nonfatal (uint16_t pc, errcode_t errcode);
 
 #define fatal(err)		do_fatal(0x1234, err)
 #define nonfatal(err)	do_nonfatal(0x5678, err)
-
-#endif /* __SASM__ */
 
 #endif /* SYS_ERRNO_H */

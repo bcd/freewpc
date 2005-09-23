@@ -1,14 +1,10 @@
 #ifndef _WPC_H
 #define _WPC_H
 
-#ifndef __SASM__
-
 #include <stdlib.h>
 #include <string.h>
 #include <env.h>
 /* Including sys/types.h is almost always wrong! */
-
-#endif
 
 #include <sys/errno.h>
 
@@ -197,8 +193,14 @@
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
-#ifndef __SASM__
 
+/* TODO : this is a better version but it generates worse code */
+#if 0
+extern inline void wpc_led_toggle (void)
+{
+	*(volatile uint8_t *)WPC_LEDS ^= 0x80;
+}
+#else
 extern inline void wpc_led_toggle (void)
 {
 	asm (										\
@@ -210,6 +212,7 @@ extern inline void wpc_led_toggle (void)
 		: "a" 								\
 	);
 }
+#endif
 
 /********************************************/
 /* RAM Protection Circuit                   */
@@ -239,8 +242,6 @@ extern inline void wpc_set_rom_page (uint8_t page)
 	*(volatile uint8_t *)WPC_ROM_BANK = page;
 }
 
-#endif
-
 #define LED_DIAGNOSTIC		0x80
 
 /* 0x4 | 0x2 are always set when writing this register.
@@ -263,11 +264,7 @@ extern inline void wpc_set_rom_page (uint8_t page)
 #define GID_LAMP_DEMO				8
 #define GID_SW_HANDLER				9
 #define GID_FIRST_TASK				10
-
-/****************  Macros  ***************************/
-#if defined(__SASM__)
-#include "wpc.m4"
-#endif
+#define GID_STARFIELD				11
 
 #endif /* _WPC_H */
 

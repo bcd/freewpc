@@ -1,8 +1,6 @@
 #ifndef _SYS_SWITCH_H
 #define _SYS_SWITCH_H
 
-#ifndef __SASM__
-
 /** Small integer typedef for a switch number */
 typedef uint8_t switchnum_t;
 
@@ -23,7 +21,8 @@ typedef struct
 	uint8_t pad[1]; /* Keep this aligned to a power of 2! */
 } switch_info_t;
 
-#endif /* __SASM__ */
+
+#define DECLARE_SWITCH_DRIVER(name)	const switch_info_t name =
 
 #define NUM_PF_SWITCHES 64
 #define NUM_DEDICATED_SWITCHES 8
@@ -66,24 +65,14 @@ typedef struct
 #define SW_COINDOOR_CLOSED		MAKE_SWITCH(2,2)
 #endif
 
+/* Array types. */
 #define AR_RAW			0
 #define AR_CHANGED 	1
 #define AR_PENDING 	2
 #define AR_QUEUED 	3
 #define NUM_SWITCH_ARRAYS 	4
 
-#ifndef __SASM__
 extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
-
-#if 0
-typedef struct switch_props
-{
-	switch_handler_t handler;
-	uint8_t flags;
-	uint8_t min_activation_time;
-	uint8_t min_deactivation_time;
-} switch_props_t;
-#endif
 
 void switch_init (void);
 void switch_rtt (void);
@@ -92,8 +81,5 @@ void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
-
-#endif
-
 
 #endif /* _SYS_SWITCH_H */

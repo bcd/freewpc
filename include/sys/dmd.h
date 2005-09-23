@@ -15,7 +15,6 @@
 /* The height of a DMD page, in pixel */
 #define DMD_PIXEL_HEIGHT 32
 
-#ifndef __SASM__
 typedef uint8_t dmd_pagenum_t;
 
 typedef uint8_t *dmd_buffer_t;
@@ -50,7 +49,5 @@ void dmd_alloc_low_clean (void);
 void dmd_alloc_high_clean (void);
 void dmd_draw_border (char *dbuf);
 void dmd_shift_up (dmd_buffer_t *dbuf);
-
-#endif /* __SASM__ */
 
 #endif /* _SYS_DMD_H */
