@@ -30,6 +30,16 @@ const uint8_t mach_edge_switches[] = {
 	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98,
 };
 
+void tz_init (void)
+{
+	extern void lock_init (void);
+	extern void slot_init (void);
+	extern void rocket_init (void);
+
+	lock_init ();
+	slot_init ();
+	rocket_init ();
+}
 
 void tz_start_game (void)
 {
@@ -46,5 +56,6 @@ void tz_add_player (void)
 machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
 	.add_player = tz_add_player,
+	.init = tz_init,
 };
 

@@ -1,9 +1,11 @@
 
 #include <freewpc.h>
 
-
 void amode_deff (void) __taskentry__
 {
+	extern void starfield_start (void);
+	extern void starfield_stop (void);
+
 	for (;;)
 	{
 		int i;
@@ -25,9 +27,11 @@ void amode_deff (void) __taskentry__
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_5x5, 64, 10, "TWILIGHT ZONE");
+		starfield_start ();
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_5x5, 64, 20, "2005");
 		deff_swap_low_high (17, TIME_100MS * 2);
+		starfield_stop ();
 
 		for (i = 32; i != 0; --i)
 		{
