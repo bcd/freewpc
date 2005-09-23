@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 
+#pragma section ("font")
 
 const uint8_t font_5x5_alpha_cap[][5] = {
 	{ 4, 10, 31, 17, 17 },
@@ -29,7 +30,7 @@ const uint8_t font_5x5_alpha_cap[][5] = {
 
 	{ 17, 17, 17, 17, 14 },
 	{ 17, 17, 10, 10, 4 },
-	{ 17, 17, 21, 10, 4 },
+	{ 17, 17, 21, 21, 14 },
 	{ 17, 10, 4, 10, 17 },
 	{ 17, 10, 4, 4, 4 },
 	{ 31, 8, 4, 2, 31 },
@@ -54,8 +55,8 @@ const font_t font_5x5 = {
 	.width = 5, 
 	.spacing = 3,
 	.height = 5, 
-	.chars = font_5x5_alpha_cap, 
-	.digits = font_5x5_digit
+	.chars = (uint8_t **)font_5x5_alpha_cap, 
+	.digits = (uint8_t **)font_5x5_digit
 };
 
 
