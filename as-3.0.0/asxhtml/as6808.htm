@@ -1,0 +1,204 @@
+<HTML>
+<HEAD>
+<TITLE></TITLE>
+</HEAD>
+<BODY BGCOLOR="#C0C0C0">
+
+<A href="../home.htm">
+<IMG width=343 height=58 border=0 SRC="welcom.gif" ALT="Welcome"></A>
+
+<H2>AS6808  Assembler</H2>
+
+<A NAME = "TOP"> </A> 
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+
+
+<H4><B><PRE>
+68HC08 REGISTER SET 
+
+The  following  is  a  list  of  the  68HC08  registers  used by
+AS6808:  
+
+        a       -       8-bit accumulator
+        x       -       index register  &lt;H:X&gt;
+        s       -       stack pointer
+
+
+68HC08 INSTRUCTION SET 
+
+
+   The  following tables list all 68HC08 mnemonics recognized by
+the AS6808 assembler.  The designation [] refers to a required
+addressing  mode  argument.   The  following  list specifies the
+format for each addressing mode supported by AS6808:  
+
+        #data           immediate data
+                        byte or word data
+
+        *dir            direct page addressing
+                        (see .setdp directive)
+                        0 &lt;= dir &lt;= 255 
+
+        ,x              register indexed addressing
+                        zero offset
+
+        offset,x        register indexed addressing
+                          0 &lt;= offset &lt;= 255   --- byte mode
+                        256 &lt;= offset &lt;= 65535 --- word mode
+                        (an externally defined offset uses the
+                         word mode)
+
+        ,x+             register indexed addressing
+                        zero offset with post increment
+
+        offset,x+       register indexed addressing
+                        unsigned byte offset with post increment
+
+        offset,s        stack pointer indexed addressing
+                          0 &lt;= offset &lt;= 255   --- byte mode
+                        256 &lt;= offset &lt;= 65535 --- word mode
+                        (an externally defined offset uses the
+                         word mode)
+
+        ext             extended addressing
+
+        label           branch label
+
+The terms data, dir, offset, and ext may all be expressions.  
+
+   Note  that  not all addressing modes are valid with every in-
+struction, refer to the 68HC08 technical data for valid modes.  
+
+
+Control Instructions 
+
+        clc             cli             daa             div
+        mul             nop             nsa             psha
+        pshh            pshx            pula            pulh
+        pulx            rsp             rti             rts
+        sec             sei             stop            swi
+        tap             tax             tpa             tsx
+        txa             txs             wait
+
+
+Bit Manipulation Instructions 
+
+        brset   #data,*dir,label
+        brclr   #data,*dir,label
+
+        bset    #data,*dir
+        bclr    #data,*dir
+
+
+Branch Instructions 
+
+        bra     label           brn     label
+        bhi     label           bls     label
+        bcc     label           bcs     label
+        bne     label           beq     label
+        bhcc    label           bhcs    label
+        bpl     label           bmi     label
+        bmc     label           bms     label
+        bil     label           bih     label
+        bsr     label           bge     label
+        blt     label           bgt     label
+        ble     label
+
+
+Complex Branch Instructions 
+
+        cbeqa   [],label
+        cbeqx   [],label
+        cbeq    [],label
+        dbnza   label
+        dbnzx   label
+        dbnz    [],label
+
+
+Read-Modify-Write Instructions 
+
+        nega                    negx
+        neg     []
+
+        coma                    comx
+        com     []
+
+        lsra                    lsrx
+        lsr     []
+
+        rora                    rorx
+        ror     []
+
+        asra                    asrx
+        asr     []
+
+        asla                    aslx
+        asl     []
+
+        lsla                    lslx
+        lsl     []
+
+        rola                    rolx
+        rol     []
+
+        deca                    decx
+        dec     []
+
+        inca                    incx
+        inc     []
+
+        tsta                    tstx
+        tst     []
+
+        clra                    clrx
+        clr     []              clrh
+
+        aix     #data
+
+        ais     #data
+
+
+E.2.6  Register\Memory Instructions 
+
+        sub     []              cmp     []
+        sbc     []              cpx     []
+        and     []              bit     []
+        lda     []              sta     []
+        eor     []              adc     []
+        ora     []              add     []
+        ldx     []              stx     []
+
+
+Double Operand Move Instruction 
+
+        mov     [],[]
+
+
+16-Bit &lt;H:X&gt; Index Register Instructions 
+
+        cphx    []
+        ldhx    []
+        sthx    []
+
+
+Jump and Jump to Subroutine Instructions 
+
+        jmp     []              jsr     []
+
+<H5><A HREF="asxdoc.htm#TOP"> Go to the Documentation Index</A></H5>
+</PRE></B></H4>
+
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+
+<H4>
+<P><A HREF="asxxxx.htm#JUMP">
+<IMG width=32 height=32 border=0 SRC="spcshp.gif" ALIGN=bottom></A>
+<B>...  Exit the ASxxxx Documentation</B></A></P>
+
+<P><A href="../home.htm">
+<IMG width=32 height=32 border=0 SRC="home.gif" ALIGN=bottom></A>
+<B>...  Home Page</B></P>
+</H4>
+
+</BODY> 
+</HTML>
