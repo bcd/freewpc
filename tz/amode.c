@@ -5,6 +5,7 @@ void amode_deff (void) __taskentry__
 {
 	extern void starfield_start (void);
 	extern void starfield_stop (void);
+	extern char freewpc_bits[];
 
 	for (;;)
 	{
@@ -13,6 +14,12 @@ void amode_deff (void) __taskentry__
 		/** Display game over screen **/
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_5x5, 64, 16, "GAME OVER");
+		dmd_show_low ();
+		task_sleep_sec (5);
+
+		/** Display FreeWPC logo **/
+		dmd_alloc_low ();
+		dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)freewpc_bits);
 		dmd_show_low ();
 		task_sleep_sec (5);
 

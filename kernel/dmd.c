@@ -133,7 +133,7 @@ void dmd_invert_page (dmd_buffer_t *dbuf)
 }
 
 
-static inline void dmd_copy_page (dmd_buffer_t *dst, dmd_buffer_t *src)
+void dmd_copy_page (dmd_buffer_t *dst, dmd_buffer_t *src)
 {
 	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dst16 = (uint16_t *)dst;
