@@ -55,6 +55,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "target-def.h"
 #include "expr.h"
+#include "cpplib.h"
+#include "c-pragma.h"
+#include "c-lex.h"
 
 /* macro to return TRUE if length of operand mode is one byte */
 #define BYTE_MODE(X) ((GET_MODE_SIZE (GET_MODE (X))) == 1)
@@ -110,10 +113,14 @@ extern FILE *asm_out_file;
 static int last_mem_size;   /* operand size (bytes) */
 
 /* True if a #pragma interrupt has been seen for the current function.  */
-static int in_interrupt;
+static int in_interrupt = 0;
 
 /* True if a #pragma naked preceded the current function */
-static int in_naked_function;
+static int in_naked_function = 0;
+
+/* True if the section was recently changed and another .area
+ * directive needs to be output before emitting the next label. */
+int section_changed = 0;
 
 /* Section names.  The defaults here are used until a #pragma is seen
  * that changes it. */
@@ -653,48 +660,72 @@ output_function_epilogue ( file, size )
  * Handle pragmas.  Note that only the last branch pragma seen in the 
  * source has any affect on code generation.  
  */
+#define BAD_PRAGMA(msgid, arg) \
+	do { warning (msgid, arg); return -1; } while (0)
+
+static int
+pragma_parse (name, sect)
+     const char *name;
+     tree *sect;
+{
+  tree s, x;
+
+  if (c_lex (&x) != CPP_OPEN_PAREN)
+    BAD_PRAGMA ("missing '(' after '#pragma %s' - ignored", name);
+
+  if (c_lex (&s) != CPP_STRING)
+    BAD_PRAGMA ("missing section name in '#pragma %s' - ignored", name);
+
+  if (c_lex (&x) != CPP_CLOSE_PAREN)
+    BAD_PRAGMA ("missing ')' for '#pragma %s' - ignored", name);
+
+  if (c_lex (&x) != CPP_EOF)
+    warning ("junk at end of '#pragma %s'", name);
+
+  *sect = s;
+  return 0;
+}
+
+
 void
 pragma_short_branch (pfile)
-	void *pfile;
+	cpp_reader *pfile ATTRIBUTE_UNUSED;
 {
 	target_flags |= 1;
 }
 
 void 
 pragma_long_branch (pfile)
-	void *pfile;
+	cpp_reader *pfile ATTRIBUTE_UNUSED;
 {
    target_flags &= ~1;
 }
 
 void 
 pragma_interrupt (pfile)
-	void *pfile;
+	cpp_reader *pfile ATTRIBUTE_UNUSED;
 {
    in_interrupt = 1;
 }
 
 void 
 pragma_naked (pfile)
-	void *pfile;
+	cpp_reader *pfile ATTRIBUTE_UNUSED;
 {
 	in_naked_function = 1;
 }
 
-void pragma_code_section (pfile)
-	void *pfile;
+void pragma_section (pfile)
+	cpp_reader *pfile ATTRIBUTE_UNUSED;
 {
+	tree sect;
 
-}
+	if (pragma_parse ("section", &sect))
+		return;
 
-void pragma_data_section (pfile)
-	void *pfile;
-{
-}
-
-void pragma_bss_section (pfile)
-	void *pfile;
-{
+	snprintf (code_section_op, 6+TREE_STRING_LENGTH (sect),
+		".area\t%s", TREE_STRING_POINTER (sect));
+	section_changed++;
 }
 
 

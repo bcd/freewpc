@@ -63,6 +63,7 @@ extern int target_flags;
 extern short *reg_renumber;	/* def in local_alloc.c */
 
 /* Runtime current values of section names */
+extern int section_changed;
 extern char code_section_op[], data_section_op[], bss_section_op[];
 
 /* Function prototypes (defined in m6809.c) */
@@ -115,6 +116,9 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 
 /* Allow $ in identifiers */
 #define DOLLARS_IN_IDENTIFIERS 1
+
+/* Don't unroll too much! (default in unroll.c was 100) */
+#define MAX_UNROLLED_INSNS 32
 
 /*--------------------------------------------------------------
 	Target machine storage layout
@@ -523,7 +527,8 @@ enum reg_class {
 #define PCC_STATIC_STRUCT_RETURN
 
 /* 1 if N is a possible register number for a function value. */
-#define FUNCTION_VALUE_REGNO_P(N) ((N) == HARD_D_REGNUM)
+#define FUNCTION_VALUE_REGNO_P(N) \
+  (((N) == HARD_D_REGNUM) || ((N) == HARD_B_REGNUM))
 
 /* Define this to be true when FUNCTION_VALUE_REGNO_P is true for
    more than one register.  */
@@ -1053,23 +1058,19 @@ enum reg_class {
 **
 *****************************************************************************/
 
-extern void pragma_short_branch PARAMS ((void *));
-extern void pragma_long_branch PARAMS ((void *));
-extern void pragma_interrupt PARAMS ((void *));
-extern void pragma_naked PARAMS ((void *));
-extern void pragma_code_section PARAMS ((void *));
-extern void pragma_data_section PARAMS ((void *));
-extern void pragma_bss_section PARAMS ((void *));
 
 #define REGISTER_TARGET_PRAGMAS(PFILE) \
 do { \
+	extern void pragma_short_branch PARAMS ((cpp_reader *)); \
+	extern void pragma_long_branch PARAMS ((cpp_reader *)); \
+	extern void pragma_interrupt PARAMS ((cpp_reader *)); \
+	extern void pragma_naked PARAMS ((cpp_reader *)); \
+	extern void pragma_section PARAMS ((cpp_reader *)); \
 	cpp_register_pragma (PFILE, 0, "short_branch", pragma_short_branch); \
 	cpp_register_pragma (PFILE, 0, "long_branch", pragma_long_branch); \
 	cpp_register_pragma (PFILE, 0, "interrupt", pragma_interrupt); \
 	cpp_register_pragma (PFILE, 0, "naked", pragma_naked); \
-	cpp_register_pragma (PFILE, 0, "data_section", pragma_data_section); \
-	cpp_register_pragma (PFILE, 0, "code_section", pragma_code_section); \
-	cpp_register_pragma (PFILE, 0, "bss_section", pragma_bss_section); \
+	cpp_register_pragma (PFILE, 0, "section", pragma_section); \
 } while (0)
 
 /*--------------------------------------------------------------
@@ -1245,8 +1246,14 @@ do {                                             \
    such as the label on a static function or variable NAME.  */
 
 #define ASM_OUTPUT_LABEL(FILE,NAME) \
-  {assemble_name (FILE, NAME); \
-  fputs (":\n", FILE);}
+do { \
+  if (section_changed) { \
+	  fprintf (FILE, "\n%s\n\n", code_section_op); \
+     section_changed = 0; \
+  } \
+  assemble_name (FILE, NAME); \
+  fputs (":\n", FILE); \
+} while (0)
 
 /* This is how to output a command to make the user-level label
     named NAME defined for reference from other files.  */
