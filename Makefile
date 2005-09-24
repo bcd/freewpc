@@ -22,6 +22,9 @@ MACHINE ?= tz
 # Set this to the path where the final ROM image should be installed
 TARGET_ROMPATH = /home/bcd/eptools/mameroms
 
+# Which version of the assembler tools to use
+ASVER ?= 3.0.0
+
 #######################################################################
 ###	Directories
 #######################################################################
@@ -46,9 +49,6 @@ SYSTEM_BINFILES = freewpc.bin
 PAGED_BINFILES = page62.bin
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
-
-# Preloaded macro files
-DEFMACROS = m6809.m4 syscall.m4
 
 TMPFILES = *.sp		# Intermediate sasm assmebler files
 TMPFILES += *.o		# Intermediate object files
@@ -351,6 +351,16 @@ ptrindex:
 #
 gcc:
 	cd gcc-build && ./gccbuild
+
+gcc-%:
+	cd gcc-build && ./gccbuild %
+
+astools:
+	cd as-$(ASVER) && make
+
+astools-%:
+	cd as-$(ASVER) && make %
+
 
 kernel/switches.o : include/$(MACHINE)/switch.h
 
