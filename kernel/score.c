@@ -2,7 +2,7 @@
 #include <freewpc.h>
 
 
-volatile uint8_t score_change;
+volatile U8 score_change;
 
 
 void score_deff (void)
@@ -29,9 +29,28 @@ void score_zero (score_t *s)
 	memset (s, 0, sizeof (score_t));
 }
 
-score_t *score_add (score_t *s1, score_t *s2)
+extern inline U8 __add_with_carry (U8 v1, U8 v2)
 {
-	return (s1);
+	asm volatile ("adcb\t%1" :: "d" (v1), "g" (v2));
+	return v1;
+	// return v1 + v2;
+}
+
+extern inline void __daa (void)
+{
+	asm volatile ("daa");
+}
+
+void score_add (score_t *s1, score_t *s2)
+{
+	register bcd_t *bcd1 = (bcd_t *)s1;
+	register bcd_t *bcd2 = (bcd_t *)s2;
+	register int i = sizeof(score_t);
+	bcd1[i] += bcd2[i];
+	for (i=sizeof(score_t)-1; i > 0; --i)
+	{
+		bcd1[i] = __add_with_carry (bcd1[i], bcd2[i]);
+	}
 }
 
 score_t *score_sub (score_t *s1, score_t *s2)
