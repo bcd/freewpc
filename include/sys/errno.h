@@ -17,7 +17,7 @@
 #define ERR_DEFF_QUEUE_FULL		13
 #define ERR_TASK_KILL_FAILED		14
 #define ERR_NOT_IMPLEMENTED_YET	15
-
+#define ERR_UNPRINTABLE_CHAR		16
 
 typedef uint8_t errcode_t;
 void do_fatal (uint16_t pc, errcode_t errcode) __noreturn__;
