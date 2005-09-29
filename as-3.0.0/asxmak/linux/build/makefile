@@ -39,7 +39,7 @@ clean:
 
 
 CC=		gcc
-CCOPT=		-O2 -g -pg
+CCOPT=		-O2 -g -pg -D__addr_t_defined
 CCFLAGS=	-Wall -funsigned-char $(CCOPT)
 
 LD=		gcc
