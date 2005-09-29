@@ -341,39 +341,10 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 };
 
 
-#if 00000
-static const switch_info_t switch_info[NUM_SWITCHES] = {
-	[SW_LEFT_COIN] = { .fn = sw_left_coin_handler, },
-	[SW_CENTER_COIN] = { .fn = sw_center_coin_handler, },
-	[SW_RIGHT_COIN] = { .fn = sw_right_coin_handler, },
-	[SW_FOURTH_COIN] = { .fn = sw_fourth_coin_handler, },
-	[SW_ESCAPE] = { .fn = sw_escape_button_handler, },
-	[SW_DOWN] = { .fn = sw_down_button_handler, },
-	[SW_UP] = { .fn = sw_up_button_handler, },
-	[SW_ENTER] = { .fn = sw_enter_button_handler, },
-
-	[SW_START_BUTTON] = { .fn = sw_start_button_handler },
-	[SW_TILT] = { .fn = sw_tilt_handler },
-	[SW_RIGHT_TROUGH] = { .fn = sw_trough_handler },
-	[SW_CENTER_TROUGH] = { .fn = sw_trough_handler },
-	[SW_LEFT_TROUGH] = { .fn = sw_trough_handler },
-	[SW_OUTHOLE] = { .fn = sw_outhole_handler },
-
-	[SW_SLAM_TILT] = { .fn = sw_slam_tilt_handler },
-
-	[SW_ROCKET] = { .fn = sw_rocket_handler },
-
-	[SW_SLOT] = { .fn = sw_slot_handler },
-	[SW_LOCK_CENTER] = { .fn = sw_lock_handler },
-	[SW_LOCK_UPPER] = { .fn = sw_lock_handler },
-	[SW_LOCK_LOWER] = { .fn = sw_lock_handler },
-};
-#endif
 
 extern inline const switch_info_t *switch_lookup (uint8_t sw)
 {
 	return switch_table[sw];
-	/// return (switch_info_t *)((uint8_t *)switch_info + (sw << 2));
 }
 
 
