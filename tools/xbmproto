@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# xbmproto - generate prototype from XBM file
+#
+
+xbmfiles=
+outfile=`tty`
+
+function do_proto1 () {
+	xbmfile=$1;
+	grep bits $xbmfile | sed -e "s/static/extern/" -e "s/=.*$/;/";
+	return 0;
+}
+
+while [ "$1" != "" ]; do
+	arg=$1; shift
+	case $arg in
+		-f)
+			xbmfiles="$xbmfiles $1"; shift
+			;;
+		-D)
+			add=`ls -1 $1/* | grep ".xbm"`
+			xbmfiles="$xbmfiles $add"
+			shift
+			;;
+		-o)
+			outfile=$1; shift
+			;;
+	esac
+done
+
+echo "#ifndef _XBMPROTO_H" > $outfile
+echo "#define _XBMPROTO_H" >> $outfile
+(
+for xbm in $xbmfiles; do
+	do_proto1 $xbm;
+done
+) >> $outfile
+echo "#endif // _XBMPROTO_H" >> $outfile
