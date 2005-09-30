@@ -2,9 +2,10 @@
 #include <freewpc.h>
 #include <m6809_math.h>
 
+
+/* Initially zero, this is set to 1 when a remote debugger is
+ * detected */
 static uint8_t db_attached;
-
-
 
 
 
@@ -22,12 +23,6 @@ void db_puti (uint8_t v)
 	uint8_t rem;
 
 	DIV10 (v, quot, rem);
-
-#if 0
-	volatile uint16_t quot_rem = div10 (v);
-	asm ("sta %0" :: "m" (quot));
-	asm ("stb %0" :: "m" (rem));
-#endif
 
 	db_putc (quot + '0');
 	db_putc (rem + '0');
@@ -55,23 +50,6 @@ void db_put4x (uint16_t v)
 	db_put2x (v & 0xFF);
 }
 
-
-void db_printf (const char *s)
-{
-	if (!db_attached) return;
-
-	while (*s)
-	{
-		if (*s == '%')
-		{
-			s++;
-		}
-		else
-		{
-			db_putc (*s++);
-		}
-	}
-}
 
 
 void db_dump_switches (void)
