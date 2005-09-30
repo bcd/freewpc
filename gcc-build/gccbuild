@@ -12,6 +12,11 @@
 
 VERSION=3.1.1
 
+whereis sudo >/dev/null 2>&1
+if [ "$?" = "0" ]; then
+	SUDO=sudo
+fi
+
 while [ "$1" != "" ]; do
 arg=$1; shift
 case $arg in
@@ -24,7 +29,7 @@ case $arg in
 	asm)
 		cd ../asm-thomson && make clean
 		cd ../asm-thomson && make
-		cd ../asm-thomson && sudo make install
+		cd ../asm-thomson && $SUDO make install
 		;;
 
 	unpack)
@@ -50,10 +55,10 @@ case $arg in
 
 	*)
 		make cross LANGUAGES="c proto c++"
-		cd gcc && sudo make LANGUAGES="c proto c++" install
+		cd gcc && $SUDO make LANGUAGES="c proto c++" install
 		echo "Copying new executable ... installation complete!"
-		sudo mkdir -p /usr/local/m6809/bin
-		sudo cp xgcc /usr/local/m6809/bin/gcc
+		$SUDO mkdir -p /usr/local/m6809/bin
+		$SUDO cp xgcc /usr/local/m6809/bin/gcc
 		echo "Done building"
 		;;
 esac
