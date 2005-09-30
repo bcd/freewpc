@@ -25,6 +25,7 @@ TARGET_ROMPATH = /home/bcd/eptools/mameroms
 # Which version of the assembler tools to use
 ASVER ?= 3.0.0
 
+
 #######################################################################
 ###	Directories
 #######################################################################
@@ -32,6 +33,7 @@ ASVER ?= 3.0.0
 LIBC_DIR = ./libc
 INCLUDE_DIR = ./include
 MACHINE_DIR = ./$(MACHINE)
+
 
 #######################################################################
 ###	Filenames
@@ -44,6 +46,9 @@ TMPFILES += $(ERR)
 # The linker command file (generated dynamically)
 LINKCMD = freewpc.lnk
 PAGED_LINKCMD = page62.lnk
+
+# The XBM prototype header file
+XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = freewpc.bin
 PAGED_BINFILES = page62.bin
@@ -76,13 +81,16 @@ LD = /home/bcd/bin/aslink
 REQUIRED += $(CC) $(LD)
 
 # Name of the rommer to use
-ROMMER = srec_cat
-PATH_REQUIRED += $(ROMMER)
+# ROMMER = srec_cat
+# ROMMER_FLAGS = --fill 0xff 0x4000 0x8000
+# PATH_REQUIRED += $(ROMMER)
 
 # Name of the blanker to use
 BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
 
+# The XBM prototype generator
+XBMPROTO = tools/xbmproto
 
 #######################################################################
 ###	Source and Binary Filenames
@@ -106,6 +114,9 @@ XBM_OBJS = images/freewpc.o images/brian.o
 OS_INCLUDES = include/freewpc.h include/wpc.h
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
+
+
+XBM_SRCS = $(patsubst %.o,%.xbm,$(XBM_OBJS))
 
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
@@ -161,6 +172,11 @@ CFLAGS += -Werror-implicit-function-declaration
 # "pages", which are like sections...
 #
 
+RAM_ADDR = 0x0
+PAGED_ROM_ADDR = 0x4000
+FIXED_ROM_ADDR = 0x8000
+VECTOR_ROM_ADDR = 0xFFF0
+
 
 KERNEL_OBJS = $(patsubst %,kernel/%,$(OS_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
@@ -191,7 +207,7 @@ C_OBJS = $(KERNEL_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
 
-DEPS = $(DEFMACROS) $(INCLUDES) Makefile
+DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H)
 
 #######################################################################
 ###	Include User Settings
@@ -251,12 +267,13 @@ $(GAME_ROM) : blank256.bin blank128.bin blank64.bin blank16.bin $(BINFILES)
 blank%.bin:
 	@echo Creating $*KB blank file ... && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
 
-$(SYSTEM_BINFILES) : %.bin : %.s19
-	@echo Converting $< to binary ... && $(ROMMER) $< --motorola --output - --binary | dd of=$@ bs=1k skip=32
+$(SYSTEM_BINFILES) : %.bin : %.s19 srec2bin
+# 	@echo Converting $< to binary ... && $(ROMMER) $< --motorola --output - --binary | dd of=$@ bs=1k skip=32
+	@echo Converting $< to binary ... && tools/srec2bin/srec2bin $< $@ system
 
-ROMMER_FLAGS = --fill 0xff 0x4000 0x8000
-$(PAGED_BINFILES) : %.bin : %.s19
-	@echo Converting $< to binary ... && $(ROMMER) $< --motorola $(ROMMER_FLAGS) --output - --binary | dd of=$@ bs=1k skip=16
+$(PAGED_BINFILES) : %.bin : %.s19 srec2bin
+# 	@echo Converting $< to binary ... && $(ROMMER) $< --motorola $(ROMMER_FLAGS) --output - --binary | dd of=$@ bs=1k skip=16
+	@echo Converting $< to binary ... && tools/srec2bin/srec2bin $< $@ paged
 
 #
 # General rule for linking a group of object files.  The linker produces
@@ -328,6 +345,7 @@ $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 
 #
 # General rule for how to build any C module.
+# TODO:
 #
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
@@ -339,36 +357,81 @@ $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS)
 $(XBM_OBJS) : %.o : %.xbm
 	@echo Compiling $< ... && $(CC) -Dstatic= -o $@ -x c -c $< 2>&1 | tee -a err
 
-show_objs:
-	@echo $(OBJS)
-
 ptrindex:
 	tools/ptrindex/ptrindex.pl -m deff -C kernel -C tz
+
+
+#######################################################################
+###	Header File Targets
+#######################################################################
+
+#
+# How to make the XBM prototypes
+#
+
+xbmprotos: $(XBM_H)
+
+$(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
+	@echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
 
 #
 # 'make gcc' will build the compiler.  It uses a homegrown script
 # 'gccbuild' to control the entire link process.
 #
+# 'make gcc-install' will install it into the local bin directory.
+#
+# 'make gcc-anythingelse' will run gcc's 'anythingelse' target.
+#
+gcc-install:
+	cp -p /usr/local/m6809/bin/gcc /usr/local/bin/gcc09
+
 gcc:
 	cd gcc-build && ./gccbuild
 
 gcc-%:
 	cd gcc-build && ./gccbuild %
 
-astools:
-	cd as-$(ASVER) && make
+#
+# 'make astools' will build the assembler, linker, and library
+# manager.  As with gcc, -install will also install it and any
+# other suffix will pass those options to the astools makefile.
+#
+astools: astools-build astools-install
+
+astools-install:
+	cp -p $(AS) /usr/local/bin/as09
+	cp -p $(LD) /usr/local/bin/ld09
+
+astools-build:
+	cd as-$(ASVER)/asxmak/linux/build && make
 
 astools-%:
-	cd as-$(ASVER) && make %
+	cd as-$(ASVER)/asxmak/linux/build && make $*
 
+#
+# How to build the srec2bin utility, which is a simple S-record to
+# binary converter suitable for what we need.
+#
+srec2bin: tools/srec2bin/srec2bin
+
+tools/srec2bin/srec2bin : tools/srec2bin/srec2bin.c
+	cd tools/srec2bin && make srec2bin
 
 kernel/switches.o : include/$(MACHINE)/switch.h
 
 #
 # 'make clean' does what you think.
 #
-clean:
+clean: clean_derived
 	@for dir in `echo . kernel fonts images $(MACHINE)`;\
 		do echo Removing files in $$dir... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
+
+clean_derived:
+	@for file in `echo $(XBM_H)` ;\
+		do echo "Removing derived file $$file..." && \
+		rm -f $$file; done
+
+show_objs:
+	@echo $(OBJS)
 

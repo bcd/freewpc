@@ -7,7 +7,7 @@ typedef unsigned char U8;
 
 U8 image[0x10000];
 
-U8 fill_byte = 0xFF;
+U8 fill_byte = 0x00;
 
 
 unsigned int hexval (char *s, int len)
