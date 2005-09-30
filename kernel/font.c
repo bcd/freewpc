@@ -78,7 +78,7 @@ uint8_t *font_lookup (const font_t *font, char c)
 	}
 	else
 	{
-		return NULL;
+		fatal (ERR_UNPRINTABLE_CHAR);
 	}
 	return entry + index * font->height;
 }
