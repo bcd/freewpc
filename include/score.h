@@ -12,4 +12,6 @@
 typedef bcd_t score_t[(MAX_SCORE_DIGITS + 1)/2];
 
 
+extern volatile U8 score_change;
+
 #endif /* _SCORE_H */
