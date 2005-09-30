@@ -189,6 +189,7 @@ void do_reset (void) __noreturn__
 	task_init ();
 	deff_init ();
 	test_init ();
+	call_hook (init);
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;
 
