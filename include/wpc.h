@@ -242,12 +242,56 @@ extern inline void wpc_set_rom_page (uint8_t page)
 	*(volatile uint8_t *)WPC_ROM_BANK = page;
 }
 
+
+
 #define LED_DIAGNOSTIC		0x80
 
 /* 0x4 | 0x2 are always set when writing this register.
  * 0x80 and 0x10 are also set when clearing the IRQ from the
  * IRQ handler.
  */
+
+/********************************************/
+/* Zero Crossing/IRQ Clear Register         */
+/********************************************/
+
+extern inline void wpc_irq_clear (void)
+{
+	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x96;
+}
+
+
+
+extern inline U8 wpc_get_jumpers (void)
+{
+	return *(volatile U8 *)WPC_SW_JUMPER_INPUT;
+}
+
+
+extern inline U8 wpc_get_flipper_a (void)
+{
+	return *(volatile U8 *)WPC_FLIPTRONIC_PORT_A;
+}
+
+
+extern inline U8 wpc_get_flipper_b (void)
+{
+	return *(volatile U8 *)WPC_FLIPTRONIC_PORT_B;
+}
+
+
+extern inline U8 wpc_read_ticket (void)
+{
+	return *(volatile U8 *)WPC_TICKET_DISPENSE;
+}
+
+
+extern inline void wpc_write_ticket (U8 val)
+{
+	*(volatile U8 *)WPC_TICKET_DISPENSE = val;
+}
+
+
 
 /***************************************************************
  * Task Groups
