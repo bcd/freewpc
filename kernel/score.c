@@ -4,22 +4,42 @@
 
 volatile U8 score_change;
 
+U8 scores[4][4];
+U8 *current_score;
 
-void score_deff (void)
+
+void scores_draw (void)
+{
+	sprintf ("%iUP", player_up);
+	font_render_string (&font_5x5, 4, 26, sprintf_buffer);
+
+	sprintf ("BALL %i", ball_up);
+	font_render_string_right (&font_5x5, 124, 26, sprintf_buffer);
+
+	sprintf ("%8b", current_score);
+	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+}
+
+
+void scores_deff (void) __taskentry__
 {
 	for (;;)
 	{
-		/* Stop any score effects (i.e. flashing) */
-
-		/* Redraw the scores on the screen */
-		
-		/* Restart score effects */
-
 		/* Clear score change flag */
 		score_change = 0;
 
+		/* Stop any score effects (i.e. flashing) */
+
+		/* Redraw the scores on the screen */
+		dmd_alloc_low_clean ();
+		scores_draw ();
+		dmd_show_low ();
+		
+		/* Restart score effects */
+
 		/* Wait for a score change */
-		while (score_change == 0);
+		while (score_change == 0)
+			task_sleep (TIME_100MS * 2);
 	}
 }
 
@@ -53,19 +73,18 @@ void score_add (score_t *s1, score_t *s2)
 	}
 }
 
-score_t *score_sub (score_t *s1, score_t *s2)
+void score_sub (score_t *s1, score_t *s2)
 {
-	return (s1);
 }
 
-score_t *score_mul (score_t *s1, uint8_t multiplier)
+void score_mul (score_t *s1, uint8_t multiplier)
 {
-	return (s1);
 }
 
 int score_compare (score_t *s1, score_t *s2)
 {
 	return (0);
 }
+
 
 

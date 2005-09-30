@@ -13,9 +13,6 @@ uint8_t player_up;
 uint8_t ball_up;
 uint8_t extra_balls;
 
-U8 scores[4][4];
-U8 *current_score;
-
 void start_ball (void);
 
 void dump_game (void)
@@ -29,30 +26,6 @@ void dump_game (void)
 	db_puts (" of "); db_puti (num_players); db_putc ('\n');
 	db_puts ("Ball : "); db_puti (ball_up); db_putc ('\n');
 	db_puts ("EBs : "); db_puti (extra_balls); db_putc ('\n');
-}
-
-
-void scores_draw (void)
-{
-	sprintf ("%iUP", player_up);
-	font_render_string (&font_5x5, 4, 26, sprintf_buffer);
-
-	sprintf ("BALL %i", ball_up);
-	font_render_string_right (&font_5x5, 124, 26, sprintf_buffer);
-
-	sprintf ("%8b", current_score);
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
-}
-
-void scores_deff (void) __taskentry__
-{
-	for (;;)
-	{
-		dmd_alloc_low_clean ();
-		scores_draw ();
-		dmd_show_low ();
-		task_sleep (TIME_100MS * 5);
-	}
 }
 
 
@@ -134,11 +107,6 @@ void start_game (void)
 	player_up = 1;
 	ball_up = 1;
 	extra_balls = 0;
-
-	current_score[0] = 0x12;
-	current_score[1] = 0x45;
-	current_score[2] = 0x89;
-	current_score[3] = 0x30;
 
 	start_ball ();
 	deff_stop (DEFF_AMODE);
