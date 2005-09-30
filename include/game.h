@@ -14,7 +14,6 @@ extern uint8_t player_up;
 extern uint8_t ball_up;
 extern uint8_t extra_balls;
 
-void scores_draw (void);
 void start_ball (void);
 void end_game (void);
 void end_ball (void);
