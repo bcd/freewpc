@@ -1,0 +1,16 @@
+#!/bin/bash
+
+SVNROOT=svn+ssh://www.oddchange.com/home/bcd/svn/freewpc
+
+case $1 in
+	set)
+		tag=$2
+		svn copy $SVNROOT/trunk $SVNROOT/tags/$tag
+		;;
+	list)
+		svn list $SVNROOT/tags
+		;;
+	*)
+		echo "Syntax: svntag [set|list]"
+		;;
+esac
