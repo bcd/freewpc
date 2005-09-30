@@ -3,23 +3,41 @@
 
 #if (MACHINE_DMD == 1)
 
+/* Points to the next free page that can be allocated */
 dmd_pagenum_t dmd_free_page;
+
+/* Low/High cache the current pages that are mapped into
+ * visible memory */
 dmd_pagenum_t dmd_low_page;
 dmd_pagenum_t dmd_high_page;
-dmd_pagenum_t dmd_visible_page;
 
+/* Dark/Bright store the 2 pages that are used to actually
+ * draw on the display.  These values are programmed into
+ * the DMD 'visible' register.  The values are switched fast
+ * to give the appearance of 3-color images.  The 'dark'
+ * page is shown 1/3 of the time, while the 'bright' page
+ * is shown 2/3 of the time.  (The brightest pixels are
+ * those that are set in both of the pages at the same time.)
+ */
+dmd_pagenum_t dmd_dark_page;
+dmd_pagenum_t dmd_bright_page;
+
+/* Page flip counter */
+U8 dmd_page_flip_count;
 
 void dmd_init (void)
 {
 	wpc_dmd_firq_row = 0xFF;
 	dmd_low_page = wpc_dmd_low_page = 0;
 	dmd_high_page = wpc_dmd_high_page = 0;
-	dmd_visible_page = wpc_dmd_visible_page = 0;
+	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = 0;
 	dmd_free_page = 1;
+	dmd_page_flip_count = 3;
 }
 
 void dmd_rtt (void)
 {
+	/* TODO : switch between dark and bright */
 }
 
 
@@ -52,12 +70,12 @@ void dmd_alloc_low_high (void)
 
 void dmd_show_low (void)
 {
-	dmd_visible_page = wpc_dmd_visible_page = dmd_low_page;
+	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = dmd_low_page;
 }
 
 void dmd_show_high (void)
 {
-	dmd_visible_page = wpc_dmd_visible_page = dmd_high_page;
+	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = dmd_high_page;
 }
 
 void dmd_flip_low_high (void)
@@ -71,7 +89,7 @@ void dmd_flip_low_high (void)
 
 void dmd_show_other (void)
 {
-	if (dmd_visible_page == dmd_low_page)
+	if (dmd_dark_page == dmd_low_page)
 		dmd_show_high ();
 	else
 		dmd_show_low ();
@@ -82,7 +100,7 @@ void dmd_swap_low_high (void)
 {
 	__lda (dmd_high_page);
 	__ldb (dmd_low_page);
-	__asm__ volatile ("exg a,b");
+	__asm__ volatile ("exg\ta,b");
 	__sta (&dmd_high_page);
 	__stb (&dmd_low_page);
 }
