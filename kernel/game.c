@@ -13,7 +13,8 @@ uint8_t player_up;
 uint8_t ball_up;
 uint8_t extra_balls;
 
-uint8_t current_score[4];
+U8 scores[4][4];
+U8 *current_score;
 
 void start_ball (void);
 
@@ -75,6 +76,8 @@ void end_ball (void)
 	if (!in_game)
 		goto done;
 
+	call_hook (end_ball);
+
 	if (extra_balls > 0)
 	{
 		extra_balls--;
@@ -106,6 +109,9 @@ done:
 void start_ball (void)
 {
 	db_puts ("In startball\n");
+	call_hook (start_ball);
+	current_score = scores[player_up - 1];
+	score_change++;
 	device_request_kick (device_entry (DEV_TROUGH));
 }
 
@@ -113,6 +119,7 @@ void add_player (void)
 {
 	remove_credit ();
 	num_players++;
+	call_hook (add_player);
 }
 
 void start_game (void)
@@ -122,6 +129,7 @@ void start_game (void)
 	in_tilt = FALSE;
 	num_players = 0;
 
+	call_hook (start_game);
 	add_player ();
 	player_up = 1;
 	ball_up = 1;
@@ -169,7 +177,6 @@ void sw_start_button_handler (void) __taskentry__
 		if (verify_start_ok ())
 		{
 			start_game ();
-			call_hook (start_game);
 		}
 		else
 		{
@@ -183,7 +190,6 @@ void sw_start_button_handler (void) __taskentry__
 			if (num_players < MAX_PLAYERS)
 			{
 				add_player ();
-				call_hook (add_player);
 			}
 		}
 		else if (verify_start_ok ())
