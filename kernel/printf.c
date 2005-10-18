@@ -4,13 +4,13 @@
 
 char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
-uint8_t sprintf_width;
+U8 sprintf_width;
 
 bool sprintf_leading_zeroes;
 
-uint8_t leading_zero_count;
+U8 leading_zero_count;
 
-uint8_t number_length;
+S8 number_length;
 
 
 
@@ -93,7 +93,8 @@ do_format_chars:
 				{
 					register uint16_t w = va_arg (va, uint16_t);
 					endbuf = do_sprintf_decimal (buf, w);
-fixup_number:
+fixup_number:;
+#if 0
 					leading_zero_count = 0;
 					while ((buf[leading_zero_count] == '0') &&
 						(buf + leading_zero_count < endbuf))
@@ -109,8 +110,19 @@ fixup_number:
 					else
 					{
 						/* Not OK to display leading zeroes */
+						/* memmove (buf, 
+						 * 	buf+leading_zero_count, 
+						 * 	number_length-leading_zero_count) */
+						number_length -= leading_zero_count;
+						while (--number_length > 0)
+						{
+							buf[0] = buf[leading_zero_count];
+							buf++;
+							endbuf--;
+						}
 					}
 
+#endif
 					buf = endbuf;
 					break;
 				}
@@ -129,13 +141,14 @@ fixup_number:
 				case 'b':
 				{
 					register bcd_t *bcd  = va_arg (va, bcd_t *);
-					// db_putp (bcd);
+					endbuf = buf;
 					while (sprintf_width != 0)
 					{
 						// db_put2x (*bcd);
-						buf = do_sprintf_hex_byte (buf, *bcd++);
+						endbuf = do_sprintf_hex_byte (endbuf, *bcd++);
 						sprintf_width -= 2;
 					}
+					goto fixup_number;
 					break;
 				}
 
@@ -164,12 +177,6 @@ fixup_number:
 	va_end (va);
 
 	*buf = '\0';
-
-#if 0
-	db_puts ("sprintf: ");
-	db_puts (sprintf_buffer);
-	db_putc ('\n');
-#endif
 }
 
 

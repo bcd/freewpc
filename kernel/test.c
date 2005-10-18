@@ -34,10 +34,12 @@ uint8_t test_index;
 
 void test_start (void)
 {
+	end_game ();
 	amode_stop ();
 	test_menu = &main_menu;
 	in_test = 1;
 	deff_restart (DEFF_TEST_MENU);
+	sound_send (SND_ENTER);
 }
 
 
@@ -111,9 +113,10 @@ void test_up_button (void)
 void test_down (void)
 {
 	sound_send (SND_DOWN);
-	test_index--;
-	if ((test_menu->child_count) && (test_index < test_menu->start_index))
+	if ((test_menu->child_count) && (test_index == 0))
 		test_index = test_menu->child_count - 1;
+	else
+		test_index--;
 	deff_restart (DEFF_TEST_MENU);
 }
 
@@ -170,8 +173,24 @@ void test_start_button (void)
 
 void sound_enter_proc (void) __taskentry__
 {
-	*(uint8_t *)WPCS_DATA = test_index;
+	sound_send (test_index);
 	task_exit ();
+}
+
+
+
+void lamp_test_flash (void)
+{
+	for (;;)
+	{
+		lamp_toggle (test_index);
+		task_sleep_sec (TIME_100MS * 2);
+	}
+}
+
+void lamp_enter_proc (void) __taskentry__
+{
+	task_create_gid1 (GID_LAMP_TEST_SINGLE, lamp_test_flash);
 }
 
 
@@ -194,7 +213,7 @@ void rtc_print_deff (void) __taskentry__
 
 	dmd_draw_border (dmd_low_bytes);
 	dmd_show_low ();
-	task_sleep_sec (5);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 
@@ -244,6 +263,7 @@ void font_enter_proc (void) __taskentry__
 
 const test_t main_menu_items[] = {
 	{ "SOUNDS", &main_menu, 0, 0, TEST_ITEM(sound_enter_proc) },
+	{ "LAMPS", &main_menu, 0, 0, TEST_ITEM(lamp_enter_proc) },
 	{ "SOLENOIDS", &main_menu, 0, 0, TEST_ITEM(sol_enter_proc) },
 	{ "BALL DEVICES", &main_menu, 0, 0, TEST_ITEM(device_enter_proc) },
 	{ "RT CLOCK", &main_menu, 0, 0, TEST_ITEM(rtc_enter_proc) },

@@ -17,6 +17,7 @@
 uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
+#if 0
 extern void sw_left_coin_handler (void);
 extern void sw_right_coin_handler (void);
 extern void sw_center_coin_handler (void);
@@ -36,6 +37,7 @@ extern void sw_lock_handler  (void);
 
 extern void sw_tilt_handler  (void);
 extern void sw_slam_tilt_handler  (void);
+#endif
 
 
 /*
@@ -307,7 +309,10 @@ extern const switch_info_t
 	MACHINE_SW75, MACHINE_SW76, MACHINE_SW77, MACHINE_SW78,
 
 	MACHINE_SW81, MACHINE_SW82, MACHINE_SW83, MACHINE_SW84,
-	MACHINE_SW85, MACHINE_SW86, MACHINE_SW87, MACHINE_SW88;
+	MACHINE_SW85, MACHINE_SW86, MACHINE_SW87, MACHINE_SW88,
+
+	sw_unused, sw_right_flipper, sw_unused, sw_left_flipper,
+	sw_unused, sw_upper_right_flipper, sw_unused, sw_upper_left_flipper;
 
 
 static const switch_info_t *switch_table[NUM_SWITCHES] = {
@@ -338,6 +343,8 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 	&MACHINE_SW81, &MACHINE_SW82, &MACHINE_SW83, &MACHINE_SW84,
 	&MACHINE_SW85, &MACHINE_SW86, &MACHINE_SW87, &MACHINE_SW88,
 
+	&sw_unused, &sw_right_flipper, &sw_unused, &sw_left_flipper,
+	&sw_unused, &sw_upper_right_flipper, &sw_unused, &sw_upper_left_flipper,
 };
 
 
@@ -365,8 +372,10 @@ extern inline void switch_rowpoll (const uint8_t col)
 	 */
 	if (col == 0)
 		asm __volatile__ ("\tlda " STR(WPC_SW_CABINET_INPUT));
-	else
+	else if (col <= 8)
 		asm __volatile__ ("\tlda " STR(WPC_SW_ROW_INPUT));
+	else /* if (col == 9) */
+		asm __volatile__ ("\tlda " STR(WPC_FLIPTRONIC_PORT_A));
 
 	if (col < 8)
 	{
@@ -419,6 +428,9 @@ void switch_rtt (void)
 	switch_rowpoll (6);
 	switch_rowpoll (7);
 	switch_rowpoll (8);
+
+	/* Poll the flipper switches */
+	switch_rowpoll (9);
 }
 
 
@@ -427,8 +439,14 @@ void switch_sched (void)
 	const uint8_t sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
+	if ((swinfo->flags & SW_IN_GAME) && !in_game)
+		return;
+
 	if (swinfo->fn)
 		(*swinfo->fn) ();
+
+	if (swinfo->flags & SW_PLAYFIELD)
+		call_hook(any_pf_switch);
 
 	/* Debounce period after the switch has been handled */
 	task_sleep (TIME_100MS * 3);
@@ -445,7 +463,7 @@ void switch_idle_task (void)
 	uint8_t rawbits, pendbits;
 	uint8_t col;
 
-	for (col = 0; col < 9; col++)
+	for (col = 0; col <= 9; col++)
 	{
 		/* Disable interrupts while fiddling with the bits */
 		disable_irq ();

@@ -5,14 +5,22 @@ uint8_t free_play;
 uint8_t credit_count;
 uint8_t unit_count;
 
+void credits_render (void)
+{
+	if (free_play)
+		sprintf ("FREE PLAY");
+	else
+		sprintf ("CREDITS %d", credit_count);
+}
+
+
 void credits_draw (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_alloc_high_clean ();
 
-	sprintf ("CREDITS %d", credit_count);
+	credits_render ();
 	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
-
 	dmd_copy_low_to_high ();
 
 	if (credit_count == 0)
@@ -36,6 +44,7 @@ void credits_deff (void)
 }
 
 
+
 void add_credit (void)
 {
 	sound_send (SND_SCROLL);
@@ -47,6 +56,15 @@ void add_credit (void)
 bool has_credits_p (void)
 {
 	return (credit_count > 0);
+}
+
+
+void lamp_start_update (void)
+{
+	if (has_credits_p)
+		lamp_on (MACHINE_START_LAMP);
+	else
+		lamp_off (MACHINE_START_LAMP);
 }
 
 
@@ -123,5 +141,6 @@ void coin_init (void)
 {
 	credit_count = 0;
 	unit_count = 0;
-	free_play = 0;
+	free_play = FALSE;
 }
+

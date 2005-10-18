@@ -31,7 +31,8 @@ void music_change (music_code_t code)
 void sound_init (void)
 {
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
-	current_volume = 0;
+	current_volume = DEFAULT_VOLUME;
+	volume_update ();
 	music_off ();
 }
 
@@ -51,9 +52,14 @@ void sound_send (sound_code_t code)
 	else
 	{
 		*(volatile uint8_t *)WPCS_DATA = SND_START_EXTENDED;
-		task_sleep (TIME_16MS);
+		task_sleep (TIME_66MS);
 		*(volatile uint8_t *)WPCS_DATA = code_lo;
 	}
+}
+
+
+void volume_update (void)
+{
 }
 
 
@@ -62,6 +68,7 @@ void volume_deff (void) __taskentry__
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
 	font_render_string_center (&font_5x5, 64, 13, sprintf_buffer);
+	volume_update ();
 	music_change (2);
 	dmd_show_low ();
 	task_sleep_sec (4);

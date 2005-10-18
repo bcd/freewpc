@@ -379,7 +379,10 @@ void device_init (void)
 
 	device_count = 0;
 	for (dev=device_entry(0); dev < device_entry(MAX_DEVICES); dev++)
+	{
 		device_clear (dev);
+		device_call_op (dev, power_up);
+	}
 }
 
 

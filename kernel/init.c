@@ -51,14 +51,13 @@ void do_irq (void)
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x96;
 
 	/* Execute rtts every 1ms */
-	wpc_led_toggle ();
 #ifdef DEBUGGER
 	db_rtt ();
 #endif
 	switch_rtt ();
 	lamp_rtt ();
 	sol_rtt ();
-	triac_rtt ();
+	flipper_rtt ();
 	irq_count++;
 
 	irq_shift_count <<= 1;
@@ -68,6 +67,13 @@ void do_irq (void)
 
 		/* Execute rtts every 8ms */
 		tick_count++;
+		triac_rtt ();
+
+		if ((tick_count & 7) == 0)
+		{
+			/* Execute rtts every 64ms */
+			wpc_led_toggle ();
+		}
 	}
 }
 
@@ -117,23 +123,6 @@ void do_swi3 (void)
 }
 
 
-void idle (void)
-{
-}
-
-
-void lamp_c_demo (void) __taskentry__
-{
-	lampset_set_apply_delay (0);
-	lampset_apply_on (LAMPSET_ALL);
-
-	lampset_set_apply_delay (TIME_33MS);
-	for (;;)
-	{
-		lampset_apply_toggle (LAMPSET_ALL);
-	}
-}
-
 
 #pragma naked
 void do_reset (void) __noreturn__
@@ -179,6 +168,7 @@ void do_reset (void) __noreturn__
 	triac_init ();
 	dmd_init ();
 	switch_init ();
+	flipper_init ();
 	sound_init ();
 
 	device_init ();
@@ -189,6 +179,7 @@ void do_reset (void) __noreturn__
 	task_init ();
 	deff_init ();
 	test_init ();
+	score_init ();
 	call_hook (init);
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;
@@ -197,7 +188,6 @@ void do_reset (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	task_create_gid (GID_LAMP_DEMO, lamp_c_demo);
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
 	amode_start ();

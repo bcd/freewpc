@@ -33,7 +33,7 @@ void sw_up_button_handler (void) __taskentry__
 	test_up_button ();
 	
 	if (!in_test)
-		volume_down ();
+		volume_up ();
 
 	task_exit ();
 }

@@ -39,7 +39,7 @@ void end_game (void)
 	// return to attract mode
 
 	deff_stop (DEFF_SCORES);
-	deff_start (DEFF_AMODE);
+	amode_start ();
 }
 
 void end_ball (void)
@@ -101,6 +101,7 @@ void start_game (void)
 	in_bonus = FALSE;
 	in_tilt = FALSE;
 	num_players = 0;
+	scores_reset ();
 
 	call_hook (start_game);
 	add_player ();
@@ -109,7 +110,7 @@ void start_game (void)
 	extra_balls = 0;
 
 	start_ball ();
-	deff_stop (DEFF_AMODE);
+	amode_stop ();
 	deff_start (DEFF_SCORES);
 }
 
