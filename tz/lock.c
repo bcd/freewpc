@@ -1,7 +1,5 @@
 
 #include <freewpc.h>
-#include <mach/switch.h>
-#include <mach/coil.h>
 
 
 void sw_lock_handler (void)

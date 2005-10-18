@@ -49,6 +49,7 @@ void starfield_task (void)
 	star_create (14, 8);
 	task_sleep_sec (1);
 	star_create (1, 27);
+	task_sleep_sec (2);
 	task_exit ();
 }
 

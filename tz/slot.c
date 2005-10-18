@@ -17,8 +17,9 @@ DECLARE_SWITCH_DRIVER (sw_slot)
 
 void slot_kick_sound (void)
 {
-	task_sleep (TIME_100MS * 5);
+	task_sleep (TIME_100MS * 2);
 	sound_send (SND_SLOT_KICKOUT_1);
+	task_sleep (TIME_100MS * 3);
 	sound_send (SND_SLOT_KICKOUT_2);
 	task_exit ();
 }

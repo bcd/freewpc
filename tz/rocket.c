@@ -3,7 +3,6 @@
 #include <mach/switch.h>
 #include <mach/coil.h>
 
-
 void sw_rocket_handler (void)
 {
 	device_sw_handler (3);
@@ -13,6 +12,12 @@ DECLARE_SWITCH_DRIVER (sw_rocket)
 {
 	.fn = sw_rocket_handler,
 };
+
+void rocket_enter (void)
+{
+	static U8 score[] = { 0x00, 0x00, 0x04, 0x70 };
+	score_add_current (score);
+}
 
 void rocket_kick_sound (void)
 {
@@ -31,6 +36,7 @@ void rocket_kick_attempt (device_t *dev)
 
 
 device_ops_t rocket_ops = {
+	.enter = rocket_enter,
 	.kick_attempt = rocket_kick_attempt,
 };
 

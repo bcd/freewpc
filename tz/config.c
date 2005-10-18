@@ -11,7 +11,7 @@
  * column 1, etc. to column 8.
  */
 const uint8_t mach_opto_mask[] = {
-	0x00, 0x00, 0x28, 0x0, 0x0, 0x10, 0x0, 0x3E, 0x5D,
+	0x00, 0x00, 0x28, 0x0, 0x0, 0x10, 0x0, 0x3E, 0x5D, 0xFF,
 };
 
 
@@ -27,7 +27,7 @@ const uint8_t mach_opto_mask[] = {
  * they change state (the device count goes up or down).
  */
 const uint8_t mach_edge_switches[] = {
-	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98,
+	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98, 0x00,
 };
 
 void tz_init (void)
@@ -49,7 +49,13 @@ void tz_start_game (void)
 
 void tz_add_player (void)
 {
-	sound_send (SND_PLAYER_ONE + num_players - 1);
+	if (num_players > 1)
+		sound_send (SND_PLAYER_ONE + num_players - 1);
+}
+
+
+void tz_any_pf_switch (void)
+{
 }
 
 
@@ -57,5 +63,6 @@ machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
 	.add_player = tz_add_player,
 	.init = tz_init,
+	.any_pf_switch = tz_any_pf_switch,
 };
 
