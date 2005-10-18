@@ -1,8 +1,9 @@
 
 #include <freewpc.h>
 
-#pragma section ("font")
+#define DECLARE_PAGED	_Pragma ("section (\"font\")")
 
+DECLARE_PAGED
 const uint8_t font_5x5_alpha_cap[][5] = {
 	{ 4, 10, 31, 17, 17 },
 	{ 7, 9, 7, 9, 7 },

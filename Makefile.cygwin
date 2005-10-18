@@ -20,7 +20,8 @@
 MACHINE ?= tz
 
 # Set this to the path where the final ROM image should be installed
-TARGET_ROMPATH = /home/bcd/eptools/mameroms
+# TARGET_ROMPATH = /home/bcd/eptools/mameroms
+TARGET_ROMPATH = /cygdrive/c/personal_COPIED/pinmame/roms/tz_92
 
 # Which version of the assembler tools to use
 ASVER ?= 3.0.0
@@ -75,10 +76,13 @@ TMPFILES += $(ERR)
 #######################################################################
 
 # Path to the compiler and linker
+#CC = /usr/local/m6809/bin/gcc
+#LD = as-$(ASVER)/asxmak/linux/exe/aslink
+#AS = as-$(ASVER)/asxmak/linux/exe/as6809 
 CC = /usr/local/bin/gcc09
-# LD = /usr/local/bin/ld09
-LD = /home/bcd/bin/aslink
-REQUIRED += $(CC) $(LD)
+LD = /usr/local/bin/ld09
+AS = /usr/local/bin/as09
+REQUIRED += $(CC) $(LD) $(AS)
 
 # Name of the rommer to use
 # ROMMER = srec_cat
@@ -92,6 +96,7 @@ PATH_REQUIRED += $(BLANKER)
 # The XBM prototype generator
 XBMPROTO = tools/xbmproto
 
+
 #######################################################################
 ###	Source and Binary Filenames
 #######################################################################
@@ -103,7 +108,7 @@ PAGED_SECTIONS = font
 FIXED_SECTION = sysrom
 
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
-	switches.o flip.o sound.o coin.o service.o game.o test.o \
+	switches.o sound.o coin.o service.o game.o test.o \
 	device.o lampset.o score.o deff.o triac.o paging.o db.o \
 	trough.o font.o printf.o tilt.o vector.o
 
@@ -114,6 +119,7 @@ XBM_OBJS = images/freewpc.o images/brian.o
 OS_INCLUDES = include/freewpc.h include/wpc.h
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
+
 
 
 XBM_SRCS = $(patsubst %.o,%.xbm,$(XBM_OBJS))
@@ -171,6 +177,7 @@ CFLAGS += -Werror-implicit-function-declaration
 # The following variables group different object files into
 # "pages", which are like sections...
 #
+
 
 RAM_ADDR = 0x0
 PAGED_ROM_ADDR = 0x4000
@@ -334,18 +341,18 @@ $(LINKCMD) : $(DEPS)
 # is invoked first.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
-	@echo Assembling $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
+	@echo Assembling $< ... && $(CC) -o $@ -c $< 2>&1 | tee -a err
+# removed -x assembler-with-cpp
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
-	@echo Assembling page header $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
+	@echo Assembling page header $< ... && $(CC) -o $@ -c $< 2>&1 | tee -a err
 
 #
 # General rule for how to build any C module.
-# TODO:
 #
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
@@ -374,6 +381,12 @@ xbmprotos: $(XBM_H)
 $(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
 	@echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
 
+
+#######################################################################
+###	Other Targets
+#######################################################################
+
+
 #
 # 'make gcc' will build the compiler.  It uses a homegrown script
 # 'gccbuild' to control the entire link process.
@@ -390,6 +403,7 @@ gcc:
 
 gcc-%:
 	cd gcc-build && ./gccbuild %
+
 
 #
 # 'make astools' will build the assembler, linker, and library
@@ -408,6 +422,7 @@ astools-build:
 astools-%:
 	cd as-$(ASVER)/asxmak/linux/build && make $*
 
+
 #
 # How to build the srec2bin utility, which is a simple S-record to
 # binary converter suitable for what we need.
@@ -417,7 +432,15 @@ srec2bin: tools/srec2bin/srec2bin
 tools/srec2bin/srec2bin : tools/srec2bin/srec2bin.c
 	cd tools/srec2bin && make srec2bin
 
+
+
+#######################################################################
+###	Extra Dependencies
+#######################################################################
+
 kernel/switches.o : include/$(MACHINE)/switch.h
+
+
 
 #
 # 'make clean' does what you think.
@@ -428,10 +451,12 @@ clean: clean_derived
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
 clean_derived:
-	@for file in `echo $(XBM_H)` ;\
-		do echo "Removing derived file $$file..." && \
+	@for file in `echo images/xbmproto.h`;\
+		do echo Removing derived file $$file... && \
 		rm -f $$file; done
+
 
 show_objs:
 	@echo $(OBJS)
+
 
