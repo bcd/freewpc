@@ -14,9 +14,9 @@
  */
 typedef unsigned char bool;
 typedef unsigned char bcd_t;
-typedef char int8_t, I8;
+typedef char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
-typedef int int16_t, I16;
+typedef int int16_t, I16, S16;
 typedef unsigned int uint16_t, U16;
 
 /*
@@ -50,6 +50,7 @@ typedef unsigned int uint16_t, U16;
 #include <sys/sol.h>
 #include <sys/lamp.h>
 #include <sys/switch.h>
+#include <sys/flip.h>
 #include <sys/sound.h>
 #include <sys/dmd.h>
 #include <sys/triac.h>
@@ -67,6 +68,7 @@ typedef unsigned int uint16_t, U16;
 #include <mach/switch.h>
 #include <mach/coil.h>
 #include <mach/sound.h>
+#include <mach/lamp.h>
 
 /* From here on are any headers that are dependent on machine
  * specific features being defined */

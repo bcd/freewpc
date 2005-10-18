@@ -261,22 +261,43 @@ extern inline void wpc_irq_clear (void)
 }
 
 
+/***************************************************************
+ * Flippers
+ ***************************************************************/
 
-extern inline U8 wpc_get_jumpers (void)
-{
-	return *(volatile U8 *)WPC_SW_JUMPER_INPUT;
-}
+#define WPC_LR_FLIP_POWER	0x1
+#define WPC_LR_FLIP_HOLD	0x2
+#define WPC_LL_FLIP_POWER	0x4
+#define WPC_LL_FLIP_HOLD	0x8
+#define WPC_UR_FLIP_POWER	0x10
+#define WPC_UR_FLIP_HOLD	0x20
+#define WPC_UL_FLIP_POWER	0x40
+#define WPC_UL_FLIP_HOLD	0x80
 
+#define WPC_LR_FLIP_EOS		0x1
+#define WPC_LR_FLIP_SW		0x2
+#define WPC_LL_FLIP_EOS		0x4
+#define WPC_LL_FLIP_SW		0x8
+#define WPC_UR_FLIP_EOS		0x10
+#define WPC_UR_FLIP_SW		0x20
+#define WPC_UL_FLIP_EOS		0x40
+#define WPC_UL_FLIP_SW		0x80
 
-extern inline U8 wpc_get_flipper_a (void)
+extern inline U8 wpc_read_flippers (void)
 {
 	return *(volatile U8 *)WPC_FLIPTRONIC_PORT_A;
 }
 
 
-extern inline U8 wpc_get_flipper_b (void)
+extern inline void wpc_write_flippers (U8 val)
 {
-	return *(volatile U8 *)WPC_FLIPTRONIC_PORT_B;
+	*(volatile U8 *)WPC_FLIPTRONIC_PORT_A = val;
+}
+
+
+extern inline U8 wpc_get_jumpers (void)
+{
+	return *(volatile U8 *)WPC_SW_JUMPER_INPUT;
 }
 
 
@@ -309,6 +330,9 @@ extern inline void wpc_write_ticket (U8 val)
 #define GID_SW_HANDLER				9
 #define GID_FIRST_TASK				10
 #define GID_STARFIELD				11
+#define GID_LAMP_UPDATE				12
+#define GID_LAMP_TEST_SINGLE		13
+#define GID_RIGHT_RAMP_ENTERED	14
 
 #endif /* _WPC_H */
 

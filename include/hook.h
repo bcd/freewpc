@@ -31,6 +31,7 @@ typedef struct machine_hooks
 	void (*credit_added) (void);
 	void (*volume_change) (void);
 	void (*ball_search) (void);
+	void (*any_pf_switch) (void);
 } machine_hooks_t;
 
 

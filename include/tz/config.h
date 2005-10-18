@@ -62,7 +62,7 @@
 #define MACHINE_LAUNCH_SOLENOID
 
 /* Define the standard lamps */
-#define MACHINE_START_LAMP
+#define MACHINE_START_LAMP		LM_START_BUTTON
 
 /* Define optional lamps */
 #define MACHINE_BUYIN_LAMP
@@ -73,6 +73,11 @@ extern const uint8_t mach_opto_mask[];
 /* Declare the array of edge switches, defined elsewhere */
 extern const uint8_t mach_edge_switches[];
 
+/* Declare the global machine hooks */
 #define MACHINE_HOOKS tz_hooks
+
+void amode_left_flipper (void);
+void amode_right_flipper (void);
+
 
 #endif /* MACH_CONFIG_H */

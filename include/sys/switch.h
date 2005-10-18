@@ -8,6 +8,8 @@ typedef uint8_t switchnum_t;
 #define SW_OPTICAL	0x01 /* Switch is active when it is _open_ */
 #define SW_EDGE		0x02 /* Switch is handled on any edge */
 #define SW_PLAY		0x04 /* Switch marks a ball as 'in play' */
+#define SW_IN_GAME	0x08 /* Only service switch during a game */
+#define SW_PLAYFIELD	0x10 /* Declares that switch is 'on the playfield' */
 
 /** Switch handler prototype form */
 typedef void (*switch_handler_t) (void);
@@ -26,7 +28,10 @@ typedef struct
 
 #define NUM_PF_SWITCHES 64
 #define NUM_DEDICATED_SWITCHES 8
-#define NUM_SWITCHES (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES)
+#define NUM_FLIPPER_SWITCHES 8
+
+#define NUM_SWITCHES (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES + NUM_FLIPPER_SWITCHES)
+
 #define SWITCH_BITS_SIZE	(NUM_SWITCHES / 8)
 
 #define SW_COL(x)			((x) >> 3)
@@ -54,6 +59,16 @@ typedef struct
 #define SW_TROUGH4				0
 #define SW_TROUGH5				0
 #define SW_TROUGH6				0
+
+/* Flipper switches */
+#define SW_LR_FLIP_EOS			MAKE_SWITCH(9,1)
+#define SW_LR_FLIP_SW			MAKE_SWITCH(9,2)
+#define SW_LL_FLIP_EOS			MAKE_SWITCH(9,3)
+#define SW_LL_FLIP_SW			MAKE_SWITCH(9,4)
+#define SW_UR_FLIP_EOS			MAKE_SWITCH(9,5)
+#define SW_UR_FLIP_SW			MAKE_SWITCH(9,6)
+#define SW_UL_FLIP_EOS			MAKE_SWITCH(9,7)
+#define SW_UL_FLIP_SW			MAKE_SWITCH(9,8)
 
 /* Always closed switch */
 #ifndef SW_ALWAYS_CLOSED

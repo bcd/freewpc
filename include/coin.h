@@ -2,6 +2,7 @@
 #ifndef _COIN_H
 #define _COIN_H
 
+void credits_render (void);
 void credits_draw (void);
 void credit_added_deff (void);
 void add_credit (void);

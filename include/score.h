@@ -11,17 +11,29 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[(MAX_SCORE_DIGITS + 1)/2];
 
+/** Macros for adding to the CURRENT score; these are shortcuts **/
+
+extern volatile U8 score_change;
+extern U8 scores[4][4];
+extern U8 *current_score;
+
 void scores_draw (void);
+void scores_draw_ball (void);
+void scores_draw_current (void);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
 void score_add (score_t *s1, score_t *s2);
 void score_sub (score_t *s1, score_t *s2);
 void score_mul (score_t *s1, uint8_t multiplier);
 int score_compare (score_t *s1, score_t *s2);
+void scores_reset (void);
+void score_init (void);
 
-extern volatile U8 score_change;
+extern inline void score_add_current (score_t *s)
+{
+	score_add ((score_t *)current_score, s);
+	score_change++;
+}
 
-extern U8 scores[4][4];
-extern U8 *current_score;
 
 #endif /* _SCORE_H */

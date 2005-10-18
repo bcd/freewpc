@@ -63,6 +63,8 @@ typedef uint8_t lampset_id_t;
  * The list of lampset IDs (this is mostly game-specific)
  */
 #define LAMPSET_ALL		0
+#define LAMPSET_ODDS		1
+#define LAMPSET_EVENS	2
 
 
 void lamp_init (void);
@@ -73,6 +75,8 @@ void lamp_toggle (lampnum_t lamp);
 int lamp_test (lampnum_t lamp);
 void lamp_flash (lampnum_t lamp);
 void lamp_noflash (lampnum_t lamp);
+void lamp_all_on (void);
+void lamp_all_off (void);
 
 void lampset_apply (lampset_id_t id, lamp_operator_t op);
 void lampset_apply_on (lampset_id_t id);
