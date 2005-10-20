@@ -7,6 +7,24 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
+/*
+ * An active switch is one which has transitioned and is eligible
+ * for servicing, but is undergoing additional debounce logic.
+ * This struct tracks the switch number, its state, and the
+ * debounce timer.
+ *
+ * There are a finite number of these objects; when the hardware
+ * detects a transition, it will either allocate a new slot or
+ * re-use an existing slot for the same switch that did not
+ * complete its debounce cycle.
+ */
+typedef struct
+{
+	U8 id;
+	U8 timer;
+} pending_switch_t;
+
+
 /* Define shorthand names for the various arrays of switch bits */
 #define switch_raw_bits			switch_bits[AR_RAW]
 #define switch_changed_bits	switch_bits[AR_CHANGED]
@@ -442,11 +460,21 @@ void switch_sched (void)
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
 		return;
 
+	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
+		call_hook(any_pf_switch);
+
+	if ((swinfo->flags & SW_PLAY) && !ball_in_play)
+		mark_ball_in_play ();
+
+	if (swinfo->lamp != 0)
+	{
+	}
+
+	if ((swinfo->sound != 0) && in_live_game)
+		sound_send (swinfo->sound);
+
 	if (swinfo->fn)
 		(*swinfo->fn) ();
-
-	if (swinfo->flags & SW_PLAYFIELD)
-		call_hook(any_pf_switch);
 
 	/* Debounce period after the switch has been handled */
 	task_sleep (TIME_100MS * 3);

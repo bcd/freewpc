@@ -20,6 +20,7 @@ typedef struct
 
 #define MAX_QUEUED_DEFFS 16
 
+#if 0 /* these are now in include/gendefine_deff.h */
 #define DEFF_NULL				0
 #define DEFF_COIN_INSERT	1
 #define DEFF_TEST_MENU		2
@@ -32,6 +33,7 @@ typedef struct
 #define DEFF_TILT				9
 #define DEFF_TILT_WARNING	10
 #define DEFF_SLAM_TILT		11
+#endif
 
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);

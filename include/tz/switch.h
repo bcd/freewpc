@@ -86,6 +86,12 @@
 #define MACHINE_SW23				sw_buyin_button
 #define MACHINE_SW28				sw_rocket
 
+#define MACHINE_SW31				sw_left_jet
+#define MACHINE_SW32				sw_right_jet
+#define MACHINE_SW33				sw_bottom_jet
+
+#define MACHINE_SW34				sw_left_sling
+#define MACHINE_SW35				sw_right_sling
 #define MACHINE_SW36				sw_left_outlane
 #define MACHINE_SW37				sw_left_inlane_1
 #define MACHINE_SW38				sw_left_inlane_2

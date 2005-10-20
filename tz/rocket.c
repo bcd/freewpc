@@ -13,7 +13,7 @@ DECLARE_SWITCH_DRIVER (sw_rocket)
 	.fn = sw_rocket_handler,
 };
 
-void rocket_enter (void)
+void rocket_enter (device_t *dev)
 {
 	static U8 score[] = { 0x00, 0x00, 0x04, 0x70 };
 	score_add_current (score);
@@ -27,10 +27,13 @@ void rocket_kick_sound (void)
 
 void rocket_kick_attempt (device_t *dev)
 {
-	db_puts ("Sending rocket kick sound\n");
-	sound_send (SND_ROCKET_KICK_REVVING);
-	task_sleep (TIME_100MS * 7);
-	task_create_gid (0, rocket_kick_sound);
+	if (in_game && !in_tilt)
+	{
+		db_puts ("Sending rocket kick sound\n");
+		sound_send (SND_ROCKET_KICK_REVVING);
+		task_sleep (TIME_100MS * 7);
+		task_create_gid (0, rocket_kick_sound);
+	}
 }
 
 

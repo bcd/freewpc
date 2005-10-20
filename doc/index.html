@@ -1,4 +1,6 @@
 
+<h1>FreeWPC - New Software for Your '90s Bally/Williams Pinball</h1>
+
 <h2>What is FreeWPC?</h2>
 
 <p><b>FreeWPC</b> is a free platform for developing replacement game ROMs for
@@ -9,8 +11,9 @@ rules.
 <p>FreeWPC only replaces your game ROM (the U6 chip), which contains all
 of the game code and dot matrix text/graphics.  In particular, sounds and
 music are NOT included in this chip, so you'll have to get by with
-reusing the same sounds/music as are provided normally.  (Perhaps another
-project could be started to add custom music?)
+reusing the same sounds/music as are provided normally.  This
+project is ambitious enough; perhaps others could work on replacement
+audio?
 
 <p>Some important features of FreeWPC:
 
@@ -21,8 +24,11 @@ decent C compiler for the 6809 CPU.  In some places, assembly language
 code is used for performance or to do some really low-level things.
 Using C over assembler should allow more people to get involved with the
 project.
+<li>Development can be done under Linux or under Windows using the
+Cygwin UNIX emulation suite.
 <li>The system is designed to be flexible and extensive.  Eventually,
-all generations of WPC should be supported.
+all generations of WPC should be supported, and multiple machines can
+be targeted using the same common core code.
 <li>Eventually, code should be able to run on an actual pinball machine;
 however, for now, FreeWPC ROMs should only be used in emulators such as
 Visual PinMame.  <b>Repeat: do not attempt to put a FreeWPC ROM in a 
@@ -44,12 +50,12 @@ You have been warned.
 
 <p>The initial target machine is <b>Twilight Zone</b>.  Preview Releases
 are being provided in binary format for those who would like to play
-around with these ROMs.
+around with these ROMs under PinMame or Visual Pinball.
 
 <p><a href="NOTREADY">Download Preview Release 1</a>.
 
 <p>Source code for the entire development platform will not be
-publicly released for some time, until things are fairly stable.
+publicly released yet, until things are more stable.
 
 <h2>Installation (PinMAME or Visual PinMAME)</h2>
 
@@ -60,7 +66,8 @@ version of the ROM file for when you want to revert back.
 
 <h2>Internal Design</h2>
 
-<p>I've written a short paper on <a href="freewpc_design.html">the design of FreeWPC</a>.
+<p>I've written a short paper on 
+<a href="freewpc_design.html">the design of FreeWPC</a>.
 New developers should definitely take a look at this before getting
 involved.  It covers some basic embedded systems concepts as well
 as describing how some of the features are implemented.  It also explains
@@ -84,7 +91,7 @@ no graphics.  Anyone with experience and interest to work on that should
 let me know.
 <li>The code has not been thoroughly optimized.  I've tried to address
 grotesque wasteful uses of CPU and memory, but there is much to be done
-in this area.
+in this area.  The compiler is, sadly, not the greatest.
 </ul>
 
 <h2>Want to Help?</h2>

@@ -318,6 +318,7 @@ extern inline void wpc_write_ticket (U8 val)
  * Task Groups
  ***************************************************************/
 
+#if 0 /* these are now in gendefine_gid.h */
 #define GID_NONE						0
 #define GID_TEST_BANNER				1
 #define GID_DEFF						2
@@ -333,6 +334,7 @@ extern inline void wpc_write_ticket (U8 val)
 #define GID_LAMP_UPDATE				12
 #define GID_LAMP_TEST_SINGLE		13
 #define GID_RIGHT_RAMP_ENTERED	14
+#endif
 
 #endif /* _WPC_H */
 

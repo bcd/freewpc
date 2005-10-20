@@ -1,7 +1,7 @@
 
 #include <freewpc.h>
 
-U8 flippers_enabled;
+bool flippers_enabled;
 
 U8 flipper_inputs;
 
@@ -50,11 +50,15 @@ DECLARE_SWITCH_DRIVER (sw_upper_right_flipper) {
 
 void flipper_enable (void)
 {
+	flipper_triac_enable ();
+	flippers_enabled = TRUE;
 }
 
 
 void flipper_disable (void)
 {
+	flipper_triac_disable ();
+	flippers_enabled = FALSE;
 }
 
 
@@ -96,7 +100,7 @@ void flipper_rtt (void)
 
 void flipper_init (void)
 {
-	flippers_enabled = 1;
+	flipper_disable ();
 }
 
 

@@ -2,30 +2,27 @@
 #include <freewpc.h>
 
 extern void starfield_start (void);
-extern void starfield_stop (void);
-
-U8 amode_flipper_states;
 
 void amode_page_delay (U8 secs)
 {
 	U8 amode_flippers;
+	U8 amode_flippers_start;
 
 	/* Convert secs to 66ms ticks */
 	secs <<= 4;
 
+	amode_flippers_start = switch_poll_logical (SW_LL_FLIP_SW);
 	while (secs != 0)
 	{
 		task_sleep (TIME_66MS);
-		amode_flippers = (switch_poll_logical (SW_LL_FLIP_SW) ^
-				switch_poll_logical (SW_LL_FLIP_SW));
-		if ((amode_flippers != amode_flipper_states) &&
-			 (amode_flippers == TRUE))
+		amode_flippers = switch_poll_logical (SW_LL_FLIP_SW);
+
+		if ((amode_flippers != amode_flippers_start) &&
+			 (amode_flippers != 0))
 		{
-			amode_flipper_states = amode_flippers;
 			return;
 		}
-
-		amode_flipper_states = amode_flippers;
+		amode_flippers_start = amode_flippers;
 		secs--;
 	}
 }
@@ -120,7 +117,6 @@ void amode_deff (void) __taskentry__
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_5x5, 64, 20, "2005");
 		deff_swap_low_high (23, TIME_100MS * 2);
-		starfield_stop ();
 
 		for (i = 32; i != 0; --i)
 		{
@@ -137,11 +133,11 @@ void amode_deff (void) __taskentry__
 		/** Display 'custom message'? **/
 
 		/** Display rules hint **/
-		dmd_alloc_low ();
+		dmd_alloc_low_clean ();
 		dmd_draw_border (dmd_low_bytes);
-		font_render_string_center (&font_5x5, 64, 4, "HOLD FLIPPERS");
-		font_render_string_center (&font_5x5, 64, 11, "TO VIEW THE");
-		font_render_string_center (&font_5x5, 64, 18, "GAME RULES");
+		font_render_string_center (&font_5x5, 64, 5, "HOLD FLIPPERS");
+		font_render_string_center (&font_5x5, 64, 13, "TO VIEW THE");
+		font_render_string_center (&font_5x5, 64, 21, "GAME RULES");
 		dmd_show_low ();
 		amode_page_delay (5);
 	}
@@ -157,7 +153,6 @@ void amode_start (void)
 void amode_stop (void)
 {
 	deff_stop (DEFF_AMODE);
-	starfield_stop ();
 	task_kill_gid (GID_LAMP_DEMO);
 	lamp_all_off ();
 }

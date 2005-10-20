@@ -20,7 +20,9 @@ typedef struct
 {
 	void (*fn) (void);
 	uint8_t flags;
-	uint8_t pad[1]; /* Keep this aligned to a power of 2! */
+	uint8_t lamp;
+	sound_code_t sound;
+	uint8_t pad[3]; /* Keep this aligned to a power of 2! */
 } switch_info_t;
 
 

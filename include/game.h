@@ -14,18 +14,24 @@ extern uint8_t player_up;
 extern uint8_t ball_up;
 extern uint8_t extra_balls;
 
+#define in_live_game		(in_game && !in_tilt)
+
 void start_ball (void);
 void end_game (void);
 void end_ball (void);
 void start_ball (void);
+void mark_ball_in_play (void);
 void add_player (void);
 void start_game (void);
 void stop_game (void);
 bool verify_start_ok (void);
 void sw_start_button_handler (void) __taskentry__;
 void sw_buy_in_button_handler (void) __taskentry__;
+
 void sw_tilt_handler (void) __taskentry__;
 void sw_slam_tilt_handler (void) __taskentry__;
+void tilt_start_ball (void);
+
 void game_init (void);
 
 

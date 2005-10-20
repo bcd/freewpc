@@ -43,7 +43,7 @@ void tz_init (void)
 
 void tz_start_game (void)
 {
-	sound_send (SND_YOU_UNLOCK_THIS_DOOR);
+	sound_send (SND_DONT_TOUCH_DOOR_1);
 }
 
 
@@ -59,10 +59,33 @@ void tz_any_pf_switch (void)
 }
 
 
+void tz_bonus (void)
+{
+	task_sleep_sec (1);
+}
+
+
+void tz_tilt (void)
+{
+	sound_send (SND_TILT);
+	task_sleep_sec (3);
+	sound_send (SND_WITH_THE_DEVIL);
+}
+
+
+void tz_tilt_warning (void)
+{
+	sound_send (SND_TILT_WARNING);
+}
+
+
 machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
 	.add_player = tz_add_player,
 	.init = tz_init,
+	.bonus = tz_bonus,
+	.tilt = tz_tilt,
+	.tilt_warning = tz_tilt_warning,
 	.any_pf_switch = tz_any_pf_switch,
 };
 

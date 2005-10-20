@@ -49,9 +49,9 @@ typedef unsigned int uint16_t, U16;
 #include <sys/font.h>
 #include <sys/sol.h>
 #include <sys/lamp.h>
+#include <sys/sound.h>
 #include <sys/switch.h>
 #include <sys/flip.h>
-#include <sys/sound.h>
 #include <sys/dmd.h>
 #include <sys/triac.h>
 
@@ -69,6 +69,9 @@ typedef unsigned int uint16_t, U16;
 #include <mach/coil.h>
 #include <mach/sound.h>
 #include <mach/lamp.h>
+
+#include <gendefine_gid.h>
+#include <gendefine_deff.h>
 
 /* From here on are any headers that are dependent on machine
  * specific features being defined */

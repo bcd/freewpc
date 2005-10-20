@@ -74,30 +74,37 @@ void score_zero (score_t *s)
 	memset (s, 0, sizeof (score_t));
 }
 
-extern inline U8 __add_with_carry (U8 v1, U8 v2)
-{
-	asm volatile ("adcb\t%1" :: "d" (v1), "g" (v2));
-	asm volatile ("tfr b,a");
-	asm volatile ("daa");
-	asm volatile ("tfr a,b");
-	return v1;
-	// return v1 + v2;
-}
-
-extern inline void __daa (void)
-{
-	asm volatile ("daa");
-}
 
 void score_add (score_t *s1, score_t *s2)
 {
 	register bcd_t *bcd1 = (bcd_t *)s1;
 	register bcd_t *bcd2 = (bcd_t *)s2;
-	register int i = sizeof(score_t) - 1;
-	bcd1[i] += bcd2[i];
-	for (i=sizeof(score_t)-2; i >= 0; --i)
+	register S8 len;
+
+	bcd1 += sizeof (score_t)-1;
+	bcd2 += sizeof (score_t)-1;
+
+	asm volatile ("lda\t%0" :: "m" (*bcd1));
+	asm volatile ("adda\t%0" :: "m" (*bcd2));
+	asm volatile ("daa");
+	asm volatile ("sta\t%0" :: "m" (*bcd1));
+	bcd1--;
+	bcd2--;
+
+  	len = sizeof(score_t) - 2;
+	while (len > 0)
 	{
-		bcd1[i] = __add_with_carry (bcd1[i], bcd2[i]);
+	  /* TODO : possible compiler optimization could
+		* be done here. (in older implementation)
+		* stb ,x; leax -1,x => stb ,-x
+		*/
+		asm volatile ("lda\t%0" :: "m" (*bcd1));
+		asm volatile ("adca\t%0" :: "m" (*bcd2));
+		asm volatile ("daa");
+		asm volatile ("sta\t%0" :: "m" (*bcd1));
+		bcd1--;
+		bcd2--;
+		len--;
 	}
 }
 

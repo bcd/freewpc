@@ -69,10 +69,11 @@ void do_irq (void)
 		tick_count++;
 		triac_rtt ();
 
-		if ((tick_count & 7) == 0)
+		if ((tick_count & 3) == 0) /* 4 x 8ms */
 		{
-			/* Execute rtts every 64ms */
+			/* Execute rtts every 32ms */
 			wpc_led_toggle ();
+			sound_rtt ();
 		}
 	}
 }

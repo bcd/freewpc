@@ -1,16 +1,23 @@
 
 #include <freewpc.h>
 
+#define FREE_ONLY
+#define MAX_CREDITS 30
+
 uint8_t free_play;
 uint8_t credit_count;
 uint8_t unit_count;
 
 void credits_render (void)
 {
+#ifdef FREE_ONLY
+	sprintf ("FREE ONLY");
+#else
 	if (free_play)
 		sprintf ("FREE PLAY");
 	else
 		sprintf ("CREDITS %d", credit_count);
+#endif
 }
 
 
@@ -23,7 +30,7 @@ void credits_draw (void)
 	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
 	dmd_copy_low_to_high ();
 
-	if (credit_count == 0)
+	if (!has_credits_p ())
 	{
 		sprintf ("INSERT COINS");
 	}
@@ -47,15 +54,24 @@ void credits_deff (void)
 
 void add_credit (void)
 {
-	sound_send (SND_SCROLL);
-	deff_restart (DEFF_CREDITS);
-	credit_count++;
+	if (credit_count < MAX_CREDITS)
+	{
+		sound_send (SND_THUD);
+		deff_restart (DEFF_CREDITS);
+#ifndef FREE_ONLY
+		credit_count++;
+#endif
+	}
 }
 
 
 bool has_credits_p (void)
 {
+#ifndef FREE_ONLY
 	return (credit_count > 0);
+#else
+	return (TRUE);
+#endif
 }
 
 
@@ -70,8 +86,10 @@ void lamp_start_update (void)
 
 void remove_credit (void)
 {
+#ifndef FREE_ONLY
 	if (credit_count > 0)
 		credit_count--;
+#endif
 }
 
 
@@ -141,6 +159,10 @@ void coin_init (void)
 {
 	credit_count = 0;
 	unit_count = 0;
+#ifdef FREE_ONLY
+	free_play = TRUE;
+#else
 	free_play = FALSE;
+#endif
 }
 

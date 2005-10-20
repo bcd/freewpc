@@ -99,6 +99,8 @@ void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s
 		static uint8_t xb;
 		static uint8_t xr;
 
+		/* TODO : drawing to positions that are not 8-bit aligned
+		 * does not work, so force to proper alignment for now. */
 #if 11111
 	x &= ~7;
 #endif

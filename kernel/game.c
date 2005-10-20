@@ -49,7 +49,11 @@ void end_ball (void)
 	if (!in_game)
 		goto done;
 
+	flipper_disable ();
 	call_hook (end_ball);
+
+	if (!in_tilt)
+		call_hook (bonus);
 
 	if (extra_balls > 0)
 	{
@@ -82,10 +86,20 @@ done:
 void start_ball (void)
 {
 	db_puts ("In startball\n");
+	in_tilt = FALSE;
+	ball_in_play = FALSE;
 	call_hook (start_ball);
 	current_score = scores[player_up - 1];
 	score_change++;
 	device_request_kick (device_entry (DEV_TROUGH));
+	tilt_start_ball ();
+	flipper_enable ();
+}
+
+void mark_ball_in_play (void)
+{
+	ball_in_play = TRUE;		
+	call_hook (ball_in_play);
 }
 
 void add_player (void)

@@ -17,9 +17,7 @@ DECLARE_SWITCH_DRIVER (sw_slot)
 
 void slot_kick_sound (void)
 {
-	task_sleep (TIME_100MS * 2);
-	sound_send (SND_SLOT_KICKOUT_1);
-	task_sleep (TIME_100MS * 3);
+	task_sleep (TIME_100MS);
 	sound_send (SND_SLOT_KICKOUT_2);
 	task_exit ();
 }
@@ -27,7 +25,12 @@ void slot_kick_sound (void)
 void slot_kick_attempt (device_t *dev)
 {
 	db_puts ("Sending slot kick sound\n");
-	task_create_gid (0, slot_kick_sound);
+	if (in_game && !in_tilt)
+	{
+		sound_send (SND_SLOT_KICKOUT_1);
+		task_sleep (TIME_100MS * 7);
+		task_create_gid (0, slot_kick_sound);
+	}
 }
 
 

@@ -21,7 +21,10 @@ typedef struct machine_hooks
 	void (*start_game) (void);
 	void (*add_player) (void);
 	void (*start_ball) (void);
+	void (*ball_in_play) (void);
 	void (*end_ball) (void);
+	void (*bonus) (void);
+	void (*tilt_warning) (void);
 	void (*tilt) (void);
 	void (*slam_tilt) (void);
 	void (*replay) (void);

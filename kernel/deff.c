@@ -22,7 +22,7 @@ static const deff_t deff_table[] = {
 	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
 	[DEFF_CREDITS] = { D_NORMAL, 120, credits_deff },
 	[DEFF_TILT_WARNING] = { D_NORMAL, 200, tilt_warning_deff },
-	[DEFF_TILT] = { D_NORMAL, 205, tilt_deff }, /* should be D_RUNNING */
+	[DEFF_TILT] = { D_RUNNING, 205, tilt_deff },
 	[DEFF_SLAM_TILT] = { D_NORMAL, 210, tilt_deff },
 	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },
 	[DEFF_FONT_TEST] = { D_RUNNING, 250, font_test_deff },
@@ -79,7 +79,7 @@ static deffnum_t deff_get_highest_priority (void)
 {
 	uint8_t i;
 	uint8_t prio = 0;
-	uint8_t best = 0;
+	uint8_t best = DEFF_NULL;
 
 	for (i=0; i < MAX_QUEUED_DEFFS; i++)
 	{
@@ -236,7 +236,7 @@ void deff_swap_low_high (int8_t count, task_ticks_t delay)
 void deff_init (void)
 {
 	deff_prio = 0;
-	deff_active = 0x0;
+	deff_active = DEFF_NULL;
 	memset (deff_queue, 0, MAX_QUEUED_DEFFS);
 }
 

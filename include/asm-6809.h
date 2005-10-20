@@ -109,5 +109,17 @@ extern inline void *memmove (void *s1, const void *s2, long unsigned int n)
 }
 
 
+extern inline long unsigned int strlen (const char *s)
+{
+	long unsigned int len = 0;
+	while (*s != '\0')
+	{
+		len++;
+		s++;
+	}
+	return (len);
+}
+
+
 
 #endif /* _ASM_6809_H */

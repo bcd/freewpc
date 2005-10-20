@@ -1,14 +1,44 @@
 
 #include <freewpc.h>
+#include <queue.h>
 
 #if (MACHINE_DCS == 0)
 
-#define MUSIC_STACK_SIZE 8
+#define SOUND_QUEUE_LEN 8
 
+struct {
+	U8 head;
+	U8 tail;
+	U8 elems[SOUND_QUEUE_LEN];
+} sound_queue;
+
+#define MUSIC_STACK_SIZE 8
 
 __fastram__ music_code_t music_stack[MUSIC_STACK_SIZE];
 __fastram__ music_code_t *music_head;
 uint8_t current_volume;
+
+
+
+static void sound_queue_init (void)
+{
+	queue_init ((queue_t *)&sound_queue);
+}
+
+static void sound_queue_insert (U8 val)
+{
+	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val);
+}
+
+static U8 sound_queue_remove (void)
+{
+	return queue_remove ((queue_t *)&sound_queue, SOUND_QUEUE_LEN);
+}
+
+extern inline bool sound_queue_empty (void)
+{
+	return queue_empty ((queue_t *)&sound_queue);
+}
 
 
 void music_off (void)
@@ -19,7 +49,8 @@ void music_off (void)
 
 void music_set (music_code_t code)
 {
-	*music_head = *(uint8_t *)WPCS_DATA = code;
+	*music_head = code;
+	sound_queue_insert (code);
 }
 
 void music_change (music_code_t code)
@@ -28,10 +59,21 @@ void music_change (music_code_t code)
 		music_set (code);
 }
 
+
+void sound_rtt (void)
+{
+	if (!sound_queue_empty ())
+	{
+		*(volatile U8 *)WPCS_DATA = sound_queue_remove ();
+	}
+}
+
+
 void sound_init (void)
 {
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
 	current_volume = DEFAULT_VOLUME;
+	sound_queue_init ();
 	volume_update ();
 	music_off ();
 }
@@ -47,13 +89,12 @@ void sound_send (sound_code_t code)
 
 	if (code_hi == 0)
 	{
-		*(volatile uint8_t *)WPCS_DATA = code_lo;
+		sound_queue_insert (code_lo);
 	}
 	else
 	{
-		*(volatile uint8_t *)WPCS_DATA = SND_START_EXTENDED;
-		task_sleep (TIME_66MS);
-		*(volatile uint8_t *)WPCS_DATA = code_lo;
+		sound_queue_insert (SND_START_EXTENDED);
+		sound_queue_insert (code_lo);
 	}
 }
 
