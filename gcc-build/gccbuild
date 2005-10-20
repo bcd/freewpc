@@ -27,9 +27,8 @@ case $arg in
 	# I'm not using the Thomson assembler anymore ... I use
 	# the latest version of asxxxx tools.
 	asm)
-		cd ../asm-thomson && make clean
-		cd ../asm-thomson && make
-		cd ../asm-thomson && $SUDO make install
+		# cd .. && zcat asm-6809.tar.gz | tar xvf -
+		cd ../asm-thomson && make clean && make && $SUDO make install
 		;;
 
 	unpack)
