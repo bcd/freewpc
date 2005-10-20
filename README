@@ -16,3 +16,58 @@ The venerable Unix 'dd' utility is used to pad files to the correct
 size.  A tool called 'srec_cat' is used to convert from S-records into
 binary.
 
+
+======================
+Compiling the software
+======================
+
+1. First, you must build the gcc cross compiler.  This takes
+awhile and is performed in several steps:
+
+1a) Obtain a clean distribution of the gcc 3.1.1
+compiler and place it in the root directory as 
+gcc-3.1.1.tar.bz2.
+
+1b) Switch to the gcc-build subdirectory.
+
+1c) Run './gccbuild unpack'.  This will extract all of the
+core gcc files.
+
+1d) Run './gccbuild patch'.  This will patch the clean gcc
+with some new files.  TODO : this also needs to put in some
+of my local changes.  You'll need to have the 'patch' utility
+installed for this to work (you won't get this by default
+under Cygwin).
+
+[ I just ran cp -p gcc-patch/calls.c gcc-3.1.1/gcc/calls.c
+to do the TODO step by hand. ]
+
+1e) Configure the compiler for your host platform.
+Run './gccbuild config' to do this.  This will take about
+10 minutes under Cygwin.
+
+1f) Compile the cross-compiler.  Run './gccbuild compile'
+to do this.  This may take a while.
+The compiler will be installed into /usr/local/m6809/bin
+on your host system, and named 'gcc'.
+
+2. Build the Thomson binutils.  TODO: these need to be
+put under source control, to capture my changes to addr_t
+for Cygwin.
+
+3. Build the latest binutils -- the assembler and linker.
+These are under version 3.0.0 of the astools suite.
+From the top-level directory, run 'make astools'.
+These also get installed into /usr/local/m6809/bin.
+
+4. Configure the game which you want to compile.
+TODO, this is a manual step right now:
+
+cd include && ln -s tz mach
+
+5. Configure the installation directory (where your pinmame
+ROMs go)
+
+6. Build the code, using 'make'.
+
+
