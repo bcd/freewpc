@@ -7,12 +7,74 @@ const lampnum_t lampset_all[] = {
 	LAMP_END,
 };
 
+/********** Game specific lamp sets *****************/
+
+const lampnum_t lampset_spiral_awards[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_door_panel_awards[] = {
+	LM_PANEL_TSM,
+	LM_PANEL_EB,
+	LM_PANEL_SUPER_SLOT,
+	LM_PANEL_CLOCK_MIL,
+	LM_PANEL_SPIRAL,
+	LM_PANEL_BATTLE_POWER,
+	LM_PANEL_10M,
+	LM_PANEL_GREED,
+	LM_PANEL_CAMERA,
+	LM_PANEL_HH,
+	LM_PANEL_CLOCK_CHAOS,
+	LM_PANEL_SUPER_SKILL,
+	LM_PANEL_FAST_LOCK,
+	LM_PANEL_GUMBALL,
+	LAMP_END
+};
+
+const lampnum_t lampset_door_panels_and_handle[] = {
+	LAMP_MACRO_REF(LAMPSET_DOOR_PANELS),
+	LM_PANEL_LITZ,
+	LAMP_END
+};
+
+const lampnum_t lampset_left_ramp_awards[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_lock_awards[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_piano_awards[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_greed_targets[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_powerfield_values[] = {
+	LAMP_END
+};
+
+const lampnum_t lampset_jets[] = {
+	LAMP_END
+};
+
 
 /*
  * Lampsets are statically registered in the following table.
  */
 const lampnum_t *lampset_table[] = {
 	[LAMPSET_ALL] = lampset_all,
+	[LAMPSET_DOOR_PANELS] = lampset_door_panel_awards,
+	[LAMPSET_DOOR_PANELS_AND_HANDLE] = lampset_door_panels_and_handle,
+	[LAMPSET_LEFT_RAMP_AWARDS] = lampset_left_ramp_awards,
+	[LAMPSET_LOCK_AWARDS] = lampset_lock_awards,
+	[LAMPSET_PIANO_AWARDS] = lampset_piano_awards,
+	[LAMPSET_GREED_TARGETS] = lampset_greed_targets,
+	[LAMPSET_POWERFIELD_VALUES] = lampset_powerfield_values,
+	[LAMPSET_JETS] = lampset_jets,
 };
 
 
@@ -48,6 +110,10 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				for (opcode = lset[0]; opcode < lset[1]; opcode++)
 					lampset_invoke_operator (opcode, op);
 				lset += 2;
+				break;
+
+			case LAMP_MACRO_REF_OP:
+				lampset_apply (lset[0], op);
 				break;
 
 			default:

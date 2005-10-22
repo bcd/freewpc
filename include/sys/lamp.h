@@ -5,6 +5,10 @@
 
 #define NUM_LAMP_COLS	8
 
+#define MAKE_LAMP(col,row)	(((col-1) * 8) + row-1)
+
+/* The lamp flash state is updated every 32ms, so this will
+ * toggle the lamp flash state about 4 times/sec */
 #define LAMP_DEFAULT_FLASH_RATE 8
 
 
@@ -59,15 +63,9 @@ typedef uint8_t lampset_id_t;
 
 #define LAMP_END LAMP_END_OP
 
-/*
- * The list of lampset IDs (this is mostly game-specific)
- */
-#define LAMPSET_ALL		0
-#define LAMPSET_ODDS		1
-#define LAMPSET_EVENS	2
-
 
 void lamp_init (void);
+void lamp_flash_rtt (void);
 void lamp_rtt (void);
 void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);

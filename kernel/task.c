@@ -23,6 +23,8 @@ __fastram__ uint16_t task_save_U, task_save_X;
 
 task_t task_buffer[NUM_TASKS];
 
+U8 task_idle_count;
+
 #define DEBUG_TASKS
 
 #ifdef DEBUG_TASKS
@@ -362,6 +364,10 @@ void task_dispatcher (void)
 			/* Execute idle tasks on system stack */
 			set_stack_pointer (STACK_BASE);
 
+			/* Increment counter for number of times we run
+			 * the idle code. */
+			task_idle_count++;
+
 			/* Call idle tasks */
 			switch_idle_task ();
 
@@ -399,6 +405,7 @@ void task_init (void)
 	extern uint8_t tick_count;
 
 	memset (task_buffer, 0, sizeof (task_buffer));
+	task_idle_count = 0;
 
 #ifdef DEBUG_TASKS
 	task_count = 0;

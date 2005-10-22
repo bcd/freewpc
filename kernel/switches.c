@@ -477,7 +477,7 @@ void switch_sched (void)
 		(*swinfo->fn) ();
 
 	/* Debounce period after the switch has been handled */
-	task_sleep (TIME_100MS * 3);
+	task_sleep (TIME_100MS * 1); /* was 300ms!!! */
 
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
 	register uint8_t v = sw;

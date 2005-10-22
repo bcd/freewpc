@@ -11,6 +11,8 @@
 
 #define NUM_TASKS				16
 
+extern U8 task_idle_count;
+
 typedef uint8_t task_gid_t;
 
 typedef uint8_t task_ticks_t;

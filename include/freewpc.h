@@ -72,6 +72,7 @@ typedef unsigned int uint16_t, U16;
 
 #include <gendefine_gid.h>
 #include <gendefine_deff.h>
+#include <gendefine_lampset.h>
 
 /* From here on are any headers that are dependent on machine
  * specific features being defined */

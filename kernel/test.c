@@ -178,19 +178,17 @@ void sound_enter_proc (void) __taskentry__
 }
 
 
-
-void lamp_test_flash (void)
+void sound2_enter_proc (void) __taskentry__
 {
-	for (;;)
-	{
-		lamp_toggle (test_index);
-		task_sleep_sec (TIME_100MS * 2);
-	}
+	sound_send (0x100 + test_index);
+	task_exit ();
 }
+
 
 void lamp_enter_proc (void) __taskentry__
 {
-	task_create_gid1 (GID_LAMP_TEST_SINGLE, lamp_test_flash);
+	lamp_flash (test_index);
+	task_exit ();
 }
 
 
@@ -262,7 +260,8 @@ void font_enter_proc (void) __taskentry__
 
 
 const test_t main_menu_items[] = {
-	{ "SOUNDS", &main_menu, 0, 0, TEST_ITEM(sound_enter_proc) },
+	{ "SOUNDS 1", &main_menu, 0, 0, TEST_ITEM(sound_enter_proc) },
+	{ "SOUNDS 2", &main_menu, 0, 0, TEST_ITEM(sound2_enter_proc) },
 	{ "LAMPS", &main_menu, 0, 0, TEST_ITEM(lamp_enter_proc) },
 	{ "SOLENOIDS", &main_menu, 0, 0, TEST_ITEM(sol_enter_proc) },
 	{ "BALL DEVICES", &main_menu, 0, 0, TEST_ITEM(device_enter_proc) },

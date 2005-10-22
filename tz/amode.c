@@ -57,14 +57,14 @@ void amode_leff (void) __taskentry__
 	for (;;)
 	{
 		lampset_set_apply_delay (0);
-		lampset_apply_on (LAMPSET_ALL);
+		lampset_apply_off (LAMPSET_ALL);
 
-		lampset_set_apply_delay (TIME_33MS);
-		lampset_apply_toggle (LAMPSET_ALL);
+		lampset_set_apply_delay (TIME_100MS);
+		for (i=0; i < 4; i++)
+		{
+			lampset_apply_toggle (LAMPSET_DOOR_PANELS_AND_HANDLE);
+		}
 	
-		lampset_set_apply_delay (TIME_16MS);
-		lampset_apply_toggle (LAMPSET_ALL);
-
 		lampset_set_apply_delay (0);
 		for (i=0; i < 64; i += 2)
 			lamp_on (i);

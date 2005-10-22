@@ -96,9 +96,20 @@
 #define MACHINE_SW37				sw_left_inlane_1
 #define MACHINE_SW38				sw_left_inlane_2
 
+#define MACHINE_SW48				sw_greed
+
+#define MACHINE_SW53				sw_left_ramp_enter
+#define MACHINE_SW54				sw_left_ramp_exit
 #define MACHINE_SW58				sw_slot
 
+#define MACHINE_SW64				sw_greed
+#define MACHINE_SW66				sw_greed
+#define MACHINE_SW67				sw_greed
+#define MACHINE_SW68				sw_greed
+
 #define MACHINE_SW73				sw_right_ramp
+#define MACHINE_SW77				sw_greed
+#define MACHINE_SW78				sw_greed
 
 #define MACHINE_SW84				sw_lock
 #define MACHINE_SW85				sw_lock

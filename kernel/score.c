@@ -75,14 +75,14 @@ void score_zero (score_t *s)
 }
 
 
-void score_add (score_t *s1, score_t *s2)
+void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 {
-	register bcd_t *bcd1 = (bcd_t *)s1;
-	register bcd_t *bcd2 = (bcd_t *)s2;
-	register S8 len;
+	register bcd_t *bcd1 = s1;
+	register bcd_t *bcd2 = s2;
+	register bcd_t len = _len;
 
-	bcd1 += sizeof (score_t)-1;
-	bcd2 += sizeof (score_t)-1;
+	bcd1 += len-1;
+	bcd2 += len-1;
 
 	asm volatile ("lda\t%0" :: "m" (*bcd1));
 	asm volatile ("adda\t%0" :: "m" (*bcd2));
@@ -90,8 +90,8 @@ void score_add (score_t *s1, score_t *s2)
 	asm volatile ("sta\t%0" :: "m" (*bcd1));
 	bcd1--;
 	bcd2--;
+  	len--;
 
-  	len = sizeof(score_t) - 2;
 	while (len > 0)
 	{
 	  /* TODO : possible compiler optimization could
