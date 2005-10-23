@@ -34,11 +34,13 @@ uint8_t test_index;
 
 void test_start (void)
 {
+	in_test = 1;
 	end_game ();
 	amode_stop ();
 	test_menu = &main_menu;
-	in_test = 1;
+	test_index = 0;
 	deff_restart (DEFF_TEST_MENU);
+	sound_reset ();
 	sound_send (SND_ENTER);
 }
 

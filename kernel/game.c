@@ -38,6 +38,7 @@ void end_game (void)
 	// do match sequence
 	// return to attract mode
 
+	call_hook (end_game);
 	deff_stop (DEFF_SCORES);
 	amode_start ();
 }
@@ -94,6 +95,7 @@ void start_ball (void)
 	device_request_kick (device_entry (DEV_TROUGH));
 	tilt_start_ball ();
 	flipper_enable ();
+	triac_enable (TRIAC_GI_MASK);
 }
 
 void mark_ball_in_play (void)
@@ -117,15 +119,16 @@ void start_game (void)
 	num_players = 0;
 	scores_reset ();
 
-	call_hook (start_game);
 	add_player ();
 	player_up = 1;
 	ball_up = 1;
 	extra_balls = 0;
 
-	start_ball ();
-	amode_stop ();
 	deff_start (DEFF_SCORES);
+	amode_stop ();
+	call_hook (start_game);
+
+	start_ball ();
 }
 
 void stop_game (void)

@@ -17,6 +17,14 @@ uint8_t *pulse_queue_head;
 uint8_t *pulse_queue_tail;
 uint8_t pulse_queue[8];
 
+typedef struct sol_pulse {
+	U8 *sol_cache;
+	U8 sol_bitmask;
+	U8 sol_active_high;
+	U8 sol_on_irqs;
+	U8 sol_off_irqs;
+} sol_pulse_t;
+
 
 uint8_t sol_calc_cksum (void)
 {

@@ -17,8 +17,8 @@ extern void slam_tilt_deff (void) __taskentry__;
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
 	[DEFF_TEST_MENU] = { D_RUNNING, 5, test_menu_deff },
-	[DEFF_SCORES] = { D_RUNNING, 10, scores_deff },
-	[DEFF_AMODE] = { D_RUNNING, 20, amode_deff },
+	[DEFF_AMODE] = { D_RUNNING, 10, amode_deff },
+	[DEFF_SCORES] = { D_RUNNING, 30, scores_deff },
 	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
 	[DEFF_CREDITS] = { D_NORMAL, 120, credits_deff },
 	[DEFF_TILT_WARNING] = { D_NORMAL, 200, tilt_warning_deff },
@@ -192,7 +192,7 @@ void deff_start_highest_priority (void)
 	db_puts ("Restarting highest priority deff\n");
 
 	deff_active = deff_get_highest_priority ();
-	if (deff_active != 0)
+	if (deff_active != DEFF_NULL)
 	{
 		const deff_t *deff = &deff_table[deff_active];
 		db_puts ("Recreating deff task\n");

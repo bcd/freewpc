@@ -108,6 +108,15 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 	}
 }
 
+
+void score_add_current (bcd_t *s)
+{
+	score_add (current_score, s, sizeof (score_t));
+	score_change++;
+	/* check replay */
+}
+
+
 void score_sub (score_t *s1, score_t *s2)
 {
 }

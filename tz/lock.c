@@ -16,6 +16,7 @@ DECLARE_SWITCH_DRIVER (sw_lock)
 		
 void lock_enter (device_t *dev)
 {
+	score_add_current_const (0x7500);
 }
 
 void lock_kick_attempt (device_t *dev)

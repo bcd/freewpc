@@ -44,6 +44,24 @@ void tz_init (void)
 void tz_start_game (void)
 {
 	sound_send (SND_DONT_TOUCH_DOOR_1);
+	task_sleep_sec (3);
+}
+
+
+void tz_end_game (void)
+{
+	if (!in_test)
+		music_set (MUS_LOCK_LIT);
+}
+
+void tz_start_ball (void)
+{
+	music_set (MUS_TZ_PLUNGER);
+}
+
+void tz_end_ball (void)
+{
+	sound_reset ();
 }
 
 
@@ -81,6 +99,9 @@ void tz_tilt_warning (void)
 
 machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
+	.end_game = tz_end_game,
+	.start_ball = tz_start_ball,
+	.end_ball = tz_end_ball,
 	.add_player = tz_add_player,
 	.init = tz_init,
 	.bonus = tz_bonus,

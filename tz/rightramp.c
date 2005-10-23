@@ -2,7 +2,6 @@
 #include <freewpc.h>
 
 
-
 void sw_right_ramp_task (void)
 {
 	task_sleep_sec (2);
@@ -17,8 +16,7 @@ void sw_right_ramp_handler (void)
 {
 	if (in_game && !in_tilt)
 	{
-		static U8 score[] = { 0x00, 0x00, 0x50, 0x00 };
-		score_add_current (score);
+		score_add_current_const (0x5000);
 	}
 
 	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))

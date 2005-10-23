@@ -8,8 +8,8 @@
 #define MAKE_LAMP(col,row)	(((col-1) * 8) + row-1)
 
 /* The lamp flash state is updated every 32ms, so this will
- * toggle the lamp flash state about 4 times/sec */
-#define LAMP_DEFAULT_FLASH_RATE 8
+ * toggle the lamp flash state about 8 times/sec */
+#define LAMP_DEFAULT_FLASH_RATE 4
 
 
 /* Lamp effect opcodes

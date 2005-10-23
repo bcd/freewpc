@@ -4,32 +4,27 @@
 
 void sw_left_outlane_handler (void)
 {
-	static U8 score[] = { 0x00, 0x01, 0x00, 0x00 };
-	score_add_current (score);
+	score_add_current_const (0x10000);
 }
 
 void sw_right_outlane_handler (void)
 {
-	static U8 score[] = { 0x00, 0x01, 0x00, 0x00 };
-	score_add_current (score);
+	score_add_current_const (0x10000);
 }
 
 void sw_left_inlane_1_handler (void)
 {
-	static U8 score[] = { 0x00, 0x00, 0x10, 0x00 };
-	score_add_current (score);
+	score_add_current_const (0x1000);
 }
 
 void sw_left_inlane_2_handler (void)
 {
-	static U8 score[] = { 0x00, 0x00, 0x10, 0x00 };
-	score_add_current (score);
+	score_add_current_const (0x1000);
 }
 
 void sw_right_inlane_handler (void)
 {
-	static U8 score[] = { 0x00, 0x00, 0x10, 0x00 };
-	score_add_current (score);
+	score_add_current_const (0x1000);
 }
 
 

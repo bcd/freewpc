@@ -9,9 +9,6 @@ const lampnum_t lampset_all[] = {
 
 /********** Game specific lamp sets *****************/
 
-const lampnum_t lampset_spiral_awards[] = {
-	LAMP_END
-};
 
 const lampnum_t lampset_door_panel_awards[] = {
 	LM_PANEL_TSM,
@@ -37,27 +34,93 @@ const lampnum_t lampset_door_panels_and_handle[] = {
 	LAMP_END
 };
 
+const lampnum_t lampset_door_locks[] = {
+	LM_LOCK1, LM_LOCK2, LAMP_END
+};
+
+
+const lampnum_t lampset_door_gumball[] = {
+	LM_GUM, LM_BALL, LAMP_END
+};
+
+
 const lampnum_t lampset_left_ramp_awards[] = {
+	LM_BONUS_X,
+	LM_MULTIBALL,
+	LM_SUPER_SKILL,
 	LAMP_END
 };
 
 const lampnum_t lampset_lock_awards[] = {
+	LM_LOCK_ARROW,
+	LM_LOCK_EB,
 	LAMP_END
 };
 
 const lampnum_t lampset_piano_awards[] = {
+	LM_PIANO_PANEL,
+	LM_PIANO_JACKPOT,
 	LAMP_END
 };
 
 const lampnum_t lampset_greed_targets[] = {
+	LM_LL_5M,
+	LM_ML_5M,
+	LM_UL_5M,
+	LM_UR_5M,
+	LM_MR2_5M,
+	LM_MR1_5M,
+	LM_LR_5M,
 	LAMP_END
 };
 
 const lampnum_t lampset_powerfield_values[] = {
+	LM_MPF_500K,
+	LM_MPF_750K,
+	LM_MPF_1M,
 	LAMP_END
 };
 
 const lampnum_t lampset_jets[] = {
+	LM_LEFT_JET,
+	LM_RIGHT_JET,
+	LM_LOWER_JET,
+	LAMP_END
+};
+
+
+const lampnum_t lampset_lower_lanes[] = {
+	LM_LEFT_OUTLANE,
+	LM_LEFT_INLANE1,
+	LM_LEFT_INLANE2,
+	LM_RIGHT_INLANE,
+	LM_RIGHT_OUTLANE,
+	LAMP_END
+};
+
+
+const lampnum_t lampset_spiral_awards[] = {
+	LM_SPIRAL_2M,
+	LM_SPIRAL_3M,
+	LM_SPIRAL_4M,
+	LM_SPIRAL_5M,
+	LM_SPIRAL_10M,
+	LM_SPIRAL_EB,
+	LAMP_END
+};
+
+const lampnum_t lampset_amode_all[] = {
+	LAMP_MACRO_REF(LAMPSET_DOOR_PANELS_AND_HANDLE),
+	LAMP_MACRO_REF(LAMPSET_LEFT_RAMP_AWARDS),
+	LAMP_MACRO_REF(LAMPSET_LOCK_AWARDS),
+	LAMP_MACRO_REF(LAMPSET_PIANO_AWARDS),
+	LAMP_MACRO_REF(LAMPSET_GREED_TARGETS),
+	LAMP_MACRO_REF(LAMPSET_POWERFIELD_VALUES),
+	LAMP_MACRO_REF(LAMPSET_JETS),
+	LAMP_MACRO_REF(LAMPSET_LOWER_LANES),
+	LAMP_MACRO_REF(LAMPSET_SPIRAL_AWARDS),
+	LAMP_MACRO_REF(LAMPSET_DOOR_LOCKS),
+	LAMP_MACRO_REF(LAMPSET_DOOR_GUMBALL),
 	LAMP_END
 };
 
@@ -75,6 +138,11 @@ const lampnum_t *lampset_table[] = {
 	[LAMPSET_GREED_TARGETS] = lampset_greed_targets,
 	[LAMPSET_POWERFIELD_VALUES] = lampset_powerfield_values,
 	[LAMPSET_JETS] = lampset_jets,
+	[LAMPSET_LOWER_LANES] = lampset_lower_lanes,
+	[LAMPSET_SPIRAL_AWARDS] = lampset_spiral_awards,
+	[LAMPSET_DOOR_LOCKS] = lampset_door_locks,
+	[LAMPSET_DOOR_GUMBALL] = lampset_door_gumball,
+	[LAMPSET_AMODE_ALL] = lampset_amode_all,
 };
 
 

@@ -25,18 +25,22 @@ void scores_draw_current (void);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
 void score_add (bcd_t *s1, bcd_t *s2, U8 len);
+void score_add_current (bcd_t *s);
 void score_sub (score_t *s1, score_t *s2);
 void score_mul (score_t *s1, uint8_t multiplier);
 int score_compare (score_t *s1, score_t *s2);
 void scores_reset (void);
 void score_init (void);
 
-extern inline void score_add_current (bcd_t *s)
-{
-	score_add (current_score, s, sizeof (score_t));
-	score_change++;
-	/* check replay */
+#define score_add_current_const(val) \
+{ \
+	static U8 score[] = { \
+		(val & 0xFF000000) >> 24, \
+		(val & 0x00FF0000) >> 16, \
+		(val & 0x0000FF00) >> 8, \
+		(val & 0x000000FF) \
+	}; \
+	score_add_current (score); \
 }
-
 
 #endif /* _SCORE_H */

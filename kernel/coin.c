@@ -51,6 +51,14 @@ void credits_deff (void)
 }
 
 
+void lamp_start_update (void)
+{
+	if (has_credits_p)
+		lamp_flash (MACHINE_START_LAMP);
+	else
+		lamp_noflash (MACHINE_START_LAMP);
+}
+
 
 void add_credit (void)
 {
@@ -60,6 +68,7 @@ void add_credit (void)
 		deff_restart (DEFF_CREDITS);
 #ifndef FREE_ONLY
 		credit_count++;
+		lamp_start_update ();
 #endif
 	}
 }
@@ -75,20 +84,14 @@ bool has_credits_p (void)
 }
 
 
-void lamp_start_update (void)
-{
-	if (has_credits_p)
-		lamp_on (MACHINE_START_LAMP);
-	else
-		lamp_off (MACHINE_START_LAMP);
-}
-
-
 void remove_credit (void)
 {
 #ifndef FREE_ONLY
 	if (credit_count > 0)
+	{
 		credit_count--;
+		lamp_start_update ();
+	}
 #endif
 }
 
@@ -164,5 +167,6 @@ void coin_init (void)
 #else
 	free_play = FALSE;
 #endif
+	lamp_start_update ();
 }
 

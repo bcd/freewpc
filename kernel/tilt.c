@@ -44,6 +44,8 @@ void sw_tilt_handler (void)
 		return;
 	else if (++tilt_warnings == 3)
 	{
+		sound_reset ();
+		triac_disable (TRIAC_GI_MASK);
 		deff_start (DEFF_TILT);
 		in_tilt = TRUE;
 		flipper_disable ();

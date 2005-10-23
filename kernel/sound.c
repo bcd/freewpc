@@ -41,16 +41,16 @@ extern inline bool sound_queue_empty (void)
 }
 
 
-void music_off (void)
-{
-	music_stack[0] = *(uint8_t *)WPCS_DATA = 0;
-	music_head = music_stack;
-}
-
 void music_set (music_code_t code)
 {
 	*music_head = code;
 	sound_queue_insert (code);
+}
+
+void music_off (void)
+{
+	music_head = music_stack;
+	music_set (MUS_OFF);
 }
 
 void music_change (music_code_t code)
@@ -66,6 +66,12 @@ void sound_rtt (void)
 	{
 		*(volatile U8 *)WPCS_DATA = sound_queue_remove ();
 	}
+}
+
+
+void sound_reset (void)
+{
+	music_off ();	
 }
 
 

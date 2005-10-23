@@ -23,6 +23,7 @@ void music_change (music_code_t code);
 void sound_rtt (void);
 void sound_init (void);
 void sound_send (sound_code_t code);
+void sound_reset (void);
 void volume_down (void);
 void volume_up (void);
 void volume_update (void);

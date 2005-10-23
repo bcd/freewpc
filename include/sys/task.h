@@ -62,4 +62,6 @@ void task_kill_gid (task_gid_t);
 uint16_t task_get_arg (void);
 void task_set_arg (task_t *tp, uint16_t arg);
 
+#define task_create_child(fn)		task_create_gid (task_getgid (), fn)
+
 #endif /* _SYS_TASK_H */

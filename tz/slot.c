@@ -22,6 +22,13 @@ void slot_kick_sound (void)
 	task_exit ();
 }
 
+
+void slot_enter (device_t *dev)
+{
+	score_add_current_const (0x2500);
+}
+
+
 void slot_kick_attempt (device_t *dev)
 {
 	db_puts ("Sending slot kick sound\n");
@@ -35,6 +42,7 @@ void slot_kick_attempt (device_t *dev)
 
 
 device_ops_t slot_ops = {
+	.enter = slot_enter,
 	.kick_attempt = slot_kick_attempt,
 };
 

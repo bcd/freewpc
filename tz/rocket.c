@@ -15,8 +15,7 @@ DECLARE_SWITCH_DRIVER (sw_rocket)
 
 void rocket_enter (device_t *dev)
 {
-	static U8 score[] = { 0x00, 0x01, 0x00, 0x00 };
-	score_add_current (score);
+	score_add_current_const(0x10000);
 }
 
 void rocket_kick_sound (void)

@@ -48,6 +48,12 @@ void amode_right_flipper (void)
 	amode_scroll ();
 }
 
+void amode_lamp_toggle_task (void) __taskentry__
+{
+	lampset_apply_toggle (LAMPSET_AMODE_ALL);
+	task_exit ();
+}
+
 
 void amode_leff (void) __taskentry__
 {
@@ -57,25 +63,22 @@ void amode_leff (void) __taskentry__
 	for (;;)
 	{
 		lampset_set_apply_delay (0);
-		lampset_apply_off (LAMPSET_ALL);
+		lampset_apply_off (LAMPSET_AMODE_ALL);
 
-		lampset_set_apply_delay (TIME_100MS);
+		lampset_set_apply_delay (TIME_33MS);
 		for (i=0; i < 4; i++)
-		{
-			lampset_apply_toggle (LAMPSET_DOOR_PANELS_AND_HANDLE);
-		}
-	
-		lampset_set_apply_delay (0);
-		for (i=0; i < 64; i += 2)
-			lamp_on (i);
-		for (i=1; i < 64; i += 2)
-			lamp_off (i);
+			lampset_apply_toggle (LAMPSET_AMODE_ALL);
 
-		for (i=0; i < 16; i++)
+#if 0	
+		lampset_set_apply_delay (TIME_16MS);
+		for (i=0; i < 2; i++)
 		{
-			lampset_apply_toggle (LAMPSET_ALL);
-			task_sleep (TIME_100MS * 2);
+			task_create_child (amode_lamp_toggle_task);
+			task_sleep (TIME_100MS * 3);
+			task_create_child (amode_lamp_toggle_task);
+			task_sleep_sec (5);
 		}
+#endif
 	}
 }
 
@@ -109,13 +112,13 @@ void amode_deff (void) __taskentry__
 		deff_swap_low_high (25, TIME_100MS + TIME_50MS);
 		amode_page_delay (3);
 
-		/** Display TZ 2005 message **/
+		/** Display TZ 2006 message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_5x5, 64, 10, "TWILIGHT ZONE");
 		starfield_start ();
 		dmd_copy_low_to_high ();
-		font_render_string_center (&font_5x5, 64, 20, "2005");
+		font_render_string_center (&font_5x5, 64, 20, "2006");
 		deff_swap_low_high (23, TIME_100MS * 2);
 
 		for (i = 32; i != 0; --i)
@@ -140,6 +143,9 @@ void amode_deff (void) __taskentry__
 		font_render_string_center (&font_5x5, 64, 21, "GAME RULES");
 		dmd_show_low ();
 		amode_page_delay (5);
+
+		/* Kill music if it is running */
+		music_set (MUS_SILENCE);
 	}
 }
 

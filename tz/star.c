@@ -36,7 +36,7 @@ void star_task (void)
 #define star_create(x,y) \
 do \
 { \
-	task_t *tp = task_create_gid (task_getgid (), star_task); \
+	task_t *tp = task_create_child (star_task); \
 	task_set_arg (tp, (x << 8) | y); \
 } while (0)
 
@@ -55,5 +55,6 @@ void starfield_task (void)
 
 void starfield_start (void)
 {
-	task_create_gid (task_getgid (), starfield_task);
+	task_create_child (starfield_task);
 }
+
