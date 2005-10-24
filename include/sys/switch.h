@@ -7,9 +7,9 @@ typedef uint8_t switchnum_t;
 /** Switch flags */
 #define SW_OPTICAL	0x01 /* Switch is active when it is _open_ */
 #define SW_EDGE		0x02 /* Switch is handled on any edge */
-#define SW_PLAY		0x04 /* Switch marks a ball as 'in play' */
 #define SW_IN_GAME	0x08 /* Only service switch during a game */
 #define SW_PLAYFIELD	0x10 /* Declares that switch is 'on the playfield' */
+#define SW_NOPLAY		0x20 /* Switch does not mark a ball as 'in play' */
 
 /** Switch handler prototype form */
 typedef void (*switch_handler_t) (void);

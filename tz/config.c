@@ -59,6 +59,11 @@ void tz_start_ball (void)
 	music_set (MUS_TZ_PLUNGER);
 }
 
+void tz_ball_in_play (void)
+{
+	music_set (MUS_TZ_IN_PLAY);
+}
+
 void tz_end_ball (void)
 {
 	sound_reset ();
@@ -79,7 +84,8 @@ void tz_any_pf_switch (void)
 
 void tz_bonus (void)
 {
-	task_sleep_sec (1);
+	music_set (MUS_BONUS_START);
+	task_sleep_sec (3);
 }
 
 
@@ -97,10 +103,16 @@ void tz_tilt_warning (void)
 }
 
 
+void tz_start_without_credits (void)
+{
+}
+
+
 machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
 	.end_game = tz_end_game,
 	.start_ball = tz_start_ball,
+	.ball_in_play = tz_ball_in_play,
 	.end_ball = tz_end_ball,
 	.add_player = tz_add_player,
 	.init = tz_init,
@@ -108,5 +120,6 @@ machine_hooks_t tz_hooks = {
 	.tilt = tz_tilt,
 	.tilt_warning = tz_tilt_warning,
 	.any_pf_switch = tz_any_pf_switch,
+	.start_without_credits = tz_start_without_credits,
 };
 

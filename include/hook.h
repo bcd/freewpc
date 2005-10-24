@@ -33,6 +33,7 @@ typedef struct machine_hooks
 	void (*grand_champion) (void);
 	void (*coin_added) (void);
 	void (*credit_added) (void);
+	void (*start_without_credits) (void);
 	void (*volume_change) (void);
 	void (*ball_search) (void);
 	void (*any_pf_switch) (void);

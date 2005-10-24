@@ -50,11 +50,21 @@ void end_ball (void)
 	if (!in_game)
 		goto done;
 
+	if (!ball_in_play)
+	{
+		device_request_kick (device_entry (DEV_TROUGH));
+		goto done;
+	}
+
 	flipper_disable ();
 	call_hook (end_ball);
 
 	if (!in_tilt)
+	{
+		in_bonus = TRUE;
 		call_hook (bonus);
+		in_bonus = FALSE;
+	}
 
 	if (extra_balls > 0)
 	{
@@ -91,7 +101,7 @@ void start_ball (void)
 	ball_in_play = FALSE;
 	call_hook (start_ball);
 	current_score = scores[player_up - 1];
-	score_change++;
+	deff_restart (DEFF_SCORES);
 	device_request_kick (device_entry (DEV_TROUGH));
 	tilt_start_ball ();
 	flipper_enable ();
@@ -156,7 +166,11 @@ void sw_start_button_handler (void) __taskentry__
 	}
 
 	if (!has_credits_p ())
+	{
+		deff_start (DEFF_CREDITS);
+		call_hook (start_without_credits);
 		return;
+	}
 
 	if (!in_game)
 	{

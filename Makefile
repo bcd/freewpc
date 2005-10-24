@@ -78,7 +78,8 @@ TMPFILES += $(ERR)
 
 # Path to the compiler and linker
 CC = /usr/local/m6809/bin/gcc
-LD = /usr/local/m6809/bin/ld
+# LD = /usr/local/m6809/bin/ld
+LD = /home/bcd/bin/aslink
 AS = /usr/local/m6809/bin/as
 REQUIRED += $(CC) $(LD) $(AS)
 
@@ -106,9 +107,9 @@ FIXED_SECTION = sysrom
 OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o test.o \
 	device.o lampset.o score.o deff.o triac.o paging.o db.o \
-	trough.o font.o printf.o tilt.o vector.o
+	trough.o font.o printf.o tilt.o vector.o reset.o
 
-FONT_OBJS = fonts/mono5x5.o
+FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
 XBM_OBJS = images/freewpc.o images/brian.o
 

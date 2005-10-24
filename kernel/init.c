@@ -13,18 +13,16 @@ uint8_t sys_init_complete;
 void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 {
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
-	int i;
 
 	dmd_alloc_low_clean ();
 
 	sprintf ("ERRNO %i", error_code);
 	font_render_string_center (&font_5x5, 64, 2, sprintf_buffer);
 
-	for (i=0; i < 8; i++)
-	{
-		sprintf ("%02x", stack[i]);
-		font_render_string (&font_5x5, i*16, 10, sprintf_buffer);
-	}
+	sprintf ("%02x", stack[0]);
+	font_render_string (&font_5x5, 0*16, 10, sprintf_buffer);
+	sprintf ("%02x", stack[1]);
+	font_render_string (&font_5x5, 1*16, 10, sprintf_buffer);
 
 	dmd_show_low ();
 	task_dump ();
@@ -51,6 +49,7 @@ void do_reset (void) __noreturn__
 	extern void lamp_demo ();
 	extern void test_start (void);
 	extern void test_init (void);
+	extern void system_reset (void);
 
 	set_direct_page_pointer (0);
 
@@ -108,9 +107,11 @@ void do_reset (void) __noreturn__
 
 	wpc_led_toggle ();
 
-	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
-	amode_start ();
+	task_create_gid (GID_SYSTEM_RESET, system_reset);
+	
+	task_create_gid (GID_DEVICE_PROBE, device_probe);
+	
 	task_exit ();
 }
 

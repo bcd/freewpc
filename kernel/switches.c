@@ -461,10 +461,11 @@ void switch_sched (void)
 		return;
 
 	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
+	{
 		call_hook(any_pf_switch);
-
-	if ((swinfo->flags & SW_PLAY) && !ball_in_play)
-		mark_ball_in_play ();
+		if (!(swinfo->flags & SW_NOPLAY) && !ball_in_play)
+			mark_ball_in_play ();
+	}
 
 	if (swinfo->lamp != 0)
 	{

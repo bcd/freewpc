@@ -4,6 +4,9 @@
 static uint8_t font_space[32] = { 0, };
 
 
+fontargs_t font_args;
+
+
 extern inline uint8_t lsrqi3 (uint8_t data, uint8_t count)
 {
 	switch (count)
@@ -86,11 +89,20 @@ uint8_t *font_lookup (const font_t *font, char c)
 }
 
 
-void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s)
+void fontargs_render_string (const fontargs_t *args)
 {
 	static uint8_t *dmd_base;
+	const char *s = args->s;
+	U8 x = args->x;
+	const font_t *font = args->font;
 
-	dmd_base = ((uint8_t *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
+#if 0
+	db_puts ("font render y=");
+	db_put2x (args->y);
+	db_putc ('\n');
+#endif
+
+	dmd_base = ((uint8_t *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
 
 	while (*s != '\0')
 	{
@@ -98,6 +110,21 @@ void font_render_string (const font_t *font, uint8_t x, uint8_t y, const char *s
 		static uint8_t i;
 		static uint8_t xb;
 		static uint8_t xr;
+
+		if (*s == '.')
+		{
+			dmd_base[(font->height-1) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
+			s++;
+			continue;
+		}
+		else if (*s == ',')
+		{
+			dmd_base[(font->height-3) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
+			dmd_base[(font->height-2) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
+			dmd_base[(font->height-1) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x80;
+			s++;
+			continue;
+		}
 
 		/* TODO : drawing to positions that are not 8-bit aligned
 		 * does not work, so force to proper alignment for now. */
@@ -154,17 +181,29 @@ uint8_t font_get_string_width (const font_t *font, const char *s)
 	return (width);
 }
 
-void font_render_string_center (const font_t *font, uint8_t x, uint8_t y, const char *s)
+void fontargs_render_string_center (const fontargs_t *args)
 {
-	x -= (font_get_string_width (font, s) / 2);
-	font_render_string (font, x, y, s);
+	font_args.x = args->x - (font_get_string_width (args->font, args->s) / 2);
+	if (args != &font_args)
+	{
+		font_args.y = args->y;
+		font_args.font = args->font;
+		font_args.s = args->s;
+	}
+	fontargs_render_string (&font_args);
 }
 
 
-void font_render_string_right (const font_t *font, uint8_t x, uint8_t y, const char *s)
+void fontargs_render_string_right (const fontargs_t *args)
 {
-	x -= font_get_string_width (font, s);
-	font_render_string (font, x, y, s);
+	font_args.x = args->x - font_get_string_width (args->font, args->s);
+	if (args != &font_args)
+	{
+		font_args.y = args->y;
+		font_args.font = args->font;
+		font_args.s = args->s;
+	}
+	fontargs_render_string (&font_args);
 }
 
 

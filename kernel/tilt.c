@@ -19,7 +19,8 @@ void tilt_warning_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
 	dmd_alloc_high_clean ();
-	font_render_string_center (&font_5x5, 64, 13, "DANGER");
+	font_render_string_center (&font_5x5, 64, 13, 
+			(tilt_warnings == 1) ? "DANGER" : "DANGER  DANGER");
 	dmd_show_low ();
 	deff_swap_low_high (32, TIME_66MS);
 	deff_exit ();

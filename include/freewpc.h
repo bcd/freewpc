@@ -8,6 +8,8 @@
  * features.
  */
 
+/* First include all configuration options */
+#include <config.h>
 
 /*
  * Standard types
@@ -36,7 +38,8 @@ typedef unsigned int uint16_t, U16;
  * Original : 43 ==> Total size of 64
  */
 /// #define TASK_STACK_SIZE		43   /* sometimes fails with deffs */
-#define TASK_STACK_SIZE		75
+/// #define TASK_STACK_SIZE		75
+#define TASK_STACK_SIZE		91
 
 /* Include the standard header files that are needed
  * by most modules */

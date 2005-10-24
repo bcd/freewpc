@@ -32,14 +32,19 @@ int score_compare (score_t *s1, score_t *s2);
 void scores_reset (void);
 void score_init (void);
 
-#define score_add_current_const(val) \
-{ \
-	static U8 score[] = { \
+
+#define score_decl(val) \
+	{ \
 		(val & 0xFF000000) >> 24, \
 		(val & 0x00FF0000) >> 16, \
 		(val & 0x0000FF00) >> 8, \
 		(val & 0x000000FF) \
-	}; \
+	}
+
+
+#define score_add_current_const(val) \
+{ \
+	static U8 score[] = score_decl(val); \
 	score_add_current (score); \
 }
 

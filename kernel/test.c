@@ -237,10 +237,23 @@ void device_enter_proc (void) __taskentry__
 
 void font_test_deff (void)
 {
+	const font_t *font;
+
+	switch (test_index)
+	{
+		case 0:
+			font = &font_5x5;
+			break;
+
+		case 1:
+			font = &font_9x6;
+			break;
+	}
+
 	dmd_alloc_low_clean ();
-	font_render_string (&font_5x5, 0, 0, "ABCDEFGHIJKLM");
-	font_render_string (&font_5x5, 0, 8, "NOPQRSTUVWXYZ");
-	font_render_string (&font_5x5, 0, 16, "0123456789");
+	font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+	font_render_string (font, 0, 8, "NOPQRSTUVWXYZ");
+	font_render_string (font, 0, 16, "0123456789");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	while (switch_poll_logical (SW_ESCAPE) == FALSE)

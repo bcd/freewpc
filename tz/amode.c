@@ -25,6 +25,7 @@ void amode_page_delay (U8 secs)
 		amode_flippers_start = amode_flippers;
 		secs--;
 	}
+	//task_sleep_sec (secs);
 }
 
 void amode_flipper_sound (void)
@@ -59,6 +60,7 @@ void amode_leff (void) __taskentry__
 {
 	U8 i;
 
+	lamp_all_off ();
 	triac_enable (TRIAC_GI_MASK);
 	for (;;)
 	{
@@ -69,7 +71,7 @@ void amode_leff (void) __taskentry__
 		for (i=0; i < 4; i++)
 			lampset_apply_toggle (LAMPSET_AMODE_ALL);
 
-#if 0	
+#if 0
 		lampset_set_apply_delay (TIME_16MS);
 		for (i=0; i < 2; i++)
 		{

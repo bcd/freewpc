@@ -11,10 +11,10 @@ U8 *current_score;
 void scores_draw_ball (void)
 {
 	sprintf ("%1iUP", player_up);
-	font_render_string (&font_5x5, 4, 26, sprintf_buffer);
+	font_render_string_center (&font_5x5, 32, 26, sprintf_buffer);
 
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_right (&font_5x5, 124, 26, sprintf_buffer);
+	font_render_string_center (&font_5x5, 96, 26, sprintf_buffer);
 }
 
 
@@ -28,7 +28,7 @@ void scores_draw_credits (void)
 void scores_draw_current (void)
 {
 	sprintf ("%8b", current_score);
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_9x6, 64, 10, sprintf_buffer);
 }
 
 

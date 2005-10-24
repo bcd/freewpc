@@ -5,6 +5,7 @@
 void sw_right_ramp_task (void)
 {
 	task_sleep_sec (2);
+	sound_send (SND_RIGHT_RAMP_EXIT);
 	sol_on (SOL_RIGHT_RAMP_DIV);
 	task_sleep (TIME_100MS * 2);
 	sol_off (SOL_RIGHT_RAMP_DIV);

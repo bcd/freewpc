@@ -1,7 +1,8 @@
 
 #include <freewpc.h>
 
-#define FREE_ONLY
+//#define FREE_ONLY
+
 #define MAX_CREDITS 30
 
 uint8_t free_play;

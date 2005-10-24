@@ -135,7 +135,7 @@ void dmd_clean_page_high (void)
 
 void dmd_invert_page (dmd_buffer_t *dbuf)
 {
-	register int16_t count asm ("u") = DMD_PAGE_SIZE / (2 * 4);
+	register int16_t count /* asm ("u") */ = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
 	while (--count >= 0)
 	{

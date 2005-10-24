@@ -169,9 +169,35 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register uint8_t opcode;
 	register const lampnum_t *lset = lampset_table[id];
+	static const lampnum_t *lset_stack[4];
+	int lset_stack_offset = 0;
 
-	while ((opcode = *lset++) != LAMP_END)
+#if 0
+	db_puts ("lampset_apply: ");
+	db_put2x (id);
+	db_putc (' ');
+	db_put4x (op);
+	db_putc ('\n');
+#endif
+
+	lset_stack[lset_stack_offset++] = 0;
+
+	while (lset)
 	{
+#if 0
+		db_puts ("lset: ");
+		db_put4x (lset);
+		db_putc ('\n');
+#endif
+
+		opcode = *lset++;
+
+#if 0
+		db_puts ("Opcode: ");
+		db_put2x (opcode);
+		db_putc ('\n');
+#endif
+
 		switch (opcode)
 		{
 			case LAMP_MACRO_RANGE_OP:
@@ -181,7 +207,12 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				break;
 
 			case LAMP_MACRO_REF_OP:
-				lampset_apply (lset[0], op);
+				lset_stack[lset_stack_offset++] = lset+1;
+				lset = lampset_table[lset[0]];
+				break;
+
+			case LAMP_END:
+				lset = lset_stack[--lset_stack_offset];
 				break;
 
 			default:
@@ -190,6 +221,7 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 		}
 	}
 }
+
 
 /* Common uses of apply */
 void lampset_apply_on (lampset_id_t id)

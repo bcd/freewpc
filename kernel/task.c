@@ -415,6 +415,7 @@ void task_init (void)
 	task_current->state = TASK_USED;
 	task_current->arg = 0;
 	task_current->gid = GID_FIRST_TASK;
+	task_current->delay = 0;
 	__asm__ volatile ("st%0 _task_dispatch_tick" :: "q" (tick_count));
 }
 
