@@ -69,10 +69,10 @@ a requirement I imposed on the system myself.  Software engineers from
 Williams have repeatedly indicated that they wrote the games directly
 in assembly language.  In some ways this is better, since the developer
 has completely control of what the CPU is doing.  Good compilers were
-not available for the 6809 back in 1990, so it was the only available
-choice when WPC was first developed.  Today, there was a gcc port for
-the 6809 which, although I was skeptical at first, was adequate
-enough to get the project rolling.  Using C allows more people to get
+not available for the 6809 back in 1990, so assembly was the only available
+choice when WPC was first developed.  Today, there is a gcc port for
+the 6809 which, although I was skeptical at first, is adequate
+to get the project rolling.  Using C also allows more people to get
 involved in the project and understand what is going on.
 </ul>
 
@@ -110,7 +110,7 @@ though!
 interrupt once every 976 microseconds...  The timing of the IRQ is
 fairly accurate as it is derived from the 32Khz oscillator on the CPU
 board.  Thus, the IRQ is used as the main timing source for the kernel.
-Realtime functions are called directly from the IRQ handler.  FCFS
+Realtime functions are called directly from the IRQ vector.  FCFS
 tasks which are sleeping have their "time-until-ready-to-run" counters
 updated based on the number of IRQs that have happened.
 
@@ -162,7 +162,7 @@ the emulations, though.
 <p>The major input devices are, of course, the various switches and
 buttons.  There's also the DIP switches on the CPU board, the real time
 clock, and the AC zero-cross detection circuit.  Switches are the easiest
-to describe because they work in theory in the simplest possible of way.
+to describe because they work in theory in the simplest possible way.
 Every switch is just a binary input, either 1 (active) or 0 (inactive).
 
 <p>Of course, it's much more complicated than that.  First and foremost
@@ -204,7 +204,7 @@ what do you do?
 <p>The solution implemented in FreeWPC involves hardcoded priorities.
 When a task wants to use a resource, it first tries to <i>allocate</i> that
 resource, passing a priority value.  The allocation/free approach is
-very simple to the way that files or other devices are opened/closed on
+very similar to the way that files or other devices are opened/closed on
 traditional UNIX systems.
 
 <p>Only the task with the highest priority is allowed to use the
@@ -212,9 +212,7 @@ resource.  This usage is preemptive, unlike task scheduling: when a higher
 priority task takes over control over a resource, the lower priority
 task must stop using it immediately.  Likewise, when the higher priority
 task is done, control should be returned to the lower priority task.
-
-<p>This approach is implemented by using what computer scientists call
-a <b>priority queue</b>.
+This approach is implemented by a data structure called a <b>priority queue</b>.
 
 <p>Priority queueing is often used in realtime operating systems for task
 scheduling, but it is slightly different here.  Our FCFS tasks have no
@@ -240,9 +238,8 @@ assignments, but for some effects, this might make sense.
 all of the lamps could be treated as a single resource, so you get all or
 none of them.  But you could break it down further and manage each lamp
 separately, so that a lamp effect might run but only be able to update
-some of the lamps.  Today, FreeWPC treats the entire lamp matrix as one
-resource.  The same goes for the entire dot matrix display; you either
-get it or you don't.
+some of the lamps.  The net effect is that you could have multiple tasks
+operating on different "parts" of a resource at the same time.
 
 <p>To implement the priority queueing properly, a task that wants to
 implement some part of an effect needs to be standalone from any other
@@ -250,7 +247,7 @@ processing.  That way, that particular task can be stopped/started by
 the kernel's resource management routines as priorities change.
 Only the tasks that are actively controlling the resource will run.
 The kernel simply remembers all of the tasks that have been queued up
-which can't run currently.
+which can't run now.
 
 <h2>Initialization</h2>
 
@@ -283,7 +280,5 @@ task scheduler.  The <b>first task</b> is started before doing so, to
 ensure that there is some work to be done.  The first task takes care
 of switch scheduling, which drives all of the other functions, and starts
 up the initial attract mode.
-
-
 
 
