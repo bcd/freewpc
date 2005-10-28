@@ -454,6 +454,26 @@ $(SR) : $(SR).c
 kernel/switches.o : include/$(MACHINE)/switch.h
 
 #
+# Install to the web server
+#
+WEBDIR := /home/bcd/oddchange/freewpc
+
+web : webdocs webroms
+
+webdocs : webdir
+	cp -p doc/* $(WEBDIR)
+
+webroms : webdir
+	cp -p $(GAME_ROM) $(WEBDIR)/releases
+
+webdir : $(WEBDIR)
+
+$(WEBDIR):
+	mkdir -p $(WEBDIR)
+	mkdir -p $(WEBDIR)/releases
+
+
+#
 # 'make clean' does what you think.
 #
 clean: clean_derived clean_gendefines
