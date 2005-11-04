@@ -54,7 +54,7 @@ const uint8_t font_5x5_digit[][5] = {
 
 const font_t font_5x5 = {
 	.width = 5, 
-	.spacing = 3,
+	.spacing = 1,
 	.height = 5, 
 	.chars = (uint8_t **)font_5x5_alpha_cap, 
 	.digits = (uint8_t **)font_5x5_digit
