@@ -52,6 +52,22 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 /*** #define CONFIG_REG_ARGS ***/
 
+
+/* Enable 8-bit 'ints'.  This is highly recommended.  If you need
+ * 16-bit data, then use the 'long' data type explicitly.  With
+ * this option, the compiler will never implicit convert 8-bit
+ * to 16-bit data unless you tell it to.
+ */
+#define CONFIG_BYTE_INT
+
+
+/* Enable separate usage of 'A' and 'B' registers.
+ *
+ * This does not work yet.
+ */
+/*** #define CONFIG_AB ***/
+
+
 /* Names to predefine in the preprocessor for this target machine.  */
 #define CPP_PREDEFINES "-Dmc6809 -DMC6809"
 
@@ -215,9 +231,15 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 
 /* 1 for registers that have pervasive standard uses
    and are not available for the register allocator.  */
+#ifdef CONFIG_AB
+#define FIXED_REGISTERS \
+    {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, } 
+  /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
+#else
 #define FIXED_REGISTERS \
     {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
+#endif
 
 /* 1 for registers not available across function calls.
    These must include the FIXED_REGISTERS and also any
@@ -229,6 +251,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
     {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 
+
 /* --- DELETED
 #define OVERLAPPING_REGNO_P(REGNO) (((REGNO) == HARD_D_REGNUM) \
     || ((REGNO) == HARD_A_REGNUM) || ((REGNO) == HARD_B_REGNUM))
@@ -238,6 +261,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    to hold something of mode MODE.
    This is ordinarily the length in words of a value of mode MODE
    but can be less for certain modes in special long registers.  */
+/* TODO : change this for CONFIG_AB */
 #define HARD_REGNO_NREGS(REGNO, MODE) \
     ((REGNO >= HARD_A_REGNUM) ? (GET_MODE_SIZE (MODE)) \
 	: ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
@@ -339,6 +363,9 @@ enum reg_class {
 	 /* 8-bit (byte (QI)) data (D) */
     Q_REGS,
 
+	 /* Either a D_REG or Q_REG can be an index register (A,B,D) */
+	 I_REGS,
+
 	 /* 16-bit addresses (X,Y,U,S,PC) */
     A_REGS,
 
@@ -357,20 +384,25 @@ enum reg_class {
 
 /* Give names of register classes as strings for dump file.   */
 #define REG_CLASS_NAMES \
- {"NO_REGS", "D_REGS", "Q_REGS", "A_REGS", "G_REGS", "ALL_REGS" }
+ {"NO_REGS", "D_REGS", "Q_REGS", "I_REGS", "A_REGS", "G_REGS", "ALL_REGS" }
 
 /* Define which registers fit in which classes.
    This is an initializer for a vector of HARD_REG_SET
    of length N_REG_CLASSES.  */
 
+#ifdef CONFIG_AB
+#define Q_REG_CLASS_CONTENTS	(A_REGBIT | B_REGBIT)
+#else
 #define Q_REG_CLASS_CONTENTS	(D_REGBIT)
+#endif
 
 #define REG_CLASS_CONTENTS { \
 	0, \
 	D_REGBIT, \
 	Q_REG_CLASS_CONTENTS, \
+	D_REGBIT | A_REGBIT | B_REGBIT, \
 	X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT, \
-	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT, \
+	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT | Q_REG_CLASS_CONTENTS, \
 	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT |  \
 		A_REGBIT | B_REGBIT, \
 }
@@ -383,12 +415,21 @@ enum reg_class {
 #define REGNO_REG_CLASS(REGNO) \
   (D_REGNO_P (REGNO) ? D_REGS : \
   (Q_REGNO_P (REGNO) ? Q_REGS : \
+  (I_REGNO_P (REGNO) ? I_REGS : \
   (A_REGNO_P (REGNO) ? A_REGS : \
-  (G_REGNO_P (REGNO) ? G_REGS : ALL_REGS))))
+  (G_REGNO_P (REGNO) ? G_REGS : ALL_REGS)))))
 
 #define D_REGNO_P(REGNO) ((REGNO) == HARD_D_REGNUM)
 
+#ifdef CONFIG_AB
+#define Q_REGNO_P(REGNO) (((REGNO) == HARD_A_REGNUM) || \
+	((REGNO) == HARD_B_REGNUM))
+#else
 #define Q_REGNO_P(REGNO) ((REGNO) == HARD_D_REGNUM)
+#endif
+
+#define I_REGNO_P(REGNO) (((REGNO) == HARD_D_REGNUM) || \
+	((REGNO) == HARD_A_REGNUM) || ((REGNO) == HARD_B_REGNUM))
 
 #define A_REGNO_P(REGNO) (((REGNO) >= HARD_X_REGNUM) \
     && ((REGNO) <= HARD_PC_REGNUM))
@@ -396,11 +437,12 @@ enum reg_class {
 #define G_REGNO_P(REGNO) ((REGNO) <= HARD_PC_REGNUM)
 
 #define D_REG_P(X) (REG_P (X) && D_REGNO_P (REGNO (X)))
+#define I_REG_P(X) (REG_P (X) && I_REGNO_P (REGNO (X)))
 #define A_REG_P(X) (REG_P (X) && A_REGNO_P (REGNO (X)))
 #define Q_REG_P(X) (REG_P (X) && Q_REGNO_P (REGNO (X)))
 
 /* The class value for index registers, and the one for base regs.  */
-#define INDEX_REG_CLASS D_REGS
+#define INDEX_REG_CLASS I_REGS
 #define BASE_REG_CLASS A_REGS
 
 /* Get reg_class from a letter in the machine description.  */
@@ -411,7 +453,8 @@ enum reg_class {
 #define REG_CLASS_FROM_LETTER(C) \
   (((C) == 'a' ? A_REGS : \
    ((C) == 'd' ? D_REGS : \
-   ((C) == 'q' ? Q_REGS : NO_REGS))))
+	((C) == 'x' ? I_REGS : \
+   ((C) == 'q' ? Q_REGS : NO_REGS)))))
 
 /*--------------------------------------------------------------
    The letters I, J, K, L and M in a register constraint string
@@ -421,17 +464,21 @@ enum reg_class {
    Return 1 if VALUE is in the range specified by C.
 
    For the 6809, J, K, L are used for indexed addressing.
-   `I' is used for shift counts which can only be equal to 1.
+   `I' is used for the constant 1.
    `J' is used for the 5-bit offsets.
    `K' is used for the 8-bit offsets.
    `L' is used for the range of signed numbers that fit in 16 bits.
+	`N' is used for the constant -1.
+   `O' is used for the constant 0.
 --------------------------------------------------------------*/
 
-#define CONST_OK_FOR_LETTER_P(VALUE, C)  \
-  ((C) == 'I' ? ((unsigned)(VALUE) == 1) :    \
-   (C) == 'J' ? ((unsigned)(VALUE) <= 31) :    \
+#define CONST_OK_FOR_LETTER_P(VALUE, C)         \
+  ((C) == 'I' ? ((unsigned)(VALUE) == 1) :      \
+   (C) == 'J' ? ((unsigned)(VALUE) <= 31) :     \
    (C) == 'K' ? ((unsigned)(VALUE) <= 255) :    \
-   (C) == 'L' ? ((unsigned)(VALUE) <= 0xffff) : 0)
+   (C) == 'L' ? ((unsigned)(VALUE) <= 0xffff) : \
+   (C) == 'N' ? ((VALUE) == -1) :               \
+   (C) == 'O' ? ((unsigned)(VALUE) == 0) : 0)
 
 /* Similar, but for floating constants, and defining letters G and H.
    No floating-point constants are valid on MC6809.  */
@@ -513,8 +560,14 @@ enum reg_class {
    otherwise, FUNC is 0.  */
 
 /* All return values are in the D-register (register 0) */
+#ifdef CONFIG_AB
+#define FUNCTION_VALUE(VALTYPE, FUNC) \
+  gen_rtx (REG, TYPE_MODE (VALTYPE), \
+  (TYPE_MODE (VALTYPE) == QImode) ? HARD_B_REGNUM : HARD_D_REGNUM)
+#else
 #define FUNCTION_VALUE(VALTYPE, FUNC) \
   gen_rtx (REG, TYPE_MODE (VALTYPE), HARD_D_REGNUM)
+#endif
 
 /* Define how to find the value returned by a library function
    assuming the value has mode MODE.  */
@@ -692,7 +745,7 @@ enum reg_class {
 
 /* MC6809 index registers do not allow scaling, */
 /* but there is "accumulator-offset" mode. */
-#define HARD_OK_FOR_INDEX_P(REGNO) D_REGNO_P (REGNO)
+#define HARD_OK_FOR_INDEX_P(REGNO) I_REGNO_P (REGNO)
 
 /* These assume that REGNO is a hard or pseudo reg number.
    They give nonzero only if REGNO is a hard reg of the suitable class
@@ -903,10 +956,18 @@ enum reg_class {
 
 /* Size (bits) of the type "int" on target machine */
 /*   (If undefined, default is BITS_PER_WORD).  */
+#ifdef CONFIG_BYTE_INT
+#define INT_TYPE_SIZE 8
+#else
 #define INT_TYPE_SIZE (16)
+#endif
 
 /* Size (bits) of the type "short" on target machine */
+#ifdef CONFIG_BYTE_INT
+#define SHORT_TYPE_SIZE 8
+#else
 #define SHORT_TYPE_SIZE 16
+#endif
 
 /* Size (bits) of the type "long" on target machine */
 #define LONG_TYPE_SIZE 16
@@ -920,12 +981,8 @@ enum reg_class {
 /* Size (bits) of the type "double" on target machine */
 #define DOUBLE_TYPE_SIZE 32
 
-/* Define this if zero-extension is slow
-	(more than one real instruction).  */
-/*** #define SLOW_ZERO_EXTEND ***/ /* */
-
 /* Nonzero if access to memory by bytes is slow and undesirable.  */
-#define SLOW_BYTE_ACCESS 0 /* */
+#define SLOW_BYTE_ACCESS 0
 
 /* Define if shifts truncate the shift count
    which implies one can omit a sign-extension or zero-extension
@@ -942,6 +999,7 @@ enum reg_class {
 
 /* When a prototype says `char' or `short', really pass an `int'.  */
 /**** was:  don't do this, we need char args for interrupt routines */
+#undef PROMOTE_PROTOTYPES
 /* #define PROMOTE_PROTOTYPES 1 */
 
 /* Specify the machine mode that pointers have.
