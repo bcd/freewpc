@@ -79,5 +79,7 @@ extern const uint8_t mach_edge_switches[];
 void amode_left_flipper (void);
 void amode_right_flipper (void);
 
+void piano_ball_start (void);
+void slot_ball_start (void);
 
 #endif /* MACH_CONFIG_H */

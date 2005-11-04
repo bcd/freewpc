@@ -38,24 +38,41 @@
 #define SW_LEFT_INLANE_1		MAKE_SW(3,7)
 #define SW_LEFT_INLANE_2		MAKE_SW(3,8)
 
+#define SW_DEAD_END				MAKE_SW(4,1)
+#define SW_CAMERA					MAKE_SW(4,2)
+#define SW_PIANO					MAKE_SW(4,3)
+#define SW_MPF_ENTER				MAKE_SW(4,4)
+#define SW_MPF_LEFT				MAKE_SW(4,5)
+#define SW_MPF_RIGHT				MAKE_SW(4,6)
+#define SW_CLOCK_TARGET			MAKE_SW(4,7)
+
+#define SW_GUMBALL_LANE			MAKE_SW(5,1)
+#define SW_HITCHHIKER			MAKE_SW(5,2)
 #define SW_LEFT_RAMP_ENTER		MAKE_SW(5,3)
 #define SW_LEFT_RAMP_EXIT		MAKE_SW(5,4)
-
+#define SW_GUMBALL_GENEVA		MAKE_SW(5,5)
+#define SW_GUMBALL_EXIT			MAKE_SW(5,6)
+#define SW_SLOT_PROXIMITY		MAKE_SW(5,7)
 #define SW_SLOT					MAKE_SW(5,8)
 
 #define SW_SKILL_BOTTOM			MAKE_SW(6,1)
 #define SW_SKILL_CENTER			MAKE_SW(6,2)
 #define SW_SKILL_TOP				MAKE_SW(6,3)
+#define SW_POWER_PAYOFF			MAKE_SW(6,5)
 
 #define SW_AUTOFIRE1				MAKE_SW(7,1)
 #define SW_AUTOFIRE2				MAKE_SW(7,2)
 #define SW_RIGHT_RAMP			MAKE_SW(7,3)
+#define SW_GUMBALL_POPPER		MAKE_SW(7,4)
+#define SW_MPF_TOP				MAKE_SW(7,5)
+#define SW_MPF_EXIT				MAKE_SW(7,6)
 
 #define SW_LOWER_RIGHT_MAGNET	MAKE_SW(8,1)
 #define SW_UPPER_RIGHT_MAGNET	MAKE_SW(8,2)
 #define SW_LEFT_MAGNET			MAKE_SW(8,3)
 #define SW_LOCK_CENTER			MAKE_SW(8,4)
 #define SW_LOCK_UPPER			MAKE_SW(8,5)
+#define SW_GUMBALL_ENTER		MAKE_SW(8,7)
 #define SW_LOCK_LOWER			MAKE_SW(8,8)
 
 /*
@@ -96,12 +113,18 @@
 #define MACHINE_SW37				sw_left_inlane_1
 #define MACHINE_SW38				sw_left_inlane_2
 
+#define MACHINE_SW41				sw_deadend
+#define MACHINE_SW42				sw_camera
+#define MACHINE_SW43				sw_piano
 #define MACHINE_SW48				sw_greed
 
 #define MACHINE_SW53				sw_left_ramp_enter
 #define MACHINE_SW54				sw_left_ramp_exit
 #define MACHINE_SW58				sw_slot
 
+#define MACHINE_SW61				sw_lower_skill
+#define MACHINE_SW62				sw_center_skill
+#define MACHINE_SW63				sw_upper_skill
 #define MACHINE_SW64				sw_greed
 #define MACHINE_SW66				sw_greed
 #define MACHINE_SW67				sw_greed
@@ -111,6 +134,8 @@
 #define MACHINE_SW77				sw_greed
 #define MACHINE_SW78				sw_greed
 
+#define MACHINE_SW81				sw_right_loop
+#define MACHINE_SW83				sw_left_loop
 #define MACHINE_SW84				sw_lock
 #define MACHINE_SW85				sw_lock
 #define MACHINE_SW88				sw_lock
