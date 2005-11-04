@@ -12,6 +12,8 @@
 # privileges to install it.
 #
 
+# DEBUG_COMPILER=y
+
 #######################################################################
 ###	Configuration
 #######################################################################
@@ -47,13 +49,15 @@ TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
 LINKCMD = freewpc.lnk
-PAGED_LINKCMD = page62.lnk
+PAGED_LINKCMD = page55.lnk page56.lnk page57.lnk page58.lnk page59.lnk \
+					 page60.lnk page61.lnk page62.lnk
 
 # The XBM prototype header file
 XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = freewpc.bin
-PAGED_BINFILES = page62.bin
+PAGED_BINFILES = page55.bin page56.bin page57.bin page58.bin \
+					  page59.bin page60.bin page61.bin page62.bin
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
@@ -77,10 +81,11 @@ TMPFILES += $(ERR)
 #######################################################################
 
 # Path to the compiler and linker
-CC = /usr/local/m6809/bin/gcc
-# LD = /usr/local/m6809/bin/ld
-LD = /home/bcd/bin/aslink
-AS = /usr/local/m6809/bin/as
+GCC_ROOT = /usr/local/m6809/bin
+CC = $(GCC_ROOT)/gcc
+LD = $(GCC_ROOT)/ld
+# LD = /home/bcd/bin/aslink
+AS = $(GCC_ROOT)/as
 REQUIRED += $(CC) $(LD) $(AS)
 
 # Name of the S-record converter
@@ -100,14 +105,13 @@ XBMPROTO = tools/xbmproto
 
 GAME_ROM = freewpc.rom
 
-PAGED_SECTIONS = font
-
 FIXED_SECTION = sysrom
 
-OS_OBJS = div10.o init.o sysinfo.o task.o lamp.o sol.o dmd.o \
+OS_OBJS = div10.o init.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o test.o \
-	device.o lampset.o score.o deff.o triac.o paging.o db.o \
-	trough.o font.o printf.o tilt.o vector.o reset.o
+	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
+	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
+	task.o lamp.o sol.o
 
 FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
@@ -129,7 +133,14 @@ CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
 # Default optimizations.  These are the only optimizations that
 # are known to work OK; using -O2 is almost guaranteed to fail.
-CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls
+CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing
+
+# Default machine flags.  To keep code size small, turn on short
+# branches by default.  Some files may need to override this option
+# if they include a long function, which might need to branch longer
+# distances.  Those files can use "#pragma long_branch" to revert to
+# the safer inefficient form.
+CFLAGS += -mshort_branch
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -137,6 +148,10 @@ CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-
 ifdef UNROLL_LOOPS
 CFLAGS += -funroll-loops
 endif
+
+# Throw some extra information in the assembler logs
+# (disabled because it doesn't really help much)
+# CFLAGS += -fverbose-asm
 
 # Turn on compiler debug.  This will cause a bunch of compiler
 # debug files to get written out during every phase of the build.
@@ -174,6 +189,19 @@ CFLAGS += -Werror-implicit-function-declaration
 # "pages", which are like sections...
 #
 
+page55_SECTIONS =
+page56_SECTIONS =
+page57_SECTIONS =
+page58_SECTIONS =
+page59_SECTIONS =
+page60_SECTIONS =
+page61_SECTIONS =
+page62_SECTIONS = font
+
+PAGED_SECTIONS = $(page55_SECTIONS) $(page56_SECTIONS) $(page57_SECTIONS) \
+					  $(page58_SECTIONS) $(page59_SECTIONS) $(page60_SECTIONS) \
+					  $(page61_SECTIONS) $(page62_SECTIONS)
+
 RAM_ADDR = 0x0
 PAGED_ROM_ADDR = 0x4000
 FIXED_ROM_ADDR = 0x8000
@@ -185,18 +213,21 @@ MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 
 
-PAGE55_OBJS =
-PAGE56_OBJS =
-PAGE57_OBJS =
-PAGE58_OBJS =
-PAGE59_OBJS =
-PAGE60_OBJS =
-PAGE61_OBJS =
-PAGE62_OBJS = $(FONT_OBJS)
+page55_OBJS =
+page56_OBJS =
+page57_OBJS =
+page58_OBJS =
+page59_OBJS =
+page60_OBJS =
+page61_OBJS =
+page62_OBJS = $(FONT_OBJS)
 
-PAGED_OBJS = $(PAGE61_OBJS) $(PAGE62_OBJS)
+PAGED_OBJS = $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
+				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) \
+				 $(page61_OBJS) $(page62_OBJS)
 
-PAGE_HEADER_OBJS = page61.o page62.o
+PAGE_HEADER_OBJS = page55.o page56.o page57.o page58.o page59.o \
+						 page60.o page61.o page62.o
 
 SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) $(XBM_OBJS)
 
@@ -214,6 +245,7 @@ DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile
 GENDEFINES = \
 	include/gendefine_gid.h \
 	include/gendefine_deff.h \
+	include/gendefine_leff.h \
 	include/gendefine_lampset.h \
 
 #######################################################################
@@ -264,8 +296,8 @@ build : $(GAME_ROM)
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : blank256.bin blank128.bin blank64.bin blank16.bin $(BINFILES)
-	@echo Padding ... && cat blank256.bin blank128.bin blank64.bin blank16.bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
+$(GAME_ROM) : blank256.bin blank64.bin blank32.bin $(BINFILES)
+	@echo Padding ... && cat blank256.bin blank64.bin blank32.bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
@@ -292,27 +324,32 @@ $(BINFILES:.bin=.s19) : %.s19 : $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS) %.l
 #
 $(PAGED_LINKCMD) : $(DEPS)
 	@echo Creating linker command file...
-	@rm -f $(PAGED_LINKCMD)
-	@echo "-mxswz" >> $(PAGED_LINKCMD)
-	@echo "-b ram = 0x100" >> $(PAGED_LINKCMD)
-	@for f in `echo $(PAGED_SECTIONS)`; do echo "-b $$f = 0x4000" >> $(PAGED_LINKCMD); done
-	@echo "-b sysrom = 0x8000" >> $(PAGED_LINKCMD)
-	@echo "-b vector = 0xFFF0" >> $(PAGED_LINKCMD)
-	@echo page62.o >> $(PAGED_LINKCMD)
-	@echo $(FONT_OBJS) >> $(PAGED_LINKCMD)
-	@echo "-v" >> $(PAGED_LINKCMD)
-	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(PAGED_LINKCMD); done
-	@for f in `echo $(filter-out $(FONT_OBJS), $(PAGE_HEADER_OBJS) $(PAGED_OBJS))`; do echo $$f >> $(PAGED_LINKCMD); done
-	@echo "-k $(LIBC_DIR)/" >> $(PAGED_LINKCMD)
-	@echo "-l c.a" >> $(PAGED_LINKCMD)
-	@echo "-e" >> $(PAGED_LINKCMD)
+	@rm -f $@
+	@echo "-mxswz" >> $@
+	@echo "-b ram = 0x100" >> $@
+	@for f in `echo $($(@:.lnk=_SECTIONS))`; do echo "-b $$f = 0x4000" >> $@; done
+	@echo "-b sysrom = 0x8000" >> $@
+	@echo $(@:.lnk=.o) >> $@
+	@echo $($(@:.lnk=_OBJS)) >> $@
+	@echo "-v" >> $@
+	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $@; done
+	@for f in `echo $(filter-out $($(@:.lnk=_OBJS)) $(@:.lnk=.o), $(PAGE_HEADER_OBJS) $(PAGED_OBJS))`; do echo $$f >> $@; done
+	@echo "-k $(LIBC_DIR)/" >> $@
+	@echo "-l c.a" >> $@
+	@echo "-e" >> $@
 
+	#@echo "-b vector = 0xFFF0" >> $@
 
 #
 # How to build a page header source file.
 #
 page%.s:
-	@echo ".area page$*" > page$*.s
+	@echo ".area sysrom" > page$*.s
+	@echo ".db 0" >> page$*.s
+	@echo ".area page$*" >> page$*.s
+	@echo ".db 0" >> page$*.s
+	@echo ".area ram" >> page$*.s
+	@echo ".db 0" >> page$*.s
 
 #
 # How to make the linker command file for the system section.
@@ -341,8 +378,6 @@ $(LINKCMD) : $(DEPS)
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
 	@echo Assembling $< ... && $(AS) $< 2>&1 | tee -a err
 
-#! @echo Assembling $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
-
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
@@ -350,11 +385,8 @@ $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
 $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 	@echo Assembling page header $< ... && $(AS) $< 2>&1 | tee -a err
 
-#! @echo Assembling page header $< ... && $(CC) -o $@ -c -x assembler-with-cpp $< 2>&1 | tee -a err
-
 #
 # General rule for how to build any C module.
-# TODO:
 #
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
@@ -398,6 +430,9 @@ include/gendefine_gid.h :
 include/gendefine_deff.h :
 	@echo Autogenerating display effect IDs... && tools/gendefine -p DEFF_ > include/gendefine_deff.h
 
+include/gendefine_leff.h :
+	@echo Autogenerating lamp effect IDs... && tools/gendefine -p LEFF_ > include/gendefine_leff.h
+
 include/gendefine_lampset.h :
 	@echo Autogenerating lampset IDs... && tools/gendefine -p LAMPSET_ > include/gendefine_lampset.h
 
@@ -419,10 +454,10 @@ gendefines_again: clean_gendefines gendefines
 # 'make gcc-anythingelse' will run gcc's 'anythingelse' target.
 #
 gcc-install:
-	cp -p /usr/local/m6809/bin/gcc /usr/local/bin/gcc09
+	cp -p $(GCC) /usr/local/bin/gcc09
 
 gcc:
-	cd gcc-build && ./gccbuild
+	cd gcc-build && ./gccbuild make
 
 gcc-%:
 	cd gcc-build && ./gccbuild %
@@ -435,7 +470,7 @@ gcc-%:
 astools: astools-build astools-install
 
 astools-install:
-	cp -p $(ASTOOLS_DIR)/aslink /usr/local/m6809/bin/ld
+	cp -p $(ASTOOLS_DIR)/aslink $(LD)
 
 astools-build:
 	cd asm-thomson && make && make install
@@ -478,7 +513,7 @@ $(WEBDIR):
 #
 clean: clean_derived clean_gendefines
 	@for dir in `echo . kernel fonts images $(MACHINE)`;\
-		do echo Removing files in $$dir... && \
+		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
 clean_derived:
