@@ -3,7 +3,7 @@
 #define _PRINTF_H
 
 
-typedef uint16_t *va_list;
+typedef U16 *va_list;
 
 #define PRINTF_BUFFER_SIZE		48
 
@@ -14,19 +14,21 @@ do { \
 } while (0) \
 
 
-
-#define va_arg(va, type)	((type)*va++)
+#define va_arg(va, type)	*((type *)va)++
 
 #define va_end(va)
 
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 void sprintf (const char *format, ...);
 
+#ifdef DEBUGGER
 #define dbprintf(format, rest...) \
 	do { \
 		sprintf (format, ## rest ); \
 		db_puts (sprintf_buffer); \
 	} while (0)
-
+#else
+#define dbprintf(format, rest...)
+#endif /* DEBUGGER */
 
 #endif /* _PRINTF_H */

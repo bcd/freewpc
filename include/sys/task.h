@@ -9,7 +9,7 @@
 #define TASK_USED		1
 #define TASK_BLOCKED	2
 
-#define NUM_TASKS				16
+#define NUM_TASKS 32
 
 extern U8 task_idle_count;
 
@@ -58,7 +58,7 @@ void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
 void task_exit (void) __noreturn__;
 task_t *task_find_gid (task_gid_t);
-void task_kill_gid (task_gid_t);
+bool task_kill_gid (task_gid_t);
 uint16_t task_get_arg (void);
 void task_set_arg (task_t *tp, uint16_t arg);
 

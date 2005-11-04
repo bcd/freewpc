@@ -68,25 +68,38 @@ extern inline void set_stack_pointer (const uint16_t s)
 extern inline U16 get_stack_pointer (void)
 {
 	U16 result;
-	asm __volatile__ ("lea%0\t,s" :: "a" (result));
+	asm __volatile__ ("lea%0\t,s" : "=a" (result));
 	return result;
 }
 
 extern inline void set_direct_page_pointer (const uint8_t dp)
 {
-	asm __volatile__ ("\ttfr b, dp" :: "d" (dp));
+	asm __volatile__ ("tfr\tb, dp" :: "q" (dp));
 }
 
 
 extern inline void *memset (void *s, int c, long unsigned int n)
 {
-	register char *s1 = (char *)s;
-	while (n > 0)
+	if ((n % 2) == 0)
 	{
-		*s1++ = c & 0xFF;
-		n--;
+		register U16 *s1 = (U16 *)s;
+		n /= 2;
+		while (n > 0)
+		{
+			*s1++ = ((U16)c << 8) | c;
+			n--;
+		}
 	}
-	return (s);
+	else
+	{
+		register char *s1 = (char *)s;
+		while (n > 0)
+		{
+			*s1++ = c & 0xFF;
+			n--;
+		}
+		return (s);
+	}
 }
 
 

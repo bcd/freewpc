@@ -50,5 +50,7 @@ void dmd_alloc_low_clean (void);
 void dmd_alloc_high_clean (void);
 void dmd_draw_border (char *dbuf);
 void dmd_shift_up (dmd_buffer_t *dbuf);
+void dmd_shift_down (dmd_buffer_t *dbuf);
+void dmd_draw_image (char *image_bits);
 
 #endif /* _SYS_DMD_H */

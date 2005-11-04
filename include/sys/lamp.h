@@ -3,21 +3,20 @@
 
 #define NUM_LAMPS 64
 
+#define FLAG_OFFSET					0x40
+#define LAMP_FLASH_OFFSET			0x80
+#define LAMP_FAST_FLASH_OFFSET	0xC0
+
 #define NUM_LAMP_COLS	8
+
+#define NUM_VLAMP_COLS	8
 
 #define MAKE_LAMP(col,row)	(((col-1) * 8) + row-1)
 
 /* The lamp flash state is updated every 32ms, so this will
  * toggle the lamp flash state about 8 times/sec */
 #define LAMP_DEFAULT_FLASH_RATE 4
-
-
-/* Lamp effect opcodes
- */
-#define LAMP_OP_SKIP_RANGE	0xFD
-#define LAMP_OP_RANGE		0xFE
-#define LAMP_OP_EXIT			0xFF
-
+#define LAMP_FAST_FLASH_RATE 2
 
 /* Small integer type for a lamp number */
 typedef uint8_t lampnum_t;
@@ -71,8 +70,22 @@ void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
 void lamp_toggle (lampnum_t lamp);
 int lamp_test (lampnum_t lamp);
-void lamp_flash (lampnum_t lamp);
-void lamp_noflash (lampnum_t lamp);
+
+#define flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
+#define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
+#define flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
+#define flag_test(lamp)		lamp_test (lamp + FLAG_OFFSET)
+
+#define lamp_flash_on(lamp)		lamp_on (lamp + LAMP_FLASH_OFFSET)
+#define lamp_flash_off(lamp)		lamp_off (lamp + LAMP_FLASH_OFFSET)
+#define lamp_flash_toggle(lamp)	lamp_toggle (lamp + LAMP_FLASH_OFFSET)
+#define lamp_flash_test(lamp)		lamp_test (lamp + LAMP_FLASH_OFFSET)
+
+#define lamp_fast_flash_on(lamp)			lamp_on (lamp + LAMP_FAST_FLASH_OFFSET)
+#define lamp_fast_flash_off(lamp)		lamp_off (lamp + LAMP_FAST_FLASH_OFFSET)
+#define lamp_fast_flash_toggle(lamp)	lamp_toggle (lamp + LAMP_FAST_FLASH_OFFSET)
+#define lamp_fast_flash_test(lamp)		lamp_test (lamp + LAMP_FAST_FLASH_OFFSET)
+
 void lamp_all_on (void);
 void lamp_all_off (void);
 

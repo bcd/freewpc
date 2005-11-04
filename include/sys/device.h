@@ -13,9 +13,20 @@
 
 #define MAX_BALLS 6
 
-#define DEVICE_GID_BASE 0x10
+/*
+#define GID_DEVICE0_ACTIVE
+#define GID_DEVICE1_ACTIVE
+#define GID_DEVICE2_ACTIVE
+#define GID_DEVICE3_ACTIVE
+#define GID_DEVICE4_ACTIVE
+#define GID_DEVICE5_ACTIVE
+#define GID_DEVICE6_ACTIVE
+#define GID_DEVICE7_ACTIVE
+ */
 
-#define DEVICE_GID(devno)	(DEVICE_GID_BASE + (devno))
+#define DEVICE_GID_BASE		GID_DEVICE0_ACTIVE
+
+#define DEVICE_GID(devno)	(GID_DEVICE0_ACTIVE + (devno))
 
 struct device;
 

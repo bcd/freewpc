@@ -15,7 +15,7 @@ typedef bcd_t score_t[BYTES_PER_SCORE];
 
 /** Macros for adding to the CURRENT score; these are shortcuts **/
 
-extern volatile U8 score_change;
+extern U8 score_change;
 extern U8 scores[][BYTES_PER_SCORE];
 extern U8 *current_score;
 
@@ -28,7 +28,7 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 len);
 void score_add_current (bcd_t *s);
 void score_sub (score_t *s1, score_t *s2);
 void score_mul (score_t *s1, uint8_t multiplier);
-int score_compare (score_t *s1, score_t *s2);
+I8 score_compare (bcd_t *s1, bcd_t *s2);
 void scores_reset (void);
 void score_init (void);
 

@@ -12,6 +12,8 @@
 
 #define db_inb db_data_reg
 
+#ifdef DEBUGGER
+
 #define db_putc(b) \
 { \
 	db_data_reg = b; \
@@ -21,6 +23,13 @@ void db_puts (const char *s);
 void db_puti (uint8_t v);
 void db_put2x (uint8_t v);
 void db_put4x (uint16_t v);
+#else
+#define db_puts(s)
+#define db_puti(i)
+#define db_put2x(v)
+#define db_put4x(v)
+#define db_putc(b)
+#endif
 
 #define db_putp(p)	db_put4x ((uint16_t)p)
 

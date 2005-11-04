@@ -80,7 +80,7 @@
 #define IRQS_PER_TICK 8
 
 /* Primitive time constants */
-#define TIME_16MS 	2
+//#define TIME_16MS 	2
 #define TIME_33MS 	4
 #define TIME_50MS 	6
 #define TIME_66MS 	(TIME_33MS * 2)
@@ -204,9 +204,9 @@ extern inline void wpc_led_toggle (void)
 extern inline void wpc_led_toggle (void)
 {
 	asm (										\
-		"lda " STR(WPC_LEDS) "\n"		\
-		"\teora #0x80\n"					\
-		"\tsta " STR(WPC_LEDS) "\n"	\
+		"lda\t" STR(WPC_LEDS) "\n"		\
+		"\teora\t#0x80\n"					\
+		"\tsta\t" STR(WPC_LEDS) "\n"	\
 		:										\
 		: 										\
 		: "a" 								\
@@ -242,7 +242,18 @@ extern inline void wpc_set_rom_page (uint8_t page)
 	*(volatile uint8_t *)WPC_ROM_BANK = page;
 }
 
+#define call_far(page, fncall) \
+do { \
+	U8 __saved_page = wpc_get_rom_page (); \
+	wpc_set_rom_page (page); \
+	fncall; \
+	wpc_set_rom_page (__saved_page); \
+} while (0);
 
+
+/********************************************/
+/* LED Register                             */
+/********************************************/
 
 #define LED_DIAGNOSTIC		0x80
 
@@ -312,29 +323,6 @@ extern inline void wpc_write_ticket (U8 val)
 	*(volatile U8 *)WPC_TICKET_DISPENSE = val;
 }
 
-
-
-/***************************************************************
- * Task Groups
- ***************************************************************/
-
-#if 0 /* these are now in gendefine_gid.h */
-#define GID_NONE						0
-#define GID_TEST_BANNER				1
-#define GID_DEFF						2
-#define GID_DEFF_POPUP				3
-#define GID_TEST_LOOP				4
-#define GID_DEFF_EXITING			5
-#define GID_TEST_PROC				6
-#define GID_DEVICE_PROBE			7
-#define GID_LAMP_DEMO				8
-#define GID_SW_HANDLER				9
-#define GID_FIRST_TASK				10
-#define GID_STARFIELD				11
-#define GID_LAMP_UPDATE				12
-#define GID_LAMP_TEST_SINGLE		13
-#define GID_RIGHT_RAMP_ENTERED	14
-#endif
 
 #endif /* _WPC_H */
 

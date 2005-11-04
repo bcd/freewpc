@@ -8,8 +8,8 @@ uint16_t div10 (uint8_t val);
 do \
 { \
 	uint16_t __unused_quot_rem __attribute__ ((unused)) = div10 (u8); \
-	asm ("sta %0" :: "m" (quot)); \
-	asm ("stb %0" :: "m" (rem)); \
+	asm ("sta\t%0" :: "m" (quot)); \
+	asm ("stb\t%0" :: "m" (rem)); \
 } while (0)
 
 

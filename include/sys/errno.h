@@ -18,12 +18,13 @@
 #define ERR_TASK_KILL_FAILED		14
 #define ERR_NOT_IMPLEMENTED_YET	15
 #define ERR_UNPRINTABLE_CHAR		16
+#define ERR_LEFF_QUEUE_FULL		17
 
 typedef uint8_t errcode_t;
-void do_fatal (uint16_t pc, errcode_t errcode) __noreturn__;
-void do_nonfatal (uint16_t pc, errcode_t errcode);
+void do_fatal (errcode_t errcode) __noreturn__;
+void do_nonfatal (errcode_t errcode);
 
-#define fatal(err)		do_fatal(0x1234, err)
-#define nonfatal(err)	do_nonfatal(0x5678, err)
+#define fatal(err)		do_fatal(err)
+#define nonfatal(err)	do_nonfatal(err)
 
 #endif /* SYS_ERRNO_H */
