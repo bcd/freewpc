@@ -11,7 +11,7 @@
  *
  * Most of the module is written in portable C.  The task structure
  * and the register save/restore routines are written in lots of
- * assembler.
+ * assembler, though.
  *
  */
 
@@ -34,6 +34,7 @@ uint8_t task_count;
 
 void task_dump (void)
 {
+#ifdef DEBUGGER
 	register short t;
 	register task_t *tp;
 
@@ -66,6 +67,7 @@ void task_dump (void)
 		}
 	}
 	db_puts ("----------------------\n");
+#endif
 }
 
 
@@ -138,7 +140,6 @@ void task_restore (void)
 
 	__asm__ volatile ("ldu	%0" :: "m" (__x->pc));
 	__asm__ volatile ("pshs\tu");
-
 	__asm__ volatile ("ldy	%0" :: "m" (__x->y));
 	__asm__ volatile ("lda	%0" :: "m" (__x->a));
 	__asm__ volatile ("ldb	%0" :: "m" (__x->b));
@@ -178,7 +179,14 @@ void task_create (void)
 	*(uint16_t *)&tp->stack = 0xEEEE;
 
 	tp->s = (uint16_t)(tp->stack + TASK_STACK_SIZE - 1);
-	
+
+	/* TODO?? : push the address of task_exit onto the
+	 * stack so that the task can simply return and it
+	 * will exit automatically.  All tasks will need
+	 * to do this and this will save the code space of
+	 * a function call (though replaced by stack space)
+	 */
+
 	__asm__ volatile ("puls\td,u,y,pc");
 }
 
@@ -287,6 +295,11 @@ void task_sleep_sec (int8_t secs)
 {
 	while (--secs >= 0)
 		task_sleep (TIME_1S);
+	/* TODO :
+	 * ldb ,s
+	 * decb
+	 * stb ,s
+	 * could be compressed to dec ,s, no? */
 }
 
 
@@ -295,6 +308,8 @@ void task_exit (void) __noreturn__
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
+	/* TODO : the following generates
+	 * clrb, stb 16,x: could be clr 16,x */
 	task_current->state = TASK_FREE;
 	task_current = 0;
 #ifdef DEBUG_TASKS
@@ -327,14 +342,19 @@ void task_kill_pid (task_t *tp)
 #endif
 }
 
-void task_kill_gid (task_gid_t gid)
+bool task_kill_gid (task_gid_t gid)
 {
 	register short t;
 	register task_t *tp;
+	bool rc = FALSE;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if ((tp->state != TASK_FREE) && (tp->gid == gid))
+		{
 			task_kill_pid (tp);
+			rc = TRUE;
+		}
+	return (rc);
 }
 
 

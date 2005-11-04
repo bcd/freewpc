@@ -10,7 +10,7 @@ __fastram__ uint8_t tick_count;
 uint8_t sys_init_complete;
 
 
-void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
+void do_fatal (errcode_t error_code) __noreturn__
 {
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
 
@@ -30,7 +30,7 @@ void do_fatal (uint16_t pc, errcode_t error_code) __noreturn__
 }
 
 
-void do_nonfatal (uint16_t pc, errcode_t error_code)
+void do_nonfatal (errcode_t error_code)
 {
 }
 
@@ -97,6 +97,7 @@ void do_reset (void) __noreturn__
 	irq_init ();
 	task_init ();
 	deff_init ();
+	leff_init ();
 	test_init ();
 	score_init ();
 	call_hook (init);

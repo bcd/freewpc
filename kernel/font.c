@@ -9,27 +9,28 @@ fontargs_t font_args;
 
 extern inline uint8_t lsrqi3 (uint8_t data, uint8_t count)
 {
+	register U8 d = data;
 	switch (count)
 	{
 		default:
 		case 7:
-			data >>= 1;
+			d >>= 1;
 		case 6:
-			data >>= 1;
+			d >>= 1;
 		case 5:
-			data >>= 1;
+			d >>= 1;
 		case 4:
-			data >>= 1;
+			d >>= 1;
 		case 3:
-			data >>= 1;
+			d >>= 1;
 		case 2:
-			data >>= 1;
+			d >>= 1;
 		case 1:
-			data >>= 1;
+			d >>= 1;
 		case 0:
 			break;
 	}
-	return (data);
+	return (d);
 }
 
 
@@ -88,21 +89,16 @@ uint8_t *font_lookup (const font_t *font, char c)
 	return entry + index * font->height;
 }
 
-
+#pragma long_branch
 void fontargs_render_string (const fontargs_t *args)
 {
 	static uint8_t *dmd_base;
-	const char *s = args->s;
-	U8 x = args->x;
-	const font_t *font = args->font;
-
-#if 0
-	db_puts ("font render y=");
-	db_put2x (args->y);
-	db_putc ('\n');
-#endif
+	static const char *s;
+	U8 x;
 
 	dmd_base = ((uint8_t *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
+   s = args->s;
+  	x = args->x;
 
 	while (*s != '\0')
 	{
@@ -111,24 +107,29 @@ void fontargs_render_string (const fontargs_t *args)
 		static uint8_t xb;
 		static uint8_t xr;
 
+		xb = x / 8;
+
 		if (*s == '.')
 		{
-			dmd_base[(font->height-1) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
+			dmd_base[(args->font->height-1) * DMD_BYTE_WIDTH + xb - 1] |= 0x40;
 			s++;
 			continue;
 		}
 		else if (*s == ',')
 		{
-			dmd_base[(font->height-3) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
-			dmd_base[(font->height-2) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x40;
-			dmd_base[(font->height-1) * DMD_BYTE_WIDTH + x/8 - 1] |= 0x80;
+			U8 *dmd_pos = &dmd_base[(args->font->height - 3) * DMD_BYTE_WIDTH + xb - 1];
+			*dmd_pos |= 0x40;
+			dmd_pos -= DMD_BYTE_WIDTH;
+			*dmd_pos |= 0x40;
+			dmd_pos -= DMD_BYTE_WIDTH;
+			*dmd_pos |= 0x80;
 			s++;
 			continue;
 		}
 
 		/* TODO : drawing to positions that are not 8-bit aligned
 		 * does not work, so force to proper alignment for now. */
-#if 11111
+#if 00000
 	x &= ~7;
 #endif
 
@@ -136,41 +137,33 @@ void fontargs_render_string (const fontargs_t *args)
 		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
 #endif
 
-		data = font_lookup (font, *s);
+		data = font_lookup (args->font, *s);
 		xb = x / 8;
 		xr = x % 8;
 
 		if (xr == 0)
 		{
-			for (i=0; i <font->height; i++)
+			for (i=0; i <args->font->height; i++)
 				dmd_base[i * DMD_BYTE_WIDTH + xb] = *data++;
 		}
 		else
 		{
-			for (i=0; i <font->height; i++)
+			for (i=0; i <args->font->height; i++)
 			{
-#if 0
-				db_put2x (xr);
-				db_putc (' ');
-				db_put2x (*data);
-				db_putc (' ');
-				db_put2x (*data << xr);
-				db_putc (' ');
-				db_put2x (*data >> (8 - xr));
-				db_putc ('\n');
-#endif
-				dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
-				// dmd_base[i * DMD_BYTE_WIDTH + xb] = aslqi3 (*data, xr);
-				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
-				// dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = lsrqi3 (*data, (8 - xr));
+				//dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
+				dmd_base[i * DMD_BYTE_WIDTH + xb] |= aslqi3 (*data, xr);
+				//dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
+				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] |= lsrqi3 (*data, (8 - xr));
 				data++;
 			}
 		}
 
-		x += font->width + font->spacing; /* advance by 1 char ... font->width */
+		/* advance by 1 char ... args->font->width */
+		x += args->font->width + args->font->spacing; 
 		s++;
 	}
 }
+#pragma short_branch
 
 
 uint8_t font_get_string_width (const font_t *font, const char *s)

@@ -170,6 +170,26 @@ void test_start_button (void)
 	if (!in_test) return;
 }
 
+void test_left_flipper_button (void)
+{
+	sound_send (SND_DOWN);
+	if ((test_menu->child_count) && (test_index == 0))
+		test_index = test_menu->child_count - 1;
+	else
+		test_index -= 0x10;
+	deff_restart (DEFF_TEST_MENU);
+}
+
+
+void test_right_flipper_button (void)
+{
+	sound_send (SND_UP);
+	test_index += 0x10;
+	if ((test_menu->child_count) && (test_index >= test_menu->child_count))
+		test_index = test_menu->start_index;
+	deff_restart (DEFF_TEST_MENU);
+}
+
 
 /********************************************************************/
 
@@ -189,7 +209,7 @@ void sound2_enter_proc (void) __taskentry__
 
 void lamp_enter_proc (void) __taskentry__
 {
-	lamp_flash (test_index);
+	lamp_flash_on (test_index);
 	task_exit ();
 }
 
@@ -248,12 +268,24 @@ void font_test_deff (void)
 		case 1:
 			font = &font_9x6;
 			break;
+
+		default:
+			font = NULL;
+			break;
 	}
 
 	dmd_alloc_low_clean ();
-	font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-	font_render_string (font, 0, 8, "NOPQRSTUVWXYZ");
-	font_render_string (font, 0, 16, "0123456789");
+	if (font != NULL)
+	{
+		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+		font_render_string (font, 0, 8, "NOPQRSTUVWXYZ");
+		font_render_string (font, 0, 16, "0123456789");
+	}
+	else
+	{
+		font_render_string_center (&font_5x5, 64, 16, "INVALID FONT");
+	}
+
 	dmd_show_low ();
 	task_sleep_sec (2);
 	while (switch_poll_logical (SW_ESCAPE) == FALSE)

@@ -24,12 +24,12 @@ char digit2char (uint8_t digit)
 }
 
 
-char *do_sprintf_decimal (char *buf, uint16_t w)
+char *do_sprintf_decimal (char *buf, U8 b)
 {
 	uint8_t quot;
 	uint8_t rem;
 
-	DIV10 (w & 0xFF, quot, rem);
+	DIV10 (b, quot, rem);
 
 	*buf++ = quot + '0';
 	*buf++ = rem + '0';
@@ -45,14 +45,18 @@ char *do_sprintf_hex_byte (char *buf, uint8_t b)
 }
 
 
+#define HIGHBYTE(w)	(((U8 *)&w)[0])
+#define LOWBYTE(w)	(((U8 *)&w)[1])
+
 char *do_sprintf_hex (char *buf, uint16_t w)
 {
-	buf = do_sprintf_hex_byte (buf, w >> 8);
-	buf = do_sprintf_hex_byte (buf, w & 0xFF);
+	buf = do_sprintf_hex_byte (buf, HIGHBYTE(w));
+	buf = do_sprintf_hex_byte (buf, LOWBYTE (w));
 	return buf;
 }
 
 
+#pragma long_branch
 void sprintf (const char *format, ...)
 {
 	static va_list va;
@@ -78,23 +82,17 @@ do_format_chars:
 					sprintf_leading_zeroes = TRUE;
 					goto do_format_chars;
 
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
+				case '1': case '2': case '3':
+				case '4': case '5': case '6':
+				case '7': case '8': case '9':
 					sprintf_width = *format - '0';
 					goto do_format_chars;
 
 				case 'd':
 				case 'i':
 				{
-					register uint16_t w = va_arg (va, uint16_t);
-					endbuf = do_sprintf_decimal (buf, w);
+					register U8 b = va_arg (va, U8);
+					endbuf = do_sprintf_decimal (buf, b);
 fixup_number:
 					leading_zero_count = 0;
 					while ((buf[leading_zero_count] == '0') &&
@@ -151,11 +149,8 @@ fixup_number:
 
 				case 'x':
 				{
-					register uint16_t w  = va_arg (va, uint16_t);
-					if (sprintf_width <= 2)
-						endbuf = do_sprintf_hex_byte (buf, w & 0xFF);
-					else
-						endbuf = do_sprintf_hex (buf, w);
+					register U8 b = va_arg (va, U8);
+					endbuf = do_sprintf_hex_byte (buf, b);
 					goto fixup_number;
 					break;
 				}
@@ -166,7 +161,6 @@ fixup_number:
 					endbuf = buf;
 					while (sprintf_width != 0)
 					{
-						// db_put2x (*bcd);
 						endbuf = do_sprintf_hex_byte (endbuf, *bcd++);
 						sprintf_width -= 2;
 					}
@@ -178,8 +172,10 @@ fixup_number:
 				case 's':
 				{
 					register const char *s = va_arg (va, const char *);
+					register char *_buf = buf;
 					while (*s)
-						*buf++ = *s++;
+						*_buf++ = *s++;
+					buf = _buf;
 					break;
 				}
 
@@ -201,5 +197,5 @@ fixup_number:
 
 	*buf = '\0';
 }
-
+#pragma short_branch
 

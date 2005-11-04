@@ -2,13 +2,12 @@
 #include <freewpc.h>
 #include <m6809_math.h>
 
-
 /* Initially zero, this is set to 1 when a remote debugger is
  * detected */
 static uint8_t db_attached;
 
 
-
+#ifdef DEBUGGER
 
 void db_puts (const char *s)
 {
@@ -67,6 +66,7 @@ void db_dump_switches (void)
 	}
 }
 
+#endif /* DEBUGGER */
 
 void db_rtt (void)
 {

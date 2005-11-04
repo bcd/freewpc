@@ -199,7 +199,7 @@ void dmd_draw_border (char *dbuf)
 void dmd_shift_up (dmd_buffer_t *dbuf)
 {
 	uint16_t i;
-	for (i=(31 * 16 / 2); i != 0; --i)
+	for (i=(31L * 16 / 2); i != 0; --i)
 	{
 		dbuf[0] = dbuf[8];
 		dbuf++;
@@ -214,6 +214,33 @@ void dmd_shift_up (dmd_buffer_t *dbuf)
 	*dbuf++ = 0;
 	*dbuf++ = 0;
 }
+
+
+void dmd_shift_down (dmd_buffer_t *dbuf)
+{
+	U16 i;
+
+	dbuf = (dmd_buffer_t *)((char *)dbuf + 510);
+	for (i=(30L * 16 / 2 / 2); i != 0; --i)
+	{
+		dbuf[0] = dbuf[-16];
+		dbuf--;
+	}
+	for (i=16 / 4; i > 0; --i)
+	{
+		*dbuf-- = 0;	
+		*dbuf-- = 0;	
+		*dbuf-- = 0;	
+		*dbuf-- = 0;	
+	}
+}
+
+
+void dmd_draw_image (char *image_bits)
+{
+	call_far (0x3C, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)image_bits)));
+}
+
 
 #endif /* MACHINE_DMD */
 

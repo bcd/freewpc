@@ -13,6 +13,7 @@ static uint8_t live_balls;
 
 void device_debug (void)
 {
+#ifdef DEBUGGER
 	devicenum_t devno;
 
 	for (devno = 0; devno < device_count; devno++)
@@ -37,6 +38,7 @@ void device_debug (void)
 
 	dbprintf ("Counted %d Missing %d Live %d\n", 
 		counted_balls, missing_balls, live_balls);
+#endif
 }
 
 void device_clear (device_t *dev)

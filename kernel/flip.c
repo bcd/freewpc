@@ -11,7 +11,11 @@ U8 flipper_outputs;
 
 void sw_left_flipper_handler (void) 
 {
-	if (deff_get_active () == DEFF_AMODE)
+	extern void test_left_flipper_button (void);
+
+	if (in_test)
+		test_left_flipper_button ();
+	else if (deff_get_active () == DEFF_AMODE)
 	{
 		amode_left_flipper ();
 	}
@@ -19,7 +23,11 @@ void sw_left_flipper_handler (void)
 
 void sw_right_flipper_handler (void)
 {
-	if (deff_get_active () == DEFF_AMODE)
+	extern void test_right_flipper_button (void);
+
+	if (in_test)
+		test_right_flipper_button ();
+	else if (deff_get_active () == DEFF_AMODE)
 	{
 		amode_right_flipper ();
 	}

@@ -55,9 +55,9 @@ void credits_deff (void)
 void lamp_start_update (void)
 {
 	if (has_credits_p)
-		lamp_flash (MACHINE_START_LAMP);
+		lamp_flash_on (MACHINE_START_LAMP);
 	else
-		lamp_noflash (MACHINE_START_LAMP);
+		lamp_flash_off (MACHINE_START_LAMP);
 }
 
 
@@ -117,21 +117,25 @@ static void do_coin (uint8_t slot)
 void sw_left_coin_handler (void) __taskentry__
 {
 	do_coin (0);
+	task_exit ();
 }
 
 void sw_center_coin_handler (void) __taskentry__
 {
 	do_coin (1);
+	task_exit ();
 }
 
 void sw_right_coin_handler (void) __taskentry__
 {
 	do_coin (2);
+	task_exit ();
 }
 
 void sw_fourth_coin_handler (void) __taskentry__
 {
 	do_coin (3);
+	task_exit ();
 }
 
 

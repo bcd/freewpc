@@ -111,16 +111,16 @@ const lampnum_t lampset_spiral_awards[] = {
 
 const lampnum_t lampset_amode_all[] = {
 	LAMP_MACRO_REF(LAMPSET_DOOR_PANELS_AND_HANDLE),
+	LAMP_MACRO_REF(LAMPSET_DOOR_LOCKS),
+	LAMP_MACRO_REF(LAMPSET_DOOR_GUMBALL),
+	LAMP_MACRO_REF(LAMPSET_SPIRAL_AWARDS),
+	LAMP_MACRO_REF(LAMPSET_LOWER_LANES),
+	LAMP_MACRO_REF(LAMPSET_JETS),
+	LAMP_MACRO_REF(LAMPSET_POWERFIELD_VALUES),
 	LAMP_MACRO_REF(LAMPSET_LEFT_RAMP_AWARDS),
 	LAMP_MACRO_REF(LAMPSET_LOCK_AWARDS),
 	LAMP_MACRO_REF(LAMPSET_PIANO_AWARDS),
 	LAMP_MACRO_REF(LAMPSET_GREED_TARGETS),
-	LAMP_MACRO_REF(LAMPSET_POWERFIELD_VALUES),
-	LAMP_MACRO_REF(LAMPSET_JETS),
-	LAMP_MACRO_REF(LAMPSET_LOWER_LANES),
-	LAMP_MACRO_REF(LAMPSET_SPIRAL_AWARDS),
-	LAMP_MACRO_REF(LAMPSET_DOOR_LOCKS),
-	LAMP_MACRO_REF(LAMPSET_DOOR_GUMBALL),
 	LAMP_END
 };
 
@@ -165,6 +165,7 @@ void lampset_set_apply_delay (task_ticks_t delay)
 
 
 /* Apply an operator to each element of a lampset, one by one */
+#pragma long_branch
 void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register uint8_t opcode;
@@ -221,7 +222,7 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 		}
 	}
 }
-
+#pragma short_branch
 
 /* Common uses of apply */
 void lampset_apply_on (lampset_id_t id)
@@ -245,10 +246,14 @@ void lampset_apply_toggle (lampset_id_t id)
  */
 void lampset_step_increment (lampset_id_t id)
 {
+	/* Find the first lamp that is on; turn it off, and turn the
+	 * next lamp in the sequence on */
 }
 
 void lampset_step_decrement (lampset_id_t id)
 {
+	/* Find the first lamp that is on; turn it off, and turn the
+	 * previous lamp in the sequence on */
 }
 
 /*
@@ -258,10 +263,13 @@ void lampset_step_decrement (lampset_id_t id)
  */
 void lampset_build_increment (lampset_id_t id)
 {
+	/* Turn on the first lamp that is off, and then stop */
 }
 
 void lampset_build_decrement (lampset_id_t id)
 {
+	/* Going in reverse, turn off the first lamp that is on, and
+	 * then stop */
 }
 
 
@@ -269,6 +277,8 @@ void lampset_build_decrement (lampset_id_t id)
  * Rotate functions.  These routines take the existing lamp values and
  * rotate them either up or down (by which we are referring to the
  * order of the lamps in the array).
+ *
+ * This function is implemented similar to 'memmove'.
  */
 void lampset_rotate_next (lampset_id_t id)
 {

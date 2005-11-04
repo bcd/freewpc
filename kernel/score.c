@@ -2,8 +2,7 @@
 #include <freewpc.h>
 
 
-volatile U8 score_change;
-
+U8 score_change;
 U8 scores[4][4];
 U8 *current_score;
 
@@ -51,7 +50,8 @@ void scores_deff (void) __taskentry__
 		/* Stop any score effects (i.e. flashing) */
 
 		/* Redraw the scores on the screen */
-		dmd_alloc_low_clean ();
+		dmd_alloc_low_high ();
+		dmd_clean_page_low ();
 		scores_draw_ball ();
 		dmd_copy_low_to_high ();
 		scores_draw_current ();
@@ -62,7 +62,7 @@ void scores_deff (void) __taskentry__
 		/* Wait for a score change */
 		while (score_change == 0)
 		{
-			task_sleep (TIME_100MS);
+			task_sleep (ball_in_play ? TIME_100MS * 2 : TIME_100MS);
 			dmd_show_other ();
 		}
 	}
@@ -79,7 +79,7 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 {
 	register bcd_t *bcd1 = s1;
 	register bcd_t *bcd2 = s2;
-	register bcd_t len = _len;
+	register U8 len = _len;
 
 	bcd1 += len-1;
 	bcd2 += len-1;
@@ -125,8 +125,20 @@ void score_mul (score_t *s1, uint8_t multiplier)
 {
 }
 
-int score_compare (score_t *s1, score_t *s2)
+I8 score_compare (bcd_t *s1, bcd_t *s2)
 {
+	register int len = sizeof (score_t);
+	register I8 diff;
+
+	while (len > 0)
+	{
+		diff = *s1 - *s2;
+		if (diff != 0)
+			return (diff);
+		s1++;
+		s2++;
+		len--;
+	}
 	return (0);
 }
 

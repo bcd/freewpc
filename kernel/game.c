@@ -76,6 +76,7 @@ void end_ball (void)
 	player_up++;
 	if (player_up <= num_players)
 	{
+		player_change ();
 		start_ball ();
 		goto done;
 	}
@@ -84,6 +85,7 @@ void end_ball (void)
 	ball_up++;
 	if (ball_up <= MAX_BALLS_PER_GAME)
 	{
+		player_change ();
 		start_ball ();
 		goto done;
 	}
@@ -110,8 +112,11 @@ void start_ball (void)
 
 void mark_ball_in_play (void)
 {
-	ball_in_play = TRUE;		
-	call_hook (ball_in_play);
+	if (ball_in_play == FALSE)
+	{
+		ball_in_play = TRUE;		
+		call_hook (ball_in_play);
+	}
 }
 
 void add_player (void)
@@ -138,6 +143,7 @@ void start_game (void)
 	amode_stop ();
 	call_hook (start_game);
 
+	player_start_game ();
 	start_ball ();
 }
 
