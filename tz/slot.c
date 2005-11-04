@@ -25,7 +25,14 @@ void slot_kick_sound (void)
 
 void slot_enter (device_t *dev)
 {
-	score_add_current_const (0x2500);
+	if (task_kill_gid (GID_SLOT_DISABLED_BY_PIANO))
+	{
+		/* piano was recently hit, so ignore slot */
+	}
+	else
+	{
+		score_add_current_const (0x2500);
+	}
 }
 
 
@@ -38,6 +45,11 @@ void slot_kick_attempt (device_t *dev)
 		task_sleep (TIME_100MS * 7);
 		task_create_gid (0, slot_kick_sound);
 	}
+}
+
+
+void CALLSET(slot, start_ball) (void)
+{
 }
 
 

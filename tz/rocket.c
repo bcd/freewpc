@@ -18,7 +18,7 @@ void rocket_enter (device_t *dev)
 	score_add_current_const(0x10000);
 }
 
-void rocket_kick_sound (void)
+void rocket_kick_sound (void) __taskentry__
 {
 	sound_send (SND_ROCKET_KICK_DONE);
 	task_exit ();

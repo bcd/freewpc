@@ -60,7 +60,6 @@ void amode_leff (void) __taskentry__
 {
 	U8 i;
 
-	lamp_all_off ();
 	triac_enable (TRIAC_GI_MASK);
 	for (;;)
 	{
@@ -87,8 +86,6 @@ void amode_leff (void) __taskentry__
 
 void amode_deff (void) __taskentry__
 {
-	extern char freewpc_bits[];
-
 	for (;;)
 	{
 		int i;
@@ -107,7 +104,7 @@ void amode_deff (void) __taskentry__
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low ();
-		dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)freewpc_bits);
+		dmd_draw_image (freewpc_bits);
 		dmd_show_low ();
 		dmd_copy_low_to_high ();
 		dmd_invert_page (dmd_low_buffer);
@@ -137,6 +134,7 @@ void amode_deff (void) __taskentry__
 
 		/** Display 'custom message'? **/
 
+#if 00000
 		/** Display rules hint **/
 		dmd_alloc_low_clean ();
 		dmd_draw_border (dmd_low_bytes);
@@ -145,6 +143,7 @@ void amode_deff (void) __taskentry__
 		font_render_string_center (&font_5x5, 64, 21, "GAME RULES");
 		dmd_show_low ();
 		amode_page_delay (5);
+#endif
 
 		/* Kill music if it is running */
 		music_set (MUS_SILENCE);
@@ -163,5 +162,6 @@ void amode_stop (void)
 	deff_stop (DEFF_AMODE);
 	task_kill_gid (GID_LAMP_DEMO);
 	lamp_all_off ();
+	music_set (MUS_SILENCE);
 }
 

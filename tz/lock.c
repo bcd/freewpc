@@ -21,6 +21,7 @@ void lock_enter (device_t *dev)
 
 void lock_kick_attempt (device_t *dev)
 {
+	sound_send (SND_LOCK_KICKOUT);
 }
 
 

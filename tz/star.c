@@ -37,7 +37,7 @@ void star_task (void)
 do \
 { \
 	task_t *tp = task_create_child (star_task); \
-	task_set_arg (tp, (x << 8) | y); \
+	task_set_arg (tp, ((U16)x << 8) | y); \
 } while (0)
 
 void starfield_task (void)

@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM = ftz0_01.rom
+GAME_ROM = ftz0_02.rom
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
@@ -42,10 +42,10 @@ PINMAME_OTHER_ROMS = tzu*.rom
 
 
 
-
 GAME_OBJS = config.o clock.o amode.o lanes.o lock.o \
 	slot.o sling.o jets.o rightramp.o rocket.o star.o \
-	leftramp.o greed.o
+	leftramp.o greed.o piano.o camera.o deadend.o skill.o \
+	loop.o
 
 GAME_INCLUDES =
 

@@ -44,24 +44,32 @@ void tz_init (void)
 void tz_start_game (void)
 {
 	sound_send (SND_DONT_TOUCH_DOOR_1);
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 }
 
 
 void tz_end_game (void)
 {
 	if (!in_test)
-		music_set (MUS_LOCK_LIT);
+		music_set (MUS_POWERBALL_MANIA);
 }
 
 void tz_start_ball (void)
 {
-	music_set (MUS_TZ_PLUNGER);
+	extern void enable_skill_shot ();
+
+	music_set (MUS_MULTIBALL_LIT_PLUNGER);
+	enable_skill_shot ();
+	//#include <callset_start_ball.h>
 }
 
 void tz_ball_in_play (void)
 {
-	music_set (MUS_TZ_IN_PLAY);
+	extern void disable_skill_shot ();
+
+	music_set (MUS_MULTIBALL_LIT);
+	disable_skill_shot ();
+	/* start ballsaver if enabled */
 }
 
 void tz_end_ball (void)
@@ -72,8 +80,10 @@ void tz_end_ball (void)
 
 void tz_add_player (void)
 {
+#ifdef CONFIG_TZONE_IP
 	if (num_players > 1)
 		sound_send (SND_PLAYER_ONE + num_players - 1);
+#endif
 }
 
 
@@ -93,7 +103,7 @@ void tz_tilt (void)
 {
 	sound_send (SND_TILT);
 	task_sleep_sec (3);
-	sound_send (SND_WITH_THE_DEVIL);
+	sound_send (SND_OH_NO);
 }
 
 
