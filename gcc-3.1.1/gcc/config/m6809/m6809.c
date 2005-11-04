@@ -592,10 +592,6 @@ output_function_epilogue ( file, size )
 	register int regno; 
 	int offset = 0; 
 	char reglist[30]; 
-    /*    extern int inhibit_defer_pop;
-    extern int pending_stack_adjust;
-    extern int current_function_pops_args; */
-    int tmp_inh_def_pop;
 
     fprintf (file, ";;;EPILOGUE\n"); 
 
@@ -605,13 +601,6 @@ output_function_epilogue ( file, size )
 		in_naked_function = 0;
 		return;
 	 }
-
-/*
- *   tmp_inh_def_pop = inhibit_defer_pop;
- *   inhibit_defer_pop = 0;
- *   do_pending_stack_adjust();
- *   inhibit_defer_pop = tmp_inh_def_pop;
- */
 
     reglist[0] = '\0'; 
     if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
@@ -627,13 +616,6 @@ output_function_epilogue ( file, size )
               offset += 2; 
             } 
         } 
-
-    /* Offset >= 0, also kann - im formatstring auftauchen */
-/* not needed - EXIT_IGNORE_STACK == 0 !!
- *   if ((frame_pointer_needed) && (offset+size != 0) ) 
- *       fprintf (file, "\tleas\t-%d,u\t;set S-reg from frame pointer\n",
- *           (size)+offset);
- */
 
     if (offset != 0)
       if ((size == 0) && !in_interrupt)
