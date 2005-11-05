@@ -57,7 +57,7 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 
 
 #pragma long_branch
-void sprintf (const char *format, ...)
+int printf (const char *format, ...)
 {
 	static va_list va;
 	static uint8_t *buf;
@@ -196,6 +196,7 @@ fixup_number:
 	va_end (va);
 
 	*buf = '\0';
+	return 0;
 }
 #pragma short_branch
 

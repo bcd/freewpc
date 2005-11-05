@@ -19,12 +19,13 @@ do { \
 #define va_end(va)
 
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
-void sprintf (const char *format, ...);
+int printf (const char *format, ...);
+#define sprintf printf
 
 #ifdef DEBUGGER
 #define dbprintf(format, rest...) \
 	do { \
-		sprintf (format, ## rest ); \
+		printf (format, ## rest ); \
 		db_puts (sprintf_buffer); \
 	} while (0)
 #else
