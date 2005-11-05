@@ -84,7 +84,6 @@ TMPFILES += $(ERR)
 GCC_ROOT = /usr/local/m6809/bin
 CC = $(GCC_ROOT)/gcc
 LD = $(GCC_ROOT)/ld
-# LD = /home/bcd/bin/aslink
 AS = $(GCC_ROOT)/as
 REQUIRED += $(CC) $(LD) $(AS)
 
@@ -159,8 +158,10 @@ ifdef DEBUG_COMPILER
 CFLAGS += -da
 endif
 
-# Please, turn on all warnings!
-CFLAGS += -Wall
+# Please, turn on all warnings!  But don't check format strings,
+# because we define those differently than ANSI C.
+CFLAGS += -Wall -Wno-format
+
 
 # I've been burned by not having a prototype for a function
 # that takes a 'char' sized argument.  The compiler implicitly
