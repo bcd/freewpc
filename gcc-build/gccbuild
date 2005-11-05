@@ -20,14 +20,16 @@ fi
 while [ "$1" != "" ]; do
 arg=$1; shift
 case $arg in
-	ver4)
+	ver3.3.6)
+		VERSION=3.3.6
+		;;
+	ver4.0.1)
 		VERSION=4.0.1
 		;;
-	
-	# I'm not using the Thomson assembler anymore ... I use
-	# the latest version of asxxxx tools.
+	asm-unpack)
+		cd .. && zcat asm-6809.tar.gz | tar xvf -
+		;;
 	asm)
-		# cd .. && zcat asm-6809.tar.gz | tar xvf -
 		cd ../asm-thomson && make clean && make && $SUDO make install
 		;;
 
@@ -38,8 +40,8 @@ case $arg in
 	patch)
 		# This patch file only works for gcc 3.1.1
 		# - add m6809 into config.sub
-		# - add m6809-* into config.gcc
-		# - add m6809-*-*) tm_file=m6809/m6809.h in config.gcc also
+		# - add m6809-* into gcc/config.gcc
+		# - add m6809-*-*) tm_file=m6809/m6809.h in gcc/config.gcc also
 		cd .. && patch -p0 < m6809-gcc.diff
 		# TODO : copy all files from ROOT/gcc-patch into ROOT/gcc-3.1.1/gcc
 		;;
