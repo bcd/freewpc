@@ -32,6 +32,7 @@ uint8_t task_count;
 #endif
 
 
+#pragma long_branch
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -69,6 +70,7 @@ void task_dump (void)
 	db_puts ("----------------------\n");
 #endif
 }
+#pragma short_branch
 
 
 task_t *task_allocate (void)
