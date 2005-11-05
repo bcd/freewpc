@@ -35,16 +35,16 @@ void score_init (void);
 
 #define score_decl(val) \
 	{ \
-		(val & 0xFF000000) >> 24, \
-		(val & 0x00FF0000) >> 16, \
-		(val & 0x0000FF00) >> 8, \
-		(val & 0x000000FF) \
+		(val & 0xFF000000ULL) >> 24, \
+		(val & 0x00FF0000ULL) >> 16, \
+		(val & 0x0000FF00ULL) >> 8, \
+		(val & 0x000000FFULL) \
 	}
 
 
 #define score_add_current_const(val) \
 { \
-	static U8 score[] = score_decl(val); \
+	static U8 score[] = score_decl(val ## ULL); \
 	score_add_current (score); \
 }
 
