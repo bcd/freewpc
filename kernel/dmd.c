@@ -185,9 +185,13 @@ void dmd_alloc_high_clean (void)
 void dmd_draw_border (char *dbuf)
 {
 	dmd_buffer_t *dbuf_bot = (dmd_buffer_t *)((char *)dbuf + 480);
+
+	uint16_t *dbuf16 = (uint16_t *)dbuf;
+	uint16_t *dbuf16_bot = (uint16_t *)dbuf_bot;
+
 	uint16_t i;
 	for (i=0; i < 16; i++)
-		*((uint16_t *)dbuf_bot)++ = *((uint16_t *)dbuf)++ = 0xFFFF;
+		*dbuf16_bot++ = *dbuf16++ = 0xFFFF;
 	for (i=0; i < 28; i++)
 	{
 		dbuf[0] = 0x03;
