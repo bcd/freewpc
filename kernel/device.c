@@ -11,6 +11,7 @@ static uint8_t counted_balls;
 static uint8_t missing_balls;
 static uint8_t live_balls;
 
+#pragma long_branch
 void device_debug (void)
 {
 #ifdef DEBUGGER
@@ -40,6 +41,7 @@ void device_debug (void)
 		counted_balls, missing_balls, live_balls);
 #endif
 }
+#pragma short_branch
 
 void device_clear (device_t *dev)
 {
@@ -85,6 +87,7 @@ uint8_t device_recount (device_t *dev)
 }
 
 
+#pragma long_branch
 void device_update (void)
 {
 	uint8_t devno;
@@ -220,6 +223,7 @@ wait_and_recount:
 	device_debug ();
 	task_exit ();
 }
+#pragma short_branch
 
 
 /* Request that a device eject 1 ball */
@@ -326,7 +330,9 @@ void device_probe (void)
 /* Called from a switch handler to do the common processing */
 void device_sw_handler (uint8_t devno)
 {
+#ifdef DEBUGGER
 	device_t *dev = device_entry (devno);
+#endif
 
 	dbprintf ("Device switch handler for %s\n", dev->props->name);
 
