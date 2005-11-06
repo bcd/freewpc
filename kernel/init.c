@@ -16,6 +16,8 @@ void do_fatal (errcode_t error_code) __noreturn__
 
 	dmd_alloc_low_clean ();
 
+	dbprintf ("Fatal error: %i", error_code);
+
 	sprintf ("ERRNO %i", error_code);
 	font_render_string_center (&font_5x5, 64, 2, sprintf_buffer);
 
