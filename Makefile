@@ -148,6 +148,8 @@ ifdef UNROLL_LOOPS
 CFLAGS += -funroll-loops
 endif
 
+CFLAGS += -fno-builtin
+
 # Throw some extra information in the assembler logs
 # (disabled because it doesn't really help much)
 # CFLAGS += -fverbose-asm
@@ -461,7 +463,7 @@ gcc:
 	cd gcc-build && ./gccbuild make
 
 gcc-%:
-	cd gcc-build && ./gccbuild %
+	cd gcc-build && ./gccbuild $*
 
 #
 # 'make astools' will build the assembler, linker, and library
