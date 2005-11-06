@@ -90,12 +90,10 @@ uint8_t device_recount (device_t *dev)
 #pragma long_branch
 void device_update (void)
 {
-	uint8_t devno;
 	device_t *dev;
 
 	db_puts ("In device update (");
-	devno = task_getgid () - DEVICE_GID_BASE;
-	dev = &device_table[devno];
+	dev = &device_table[task_getgid () - DEVICE_GID_BASE];
 	db_put4x ((uint16_t)task_getpid ());
 	db_puts (")\n");
 
@@ -206,6 +204,7 @@ wait_and_recount:
 		else 
 		{
 			/* Container has balls ready to kick */
+			db_puts ("About to call kick_attempt\n");
 
 			/* Mark state as releasing if still idle */
 			if (dev->state == DEV_STATE_IDLE)
@@ -236,6 +235,7 @@ void device_request_kick (device_t *dev)
 		dbprintf ("Request to kick from %s\n", dev->props->name);
 
 		dev->kicks_needed++;
+		dbprintf ("Creating task with gid=%02x\n", gid);
 		task_create_gid1 (gid, device_update);
 	}
 }
