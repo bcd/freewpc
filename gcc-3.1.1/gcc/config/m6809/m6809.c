@@ -57,7 +57,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expr.h"
 #include "cpplib.h"
 #include "c-pragma.h"
+#if (TARGET_GCC_VERSION < 3003)
 #include "c-lex.h"
+#endif
 
 /* macro to return TRUE if length of operand mode is one byte */
 #define BYTE_MODE(X) ((GET_MODE_SIZE (GET_MODE (X))) == 1)

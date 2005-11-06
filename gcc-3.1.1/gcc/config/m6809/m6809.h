@@ -42,6 +42,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
+#define TARGET_GCC_VERSION 3001 /* for gcc 3.1.1 */
 
 /* Enable new convention for argument passing:
  * Can use the 'B' register for the first 8-bit argument, or the 'D'
@@ -119,8 +120,6 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 #define TARGET_SWITCHES \
   { { "short_branch", TARGET_FLAG_SHORT_BRANCH }, \
     { "long_branch", -TARGET_FLAG_SHORT_BRANCH }, \
-    { "c2", 2 }, \
-    { "noc2", -2 }, \
     { "argcount", TARGET_FLAG_ARGCOUNT }, \
     { "noargcount", -TARGET_FLAG_ARGCOUNT }, \
     { "short_int", TARGET_FLAG_SHORT_INT }, \
@@ -233,7 +232,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    and are not available for the register allocator.  */
 #ifdef CONFIG_AB
 #define FIXED_REGISTERS \
-    {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, } 
+    {1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, } 
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 #else
 #define FIXED_REGISTERS \
@@ -251,8 +250,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
     {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 
-
-/* --- DELETED
+/* --- DELETED : this macro has been obsolete forever
 #define OVERLAPPING_REGNO_P(REGNO) (((REGNO) == HARD_D_REGNUM) \
     || ((REGNO) == HARD_A_REGNUM) || ((REGNO) == HARD_B_REGNUM))
 --- DELETED --- */
@@ -261,7 +259,6 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    to hold something of mode MODE.
    This is ordinarily the length in words of a value of mode MODE
    but can be less for certain modes in special long registers.  */
-/* TODO : change this for CONFIG_AB */
 #define HARD_REGNO_NREGS(REGNO, MODE) \
     ((REGNO >= HARD_A_REGNUM) ? (GET_MODE_SIZE (MODE)) \
 	: ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
@@ -395,6 +392,7 @@ enum reg_class {
 #else
 #define Q_REG_CLASS_CONTENTS	(D_REGBIT)
 #endif
+#define I_REG_CLASS_CONTENTS	(A_REGBIT | B_REGBIT | D_REGBIT)
 
 #define REG_CLASS_CONTENTS { \
 	0, \
@@ -944,7 +942,9 @@ enum reg_class {
 #define NO_RECURSIVE_FUNCTION_CSE
 
 /* define SCCS_DIRECTIVE if SCCS directives should be ignored */
+#if (TARGET_GCC_VERSION < 3003)
 #define SCCS_DIRECTIVE 1
+#endif
 
 /* This flag, if defined, says the same insns that convert to a signed fixnum
    also convert validly to an unsigned one.  */
@@ -1316,10 +1316,14 @@ do { \
 /* This is how to output a command to make the user-level label
     named NAME defined for reference from other files.  */
 
+#if (TARGET_GCC_VERSION < 3003)
 #define ASM_GLOBALIZE_LABEL(FILE,NAME) \
   {fputs ("\t.globl ", FILE); \
   assemble_name (FILE, NAME); \
   fputs ("\n", FILE);}
+#else
+#define GLOBAL_ASM_OP "\t.globl "
+#endif
 
 /* This is how to output a reference to a user label named NAME. */
 #define ASM_OUTPUT_LABELREF(FILE,NAME) \
