@@ -5,8 +5,8 @@
 /* Include ASIC address definitions */
 #include <wpc.h>
 
-#define db_status_reg	*(uint8_t *)WPC_DEBUG_CONTROL_PORT
-#define db_data_reg		*(uint8_t *)WPC_DEBUG_DATA_PORT
+#define db_status_reg	*(volatile uint8_t *)WPC_DEBUG_CONTROL_PORT
+#define db_data_reg		*(volatile uint8_t *)WPC_DEBUG_DATA_PORT
 #define db_write_ready	(db_status_reg & 0x1)
 #define db_read_ready	(db_status_reg & 0x2)
 
