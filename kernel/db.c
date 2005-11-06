@@ -28,7 +28,7 @@ void db_puti (uint8_t v)
 }
 
 
-char db_get_nibble_char (uint8_t v)
+static char db_get_nibble_char (uint8_t v)
 {
 	if (v > 9)
 		return v - 10 + 'A';
