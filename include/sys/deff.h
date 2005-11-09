@@ -16,6 +16,7 @@ typedef struct
 	uint8_t flags;
 	uint8_t prio;
 	deff_function_t fn;
+	U8 pad;
 } deff_t;
 
 #define MAX_QUEUED_DEFFS 16

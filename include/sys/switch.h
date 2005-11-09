@@ -22,7 +22,9 @@ typedef struct
 	uint8_t flags;
 	uint8_t lamp;
 	sound_code_t sound;
-	uint8_t pad[3]; /* Keep this aligned to a power of 2! */
+	task_ticks_t active_time;
+	task_ticks_t inactive_time;
+	uint8_t pad[1]; /* Keep this aligned to a power of 2! */
 } switch_info_t;
 
 
@@ -87,7 +89,8 @@ typedef struct
 #define AR_CHANGED 	1
 #define AR_PENDING 	2
 #define AR_QUEUED 	3
-#define NUM_SWITCH_ARRAYS 	4
+#define AR_RUNNING   4
+#define NUM_SWITCH_ARRAYS 	5
 
 extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
