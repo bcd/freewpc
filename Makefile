@@ -389,6 +389,13 @@ $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 	@echo Assembling page header $< ... && $(AS) $< 2>&1 | tee -a err
 
 #
+# General rule for how to build any C++ module.
+#
+tz/cpptest.o : %.o : %.cpp $(REQUIRED) $(DEPS) $(GENDEFINES)
+	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
+	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
+
+#
 # General rule for how to build any C module.
 #
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
