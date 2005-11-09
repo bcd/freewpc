@@ -1,6 +1,10 @@
 #ifndef _FREEWPC_H
 #define _FREEWPC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * This is the top-level include file for FreeWPC.  All files
  * should include this one first in order to get all of the
@@ -14,7 +18,9 @@
 /*
  * Standard types
  */
+#ifndef __cplusplus
 typedef unsigned char bool;
+#endif
 typedef unsigned char bcd_t;
 typedef char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
@@ -95,5 +101,9 @@ typedef unsigned long uint16_t, U16;
 /* From here on are any headers that are dependent on machine
  * specific features being defined */
 #include <hook.h>
+
+#ifdef __cplusplus
+} 
+#endif /* extern "C" */
 
 #endif /* _FREEWPC_H */
