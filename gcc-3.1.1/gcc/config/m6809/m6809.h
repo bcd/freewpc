@@ -1,10 +1,3 @@
-/*
- * $Header: /home/eric/src/gcc-2.95.3/gcc/config/m6809/RCS/m6809.h,v 1.8 2002/01/07 23:01:56 eric Exp $
- */
-/*-------------------------------------------------------------------
-	FILE: m6809.h
-	SCCS: @(#)tm-m6809.h	1.2 SAL 1/22/92
--------------------------------------------------------------------*/
 /* Definitions of target machine for GNU compiler.  MC6809 version.
 
  MC6809 Version by Tom Jones (jones@sal.wisc.edu)
@@ -24,6 +17,12 @@
  minor changes to adapt it to gcc-2.95.3 by Eric Botcazou
  (ebotcazou@multimania.com)
 
+ changes for gcc-3.1.1 by ???
+
+ further changes for gcc-3.1.1 and beyond by Brian Dominy
+ (brian@oddchange.com)
+
+
 This file is part of GNU CC.
 
 GNU CC is free software; you can redistribute it and/or modify
@@ -42,16 +41,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
+/* Define the version of gcc which this machine description will
+ * be combined with.  We support multiple variants for compatibility.
+ */
 #define TARGET_GCC_VERSION 3001 /* for gcc 3.1.1 */
+
 
 /* Enable new convention for argument passing:
  * Can use the 'B' register for the first 8-bit argument, or the 'D'
  * register for the first 16-bit argument.  Only the first argument
- * is eligible.
- *
- * This does not work yet.
+ * is eligible.  This is slightly more efficient.
  */
-/*** #define CONFIG_REG_ARGS ***/
+#define CONFIG_REG_ARGS
 
 
 /* Enable 8-bit 'ints'.  This is highly recommended.  If you need
@@ -63,6 +64,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 /* Enable separate usage of 'A' and 'B' registers.
+ * To work properly, we need to redefine a lot of other things.
  *
  * This does not work yet.
  */
@@ -250,11 +252,6 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
     {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 
-/* --- DELETED : this macro has been obsolete forever
-#define OVERLAPPING_REGNO_P(REGNO) (((REGNO) == HARD_D_REGNUM) \
-    || ((REGNO) == HARD_A_REGNUM) || ((REGNO) == HARD_B_REGNUM))
---- DELETED --- */
-
 /* Return number of consecutive hard regs needed starting at reg REGNO
    to hold something of mode MODE.
    This is ordinarily the length in words of a value of mode MODE
@@ -309,8 +306,6 @@ of machine-mode MODE.  */
       offset += 2;                                                \
   (DEPTH) = (offset + (get_frame_size ()));                       \
 }
-
-
 
 /* Base register for access to arguments of the function.  */
 #define ARG_POINTER_REGNUM FRAME_POINTER_REGNUM
@@ -387,22 +382,35 @@ enum reg_class {
    This is an initializer for a vector of HARD_REG_SET
    of length N_REG_CLASSES.  */
 
+#define D_REG_CLASS_CONTENTS	(D_REGBIT)
+
 #ifdef CONFIG_AB
 #define Q_REG_CLASS_CONTENTS	(A_REGBIT | B_REGBIT)
 #else
 #define Q_REG_CLASS_CONTENTS	(D_REGBIT)
 #endif
-#define I_REG_CLASS_CONTENTS	(A_REGBIT | B_REGBIT | D_REGBIT)
+
+#define I_REG_CLASS_CONTENTS	\
+	(A_REGBIT | B_REGBIT | D_REGBIT)
+
+#define A_REG_CLASS_CONTENTS	\
+	(X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT)
+
+#define G_REG_CLASS_CONTENTS	\
+	(D_REG_CLASS_CONTENTS | Q_REG_CLASS_CONTENTS | \
+	 I_REG_CLASS_CONTENTS | A_REG_CLASS_CONTENTS)
+
+#define ALL_REG_CLASS_CONTENTS \
+	(G_REG_CLASS_CONTENTS | A_REGBIT | B_REGBIT)
 
 #define REG_CLASS_CONTENTS { \
 	0, \
 	D_REGBIT, \
 	Q_REG_CLASS_CONTENTS, \
 	D_REGBIT | A_REGBIT | B_REGBIT, \
-	X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT, \
-	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT | Q_REG_CLASS_CONTENTS, \
-	D_REGBIT | X_REGBIT | Y_REGBIT | U_REGBIT | S_REGBIT | PC_REGBIT |  \
-		A_REGBIT | B_REGBIT, \
+	A_REG_CLASS_CONTENTS, \
+	G_REG_CLASS_CONTENTS, \
+	ALL_REG_CLASS_CONTENTS, \
 }
 
 /* The same information, inverted:
@@ -583,15 +591,11 @@ enum reg_class {
 
 /* Define this to be true when FUNCTION_VALUE_REGNO_P is true for
    more than one register.  */
-#ifdef CONFIG_REG_ARGS
 #define NEEDS_UNTYPED_CALL 1
-#else
-#define NEEDS_UNTYPED_CALL 0
-#endif
 
 /* 1 if N is a possible register number for function argument passing. */
 #ifdef CONFIG_REG_ARGS
-#define FUNCTION_ARG_REGNO_P(N) (((N) == HARD_B_REGNUM) || ((N) == HARD_D_REGNUM))
+#define FUNCTION_ARG_REGNO_P(N) ((N) == HARD_D_REGNUM)
 #else
 #define FUNCTION_ARG_REGNO_P(N) 0
 #endif
@@ -616,7 +620,8 @@ enum reg_class {
    For a library call, FNTYPE is 0.  */
 
 #ifdef CONFIG_REG_ARGS
-#define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) ((CUM) = -1)
+#define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) \
+	((CUM) = m6809_init_cumulative_args (CUM, FNTYPE, LIBNAME, INDIRECT))
 #else
 #define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT) ((CUM) = 0)
 #endif
@@ -643,7 +648,7 @@ enum reg_class {
 
 /* Define where to put the arguments to a function.
    Value is zero to push the argument on the stack,
-   or a hard register in which to store the argument.
+   or a hard register rtx in which to store the argument.
 	This macro is used _before_ FUNCTION_ARG_ADVANCE.
 
    MODE is the argument's machine mode.
@@ -658,7 +663,7 @@ enum reg_class {
 #ifdef CONFIG_REG_ARGS
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
 	((((CUM) >= 0) || (MODE == BLKmode)) ? 0 : \
-		((MODE == HImode) ? HARD_D_REGNUM : HARD_B_REGNUM))
+		gen_rtx_REG (MODE, HARD_D_REGNUM))
 #else
 /* Old style : all args are pushed. */
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) 0
@@ -998,14 +1003,13 @@ enum reg_class {
 #define NO_FUNCTION_CSE
 
 /* When a prototype says `char' or `short', really pass an `int'.  */
-/**** was:  don't do this, we need char args for interrupt routines */
+/* When int is sizeof(char), this doesn't really matter. */
 #undef PROMOTE_PROTOTYPES
 /* #define PROMOTE_PROTOTYPES 1 */
 
 /* Specify the machine mode that pointers have.
    After generation of rtl, the compiler makes no further distinction
    between pointers and any other objects of this machine mode.  */
-/*** #define Pmode SImode ***/ /* nomal definition */
 #define Pmode HImode
 
 /* A function address in a call instruction
@@ -1172,12 +1176,6 @@ do { \
 
 /* A list of extra section function definitions.  */
  
-/* #undef EXTRA_SECTION_FUNCTIONS
-#define EXTRA_SECTION_FUNCTIONS          \
-  CTORS_SECTION_FUNCTION                 \
-  DTORS_SECTION_FUNCTION */
-
-
 #define CTORS_SECTION_FUNCTION                                          \
 void                                                                    \
 ctors_section ()                                                        \
@@ -1199,10 +1197,6 @@ dtors_section ()                                                        \
       in_section = in_dtors;                                            \
     }                                                                   \
 }
-
-#ifdef ORIG_OBSOLETE
-#define INT_ASM_OP ".word"
-#endif
 
 /* A C statement (sans semicolon) to output an element in the table of
    global constructors.  */
@@ -1511,10 +1505,8 @@ do {bss_section (); \
    CODE is the code from the %-spec for printing this operand.
    If `%z3' was used to print operand 3, then CODE is 'z'. */
 
-#define PRINT_OPERAND(FILE, X, CODE) \
-    print_operand (FILE, X, CODE)
+#define PRINT_OPERAND(FILE, X, CODE) print_operand (FILE, X, CODE)
 
 /* Print a memory operand whose address is X, on file FILE. */
-#define PRINT_OPERAND_ADDRESS(FILE, ADDR) \
-    print_operand_address (FILE, ADDR)
+#define PRINT_OPERAND_ADDRESS(FILE, ADDR) print_operand_address (FILE, ADDR)
 

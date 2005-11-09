@@ -744,6 +744,27 @@ check_float_value (mode, d, overflow)
 }
 
 
+int
+m6809_init_cumulative_args (cum, fntype, libname, indirect)
+     CUMULATIVE_ARGS cum ATTRIBUTE_UNUSED;
+     tree fntype;
+     rtx libname ATTRIBUTE_UNUSED;
+     int indirect ATTRIBUTE_UNUSED;
+{
+	if (TYPE_ARG_TYPES (fntype) != 0 &&
+		(TREE_VALUE (tree_last (TYPE_ARG_TYPES (fntype))) != void_type_node))
+	{
+		/* has variable arguments, must pass on stack */
+		return 0;
+	}
+	else
+	{
+		/* has no variable arguments, can use registers */
+		return -1;
+	}
+}
+
+
 /* TBD */
 void
 m6809_gen_register_shift (operands)
