@@ -205,7 +205,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
-	__asm__ volatile ("jsr _task_create\n" : "=r" (tp) : "0" (fn_x));
+	__asm__ volatile ("jsr _task_create\n" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
 #ifdef DEBUG_TASKS
