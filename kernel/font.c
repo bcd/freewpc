@@ -127,12 +127,6 @@ void fontargs_render_string (const fontargs_t *args)
 			continue;
 		}
 
-		/* TODO : drawing to positions that are not 8-bit aligned
-		 * does not work, so force to proper alignment for now. */
-#if 00000
-	x &= ~7;
-#endif
-
 #ifdef DB_FONT
 		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
 #endif
@@ -150,9 +144,7 @@ void fontargs_render_string (const fontargs_t *args)
 		{
 			for (i=0; i <args->font->height; i++)
 			{
-				//dmd_base[i * DMD_BYTE_WIDTH + xb] = (*data << xr);
 				dmd_base[i * DMD_BYTE_WIDTH + xb] |= aslqi3 (*data, xr);
-				//dmd_base[i * DMD_BYTE_WIDTH + xb + 1] = *data >> (8 - xr);
 				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] |= lsrqi3 (*data, (8 - xr));
 				data++;
 			}
