@@ -41,23 +41,9 @@ extern inline void __bytecopy (uint8_t *dst, uint8_t src)
 	__sta (dst);
 }
 
-#if 0
-extern inline uint8_t __highbyte (uint16_t val)
-{
-	asm __volatile__ ("\ttfr a,b\n\tclra\n");
-}
-
-
-extern inline uint8_t __lowbyte (uint16_t val)
-{
-	asm __volatile__ ("\tclra\n");
-}
-#endif
-
 extern inline void __swapbyte (uint8_t *v1, uint8_t *v2)
 {
 }
-
 
 extern inline void set_stack_pointer (const uint16_t s)
 {
