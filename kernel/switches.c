@@ -30,32 +30,10 @@ typedef struct
 #define switch_changed_bits	switch_bits[AR_CHANGED]
 #define switch_pending_bits	switch_bits[AR_PENDING]
 #define switch_queued_bits		switch_bits[AR_QUEUED]
+#define switch_running_bits	switch_bits[AR_RUNNING]
 
 /** The global array of switch bits, all in one place */
 uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
-
-
-#if 0
-extern void sw_left_coin_handler (void);
-extern void sw_right_coin_handler (void);
-extern void sw_center_coin_handler (void);
-extern void sw_fourth_coin_handler (void);
-extern void sw_escape_button_handler  (void);
-extern void sw_down_button_handler  (void);
-extern void sw_up_button_handler  (void);
-extern void sw_enter_button_handler  (void);
-
-extern void sw_start_button_handler  (void);
-extern void sw_trough_handler  (void);
-extern void sw_outhole_handler  (void);
-
-extern void sw_rocket_handler  (void);
-extern void sw_slot_handler  (void);
-extern void sw_lock_handler  (void);
-
-extern void sw_tilt_handler  (void);
-extern void sw_slam_tilt_handler  (void);
-#endif
 
 
 /*
@@ -478,7 +456,10 @@ void switch_sched (void)
 		(*swinfo->fn) ();
 
 	/* Debounce period after the switch has been handled */
-	task_sleep (TIME_100MS * 1); /* was 300ms!!! */
+	if (swinfo->inactive_time == 0)
+		task_sleep (TIME_100MS * 1); /* was 300ms!!! */
+	else
+		task_sleep (swinfo->inactive_time);
 
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
 	register uint8_t v = sw;
