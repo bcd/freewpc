@@ -1,0 +1,57 @@
+#!/bin/sh
+
+GCC_VERSION=3.1.1
+GCC6809_VERSION=`date +%Y%b%d`
+
+while [ "$1" != "" ]; do
+	arg=$1; shift
+	case $arg in
+		--3.1)
+			GCC_VERSION=3.1.1
+			;;
+		--3.3)
+			GCC_VERSION=3.3.6
+			;;
+		--all|-A)
+			./make-gcc-patch --3.1
+			./make-gcc-patch --3.3
+			exit 0
+			;;
+		--release|-R)
+			GCC6809_VERSION=$1; shift
+			;;
+	esac
+done
+
+PATCH=gcc6809-$GCC_VERSION-$GCC6809_VERSION.diff
+GCC_ROOT=gcc-$GCC_VERSION
+
+echo "Creating 6809 patch $PATCH..."
+
+cd /home/bcd/src/freewpc/trunk
+rm -f $PATCH
+
+for f in `echo \
+	$GCC_ROOT/config.sub \
+	$GCC_ROOT/gcc/config.gcc \
+	$GCC_ROOT/gcc/calls.c \
+	`;
+do
+	echo "Generate diff of $f ..."
+	bzcat $GCC_ROOT.tar.bz2 | tar hxvfO - $f | diff -Nau - $f >> $PATCH
+done
+
+for f in `echo \
+	$GCC_ROOT/gcc/config/m6809/origin.txt \
+	$GCC_ROOT/gcc/config/m6809/m6809.md \
+	$GCC_ROOT/gcc/config/m6809/xm-m6809.h \
+	$GCC_ROOT/gcc/config/m6809/m6809.c \
+	$GCC_ROOT/gcc/config/m6809/m6809.h \
+	$GCC_ROOT/gcc/config/m6809/thomson.h \
+	`;
+do
+	echo "Adding new file $f ..."
+	diff -Nau does_not_exist $f | sed -e "s/3001/3003/" >> $PATCH
+done
+
+echo "All done.  File is named $PATCH.";
