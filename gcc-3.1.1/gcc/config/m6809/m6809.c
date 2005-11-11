@@ -529,8 +529,11 @@ print_options (file)
 #endif
 
 	fprintf (file, ";;; OPTIONS:\t%s%s\n",
-		(TARGET_SHORT_INT ? " -mshort_int":" -mlong_int"),
-		(TARGET_SHORT_BRANCH ? " -mshort_branch":" -mlong_branch"));
+		(TARGET_BYTE_INT ? "-mint8" : 
+		 TARGET_SHORT_INT ? " -mint16" : "-mint32"),
+		(TARGET_SHORT_BRANCH ? " -mshort-branch":" -mlong-branch"),
+		(TARGET_REG_ARGS ? " -mreg-args":" -mno-reg-args"),
+		);
 	fprintf (file, ";;; OPTIONS:\t%s\n",
 		(flag_signed_char ? " signed-char" : " !signed-char"));
 	fprintf (file, "\t.module\t%s\n", my_basename(main_input_filename));

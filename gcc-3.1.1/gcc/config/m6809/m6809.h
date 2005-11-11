@@ -44,23 +44,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 /* Define the version of gcc which this machine description will
  * be combined with.  We support multiple variants for compatibility.
  */
-#define TARGET_GCC_VERSION 3001 /* for gcc 3.1.1 */
-
-
-/* Enable new convention for argument passing:
- * Can use the 'B' register for the first 8-bit argument, or the 'D'
- * register for the first 16-bit argument.  Only the first argument
- * is eligible.  This is slightly more efficient.
- */
-#define CONFIG_REG_ARGS
-
-
-/* Enable 8-bit 'ints'.  This is highly recommended.  If you need
- * 16-bit data, then use the 'long' data type explicitly.  With
- * this option, the compiler will never implicit convert 8-bit
- * to 16-bit data unless you tell it to.
- */
-#define CONFIG_BYTE_INT
+#ifndef TARGET_GCC_VERSION
+#define TARGET_GCC_VERSION 3001
+#endif
 
 
 /* Enable separate usage of 'A' and 'B' registers.
@@ -99,6 +85,8 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 #define TARGET_FLAG_SHORT_BRANCH      0x1
 #define TARGET_FLAG_ARGCOUNT          0x4
 #define TARGET_FLAG_SHORT_INT         0x8
+#define TARGET_FLAG_REG_ARGS			  0x10
+#define TARGET_FLAG_BYTE_INT          0x20
 
 #define TARGET_ARGCOUNT (target_flags & TARGET_FLAG_ARGCOUNT)
 
@@ -108,10 +96,22 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 /* Compile with short (+-255) branch instructions */
 #define TARGET_SHORT_BRANCH (target_flags & TARGET_FLAG_SHORT_BRANCH)
 
+/* Enable function arguments in registers */
+#define TARGET_REG_ARGS (target_flags & TARGET_FLAG_REG_ARGS)
+
+/* Compile with 8-bit 'int' */
+#define TARGET_BYTE_INT (target_flags & TARGET_FLAG_BYTE_INT)
+
 /* Default target_flags if no switches specified.  */
 #ifndef TARGET_DEFAULT
-#define TARGET_DEFAULT TARGET_FLAG_SHORT_INT
+#define TARGET_DEFAULT \
+	(TARGET_FLAG_SHORT_INT | TARGET_FLAG_REG_ARGS | TARGET_FLAG_BYTE_INT)
 #endif
+
+/* For compatibility with older versions... */
+#define CONFIG_REG_ARGS		TARGET_REG_ARGS
+#define CONFIG_BYTE_INT		TARGET_BYTE_INT
+
 
 /* Macro to define tables used to set the flags.
    This is a list in braces of pairs in braces,
@@ -120,12 +120,15 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    An empty string NAME is used to identify the default VALUE.  */
 
 #define TARGET_SWITCHES \
-  { { "short_branch", TARGET_FLAG_SHORT_BRANCH }, \
-    { "long_branch", -TARGET_FLAG_SHORT_BRANCH }, \
+  { { "short-branch", TARGET_FLAG_SHORT_BRANCH }, \
+    { "long-branch", -TARGET_FLAG_SHORT_BRANCH }, \
     { "argcount", TARGET_FLAG_ARGCOUNT }, \
     { "noargcount", -TARGET_FLAG_ARGCOUNT }, \
-    { "short_int", TARGET_FLAG_SHORT_INT }, \
-    { "long_int", -TARGET_FLAG_SHORT_INT }, \
+    { "int8", TARGET_FLAG_BYTE_INT }, \
+    { "int16", TARGET_FLAG_SHORT_INT }, \
+    { "int32", -TARGET_FLAG_SHORT_INT }, \
+	 { "reg-args", TARGET_FLAG_REG_ARGS }, \
+	 { "noreg-args", TARGET_FLAG_REG_ARGS }, \
     { "", TARGET_DEFAULT }}
 
 /* Pick a target if none was specified */
@@ -277,7 +280,7 @@ of machine-mode MODE.  */
    The values of these macros are register numbers.  */
 
 /* program counter if referenced as a register */
-#define PC_REGNUM HARD_PC_REGNUM /* */
+#define PC_REGNUM HARD_PC_REGNUM
 
 /* Register to use for pushing function arguments.  */
 #define STACK_POINTER_REGNUM HARD_S_REGNUM
@@ -319,7 +322,7 @@ of machine-mode MODE.  */
 
 /* default (ascending) order is (almost) fine for MC6809 */
 #define REG_ALLOC_ORDER \
-    {1, 2, 3, 0, 4, 5, 6, 7, 9, 8, 10, 11, }  /* */
+    {1, 2, 3, 0, 4, 5, 6, 7, 9, 8, 10, 11, }
   /* X, Y, U, D, S, PC,-, -, B, A, CC, DP */
 
 /*--------------------------------------------------------------
@@ -1141,7 +1144,7 @@ do { \
 /* Output at beginning of assembler file.  */
 #define ASM_FILE_START(FILE) \
     fprintf (FILE, ";;; gcc built %s %s\n", __DATE__, __TIME__ ); \
-    fprintf (FILE, ";;; MC6809 $Revision: 1.8 $\n"); \
+    fprintf (FILE, ";;; MC6809 $Revision: 1.9 $\n"); \
     print_options (FILE); 
 
 #define ASM_FILE_END(FILE) /* */
@@ -1252,7 +1255,7 @@ do {                                             \
    This sequence is indexed by compiler's hard-register-number (see above).  */
 
 #define REGISTER_NAMES \
-{"d", "x", "y", "u", "s", "p","-", "-", \
+{"d", "x", "y", "u", "s", "pc","-", "-", \
  "a", "b", "cc","dp",}
 
 /* This is BSD, so it wants DBX format.  */
