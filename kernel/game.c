@@ -235,6 +235,7 @@ void game_init (void)
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
+	ball_in_play = FALSE;
 }
 
 
