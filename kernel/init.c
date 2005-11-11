@@ -121,6 +121,7 @@ void do_reset (void) __noreturn__
 
 void lockup_check_rtt (void)
 {
+	/* FIXME : static does not do what you think in gcc 3.1.1 */
 	static U8 last_idle_count = 0;
 
 	if (last_idle_count != 0)
@@ -163,7 +164,7 @@ void do_irq (void)
 			wpc_led_toggle ();
 			sound_rtt ();
 			lamp_flash_rtt ();
-			lockup_check_rtt ();
+			/// lockup_check_rtt (); /* disabled for now */
 		}
 	}
 }
