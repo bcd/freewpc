@@ -11,6 +11,10 @@
 
 
 VERSION=3.1.1
+z=`pwd | grep 3.3.6`;
+if [ "$?" = "0" ]; then
+	VERSION=3.3.6
+fi
 
 whereis sudo >/dev/null 2>&1
 if [ "$?" = "0" ]; then
@@ -55,11 +59,14 @@ case $arg in
 		;;
 
 	*)
+		echo "Building gcc09 version $VERSION"
+		sleep 1
 		make cross LANGUAGES="c proto c++"
 		cd gcc && $SUDO make LANGUAGES="c proto c++" install
 		echo "Copying new executable ... installation complete!"
 		$SUDO mkdir -p /usr/local/m6809/bin
 		$SUDO cp xgcc /usr/local/m6809/bin/gcc
+		$SUDO cp xgcc /usr/local/m6809/bin/gcc-$VERSION
 		echo "Done building"
 		;;
 esac
