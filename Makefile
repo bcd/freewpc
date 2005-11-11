@@ -28,6 +28,8 @@ TARGET_ROMPATH =
 # Which version of the assembler tools to use
 ASVER ?= 3.0.0
 
+# Which version of the compiler to use
+GCC_VERSION ?= 3.3.6
 
 #######################################################################
 ###	Directories
@@ -82,7 +84,11 @@ TMPFILES += $(ERR)
 
 # Path to the compiler and linker
 GCC_ROOT = /usr/local/m6809/bin
+ifdef GCC_VERSION
+CC = $(GCC_ROOT)/gcc-$(GCC_VERSION)
+else
 CC = $(GCC_ROOT)/gcc
+endif
 LD = $(GCC_ROOT)/ld
 AS = $(GCC_ROOT)/as
 REQUIRED += $(CC) $(LD) $(AS)
@@ -127,8 +133,11 @@ XBM_SRCS = $(patsubst %.o,%.xbm,$(XBM_OBJS))
 ###	Compiler / Assembler / Linker Flags
 #######################################################################
 
-# Default CFLAGS
+# Default include directories
 CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
+
+# Additional defines
+CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 
 # Default optimizations.  These are the only optimizations that
 # are known to work OK; using -O2 is almost guaranteed to fail.
@@ -139,7 +148,7 @@ CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-
 # if they include a long function, which might need to branch longer
 # distances.  Those files can use "#pragma long_branch" to revert to
 # the safer inefficient form.
-CFLAGS += -mshort_branch
+CFLAGS += -mshort-branch
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -463,14 +472,17 @@ gendefines_again: clean_gendefines gendefines
 #
 # 'make gcc-anythingelse' will run gcc's 'anythingelse' target.
 #
-gcc-install:
-	cp -p $(GCC) /usr/local/bin/gcc09
+ifdef GCC_VERSION
+GCC_BUILD_DIR = gcc-$(GCC_VERSION)-build
+else
+GCC_BUILD_DIR = gcc-build
+endif
 
 gcc:
-	cd gcc-build && ./gccbuild make
+	cd $(GCC_BUILD_DIR) && ./gccbuild make
 
 gcc-%:
-	cd gcc-build && ./gccbuild $*
+	cd $(GCC_BUILD_DIR) && ./gccbuild $*
 
 #
 # 'make astools' will build the assembler, linker, and library
