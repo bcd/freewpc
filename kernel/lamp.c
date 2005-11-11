@@ -42,7 +42,7 @@ U8 lamp_strobe_column;
 
 void lamp_init (void)
 {
-	memset (lamp_matrix, 0, NUM_LAMP_COLS * 7);
+	memset (lamp_matrix, 0, NUM_LAMP_COLS * 8);
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
 	lamp_apply_delay = 0;
