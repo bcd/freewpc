@@ -1,13 +1,13 @@
 
 #include <freewpc.h>
 
-static uint8_t font_space[32] = { 0, };
+static U8 font_space[32] = { 0, };
 
 
 fontargs_t font_args;
 
 
-extern inline uint8_t lsrqi3 (uint8_t data, uint8_t count)
+extern inline U8 lsrqi3 (U8 data, U8 count)
 {
 	register U8 d = data;
 	switch (count)
@@ -34,7 +34,7 @@ extern inline uint8_t lsrqi3 (uint8_t data, uint8_t count)
 }
 
 
-extern inline uint8_t aslqi3 (uint8_t data, uint8_t count)
+extern inline U8 aslqi3 (U8 data, U8 count)
 {
 	switch (count)
 	{
@@ -60,25 +60,40 @@ extern inline uint8_t aslqi3 (uint8_t data, uint8_t count)
 }
 
 
-uint8_t *font_lookup (const font_t *font, char c)
+U8 *font_lookup (const font_t *font, char c)
 {
-	uint8_t *entry;
-	uint8_t index;
+	U8 *entry;
+	U8 index;
 
 	if ((c >= 'A') && (c <= 'Z'))
 	{
-		entry = (uint8_t *)font->chars;
+		entry = (U8 *)font->chars;
 		index = c - 'A';
 	}
 	else if ((c >= '0') && (c <= '9'))
 	{
-		entry = (uint8_t *)font->digits;
+		entry = (U8 *)font->digits;
 		index = c - '0';
+	}
+	else if (c == '.')
+	{
+		entry = (U8 *)font->seps;
+		index = 0;
+	}
+	else if (c == ',')
+	{
+		entry = (U8 *)font->seps;
+		index = 1;
 	}
 	else if (c == ' ')
 	{
 		entry = font_space;
 		index = 0;
+	}
+	else if ((c >= 'a') && (c <= 'z'))
+	{
+		entry = (U8 *)font->chars;
+		index = c - 'a';
 	}
 	else
 	{
@@ -92,27 +107,29 @@ uint8_t *font_lookup (const font_t *font, char c)
 #pragma long_branch
 void fontargs_render_string (const fontargs_t *args)
 {
-	static uint8_t *dmd_base;
+	static U8 *dmd_base;
 	static const char *s;
 	U8 x;
 
-	dmd_base = ((uint8_t *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
+	dmd_base = ((U8 *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
    s = args->s;
   	x = args->x;
 
 	while (*s != '\0')
 	{
-		static uint8_t *data;
-		static uint8_t i;
-		static uint8_t xb;
-		static uint8_t xr;
+		static U8 *data;
+		static U8 i;
+		static U8 xb;
+		static U8 xr;
 
 		xb = x / 8;
 
+#if 00000
 		if (*s == '.')
 		{
 			dmd_base[(args->font->height-1) * DMD_BYTE_WIDTH + xb - 1] |= 0x40;
 			s++;
+			x += 3;
 			continue;
 		}
 		else if (*s == ',')
@@ -124,8 +141,10 @@ void fontargs_render_string (const fontargs_t *args)
 			dmd_pos -= DMD_BYTE_WIDTH;
 			*dmd_pos |= 0x80;
 			s++;
+			x += 3;
 			continue;
 		}
+#endif
 
 #ifdef DB_FONT
 		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
@@ -151,16 +170,19 @@ void fontargs_render_string (const fontargs_t *args)
 		}
 
 		/* advance by 1 char ... args->font->width */
-		x += args->font->width + args->font->spacing; 
+		if ((*s == '.') || (*s == ','))
+			x += 4;
+		else
+			x += args->font->width + args->font->spacing; 
 		s++;
 	}
 }
 #pragma short_branch
 
 
-uint8_t font_get_string_width (const font_t *font, const char *s)
+U8 font_get_string_width (const font_t *font, const char *s)
 {
-	uint8_t width = 0;
+	U8 width = 0;
 	while (*s++ != '\0')
 		width += (font->width + font->spacing);
 	return (width);

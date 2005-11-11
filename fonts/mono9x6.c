@@ -52,12 +52,19 @@ const uint8_t font_9x6_digit[][9] = {
 };
 
 
+const uint8_t font_9x6_sep[][9] = {
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 2 },
+	{ 0, 0, 0, 0, 0, 0, 0, 2, 1 },
+};
+
+
 const font_t font_9x6 = {
 	.width = 6,
 	.spacing = 2,
 	.height = 9, 
 	.chars = (uint8_t **)font_9x6_alpha_cap, 
-	.digits = (uint8_t **)font_9x6_digit
+	.digits = (uint8_t **)font_9x6_digit,
+	.seps = (uint8_t **)font_9x6_sep,
 };
 
 

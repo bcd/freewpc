@@ -51,13 +51,18 @@ const uint8_t font_5x5_digit[][5] = {
 	{ 14, 17, 30, 16, 14 },
 };
 
+const uint8_t font_5x5_sep[][5] = {
+	{ 0, 0, 0, 0, 2 },
+	{ 0, 0, 0, 2, 1 },
+};
 
 const font_t font_5x5 = {
 	.width = 5, 
 	.spacing = 1,
 	.height = 5, 
 	.chars = (uint8_t **)font_5x5_alpha_cap, 
-	.digits = (uint8_t **)font_5x5_digit
+	.digits = (uint8_t **)font_5x5_digit,
+	.seps = (uint8_t **)font_5x5_sep,
 };
 
 

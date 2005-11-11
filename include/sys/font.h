@@ -8,6 +8,7 @@ typedef struct
 	uint8_t height;
 	uint8_t **chars;
 	uint8_t **digits;
+	uint8_t **seps;
 } font_t;
 
 extern const font_t font_5x5;
