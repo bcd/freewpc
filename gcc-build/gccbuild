@@ -61,6 +61,7 @@ case $arg in
 	*)
 		echo "Building gcc09 version $VERSION"
 		sleep 1
+		rm -f gcc/xgcc*
 		make cross LANGUAGES="c proto c++"
 		cd gcc && $SUDO make LANGUAGES="c proto c++" install
 		echo "Copying new executable ... installation complete!"
