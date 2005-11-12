@@ -142,9 +142,10 @@ data_reg_operand (op, mode)
 
 	if (reg_operand (op, mode)) {
 		if (reload_completed) {
-			if (REGNO (op) == HARD_D_REGNUM) {
+			if	((REGNO (op) == HARD_D_REGNUM) ||
+				 (REGNO (op) == HARD_A_REGNUM) ||
+				 (REGNO (op) == HARD_B_REGNUM))
 				code = 1;
-			}
 		}
 		else {
 			code = 1;
@@ -293,11 +294,13 @@ register rtx addr;
 	switch (GET_CODE (addr)) {
 		case REG:
 			regno = REGNO (addr);
+#if 0 /* bcd - correct, this is not valid */
 			/* Not sure about the following: you can't index from b
 			 * anyway, so I don't think this is valid. */
 			if ((BYTE_MODE (addr)) && (REGNO (addr) == HARD_D_REGNUM))
 				fprintf (file, ",b");
 			else
+#endif
 				fprintf (file, ",%s", reg_names[regno]);
 			break;
 
@@ -532,7 +535,7 @@ print_options (file)
 		(TARGET_BYTE_INT ? "-mint8" : 
 		 TARGET_SHORT_INT ? " -mint16" : "-mint32"),
 		(TARGET_SHORT_BRANCH ? " -mshort-branch":" -mlong-branch"),
-		(TARGET_REG_ARGS ? " -mreg-args":" -mno-reg-args"),
+		(TARGET_REG_ARGS ? " -mreg-args":" -mno-reg-args")
 		);
 	fprintf (file, ";;; OPTIONS:\t%s\n",
 		(flag_signed_char ? " signed-char" : " !signed-char"));
@@ -540,14 +543,74 @@ print_options (file)
 }
 
 
+/* Return a bitarray of the registers which are used by a function. */
+unsigned int
+m6809_get_live_regs ()
+{
+	unsigned int regs = 0;
+	int regno;
+
+	if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM]))
+		regs |= (1 << HARD_U_REGNUM);
+
+	for (regno = HARD_X_REGNUM; regno <= HARD_U_REGNUM; regno++)
+		if (regs_ever_live[regno] && ! call_used_regs[regno])
+			regs |= (1 << regno);
+
+	return regs;
+}
+
+
+/* Return a printable version of a list of registers */
+const char *
+m6809_get_regs_printable (unsigned int regs)
+{
+	static char list[64];
+	char *listp = list;
+	unsigned int regno;
+
+	for (regno=0; regno < FIRST_PSEUDO_REGISTER; regno++)
+		if (regs & (1 << regno))
+			listp += sprintf (listp,
+				(listp == list) ? "%s" : ",%s", reg_names[regno]);
+
+	return list;
+}
+
+
+/* Return the total number of bytes covered by a set of registers */
+unsigned int
+m6809_get_regs_size (unsigned int regs)
+{
+	unsigned int regno;
+	unsigned int size = 0;
+
+	for (regno=0; regno < FIRST_PSEUDO_REGISTER; regno++)
+		if (regs & (1 << regno))
+			size += 2; /* size of each register */
+
+	return size;
+}
+
+
+unsigned int
+m6809_initial_frame_pointer_offset ()
+{
+	unsigned int regs = m6809_get_live_regs ();
+	return m6809_get_regs_size (regs) + get_frame_size ();
+}
+
+
 void
 output_function_prologue ( file, size )
 	FILE *file;
 	int size;
-{ 
+{
+#if 00000
 	register int regno;
 	int offset = 0; 
-	char reglist[30]; 
+#endif
+	unsigned int live_regs = m6809_get_live_regs ();
 
 	if (in_naked_function)
 	{
@@ -561,6 +624,7 @@ output_function_prologue ( file, size )
 	fprintf (file, ";;;  PROLOGUE for %s\n", current_function_name); 
 	fprintf (file, ";;;-----------------------------------------\n"); 
 
+#if 00000
 	reglist[0] = '\0'; 
 
 	if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
@@ -576,15 +640,25 @@ output_function_prologue ( file, size )
 			offset += 2; 
 		} 
 	} 
+#endif
 
+	/* Allocate storage for locals */
 	if (size != 0) 
-		fprintf (file, "\tleas\t-(%d),s\t; allocate auto variables\n", size);
-	if (offset != 0) 
-		fprintf (file, "\tpshs\t%s\t;save registers\n", reglist); 
+		fprintf (file, "\tleas\t-(%d),s\t; allocate auto variables\n", 
+			size);
+
+	/* Save away registers that are clobbered */
+	if (live_regs != 0) 
+		fprintf (file, "\tpshs\t%s\t;save registers\n", 
+			m6809_get_regs_printable (live_regs));
+
+	/* Set up frame pointer if necessary */
 	if (frame_pointer_needed) { 
 		fprintf (file, 
-			"\tleau\t%d,s\t;use U-reg as frame pointer\n", offset+size); 
-	} 
+			"\tleau\t%d,s\t;use U-reg as frame pointer\n", 
+				size + m6809_get_regs_size (live_regs)); 
+	}
+
 	fprintf (file, ";;;END PROLOGUE\n"); 
 }
 
@@ -594,9 +668,13 @@ output_function_epilogue ( file, size )
 	FILE *file;
 	int size;
 {
+#if 00000
 	register int regno; 
 	int offset = 0; 
 	char reglist[30]; 
+#endif
+	unsigned int live_regs = m6809_get_live_regs ();
+	const char *reglist = m6809_get_regs_printable (live_regs);
 
     fprintf (file, ";;;EPILOGUE\n"); 
 
@@ -607,6 +685,7 @@ output_function_epilogue ( file, size )
 		return;
 	 }
 
+#if 00000
     reglist[0] = '\0'; 
     if ((frame_pointer_needed) && (!regs_ever_live[HARD_U_REGNUM])) { 
           strcat (reglist, reg_names[HARD_U_REGNUM]); 
@@ -621,19 +700,22 @@ output_function_epilogue ( file, size )
               offset += 2; 
             } 
         } 
+#endif
 
-    if (offset != 0)
-      if ((size == 0) && !in_interrupt)
-        fprintf (file, "\tpuls\t%s,pc\t;restore registers\n", reglist);
-      else
-        fprintf (file, "\tpuls\t%s\t;restore registers\n", reglist);
-    if (size != 0)
-        fprintf (file, "\tleas\t%d,s\t; deallocate auto variables\n",
-            size);
-    if (in_interrupt)
-      fprintf (file, "\trti\t\t; return from interrupt\n");
-    else if (offset==0 || (size != 0))
-      fprintf (file, "\trts\t\t; return from function\n");
+	if (live_regs != 0)
+  		if ((size == 0) && !in_interrupt)
+			fprintf (file, "\tpuls\t%s,pc\t;restore registers\n", reglist);
+		else
+  			fprintf (file, "\tpuls\t%s\t;restore registers\n", reglist);
+
+	if (size != 0)
+		fprintf (file, "\tleas\t%d,s\t; deallocate auto variables\n",
+			size);
+
+	if (in_interrupt)
+  		fprintf (file, "\trti\t\t; return from interrupt\n");
+	else if ((live_regs == 0) || (size != 0))
+		fprintf (file, "\trts\t\t; return from function\n");
 
 	fprintf (file, ";;;-----------------------------------------\n"); 
 	fprintf (file, ";;; END EPILOGUE for %s\n", current_function_name); 

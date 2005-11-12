@@ -77,16 +77,20 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 /* 
    -margcount		use standard calling sequence, with arg count word
    -mnoargcount 	don't push arg count (it's in the symbol table)
-   -mshort_int		use short integers for type "int"
-   -mlong_int		use long integers for type "int"
-   -mshort_branch	use short branch instructions
+   -mint8		use bytes for type "int"
+   -mint16		use short integers for type "int"
+   -mint32		use long integers for type "int"
+   -mshort-branch	use short branch instructions
+   -mlong-branch	use long branch instructions
 */
 
 #define TARGET_FLAG_SHORT_BRANCH      0x1
 #define TARGET_FLAG_ARGCOUNT          0x4
 #define TARGET_FLAG_SHORT_INT         0x8
-#define TARGET_FLAG_REG_ARGS			  0x10
+#define TARGET_FLAG_REG_ARGS          0x10
 #define TARGET_FLAG_BYTE_INT          0x20
+#define TARGET_FLAG_SMALL_SIZE_T      0x40
+
 
 #define TARGET_ARGCOUNT (target_flags & TARGET_FLAG_ARGCOUNT)
 
@@ -95,6 +99,9 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 
 /* Compile with short (+-255) branch instructions */
 #define TARGET_SHORT_BRANCH (target_flags & TARGET_FLAG_SHORT_BRANCH)
+
+/* Compile with short (+-255) size_t */
+#define TARGET_SMALL_SIZE_T (target_flags & TARGET_FLAG_SMALL_SIZE_T)
 
 /* Enable function arguments in registers */
 #define TARGET_REG_ARGS (target_flags & TARGET_FLAG_REG_ARGS)
@@ -127,9 +134,11 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
     { "int8", TARGET_FLAG_BYTE_INT }, \
     { "int16", TARGET_FLAG_SHORT_INT }, \
     { "int32", -TARGET_FLAG_SHORT_INT }, \
-	 { "reg-args", TARGET_FLAG_REG_ARGS }, \
-	 { "noreg-args", TARGET_FLAG_REG_ARGS }, \
-    { "", TARGET_DEFAULT }}
+    { "reg-args", TARGET_FLAG_REG_ARGS }, \
+    { "noreg-args", TARGET_FLAG_REG_ARGS }, \
+    { "short_size", TARGET_FLAG_SMALL_SIZE_T }, \
+    { "long_size", -TARGET_FLAG_SMALL_SIZE_T }, \
+    { "", TARGET_DEFAULT } }
 
 /* Pick a target if none was specified */
 #define OVERRIDE_OPTIONS  override_options ();
@@ -159,6 +168,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 #define BITS_PER_UNIT 8
 
 /* Width in bits of a "word", or the contents of a machine register. */
+/* TODO : change this when doing byte register allocation */
 #define BITS_PER_WORD 16
 
 /* Width of a word, in units (bytes).  */
@@ -979,6 +989,9 @@ enum reg_class {
 
 /* Size (bits) of the type "long" on target machine */
 #define LONG_TYPE_SIZE 16
+
+/* Size (bits) of the type "long long" on target machine */
+#define LONG_LONG_TYPE_SIZE 32
 
 /* Size (bits) of the type "char" on target machine */
 #define CHAR_TYPE_SIZE 8
