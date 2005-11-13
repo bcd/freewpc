@@ -70,6 +70,9 @@ void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
 void lamp_toggle (lampnum_t lamp);
 int lamp_test (lampnum_t lamp);
+void leff_on (lampnum_t lamp);
+void leff_off (lampnum_t lamp);
+void leff_toggle (lampnum_t lamp);
 
 #define flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
 #define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
@@ -88,11 +91,17 @@ int lamp_test (lampnum_t lamp);
 
 void lamp_all_on (void);
 void lamp_all_off (void);
+void lamp_leff1_erase (void);
+void lamp_leff2_erase (void);
 
 void lampset_apply (lampset_id_t id, lamp_operator_t op);
 void lampset_apply_on (lampset_id_t id);
 void lampset_apply_off (lampset_id_t id);
 void lampset_apply_toggle (lampset_id_t id);
+void lampset_apply_leff_on (lampset_id_t id);
+void lampset_apply_leff_off (lampset_id_t id);
+void lampset_apply_leff_toggle (lampset_id_t id);
+void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on);
 void lampset_set_apply_delay (task_ticks_t ticks);
 void lampset_step_increment (lampset_id_t id);
 void lampset_step_decrement (lampset_id_t id);

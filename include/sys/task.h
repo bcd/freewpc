@@ -11,7 +11,7 @@
 
 #define NUM_TASKS 32
 
-extern U8 task_idle_count;
+
 
 typedef uint8_t task_gid_t;
 
@@ -39,6 +39,26 @@ typedef struct
 } task_t;
 
 typedef task_t *task_pid_t;
+
+
+
+extern U8 task_idle_count;
+extern task_t *task_current;
+
+
+/********************************/
+/*     Inline Macros            */
+/********************************/
+
+extern inline task_t *task_getpid (void)
+{
+	return task_current;
+}
+
+extern inline task_gid_t task_getgid (void)
+{
+	return task_current->gid;
+}
 
 /********************************/
 /*     Function Prototypes      */
