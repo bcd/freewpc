@@ -135,7 +135,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
     { "int16", TARGET_FLAG_SHORT_INT }, \
     { "int32", -TARGET_FLAG_SHORT_INT }, \
     { "reg-args", TARGET_FLAG_REG_ARGS }, \
-    { "noreg-args", TARGET_FLAG_REG_ARGS }, \
+    { "noreg-args", -TARGET_FLAG_REG_ARGS }, \
     { "short_size", TARGET_FLAG_SMALL_SIZE_T }, \
     { "long_size", -TARGET_FLAG_SMALL_SIZE_T }, \
     { "", TARGET_DEFAULT } }
@@ -247,11 +247,11 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    and are not available for the register allocator.  */
 #ifdef CONFIG_AB
 #define FIXED_REGISTERS \
-    {1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, } 
+    {1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, }
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 #else
 #define FIXED_REGISTERS \
-    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
+    {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, }
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 #endif
 
@@ -262,7 +262,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
    and the register where structure-value addresses are passed.
    Aside from that, you can include as many other registers as you like.  */
 #define CALL_USED_REGISTERS \
-    {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, } 
+    {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, }
   /* D, X, Y, U, S, PC,-, -, A, B, C, DP */
 
 /* Return number of consecutive hard regs needed starting at reg REGNO
