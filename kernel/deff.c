@@ -1,32 +1,37 @@
 
 #include <freewpc.h>
 
+#define MACHINE_DISPLAY_EFFECTS \
+	DECL_DEFF (DEFF_TEST_MENU, D_RUNNING, 5, test_menu_deff) \
+	DECL_DEFF (DEFF_AMODE, D_RUNNING, 10, amode_deff) \
+	DECL_DEFF (DEFF_BRIAN_IMAGE, D_NORMAL, 20, egg_brian_image_deff) \
+	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
+	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
+	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
+	DECL_DEFF (DEFF_BONUS, D_NORMAL, 150, bonus_deff) \
+	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
+	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
+	DECL_DEFF (DEFF_SLAM_TILT, D_NORMAL, 210, tilt_deff) \
+	DECL_DEFF (DEFF_PRINT_RTC, D_NORMAL, 250, rtc_print_deff) \
+	DECL_DEFF (DEFF_FONT_TEST, D_RUNNING, 250, font_test_deff) \
+	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, 250, volume_deff) \
 
-extern void scores_deff (void) __taskentry__;
-extern void coin_deff (void) __taskentry__;
-extern void test_menu_deff (void) __taskentry__;
-extern void rtc_print_deff (void) __taskentry__;
-extern void credits_deff (void) __taskentry__;
-extern void font_test_deff (void) __taskentry__;
-extern void amode_deff (void) __taskentry__;
-extern void volume_deff (void) __taskentry__;
-extern void tilt_deff (void) __taskentry__;
-extern void tilt_warning_deff (void) __taskentry__;
-extern void slam_tilt_deff (void) __taskentry__;
+
+/* Declare externs for all of the deff functions */
+#define DECL_DEFF(num, flags, pri, fn) \
+	extern void fn (void);
+
+MACHINE_DISPLAY_EFFECTS
+
+
+/* Now declare the deff table itself */
+#undef DECL_DEFF
+#define DECL_DEFF(num, flags, pri, fn) \
+	[num] = { flags, pri, fn },
 
 static const deff_t deff_table[] = {
 	[DEFF_NULL] = { D_NORMAL, 0, NULL },
-	[DEFF_TEST_MENU] = { D_RUNNING, 5, test_menu_deff },
-	[DEFF_AMODE] = { D_RUNNING, 10, amode_deff },
-	[DEFF_SCORES] = { D_RUNNING, 30, scores_deff },
-	[DEFF_COIN_INSERT] = { D_NORMAL, 110, coin_deff },
-	[DEFF_CREDITS] = { D_NORMAL, 120, credits_deff },
-	[DEFF_TILT_WARNING] = { D_NORMAL, 200, tilt_warning_deff },
-	[DEFF_TILT] = { D_RUNNING, 205, tilt_deff },
-	[DEFF_SLAM_TILT] = { D_NORMAL, 210, tilt_deff },
-	[DEFF_PRINT_RTC] = { D_NORMAL, 250, rtc_print_deff },
-	[DEFF_FONT_TEST] = { D_RUNNING, 250, font_test_deff },
-	[DEFF_VOLUME_CHANGE] = { D_RUNNING, 250, volume_deff },
+	MACHINE_DISPLAY_EFFECTS
 };
 
 

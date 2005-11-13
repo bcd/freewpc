@@ -67,6 +67,7 @@ void add_credit (void)
 	{
 		sound_send (SND_THUD);
 		deff_restart (DEFF_CREDITS);
+		leff_start (LEFF_FLASH_ALL);
 #ifndef FREE_ONLY
 		credit_count++;
 		lamp_start_update ();

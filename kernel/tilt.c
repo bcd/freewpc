@@ -50,6 +50,7 @@ void sw_tilt_handler (void)
 		deff_start (DEFF_TILT);
 		in_tilt = TRUE;
 		flipper_disable ();
+		mark_ball_in_play ();
 		call_hook (tilt);
 	}
 	else

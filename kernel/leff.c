@@ -1,23 +1,34 @@
 
 #include <freewpc.h>
 
+#define MACHINE_LAMP_EFFECTS \
+	DECL_LEFF (LEFF_AMODE, L_RUNNING, 10, 0, 0, amode_leff) \
+	DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, 100, 0, 0, flash_all_leff) \
+
+
+/* Declare externs for all of the deff functions */
+#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
+	extern void fn (void);
+
+MACHINE_LAMP_EFFECTS
+
+
+/* Now declare the deff table itself */
+#undef DECL_LEFF
+#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
+	[num] = { flags, pri, b1, b2, fn },
+
+static const leff_t leff_table[] = {
+	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL },
+	MACHINE_LAMP_EFFECTS
+};
+
+
 /* Declare externs for lamp bit matrices used by leffs */
 extern __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
-
-
-extern void amode_leff (void) __taskentry__;
-
-static const leff_t leff_table[] = {
-	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL },
-	[LEFF_AMODE] = { L_RUNNING, 10, 0, 0, amode_leff },
-#if 0
-	[LEFF_TILT_WARNING] = { L_NORMAL, 100, 0, 0, NULL },
-	[LEFF_TILT] = { L_NORMAL, 150, 0, 0, NULL },
-#endif
-};
 
 
 /** Indicates the id of the leff currently active */
@@ -92,11 +103,18 @@ static leffnum_t leff_get_highest_priority (void)
 }
 
 
+void leff_create_handler (const leff_t *leff)
+{
+	lamp_leff1_erase ();
+	task_recreate_gid (GID_LEFF, leff->fn);
+}
+
+
 void leff_start (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	db_puts ("Deff start request for # "); db_puti (dn); db_putc ('\n');
+	db_puts ("Leff start request for # "); db_puti (dn); db_putc ('\n');
 
 	if (leff->flags & L_RUNNING)
 	{
@@ -107,7 +125,7 @@ void leff_start (leffnum_t dn)
 			/* This is the new active running leff */
 			db_puts ("Requested leff is now highest priority\n");
 			leff_active = dn;
-			task_recreate_gid (GID_LEFF, leff->fn);
+			leff_create_handler (leff);
 		}
 		else
 		{
@@ -122,7 +140,7 @@ void leff_start (leffnum_t dn)
 		{
 			db_puts ("Restarting quick leff with high pri\n");
 			leff_active = dn;
-			task_recreate_gid (GID_LEFF, leff->fn);
+			leff_create_handler (leff);
 		}
 		else
 		{
@@ -157,7 +175,7 @@ void leff_restart (leffnum_t dn)
 	if (dn == leff_active)
 	{
 		const leff_t *leff = &leff_table[dn];
-		task_recreate_gid (GID_LEFF, leff->fn);
+		leff_create_handler (leff);
 	}
 	else
 	{
@@ -182,10 +200,12 @@ void leff_start_highest_priority (void)
 	{
 		const leff_t *leff = &leff_table[leff_active];
 		db_puts ("Recreating leff task\n");
-		task_recreate_gid (GID_LEFF, leff->fn);
+		leff_create_handler (leff);
 	}
 	else
 	{
+		lamp_leff1_erase ();
+		lamp_leff2_erase ();
 		task_recreate_gid (GID_LEFF, leff_default);
 	}
 }
@@ -193,6 +213,7 @@ void leff_start_highest_priority (void)
 
 void leff_exit (void) __noreturn__
 {
+	db_puts ("Exiting leff\n");
 	task_setgid (GID_LEFF_EXITING);
 	leff_remove_queue (leff_active);
 	leff_start_highest_priority ();

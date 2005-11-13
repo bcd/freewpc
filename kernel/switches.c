@@ -430,6 +430,25 @@ void switch_rtt (void)
 }
 
 
+void switch_lamp_pulse (void)
+{
+	const switch_info_t * const swinfo = task_get_arg ();
+	if (lamp_test (swinfo->lamp))
+	{
+		leff_on (swinfo->lamp);
+		task_sleep (TIME_100MS * 2);
+		leff_off (swinfo->lamp);
+	}
+	else
+	{
+		leff_off (swinfo->lamp);
+		task_sleep (TIME_100MS * 2);
+		leff_on (swinfo->lamp);
+	}
+	task_exit ();
+}
+
+
 void switch_sched (void)
 {
 	const uint8_t sw = task_get_arg ();
@@ -445,8 +464,10 @@ void switch_sched (void)
 			mark_ball_in_play ();
 	}
 
-	if (swinfo->lamp != 0)
+	if ((swinfo->lamp != 0) && in_live_game)
 	{
+		task_t *tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
+		task_set_arg (tp, swinfo);
 	}
 
 	if ((swinfo->sound != 0) && in_live_game)

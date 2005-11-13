@@ -24,10 +24,10 @@ __fastram__ U8 lamp_fast_flash_matrix[NUM_LAMP_COLS];
 
 /* Bitsets for doing temporary lamp effects, which hide the
  * normal state of the lamps */
-__fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
-__fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+__fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
+__fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 U8 lamp_flash_max;
 U8 lamp_flash_count;
@@ -160,6 +160,50 @@ void lamp_all_off (void)
 {
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
+}
+
+void lamp_leff1_erase (void)
+{
+	memset (lamp_leff1_matrix, 0, 2 * NUM_LAMP_COLS);
+}
+
+
+void lamp_leff2_erase (void)
+{
+	memset (lamp_leff2_matrix, 0, 2 * NUM_LAMP_COLS);
+}
+
+
+void leff_on (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_matrix;
+	register uint8_t v = lamp;
+	__setbit(p, v);
+}
+
+
+void leff_off (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_matrix;
+	register uint8_t v = lamp;
+	__clearbit(p, v);
+}
+
+
+void leff_toggle (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_matrix;
+	register uint8_t v = lamp;
+	__togglebit(p, v);
+}
+
+
+int leff_test (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_matrix;
+	register uint8_t v = lamp;
+	__testbit(p, v);
+	return v;
 }
 
 

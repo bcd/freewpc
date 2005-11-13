@@ -116,10 +116,12 @@ void volume_deff (void) __taskentry__
 	sprintf ("VOLUME %d", current_volume);
 	font_render_string_center (&font_5x5, 64, 13, sprintf_buffer);
 	volume_update ();
-	music_change (2);
+	if (!in_game)
+		music_change (2);
 	dmd_show_low ();
 	task_sleep_sec (4);
-	music_off ();
+	if (!in_game)
+		music_off ();
 	deff_exit ();
 }
 

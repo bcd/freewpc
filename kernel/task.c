@@ -249,16 +249,6 @@ task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
 	return task_create_gid (gid, fn);
 }
 
-task_t *task_getpid (void)
-{
-	return task_current;
-}
-
-task_gid_t task_getgid (void)
-{
-	return task_current->gid;
-}
-
 void task_setgid (task_gid_t gid)
 {
 	task_current->gid = gid;

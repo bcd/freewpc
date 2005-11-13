@@ -17,10 +17,10 @@ void system_reset (void)
 	font_render_string (&font_5x5, 0, 0, sprintf_buffer);
 
 	sprintf ("GCC %s", gcc_version);
-	font_render_string (&font_5x5, 0, 6, sprintf_buffer);
+	font_render_string (&font_5x5, 0, 7, sprintf_buffer);
 
 	sprintf ("BUILT %s", build_date);
-	font_render_string (&font_5x5, 0, 12, sprintf_buffer);
+	font_render_string (&font_5x5, 0, 14, sprintf_buffer);
 
 	dmd_show_low ();
 

@@ -16,9 +16,7 @@ void sw_left_flipper_handler (void)
 	if (in_test)
 		test_left_flipper_button ();
 	else if (deff_get_active () == DEFF_AMODE)
-	{
 		amode_left_flipper ();
-	}
 }
 
 void sw_right_flipper_handler (void)
@@ -28,9 +26,7 @@ void sw_right_flipper_handler (void)
 	if (in_test)
 		test_right_flipper_button ();
 	else if (deff_get_active () == DEFF_AMODE)
-	{
 		amode_right_flipper ();
-	}
 }
 
 void sw_upper_left_flipper_handler (void)

@@ -147,7 +147,7 @@ const lampnum_t *lampset_table[] = {
 
 
 __fastram__ task_ticks_t lampset_apply_delay;
-
+U8 lampset_alternation_state;
 
 static inline void lampset_invoke_operator (
 	lampnum_t lamp, lamp_operator_t op )
@@ -238,6 +238,39 @@ void lampset_apply_off (lampset_id_t id)
 void lampset_apply_toggle (lampset_id_t id)
 {
 	lampset_apply (id, lamp_toggle);
+}
+
+
+
+void lampset_apply_leff_on (lampset_id_t id)
+{
+	lampset_apply (id, leff_on);
+}
+
+void lampset_apply_leff_off (lampset_id_t id)
+{
+	lampset_apply (id, leff_off);
+}
+
+void lampset_apply_leff_toggle (lampset_id_t id)
+{
+	lampset_apply (id, leff_toggle);
+}
+
+void lamp_alternating (lampnum_t lamp)
+{
+	if (lampset_alternation_state)
+		leff_on (lamp);
+	else
+		leff_off (lamp);
+	lampset_alternation_state = ~lampset_alternation_state;
+}
+
+
+void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on)
+{
+	lampset_alternation_state = initially_on;
+	lampset_apply (id, lamp_alternating);
 }
 
 /* Step functions.  These routines treat the lampset of length N as
