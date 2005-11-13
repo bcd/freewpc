@@ -89,6 +89,8 @@ CC = $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
 CC = $(GCC_ROOT)/gcc
 endif
+CC_MODE = -S
+# CC_MODE = -E
 LD = $(GCC_ROOT)/ld
 AS = $(GCC_ROOT)/as
 REQUIRED += $(CC) $(LD) $(AS)
@@ -132,16 +134,19 @@ XBM_SRCS = $(patsubst %.o,%.xbm,$(XBM_OBJS))
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
 #######################################################################
-
 # Default include directories
-CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
+CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR) -Icallset
 
 # Additional defines
+ifdef GCC_VERSION
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
+else
+CFLAGS += -DGCC_VERSION=3.1.1
+endif
 
 # Default optimizations.  These are the only optimizations that
 # are known to work OK; using -O2 is almost guaranteed to fail.
-CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing
+CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
 # Default machine flags.  To keep code size small, turn on short
 # branches by default.  Some files may need to override this option
@@ -408,7 +413,7 @@ tz/cpptest.o : %.o : %.cpp $(REQUIRED) $(DEPS) $(GENDEFINES)
 # General rule for how to build any C module.
 #
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
-	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
+	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) $(CC_MODE) $(CFLAGS) $<
 	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
 
 #! @$(CC) -o $@ -c $(CFLAGS) $< 2>&1 | tee -a err
@@ -460,6 +465,12 @@ clean_gendefines:
 
 gendefines_again: clean_gendefines gendefines
 
+#
+# How to automake callsets
+#
+callsets :
+	@echo Generating callsets ... && tools/gencallset
+
 #######################################################################
 ###	Tools
 #######################################################################
@@ -473,7 +484,11 @@ gendefines_again: clean_gendefines gendefines
 # 'make gcc-anythingelse' will run gcc's 'anythingelse' target.
 #
 ifdef GCC_VERSION
+ifeq ($(GCC_VERSION),3.1.1)
+GCC_BUILD_DIR = gcc-build
+else
 GCC_BUILD_DIR = gcc-$(GCC_VERSION)-build
+endif
 else
 GCC_BUILD_DIR = gcc-build
 endif
