@@ -12,4 +12,8 @@ void sol_off (solnum_t sol);
 void sol_serve (void);
 void sol_init (void);
 
+void flasher_pulse (solnum_t n);
+void flasher_rtt (void);
+void flasher_init (void);
+
 #endif /* _SYS_SOL_H */
