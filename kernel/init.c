@@ -85,6 +85,7 @@ void do_reset (void) __noreturn__
 	db_init ();
 #endif
 	sol_init ();
+	flasher_init ();
 	triac_init ();
 	dmd_init ();
 	switch_init ();
@@ -157,6 +158,7 @@ void do_irq (void)
 		/* Execute rtts every 8ms */
 		tick_count++;
 		triac_rtt ();
+		flasher_rtt ();
 
 		if ((tick_count & 3) == 0) /* 4 x 8ms */
 		{
@@ -165,6 +167,9 @@ void do_irq (void)
 			sound_rtt ();
 			lamp_flash_rtt ();
 			/// lockup_check_rtt (); /* disabled for now */
+
+			extern void tz_clock_rtt (void);
+			tz_clock_rtt ();
 		}
 	}
 }
