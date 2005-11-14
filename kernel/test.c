@@ -223,12 +223,22 @@ void sol_enter_proc (void) __taskentry__
 }
 
 
+void flasher_enter_proc (void) __taskentry__
+{
+	flasher_pulse (test_index);
+	task_exit ();
+}
+
+
 void rtc_print_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_5x5, 64, 4, "CURRENT TIME");
 
-	sprintf ("%d %d", *(uint8_t *)WPC_CLK_HOURS_DAYS, *(uint8_t *)WPC_CLK_MINS);
+	sprintf ("%02d %02d", 
+		*(uint8_t *)WPC_CLK_HOURS_DAYS, 
+		*(uint8_t *)WPC_CLK_MINS);
+
 	font_render_string_center (&font_5x5, 64, 16, sprintf_buffer);
 
 	dmd_draw_border (dmd_low_bytes);
@@ -278,8 +288,8 @@ void font_test_deff (void)
 	if (font != NULL)
 	{
 		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-		font_render_string (font, 0, 8, "NOPQRSTUVWXYZ");
-		font_render_string (font, 0, 16, "0123456789");
+		font_render_string (font, 0, 10, "NOPQRSTUVWXYZ");
+		font_render_string (font, 0, 20, "0123456789.,");
 	}
 	else
 	{
@@ -311,6 +321,7 @@ const test_t main_menu_items[] = {
 	{ "SOUNDS 2", &main_menu, 0, 0, TEST_ITEM(sound2_enter_proc) },
 	{ "LAMPS", &main_menu, 0, 0, TEST_ITEM(lamp_enter_proc) },
 	{ "SOLENOIDS", &main_menu, 0, 0, TEST_ITEM(sol_enter_proc) },
+	{ "FLASHERS", &main_menu, 0, 0, TEST_ITEM(flasher_enter_proc) },
 	{ "BALL DEVICES", &main_menu, 0, 0, TEST_ITEM(device_enter_proc) },
 	{ "RT CLOCK", &main_menu, 0, 0, TEST_ITEM(rtc_enter_proc) },
 	{ "FONT TEST", &main_menu, 0, 0, TEST_ITEM(font_enter_proc) },
