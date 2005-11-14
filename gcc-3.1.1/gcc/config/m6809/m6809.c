@@ -294,14 +294,7 @@ register rtx addr;
 	switch (GET_CODE (addr)) {
 		case REG:
 			regno = REGNO (addr);
-#if 0 /* bcd - correct, this is not valid */
-			/* Not sure about the following: you can't index from b
-			 * anyway, so I don't think this is valid. */
-			if ((BYTE_MODE (addr)) && (REGNO (addr) == HARD_D_REGNUM))
-				fprintf (file, ",b");
-			else
-#endif
-				fprintf (file, ",%s", reg_names[regno]);
+			fprintf (file, ",%s", reg_names[regno]);
 			break;
 
 		case PRE_DEC:
