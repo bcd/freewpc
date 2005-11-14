@@ -15,8 +15,8 @@
 
 /* The lamp flash state is updated every 32ms, so this will
  * toggle the lamp flash state about 8 times/sec */
-#define LAMP_DEFAULT_FLASH_RATE 4
-#define LAMP_FAST_FLASH_RATE 2
+#define LAMP_DEFAULT_FLASH_RATE 3
+//#define LAMP_FAST_FLASH_RATE 2
 
 /* Small integer type for a lamp number */
 typedef uint8_t lampnum_t;
@@ -91,8 +91,12 @@ void leff_toggle (lampnum_t lamp);
 
 void lamp_all_on (void);
 void lamp_all_off (void);
+void lamp_leff1_allocate_all (void);
 void lamp_leff1_erase (void);
+void lamp_leff1_free_all (void);
 void lamp_leff2_erase (void);
+void lamp_leff_allocate (lampnum_t lamp);
+void lamp_leff_free (lampnum_t lamp);
 
 void lampset_apply (lampset_id_t id, lamp_operator_t op);
 void lampset_apply_on (lampset_id_t id);
