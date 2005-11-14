@@ -26,8 +26,31 @@ void flasher_pulse (solnum_t n)
 }
 
 
+void flasher_rtt (void)
+{
+	U8 i;
+	for (i=0; i < MAX_ACTIVE_FLASHERS; i++)
+	{
+		if (flashers_active[i].flasher != 0)
+		{
+			sol_on (flashers_active[i].flasher);
+			if (--flashers_active[i].duration == 0)
+			{
+				sol_off (flashers_active[i].flasher);
+				flashers_active[i].flasher = 0;
+			}
+		}
+	}
+}
+
+
 void flasher_init (void)
 {
+	U8 i;
+	for (i=0; i < MAX_ACTIVE_FLASHERS; i++)
+	{
+		flashers_active[i].flasher = 0;
+	}
 }
 
 
