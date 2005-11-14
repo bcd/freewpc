@@ -99,6 +99,13 @@ void db_rtt (void)
 					dump_game ();
 					break;
 				}
+
+				case 'c':
+				{
+					extern void tz_dump_clock (void);
+					tz_dump_clock ();
+					break;
+				}
 			}
 		}
 	}
