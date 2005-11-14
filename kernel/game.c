@@ -39,6 +39,7 @@ void end_game (void)
 	// return to attract mode
 
 	call_hook (end_game);
+	lamp_all_off ();
 	deff_stop (DEFF_SCORES);
 	amode_start ();
 }
@@ -112,7 +113,7 @@ void start_ball (void)
 
 void mark_ball_in_play (void)
 {
-	if (ball_in_play == FALSE)
+	if (in_game && !ball_in_play)
 	{
 		ball_in_play = TRUE;		
 		call_hook (ball_in_play);
