@@ -433,18 +433,13 @@ void switch_rtt (void)
 void switch_lamp_pulse (void)
 {
 	const switch_info_t * const swinfo = task_get_arg ();
-	if (lamp_test (swinfo->lamp))
-	{
-		leff_on (swinfo->lamp);
-		task_sleep (TIME_100MS * 2);
-		leff_off (swinfo->lamp);
-	}
-	else
-	{
-		leff_off (swinfo->lamp);
-		task_sleep (TIME_100MS * 2);
-		leff_on (swinfo->lamp);
-	}
+	dbprintf ("Pulsing lamp %d\n", swinfo->lamp);
+
+	lamp_leff_allocate (swinfo->lamp);
+	leff_toggle (swinfo->lamp);
+	task_sleep (TIME_100MS * 2);
+	leff_toggle (swinfo->lamp);
+	lamp_leff_free (swinfo->lamp);
 	task_exit ();
 }
 
