@@ -8,7 +8,7 @@
 	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
 	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
 	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
-	DECL_DEFF (DEFF_BONUS, D_NORMAL, 150, bonus_deff) \
+	DECL_DEFF (DEFF_BONUS, D_RUNNING, 150, bonus_deff) \
 	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
 	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
 	DECL_DEFF (DEFF_SLAM_TILT, D_NORMAL, 210, tilt_deff) \
