@@ -162,15 +162,41 @@ void lamp_all_off (void)
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
 }
 
-void lamp_leff1_erase (void)
+
+void lamp_leff1_allocate_all (void)
 {
-	memset (lamp_leff1_matrix, 0, 2 * NUM_LAMP_COLS);
+	memset (lamp_leff1_allocated, 0xFF, NUM_LAMP_COLS);
 }
 
+void lamp_leff1_erase (void)
+{
+	memset (lamp_leff1_matrix, 0, NUM_LAMP_COLS);
+}
+
+void lamp_leff1_free_all (void)
+{	
+	memset (lamp_leff1_allocated, 0x0, NUM_LAMP_COLS);
+}
 
 void lamp_leff2_erase (void)
 {
 	memset (lamp_leff2_matrix, 0, 2 * NUM_LAMP_COLS);
+}
+
+
+void lamp_leff_allocate (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_allocated;
+	register uint8_t v = lamp;
+	__setbit(p, v);
+}
+
+
+void lamp_leff_free (lampnum_t lamp)
+{
+	register bitset p = lamp_leff1_allocated;
+	register uint8_t v = lamp;
+	__clearbit(p, v);
 }
 
 
