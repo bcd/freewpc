@@ -29,6 +29,17 @@ char *do_sprintf_decimal (char *buf, U8 b)
 	uint8_t quot;
 	uint8_t rem;
 
+	if (b >= 200)
+	{
+		*buf++ = '2';
+		b -= 200;
+	}
+	else if (b >= 100)
+	{
+		*buf++ = '1';
+		b -= 100;
+	}
+
 	DIV10 (b, quot, rem);
 
 	*buf++ = quot + '0';
