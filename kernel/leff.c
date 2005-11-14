@@ -1,9 +1,17 @@
 
 #include <freewpc.h>
 
+#define L_NOLAMPS		0x0
+#define L_ALL_LAMPS	0xFF
+#define L_NOGI			0
+
 #define MACHINE_LAMP_EFFECTS \
-	DECL_LEFF (LEFF_AMODE, L_RUNNING, 10, 0, 0, amode_leff) \
-	DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, 100, 0, 0, flash_all_leff) \
+	DECL_LEFF (LEFF_AMODE, L_RUNNING, 10, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
+	DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, 50, L_NOLAMPS, L_NOGI, left_ramp_leff) \
+	DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, 100, LAMPSET_AMODE_ALL, L_NOGI, flash_all_leff) \
+	DECL_LEFF (LEFF_BONUS, L_RUNNING, 150, L_ALL_LAMPS, L_NOGI, bonus_leff) \
+	DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, 200, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
+	DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 
 
 /* Declare externs for all of the deff functions */
@@ -105,7 +113,20 @@ static leffnum_t leff_get_highest_priority (void)
 
 void leff_create_handler (const leff_t *leff)
 {
-	lamp_leff1_erase ();
+	if (leff->lampset != 0)
+	{
+		if (leff->lampset == 0xFF)
+		{
+			lamp_leff1_allocate_all ();
+		}
+		else
+		{
+			lamp_leff1_free_all ();
+			lampset_apply (leff->lampset, lamp_leff_allocate);
+		}
+		lamp_leff1_erase ();
+	}
+
 	task_recreate_gid (GID_LEFF, leff->fn);
 }
 
@@ -160,6 +181,7 @@ void leff_stop (leffnum_t dn)
 	{
 		db_puts ("Remove running leff from queue\n");
 		leff_remove_queue (dn);
+		lamp_leff1_free_all ();
 
 		leff_start_highest_priority ();
 	}
@@ -205,7 +227,7 @@ void leff_start_highest_priority (void)
 	else
 	{
 		lamp_leff1_erase ();
-		lamp_leff2_erase ();
+		lamp_leff1_free_all ();
 		task_recreate_gid (GID_LEFF, leff_default);
 	}
 }
