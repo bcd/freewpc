@@ -45,7 +45,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 GAME_OBJS = config.o clock.o amode.o lanes.o lock.o \
 	slot.o sling.o jets.o rightramp.o rocket.o star.o \
 	leftramp.o greed.o piano.o camera.o deadend.o skill.o \
-	loop.o bonus.o leffs.o
+	loop.o bonus.o leffs.o door.o
 
 GAME_INCLUDES =
 
