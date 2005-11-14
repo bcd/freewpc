@@ -35,15 +35,28 @@ void tz_init (void)
 	extern void lock_init (void);
 	extern void slot_init (void);
 	extern void rocket_init (void);
+	extern void tz_clock_init (void);
 
 	lock_init ();
 	slot_init ();
 	rocket_init ();
+	tz_clock_init ();
 }
 
 void tz_start_game (void)
 {
 	sound_send (SND_DONT_TOUCH_DOOR_1);
+
+	lamp_flash_on (LM_PANEL_TSM);
+	lamp_flash_on (LM_SPIRAL_2M);
+	lamp_on (LM_LEFT_INLANE1);
+	lamp_on (LM_LEFT_INLANE2);
+	lamp_on (LM_RIGHT_INLANE);
+	lamp_on (LM_LEFT_JET);
+	lamp_on (LM_LOWER_JET);
+	lamp_on (LM_RIGHT_JET);
+
+	#include <start_game.callset>
 	task_sleep_sec (2);
 }
 
@@ -60,7 +73,7 @@ void tz_start_ball (void)
 
 	music_set (MUS_MULTIBALL_LIT_PLUNGER);
 	enable_skill_shot ();
-	//#include <callset_start_ball.h>
+	#include <start_ball.callset>
 }
 
 void tz_ball_in_play (void)
@@ -94,8 +107,12 @@ void tz_any_pf_switch (void)
 
 void tz_bonus (void)
 {
-	music_set (MUS_BONUS_START);
-	task_sleep_sec (3);
+	deff_start (DEFF_BONUS);
+	leff_start (LEFF_BONUS);
+	task_sleep_sec (1);
+	while (deff_get_active () == DEFF_BONUS)
+		task_sleep (TIME_33MS);
+	leff_stop (LEFF_BONUS);
 }
 
 
@@ -117,6 +134,9 @@ void tz_start_without_credits (void)
 {
 }
 
+void tz_coin_added (void)
+{
+}
 
 machine_hooks_t tz_hooks = {
 	.start_game = tz_start_game,
@@ -131,5 +151,6 @@ machine_hooks_t tz_hooks = {
 	.tilt_warning = tz_tilt_warning,
 	.any_pf_switch = tz_any_pf_switch,
 	.start_without_credits = tz_start_without_credits,
+	.coin_added = tz_coin_added,
 };
 

@@ -17,7 +17,7 @@ void sw_piano_handler (void)
 }
 
 
-void CALLSET(piano, start_ball) (void)
+CALLSET_ENTRY(piano, start_ball)
 {
 }
 

@@ -17,7 +17,7 @@ void sw_deadend_handler (void)
 }
 
 
-void CALLSET(deadend, start_ball) (void)
+CALLSET_ENTRY(deadend, start_ball)
 {
 }
 

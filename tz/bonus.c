@@ -1,6 +1,13 @@
 
 #include <freewpc.h>
 
+void bonus_leff (void)
+{
+	triac_disable (TRIAC_GI_MASK);
+	for (;;)
+		task_sleep_sec (5);
+}
+
 void bonus_deff (void)
 {
 	music_set (MUS_BONUS_START);

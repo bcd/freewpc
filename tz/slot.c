@@ -18,6 +18,7 @@ DECLARE_SWITCH_DRIVER (sw_slot)
 void slot_kick_sound (void)
 {
 	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 	sound_send (SND_SLOT_KICKOUT_2);
 	task_exit ();
 }
@@ -48,7 +49,7 @@ void slot_kick_attempt (device_t *dev)
 }
 
 
-void CALLSET(slot, start_ball) (void)
+CALLSET_ENTRY(slot, start_ball)
 {
 }
 

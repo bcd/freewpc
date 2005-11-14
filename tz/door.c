@@ -20,7 +20,7 @@ void door_lamp_solid (U8 index)
 {
 }
 
-void door_start_game (void)
+CALLSET_ENTRY(door, start_game)
 {
 	door_index = 0;
 	door_panels_started = 0;
@@ -28,7 +28,8 @@ void door_start_game (void)
 	door_lamp_flash (door_index);
 }
 
-void door_start_ball (void)
+CALLSET_ENTRY(door, start_ball)
 {
 }
+
 

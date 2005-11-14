@@ -21,12 +21,13 @@ void rocket_enter (device_t *dev)
 void rocket_kick_sound (void) __taskentry__
 {
 	sound_send (SND_ROCKET_KICK_DONE);
+	flasher_pulse (FLASH_UR_FLIPPER);
 	task_exit ();
 }
 
 void rocket_kick_attempt (device_t *dev)
 {
-	if (in_game && !in_tilt)
+	if (in_live_game)
 	{
 		db_puts ("Sending rocket kick sound\n");
 		sound_send (SND_ROCKET_KICK_REVVING);

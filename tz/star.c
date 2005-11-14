@@ -6,27 +6,33 @@ void star_task (void)
 	uint16_t args = task_get_arg ();
 	uint8_t x = args >> 8;
 	uint8_t y = args & 0xFF;
-	uint8_t *dmd = dmd_low_bytes + (y << 4) + x;
+	uint8_t *dmd = dmd_low_bytes + ((U16)y << 4) + x;
 	uint8_t i;
 
 	for (i=8; i>0; i--)
 	{
 		dmd[-DMD_BYTE_WIDTH] = 0x10;
+		dmd[-DMD_BYTE_WIDTH + DMD_PAGE_SIZE] = 0x10;
 		task_sleep (TIME_33MS);
 
 		dmd[0] = 0x3C;
+		dmd[DMD_PAGE_SIZE] = 0x3C;
 		task_sleep (TIME_33MS);
 
 		dmd[+DMD_BYTE_WIDTH] = 0x8;
+		dmd[+DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x8;
 		task_sleep (TIME_33MS);
 
 		dmd[-DMD_BYTE_WIDTH] = 0x8;
+		dmd[-DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x8;
 		task_sleep (TIME_33MS);
 
 		dmd[0] = 0x18;
+		dmd[0+DMD_PAGE_SIZE] = 0x18;
 		task_sleep (TIME_33MS);
 
 		dmd[+DMD_BYTE_WIDTH] = 0x10;
+		dmd[+DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x10;
 		task_sleep (TIME_33MS);
 	}
 	task_exit ();

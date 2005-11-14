@@ -17,7 +17,7 @@ void sw_camera_handler (void)
 }
 
 
-void CALLSET(camera, start_ball) (void)
+CALLSET_ENTRY(camera, start_ball)
 {
 }
 

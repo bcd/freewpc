@@ -48,6 +48,7 @@ DECLARE_SWITCH_DRIVER (sw_left_inlane_1)
 	.fn = sw_left_inlane_1_handler,
 	.flags = SW_PLAYFIELD,
 	.sound = SND_INSIDE_LEFT_INLANE,
+	.lamp = LM_LEFT_INLANE1,
 };
 
 DECLARE_SWITCH_DRIVER (sw_left_inlane_2)
@@ -55,6 +56,7 @@ DECLARE_SWITCH_DRIVER (sw_left_inlane_2)
 	.fn = sw_left_inlane_2_handler,
 	.flags = SW_PLAYFIELD,
 	.sound = SND_INSIDE_LEFT_INLANE,
+	.lamp = LM_LEFT_INLANE2,
 };
 
 DECLARE_SWITCH_DRIVER (sw_right_inlane)
@@ -62,5 +64,6 @@ DECLARE_SWITCH_DRIVER (sw_right_inlane)
 	.fn = sw_right_inlane_handler,
 	.flags = SW_PLAYFIELD,
 	.sound = SND_INSIDE_LEFT_INLANE,
+	.lamp = LM_RIGHT_INLANE,
 };
 

@@ -1,6 +1,10 @@
 
 #include <freewpc.h>
 
+U8 egg_code_values[3];
+U8 egg_index;
+
+
 extern void starfield_start (void);
 
 void amode_page_delay (U8 secs)
@@ -28,18 +32,80 @@ void amode_page_delay (U8 secs)
 	//task_sleep_sec (secs);
 }
 
+void amode_flipper_sound_debounce_timer (void)
+{
+	task_sleep_sec (10);
+	task_sleep_sec (10);
+	task_exit ();
+}
+
 void amode_flipper_sound (void)
 {
+	if (!task_find_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE))
+	{
+		task_create_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE,
+			amode_flipper_sound_debounce_timer);
+		sound_send (SND_CUCKOO);
+	}
 }
 
 void amode_scroll (void)
 {
 }
 
+void egg_timer_task (void)
+{
+	task_sleep_sec (7);
+	task_exit ();
+}
+
+void egg_left_flipper (void)
+{
+	if (!task_find_gid (GID_EGG_TIMER))
+	{
+		task_create_gid1 (GID_EGG_TIMER, egg_timer_task);
+		egg_index = 0;
+		egg_code_values[0] = 0;
+		egg_code_values[1] = 0;
+		egg_code_values[2] = 0;
+	}
+	db_puts ("L");
+	egg_code_values[egg_index]++;
+}
+
+void egg_brian_image_deff (void)
+{
+	dmd_alloc_low ();
+	dmd_draw_image (brian_bits);
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+void egg_right_flipper (void)
+{
+	if (!task_find_gid (GID_EGG_TIMER)) 
+		return;
+	db_puts ("R");
+	egg_index++;
+	if (egg_index == 3)
+	{
+		dbprintf ("\nEgg code %d %d %d entered\n", egg_code_values[0], egg_code_values[1], egg_code_values[2]);
+		if ((egg_code_values[0] == 2) &&
+			 (egg_code_values[1] == 3) &&
+			 (egg_code_values[2] == 4))
+		{
+			db_puts ("Show pic\n");
+			deff_start (DEFF_BRIAN_IMAGE);
+		}
+	}
+}
+
 void amode_left_flipper (void)
 {
 	amode_flipper_sound ();
 	amode_scroll ();
+	egg_left_flipper ();
 }
 
 
@@ -47,11 +113,12 @@ void amode_right_flipper (void)
 {
 	amode_flipper_sound ();
 	amode_scroll ();
+	egg_right_flipper ();
 }
 
 void amode_lamp_toggle_task (void) __taskentry__
 {
-	lampset_apply_toggle (LAMPSET_AMODE_ALL);
+	lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
 	task_exit ();
 }
 
@@ -64,22 +131,11 @@ void amode_leff (void) __taskentry__
 	for (;;)
 	{
 		lampset_set_apply_delay (0);
-		lampset_apply_off (LAMPSET_AMODE_ALL);
+		lampset_apply_leff_off (LAMPSET_AMODE_ALL);
 
 		lampset_set_apply_delay (TIME_33MS);
 		for (i=0; i < 4; i++)
-			lampset_apply_toggle (LAMPSET_AMODE_ALL);
-
-#if 0
-		lampset_set_apply_delay (TIME_16MS);
-		for (i=0; i < 2; i++)
-		{
-			task_create_child (amode_lamp_toggle_task);
-			task_sleep (TIME_100MS * 3);
-			task_create_child (amode_lamp_toggle_task);
-			task_sleep_sec (5);
-		}
-#endif
+			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
 	}
 }
 
@@ -154,13 +210,15 @@ void amode_deff (void) __taskentry__
 void amode_start (void)
 {
 	deff_start (DEFF_AMODE);
-	task_create_gid (GID_LAMP_DEMO, amode_leff);
+	leff_start (LEFF_AMODE);
+	lamp_start_update ();
 }
+
 
 void amode_stop (void)
 {
 	deff_stop (DEFF_AMODE);
-	task_kill_gid (GID_LAMP_DEMO);
+	leff_stop (LEFF_AMODE);
 	lamp_all_off ();
 	music_set (MUS_SILENCE);
 }
