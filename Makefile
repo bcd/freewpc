@@ -118,7 +118,7 @@ OS_OBJS = div10.o init.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o test.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
-	task.o lamp.o sol.o
+	task.o lamp.o sol.o flasher.o
 
 FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
