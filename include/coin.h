@@ -5,6 +5,7 @@
 void credits_render (void);
 void credits_draw (void);
 void credit_added_deff (void);
+void lamp_start_update (void);
 void add_credit (void);
 bool has_credits_p (void);
 void remove_credit (void);
