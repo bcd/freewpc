@@ -111,6 +111,9 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 
 void score_add_current (bcd_t *s)
 {
+	if (!in_live_game)
+		return;
+
 	score_add (current_score, s, sizeof (score_t));
 	score_change++;
 	/* check replay */
