@@ -51,15 +51,15 @@ TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
 LINKCMD = freewpc.lnk
-PAGED_LINKCMD = page55.lnk page56.lnk page57.lnk page58.lnk page59.lnk \
-					 page60.lnk page61.lnk page62.lnk
+PAGED_LINKCMD = page54.lnk page55.lnk page56.lnk page57.lnk page58.lnk \
+	page59.lnk page60.lnk page61.lnk
 
 # The XBM prototype header file
 XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = freewpc.bin
-PAGED_BINFILES = page55.bin page56.bin page57.bin page58.bin \
-					  page59.bin page60.bin page61.bin page62.bin
+PAGED_BINFILES = page54.bin page55.bin page56.bin page57.bin \
+					  page58.bin page59.bin page60.bin page61.bin
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
@@ -89,7 +89,7 @@ CC = $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
 CC = $(GCC_ROOT)/gcc
 endif
-CC_MODE = -S
+CC_MODE ?= -S
 # CC_MODE = -E
 LD = $(GCC_ROOT)/ld
 AS = $(GCC_ROOT)/as
@@ -206,18 +206,18 @@ CFLAGS += -Werror-implicit-function-declaration
 # "pages", which are like sections...
 #
 
+page54_SECTIONS =
 page55_SECTIONS =
 page56_SECTIONS =
 page57_SECTIONS =
 page58_SECTIONS =
 page59_SECTIONS =
-page60_SECTIONS =
-page61_SECTIONS =
-page62_SECTIONS = font
+page60_SECTIONS = images
+page61_SECTIONS = font
 
-PAGED_SECTIONS = $(page55_SECTIONS) $(page56_SECTIONS) $(page57_SECTIONS) \
-					  $(page58_SECTIONS) $(page59_SECTIONS) $(page60_SECTIONS) \
-					  $(page61_SECTIONS) $(page62_SECTIONS)
+PAGED_SECTIONS = $(page54_SECTIONS) $(page55_SECTIONS) $(page56_SECTIONS) \
+					  $(page57_SECTIONS) $(page58_SECTIONS) $(page59_SECTIONS) \
+					  $(page60_SECTIONS) $(page61_SECTIONS)
 
 RAM_ADDR = 0x0
 PAGED_ROM_ADDR = 0x4000
@@ -230,23 +230,22 @@ MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 
 
+page54_OBJS =
 page55_OBJS =
 page56_OBJS =
 page57_OBJS =
 page58_OBJS =
 page59_OBJS =
-page60_OBJS =
-page61_OBJS =
-page62_OBJS = $(FONT_OBJS)
+page60_OBJS = $(XBM_OBJS)
+page61_OBJS = $(FONT_OBJS)
 
-PAGED_OBJS = $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
-				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) \
-				 $(page61_OBJS) $(page62_OBJS)
+PAGED_OBJS = $(page54_OBJS) $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
+				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 
-PAGE_HEADER_OBJS = page55.o page56.o page57.o page58.o page59.o \
-						 page60.o page61.o page62.o
+PAGE_HEADER_OBJS = page54.o page55.o page56.o page57.o page58.o page59.o \
+						 page60.o page61.o
 
-SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) $(XBM_OBJS)
+SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) # $(XBM_OBJS)
 
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS)
@@ -416,13 +415,14 @@ $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
 	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) $(CC_MODE) $(CFLAGS) $<
 	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
 
+
 #! @$(CC) -o $@ -c $(CFLAGS) $< 2>&1 | tee -a err
 
 #
 # General rule for how to build any XBM bitmap image.
 #
 $(XBM_OBJS) : %.o : %.xbm
-	@echo Compiling $< ... && $(CC) -Dstatic= -o $(@:.o=.S) -x c -S $<
+	@echo Compiling $< ... && $(CC) "-Dstatic=__attribute__((section(\"images\")))" -o $(@:.o=.S) -x c -S $<
 	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
 
 ptrindex:
