@@ -32,8 +32,12 @@ typedef struct
 	uint8_t			delay;
 	uint8_t			asleep;
 	uint8_t			state;
+#if 0
 	uint8_t			a;
 	uint8_t			b;
+#else
+	uint16_t			unused_2;
+#endif
 	uint16_t			arg;
 	uint8_t			stack[TASK_STACK_SIZE];
 } task_t;
