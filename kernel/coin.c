@@ -76,13 +76,13 @@ void add_credit (void)
 {
 	if (credit_count < MAX_CREDITS)
 	{
-		sound_send (SND_THUD);
-		deff_restart (DEFF_CREDITS);
-		leff_start (LEFF_FLASH_ALL);
 #ifndef FREE_ONLY
 		credit_count++;
 		lamp_start_update ();
 #endif
+		sound_send (SND_THUD);
+		leff_start (LEFF_FLASH_ALL);
+		deff_restart (DEFF_CREDITS);
 	}
 }
 
