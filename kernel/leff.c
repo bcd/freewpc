@@ -122,6 +122,7 @@ void leff_create_handler (const leff_t *leff)
 		else
 		{
 			lamp_leff1_free_all ();
+			lampset_set_apply_delay (0);
 			lampset_apply (leff->lampset, lamp_leff_allocate);
 		}
 		lamp_leff1_erase ();
