@@ -99,6 +99,7 @@ U8 *font_lookup (const font_t *font, char c)
 	{
 		entry = NULL;
 		index = 0;
+		dbprintf ("Unprintable character: %i\n", c);
 		fatal (ERR_UNPRINTABLE_CHAR);
 	}
 	return entry + index * font->height;
@@ -150,7 +151,7 @@ void fontargs_render_string (const fontargs_t *args)
 		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
 #endif
 
-		data = font_lookup (args->font, *s);
+		call_far (61, (data = font_lookup (args->font, *s)));
 		xb = x / 8;
 		xr = x % 8;
 
