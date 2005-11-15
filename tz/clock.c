@@ -4,7 +4,7 @@
 
 enum mech_clock_mode
 {
-	CLOCK_STOPPED,
+	CLOCK_STOPPED = 0,
 	CLOCK_RUNNING_FORWARD,
 	CLOCK_RUNNING_BACKWARD,
 	CLOCK_CALIBRATING,
@@ -18,7 +18,9 @@ U8 clock_speed;
 U8 clock_delay_time;
 U8 clock_sw_seen;
 U8 clock_find_target;
-
+U8 clock_last_sw;
+U8 clock_sw_changed;
+U8 clock_calibration_ticks;
 
 void tz_dump_clock (void)
 {
@@ -31,15 +33,26 @@ void tz_dump_clock (void)
  * Twilight Zone Clock Driver
  */
 
-#define CLK_SW_HOUR12	0x1
-#define CLK_SW_HOUR3		0x2
-#define CLK_SW_HOUR6		0x4
-#define CLK_SW_HOUR9		0x8
-#define CLK_SW_MIN00		0x10
-#define CLK_SW_MIN15		0x20
-#define CLK_SW_MIN30		0x40
-#define CLK_SW_MIN45		0x80
+/* Given an hour value (0-11), return the value of the hour
+ * optos that matches it.  The reading is valid from
+ * H:30 to (H+1):29.  */
+static U8 tz_clock_hour_to_opto[] =
+{ 0x10, 0x00, 0x40, 0xC0, 0xD0, 0x50, 0x70, 0x60, 0x20, 0x30, 0xB0, 0x90 };
 
+/* The same information, in reverse: given an opto reading,
+ * returns the hour value */
+static U8 tz_clock_opto_to_hour[] =
+{ 1, 0, 8, 9, 2, 5, 7, 6, 0, 11, 0, 10, 3, 4, 0, 0 };
+
+/* The lower nibble of the current clock switch reading
+ * returns the minute optos.  The opto is only active when
+ * the minute hand is directly over the given position. */
+#define CLK_SW_MIN00		0x2
+#define CLK_SW_MIN15		0x1
+#define CLK_SW_MIN30		0x8
+#define CLK_SW_MIN45		0x4
+
+/* Drives for the clock and the switch strobe on the aux board */
 #define CLK_DRV_REVERSE				0x20
 #define CLK_DRV_FORWARD				0x40
 #define CLK_DRV_SWITCH_STROBE		0x80
@@ -54,12 +67,18 @@ extern inline void wpc_ext1_disable (U8 bits)
 	*(volatile U8 *)WPC_EXTBOARD1 &= ~bits;
 }
 
+#pragma long_branch
 void tz_clock_rtt (void)
 {
 	/* Read latest switch state */
 	wpc_ext1_enable (CLK_DRV_SWITCH_STROBE);
+	clock_last_sw = clock_sw;
 	clock_sw = ~ (*(volatile U8 *)WPC_SW_ROW_INPUT);
 	wpc_ext1_disable (CLK_DRV_SWITCH_STROBE);
+
+	/* Set transition flag if the value changed */
+	if (clock_last_sw != clock_sw)
+		clock_sw_changed++;
 
 	/* Add to list of all switches seen to be working. */
 	clock_sw_seen |= clock_sw;
@@ -95,6 +114,33 @@ void tz_clock_rtt (void)
 			break;
 
 		case CLOCK_CALIBRATING:
+#if 0
+			/* Calculate number of rtt cycles between minute optos */
+			if (clock_sw & 0x0F)
+			{
+				/* On a minute opto : publish current count
+				 * and continue */
+				dbprintf ("Clock calibration count: %02x\n", 
+					clock_calibration_ticks);
+				clock_calibration_ticks = 0;
+			}
+			else
+				clock_calibration_ticks++;
+#endif
+
+			/* Once all switches have been seen, proceed
+			 * to finding home position (12:00)
+			 */
+			if (clock_sw_seen == 0xFF)
+			{
+				clock_mode = CLOCK_FIND;
+				clock_find_target = 
+					tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
+			}
+			else
+			{
+				goto clock_running_forward;
+			}
 			break;
 
 		case CLOCK_FIND:
@@ -109,7 +155,8 @@ void tz_clock_rtt (void)
 			}
 			else
 			{
-				goto clock_running_forward;
+				/* Direction to move depends on current state */
+				goto clock_running_backward;
 			}
 			break;
 	}
@@ -137,20 +184,12 @@ void tz_clock_stop (void)
 }
 
 
-void tz_clock_reset (void) 
-{
-	clock_find_target = CLK_SW_HOUR12 | CLK_SW_MIN00;
-	clock_mode = CLOCK_FIND;
-	task_exit ();
-}
-
-
 void tz_clock_init (void) 
 {
-	clock_mode = CLOCK_CALIBRATING;
 	clock_sw = 0;
 	clock_sw_seen = 0;
-	clock_delay_time = clock_speed = 4;
-	task_create_gid (GID_CLOCK_MECH, tz_clock_reset);
+	clock_delay_time = clock_speed = 1;
+	clock_calibration_ticks = 4;
+	clock_mode = CLOCK_CALIBRATING;
 }
 
