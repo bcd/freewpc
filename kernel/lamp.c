@@ -148,11 +148,19 @@ int lamp_test (lampnum_t lamp)
 	return v;
 }
 
+void lamp_global_update ()
+{
+	call_hook (lamp_refresh);
+	if (!in_test)
+		lamp_start_update ();
+}
+
 
 void lamp_all_on (void)
 {
 	memset (lamp_matrix, 0xff, NUM_LAMP_COLS);
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
+	lamp_global_update ();
 }
 
 
@@ -160,6 +168,7 @@ void lamp_all_off (void)
 {
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
+	lamp_global_update ();
 }
 
 
