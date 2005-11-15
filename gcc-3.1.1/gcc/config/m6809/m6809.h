@@ -1171,6 +1171,14 @@ do { \
    no longer contain unusual constructs.  */
 #define ASM_APP_OFF "; End of inline assembler code\n"
 
+/* Output assembly directives to switch to section 'name' */
+#undef TARGET_ASM_NAMED_SECTION
+#define TARGET_ASM_NAMED_SECTION	m6809_asm_named_section
+
+#undef TARGET_HAVE_NAMED_SECTION
+#define TARGET_HAVE_NAMED_SECTION m6809_have_named_section
+
+
 /* Output before read-only data.  */
 #define TEXT_SECTION_ASM_OP (code_section_op)
 

@@ -102,8 +102,6 @@ void output_function_epilogue ( FILE *file, int size );
 #undef TARGET_ASM_UNALIGNED_SI_OP
 #define TARGET_ASM_UNALIGNED_SI_OP "\t.word\t"
 
-struct gcc_target targetm = TARGET_INITIALIZER;
-
 override_options ()
 {
 }
@@ -842,6 +840,16 @@ m6809_init_cumulative_args (cum, fntype, libname, indirect)
 	}
 }
 
+bool m6809_have_named_section = (bool)1;
+
+void m6809_asm_named_section (
+	const char *name, 
+	unsigned int flags,
+	unsigned int align)
+{
+	fprintf (asm_out_file, "\t.area\t%s\n", name);
+}
+
 
 /* TBD */
 void
@@ -856,4 +864,6 @@ m6809_gen_register_shift (operands)
     output_asm_insn ("bra .-9			   ;loop", operands);
 }
 
+
+struct gcc_target targetm = TARGET_INITIALIZER;
 
