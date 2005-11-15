@@ -116,8 +116,10 @@ void task_save (void)
 	__x->x = __u = task_save_X;
 
 	/* Save D and Y, already in registers */
+#if 0 /* A,B are volatile and do not need to be saved */
 	__asm__ volatile ("sta	%0" :: "m" (__x->a));
 	__asm__ volatile ("stb	%0" :: "m" (__x->b));
+#endif
 	__asm__ volatile ("sty	%0" :: "m" (__x->y));
 
 	/* Save current stack pointer */
@@ -143,8 +145,10 @@ void task_restore (void)
 	__asm__ volatile ("ldu	%0" :: "m" (__x->pc));
 	__asm__ volatile ("pshs\tu");
 	__asm__ volatile ("ldy	%0" :: "m" (__x->y));
+#if 0
 	__asm__ volatile ("lda	%0" :: "m" (__x->a));
 	__asm__ volatile ("ldb	%0" :: "m" (__x->b));
+#endif
 	__asm__ volatile ("ldu	%0" :: "m" (__x->u));
 
 	__x->delay = 0;
@@ -171,8 +175,10 @@ void task_create (void)
 
 	__asm__ volatile ("puls\td,u");
 
+#if 0
 	__asm__ volatile ("sta	%0" :: "m" (tp->a));
 	__asm__ volatile ("stb	%0" :: "m" (tp->b));
+#endif
 	__asm__ volatile ("sty	%0" :: "m" (tp->y));
 	__asm__ volatile ("stu	%0" :: "m" (tp->u));
 
@@ -287,11 +293,6 @@ void task_sleep_sec (int8_t secs)
 {
 	while (--secs >= 0)
 		task_sleep (TIME_1S);
-	/* TODO :
-	 * ldb ,s
-	 * decb
-	 * stb ,s
-	 * could be compressed to dec ,s, no? */
 }
 
 
@@ -300,8 +301,6 @@ void task_exit (void) __noreturn__
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
-	/* TODO : the following generates
-	 * clrb, stb 16,x: could be clr 16,x */
 	task_current->state = TASK_FREE;
 	task_current = 0;
 #ifdef DEBUG_TASKS
