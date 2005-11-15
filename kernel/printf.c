@@ -158,7 +158,7 @@ fixup_number:
 					break;
 				}
 
-				case 'x':
+				case 'x': case 'X':
 				{
 					register U8 b = va_arg (va, U8);
 					endbuf = do_sprintf_hex_byte (buf, b);
