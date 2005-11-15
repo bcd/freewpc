@@ -42,6 +42,7 @@ typedef struct machine_hooks
 	void (*volume_change) (void);
 	void (*ball_search) (void);
 	void (*any_pf_switch) (void);
+	void (*lamp_refresh) (void);
 } machine_hooks_t;
 
 
