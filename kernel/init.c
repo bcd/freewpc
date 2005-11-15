@@ -76,7 +76,7 @@ void do_reset (void) __noreturn__
 
 	/* Initialize the ROM page register so that the
 	 * page of ROM adjacent to the system area is mapped. */
-	wpc_set_rom_page (0x3D);
+	wpc_set_rom_page (61);
 
 	sys_init_complete = 0;
 	

@@ -242,7 +242,7 @@ void dmd_shift_down (dmd_buffer_t *dbuf)
 
 void dmd_draw_image (char *image_bits)
 {
-	call_far (0x3C, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)image_bits)));
+	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)image_bits)));
 }
 
 
