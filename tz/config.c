@@ -32,22 +32,14 @@ const uint8_t mach_edge_switches[] = {
 
 void tz_init (void)
 {
-	extern void lock_init (void);
-	extern void slot_init (void);
-	extern void rocket_init (void);
-	extern void tz_clock_init (void);
-
-	lock_init ();
-	slot_init ();
-	rocket_init ();
-	tz_clock_init ();
+	#include <init.callset>
 }
+
 
 void tz_start_game (void)
 {
 	sound_send (SND_DONT_TOUCH_DOOR_1);
 
-	lamp_flash_on (LM_PANEL_TSM);
 	lamp_flash_on (LM_SPIRAL_2M);
 	lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_LEFT_INLANE2);

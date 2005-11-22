@@ -12,20 +12,42 @@ enum mech_clock_mode
 };
 
 
+/* Current state of the clock switches, as read during the last rtt */
 U8 clock_sw;
+
+/* Mode that drives the rtt state machine */
 enum mech_clock_mode clock_mode;
+
+/* Configured speed of the clock.  When set to higher values, the
+ * clock will run more slowly.  This represents the number of idle
+ * rtt cycles between pulses to the clock motor drives. */
 U8 clock_speed;
+
 U8 clock_delay_time;
-U8 clock_sw_seen;
+
+/* Clock switches which have been seen to be active */
+U8 clock_sw_seen_active;
+
+/* Clock switches which have been seen to be inactive */
+U8 clock_sw_seen_inactive;
+
+/* Indicates the target switch values that will trigger the
+ * clock to stop moving */
 U8 clock_find_target;
+
+/* Clock switches seen on the last rtt cycle, used to detect
+ * switch transitions */
 U8 clock_last_sw;
+
 U8 clock_sw_changed;
+
 U8 clock_calibration_ticks;
 
 void tz_dump_clock (void)
 {
 	dbprintf ("\nClock switches now active: %02x\n", clock_sw);
-	dbprintf ("\nClock switches seen: %02x\n", clock_sw_seen);
+	dbprintf ("Seen active: %02x\n", clock_sw_seen_active);
+	dbprintf ("Seen inactive: %02x\n", clock_sw_seen_inactive);
 }
 
 
@@ -80,8 +102,9 @@ void tz_clock_rtt (void)
 	if (clock_last_sw != clock_sw)
 		clock_sw_changed++;
 
-	/* Add to list of all switches seen to be working. */
-	clock_sw_seen |= clock_sw;
+	/* Add to list of all switches seen */
+	clock_sw_seen_active |= clock_sw;
+	clock_sw_seen_inactive |= ~clock_sw;
 
 	/* Update solenoid drives based on desired direction
 	 * and speed */
@@ -131,7 +154,7 @@ void tz_clock_rtt (void)
 			/* Once all switches have been seen, proceed
 			 * to finding home position (12:00)
 			 */
-			if (clock_sw_seen == 0xFF)
+			if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
 			{
 				clock_mode = CLOCK_FIND;
 				clock_find_target = 
@@ -184,10 +207,11 @@ void tz_clock_stop (void)
 }
 
 
-void tz_clock_init (void) 
+CALLSET_ENTRY (tz_clock, init)
 {
 	clock_sw = 0;
-	clock_sw_seen = 0;
+	clock_sw_seen_active = 0;
+	clock_sw_seen_inactive = 0;
 	clock_delay_time = clock_speed = 1;
 	clock_calibration_ticks = 4;
 	clock_mode = CLOCK_CALIBRATING;

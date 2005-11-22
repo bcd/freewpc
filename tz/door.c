@@ -12,24 +12,39 @@ U8 door_panels_started;
 U8 door_panels_completed;
 
 
-void door_lamp_flash (U8 index)
+extern inline const U8 *door_get_lamps (void)
 {
+	return lampset_lookup (LAMPSET_DOOR_PANELS);
 }
 
-void door_lamp_solid (U8 index)
+
+void door_set_flashing (U8 id)
 {
+	const U8 *door_lamps = door_get_lamps ();
+	lamp_flash_off (door_lamps[door_index]);
+	door_index = id;
+	lamp_flash_on (door_lamps[door_index]);
 }
+
+
+void door_advance_flashing (void)
+{
+	U8 new_door_index = door_index + 1;
+	if (new_door_index > 14)
+		new_door_index = 0;
+	door_set_flashing (new_door_index);
+}
+
 
 CALLSET_ENTRY(door, start_game)
 {
 	door_index = 0;
 	door_panels_started = 0;
 	door_panels_completed = 0;
-	door_lamp_flash (door_index);
 }
 
 CALLSET_ENTRY(door, start_ball)
 {
+	door_set_flashing (door_index);
 }
-
 

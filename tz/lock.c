@@ -4,13 +4,13 @@
 
 void sw_lock_handler (void)
 {
-	db_puts ("Lock switch handler\n");
-	device_sw_handler (1);
+	// device_sw_handler (1);
 }
 
 DECLARE_SWITCH_DRIVER (sw_lock)
 {
 	.fn = sw_lock_handler,
+	.devno = SW_DEVICE_DECL(1),
 };
 
 		
@@ -40,7 +40,7 @@ device_properties_t lock_props = {
 };
 
 
-void lock_init (void)
+CALLSET_ENTRY (lock, init)
 {
 	device_register (1, &lock_props);
 }

@@ -5,12 +5,13 @@
 
 void sw_rocket_handler (void)
 {
-	device_sw_handler (3);
+	// device_sw_handler (3);
 }
 
 DECLARE_SWITCH_DRIVER (sw_rocket)
 {
 	.fn = sw_rocket_handler,
+	.devno = SW_DEVICE_DECL(3),
 };
 
 void rocket_enter (device_t *dev)
@@ -18,7 +19,7 @@ void rocket_enter (device_t *dev)
 	score_add_current_const(0x10000);
 }
 
-void rocket_kick_sound (void) __taskentry__
+__taskentry__ void rocket_kick_sound (void)
 {
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);
@@ -30,8 +31,9 @@ void rocket_kick_attempt (device_t *dev)
 	if (in_live_game)
 	{
 		db_puts ("Sending rocket kick sound\n");
+		leff_start (LEFF_NO_GI);
 		sound_send (SND_ROCKET_KICK_REVVING);
-		task_sleep (TIME_100MS * 7);
+		task_sleep (TIME_100MS * 8);
 		task_create_gid (0, rocket_kick_sound);
 	}
 }
@@ -53,7 +55,7 @@ device_properties_t rocket_props = {
 };
 
 
-void rocket_init (void)
+CALLSET_ENTRY (rocket, init)
 {
 	device_register (3, &rocket_props);
 }

@@ -76,7 +76,7 @@ void egg_left_flipper (void)
 void egg_brian_image_deff (void)
 {
 	dmd_alloc_low ();
-	dmd_draw_image (brian_bits);
+	dmd_draw_bitmap ((dmd_buffer_t *)brian_bits, 0, 0, 32, 32);
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -133,9 +133,12 @@ void amode_leff (void) __taskentry__
 		lampset_set_apply_delay (0);
 		lampset_apply_leff_off (LAMPSET_AMODE_ALL);
 
-		lampset_set_apply_delay (TIME_33MS);
+		lampset_set_apply_delay (TIME_16MS);
 		for (i=0; i < 4; i++)
+		{
 			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
+			task_sleep (TIME_100MS * 3);
+		}
 	}
 }
 

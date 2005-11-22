@@ -19,6 +19,7 @@ void award_skill_shot (void)
 {
 	mark_ball_in_play ();
 	disable_skill_shot ();
+	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	switch (skill_switch_reached)
 	{

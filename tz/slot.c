@@ -6,19 +6,18 @@
 
 void sw_slot_handler (void)
 {
-	device_sw_handler (2);
+	// device_sw_handler (2);
 }
 
 
 DECLARE_SWITCH_DRIVER (sw_slot)
 {
 	.fn = sw_slot_handler,
+	.devno = SW_DEVICE_DECL(2),
 };
 
 void slot_kick_sound (void)
 {
-	task_sleep (TIME_100MS);
-	flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 	sound_send (SND_SLOT_KICKOUT_2);
 	task_exit ();
 }
@@ -26,6 +25,8 @@ void slot_kick_sound (void)
 
 void slot_enter (device_t *dev)
 {
+	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
+
 	if (task_kill_gid (GID_SLOT_DISABLED_BY_PIANO))
 	{
 		/* piano was recently hit, so ignore slot */
@@ -43,6 +44,7 @@ void slot_kick_attempt (device_t *dev)
 	if (in_game && !in_tilt)
 	{
 		sound_send (SND_SLOT_KICKOUT_1);
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 		task_sleep (TIME_100MS * 7);
 		task_create_gid (0, slot_kick_sound);
 	}
@@ -69,7 +71,7 @@ device_properties_t slot_props = {
 };
 
 
-void slot_init (void)
+CALLSET_ENTRY (slot, init)
 {
 	device_register (2, &slot_props);
 }
