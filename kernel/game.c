@@ -4,14 +4,14 @@
 #define MAX_PLAYERS 4
 #define MAX_BALLS_PER_GAME 3
 
-uint8_t in_game;
-uint8_t in_bonus;
-uint8_t in_tilt;
-uint8_t ball_in_play;
-uint8_t num_players;
-uint8_t player_up;
-uint8_t ball_up;
-uint8_t extra_balls;
+U8 in_game;
+U8 in_bonus;
+U8 in_tilt;
+U8 ball_in_play;
+U8 num_players;
+U8 player_up;
+U8 ball_up;
+U8 extra_balls;
 
 void start_ball (void);
 
