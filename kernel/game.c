@@ -40,6 +40,7 @@ void end_game (void)
 
 	call_hook (end_game);
 	lamp_all_off ();
+	flipper_disable ();
 	deff_stop (DEFF_SCORES);
 	amode_start ();
 }
@@ -66,6 +67,8 @@ void end_ball (void)
 		call_hook (bonus);
 		in_bonus = FALSE;
 	}
+	else
+		in_tilt = FALSE;
 
 	if (extra_balls > 0)
 	{

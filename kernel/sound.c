@@ -43,8 +43,11 @@ extern inline bool sound_queue_empty (void)
 
 void music_set (music_code_t code)
 {
-	*music_head = code;
-	sound_queue_insert (code);
+	if ((current_volume > 0) || (code == MUS_OFF))
+	{
+		*music_head = code;
+		sound_queue_insert (code);
+	}
 }
 
 void music_off (void)
@@ -89,6 +92,9 @@ void sound_send (sound_code_t code)
 	uint8_t code_lo;
 	uint8_t code_hi;
 
+	if (current_volume == 0)
+		return;
+
 	asm ("ldd %0" :: "m" (code));
 	asm ("sta %0" :: "m" (code_hi));
 	asm ("stb %0" :: "m" (code_lo));
@@ -107,6 +113,10 @@ void sound_send (sound_code_t code)
 
 void volume_update (void)
 {
+	if (current_volume == 0)
+		sound_queue_insert (MUS_OFF);
+	else
+		music_set (*music_head);
 }
 
 
@@ -131,6 +141,7 @@ void volume_down (void)
 	if (current_volume > MIN_VOLUME)
 	{
 		current_volume--;
+		volume_update ();
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
@@ -141,6 +152,7 @@ void volume_up (void)
 	if (current_volume < MAX_VOLUME)
 	{
 		current_volume++;
+		volume_update ();
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
 }

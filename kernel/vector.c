@@ -21,9 +21,8 @@ typedef struct
 	void (*reset) (void);
 } m6809_vector_table_t;
 
-#pragma section ("vector")
 
-m6809_vector_table_t vectors = {
+__attribute__((section("vector"))) m6809_vector_table_t vectors = {
 	.unused = do_reset,
 	.swi3 = do_swi3,
 	.swi2 = do_swi2,

@@ -10,7 +10,7 @@ __fastram__ uint8_t tick_count;
 uint8_t sys_init_complete;
 
 
-void do_fatal (errcode_t error_code) __noreturn__
+__noreturn__ void do_fatal (errcode_t error_code)
 {
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
 
@@ -44,7 +44,7 @@ void irq_init (void)
 
 
 #pragma naked
-void do_reset (void) __noreturn__
+__noreturn__ void do_reset (void)
 {
 	register uint8_t *ramptr asm ("x");
 
@@ -103,6 +103,7 @@ void do_reset (void) __noreturn__
 	leff_init ();
 	test_init ();
 	score_init ();
+	adj_init ();
 	call_hook (init);
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;

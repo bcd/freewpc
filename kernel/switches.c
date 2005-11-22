@@ -444,6 +444,7 @@ void switch_lamp_pulse (void)
 }
 
 
+#pragma long_branch
 void switch_sched (void)
 {
 	const uint8_t sw = task_get_arg ();
@@ -462,7 +463,7 @@ void switch_sched (void)
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
 		task_t *tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
-		task_set_arg (tp, swinfo);
+		task_set_arg (tp, (U16)swinfo);
 	}
 
 	if ((swinfo->sound != 0) && in_live_game)
@@ -470,6 +471,9 @@ void switch_sched (void)
 
 	if (swinfo->fn)
 		(*swinfo->fn) ();
+
+	if (SW_HAS_DEVICE (swinfo))
+		device_sw_handler (SW_GET_DEVICE (swinfo));
 
 	/* Debounce period after the switch has been handled */
 	if (swinfo->inactive_time == 0)
@@ -482,6 +486,7 @@ void switch_sched (void)
 	__clearbit(p, v);
 	task_exit ();
 }
+#pragma short_branch
 
 
 void switch_idle_task (void)

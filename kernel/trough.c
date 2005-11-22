@@ -6,13 +6,13 @@
 
 void sw_trough_handler (void)
 {
-	device_sw_handler (DEV_TROUGH);
 }
 
 
 DECLARE_SWITCH_DRIVER (sw_trough)
 {
 	.fn = sw_trough_handler,
+	.devno = SW_DEVICE_DECL(DEV_TROUGH),
 };
 
 

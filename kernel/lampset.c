@@ -152,12 +152,26 @@ const lampnum_t *lampset_table[] = {
 
 
 __fastram__ task_ticks_t lampset_apply_delay;
-U8 lampset_alternation_state;
+
+__fastram__ U8 lampset_alternation_state;
+
+/* During a lampset_apply operation, this variable contains the
+ * index of the lamp that is currently being processed.
+ * The apply callbacks can scan this value to control the actions.
+ *
+ * Note once we support multiple leffs running simultaneously, this
+ * will have to be changed.
+ */
+U8 lampset_apply_count;
+
+U8 lampset_private_data;
+
 
 static inline void lampset_invoke_operator (
 	lampnum_t lamp, lamp_operator_t op )
 {
 	(*op) (lamp);
+	lampset_apply_count++;
 	if (lampset_apply_delay > 0)
 		task_sleep (lampset_apply_delay);
 }
@@ -166,6 +180,12 @@ static inline void lampset_invoke_operator (
 void lampset_set_apply_delay (task_ticks_t delay)
 {
 	lampset_apply_delay = delay;
+}
+
+
+const U8 *lampset_lookup (lampset_id_t id)
+{
+	return lampset_table[id];
 }
 
 
@@ -178,31 +198,13 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 	static const lampnum_t *lset_stack[4];
 	int lset_stack_offset = 0;
 
-#if 0
-	db_puts ("lampset_apply: ");
-	db_put2x (id);
-	db_putc (' ');
-	db_put4x (op);
-	db_putc ('\n');
-#endif
-
 	lset_stack[lset_stack_offset++] = 0;
+	lampset_apply_count = 0;
+	lampset_private_data = 0;
 
 	while (lset)
 	{
-#if 0
-		db_puts ("lset: ");
-		db_put4x (lset);
-		db_putc ('\n');
-#endif
-
 		opcode = *lset++;
-
-#if 0
-		db_puts ("Opcode: ");
-		db_put2x (opcode);
-		db_putc ('\n');
-#endif
 
 		switch (opcode)
 		{
@@ -281,18 +283,50 @@ void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on)
 /* Step functions.  These routines treat the lampset of length N as
  * an integer in the range of 0 to N-1.  When the 'value' is k, that
  * means the kth lamp is on, and all other lamps are off.
+ * The private data field holds the number of the previous lamp.
  */
-void lampset_step_increment (lampset_id_t id)
+void lampset_step_increment_handler (lampnum_t lamp)
 {
 	/* Find the first lamp that is on; turn it off, and turn the
 	 * next lamp in the sequence on */
+	if (lamp_test (lamp))
+	{
+		lamp_off (lamp);
+		lamp_on (lampset_private_data);
+	}
+
+	lampset_private_data = lamp;
 }
 
-void lampset_step_decrement (lampset_id_t id)
+void lampset_step_increment (lampset_id_t id)
+{
+	lampset_apply (id, lampset_step_increment_handler);
+}
+
+
+
+void lampset_step_decrement_handler (lampnum_t lamp)
 {
 	/* Find the first lamp that is on; turn it off, and turn the
 	 * previous lamp in the sequence on */
+	if (lampset_private_data)
+	{
+		lamp_on (lamp);
+		lampset_private_data = 0;
+	}
+	else if (lamp_test (lamp))
+	{
+		lamp_off (lamp);
+		lampset_private_data = 1;
+	}
 }
+
+
+void lampset_step_decrement (lampset_id_t id)
+{
+	lampset_apply (id, lampset_step_decrement_handler);
+}
+
 
 /*
  * Build functions.  These routines are similar to the step functions,
