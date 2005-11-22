@@ -189,36 +189,26 @@ CFLAGS += -Werror-implicit-function-declaration
 # CFLAGS += -fno-defer-pop
 
 #######################################################################
+###	Include Machine Extensions
+#######################################################################
+include $(MACHINE)/Makefile
+
+#######################################################################
 ###	Object File Distribution
 #######################################################################
 
 # Because WPC uses ROM paging, the linking job is more
 # difficult to get right.  We require that the programmer
 # explicitly state which pages things should belong in.
-#
-# The process happens at two levels.  First, each source
-# file can use "#pragma section ()" to place functions into
-# different "sections", which are just named groups of code
-# and data.  A single file can have a mixture of multiple
-# sections in theory, but in reality there are some restrictions.
-#
-# The following variables group different object files into
-# "pages", which are like sections...
-#
+# TBD
 
-page54_SECTIONS =
-page55_SECTIONS =
-page56_SECTIONS =
-page57_SECTIONS =
-page58_SECTIONS =
-page59_SECTIONS =
-page60_SECTIONS = images
-page61_SECTIONS = font
+PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
 
-PAGED_SECTIONS = $(page54_SECTIONS) $(page55_SECTIONS) $(page56_SECTIONS) \
-					  $(page57_SECTIONS) $(page58_SECTIONS) $(page59_SECTIONS) \
-					  $(page60_SECTIONS) $(page61_SECTIONS)
-
+#
+# The WPC physical memory map is divided into four sections.
+# The build procedure can control which section is used for a
+# particular function.
+#
 RAM_ADDR = 0x0
 PAGED_ROM_ADDR = 0x4000
 FIXED_ROM_ADDR = 0x8000
@@ -229,29 +219,39 @@ KERNEL_OBJS = $(patsubst %,kernel/%,$(OS_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 
+#
+# Define a mapping between object files and page numbers in
+# which they should be placed.  This information must be
+# provided in both directions.
+#
+page54_OBJS = page54.o
+page55_OBJS = page55.o
+page56_OBJS = page56.o
+page57_OBJS = page57.o
+page58_OBJS = page58.o
+page59_OBJS = page59.o
+page60_OBJS = page60.o $(XBM_OBJS)
+page61_OBJS = page61.o $(FONT_OBJS)
 
-page54_OBJS =
-page55_OBJS =
-page56_OBJS =
-page57_OBJS =
-page58_OBJS =
-page59_OBJS =
-page60_OBJS = $(XBM_OBJS)
-page61_OBJS = $(FONT_OBJS)
+$(XBM_OBJS) : PAGE=60
+$(FONT_OBJS) : PAGE=61
+
+
 
 PAGED_OBJS = $(page54_OBJS) $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
 				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 
+
 PAGE_HEADER_OBJS = page54.o page55.o page56.o page57.o page58.o page59.o \
 						 page60.o page61.o
 
-SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) # $(XBM_OBJS)
+SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
+$(SYSTEM_OBJS) : PAGE=0
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS)
 
 C_OBJS = $(KERNEL_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
-
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
@@ -273,12 +273,6 @@ GENDEFINES = \
 ###	Set Default Target
 #######################################################################
 default_target : clean_err check_prereqs mame_install
-
-
-#######################################################################
-###	Include Machine Extensions
-#######################################################################
-include $(MACHINE)/Makefile
 
 
 #######################################################################
@@ -339,13 +333,12 @@ $(BINFILES:.bin=.s19) : %.s19 : $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS) %.l
 # How to make the linker command file for a paged section.
 #
 $(PAGED_LINKCMD) : $(DEPS)
-	@echo Creating linker command file...
+	@echo Creating linker command file $@ ...
 	@rm -f $@
 	@echo "-mxswz" >> $@
 	@echo "-b ram = 0x100" >> $@
-	@for f in `echo $($(@:.lnk=_SECTIONS))`; do echo "-b $$f = 0x4000" >> $@; done
+	@for f in `echo $(PAGED_SECTIONS)`; do echo "-b $$f = 0x4000" >> $@; done
 	@echo "-b sysrom = 0x8000" >> $@
-	@echo $(@:.lnk=.o) >> $@
 	@echo $($(@:.lnk=_OBJS)) >> $@
 	@echo "-v" >> $@
 	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $@; done
@@ -354,7 +347,6 @@ $(PAGED_LINKCMD) : $(DEPS)
 	@echo "-l c.a" >> $@
 	@echo "-e" >> $@
 
-	#@echo "-b vector = 0xFFF0" >> $@
 
 #
 # How to build a page header source file.
@@ -371,7 +363,7 @@ page%.s:
 # How to make the linker command file for the system section.
 #
 $(LINKCMD) : $(DEPS)
-	@echo Creating linker command file...
+	@echo Creating linker command file $@ ...
 	@rm -f $(LINKCMD)
 	@echo "-mxswz" >> $(LINKCMD)
 	@echo "-b ram = 0x100" >> $(LINKCMD)
@@ -404,29 +396,29 @@ $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 #
 # General rule for how to build any C++ module.
 #
-tz/cpptest.o : %.o : %.cpp $(REQUIRED) $(DEPS) $(GENDEFINES)
-	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
-	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
+#tz/cpptest.o : %.o : %.cpp $(REQUIRED) $(DEPS) $(GENDEFINES)
+#	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
+#	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
+#
 
 #
-# General rule for how to build any C module.
+# General rule for how to build any C or XBM module.
+# The basic rule is the same, but with a few differences that are
+# handled through some extra variables:
 #
+
+$(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))" 
+$(XBM_OBJS) : PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
+
+$(C_OBJS) : GCC_LANG=
+$(XBM_OBJS) : GCC_LANG=-x c
+
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
-	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) $(CC_MODE) $(CFLAGS) $<
-	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
-
-
-#! @$(CC) -o $@ -c $(CFLAGS) $< 2>&1 | tee -a err
-
-#
-# General rule for how to build any XBM bitmap image.
-#
 $(XBM_OBJS) : %.o : %.xbm
-	@echo Compiling $< ... && $(CC) "-Dstatic=__attribute__((section(\"images\")))" -o $(@:.o=.S) -x c -S $<
-	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
 
-ptrindex:
-	tools/ptrindex/ptrindex.pl -m deff -C kernel -C tz
+$(C_OBJS) $(XBM_OBJS) :
+	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $<
+	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
 
 
 #######################################################################
