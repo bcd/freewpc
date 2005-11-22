@@ -296,7 +296,8 @@ void task_sleep_sec (int8_t secs)
 }
 
 
-void task_exit (void) __noreturn__
+#pragma naked
+__noreturn__ void task_exit (void)
 {
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
@@ -307,8 +308,7 @@ void task_exit (void) __noreturn__
 	task_count--;
 #endif
 
-	__asm__ volatile ("jmp _task_dispatcher");
-	for (;;);
+	task_dispatcher ();
 }
 
 task_t *task_find_gid (task_gid_t gid)
@@ -361,7 +361,7 @@ void task_set_arg (task_t *tp, uint16_t arg)
 }
 
 #pragma naked
-void task_dispatcher (void)
+void __attribute__((noreturn)) task_dispatcher (void)
 {
 	extern __fastram__ uint8_t tick_count;
 	register task_t *tp asm ("x");
