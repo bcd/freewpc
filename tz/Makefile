@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM = ftz0_02.rom
+GAME_ROM = ftz0_03.rom
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
@@ -31,6 +31,8 @@ ROM_PAGE_COUNT = 32
 #
 # These options control the way that the game
 # ROM is made available to pinmame for testing.
+# They are only used during installation into
+# the pinmame roms directory.
 #
 #################################################
 
@@ -40,7 +42,9 @@ PINMAME_GAME_ROM = tzone9_2.rom
 
 PINMAME_OTHER_ROMS = tzu*.rom
 
-
+#
+# Object files exported by this game
+#
 
 GAME_OBJS = config.o clock.o amode.o lanes.o lock.o \
 	slot.o sling.o jets.o rightramp.o rocket.o star.o \
@@ -48,6 +52,5 @@ GAME_OBJS = config.o clock.o amode.o lanes.o lock.o \
 	loop.o bonus.o leffs.o door.o
 
 GAME_INCLUDES =
-
 
 
