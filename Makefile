@@ -114,7 +114,7 @@ GAME_ROM = freewpc.rom
 
 FIXED_SECTION = sysrom
 
-OS_OBJS = div10.o init.o sysinfo.o dmd.o \
+OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o test.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
@@ -209,10 +209,12 @@ PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
 # The build procedure can control which section is used for a
 # particular function.
 #
-RAM_ADDR = 0x0
-PAGED_ROM_ADDR = 0x4000
-FIXED_ROM_ADDR = 0x8000
-VECTOR_ROM_ADDR = 0xFFF0
+
+DIRECT_AREA = 0x0
+RAM_AREA = 0x100
+PAGED_AREA = 0x4000
+FIXED_AREA = 0x8000
+VECTOR_AREA = 0xFFF0
 
 
 KERNEL_OBJS = $(patsubst %,kernel/%,$(OS_OBJS))
@@ -256,7 +258,8 @@ C_OBJS = $(KERNEL_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
 
-DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile
+DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile include/mach
+
 
 GENDEFINES = \
 	include/gendefine_gid.h \
@@ -268,6 +271,19 @@ GENDEFINES = \
 ###	Include User Settings
 #######################################################################
 -include user.make
+
+ifeq ($(FREEWPC_DEBUGGER),y)
+CFLAGS += -DDEBUGGER
+endif
+ifdef USER_MAJOR
+CFLAGS += -DFREEWPC_MAJOR_VERSION=$(USER_MAJOR)
+endif
+ifdef USER_MINOR
+CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
+endif
+ifdef USER_TAG
+CFLAGS += -DUSER_TAG=\"$(USER_TAG)\"
+endif
 
 #######################################################################
 ###	Set Default Target
@@ -336,9 +352,10 @@ $(PAGED_LINKCMD) : $(DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $@
 	@echo "-mxswz" >> $@
-	@echo "-b ram = 0x100" >> $@
-	@for f in `echo $(PAGED_SECTIONS)`; do echo "-b $$f = 0x4000" >> $@; done
-	@echo "-b sysrom = 0x8000" >> $@
+	@echo "-b ram = $(RAM_AREA)" >> $@
+	@for f in `echo $(PAGED_SECTIONS)`; \
+		do echo "-b $$f = $(PAGED_AREA)" >> $@; done
+	@echo "-b sysrom = $(FIXED_AREA)" >> $@
 	@echo $($(@:.lnk=_OBJS)) >> $@
 	@echo "-v" >> $@
 	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $@; done
@@ -346,6 +363,13 @@ $(PAGED_LINKCMD) : $(DEPS)
 	@echo "-k $(LIBC_DIR)/" >> $@
 	@echo "-l c.a" >> $@
 	@echo "-e" >> $@
+
+#
+# How to build the system page header source file.
+#
+freewpc.s:
+	@echo ".area sysrom" > $@
+	@echo ".db 0" >> $@
 
 
 #
@@ -366,10 +390,11 @@ $(LINKCMD) : $(DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $(LINKCMD)
 	@echo "-mxswz" >> $(LINKCMD)
-	@echo "-b ram = 0x100" >> $(LINKCMD)
-	@for f in `echo $(PAGED_SECTIONS)`; do echo "-b $$f = 0x4000" >> $(LINKCMD); done
-	@echo "-b sysrom = 0x8000" >> $(LINKCMD)
-	@echo "-b vector = 0xFFF0" >> $(LINKCMD)
+	@echo "-b ram = $(RAM_AREA)" >> $(LINKCMD)
+	@for f in `echo $(PAGED_SECTIONS)`; \
+		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done
+	@echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD)
+	@echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD)
 	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done
 	@echo "-v" >> $(LINKCMD)
 	@for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done
@@ -406,7 +431,6 @@ $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 # The basic rule is the same, but with a few differences that are
 # handled through some extra variables:
 #
-
 $(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))" 
 $(XBM_OBJS) : PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
 
@@ -491,6 +515,14 @@ gcc:
 gcc-%:
 	cd $(GCC_BUILD_DIR) && ./gccbuild $*
 
+
+#$(GCC_BUILD_DIR)/gccbuild: $(GCC_BUILD_DIR)
+#	cd $(GCC_BUILD_DIR) && ln -s ../gcc-build/gccbuild . && cd -
+#
+#$(GCC_BUILD_DIR):
+#	mkdir -p $(GCC_BUILD_DIR)
+
+
 #
 # 'make astools' will build the assembler, linker, and library
 # manager.  As with gcc, -install will also install it and any
@@ -517,6 +549,13 @@ $(SR) : $(SR).c
 
 kernel/switches.o : include/$(MACHINE)/switch.h
 
+include/mach:
+	@echo Setting symbolic link for machine include files &&\
+		cd include && ln -s $(MACHINE) mach
+
+Makefile : user.make
+
+
 #
 # Install to the web server
 #
@@ -536,6 +575,13 @@ $(WEBDIR):
 	mkdir -p $(WEBDIR)
 	mkdir -p $(WEBDIR)/releases
 
+
+#
+# For debugging the makefile settings
+#
+info:
+	@echo "Machine : $(MACHINE)"
+	@echo "CFLAGS = $(CFLAGS)"
 
 #
 # 'make clean' does what you think.
