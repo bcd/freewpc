@@ -1,8 +1,6 @@
 
 #include <freewpc.h>
 
-#define DECLARE_PAGED	_Pragma ("section (\"font\")")
-
 DECLARE_PAGED
 const uint8_t font_5x5_alpha_cap[][5] = {
 	{ 4, 10, 31, 17, 17 },
@@ -37,7 +35,7 @@ const uint8_t font_5x5_alpha_cap[][5] = {
 	{ 31, 8, 4, 2, 31 },
 };
 
-
+DECLARE_PAGED
 const uint8_t font_5x5_digit[][5] = {
 	{ 14, 17, 17, 17, 14 },
 	{ 4, 6, 4, 4, 14 },
@@ -51,11 +49,13 @@ const uint8_t font_5x5_digit[][5] = {
 	{ 14, 17, 30, 16, 14 },
 };
 
+DECLARE_PAGED
 const uint8_t font_5x5_sep[][5] = {
 	{ 0, 0, 0, 0, 2 },
 	{ 0, 0, 0, 2, 1 },
 };
 
+DECLARE_PAGED
 const font_t font_5x5 = {
 	.width = 5, 
 	.spacing = 1,
