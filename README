@@ -45,6 +45,8 @@ to do the TODO step by hand. ]
 If you're building other than for gcc 3.1.1, then you'll
 need to symlink the m6809 subdirectory in your 'config'
 back to 3.1.1 to pick up the target definition files.
+For untested gcc versions, the patching must be done by
+hand, by editing config.sub and gcc/config.gcc
 
 1e) Configure the compiler for your host platform.
 Run './gccbuild config' to do this.  This will take about
