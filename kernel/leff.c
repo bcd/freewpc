@@ -7,8 +7,10 @@
 
 #define MACHINE_LAMP_EFFECTS \
 	DECL_LEFF (LEFF_AMODE, L_RUNNING, 10, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
+	DECL_LEFF (LEFF_NO_GI, L_NORMAL, 20, L_NOLAMPS, L_NOGI, no_gi_leff) \
 	DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, 50, L_NOLAMPS, L_NOGI, left_ramp_leff) \
 	DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, 100, LAMPSET_AMODE_ALL, L_NOGI, flash_all_leff) \
+	DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, 140, L_NOLAMPS, L_NOGI, flasher_happy_leff) \
 	DECL_LEFF (LEFF_BONUS, L_RUNNING, 150, L_ALL_LAMPS, L_NOGI, bonus_leff) \
 	DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, 200, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 	DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
@@ -113,6 +115,7 @@ static leffnum_t leff_get_highest_priority (void)
 
 void leff_create_handler (const leff_t *leff)
 {
+	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != 0)
 	{
 		if (leff->lampset == 0xFF)
@@ -126,6 +129,12 @@ void leff_create_handler (const leff_t *leff)
 			lampset_apply (leff->lampset, lamp_leff_allocate);
 		}
 		lamp_leff1_erase ();
+	}
+
+	/* Allocate general illumination needed by the lamp effect */
+	if (leff->gi != 0)
+	{
+		triac_leff_allocate (leff->gi);
 	}
 
 	task_recreate_gid (GID_LEFF, leff->fn);
@@ -183,6 +192,7 @@ void leff_stop (leffnum_t dn)
 		db_puts ("Remove running leff from queue\n");
 		leff_remove_queue (dn);
 		lamp_leff1_free_all ();
+		triac_leff_free (TRIAC_GI_MASK);
 
 		leff_start_highest_priority ();
 	}
@@ -234,7 +244,7 @@ void leff_start_highest_priority (void)
 }
 
 
-void leff_exit (void) __noreturn__
+__noreturn__ void leff_exit (void)
 {
 	db_puts ("Exiting leff\n");
 	task_setgid (GID_LEFF_EXITING);

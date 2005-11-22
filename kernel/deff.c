@@ -10,6 +10,7 @@
 	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
 	DECL_DEFF (DEFF_BONUS, D_RUNNING, 150, bonus_deff) \
 	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
+	DECL_DEFF (DEFF_REPLAY, D_NORMAL, 202, replay_deff) \
 	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
 	DECL_DEFF (DEFF_SLAM_TILT, D_NORMAL, 210, tilt_deff) \
 	DECL_DEFF (DEFF_PRINT_RTC, D_NORMAL, 250, rtc_print_deff) \
@@ -210,7 +211,7 @@ void deff_start_highest_priority (void)
 }
 
 
-void deff_exit (void) __noreturn__
+__noreturn__ void deff_exit (void)
 {
 	db_puts ("Exiting deff\n");
 	task_setgid (GID_DEFF_EXITING);
