@@ -54,7 +54,7 @@ void test_stop (void)
 
 
 
-void test_menu_deff (void) __taskentry__ __noreturn__
+__taskentry__ __noreturn__ void test_menu_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page (dmd_low_buffer);
@@ -310,6 +310,18 @@ void font_enter_proc (void) __taskentry__
 }
 
 
+void leff_enter_proc (void) __taskentry__
+{
+	leff_start (test_index);
+	task_exit ();
+}
+
+
+void deff_enter_proc (void) __taskentry__
+{
+	deff_start (test_index);
+	task_exit ();
+}
 
 
 #define TEST_ITEM(p)	.u = { .item = { p } }
@@ -325,6 +337,8 @@ const test_t main_menu_items[] = {
 	{ "BALL DEVICES", &main_menu, 0, 0, TEST_ITEM(device_enter_proc) },
 	{ "RT CLOCK", &main_menu, 0, 0, TEST_ITEM(rtc_enter_proc) },
 	{ "FONT TEST", &main_menu, 0, 0, TEST_ITEM(font_enter_proc) },
+	{ "LAMP EFFECTS", &main_menu, 0, 0, TEST_ITEM(leff_enter_proc) },
+	{ "DMD EFFECTS", &main_menu, 0, 0, TEST_ITEM(deff_enter_proc) },
 };
 
 const test_t main_menu = {
