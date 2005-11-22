@@ -4,7 +4,7 @@
 std_adj_t system_config;
 pricing_adj_t price_config;
 
-static const std_adj_t factory_system_config = {
+static const std_adj_t std_adj_defaults = {
 	.balls_per_game = 3,
 	.tilt_warnings = 2,
 	.max_ebs = 10,
@@ -13,7 +13,7 @@ static const std_adj_t factory_system_config = {
 	.replay_percent = 0,
 	.replay_start = 0,
 	.replay_levels = 0,
-	.replay_level[4] = { 0, 0, 0, 0 },
+	.replay_level = { 0, 0, 0, 0 },
 	.replay_boost = 0,
 	.replay_award = 0,
 	.special_award = 0,
@@ -35,11 +35,11 @@ static const std_adj_t factory_system_config = {
 	.ticket_board = 0,
 	.no_bonus_flips = 1,
 	.game_restart = 2,
-} std_adj_t;
+};
 
 
 void adj_init (void)
 {
-	memcpy (&system_config, &factory_system_config);
+	memcpy (&system_config, &std_adj_defaults, sizeof (std_adj_t));
 }
 
