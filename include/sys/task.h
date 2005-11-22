@@ -80,11 +80,12 @@ task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
-void task_exit (void) __noreturn__;
+__noreturn__ void task_exit (void);
 task_t *task_find_gid (task_gid_t);
 bool task_kill_gid (task_gid_t);
 uint16_t task_get_arg (void);
 void task_set_arg (task_t *tp, uint16_t arg);
+__noreturn__ void task_dispatcher (void);
 
 #define task_create_child(fn)		task_create_gid (task_getgid (), fn)
 

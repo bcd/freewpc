@@ -43,6 +43,10 @@ void gi_recalc_zerocross (void);
 void triac_rtt (void);
 void triac_enable (triacbits_t bits);
 void triac_disable (triacbits_t bits);
+void triac_leff_allocate (U8 triac);
+void triac_leff_free (U8 triac);
+void triac_leff_enable (U8 triac);
+void triac_leff_disable (U8 triac);
 void triac_init (void);
 
 #endif /* _SYS_TRIAC_H */

@@ -21,7 +21,7 @@
 #define ERR_LEFF_QUEUE_FULL		17
 
 typedef uint8_t errcode_t;
-void do_fatal (errcode_t errcode) __noreturn__;
+__noreturn__ void do_fatal (errcode_t errcode);
 void do_nonfatal (errcode_t errcode);
 
 #define fatal(err)		do_fatal(err)

@@ -24,11 +24,19 @@ typedef struct
 	sound_code_t sound;
 	task_ticks_t active_time;
 	task_ticks_t inactive_time;
-	uint8_t pad[1]; /* Keep this aligned to a power of 2! */
+	int devno;
+	uint8_t pad[8]; /* Keep this aligned to a power of 2! */
 } switch_info_t;
 
 
 #define DECLARE_SWITCH_DRIVER(name)	const switch_info_t name =
+
+#define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
+
+#define SW_HAS_DEVICE(sw)	(sw->devno != 0)
+
+#define SW_GET_DEVICE(sw)	(sw->devno - 1)
+
 
 #define NUM_PF_SWITCHES 64
 #define NUM_DEDICATED_SWITCHES 8

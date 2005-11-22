@@ -61,4 +61,6 @@ typedef struct
 
 extern pricing_adj_t price_config;
 
+void adj_init (void);
+
 #endif /* _STDADJ_H */

@@ -98,6 +98,7 @@ void lamp_leff2_erase (void);
 void lamp_leff_allocate (lampnum_t lamp);
 void lamp_leff_free (lampnum_t lamp);
 
+const U8 *lampset_lookup (lampset_id_t id);
 void lampset_apply (lampset_id_t id, lamp_operator_t op);
 void lampset_apply_on (lampset_id_t id);
 void lampset_apply_off (lampset_id_t id);

@@ -27,7 +27,7 @@ void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
 void leff_restart (leffnum_t dn);
 void leff_start_highest_priority (void);
-void leff_exit (void) __noreturn__;
+__noreturn__ void leff_exit (void);
 void leff_init (void);
 
 #endif /* _SYS_LEFF_H */

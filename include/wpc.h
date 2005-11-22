@@ -80,7 +80,7 @@
 #define IRQS_PER_TICK 8
 
 /* Primitive time constants */
-//#define TIME_16MS 	2
+#define TIME_16MS 	2
 #define TIME_33MS 	4
 #define TIME_50MS 	6
 #define TIME_66MS 	(TIME_33MS * 2)

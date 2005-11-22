@@ -26,7 +26,7 @@ void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);
 void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);
-void deff_exit (void) __noreturn__;
+__noreturn__ void deff_exit (void);
 void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (int8_t count, task_ticks_t delay);
 void deff_init (void);

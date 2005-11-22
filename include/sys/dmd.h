@@ -52,5 +52,7 @@ void dmd_draw_border (char *dbuf);
 void dmd_shift_up (dmd_buffer_t *dbuf);
 void dmd_shift_down (dmd_buffer_t *dbuf);
 void dmd_draw_image (char *image_bits);
+void dmd_draw_bitmap (dmd_buffer_t *image_bits, 
+	U8 x, U8 y, U8 width, U8 height);
 
 #endif /* _SYS_DMD_H */
