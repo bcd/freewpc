@@ -22,6 +22,7 @@ void flasher_pulse (solnum_t n)
 		{
 			flashers_active[i].flasher = n;
 			flashers_active[i].duration = TIME_66MS;
+			return;
 		}
 }
 
