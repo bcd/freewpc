@@ -64,6 +64,7 @@ void triac_disable (U8 triac)
 
 void triac_leff_allocate (U8 triac)
 {
+	triac_leff_bits &= ~triac;
 	triac_leff_alloc |= triac;
 }
 
