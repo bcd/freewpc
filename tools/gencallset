@@ -8,15 +8,10 @@
 
 my @dirs = ("kernel", "tz", "fonts");
 
-my $firstval = 1;
-
-
 
 my @functions = ();
 
 my %functionhash;
-
-my $nextval = $firstval;
 
 while ($arg = shift)
 {
@@ -34,11 +29,11 @@ foreach $src (@srclist) {
 	open FH, $src;
 	while (<FH>) {
 		chomp;
-		if (/CALLSET_ENTRY\((.*)\)/) {
+		if (/CALLSET_ENTRY[ \t]*\((.*)\)/) {
 			my $callset_entry_args = $1;
 			my ($module, $set) = split /, */, $callset_entry_args;
 			next if (!defined $module or !defined $set);
-			# print "Found $module + $set\n";
+			print "Found $module + $set\n";
 			if (!defined $functionhash{$set}) {
 				$functionhash{$set} = "";
 			}
