@@ -12,8 +12,6 @@ extern "C" {
  * features.
  */
 
-/* First include all configuration options */
-#include <config.h>
 
 /*
  * Standard types
@@ -35,6 +33,11 @@ typedef unsigned long uint16_t, U16;
 #undef FALSE
 #define FALSE 0
 
+/*
+ * Define macros that let us print #defines which are strings.
+ */
+#define C_STRING(x)	C_STR(x)
+#define C_STR(x)		#x
 
 /*
  * Define the size of the process stack (currently here
@@ -84,7 +87,8 @@ typedef unsigned long uint16_t, U16;
 #include <amode.h>
 #include <callset.h>
 
-/* Game-specific defines */
+/* Game-specific defines.  'mach' should point to
+ * the machine-specific directory, e.g. 'tz'. */
 #include <mach/config.h>
 #include <mach/switch.h>
 #include <mach/coil.h>
