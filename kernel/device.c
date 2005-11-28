@@ -228,15 +228,19 @@ wait_and_recount:
 /* Request that a device eject 1 ball */
 void device_request_kick (device_t *dev)
 {
+	dbprintf ("Request to kick from %s\n", dev->props->name);
+	
 	if ((dev->actual_count - dev->kicks_needed) > 0)
 	{
 		task_gid_t gid = DEVICE_GID (device_devno (dev));
 		
-		dbprintf ("Request to kick from %s\n", dev->props->name);
-
 		dev->kicks_needed++;
 		dbprintf ("Creating task with gid=%02x\n", gid);
 		task_create_gid1 (gid, device_update);
+	}
+	else
+	{
+		dbprintf ("No balls to kick!\n");
 	}
 }
 
@@ -367,7 +371,7 @@ void device_remove_live (void)
 	if (live_balls > 0)
 	{
 		live_balls--;
-		if (live_balls == 0)
+		if ((live_balls == 0) && in_game)
 		{
 			end_ball ();
 		}
