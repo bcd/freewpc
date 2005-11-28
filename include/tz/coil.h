@@ -22,9 +22,13 @@
 #define SOL_LOCK_RELEASE	14
 #define SOL_SHOOTER_DIV		15
 
-/* #define GUMBALL??? 23 */
-
-#define SOL_RAMP_DIV			26
+#define SOL_LEFT_MAGNET        20
+#define SOL_UPPER_RIGHT_MAGNET 21
+#define SOL_RIGHT_MAGNET       22
+#define SOL_GUMBALL_RELEASE    23
+#define SOL_MPF_LEFT_MAGNET    24
+#define SOL_MPF_RIGHT_MAGNET   25
+#define SOL_RAMP_DIV			    26
 
 #define FLASH_JETS					16
 #define FLASH_RAMP3_POWER_PAYOFF	17
