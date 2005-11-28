@@ -25,6 +25,6 @@ void sw_greed_handler (void)
 DECLARE_SWITCH_DRIVER (sw_greed)
 {
 	.fn = sw_greed_handler,
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 };
 
