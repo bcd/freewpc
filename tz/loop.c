@@ -71,21 +71,28 @@ void sw_right_loop_top_handler (void) __taskentry__
 
 void sw_right_loop_handler (void) __taskentry__
 {
-	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
+	/* Tell gumball module that ball is present */
+	extern void sw_gumball_right_loop_entered (void);
+
+	sw_gumball_right_loop_entered ();
+	if (in_live_game)
 	{
-		/* Left loop completed */
-		award_left_loop ();
-	}
-	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
-	{
-		/* Right loop aborted */
-		abort_loop ();
-	}
-	else
-	{
-		/* Right loop started */
-		task_create_gid (GID_RIGHT_LOOP_ENTERED, loop_timer);
-		enter_loop ();
+		if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
+		{
+			/* Left loop completed */
+			award_left_loop ();
+		}
+		else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
+		{
+			/* Right loop aborted */
+			abort_loop ();
+		}
+		else
+		{
+			/* Right loop started */
+			task_create_gid (GID_RIGHT_LOOP_ENTERED, loop_timer);
+			enter_loop ();
+		}
 	}
 	task_exit ();
 }
@@ -93,7 +100,7 @@ void sw_right_loop_handler (void) __taskentry__
 
 DECLARE_SWITCH_DRIVER (sw_left_loop)
 {
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.fn = sw_left_loop_handler,
 };
 

@@ -1,6 +1,10 @@
 
 #include <freewpc.h>
 
+bool gumball_load_enabled;
+
+bool gumball_geneva_tripped;
+
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
@@ -13,10 +17,6 @@ void gumball_mech_deactivate (void)
 {
 }
 
-void gumball_popper_kick (void)
-{
-}
-
 void gumball_diverter_open (void)
 {
 }
@@ -25,12 +25,36 @@ void gumball_diverter_close (void)
 {
 }
 
+bool gumball_load_is_enabled (void)
+{
+	return gumball_load_enabled;
+}
+
 void gumball_load_disable (void)
 {
+	gumball_load_enabled = FALSE;
 }
 
 void gumball_load_enable (void)
 {
+	gumball_load_enabled = TRUE;
+}
+
+void gumball_load_from_trough (void)
+{
+	extern void autofire_add_ball (void);
+
+	gumball_load_enable ();
+	autofire_add_ball ();
+}
+
+void gumball_release (void)
+{
+	gumball_geneva_tripped = FALSE;
+	sol_on (SOL_GUMBALL_RELEASE);
+	while (gumball_geneva_tripped == FALSE)
+		task_sleep (TIME_33MS);
+	sol_off (SOL_GUMBALL_RELEASE);
 }
 
 /*************************************************************/
@@ -43,25 +67,86 @@ void sw_gumball_exit_handler (void)
 
 void sw_gumball_geneva_handler (void)
 {
+	dbprintf ("Geneva tripped.\n");
+	gumball_geneva_tripped = TRUE;
 }
 
 void sw_gumball_enter_handler (void)
 {
+	/* Ball has entered the gumball machine.
+	 * Increment virtual count of balls inside.
+	 * Tell popper to quit retrying. */
+	dbprintf ("Gumball entered.\n");
 }
 
 void sw_gumball_popper_handler (void)
 {
+	/* Wait for ball to settle, then pop
+	 * ball into the gumball machine. */
+	task_sleep (TIME_100MS * 5);
+
+	dbprintf ("Pulsing popper\n");
+	sol_on (SOL_POPPER);
+	task_sleep (TIME_100MS);
+	sol_off (SOL_POPPER);
+}
+
+void sw_gumball_right_loop_entered (void)
+{
+	if (gumball_load_is_enabled ())
+	{
+		dbprintf ("Gumball load enabled; diverter on\n");
+		sol_on (SOL_GUMBALL_DIV);
+	}
+	else
+	{
+		dbprintf ("Gumball load not enabled.\n");
+	}
 }
 
 void sw_gumball_lane_handler (void)
 {
+	/* Ball is approaching popper.
+	 * Gumball diverter can be closed now. */
+	dbprintf ("Gumball lane reached; diverter off\n");
+	sol_off (SOL_GUMBALL_DIV);
+	gumball_load_disable ();
 }
+
+
+DECLARE_SWITCH_DRIVER (sw_gumball_exit)
+{
+	.fn = sw_gumball_exit_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_gumball_geneva)
+{
+	.fn = sw_gumball_geneva_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_gumball_enter)
+{
+	.fn = sw_gumball_enter_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_gumball_popper)
+{
+	.fn = sw_gumball_popper_handler,
+};
+
+DECLARE_SWITCH_DRIVER (sw_gumball_lane)
+{
+	.fn = sw_gumball_lane_handler,
+};
+
+
 
 /*************************************************************/
 /* Callbacks                                                 */
 /*************************************************************/
 
-void gumball_init (void)
+CALLSET_ENTRY (gumball, init)
 {
+	gumball_load_disable ();
 }
 
