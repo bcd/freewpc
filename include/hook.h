@@ -24,7 +24,7 @@ typedef struct machine_hooks
 	void (*start_ball) (void);
 	void (*ball_in_play) (void);
 	void (*ball_drain) (void);
-	void (*end_ball) (void);
+	bool (*end_ball) (void);
 	void (*bonus) (void);
 	void (*abort_game) (void);
 	void (*end_game) (void);
@@ -57,10 +57,14 @@ do \
 		(MACHINE_HOOKS.hook) (); \
 } while (0)
 
+#define call_boolean_hook(hook) \
+((MACHINE_HOOKS.hook) ? (MACHINE_HOOKS.hook) () : TRUE)
+
 #else
 
 /* If no hooks are defined, then calling a hook is trivial */
 #define call_hook(hook)
+#define call_boolean_hook(hook)
 
 #endif
 

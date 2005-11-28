@@ -1,6 +1,12 @@
 
 #include <freewpc.h>
 
+/** Filename: mach/config.c
+ * Machine-specific functions.  These are all callbacks
+ * from the main kernel code to handle various events
+ * in game-specific ways.
+ */
+
 
 /** An array in which each 1 bit represents an opto switch
  * and 0 represents a normal switch.  This is used for
@@ -55,6 +61,7 @@ void tz_start_game (void)
 
 void tz_end_game (void)
 {
+	#include <end_game.callset>
 	if (!in_test)
 		music_set (MUS_POWERBALL_MANIA);
 }
@@ -77,9 +84,10 @@ void tz_ball_in_play (void)
 	/* start ballsaver if enabled */
 }
 
-void tz_end_ball (void)
+bool tz_end_ball (void)
 {
 	sound_reset ();
+	return TRUE;
 }
 
 
@@ -124,6 +132,7 @@ void tz_tilt_warning (void)
 
 void tz_start_without_credits (void)
 {
+	sound_send (SND_GREEEED);
 }
 
 void tz_coin_added (void)
