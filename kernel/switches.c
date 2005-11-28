@@ -432,7 +432,7 @@ void switch_rtt (void)
 
 void switch_lamp_pulse (void)
 {
-	const switch_info_t * const swinfo = task_get_arg ();
+	const switch_info_t * const swinfo = (switch_info_t *)task_get_arg ();
 	dbprintf ("Pulsing lamp %d\n", swinfo->lamp);
 
 	lamp_leff_allocate (swinfo->lamp);
@@ -444,15 +444,32 @@ void switch_lamp_pulse (void)
 }
 
 
+/*
+ * Any switch transition is handled by this routine.  It performs
+ * some of the common switch handling logic before calling the
+ * switch-specific function.
+ */
 #pragma long_branch
 void switch_sched (void)
 {
 	const uint8_t sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-	if ((swinfo->flags & SW_IN_GAME) && !in_game)
-		return;
+	dbprintf ("Servicing switch 0x%02x\n", sw);
 
+	/* Don't service switches marked SW_IN_GAME at all, if we're
+	 * not presently in a game */
+	if ((swinfo->flags & SW_IN_GAME) && !in_game)
+	{
+		dbprintf ("Not handling switch because not in game\n");
+		goto cleanup;
+	}
+
+	/* If a switch is marked SW_PLAYFIELD and we're in a game,
+	 * then call the global playfield switch handler and mark
+	 * the ball 'in play'.  Don't do the last bit if the switch
+	 * specifically doesn't want this to happen.
+	 */
 	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
 	{
 		call_hook(any_pf_switch);
@@ -460,12 +477,15 @@ void switch_sched (void)
 			mark_ball_in_play ();
 	}
 
+	/* TODO : not working */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
 		task_t *tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
 		task_set_arg (tp, (U16)swinfo);
 	}
 
+	/* If we're in a live game and the switch declares a standard
+	 * sound, then make it happen. */
 	if ((swinfo->sound != 0) && in_live_game)
 		sound_send (swinfo->sound);
 
@@ -475,6 +495,7 @@ void switch_sched (void)
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
+cleanup:
 	/* Debounce period after the switch has been handled */
 	if (swinfo->inactive_time == 0)
 		task_sleep (TIME_100MS * 1); /* was 300ms!!! */
@@ -493,6 +514,10 @@ void switch_idle_task (void)
 {
 	uint8_t rawbits, pendbits;
 	uint8_t col;
+	extern U8 sys_init_complete;
+
+	if (sys_init_complete == 0)
+		return;
 
 	for (col = 0; col <= 9; col++)
 	{
@@ -531,6 +556,12 @@ void switch_idle_task (void)
 			{
 				if (pendbits & 1)
 				{
+					/* TODO : rather than handling the switch right away,
+					 * we should queue it up, and then process the switches
+					 * later in queue order.  This would solve the problem
+					 * of some switch handlers taking longer to execute
+					 * than others.
+					 */
 					task_t *tp = task_create_gid (GID_SW_HANDLER, switch_sched);
 					task_set_arg (tp, sw);
 				}
