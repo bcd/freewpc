@@ -8,6 +8,13 @@
  * A "task" is analogous to a process.  Tasks can be created, stopped,
  * killed, etc. as one would expect.  All tasks are "peers", as no
  * parent/child relationship exists among the tasks.
+ * 
+ * The process ID of a task is simply a pointer to its kernel task
+ * structure; every task therefore has a unique pid.
+ *
+ * The group ID of a task can be declared when it is created; multiple
+ * tasks can share the same group ID.  Killing a group ID kills all
+ * tasks in the group, e.g.
  *
  * Most of the module is written in portable C.  The task structure
  * and the register save/restore routines are written in lots of
@@ -340,7 +347,9 @@ bool task_kill_gid (task_gid_t gid)
 	bool rc = FALSE;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if ((tp->state != TASK_FREE) && (tp->gid == gid))
+		if (	(tp != task_current) &&
+				(tp->state != TASK_FREE) && 
+				(tp->gid == gid) )
 		{
 			task_kill_pid (tp);
 			rc = TRUE;
@@ -363,7 +372,7 @@ void task_set_arg (task_t *tp, uint16_t arg)
 #pragma naked
 void __attribute__((noreturn)) task_dispatcher (void)
 {
-	extern __fastram__ uint8_t tick_count;
+	extern uint8_t tick_count;
 	register task_t *tp asm ("x");
 
 	for (tp++;; tp++)
