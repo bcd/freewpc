@@ -17,40 +17,40 @@ void start_ball (void);
 
 void dump_game (void)
 {
-	db_puts ("Game : "); db_puti (in_game);
-	db_puts ("   Bonus : "); db_puti (in_bonus);
-	db_puts ("   Tilt : "); db_puti (in_tilt);
-	db_putc ('\n');
-	db_puts ("In Play : "); db_puti (ball_in_play); db_putc ('\n');
-	db_puts ("Player Up : "); db_puti (player_up);
-	db_puts (" of "); db_puti (num_players); db_putc ('\n');
-	db_puts ("Ball : "); db_puti (ball_up); db_putc ('\n');
-	db_puts ("EBs : "); db_puti (extra_balls); db_putc ('\n');
+	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
+		in_game, in_bonus, in_tilt);
+	dbprintf ("In Play : %d\n", ball_in_play);
+	dbprintf ("Player Up : %d of %d\n", player_up, num_players);
+	dbprintf ("Ball : %d    EBs : %d\n", ball_up, extra_balls);
 }
 
 
 void end_game (void)
 {
-	in_game = 0;
-	ball_up = 0;
+	if (in_game)
+	{
+		in_game = 0;
+		ball_up = 0;
 
-	// check high scores
-	// do match sequence
-	// return to attract mode
-
-	call_hook (end_game);
-	lamp_all_off ();
-	flipper_disable ();
-	deff_stop (DEFF_SCORES);
-	amode_start ();
+		// check high scores
+		// do match sequence
+		// return to attract mode
+	
+		call_hook (end_game);
+		lamp_all_off ();
+		flipper_disable ();
+		deff_stop_all ();
+		leff_stop_all ();
+		amode_start ();
+	}
 }
 
 void end_ball (void)
 {
-	db_puts ("In endball\n");
-
 	if (!in_game)
 		goto done;
+
+	db_puts ("In endball\n");
 
 	if (!ball_in_play)
 	{
@@ -58,8 +58,13 @@ void end_ball (void)
 		goto done;
 	}
 
+	if (!call_boolean_hook (end_ball))
+	{
+		dbprintf ("end_ball hook returned false\n");
+		goto done;
+	}
+	
 	flipper_disable ();
-	call_hook (end_ball);
 
 	if (!in_tilt)
 	{
@@ -132,28 +137,32 @@ void add_player (void)
 
 void start_game (void)
 {
-	in_game = TRUE;
-	in_bonus = FALSE;
-	in_tilt = FALSE;
-	num_players = 0;
-	scores_reset ();
-
-	add_player ();
-	player_up = 1;
-	ball_up = 1;
-	extra_balls = 0;
-
-	deff_start (DEFF_SCORES);
-	amode_stop ();
-	call_hook (start_game);
-
-	player_start_game ();
-	start_ball ();
+	if (!in_game)
+	{
+		in_game = TRUE;
+		in_bonus = FALSE;
+		in_tilt = FALSE;
+		num_players = 0;
+		scores_reset ();
+	
+		add_player ();
+		player_up = 1;
+		ball_up = 1;
+		extra_balls = 0;
+	
+		deff_start (DEFF_SCORES);
+		amode_stop ();
+		call_hook (start_game);
+	
+		player_start_game ();
+		start_ball ();
+	}
 }
 
 void stop_game (void)
 {
-	deff_stop (DEFF_SCORES);
+	deff_stop_all ();
+	leff_stop_all ();
 }
 
 bool verify_start_ok (void)
