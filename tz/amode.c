@@ -69,7 +69,6 @@ void egg_left_flipper (void)
 		egg_code_values[1] = 0;
 		egg_code_values[2] = 0;
 	}
-	db_puts ("L");
 	egg_code_values[egg_index]++;
 }
 
@@ -86,7 +85,6 @@ void egg_right_flipper (void)
 {
 	if (!task_find_gid (GID_EGG_TIMER)) 
 		return;
-	db_puts ("R");
 	egg_index++;
 	if (egg_index == 3)
 	{
@@ -95,7 +93,6 @@ void egg_right_flipper (void)
 			 (egg_code_values[1] == 3) &&
 			 (egg_code_values[2] == 4))
 		{
-			db_puts ("Show pic\n");
 			deff_start (DEFF_BRIAN_IMAGE);
 		}
 	}
@@ -128,16 +125,24 @@ void amode_leff (void) __taskentry__
 	U8 i;
 
 	triac_enable (TRIAC_GI_MASK);
+	lampset_set_apply_delay (0);
 	for (;;)
 	{
-		lampset_set_apply_delay (0);
 		lampset_apply_leff_off (LAMPSET_AMODE_ALL);
 
 		lampset_set_apply_delay (TIME_16MS);
-		for (i=0; i < 4; i++)
+		for (i=0; i < 6; i++)
 		{
 			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
 			task_sleep (TIME_100MS * 3);
+		}
+
+		lampset_set_apply_delay (0);
+		lampset_apply_leff_alternating (LAMPSET_AMODE_ALL, 0);
+		for (i=0; i < 25; i++)
+		{
+			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
+			task_sleep (TIME_100MS * 2);
 		}
 	}
 }
@@ -170,13 +175,13 @@ void amode_deff (void) __taskentry__
 		deff_swap_low_high (25, TIME_100MS + TIME_50MS);
 		amode_page_delay (3);
 
-		/** Display TZ 2006 message **/
+		/** Display game title message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_5x5, 64, 10, "TWILIGHT ZONE");
+		font_render_string_center (&font_5x5, 64, 10, "BACK TO THE ZONE");
 		starfield_start ();
 		dmd_copy_low_to_high ();
-		font_render_string_center (&font_5x5, 64, 20, "2006");
+		font_render_string_center (&font_5x5, 64, 20, "TZ 2006");
 		deff_swap_low_high (23, TIME_100MS * 2);
 
 		for (i = 32; i != 0; --i)
