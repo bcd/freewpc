@@ -25,7 +25,7 @@ extern inline void rt_sol_on (U8 *sol_cache, U8 bitmask, U8 active_high)
 
 extern inline U8 rt_sol_active (U8 *sol_cache, U8 bitmask, U8 active_high)
 {
-	return (*sol_cache & bitmask);
+	return (in_live_game && (*sol_cache & bitmask));
 }
 
 /* Each rt solenoid is governed by a rt_sol_state object,
