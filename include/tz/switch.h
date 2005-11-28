@@ -24,6 +24,7 @@
 #define SW_SLAM_TILT				MAKE_SW(2,1)
 #define SW_COIN_DOOR_CLOSED	MAKE_SW(2,2)
 #define SW_BUYIN_BUTTON			MAKE_SW(2,3)
+/*** switch 24 reserved for system ***/
 #define SW_FAR_LEFT_TROUGH		MAKE_SW(2,5)
 #define SW_TROUGH_PROX			MAKE_SW(2,6)
 #define SW_SHOOTER				MAKE_SW(2,7)
@@ -45,6 +46,7 @@
 #define SW_MPF_LEFT				MAKE_SW(4,5)
 #define SW_MPF_RIGHT				MAKE_SW(4,6)
 #define SW_CLOCK_TARGET			MAKE_SW(4,7)
+#define SW_STANDUP1				MAKE_SW(4,8)
 
 #define SW_GUMBALL_LANE			MAKE_SW(5,1)
 #define SW_HITCHHIKER			MAKE_SW(5,2)
@@ -58,7 +60,11 @@
 #define SW_SKILL_BOTTOM			MAKE_SW(6,1)
 #define SW_SKILL_CENTER			MAKE_SW(6,2)
 #define SW_SKILL_TOP				MAKE_SW(6,3)
+#define SW_STANDUP4				MAKE_SW(6,4)
 #define SW_POWER_PAYOFF			MAKE_SW(6,5)
+#define SW_STANDUP5				MAKE_SW(6,6)
+#define SW_STANDUP6				MAKE_SW(6,7)
+#define SW_STANDUP7				MAKE_SW(6,8)
 
 #define SW_AUTOFIRE1				MAKE_SW(7,1)
 #define SW_AUTOFIRE2				MAKE_SW(7,2)
@@ -66,12 +72,15 @@
 #define SW_GUMBALL_POPPER		MAKE_SW(7,4)
 #define SW_MPF_TOP				MAKE_SW(7,5)
 #define SW_MPF_EXIT				MAKE_SW(7,6)
+#define SW_STANDUP2				MAKE_SW(7,7)
+#define SW_STANDUP3				MAKE_SW(7,8)
 
 #define SW_LOWER_RIGHT_MAGNET	MAKE_SW(8,1)
 #define SW_UPPER_RIGHT_MAGNET	MAKE_SW(8,2)
 #define SW_LEFT_MAGNET			MAKE_SW(8,3)
 #define SW_LOCK_CENTER			MAKE_SW(8,4)
 #define SW_LOCK_UPPER			MAKE_SW(8,5)
+#define SW_CLOCK_PASSAGE		MAKE_SW(8,6)
 #define SW_GUMBALL_ENTER		MAKE_SW(8,7)
 #define SW_LOCK_LOWER			MAKE_SW(8,8)
 
@@ -118,8 +127,11 @@
 #define MACHINE_SW43				sw_piano
 #define MACHINE_SW48				sw_greed
 
+#define MACHINE_SW51				sw_gumball_lane
 #define MACHINE_SW53				sw_left_ramp_enter
 #define MACHINE_SW54				sw_left_ramp_exit
+#define MACHINE_SW55				sw_gumball_geneva
+#define MACHINE_SW56				sw_gumball_exit
 #define MACHINE_SW58				sw_slot
 
 #define MACHINE_SW61				sw_lower_skill
@@ -131,6 +143,7 @@
 #define MACHINE_SW68				sw_greed
 
 #define MACHINE_SW73				sw_right_ramp
+#define MACHINE_SW74				sw_gumball_popper
 #define MACHINE_SW77				sw_greed
 #define MACHINE_SW78				sw_greed
 
@@ -138,6 +151,7 @@
 #define MACHINE_SW83				sw_left_loop
 #define MACHINE_SW84				sw_lock
 #define MACHINE_SW85				sw_lock
+#define MACHINE_SW87				sw_gumball_enter
 #define MACHINE_SW88				sw_lock
 
 #endif /* _MACH_SWITCH_H */
