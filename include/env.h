@@ -10,7 +10,7 @@
  * version used. */
 
 #ifdef HAVE_FASTRAM_ATTRIBUTE
-#define __fastram__ __attribute__((__fastram__))
+#define __fastram__ __attribute__((section("direct")))
 #else
 #define __fastram__
 #endif
