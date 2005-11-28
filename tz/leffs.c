@@ -51,7 +51,7 @@ void no_lights_leff (void)
 void no_gi_leff (void)
 {
 	triac_disable (TRIAC_GI_MASK);
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	triac_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
