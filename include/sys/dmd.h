@@ -49,6 +49,7 @@ void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
 void dmd_alloc_high_clean (void);
 void dmd_draw_border (char *dbuf);
+void dmd_draw_horiz_line (dmd_buffer_t *dbuf, U8 y);
 void dmd_shift_up (dmd_buffer_t *dbuf);
 void dmd_shift_down (dmd_buffer_t *dbuf);
 void dmd_draw_image (char *image_bits);
