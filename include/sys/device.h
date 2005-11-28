@@ -65,10 +65,8 @@ typedef struct device_ops
 
 #define device_call_op(dev, op) \
 do { \
-	db_puts ("Calling device hook "); \
-	db_puts (#op); \
-	db_putc ('\n'); \
-	if (dev->props->ops->op) \
+	dbprintf ("Calling device hook %s\n", #op); \
+	if (in_live_game && (dev->props->ops->op)) \
 	{ \
 		(*dev->props->ops->op) (dev); \
 	} \
