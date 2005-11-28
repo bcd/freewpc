@@ -200,6 +200,21 @@ void dmd_draw_border (char *dbuf)
 	}
 }
 
+void dmd_draw_horiz_line (dmd_buffer_t *dbuf, U8 y)
+{
+	dbuf += y * (16 / 2);
+
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+	*dbuf++ = 0xffffUL;
+}
+
+
 void dmd_shift_up (dmd_buffer_t *dbuf)
 {
 	uint16_t i;
@@ -262,7 +277,7 @@ void dmd_draw_bitmap (dmd_buffer_t *image_bits,
 
 	for (j=0; j < height; j++)
 	{
-		for (i=0; i < (width / 2); i++)
+		for (i=0; i < ((width / 8) / 2); i++)
 		{
 			dbuf[(x + i)/ 2] = *image_bits++;
 		}
