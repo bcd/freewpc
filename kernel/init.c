@@ -1,3 +1,7 @@
+/*********************************************************************
+ * FreeWPC - the pinball software alternative
+ * Copyright (C) 2005 by Brian Dominy.  All Rights Reserved.
+ *********************************************************************/
 
 #include <freewpc.h>
 #include <asm-6809.h>
@@ -43,6 +47,7 @@ void irq_init (void)
 }
 
 
+/* do_reset is the entry point to the program.  It all starts here. */
 #pragma naked
 __noreturn__ void do_reset (void)
 {
@@ -53,6 +58,11 @@ __noreturn__ void do_reset (void)
 	extern void test_init (void);
 	extern void system_reset (void);
 
+	/* Initialize the direct page pointer.  This hardware register
+	 * determines where 'direct' addressing instructions are targeted.
+	 * By setting to zero, direct addresses are mapped to 0000h-00FFh.
+	 * We can use shorter instructions when referencing variables here.
+	 */
 	set_direct_page_pointer (0);
 
 	/* Initialize the stack pointer.  We can now make
@@ -79,7 +89,10 @@ __noreturn__ void do_reset (void)
 	wpc_set_rom_page (61);
 
 	sys_init_complete = 0;
-	
+
+	/* Initialize all of the other kernel subsystems,
+	 * starting with the hardware-centric ones and moving on
+	 * to software features. */
 	wpc_led_toggle ();
 #ifdef DEBUGGER
 	db_init ();
@@ -98,6 +111,11 @@ __noreturn__ void do_reset (void)
 
 	wpc_led_toggle ();
 	irq_init ();
+
+	/* task_init is somewhat special in that it transforms the system
+	 * from a single task into a multitasking one.  After this, tasks
+	 * can be spawned if need be.  A task is created for the current
+	 * thread of execution, too. */
 	task_init ();
 	deff_init ();
 	leff_init ();
@@ -108,15 +126,25 @@ __noreturn__ void do_reset (void)
 
 	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x06;
 
-	sys_init_complete++;
-
 	wpc_led_toggle ();
 
-
+	/* The system is mostly usable at this point.
+	 * Now, start the display effect that runs at powerup.
+	 */
 	task_create_gid (GID_SYSTEM_RESET, system_reset);
-	
+
+	/* Also run a probe on all of the ball devices, to see
+	 * if they are working properly and empty out any
+	 * balls in them that don't belong there yet. */
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
-	
+
+#if 0
+	/* The system can run itself now, this task is done! */
+	while (task_find_gid (GID_SYSTEM_RESET))
+		task_sleep (TIME_100MS * 5);
+#endif
+
+	sys_init_complete++;
 	task_exit ();
 }
 
@@ -137,6 +165,14 @@ void lockup_check_rtt (void)
 }
 
 
+/*
+ * do_irq is the entry point from the IRQ vector.  Due to the
+ * way the hardware works, the CPU will stop whatever it is doing
+ * and jump to this location every 976 microseconds (1024 times
+ * per second).  This function is used for time-critical operations
+ * which won't necessarily get scheduled accurately from the
+ * nonpreemptive tasks.
+ */
 #pragma interrupt
 void do_irq (void)
 {
@@ -176,6 +212,14 @@ void do_irq (void)
 }
 
 
+/*
+ * do_firq is the entry point from the FIRQ vector.  This interrupt
+ * is generated from the WPC ASIC on two different occasions: (1)
+ * when the DMD controller has been programmed to generate an 
+ * interrupt after drawing a particular scan line, and (2) when the
+ * WPC's peripheral timer register reaches zero.  The type of interrupt
+ * can be determined by reading the peripheral timer register.
+ */
 #pragma interrupt
 void do_firq (void)
 {
