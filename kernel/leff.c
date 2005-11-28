@@ -1,6 +1,15 @@
 
 #include <freewpc.h>
 
+/** Filename: leff.c
+ *
+ * A leff, or lamp effect, is a temporary override of the lamp matrix
+ * bits for a "light show".  At present, the leff module operates
+ * independently, but identically to the display effect module.
+ * See deff.c for details.
+ *
+ */
+
 #define L_NOLAMPS		0x0
 #define L_ALL_LAMPS	0xFF
 #define L_NOGI			0
@@ -259,6 +268,13 @@ void leff_init (void)
 	leff_prio = 0;
 	leff_active = LEFF_NULL;
 	memset (leff_queue, 0, MAX_QUEUED_LEFFS);
+}
+
+
+void leff_stop_all (void)
+{
+	task_kill_gid (GID_LEFF);
+	leff_init ();
 }
 
 

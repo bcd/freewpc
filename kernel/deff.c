@@ -1,6 +1,32 @@
 
 #include <freewpc.h>
 
+/** Filename: deff.c
+ * 
+ * A display effect -- or deff -- is a task responsible for drawing to
+ * the display (DMD or alphanumeric).
+ *
+ * At any given time, there may be multiple deffs which have been
+ * "started", or queued to run.  However, the display can only be granted
+ * to one deff at a time, so only the one with the highest "priority"
+ * actually executes.
+ *
+ * The single running deff always has the same task group ID,
+ * GID_DEFF.  Whenever priorities change, the running deff can be
+ * stopped just by killing GID_DEFF and then restarting whatever
+ * deff needs to be running.
+ *
+ * There are two kinds of deffs: normal, and running.  Running deffs
+ * are special in that they are long-lived and continue to run
+ * until explicitly stopped by a call to deff_stop().  Normal deffs
+ * are short-lived and stop on their own once the effect completes.
+ * If a normal deff can't get the display immediately, it is
+ * discarded.  If a running deff can't get the display, it is queued
+ * and subject to get it later if priorities change.
+ */
+
+
+/* TODO - move most of this, but not all, into the game specific code */
 #define MACHINE_DISPLAY_EFFECTS \
 	DECL_DEFF (DEFF_TEST_MENU, D_RUNNING, 5, test_menu_deff) \
 	DECL_DEFF (DEFF_AMODE, D_RUNNING, 10, amode_deff) \
@@ -244,6 +270,13 @@ void deff_init (void)
 	deff_prio = 0;
 	deff_active = DEFF_NULL;
 	memset (deff_queue, 0, MAX_QUEUED_DEFFS);
+}
+
+
+void deff_stop_all (void)
+{
+	task_kill_gid (GID_DEFF);
+	deff_init ();
 }
 
 

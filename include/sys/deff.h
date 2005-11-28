@@ -30,6 +30,7 @@ __noreturn__ void deff_exit (void);
 void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (int8_t count, task_ticks_t delay);
 void deff_init (void);
+void deff_stop_all (void);
 
 #endif /* _SYS_DEFF_H */
 
