@@ -106,3 +106,9 @@ DECLARE_SWITCH_DRIVER (sw_upper_skill)
 	.flags = SW_IN_GAME,
 };
 
+
+CALLSET_ENTRY (skill, end_game)
+{
+	disable_skill_shot ();
+}
+
