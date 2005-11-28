@@ -1,8 +1,6 @@
 
 #include <freewpc.h>
 
-#define C_STRING(x)	C_STR(x)
-#define C_STR(x)		#x
 
 static char gcc_version[] = C_STRING(GCC_VERSION);
 
@@ -21,6 +19,10 @@ void system_reset (void)
 
 	sprintf ("BUILT %s", build_date);
 	font_render_string (&font_5x5, 0, 14, sprintf_buffer);
+
+#ifdef USER_TAG
+	font_render_string (&font_5x5, 0, 21, C_STRING(USER_TAG));
+#endif
 
 	dmd_show_low ();
 
