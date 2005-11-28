@@ -26,10 +26,14 @@ MACHINE ?= tz
 TARGET_ROMPATH =
 
 # Which version of the assembler tools to use
-ASVER ?= 3.0.0
+ASVER ?= 1.5.2
+#ASVER ?= 3.0.0
 
 # Which version of the compiler to use
 GCC_VERSION ?= 3.3.6
+
+# Set to 'y' if you want to use the direct page
+USE_DIRECT_PAGE=n
 
 #######################################################################
 ###	Directories
@@ -65,6 +69,7 @@ TMPFILES += $(LINKCMD)
 
 TMPFILES = *.sp		# Intermediate sasm assmebler files
 TMPFILES += *.o		# Intermediate object files
+TMPFILES += *.rel		# Intermediate object files (as 3.0.0)
 TMPFILES += *.lnk		# Linker command files
 TMPFILES += *.s19 	# Motorola S-record files
 TMPFILES += *.map 	# Linker map files
@@ -188,6 +193,12 @@ CFLAGS += -Werror-implicit-function-declaration
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
 
+ifeq ($(ASVER),1.5.2)
+ASFLAGS =
+else
+ASFLAGS = -og
+endif
+
 #######################################################################
 ###	Include Machine Extensions
 #######################################################################
@@ -210,8 +221,14 @@ PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
 # particular function.
 #
 
+ifeq ($(USE_DIRECT_PAGE),y)
 DIRECT_AREA = 0x0
 RAM_AREA = 0x100
+DIRECT_LNK_CMD = "-b direct = $(DIRECT_AREA)"
+else
+RAM_AREA = 0x0
+DIRECT_LNK_CMD = "-x"
+endif
 PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
@@ -282,7 +299,7 @@ ifdef USER_MINOR
 CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
 endif
 ifdef USER_TAG
-CFLAGS += -DUSER_TAG=\"$(USER_TAG)\"
+CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
 
 #######################################################################
@@ -352,6 +369,7 @@ $(PAGED_LINKCMD) : $(DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $@
 	@echo "-mxswz" >> $@
+	@echo $(DIRECT_LNK_CMD) >> $@
 	@echo "-b ram = $(RAM_AREA)" >> $@
 	@for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $@; done
@@ -390,6 +408,7 @@ $(LINKCMD) : $(DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $(LINKCMD)
 	@echo "-mxswz" >> $(LINKCMD)
+	@echo $(DIRECT_LNK_CMD) >> $(LINKCMD)
 	@echo "-b ram = $(RAM_AREA)" >> $(LINKCMD)
 	@for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done
@@ -409,14 +428,16 @@ $(LINKCMD) : $(DEPS)
 # is invoked first.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
-	@echo Assembling $< ... && $(AS) $< 2>&1 | tee -a err
+	@echo Assembling $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
+	## @mv $*.rel $*.o
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
-	@echo Assembling page header $< ... && $(AS) $< 2>&1 | tee -a err
+	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
+	## @mv $(@:.o=.rel) $@
 
 #
 # General rule for how to build any C++ module.
@@ -442,7 +463,8 @@ $(XBM_OBJS) : %.o : %.xbm
 
 $(C_OBJS) $(XBM_OBJS) :
 	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $<
-	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
+	@echo Assembling $(@:.o=.S) ... && $(AS) $(ASFLAGS) $(@:.o=.S)
+	## @mv $(@:.o=.rel) $@
 
 
 #######################################################################
@@ -581,7 +603,13 @@ $(WEBDIR):
 #
 info:
 	@echo "Machine : $(MACHINE)"
+	@echo "GCC_VERSION = $(GCC_VERSION)"
+	@echo "CC = $(CC)"
+	-@$(CC) -v
+	@echo "AS = $(AS)"
+	-@$(AS)
 	@echo "CFLAGS = $(CFLAGS)"
+	@echo "ASFLAGS = $(ASFLAGS)"
 
 #
 # 'make clean' does what you think.
