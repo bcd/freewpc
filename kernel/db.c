@@ -4,7 +4,7 @@
 
 /* Initially zero, this is set to 1 when a remote debugger is
  * detected */
-static uint8_t db_attached;
+U8 db_attached;
 
 
 #ifdef DEBUGGER
