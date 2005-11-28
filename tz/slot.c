@@ -26,6 +26,7 @@ void slot_kick_sound (void)
 void slot_enter (device_t *dev)
 {
 	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
+	mark_ball_in_play ();
 
 	if (task_kill_gid (GID_SLOT_DISABLED_BY_PIANO))
 	{
