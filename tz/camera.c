@@ -25,5 +25,6 @@ CALLSET_ENTRY(camera, start_ball)
 DECLARE_SWITCH_DRIVER (sw_camera)
 {
 	.fn = sw_camera_handler,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 };
 
