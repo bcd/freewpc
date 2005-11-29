@@ -12,8 +12,6 @@
 # privileges to install it.
 #
 
-# DEBUG_COMPILER=y
-
 #######################################################################
 ###	Configuration
 #######################################################################
@@ -34,6 +32,10 @@ GCC_VERSION ?= 3.3.6
 
 # Set to 'y' if you want to use the direct page
 USE_DIRECT_PAGE=n
+
+# Uncomment this if you want extra debug notes from the compiler.
+# Normally, you do not want to turn this on.
+# DEBUG_COMPILER=y
 
 #######################################################################
 ###	Directories
@@ -229,6 +231,7 @@ else
 RAM_AREA = 0x0
 DIRECT_LNK_CMD = "-x"
 endif
+NVRAM_AREA = 0x1800
 PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
@@ -620,7 +623,7 @@ clean: clean_derived clean_gendefines
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
 clean_derived:
-	@for file in `echo $(XBM_H)` ;\
+	@for file in `echo $(XBM_H) include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done
 
