@@ -251,6 +251,17 @@ do { \
 } while (0);
 
 
+#define wpc_push_page(page) \
+{ \
+	U8 __saved_page = wpc_get_rom_page (); \
+	wpc_set_rom_page (page);
+
+
+#define wpc_pop_page() \
+	wpc_set_rom_page (__saved_page); \
+}
+
+
 /********************************************/
 /* LED Register                             */
 /********************************************/
