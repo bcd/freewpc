@@ -178,7 +178,7 @@ void sw_start_button_handler (void) __taskentry__
 {
 	extern void test_start_button (void);
 
-	if (0) /* in_test_mode */
+	if (in_test)
 	{
 		test_start_button ();
 		return;
