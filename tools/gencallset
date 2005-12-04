@@ -6,7 +6,7 @@
 # defines that match a particular pattern.  For each
 # one, treat as a function call and generate a call to it.
 
-my @dirs = ("kernel", "tz", "fonts");
+my @dirs = ("kernel", "mach", "fonts");
 
 
 my @functions = ();
