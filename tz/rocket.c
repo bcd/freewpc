@@ -5,7 +5,6 @@
 
 void sw_rocket_handler (void)
 {
-	// device_sw_handler (3);
 }
 
 DECLARE_SWITCH_DRIVER (sw_rocket)

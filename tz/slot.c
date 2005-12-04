@@ -6,7 +6,6 @@
 
 void sw_slot_handler (void)
 {
-	// device_sw_handler (2);
 }
 
 
