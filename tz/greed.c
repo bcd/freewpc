@@ -18,7 +18,6 @@ void sw_greed_handler (void)
 		greed_sound_index = 0;
 	sound_send (greed_sounds[greed_sound_index]);
 	score_add_current_const (0x500);
-	task_exit ();
 }
 
 
