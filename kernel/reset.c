@@ -11,10 +11,10 @@ void system_reset (void)
 {
 	dmd_alloc_low_clean ();
 
-	sprintf ("FREEWPC V%1x.%02x", FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR);
-	font_render_string (&font_5x5, 0, 0, sprintf_buffer);
+	font_render_string (&font_5x5, 0, 0, MACHINE_NAME);
 
-	sprintf ("GCC %s", gcc_version);
+	sprintf ("SY %1x.%02x GCC %s", 
+		FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR, gcc_version);
 	font_render_string (&font_5x5, 0, 7, sprintf_buffer);
 
 	sprintf ("BUILT %s", build_date);
