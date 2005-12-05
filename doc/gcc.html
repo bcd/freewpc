@@ -15,31 +15,36 @@ this project, which may or may not be of use to others.
 
 <p>For performance, we take care to use the smallest data type that will
 work.  Wherever possible, we use unsigned 8-bit values (<b>U8</b>).
-This maps to the C <b>unsigned char</b> type.  gcc consider plain <b>int</b>
-to be signed, 16-bit.  There is only one register that can be used for
-this purpose, the D register, so it should not be used unless necessary.
+This maps to the C <b>unsigned int</b> type. 
+There is only one register that can be used for
+this purpose, the B register, so it should not be used unless necessary.
+Future versions of the compiler may also use the A register for this
+type.  If you need 16-bit data, you should use <b>U16</b>, or
+<b>long</b>.
 
 <h2>Argument Passing Conventions</h2>
 
-<p>All function arguments are passed by pushing them onto the stack.
-Byte arguments are NOT extended to int when passing them, to minimize
-stack usage.  Because of this, you MUST use a function prototype for any
-function you call, so that the compiler can verify that the parameter
-types match.
+<p>gcc6809 supports a number of options for how to pass arguments
+to subroutines.  For compatibility with older releases, there are
+options to avoid argument passing in registers, however, by default
+gcc will put 1 or 2 arguments into registers, then pass everything
+else on the stack.  This yields the best performance.
 
 <p>I made one change to the gcc core to reduce the amount of stack
 space that it will use before popping arguments.  Normally, gcc will
 keep arguments on the stack for some time, and then try to pop lots of
 the arguments at once, to reduce the number of pop instructions.
-Because our kernel only gives each task a very small amount of stack
+Because the FreeWPC kernel only gives each task a very small amount of stack
 space, this can lead to stack overflow pretty quickly with the default
-values.
+values.  In my gcc6809 tree, the stack will pop once the argument size
+exceeds 8 bytes.  This still allows for some combining of pop instructions
+across multiple calls.
 
 <h2>Register Usage</h2>
 
 <h2>Stack Usage</h2>
 
-<h2>Using <i>#pragma section</i></h2>
+<h2>Using the <i>section</i> attribute</h2>
 
 <h2>Using Inline Assembly</h2>
 
