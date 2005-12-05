@@ -20,7 +20,8 @@
 MACHINE ?= tz
 
 # Set this to the path where the final ROM image should be installed
-# This is left blank on purpose: set this in your user.make file
+# This is left blank on purpose: set this in your user.make file.
+# There is no default value.
 TARGET_ROMPATH =
 
 # Which version of the assembler tools to use
@@ -30,7 +31,7 @@ ASVER ?= 1.5.2
 # Which version of the compiler to use
 GCC_VERSION ?= 3.3.6
 
-# Set to 'y' if you want to use the direct page
+# Set to 'y' if you want to use the direct page (not working yet)
 USE_DIRECT_PAGE=n
 
 # Uncomment this if you want extra debug notes from the compiler.
@@ -57,14 +58,18 @@ TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
 LINKCMD = freewpc.lnk
-PAGED_LINKCMD = page54.lnk page55.lnk page56.lnk page57.lnk page58.lnk \
+#PAGED_LINKCMD = page54.lnk page55.lnk page56.lnk page57.lnk page58.lnk \
+#	page59.lnk page60.lnk page61.lnk
+PAGED_LINKCMD = page56.lnk page57.lnk page58.lnk \
 	page59.lnk page60.lnk page61.lnk
 
 # The XBM prototype header file
 XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = freewpc.bin
-PAGED_BINFILES = page54.bin page55.bin page56.bin page57.bin \
+#PAGED_BINFILES = page54.bin page55.bin page56.bin page57.bin \
+#					  page58.bin page59.bin page60.bin page61.bin
+PAGED_BINFILES = page56.bin page57.bin \
 					  page58.bin page59.bin page60.bin page61.bin
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
@@ -83,6 +88,7 @@ TMPFILES += *.c.[0-9]*.*
 TMPFILES += *.out
 TMPFILES += *.m41 	# Old M4 macro output files
 TMPFILES += page*.s	# Page header files
+TMPFILES += *.callset # Callset files
 TMPFILES += $(ERR)
 
 #######################################################################
@@ -99,7 +105,11 @@ endif
 CC_MODE ?= -S
 # CC_MODE = -E
 LD = $(GCC_ROOT)/ld
+ifdef NEWAS
+AS = $(GCC_ROOT)/as-$(ASVER)
+else
 AS = $(GCC_ROOT)/as
+endif
 REQUIRED += $(CC) $(LD) $(AS)
 
 # Name of the S-record converter
@@ -112,6 +122,9 @@ PATH_REQUIRED += $(BLANKER)
 
 # The XBM prototype generator
 XBMPROTO = tools/xbmproto
+
+# The Unix calculator
+BC = bc
 
 #######################################################################
 ###	Source and Binary Filenames
@@ -149,6 +162,12 @@ ifdef GCC_VERSION
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 else
 CFLAGS += -DGCC_VERSION=3.1.1
+endif
+
+ifdef ASVER
+CFLAGS += -DAS_VERSION=$(ASVER)
+else
+CFLAGS += -DAS_VERSION=1.5.2
 endif
 
 # Default optimizations.  These are the only optimizations that
@@ -195,10 +214,14 @@ CFLAGS += -Werror-implicit-function-declaration
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
 
+
+#
+# Newer versions of the assembler require these flags be passed.
+#
 ifeq ($(ASVER),1.5.2)
 ASFLAGS =
 else
-ASFLAGS = -og
+ASFLAGS = -log
 endif
 
 #######################################################################
@@ -215,7 +238,15 @@ include $(MACHINE)/Makefile
 # explicitly state which pages things should belong in.
 # TBD
 
-PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
+#PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
+PAGED_SECTIONS = page56 page57 page58 page59 page60 page61
+
+NUM_PAGED_SECTIONS := 6 
+
+NUM_BLANK_PAGES := \
+	$(shell echo $(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS) | $(BC))
+
+BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
 
 #
 # The WPC physical memory map is divided into four sections.
@@ -246,8 +277,8 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 # which they should be placed.  This information must be
 # provided in both directions.
 #
-page54_OBJS = page54.o
-page55_OBJS = page55.o
+##page54_OBJS = page54.o
+##page55_OBJS = page55.o
 page56_OBJS = page56.o
 page57_OBJS = page57.o
 page58_OBJS = page58.o
@@ -258,18 +289,23 @@ page61_OBJS = page61.o $(FONT_OBJS)
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) : PAGE=61
 
+PAGE_DEFINES := -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
+CFLAGS += $(PAGE_DEFINES)
 
-
-PAGED_OBJS = $(page54_OBJS) $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
+#PAGED_OBJS = $(page54_OBJS) $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
+#				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
+PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
 				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 
 
-PAGE_HEADER_OBJS = page54.o page55.o page56.o page57.o page58.o page59.o \
+#PAGE_HEADER_OBJS = page54.o page55.o page56.o page57.o page58.o page59.o \
+#						 page60.o page61.o
+PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 						 page60.o page61.o
 
 SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
-$(SYSTEM_OBJS) : PAGE=0
+$(SYSTEM_OBJS) : PAGE=59
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS)
 
@@ -278,7 +314,9 @@ C_OBJS = $(KERNEL_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
 
-DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile include/mach
+MACH_LINKS = mach include/mach
+
+DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile $(MACH_LINKS)
 
 
 GENDEFINES = \
@@ -308,7 +346,7 @@ endif
 #######################################################################
 ###	Set Default Target
 #######################################################################
-default_target : clean_err check_prereqs mame_install
+default_target : clean_err check_prereqs install
 
 
 #######################################################################
@@ -322,15 +360,28 @@ check_prereqs :
 
 # TODO : change zip to do a replace of the existing ROM.  Also make
 # a backup of the existing zip so we can run the real game again :-)
-mame_install : $(PINMAME_GAME_ROM)
-	@echo Copying to mame directory ...; \
-	cp -p $(PINMAME_GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_ROM); \
-	cd $(TARGET_ROMPATH) && \
+install : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
+	@echo Installing to MAME directory '$(TARGET_ROMPATH)' ...; \
+	cd $(TARGET_ROMPATH); \
+	if [ ! -f $(PINMAME_MACHINE).zip.original ]; then \
+		echo Saving original MAME roms...; \
+		mv $(PINMAME_MACHINE).zip $(PINMAME_MACHINE).zip.original; \
+	fi; \
 	rm -f $(PINMAME_MACHINE).zip; \
 	zip -9 $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
 
-$(PINMAME_GAME_ROM) : $(GAME_ROM)
-	cp -p $(GAME_ROM) $(PINMAME_GAME_ROM)
+uninstall :
+	@echo Restoring original ROM in $(TARGET_ROMPATH)... ; \
+	cd $(TARGET_ROMPATH) && \
+	rm -f $(PINMAME_MACHINE).zip && \
+	mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip
+
+
+#
+# PinMAME will want the ROM file to be named differently...
+#
+$(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(GAME_ROM)
+	cp -p $(GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 
 #
 # Use 'make build' to build the ROM without installing it.
@@ -342,8 +393,9 @@ build : $(GAME_ROM)
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : blank256.bin blank64.bin blank32.bin $(BINFILES)
-	@echo Padding ... && cat blank256.bin blank64.bin blank32.bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
+$(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
+	@echo Padding ... && \
+		cat blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
@@ -424,6 +476,7 @@ $(LINKCMD) : $(DEPS)
 	@echo "-l c.a" >> $(LINKCMD)
 	@echo "-e" >> $(LINKCMD)
 
+
 #
 # General rule for how to build any assembler file.  We use gcc to do
 # it rather than invoking the assembler directly.  This lets us embed
@@ -432,7 +485,9 @@ $(LINKCMD) : $(DEPS)
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
 	@echo Assembling $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
-	## @mv $*.rel $*.o
+ifneq ($(ASVER), 1.5.2)
+	@mv $*.rel $*.o
+endif
 
 #
 # General rule for how to build a page header, which is a special
@@ -440,7 +495,9 @@ $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
 #
 $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
 	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
-	## @mv $(@:.o=.rel) $@
+ifneq ($(ASVER), 1.5.2)
+	@mv $(@:.o=.rel) $@
+endif
 
 #
 # General rule for how to build any C++ module.
@@ -467,8 +524,9 @@ $(XBM_OBJS) : %.o : %.xbm
 $(C_OBJS) $(XBM_OBJS) :
 	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $<
 	@echo Assembling $(@:.o=.S) ... && $(AS) $(ASFLAGS) $(@:.o=.S)
-	## @mv $(@:.o=.rel) $@
-
+ifneq ($(ASVER), 1.5.2)
+	@mv $(@:.o=.rel) $@
+endif
 
 #######################################################################
 ###	Header File Targets
@@ -487,7 +545,7 @@ $(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
 #
 # How to automake files of #defines
 #
-gendefines: $(GENDEFINES)
+gendefines: $(GENDEFINES) $(MACH_LINKS)
 
 include/gendefine_gid.h :
 	@echo Autogenerating task IDs... && tools/gendefine -p GID_ > include/gendefine_gid.h
@@ -509,8 +567,10 @@ gendefines_again: clean_gendefines gendefines
 #
 # How to automake callsets
 #
-callsets :
-	@echo Generating callsets ... && tools/gencallset
+$(MACHINE)/config.c : callset
+
+callset :
+	@echo Generating callsets ... && mkdir -p callset && tools/gencallset
 
 #######################################################################
 ###	Tools
@@ -559,20 +619,29 @@ astools-install:
 	cp -p $(ASTOOLS_DIR)/aslink $(LD)
 
 astools-build:
-	cd asm-thomson && make && make install
-	cd $(ASTOOLS_DIR) && make
+	cd asm-thomson && $(MAKE) && $(MAKE) install
+	cd $(ASTOOLS_DIR) && $(MAKE)
 
 astools-%:
-	cd $(ASTOOLS_DIR) && make $*
+	cd $(ASTOOLS_DIR) && $(MAKE) $*
 
 #
 # How to build the srec2bin utility, which is a simple S-record to
 # binary converter suitable for what we need.
 #
 $(SR) : $(SR).c
-	cd tools/srec2bin && make srec2bin
+	cd tools/srec2bin && $(MAKE) srec2bin
 
 kernel/switches.o : include/$(MACHINE)/switch.h
+
+
+#
+# Symbolic links to the machine code.  Once set, code can reference
+# 'mach' and 'include/mach' without knowing the specific machine type.
+#
+mach:
+	@echo Setting symbolic link for machine source code &&\
+		ln -s $(MACHINE) mach
 
 include/mach:
 	@echo Setting symbolic link for machine include files &&\
@@ -613,19 +682,21 @@ info:
 	-@$(AS)
 	@echo "CFLAGS = $(CFLAGS)"
 	@echo "ASFLAGS = $(ASFLAGS)"
+	@echo "BLANK_SIZE = $(BLANK_SIZE)"
 
 #
 # 'make clean' does what you think.
 #
 clean: clean_derived clean_gendefines
-	@for dir in `echo . kernel fonts images $(MACHINE)`;\
+	@for dir in `echo . callset kernel fonts images $(MACHINE)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
 clean_derived:
-	@for file in `echo $(XBM_H) include/mach` ;\
+	@for file in `echo $(XBM_H) mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
-		rm -f $$file; done
+		rm -f $$file; done && \
+		rm -rf callset
 
 show_objs:
 	@echo $(OBJS)
