@@ -102,6 +102,7 @@ U8 *font_lookup (const font_t *font, char c)
 		dbprintf ("Unprintable character: %i\n", c);
 		fatal (ERR_UNPRINTABLE_CHAR);
 	}
+
 	return entry + index * font->height;
 }
 
@@ -116,6 +117,8 @@ void fontargs_render_string (const fontargs_t *args)
    s = args->s;
   	x = args->x;
 
+	wpc_push_page (FONT_PAGE);
+
 	while (*s != '\0')
 	{
 		static U8 *data;
@@ -125,33 +128,11 @@ void fontargs_render_string (const fontargs_t *args)
 
 		xb = x / 8;
 
-#if 00000
-		if (*s == '.')
-		{
-			dmd_base[(args->font->height-1) * DMD_BYTE_WIDTH + xb - 1] |= 0x40;
-			s++;
-			x += 3;
-			continue;
-		}
-		else if (*s == ',')
-		{
-			U8 *dmd_pos = &dmd_base[(args->font->height - 3) * DMD_BYTE_WIDTH + xb - 1];
-			*dmd_pos |= 0x40;
-			dmd_pos -= DMD_BYTE_WIDTH;
-			*dmd_pos |= 0x40;
-			dmd_pos -= DMD_BYTE_WIDTH;
-			*dmd_pos |= 0x80;
-			s++;
-			x += 3;
-			continue;
-		}
-#endif
-
 #ifdef DB_FONT
 		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
 #endif
 
-		call_far (61, (data = font_lookup (args->font, *s)));
+		data = font_lookup (args->font, *s);
 		xb = x / 8;
 		xr = x % 8;
 
@@ -177,15 +158,23 @@ void fontargs_render_string (const fontargs_t *args)
 			x += args->font->width + args->font->spacing; 
 		s++;
 	}
+
+	wpc_pop_page ();
 }
 #pragma short_branch
 
 
 U8 font_get_string_width (const font_t *font, const char *s)
 {
+	U8 oldpage = wpc_get_rom_page ();
+	wpc_set_rom_page (FONT_PAGE);
+
 	U8 width = 0;
 	while (*s++ != '\0')
 		width += (font->width + font->spacing);
+
+	wpc_set_rom_page (oldpage);
+
 	return (width);
 }
 
