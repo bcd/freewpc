@@ -78,9 +78,9 @@ void sol_off (solnum_t sol)
 
 void sol_serve (void)
 {
-	sol_on (SOL_BALL_SERVE);
+	sol_on (MACHINE_BALL_SERVE_SOLENOID);
 	task_sleep (TIME_33MS);
-	sol_off (SOL_BALL_SERVE);
+	sol_off (MACHINE_BALL_SERVE_SOLENOID);
 }
 
 
