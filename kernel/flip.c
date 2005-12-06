@@ -15,8 +15,14 @@ void sw_left_flipper_handler (void)
 
 	if (in_test)
 		test_left_flipper_button ();
+
+#ifdef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)
-		amode_left_flipper ();
+	{
+		extern void MACHINE_AMODE_LEFT_FLIPPER_HANDLER (void);
+		MACHINE_AMODE_LEFT_FLIPPER_HANDLER ();
+	}
+#endif
 }
 
 void sw_right_flipper_handler (void)
@@ -25,8 +31,14 @@ void sw_right_flipper_handler (void)
 
 	if (in_test)
 		test_right_flipper_button ();
+
+#ifdef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)
-		amode_right_flipper ();
+	{
+		extern void MACHINE_AMODE_RIGHT_FLIPPER_HANDLER (void);
+		MACHINE_AMODE_RIGHT_FLIPPER_HANDLER ();
+	}
+#endif
 }
 
 void sw_upper_left_flipper_handler (void)
