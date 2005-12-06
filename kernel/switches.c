@@ -54,29 +54,31 @@ const switch_info_t sw_unused =
  * If any switch entries are still undefined, then fill
  * their slots with the "unused" switch.
  */
+#if 000
 #ifndef MACHINE_SW01
-#define MACHINE_SW01 sw_unused
+#define MACHINE_SW01 sw_left_coin
 #endif
 #ifndef MACHINE_SW02
-#define MACHINE_SW02 sw_unused
+#define MACHINE_SW02 sw_center_coin
 #endif
 #ifndef MACHINE_SW03
-#define MACHINE_SW03 sw_unused
+#define MACHINE_SW03 sw_right_coin
 #endif
 #ifndef MACHINE_SW04
-#define MACHINE_SW04 sw_unused
+#define MACHINE_SW04 sw_fourth_coin
 #endif
 #ifndef MACHINE_SW05
-#define MACHINE_SW05 sw_unused
+#define MACHINE_SW05 sw_escape_button
 #endif
 #ifndef MACHINE_SW06
-#define MACHINE_SW06 sw_unused
+#define MACHINE_SW06 sw_down_button
 #endif
 #ifndef MACHINE_SW07
-#define MACHINE_SW07 sw_unused
+#define MACHINE_SW07 sw_up_button
 #endif
 #ifndef MACHINE_SW08
-#define MACHINE_SW08 sw_unused
+#define MACHINE_SW08 sw_enter_button
+#endif
 #endif
 
 #ifndef MACHINE_SW11
@@ -280,8 +282,9 @@ const switch_info_t sw_unused =
  * table entries.
  */
 extern const switch_info_t 
-	MACHINE_SW01, MACHINE_SW02, MACHINE_SW03, MACHINE_SW04,
-	MACHINE_SW05, MACHINE_SW06, MACHINE_SW07, MACHINE_SW08,
+	/* Dedicated Switches */
+	sw_left_coin, sw_center_coin, sw_right_coin, sw_fourth_coin,
+	sw_escape_button, sw_down_button, sw_up_button, sw_enter_button,
 
 	MACHINE_SW11, MACHINE_SW12, MACHINE_SW13, MACHINE_SW14,
 	MACHINE_SW15, MACHINE_SW16, MACHINE_SW17, MACHINE_SW18,
@@ -312,8 +315,8 @@ extern const switch_info_t
 
 
 static const switch_info_t *switch_table[NUM_SWITCHES] = {
-	&MACHINE_SW01, &MACHINE_SW02, &MACHINE_SW03, &MACHINE_SW04,
-	&MACHINE_SW05, &MACHINE_SW06, &MACHINE_SW07, &MACHINE_SW08,
+	&sw_left_coin, &sw_center_coin, &sw_right_coin, &sw_fourth_coin,
+	&sw_escape_button, &sw_down_button, &sw_up_button, &sw_enter_button,
 
 	&MACHINE_SW11, &MACHINE_SW12, &MACHINE_SW13, &MACHINE_SW14,
 	&MACHINE_SW15, &MACHINE_SW16, &MACHINE_SW17, &MACHINE_SW18,
@@ -350,6 +353,60 @@ extern inline const switch_info_t *switch_lookup (uint8_t sw)
 	return switch_table[sw];
 }
 
+#ifdef DEBUGGER
+#pragma long_branch
+void switch_check_masks (void)
+{
+	U8 col;
+	S8 row;
+	U8 opto_mask;
+	U8 edge_mask;
+	const U8 *mach_optos = mach_opto_mask;
+	const U8 *mach_edges = mach_edge_switches;
+
+	for (col = 0; col < SWITCH_BITS_SIZE; col++)
+	{
+		opto_mask = 0;
+		edge_mask = 0;
+		for (row = 7; row >= 0; --row)
+		{
+			const switch_info_t *sw = switch_table[MAKE_SWITCH (col,row)];
+
+			opto_mask <<= 1;
+			edge_mask <<= 1;
+
+			if (sw->flags & SW_OPTICAL)
+				opto_mask |= 1;
+			if (sw->flags & SW_EDGE)
+				edge_mask |= 1;
+		}
+
+		if (opto_mask != *mach_optos)
+		{
+			dbprintf ("Column %d optos: mach %02X driver %02X read %02X\n",
+				col, *mach_optos, opto_mask, switch_bits[AR_RAW][col]);
+		}
+		else
+		{
+			dbprintf ("Column %d optos OK\n", col);
+		}
+
+		if (edge_mask != *mach_edges)
+		{
+			dbprintf ("Column %d edges: mach %02X driver %02X\n\n",
+				col, *mach_edges, edge_mask);
+		}
+		else
+		{
+			dbprintf ("Column %d edges OK\n\n", col);
+		}
+
+		mach_optos++;
+		mach_edges++;
+	}
+}
+#pragma short_branch
+#endif
 
 void switch_init (void)
 {
@@ -373,9 +430,15 @@ extern inline void switch_rowpoll (const uint8_t col)
 	else /* if (col == 9) */
 		asm __volatile__ ("\tlda " STR(WPC_FLIPTRONIC_PORT_A));
 
+	/* Set up the column strobe for the next read (on the next
+	 * iteration) */
 	if (col < 8)
 	{
+#if defined (MACHINE_PIC) && (MACHINE_PIC == 1)
+		asm __volatile__ ("\tldb %0" :: "g" (col + 0x16));
+#else
 		asm __volatile__ ("\tldb %0" :: "g" (1 << col));
+#endif
 		asm __volatile__ ("\tstb " STR(WPC_SW_COL_STROBE));
 	}
 

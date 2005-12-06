@@ -88,6 +88,7 @@
  * Declare switch drivers.  Each macro defines the name of a driver object
  * which contains all of the properties of that switch.
  */
+#if 0
 #define MACHINE_SW01				sw_left_coin
 #define MACHINE_SW02				sw_center_coin
 #define MACHINE_SW03				sw_right_coin
@@ -96,6 +97,7 @@
 #define MACHINE_SW06				sw_down_button
 #define MACHINE_SW07				sw_up_button
 #define MACHINE_SW08				sw_enter_button
+#endif
 
 #define MACHINE_SW11				sw_right_inlane
 #define MACHINE_SW12				sw_right_outlane
