@@ -84,9 +84,9 @@ __noreturn__ void do_reset (void)
 	wpc_set_ram_protect_size (RAM_LOCK_512);
 	wpc_set_ram_protect (RAM_LOCK_512);
 
-	/* Initialize the ROM page register so that the
+	/* Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped. */
-	wpc_set_rom_page (61);
+	wpc_set_rom_page (SYS_PAGE);
 
 	sys_init_complete = 0;
 
@@ -205,8 +205,10 @@ void do_irq (void)
 			lamp_flash_rtt ();
 			/// lockup_check_rtt (); /* disabled for now */
 
+#ifdef MACHINE_TZ
 			extern void tz_clock_rtt (void);
 			tz_clock_rtt ();
+#endif
 		}
 	}
 }
