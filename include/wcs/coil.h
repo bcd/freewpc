@@ -1,0 +1,50 @@
+
+
+#ifndef _MACH_COIL_H
+#define _MACH_COIL_H
+
+
+#define SOL_GOAL_POPPER		0
+#define SOL_TV_POPPER		1
+#define SOL_KICKBACK			2
+#define SOL_LOCK_RELEASE	3
+#define SOL_UPPER_EJECT		4
+#define SOL_TROUGH			5
+#define SOL_KNOCKER			6
+#define SOL_RAMP_DIVERTER	7
+
+#define SOL_LEFT_JET			8
+#define SOL_UPPER_JET		9
+#define SOL_LOWER_JET		10
+#define SOL_LEFT_SLING		11
+#define SOL_RIGHT_SLING		12
+#define SOL_RIGHT_EJECT		13
+#define SOL_LEFT_EJECT		14
+#define SOL_DIVERTER_HOLD	15
+
+#define SOL_GOALIE_DRIVE	20
+#define SOL_SPINNING_BALL	21
+#define SOL_BALL_CW			22
+#define SOL_BALL_CCW			23
+
+#define SOL_LOOP_GATE		33
+#define SOL_LOCK_MAGNET		34
+
+#if 0
+#define FLASH_JETS					16
+#define FLASH_RAMP3_POWER_PAYOFF	17
+#define FLASH_POWERFIELD			18
+#define FLASH_RAMP1					19
+#define FLASH_CLOCK_TARGET			27
+#define FLASH_UR_FLIPPER			40
+#define FLASH_GUMBALL_HIGH			41
+#define FLASH_GUMBALL_MID			42
+#define FLASH_GUMBALL_LOW			43
+#define FLASH_RAMP2					44
+
+#define SOL_CLOCK_REVERSE			45
+#define SOL_CLOCK_FORWARD			46
+#define SOL_CLOCK_SWITCH_ENABLE 	47
+#endif
+
+#endif /* _MACH_COIL_H */
