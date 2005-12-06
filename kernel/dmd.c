@@ -271,10 +271,9 @@ void dmd_draw_bitmap (dmd_buffer_t *image_bits,
 	U8 x, U8 y, U8 width, U8 height)
 {
 	int i, j;
-	U8 __saved_page = wpc_get_rom_page ();
-	wpc_set_rom_page (60);
 	dmd_buffer_t *dbuf = dmd_low_buffer + ((16 / 2) * y);
 
+	wpc_push_page (XBM_PAGE);
 	for (j=0; j < height; j++)
 	{
 		for (i=0; i < ((width / 8) / 2); i++)
@@ -283,7 +282,7 @@ void dmd_draw_bitmap (dmd_buffer_t *image_bits,
 		}
 		dbuf += (16 / 2);
 	}
-	wpc_set_rom_page (__saved_page);
+	wpc_pop_page ();
 }
 
 
