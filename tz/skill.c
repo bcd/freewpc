@@ -62,7 +62,6 @@ void sw_lower_skill_handler (void) __taskentry__
 	{
 		award_skill_switch (1);
 	}
-	task_exit ();
 }
 
 
@@ -72,7 +71,6 @@ void sw_center_skill_handler (void) __taskentry__
 	{
 		award_skill_switch (2);
 	}
-	task_exit ();
 }
 
 
@@ -82,7 +80,6 @@ void sw_upper_skill_handler (void) __taskentry__
 	{
 		award_skill_switch (3);
 	}
-	task_exit ();
 }
 
 
