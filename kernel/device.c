@@ -384,8 +384,8 @@ void device_init (void)
 	device_t *dev;
 
 	device_ss_state = 0;
-	max_balls = 3;
-	counted_balls = 3;
+	max_balls = MACHINE_TROUGH_SIZE;
+	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
 
