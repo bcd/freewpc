@@ -15,6 +15,11 @@ U8 extra_balls;
 
 void start_ball (void);
 
+#ifndef MACHINE_CUSTOM_AMODE
+void amode_start (void) {}
+void amode_stop (void) {}
+#endif
+
 void dump_game (void)
 {
 	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
