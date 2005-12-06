@@ -16,6 +16,8 @@ DECLARE_SWITCH_DRIVER (sw_trough)
 };
 
 
+#ifdef MACHINE_OUTHOLE_SWITCH
+
 void sw_outhole_handler (void)
 {
 	sol_on (SOL_OUTHOLE);
@@ -27,6 +29,8 @@ DECLARE_SWITCH_DRIVER (sw_outhole)
 {
 	.fn = sw_outhole_handler,
 };
+
+#endif
 
 void trough_enter (device_t *dev)
 {
@@ -54,10 +58,26 @@ device_ops_t trough_ops = {
 device_properties_t trough_props = {
 	.ops = &trough_ops,
 	.name = "TROUGH",
-	.sol = SOL_BALL_SERVE,
-	.sw_count = 3,
-	.init_max_count = 3,
-	.sw = { SW_LEFT_TROUGH, SW_CENTER_TROUGH, SW_RIGHT_TROUGH },
+	.sol = MACHINE_BALL_SERVE_SOLENOID,
+	.sw_count = MACHINE_TROUGH_SIZE,
+	.init_max_count = MACHINE_TROUGH_SIZE,
+	.sw = {
+#ifdef MACHINE_TROUGH1
+		MACHINE_TROUGH1,
+#endif
+#ifdef MACHINE_TROUGH2
+		MACHINE_TROUGH2,
+#endif
+#ifdef MACHINE_TROUGH3
+		MACHINE_TROUGH3,
+#endif
+#ifdef MACHINE_TROUGH4
+		MACHINE_TROUGH4,
+#endif
+#ifdef MACHINE_TROUGH5
+		MACHINE_TROUGH5,
+#endif
+	}
 };
 
 
