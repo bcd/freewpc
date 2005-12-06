@@ -2,8 +2,6 @@
 #include <freewpc.h>
 #include <queue.h>
 
-#if (MACHINE_DCS == 0)
-
 #define SOUND_QUEUE_LEN 8
 
 struct {
@@ -25,10 +23,18 @@ static void sound_queue_init (void)
 	queue_init ((queue_t *)&sound_queue);
 }
 
+#if (MACHINE_DCS == 1)
+static void sound_queue_insert (U16 val)
+{
+	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val >> 8);
+	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val & 0xFF);
+}
+#else
 static void sound_queue_insert (U8 val)
 {
 	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val);
 }
+#endif
 
 static U8 sound_queue_remove (void)
 {
@@ -81,6 +87,31 @@ void sound_reset (void)
 void sound_init (void)
 {
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
+#if (MACHINE_DCS == 1)
+	{
+		U8 x = 200;
+		while (--x > 0)
+		{
+			asm ("nop");
+			asm ("nop");
+			asm ("nop");
+		}
+	}
+
+	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
+
+	{
+		U8 x = 200;
+		while (--x > 0)
+		{
+			asm ("nop");
+			asm ("nop");
+			asm ("nop");
+		}
+	}
+
+	*(uint8_t *)WPCS_CONTROL_STATUS = 1;
+#endif
 	current_volume = DEFAULT_VOLUME;
 	sound_queue_init ();
 	volume_update ();
@@ -156,6 +187,4 @@ void volume_up (void)
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
-
-#endif /* !MACHINE_DCS */
 
