@@ -41,7 +41,7 @@ void award_right_loop (void)
 
 
 
-void sw_left_loop_handler (void) __taskentry__
+void sw_left_loop_handler (void)
 {
 	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
@@ -59,17 +59,15 @@ void sw_left_loop_handler (void) __taskentry__
 		task_create_gid (GID_LEFT_LOOP_ENTERED, loop_timer);
 		enter_loop ();
 	}
-	task_exit ();
 }
 
 
-void sw_right_loop_top_handler (void) __taskentry__
+void sw_right_loop_top_handler (void)
 {
-	task_exit ();
 }
 
 
-void sw_right_loop_handler (void) __taskentry__
+void sw_right_loop_handler (void)
 {
 	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
@@ -94,7 +92,6 @@ void sw_right_loop_handler (void) __taskentry__
 			enter_loop ();
 		}
 	}
-	task_exit ();
 }
 
 
