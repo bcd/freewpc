@@ -52,17 +52,20 @@ void test_start (void)
 	in_test = 1;
 	end_game ();
 	amode_stop ();
+	wpc_set_rom_page (59);
 	test_menu = &main_menu;
 	test_menu_stack_top = &test_menu_stack[0];
 	test_index = 0;
-	deff_restart (DEFF_TEST_MENU);
 	sound_reset ();
+	deff_stop_all ();
 	sound_send (SND_ENTER);
+	deff_restart (DEFF_TEST_MENU);
 }
 
 
 void test_stop (void)
 {
+	wpc_set_rom_page (61);
 	deff_stop (DEFF_TEST_MENU);
 	in_test = 0;
 	amode_start ();
@@ -358,6 +361,7 @@ void deff_enter_proc (void) __taskentry__
 }
 
 
+#ifdef MACHINE_TZ
 void autofire_launch_proc (void) __taskentry__
 {
 	extern void autofire_add_ball (void);
@@ -383,6 +387,7 @@ void release_gumball_proc (void) __taskentry__
 	task_exit ();
 }
 
+#endif /* MACHINE_TZ */
 
 /********************************************************************/
 
@@ -404,6 +409,11 @@ void user_tag_formatter (U8 *unused)
 void yes_no_formatter (U8 *boolp)
 {
 	sprintf (*boolp ? "YES" : "NO");
+}
+
+void asm_version_formatter (U8 *unused)
+{
+	sprintf (C_STRING (AS_VERSION));
 }
 
 void switch_edges_formatter (U8 *unused)
@@ -459,6 +469,7 @@ extern U8 db_attached;
 
 const test_t system_info_items[] = {
 	{ "GCC VERSION", &dev_menu_items[0], RO_VALUE_ITEM(gcc_version_formatter, NULL) },
+	{ "ASM VERSION", &dev_menu_items[0], RO_VALUE_ITEM(asm_version_formatter, NULL) },
 	{ "BUILD DATE", &dev_menu_items[0], RO_VALUE_ITEM(build_date_formatter, NULL) },
 	{ "USER TAG", &dev_menu_items[0], RO_VALUE_ITEM(user_tag_formatter, NULL) },
 	{ "DEBUG ENABLED", &dev_menu_items[0], RO_VALUE_ITEM(yes_no_formatter, &db_attached) },
@@ -471,9 +482,11 @@ const test_t dev_menu_items[] = {
 	{ "LAMP EFFECTS", &main_menu_items[4], 0, 0, TEST_ITEM(leff_enter_proc) },
 	{ "SOLENOID STEPPING", &main_menu_items[4], 0, 0, TEST_ITEM(NULL) },
 	{ "RAM DUMP", &main_menu_items[4], 0, 0, TEST_ITEM(NULL) },
+#ifdef MACHINE_TZ
 	{ "AUTOFIRE LAUNCH", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_launch_proc) },
 	{ "LOAD GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_to_gumball_proc) },
 	{ "RELEASE GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(release_gumball_proc) },
+#endif
 };
 
 const test_t main_menu_items[] = {
