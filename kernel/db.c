@@ -100,12 +100,21 @@ void db_rtt (void)
 					break;
 				}
 
+				case 's':
+				{
+					extern void switch_check_masks (void);
+					switch_check_masks ();
+					break;
+				}
+
+#ifdef MACHINE_TZ
 				case 'c':
 				{
 					extern void tz_dump_clock (void);
 					tz_dump_clock ();
 					break;
 				}
+#endif
 			}
 		}
 	}
