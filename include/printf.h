@@ -14,6 +14,8 @@ do { \
 } while (0) \
 
 
+/* TODO : this macro is generating warnings with the latest gcc.
+ * Not sure how to fix it properly yet. */
 #define va_arg(va, type)	*((type *)va)++
 
 #define va_end(va)
