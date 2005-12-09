@@ -190,7 +190,7 @@ void dmd_draw_border (char *dbuf)
 	int i;
 
 	for (i=0; i < 16; i++)
-		*dbuf16_bot++ = *dbuf16++ = 0xFFFF;
+		*dbuf16_bot++ = *dbuf16++ = 0xFFFFUL;
 	dbuf += 32;
 	for (i=0; i < 28; i++)
 	{
@@ -200,7 +200,7 @@ void dmd_draw_border (char *dbuf)
 	}
 }
 
-void dmd_draw_horiz_line (dmd_buffer_t *dbuf, U8 y)
+void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 {
 	dbuf += y * (16 / 2);
 
