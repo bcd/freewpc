@@ -15,6 +15,14 @@ z=`pwd | grep 3.3.6`;
 if [ "$?" = "0" ]; then
 	VERSION=3.3.6
 fi
+z=`pwd | grep 3.4.4`;
+if [ "$?" = "0" ]; then
+	VERSION=3.4.4
+fi
+z=`pwd | grep 4.0.1`;
+if [ "$?" = "0" ]; then
+	VERSION=4.0.1
+fi
 
 whereis sudo >/dev/null 2>&1
 if [ "$?" = "0" ]; then
@@ -51,6 +59,7 @@ case $arg in
 		;;
 
 	config|configure)
+		echo "Configuring gcc09 version $VERSION"
 		../gcc-${VERSION}/configure --target=m6809 --program-suffix=09 --nfp --enable-obsolete
 		;;
 
@@ -63,7 +72,12 @@ case $arg in
 		sleep 1
 		rm -f gcc/xgcc*
 		make cross LANGUAGES="c proto c++"
-		cd gcc && $SUDO make LANGUAGES="c proto c++" install
+		if [ "$VERSION" = "4.0.1" ]; then
+			GCC_SUBDIR=.
+		else
+			GCC_SUBDIR=gcc
+		fi
+		cd $GCC_SUBDIR && $SUDO make LANGUAGES="c proto c++" install
 		echo "Copying new executable ... installation complete!"
 		$SUDO mkdir -p /usr/local/m6809/bin
 		$SUDO cp xgcc /usr/local/m6809/bin/gcc
