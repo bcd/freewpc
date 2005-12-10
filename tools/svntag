@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# svntag - simple shell script for creating tagged releases
+#
 
 SVNROOT=svn+ssh://www.oddchange.com/home/bcd/svn/freewpc
 
