@@ -39,6 +39,11 @@ USE_DIRECT_PAGE=n
 # DEBUG_COMPILER=y
 
 #######################################################################
+###	Include User Settings
+#######################################################################
+-include user.make
+
+#######################################################################
 ###	Directories
 #######################################################################
 
@@ -58,8 +63,6 @@ TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
 LINKCMD = freewpc.lnk
-#PAGED_LINKCMD = page54.lnk page55.lnk page56.lnk page57.lnk page58.lnk \
-#	page59.lnk page60.lnk page61.lnk
 PAGED_LINKCMD = page56.lnk page57.lnk page58.lnk \
 	page59.lnk page60.lnk page61.lnk
 
@@ -67,8 +70,6 @@ PAGED_LINKCMD = page56.lnk page57.lnk page58.lnk \
 XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = freewpc.bin
-#PAGED_BINFILES = page54.bin page55.bin page56.bin page57.bin \
-#					  page58.bin page59.bin page60.bin page61.bin
 PAGED_BINFILES = page56.bin page57.bin \
 					  page58.bin page59.bin page60.bin page61.bin
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
@@ -214,6 +215,18 @@ CFLAGS += -Werror-implicit-function-declaration
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
 
+ifeq ($(FREEWPC_DEBUGGER),y)
+CFLAGS += -DDEBUGGER
+endif
+ifdef USER_MAJOR
+CFLAGS += -DFREEWPC_MAJOR_VERSION=$(USER_MAJOR)
+endif
+ifdef USER_MINOR
+CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
+endif
+ifdef USER_TAG
+CFLAGS += -DUSER_TAG=$(USER_TAG)
+endif
 
 #
 # Newer versions of the assembler require these flags be passed.
@@ -277,8 +290,6 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 # which they should be placed.  This information must be
 # provided in both directions.
 #
-##page54_OBJS = page54.o
-##page55_OBJS = page55.o
 page56_OBJS = page56.o
 page57_OBJS = page57.o
 page58_OBJS = page58.o
@@ -292,14 +303,10 @@ $(FONT_OBJS) : PAGE=61
 PAGE_DEFINES := -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
 
-#PAGED_OBJS = $(page54_OBJS) $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
-#				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
 				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 
 
-#PAGE_HEADER_OBJS = page54.o page55.o page56.o page57.o page58.o page59.o \
-#						 page60.o page61.o
 PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 						 page60.o page61.o
 
@@ -324,24 +331,6 @@ GENDEFINES = \
 	include/gendefine_deff.h \
 	include/gendefine_leff.h \
 	include/gendefine_lampset.h \
-
-#######################################################################
-###	Include User Settings
-#######################################################################
--include user.make
-
-ifeq ($(FREEWPC_DEBUGGER),y)
-CFLAGS += -DDEBUGGER
-endif
-ifdef USER_MAJOR
-CFLAGS += -DFREEWPC_MAJOR_VERSION=$(USER_MAJOR)
-endif
-ifdef USER_MINOR
-CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
-endif
-ifdef USER_TAG
-CFLAGS += -DUSER_TAG=$(USER_TAG)
-endif
 
 #######################################################################
 ###	Set Default Target
@@ -371,10 +360,12 @@ install : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 	zip -9 $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
 
 uninstall :
-	@echo Restoring original ROM in $(TARGET_ROMPATH)... ; \
-	cd $(TARGET_ROMPATH) && \
-	rm -f $(PINMAME_MACHINE).zip && \
-	mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip
+	@echo Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)... ; \
+	if [ -f $(PINMAME_MACHINE).zip.original ]; then \
+		cd $(TARGET_ROMPATH) && \
+		rm -f $(PINMAME_MACHINE).zip && \
+		mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip; \
+	fi
 
 
 #
@@ -599,13 +590,6 @@ gcc:
 
 gcc-%:
 	cd $(GCC_BUILD_DIR) && ./gccbuild $*
-
-
-#$(GCC_BUILD_DIR)/gccbuild: $(GCC_BUILD_DIR)
-#	cd $(GCC_BUILD_DIR) && ln -s ../gcc-build/gccbuild . && cd -
-#
-#$(GCC_BUILD_DIR):
-#	mkdir -p $(GCC_BUILD_DIR)
 
 
 #
