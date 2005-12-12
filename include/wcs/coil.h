@@ -30,21 +30,4 @@
 #define SOL_LOOP_GATE		33
 #define SOL_LOCK_MAGNET		34
 
-#if 0
-#define FLASH_JETS					16
-#define FLASH_RAMP3_POWER_PAYOFF	17
-#define FLASH_POWERFIELD			18
-#define FLASH_RAMP1					19
-#define FLASH_CLOCK_TARGET			27
-#define FLASH_UR_FLIPPER			40
-#define FLASH_GUMBALL_HIGH			41
-#define FLASH_GUMBALL_MID			42
-#define FLASH_GUMBALL_LOW			43
-#define FLASH_RAMP2					44
-
-#define SOL_CLOCK_REVERSE			45
-#define SOL_CLOCK_FORWARD			46
-#define SOL_CLOCK_SWITCH_ENABLE 	47
-#endif
-
 #endif /* _MACH_COIL_H */
