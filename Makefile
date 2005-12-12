@@ -360,11 +360,13 @@ install : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 	zip -9 $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
 
 uninstall :
-	@echo Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)... ; \
+	@cd $(TARGET_ROMPATH) && \
 	if [ -f $(PINMAME_MACHINE).zip.original ]; then \
-		cd $(TARGET_ROMPATH) && \
-		rm -f $(PINMAME_MACHINE).zip && \
-		mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip; \
+		if [ -f $(PINMAME_MACHINE).zip ]; then \
+			echo Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)... ; \
+			rm -f $(PINMAME_MACHINE).zip && \
+			mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip; \
+		fi; \
 	fi
 
 
