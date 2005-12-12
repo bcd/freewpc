@@ -53,6 +53,9 @@ typedef unsigned long uint16_t, U16;
 /* Include the standard header files that are needed
  * by most modules */
 
+/* Main configuration - game specific */
+#include <mach/config.h>
+
 /* General stuff */
 #include <asm-6809.h>
 #include <wpc.h>
@@ -85,11 +88,11 @@ typedef unsigned long uint16_t, U16;
 #include <stdadj.h>
 #include <printf.h>
 #include <amode.h>
+#include <test.h>
 #include <callset.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory, e.g. 'tz'. */
-#include <mach/config.h>
 #include <mach/switch.h>
 #include <mach/coil.h>
 #include <mach/sound.h>
