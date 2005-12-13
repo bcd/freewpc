@@ -71,6 +71,7 @@ void db_dump_switches (void)
 
 void db_rtt (void)
 {
+#ifdef DEBUGGER
 	if (!db_attached)
 	{
 		if (db_read_ready)
@@ -118,6 +119,7 @@ void db_rtt (void)
 			}
 		}
 	}
+#endif /* DEBUGGER */
 }
 
 void db_init (void)

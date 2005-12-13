@@ -1,10 +1,10 @@
 
 #include <freewpc.h>
 
-/* Lamps 00h through 3Fh correspond to the physical lamp locations */
+/** Lamps 00h through 3Fh correspond to the physical lamp locations */
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
-/* Lamps 40h through 7Fh are 'virtual' and don't really exist, but
+/** Lamps 40h through 7Fh are 'virtual' and don't really exist, but
  * they can be used to store boolean values.
  * These two bitsets are kept adjacent, so the same functions can
  * be used to bit-twiddle both of them.
@@ -13,21 +13,22 @@ __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
  * ball to ball. */
 __fastram__ U8 bit_matrix[NUM_VLAMP_COLS];
 
-/* Lamps 80h through BFh are the same as the regular lamps, but
+/** Lamps 80h through BFh are the same as the regular lamps, but
  * control the flash state */
 __fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
 
-/* Lamps C0h through FFh are similarly used to control the
+/** Lamps C0h through FFh are similarly used to control the
  * 'fast flash' state of the lamp.  Fast flash overrides slow
  * flash, which overrides the steady value. */
 __fastram__ U8 lamp_fast_flash_matrix[NUM_LAMP_COLS];
 
-/* Bitsets for doing temporary lamp effects, which hide the
+/** Bitsets for doing temporary lamp effects, which hide the
  * normal state of the lamps */
 __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+
 
 U8 lamp_flash_max;
 U8 lamp_flash_count;

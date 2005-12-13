@@ -68,6 +68,7 @@ typedef unsigned long uint16_t, U16;
 #include <sys/font.h>
 
 /* Hardware modules */
+#include <sys/ac.h>
 #include <sys/sol.h>
 #include <sys/lamp.h>
 #include <sys/sound.h>
@@ -75,6 +76,7 @@ typedef unsigned long uint16_t, U16;
 #include <sys/flip.h>
 #include <sys/dmd.h>
 #include <sys/triac.h>
+#include <sys/irq.h>
 
 /* Other software structures */
 #include <sys/deff.h>

@@ -80,7 +80,11 @@ void add_credit (void)
 		credit_count++;
 		lamp_start_update ();
 #endif
-		sound_send (SND_THUD);
+
+#ifdef MACHINE_ADD_CREDIT_SOUND
+		sound_send (MACHINE_ADD_CREDIT_SOUND);
+#endif
+
 		leff_start (LEFF_FLASH_ALL);
 		deff_restart (DEFF_CREDITS);
 	}

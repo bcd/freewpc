@@ -105,7 +105,7 @@ extern const uint8_t mach_edge_switches[];
 void piano_ball_start (void);
 void slot_ball_start (void);
 /* Declare the global machine hooks */
-#define MACHINE_HOOKS funhouse_hooks
+#define MACHINE_HOOKS wcs_hooks
 
 
 #endif /* MACH_CONFIG_H */

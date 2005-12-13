@@ -30,7 +30,7 @@ __fastram__ uint16_t task_save_U, task_save_X;
 
 task_t task_buffer[NUM_TASKS];
 
-U8 task_idle_count;
+bool task_dispatching_ok;
 
 #define DEBUG_TASKS
 
@@ -133,6 +133,9 @@ void task_save (void)
 	__asm__ volatile ("leau\t,s");
 	__x->s = __u;
 
+	/* Save current ROM page */
+	__x->rom_page = wpc_get_rom_page ();
+
 	/* TODO : add test for stack overflow */
 
 	/* Jump to the task dispatcher */
@@ -148,6 +151,9 @@ void task_restore (void)
 
 	task_current = __x;
 	set_stack_pointer (__x->s);
+
+	/* Restore ROM page register */
+	wpc_set_rom_page (__x->rom_page);
 
 	__asm__ volatile ("ldu	%0" :: "m" (__x->pc));
 	__asm__ volatile ("pshs\tu");
@@ -191,6 +197,7 @@ void task_create (void)
 
 	tp->gid = 0;
 	tp->arg = 0;
+	tp->rom_page = wpc_get_rom_page ();
 	*(uint16_t *)&tp->stack = 0xEEEE;
 
 	tp->s = (uint16_t)(tp->stack + TASK_STACK_SIZE - 1);
@@ -377,6 +384,10 @@ void __attribute__((noreturn)) task_dispatcher (void)
 
 	for (tp++;; tp++)
 	{
+		/* Increment counter for number of times we run
+		 * the dispatcher code. */
+		task_dispatching_ok = TRUE;
+
 		/* If at the end of the list, execute some special
 		 * system code before starting at the top again. */
 		if (tp == &task_buffer[NUM_TASKS])
@@ -384,12 +395,9 @@ void __attribute__((noreturn)) task_dispatcher (void)
 			/* Execute idle tasks on system stack */
 			set_stack_pointer (STACK_BASE);
 
-			/* Increment counter for number of times we run
-			 * the idle code. */
-			task_idle_count++;
-
 			/* Call idle tasks */
 			switch_idle_task ();
+			ac_idle_task ();
 
 			tp = &task_buffer[0];
 		}
@@ -425,7 +433,7 @@ void task_init (void)
 	extern uint8_t tick_count;
 
 	memset (task_buffer, 0, sizeof (task_buffer));
-	task_idle_count = 0;
+	task_dispatching_ok = TRUE;
 
 #ifdef DEBUG_TASKS
 	task_count = 0;

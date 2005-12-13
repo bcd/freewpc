@@ -36,7 +36,7 @@ const uint8_t mach_edge_switches[] = {
 	0x00, 0x00, 0x00, 0x1F, 0x12, 0x38, 0x00, 0xC0, 0x00, 0x00,
 };
 
-void funhouse_init (void)
+void wcs_init (void)
 {
 	#include <init.callset>
 }
@@ -46,50 +46,50 @@ CALLSET_ENTRY (unused, start_game) {}
 CALLSET_ENTRY (unused, end_game) {}
 CALLSET_ENTRY (unused, start_ball) {}
 
-void funhouse_start_game (void)
+void wcs_start_game (void)
 {
 	#include <start_game.callset>
 	task_sleep_sec (2);
 }
 
 
-void funhouse_end_game (void)
+void wcs_end_game (void)
 {
 	#include <end_game.callset>
 	if (!in_test)
-		music_set (MUS_POWERBALL_MANIA);
+		music_set (MUS_MAIN_DRUM_ENTRY);
 }
 
-void funhouse_start_ball (void)
+void wcs_start_ball (void)
 {
 	music_set (MUS_MULTIBALL_LIT_PLUNGER);
 	#include <start_ball.callset>
 }
 
-void funhouse_ball_in_play (void)
+void wcs_ball_in_play (void)
 {
 	music_set (MUS_MULTIBALL_LIT);
 	/* start ballsaver if enabled */
 }
 
-bool funhouse_end_ball (void)
+bool wcs_end_ball (void)
 {
 	sound_reset ();
 	return TRUE;
 }
 
 
-void funhouse_add_player (void)
+void wcs_add_player (void)
 {
 }
 
 
-void funhouse_any_pf_switch (void)
+void wcs_any_pf_switch (void)
 {
 }
 
 
-void funhouse_bonus (void)
+void wcs_bonus (void)
 {
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
@@ -100,37 +100,37 @@ void funhouse_bonus (void)
 }
 
 
-void funhouse_tilt (void)
+void wcs_tilt (void)
 {
 }
 
 
-void funhouse_tilt_warning (void)
+void wcs_tilt_warning (void)
 {
 }
 
 
-void funhouse_start_without_credits (void)
+void wcs_start_without_credits (void)
 {
 }
 
-void funhouse_coin_added (void)
+void wcs_coin_added (void)
 {
 }
 
-machine_hooks_t funhouse_hooks = {
-	.start_game = funhouse_start_game,
-	.end_game = funhouse_end_game,
-	.start_ball = funhouse_start_ball,
-	.ball_in_play = funhouse_ball_in_play,
-	.end_ball = funhouse_end_ball,
-	.add_player = funhouse_add_player,
-	.init = funhouse_init,
-	.bonus = funhouse_bonus,
-	.tilt = funhouse_tilt,
-	.tilt_warning = funhouse_tilt_warning,
-	.any_pf_switch = funhouse_any_pf_switch,
-	.start_without_credits = funhouse_start_without_credits,
-	.coin_added = funhouse_coin_added,
+machine_hooks_t wcs_hooks = {
+	.start_game = wcs_start_game,
+	.end_game = wcs_end_game,
+	.start_ball = wcs_start_ball,
+	.ball_in_play = wcs_ball_in_play,
+	.end_ball = wcs_end_ball,
+	.add_player = wcs_add_player,
+	.init = wcs_init,
+	.bonus = wcs_bonus,
+	.tilt = wcs_tilt,
+	.tilt_warning = wcs_tilt_warning,
+	.any_pf_switch = wcs_any_pf_switch,
+	.start_without_credits = wcs_start_without_credits,
+	.coin_added = wcs_coin_added,
 };
 

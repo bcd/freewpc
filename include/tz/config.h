@@ -84,6 +84,9 @@
 /* Define optional lamps */
 #define MACHINE_BUYIN_LAMP
 
+/* Define sound effects for standard system functions */
+#define MACHINE_ADD_CREDIT_SOUND		SND_THUD
+
 /* Define the names of functions to handle flipper buttons
  * in attract mode.  Leave undefined if not needed.
  * The functions should not take any arguments. */
@@ -95,6 +98,13 @@
  * If undefined, the system will use a default function.
  */
 #define MACHINE_CUSTOM_AMODE
+
+/* Define additional test menu items.  This is intended to be used
+ * for devices unique to each machine. */
+#define MACHINE_TEST_MENU_ITEMS \
+	{ "AUTOFIRE LAUNCH", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_launch_proc) }, \
+	{ "LOAD GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_to_gumball_proc) }, \
+	{ "RELEASE GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(release_gumball_proc) },
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
@@ -124,7 +134,11 @@ extern const uint8_t mach_edge_switches[];
 	DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 
 
+/* Externs for any functions system needs to see */
 void piano_ball_start (void);
 void slot_ball_start (void);
+void autofire_launch_proc (void);
+void autofire_to_gumball_proc (void);
+void release_gumball_proc (void);
 
 #endif /* MACH_CONFIG_H */

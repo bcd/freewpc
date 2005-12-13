@@ -23,18 +23,10 @@ static void sound_queue_init (void)
 	queue_init ((queue_t *)&sound_queue);
 }
 
-#if (MACHINE_DCS == 1)
-static void sound_queue_insert (U16 val)
-{
-	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val >> 8);
-	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val & 0xFF);
-}
-#else
 static void sound_queue_insert (U8 val)
 {
 	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val);
 }
-#endif
 
 static U8 sound_queue_remove (void)
 {
@@ -52,7 +44,10 @@ void music_set (music_code_t code)
 	if ((current_volume > 0) || (code == MUS_OFF))
 	{
 		*music_head = code;
-		sound_queue_insert (code);
+#if (MACHINE_DCS == 1)
+		sound_queue_insert (0);
+#endif
+		sound_queue_insert (*music_head);
 	}
 }
 
@@ -86,36 +81,41 @@ void sound_reset (void)
 
 void sound_init (void)
 {
+#if (MACHINE_DCS == 0)
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
-#if (MACHINE_DCS == 1)
-	{
-		U8 x = 200;
-		while (--x > 0)
-		{
-			asm ("nop");
-			asm ("nop");
-			asm ("nop");
-		}
-	}
-
-	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
-
-	{
-		U8 x = 200;
-		while (--x > 0)
-		{
-			asm ("nop");
-			asm ("nop");
-			asm ("nop");
-		}
-	}
-
-	*(uint8_t *)WPCS_CONTROL_STATUS = 1;
-#endif
 	current_volume = DEFAULT_VOLUME;
 	sound_queue_init ();
 	volume_update ();
 	music_off ();
+#else
+	static U8 dcs_init_string[] = {
+		0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
+		0xC4, 0xAA, 0x83, 0x37, 0x28, 0xC8, 0xE6, 0xE7, 0xD4, 0x85,
+		0xD9, 0x16, 0x10, 0x64, 0x58, 0xC6, 0xCC, 0x93, 0x85, 0x0F,
+		0x7C
+	};
+	int i, j;
+
+	current_volume = DEFAULT_VOLUME;
+	sound_queue_init ();
+
+	for (i=0; i < sizeof (dcs_init_string); i++)
+	{
+		for (j=0; j < 4; j++)
+		{
+			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			task_sleep (1); /* 8ms */
+			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			task_sleep (1); /* 8ms */
+			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			task_sleep (1); /* 8ms */
+			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			task_sleep (1); /* 8ms */
+		}
+	}
+
+	task_exit ();
+#endif
 }
 
 void sound_send (sound_code_t code)
@@ -130,13 +130,19 @@ void sound_send (sound_code_t code)
 	asm ("sta %0" :: "m" (code_hi));
 	asm ("stb %0" :: "m" (code_lo));
 
+#if (MACHINE_DCS == 0)
 	if (code_hi == 0)
 	{
 		sound_queue_insert (code_lo);
 	}
 	else
+#endif
 	{
+#if (MACHINE_DCS == 1)
+		sound_queue_insert (code_hi);
+#else
 		sound_queue_insert (SND_START_EXTENDED);
+#endif
 		sound_queue_insert (code_lo);
 	}
 }

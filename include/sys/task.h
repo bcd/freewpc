@@ -36,7 +36,8 @@ typedef struct
 	uint8_t			a;
 	uint8_t			b;
 #else
-	uint16_t			unused_2;
+	uint8_t			rom_page;
+	uint8_t			unused_2;
 #endif
 	uint16_t			arg;
 	uint8_t			stack[TASK_STACK_SIZE];
@@ -46,7 +47,7 @@ typedef task_t *task_pid_t;
 
 
 
-extern U8 task_idle_count;
+extern bool task_dispatching_ok;
 extern task_t *task_current;
 
 

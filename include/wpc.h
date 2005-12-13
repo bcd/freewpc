@@ -18,13 +18,11 @@
  * WPC generations
  ***************************************************************/
 
+#if 0
 #define WPC_ALPHA 		0
 #define WPC_FLIPTRONIC 	1
 #define WPC95  			2
 #define WPC_DMD 			3
-
-#ifndef WPC_FAMILY
-#define WPC_FAMILY 		WPC_DMD
 #endif
 
 /* The FIRQ clear/peripheral timer register bits */
@@ -151,15 +149,14 @@
 #define WPC_SW_JUMPER_INPUT 			0x3FE7
 #define WPC_SW_CABINET_INPUT 			0x3FE8
 
-#if (WPC_FAMILY == WPC95)
-#define WPC95_SW_PIC_READ 				0x3FE9
-#define WPC95_SW_PIC_WRITE 			0x3FEA
-#else
 #define WPC_SW_ROW_INPUT 				0x3FE9
 #define WPC_SW_COL_STROBE 				0x3FEA
+#if (MACHINE_PIC == 1)
+#define WPC95_SW_PIC_READ 				0x3FE9
+#define WPC95_SW_PIC_WRITE 			0x3FEA
 #endif
 
-#if (WPC_FAMILY == WPC_ALPHA)
+#if (MACHINE_DMD == 0)
 #define WPC_ALPHA_POS 					0x3FEB
 #define WPC_ALPHA_ROW1 					0x3FEC
 #else
@@ -168,15 +165,15 @@
 #define WPC_EXTBOARD3 					0x3FED
 #endif
 
-#if (WPC_FAMILY == WPC95)
-#else
+#if (MACHINE_WCS95 == 1)
 #define WPC95_FLIPPER_COIL_OUTPUT 	0x3FEE
 #define WPC95_FLIPPER_SWITCH_INPUT 	0x3FEF
+#else
 #endif
 
-#if (WPC_FAMILY == WPC_ALPHA)
-#else
+#if (MACHINE_DMD == 0)
 #define WPC_ALPHA_ROW2 					0x3FEE
+#else
 #endif
 
 #define WPC_LEDS 							0x3FF2
@@ -229,6 +226,10 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 }
 
 /********************************************/
+/* DIP Switches                             */
+/********************************************/
+
+/********************************************/
 /* ROM Paging                               */
 /********************************************/
 
@@ -277,9 +278,15 @@ do { \
 /* Zero Crossing/IRQ Clear Register         */
 /********************************************/
 
-extern inline void wpc_irq_clear (void)
+extern inline void wpc_write_irq_clear (U8 val)
 {
-	*(uint8_t *)WPC_ZEROCROSS_IRQ_CLEAR = 0x96;
+	*(volatile U8 *)WPC_ZEROCROSS_IRQ_CLEAR = val;
+}
+
+extern inline U8 wpc_read_ac_zerocross (void)
+{
+	U8 val = *(volatile U8 *)WPC_ZEROCROSS_IRQ_CLEAR;
+	return (val & 0x80);
 }
 
 

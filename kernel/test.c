@@ -1,50 +1,20 @@
 
 #include <freewpc.h>
 
-
-uint8_t in_test;
-
-struct test;
-
-typedef struct test_class
-{
-	void (*escape_handler) (struct test *t);
-	void (*enter_handler) (struct test *t);
-	void (*up_handler) (struct test *t);
-	void (*down_handler) (struct test *t);
-} test_class_t;
-
-typedef struct test
-{
-	const char *banner;
-	const struct test *up;
-	uint8_t start_index;
-	uint8_t child_count;
-	union {
-		struct {
-			const struct test *first_child;
-		} menu;
-
-		struct {
-			void (*enter_proc) (void) __taskentry__;
-			void (*value_format) (U8 *value);
-			U8 *value;
-		} item;
-	} u;
-} test_t;
+/** 1 if we are in test mode, 0 if not */
+U8 in_test;
 
 extern const test_t main_menu;
 extern const test_t main_menu_items[];
 extern const test_t dev_menu_items[];
-
-#define TEST_MENU_COUNT(m)	(sizeof (m) / sizeof (struct test))
 
 const test_t *test_menu_stack[8];
 const test_t **test_menu_stack_top;
 
 const test_t *test_menu;
 
-uint8_t test_index;
+/** The index of the current menu item that is being displayed */
+U8 test_index;
 
 
 void test_start (void)
@@ -58,7 +28,7 @@ void test_start (void)
 	test_index = 0;
 	sound_reset ();
 	deff_stop_all ();
-	sound_send (SND_ENTER);
+	sound_send (SND_TEST_ENTER);
 	deff_restart (DEFF_TEST_MENU);
 }
 
@@ -79,7 +49,7 @@ __taskentry__ __noreturn__ void test_menu_deff (void)
 	dmd_clean_page (dmd_low_buffer);
 
 	font_render_string_center (&font_5x5, 64, 4, test_menu->banner);
-	dmd_draw_horiz_line (dmd_low_buffer, 11);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
 
 	dmd_copy_low_to_high ();
 
@@ -102,6 +72,11 @@ __taskentry__ __noreturn__ void test_menu_deff (void)
 				task_sleep_sec (5);
 		}
 	}
+	else
+	{
+		sprintf ("%02X", test_index);
+		font_render_string (&font_5x5, 32, 14, sprintf_buffer);
+	}
 
 	for (;;)
 	{
@@ -114,7 +89,7 @@ __taskentry__ __noreturn__ void test_menu_deff (void)
 
 void test_up (void)
 {
-	sound_send (SND_UP);
+	sound_send (SND_TEST_UP);
 	test_index++;
 	if ((test_menu->child_count) && (test_index >= test_menu->child_count))
 		test_index = test_menu->start_index;
@@ -144,7 +119,7 @@ void test_up_button (void)
 
 void test_down (void)
 {
-	sound_send (SND_DOWN);
+	sound_send (SND_TEST_DOWN);
 	if ((test_menu->child_count) && (test_index == 0))
 		test_index = test_menu->child_count - 1;
 	else
@@ -171,12 +146,12 @@ void test_enter_button (void)
 		{
 			test_menu = &test_menu->u.menu.first_child[test_index];
 			test_index = test_menu->start_index;
-			sound_send (SND_ENTER);
+			sound_send (SND_TEST_ENTER);
 			deff_restart (DEFF_TEST_MENU);
 		}
 		else
 		{
-			sound_send (SND_ALERT);
+			sound_send (SND_TEST_ALERT);
 		}
 	}
 	else if (test_menu->u.item.enter_proc)
@@ -209,7 +184,7 @@ void test_start_button (void)
 
 void test_left_flipper_button (void)
 {
-	sound_send (SND_DOWN);
+	sound_send (SND_TEST_DOWN);
 	if ((test_menu->child_count) && (test_index == 0))
 		test_index = test_menu->child_count - 1;
 	else
@@ -220,7 +195,7 @@ void test_left_flipper_button (void)
 
 void test_right_flipper_button (void)
 {
-	sound_send (SND_UP);
+	sound_send (SND_TEST_UP);
 	test_index += 0x10;
 	if ((test_menu->child_count) && (test_index >= test_menu->child_count))
 		test_index = test_menu->start_index;
@@ -239,7 +214,11 @@ void sound_enter_proc (void) __taskentry__
 
 void sound2_enter_proc (void) __taskentry__
 {
+#if (MACHINE_DCS == 0)
 	sound_send (0x100 + test_index);
+#else
+	sound_send (0x100 + test_index); /* or 0x300 for test sounds */
+#endif
 	task_exit ();
 }
 
@@ -360,35 +339,6 @@ void deff_enter_proc (void) __taskentry__
 	task_exit ();
 }
 
-
-#ifdef MACHINE_TZ
-void autofire_launch_proc (void) __taskentry__
-{
-	extern void autofire_add_ball (void);
-
-	autofire_add_ball ();
-	task_exit ();
-}
-
-void autofire_to_gumball_proc (void) __taskentry__
-{
-	extern void gumball_load_from_trough (void);
-
-	gumball_load_from_trough ();
-	task_exit ();
-}
-
-
-void release_gumball_proc (void) __taskentry__
-{
-	extern void gumball_release (void);
-
-	gumball_release ();
-	task_exit ();
-}
-
-#endif /* MACHINE_TZ */
-
 /********************************************************************/
 
 void gcc_version_formatter (U8 *unused)
@@ -422,15 +372,6 @@ void switch_edges_formatter (U8 *unused)
 
 /********************************************************************/
 
-
-#define TEST_ITEM(enter_proc)	\
-	.u = { .item = { enter_proc, NULL, NULL } }
-
-#define RO_VALUE_ITEM(format, valptr) \
-	0, 0, .u = { .item = { NULL, format, valptr } }
-
-#define TEST_MENU(m)	\
-	TEST_MENU_COUNT(m), .u = { .menu = { m } }
 
 const test_t effect_menu_items[] = {
 };
@@ -482,10 +423,8 @@ const test_t dev_menu_items[] = {
 	{ "LAMP EFFECTS", &main_menu_items[4], 0, 0, TEST_ITEM(leff_enter_proc) },
 	{ "SOLENOID STEPPING", &main_menu_items[4], 0, 0, TEST_ITEM(NULL) },
 	{ "RAM DUMP", &main_menu_items[4], 0, 0, TEST_ITEM(NULL) },
-#ifdef MACHINE_TZ
-	{ "AUTOFIRE LAUNCH", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_launch_proc) },
-	{ "LOAD GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_to_gumball_proc) },
-	{ "RELEASE GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(release_gumball_proc) },
+#ifdef MACHINE_TEST_MENU_ITEMS
+	MACHINE_TEST_MENU_ITEMS
 #endif
 };
 
