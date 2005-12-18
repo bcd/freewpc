@@ -15,20 +15,14 @@
 #define STR(x)	S(x)
 
 /***************************************************************
- * WPC generations
+ * Peripheral timer
  ***************************************************************/
-
-#if 0
-#define WPC_ALPHA 		0
-#define WPC_FLIPTRONIC 	1
-#define WPC95  			2
-#define WPC_DMD 			3
-#endif
 
 /* The FIRQ clear/peripheral timer register bits */
 #define FIRQ_CLEAR_BIT 0x80
 
 
+#if 0
 /***************************************************************
  * Paging
  ***************************************************************/
@@ -36,6 +30,7 @@
 /* Offset of the offset and page parts of a far pointer */
 #define FP_OFFSET			0
 #define FP_PAGE			2
+#endif
 
 /***************************************************************
  * Memory usage
@@ -48,7 +43,7 @@
 #define USER_RAM_SIZE	0x1800
 
 /* The protected RAM size -- whatever is left */
-#define PROT_RAM_SIZE	(RAM_SIZE - USER_RAM_SIZE)
+#define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
 /* The base address of the (dynamic) heap */
 #define HEAP_BASE 		0x800
@@ -262,6 +257,19 @@ do { \
 	wpc_set_rom_page (__saved_page); \
 }
 
+/********************************************/
+/* RAM Paging                               */
+/********************************************/
+
+extern inline uint8_t wpc_get_ram_page (void)
+{
+	return *(volatile uint8_t *)WPC_RAM_BANK;
+}
+
+extern inline void wpc_set_ram_page (uint8_t page)
+{
+	*(volatile uint8_t *)WPC_RAM_BANK = page;
+}
 
 /********************************************/
 /* LED Register                             */

@@ -78,6 +78,9 @@ __noreturn__ void do_reset (void)
 	 * separate from this one. */
 	set_stack_pointer (STACK_BASE);
 
+	/** Initializing the RAM page */
+	wpc_set_ram_page (0);
+
 	/** Perform basic diagnostics to ensure that everything is
 	 * more or less working.
 	 * 1. Verify ROM is good first, since that ensures that this
@@ -177,12 +180,7 @@ __noreturn__ void do_reset (void)
 	 * balls in them that don't belong there yet. */
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
-#if 0
 	/* The system can run itself now, this task is done! */
-	while (task_find_gid (GID_SYSTEM_RESET))
-		task_sleep (TIME_100MS * 5);
-#endif
-
 	sys_init_complete++;
 	task_exit ();
 }
@@ -202,7 +200,6 @@ void lockup_check_rtt (void)
 {
 	if (sys_init_complete && !task_dispatching_ok)
 	{
-		// db_puts ("lockup detected!\n");
 		do_fatal (ERR_FCFS_LOCKUP);
 	}
 	else
