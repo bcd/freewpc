@@ -353,7 +353,7 @@ install : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 	@echo Installing to MAME directory '$(TARGET_ROMPATH)' ...; \
 	cd $(TARGET_ROMPATH); \
 	if [ ! -f $(PINMAME_MACHINE).zip.original ]; then \
-		echo Saving original MAME roms...; \
+		echo "Saving original MAME roms..."; \
 		mv $(PINMAME_MACHINE).zip $(PINMAME_MACHINE).zip.original; \
 	fi; \
 	rm -f $(PINMAME_MACHINE).zip; \
@@ -363,7 +363,7 @@ uninstall :
 	@cd $(TARGET_ROMPATH) && \
 	if [ -f $(PINMAME_MACHINE).zip.original ]; then \
 		if [ -f $(PINMAME_MACHINE).zip ]; then \
-			echo Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)... ; \
+			echo "Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)..."; \
 			rm -f $(PINMAME_MACHINE).zip && \
 			mv $(PINMAME_MACHINE).zip.original $(PINMAME_MACHINE).zip; \
 		fi; \
