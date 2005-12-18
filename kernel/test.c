@@ -22,7 +22,7 @@ void test_start (void)
 	in_test = 1;
 	end_game ();
 	amode_stop ();
-	wpc_set_rom_page (59);
+	/// wpc_set_rom_page (59);
 	test_menu = &main_menu;
 	test_menu_stack_top = &test_menu_stack[0];
 	test_index = 0;
@@ -35,7 +35,7 @@ void test_start (void)
 
 void test_stop (void)
 {
-	wpc_set_rom_page (61);
+	/// wpc_set_rom_page (61);
 	deff_stop (DEFF_TEST_MENU);
 	in_test = 0;
 	amode_start ();
@@ -413,7 +413,7 @@ const test_t system_info_items[] = {
 	{ "ASM VERSION", &dev_menu_items[0], RO_VALUE_ITEM(asm_version_formatter, NULL) },
 	{ "BUILD DATE", &dev_menu_items[0], RO_VALUE_ITEM(build_date_formatter, NULL) },
 	{ "USER TAG", &dev_menu_items[0], RO_VALUE_ITEM(user_tag_formatter, NULL) },
-	{ "DEBUG ENABLED", &dev_menu_items[0], RO_VALUE_ITEM(yes_no_formatter, &db_attached) },
+	{ "DEBUG ATTACHED", &dev_menu_items[0], RO_VALUE_ITEM(yes_no_formatter, &db_attached) },
 };
 
 const test_t dev_menu_items[] = {
