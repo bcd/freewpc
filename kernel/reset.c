@@ -28,6 +28,9 @@ void system_reset (void)
 
 	task_sleep_sec (3);
 
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+
 	amode_start ();
 
 	task_exit ();
