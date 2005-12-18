@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM = fwcs0_00.rom
+GAME_ROM = fwcs0_01.rom
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
