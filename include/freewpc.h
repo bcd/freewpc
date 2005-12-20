@@ -25,6 +25,11 @@ typedef unsigned char uint8_t, U8;
 typedef long int16_t, I16, S16;
 typedef unsigned long uint16_t, U16;
 
+
+extern U8 sys_init_complete;
+extern U8 sys_init_pending_tasks;
+
+
 /*
  * Define TRUE and FALSE to suitable values.
  */
