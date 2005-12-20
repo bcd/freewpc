@@ -10,6 +10,7 @@ typedef uint8_t switchnum_t;
 #define SW_IN_GAME	0x08 /* Only service switch during a game */
 #define SW_PLAYFIELD	0x10 /* Declares that switch is 'on the playfield' */
 #define SW_NOPLAY		0x20 /* Switch does not mark a ball as 'in play' */
+#define SW_IN_TEST	0x40 /* Service switch in test mode; default is no */
 
 /** Switch handler prototype form */
 typedef void (*switch_handler_t) (void);
