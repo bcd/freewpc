@@ -239,6 +239,7 @@ void sw_buy_in_button_handler (void) __taskentry__
 DECLARE_SWITCH_DRIVER (sw_start_button)
 {
 	.fn = sw_start_button_handler,
+	.flags = SW_IN_TEST,
 };
 
 DECLARE_SWITCH_DRIVER (sw_buyin_button)
