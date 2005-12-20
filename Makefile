@@ -136,10 +136,16 @@ GAME_ROM = freewpc.rom
 FIXED_SECTION = sysrom
 
 OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
-	switches.o flip.o sound.o coin.o service.o game.o test.o \
+	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
-	task.o lamp.o sol.o flasher.o ac.o
+	task.o lamp.o sol.o flasher.o ac.o 
+
+ifdef NEW_TEST
+OS_OBJS += test2.o
+else
+OS_OBJS += test.o
+endif
 
 FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
@@ -227,6 +233,9 @@ endif
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
+ifdef NEW_TEST
+CFLAGS += -DCONFIG_NEW_TEST_MODE
+endif
 
 #
 # Newer versions of the assembler require these flags be passed.
@@ -249,9 +258,7 @@ include $(MACHINE)/Makefile
 # Because WPC uses ROM paging, the linking job is more
 # difficult to get right.  We require that the programmer
 # explicitly state which pages things should belong in.
-# TBD
 
-#PAGED_SECTIONS = page54 page55 page56 page57 page58 page59 page60 page61
 PAGED_SECTIONS = page56 page57 page58 page59 page60 page61
 
 NUM_PAGED_SECTIONS := 6 
@@ -280,7 +287,6 @@ PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
 
-
 KERNEL_OBJS = $(patsubst %,kernel/%,$(OS_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
@@ -300,7 +306,7 @@ page61_OBJS = page61.o $(FONT_OBJS)
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) : PAGE=61
 
-PAGE_DEFINES := -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
+PAGE_DEFINES := -DTEST_PAGE=58 -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
 
 PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
@@ -316,7 +322,7 @@ $(SYSTEM_OBJS) : PAGE=59
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
+C_OBJS = $(KERNEL_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
@@ -419,6 +425,7 @@ $(PAGED_LINKCMD) : $(DEPS)
 	@echo "-mxswz" >> $@
 	@echo $(DIRECT_LNK_CMD) >> $@
 	@echo "-b ram = $(RAM_AREA)" >> $@
+	@echo "-b nvram = $(NVRAM_AREA)" >> $@
 	@for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $@; done
 	@echo "-b sysrom = $(FIXED_AREA)" >> $@
@@ -458,6 +465,7 @@ $(LINKCMD) : $(DEPS)
 	@echo "-mxswz" >> $(LINKCMD)
 	@echo $(DIRECT_LNK_CMD) >> $(LINKCMD)
 	@echo "-b ram = $(RAM_AREA)" >> $(LINKCMD)
+	@echo "-b nvram = $(NVRAM_AREA)" >> $(LINKCMD)
 	@for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done
 	@echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD)
