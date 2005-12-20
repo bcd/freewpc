@@ -25,15 +25,23 @@
  * and subject to get it later if priorities change.
  */
 
-#define SYSTEM_DISPLAY_EFFECTS \
+#ifdef CONFIG_NEW_TEST_MODE
+#define TEST_DISPLAY_EFFECTS
+#else
+#define TEST_DISPLAY_EFFECTS \
 	DECL_DEFF (DEFF_TEST_MENU, D_RUNNING, 5, test_menu_deff) \
+	DECL_DEFF (DEFF_PRINT_RTC, D_NORMAL, 250, rtc_print_deff) \
+	DECL_DEFF (DEFF_FONT_TEST, D_RUNNING, 250, font_test_deff)
+#endif
+
+
+#define SYSTEM_DISPLAY_EFFECTS \
+	TEST_DISPLAY_EFFECTS \
 	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
 	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
 	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
 	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
 	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
-	DECL_DEFF (DEFF_PRINT_RTC, D_NORMAL, 250, rtc_print_deff) \
-	DECL_DEFF (DEFF_FONT_TEST, D_RUNNING, 250, font_test_deff) \
 	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, 250, volume_deff)
 
 
@@ -274,6 +282,8 @@ void deff_init (void)
 void deff_stop_all (void)
 {
 	task_kill_gid (GID_DEFF);
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
 	deff_init ();
 }
 
