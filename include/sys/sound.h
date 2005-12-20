@@ -8,8 +8,10 @@
 #define SND_TEST_ABORT			0x52
 #define SND_TEST_CONFIRM		0x53
 #define SND_TEST_ALERT			0x54
+#define SND_TEST_HSRESET		0x55
+#define SND_TEST_CHANGE			0x56
 #define SND_TEST_ENTER			0x57
-#define SND_TEST_EXIT			0x58
+#define SND_TEST_ESCAPE			0x58
 #define SND_TEST_SCROLL			0x59
 #else
 
@@ -17,16 +19,17 @@
 #define SPEECH_SND(x)			((1UL << 8) + (x))
 #define TEST_SND(x)				((3UL << 8) + (x))
 
-#define SND_TEST_UP				TEST_SND(212)
-#define SND_TEST_ALERT			TEST_SND(216)
-#define SND_TEST_BONG			TEST_SND(216)
-#define SND_TEST_DOWN			TEST_SND(218)
-#define SND_TEST_SCROLL			TEST_SND(218)
-#define SND_TEST_ABORT			TEST_SND(218)
-#define SND_TEST_CONFIRM		TEST_SND(218)
-#define SND_TEST_ENTER			TEST_SND(219)
-#define SND_TEST_ESCAPE			TEST_SND(219)
-#define SND_TEST_EXIT			TEST_SND(220)
+#define SND_TEST_DOWN			TEST_SND(0xD4)
+#define SND_TEST_UP				TEST_SND(0xD5)
+#define SND_TEST_ABORT			TEST_SND(0xD6)
+#define SND_TEST_CONFIRM		TEST_SND(0xD7)
+#define SND_TEST_ALERT			TEST_SND(0xD8)
+#define SND_TEST_HSRESET		TEST_SND(0xD9)
+#define SND_TEST_CHANGE			TEST_SND(0xDA)
+#define SND_TEST_ENTER			TEST_SND(0xDB)
+#define SND_TEST_ESCAPE			TEST_SND(0xDC)
+#define SND_TEST_SCROLL			TEST_SND(0xDD)
+#undef SND_TEST_EXIT
 #endif
 
 #define MIN_VOLUME				0
