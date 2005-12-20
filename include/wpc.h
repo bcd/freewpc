@@ -220,6 +220,10 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 	*(volatile uint8_t *)WPC_RAM_LOCKSIZE = sz;
 }
 
+#define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
+#define wpc_nvram_put()		wpc_set_ram_protect(RAM_LOCKED)
+
+
 /********************************************/
 /* DIP Switches                             */
 /********************************************/
