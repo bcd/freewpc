@@ -21,4 +21,6 @@
 #define __taskentry__
 #endif
 
+#define __nvram__ __attribute__((section ("nvram")))
+
 #endif /* _ENV_H */
