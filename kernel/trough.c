@@ -28,6 +28,7 @@ void sw_outhole_handler (void)
 DECLARE_SWITCH_DRIVER (sw_outhole)
 {
 	.fn = sw_outhole_handler,
+	.flags = SW_IN_TEST,
 };
 
 #endif
