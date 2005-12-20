@@ -52,13 +52,18 @@ void sw_upper_right_flipper_handler (void)
 
 DECLARE_SWITCH_DRIVER (sw_left_flipper) {
 	.fn = sw_left_flipper_handler,
+	.flags = SW_IN_TEST,
 };
+
 DECLARE_SWITCH_DRIVER (sw_right_flipper) {
 	.fn = sw_right_flipper_handler,
+	.flags = SW_IN_TEST,
 };
+
 DECLARE_SWITCH_DRIVER (sw_upper_left_flipper) {
 	.fn = sw_upper_left_flipper_handler,
 };
+
 DECLARE_SWITCH_DRIVER (sw_upper_right_flipper) {
 	.fn = sw_upper_right_flipper_handler,
 };
