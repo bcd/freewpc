@@ -11,8 +11,6 @@ void deadend_to_slot_timer (void)
 void sw_deadend_handler (void)
 {
 	score_add_current_const (0x75000);
-	sound_send (SND_ODD_CHANGE_BEGIN);
-
 	task_recreate_gid (GID_SLOT_DISABLED_BY_DEAD_END, deadend_to_slot_timer);
 }
 
@@ -25,5 +23,6 @@ CALLSET_ENTRY(deadend, start_ball)
 DECLARE_SWITCH_DRIVER (sw_deadend)
 {
 	.fn = sw_deadend_handler,
+	.sound = SND_ODD_CHANGE_BEGIN,
 };
 
