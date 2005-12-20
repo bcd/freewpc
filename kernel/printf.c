@@ -166,6 +166,24 @@ fixup_number:
 					break;
 				}
 
+				case 'l': case 'L':
+				{
+					++format;
+					switch (*format)
+					{
+						case 'x': case 'X':
+						{
+							register U8 b = va_arg (va, U8);
+							endbuf = do_sprintf_hex_byte (buf, b);
+							b = va_arg (va, U8);
+							endbuf = do_sprintf_hex_byte (endbuf, b);
+							goto fixup_number;
+							break;
+						}
+					}
+					break;
+				}
+
 				case 'b':
 				{
 					register bcd_t *bcd  = va_arg (va, bcd_t *);
