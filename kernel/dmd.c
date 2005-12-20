@@ -271,14 +271,15 @@ void dmd_draw_bitmap (dmd_buffer_t *image_bits,
 	U8 x, U8 y, U8 width, U8 height)
 {
 	int i, j;
-	dmd_buffer_t *dbuf = dmd_low_buffer + ((16 / 2) * y);
+	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
+	U16 *image_data = (U16 *)image_bits;
 
 	wpc_push_page (XBM_PAGE);
 	for (j=0; j < height; j++)
 	{
 		for (i=0; i < ((width / 8) / 2); i++)
 		{
-			dbuf[(x + i)/ 2] = *image_bits++;
+			dbuf[x + i] = *image_data++;
 		}
 		dbuf += (16 / 2);
 	}
