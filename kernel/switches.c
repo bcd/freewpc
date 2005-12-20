@@ -42,6 +42,7 @@ uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 void sw_unused_handler (void)
 {
+	dbprintf ("Unregistered switch\n");
 }
 
 const switch_info_t sw_unused =
@@ -528,6 +529,14 @@ void switch_sched (void)
 		goto cleanup;
 	}
 
+	/* Don't service switches not marked SW_IN_TEST, unless we're
+	 * actually in test mode */
+	if (!(swinfo->flags & SW_IN_TEST) && in_test)
+	{
+		dbprintf ("Not handling switch because in test mode\n");
+		goto cleanup;
+	}
+
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and mark
 	 * the ball 'in play'.  Don't do the last bit if the switch
@@ -555,10 +564,10 @@ void switch_sched (void)
 	if (swinfo->fn)
 		(*swinfo->fn) ();
 
+cleanup:
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
-cleanup:
 	/* Debounce period after the switch has been handled */
 	if (swinfo->inactive_time == 0)
 		task_sleep (TIME_100MS * 1); /* was 300ms!!! */
