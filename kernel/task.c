@@ -392,12 +392,15 @@ void __attribute__((noreturn)) task_dispatcher (void)
 		 * system code before starting at the top again. */
 		if (tp == &task_buffer[NUM_TASKS])
 		{
+			extern void nvram_idle_task (void);
+
 			/* Execute idle tasks on system stack */
 			set_stack_pointer (STACK_BASE);
 
 			/* Call idle tasks */
 			switch_idle_task ();
 			ac_idle_task ();
+			nvram_idle_task ();
 
 			tp = &task_buffer[0];
 		}
