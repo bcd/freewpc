@@ -114,6 +114,7 @@ void sound_init (void)
 		}
 	}
 
+	sys_init_pending_tasks--;
 	task_exit ();
 #endif
 }

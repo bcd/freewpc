@@ -4,12 +4,12 @@
 
 device_t device_table[MAX_DEVICES];
 
-static uint8_t device_ss_state;
-static uint8_t device_count;
-static uint8_t max_balls;
-static uint8_t counted_balls;
-static uint8_t missing_balls;
-static uint8_t live_balls;
+U8 device_ss_state;
+U8 device_count;
+U8 max_balls;
+U8 counted_balls;
+U8 missing_balls;
+U8 live_balls;
 
 #pragma long_branch
 void device_debug (void)
@@ -395,6 +395,7 @@ void device_init (void)
 		device_clear (dev);
 		device_call_op (dev, power_up);
 	}
+	sys_init_pending_tasks--;
 }
 
 

@@ -11,8 +11,10 @@ uint8_t errcode;
 __fastram__ uint8_t irq_count;
 __fastram__ uint8_t tick_count;
 
-U8 sys_init_complete;
+__nvram__ U8 nvram_test_byte;
 
+U8 sys_init_complete;
+U8 sys_init_pending_tasks;
 
 __noreturn__ void do_fatal (errcode_t error_code)
 {
@@ -122,6 +124,7 @@ __noreturn__ void do_reset (void)
 	/** Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
 	sys_init_complete = 0;
+	sys_init_pending_tasks = 0;
 
 	/** Initialize all of the other kernel subsystems,
 	 * starting with the hardware-centric ones and moving on
@@ -166,22 +169,25 @@ __noreturn__ void do_reset (void)
 
 	wpc_led_toggle ();
 
-#if (MACHINE_DCS == 1)
-	task_create_gid (GID_DCS_INIT, sound_init);
-#endif
-
 	/** The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
 	 */
+
 	task_create_gid (GID_SYSTEM_RESET, system_reset);
+
+	/* Initialize the sound board further */
+#if (MACHINE_DCS == 1)
+	sys_init_pending_tasks++;
+	task_create_gid (GID_DCS_INIT, sound_init);
+#endif
 
 	/* Also run a probe on all of the ball devices, to see
 	 * if they are working properly and empty out any
 	 * balls in them that don't belong there yet. */
+	sys_init_pending_tasks++;
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
 
 	/* The system can run itself now, this task is done! */
-	sys_init_complete++;
 	task_exit ();
 }
 
@@ -205,6 +211,17 @@ void lockup_check_rtt (void)
 	else
 	{
 		task_dispatching_ok = FALSE;
+	}
+}
+
+
+void nvram_idle_task (void)
+{
+	U8 data = nvram_test_byte;
+	++nvram_test_byte;
+	if (data != nvram_test_byte)
+	{
+		fatal (ERR_NVRAM_UNLOCKED);
 	}
 }
 
