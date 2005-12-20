@@ -21,6 +21,7 @@
 #define ERR_LEFF_QUEUE_FULL		17
 #define ERR_FCFS_LOCKUP				18
 #define ERR_REAL_HARDWARE			19
+#define ERR_NVRAM_UNLOCKED			20
 
 typedef uint8_t errcode_t;
 __noreturn__ void do_fatal (errcode_t errcode);
