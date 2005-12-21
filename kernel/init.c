@@ -278,9 +278,8 @@ void do_irq (void)
 			if ((tick_count & 15) == 0)
 			{
 				/* Execute rtts every 16 x 8 ms = 128ms */
-				lockup_check_rtt (); /* disabled for now */
+				lockup_check_rtt ();
 			}
-
 		}
 	}
 }
