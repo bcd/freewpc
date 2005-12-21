@@ -65,6 +65,23 @@ extern inline task_gid_t task_getgid (void)
 	return task_current->gid;
 }
 
+
+/*******************************/
+/*     Debug Timing            */
+/*******************************/
+
+#define debug_time_start() \
+{ \
+	U8 __debug_timer = irq_count; \
+
+
+#define debug_time_stop() \
+	dbprintf ("debug time: %02X %02X\n", \
+		__debug_timer, irq_count); \
+}
+
+/********************************************/
+/* RAM Paging                               */
 /********************************/
 /*     Function Prototypes      */
 /********************************/
