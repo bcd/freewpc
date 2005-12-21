@@ -17,8 +17,13 @@ extern const font_t font_9x6;
 typedef struct
 {
 	const font_t *font;
-	U8 x;
-	U8 y;
+	union {
+		struct {
+			U8 x;
+			U8 y;
+		};
+		U16 xy;
+	};
 	const char *s;
 } fontargs_t;
 
@@ -41,8 +46,7 @@ void fontargs_render_string_right (const fontargs_t *args);
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
-	font_args.x = _x; \
-	font_args.y = _y; \
+	font_args.xy = ((((U16)(_x)) << 8) | (_y)); \
 	font_args.s = _s;
 
 
