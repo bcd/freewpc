@@ -34,6 +34,9 @@ GCC_VERSION ?= 3.3.6
 # Set to 'y' if you want to use the direct page (not working yet)
 USE_DIRECT_PAGE=n
 
+# Build date (now)
+BUILD_DATE = \"$(shell date +%m/%d/%y)\"
+
 # Uncomment this if you want extra debug notes from the compiler.
 # Normally, you do not want to turn this on.
 # DEBUG_COMPILER=y
@@ -220,6 +223,8 @@ CFLAGS += -Werror-implicit-function-declaration
 
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
+
+CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
 
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER

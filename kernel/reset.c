@@ -7,7 +7,7 @@
 
 volatile const char gcc_version[] = C_STRING(GCC_VERSION);
 
-static char build_date[] = __DATE__;
+static char build_date[] = BUILD_DATE;
 
 __nvram__ U8 freewpc_accepted[3];
 
@@ -69,14 +69,15 @@ void system_reset (void)
 
 	font_render_string_center (&font_5x5, 64, 0, MACHINE_NAME);
 
-	sprintf ("SY %1x.%02x   %s", 
-		FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR, build_date);
-	font_render_string (&font_5x5, 0, 7, sprintf_buffer);
-
-	font_render_string_center (&font_5x5, 64, 21, "TESTING...");
+	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+	font_render_string_center (&font_5x5, 32, 8, sprintf_buffer);
+	font_render_string_center (&font_5x5, 96, 8, build_date);
 
 #ifdef USER_TAG
-	font_render_string_center (&font_5x5, 64, 14, C_STRING(USER_TAG));
+	font_render_string_center (&font_5x5, 64, 16, C_STRING(USER_TAG));
+	font_render_string_center (&font_5x5, 64, 24, "TESTING...");
+#else
+	font_render_string_center (&font_5x5, 64, 20, "TESTING...");
 #endif
 
 	dmd_show_low ();
