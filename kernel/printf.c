@@ -124,17 +124,6 @@ fixup_number:
 						/* memmove (buf, 
 						 * 	buf+leading_zero_count, 
 						 * 	number_length-leading_zero_count) */
-#if 0
-						*endbuf = '\0';
-						db_puts ("Leading zeroes: ");
-						db_puti (leading_zero_count);
-						db_puts ("   Number length: ");
-						db_puti (number_length);
-						db_puts ("   Buffer: ");
-						db_puts (buf);
-						db_putc ('\n');
-#endif
-
 						if (number_length == leading_zero_count)
 						{
 							number_length = min_width;
@@ -205,6 +194,13 @@ fixup_number:
 					while (*s)
 						*_buf++ = *s++;
 					buf = _buf;
+					break;
+				}
+
+				case 'c':
+				{
+					register const char c = va_arg (va, const char);
+					*buf++ = c;
 					break;
 				}
 
