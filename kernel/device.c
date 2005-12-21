@@ -325,6 +325,7 @@ void device_probe (void)
 	device_update_globals ();
 
 	device_ss_state = 1;
+	sys_init_pending_tasks--;
 
 	device_debug ();
 	task_exit ();
@@ -395,7 +396,6 @@ void device_init (void)
 		device_clear (dev);
 		device_call_op (dev, power_up);
 	}
-	sys_init_pending_tasks--;
 }
 
 
