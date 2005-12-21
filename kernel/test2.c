@@ -44,14 +44,31 @@
  * of drawing it to the DMD and handles the keypresses to change pages.
  */
 
+
+/* Whenever a function can be optional, use this rather than NULL.  It's
+ * faster to call into a null function than it is to do a compare
+ * against NULL before making the call.
+ */
+static void null_function (void) {}
+
+
+/* The window operations structure (window class). */
 struct window_ops
 {
+	/** Constructor/destructor functions */
 	void (*init) (void);
 	void (*exit) (void);
 
+	/** suspend/resume are called whenever the
+	 * current window is swapped out due to a new
+	 * window being loaded, or being swapped back
+	 * in when the new window exits. */
 	void (*suspend) (void);
 	void (*resume) (void);
 
+	/* The draw function, called just about every
+	 * time something changes.  Draw functions are
+	 * always called after the key handlers below. */
 	void (*draw) (void);
 
 	/** Key handlers **/
@@ -63,16 +80,57 @@ struct window_ops
 	void (*right) (void);
 	void (*start) (void);
 
-	/** Thread function **/
+	/** Thread function.  This should be set to NULL
+	 * if the window doesn't need a thread. */
 	void (*thread) (void);
 };
 
 
-/** The device structure is a read-only descriptor that
- * contains various device properties. */
+/* The default window constructor.
+ *
+ * We use a gcc trick here to simulate object-oriented
+ * behavior.  In a structue, if you have two named
+ * field definitions in an initializer, only the last one
+ * is used.  We start our structure initializers with
+ * DEFAULT_WINDOW to give them default values, in case no
+ * override is desired.  The code can declare different
+ * initializers for any custom behavior.
+ *
+ * Generally, to simulate subclassing, the overriding
+ * function should call the overridden first.
+ *
+ * All functions are null by default, except for
+ * the ESCAPE button, which always pops the current
+ * window and returns to the previous one.
+ */
+#define DEFAULT_WINDOW \
+	.init = null_function, \
+	.exit = null_function, \
+	.suspend = null_function, \
+	.resume = null_function, \
+	.draw = null_function, \
+	.escape = window_pop, \
+	.enter = null_function, \
+	.up = null_function, \
+	.down = null_function, \
+	.left = null_function, \
+	.right = null_function, \
+	.start = null_function, \
+	.thread = NULL
+
 
 struct menu;
 
+
+/* The window object.  These are RAM objects that store the
+ * state of a particular instance of a window.
+ *
+ * The w_class union is used to hold custom data needed for
+ * different classes of windows.  The common code only knows
+ * about w_priv; the init function should always use the
+ * priv data (passed in by the creator of the window) to
+ * populate the w_class union as needed.
+ */
 struct window
 {
 	struct window_ops *ops;
@@ -91,9 +149,16 @@ struct window
 	} w_class;
 };
 
+
+/** menu_selection is a shorthand macro for obtaining
+ * the current "selection" in a menu window. */
 #define menu_selection (win_top->w_class.menu.selected)
 
 
+/** window_call_op() is a macro for invoking one of the
+ * window_ops.  This is done so that tracing can be added
+ * here, rather than throughout the code. */
+#if 1
 #define window_call_op(win, op) \
 do { \
 	if (win->ops->op) \
@@ -101,8 +166,13 @@ do { \
 		(*win->ops->op) (); \
 	} \
 } while (0)
+#else
+#define window_call_op(win, op)	win->ops->op ()
+#endif
 
 
+/** win_top always points to the current window, or NULL if
+ * no window is open. */
 extern struct window *win_top;
 
 /**********************************************************/
@@ -115,8 +185,10 @@ void window_push_first (void)
 {
 	in_test = 1;
 	end_game ();
+	sound_reset ();
 	deff_stop_all ();
 	leff_stop_all ();
+	lamp_all_off ();
 }
 
 
@@ -192,11 +264,14 @@ void window_init (void)
 /***************************************************/
 
 /* The menu object, which is shared between real menus
- * and menu items that aren't menus themselves. */
+ * and menu items that aren't menus themselves.
+ *
+ * The M_xxx macros are used in the menu flags.
+ */
 
 #define M_MENU 0x1
 #define M_ITEM 0x2
-
+#define M_LETTER_PREFIX 0x4
 
 struct menu
 {
@@ -222,11 +297,11 @@ extern struct window_ops menu_window;
 
 U8 browser_action;
 U8 browser_last_selection_update;
-void (*browser_item_number) (int);
+void (*browser_item_number) (U8);
 U8 browser_min;
 U8 browser_max;
 
-void browser_default_item_number (int val)
+void browser_default_item_number (U8 val)
 {
 	sprintf ("%02X", val);
 }
@@ -275,13 +350,13 @@ void browser_down (void)
 	sound_send (SND_TEST_DOWN);
 	menu_selection--;
 	if (menu_selection == 0xFF)
-		menu_selection = browser_max-1;
+		menu_selection = browser_max;
 }
 
 #define INHERIT_FROM_BROWSER \
+	DEFAULT_WINDOW, \
 	.init = browser_init, \
 	.draw = browser_draw, \
-	.escape = window_pop, \
 	.up = browser_up, \
 	.down = browser_down \
 
@@ -291,8 +366,38 @@ struct window_ops browser_window = {
 
 void browser_print_operation (const char *s)
 {
-	font_render_string (&font_5x5, 48, 20, s);
+	font_render_string (&font_5x5, 56, 20, s);
 }
+
+/*****************************************************/
+
+/* A window class for a confirmation screen.
+ * A customizable message is displayed, with the
+ * choice to confirm (start) or abort (escape).
+ * The action taken on confirmation is also
+ * customizable.
+ */
+
+void (*confirm_banner) (void);
+void (*confirm_action) (void);
+
+void confirm_init (void)
+{
+	confirm_banner = confirm_action = null_function;
+}
+
+void confirm_draw (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+}
+
+struct window_ops confirm_window = {
+	DEFAULT_WINDOW,
+	.init = confirm_init,
+	.draw = confirm_draw,
+};
+
 
 /*****************************************************/
 
@@ -315,8 +420,6 @@ static int count_submenus (struct menu *m)
 
 void menu_init (void)
 {
-	dbprintf ("menu: init\n");
-
 	struct menu *m = win_top->w_class.priv;
 	
 	win_top->w_class.menu.self = m;
@@ -324,10 +427,6 @@ void menu_init (void)
 	menu_selection = 0;
 }
 
-void menu_exit (void)
-{
-	dbprintf ("menu: exit\n");
-}
 
 void menu_draw (void)
 {
@@ -337,13 +436,19 @@ void menu_draw (void)
 
 	dmd_alloc_low_clean ();
 
-	dbprintf ("menu: draw\n");
 	font_render_string (&font_5x5, 8, 4, m->name);
 
 	subm = m->var.submenus;
 	if (subm != NULL)
 	{
-		sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
+		if (subm[*sel]->flags & M_LETTER_PREFIX)
+		{
+			sprintf ("%c. %s", subm[*sel]->name[0], subm[*sel]->name);
+		}
+		else
+		{
+			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
+		}
 		font_render_string (&font_5x5, 8, 14, sprintf_buffer);
 	}
 	else
@@ -353,18 +458,11 @@ void menu_draw (void)
 	dmd_show_low ();
 }
 
-void menu_escape (void)
-{
-	dbprintf ("menu: escape\n");
-	window_pop ();
-}
 
 void menu_enter (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	U8 sel = win_top->w_class.menu.selected;
-
-	dbprintf ("menu: enter\n");
 
 	m = m->var.submenus[sel];
 	if (m->flags & M_MENU)
@@ -390,7 +488,6 @@ void menu_up (void)
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
 	
-	dbprintf ("menu: up\n");
 	sound_send (SND_TEST_UP);
 	(*sel)++;
 	if ((*sel) >= count_submenus (m))
@@ -402,7 +499,6 @@ void menu_down (void)
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
 	
-	dbprintf ("menu: down\n");
 	sound_send (SND_TEST_DOWN);
 	(*sel)--;
 	if ((*sel) == 0xFF) 
@@ -413,27 +509,17 @@ void menu_down (void)
 	}
 }
 
-void menu_left (void)
-{
-}
-
-void menu_right (void)
-{
-}
-
 void menu_start (void)
 {
 }
 
 struct window_ops menu_window = {
+	DEFAULT_WINDOW,
 	.init = menu_init,
 	.draw = menu_draw,
-	.escape = menu_escape,
 	.enter = menu_enter,
 	.up = menu_up,
 	.down = menu_down,
-	.left = menu_left,
-	.right = menu_right,
 	.start = menu_start
 };
 
@@ -492,14 +578,95 @@ struct menu dev_font_test_item = {
 
 /**********************************************************/
 
+
+struct deff_leff_ops {
+	void (*start) (U8 id);
+	void (*stop) (U8 id);
+	U8 (*get_active) (void);
+};
+
+struct deff_leff_ops *deff_leff_test_ops;
+
+
+struct deff_leff_ops dev_deff_ops = {
+	.start = deff_start,
+	.stop = deff_stop,
+	.get_active = deff_get_active,
+};
+
+struct deff_leff_ops dev_leff_ops = {
+	.start = leff_start,
+	.stop = leff_stop,
+	.get_active = leff_get_active,
+};
+
+void deff_leff_thread (void)
+{
+	for (;;)
+	{
+		if (deff_leff_test_ops == &dev_deff_ops) 
+		{
+			if (!deff_leff_test_ops->get_active () == menu_selection)
+				browser_draw ();
+		}
+		else
+		{
+			browser_draw ();
+			if (deff_leff_test_ops->get_active () == menu_selection)
+				browser_print_operation ("RUNNING");
+			else
+				browser_print_operation ("STOPPED");
+		}
+		task_sleep (TIME_100MS * 5);
+	}
+}
+
+
+void deff_leff_init (void)
+{
+	extern struct menu dev_deff_test_item;
+	struct menu *m = win_top->w_class.priv;
+
+	browser_init ();
+
+	if (m == &dev_deff_test_item)
+		deff_leff_test_ops = &dev_deff_ops;
+	else
+		deff_leff_test_ops = &dev_leff_ops;
+}
+
+void deff_leff_enter (void)
+{
+	if (deff_leff_test_ops->get_active () == menu_selection)
+	{
+		/* deff/leff already running, so stop it */
+		deff_leff_test_ops->start (menu_selection);
+	}
+	else
+	{
+		/* deff/leff not running, so start it */
+		deff_leff_test_ops->stop (menu_selection);
+	}
+}
+
+struct window_ops deff_leff_window = {
+	INHERIT_FROM_BROWSER,
+	.init = deff_leff_init,
+	.draw = null_function,
+	.thread = deff_leff_thread,
+	.enter = deff_leff_enter,
+};
+
 struct menu dev_deff_test_item = {
 	.name = "DISPLAY EFFECTS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &deff_leff_window, NULL } },
 };
 
 struct menu dev_leff_test_item = {
 	.name = "LAMP EFFECTS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &deff_leff_window, NULL } },
 };
 
 
@@ -539,7 +706,7 @@ void dev_balldev_test_draw (void)
 		sprintf ("SOL %d", dev->props->sol+1);
 		font_render_string (&font_5x5, 8, 18, sprintf_buffer);
 
-		task_sleep (TIME_16MS);
+		task_yield ();
 
 		sprintf ("COUNTED %d", counted_balls);
 		font_render_string (&font_5x5, 72, 6, sprintf_buffer);
@@ -654,6 +821,7 @@ void dev_soundedit_init (void)
 	dev_soundedit_page_start = 0;
 }
 
+#pragma long_branch
 void dev_soundedit_draw (void)
 {
 	int i;
@@ -661,15 +829,17 @@ void dev_soundedit_draw (void)
 	dmd_alloc_low_clean ();
 	for (i=0; i < 4; i++)
 	{
-		sprintf ("%s %02d %04lX",
+		sprintf ("%s %02d",
 			(dev_soundedit_page_start+i == dev_soundedit_cursor) ? "X" : "O",
-			dev_soundedit_page_start+i,
-			dev_soundedit_program[dev_soundedit_page_start+i]);
+			dev_soundedit_page_start+i);
 		font_render_string (&font_5x5, 16, i*6+1, sprintf_buffer);
-		task_sleep (TIME_16MS);
+		dev_soundedit_print_op (dev_soundedit_program[dev_soundedit_page_start+i]);
+		font_render_string (&font_5x5, 48, i*6+1, sprintf_buffer);
+		task_yield ();
 	}
 	dmd_show_low ();
 }
+#pragma short_branch
 
 void dev_soundedit_up (void)
 {
@@ -696,10 +866,10 @@ void dev_soundedit_down (void)
 }
 
 struct window_ops dev_soundedit_window = {
+	DEFAULT_WINDOW,
 	.init = dev_soundedit_init,
 	.up = dev_soundedit_up,
 	.down = dev_soundedit_down,
-	.escape = window_pop,
 	.draw = dev_soundedit_draw,
 };
 
@@ -721,21 +891,90 @@ struct menu *dev_menu_items[] = {
 
 struct menu development_menu = {
 	.name = "DEVELOPMENT",
-	.flags = M_MENU,
+	.flags = M_MENU | M_LETTER_PREFIX,
 	.var = { .submenus = dev_menu_items },
+};
+
+/**********************************************************************/
+
+struct menu factory_reset_item = {
+	.name = "FACTORY RESET",
+	.flags = M_ITEM,
+};
+
+struct menu clear_credits_item = {
+	.name = "CLEAR CREDITS",
+	.flags = M_ITEM,
+};
+
+struct menu burnin_item = {
+	.name = "AUTO BURNIN",
+	.flags = M_ITEM,
+};
+
+struct menu *util_menu_items[] = {
+	&factory_reset_item,
+	&clear_credits_item,
+	&burnin_item,
+	NULL,
+};
+
+struct menu utilities_menu = {
+	.name = "UTILITIES",
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = util_menu_items },
 };
 
 /**********************************************************************/
 
 struct menu bookkeeping_menu = {
 	.name = "BOOKKEEPING",
-	.flags = M_MENU,
+	.flags = M_MENU | M_LETTER_PREFIX,
+};
+
+/**********************************************************************/
+
+struct menu date_style_item = {
+	.name = "DATE STYLE",
+	.flags = M_ITEM,
+};
+
+struct menu clock_style_item = {
+	.name = "CLOCK STYLE",
+	.flags = M_ITEM,
+};
+
+struct menu euro_score_format_item = {
+	.name = "EURO. SCR. FORMAT",
+	.flags = M_ITEM,
+};
+
+struct menu game_restart_item = {
+	.name = "GAME RESTART",
+	.flags = M_ITEM,
+};
+
+struct menu free_play_item = {
+	.name = "FREE PLAY",
+	.flags = M_ITEM,
+};
+
+struct menu *adj_menu_items[] = {
+	&date_style_item,
+	&clock_style_item,
+	&euro_score_format_item,
+	&game_restart_item,
+	&free_play_item,
+	NULL
 };
 
 struct menu adjustments_menu = {
 	.name = "ADJUSTMENTS",
-	.flags = M_MENU,
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = adj_menu_items },
 };
+
+/**********************************************************************/
 
 struct menu switch_edges_item = {
 	.name = "SWITCH EDGES",
@@ -749,7 +988,7 @@ struct menu switch_levels_item = {
 
 /*************** Single Switch Test ***********************/
 
-void switch_item_number (int val)
+void switch_item_number (U8 val)
 {
 	if (val < 8)
 		sprintf ("D%d", val+1);
@@ -879,7 +1118,6 @@ void sound_test_set_change (void)
 void sound_test_play (U8 sel)
 {
 	sound_code_t snd = ((unsigned long)sound_test_set << 8) + sel;
-	dbprintf ("test sound %04lX\n", snd);
 	sound_send (snd);
 }
 
@@ -913,7 +1151,7 @@ void sound_test_draw (void)
 void sound_test_enter (void)
 {
 	browser_action = ~browser_action;
-	browser_last_selection_update = win_top->w_class.menu.selected + 1;
+	browser_last_selection_update = menu_selection + 1;
 	if (browser_action == 0)
 		sound_reset ();
 	browser_draw ();
@@ -944,19 +1182,72 @@ struct menu sound_test_item = {
 
 /****************** Solenoid Test **************************/
 
+/* The browser action stores the pulse width */
+
+void solenoid_test_init (void)
+{
+	browser_init ();
+	browser_action = TIME_66MS;
+}
+
+void solenoid_test_draw (void)
+{
+	char *s;
+
+	browser_draw ();
+	switch (browser_action)
+	{
+		default: s = "UNKNOWN PULSE"; break;
+		case TIME_16MS: s = "VERY SOFT PULSE"; break;
+		case TIME_33MS: s = "SOFT PULSE"; break;
+		case TIME_66MS: s = "NORMAL PULSE"; break;
+		case TIME_100MS: s = "HARD PULSE"; break;
+		case TIME_133MS: s = "VERY HARD PULSE"; break;
+	}
+	font_render_string_center (&font_5x5, 64, 12, s);
+}
+
 void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
+	browser_print_operation ("PULSING");
+	task_sleep (TIME_100MS * 3);
+
 	sol_on (sel);
-	browser_print_operation ("PULSE ON");
-	task_sleep (TIME_100MS);
+	task_sleep (browser_action);
 	sol_off (sel);
+
 	browser_print_operation ("PULSE OFF");
+	task_sleep (TIME_100MS);
+}
+
+void solenoid_test_right (void)
+{
+	if (browser_action == TIME_133MS)
+		sound_send (SND_TEST_ABORT);
+	else if (browser_action == TIME_16MS)
+		browser_action = TIME_33MS;
+	else
+		browser_action += TIME_33MS;
+}
+
+void solenoid_test_left (void)
+{
+	if (browser_action == TIME_16MS)
+		sound_send (SND_TEST_ABORT);
+	else if (browser_action == TIME_33MS)
+		browser_action = TIME_16MS;
+	else
+		browser_action -= TIME_33MS;
 }
 
 struct window_ops solenoid_test_window = {
 	INHERIT_FROM_BROWSER,
+	.init = solenoid_test_init,
+	.draw = solenoid_test_draw,
 	.enter = solenoid_test_enter,
+	.left = solenoid_test_left,
+	.right = solenoid_test_right,
 };
 
 struct menu solenoid_test_item = {
@@ -967,16 +1258,98 @@ struct menu solenoid_test_item = {
 
 /****************** GI Test **************************/
 
+U8 gi_test_values[] = {
+	0,
+	TRIAC_GI_STRING(0),	
+	TRIAC_GI_STRING(1),	
+	TRIAC_GI_STRING(2),	
+	TRIAC_GI_STRING(3),	
+	TRIAC_GI_STRING(4),	
+	TRIAC_GI_MASK,
+};
+
+const char *gi_test_names[] = {
+	"ALL OFF",
+	"STRING 1 ON",
+	"STRING 2 ON",
+	"STRING 3 ON",
+	"STRING 4 ON",
+	"STRING 5 ON",
+	"ALL ON",
+};
+
+void gi_test_init (void)
+{
+	browser_init ();
+	browser_max = NUM_GI_TRIACS+1;
+}
+
+void gi_test_draw (void)
+{
+	browser_draw ();
+	browser_print_operation (gi_test_names[menu_selection]);
+	triac_disable (TRIAC_GI_MASK);
+	triac_enable (gi_test_values[menu_selection]);
+}
+
+struct window_ops gi_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = gi_test_init,
+	.draw = gi_test_draw,
+};
+
 struct menu gi_test_item = {
 	.name = "GEN. ILLUMINATION",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &gi_test_window, NULL } },
 };
 
 /****************** Lamp Test **************************/
 
+void lamp_test_item_number (U8 val)
+{
+	sprintf ("LAMP%1d%1d", (val / 8) + 1, (val % 8) + 1);
+}
+
+void lamp_test_init (void)
+{
+	browser_init ();
+	browser_max = NUM_LAMPS-1;
+	browser_item_number = lamp_test_item_number;
+}
+
+void lamp_test_draw (void)
+{
+	lamp_flash_on (menu_selection);
+	browser_draw ();
+	browser_print_operation ("FLASHING");
+}
+
+void lamp_test_up (void)
+{
+	lamp_flash_off (menu_selection);
+	browser_up ();
+}
+
+void lamp_test_down (void)
+{
+	lamp_flash_off (menu_selection);
+	browser_down ();
+}
+
+struct window_ops lamp_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = lamp_test_init,
+	.draw = lamp_test_draw,
+	.exit = lamp_all_off,
+	.up = lamp_test_up,
+	.down = lamp_test_down,
+};
+
 struct menu lamp_test_item = {
 	.name = "LAMP TEST",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &lamp_test_window, NULL } },
 };
 
 /****************** All Lamps Test ***********************/
@@ -986,9 +1359,9 @@ void all_lamp_test_thread (void)
 	for (;;)
 	{
 		lamp_all_on ();
-		task_sleep_sec (1);
+		task_sleep (TIME_100MS * 7);
 		lamp_all_off ();
-		task_sleep (TIME_100MS * 5);
+		task_sleep (TIME_100MS * 3);
 	}
 }
 
@@ -1003,8 +1376,8 @@ struct window_ops all_lamp_test_window = {
 	.thread = all_lamp_test_thread,
 	.init = all_lamp_test_init,
 	.exit = lamp_all_off,
-	.up = NULL,
-	.down = NULL,
+	.up = null_function,
+	.down = null_function,
 };
 
 struct menu all_lamp_test_item = {
@@ -1014,12 +1387,30 @@ struct menu all_lamp_test_item = {
 };
 /***************** DIP Switch Test **********************/
 
+void dipsw_render_single (U8 sw, U8 state)
+{
+	sprintf ("SW%d %s", sw, state ? "OFF" : "ON");
+}
+
 void dipsw_test_draw (void)
 {
+	U8 sw;
+	U8 dipsw = wpc_get_jumpers ();
+
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_5x5, 64, 3, "DIP SWITCHES");
-	sprintf ("%02X", wpc_get_jumpers ());
-	font_render_string_center (&font_5x5, 64, 18, sprintf_buffer);
+
+	for (sw = 0; sw < 8; sw++)
+	{
+		dipsw_render_single (sw+1, dipsw & 0x1);
+		font_render_string (&font_5x5, 
+			(sw <= 3) ? 8 : 60, 
+			(sw % 4) * 6 + 9, 
+			sprintf_buffer);
+		dipsw >>= 1;
+		task_yield ();
+	}
+
 	dmd_show_low ();
 }
 
@@ -1039,7 +1430,7 @@ struct menu dipsw_test_item = {
 #define ASIC_REG_BASE 0x3FD0
 #define ASIC_REG_COUNT 0x30
 
-void asic_register_item_number (int val)
+void asic_register_item_number (U8 val)
 {
 	sprintf ("%04lX", ASIC_REG_BASE + val);
 }
@@ -1093,6 +1484,7 @@ struct menu *test_menu_items[] = {
 	&switch_levels_item,
 	&single_switches_item,
 	&solenoid_test_item,
+	&gi_test_item,
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,
@@ -1103,7 +1495,7 @@ struct menu *test_menu_items[] = {
 
 struct menu test_menu = {
 	.name = "TESTS",
-	.flags = M_MENU,
+	.flags = M_MENU | M_LETTER_PREFIX,
 	.var = { .submenus = test_menu_items, },
 };
 
@@ -1111,6 +1503,7 @@ struct menu *main_menu_items[] = {
 	&bookkeeping_menu,
 	&adjustments_menu,
 	&test_menu,
+	&utilities_menu,
 	&development_menu,
 	NULL,
 };
@@ -1146,10 +1539,12 @@ void scroller_init (void)
 void scroller_draw (void)
 {
 	scroller s = win_top->w_class.scroller.funcs;
+	U8 offset = win_top->w_class.scroller.offset;
+
 	dmd_alloc_low_clean ();
-	s[win_top->w_class.scroller.offset * 2] ();
+	s[offset * 2] ();
 	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
-	s[win_top->w_class.scroller.offset * 2 + 1] ();
+	s[offset * 2 + 1] ();
 	font_render_string_center (&font_5x5, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
@@ -1158,12 +1553,19 @@ void scroller_up (void)
 {
 	if (++win_top->w_class.scroller.offset >= win_top->w_class.scroller.size)
 		win_top->w_class.scroller.offset = 0;
+	sound_send (SND_TEST_UP);
 }
 
 void scroller_down (void)
 {
 	if (--win_top->w_class.scroller.offset == 0xFF)
 		win_top->w_class.scroller.offset = win_top->w_class.scroller.size-1;
+	sound_send (SND_TEST_DOWN);
+}
+
+void scroller_resume (void)
+{
+	win_top->w_class.scroller.offset = 0;
 }
 
 #define INHERIT_FROM_SCROLLER \
@@ -1171,7 +1573,7 @@ void scroller_down (void)
 	.draw = scroller_draw, \
 	.up = scroller_up, \
 	.down = scroller_down, \
-	.escape = window_pop
+	.resume = scroller_resume
 
 struct window_ops scroller_window = {
 	INHERIT_FROM_SCROLLER,
@@ -1182,39 +1584,32 @@ struct window_ops scroller_window = {
 /* A scroller instance for system information */
 
 void sysinfo_machine_name (void) { sprintf (MACHINE_NAME); }
+void sysinfo_machine_version (void) {
+	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+}
 void sysinfo_system_version (void) { 
-	sprintf ("SYSTEM VERSION %1x.%02x", 
-		FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR);
+	sprintf ("SY %1x.%02x", FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR);
 }
 void sysinfo_compiler_version (void) { 
-	sprintf ("GCC VERSION %s", C_STRING(GCC_VERSION));
-}
-void sysinfo_assembler_version (void) {
-	sprintf ("ASM VERSION %s", C_STRING(AS_VERSION));
+	sprintf ("GCC %s, ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
 }
 
 scroller_item sysinfo_scroller[] = {
 	sysinfo_machine_name,
+	sysinfo_machine_version,
 	sysinfo_system_version,
 	sysinfo_compiler_version,
-	sysinfo_assembler_version,
+	NULL,
 };
-
-void sysinfo_resume (void)
-{
-	win_top->w_class.scroller.offset = 0;
-}
 
 void sysinfo_enter (void)
 {
-	dbprintf ("Entering test mode\n");
 	window_push (&menu_window, &main_menu);
 }
 
 struct window_ops sysinfo_scroller_window = {
 	INHERIT_FROM_SCROLLER,
 	.enter = sysinfo_enter,
-	.resume = sysinfo_resume,
 };
 
 /**********************************************************/
