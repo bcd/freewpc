@@ -51,8 +51,9 @@ const uint8_t font_5x5_digit[][5] = {
 
 DECLARE_PAGED
 const uint8_t font_5x5_sep[][5] = {
-	{ 0, 0, 0, 0, 2 },
-	{ 0, 0, 0, 2, 1 },
+	/* period */ { 0, 0, 0, 0, 2 },
+	/* comma */ { 0, 0, 0, 2, 1 },
+	/* slash */ { 16, 8, 4, 2, 1 },
 };
 
 DECLARE_PAGED

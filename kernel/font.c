@@ -85,6 +85,11 @@ U8 *font_lookup (const font_t *font, char c)
 		entry = (U8 *)font->seps;
 		index = 1;
 	}
+	else if (c == '/')
+	{
+		entry = (U8 *)font->seps;
+		index = 2;
+	}
 	else if (c == ' ')
 	{
 		entry = font_space;
@@ -100,7 +105,7 @@ U8 *font_lookup (const font_t *font, char c)
 		entry = NULL;
 		index = 0;
 		dbprintf ("Unprintable character: %i\n", c);
-		fatal (ERR_UNPRINTABLE_CHAR);
+		fatal (ERR_UNPRINTABLE_CHAR); /* TODO : this should be nonfatal */
 	}
 
 	return entry + index * font->height;
