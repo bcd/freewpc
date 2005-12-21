@@ -117,14 +117,14 @@ void fontargs_render_string (const fontargs_t *args)
 	static U8 *dmd_base;
 	static const char *s;
 	U8 x;
+	char c;
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
    s = args->s;
   	x = args->x;
 
-	wpc_push_page (FONT_PAGE);
 
-	while (*s != '\0')
+	while ((c = *s) != '\0')
 	{
 		static U8 *data;
 		static U8 i;
@@ -133,11 +133,9 @@ void fontargs_render_string (const fontargs_t *args)
 
 		xb = x / 8;
 
-#ifdef DB_FONT
-		db_puts ("--- Rendering character "); db_putc (*s); db_puts ("---\n");
-#endif
+		wpc_push_page (FONT_PAGE);
+		data = font_lookup (args->font, c);
 
-		data = font_lookup (args->font, *s);
 		xb = x / 8;
 		xr = x % 8;
 
@@ -157,29 +155,30 @@ void fontargs_render_string (const fontargs_t *args)
 		}
 
 		/* advance by 1 char ... args->font->width */
-		if ((*s == '.') || (*s == ','))
+		if ((c == '.') || (c == ','))
 			x += 4;
 		else
 			x += args->font->width + args->font->spacing; 
 		s++;
+		wpc_pop_page ();
 	}
-
-	wpc_pop_page ();
 }
 #pragma short_branch
 
 
 U8 font_get_string_width (const font_t *font, const char *s)
 {
-	U8 oldpage = wpc_get_rom_page ();
-	wpc_set_rom_page (FONT_PAGE);
-
 	U8 width = 0;
+	U8 font_width;
+	U8 font_spacing;
+
+	wpc_push_page (FONT_PAGE);
+	font_width = font->width;
+	font_spacing = font->spacing;
+	wpc_pop_page ();
+
 	while (*s++ != '\0')
-		width += (font->width + font->spacing);
-
-	wpc_set_rom_page (oldpage);
-
+		width += (font_width + font_spacing);
 	return (width);
 }
 

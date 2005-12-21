@@ -1,7 +1,16 @@
 
 #include <freewpc.h>
 
-///// #pragma section("testmode")
+struct window;
+
+/** win_top always points to the current window, or NULL if
+ * no window is open. */
+struct window *win_top;
+
+U8 in_test;
+
+
+#pragma section("page58")
 
 /*
  * Test Mode
@@ -171,15 +180,10 @@ do { \
 #endif
 
 
-/** win_top always points to the current window, or NULL if
- * no window is open. */
-extern struct window *win_top;
 
 /**********************************************************/
 
 struct window win_stack[16];
-struct window *win_top;
-
 
 void window_push_first (void)
 {
@@ -602,22 +606,29 @@ struct deff_leff_ops dev_leff_ops = {
 
 void deff_leff_thread (void)
 {
+	U8 last_active = 0xEE;
+
 	for (;;)
 	{
-		if (deff_leff_test_ops == &dev_deff_ops) 
+		U8 is_active = deff_leff_test_ops->get_active ();
+		if (is_active != last_active)
 		{
-			if (!deff_leff_test_ops->get_active () == menu_selection)
-				browser_draw ();
-		}
-		else
-		{
-			browser_draw ();
-			if (deff_leff_test_ops->get_active () == menu_selection)
-				browser_print_operation ("RUNNING");
+			if (deff_leff_test_ops == &dev_deff_ops) 
+			{
+				if (is_active == 0)
+					browser_draw ();
+			}
 			else
-				browser_print_operation ("STOPPED");
+			{
+				browser_draw ();
+				if (is_active == menu_selection)
+					browser_print_operation ("RUNNING");
+				else
+					browser_print_operation ("STOPPED");
+			}
 		}
-		task_sleep (TIME_100MS * 5);
+		last_active = is_active;
+		task_sleep (TIME_100MS);
 	}
 }
 
@@ -628,6 +639,8 @@ void deff_leff_init (void)
 	struct menu *m = win_top->w_class.priv;
 
 	browser_init ();
+	browser_min = 1;
+	browser_max = 16;
 
 	if (m == &dev_deff_test_item)
 		deff_leff_test_ops = &dev_deff_ops;
@@ -1569,6 +1582,7 @@ void scroller_resume (void)
 }
 
 #define INHERIT_FROM_SCROLLER \
+	DEFAULT_WINDOW, \
 	.init = scroller_init, \
 	.draw = scroller_draw, \
 	.up = scroller_up, \
@@ -1616,15 +1630,9 @@ struct window_ops sysinfo_scroller_window = {
 
 /* Compatibility functions for old test mode */
 
-U8 in_test;
-
-//// #pragma section("sysrom")
-
 void test_init (void)
 {
-	wpc_push_page (TEST_PAGE);
 	window_init ();
-	wpc_pop_page ();
 	in_test = 0;
 }
 
@@ -1690,7 +1698,6 @@ void test_enter_button (void)
 {
 	if (!win_top)
 	{
-		wpc_set_rom_page (TEST_PAGE);
 		window_push (&sysinfo_scroller_window, &sysinfo_scroller);
 	}
 	else
@@ -1705,7 +1712,7 @@ void test_escape_button (void)
 	if (!win_top) return;
 	window_call_op (win_top, escape);
 	if (!win_top)
-		wpc_set_rom_page (TEST_PAGE);
+		return;
 	else
 		window_call_op (win_top, draw);
 }

@@ -92,6 +92,7 @@ TMPFILES += *.c.[0-9]*.*
 TMPFILES += *.out
 TMPFILES += *.m41 	# Old M4 macro output files
 TMPFILES += page*.s	# Page header files
+TMPFILES += freewpc.s # System header file
 TMPFILES += *.callset # Callset files
 TMPFILES += $(ERR)
 
@@ -144,11 +145,7 @@ OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
 	task.o lamp.o sol.o flasher.o ac.o 
 
-ifdef NEW_TEST
-OS_OBJS += test2.o
-else
-OS_OBJS += test.o
-endif
+TEST_OBJS = kernel/test2.o
 
 FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
@@ -238,9 +235,7 @@ endif
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
-ifdef NEW_TEST
 CFLAGS += -DCONFIG_NEW_TEST_MODE
-endif
 
 #
 # Newer versions of the assembler require these flags be passed.
@@ -303,11 +298,12 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 #
 page56_OBJS = page56.o
 page57_OBJS = page57.o
-page58_OBJS = page58.o
+page58_OBJS = page58.o $(TEST_OBJS)
 page59_OBJS = page59.o
 page60_OBJS = page60.o $(XBM_OBJS)
 page61_OBJS = page61.o $(FONT_OBJS)
 
+$(TEST_OBJS) : PAGE=58
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) : PAGE=61
 
@@ -418,48 +414,55 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 # General rule for linking a group of object files.  The linker produces
 # a Motorola S-record file by default (S19).
 #
-$(BINFILES:.bin=.s19) : %.s19 : $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS) %.lnk
-	@echo Linking $@... && $(LD) -f $@ >> $(ERR) 2>&1
+$(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
+	echo Linking $@... && $(LD) -f $< >> $(ERR) 2>&1
 
 #
 # How to make the linker command file for a paged section.
 #
 $(PAGED_LINKCMD) : $(DEPS)
 	@echo Creating linker command file $@ ...
-	@rm -f $@
-	@echo "-mxswz" >> $@
-	@echo $(DIRECT_LNK_CMD) >> $@
-	@echo "-b ram = $(RAM_AREA)" >> $@
-	@echo "-b nvram = $(NVRAM_AREA)" >> $@
-	@for f in `echo $(PAGED_SECTIONS)`; \
-		do echo "-b $$f = $(PAGED_AREA)" >> $@; done
-	@echo "-b sysrom = $(FIXED_AREA)" >> $@
-	@echo $($(@:.lnk=_OBJS)) >> $@
-	@echo "-v" >> $@
-	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $@; done
-	@for f in `echo $(filter-out $($(@:.lnk=_OBJS)) $(@:.lnk=.o), $(PAGE_HEADER_OBJS) $(PAGED_OBJS))`; do echo $$f >> $@; done
-	@echo "-k $(LIBC_DIR)/" >> $@
-	@echo "-l c.a" >> $@
-	@echo "-e" >> $@
+	@rm -f $@ ;\
+	echo "-mxswz" >> $@ ;\
+	echo $(DIRECT_LNK_CMD) >> $@ ;\
+	echo "-b ram = $(RAM_AREA)" >> $@ ;\
+	echo "-b nvram = $(NVRAM_AREA)" >> $@ ;\
+	for f in `echo $(PAGED_SECTIONS)`; \
+		do echo "-b $$f = $(PAGED_AREA)" >> $@ ;\
+	done ;\
+	echo "-b sysrom = $(FIXED_AREA)" >> $@ ;\
+	echo "$(@:.lnk=.o)" >> $@ ;\
+	for f in `echo $(SYSTEM_OBJS) $(PAGED_OBJS)`; do \
+		echo "$($(@:.lnk=_OBJS))" | grep $$f > /dev/null 2>&1 ;\
+		if [ "$$?" = "0" ]; then echo "-o" >> $@ ;\
+		else echo "-v" >> $@ ; fi ;\
+		if [ "$$f" != "$(@:.lnk=.o)" ]; then echo "$$f"; fi >> $@ ;\
+	done ;\
+	echo "-k $(LIBC_DIR)/" >> $@ ;\
+	echo "-l c.a" >> $@ ;\
+	echo "-e" >> $@
 
 #
 # How to build the system page header source file.
 #
 freewpc.s:
 	@echo ".area sysrom" > $@
-	@echo ".db 0" >> $@
+	#@echo ".db 0" >> $@
+	#@echo ".area ram" >> page$*.s
+	#@echo ".db 0" >> page$*.s
 
 
 #
 # How to build a page header source file.
 #
 page%.s:
-	@echo ".area sysrom" > page$*.s
-	@echo ".db 0" >> page$*.s
 	@echo ".area page$*" >> page$*.s
 	@echo ".db 0" >> page$*.s
-	@echo ".area ram" >> page$*.s
-	@echo ".db 0" >> page$*.s
+	#@echo ".area ram" >> page$*.s
+	#@echo ".db 0" >> page$*.s
+
+	#@echo ".area sysrom" > page$*.s
+	#@echo ".db 0" >> page$*.s
 
 #
 # How to make the linker command file for the system section.
@@ -475,7 +478,7 @@ $(LINKCMD) : $(DEPS)
 		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done
 	@echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD)
 	@echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD)
-	@for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done
+	@for f in `echo freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done
 	@echo "-v" >> $(LINKCMD)
 	@for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done
 	@echo "-k $(LIBC_DIR)/" >> $(LINKCMD)

@@ -185,7 +185,7 @@ void sw_start_button_handler (void) __taskentry__
 
 	if (in_test)
 	{
-		test_start_button ();
+		call_far (TEST_PAGE, test_start_button ());
 		return;
 	}
 

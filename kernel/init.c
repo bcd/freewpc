@@ -77,8 +77,15 @@ __noreturn__ void do_reset (void)
 	 * function calls!  Note that this stack is only used
 	 * for execution that is not task-based.  Once tasks
 	 * can be run, each task will use its own stack pointer
-	 * separate from this one. */
-	set_stack_pointer (STACK_BASE);
+	 * separate from this one.
+	 *
+	 * The initial stack pointer is shifted down from the
+	 * available stack size, because do_reset() may
+	 * use local variables, and will assume that it already
+	 * has space allocated for them; the naked pragma prevents
+	 * them from being allocated explicitly.
+	 */
+	set_stack_pointer (STACK_BASE - 16);
 
 	/** Initializing the RAM page */
 	wpc_set_ram_page (0);
@@ -157,7 +164,7 @@ __noreturn__ void do_reset (void)
 	task_init ();
 	deff_init ();
 	leff_init ();
-	test_init ();
+	call_far (TEST_PAGE, test_init ());
 	score_init ();
 	adj_init ();
 	call_hook (init);
