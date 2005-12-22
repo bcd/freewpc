@@ -429,7 +429,11 @@ extern inline void switch_rowpoll (const uint8_t col)
 	else if (col <= 8)
 		asm __volatile__ ("\tlda " STR(WPC_SW_ROW_INPUT));
 	else /* if (col == 9) */
+#if (MACHINE_WPC95 == 1)
+		asm __volatile__ ("\tlda " STR(WPC95_FLIPPER_SWITCH_INPUT));
+#else
 		asm __volatile__ ("\tlda " STR(WPC_FLIPTRONIC_PORT_A));
+#endif
 
 	/* Set up the column strobe for the next read (on the next
 	 * iteration) */
@@ -577,6 +581,7 @@ cleanup:
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
 	register uint8_t v = sw;
 	__clearbit(p, v);
+
 	task_exit ();
 }
 #pragma short_branch

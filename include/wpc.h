@@ -149,8 +149,8 @@
 #define WPC_SW_ROW_INPUT 				0x3FE9
 #define WPC_SW_COL_STROBE 				0x3FEA
 #if (MACHINE_PIC == 1)
-#define WPC95_SW_PIC_READ 				0x3FE9
-#define WPC95_SW_PIC_WRITE 			0x3FEA
+#define WPCS_PIC_READ 					0x3FE9
+#define WPCS_PIC_WRITE 					0x3FEA
 #endif
 
 #if (MACHINE_DMD == 0)
@@ -162,7 +162,7 @@
 #define WPC_EXTBOARD3 					0x3FED
 #endif
 
-#if (MACHINE_WCS95 == 1)
+#if (MACHINE_WPC95 == 1)
 #define WPC95_FLIPPER_COIL_OUTPUT 	0x3FEE
 #define WPC95_FLIPPER_SWITCH_INPUT 	0x3FEF
 #else
@@ -284,6 +284,7 @@ extern inline void wpc_set_ram_page (uint8_t page)
 #define LED_DIAGNOSTIC		0x80
 
 /* 0x4 | 0x2 are always set when writing this register.
+ * One of these is probably to clear blanking.
  * 0x80 and 0x10 are also set when clearing the IRQ from the
  * IRQ handler.
  */
