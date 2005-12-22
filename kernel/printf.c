@@ -162,11 +162,14 @@ fixup_number:
 					{
 						case 'x': case 'X':
 						{
-							register U8 b = va_arg (va, U8);
-							endbuf = do_sprintf_hex_byte (buf, b);
-							b = va_arg (va, U8);
-							endbuf = do_sprintf_hex_byte (endbuf, b);
-							goto fixup_number;
+do_long_integer:
+							do {
+								register U8 b = va_arg (va, U8);
+								endbuf = do_sprintf_hex_byte (buf, b);
+								b = va_arg (va, U8);
+								endbuf = do_sprintf_hex_byte (endbuf, b);
+								goto fixup_number;
+							} while (0);
 							break;
 						}
 					}
@@ -206,9 +209,9 @@ fixup_number:
 
 				case 'p':
 				{
-					register void *p = va_arg (va, void *);
-					p = p;
-					break;
+					sprintf_leading_zeroes = TRUE;
+					sprintf_width = 4;
+					goto do_long_integer;
 				}
 			}
 		}
