@@ -18,9 +18,6 @@
 #define MACHINE_MAJOR_VERSION 0
 #define MACHINE_MINOR_VERSION 02
 
-#define MACHINE_DATE "12/05/2005"
-
-
 
 /* Define as 1 if the machine has a DMD, 0 if it is alphanumeric */
 #define MACHINE_DMD 1
@@ -90,6 +87,10 @@
  */
 #undef MACHINE_CUSTOM_AMODE
 
+/* Define the music cue to play during a volume change.
+ * If undefined, the system will pick one for you. */
+#define MACHINE_VOLUME_CHANGE_MUSIC 0x2
+
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
 
@@ -102,8 +103,6 @@ extern const uint8_t mach_edge_switches[];
 /* Declare the lamp effects that this machine implements */
 #undef MACHINE_LAMP_EFFECTS
 
-void piano_ball_start (void);
-void slot_ball_start (void);
 /* Declare the global machine hooks */
 #define MACHINE_HOOKS wcs_hooks
 
