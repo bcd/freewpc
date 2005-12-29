@@ -4,14 +4,8 @@
 #include <mach/coil.h>
 
 
-void sw_trough_handler (void)
-{
-}
-
-
 DECLARE_SWITCH_DRIVER (sw_trough)
 {
-	.fn = sw_trough_handler,
 	.devno = SW_DEVICE_DECL(DEV_TROUGH),
 };
 
@@ -33,9 +27,21 @@ DECLARE_SWITCH_DRIVER (sw_outhole)
 
 #endif
 
+
 void trough_enter (device_t *dev)
 {
 	device_remove_live ();
+}
+
+
+void trough_kick_attempt (device_t *dev)
+{
+	/* Wait for any conditions that should delay a trough
+	 * kick.
+	 *
+	 * On autoplunging games, always wait for the plunger
+	 * area to clear.
+	 */
 }
 
 
@@ -52,6 +58,7 @@ void trough_full (device_t *dev)
 
 device_ops_t trough_ops = {
 	.enter = trough_enter,
+	.kick_attempt = trough_kick_attempt,
 	.kick_success = trough_kick_success,
 	.full = trough_full,
 };
