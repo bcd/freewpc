@@ -80,8 +80,19 @@ extern inline task_gid_t task_getgid (void)
 		__debug_timer, irq_count); \
 }
 
-/********************************************/
-/* RAM Paging                               */
+/*******************************/
+/*   Large Stack Allocation    */
+/*******************************/
+
+#define stack_large_begin() \
+do { \
+	__asm__ volatile ("leau\t,s" ::: "u"); \
+	__asm__ volatile ("stu %0" :: "m" (task_current->s) ); \
+	set_stack_pointer (STACK_BASE - 16); \
+} while (0)
+
+#define stack_large_end() set_stack_pointer (task_current->s)
+
 /********************************/
 /*     Function Prototypes      */
 /********************************/
