@@ -45,9 +45,6 @@ static dmd_pagenum_t dmd_alloc (void)
 {
 	dmd_pagenum_t page = dmd_free_page;
 	dmd_free_page += 1;
-	/* TODO - compiler is doing 16-bit here.  Need rules for
-	 * treating values like DMD_PAGE_COUNT that are less than
-	 * 255 as byte values */
 	dmd_free_page %= DMD_PAGE_COUNT;
 	return page;
 }
