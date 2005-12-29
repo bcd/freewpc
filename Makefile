@@ -89,6 +89,7 @@ TMPFILES += *.rom		# Complete ROM files
 TMPFILES += *.lst 	# Assembler listings
 TMPFILES += *.s1 *.s2 *.s3 *.s4 *.S 
 TMPFILES += *.c.[0-9]*.* 
+TMPFILES += *.xbm.[0-9]*.* 
 TMPFILES += *.out
 TMPFILES += *.m41 	# Old M4 macro output files
 TMPFILES += page*.s	# Page header files
@@ -177,9 +178,11 @@ else
 CFLAGS += -DAS_VERSION=1.5.2
 endif
 
-# Default optimizations.  These are the only optimizations that
-# are known to work OK; using -O2 is almost guaranteed to fail.
-CFLAGS += -O1 -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
+# Default optimizations.  -O2 works OK for me, but hasn't always; you might
+# want to fall back to -O1 if you have problems.
+# OPT = -O1
+OPT = -O2
+CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
 # Default machine flags.  To keep code size small, turn on short
 # branches by default.  Some files may need to override this option
@@ -235,7 +238,6 @@ endif
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
-CFLAGS += -DCONFIG_NEW_TEST_MODE
 
 #
 # Newer versions of the assembler require these flags be passed.
@@ -415,7 +417,7 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 # a Motorola S-record file by default (S19).
 #
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
-	echo Linking $@... && $(LD) -f $< >> $(ERR) 2>&1
+	@echo Linking $@... && $(LD) -f $< >> $(ERR) 2>&1
 
 #
 # How to make the linker command file for a paged section.
@@ -447,9 +449,6 @@ $(PAGED_LINKCMD) : $(DEPS)
 #
 freewpc.s:
 	@echo ".area sysrom" > $@
-	#@echo ".db 0" >> $@
-	#@echo ".area ram" >> page$*.s
-	#@echo ".db 0" >> page$*.s
 
 
 #
@@ -458,11 +457,6 @@ freewpc.s:
 page%.s:
 	@echo ".area page$*" >> page$*.s
 	@echo ".db 0" >> page$*.s
-	#@echo ".area ram" >> page$*.s
-	#@echo ".db 0" >> page$*.s
-
-	#@echo ".area sysrom" > page$*.s
-	#@echo ".db 0" >> page$*.s
 
 #
 # How to make the linker command file for the system section.
