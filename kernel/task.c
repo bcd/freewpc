@@ -33,6 +33,8 @@ task_t task_buffer[NUM_TASKS];
 bool task_dispatching_ok;
 
 #define DEBUG_TASKS
+#define DUMP_ALL_TASKS
+
 
 #ifdef DEBUG_TASKS
 uint8_t task_count;
@@ -51,7 +53,9 @@ void task_dump (void)
 	db_puts ("\n----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
+#ifndef DUMP_ALL_TASKS
 		if (tp->state != TASK_FREE)
+#endif
 		{
 			db_puts ("PID ");
 			db_put4x ((uint16_t)tp);
@@ -86,7 +90,7 @@ task_t *task_allocate (void)
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (tp->state == TASK_FREE)
+		if ((tp->state == TASK_FREE) && (tp != task_current))
 		{
 			tp->state = TASK_USED;
 			tp->delay = 0;
@@ -213,10 +217,10 @@ void task_create (void)
 }
 
 
+#pragma naked
 void task_yield (void)
 {
-	/* TODO : this could just be a jmp, right? */
-	__asm__ volatile ("jsr _task_save");
+	__asm__ volatile ("jmp _task_save");
 }
 
 
@@ -280,11 +284,6 @@ void task_sleep (task_ticks_t ticks)
 
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
-
-#if 0 /* doesn't work for the first task created */
-	if (task_current->state != TASK_USED)
-		fatal (ERR_TASK_STACK_OVERFLOW);
-#endif
 
 	if (task_current->state != TASK_USED)
 	{
