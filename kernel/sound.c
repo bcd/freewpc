@@ -14,8 +14,8 @@ struct {
 
 __fastram__ music_code_t music_stack[MUSIC_STACK_SIZE];
 __fastram__ music_code_t *music_head;
-uint8_t current_volume;
 
+__nvram__ U8 current_volume;
 
 
 static void sound_queue_init (void)
@@ -41,9 +41,9 @@ extern inline bool sound_queue_empty (void)
 
 void music_set (music_code_t code)
 {
+	*music_head = code;
 	if ((current_volume > 0) || (code == MUS_OFF))
 	{
-		*music_head = code;
 #if (MACHINE_DCS == 1)
 		sound_queue_insert (0);
 #endif
@@ -79,14 +79,21 @@ void sound_reset (void)
 }
 
 
+void sound_ready (void)
+{
+	current_volume = DEFAULT_VOLUME;
+	sound_queue_init ();
+	music_off ();
+	volume_update ();
+}
+
 void sound_init (void)
 {
 #if (MACHINE_DCS == 0)
+	/* TODO : WPC sound also need to run as a background thread,
+	 * waiting for sync from the sound board */
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
-	current_volume = DEFAULT_VOLUME;
-	sound_queue_init ();
-	volume_update ();
-	music_off ();
+	sound_ready ();
 #else
 	static U8 dcs_init_string[] = {
 		0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
@@ -95,9 +102,6 @@ void sound_init (void)
 		0x7C
 	};
 	int i, j;
-
-	current_volume = DEFAULT_VOLUME;
-	sound_queue_init ();
 
 	for (i=0; i < sizeof (dcs_init_string); i++)
 	{
@@ -113,6 +117,9 @@ void sound_init (void)
 			task_sleep (1); /* 8ms */
 		}
 	}
+
+	task_sleep_sec (3);
+	sound_ready ();
 
 	sys_init_pending_tasks--;
 	task_exit ();
@@ -152,9 +159,19 @@ void sound_send (sound_code_t code)
 void volume_update (void)
 {
 	if (current_volume == 0)
-		sound_queue_insert (MUS_OFF);
+	{
+		music_change (MUS_OFF);
+	}
 	else
-		music_set (*music_head);
+	{
+#if (MACHINE_DCS == 1)
+		U8 code = current_volume * 8 + 0x40;
+		sound_queue_insert (0x55);
+		sound_queue_insert (0xAA);
+		sound_queue_insert (code);
+		sound_queue_insert (~code);
+#endif
+	}
 }
 
 
@@ -163,9 +180,12 @@ void volume_deff (void) __taskentry__
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
 	font_render_string_center (&font_5x5, 64, 13, sprintf_buffer);
-	volume_update ();
 	if (!in_game)
-		music_change (2);
+#ifdef MACHINE_VOLUME_CHANGE_MUSIC
+		music_change (MACHINE_VOLUME_CHANGE_MUSIC);
+#else
+		music_change (1);
+#endif
 	dmd_show_low ();
 	task_sleep_sec (4);
 	if (!in_game)
