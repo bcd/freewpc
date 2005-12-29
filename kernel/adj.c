@@ -1,8 +1,8 @@
 
 #include <freewpc.h>
 
-std_adj_t system_config;
-pricing_adj_t price_config;
+__nvram__ std_adj_t system_config;
+__nvram__ pricing_adj_t price_config;
 
 static const std_adj_t std_adj_defaults = {
 	.balls_per_game = 3,
@@ -40,6 +40,8 @@ static const std_adj_t std_adj_defaults = {
 
 void adj_init (void)
 {
-	memcpy (&system_config, &std_adj_defaults, sizeof (std_adj_t));
+	/* TODO : do this only during factory reset */
+	extern void adj_reset_all (void);
+	call_far (TEST_PAGE, adj_reset_all ());
 }
 
