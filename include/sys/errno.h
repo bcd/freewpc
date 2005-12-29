@@ -24,10 +24,7 @@
 #define ERR_NVRAM_UNLOCKED			20
 
 typedef uint8_t errcode_t;
-__noreturn__ void do_fatal (errcode_t errcode);
-void do_nonfatal (errcode_t errcode);
-
-#define fatal(err)		do_fatal(err)
-#define nonfatal(err)	do_nonfatal(err)
+__noreturn__ void fatal (errcode_t errcode);
+void nonfatal (errcode_t errcode);
 
 #endif /* SYS_ERRNO_H */

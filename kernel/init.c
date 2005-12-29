@@ -16,7 +16,7 @@ __nvram__ U8 nvram_test_byte;
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
 
-__noreturn__ void do_fatal (errcode_t error_code)
+__noreturn__ void fatal (errcode_t error_code)
 {
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
 
@@ -41,7 +41,7 @@ __noreturn__ void do_fatal (errcode_t error_code)
 }
 
 
-void do_nonfatal (errcode_t error_code)
+void nonfatal (errcode_t error_code)
 {
 }
 
@@ -112,8 +112,8 @@ __noreturn__ void do_reset (void)
 
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
-	wpc_set_ram_protect_size (RAM_LOCK_512);
-	wpc_set_ram_protect (RAM_LOCK_512);
+	wpc_set_ram_protect_size (RAM_LOCK_2K);
+	wpc_set_ram_protect (RAM_LOCK_2K);
 
 	/** Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped. */
@@ -166,6 +166,7 @@ __noreturn__ void do_reset (void)
 	leff_init ();
 	call_far (TEST_PAGE, test_init ());
 	score_init ();
+	coin_init ();
 	adj_init ();
 	call_hook (init);
 
@@ -205,7 +206,7 @@ __noreturn__ void do_reset (void)
  * scheduling occurs.  If this value stops moving, something
  * is very wrong.
  *
- * This check occurs every 16 IRQs.  No task should run for
+ * This check occurs every 128 IRQs.  No task should run for
  * that long without giving up control.  If the count doesn't
  * change on every check, we invoke a fatal error and reset.
  */
@@ -213,7 +214,7 @@ void lockup_check_rtt (void)
 {
 	if (sys_init_complete && !task_dispatching_ok)
 	{
-		do_fatal (ERR_FCFS_LOCKUP);
+		fatal (ERR_FCFS_LOCKUP);
 	}
 	else
 	{
