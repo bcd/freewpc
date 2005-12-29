@@ -104,8 +104,7 @@ U8 *font_lookup (const font_t *font, char c)
 	{
 		entry = NULL;
 		index = 0;
-		dbprintf ("Unprintable character: %i\n", c);
-		fatal (ERR_UNPRINTABLE_CHAR); /* TODO : this should be nonfatal */
+		nonfatal (ERR_UNPRINTABLE_CHAR);
 	}
 
 	return entry + index * font->height;
