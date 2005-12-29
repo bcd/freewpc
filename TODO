@@ -1,25 +1,11 @@
 
-=========================================================================
-	Implement a strategy for far code/data
-=========================================================================
-
-Use GCC's attribute mechanism to attach a "section" name to each
-declaration.  For example,
-
-void far_function (void) __attribute__ ((__section__("far")) ...
-
-would declare far_function to go into a section named "far":
-
-.area far
-...
-
-Every function and variable has a default section name; this attribute
-can be used to override the default.
-
-The linker must know where to put each section in the final output image.
-
-The code generator for function calls and data accesses can be modified
-to compare the "current section" (based on the attribute of the current
-function) and the "target section" (the called function or accessed
-variable), and to generate appropriate code to handle this.
-
+Add Transitional effects
+Use inheritance in switch drivers to set all fields correctly for
+	various kinds of switches
+Rudimentary animations by panning over a static image larger than the
+	display
+Add image compression/decompression algorithms
+Do proper switch debouncing/queueing
+Add timer support
+Add adjustment (writable browser) support
+Better DMD function names (low? used everywhere)
