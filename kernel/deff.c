@@ -25,18 +25,7 @@
  * and subject to get it later if priorities change.
  */
 
-#ifdef CONFIG_NEW_TEST_MODE
-#define TEST_DISPLAY_EFFECTS
-#else
-#define TEST_DISPLAY_EFFECTS \
-	DECL_DEFF (DEFF_TEST_MENU, D_RUNNING, 5, test_menu_deff) \
-	DECL_DEFF (DEFF_PRINT_RTC, D_NORMAL, 250, rtc_print_deff) \
-	DECL_DEFF (DEFF_FONT_TEST, D_RUNNING, 250, font_test_deff)
-#endif
-
-
 #define SYSTEM_DISPLAY_EFFECTS \
-	TEST_DISPLAY_EFFECTS \
 	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
 	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
 	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
