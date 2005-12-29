@@ -3,7 +3,7 @@
 #define _SYS_DMD_H
 
 /* The size of each DMD page */
-#define DMD_PAGE_SIZE 0x200
+#define DMD_PAGE_SIZE 0x200UL
 
 /* The number of DMD pages */
 #define DMD_PAGE_COUNT 16
