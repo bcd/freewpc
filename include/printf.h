@@ -3,7 +3,7 @@
 #define _PRINTF_H
 
 
-typedef U16 *va_list;
+typedef U8 *va_list;
 
 #define PRINTF_BUFFER_SIZE		48
 
@@ -14,9 +14,7 @@ do { \
 } while (0) \
 
 
-/* TODO : this macro is generating warnings with the latest gcc.
- * Not sure how to fix it properly yet. */
-#define va_arg(va, type)	*((type *)va)++
+#define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
 
 #define va_end(va)
 
