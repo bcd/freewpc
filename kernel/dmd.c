@@ -105,9 +105,9 @@ void dmd_swap_low_high (void)
 
 void dmd_clean_page (dmd_buffer_t *dbuf)
 {
-	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
+	register long int count = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
-	register uint16_t zero = 0;
+	register volatile U16 zero asm ("y") = 0;
 	while (--count >= 0)
 	{
 		*dbuf16++ = zero;
