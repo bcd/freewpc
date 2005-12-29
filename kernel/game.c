@@ -55,8 +55,6 @@ void end_ball (void)
 	if (!in_game)
 		goto done;
 
-	db_puts ("In endball\n");
-
 	if (!ball_in_play)
 	{
 		device_request_kick (device_entry (DEV_TROUGH));
@@ -64,10 +62,7 @@ void end_ball (void)
 	}
 
 	if (!call_boolean_hook (end_ball))
-	{
-		dbprintf ("end_ball hook returned false\n");
 		goto done;
-	}
 	
 	flipper_disable ();
 
@@ -90,7 +85,6 @@ void end_ball (void)
 	player_up++;
 	if (player_up <= num_players)
 	{
-		player_change ();
 		start_ball ();
 		goto done;
 	}
@@ -99,7 +93,6 @@ void end_ball (void)
 	ball_up++;
 	if (ball_up <= MAX_BALLS_PER_GAME)
 	{
-		player_change ();
 		start_ball ();
 		goto done;
 	}
@@ -116,6 +109,7 @@ void start_ball (void)
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
 	call_hook (start_ball);
+	player_change ();
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
 	device_request_kick (device_entry (DEV_TROUGH));
