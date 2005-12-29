@@ -22,16 +22,6 @@
 #define FIRQ_CLEAR_BIT 0x80
 
 
-#if 0
-/***************************************************************
- * Paging
- ***************************************************************/
-
-/* Offset of the offset and page parts of a far pointer */
-#define FP_OFFSET			0
-#define FP_PAGE			2
-#endif
-
 /***************************************************************
  * Memory usage
  ***************************************************************/
@@ -88,15 +78,11 @@
 
 /* When the lock register(s) contain these values, the upper
  * N bytes of the RAM are write protected. */
-#define RAM_LOCK_512			0x1
-
-#if 0
 #define RAM_LOCK_4K			0x0
 #define RAM_LOCK_2K			0x1
 #define RAM_LOCK_1K			0x3
 #define RAM_LOCK_512			0x7
 #define RAM_LOCK_256			0xF
-#endif
 
 #define RAM_LOCKED			0x0
 
@@ -188,25 +174,10 @@
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
 
-/* TODO : this is a better version but it generates worse code */
-#if 0
 extern inline void wpc_led_toggle (void)
 {
-	*(volatile uint8_t *)WPC_LEDS ^= 0x80;
+	*(volatile U8 *)WPC_LEDS ^= 0x80;
 }
-#else
-extern inline void wpc_led_toggle (void)
-{
-	asm (										\
-		"lda\t" STR(WPC_LEDS) "\n"		\
-		"\teora\t#0x80\n"					\
-		"\tsta\t" STR(WPC_LEDS) "\n"	\
-		:										\
-		: 										\
-		: "a" 								\
-	);
-}
-#endif
 
 /********************************************/
 /* RAM Protection Circuit                   */
