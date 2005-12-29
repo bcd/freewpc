@@ -7,9 +7,13 @@ struct window;
  * no window is open. */
 struct window *win_top;
 
+/* Equivalent to (win_top != NULL), but as a byte, this can
+ * be tested with a single instruction.
+ * TODO - these two variables could be overlapped into a union. */
 U8 in_test;
 
 
+/* Test mode now runs in its own page of ROM */
 #pragma section("page58")
 
 /*
@@ -207,7 +211,9 @@ void window_pop_first (void)
 void window_start_thread (void)
 {
 	if (win_top->ops->thread)
+	{
 		task_recreate_gid (GID_WINDOW_THREAD, win_top->ops->thread);
+	}
 }
 
 void window_stop_thread (void)
@@ -372,6 +378,158 @@ void browser_print_operation (const char *s)
 {
 	font_render_string (&font_5x5, 56, 20, s);
 }
+
+/**********************************************************/
+
+/* A window class for adjustment browsing.
+ * It supports all of the standard browser operations,
+ * but the enter key can be used to go into edit mode
+ * and change the value of the item.
+ */
+
+#define ADJ_BROWSING 0
+#define ADJ_EDITING 1
+#define ADJ_CONFIRMING 2
+
+struct adjustment_value
+{
+	U8 min;
+	U8 max;
+	U8 step;
+	void (*render) (U8 val);
+};
+
+struct adjustment
+{
+	const char *name;
+	struct adjustment_value *values;
+	U8 factory_default;
+	U8 *nvram;
+};
+
+struct adjustment *browser_adjs;
+U8 adj_edit_value;
+
+struct adjustment_value integer_value = { 0, 0xFF, 1, NULL };
+struct adjustment_value balls_per_game_value = { 1, 10, 1, NULL };
+struct adjustment_value max_eb_value = { 0, 10, 1, NULL };
+struct adjustment_value on_off_value = { 0, 1, 1, NULL };
+struct adjustment_value yes_no_value = { 0, 1, 1, NULL };
+struct adjustment_value enabled_disabled_value = { 0, 1, 1, NULL };
+struct adjustment_value clock_style_value = { 0, 1, 1, NULL };
+struct adjustment_value date_style_value = { 0, 1, 1, NULL };
+struct adjustment_value game_restart_value = { 0, 2, 1, NULL };
+
+struct adjustment standard_adjustments[] = {
+	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
+	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
+	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
+	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
+	{ "LANGUAGE", &integer_value, 0, &system_config.language },
+	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
+	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
+	{ "ALLOW DIM ALLUM.", &yes_no_value, 0, &system_config.allow_dim_illum },
+	{ "TOURNAMENT MODE", &yes_no_value, 0, &system_config.tournament_mode },
+	{ "EURO. DIGIT SEP.", &yes_no_value, 0, &system_config.euro_digit_sep },
+	{ "NO BONUS FLIPS", &yes_no_value, 0, &system_config.no_bonus_flips },
+	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
+	{ NULL, NULL, 0, NULL },
+};
+
+
+void adj_reset (struct adjustment *adjs)
+{
+	wpc_nvram_get ();
+	while (adjs->name != NULL)
+	{
+		*(adjs->nvram) = adjs->factory_default;
+		adjs++;
+	}
+	wpc_nvram_put ();
+}
+
+
+void adj_reset_all (void)
+{
+	adj_reset (standard_adjustments);
+}
+
+
+void adj_browser_draw (void)
+{
+	struct menu *m = win_top->w_class.menu.self;
+
+	dmd_alloc_low_clean ();
+
+	font_render_string_center (&font_5x5, 64, 1, m->name);
+
+	sprintf ("%d. %s", menu_selection+1, browser_adjs[menu_selection].name);
+	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+
+	if (browser_action == ADJ_BROWSING)
+	{
+		sprintf ("%d", *(browser_adjs[menu_selection].nvram));
+	}
+	else
+	{
+		sprintf ("EDIT... %d", *(browser_adjs[menu_selection].nvram));
+	}
+	font_render_string_center (&font_5x5, 64, 19, sprintf_buffer);
+
+	dmd_show_low ();
+}
+
+
+void adj_browser_init (void)
+{
+	browser_init ();
+	browser_adjs = standard_adjustments;
+	browser_action = ADJ_BROWSING;
+	browser_min = 0;
+	/* the last entry must be NULL, so don't count that one */
+	browser_max = (sizeof (standard_adjustments) / sizeof (struct adjustment))-2;
+}
+
+void adj_browser_enter (void)
+{
+	if (browser_action == ADJ_BROWSING)
+	{
+		browser_action = ADJ_EDITING;
+	}
+	else if (browser_action == ADJ_EDITING)
+	{
+		//browser_action = ADJ_CONFIRMING;
+	}
+}
+
+
+void adj_browser_escape (void)
+{
+	if (browser_action == ADJ_EDITING)
+	{
+		browser_action = ADJ_BROWSING;
+	}
+	else if (browser_action == ADJ_CONFIRMING)
+	{
+		browser_action = ADJ_EDITING;
+	}
+	else
+	{
+		window_pop ();
+	}
+}
+
+
+#define INHERIT_FROM_ADJ_BROWSER \
+	INHERIT_FROM_BROWSER, \
+	.init = adj_browser_init, \
+	.draw = adj_browser_draw, \
+	.enter = adj_browser_enter, \
+	.escape = adj_browser_escape
+
+struct window_ops adj_browser_window = {
+	INHERIT_FROM_ADJ_BROWSER,
+};
 
 /*****************************************************/
 
@@ -590,6 +748,7 @@ struct deff_leff_ops {
 };
 
 struct deff_leff_ops *deff_leff_test_ops;
+U8 deff_leff_last_active;
 
 
 struct deff_leff_ops dev_deff_ops = {
@@ -606,17 +765,19 @@ struct deff_leff_ops dev_leff_ops = {
 
 void deff_leff_thread (void)
 {
-	U8 last_active = 0xEE;
-
+	browser_draw ();
 	for (;;)
 	{
 		U8 is_active = deff_leff_test_ops->get_active ();
-		if (is_active != last_active)
+		if (is_active != deff_leff_last_active)
 		{
 			if (deff_leff_test_ops == &dev_deff_ops) 
 			{
-				if (is_active == 0)
+				if (is_active != menu_selection)
+				{
 					browser_draw ();
+					browser_print_operation ("STOPPED");
+				}
 			}
 			else
 			{
@@ -627,8 +788,8 @@ void deff_leff_thread (void)
 					browser_print_operation ("STOPPED");
 			}
 		}
-		last_active = is_active;
-		task_sleep (TIME_100MS);
+		deff_leff_last_active = is_active;
+		task_sleep (TIME_100MS * 4);
 	}
 }
 
@@ -646,28 +807,35 @@ void deff_leff_init (void)
 		deff_leff_test_ops = &dev_deff_ops;
 	else
 		deff_leff_test_ops = &dev_leff_ops;
+	deff_leff_last_active = 0xEE;
 }
+
+void deff_leff_up (void) { browser_up (); deff_leff_last_active++; }
+void deff_leff_down (void) { browser_down (); deff_leff_last_active++; }
 
 void deff_leff_enter (void)
 {
 	if (deff_leff_test_ops->get_active () == menu_selection)
 	{
 		/* deff/leff already running, so stop it */
-		deff_leff_test_ops->start (menu_selection);
+		deff_leff_test_ops->stop (menu_selection);
 	}
 	else
 	{
 		/* deff/leff not running, so start it */
-		deff_leff_test_ops->stop (menu_selection);
+		deff_leff_test_ops->start (menu_selection);
 	}
+	sound_send (SND_TEST_ENTER);
+	deff_leff_last_active++;
 }
 
 struct window_ops deff_leff_window = {
 	INHERIT_FROM_BROWSER,
 	.init = deff_leff_init,
-	.draw = null_function,
 	.thread = deff_leff_thread,
 	.enter = deff_leff_enter,
+	.up = deff_leff_up,
+	.down = deff_leff_down,
 };
 
 struct menu dev_deff_test_item = {
@@ -682,6 +850,17 @@ struct menu dev_leff_test_item = {
 	.var = { .subwindow = { &deff_leff_window, NULL } },
 };
 
+/*********** Lampsets **********************/
+
+struct window_ops dev_lampset_window = {
+	INHERIT_FROM_BROWSER,
+};
+
+struct menu dev_lampset_test_item = {
+	.name = "LAMPSETS",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &dev_lampset_window, NULL } },
+};
 
 /*********** Ball Devices **********************/
 
@@ -696,9 +875,13 @@ void dev_balldev_test_init (void)
 void dev_balldev_test_draw (void)
 {
 	extern U8 counted_balls, missing_balls;
-
-	device_t *dev = &device_table[menu_selection];
+	device_t *dev;
 	char *s;
+
+	task_yield ();
+	stack_large_begin ();
+
+	dev = &device_table[menu_selection];
 
 	dmd_alloc_low_clean ();
 
@@ -714,15 +897,16 @@ void dev_balldev_test_draw (void)
 	
 		sprintf ("SIZE %d", dev->size);
 		font_render_string (&font_5x5, 8, 6, sprintf_buffer);
+
 		sprintf ("COUNT %d", dev->actual_count);
 		font_render_string (&font_5x5, 8, 12, sprintf_buffer);
+
 		sprintf ("SOL %d", dev->props->sol+1);
 		font_render_string (&font_5x5, 8, 18, sprintf_buffer);
 
-		task_yield ();
-
 		sprintf ("COUNTED %d", counted_balls);
 		font_render_string (&font_5x5, 72, 6, sprintf_buffer);
+
 		sprintf ("MISSING %d", missing_balls);
 		font_render_string (&font_5x5, 72, 12, sprintf_buffer);
 
@@ -735,7 +919,10 @@ void dev_balldev_test_draw (void)
 		}
 		font_render_string_center (&font_5x5, 64, 24, s);
 	}
+
 	dmd_show_low ();
+
+	stack_large_end ();
 }
 #pragma short_branch
 
@@ -756,13 +943,22 @@ void dev_balldev_test_thread (void)
 				(last_dev == dev))
 			{
 				sound_send (SND_TEST_CHANGE);
+				dev_balldev_test_draw ();
 			}
+			else if (i == 7)
+				dev_balldev_test_draw ();
+
 			last_count = dev->actual_count;
 			last_dev = dev;
 			task_sleep (TIME_66MS);
 		}
 
-		dev_balldev_test_draw ();
+#if defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_LAUNCH_SWITCH)
+		if (switch_poll (MACHINE_LAUNCH_SWITCH))
+		{
+			sol_pulse (MACHINE_LAUNCH_SOLENOID);
+		}
+#endif
 	}
 }
 
@@ -788,6 +984,7 @@ void dev_balldev_test_change (void)
 	browser_action++;
 	if (browser_action == 4)
 		browser_action = 0;
+	sound_send (SND_TEST_CHANGE);
 	dev_balldev_test_draw ();
 }
 
@@ -897,6 +1094,7 @@ struct menu *dev_menu_items[] = {
 	&dev_font_test_item,
 	&dev_deff_test_item,
 	&dev_leff_test_item,
+	&dev_lampset_test_item,
 	&dev_balldev_test_item,
 	&dev_soundedit_item,
 	NULL,
@@ -925,10 +1123,42 @@ struct menu burnin_item = {
 	.flags = M_ITEM,
 };
 
+
+void revoke_init (void)
+{
+	extern U8 freewpc_accepted[];
+	extern void do_reset (void);
+
+	dmd_alloc_low_clean ();
+	dmd_show_low();
+	task_sleep_sec (1);
+
+	wpc_nvram_get ();
+	freewpc_accepted[0] = 0;
+	freewpc_accepted[1] = 0;
+	freewpc_accepted[2] = 0;
+	wpc_nvram_put ();
+
+	do_reset ();
+}
+
+struct window_ops revoke_window = {
+	DEFAULT_WINDOW,
+	.init = revoke_init,
+};
+
+struct menu revoke_item = {
+	.name = "REVOKE FREEWPC",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &revoke_window, NULL } },
+};
+
+
 struct menu *util_menu_items[] = {
 	&factory_reset_item,
 	&clear_credits_item,
 	&burnin_item,
+	&revoke_item,
 	NULL,
 };
 
@@ -983,8 +1213,9 @@ struct menu *adj_menu_items[] = {
 
 struct menu adjustments_menu = {
 	.name = "ADJUSTMENTS",
-	.flags = M_MENU | M_LETTER_PREFIX,
-	.var = { .submenus = adj_menu_items },
+	.flags = M_ITEM | M_LETTER_PREFIX,
+	// .var = { .submenus = adj_menu_items },
+	.var = { .subwindow = { &adj_browser_window, NULL } },
 };
 
 /**********************************************************************/
@@ -1104,12 +1335,8 @@ void sound_test_set_draw (void)
 			s = "SPEECH";
 			break;
 
-		case 2:
-			s = "UNDEFINED";
-			break;
-
 		case 3:
-			s = "TEST MODE";
+			s = "MISC/TEST MODE";
 			break;
 #endif
 	}
@@ -1120,6 +1347,8 @@ void sound_test_set_change (void)
 {
 	sound_test_set++;
 #if (MACHINE_DCS == 0)
+	if (sound_test_set == 1)
+		sound_test_set = 3;
 	if (sound_test_set > 1)
 #else
 	if (sound_test_set > 3)
@@ -1398,6 +1627,14 @@ struct menu all_lamp_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &all_lamp_test_window, NULL } },
 };
+
+/*************** Lamp Row/Col Test ********************/
+
+struct menu lamp_row_col_test_item = {
+	.name = "LAMP ROWS/COLS",
+	.flags = M_ITEM,
+};
+
 /***************** DIP Switch Test **********************/
 
 void dipsw_render_single (U8 sw, U8 state)
@@ -1430,6 +1667,8 @@ void dipsw_test_draw (void)
 struct window_ops dipsw_test_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = dipsw_test_draw,
+	.up = null_function,
+	.down = null_function,
 };
 
 struct menu dipsw_test_item = {
@@ -1490,19 +1729,45 @@ struct menu asic_tests_menu = {
 	.var = { .submenus = asic_test_items, },
 };
 
+
+struct menu flipper_test_item = {
+	.name = "FLIPPER TEST",
+	.flags = M_ITEM,
+};
+
+struct menu display_test_item = {
+	.name = "DISPLAY TEST",
+	.flags = M_ITEM,
+};
+
+struct menu debugger_test_item = {
+	.name = "DEBUGGER TEST",
+	.flags = M_ITEM,
+};
+
+struct menu empty_balls_item = {
+	.name = "EMPTY BALLS TEST",
+	.flags = M_ITEM,
+};
+
 /****************** TEST MENU **************************/
 
 struct menu *test_menu_items[] = {
 	&switch_edges_item,
 	&switch_levels_item,
 	&single_switches_item,
+	&display_test_item,
 	&solenoid_test_item,
 	&gi_test_item,
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,
+	&lamp_row_col_test_item,
 	&dipsw_test_item,
+	&flipper_test_item,
 	&asic_tests_menu,
+	&debugger_test_item,
+	&empty_balls_item,
 	NULL,
 };
 
@@ -1621,9 +1886,18 @@ void sysinfo_enter (void)
 	window_push (&menu_window, &main_menu);
 }
 
+void sysinfo_up (void)
+{
+	if (++win_top->w_class.scroller.offset >= win_top->w_class.scroller.size)
+		sysinfo_enter ();
+	else
+		sound_send (SND_TEST_UP);
+}
+
 struct window_ops sysinfo_scroller_window = {
 	INHERIT_FROM_SCROLLER,
 	.enter = sysinfo_enter,
+	.up = sysinfo_up,
 };
 
 /**********************************************************/
