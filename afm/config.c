@@ -56,19 +56,15 @@ void afm_start_game (void)
 void afm_end_game (void)
 {
 	#include <end_game.callset>
-	if (!in_test)
-		music_set (MUS_MAIN_DRUM_ENTRY);
 }
 
 void afm_start_ball (void)
 {
-	music_set (MUS_MULTIBALL_LIT_PLUNGER);
 	#include <start_ball.callset>
 }
 
 void afm_ball_in_play (void)
 {
-	music_set (MUS_MULTIBALL_LIT);
 	/* start ballsaver if enabled */
 }
 
