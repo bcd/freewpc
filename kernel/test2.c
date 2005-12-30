@@ -1650,6 +1650,7 @@ void dipsw_test_draw (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_5x5, 64, 3, "DIP SWITCHES");
 
+	task_yield ();
 	for (sw = 0; sw < 8; sw++)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
@@ -1658,7 +1659,6 @@ void dipsw_test_draw (void)
 			(sw % 4) * 6 + 9, 
 			sprintf_buffer);
 		dipsw >>= 1;
-		task_yield ();
 	}
 
 	dmd_show_low ();
