@@ -1,9 +1,6 @@
 
 #include <freewpc.h>
 
-#define MAX_PLAYERS 4
-#define MAX_BALLS_PER_GAME 3
-
 U8 in_game;
 U8 in_bonus;
 U8 in_tilt;
@@ -122,7 +119,7 @@ void end_ball (void)
 
 	player_up = 1;
 	ball_up++;
-	if (ball_up <= MAX_BALLS_PER_GAME)
+	if (ball_up <= system_config.balls_per_game)
 	{
 		start_ball ();
 		goto done;
@@ -236,7 +233,7 @@ void sw_start_button_handler (void) __taskentry__
 	{
 		if (ball_up == 1)
 		{
-			if (num_players < MAX_PLAYERS)
+			if (num_players < system_config.max_players)
 			{
 				add_player ();
 			}
