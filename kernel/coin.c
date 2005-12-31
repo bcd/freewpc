@@ -1,11 +1,10 @@
 
 #include <freewpc.h>
 
-//#define FREE_ONLY
+//#define FREE_ONLY /* TODO : this belongs in makefile */
 
 #define MAX_CREDITS 30
 
-__nvram__ U8 free_play;
 __nvram__ U8 credit_count;
 __nvram__ U8 unit_count;
 __nvram__ U8 units_per_credit;
@@ -16,7 +15,7 @@ void credits_render (void)
 #ifdef FREE_ONLY
 	sprintf ("FREE ONLY");
 #else
-	if (free_play)
+	if (price_config.free_play)
 		sprintf ("FREE PLAY");
 	else
 	{
@@ -233,18 +232,16 @@ void coin_init (void)
 {
 	/* TODO : this should only be done during a factory reset */
 	wpc_nvram_get ();
+
 	credit_count = 0;
 	unit_count = 0;
-#ifdef FREE_ONLY
-	free_play = TRUE;
-#else
-	free_play = FALSE;
-#endif
+
 	units_per_credit = 2;
 	units_per_coin[0] = 1;
 	units_per_coin[1] = 4;
 	units_per_coin[2] = 1;
 	units_per_coin[3] = 1;
+
 	wpc_nvram_put ();
 
 	lamp_start_update ();
