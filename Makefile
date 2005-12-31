@@ -277,11 +277,11 @@ BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
 #
 
 ifeq ($(USE_DIRECT_PAGE),y)
-DIRECT_AREA = 0x0
+DIRECT_AREA = 0x4
 RAM_AREA = 0x100
 DIRECT_LNK_CMD = "-b direct = $(DIRECT_AREA)"
 else
-RAM_AREA = 0x0
+RAM_AREA = 0x4
 DIRECT_LNK_CMD = "-x"
 endif
 NVRAM_AREA = 0x1800

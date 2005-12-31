@@ -85,7 +85,7 @@ __noreturn__ void do_reset (void)
 	 * has space allocated for them; the naked pragma prevents
 	 * them from being allocated explicitly.
 	 */
-	set_stack_pointer (STACK_BASE - 16);
+	set_stack_pointer (STACK_BASE - 8);
 
 	/** Initializing the RAM page */
 	wpc_set_ram_page (0);
@@ -109,6 +109,11 @@ __noreturn__ void do_reset (void)
 	{
 		*ramptr-- = 0;
 	} while (ramptr != 0);
+
+	/** Install the null pointer catcher, by programming
+	 * an actual instruction at address 0x0 */
+	*(U8 *)0 = 0x20;
+	*(U8 *)1 = 0xFE;
 
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
