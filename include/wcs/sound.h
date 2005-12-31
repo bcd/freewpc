@@ -2,7 +2,6 @@
 #ifndef _MACH_SOUND_H
 #define _MACH_SOUND_H
 
-#define MUS_OFF 						MUSIC_SND(0x0)
 #define MUS_MULTIBALL				MUSIC_SND(0x1)
 #define MUS_LOCK_LIT					MUSIC_SND(0x2)
 #define MUS_MAIN_LONG_ENTRY		MUSIC_SND(0x3)

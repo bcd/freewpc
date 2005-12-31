@@ -2,8 +2,6 @@
 #ifndef _MACH_SOUND_H
 #define _MACH_SOUND_H
 
-#define MUS_OFF 0x0
-#define MUS_SILENCE 0x1
 #ifdef CONFIG_TZONE_IP
 #define MUS_TZ_PLUNGER 0x2
 #define MUS_TZ_IN_PLAY 0x3
@@ -53,7 +51,7 @@
 //#define SND_TEST_ENTER 0x57 
 //#define SND_TEST_ESCAPE 0x58 
 //#define SND_TEST_SCROLL 0x59 
-#define SND_GET_VERSION 0x5F 
+//#define SND_GET_VERSION 0x5F 
 #define SND_VOLUME_CHANGE 0x79 
 #define SND_START_EXTENDED 0x7A 
 #define SND_STOP_SOUND 0x7D 

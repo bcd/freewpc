@@ -17,10 +17,19 @@ __fastram__ music_code_t *music_head;
 
 __nvram__ U8 current_volume;
 
+U8 sound_error_code;
+
+U8 sound_version_major;
+U8 sound_version_minor;
+
+#define sound_version sound_version_major
+
 
 static void sound_queue_init (void)
 {
+	disable_irq ();
 	queue_init ((queue_t *)&sound_queue);
+	enable_irq ();
 }
 
 static void sound_queue_insert (U8 val)
@@ -64,6 +73,36 @@ void music_change (music_code_t code)
 }
 
 
+#if (MACHINE_DCS == 1)
+
+U8 sound_board_poll (void)
+{
+	U8 status = *(volatile U8 *)WPCS_CONTROL_STATUS;
+	U8 in_data;
+
+	if (status & 0x80)
+	{
+		in_data = *(volatile U8 *)WPCS_DATA;
+		return (in_data);
+	}
+	else
+		return (0xFF);
+}
+
+U8 sound_board_read (U8 retries)
+{
+	do {
+		U8 in = sound_board_poll ();
+		if (in != 0xFF)
+			return (in);
+		else
+			task_sleep (TIME_66MS);
+	} while (--retries != 0);
+	return (0xFF);
+}
+
+#endif /* DCS */
+
 void sound_rtt (void)
 {
 	if (!sound_queue_empty ())
@@ -81,10 +120,10 @@ void sound_reset (void)
 
 void sound_ready (void)
 {
-	current_volume = DEFAULT_VOLUME;
 	sound_queue_init ();
 	music_off ();
-	volume_update ();
+	//volume_set (current_volume);
+	volume_set (DEFAULT_VOLUME);
 }
 
 void sound_init (void)
@@ -95,13 +134,14 @@ void sound_init (void)
 	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
 	sound_ready ();
 #else
+	int i, j;
+#if 1
 	static U8 dcs_init_string[] = {
 		0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
 		0xC4, 0xAA, 0x83, 0x37, 0x28, 0xC8, 0xE6, 0xE7, 0xD4, 0x85,
 		0xD9, 0x16, 0x10, 0x64, 0x58, 0xC6, 0xCC, 0x93, 0x85, 0x0F,
 		0x7C
 	};
-	int i, j;
 
 	for (i=0; i < sizeof (dcs_init_string); i++)
 	{
@@ -117,10 +157,61 @@ void sound_init (void)
 			task_sleep (1); /* 8ms */
 		}
 	}
+#endif
 
-	task_sleep_sec (3);
-	sound_ready ();
+	/* Wait for the sound board to report its presence, by
+	 * reading a value of 0x79. */
+	dbprintf ("Waiting for sound board...\n");
+	i = 100;
+	for (;;)
+	{
+		if ((sound_board_poll ()) == 0x79)
+			break;
+		else
+		{
+			task_sleep (TIME_33MS);
+			if (i-- == 0)
+			{
+				dbprintf ("Error: sound board not detected\n");
+				goto exit_func;
+			}
+		}
+	}
+	(void)sound_board_poll ();
 
+	dbprintf ("Checking for errors...\n");
+	sound_error_code = sound_board_read (100);
+	(void)sound_board_poll ();
+
+	sound_queue_init ();
+	task_sleep_sec (1);
+
+	dbprintf ("Error flag is %02X ; checking version...\n", sound_error_code);
+	i = 8;
+	do {
+		sound_send (SND_GET_VERSION_CMD);
+		task_sleep (TIME_100MS);
+		sound_version = sound_board_poll ();
+	} while ((sound_version == 255) && (--i != 0));
+	(void)sound_board_poll ();
+
+	i = 8;
+	do {
+		sound_send (SND_GET_UNKNOWN_CMD);
+		task_sleep (TIME_100MS);
+		sound_version_minor = sound_board_poll ();
+	} while ((sound_version_minor == 255) && (--i != 0));
+	(void)sound_board_poll ();
+
+#if (MACHINE_DCS == 1)
+	dbprintf ("Detected %d.%d sound.\n", sound_version >> 4, sound_version & 0x0F);
+#else
+	dbprintf ("Detected L-%d sound.\n", sound_version);
+#endif
+
+	volume_set (DEFAULT_VOLUME);
+
+exit_func:
 	sys_init_pending_tasks--;
 	task_exit ();
 #endif
@@ -156,8 +247,12 @@ void sound_send (sound_code_t code)
 }
 
 
-void volume_update (void)
+void volume_set (U8 vol)
 {
+	wpc_nvram_get ();
+	current_volume = vol;
+	wpc_nvram_put ();
+
 	if (current_volume == 0)
 	{
 		music_change (MUS_OFF);
@@ -165,7 +260,7 @@ void volume_update (void)
 	else
 	{
 #if (MACHINE_DCS == 1)
-		U8 code = current_volume * 8 + 0x40;
+		U8 code = current_volume * 8;
 		sound_queue_insert (0x55);
 		sound_queue_insert (0xAA);
 		sound_queue_insert (code);
@@ -198,8 +293,7 @@ void volume_down (void)
 {
 	if (current_volume > MIN_VOLUME)
 	{
-		current_volume--;
-		volume_update ();
+		volume_set (current_volume-1);
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
@@ -209,8 +303,7 @@ void volume_up (void)
 {
 	if (current_volume < MAX_VOLUME)
 	{
-		current_volume++;
-		volume_update ();
+		volume_set (current_volume+1);
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
