@@ -32,6 +32,9 @@ task_t task_buffer[NUM_TASKS];
 
 bool task_dispatching_ok;
 
+U8 task_largest_stack;
+
+
 #define DEBUG_TASKS
 #define DUMP_ALL_TASKS
 
@@ -65,16 +68,23 @@ void task_dump (void)
 			db_put2x (tp->gid);
 			db_puts ("  PC ");
 			db_put4x ((uint16_t)tp->pc);
+#ifdef LARGE_STACKS
+			db_puts ("  STKW ");
+			db_put2x (tp->stack_word_count);
+#else
 			db_puts ("  S ");
 			db_put4x ((uint16_t)tp->s);
+#endif
 			db_puts ("  Stack ");
 			db_put4x ((uint16_t)tp->stack);
 			db_puts ("-");
 			db_put4x ((uint16_t)tp->stack + TASK_STACK_SIZE);
 			db_puts ("  ARG ");
 			db_put4x ((uint16_t)tp->arg);
+#ifndef LARGE_STACKS
 			db_puts ("  SB ");
 			db_put4x ((uint16_t)*(uint16_t *)tp->stack);
+#endif
 			db_putc ('\n');
 		}
 	}
@@ -84,6 +94,10 @@ void task_dump (void)
 #pragma short_branch
 
 
+/*
+ * Allocate a new task block, by searching the array (linearly)
+ * for the first entry that is TASK_FREE.
+ */
 task_t *task_allocate (void)
 {
 	register short t;
@@ -94,17 +108,25 @@ task_t *task_allocate (void)
 		{
 			tp->state = TASK_USED;
 			tp->delay = 0;
+			tp->stack_word_count = 0;
 			return tp;
 		}
 	fatal (ERR_NO_FREE_TASKS);
 	return 0;
 }
 
+
+/*
+ * Save the current execution state into the current task block.
+ */
 #pragma naked
 void task_save (void)
 {
 	register uint16_t __u asm ("u");
 	register task_t * __x asm ("x");
+#ifdef LARGE_STACKS
+	register U8 __b asm ("d");
+#endif
 
 	/* Save U, X immediately to memory to free up some regs for
 	 * the rest of the function */
@@ -133,9 +155,49 @@ void task_save (void)
 #endif
 	__asm__ volatile ("sty	%0" :: "m" (__x->y));
 
-	/* Save current stack pointer */
+	/* Save current stack */
+#ifdef LARGE_STACKS
+	/* In the new scheme, tasks execute on a system stack, and
+	 * during swap out, the stack data is copied into the task
+	 * block.  This allows tasks to use large stack space as
+	 * long as they don't sleep in the middle of such usage.
+	 * This also protects the task data a little better; stack
+	 * overflows won't corrupt anything critical.
+	 */
+
+	/* Get current stack pointer in u */
+	__asm__ volatile ("leau\t,s");
+
+	/* Get stack save area pointer in y */
+	__asm__ volatile ("leay\t,%0" :: "a" (__x->stack));
+
+	__b = 0;
+	while (__u < STACK_BASE)
+	{
+		/* Use X register to transfer data */
+		__asm__ volatile ("lda\t,u+");
+		__asm__ volatile ("sta\t,y+");
+		__b ++;
+		/* TODO : check for overflow during copy */
+	}
+
+	/// /* Restore trashed X */
+	/// __x = task_current;
+
+	if ((__x->stack_word_count = __b) > task_largest_stack)
+	{
+		task_largest_stack = __b;
+		dbprintf ("Largest stack = %d\n", __b);
+	}
+
+#else
+	/* In the old scheme, task stacks are kept directly in the
+	 * task block, so no copying is necessary; just save the
+	 * pointer.
+	 */
 	__asm__ volatile ("leau\t,s");
 	__x->s = __u;
+#endif
 
 	/* Save current ROM page */
 	__x->rom_page = wpc_get_rom_page ();
@@ -151,10 +213,43 @@ void task_save (void)
 void task_restore (void)
 {
 	register task_t * __x asm ("x");
-	register uint16_t __u asm ("u");
+	register uint16_t __u asm ("u") __attribute__ ((unused));
+#ifdef LARGE_STACKS
+	register U8 __b asm ("d");
+#endif
 
 	task_current = __x;
+
+	/* Restore stack */
+#ifdef LARGE_STACKS
+	disable_irq ();
+	/* Get live stack area pointer in u */
+	__asm__ volatile ("ldu\t%0" :: "i" (STACK_BASE));
+
+	/* Get stack save area pointer in y */
+	__asm__ volatile ("leay\t,%0" :: "a" (__x->stack + __x->stack_word_count));
+
+	/* Copy */
+	__b = __x->stack_word_count;
+	while (__b != 0)
+	{
+		/* Use X register to transfer data */
+		__asm__ volatile ("lda\t,-y");
+		__asm__ volatile ("sta\t,-u");
+		__b --;
+	}
+
+	/* Save stack pointer to S */
+	__asm__ volatile ("leas\t,u");
+
+	/// /* Restore __x as task_current */
+	/// __x = task_current;
+
+	enable_irq ();
+#else
+	/* Stack is ready to go, just set the pointer */
 	set_stack_pointer (__x->s);
+#endif
 
 	/* Restore ROM page register */
 	wpc_set_rom_page (__x->rom_page);
@@ -202,9 +297,14 @@ void task_create (void)
 	tp->gid = 0;
 	tp->arg = 0;
 	tp->rom_page = wpc_get_rom_page ();
-	*(uint16_t *)&tp->stack = 0xEEEE;
 
+#ifdef LARGE_STACKS
+	/* TODO */
+	tp->stack_word_count = 0;
+#else
+	*(uint16_t *)&tp->stack = 0xEEEE;
 	tp->s = (uint16_t)(tp->stack + TASK_STACK_SIZE - 1);
+#endif
 
 	/* TODO?? : push the address of task_exit onto the
 	 * stack so that the task can simply return and it
@@ -214,13 +314,6 @@ void task_create (void)
 	 */
 
 	__asm__ volatile ("puls\td,u,y,pc");
-}
-
-
-#pragma naked
-void task_yield (void)
-{
-	__asm__ volatile ("jmp _task_save");
 }
 
 
@@ -299,6 +392,15 @@ void task_sleep (task_ticks_t ticks)
 	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
 	__asm__ volatile ("jsr _task_save");
+
+#if 00000
+	{
+		dbprintf ("task %p awake (saved %d), pc =", 
+			task_current, task_current->stack_word_count);
+		__asm__ volatile ("ldd\t3,s\n\tjsr\t_db_put4x\n");
+		db_putc ('\n');
+	}
+#endif
 }
 
 
@@ -430,23 +532,31 @@ void __attribute__((noreturn)) task_dispatcher (void)
 	}
 }
 
+
 void task_init (void)
 {
 	extern uint8_t tick_count;
 
+	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
+
+	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;
 
 #ifdef DEBUG_TASKS
 	task_count = 0;
 #endif
 
+	/* Allocate a task for the first (current) thread of execution.
+	 * The calling routine can then sleep and/or create new tasks
+	 * after this point. */
 	task_current = task_allocate ();
 	task_current->state = TASK_USED;
 	task_current->arg = 0;
 	task_current->gid = GID_FIRST_TASK;
 	task_current->delay = 0;
-	__asm__ volatile ("st%0 _task_dispatch_tick" :: "q" (tick_count));
+
+	task_dispatch_tick = tick_count;
 }
 
 
