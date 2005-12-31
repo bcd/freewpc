@@ -171,7 +171,7 @@ struct window
 /** window_call_op() is a macro for invoking one of the
  * window_ops.  This is done so that tracing can be added
  * here, rather than throughout the code. */
-#if 1
+#if 0
 #define window_call_op(win, op) \
 do { \
 	if (win->ops->op) \
@@ -410,29 +410,58 @@ struct adjustment
 struct adjustment *browser_adjs;
 U8 adj_edit_value;
 
-struct adjustment_value integer_value = { 0, 0xFF, 1, NULL };
-struct adjustment_value balls_per_game_value = { 1, 10, 1, NULL };
-struct adjustment_value max_eb_value = { 0, 10, 1, NULL };
-struct adjustment_value on_off_value = { 0, 1, 1, NULL };
-struct adjustment_value yes_no_value = { 0, 1, 1, NULL };
-struct adjustment_value enabled_disabled_value = { 0, 1, 1, NULL };
-struct adjustment_value clock_style_value = { 0, 1, 1, NULL };
-struct adjustment_value date_style_value = { 0, 1, 1, NULL };
-struct adjustment_value game_restart_value = { 0, 2, 1, NULL };
+static void decimal_render (U8 val) { sprintf ("%d", val); }
+static void hex_render (U8 val) { sprintf ("%X", val); }
+static void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
+static void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
+static void hs_reset_render (U8 val) { sprintf ("%d X 250", val); }
+static void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
+static void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
+
+struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
+struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
+struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
+struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
+struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
+struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
+struct adjustment_value enabled_disabled_value = { 0, 1, 1, decimal_render };
+struct adjustment_value clock_style_value = { 0, 1, 1, decimal_render };
+struct adjustment_value date_style_value = { 0, 1, 1, decimal_render };
+struct adjustment_value game_restart_value = { 0, 2, 1, decimal_render };
+struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
+struct adjustment_value hs_reset_value = { 0, 40, 1, hs_reset_render };
+struct adjustment_value clock_style_value = { 0, 0, 1, clock_style_render };
+struct adjustment_value date_style_value = { 0, 0, 1, date_style_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
+	{ "MAX PLAYERS", &players_per_game_value, 1, &system_config.max_players },
 	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "LANGUAGE", &integer_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
-	{ "ALLOW DIM ALLUM.", &yes_no_value, 0, &system_config.allow_dim_illum },
-	{ "TOURNAMENT MODE", &yes_no_value, 0, &system_config.tournament_mode },
-	{ "EURO. DIGIT SEP.", &yes_no_value, 0, &system_config.euro_digit_sep },
-	{ "NO BONUS FLIPS", &yes_no_value, 0, &system_config.no_bonus_flips },
+	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
+	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
+	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
+	{ "NO BONUS FLIPS", &yes_no_value, NO, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
+	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+
+	{ "MAXIMUM CREDITS", &max_credits_value, 10, &price_config.max_credits },
+	{ "FREE PLAY", &yes_no_value, 
+#ifdef FREE_ONLY
+		YES,
+#else
+		NO, 
+#endif
+		&price_config.free_play },
+	
+	{ "HIGHEST SCORES", &on_off_value, ON, NULL },
+	{ "GRAND CHAMPION", &on_off_value, ON, NULL },
+	{ "H.S. RESET EVERY", &hs_reset_value, 12, NULL },
+
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -449,32 +478,56 @@ void adj_reset (struct adjustment *adjs)
 }
 
 
+void adj_verify (struct adjustment *adjs)
+{
+	U8 val;
+
+	while (adjs->name != NULL)
+	{
+		val = *(adjs->nvram);
+		if ((val < adjs->values->min) || (val > adjs->values->max))
+		{
+			wpc_nvram_get ();
+			*(adjs->nvram) = adjs->factory_default;
+			wpc_nvram_put ();
+		}
+		adjs++;
+	}
+}
+
+
 void adj_reset_all (void)
 {
 	adj_reset (standard_adjustments);
 }
 
 
+void adj_verify_all (void)
+{
+	adj_verify (standard_adjustments);
+}
+
+
 void adj_browser_draw (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
+	struct adjustment *ad = browser_adjs + menu_selection;
 
 	dmd_alloc_low_clean ();
 
 	font_render_string_center (&font_5x5, 64, 1, m->name);
 
-	sprintf ("%d. %s", menu_selection+1, browser_adjs[menu_selection].name);
+	sprintf ("%d. %s", menu_selection+1, ad->name);
 	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
 
-	if (browser_action == ADJ_BROWSING)
-	{
-		sprintf ("%d", *(browser_adjs[menu_selection].nvram));
-	}
+	if (browser_action == ADJ_EDITING)
+		ad->values->render (adj_edit_value);
 	else
-	{
-		sprintf ("EDIT... %d", *(browser_adjs[menu_selection].nvram));
-	}
+		ad->values->render (*(ad->nvram));
 	font_render_string_center (&font_5x5, 64, 19, sprintf_buffer);
+
+	if (browser_action == ADJ_EDITING)
+		dmd_invert_page (dmd_low_buffer);
 
 	dmd_show_low ();
 }
@@ -483,22 +536,31 @@ void adj_browser_draw (void)
 void adj_browser_init (void)
 {
 	browser_init ();
-	browser_adjs = standard_adjustments;
 	browser_action = ADJ_BROWSING;
 	browser_min = 0;
+
+	browser_adjs = standard_adjustments;
 	/* the last entry must be NULL, so don't count that one */
 	browser_max = (sizeof (standard_adjustments) / sizeof (struct adjustment))-2;
 }
 
 void adj_browser_enter (void)
 {
-	if (browser_action == ADJ_BROWSING)
+	if ((browser_action == ADJ_BROWSING) &&
+		 (browser_adjs[menu_selection].nvram != NULL))
 	{
+		adj_edit_value = *(browser_adjs[menu_selection].nvram);
 		browser_action = ADJ_EDITING;
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		//browser_action = ADJ_CONFIRMING;
+
+		wpc_nvram_get ();
+		*(browser_adjs[menu_selection].nvram) = adj_edit_value;
+		wpc_nvram_put ();
+		sound_send (SND_TEST_CONFIRM);
+		browser_action = ADJ_BROWSING;
 	}
 }
 
@@ -507,6 +569,7 @@ void adj_browser_escape (void)
 {
 	if (browser_action == ADJ_EDITING)
 	{
+		/* abort */
 		browser_action = ADJ_BROWSING;
 	}
 	else if (browser_action == ADJ_CONFIRMING)
@@ -520,12 +583,44 @@ void adj_browser_escape (void)
 }
 
 
+void adj_browser_up (void)
+{
+	if (browser_action == ADJ_BROWSING)
+		browser_up ();
+	else if (browser_action == ADJ_EDITING)
+	{
+		sound_send (SND_TEST_UP);
+		if (adj_edit_value < browser_adjs[menu_selection].values->max)
+			adj_edit_value += browser_adjs[menu_selection].values->step;
+		else
+			adj_edit_value = browser_adjs[menu_selection].values->min;
+	}
+}
+
+
+void adj_browser_down (void)
+{
+	if (browser_action == ADJ_BROWSING)
+		browser_down ();
+	else if (browser_action == ADJ_EDITING)
+	{
+		sound_send (SND_TEST_DOWN);
+		if (adj_edit_value > browser_adjs[menu_selection].values->min)
+			adj_edit_value -= browser_adjs[menu_selection].values->step;
+		else
+			adj_edit_value = browser_adjs[menu_selection].values->max;
+	}
+}
+
+
 #define INHERIT_FROM_ADJ_BROWSER \
 	INHERIT_FROM_BROWSER, \
 	.init = adj_browser_init, \
 	.draw = adj_browser_draw, \
 	.enter = adj_browser_enter, \
-	.escape = adj_browser_escape
+	.escape = adj_browser_escape, \
+	.up = adj_browser_up, \
+	.down = adj_browser_down
 
 struct window_ops adj_browser_window = {
 	INHERIT_FROM_ADJ_BROWSER,
@@ -1118,6 +1213,11 @@ struct menu clear_credits_item = {
 	.flags = M_ITEM,
 };
 
+struct menu set_time_item = {
+	.name = "SET DATE/TIME",
+	.flags = M_ITEM,
+};
+
 struct menu burnin_item = {
 	.name = "AUTO BURNIN",
 	.flags = M_ITEM,
@@ -1157,6 +1257,7 @@ struct menu revoke_item = {
 struct menu *util_menu_items[] = {
 	&factory_reset_item,
 	&clear_credits_item,
+	&set_time_item,
 	&burnin_item,
 	&revoke_item,
 	NULL,
