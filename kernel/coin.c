@@ -24,17 +24,20 @@ void credits_render (void)
 		{
 			if (credit_count == 0)
 			{
-				sprintf ("CREDITS %d/%d", unit_count, units_per_credit);
+				sprintf ("%d/%d CREDIT", unit_count, units_per_credit);
 			}
 			else
 			{
-				sprintf ("CREDITS %d %d/%d",
+				sprintf ("%d %d/%d CREDITS",
 					credit_count, unit_count, units_per_credit);
 			}
 		}
 		else
 		{
-			sprintf ("CREDITS %d", credit_count);
+			if (credit_count == 1)
+				sprintf ("%d CREDIT", credit_count);
+			else
+				sprintf ("%d CREDITS", credit_count);
 		}
 	}
 #endif
@@ -93,23 +96,23 @@ void lamp_start_update (void)
 
 void add_credit (void)
 {
-	if (credit_count < MAX_CREDITS)
-	{
-#ifndef FREE_ONLY
-		wpc_nvram_get ();
-		credit_count++;
-		wpc_nvram_put ();
+	if (credit_count >= MAX_CREDITS)
+		return;
 
-		lamp_start_update ();
+#ifndef FREE_ONLY
+	wpc_nvram_get ();
+	credit_count++;
+	wpc_nvram_put ();
+
+	lamp_start_update ();
 #endif
 
 #ifdef MACHINE_ADD_CREDIT_SOUND
-		sound_send (MACHINE_ADD_CREDIT_SOUND);
+	sound_send (MACHINE_ADD_CREDIT_SOUND);
 #endif
 
-		leff_start (LEFF_FLASH_ALL);
-		deff_restart (DEFF_CREDITS);
-	}
+	leff_start (LEFF_FLASH_ALL);
+	deff_restart (DEFF_CREDITS);
 }
 
 
@@ -140,6 +143,9 @@ void remove_credit (void)
 
 void add_units (int n)
 {
+	if (credit_count >= MAX_CREDITS)
+		return;
+
 	wpc_nvram_get ();
 	unit_count += n;
 	wpc_nvram_put ();
