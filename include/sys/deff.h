@@ -32,5 +32,10 @@ void deff_swap_low_high (int8_t count, task_ticks_t delay);
 void deff_init (void);
 void deff_stop_all (void);
 
+
+#ifndef MACHINE_CUSTOM_AMODE
+void default_amode_deff (void);
+#endif
+
 #endif /* _SYS_DEFF_H */
 

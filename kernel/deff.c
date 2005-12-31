@@ -54,6 +54,9 @@ static const deff_t deff_table[] = {
 #ifdef MACHINE_DISPLAY_EFFECTS
 	MACHINE_DISPLAY_EFFECTS
 #endif
+#ifndef MACHINE_CUSTOM_AMODE
+	[DEFF_AMODE] = { D_RUNNING, 10, default_amode_deff },
+#endif
 };
 
 
@@ -133,7 +136,7 @@ void deff_start (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
 
-	db_puts ("Deff start request for # "); db_puti (dn); db_putc ('\n');
+	dbprintf ("Deff %d start request\n", dn);
 
 	if (deff->flags & D_RUNNING)
 	{
@@ -173,7 +176,7 @@ void deff_stop (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
 
-	db_puts ("Stopping deff # "); db_puti (dn); db_putc ('\n');
+	dbprintf ("Stopping deff #%d\n", dn);
 
 	if (deff->flags & D_RUNNING)
 	{

@@ -214,20 +214,3 @@ void amode_deff (void) __taskentry__
 	}
 }
 
-
-void amode_start (void)
-{
-	deff_start (DEFF_AMODE);
-	leff_start (LEFF_AMODE);
-	lamp_start_update ();
-}
-
-
-void amode_stop (void)
-{
-	deff_stop (DEFF_AMODE);
-	leff_stop (LEFF_AMODE);
-	lamp_all_off ();
-	music_set (MUS_SILENCE);
-}
-

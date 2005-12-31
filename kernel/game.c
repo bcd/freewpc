@@ -15,10 +15,41 @@ U8 extra_balls;
 
 void start_ball (void);
 
+
 #ifndef MACHINE_CUSTOM_AMODE
-void amode_start (void) {}
-void amode_stop (void) {}
+void default_amode_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_alloc_high_clean ();
+	font_render_string_center (&font_5x5, 64, 16, "NO ATTRACT MODE");
+	dmd_show_low ();
+	for (;;)
+	{
+		dmd_show_other ();
+		task_sleep_sec (1);
+	}
+}
 #endif
+
+void amode_start (void)
+{
+	deff_start (DEFF_AMODE);
+#ifndef MACHINE_CUSTOM_AMODE
+	leff_start (LEFF_AMODE);
+#endif
+	lamp_start_update ();
+}
+
+
+void amode_stop (void)
+{
+	deff_stop (DEFF_AMODE);
+#ifndef MACHINE_CUSTOM_AMODE
+	leff_stop (LEFF_AMODE);
+#endif
+	lamp_all_off ();
+	music_set (MUS_OFF);
+}
 
 void dump_game (void)
 {
