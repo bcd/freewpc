@@ -51,9 +51,9 @@ extern U8 irq_count;
  * This value + 21 should be a nice round number.
  * Original : 43 ==> Total size of 64
  */
-/// #define TASK_STACK_SIZE		43   /* sometimes fails with deffs */
-/// #define TASK_STACK_SIZE		75
-#define TASK_STACK_SIZE		91
+/// #define TASK_STACK_SIZE		43
+#define TASK_STACK_SIZE		75
+/// #define TASK_STACK_SIZE		91
 
 /* Include the standard header files that are needed
  * by most modules */
