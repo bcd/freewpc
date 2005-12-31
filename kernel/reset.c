@@ -15,6 +15,8 @@ __nvram__ U8 freewpc_accepted[3];
 #pragma long_branch
 void system_accept_freewpc (void)
 {
+	extern void adj_reset_all (void);
+
 	if ((freewpc_accepted[0] == ACCEPT_1) &&
 		 (freewpc_accepted[1] == ACCEPT_2) &&
 		 (freewpc_accepted[2] == ACCEPT_3))
@@ -58,6 +60,8 @@ void system_accept_freewpc (void)
 	freewpc_accepted[1] = ACCEPT_2;
 	freewpc_accepted[2] = ACCEPT_3;
 	wpc_nvram_put ();
+
+	call_far (TEST_PAGE, adj_reset_all ());
 }
 #pragma short_branch
 
@@ -69,7 +73,11 @@ void system_reset (void)
 
 	font_render_string_center (&font_5x5, 64, 0, MACHINE_NAME);
 
+#ifdef DEBUGGER
+	sprintf ("D%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+#else
 	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+#endif
 	font_render_string_center (&font_5x5, 32, 8, sprintf_buffer);
 	font_render_string_center (&font_5x5, 96, 8, build_date);
 
