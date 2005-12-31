@@ -70,7 +70,7 @@
 #define TIME_100MS 	(TIME_33MS * 3)
 #define TIME_133MS 	(TIME_33MS * 4)
 #define TIME_166MS 	(TIME_33MS * 5)
-#define TIME_1S 		(TIME_100MS * 10)
+#define TIME_1S 		(TIME_100MS * 10) /* 4 * 3 * 10 = 120 ticks */
 
 /***************************************************************
  * RAM Protection Circuit
