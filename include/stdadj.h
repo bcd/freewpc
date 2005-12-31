@@ -3,9 +3,18 @@
 
 typedef uint8_t adjval_t;
 
+/* Yes/No value defines */
+#define YES 1
+#define NO 0
+
+/* Off/On value defines */
+#define OFF 0
+#define ON 1
+
 typedef struct
 {
 	adjval_t balls_per_game;
+	adjval_t max_players;
 	adjval_t tilt_warnings;
 	adjval_t max_ebs;
 	adjval_t max_ebs_per_bip;
@@ -35,6 +44,7 @@ typedef struct
 	adjval_t ticket_board;
 	adjval_t no_bonus_flips;
 	adjval_t game_restart;
+	adjval_t family_mode;
 } std_adj_t;
 
 extern std_adj_t system_config;
