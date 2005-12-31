@@ -35,57 +35,45 @@ bool task_dispatching_ok;
 U8 task_largest_stack;
 
 
+/* Define this to enable some debug counters */
 #define DEBUG_TASKS
-#define DUMP_ALL_TASKS
 
-
-#ifdef DEBUG_TASKS
-uint8_t task_count;
-#endif
+/* Uncomment this to turn on dumping of entire task table.
+ * Normally, only the running entries are displayed. */
+//#define DUMP_ALL_TASKS
 
 
 #pragma long_branch
 void task_dump (void)
 {
 #ifdef DEBUGGER
-	register short t;
+	register long int t;
 	register task_t *tp;
 
-	db_puts ("\nCurrent ");
-	db_put4x ((uint16_t)task_current);
-	db_puts ("\n----------------------\n");
+	dbprintf ("\nCurrent = %p\n", task_current);
+	db_puts ("----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
 #ifndef DUMP_ALL_TASKS
 		if (tp->state != TASK_FREE)
 #endif
 		{
-			db_puts ("PID ");
-			db_put4x ((uint16_t)tp);
-			db_puts ("  State ");
-			db_put2x (tp->state);
-			db_puts ("  GID ");
-			db_put2x (tp->gid);
-			db_puts ("  PC ");
-			db_put4x ((uint16_t)tp->pc);
+			dbprintf ("PID %p  State %02X  GID %02X  PC %p",
+				tp, tp->state, tp->gid, tp->pc);
 #ifdef LARGE_STACKS
 			db_puts ("  STKW ");
 			db_put2x (tp->stack_word_count);
 #else
 			db_puts ("  S ");
 			db_put4x ((uint16_t)tp->s);
-#endif
 			db_puts ("  Stack ");
 			db_put4x ((uint16_t)tp->stack);
 			db_puts ("-");
 			db_put4x ((uint16_t)tp->stack + TASK_STACK_SIZE);
-			db_puts ("  ARG ");
-			db_put4x ((uint16_t)tp->arg);
-#ifndef LARGE_STACKS
 			db_puts ("  SB ");
 			db_put4x ((uint16_t)*(uint16_t *)tp->stack);
 #endif
-			db_putc ('\n');
+			dbprintf ("  ARG %04X\n", tp->arg);
 		}
 	}
 	db_puts ("----------------------\n");
@@ -299,7 +287,6 @@ void task_create (void)
 	tp->rom_page = wpc_get_rom_page ();
 
 #ifdef LARGE_STACKS
-	/* TODO */
 	tp->stack_word_count = 0;
 #else
 	*(uint16_t *)&tp->stack = 0xEEEE;
@@ -322,12 +309,9 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
-	__asm__ volatile ("jsr _task_create\n" : "=r" (tp) : "0" (fn_x) : "d");
+	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
-#ifdef DEBUG_TASKS
-	task_count++;
-#endif
 	return (tp);
 }
 
@@ -380,18 +364,15 @@ void task_sleep (task_ticks_t ticks)
 
 	if (task_current->state != TASK_USED)
 	{
-		db_puts ("*** Warning: task_current = ");
-		db_put4x ((uint16_t)task_current);
-		db_puts (" state = ");
-		db_put2x (task_current->state);
-		db_putc ('\n');
+		dbprintf ("Warning: task_current = %p, state = %02X\n",
+			task_current, task_current->state);
 	}
 
 	task_current->delay = ticks;
 	task_current->asleep = tick_count;
 	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
-	__asm__ volatile ("jsr _task_save");
+	__asm__ volatile ("jsr\t_task_save");
 
 #if 00000
 	{
@@ -419,10 +400,6 @@ __noreturn__ void task_exit (void)
 
 	task_current->state = TASK_FREE;
 	task_current = 0;
-#ifdef DEBUG_TASKS
-	task_count--;
-#endif
-
 	task_dispatcher ();
 }
 
@@ -443,9 +420,6 @@ void task_kill_pid (task_t *tp)
 		fatal (ERR_TASK_KILL_CURRENT);
 	tp->state = TASK_FREE;
 	tp->gid = 0;
-#ifdef DEBUG_TASKS
-	task_count--;
-#endif
 }
 
 bool task_kill_gid (task_gid_t gid)
@@ -542,10 +516,6 @@ void task_init (void)
 
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;
-
-#ifdef DEBUG_TASKS
-	task_count = 0;
-#endif
 
 	/* Allocate a task for the first (current) thread of execution.
 	 * The calling routine can then sleep and/or create new tasks
