@@ -45,7 +45,7 @@ void sw_tilt_handler (void)
 
 	if (in_tilt)
 		return;
-	else if (++tilt_warnings == 3)
+	else if (++tilt_warnings == system_config.tilt_warnings)
 	{
 		sound_reset ();
 		triac_disable (TRIAC_GI_MASK);
