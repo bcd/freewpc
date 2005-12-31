@@ -523,8 +523,6 @@ void switch_sched (void)
 	const uint8_t sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-	dbprintf ("Servicing switch 0x%02x\n", sw);
-
 	/* Don't service switches marked SW_IN_GAME at all, if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
