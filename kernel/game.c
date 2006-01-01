@@ -31,7 +31,7 @@ void default_amode_deff (void)
 void amode_start (void)
 {
 	deff_start (DEFF_AMODE);
-#ifndef MACHINE_CUSTOM_AMODE
+#ifdef MACHINE_CUSTOM_AMODE
 	leff_start (LEFF_AMODE);
 #endif
 	lamp_start_update ();
@@ -41,7 +41,7 @@ void amode_start (void)
 void amode_stop (void)
 {
 	deff_stop (DEFF_AMODE);
-#ifndef MACHINE_CUSTOM_AMODE
+#ifdef MACHINE_CUSTOM_AMODE
 	leff_stop (LEFF_AMODE);
 #endif
 	lamp_all_off ();
