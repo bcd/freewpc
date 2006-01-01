@@ -95,7 +95,11 @@ extern U8 irq_count;
 #include <stdadj.h>
 #include <printf.h>
 #include <amode.h>
+#if 0
 #include <test.h>
+#else
+#include <window.h>
+#endif
 #include <callset.h>
 
 /* Game-specific defines.  'mach' should point to
