@@ -210,7 +210,7 @@ void amode_deff (void) __taskentry__
 #endif
 
 		/* Kill music if it is running */
-		music_set (MUS_SILENCE);
+		music_set (MUS_OFF);
 	}
 }
 
