@@ -146,7 +146,7 @@ OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
 	task.o lamp.o sol.o flasher.o ac.o 
 
-TEST_OBJS = kernel/test2.o
+TEST_OBJS = test/window.o
 
 FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
 
@@ -684,7 +684,7 @@ info:
 # 'make clean' does what you think.
 #
 clean: clean_derived clean_gendefines
-	@for dir in `echo . callset kernel fonts images $(MACHINE)`;\
+	@for dir in `echo . callset kernel fonts images test $(MACHINE)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 

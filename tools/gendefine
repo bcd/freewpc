@@ -8,7 +8,7 @@
 
 my $prefix = "GID_";
 
-my @dirs = ("include", "kernel", "mach", "fonts");
+my @dirs = ("include", "kernel", "mach", "fonts", "test");
 
 my $firstval = 1;
 
