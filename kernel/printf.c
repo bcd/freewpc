@@ -172,6 +172,16 @@ do_long_integer:
 							} while (0);
 							break;
 						}
+
+						case 'd':
+						{
+							do {
+								register U16 w = va_arg (va, U16);
+								/* TODO */
+								goto fixup_number;
+							} while (0);
+							break;
+						}
 					}
 					break;
 				}
