@@ -65,6 +65,7 @@ __noreturn__ void do_reset (void)
 
 	/** Disable hardware IRQ in the 6809 */
 	disable_irq ();
+	disable_firq ();
 
 	/** Initialize the direct page pointer.  This hardware register
 	 * determines where 'direct' addressing instructions are targeted.
@@ -179,8 +180,7 @@ __noreturn__ void do_reset (void)
 	 * in the 6809 */
 	wpc_write_irq_clear (0x06);
 	enable_irq ();
-
-	wpc_led_toggle ();
+	enable_firq ();
 
 	/** The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
@@ -309,9 +309,12 @@ void do_irq (void)
 #pragma interrupt
 void do_firq (void)
 {
-	if (*(int8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR < 0)
+	asm __volatile__ ("pshs\ta,b");
+
+	if (*(U8 *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR & 0x80)
 	{
 		/* Timer interrupt */
+		*(uint8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR  = 0;
 	}
 	else
 	{
@@ -319,7 +322,7 @@ void do_firq (void)
 		dmd_rtt ();
 	}
 
-	*(uint8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR  = 0;
+	asm __volatile__ ("puls\ta,b");
 }
 
 
