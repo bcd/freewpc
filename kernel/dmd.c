@@ -27,17 +27,33 @@ U8 dmd_page_flip_count;
 
 void dmd_init (void)
 {
-	wpc_dmd_firq_row = 0xFF;
+	/* Program the DMD controller to generate interrupts */
+	wpc_dmd_firq_row = 30;
+
 	dmd_low_page = wpc_dmd_low_page = 0;
 	dmd_high_page = wpc_dmd_high_page = 0;
 	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = 0;
 	dmd_free_page = 1;
-	dmd_page_flip_count = 3;
+	dmd_page_flip_count = 2;
 }
 
 void dmd_rtt (void)
 {
-	/* TODO : switch between dark and bright */
+	/* Switch between dark and bright */
+	if (dmd_page_flip_count >= 2)
+	{
+		/* Show the dark page 1/3 of the time */
+		wpc_dmd_visible_page = dmd_dark_page;
+		dmd_page_flip_count = 0;
+	}
+	else
+	{
+		/* Show the bright page 2/3 of the time */
+		wpc_dmd_visible_page = dmd_bright_page;
+		dmd_page_flip_count++;
+	}
+
+	wpc_dmd_firq_row = 30;
 }
 
 
@@ -100,6 +116,13 @@ void dmd_swap_low_high (void)
 	__asm__ volatile ("exg\ta,b");
 	__sta (&dmd_high_page);
 	__stb (&dmd_low_page);
+}
+
+
+void dmd_show2 (void)
+{
+	dmd_dark_page = dmd_low_page;
+	dmd_bright_page = dmd_high_page;
 }
 
 
@@ -252,9 +275,16 @@ void dmd_shift_down (dmd_buffer_t *dbuf)
 }
 
 
-void dmd_draw_image (char *image_bits)
+void dmd_draw_image (dmd_buffer_t *image_bits)
 {
 	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)image_bits)));
+}
+
+
+void dmd_draw_image2 (dmd_buffer_t *image_bits)
+{
+	call_far (60, (dmd_copy_page (dmd_low_buffer, image_bits)));
+	call_far (60, (dmd_copy_page (dmd_high_buffer, (image_bits + 0x100))));
 }
 
 
@@ -281,6 +311,49 @@ void dmd_draw_bitmap (dmd_buffer_t *image_bits,
 		dbuf += (16 / 2);
 	}
 	wpc_pop_page ();
+}
+
+
+void dmd_color_test (void)
+{
+	U16 *buf;
+	long int n;
+
+	dmd_alloc_low_high ();
+	dmd_clean_page (dmd_low_buffer);
+
+	/* Draw the bright page first. */
+	buf = (U16 *)dmd_low_buffer + 6;
+	for (n=0; n < 16; n++)
+	{
+		buf[0] = 0xFFFFUL;
+		buf[1] = 0xFFFFUL;
+		buf += 8;
+	}
+	dmd_copy_low_to_high ();
+
+	/* Draw the medium intensity on the high page,
+	 * after the copy of the brightest pixels */
+	buf = (U16 *)dmd_high_buffer + 4;
+	for (n=0; n < 16; n++)
+	{
+		buf[0] = 0xFFFFUL;
+		buf[1] = 0xFFFFUL;
+		buf += 8;
+	}
+
+
+	/* Draw the dark page second */
+	/* Install low page as dark, high page as bright */
+	buf = (U16 *)dmd_low_buffer + 2;
+	for (n=0; n < 16; n++)
+	{
+		buf[0] = 0xFFFFUL;
+		buf[1] = 0xFFFFUL;
+		buf += 8;
+	}
+
+	dmd_show2 ();
 }
 
 

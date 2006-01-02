@@ -27,10 +27,6 @@ typedef uint8_t *dmd_buffer_t;
 #define dmd_low_buffer		((dmd_buffer_t *)DMD_LOW_BASE)
 #define dmd_high_buffer		((dmd_buffer_t *)DMD_HIGH_BASE)
 
-#define dmd_low_bytes		((uint8_t *)DMD_LOW_BASE)
-#define dmd_high_bytes		((uint8_t *)DMD_HIGH_BASE)
-
-
 void dmd_init (void);
 void dmd_rtt (void);
 void dmd_alloc_low (void);
@@ -40,6 +36,7 @@ void dmd_show_low (void);
 void dmd_show_high (void);
 void dmd_show_other (void);
 void dmd_flip_low_high (void);
+void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t *dbuf);
 void dmd_clean_page_low (void);
 void dmd_clean_page_high (void);
@@ -52,7 +49,8 @@ void dmd_draw_border (char *dbuf);
 void dmd_draw_horiz_line (U16 *dbuf, U8 y);
 void dmd_shift_up (dmd_buffer_t *dbuf);
 void dmd_shift_down (dmd_buffer_t *dbuf);
-void dmd_draw_image (char *image_bits);
+void dmd_draw_image (dmd_buffer_t *image_bits);
+void dmd_draw_image2 (dmd_buffer_t *image_bits);
 void dmd_draw_bitmap (dmd_buffer_t *image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
 
