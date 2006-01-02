@@ -27,8 +27,23 @@ __fastram__ U8 triac_enables;
 __fastram__ U8 triac_leff_alloc;
 __fastram__ U8 triac_leff_bits;
 
+U8 gi_brightness;
+
 U8 triac_dim_level[NUM_GI_TRIACS];
 
+
+U8 gi_brightness_table[] =
+{
+	[8] = 0xFF,
+	[7] = 0xFE,
+	[6] = 0xFC,
+	[5] = 0xF8,
+	[4] = 0xF0,
+	[3] = 0xE0,
+	[2] = 0xC0,
+	[1] = 0x80,
+	[0] = 0x00,
+};
 
 
 void gi_recalc_zerocross ()
@@ -38,14 +53,22 @@ void gi_recalc_zerocross ()
 
 void triac_rtt (void)
 {
+	extern U8 tick_count;
+
 	U8 triac_bits;
 
 	gi_recalc_zerocross ();
 
 	triac_bits = triac_enables;
-	triac_bits &= ~triac_leff_alloc;
-	triac_bits |= triac_leff_bits;
-
+	if ((tick_count & gi_brightness_table[gi_brightness]) == tick_count)
+	{
+		triac_bits &= ~triac_leff_alloc;
+		triac_bits |= triac_leff_bits;
+	}
+	else
+	{
+		triac_bits &= ~TRIAC_GI_MASK;
+	}
 	triac_write (triac_enables);
 }
 
@@ -87,8 +110,19 @@ void triac_leff_disable (U8 triac)
 }
 
 
+void triac_set_brightness (U8 val)
+{
+	gi_brightness = val;
+}
+
+U8 triac_get_brightness (void)
+{
+	return (gi_brightness);
+}
+
 void triac_init (void)
 {
+	gi_brightness = 8;
 	triac_enables = 0;
 	triac_leff_alloc = 0;
 	triac_leff_bits = 0;

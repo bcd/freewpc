@@ -47,6 +47,9 @@ void triac_leff_allocate (U8 triac);
 void triac_leff_free (U8 triac);
 void triac_leff_enable (U8 triac);
 void triac_leff_disable (U8 triac);
+U8 triac_get_brightness (void);
+void triac_set_brightness (U8 bits);
+
 void triac_init (void);
 
 #endif /* _SYS_TRIAC_H */
