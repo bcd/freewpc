@@ -37,7 +37,7 @@
 #define MUS_OFF					0
 
 #define MIN_VOLUME				0
-#define MAX_VOLUME				32
+#define MAX_VOLUME				31
 #define DEFAULT_VOLUME			16
 
 typedef uint16_t music_code_t, sound_code_t;
