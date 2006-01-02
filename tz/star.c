@@ -3,13 +3,10 @@
 
 void star_task (void)
 {
-	uint16_t args = task_get_arg ();
-	uint8_t x = args >> 8;
-	uint8_t y = args & 0xFF;
-	uint8_t *dmd = dmd_low_bytes + ((U16)y << 4) + x;
+	uint8_t *dmd = task_get_arg ();
 	uint8_t i;
 
-	for (i=8; i>0; i--)
+	for (i=3; i>0; i--)
 	{
 		dmd[-DMD_BYTE_WIDTH] = 0x10;
 		dmd[-DMD_BYTE_WIDTH + DMD_PAGE_SIZE] = 0x10;
@@ -17,7 +14,7 @@ void star_task (void)
 
 		dmd[0] = 0x3C;
 		dmd[DMD_PAGE_SIZE] = 0x3C;
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 
 		dmd[+DMD_BYTE_WIDTH] = 0x8;
 		dmd[+DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x8;
@@ -25,7 +22,7 @@ void star_task (void)
 
 		dmd[-DMD_BYTE_WIDTH] = 0x8;
 		dmd[-DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x8;
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 
 		dmd[0] = 0x18;
 		dmd[0+DMD_PAGE_SIZE] = 0x18;
@@ -33,7 +30,7 @@ void star_task (void)
 
 		dmd[+DMD_BYTE_WIDTH] = 0x10;
 		dmd[+DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x10;
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS);
 	}
 	task_exit ();
 }
@@ -43,18 +40,18 @@ void star_task (void)
 do \
 { \
 	task_t *tp = task_create_child (star_task); \
-	task_set_arg (tp, ((U16)x << 8) | y); \
+	task_set_arg (tp, dmd_low_buffer + ((U16)y << 4) + x); \
 } while (0)
 
 void starfield_task (void)
 {
-	star_create (1, 5);
+	star_create (1, 2);
 	task_sleep_sec (1);
-	star_create (14, 24);
+	star_create (15, 28);
 	task_sleep_sec (1);
-	star_create (14, 8);
+	star_create (15, 2);
 	task_sleep_sec (1);
-	star_create (1, 27);
+	star_create (1, 28);
 	task_sleep_sec (2);
 	task_exit ();
 }
