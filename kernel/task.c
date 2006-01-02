@@ -211,6 +211,7 @@ void task_restore (void)
 	/* Restore stack */
 #ifdef LARGE_STACKS
 	disable_irq ();
+	disable_firq ();
 	/* Get live stack area pointer in u */
 	__asm__ volatile ("ldu\t%0" :: "i" (STACK_BASE));
 
@@ -233,6 +234,7 @@ void task_restore (void)
 	/// /* Restore __x as task_current */
 	/// __x = task_current;
 
+	enable_firq ();
 	enable_irq ();
 #else
 	/* Stack is ready to go, just set the pointer */
