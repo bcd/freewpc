@@ -148,16 +148,26 @@ OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 
 TEST_OBJS = test/window.o
 
-FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o
+FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o 
 
-XBM_OBJS = images/freewpc.o images/brian.o
+FON_OBJS = \
+	fonts/fixed10.o \
+	fonts/fixed6.o \
+	fonts/lucida9.o \
+	fonts/cu17.o \
+	fonts/term6.o
+
+XBM_OBJS = images/freewpc.o images/brian.o \
+	images/freewpc_logo_1.o images/freewpc_logo_2.o
 
 OS_INCLUDES = include/freewpc.h include/wpc.h
 
 INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
-
 XBM_SRCS = $(patsubst %.o,%.xbm,$(XBM_OBJS))
+
+FON_SRCS = $(patsubst %.o,%.fon,$(FON_OBJS))
+export FON_SRCS
 
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
@@ -303,11 +313,11 @@ page57_OBJS = page57.o
 page58_OBJS = page58.o $(TEST_OBJS)
 page59_OBJS = page59.o
 page60_OBJS = page60.o $(XBM_OBJS)
-page61_OBJS = page61.o $(FONT_OBJS)
+page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
 
 $(TEST_OBJS) : PAGE=58
 $(XBM_OBJS) : PAGE=60
-$(FONT_OBJS) : PAGE=61
+$(FONT_OBJS) $(FON_OBJS) : PAGE=61
 
 PAGE_DEFINES := -DTEST_PAGE=58 -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
@@ -328,12 +338,13 @@ AS_OBJS = $(SYSTEM_HEADER_OBJS)
 C_OBJS = $(KERNEL_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 
-OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
 
 MACH_LINKS = mach include/mach
 
-DEPS = $(DEFMACROS) $(INCLUDES) Makefile $(XBM_H) $(MACHINE)/Makefile $(MACH_LINKS)
 
+MAKE_DEPS = Makefile $(MACHINE)/Makefile
+DEPS = $(MAKE_DEPS) $(DEFMACROS) $(INCLUDES) $(XBM_H) $(MACH_LINKS)
 
 GENDEFINES = \
 	include/gendefine_gid.h \
@@ -422,7 +433,7 @@ $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJ
 #
 # How to make the linker command file for a paged section.
 #
-$(PAGED_LINKCMD) : $(DEPS)
+$(PAGED_LINKCMD) : $(MAKE_DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $@ ;\
 	echo "-mxswz" >> $@ ;\
@@ -461,7 +472,7 @@ page%.s:
 #
 # How to make the linker command file for the system section.
 #
-$(LINKCMD) : $(DEPS)
+$(LINKCMD) : $(MAKE_DEPS)
 	@echo Creating linker command file $@ ...
 	@rm -f $(LINKCMD)
 	@echo "-mxswz" >> $(LINKCMD)
@@ -516,17 +527,17 @@ endif
 # handled through some extra variables:
 #
 $(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))" 
-$(XBM_OBJS) : PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
+$(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
 
 $(C_OBJS) : GCC_LANG=
-$(XBM_OBJS) : GCC_LANG=-x c
+$(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
 $(XBM_OBJS) : %.o : %.xbm
+$(FON_OBJS) : %.o : %.fon
 
-$(C_OBJS) $(XBM_OBJS) :
-	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $<
-	@echo Assembling $(@:.o=.S) ... && $(AS) $(ASFLAGS) $(@:.o=.S)
+$(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
+	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S)
 ifneq ($(ASVER), 1.5.2)
 	@mv $(@:.o=.rel) $@
 endif
@@ -573,7 +584,11 @@ gendefines_again: clean_gendefines gendefines
 $(MACHINE)/config.c : callset
 
 callset :
-	@echo Generating callsets ... && mkdir -p callset && tools/gencallset
+	@echo "Generating callsets ... " && mkdir -p callset && tools/gencallset
+
+.PHONY : fonts clean-fonts
+fonts clean-fonts:
+	@echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
 
 #######################################################################
 ###	Tools

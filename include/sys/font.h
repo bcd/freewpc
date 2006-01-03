@@ -1,18 +1,26 @@
 #ifndef _SYS_FONT_H
 #define _SYS_FONT_H
 
+
 typedef struct
 {
-	uint8_t width;
-	uint8_t spacing;
-	uint8_t height;
-	uint8_t **chars;
-	uint8_t **digits;
-	uint8_t **seps;
+	U8 width;
+	U8 bytewidth;
+	U8 spacing;
+	U8 height;
+	U8 **chars;
+	U8 **digits;
+	U8 **seps;
+	U8 **glyphs;
 } font_t;
 
 extern const font_t font_5x5;
 extern const font_t font_9x6;
+extern const font_t font_fixed10;
+extern const font_t font_fixed6;
+extern const font_t font_lucida9;
+extern const font_t font_cu17;
+extern const font_t font_term6;
 
 typedef struct
 {
@@ -29,10 +37,10 @@ typedef struct
 
 extern fontargs_t font_args;
 
-void fontargs_render_string (const fontargs_t *args);
-uint8_t font_get_string_width (const font_t *font, const char *s);
+void font_get_string_area (const font_t *font, const char *s);
 void fontargs_render_string_center (const fontargs_t *args);
 void fontargs_render_string_right (const fontargs_t *args);
+void fontargs_render_string_left (const fontargs_t *args);
 
 
 #define DECL_FONTARGS_CONST(_f,_x,_y,_s) \
@@ -50,11 +58,14 @@ void fontargs_render_string_right (const fontargs_t *args);
 	font_args.s = _s;
 
 
-#define font_render_string(f,x,y,s) \
+#define font_render_string_left(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string (&font_args); \
+	fontargs_render_string_left (&font_args); \
 }
+
+#define font_render_string font_render_string_left
+
 
 #define font_render_string_center(f,x,y,s) \
 { \
@@ -65,7 +76,7 @@ void fontargs_render_string_right (const fontargs_t *args);
 #define font_render_string_right(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_center (&font_args); \
+	fontargs_render_string_right (&font_args); \
 }
 
 

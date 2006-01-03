@@ -6,6 +6,13 @@ static U8 font_space[32] = { 0, };
 
 fontargs_t font_args;
 
+U8 font_width;
+U8 font_byte_width;
+U8 font_height;
+
+U8 font_string_width;
+U8 font_string_height;
+
 
 extern inline U8 lsrqi3 (U8 data, U8 count)
 {
@@ -60,12 +67,29 @@ extern inline U8 aslqi3 (U8 data, U8 count)
 }
 
 
+#pragma long_branch
 U8 *font_lookup (const font_t *font, char c)
 {
 	U8 *entry;
 	U8 index;
 
-	if ((c >= 'A') && (c <= 'Z'))
+	if (font->glyphs)
+	{
+		if (c == ' ')
+		{
+			entry = font_space;
+			index = 0;
+		}
+		else
+		{
+			U8 *data = font->glyphs[(U8)c];
+			font_width = *data++;
+			font_byte_width = (font_width + 7) >> 3;
+			font_height = *data++;
+			return (data);
+		}
+	}
+	else if ((c >= 'A') && (c <= 'Z'))
 	{
 		entry = (U8 *)font->chars;
 		index = c - 'A';
@@ -107,21 +131,26 @@ U8 *font_lookup (const font_t *font, char c)
 		nonfatal (ERR_UNPRINTABLE_CHAR);
 	}
 
+	font_width = font->width;
+	font_byte_width = font->bytewidth;
+	font_height = font->height;
 	return entry + index * font->height;
 }
 
 #pragma long_branch
-void fontargs_render_string (const fontargs_t *args)
+static void fontargs_render_string (void)
 {
 	static U8 *dmd_base;
 	static const char *s;
 	U8 x;
 	char c;
+	const fontargs_t *args = &font_args;
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
-   s = args->s;
+	s = sprintf_buffer;
   	x = args->x;
 
+	wpc_push_page (FONT_PAGE);
 
 	while ((c = *s) != '\0')
 	{
@@ -129,10 +158,8 @@ void fontargs_render_string (const fontargs_t *args)
 		static U8 i;
 		static U8 xb;
 		static U8 xr;
+		unsigned long int j;
 
-		xb = x / 8;
-
-		wpc_push_page (FONT_PAGE);
 		data = font_lookup (args->font, c);
 
 		xb = x / 8;
@@ -140,16 +167,26 @@ void fontargs_render_string (const fontargs_t *args)
 
 		if (xr == 0)
 		{
-			for (i=0; i <args->font->height; i++)
-				dmd_base[i * DMD_BYTE_WIDTH + xb] = *data++;
+			for (i=0; i < font_height; i++)
+			{
+				for (j=0; j < font_byte_width; j++)
+				{
+					dmd_base[i * DMD_BYTE_WIDTH + xb + j] = *data++;
+				}
+			}
 		}
 		else
 		{
-			for (i=0; i <args->font->height; i++)
+			for (i=0; i < font_height; i++)
 			{
-				dmd_base[i * DMD_BYTE_WIDTH + xb] |= aslqi3 (*data, xr);
-				dmd_base[i * DMD_BYTE_WIDTH + xb + 1] |= lsrqi3 (*data, (8 - xr));
-				data++;
+				for (j=0; j < font_byte_width; j++)
+				{
+					dmd_base[i * DMD_BYTE_WIDTH + xb + j] |= 
+						aslqi3 (*data, xr);
+					dmd_base[i * DMD_BYTE_WIDTH + xb + j + 1] |= 
+						lsrqi3 (*data, (8 - xr));
+					data++;
+				}
 			}
 		}
 
@@ -157,54 +194,104 @@ void fontargs_render_string (const fontargs_t *args)
 		if ((c == '.') || (c == ','))
 			x += 4;
 		else
-			x += args->font->width + args->font->spacing; 
+			x += font_width + args->font->spacing; 
 		s++;
-		wpc_pop_page ();
 	}
+	wpc_pop_page ();
 }
 #pragma short_branch
 
 
-U8 font_get_string_width (const font_t *font, const char *s)
+void font_get_string_area (const font_t *font, const char *s)
 {
-	U8 width = 0;
-	U8 font_width;
-	U8 font_spacing;
+	U8 c;
+
+	/* Copy the string to be rendered into the RAM buffer,
+	 * if it is not already there.  This allows us to be
+	 * more efficient later on, as page flipping between
+	 * static strings and the font data is not required.
+	 */
+	if (s != sprintf_buffer)
+	{
+		U8 *ram = sprintf_buffer;
+		while (*s != '\0')
+			*ram++ = *s++;
+		*ram = '\0';
+		s = sprintf_buffer;
+	}
 
 	wpc_push_page (FONT_PAGE);
-	font_width = font->width;
-	font_spacing = font->spacing;
-	wpc_pop_page ();
 
-	while (*s++ != '\0')
-		width += (font_width + font_spacing);
-	return (width);
+	if (font->glyphs)
+	{
+		font_string_width = 0;
+		font_string_height = 0;
+
+		while ((c = *s++) != '\0')
+		{
+			(void)font_lookup (font, c);
+			font_string_width += font_width + font->spacing;
+			if (font_height > font_string_height)
+				font_string_height = font_height;
+		}
+	}
+	else
+	{
+		U8 font_width, font_spacing;
+
+		font_width = font->width;
+		font_spacing = font->spacing;
+		font_string_height = font->height;
+
+		font_string_width = 0;
+		while ((c = *s++) != '\0')
+		{
+			font_string_width += font_width + font_spacing;
+		}
+	}
+
+	wpc_pop_page ();
+	task_dispatching_ok = TRUE;
 }
 
-void fontargs_render_string_center (const fontargs_t *args)
+void fontargs_render_string_left (const fontargs_t *args)
 {
-	font_args.x = args->x - (font_get_string_width (args->font, args->s) / 2);
+	font_get_string_area (args->font, args->s);
 	if (args != &font_args)
 	{
+		font_args.x = args->x;
 		font_args.y = args->y;
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
-	fontargs_render_string (&font_args);
+	fontargs_render_string ();
+}
+
+
+void fontargs_render_string_center (const fontargs_t *args)
+{
+	font_get_string_area (args->font, args->s);
+	font_args.x = args->x - (font_string_width / 2);
+	font_args.y = args->y - (font_string_height / 2);
+	if (args != &font_args)
+	{
+		font_args.font = args->font;
+		font_args.s = args->s;
+	}
+	fontargs_render_string ();
 }
 
 
 void fontargs_render_string_right (const fontargs_t *args)
 {
-	font_args.x = args->x - font_get_string_width (args->font, args->s);
+	font_get_string_area (args->font, args->s);
+	font_args.x = args->x - font_string_width;
 	if (args != &font_args)
 	{
 		font_args.y = args->y;
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
-	fontargs_render_string (&font_args);
+	fontargs_render_string ();
 }
-
-
 

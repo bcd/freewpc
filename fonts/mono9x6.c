@@ -1,7 +1,9 @@
 
 #include <freewpc.h>
 
-DECLARE_PAGED
+#pragma section ("page61")
+
+
 const uint8_t font_9x6_alpha_cap[][9] = {
 	{ 4, 4, 10, 10, 31, 31, 17, 17, 17 },
 	{ 7, 7, 9, 9, 7, 9, 9, 7, 7 },
@@ -36,7 +38,6 @@ const uint8_t font_9x6_alpha_cap[][9] = {
 };
 
 
-DECLARE_PAGED
 const uint8_t font_9x6_digit[][9] = {
 	{ 12, 30, 51, 51, 51, 51, 51, 30, 12 },
 	{ 12, 12, 14, 14, 12, 12, 12, 30, 30 },
@@ -51,7 +52,6 @@ const uint8_t font_9x6_digit[][9] = {
 };
 
 
-DECLARE_PAGED
 const uint8_t font_9x6_sep[][9] = {
 	{ 0, 0, 0, 0, 0, 0, 0, 0, 2 },
 	{ 0, 0, 0, 0, 0, 0, 2, 2, 1 },
@@ -59,14 +59,15 @@ const uint8_t font_9x6_sep[][9] = {
 };
 
 
-DECLARE_PAGED
 const font_t font_9x6 = {
 	.width = 6,
+	.bytewidth = 1,
 	.spacing = 2,
 	.height = 9, 
 	.chars = (uint8_t **)font_9x6_alpha_cap, 
 	.digits = (uint8_t **)font_9x6_digit,
 	.seps = (uint8_t **)font_9x6_sep,
+	.glyphs = NULL,
 };
 
 
