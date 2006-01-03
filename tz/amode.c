@@ -167,13 +167,10 @@ void amode_deff (void) __taskentry__
 		amode_page_delay (7);
 
 		/** Display FreeWPC logo **/
-		dmd_alloc_low ();
-		dmd_draw_image (freewpc_bits);
-		dmd_show_low ();
-		dmd_copy_low_to_high ();
-		dmd_invert_page (dmd_low_buffer);
-		deff_swap_low_high (25, TIME_100MS + TIME_50MS);
-		amode_page_delay (3);
+		dmd_alloc_low_high ();
+		dmd_draw_image2 (freewpc_logo_bits);
+		dmd_show2 ();
+		amode_page_delay (7);
 
 		/** Display game title message **/
 		dmd_alloc_low_high ();
