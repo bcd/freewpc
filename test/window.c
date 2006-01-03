@@ -669,13 +669,22 @@ const font_t *font_test_lookup (void)
 	{
 		case 0: default: return &font_5x5;
 		case 1: return &font_9x6;
+		case 2: return &font_fixed10;
+		case 3: return &font_fixed6;
+		case 4: return &font_lucida9;
+		case 5: return &font_term6;
+#if 0
+				  /* Not working */
+		case 100: return &font_cu17;
+#endif
 	}
 }
+
 
 void font_test_init (void)
 {
 	browser_init ();
-	browser_max = 1;
+	browser_max = 5;
 }
 
 void font_test_draw (void)
@@ -860,27 +869,27 @@ void dev_balldev_test_draw (void)
 	if ((dev == NULL) || (dev->props == NULL))
 	{
 		sprintf ("DEV %d NOT INSTALLED", menu_selection);
-		font_render_string_center (&font_5x5, 64, 0, sprintf_buffer);
+		font_render_string_center (&font_5x5, 64, 3, sprintf_buffer);
 	}
 	else
 	{
 		sprintf ("DEV %d   %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_5x5, 64, 0, sprintf_buffer);
+		font_render_string_center (&font_5x5, 64, 3, sprintf_buffer);
 	
 		sprintf ("SIZE %d", dev->size);
-		font_render_string (&font_5x5, 8, 6, sprintf_buffer);
+		font_render_string (&font_5x5, 8, 7, sprintf_buffer);
 
 		sprintf ("COUNT %d", dev->actual_count);
-		font_render_string (&font_5x5, 8, 12, sprintf_buffer);
+		font_render_string (&font_5x5, 8, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_5x5, 8, 18, sprintf_buffer);
+		font_render_string (&font_5x5, 8, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_5x5, 72, 6, sprintf_buffer);
+		font_render_string (&font_5x5, 72, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_5x5, 72, 12, sprintf_buffer);
+		font_render_string (&font_5x5, 72, 13, sprintf_buffer);
 
 		switch (browser_action)
 		{
@@ -889,7 +898,7 @@ void dev_balldev_test_draw (void)
 			case 2: s = "ENABLE LOCK"; break;
 			case 3: s = "DISABLE LOCK"; break;
 		}
-		font_render_string_center (&font_5x5, 64, 24, s);
+		font_render_string_center (&font_5x5, 64, 28, s);
 	}
 
 	dmd_show_low ();
@@ -1509,7 +1518,7 @@ void gi_test_draw (void)
 	browser_draw ();
 	browser_print_operation (gi_test_names[menu_selection]);
 	sprintf ("BRIGHTNESS %d", triac_get_brightness ());
-	font_render_string_center (&font_5x5, 64, 27, sprintf_buffer);
+	font_render_string_center (&font_5x5, 64, 29, sprintf_buffer);
 
 	triac_disable (TRIAC_GI_MASK);
 	triac_enable (gi_test_values[menu_selection]);
