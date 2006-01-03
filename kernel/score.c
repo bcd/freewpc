@@ -27,7 +27,7 @@ void scores_draw_credits (void)
 void scores_draw_current (void)
 {
 	sprintf ("%8b", current_score);
-	font_render_string_center (&font_9x6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_lucida9, 64, 10, sprintf_buffer);
 }
 
 
