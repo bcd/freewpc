@@ -24,14 +24,15 @@ decent C compiler for the 6809 CPU.  In some places, assembly language
 code is used for performance or to do some really low-level things.
 Using C over assembler should allow more people to get involved with the
 project.
-<li>Development can be done under Linux or under Windows using the
-Cygwin UNIX emulation suite.
-<li>The system is designed to be flexible and extensive.  Eventually,
-all generations of WPC should be supported, and multiple machines can
-be targeted using the same common core code.
+<li>Most development can be done under Linux or under Windows using the
+Cygwin UNIX emulation suite.  Some tasks require installation of other 
+programs, for example, if you want to make your own fonts.
+<li>The system is designed to be flexible and extensive.  All generations
+of WPC will be supported, except for alphanumeric games.  Multiple machines 
+can be targeted using the same common core "system" code.
 <li>Eventually, code should be able to run on an actual pinball machine;
 however, for now, FreeWPC ROMs should only be used in emulators such as
-Visual PinMame.  <b>Repeat: do not attempt to put a FreeWPC ROM in a 
+pinmame.  <b>Repeat: do not attempt to put a FreeWPC ROM in a 
 real machine!</b> I guarantee you, it won't work and you <b>WILL</b> cause 
 irreparable damage to your game, yourself, your house, etc... 
 You have been warned.
@@ -48,19 +49,19 @@ You have been warned.
 
 <h2>Downloads</h2>
 
-<p>The initial target machine is <b>Twilight Zone</b>.  Preview Releases
-are being provided in binary format for those who would like to play
-around with these ROMs under PinMame or Visual Pinball.
+<p>Development of the system is done on a number of games simultaneously,
+in order to ensure that the code works on all WPC generations.  At
+present, only <b>Twilight Zone</b> is playable; but <b>World Cup Soccer</b>
+and <b>Attack From Mars</b> are runnable.
 
-<p><a href="releases/ftz0_03.rom">Download Preview Release 3 (December 18, 2005)</a>.
-<p><a href="releases/ftz0_02.rom">Download Preview Release 2 (November 15, 2005)</a>.
-<p><a href="releases/ftz0_01.rom">Download Preview Release 1 (October 23, 2005)</a>.
+<p>Here are the latest available binaries:</p>
 
-<p>As proof of concept of the portability of FreeWPC, I also built a 
-non-playable version of <b>World Cup Soccer</b>, which uses the DCS sound
-board and PIC security chip.  You can't do much with this ROM other than
-go into the test mode; there's not even an attract mode:
+<h3>Twilight Zone</h3>
+<p><a href="releases/ftz0_03.rom">FreeWPC/TZ 0.03 (December 18, 2005)</a>.
+<p><a href="releases/ftz0_02.rom">FreeWPC/TZ 0.02 (November 15, 2005)</a>.
+<p><a href="releases/ftz0_01.rom">FreeWPC/TZ 0.01 (October 23, 2005)</a>.
 
+<h3>World Cup Soccer</h3>
 <p><a href="releases/fwcs_0_01.rom">Download FreeWPC/WCS 0.01 (December 18, 2005)</a>.
 
 <p>Source code for the entire development platform will not be
@@ -90,14 +91,9 @@ demonstrate only the most basic functionality.  Here are some of the
 areas that need addressing:
 
 <ul>
-<li>General illumination is not well implemented yet.
+<li>General illumination is implemented but there is no support for
+controlling the brightness.
 <li>Dot matrix transitional effects are non-existent.
-<li>Built-in support for distributing code throughout the ROM is not
-yet ready (but I'm working on it!)  The code is limited to 48K in size
-today.
-<li>Only two fonts are implemented, and they're rather ugly.  Plus there are
-few graphics.  Anyone with experience and interest to work on that should
-let me know.
 <li>The code has not been thoroughly optimized.  I've tried to address
 grotesque wasteful uses of CPU and memory, but there is much to be done
 in this area.  The compiler is, sadly, not the greatest.
@@ -115,4 +111,6 @@ anyone interested would probably meet that requirement.
 
 <p>All development is currently done under the Linux operating system.
 I use <a href="subversion">Subversion</a> for source control.
+Developers will also need to grab my <a href="/gcc6809.html">GCC for 6809</a>
+compiler.
 
