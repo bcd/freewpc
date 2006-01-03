@@ -27,6 +27,23 @@ DECLARE_SWITCH_DRIVER (sw_outhole)
 
 #endif
 
+#if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
+
+void sw_launch_handler (void)
+{
+	if (switch_poll (MACHINE_SHOOTER_SWITCH))
+	{
+		sol_pulse (MACHINE_LAUNCH_SOLENOID);
+	}
+}
+
+DECLARE_SWITCH_DRIVER (sw_launch_button)
+{
+	.fn = sw_launch_handler,
+	.flags = SW_IN_GAME,
+};
+
+#endif
 
 void trough_enter (device_t *dev)
 {
