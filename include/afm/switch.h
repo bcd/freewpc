@@ -25,12 +25,16 @@
 #define SW_TROUGH_3				MAKE_SW(3,3)
 #define SW_TROUGH_4				MAKE_SW(3,4)
 #define SW_TROUGH_5				MAKE_SW(3,5)
+#define SW_LEFT_POPPER			MAKE_SW(3,6)
+#define SW_RIGHT_POPPER			MAKE_SW(3,7)
+
+#define SW_CENTER_TROUGH		MAKE_SW(7,8)
 
 /*
  * Declare switch drivers.  Each macro defines the name of a driver object
  * which contains all of the properties of that switch.
  */
-//#define MACHINE_SW11
+#define MACHINE_SW11			sw_launch_button
 //#define MACHINE_SW12
 #define MACHINE_SW13			sw_start_button
 //#define MACHINE_SW14

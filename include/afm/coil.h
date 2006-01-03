@@ -3,5 +3,14 @@
 
 #define SOL_AUTOLAUNCH		0
 #define SOL_TROUGH			1
+#define SOL_LEFT_POPPER		2
+#define SOL_RIGHT_POPPER	3
+
+#define SOL_SAUCER_SHAKE	14
+#define SOL_DROP_TARGET		15
+
+#define SOL_DIVERTOR_POWER	34
+#define SOL_DIVERTOR_HOLD	35
+#define SOL_STROBE_LIGHT	38
 
 #endif /* _MACH_COIL_H */
