@@ -140,7 +140,7 @@ GAME_ROM = freewpc.rom
 
 FIXED_SECTION = sysrom
 
-OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
+OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o dmdtrans.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
@@ -699,7 +699,7 @@ info:
 # 'make clean' does what you think.
 #
 clean: clean_derived clean_gendefines
-	@for dir in `echo . callset kernel fonts images test $(MACHINE)`;\
+	@for dir in `echo . kernel fonts images test $(MACHINE)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 

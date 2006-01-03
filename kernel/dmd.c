@@ -7,7 +7,8 @@
 dmd_pagenum_t dmd_free_page;
 
 /* Low/High cache the current pages that are mapped into
- * visible memory */
+ * visible memory.  Note that you can't read the I/O
+ * register directly; they are write-only. */
 dmd_pagenum_t dmd_low_page;
 dmd_pagenum_t dmd_high_page;
 
@@ -22,16 +23,75 @@ dmd_pagenum_t dmd_high_page;
 dmd_pagenum_t dmd_dark_page;
 dmd_pagenum_t dmd_bright_page;
 
-/* Page flip counter */
+/* Page flip state.  The FIRQ routine uses this to
+ * determine whether to show the dark or bright page. */
 U8 dmd_page_flip_count;
+
+
+/* dmd_show_hook is normally set to a nop function.
+ * However, whenever a deff is started/stopped that defines
+ * an entry/exit transition function, the show_hook is changed
+ * to invoke dmd_do_transition, which performs the required
+ * transition before continuing.
+ */
+void (*dmd_show_hook) (U8 new_dark_page, U8 new_bright_page);
+
+/* Pointer to the current transition in effect.  This is
+ * only used by the transition show hook. */
+dmd_transition_t *dmd_transition;
+
+
+/* The trans data pointer provides transition functions with
+ * state.  The pointer is initialized to NULL before the
+ * first call to the transition functions; they can use it
+ * however they wish.  Typically, it would be used to
+ * save a pointer into the DMD buffer, indicating what should
+ * be updated on the next cycle of the transition.
+ */
+U8 *dmd_trans_data_ptr;
+U8 *dmd_trans_data_ptr2;
+
+/* The page number of the composite page, used during
+ * transitions.  Each frame of the transition sequence
+ * is stored here.  If the frame is 4-color, then two
+ * pages are allocated with consecutive numbers, and
+ * this holds the lower of the two values (the dark page).
+ */
+U8 dmd_composite_page;
+
+
+
+extern inline void wpc_dmd_set_low_page (U8 val)
+{
+	*(U8 *)WPC_DMD_LOW_PAGE = dmd_low_page = val;
+}
+
+extern inline U8 wpc_dmd_get_low_page (void)
+{
+	return dmd_low_page;
+}
+
+extern inline void wpc_dmd_set_high_page (U8 val)
+{
+	*(U8 *)WPC_DMD_HIGH_PAGE = dmd_high_page = val;
+}
+
+extern inline U8 wpc_dmd_get_high_page (void)
+{
+	return dmd_high_page;
+}
+
+
 
 void dmd_init (void)
 {
 	/* Program the DMD controller to generate interrupts */
 	wpc_dmd_firq_row = 30;
 
-	dmd_low_page = wpc_dmd_low_page = 0;
-	dmd_high_page = wpc_dmd_high_page = 0;
+	dmd_show_hook = dmd_nop_hook;
+
+	wpc_dmd_set_low_page (0);
+	wpc_dmd_set_high_page (0);
 	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = 0;
 	dmd_free_page = 1;
 	dmd_page_flip_count = 2;
@@ -60,19 +120,20 @@ void dmd_rtt (void)
 static dmd_pagenum_t dmd_alloc (void)
 {
 	dmd_pagenum_t page = dmd_free_page;
-	dmd_free_page += 1;
+	dmd_free_page += 2;
 	dmd_free_page %= DMD_PAGE_COUNT;
 	return page;
 }
 
+
 void dmd_alloc_low (void)
 {
-	dmd_low_page = wpc_dmd_low_page = dmd_alloc ();
+	wpc_dmd_set_low_page (dmd_alloc ());	
 }
 
 void dmd_alloc_high (void)
 {
-	dmd_high_page = wpc_dmd_high_page = dmd_alloc ();
+	wpc_dmd_set_high_page (dmd_alloc ());	
 }
 
 void dmd_alloc_low_high (void)
@@ -83,20 +144,21 @@ void dmd_alloc_low_high (void)
 
 void dmd_show_low (void)
 {
-	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = dmd_low_page;
+	(*dmd_show_hook) (dmd_low_page, dmd_low_page);
+	dmd_dark_page = dmd_bright_page = dmd_low_page;
 }
 
 void dmd_show_high (void)
 {
-	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = dmd_high_page;
+	(*dmd_show_hook) (dmd_high_page, dmd_high_page);
+	dmd_dark_page = dmd_bright_page = dmd_high_page;
 }
 
 void dmd_flip_low_high (void)
 {
-	dmd_pagenum_t tmp = dmd_low_page;
-	dmd_low_page = dmd_high_page;
-	dmd_high_page = tmp;
-	/* TODO - shouldn't this always rewrite the I/O registers */
+	dmd_pagenum_t tmp = wpc_dmd_get_low_page ();
+	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
+	wpc_dmd_set_high_page (tmp);
 }
 
 
@@ -121,12 +183,13 @@ void dmd_swap_low_high (void)
 
 void dmd_show2 (void)
 {
+	(*dmd_show_hook) (dmd_low_page, dmd_high_page);
 	dmd_dark_page = dmd_low_page;
 	dmd_bright_page = dmd_high_page;
 }
 
 
-void dmd_clean_page (dmd_buffer_t *dbuf)
+void dmd_clean_page (dmd_buffer_t dbuf)
 {
 	register long int count = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
@@ -153,7 +216,7 @@ void dmd_clean_page_high (void)
 }
 
 
-void dmd_invert_page (dmd_buffer_t *dbuf)
+void dmd_invert_page (dmd_buffer_t dbuf)
 {
 	register int16_t count /* asm ("u") */ = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
@@ -171,7 +234,7 @@ void dmd_invert_page (dmd_buffer_t *dbuf)
 }
 
 
-void dmd_copy_page (dmd_buffer_t *dst, dmd_buffer_t *src)
+void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 {
 	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dst16 = (uint16_t *)dst;
@@ -204,7 +267,7 @@ void dmd_alloc_high_clean (void)
 
 void dmd_draw_border (char *dbuf)
 {
-	const dmd_buffer_t *dbuf_bot = (dmd_buffer_t *)((char *)dbuf + 480);
+	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
 	register uint16_t *dbuf16_bot = (uint16_t *)dbuf_bot;
 	int i;
@@ -235,7 +298,7 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 }
 
 
-void dmd_shift_up (dmd_buffer_t *dbuf)
+void dmd_shift_up (dmd_buffer_t dbuf)
 {
 	uint16_t i;
 	for (i=(31L * 16 / 2); i != 0; --i)
@@ -255,11 +318,11 @@ void dmd_shift_up (dmd_buffer_t *dbuf)
 }
 
 
-void dmd_shift_down (dmd_buffer_t *dbuf)
+void dmd_shift_down (dmd_buffer_t dbuf)
 {
 	U16 i;
 
-	dbuf = (dmd_buffer_t *)((char *)dbuf + 510);
+	dbuf = (dmd_buffer_t)((char *)dbuf + 510);
 	for (i=(30L * 16 / 2 / 2); i != 0; --i)
 	{
 		dbuf[0] = dbuf[-16];
@@ -275,16 +338,16 @@ void dmd_shift_down (dmd_buffer_t *dbuf)
 }
 
 
-void dmd_draw_image (dmd_buffer_t *image_bits)
+void dmd_draw_image (dmd_buffer_t image_bits)
 {
-	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t *)image_bits)));
+	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
 }
 
 
-void dmd_draw_image2 (dmd_buffer_t *image_bits)
+void dmd_draw_image2 (dmd_buffer_t image_bits)
 {
 	call_far (60, (dmd_copy_page (dmd_low_buffer, image_bits)));
-	call_far (60, (dmd_copy_page (dmd_high_buffer, (image_bits + 0x100))));
+	call_far (60, (dmd_copy_page (dmd_high_buffer, (image_bits + DMD_PAGE_SIZE))));
 }
 
 
@@ -294,7 +357,7 @@ void dmd_draw_image2 (dmd_buffer_t *image_bits)
  * For now, it is assumed that x, y, width, and height are all multiples
  * of 8.
  */
-void dmd_draw_bitmap (dmd_buffer_t *image_bits, 
+void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height)
 {
 	int i, j;
@@ -356,6 +419,100 @@ void dmd_color_test (void)
 	dmd_show2 ();
 }
 
+
+void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page)
+{
+}
+
+
+extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
+{
+	/* On entry, the composite buffer must be mapped into the high page. */
+   
+	/* Map the old image in low memory. */
+	wpc_dmd_set_low_page (old_page);
+
+	/* Initialize the composite from the old image. */
+	dmd_transition->composite_old ();
+
+	/* Now remap the new image into low memory */
+	wpc_dmd_set_low_page (new_page);
+
+	/* Update the composite using the new image data.
+	 * This function should set dmd_transition to NULL when
+	 * the transition is done. */
+	dmd_transition->composite_new ();
+}
+
+
+#pragma long_branch
+void dmd_transition_hook (U8 new_dark_page, U8 new_bright_page)
+{
+	dmd_trans_data_ptr = NULL;
+	U8 one_copy_flag;
+
+	if ((new_dark_page == new_bright_page) &&
+		 (dmd_dark_page == dmd_bright_page))
+		one_copy_flag = TRUE;
+	else
+	{
+		one_copy_flag = FALSE;
+		dmd_trans_data_ptr2 = NULL;
+	}
+
+	while (dmd_transition != NULL)
+	{
+#if 0
+		task_sleep (dmd_transition->delay);
+#else
+		while (!switch_poll (SW_LAUNCH_BUTTON))
+			task_sleep (TIME_33MS);
+#endif
+
+		dmd_composite_page = dmd_alloc ();
+
+		/* Handle the transition of the dark page first.
+		 * Use the lower composite pair page. */
+		wpc_dmd_set_high_page (dmd_composite_page);
+		dmd_do_transition_cycle (dmd_dark_page, new_dark_page);
+
+		/* Handle the transition of the bright page, if either
+		 * the old or new images is 4-color.
+		 * Use the upper composite pair page (+1). */
+		if (!one_copy_flag)
+		{
+			U8 *tmp_trans_data_ptr;
+
+			tmp_trans_data_ptr = dmd_trans_data_ptr;
+			dmd_trans_data_ptr = dmd_trans_data_ptr2;
+
+			wpc_dmd_set_high_page (dmd_composite_page+1);
+			dmd_do_transition_cycle (dmd_bright_page, new_bright_page);
+
+			dmd_trans_data_ptr2 = dmd_trans_data_ptr;
+			dmd_trans_data_ptr = tmp_trans_data_ptr;
+
+			dmd_dark_page = dmd_composite_page;
+			dmd_bright_page = dmd_composite_page+1;
+
+		}
+		else
+		{
+			dmd_dark_page = dmd_bright_page = dmd_composite_page;
+		}
+	}
+
+	/* When transition is complete, reset hook */
+	dmd_show_hook = dmd_nop_hook;
+}
+#pragma short_branch
+
+
+void dmd_trans_install (dmd_transition_t *trans)
+{
+	dmd_show_hook = dmd_transition_hook;
+	dmd_transition = trans;
+}
 
 #endif /* MACHINE_DMD */
 
