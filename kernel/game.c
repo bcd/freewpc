@@ -16,15 +16,11 @@ void start_ball (void);
 #ifndef MACHINE_CUSTOM_AMODE
 void default_amode_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_alloc_high_clean ();
-	font_render_string_center (&font_5x5, 64, 16, "NO ATTRACT MODE");
-	dmd_show_low ();
+	dmd_alloc_low_high ();
+	dmd_draw_image2 (freewpc_logo_bits);
+	dmd_show2 ();
 	for (;;)
-	{
-		dmd_show_other ();
-		task_sleep_sec (1);
-	}
+		task_sleep_sec (5);
 }
 #endif
 
