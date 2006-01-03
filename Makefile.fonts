@@ -1,0 +1,22 @@
+#
+# Makefile.fonts - creates FreeWPC font files from scratch
+#
+
+fonts : $(FON_SRCS)
+
+clean-fonts :
+	rm -f $(FON_SRCS)
+
+$(FON_SRCS) : tools/fontgen
+
+fonts/fixed10.fon :
+	tools/fontgen -o $@ -fn "fixed-bold-r-*-*-10" -fs 8 -id fixed10
+fonts/fixed6.fon :
+	tools/fontgen -o $@ -fn "fixed-bold-r-*-*-6" -fs 6 -id fixed6
+fonts/lucida9.fon :
+	tools/fontgen -o $@ -fn "lucida-bold-9" -fs 9 -id lucida9
+fonts/cu17.fon :
+	tools/fontgen -o $@ -fn "clearlyu-17" -fs 17 -id cu17
+fonts/term6.fon :
+	tools/fontgen -o $@ -fn "terminal-6" -fs 6 -id term6
+
