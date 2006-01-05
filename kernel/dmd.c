@@ -34,7 +34,7 @@ U8 dmd_page_flip_count;
  * to invoke dmd_do_transition, which performs the required
  * transition before continuing.
  */
-void (*dmd_show_hook) (U8 new_dark_page, U8 new_bright_page);
+bool dmd_in_transition;
 
 /* Pointer to the current transition in effect.  This is
  * only used by the transition show hook. */
@@ -88,12 +88,12 @@ void dmd_init (void)
 	/* Program the DMD controller to generate interrupts */
 	wpc_dmd_firq_row = 30;
 
-	dmd_show_hook = dmd_nop_hook;
-
+	dmd_in_transition = FALSE;
+	dmd_transition = NULL;
 	wpc_dmd_set_low_page (0);
 	wpc_dmd_set_high_page (0);
 	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = 0;
-	dmd_free_page = 1;
+	dmd_free_page = 2;
 	dmd_page_flip_count = 2;
 }
 
@@ -129,6 +129,7 @@ static dmd_pagenum_t dmd_alloc (void)
 void dmd_alloc_low (void)
 {
 	wpc_dmd_set_low_page (dmd_alloc ());	
+	wpc_dmd_set_high_page (wpc_dmd_get_low_page ());	
 }
 
 void dmd_alloc_high (void)
@@ -138,20 +139,24 @@ void dmd_alloc_high (void)
 
 void dmd_alloc_low_high (void)
 {
-	dmd_alloc_low ();
-	dmd_alloc_high ();
+	wpc_dmd_set_low_page (dmd_alloc ());	
+	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);	
 }
 
 void dmd_show_low (void)
 {
-	(*dmd_show_hook) (dmd_low_page, dmd_low_page);
-	dmd_dark_page = dmd_bright_page = dmd_low_page;
+	if (dmd_transition)
+		dmd_do_transition ();
+	else
+		dmd_dark_page = dmd_bright_page = dmd_low_page;
 }
 
 void dmd_show_high (void)
 {
-	(*dmd_show_hook) (dmd_high_page, dmd_high_page);
-	dmd_dark_page = dmd_bright_page = dmd_high_page;
+	if (dmd_transition)
+		dmd_do_transition ();
+	else
+		dmd_dark_page = dmd_bright_page = dmd_high_page;
 }
 
 void dmd_flip_low_high (void)
@@ -183,14 +188,19 @@ void dmd_swap_low_high (void)
 
 void dmd_show2 (void)
 {
-	(*dmd_show_hook) (dmd_low_page, dmd_high_page);
-	dmd_dark_page = dmd_low_page;
-	dmd_bright_page = dmd_high_page;
+	if (dmd_transition)
+		dmd_do_transition ();
+	else
+	{
+		dmd_dark_page = dmd_low_page;
+		dmd_bright_page = dmd_high_page;
+	}
 }
 
 
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
+#if 1
 	register long int count = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
 	register volatile U16 zero asm ("y") = 0;
@@ -201,6 +211,9 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 		*dbuf16++ = zero;
 		*dbuf16++ = zero;
 	}
+#else
+	__blockclear16 (dbuf, DMD_PAGE_SIZE);
+#endif
 }
 
 
@@ -236,6 +249,7 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 
 void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 {
+#if 1
 	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dst16 = (uint16_t *)dst;
 	register uint16_t *src16 = (uint16_t *)src;
@@ -246,6 +260,9 @@ void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 		*dst16++ = *src16++;
 		*dst16++ = *src16++;
 	}
+#else
+	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
+#endif
 }
 
 void dmd_copy_low_to_high (void)
@@ -420,15 +437,11 @@ void dmd_color_test (void)
 }
 
 
-void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page)
-{
-}
-
-
 extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 {
-	/* On entry, the composite buffer must be mapped into the high page. */
-   
+	/* On entry, the composite buffer must be mapped into the 
+	 * high page. */
+ 
 	/* Map the old image in low memory. */
 	wpc_dmd_set_low_page (old_page);
 
@@ -446,30 +459,64 @@ extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 
 
 #pragma long_branch
-void dmd_transition_hook (U8 new_dark_page, U8 new_bright_page)
+void dmd_do_transition (void)
 {
 	dmd_trans_data_ptr = NULL;
 	U8 one_copy_flag;
+	U8 new_dark_page, new_bright_page;
+
+	new_dark_page = dmd_low_page;
+	new_bright_page = dmd_high_page;
 
 	if ((new_dark_page == new_bright_page) &&
 		 (dmd_dark_page == dmd_bright_page))
+	{
 		one_copy_flag = TRUE;
+		dbprintf ("mono -> mono\n");
+	}
 	else
 	{
 		one_copy_flag = FALSE;
 		dmd_trans_data_ptr2 = NULL;
+		if (new_dark_page != new_bright_page)
+		{
+			/* New image is 4-color but old image
+			 * is mono.
+			 * Need to turn old image into 4-color format
+			 * by copying it.
+			 */
+			dbprintf ("mono -> 4color\n");
+			wpc_dmd_set_low_page (dmd_dark_page);
+			wpc_dmd_set_high_page (dmd_dark_page+1);
+			dmd_copy_low_to_high ();
+			dmd_bright_page = dmd_high_page;
+			wpc_dmd_set_low_page (new_dark_page);
+		}
+		else
+		{
+			/* Old image is 4-color but new image is mono. */
+			/* Copy it to make it 4-color also */
+			dbprintf ("4color -> mono\n");
+			wpc_dmd_set_high_page (dmd_low_page+1);
+			dmd_copy_low_to_high ();
+		}
 	}
 
-	while (dmd_transition != NULL)
+	while (dmd_in_transition)
 	{
-#if 0
-		task_sleep (dmd_transition->delay);
-#else
+#ifdef STEP_TRANSITION
 		while (!switch_poll (SW_LAUNCH_BUTTON))
 			task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS);
+		while (switch_poll (SW_LAUNCH_BUTTON))
+			task_sleep (TIME_33MS);
+#else
+		task_sleep (dmd_transition->delay);
 #endif
 
-		dmd_composite_page = dmd_alloc ();
+		do {
+			dmd_composite_page = dmd_alloc ();
+		} while (dmd_composite_page == new_dark_page);
 
 		/* Handle the transition of the dark page first.
 		 * Use the lower composite pair page. */
@@ -501,17 +548,15 @@ void dmd_transition_hook (U8 new_dark_page, U8 new_bright_page)
 			dmd_dark_page = dmd_bright_page = dmd_composite_page;
 		}
 	}
-
-	/* When transition is complete, reset hook */
-	dmd_show_hook = dmd_nop_hook;
+	dmd_transition = NULL;
 }
 #pragma short_branch
 
 
-void dmd_trans_install (dmd_transition_t *trans)
+void dmd_sched_transition (dmd_transition_t *trans)
 {
-	dmd_show_hook = dmd_transition_hook;
 	dmd_transition = trans;
+	dmd_in_transition = TRUE;
 }
 
 #endif /* MACHINE_DMD */

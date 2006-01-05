@@ -27,9 +27,10 @@ typedef uint8_t *dmd_buffer_t;
  */
 typedef struct
 {
-	U8 delay;
 	void (*composite_old) (void);
 	void (*composite_new) (void);
+	U8 delay;
+	U8 arg;
 } dmd_transition_t;
 
 
@@ -40,10 +41,13 @@ typedef struct
 #define dmd_high_buffer			((dmd_buffer_t)DMD_HIGH_BASE)
 
 extern U8 *dmd_trans_data_ptr;
-extern void (*dmd_show_hook) (U8 new_dark_page, U8 new_bright_page);
+extern bool dmd_in_transition;
 extern dmd_transition_t *dmd_transition;
 
-extern dmd_transition_t trans_scroll_up;
+extern dmd_transition_t 
+	trans_scroll_up,
+	trans_scroll_down
+	;
 
 void dmd_init (void);
 void dmd_rtt (void);
@@ -72,7 +76,7 @@ void dmd_draw_image2 (dmd_buffer_t image_bits);
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
 void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page);
-void dmd_transition_hook (U8 new_dark_page, U8 new_bright_page);
-void dmd_trans_install (dmd_transition_t *trans);
+void dmd_do_transition (void);
+void dmd_sched_transition (dmd_transition_t *trans);
 
 #endif /* _SYS_DMD_H */
