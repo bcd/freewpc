@@ -89,6 +89,24 @@ extern inline void *memset (void *s, int c, long unsigned int n)
 }
 
 
+extern inline void __blockclear16 (void *s1, long unsigned int n)
+{
+	register U16 *_s1 = (U16 *)s1;
+	do
+	{
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		*_s1++ = 0UL;
+		n -= 16;
+	} while (n > 0);
+}
+
+
 extern inline void *memcpy (void *s1, const void *s2, long unsigned int n)
 {
 	register char *_s1 = (char *)s1;
@@ -100,6 +118,26 @@ extern inline void *memcpy (void *s1, const void *s2, long unsigned int n)
 	}
 	return (s1);
 }
+
+
+extern inline void __blockcopy16 (void *s1, const void *s2, long unsigned int n)
+{
+	register U16 *_s1 = (U16 *)s1;
+	register U16 *_s2 = (U16 *)s2;
+	do
+	{
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		*_s1++ = *_s2++;
+		n -= 16;
+	} while (n > 0);
+}
+
 
 
 extern inline void *memmove (void *s1, const void *s2, long unsigned int n)
