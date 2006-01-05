@@ -29,7 +29,6 @@ void amode_page_delay (U8 secs)
 		amode_flippers_start = amode_flippers;
 		secs--;
 	}
-	//task_sleep_sec (secs);
 }
 
 void amode_flipper_sound_debounce_timer (void)
@@ -75,7 +74,7 @@ void egg_left_flipper (void)
 void egg_brian_image_deff (void)
 {
 	dmd_alloc_low_clean ();
-	dmd_draw_bitmap ((dmd_buffer_t *)brian_bits, 0, 0, 32, 32);
+	dmd_draw_bitmap (brian_bits, 0, 0, 32, 32);
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -188,6 +187,11 @@ void amode_deff (void) __taskentry__
 		}
 
 		/** Display high scores **/
+		dmd_sched_transition (&trans_scroll_up);
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed10, 64, 16, "PLAY PINBALL");
+		dmd_show_low ();
+		amode_page_delay (5);
 
 		/** Display credits message **/
 		credits_draw ();
