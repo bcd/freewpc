@@ -3,8 +3,8 @@
 
 void star_task (void)
 {
-	uint8_t *dmd = task_get_arg ();
-	uint8_t i;
+	U8 *dmd = (U8 *)task_get_arg ();
+	int i;
 
 	for (i=3; i>0; i--)
 	{
@@ -40,16 +40,16 @@ void star_task (void)
 do \
 { \
 	task_t *tp = task_create_child (star_task); \
-	task_set_arg (tp, dmd_low_buffer + ((U16)y << 4) + x); \
+	task_set_arg (tp, (U16)(dmd_low_buffer + ((U16)y << 4) + x)); \
 } while (0)
 
 void starfield_task (void)
 {
-	star_create (1, 2);
+	star_create (1, 3);
 	task_sleep_sec (1);
-	star_create (15, 28);
+	star_create (14, 28);
 	task_sleep_sec (1);
-	star_create (15, 2);
+	star_create (14, 3);
 	task_sleep_sec (1);
 	star_create (1, 28);
 	task_sleep_sec (2);
