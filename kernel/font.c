@@ -77,8 +77,11 @@ U8 *font_lookup (const font_t *font, char c)
 	{
 		if (c == ' ')
 		{
-			entry = font_space;
-			index = 0;
+			U8 *data = font->glyphs[(U8)'I'];
+			font_width = *data++;
+			font_byte_width = (font_width + 7) >> 3;
+			font_height = *data++;
+			return (font_space);
 		}
 		else
 		{
