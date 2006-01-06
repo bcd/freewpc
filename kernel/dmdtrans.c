@@ -94,3 +94,37 @@ dmd_transition_t trans_scroll_down = {
 
 /*********************************************************************/
 
+void trans_scroll_left_old (void)
+{
+	__blockcopy16 (dmd_high_buffer, dmd_low_buffer + 1, DMD_PAGE_SIZE);
+}
+
+void trans_scroll_left_new (void)
+{
+	long int i;
+
+	if (dmd_trans_data_ptr == NULL)
+		dmd_trans_data_ptr = dmd_low_buffer;
+
+	register U8 *src = dmd_trans_data_ptr;
+	register U8 *dst = dmd_high_buffer + 15;
+	for (i=0; i < 32L * 16; i += 64)
+	{
+		dst[i] = src[i];
+		dst[i+16] = src[i+16];
+		dst[i+32] = src[i+32];
+		dst[i+48] = src[i+48];
+	}
+
+	dmd_trans_data_ptr++;
+	if (dmd_trans_data_ptr == dmd_low_buffer + 16)
+		dmd_in_transition = FALSE;
+}
+
+
+dmd_transition_t trans_scroll_left = {
+	.composite_old = trans_scroll_left_old,
+	.composite_new = trans_scroll_left_new,
+	.delay = TIME_33MS,
+	.arg = 0,
+};
