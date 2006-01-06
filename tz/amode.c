@@ -155,7 +155,7 @@ void amode_deff (void) __taskentry__
 		
 		/** Display game over screen **/
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_5x5, 64, 16, "GAME OVER");
+		font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
 		dmd_show_low ();
 		amode_page_delay (5);
 
@@ -187,11 +187,14 @@ void amode_deff (void) __taskentry__
 		}
 
 		/** Display high scores **/
-		dmd_sched_transition (&trans_scroll_up);
+
+		/** Display PLAY PINBALL message **/
+		dmd_sched_transition (&trans_scroll_left);
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, "PLAY PINBALL");
+		font_render_string_center (&font_fixed10, 64, 16, 
+			"PLAY PINBALL");
 		dmd_show_low ();
-		amode_page_delay (5);
+		amode_page_delay (3);
 
 		/** Display credits message **/
 		credits_draw ();
