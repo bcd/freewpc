@@ -29,7 +29,12 @@ typedef struct sol_pulse {
 
 uint8_t sol_calc_cksum (void)
 {
-	return 0;
+	return sol_state.high +
+		sol_state.low +
+		sol_state.flash1 +
+		sol_state.flash2 +
+		sol_state.aux1 +
+		sol_state.aux2;
 }
 
 
@@ -42,7 +47,7 @@ void sol_update_cksum (void)
 int sol_verify_cksum (void)
 {
 	register uint8_t cksum = sol_calc_cksum ();
-	/* If the checksums are equally, then the difference is
+	/* If the checksums are equal, then the difference is
 	 * zero and the negation of that becomes true */
 	return (!(cksum - sol_state.cksum));
 }
@@ -50,12 +55,26 @@ int sol_verify_cksum (void)
 
 void sol_rtt (void)
 {
-	/* Write cached values to hardware I/O */
-	*(uint8_t *)WPC_SOL_LOWPOWER_OUTPUT = sol_state.low;
-	*(uint8_t *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state.high;
-	*(uint8_t *)WPC_SOL_FLASH1_OUTPUT = sol_state.flash1;
-	*(uint8_t *)WPC_SOL_FLASH2_OUTPUT = sol_state.flash2;
-	*(uint8_t *)WPC_EXTBOARD1 = sol_state.aux2; /* TZ specific */
+	if (sol_verify_cksum ())
+	{
+		/* Write cached values to hardware I/O */
+		*(uint8_t *)WPC_SOL_LOWPOWER_OUTPUT = sol_state.low;
+		*(uint8_t *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state.high;
+		*(uint8_t *)WPC_SOL_FLASH1_OUTPUT = sol_state.flash1;
+		*(uint8_t *)WPC_SOL_FLASH2_OUTPUT = sol_state.flash2;
+		*(uint8_t *)WPC_EXTBOARD1 = sol_state.aux2; /* TZ specific */
+	}
+	else
+	{
+		sol_state.low = 0;
+		sol_state.high = 0;
+		sol_state.flash1 = 0;
+		sol_state.flash2 = 0;
+		sol_state.aux1 = 0;
+		sol_state.aux2 = 0; /* TZ specific */
+		sol_update_cksum ();
+		nonfatal (ERR_SOL_CKSUM_ERROR);
+	}
 }
 
 
