@@ -213,12 +213,12 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 
 extern inline uint8_t wpc_get_rom_page (void)
 {
-	return *(volatile uint8_t *)WPC_ROM_BANK;
+	return *(U8 *)WPC_ROM_BANK;
 }
 
 extern inline void wpc_set_rom_page (uint8_t page)
 {
-	*(volatile uint8_t *)WPC_ROM_BANK = page;
+	*(U8 *)WPC_ROM_BANK = page;
 }
 
 #define call_far(page, fncall) \
