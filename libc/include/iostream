@@ -1,6 +1,0 @@
-// -*- C++ -*- forwarding header.
-
-#ifndef __IOSTREAM__
-#define __IOSTREAM__
-#include <iostream.h>
-#endif

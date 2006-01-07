@@ -1,6 +1,0 @@
-// The -*- C++ -*- standard library header.
-
-#ifndef __CSTDLIB__
-#define __CSTDLIB__
-#include <stdlib.h>
-#endif

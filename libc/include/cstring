@@ -1,6 +1,0 @@
-// The -*- C++ -*- null-terminated string header.
-
-#ifndef __CSTRING__
-#define __CSTRING__
-#include <string.h>
-#endif
