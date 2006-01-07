@@ -1,8 +1,12 @@
 #ifndef _WPC_H
 #define _WPC_H
 
+#ifdef HAVE_LIBC
 #include <stdlib.h>
 #include <string.h>
+#else
+#define NULL 0UL
+#endif
 #include <env.h>
 /* Including sys/types.h is almost always wrong! */
 

@@ -6,7 +6,9 @@
 
 
 #include <env.h>
+#ifdef HAVE_LIBC
 #include <sys/types.h>
+#endif
 
 #define TASK_FREE		0
 #define TASK_USED		1
