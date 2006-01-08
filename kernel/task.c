@@ -20,6 +20,12 @@
  * and the register save/restore routines are written in lots of
  * assembler, though.
  *
+ * Caveats:
+ * 1) Inside functions that use a lot of assembly, we expect register
+ * X to be preserved across calls (e.g. task_save -> task_dispatcher).
+ * Please do NOT make any ordinary function calls in these types of
+ * routines, as they are likely to trash registers in unexpected ways.
+ *
  */
 
 __fastram__ task_t *task_current;
@@ -175,7 +181,6 @@ void task_save (void)
 	if ((__x->stack_word_count = __b) > task_largest_stack)
 	{
 		task_largest_stack = __b;
-		dbprintf ("Largest stack = %d\n", __b);
 	}
 
 #else
