@@ -226,9 +226,9 @@ void sound_send (sound_code_t code)
 	if (current_volume == 0)
 		return;
 
-	asm ("ldd %0" :: "m" (code));
-	asm ("sta %0" :: "m" (code_hi));
-	asm ("stb %0" :: "m" (code_lo));
+	asm ("ldd\t%0" :: "m" (code));
+	asm ("sta\t%0" :: "m" (code_hi));
+	asm ("stb\t%0" :: "m" (code_lo));
 
 #if (MACHINE_DCS == 0)
 	if (code_hi == 0)
