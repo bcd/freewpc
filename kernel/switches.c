@@ -33,7 +33,7 @@ typedef struct
 #define switch_running_bits	switch_bits[AR_RUNNING]
 
 /** The global array of switch bits, all in one place */
-uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+__fastram__ uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
 /*
