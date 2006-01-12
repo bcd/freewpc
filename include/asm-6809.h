@@ -17,22 +17,22 @@
 
 extern inline void __lda (uint8_t i)
 {
-	asm __volatile__ ("\tlda %0" :: "g" (i) : "d");
+	asm __volatile__ ("lda\t%0" :: "g" (i) : "d");
 }
 
 extern inline void __ldb (uint8_t i)
 {
-	asm __volatile__ ("\tldb %0" :: "g" (i) : "d");
+	asm __volatile__ ("ldb\t%0" :: "g" (i) : "d");
 }
 
 extern inline void __sta (uint8_t *i)
 {
-	asm __volatile__ ("\tsta %0" : "=m" (*i));
+	asm __volatile__ ("sta\t%0" : "=m" (*i));
 }
 
 extern inline void __stb (uint8_t *i)
 {
-	asm __volatile__ ("\tstb %0" : "=m" (*i));
+	asm __volatile__ ("stb\t%0" : "=m" (*i));
 }
 
 extern inline void __bytecopy (uint8_t *dst, uint8_t src)
