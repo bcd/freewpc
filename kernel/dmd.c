@@ -472,7 +472,6 @@ void dmd_do_transition (void)
 		 (dmd_dark_page == dmd_bright_page))
 	{
 		one_copy_flag = TRUE;
-		dbprintf ("mono -> mono\n");
 	}
 	else
 	{
@@ -485,7 +484,6 @@ void dmd_do_transition (void)
 			 * Need to turn old image into 4-color format
 			 * by copying it.
 			 */
-			dbprintf ("mono -> 4color\n");
 			wpc_dmd_set_low_page (dmd_dark_page);
 			wpc_dmd_set_high_page (dmd_dark_page+1);
 			dmd_copy_low_to_high ();
@@ -496,7 +494,6 @@ void dmd_do_transition (void)
 		{
 			/* Old image is 4-color but new image is mono. */
 			/* Copy it to make it 4-color also */
-			dbprintf ("4color -> mono\n");
 			wpc_dmd_set_high_page (dmd_low_page+1);
 			dmd_copy_low_to_high ();
 		}
