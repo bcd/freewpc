@@ -34,7 +34,8 @@ of the pages can be mapped into the 6809 address space at $3800 and
 $3A00.
 
 <p>RAM is located at the lowest addresses, between $0000 and $1FFF, for
-a total of 8KB.
+a total of 8KB.  A portion of upper RAM can be programmed as non-volatile
+and will be battery-backed across resets.
 
 <p>The CPU board supports up to 1MB of ROM space for program code and
 constant data.  Because the 6809 can only address a total of 64KB at
@@ -115,8 +116,12 @@ tasks which are sleeping have their "time-until-ready-to-run" counters
 updated based on the number of IRQs that have happened.
 
 <p>It is possible to compute the percentage of time spent running
-at the IRQ level, since the functions are fixed.  The more efficient
+at the IRQ level, since the functions are mostly fixed.  (There will
+always be some variations due to whether or not some conditional
+branches are taken.)  The more efficient
 the realtime functions, the more time available for other tasks.
+At 2MHz, the IRQ is triggered about once every 1900 CPU cycles, which
+is not a lot at all.
 There is a fine balance to be found here.  Realtime functions need
 to run every so often, <b>but not more often than that.</b>  Polling
 more frequently than necessary is simply a waste of time, for
@@ -145,11 +150,14 @@ buffer (if it is a read request -- which will retrieve the last value
 polled by the realtime function).
 
 <p>There is also the modularity between the kernel and the user code.  Each
-machine can define additional functions that need to be invoked when certain
+machine can define special "hook" functions that need to be invoked when certain
 events occur.  These are implemented as callback functions.  This allows
 the kernel to be "extended" to suit the needs of a particular machine.
 Also, there are a number of constants which are machine-specific.  Each
-machine has a "config.h" file that contains all of those values.
+machine has a "config.h" file that contains all of those values.  As much
+as possible, algorithms which are common to nearly all machines are
+put into the shared kernel, with allowances for machines to provide
+extensions or overrides.
 
 <h2>Inputs and Outputs</h2>
 
@@ -171,7 +179,8 @@ in which a significant amount of vibration occurs upon closure, causing
 the CPU to see tens of closures instead of one.  Debounce logic takes
 the raw switch signal and filters it to produce a smoother, more binary
 type signal.  Transitions only occur if they hold their new state for
-a certain period of time (which may be dependent on the type of switch).
+a certain period of time (which may be dependent on the type of switch
+and its location on the playfield).
 
 <p>Output devices like lamps and solenoids are just the opposite: they
 are binary outputs, which in theory are logically on (1) or off (0).
@@ -189,9 +198,13 @@ be programmed with the column value to determine which of the 8 columns
 it will be.  For lamps, this adds inherent duty cycling as no more than
 8 of the lamps will ever be on at a time.
 
-<p>Also for switches, there is the complication of optos, which are
+<p>For switches, there is the complication of optos, which are
 normally closed and open when they become active.  Software must use
 "backwards logic" on these.
+
+<p>Some hardware registers are write-only, which requires that software
+remember the last value written if it will ever need to be "read".  The
+read then comes from the cached value rather than touching the hardware.
 
 <h2>Effect Management</h2>
 
@@ -281,4 +294,9 @@ ensure that there is some work to be done.  The first task takes care
 of switch scheduling, which drives all of the other functions, and starts
 up the initial attract mode.
 
+<h2>For Future Discussion</h2>
 
+<p>Other topics that should be added here:
+<ul>
+<li>Dot matrix handling, including shading and transitional effects
+</ul>
