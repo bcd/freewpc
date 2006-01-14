@@ -32,7 +32,7 @@ ASVER ?= 1.5.2
 GCC_VERSION ?= 3.3.6
 
 # Set to 'y' if you want to use the direct page (not working yet)
-USE_DIRECT_PAGE=n
+USE_DIRECT_PAGE=y
 
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
@@ -247,6 +247,11 @@ CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
 endif
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
+endif
+ifeq ($(USE_DIRECT_PAGE),y)
+CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
+else
+CFLAGS += -mno-direct
 endif
 
 #
@@ -542,6 +547,12 @@ ifneq ($(ASVER), 1.5.2)
 	@mv $(@:.o=.rel) $@
 endif
 
+#
+# For testing the compiler on sample code
+#
+ctest:
+	@echo Test compiling $< ... && $(CC) -o ctest.S $(CFLAGS) $(CC_MODE) ctest.c
+
 #######################################################################
 ###	Header File Targets
 #######################################################################
@@ -593,31 +604,6 @@ fonts clean-fonts:
 #######################################################################
 ###	Tools
 #######################################################################
-
-#
-# 'make gcc' will build the compiler.  It uses a homegrown script
-# 'gccbuild' to control the entire link process.
-#
-# 'make gcc-install' will install it into the local bin directory.
-#
-# 'make gcc-anythingelse' will run gcc's 'anythingelse' target.
-#
-ifdef GCC_VERSION
-ifeq ($(GCC_VERSION),3.1.1)
-GCC_BUILD_DIR = gcc-build
-else
-GCC_BUILD_DIR = gcc-$(GCC_VERSION)-build
-endif
-else
-GCC_BUILD_DIR = gcc-build
-endif
-
-gcc:
-	cd $(GCC_BUILD_DIR) && ./gccbuild make
-
-gcc-%:
-	cd $(GCC_BUILD_DIR) && ./gccbuild $*
-
 
 #
 # 'make astools' will build the assembler, linker, and library
