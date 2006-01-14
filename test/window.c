@@ -289,13 +289,13 @@ struct adjustment
 struct adjustment *browser_adjs;
 U8 adj_edit_value;
 
-static void decimal_render (U8 val) { sprintf ("%d", val); }
-static void hex_render (U8 val) { sprintf ("%X", val); }
-static void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
-static void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
-static void hs_reset_render (U8 val) { sprintf ("%d X 250", val); }
-static void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
-static void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
+void decimal_render (U8 val) { sprintf ("%d", val); }
+void hex_render (U8 val) { sprintf ("%X", val); }
+void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
+void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
+void hs_reset_render (U8 val) { sprintf ("%d X 250", val); }
+void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
+void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
