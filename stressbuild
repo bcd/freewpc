@@ -3,6 +3,8 @@
 # stressbuild - test many different build configurations at once
 #
 
+export mach direct debugger as target
+
 rm -f stressbuild.out
 for mach in `echo tz wcs afm`; do
 	for direct in `echo y n`; do
