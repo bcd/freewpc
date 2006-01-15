@@ -25,8 +25,9 @@ MACHINE ?= tz
 TARGET_ROMPATH =
 
 # Which version of the assembler tools to use
-ASVER ?= 1.5.2
-#ASVER ?= 3.0.0
+# ASVER ?= 1.5.2
+ASVER ?= 3.0.0
+NEWAS = 1
 
 # Which version of the compiler to use
 GCC_VERSION ?= 3.3.6
@@ -89,6 +90,7 @@ TMPFILES += *.rom		# Complete ROM files
 TMPFILES += *.lst 	# Assembler listings
 TMPFILES += *.s1 *.s2 *.s3 *.s4 *.S 
 TMPFILES += *.c.[0-9]*.* 
+TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
 TMPFILES += *.out
 TMPFILES += *.m41 	# Old M4 macro output files
@@ -104,9 +106,9 @@ TMPFILES += $(ERR)
 # Path to the compiler and linker
 GCC_ROOT = /usr/local/m6809/bin
 ifdef GCC_VERSION
-CC = $(GCC_ROOT)/gcc-$(GCC_VERSION)
+CC := $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
-CC = $(GCC_ROOT)/gcc
+CC := $(GCC_ROOT)/gcc
 endif
 CC_MODE ?= -S
 # CC_MODE = -E
@@ -117,6 +119,7 @@ else
 AS = $(GCC_ROOT)/as
 endif
 REQUIRED += $(CC) $(LD) $(AS)
+
 
 # Name of the S-record converter
 SR = tools/srec2bin/srec2bin
@@ -143,7 +146,7 @@ FIXED_SECTION = sysrom
 OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o dmdtrans.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
-	trough.o font.o printf.o tilt.o vector.o reset.o player.o \
+	trough.o reset.o font.o printf.o tilt.o vector.o player.o \
 	task.o lamp.o sol.o flasher.o ac.o 
 
 TEST_OBJS = test/window.o
@@ -199,7 +202,7 @@ CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunkno
 # if they include a long function, which might need to branch longer
 # distances.  Those files can use "#pragma long_branch" to revert to
 # the safer inefficient form.
-CFLAGS += -mshort-branch
+CFLAGS += -mshort-branch -mwpc
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -251,11 +254,11 @@ endif
 ifeq ($(USE_DIRECT_PAGE),y)
 CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
 else
-CFLAGS += -mno-direct
+CFLAGS += -mnodirect
 endif
 
 #
-# Newer versions of the assembler require these flags be passed.
+# Newer versions of the assembler extra flags be passed.
 #
 ifeq ($(ASVER),1.5.2)
 ASFLAGS =
@@ -411,7 +414,7 @@ build : $(GAME_ROM)
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
+$(GAME_ROM) : blank$(BLANK_SIZE).bin binfiles
 	@echo Padding ... && \
 		cat blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
 
@@ -421,6 +424,8 @@ $(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
 #
 blank%.bin:
 	@echo Creating $*KB blank file ... && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
+
+binfiles : $(BINFILES)
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
 	@echo Converting $< to binary ... && $(SR) $< $@ system
@@ -503,7 +508,7 @@ $(LINKCMD) : $(MAKE_DEPS)
 # is invoked first.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
-	@echo Assembling $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
+	@echo Assembling $< ... && $(AS) $(ASFLAGS) $< > $(ERR) 2>&1
 ifneq ($(ASVER), 1.5.2)
 	@mv $*.rel $*.o
 endif
@@ -513,7 +518,7 @@ endif
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
-	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< 2>&1 | tee -a err
+	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< > $(ERR) 2>&1
 ifneq ($(ASVER), 1.5.2)
 	@mv $(@:.o=.rel) $@
 endif
@@ -542,8 +547,8 @@ $(XBM_OBJS) : %.o : %.xbm
 $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
-	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S)
-ifneq ($(ASVER), 1.5.2)
+	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
+ifneq ($(ASVER),1.5.2)
 	@mv $(@:.o=.rel) $@
 endif
 
