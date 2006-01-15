@@ -4,6 +4,13 @@
 static U8 font_space[32] = { 0, };
 
 
+#if 1
+#define GET_FONT_SPACING(font)	1
+#else
+#define GET_FONT_SPACING(font)	(font->spacing)
+#endif
+
+
 fontargs_t font_args;
 
 U8 font_width;
@@ -16,28 +23,29 @@ U8 font_string_height;
 
 extern inline U8 lsrqi3 (U8 data, U8 count)
 {
-	register U8 d = data;
 	switch (count)
 	{
-		default:
 		case 7:
-			d >>= 1;
+			data >>= 1;
 		case 6:
-			d >>= 1;
+			data >>= 1;
 		case 5:
-			d >>= 1;
+			data >>= 1;
 		case 4:
-			d >>= 1;
+			data >>= 1;
 		case 3:
-			d >>= 1;
+			data >>= 1;
 		case 2:
-			d >>= 1;
+			data >>= 1;
 		case 1:
-			d >>= 1;
+			data >>= 1;
 		case 0:
 			break;
+		default:
+			data = 0;
+			break;
 	}
-	return (d);
+	return (data);
 }
 
 
@@ -45,7 +53,6 @@ extern inline U8 aslqi3 (U8 data, U8 count)
 {
 	switch (count)
 	{
-		default:
 		case 7:
 			data <<= 1;
 		case 6:
@@ -61,6 +68,9 @@ extern inline U8 aslqi3 (U8 data, U8 count)
 		case 1:
 			data <<= 1;
 		case 0:
+			break;
+		default:
+			data = 0;
 			break;
 	}
 	return (data);
@@ -73,6 +83,9 @@ U8 *font_lookup (const font_t *font, char c)
 	U8 *entry;
 	U8 index;
 
+	/* TODO: old-style fonts to be converted to new format;
+	 * font->glyphs would also be defined and we could
+	 * make this much simpler. */
 	if (font->glyphs)
 	{
 		if (c == ' ')
@@ -197,7 +210,7 @@ static void fontargs_render_string (void)
 		if ((c == '.') || (c == ','))
 			x += 4;
 		else
-			x += font_width + args->font->spacing; 
+			x += font_width + GET_FONT_SPACING (args->font);
 		s++;
 	}
 	wpc_pop_page ();
@@ -233,7 +246,7 @@ void font_get_string_area (const font_t *font, const char *s)
 		while ((c = *s++) != '\0')
 		{
 			(void)font_lookup (font, c);
-			font_string_width += font_width + font->spacing;
+			font_string_width += font_width + GET_FONT_SPACING(font);
 			if (font_height > font_string_height)
 				font_string_height = font_height;
 		}
@@ -243,7 +256,7 @@ void font_get_string_area (const font_t *font, const char *s)
 		U8 font_width, font_spacing;
 
 		font_width = font->width;
-		font_spacing = font->spacing;
+		font_spacing = GET_FONT_SPACING(font);
 		font_string_height = font->height;
 
 		font_string_width = 0;
