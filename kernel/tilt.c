@@ -7,11 +7,18 @@ U8 tilt_warnings;
 void tilt_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 13, "TILT");
+	font_render_string_center (&font_cu17, 64, 13, "TILT");
 	dmd_show_low ();
 	leff_start (LEFF_TILT);
+
+	/* Run the tilt deff for a minimum amount of time */
+	task_sleep_sec (5);
+
+	/* Now wait for the tilt condition to clear */
 	while (in_tilt)
 		task_sleep_sec (1);
+
+	/* Cleanup and exit */
 	leff_stop (LEFF_TILT);
 	deff_exit ();
 }
@@ -32,7 +39,7 @@ void tilt_warning_deff (void) __taskentry__
 void slam_tilt_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 13, "SLAM TILT");
+	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
 	dmd_show_low ();
 	task_sleep_sec (5);
 	deff_exit ();
