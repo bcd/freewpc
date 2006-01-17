@@ -48,8 +48,9 @@ MACHINE_DISPLAY_EFFECTS
 #define DECL_DEFF(num, flags, pri, fn) \
 	[num] = { flags, pri, fn },
 
+
 static const deff_t deff_table[] = {
-	[DEFF_NULL] = { D_NORMAL, 0, NULL },
+	[DEFF_NULL] = { D_NORMAL, 0, deff_exit },
 	SYSTEM_DISPLAY_EFFECTS
 #ifdef MACHINE_DISPLAY_EFFECTS
 	MACHINE_DISPLAY_EFFECTS

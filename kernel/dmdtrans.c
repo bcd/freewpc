@@ -128,3 +128,11 @@ dmd_transition_t trans_scroll_left = {
 	.delay = TIME_33MS,
 	.arg = 0,
 };
+
+/*********************************************************************/
+
+#if 0
+dmd_transition_t trans_scroll_right = {};
+/* Add splits, joins, etc. */
+#endif
+

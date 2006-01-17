@@ -13,8 +13,8 @@ __fastram__ struct {
 } sol_state;
 
 
-uint8_t *pulse_queue_head;
-uint8_t *pulse_queue_tail;
+__fastram__ uint8_t *pulse_queue_head;
+__fastram__ uint8_t *pulse_queue_tail;
 uint8_t pulse_queue[8];
 
 typedef struct sol_pulse {

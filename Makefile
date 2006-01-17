@@ -6,10 +6,18 @@
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
 #
-# To build the product, just type "make"
+# To build the product, just type "make".
 #
-# To build the compiler, type "make gcc".  You will need root
-# privileges to install it.
+# To customize the build, create a file named "user.make".
+# See user.make.example for an example of how this should look.
+# The settings in user.make override any compiler defaults in the
+# Configuration section below.
+#
+# By default, make will also install your game ROM into your pinmame
+# ROMs directory.  The original MAME zip file will be saved into
+# a file with the .original extension appended.  You can do a
+# "make uninstall" to delete the FreeWPC zip and rename the original
+# zip, so that things are back to the way that they started.
 #
 
 #######################################################################
@@ -33,14 +41,20 @@ NEWAS = 1
 GCC_VERSION ?= 3.3.6
 
 # Set to 'y' if you want to use the direct page (not working yet)
-USE_DIRECT_PAGE=y
+USE_DIRECT_PAGE ?= y
+
+# Set to 'y' if you want to save the assembly sources
+SAVE_ASM ?= y
+
+# Set to 'y' if you want to link with libc.
+USE_LIBC ?= n
 
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
 
 # Uncomment this if you want extra debug notes from the compiler.
 # Normally, you do not want to turn this on.
-# DEBUG_COMPILER=y
+DEBUG_COMPILER ?= n
 
 #######################################################################
 ###	Include User Settings
@@ -110,7 +124,11 @@ CC := $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
 CC := $(GCC_ROOT)/gcc
 endif
+ifeq ($(SAVE_ASM),y)
 CC_MODE ?= -S
+else
+CC_MODE = -c
+endif
 # CC_MODE = -E
 LD = $(GCC_ROOT)/ld
 ifdef NEWAS
@@ -143,11 +161,11 @@ GAME_ROM = freewpc.rom
 
 FIXED_SECTION = sysrom
 
-OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o dmdtrans.o \
+OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
-	trough.o reset.o font.o printf.o tilt.o vector.o player.o \
-	task.o lamp.o sol.o flasher.o ac.o 
+	trough.o reset.o printf.o tilt.o vector.o player.o \
+	task.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o
 
 TEST_OBJS = test/window.o
 
@@ -175,8 +193,16 @@ export FON_SRCS
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
 #######################################################################
-# Default include directories
-CFLAGS = -I$(LIBC_DIR)/include -I$(INCLUDE_DIR) -I$(MACHINE_DIR) -Icallset
+
+# System include directories.  FreeWPC doesn't use libc currently.
+ifeq ($(USE_LIBC),y)
+CFLAGS = -I$(LIBC_DIR)/include
+else
+CFLAGS =
+endif
+
+# Program include directories
+CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR) -Icallset
 
 # Additional defines
 ifdef GCC_VERSION
@@ -197,12 +223,8 @@ endif
 OPT = -O2
 CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
-# Default machine flags.  To keep code size small, turn on short
-# branches by default.  Some files may need to override this option
-# if they include a long function, which might need to branch longer
-# distances.  Those files can use "#pragma long_branch" to revert to
-# the safer inefficient form.
-CFLAGS += -mshort-branch -mwpc
+# Default machine flags.  We enable WPC extensions here.
+CFLAGS += -mwpc
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -219,8 +241,8 @@ CFLAGS += -fno-builtin
 
 # Turn on compiler debug.  This will cause a bunch of compiler
 # debug files to get written out during every phase of the build.
-ifdef DEBUG_COMPILER
-CFLAGS += -da
+ifeq ($(DEBUG_COMPILER),y)
+CFLAGS += -da -dA
 endif
 
 # Please, turn on all warnings!  But don't check format strings,
@@ -256,9 +278,12 @@ CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
 else
 CFLAGS += -mnodirect
 endif
+ifeq ($(USE_LIBC),y)
+CFLAGS += -DHAVE_LIBC
+endif
 
 #
-# Newer versions of the assembler extra flags be passed.
+# Newer versions of the assembler need extra flags to be passed in.
 #
 ifeq ($(ASVER),1.5.2)
 ASFLAGS =
@@ -547,16 +572,20 @@ $(XBM_OBJS) : %.o : %.xbm
 $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
-	@echo Compiling $< \(in page $(PAGE)\) ... && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
+ifneq ($(CC_MODE),-c)
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
 ifneq ($(ASVER),1.5.2)
 	@mv $(@:.o=.rel) $@
+endif
+else
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< > $(ERR) 2>&1
 endif
 
 #
 # For testing the compiler on sample code
 #
 ctest:
-	@echo Test compiling $< ... && $(CC) -o ctest.S $(CFLAGS) $(CC_MODE) ctest.c
+	echo "Test compiling $< ..." && $(CC) -o ctest.o $(CFLAGS) $(CC_MODE) ctest.c
 
 #######################################################################
 ###	Header File Targets
@@ -683,6 +712,7 @@ info:
 	@echo "AS = $(AS)"
 	-@$(AS)
 	@echo "CFLAGS = $(CFLAGS)"
+	@echo "CC_MODE = $(CC_MODE)"
 	@echo "ASFLAGS = $(ASFLAGS)"
 	@echo "BLANK_SIZE = $(BLANK_SIZE)"
 

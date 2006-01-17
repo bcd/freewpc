@@ -59,7 +59,13 @@ U8 *dmd_trans_data_ptr2;
  */
 U8 dmd_composite_page;
 
-
+/*
+ * The DMD controller has two registers for controlling which pages
+ * are mapped into addressable memory.  
+ *
+ * Because these registers are write-only, writes are also cached into
+ * variables.  Then reads can be done using the cached values.
+ */
 
 extern inline void wpc_dmd_set_low_page (U8 val)
 {
@@ -82,7 +88,9 @@ extern inline U8 wpc_dmd_get_high_page (void)
 }
 
 
-
+/*
+ * Initialize the DMD subsystem.
+ */
 void dmd_init (void)
 {
 	/* Program the DMD controller to generate interrupts */
@@ -97,6 +105,19 @@ void dmd_init (void)
 	dmd_page_flip_count = 2;
 }
 
+
+/*
+ * Handle the DMD whenever the DMD controller has finished updating
+ * the display.  This function is invoked from the FIRQ handler.
+ *
+ * We support 4-color images through rapid page flipping.  One page
+ * is shown 2/3 of the time; the other 1/3 of the time.  Here, we
+ * flip between the pages.
+ *
+ * If a mono image needs to be drawn, then the bright/dark pages
+ * contain the same value, and the flipping effectively doesn't
+ * change anything.
+ */
 void dmd_rtt (void)
 {
 	/* Switch between dark and bright */
@@ -113,10 +134,22 @@ void dmd_rtt (void)
 		dmd_page_flip_count++;
 	}
 
+	/* Reprogram the controller to generate another interrupt
+	 * after the next refresh. */
 	wpc_dmd_firq_row = 30;
 }
 
 
+/*
+ * Allocate a new page of DMD memory.
+ *
+ * In order to support 4-color images, we actually reserve two pages
+ * everytime an allocation is requested.  The page number returned
+ * is always the lower numbered of the two pages.  The two pages
+ * always have consecutive numbers.
+ *
+ * This function does not map the new pages into memory.
+ */
 static dmd_pagenum_t dmd_alloc (void)
 {
 	dmd_pagenum_t page = dmd_free_page;
@@ -126,6 +159,12 @@ static dmd_pagenum_t dmd_alloc (void)
 }
 
 
+/*
+ * Allocate and map a single page, for a mono image.
+ *
+ * Since the image is mono, we map the same page into both the low
+ * and high pages.
+ */
 void dmd_alloc_low (void)
 {
 	wpc_dmd_set_low_page (dmd_alloc ());	
@@ -137,12 +176,22 @@ void dmd_alloc_high (void)
 	wpc_dmd_set_high_page (dmd_alloc ());	
 }
 
+
+/*
+ * Allocate and map two different pages.
+ */
 void dmd_alloc_low_high (void)
 {
 	wpc_dmd_set_low_page (dmd_alloc ());	
 	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);	
 }
 
+
+/*
+ * Show a mono image.  Program the hardware to display the
+ * page that is currently mapped into the low page.  The same
+ * page is stored into the dark/bright page values.
+ */
 void dmd_show_low (void)
 {
 	if (dmd_transition)
@@ -186,6 +235,9 @@ void dmd_swap_low_high (void)
 }
 
 
+/*
+ * Show a 4-color image.
+ */
 void dmd_show2 (void)
 {
 	if (dmd_transition)
@@ -200,20 +252,7 @@ void dmd_show2 (void)
 
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
-#if 1
-	register long int count = DMD_PAGE_SIZE / (2 * 4);
-	register uint16_t *dbuf16 = (uint16_t *)dbuf;
-	register volatile U16 zero asm ("y") = 0;
-	while (--count >= 0)
-	{
-		*dbuf16++ = zero;
-		*dbuf16++ = zero;
-		*dbuf16++ = zero;
-		*dbuf16++ = zero;
-	}
-#else
 	__blockclear16 (dbuf, DMD_PAGE_SIZE);
-#endif
 }
 
 
@@ -231,7 +270,7 @@ void dmd_clean_page_high (void)
 
 void dmd_invert_page (dmd_buffer_t dbuf)
 {
-	register int16_t count /* asm ("u") */ = DMD_PAGE_SIZE / (2 * 4);
+	register int16_t count = DMD_PAGE_SIZE / (2 * 4);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
 	while (--count >= 0)
 	{
@@ -249,20 +288,7 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 
 void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 {
-#if 1
-	register int8_t count asm ("d") = DMD_PAGE_SIZE / (2 * 4);
-	register uint16_t *dst16 = (uint16_t *)dst;
-	register uint16_t *src16 = (uint16_t *)src;
-	while (--count >= 0)
-	{
-		*dst16++ = *src16++;
-		*dst16++ = *src16++;
-		*dst16++ = *src16++;
-		*dst16++ = *src16++;
-	}
-#else
 	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
-#endif
 }
 
 void dmd_copy_low_to_high (void)
@@ -314,7 +340,8 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 	*dbuf++ = 0xffffUL;
 }
 
-
+/* TODO : remove these obsolete functions.  Use transitions instead. */
+#if 0
 void dmd_shift_up (dmd_buffer_t dbuf)
 {
 	uint16_t i;
@@ -353,14 +380,22 @@ void dmd_shift_down (dmd_buffer_t dbuf)
 		*dbuf-- = 0;	
 	}
 }
+#endif
 
 
+/*
+ * Draw a mono image to the currently mapped (low) page.  
+ * The image is stored in XBM format.
+ */
 void dmd_draw_image (dmd_buffer_t image_bits)
 {
 	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
 }
 
 
+/*
+ * Draw a 4-color image.
+ */
 void dmd_draw_image2 (dmd_buffer_t image_bits)
 {
 	call_far (60, (dmd_copy_page (dmd_low_buffer, image_bits)));
@@ -394,6 +429,11 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 }
 
 
+#if 0
+/*
+ * The color test was used to prove that the 4-color imaging is
+ * working correctly.  It is not required in a production build.
+ */
 void dmd_color_test (void)
 {
 	U16 *buf;
@@ -435,6 +475,7 @@ void dmd_color_test (void)
 
 	dmd_show2 ();
 }
+#endif
 
 
 extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
@@ -458,6 +499,21 @@ extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 }
 
 
+/*
+ * Do a DMD transition.
+ *
+ * Transitions are complicated because the old/new images may have
+ * different color depths (mono or 4-color).  Also, we can only map
+ * two pages at a time, but there may be up to 4 different pages
+ * involved.
+ *
+ * First, we check to see if both old and new images are mono.  If so,
+ * then the transition can be optimized slightly.
+ *
+ * For debugging transitions, define STEP_TRANSITION.  The transition
+ * will take place one frame at a time; use the launch button to
+ * step through each frame.
+ */
 #pragma long_branch
 void dmd_do_transition (void)
 {
@@ -550,6 +606,21 @@ void dmd_do_transition (void)
 #pragma short_branch
 
 
+/*
+ * Schedule a transition.
+ *
+ * Normally, when dmd_show_low or dmd_show2 is invoked, the new pages
+ * take effect immediately (i.e. using a "take" transition).
+ *
+ * Calling this function prior to those functions causes them to
+ * behave slightly differently.  It causes a transition between the
+ * old and new images to be executed.  The show functions use
+ * dmd_in_transition to determine whether or not a transition needs
+ * to be run.
+ *
+ * trans is a pointer to a transition object, which identifies the type
+ * of transition and some parameters, like its speed.
+ */
 void dmd_sched_transition (dmd_transition_t *trans)
 {
 	dmd_transition = trans;

@@ -141,6 +141,9 @@ wait_and_recount:
 			/* After attempting a release, the count did not
 			 * change ... the kick must have failed, and we
 			 * should retry */
+
+			/* TODO : infinite retries are being done now.
+			 * At some point, we must give up... */
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
@@ -379,6 +382,18 @@ void device_remove_live (void)
 	}
 }
 
+#ifdef MACHINE_LAUNCH_SOLENOID
+void device_multiball_set (U8 count)
+{
+	device_t *dev = device_entry (DEV_TROUGH);
+	U8 kicks = count - (live_balls + dev->kicks_needed);
+	while (kicks > 0)
+	{
+		device_request_kick (dev);
+		kicks--;
+	}
+}
+#endif
 
 void device_init (void)
 {

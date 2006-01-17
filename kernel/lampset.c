@@ -209,6 +209,8 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 		switch (opcode)
 		{
 			case LAMP_MACRO_RANGE_OP:
+				/* TODO: lampset ranges should be deprecated.
+				 * These should be expanded at compile time. */
 				for (opcode = lset[0]; opcode < lset[1]; opcode++)
 					lampset_invoke_operator (opcode, op);
 				lset += 2;

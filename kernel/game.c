@@ -1,9 +1,9 @@
 
 #include <freewpc.h>
 
-U8 in_game;
-U8 in_bonus;
-U8 in_tilt;
+__fastram__ U8 in_game;
+__fastram__ U8 in_bonus;
+__fastram__ U8 in_tilt;
 U8 ball_in_play;
 U8 num_players;
 U8 player_up;
@@ -44,6 +44,7 @@ void amode_stop (void)
 	music_set (MUS_OFF);
 }
 
+#ifdef DEBUGGER
 void dump_game (void)
 {
 	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
@@ -52,6 +53,7 @@ void dump_game (void)
 	dbprintf ("Player Up : %d of %d\n", player_up, num_players);
 	dbprintf ("Ball : %d    EBs : %d\n", ball_up, extra_balls);
 }
+#endif
 
 
 void end_game (void)
@@ -66,30 +68,67 @@ void end_game (void)
 		// return to attract mode
 	
 		call_hook (end_game);
+
+		/*
+		 * Make sure all effects and flippers are killed before
+		 * going back to the attract mode.
+		 */
 		lamp_all_off ();
 		flipper_disable ();
 		deff_stop_all ();
 		leff_stop_all ();
+
+		/* TBD - display the game over message here, before
+		 * going into attract mode */
+
 		amode_start ();
 	}
 }
 
+
+/*
+ * Handle end-of-ball.  This is called from the ball device
+ * subsystem whenever it detects that the number of balls in play
+ * is zero.
+ */
 void end_ball (void)
 {
+	/* Abort if not in the middle of a game.  We can get here
+	 * in test mode/attract mode also, because the device subsystem
+	 * tracks ball counts always.
+	 */
 	if (!in_game)
 		goto done;
 
+	/*
+	 * If ball_in_play never set, then either the ball drained
+	 * before touching any playfield switches, or the ball serve
+	 * failed and it fell back into the trough.  Return the
+	 * ball to the plunger lane in these cases.
+	 */
 	if (!ball_in_play)
 	{
 		device_request_kick (device_entry (DEV_TROUGH));
 		goto done;
 	}
 
+	/* TBD - handle ball saves here */
+
+	/*
+	 * Call the machine hook to verify that end_ball can
+	 * proceed.  It may return false if we don't want to 
+	 * consider this the end of the ball; in such cases,
+	 * it must explicitly put another ball back into play.
+	 */
 	if (!call_boolean_hook (end_ball))
 		goto done;
-	
+
+	/* OK, we're committing to ending the ball now.
+	 * First, disable the flippers. */
 	flipper_disable ();
 
+	/* If the ball was not tilted, start bonus.
+	 * The tilt flag is then cleared. */
 	if (!in_tilt)
 	{
 		in_bonus = TRUE;
@@ -99,6 +138,8 @@ void end_ball (void)
 	else
 		in_tilt = FALSE;
 
+	/* If the player has extra balls stacked, then start the
+	 * next ball without changing the current player up. */
 	if (extra_balls > 0)
 	{
 		extra_balls--;
@@ -106,6 +147,7 @@ void end_ball (void)
 		goto done;
 	}
 
+	/* Advance to the next player. */
 	player_up++;
 	if (player_up <= num_players)
 	{
@@ -113,6 +155,8 @@ void end_ball (void)
 		goto done;
 	}
 
+	/* If all players have had a turn, then increment the
+	 * current ball number. */
 	player_up = 1;
 	ball_up++;
 	if (ball_up <= system_config.balls_per_game)
@@ -121,10 +165,16 @@ void end_ball (void)
 		goto done;
 	}
 
+	/* After the max balls per game have been played, go into
+	 * end game */
 	end_game ();
 
+	/* On exit from the function, dump the game stats */
 done:
+#ifdef DEBUGGER
 	dump_game ();
+#endif
+	return;
 }
 
 void start_ball (void)
@@ -182,12 +232,17 @@ void start_game (void)
 	}
 }
 
+/*
+ * stop_game is called whenever a game is restarted.
+ */
 void stop_game (void)
 {
 	deff_stop_all ();
 	leff_stop_all ();
 }
 
+
+/* Perform final checks before allowing a game to start. */
 bool verify_start_ok (void)
 {
 	// check enough credits
@@ -197,6 +252,10 @@ bool verify_start_ok (void)
 	// check game not already in progress
 }
 
+
+/*
+ * Handle the start button.
+ */
 void sw_start_button_handler (void) __taskentry__
 {
 	extern void test_start_button (void);
@@ -233,6 +292,11 @@ void sw_start_button_handler (void) __taskentry__
 			{
 				add_player ();
 			}
+			else
+			{
+				/* Nothing to do if trying to add more players
+				 * than the system supports. */
+			}
 		}
 		else if (verify_start_ok ())
 		{
@@ -241,10 +305,17 @@ void sw_start_button_handler (void) __taskentry__
 		}
 	}
 
+#ifdef DEBUGGER
 	dump_game ();
+#endif
 	task_exit ();
 }
 
+
+/*
+ * Handle the extra-ball buy-in button.
+ * Not all games have one of these.
+ */
 void sw_buy_in_button_handler (void) __taskentry__
 {
 	task_exit ();
@@ -266,6 +337,9 @@ DECLARE_SWITCH_DRIVER (sw_buyin_button)
 };
 
 
+/*
+ * Initialize the game subsystem.
+ */
 void game_init (void)
 {
 	num_players = 1;

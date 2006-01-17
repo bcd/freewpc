@@ -4,10 +4,9 @@
 U8 egg_code_values[3];
 U8 egg_index;
 
-
 extern void starfield_start (void);
 
-void amode_page_delay (U8 secs)
+bool amode_page_delay (U8 secs)
 {
 	U8 amode_flippers;
 	U8 amode_flippers_start;
@@ -24,11 +23,12 @@ void amode_page_delay (U8 secs)
 		if ((amode_flippers != amode_flippers_start) &&
 			 (amode_flippers != 0))
 		{
-			return;
+			return TRUE;
 		}
 		amode_flippers_start = amode_flippers;
 		secs--;
 	}
+	return FALSE;
 }
 
 void amode_flipper_sound_debounce_timer (void)
@@ -149,27 +149,27 @@ void amode_leff (void) __taskentry__
 
 void amode_deff (void) __taskentry__
 {
+	/** Display game over screen **/
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
+	dmd_show_low ();
+	amode_page_delay (5);
+
 	for (;;)
 	{
-		int i;
-		
-		/** Display game over screen **/
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
-		dmd_show_low ();
-		amode_page_delay (5);
-
 		/** Display last set of player scores **/
 		dmd_alloc_low_clean ();
 		scores_draw ();
 		dmd_show_low ();
-		amode_page_delay (7);
+		if (amode_page_delay (7) && system_config.tournament_mode)
+			continue;
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (freewpc_logo_bits);
 		dmd_show2 ();
-		amode_page_delay (7);
+		if (amode_page_delay (7) && system_config.tournament_mode)
+			continue;
 
 		/** Display game title message **/
 		dmd_alloc_low_high ();
@@ -180,12 +180,6 @@ void amode_deff (void) __taskentry__
 		font_render_string_center (&font_5x5, 64, 20, "TZ 2006");
 		deff_swap_low_high (23, TIME_100MS * 2);
 
-		for (i = 32; i != 0; --i)
-		{
-			dmd_shift_up (dmd_low_buffer);
-			task_sleep (TIME_33MS);
-		}
-
 		/** Display high scores **/
 
 		/** Display PLAY PINBALL message **/
@@ -194,7 +188,8 @@ void amode_deff (void) __taskentry__
 		font_render_string_center (&font_fixed10, 64, 16, 
 			"PLAY PINBALL");
 		dmd_show_low ();
-		amode_page_delay (3);
+		if (amode_page_delay (3) && system_config.tournament_mode)
+			continue;
 
 		/** Display credits message **/
 		credits_draw ();

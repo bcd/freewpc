@@ -21,6 +21,18 @@ typedef struct
 
 #define MAX_QUEUED_DEFFS 16
 
+#define QUICK_DEFF_FUNC(id, p) \
+	extern void id##_deff_func (void); \
+	deff_t id##_deff = { \
+		.flags = D_NORMAL, \
+		.prio = p, \
+		.fn = id##_deff_func, \
+		.pad = 0, \
+	}; \
+	void id##_deff_func (void)
+
+#define RUNNING_DEFF_FUNC(fn, prio)
+
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);

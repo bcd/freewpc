@@ -162,6 +162,9 @@ void add_units (int n)
 	}
 	else
 	{
+#ifdef MACHINE_ADD_COIN_SOUND
+		sound_send (MACHINE_ADD_COIN_SOUND);
+#endif
 		deff_restart (DEFF_CREDITS);
 	}
 }

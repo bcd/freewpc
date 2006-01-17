@@ -2,7 +2,7 @@
 #include <freewpc.h>
 
 /** 1 if we are in test mode, 0 if not */
-U8 in_test;
+__fastram__ U8 in_test;
 
 extern const test_t main_menu;
 extern const test_t main_menu_items[];
@@ -11,7 +11,7 @@ extern const test_t dev_menu_items[];
 const test_t *test_menu_stack[8];
 const test_t **test_menu_stack_top;
 
-const test_t *test_menu;
+__fastram__ const test_t *test_menu;
 
 /** The index of the current menu item that is being displayed */
 U8 test_index;

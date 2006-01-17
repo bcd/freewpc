@@ -23,7 +23,7 @@
 #define MACHINE_NAME "TWILIGHT ZONE"
 
 #define MACHINE_MAJOR_VERSION 0
-#define MACHINE_MINOR_VERSION 04
+#define MACHINE_MINOR_VERSION 05
 
 
 #define MACHINE_PINMAME_ZIP "tz_92.zip"
@@ -83,7 +83,10 @@
 #define MACHINE_BUYIN_LAMP
 
 /* Define sound effects for standard system functions */
+#define MACHINE_ADD_COIN_SOUND		SND_LIGHT_SLOT_TIMED
 #define MACHINE_ADD_CREDIT_SOUND		SND_THUD
+#define MACHINE_VOLUME_CHANGE_MUSIC MUS_SUPER_SLOT
+
 
 /* Define the names of functions to handle flipper buttons
  * in attract mode.  Leave undefined if not needed.
@@ -130,6 +133,7 @@ extern const uint8_t mach_edge_switches[];
 	DECL_LEFF (LEFF_BONUS, L_RUNNING, 150, L_ALL_LAMPS, L_NOGI, bonus_leff) \
 	DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, 200, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 	DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
+
 
 
 /* Externs for any functions system needs to see */

@@ -1,6 +1,9 @@
 
 #include <freewpc.h>
 
+/*
+ * Handle the service button switches on the inside of the coin door.
+ */
 
 void sw_escape_button_handler (void)
 {
@@ -39,6 +42,7 @@ void sw_enter_button_handler (void)
 	call_far (TEST_PAGE, (test_enter_button ()));
 }
 
+/* Declare switch drivers for the coin door buttons */
 
 DECLARE_SWITCH_DRIVER (sw_escape_button)
 {

@@ -758,6 +758,7 @@ void deff_leff_thread (void)
 				{
 					browser_draw ();
 					browser_print_operation ("STOPPED");
+					sound_reset ();
 				}
 			}
 			else
@@ -1638,9 +1639,61 @@ struct menu all_lamp_test_item = {
 
 /*************** Lamp Row/Col Test ********************/
 
+void lamp_row_col_test_up (void)
+{
+	lamp_all_off ();
+	browser_up ();
+}
+
+void lamp_row_col_test_down (void)
+{
+	lamp_all_off ();
+	browser_down ();
+}
+
+void lamp_row_col_test_item_number (U8 val)
+{
+	U8 lamp;
+	int i;
+
+	if (val < 8)
+	{
+		sprintf ("ROW %d", val+1);
+		lamp = MAKE_LAMP (1, val+1);
+		for (i=0; i < 8; i++)
+			lamp_on (lamp++);
+	}
+	else
+	{
+		sprintf ("COL %d", val - 8 + 1);
+		lamp = MAKE_LAMP (val-8+1, 1);
+		for (i=0; i < 8; i++)
+		{
+			lamp_on (lamp);
+			lamp += 8;
+		}
+	}
+}
+
+void lamp_row_col_test_init (void)
+{
+	browser_init ();
+	browser_max = 15;
+	browser_item_number = lamp_row_col_test_item_number;
+}
+
+struct window_ops lamp_row_col_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = lamp_row_col_test_init,
+	.up = lamp_row_col_test_up,
+	.down = lamp_row_col_test_down,
+	.exit = lamp_all_off,
+};
+
 struct menu lamp_row_col_test_item = {
 	.name = "LAMP ROWS/COLS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &lamp_row_col_test_window, NULL } },
 };
 
 /***************** DIP Switch Test **********************/

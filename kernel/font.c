@@ -84,7 +84,7 @@ U8 *font_lookup (const font_t *font, char c)
 	U8 index;
 
 	/* TODO: old-style fonts to be converted to new format;
-	 * font->glyphs would also be defined and we could
+	 * font->glyphs would always be defined and we could
 	 * make this much simpler. */
 	if (font->glyphs)
 	{

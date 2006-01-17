@@ -16,7 +16,7 @@
 #define MACHINE_NAME "WORLD CUP"
 
 #define MACHINE_MAJOR_VERSION 0
-#define MACHINE_MINOR_VERSION 02
+#define MACHINE_MINOR_VERSION 03
 
 
 /* Define as 1 if the machine has a DMD, 0 if it is alphanumeric */

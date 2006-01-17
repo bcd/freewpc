@@ -1,6 +1,14 @@
 #
 # Makefile.fonts - creates FreeWPC font files from scratch
 #
+# The standard fonts are already checked into source control and
+# should not need to be recreated.  The fontgen script uses several
+# 3rd party utilities which might not be available on all systems.
+# Thus, font rebuilding is not required when doing a clean build.
+#
+# The main makefile includes this one, so all of these targets are
+# available from the standard make command.
+#
 
 fonts : $(FON_SRCS)
 

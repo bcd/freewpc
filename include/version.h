@@ -2,6 +2,6 @@
 #define _VERSION_H
 
 #define FREEWPC_VERSION_MAJOR 0x00
-#define FREEWPC_VERSION_MINOR 0x04
+#define FREEWPC_VERSION_MINOR 0x05
 
 #endif /* _VERSION_H */

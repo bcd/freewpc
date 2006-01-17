@@ -3,7 +3,8 @@
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	dmd_alloc_low_clean ();
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();

@@ -46,6 +46,14 @@ CALLSET_ENTRY (unused, start_game) {}
 CALLSET_ENTRY (unused, end_game) {}
 CALLSET_ENTRY (unused, start_ball) {}
 
+
+/* For testing the deff declaration syntax. */
+QUICK_DEFF_FUNC(DESIGN_CREDITS, 100)
+{
+	deff_exit ();
+}
+
+
 void afm_start_game (void)
 {
 	#include <start_game.callset>

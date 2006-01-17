@@ -176,8 +176,7 @@ do_long_integer:
 						case 'd':
 						{
 							do {
-								register U16 w = va_arg (va, U16);
-								/* TODO */
+								/* TODO : register U16 w = va_arg (va, U16); */
 								goto fixup_number;
 							} while (0);
 							break;

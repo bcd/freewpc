@@ -28,28 +28,40 @@
  *
  */
 
+
+/* task_current points to the control structure for the current task. */
 __fastram__ task_t *task_current;
 
-__fastram__ uint8_t task_dispatch_tick;
-
+/* When saving a task's registers during dispatch, we need some
+ * static storage to help compensate for the lacking of registers.
+ * Don't allocate on the stack, since we need to preserve the
+ * stack pointer carefully during dispatch. */
 __fastram__ uint16_t task_save_U, task_save_X;
 
+/* The static array of task structures */
 task_t task_buffer[NUM_TASKS];
 
+/* A flag that indicates that dispatching is working as expected.
+ * This is set to 1 everytime we dispatch correctly, and to 0
+ * periodically from the IRQ.  If the IRQ finds it at 0, that
+ * means we went a long time without a dispatch; this probably
+ * means that (1) some task has been running for a very long time,
+ * or (2) the task is jumped into the weeds and is never coming back.
+ * Case (1) is theoretically OK, but we consider it just as bad as
+ * case (2), which could lead to all kinds of weird behavior.
+ * The IRQ will reset the system when this happens. */
 bool task_dispatching_ok;
 
+/* For debug, this tells us the largest stack size that we've had
+ * to deal with so far.  This helps to determine how big the stack
+ * area in the task structure needs to be */
 U8 task_largest_stack;
-
-
-/* Define this to enable some debug counters */
-#define DEBUG_TASKS
 
 /* Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
 //#define DUMP_ALL_TASKS
 
 
-#pragma long_branch
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -66,26 +78,14 @@ void task_dump (void)
 		{
 			dbprintf ("PID %p  State %02X  GID %02X  PC %p",
 				tp, tp->state, tp->gid, tp->pc);
-#ifdef LARGE_STACKS
 			db_puts ("  STKW ");
 			db_put2x (tp->stack_word_count);
-#else
-			db_puts ("  S ");
-			db_put4x ((uint16_t)tp->s);
-			db_puts ("  Stack ");
-			db_put4x ((uint16_t)tp->stack);
-			db_puts ("-");
-			db_put4x ((uint16_t)tp->stack + TASK_STACK_SIZE);
-			db_puts ("  SB ");
-			db_put4x ((uint16_t)*(uint16_t *)tp->stack);
-#endif
 			dbprintf ("  ARG %04X\n", tp->arg);
 		}
 	}
 	db_puts ("----------------------\n");
 #endif
 }
-#pragma short_branch
 
 
 /*
@@ -118,9 +118,7 @@ void task_save (void)
 {
 	register uint16_t __u asm ("u");
 	register task_t * __x asm ("x");
-#ifdef LARGE_STACKS
 	register U8 __b asm ("d");
-#endif
 
 	/* Save U, X immediately to memory to free up some regs for
 	 * the rest of the function */
@@ -150,7 +148,6 @@ void task_save (void)
 	__asm__ volatile ("sty	%0" :: "m" (__x->y));
 
 	/* Save current stack */
-#ifdef LARGE_STACKS
 	/* In the new scheme, tasks execute on a system stack, and
 	 * during swap out, the stack data is copied into the task
 	 * block.  This allows tasks to use large stack space as
@@ -175,22 +172,10 @@ void task_save (void)
 		/* TODO : check for overflow during copy */
 	}
 
-	/// /* Restore trashed X */
-	/// __x = task_current;
-
 	if ((__x->stack_word_count = __b) > task_largest_stack)
 	{
 		task_largest_stack = __b;
 	}
-
-#else
-	/* In the old scheme, task stacks are kept directly in the
-	 * task block, so no copying is necessary; just save the
-	 * pointer.
-	 */
-	__asm__ volatile ("leau\t,s");
-	__x->s = __u;
-#endif
 
 	/* Save current ROM page */
 	__x->rom_page = wpc_get_rom_page ();
@@ -207,14 +192,11 @@ void task_restore (void)
 {
 	register task_t * __x asm ("x");
 	register uint16_t __u asm ("u") __attribute__ ((unused));
-#ifdef LARGE_STACKS
 	register U8 __b asm ("d");
-#endif
 
 	task_current = __x;
 
 	/* Restore stack */
-#ifdef LARGE_STACKS
 	disable_irq ();
 	disable_firq ();
 	/* Get live stack area pointer in u */
@@ -241,10 +223,6 @@ void task_restore (void)
 
 	enable_firq ();
 	enable_irq ();
-#else
-	/* Stack is ready to go, just set the pointer */
-	set_stack_pointer (__x->s);
-#endif
 
 	/* Restore ROM page register */
 	wpc_set_rom_page (__x->rom_page);
@@ -292,13 +270,7 @@ void task_create (void)
 	tp->gid = 0;
 	tp->arg = 0;
 	tp->rom_page = wpc_get_rom_page ();
-
-#ifdef LARGE_STACKS
 	tp->stack_word_count = 0;
-#else
-	*(uint16_t *)&tp->stack = 0xEEEE;
-	tp->s = (uint16_t)(tp->stack + TASK_STACK_SIZE - 1);
-#endif
 
 	/* TODO?? : push the address of task_exit onto the
 	 * stack so that the task can simply return and it
@@ -532,8 +504,6 @@ void task_init (void)
 	task_current->arg = 0;
 	task_current->gid = GID_FIRST_TASK;
 	task_current->delay = 0;
-
-	task_dispatch_tick = tick_count;
 }
 
 
