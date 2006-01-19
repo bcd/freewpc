@@ -127,9 +127,11 @@
 #define MACHINE_SW41				sw_deadend
 #define MACHINE_SW42				sw_camera
 #define MACHINE_SW43				sw_piano
+#define MACHINE_SW47          sw_clock_target
 #define MACHINE_SW48				sw_greed
 
 #define MACHINE_SW51				sw_gumball_lane
+#define MACHINE_SW52          sw_hitch
 #define MACHINE_SW53				sw_left_ramp_enter
 #define MACHINE_SW54				sw_left_ramp_exit
 #define MACHINE_SW55				sw_gumball_geneva
