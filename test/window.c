@@ -701,8 +701,11 @@ void font_test_draw (void)
 
 	dmd_alloc_low_clean ();
 	font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+	task_dispatching_ok = TRUE;
 	font_render_string (font, 0, 10, "NOPQRSTUVWXYZ");
+	task_dispatching_ok = TRUE;
 	font_render_string (font, 0, 20, "0123456789");
+	task_dispatching_ok = TRUE;
 	dmd_show_low ();
 }
 
