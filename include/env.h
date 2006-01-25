@@ -23,4 +23,10 @@
 
 #define __nvram__ __attribute__((section ("nvram")))
 
+#ifdef CONFIG_MULTIPLAYER
+#define __local__ __attribute__((section ("local")))
+#else
+#define __local__
+#endif
+
 #endif /* _ENV_H */

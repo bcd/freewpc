@@ -50,7 +50,6 @@ void db_put4x (uint16_t v)
 }
 
 
-#if 0 // doesn't compile anymore for some reason
 void db_dump_switches (void)
 {
 	uint8_t row, col;
@@ -65,7 +64,6 @@ void db_dump_switches (void)
 		db_putc ('\n');
 	}
 }
-#endif
 
 #endif /* DEBUGGER */
 
@@ -101,12 +99,14 @@ void db_rtt (void)
 					break;
 				}
 
+#if 0
 				case 's':
 				{
 					extern void switch_check_masks (void);
 					switch_check_masks ();
 					break;
 				}
+#endif
 
 #ifdef MACHINE_TZ
 				case 'c':

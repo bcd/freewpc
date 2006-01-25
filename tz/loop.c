@@ -75,7 +75,12 @@ void sw_right_loop_handler (void)
 	sw_gumball_right_loop_entered ();
 	if (in_live_game)
 	{
-		if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
+		if (task_kill_gid (GID_LOOP_DISABLED_BY_LOCK_EXIT))
+		{
+			/* Ignore right loop switch after lock kickout */
+			return;
+		}
+		else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 		{
 			/* Left loop completed */
 			award_left_loop ();

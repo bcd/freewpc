@@ -43,8 +43,9 @@
 #define HEAP_BASE 		0x800
 
 /* The base address of the stack */
-#define STACK_BASE 		0x1800
-
+#define STACK_BASE 		(USER_RAM_SIZE - 0x8)
+#define STACK_SIZE      0x200
+#define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
 /***************************************************************
  * System timing
@@ -60,21 +61,33 @@
  * represents about 8.33ms of actual time.
  *
  * The tick count is stored in a single byte field of the
- * task structure, so it can store up to about 1 second.
+ * task structure, so it can store up to about 2 seconds.
  * If you need to sleep longer than this, use 'task_sleep_sec'
  * instead of 'task_sleep'.
  */
 #define IRQS_PER_TICK 8
 
 /* Primitive time constants */
-#define TIME_16MS 	2
-#define TIME_33MS 	4
-#define TIME_50MS 	6
-#define TIME_66MS 	(TIME_33MS * 2)
-#define TIME_100MS 	(TIME_33MS * 3)
-#define TIME_133MS 	(TIME_33MS * 4)
-#define TIME_166MS 	(TIME_33MS * 5)
-#define TIME_1S 		(TIME_100MS * 10) /* 4 * 3 * 10 = 120 ticks */
+#define TIME_16MS 	2U
+#define TIME_33MS 	4U
+#define TIME_50MS 	6U
+#define TIME_66MS 	(TIME_33MS * 2U)
+#define TIME_100MS 	(TIME_33MS * 3U)
+#define TIME_133MS 	(TIME_33MS * 4U)
+#define TIME_166MS 	(TIME_33MS * 5U)
+#define TIME_500MS	(TIME_100MS * 5U)
+#define TIME_1S 		(TIME_100MS * 10U) /* 4 * 3 * 10 = 120 ticks */
+#define TIME_2S 		(TIME_1S * 2U)     /* 240 ticks */
+
+/*
+ * These time values can only be used for timer functions.
+ */
+#define TIME_3S 		(TIME_1S * 3UL)
+#define TIME_4S 		(TIME_1S * 4UL)
+#define TIME_5S 		(TIME_1S * 5UL)
+#define TIME_6S 		(TIME_1S * 6UL)
+#define TIME_7S 		(TIME_1S * 7UL)
+#define TIME_8S 		(TIME_1S * 8UL)
 
 /***************************************************************
  * RAM Protection Circuit

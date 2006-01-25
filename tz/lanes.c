@@ -1,15 +1,22 @@
 
 #include <freewpc.h>
 
+void handle_outlane (void)
+{
+	if (ballsave_test_active ())
+		ballsave_launch ();
+}
 
 void sw_left_outlane_handler (void)
 {
 	score_add_current_const (0x10000);
+	handle_outlane ();
 }
 
 void sw_right_outlane_handler (void)
 {
 	score_add_current_const (0x10000);
+	handle_outlane ();
 }
 
 void sw_left_inlane_1_handler (void)

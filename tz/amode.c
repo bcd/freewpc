@@ -44,7 +44,7 @@ void amode_flipper_sound (void)
 	{
 		task_create_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE,
 			amode_flipper_sound_debounce_timer);
-		sound_send (SND_CUCKOO);
+		sound_send (SND_THUD);
 	}
 }
 

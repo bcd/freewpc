@@ -74,3 +74,13 @@ void flash_all_leff (void)
 	leff_exit ();
 }
 
+
+void slot_kickout_leff (void)
+{
+	int i;
+	for (i = 0; i < 8; i++)
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+	leff_exit ();
+}
+
+

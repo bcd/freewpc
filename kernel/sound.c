@@ -266,6 +266,10 @@ void volume_set (U8 vol)
 		sound_queue_insert (0xAA);
 		sound_queue_insert (code);
 		sound_queue_insert (~code);
+#else
+		sound_queue_insert (SND_SET_VOLUME_CMD);
+		sound_queue_insert (current_volume);
+		sound_queue_insert (~current_volume);
 #endif
 	}
 }

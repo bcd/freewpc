@@ -14,6 +14,10 @@
 #define SND_TEST_ESCAPE			0x58
 #define SND_TEST_SCROLL			0x59
 #define SND_GET_VERSION_CMD	0x5F 
+#define SND_SET_VOLUME_CMD    0x79
+#define SND_START_EXTENDED		0x7A 
+#define SND_STOP_SOUND			0x7D 
+#define SND_STOP_MUSIC			0x7E 
 #else
 
 #define MUSIC_SND(x)				((0UL << 8) + (x))
@@ -38,7 +42,7 @@
 
 #define MIN_VOLUME				0
 #define MAX_VOLUME				31
-#define DEFAULT_VOLUME			16
+#define DEFAULT_VOLUME			8
 
 typedef uint16_t music_code_t, sound_code_t;
 

@@ -1,8 +1,6 @@
 
 #include <freewpc.h>
 
-//#define FREE_ONLY /* TODO : this belongs in makefile */
-
 #define MAX_CREDITS 30
 
 __nvram__ U8 credit_count;

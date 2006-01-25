@@ -9,7 +9,7 @@ rm -f stressbuild.out
 for mach in `echo tz wcs afm`; do
 	for direct in `echo y n`; do
 		for debugger in `echo y n`; do
-			for as in `echo 1.5.2 3.0.0`; do
+			for as in `echo 1.5.2`; do
 				for target in `echo clean default_target`; do
 					echo Execing make \
 						MACHINE=$mach USE_DIRECT_PAGE=$direct DEBUGGER=$debugger \

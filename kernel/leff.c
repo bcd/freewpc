@@ -8,6 +8,17 @@
  * independently, but identically to the display effect module.
  * See deff.c for details.
  *
+ * TODO : multiple lamp effects should be allowed to run concurrently,
+ * as long as they do not use the same lamps.  There are really two
+ * different kinds of lamp effects: temporary "light shows" and
+ * long-running effects.  Light shows can be skipped if possible,
+ * but other effects indicate critical information to the player;
+ * e.g. ballsaver is active, jets at max, etc.  The latter usually
+ * do not overlap.  The strategy should be to treat these separately.
+ * Temporary light shows act more like display effects and can only
+ * be one at a time.  Other lamp effects "share" one of the leff
+ * matrices, and can run concurrently.  The caller is expected not
+ * to start multiple of these which overlap.
  */
 
 #define L_NOLAMPS		0x0

@@ -16,7 +16,15 @@ __nvram__ U8 nvram_test_byte;
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
 
-__noreturn__ void fatal (errcode_t error_code)
+U8 nonfatal_error_count;
+
+
+/*
+ * fatal is the entry point for errors that are nonrecoverable.
+ * error_code is one of the values in include/sys/errno.h.
+ */
+__noreturn__ 
+void fatal (errcode_t error_code)
 {
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
 
@@ -43,6 +51,7 @@ __noreturn__ void fatal (errcode_t error_code)
 
 void nonfatal (errcode_t error_code)
 {
+	nonfatal_error_count++;
 }
 
 
@@ -63,9 +72,8 @@ __noreturn__ void do_reset (void)
 	extern void test_init (void);
 	extern void system_reset (void);
 
-	/** Disable hardware IRQ in the 6809 */
-	disable_irq ();
-	disable_firq ();
+	/** Disable hardware interrupts in the 6809 */
+	disable_interrupts ();
 
 	/** Initialize the direct page pointer.  This hardware register
 	 * determines where 'direct' addressing instructions are targeted.
@@ -168,6 +176,7 @@ __noreturn__ void do_reset (void)
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
 	task_init ();
+	timer_init ();
 	deff_init ();
 	leff_init ();
 	call_far (TEST_PAGE, test_init ());
@@ -179,8 +188,7 @@ __noreturn__ void do_reset (void)
 	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
 	wpc_write_irq_clear (0x06);
-	enable_irq ();
-	enable_firq ();
+	enable_interrupts ();
 
 	/** The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.

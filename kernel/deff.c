@@ -31,7 +31,8 @@
 	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
 	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
 	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
-	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, 250, volume_deff)
+	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, 250, volume_deff) \
+	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, 250, slam_tilt_deff)
 
 
 /* Declare externs for all of the deff functions */
@@ -72,6 +73,11 @@ uint8_t deff_prio;
  * is also in this queue. */
 static uint8_t deff_queue[MAX_QUEUED_DEFFS];
 
+
+U8 deff_get_count (void)
+{
+	return sizeof (deff_table) / sizeof (deff_t);
+}
 
 uint8_t deff_get_active (void)
 {

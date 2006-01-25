@@ -42,6 +42,8 @@ void skill_switch_monitor (void) __taskentry__
 
 void award_skill_switch (U8 sw)
 {
+	timer_restart (GID_SLOT_DISABLED_BY_SKILL_SWITCH, TIME_2S, freerunning_timer_function);
+
 	if (skill_switch_reached < sw)
 	{
 		skill_switch_reached = sw;

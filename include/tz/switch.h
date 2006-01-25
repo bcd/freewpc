@@ -88,20 +88,8 @@
  * Declare switch drivers.  Each macro defines the name of a driver object
  * which contains all of the properties of that switch.
  */
-#if 0
-#define MACHINE_SW01				sw_left_coin
-#define MACHINE_SW02				sw_center_coin
-#define MACHINE_SW03				sw_right_coin
-#define MACHINE_SW04				sw_fourth_coin
-#define MACHINE_SW05				sw_escape_button
-#define MACHINE_SW06				sw_down_button
-#define MACHINE_SW07				sw_up_button
-#define MACHINE_SW08				sw_enter_button
-#endif
-
 #define MACHINE_SW11				sw_right_inlane
 #define MACHINE_SW12				sw_right_outlane
-
 #define MACHINE_SW13				sw_start_button
 #define MACHINE_SW14				sw_tilt
 #define MACHINE_SW15				sw_trough
@@ -110,14 +98,12 @@
 #define MACHINE_SW18				sw_outhole
 
 #define MACHINE_SW21				sw_slam_tilt
-//#define MACHINE_SW22				sw_coin_door_closed
 #define MACHINE_SW23				sw_buyin_button
 #define MACHINE_SW28				sw_rocket
 
 #define MACHINE_SW31				sw_left_jet
 #define MACHINE_SW32				sw_right_jet
 #define MACHINE_SW33				sw_bottom_jet
-
 #define MACHINE_SW34				sw_left_sling
 #define MACHINE_SW35				sw_right_sling
 #define MACHINE_SW36				sw_left_outlane
@@ -146,6 +132,8 @@
 #define MACHINE_SW67				sw_greed
 #define MACHINE_SW68				sw_greed
 
+#define MACHINE_SW71				sw_autofire1
+#define MACHINE_SW72				sw_autofire2
 #define MACHINE_SW73				sw_right_ramp
 #define MACHINE_SW74				sw_gumball_popper
 #define MACHINE_SW77				sw_greed

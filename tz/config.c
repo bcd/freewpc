@@ -17,7 +17,7 @@
  * column 1, etc. to column 8.
  */
 const uint8_t mach_opto_mask[] = {
-	0x00, 0x00, 0x28, 0x0, 0x0, 0x10, 0x0, 0x3E, 0x5D, 0xFF,
+	0x00, 0x00, 0x28, 0x0, 0x0, 0x10, 0x0, 0x3F, 0x5D, 0xFF,
 };
 
 
@@ -78,16 +78,29 @@ void tz_start_ball (void)
 void tz_ball_in_play (void)
 {
 	extern void disable_skill_shot ();
+	extern void ballsave_enable ();
 
 	music_set (MUS_MULTIBALL_LIT);
 	disable_skill_shot ();
 	/* start ballsaver if enabled */
+	ballsave_enable ();
 }
 
 bool tz_end_ball (void)
 {
-	sound_reset ();
-	return TRUE;
+	extern bool ballsave_test_active (void);
+	extern void ballsave_launch (void);
+
+	if (ballsave_test_active ())
+	{
+		ballsave_launch ();
+		return FALSE;
+	}
+	else
+	{
+		sound_reset ();
+		return TRUE;
+	}
 }
 
 

@@ -19,6 +19,7 @@ void sw_camera_handler (void)
 
 CALLSET_ENTRY(camera, start_ball)
 {
+	lamp_flash_on (LM_CAMERA);
 }
 
 

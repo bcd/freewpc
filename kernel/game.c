@@ -112,13 +112,12 @@ void end_ball (void)
 		goto done;
 	}
 
-	/* TBD - handle ball saves here */
-
 	/*
 	 * Call the machine hook to verify that end_ball can
 	 * proceed.  It may return false if we don't want to 
 	 * consider this the end of the ball; in such cases,
 	 * it must explicitly put another ball back into play.
+	 * (Game code should check for ball saves here.)
 	 */
 	if (!call_boolean_hook (end_ball))
 		goto done;
@@ -137,6 +136,11 @@ void end_ball (void)
 	}
 	else
 		in_tilt = FALSE;
+
+	/* Stop all processes & effects that shouldn't be
+	 * running anymore. */
+	deff_stop_all ();
+	leff_stop_all ();
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */

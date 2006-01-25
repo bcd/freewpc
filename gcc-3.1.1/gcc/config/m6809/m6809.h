@@ -58,7 +58,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 /* Names to predefine in the preprocessor for this target machine.  */
+#if (TARGET_GCC_VERSION < 3004)
 #define CPP_PREDEFINES "-Dmc6809 -DMC6809"
+#endif
 
 /* Print subsidiary information on the compiler version in use.  */
 #define TARGET_VERSION fprintf (stderr, " (MC6809)");
@@ -200,7 +202,7 @@ extern char code_section_op[], data_section_op[], bss_section_op[];
 /*** #define PCC_BITFIELD_TYPE_MATTERS ***/	/* */
 
 /* largest mode to use -- try 16 -- tej */
-#define MAX_FIXED_MODE_SIZE 16
+#define MAX_FIXED_MODE_SIZE 64
 
 /* No data type wants to be aligned rounder than this.  */
 #define BIGGEST_ALIGNMENT 8
@@ -1000,7 +1002,7 @@ enum reg_class {
 #define FLOAT_TYPE_SIZE 32
 
 /* Size (bits) of the type "double" on target machine */
-#define DOUBLE_TYPE_SIZE 32
+#define DOUBLE_TYPE_SIZE 64
 
 /* Nonzero if access to memory by bytes is slow and undesirable.  */
 #define SLOW_BYTE_ACCESS 0
@@ -1155,6 +1157,9 @@ do { \
 	ASSEMBLER FORMAT
 --------------------------------------------------------------*/
 /* Output at beginning of assembler file.  */
+/* TODO : we're using default for gcc 3.4, need to replace */
+#if (TARGET_GCC_VERSION < 3004)
+
 #define ASM_FILE_START(FILE) \
     fprintf (FILE, ";;; gcc built %s %s\n", __DATE__, __TIME__ ); \
     fprintf (FILE, ";;; MC6809 $Revision: 1.9 $\n"); \
@@ -1162,6 +1167,8 @@ do { \
 
 #define ASM_FILE_END(FILE) /* */
 /*    fprintf (FILE, "\tend\n") */
+
+#endif /* TARGET_GCC_VERSION */
 
 /* Output to assembler file text saying following lines
    may contain character constants, extra white space, comments, etc.  */

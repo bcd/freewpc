@@ -340,48 +340,6 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 	*dbuf++ = 0xffffUL;
 }
 
-/* TODO : remove these obsolete functions.  Use transitions instead. */
-#if 0
-void dmd_shift_up (dmd_buffer_t dbuf)
-{
-	uint16_t i;
-	for (i=(31L * 16 / 2); i != 0; --i)
-	{
-		dbuf[0] = dbuf[8];
-		dbuf++;
-	}
-
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-	*dbuf++ = 0;
-}
-
-
-void dmd_shift_down (dmd_buffer_t dbuf)
-{
-	U16 i;
-
-	dbuf = (dmd_buffer_t)((char *)dbuf + 510);
-	for (i=(30L * 16 / 2 / 2); i != 0; --i)
-	{
-		dbuf[0] = dbuf[-16];
-		dbuf--;
-	}
-	for (i=16 / 4; i > 0; --i)
-	{
-		*dbuf-- = 0;	
-		*dbuf-- = 0;	
-		*dbuf-- = 0;	
-		*dbuf-- = 0;	
-	}
-}
-#endif
-
 
 /*
  * Draw a mono image to the currently mapped (low) page.  
@@ -389,7 +347,7 @@ void dmd_shift_down (dmd_buffer_t dbuf)
  */
 void dmd_draw_image (dmd_buffer_t image_bits)
 {
-	call_far (60, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
+	call_far (XBM_PAGE, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
 }
 
 
@@ -398,8 +356,8 @@ void dmd_draw_image (dmd_buffer_t image_bits)
  */
 void dmd_draw_image2 (dmd_buffer_t image_bits)
 {
-	call_far (60, (dmd_copy_page (dmd_low_buffer, image_bits)));
-	call_far (60, (dmd_copy_page (dmd_high_buffer, (image_bits + DMD_PAGE_SIZE))));
+	call_far (XBM_PAGE, (dmd_copy_page (dmd_low_buffer, image_bits)));
+	call_far (XBM_PAGE, (dmd_copy_page (dmd_high_buffer, (image_bits + DMD_PAGE_SIZE))));
 }
 
 
@@ -429,7 +387,7 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 }
 
 
-#if 0
+#ifdef INCLUDE_COLOR_TEST
 /*
  * The color test was used to prove that the 4-color imaging is
  * working correctly.  It is not required in a production build.

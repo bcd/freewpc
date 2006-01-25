@@ -165,7 +165,7 @@ void task_save (void)
 	__b = 0;
 	while (__u < STACK_BASE)
 	{
-		/* Use X register to transfer data */
+		/* TODO : use X register to transfer data faster */
 		__asm__ volatile ("lda\t,u+");
 		__asm__ volatile ("sta\t,y+");
 		__b ++;
@@ -488,8 +488,6 @@ void __attribute__((noreturn)) task_dispatcher (void)
 
 void task_init (void)
 {
-	extern uint8_t tick_count;
-
 	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
 

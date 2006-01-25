@@ -1,9 +1,19 @@
 
 #include <freewpc.h>
 
+__local__ U8 left_ramps;
+
+
+void left_ramp_deff (void)
+{
+}
+
+
 void sw_left_ramp_handler (void)
 {
 	leff_start (LEFF_LEFT_RAMP);
+	left_ramps++;
+	score_add_current_const (0x10000);
 }
 
 

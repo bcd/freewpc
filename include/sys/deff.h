@@ -33,6 +33,7 @@ typedef struct
 
 #define RUNNING_DEFF_FUNC(fn, prio)
 
+U8 deff_get_count (void);
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);

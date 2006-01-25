@@ -215,9 +215,7 @@ wait_and_recount:
 
 			device_call_op (dev, kick_attempt);
 		
-			sol_on (dev->props->sol);
-			task_sleep (TIME_100MS);
-			sol_off (dev->props->sol);
+			sol_pulse (dev->props->sol);
 			goto wait_and_recount;
 		}
 	}
@@ -382,18 +380,23 @@ void device_remove_live (void)
 	}
 }
 
-#ifdef MACHINE_LAUNCH_SOLENOID
 void device_multiball_set (U8 count)
 {
 	device_t *dev = device_entry (DEV_TROUGH);
 	U8 kicks = count - (live_balls + dev->kicks_needed);
 	while (kicks > 0)
 	{
+#ifdef MACHINE_LAUNCH_SOLENOID
 		device_request_kick (dev);
+#else
+#ifdef MACHINE_TZ
+		extern void autofire_add_ball (void);
+		autofire_add_ball ();
+#endif
+#endif
 		kicks--;
 	}
 }
-#endif
 
 void device_init (void)
 {

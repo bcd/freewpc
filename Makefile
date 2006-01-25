@@ -1,7 +1,7 @@
 #
 # FreeWPC makefile
 #
-# (C) Copyright 2005 by Brian Dominy.
+# (C) Copyright 2005-2006 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
@@ -35,7 +35,7 @@ TARGET_ROMPATH =
 # Which version of the assembler tools to use
 # ASVER ?= 1.5.2
 ASVER ?= 3.0.0
-NEWAS = 1
+NEWAS ?= 1
 
 # Which version of the compiler to use
 GCC_VERSION ?= 3.3.6
@@ -131,10 +131,11 @@ CC_MODE = -c
 endif
 # CC_MODE = -E
 LD = $(GCC_ROOT)/ld
-ifdef NEWAS
+ifeq ($(NEWAS),1)
 AS = $(GCC_ROOT)/as-$(ASVER)
 else
 AS = $(GCC_ROOT)/as
+ASVER := 1.5.2
 endif
 REQUIRED += $(CC) $(LD) $(AS)
 
@@ -165,7 +166,7 @@ OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o reset.o printf.o tilt.o vector.o player.o \
-	task.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o
+	task.o timer.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o
 
 TEST_OBJS = test/window.o
 
@@ -250,11 +251,13 @@ endif
 CFLAGS += -Wall -Wno-format
 
 
+ifdef OLD_INT_SIZE_NOT_NEEDED_ANYMORE
 # I've been burned by not having a prototype for a function
 # that takes a 'char' sized argument.  The compiler implicitly
 # converts this to 'int', which is a different size, and bad
 # things happen...
 CFLAGS += -Werror-implicit-function-declaration
+endif
 
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
@@ -280,6 +283,9 @@ CFLAGS += -mnodirect
 endif
 ifeq ($(USE_LIBC),y)
 CFLAGS += -DHAVE_LIBC
+endif
+ifeq ($(FREE_ONLY),y)
+CFLAGS += -DFREE_ONLY
 endif
 
 #
@@ -327,6 +333,8 @@ else
 RAM_AREA = 0x4
 DIRECT_LNK_CMD = "-x"
 endif
+MALLOC_AREA = 0x1400
+STACK_AREA = 0x1600
 NVRAM_AREA = 0x1800
 PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
@@ -567,7 +575,7 @@ $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE
 $(C_OBJS) : GCC_LANG=
 $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
-$(C_OBJS) : %.o : %.c $(REQUIRED) $(DEPS) $(GENDEFINES)
+$(C_OBJS) : %.o : %.c $(DEPS) $(GENDEFINES) $(REQUIRED)
 $(XBM_OBJS) : %.o : %.xbm
 $(FON_OBJS) : %.o : %.fon
 
@@ -586,6 +594,9 @@ endif
 #
 ctest:
 	echo "Test compiling $< ..." && $(CC) -o ctest.o $(CFLAGS) $(CC_MODE) ctest.c
+
+cpptest:
+	@echo Test compiling $< ... && $(CC) -o cpptest.S $(CFLAGS) $(CC_MODE) cpptest.cpp
 
 #######################################################################
 ###	Header File Targets

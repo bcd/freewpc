@@ -64,7 +64,7 @@ U8 in_test;
  */
 static void null_function (void) {}
 
-struct window win_stack[16];
+struct window win_stack[8];
 
 
 
@@ -108,7 +108,7 @@ void window_push (struct window_ops *ops, void *priv)
 		window_push_first ();
 		win_top = &win_stack[0];
 	}
-	else
+	else if (win_top < &win_stack[8])
 	{
 		window_call_op (win_top, suspend);
 		win_top++;
@@ -190,9 +190,14 @@ void (*browser_item_number) (U8);
 U8 browser_min;
 U8 browser_max;
 
-void browser_default_item_number (U8 val)
+void browser_hex_item_number (U8 val)
 {
 	sprintf ("%02X", val);
+}
+
+void browser_decimal_item_number (U8 val)
+{
+	sprintf ("%d", val);
 }
 
 void browser_init (void)
@@ -204,7 +209,7 @@ void browser_init (void)
 
 	browser_action = 0;
 	browser_last_selection_update = 0;
-	browser_item_number = browser_default_item_number;
+	browser_item_number = browser_hex_item_number;
 	browser_min = 0;
 	browser_max = 0xFF;
 }
@@ -786,12 +791,18 @@ void deff_leff_init (void)
 
 	browser_init ();
 	browser_min = 1;
-	browser_max = 16;
+	browser_item_number = browser_decimal_item_number;
 
 	if (m == &dev_deff_test_item)
+	{
 		deff_leff_test_ops = &dev_deff_ops;
+		browser_max = deff_get_count ();
+	}
 	else
+	{
 		deff_leff_test_ops = &dev_leff_ops;
+		browser_max = 16;
+	}
 	deff_leff_last_active = 0xEE;
 }
 

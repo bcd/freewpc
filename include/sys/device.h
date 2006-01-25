@@ -135,6 +135,7 @@ void device_request_empty (device_t *dev);
 void device_sw_handler (uint8_t devno);
 void device_add_live (void);
 void device_remove_live (void);
+void device_multiball_set (U8 count);
 void device_init (void);
 
 void trough_init (void);

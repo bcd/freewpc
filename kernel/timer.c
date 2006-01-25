@@ -4,32 +4,40 @@
 /*
  * Timers are special cases of tasks; they just all run the same
  * function, counting down the time, then exiting.
+ *
+ * TIMER_GRAN is the minimum granularity of all timers.
  */
 
-#define TIMER_GRAN	(TIME_100MS * 5)
+#define TIMER_FREERUNNING_GRAN	(TIME_100MS * 5)
+#define TIMER_PAUSABLE_GRAN		(TIME_100MS * 2)
 
 
-static __taskentry__ void timer_function (void)
+U8 pausable_timer_locks;
+
+
+__taskentry__ void freerunning_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
 	while (ticks > 0)
 	{
-		task_sleep (TIMER_GRAN);
-		ticks -= TIMER_GRAN;
+		task_sleep (TIMER_FREERUNNING_GRAN);
+		ticks -= TIMER_FREERUNNING_GRAN;
 	}
 	task_exit ();
 }
 
 
-bool timer_kill_gid (task_gid_t gid)
+__taskentry__ void pausable_timer_function (void)
 {
-	return task_kill_gid (gid);
-}
-
-
-void timer_kill_pid (task_t *tp)
-{
-	task_kill_pid (tp);
+	U16 ticks = task_get_arg ();
+	while (ticks > 0)
+	{
+		task_sleep (TIMER_PAUSABLE_GRAN);
+		if (pausable_timer_locks != 0)
+			continue;
+		ticks -= TIMER_PAUSABLE_GRAN;
+	}
+	task_exit ();
 }
 
 
@@ -39,26 +47,32 @@ task_t *timer_find_gid (task_gid_t gid)
 }
 
 
-void timer_restart (task_gid_t gid, task_ticks_t ticks)
+task_t *timer_restart (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
 {
-	task_t *tp = task_recreate_gid (gid, timer_function);
+	task_t *tp = task_recreate_gid (gid, fn);
+	task_set_arg (tp, (U16)ticks);
 	return (tp);
 }
 
 
-task_t *timer_start1 (task_gid_t gid, task_ticks_t ticks)
+task_t *timer_start1 (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
 {
-	task_t *tp = task_create_gid1 (gid);
+	task_t *tp = task_create_gid1 (gid, fn);
+	task_set_arg (tp, (U16)ticks);
+	return (tp);
 }
 
 
-task_t *timer_start (task_gid_t gid, task_ticks_t ticks)
+task_t *timer_start (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
 {
-	return task_create_gid ();
+	task_t *tp = task_create_gid (gid, fn);
+	task_set_arg (tp, (U16)ticks);
+	return (tp);
 }
 
 
 void timer_init (void)
 {
+	pausable_timer_locks = 0;
 }
 

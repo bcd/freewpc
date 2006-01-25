@@ -19,9 +19,16 @@ void lock_enter (device_t *dev)
 	score_add_current_const (0x7500);
 }
 
+void lock_to_loop_timer (void)
+{
+	task_sleep_sec (3);
+	task_exit ();
+}
+
 void lock_kick_attempt (device_t *dev)
 {
 	sound_send (SND_LOCK_KICKOUT);
+	task_recreate_gid (GID_LOOP_DISABLED_BY_LOCK_EXIT, lock_to_loop_timer);
 }
 
 

@@ -4,14 +4,8 @@
 #include <mach/coil.h>
 
 
-void sw_slot_handler (void)
-{
-}
-
-
 DECLARE_SWITCH_DRIVER (sw_slot)
 {
-	.fn = sw_slot_handler,
 	.devno = SW_DEVICE_DECL(2),
 };
 
@@ -24,6 +18,8 @@ void slot_kick_sound (void)
 
 void slot_enter (device_t *dev)
 {
+	extern void door_award_flashing (void);
+
 	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 	mark_ball_in_play ();
 
@@ -31,9 +27,18 @@ void slot_enter (device_t *dev)
 	{
 		/* piano was recently hit, so ignore slot */
 	}
+	else if (task_kill_gid (GID_SLOT_DISABLED_BY_CAMERA))
+	{
+		/* camera was recently hit, so ignore slot */
+	}
+	else if (task_kill_gid (GID_SLOT_DISABLED_BY_SKILL_SWITCH))
+	{
+		/* skill switch was recently hit, so ignore slot */
+	}
 	else
 	{
 		score_add_current_const (0x2500);
+		door_award_flashing ();
 	}
 }
 
@@ -44,8 +49,8 @@ void slot_kick_attempt (device_t *dev)
 	if (in_game && !in_tilt)
 	{
 		sound_send (SND_SLOT_KICKOUT_1);
-		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
-		task_sleep (TIME_100MS * 7);
+		leff_start (LEFF_SLOT_KICKOUT);
+		task_sleep (TIME_100MS * 5);
 		task_create_gid (0, slot_kick_sound);
 	}
 }

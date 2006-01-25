@@ -362,4 +362,3 @@ void lampset_rotate_previous (lampset_id_t id)
 {
 }
 
-

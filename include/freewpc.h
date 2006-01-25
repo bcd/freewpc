@@ -1,6 +1,7 @@
 #ifndef _FREEWPC_H
 #define _FREEWPC_H
 
+/* For C++ compilation.  Everything in the kernel is plain C. */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -88,6 +89,7 @@ extern U8 irq_count;
 #include <sys/leff.h>
 #include <sys/debug.h>
 #include <sys/device.h>
+#include <timer.h>
 #include <score.h>
 #include <coin.h>
 #include <game.h>
@@ -95,12 +97,9 @@ extern U8 irq_count;
 #include <stdadj.h>
 #include <printf.h>
 #include <amode.h>
-#if 0
-#include <test.h>
-#else
 #include <window.h>
-#endif
 #include <callset.h>
+#include <priority.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory, e.g. 'tz'. */
