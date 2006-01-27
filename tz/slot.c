@@ -22,6 +22,7 @@ void slot_enter (device_t *dev)
 
 	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 	mark_ball_in_play ();
+	score_add_current_const (0x1000);
 
 	if (task_kill_gid (GID_SLOT_DISABLED_BY_PIANO))
 	{
@@ -37,7 +38,7 @@ void slot_enter (device_t *dev)
 	}
 	else
 	{
-		score_add_current_const (0x2500);
+		score_add_current_const (0x5000);
 		door_award_flashing ();
 	}
 }
