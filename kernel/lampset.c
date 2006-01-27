@@ -190,7 +190,6 @@ const U8 *lampset_lookup (lampset_id_t id)
 
 
 /* Apply an operator to each element of a lampset, one by one */
-#pragma long_branch
 void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register uint8_t opcode;
@@ -231,7 +230,6 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 		}
 	}
 }
-#pragma short_branch
 
 /* Common uses of apply */
 void lampset_apply_on (lampset_id_t id)

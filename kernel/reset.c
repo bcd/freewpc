@@ -12,7 +12,6 @@ static char build_date[] = BUILD_DATE;
 __nvram__ U8 freewpc_accepted[3];
 
 
-#pragma long_branch
 void system_accept_freewpc (void)
 {
 	extern void adj_reset_all (void);
@@ -63,7 +62,6 @@ void system_accept_freewpc (void)
 
 	call_far (TEST_PAGE, adj_reset_all ());
 }
-#pragma short_branch
 
 
 void system_reset (void)

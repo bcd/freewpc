@@ -67,7 +67,6 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 }
 
 
-#pragma long_branch
 int printf (const char *format, ...)
 {
 	static va_list va;
@@ -235,5 +234,4 @@ do_long_integer:
 	*buf = '\0';
 	return 0;
 }
-#pragma short_branch
 
