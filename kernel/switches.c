@@ -355,7 +355,6 @@ extern inline const switch_info_t *switch_lookup (uint8_t sw)
 }
 
 #ifdef DEBUGGER
-#pragma long_branch
 void switch_check_masks (void)
 {
 	U8 col;
@@ -406,7 +405,6 @@ void switch_check_masks (void)
 		mach_edges++;
 	}
 }
-#pragma short_branch
 #endif
 
 void switch_init (void)
@@ -447,12 +445,12 @@ extern inline void switch_rowpoll (const uint8_t col)
 		asm __volatile__ ("\tstb " STR(WPC_SW_COL_STROBE));
 	}
 
-	asm __volatile__ ("\tldb %0" 	:: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\tsta %0"	:: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\teorb %0"  :: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\tstb %0"	:: "m" (switch_bits[AR_CHANGED][col]));
-	asm __volatile__ ("\torb %0"	:: "m" (switch_bits[AR_PENDING][col]));
-	asm __volatile__ ("\tstb %0"	:: "m" (switch_bits[AR_PENDING][col]));
+	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
+	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_RAW][col]));
+	asm __volatile__ ("\teorb\t%0"  	:: "m" (switch_bits[AR_RAW][col]));
+	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
+	asm __volatile__ ("\torb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
+	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
 }
 
 
@@ -517,7 +515,6 @@ void switch_lamp_pulse (void)
  * some of the common switch handling logic before calling the
  * switch-specific function.
  */
-#pragma long_branch
 void switch_sched (void)
 {
 	const uint8_t sw = task_get_arg ();
@@ -582,7 +579,6 @@ cleanup:
 
 	task_exit ();
 }
-#pragma short_branch
 
 
 void switch_idle_task (void)
