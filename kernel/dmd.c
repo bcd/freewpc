@@ -472,7 +472,6 @@ extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
  * will take place one frame at a time; use the launch button to
  * step through each frame.
  */
-#pragma long_branch
 void dmd_do_transition (void)
 {
 	dmd_trans_data_ptr = NULL;
@@ -561,7 +560,6 @@ void dmd_do_transition (void)
 	}
 	dmd_transition = NULL;
 }
-#pragma short_branch
 
 
 /*

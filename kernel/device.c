@@ -11,7 +11,6 @@ U8 counted_balls;
 U8 missing_balls;
 U8 live_balls;
 
-#pragma long_branch
 void device_debug (void)
 {
 #ifdef DEBUGGER
@@ -41,7 +40,6 @@ void device_debug (void)
 		counted_balls, missing_balls, live_balls);
 #endif
 }
-#pragma short_branch
 
 void device_clear (device_t *dev)
 {
@@ -87,7 +85,6 @@ uint8_t device_recount (device_t *dev)
 }
 
 
-#pragma long_branch
 void device_update (void)
 {
 	device_t *dev;
@@ -223,7 +220,6 @@ wait_and_recount:
 	device_debug ();
 	task_exit ();
 }
-#pragma short_branch
 
 
 /* Request that a device eject 1 ball */
