@@ -14,13 +14,19 @@ typedef struct
 	U8 **glyphs;
 } font_t;
 
-extern const font_t font_5x5;
-extern const font_t font_9x6;
+extern const font_t font_mono5;
+extern const font_t font_mono9;
 extern const font_t font_fixed10;
 extern const font_t font_fixed6;
 extern const font_t font_lucida9;
 extern const font_t font_cu17;
 extern const font_t font_term6;
+
+extern const font_t font_legacy5x5;
+extern const font_t font_legacy9x6;
+
+#define font_5x5 font_mono5
+#define font_9x6 font_mono9
 
 typedef struct
 {
