@@ -91,7 +91,7 @@ extern inline void wpc_ext1_disable (U8 bits)
 	*(volatile U8 *)WPC_EXTBOARD1 &= ~bits;
 }
 
-#pragma long_branch
+
 void tz_clock_rtt (void)
 {
 	/* Read latest switch state */
