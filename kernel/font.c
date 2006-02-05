@@ -1,7 +1,7 @@
 
 #include <freewpc.h>
 
-static U8 font_space[32] = { 0, };
+static U8 font_space[16] = { 0, };
 
 
 #if 1
@@ -77,7 +77,6 @@ extern inline U8 aslqi3 (U8 data, U8 count)
 }
 
 
-#pragma long_branch
 U8 *font_lookup (const font_t *font, char c)
 {
 	U8 *entry;
@@ -86,8 +85,11 @@ U8 *font_lookup (const font_t *font, char c)
 	/* TODO: old-style fonts to be converted to new format;
 	 * font->glyphs would always be defined and we could
 	 * make this much simpler. */
+#ifdef CONFIG_OLD_FONTS
 	if (font->glyphs)
 	{
+#endif
+
 		if (c == ' ')
 		{
 			U8 *data = font->glyphs[(U8)'I'];
@@ -104,6 +106,8 @@ U8 *font_lookup (const font_t *font, char c)
 			font_height = *data++;
 			return (data);
 		}
+
+#ifdef CONFIG_OLD_FONTS
 	}
 	else if ((c >= 'A') && (c <= 'Z'))
 	{
@@ -151,9 +155,9 @@ U8 *font_lookup (const font_t *font, char c)
 	font_byte_width = font->bytewidth;
 	font_height = font->height;
 	return entry + index * font->height;
+#endif
 }
 
-#pragma long_branch
 static void fontargs_render_string (void)
 {
 	static U8 *dmd_base;
@@ -215,7 +219,6 @@ static void fontargs_render_string (void)
 	}
 	wpc_pop_page ();
 }
-#pragma short_branch
 
 
 void font_get_string_area (const font_t *font, const char *s)
@@ -238,8 +241,10 @@ void font_get_string_area (const font_t *font, const char *s)
 
 	wpc_push_page (FONT_PAGE);
 
+#ifdef CONFIG_OLD_FONTS
 	if (font->glyphs)
 	{
+#endif
 		font_string_width = 0;
 		font_string_height = 0;
 
@@ -250,6 +255,8 @@ void font_get_string_area (const font_t *font, const char *s)
 			if (font_height > font_string_height)
 				font_string_height = font_height;
 		}
+
+#ifdef CONFIG_OLD_FONTS
 	}
 	else
 	{
@@ -265,10 +272,12 @@ void font_get_string_area (const font_t *font, const char *s)
 			font_string_width += font_width + font_spacing;
 		}
 	}
+#endif
 
 	wpc_pop_page ();
 	task_dispatching_ok = TRUE;
 }
+
 
 void fontargs_render_string_left (const fontargs_t *args)
 {

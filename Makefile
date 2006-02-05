@@ -170,7 +170,7 @@ OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
 
 TEST_OBJS = test/window.o
 
-FONT_OBJS = fonts/mono5x5.o fonts/mono9x6.o 
+FONT_OBJS = fonts/mono5.o fonts/mono9.o
 
 FON_OBJS = \
 	fonts/fixed10.o \
@@ -701,9 +701,11 @@ web : webdocs webroms
 
 webdocs : webdir
 	cp -p doc/* $(WEBDIR)
+	cd $(WEBDIR) && chmod -R og+w *
 
 webroms : webdir
 	cp -p $(GAME_ROM) $(WEBDIR)/releases
+	chmod og+w $(WEBDIR)/releases/$(GAME_ROM)
 
 webdir : $(WEBDIR)
 

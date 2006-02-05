@@ -55,7 +55,7 @@ const uint8_t font_5x5_sep[][5] = {
 	/* slash */ { 16, 8, 4, 2, 1 },
 };
 
-const font_t font_5x5 = {
+const font_t font_legacy5x5 = {
 	.width = 5, 
 	.bytewidth = 1,
 	.spacing = 1,
