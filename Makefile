@@ -715,6 +715,12 @@ $(WEBDIR):
 
 
 #
+# Documentation (doxygen)
+#
+doc: Doxyfile
+	doxygen
+
+#
 # For debugging the makefile settings
 #
 info:
