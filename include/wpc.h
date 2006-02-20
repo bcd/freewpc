@@ -14,7 +14,7 @@
 
 #define DEBUG
 
-
+/** Macro to convert a preprocessing symbol into a string */
 #define S(x)	#x
 #define STR(x)	S(x)
 
@@ -22,7 +22,7 @@
  * Peripheral timer
  ***************************************************************/
 
-/* The FIRQ clear/peripheral timer register bits */
+/** The FIRQ clear/peripheral timer register bits */
 #define FIRQ_CLEAR_BIT 0x80
 
 
@@ -30,19 +30,19 @@
  * Memory usage
  ***************************************************************/
 
-/* The total size of RAM  -- 8K */
+/** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000
 
-/* The usable, nonprotected area of RAM -- the first 6K */
+/** The usable, nonprotected area of RAM -- the first 6K */
 #define USER_RAM_SIZE	0x1800
 
-/* The protected RAM size -- whatever is left */
+/** The protected RAM size -- whatever is left */
 #define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
-/* The base address of the (dynamic) heap */
+/** The base address of the (dynamic) heap */
 #define HEAP_BASE 		0x800
 
-/* The base address of the stack */
+/** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200
 #define STACK_MIN			(STACK_BASE - STACK_SIZE)
@@ -93,7 +93,7 @@
  * RAM Protection Circuit
  ***************************************************************/
 
-/* When the lock register(s) contain these values, the upper
+/** When the lock register(s) contain these values, the upper
  * N bytes of the RAM are write protected. */
 #define RAM_LOCK_4K			0x0
 #define RAM_LOCK_2K			0x1
@@ -103,7 +103,7 @@
 
 #define RAM_LOCKED			0x0
 
-/* When the lock register contains this value, the memory
+/** When the lock register contains this value, the memory
  * protection circuit is disabled */
 #define RAM_UNLOCKED			0xB4
 

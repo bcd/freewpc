@@ -1,28 +1,22 @@
 #ifndef _SYS_DEVICE_H
 #define _SYS_DEVICE_H
 
+/** The maximum number of switches that a ball device can have */
 #ifndef MAX_SWITCHES_PER_DEVICE
 #define MAX_SWITCHES_PER_DEVICE 6
 #endif
 
+/** The maximum number of ball devices that are supported */
 #ifndef MAX_DEVICES
 #define MAX_DEVICES 8
 #endif
 
+/** The device number for the trough device, which all games must have */
 #define DEV_TROUGH 0
 
+#if 0
 #define MAX_BALLS 6
-
-/*
-#define GID_DEVICE0_ACTIVE
-#define GID_DEVICE1_ACTIVE
-#define GID_DEVICE2_ACTIVE
-#define GID_DEVICE3_ACTIVE
-#define GID_DEVICE4_ACTIVE
-#define GID_DEVICE5_ACTIVE
-#define GID_DEVICE6_ACTIVE
-#define GID_DEVICE7_ACTIVE
- */
+#endif
 
 #define DEVICE_GID_BASE		GID_DEVICE0_ACTIVE
 
@@ -37,28 +31,28 @@ struct device;
  * by the common code here. */
 typedef struct device_ops
 {
-	/* Called when the machine is powered up */
+	/** Called when the machine is powered up */
 	void (*power_up) (struct device *dev);
 
-	/* Called whenever a game is started */
+	/** Called whenever a game is started */
 	void (*game_start) (struct device *dev);
 
-	/* Called whenever a ball enters the device */
+	/** Called whenever a ball enters the device */
 	void (*enter) (struct device *dev);
 
-	/* Called whenever the game tries to kick a ball from the device */
+	/** Called whenever the game tries to kick a ball from the device */
 	void (*kick_attempt) (struct device *dev);
 
-	/* Called when a kick is successful */
+	/** Called when a kick is successful */
 	void (*kick_success) (struct device *dev);
 
-	/* Called when a kick is not successful */
+	/** Called when a kick is not successful */
 	void (*kick_failure) (struct device *dev);
 
-	/* Called when the device becomes full */
+	/** Called when the device becomes full */
 	void (*full) (struct device *dev);
 
-	/* Called when the device becomes empty */
+	/** Called when the device becomes empty */
 	void (*empty) (struct device *dev);
 } device_ops_t;
 
@@ -86,7 +80,7 @@ typedef struct device_properties
 } device_properties_t;
 
 
-/*
+/**
  * Device states.  Each device is governed by a state
  * machine; these values dictate the various states that
  * a device can be in.

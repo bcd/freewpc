@@ -1,18 +1,23 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Manages the dot matrix controller (DMD)
+ */
+
 #if (MACHINE_DMD == 1)
 
-/* Points to the next free page that can be allocated */
+/** Points to the next free page that can be allocated */
 dmd_pagenum_t dmd_free_page;
 
-/* Low/High cache the current pages that are mapped into
+/** Low/High cache the current pages that are mapped into
  * visible memory.  Note that you can't read the I/O
  * register directly; they are write-only. */
 dmd_pagenum_t dmd_low_page;
 dmd_pagenum_t dmd_high_page;
 
-/* Dark/Bright store the 2 pages that are used to actually
+/** Dark/Bright store the 2 pages that are used to actually
  * draw on the display.  These values are programmed into
  * the DMD 'visible' register.  The values are switched fast
  * to give the appearance of 3-color images.  The 'dark'
@@ -23,12 +28,12 @@ dmd_pagenum_t dmd_high_page;
 dmd_pagenum_t dmd_dark_page;
 dmd_pagenum_t dmd_bright_page;
 
-/* Page flip state.  The FIRQ routine uses this to
+/** Page flip state.  The FIRQ routine uses this to
  * determine whether to show the dark or bright page. */
 U8 dmd_page_flip_count;
 
 
-/* dmd_show_hook is normally set to a nop function.
+/** dmd_show_hook is normally set to a nop function.
  * However, whenever a deff is started/stopped that defines
  * an entry/exit transition function, the show_hook is changed
  * to invoke dmd_do_transition, which performs the required
@@ -36,12 +41,12 @@ U8 dmd_page_flip_count;
  */
 bool dmd_in_transition;
 
-/* Pointer to the current transition in effect.  This is
+/** Pointer to the current transition in effect.  This is
  * only used by the transition show hook. */
 dmd_transition_t *dmd_transition;
 
 
-/* The trans data pointer provides transition functions with
+/** The trans data pointer provides transition functions with
  * state.  The pointer is initialized to NULL before the
  * first call to the transition functions; they can use it
  * however they wish.  Typically, it would be used to
@@ -51,7 +56,7 @@ dmd_transition_t *dmd_transition;
 U8 *dmd_trans_data_ptr;
 U8 *dmd_trans_data_ptr2;
 
-/* The page number of the composite page, used during
+/** The page number of the composite page, used during
  * transitions.  Each frame of the transition sequence
  * is stored here.  If the frame is 4-color, then two
  * pages are allocated with consecutive numbers, and
@@ -59,7 +64,7 @@ U8 *dmd_trans_data_ptr2;
  */
 U8 dmd_composite_page;
 
-/*
+/**
  * The DMD controller has two registers for controlling which pages
  * are mapped into addressable memory.  
  *
@@ -88,7 +93,7 @@ extern inline U8 wpc_dmd_get_high_page (void)
 }
 
 
-/*
+/**
  * Initialize the DMD subsystem.
  */
 void dmd_init (void)
@@ -106,7 +111,7 @@ void dmd_init (void)
 }
 
 
-/*
+/**
  * Handle the DMD whenever the DMD controller has finished updating
  * the display.  This function is invoked from the FIRQ handler.
  *
@@ -140,7 +145,7 @@ void dmd_rtt (void)
 }
 
 
-/*
+/**
  * Allocate a new page of DMD memory.
  *
  * In order to support 4-color images, we actually reserve two pages
@@ -159,7 +164,7 @@ static dmd_pagenum_t dmd_alloc (void)
 }
 
 
-/*
+/**
  * Allocate and map a single page, for a mono image.
  *
  * Since the image is mono, we map the same page into both the low
@@ -177,7 +182,7 @@ void dmd_alloc_high (void)
 }
 
 
-/*
+/**
  * Allocate and map two different pages.
  */
 void dmd_alloc_low_high (void)
@@ -187,7 +192,7 @@ void dmd_alloc_low_high (void)
 }
 
 
-/*
+/**
  * Show a mono image.  Program the hardware to display the
  * page that is currently mapped into the low page.  The same
  * page is stored into the dark/bright page values.
@@ -235,7 +240,7 @@ void dmd_swap_low_high (void)
 }
 
 
-/*
+/**
  * Show a 4-color image.
  */
 void dmd_show2 (void)
@@ -341,7 +346,7 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 }
 
 
-/*
+/**
  * Draw a mono image to the currently mapped (low) page.  
  * The image is stored in XBM format.
  */
@@ -351,7 +356,7 @@ void dmd_draw_image (dmd_buffer_t image_bits)
 }
 
 
-/*
+/**
  * Draw a 4-color image.
  */
 void dmd_draw_image2 (dmd_buffer_t image_bits)
@@ -361,7 +366,7 @@ void dmd_draw_image2 (dmd_buffer_t image_bits)
 }
 
 
-/* Draw the bitmap described by image_bits, with given width & height,
+/** Draw the bitmap described by image_bits, with given width & height,
  * at the given location on the DMD.
  *
  * For now, it is assumed that x, y, width, and height are all multiples
@@ -388,7 +393,7 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 
 
 #ifdef INCLUDE_COLOR_TEST
-/*
+/**
  * The color test was used to prove that the 4-color imaging is
  * working correctly.  It is not required in a production build.
  */
@@ -457,7 +462,7 @@ extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 }
 
 
-/*
+/**
  * Do a DMD transition.
  *
  * Transitions are complicated because the old/new images may have
@@ -562,7 +567,7 @@ void dmd_do_transition (void)
 }
 
 
-/*
+/**
  * Schedule a transition.
  *
  * Normally, when dmd_show_low or dmd_show2 is invoked, the new pages

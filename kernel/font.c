@@ -1,6 +1,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Routines for writing text to the DMD in a particular font.
+ */
+
 static U8 font_space[16] = { 0, };
 
 

@@ -6,6 +6,11 @@
 #include <freewpc.h>
 #include <asm-6809.h>
 
+/**
+ * \file
+ * \brief Entry point to the game program.
+ */
+
 uint8_t errcode;
 
 __fastram__ uint8_t irq_count;

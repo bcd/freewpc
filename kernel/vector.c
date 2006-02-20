@@ -1,4 +1,12 @@
 
+/*
+ * \file
+ * \brief 6809 interrupt vector table
+ *
+ * This module defines the contents of the vector table and places the
+ * structure at a fixed location, named "vector", which is mapped at
+ * link-time to address 0xFFF0.
+ */
 
 extern void do_reset (void);
 extern void do_swi3 (void);
@@ -9,6 +17,7 @@ extern void do_swi (void);
 extern void do_nmi (void);
 
 
+/** The 6809 vector table structure */
 typedef struct
 {
 	void (*unused) (void);
@@ -22,6 +31,7 @@ typedef struct
 } m6809_vector_table_t;
 
 
+/** The interrupt vector table */
 __attribute__((section("vector"))) m6809_vector_table_t vectors = {
 	.unused = do_reset,
 	.swi3 = do_swi3,

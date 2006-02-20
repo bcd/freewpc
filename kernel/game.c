@@ -1,13 +1,39 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief The main game state machine logic.
+ *
+ * This module implements the standard state machine of a pinball game.
+ */
+
+
+/** Nonzero if a game is currently in progress. */
 __fastram__ U8 in_game;
+
+/** Nonzero if the current game is currently in bonus count */
 __fastram__ U8 in_bonus;
+
+/** Nonzero if the current game is currently in tilt mode */
 __fastram__ U8 in_tilt;
+
+/** Nonzero if the current ball is considered 'in play', which
+ * means that ball loss is allowed to end the ball.  When zero,
+ * ball loss is not allowed and will result in a new ball being
+ * delivered to the plunger lane. */
 U8 ball_in_play;
+
+/** The number of players in the current game */
 U8 num_players;
+
+/** The number of the player that is currently up. */
 U8 player_up;
+
+/** The number of the current ball in play */
 U8 ball_up;
+
+/** The number of earned extra balls stacked by the current player */
 U8 extra_balls;
 
 void start_ball (void);

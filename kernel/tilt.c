@@ -1,6 +1,12 @@
 
 #include <freewpc.h>
 
+/**
+ * \brief Common tilt functions
+ */
+
+
+/** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
 
 

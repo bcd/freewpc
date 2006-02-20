@@ -7,20 +7,29 @@
 #include <sys/types.h>
 #endif
 
+
+/** Values for the 'state' field in the task structure */
 #define TASK_FREE		0
 #define TASK_USED		1
 #define TASK_BLOCKED	2
 
+/** The maximum number of tasks that can be running at once.
+ * Space for this many task structures is statically allocated.
+ */
 #define NUM_TASKS 32
 
 
-
+/** Type for the group ID (gid) */
 typedef uint8_t task_gid_t;
 
+/** Type for the number of task ticks.  1 task tick is the
+ * smallest amount that a task can sleep. */
 typedef uint8_t task_ticks_t;
 
+/** Type for the entry point to a new task */
 typedef void (*task_function_t) (void);
 
+/** Type for the task structure */
 typedef struct
 {
 	task_gid_t		gid;

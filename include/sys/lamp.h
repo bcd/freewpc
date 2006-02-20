@@ -1,6 +1,7 @@
 #ifndef _SYS_LAMP_H
 #define _SYS_LAMP_H
 
+/** The maximum number of physical lamps supported */
 #define NUM_LAMPS 64
 
 #define FLAG_OFFSET					0x40
@@ -11,30 +12,30 @@
 
 #define NUM_VLAMP_COLS	8
 
+/** Macro to create a lamp number from its row and column */
 #define MAKE_LAMP(col,row)	((((col)-1) * 8) + (row)-1)
 
-/* The lamp flash state is updated every 32ms, so this will
+/** The lamp flash state is updated every 32ms, so this will
  * toggle the lamp flash state about 8 times/sec */
 #define LAMP_DEFAULT_FLASH_RATE 3
-//#define LAMP_FAST_FLASH_RATE 2
 
-/* Small integer type for a lamp number */
+/** Small integer type for a lamp number */
 typedef uint8_t lampnum_t;
 
-/* A lamp operator is any routine which abides to the following
+/** A lamp operator is any routine which abides to the following
  * prototype for modifying a simple lamp.  Standard routines
  * like lamp_on, lamp_off are lamp operators. */
 typedef void (*lamp_operator_t) (lampnum_t);
 
-/* A lampset is a sequence of lamp numbers, some of which are
+/** A lampset is a sequence of lamp numbers, some of which are
  * "immediate lamp values", others are "lamp value macros".
  */
 typedef const lampnum_t lampset_t[];
 
-/* Lampsets are identified by small integers */
+/** Lampsets are identified by small integers */
 typedef uint8_t lampset_id_t;
 
-/*
+/**
  * Lamp macros are lampset members which calculate actual
  * lamp values at runtime.
  *
@@ -47,7 +48,7 @@ typedef uint8_t lampset_id_t;
 #define LAMP_END_OP					(NUM_LAMPS + 4)
 
 
-/*
+/**
  * When defining a lampset, you can use the following C macros
  * to emit proper lamp macro code into the array.
  */

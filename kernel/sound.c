@@ -2,6 +2,11 @@
 #include <freewpc.h>
 #include <queue.h>
 
+/**
+ * \file
+ * \brief Sound and music control
+ */
+
 #define SOUND_QUEUE_LEN 8
 
 struct {

@@ -1,8 +1,11 @@
 #ifndef _SYS_DEFF_H
 #define _SYS_DEFF_H
 
+
+/** Type for a display effect ID */
 typedef uint8_t deffnum_t;
 
+/** Type for a display effect function */
 typedef void (*deff_function_t) (void) __taskentry__;
 
 #define D_NORMAL	0x0
@@ -11,27 +14,30 @@ typedef void (*deff_function_t) (void) __taskentry__;
  * until it is explicitly stopped. */
 #define D_RUNNING 0x1
 
+/** Type for a display effect definition */
 typedef struct
 {
 	uint8_t flags;
 	uint8_t prio;
 	deff_function_t fn;
-	U8 pad;
 } deff_t;
 
+
+/** The maximum number of display effects that can be queued (i.e.
+ * waiting to run, but blocked by a higher priority effect).
+ */
 #define MAX_QUEUED_DEFFS 16
 
-#define QUICK_DEFF_FUNC(id, p) \
-	extern void id##_deff_func (void); \
-	deff_t id##_deff = { \
-		.flags = D_NORMAL, \
-		.prio = p, \
-		.fn = id##_deff_func, \
-		.pad = 0, \
-	}; \
-	void id##_deff_func (void)
 
-#define RUNNING_DEFF_FUNC(fn, prio)
+#define DECLARE_DEFF(id, _flags, _prio) \
+	extern void id##_func (void); \
+	const deff_t id##_deff = { \
+		.flags = _flags, \
+		.prio = _prio, \
+		.fn = id##_func, \
+	}; \
+	void id##_func (void) __taskentry__
+
 
 U8 deff_get_count (void);
 uint8_t deff_get_active (void);

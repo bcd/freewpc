@@ -2,6 +2,12 @@
 #include <freewpc.h>
 #include <m6809_math.h>
 
+/**
+ * \file
+ * \brief An implementation of the C printf() routine (non-standard) for
+ * writing formatted text to the DMD.
+ */
+
 char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
 U8 sprintf_width;

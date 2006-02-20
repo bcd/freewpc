@@ -1,8 +1,9 @@
 
 #include <freewpc.h>
 
-/*
- * This module implements a round-robin, non-realtime, non-preemptive
+/**
+ * \file
+ * \brief This module implements a round-robin, non-realtime, non-preemptive
  * task scheduler.
  *
  * A "task" is analogous to a process.  Tasks can be created, stopped,
@@ -29,19 +30,19 @@
  */
 
 
-/* task_current points to the control structure for the current task. */
+/** task_current points to the control structure for the current task. */
 __fastram__ task_t *task_current;
 
-/* When saving a task's registers during dispatch, we need some
+/** When saving a task's registers during dispatch, we need some
  * static storage to help compensate for the lacking of registers.
  * Don't allocate on the stack, since we need to preserve the
  * stack pointer carefully during dispatch. */
 __fastram__ uint16_t task_save_U, task_save_X;
 
-/* The static array of task structures */
+/** The static array of task structures */
 task_t task_buffer[NUM_TASKS];
 
-/* A flag that indicates that dispatching is working as expected.
+/** A flag that indicates that dispatching is working as expected.
  * This is set to 1 everytime we dispatch correctly, and to 0
  * periodically from the IRQ.  If the IRQ finds it at 0, that
  * means we went a long time without a dispatch; this probably
@@ -52,12 +53,12 @@ task_t task_buffer[NUM_TASKS];
  * The IRQ will reset the system when this happens. */
 bool task_dispatching_ok;
 
-/* For debug, this tells us the largest stack size that we've had
+/** For debug, this tells us the largest stack size that we've had
  * to deal with so far.  This helps to determine how big the stack
  * area in the task structure needs to be */
 U8 task_largest_stack;
 
-/* Uncomment this to turn on dumping of entire task table.
+/** Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
 //#define DUMP_ALL_TASKS
 
@@ -88,7 +89,7 @@ void task_dump (void)
 }
 
 
-/*
+/**
  * Allocate a new task block, by searching the array (linearly)
  * for the first entry that is TASK_FREE.
  */
@@ -110,7 +111,7 @@ task_t *task_allocate (void)
 }
 
 
-/*
+/**
  * Save the current execution state into the current task block.
  */
 #pragma naked

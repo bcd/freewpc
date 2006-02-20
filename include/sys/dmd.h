@@ -2,26 +2,28 @@
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
-/* The size of each DMD page */
+/** The size of each DMD page */
 #define DMD_PAGE_SIZE 0x200UL
 
-/* The number of DMD pages */
+/** The number of DMD pages */
 #define DMD_PAGE_COUNT 16
 
-/* The width of a DMD page, in pixel */
+/** The width of a DMD page, in pixels */
 #define DMD_PIXEL_WIDTH	128
-#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / 8)
 
-/* The height of a DMD page, in pixel */
+/** The width of a DMD page, in bytes */
+#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / sizeof(U8))
+
+/** The height of a DMD page, in pixel */
 #define DMD_PIXEL_HEIGHT 32
 
-/* The type of a page number */
+/** The type of a page number */
 typedef uint8_t dmd_pagenum_t;
 
-/* The type of a page buffer pointer */
+/** The type of a page buffer pointer */
 typedef uint8_t *dmd_buffer_t;
 
-/* A DMD transition describes all of the properties of a
+/** A DMD transition describes all of the properties of a
  * transition, such as the functions that render each
  * successive frame change, timing, etc.
  */

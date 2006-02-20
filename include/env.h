@@ -1,7 +1,7 @@
 #ifndef _ENV_H
 #define _ENV_H
 
-/* noreturn is a standard GCC attribute and is always
+/** noreturn is a standard GCC attribute and is always
  * available */
 #define __noreturn__ __attribute__((__noreturn__))
 

@@ -1,7 +1,9 @@
 
 #include <freewpc.h>
 
-/** Filename: leff.c
+/**
+ * \file
+ * \brief Lamp effect management
  *
  * A leff, or lamp effect, is a temporary override of the lamp matrix
  * bits for a "light show".  At present, the leff module operates

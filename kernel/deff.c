@@ -1,9 +1,9 @@
 
 #include <freewpc.h>
 
-/** Filename: deff.c
- * 
- * A display effect -- or deff -- is a task responsible for drawing to
+/**
+ * \file
+ * \brief A display effect -- or deff -- is a task responsible for drawing to
  * the display (DMD or alphanumeric).
  *
  * At any given time, there may be multiple deffs which have been
@@ -25,6 +25,8 @@
  * and subject to get it later if priorities change.
  */
 
+
+/** Define the standard system display effect entries. */
 #define SYSTEM_DISPLAY_EFFECTS \
 	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
 	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
@@ -35,7 +37,7 @@
 	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, 250, slam_tilt_deff)
 
 
-/* Declare externs for all of the deff functions */
+/** Declare externs for all of the deff functions */
 #define DECL_DEFF(num, flags, pri, fn) \
 	extern void fn (void);
 
@@ -44,7 +46,7 @@ SYSTEM_DISPLAY_EFFECTS
 MACHINE_DISPLAY_EFFECTS
 #endif
 
-/* Now declare the deff table itself */
+/** Now declare the deff table itself */
 #undef DECL_DEFF
 #define DECL_DEFF(num, flags, pri, fn) \
 	[num] = { flags, pri, fn },

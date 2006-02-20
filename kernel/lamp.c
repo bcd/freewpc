@@ -1,4 +1,9 @@
 
+/**
+ * \file
+ * \brief Lamp management functions
+ */
+
 #include <freewpc.h>
 
 /** Lamps 00h through 3Fh correspond to the physical lamp locations */

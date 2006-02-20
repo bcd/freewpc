@@ -14,7 +14,6 @@ extern uint8_t player_up;
 extern uint8_t ball_up;
 extern uint8_t extra_balls;
 
-#define in_live_game		(in_game && !in_tilt)
 
 void start_ball (void);
 void end_game (void);

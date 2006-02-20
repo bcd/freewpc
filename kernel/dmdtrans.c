@@ -1,7 +1,11 @@
 
 #include <freewpc.h>
 
-/*
+/**
+ * \file
+ * \brief Handle DMD transitions: gradual changes between one display
+ * effect and another.
+ *
  * There are inherently 3 classes of transitions:
  * 1. Old image remains static, new image overlays it.
  * 2. Old image "disappears", revealing static new image underneath it.
@@ -9,7 +13,7 @@
  */
 
 
-/*********************************************************************/
+
 
 /* The scroll_up transition.
  * Existing image data is pushed up off the screen, with new data
@@ -129,10 +133,5 @@ dmd_transition_t trans_scroll_left = {
 	.arg = 0,
 };
 
-/*********************************************************************/
 
-#if 0
-dmd_transition_t trans_scroll_right = {};
-/* Add splits, joins, etc. */
-#endif
 

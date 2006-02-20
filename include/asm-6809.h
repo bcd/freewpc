@@ -1,6 +1,10 @@
 #ifndef _ASM_6809_H
 #define _ASM_6809_H
 
+/**
+ * \brief Various definitions/macros for the Motorola 6809 MPU.
+ */
+
 /* Basic properties of the CPU architecture */
 #define BITS_PER_BYTE 8
 #define BITS_PER_WORD 16
@@ -156,7 +160,6 @@ extern inline long unsigned int strlen (const char *s)
 	}
 	return (len);
 }
-
 
 
 #endif /* _ASM_6809_H */
