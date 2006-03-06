@@ -36,20 +36,42 @@ int main (int argc, char *argv[])
 	char *option;
 	int start_offset = 0;
 	int write_length = 0;
+	int coco_bin_format = 0;
 	char **argn = &argv[1];
+	int min_addr = 0xFFFF, max_addr = 0;
 
-	srec_file = *argn++;
-	bin_file = *argn++;
-	option = *argn++;
-	if (!strcmp (option, "system"))
+	while (*argn != NULL)
 	{
-		start_offset = 0x8000;
-		write_length = 0x8000;
-	}
-	else
-	{
-		start_offset = 0x4000;
-		write_length = 0x4000;
+		if (**argn == '-')
+		{
+			switch ((*argn++)[1])
+			{
+				case 'o':
+					bin_file = *argn++;
+					break;
+
+				case 'f':
+					fill_byte = strtoul (*argn++, NULL, 0);
+					break;
+
+				case 's':
+					start_offset = strtoul (*argn++, NULL, 0);
+					break;
+
+				case 'l':
+					write_length = strtoul (*argn++, NULL, 0);
+					break;
+
+				case 'C':
+					coco_bin_format = 1;
+					break;
+			}
+		}
+		else
+		{
+			srec_file = *argn++;
+			break;
+		}
 	}
 
 	memset (image, fill_byte, sizeof (image));
@@ -85,13 +107,45 @@ int main (int argc, char *argv[])
 			image[addr+i] = hexval (s, 2);
 			s += 2;
 		}
+
+		/* Update min/max addr */
+		if (addr < min_addr)
+			min_addr = addr;
+		if (addr+len-1 > max_addr)
+			max_addr = addr;
+
 	}
 	fclose (ifp);
-	
+
+	if (write_length == 0)
+		write_length = max_addr - min_addr + 1;
+
 	ofp = fopen (bin_file, "wb");
+
+	if (coco_bin_format)
+	{
+		line[0] = 0;
+		line[1] = (write_length & 0xFF00) >> 8;
+		line[2] = write_length & 0xFF;
+		line[3] = (start_offset & 0xFF00) >> 8;
+		line[4] = start_offset & 0xFF;
+		fwrite (line, sizeof (U8), 5, ofp);
+	}
+
 	fwrite (image + start_offset, 
 		sizeof (U8), 
 		write_length, ofp);
+
+	if (coco_bin_format)
+	{
+		line[0] = 0xFF;
+		line[1] = 0;
+		line[2] = 0;
+		line[3] = (start_offset & 0xFF00) >> 8;
+		line[4] = start_offset & 0xFF;
+		fwrite (line, sizeof (U8), 5, ofp);
+	}
+
 	fclose (ofp);
 
 	exit (0);

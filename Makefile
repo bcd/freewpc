@@ -195,11 +195,11 @@ export FON_SRCS
 ###	Compiler / Assembler / Linker Flags
 #######################################################################
 
+CFLAGS = $(EXTRA_CFLAGS)
+
 # System include directories.  FreeWPC doesn't use libc currently.
 ifeq ($(USE_LIBC),y)
-CFLAGS = -I$(LIBC_DIR)/include
-else
-CFLAGS =
+CFLAGS += -I$(LIBC_DIR)/include
 endif
 
 # Program include directories
@@ -461,10 +461,10 @@ blank%.bin:
 binfiles : $(BINFILES)
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) $< $@ system
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) $< $@ paged
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 $<
 
 #
 # General rule for linking a group of object files.  The linker produces
