@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
 		if (addr < min_addr)
 			min_addr = addr;
 		if (addr+len-1 > max_addr)
-			max_addr = addr;
+			max_addr = addr+len-1;
 
 	}
 	fclose (ifp);
