@@ -12,7 +12,7 @@
 #define DMD_PIXEL_WIDTH	128
 
 /** The width of a DMD page, in bytes */
-#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / sizeof(U8))
+#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / 8)
 
 /** The height of a DMD page, in pixel */
 #define DMD_PIXEL_HEIGHT 32
