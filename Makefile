@@ -717,6 +717,7 @@ $(WEBDIR):
 #
 # Documentation (doxygen)
 #
+.PHONY : doc
 doc: Doxyfile
 	doxygen
 
