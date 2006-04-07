@@ -15,7 +15,7 @@ cd freewpc
 <p>Then to checkout the code from the server,
 
 <pre>
-svn checkout svn+ssh://www.oddchange.com/var/svn/freewpc/trunk</b>
+svn checkout http://www.oddchange.com/svn/public/freewpc/trunk</b>
 </pre>
 
 <p>This will create a directory called <b>trunk</b> and populate it
@@ -25,7 +25,7 @@ with the latest files in the repository.
 
 <p>You can just do <b>svn update</b>, either at the root or in any
 subdirectory, to grab the latest versions of all the files.  Most all
-Subversion files work this way.  You can also give a single filename,
+Subversion commands work this way.  You can also give a single filename,
 and it will only apply to that one file instead of the whole directory.
 
 <pre>
@@ -34,6 +34,8 @@ svn update
 
 <h2>Checking In Changes</h2>
 
+<p>Use the <b>commit</b> command to push your local changes back to the project
+server.  You must have write privileges in order to perform this command.</p>
 <pre>
 svn commit
 </pre>
