@@ -87,80 +87,22 @@ U8 *font_lookup (const font_t *font, char c)
 	U8 *entry;
 	U8 index;
 
-	/* TODO: old-style fonts to be converted to new format;
-	 * font->glyphs would always be defined and we could
-	 * make this much simpler. */
-#ifdef CONFIG_OLD_FONTS
-	if (font->glyphs)
+	if (c == ' ')
 	{
-#endif
-
-		if (c == ' ')
-		{
-			U8 *data = font->glyphs[(U8)'I'];
-			font_width = *data++;
-			font_byte_width = (font_width + 7) >> 3;
-			font_height = *data++;
-			return (font_space);
-		}
-		else
-		{
-			U8 *data = font->glyphs[(U8)c];
-			font_width = *data++;
-			font_byte_width = (font_width + 7) >> 3;
-			font_height = *data++;
-			return (data);
-		}
-
-#ifdef CONFIG_OLD_FONTS
-	}
-	else if ((c >= 'A') && (c <= 'Z'))
-	{
-		entry = (U8 *)font->chars;
-		index = c - 'A';
-	}
-	else if ((c >= '0') && (c <= '9'))
-	{
-		entry = (U8 *)font->digits;
-		index = c - '0';
-	}
-	else if (c == '.')
-	{
-		entry = (U8 *)font->seps;
-		index = 0;
-	}
-	else if (c == ',')
-	{
-		entry = (U8 *)font->seps;
-		index = 1;
-	}
-	else if (c == '/')
-	{
-		entry = (U8 *)font->seps;
-		index = 2;
-	}
-	else if (c == ' ')
-	{
-		entry = font_space;
-		index = 0;
-	}
-	else if ((c >= 'a') && (c <= 'z'))
-	{
-		entry = (U8 *)font->chars;
-		index = c - 'a';
+		U8 *data = font->glyphs[(U8)'I'];
+		font_width = *data++;
+		font_byte_width = (font_width + 7) >> 3;
+		font_height = *data++;
+		return (font_space);
 	}
 	else
 	{
-		entry = NULL;
-		index = 0;
-		nonfatal (ERR_UNPRINTABLE_CHAR);
+		U8 *data = font->glyphs[(U8)c];
+		font_width = *data++;
+		font_byte_width = (font_width + 7) >> 3;
+		font_height = *data++;
+		return (data);
 	}
-
-	font_width = font->width;
-	font_byte_width = font->bytewidth;
-	font_height = font->height;
-	return entry + index * font->height;
-#endif
 }
 
 static void fontargs_render_string (void)
@@ -246,38 +188,16 @@ void font_get_string_area (const font_t *font, const char *s)
 
 	wpc_push_page (FONT_PAGE);
 
-#ifdef CONFIG_OLD_FONTS
-	if (font->glyphs)
+	font_string_width = 0;
+	font_string_height = 0;
+
+	while ((c = *s++) != '\0')
 	{
-#endif
-		font_string_width = 0;
-		font_string_height = 0;
-
-		while ((c = *s++) != '\0')
-		{
-			(void)font_lookup (font, c);
-			font_string_width += font_width + GET_FONT_SPACING(font);
-			if (font_height > font_string_height)
-				font_string_height = font_height;
-		}
-
-#ifdef CONFIG_OLD_FONTS
+		(void)font_lookup (font, c);
+		font_string_width += font_width + GET_FONT_SPACING(font);
+		if (font_height > font_string_height)
+			font_string_height = font_height;
 	}
-	else
-	{
-		U8 font_width, font_spacing;
-
-		font_width = font->width;
-		font_spacing = GET_FONT_SPACING(font);
-		font_string_height = font->height;
-
-		font_string_width = 0;
-		while ((c = *s++) != '\0')
-		{
-			font_string_width += font_width + font_spacing;
-		}
-	}
-#endif
 
 	wpc_pop_page ();
 	task_dispatching_ok = TRUE;
