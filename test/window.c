@@ -1,23 +1,9 @@
 
 #include <freewpc.h>
 
-struct window;
-
-/** win_top always points to the current window, or NULL if
- * no window is open. */
-struct window *win_top;
-
-/* Equivalent to (win_top != NULL), but as a byte, this can
- * be tested with a single instruction.
- * TODO - these two variables could be overlapped into a union. */
-U8 in_test;
-
-
-/* Test mode now runs in its own page of ROM */
-#pragma section("page58")
-
-/*
- * Test Mode
+/**
+ * \file
+ * \brief Test mode infrastructure and test implementations
  *
  * The test mode system is comprised of a number of inter-related
  * modules.
@@ -55,7 +41,26 @@ U8 in_test;
  * messages.  A scroller is implemented as a set of function pointers
  * to functions that render the text; the common code takes care
  * of drawing it to the DMD and handles the keypresses to change pages.
+ *
+ * At present, the test implementations are also included in this same
+ * file, although for modularity's sake they should be moved elsewhere.
  */
+
+
+struct window;
+
+/** win_top always points to the current window, or NULL if
+ * no window is open. */
+struct window *win_top;
+
+/* Equivalent to (win_top != NULL), but as a byte, this can
+ * be tested with a single instruction.
+ * TODO - these two variables could be overlapped into a union. */
+U8 in_test;
+
+
+/* Test mode now runs in its own page of ROM */
+#pragma section("page58")
 
 
 /* Whenever a function can be optional, use this rather than NULL.  It's

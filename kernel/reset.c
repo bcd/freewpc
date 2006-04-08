@@ -1,6 +1,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief System reset message screen and user acceptance of the software.
+ */
+
 #define ACCEPT_1	0x19
 #define ACCEPT_2	0x75
 #define ACCEPT_3	0xB9
@@ -34,7 +39,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_5x5, 64, 3, "FREEWPC");
 	font_render_string_center (&font_5x5, 64, 9, "NO WARRANTY EXISTS");
 	font_render_string_center (&font_5x5, 64, 15, "ROM MAY CAUSE DAMAGE");
-	font_render_string_center (&font_5x5, 64, 21, "TO YOUR MACHINE");
+	font_render_string_center (&font_5x5, 64, 21, "TO REAL MACHINE");
 	font_render_string_center (&font_5x5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);

@@ -1,12 +1,30 @@
 
+/**
+ * \file
+ * \brief Coin switch handlers
+ */
+
 #include <freewpc.h>
 
+/** The maximum number of credits allowed.  Inserting more coins
+ * will not cause any more credits to be added beyond this amount. */
 #define MAX_CREDITS 30
 
+/** The number of credits */
 __nvram__ U8 credit_count;
+
+/** The number of additional units purchased, less than the value
+ * of one credit */
 __nvram__ U8 unit_count;
+
+/** The configuration that determines how many units are equal to one
+ * credit */
 __nvram__ U8 units_per_credit;
+
+/** The configuration that determines how many units are awarded for
+ * each coin insertion, which may be different for each coin slot */
 __nvram__ U8 units_per_coin[4];
+
 
 void credits_render (void)
 {
@@ -47,7 +65,7 @@ void credits_draw (void)
 	dmd_alloc_high ();
 
 	credits_render ();
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	dmd_copy_low_to_high ();
 
 	if (!has_credits_p ())
@@ -58,7 +76,7 @@ void credits_draw (void)
 	{
 		sprintf ("PRESS START");
 	}
-	font_render_string_center (&font_5x5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 
 	deff_swap_low_high (25, TIME_100MS);
 }

@@ -1,8 +1,9 @@
 
 #include <freewpc.h>
 
-/*
- * Handle the service button switches on the inside of the coin door.
+/**
+ * \file
+ * \brief Handle the service button switches inside the coin door.
  */
 
 void sw_escape_button_handler (void)

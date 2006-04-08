@@ -1,4 +1,13 @@
 
+/**
+ * \file
+ * \brief Routines for working with groups of related lamps
+ *
+ * A lampset is a descriptor that represents a set of lamps.
+ * Often, related lamps are modified together; these routines
+ * provide the common logic.
+ */
+
 #include <freewpc.h>
 
 /* The default lampset for all lamps */

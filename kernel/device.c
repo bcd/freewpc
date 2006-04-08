@@ -1,4 +1,20 @@
 
+/**
+ * \file
+ * \brief Ball device logic
+ *
+ * A ball device, or simply a device, is any playfield mechanism that
+ * can hold and/or release a pinball.  Typically, a device consists of
+ * one or more switches used to keep track of the number of balls in
+ * the device, and a coil for ejecting a single ball from the device.
+ * Examples include ejects (single ball), poppers, scoops, etc.
+ *
+ * Devices are managed by the kernel for the most part.  Each
+ * implementation of a device declares "operation" routines that act
+ * as callbacks and get called at the appropriate times for device-
+ * specific behavior.
+ */
+
 #include <freewpc.h>
 
 

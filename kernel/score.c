@@ -1,4 +1,9 @@
 
+/**
+ * \file
+ * \brief Routines for doing math on scores
+ */
+
 #include <freewpc.h>
 
 
@@ -10,17 +15,17 @@ U8 *current_score;
 void scores_draw_ball (void)
 {
 	sprintf ("%1iUP", player_up);
-	font_render_string_center (&font_5x5, 32, 26, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
 
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_5x5, 96, 26, sprintf_buffer);
+	font_render_string_center (&font_mono5, 96, 26, sprintf_buffer);
 }
 
 
 void scores_draw_credits (void)
 {
 	credits_render ();
-	font_render_string_center (&font_5x5, 64, 27, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 27, sprintf_buffer);
 }
 
 

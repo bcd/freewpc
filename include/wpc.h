@@ -1,3 +1,8 @@
+/**
+ * \file
+ * \brief Definitions/macros related to the WPC hardware
+ */
+
 #ifndef _WPC_H
 #define _WPC_H
 

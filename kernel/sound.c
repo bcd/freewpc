@@ -284,7 +284,7 @@ void volume_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
-	font_render_string_center (&font_5x5, 64, 13, sprintf_buffer);
+	font_render_string_center (&font_mono9, 64, 13, sprintf_buffer);
 	if (!in_game)
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 		music_change (MACHINE_VOLUME_CHANGE_MUSIC);

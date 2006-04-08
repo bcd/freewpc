@@ -1,10 +1,18 @@
 
+/**
+ * \file
+ * \brief Common flipper logic, for switches and solenoids
+ */
+
 #include <freewpc.h>
 
+/** TRUE if the flipper coils are enabled */
 bool flippers_enabled;
 
+/** Cache of the last values read from the flipper input switches */
 U8 flipper_inputs;
 
+/** Cache of the next/last value to be written to the flipper outputs */
 U8 flipper_outputs;
 
 

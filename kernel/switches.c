@@ -4,6 +4,11 @@
  * (C) Copyright 2005 by Brian Dominy.
  */
 
+/**
+ * \file
+ * \brief Handle all switch inputs
+ */
+
 #include <freewpc.h>
 #include <sys/irq.h>
 
@@ -55,33 +60,6 @@ const switch_info_t sw_unused =
  * If any switch entries are still undefined, then fill
  * their slots with the "unused" switch.
  */
-#if 000
-#ifndef MACHINE_SW01
-#define MACHINE_SW01 sw_left_coin
-#endif
-#ifndef MACHINE_SW02
-#define MACHINE_SW02 sw_center_coin
-#endif
-#ifndef MACHINE_SW03
-#define MACHINE_SW03 sw_right_coin
-#endif
-#ifndef MACHINE_SW04
-#define MACHINE_SW04 sw_fourth_coin
-#endif
-#ifndef MACHINE_SW05
-#define MACHINE_SW05 sw_escape_button
-#endif
-#ifndef MACHINE_SW06
-#define MACHINE_SW06 sw_down_button
-#endif
-#ifndef MACHINE_SW07
-#define MACHINE_SW07 sw_up_button
-#endif
-#ifndef MACHINE_SW08
-#define MACHINE_SW08 sw_enter_button
-#endif
-#endif
-
 #ifndef MACHINE_SW11
 #define MACHINE_SW11 sw_unused
 #endif
@@ -287,6 +265,7 @@ extern const switch_info_t
 	sw_left_coin, sw_center_coin, sw_right_coin, sw_fourth_coin,
 	sw_escape_button, sw_down_button, sw_up_button, sw_enter_button,
 
+	/* Playfield Switches */
 	MACHINE_SW11, MACHINE_SW12, MACHINE_SW13, MACHINE_SW14,
 	MACHINE_SW15, MACHINE_SW16, MACHINE_SW17, MACHINE_SW18,
 
@@ -311,6 +290,7 @@ extern const switch_info_t
 	MACHINE_SW81, MACHINE_SW82, MACHINE_SW83, MACHINE_SW84,
 	MACHINE_SW85, MACHINE_SW86, MACHINE_SW87, MACHINE_SW88,
 
+	/* Flipper switches (EOS switches don't have handlers) */
 	sw_unused, sw_right_flipper, sw_unused, sw_left_flipper,
 	sw_unused, sw_upper_right_flipper, sw_unused, sw_upper_left_flipper;
 

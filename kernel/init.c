@@ -40,12 +40,12 @@ void fatal (errcode_t error_code)
 	dbprintf ("Fatal error: %i", error_code);
 
 	sprintf ("ERRNO %i", error_code);
-	font_render_string_center (&font_5x5, 64, 2, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
 
 	sprintf ("%02x", stack[0]);
-	font_render_string (&font_5x5, 0*16, 10, sprintf_buffer);
+	font_render_string (&font_mono5, 0*16, 10, sprintf_buffer);
 	sprintf ("%02x", stack[1]);
-	font_render_string (&font_5x5, 1*16, 10, sprintf_buffer);
+	font_render_string (&font_mono5, 1*16, 10, sprintf_buffer);
 
 	dmd_show_low ();
 	task_dump ();
