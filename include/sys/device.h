@@ -14,11 +14,15 @@
 /** The device number for the trough device, which all games must have */
 #define DEV_TROUGH 0
 
-#if 0
-#define MAX_BALLS 6
-#endif
 
 #define DEVICE_GID_BASE		GID_DEVICE0_ACTIVE
+#define DEVICE_GID1			GID_DEVICE1_ACTIVE
+#define DEVICE_GID2			GID_DEVICE2_ACTIVE
+#define DEVICE_GID3			GID_DEVICE3_ACTIVE
+#define DEVICE_GID4			GID_DEVICE4_ACTIVE
+#define DEVICE_GID5			GID_DEVICE5_ACTIVE
+#define DEVICE_GID6			GID_DEVICE6_ACTIVE
+#define DEVICE_GID7			GID_DEVICE7_ACTIVE
 
 #define DEVICE_GID(devno)	(GID_DEVICE0_ACTIVE + (devno))
 
