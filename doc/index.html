@@ -47,7 +47,7 @@ You have been warned.</li>
 <li><a href="cap_edit_game.png">An editor window, showing some of the game functions coded.</a></li>
 </ul>
 
-<h2>Installation (PinMAME or Visual PinMAME)</h2>
+<h2>Binary Installation (PinMAME or Visual PinMAME)</h2>
 
 <p>You will need to copy the ROM file into your PinMAME <b>roms</b>
 directory so that PinMAME can find it.  The location of this directory
@@ -55,6 +55,15 @@ depends on how you installed PinMAME.  These directories typically contain
 ZIP files of the game ROM and sound ROMs; you'll need to unzip the file,
 replace the game ROM, then zip it back.  Make sure to save your original
 version of the ROM file for when you want to revert back to the real deal.</p>
+
+<h2>Source Installation</h2>
+
+<p>Source code is released under the GNU General Public License.
+If you just want to browse the code, use the
+<a href="/websvn/">Subversion repository browser</a>.  If you want
+to download the code directly and you have Subversion installed,
+see the <a href="/freewpc/subversion.html">Subversion starter page</a> and
+the <a href="/freewpc/build.html">build instructions</a>.</p>
 
 <h2>Internal Design</h2>
 
@@ -94,5 +103,7 @@ anyone interested would probably meet that requirement.</p>
 <p>All development is currently done under the Linux operating system.
 I use <a href="subversion">Subversion</a> for source control.
 Developers will also need to grab my <a href="/gcc6809.html">GCC for 6809</a>
-compiler, an assembler, and a linker.</p>
+compiler, an assembler, and a linker.  <b>Note:</b> the libc6809 port of
+the C library to the 6809 is <b>not</b> needed.  FreeWPC provides its own
+implementation of C library style functions that it needs.</p>
 
