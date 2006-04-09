@@ -81,21 +81,21 @@
  * the IRQ frequency, since the IRQ happens more often than
  * we need for timing granularity.
  *
- * We define this to be 8 now, which means that every 8 IRQs,
+ * We define this to be 16 now, which means that every 16 IRQs,
  * we increment our "tick counter" by 1.  The tick then
- * represents about 8.33ms of actual time.
+ * represents about 16.66ms of actual time.
  *
  * The tick count is stored in a single byte field of the
- * task structure, so it can store up to about 2 seconds.
+ * task structure, so it can store up to about 4 seconds.
  * If you need to sleep longer than this, use 'task_sleep_sec'
  * instead of 'task_sleep'.
  */
-#define IRQS_PER_TICK 8
+#define IRQS_PER_TICK 16
 
 /* Primitive time constants */
-#define TIME_16MS 	2U
-#define TIME_33MS 	4U
-#define TIME_50MS 	6U
+#define TIME_16MS 	1U
+#define TIME_33MS 	2U
+#define TIME_50MS 	3U
 #define TIME_66MS 	(TIME_33MS * 2U)
 #define TIME_100MS 	(TIME_33MS * 3U)
 #define TIME_133MS 	(TIME_33MS * 4U)

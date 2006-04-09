@@ -120,6 +120,7 @@ extern U8 irq_count;
 #include <window.h>
 #include <callset.h>
 #include <priority.h>
+#include <eb.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory, e.g. 'tz'. */

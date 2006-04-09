@@ -284,11 +284,14 @@ void do_irq (void)
 	/** Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);
 
+	irq_count++;
+	if ((irq_count & 15) == 0)
+		tick_count++;
+
 	/* Execute rtts every 1ms */
 #ifdef DEBUGGER
 	db_rtt ();
 #endif
-	irq_count++;
 	sol_rtt ();
 	flipper_rtt ();
 	if (irq_count & 0x1)
@@ -299,12 +302,11 @@ void do_irq (void)
 	if ((irq_count & 7) == 0)
 	{
 		/* Execute rtts every 8ms */
-		tick_count++;
 		ac_rtt ();
 		triac_rtt ();
 		flasher_rtt ();
 
-		if ((tick_count & 3) == 0) /* 4 x 8ms */
+		if ((irq_count & 31) == 0)
 		{
 			/* Execute rtts every 32ms */
 			wpc_led_toggle ();
@@ -316,9 +318,9 @@ void do_irq (void)
 			tz_clock_rtt ();
 #endif
 
-			if ((tick_count & 15) == 0)
+			if ((irq_count & 127) == 0)
 			{
-				/* Execute rtts every 16 x 8 ms = 128ms */
+				/* Execute rtts every 128ms */
 				lockup_check_rtt ();
 			}
 		}
