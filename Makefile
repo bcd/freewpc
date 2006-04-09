@@ -162,7 +162,7 @@ GAME_ROM = freewpc.rom
 
 FIXED_SECTION = sysrom
 
-OS_OBJS = div10.o init.o adj.o sysinfo.o dmd.o \
+OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o reset.o printf.o tilt.o vector.o player.o \
@@ -177,7 +177,10 @@ FON_OBJS = \
 	fonts/fixed6.o \
 	fonts/lucida9.o \
 	fonts/cu17.o \
-	fonts/term6.o
+	fonts/term6.o \
+	fonts/times10.o \
+	fonts/times8.o \
+	fonts/helv8.o \
 
 XBM_OBJS = images/freewpc.o images/brian.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o
