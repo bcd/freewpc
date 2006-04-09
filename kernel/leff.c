@@ -200,20 +200,14 @@ void leff_stop (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	db_puts ("Stopping leff # "); db_puti (dn); db_putc ('\n');
 
 	if (leff->flags & L_RUNNING)
 	{
-		db_puts ("Remove running leff from queue\n");
+		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
 		lamp_leff1_free_all ();
 		triac_leff_free (TRIAC_GI_MASK);
-
 		leff_start_highest_priority ();
-	}
-	else
-	{
-		fatal (ERR_NOT_IMPLEMENTED_YET);
 	}
 }
 

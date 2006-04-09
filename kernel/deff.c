@@ -185,18 +185,11 @@ void deff_stop (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
 
-	dbprintf ("Stopping deff #%d\n", dn);
-
 	if (deff->flags & D_RUNNING)
 	{
-		db_puts ("Remove running deff from queue\n");
+		dbprintf ("Stopping deff #%d\n", dn);
 		deff_remove_queue (dn);
-
 		deff_start_highest_priority ();
-	}
-	else
-	{
-		fatal (ERR_NOT_IMPLEMENTED_YET);
 	}
 }
 
