@@ -1357,10 +1357,10 @@ void sound_test_set_change (void)
 {
 	sound_test_set++;
 #if (MACHINE_DCS == 0)
-	if (sound_test_set == 1)
-		sound_test_set = 3;
 	if (sound_test_set > 1)
 #else
+	if (sound_test_set == 2)
+		sound_test_set = 3;
 	if (sound_test_set > 3)
 #endif
 		sound_test_set = 0;
