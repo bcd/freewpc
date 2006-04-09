@@ -33,8 +33,6 @@ U8 player_up;
 /** The number of the current ball in play */
 U8 ball_up;
 
-/** The number of earned extra balls stacked by the current player */
-U8 extra_balls;
 
 void start_ball (void);
 
@@ -73,6 +71,8 @@ void amode_stop (void)
 #ifdef DEBUGGER
 void dump_game (void)
 {
+	extern U8 extra_balls;
+
 	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
 		in_game, in_bonus, in_tilt);
 	dbprintf ("In Play : %d\n", ball_in_play);
@@ -170,9 +170,8 @@ void end_ball (void)
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
-	if (extra_balls > 0)
+	if (decrement_extra_balls ())
 	{
-		extra_balls--;
 		start_ball ();
 		goto done;
 	}
@@ -251,7 +250,7 @@ void start_game (void)
 		add_player ();
 		player_up = 1;
 		ball_up = 1;
-		extra_balls = 0;
+		clear_extra_balls ();
 	
 		deff_start (DEFF_SCORES);
 		amode_stop ();
