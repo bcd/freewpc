@@ -21,6 +21,9 @@ extern const font_t font_fixed6;
 extern const font_t font_lucida9;
 extern const font_t font_cu17;
 extern const font_t font_term6;
+extern const font_t font_times8;
+extern const font_t font_times10;
+extern const font_t font_helv8;
 
 extern const font_t font_legacy5x5;
 extern const font_t font_legacy9x6;
