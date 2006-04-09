@@ -25,3 +25,22 @@ blanks (0xFF).
 
 <p>Like MACHINE, these are most easily set by using a user.mak file.  <b>TBD</b></p>
 
+<h2>System Requirements</h2>
+
+<p>The build procedure uses several other applications that will need
+to be installed on your build system.  Most Linux systems have all of these;
+if using Cygwin, you may not get them all by default.  You should have:</p>
+
+<ul>
+<li>The gcc6809 toolchain, installed in /usr/local/m6809</li>
+<li>The asxxxx assembler and linker</li>
+<li>The dd program, for generating the blank portions of the ROM file</li>
+<li>The bc program, for doing math to determine proper ROM section sizes</li>
+<li>zip and unzip, in order to manipulate xpinmame ROM bundles</li>
+<li>The bash shell</li>
+<li>doxygen, if you want to be able to autogenerate documentation files
+(optional)</li>
+<li>Other basic UNIX utilities, like cat, rm, mv, mkdir, etc. which are almost
+certainly present</li>
+</ul>
+
