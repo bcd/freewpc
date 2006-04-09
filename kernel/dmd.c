@@ -45,12 +45,12 @@ dmd_pagenum_t dmd_high_page;
  * is shown 2/3 of the time.  (The brightest pixels are
  * those that are set in both of the pages at the same time.)
  */
-dmd_pagenum_t dmd_dark_page;
-dmd_pagenum_t dmd_bright_page;
+__fastram__ dmd_pagenum_t dmd_dark_page;
+__fastram__ dmd_pagenum_t dmd_bright_page;
 
 /** Page flip state.  The FIRQ routine uses this to
  * determine whether to show the dark or bright page. */
-U8 dmd_page_flip_count;
+__fastram__ U8 dmd_page_flip_count;
 
 
 /** dmd_show_hook is normally set to a nop function.
