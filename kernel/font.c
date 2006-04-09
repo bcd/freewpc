@@ -84,9 +84,6 @@ extern inline U8 aslqi3 (U8 data, U8 count)
 
 U8 *font_lookup (const font_t *font, char c)
 {
-	U8 *entry;
-	U8 index;
-
 	if (c == ' ')
 	{
 		U8 *data = font->glyphs[(U8)'I'];
