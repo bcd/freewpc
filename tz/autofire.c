@@ -66,8 +66,12 @@ __taskentry__ void autofire_handler (void)
 		/* Wait for autofire switch to go off once */
 		/* TODO : add timeout here */
 		task_sleep_sec (2);
+#if 0
 		while (!switch_poll_logical (SW_AUTOFIRE2))
 			task_sleep (TIME_66MS);
+#else
+		task_sleep_sec (1);
+#endif
 
 		/* Close autofire diverter */
 		sol_off (SOL_SHOOTER_DIV);
