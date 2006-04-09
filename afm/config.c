@@ -48,7 +48,7 @@ CALLSET_ENTRY (unused, start_ball) {}
 
 
 /* For testing the deff declaration syntax. */
-QUICK_DEFF_FUNC(DESIGN_CREDITS, 100)
+DECLARE_DEFF(DESIGN_CREDITS, D_NORMAL, 100)
 {
 	deff_exit ();
 }
