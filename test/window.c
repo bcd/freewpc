@@ -683,6 +683,9 @@ const font_t *font_test_lookup (void)
 		case 3: return &font_fixed6;
 		case 4: return &font_lucida9;
 		case 5: return &font_term6;
+		case 6: return &font_times8;
+		case 7: return &font_times10;
+		case 8: return &font_helv8;
 #if 0
 				  /* Not working */
 		case 100: return &font_cu17;
@@ -694,7 +697,7 @@ const font_t *font_test_lookup (void)
 void font_test_init (void)
 {
 	browser_init ();
-	browser_max = 5;
+	browser_max = 8; /* set to highest valid font number */
 }
 
 void font_test_draw (void)
