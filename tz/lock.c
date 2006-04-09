@@ -23,7 +23,6 @@
 
 void sw_lock_handler (void)
 {
-	// device_sw_handler (1);
 }
 
 DECLARE_SWITCH_DRIVER (sw_lock)
