@@ -1680,15 +1680,15 @@ void lamp_row_col_test_item_number (U8 val)
 
 	if (val < 8)
 	{
-		sprintf ("ROW %d", val+1);
-		lamp = MAKE_LAMP (1, val+1);
+		sprintf ("COL %d", val+1);
+		lamp = MAKE_LAMP (val+1, 1);
 		for (i=0; i < 8; i++)
 			lamp_on (lamp++);
 	}
 	else
 	{
-		sprintf ("COL %d", val - 8 + 1);
-		lamp = MAKE_LAMP (val-8+1, 1);
+		sprintf ("ROW %d", val-8+1);
+		lamp = MAKE_LAMP (1, val-8+1);
 		for (i=0; i < 8; i++)
 		{
 			lamp_on (lamp);
