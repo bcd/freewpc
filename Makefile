@@ -182,7 +182,7 @@ FON_OBJS = \
 	fonts/times8.o \
 	fonts/helv8.o \
 
-XBM_OBJS = images/freewpc.o images/brian.o \
+XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o
 
 OS_INCLUDES = include/freewpc.h include/wpc.h

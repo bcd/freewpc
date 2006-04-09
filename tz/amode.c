@@ -92,9 +92,9 @@ void egg_left_flipper (void)
 
 void egg_brian_image_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_draw_bitmap (brian_bits, 0, 0, 32, 32);
-	dmd_show_low ();
+	dmd_alloc_low_high ();
+	dmd_draw_image2 (brianhead_bits);
+	dmd_show2 ();
 	task_sleep_sec (3);
 	deff_exit ();
 }
