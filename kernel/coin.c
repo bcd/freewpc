@@ -154,7 +154,10 @@ void add_credit (void)
 bool has_credits_p (void)
 {
 #ifndef FREE_ONLY
-	return (credit_count > 0);
+	if (price_config.free_play)
+		return (TRUE);
+	else
+		return (credit_count > 0);
 #else
 	return (TRUE);
 #endif
