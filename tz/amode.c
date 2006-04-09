@@ -153,7 +153,7 @@ void amode_deff (void) __taskentry__
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
 	dmd_show_low ();
-	amode_page_delay (5);
+	amode_page_delay (4);
 
 	for (;;)
 	{
@@ -168,8 +168,11 @@ void amode_deff (void) __taskentry__
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (freewpc_logo_bits);
 		dmd_show2 ();
-		if (amode_page_delay (7) && system_config.tournament_mode)
+		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
+
+		/** Display credits message **/
+		credits_draw ();
 
 		/** Display game title message **/
 		dmd_alloc_low_high ();
@@ -190,10 +193,6 @@ void amode_deff (void) __taskentry__
 		dmd_show_low ();
 		if (amode_page_delay (3) && system_config.tournament_mode)
 			continue;
-
-		/** Display credits message **/
-		credits_draw ();
-		credits_draw ();
 
 		/** Display 'custom message'? **/
 
