@@ -65,7 +65,7 @@ void credits_draw (void)
 	dmd_alloc_high ();
 
 	credits_render ();
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	dmd_copy_low_to_high ();
 
 	if (!has_credits_p ())
@@ -76,9 +76,9 @@ void credits_draw (void)
 	{
 		sprintf ("PRESS START");
 	}
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
 
-	deff_swap_low_high (25, TIME_100MS);
+	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
 }
 
 
