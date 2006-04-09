@@ -3,7 +3,7 @@
 # svntag - simple shell script for creating tagged releases
 #
 
-SVNROOT=http://www.oddchange.com/svn/freewpc
+SVNROOT=http://www.oddchange.com/svn/public/freewpc
 
 case $1 in
 	set)
