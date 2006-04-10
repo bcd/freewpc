@@ -34,10 +34,6 @@
 
 #define MACHINE_NAME "ATTACK FROM MARS"
 
-#define MACHINE_MAJOR_VERSION 0
-#define MACHINE_MINOR_VERSION 02
-
-
 /* Define as 1 if the machine has a DMD, 0 if it is alphanumeric */
 #define MACHINE_DMD 1
 

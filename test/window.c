@@ -1950,7 +1950,7 @@ void sysinfo_machine_version (void) {
 	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
 }
 void sysinfo_system_version (void) { 
-	sprintf ("SY %1x.%02x", FREEWPC_VERSION_MAJOR, FREEWPC_VERSION_MINOR);
+	sprintf ("SY %1x.%02x", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
 }
 void sysinfo_compiler_version (void) { 
 	sprintf ("GCC %s, ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));

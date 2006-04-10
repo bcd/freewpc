@@ -15,12 +15,7 @@
 
 #define MACHINE_NAME "FUNHOUSE"
 
-#define MACHINE_MAJOR_VERSION 0
-#define MACHINE_MINOR_VERSION 0
-
 #define MACHINE_DATE "11/29/2005"
-
-
 
 /* Define as 1 if the machine has a DMD, 0 if it is alphanumeric */
 #define MACHINE_DMD 0

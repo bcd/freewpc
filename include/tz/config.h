@@ -41,9 +41,6 @@
 
 #define MACHINE_NAME "TWILIGHT ZONE"
 
-#define MACHINE_MAJOR_VERSION 0
-#define MACHINE_MINOR_VERSION 05
-
 
 #define MACHINE_PINMAME_ZIP "tz_92.zip"
 #define MACHINE_PINMAME_ROM "tzone9_2.rom"

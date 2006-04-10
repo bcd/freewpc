@@ -158,8 +158,6 @@ BC = bc
 ###	Source and Binary Filenames
 #######################################################################
 
-GAME_ROM = freewpc.rom
-
 FIXED_SECTION = sysrom
 
 OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
@@ -270,11 +268,17 @@ CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER
 endif
-ifdef USER_MAJOR
-CFLAGS += -DFREEWPC_MAJOR_VERSION=$(USER_MAJOR)
+ifdef SYSTEM_MAJOR
+CFLAGS += -DFREEWPC_MAJOR_VERSION=$(SYSTEM_MAJOR)
 endif
-ifdef USER_MINOR
-CFLAGS += -DFREEWPC_MINOR_VERSION=$(USER_MAJOR)
+ifdef SYSTEM_MINOR
+CFLAGS += -DFREEWPC_MINOR_VERSION=$(SYSTEM_MINOR)
+endif
+ifdef MACHINE_MAJOR
+CFLAGS += -DMACHINE_MAJOR_VERSION=$(MACHINE_MAJOR)
+endif
+ifdef MACHINE_MINOR
+CFLAGS += -DMACHINE_MINOR_VERSION=$(MACHINE_MINOR)
 endif
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
@@ -304,6 +308,13 @@ endif
 ###	Include Machine Extensions
 #######################################################################
 include $(MACHINE)/Makefile
+
+# Fix up names based on machine definitions
+ifdef GAME_ROM_PREFIX
+GAME_ROM = $(GAME_ROM_PREFIX)$(MACHINE_MAJOR)_$(MACHINE_MINOR).rom
+else
+GAME_ROM = freewpc.rom
+endif
 
 #######################################################################
 ###	Object File Distribution
@@ -697,9 +708,8 @@ Makefile : user.make
 
 #
 # Install to the web server
+# Set the location of the web documents in WEBDIR in your user.make.
 #
-WEBDIR := /home/bcd/oddchange/freewpc
-
 web : webdocs webroms
 
 webdocs : webdir
@@ -710,12 +720,13 @@ webroms : webdir
 	cp -p $(GAME_ROM) $(WEBDIR)/releases
 	chmod og+w $(WEBDIR)/releases/$(GAME_ROM)
 
+ifdef WEBDIR
 webdir : $(WEBDIR)
 
 $(WEBDIR):
 	mkdir -p $(WEBDIR)
 	mkdir -p $(WEBDIR)/releases
-
+endif
 
 #
 # Documentation (doxygen)
@@ -729,6 +740,7 @@ doc: Doxyfile
 #
 info:
 	@echo "Machine : $(MACHINE)"
+	@echo "GAME_ROM : $(GAME_ROM)"
 	@echo "GCC_VERSION = $(GCC_VERSION)"
 	@echo "CC = $(CC)"
 	-@$(CC) -v

@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM = fafm0_05.rom
+GAME_ROM_PREFIX = fafm
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
@@ -38,7 +38,7 @@ ROM_PAGE_COUNT = 64
 
 PINMAME_MACHINE = afm_113
 
-PINMAME_GAME_ROM = afm_1_13.bin
+PINMAME_GAME_ROM = afm_113b.bin
 
 PINMAME_OTHER_ROMS = afm_s*.l1
 

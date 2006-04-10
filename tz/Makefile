@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM = ftz0_05.rom
+GAME_ROM_PREFIX = ftz
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
