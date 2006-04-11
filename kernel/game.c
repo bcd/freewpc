@@ -357,7 +357,6 @@ void sw_start_button_handler (void) __taskentry__
 #ifdef DEBUGGER
 	dump_game ();
 #endif
-	task_exit ();
 }
 
 
@@ -367,7 +366,6 @@ void sw_start_button_handler (void) __taskentry__
  */
 void sw_buy_in_button_handler (void) __taskentry__
 {
-	task_exit ();
 }
 
 /*
