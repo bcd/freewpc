@@ -66,10 +66,10 @@
 
 /* Define the locations of standard switches within the switch matrix.
  * These switches _must_ be defined */
-#define MACHINE_SHOOTER_SWITCH
-#define MACHINE_TILT_SWITCH
-#define MACHINE_SLAM_TILT_SWITCH
-#define MACHINE_START_SWITCH
+#define MACHINE_SHOOTER_SWITCH	SW_SHOOTER
+#define MACHINE_TILT_SWITCH		SW_TILT
+#define MACHINE_SLAM_TILT_SWITCH	SW_SLAM_TILT
+#define MACHINE_START_SWITCH		SW_START_BUTTON
 
 /* Define the locations of optional switches.  These may not be
  * defined for all games. */
@@ -96,7 +96,7 @@
 #define MACHINE_START_LAMP		LM_START_BUTTON
 
 /* Define optional lamps */
-#define MACHINE_BUYIN_LAMP
+#define MACHINE_BUYIN_LAMP		LM_BUYIN_BUTTON
 
 /* Define sound effects for standard system functions */
 #define MACHINE_ADD_COIN_SOUND		SND_LIGHT_SLOT_TIMED
