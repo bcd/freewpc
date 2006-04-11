@@ -28,7 +28,7 @@
 
 const char copyright[] = "FreeWPC System ROM.  Written by Brian Dominy.  Licensed under the GNU General Public License (GPL)";
 
-const uint8_t system_major_version = 0;
-const uint8_t system_minor_version = 5;
+const uint8_t system_major_version = FREEWPC_MAJOR_VERSION;
+const uint8_t system_minor_version = FREEWPC_MINOR_VERSION;
 
 

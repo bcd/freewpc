@@ -34,7 +34,11 @@
 /** The device number for the trough device, which all games must have */
 #define DEV_TROUGH 0
 
-
+/** The GIDs for the device update tasks.
+ * Every device has its own GID for the function that runs to service it.
+ * This task is in charge of processing switch closures AND servicing
+ * kick requests.
+ */
 #define DEVICE_GID_BASE		GID_DEVICE0_ACTIVE
 #define DEVICE_GID1			GID_DEVICE1_ACTIVE
 #define DEVICE_GID2			GID_DEVICE2_ACTIVE
@@ -44,7 +48,11 @@
 #define DEVICE_GID6			GID_DEVICE6_ACTIVE
 #define DEVICE_GID7			GID_DEVICE7_ACTIVE
 
+
+/** Translate a device number (devno), which is zero-based, into
+ * its corresponding GID. */
 #define DEVICE_GID(devno)	(GID_DEVICE0_ACTIVE + (devno))
+
 
 struct device;
 
@@ -81,6 +89,12 @@ typedef struct device_ops
 } device_ops_t;
 
 
+/** Macro used by the device module to invoke callback operations.
+ * If an operation isn't defined, then it is skipped, so you need
+ * not provide all of the operations if you don't need them all.
+ * These hooks are only called during an actual game; the system
+ * is fully in charge during test/attract mode.
+ */
 #define device_call_op(dev, op) \
 do { \
 	dbprintf ("Calling device hook %s\n", #op); \
@@ -95,11 +109,26 @@ do { \
  * contains various device properties. */
 typedef struct device_properties
 {
+	/** Pointer to the operations structure */
 	device_ops_t *ops;
+
+	/** Name of the device */
 	const char *name;
+
+	/** The solenoid used to kick balls from it */
 	solnum_t sol;
+
+	/** The number of switches in the device for counting balls */
 	uint8_t sw_count;
+
+	/** The initial number of switches that ought to be closed;
+	 * i.e. the number of balls that the device is allowed to hold
+	 * at initialization time.  Any extra balls found will be kicked. */
 	uint8_t init_max_count;
+
+	/** The switch numbers for the switches; switch 0 always refers to
+	 * the first switch that would close when a ball enters the device,
+	 * switch MAX-1 is the last switch to open when a ball leaves it.  */
 	switchnum_t sw[MAX_SWITCHES_PER_DEVICE];
 } device_properties_t;
 
@@ -120,13 +149,28 @@ typedef struct device_properties
  * device. */
 typedef struct device
 {
+	/** Device number assigned to this device */
 	uint8_t devno;
+
+	/** The size of the device, same as the number of counting switches */
 	uint8_t size;
+
+	/** The current count of balls */
 	uint8_t actual_count;
+
+	/** The previous count of balls */
 	uint8_t previous_count;
+
+	/** The maximum number of balls that can be held here. */
 	uint8_t max_count;
+
+	/** The number of balls needed to be kicked out */
 	uint8_t kicks_needed;
+
+	/** The operational state of the device */
 	uint8_t state;
+
+	/** Pointer to the device property structure */
 	device_properties_t *props;
 } device_t;
 

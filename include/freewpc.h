@@ -115,6 +115,7 @@ extern U8 irq_count;
 #include <game.h>
 #include <player.h>
 #include <stdadj.h>
+#include <audit.h>
 #include <printf.h>
 #include <amode.h>
 #include <window.h>

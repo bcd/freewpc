@@ -9,4 +9,4 @@ Do proper switch debouncing/queueing
 Add timer support
 Add adjustment (writable browser) support
 Better DMD function names (low? used everywhere)
-Game Over message should only be printed once, not continuously during amode
+Game Over message should only be printed once, not continuously during amode (Fixed?)

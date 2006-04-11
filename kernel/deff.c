@@ -48,13 +48,14 @@
 
 /** Define the standard system display effect entries. */
 #define SYSTEM_DISPLAY_EFFECTS \
-	DECL_DEFF (DEFF_SCORES, D_RUNNING, 30, scores_deff) \
-	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, 110, coin_deff) \
-	DECL_DEFF (DEFF_CREDITS, D_NORMAL, 120, credits_deff) \
-	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, 200, tilt_warning_deff) \
-	DECL_DEFF (DEFF_TILT, D_RUNNING, 205, tilt_deff) \
-	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, 250, volume_deff) \
-	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, 250, slam_tilt_deff)
+	DECL_DEFF (DEFF_SCORES, D_RUNNING, PRI_SCORES, scores_deff) \
+	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, PRI_COINS, coin_deff) \
+	DECL_DEFF (DEFF_CREDITS, D_NORMAL, PRI_CREDITS, credits_deff) \
+	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, PRI_TILT_WARNING, tilt_warning_deff) \
+	DECL_DEFF (DEFF_TILT, D_RUNNING, PRI_TILT, tilt_deff) \
+	DECL_DEFF (DEFF_GAME_OVER, D_RUNNING, PRI_GAME_OVER, game_over_deff) \
+	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, PRI_VOLUME_CHANGE, volume_deff) \
+	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff)
 
 
 /** Declare externs for all of the deff functions */
@@ -79,7 +80,7 @@ static const deff_t deff_table[] = {
 	MACHINE_DISPLAY_EFFECTS
 #endif
 #ifndef MACHINE_CUSTOM_AMODE
-	[DEFF_AMODE] = { D_RUNNING, 10, default_amode_deff },
+	[DEFF_AMODE] = { D_RUNNING, PRI_AMODE, default_amode_deff },
 #endif
 };
 

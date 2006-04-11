@@ -94,8 +94,9 @@ void egg_brian_image_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_draw_image2 (brianhead_bits);
+	font_render_string_center (&font_cu17, 96, 16, "BCD");
 	dmd_show2 ();
-	task_sleep_sec (3);
+	task_sleep_sec (8);
 	deff_exit ();
 }
 
@@ -168,12 +169,6 @@ void amode_leff (void) __taskentry__
 
 void amode_deff (void) __taskentry__
 {
-	/** Display game over screen **/
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
-	dmd_show_low ();
-	amode_page_delay (4);
-
 	for (;;)
 	{
 		/** Display last set of player scores **/
@@ -225,6 +220,11 @@ void amode_deff (void) __taskentry__
 		dmd_show_low ();
 		amode_page_delay (5);
 #endif
+
+		/* Display date/time */
+		rtc_show_date_time ();
+		if (amode_page_delay (5) && system_config.tournament_mode)
+			continue;
 
 		/* Kill music if it is running */
 		music_set (MUS_OFF);

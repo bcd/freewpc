@@ -303,9 +303,14 @@ void decimal_render (U8 val) { sprintf ("%d", val); }
 void hex_render (U8 val) { sprintf ("%X", val); }
 void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
 void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
-void hs_reset_render (U8 val) { sprintf ("%d X 250", val); }
 void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
 void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
+void lang_render (U8 val) { sprintf ("ENGLISH"); }
+
+void hs_reset_render (U8 val)
+{ 
+	sprintf ("%ld", val * 250UL);
+}
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
@@ -313,12 +318,12 @@ struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
 struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
-struct adjustment_value enabled_disabled_value = { 0, 1, 1, decimal_render };
 struct adjustment_value game_restart_value = { 0, 2, 1, decimal_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
 struct adjustment_value hs_reset_value = { 0, 40, 1, hs_reset_render };
 struct adjustment_value clock_style_value = { 0, 0, 1, clock_style_render };
 struct adjustment_value date_style_value = { 0, 0, 1, date_style_render };
+struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
@@ -326,7 +331,7 @@ struct adjustment standard_adjustments[] = {
 	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
-	{ "LANGUAGE", &integer_value, 0, &system_config.language },
+	{ "LANGUAGE", &lang_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
 	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
@@ -1180,9 +1185,38 @@ struct menu utilities_menu = {
 
 /**********************************************************************/
 
+struct menu main_audits_item = {
+	.name = "MAIN AUDITS",
+	.flags = M_ITEM,
+};
+
+struct menu earnings_audits_item = {
+	.name = "EARNINGS AUDITS",
+	.flags = M_ITEM,
+};
+
+struct menu standard_audits_item = {
+	.name = "STANDARD AUDITS",
+	.flags = M_ITEM,
+};
+
+struct menu feature_audits_item = {
+	.name = "FEATURE AUDITS",
+	.flags = M_ITEM,
+};
+
+struct menu *audit_menu_items[] = {
+	&main_audits_item,
+	&earnings_audits_item,
+	&standard_audits_item,
+	&feature_audits_item,
+	NULL,
+};
+
 struct menu bookkeeping_menu = {
 	.name = "BOOKKEEPING",
 	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = audit_menu_items },
 };
 
 /**********************************************************************/

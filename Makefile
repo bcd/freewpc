@@ -25,6 +25,7 @@
 #######################################################################
 
 # Set this to the name of the machine for which you are targetting.
+# MACHINE ?= $(shell if [ -h mach ]; then stat -c "%N" mach | awk '{print $3}' | tr -d "\`\'"; fi)
 MACHINE ?= tz
 
 # Set this to the path where the final ROM image should be installed
@@ -164,7 +165,8 @@ OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o reset.o printf.o tilt.o vector.o player.o \
-	task.o timer.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o
+	task.o timer.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o \
+	math.o rtc.o audit.o
 
 TEST_OBJS = test/window.o
 

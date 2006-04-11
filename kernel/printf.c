@@ -74,6 +74,29 @@ char *do_sprintf_decimal (char *buf, U8 b)
 }
 
 
+
+char *do_sprintf_long_decimal (char *buf, U16 w)
+{
+	static const U16 powers_of_ten[] = { 10000, 1000, 100, 10, 1 };
+	const U16 *current_power_of_ten = powers_of_ten;
+
+	if (w == 0)
+		*buf++ = '0';
+	else while (w > 0)
+	{
+		int digit = 0;
+		while (w >= *current_power_of_ten)
+		{
+			digit++;
+			w -= *current_power_of_ten;
+		}
+		*buf++ = digit + '0';
+		current_power_of_ten++;
+	}
+	return (buf);
+}
+
+
 char *do_sprintf_hex_byte (char *buf, uint8_t b)
 {
 	*buf++ = digit2char (b >> 4);
@@ -180,14 +203,14 @@ fixup_number:
 					break;
 				}
 
-				case 'l': case 'L':
+				case 'l':
 				{
 					++format;
 					switch (*format)
 					{
 						case 'x': case 'X':
 						{
-do_long_integer:
+do_long_hex_integer:
 							do {
 								register U8 b = va_arg (va, U8);
 								endbuf = do_sprintf_hex_byte (buf, b);
@@ -201,7 +224,8 @@ do_long_integer:
 						case 'd':
 						{
 							do {
-								/* TODO : register U16 w = va_arg (va, U16); */
+								register U16 w = va_arg (va, U16);
+								endbuf = do_sprintf_long_decimal (buf, w);
 								goto fixup_number;
 							} while (0);
 							break;
@@ -245,7 +269,7 @@ do_long_integer:
 				{
 					sprintf_leading_zeroes = TRUE;
 					sprintf_width = 4;
-					goto do_long_integer;
+					goto do_long_hex_integer;
 				}
 			}
 		}

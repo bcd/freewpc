@@ -68,6 +68,17 @@ void default_amode_deff (void)
 }
 #endif
 
+
+void game_over_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
 void amode_start (void)
 {
 	deff_start (DEFF_AMODE);
@@ -126,7 +137,7 @@ void end_game (void)
 
 		/* TBD - display the game over message here, before
 		 * going into attract mode */
-
+		deff_start (DEFF_GAME_OVER);
 		amode_start ();
 	}
 }

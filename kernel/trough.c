@@ -105,6 +105,11 @@ device_ops_t trough_ops = {
 	.full = trough_full,
 };
 
+
+/*
+ * The trough device properties.  Most of this is machine
+ * dependent and therefore uses MACHINE_xxx defines heavily.
+ */
 device_properties_t trough_props = {
 	.ops = &trough_ops,
 	.name = "TROUGH",
@@ -126,6 +131,9 @@ device_properties_t trough_props = {
 #endif
 #ifdef MACHINE_TROUGH5
 		MACHINE_TROUGH5,
+#endif
+#ifdef MACHINE_TROUGH6
+		MACHINE_TROUGH6,
 #endif
 	}
 };

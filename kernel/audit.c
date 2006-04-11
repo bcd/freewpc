@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -18,15 +19,21 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _SYS_BAUD_H
-#define _SYS_BAUD_H
+#include <freewpc.h>
 
-/* Defines for the serial port baud rates */
-#define BAUD_300BPS		0
-#define BAUD_600BPS		1
-#define BAUD_1200BPS		2
-#define BAUD_2400BPS		3
-#define BAUD_4800BPS		4
-#define BAUD_9600BPS		5
+__nvram__ std_audits_t system_audits;
 
-#endif /* _SYS_BAUD_H */
+void audit_reset (void)
+{
+	wpc_nvram_get ();
+	memset (&system_audits, 0, sizeof (system_audits));
+	wpc_nvram_put ();
+}
+
+void audit_increment (audit_t *aud)
+{
+	wpc_nvram_get ();
+	(*aud)++;
+	wpc_nvram_put ();
+}
+

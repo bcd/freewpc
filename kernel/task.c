@@ -467,6 +467,9 @@ void __attribute__((noreturn)) task_dispatcher (void)
 		 * system code before starting at the top again. */
 		if (tp == &task_buffer[NUM_TASKS])
 		{
+			/* TODO : all of these functions should only be called
+			 * when there is nothing else to do.  They are getting
+			 * executed way too often. */
 			extern void nvram_idle_task (void);
 
 			/* Execute idle tasks on system stack */
@@ -476,6 +479,7 @@ void __attribute__((noreturn)) task_dispatcher (void)
 			switch_idle_task ();
 			ac_idle_task ();
 			nvram_idle_task ();
+			rtc_idle_task ();
 
 			tp = &task_buffer[0];
 		}

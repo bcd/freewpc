@@ -86,6 +86,7 @@ void system_accept_freewpc (void)
 	wpc_nvram_put ();
 
 	call_far (TEST_PAGE, adj_reset_all ());
+	rtc_factory_reset ();
 }
 
 

@@ -24,8 +24,10 @@
 /*
  * Standard priorities for effects (display & lamps).
  * Use the standard priority unless you have a good reason not to.
+ * Some thought has been putting into the ordering here.
  */
 typedef enum _priority {
+	PRI_NULL,
 	PRI_AMODE,
 	PRI_COINS,
 	PRI_CREDITS,
@@ -46,7 +48,7 @@ typedef enum _priority {
 	PRI_EB,
 	PRI_JACKPOT,
 	PRI_SUPER_JACKPOT,
-	
+
 	PRI_REPLAY,
 	PRI_SPECIAL,
 
@@ -55,6 +57,7 @@ typedef enum _priority {
 	PRI_BONUS,
 	PRI_TILT_WARNING,
 	PRI_TILT,
+	PRI_GAME_OVER,
 
 	PRI_EB_BUYIN,	
 	PRI_HSENTRY,

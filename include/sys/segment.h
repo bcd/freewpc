@@ -21,6 +21,10 @@
 #ifndef _SYS_SEGMENT_H
 #define _SYS_SEGMENT_H
 
+/* This file is not used by FreeWPC.  It was used in the early
+ * days of development when the alphanumeric display was still
+ * supported.
+ */
 #define SEG_TOP			0x1
 #define SEG_UPR_RIGHT	0x2
 #define SEG_LWR_RIGHT	0x4

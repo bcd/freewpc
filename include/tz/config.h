@@ -134,15 +134,15 @@ extern const uint8_t mach_edge_switches[];
 
 /* Declare the display effects that this machine implements */
 #define MACHINE_DISPLAY_EFFECTS \
-	DECL_DEFF (DEFF_AMODE, D_RUNNING, 10, amode_deff) \
-	DECL_DEFF (DEFF_BRIAN_IMAGE, D_NORMAL, 20, egg_brian_image_deff) \
-	DECL_DEFF (DEFF_BONUS, D_RUNNING, 150, bonus_deff) \
-	DECL_DEFF (DEFF_REPLAY, D_NORMAL, 202, replay_deff) \
-	DECL_DEFF (DEFF_JACKPOT, D_NORMAL, 202, jackpot_deff) \
-	DECL_DEFF (DEFF_SPECIAL, D_NORMAL, 202, special_deff) \
-	DECL_DEFF (DEFF_EXTRA_BALL, D_NORMAL, 202, extra_ball_deff) \
-	DECL_DEFF (DEFF_BALL_SAVE, D_NORMAL, 202, ballsave_deff) \
-	DECL_DEFF (DEFF_DOOR_AWARD, D_NORMAL, 202, door_award_deff) \
+	DECL_DEFF (DEFF_AMODE, D_RUNNING, PRI_AMODE, amode_deff) \
+	DECL_DEFF (DEFF_BRIAN_IMAGE, D_NORMAL, PRI_EGG1, egg_brian_image_deff) \
+	DECL_DEFF (DEFF_BONUS, D_RUNNING, PRI_BONUS, bonus_deff) \
+	DECL_DEFF (DEFF_REPLAY, D_NORMAL, PRI_REPLAY, replay_deff) \
+	DECL_DEFF (DEFF_JACKPOT, D_NORMAL, PRI_JACKPOT, jackpot_deff) \
+	DECL_DEFF (DEFF_SPECIAL, D_NORMAL, PRI_SPECIAL, special_deff) \
+	DECL_DEFF (DEFF_EXTRA_BALL, D_NORMAL, PRI_EB, extra_ball_deff) \
+	DECL_DEFF (DEFF_BALL_SAVE, D_NORMAL, PRI_GAME_MODE1+3, ballsave_deff) \
+	DECL_DEFF (DEFF_DOOR_AWARD, D_NORMAL, PRI_GAME_MODE1+1, door_award_deff) \
 
 /* Declare the lamp effects that this machine implements */
 #define MACHINE_LAMP_EFFECTS \

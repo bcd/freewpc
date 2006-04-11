@@ -461,6 +461,11 @@ void dmd_color_test (void)
 #endif
 
 
+/*
+ * Helper function used to do a DMD transition.
+ * This contains common logic that needs to happen several times during
+ * a transition.
+ */
 extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 {
 	/* On entry, the composite buffer must be mapped into the 
@@ -595,7 +600,7 @@ void dmd_do_transition (void)
  *
  * Calling this function prior to those functions causes them to
  * behave slightly differently.  It causes a transition between the
- * old and new images to be executed.  The show functions use
+ * old and new images to be occur.  The show functions use
  * dmd_in_transition to determine whether or not a transition needs
  * to be run.
  *

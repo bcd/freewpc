@@ -31,6 +31,11 @@ typedef uint8_t adjval_t;
 #define OFF 0
 #define ON 1
 
+/* Date/Time styles */
+#define DATE_TIME_STYLE_US 0
+#define DATE_TIME_STYLE_EURO 1
+
+
 typedef struct
 {
 	adjval_t balls_per_game;

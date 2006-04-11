@@ -180,7 +180,7 @@ void leff_start (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	db_puts ("Leff start request for # "); db_puti (dn); db_putc ('\n');
+	dbprintf ("Leff start request for #%d\n", dn);
 
 	if (leff->flags & L_RUNNING)
 	{

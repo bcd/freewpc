@@ -543,6 +543,8 @@ void switch_sched (void)
 	}
 
 	/* TODO : not working */
+	/* If the switch has an associated lamp, then flicker the lamp when
+	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
 		task_t *tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
@@ -554,10 +556,16 @@ void switch_sched (void)
 	if ((swinfo->sound != 0) && in_live_game)
 		sound_send (swinfo->sound);
 
+	/* If the switch declares a processing function, call it.
+	 * Note: processing functions used to be full-fledged tasks a long
+	 * time ago, but not anymore.  These functions should 'return' and
+	 * not do a 'task_exit'. */
 	if (swinfo->fn)
 		(*swinfo->fn) ();
 
 cleanup:
+	/* If the switch is part of a device, then let the device
+	 * subsystem process the event */
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
@@ -567,9 +575,12 @@ cleanup:
 	else
 		task_sleep (swinfo->inactive_time);
 
+#if 0
+	/* This code isn't needed at the moment */
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
 	register uint8_t v = sw;
 	__clearbit(p, v);
+#endif
 
 	task_exit ();
 }
