@@ -88,6 +88,7 @@
 
 /* Define the standard solenoids */
 #define MACHINE_BALL_SERVE_SOLENOID	SOL_BALL_SERVE
+#define MACHINE_KNOCKER_SOLENOID	SOL_KNOCKER
 
 /* Define optional solenoids */
 #undef MACHINE_LAUNCH_SOLENOID
@@ -156,7 +157,35 @@ DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, 200, L_ALL_LAMPS, L_NOGI, no_lights_lef
 DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_leff) \
 
+/* Declares the lampsets that should be instantiated */
+#define MACHINE_LAMPSETS \
+	DECL_LAMPSET(LAMPSET_DOOR_PANELS, LMSET_DOOR_PANEL_AWARDS) \
+	DECL_LAMPSET(LAMPSET_DOOR_PANELS_AND_HANDLE, LMSET_DOOR_PANELS_AND_HANDLE) \
+	DECL_LAMPSET(LAMPSET_DOOR_LOCKS, LMSET_DOOR_LOCKS) \
+	DECL_LAMPSET(LAMPSET_DOOR_GUMBALL, LMSET_DOOR_GUMBALL) \
+	DECL_LAMPSET(LAMPSET_LEFT_RAMP_AWARDS, LMSET_LEFT_RAMP_AWARDS) \
+	DECL_LAMPSET(LAMPSET_LOCK_AWARDS, LMSET_LOCK_AWARDS) \
+	DECL_LAMPSET(LAMPSET_PIANO_AWARDS, LMSET_PIANO_AWARDS) \
+	DECL_LAMPSET(LAMPSET_GREED_TARGETS, LMSET_GREED_TARGETS) \
+	DECL_LAMPSET(LAMPSET_POWERFIELD_VALUES, LMSET_POWERFIELD_VALUES) \
+	DECL_LAMPSET(LAMPSET_JETS, LMSET_JETS) \
+	DECL_LAMPSET(LAMPSET_LOWER_LANES, LMSET_LOWER_LANES) \
+	DECL_LAMPSET(LAMPSET_SPIRAL_AWARDS, LMSET_SPIRAL_AWARDS) \
+	DECL_LAMPSET(LAMPSET_AMODE_ALL, LMSET_AMODE_ALL)
 
+/* Declares which coil drives correspond to flashlamps */
+#define MACHINE_SOL_FLASHERP(sol) \
+	((sol == FLASH_JETS) || (sol == FLASH_RAMP3_POWER_PAYOFF) || \
+	(sol == FLASH_POWERFIELD) || (sol == FLASH_RAMP1) || \
+	(sol == FLASH_CLOCK_TARGET) || (sol == FLASH_UR_FLIPPER) || \
+	(sol == FLASH_GUMBALL_HIGH) || (sol == FLASH_GUMBALL_MID) || \
+	(sol == FLASH_GUMBALL_LOW) || (sol == FLASH_RAMP2))
+
+/* Declares which coil drives should not be fired during ball
+ * search, for any reason.  Ball device solenoids are automatically
+ * excluded and need not be specified here.  Only solenoids 1-32
+ * will be checked; others are automatically skipped. */
+// #define MACHINE_SOL_NOSEARCHP(sol)
 
 /* Externs for any functions system needs to see */
 void piano_ball_start (void);

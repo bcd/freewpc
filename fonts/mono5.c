@@ -54,6 +54,7 @@ static const uint8_t font_5x5_sep[][7] = {
 	/* comma */ { 3, 5, 0, 0, 0, 2, 1 },
 	/* slash */ { 5, 5, 16, 8, 4, 2, 1 },
 	/* colon */ { 3, 5, 0, 2, 0, 2, 0 },
+	/* hyphen */ { 3, 5, 0, 0, 14, 0, 0 },
 };
 
 static unsigned char *mono5_glyphs[] = {
@@ -97,6 +98,7 @@ static unsigned char *mono5_glyphs[] = {
    [','] = (unsigned char *)font_5x5_sep[1],
    ['/'] = (unsigned char *)font_5x5_sep[2],
    [':'] = (unsigned char *)font_5x5_sep[3],
+   ['-'] = (unsigned char *)font_5x5_sep[4],
 };
 
 const font_t font_mono5 = {

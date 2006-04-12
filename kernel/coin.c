@@ -99,6 +99,8 @@ void credits_deff (void)
 
 void lamp_start_update (void)
 {
+	/* TODO : start button is flashing very early after reset, before
+	 * a game can actually be started. */
 	if (has_credits_p ())
 	{
 		if (!in_game)

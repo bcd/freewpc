@@ -202,6 +202,7 @@ void amode_deff (void) __taskentry__
 		deff_swap_low_high (23, TIME_100MS * 2);
 
 		/** Display high scores **/
+		high_score_amode_show ();
 
 		/** Display PLAY PINBALL message **/
 		dmd_sched_transition (&trans_scroll_left);

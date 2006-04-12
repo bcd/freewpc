@@ -67,7 +67,7 @@ static U8 sound_queue_remove (void)
 	return queue_remove ((queue_t *)&sound_queue, SOUND_QUEUE_LEN);
 }
 
-extern inline bool sound_queue_empty (void)
+inline bool sound_queue_empty (void)
 {
 	return queue_empty ((queue_t *)&sound_queue);
 }

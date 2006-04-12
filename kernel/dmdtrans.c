@@ -154,4 +154,40 @@ dmd_transition_t trans_scroll_left = {
 };
 
 
+/*********************************************************************/
+
+void trans_scroll_right_old (void)
+{
+	__blockcopy16 (dmd_high_buffer+1, dmd_low_buffer, DMD_PAGE_SIZE-1);
+}
+
+void trans_scroll_right_new (void)
+{
+	long int i;
+
+	if (dmd_trans_data_ptr == NULL)
+		dmd_trans_data_ptr = dmd_low_buffer+15;
+
+	register U8 *src = dmd_trans_data_ptr;
+	register U8 *dst = dmd_high_buffer;
+	for (i=0; i < 32L * 16; i += 64)
+	{
+		dst[i] = src[i];
+		dst[i+16] = src[i+16];
+		dst[i+32] = src[i+32];
+		dst[i+48] = src[i+48];
+	}
+
+	dmd_trans_data_ptr++;
+	if (dmd_trans_data_ptr == dmd_low_buffer + 31)
+		dmd_in_transition = FALSE;
+}
+
+
+dmd_transition_t trans_scroll_right = {
+	.composite_old = trans_scroll_right_old,
+	.composite_new = trans_scroll_right_new,
+	.delay = TIME_33MS,
+	.arg = 0,
+};
 

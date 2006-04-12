@@ -26,10 +26,10 @@
  * \brief Entry point to the game program.
  */
 
-uint8_t errcode;
+U8 errcode;
 
-__fastram__ uint8_t irq_count;
-__fastram__ uint8_t tick_count;
+__fastram__ volatile U8 irq_count;
+__fastram__ U8 tick_count;
 
 __nvram__ U8 nvram_test_byte;
 
@@ -87,8 +87,6 @@ __noreturn__ void do_reset (void)
 {
 	register uint8_t *ramptr asm ("x");
 
-	extern void lamp_demo ();
-	extern void test_start (void);
 	extern void test_init (void);
 	extern void system_reset (void);
 
@@ -203,6 +201,8 @@ __noreturn__ void do_reset (void)
 	score_init ();
 	coin_init ();
 	adj_init ();
+	high_score_init ();
+	ball_search_init ();
 	call_hook (init);
 
 	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and

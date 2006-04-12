@@ -343,7 +343,7 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 
 
 
-extern inline const switch_info_t *switch_lookup (uint8_t sw)
+inline const switch_info_t *switch_lookup (uint8_t sw)
 {
 	return switch_table[sw];
 }
@@ -407,7 +407,7 @@ void switch_init (void)
 }
 
 
-extern inline void switch_rowpoll (const uint8_t col)
+inline void switch_rowpoll (const uint8_t col)
 {
 	/* Read the switch column from the hardware.
 	 * Column 0 corresponds to the cabinet switches.

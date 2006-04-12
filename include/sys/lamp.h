@@ -40,7 +40,7 @@
 #define LAMP_DEFAULT_FLASH_RATE 3
 
 /** Small integer type for a lamp number */
-typedef uint8_t lampnum_t;
+typedef U8 lampnum_t;
 
 /** A lamp operator is any routine which abides to the following
  * prototype for modifying a simple lamp.  Standard routines
@@ -53,19 +53,31 @@ typedef void (*lamp_operator_t) (lampnum_t);
 typedef const lampnum_t lampset_t[];
 
 /** Lampsets are identified by small integers */
-typedef uint8_t lampset_id_t;
+typedef U8 lampset_id_t;
+
+
+/** Macros used to instantiate a lampset.  Lampsets are declared
+ * as a simple list of lamp values; instantiation turns the
+ * list into an actual array declaration, properly terminated. */
+#define DECL_LAMPSET_INSTANCE(idx, lampdata...) \
+	static const lampnum_t __ ## lampset_ ## idx ## _data[] = { lampdata, LAMP_END }; \
+
+
+#define DECL_LAMPSET_TABLE_ENTRY(idx, lampdata...) \
+	[idx] = __ ## lampset_ ## idx ## _data,
+
 
 /**
  * Lamp macros are lampset members which calculate actual
  * lamp values at runtime.
  *
  * Macro values start above the range of acutal lamp numbers.
+ * These macros will be deprecated and replaced by a compile-time
+ * mechanism to construct new lampsets.
  */
 
 #define LAMP_MACRO_RANGE_OP		(NUM_LAMPS + 1)
-#define LAMP_MACRO_REF_OP			(NUM_LAMPS + 2)
-#define LAMP_MACRO_REVERSE_OP		(NUM_LAMPS + 3)
-#define LAMP_END_OP					(NUM_LAMPS + 4)
+#define LAMP_END_OP					(NUM_LAMPS + 2)
 
 
 /**
@@ -74,12 +86,6 @@ typedef uint8_t lampset_id_t;
  */
 #define LAMP_MACRO_RANGE(p,q) \
 	LAMP_MACRO_RANGE_OP, (p), (q)
-
-#define LAMP_MACRO_REF(id) \
-	LAMP_MACRO_REF_OP, (id)
-
-#define LAMP_MACRO_REVERSE_REF(id) \
-	LAMP_MACRO_REF_OP, (id)
 
 #define LAMP_END LAMP_END_OP
 

@@ -31,152 +31,41 @@
 #include <freewpc.h>
 
 /* The default lampset for all lamps */
-const lampnum_t lampset_all[] = {
-	LAMP_MACRO_RANGE (0, NUM_LAMPS - 1),
-	LAMP_END,
-};
-
-/********** Game specific lamp sets *****************/
+#define LMSET_ALL_LAMPS		LAMP_MACRO_RANGE (0, NUM_LAMPS - 1)
 
 
-const lampnum_t lampset_door_panel_awards[] = {
-	LM_PANEL_TSM,
-	LM_PANEL_EB,
-	LM_PANEL_SUPER_SLOT,
-	LM_PANEL_CLOCK_MIL,
-	LM_PANEL_SPIRAL,
-	LM_PANEL_BATTLE_POWER,
-	LM_PANEL_10M,
-	LM_PANEL_GREED,
-	LM_PANEL_CAMERA,
-	LM_PANEL_HH,
-	LM_PANEL_CLOCK_CHAOS,
-	LM_PANEL_SUPER_SKILL,
-	LM_PANEL_FAST_LOCK,
-	LM_PANEL_GUMBALL,
-	LAMP_END
-};
-
-const lampnum_t lampset_door_panels_and_handle[] = {
-	LAMP_MACRO_REF(LAMPSET_DOOR_PANELS),
-	LM_PANEL_LITZ,
-	LAMP_END
-};
-
-const lampnum_t lampset_door_locks[] = {
-	LM_LOCK1, LM_LOCK2, LAMP_END
-};
-
-
-const lampnum_t lampset_door_gumball[] = {
-	LM_GUM, LM_BALL, LAMP_END
-};
-
-
-const lampnum_t lampset_left_ramp_awards[] = {
-	LM_BONUS_X,
-	LM_MULTIBALL,
-	LM_SUPER_SKILL,
-	LAMP_END
-};
-
-const lampnum_t lampset_lock_awards[] = {
-	LM_LOCK_ARROW,
-	LM_LOCK_EB,
-	LAMP_END
-};
-
-const lampnum_t lampset_piano_awards[] = {
-	LM_PIANO_PANEL,
-	LM_PIANO_JACKPOT,
-	LAMP_END
-};
-
-const lampnum_t lampset_greed_targets[] = {
-	LM_LL_5M,
-	LM_ML_5M,
-	LM_UL_5M,
-	LM_UR_5M,
-	LM_MR2_5M,
-	LM_MR1_5M,
-	LM_LR_5M,
-	LAMP_END
-};
-
-const lampnum_t lampset_powerfield_values[] = {
-	LM_MPF_500K,
-	LM_MPF_750K,
-	LM_MPF_1M,
-	LAMP_END
-};
-
-const lampnum_t lampset_jets[] = {
-	LM_LEFT_JET,
-	LM_RIGHT_JET,
-	LM_LOWER_JET,
-	LAMP_END
-};
-
-
-const lampnum_t lampset_lower_lanes[] = {
-	LM_LEFT_OUTLANE,
-	LM_LEFT_INLANE1,
-	LM_LEFT_INLANE2,
-	LM_RIGHT_INLANE,
-	LM_RIGHT_OUTLANE,
-	LAMP_END
-};
-
-
-const lampnum_t lampset_spiral_awards[] = {
-	LM_SPIRAL_2M,
-	LM_SPIRAL_3M,
-	LM_SPIRAL_4M,
-	LM_SPIRAL_5M,
-	LM_SPIRAL_10M,
-	LM_SPIRAL_EB,
-	LAMP_END
-};
-
-const lampnum_t lampset_amode_all[] = {
-	LAMP_MACRO_REF(LAMPSET_DOOR_PANELS_AND_HANDLE),
-	LAMP_MACRO_REF(LAMPSET_DOOR_LOCKS),
-	LAMP_MACRO_REF(LAMPSET_DOOR_GUMBALL),
-	LAMP_MACRO_REF(LAMPSET_SPIRAL_AWARDS),
-	LAMP_MACRO_REF(LAMPSET_LOWER_LANES),
-	LAMP_MACRO_REF(LAMPSET_JETS),
-	LAMP_MACRO_REF(LAMPSET_POWERFIELD_VALUES),
-	LM_LEFT_SPIRAL,
-	LM_LEFT_POWERBALL,
-	LAMP_MACRO_REF(LAMPSET_LEFT_RAMP_AWARDS),
-	LM_RAMP_BATTLE,
-	LAMP_MACRO_REF(LAMPSET_LOCK_AWARDS),
-	LAMP_MACRO_REF(LAMPSET_PIANO_AWARDS),
-	LM_RIGHT_SPIRAL,
-	LM_RIGHT_POWERBALL,
-	LAMP_MACRO_REF(LAMPSET_GREED_TARGETS),
-	LAMP_END
-};
-
+/* The list of all system-defined lampsets */
+#define SYSTEM_LAMPSETS \
+	DECL_LAMPSET (LAMPSET_ALL, LMSET_ALL_LAMPS)
 
 /*
- * Lampsets are statically registered in the following table.
+ * Declare the lampset arrays.  Here, the actual storage space is
+ * defined.  Each lampset appears as an array of lamp values, terminated
+ * by the special value LAMP_END.
  */
+
+#undef DECL_LAMPSET
+#define DECL_LAMPSET(idx, lampdata)	DECL_LAMPSET_INSTANCE(idx, lampdata)
+
+SYSTEM_LAMPSETS
+#ifdef MACHINE_LAMPSETS
+MACHINE_LAMPSETS
+#endif
+
+/*
+ * Declare the lampset table.  This is an array of pointers to each of
+ * the lampsets defined above.  Lampsets can be referred to by index
+ * instead of pointer this way.
+ */
+
+#undef DECL_LAMPSET
+#define DECL_LAMPSET(idx, lampdata)	DECL_LAMPSET_TABLE_ENTRY(idx, lampdata)
+
 const lampnum_t *lampset_table[] = {
-	[LAMPSET_ALL] = lampset_all,
-	[LAMPSET_DOOR_PANELS] = lampset_door_panel_awards,
-	[LAMPSET_DOOR_PANELS_AND_HANDLE] = lampset_door_panels_and_handle,
-	[LAMPSET_LEFT_RAMP_AWARDS] = lampset_left_ramp_awards,
-	[LAMPSET_LOCK_AWARDS] = lampset_lock_awards,
-	[LAMPSET_PIANO_AWARDS] = lampset_piano_awards,
-	[LAMPSET_GREED_TARGETS] = lampset_greed_targets,
-	[LAMPSET_POWERFIELD_VALUES] = lampset_powerfield_values,
-	[LAMPSET_JETS] = lampset_jets,
-	[LAMPSET_LOWER_LANES] = lampset_lower_lanes,
-	[LAMPSET_SPIRAL_AWARDS] = lampset_spiral_awards,
-	[LAMPSET_DOOR_LOCKS] = lampset_door_locks,
-	[LAMPSET_DOOR_GUMBALL] = lampset_door_gumball,
-	[LAMPSET_AMODE_ALL] = lampset_amode_all,
+	SYSTEM_LAMPSETS
+#ifdef MACHINE_LAMPSETS
+	MACHINE_LAMPSETS
+#endif
 };
 
 
@@ -242,11 +131,6 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				for (opcode = lset[0]; opcode < lset[1]; opcode++)
 					lampset_invoke_operator (opcode, op);
 				lset += 2;
-				break;
-
-			case LAMP_MACRO_REF_OP:
-				lset_stack[lset_stack_offset++] = lset+1;
-				lset = lampset_table[lset[0]];
 				break;
 
 			case LAMP_END:

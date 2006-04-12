@@ -166,7 +166,7 @@ OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
 	trough.o reset.o printf.o tilt.o vector.o player.o \
 	task.o timer.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o \
-	math.o rtc.o audit.o
+	math.o rtc.o audit.o search.o highscore.o
 
 TEST_OBJS = test/window.o
 
@@ -367,7 +367,10 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 #
 # Define a mapping between object files and page numbers in
 # which they should be placed.  This information must be
-# provided in both directions.
+# provided in both directions.  Also, the mapping must be
+# available to the C code in the form of xxx_PAGE macros
+# for when the code wants to switch the page to a particular
+# class of function.
 #
 page56_OBJS = page56.o
 page57_OBJS = page57.o
@@ -382,6 +385,7 @@ $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 
 PAGE_DEFINES := -DTEST_PAGE=58 -DSYS_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
+
 
 PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
 				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)

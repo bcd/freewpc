@@ -28,7 +28,15 @@
 
 my $prefix = "GID_";
 
-my @dirs = ("include", "kernel", "mach", "fonts", "test");
+my @dirs = (
+	"include", 
+	"include/sys", 
+	"include/mach", 
+	"kernel", 
+	"mach", 
+	"fonts", 
+	"test"
+	);
 
 my $firstval = 1;
 
@@ -49,7 +57,7 @@ while ($arg = shift)
 
 foreach $dir (@dirs) {
 	my @files = split /\n+/, 
-		`cd $dir && find . -name "*.c" -or -name "*.h"`;
+		`cd $dir && find . -maxdepth 1 -name "*.[ch]"`;
 	foreach $file (@files) {
 		push @srclist, "$dir/" . $file;
 	}

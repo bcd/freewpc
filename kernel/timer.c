@@ -21,12 +21,19 @@
 
 #include <freewpc.h>
 
-/*
- * Timers are special cases of tasks; they just all run the same
- * function, counting down the time, then exiting.
+/**
+ * \file
+ * \brief Timer APIs
  *
- * TIMER_GRAN is the minimum granularity of all timers.
+ * Timers are special cases of tasks; they just all run the same
+ * function, counting down the time, then exiting.  Actually, there
+ * are a few different predefined timer functions, which offer
+ * slightly different behavior.
+ *
+ * The timer APIs are very similar to the task APIs, just with the
+ * addition of a timeout value in most places.
  */
+
 
 #define TIMER_FREERUNNING_GRAN	(TIME_100MS * 5)
 #define TIMER_PAUSABLE_GRAN		(TIME_100MS * 2)

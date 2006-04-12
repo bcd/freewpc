@@ -84,6 +84,7 @@ U8 *dmd_trans_data_ptr2;
  */
 U8 dmd_composite_page;
 
+
 /**
  * The DMD controller has two registers for controlling which pages
  * are mapped into addressable memory.  
@@ -92,22 +93,22 @@ U8 dmd_composite_page;
  * variables.  Then reads can be done using the cached values.
  */
 
-extern inline void wpc_dmd_set_low_page (U8 val)
+inline void wpc_dmd_set_low_page (U8 val)
 {
 	*(U8 *)WPC_DMD_LOW_PAGE = dmd_low_page = val;
 }
 
-extern inline U8 wpc_dmd_get_low_page (void)
+inline U8 wpc_dmd_get_low_page (void)
 {
 	return dmd_low_page;
 }
 
-extern inline void wpc_dmd_set_high_page (U8 val)
+inline void wpc_dmd_set_high_page (U8 val)
 {
 	*(U8 *)WPC_DMD_HIGH_PAGE = dmd_high_page = val;
 }
 
-extern inline U8 wpc_dmd_get_high_page (void)
+inline U8 wpc_dmd_get_high_page (void)
 {
 	return dmd_high_page;
 }
@@ -462,7 +463,7 @@ void dmd_color_test (void)
  * This contains common logic that needs to happen several times during
  * a transition.
  */
-extern inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
+inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 {
 	/* On entry, the composite buffer must be mapped into the 
 	 * high page. */

@@ -24,8 +24,7 @@
 
 /**
  * \file
- * \brief An implementation of the C printf() routine (non-standard) for
- * writing formatted text to the DMD.
+ * \brief An implementation of the C printf() routine (non-standard).
  */
 
 char sprintf_buffer[PRINTF_BUFFER_SIZE];

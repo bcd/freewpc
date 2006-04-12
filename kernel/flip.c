@@ -113,7 +113,7 @@ void flipper_disable (void)
 }
 
 
-extern inline void flipper_service (
+inline void flipper_service (
 	U8 sw_button,
 	U8 sw_eos,
 	U8 sol_power,

@@ -48,8 +48,8 @@ static U8 days_in_month_table[] = {
 };
 
 static const char *month_names[] = {
-	"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-	"JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+	"JAN.", "FEB.", "MAR.", "APR.", "MAY.", "JUN.",
+	"JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC.",
 };
 
 

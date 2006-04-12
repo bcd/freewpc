@@ -42,15 +42,29 @@ typedef uint8_t dmd_pagenum_t;
 /** The type of a page buffer pointer */
 typedef uint8_t *dmd_buffer_t;
 
+
 /** A DMD transition describes all of the properties of a
  * transition, such as the functions that render each
  * successive frame change, timing, etc.
  */
 typedef struct
 {
+	/** Render the part of the transitional image that comes from
+	 * the previous image. */
 	void (*composite_old) (void);
+
+	/** Render the part of the transitional image that comes from
+	 * the new image.   This function is also responsible for
+	 * determining when the transition is finished; it should
+	 * dmd_in_transition to FALSE when this happens.
+	 */
 	void (*composite_new) (void);
+
+	/** A parameter that determines how fast the transition occurs.
+	 * This is the delay between transitional frames, and is given
+	 * as a TIME_xxx define. */
 	U8 delay;
+
 	U8 arg;
 } dmd_transition_t;
 
@@ -68,7 +82,8 @@ extern dmd_transition_t *dmd_transition;
 extern dmd_transition_t 
 	trans_scroll_up,
 	trans_scroll_down,
-	trans_scroll_left
+	trans_scroll_left,
+	trans_scroll_right
 	;
 
 void dmd_init (void);

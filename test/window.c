@@ -69,6 +69,10 @@ U8 in_test;
  */
 static void null_function (void) {}
 
+
+/* The window stack keeps track of where you came from, so when you
+ * exit a menu/window/whatever, you can go back to where you started.
+ * There is a maximum depth here, which should be sufficient. */
 struct window win_stack[8];
 
 
@@ -135,6 +139,9 @@ void window_push (struct window_ops *ops, void *priv)
 
 void window_pop (void)
 {
+	if (win_top == NULL)
+		return;
+
 	window_stop_thread ();
 	window_call_op (win_top, exit);
 	sound_send (SND_TEST_ESCAPE);
@@ -356,6 +363,9 @@ struct adjustment feature_adjustments[] = {
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
+#else
+	{ "", &on_off_value, OFF, NULL },
+	{ "", &on_off_value, OFF, NULL },
 #endif
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
 	{ NULL, NULL, 0, NULL },
@@ -377,6 +387,14 @@ struct adjustment pricing_adjustments[] = {
 #else
 	{ "FREE PLAY", &yes_no_value, YES, &price_config.free_play },
 #endif
+	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
+	{ "1-COIN BUY-IN", &yes_no_value, NO, NULL },
+	{ "COIN METER UNITS", &integer_value, 0, NULL },
+	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
+	{ "MIN. COIN MSEC.", &integer_value, 50, NULL },
+	{ "SLAMTILT PENALTY", &yes_no_value, YES, NULL },
+	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, NULL },
+	{ "CREDIT FRACTION", &on_off_value, OFF, NULL },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -633,6 +651,7 @@ struct window_ops adj_browser_window = {
 
 void (*confirm_banner) (void);
 void (*confirm_action) (void);
+U8 confirm_timer;
 
 void confirm_init (void)
 {
@@ -642,13 +661,50 @@ void confirm_init (void)
 void confirm_draw (void)
 {
 	dmd_alloc_low_clean ();
+	font_render_string (&font_mono5, 64, 8, "ENTER TO CONFIRM");
+	font_render_string (&font_mono5, 64, 14, "ESCAPE TO CANCEL");
 	dmd_show_low ();
+}
+
+void confirm_enter (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string (&font_mono5, 64, 10, "SAVING NEW");
+	font_render_string (&font_mono5, 64, 20, "ADJUSTMENT VALUE");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	window_pop ();
+}
+
+void confirm_escape (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string (&font_mono5, 64, 10, "ESCAPE PRESSED");
+	font_render_string (&font_mono5, 64, 20, "CHANGED IGNORED");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	window_pop ();
+}
+
+void confirm_thread (void)
+{
+	confirm_timer = 7;
+	while (confirm_timer > 0)
+	{
+		task_sleep_sec (1);
+		confirm_timer--;
+		confirm_draw ();
+	}
+	confirm_escape ();
 }
 
 struct window_ops confirm_window = {
 	DEFAULT_WINDOW,
 	.init = confirm_init,
 	.draw = confirm_draw,
+	.enter = confirm_enter,
+	.escape = confirm_escape,
+	.thread = confirm_thread,
 };
 
 
@@ -1249,7 +1305,10 @@ struct menu clear_credits_item = {
 	.flags = M_ITEM,
 };
 
-/**********************************************************************/
+struct menu clear_coins_item = {
+	.name = "CLEAR COINS",
+	.flags = M_ITEM,
+};
 
 struct menu set_time_item = {
 	.name = "SET DATE/TIME",
@@ -1296,6 +1355,7 @@ struct menu revoke_item = {
 struct menu *util_menu_items[] = {
 	&factory_reset_item,
 	&clear_credits_item,
+	&clear_coins_item,
 	&set_time_item,
 	&burnin_item,
 	&revoke_item,
