@@ -353,7 +353,9 @@ DIRECT_LNK_CMD = "-x"
 endif
 MALLOC_AREA = 0x1400
 STACK_AREA = 0x1600
-NVRAM_AREA = 0x1800
+# The first 16-bytes of the nonvolatile area are reserved.
+# PinMAME has a hack that overwrites this area.
+NVRAM_AREA = 0x1810
 PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
@@ -593,8 +595,12 @@ $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE
 $(C_OBJS) : GCC_LANG=
 $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
-$(C_OBJS) : %.o : %.c $(DEPS) $(GENDEFINES) $(REQUIRED)
+$(C_OBJS) : %.o : %.c 
+
+$(C_OBJS) : $(DEPS) $(GENDEFINES) $(REQUIRED)
+
 $(XBM_OBJS) : %.o : %.xbm
+
 $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):

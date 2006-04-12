@@ -24,6 +24,8 @@ __nvram__ std_adj_t system_config;
 
 __nvram__ pricing_adj_t price_config;
 
+__nvram__ hstd_adj_t hstd_config;
+
 
 void adj_init (void)
 {

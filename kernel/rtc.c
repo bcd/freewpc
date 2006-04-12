@@ -21,6 +21,15 @@
 
 #include <freewpc.h>
 
+struct wpc_pinmame_clock_data
+{
+	U16 year;
+	U8 month;
+	U8 day;
+	U8 day_of_week;
+};
+
+
 /* Year is stored as an offset from 2000 */
 static __nvram__ U8 year;
 static __nvram__ U8 month;
@@ -110,13 +119,32 @@ static void rtc_hw_read (void)
 }
 
 
+static void rtc_pinmame_read (void)
+{
+	struct wpc_pinmame_clock_data *clock_data;
+
+	clock_data = (struct wpc_pinmame_clock_data *)0x1800;
+	if (clock_data->year >= 2000)
+	{
+		wpc_nvram_get ();
+		year = clock_data->year - 2000;
+		month = clock_data->month;
+		day = clock_data->day;
+		wpc_nvram_put ();
+	}
+}
+
+
 void rtc_idle_task (void)
 {
 	rtc_hw_read ();
 	rtc_normalize ();
 
 	if (minute != last_minute)
+	{
 		audit_increment (&system_audits.minutes_on);
+		rtc_pinmame_read ();
+	}
 }
 
 
@@ -129,7 +157,7 @@ void rtc_render_date (void)
 			sprintf ("%s %d, 20%02d", month_names[month-1], day, year);
 			break;
 		case DATE_TIME_STYLE_EURO:
-			sprintf ("%d %s, 20%02d", day, month_names[month-1], year);
+			sprintf ("%d %s 20%02d", day, month_names[month-1], year);
 			break;
 	}
 }

@@ -70,6 +70,10 @@ typedef struct
 	adjval_t no_bonus_flips;
 	adjval_t game_restart;
 	adjval_t family_mode;
+#ifdef MACHINE_LAUNCH_SWITCH
+	adjval_t flipper_plunger;
+	adjval_t timed_plunger;
+#endif
 } std_adj_t;
 
 extern std_adj_t system_config;
@@ -95,6 +99,19 @@ typedef struct
 } pricing_adj_t;
 
 extern pricing_adj_t price_config;
+
+
+typedef struct
+{
+	adjval_t highest_scores;
+	adjval_t hstd_award;
+	adjval_t champion_hstd;
+	adjval_t hstd_credits[4];
+	adjval_t hs_reset_every;
+} hstd_adj_t;
+
+extern hstd_adj_t hstd_config;
+
 
 void adj_init (void);
 

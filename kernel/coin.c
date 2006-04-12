@@ -26,24 +26,12 @@
 
 #include <freewpc.h>
 
-/** The maximum number of credits allowed.  Inserting more coins
- * will not cause any more credits to be added beyond this amount. */
-#define MAX_CREDITS 30
-
 /** The number of credits */
 __nvram__ U8 credit_count;
 
 /** The number of additional units purchased, less than the value
  * of one credit */
 __nvram__ U8 unit_count;
-
-/** The configuration that determines how many units are equal to one
- * credit */
-__nvram__ U8 units_per_credit;
-
-/** The configuration that determines how many units are awarded for
- * each coin insertion, which may be different for each coin slot */
-__nvram__ U8 units_per_coin[4];
 
 
 void credits_render (void)
@@ -59,12 +47,12 @@ void credits_render (void)
 		{
 			if (credit_count == 0)
 			{
-				sprintf ("%d/%d CREDIT", unit_count, units_per_credit);
+				sprintf ("%d/%d CREDIT", unit_count, price_config.units_per_credit);
 			}
 			else
 			{
 				sprintf ("%d %d/%d CREDITS",
-					credit_count, unit_count, units_per_credit);
+					credit_count, unit_count, price_config.units_per_credit);
 			}
 		}
 		else
@@ -131,7 +119,7 @@ void lamp_start_update (void)
 
 void add_credit (void)
 {
-	if (credit_count >= MAX_CREDITS)
+	if (credit_count >= price_config.max_credits)
 		return;
 
 #ifndef FREE_ONLY
@@ -181,19 +169,19 @@ void remove_credit (void)
 
 void add_units (int n)
 {
-	if (credit_count >= MAX_CREDITS)
+	if (credit_count >= price_config.max_credits)
 		return;
 
 	wpc_nvram_get ();
 	unit_count += n;
 	wpc_nvram_put ();
 
-	if (unit_count >= units_per_credit)
+	if (unit_count >= price_config.units_per_credit)
 	{
-		while (unit_count >= units_per_credit)
+		while (unit_count >= price_config.units_per_credit)
 		{
 			wpc_nvram_get ();
-			unit_count -= units_per_credit;
+			unit_count -= price_config.units_per_credit;
 			wpc_nvram_put ();
 
 			add_credit ();
@@ -222,7 +210,7 @@ void coin_deff (void) __taskentry__
 
 static void do_coin (uint8_t slot)
 {
-	add_units (units_per_coin[slot]);
+	add_units (price_config.slot_values[slot]);
 }
 
 void sw_left_coin_handler (void)
@@ -274,16 +262,8 @@ void coin_init (void)
 {
 	/* TODO : this should only be done during a factory reset */
 	wpc_nvram_get ();
-
 	credit_count = 0;
 	unit_count = 0;
-
-	units_per_credit = 2;
-	units_per_coin[0] = 1;
-	units_per_coin[1] = 4;
-	units_per_coin[2] = 1;
-	units_per_coin[3] = 1;
-
 	wpc_nvram_put ();
 
 	lamp_start_update ();

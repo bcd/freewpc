@@ -77,12 +77,12 @@ char *do_sprintf_decimal (char *buf, U8 b)
 
 char *do_sprintf_long_decimal (char *buf, U16 w)
 {
-	static const U16 powers_of_ten[] = { 10000, 1000, 100, 10, 1 };
+	static const U16 powers_of_ten[] = { 10000, 1000, 100, 10, 1, 0 };
 	const U16 *current_power_of_ten = powers_of_ten;
 
 	if (w == 0)
 		*buf++ = '0';
-	else while (w > 0)
+	else while (*current_power_of_ten != 0)
 	{
 		int digit = 0;
 		while (w >= *current_power_of_ten)

@@ -439,12 +439,58 @@ extern inline void switch_rowpoll (const uint8_t col)
 		asm __volatile__ ("\tstb " STR(WPC_SW_COL_STROBE));
 	}
 
+	/* Process the switch column.
+	 * This code is written in assembler in order to use the 'a'
+	 * register, which keeps this code fast.
+	 * For each column, 3 different values are stored:
+	 * AR_RAW - the last raw reading from the hardware
+	 *
+	 * AR_CHANGED - '1' means the raw reading changed since the last
+	 * poll.  This is computed as the XOR of the previous two readings.
+	 *
+	 * AR_PENDING - '1' means the switch changed and is waiting to be
+	 * processed.  Anytime AR_CHANGED becomes asserted, the same bits
+	 * are ORed into this variable.  Changes queue up here until the
+	 * switch can be processed by the idle task.
+	 *
+	 * TODO - add an AR_DEBOUNCED field which performs simple debouncing
+	 * of the raw values, to eliminate spurious transitions.
+	 */
+#if 0
 	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
 	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_RAW][col]));
 	asm __volatile__ ("\teorb\t%0"  	:: "m" (switch_bits[AR_RAW][col]));
 	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
 	asm __volatile__ ("\torb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
 	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
+#endif
+
+	/* Load previous raw state of switch */
+	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
+
+	/* Save current raw state of switch */
+	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_RAW][col]));
+	
+	/* Did switch change? B=0: no change, B=1: change */
+	asm __volatile__ ("\teorb\t%0"  	:: "m" (switch_bits[AR_RAW][col]));
+
+	/* Did the switch change states the last time? */
+	asm __volatile__ ("\tlda\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
+
+	/* Save current change state of switch */
+	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
+
+	/* Is this a stable switch change?  This occurs when a change
+	 * is followed by no-change; i.e. the current change value is 0
+	 * and the previous change value is 1.  The following computes
+	 * A=0: not a stable change, A=1: stable change */
+	asm __volatile__ ("\tcoma");
+	asm __volatile__ ("\tora\t%0"  	:: "m" (switch_bits[AR_CHANGED][col]));
+	asm __volatile__ ("\tcoma");
+
+	/* Enqueue any stable changes into the pending array */
+	asm __volatile__ ("\tora\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
+	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
 }
 
 

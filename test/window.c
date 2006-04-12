@@ -86,10 +86,15 @@ void window_push_first (void)
 
 void window_pop_first (void)
 {
-	in_test = 0;
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+
+	/* Delay before starting amode and actually
+	 * exiting test mode; this keeps extra presses 
+	 * of the escape button from adding service credits. */
+	task_sleep_sec (1);
 	amode_start ();
+	in_test = 0;
 }
 
 void window_start_thread (void)
@@ -309,7 +314,10 @@ void lang_render (U8 val) { sprintf ("ENGLISH"); }
 
 void hs_reset_render (U8 val)
 { 
-	sprintf ("%ld", val * 250UL);
+	if (val == 0)
+		sprintf ("OFF");
+	else
+		sprintf ("%ld", val * 250UL);
 }
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
@@ -321,8 +329,9 @@ struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
 struct adjustment_value game_restart_value = { 0, 2, 1, decimal_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
 struct adjustment_value hs_reset_value = { 0, 40, 1, hs_reset_render };
-struct adjustment_value clock_style_value = { 0, 0, 1, clock_style_render };
-struct adjustment_value date_style_value = { 0, 0, 1, date_style_render };
+struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
+struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
+struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 
 struct adjustment standard_adjustments[] = {
@@ -339,21 +348,72 @@ struct adjustment standard_adjustments[] = {
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
 	{ "NO BONUS FLIPS", &yes_no_value, NO, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
-	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+	{ NULL, NULL, 0, NULL },
+};
 
-	{ "MAXIMUM CREDITS", &max_credits_value, 10, &price_config.max_credits },
-	{ "FREE PLAY", &yes_no_value, 
-#ifdef FREE_ONLY
-		YES,
-#else
-		NO, 
+
+struct adjustment feature_adjustments[] = {
+#ifdef MACHINE_LAUNCH_SWITCH
+	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
+	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
-		&price_config.free_play },
-	
-	{ "HIGHEST SCORES", &on_off_value, ON, NULL },
-	{ "GRAND CHAMPION", &on_off_value, ON, NULL },
-	{ "H.S. RESET EVERY", &hs_reset_value, 12, NULL },
+	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+	{ NULL, NULL, 0, NULL },
 
+};
+
+
+struct adjustment pricing_adjustments[] = {
+	{ "UNITS PER CREDIT", &integer_value, 2, &price_config.units_per_credit },
+	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
+	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
+	{ "LEFT SLOT VALUE", &integer_value, 1, &price_config.slot_values[0] },
+	{ "CENTER SLOT VALUE", &integer_value, 4, &price_config.slot_values[1] },
+	{ "RIGHT SLOT VALUE", &integer_value, 1, &price_config.slot_values[2] },
+	{ "4TH SLOT VALUE", &integer_value, 1, &price_config.slot_values[3] },
+	{ "MAXIMUM CREDITS", &integer_value, 10, &price_config.max_credits },
+#ifdef FREE_ONLY
+	{ "", &yes_no_value, NO, &price_config.free_play },
+#else
+	{ "FREE PLAY", &yes_no_value, YES, &price_config.free_play },
+#endif
+	{ NULL, NULL, 0, NULL },
+};
+
+
+struct adjustment hstd_adjustments[] = {
+	{ "HIGHEST SCORES", &on_off_value, ON, &hstd_config.highest_scores },
+	{ "H.S.T.D. AWARD", &on_off_value, ON, &hstd_config.hstd_award },
+	{ "CHAMPION H.S.T.D.", &on_off_value, ON, &hstd_config.champion_hstd },
+	{ "CHAMPION CREDITS", &on_off_value, ON, NULL },
+	{ "H.S.T.D. 1 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[0] },
+	{ "H.S.T.D. 2 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[1] },
+	{ "H.S.T.D. 3 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[2] },
+	{ "H.S.T.D. 4 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[3] },
+	{ "H.S. RESET EVERY", &hs_reset_value, 12, &hstd_config.hs_reset_every },
+	{ "BACKUP CHAMPION", &score_value, 0, NULL },
+	{ "BACKUP H.S.T.D. 1", &score_value, 0, NULL },
+	{ "BACKUP H.S.T.D. 2", &score_value, 0, NULL },
+	{ "BACKUP H.S.T.D. 3", &score_value, 0, NULL },
+	{ "BACKUP H.S.T.D. 4", &score_value, 0, NULL },
+	{ NULL, NULL, 0, NULL },
+};
+
+
+struct adjustment printer_adjustments[] = {
+	{ "COLUMN WIDTH", &integer_value, 72, NULL },
+	{ "LINES PER PAGE", &integer_value, 60, NULL },
+	{ "PAUSE EVERY PAGE", &yes_no_value, NO, NULL },
+	{ "PRINTER TYPE", &integer_value, 0, NULL },
+	{ "SERIAL BAUD RATE", &integer_value, 0, NULL },
+	{ "SERIAL D.T.R.", &integer_value, 0, NULL },
+	{ "AUTO PRINTOUT", &on_off_value, OFF, NULL },
+	{ NULL, NULL, 0, NULL },
+};
+
+
+struct adjustment empty_adjustments[] = {
+	{ "EMPTY ADJ. SET", &integer_value, 0, NULL },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -391,32 +451,48 @@ void adj_verify (struct adjustment *adjs)
 void adj_reset_all (void)
 {
 	adj_reset (standard_adjustments);
+	adj_reset (feature_adjustments);
+	adj_reset (pricing_adjustments);
+	adj_reset (hstd_adjustments);
+	adj_reset (printer_adjustments);
 }
 
 
 void adj_verify_all (void)
 {
 	adj_verify (standard_adjustments);
+	adj_verify (feature_adjustments);
+	adj_verify (pricing_adjustments);
+	adj_verify (hstd_adjustments);
+	adj_verify (printer_adjustments);
 }
 
 
 void adj_browser_draw (void)
 {
-	struct menu *m = win_top->w_class.menu.self;
 	struct adjustment *ad = browser_adjs + menu_selection;
 
 	dmd_alloc_low_clean ();
 
-	font_render_string_center (&font_5x5, 64, 1, m->name);
-
 	sprintf ("%d. %s", menu_selection+1, ad->name);
 	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
 
-	if (browser_action == ADJ_EDITING)
-		ad->values->render (adj_edit_value);
+	if (ad->nvram == NULL)
+	{
+		font_render_string_center (&font_5x5, 32, 20, "N/A");
+	}
 	else
-		ad->values->render (*(ad->nvram));
-	font_render_string_center (&font_5x5, 64, 19, sprintf_buffer);
+	{
+		if (browser_action == ADJ_EDITING)
+			ad->values->render (adj_edit_value);
+		else if (ad->nvram)
+			ad->values->render (adj_edit_value = *(ad->nvram));
+
+		font_render_string_center (&font_5x5, 32, 21, sprintf_buffer);
+
+		if (adj_edit_value == ad->factory_default)
+			font_render_string_center (&font_5x5, 96, 21, "DEFAULT");
+	}
 
 	if (browser_action == ADJ_EDITING)
 		dmd_invert_page (dmd_low_buffer);
@@ -427,13 +503,28 @@ void adj_browser_draw (void)
 
 void adj_browser_init (void)
 {
+	struct adjustment *ad;
+
 	browser_init ();
 	browser_action = ADJ_BROWSING;
 	browser_min = 0;
 
-	browser_adjs = standard_adjustments;
-	/* the last entry must be NULL, so don't count that one */
-	browser_max = (sizeof (standard_adjustments) / sizeof (struct adjustment))-2;
+	ad = browser_adjs = win_top->w_class.priv;
+
+	/* Count the number of adjustments manually by stepping through
+	 * the array of entries */
+	browser_max = -1;
+	while (ad->name != NULL)
+	{
+		browser_max++;
+		ad++;
+	}
+	if (browser_max == -1)
+	{
+		/* No adjustments were defined in this menu. */
+		browser_adjs = empty_adjustments;
+		browser_max = 0;
+	}
 }
 
 void adj_browser_enter (void)
@@ -443,15 +534,19 @@ void adj_browser_enter (void)
 	{
 		adj_edit_value = *(browser_adjs[menu_selection].nvram);
 		browser_action = ADJ_EDITING;
+		sound_send (SND_TEST_ENTER);
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		//browser_action = ADJ_CONFIRMING;
 
-		wpc_nvram_get ();
-		*(browser_adjs[menu_selection].nvram) = adj_edit_value;
-		wpc_nvram_put ();
-		sound_send (SND_TEST_CONFIRM);
+		if (*(browser_adjs[menu_selection].nvram) != adj_edit_value)
+		{
+			wpc_nvram_get ();
+			*(browser_adjs[menu_selection].nvram) = adj_edit_value;
+			wpc_nvram_put ();
+			sound_send (SND_TEST_CONFIRM);
+		}
 		browser_action = ADJ_BROWSING;
 	}
 }
@@ -462,6 +557,7 @@ void adj_browser_escape (void)
 	if (browser_action == ADJ_EDITING)
 	{
 		/* abort */
+		sound_send (SND_TEST_ABORT);
 		browser_action = ADJ_BROWSING;
 	}
 	else if (browser_action == ADJ_CONFIRMING)
@@ -478,7 +574,11 @@ void adj_browser_escape (void)
 void adj_browser_up (void)
 {
 	if (browser_action == ADJ_BROWSING)
-		browser_up ();
+	{
+		do {
+			browser_up ();
+		} while (!*browser_adjs[menu_selection].name);
+	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		sound_send (SND_TEST_UP);
@@ -493,7 +593,11 @@ void adj_browser_up (void)
 void adj_browser_down (void)
 {
 	if (browser_action == ADJ_BROWSING)
-		browser_down ();
+	{
+		do {
+			browser_down ();
+		} while (!*browser_adjs[menu_selection].name);
+	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		sound_send (SND_TEST_DOWN);
@@ -623,7 +727,7 @@ void menu_enter (void)
 		struct window_ops *ops = m->var.subwindow.ops;
 		if (ops != NULL)
 		{
-			window_push (ops, m);
+			window_push (ops, m->var.subwindow.priv ? m->var.subwindow.priv : m);
 		}
 		else
 		{
@@ -1117,15 +1221,35 @@ struct menu development_menu = {
 
 /**********************************************************************/
 
+void factory_reset_init (void)
+{
+	adj_reset_all ();
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_5x5, 64, 12, "FACTORY SETTINGS");
+	font_render_string_center (&font_5x5, 64, 24, "RESTORED");
+	dmd_show_low ();
+}
+
+struct window_ops factory_reset_window = {
+	DEFAULT_WINDOW,
+	.init = factory_reset_init,
+};
+
 struct menu factory_reset_item = {
 	.name = "FACTORY RESET",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &factory_reset_window, NULL } },
 };
+
+/**********************************************************************/
 
 struct menu clear_credits_item = {
 	.name = "CLEAR CREDITS",
 	.flags = M_ITEM,
 };
+
+/**********************************************************************/
 
 struct menu set_time_item = {
 	.name = "SET DATE/TIME",
@@ -1137,6 +1261,7 @@ struct menu burnin_item = {
 	.flags = M_ITEM,
 };
 
+/**********************************************************************/
 
 void revoke_init (void)
 {
@@ -1221,45 +1346,49 @@ struct menu bookkeeping_menu = {
 
 /**********************************************************************/
 
-struct menu date_style_item = {
-	.name = "DATE STYLE",
+struct menu standard_adjustments_menu = {
+	.name = "STANDARD ADJ.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, standard_adjustments } },
 };
 
-struct menu clock_style_item = {
-	.name = "CLOCK STYLE",
+struct menu feature_adjustments_menu = {
+	.name = "FEATURE ADJ.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, feature_adjustments } },
 };
 
-struct menu euro_score_format_item = {
-	.name = "EURO. SCR. FORMAT",
+struct menu pricing_adjustments_menu = {
+	.name = "PRICING ADJ.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, pricing_adjustments } },
 };
 
-struct menu game_restart_item = {
-	.name = "GAME RESTART",
+struct menu hstd_adjustments_menu = {
+	.name = "H.S.T.D. ADJ.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, hstd_adjustments } },
 };
 
-struct menu free_play_item = {
-	.name = "FREE PLAY",
+struct menu printer_adjustments_menu = {
+	.name = "PRINTER ADJ.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, printer_adjustments } },
 };
 
 struct menu *adj_menu_items[] = {
-	&date_style_item,
-	&clock_style_item,
-	&euro_score_format_item,
-	&game_restart_item,
-	&free_play_item,
-	NULL
+	&standard_adjustments_menu,
+	&feature_adjustments_menu,
+	&pricing_adjustments_menu,
+	&hstd_adjustments_menu,
+	&printer_adjustments_menu,
+	NULL,
 };
 
 struct menu adjustments_menu = {
 	.name = "ADJUSTMENTS",
-	.flags = M_ITEM | M_LETTER_PREFIX,
-	// .var = { .submenus = adj_menu_items },
-	.var = { .subwindow = { &adj_browser_window, NULL } },
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = adj_menu_items },
 };
 
 /**********************************************************************/
@@ -2035,11 +2164,11 @@ void test_up_button (void)
 	window_call_op (win_top, up);
 	window_call_op (win_top, draw);
 
-	for (i=0; i < 32; i++)
+	for (i=0; i < 16; i++)
 		if (!switch_poll (SW_UP))
 			return;
 		else
-			task_sleep (TIME_16MS);
+			task_sleep (TIME_33MS);
 
 	while (switch_poll (SW_UP))
 	{
@@ -2057,11 +2186,11 @@ void test_down_button (void)
 	window_call_op (win_top, down);
 	window_call_op (win_top, draw);
 
-	for (i=0; i < 32; i++)
+	for (i=0; i < 16; i++)
 		if (!switch_poll (SW_DOWN))
 			return;
 		else
-			task_sleep (TIME_16MS);
+			task_sleep (TIME_33MS);
 
 	while (switch_poll (SW_DOWN))
 	{

@@ -54,6 +54,7 @@ void amode_flipper_sound_debounce_timer (void)
 {
 	task_sleep_sec (10);
 	task_sleep_sec (10);
+	task_sleep_sec (10);
 	task_exit ();
 }
 
@@ -94,7 +95,10 @@ void egg_brian_image_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_draw_image2 (brianhead_bits);
-	font_render_string_center (&font_cu17, 96, 16, "BCD");
+	font_render_string_center (&font_cu17, 66, 18, "BCD");
+	dmd_flip_low_high ();
+	font_render_string_center (&font_cu17, 64, 16, "BCD");
+	dmd_flip_low_high ();
 	dmd_show2 ();
 	task_sleep_sec (8);
 	deff_exit ();

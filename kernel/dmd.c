@@ -235,7 +235,13 @@ void dmd_show_high (void)
 
 void dmd_flip_low_high (void)
 {
-	dmd_pagenum_t tmp = wpc_dmd_get_low_page ();
+	/* Note: tmp is made volatile here, to ensure that
+	 * tmp is actually used in wpc_dmd_set_high() below.
+	 * Without it, the compiler might optimize and try
+	 * to read from the hardware register, which doesn't
+	 * work.
+	 */
+	volatile dmd_pagenum_t tmp = wpc_dmd_get_low_page ();
 	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
 	wpc_dmd_set_high_page (tmp);
 }
@@ -247,16 +253,6 @@ void dmd_show_other (void)
 		dmd_show_high ();
 	else
 		dmd_show_low ();
-}
-
-
-void dmd_swap_low_high (void)
-{
-	__lda (dmd_high_page);
-	__ldb (dmd_low_page);
-	__asm__ volatile ("exg\ta,b");
-	__sta (&dmd_high_page);
-	__stb (&dmd_low_page);
 }
 
 
