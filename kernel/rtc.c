@@ -156,6 +156,7 @@ void rtc_render_date (void)
 		default:
 			sprintf ("%s %d, 20%02d", month_names[month-1], day, year);
 			break;
+
 		case DATE_TIME_STYLE_EURO:
 			sprintf ("%d %s 20%02d", day, month_names[month-1], year);
 			break;

@@ -103,6 +103,7 @@ extern volatile U8 irq_count;
 #include <sys/dmd.h>
 #include <sys/triac.h>
 #include <sys/irq.h>
+#include <sys/rtc.h>
 
 /* Other software structures */
 #include <sys/deff.h>
@@ -122,6 +123,8 @@ extern volatile U8 irq_count;
 #include <callset.h>
 #include <priority.h>
 #include <eb.h>
+#include <highscore.h>
+#include <search.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory, e.g. 'tz'. */

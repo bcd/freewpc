@@ -1453,9 +1453,31 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
+void switch_matrix_draw (void)
+{
+	int row, col;
+	for (row=1; row <= 8; row++)
+	{
+		for (col=1; col <=8; col++)
+		{
+			U8 sw = MAKE_SWITCH (col,row);
+			bool opto_p = switch_is_opto (sw);
+			bool state_p = switch_poll (sw);
+		}
+	}
+}
+
+struct window_ops switch_edges_window = {
+	INHERIT_FROM_BROWSER,
+};
+
 struct menu switch_edges_item = {
 	.name = "SWITCH EDGES",
 	.flags = M_ITEM,
+};
+
+struct window_ops switch_levels_window = {
+	INHERIT_FROM_BROWSER,
 };
 
 struct menu switch_levels_item = {

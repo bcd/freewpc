@@ -34,16 +34,16 @@ U8 ball_search_timeout;
  */
 static bool ball_search_solenoid_ok (U8 sol)
 {
+#if !defined(MACHINE_SOL_FLASHERP)
 	/* If the machine description is not proper, then we can't know
 	 * for sure which solenoids are OK, so don't fire _any_.  */
-#if !defined(MACHINE_SOL_FLASHERP)
 	return (FALSE);
-#endif
-
+#else
 	/* Don't fire if it's just a flasher.  It's doubtful that
 	 * photons will free a stuck ball. */
 	if (MACHINE_SOL_FLASHERP(sol))
 		return (FALSE);
+#endif
 
 	/* OK, you can use it. */
 	return (TRUE);
@@ -68,7 +68,7 @@ static bool ball_search_timed_out (void)
 }
 
 
-void ball_search_run (void)
+static void ball_search_run (void)
 {
 	U8 sol;
 

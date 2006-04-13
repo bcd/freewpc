@@ -143,15 +143,28 @@ static void fontargs_render_string (void)
 		static U8 xb;
 		static U8 xr;
 		unsigned long int j;
+		static U8 min_height;
+		static U8 max_height;
 
 		data = font_lookup (args->font, c);
+
+		if (font_height < args->font->height)
+		{
+			min_height = args->font->height - font_height;
+			max_height = args->font->height;
+		}
+		else
+		{
+			min_height = 0;
+			max_height = font_height;
+		}
 
 		xb = x / 8;
 		xr = x % 8;
 
 		if (xr == 0)
 		{
-			for (i=0; i < font_height; i++)
+			for (i=min_height; i < max_height; i++)
 			{
 				for (j=0; j < font_byte_width; j++)
 				{
@@ -161,7 +174,7 @@ static void fontargs_render_string (void)
 		}
 		else
 		{
-			for (i=0; i < font_height; i++)
+			for (i=min_height; i < max_height; i++)
 			{
 				for (j=0; j < font_byte_width; j++)
 				{
@@ -175,9 +188,11 @@ static void fontargs_render_string (void)
 		}
 
 		/* advance by 1 char ... args->font->width */
+#if 0
 		if ((c == '.') || (c == ','))
 			x += 4;
 		else
+#endif
 			x += font_width + GET_FONT_SPACING (args->font);
 		s++;
 	}

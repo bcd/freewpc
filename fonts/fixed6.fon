@@ -154,7 +154,7 @@ static char glyph_fixed6_9_bits[] = { glyph_fixed6_9_width, glyph_fixed6_9_heigh
 #define glyph_fixed6_period_width 3
 #define glyph_fixed6_period_height 2
 static char glyph_fixed6_period_bits[] = { glyph_fixed6_period_width, glyph_fixed6_period_height,
- 0x06,0x07};
+ 0x03,0x03};
 #define glyph_fixed6_comma_width 2
 #define glyph_fixed6_comma_height 4
 static char glyph_fixed6_comma_bits[] = { glyph_fixed6_comma_width, glyph_fixed6_comma_height,
@@ -234,7 +234,7 @@ const font_t font_fixed6 = {
 	.width = 0,
 	.bytewidth = 0,
 	.spacing = 2,
-	.height = 0,
+	.height = 9,
 	.chars = 0,
 	.digits = 0,
 	.seps = 0,

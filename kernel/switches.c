@@ -407,7 +407,7 @@ void switch_init (void)
 }
 
 
-inline void switch_rowpoll (const uint8_t col)
+extern inline void switch_rowpoll (const uint8_t col)
 {
 	/* Read the switch column from the hardware.
 	 * Column 0 corresponds to the cabinet switches.
