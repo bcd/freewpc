@@ -29,7 +29,7 @@
 U8 errcode;
 
 __fastram__ volatile U8 irq_count;
-__fastram__ U8 tick_count;
+__fastram__ volatile U8 tick_count;
 
 __nvram__ U8 nvram_test_byte;
 

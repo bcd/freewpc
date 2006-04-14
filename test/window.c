@@ -2086,28 +2086,10 @@ struct window_ops asic_register_window = {
 };
 
 struct menu asic_register_item = {
-	.name = "ASIC REGISTERS",
+	.name = "ASIC REGISTER TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &asic_register_window, NULL } },
 };
-
-struct menu asic_clock_item = {
-	.name = "REAL TIME CLOCK",
-	.flags = M_ITEM,
-};
-
-struct menu *asic_test_items[] = {
-	&asic_register_item,
-	&asic_clock_item,
-	NULL,
-};
-
-struct menu asic_tests_menu = {
-	.name = "WPC ASIC TESTS",
-	.flags = M_MENU,
-	.var = { .submenus = asic_test_items, },
-};
-
 
 struct menu flipper_test_item = {
 	.name = "FLIPPER TEST",
@@ -2144,7 +2126,7 @@ struct menu *test_menu_items[] = {
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
 	&flipper_test_item,
-	&asic_tests_menu,
+	&asic_register_item,
 	&debugger_test_item,
 	&empty_balls_item,
 	NULL,

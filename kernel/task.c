@@ -454,11 +454,11 @@ void task_set_arg (task_t *tp, uint16_t arg)
 #pragma naked
 void __attribute__((noreturn)) task_dispatcher (void)
 {
-	extern uint8_t tick_count;
+	extern volatile U8 tick_count;
 	register task_t *tp asm ("x");
-	U8 irq_start_count;
+	U8 tick_start_count;
 
-	irq_start_count = irq_count;
+	tick_start_count = tick_count;
 	for (tp++;; tp++)
 	{
 		/* Increment counter for number of times we run
@@ -480,7 +480,7 @@ void __attribute__((noreturn)) task_dispatcher (void)
 				set_stack_pointer (STACK_BASE);
 	
 				/* Wait for next IRQ before continuing */
-				while (irq_start_count == irq_count);
+				while (tick_start_count == tick_count);
 	
 				/* Call idle tasks */
 				switch_idle_task ();
@@ -491,7 +491,7 @@ void __attribute__((noreturn)) task_dispatcher (void)
 
 			/* Reset to beginning of the task list */
 			tp = &task_buffer[0];
-			irq_start_count = irq_count;
+			tick_start_count = tick_count;
 		}
 
 		if (tp->state == TASK_FREE)
