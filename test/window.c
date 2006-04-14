@@ -647,6 +647,86 @@ struct window_ops adj_browser_window = {
 
 /*****************************************************/
 
+struct audit
+{
+	const char *name;
+	void (*render) (audit_t);
+	audit_t *nvram;
+};
+
+
+void integer_audit (audit_t val) 
+{ 
+	sprintf ("%ld", val);
+}
+
+
+struct audit *browser_audits;
+
+
+struct audit standard_audits[] = {
+	{ "LEFT COINS", &integer_audit, &system_audits.coins_added[0] },
+	{ "CENTER COINS", &integer_audit, &system_audits.coins_added[1] },
+	{ "RIGHT COINS", &integer_audit, &system_audits.coins_added[2] },
+	{ "4TH SLOT COINS", &integer_audit, &system_audits.coins_added[3] },
+	{ "PAID CREDITS", &integer_audit, &system_audits.paid_credits },
+	{ "SERVICE CREDITS", &integer_audit, &system_audits.service_credits },
+	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
+	{ "TILTS", &integer_audit, &system_audits.tilts },
+	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
+	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },
+	{ NULL, NULL, NULL },
+};
+
+
+void audit_browser_init (void)
+{
+	struct audit *aud;
+
+	browser_init ();
+
+	aud = browser_audits = win_top->w_class.priv;
+	
+	/* Count the number of adjustments manually by stepping through
+	 * the array of entries */
+	browser_min = 0;
+	browser_max = -1;
+	while (aud->name != NULL)
+	{
+		browser_max++;
+		aud++;
+	}
+}
+
+void audit_browser_draw (void)
+{
+	struct audit *aud = browser_audits + menu_selection;
+
+	dmd_alloc_low_clean ();
+
+	sprintf ("%d. %s", menu_selection+1, aud->name);
+	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+
+	if (aud->nvram)
+		aud->render (*(aud->nvram));
+	font_render_string_center (&font_5x5, 32, 21, sprintf_buffer);
+
+	dmd_show_low ();
+}
+
+
+#define INHERIT_FROM_AUDIT_BROWSER \
+	INHERIT_FROM_BROWSER, \
+	.init = audit_browser_init, \
+	.draw = audit_browser_draw
+
+struct window_ops audit_browser_window = {
+	INHERIT_FROM_AUDIT_BROWSER,
+};
+
+
+/*****************************************************/
+
 /* A window class for a confirmation screen.
  * A customizable message is displayed, with the
  * choice to confirm (start) or abort (escape).
@@ -1282,6 +1362,29 @@ struct menu development_menu = {
 
 /**********************************************************************/
 
+void factory_adjust_init (void)
+{
+	adj_reset_all ();
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_5x5, 64, 12, "FACTORY ADJUSTMENTS");
+	font_render_string_center (&font_5x5, 64, 24, "RESTORED");
+	dmd_show_low ();
+}
+
+struct window_ops factory_adjust_window = {
+	DEFAULT_WINDOW,
+	.init = factory_adjust_init,
+};
+
+struct menu factory_adjust_item = {
+	.name = "FACTORY ADJUST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &factory_adjust_window, NULL } },
+};
+
+/**********************************************************************/
+
 void factory_reset_init (void)
 {
 	adj_reset_all ();
@@ -1315,13 +1418,25 @@ struct menu clear_coins_item = {
 	.flags = M_ITEM,
 };
 
+struct menu clear_audits_item = {
+	.name = "CLEAR AUDITS",
+	.flags = M_ITEM,
+};
+
 struct menu set_time_item = {
-	.name = "SET DATE/TIME",
+	.name = "SET TIME/DATE",
 	.flags = M_ITEM,
 };
 
 struct menu burnin_item = {
-	.name = "AUTO BURNIN",
+	.name = "AUTO BURN-IN",
+	.flags = M_ITEM,
+};
+
+/**********************************************************************/
+
+struct menu presets_menu_item = {
+	.name = "PRE-SETS",
 	.flags = M_ITEM,
 };
 
@@ -1359,9 +1474,11 @@ struct menu revoke_item = {
 
 struct menu *util_menu_items[] = {
 	&factory_reset_item,
+	&factory_adjust_item,
 	&clear_credits_item,
 	&clear_coins_item,
 	&set_time_item,
+	&presets_menu_item,
 	&burnin_item,
 	&revoke_item,
 	NULL,
@@ -1388,6 +1505,7 @@ struct menu earnings_audits_item = {
 struct menu standard_audits_item = {
 	.name = "STANDARD AUDITS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &audit_browser_window, standard_audits } },
 };
 
 struct menu feature_audits_item = {
@@ -1475,7 +1593,7 @@ void switch_matrix_draw (void)
 			{
 				U8 mask = (col & 1) ? 0x0E : 0xE0;
 				dmd[0 * DMD_BYTE_WIDTH] |= mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0xAA;
 				dmd[2 * DMD_BYTE_WIDTH] |= mask;
 			}
 			else

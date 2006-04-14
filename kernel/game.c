@@ -120,9 +120,8 @@ void end_game (void)
 		in_game = 0;
 		ball_up = 0;
 
-		// check high scores
-		// do match sequence
-		// return to attract mode
+		high_score_check ();
+		/* TODO : do match sequence */
 	
 		call_hook (end_game);
 
@@ -134,9 +133,6 @@ void end_game (void)
 		flipper_disable ();
 		deff_stop_all ();
 		leff_stop_all ();
-
-		/* TBD - display the game over message here, before
-		 * going into attract mode */
 		deff_start (DEFF_GAME_OVER);
 		amode_start ();
 	}
@@ -278,6 +274,7 @@ void start_game (void)
 		in_tilt = FALSE;
 		num_players = 0;
 		scores_reset ();
+		high_score_reset_check ();
 	
 		add_player ();
 		player_up = 1;

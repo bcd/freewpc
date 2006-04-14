@@ -57,5 +57,6 @@ extern __nvram__ std_audits_t system_audits;
 
 void audit_reset (void);
 void audit_increment (audit_t *aud);
+void audit_init (void);
 
 #endif /* _STDADJ_H */

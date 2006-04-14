@@ -432,8 +432,6 @@ clean_err:
 
 check_prereqs :
 
-# TODO : change zip to do a replace of the existing ROM.  Also make
-# a backup of the existing zip so we can run the real game again :-)
 install : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 	@echo Installing to MAME directory '$(TARGET_ROMPATH)' ...; \
 	cd $(TARGET_ROMPATH); \
@@ -500,9 +498,42 @@ $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJ
 #
 # How to make the linker command file for a paged section.
 #
+# This is complicated.  Every paged area of the ROM needs visibility to
+# all of the object files, no matter what pages they reside in, so that
+# "far" objects can be referenced.  To do this, we have to link all of
+# the objects once for every paged section.  The linker lets us specify
+# for each object file whether it should be output into the image (-o)
+# or is only used for resolving external references (-v).  So on every
+# link step, a different set of -o and -v flags are used, depending on
+# which page we are trying to build.
+#
+# Two helper functions are defined.  OBJ_PAGE_LINKOPT returns the
+# right linker option followed by the name of the object file, given
+# an object filename and the name of the linker command file.
+# OBJ_PAGE_LIST does the same thing, but for all object files rather
+# than just one of them.  The output of OBJ_PAGE_LIST has all of the
+# options/filenames on a single line; the linker requires that they all
+# be on separate lines.  We use a for loop in the bash code to iterate
+# over the OBJ_PAGE_LIST output to split it into multiple lines.
+#
+
+# OBJ_PAGE_LINKOPT : Expands to either -o if in the page or -v if not
+# $1 = object file name
+# $2 = paged linkcmd file
+# Example use: $(call OBJ_PAGE_LINKOPT,obj.o,page58.lnk)
+# Example output: -o obj.o or -v obj.o
+OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:.lnk=_OBJS))))
+
+# OBJ_PAGE_LIST : Call OBJ_PAGE_LINKOPT for every relevant object file
+# $1 = paged linkcmd file
+# Note: the object filenames of the form pageXX.o are skipped as the
+# bash code below already outputs these explicitly.
+OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(1)))
+
+
 $(PAGED_LINKCMD) : $(MAKE_DEPS)
-	@echo Creating linker command file $@ ...
-	@rm -f $@ ;\
+	@echo Creating linker command file $@ ... ;\
+	rm -f $@ ;\
 	echo "-mxswz" >> $@ ;\
 	echo $(DIRECT_LNK_CMD) >> $@ ;\
 	echo "-b ram = $(RAM_AREA)" >> $@ ;\
@@ -512,15 +543,24 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS)
 	done ;\
 	echo "-b sysrom = $(FIXED_AREA)" >> $@ ;\
 	echo "$(@:.lnk=.o)" >> $@ ;\
+	for f in `echo $(call OBJ_PAGE_LIST,$@)` ;\
+	   do echo $$f >> $@ ;\
+	done ;\
+	echo "-k $(LIBC_DIR)/" >> $@ ;\
+	echo "-l c.a" >> $@ ;\
+	echo "-e" >> $@
+
+ifdef DELETEME
+
 	for f in `echo $(SYSTEM_OBJS) $(PAGED_OBJS)`; do \
 		echo "$($(@:.lnk=_OBJS))" | grep $$f > /dev/null 2>&1 ;\
 		if [ "$$?" = "0" ]; then echo "-o" >> $@ ;\
 		else echo "-v" >> $@ ; fi ;\
 		if [ "$$f" != "$(@:.lnk=.o)" ]; then echo "$$f"; fi >> $@ ;\
 	done ;\
-	echo "-k $(LIBC_DIR)/" >> $@ ;\
-	echo "-l c.a" >> $@ ;\
-	echo "-e" >> $@
+
+endif
+
 
 #
 # How to build the system page header source file.
@@ -540,22 +580,22 @@ page%.s:
 # How to make the linker command file for the system section.
 #
 $(LINKCMD) : $(MAKE_DEPS)
-	@echo Creating linker command file $@ ...
-	@rm -f $(LINKCMD)
-	@echo "-mxswz" >> $(LINKCMD)
-	@echo $(DIRECT_LNK_CMD) >> $(LINKCMD)
-	@echo "-b ram = $(RAM_AREA)" >> $(LINKCMD)
-	@echo "-b nvram = $(NVRAM_AREA)" >> $(LINKCMD)
-	@for f in `echo $(PAGED_SECTIONS)`; \
-		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done
-	@echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD)
-	@echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD)
-	@for f in `echo freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done
-	@echo "-v" >> $(LINKCMD)
-	@for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done
-	@echo "-k $(LIBC_DIR)/" >> $(LINKCMD)
-	@echo "-l c.a" >> $(LINKCMD)
-	@echo "-e" >> $(LINKCMD)
+	@echo Creating linker command file $@ ... ;\
+	rm -f $(LINKCMD) ;\
+	echo "-mxswz" >> $(LINKCMD) ;\
+	echo $(DIRECT_LNK_CMD) >> $(LINKCMD) ;\
+	echo "-b ram = $(RAM_AREA)" >> $(LINKCMD) ;\
+	echo "-b nvram = $(NVRAM_AREA)" >> $(LINKCMD) ;\
+	for f in `echo $(PAGED_SECTIONS)`; \
+		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done ;\
+	echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD) ;\
+	echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD) ;\
+	for f in `echo freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
+	echo "-v" >> $(LINKCMD) ;\
+	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
+	echo "-k $(LIBC_DIR)/" >> $(LINKCMD) ;\
+	echo "-l c.a" >> $(LINKCMD) ;\
+	echo "-e" >> $(LINKCMD)
 
 
 #

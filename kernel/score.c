@@ -28,9 +28,9 @@
 
 
 U8 score_change;
-U8 scores[4][4];
+score_t scores[MAX_PLAYERS];
 U8 *current_score;
-
+score_t bonus_score;
 
 void scores_draw_ball (void)
 {
@@ -145,15 +145,15 @@ void score_add_current (bcd_t *s)
 }
 
 
-void score_sub (score_t *s1, score_t *s2)
+void score_sub (score_t s1, score_t s2)
 {
 }
 
-void score_mul (score_t *s1, uint8_t multiplier)
+void score_mul (score_t s1, uint8_t multiplier)
 {
 }
 
-I8 score_compare (bcd_t *s1, bcd_t *s2)
+I8 score_compare (score_t s1, score_t s2)
 {
 	register int len = sizeof (score_t);
 	register I8 diff;

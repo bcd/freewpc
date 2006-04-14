@@ -28,7 +28,7 @@
 
 U8 errcode;
 
-__fastram__ volatile U8 irq_count;
+__fastram__ U8 irq_count;
 __fastram__ volatile U8 tick_count;
 
 __nvram__ U8 nvram_test_byte;
@@ -202,6 +202,7 @@ __noreturn__ void do_reset (void)
 	score_init ();
 	coin_init ();
 	adj_init ();
+	audit_init ();
 	high_score_init ();
 	ball_search_init ();
 	call_hook (init);

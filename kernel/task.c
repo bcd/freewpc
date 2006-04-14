@@ -454,7 +454,7 @@ void task_set_arg (task_t *tp, uint16_t arg)
 #pragma naked
 void __attribute__((noreturn)) task_dispatcher (void)
 {
-	extern volatile U8 tick_count;
+	extern U8 tick_count;
 	register task_t *tp asm ("x");
 	U8 tick_start_count;
 
@@ -479,8 +479,8 @@ void __attribute__((noreturn)) task_dispatcher (void)
 				/* Execute idle tasks on system stack */
 				set_stack_pointer (STACK_BASE);
 	
-				/* Wait for next IRQ before continuing */
-				while (tick_start_count == tick_count);
+				/* Wait for next task tick before continuing */
+				while (tick_start_count == *(volatile U8 *)&tick_count);
 	
 				/* Call idle tasks */
 				switch_idle_task ();

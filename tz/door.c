@@ -76,9 +76,20 @@ void door_set_flashing (U8 id)
 
 void door_advance_flashing (void)
 {
-	U8 new_door_index = door_index + 1;
-	if (new_door_index > 14)
-		new_door_index = 0;
+	const U8 *door_lamps = door_get_lamps ();
+	U8 new_door_index;
+
+	if (door_panels_started < 14)
+	{
+		do {
+			new_door_index = door_index + 1;
+			if (new_door_index >= 14)
+				new_door_index = 0;
+		} while (lamp_test (door_lamps[new_door_index]));
+	}
+	else
+		new_door_index = 14;
+
 	door_set_flashing (new_door_index);
 }
 
@@ -91,7 +102,7 @@ void door_award_deff (void)
 	printf ("%d DOOR PANELS", door_panels_started);
 	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (4);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 

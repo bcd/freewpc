@@ -30,10 +30,17 @@ void audit_reset (void)
 	wpc_nvram_put ();
 }
 
+
 void audit_increment (audit_t *aud)
 {
 	wpc_nvram_get ();
 	(*aud)++;
 	wpc_nvram_put ();
+}
+
+
+void audit_init (void)
+{
+	audit_reset ();
 }
 
