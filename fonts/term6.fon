@@ -227,8 +227,5 @@ const font_t font_term6 = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = 8,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = term6_glyphs,
 };

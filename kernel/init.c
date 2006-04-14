@@ -36,7 +36,6 @@ __nvram__ U8 nvram_test_byte;
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
 
-U8 nonfatal_error_count;
 
 
 /*
@@ -49,6 +48,8 @@ void fatal (errcode_t error_code)
 	U8 *stack = (U8 *)get_stack_pointer () + 16;
 
 	disable_irq ();
+
+	audit_increment (&system_audits.fatal_errors);
 	
 	dmd_alloc_low_clean ();
 
@@ -71,7 +72,7 @@ void fatal (errcode_t error_code)
 
 void nonfatal (errcode_t error_code)
 {
-	nonfatal_error_count++;
+	audit_increment (&system_audits.non_fatal_errors);
 }
 
 
@@ -215,6 +216,9 @@ __noreturn__ void do_reset (void)
 	 */
 
 	task_create_gid (GID_SYSTEM_RESET, system_reset);
+
+	/* Bump the power-up audit */
+	audit_increment (&system_audits.power_ups);
 
 	/* Initialize the sound board further */
 #if (MACHINE_DCS == 1)

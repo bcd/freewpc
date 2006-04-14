@@ -86,6 +86,8 @@ void sw_tilt_handler (void)
 		in_tilt = TRUE;
 		flipper_disable ();
 		mark_ball_in_play ();
+		audit_increment (&system_audits.tilts);
+		audit_increment (&system_audits.plumb_bob_tilts);
 		call_hook (tilt);
 	}
 	else
@@ -99,6 +101,8 @@ void sw_tilt_handler (void)
 void sw_slam_tilt_handler (void)
 {
 	deff_start (DEFF_SLAM_TILT);
+	audit_increment (&system_audits.tilts);
+	audit_increment (&system_audits.slam_tilts);
 }
 
 

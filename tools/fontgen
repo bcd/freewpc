@@ -110,9 +110,6 @@ const font_t font_$cfont = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = `grep "#define.*0_height" $fonfile | awk '{print $3}'`,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = ${cfont}_glyphs,
 };
 END

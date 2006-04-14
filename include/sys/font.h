@@ -28,9 +28,6 @@ typedef struct
 	U8 bytewidth;
 	U8 spacing;
 	U8 height;
-	U8 **chars;
-	U8 **digits;
-	U8 **seps;
 	U8 **glyphs;
 } font_t;
 

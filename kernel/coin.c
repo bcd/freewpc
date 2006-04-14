@@ -187,6 +187,7 @@ void add_units (int n)
 			wpc_nvram_put ();
 
 			add_credit ();
+			audit_increment (&system_audits.paid_credits);
 		}
 	}
 	else
@@ -213,6 +214,7 @@ void coin_deff (void) __taskentry__
 static void do_coin (uint8_t slot)
 {
 	add_units (price_config.slot_values[slot]);
+	audit_increment (&system_audits.coins_added[slot]);
 }
 
 void sw_left_coin_handler (void)

@@ -41,3 +41,19 @@ fonts/times8.fon :
 fonts/helv8.fon :
 	tools/fontgen -o $@ -fn "-adobe-helvetica-bold-r-*-*-8-*-75" -id helv8
 
+###################################################
+# Experimental
+###################################################
+
+fonts/schu.fon :
+	tools/fontgen -n -o $@ -fn "-schumacher-clean-*-r-*-*-0" -id schu
+
+fonts/utopia.fon :
+	tools/fontgen -n -o $@ -fn "-adobe-utopia-regular-*-normal-*-0" -id utopia
+
+fonts/luctype.fon :
+	tools/fontgen -n -o $@ -fn "-b&h-lucidatypewriter-medium-r-normal-*-0-0" -id luctype
+
+fonts/miscfixed.fon :
+	tools/fontgen -n -o $@ -fn "-misc-fixed-medium-r-semicondensed-*-0-0" -id misctype
+

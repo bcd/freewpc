@@ -235,8 +235,5 @@ const font_t font_fixed6 = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = 9,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = fixed6_glyphs,
 };

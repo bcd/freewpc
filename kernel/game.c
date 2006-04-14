@@ -272,6 +272,7 @@ void start_game (void)
 {
 	if (!in_game)
 	{
+		audit_increment (&system_audits.games_started);
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;

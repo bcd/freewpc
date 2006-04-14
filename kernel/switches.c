@@ -449,22 +449,12 @@ extern inline void switch_rowpoll (const uint8_t col)
 	 * poll.  This is computed as the XOR of the previous two readings.
 	 *
 	 * AR_PENDING - '1' means the switch changed and is waiting to be
-	 * processed.  Anytime AR_CHANGED becomes asserted, the same bits
-	 * are ORed into this variable.  Changes queue up here until the
+	 * processed.  When AR_CHANGED becomes asserted, and does not
+	 * assert on the following cycle, that indicates a stable change.
+	 * This is how we do debouncing.  The switch bits are then
+	 * ORed into this AR_PENDING.  Changes queue up here until the
 	 * switch can be processed by the idle task.
-	 *
-	 * TODO - add an AR_DEBOUNCED field which performs simple debouncing
-	 * of the raw values, to eliminate spurious transitions.
 	 */
-#if 0
-	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\teorb\t%0"  	:: "m" (switch_bits[AR_RAW][col]));
-	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
-	asm __volatile__ ("\torb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
-	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
-#endif
-
 	/* Load previous raw state of switch */
 	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
 

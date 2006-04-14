@@ -45,6 +45,7 @@ void increment_extra_balls (void)
 	if (extra_balls < system_config.max_ebs_per_bip)
 	{
 		extra_balls++;
+		audit_increment (&system_audits.extra_balls_awarded);
 		update_extra_ball_lamp ();
 	}
 }

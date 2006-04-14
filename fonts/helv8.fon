@@ -256,8 +256,5 @@ const font_t font_helv8 = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = 12,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = helv8_glyphs,
 };

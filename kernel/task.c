@@ -456,32 +456,42 @@ void __attribute__((noreturn)) task_dispatcher (void)
 {
 	extern uint8_t tick_count;
 	register task_t *tp asm ("x");
+	U8 irq_start_count;
 
+	irq_start_count = irq_count;
 	for (tp++;; tp++)
 	{
 		/* Increment counter for number of times we run
 		 * the dispatcher code. */
 		task_dispatching_ok = TRUE;
 
-		/* If at the end of the list, execute some special
-		 * system code before starting at the top again. */
+		/* Reset task pointer to top of list after scanning
+		 * them all. */
 		if (tp == &task_buffer[NUM_TASKS])
 		{
-			/* TODO : all of these functions should only be called
-			 * when there is nothing else to do.  They are getting
-			 * executed way too often. */
-			extern void nvram_idle_task (void);
+			/* If the system is fully initialized, also
+			 * run the idle tasks once every pass through
+			 * the list. */
+			if (sys_init_complete)
+			{
+				extern void nvram_idle_task (void);
 
-			/* Execute idle tasks on system stack */
-			set_stack_pointer (STACK_BASE);
+				/* Execute idle tasks on system stack */
+				set_stack_pointer (STACK_BASE);
+	
+				/* Wait for next IRQ before continuing */
+				while (irq_start_count == irq_count);
+	
+				/* Call idle tasks */
+				switch_idle_task ();
+				ac_idle_task ();
+				nvram_idle_task ();
+				rtc_idle_task ();
+			} 
 
-			/* Call idle tasks */
-			switch_idle_task ();
-			ac_idle_task ();
-			nvram_idle_task ();
-			rtc_idle_task ();
-
+			/* Reset to beginning of the task list */
 			tp = &task_buffer[0];
+			irq_start_count = irq_count;
 		}
 
 		if (tp->state == TASK_FREE)

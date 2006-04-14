@@ -162,10 +162,17 @@ void amode_leff (void) __taskentry__
 
 		lampset_set_apply_delay (0);
 		lampset_apply_leff_alternating (LAMPSET_AMODE_ALL, 0);
-		for (i=0; i < 25; i++)
+		for (i=0; i < 20; i++)
 		{
 			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
 			task_sleep (TIME_100MS * 2);
+		}
+
+		lampset_apply_leff_alternating (LAMPSET_AMODE_RAND, 0);
+		for (i=0; i < 60; i++)
+		{
+			lampset_apply_leff_toggle (LAMPSET_AMODE_RAND);
+			task_sleep (TIME_100MS);
 		}
 	}
 }

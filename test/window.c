@@ -543,6 +543,11 @@ void adj_browser_init (void)
 		browser_adjs = empty_adjustments;
 		browser_max = 0;
 	}
+
+#if 0 /* not working */
+	while (!*browser_adjs[menu_selection].name);
+		browser_up ();
+#endif
 }
 
 void adj_browser_enter (void)
@@ -1456,33 +1461,79 @@ struct menu adjustments_menu = {
 void switch_matrix_draw (void)
 {
 	int row, col;
-	for (row=1; row <= 8; row++)
+
+	for (row=0; row < 8; row++)
 	{
-		for (col=1; col <=8; col++)
+		for (col=0; col < 8; col++)
 		{
-			U8 sw = MAKE_SWITCH (col,row);
+			U8 sw = MAKE_SWITCH (col+1,row+1);
 			bool opto_p = switch_is_opto (sw);
 			bool state_p = switch_poll (sw);
+			register U8 *dmd = dmd_low_buffer +
+				((U16)row << 6) + (col >> 1);
+			if (state_p)
+			{
+				U8 mask = (col & 1) ? 0x0E : 0xE0;
+				dmd[0 * DMD_BYTE_WIDTH] |= mask;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
+				dmd[2 * DMD_BYTE_WIDTH] |= mask;
+			}
+			else
+			{
+				U8 mask = (col & 1) ? 0x0E : 0xE0;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
+			}
 		}
+	}
+}
+
+void switch_edges_draw (void)
+{
+	dmd_alloc_low_clean ();
+	switch_matrix_draw ();
+	font_render_string_center (&font_mono5, 80, 4, "SWITCH EDGES");
+	dmd_show_low ();
+}
+
+void switch_edges_thread (void)
+{
+	for (;;) {
+		task_sleep (TIME_100MS);
+		switch_edges_draw ();
 	}
 }
 
 struct window_ops switch_edges_window = {
 	INHERIT_FROM_BROWSER,
+	.draw = switch_edges_draw,
+	.thread = switch_edges_thread,
 };
 
 struct menu switch_edges_item = {
 	.name = "SWITCH EDGES",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &switch_edges_window, NULL } },
 };
+
+
+
+void switch_levels_draw (void)
+{
+	dmd_alloc_low_clean ();
+	switch_matrix_draw ();
+	font_render_string_center (&font_mono5, 80, 4, "SWITCH LEVELS");
+	dmd_show_low ();
+}
 
 struct window_ops switch_levels_window = {
 	INHERIT_FROM_BROWSER,
+	.draw = switch_levels_draw,
 };
 
 struct menu switch_levels_item = {
 	.name = "SWITCH LEVELS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &switch_levels_window, NULL } },
 };
 
 /*************** Single Switch Test ***********************/

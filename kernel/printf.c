@@ -39,6 +39,9 @@ S8 number_length;
 
 U8 min_width;
 
+bool sprintf_commas;
+
+
 
 char digit2char (uint8_t digit)
 {
@@ -130,6 +133,7 @@ int printf (const char *format, ...)
 		{
 			sprintf_width = 0;
 			sprintf_leading_zeroes = FALSE;
+			sprintf_commas = TRUE;
 			min_width = 1;
 
 do_format_chars:
@@ -190,6 +194,12 @@ fixup_number:
 
 							buf = endbuf - leading_zero_count;
 						}
+					}
+
+					if (sprintf_commas)
+					{
+						/* Need to inject commas into the string of
+						digits. */
 					}
 					break;
 				}

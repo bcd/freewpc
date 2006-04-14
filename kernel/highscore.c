@@ -27,20 +27,42 @@ __nvram__ U8 gc_initials[HIGH_SCORE_NAMESZ];
 __nvram__ U8 highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH];
 __nvram__ U8 high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ];
 
-static U8 default_gc_score[HIGH_SCORE_WIDTH] = { 0x10, 0x00, 0x00, 0x00 };
-static U8 default_gc_initials[HIGH_SCORE_NAMESZ] = { 'B', 'C', 'D' };
+
+static U8 default_gc_score[HIGH_SCORE_WIDTH] = 
+#ifndef MACHINE_GRAND_CHAMPION_SCORE
+	{ 0x10, 0x00, 0x00, 0x00 }
+#else
+#endif
+	;
+
+
+static U8 default_gc_initials[HIGH_SCORE_NAMESZ] = 
+#ifndef MACHINE_GRAND_CHAMPION_INITIALS
+	{ 'B', 'C', 'D' }
+#else
+#endif
+	;
+
 
 static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
+#ifndef MACHINE_HIGH_SCORES
 	{ 0x08, 0x00, 0x00, 0x00 },
 	{ 0x07, 0x00, 0x00, 0x00 },
 	{ 0x06, 0x00, 0x00, 0x00 },
 	{ 0x05, 0x00, 0x00, 0x00 },
+#else
+#endif
 };
+
+
 static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
+#ifndef MACHINE_HIGH_SCORE_INITIALS
 	{ 'Q', 'Q', 'Q' },
 	{ 'F', 'T', 'L' },
 	{ 'N', 'P', 'L' },
 	{ 'P', 'Y', 'L' },
+#else
+#endif
 };
 
 

@@ -266,8 +266,5 @@ const font_t font_lucida9 = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = 13,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = lucida9_glyphs,
 };

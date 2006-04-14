@@ -330,8 +330,5 @@ const font_t font_cu17 = {
 	.bytewidth = 0,
 	.spacing = 2,
 	.height = 22,
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = cu17_glyphs,
 };

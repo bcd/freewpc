@@ -102,13 +102,8 @@ static unsigned char *mono5_glyphs[] = {
 };
 
 const font_t font_mono5 = {
-	.width = 0, 
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 5, 
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = mono5_glyphs,
 };
 

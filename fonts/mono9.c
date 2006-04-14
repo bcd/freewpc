@@ -102,13 +102,8 @@ static unsigned char *mono9_glyphs[] = {
 };
 
 const font_t font_mono9 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 9, 
-	.chars = 0,
-	.digits = 0,
-	.seps = 0,
 	.glyphs = mono9_glyphs,
 };
 

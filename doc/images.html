@@ -97,3 +97,26 @@ using the <b>pamditherbw</b> tool, but I haven't tried that yet.)</p>
 <li>pbmclean - remove lone pixels from a 1-bit image
 </ul>
 
+<h2>Font Files<h2>
+
+<p>A FreeWPC font file is just a collection of XBM image files, where
+each image represents a single character in the font.  NetPBM provides
+the tool <b>pbmtotextps</b> for generating images from X fonts.
+You can run the <b>xfontsel</b> tool to preview various X fonts and
+determine the font name that corresponds to the desired family, point size,
+weight, etc.  Then, use NetPBM to generate the XBM for all of the
+characters that you want to represent in that font.</p>
+
+<p>The <b>.fon</b> files contain ancillary data in addition to the
+font glyphs themselves.  For example, even in a single font, the size of
+all characters is not alike; some are wider or taller than others.
+So size information is preserved.  Also, not all glyphs need be
+represented in a font, for example, if the font is only used for displaying
+numbers, then the alphabetics can be omitted to keep the font file smaller.</p>
+
+<p>The <b>fontgen</b> script provided by FreeWPC does this semi-
+automatically.  It is possible to run this on Cygwin, but the emulation
+makes it painfully slow to do so.  FreeWPC comes with font files
+out-of-the-box to use, so not all developers are not required to have these
+tools unless custom font/image editing is desired.</p>
+

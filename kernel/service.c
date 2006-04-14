@@ -31,7 +31,10 @@ void sw_escape_button_handler (void)
 	extern void test_escape_button (void);
 
 	if (!in_test)
+	{
 		add_credit ();
+		audit_increment (&system_audits.service_credits);
+	}
 	else
 		call_far (TEST_PAGE, test_escape_button ());
 }
