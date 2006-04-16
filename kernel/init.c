@@ -294,13 +294,10 @@ void do_irq (void)
 		tick_count++;
 
 	/* Execute rtts every 1ms */
-#ifdef DEBUGGER
-	db_rtt ();
-#endif
 	sol_rtt ();
 	flipper_rtt ();
 	if (irq_count & 0x1)
-		lamp_rtt ();
+		lamp_rtt (); /* TODO - this is REALLY slow */
 	else
 		switch_rtt ();
 
@@ -315,6 +312,9 @@ void do_irq (void)
 		{
 			/* Execute rtts every 32ms */
 			wpc_led_toggle ();
+#ifdef DEBUGGER
+			db_rtt ();
+#endif
 			sound_rtt ();
 			lamp_flash_rtt ();
 

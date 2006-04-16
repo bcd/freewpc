@@ -38,15 +38,15 @@ static U8 font_space[16] = { 0, };
 
 fontargs_t font_args;
 
-U8 font_width;
-U8 font_byte_width;
-U8 font_height;
+__fastram__ U8 font_width;
+__fastram__ U8 font_byte_width;
+__fastram__ U8 font_height;
 
 U8 font_string_width;
 U8 font_string_height;
 
 
-inline U8 lsrqi3 (U8 data, U8 count)
+/* inline */ U8 lsrqi3 (U8 data, U8 count)
 {
 	switch (count)
 	{
@@ -74,7 +74,7 @@ inline U8 lsrqi3 (U8 data, U8 count)
 }
 
 
-inline U8 aslqi3 (U8 data, U8 count)
+/* inline */ U8 aslqi3 (U8 data, U8 count)
 {
 	switch (count)
 	{
@@ -188,12 +188,7 @@ static void fontargs_render_string (void)
 		}
 
 		/* advance by 1 char ... args->font->width */
-#if 0
-		if ((c == '.') || (c == ','))
-			x += 4;
-		else
-#endif
-			x += font_width + GET_FONT_SPACING (args->font);
+		x += font_width + GET_FONT_SPACING (args->font);
 		s++;
 	}
 	wpc_pop_page ();

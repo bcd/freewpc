@@ -161,12 +161,14 @@ BC = bc
 
 FIXED_SECTION = sysrom
 
+OS_GCC34_BROKEN_OBJS = task.o dmdtrans.o font.o rtc.o printf.o
+
 OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o db.o \
-	trough.o reset.o printf.o tilt.o vector.o player.o \
-	task.o timer.o lamp.o sol.o flasher.o ac.o dmdtrans.o font.o \
-	math.o rtc.o audit.o search.o highscore.o
+	trough.o reset.o tilt.o vector.o player.o \
+	timer.o lamp.o sol.o flasher.o ac.o \
+	math.o audit.o search.o highscore.o $(OS_GCC34_BROKEN_OBJS)
 
 TEST_OBJS = test/window.o
 
@@ -212,7 +214,7 @@ CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR) -Icallset
 ifdef GCC_VERSION
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 else
-CFLAGS += -DGCC_VERSION=3.1.1
+CFLAGS += -DGCC_VERSION=3.3.6
 endif
 
 ifdef ASVER

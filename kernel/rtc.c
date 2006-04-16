@@ -166,12 +166,17 @@ void rtc_render_date (void)
 
 void rtc_render_time (void)
 {
+	static const U8 rtc_us_hours[] = {
+		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+	};
+
 	switch (system_config.date_style)
 	{
 		case DATE_TIME_STYLE_US:
 		default:
 			sprintf ("%d:%02d %s", 
-				hour - ((hour > 12)?12:0), minute, (hour > 12)?"PM":"AM");
+				rtc_us_hours[hour], minute, (hour > 12)?"PM":"AM");
 			break;
 
 		case DATE_TIME_STYLE_EURO:

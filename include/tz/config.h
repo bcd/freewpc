@@ -58,6 +58,10 @@
 /* Define as 1 if the machine uses the WPC95 hardware */
 #define MACHINE_WPC95 0
 
+/* Define if any upper flippers exist */
+#define MACHINE_HAS_UPPER_LEFT_FLIPPER
+#define MACHINE_HAS_UPPER_RIGHT_FLIPPER
+
 /* Define the number of digits to use for "standard" score values.
  * Note that for alphanumeric games, setting this to any value
  * higher than 8 will not work because of the way that the score

@@ -142,8 +142,14 @@ void flipper_rtt (void)
 	{
 		flipper_service (WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
 		flipper_service (WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
+
+#ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
 		flipper_service (WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+#endif
+
+#ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER
 		flipper_service (WPC_UR_FLIP_SW, WPC_UR_FLIP_EOS, WPC_UR_FLIP_POWER, WPC_UR_FLIP_HOLD);
+#endif
 	}
 
 	wpc_write_flippers (~flipper_outputs);

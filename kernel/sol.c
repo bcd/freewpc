@@ -75,6 +75,9 @@ int sol_verify_cksum (void)
 
 void sol_rtt (void)
 {
+	/* TODO - checksum verification should be done outside
+	 * of IRQ, as this takes up precious cycles.  It should
+	 * not hurt too badly to do this every 8ms or 16ms. */
 	if (sol_verify_cksum ())
 	{
 		/* Write cached values to hardware I/O */

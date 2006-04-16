@@ -87,6 +87,7 @@ void db_dump_switches (void)
 
 #endif /* DEBUGGER */
 
+
 void db_rtt (void)
 {
 #ifdef DEBUGGER
@@ -98,6 +99,7 @@ void db_rtt (void)
 			db_attached = 1;
 		}
 	}
+#if 0 /* move this into task level, out of IRQ */
 	else
 	{
 		if (db_read_ready)
@@ -139,6 +141,7 @@ void db_rtt (void)
 			}
 		}
 	}
+#endif /* 0 */
 #endif /* DEBUGGER */
 }
 

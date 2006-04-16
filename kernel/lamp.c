@@ -68,7 +68,8 @@ U8 lamp_strobe_column;
 
 void lamp_init (void)
 {
-	memset (lamp_matrix, 0, NUM_LAMP_COLS * 8);
+	memset (lamp_matrix, 0, NUM_LAMP_COLS * 4);
+	lamp_leff1_free_all ();
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
 	lamp_apply_delay = 0;
@@ -95,35 +96,42 @@ void lamp_rtt (void)
 {
 	static U8 bits;
 	static U8 flashbits;
+	register U16 col;
 
 	/* Setup the strobe */
 	*(U8 *)WPC_LAMP_ROW_OUTPUT = 0;
 	*(U8 *)WPC_LAMP_COL_STROBE = lamp_strobe_mask;
 
+	/* Load the lamp column into U */
+	col = lamp_strobe_column;
+
 	/* Grab the default lamp values */
-	bits = lamp_matrix[lamp_strobe_column];
+	bits = lamp_matrix[col];
 
 	/* Override with the flashing lamps */
-	flashbits = lamp_flash_matrix[lamp_strobe_column];
+	flashbits = lamp_flash_matrix[col];
 	bits &= ~flashbits;
 	bits |= (flashbits & lamp_flash_mask);
 
 	/* Override with the fast flashing lamps */
-	flashbits = lamp_fast_flash_matrix[lamp_strobe_column];
+	flashbits = lamp_fast_flash_matrix[col];
 	bits &= ~flashbits;
 	bits |= (flashbits & lamp_fast_flash_mask);
 
 	/* Override with the lamp effect lamps */
-	bits &= ~lamp_leff1_allocated[lamp_strobe_column];
-	bits |= lamp_leff1_matrix[lamp_strobe_column];
-	bits &= ~lamp_leff2_allocated[lamp_strobe_column];
-	bits |= lamp_leff2_matrix[lamp_strobe_column];
+	bits &= lamp_leff1_allocated[col];
+	bits |= lamp_leff1_matrix[col];
+#if 0
+	bits &= lamp_leff2_allocated[col];
+	bits |= lamp_leff2_matrix[col];
+#endif
 
 	/* Write the result to the hardware */
 	*(U8 *)WPC_LAMP_ROW_OUTPUT = bits;
 
 	/* Advance strobe to next position for next iteration */
-	lamp_strobe_column = (lamp_strobe_column+1) & 7;
+	lamp_strobe_column++;
+	lamp_strobe_column &= 7;
 	lamp_strobe_mask <<= 1;
 	if (lamp_strobe_mask == 0)
 	{
@@ -200,7 +208,7 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	memset (lamp_leff1_allocated, 0xFF, NUM_LAMP_COLS);
+	memset (lamp_leff1_allocated, 0, NUM_LAMP_COLS);
 }
 
 void lamp_leff1_erase (void)
@@ -210,7 +218,7 @@ void lamp_leff1_erase (void)
 
 void lamp_leff1_free_all (void)
 {	
-	memset (lamp_leff1_allocated, 0x0, NUM_LAMP_COLS);
+	memset (lamp_leff1_allocated, 0xFF, NUM_LAMP_COLS);
 }
 
 void lamp_leff2_erase (void)
@@ -223,7 +231,7 @@ void lamp_leff_allocate (lampnum_t lamp)
 {
 	register bitset p = lamp_leff1_allocated;
 	register uint8_t v = lamp;
-	__setbit(p, v);
+	__clearbit(p, v);
 }
 
 
@@ -231,7 +239,7 @@ void lamp_leff_free (lampnum_t lamp)
 {
 	register bitset p = lamp_leff1_allocated;
 	register uint8_t v = lamp;
-	__clearbit(p, v);
+	__setbit(p, v);
 }
 
 
