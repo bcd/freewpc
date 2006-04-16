@@ -26,6 +26,10 @@
  * \brief Routines for writing text to the DMD in a particular font.
  */
 
+
+/* Space characters are not embedded in each font, because it would
+ * just be a bunch of zero characters.  All fonts share the same
+ * space glyph data, given here */
 static U8 font_space[16] = { 0, };
 
 
@@ -46,62 +50,16 @@ U8 font_string_width;
 U8 font_string_height;
 
 
-/* inline */ U8 lsrqi3 (U8 data, U8 count)
-{
-	switch (count)
-	{
-		case 7:
-			data >>= 1;
-		case 6:
-			data >>= 1;
-		case 5:
-			data >>= 1;
-		case 4:
-			data >>= 1;
-		case 3:
-			data >>= 1;
-		case 2:
-			data >>= 1;
-		case 1:
-			data >>= 1;
-		case 0:
-			break;
-		default:
-			data = 0;
-			break;
-	}
-	return (data);
-}
-
-
-/* inline */ U8 aslqi3 (U8 data, U8 count)
-{
-	switch (count)
-	{
-		case 7:
-			data <<= 1;
-		case 6:
-			data <<= 1;
-		case 5:
-			data <<= 1;
-		case 4:
-			data <<= 1;
-		case 3:
-			data <<= 1;
-		case 2:
-			data <<= 1;
-		case 1:
-			data <<= 1;
-		case 0:
-			break;
-		default:
-			data = 0;
-			break;
-	}
-	return (data);
-}
-
-
+/* Returns a pointer to the glyph data for a character 'c'
+ * in the font 'font'.  This points directly to the raw bytes
+ * that can be ORed into the display.
+ *
+ * This function also sets some global variables related to
+ * the characteristics of this character:
+ * font_width : number of bits wide, including spacing
+ * font_byte_width: number of bytes wide, excluding spacing
+ * font_height: number of bits high.
+ */
 U8 *font_lookup (const font_t *font, char c)
 {
 	if (c == ' ')
@@ -109,6 +67,7 @@ U8 *font_lookup (const font_t *font, char c)
 		U8 *data = font->glyphs[(U8)'I'];
 		font_width = *data++;
 		font_byte_width = (font_width + 7) >> 3;
+		font_width += GET_FONT_SPACING (font);
 		font_height = *data++;
 		return (font_space);
 	}
@@ -117,10 +76,12 @@ U8 *font_lookup (const font_t *font, char c)
 		U8 *data = font->glyphs[(U8)c];
 		font_width = *data++;
 		font_byte_width = (font_width + 7) >> 3;
+		font_width += GET_FONT_SPACING (font);
 		font_height = *data++;
 		return (data);
 	}
 }
+
 
 static void fontargs_render_string (void)
 {
@@ -138,58 +99,80 @@ static void fontargs_render_string (void)
 
 	while ((c = *s) != '\0')
 	{
-		static U8 *data;
-		static U8 i;
+		static U8 i, j;
 		static U8 xb;
-		static U8 xr;
-		unsigned long int j;
-		static U8 min_height;
-		static U8 max_height;
+		static U8 top_space;
+		register U8 *data;
+		register U8 *dmd;
 
 		data = font_lookup (args->font, c);
 
 		if (font_height < args->font->height)
 		{
-			min_height = args->font->height - font_height;
-			max_height = args->font->height;
+			top_space = (args->font->height - font_height);
+			top_space *= DMD_BYTE_WIDTH;
+			dmd_base += top_space;
 		}
 		else
-		{
-			min_height = 0;
-			max_height = font_height;
-		}
+			top_space = 0;
 
 		xb = x / 8;
-		xr = x % 8;
 
-		if (xr == 0)
+		for (i=0; i < font_height; i++)
 		{
-			for (i=min_height; i < max_height; i++)
+			for (j=0; j < font_byte_width; j++)
 			{
-				for (j=0; j < font_byte_width; j++)
+				dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
+				switch (x % 8)
 				{
-					dmd_base[i * DMD_BYTE_WIDTH + xb + j] = *data++;
-				}
-			}
-		}
-		else
-		{
-			for (i=min_height; i < max_height; i++)
-			{
-				for (j=0; j < font_byte_width; j++)
-				{
-					dmd_base[i * DMD_BYTE_WIDTH + xb + j] |= 
-						aslqi3 (*data, xr);
-					dmd_base[i * DMD_BYTE_WIDTH + xb + j + 1] |= 
-						lsrqi3 (*data, (8 - xr));
-					data++;
+					default: /* should not happen */
+					case 0:
+						dmd[0] = *data++;
+						break;
+					case 1:
+						dmd[0] |= *data << 1;
+						dmd[1] = (*data >> 7) | dmd[1];
+						data++;
+						break;
+					case 2:
+						dmd[0] |= *data << 2;
+						dmd[1] = (*data >> 6) | dmd[1];
+						data++;
+						break;
+					case 3:
+						dmd[0] |= *data << 3;
+						dmd[1] = (*data >> 5) | dmd[1];
+						data++;
+						break;
+					case 4:
+						dmd[0] |= *data << 4;
+						dmd[1] = (*data >> 4) | dmd[1];
+						data++;
+						break;
+					case 5:
+						dmd[0] |= *data << 5;
+						dmd[1] = (*data >> 3) | dmd[1];
+						data++;
+						break;
+					case 6:
+						dmd[0] |= *data << 6;
+						dmd[1] = (*data >> 2) | dmd[1];
+						data++;
+						break;
+					case 7:
+						dmd[0] |= *data << 7;
+						dmd[1] = (*data >> 1) | dmd[1];
+						data++;
+						break;
 				}
 			}
 		}
 
 		/* advance by 1 char ... args->font->width */
-		x += font_width + GET_FONT_SPACING (args->font);
+		x += font_width;
 		s++;
+		if (top_space != 0)
+			dmd_base -= top_space;
 	}
 	wpc_pop_page ();
 }
@@ -221,7 +204,7 @@ void font_get_string_area (const font_t *font, const char *s)
 	while ((c = *s++) != '\0')
 	{
 		(void)font_lookup (font, c);
-		font_string_width += font_width + GET_FONT_SPACING(font);
+		font_string_width += font_width;
 		if (font_height > font_string_height)
 			font_string_height = font_height;
 	}
