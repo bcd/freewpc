@@ -31,7 +31,7 @@
 
 DECLARE_SWITCH_DRIVER (sw_trough)
 {
-	.devno = SW_DEVICE_DECL(DEV_TROUGH),
+	.devno = SW_DEVICE_DECL(DEVNO_TROUGH),
 };
 
 
@@ -141,6 +141,6 @@ device_properties_t trough_props = {
 
 void trough_init (void)
 {
-	device_register (DEV_TROUGH, &trough_props);
+	device_register (DEVNO_TROUGH, &trough_props);
 }
 

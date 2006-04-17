@@ -31,9 +31,6 @@
 #define MAX_DEVICES 8
 #endif
 
-/** The device number for the trough device, which all games must have */
-#define DEV_TROUGH 0
-
 /** The GIDs for the device update tasks.
  * Every device has its own GID for the function that runs to service it.
  * This task is in charge of processing switch closures AND servicing

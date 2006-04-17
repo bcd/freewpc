@@ -37,15 +37,26 @@
 
 #include <freewpc.h>
 
+/** Runtime status about each device */
+device_t device_table[NUM_DEVICES];
 
-device_t device_table[MAX_DEVICES];
-
+/** The global state of the entire device subsystem */
 U8 device_ss_state;
+
+/** The number of devices registered */
 U8 device_count;
+
+/** The maximum number of balls that this machine should have */
 U8 max_balls;
+
+/** The number of balls accounted for */
 U8 counted_balls;
+
+/** The number of balls that have gone missing */
 U8 missing_balls;
+
 U8 live_balls;
+
 
 void device_debug (void)
 {
@@ -76,6 +87,7 @@ void device_debug (void)
 		counted_balls, missing_balls, live_balls);
 #endif
 }
+
 
 void device_clear (device_t *dev)
 {
@@ -121,6 +133,12 @@ uint8_t device_recount (device_t *dev)
 }
 
 
+/*
+ * The core function for handling a device.
+ * This function is invoked (within its own task context) whenever
+ * a switch closure occurs on a device, or when a request is made to
+ * kick a ball from a device.
+ */
 void device_update (void)
 {
 	device_t *dev;
@@ -258,7 +276,7 @@ wait_and_recount:
 }
 
 
-/* Request that a device eject 1 ball */
+/** Request that a device eject 1 ball */
 void device_request_kick (device_t *dev)
 {
 	dbprintf ("Request to kick from %s\n", dev->props->name);
@@ -278,6 +296,7 @@ void device_request_kick (device_t *dev)
 }
 
 
+/** Request that a device ejects all balls */
 void device_request_empty (device_t *dev)
 {
 	if ((dev->actual_count - dev->kicks_needed) > 0)
@@ -290,11 +309,13 @@ void device_request_empty (device_t *dev)
 }
 
 
+/** Update the global state of the machine.  This happens nearly
+ * anytime a change happens locally within a particular device. */
 void device_update_globals (void)
 {
 	devicenum_t devno;
-	// uint8_t previous_counted_balls = counted_balls;
 
+	/* Recount the number of balls that are held */
 	counted_balls = 0;
 	for (devno = 0; devno < device_count; devno++)
 	{
@@ -302,6 +323,7 @@ void device_update_globals (void)
 		counted_balls += dev->actual_count;
 	}
 
+	/* Count how many balls are missing */
 	missing_balls = max_balls - counted_balls;
 	if (missing_balls == live_balls)
 	{
@@ -309,36 +331,9 @@ void device_update_globals (void)
 	}
 	else
 	{
-		/* Number of balls not accounted for is NOT what we expect */
+		/* TODO : Number of balls not accounted for is NOT what we expect */
 		db_puts ("Missing != Live\n");
 	}
-
-#if 0
-	if (counted_balls == previous_counted_balls)
-	{
-		/* No change in total count, so nothing to update */
-	}
-	else if (counted_balls > previous_counted_balls)
-	{
-		/* Counted went up */
-		uint8_t add_count = counted_balls - previous_counted_balls;
-		while (add_count > 0)
-		{
-			missing_balls--;
-			add_count--;
-		}
-	}
-	else if (counted_balls < previous_counted_balls)
-	{
-		/* Counted went down */
-		uint8_t down_count = previous_counted_balls - counted_balls;
-		while (down_count > 0)
-		{
-			missing_balls++;
-			down_count--;
-		}
-	}
-#endif
 }
 
 
@@ -412,9 +407,11 @@ void device_remove_live (void)
 	}
 }
 
+
+/** Sets the desired number of balls to be in play. */
 void device_multiball_set (U8 count)
 {
-	device_t *dev = device_entry (DEV_TROUGH);
+	device_t *dev = device_entry (DEVNO_TROUGH);
 	U8 kicks = count - (live_balls + dev->kicks_needed);
 	while (kicks > 0)
 	{
@@ -441,7 +438,7 @@ void device_init (void)
 	live_balls = 0;
 
 	device_count = 0;
-	for (dev=device_entry(0); dev < device_entry(MAX_DEVICES); dev++)
+	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
 	{
 		device_clear (dev);
 		device_call_op (dev, power_up);

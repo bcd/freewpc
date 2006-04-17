@@ -161,7 +161,7 @@ void end_ball (void)
 	 */
 	if (!ball_in_play)
 	{
-		device_request_kick (device_entry (DEV_TROUGH));
+		device_request_kick (device_entry (DEVNO_TROUGH));
 		goto done;
 	}
 
@@ -242,7 +242,7 @@ void start_ball (void)
 	player_change ();
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
-	device_request_kick (device_entry (DEV_TROUGH));
+	device_request_kick (device_entry (DEVNO_TROUGH));
 	tilt_start_ball ();
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);

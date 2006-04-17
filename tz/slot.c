@@ -25,7 +25,7 @@
 
 DECLARE_SWITCH_DRIVER (sw_slot)
 {
-	.devno = SW_DEVICE_DECL(2),
+	.devno = SW_DEVICE_DECL(DEVNO_SLOT),
 };
 
 void slot_kick_sound (void)
@@ -98,6 +98,6 @@ device_properties_t slot_props = {
 
 CALLSET_ENTRY (slot, init)
 {
-	device_register (2, &slot_props);
+	device_register (DEVNO_SLOT, &slot_props);
 }
 

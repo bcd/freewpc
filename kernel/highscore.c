@@ -131,7 +131,7 @@ void high_score_check (void)
 }
 
 
-void high_score_init (void)
+void high_score_init (void) 
 {
 	high_score_reset ();
 }

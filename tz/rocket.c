@@ -29,7 +29,7 @@ void sw_rocket_handler (void)
 DECLARE_SWITCH_DRIVER (sw_rocket)
 {
 	.fn = sw_rocket_handler,
-	.devno = SW_DEVICE_DECL(3),
+	.devno = SW_DEVICE_DECL(DEVNO_ROCKET),
 };
 
 void rocket_enter (device_t *dev)
@@ -75,6 +75,6 @@ device_properties_t rocket_props = {
 
 CALLSET_ENTRY (rocket, init)
 {
-	device_register (3, &rocket_props);
+	device_register (DEVNO_ROCKET, &rocket_props);
 }
 

@@ -61,7 +61,7 @@ __taskentry__ void autofire_handler (void)
 		sol_on (SOL_SHOOTER_DIV);
 
 		/* Request kick from trough */
-		device_request_kick (device_entry (DEV_TROUGH));
+		device_request_kick (device_entry (DEVNO_TROUGH));
 
 		/* Wait for autofire switch to go off once */
 		/* TODO : add timeout here */

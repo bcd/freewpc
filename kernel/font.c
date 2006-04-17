@@ -120,6 +120,7 @@ static void fontargs_render_string (void)
 
 		for (i=0; i < font_height; i++)
 		{
+			task_dispatching_ok = TRUE;
 			for (j=0; j < font_byte_width; j++)
 			{
 				dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;

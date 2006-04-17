@@ -28,7 +28,7 @@ void sw_lock_handler (void)
 DECLARE_SWITCH_DRIVER (sw_lock)
 {
 	.fn = sw_lock_handler,
-	.devno = SW_DEVICE_DECL(1),
+	.devno = SW_DEVICE_DECL(DEVNO_LOCK),
 };
 
 		
@@ -67,6 +67,6 @@ device_properties_t lock_props = {
 
 CALLSET_ENTRY (lock, init)
 {
-	device_register (1, &lock_props);
+	device_register (DEVNO_LOCK, &lock_props);
 }
 

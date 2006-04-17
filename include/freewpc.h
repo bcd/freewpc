@@ -138,11 +138,31 @@ extern U8 irq_count;
 #include <gendefine_deff.h>
 #include <gendefine_leff.h>
 #include <gendefine_lampset.h>
+#include <gendefine_devno.h>
 #include <../images/xbmproto.h>
 
 /* From here on are any headers that are dependent on machine
  * specific features being defined */
 #include <hook.h>
+
+/* This is ugly, but I can't figure out any other way to get 
+ * pragmas working */
+#ifdef PAGE
+#if (PAGE == 57)
+#define PAGE_PRAGMA _Pragma ("section (\"page57\")")
+#elif (PAGE == 58)
+#define PAGE_PRAGMA _Pragma ("section (\"page58\")")
+#elif (PAGE == 59)
+#define PAGE_PRAGMA _Pragma ("section (\"page59\")")
+#elif (PAGE == 60)
+#define PAGE_PRAGMA _Pragma ("section (\"page60\")")
+#elif (PAGE == 61)
+#define PAGE_PRAGMA _Pragma ("section (\"page61\")")
+#else
+#define PAGE_PRAGMA
+#endif
+PAGE_PRAGMA
+#endif
 
 #ifdef __cplusplus
 } 

@@ -149,8 +149,9 @@ __noreturn__ void do_reset (void)
 	wpc_set_ram_protect (RAM_LOCK_2K);
 
 	/** Initialize the ROM page register 
-	 * page of ROM adjacent to the system area is mapped. */
-	wpc_set_rom_page (SYS_PAGE);
+	 * page of ROM adjacent to the system area is mapped.
+	 * This is the default location for machine-specific files. */
+	wpc_set_rom_page (MACHINE_PAGE);
 
 	/** Initialize other critical WPC output registers relating
 	 * to hardware */
@@ -320,7 +321,7 @@ void do_irq (void)
 
 #ifdef MACHINE_TZ
 			extern void tz_clock_rtt (void);
-			tz_clock_rtt ();
+			call_far (MACHINE_PAGE, tz_clock_rtt ());
 #endif
 
 			if ((irq_count & 127) == 0)

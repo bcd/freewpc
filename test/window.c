@@ -59,10 +59,6 @@ struct window *win_top;
 U8 in_test;
 
 
-/* Test mode now runs in its own page of ROM */
-#pragma section("page58")
-
-
 /* Whenever a function can be optional, use this rather than NULL.  It's
  * faster to call into a null function than it is to do a compare
  * against NULL before making the call.
@@ -335,7 +331,7 @@ struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
 struct adjustment_value game_restart_value = { 0, 2, 1, decimal_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
-struct adjustment_value hs_reset_value = { 0, 40, 1, hs_reset_render };
+struct adjustment_value hs_reset_value = { 0, 80, 1, hs_reset_render };
 struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
 struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
@@ -1122,7 +1118,7 @@ struct menu dev_lampset_test_item = {
 void dev_balldev_test_init (void)
 {
 	browser_init ();
-	browser_max = MAX_DEVICES-1;
+	browser_max = NUM_DEVICES-1;
 }
 
 #pragma long_branch
@@ -1408,8 +1404,8 @@ struct menu factory_reset_item = {
 
 /**********************************************************************/
 
-struct menu clear_credits_item = {
-	.name = "CLEAR CREDITS",
+struct menu clear_audits_item = {
+	.name = "CLEAR AUDITS",
 	.flags = M_ITEM,
 };
 
@@ -1418,13 +1414,28 @@ struct menu clear_coins_item = {
 	.flags = M_ITEM,
 };
 
-struct menu clear_audits_item = {
-	.name = "CLEAR AUDITS",
+struct menu reset_hstd_item = {
+	.name = "RESET H.S.T.D.",
 	.flags = M_ITEM,
 };
 
 struct menu set_time_item = {
 	.name = "SET TIME/DATE",
+	.flags = M_ITEM,
+};
+
+struct menu custom_message_item = {
+	.name = "CUSTOM MESSAGE",
+	.flags = M_ITEM,
+};
+
+struct menu set_gameid_item = {
+	.name = "SET GAME I.D.",
+	.flags = M_ITEM,
+};
+
+struct menu clear_credits_item = {
+	.name = "CLEAR CREDITS",
 	.flags = M_ITEM,
 };
 
@@ -1473,12 +1484,16 @@ struct menu revoke_item = {
 
 
 struct menu *util_menu_items[] = {
-	&factory_reset_item,
-	&factory_adjust_item,
-	&clear_credits_item,
+	&clear_audits_item,
 	&clear_coins_item,
+	&reset_hstd_item,
 	&set_time_item,
+	&custom_message_item,
+	&set_gameid_item,
+	&factory_adjust_item,
+	&factory_reset_item,
 	&presets_menu_item,
+	&clear_credits_item,
 	&burnin_item,
 	&revoke_item,
 	NULL,
@@ -1589,17 +1604,18 @@ void switch_matrix_draw (void)
 			bool state_p = switch_poll (sw);
 			register U8 *dmd = dmd_low_buffer +
 				((U16)row << 6) + (col >> 1);
+			U8 mask = (col & 1) ? 0x0E : 0xE0;
 			if (state_p)
 			{
-				U8 mask = (col & 1) ? 0x0E : 0xE0;
 				dmd[0 * DMD_BYTE_WIDTH] |= mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0xAA;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
 				dmd[2 * DMD_BYTE_WIDTH] |= mask;
 			}
 			else
 			{
-				U8 mask = (col & 1) ? 0x0E : 0xE0;
+				dmd[0 * DMD_BYTE_WIDTH] &= ~mask;
 				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
+				dmd[2 * DMD_BYTE_WIDTH] &= ~mask;
 			}
 		}
 	}
@@ -1625,6 +1641,8 @@ struct window_ops switch_edges_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = switch_edges_draw,
 	.thread = switch_edges_thread,
+	.up = null_function,
+	.down = null_function,
 };
 
 struct menu switch_edges_item = {
@@ -1646,6 +1664,8 @@ void switch_levels_draw (void)
 struct window_ops switch_levels_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = switch_levels_draw,
+	.up = null_function,
+	.down = null_function,
 };
 
 struct menu switch_levels_item = {
@@ -2204,7 +2224,7 @@ struct window_ops asic_register_window = {
 };
 
 struct menu asic_register_item = {
-	.name = "ASIC REGISTER TEST",
+	.name = "ASIC TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &asic_register_window, NULL } },
 };
