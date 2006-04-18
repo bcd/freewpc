@@ -54,6 +54,6 @@ void db_put4x (uint16_t v);
 
 void db_init (void);
 void db_dump_switches (void);
-void db_rtt (void);
+void db_idle_task (void);
 
 #endif /* _SYS_DEBUG_H */

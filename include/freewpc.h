@@ -148,7 +148,13 @@ extern U8 irq_count;
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */
 #ifdef PAGE
-#if (PAGE == 57)
+#if (PAGE == 54)
+#define PAGE_PRAGMA _Pragma ("section (\"page54\")")
+#elif (PAGE == 55)
+#define PAGE_PRAGMA _Pragma ("section (\"page55\")")
+#elif (PAGE == 56)
+#define PAGE_PRAGMA _Pragma ("section (\"page56\")")
+#elif (PAGE == 57)
 #define PAGE_PRAGMA _Pragma ("section (\"page57\")")
 #elif (PAGE == 58)
 #define PAGE_PRAGMA _Pragma ("section (\"page58\")")

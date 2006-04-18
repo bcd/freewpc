@@ -73,6 +73,8 @@ struct window win_stack[8];
 
 
 
+/** Push the first window onto the stack.  This ends any game in progress
+ * marks 'in test'.  It also resets sound, display, and lamps. */
 void window_push_first (void)
 {
 	in_test = 1;
@@ -84,6 +86,7 @@ void window_push_first (void)
 }
 
 
+/** Pop the first window pushed, returning out of test mode */
 void window_pop_first (void)
 {
 	dmd_alloc_low_clean ();
@@ -97,6 +100,7 @@ void window_pop_first (void)
 	in_test = 0;
 }
 
+/** Starts the window's thread function, if it exists. */
 void window_start_thread (void)
 {
 	if (win_top->ops->thread)
@@ -105,11 +109,15 @@ void window_start_thread (void)
 	}
 }
 
+
+/** Stops the window's thread function, if it exists. */
 void window_stop_thread (void)
 {
 	task_kill_gid (GID_WINDOW_THREAD);
 }
 
+
+/** Push a new window onto the stack */
 void window_push (struct window_ops *ops, void *priv)
 {
 	window_stop_thread ();
@@ -133,6 +141,7 @@ void window_push (struct window_ops *ops, void *priv)
 }
 
 
+/** Pop the current window off the stack */
 void window_pop (void)
 {
 	if (win_top == NULL)
@@ -157,6 +166,7 @@ void window_pop (void)
 }
 
 
+/** Initialize the window subsystem */
 void window_init (void)
 {
 	win_top = NULL;
@@ -773,6 +783,7 @@ void confirm_thread (void)
 	while (confirm_timer > 0)
 	{
 		task_sleep_sec (1);
+		sound_send (SND_TEST_HSRESET);
 		confirm_timer--;
 		confirm_draw ();
 	}
@@ -1226,6 +1237,12 @@ void dev_balldev_test_enter (void)
 		case 1:
 			device_request_empty (dev);
 			break;
+		case 2:
+			/* enable lock */
+			break;
+		case 3:
+			/* disable lock */
+			break;
 	}
 }
 
@@ -1281,7 +1298,6 @@ void dev_soundedit_init (void)
 	dev_soundedit_page_start = 0;
 }
 
-#pragma long_branch
 void dev_soundedit_draw (void)
 {
 	int i;
@@ -1299,7 +1315,6 @@ void dev_soundedit_draw (void)
 	}
 	dmd_show_low ();
 }
-#pragma short_branch
 
 void dev_soundedit_up (void)
 {
@@ -1404,9 +1419,35 @@ struct menu factory_reset_item = {
 
 /**********************************************************************/
 
+void clear_audits_init (void)
+{
+	audit_reset ();
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_5x5, 64, 16, "AUDITS CLEARED");
+	dmd_show_low ();
+}
+
+struct window_ops clear_audits_window = {
+	DEFAULT_WINDOW,
+	.init = clear_audits_init,
+};
+
 struct menu clear_audits_item = {
 	.name = "CLEAR AUDITS",
 	.flags = M_ITEM,
+};
+
+/**********************************************************************/
+
+void clear_coins_init (void)
+{
+	credits_clear ();
+}
+
+struct window_ops clear_coins_window = {
+	DEFAULT_WINDOW,
+	.init = clear_coins_init,
 };
 
 struct menu clear_coins_item = {

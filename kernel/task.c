@@ -483,6 +483,9 @@ void __attribute__((noreturn)) task_dispatcher (void)
 				while (tick_start_count == *(volatile U8 *)&tick_count);
 	
 				/* Call idle tasks */
+#ifdef DEBUGGER
+				db_idle_task ();
+#endif
 				switch_idle_task ();
 				ac_idle_task ();
 				nvram_idle_task ();

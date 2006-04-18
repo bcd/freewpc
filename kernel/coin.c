@@ -262,14 +262,17 @@ DECLARE_SWITCH_DRIVER (sw_fourth_coin)
 };
 
 
-void coin_init (void)
+void credits_clear (void)
 {
-	/* TODO : this should only be done during a factory reset */
 	wpc_nvram_get ();
 	credit_count = 0;
 	unit_count = 0;
 	wpc_nvram_put ();
+}
 
+
+void coin_init (void)
+{
 	lamp_start_update ();
 }
 

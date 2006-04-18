@@ -112,6 +112,9 @@
 
 #define MACHINE_SW21				sw_slam_tilt
 #define MACHINE_SW23				sw_buyin_button
+// #define MACHINE_SW25       sw_far_left_trough
+#define MACHINE_SW26				sw_trough_prox
+// #define MACHINE_SW27			sw_shooter
 #define MACHINE_SW28				sw_rocket
 
 #define MACHINE_SW31				sw_left_jet
@@ -126,6 +129,9 @@
 #define MACHINE_SW41				sw_deadend
 #define MACHINE_SW42				sw_camera
 #define MACHINE_SW43				sw_piano
+// #define MACHINE_SW44			sw_mpf_enter
+// #define MACHINE_SW45			sw_mpf_left
+// #define MACHINE_SW46			sw_mpf_right
 #define MACHINE_SW47          sw_clock_target
 #define MACHINE_SW48				sw_greed
 
@@ -135,12 +141,14 @@
 #define MACHINE_SW54				sw_left_ramp_exit
 #define MACHINE_SW55				sw_gumball_geneva
 #define MACHINE_SW56				sw_gumball_exit
+#define MACHINE_SW57				sw_slot_prox
 #define MACHINE_SW58				sw_slot
 
 #define MACHINE_SW61				sw_lower_skill
 #define MACHINE_SW62				sw_center_skill
 #define MACHINE_SW63				sw_upper_skill
 #define MACHINE_SW64				sw_greed
+//#define MACHINE_SW65			sw_power_payoff
 #define MACHINE_SW66				sw_greed
 #define MACHINE_SW67				sw_greed
 #define MACHINE_SW68				sw_greed
@@ -149,13 +157,17 @@
 #define MACHINE_SW72				sw_autofire2
 #define MACHINE_SW73				sw_right_ramp
 #define MACHINE_SW74				sw_gumball_popper
+//#define MACHINE_SW75			sw_mpf_top
+//#define MACHINE_SW76			sw_mpf_exit
 #define MACHINE_SW77				sw_greed
 #define MACHINE_SW78				sw_greed
 
 #define MACHINE_SW81				sw_right_loop
+//#define MACHINE_SW82			sw_upper_right_magnet
 #define MACHINE_SW83				sw_left_loop
 #define MACHINE_SW84				sw_lock
 #define MACHINE_SW85				sw_lock
+//#define MACHINE_SW86			sw_clock_passage
 #define MACHINE_SW87				sw_gumball_enter
 #define MACHINE_SW88				sw_lock
 

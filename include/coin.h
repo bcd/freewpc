@@ -33,6 +33,7 @@ void sw_left_coin_handler (void) __taskentry__;
 void sw_center_coin_handler (void) __taskentry__;
 void sw_right_coin_handler (void) __taskentry__;
 void sw_fourth_coin_handler (void) __taskentry__;
+void credits_clear (void);
 void coin_init (void);
 
 #endif /* _COIN_H */

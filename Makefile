@@ -161,7 +161,7 @@ BC = bc
 
 FIXED_SECTION = sysrom
 
-OS_GCC34_BROKEN_OBJS = task.o dmdtrans.o font.o rtc.o printf.o
+OS_GCC34_BROKEN_OBJS = task.o font.o rtc.o printf.o
 
 OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	switches.o flip.o sound.o coin.o service.o game.o \
@@ -171,6 +171,8 @@ OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o dmd.o \
 	math.o audit.o search.o highscore.o $(OS_GCC34_BROKEN_OBJS)
 
 TEST_OBJS = test/window.o
+
+TRANS_OBJS = kernel/dmdtrans.o
 
 FONT_OBJS = fonts/mono5.o fonts/mono9.o
 
@@ -375,18 +377,19 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 # class of function.
 #
 page56_OBJS = page56.o
-page57_OBJS = page57.o
+page57_OBJS = page57.o $(TRANS_OBJS)
 page58_OBJS = page58.o $(TEST_OBJS)
 page59_OBJS = page59.o
 page60_OBJS = page60.o $(XBM_OBJS)
 page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
 
+$(TRANS_OBJS) : PAGE=57
 $(TEST_OBJS) : PAGE=58
 $(MACHINE_OBJS) : PAGE=59
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 
-PAGE_DEFINES := -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
+PAGE_DEFINES := -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
 
 
@@ -405,7 +408,7 @@ $(SYSTEM_OBJS) : PAGE=62
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
+C_OBJS = $(KERNEL_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)

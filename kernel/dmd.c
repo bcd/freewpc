@@ -539,6 +539,7 @@ void dmd_do_transition (void)
 		}
 	}
 
+	wpc_push_page (TRANS_PAGE);
 	while (dmd_in_transition)
 	{
 #ifdef STEP_TRANSITION
@@ -585,6 +586,7 @@ void dmd_do_transition (void)
 			dmd_dark_page = dmd_bright_page = dmd_composite_page;
 		}
 	}
+	wpc_pop_page ();
 	dmd_transition = NULL;
 }
 
@@ -593,7 +595,7 @@ void dmd_do_transition (void)
  * Schedule a transition.
  *
  * Normally, when dmd_show_low or dmd_show2 is invoked, the new pages
- * take effect immediately (i.e. using a "take" transition).
+ * take effect immediately (i.e. using a "cut" transition).
  *
  * Calling this function prior to those functions causes them to
  * behave slightly differently.  It causes a transition between the

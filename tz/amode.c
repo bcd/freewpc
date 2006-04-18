@@ -178,8 +178,36 @@ void amode_leff (void) __taskentry__
 }
 
 
+void amode_show_design_credits (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 12, "BY BRIAN DOMINY");
+	font_render_string_center (&font_mono5, 64, 19, "RELEASED UNDER THE");
+	font_render_string_center (&font_mono5, 64, 25, "GNU PUBLIC LICENSE");
+	dmd_sched_transition (&trans_scroll_up_slow);
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 5, "VISIT ODDCHANGE.COM");
+	font_render_string_center (&font_mono5, 64, 12, "FOR MORE INFO");
+	font_render_string_center (&font_mono5, 64, 19, "(C) COPYRIGHT 2006");
+	dmd_sched_transition (&trans_scroll_up_slow);
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up_slow);
+	dmd_show_low ();
+}
+
+
 void amode_deff (void) __taskentry__
 {
+	int design_credit_counter = 3;
+
 	for (;;)
 	{
 		/** Display last set of player scores **/
@@ -192,6 +220,7 @@ void amode_deff (void) __taskentry__
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (freewpc_logo_bits);
+		dmd_sched_transition (&trans_random_boxfade);
 		dmd_show2 ();
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
@@ -240,6 +269,12 @@ void amode_deff (void) __taskentry__
 
 		/* Kill music if it is running */
 		music_set (MUS_OFF);
+
+		if (--design_credit_counter == 0)
+		{
+			design_credit_counter = 3;
+			amode_show_design_credits ();
+		}
 	}
 }
 

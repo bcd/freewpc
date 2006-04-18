@@ -27,8 +27,12 @@
  * effect and another.
  *
  * There are inherently 3 classes of transitions:
- * 1. Old image remains static, new image overlays it.
- * 2. Old image "disappears", revealing static new image underneath it.
+ * 1. Old image remains static, new image overlays it.  For this class,
+ * the "old" transition function is dmd_copy_low_to_high.  The "new"
+ * function copies in the new data one section at a time.
+ *
+ * 2. Old image moves away, revealing static new image underneath it.
+ *
  * 3. Both old image and new image move during the transition.
  */
 
@@ -86,7 +90,14 @@ dmd_transition_t trans_scroll_up = {
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_33MS,
-	.arg = 4 * 16,
+	.arg = 4 * 16, /* 4 lines at a time */
+};
+
+dmd_transition_t trans_scroll_up_slow = {
+	.composite_old = trans_scroll_up_old,
+	.composite_new = trans_scroll_up_new,
+	.delay = TIME_100MS,
+	.arg = 1 * 16, /* 4 lines at a time */
 };
 
 /*********************************************************************/
@@ -190,4 +201,65 @@ dmd_transition_t trans_scroll_right = {
 	.delay = TIME_33MS,
 	.arg = 0,
 };
+
+/*********************************************************************/
+
+static U16 sequential_boxfade_offset_table[] = {
+	0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+	128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,
+	256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,
+	384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,
+};
+
+static U16 random_boxfade_offset_table[] = {
+	130, 395, 13, 396, 8, 390, 10, 264, 12,
+	135, 15, 265, 384, 2, 131, 393, 5, 397,
+	141, 6, 386, 1, 387, 138, 394, 258, 133,
+	398, 134, 399, 257, 3, 389, 267, 391, 139,
+	9, 140, 270, 262, 11, 142, 269, 143, 4, 136,
+	263, 132, 256, 392, 268, 128, 0, 261, 388, 137,
+	7, 129, 14, 259, 260, 385, 266, 271,
+};
+
+
+void trans_fade_new (void)
+{
+	U16 offset;
+
+	if (dmd_trans_data_ptr == NULL)
+		dmd_trans_data_ptr = (U8 *)dmd_transition->arg;
+
+	offset = *(U16 *)dmd_trans_data_ptr;
+
+	dmd_high_buffer[offset] = dmd_low_buffer[offset];
+	dmd_high_buffer[16 + offset] = dmd_low_buffer[16 + offset];
+	dmd_high_buffer[32 + offset] = dmd_low_buffer[32 + offset];
+	dmd_high_buffer[48 + offset] = dmd_low_buffer[48 + offset];
+	dmd_high_buffer[64 + offset] = dmd_low_buffer[64 + offset];
+	dmd_high_buffer[80 + offset] = dmd_low_buffer[80 + offset];
+	dmd_high_buffer[96 + offset] = dmd_low_buffer[96 + offset];
+	dmd_high_buffer[112 + offset] = dmd_low_buffer[112 + offset];
+
+	dmd_trans_data_ptr += sizeof (U16);
+	if ((U16)dmd_trans_data_ptr == dmd_transition->arg + 64 * sizeof (U16))
+		dmd_in_transition = FALSE;
+}
+
+dmd_transition_t trans_sequential_boxfade = {
+	.composite_old = dmd_copy_low_to_high,
+	.composite_new = trans_fade_new,
+	.delay = TIME_33MS,
+	.arg = (U16)sequential_boxfade_offset_table,
+};
+
+dmd_transition_t trans_random_boxfade = {
+	.composite_old = dmd_copy_low_to_high,
+	.composite_new = trans_fade_new,
+	.delay = TIME_33MS,
+	.arg = (U16)random_boxfade_offset_table,
+};
+
+
+/*********************************************************************/
+
 

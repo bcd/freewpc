@@ -88,7 +88,7 @@ void db_dump_switches (void)
 #endif /* DEBUGGER */
 
 
-void db_rtt (void)
+void db_idle_task (void)
 {
 #ifdef DEBUGGER
 	if (!db_attached)
@@ -148,6 +148,5 @@ void db_rtt (void)
 void db_init (void)
 {
 	db_attached = 0;
-	db_rtt ();
 }
 

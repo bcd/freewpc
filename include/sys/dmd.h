@@ -65,7 +65,11 @@ typedef struct
 	 * as a TIME_xxx define. */
 	U8 delay;
 
-	U8 arg;
+	/** Extra data used to create multiple transitions using common
+	 * code but with slight differences.  Each transition interprets
+	 * this field differently.  It could be used to hold a pointer or
+	 * an offset. */
+	U16 arg;
 } dmd_transition_t;
 
 
@@ -81,9 +85,12 @@ extern dmd_transition_t *dmd_transition;
 
 extern dmd_transition_t 
 	trans_scroll_up,
+	trans_scroll_up_slow,
 	trans_scroll_down,
 	trans_scroll_left,
-	trans_scroll_right
+	trans_scroll_right,
+	trans_sequential_boxfade,
+	trans_random_boxfade
 	;
 
 void dmd_init (void);

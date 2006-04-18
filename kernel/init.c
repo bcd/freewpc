@@ -313,9 +313,6 @@ void do_irq (void)
 		{
 			/* Execute rtts every 32ms */
 			wpc_led_toggle ();
-#ifdef DEBUGGER
-			db_rtt ();
-#endif
 			sound_rtt ();
 			lamp_flash_rtt ();
 

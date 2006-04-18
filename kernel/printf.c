@@ -118,6 +118,26 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 }
 
 
+void insert_numeric_separators (void)
+{
+	switch (number_length)
+	{
+		case 0: case 1: case 2: case 3:
+			break;
+
+		case 4: 
+		case 5:
+		case 6:
+			/* Insert one comma */
+			break;
+
+		case 7: case 8:
+			/* Insert two commas */
+			break;
+	}
+}
+
+
 int printf (const char *format, ...)
 {
 	static va_list va;
