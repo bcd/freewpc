@@ -90,7 +90,9 @@ extern dmd_transition_t
 	trans_scroll_left,
 	trans_scroll_right,
 	trans_sequential_boxfade,
-	trans_random_boxfade
+	trans_random_boxfade,
+	trans_vstripe_left2right,
+	trans_vstripe_right2left
 	;
 
 void dmd_init (void);

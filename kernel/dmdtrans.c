@@ -263,3 +263,82 @@ dmd_transition_t trans_random_boxfade = {
 /*********************************************************************/
 
 
+void trans_vstripe_new (void)
+{
+	U8 col;
+	U8 mask;
+	U8 *src, *dst;
+
+	if (dmd_trans_data_ptr == NULL)
+		dmd_trans_data_ptr = (U8 *)dmd_transition->arg;
+
+	col = dmd_trans_data_ptr[0];
+	mask = dmd_trans_data_ptr[1];
+	dst =	dmd_high_buffer + col;
+	src = dmd_low_buffer + col;
+
+	*dst &= ~mask;
+	*dst |= *src & mask;
+
+	dmd_trans_data_ptr += 2;
+
+	if (dmd_trans_data_ptr[1] == 0)
+		dmd_in_transition = FALSE;
+}
+
+
+static U8 vstripe_left2right_data_table[] = {
+	0, 0xF, 0, 0xF0,
+	1, 0xF, 1, 0xF0,
+	2, 0xF, 2, 0xF0,
+	3, 0xF, 3, 0xF0,
+	4, 0xF, 4, 0xF0,
+	5, 0xF, 5, 0xF0,
+	6, 0xF, 6, 0xF0,
+	7, 0xF, 7, 0xF0,
+	8, 0xF, 8, 0xF0,
+	9, 0xF, 9, 0xF0,
+	10, 0xF, 10, 0xF0,
+	11, 0xF, 11, 0xF0,
+	12, 0xF, 12, 0xF0,
+	13, 0xF, 13, 0xF0,
+	14, 0xF, 14, 0xF0,
+	15, 0xF, 15, 0xF0,
+	0, 0
+};
+
+dmd_transition_t trans_vstripe_left2right = {
+	.composite_old = dmd_copy_low_to_high,
+	.composite_new = trans_vstripe_new,
+	.delay = TIME_33MS,
+	.arg = (U16)vstripe_left2right_data_table,
+};
+
+
+static U8 vstripe_right2left_data_table[] = {
+	15, 0xF0, 15, 0xF,
+	14, 0xF0, 14, 0xF,
+	13, 0xF0, 13, 0xF,
+	12, 0xF0, 12, 0xF,
+	11, 0xF0, 11, 0xF,
+	10, 0xF0, 10, 0xF,
+	9, 0xF0, 9, 0xF,
+	8, 0xF0, 8, 0xF,
+	7, 0xF0, 7, 0xF,
+	6, 0xF0, 6, 0xF,
+	5, 0xF0, 5, 0xF,
+	4, 0xF0, 4, 0xF,
+	3, 0xF0, 3, 0xF,
+	2, 0xF0, 2, 0xF,
+	1, 0xF0, 1, 0xF,
+	0, 0xF0, 0, 0xF,
+	0, 0
+};
+
+dmd_transition_t trans_vstripe_right2left = {
+	.composite_old = dmd_copy_low_to_high,
+	.composite_new = trans_vstripe_new,
+	.delay = TIME_33MS,
+	.arg = (U16)vstripe_right2left_data_table,
+};
+
