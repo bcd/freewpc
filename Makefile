@@ -355,11 +355,26 @@ else
 RAM_AREA = 0x4
 DIRECT_LNK_CMD = "-x"
 endif
+
+ifeq ($(USE_LOCALS),y)
+LOCAL_AREA = 0x1200
+LOCAL_AREA_SIZE = 0xA0
+LOCAL_SAVE_AREA = 0x12A0
+LOCAL_LNK_CMD = "-b local = $(LOCAL_AREA)"
+else
+LOCAL_LNK_CMD = "-x"
+endif
+
 MALLOC_AREA = 0x1400
+MALLOC_AREA_SIZE = 0x200
+
 STACK_AREA = 0x1600
+STACK_AREA_SIZE = 0x200
+
 # The first 16-bytes of the nonvolatile area are reserved.
 # PinMAME has a hack that overwrites this area.
 NVRAM_AREA = 0x1810
+
 PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0

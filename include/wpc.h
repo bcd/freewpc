@@ -72,6 +72,16 @@
 #define STACK_SIZE      0x200
 #define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
+/** The layout of the player local area */
+#define LOCAL_BASE		0x1200
+#define LOCAL_SIZE		0xA0
+
+#define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
+
+/** The layout of the malloc area */
+#define MALLOC_BASE		0x1400
+#define MALLOC_SIZE		0x200
+
 /***************************************************************
  * System timing
  ***************************************************************/
