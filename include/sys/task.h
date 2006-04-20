@@ -35,7 +35,7 @@
 /** The maximum number of tasks that can be running at once.
  * Space for this many task structures is statically allocated.
  */
-#define NUM_TASKS 32
+#define NUM_TASKS 48
 
 
 /** Type for the group ID (gid) */
@@ -111,13 +111,6 @@ extern inline task_gid_t task_getgid (void)
 		__debug_timer, irq_count); \
 }
 
-/*******************************/
-/*   Large Stack Allocation    */
-/*******************************/
-
-/* These are obsolete macros */
-#define stack_large_begin()
-#define stack_large_end()
 
 /********************************/
 /*     Function Prototypes      */

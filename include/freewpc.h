@@ -66,14 +66,14 @@ extern U8 irq_count;
 #define C_STR(x)		#x
 
 /*
- * Define the size of the process stack (currently here
- * because the assembler code needs it.
+ * Define the size of the process stack (TODO:
+ * move this elsewhere)
  *
  * This value + 21 should be a nice round number.
  * Original : 43 ==> Total size of 64
  */
-/// #define TASK_STACK_SIZE		43
-#define TASK_STACK_SIZE		75
+#define TASK_STACK_SIZE		43
+/// #define TASK_STACK_SIZE		75
 /// #define TASK_STACK_SIZE		91
 
 /* Include the standard header files that are needed
