@@ -69,9 +69,9 @@ const lampnum_t *lampset_table[] = {
 };
 
 
-__fastram__ task_ticks_t lampset_apply_delay;
+task_ticks_t lampset_apply_delay;
 
-__fastram__ U8 lampset_alternation_state;
+U8 lampset_alternation_state;
 
 /* During a lampset_apply operation, this variable contains the
  * index of the lamp that is currently being processed.
