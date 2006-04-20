@@ -142,14 +142,13 @@ void window_push (struct window_ops *ops, void *priv)
 
 
 /** Pop the current window off the stack */
-void window_pop (void)
+void window_pop_quiet (void)
 {
 	if (win_top == NULL)
 		return;
 
 	window_stop_thread ();
 	window_call_op (win_top, exit);
-	sound_send (SND_TEST_ESCAPE);
 
 	if (win_top == &win_stack[0])
 	{
@@ -163,6 +162,12 @@ void window_pop (void)
 		window_call_op (win_top, draw);
 		window_start_thread ();
 	}
+}
+
+void window_pop (void)
+{
+	sound_send (SND_TEST_ESCAPE);
+	window_pop_quiet ();
 }
 
 
@@ -370,8 +375,8 @@ struct adjustment feature_adjustments[] = {
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #else
-	{ "", &on_off_value, OFF, NULL },
-	{ "", &on_off_value, OFF, NULL },
+	{ "", &on_off_value, OFF, NULL }, /* skip over */
+	{ "", &on_off_value, OFF, NULL }, /* skip over */
 #endif
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
 	{ NULL, NULL, 0, NULL },
@@ -389,9 +394,9 @@ struct adjustment pricing_adjustments[] = {
 	{ "4TH SLOT VALUE", &integer_value, 1, &price_config.slot_values[3] },
 	{ "MAXIMUM CREDITS", &integer_value, 10, &price_config.max_credits },
 #ifdef FREE_ONLY
-	{ "", &yes_no_value, NO, &price_config.free_play },
+	{ "", &yes_no_value, YES, &price_config.free_play },
 #else
-	{ "FREE PLAY", &yes_no_value, YES, &price_config.free_play },
+	{ "FREE PLAY", &yes_no_value, NO, &price_config.free_play },
 #endif
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
 	{ "1-COIN BUY-IN", &yes_no_value, NO, NULL },
@@ -747,39 +752,46 @@ U8 confirm_timer;
 void confirm_init (void)
 {
 	confirm_banner = confirm_action = null_function;
+	confirm_timer = 7;
 }
 
 void confirm_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string (&font_mono5, 64, 8, "ENTER TO CONFIRM");
-	font_render_string (&font_mono5, 64, 14, "ESCAPE TO CANCEL");
+	sprintf ("%d", confirm_timer);
+	font_render_string_left (&font_mono5, 2, 2, sprintf_buffer);
+	font_render_string_left (&font_mono5, 120, 2, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 14, "ENTER TO SAVE");
+	font_render_string_center (&font_mono5, 64, 20, "ESCAPE TO CANCEL");
 	dmd_show_low ();
 }
 
 void confirm_enter (void)
 {
+	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string (&font_mono5, 64, 10, "SAVING NEW");
-	font_render_string (&font_mono5, 64, 20, "ADJUSTMENT VALUE");
+	font_render_string_center (&font_mono5, 64, 10, "SAVING NEW");
+	font_render_string_center (&font_mono5, 64, 20, "ADJUSTMENT VALUE");
 	dmd_show_low ();
+	sound_send (SND_TEST_CONFIRM);
 	task_sleep_sec (2);
-	window_pop ();
+	window_pop_quiet ();
 }
 
 void confirm_escape (void)
 {
+	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string (&font_mono5, 64, 10, "ESCAPE PRESSED");
-	font_render_string (&font_mono5, 64, 20, "CHANGED IGNORED");
+	font_render_string_center (&font_mono5, 64, 10, "ESCAPE PRESSED");
+	font_render_string_center (&font_mono5, 64, 20, "CHANGE IGNORED");
 	dmd_show_low ();
+	sound_send (SND_TEST_ABORT);
 	task_sleep_sec (2);
-	window_pop ();
+	window_pop_quiet ();
 }
 
 void confirm_thread (void)
 {
-	confirm_timer = 7;
 	while (confirm_timer > 0)
 	{
 		task_sleep_sec (1);
@@ -787,16 +799,21 @@ void confirm_thread (void)
 		confirm_timer--;
 		confirm_draw ();
 	}
-	confirm_escape ();
+	task_sleep (TIME_100MS * 5);
+	window_pop_quiet ();
+	task_exit ();
 }
 
+#define INHERIT_FROM_CONFIRM_WINDOW \
+	DEFAULT_WINDOW, \
+	.init = confirm_init, \
+	.draw = confirm_draw, \
+	.enter = confirm_enter, \
+	.escape = confirm_escape, \
+	.thread = confirm_thread
+
 struct window_ops confirm_window = {
-	DEFAULT_WINDOW,
-	.init = confirm_init,
-	.draw = confirm_draw,
-	.enter = confirm_enter,
-	.escape = confirm_escape,
-	.thread = confirm_thread,
+	INHERIT_FROM_CONFIRM_WINDOW,
 };
 
 
@@ -1132,15 +1149,11 @@ void dev_balldev_test_init (void)
 	browser_max = NUM_DEVICES-1;
 }
 
-#pragma long_branch
 void dev_balldev_test_draw (void)
 {
 	extern U8 counted_balls, missing_balls;
 	device_t *dev;
 	char *s;
-
-	task_yield ();
-	stack_large_begin ();
 
 	dev = &device_table[menu_selection];
 
@@ -1182,10 +1195,7 @@ void dev_balldev_test_draw (void)
 	}
 
 	dmd_show_low ();
-
-	stack_large_end ();
 }
-#pragma short_branch
 
 
 void dev_balldev_test_thread (void)
@@ -1311,7 +1321,6 @@ void dev_soundedit_draw (void)
 		font_render_string (&font_5x5, 16, i*6+1, sprintf_buffer);
 		dev_soundedit_print_op (dev_soundedit_program[dev_soundedit_page_start+i]);
 		font_render_string (&font_5x5, 48, i*6+1, sprintf_buffer);
-		task_yield ();
 	}
 	dmd_show_low ();
 }
@@ -1354,6 +1363,28 @@ struct menu dev_soundedit_item = {
 	.var = { .subwindow = { &dev_soundedit_window, NULL } },
 };
 
+/**********************************************************************/
+
+void dev_random_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("%d", random ());
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+}
+
+struct window_ops dev_random_test_window = {
+	DEFAULT_WINDOW,
+	.draw = dev_random_test_draw,
+};
+
+struct menu dev_random_test_item = {
+	.name = "RANDOM TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &dev_random_test_window, NULL } },
+};
+
+/**********************************************************************/
 
 struct menu *dev_menu_items[] = {
 	&dev_font_test_item,
@@ -1362,6 +1393,7 @@ struct menu *dev_menu_items[] = {
 	&dev_lampset_test_item,
 	&dev_balldev_test_item,
 	&dev_soundedit_item,
+	&dev_random_test_item,
 	NULL,
 };
 
@@ -1373,19 +1405,15 @@ struct menu development_menu = {
 
 /**********************************************************************/
 
-void factory_adjust_init (void)
+void factory_adjust_confirm (void)
 {
 	adj_reset_all ();
-
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 12, "FACTORY ADJUSTMENTS");
-	font_render_string_center (&font_5x5, 64, 24, "RESTORED");
-	dmd_show_low ();
+	confirm_enter ();
 }
 
 struct window_ops factory_adjust_window = {
-	DEFAULT_WINDOW,
-	.init = factory_adjust_init,
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = factory_adjust_confirm,
 };
 
 struct menu factory_adjust_item = {
@@ -1396,19 +1424,15 @@ struct menu factory_adjust_item = {
 
 /**********************************************************************/
 
-void factory_reset_init (void)
+void factory_reset_confirm (void)
 {
 	adj_reset_all ();
-
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 12, "FACTORY SETTINGS");
-	font_render_string_center (&font_5x5, 64, 24, "RESTORED");
-	dmd_show_low ();
+	confirm_enter ();
 }
 
 struct window_ops factory_reset_window = {
-	DEFAULT_WINDOW,
-	.init = factory_reset_init,
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = factory_reset_confirm,
 };
 
 struct menu factory_reset_item = {
@@ -1419,46 +1443,61 @@ struct menu factory_reset_item = {
 
 /**********************************************************************/
 
-void clear_audits_init (void)
+void clear_audits_confirm (void)
 {
 	audit_reset ();
-
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 16, "AUDITS CLEARED");
-	dmd_show_low ();
+	confirm_enter ();
 }
 
 struct window_ops clear_audits_window = {
-	DEFAULT_WINDOW,
-	.init = clear_audits_init,
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = clear_audits_confirm,
 };
 
 struct menu clear_audits_item = {
 	.name = "CLEAR AUDITS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &clear_audits_window, NULL } },
 };
 
 /**********************************************************************/
 
-void clear_coins_init (void)
+void clear_coins_confirm (void)
 {
-	credits_clear ();
+	confirm_enter ();
 }
 
 struct window_ops clear_coins_window = {
-	DEFAULT_WINDOW,
-	.init = clear_coins_init,
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = clear_coins_confirm,
 };
 
 struct menu clear_coins_item = {
 	.name = "CLEAR COINS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &clear_coins_window, NULL } },
+};
+
+/**********************************************************************/
+
+void reset_hstd_window_confirm (void)
+{
+	high_score_reset ();
+	confirm_enter ();
+}
+
+struct window_ops reset_hstd_window = {
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = reset_hstd_window_confirm,
 };
 
 struct menu reset_hstd_item = {
 	.name = "RESET H.S.T.D.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &reset_hstd_window, NULL } },
 };
+
+/**********************************************************************/
 
 struct menu set_time_item = {
 	.name = "SET TIME/DATE",
@@ -1475,10 +1514,26 @@ struct menu set_gameid_item = {
 	.flags = M_ITEM,
 };
 
+/**********************************************************************/
+
+void clear_credits_confirm (void)
+{
+	credits_clear ();
+	confirm_enter ();
+}
+
+struct window_ops clear_credits_window = {
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = clear_credits_confirm,
+};
+
 struct menu clear_credits_item = {
 	.name = "CLEAR CREDITS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &clear_credits_window, NULL } },
 };
+
+/**********************************************************************/
 
 struct menu burnin_item = {
 	.name = "AUTO BURN-IN",
@@ -1649,13 +1704,13 @@ void switch_matrix_draw (void)
 			if (state_p)
 			{
 				dmd[0 * DMD_BYTE_WIDTH] |= mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
 				dmd[2 * DMD_BYTE_WIDTH] |= mask;
 			}
 			else
 			{
 				dmd[0 * DMD_BYTE_WIDTH] &= ~mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
+				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
 				dmd[2 * DMD_BYTE_WIDTH] &= ~mask;
 			}
 		}
@@ -1705,6 +1760,7 @@ void switch_levels_draw (void)
 struct window_ops switch_levels_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = switch_levels_draw,
+	.thread = switch_edges_thread,
 	.up = null_function,
 	.down = null_function,
 };
@@ -2208,7 +2264,6 @@ void dipsw_test_draw (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_5x5, 64, 3, "DIP SWITCHES");
 
-	task_yield ();
 	for (sw = 0; sw < 8; sw++)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
@@ -2413,12 +2468,23 @@ void sysinfo_compiler_version (void) {
 	sprintf ("GCC %s, ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
 }
 
+#ifdef DEBUGGER
+void sysinfo_stats1 (void) {
+	extern U8 task_largest_stack;
+	sprintf ("MAX STACK %d", task_largest_stack);
+}
+void sysinfo_stats2 (void) {
+	sprintf ("");
+}
+#endif
+
 scroller_item sysinfo_scroller[] = {
-	sysinfo_machine_name,
-	sysinfo_machine_version,
-	sysinfo_system_version,
-	sysinfo_compiler_version,
-	NULL,
+	sysinfo_machine_name, sysinfo_machine_version,
+	sysinfo_system_version, sysinfo_compiler_version,
+#ifdef DEBUGGER
+	sysinfo_stats1, sysinfo_stats2,
+#endif
+	NULL
 };
 
 void sysinfo_enter (void)
