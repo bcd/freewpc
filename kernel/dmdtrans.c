@@ -268,6 +268,7 @@ void trans_vstripe_new (void)
 	U8 col;
 	U8 mask;
 	U8 *src, *dst;
+	U8 i;
 
 	if (dmd_trans_data_ptr == NULL)
 		dmd_trans_data_ptr = (U8 *)dmd_transition->arg;
@@ -277,8 +278,23 @@ void trans_vstripe_new (void)
 	dst =	dmd_high_buffer + col;
 	src = dmd_low_buffer + col;
 
-	*dst &= ~mask;
-	*dst |= *src & mask;
+	for (i=0; i < 8; i++)
+	{
+		dst[0 * DMD_BYTE_WIDTH] &= ~mask;
+		dst[0 * DMD_BYTE_WIDTH] |= src[0 * DMD_BYTE_WIDTH] & mask;
+
+		dst[1 * DMD_BYTE_WIDTH] &= ~mask;
+		dst[1 * DMD_BYTE_WIDTH] |= src[1 * DMD_BYTE_WIDTH] & mask;
+
+		dst[2 * DMD_BYTE_WIDTH] &= ~mask;
+		dst[2 * DMD_BYTE_WIDTH] |= src[2 * DMD_BYTE_WIDTH] & mask;
+
+		dst[3 * DMD_BYTE_WIDTH] &= ~mask;
+		dst[3 * DMD_BYTE_WIDTH] |= src[3 * DMD_BYTE_WIDTH] & mask;
+
+		dst += 4 * DMD_BYTE_WIDTH;
+		src += 4 * DMD_BYTE_WIDTH;
+	}
 
 	dmd_trans_data_ptr += 2;
 

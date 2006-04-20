@@ -214,7 +214,7 @@ void amode_deff (void) __taskentry__
 		dmd_alloc_low_clean ();
 		scores_draw ();
 		dmd_show_low ();
-		if (amode_page_delay (7) && system_config.tournament_mode)
+		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
 		/** Display FreeWPC logo **/
@@ -235,7 +235,7 @@ void amode_deff (void) __taskentry__
 		starfield_start ();
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_5x5, 64, 20, "TZ 2006");
-		deff_swap_low_high (23, TIME_100MS * 2);
+		deff_swap_low_high (19, TIME_100MS * 2);
 
 		/** Display high scores **/
 		high_score_amode_show ();
