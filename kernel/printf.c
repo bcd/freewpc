@@ -35,7 +35,7 @@ bool sprintf_leading_zeroes;
 
 U8 leading_zero_count;
 
-S8 number_length;
+S16 number_length;
 
 U8 min_width;
 
@@ -182,7 +182,6 @@ fixup_number:
 					{
 						leading_zero_count++;
 					}
-					number_length = endbuf - buf;
 
 					if (sprintf_leading_zeroes)
 					{
@@ -191,6 +190,8 @@ fixup_number:
 					}
 					else
 					{
+						number_length = endbuf - buf;
+
 						/* Not OK to display leading zeroes */
 						/* memmove (buf, 
 						 * 	buf+leading_zero_count, 
