@@ -204,7 +204,12 @@ void end_ball (void)
 	}
 
 	/* Advance to the next player. */
+	if (num_players > 1)
+		player_save ();
 	player_up++;
+	if (num_players > 1)
+		player_restore ();
+
 	if (player_up <= num_players)
 	{
 		start_ball ();
@@ -239,7 +244,6 @@ void start_ball (void)
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
 	call_hook (start_ball);
-	player_change ();
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
 	device_request_kick (device_entry (DEVNO_TROUGH));
@@ -274,6 +278,7 @@ void start_game (void)
 		in_tilt = FALSE;
 		num_players = 0;
 		scores_reset ();
+		player_start_game ();
 		high_score_reset_check ();
 	
 		add_player ();

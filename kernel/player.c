@@ -29,18 +29,19 @@
  * swapped in/out quickly whenever the current player changes.
  */
 
-/* Array of entries for each player's saved area */
-player_local_t player_locals[MAX_PLAYERS];
-
-/* Pointer to the local for the current player */
-player_local_t *player_local_current;
-
 
 void player_start_game (void)
 {
+	__blockclear16 (LOCAL_BASE, LOCAL_SIZE);
 }
 
-void player_change (void)
+void player_save (void)
 {
+	__blockcopy16 (LOCAL_SAVE_BASE(player_up), LOCAL_BASE, LOCAL_SIZE);
+}
+
+void player_restore (void)
+{
+	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up), LOCAL_SIZE);
 }
 
