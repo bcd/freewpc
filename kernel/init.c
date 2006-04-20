@@ -83,8 +83,8 @@ void irq_init (void)
 
 
 /** do_reset is the entry point to the program.  It all starts here. */
-#pragma naked
-__noreturn__ void do_reset (void)
+__attribute__((naked)) __noreturn__ 
+void do_reset (void)
 {
 	register uint8_t *ramptr asm ("x");
 
@@ -284,7 +284,7 @@ void nvram_idle_task (void)
  * You MUST keep processing in this function to the absolute
  * minimum, as it must be fast!
  */
-#pragma interrupt
+__attribute__((interrupt))
 void do_irq (void)
 {
 	/** Clear the source of the interrupt */
@@ -339,7 +339,7 @@ void do_irq (void)
  * WPC's peripheral timer register reaches zero.  The type of interrupt
  * can be determined by reading the peripheral timer register.
  */
-#pragma interrupt
+__attribute__((interrupt))
 void do_firq (void)
 {
 	asm __volatile__ ("pshs\ta,b");
@@ -359,28 +359,28 @@ void do_firq (void)
 }
 
 
-#pragma interrupt
+__attribute__((interrupt))
 void do_nmi (void)
 {
 	fatal (ERR_NMI);
 }
 
 
-#pragma interrupt
+__attribute__((interrupt))
 void do_swi (void)
 {
 	fatal (ERR_SWI);
 }
 
 
-#pragma interrupt
+__attribute__((interrupt))
 void do_swi2 (void)
 {
 	fatal (ERR_SWI2);
 }
 
 
-#pragma interrupt
+__attribute__((interrupt))
 void do_swi3 (void)
 {
 	fatal (ERR_SWI3);

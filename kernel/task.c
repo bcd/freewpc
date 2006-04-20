@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -134,7 +133,7 @@ task_t *task_allocate (void)
 /**
  * Save the current execution state into the current task block.
  */
-#pragma naked
+__attribute__((naked))
 void task_save (void)
 {
 	register uint16_t __u asm ("u");
@@ -208,7 +207,7 @@ void task_save (void)
 }
 
 
-#pragma naked
+__attribute__((naked))
 void task_restore (void)
 {
 	register task_t * __x asm ("x");
@@ -230,7 +229,7 @@ void task_restore (void)
 	__b = __x->stack_word_count;
 	while (__b != 0)
 	{
-		/* Use X register to transfer data */
+		/* TODO : use X register to transfer data */
 		__asm__ volatile ("lda\t,-y");
 		__asm__ volatile ("sta\t,-u");
 		__b --;
@@ -265,7 +264,7 @@ void task_restore (void)
 }
 
 
-#pragma naked
+__attribute__((naked))
 void task_create (void)
 {
 	register task_t *tp asm ("x");
@@ -333,6 +332,8 @@ task_t *task_create_gid_const (uint8_t unused)
 #endif
 
 
+/** Create a task, but not if a task with the same GID already exists.
+ * The previous task will continue to run. */
 task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
 {
 	task_t *tp = task_find_gid (gid);
@@ -342,6 +343,9 @@ task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
 }
 
 
+/** Create a task with a given GID, ensuring that only one task
+ * with that GID exists.  Any tasks with the same GID are killed
+ * prior to starting the new task.  */
 task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
 {
 	task_kill_gid (gid);
@@ -373,15 +377,6 @@ void task_sleep (task_ticks_t ticks)
 	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
 	__asm__ volatile ("jsr\t_task_save");
-
-#if 00000
-	{
-		dbprintf ("task %p awake (saved %d), pc =", 
-			task_current, task_current->stack_word_count);
-		__asm__ volatile ("ldd\t3,s\n\tjsr\t_db_put4x\n");
-		db_putc ('\n');
-	}
-#endif
 }
 
 
@@ -392,7 +387,7 @@ void task_sleep_sec (int8_t secs)
 }
 
 
-#pragma naked
+__attribute__((naked))
 __noreturn__ void task_exit (void)
 {
 	if (task_current == 0)
@@ -451,8 +446,8 @@ void task_set_arg (task_t *tp, uint16_t arg)
 	tp->arg = arg;
 }
 
-#pragma naked
-void __attribute__((noreturn)) task_dispatcher (void)
+__attribute__((naked)) __noreturn__
+void task_dispatcher (void)
 {
 	extern U8 tick_count;
 	register task_t *tp asm ("x");
@@ -490,6 +485,7 @@ void __attribute__((noreturn)) task_dispatcher (void)
 				ac_idle_task ();
 				nvram_idle_task ();
 				rtc_idle_task ();
+				random_reseed ();
 			} 
 
 			/* Reset to beginning of the task list */
