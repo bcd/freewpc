@@ -1,9 +1,6 @@
 
 #include <freewpc.h>
 
-#pragma section ("page61")
-
-
 static const uint8_t font_9x6_alpha_cap[][11] = {
 	{ 6, 9, 4, 4, 10, 10, 31, 31, 17, 17, 17 },
 	{ 6, 9, 7, 7, 9, 9, 7, 9, 9, 7, 7 },

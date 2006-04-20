@@ -1,8 +1,6 @@
 
 #include <freewpc.h>
 
-#pragma section ("page61")
-
 static const uint8_t font_5x5_alpha_cap[][7] = {
 	{ 5, 5, 4, 10, 31, 17, 17 },
 	{ 5, 5, 7, 9, 7, 9, 7 },
