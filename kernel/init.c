@@ -31,7 +31,7 @@ U8 errcode;
 __fastram__ U8 irq_count;
 __fastram__ volatile U8 tick_count;
 
-__nvram__ U8 nvram_test_byte;
+__nvram__ volatile U8 nvram_test_byte;
 
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
