@@ -20,6 +20,47 @@
 
 #include <freewpc.h>
 
+
+void new_star_task (void)
+{
+	U16 offset = ((U16)random () & 0x3F) * 4;
+	U8 rand8;
+	U8 mask; 
+
+	do {
+		rand8 = random () & 0x07;
+		mask = 1 << rand8;
+		rand8++;
+		mask |= 1 << rand8;
+	} while (FALSE); // ((dmd_low_buffer[offset] & mask) == 0);
+
+	for (;;)
+	{
+		task_sleep_sec (random () & 0x03);
+		dmd_low_buffer[offset] |= mask;
+		dmd_low_buffer[offset+16] |= mask;
+
+		task_sleep_sec (random () & 0x03);
+		dmd_low_buffer[offset] &= ~mask;
+		dmd_low_buffer[offset+16] &= ~mask;
+	}
+}
+
+
+void new_starfield_start (void)
+{
+	int i;
+	for (i=0; i < 16; i++)
+		task_create_gid (GID_NEW_STAR, new_star_task);
+}
+
+
+void new_starfield_stop (void)
+{
+	task_kill_gid (GID_NEW_STAR);
+}
+
+
 void star_task (void)
 {
 	U8 *dmd = (U8 *)task_get_arg ();
