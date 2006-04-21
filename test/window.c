@@ -1130,8 +1130,25 @@ struct menu dev_leff_test_item = {
 
 /*********** Lampsets **********************/
 
+void lampset_init (void)
+{
+	browser_init ();
+	browser_max = MAX_LAMPSET;
+}
+
+void lampset_draw (void)
+{
+	browser_draw ();
+	lamp_all_off ();
+	lampset_apply_on (menu_selection);
+
+}
+
 struct window_ops dev_lampset_window = {
 	INHERIT_FROM_BROWSER,
+	.init = lampset_init,
+	.draw = lampset_draw,
+	.exit = lamp_all_off,
 };
 
 struct menu dev_lampset_test_item = {
