@@ -92,6 +92,7 @@ void high_score_amode_show (void)
 	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 	high_score_draw_single (1, high_score_initials[0], highest_scores[0], 8);
 	high_score_draw_single (2, high_score_initials[1], highest_scores[1], 20);
+	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_show_low ();
 	task_sleep_sec (4);
 
@@ -99,6 +100,7 @@ void high_score_amode_show (void)
 	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 	high_score_draw_single (3, high_score_initials[2], highest_scores[2], 8);
 	high_score_draw_single (4, high_score_initials[3], highest_scores[3], 20);
+	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_show_low ();
 	task_sleep_sec (4);
 }
