@@ -719,7 +719,7 @@ include/gendefine_leff.h :
 	@echo Autogenerating lamp effect IDs... && tools/gendefine -p LEFF_ > include/gendefine_leff.h
 
 include/gendefine_lampset.h :
-	@echo Autogenerating lampset IDs... && tools/gendefine -p LAMPSET_ > include/gendefine_lampset.h
+	@echo Autogenerating lampset IDs... && tools/gendefine -p LAMPSET_ -c MAX_LAMPSET > include/gendefine_lampset.h
 
 include/gendefine_devno.h :
 	@echo Autogenerating device IDs... && tools/gendefine -p DEVNO_ -f 0 -c NUM_DEVICES > include/gendefine_devno.h
