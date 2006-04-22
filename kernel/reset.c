@@ -32,7 +32,7 @@
 
 volatile const char gcc_version[] = C_STRING(GCC_VERSION);
 
-static char build_date[] = BUILD_DATE;
+char build_date[] = BUILD_DATE;
 
 __nvram__ U8 freewpc_accepted[3];
 
