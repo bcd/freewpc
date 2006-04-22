@@ -56,31 +56,31 @@
  ***************************************************************/
 
 /** The total size of RAM  -- 8K */
-#define RAM_SIZE 			0x2000
+#define RAM_SIZE 			0x2000UL
 
 /** The usable, nonprotected area of RAM -- the first 6K */
-#define USER_RAM_SIZE	0x1800
+#define USER_RAM_SIZE	0x1800UL
 
 /** The protected RAM size -- whatever is left */
 #define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
 /** The base address of the (dynamic) heap */
-#define HEAP_BASE 		0x800
+#define HEAP_BASE 		0x800UL
 
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
-#define STACK_SIZE      0x200
+#define STACK_SIZE      0x200UL
 #define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
 /** The layout of the player local area */
-#define LOCAL_BASE		0x1200
-#define LOCAL_SIZE		0xA0
+#define LOCAL_BASE		((U8 *)0x1200)
+#define LOCAL_SIZE		0xA0U
 
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
 /** The layout of the malloc area */
-#define MALLOC_BASE		0x1400
-#define MALLOC_SIZE		0x200
+#define MALLOC_BASE		((U8 *)0x1400)
+#define MALLOC_SIZE		0x200UL
 
 /***************************************************************
  * System timing
