@@ -49,4 +49,10 @@
 #define __local__
 #endif
 
+#define VOIDCALL(fn) \
+{ \
+	extern void fn (void); \
+	fn (); \
+}
+
 #endif /* _ENV_H */

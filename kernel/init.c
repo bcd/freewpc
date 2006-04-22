@@ -29,7 +29,7 @@
 U8 errcode;
 
 __fastram__ U8 irq_count;
-__fastram__ volatile U8 tick_count;
+__fastram__ U8 tick_count;
 
 __nvram__ volatile U8 nvram_test_byte;
 
@@ -301,6 +301,9 @@ void do_irq (void)
 		lamp_rtt (); /* TODO - this is REALLY slow */
 	else
 		switch_rtt ();
+#ifdef MACHINE_1MS_RTTS
+	MACHINE_1MS_RTTS
+#endif
 
 	if ((irq_count & 7) == 0)
 	{
@@ -308,6 +311,9 @@ void do_irq (void)
 		ac_rtt ();
 		triac_rtt ();
 		flasher_rtt ();
+#ifdef MACHINE_8MS_RTTS
+		MACHINE_8MS_RTTS
+#endif
 
 		if ((irq_count & 31) == 0)
 		{
@@ -315,16 +321,17 @@ void do_irq (void)
 			wpc_led_toggle ();
 			sound_rtt ();
 			lamp_flash_rtt ();
-
-#ifdef MACHINE_TZ
-			extern void tz_clock_rtt (void);
-			call_far (MACHINE_PAGE, tz_clock_rtt ());
+#ifdef MACHINE_32MS_RTTS
+			MACHINE_32MS_RTTS
 #endif
 
 			if ((irq_count & 127) == 0)
 			{
 				/* Execute rtts every 128ms */
 				lockup_check_rtt ();
+#ifdef MACHINE_128MS_RTTS
+				MACHINE_128MS_RTTS
+#endif
 			}
 		}
 	}

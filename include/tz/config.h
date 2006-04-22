@@ -192,6 +192,24 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_l
  * will be checked; others are automatically skipped. */
 // #define MACHINE_SOL_NOSEARCHP(sol)
 
+/* Declare realtime functions in the machine layer.
+ * These functions MUST be linked into the system page of the ROM,
+ * and must be declared like this: void xyz (void) .
+ * Use the VOIDCALL macro around the name of each function to
+ * generate the proper calling sequence.
+ *
+ * Use the proper define based on how often the function needs to be
+ * called.  You can safely leave any unneeded ones #undef'd.
+ */
+#undef MACHINE_1MS_RTTS
+
+#undef MACHINE_8MS_RTTS
+
+#undef MACHINE_32MS_RTTS
+
+#define MACHINE_128MS_RTTS \
+	VOIDCALL(tz_clock_rtt)
+
 /* Externs for any functions system needs to see */
 void piano_ball_start (void);
 void slot_ball_start (void);
