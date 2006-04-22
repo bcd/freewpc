@@ -166,6 +166,8 @@ void window_pop_quiet (void)
 
 void window_pop (void)
 {
+	if (win_top == NULL)
+		return;
 	sound_send (SND_TEST_ESCAPE);
 	window_pop_quiet ();
 }
@@ -339,6 +341,7 @@ void hs_reset_render (U8 val)
 }
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
+struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
 struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
@@ -385,14 +388,14 @@ struct adjustment feature_adjustments[] = {
 
 
 struct adjustment pricing_adjustments[] = {
-	{ "UNITS PER CREDIT", &integer_value, 2, &price_config.units_per_credit },
+	{ "UNITS PER CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
 	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
-	{ "LEFT SLOT VALUE", &integer_value, 1, &price_config.slot_values[0] },
-	{ "CENTER SLOT VALUE", &integer_value, 4, &price_config.slot_values[1] },
-	{ "RIGHT SLOT VALUE", &integer_value, 1, &price_config.slot_values[2] },
-	{ "4TH SLOT VALUE", &integer_value, 1, &price_config.slot_values[3] },
-	{ "MAXIMUM CREDITS", &integer_value, 10, &price_config.max_credits },
+	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
+	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
+	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
+	{ "4TH SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[3] },
+	{ "MAXIMUM CREDITS", &nonzero_integer_value, 10, &price_config.max_credits },
 #ifdef FREE_ONLY
 	{ "", &yes_no_value, YES, &price_config.free_play },
 #else
@@ -402,7 +405,7 @@ struct adjustment pricing_adjustments[] = {
 	{ "1-COIN BUY-IN", &yes_no_value, NO, NULL },
 	{ "COIN METER UNITS", &integer_value, 0, NULL },
 	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
-	{ "MIN. COIN MSEC.", &integer_value, 50, NULL },
+	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, NULL },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, NULL },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, NULL },
 	{ "CREDIT FRACTION", &on_off_value, OFF, NULL },
@@ -794,8 +797,8 @@ void confirm_thread (void)
 {
 	while (confirm_timer > 0)
 	{
-		task_sleep_sec (1);
 		sound_send (SND_TEST_HSRESET);
+		task_sleep_sec (1);
 		confirm_timer--;
 		confirm_draw ();
 	}
@@ -2380,6 +2383,8 @@ struct menu *test_menu_items[] = {
 	&asic_register_item,
 	&debugger_test_item,
 	&empty_balls_item,
+#ifdef MACHINE_TEST_MENU_ITEMS
+#endif
 	NULL,
 };
 
@@ -2476,13 +2481,25 @@ struct window_ops scroller_window = {
 
 void sysinfo_machine_name (void) { sprintf (MACHINE_NAME); }
 void sysinfo_machine_version (void) {
-	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+	extern char build_date[];
+#ifdef DEBUGGER
+	sprintf ("D%1x.%02x  %s", 
+		MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION, build_date);
+#else
+	sprintf ("R%1x.%02x  %s", 
+		MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION, build_date);
+#endif
 }
 void sysinfo_system_version (void) { 
+#ifdef USER_TAG
+	sprintf ("%s %1x.%02x", C_STRING(USER_TAG), 
+		FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
+#else
 	sprintf ("SY %1x.%02x", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
+#endif
 }
 void sysinfo_compiler_version (void) { 
-	sprintf ("GCC %s, ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
+	sprintf ("GCC %s  ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
 }
 
 #ifdef DEBUGGER
