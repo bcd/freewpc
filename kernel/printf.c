@@ -141,8 +141,8 @@ void insert_numeric_separators (void)
 int printf (const char *format, ...)
 {
 	static va_list va;
-	static uint8_t *buf;
-	static uint8_t *endbuf;
+	static char *buf;
+	static char *endbuf;
 	
 	buf = sprintf_buffer;
 
@@ -203,7 +203,7 @@ fixup_number:
 						}
 						else
 						{
-							U8 *buf2 = buf;
+							char *buf2 = buf;
 							number_length -= leading_zero_count;
 
 							while (number_length > 0)
