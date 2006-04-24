@@ -81,8 +81,9 @@ void door_advance_flashing (void)
 
 	if (door_panels_started < 14)
 	{
+		new_door_index = door_index;
 		do {
-			new_door_index = door_index + 1;
+			new_door_index++;
 			if (new_door_index >= 14)
 				new_door_index = 0;
 		} while (lamp_test (door_lamps[new_door_index]));
