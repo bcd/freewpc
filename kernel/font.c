@@ -24,6 +24,15 @@
 /**
  * \file
  * \brief Routines for writing text to the DMD in a particular font.
+ *
+ * The font functions take strings, which can be true C constants or
+ * a pointer to a buffer that is already formatted, and renders the
+ * string at a particular location in a particular font.
+ *
+ * Coordinate values are given in pixels.
+ *
+ * Three variants exist, one for each justification: left, right, or
+ * center.
  */
 
 
@@ -42,11 +51,20 @@ static U8 font_space[16] = { 0, };
 
 fontargs_t font_args;
 
+/** The width of the current character being rendered in bits */
 __fastram__ U8 font_width;
+
+/** The width of the current character being rendered in bytes */
 __fastram__ U8 font_byte_width;
+
+/** The height of the current character being rendered */
 __fastram__ U8 font_height;
 
+/** The total width of the current string being rendered */
 U8 font_string_width;
+
+/** The overall height of the current string being rendered, which
+ * is the maximum height of all its characters */
 U8 font_string_height;
 
 
@@ -83,6 +101,10 @@ U8 *font_lookup (const font_t *font, char c)
 }
 
 
+/** Renders a string whose characteristics have already been
+ * computed.  font_args contains the font type, starting
+ * coordinates (from the upper left), and pointer to the string
+ * data. */
 static void fontargs_render_string (void)
 {
 	static U8 *dmd_base;
@@ -95,6 +117,8 @@ static void fontargs_render_string (void)
 	s = sprintf_buffer;
   	x = args->x;
 
+	/* Font data is stored in a separate page of ROM; switch
+	 * there to be able to read the font data */
 	wpc_push_page (FONT_PAGE);
 
 	while ((c = *s) != '\0')
@@ -179,6 +203,11 @@ static void fontargs_render_string (void)
 }
 
 
+/** Calculate font_string_width and font_string_height
+ * in advance for a particular string to be rendered in a
+ * particular font.  This is needed when doing centered or
+ * right-justified writing, in order to calculate how to translate
+ * the input coordinates to the real starting coordinates. */
 void font_get_string_area (const font_t *font, const char *s)
 {
 	U8 c;
