@@ -92,6 +92,9 @@ void star_task (void)
 		dmd[+DMD_BYTE_WIDTH+DMD_PAGE_SIZE] = 0x10;
 		task_sleep (TIME_100MS);
 	}
+	dmd[-DMD_BYTE_WIDTH] = 0;
+	dmd[0] = 0;
+	dmd[+DMD_BYTE_WIDTH] = 0;
 	task_exit ();
 }
 
@@ -105,19 +108,27 @@ do \
 
 void starfield_task (void)
 {
-	star_create (1, 3);
-	task_sleep_sec (1);
-	star_create (14, 28);
-	task_sleep_sec (1);
-	star_create (14, 3);
-	task_sleep_sec (1);
-	star_create (1, 28);
-	task_sleep_sec (2);
-	task_exit ();
+	for (;;)
+	{
+		star_create (1, 3);
+		task_sleep_sec (1);
+		star_create (14, 28);
+		task_sleep_sec (1);
+		star_create (14, 3);
+		task_sleep_sec (1);
+		star_create (1, 28);
+		task_sleep_sec (2);
+	}
 }
 
 void starfield_start (void)
 {
-	task_create_child (starfield_task);
+	task_create_gid1 (GID_STARFIELD, starfield_task);
 }
+
+void starfield_stop (void)
+{
+	task_kill_gid (GID_STARFIELD);
+}
+
 
