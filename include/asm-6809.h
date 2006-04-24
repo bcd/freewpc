@@ -39,6 +39,12 @@
 #define CC_FIRQ 		0x40
 #define CC_E 			0x80
 
+/** Declare a variable that can be used to access the condition
+ * code register directly.  This requires a newer version of the
+ * gcc6809 compiler to work OK. */
+register int condition_code_reg asm ("cc");
+
+
 extern inline void __lda (uint8_t i)
 {
 	asm __volatile__ ("lda\t%0" :: "g" (i) : "d");
