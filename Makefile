@@ -558,9 +558,10 @@ OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_O
 $(PAGED_LINKCMD) : $(MAKE_DEPS)
 	@echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
-	echo "-mxswz" >> $@ ;\
+	echo "-xswz" >> $@ ;\
 	echo $(DIRECT_LNK_CMD) >> $@ ;\
 	echo "-b ram = $(RAM_AREA)" >> $@ ;\
+	echo $(LOCAL_LNK_CMD) >> $@ ;\
 	echo "-b nvram = $(NVRAM_AREA)" >> $@ ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $@ ;\
@@ -573,18 +574,6 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS)
 	echo "-k $(LIBC_DIR)/" >> $@ ;\
 	echo "-l c.a" >> $@ ;\
 	echo "-e" >> $@
-
-ifdef DELETEME
-
-	for f in `echo $(SYSTEM_OBJS) $(PAGED_OBJS)`; do \
-		echo "$($(@:.lnk=_OBJS))" | grep $$f > /dev/null 2>&1 ;\
-		if [ "$$?" = "0" ]; then echo "-o" >> $@ ;\
-		else echo "-v" >> $@ ; fi ;\
-		if [ "$$f" != "$(@:.lnk=.o)" ]; then echo "$$f"; fi >> $@ ;\
-	done ;\
-
-endif
-
 
 #
 # How to build the system page header source file.
@@ -609,6 +598,7 @@ $(LINKCMD) : $(MAKE_DEPS)
 	echo "-mxswz" >> $(LINKCMD) ;\
 	echo $(DIRECT_LNK_CMD) >> $(LINKCMD) ;\
 	echo "-b ram = $(RAM_AREA)" >> $(LINKCMD) ;\
+	echo $(LOCAL_LNK_CMD) >> $(LINKCMD) ;\
 	echo "-b nvram = $(NVRAM_AREA)" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done ;\
