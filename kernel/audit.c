@@ -41,6 +41,6 @@ void audit_increment (audit_t *aud)
 
 void audit_init (void)
 {
-	audit_reset ();
+	/* TODO : validate that audit structure is sane */	
 }
 
