@@ -432,11 +432,11 @@ extern inline void switch_rowpoll (const uint8_t col)
 	if (col < 8)
 	{
 #if defined (MACHINE_PIC) && (MACHINE_PIC == 1)
-		asm __volatile__ ("\tldb %0" :: "g" (col + 0x16));
+		asm __volatile__ ("\tldb\t%0" :: "g" (col + 0x16));
 #else
-		asm __volatile__ ("\tldb %0" :: "g" (1 << col));
+		asm __volatile__ ("\tldb\t%0" :: "g" (1 << col));
 #endif
-		asm __volatile__ ("\tstb " STR(WPC_SW_COL_STROBE));
+		asm __volatile__ ("\tstb\t" STR(WPC_SW_COL_STROBE));
 	}
 
 	/* Process the switch column.
