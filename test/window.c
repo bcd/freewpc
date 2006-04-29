@@ -1081,12 +1081,12 @@ void deff_leff_init (void)
 	if (m == &dev_deff_test_item)
 	{
 		deff_leff_test_ops = &dev_deff_ops;
-		browser_max = deff_get_count ();
+		browser_max = MAX_DEFFS;
 	}
 	else
 	{
 		deff_leff_test_ops = &dev_leff_ops;
-		browser_max = 16;
+		browser_max = MAX_LEFFS;
 	}
 	deff_leff_last_active = 0xEE;
 }
@@ -1136,13 +1136,16 @@ struct menu dev_leff_test_item = {
 void lampset_init (void)
 {
 	browser_init ();
+	browser_min = 1;
 	browser_max = MAX_LAMPSET;
+	browser_item_number = browser_decimal_item_number;
 }
 
 void lampset_draw (void)
 {
 	browser_draw ();
 	lamp_all_off ();
+	lampset_set_apply_delay (0);
 	lampset_apply_on (menu_selection);
 
 }
@@ -1749,7 +1752,7 @@ void switch_edges_thread (void)
 {
 	for (;;) {
 		task_sleep (TIME_100MS);
-		switch_edges_draw ();
+		switch_matrix_draw ();
 	}
 }
 
