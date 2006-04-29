@@ -58,9 +58,9 @@ U8 missing_balls;
 U8 live_balls;
 
 
+#ifdef DEBUGGER
 void device_debug (void)
 {
-#ifdef DEBUGGER
 	devicenum_t devno;
 
 	for (devno = 0; devno < device_count; devno++)
@@ -85,8 +85,10 @@ void device_debug (void)
 
 	dbprintf ("Counted %d Missing %d Live %d\n", 
 		counted_balls, missing_balls, live_balls);
-#endif
 }
+#else
+#define device_debug()
+#endif
 
 
 void device_clear (device_t *dev)
@@ -141,12 +143,7 @@ uint8_t device_recount (device_t *dev)
  */
 void device_update (void)
 {
-	device_t *dev;
-
-	db_puts ("In device update (");
-	dev = &device_table[task_getgid () - DEVICE_GID_BASE];
-	db_put4x ((uint16_t)task_getpid ());
-	db_puts (")\n");
+	device_t *dev = &device_table[task_getgid () - DEVICE_GID_BASE];
 
 wait_and_recount:
 	task_sleep_sec (1);
@@ -195,6 +192,8 @@ wait_and_recount:
 
 			/* TODO : infinite retries are being done now.
 			 * At some point, we must give up... */
+			db_puts ("Kick did not change anything\n");
+			device_call_op (dev, kick_failure);
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
@@ -219,7 +218,9 @@ wait_and_recount:
 		}
 		else if (dev->actual_count > dev->previous_count)
 		{
-			/* The count went up during a kick cycle ... */
+			/* The count went up during a kick cycle.
+			 * kicks_needed is presumably still nonzero, so
+			 * the code below should attempt the kick again. */
 			db_puts ("After kick, count increased\n");
 		}
 	}
