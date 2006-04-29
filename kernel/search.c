@@ -39,10 +39,22 @@ static bool ball_search_solenoid_ok (U8 sol)
 	 * for sure which solenoids are OK, so don't fire _any_.  */
 	return (FALSE);
 #else
-	/* Don't fire if it's just a flasher.  It's doubtful that
-	 * photons will free a stuck ball. */
-	if (MACHINE_SOL_FLASHERP(sol))
+	if (MACHINE_SOL_FLASHERP(sol)
+#ifdef MACHINE_BALL_SERVE_SOLENOID
+		 || (sol == MACHINE_BALL_SERVE_SOLENOID)
+#endif
+#ifdef MACHINE_KNOCKER_SOLENOID
+		 || (sol == MACHINE_KNOCKER_SOLENOID)
+#endif
+#ifdef MACHINE_LAUNCH_SOLENOID
+		 || (sol == MACHINE_LAUNCH_SOLENOID)
+#endif
+#ifdef MACHINE_SOL_NOSEARCHP
+		 || (MACHINE_SOL_NOSEARCHP(sol))
+#endif
+		 )
 		return (FALSE);
+	/* TODO - add check for all ball device kick coils */
 #endif
 
 	/* OK, you can use it. */
@@ -72,6 +84,8 @@ static void ball_search_run (void)
 {
 	U8 sol;
 
+	dbprintf ("Ball search triggered\n");
+
 	/* Fire all solenoids */
 	/* Skip over solenoids known not to be pertinent to ball
 	 * search, and others defined by the machine description */
@@ -80,8 +94,11 @@ static void ball_search_run (void)
 		if (ball_search_solenoid_ok (sol))
 		{
 			sol_pulse (sol);
-			task_sleep (TIME_100MS * 5);
+			task_sleep (TIME_100MS * 1);
 		}
+
+		if (ball_search_timer == 0)
+			break;
 	}
 }
 
@@ -107,7 +124,7 @@ void ball_search_monitor_task (void)
 				while (ball_search_timer != 0)
 				{
 					ball_search_run ();
-					task_sleep_sec (7);
+					task_sleep_sec (15);
 				}
 			}
 		}

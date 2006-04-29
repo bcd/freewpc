@@ -179,6 +179,9 @@ void end_ball (void)
 	 * First, disable the flippers. */
 	flipper_disable ();
 
+	/* Stop the ball search monitor */
+	ball_search_monitor_start ();
+
 	/* If the ball was not tilted, start bonus.
 	 * The tilt flag is then cleared. */
 	if (!in_tilt)
@@ -191,7 +194,8 @@ void end_ball (void)
 		in_tilt = FALSE;
 
 	/* Stop all processes & effects that shouldn't be
-	 * running anymore. */
+	 * running anymore.  TODO : this should be killing
+	 * lots of other stuff. */
 	deff_stop_all ();
 	leff_stop_all ();
 
@@ -250,6 +254,8 @@ void start_ball (void)
 	tilt_start_ball ();
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);
+	ball_search_timeout_set (12);
+	ball_search_monitor_start ();
 }
 
 void mark_ball_in_play (void)
