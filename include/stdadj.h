@@ -76,7 +76,7 @@ typedef struct
 #endif
 } std_adj_t;
 
-extern std_adj_t system_config;
+extern __nvram__ std_adj_t system_config;
 
 typedef struct
 {
@@ -98,7 +98,7 @@ typedef struct
 	adjval_t min_coin_msec;
 } pricing_adj_t;
 
-extern pricing_adj_t price_config;
+extern __nvram__ pricing_adj_t price_config;
 
 
 typedef struct
@@ -110,7 +110,7 @@ typedef struct
 	adjval_t hs_reset_every;
 } hstd_adj_t;
 
-extern hstd_adj_t hstd_config;
+extern __nvram__ hstd_adj_t hstd_config;
 
 
 void adj_init (void);
