@@ -569,13 +569,15 @@ void switch_sched (void)
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and mark
 	 * the ball 'in play'.  Don't do the last bit if the switch
-	 * specifically doesn't want this to happen.
+	 * specifically doesn't want this to happen.  Also, kick
+	 * the ball search timer so that it doesn't expire.
 	 */
 	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
 	{
 		call_hook(any_pf_switch);
 		if (!(swinfo->flags & SW_NOPLAY) && !ball_in_play)
 			mark_ball_in_play ();
+		ball_search_timer_reset ();
 	}
 
 	/* TODO : not working */
