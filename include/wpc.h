@@ -254,6 +254,11 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 #define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
 #define wpc_nvram_put()		wpc_set_ram_protect(RAM_LOCKED)
 
+#define wpc_nvram_add(var,n) \
+	do { \
+		volatile typeof(var) *pvar = &var; \
+		*pvar += n; \
+	} while (0)
 
 /********************************************/
 /* DIP Switches                             */
