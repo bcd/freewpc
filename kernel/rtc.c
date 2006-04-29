@@ -55,6 +55,8 @@ static const char *month_names[] = {
 
 static void rtc_checksum_update (void)
 {
+	/* TODO */
+	checksum = 0;
 }
 
 void rtc_factory_reset (void)
@@ -196,5 +198,10 @@ void rtc_show_date_time (void)
 	font_render_string_center (&font_5x5, 64, 21, sprintf_buffer);
 
 	dmd_show_low ();
+}
+
+
+void rtc_init (void)
+{
 }
 
