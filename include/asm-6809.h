@@ -114,8 +114,8 @@ extern inline void *memset (void *s, int c, long unsigned int n)
 			*s1++ = c & 0xFF;
 			n--;
 		}
-		return (s);
 	}
+	return (s);
 }
 
 
