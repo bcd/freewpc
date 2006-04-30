@@ -68,6 +68,9 @@ void star_task (void)
 
 	for (i=3; i>0; i--)
 	{
+		if (deff_get_active () != DEFF_AMODE)
+			break;
+
 		dmd[-DMD_BYTE_WIDTH] = 0x10;
 		dmd[-DMD_BYTE_WIDTH + DMD_PAGE_SIZE] = 0x10;
 		task_sleep (TIME_33MS);
@@ -108,7 +111,7 @@ do \
 
 void starfield_task (void)
 {
-	for (;;)
+	while (deff_get_active () == DEFF_AMODE)
 	{
 		star_create (1, 3);
 		task_sleep_sec (1);
