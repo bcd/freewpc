@@ -35,6 +35,31 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE];
 
+/** Defines for score values */
+#define SCORE_10	0x10ULL
+#define SCORE_100	0x100ULL
+#define SCORE_500	0x500ULL
+#define SCORE_1K	0x1000ULL
+#define SCORE_5K	0x5000ULL
+#define SCORE_10K	0x10000ULL
+#define SCORE_20K	0x20000ULL
+#define SCORE_25K	0x25000ULL
+#define SCORE_30K	0x30000ULL
+#define SCORE_50K	0x50000ULL
+#define SCORE_75K	0x75000ULL
+#define SCORE_100K	0x100000ULL
+#define SCORE_500K	0x500000ULL
+#define SCORE_1M		0x1000000ULL
+
+#define SCORE2(tens,ones) \
+	((SCORE_10 * tens) + ones)
+
+#define SCORE3(huns,tens,ones) \
+	((SCORE_100 * huns) + SCORE2(tens,ones))
+
+#define SCORE4(thous,huns,tens,ones) \
+	((SCORE_1K * thous) + SCORE3(huns,tens,ones))
+
 /** Macros for adding to the CURRENT score; these are shortcuts **/
 
 extern U8 score_change;
@@ -57,16 +82,16 @@ void score_init (void);
 
 #define score_decl(val) \
 	{ \
-		(val & 0xFF000000ULL) >> 24, \
-		(val & 0x00FF0000ULL) >> 16, \
-		(val & 0x0000FF00ULL) >> 8, \
-		(val & 0x000000FFULL) \
+		((val) & 0xFF000000ULL) >> 24, \
+		((val) & 0x00FF0000ULL) >> 16, \
+		((val) & 0x0000FF00ULL) >> 8, \
+		((val) & 0x000000FFULL) \
 	}
 
 
 #define score_add_current_const(val) \
 { \
-	static U8 score[] = score_decl(val ## ULL); \
+	static U8 score[] = score_decl(val); \
 	score_add_current (score); \
 }
 

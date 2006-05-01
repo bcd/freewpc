@@ -294,7 +294,7 @@ void do_irq (void)
 	sol_rtt ();
 	flipper_rtt ();
 	if (irq_count & 0x1)
-		lamp_rtt (); /* TODO - this is REALLY slow */
+		lamp_rtt ();
 	else
 		switch_rtt ();
 #ifdef MACHINE_1MS_RTTS

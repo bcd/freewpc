@@ -42,9 +42,9 @@ void award_skill_shot (void)
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	switch (skill_switch_reached)
 	{
-		case 1: score_add_current_const (0x25000); break;
-		case 2: score_add_current_const (0x50000); break;
-		case 3: score_add_current_const (0x100000); break;
+		case 1: score_add_current_const (SCORE_25K); break;
+		case 2: score_add_current_const (SCORE_50K); break;
+		case 3: score_add_current_const (SCORE_100K); break;
 	}
 }
 

@@ -64,17 +64,40 @@ typedef struct machine_hooks
 	void (*lamp_refresh) (void);
 } machine_hooks_t;
 
+#define INHERIT_FROM_DEFAULT_HOOKS \
+	.init = null_function, \
+	.start_game_attempt = null_true_function, \
+	.start_game = null_function, \
+	.add_player = null_function, \
+	.start_ball = null_function, \
+	.ball_in_play = null_function, \
+	.ball_drain = null_function, \
+	.end_ball = null_true_function, \
+	.bonus = null_function, \
+	.abort_game = null_function, \
+	.end_game = null_function, \
+	.amode_start = null_function, \
+	.amode_stop = null_function, \
+	.tilt_warning = null_function, \
+	.tilt = null_function, \
+	.slam_tilt = null_function, \
+	.replay = null_function, \
+	.high_score = null_function, \
+	.grand_champion = null_function, \
+	.coin_added = null_function, \
+	.credit_added = null_function, \
+	.start_without_credits = null_function, \
+	.volume_change = null_function, \
+	.ball_search = null_function, \
+	.any_pf_switch = null_function, \
+	.lamp_refresh = null_function
+
 
 #ifdef MACHINE_HOOKS
 
 extern machine_hooks_t MACHINE_HOOKS;
 
-#define call_hook(hook) \
-do \
-{ \
-	if (MACHINE_HOOKS.hook) \
-		(MACHINE_HOOKS.hook) (); \
-} while (0)
+#define call_hook(hook)	(MACHINE_HOOKS.hook) ()
 
 #define call_boolean_hook(hook) \
 ((MACHINE_HOOKS.hook) ? (MACHINE_HOOKS.hook) () : TRUE)

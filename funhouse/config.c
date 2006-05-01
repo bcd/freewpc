@@ -41,6 +41,8 @@ void funhouse_init (void)
 	#include <init.callset>
 }
 
+static void null_hook (void) {}
+
 CALLSET_ENTRY (unused, init) {}
 CALLSET_ENTRY (unused, start_game) {}
 CALLSET_ENTRY (unused, end_game) {}
@@ -119,6 +121,7 @@ void funhouse_coin_added (void)
 }
 
 machine_hooks_t funhouse_hooks = {
+	INHERIT_FROM_DEFAULT_HOOKS,
 	.start_game = funhouse_start_game,
 	.end_game = funhouse_end_game,
 	.start_ball = funhouse_start_ball,

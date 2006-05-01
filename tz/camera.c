@@ -29,7 +29,7 @@ void camera_to_slot_timer (void)
 
 void sw_camera_handler (void)
 {
-	score_add_current_const (0x30000);
+	score_add_current_const (SCORE_10K * 3);
 	sound_send (SND_ODD_CHANGE_BEGIN);
 
 	task_recreate_gid (GID_SLOT_DISABLED_BY_CAMERA, camera_to_slot_timer);

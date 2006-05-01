@@ -27,11 +27,11 @@
 #include <freewpc.h>
 
 /** The number of credits */
-__nvram__ U8 credit_count;
+__nvram__ volatile U8 credit_count;
 
 /** The number of additional units purchased, less than the value
  * of one credit */
-__nvram__ U8 unit_count;
+__nvram__ volatile U8 unit_count;
 
 
 void credits_render (void)
@@ -174,18 +174,12 @@ void add_units (int n)
 	if (credit_count >= price_config.max_credits)
 		return;
 
-	wpc_nvram_get ();
-	unit_count += n;
-	wpc_nvram_put ();
-
+	wpc_nvram_add (unit_count, n);
 	if (unit_count >= price_config.units_per_credit)
 	{
 		while (unit_count >= price_config.units_per_credit)
 		{
-			wpc_nvram_get ();
-			unit_count -= price_config.units_per_credit;
-			wpc_nvram_put ();
-
+			wpc_nvram_subtract (unit_count, price_config.units_per_credit);
 			add_credit ();
 			audit_increment (&system_audits.paid_credits);
 		}

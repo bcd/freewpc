@@ -26,13 +26,13 @@ U8 autofire_request_count;
 
 void sw_autofire1_handler (void)
 {
-	score_add_current_const (0x100);
+	score_add_current_const (SCORE_100);
 }
 
 
 void sw_autofire2_handler (void)
 {
-	score_add_current_const (0x200);
+	score_add_current_const (SCORE_100 * 2);
 	if (autofire_request_count == 0)
 	{
 	}

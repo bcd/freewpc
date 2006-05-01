@@ -28,29 +28,29 @@ void handle_outlane (void)
 
 void sw_left_outlane_handler (void)
 {
-	score_add_current_const (0x10000);
+	score_add_current_const (SCORE_10K);
 	handle_outlane ();
 }
 
 void sw_right_outlane_handler (void)
 {
-	score_add_current_const (0x10000);
+	score_add_current_const (SCORE_10K);
 	handle_outlane ();
 }
 
 void sw_left_inlane_1_handler (void)
 {
-	score_add_current_const (0x1000);
+	score_add_current_const (SCORE_1K);
 }
 
 void sw_left_inlane_2_handler (void)
 {
-	score_add_current_const (0x1000);
+	score_add_current_const (SCORE_1K);
 }
 
 void sw_right_inlane_handler (void)
 {
-	score_add_current_const (0x1000);
+	score_add_current_const (SCORE_1K);
 }
 
 

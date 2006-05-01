@@ -36,7 +36,7 @@ void sw_right_ramp_handler (void)
 {
 	if (in_game && !in_tilt)
 	{
-		score_add_current_const (0x5000);
+		score_add_current_const (SCORE_5K);
 	}
 
 	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))

@@ -59,13 +59,6 @@ struct window *win_top;
 U8 in_test;
 
 
-/* Whenever a function can be optional, use this rather than NULL.  It's
- * faster to call into a null function than it is to do a compare
- * against NULL before making the call.
- */
-static void null_function (void) {}
-
-
 /* The window stack keeps track of where you came from, so when you
  * exit a menu/window/whatever, you can go back to where you started.
  * There is a maximum depth here, which should be sufficient. */
@@ -771,6 +764,7 @@ void confirm_draw (void)
 
 void confirm_enter (void)
 {
+	dbprintf ("Confirming adjustment change.\n");
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 10, "SAVING NEW");
@@ -2639,5 +2633,12 @@ void test_start_button (void)
 	if (!win_top) return;
 	window_call_op (win_top, start);
 	window_call_op (win_top, draw);
+}
+
+
+void page_test_function (void)
+{
+	dbprintf ("Testing paging capability...\n");
+	return;
 }
 

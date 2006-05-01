@@ -49,6 +49,8 @@
 #define __local__
 #endif
 
+#define __far__ __attribute__((far(CONFIG_FAR_PAGE)))
+
 #define VOIDCALL(fn) \
 { \
 	extern void fn (void); \

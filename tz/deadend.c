@@ -29,7 +29,7 @@ void deadend_to_slot_timer (void)
 
 void sw_deadend_handler (void)
 {
-	score_add_current_const (0x75000);
+	score_add_current_const (SCORE_10K * 7 + SCORE_5K);
 	task_recreate_gid (GID_SLOT_DISABLED_BY_DEAD_END, deadend_to_slot_timer);
 }
 

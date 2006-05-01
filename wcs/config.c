@@ -65,6 +65,7 @@ CALLSET_ENTRY (unused, start_game) {}
 CALLSET_ENTRY (unused, end_game) {}
 CALLSET_ENTRY (unused, start_ball) {}
 
+
 void wcs_start_game (void)
 {
 	#include <start_game.callset>
@@ -138,6 +139,7 @@ void wcs_coin_added (void)
 }
 
 machine_hooks_t wcs_hooks = {
+	INHERIT_FROM_DEFAULT_HOOKS,
 	.start_game = wcs_start_game,
 	.end_game = wcs_end_game,
 	.start_ball = wcs_start_ball,

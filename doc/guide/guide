@@ -12,6 +12,7 @@ my $currentDate = `date`;
 my $inputFile = "master.g";
 my $outputFile = "index.html";
 my $tocFlag = 0;
+my $specificSectionFlag = undef;
 
 my $headingTopMargin = ($tocFlag ? "0px" : "8px");
 my $headingBottomMargin = ($tocFlag ? "0px" : "8px");
@@ -93,6 +94,15 @@ sub printListItemEnd
 	$inList = 0;
 }
 
+sub getSectionLevel
+{
+	my $level = $sectionNumbers[0];
+	for (my $i = 1; $i <= $sectionLevel; $i++) {
+		$level .= "/" . $sectionNumbers[$i];
+	}
+	return $level;
+}
+
 sub printSectionLevel
 {
 	my ($name, $summary) = @_;
@@ -151,6 +161,10 @@ while ($arg = shift) {
 	elsif ($arg =~ /-T/) {
 		$tocFlag = 1;
 	}
+	elsif ($arg =~ /-S/) {
+		$specificSectionFlag = shift;
+		print "Writing section $specificSectionFlag\n";
+	}
 	else {
 		$inputFile = $arg;
 	}
@@ -168,16 +182,22 @@ while (<FH>)
 		$sectionLevel++;
 		my ($name, $summary) = split /:/, $1;
 		$summary =~ s/^[ \t]*//;
+		next if (($specificSectionFlag != undef) && ($specificSectionFlag ne getSectionLevel ()));
 		printLevelStart ();
-		printSectionLevel ($name, $summary); print "\n";
+		printSectionLevel ($name, $summary); print OFH "\n";
+		next;
 	}
 	elsif (/^\}/) {
-		printLevelEnd ();
+		printLevelEnd () unless (($specificSectionFlag != undef) && ($specificSectionFlag ne getSectionLevel ()));
 		$sectionNumbers[$sectionLevel + 1] = 1;
 		$sectionNumbers[$sectionLevel]++;
 		$sectionLevel--;
+		next;
 	}
-	elsif (/^\<(.*)/) {
+
+	next if (($specificSectionFlag != undef) && ($specificSectionFlag ne getSectionLevel ()));
+
+	if (/^\<(.*)/) {
 		printListItemStart ($1) if (!$tocFlag);
 	}
 	elsif (/^\>/) {

@@ -37,7 +37,7 @@
 
 /** The lamp flash state is updated every 32ms, so this will
  * toggle the lamp flash state about 8 times/sec */
-#define LAMP_DEFAULT_FLASH_RATE 3
+#define LAMP_DEFAULT_FLASH_RATE 4
 
 /** Small integer type for a lamp number */
 typedef U8 lampnum_t;

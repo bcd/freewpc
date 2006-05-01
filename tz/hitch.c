@@ -23,7 +23,7 @@
 
 void sw_hitch_handler (void)
 {
-	score_add_current_const (0x50000);
+	score_add_current_const (SCORE_50K);
 }
 
 

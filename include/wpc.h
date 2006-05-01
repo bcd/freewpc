@@ -257,7 +257,17 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 #define wpc_nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
+		wpc_nvram_get (); \
 		*pvar += n; \
+		wpc_nvram_put (); \
+	} while (0)
+
+#define wpc_nvram_subtract(var,n) \
+	do { \
+		volatile typeof(var) *pvar = &var; \
+		wpc_nvram_get (); \
+		*pvar -= n; \
+		wpc_nvram_put (); \
 	} while (0)
 
 /********************************************/

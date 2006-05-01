@@ -72,7 +72,9 @@ typedef struct device_ops
 	/** Called whenever the game tries to kick a ball from the device */
 	void (*kick_attempt) (struct device *dev);
 
-	/** Called when a kick is successful */
+	/** Called when a kick is successful.
+	 * If a delay is needed in between kicks, enforce that by
+	 * putting a delay in this routine. */
 	void (*kick_success) (struct device *dev);
 
 	/** Called when a kick is not successful */

@@ -42,6 +42,7 @@ enum mech_clock_mode clock_mode;
  * rtt cycles between pulses to the clock motor drives. */
 U8 clock_speed;
 
+/** The current clock delay counter */
 U8 clock_delay_time;
 
 /* Clock switches which have been seen to be active */
@@ -64,11 +65,14 @@ U8 clock_calibration_ticks;
 
 void tz_dump_clock (void)
 {
+	dbprintf ("%02x ", clock_sw);
+#if 0
 	dbprintf ("\nClock switches now active: %02x\n", clock_sw);
 	dbprintf ("Seen active: %02x\n", clock_sw_seen_active);
 	dbprintf ("Seen inactive: %02x\n", clock_sw_seen_inactive);
 	dbprintf ("State machine: %02x\n", clock_mode);
 	dbprintf ("Target switches: %02x\n", clock_find_target);
+#endif
 }
 
 
@@ -193,6 +197,11 @@ void tz_clock_rtt (void)
 				clock_mode = CLOCK_STOPPED;
 				goto clock_stopped;
 			}
+			else if ((clock_sw & 0xF0) == (clock_find_target & 0xF0) && (clock_speed < 2))
+			{
+				clock_speed = 3;
+				goto clock_stopped;
+			}
 			else if (clock_delay_time != clock_speed)
 			{
 				goto clock_stopped;
@@ -234,7 +243,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
 	clock_delay_time = clock_speed = 1;
-	clock_calibration_ticks = 4;
+	clock_calibration_ticks = 3;
 	clock_mode = CLOCK_CALIBRATING;
 }
 

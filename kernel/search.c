@@ -97,6 +97,8 @@ static void ball_search_run (void)
 			task_sleep (TIME_100MS * 1);
 		}
 
+		/* If a switch triggered, stop the ball
+		 * search immediately */
 		if (ball_search_timer == 0)
 			break;
 	}
@@ -116,7 +118,13 @@ void ball_search_monitor_task (void)
 	for (;;)
 	{
 		task_sleep_sec (1);
-		if (in_live_game && !in_bonus && live_balls)
+
+		/* Step the ball search timer as long as a game
+		 * is in progess. */
+		if (in_live_game 
+				&& !in_bonus 
+				&& live_balls 
+				&& !switch_poll (MACHINE_SHOOTER_SWITCH))
 		{
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
@@ -146,5 +154,6 @@ void ball_search_monitor_stop (void)
 
 void ball_search_init (void)
 {
+	ball_search_timeout_set (20);
 }
 

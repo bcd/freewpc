@@ -32,7 +32,7 @@ void sw_left_ramp_handler (void)
 {
 	leff_start (LEFF_LEFT_RAMP);
 	left_ramps++;
-	score_add_current_const (0x10000);
+	score_add_current_const (SCORE_10K);
 }
 
 

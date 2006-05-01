@@ -28,21 +28,21 @@ void loop_timer (void) __taskentry__
 
 void enter_loop (void)
 {
-	score_add_current_const (0x1000);
+	score_add_current_const (SCORE_1K);
 	sound_send (SND_LOOP_ENTER);
 }
 
 
 void award_loop (void)
 {
-	score_add_current_const (0x25000);
+	score_add_current_const ((SCORE_10K * 2) + SCORE_5K);
 	sound_send (SND_SPIRAL_AWARDED);
 }
 
 
 void abort_loop (void)
 {
-	score_add_current_const (0x1000);
+	score_add_current_const (SCORE_1K);
 	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
 }
 

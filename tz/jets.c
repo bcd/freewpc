@@ -38,7 +38,7 @@ void sw_jet_sound (void)
 
 void sw_jet_handler (void)
 {
-	score_add_current_const (0x1230);
+	score_add_current_const (0x1230ULL);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 
 	extern void door_advance_flashing (void);

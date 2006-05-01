@@ -18,19 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
+#ifndef _MISC_H
+#define _MISC_H
 
+void null_function (void);
+bool null_true_function (void);
+bool null_false_function (void);
 
-void sw_clock_target_handler (void)
-{
-	score_add_current_const (SCORE_500);
-}
-
-
-DECLARE_SWITCH_DRIVER (sw_clock_target)
-{
-	.fn = sw_clock_target_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_CUCKOO,
-};
-
+#endif /* _MISC_H */

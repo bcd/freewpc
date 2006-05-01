@@ -124,5 +124,6 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
+void dmd_reset_transition (void);
 
 #endif /* _SYS_DMD_H */

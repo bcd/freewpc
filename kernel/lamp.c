@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -57,8 +56,6 @@ __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 U8 lamp_flash_max;
 U8 lamp_flash_count;
-U8 lamp_flash_mask;
-U8 lamp_fast_flash_mask;
 
 U8 lamp_apply_delay;
 
@@ -73,20 +70,25 @@ void lamp_init (void)
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
 	lamp_apply_delay = 0;
-	lamp_flash_mask = lamp_fast_flash_mask = 0x00;
 
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
 }
 
+
+/* Runs periodically to invert any lamps in the flashing state */
 void lamp_flash_rtt (void)
 {
 	--lamp_flash_count;
 	if (lamp_flash_count == 0)
 	{
-		lamp_fast_flash_mask = ~lamp_fast_flash_mask;
-		if (lamp_fast_flash_mask == 0)
-			lamp_flash_mask = ~lamp_flash_mask;
+		U16 *lamp_matrix_words = (U16 *)lamp_matrix;
+		U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
+
+		lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
+		lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
+		lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
+		lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
 		lamp_flash_count = lamp_flash_max;
 	}
 }
@@ -94,8 +96,7 @@ void lamp_flash_rtt (void)
 
 void lamp_rtt (void)
 {
-	static U8 bits;
-	static U8 flashbits;
+	U8 bits;
 	register U16 col;
 
 	/* Setup the strobe */
@@ -108,15 +109,12 @@ void lamp_rtt (void)
 	/* Grab the default lamp values */
 	bits = lamp_matrix[col];
 
-	/* Override with the flashing lamps */
-	flashbits = lamp_flash_matrix[col];
-	bits &= ~flashbits;
-	bits |= (flashbits & lamp_flash_mask);
-
+#if 0
 	/* Override with the fast flashing lamps */
 	flashbits = lamp_fast_flash_matrix[col];
 	bits &= ~flashbits;
 	bits |= (flashbits & lamp_fast_flash_mask);
+#endif
 
 	/* Override with the lamp effect lamps */
 	bits &= lamp_leff1_allocated[col];

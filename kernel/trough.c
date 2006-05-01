@@ -37,11 +37,19 @@ DECLARE_SWITCH_DRIVER (sw_trough)
 
 #ifdef MACHINE_OUTHOLE_SWITCH
 
+void handle_outhole (void)
+{
+	while (switch_poll (SW_OUTHOLE))
+	{
+		sol_pulse (SOL_OUTHOLE);
+		task_sleep_sec (2);
+	}
+	task_exit ();
+}
+
 void sw_outhole_handler (void)
 {
-	sol_on (SOL_OUTHOLE);
-	task_sleep_sec (1);
-	sol_off (SOL_OUTHOLE);
+	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
 }
 
 DECLARE_SWITCH_DRIVER (sw_outhole)

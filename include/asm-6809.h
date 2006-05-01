@@ -94,9 +94,30 @@ extern inline void set_direct_page_pointer (const uint8_t dp)
 }
 
 
+/* Optimized memset function.
+ * The length n should be a constant.
+ * Based on the length, one of the blocks of code will be
+ * expanded, whichever is the most optimal.
+ * 8-byte aligned sizes will copy 4 words at a time.
+ * When 2-byte aligned, copy a word at a time.
+ * Otherwise, copy one byte at a time.
+ */
 extern inline void *memset (void *s, int c, long unsigned int n)
 {
-	if ((n % 2) == 0)
+	if ((n % 8) == 0)
+	{
+		register U16 *s1 = (U16 *)s;
+		n /= 8;
+		while (n > 0)
+		{
+			*s1++ = ((U16)c << 8) | c;
+			*s1++ = ((U16)c << 8) | c;
+			*s1++ = ((U16)c << 8) | c;
+			*s1++ = ((U16)c << 8) | c;
+			n--;
+		}
+	}
+	else if ((n % 2) == 0)
 	{
 		register U16 *s1 = (U16 *)s;
 		n /= 2;
@@ -172,6 +193,7 @@ extern inline void __blockcopy16 (void *s1, const void *s2, long unsigned int n)
 
 extern inline void *memmove (void *s1, const void *s2, long unsigned int n)
 {
+	/* TODO - memcpy isn't always going to work */
 	return memcpy (s1, s2, n);
 }
 

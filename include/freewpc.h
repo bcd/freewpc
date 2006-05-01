@@ -86,6 +86,7 @@ extern U8 irq_count;
 #include <asm-6809.h>
 #include <wpc.h>
 #include <version.h>
+#include <misc.h>
 
 /* Core software structures */
 #include <sys/bitarray.h>

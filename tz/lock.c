@@ -34,7 +34,7 @@ DECLARE_SWITCH_DRIVER (sw_lock)
 		
 void lock_enter (device_t *dev)
 {
-	score_add_current_const (0x7500);
+	score_add_current_const (SCORE_1K * 7 + SCORE_500);
 }
 
 void lock_to_loop_timer (void)

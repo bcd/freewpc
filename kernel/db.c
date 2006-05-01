@@ -99,7 +99,6 @@ void db_idle_task (void)
 			db_attached = 1;
 		}
 	}
-#if 0 /* move this into task level, out of IRQ */
 	else
 	{
 		if (db_read_ready)
@@ -121,14 +120,12 @@ void db_idle_task (void)
 					break;
 				}
 
-#if 0
 				case 's':
 				{
 					extern void switch_check_masks (void);
 					switch_check_masks ();
 					break;
 				}
-#endif
 
 #ifdef MACHINE_TZ
 				case 'c':
@@ -141,7 +138,6 @@ void db_idle_task (void)
 			}
 		}
 	}
-#endif /* 0 */
 #endif /* DEBUGGER */
 }
 

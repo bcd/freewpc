@@ -612,5 +612,11 @@ void dmd_sched_transition (dmd_transition_t *trans)
 	dmd_in_transition = TRUE;
 }
 
+void dmd_reset_transition (void)
+{
+	dmd_in_transition = FALSE;
+	dmd_transition = NULL;
+}
+
 #endif /* MACHINE_DMD */
 

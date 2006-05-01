@@ -36,7 +36,7 @@ void sw_piano_handler (void)
 
 	task_recreate_gid (GID_SLOT_DISABLED_BY_PIANO, piano_to_slot_timer);
 
-	score_add_current_const (0x5130);
+	score_add_current_const (0x5130ULL);
 	sound_send (SND_ODD_CHANGE_BEGIN);
 	device_multiball_set (3);
 }

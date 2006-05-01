@@ -24,6 +24,33 @@
 __fastram__ uint8_t page_loaded;
 
 
+void _far_call_handler (U8 unused1, U8 unused2)
+{
+	struct far_call_address
+	{
+		volatile void (*address) ();
+		U8 page;
+	};
+	register void (*call_address) ();
+	struct far_call_address * volatile *call_info;
+	U8 saved_page;
+
+	asm __volatile__ ("pshs\tb,x" ::: "b", "x");
+	call_info = (struct far_call_address * volatile *)(&unused2 - 2);
+	dbprintf ("%p %02X\n", (call_info[-1])->address, (call_info[-1])->page);
+	dbprintf ("%p %02X\n", (call_info[0])->address, (call_info[0])->page);
+	dbprintf ("%p %02X\n", (call_info[1])->address, (call_info[1])->page);
+	dbprintf ("%p %02X\n", (call_info[2])->address, (call_info[2])->page);
+	dbprintf ("%p %02X\n", (call_info[3])->address, (call_info[3])->page);
+
+	saved_page = wpc_get_rom_page ();
+	call_address = (*call_info)->address;
+	asm __volatile__ ("puls\tb,x" ::: "b", "x");
+	call_address ();
+	wpc_set_rom_page (saved_page);
+	(*call_info)++;
+}
+
 
 uint8_t paged_read_byte (uint8_t *byte_ptr, uint8_t page)
 {
@@ -35,3 +62,14 @@ uint16_t paged_read_word (uint16_t *word_ptr, uint8_t page)
 {
 	return 0;
 }
+
+
+void paging_test (void)
+{
+	extern __attribute__((far("58"))) void page_test_function (void);
+	dbprintf ("Attempting page test\n");
+	page_test_function ();
+	dbprintf ("Paging OK.\n");
+}
+
+

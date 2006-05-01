@@ -190,7 +190,8 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_l
  * search, for any reason.  Ball device solenoids are automatically
  * excluded and need not be specified here.  Only solenoids 1-32
  * will be checked; others are automatically skipped. */
-// #define MACHINE_SOL_NOSEARCHP(sol)
+#define MACHINE_SOL_NOSEARCHP(sol) \
+	(sol == SOL_GUMBALL_RELEASE)
 
 /* Declare realtime functions in the machine layer.
  * These functions MUST be linked into the system page of the ROM,
@@ -205,10 +206,10 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_l
 
 #undef MACHINE_8MS_RTTS
 
-#undef MACHINE_32MS_RTTS
-
-#define MACHINE_128MS_RTTS \
+#define MACHINE_32MS_RTTS \
 	VOIDCALL(tz_clock_rtt)
+
+#undef MACHINE_128MS_RTTS
 
 /* Externs for any functions system needs to see */
 void piano_ball_start (void);

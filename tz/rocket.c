@@ -34,7 +34,7 @@ DECLARE_SWITCH_DRIVER (sw_rocket)
 
 void rocket_enter (device_t *dev)
 {
-	score_add_current_const(0x10000);
+	score_add_current_const(SCORE_10K);
 }
 
 __taskentry__ void rocket_kick_sound (void)

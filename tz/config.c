@@ -55,6 +55,7 @@ const uint8_t mach_edge_switches[] = {
 	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98, 0x00,
 };
 
+
 void tz_init (void)
 {
 	#include <init.callset>
@@ -167,11 +168,9 @@ void tz_start_without_credits (void)
 	sound_send (SND_GREEEED);
 }
 
-void tz_coin_added (void)
-{
-}
 
 machine_hooks_t tz_hooks = {
+	INHERIT_FROM_DEFAULT_HOOKS,
 	.start_game = tz_start_game,
 	.end_game = tz_end_game,
 	.start_ball = tz_start_ball,
@@ -184,6 +183,5 @@ machine_hooks_t tz_hooks = {
 	.tilt_warning = tz_tilt_warning,
 	.any_pf_switch = tz_any_pf_switch,
 	.start_without_credits = tz_start_without_credits,
-	.coin_added = tz_coin_added,
 };
 

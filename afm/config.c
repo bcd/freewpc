@@ -142,6 +142,7 @@ void afm_coin_added (void)
 }
 
 machine_hooks_t afm_hooks = {
+	INHERIT_FROM_DEFAULT_HOOKS,
 	.start_game = afm_start_game,
 	.end_game = afm_end_game,
 	.start_ball = afm_start_ball,
