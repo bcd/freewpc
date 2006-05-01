@@ -119,16 +119,13 @@ void lamp_start_update (void)
 }
 
 
-void add_credit (void)
+static void increment_credit_count (void)
 {
 	if (credit_count >= price_config.max_credits)
 		return;
 
 #ifndef FREE_ONLY
-	wpc_nvram_get ();
 	credit_count++;
-	wpc_nvram_put ();
-
 	lamp_start_update ();
 #endif
 
@@ -138,6 +135,14 @@ void add_credit (void)
 
 	leff_start (LEFF_FLASH_ALL);
 	deff_restart (DEFF_CREDITS);
+}
+
+
+void add_credit (void)
+{
+	wpc_nvram_get ();
+	increment_credit_count ();
+	wpc_nvram_put ();
 }
 
 
@@ -191,6 +196,7 @@ void add_units (int n)
 #endif
 		deff_restart (DEFF_CREDITS);
 	}
+	wpc_nvram_put ();
 }
 
 

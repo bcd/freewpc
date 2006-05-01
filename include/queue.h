@@ -59,7 +59,11 @@ extern inline void queue_insert (queue_t *q, U8 qlen, U8 v)
 extern inline U8 queue_remove (queue_t *q, U8 qlen)
 {
 	U8 v = q->elems[q->head_off];
-	if (++q->head_off == qlen)
+	if (qlen == 8)
+	{
+		q->head_off = (q->head_off + 1) & 7;
+	}
+	else if (++q->head_off == qlen)
 		q->head_off = 0;
 	return (v);
 }

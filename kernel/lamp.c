@@ -26,7 +26,6 @@
 #include <freewpc.h>
 
 /** Lamps 00h through 3Fh correspond to the physical lamp locations */
-__fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
 /** Lamps 40h through 7Fh are 'virtual' and don't really exist, but
  * they can be used to store boolean values.
@@ -35,16 +34,26 @@ __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
  * Both of these bitsets are also saved from player to player.
  * Note the flash sets are NOT saved and must be recalculated from
  * ball to ball. */
-__fastram__ U8 bit_matrix[NUM_VLAMP_COLS];
 
 /** Lamps 80h through BFh are the same as the regular lamps, but
  * control the flash state */
-__fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
 
 /** Lamps C0h through FFh are similarly used to control the
  * 'fast flash' state of the lamp.  Fast flash overrides slow
  * flash, which overrides the steady value. */
-__fastram__ U8 lamp_fast_flash_matrix[NUM_LAMP_COLS];
+
+__fastram__ struct bit_matrix_table
+{
+	U8 solid_lamps[NUM_LAMP_COLS];
+	U8 bits[NUM_VLAMP_COLS];
+	U8 flashing_lamps[NUM_LAMP_COLS];
+	U8 fast_flashing_lamps[NUM_LAMP_COLS];
+} bit_matrix_array;
+
+#define lamp_matrix					bit_matrix_array.solid_lamps
+#define bit_matrix					bit_matrix_array.bits
+#define lamp_flash_matrix			bit_matrix_array.flashing_lamps
+#define lamp_fast_flash_matrix	bit_matrix_array.fast_flashing_lamps
 
 /** Bitsets for doing temporary lamp effects, which hide the
  * normal state of the lamps */
@@ -56,12 +65,10 @@ __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 U8 lamp_flash_max;
 U8 lamp_flash_count;
-
 U8 lamp_apply_delay;
 
-U8 lamp_strobe_mask;
-U8 lamp_strobe_column;
-
+__fastram__ U8 lamp_strobe_mask;
+__fastram__ U16 lamp_strobe_column;
 
 void lamp_init (void)
 {
@@ -97,28 +104,17 @@ void lamp_flash_rtt (void)
 void lamp_rtt (void)
 {
 	U8 bits;
-	register U16 col;
 
 	/* Setup the strobe */
 	*(U8 *)WPC_LAMP_ROW_OUTPUT = 0;
 	*(U8 *)WPC_LAMP_COL_STROBE = lamp_strobe_mask;
 
-	/* Load the lamp column into U */
-	col = lamp_strobe_column;
-
 	/* Grab the default lamp values */
-	bits = lamp_matrix[col];
-
-#if 0
-	/* Override with the fast flashing lamps */
-	flashbits = lamp_fast_flash_matrix[col];
-	bits &= ~flashbits;
-	bits |= (flashbits & lamp_fast_flash_mask);
-#endif
+	bits = lamp_matrix[lamp_strobe_column];
 
 	/* Override with the lamp effect lamps */
-	bits &= lamp_leff1_allocated[col];
-	bits |= lamp_leff1_matrix[col];
+	bits &= lamp_leff1_allocated[lamp_strobe_column];
+	bits |= lamp_leff1_matrix[lamp_strobe_column];
 #if 0
 	bits &= lamp_leff2_allocated[col];
 	bits |= lamp_leff2_matrix[col];

@@ -27,38 +27,65 @@
 
 #define SOL_CYCLES 8
 
-#define sol_on(id)	sol_modify(id, 0xff)
-#define sol_off(id)	sol_modify(id, 0
+#define SOL_DUTY_0		0x0
+#define SOL_DUTY_12_88	0x40
+#define SOL_DUTY_25_75	0x22
+#define SOL_DUTY_50_50	0x55
+#define SOL_DUTY_75_25	0x77
+#define SOL_DUTY_100		0xFF
+
+/* For compatibility, sol_on and sol_off refer to all-on
+ * or all-off. */
+#define sol2_on(id)	sol_modify(id, SOL_DUTY_100)
+
+#define sol2_off(id)	sol_modify(id, SOL_DUTY_0)
 
 
-U8 sol_cycle;
+static U8 sol_cycle;
 
 
-U8 sol_state[SOL_ARRAY_WIDTH][SOL_CYCLES];
+static U8 sol_state[SOL_ARRAY_WIDTH][SOL_CYCLES];
 
 
 
-void sol_rtt (void)
+void
+sol2_rtt (void)
 {
+	/* TODO - align adjacent registers to do 16-bit writes? */
+	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = sol_state[0][sol_cycle];
+	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state[1][sol_cycle];
+	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = sol_state[2][sol_cycle];
+	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = sol_state[3][sol_cycle];
+	*(volatile U8 *)WPC_EXTBOARD1 = sol_state[4][sol_cycle]; /* TODO : TZ */
+
+	/* Advance cycle counter */
+	sol_cycle++;
+	sol_cycle %= SOL_CYCLES;
 }
 
 
-void sol_modify (U8 id, U8 cycle_mask)
+void
+sol2_modify (solnum_t sol, U8 cycle_mask)
 {
 	/* Set a bit in each of the 8 bitarrays */
-	U8 *bitptr = sol_state[0];
-	U8 bitpos = id;
 	int count = SOL_CYCLES;
-	while (count-- > 0)
+	for (count = 0; count < SOL_CYCLES; count++)
 	{
-		*bitptr &= cycle_mask;
-		*bitptr |= cycle_mask;
+		register bitset p = &sol_state[0][count];
+		register U8 v = sol;
+
+		if (cycle_mask & 1)
+			__setbit (p, v);
+		else
+			__clearbit (p, v);
 	}
 }
 
 
-void sol_init (void)
+void
+sol2_init (void)
 {
 	memset (sol_state, 0, sizeof (sol_state));
+	sol_cycle = 0;
 }
 

@@ -167,7 +167,7 @@ OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o \
 	flip.o sound.o coin.o service.o game.o \
 	device.o lampset.o score.o deff.o leff.o triac.o paging.o \
 	trough.o reset.o tilt.o vector.o \
-	timer.o sol.o flasher.o ac.o misc.o \
+	timer.o sol.o sol2.o flasher.o ac.o misc.o \
 	math.o audit.o search.o highscore.o rtc.o printf.o \
 	$(OS_GCC40_BROKEN_OBJS)
 
@@ -665,7 +665,7 @@ $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
 ifneq ($(CC_MODE),-c)
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) -mfar-code-page=$(PAGE) -DPAGE=$(PAGE) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) -DPAGE=$(PAGE) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
 ifneq ($(ASVER),1.5.2)
 	@mv $(@:.o=.rel) $@
 endif

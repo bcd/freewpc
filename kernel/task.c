@@ -76,6 +76,7 @@ bool task_dispatching_ok;
  * to deal with so far.  This helps to determine how big the stack
  * area in the task structure needs to be */
 U8 task_largest_stack;
+U16 task_largest_stack_pc;
 
 /** Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
@@ -195,6 +196,7 @@ void task_save (void)
 	if ((__x->stack_word_count = __b) > task_largest_stack)
 	{
 		task_largest_stack = __b;
+		task_largest_stack_pc = __x->pc;
 	}
 
 	/* Save current ROM page */
@@ -527,6 +529,10 @@ void task_init (void)
 
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;
+
+	/* Init debugging of largest stack */
+	task_largest_stack = 0;
+	task_largest_stack_pc = 0;
 
 	/* Allocate a task for the first (current) thread of execution.
 	 * The calling routine can then sleep and/or create new tasks

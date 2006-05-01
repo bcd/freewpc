@@ -22,7 +22,7 @@
 #include <freewpc.h>
 #include <m6809_math.h>
 
-/* Initially zero, this is set to 1 when a remote debugger is
+/** Initially zero, this is set to 1 when a remote debugger is
  * detected */
 U8 db_attached;
 
@@ -93,17 +93,17 @@ void db_idle_task (void)
 #ifdef DEBUGGER
 	if (!db_attached)
 	{
-		if (db_read_ready)
+		if (wpc_debug_read_ready ())
 		{
-			db_putc (0);
+			wpc_debug_write (0);
 			db_attached = 1;
 		}
 	}
 	else
 	{
-		if (db_read_ready)
+		if (wpc_debug_read_ready ())
 		{
-			char c = db_data_reg;
+			char c = wpc_debug_read (); 
 			switch (c)
 			{
 				case 't':

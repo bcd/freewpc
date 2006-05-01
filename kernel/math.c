@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -31,7 +30,13 @@ typedef unsigned short U16;
 static U8 seed1;
 static U8 seed2;
 
-
+/*
+ * Notes on random numbers:
+ * See http://www.maxim-ic.com/appnotes.cfm/appnote_number/1743.
+ *
+ * For 16-bit loop, use taps 1, 2, 4, 15.
+ * For 24-bit loop, use taps 0, 2, 3, 23.
+ */
 
 static inline U8 read_random_register (void)
 {
@@ -52,9 +57,10 @@ U8 random (void)
 	U8 val;
 
 	seed1 ^= read_random_register ();
+	seed1 <<= 3;
 	seed1 += 17;
-	seed2 ^= ~seed1;
 	seed2 += 61;
+	seed2 ^= ~seed1;
 	val = ~seed2;
 	return (val);
 }
@@ -71,6 +77,7 @@ U8 random_bounded (U8 upper_bound)
 void random_reseed (void)
 {
 	seed1++;
+	seed2++;
 }
 
 

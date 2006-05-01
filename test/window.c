@@ -375,6 +375,9 @@ struct adjustment feature_adjustments[] = {
 	{ "", &on_off_value, OFF, NULL }, /* skip over */
 #endif
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+#ifdef MACHINE_FEATURE_ADJUSTMENTS
+	MACHINE_FEATURE_ADJUSTMENTS
+#endif
 	{ NULL, NULL, 0, NULL },
 
 };
@@ -1639,6 +1642,9 @@ struct menu standard_audits_item = {
 struct menu feature_audits_item = {
 	.name = "FEATURE AUDITS",
 	.flags = M_ITEM,
+#ifdef MACHINE_FEATURE_AUDITS
+	.var = { .subwindow = { &audit_browser_window, MACHINE_FEATURE_AUDITS } },
+#endif
 };
 
 struct menu *audit_menu_items[] = {
@@ -2226,7 +2232,7 @@ void lamp_row_col_test_item_number (U8 val)
 	U8 lamp;
 	int i;
 
-	if (val < 8)
+	if (val < NUM_LAMP_COLS)
 	{
 		sprintf ("COL %d", val+1);
 		lamp = MAKE_LAMP (val+1, 1);
@@ -2248,7 +2254,7 @@ void lamp_row_col_test_item_number (U8 val)
 void lamp_row_col_test_init (void)
 {
 	browser_init ();
-	browser_max = 15;
+	browser_max = (NUM_LAMP_COLS * 2) - 1;
 	browser_item_number = lamp_row_col_test_item_number;
 }
 
@@ -2285,7 +2291,7 @@ void dipsw_test_draw (void)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
 		font_render_string (&font_5x5, 
-			(sw <= 3) ? 8 : 60, 
+			(sw <= 3) ? 8 : 72, 
 			(sw % 4) * 6 + 9, 
 			sprintf_buffer);
 		dipsw >>= 1;
@@ -2505,7 +2511,8 @@ void sysinfo_stats1 (void) {
 	sprintf ("MAX STACK %d", task_largest_stack);
 }
 void sysinfo_stats2 (void) {
-	sprintf ("");
+	extern U16 task_largest_stack_pc;
+	sprintf ("SAVE FROM %p", task_largest_stack_pc);
 }
 #endif
 

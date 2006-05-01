@@ -43,7 +43,7 @@ void righthole_kick_sound (void)
 void righthole_enter (device_t *dev)
 {
 	mark_ball_in_play ();
-	score_add_current_const (0x2500);
+	score_add_current_const (SCORE_2500);
 }
 
 
