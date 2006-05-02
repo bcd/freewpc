@@ -59,8 +59,6 @@ U8 clock_find_target;
  * switch transitions */
 U8 clock_last_sw;
 
-U8 clock_sw_changed;
-
 U8 clock_calibration_ticks;
 
 void tz_dump_clock (void)
@@ -123,14 +121,6 @@ void tz_clock_rtt (void)
 	clock_sw = ~ (*(volatile U8 *)WPC_SW_ROW_INPUT);
 	wpc_ext1_disable (CLK_DRV_SWITCH_STROBE);
 
-	/* Set transition flag if the value changed */
-	if (clock_last_sw != clock_sw)
-		clock_sw_changed++;
-
-	/* Add to list of all switches seen */
-	clock_sw_seen_active |= clock_sw;
-	clock_sw_seen_inactive |= ~clock_sw;
-
 	/* Update solenoid drives based on desired direction
 	 * and speed */
 	switch (clock_mode)
@@ -150,8 +140,8 @@ void tz_clock_rtt (void)
 			else if (clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 		clock_running_forward:
-				sol_on (SOL_CLOCK_FORWARD);
 				sol_off (SOL_CLOCK_REVERSE);
+				sol_on (SOL_CLOCK_FORWARD);
 			}
 			else
 			{
@@ -176,19 +166,22 @@ void tz_clock_rtt (void)
 				clock_calibration_ticks++;
 #endif
 
-			/* Once all switches have been seen, proceed
-			 * to finding home position (12:00)
-			 */
-			if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+			/* Add to list of all switches seen if changed */
+			if (clock_sw != clock_last_sw)
 			{
-				clock_mode = CLOCK_FIND;
-				clock_find_target = 
-					tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
+				clock_sw_seen_active |= clock_sw;
+				clock_sw_seen_inactive |= ~clock_sw;
+				/* Once all switches have been seen, proceed
+				 * to finding home position (12:00)
+				 */
+				if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+				{
+					clock_mode = CLOCK_FIND;
+					clock_find_target = 
+						tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
+				}
 			}
-			else
-			{
-				goto clock_running_forward;
-			}
+			goto clock_running_forward;
 			break;
 
 		case CLOCK_FIND:
