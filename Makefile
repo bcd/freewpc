@@ -275,13 +275,18 @@ CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
 
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER
+ifeq ($(FREEWPC_IRQPROFILE),y)
+CFLAGS += -DIRQPROFILE
 endif
-ifdef SYSTEM_MAJOR
+endif
+ifndef SYSTEM_MAJOR
+SYSTEM_MAJOR = 0
+endif
 CFLAGS += -DFREEWPC_MAJOR_VERSION=$(SYSTEM_MAJOR)
+ifndef SYSTEM_MINOR
+SYSTEM_MINOR = 0
 endif
-ifdef SYSTEM_MINOR
 CFLAGS += -DFREEWPC_MINOR_VERSION=$(SYSTEM_MINOR)
-endif
 ifndef MACHINE_MAJOR
 MACHINE_MAJOR = $(SYSTEM_MAJOR)
 endif
@@ -433,7 +438,7 @@ OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
 MACH_LINKS = .mach .include_mach
 
 
-MAKE_DEPS = Makefile $(MACHINE)/Makefile
+MAKE_DEPS = Makefile $(MACHINE)/Makefile user.make
 DEPS = $(MAKE_DEPS) $(INCLUDES) $(XBM_H) $(MACH_LINKS) callset
 
 GENDEFINES = \
@@ -781,8 +786,6 @@ kernel/switches.o : include/$(MACHINE)/switch.h
 	@echo Setting symbolic link for machine include files &&\
 		touch .include_mach && cd include && ln -s $(MACHINE) mach
 
-Makefile : user.make
-
 
 #
 # Install to the web server
@@ -812,6 +815,12 @@ endif
 .PHONY : doc
 doc: Doxyfile
 	doxygen
+
+#
+# User configuration files
+#
+.IGNORE : user.make
+user.make :
 
 #
 # For debugging the makefile settings
