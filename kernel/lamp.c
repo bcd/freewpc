@@ -47,11 +47,13 @@ __fastram__ struct bit_matrix_table
 	U8 solid_lamps[NUM_LAMP_COLS];
 	U8 bits[NUM_VLAMP_COLS];
 	U8 flashing_lamps[NUM_LAMP_COLS];
+	U8 flashing_lamps_now[NUM_LAMP_COLS];
 	U8 fast_flashing_lamps[NUM_LAMP_COLS];
 } bit_matrix_array;
 
 #define lamp_matrix					bit_matrix_array.solid_lamps
 #define bit_matrix					bit_matrix_array.bits
+#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
 #define lamp_flash_matrix			bit_matrix_array.flashing_lamps
 #define lamp_fast_flash_matrix	bit_matrix_array.fast_flashing_lamps
 
@@ -72,7 +74,7 @@ __fastram__ U16 lamp_strobe_column;
 
 void lamp_init (void)
 {
-	memset (lamp_matrix, 0, NUM_LAMP_COLS * 4);
+	memset (&bit_matrix_array, 0, sizeof (bit_matrix_array));
 	lamp_leff1_free_all ();
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
@@ -89,7 +91,7 @@ void lamp_flash_rtt (void)
 	--lamp_flash_count;
 	if (lamp_flash_count == 0)
 	{
-		U16 *lamp_matrix_words = (U16 *)lamp_matrix;
+		U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
 		U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
 
 		lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
@@ -111,6 +113,9 @@ void lamp_rtt (void)
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
+
+	/* OR in the flashing lamp values */
+	bits |= lamp_flash_matrix_now[lamp_strobe_column];
 
 	/* Override with the lamp effect lamps */
 	bits &= lamp_leff1_allocated[lamp_strobe_column];
@@ -171,6 +176,35 @@ void lamp_toggle (lampnum_t lamp)
 int lamp_test (lampnum_t lamp)
 {
 	register bitset p = lamp_matrix;
+	register uint8_t v = lamp;
+	__testbit(p, v);
+	return v;
+}
+
+
+void lamp_flash_on (lampnum_t lamp)
+{
+	register bitset p = lamp_flash_matrix;
+	register uint8_t v = lamp;
+	__setbit(p, v);
+}
+
+
+void lamp_flash_off (lampnum_t lamp)
+{
+	register bitset p = lamp_flash_matrix;
+	register uint8_t v = lamp;
+	__clearbit(p, v);
+
+	p = lamp_flash_matrix_now;
+	v = lamp;
+	__clearbit(p, v);
+}
+
+
+int lamp_flash_test (lampnum_t lamp)
+{
+	register bitset p = lamp_flash_matrix;
 	register uint8_t v = lamp;
 	__testbit(p, v);
 	return v;

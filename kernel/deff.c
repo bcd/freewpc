@@ -55,7 +55,8 @@
 	DECL_DEFF (DEFF_TILT, D_RUNNING, PRI_TILT, tilt_deff) \
 	DECL_DEFF (DEFF_GAME_OVER, D_RUNNING, PRI_GAME_OVER, game_over_deff) \
 	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, PRI_VOLUME_CHANGE, volume_deff) \
-	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff)
+	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff) \
+	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff)
 
 
 /** Declare externs for all of the deff functions */

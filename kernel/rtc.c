@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -21,6 +20,10 @@
 
 #include <freewpc.h>
 
+
+/** PinMAME expects address 0x1800 in nvram to contain the
+ * following date structure, as apparently all real WPC
+ * ROMs put this information there. */
 struct wpc_pinmame_clock_data
 {
 	U16 year;
@@ -37,8 +40,8 @@ static __nvram__ U8 day;
 static __nvram__ U8 hour;
 static __nvram__ U8 checksum;
 static U8 minute;
-static U8 second;
 
+/** Keeps track of when the minute changes, for auditing */
 static U8 last_minute;
 
 
@@ -48,7 +51,7 @@ static U8 days_in_month_table[] = {
 };
 
 static const char *month_names[] = {
-	"JAN.", "FEB.", "MAR.", "APR.", "MAY.", "JUN.",
+	"JAN.", "FEB.", "MAR.", "APR.", "MAY", "JUN.",
 	"JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC.",
 };
 
@@ -61,13 +64,14 @@ static void rtc_checksum_update (void)
 
 void rtc_factory_reset (void)
 {
+
+	/* Reset the date to Jan. 1, 2006 */
 	wpc_nvram_get ();
 	year = 6;
 	month = 1;
 	day = 1;
 	hour = 0;
 	minute = 0;
-	second = 0;
 	wpc_nvram_put ();
 	rtc_checksum_update ();
 	last_minute = 0;
@@ -77,6 +81,7 @@ void rtc_factory_reset (void)
 static U8 rtc_days_in_current_month (void)
 {
 	U8 days = days_in_month_table[month-1];
+	/* Handle leap years */
 	if ((month == 2) && ((year % 4) == 0))
 		days++;
 	return (days);
@@ -147,6 +152,7 @@ void rtc_idle_task (void)
 		audit_increment (&system_audits.minutes_on);
 		rtc_pinmame_read ();
 	}
+	last_minute = minute;
 }
 
 

@@ -126,6 +126,7 @@ extern U8 irq_count;
 #include <eb.h>
 #include <highscore.h>
 #include <search.h>
+#include <status.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory, e.g. 'tz'. */

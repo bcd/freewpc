@@ -117,13 +117,13 @@ void starfield_task (void)
 	while (deff_get_active () == DEFF_AMODE)
 	{
 		star_create (1, 3);
-		task_sleep_sec (1);
+		task_sleep (TIME_100MS * 3);
 		star_create (14, 28);
-		task_sleep_sec (1);
+		task_sleep (TIME_100MS * 3);
 		star_create (14, 3);
-		task_sleep_sec (1);
+		task_sleep (TIME_100MS * 3);
 		star_create (1, 28);
-		task_sleep_sec (2);
+		task_sleep_sec (1);
 	}
 	task_exit ();
 }

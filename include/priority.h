@@ -49,21 +49,23 @@ typedef enum _priority {
 	PRI_JACKPOT,
 	PRI_SUPER_JACKPOT,
 
+	PRI_STATUS,
 	PRI_REPLAY,
 	PRI_SPECIAL,
-
 	PRI_VOLUME_CHANGE,
-	
-	PRI_BONUS,
 	PRI_TILT_WARNING,
+
+	/* Every priority greater than PRI_SOLO indicates
+	an effect that not only preempts, but also *kills*
+	anything with lower priority. */
+	PRI_SOLO,
+	PRI_BONUS,
 	PRI_TILT,
 	PRI_GAME_OVER,
-
 	PRI_EB_BUYIN,	
 	PRI_HSENTRY,
 	PRI_MATCH,
 	PRI_1COIN_BUYIN,
-
 	PRI_SLAMTILT,
 } priority_t;
 

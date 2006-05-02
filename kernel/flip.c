@@ -45,6 +45,10 @@ void sw_left_flipper_handler (void)
 	{
 		call_far (TEST_PAGE, test_left_flipper_button ());
 	}
+	else if (in_live_game)
+	{
+		status_report_check ();
+	}
 #ifdef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)
 	{
@@ -61,6 +65,10 @@ void sw_right_flipper_handler (void)
 	if (in_test)
 	{
 		call_far (TEST_PAGE, test_right_flipper_button ());
+	}
+	else if (in_live_game)
+	{
+		status_report_check ();
 	}
 #ifdef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)

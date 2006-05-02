@@ -161,15 +161,48 @@ BC = bc
 
 FIXED_SECTION = sysrom
 
-OS_GCC40_BROKEN_OBJS = dmd.o switches.o db.o player.o lamp.o task.o font.o
-
-OS_OBJS = div10.o init.o adj.o eb.o sysinfo.o \
-	flip.o sound.o coin.o service.o game.o \
-	device.o lampset.o score.o deff.o leff.o triac.o paging.o \
-	trough.o reset.o tilt.o vector.o \
-	timer.o sol.o sol2.o flasher.o ac.o misc.o \
-	math.o audit.o search.o highscore.o rtc.o printf.o \
-	$(OS_GCC40_BROKEN_OBJS)
+KERNEL_OBJS = \
+	kernel/ac.o \
+	kernel/adj.o \
+	kernel/audit.o \
+	kernel/coin.o \
+	kernel/db.o \
+	kernel/deff.o \
+	kernel/device.o \
+	kernel/div10.o \
+	kernel/dmd.o \
+	kernel/eb.o \
+	kernel/flasher.o \
+	kernel/flip.o \
+	kernel/font.o \
+	kernel/game.o \
+	kernel/highscore.o \
+	kernel/init.o \
+	kernel/lamp.o \
+	kernel/lampset.o \
+	kernel/leff.o \
+	kernel/math.o \
+	kernel/misc.o \
+	kernel/paging.o \
+	kernel/player.o \
+	kernel/printf.o \
+	kernel/reset.o \
+	kernel/rtc.o \
+	kernel/score.o \
+	kernel/search.o \
+	kernel/service.o \
+	kernel/sol.o \
+	kernel/sol2.o \
+	kernel/sound.o \
+	kernel/status.o \
+	kernel/switches.o \
+	kernel/sysinfo.o \
+	kernel/task.o \
+	kernel/timer.o \
+	kernel/triac.o \
+	kernel/trough.o \
+	kernel/tilt.o \
+	kernel/vector.o
 
 TEST_OBJS = test/window.o
 
@@ -226,12 +259,27 @@ else
 CFLAGS += -DAS_VERSION=1.5.2
 endif
 
+# Enables debugging (using DBX) or profiling.
+# -fomit-frame-pointer cannot be used in either case.
+ifdef DBX
+CFLAGS += -g
+endif
+ifdef PROFILE
+CFLAGS += -pg
+endif
+
+ifndef DBX
+ifndef PROFILE
+CFLAGS += -fomit-frame-pointer
+endif
+endif
+
 # Default optimizations.  -O2 works OK for me, but hasn't always; you might
 # want to fall back to -O1 if you have problems.
 ifndef OPT
 OPT = -O2
 endif
-CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -fomit-frame-pointer -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
+CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
 # Default machine flags.  We enable WPC extensions here.
 CFLAGS += -mwpc
@@ -386,7 +434,6 @@ PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
 
-KERNEL_OBJS = $(patsubst %,kernel/%,$(OS_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 

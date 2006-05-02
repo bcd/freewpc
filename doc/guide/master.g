@@ -3,28 +3,80 @@
 # This file is processed by the 'guide' perl script to generate
 # the final documentation.
 {Overview
-This document provides an overview of the FreeWPC architecture for
-developers who wish to understand how the system works.
+	FreeWPC is a free platform for developing replacement game ROMs for
+	Bally/Williams pinball machines based on the WPC 
+	(Williams Pinball Controller)
+	chip.  FreeWPC provides the foundation for building new ROMs with 
+	custom game rules.
 
-The details provided here reflect the status of the ///latest development///
-branch.  FreeWPC is constantly evolving and the information here is
-subject to change.
+	FreeWPC only replaces your game ROM (the U6 chip), which contains all
+	of the game code and dot matrix text/graphics.  In particular, sounds and
+	music are NOT included in this chip, so you'll have to get by with
+	reusing the same sounds/music as are provided normally.  This
+	project is ambitious enough; perhaps others could work on replacement
 
+	Eventually, code should be able to run on an actual pinball machine; 
+	however, for now, FreeWPC ROMs should only be used in emulators such as 
+	pinmame. '''Do not attempt to put a FreeWPC ROM in a real machine!''' 
+	It likely won't work and you may cause irreparable damage to your game, 
+	yourself, your house, etc.  You have been warned.
+
+	This document provides an overview of the FreeWPC architecture for
+	developers who wish to understand how the system works.
+
+	The details provided here reflect the status of the ///latest development///
+	branch.  FreeWPC is constantly evolving and the information here is
+	subject to change.
+
+	If you are interested in working on this project, please contact me
+	at <a href="mailto:freewpc@oddchange.com">freewpc@oddchange.com</a>.  
+	Developers should be familiar
+	with basic embedded systems programming concepts and the C programming
+	language.  Familiarity with 6809 assembler is ///highly/// recommended.
+	Also, knowledge of WPC pinball machines is expected, but I'm assuming
+	anyone interested would probably meet that requirement.
+
+	{Features
+		<It is 100% Williams-free code, written from scratch, released under the GNU General Public License.
+		<Code is written mostly in C, thanks to the availability of a halfway decent <a href="/gcc6809.html">C compiler for the 6809 CPU</a>.  In some places, assembly language code is used for performance or to do some really low-level things.  Using C over assembler should allow more people to get involved with the project.
+		<Most development can be done under Linux or under Windows using the Cygwin UNIX emulation suite.  Some tasks require installation of other programs, for example, if you want to make your own fonts.
+		<The system is designed to be flexible and extensive.  All generations of WPC will be supported, except for alphanumeric games.  Multiple machines can be targeted using the same common core "system" code.
+		>
+	}
+	{Preview Releases
+		You will need to copy the ROM file into your PinMAME <b>roms</b>
+		directory so that PinMAME can find it.  The location of this directory
+		depends on how you installed PinMAME.  These directories typically contain
+		ZIP files of the game ROM and sound ROMs; you'll need to unzip the file,
+		replace the game ROM, then zip it back.  Make sure to save your original
+		version of the ROM file for when you want to revert back to the real deal.
+	}
 	{Source Code Repository
 		The source code is maintained in a Subversion repository.  The URL
 		for the repository is %url(svn/public/freewpc).  Beneath the
 		root directory, there is a '''tags''' subdirectory which contains
 		stable snapshots of the code and a '''trunk''' subdirectory that
 		houses the ongoing development branch.
+
+		See the <a href="/freewpc/subversion.html">Subversion starter page</a>
+		for general information about Subversion commands.
+
+		For those without Subversion, you can use the web tool at
+		%url(websvn/) to browse the repository and download tarballs.
+
 	}
 	{Detailed Design
 		This guide covers the high-level architecture and design of
 		FreeWPC.  For more specific information about how a particular
-		works, refer to the low-level design documentation that is
+		module works, refer to the low-level design documentation that is
 		automatically generated from the code using %tool(doxygen).
 		The latest version is at %url(freewpc/doxygen).
+		<a href="freewpc_design.html">the design of FreeWPC</a>.
 	}
 	{Build System : How the source code gets compiled into a ROM image
+		An older overview of the build system is 
+		<a href="/freewpc/build.html">here</a>.
+
 		{System Requirements : What you need in order to compile the program
 			FreeWPC requires a UNIX or UNIX-compatible system in order
 			to compile game ROMs.  The build system relies heavily on an
@@ -118,8 +170,9 @@ subject to change.
 						Identifies the directory in which PinMAME
 						zip files are located.  This is only needed
 						if debugging with PinMAME.  The Makefile
-						can automatically copy newly built ROM
-						images into this directory for testing.
+						will automatically copy newly built ROM
+						images into this directory for testing, if this
+						is defined.
 					<GAME_ROM_PREFIX
 					>
 				}
@@ -809,7 +862,8 @@ subject to change.
 
 {Limitations
 	{Performance
-		The GCC compiler often generates poor code.
+		The GCC compiler sometimes generates poor code, especially for
+		complex expressions.
 
 		Subroutine calls inside the IRQ handler account for
 		a large portion of its running time.  The call
@@ -818,7 +872,7 @@ subject to change.
 		of calls.
 	}
 	{Fault Tolerance
-		fatal() should reboot the system immediately.
+		%api(fatal) should reboot the system immediately.
 
 		Initialization should ensure that the hardware registers
 		have sane values before doing anything else.
@@ -840,3 +894,6 @@ subject to change.
 		}
 	}
 }
+{References
+}
+
