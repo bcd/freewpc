@@ -451,7 +451,11 @@ GENDEFINES = \
 #######################################################################
 ###	Set Default Target
 #######################################################################
+ifdef TARGET_ROMPATH
 default_target : clean_err check_prereqs install
+else
+default_target : clean_err check_prereqs build
+endif
 
 #######################################################################
 ###	Begin Makefile Targets
