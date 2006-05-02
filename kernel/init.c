@@ -286,6 +286,10 @@ void do_irq (void)
 	/** Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);
 
+#ifdef IRQPROFILE
+	*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT = 0;
+#endif
+
 	irq_count++;
 	if ((irq_count & 15) == 0)
 		tick_count++;
@@ -331,6 +335,11 @@ void do_irq (void)
 			}
 		}
 	}
+
+#ifdef IRQPROFILE
+	db_putc (0xDD);
+	db_putc (*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT);
+#endif
 }
 
 
