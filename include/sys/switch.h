@@ -22,7 +22,7 @@
 #define _SYS_SWITCH_H
 
 /** Small integer typedef for a switch number */
-typedef uint8_t switchnum_t;
+typedef U8 switchnum_t;
 
 /** Switch flags */
 #define SW_OPTICAL	0x01 /* Switch is active when it is _open_ */
@@ -40,13 +40,16 @@ typedef void (*switch_handler_t) (void);
 typedef struct
 {
 	void (*fn) (void);
-	uint8_t flags;
-	uint8_t lamp;
+	U8 fnpage;
+	U8 flags;
+	U8 lamp;
 	sound_code_t sound;
 	task_ticks_t active_time;
 	task_ticks_t inactive_time;
 	int devno;
+#if 0
 	uint8_t pad[8]; /* Keep this aligned to a power of 2! */
+#endif
 } switch_info_t;
 
 

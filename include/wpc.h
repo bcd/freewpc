@@ -295,7 +295,7 @@ do { \
 	wpc_set_rom_page (page); \
 	fncall; \
 	wpc_set_rom_page (__saved_page); \
-} while (0);
+} while (0)
 
 
 #define wpc_push_page(page) \
