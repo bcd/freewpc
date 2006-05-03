@@ -31,6 +31,7 @@ void sw_deadend_handler (void)
 {
 	score_add_current_const (SCORE_10K * 7 + SCORE_5K);
 	task_recreate_gid (GID_SLOT_DISABLED_BY_DEAD_END, deadend_to_slot_timer);
+	timer_restart (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S, freerunning_timer_function);
 }
 
 

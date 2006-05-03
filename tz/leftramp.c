@@ -25,11 +25,24 @@ __local__ U8 left_ramps;
 
 void left_ramp_deff (void)
 {
+	dmd_alloc_low_clean ();
+	sprintf ("%d LEFT RAMPS", left_ramps);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+
+CALLSET(leftramp, start_game)
+{
+	left_ramps = 0;
 }
 
 
 void sw_left_ramp_handler (void)
 {
+	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	left_ramps++;
 	score_add_current_const (SCORE_10K);

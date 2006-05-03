@@ -29,10 +29,15 @@ void camera_to_slot_timer (void)
 
 void sw_camera_handler (void)
 {
-	score_add_current_const (SCORE_10K * 3);
-	sound_send (SND_ODD_CHANGE_BEGIN);
-
-	task_recreate_gid (GID_SLOT_DISABLED_BY_CAMERA, camera_to_slot_timer);
+	if (task_kill_gid (GID_CAMERA_DISABLED_BY_DEAD_END))
+	{
+	}
+	else
+	{
+		score_add_current_const (SCORE_10K * 3);
+		sound_send (SND_ODD_CHANGE_BEGIN);
+		task_recreate_gid (GID_SLOT_DISABLED_BY_CAMERA, camera_to_slot_timer);
+	}
 }
 
 
