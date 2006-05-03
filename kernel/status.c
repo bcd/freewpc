@@ -69,15 +69,14 @@ void status_report_monitor (void)
 		if (!switch_poll_logical (SW_LL_FLIP_SW) 
 			&& !switch_poll_logical (SW_LR_FLIP_SW))
 			goto done;
-		task_sleep (TIME_50MS);
+		task_sleep (TIME_100MS);
 	}
 
 	/* OK, start the status report deff */
 start:
 	deff_start (DEFF_STATUS_REPORT);
 
-	/* Wait again until the flippers are released.  Poll less
-	 * frequently this time */
+	/* Wait again until the flippers are released. */
 	for (;;)
 	{
 		if (!switch_poll_logical (SW_LL_FLIP_SW) 
