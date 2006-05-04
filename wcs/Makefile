@@ -46,7 +46,7 @@ PINMAME_OTHER_ROMS = wcup_u*.rom
 # Object files exported by this game
 #
 
-GAME_OBJS = config.o 
+GAME_OBJS = config.o tv_popper.o goal_popper.o
 
 GAME_INCLUDES =
 

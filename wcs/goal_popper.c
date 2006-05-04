@@ -23,56 +23,51 @@
 #include <mach/coil.h>
 
 
-void sw_righthole_handler (void)
-{
-}
 
-
-DECLARE_SWITCH_DRIVER (sw_righthole)
+DECLARE_SWITCH_DRIVER (sw_goal_popper)
 {
-	.fn = sw_righthole_handler,
-	.devno = SW_DEVICE_DECL(DEVNO_RIGHTHOLE),
+	.devno = SW_DEVICE_DECL(DEVNO_GOAL_POPPER),
 };
 
-void righthole_kick_sound (void)
+void goal_popper_kick_sound (void)
 {
 	task_exit ();
 }
 
 
-void righthole_enter (device_t *dev)
+void goal_popper_enter (device_t *dev)
 {
 	mark_ball_in_play ();
 	score_add_current_const (SCORE_1K);
 }
 
 
-void righthole_kick_attempt (device_t *dev)
+void goal_popper_kick_attempt (device_t *dev)
 {
-	db_puts ("Sending righthole kick sound\n");
+	db_puts ("Sending goal_popper kick sound\n");
 	if (in_game && !in_tilt)
 	{
 	}
 }
 
 
-device_ops_t righthole_ops = {
-	.enter = righthole_enter,
-	.kick_attempt = righthole_kick_attempt,
+device_ops_t goal_popper_ops = {
+	.enter = goal_popper_enter,
+	.kick_attempt = goal_popper_kick_attempt,
 };
 
-device_properties_t righthole_props = {
-	.ops = &righthole_ops,
-	.name = "RIGHT POPPER",
-	.sol = SOL_RIGHT_POPPER,
+device_properties_t goal_popper_props = {
+	.ops = &goal_popper_ops,
+	.name = "GOAL POPPER",
+	.sol = SOL_GOAL_POPPER,
 	.sw_count = 1,
 	.init_max_count = 0,
-	.sw = { SW_RIGHT_POPPER },
+	.sw = { SW_GOAL_POPPER },
 };
 
 
-CALLSET_ENTRY (righthole, init)
+CALLSET_ENTRY (goal_popper, init)
 {
-	device_register (DEVNO_RIGHTHOLE, &righthole_props);
+	device_register (DEVNO_GOAL_POPPER, &goal_popper_props);
 }
 

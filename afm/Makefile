@@ -46,7 +46,7 @@ PINMAME_OTHER_ROMS = afm_s*.l1
 # Object files exported by this game
 #
 
-GAME_OBJS = config.o righthole.o
+GAME_OBJS = config.o righthole.o lefthole.o
 
 GAME_INCLUDES =
 

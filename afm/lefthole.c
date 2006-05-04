@@ -23,56 +23,51 @@
 #include <mach/coil.h>
 
 
-void sw_righthole_handler (void)
-{
-}
 
-
-DECLARE_SWITCH_DRIVER (sw_righthole)
+DECLARE_SWITCH_DRIVER (sw_lefthole)
 {
-	.fn = sw_righthole_handler,
-	.devno = SW_DEVICE_DECL(DEVNO_RIGHTHOLE),
+	.devno = SW_DEVICE_DECL(DEVNO_LEFTHOLE),
 };
 
-void righthole_kick_sound (void)
+void lefthole_kick_sound (void)
 {
 	task_exit ();
 }
 
 
-void righthole_enter (device_t *dev)
+void lefthole_enter (device_t *dev)
 {
 	mark_ball_in_play ();
 	score_add_current_const (SCORE_1K);
 }
 
 
-void righthole_kick_attempt (device_t *dev)
+void lefthole_kick_attempt (device_t *dev)
 {
-	db_puts ("Sending righthole kick sound\n");
+	db_puts ("Sending lefthole kick sound\n");
 	if (in_game && !in_tilt)
 	{
 	}
 }
 
 
-device_ops_t righthole_ops = {
-	.enter = righthole_enter,
-	.kick_attempt = righthole_kick_attempt,
+device_ops_t lefthole_ops = {
+	.enter = lefthole_enter,
+	.kick_attempt = lefthole_kick_attempt,
 };
 
-device_properties_t righthole_props = {
-	.ops = &righthole_ops,
-	.name = "RIGHT POPPER",
-	.sol = SOL_RIGHT_POPPER,
+device_properties_t lefthole_props = {
+	.ops = &lefthole_ops,
+	.name = "LEFT POPPER",
+	.sol = SOL_LEFT_POPPER,
 	.sw_count = 1,
 	.init_max_count = 0,
-	.sw = { SW_RIGHT_POPPER },
+	.sw = { SW_LEFT_POPPER },
 };
 
 
-CALLSET_ENTRY (righthole, init)
+CALLSET_ENTRY (lefthole, init)
 {
-	device_register (DEVNO_RIGHTHOLE, &righthole_props);
+	device_register (DEVNO_LEFTHOLE, &lefthole_props);
 }
 
