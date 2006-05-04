@@ -20,12 +20,6 @@
 
 #include <freewpc.h>
 
-void camera_to_slot_timer (void)
-{
-	task_sleep_sec (4);
-	task_exit ();
-}
-
 
 void sw_camera_handler (void)
 {
@@ -35,8 +29,8 @@ void sw_camera_handler (void)
 	else
 	{
 		score_add_current_const (SCORE_10K * 3);
-		sound_send (SND_ODD_CHANGE_BEGIN);
-		task_recreate_gid (GID_SLOT_DISABLED_BY_CAMERA, camera_to_slot_timer);
+		sound_send (SND_CAMERA_PICTURE_EJECT_1);
+		timer_restart_free (GID_SLOT_DISABLED_BY_CAMERA, TIME_4S);
 	}
 }
 

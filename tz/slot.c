@@ -58,7 +58,13 @@ void slot_enter (device_t *dev)
 	else
 	{
 		score_add_current_const (SCORE_5K);
-		door_award_flashing ();
+
+		if (lamp_test (LM_SLOT_MACHINE))
+		{
+			door_award_flashing ();
+			lamp_tristate_off (LM_SLOT_MACHINE);
+			lamp_tristate_on (LM_LEFT_INLANE2);
+		}
 	}
 }
 

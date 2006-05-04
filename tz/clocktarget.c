@@ -31,6 +31,6 @@ DECLARE_SWITCH_DRIVER (sw_clock_target)
 {
 	.fn = sw_clock_target_handler,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_CUCKOO,
+	.sound = SND_THUD,
 };
 

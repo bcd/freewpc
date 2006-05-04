@@ -21,6 +21,14 @@
 #include <freewpc.h>
 
 
+void right_ramp_default_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+	deff_exit ();
+}
+
+
 void sw_right_ramp_task (void)
 {
 	task_sleep_sec (2);

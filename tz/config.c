@@ -68,7 +68,6 @@ void tz_start_game (void)
 
 	lamp_flash_on (LM_SPIRAL_2M);
 	lamp_on (LM_LEFT_INLANE1);
-	lamp_on (LM_LEFT_INLANE2);
 	lamp_on (LM_RIGHT_INLANE);
 	lamp_on (LM_LEFT_JET);
 	lamp_on (LM_LOWER_JET);

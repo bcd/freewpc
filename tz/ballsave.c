@@ -62,5 +62,3 @@ void ballsave_launch (void)
 	deff_start (DEFF_BALL_SAVE);
 	ballsave_disable ();
 }
-
-

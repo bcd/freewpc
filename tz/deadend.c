@@ -20,18 +20,12 @@
 
 #include <freewpc.h>
 
-void deadend_to_slot_timer (void)
-{
-	task_sleep_sec (4);
-	task_exit ();
-}
-
 
 void sw_deadend_handler (void)
 {
 	score_add_current_const (SCORE_10K * 7 + SCORE_5K);
-	task_recreate_gid (GID_SLOT_DISABLED_BY_DEAD_END, deadend_to_slot_timer);
-	timer_restart (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S, freerunning_timer_function);
+	timer_restart_free (GID_SLOT_DISABLED_BY_DEAD_END, TIME_7S);
+	timer_restart_free (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S);
 }
 
 
@@ -43,6 +37,6 @@ CALLSET_ENTRY(deadend, start_ball)
 DECLARE_SWITCH_DRIVER (sw_deadend)
 {
 	.fn = sw_deadend_handler,
-	.sound = SND_ODD_CHANGE_BEGIN,
+	.sound = SND_DEAD_END_SCREECH,
 };
 

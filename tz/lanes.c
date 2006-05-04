@@ -22,8 +22,14 @@
 
 void handle_outlane (void)
 {
+	/* Reenable the ballsaver to its maximum timeout.
+	 * The actual save is still triggered when the ball lands
+	 * in the trough and calls endball.
+	 */
 	if (ballsave_test_active ())
-		ballsave_launch ();
+	{
+		ballsave_enable ();
+	}
 }
 
 void sw_left_outlane_handler (void)
@@ -46,6 +52,8 @@ void sw_left_inlane_1_handler (void)
 void sw_left_inlane_2_handler (void)
 {
 	score_add_current_const (SCORE_1K);
+	lamp_tristate_on (LM_SLOT_MACHINE);
+	lamp_tristate_off (LM_LEFT_INLANE2);
 }
 
 void sw_right_inlane_handler (void)

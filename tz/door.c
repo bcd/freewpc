@@ -105,6 +105,7 @@ void door_award_deff (void)
 		door_panels_started);
 	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);
 	dmd_show_low ();
+	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	task_sleep_sec (3);
 	deff_exit ();
 }
@@ -118,6 +119,7 @@ void door_award_flashing (void)
 	deff_start (DEFF_DOOR_AWARD);
 	task_sleep_sec (1);
 	door_advance_flashing ();
+	score_add_current_const (SCORE_50K);
 }
 
 
@@ -130,8 +132,8 @@ CALLSET_ENTRY(door, start_game)
 
 CALLSET_ENTRY(door, start_ball)
 {
-	lamp_on (LM_PIANO_PANEL);
-	lamp_on (LM_SLOT_MACHINE);
+	lamp_tristate_on (LM_SLOT_MACHINE);
+	lamp_tristate_off (LM_LEFT_INLANE2);
 	door_set_flashing (door_index);
 }
 

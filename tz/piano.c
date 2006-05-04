@@ -38,7 +38,6 @@ void sw_piano_handler (void)
 
 	score_add_current_const (0x5130ULL);
 	sound_send (SND_ODD_CHANGE_BEGIN);
-	// device_multiball_set (3);
 }
 
 
