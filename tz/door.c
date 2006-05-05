@@ -22,13 +22,13 @@
 
 /** Index of the panel which is currently slow flashing (next to
  * be awarded) or fast flashing (running) */
-U8 door_index;
+__local__ U8 door_index;
 
 /** Number of door panels that have been started */
-U8 door_panels_started;
+__local__ U8 door_panels_started;
 
 /** Number of door panels that have been completed */
-U8 door_panels_completed;
+__local__ U8 door_panels_completed;
 
 U8 door_active_lamp;
 
@@ -123,7 +123,7 @@ void door_award_flashing (void)
 }
 
 
-CALLSET_ENTRY(door, start_game)
+CALLSET_ENTRY(door, start_player)
 {
 	door_index = 0;
 	door_panels_started = 0;

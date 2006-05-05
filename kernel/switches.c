@@ -109,7 +109,7 @@ const switch_info_t sw_unused =
 #define MACHINE_SW23 sw_unused
 #endif
 #ifndef MACHINE_SW24
-#define MACHINE_SW24 sw_unused
+#define MACHINE_SW24 sw_coin_door_closed
 #endif
 #ifndef MACHINE_SW25
 #define MACHINE_SW25 sw_unused

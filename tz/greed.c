@@ -36,7 +36,7 @@ void sw_greed_handler (void)
 	if (greed_sound_index >= 4)
 		greed_sound_index = 0;
 	sound_send (greed_sounds[greed_sound_index]);
-	score_add_current_const (SCORE_500);
+	score_add_current_const (SCORE_10K);
 }
 
 

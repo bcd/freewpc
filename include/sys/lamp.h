@@ -115,11 +115,11 @@ void leff_toggle (lampnum_t lamp);
 #define lamp_fast_flash_test(lamp)		lamp_test (lamp + LAMP_FAST_FLASH_OFFSET)
 
 #define lamp_tristate_on(lamp) \
-	do { lamp_on(lamp); lamp_flash_off(lamp); } while (0)
+	do { lamp_flash_off(lamp); lamp_on(lamp); } while (0)
 #define lamp_tristate_off(lamp) \
-	do { lamp_off(lamp); lamp_flash_off(lamp); } while (0)
+	do { lamp_flash_off(lamp); lamp_off(lamp); } while (0)
 #define lamp_tristate_flash(lamp) \
-	do { lamp_off(lamp); lamp_flash_on(lamp); } while (0)
+	do { lamp_flash_on(lamp); } while (0)
 
 void lamp_all_on (void);
 void lamp_all_off (void);

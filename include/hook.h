@@ -39,6 +39,7 @@ typedef struct machine_hooks
 	void (*init) (void);
 	bool (*start_game_attempt) (void);
 	void (*start_game) (void);
+	void (*start_player) (void);
 	void (*add_player) (void);
 	void (*start_ball) (void);
 	void (*ball_in_play) (void);
@@ -68,6 +69,7 @@ typedef struct machine_hooks
 	.init = null_function, \
 	.start_game_attempt = null_true_function, \
 	.start_game = null_function, \
+	.start_player = null_function, \
 	.add_player = null_function, \
 	.start_ball = null_function, \
 	.ball_in_play = null_function, \

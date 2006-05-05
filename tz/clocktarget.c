@@ -23,7 +23,7 @@
 
 void sw_clock_target_handler (void)
 {
-	score_add_current_const (SCORE_500);
+	score_add_current_const (SCORE_25K);
 }
 
 

@@ -40,7 +40,7 @@ extern "C" {
 #ifndef __cplusplus
 typedef unsigned char bool;
 #endif
-typedef unsigned char bcd_t;
+typedef unsigned char bcd_t, BCD;
 typedef char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
 typedef long int16_t, I16, S16;

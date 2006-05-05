@@ -22,6 +22,9 @@
 #define _SYS_FONT_H
 
 
+/**
+ * The font descriptor structure.
+ */
 typedef struct
 {
 	U8 width;

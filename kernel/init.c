@@ -142,7 +142,7 @@ void do_reset (void)
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (RAM_LOCK_2K);
-	wpc_set_ram_protect (RAM_LOCK_2K);
+	wpc_set_ram_protect (RAM_LOCKED);
 
 	/** Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped.

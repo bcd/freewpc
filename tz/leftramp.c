@@ -34,7 +34,7 @@ void left_ramp_deff (void)
 }
 
 
-CALLSET_ENTRY(leftramp, start_game)
+CALLSET_ENTRY(leftramp, start_player)
 {
 	left_ramps = 0;
 }

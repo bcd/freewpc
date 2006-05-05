@@ -47,28 +47,28 @@ void system_accept_freewpc (void)
 		return;
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_5x5, 64, 9, "WARNING... BALLY WMS");
-	font_render_string_center (&font_5x5, 64, 15, "DOES NOT SUPPORT");
-	font_render_string_center (&font_5x5, 64, 21, "THIS SOFTWARE");
-	font_render_string_center (&font_5x5, 64, 27, "PRESS ENTER");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "WARNING... BALLY WMS");
+	font_render_string_center (&font_mono5, 64, 15, "DOES NOT SUPPORT");
+	font_render_string_center (&font_mono5, 64, 21, "THIS SOFTWARE");
+	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_5x5, 64, 9, "NO WARRANTY EXISTS");
-	font_render_string_center (&font_5x5, 64, 15, "ROM MAY CAUSE DAMAGE");
-	font_render_string_center (&font_5x5, 64, 21, "TO REAL MACHINE");
-	font_render_string_center (&font_5x5, 64, 27, "PRESS ENTER");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "NO WARRANTY EXISTS");
+	font_render_string_center (&font_mono5, 64, 15, "ROM MAY CAUSE DAMAGE");
+	font_render_string_center (&font_mono5, 64, 21, "TO REAL MACHINE");
+	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_5x5, 64, 9, "IF YOU ARE SURE YOU");
-	font_render_string_center (&font_5x5, 64, 15, "WANT TO CONTINUE");
-	font_render_string_center (&font_5x5, 64, 21, "PRESS ENTER TWICE");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "IF YOU ARE SURE YOU");
+	font_render_string_center (&font_mono5, 64, 15, "WANT TO CONTINUE");
+	font_render_string_center (&font_mono5, 64, 21, "PRESS ENTER TWICE");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
@@ -95,21 +95,21 @@ void system_reset (void)
 	system_accept_freewpc ();
 	dmd_alloc_low_clean ();
 
-	font_render_string_center (&font_5x5, 64, 4, MACHINE_NAME);
+	font_render_string_center (&font_mono5, 64, 4, MACHINE_NAME);
 
 #ifdef DEBUGGER
 	sprintf ("D%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
 #else
 	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
 #endif
-	font_render_string_center (&font_5x5, 32, 12, sprintf_buffer);
-	font_render_string_center (&font_5x5, 96, 12, build_date);
+	font_render_string_center (&font_mono5, 32, 12, sprintf_buffer);
+	font_render_string_center (&font_mono5, 96, 12, build_date);
 
 #ifdef USER_TAG
-	font_render_string_center (&font_5x5, 64, 20, C_STRING(USER_TAG));
-	font_render_string_center (&font_5x5, 64, 28, "TESTING...");
+	font_render_string_center (&font_mono5, 64, 20, C_STRING(USER_TAG));
+	font_render_string_center (&font_mono5, 64, 28, "TESTING...");
 #else
-	font_render_string_center (&font_5x5, 64, 24, "TESTING...");
+	font_render_string_center (&font_mono5, 64, 24, "TESTING...");
 #endif
 
 	dmd_show_low ();

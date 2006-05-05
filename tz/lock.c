@@ -45,11 +45,16 @@ static void update_lock_lamp (void)
 
 CALLSET_ENTRY(lock, start_game)
 {
+}
+
+
+CALLSET_ENTRY(lock, start_player)
+{
 	lock_shots_made = 0;
 	multiballs_played = 0;
 	balls_locked = 0;
-	locks_lit = 0;
-	shots_for_lock = 1;
+	locks_lit = 1;
+	shots_for_lock = 0;
 }
 
 
@@ -67,7 +72,7 @@ DECLARE_SWITCH_DRIVER (sw_lock)
 		
 void lock_enter (device_t *dev)
 {
-	score_add_current_const (SCORE_10K);
+	score_add_current_const (SCORE_75K);
 
 	if (locks_lit != 0)
 	{

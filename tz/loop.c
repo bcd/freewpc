@@ -35,7 +35,7 @@ void enter_loop (void)
 
 void award_loop (void)
 {
-	score_add_current_const (SCORE_25K);
+	score_add_current_const (SCORE_50K);
 	sound_send (SND_SPIRAL_AWARDED);
 }
 

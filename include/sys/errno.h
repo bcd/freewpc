@@ -43,7 +43,7 @@
 #define ERR_REAL_HARDWARE			19
 #define ERR_NVRAM_UNLOCKED			20
 #define ERR_SOL_CKSUM_ERROR      21
-
+#define ERR_NVRAM                22
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);

@@ -24,6 +24,7 @@
 __fastram__ uint8_t page_loaded;
 
 
+#if 0
 void _far_call_handler (U8 unused1, U8 unused2)
 {
 	struct far_call_address
@@ -50,7 +51,7 @@ void _far_call_handler (U8 unused1, U8 unused2)
 	wpc_set_rom_page (saved_page);
 	(*call_info)++;
 }
-
+#endif
 
 uint8_t paged_read_byte (uint8_t *byte_ptr, uint8_t page)
 {

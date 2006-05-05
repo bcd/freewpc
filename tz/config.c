@@ -66,15 +66,19 @@ void tz_start_game (void)
 {
 	sound_send (SND_DONT_TOUCH_DOOR_1);
 
+	#include <start_game.callset>
+	task_sleep_sec (2);
+}
+
+void tz_start_player (void)
+{
 	lamp_flash_on (LM_SPIRAL_2M);
 	lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_RIGHT_INLANE);
 	lamp_on (LM_LEFT_JET);
 	lamp_on (LM_LOWER_JET);
 	lamp_on (LM_RIGHT_JET);
-
-	#include <start_game.callset>
-	task_sleep_sec (2);
+	#include <start_player.callset>
 }
 
 
@@ -171,6 +175,7 @@ void tz_start_without_credits (void)
 machine_hooks_t tz_hooks = {
 	INHERIT_FROM_DEFAULT_HOOKS,
 	.start_game = tz_start_game,
+	.start_player = tz_start_player,
 	.end_game = tz_end_game,
 	.start_ball = tz_start_ball,
 	.ball_in_play = tz_ball_in_play,

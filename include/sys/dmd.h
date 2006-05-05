@@ -36,11 +36,26 @@
 /** The height of a DMD page, in pixel */
 #define DMD_PIXEL_HEIGHT 32
 
+
+/** Coordinates that are aligned various ways */
+#define DMD_CENTER_X (DMD_PIXEL_WIDTH / 2)
+#define DMD_CENTER_Y (DMD_PIXEL_HEIGHT / 2)
+
+#define DMD_LEFT_CENTER_X (DMD_PIXEL_WIDTH / 3)
+#define DMD_RIGHT_CENTER_X (2 * DMD_PIXEL_WIDTH / 3)
+#define DMD_TOP_CENTER_Y (DMD_PIXEL_HEIGHT / 3)
+#define DMD_BOTTOM_CENTER_Y (2 * DMD_PIXEL_HEIGHT / 3)
+
+#define DMD_ALIGN_CENTER         DMD_CENTER_X, DMD_CENTER_Y
+#define DMD_ALIGN_TOP_CENTER     DMD_CENTER_X, DMD_TOP_CENTER_Y
+#define DMD_ALIGN_BOTTOM_CENTER  DMD_CENTER_X, DMD_BOTTOM_CENTER_Y
+
+
 /** The type of a page number */
-typedef uint8_t dmd_pagenum_t;
+typedef U8 dmd_pagenum_t;
 
 /** The type of a page buffer pointer */
-typedef uint8_t *dmd_buffer_t;
+typedef U8 *dmd_buffer_t;
 
 
 /** A DMD transition describes all of the properties of a

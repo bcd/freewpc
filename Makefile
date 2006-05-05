@@ -44,6 +44,9 @@ GCC_VERSION ?= 3.3.6
 # Set to 'y' if you want to use the direct page (not working yet)
 USE_DIRECT_PAGE ?= y
 
+# Set to 'y' if you want to enable multiplayer games
+USE_LOCALS ?= y
+
 # Set to 'y' if you want to save the assembly sources
 SAVE_ASM ?= y
 
@@ -204,6 +207,9 @@ KERNEL_OBJS = \
 	kernel/tilt.o \
 	kernel/vector.o
 
+KERNEL_ASM_OBJS = \
+	kernel/farcall.o
+
 TEST_OBJS = test/window.o
 
 TRANS_OBJS = kernel/dmdtrans.o
@@ -237,6 +243,10 @@ export FON_SRCS
 #######################################################################
 
 CFLAGS = $(EXTRA_CFLAGS)
+
+ifeq ($(USE_LOCALS),y)
+CFLAGS += -DCONFIG_MULTIPLAYER
+endif
 
 # System include directories.  FreeWPC doesn't use libc currently.
 ifeq ($(USE_LIBC),y)
@@ -470,12 +480,12 @@ PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 						 page60.o page61.o
 
 
-SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
+SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
 $(SYSTEM_OBJS) : PAGE=62
 
 
-AS_OBJS = $(SYSTEM_HEADER_OBJS)
+AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
 C_OBJS = $(KERNEL_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
 
@@ -789,6 +799,10 @@ gendefines_again: clean_gendefines gendefines
 #
 callset :
 	@echo "Generating callsets ... " && mkdir -p callset && tools/gencallset
+
+.PHONY : callset_again
+callset_again:
+	rm -rf callset && $(MAKE) callset
 
 .PHONY : fonts clean-fonts
 fonts clean-fonts:

@@ -29,6 +29,7 @@ void handle_outlane (void)
 	if (ballsave_test_active ())
 	{
 		ballsave_enable ();
+		ball_search_timer_reset ();
 	}
 }
 

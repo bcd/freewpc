@@ -2387,6 +2387,7 @@ struct menu *test_menu_items[] = {
 	&debugger_test_item,
 	&empty_balls_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
+	// MACHINE_TEST_MENU_ITEMS
 #endif
 	NULL,
 };

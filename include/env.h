@@ -51,6 +51,8 @@
 
 #define __far__ __attribute__((far(CONFIG_FAR_PAGE)))
 
+#define __naked__ __attribute__((naked))
+
 #define VOIDCALL(fn) \
 { \
 	extern void fn (void); \

@@ -199,9 +199,9 @@ void rtc_show_date_time (void)
 	dmd_alloc_low_clean ();
 
 	rtc_render_date ();
-	font_render_string_center (&font_5x5, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
 	rtc_render_time ();
-	font_render_string_center (&font_5x5, 64, 21, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 
 	dmd_show_low ();
 }

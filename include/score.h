@@ -105,4 +105,6 @@ void score_init (void);
 	score_add_current (score); \
 }
 
+#define MAKE_BCD(b)	0x##b
+
 #endif /* _SCORE_H */

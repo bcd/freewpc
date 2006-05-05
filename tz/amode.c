@@ -74,17 +74,12 @@ void amode_scroll (void)
 {
 }
 
-void egg_timer_task (void)
-{
-	task_sleep_sec (7);
-	task_exit ();
-}
 
 void egg_left_flipper (void)
 {
 	if (!task_find_gid (GID_EGG_TIMER))
 	{
-		task_create_gid1 (GID_EGG_TIMER, egg_timer_task);
+		timer_start1_free (GID_EGG_TIMER, TIME_7S);
 		egg_index = 0;
 		egg_code_values[0] = 0;
 		egg_code_values[1] = 0;
@@ -256,17 +251,6 @@ void amode_deff (void) __taskentry__
 			continue;
 
 		/** Display 'custom message'? **/
-
-#if 00000
-		/** Display rules hint **/
-		dmd_alloc_low_clean ();
-		dmd_draw_border (dmd_low_bytes);
-		font_render_string_center (&font_5x5, 64, 5, "HOLD FLIPPERS");
-		font_render_string_center (&font_5x5, 64, 13, "TO VIEW THE");
-		font_render_string_center (&font_5x5, 64, 21, "GAME RULES");
-		dmd_show_low ();
-		amode_page_delay (5);
-#endif
 
 		/* Display date/time */
 		rtc_show_date_time ();

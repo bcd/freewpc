@@ -20,10 +20,12 @@
 
 #include <freewpc.h>
 
+__local__ U8 hitch_count;
+
 
 void sw_hitch_handler (void)
 {
-	score_add_current_const (SCORE_50K);
+	score_add_current_const (SCORE_100K);
 }
 
 

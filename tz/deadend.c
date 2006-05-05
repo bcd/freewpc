@@ -20,18 +20,22 @@
 
 #include <freewpc.h>
 
+__local__ U8 dead_end_value;
+
+
+CALLSET_ENTRY (deadend, start_ball)
+{
+	dead_end_value = 100;
+}
+
 
 void sw_deadend_handler (void)
 {
-	score_add_current_const (SCORE_10K * 7 + SCORE_5K);
+	score_add_current_const (SCORE_100K);
 	timer_restart_free (GID_SLOT_DISABLED_BY_DEAD_END, TIME_7S);
 	timer_restart_free (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S);
 }
 
-
-CALLSET_ENTRY(deadend, start_ball)
-{
-}
 
 
 DECLARE_SWITCH_DRIVER (sw_deadend)

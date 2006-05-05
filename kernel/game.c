@@ -159,7 +159,7 @@ void end_ball (void)
 	 * failed and it fell back into the trough.  Return the
 	 * ball to the plunger lane in these cases.
 	 */
-	if (!ball_in_play)
+	if (!ball_in_play && !in_tilt)
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
 		goto done;
@@ -172,7 +172,7 @@ void end_ball (void)
 	 * it must explicitly put another ball back into play.
 	 * (Game code should check for ball saves here.)
 	 */
-	if (!call_boolean_hook (end_ball))
+	if (!call_boolean_hook (end_ball) && !in_tilt)
 		goto done;
 
 	/* OK, we're committing to ending the ball now.
@@ -209,20 +209,24 @@ void end_ball (void)
 
 	/* Advance to the next player. */
 	if (num_players > 1)
+	{
 		player_save ();
-	player_up++;
-	if (num_players > 1)
+		player_up++;
 		player_restore ();
 
-	if (player_up <= num_players)
-	{
-		start_ball ();
-		goto done;
+		if (player_up <= num_players)
+		{
+			start_ball ();
+			goto done;
+		}
+		else
+		{
+			player_up = 1;
+		}
 	}
 
 	/* If all players have had a turn, then increment the
 	 * current ball number. */
-	player_up = 1;
 	ball_up++;
 	if (ball_up <= system_config.balls_per_game)
 	{
@@ -247,7 +251,11 @@ void start_ball (void)
 	db_puts ("In startball\n");
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
+
+	if (ball_up == 1)
+		call_hook (start_player);
 	call_hook (start_ball);
+
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
 	device_request_kick (device_entry (DEVNO_TROUGH));
@@ -284,7 +292,6 @@ void start_game (void)
 		in_tilt = FALSE;
 		num_players = 0;
 		scores_reset ();
-		player_start_game ();
 		high_score_reset_check ();
 	
 		add_player ();

@@ -107,6 +107,7 @@
 //#define MACHINE_SW18
 //
 #define MACHINE_SW21			sw_slam_tilt
+//#define MACHINE_SW22
 //#define MACHINE_SW23
 //#define MACHINE_SW28
 //
@@ -120,10 +121,10 @@
 //#define MACHINE_SW38			sw_shooter
 //
 //#define MACHINE_SW41
-//#define MACHINE_SW42
+#define MACHINE_SW42			sw_goal_popper
 //#define MACHINE_SW43
 //#define MACHINE_SW44
-//#define MACHINE_SW45
+#define MACHINE_SW45			sw_tv_popper
 //#define MACHINE_SW46
 //#define MACHINE_SW47
 //#define MACHINE_SW48

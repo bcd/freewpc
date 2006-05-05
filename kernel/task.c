@@ -56,7 +56,7 @@ __fastram__ task_t *task_current;
  * static storage to help compensate for the lacking of registers.
  * Don't allocate on the stack, since we need to preserve the
  * stack pointer carefully during dispatch. */
-__fastram__ uint16_t task_save_U, task_save_X;
+__fastram__ U16 task_save_U, task_save_X;
 
 /** The static array of task structures */
 task_t task_buffer[NUM_TASKS];
@@ -78,6 +78,12 @@ bool task_dispatching_ok;
 U8 task_largest_stack;
 U16 task_largest_stack_pc;
 
+/** Also for debug, this tracks the maximum number of tasks needed. */
+#ifdef TASKCOUNT
+U8 task_count;
+U8 task_max_count;
+#endif
+
 /** Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
 //#define DUMP_ALL_TASKS
@@ -90,6 +96,9 @@ void task_dump (void)
 	register task_t *tp;
 
 	dbprintf ("\nCurrent = %p\n", task_current);
+#ifdef TASKCOUNT
+	dbprintf ("Max tasks = %d\n", task_max_count);
+#endif
 	db_puts ("----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
@@ -137,14 +146,14 @@ task_t *task_allocate (void)
 __attribute__((naked))
 void task_save (void)
 {
-	register uint16_t __u asm ("u");
+	register U16 __u asm ("u");
 	register task_t * __x asm ("x");
 	register U8 __b asm ("d");
 
 	/* Save U, X immediately to memory to free up some regs for
 	 * the rest of the function */
-	task_save_U = (uint16_t)__u;
-	task_save_X = (uint16_t)__x;
+	task_save_U = (U16)__u;
+	task_save_X = (U16)__x;
 
 	/* Get the PC by popping it off the stack */
 	__asm__ volatile ("puls\tu");
@@ -213,7 +222,7 @@ __attribute__((naked))
 void task_restore (void)
 {
 	register task_t * __x asm ("x");
-	register uint16_t __u asm ("u") __attribute__ ((unused));
+	register U16 __u asm ("u") __attribute__ ((unused));
 	register U8 __b asm ("d");
 
 	task_current = __x;
@@ -313,6 +322,11 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
+#ifdef TASKCOUNT
+	task_count++;
+	if (task_count > task_max_count)
+		task_max_count = task_count;
+#endif
 	return (tp);
 }
 
@@ -397,6 +411,9 @@ __noreturn__ void task_exit (void)
 
 	task_current->state = TASK_FREE;
 	task_current = 0;
+#ifdef TASKCOUNT
+	task_count--;
+#endif
 	task_dispatcher ();
 }
 
@@ -437,13 +454,13 @@ bool task_kill_gid (task_gid_t gid)
 }
 
 
-uint16_t task_get_arg (void)
+U16 task_get_arg (void)
 {
 	return task_current->arg;
 }
 
 
-void task_set_arg (task_t *tp, uint16_t arg)
+void task_set_arg (task_t *tp, U16 arg)
 {
 	tp->arg = arg;
 }
@@ -534,6 +551,10 @@ void task_init (void)
 	task_largest_stack = 0;
 	task_largest_stack_pc = 0;
 
+#ifdef TASKCOUNT
+	task_count = task_max_count = 1;
+#endif
+
 	/* Allocate a task for the first (current) thread of execution.
 	 * The calling routine can then sleep and/or create new tasks
 	 * after this point. */
@@ -543,5 +564,4 @@ void task_init (void)
 	task_current->gid = GID_FIRST_TASK;
 	task_current->delay = 0;
 }
-
 

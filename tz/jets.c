@@ -22,6 +22,24 @@
 
 int jet_sound_index;
 
+__local__ BCD jet_value;
+__local__ int jets_scored;
+__local__ int jets_for_bonus;
+
+
+CALLSET_ENTRY(jet, start_player)
+{
+	jets_scored = 0;
+	jets_for_bonus = 25;
+}
+
+
+CALLSET_ENTRY(jet, start_ball)
+{
+	jet_value = MAKE_BCD(25);
+}
+
+
 sound_code_t jet_sounds[] = { SND_HORN1, SND_HORN2, SND_HORN3 };
 
 void sw_jet_sound (void)
@@ -38,7 +56,7 @@ void sw_jet_sound (void)
 
 void sw_jet_handler (void)
 {
-	score_add_current_const (0x1230ULL);
+	score_add_current_const (SCORE_25K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 
 	extern void door_advance_flashing (void);

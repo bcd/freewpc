@@ -428,6 +428,7 @@ void device_multiball_set (U8 count)
 	}
 }
 
+
 void device_init (void)
 {
 	device_t *dev;

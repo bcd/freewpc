@@ -66,7 +66,19 @@ void sw_enter_button_handler (void)
 	call_far (TEST_PAGE, (test_enter_button ()));
 }
 
-/* Declare switch drivers for the coin door buttons */
+
+void sw_coin_door_closed_handler (void)
+{
+	dbprintf ("Coin door closed");
+}
+
+
+/* Declare switch drivers for the coin door & its buttons */
+
+DECLARE_SWITCH_DRIVER (sw_coin_door_closed)
+{
+	.fn = sw_coin_door_closed_handler,
+};
 
 DECLARE_SWITCH_DRIVER (sw_escape_button)
 {

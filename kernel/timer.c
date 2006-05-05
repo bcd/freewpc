@@ -68,32 +68,40 @@ __taskentry__ void pausable_timer_function (void)
 }
 
 
-task_t *timer_find_gid (task_gid_t gid)
+__taskentry__ void live_ball_timer_function (void)
 {
-	return task_find_gid (gid);
+	U16 ticks = task_get_arg ();
+	while (ticks > 0)
+	{
+		task_sleep (TIMER_PAUSABLE_GRAN);
+		if (0) /* TODO : add condition that ball is live */
+			continue;
+		ticks -= TIMER_PAUSABLE_GRAN;
+	}
+	task_exit ();
 }
 
 
-task_t *timer_restart (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
+task_t *timer_restart (task_gid_t gid, U16 ticks, task_function_t fn)
 {
 	task_t *tp = task_recreate_gid (gid, fn);
-	task_set_arg (tp, (U16)ticks);
+	task_set_arg (tp, ticks);
 	return (tp);
 }
 
 
-task_t *timer_start1 (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
+task_t *timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn)
 {
 	task_t *tp = task_create_gid1 (gid, fn);
-	task_set_arg (tp, (U16)ticks);
+	task_set_arg (tp, ticks);
 	return (tp);
 }
 
 
-task_t *timer_start (task_gid_t gid, task_ticks_t ticks, task_function_t fn)
+task_t *timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 {
 	task_t *tp = task_create_gid (gid, fn);
-	task_set_arg (tp, (U16)ticks);
+	task_set_arg (tp, ticks);
 	return (tp);
 }
 

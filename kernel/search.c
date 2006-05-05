@@ -124,7 +124,9 @@ void ball_search_monitor_task (void)
 		if (in_live_game 
 				&& !in_bonus 
 				&& live_balls 
-				&& !switch_poll (MACHINE_SHOOTER_SWITCH))
+				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
+				&& !switch_poll_logical (SW_LL_FLIP_SW) 
+				&& !switch_poll_logical (SW_LR_FLIP_SW))
 		{
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
