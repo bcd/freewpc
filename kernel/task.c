@@ -133,6 +133,7 @@ task_t *task_allocate (void)
 			tp->state = TASK_USED;
 			tp->delay = 0;
 			tp->stack_word_count = 0;
+			tp->flags = 0;
 			return tp;
 		}
 	fatal (ERR_NO_FREE_TASKS);
@@ -451,6 +452,33 @@ bool task_kill_gid (task_gid_t gid)
 			rc = TRUE;
 		}
 	return (rc);
+}
+
+
+void task_kill_all (void)
+{
+	register short t;
+	register task_t *tp;
+
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if (	(tp != task_current) &&
+				(tp->state != TASK_FREE) && 
+				!(tp->flags & TASK_PROTECTED) )
+		{
+			task_kill_pid (tp);
+		}
+}
+
+
+void task_set_flags (U8 flags)
+{
+	task_current->flags |= flags;
+}
+
+
+void task_clear_flags (U8 flags)
+{
+	task_current->flags &= ~flags;
 }
 
 

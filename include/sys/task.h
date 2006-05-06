@@ -32,6 +32,11 @@
 #define TASK_USED		1
 #define TASK_BLOCKED	2
 
+
+/** Values for the 'flags' field */
+#define TASK_PROTECTED   0x01
+
+
 /** The maximum number of tasks that can be running at once.
  * Space for this many task structures is statically allocated.
  */
@@ -58,7 +63,7 @@ typedef struct
 	uint16_t			x;
 	uint16_t			y;
 	U8					stack_word_count;
-	U8					unused_3;
+	U8					flags;
 	uint16_t			u;
 	uint8_t			delay;
 	uint8_t			asleep;
@@ -130,6 +135,9 @@ void task_sleep_sec (int8_t secs);
 __noreturn__ void task_exit (void);
 task_t *task_find_gid (task_gid_t);
 bool task_kill_gid (task_gid_t);
+void task_kill_all (void);
+void task_set_flags (U8 flags);
+void task_clear_flags (U8 flags);
 uint16_t task_get_arg (void);
 void task_set_arg (task_t *tp, uint16_t arg);
 __noreturn__ void task_dispatcher (void);
