@@ -20,12 +20,6 @@
 
 #include <freewpc.h>
 
-void loop_timer (void) __taskentry__
-{
-	task_sleep_sec (3);
-	task_exit ();
-}
-
 void enter_loop (void)
 {
 	score_add_current_const (SCORE_1K);
@@ -75,7 +69,7 @@ void sw_left_loop_handler (void)
 	else
 	{
 		/* Left loop started */
-		task_create_gid (GID_LEFT_LOOP_ENTERED, loop_timer);
+		timer_restart_free (GID_LEFT_LOOP_ENTERED, TIME_3S);
 		enter_loop ();
 	}
 }
@@ -91,7 +85,6 @@ void sw_right_loop_handler (void)
 	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
 
-	sw_gumball_right_loop_entered ();
 	if (in_live_game)
 	{
 		if (task_kill_gid (GID_LOOP_DISABLED_BY_LOCK_EXIT))
@@ -112,8 +105,9 @@ void sw_right_loop_handler (void)
 		else
 		{
 			/* Right loop started */
-			task_create_gid (GID_RIGHT_LOOP_ENTERED, loop_timer);
+			timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
 			enter_loop ();
+			sw_gumball_right_loop_entered ();
 		}
 	}
 }
