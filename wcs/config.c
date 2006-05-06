@@ -111,12 +111,14 @@ void wcs_any_pf_switch (void)
 
 void wcs_bonus (void)
 {
+#if 0
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
 	task_sleep_sec (1);
 	while (deff_get_active () == DEFF_BONUS)
 		task_sleep (TIME_33MS);
 	leff_stop (LEFF_BONUS);
+#endif
 }
 
 
