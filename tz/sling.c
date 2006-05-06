@@ -25,8 +25,6 @@ U8 rtsol_lower_jet;
 
 void slingshot_rtt (void)
 {
-	extern U8 *sol_rt_state;
-
 	rt_solenoid_update ((char *)&sol_rt_state + (SOL_LOWER_JET / 8),
 		1 << (SOL_LOWER_JET % 8),
 		RTSOL_ACTIVE_HIGH,
