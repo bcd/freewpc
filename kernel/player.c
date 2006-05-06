@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 
+__local__ U8 __unused_local__;
+
 /* Theory of operation:
  *
  * Some state needs to be "per-player" and not global.
