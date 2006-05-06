@@ -54,7 +54,7 @@ SAVE_ASM ?= y
 USE_LIBC ?= n
 
 # Set to 'y' to use the new solenoid routines
-USE_NEWSOL ?= n
+USE_NEWSOL ?= y
 
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
@@ -453,6 +453,7 @@ FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
 
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
+MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_PAGED_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 
 #
@@ -466,15 +467,17 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 page56_OBJS = page56.o
 page57_OBJS = page57.o $(TRANS_OBJS)
 page58_OBJS = page58.o $(TEST_OBJS)
-page59_OBJS = page59.o
+page59_OBJS = page59.o $(MACHINE_PAGED_OBJS)
 page60_OBJS = page60.o $(XBM_OBJS)
 page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
+SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
 $(TRANS_OBJS) : PAGE=57
 $(TEST_OBJS) : PAGE=58
-$(MACHINE_OBJS) : PAGE=59
+$(MACHINE_PAGED_OBJS) : PAGE=59
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
+$(SYSTEM_OBJS) : PAGE=62
 
 PAGE_DEFINES := -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
@@ -487,15 +490,9 @@ PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
 PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 						 page60.o page61.o
 
-
-SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
-
-$(SYSTEM_OBJS) : PAGE=62
-
-
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(FONT_OBJS)
+C_OBJS = $(KERNEL_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(FONT_OBJS)
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
@@ -805,7 +802,7 @@ gendefines_again: clean_gendefines gendefines
 #
 # How to automake callsets
 #
-callset :
+callset : tools/gencallset
 	@echo "Generating callsets ... " && mkdir -p callset && tools/gencallset
 
 .PHONY : callset_again

@@ -61,6 +61,12 @@ foreach $src (@srclist) {
 			}
 			$functionhash{$set} .= "$module ";
 		}
+		elsif (/#include <([^.]*)\.callset>/) {
+			print "Callset '$1' invoked\n";
+			if (!defined $functionhash{$1}) {
+				$functionhash{$1} = "";
+			}
+		}
 	}
 	close FH;
 }
