@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# svntag - simple shell script for creating tagged releases
+#
+
+SVNROOT=http://www.oddchange.com/svn/public/freewpc
+
+case $1 in
+	set)
+		tag=$2
+		svn copy $SVNROOT/trunk $SVNROOT/tags/$tag
+		;;
+	list)
+		svn list $SVNROOT/tags
+		;;
+	*)
+		echo "Syntax: svntag [set|list]"
+		;;
+esac

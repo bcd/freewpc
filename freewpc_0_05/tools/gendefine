@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+#
+# gendefine
+#
+# Scan all source files recursively and grep them for
+# defines that match a particular pattern.  For each
+# one, generate a unique value for it.
+
+my $prefix = "GID_";
+
+my @dirs = ("include", "kernel", "mach", "fonts", "test");
+
+my $firstval = 1;
+
+
+
+my @defines = ();
+
+my %definehash;
+
+my $nextval = $firstval;
+
+while ($arg = shift)
+{
+	if ($arg =~ m/-p/) {
+		$prefix = shift;
+	}
+}
+
+foreach $dir (@dirs) {
+	my @files = split /\n+/, 
+		`cd $dir && find . -name "*.c" -or -name "*.h"`;
+	foreach $file (@files) {
+		push @srclist, "$dir/" . $file;
+	}
+}
+
+foreach $src (@srclist) {
+	# print "Processing $src:\n";
+	open FH, $src;
+	while (<FH>) {
+		chomp;
+		if (/[^a-zA-Z0-9_](${prefix}[a-zA-Z0-9_]*)/) {
+			my $define = $1;
+			# print "Found $define.\n";
+			if (!defined $definehash{$define})
+			{
+				push @defines, $define;
+				$definehash{$define} = $nextval;
+				$nextval++;
+			}
+		}
+	}
+	close FH;
+}
+
+print "#ifndef __GENDEFINE_" . $prefix . "\n";
+print "#define __GENDEFINE_" . $prefix . "\n";
+foreach $define (@defines) {
+	print "#define $define " . $definehash{$define} . "\n";
+}
+print "#endif /* __GENDEFINE_" . $prefix . " */\n";
+

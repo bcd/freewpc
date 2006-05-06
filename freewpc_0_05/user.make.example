@@ -1,0 +1,31 @@
+#
+# This is an example user.make file.
+# If you don't already have a user.make, you can rename this one
+# and change anything you don't like.
+#
+
+#
+# Set this to the directory in which mame roms should be installed.
+
+# Under Cygwin use something like the following.  make has trouble
+# with filenames that have spaces or colons in them.
+#TARGET_ROMPATH := "/cygdrive/c/Progra~1/VPinmame/roms"
+
+#
+# Set to 'y' if you wish to use the freewpc debugger.
+#
+#FREEWPC_DEBUGGER := n
+
+#
+# Set if you wish to override the major/minor version numbers
+# to be used.
+#
+#USER_MAJOR=
+#USER_MINOR=
+
+#
+# Set to an arbitrary string to be included in the final binary
+# for identification purposes.
+#
+#USER_TAG = "MY TAG"
+
