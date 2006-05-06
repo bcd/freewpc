@@ -295,7 +295,6 @@ void do_irq (void)
 		tick_count++;
 
 	/* Execute rtts every 1ms */
-	sol_rtt ();
 	flipper_rtt ();
 	if (irq_count & 0x1)
 		lamp_rtt ();
@@ -308,6 +307,7 @@ void do_irq (void)
 	if ((irq_count & 7) == 0)
 	{
 		/* Execute rtts every 8ms */
+		sol_rtt ();
 		ac_rtt ();
 		triac_rtt ();
 		flasher_rtt ();

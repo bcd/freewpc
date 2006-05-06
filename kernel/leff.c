@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -148,11 +147,21 @@ static leffnum_t leff_get_highest_priority (void)
 }
 
 
+/* Start the lamp effect function, but do a little
+ * housekeeping before starting the task...
+ *
+ * If the leff has declared a lampset, then those lamps
+ * are allocated.  Likewise, if it needs GI, then those
+ * strings are allocated.
+ */
 void leff_create_handler (const leff_t *leff)
 {
 	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != 0)
 	{
+		lamp_leff1_erase ();
+		/* For legacy code that doesn't declare a
+		 * lampset, assume the leff needs everything. */
 		if (leff->lampset == 0xFF)
 		{
 			lamp_leff1_allocate_all ();
@@ -163,7 +172,6 @@ void leff_create_handler (const leff_t *leff)
 			lampset_set_apply_delay (0);
 			lampset_apply (leff->lampset, lamp_leff_allocate);
 		}
-		lamp_leff1_erase ();
 	}
 
 	/* Allocate general illumination needed by the lamp effect */

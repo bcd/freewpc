@@ -429,6 +429,17 @@ void device_multiball_set (U8 count)
 }
 
 
+/** Called at game start time to see if it is OK to
+ * start a game.  This routine should check that all
+ * balls are accounted for, and at least 1 ball is
+ * in the trough. */
+bool device_check_start_ok (void)
+{
+	/* OK to start game */
+	return TRUE;
+}
+
+
 void device_init (void)
 {
 	device_t *dev;

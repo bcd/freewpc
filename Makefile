@@ -53,6 +53,9 @@ SAVE_ASM ?= y
 # Set to 'y' if you want to link with libc.
 USE_LIBC ?= n
 
+# Set to 'y' to use the new solenoid routines
+USE_NEWSOL ?= n
+
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
 
@@ -194,8 +197,6 @@ KERNEL_OBJS = \
 	kernel/score.o \
 	kernel/search.o \
 	kernel/service.o \
-	kernel/sol.o \
-	kernel/sol2.o \
 	kernel/sound.o \
 	kernel/status.o \
 	kernel/switches.o \
@@ -206,6 +207,13 @@ KERNEL_OBJS = \
 	kernel/trough.o \
 	kernel/tilt.o \
 	kernel/vector.o
+
+ifeq ($(USE_NEWSOL),y)
+KERNEL_OBJS += kernel/sol2.o
+EXTRA_CFLAGS += -DNEWSOL
+else
+KERNEL_OBJS += kernel/sol.o
+endif
 
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o

@@ -52,6 +52,23 @@ const char *door_panel_names[] = {
 	"RETURN TO THE ZONE",
 };
 
+const char *door_award_goals[] = {
+	"JET BUMPERS",
+	"LOCK LANE",
+	"SLOT MACHINE",
+	"CLOCK TARGET",
+	"LEFT LOOP",
+	"RIGHT RAMP",
+	"ANYTHING",
+	"STANDUPS",
+	"THE CAMERA",
+	"HITCHHIKER",
+	"POWER PAYOFF",
+	"LEFT RAMP",
+	"LOCK LANE",
+	"RIGHT LOOP",
+	"PIANO!",
+};
 
 extern inline const U8 *door_get_lamps (void)
 {
@@ -94,6 +111,20 @@ void door_advance_flashing (void)
 	door_set_flashing (new_door_index);
 }
 
+void door_award_rotate (void) __taskentry__
+{
+	task_sleep_sec (3);
+	while (in_live_game)
+	{
+		if (!switch_poll (SW_SHOOTER))
+		{
+			door_advance_flashing ();
+		}
+		task_sleep (TIME_100MS * 4);
+	}
+	task_exit ();
+}
+
 
 void door_award_deff (void)
 {
@@ -113,12 +144,11 @@ void door_award_deff (void)
 
 void door_award_flashing (void)
 {
+	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_on (door_active_lamp);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
-	task_sleep_sec (1);
-	door_advance_flashing ();
 	score_add_current_const (SCORE_50K);
 }
 
@@ -128,12 +158,12 @@ CALLSET_ENTRY(door, start_player)
 	door_index = 0;
 	door_panels_started = 0;
 	door_panels_completed = 0;
+	flag_on (FLAG_DOOR_AWARD_LIT);
 }
 
 CALLSET_ENTRY(door, start_ball)
 {
-	lamp_tristate_on (LM_SLOT_MACHINE);
-	lamp_tristate_off (LM_LEFT_INLANE2);
 	door_set_flashing (door_index);
+	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 

@@ -28,6 +28,24 @@ DECLARE_SWITCH_DRIVER (sw_slot)
 	.devno = SW_DEVICE_DECL(DEVNO_SLOT),
 };
 
+
+CALLSET_ENTRY (slot, update_lamps)
+{
+	if (flag_test (FLAG_DOOR_AWARD_LIT))
+	{
+		extern void door_award_rotate (void);
+		lamp_tristate_on (LM_SLOT_MACHINE);
+		lamp_tristate_off (LM_LEFT_INLANE2);
+		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
+	}
+	else
+	{
+		lamp_tristate_off (LM_SLOT_MACHINE);
+		lamp_tristate_on (LM_LEFT_INLANE2);
+		task_kill_gid (GID_DOOR_AWARD_ROTATE);
+	}
+}
+
 void slot_kick_sound (void)
 {
 	sound_send (SND_SLOT_KICKOUT_2);
@@ -59,11 +77,12 @@ void slot_enter (device_t *dev)
 	{
 		score_add_current_const (SCORE_5K);
 
-		if (lamp_test (LM_SLOT_MACHINE))
+		if (flag_test (FLAG_DOOR_AWARD_LIT))
 		{
 			door_award_flashing ();
-			lamp_tristate_off (LM_SLOT_MACHINE);
-			lamp_tristate_on (LM_LEFT_INLANE2);
+			flag_off (FLAG_DOOR_AWARD_LIT);
+			slot_update_lamps ();
+			task_sleep_sec (2);
 		}
 	}
 }
@@ -84,6 +103,7 @@ void slot_kick_attempt (device_t *dev)
 
 CALLSET_ENTRY(slot, start_ball)
 {
+	slot_update_lamps ();
 }
 
 

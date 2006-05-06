@@ -47,15 +47,16 @@ __fastram__ struct bit_matrix_table
 	U8 solid_lamps[NUM_LAMP_COLS];
 	U8 bits[NUM_VLAMP_COLS];
 	U8 flashing_lamps[NUM_LAMP_COLS];
-	U8 flashing_lamps_now[NUM_LAMP_COLS];
 	U8 fast_flashing_lamps[NUM_LAMP_COLS];
+
+	U8 flashing_lamps_now[NUM_LAMP_COLS];
 } bit_matrix_array;
 
 #define lamp_matrix					bit_matrix_array.solid_lamps
 #define bit_matrix					bit_matrix_array.bits
-#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
 #define lamp_flash_matrix			bit_matrix_array.flashing_lamps
 #define lamp_fast_flash_matrix	bit_matrix_array.fast_flashing_lamps
+#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
 
 /** Bitsets for doing temporary lamp effects, which hide the
  * normal state of the lamps */
@@ -82,6 +83,12 @@ void lamp_init (void)
 
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
+}
+
+
+void lamp_update_all (void)
+{
+#include <update_lamps.callset>
 }
 
 
@@ -233,7 +240,6 @@ void lamp_all_off (void)
 	lamp_global_update ();
 }
 
-
 void lamp_leff1_allocate_all (void)
 {
 	memset (lamp_leff1_allocated, 0, NUM_LAMP_COLS);
@@ -301,6 +307,12 @@ int leff_test (lampnum_t lamp)
 	register uint8_t v = lamp;
 	__testbit(p, v);
 	return v;
+}
+
+
+U8 *get_bit_base (void)
+{
+	return bit_matrix;
 }
 
 

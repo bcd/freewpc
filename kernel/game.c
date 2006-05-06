@@ -196,8 +196,12 @@ void end_ball (void)
 	/* Stop all processes & effects that shouldn't be
 	 * running anymore.  TODO : this should be killing
 	 * lots of other stuff. */
+#if 0
+	task_kill_all ();
+#else
 	deff_stop_all ();
 	leff_stop_all ();
+#endif
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
@@ -255,6 +259,7 @@ void start_ball (void)
 	if (ball_up == 1)
 		call_hook (start_player);
 	call_hook (start_ball);
+	lamp_update_all ();
 
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
@@ -322,9 +327,10 @@ void stop_game (void)
 bool verify_start_ok (void)
 {
 	// check enough credits
-	return (has_credits_p ());
-
 	// check balls stable
+	return (has_credits_p ()
+		&& device_check_start_ok ());
+
 	// check game not already in progress
 }
 

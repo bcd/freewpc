@@ -119,10 +119,6 @@ void sol_pulse (solnum_t sol)
 	sol_off (sol);
 }
 
-void sol_serve (void)
-{
-	sol_pulse (MACHINE_BALL_SERVE_SOLENOID);
-}
 
 void sol_init (void)
 {

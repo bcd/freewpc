@@ -91,6 +91,7 @@ typedef U8 lampset_id_t;
 
 
 void lamp_init (void);
+void lamp_update_all (void);
 void lamp_flash_rtt (void);
 void lamp_rtt (void);
 void lamp_on (lampnum_t lamp);
@@ -129,6 +130,7 @@ void lamp_leff1_free_all (void);
 void lamp_leff2_erase (void);
 void lamp_leff_allocate (lampnum_t lamp);
 void lamp_leff_free (lampnum_t lamp);
+U8 *get_bit_base (void);
 
 const U8 *lampset_lookup (lampset_id_t id);
 void lampset_apply (lampset_id_t id, lamp_operator_t op);

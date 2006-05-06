@@ -152,15 +152,15 @@ extern const uint8_t mach_edge_switches[];
 
 /* Declare the lamp effects that this machine implements */
 #define MACHINE_LAMP_EFFECTS \
-DECL_LEFF (LEFF_AMODE, L_RUNNING, 10, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
-DECL_LEFF (LEFF_NO_GI, L_NORMAL, 20, L_NOLAMPS, L_NOGI, no_gi_leff) \
-DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, 50, L_NOLAMPS, L_NOGI, left_ramp_leff) \
-DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, 100, LAMPSET_AMODE_ALL, L_NOGI, flash_all_leff) \
-DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, 140, L_NOLAMPS, L_NOGI, flasher_happy_leff) \
-DECL_LEFF (LEFF_BONUS, L_RUNNING, 150, L_ALL_LAMPS, L_NOGI, bonus_leff) \
-DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, 200, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
-DECL_LEFF (LEFF_TILT, L_RUNNING, 205, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
-DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_leff) \
+DECL_LEFF (LEFF_AMODE, L_RUNNING, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
+DECL_LEFF (LEFF_NO_GI, L_NORMAL, PRI_LEFF3, L_NOLAMPS, L_NOGI, no_gi_leff) \
+DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_NOGI, left_ramp_leff) \
+DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, flash_all_leff) \
+DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, flasher_happy_leff) \
+DECL_LEFF (LEFF_BONUS, L_RUNNING, PRI_BONUS, L_ALL_LAMPS, L_NOGI, bonus_leff) \
+DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, PRI_TILT_WARNING, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
+DECL_LEFF (LEFF_TILT, L_RUNNING, PRI_TILT, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
+DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, PRI_LEFF3, L_ALL_LAMPS, L_NOGI, slot_kickout_leff) \
 
 /* Declares the lampsets that should be instantiated */
 #define MACHINE_LAMPSETS \
@@ -211,6 +211,8 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, 205, L_ALL_LAMPS, L_NOGI, slot_kickout_l
 	VOIDCALL(tz_clock_rtt)
 
 #undef MACHINE_128MS_RTTS
+
+#define MACHINE_INCLUDE_FLAGS
 
 /* Externs for any functions system needs to see */
 void piano_ball_start (void);

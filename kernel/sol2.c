@@ -21,42 +21,29 @@
 
 #include <freewpc.h>
 
-#define SOL_COUNT 48
-
-#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
-
-#define SOL_CYCLES 8
-
-#define SOL_DUTY_0		0x0
-#define SOL_DUTY_12_88	0x40
-#define SOL_DUTY_25_75	0x22
-#define SOL_DUTY_50_50	0x55
-#define SOL_DUTY_75_25	0x77
-#define SOL_DUTY_100		0xFF
-
-/* For compatibility, sol_on and sol_off refer to all-on
- * or all-off. */
-#define sol2_on(id)	sol_modify(id, SOL_DUTY_100)
-
-#define sol2_off(id)	sol_modify(id, SOL_DUTY_0)
-
-
+/** The current stage of the solenoid update cycle */
 static U8 sol_cycle;
 
 
-static U8 sol_state[SOL_ARRAY_WIDTH][SOL_CYCLES];
+static U8 sol_state[SOL_CYCLES][SOL_ARRAY_WIDTH];
+
+U8 sol_rt_state[SOL_ARRAY_WIDTH];
 
 
-
+/* Realtime update of the solenoids.
+ *
+ * Copy the solenoid states for the current cycles to the hardware.
+ */
 void
-sol2_rtt (void)
+sol_rtt (void)
 {
 	/* TODO - align adjacent registers to do 16-bit writes? */
-	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = sol_state[0][sol_cycle];
-	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state[1][sol_cycle];
-	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = sol_state[2][sol_cycle];
-	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = sol_state[3][sol_cycle];
-	*(volatile U8 *)WPC_EXTBOARD1 = sol_state[4][sol_cycle]; /* TODO : TZ */
+	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state[sol_cycle][0];
+	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = sol_state[sol_cycle][1];
+	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = sol_state[sol_cycle][2];
+	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = sol_state[sol_cycle][3];
+	// *(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][4];
+	*(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][5]; /* TODO : TZ */
 
 	/* Advance cycle counter */
 	sol_cycle++;
@@ -64,28 +51,44 @@ sol2_rtt (void)
 }
 
 
+/*
+ * Turns on/off a solenoid.
+ * The cycle_mask controls the "strength" at which the coil will be
+ * on. */
 void
-sol2_modify (solnum_t sol, U8 cycle_mask)
+sol_modify (solnum_t sol, U8 cycle_mask)
 {
 	/* Set a bit in each of the 8 bitarrays */
-	int count = SOL_CYCLES;
+	int count;
 	for (count = 0; count < SOL_CYCLES; count++)
 	{
-		register bitset p = &sol_state[0][count];
+		register bitset p = &sol_state[count][0];
 		register U8 v = sol;
 
 		if (cycle_mask & 1)
 			__setbit (p, v);
 		else
 			__clearbit (p, v);
+
+		cycle_mask >>= 1;
 	}
 }
 
 
 void
-sol2_init (void)
+sol_modify_pulse (solnum_t sol, U8 cycle_mask)
+{
+	sol_modify (sol, cycle_mask);
+	task_sleep (TIME_66MS);
+	sol_modify (sol, 0);
+}
+
+
+void
+sol_init (void)
 {
 	memset (sol_state, 0, sizeof (sol_state));
+	memset (sol_rt_state, 0, sizeof (sol_rt_state));
 	sol_cycle = 0;
 }
 

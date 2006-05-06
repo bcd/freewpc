@@ -18,37 +18,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
-#include <rtsol.h>
+#ifndef _MACH_FLAGS_H
+#define _MACH_FLAGS_H
 
-U8 rtsol_lower_jet;
+#define FLAG_DOOR_AWARD_LIT           0
+#define FLAG_LEFT_OUTLANE_LIT         1
+#define FLAG_RIGHT_OUTLANE_LIT        2
+#define FLAG_QUICK_MULTIBALL_RUNNING  3
+#define FLAG_BTTZ_RUNNING             4
+#define FLAG_SUPER_SKILL_LIT          5
+#define FLAG_BATTLE_THE_POWER_LIT     6
+#define FLAG_POWERBALL_IN_PLAY        7
 
-void slingshot_rtt (void)
-{
-	extern U8 *sol_rt_state;
-
-	rt_solenoid_update ((char *)&sol_rt_state + (SOL_LOWER_JET / 8),
-		1 << (SOL_LOWER_JET % 8),
-		RTSOL_ACTIVE_HIGH,
-		&switch_bits[0][0] + (SW_BOTTOM_JET / 8),
-		1 << (SW_BOTTOM_JET % 8),
-		RTSW_ACTIVE_HIGH,
-		&rtsol_lower_jet,
-		8,
-		8);
-}
-
-
-DECLARE_SWITCH_DRIVER (sw_left_sling)
-{
-	.flags = SW_PLAYFIELD,
-	.sound = SND_SLINGSHOT,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_right_sling)
-{
-	.flags = SW_PLAYFIELD,
-	.sound = SND_SLINGSHOT,
-};
-
+#endif /* _MACH_LAMP_H */

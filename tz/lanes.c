@@ -37,29 +37,38 @@ void sw_left_outlane_handler (void)
 {
 	score_add_current_const (SCORE_10K);
 	handle_outlane ();
+	if (flag_test (FLAG_LEFT_OUTLANE_LIT))
+	{
+	}
 }
 
 void sw_right_outlane_handler (void)
 {
 	score_add_current_const (SCORE_10K);
 	handle_outlane ();
+	if (flag_test (FLAG_RIGHT_OUTLANE_LIT))
+	{
+	}
 }
 
 void sw_left_inlane_1_handler (void)
 {
 	score_add_current_const (SCORE_1K);
+	timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 }
 
 void sw_left_inlane_2_handler (void)
 {
 	score_add_current_const (SCORE_1K);
-	lamp_tristate_on (LM_SLOT_MACHINE);
-	lamp_tristate_off (LM_LEFT_INLANE2);
+	flag_on (FLAG_DOOR_AWARD_LIT);
+	slot_update_lamps ();
 }
 
 void sw_right_inlane_handler (void)
 {
 	score_add_current_const (SCORE_1K);
+	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
+	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
 }
 
 

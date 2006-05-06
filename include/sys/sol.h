@@ -23,13 +23,42 @@
 
 #include <mach/coil.h>
 
-typedef uint8_t solnum_t;
+typedef U8 solnum_t;
 
-void sol_rtt (void);
+#define SOL_COUNT 48
+
+#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
+
+/** Number of stages in a duty cycle */
+#define SOL_CYCLES 8
+
+/** Duty cycle values */
+#define SOL_DUTY_0		0x0
+#define SOL_DUTY_12_88	0x40
+#define SOL_DUTY_25_75	0x22
+#define SOL_DUTY_50_50	0x55
+#define SOL_DUTY_75_25	0x77
+#define SOL_DUTY_100		0xFF
+
+/* For compatibility, sol_on and sol_off refer to all-on
+ * or all-off. */
+#ifdef NEWSOL
+#define sol_on(id)     sol_modify(id, SOL_DUTY_100)
+#define sol_off(id)    sol_modify(id, SOL_DUTY_0)
+#define sol_pulse(id)  sol_modify_pulse(id, SOL_DUTY_100)
+void sol_modify (solnum_t sol, U8 cycle_mask);
+void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
+#else
+#define sol_rt_state   sol_state
 void sol_on (solnum_t sol);
 void sol_off (solnum_t sol);
 void sol_pulse (solnum_t sol);
-void sol_serve (void);
+#endif
+
+// #define sol_serve(id)  sol_pulse(MACHINE_BALL_SERVE_SOLENOID)
+#define sol_serve(id)  sol_modify_pulse(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88)
+
+void sol_rtt (void);
 void sol_init (void);
 
 void flasher_pulse (solnum_t n);

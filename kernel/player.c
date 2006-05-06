@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -29,10 +28,13 @@
  * swapped in/out quickly whenever the current player changes.
  */
 
-
 void player_start_game (void)
 {
+	/* Clear all player local variables */
 	__blockclear16 (LOCAL_BASE, LOCAL_SIZE);
+
+	/* Clear the local bitflags */
+	memset (get_bit_base (), 0, 8);
 }
 
 void player_save (void)

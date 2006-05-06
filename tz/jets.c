@@ -58,9 +58,6 @@ void sw_jet_handler (void)
 {
 	score_add_current_const (SCORE_25K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
-
-	extern void door_advance_flashing (void);
-	door_advance_flashing ();
 }
 
 DECLARE_SWITCH_DRIVER (sw_left_jet)

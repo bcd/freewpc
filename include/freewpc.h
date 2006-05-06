@@ -87,6 +87,7 @@ extern U8 irq_count;
 #include <wpc.h>
 #include <version.h>
 #include <misc.h>
+#include <math.h>
 
 /* Core software structures */
 #include <sys/bitarray.h>
@@ -129,11 +130,14 @@ extern U8 irq_count;
 #include <status.h>
 
 /* Game-specific defines.  'mach' should point to
- * the machine-specific directory, e.g. 'tz'. */
+ * the machine-specific directory */
 #include <mach/switch.h>
 #include <mach/coil.h>
 #include <mach/sound.h>
 #include <mach/lamp.h>
+#ifdef MACHINE_INCLUDE_FLAGS
+#include <mach/flags.h>
+#endif
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>

@@ -48,6 +48,12 @@ typedef enum _priority {
 	PRI_EB,
 	PRI_JACKPOT,
 	PRI_SUPER_JACKPOT,
+	
+	PRI_LEFF1,
+	PRI_LEFF2,
+	PRI_LEFF3,
+	PRI_LEFF4,
+	PRI_LEFF5,
 
 	PRI_STATUS,
 	PRI_REPLAY,
@@ -67,6 +73,7 @@ typedef enum _priority {
 	PRI_MATCH,
 	PRI_1COIN_BUYIN,
 	PRI_SLAMTILT,
+
 } priority_t;
 
 #endif /* _PRIORITY_H */

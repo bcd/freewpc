@@ -26,7 +26,8 @@ __local__ U8 balls_locked;
 __local__ U8 locks_lit;
 __local__ U8 shots_for_lock;
 
-static void update_lock_lamp (void)
+
+CALLSET_ENTRY (lock, update_lamps)
 {
 	if (locks_lit > 0)
 	{
@@ -60,7 +61,6 @@ CALLSET_ENTRY(lock, start_player)
 
 CALLSET_ENTRY(lock, start_ball)
 {
-	update_lock_lamp ();
 }
 
 
@@ -95,7 +95,7 @@ void lock_enter (device_t *dev)
 			sound_send (SND_ROBOT_AWARD);
 		}
 	}
-	update_lock_lamp ();
+	lock_update_lamps ();
 	task_sleep_sec (1);
 }
 

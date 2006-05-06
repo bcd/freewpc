@@ -141,7 +141,7 @@ void score_add_current (bcd_t *s)
 
 	score_add (current_score, s, sizeof (score_t));
 	score_change++;
-	/* check replay */
+	/* TODO : check replay */
 }
 
 
@@ -151,7 +151,11 @@ void score_sub (score_t s1, score_t s2)
 
 void score_mul (score_t s1, uint8_t multiplier)
 {
+	register int off = sizeof (score_t);
+	register bcd_t *bcd = s1 + off - 1;
+	bcd_t overflow = 0;
 }
+
 
 I8 score_compare (score_t s1, score_t s2)
 {
