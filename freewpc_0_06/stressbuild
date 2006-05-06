@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# stressbuild - test many different build configurations at once
+#
+
+export mach direct debugger as target
+
+rm -f stressbuild.out
+for mach in `echo tz wcs afm`; do
+	for direct in `echo y n`; do
+		for debugger in `echo y n`; do
+			for as in `echo 1.5.2`; do
+				for target in `echo clean default_target`; do
+					echo Execing make \
+						MACHINE=$mach USE_DIRECT_PAGE=$direct DEBUGGER=$debugger \
+						ASVER=$as $target | tee -a stressbuild.out
+					make MACHINE=$mach USE_DIRECT_PAGE=$direct DEBUGGER=$debugger \
+						ASVER=$as $target 2>&1 >> stressbuild.out
+            	if [ $? != 0 ]; then exit 1; fi
+				done
+			done
+		done
+	done
+done
+echo "All done".
+exit 0

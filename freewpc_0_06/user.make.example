@@ -1,0 +1,45 @@
+#
+# This is an example user.make file.
+# If you don't already have a user.make, you can rename this one
+# and change anything you don't like.
+#
+
+# Set the machine you are trying to build.
+# If you are primarily working with a single machine type, it is
+# easier to specify it here than saying MACHINE=xxx every time you run
+# make.
+#MACHINE = tz
+
+#
+# Set this to the directory in which mame roms should be installed.
+#
+# Under Cygwin use something like the following.  make has trouble
+# with filenames that have spaces or colons in them.
+#TARGET_ROMPATH := "/cygdrive/c/Progra~1/VPinmame/roms"
+
+#
+# Set to 'y' if you wish to use the freewpc debugger.
+#
+#FREEWPC_DEBUGGER := n
+
+#
+# Set if you wish to override the major/minor version numbers
+# to be used.  SYSTEM refers to the core code, MACHINE to the
+# game rev.
+#
+#SYSTEM_MAJOR=
+#SYSTEM_MINOR=
+#MACHINE_MAJOR=
+#MACHINE_MINOR=
+
+#
+# Set to an arbitrary string to be included in the final binary
+# for identification purposes.
+#
+#USER_TAG = "MY TAG"
+
+# If using astools prior to 3.0 , uncomment both of the following:
+#NEWAS = 0
+#ASVER =
+
+

@@ -1,0 +1,128 @@
+<HTML>
+<HEAD>
+<TITLE></TITLE>
+</HEAD>
+<BODY BGCOLOR="#C0C0C0">
+
+<A href="../home.htm">
+<IMG width=343 height=58 border=0 SRC="welcom.gif" ALT="Welcome"></A>
+
+<H2>The Linker Description</H2>
+
+<A NAME = "TOP"> </A> 
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+<A NAME = "Index"></A>
+<H3><B>
+<IMG SRC = "green.gif" ALT = "-">... Building ASxxxx and ASlink</A>
+</B></H3>
+<H4><PRE>
+    <IMG SRC = "yellow.gif" ALT = "-"><A HREF = "#Assembler">... Building an Assembler</A>
+    <IMG SRC = "yellow.gif" ALT = "-"><A HREF = "#Linker">... Building ASlink</A>
+
+    <IMG SRC = "yellow.gif" ALT = "-"><A HREF = "asxdoc.htm#TOP">... Go to Documentation Index</A>
+
+</PRE></H4>
+
+<H4><B><PRE>
+
+   The assemblers and linker have been successfully compiled us-
+ing GCC 2.7.2 with Linux, Symantec C/C++ V6.1/V7.2,  DJGPP  (GCC
+2.8.2)  and  VC6  with  MS-DOS  and  Windows 3.x/95/98.  A Linux
+makefile, DJGPP makefile, Symantec project files, and  VC6  pro-
+ject  files  are  available  to build all the assemblers and the
+linker.  
+
+</PRE></B></H4>
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+<A NAME = "Assembler"> </A>
+<H3><B>
+<IMG SRC = "green.gif" ALT = "-">... Building an Assembler</A>
+</B></H3>
+
+<H4><B><PRE>
+   The  building  of  a typical assembler (6809 for example) re-
+quires the following files:  
+
+     1.  m6809.h 
+     2.  m09ext.c 
+     3.  m09mch.c 
+     4.  m09adr.c 
+     5.  m09pst.c 
+     6.  asxxxx.h 
+     7.  asmain.c 
+     8.  aslex.c 
+     9.  assym.c 
+    10.  assubr.c 
+    11.  asexpr.c 
+    12.  asdata.c 
+    13.  aslist.c 
+    14.  asout.c 
+
+
+   The  first  five  files are the 6809 processor dependent sec-
+tions which contain the following:  
+
+     1.  m6809.h -  header  file containing the machine specific
+         definitions of constants,  variables,  structures,  and
+         types 
+
+     2.  m09ext -  device  description, byte order, and file ex-
+         tension information 
+
+     3.  m09pst -  a  table of the assembler general directives,
+         special device directives, and assembler mnemonics with
+         associated operation codes 
+
+     4.  m09mch / m09adr -  machine specific code for processing
+         the device mnemonics,  addressing  modes,  and  special
+         directives 
+
+
+   The  remaining nine files provide the device independent sec-
+tions which handle the  details  of  file  input/output,  symbol
+table  generation,  program/data areas, expression analysis, and
+assembler directive processing.  
+
+<H5><A HREF= #Index> =&gt; Section Index</A></H5>
+</PRE></B></H4>
+
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+<A NAME = "Linker"> </A>
+<H3><B>
+<IMG SRC = "green.gif" ALT = "-">... Building ASlink</A>
+</B></H3>
+
+<H4><B><PRE>
+   The building of the linker requires the following files:  
+
+     1.  aslink.h 
+     2.  lkmain.c 
+     3.  lklex.c 
+     4.  lkarea.c 
+     5.  lkhead.c 
+     6.  lksym.c 
+     7.  lkeval.c 
+     8.  lkdata.c 
+     9.  lklist.c 
+    10.  lkrloc.c 
+    11.  lklibr.c 
+    12.  lks19.c 
+    13.  lkihx.c 
+
+<H5><A HREF= #Index> =&gt; Section Index</A></H5>
+</PRE></B></H4>
+
+<IMG width=576 height=5 border=0 SRC="rnbow.gif">
+
+<H4>
+<P><A HREF="asxxxx.htm#JUMP">
+<IMG width=32 height=32 border=0 SRC="spcshp.gif" ALIGN=bottom></A>
+<B>...  Exit the ASxxxx Documentation</B></A></P>
+
+<P><A href="../home.htm">
+<IMG width=32 height=32 border=0 SRC="home.gif" ALIGN=bottom></A>
+<B>...  Home Page</B></P>
+</H4>
+
+</BODY> 
+</HTML>

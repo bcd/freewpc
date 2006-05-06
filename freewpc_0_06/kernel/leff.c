@@ -1,0 +1,304 @@
+
+/*
+ * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include <freewpc.h>
+
+/**
+ * \file
+ * \brief Lamp effect management
+ *
+ * A leff, or lamp effect, is a temporary override of the lamp matrix
+ * bits for a "light show".  At present, the leff module operates
+ * independently, but identically to the display effect module.
+ * See deff.c for details.
+ *
+ * TODO : multiple lamp effects should be allowed to run concurrently,
+ * as long as they do not use the same lamps.  There are really two
+ * different kinds of lamp effects: temporary "light shows" and
+ * long-running effects.  Light shows can be skipped if possible,
+ * but other effects indicate critical information to the player;
+ * e.g. ballsaver is active, jets at max, etc.  The latter usually
+ * do not overlap.  The strategy should be to treat these separately.
+ * Temporary light shows act more like display effects and can only
+ * be one at a time.  Other lamp effects "share" one of the leff
+ * matrices, and can run concurrently.  The caller is expected not
+ * to start multiple of these which overlap.
+ */
+
+#define L_NOLAMPS		0x0
+#define L_ALL_LAMPS	0xFF
+#define L_NOGI			0
+
+
+/* Declare externs for all of the deff functions */
+#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
+	extern void fn (void);
+
+#ifdef MACHINE_LAMP_EFFECTS
+MACHINE_LAMP_EFFECTS
+#endif
+
+/* Now declare the deff table itself */
+#undef DECL_LEFF
+#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
+	[num] = { flags, pri, b1, b2, fn },
+
+static const leff_t leff_table[] = {
+	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL },
+#ifdef MACHINE_LAMP_EFFECTS
+	MACHINE_LAMP_EFFECTS
+#endif
+};
+
+
+/* Declare externs for lamp bit matrices used by leffs */
+extern __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
+extern __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
+extern __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
+
+
+/** Indicates the id of the leff currently active */
+static uint8_t leff_active;
+
+/** Indicates the priority of the leff currently running */
+uint8_t leff_prio;
+
+/** Queue of all leffs that have been scheduled to run, even
+ * if they are low in priority.  The actively running leff
+ * is also in this queue. */
+static uint8_t leff_queue[MAX_QUEUED_LEFFS];
+
+
+uint8_t leff_get_active (void)
+{
+	return leff_active;
+}
+
+static void leff_add_queue (leffnum_t dn)
+{
+	uint8_t i;
+
+	for (i=0; i < MAX_QUEUED_LEFFS; i++)
+		if (leff_queue[i] == dn)
+			return;
+
+	for (i=0; i < MAX_QUEUED_LEFFS; i++)
+		if (leff_queue[i] == 0)
+		{
+			leff_queue[i] = dn;
+			return;
+		}
+
+	fatal (ERR_LEFF_QUEUE_FULL);
+}
+
+
+static void leff_remove_queue (leffnum_t dn)
+{
+	uint8_t i;
+	for (i=0; i < MAX_QUEUED_LEFFS; i++)
+		if (leff_queue[i] == dn)
+			leff_queue[i] = 0;
+}
+
+
+static leffnum_t leff_get_highest_priority (void)
+{
+	uint8_t i;
+	uint8_t prio = 0;
+	uint8_t best = LEFF_NULL;
+
+	for (i=0; i < MAX_QUEUED_LEFFS; i++)
+	{
+		if (leff_queue[i] != 0)
+		{
+			const leff_t *leff = &leff_table[leff_queue[i]];
+			if (leff->prio > prio)
+			{
+				prio = leff->prio;
+				best = leff_queue[i];
+			}
+		}
+	}
+
+	/* Save the priority of the best leff here */
+	leff_prio = prio;
+
+	/* Return the leffnum of the best leff to the caller */
+	return best;
+}
+
+
+void leff_create_handler (const leff_t *leff)
+{
+	/* Allocate lamps needed by the lamp effect */
+	if (leff->lampset != 0)
+	{
+		if (leff->lampset == 0xFF)
+		{
+			lamp_leff1_allocate_all ();
+		}
+		else
+		{
+			lamp_leff1_free_all ();
+			lampset_set_apply_delay (0);
+			lampset_apply (leff->lampset, lamp_leff_allocate);
+		}
+		lamp_leff1_erase ();
+	}
+
+	/* Allocate general illumination needed by the lamp effect */
+	if (leff->gi != 0)
+	{
+		triac_leff_allocate (leff->gi);
+	}
+
+	task_recreate_gid (GID_LEFF, leff->fn);
+}
+
+
+void leff_start (leffnum_t dn)
+{
+	const leff_t *leff = &leff_table[dn];
+
+	dbprintf ("Leff start request for #%d\n", dn);
+
+	if (leff->flags & L_RUNNING)
+	{
+		db_puts ("Adding running leff to queue\n");
+		leff_add_queue (dn);
+		if (dn == leff_get_highest_priority ())
+		{
+			/* This is the new active running leff */
+			db_puts ("Requested leff is now highest priority\n");
+			leff_active = dn;
+			leff_create_handler (leff);
+		}
+		else
+		{
+			/* This leff cannot run now, because there is a
+			 * higher priority leff running. */
+			db_puts ("Can't run because higher priority active\n");
+		}
+	}
+	else
+	{
+		if (leff->prio > leff_prio)
+		{
+			db_puts ("Restarting quick leff with high pri\n");
+			leff_active = dn;
+			leff_create_handler (leff);
+		}
+		else
+		{
+			db_puts ("Quick leff lacks pri to run\n");
+		}
+	}
+}
+
+
+void leff_stop (leffnum_t dn)
+{
+	const leff_t *leff = &leff_table[dn];
+
+
+	if (leff->flags & L_RUNNING)
+	{
+		dbprintf ("Stopping leff #%d\n", dn);
+		leff_remove_queue (dn);
+		lamp_leff1_free_all ();
+		triac_leff_free (TRIAC_GI_MASK);
+		leff_start_highest_priority ();
+	}
+}
+
+
+void leff_restart (leffnum_t dn)
+{
+	if (dn == leff_active)
+	{
+		const leff_t *leff = &leff_table[dn];
+		leff_create_handler (leff);
+	}
+	else
+	{
+		leff_start (dn);
+	}
+}
+
+
+void leff_default (void)
+{
+	for (;;)
+		task_sleep_sec (10);
+}
+
+
+void leff_start_highest_priority (void)
+{
+	db_puts ("Restarting highest priority leff\n");
+
+	leff_active = leff_get_highest_priority ();
+	if (leff_active != LEFF_NULL)
+	{
+		const leff_t *leff = &leff_table[leff_active];
+		db_puts ("Recreating leff task\n");
+		leff_create_handler (leff);
+	}
+	else
+	{
+		lamp_leff1_erase ();
+		lamp_leff1_free_all ();
+		task_recreate_gid (GID_LEFF, leff_default);
+	}
+}
+
+
+__noreturn__ void leff_exit (void)
+{
+	db_puts ("Exiting leff\n");
+	task_setgid (GID_LEFF_EXITING);
+	leff_remove_queue (leff_active);
+	leff_start_highest_priority ();
+	task_exit ();
+}
+
+
+void leff_init (void)
+{
+	leff_prio = 0;
+	leff_active = LEFF_NULL;
+	memset (leff_queue, 0, MAX_QUEUED_LEFFS);
+}
+
+
+void leff_stop_all (void)
+{
+	task_kill_gid (GID_LEFF);
+	lamp_leff1_free_all ();
+	lamp_leff1_erase ();
+	//lamp_leff2_free_all ();
+	//lamp_leff2_erase ();
+	leff_init ();
+}
+
+
