@@ -532,9 +532,16 @@ void switch_lamp_pulse (void)
 	dbprintf ("Pulsing lamp %d\n", swinfo->lamp);
 
 	lamp_leff_allocate (swinfo->lamp);
+
+	if (lamp_test (swinfo->lamp))
+		leff_off (swinfo->lamp);
+	else
+		leff_on (swinfo->lamp);
+	task_sleep (TIME_100MS * 2);
+	
 	leff_toggle (swinfo->lamp);
 	task_sleep (TIME_100MS * 2);
-	leff_toggle (swinfo->lamp);
+
 	lamp_leff_free (swinfo->lamp);
 	task_exit ();
 }

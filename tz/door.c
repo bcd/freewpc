@@ -120,7 +120,7 @@ void door_award_rotate (void) __taskentry__
 		{
 			door_advance_flashing ();
 		}
-		task_sleep (TIME_100MS * 4);
+		task_sleep_sec (1);
 	}
 	task_exit ();
 }
@@ -149,7 +149,15 @@ void door_award_flashing (void)
 	lamp_on (door_active_lamp);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
+	door_advance_flashing ();
 	score_add_current_const (SCORE_50K);
+}
+
+
+void door_award_enable (void)
+{
+	flag_on (FLAG_DOOR_AWARD_LIT);
+	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
 
@@ -158,12 +166,11 @@ CALLSET_ENTRY(door, start_player)
 	door_index = 0;
 	door_panels_started = 0;
 	door_panels_completed = 0;
-	flag_on (FLAG_DOOR_AWARD_LIT);
 }
 
 CALLSET_ENTRY(door, start_ball)
 {
 	door_set_flashing (door_index);
-	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
+	door_award_enable ();
 }
 

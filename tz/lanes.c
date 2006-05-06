@@ -59,8 +59,10 @@ void sw_left_inlane_1_handler (void)
 
 void sw_left_inlane_2_handler (void)
 {
+	extern void door_award_enable ();
+
 	score_add_current_const (SCORE_1K);
-	flag_on (FLAG_DOOR_AWARD_LIT);
+	door_award_enable ();
 	slot_update_lamps ();
 }
 
