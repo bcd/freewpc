@@ -435,6 +435,9 @@ void task_kill_pid (task_t *tp)
 		fatal (ERR_TASK_KILL_CURRENT);
 	tp->state = TASK_FREE;
 	tp->gid = 0;
+#ifdef TASKCOUNT
+	task_count--;
+#endif
 }
 
 bool task_kill_gid (task_gid_t gid)
