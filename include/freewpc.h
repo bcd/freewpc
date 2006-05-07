@@ -138,6 +138,7 @@ extern U8 irq_count;
 #ifdef MACHINE_INCLUDE_FLAGS
 #include <mach/flags.h>
 #endif
+#include <mach/protos.h>
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>

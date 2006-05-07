@@ -863,6 +863,13 @@ kernel/switches.o : include/$(MACHINE)/switch.h
 	@echo Setting symbolic link for machine include files &&\
 		touch .include_mach && cd include && ln -s $(MACHINE) mach
 
+#
+# Remake machine prototypes file
+#
+protos : include/$(MACHINE)/protos.h
+
+include/$(MACHINE)/protos.h :
+	cproto -o $@ -I include -I include/sys $(MACHINE)/*.c
 
 #
 # Install to the web server
