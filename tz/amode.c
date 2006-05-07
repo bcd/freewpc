@@ -205,9 +205,6 @@ void amode_deff (void) __taskentry__
 {
 	int design_credit_counter = 3;
 
-#if 0
-	paging_test ();
-#endif
 	for (;;)
 	{
 		/** Display last set of player scores **/

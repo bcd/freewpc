@@ -64,13 +64,3 @@ uint16_t paged_read_word (uint16_t *word_ptr, uint8_t page)
 	return 0;
 }
 
-
-void paging_test (void)
-{
-	extern __attribute__((far("58"))) void page_test_function (void);
-	dbprintf ("Attempting page test\n");
-	page_test_function ();
-	dbprintf ("Paging OK.\n");
-}
-
-

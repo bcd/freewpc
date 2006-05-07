@@ -1,6 +1,6 @@
 
-RETADDR=6
-WPC_ROM_PAGE_REG=0x3FFD
+RETADDR=5
+WPC_ROM_PAGE_REG=0x3FFC
 
 	.area sysrom
 	.globl __far_call_handler
