@@ -137,7 +137,8 @@ else
 CC_MODE = -c
 endif
 # CC_MODE = -E
-LD = $(GCC_ROOT)/ld
+# LD = $(GCC_ROOT)/ld
+LD = $(GCC_ROOT)/ld-$(ASVER)
 ifeq ($(NEWAS),1)
 AS = $(GCC_ROOT)/as-$(ASVER)
 else
@@ -627,6 +628,11 @@ OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:
 # bash code below already outputs these explicitly.
 OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(1)))
 
+ifeq ($(ASVER),4.1.0)
+DUP_PAGE_OBJ = $1
+else
+DUP_PAGE_OBJ = -x
+endif
 
 $(PAGED_LINKCMD) : $(MAKE_DEPS)
 	@echo Creating linker command file $@ ... ;\
@@ -641,6 +647,7 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS)
 	done ;\
 	echo "-b sysrom = $(FIXED_AREA)" >> $@ ;\
 	echo "$(@:.lnk=.o)" >> $@ ;\
+	echo "$(call DUP_PAGE_OBJ,$(@:.lnk=.o))" >> $@ ;\
 	for f in `echo $(call OBJ_PAGE_LIST,$@)` ;\
 	   do echo $$f >> $@ ;\
 	done ;\
