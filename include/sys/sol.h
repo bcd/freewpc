@@ -48,6 +48,7 @@ typedef U8 solnum_t;
 #define sol_pulse(id)  sol_modify_pulse(id, SOL_DUTY_100)
 void sol_modify (solnum_t sol, U8 cycle_mask);
 void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
+extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 #else
 #define sol_rt_state   sol_state
 void sol_on (solnum_t sol);

@@ -147,7 +147,6 @@ void sound_ready (void)
 {
 	sound_queue_init ();
 	music_off ();
-	//volume_set (current_volume);
 	volume_set (DEFAULT_VOLUME);
 }
 
@@ -174,13 +173,13 @@ void sound_init (void)
 		for (j=0; j < 4; j++)
 		{
 			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
-			task_sleep (1); /* 8ms */
+			task_sleep (1); /* 16ms */
 			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
-			task_sleep (1); /* 8ms */
+			task_sleep (1); /* 16ms */
 			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
-			task_sleep (1); /* 8ms */
+			task_sleep (1); /* 16ms */
 			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
-			task_sleep (1); /* 8ms */
+			task_sleep (1); /* 16ms */
 		}
 	}
 #endif

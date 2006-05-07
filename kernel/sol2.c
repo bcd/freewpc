@@ -24,10 +24,11 @@
 /** The current stage of the solenoid update cycle */
 static U8 sol_cycle;
 
-
+/** The current state of the duty cycled solenoids */
 static U8 sol_state[SOL_CYCLES][SOL_ARRAY_WIDTH];
 
-U8 sol_rt_state[SOL_ARRAY_WIDTH];
+/** The current state of the non-duty cycled solenoids */
+__fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 
 
 /* Realtime update of the solenoids.
@@ -38,12 +39,17 @@ void
 sol_rtt (void)
 {
 	/* TODO - align adjacent registers to do 16-bit writes? */
-	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = sol_state[sol_cycle][0];
-	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = sol_state[sol_cycle][1];
-	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = sol_state[sol_cycle][2];
-	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = sol_state[sol_cycle][3];
-	// *(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][4];
-	*(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][5]; /* TODO : TZ */
+	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = 
+		sol_state[sol_cycle][0] | sol_rt_state[0];
+	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = 
+		sol_state[sol_cycle][1] | sol_rt_state[1];
+	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = 
+		sol_state[sol_cycle][2] | sol_rt_state[2];
+	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = 
+		sol_state[sol_cycle][3] | sol_rt_state[3];
+	// *(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][4] | sol_rt_state[4];
+	*(volatile U8 *)WPC_EXTBOARD1 = 
+		sol_state[sol_cycle][5] | sol_rt_state[5]; /* TODO : TZ */
 
 	/* Advance cycle counter */
 	sol_cycle++;

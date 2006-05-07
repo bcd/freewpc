@@ -48,6 +48,19 @@ extern inline U8 rt_sol_active (U8 *sol_cache, U8 bitmask, U8 active_high)
 	return (in_live_game && (*sol_cache & bitmask));
 }
 
+
+extern inline void rt_sol_enable (U8 sol)
+{
+	rt_sol_on (sol_rt_state + (sol / 8), 1 << (sol % 8), RTSOL_ACTIVE_HIGH);
+}
+
+
+extern inline void rt_sol_disable (U8 sol)
+{
+	rt_sol_off (sol_rt_state + (sol / 8), 1 << (sol % 8), RTSOL_ACTIVE_HIGH);
+}
+
+
 /* Each rt solenoid is governed by a rt_sol_state object,
  * which tracks the current status of that solenoid.
  * The state is an 8-bit value divided into two parts:

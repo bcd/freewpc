@@ -19,7 +19,7 @@
  */
 
 #include <freewpc.h>
-
+#include <rtsol.h>
 
 enum mech_clock_mode
 {
@@ -112,7 +112,6 @@ extern inline void wpc_ext1_disable (U8 bits)
 	*(volatile U8 *)WPC_EXTBOARD1 &= ~bits;
 }
 
-
 void tz_clock_rtt (void)
 {
 	/* Read latest switch state */
@@ -127,8 +126,8 @@ void tz_clock_rtt (void)
 	{
 		clock_stopped:
 		case CLOCK_STOPPED:
-			sol_off (SOL_CLOCK_FORWARD);
-			sol_off (SOL_CLOCK_REVERSE);
+			rt_sol_disable (SOL_CLOCK_FORWARD);
+			rt_sol_disable (SOL_CLOCK_REVERSE);
 			break;
 
 		case CLOCK_RUNNING_FORWARD:
@@ -140,14 +139,14 @@ void tz_clock_rtt (void)
 			else if (clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 		clock_running_forward:
-				sol_off (SOL_CLOCK_REVERSE);
-				sol_on (SOL_CLOCK_FORWARD);
+				rt_sol_disable (SOL_CLOCK_REVERSE);
+				rt_sol_enable (SOL_CLOCK_FORWARD);
 			}
 			else
 			{
 		clock_running_backward:
-				sol_off (SOL_CLOCK_FORWARD);
-				sol_on (SOL_CLOCK_REVERSE);
+				rt_sol_disable (SOL_CLOCK_FORWARD);
+				rt_sol_enable (SOL_CLOCK_REVERSE);
 			}
 			break;
 
