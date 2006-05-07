@@ -129,6 +129,10 @@ static void fontargs_render_string (void)
 		register U8 *data;
 		register U8 *dmd;
 
+		/* Nonprintable characters are skipped. */
+		if (c < ' ')
+			continue;
+
 		data = font_lookup (args->font, c);
 
 		if (font_height < args->font->height)
