@@ -138,6 +138,8 @@ void lamp_rtt (void)
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
 	lamp_strobe_column &= 7;
+
+	/* TODO - a rotate here would be much smarter */
 	lamp_strobe_mask <<= 1;
 	if (lamp_strobe_mask == 0)
 	{
