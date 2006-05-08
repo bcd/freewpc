@@ -130,24 +130,20 @@ void tz_clock_rtt (void)
 			rt_sol_disable (SOL_CLOCK_REVERSE);
 			break;
 
+		clock_running_forward:
 		case CLOCK_RUNNING_FORWARD:
+			if (clock_delay_time != clock_speed)
+				goto clock_stopped;
+			rt_sol_disable (SOL_CLOCK_REVERSE);
+			rt_sol_enable (SOL_CLOCK_FORWARD);
+			break;
+
+		clock_running_backward:
 		case CLOCK_RUNNING_BACKWARD:
 			if (clock_delay_time != clock_speed)
-			{
 				goto clock_stopped;
-			}
-			else if (clock_mode == CLOCK_RUNNING_FORWARD)
-			{
-		clock_running_forward:
-				rt_sol_disable (SOL_CLOCK_REVERSE);
-				rt_sol_enable (SOL_CLOCK_FORWARD);
-			}
-			else
-			{
-		clock_running_backward:
-				rt_sol_disable (SOL_CLOCK_FORWARD);
-				rt_sol_enable (SOL_CLOCK_REVERSE);
-			}
+			rt_sol_disable (SOL_CLOCK_FORWARD);
+			rt_sol_enable (SOL_CLOCK_REVERSE);
 			break;
 
 		case CLOCK_CALIBRATING:

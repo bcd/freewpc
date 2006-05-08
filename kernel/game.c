@@ -139,7 +139,7 @@ void end_game (void)
 }
 
 
-/*
+/**
  * Handle end-of-ball.  This is called from the ball device
  * subsystem whenever it detects that the number of balls in play
  * is zero.
@@ -193,15 +193,10 @@ void end_ball (void)
 	else
 		in_tilt = FALSE;
 
-	/* Stop all processes & effects that shouldn't be
-	 * running anymore.  TODO : this should be killing
-	 * lots of other stuff. */
-#if 0
+	/* Stop everything running except for this task.
+	 * Any task that has protected itself is immune to this.
+	 * Normally, this is not necessary. */
 	task_kill_all ();
-#else
-	deff_stop_all ();
-	leff_stop_all ();
-#endif
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
@@ -340,14 +335,17 @@ bool verify_start_ok (void)
  */
 void sw_start_button_handler (void) __taskentry__
 {
-	extern void test_start_button (void);
+	extern __test__ void test_start_button (void);
 
+	/* If in test mode, let test handle it completely. */
 	if (in_test)
 	{
-		call_far (TEST_PAGE, test_start_button ());
+		test_start_button ();
 		return;
 	}
 
+	/* If not enough credits, inform the player.
+	 * Also call machine hook, e.g. to make a sound. */
 	if (!has_credits_p ())
 	{
 		deff_start (DEFF_CREDITS);
@@ -355,21 +353,30 @@ void sw_start_button_handler (void) __taskentry__
 		return;
 	}
 
+	/* See if a game is already in progress. */
 	if (!in_game)
 	{
+		/* Nope, we might be able to start a new game.
+		 * Go through some more checks first. */
 		if (verify_start_ok ())
 		{
+			/* OK, we can start a game. */
 			start_game ();
 		}
 		else
 		{
+			/* For some reason, game couldn't be started? */
 			db_puts ("Can't start game now\n");
 		}
 	}
 	else
 	{
+		/* A game is already in progress.  If still at
+		 * ball 1, we can add a new player. */
 		if (ball_up == 1)
 		{
+			/* Yep, but don't add more than the maximum number
+			 * of players. */
 			if (num_players < system_config.max_players)
 			{
 				add_player ();
@@ -380,6 +387,9 @@ void sw_start_button_handler (void) __taskentry__
 				 * than the system supports. */
 			}
 		}
+
+		/* Nope, can't add a player.  Treat this as a
+		 * request to restart a new game. */
 		else if (verify_start_ok ())
 		{
 			stop_game ();

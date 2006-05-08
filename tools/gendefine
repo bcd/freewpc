@@ -46,6 +46,7 @@ my @dirs = (
 	"include/sys", 
 	"include/mach", 
 	"kernel", 
+	"common",
 	"mach", 
 	"fonts", 
 	"test"

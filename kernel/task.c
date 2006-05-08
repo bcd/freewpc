@@ -144,7 +144,7 @@ task_t *task_allocate (void)
 /**
  * Save the current execution state into the current task block.
  */
-__attribute__((naked))
+__naked__
 void task_save (void)
 {
 	register U16 __u asm ("u");
@@ -219,7 +219,7 @@ void task_save (void)
 }
 
 
-__attribute__((naked))
+__naked__
 void task_restore (void)
 {
 	register task_t * __x asm ("x");
@@ -276,7 +276,7 @@ void task_restore (void)
 }
 
 
-__attribute__((naked))
+__naked__
 void task_create (void)
 {
 	register task_t *tp asm ("x");
@@ -404,8 +404,8 @@ void task_sleep_sec (int8_t secs)
 }
 
 
-__attribute__((naked))
-__noreturn__ void task_exit (void)
+__naked__ __noreturn__ 
+void task_exit (void)
 {
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
@@ -496,7 +496,7 @@ void task_set_arg (task_t *tp, U16 arg)
 	tp->arg = arg;
 }
 
-__attribute__((naked)) __noreturn__
+__naked__ __noreturn__
 void task_dispatcher (void)
 {
 	extern U8 tick_count;

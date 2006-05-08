@@ -183,7 +183,6 @@ KERNEL_OBJS = \
 	kernel/flip.o \
 	kernel/font.o \
 	kernel/game.o \
-	kernel/highscore.o \
 	kernel/init.o \
 	kernel/lamp.o \
 	kernel/lampset.o \
@@ -194,7 +193,6 @@ KERNEL_OBJS = \
 	kernel/player.o \
 	kernel/printf.o \
 	kernel/reset.o \
-	kernel/rtc.o \
 	kernel/score.o \
 	kernel/search.o \
 	kernel/service.o \
@@ -208,6 +206,11 @@ KERNEL_OBJS = \
 	kernel/trough.o \
 	kernel/tilt.o \
 	kernel/vector.o
+
+COMMON_OBJS = \
+	common/highscore.o \
+	common/rtc.o \
+
 
 ifeq ($(USE_NEWSOL),y)
 KERNEL_OBJS += kernel/sol2.o
@@ -465,7 +468,7 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 # for when the code wants to switch the page to a particular
 # class of function.
 #
-page56_OBJS = page56.o
+page56_OBJS = page56.o $(COMMON_OBJS)
 page57_OBJS = page57.o $(TRANS_OBJS)
 page58_OBJS = page58.o $(TEST_OBJS)
 page59_OBJS = page59.o $(MACHINE_PAGED_OBJS)
@@ -473,6 +476,7 @@ page60_OBJS = page60.o $(XBM_OBJS)
 page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
 SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
+$(COMMON_OBJS) : PAGE=56
 $(TRANS_OBJS) : PAGE=57
 $(TEST_OBJS) : PAGE=58
 $(MACHINE_PAGED_OBJS) : PAGE=59
@@ -480,7 +484,7 @@ $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
-PAGE_DEFINES := -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
+PAGE_DEFINES := -DCOMMON_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
 CFLAGS += $(PAGE_DEFINES)
 
 
@@ -493,7 +497,7 @@ PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(FONT_OBJS)
+C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(FONT_OBJS)
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
@@ -743,7 +747,7 @@ $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
 ifneq ($(CC_MODE),-c)
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) -DPAGE=$(PAGE) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
 ifneq ($(ASVER),1.5.2)
 	@mv $(@:.o=.rel) $@
 endif
@@ -929,7 +933,7 @@ info:
 #
 .PHONY : clean
 clean: clean_derived clean_gendefines
-	@for dir in `echo . kernel fonts images test $(MACHINE)`;\
+	@for dir in `echo . kernel common fonts images test $(MACHINE)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 

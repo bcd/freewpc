@@ -28,7 +28,7 @@
 #
 
 
-my @dirs = ("kernel", "mach", "fonts");
+my @dirs = ("kernel", "common", "mach", "fonts");
 
 
 my @functions = ();

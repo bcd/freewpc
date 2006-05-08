@@ -21,9 +21,10 @@
 #ifndef _RTC_H
 #define _RTC_H
 
-void rtc_factory_reset (void);
-void rtc_idle_task (void);
-void rtc_render_date (void);
-void rtc_show_date_time (void);
+__common__ void rtc_factory_reset (void);
+__common__ void rtc_idle_task (void);
+__common__ void rtc_render_date (void);
+__common__ void rtc_render_time (void);
+__common__ void rtc_show_date_time (void);
 
 #endif /* _RTC_H */

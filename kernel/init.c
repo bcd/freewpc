@@ -79,12 +79,12 @@ void irq_init (void)
 
 
 /** do_reset is the entry point to the program.  It all starts here. */
-__attribute__((naked)) __noreturn__ 
+__naked__ __noreturn__ 
 void do_reset (void)
 {
 	register uint8_t *ramptr asm ("x");
 
-	extern void test_init (void);
+	extern __test__ void test_init (void);
 	extern void system_reset (void);
 
 	/** Disable hardware interrupts in the 6809 */
@@ -106,7 +106,7 @@ void do_reset (void)
 	 * The initial stack pointer is shifted down from the
 	 * available stack size, because do_reset() may
 	 * use local variables, and will assume that it already
-	 * has space allocated for them; the naked pragma prevents
+	 * has space allocated for them; the naked attribute prevents
 	 * them from being allocated explicitly.
 	 */
 	set_stack_pointer (STACK_BASE - 8);
@@ -195,7 +195,7 @@ void do_reset (void)
 	timer_init ();
 	deff_init ();
 	leff_init ();
-	call_far (TEST_PAGE, test_init ());
+	test_init ();
 	score_init ();
 	coin_init ();
 	adj_init ();

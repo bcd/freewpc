@@ -25,10 +25,10 @@
 #define HIGH_SCORE_NAMESZ	3
 #define NUM_HIGH_SCORES		4
 
-void high_score_amode_show (void);
-void high_score_reset (void);
-void high_score_init (void);
-void high_score_reset_check (void);
-void high_score_check (void);
+__common__ void high_score_amode_show (void);
+__common__ void high_score_reset (void);
+__common__ void high_score_init (void);
+__common__ void high_score_reset_check (void);
+__common__ void high_score_check (void);
 
 #endif /* _HIGHSCORE_H */
