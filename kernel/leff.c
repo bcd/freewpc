@@ -76,25 +76,25 @@ extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 
 /** Indicates the id of the leff currently active */
-static uint8_t leff_active;
+static U8 leff_active;
 
 /** Indicates the priority of the leff currently running */
-uint8_t leff_prio;
+U8 leff_prio;
 
 /** Queue of all leffs that have been scheduled to run, even
  * if they are low in priority.  The actively running leff
  * is also in this queue. */
-static uint8_t leff_queue[MAX_QUEUED_LEFFS];
+static U8 leff_queue[MAX_QUEUED_LEFFS];
 
 
-uint8_t leff_get_active (void)
+U8 leff_get_active (void)
 {
 	return leff_active;
 }
 
 static void leff_add_queue (leffnum_t dn)
 {
-	uint8_t i;
+	U8 i;
 
 	for (i=0; i < MAX_QUEUED_LEFFS; i++)
 		if (leff_queue[i] == dn)
@@ -113,7 +113,7 @@ static void leff_add_queue (leffnum_t dn)
 
 static void leff_remove_queue (leffnum_t dn)
 {
-	uint8_t i;
+	U8 i;
 	for (i=0; i < MAX_QUEUED_LEFFS; i++)
 		if (leff_queue[i] == dn)
 			leff_queue[i] = 0;
@@ -122,9 +122,9 @@ static void leff_remove_queue (leffnum_t dn)
 
 static leffnum_t leff_get_highest_priority (void)
 {
-	uint8_t i;
-	uint8_t prio = 0;
-	uint8_t best = LEFF_NULL;
+	U8 i;
+	U8 prio = 0;
+	U8 best = LEFF_NULL;
 
 	for (i=0; i < MAX_QUEUED_LEFFS; i++)
 	{

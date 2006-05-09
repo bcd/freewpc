@@ -52,7 +52,7 @@ typedef struct
 #define switch_running_bits	switch_bits[AR_RUNNING]
 
 /** The global array of switch bits, all in one place */
-__fastram__ uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+__fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
 /*
@@ -343,7 +343,7 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 
 
 
-inline const switch_info_t *switch_lookup (uint8_t sw)
+inline const switch_info_t *switch_lookup (U8 sw)
 {
 	return switch_table[sw];
 }
@@ -403,11 +403,11 @@ void switch_check_masks (void)
 
 void switch_init (void)
 {
-	memset ((uint8_t *)&switch_bits[0][0], 0, sizeof (switch_bits));
+	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
 }
 
 
-extern inline void switch_rowpoll (const uint8_t col)
+extern inline void switch_rowpoll (const U8 col)
 {
 	/* Read the switch column from the hardware.
 	 * Column 0 corresponds to the cabinet switches.
@@ -487,7 +487,7 @@ extern inline void switch_rowpoll (const uint8_t col)
 bool switch_poll (const switchnum_t sw)
 {
 	register bitset p = (bitset)switch_raw_bits;
-	register uint8_t v = sw;
+	register U8 v = sw;
 	__testbit(p, v);
 	return v;
 }
@@ -495,7 +495,7 @@ bool switch_poll (const switchnum_t sw)
 bool switch_is_opto (const switchnum_t sw)
 {
 	register bitset p = (bitset)mach_opto_mask;
-	register uint8_t v = sw;
+	register U8 v = sw;
 	__testbit(p, v);
 	return v;
 }
@@ -554,7 +554,7 @@ void switch_lamp_pulse (void)
  */
 void switch_sched (void)
 {
-	const uint8_t sw = task_get_arg ();
+	const U8 sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
 	dbprintf ("Handling switch #%d\n", sw);
@@ -630,7 +630,7 @@ cleanup:
 #if 0
 	/* This code isn't needed at the moment */
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
-	register uint8_t v = sw;
+	register U8 v = sw;
 	__clearbit(p, v);
 #endif
 
@@ -640,8 +640,8 @@ cleanup:
 
 void switch_idle_task (void)
 {
-	uint8_t rawbits, pendbits;
-	uint8_t col;
+	U8 rawbits, pendbits;
+	U8 col;
 	extern U8 sys_init_complete;
 
 	if (sys_init_complete == 0)
@@ -676,10 +676,10 @@ void switch_idle_task (void)
 		if (pendbits) /* Anything to be done on this column? */
 		{
 			/* Yes, calculate the switch number */
-			uint8_t sw = col << 3;
+			U8 sw = col << 3;
 
 			/* Iterate over all rows -- all switches on this column */
-			uint8_t row;
+			U8 row;
 			for (row=0; row < 8; row++, sw++, pendbits >>= 1)
 			{
 				if (pendbits & 1)
