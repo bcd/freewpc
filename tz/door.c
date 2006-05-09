@@ -114,12 +114,9 @@ void door_advance_flashing (void)
 void door_award_rotate (void) __taskentry__
 {
 	task_sleep_sec (3);
-	while (in_live_game)
+	while (in_live_game && ball_in_play)
 	{
-		if (!switch_poll (SW_SHOOTER))
-		{
-			door_advance_flashing ();
-		}
+		door_advance_flashing ();
 		task_sleep_sec (1);
 	}
 	task_exit ();
@@ -149,6 +146,7 @@ void door_award_flashing (void)
 	lamp_on (door_active_lamp);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
+	task_sleep (TIME_100MS);
 	door_advance_flashing ();
 	score_add_current_const (SCORE_50K);
 }
