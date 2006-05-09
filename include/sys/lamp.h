@@ -78,6 +78,7 @@ typedef U8 lampset_id_t;
 
 #define LAMP_MACRO_RANGE_OP		(NUM_LAMPS + 1)
 #define LAMP_END_OP					(NUM_LAMPS + 2)
+#define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
 
 
 /**
@@ -128,6 +129,7 @@ void lamp_leff1_allocate_all (void);
 void lamp_leff1_erase (void);
 void lamp_leff1_free_all (void);
 void lamp_leff2_erase (void);
+void lamp_leff2_free_all (void);
 void lamp_leff_allocate (lampnum_t lamp);
 void lamp_leff_free (lampnum_t lamp);
 U8 *get_bit_base (void);

@@ -133,6 +133,10 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				lset += 2;
 				break;
 
+			case LAMP_MACRO_SLEEP_OP:
+				task_sleep (*lset++);
+				break;
+
 			case LAMP_END:
 				lset = lset_stack[--lset_stack_offset];
 				break;
