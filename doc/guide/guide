@@ -9,7 +9,7 @@ my $fileRoot = "http://www.oddchange.com/svn/public/freewpc/trunk";
 my $apiRoot = "http://www.oddchange.com/freewpc/doc/html";
 my $docTitle = "FreeWPC Programmer's Reference";
 my $inputFile = "master.g";
-my $currentDate = `stat $inputFile | grep Change: | awk '{print \$2}'`;
+my $currentDate;
 my $outputFile = "index.html";
 my $tocFlag = 0;
 my $specificSectionFlag = undef;
@@ -167,6 +167,7 @@ while ($arg = shift) {
 	}
 	else {
 		$inputFile = $arg;
+		$currentDate = `stat $inputFile | grep Change: | awk '{print \$2}'`;
 	}
 }
 
@@ -185,6 +186,19 @@ while (<FH>)
 		next if (($specificSectionFlag != undef) && ($specificSectionFlag ne getSectionLevel ()));
 		printLevelStart ();
 		printSectionLevel ($name, $summary); print OFH "\n";
+		next;
+	}
+	elsif (/^\%pre\{/) {
+		printContent ("<pre>");
+		my $line;
+		for (;;) {
+			$line = <FH>;
+			chomp $line;
+			$line =~ s/^[ \t]*//;
+			last if ($line =~ /\%pre\}/);
+			printContent ($line);
+		}
+		printContent ("</pre>");
 		next;
 	}
 	elsif (/^\}/) {
