@@ -71,12 +71,17 @@ U8 lamp_flash_count;
 U8 lamp_apply_delay;
 
 __fastram__ U8 lamp_strobe_mask;
-__fastram__ U16 lamp_strobe_column;
+__fastram__ U8 lamp_strobe_column;
 
 void lamp_init (void)
 {
 	memset (&bit_matrix_array, 0, sizeof (bit_matrix_array));
+
+	/* Lamp effect allocation matrices are "backwards",
+	 * in the sense that a '1' means free, and '0' means
+	 * allocated. */
 	lamp_leff1_free_all ();
+	lamp_leff2_free_all ();
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
 	lamp_apply_delay = 0;
@@ -124,13 +129,15 @@ void lamp_rtt (void)
 	/* OR in the flashing lamp values */
 	bits |= lamp_flash_matrix_now[lamp_strobe_column];
 
-	/* Override with the lamp effect lamps */
+	/* Override with the lamp effect lamps.
+	 * Leff2 bits are low priority and used for long-running
+	 * lamp effects.  Leff1 is higher priority and used
+	 * for quick effects.
+	 */
+	bits &= lamp_leff2_allocated[lamp_strobe_column];
+	bits |= lamp_leff2_matrix[lamp_strobe_column];
 	bits &= lamp_leff1_allocated[lamp_strobe_column];
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
-#if 0
-	bits &= lamp_leff2_allocated[col];
-	bits |= lamp_leff2_matrix[col];
-#endif
 
 	/* Write the result to the hardware */
 	*(U8 *)WPC_LAMP_ROW_OUTPUT = bits;
@@ -140,12 +147,17 @@ void lamp_rtt (void)
 	lamp_strobe_column &= 7;
 
 	/* TODO - a rotate here would be much smarter */
+#if 1
 	lamp_strobe_mask <<= 1;
 	if (lamp_strobe_mask == 0)
 	{
 		/* All columns strobed : reset strobe */
 		lamp_strobe_mask = 0x1;
 	}
+#else
+	asm __volatile__ ("rol\t%0" :: "g" (lamp_strobe_mask));
+	asm __volatile__ ("rol\t%0" :: "g" (lamp_strobe_mask));
+#endif
 }
 
 
@@ -262,6 +274,10 @@ void lamp_leff2_erase (void)
 	memset (lamp_leff2_matrix, 0, 2 * NUM_LAMP_COLS);
 }
 
+void lamp_leff2_free_all (void)
+{
+	memset (lamp_leff2_allocated, 0xFF, NUM_LAMP_COLS);
+}
 
 void lamp_leff_allocate (lampnum_t lamp)
 {
