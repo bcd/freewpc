@@ -21,10 +21,10 @@
 #ifndef _SEARCH_H
 #define _SEARCH_H
 
-void ball_search_timer_reset (void);
-void ball_search_timeout_set (U8 secs);
-void ball_search_monitor_start (void);
-void ball_search_monitor_stop (void);
-void ball_search_init (void);
+__common__ void ball_search_timer_reset (void);
+__common__ void ball_search_timeout_set (U8 secs);
+__common__ void ball_search_monitor_start (void);
+__common__ void ball_search_monitor_stop (void);
+__common__ void ball_search_init (void);
 
 #endif /* _SEARCH_H */

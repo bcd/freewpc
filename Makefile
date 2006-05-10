@@ -53,9 +53,6 @@ SAVE_ASM ?= y
 # Set to 'y' if you want to link with libc.
 USE_LIBC ?= n
 
-# Set to 'y' to use the new solenoid routines
-USE_NEWSOL ?= y
-
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
 
@@ -189,15 +186,13 @@ KERNEL_OBJS = \
 	kernel/leff.o \
 	kernel/math.o \
 	kernel/misc.o \
-	kernel/paging.o \
 	kernel/player.o \
 	kernel/printf.o \
 	kernel/reset.o \
 	kernel/score.o \
-	kernel/search.o \
 	kernel/service.o \
+	kernel/sol2.o \
 	kernel/sound.o \
-	kernel/status.o \
 	kernel/switches.o \
 	kernel/sysinfo.o \
 	kernel/task.o \
@@ -210,14 +205,9 @@ KERNEL_OBJS = \
 COMMON_OBJS = \
 	common/highscore.o \
 	common/rtc.o \
+	common/search.o \
+	common/status.o \
 
-
-ifeq ($(USE_NEWSOL),y)
-KERNEL_OBJS += kernel/sol2.o
-EXTRA_CFLAGS += -DNEWSOL
-else
-KERNEL_OBJS += kernel/sol.o
-endif
 
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o

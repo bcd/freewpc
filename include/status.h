@@ -21,6 +21,6 @@
 #ifndef _STATUS_H
 #define _STATUS_H
 
-void status_report_check (void);
+__common__ void status_report_check (void);
 
 #endif /* _MISC_H */

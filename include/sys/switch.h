@@ -87,6 +87,7 @@ typedef struct
 #define SW_UP						6
 #define SW_ENTER					7
 
+#if 0
 /* Trough switch numbers (game-specific) */
 #define NUM_TROUGH_SWITCHES	3
 #define SW_TROUGH1				MAKE_SWITCH(1,5)
@@ -95,6 +96,7 @@ typedef struct
 #define SW_TROUGH4				0
 #define SW_TROUGH5				0
 #define SW_TROUGH6				0
+#endif
 
 /* Flipper switches */
 #define SW_LR_FLIP_EOS			MAKE_SWITCH(9,1)

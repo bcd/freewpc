@@ -29,6 +29,11 @@
 #include <mach/coil.h>
 
 
+/* For games with an outhole switch.
+ *
+ * The outhole switch is simple; just trigger the kicker
+ * to move the balls into the trough.
+ */
 DECLARE_SWITCH_DRIVER (sw_trough)
 {
 	.devno = SW_DEVICE_DECL(DEVNO_TROUGH),
@@ -58,7 +63,8 @@ DECLARE_SWITCH_DRIVER (sw_outhole)
 	.flags = SW_IN_TEST,
 };
 
-#endif
+#endif /* MACHINE_OUTHOLE_SWITCH */
+
 
 #if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
 
