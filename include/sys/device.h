@@ -198,6 +198,8 @@ void device_add_live (void);
 void device_remove_live (void);
 void device_multiball_set (U8 count);
 bool device_check_start_ok (void);
+void kickout_lock_get (void);
+void kickout_lock_put (void);
 void device_init (void);
 
 void trough_init (void);
