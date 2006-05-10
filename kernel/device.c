@@ -55,7 +55,15 @@ U8 counted_balls;
 /** The number of balls that have gone missing */
 U8 missing_balls;
 
+/** The number of unaccounted balls that are assumed to be on
+ * the table.  This includes balls in the plunger lane. */
 U8 live_balls;
+
+/** The number of kickout locks currently held.
+ * Normally this is zero, and kickouts occur as soon as possible.
+ * When nonzero, kickouts are delayed, e.g. to allow an effect to
+ * run.  The lock is then released and things continue. */
+U8 kickout_locks;
 
 
 #ifdef DEBUGGER
@@ -256,6 +264,12 @@ wait_and_recount:
 			 * would like */
 			db_puts ("Can't kick when no balls available!\n");
 		}
+		else if (kickout_locks > 0)
+		{
+			/* Container ready to kick, but 1 or more
+			 * locks are held so we must wait. */
+			goto wait_and_recount;
+		}
 		else 
 		{
 			/* Container has balls ready to kick */
@@ -440,6 +454,19 @@ bool device_check_start_ok (void)
 }
 
 
+
+void kickout_lock_get (void)
+{
+	kickout_locks++;
+}
+
+
+void kickout_lock_put (void)
+{
+	kickout_locks--;
+}
+
+
 void device_init (void)
 {
 	device_t *dev;
@@ -449,6 +476,7 @@ void device_init (void)
 	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
+	kickout_locks = 0;
 
 	device_count = 0;
 	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
