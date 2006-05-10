@@ -21,8 +21,10 @@
 #ifndef _MATH_H
 #define _MATH_H
 
+#define random_bool()	(random() & 0x80)
+
 U8 random (void);
-U8 random_bounded (U8 upper_bound);
 void random_reseed (void);
+void random_init (void);
 
 #endif /* _MATH_H */
