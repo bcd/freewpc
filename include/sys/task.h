@@ -60,7 +60,7 @@ typedef struct
 	uint8_t        unused;
 	uint16_t			pc;
 	uint16_t			next;
-	uint16_t			x;
+	uint16_t			x; /* TODO : does this really need to be saved? */
 	uint16_t			y;
 	U8					stack_word_count;
 	U8					flags;
@@ -143,6 +143,8 @@ void task_set_arg (task_t *tp, uint16_t arg);
 __noreturn__ void task_dispatcher (void);
 
 #define task_create_child(fn)		task_create_gid (task_getgid (), fn)
+
+#define task_create_anon(fn)		task_create_gid (0, fn)
 
 #define task_yield()					task_sleep (0)
 
