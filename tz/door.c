@@ -132,9 +132,12 @@ void door_award_deff (void)
 		(door_panels_started != 1) ? "%d DOOR PANELS" : "%d DOOR PANEL", 
 		door_panels_started);
 	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);
+	kickout_lock_get ();
 	dmd_show_low ();
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	task_sleep_sec (3);
+	task_sleep_sec (2);
+	kickout_lock_put ();
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
