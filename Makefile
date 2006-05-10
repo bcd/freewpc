@@ -184,10 +184,10 @@ KERNEL_OBJS = \
 	kernel/lamp.o \
 	kernel/lampset.o \
 	kernel/leff.o \
-	kernel/math.o \
 	kernel/misc.o \
 	kernel/player.o \
 	kernel/printf.o \
+	kernel/random.o \
 	kernel/reset.o \
 	kernel/score.o \
 	kernel/service.o \
@@ -571,14 +571,17 @@ $(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
 # How to make a blank file.  This creates an empty file of any desired size
 # in multiples of 1KB.
 #
-blank%.bin:
-	@echo Creating $*KB blank file ... && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
+blank%.bin: blankpage.bin
+	@echo "Creating $*KB blank file ..." && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
+
+blankpage.bin:
+	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0xFF -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces

@@ -91,6 +91,10 @@ int main (int argc, char *argv[])
 				case 'C':
 					coco_bin_format = 1;
 					break;
+
+				case 'B': /* blank input */
+					srec_file = NULL;
+					break;
 			}
 		}
 		else
@@ -103,8 +107,17 @@ int main (int argc, char *argv[])
 	/* Initialize output to the fill byte */
 	memset (image, fill_byte, sizeof (image));
 
+	if (srec_file == NULL)
+		goto output;
+
 	/* Open the S-record file */
 	ifp = fopen (srec_file, "r");
+	if (!ifp)
+	{
+		fprintf (stderr, "Error: Cannot open %s for reading\n", srec_file);
+		exit (1);
+	}
+
 	for (;;)
 	{
 		/* Read the next line of input */
@@ -152,8 +165,14 @@ int main (int argc, char *argv[])
 	if (write_length == 0)
 		write_length = max_addr - min_addr + 1;
 
+output:
 	/* Open the binary file for writing */
 	ofp = fopen (bin_file, "wb");
+	if (!ofp)
+	{
+		fprintf (stderr, "Error: Cannot open %s for writing\n", bin_file);
+		exit (1);
+	}
 
 	/* If the COCO option is turned on, then prepend
 	 * the output with the 5-byte header used for
