@@ -9,11 +9,13 @@
 	chip.  FreeWPC provides the foundation for building new ROMs with 
 	custom game rules.
 
+	WPC is the system that was used in all games from 1990-1999,
+	starting with ///Funhouse/// and ending with ///Cactus Canyon///.
+
 	FreeWPC only replaces your game ROM (the U6 chip), which contains all
 	of the game code and dot matrix text/graphics.  In particular, sounds and
-	music are NOT included in this chip, so you'll have to get by with
-	reusing the same sounds/music as are provided normally.  This
-	project is ambitious enough; perhaps others could work on replacement
+	music are NOT included in this part, so FreeWPC games use the
+	same sounds as the real machines.
 
 	Eventually, code should be able to run on an actual pinball machine; 
 	however, for now, FreeWPC ROMs should only be used in emulators such as 
@@ -38,7 +40,7 @@
 
 	{Features
 		<It is 100% Williams-free code, written from scratch, released under the GNU General Public License.
-		<Code is written mostly in C, thanks to the availability of a halfway decent <a href="/gcc6809.html">C compiler for the 6809 CPU</a>.  In some places, assembly language code is used for performance or to do some really low-level things.  Using C over assembler should allow more people to get involved with the project.
+		<Code is written mostly in C, thanks to the availability of a halfway decent <a href="/gcc6809">C compiler for the 6809 CPU</a>.  In some places, assembly language code is used for performance or to do some really low-level things.  Using C over assembler should allow more people to get involved with the project.
 		<Most development can be done under Linux or under Windows using the Cygwin UNIX emulation suite.  Some tasks require installation of other programs, for example, if you want to make your own fonts.
 		<The system is designed to be flexible and extensive.  All generations of WPC will be supported, except for alphanumeric games.  Multiple machines can be targeted using the same common core "system" code.
 		>
@@ -71,7 +73,8 @@
 		module works, refer to the low-level design documentation that is
 		automatically generated from the code using %tool(doxygen).
 		The latest version is at %url(freewpc/doxygen).
-		<a href="freewpc_design.html">the design of FreeWPC</a>.
+
+
 	}
 	{Build System : How the source code gets compiled into a ROM image
 		An older overview of the build system is 
@@ -318,6 +321,15 @@
 				the ROM image is always mapped here.
 	}
 	{WPC ASIC Summary : How the hardware is controlled
+		The WPC chip is essentially a giant address decoder that maps
+		a bunch of peripheral devices into the address space of the CPU, a
+		Motorola 6809.  By reading/writing addresses between $3F00 and $3FFF,
+		the CPU is able to access the peripherals.  This includes all of
+		the playfield switches, the solenoids, the lamps, etc.  It also
+		includes a number of other devices like the real-time clock and
+		a bit shifter.  Earlier generations of Williams pinballs implement
+		a lot of the I/O in custom TTL logic like PIAs.  The WPC is a
+		single ASIC.
 	}
 }
 {The FreeWPC Runtime
