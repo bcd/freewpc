@@ -241,16 +241,16 @@ void lamp_global_update ()
 
 void lamp_all_on (void)
 {
-	memset (lamp_matrix, 0xff, NUM_LAMP_COLS);
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
+	memset (lamp_matrix, 0xff, NUM_LAMP_COLS);
 	lamp_global_update ();
 }
 
 
 void lamp_all_off (void)
 {
-	memset (lamp_matrix, 0, NUM_LAMP_COLS);
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
+	memset (lamp_matrix, 0, NUM_LAMP_COLS);
 	lamp_global_update ();
 }
 
