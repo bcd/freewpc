@@ -29,7 +29,7 @@ typedef U8 switchnum_t;
 #define SW_EDGE		0x02 /* Switch is handled on any edge */
 #define SW_IN_GAME	0x08 /* Only service switch during a game */
 #define SW_PLAYFIELD	0x10 /* Declares that switch is 'on the playfield' */
-#define SW_NOPLAY	0x20 /* Switch does not mark a ball as 'in play' */
+#define SW_NOPLAY		0x20 /* Switch does not mark a ball as 'in play' */
 #define SW_IN_TEST	0x40 /* Service switch in test mode; default is no */
 
 /** Switch handler prototype form */
@@ -39,17 +39,32 @@ typedef void (*switch_handler_t) (void);
  * about a particular switch */
 typedef struct
 {
+	/** A function to call when the switch produces an event */
 	void (*fn) (void);
+
+	/** The ROM page in which the above function resides */
 	U8 fnpage;
+
+	/** A set of flags that control when switch events are produced */
 	U8 flags;
+
+	/** If nonzero, indicates a lamp that is associated with the switch */
 	U8 lamp;
+
+	/** If nonzero, indicates a sound to be made on any switch event */
 	sound_code_t sound;
+
+	/** Indicates how long the switch must be physically active
+	 * before an event is generated */
 	task_ticks_t active_time;
+
+	/** Indicates how long the switch must be physically inactive
+	 * before the next switch event can be considered */
 	task_ticks_t inactive_time;
+
+	/** If nonzero, indicates the device driver associated with this
+	 *switch. */
 	int devno;
-#if 0
-	uint8_t pad[8]; /* Keep this aligned to a power of 2! */
-#endif
 } switch_info_t;
 
 
@@ -86,17 +101,6 @@ typedef struct
 #define SW_DOWN					5
 #define SW_UP						6
 #define SW_ENTER					7
-
-#if 0
-/* Trough switch numbers (game-specific) */
-#define NUM_TROUGH_SWITCHES	3
-#define SW_TROUGH1				MAKE_SWITCH(1,5)
-#define SW_TROUGH2				MAKE_SWITCH(1,6)
-#define SW_TROUGH3				MAKE_SWITCH(1,7)
-#define SW_TROUGH4				0
-#define SW_TROUGH5				0
-#define SW_TROUGH6				0
-#endif
 
 /* Flipper switches */
 #define SW_LR_FLIP_EOS			MAKE_SWITCH(9,1)
@@ -135,5 +139,6 @@ void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
+const switch_info_t *switch_lookup (U8 sw);
 
 #endif /* _SYS_SWITCH_H */

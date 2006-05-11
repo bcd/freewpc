@@ -343,7 +343,7 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 
 
 
-inline const switch_info_t *switch_lookup (U8 sw)
+const switch_info_t *switch_lookup (U8 sw)
 {
 	return switch_table[sw];
 }
@@ -589,7 +589,6 @@ void switch_sched (void)
 		ball_search_timer_reset ();
 	}
 
-	/* TODO : not working */
 	/* If the switch has an associated lamp, then flicker the lamp when
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
