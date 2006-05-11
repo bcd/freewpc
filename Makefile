@@ -227,6 +227,9 @@ FON_OBJS = \
 	fonts/times10.o \
 	fonts/times8.o \
 	fonts/helv8.o \
+	fonts/utopia.o \
+	fonts/schu.o \
+	fonts/miscfixed.o \
 
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o
@@ -575,13 +578,13 @@ blank%.bin: blankpage.bin
 	@echo "Creating $*KB blank file ..." && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
 
 blankpage.bin:
-	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0xFF -B
+	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 -f 0xFF $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 -f 0 $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0xFF $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0 $<
 
 #
 # General rule for linking a group of object files.  The linker produces
