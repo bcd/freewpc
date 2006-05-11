@@ -191,7 +191,6 @@ void amode_show_design_credits (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 5, "VISIT ODDCHANGE.COM");
 	font_render_string_center (&font_mono5, 64, 12, "FOR MORE INFO");
-	font_render_string_center (&font_mono5, 64, 19, "(C) COPYRIGHT 2006");
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 

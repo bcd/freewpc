@@ -32,7 +32,7 @@ CALLSET_ENTRY (deadend, start_ball)
 void sw_deadend_handler (void)
 {
 	score_add_current_const (SCORE_100K);
-	timer_restart_free (GID_SLOT_DISABLED_BY_DEAD_END, TIME_7S);
+	timer_restart_free (GID_SLOT_DISABLED_BY_DEAD_END, TIME_8S);
 	timer_restart_free (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S);
 }
 

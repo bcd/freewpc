@@ -82,7 +82,6 @@ void slot_enter (device_t *dev)
 			door_award_flashing ();
 			flag_off (FLAG_DOOR_AWARD_LIT);
 			slot_update_lamps ();
-			// task_sleep_sec (2);
 		}
 	}
 }

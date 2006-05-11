@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 
+__local__ U8 clock_hits;
 
 void sw_clock_target_handler (void)
 {
@@ -27,10 +28,18 @@ void sw_clock_target_handler (void)
 }
 
 
+CALLSET_ENTRY(clocktarget, start_ball)
+{
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	clock_hits = 0;
+}
+
+
 DECLARE_SWITCH_DRIVER (sw_clock_target)
 {
 	.fn = sw_clock_target_handler,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_THUD,
+	.sound = SND_NO_CREDITS,
+	.lamp = LM_CLOCK_MILLIONS,
 };
 

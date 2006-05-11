@@ -149,6 +149,7 @@ extern const uint8_t mach_edge_switches[];
 	DECL_DEFF (DEFF_LEFT_RAMP, D_NORMAL, PRI_GAME_MODE1+1, left_ramp_deff) \
 	DECL_DEFF (DEFF_BALL_SAVE, D_NORMAL, PRI_GAME_MODE1+3, ballsave_deff) \
 	DECL_DEFF (DEFF_DOOR_AWARD, D_NORMAL, PRI_GAME_MODE1+5, door_award_deff) \
+	DECL_DEFF (DEFF_HITCHHIKER, D_NORMAL, PRI_GAME_MODE1+4, hitchhiker_deff) \
 
 /* Declare the lamp effects that this machine implements */
 #define MACHINE_LAMP_EFFECTS \
