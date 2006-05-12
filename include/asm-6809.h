@@ -42,7 +42,7 @@
 /** Declare a variable that can be used to access the condition
  * code register directly.  This requires a newer version of the
  * gcc6809 compiler to work OK. */
-register int cc_reg asm ("cc");
+register unsigned char cc_reg asm ("cc");
 
 
 extern inline void __lda (uint8_t i)
