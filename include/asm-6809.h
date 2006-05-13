@@ -71,10 +71,6 @@ extern inline void __bytecopy (uint8_t *dst, uint8_t src)
 	__sta (dst);
 }
 
-extern inline void __swapbyte (uint8_t *v1, uint8_t *v2)
-{
-}
-
 extern inline void set_stack_pointer (const uint16_t s)
 {
 	asm __volatile__ ("lds\t%0" :: "g" (s) : "d");
@@ -94,7 +90,7 @@ extern inline void set_direct_page_pointer (const uint8_t dp)
 }
 
 
-/* Optimized memset function.
+/** Optimized memset function.
  * The length n should be a constant.
  * Based on the length, one of the blocks of code will be
  * expanded, whichever is the most optimal.
