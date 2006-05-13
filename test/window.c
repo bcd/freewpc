@@ -1715,7 +1715,7 @@ struct menu adjustments_menu = {
 
 void switch_matrix_draw (void)
 {
-	int row, col;
+	U8 row, col;
 
 	for (row=0; row < 8; row++)
 	{

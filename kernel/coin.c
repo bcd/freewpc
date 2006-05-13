@@ -174,7 +174,7 @@ void remove_credit (void)
 }
 
 
-void add_units (int n)
+void add_units (U8 n)
 {
 	if (credit_count >= price_config.max_credits)
 		return;
