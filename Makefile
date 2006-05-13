@@ -577,7 +577,7 @@ $(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
 blank%.bin: blankpage.bin
 	@echo "Creating $*KB blank file ..." && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
 
-blankpage.bin:
+blankpage.bin: $(SR)
 	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
@@ -938,7 +938,7 @@ clean_derived:
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
 		rm -rf callset && \
-		rm .mach .include_mach
+		rm -rf .mach .include_mach
 
 show_objs:
 	@echo $(OBJS)
