@@ -210,7 +210,7 @@ COMMON_OBJS = \
 
 
 KERNEL_ASM_OBJS = \
-	kernel/farcall.o
+	kernel/farcall.o \
 
 TEST_OBJS = test/window.o
 
@@ -584,7 +584,7 @@ $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
 	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 -f 0 $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0 $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces
