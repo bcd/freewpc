@@ -241,16 +241,20 @@ void lamp_global_update ()
 
 void lamp_all_on (void)
 {
+	disable_interrupts ();
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
 	memset (lamp_matrix, 0xff, NUM_LAMP_COLS);
+	enable_interrupts ();
 	lamp_global_update ();
 }
 
 
 void lamp_all_off (void)
 {
+	disable_interrupts ();
 	memset (lamp_flash_matrix, 0, 2 * NUM_LAMP_COLS);
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
+	enable_interrupts ();
 	lamp_global_update ();
 }
 
