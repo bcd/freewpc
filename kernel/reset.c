@@ -98,9 +98,9 @@ void system_reset (void)
 	font_render_string_center (&font_mono5, 64, 4, MACHINE_NAME);
 
 #ifdef DEBUGGER
-	sprintf ("D%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+	sprintf ("D%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
-	sprintf ("R%1x.%02x", MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION);
+	sprintf ("R%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #endif
 	font_render_string_center (&font_mono5, 32, 12, sprintf_buffer);
 	font_render_string_center (&font_mono5, 96, 12, build_date);

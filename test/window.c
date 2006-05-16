@@ -2490,17 +2490,19 @@ void sysinfo_machine_name (void) { sprintf (MACHINE_NAME); }
 void sysinfo_machine_version (void) {
 	extern char build_date[];
 #ifdef DEBUGGER
-	sprintf ("D%1x.%02x  %s", 
-		MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION, build_date);
+	sprintf ("D%s.%s  %s", 
+		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
+		build_date);
 #else
-	sprintf ("R%1x.%02x  %s", 
-		MACHINE_MAJOR_VERSION, MACHINE_MINOR_VERSION, build_date);
+	sprintf ("R%s.%s  %s", 
+		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
+		build_date);
 #endif
 }
 void sysinfo_system_version (void) { 
 #ifdef USER_TAG
 	sprintf ("%s %1x.%02x", C_STRING(USER_TAG), 
-		FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
+		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
 	sprintf ("SY %1x.%02x", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
 #endif
