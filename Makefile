@@ -289,6 +289,9 @@ CFLAGS += -fomit-frame-pointer
 endif
 endif
 
+# Options to control the output section names
+CFLAGS += -mcode-section=sysrom -mdata-section=sysrom -mbss-section=ram
+
 # Default optimizations.  -O2 works OK for me, but hasn't always; you might
 # want to fall back to -O1 if you have problems.
 ifndef OPT
@@ -321,15 +324,6 @@ endif
 # Please, turn on all warnings!  But don't check format strings,
 # because we define those differently than ANSI C.
 CFLAGS += -Wall -Wno-format
-
-
-ifdef OLD_INT_SIZE_NOT_NEEDED_ANYMORE
-# I've been burned by not having a prototype for a function
-# that takes a 'char' sized argument.  The compiler implicitly
-# converts this to 'int', which is a different size, and bad
-# things happen...
-CFLAGS += -Werror-implicit-function-declaration
-endif
 
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
@@ -875,15 +869,11 @@ include/$(MACHINE)/protos.h :
 # Install to the web server
 # Set the location of the web documents in WEBDIR in your user.make.
 #
-web : webdocs webroms
+web : webdocs
 
 webdocs : webdir
 	cp -p doc/* $(WEBDIR)
 	cd $(WEBDIR) && chmod -R og+w *
-
-webroms : webdir
-	cp -p $(GAME_ROM) $(WEBDIR)/releases
-	chmod og+w $(WEBDIR)/releases/$(GAME_ROM)
 
 ifdef WEBDIR
 webdir : $(WEBDIR)
