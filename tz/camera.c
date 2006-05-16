@@ -30,8 +30,8 @@ void sw_camera_handler (void)
 	{
 		score_add_current_const (SCORE_10K * 3);
 		sound_send (SND_CAMERA_PICTURE_EJECT_1);
-		timer_restart_free (GID_SLOT_DISABLED_BY_CAMERA, TIME_4S);
 	}
+	timer_restart_free (GID_SLOT_DISABLED_BY_CAMERA, TIME_4S);
 }
 
 
