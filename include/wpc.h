@@ -110,6 +110,9 @@
 #define TIME_100MS 	(TIME_33MS * 3U)
 #define TIME_133MS 	(TIME_33MS * 4U)
 #define TIME_166MS 	(TIME_33MS * 5U)
+#define TIME_200MS	(TIME_100MS * 2U)
+#define TIME_300MS	(TIME_100MS * 3U)
+#define TIME_400MS	(TIME_100MS * 4U)
 #define TIME_500MS	(TIME_100MS * 5U)
 #define TIME_1S 		(TIME_100MS * 10U) /* 4 * 3 * 10 = 120 ticks */
 #define TIME_2S 		(TIME_1S * 2U)     /* 240 ticks */
@@ -123,6 +126,10 @@
 #define TIME_6S 		(TIME_1S * 6UL)
 #define TIME_7S 		(TIME_1S * 7UL)
 #define TIME_8S 		(TIME_1S * 8UL)
+#define TIME_9S 		(TIME_1S * 9UL)
+#define TIME_10S 		(TIME_1S * 10UL)
+#define TIME_15S 		(TIME_1S * 15UL)
+#define TIME_30S 		(TIME_1S * 30UL)
 
 /***************************************************************
  * RAM Protection Circuit

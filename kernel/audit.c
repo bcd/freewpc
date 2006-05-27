@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -21,8 +20,18 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Audit module.
+ *
+ * This module declares non-volatile variables (in the protected area
+ * of the RAM) for storing audit information.
+ */
+
 __nvram__ std_audits_t system_audits;
 
+
+/** Resets all audits to zero */
 void audit_reset (void)
 {
 	wpc_nvram_get ();
@@ -31,6 +40,7 @@ void audit_reset (void)
 }
 
 
+/** Increment an audit */
 void audit_increment (audit_t *aud)
 {
 	wpc_nvram_get ();
@@ -39,6 +49,7 @@ void audit_increment (audit_t *aud)
 }
 
 
+/** Initialize audits at powerup */
 void audit_init (void)
 {
 	/* TODO : validate that audit structure is sane */	

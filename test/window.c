@@ -324,6 +324,7 @@ void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
 void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
 void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
 void lang_render (U8 val) { sprintf ("ENGLISH"); }
+void replay_system_render (U8 val) { sprintf (val ? "AUTO" : "MANUAL"); }
 
 void hs_reset_render (U8 val)
 { 
@@ -333,6 +334,36 @@ void hs_reset_render (U8 val)
 		sprintf ("%ld", val * 250UL);
 }
 
+void free_award_render (U8 val)
+{
+	switch (val)
+	{
+		case 0: sprintf ("CREDIT"); return;
+		case 1: sprintf ("EXTRA BALL"); return;
+		case 2: sprintf ("TICKET"); return;
+		case 3: sprintf ("POINTS"); return;
+	}
+}
+
+void game_restart_render (U8 val)
+{
+	switch (val)
+	{
+		case 0: sprintf ("ALWAYS"); return;
+		case 1: sprintf ("SLOW"); return;
+		case 2: sprintf ("NEVER"); return;
+	}
+}
+
+void percent_render (U8 val)
+{
+	if (val == 0)
+		sprintf ("OFF");
+	else
+		sprintf ("%d%%", val);
+}
+
+
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
@@ -340,13 +371,16 @@ struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
 struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
-struct adjustment_value game_restart_value = { 0, 2, 1, decimal_render };
+struct adjustment_value game_restart_value = { 0, 2, 1, game_restart_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
 struct adjustment_value hs_reset_value = { 0, 80, 1, hs_reset_render };
 struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
 struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, 0, 0, lang_render };
+struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
+struct adjustment_value free_award_value = { 0, 3, 1, free_award_render };
+struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
@@ -354,13 +388,22 @@ struct adjustment standard_adjustments[] = {
 	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
+	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
+	{ "REPLAY AWARD", &free_award_value, 0, &system_config.replay_award },
+	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
+	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
+	{ "MATCH FEATURE", &percent_value, 7, &system_config.match_feature },
+	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
+	{ "SHOW DATE/TIME", &yes_no_value, YES, &system_config.show_date_and_time },
 	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "NO BONUS FLIPS", &yes_no_value, NO, &system_config.no_bonus_flips },
+	{ "MIN. VOLUME CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
+	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
 	{ NULL, NULL, 0, NULL },
 };
@@ -375,6 +418,7 @@ struct adjustment feature_adjustments[] = {
 	{ "", &on_off_value, OFF, NULL }, /* skip over */
 #endif
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+	/* { "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode }, */
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_ADJUSTMENTS
 #endif
@@ -1388,17 +1432,45 @@ struct menu dev_soundedit_item = {
 
 /**********************************************************************/
 
-void dev_random_test_draw (void)
+void dev_random_test_enter (void)
 {
+#if 0
 	dmd_alloc_low_clean ();
 	sprintf ("%d", random ());
 	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	dmd_show_low ();
+#else
+	long int i;
+	static U8 rowcount[32];
+
+	for (i=0; i < 32; i++)
+		rowcount[i] = 0;
+
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+
+	for (i=0; i < 200; i++)
+	{
+		U8 r = random ();
+		r &= 31;
+		if (rowcount[r] < 16)
+		{
+			U16 offset = ((U16)r << 4) + rowcount[r];
+			dmd_low_buffer[offset] = 0xFF;
+			rowcount[r]++;
+		}
+		task_sleep (TIME_66MS);
+	}
+
+	dmd_invert_page (dmd_low_buffer);
+	task_sleep (TIME_200MS);
+	dmd_invert_page (dmd_low_buffer);
+#endif
 }
 
 struct window_ops dev_random_test_window = {
 	DEFAULT_WINDOW,
-	.draw = dev_random_test_draw,
+	.enter = dev_random_test_enter,
 };
 
 struct menu dev_random_test_item = {
@@ -2501,10 +2573,10 @@ void sysinfo_machine_version (void) {
 }
 void sysinfo_system_version (void) { 
 #ifdef USER_TAG
-	sprintf ("%s %1x.%02x", C_STRING(USER_TAG), 
+	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SY %1x.%02x", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
+	sprintf ("SY %s.%s", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
 #endif
 }
 void sysinfo_compiler_version (void) { 

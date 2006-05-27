@@ -31,10 +31,15 @@ U8 score_change;
 score_t scores[MAX_PLAYERS];
 U8 *current_score;
 score_t bonus_score;
+U8 debug_value;
 
 void scores_draw_ball (void)
 {
+#if 1
+	sprintf ("DEBUG %d", debug_value);
+#else
 	sprintf ("%1iUP", player_up);
+#endif
 	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
 
 	sprintf ("BALL %1i", ball_up);

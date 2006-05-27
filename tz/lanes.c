@@ -31,12 +31,17 @@ void handle_outlane (void)
 		ballsave_enable ();
 		ball_search_timer_reset ();
 	}
+
+	/* Start a timer to tell the difference between an outlane
+	 * drain and a center drain when the ball reaches the trough. */
+	timer_restart_free (GID_DRAIN_BY_OUTLANE, TIME_7S);
 }
 
 void sw_left_outlane_handler (void)
 {
 	score_add_current_const (SCORE_10K);
 	handle_outlane ();
+	audit_increment (&system_audits.left_drains);
 	if (flag_test (FLAG_LEFT_OUTLANE_LIT))
 	{
 	}
@@ -46,6 +51,7 @@ void sw_right_outlane_handler (void)
 {
 	score_add_current_const (SCORE_10K);
 	handle_outlane ();
+	audit_increment (&system_audits.right_drains);
 	if (flag_test (FLAG_RIGHT_OUTLANE_LIT))
 	{
 	}

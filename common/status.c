@@ -57,8 +57,14 @@ void status_report_deff (void)
 }
 
 
+/** Task that is restarted anytime a flipper button is initially
+ * pressed.  It polls the flipper switches continously to
+ * see if it is being held down for the amount of time necessary
+ * to start the status report.
+ */
 void status_report_monitor (void)
 {
+	/* A count of 50 equates to a 5s hold down period. */
 	int count = 50;
 
 	/* Wait until the player has kept the flipper button(s) down
@@ -76,7 +82,11 @@ void status_report_monitor (void)
 start:
 	deff_start (DEFF_STATUS_REPORT);
 
-	/* Wait again until the flippers are released. */
+	/* Wait until the flippers are released, or the status report
+	 * deff terminates.  If the flippers are released, then
+	 * exit the task.  If the status report finishes, go back to
+	 * the beginning -- after another 5sec, it will get started
+	 * again. */
 	for (;;)
 	{
 		if (!switch_poll_logical (SW_LL_FLIP_SW) 

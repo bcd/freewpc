@@ -20,6 +20,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Driver for the WPC real-time clock (RTC)
+ */
+
 
 /** PinMAME expects address 0x1800 in nvram to contain the
  * following date structure, as apparently all real WPC
@@ -78,6 +83,7 @@ void rtc_factory_reset (void)
 }
 
 
+/** Returns the number of days in the current month. */
 static U8 rtc_days_in_current_month (void)
 {
 	U8 days = days_in_month_table[month-1];
@@ -88,6 +94,7 @@ static U8 rtc_days_in_current_month (void)
 }
 
 
+/** Normalizes the current date */
 static void rtc_normalize (void)
 {
 	wpc_nvram_get ();
@@ -116,6 +123,8 @@ static void rtc_normalize (void)
 	wpc_nvram_put ();
 }
 
+
+/** Re-read the current date/time from the hardware */
 static void rtc_hw_read (void)
 {
 	wpc_nvram_get ();
@@ -149,8 +158,10 @@ void rtc_idle_task (void)
 
 	if (minute != last_minute)
 	{
-		audit_increment (&system_audits.minutes_on);
 		rtc_pinmame_read ();
+		/* Note: the assumption here is that the idle task will
+		 * always get called at least once per minute. */
+		audit_increment (&system_audits.minutes_on);
 	}
 	last_minute = minute;
 }
@@ -207,6 +218,7 @@ void rtc_show_date_time (void)
 }
 
 
+/** Initialize the RTC */
 void rtc_init (void)
 {
 }

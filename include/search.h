@@ -27,4 +27,6 @@ __common__ void ball_search_monitor_start (void);
 __common__ void ball_search_monitor_stop (void);
 __common__ void ball_search_init (void);
 
+#define BS_TIMEOUT_DEFAULT	20
+
 #endif /* _SEARCH_H */

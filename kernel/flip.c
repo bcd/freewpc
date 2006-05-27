@@ -36,7 +36,7 @@ U8 flipper_inputs;
 U8 flipper_outputs;
 
 
-
+/** Handle left flipper presses. */
 void sw_left_flipper_handler (void) 
 {
 	extern __test__ void test_left_flipper_button (void);
@@ -44,16 +44,23 @@ void sw_left_flipper_handler (void)
 	if (in_test)
 		test_left_flipper_button ();
 	else if (in_live_game)
+	{
 		status_report_check ();
+		audit_increment (&system_audits.left_flippers);
+	}
 #ifdef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)
 	{
 		extern void MACHINE_AMODE_LEFT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_LEFT_FLIPPER_HANDLER ();
+		/* TODO : check enable player tournament mode here */
+		/* TODO : check flipper plunger */
 	}
 #endif
 }
 
+
+/** Handle right flipper presses. */
 void sw_right_flipper_handler (void)
 {
 	extern __test__ void test_right_flipper_button (void);
@@ -61,12 +68,17 @@ void sw_right_flipper_handler (void)
 	if (in_test)
 		test_right_flipper_button ();
 	else if (in_live_game)
+	{
 		status_report_check ();
+		audit_increment (&system_audits.right_flippers);
+	}
 #ifdef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
 	else if (deff_get_active () == DEFF_AMODE)
 	{
 		extern void MACHINE_AMODE_RIGHT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_RIGHT_FLIPPER_HANDLER ();
+		/* TODO : check enable player tournament mode here */
+		/* TODO : check flipper plunger */
 	}
 #endif
 }

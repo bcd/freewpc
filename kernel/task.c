@@ -46,6 +46,12 @@
  * Please do NOT make any ordinary function calls in these types of
  * routines, as they are likely to trash registers in unexpected ways.
  *
+ * TODO:
+ * The current implementation uses a static array, and a flag
+ * to indicate whether or not the task is allocated.  It would be
+ * faster on average if we maintained separate chains of tasks,
+ * so that we only had to scan one particular chain (e.g. the
+ * running chain or the free chain) at a time.
  */
 
 
@@ -399,8 +405,19 @@ void task_sleep (task_ticks_t ticks)
 
 void task_sleep_sec (int8_t secs)
 {
-	while (--secs >= 0)
-		task_sleep (TIME_1S);
+	while (secs > 0)
+	{
+		if (secs == 1)
+		{
+			task_sleep (TIME_1S);
+			return;
+		}
+		else
+		{
+			secs -= 2;
+			task_sleep (TIME_2S);
+		}
+	}
 }
 
 

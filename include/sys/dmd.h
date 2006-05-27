@@ -64,6 +64,9 @@ typedef U8 *dmd_buffer_t;
  */
 typedef struct
 {
+	/** Initialization function */
+	void (*composite_init) (void);
+
 	/** Render the part of the transitional image that comes from
 	 * the previous image. */
 	void (*composite_old) (void);
@@ -85,6 +88,9 @@ typedef struct
 	 * this field differently.  It could be used to hold a pointer or
 	 * an offset. */
 	U16 arg;
+
+	/** Number of iterations in the transition */
+	U8 count;
 } dmd_transition_t;
 
 

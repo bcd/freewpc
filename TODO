@@ -6,6 +6,4 @@ Rudimentary animations by panning over a static image larger than the
 	display
 Add image compression/decompression algorithms
 Do proper switch debouncing/queueing
-Add timer support
-Add adjustment (writable browser) support
 Better DMD function names (low? used everywhere)

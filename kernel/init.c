@@ -202,6 +202,7 @@ void do_reset (void)
 	audit_init ();
 	high_score_init ();
 	ball_search_init ();
+	knocker_init ();
 	random_init ();
 	call_hook (init);
 

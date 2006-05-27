@@ -25,28 +25,47 @@
  * \file
  * \brief Common logic for dealing with extra balls
  *
- * This module implements the standard state machine of a pinball game.
+ * This module implements the standard logic for awarding extra balls.
  */
 
 
-/** Defined in kernel/game.c */
+/** Number of extra balls earned */
 U8 extra_balls;
+
+/** Number of extra balls collected by this player */
+__local__ U8 extra_balls_earned;
+
+/** Number of extra balls collected on this ball in play */
+U8 extra_balls_earned_this_bip;
 
 
 static void update_extra_ball_lamp (void)
 {
 #ifdef MACHINE_EXTRA_BALL_LAMP
+	if (extra_balls > 0)
+	{
+		lamp_tristate_on (MACHINE_EXTRA_BALL_LAMP);
+	}
+	else
+	{
+		lamp_tristate_off (MACHINE_EXTRA_BALL_LAMP);
+	}
 #endif /* MACHINE_EXTRA_BALL_LAMP */
 }
 
 
 void increment_extra_balls (void)
 {
-	if (extra_balls < system_config.max_ebs_per_bip)
+	if ((extra_balls_earned < system_config.max_ebs)
+		&& (extra_balls_earned_this_bip < system_config.max_ebs_per_bip))
 	{
 		extra_balls++;
-		audit_increment (&system_audits.extra_balls_awarded);
 		update_extra_ball_lamp ();
+
+		audit_increment (&system_audits.extra_balls_awarded);
+
+		extra_balls_earned++;
+		extra_balls_earned_this_bip++;
 	}
 }
 
@@ -60,7 +79,16 @@ bool decrement_extra_balls (void)
 		return (TRUE);
 	}
 	else
+	{
+		extra_balls_earned_this_bip = 0;
 		return (FALSE);
+	}
+}
+
+
+CALLSET_ENTRY(extra_ball, start_player)
+{
+	extra_balls_earned = 0;
 }
 
 

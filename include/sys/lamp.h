@@ -105,6 +105,7 @@ int lamp_flash_test (lampnum_t lamp);
 void leff_on (lampnum_t lamp);
 void leff_off (lampnum_t lamp);
 void leff_toggle (lampnum_t lamp);
+int leff_test (lampnum_t lamp);
 
 #define flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
 #define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
@@ -115,6 +116,11 @@ void leff_toggle (lampnum_t lamp);
 #define lamp_fast_flash_off(lamp)		lamp_off (lamp + LAMP_FAST_FLASH_OFFSET)
 #define lamp_fast_flash_toggle(lamp)	lamp_toggle (lamp + LAMP_FAST_FLASH_OFFSET)
 #define lamp_fast_flash_test(lamp)		lamp_test (lamp + LAMP_FAST_FLASH_OFFSET)
+
+#define long_leff_allocate(lamp)		lamp_leff_allocate(lamp + 0x80)
+#define long_leff_free(lamp)			lamp_leff_free(lamp + 0x80)
+#define long_leff_on(lamp)				leff_on(lamp + 0x80)
+#define long_leff_off(lamp)			leff_off(lamp + 0x80)
 
 #define lamp_tristate_on(lamp) \
 	do { lamp_flash_off(lamp); lamp_on(lamp); } while (0)

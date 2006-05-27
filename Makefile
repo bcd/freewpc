@@ -202,8 +202,13 @@ KERNEL_OBJS = \
 	kernel/tilt.o \
 	kernel/vector.o
 
+
 COMMON_OBJS = \
+	common/buyin.o \
 	common/highscore.o \
+	common/knocker.o \
+	common/match.o \
+	common/replay.o \
 	common/rtc.o \
 	common/search.o \
 	common/status.o \
@@ -444,6 +449,7 @@ FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
 
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
+MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_TEST_OBJS))
 MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_PAGED_OBJS))
 SYSTEM_HEADER_OBJS =	freewpc.o
 
@@ -457,7 +463,7 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 #
 page56_OBJS = page56.o $(COMMON_OBJS)
 page57_OBJS = page57.o $(TRANS_OBJS)
-page58_OBJS = page58.o $(TEST_OBJS)
+page58_OBJS = page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
 page59_OBJS = page59.o $(MACHINE_PAGED_OBJS)
 page60_OBJS = page60.o $(XBM_OBJS)
 page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
@@ -465,7 +471,7 @@ SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_
 
 $(COMMON_OBJS) : PAGE=56
 $(TRANS_OBJS) : PAGE=57
-$(TEST_OBJS) : PAGE=58
+$(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
 $(MACHINE_PAGED_OBJS) : PAGE=59
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
@@ -484,7 +490,9 @@ PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(TRANS_OBJS) $(TEST_OBJS) $(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(FONT_OBJS)
+C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(TRANS_OBJS) $(TEST_OBJS) \
+	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
+	$(FONT_OBJS)
 
 
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)

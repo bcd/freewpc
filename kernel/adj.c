@@ -18,6 +18,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Adjustment module.
+ *
+ * This module declares non-volatile variables (in the protected area
+ * of the RAM) for storing adjustment information.
+ */
 #include <freewpc.h>
 
 __nvram__ std_adj_t system_config;
@@ -27,6 +34,12 @@ __nvram__ pricing_adj_t price_config;
 __nvram__ hstd_adj_t hstd_config;
 
 
+/** Initialize the adjustment module.
+ *
+ * Verify that all adjustments are sane; if any values are out-of-range
+ * or checksums fail, the adjustment will be reset to factory
+ * defaults.
+ */
 void adj_init (void)
 {
 	extern void adj_verify_all (void);

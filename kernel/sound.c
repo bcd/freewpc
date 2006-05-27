@@ -155,7 +155,7 @@ void sound_init (void)
 #if (MACHINE_DCS == 0)
 	/* TODO : WPC sound also need to run as a background thread,
 	 * waiting for sync from the sound board */
-	*(uint8_t *)WPCS_CONTROL_STATUS = 0;
+	*(U8 *)WPCS_CONTROL_STATUS = 0;
 	sound_ready ();
 #else
 	int i;
@@ -172,13 +172,13 @@ void sound_init (void)
 	{
 		for (j=0; j < 4; j++)
 		{
-			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
 			task_sleep (1); /* 16ms */
-			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
 			task_sleep (1); /* 16ms */
-			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
 			task_sleep (1); /* 16ms */
-			*(uint8_t *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
 			task_sleep (1); /* 16ms */
 		}
 	}
@@ -244,8 +244,8 @@ exit_func:
 
 void sound_send (sound_code_t code)
 {
-	uint8_t code_lo;
-	uint8_t code_hi;
+	U8 code_lo;
+	U8 code_hi;
 
 	if (current_volume == 0)
 		return;

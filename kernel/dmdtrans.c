@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -91,13 +90,15 @@ dmd_transition_t trans_scroll_up = {
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_33MS,
 	.arg = 4 * 16, /* 4 lines at a time */
+	.count = 8,
 };
 
 dmd_transition_t trans_scroll_up_slow = {
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_100MS,
-	.arg = 1 * 16, /* 4 lines at a time */
+	.arg = 1 * 16, /* 1 lines at a time */
+	.count = 32,
 };
 
 /*********************************************************************/
@@ -125,6 +126,7 @@ dmd_transition_t trans_scroll_down = {
 	.composite_new = trans_scroll_down_new,
 	.delay = TIME_33MS,
 	.arg = 4 * 16,
+	.count = 8,
 };
 
 /*********************************************************************/
@@ -162,6 +164,7 @@ dmd_transition_t trans_scroll_left = {
 	.composite_new = trans_scroll_left_new,
 	.delay = TIME_33MS,
 	.arg = 0,
+	.count = 16,
 };
 
 
@@ -200,6 +203,7 @@ dmd_transition_t trans_scroll_right = {
 	.composite_new = trans_scroll_right_new,
 	.delay = TIME_33MS,
 	.arg = 0,
+	.count = 16,
 };
 
 /*********************************************************************/
@@ -250,6 +254,7 @@ dmd_transition_t trans_sequential_boxfade = {
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
 	.arg = (U16)sequential_boxfade_offset_table,
+	.count = 64,
 };
 
 dmd_transition_t trans_random_boxfade = {
@@ -257,6 +262,7 @@ dmd_transition_t trans_random_boxfade = {
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
 	.arg = (U16)random_boxfade_offset_table,
+	.count = 64,
 };
 
 

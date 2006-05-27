@@ -45,6 +45,7 @@ void printf_thousands (U8 n)
 void replay_deff (void)
 {
 	printf ("REPLAY");
+	knocker_fire ();
 	flash_and_exit_deff (20, TIME_100MS);
 }
 

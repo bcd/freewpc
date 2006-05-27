@@ -38,6 +38,7 @@
 
 uint16_t div10 (uint8_t v)
 {
+#ifdef __M6809__
 	register uint16_t res asm ("d");
 	uint8_t i = v;
 
@@ -72,5 +73,8 @@ uint16_t div10 (uint8_t v)
 	: "d"
 	);
 	return (res);
+#else
+	return (v / 10);
+#endif
 }
 

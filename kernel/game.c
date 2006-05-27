@@ -176,8 +176,12 @@ void end_ball (void)
 		goto done;
 
 	/* OK, we're committing to ending the ball now.
-	 * First, disable the flippers. */
-	flipper_disable ();
+	 * First, disable the flippers if enabled by adjustment. */
+	if (system_config.no_bonus_flips)
+		flipper_disable ();
+
+	/* Incrmeent audit for total number of balls played */
+	audit_increment (&system_audits.balls_played);
 
 	/* Stop the ball search monitor */
 	ball_search_monitor_start ();
@@ -204,6 +208,13 @@ void end_ball (void)
 	{
 		start_ball ();
 		goto done;
+	}
+
+	/* If this is the last ball of the game for this player,
+	 * then offer to buy an extra ball if enabled */
+	if ((ball_up == system_config.balls_per_game) && FALSE)
+	{
+		buyin_offer ();
 	}
 
 	/* Advance to the next player. */
@@ -245,6 +256,7 @@ done:
 	return;
 }
 
+
 void start_ball (void)
 {
 	db_puts ("In startball\n");
@@ -282,6 +294,7 @@ void add_player (void)
 	call_hook (add_player);
 }
 
+
 void start_game (void)
 {
 	if (!in_game)
@@ -308,7 +321,8 @@ void start_game (void)
 	}
 }
 
-/*
+
+/**
  * stop_game is called whenever a game is restarted.
  */
 void stop_game (void)
@@ -330,7 +344,7 @@ bool verify_start_ok (void)
 }
 
 
-/*
+/**
  * Handle the start button.
  */
 void sw_start_button_handler (void) __taskentry__
@@ -365,8 +379,8 @@ void sw_start_button_handler (void) __taskentry__
 		}
 		else
 		{
-			/* For some reason, game couldn't be started? */
-			db_puts ("Can't start game now\n");
+			/* For some reason, game couldn't be started...
+			 * No indication is given to the player of why. */
 		}
 	}
 	else
@@ -392,8 +406,18 @@ void sw_start_button_handler (void) __taskentry__
 		 * request to restart a new game. */
 		else if (verify_start_ok ())
 		{
-			stop_game ();
-			start_game ();
+			switch (system_config.game_restart)
+			{
+				case 0: /* always */
+					stop_game ();
+					start_game ();
+					break;
+				case 1: /* slow */
+					/* TODO */
+					break;
+				default: case 2: /* never */
+					break;
+			}
 		}
 	}
 
@@ -403,7 +427,7 @@ void sw_start_button_handler (void) __taskentry__
 }
 
 
-/*
+/**
  * Handle the extra-ball buy-in button.
  * Not all games have one of these.
  */
@@ -427,9 +451,7 @@ DECLARE_SWITCH_DRIVER (sw_buyin_button)
 };
 
 
-/*
- * Initialize the game subsystem.
- */
+/** Initialize the game subsystem.  */
 void game_init (void)
 {
 	num_players = 1;

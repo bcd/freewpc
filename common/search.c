@@ -156,6 +156,6 @@ void ball_search_monitor_stop (void)
 
 void ball_search_init (void)
 {
-	ball_search_timeout_set (20);
+	ball_search_timeout_set (BS_TIMEOUT_DEFAULT);
 }
 

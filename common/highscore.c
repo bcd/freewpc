@@ -21,17 +21,24 @@
 
 #include <freewpc.h>
 
+/** The grand champion score */
 __nvram__ U8 gc_score[HIGH_SCORE_WIDTH];
+/** The initials of the grand champion */
 __nvram__ U8 gc_initials[HIGH_SCORE_NAMESZ];
 
+
+/** The highest scores */
 __nvram__ U8 highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH];
+/** The initials of the highest scores */
 __nvram__ U8 high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ];
 
 
+/** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] = 
 #ifndef MACHINE_GRAND_CHAMPION_SCORE
 	{ 0x10, 0x00, 0x00, 0x00 }
 #else
+	MACHINE_GRAND_CHAMPION_SCORE
 #endif
 	;
 
@@ -40,6 +47,7 @@ static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 #ifndef MACHINE_GRAND_CHAMPION_INITIALS
 	{ 'B', 'C', 'D' }
 #else
+	MACHINE_GRAND_CHAMPION_INITIALS
 #endif
 	;
 
@@ -51,6 +59,7 @@ static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 	{ 0x06, 0x00, 0x00, 0x00 },
 	{ 0x05, 0x00, 0x00, 0x00 },
 #else
+	MACHINE_HIGH_SCORES
 #endif
 };
 
@@ -62,10 +71,13 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 	{ 'N', 'P', 'L' },
 	{ 'P', 'Y', 'L' },
 #else
+	MACHINE_HIGH_SCORE_INITIALS
 #endif
 };
 
 
+/** Renders a single high score table entry.
+ * If pos is zero, then no position is drawn. */
 static void high_score_draw_single (int pos, const U8 *initials, 
 	const U8 *score, int row)
 {
@@ -80,6 +92,7 @@ static void high_score_draw_single (int pos, const U8 *initials,
 }
 
 
+/** Shows all of the high scores.  Called from attract mode. */
 void high_score_amode_show (void)
 {
 	dmd_alloc_low_clean ();
@@ -106,6 +119,8 @@ void high_score_amode_show (void)
 }
 
 
+/** Reset all of the high scores, including the grand champion,
+ * to default values */
 void high_score_reset (void)
 {
 	wpc_nvram_get ();
@@ -120,6 +135,13 @@ void high_score_reset (void)
 	memcpy (high_score_initials, default_high_score_initials,
 		HIGH_SCORE_NAMESZ * NUM_HIGH_SCORES);
 	wpc_nvram_put ();
+}
+
+
+/** Awards for a high score */
+void high_score_award (void)
+{
+	audit_increment (&system_audits.hstd_credits);
 }
 
 
