@@ -1,0 +1,53 @@
+/*
+ * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include <freewpc.h>
+
+__nvram__ U8 replay_score[HIGH_SCORE_WIDTH];
+
+
+void replay_award (void)
+{
+	switch (system_config.replay_award)
+	{
+		case FREE_AWARD_CREDIT:
+			add_credit ();
+			break;
+
+		case FREE_AWARD_EXTRA_BALL:
+			increment_extra_balls ();
+			break;
+	}
+	deff_start (DEFF_REPLAY);
+	audit_increment (&system_audits.replays);
+}
+
+void replay_check_current (void)
+{
+}
+
+void replay_reset (void)
+{
+}
+
+void replay_init (void) 
+{
+}
+
