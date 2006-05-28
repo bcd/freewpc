@@ -1,9 +1,17 @@
 
 #include <freewpc.h>
+#include <test.h>
 
 void tz_clock_test_init (void)
 {
 	tz_clock_stop ();
+}
+
+
+void tz_clock_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
 }
 
 
@@ -29,6 +37,7 @@ void tz_clock_test_enter (void)
 
 struct window_ops tz_clock_test_window = {
 	.init = tz_clock_test_init,
+	.draw = tz_clock_test_draw,
 	.exit = tz_clock_stop,
 };
 

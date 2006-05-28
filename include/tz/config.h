@@ -124,9 +124,13 @@
 /* Define additional test menu items.  This is intended to be used
  * for devices unique to each machine. */
 #define MACHINE_TEST_MENU_ITEMS \
+	&tz_clock_test_item,
+
+#if 0
 	{ "AUTOFIRE LAUNCH", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_launch_proc) }, \
 	{ "LOAD GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_to_gumball_proc) }, \
 	{ "RELEASE GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(release_gumball_proc) },
+#endif
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
@@ -221,5 +225,7 @@ void slot_ball_start (void);
 void autofire_launch_proc (void);
 void autofire_to_gumball_proc (void);
 void release_gumball_proc (void);
+
+extern struct menu *tz_clock_test_item;
 
 #endif /* MACH_CONFIG_H */

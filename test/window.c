@@ -401,7 +401,7 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOLUME CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
@@ -2462,7 +2462,7 @@ struct menu *test_menu_items[] = {
 	&debugger_test_item,
 	&empty_balls_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
-	// MACHINE_TEST_MENU_ITEMS
+	MACHINE_TEST_MENU_ITEMS
 #endif
 	NULL,
 };

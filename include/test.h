@@ -4,12 +4,6 @@
 
 struct window;
 
-/** win_top always points to the current window, or NULL if
- * no window is open. */
-struct window *win_top;
-
-extern U8 in_test;
-
 void window_push_first (void);
 void window_pop_first (void);
 void window_start_thread (void);

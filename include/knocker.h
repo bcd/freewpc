@@ -18,12 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _REPLAY_H
-#define _REPLAY_H
+#ifndef _KNOCKER_H
+#define _KNOCKER_H
 
-#define FREE_AWARD_CREDIT 0
-#define FREE_AWARD_EXTRA_BALL 1
-#define FREE_AWARD_TICKET 2
-#define FREE_AWARD_POINTS 3
+__common__ void knocker_init (void);
+__common__ void knocker_fire (void);
 
-#endif /* _REPLAY_H */
+#endif /* _KNOCKER_H */
