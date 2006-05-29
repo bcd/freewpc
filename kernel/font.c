@@ -82,7 +82,7 @@ U8 *font_lookup (const font_t *font, char c)
 {
 	if (c == ' ')
 	{
-		U8 *data = font->glyphs[(U8)'I'];
+		char *data = font->glyphs[(U8)'I'];
 		font_width = *data++;
 		font_byte_width = (font_width + 7) >> 3;
 		font_width += GET_FONT_SPACING (font);
@@ -91,12 +91,12 @@ U8 *font_lookup (const font_t *font, char c)
 	}
 	else
 	{
-		U8 *data = font->glyphs[(U8)c];
+		char *data = font->glyphs[(U8)c];
 		font_width = *data++;
 		font_byte_width = (font_width + 7) >> 3;
 		font_width += GET_FONT_SPACING (font);
 		font_height = *data++;
-		return (data);
+		return ((U8 *)data);
 	}
 }
 
@@ -107,7 +107,6 @@ U8 *font_lookup (const font_t *font, char c)
  * data. */
 static void fontargs_render_string (void)
 {
-#ifndef GCC4
 	static U8 *dmd_base;
 	static const char *s;
 	U8 x;
@@ -205,7 +204,6 @@ static void fontargs_render_string (void)
 			dmd_base -= top_space;
 	}
 	wpc_pop_page ();
-#endif /* GCC4 */
 }
 
 
