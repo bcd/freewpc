@@ -82,13 +82,13 @@ extern inline void rt_solenoid_update (
 	{
 		/* Solenoid is in its off-phase */
 		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);
-		*rt_sol_state++;
+		(*rt_sol_state)++;
 	}
 	else if (*rt_sol_state > 0)
 	{
 		/* Solenoid is in its on-phase */
 		rt_sol_on (sol_cache, sol_bitmask, sol_active_high);
-		*rt_sol_state--;
+		(*rt_sol_state)--;
 		if (*rt_sol_state == 0)
 		{
 			*rt_sol_state = -sol_off_irqs;

@@ -585,13 +585,13 @@ void adj_browser_init (void)
 
 	/* Count the number of adjustments manually by stepping through
 	 * the array of entries */
-	browser_max = -1;
+	browser_max = 0xFF;
 	while (ad->name != NULL)
 	{
 		browser_max++;
 		ad++;
 	}
-	if (browser_max == -1)
+	if (browser_max == 0xFF)
 	{
 		/* No adjustments were defined in this menu. */
 		browser_adjs = empty_adjustments;
@@ -2362,6 +2362,7 @@ void dipsw_test_draw (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_5x5, 64, 3, "DIP SWITCHES");
 
+#ifndef GCC4
 	for (sw = 0; sw < 8; sw++)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
@@ -2371,6 +2372,7 @@ void dipsw_test_draw (void)
 			sprintf_buffer);
 		dipsw >>= 1;
 	}
+#endif
 
 	dmd_show_low ();
 }

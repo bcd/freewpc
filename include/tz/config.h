@@ -226,6 +226,6 @@ void autofire_launch_proc (void);
 void autofire_to_gumball_proc (void);
 void release_gumball_proc (void);
 
-extern struct menu *tz_clock_test_item;
+extern struct menu tz_clock_test_item;
 
 #endif /* MACH_CONFIG_H */

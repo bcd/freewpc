@@ -134,12 +134,12 @@ void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src);
 void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
 void dmd_alloc_high_clean (void);
-void dmd_draw_border (char *dbuf);
+void dmd_draw_border (U8 *dbuf);
 void dmd_draw_horiz_line (U16 *dbuf, U8 y);
 void dmd_shift_up (dmd_buffer_t dbuf);
 void dmd_shift_down (dmd_buffer_t dbuf);
-void dmd_draw_image (dmd_buffer_t image_bits);
-void dmd_draw_image2 (dmd_buffer_t image_bits);
+void dmd_draw_image (const U8 *image_bits);
+void dmd_draw_image2 (const U8 *image_bits);
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
 void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page);

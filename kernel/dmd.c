@@ -330,7 +330,7 @@ void dmd_alloc_high_clean (void)
 	dmd_clean_page (dmd_high_buffer);
 }
 
-void dmd_draw_border (char *dbuf)
+void dmd_draw_border (U8 *dbuf)
 {
 	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
@@ -367,7 +367,7 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
  * Draw a mono image to the currently mapped (low) page.  
  * The image is stored in XBM format.
  */
-void dmd_draw_image (dmd_buffer_t image_bits)
+void dmd_draw_image (const U8 *image_bits)
 {
 	call_far (XBM_PAGE, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
 }
@@ -376,10 +376,13 @@ void dmd_draw_image (dmd_buffer_t image_bits)
 /**
  * Draw a 4-color image.
  */
-void dmd_draw_image2 (dmd_buffer_t image_bits)
+void dmd_draw_image2 (const U8 *image_bits)
 {
-	call_far (XBM_PAGE, (dmd_copy_page (dmd_low_buffer, image_bits)));
-	call_far (XBM_PAGE, (dmd_copy_page (dmd_high_buffer, (image_bits + DMD_PAGE_SIZE))));
+	call_far (XBM_PAGE, 
+		(dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
+	call_far (XBM_PAGE,
+		(dmd_copy_page (dmd_high_buffer, ((dmd_buffer_t)image_bits 
+													 	+ DMD_PAGE_SIZE))));
 }
 
 

@@ -29,6 +29,8 @@ typedef U8 solnum_t;
 
 #define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
 
+extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
+
 /** Number of stages in a duty cycle */
 #define SOL_CYCLES 8
 
@@ -43,14 +45,18 @@ typedef U8 solnum_t;
 #define sol_on(id)     sol_modify(id, SOL_DUTY_100)
 #define sol_off(id)    sol_modify(id, SOL_DUTY_0)
 #define sol_pulse(id)  sol_modify_pulse(id, SOL_DUTY_100)
-void sol_modify (solnum_t sol, U8 cycle_mask);
-void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
-extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 
-// #define sol_serve(id)  sol_pulse(MACHINE_BALL_SERVE_SOLENOID)
 #define sol_serve(id)  sol_modify_pulse(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88)
 
 void sol_rtt (void);
+
+#ifdef GCC4
+#define sol_modify(sol,cycle_mask)
+#define sol_modify_pulse(sol,cycle_mask)
+#else
+void sol_modify (solnum_t sol, U8 cycle_mask);
+void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
+#endif
 void sol_init (void);
 
 void flasher_pulse (solnum_t n);

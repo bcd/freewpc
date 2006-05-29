@@ -33,6 +33,7 @@ static void knocker_fire_task (void)
 #endif
 		task_sleep (TIME_500MS);
 	} while (--knock_count > 0);
+	task_exit ();
 }
 
 

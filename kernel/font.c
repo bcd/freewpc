@@ -107,6 +107,7 @@ U8 *font_lookup (const font_t *font, char c)
  * data. */
 static void fontargs_render_string (void)
 {
+#ifndef GCC4
 	static U8 *dmd_base;
 	static const char *s;
 	U8 x;
@@ -204,6 +205,7 @@ static void fontargs_render_string (void)
 			dmd_base -= top_space;
 	}
 	wpc_pop_page ();
+#endif /* GCC4 */
 }
 
 
@@ -223,7 +225,7 @@ void font_get_string_area (const font_t *font, const char *s)
 	 */
 	if (s != sprintf_buffer)
 	{
-		U8 *ram = sprintf_buffer;
+		char *ram = sprintf_buffer;
 		while (*s != '\0')
 			*ram++ = *s++;
 		*ram = '\0';

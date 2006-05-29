@@ -76,7 +76,7 @@ extern inline const U8 *door_get_lamps (void)
 }
 
 
-extern inline const U8 door_get_flashing_lamp (void)
+extern inline U8 door_get_flashing_lamp (void)
 {
 	return ((door_get_lamps ())[door_index]);
 }

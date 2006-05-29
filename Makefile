@@ -202,7 +202,6 @@ KERNEL_OBJS = \
 	kernel/tilt.o \
 	kernel/vector.o
 
-
 COMMON_OBJS = \
 	common/buyin.o \
 	common/highscore.o \

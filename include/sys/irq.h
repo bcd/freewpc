@@ -21,22 +21,37 @@
 #ifndef _SYS_IRQ_H
 #define _SYS_IRQ_H
 
+#ifdef GCC4
+#define NO_CC_REG
+#endif
+
 /** How to enable/disable the IRQ */
-//#define disable_irq()	asm ("orcc\t#" STR(CC_IRQ))
-//#define enable_irq()		asm ("andcc\t#" STR(~CC_IRQ))
+#ifdef NO_CC_REG
+#define disable_irq()	asm ("orcc\t#" STR(CC_IRQ))
+#define enable_irq()		asm ("andcc\t#" STR(~CC_IRQ))
+#else
 #define disable_irq()	cc_reg |= CC_IRQ
 #define enable_irq()	cc_reg &= ~CC_IRQ
+#endif
 
 /** How to enable/disable the FIRQ */
-//#define disable_firq()	asm ("orcc\t#" STR(CC_FIRQ))
-//#define enable_firq()	asm ("andcc\t#" STR(~CC_FIRQ))
+#ifdef NO_CC_REG
+#define disable_firq()	asm ("orcc\t#" STR(CC_FIRQ))
+#define enable_firq()	asm ("andcc\t#" STR(~CC_FIRQ))
+#else
 #define disable_firq()	cc_reg |= CC_FIRQ
 #define enable_firq()	cc_reg &= ~CC_FIRQ
+#endif
 
 /** How to enable/disable all interrupts */
-//#define disable_interrupts()	asm ("orcc\t#" STR(CC_IRQ|CC_FIRQ))
-//#define enable_interrupts()	asm ("andcc\t#" STR(~(CC_IRQ|CC_FIRQ)))
+#ifdef NO_CC_REG
+#define disable_interrupts()	asm ("orcc\t#" STR(CC_IRQ|CC_FIRQ))
+#define enable_interrupts()	asm ("andcc\t#" STR(~(CC_IRQ|CC_FIRQ)))
+#else
+//#define disable_interrupts()	cc_reg |= (CC_IRQ + CC_FIRQ)
+//#define enable_interrupts()	cc_reg &= ~(CC_IRQ + CC_FIRQ)
 #define disable_interrupts()	do { disable_irq(); disable_firq(); } while (0)
 #define enable_interrupts()	do { enable_irq(); enable_firq(); } while (0)
+#endif
 
 #endif /* _SYS_IRQ_H */

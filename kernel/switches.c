@@ -679,7 +679,7 @@ void switch_idle_task (void)
 		if (pendbits) /* Anything to be done on this column? */
 		{
 			/* Yes, calculate the switch number */
-			U8 sw = col << 3;
+			U8 sw = col * 8;
 
 			/* Iterate over all rows -- all switches on this column */
 			U8 row;

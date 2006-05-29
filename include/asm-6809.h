@@ -42,6 +42,9 @@
 /** Declare a variable that can be used to access the condition
  * code register directly.  This requires a newer version of the
  * gcc6809 compiler to work OK. */
+#ifdef GCC4
+volatile 
+#endif
 register unsigned char cc_reg asm ("cc");
 
 

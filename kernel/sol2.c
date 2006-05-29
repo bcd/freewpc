@@ -61,6 +61,9 @@ sol_rtt (void)
  * Turns on/off a solenoid.
  * The cycle_mask controls the "strength" at which the coil will be
  * on. */
+#ifdef GCC4
+#undef sol_modify
+#endif
 void
 sol_modify (solnum_t sol, U8 cycle_mask)
 {
@@ -81,6 +84,9 @@ sol_modify (solnum_t sol, U8 cycle_mask)
 }
 
 
+#ifdef GCC4
+#undef sol_modify_pulse
+#endif
 void
 sol_modify_pulse (solnum_t sol, U8 cycle_mask)
 {
