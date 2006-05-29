@@ -35,7 +35,7 @@ U8 debug_value;
 
 void scores_draw_ball (void)
 {
-#if 1
+#ifdef SHOW_DEBUG_VALUE
 	sprintf ("DEBUG %d", debug_value);
 #else
 	sprintf ("%1iUP", player_up);
