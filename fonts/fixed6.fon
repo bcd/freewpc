@@ -50,7 +50,7 @@ static char glyph_fixed6_K_bits[] = { glyph_fixed6_K_width, glyph_fixed6_K_heigh
 #define glyph_fixed6_L_width 7
 #define glyph_fixed6_L_height 9
 static char glyph_fixed6_L_bits[] = { glyph_fixed6_L_width, glyph_fixed6_L_height,
- 0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x3f,0x3f};
+ 0x03,0x03,0x03,0x03,0x03,0x03,0x03,0x3f,0x7f};
 #define glyph_fixed6_M_width 9
 #define glyph_fixed6_M_height 9
 static char glyph_fixed6_M_bits[] = { glyph_fixed6_M_width, glyph_fixed6_M_height,
@@ -154,7 +154,7 @@ static char glyph_fixed6_9_bits[] = { glyph_fixed6_9_width, glyph_fixed6_9_heigh
 #define glyph_fixed6_period_width 3
 #define glyph_fixed6_period_height 2
 static char glyph_fixed6_period_bits[] = { glyph_fixed6_period_width, glyph_fixed6_period_height,
- 0x03,0x03};
+ 0x06,0x07};
 #define glyph_fixed6_comma_width 2
 #define glyph_fixed6_comma_height 4
 static char glyph_fixed6_comma_bits[] = { glyph_fixed6_comma_width, glyph_fixed6_comma_height,
@@ -184,7 +184,7 @@ static char glyph_fixed6_dollar_bits[] = { glyph_fixed6_dollar_width, glyph_fixe
 static char glyph_fixed6_percent_bits[] = { glyph_fixed6_percent_width, glyph_fixed6_percent_height,
  0x8e,0x00,0x9b,0x00,0x51,0x00,0x5b,0x00,0x2e,0x00,0xb0,0x03,0x50,0x04,0xc8,
  0x04,0x88,0x03};
-static unsigned char *fixed6_glyphs[] = {
+static char *fixed6_glyphs[] = {
    ['A'] = glyph_fixed6_A_bits,
    ['B'] = glyph_fixed6_B_bits,
    ['C'] = glyph_fixed6_C_bits,

@@ -205,7 +205,7 @@ static char glyph_helv8_dollar_bits[] = { glyph_helv8_dollar_width, glyph_helv8_
 static char glyph_helv8_percent_bits[] = { glyph_helv8_percent_width, glyph_helv8_percent_height,
  0x1c,0x04,0x3e,0x06,0x73,0x02,0x63,0x03,0x77,0x01,0xfe,0x00,0xdc,0x1e,0x40,
  0x3f,0x60,0x73,0x20,0x63,0x30,0x7f,0x10,0x1e};
-static unsigned char *helv8_glyphs[] = {
+static char *helv8_glyphs[] = {
    ['A'] = glyph_helv8_A_bits,
    ['B'] = glyph_helv8_B_bits,
    ['C'] = glyph_helv8_C_bits,

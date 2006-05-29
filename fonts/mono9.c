@@ -1,7 +1,7 @@
 
 #include <freewpc.h>
 
-static const uint8_t font_9x6_alpha_cap[][11] = {
+static char font_9x6_alpha_cap[][11] = {
 	{ 6, 9, 4, 4, 10, 10, 31, 31, 17, 17, 17 },
 	{ 6, 9, 7, 7, 9, 9, 7, 9, 9, 7, 7 },
 	{ 6, 9, 14, 14, 1, 1, 1, 1, 1, 14, 14 },
@@ -35,7 +35,7 @@ static const uint8_t font_9x6_alpha_cap[][11] = {
 };
 
 
-static const uint8_t font_9x6_digit[][11] = {
+static char font_9x6_digit[][11] = {
 	{ 6, 9, 12, 30, 51, 51, 51, 51, 51, 30, 12 },
 	{ 6, 9, 12, 12, 14, 14, 12, 12, 12, 30, 30 },
 	{ 6, 9, 30, 63, 48, 24, 12, 6, 3, 63, 63 },
@@ -49,53 +49,53 @@ static const uint8_t font_9x6_digit[][11] = {
 };
 
 
-static const uint8_t font_9x6_sep[][11] = {
+static char font_9x6_sep[][11] = {
 	{ 6, 9, 0, 0, 0, 0, 0, 0, 0, 0, 2 },
 	{ 6, 9, 0, 0, 0, 0, 0, 0, 2, 2, 1 },
 	{ 6, 9, 16, 16, 8, 8, 4, 4, 2, 2, 0 },
 };
 
 
-static unsigned char *mono9_glyphs[] = {
-   ['A'] = (unsigned char *)font_9x6_alpha_cap[0],
-   ['B'] = (unsigned char *)font_9x6_alpha_cap[1],
-   ['C'] = (unsigned char *)font_9x6_alpha_cap[2],
-   ['D'] = (unsigned char *)font_9x6_alpha_cap[3],
-   ['E'] = (unsigned char *)font_9x6_alpha_cap[4],
-   ['F'] = (unsigned char *)font_9x6_alpha_cap[5],
-   ['G'] = (unsigned char *)font_9x6_alpha_cap[6],
-   ['H'] = (unsigned char *)font_9x6_alpha_cap[7],
-   ['I'] = (unsigned char *)font_9x6_alpha_cap[8],
-   ['J'] = (unsigned char *)font_9x6_alpha_cap[9],
-   ['K'] = (unsigned char *)font_9x6_alpha_cap[10],
-   ['L'] = (unsigned char *)font_9x6_alpha_cap[11],
-   ['M'] = (unsigned char *)font_9x6_alpha_cap[12],
-   ['N'] = (unsigned char *)font_9x6_alpha_cap[13],
-   ['O'] = (unsigned char *)font_9x6_alpha_cap[14],
-   ['P'] = (unsigned char *)font_9x6_alpha_cap[15],
-   ['Q'] = (unsigned char *)font_9x6_alpha_cap[16],
-   ['R'] = (unsigned char *)font_9x6_alpha_cap[17],
-   ['S'] = (unsigned char *)font_9x6_alpha_cap[18],
-   ['T'] = (unsigned char *)font_9x6_alpha_cap[19],
-   ['U'] = (unsigned char *)font_9x6_alpha_cap[20],
-   ['V'] = (unsigned char *)font_9x6_alpha_cap[21],
-   ['W'] = (unsigned char *)font_9x6_alpha_cap[22],
-   ['X'] = (unsigned char *)font_9x6_alpha_cap[23],
-   ['Y'] = (unsigned char *)font_9x6_alpha_cap[24],
-   ['Z'] = (unsigned char *)font_9x6_alpha_cap[25],
-   ['0'] = (unsigned char *)font_9x6_digit[0],
-   ['1'] = (unsigned char *)font_9x6_digit[1],
-   ['2'] = (unsigned char *)font_9x6_digit[2],
-   ['3'] = (unsigned char *)font_9x6_digit[3],
-   ['4'] = (unsigned char *)font_9x6_digit[4],
-   ['5'] = (unsigned char *)font_9x6_digit[5],
-   ['6'] = (unsigned char *)font_9x6_digit[6],
-   ['7'] = (unsigned char *)font_9x6_digit[7],
-   ['8'] = (unsigned char *)font_9x6_digit[8],
-   ['9'] = (unsigned char *)font_9x6_digit[9],
-   ['.'] = (unsigned char *)font_9x6_sep[0],
-   [','] = (unsigned char *)font_9x6_sep[1],
-   ['/'] = (unsigned char *)font_9x6_sep[2],
+static char *mono9_glyphs[] = {
+   ['A'] = font_9x6_alpha_cap[0],
+   ['B'] = font_9x6_alpha_cap[1],
+   ['C'] = font_9x6_alpha_cap[2],
+   ['D'] = font_9x6_alpha_cap[3],
+   ['E'] = font_9x6_alpha_cap[4],
+   ['F'] = font_9x6_alpha_cap[5],
+   ['G'] = font_9x6_alpha_cap[6],
+   ['H'] = font_9x6_alpha_cap[7],
+   ['I'] = font_9x6_alpha_cap[8],
+   ['J'] = font_9x6_alpha_cap[9],
+   ['K'] = font_9x6_alpha_cap[10],
+   ['L'] = font_9x6_alpha_cap[11],
+   ['M'] = font_9x6_alpha_cap[12],
+   ['N'] = font_9x6_alpha_cap[13],
+   ['O'] = font_9x6_alpha_cap[14],
+   ['P'] = font_9x6_alpha_cap[15],
+   ['Q'] = font_9x6_alpha_cap[16],
+   ['R'] = font_9x6_alpha_cap[17],
+   ['S'] = font_9x6_alpha_cap[18],
+   ['T'] = font_9x6_alpha_cap[19],
+   ['U'] = font_9x6_alpha_cap[20],
+   ['V'] = font_9x6_alpha_cap[21],
+   ['W'] = font_9x6_alpha_cap[22],
+   ['X'] = font_9x6_alpha_cap[23],
+   ['Y'] = font_9x6_alpha_cap[24],
+   ['Z'] = font_9x6_alpha_cap[25],
+   ['0'] = font_9x6_digit[0],
+   ['1'] = font_9x6_digit[1],
+   ['2'] = font_9x6_digit[2],
+   ['3'] = font_9x6_digit[3],
+   ['4'] = font_9x6_digit[4],
+   ['5'] = font_9x6_digit[5],
+   ['6'] = font_9x6_digit[6],
+   ['7'] = font_9x6_digit[7],
+   ['8'] = font_9x6_digit[8],
+   ['9'] = font_9x6_digit[9],
+   ['.'] = font_9x6_sep[0],
+   [','] = font_9x6_sep[1],
+   ['/'] = font_9x6_sep[2],
 };
 
 const font_t font_mono9 = {

@@ -176,7 +176,7 @@ static char glyph_term6_dollar_bits[] = { glyph_term6_dollar_width, glyph_term6_
 #define glyph_term6_percent_height 8
 static char glyph_term6_percent_bits[] = { glyph_term6_percent_width, glyph_term6_percent_height,
  0x06,0x09,0x09,0x1e,0x0f,0x1c,0x14,0x1c};
-static unsigned char *term6_glyphs[] = {
+static char *term6_glyphs[] = {
    ['A'] = glyph_term6_A_bits,
    ['B'] = glyph_term6_B_bits,
    ['C'] = glyph_term6_C_bits,

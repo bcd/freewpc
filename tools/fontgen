@@ -95,7 +95,7 @@ for char in `echo $chars`; do
 	pbmtextps -font \"$xfont\" -fontsize $size $char | pnmcrop | pbmtoxbm | sed -e "s/noname/$base/g" -e "s/{/& ${base}_width, ${base}_height,/" >> $fonfile
 done
 
-echo "static unsigned char *${cfont}_glyphs[] = {" >> $fonfile
+echo "static char *${cfont}_glyphs[] = {" >> $fonfile
 for char in `echo $chars`; do
 	charname=`charname $char`;
 	base="glyph_${cfont}_${charname}";
