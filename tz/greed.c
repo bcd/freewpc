@@ -35,7 +35,6 @@ U8 greed_sounds[] = {
 
 void common_greed_handler (U8 target)
 {
-	extern U8 debug_value;
 	const U8 sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
