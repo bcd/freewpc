@@ -47,9 +47,11 @@ sol_rtt (void)
 		sol_state[sol_cycle][2] | sol_rt_state[2];
 	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = 
 		sol_state[sol_cycle][3] | sol_rt_state[3];
-	// *(volatile U8 *)WPC_EXTBOARD1 = sol_state[sol_cycle][4] | sol_rt_state[4];
+
+#if 11111 /* TODO - this is for TZ only */
 	*(volatile U8 *)WPC_EXTBOARD1 = 
-		sol_state[sol_cycle][5] | sol_rt_state[5]; /* TODO : TZ */
+		sol_state[sol_cycle][5] | sol_rt_state[5];
+#endif
 
 	/* Advance cycle counter */
 	sol_cycle++;

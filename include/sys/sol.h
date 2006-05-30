@@ -50,7 +50,7 @@ extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 
 void sol_rtt (void);
 
-#ifdef GCC4
+#if 0 // #ifdef GCC4
 #define sol_modify(sol,cycle_mask)
 #define sol_modify_pulse(sol,cycle_mask)
 #else
