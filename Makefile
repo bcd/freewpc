@@ -191,7 +191,7 @@ KERNEL_OBJS = \
 	kernel/reset.o \
 	kernel/score.o \
 	kernel/service.o \
-	kernel/sol2.o \
+	kernel/sol.o \
 	kernel/sound.o \
 	kernel/switches.o \
 	kernel/sysinfo.o \
@@ -215,6 +215,10 @@ COMMON_OBJS = \
 
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o \
+
+ifeq ($(GCC_VERSION),4.1.0)
+KERNEL_ASM_OBJS += kernel/task_6809.o
+endif
 
 TEST_OBJS = test/window.o
 
