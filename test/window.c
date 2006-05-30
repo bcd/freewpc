@@ -75,6 +75,8 @@ void window_push_first (void)
 	sound_reset ();
 	deff_stop_all ();
 	leff_stop_all ();
+	/* Ensure the lamp effects stop before resetting all lamps. */
+	task_sleep (TIME_33MS);
 	lamp_all_off ();
 }
 
