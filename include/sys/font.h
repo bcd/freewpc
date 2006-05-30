@@ -31,7 +31,7 @@ typedef struct
 	U8 bytewidth;
 	U8 spacing;
 	U8 height;
-	U8 **glyphs;
+	char **glyphs;
 } font_t;
 
 extern const font_t font_mono5;
