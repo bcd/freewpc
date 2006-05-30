@@ -147,6 +147,7 @@ task_t *task_allocate (void)
 }
 
 
+#ifndef GCC4
 /**
  * Save the current execution state into the current task block.
  */
@@ -319,7 +320,7 @@ void task_create (void)
 
 	__asm__ volatile ("puls\td,u,y,pc");
 }
-
+#endif /* GCC4 */
 
 task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 {
