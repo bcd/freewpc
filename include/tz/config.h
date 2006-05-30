@@ -210,7 +210,9 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, PRI_LEFF3, L_ALL_LAMPS, L_NOGI, slot_kic
  */
 #undef MACHINE_1MS_RTTS
 
-#undef MACHINE_8MS_RTTS
+#define MACHINE_8MS_RTTS \
+	VOIDCALL(slingshot_rtt) \
+	VOIDCALL(jets_rtt)
 
 #define MACHINE_32MS_RTTS \
 	VOIDCALL(tz_clock_rtt)

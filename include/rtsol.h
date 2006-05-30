@@ -35,12 +35,26 @@
 
 extern inline void rt_sol_off (U8 *sol_cache, U8 bitmask, U8 active_high)
 {
-	*sol_cache &= ~bitmask;
+	if (active_high == RTSOL_ACTIVE_HIGH)
+	{
+		*sol_cache &= ~bitmask;
+	}
+	else
+	{
+		*sol_cache |= bitmask;
+	}
 }
 
 extern inline void rt_sol_on (U8 *sol_cache, U8 bitmask, U8 active_high)
 {
-	*sol_cache |= bitmask;
+	if (active_high == RTSOL_ACTIVE_HIGH)
+	{
+		*sol_cache |= bitmask;
+	}
+	else
+	{
+		*sol_cache &= ~bitmask;
+	}
 }
 
 extern inline U8 rt_sol_active (U8 *sol_cache, U8 bitmask, U8 active_high)
@@ -67,7 +81,7 @@ extern inline void rt_sol_disable (U8 sol)
  * 1-bit for whether the solenoid is in its on/off phase,
  * and 7-bits for the timer coutdown/countup.
  */
-extern inline void rt_solenoid_update (
+extern inline void rt_solenoid_update1 (
 	U8 *sol_cache,
 	const U8 sol_bitmask,
 	const U8 sol_active_high,
@@ -105,6 +119,24 @@ extern inline void rt_solenoid_update (
 			*rt_sol_state = sol_on_irqs;
 		}
 	}
+}
+
+extern inline void rt_solenoid_update (
+	S8 *rt_sol_state,
+	const U8 sol_num,
+	const U8 sol_active_high,
+	const U8 sw_num,
+	const U8 sw_active_high,
+	const U8 sol_on_irqs,
+	const U8 sol_off_irqs )
+{
+	rt_solenoid_update1 (
+		(U8 *)&sol_rt_state + (sol_num / 8), 1 << (sol_num % 8),
+		sol_active_high,
+		&switch_bits[0][0] + (sw_num / 8), 1 << (sw_num % 8),
+		sw_active_high, 
+		rt_sol_state,
+		sol_on_irqs, sol_off_irqs );
 }
 
 #endif /* _RTSOL_H */

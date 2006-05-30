@@ -21,19 +21,21 @@
 #include <freewpc.h>
 #include <rtsol.h>
 
-U8 rtsol_lower_jet;
+U8 rtsol_left_sling;
+U8 rtsol_right_sling;
+
 
 void slingshot_rtt (void)
 {
-	rt_solenoid_update ((char *)&sol_rt_state + (SOL_LOWER_JET / 8),
-		1 << (SOL_LOWER_JET % 8),
-		RTSOL_ACTIVE_HIGH,
-		&switch_bits[0][0] + (SW_BOTTOM_JET / 8),
-		1 << (SW_BOTTOM_JET % 8),
-		RTSW_ACTIVE_HIGH,
-		&rtsol_lower_jet,
-		8,
-		8);
+	rt_solenoid_update (&rtsol_left_sling,
+		SOL_LEFT_SLING, RTSOL_ACTIVE_HIGH,
+		SW_LEFT_SLING, RTSW_ACTIVE_HIGH,
+		8, 8);
+
+	rt_solenoid_update (&rtsol_right_sling,
+		SOL_RIGHT_SLING, RTSOL_ACTIVE_HIGH,
+		SW_RIGHT_SLING, RTSW_ACTIVE_HIGH,
+		8, 8);
 }
 
 
