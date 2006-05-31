@@ -204,6 +204,7 @@ void amode_deff (void) __taskentry__
 {
 	int design_credit_counter = 3;
 
+	tz_clock_reset ();
 	for (;;)
 	{
 		/** Display last set of player scores **/
