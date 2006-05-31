@@ -53,6 +53,7 @@ static char font_5x5_sep[][7] = {
 	/* slash */ { 5, 5, 16, 8, 4, 2, 1 },
 	/* colon */ { 3, 5, 0, 2, 0, 2, 0 },
 	/* hyphen */ { 3, 5, 0, 0, 7, 0, 0 },
+	/* percent */ { 5, 5, 18, 8, 4, 2, 9 },
 };
 
 static char *mono5_glyphs[] = {
@@ -97,6 +98,7 @@ static char *mono5_glyphs[] = {
    ['/'] = font_5x5_sep[2],
    [':'] = font_5x5_sep[3],
    ['-'] = font_5x5_sep[4],
+   ['%'] = font_5x5_sep[5],
 };
 
 const font_t font_mono5 = {

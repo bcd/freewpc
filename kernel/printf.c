@@ -151,6 +151,12 @@ int printf (const char *format, ...)
 	{
 		if (*format == '%')
 		{
+			if (format[1] == '%')
+			{
+				format++;
+				goto output_char;
+			}
+
 			sprintf_width = 0;
 			sprintf_leading_zeroes = FALSE;
 			sprintf_commas = TRUE;
@@ -305,6 +311,7 @@ do_long_hex_integer:
 		}
 		else
 		{
+output_char:
 			*buf++ = *format;
 		}
 		format++;
