@@ -219,9 +219,23 @@ void tz_clock_start_backward (void)
 }
 
 
+void tz_clock_set_speed (U8 speed)
+{
+	clock_speed = speed;
+}
+
+
 void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
+}
+
+
+void tz_clock_reset (void)
+{
+	tz_clock_set_speed (1);
+	clock_mode = CLOCK_FIND;
+	clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
 }
 
 
