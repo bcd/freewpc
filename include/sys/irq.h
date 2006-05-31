@@ -21,6 +21,9 @@
 #ifndef _SYS_IRQ_H
 #define _SYS_IRQ_H
 
+/** GCC4.1 does not compile the new style 'ccreg' instructions
+ * correctly, so we revert back to the old way of using
+ * hand-coded assembly. */
 #ifdef GCC4
 #define NO_CC_REG
 #endif

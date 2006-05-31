@@ -21,5 +21,7 @@
 #ifndef _TZ_CLOCK_H
 #define _TZ_CLOCK_H
 
+void tz_clock_set_speed (U8 speed);
+
 #endif /* _TZ_CLOCK_H */
 
