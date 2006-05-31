@@ -459,7 +459,7 @@ struct adjustment hstd_adjustments[] = {
 	{ "HIGHEST SCORES", &on_off_value, ON, &hstd_config.highest_scores },
 	{ "H.S.T.D. AWARD", &on_off_value, ON, &hstd_config.hstd_award },
 	{ "CHAMPION H.S.T.D.", &on_off_value, ON, &hstd_config.champion_hstd },
-	{ "CHAMPION CREDITS", &on_off_value, ON, NULL },
+	{ "CHAMPION CREDITS", &integer_value, 2, &hstd_config.champion_credits },
 	{ "H.S.T.D. 1 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[0] },
 	{ "H.S.T.D. 2 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[1] },
 	{ "H.S.T.D. 3 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[2] },
