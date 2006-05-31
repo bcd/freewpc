@@ -275,7 +275,7 @@ void lamp_leff1_free_all (void)
 
 void lamp_leff2_erase (void)
 {
-	memset (lamp_leff2_matrix, 0, 2 * NUM_LAMP_COLS);
+	memset (lamp_leff2_matrix, 0, NUM_LAMP_COLS);
 }
 
 void lamp_leff2_free_all (void)
