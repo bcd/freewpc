@@ -304,8 +304,8 @@ void leff_stop_all (void)
 	task_kill_gid (GID_LEFF);
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();
-	//lamp_leff2_free_all ();
-	//lamp_leff2_erase ();
+	lamp_leff2_free_all ();
+	lamp_leff2_erase ();
 	leff_init ();
 }
 
