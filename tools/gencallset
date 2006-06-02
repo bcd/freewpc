@@ -35,6 +35,10 @@ my @functions = ();
 
 my %functionhash;
 
+my %fntypehash;
+
+my %modulehash;
+
 while ($arg = shift)
 {
 }
@@ -51,7 +55,8 @@ foreach $src (@srclist) {
 	open FH, $src;
 	while (<FH>) {
 		chomp;
-		if (/CALLSET_ENTRY[ \t]*\((.*)\)/) {
+		if ((/CALLSET_ENTRY[ \t]*\((.*)\)/) 
+			|| (/CALLSET_BOOL_ENTRY[ \t]*\((.*)\)/)) {
 			my $callset_entry_args = $1;
 			my ($module, $set) = split /, */, $callset_entry_args;
 			next if (!defined $module or !defined $set);
@@ -60,11 +65,28 @@ foreach $src (@srclist) {
 				$functionhash{$set} = "";
 			}
 			$functionhash{$set} .= "$module ";
+			if (!defined $modulehash{$module}) {
+				$modulehash{$module} = $src;
+			}
 		}
 		elsif (/#include <([^.]*)\.callset>/) {
 			print "Callset '$1' invoked\n";
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
+			}
+		}
+		elsif ((/call_hook \(([^)]*)\)/)
+			|| (/callset_invoke \(([^)]*)\)/)) {
+			if (!defined $functionhash{$1}) {
+				$functionhash{$1} = "";
+				$fntypehash{$1} = "void";
+			}
+		}
+		elsif ((/call_boolean_hook \(([^)]*)\)/)
+			|| (/callset_invoke_boolean \(([^)]*)\)/)) {
+			if (!defined $functionhash{$1}) {
+				$functionhash{$1} = "";
+				$fntypehash{$1} = "bool";
 			}
 		}
 	}
@@ -75,9 +97,44 @@ foreach $set (keys %functionhash) {
 	open FH, ">callset/$set.callset";
 	my @modules = split " ", $functionhash{$set};
 	foreach $module (@modules) {
-		print FH "extern void ${module}_$set (void);\n";
+		if ($modulehash{$module} =~ /^common/) {
+			$modifier = "__common__";
+		}
+		else {
+			$modifier = "";
+		}
+		print FH "extern $modifier void ${module}_$set (void);\n";
 		print FH "${module}_$set ();\n";
 	}
 	close FH;
 }
+
+open FH, ">callset/callset.c";
+print FH "#include <freewpc.h>\n";
+foreach $set (keys %functionhash) {
+	my $rettype = $fntypehash{$set};
+	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
+	print FH "$rettype callset_$set (void) {\n";
+	my @modules = split " ", $functionhash{$set};
+	foreach $module (@modules) {
+		if ($modulehash{$module} =~ /^common/) {
+			$modifier = "__common__";
+		}
+		else {
+			$modifier = "";
+		}
+		print FH "extern $modifier $rettype ${module}_$set (void);\n";
+		if ($rettype eq "bool") {
+			print FH "if (!${module}_$set ()) return FALSE;\n";
+		}
+		else {
+			print FH "${module}_$set ();\n";
+		}
+	}
+	if ($rettype eq "bool") {
+		print FH "return TRUE;\n";
+	}
+	print FH "}\n\n";
+}
+close FH;
 

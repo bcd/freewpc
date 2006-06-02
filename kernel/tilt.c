@@ -88,12 +88,12 @@ void sw_tilt_handler (void)
 		mark_ball_in_play ();
 		audit_increment (&system_audits.tilts);
 		audit_increment (&system_audits.plumb_bob_tilts);
-		call_hook (tilt);
+		callset_invoke (tilt);
 	}
 	else
 	{
 		deff_start (DEFF_TILT_WARNING);
-		call_hook (tilt_warning);
+		callset_invoke (tilt_warning);
 	}
 }
 

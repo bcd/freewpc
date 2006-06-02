@@ -233,7 +233,7 @@ int lamp_flash_test (lampnum_t lamp)
 
 void lamp_global_update ()
 {
-	call_hook (lamp_refresh);
+	callset_invoke (lamp_refresh);
 	if (!in_test)
 		lamp_start_update ();
 }

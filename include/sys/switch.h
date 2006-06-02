@@ -132,6 +132,13 @@ typedef struct
 
 extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
+
+extern inline U8 rt_switch_poll (const switchnum_t sw_num)
+{
+	return switch_bits[0][(sw_num / 8)] & (1 << (sw_num % 8));
+}
+
+
 void switch_init (void);
 void switch_rtt (void);
 void switch_sched (void);

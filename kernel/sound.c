@@ -337,3 +337,42 @@ void volume_up (void)
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
 
+
+CALLSET_ENTRY(sound, start_game)
+{
+#ifdef MACHINE_START_GAME_SOUND
+	sound_send (MACHINE_START_GAME_SOUND);
+#endif
+}
+
+
+CALLSET_ENTRY(sound, start_ball)
+{
+#ifdef MACHINE_START_BALL_MUSIC
+	music_set (MACHINE_START_BALL_MUSIC);
+#endif
+}
+
+
+CALLSET_ENTRY (sound, ball_in_play)
+{
+#ifdef MACHINE_BALL_IN_PLAY_MUSIC
+	music_set (MACHINE_BALL_IN_PLAY_MUSIC);
+#endif
+}
+
+
+CALLSET_ENTRY(sound, end_ball)
+{
+	sound_reset ();
+}
+
+
+CALLSET_ENTRY(sound, end_game)
+{
+#ifdef MACHINE_END_GAME_MUSIC
+	if (!in_test)
+		music_set (MACHINE_END_GAME_MUSIC);
+#endif
+}
+

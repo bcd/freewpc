@@ -114,8 +114,4 @@ extern const uint8_t mach_edge_switches[];
 /* Declare the lamp effects that this machine implements */
 #undef MACHINE_LAMP_EFFECTS
 
-/* Declare the global machine hooks */
-#define MACHINE_HOOKS afm_hooks
-
-
 #endif /* MACH_CONFIG_H */

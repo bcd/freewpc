@@ -59,7 +59,7 @@
 #define SW_MPF_LEFT				MAKE_SW(4,5)
 #define SW_MPF_RIGHT				MAKE_SW(4,6)
 #define SW_CLOCK_TARGET			MAKE_SW(4,7)
-#define SW_STANDUP1				MAKE_SW(4,8)
+#define SW_STANDUP1				MAKE_SW(4,8) /* LL */
 
 #define SW_GUMBALL_LANE			MAKE_SW(5,1)
 #define SW_HITCHHIKER			MAKE_SW(5,2)
@@ -73,11 +73,11 @@
 #define SW_SKILL_BOTTOM			MAKE_SW(6,1)
 #define SW_SKILL_CENTER			MAKE_SW(6,2)
 #define SW_SKILL_TOP				MAKE_SW(6,3)
-#define SW_STANDUP4				MAKE_SW(6,4)
+#define SW_STANDUP4				MAKE_SW(6,4) /* UR */
 #define SW_POWER_PAYOFF			MAKE_SW(6,5)
-#define SW_STANDUP5				MAKE_SW(6,6)
-#define SW_STANDUP6				MAKE_SW(6,7)
-#define SW_STANDUP7				MAKE_SW(6,8)
+#define SW_STANDUP5				MAKE_SW(6,6) /* MR1 */
+#define SW_STANDUP6				MAKE_SW(6,7) /* MR2 */
+#define SW_STANDUP7				MAKE_SW(6,8) /* LR */
 
 #define SW_AUTOFIRE1				MAKE_SW(7,1)
 #define SW_AUTOFIRE2				MAKE_SW(7,2)
@@ -85,8 +85,8 @@
 #define SW_GUMBALL_POPPER		MAKE_SW(7,4)
 #define SW_MPF_TOP				MAKE_SW(7,5)
 #define SW_MPF_EXIT				MAKE_SW(7,6)
-#define SW_STANDUP2				MAKE_SW(7,7)
-#define SW_STANDUP3				MAKE_SW(7,8)
+#define SW_STANDUP2				MAKE_SW(7,7) /* ML1 */
+#define SW_STANDUP3				MAKE_SW(7,8) /* UL */
 
 #define SW_LOWER_RIGHT_MAGNET	MAKE_SW(8,1)
 #define SW_UPPER_RIGHT_MAGNET	MAKE_SW(8,2)
@@ -147,11 +147,11 @@
 #define MACHINE_SW61				sw_lower_skill
 #define MACHINE_SW62				sw_center_skill
 #define MACHINE_SW63				sw_upper_skill
-#define MACHINE_SW64				sw_greed2
+#define MACHINE_SW64				sw_greed4
 //#define MACHINE_SW65			sw_power_payoff
-#define MACHINE_SW66				sw_greed3
-#define MACHINE_SW67				sw_greed4
-#define MACHINE_SW68				sw_greed5
+#define MACHINE_SW66				sw_greed5
+#define MACHINE_SW67				sw_greed6
+#define MACHINE_SW68				sw_greed7
 
 #define MACHINE_SW71				sw_autofire1
 #define MACHINE_SW72				sw_autofire2
@@ -159,8 +159,8 @@
 #define MACHINE_SW74				sw_gumball_popper
 //#define MACHINE_SW75			sw_mpf_top
 //#define MACHINE_SW76			sw_mpf_exit
-#define MACHINE_SW77				sw_greed6
-#define MACHINE_SW78				sw_greed7
+#define MACHINE_SW77				sw_greed2
+#define MACHINE_SW78				sw_greed3
 
 #define MACHINE_SW81				sw_right_loop
 //#define MACHINE_SW82			sw_upper_right_magnet

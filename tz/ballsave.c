@@ -62,3 +62,23 @@ void ballsave_launch (void)
 	deff_start (DEFF_BALL_SAVE);
 	ballsave_disable ();
 }
+
+
+CALLSET_ENTRY (ballsave, ball_in_play)
+{
+	/* start ballsaver if enabled */
+	ballsave_enable ();
+}
+
+
+CALLSET_BOOL_ENTRY(ballsave, end_ball_check)
+{
+	if (ballsave_test_active ())
+	{
+		ballsave_launch ();
+		return FALSE;
+	}
+	else
+		return TRUE;
+}
+

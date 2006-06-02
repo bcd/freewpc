@@ -166,6 +166,7 @@ BC = bc
 FIXED_SECTION = sysrom
 
 KERNEL_OBJS = \
+	callset/callset.o \
 	kernel/ac.o \
 	kernel/adj.o \
 	kernel/audit.o \
@@ -175,7 +176,6 @@ KERNEL_OBJS = \
 	kernel/device.o \
 	kernel/div10.o \
 	kernel/dmd.o \
-	kernel/eb.o \
 	kernel/flasher.o \
 	kernel/flip.o \
 	kernel/font.o \
@@ -204,6 +204,7 @@ KERNEL_OBJS = \
 
 COMMON_OBJS = \
 	common/buyin.o \
+	common/eb.o \
 	common/highscore.o \
 	common/knocker.o \
 	common/match.o \
@@ -504,7 +505,7 @@ MACH_LINKS = .mach .include_mach
 
 
 MAKE_DEPS = Makefile $(MACHINE)/Makefile user.make
-DEPS = $(MAKE_DEPS) $(INCLUDES) $(XBM_H) $(MACH_LINKS) callset
+DEPS = $(MAKE_DEPS) $(INCLUDES) $(XBM_H) $(MACH_LINKS)
 
 GENDEFINES = \
 	include/gendefine_gid.h \
@@ -814,7 +815,10 @@ gendefines_again: clean_gendefines gendefines
 #
 # How to automake callsets
 #
-callset : tools/gencallset
+callset:
+	mkdir -p callset
+
+callset/callset.c : callset $(MACH_LINKS) tools/gencallset
 	@echo "Generating callsets ... " && mkdir -p callset && tools/gencallset
 
 .PHONY : callset_again

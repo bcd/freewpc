@@ -55,6 +55,9 @@ CALLSET_ENTRY(jet, start_player)
 {
 	jets_scored = 0;
 	jets_for_bonus = 25;
+	lamp_tristate_on (LM_LEFT_JET);
+	lamp_tristate_on (LM_LOWER_JET);
+	lamp_tristate_on (LM_RIGHT_JET);
 }
 
 

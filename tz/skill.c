@@ -125,6 +125,18 @@ DECLARE_SWITCH_DRIVER (sw_upper_skill)
 };
 
 
+CALLSET_ENTRY (skill, start_ball)
+{
+	enable_skill_shot ();
+}
+
+
+CALLSET_ENTRY (skill, ball_in_play)
+{
+	disable_skill_shot ();
+}
+
+
 CALLSET_ENTRY (skill, end_game)
 {
 	disable_skill_shot ();

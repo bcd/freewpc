@@ -80,6 +80,13 @@ void sw_right_inlane_handler (void)
 }
 
 
+CALLSET_ENTRY(lanes, start_player)
+{
+	lamp_flash_on (LM_SPIRAL_2M);
+	lamp_on (LM_LEFT_INLANE1);
+	lamp_on (LM_RIGHT_INLANE);
+}
+
 
 DECLARE_SWITCH_DRIVER (sw_left_outlane)
 {

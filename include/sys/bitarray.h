@@ -23,6 +23,8 @@
 
 typedef uint8_t *bitset;
 
+/** WPC_BITOP is an assembly macro for accessing the WPC shifter
+ * hardware. */
 #define WPC_BITOP(bs, index, bitop)				\
 do {														\
 	__asm__ volatile (								\

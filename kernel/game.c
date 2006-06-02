@@ -123,7 +123,7 @@ void end_game (void)
 		high_score_check ();
 		/* TODO : do match sequence */
 	
-		call_hook (end_game);
+		callset_invoke (end_game);
 
 		/*
 		 * Make sure all effects and flippers are killed before
@@ -172,11 +172,13 @@ void end_ball (void)
 	 * it must explicitly put another ball back into play.
 	 * (Game code should check for ball saves here.)
 	 */
-	if (!call_boolean_hook (end_ball) && !in_tilt)
+	if (!callset_invoke_boolean (end_ball_check) && !in_tilt)
 		goto done;
 
-	/* OK, we're committing to ending the ball now.
-	 * First, disable the flippers if enabled by adjustment. */
+	/* OK, we're committing to ending the ball now. */
+	callset_invoke (end_ball);
+
+	/* First, disable the flippers if enabled by adjustment. */
 	if (system_config.no_bonus_flips)
 		flipper_disable ();
 
@@ -191,7 +193,7 @@ void end_ball (void)
 	if (!in_tilt)
 	{
 		in_bonus = TRUE;
-		call_hook (bonus);
+		callset_invoke (bonus);
 		in_bonus = FALSE;
 	}
 	else
@@ -264,8 +266,8 @@ void start_ball (void)
 	ball_in_play = FALSE;
 
 	if (ball_up == 1)
-		call_hook (start_player);
-	call_hook (start_ball);
+		callset_invoke (start_player);
+	callset_invoke (start_ball);
 	lamp_update_all ();
 
 	current_score = scores[player_up - 1];
@@ -283,7 +285,7 @@ void mark_ball_in_play (void)
 	if (in_game && !ball_in_play)
 	{
 		ball_in_play = TRUE;		
-		call_hook (ball_in_play);
+		callset_invoke (ball_in_play);
 	}
 }
 
@@ -291,7 +293,7 @@ void add_player (void)
 {
 	remove_credit ();
 	num_players++;
-	call_hook (add_player);
+	callset_invoke (add_player);
 }
 
 
@@ -314,7 +316,7 @@ void start_game (void)
 	
 		deff_start (DEFF_SCORES);
 		amode_stop ();
-		call_hook (start_game);
+		callset_invoke (start_game);
 	
 		player_start_game ();
 		start_ball ();
@@ -363,7 +365,7 @@ void sw_start_button_handler (void) __taskentry__
 	if (!has_credits_p ())
 	{
 		deff_start (DEFF_CREDITS);
-		call_hook (start_without_credits);
+		callset_invoke (start_without_credits);
 		return;
 	}
 

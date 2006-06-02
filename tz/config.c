@@ -56,78 +56,7 @@ const uint8_t mach_edge_switches[] = {
 };
 
 
-void tz_init (void)
-{
-	#include <init.callset>
-}
-
-
-void tz_start_game (void)
-{
-	sound_send (SND_DONT_TOUCH_DOOR_1);
-
-	#include <start_game.callset>
-	task_sleep_sec (2);
-}
-
-void tz_start_player (void)
-{
-	lamp_flash_on (LM_SPIRAL_2M);
-	lamp_on (LM_LEFT_INLANE1);
-	lamp_on (LM_RIGHT_INLANE);
-	lamp_on (LM_LEFT_JET);
-	lamp_on (LM_LOWER_JET);
-	lamp_on (LM_RIGHT_JET);
-	#include <start_player.callset>
-}
-
-
-void tz_end_game (void)
-{
-	#include <end_game.callset>
-	if (!in_test)
-		music_set (MUS_POWERBALL_MANIA);
-}
-
-void tz_start_ball (void)
-{
-	extern void enable_skill_shot ();
-
-	music_set (MUS_MULTIBALL_LIT_PLUNGER);
-	enable_skill_shot ();
-	#include <start_ball.callset>
-}
-
-void tz_ball_in_play (void)
-{
-	extern void disable_skill_shot ();
-	extern void ballsave_enable ();
-
-	music_set (MUS_MULTIBALL_LIT);
-	disable_skill_shot ();
-	/* start ballsaver if enabled */
-	ballsave_enable ();
-}
-
-bool tz_end_ball (void)
-{
-	extern bool ballsave_test_active (void);
-	extern void ballsave_launch (void);
-
-	if (ballsave_test_active ())
-	{
-		ballsave_launch ();
-		return FALSE;
-	}
-	else
-	{
-		sound_reset ();
-		return TRUE;
-	}
-}
-
-
-void tz_add_player (void)
+CALLSET_ENTRY (tz, add_player)
 {
 #ifdef CONFIG_TZONE_IP
 	if (num_players > 1)
@@ -136,12 +65,7 @@ void tz_add_player (void)
 }
 
 
-void tz_any_pf_switch (void)
-{
-}
-
-
-void tz_bonus (void)
+CALLSET_ENTRY (tz, bonus)
 {
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
@@ -152,7 +76,7 @@ void tz_bonus (void)
 }
 
 
-void tz_tilt (void)
+CALLSET_ENTRY (tz, tilt)
 {
 	sound_send (SND_TILT);
 	task_sleep_sec (3);
@@ -160,32 +84,15 @@ void tz_tilt (void)
 }
 
 
-void tz_tilt_warning (void)
+CALLSET_ENTRY (tz, tilt_warning)
 {
 	sound_send (SND_TILT_WARNING);
 }
 
 
-void tz_start_without_credits (void)
+CALLSET_ENTRY (tz, start_without_credits)
 {
 	sound_send (SND_GREEEED);
 }
 
-
-machine_hooks_t tz_hooks = {
-	INHERIT_FROM_DEFAULT_HOOKS,
-	.start_game = tz_start_game,
-	.start_player = tz_start_player,
-	.end_game = tz_end_game,
-	.start_ball = tz_start_ball,
-	.ball_in_play = tz_ball_in_play,
-	.end_ball = tz_end_ball,
-	.add_player = tz_add_player,
-	.init = tz_init,
-	.bonus = tz_bonus,
-	.tilt = tz_tilt,
-	.tilt_warning = tz_tilt_warning,
-	.any_pf_switch = tz_any_pf_switch,
-	.start_without_credits = tz_start_without_credits,
-};
 

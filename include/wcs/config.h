@@ -104,7 +104,12 @@
 
 /* Define the music cue to play during a volume change.
  * If undefined, the system will pick one for you. */
-#define MACHINE_VOLUME_CHANGE_MUSIC 0x2
+#define MACHINE_VOLUME_CHANGE_MUSIC MUS_LOCK_LIT
+#define MACHINE_START_BALL_MUSIC		MUS_MULTIBALL_LIT_PLUNGER
+#define MACHINE_BALL_IN_PLAY_MUSIC	MUS_MULTIBALL_LIT
+#define MACHINE_END_GAME_MUSIC		MUS_MAIN_DRUM_ENTRY
+#undef MACHINE_TILT_WARNING_SOUND
+#undef MACHINE_TILT_SOUND
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
@@ -117,9 +122,5 @@ extern const uint8_t mach_edge_switches[];
 
 /* Declare the lamp effects that this machine implements */
 #undef MACHINE_LAMP_EFFECTS
-
-/* Declare the global machine hooks */
-#define MACHINE_HOOKS wcs_hooks
-
 
 #endif /* MACH_CONFIG_H */

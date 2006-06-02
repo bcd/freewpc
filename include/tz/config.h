@@ -103,11 +103,16 @@
 /* Define optional lamps */
 #define MACHINE_BUYIN_LAMP		LM_BUYIN_BUTTON
 
-/* Define sound effects for standard system functions */
+/* Define sounds/music for standard system functions */
 #define MACHINE_ADD_COIN_SOUND		SND_LIGHT_SLOT_TIMED
 #define MACHINE_ADD_CREDIT_SOUND		SND_THUD
 #define MACHINE_VOLUME_CHANGE_MUSIC MUS_SUPER_SLOT
-
+#define MACHINE_START_GAME_SOUND		SND_DONT_TOUCH_DOOR_1
+#define MACHINE_START_BALL_MUSIC		MUS_MULTIBALL_LIT_PLUNGER
+#define MACHINE_BALL_IN_PLAY_MUSIC	MUS_MULTIBALL_LIT
+#define MACHINE_END_GAME_MUSIC		MUS_POWERBALL_MANIA
+#define MACHINE_TILT_WARNING_SOUND	SND_TILT_WARNING
+#define MACHINE_TILT_SOUND				SND_TILT
 
 /* Define the names of functions to handle flipper buttons
  * in attract mode.  Leave undefined if not needed.
@@ -124,22 +129,15 @@
 /* Define additional test menu items.  This is intended to be used
  * for devices unique to each machine. */
 #define MACHINE_TEST_MENU_ITEMS \
-	&tz_clock_test_item,
+	&tz_clock_test_item, \
+	&tz_gumball_test_item,
 
-#if 0
-	{ "AUTOFIRE LAUNCH", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_launch_proc) }, \
-	{ "LOAD GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(autofire_to_gumball_proc) }, \
-	{ "RELEASE GUMBALL", &main_menu_items[4], 0, 0, TEST_ITEM(release_gumball_proc) },
-#endif
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
 
 /* Declare the array of edge switches, defined elsewhere */
 extern const uint8_t mach_edge_switches[];
-
-/* Declare the global machine hooks */
-#define MACHINE_HOOKS tz_hooks
 
 /* Declare the display effects that this machine implements */
 #define MACHINE_DISPLAY_EFFECTS \
@@ -229,5 +227,6 @@ void autofire_to_gumball_proc (void);
 void release_gumball_proc (void);
 
 extern struct menu tz_clock_test_item;
+extern struct menu tz_gumball_test_item;
 
 #endif /* MACH_CONFIG_H */

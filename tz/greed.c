@@ -129,7 +129,7 @@ DECLARE_SWITCH_DRIVER (sw_greed4)
 {
 	.fn = sw_greed_handler4,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.lamp = LM_LR_5M,
+	.lamp = LM_UR_5M,
 };
 
 DECLARE_SWITCH_DRIVER (sw_greed5)
@@ -150,6 +150,6 @@ DECLARE_SWITCH_DRIVER (sw_greed7)
 {
 	.fn = sw_greed_handler7,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.lamp = LM_UR_5M,
+	.lamp = LM_LR_5M,
 };
 

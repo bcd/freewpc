@@ -23,9 +23,9 @@
 
 extern uint8_t extra_balls;
 
-void increment_extra_balls (void);
-bool decrement_extra_balls (void);
-void clear_extra_balls (void);
+__common__ void increment_extra_balls (void);
+__common__ bool decrement_extra_balls (void);
+__common__ void clear_extra_balls (void);
 
 #endif /* GAME_H */
 

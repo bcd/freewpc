@@ -150,10 +150,6 @@ extern U8 irq_count;
 #include <gendefine_devno.h>
 #include <../images/xbmproto.h>
 
-/* From here on are any headers that are dependent on machine
- * specific features being defined */
-#include <hook.h>
-
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */
 #ifdef PAGE

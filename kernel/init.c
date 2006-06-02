@@ -204,7 +204,7 @@ void do_reset (void)
 	ball_search_init ();
 	knocker_init ();
 	random_init ();
-	call_hook (init);
+	callset_invoke (init);
 
 	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
