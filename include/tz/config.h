@@ -190,6 +190,9 @@ DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, PRI_LEFF3, L_ALL_LAMPS, L_NOGI, slot_kic
 	(sol == FLASH_GUMBALL_HIGH) || (sol == FLASH_GUMBALL_MID) || \
 	(sol == FLASH_GUMBALL_LOW) || (sol == FLASH_RAMP2))
 
+/* Declares that EXTBOARD1 is used to drive some extra solenoids */
+#define MACHINE_SOL_EXTBOARD1
+
 /* Declares which coil drives should not be fired during ball
  * search, for any reason.  Ball device solenoids are automatically
  * excluded and need not be specified here.  Only solenoids 1-32
