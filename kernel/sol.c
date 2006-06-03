@@ -48,7 +48,7 @@ sol_rtt (void)
 	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = 
 		sol_state[sol_cycle][3] | sol_rt_state[3];
 
-#if 11111 /* TODO - this is for TZ only */
+#ifdef MACHINE_SOL_EXTBOARD1
 	*(volatile U8 *)WPC_EXTBOARD1 = 
 		sol_state[sol_cycle][5] | sol_rt_state[5];
 #endif
