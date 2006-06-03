@@ -49,16 +49,9 @@ extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 #define sol_serve(id)  sol_modify_pulse(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88)
 
 void sol_rtt (void);
-
-#if 0 // #ifdef GCC4
-#define sol_modify(sol,cycle_mask)
-#define sol_modify_pulse(sol,cycle_mask)
-#else
 void sol_modify (solnum_t sol, U8 cycle_mask);
 void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
-#endif
 void sol_init (void);
-
 void flasher_pulse (solnum_t n);
 void flasher_rtt (void);
 void flasher_init (void);
