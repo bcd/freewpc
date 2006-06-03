@@ -554,13 +554,15 @@ void switch_lamp_pulse (void)
  */
 void switch_sched (void)
 {
-	const U8 sw = task_get_arg ();
+	const U8 sw = (U8)task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-#if 0
+#if 0 /* TODO */
 	/* Under the newest version of gcc6809, this statement
 	 * causes the compiler to crash...????  */
 	dbprintf ("Handling switch #%d\n", sw);
+#else
+	dbprintf ("Handling switch %p", swinfo);
 #endif
 
 	/* Don't service switches marked SW_IN_GAME at all, if we're
