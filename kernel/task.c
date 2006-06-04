@@ -82,7 +82,6 @@ bool task_dispatching_ok;
  * to deal with so far.  This helps to determine how big the stack
  * area in the task structure needs to be */
 U8 task_largest_stack;
-U16 task_largest_stack_pc;
 
 /** Also for debug, this tracks the maximum number of tasks needed. */
 #ifdef TASKCOUNT
@@ -147,7 +146,7 @@ task_t *task_allocate (void)
 }
 
 
-#ifndef GCC4
+#ifndef TASK_LL_SUPPORT
 /**
  * Save the current execution state into the current task block.
  */
@@ -213,7 +212,6 @@ void task_save (void)
 	if ((__x->stack_word_count = __b) > task_largest_stack)
 	{
 		task_largest_stack = __b;
-		task_largest_stack_pc = __x->pc;
 	}
 
 	/* Save current ROM page */
@@ -320,7 +318,8 @@ void task_create (void)
 
 	__asm__ volatile ("puls\td,u,y,pc");
 }
-#endif /* GCC4 */
+#endif /* TASK_LL_SUPPORT */
+
 
 task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 {
@@ -337,23 +336,6 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 #endif
 	return (tp);
 }
-
-#if 00000
-struct task_create_gid_args
-{
-	task_gid_t gid;
-	task_function_t fn;
-};
-task_t *task_create_gid_const (uint8_t unused)
-{
-	typedef struct task_create_gid_args *argptr;
-	volatile argptr *args = (argptr *)(&unused - 2);
-	argptr arg = *args;
-	task_t *tp = task_create_gid (arg->gid, arg->fn);
-	*args = arg + 3;
-	return tp;
-}
-#endif
 
 
 /** Create a task, but not if a task with the same GID already exists.
@@ -422,6 +404,10 @@ void task_sleep_sec (int8_t secs)
 }
 
 
+/**
+ * Exit the current task, and return to the dispatcher to select
+ * another task to start running now.
+ */
 __naked__ __noreturn__ 
 void task_exit (void)
 {
@@ -436,6 +422,16 @@ void task_exit (void)
 	task_dispatcher ();
 }
 
+
+/**
+ * Find the task that has the given group ID.
+ *
+ * If more than one task matches, only the first can be returned by
+ * this API.
+ *
+ * If no task is found, then NULL is returned; otherwise, a pointer
+ * to the task structure is returned.
+ */
 task_t *task_find_gid (task_gid_t gid)
 {
 	register short t;
@@ -447,6 +443,10 @@ task_t *task_find_gid (task_gid_t gid)
 	return (NULL);
 }
 
+
+/**
+ * Kills the given task.
+ */
 void task_kill_pid (task_t *tp)
 {
 	if (tp == task_current)
@@ -458,6 +458,10 @@ void task_kill_pid (task_t *tp)
 #endif
 }
 
+
+/**
+ * Kill all tasks with the given group ID.
+ */
 bool task_kill_gid (task_gid_t gid)
 {
 	register short t;
@@ -476,6 +480,12 @@ bool task_kill_gid (task_gid_t gid)
 }
 
 
+/**
+ * Kills all tasks that are not protected.
+ *
+ * Protected tasks are marked with the flag TASK_PROTECTED and are
+ * immune to this call.
+ */
 void task_kill_all (void)
 {
 	register short t;
@@ -514,6 +524,10 @@ void task_set_arg (task_t *tp, U16 arg)
 	tp->arg = arg;
 }
 
+
+/**
+ * The task dispatcher.  This function selects a new task to run.
+ */
 __naked__ __noreturn__
 void task_dispatcher (void)
 {
@@ -588,6 +602,9 @@ void task_dispatcher (void)
 }
 
 
+/**
+ * Initialize the task subsystem.
+ */
 void task_init (void)
 {
 	/* Clean the memory for all task blocks */
@@ -598,7 +615,6 @@ void task_init (void)
 
 	/* Init debugging of largest stack */
 	task_largest_stack = 0;
-	task_largest_stack_pc = 0;
 
 #ifdef TASKCOUNT
 	task_count = task_max_count = 1;
