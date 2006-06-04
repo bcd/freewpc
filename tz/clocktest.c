@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 #include <test.h>
+#include <tz/clock.h>
 
 S8 clock_test_setting;
 
