@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <rtsol.h>
+#include <tz/clock.h>
 
 enum mech_clock_mode
 {
