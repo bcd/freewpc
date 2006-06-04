@@ -93,7 +93,7 @@ void lamp_init (void)
 
 void lamp_update_all (void)
 {
-#include <update_lamps.callset>
+	callset_invoke (update_lamps);
 }
 
 
