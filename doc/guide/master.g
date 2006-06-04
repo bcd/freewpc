@@ -258,14 +258,20 @@
 }
 {Hardware Description
 	{The 6809 CPU
-		The 6809 is a 2MHz, 8-bit Motorola processor.
+		The 6809 is a 2MHz, 8-bit Motorola processor.  This means that
+		it can execute 2 million cycles per second.  Each assembler
+		instruction takes one or more cycles to complete, depending
+		on its complexity.  A single cycle is 500ns long.
 
 		It supports two interrupts: a normal '''IRQ''', and
 		a '''fast IRQ''', or '''FIRQ'''.  The difference is that
 		when an IRQ occurs, all registers are saved to the
 		stack.  The FIRQ handler must manually save any registers
 		that need to be preserved.  On the WPC platform, the
-		IRQ is driven via a crystal to fire 1024 times per second.
+		IRQ is driven via a crystal to fire 1024 times per second,
+		or about once every 976 microseconds (equivalently, once
+		every 1952 cycles).
+
 		The FIRQ is asserted by the WPC, when programmed to do so,
 		when the DMD controller has finished drawing a particular
 		scanline or when its internal timer register expires.
