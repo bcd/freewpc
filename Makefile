@@ -217,7 +217,7 @@ COMMON_OBJS = \
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o \
 
-ifeq ($(GCC_VERSION),4.1.0)
+ifdef TASK_LL_SUPPORT
 KERNEL_ASM_OBJS += kernel/task_6809.o
 endif
 
@@ -260,6 +260,10 @@ CFLAGS = $(EXTRA_CFLAGS)
 
 ifeq ($(USE_LOCALS),y)
 CFLAGS += -DCONFIG_MULTIPLAYER
+endif
+
+ifdef TASK_LL_SUPPORT
+CFLAGS += -DTASK_LL_SUPPORT
 endif
 
 # System include directories.  FreeWPC doesn't use libc currently.
