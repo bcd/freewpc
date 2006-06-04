@@ -22,26 +22,51 @@
 # gencallset - generate function call lists automatically
 # ------------------------------------------------------------------
 #
-# Scan all source files recursively and grep them for
-# defines that match a particular pattern.  For each
-# one, treat as a function call and generate a call to it.
+# Scan all source files and search them for callset entries
+# and callset invocations.
+#
+# A callset entry is a function that is intended to be called
+# when a certain global event occurs, such as "end ball" or
+# "start game".  An invocation is a generation of the global
+# event and causes all of the entries to be called, one by one.
+#
+# Entries are declared using the macro CALLSET_ENTRY(module, event),
+# where module is an arbitrary string identifying the module
+# declaring the callset, and event is the well-known event name.
+# Most callsets do not return any values; for those that do, use
+# CALLSET_BOOLEAN_ENTRY instead.
+#
+# Invocations are indicated by calls to callset_invoke() or
+# callset_invoke_boolean().
+#
+# The output of this script is a file callset/callset.c, which
+# defines the global event handlers making calls to all of
+# the interested modules.
 #
 
+# A list of directories to be searched.
+my @dirs = ("kernel", "common", "mach");
 
-my @dirs = ("kernel", "common", "mach", "fonts");
-
-
-my @functions = ();
-
+# A hash that maps an event name to a list of
+# interested modules.  The module names are stored as a single
+# string, with spaces between each name.
 my %functionhash;
 
+# A hash that maps an event name to its return type.
+# Normally this is "void", but is sometimes "bool".
 my %fntypehash;
 
+# A hash that maps a module name to the filename in which
+# it was declared.  This is necessary in order to generate
+# proper prototypes for each call into the module; this
+# allows for calls into paged areas.
 my %modulehash;
 
-while ($arg = shift)
-{
-}
+
+
+#############################################################
+# Build the list of all filenames to be searched.
+#############################################################
 
 foreach $dir (@dirs) {
 	my @files = split /\n+/, 
@@ -50,6 +75,10 @@ foreach $dir (@dirs) {
 		push @srclist, "$dir/" . $file;
 	}
 }
+
+#############################################################
+# For each file, search for entries and invocations.
+#############################################################
 
 foreach $src (@srclist) {
 	open FH, $src;
@@ -60,7 +89,6 @@ foreach $src (@srclist) {
 			my $callset_entry_args = $1;
 			my ($module, $set) = split /, */, $callset_entry_args;
 			next if (!defined $module or !defined $set);
-			print "Found $module + $set\n";
 			if (!defined $functionhash{$set}) {
 				$functionhash{$set} = "";
 			}
@@ -69,21 +97,13 @@ foreach $src (@srclist) {
 				$modulehash{$module} = $src;
 			}
 		}
-		elsif (/#include <([^.]*)\.callset>/) {
-			print "Callset '$1' invoked\n";
-			if (!defined $functionhash{$1}) {
-				$functionhash{$1} = "";
-			}
-		}
-		elsif ((/call_hook \(([^)]*)\)/)
-			|| (/callset_invoke \(([^)]*)\)/)) {
+		elsif (/callset_invoke \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
 				$fntypehash{$1} = "void";
 			}
 		}
-		elsif ((/call_boolean_hook \(([^)]*)\)/)
-			|| (/callset_invoke_boolean \(([^)]*)\)/)) {
+		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
 				$fntypehash{$1} = "bool";
@@ -93,21 +113,9 @@ foreach $src (@srclist) {
 	close FH;
 }
 
-foreach $set (keys %functionhash) {
-	open FH, ">callset/$set.callset";
-	my @modules = split " ", $functionhash{$set};
-	foreach $module (@modules) {
-		if ($modulehash{$module} =~ /^common/) {
-			$modifier = "__common__";
-		}
-		else {
-			$modifier = "";
-		}
-		print FH "extern $modifier void ${module}_$set (void);\n";
-		print FH "${module}_$set ();\n";
-	}
-	close FH;
-}
+#############################################################
+# Write the output file.
+#############################################################
 
 open FH, ">callset/callset.c";
 print FH "#include <freewpc.h>\n";
