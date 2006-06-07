@@ -28,10 +28,10 @@ typedef uint8_t *bitset;
 #define WPC_BITOP(bs, index, bitop)				\
 do {														\
 	__asm__ volatile (								\
-		"st%0\t" STR(WPC_SHIFTADDR) "\n"			\
-		"\tst%1\t" STR(WPC_SHIFTBIT) "\n"		\
-		"\tld%0\t" STR(WPC_SHIFTADDR) "\n"		\
-		"\tld%1\t" STR(WPC_SHIFTBIT) "\n"		\
+		"st%0\t" C_STRING(WPC_SHIFTADDR) "\n"	\
+		"\tst%1\t" C_STRING(WPC_SHIFTBIT) "\n" \
+		"\tld%0\t" C_STRING(WPC_SHIFTADDR) "\n"\
+		"\tld%1\t" C_STRING(WPC_SHIFTBIT) "\n"	\
 		bitop												\
 		: "=a" (bs), "=q" (index)					\
 		: "a" (bs), "q" (index)						\

@@ -1796,7 +1796,9 @@ void switch_matrix_draw (void)
 		for (col=0; col < 8; col++)
 		{
 			U8 sw = MAKE_SWITCH (col+1,row+1);
+#if 0 /* whether or not it is an opto isn't important now */
 			bool opto_p = switch_is_opto (sw);
+#endif
 			bool state_p = switch_poll (sw);
 			register U8 *dmd = dmd_low_buffer +
 				((U16)row << 6) + (col >> 1);

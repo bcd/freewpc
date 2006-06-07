@@ -49,11 +49,11 @@
 #define __local__
 #endif
 
-#define __far__(x) __attribute__((far(x)))
-#define __common__		__far__(STR(COMMON_PAGE))
-#define __transition__	__far__(STR(TRANS_PAGE))
-#define __test__			__far__(STR(TEST_PAGE))
-#define __machine__		__far__(STR(MACHINE_PAGE))
+#define __far__(x)       __attribute__((far(x)))
+#define __common__		__far__(C_STRING(COMMON_PAGE))
+#define __transition__	__far__(C_STRING(TRANS_PAGE))
+#define __test__			__far__(C_STRING(TEST_PAGE))
+#define __machine__		__far__(C_STRING(MACHINE_PAGE))
 
 #define __naked__ __attribute__((naked))
 

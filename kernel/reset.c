@@ -120,9 +120,11 @@ void system_reset (void)
 
 	sys_init_complete++;
 
+#if 0
 	/* TODO : ??? why is this here ? */
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+#endif
 
 	amode_start ();
 

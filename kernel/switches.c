@@ -417,14 +417,14 @@ extern inline void switch_rowpoll (const U8 col)
 	 * the next read will come from column N+1.
 	 */
 	if (col == 0)
-		asm __volatile__ ("\tlda\t" STR(WPC_SW_CABINET_INPUT));
+		asm __volatile__ ("\tlda\t" C_STRING(WPC_SW_CABINET_INPUT));
 	else if (col <= 8)
-		asm __volatile__ ("\tlda\t" STR(WPC_SW_ROW_INPUT));
+		asm __volatile__ ("\tlda\t" C_STRING(WPC_SW_ROW_INPUT));
 	else /* if (col == 9) */
 #if (MACHINE_WPC95 == 1)
-		asm __volatile__ ("\tlda\t" STR(WPC95_FLIPPER_SWITCH_INPUT));
+		asm __volatile__ ("\tlda\t" C_STRING(WPC95_FLIPPER_SWITCH_INPUT));
 #else
-		asm __volatile__ ("\tlda\t" STR(WPC_FLIPTRONIC_PORT_A));
+		asm __volatile__ ("\tlda\t" C_STRING(WPC_FLIPTRONIC_PORT_A));
 #endif
 
 	/* Set up the column strobe for the next read (on the next
@@ -436,7 +436,7 @@ extern inline void switch_rowpoll (const U8 col)
 #else
 		asm __volatile__ ("\tldb\t%0" :: "g" (1 << col));
 #endif
-		asm __volatile__ ("\tstb\t" STR(WPC_SW_COL_STROBE));
+		asm __volatile__ ("\tstb\t" C_STRING(WPC_SW_COL_STROBE));
 	}
 
 	/* Process the switch column.

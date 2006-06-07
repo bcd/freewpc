@@ -59,6 +59,9 @@ extern U8 irq_count;
 #undef FALSE
 #define FALSE 0
 
+/* Define NULL */
+#define NULL 0UL
+
 /*
  * Define macros that let us print #defines which are strings.
  */
@@ -84,7 +87,13 @@ extern U8 irq_count;
 
 /* General stuff */
 #include <asm-6809.h>
+#include <env.h>
+//// #include <sys/errno.h>
+#ifdef MACHINE_PLATFORM_WHITESTAR
+#include <whitestar.h>
+#else
 #include <wpc.h>
+#endif
 #include <version.h>
 #include <misc.h>
 #include <math.h>
