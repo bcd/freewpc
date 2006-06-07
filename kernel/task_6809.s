@@ -35,8 +35,6 @@ L33:
 	cmpb	_task_largest_stack	;cmpqi:
 	bls	L29	;length = 2
 	stb	_task_largest_stack	;movqi: R:b -> _task_largest_stack
-	ldd	2,x	;movhi: 2,x -> R:d
-	std	_task_largest_stack_pc	;movhi: R:d -> _task_largest_stack_pc
 L29:
 	ldb	16380	;movqi: 16380 -> R:b
 	stb	17,x	;movqi: R:b -> 17,x
@@ -47,8 +45,7 @@ L29:
 _task_restore:
 	stx	*_task_current	;movhi: R:x -> *_task_current
 ; Begin inline assembler code
-	orcc	#0x10
-	orcc	#0x40
+	orcc	#(0x10|0x40)
 	ldu	#6136
 ; End of inline assembler code
 	ldb	10,x	;zero_extendqihi: 10,x -> R:d

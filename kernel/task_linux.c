@@ -28,7 +28,6 @@
 
 bool task_dispatching_ok = TRUE;
 U8 task_largest_stack = 0;
-U16 task_largest_stack_pc = 0;
 
 /** Also for debug, this tracks the maximum number of tasks needed. */
 #ifdef TASKCOUNT
