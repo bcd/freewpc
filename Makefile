@@ -28,6 +28,9 @@
 # MACHINE ?= $(shell if [ -h mach ]; then stat -c "%N" mach | awk '{print $3}' | tr -d "\`\'"; fi)
 MACHINE ?= tz
 
+# Set the location for temporary build output files
+BLD ?= build
+
 # Set this to the path where the final ROM image should be installed
 # This is left blank on purpose: set this in your user.make file.
 # There is no default value.
@@ -84,16 +87,17 @@ ERR = err
 TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
-LINKCMD = freewpc.lnk
-PAGED_LINKCMD = page56.lnk page57.lnk page58.lnk \
-	page59.lnk page60.lnk page61.lnk
+LINKCMD = $(BLD)/freewpc.lnk
+PAGED_LINKCMD = $(BLD)/page56.lnk $(BLD)/page57.lnk $(BLD)/page58.lnk \
+	$(BLD)/page59.lnk $(BLD)/page60.lnk $(BLD)/page61.lnk
 
 # The XBM prototype header file
 XBM_H = images/xbmproto.h
 
-SYSTEM_BINFILES = freewpc.bin
-PAGED_BINFILES = page56.bin page57.bin \
-					  page58.bin page59.bin page60.bin page61.bin
+SYSTEM_BINFILES = $(BLD)/freewpc.bin
+PAGED_BINFILES = $(BLD)/page56.bin $(BLD)/page57.bin $(BLD)/page58.bin \
+	$(BLD)/page59.bin $(BLD)/page60.bin $(BLD)/page61.bin
+
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
@@ -111,11 +115,11 @@ TMPFILES += *.c.[0-9]*.*
 TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
 TMPFILES += *.out
-TMPFILES += *.m41 	# Old M4 macro output files
 TMPFILES += page*.s	# Page header files
 TMPFILES += freewpc.s # System header file
 TMPFILES += *.callset # Callset files
 TMPFILES += $(ERR)
+TMPFILES += $(BLD)/*
 
 #######################################################################
 ###	Programs
@@ -459,7 +463,7 @@ VECTOR_AREA = 0xFFF0
 MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_TEST_OBJS))
 MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_PAGED_OBJS))
-SYSTEM_HEADER_OBJS =	freewpc.o
+SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 
 #
 # Define a mapping between object files and page numbers in
@@ -469,12 +473,12 @@ SYSTEM_HEADER_OBJS =	freewpc.o
 # for when the code wants to switch the page to a particular
 # class of function.
 #
-page56_OBJS = page56.o $(COMMON_OBJS)
-page57_OBJS = page57.o $(TRANS_OBJS)
-page58_OBJS = page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
-page59_OBJS = page59.o $(MACHINE_PAGED_OBJS)
-page60_OBJS = page60.o $(XBM_OBJS)
-page61_OBJS = page61.o $(FONT_OBJS) $(FON_OBJS)
+page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS)
+page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS)
+page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
+page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS)
+page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
+page61_OBJS = $(BLD)/page61.o $(FONT_OBJS) $(FON_OBJS)
 SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
 $(COMMON_OBJS) : PAGE=56
@@ -493,8 +497,8 @@ PAGED_OBJS = $(page56_OBJS) $(page57_OBJS) \
 				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
 
 
-PAGE_HEADER_OBJS = page56.o page57.o page58.o page59.o \
-						 page60.o page61.o
+PAGE_HEADER_OBJS = $(BLD)/page56.o $(BLD)/page57.o $(BLD)/page58.o $(BLD)/page59.o \
+						 $(BLD)/page60.o $(BLD)/page61.o
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
@@ -576,18 +580,18 @@ build : $(GAME_ROM)
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : blank$(BLANK_SIZE).bin $(BINFILES)
+$(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES)
 	@echo Padding ... && \
-		cat blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
+		cat $(BLD)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
 # in multiples of 1KB.
 #
-blank%.bin: blankpage.bin
+$(BLD)/blank%.bin: $(BLD)/blankpage.bin
 	@echo "Creating $*KB blank file ..." && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
 
-blankpage.bin: $(SR)
+$(BLD)/blankpage.bin: $(SR)
 	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
@@ -636,7 +640,7 @@ OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:
 # $1 = paged linkcmd file
 # Note: the object filenames of the form pageXX.o are skipped as the
 # bash code below already outputs these explicitly.
-OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(1)))
+OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(patsubst $(BLD)/%,%,$1)))
 
 ifeq ($(ASVER),4.1.0)
 DUP_PAGE_OBJ = $1
@@ -668,16 +672,16 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS)
 #
 # How to build the system page header source file.
 #
-freewpc.s:
+$(BLD)/freewpc.s:
 	@echo ".area sysrom" > $@
 
 
 #
 # How to build a page header source file.
 #
-page%.s:
-	@echo ".area page$*" >> page$*.s
-	@echo ".db 0" >> page$*.s
+$(BLD)/page%.s:
+	@echo ".area page$*" >> $@
+	@echo ".db 0" >> $@
 
 #
 # How to make the linker command file for the system section.
@@ -694,7 +698,7 @@ $(LINKCMD) : $(MAKE_DEPS)
 		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done ;\
 	echo "-b sysrom = $(FIXED_AREA)" >> $(LINKCMD) ;\
 	echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD) ;\
-	for f in `echo freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
+	for f in `echo $(BLD)/freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-v" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-k $(LIBC_DIR)/" >> $(LINKCMD) ;\
@@ -718,7 +722,7 @@ endif
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
-$(PAGE_HEADER_OBJS) : page%.o : page%.s $(REQUIRED) $(DEPS)
+$(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED) $(DEPS)
 	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< > $(ERR) 2>&1
 ifneq ($(ASVER), 1.5.2)
 	@mv $(@:.o=.rel) $@
