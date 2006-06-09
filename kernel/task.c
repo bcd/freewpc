@@ -160,7 +160,9 @@ void task_save (void)
 	/* Save U, X immediately to memory to free up some regs for
 	 * the rest of the function */
 	task_save_U = (U16)__u;
+#ifdef SAVE_X
 	task_save_X = (U16)__x;
+#endif
 
 	/* Get the PC by popping it off the stack */
 	__asm__ volatile ("puls\tu");
@@ -174,8 +176,10 @@ void task_save (void)
 	/* Save U (in task_save_U).  Use U to hold the data. */
 	__x->u = __u = task_save_U;
 
+#ifdef SAVE_X
 	/* Save X (in task_save_X).  Use U to hold the data. */
 	__x->x = __u = task_save_X;
+#endif
 
 	/* Save D and Y, already in registers */
 #if 0 /* A,B are volatile and do not need to be saved */
@@ -275,7 +279,9 @@ void task_restore (void)
 
 	__x->delay = 0;
 
+#ifdef SAVE_X
 	__asm__ volatile ("ldx	%0" :: "m" (__x->x));
+#endif
 
 	__asm__ volatile ("rts");
 }

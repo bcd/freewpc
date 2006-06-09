@@ -32,8 +32,9 @@ case $1 in
 	list)
 		svn list $SVNROOT/tags
 		;;
-	*)
-		echo "Syntax: svntag [set|list]"
+	help|*)
+		echo "Syntax: svntag [set|list] [tagname]"
+		echo "tagname should be checkpoints/yyyy-mm-dd or releases/xxx"
 		;;
 esac
 

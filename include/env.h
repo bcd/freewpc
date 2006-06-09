@@ -55,7 +55,7 @@
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 
-#define __naked__ __attribute__((naked))
+#define __naked__       __attribute__((naked))
 
 #define VOIDCALL(fn) \
 { \

@@ -45,7 +45,7 @@
 #
 
 # A list of directories to be searched.
-my @dirs = ("kernel", "common", "mach");
+my @SearchDirs = ("kernel", "common", "mach");
 
 # A hash that maps an event name to a list of
 # interested modules.  The module names are stored as a single
@@ -62,13 +62,22 @@ my %fntypehash;
 # allows for calls into paged areas.
 my %modulehash;
 
+# The target boolean type name
+my $bool_type = "bool";
+
+# The output file name
+$OutputFile = "build/callset.c";
+
+# A list of all include files that the result file will need
+# to include
+@IncludeFiles = ("freewpc.h");
 
 
 #############################################################
 # Build the list of all filenames to be searched.
 #############################################################
 
-foreach $dir (@dirs) {
+foreach $dir (@SearchDirs) {
 	my @files = split /\n+/, 
 		`cd $dir && find . -name "*.c" -or -name "*.h"`;
 	foreach $file (@files) {
@@ -106,7 +115,7 @@ foreach $src (@srclist) {
 		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
-				$fntypehash{$1} = "bool";
+				$fntypehash{$1} = $bool_type;
 			}
 		}
 	}
@@ -114,11 +123,30 @@ foreach $src (@srclist) {
 }
 
 #############################################################
+# Parse command-line arguments
+#############################################################
+
+while (my $arg = shift @ARGV) {
+	if ($arg =~ /^-o$/) {
+		$OutputFile = shift @ARGV;
+	}
+	elsif ($arg =~ /^--include$/) {
+		push @IncludeFileList, (shift @ARGV);
+	}
+	elsif ($arg =~ /^-D$/) {
+		push @SearchDirs, (shift @ARGV);
+	}
+}
+
+#############################################################
 # Write the output file.
 #############################################################
 
-open FH, ">callset/callset.c";
-print FH "#include <freewpc.h>\n";
+open FH, ">$OutputFile";
+for $include (@IncludeFiles) {
+	print FH "#include <$include>\n";
+}
+
 foreach $set (keys %functionhash) {
 	my $rettype = $fntypehash{$set};
 	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
@@ -132,14 +160,14 @@ foreach $set (keys %functionhash) {
 			$modifier = "";
 		}
 		print FH "extern $modifier $rettype ${module}_$set (void);\n";
-		if ($rettype eq "bool") {
+		if ($rettype eq $bool_type) {
 			print FH "if (!${module}_$set ()) return FALSE;\n";
 		}
 		else {
 			print FH "${module}_$set ();\n";
 		}
 	}
-	if ($rettype eq "bool") {
+	if ($rettype eq $bool_type) {
 		print FH "return TRUE;\n";
 	}
 	print FH "}\n\n";

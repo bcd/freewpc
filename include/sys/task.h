@@ -42,48 +42,54 @@
  */
 #define NUM_TASKS 48
 
+/*
+ * Define the size of the saved process stack.
+ *
+ * This value + 17 should equate a power of 2.
+ */
+#define TASK_STACK_SIZE		47
 
 /** Type for the group ID (gid) */
-typedef uint8_t task_gid_t;
+typedef U8 task_gid_t;
 
 /** Type for the number of task ticks.  1 task tick is the
  * smallest amount that a task can sleep. */
-typedef uint8_t task_ticks_t;
+typedef U8 task_ticks_t;
 
 /** Type for the entry point to a new task */
 typedef void (*task_function_t) (void);
 
-/** Type for the task structure */
+/** Type for the task structure.
+ * For proper saving/restoring, only the registers that are live
+ * across function calls need to be kept here.  The 6809 compiler
+ * allows functions to trash D and X, so they aren't here -- just
+ * U and Y.
+ *
+ * When adding/removing fields to this structure, adjust
+ * TASK_STACK_SIZE above accordingly so that the total size is
+ * a power of 2.
+ */
 typedef struct
 {
-	task_gid_t		gid;
-	uint8_t        unused;
-	uint16_t			pc;
-	uint16_t			next;
-	uint16_t			x; /* TODO : does this really need to be saved? */
-	uint16_t			y;
-	U8					stack_word_count;
-	U8					flags;
-	uint16_t			u;
-	uint8_t			delay;
-	uint8_t			asleep;
-	uint8_t			state;
-#if 0
-	uint8_t			a;
-	uint8_t			b;
-#else
-	uint8_t			rom_page;
-	uint8_t			unused_2;
-#endif
-	uint16_t			arg;
-	uint8_t			stack[TASK_STACK_SIZE];
+	task_gid_t	gid;
+	U16			next;
+	U16			pc;
+	U16			y;
+	U16			u;
+	U8				rom_page;
+	U8				stack_word_count;
+	U8				flags;
+	U8				delay;
+	U8				asleep;
+	U8				state;
+	U16			arg;
+	U8				stack[TASK_STACK_SIZE];
 } task_t;
 
 typedef task_t *task_pid_t;
 
-
-
 extern bool task_dispatching_ok;
+
 extern task_t *task_current;
 
 
@@ -138,8 +144,8 @@ bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
 void task_set_flags (U8 flags);
 void task_clear_flags (U8 flags);
-uint16_t task_get_arg (void);
-void task_set_arg (task_t *tp, uint16_t arg);
+U16 task_get_arg (void);
+void task_set_arg (task_t *tp, U16 arg);
 __noreturn__ void task_dispatcher (void);
 
 #define task_create_child(fn)		task_create_gid (task_getgid (), fn)

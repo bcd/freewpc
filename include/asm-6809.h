@@ -47,7 +47,7 @@ volatile
 #endif
 register unsigned char cc_reg asm ("cc");
 
-
+#if 0
 extern inline void __lda (uint8_t i)
 {
 	asm __volatile__ ("lda\t%0" :: "g" (i) : "d");
@@ -73,6 +73,8 @@ extern inline void __bytecopy (uint8_t *dst, uint8_t src)
 	__lda (src);
 	__sta (dst);
 }
+#endif
+
 
 extern inline void set_stack_pointer (const uint16_t s)
 {

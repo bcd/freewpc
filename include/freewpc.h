@@ -47,6 +47,7 @@ typedef long int16_t, I16, S16;
 typedef unsigned long uint16_t, U16;
 
 
+/* TODO - move these elsewhere */
 extern U8 sys_init_complete;
 extern U8 sys_init_pending_tasks;
 extern U8 irq_count;
@@ -67,17 +68,6 @@ extern U8 irq_count;
  */
 #define C_STRING(x)	C_STR(x)
 #define C_STR(x)		#x
-
-/*
- * Define the size of the process stack (TODO:
- * move this elsewhere)
- *
- * This value + 21 should be a nice round number.
- * Original : 43 ==> Total size of 64
- */
-#define TASK_STACK_SIZE		43
-/// #define TASK_STACK_SIZE		75
-/// #define TASK_STACK_SIZE		91
 
 /* Include the standard header files that are needed
  * by most modules */

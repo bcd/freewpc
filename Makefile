@@ -101,23 +101,21 @@ PAGED_BINFILES = $(BLD)/page56.bin $(BLD)/page57.bin $(BLD)/page58.bin \
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
-TMPFILES = *.sp		# Intermediate sasm assmebler files
-TMPFILES += *.o		# Intermediate object files
-TMPFILES += *.rel		# Intermediate object files (as 3.0.0)
-TMPFILES += *.lnk		# Linker command files
-TMPFILES += *.s19 	# Motorola S-record files
-TMPFILES += *.map 	# Linker map files
-TMPFILES += *.bin		# Raw binary images
+TMPFILES += *.o		# Intermediate object files (as < 3.0.0)
+TMPFILES += *.rel		# Intermediate object files (as >= 3.0.0) 
+# TMPFILES += *.lnk		# Linker command files
+# TMPFILES += *.s19 	# Motorola S-record files
+# TMPFILES += *.map 	# Linker map files
+# TMPFILES += *.bin		# Raw binary images
 TMPFILES += *.rom		# Complete ROM files
 TMPFILES += *.lst 	# Assembler listings
-TMPFILES += *.s1 *.s2 *.s3 *.s4 *.S 
+TMPFILES += *.S 
 TMPFILES += *.c.[0-9]*.* 
 TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
 TMPFILES += *.out
-TMPFILES += page*.s	# Page header files
-TMPFILES += freewpc.s # System header file
-TMPFILES += *.callset # Callset files
+# TMPFILES += page*.s	# Page header files
+# TMPFILES += freewpc.s # System header file
 TMPFILES += $(ERR)
 TMPFILES += $(BLD)/*
 
@@ -151,7 +149,7 @@ REQUIRED += $(CC) $(LD) $(AS)
 
 # Name of the S-record converter
 SR = tools/srec2bin/srec2bin
-PATH_REQUIRED += $(SR)
+REQUIRED += $(PWD)/$(SR)
 
 # Name of the blanker to use
 BLANKER = dd
@@ -162,6 +160,7 @@ XBMPROTO = tools/xbmproto
 
 # The Unix calculator
 BC = bc
+PATH_REQUIRED += $(BC)
 
 #######################################################################
 ###	Source and Binary Filenames
@@ -170,7 +169,7 @@ BC = bc
 FIXED_SECTION = sysrom
 
 KERNEL_OBJS = \
-	callset/callset.o \
+	build/callset.o \
 	kernel/ac.o \
 	kernel/adj.o \
 	kernel/audit.o \
@@ -276,7 +275,7 @@ CFLAGS += -I$(LIBC_DIR)/include
 endif
 
 # Program include directories
-CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR) -Icallset
+CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
 # Additional defines
 ifdef GCC_VERSION
@@ -823,15 +822,14 @@ gendefines_again: clean_gendefines gendefines
 #
 # How to automake callsets
 #
-callset:
-	mkdir -p callset
+callset: $(BLD)/callset.o
 
-callset/callset.c : callset $(MACH_LINKS) tools/gencallset
-	@echo "Generating callsets ... " && mkdir -p callset && tools/gencallset
+$(BLD)/callset.c : $(MACH_LINKS) tools/gencallset
+	@echo "Generating callsets ... " && tools/gencallset
 
 .PHONY : callset_again
 callset_again:
-	rm -rf callset && $(MAKE) callset
+	rm -rf $(BLD)/callset.c && $(MAKE) callset
 
 .PHONY : fonts clean-fonts
 fonts clean-fonts:
@@ -936,6 +934,8 @@ info:
 	@echo "CC_MODE = $(CC_MODE)"
 	@echo "ASFLAGS = $(ASFLAGS)"
 	@echo "BLANK_SIZE = $(BLANK_SIZE)"
+	@echo "REQUIRED = $(REQUIRED)"
+	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 
 #
 # 'make clean' does what you think.
@@ -950,7 +950,6 @@ clean_derived:
 	@for file in `echo $(XBM_H) mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
-		rm -rf callset && \
 		rm -rf .mach .include_mach
 
 show_objs:
