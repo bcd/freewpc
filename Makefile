@@ -45,6 +45,12 @@ TARGET_ROMPATH =
 # Which version of the assembler tools to use
 # Version 1.5.2 is no longer supported; it generates .rel files instead of .o
 ASVER ?= 4.1.0
+ifeq ($(ASVER),)
+ASVER := 4.1.0
+endif
+ifeq ($(ASVER),1.5.2)
+error astools version 1.5.2 no longer supported
+endif
 
 # Which version of the compiler to use
 GCC_VERSION ?= 3.4.6
