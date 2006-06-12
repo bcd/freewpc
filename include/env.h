@@ -21,6 +21,12 @@
 #ifndef _ENV_H
 #define _ENV_H
 
+/* Declare that certain things exist.  This is true of the 6809
+ * but may change later as we port to different architectures. */
+#define HAVE_NVRAM_SECTION
+#define HAVE_LOCAL_SECTION
+#define HAVE_PAGING
+
 /** noreturn is a standard GCC attribute and is always
  * available */
 #define __noreturn__ __attribute__((__noreturn__))
@@ -41,19 +47,23 @@
 #define __taskentry__
 #endif
 
+#ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))
+#endif
 
-#ifdef CONFIG_MULTIPLAYER
+#ifdef HAVE_LOCAL_SECTION
 #define __local__ __attribute__((section ("local")))
 #else
 #define __local__
 #endif
 
+#ifdef HAVE_PAGING
 #define __far__(x)       __attribute__((far(x)))
 #define __common__		__far__(C_STRING(COMMON_PAGE))
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
+#endif
 
 #define __naked__       __attribute__((naked))
 

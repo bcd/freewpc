@@ -27,8 +27,6 @@
 #define CALLSET_BOOL_ENTRY(module,set) \
 	bool module ## _ ## set (void)
 
-// #define CALLSET_INVOKE(set)
-
 #define callset_invoke(set)	VOIDCALL(callset_ ## set)
 
 #define callset_invoke_boolean(set)	\

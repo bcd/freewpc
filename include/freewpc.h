@@ -75,15 +75,23 @@ extern U8 irq_count;
 /* Main configuration - game specific */
 #include <mach/config.h>
 
-/* General stuff */
-#include <asm-6809.h>
+/* Processor specifics */
+#ifdef __M6809__
+#include <m6809/m6809.h>
+#endif
+#ifdef __I386__
+#endif
+
+/* Build system information */
 #include <env.h>
-//// #include <sys/errno.h>
+
+/* Platform specifics */
 #ifdef MACHINE_PLATFORM_WHITESTAR
 #include <whitestar.h>
 #else
 #include <wpc.h>
 #endif
+
 #include <version.h>
 #include <misc.h>
 #include <math.h>

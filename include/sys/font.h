@@ -27,10 +27,19 @@
  */
 typedef struct
 {
+	/** The maximum character width, in bits */
 	U8 width;
+
+	/** The maximum character width, in bytes */
 	U8 bytewidth;
+
+	/** The preferred spacing between characters, in bits */
 	U8 spacing;
+
+	/** The normal height of all characters, in bits */
 	U8 height;
+
+	/** A pointer to the table of glyphs */
 	char **glyphs;
 } font_t;
 
@@ -51,9 +60,13 @@ extern const font_t font_utopia;
 extern const font_t font_legacy5x5;
 extern const font_t font_legacy9x6;
 
-#define font_5x5 font_mono5
-#define font_9x6 font_mono9
 
+/**
+ *  A descriptor that encapsulates a font, a position
+ *  on the display, and a constant string to be rendered
+ *  there.  It is primarily to avoid passing too many
+ *  arguments to subroutines.
+ */
 typedef struct
 {
 	const font_t *font;

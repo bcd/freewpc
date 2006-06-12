@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <asm-6809.h>
 
 /**
  * \file

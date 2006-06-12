@@ -229,10 +229,10 @@ void amode_deff (void) __taskentry__
 		/** Display game title message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_5x5, 64, 10, "BACK TO THE ZONE");
+		font_render_string_center (&font_mono5, 64, 10, "BACK TO THE ZONE");
 		starfield_start ();
 		dmd_copy_low_to_high ();
-		font_render_string_center (&font_5x5, 64, 20, "TZ 2006");
+		font_render_string_center (&font_mono5, 64, 20, "TZ 2006");
 		deff_swap_low_high (19, TIME_100MS * 2);
 		starfield_stop ();
 

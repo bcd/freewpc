@@ -28,6 +28,12 @@
 # MACHINE ?= $(shell if [ -h mach ]; then stat -c "%N" mach | awk '{print $3}' | tr -d "\`\'"; fi)
 MACHINE ?= tz
 
+# Set this to the name of the platform.  Normally this should be set
+# by the machine's Makefile.  Default to WPC for now.
+PLATFORM ?= wpc
+#PLATFORM = whitestar
+#PLATFORM = linux
+
 # Set the location for temporary build output files
 BLD ?= build
 
@@ -37,21 +43,20 @@ BLD ?= build
 TARGET_ROMPATH =
 
 # Which version of the assembler tools to use
-# ASVER ?= 1.5.2
+# Version 1.5.2 is no longer supported; it generates .rel files instead of .o
 ASVER ?= 3.0.0
-NEWAS ?= 1
 
 # Which version of the compiler to use
 GCC_VERSION ?= 3.3.6
 
-# Set to 'y' if you want to use the direct page (not working yet)
-USE_DIRECT_PAGE ?= y
+# Set to 'y' if you want to use the direct page
+USE_DIRECT_PAGE := y
 
 # Set to 'y' if you want to enable multiplayer games
 USE_LOCALS ?= y
 
 # Set to 'y' if you want to save the assembly sources
-SAVE_ASM ?= y
+SAVE_ASM ?= n
 
 # Set to 'y' if you want to link with libc.
 USE_LIBC ?= n
@@ -75,8 +80,6 @@ DEBUG_COMPILER ?= n
 LIBC_DIR = ./libc
 INCLUDE_DIR = ./include
 MACHINE_DIR = ./$(MACHINE)
-ASTOOLS_DIR = as-$(ASVER)/asxmak/linux/build
-
 
 #######################################################################
 ###	Filenames
@@ -103,10 +106,6 @@ TMPFILES += $(LINKCMD)
 
 TMPFILES += *.o		# Intermediate object files (as < 3.0.0)
 TMPFILES += *.rel		# Intermediate object files (as >= 3.0.0) 
-# TMPFILES += *.lnk		# Linker command files
-# TMPFILES += *.s19 	# Motorola S-record files
-# TMPFILES += *.map 	# Linker map files
-# TMPFILES += *.bin		# Raw binary images
 TMPFILES += *.rom		# Complete ROM files
 TMPFILES += *.lst 	# Assembler listings
 TMPFILES += *.S 
@@ -114,8 +113,6 @@ TMPFILES += *.c.[0-9]*.*
 TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
 TMPFILES += *.out
-# TMPFILES += page*.s	# Page header files
-# TMPFILES += freewpc.s # System header file
 TMPFILES += $(ERR)
 TMPFILES += $(BLD)/*
 
@@ -130,22 +127,14 @@ CC := $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
 CC := $(GCC_ROOT)/gcc
 endif
-ifeq ($(SAVE_ASM),y)
-CC_MODE ?= -S
-else
-CC_MODE = -c
-endif
-# CC_MODE = -E
-# LD = $(GCC_ROOT)/ld
-LD = $(GCC_ROOT)/ld-$(ASVER)
-ifeq ($(NEWAS),1)
-AS = $(GCC_ROOT)/as-$(ASVER)
-else
-AS = $(GCC_ROOT)/as
-ASVER := 1.5.2
-endif
-REQUIRED += $(CC) $(LD) $(AS)
 
+# We use the latest versions of astools, version 4.1.0
+LD6809 = $(GCC_ROOT)/aslink
+LD = $(GCC_ROOT)/ld
+AS6809 = $(GCC_ROOT)/as6809
+AS = $(GCC_ROOT)/as
+
+REQUIRED += $(CC) $(LD6809) $(AS6809) $(LD) $(AS)
 
 # Name of the S-record converter
 SR = tools/srec2bin/srec2bin
@@ -157,6 +146,9 @@ PATH_REQUIRED += $(BLANKER)
 
 # The XBM prototype generator
 XBMPROTO = tools/xbmproto
+
+# The gendefine script
+GENDEFINE = tools/gendefine
 
 # The Unix calculator
 BC = bc
@@ -261,6 +253,10 @@ export FON_SRCS
 
 CFLAGS = $(EXTRA_CFLAGS)
 
+ifeq ($(SAVE_ASM),y)
+CFLAGS += -save-temps
+endif
+
 ifeq ($(USE_LOCALS),y)
 CFLAGS += -DCONFIG_MULTIPLAYER
 endif
@@ -344,8 +340,10 @@ CFLAGS += -Wall -Wno-format
 # I'd like to use this sometimes, but some things don't compile with it...
 # CFLAGS += -fno-defer-pop
 
+#
+# Define lots of other things based on make parameters
+#
 CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
-
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER
 ifeq ($(FREEWPC_IRQPROFILE),y)
@@ -383,19 +381,15 @@ ifeq ($(FREE_ONLY),y)
 CFLAGS += -DFREE_ONLY
 endif
 
-#
-# Newer versions of the assembler need extra flags to be passed in.
-#
-ifeq ($(ASVER),1.5.2)
-ASFLAGS =
-else
-ASFLAGS = -log
-endif
-
 #######################################################################
 ###	Include Machine Extensions
 #######################################################################
 include $(MACHINE)/Makefile
+
+#######################################################################
+###	Include Platform Extensions
+#######################################################################
+-include Makefile.$(PLATFORM)
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
@@ -659,6 +653,7 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS)
 		do echo "-b $$f = $(PAGED_AREA)" >> $@ ;\
 	done ;\
 	echo "-b sysrom = $(FIXED_AREA)" >> $@ ;\
+	echo "-o" >> $@ ;\
 	echo "$(@:.lnk=.o)" >> $@ ;\
 	echo "$(call DUP_PAGE_OBJ,$(@:.lnk=.o))" >> $@ ;\
 	for f in `echo $(call OBJ_PAGE_LIST,$@)` ;\
@@ -712,28 +707,14 @@ $(LINKCMD) : $(MAKE_DEPS)
 # is invoked first.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
-	@echo Assembling $< ... && $(AS) $(ASFLAGS) $< > $(ERR) 2>&1
-ifneq ($(ASVER), 1.5.2)
-	@mv $*.rel $*.o
-endif
+	@echo Assembling $< ... && $(AS) -o $@ $< > $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED) $(DEPS)
-	@echo Assembling page header $< ... && $(AS) $(ASFLAGS) $< > $(ERR) 2>&1
-ifneq ($(ASVER), 1.5.2)
-	@mv $(@:.o=.rel) $@
-endif
-
-#
-# General rule for how to build any C++ module.
-#
-#tz/cpptest.o : %.o : %.cpp $(REQUIRED) $(DEPS) $(GENDEFINES)
-#	@echo Compiling $< ... && $(CC) -o $(@:.o=.S) -S $(CFLAGS) $<
-#	@echo Assembling $(@:.o=.S) ... && $(AS) $(@:.o=.S)
-#
+	@echo Assembling page header $< ... && $(AS) -o $@ $< > $(ERR) 2>&1
 
 #
 # General rule for how to build any C or XBM module.
@@ -755,23 +736,16 @@ $(XBM_OBJS) : %.o : %.xbm
 $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
-ifneq ($(CC_MODE),-c)
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $(@:.o=.S) $(CFLAGS) $(CC_MODE) $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< && $(AS) $(ASFLAGS) $(@:.o=.S) > $(ERR) 2>&1
-ifneq ($(ASVER),1.5.2)
-	@mv $(@:.o=.rel) $@
-endif
-else
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< > $(ERR) 2>&1
-endif
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< > $(ERR) 2>&1
 
 #
 # For testing the compiler on sample code
 #
 ctest:
-	echo "Test compiling $< ..." && $(CC) -o ctest.o $(CFLAGS) $(CC_MODE) ctest.c
+	echo "Test compiling $< ..." && $(CC) -o ctest.o $(CFLAGS) -c ctest.c
 
 cpptest:
-	@echo Test compiling $< ... && $(CC) -o cpptest.S $(CFLAGS) $(CC_MODE) cpptest.cpp
+	@echo Test compiling $< ... && $(CC) -o cpptest.S $(CFLAGS) -c cpptest.cpp
 
 #######################################################################
 ###	Header File Targets
@@ -794,23 +768,23 @@ gendefines: $(GENDEFINES) $(MACH_LINKS)
 
 include/gendefine_gid.h :
 	@echo Autogenerating task IDs... && \
-		tools/gendefine -p GID_ > include/gendefine_gid.h
+		$(GENDEFINE) -p GID_ > $@
 
 include/gendefine_deff.h :
 	@echo Autogenerating display effect IDs... && \
-		tools/gendefine -p DEFF_ -c MAX_DEFFS > include/gendefine_deff.h
+		$(GENDEFINE) -p DEFF_ -c MAX_DEFFS > $@
 
 include/gendefine_leff.h :
 	@echo Autogenerating lamp effect IDs... && \
-		tools/gendefine -p LEFF_ -c MAX_LEFFS > include/gendefine_leff.h
+		$(GENDEFINE) -p LEFF_ -c MAX_LEFFS > $@
 
 include/gendefine_lampset.h :
 	@echo Autogenerating lampset IDs... && \
-		tools/gendefine -p LAMPSET_ -c MAX_LAMPSET > include/gendefine_lampset.h
+		$(GENDEFINE) -p LAMPSET_ -c MAX_LAMPSET > $@
 
 include/gendefine_devno.h :
 	@echo Autogenerating device IDs... && \
-		tools/gendefine -p DEVNO_ -f 0 -c NUM_DEVICES > include/gendefine_devno.h
+		$(GENDEFINE) -p DEVNO_ -f 0 -c NUM_DEVICES > $@
 
 .PHONY : clean_gendefines
 clean_gendefines:
@@ -838,23 +812,6 @@ fonts clean-fonts:
 #######################################################################
 ###	Tools
 #######################################################################
-
-#
-# 'make astools' will build the assembler, linker, and library
-# manager.  As with gcc, -install will also install it and any
-# other suffix will pass those options to the astools makefile.
-#
-astools: astools-build astools-install
-
-astools-install:
-	cp -p $(ASTOOLS_DIR)/aslink $(LD)
-
-astools-build:
-	cd asm-thomson && $(MAKE) && $(MAKE) install
-	cd $(ASTOOLS_DIR) && $(MAKE)
-
-astools-%:
-	cd $(ASTOOLS_DIR) && $(MAKE) $*
 
 #
 # How to build the srec2bin utility, which is a simple S-record to
@@ -931,8 +888,6 @@ info:
 	-@$(AS)
 	@echo "CFLAGS = $(CFLAGS)"
 	@echo "PAGEFLAGS = $(PAGEFLAGS)"
-	@echo "CC_MODE = $(CC_MODE)"
-	@echo "ASFLAGS = $(ASFLAGS)"
 	@echo "BLANK_SIZE = $(BLANK_SIZE)"
 	@echo "REQUIRED = $(REQUIRED)"
 	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"

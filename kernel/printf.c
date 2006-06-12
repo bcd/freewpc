@@ -20,7 +20,7 @@
  */
 
 #include <freewpc.h>
-#include <m6809_math.h>
+#include <m6809/math.h>
 
 /**
  * \file

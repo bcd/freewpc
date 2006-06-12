@@ -33,6 +33,7 @@ U8 *current_score;
 score_t bonus_score;
 U8 debug_value;
 
+
 void scores_draw_ball (void)
 {
 #ifdef SHOW_DEBUG_VALUE

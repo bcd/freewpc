@@ -44,7 +44,7 @@ void tz_clock_test_init (void)
 void tz_clock_test_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 2, "CLOCK MECH. TEST");
+	font_render_string_center (&font_mono5, 64, 2, "CLOCK MECH. TEST");
 	switch (clock_test_setting)
 	{
 		case -2: sprintf ("BACKWARD FAST"); break;
@@ -53,7 +53,7 @@ void tz_clock_test_draw (void)
 		case 1: sprintf ("FORWARD SLOW"); break;
 		case 2: sprintf ("FORWARD FAST"); break;
 	}
-	font_render_string_center (&font_5x5, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
 	dmd_show_low ();
 }
 

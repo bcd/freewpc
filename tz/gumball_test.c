@@ -16,7 +16,7 @@ void tz_gumball_test_init (void)
 void tz_gumball_test_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 2, "GUMBALL TEST");
+	font_render_string_center (&font_mono5, 64, 2, "GUMBALL TEST");
 	dmd_show_low ();
 }
 

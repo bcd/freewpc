@@ -42,11 +42,7 @@
 # Any of the 3.4.x series should work OK.
 #GCC_VERSION := 3.4.6
 
-# If using astools prior to 3.0 , uncomment both of the following:
-#NEWAS = 0
-#ASVER =
-
-# If using anything newer than 3.0, just set ASVER:
+# Set the assembler.  Versions 3.0.0 and higher are supported
 #ASVER := 4.1.0
 
 # Uncomment if you want to build a FREE ONLY ROM.

@@ -245,12 +245,12 @@ void browser_draw (void)
 
 	dmd_alloc_low_clean ();
 
-	font_render_string_center (&font_5x5, 64, 2, m->name);
+	font_render_string_center (&font_mono5, 64, 2, m->name);
 
 	if (browser_item_number)
 	{
 		(*browser_item_number) (menu_selection);
-		font_render_string (&font_5x5, 8, 20, sprintf_buffer);
+		font_render_string (&font_mono5, 8, 20, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -285,7 +285,7 @@ struct window_ops browser_window = {
 
 void browser_print_operation (const char *s)
 {
-	font_render_string (&font_5x5, 56, 20, s);
+	font_render_string (&font_mono5, 56, 20, s);
 }
 
 /**********************************************************/
@@ -549,11 +549,11 @@ void adj_browser_draw (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%d. %s", menu_selection+1, ad->name);
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
 	if (ad->nvram == NULL)
 	{
-		font_render_string_center (&font_5x5, 32, 20, "N/A");
+		font_render_string_center (&font_mono5, 32, 20, "N/A");
 	}
 	else
 	{
@@ -562,10 +562,10 @@ void adj_browser_draw (void)
 		else if (ad->nvram)
 			ad->values->render (adj_edit_value = *(ad->nvram));
 
-		font_render_string_center (&font_5x5, 32, 21, sprintf_buffer);
+		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 
 		if (adj_edit_value == ad->factory_default)
-			font_render_string_center (&font_5x5, 96, 21, "DEFAULT");
+			font_render_string_center (&font_mono5, 96, 21, "DEFAULT");
 	}
 
 	if (browser_action == ADJ_EDITING)
@@ -761,11 +761,11 @@ void audit_browser_draw (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%d. %s", menu_selection+1, aud->name);
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
 	if (aud->nvram)
 		aud->render (*(aud->nvram));
-	font_render_string_center (&font_5x5, 32, 21, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -900,7 +900,7 @@ void menu_draw (void)
 
 	dmd_alloc_low_clean ();
 
-	font_render_string (&font_5x5, 8, 4, m->name);
+	font_render_string (&font_mono5, 8, 4, m->name);
 
 	subm = m->var.submenus;
 	if (subm != NULL)
@@ -913,11 +913,11 @@ void menu_draw (void)
 		{
 			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
 		}
-		font_render_string (&font_5x5, 8, 14, sprintf_buffer);
+		font_render_string (&font_mono5, 8, 14, sprintf_buffer);
 	}
 	else
 	{
-		font_render_string (&font_5x5, 8, 14, "ERROR... NO SUBMENUS");
+		font_render_string (&font_mono5, 8, 14, "ERROR... NO SUBMENUS");
 	}
 	dmd_show_low ();
 }
@@ -997,8 +997,8 @@ const font_t *font_test_lookup (void)
 {
 	switch (menu_selection)
 	{
-		case 0: default: return &font_5x5;
-		case 1: return &font_9x6;
+		case 0: default: return &font_mono5;
+		case 1: return &font_mono9;
 		case 2: return &font_fixed10;
 		case 3: return &font_fixed6;
 		case 4: return &font_lucida9;
@@ -1030,7 +1030,7 @@ void font_test_draw (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("FONT %d", menu_selection+1);
-	font_render_string_center (&font_5x5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 
 	dmd_show_low ();
 	task_sleep (TIME_100MS * 5);
@@ -1231,27 +1231,27 @@ void dev_balldev_test_draw (void)
 	if ((dev == NULL) || (dev->props == NULL))
 	{
 		sprintf ("DEV %d NOT INSTALLED", menu_selection);
-		font_render_string_center (&font_5x5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 	}
 	else
 	{
 		sprintf ("DEV %d   %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_5x5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 	
 		sprintf ("SIZE %d", dev->size);
-		font_render_string (&font_5x5, 8, 7, sprintf_buffer);
+		font_render_string (&font_mono5, 8, 7, sprintf_buffer);
 
 		sprintf ("COUNT %d", dev->actual_count);
-		font_render_string (&font_5x5, 8, 13, sprintf_buffer);
+		font_render_string (&font_mono5, 8, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_5x5, 8, 19, sprintf_buffer);
+		font_render_string (&font_mono5, 8, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_5x5, 72, 7, sprintf_buffer);
+		font_render_string (&font_mono5, 72, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_5x5, 72, 13, sprintf_buffer);
+		font_render_string (&font_mono5, 72, 13, sprintf_buffer);
 
 		switch (browser_action)
 		{
@@ -1260,7 +1260,7 @@ void dev_balldev_test_draw (void)
 			case 2: s = "ENABLE LOCK"; break;
 			case 3: s = "DISABLE LOCK"; break;
 		}
-		font_render_string_center (&font_5x5, 64, 28, s);
+		font_render_string_center (&font_mono5, 64, 28, s);
 	}
 
 	dmd_show_low ();
@@ -1387,9 +1387,9 @@ void dev_soundedit_draw (void)
 		sprintf ("%s %02d",
 			(dev_soundedit_page_start+i == dev_soundedit_cursor) ? "X" : "O",
 			dev_soundedit_page_start+i);
-		font_render_string (&font_5x5, 16, i*6+1, sprintf_buffer);
+		font_render_string (&font_mono5, 16, i*6+1, sprintf_buffer);
 		dev_soundedit_print_op (dev_soundedit_program[dev_soundedit_page_start+i]);
-		font_render_string (&font_5x5, 48, i*6+1, sprintf_buffer);
+		font_render_string (&font_mono5, 48, i*6+1, sprintf_buffer);
 	}
 	dmd_show_low ();
 }
@@ -1983,7 +1983,7 @@ void sound_test_set_draw (void)
 			break;
 #endif
 	}
-	font_render_string_center (&font_5x5, 64, 9, s);
+	font_render_string_center (&font_mono5, 64, 9, s);
 }
 
 void sound_test_set_change (void)
@@ -2089,7 +2089,7 @@ void solenoid_test_draw (void)
 		case TIME_100MS: s = "HARD PULSE"; break;
 		case TIME_133MS: s = "VERY HARD PULSE"; break;
 	}
-	font_render_string_center (&font_5x5, 64, 12, s);
+	font_render_string_center (&font_mono5, 64, 12, s);
 }
 
 void solenoid_test_enter (void)
@@ -2174,7 +2174,7 @@ void gi_test_draw (void)
 	browser_draw ();
 	browser_print_operation (gi_test_names[menu_selection]);
 	sprintf ("BRIGHTNESS %d", triac_get_brightness ());
-	font_render_string_center (&font_5x5, 64, 29, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 
 	triac_disable (TRIAC_GI_MASK);
 	triac_enable (gi_test_values[menu_selection]);
@@ -2364,13 +2364,13 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_5x5, 64, 3, "DIP SWITCHES");
+	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCHES");
 
 #ifndef GCC4
 	for (sw = 0; sw < 8; sw++)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
-		font_render_string (&font_5x5, 
+		font_render_string (&font_mono5, 
 			(sw <= 3) ? 8 : 72, 
 			(sw % 4) * 6 + 9, 
 			sprintf_buffer);
@@ -2523,9 +2523,9 @@ void scroller_draw (void)
 
 	dmd_alloc_low_clean ();
 	s[offset * 2] ();
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	s[offset * 2 + 1] ();
-	font_render_string_center (&font_5x5, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
 

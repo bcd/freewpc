@@ -21,8 +21,15 @@
 #ifndef _AUDIT_H
 #define _AUDIT_H
 
+/**
+ * An audit variable.  Audits are 16-bit integers stored in
+ * non-volatile memory.
+ */
 typedef uint16_t audit_t;
 
+/**
+ * The table of standard WPC system audits.
+ */
 typedef struct
 {
 	audit_t coins_added[4];

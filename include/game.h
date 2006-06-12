@@ -22,7 +22,6 @@
 #define _GAME_H
 
 #define MAX_PLAYERS 4
-#define MAX_BALLS_PER_GAME 3
 
 extern uint8_t in_game;
 extern uint8_t in_bonus;

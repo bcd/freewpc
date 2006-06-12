@@ -21,11 +21,19 @@
 #ifndef _WINDOW_H
 #define _WINDOW_H
 
-/* The window operations structure (window class). */
+/** The window operations structure (window class).
+ * In test mode, these are callbacks that get invoked to
+ * perform specific operations, depending on which
+ * buttons are pressed.
+ */
 struct window_ops
 {
-	/** Constructor/destructor functions */
+	/** A constructor function that executes right after
+	 * the window is created */
 	void (*init) (void);
+
+	/** A denstructor function that executes just before
+	 * the window is destroyed */
 	void (*exit) (void);
 
 	/** suspend/resume are called whenever the
@@ -35,9 +43,10 @@ struct window_ops
 	void (*suspend) (void);
 	void (*resume) (void);
 
-	/* The draw function, called just about every
+	/** The draw function, called just about every
 	 * time something changes.  Draw functions are
-	 * always called after the key handlers below. */
+	 * always called after the key handlers below.
+	 * It must be fast, and should not sleep. */
 	void (*draw) (void);
 
 	/** Key handlers **/
@@ -50,12 +59,18 @@ struct window_ops
 	void (*start) (void);
 
 	/** Thread function.  This should be set to NULL
-	 * if the window doesn't need a thread. */
+	 * if the window doesn't need a thread.   Otherwise,
+	 * a thread will be spawned to this function whenever
+	 * the window is active.  (Note, this is different
+	 * than the behavior of init/exit.  When a new submenu
+	 * is entered, the old window's thread will be stopped,
+	 * but its exit isn't called.)
+	 */
 	void (*thread) (void);
 };
 
 
-/* The default window constructor.
+/** The default window constructor.
  *
  * We use a gcc trick here to simulate object-oriented
  * behavior.  In a structue, if you have two named
@@ -91,7 +106,7 @@ struct window_ops
 struct menu;
 
 
-/* The window object.  These are RAM objects that store the
+/** The window object.  These are RAM objects that store the
  * state of a particular instance of a window.
  *
  * The w_class union is used to hold custom data needed for
@@ -126,18 +141,7 @@ struct window
 
 /** window_call_op() is a macro for invoking one of the
  * window_ops.  This is done so that tracing can be added
- * here, rather than throughout the code. */
-#if 0
-#define window_call_op(win, op) \
-do { \
-	if (win->ops->op) \
-	{ \
-		(*win->ops->op) (); \
-	} \
-} while (0)
-#else
+ * here, rather than throughout the code, if needed. */
 #define window_call_op(win, op)	win->ops->op ()
-#endif
-
 
 #endif /* _WINDOW_H */

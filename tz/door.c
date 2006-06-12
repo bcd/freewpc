@@ -127,7 +127,7 @@ void door_award_deff (void)
 {
 	dmd_alloc_low_clean ();
 	printf ("%s", door_panel_names[door_index]);
-	font_render_string_center (&font_5x5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	printf (
 		(door_panels_started != 1) ? "%d DOOR PANELS" : "%d DOOR PANEL", 
 		door_panels_started);
