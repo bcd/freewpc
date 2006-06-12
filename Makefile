@@ -44,10 +44,10 @@ TARGET_ROMPATH =
 
 # Which version of the assembler tools to use
 # Version 1.5.2 is no longer supported; it generates .rel files instead of .o
-ASVER ?= 3.0.0
+ASVER ?= 4.1.0
 
 # Which version of the compiler to use
-GCC_VERSION ?= 3.3.6
+GCC_VERSION ?= 3.4.6
 
 # Set to 'y' if you want to use the direct page
 USE_DIRECT_PAGE := y
