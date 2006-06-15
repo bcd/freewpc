@@ -110,11 +110,10 @@ PAGED_BINFILES = $(BLD)/page56.bin $(BLD)/page57.bin $(BLD)/page58.bin \
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
-TMPFILES += *.o		# Intermediate object files (as < 3.0.0)
-TMPFILES += *.rel		# Intermediate object files (as >= 3.0.0) 
-TMPFILES += *.rom		# Complete ROM files
-TMPFILES += *.lst 	# Assembler listings
-TMPFILES += *.S 
+TMPFILES += *.o
+TMPFILES += *.rom
+TMPFILES += *.lst
+TMPFILES += *.S
 TMPFILES += *.c.[0-9]*.* 
 TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
@@ -604,7 +603,7 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 # a Motorola S-record file by default (S19).
 #
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
-	@echo Linking $@... && $(LD) -f $< >> $(ERR) 2>&1
+	@echo Linking $@... && $(LD6809) -f $< >> $(ERR) 2>&1
 
 #
 # How to make the linker command file for a paged section.
