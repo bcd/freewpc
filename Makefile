@@ -114,6 +114,7 @@ TMPFILES += *.o
 TMPFILES += *.rom
 TMPFILES += *.lst
 TMPFILES += *.S
+TMPFILES += *.i
 TMPFILES += *.c.[0-9]*.* 
 TMPFILES += *.fon.[0-9]*.* 
 TMPFILES += *.xbm.[0-9]*.* 
