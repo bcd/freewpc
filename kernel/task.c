@@ -237,14 +237,18 @@ void task_restore (void)
 
 	task_current = __x;
 
-	/* Restore stack */
+	/* Restore stack.  This must be done with interrupts disabled. */
 	disable_irq ();
 	disable_firq ();
-	/* Get live stack area pointer in u */
-	__asm__ volatile ("ldu\t%0" :: "i" (STACK_BASE));
 
 	/* Get stack save area pointer in y */
 	__asm__ volatile ("leay\t,%0" :: "a" (__x->stack + __x->stack_word_count));
+
+	/* Get live stack area pointer in u.
+	 * Note, this must be done AFTER the previous statement, since it might
+	 * use the U register in the calculation (seen in newer GCC builds).
+	 */
+	__asm__ volatile ("ldu\t%0" :: "i" (STACK_BASE));
 
 	/* Copy */
 	__b = __x->stack_word_count;
@@ -258,9 +262,6 @@ void task_restore (void)
 
 	/* Save stack pointer to S */
 	__asm__ volatile ("leas\t,u");
-
-	/// /* Restore __x as task_current */
-	/// __x = task_current;
 
 	enable_firq ();
 	enable_irq ();
