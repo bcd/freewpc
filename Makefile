@@ -310,6 +310,9 @@ endif
 # Options to control the output section names
 CFLAGS += -mcode-section=sysrom -mdata-section=sysrom -mbss-section=ram
 
+# Use 8-bit integers by default for now.
+CFLAGS += -mint8
+
 # Default optimizations.  -O2 works OK for me, but hasn't always; you might
 # want to fall back to -O1 if you have problems.
 ifndef OPT

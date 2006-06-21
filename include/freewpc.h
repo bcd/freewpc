@@ -40,12 +40,21 @@ extern "C" {
 #ifndef __cplusplus
 typedef unsigned char bool;
 #endif
+
+/* 8-bit integers are always 'char' */
 typedef unsigned char bcd_t, BCD;
 typedef signed char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
+
+/* 16-bit integers depend on the compiler */
+#if defined(__m6809__) && defined(__int8__)
 typedef long int16_t, I16, S16;
 typedef unsigned long uint16_t, U16;
-
+#endif
+#if defined(__m6809__) && defined(__int16__)
+typedef int int16_t, I16, S16;
+typedef unsigned int uint16_t, U16;
+#endif
 
 /* TODO - move these elsewhere */
 extern U8 sys_init_complete;
