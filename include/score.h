@@ -101,7 +101,7 @@ void score_init (void);
 
 #define score_add_current_const(val) \
 { \
-	static U8 score[] = score_decl(val); \
+	static const U8 score[] = score_decl(val); \
 	score_add_current (score); \
 }
 
