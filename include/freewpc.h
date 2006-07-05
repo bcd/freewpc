@@ -47,13 +47,12 @@ typedef signed char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
 
 /* 16-bit integers depend on the compiler */
-#if defined(__m6809__) && defined(__int8__)
-typedef long int16_t, I16, S16;
-typedef unsigned long uint16_t, U16;
-#endif
 #if defined(__m6809__) && defined(__int16__)
 typedef int int16_t, I16, S16;
 typedef unsigned int uint16_t, U16;
+#else /* default assumes -mint8 on wpc */
+typedef long int16_t, I16, S16;
+typedef unsigned long uint16_t, U16;
 #endif
 
 /* TODO - move these elsewhere */
