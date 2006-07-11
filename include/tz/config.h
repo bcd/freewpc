@@ -132,6 +132,29 @@
 	&tz_clock_test_item, \
 	&tz_gumball_test_item,
 
+/* Define additional feature adjustments.  You must define both a struct,
+ * named feature_adj_t, that contains the storage for the adjustments,
+ * as well as test mode descriptions to be included, named
+ * MACHINE_FEATURE_ADJUSTMENTS. */
+typedef struct
+{
+	U8 ball_saves;
+	U8 ball_save_time;
+	U8 installed_balls;
+	U8 disable_clock;
+	U8 disable_gumball;
+	U8 powerball_missing;
+	U8 third_magnet;
+} feature_adj_t;
+
+#define MACHINE_FEATURE_ADJUSTMENTS \
+	{ "BALL SAVES", &integer_value, 1, &feature_config.ball_saves }, \
+	{ "BALL SAVE TIME", &integer_value, 7, &feature_config.ball_save_time }, \
+	{ "INSTALLED BALLS", &integer_value, 6, &feature_config.installed_balls }, \
+	{ "DISABLE CLOCK", &yes_no_value, NO, &feature_config.disable_clock }, \
+	{ "DISABLE GUMBALL", &yes_no_value, NO, &feature_config.disable_gumball }, \
+	{ "POWERBALL MISSING", &yes_no_value, NO, &feature_config.powerball_missing }, \
+	{ "3RD MAGNET INSTALLED", &yes_no_value, NO, &feature_config.third_magnet },
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];

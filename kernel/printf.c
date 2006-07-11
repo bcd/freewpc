@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -272,7 +271,11 @@ do_long_hex_integer:
 
 				case 'b':
 				{
-					register bcd_t *bcd  = va_arg (va, bcd_t *);
+					/* TODO : this used to be a 'register' variable, but
+					 * with the most recent gcc, that causes incorrect
+					 * values to be displayed.  'static' works though... */
+					static bcd_t *bcd;
+					bcd = va_arg (va, bcd_t *);
 					endbuf = buf;
 					while (sprintf_width != 0)
 					{

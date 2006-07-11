@@ -55,6 +55,11 @@
  * end of the transition.
  */
 
+void trans_scroll_up_init (void)
+{
+	dmd_trans_data_ptr = dmd_low_buffer;
+}
+
 void trans_scroll_up_old (void)
 {
 	/* dmd_low_buffer = old image data */
@@ -73,9 +78,6 @@ void trans_scroll_up_new (void)
 	/* dmd_high_buffer = composite buffer */
 	register U16 arg = dmd_transition->arg;
 
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = dmd_low_buffer;
-
 	__blockcopy16 (dmd_high_buffer + DMD_PAGE_SIZE - arg,
 		dmd_trans_data_ptr, arg);
 
@@ -86,6 +88,7 @@ void trans_scroll_up_new (void)
 
 
 dmd_transition_t trans_scroll_up = {
+	.composite_init = trans_scroll_up_init,
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_33MS,
@@ -94,14 +97,21 @@ dmd_transition_t trans_scroll_up = {
 };
 
 dmd_transition_t trans_scroll_up_slow = {
+	.composite_init = trans_scroll_up_init,
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_100MS,
-	.arg = 1 * 16, /* 1 lines at a time */
+	.arg = 1 * 16, /* 1 line at a time */
 	.count = 32,
 };
 
 /*********************************************************************/
+
+void trans_scroll_down_init (void)
+{
+	register U16 arg = dmd_transition->arg;
+	dmd_trans_data_ptr = dmd_low_buffer + DMD_PAGE_SIZE - arg;
+}
 
 void trans_scroll_down_old (void)
 {
@@ -113,8 +123,6 @@ void trans_scroll_down_old (void)
 void trans_scroll_down_new (void)
 {
 	register U16 arg = dmd_transition->arg;
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = dmd_low_buffer + DMD_PAGE_SIZE - arg;
 	__blockcopy16 (dmd_high_buffer, dmd_trans_data_ptr, arg);
 	dmd_trans_data_ptr -= arg;
 	if (dmd_trans_data_ptr < dmd_low_buffer)
@@ -122,6 +130,7 @@ void trans_scroll_down_new (void)
 }
 
 dmd_transition_t trans_scroll_down = {
+	.composite_init = trans_scroll_down_init,
 	.composite_old = trans_scroll_down_old,
 	.composite_new = trans_scroll_down_new,
 	.delay = TIME_33MS,

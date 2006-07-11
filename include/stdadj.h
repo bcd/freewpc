@@ -114,6 +114,9 @@ typedef struct
 
 extern __nvram__ hstd_adj_t hstd_config;
 
+#ifdef MACHINE_FEATURE_ADJUSTMENTS
+extern __nvram__ feature_adj_t feature_config;
+#endif
 
 void adj_init (void);
 

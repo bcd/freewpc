@@ -29,12 +29,27 @@ void bonus_leff (void)
 
 void bonus_deff (void)
 {
+	extern U8 door_panels_started;
+
 	music_set (MUS_BONUS_START);
+
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 8, "BONUS");
-	font_render_string_center (&font_fixed6, 64, 20, "TBD");
+	sprintf ("%d DOOR PANELS", door_panels_started);
+	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	sprintf ("%d,000,000", door_panels_started);
+	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	sound_send (SND_GREED_ROUND_BOOM);
+	task_sleep_sec (1);
+
+	dmd_alloc_low_clean ();
+	scores_draw ();
+	dmd_sched_transition (&trans_scroll_up);
+	dmd_show_low ();
+	sound_send (SND_GREED_ROUND_BOOM);
+	task_sleep_sec (2);
+	
 	deff_exit ();
 }

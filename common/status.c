@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 
+/* TODO : you cannot page through the status report now. */
 
 void status_report_deff (void)
 {

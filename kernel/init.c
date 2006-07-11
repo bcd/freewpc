@@ -245,6 +245,11 @@ void do_reset (void)
  * This check occurs every 128 IRQs.  No task should run for
  * that long without giving up control.  If the count doesn't
  * change on every check, we invoke a fatal error and reset.
+ *
+ * NOTE: if a task _really_ does take that long to execute before
+ * switching out, it should set "task_dispatching_ok = TRUE"
+ * periodically, to avoid a time out here.  This should rarely be
+ * used.
  */
 void lockup_check_rtt (void)
 {
@@ -287,6 +292,13 @@ void do_irq (void)
 	/** Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);
 
+	/** When building a profiling program, count the
+	 * number of IRQs by writing to the pseudoregister
+	 * WPC_PINMAME_CYCLE_COUNT every time we take an IRQ.
+	 * Pinmame has been modified to understand this and
+	 * keep track of how long we're spending in the IRQ
+	 * based on these writes.  This should never be defined
+	 * for real hardware. */
 #ifdef IRQPROFILE
 	*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT = 0;
 #endif
@@ -337,6 +349,8 @@ void do_irq (void)
 		}
 	}
 
+	/** Again, for profiling, we mark the end of an IRQ
+	 * by writing these markers. */
 #ifdef IRQPROFILE
 	db_putc (0xDD);
 	db_putc (*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT);
@@ -351,6 +365,9 @@ void do_irq (void)
  * interrupt after drawing a particular scan line, and (2) when the
  * WPC's peripheral timer register reaches zero.  The type of interrupt
  * can be determined by reading the peripheral timer register.
+ *
+ * The peripheral timer is currently unused.  Real WPC games only used
+ * it on the alphanumeric machines, supposedly.
  */
 __attribute__((interrupt))
 void do_firq (void)

@@ -26,4 +26,9 @@
 #define FREE_AWARD_TICKET 2
 #define FREE_AWARD_POINTS 3
 
+__common__ void replay_award (void);
+__common__ void replay_check_current (void);
+__common__ void replay_reset (void);
+__common__ void replay_init (void);
+
 #endif /* _REPLAY_H */

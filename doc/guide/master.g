@@ -2,6 +2,7 @@
 # (C) Copyright 2006 by Brian Dominy.
 # This file is processed by the 'guide' perl script to generate
 # the final documentation.
+
 {Overview
 	FreeWPC is a free platform for developing replacement game ROMs for
 	Bally/Williams pinball machines based on the WPC 
@@ -37,6 +38,8 @@
 	language.  Familiarity with 6809 assembler is ///highly/// recommended.
 	Also, knowledge of WPC pinball machines is expected, but I'm assuming
 	anyone interested would probably meet that requirement.
+
+	Note: this document is a work-in-progress and incomplete.
 
 	{Features
 		<It is 100% Williams-free code, written from scratch, released under the GNU General Public License.
@@ -137,7 +140,7 @@
 						set to 1.
 					<SAVE_ASM
 						When set to 'y', the intermediate assembler code
-						is saved.  This defaults on.
+						is saved.  This defaults to 'n'.
 					<DEBUG_COMPILER
 						Set this to 'y' in order to generate lots of
 						compiler debug output.  This is needed only
@@ -223,7 +226,7 @@
 			<Compiling Page Headers
 			<Linking Pages
 				The aslink utility is used to create one S-record file,
-				with the '''.S19''' extension, for each page of ROM.
+				with the '''.s19''' extension, for each page of ROM.
 			<Converting Pages to Binary
 				The %file(tools/srec2bin) utility included with FreeWPC
 				is run to convert the S-records into raw binary files.

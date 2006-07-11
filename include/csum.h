@@ -18,45 +18,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
+#ifndef __CSUM_H
+#define __CSUM_H
 
-__nvram__ U8 replay_score[HIGH_SCORE_WIDTH];
-__nvram__ U8 replay_csum;
-
-
-const struct area_csum replay_csum_info = {
-	.area = replay_score,
-	.length = HIGH_SCORE_WIDTH,
-	.csum = &replay_csum,
-	.reset = replay_reset,
-	.reset_page = PAGE,
+struct area_csum
+{
+	/* __nvram__ */ U8 *area;
+	U8 length;
+	/* __nvram__ */ U8 *csum;
+	void (*reset) (void);
+	U8 reset_page;
 };
 
-void replay_award (void)
-{
-	switch (system_config.replay_award)
-	{
-		case FREE_AWARD_CREDIT:
-			add_credit ();
-			break;
+void csum_area_update (struct area_csum *csi);
+void csum_area_check (struct area_csum *csi);
+void csum_area_check_all (void);
 
-		case FREE_AWARD_EXTRA_BALL:
-			increment_extra_balls ();
-			break;
-	}
-	deff_start (DEFF_REPLAY);
-	audit_increment (&system_audits.replays);
-}
-
-void replay_check_current (void)
-{
-}
-
-void replay_reset (void)
-{
-}
-
-void replay_init (void) 
-{
-}
-
+#endif /* __CSUM_H */

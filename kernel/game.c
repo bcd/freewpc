@@ -119,6 +119,7 @@ void end_game (void)
 	{
 		in_game = 0;
 		ball_up = 0;
+		in_tilt = 0;
 
 		high_score_check ();
 		/* TODO : do match sequence */

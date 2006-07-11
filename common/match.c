@@ -30,6 +30,10 @@ void match_deff (void)
 {
 }
 
+void do_match (volatile bool will_match)
+{
+}
+
 void match_start (void) 
 {
 	U8 match_flag;
@@ -39,15 +43,16 @@ void match_start (void)
 		return;
 
 	/* Randomly decide whether or not to award a match. */
-	match_flag = random () >> 1; /* 0-127, close enough for now TODO */
+	match_flag = random () >> 3; /* returns 0-31 */
+	match_flag *= 3; /* now between 0-96, pretty close */
 	if (match_flag <= system_config.match_feature)
 	{
 		/* Yep, will match */
-		match_flag = TRUE;
+		do_match (TRUE);
 	}
 	else
 	{
-		match_flag = FALSE;
+		do_match (FALSE);
 	}
 }
 

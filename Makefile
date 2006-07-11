@@ -172,6 +172,7 @@ KERNEL_OBJS = \
 	kernel/adj.o \
 	kernel/audit.o \
 	kernel/coin.o \
+	kernel/csum.o \
 	kernel/db.o \
 	kernel/deff.o \
 	kernel/device.o \
@@ -491,7 +492,7 @@ $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
-PAGE_DEFINES := -DCOMMON_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61
+PAGE_DEFINES := -DCOMMON_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
 CFLAGS += $(PAGE_DEFINES)
 
 

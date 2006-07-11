@@ -60,6 +60,16 @@ random (void)
 
 
 /**
+ * Return a new random number from 0 to (N-1).
+ */
+U8
+random_scaled (U8 N)
+{
+	return (random () * (U16)N) >> 8;
+}
+
+
+/**
  * Tweak the random number seed slightly.
  */
 void

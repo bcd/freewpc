@@ -43,7 +43,17 @@ static __nvram__ U8 year;
 static __nvram__ U8 month;
 static __nvram__ U8 day;
 static __nvram__ U8 hour;
-static __nvram__ U8 checksum;
+
+/** Checksum descriptor for the RTC info */
+static __nvram__ U8 rtc_csum;
+const struct area_csum rtc_csum_info = {
+	.area = &year,
+	.length = 4,
+	.csum = &rtc_csum,
+	.reset = rtc_factory_reset,
+	.reset_page = PAGE,
+};
+
 static U8 minute;
 
 /** Keeps track of when the minute changes, for auditing */
@@ -61,24 +71,15 @@ static const char *month_names[] = {
 };
 
 
-static void rtc_checksum_update (void)
-{
-	/* TODO */
-	checksum = 0;
-}
-
 void rtc_factory_reset (void)
 {
 
 	/* Reset the date to Jan. 1, 2006 */
-	wpc_nvram_get ();
 	year = 6;
 	month = 1;
 	day = 1;
 	hour = 0;
 	minute = 0;
-	wpc_nvram_put ();
-	rtc_checksum_update ();
 	last_minute = 0;
 }
 
@@ -130,7 +131,7 @@ static void rtc_hw_read (void)
 	wpc_nvram_get ();
 	hour = *(volatile U8 *)WPC_CLK_HOURS_DAYS;
 	minute = *(volatile U8 *)WPC_CLK_MINS;
-	rtc_checksum_update ();
+	// csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
 }
 

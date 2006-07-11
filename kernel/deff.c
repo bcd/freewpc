@@ -302,6 +302,7 @@ void deff_init (void)
 void deff_stop_all (void)
 {
 	task_kill_gid (GID_DEFF);
+	dmd_reset_transition ();
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 	deff_init ();

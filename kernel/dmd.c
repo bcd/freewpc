@@ -543,6 +543,10 @@ void dmd_do_transition (void)
 	}
 
 	wpc_push_page (TRANS_PAGE);
+	
+	if (dmd_transition->composite_init)
+		(*dmd_transition->composite_init) ();
+
 	while (dmd_in_transition)
 	{
 #ifdef STEP_TRANSITION

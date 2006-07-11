@@ -78,6 +78,9 @@ void window_push_first (void)
 	/* Ensure the lamp effects stop before resetting all lamps. */
 	task_sleep (TIME_33MS);
 	lamp_all_off ();
+
+	/* Kill any other tasks still running */
+	task_kill_all ();
 }
 
 
@@ -367,6 +370,7 @@ void percent_render (U8 val)
 
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
+struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
 struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
@@ -415,12 +419,14 @@ struct adjustment feature_adjustments[] = {
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
-#else
-	{ "", &on_off_value, OFF, NULL }, /* skip over */
-	{ "", &on_off_value, OFF, NULL }, /* skip over */
 #endif
+
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
-	/* { "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode }, */
+
+#ifdef MACHINE_HAS_NOVICE_MODE
+	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
+#endif
+
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_ADJUSTMENTS
 #endif
@@ -459,11 +465,11 @@ struct adjustment hstd_adjustments[] = {
 	{ "HIGHEST SCORES", &on_off_value, ON, &hstd_config.highest_scores },
 	{ "H.S.T.D. AWARD", &on_off_value, ON, &hstd_config.hstd_award },
 	{ "CHAMPION H.S.T.D.", &on_off_value, ON, &hstd_config.champion_hstd },
-	{ "CHAMPION CREDITS", &integer_value, 2, &hstd_config.champion_credits },
-	{ "H.S.T.D. 1 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[0] },
-	{ "H.S.T.D. 2 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[1] },
-	{ "H.S.T.D. 3 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[2] },
-	{ "H.S.T.D. 4 CREDITS", &integer_value, 1, &hstd_config.hstd_credits[3] },
+	{ "CHAMPION CREDITS", &credit_count_value, 2, &hstd_config.champion_credits },
+	{ "H.S.T.D. 1 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[0] },
+	{ "H.S.T.D. 2 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[1] },
+	{ "H.S.T.D. 3 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[2] },
+	{ "H.S.T.D. 4 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[3] },
 	{ "H.S. RESET EVERY", &hs_reset_value, 12, &hstd_config.hs_reset_every },
 	{ "BACKUP CHAMPION", &score_value, 0, NULL },
 	{ "BACKUP H.S.T.D. 1", &score_value, 0, NULL },
@@ -1639,9 +1645,87 @@ struct menu burnin_item = {
 
 /**********************************************************************/
 
+struct preset_component
+{
+	U8 *adj;
+	U8 value;
+};
+
+struct preset
+{
+	char *name;
+	struct preset_component comps[0];
+};
+
+struct preset preset_3ball = {
+	.name = "INSTALL 3-BALL",
+};
+struct preset_component preset_3ball_comps[] = {
+	{ NULL, 0 },
+};
+
+struct preset preset_5ball = {
+	.name = "INSTALL 5-BALL",
+};
+struct preset_component preset_5ball_comps[] = {
+	{ NULL, 0 },
+};
+
+struct preset preset_tournament = {
+	.name = "INSTALL TOURNAMENT",
+};
+struct preset_component preset_tournament_comps[] = {
+	{ NULL, 0 },
+};
+
+struct preset *preset_table[] = {
+	&preset_3ball,
+	&preset_5ball,
+	&preset_tournament,
+};
+
+
+void presets_init (void)
+{
+	browser_init ();
+	browser_max = (sizeof (preset_table) / sizeof (struct preset)) - 1;
+}
+
+void presets_draw (void)
+{
+	struct preset *pre = preset_table[menu_selection];
+
+	dmd_alloc_low_clean ();
+
+	sprintf ("%d. %s", menu_selection+1, pre->name);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+
+	/* TODO : Is it installed? */	
+	if (1)
+	{
+		font_render_string_center (&font_mono5, 32, 20, "INSTALLED");
+	}
+
+	dmd_show_low ();
+}
+
+
+void presets_enter (void)
+{
+}
+
+
+struct window_ops presets_window = {
+	INHERIT_FROM_BROWSER,
+	.init = presets_init,
+	.draw = presets_draw,
+	.enter = presets_enter,
+};
+
 struct menu presets_menu_item = {
 	.name = "PRE-SETS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &presets_window, NULL } },
 };
 
 /**********************************************************************/
@@ -1755,7 +1839,9 @@ struct menu feature_adjustments_menu = {
 struct menu pricing_adjustments_menu = {
 	.name = "PRICING ADJ.",
 	.flags = M_ITEM,
+#ifndef FREE_ONLY
 	.var = { .subwindow = { &adj_browser_window, pricing_adjustments } },
+#endif
 };
 
 struct menu hstd_adjustments_menu = {
@@ -1850,7 +1936,6 @@ struct menu switch_edges_item = {
 };
 
 
-
 void switch_levels_draw (void)
 {
 	dmd_alloc_low_clean ();
@@ -1901,13 +1986,20 @@ void single_switch_draw (void)
 	const char *state;
 	const char *opto;
 
-	browser_draw ();
+	dmd_alloc_low_clean ();
+	switch_matrix_draw ();
+	font_render_string_center (&font_mono5, 80, 4, "SINGLE SW.");
+
+	(*browser_item_number) (menu_selection);
+	font_render_string (&font_mono5, 96, 12, sprintf_buffer);
 
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 
 	sprintf ("%s%s", opto, state);
-	browser_print_operation (sprintf_buffer);
+	font_render_string (&font_mono5, 86, 20, sprintf_buffer);
+	
+	dmd_show_low ();
 }
 
 void single_switch_thread (void)
@@ -2394,6 +2486,40 @@ struct menu dipsw_test_item = {
 	.var = { .subwindow = { &dipsw_test_window, NULL } },
 };
 
+/*************** Empty Balls Test ********************/
+
+void empty_balls_test_init (void)
+{
+	device_t *dev;
+	U8 count;
+
+	for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
+		device_request_empty (dev);
+	for (count = 3; count > 0; --count)
+		gumball_release ();
+}
+
+void empty_balls_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
+	dmd_show_low ();
+}
+
+struct window_ops empty_balls_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = empty_balls_test_init,
+	.draw = empty_balls_test_draw,
+	.up = null_function,
+	.down = null_function,
+};
+
+struct menu empty_balls_test_item = {
+	.name = "EMPTY BALLS TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &empty_balls_test_window, NULL } },
+};
+
 /****************** WPC ASIC Tests ***********************/
 
 #define ASIC_REG_BASE 0x3FD0
@@ -2444,10 +2570,6 @@ struct menu debugger_test_item = {
 	.flags = M_ITEM,
 };
 
-struct menu empty_balls_item = {
-	.name = "EMPTY BALLS TEST",
-	.flags = M_ITEM,
-};
 
 /****************** TEST MENU **************************/
 
@@ -2466,7 +2588,7 @@ struct menu *test_menu_items[] = {
 	&flipper_test_item,
 	&asic_register_item,
 	&debugger_test_item,
-	&empty_balls_item,
+	&empty_balls_test_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
 	MACHINE_TEST_MENU_ITEMS
 #endif

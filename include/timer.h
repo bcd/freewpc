@@ -29,6 +29,7 @@ void timer_init (void);
 #define timer_kill_gid 	task_kill_gid
 #define timer_kill_pid 	task_kill_pid
 #define timer_find_gid	task_find_gid
+#define timer_test_and_kill_gid	task_kill_gid
 
 #define timer_pause() \
 do { \
@@ -45,7 +46,7 @@ __taskentry__ void pausable_timer_function (void);
 
 #define timer_restart_free(g,t)	timer_restart(g,t,freerunning_timer_function)
 #define timer_start1_free(g,t)	timer_start1(g,t,freerunning_timer_function)
-#define timer_start_free(g,t)	t	imer_start(g,t,freerunning_timer_function)
+#define timer_start_free(g,t)		timer_start(g,t,freerunning_timer_function)
 
 #endif /* _TIMER_H */
 

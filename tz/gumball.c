@@ -69,10 +69,18 @@ void gumball_load_from_trough (void)
 
 void gumball_release (void)
 {
+	U8 timeout;
+
+	/* TODO : multiple release requests from multiple threads are
+	 * not handled */
+
 	gumball_geneva_tripped = FALSE;
 	sol_on (SOL_GUMBALL_RELEASE);
-	while (gumball_geneva_tripped == FALSE)
+
+	timeout = 64;
+	while ((gumball_geneva_tripped == FALSE) && (--timeout > 0))
 		task_sleep (TIME_33MS);
+
 	sol_off (SOL_GUMBALL_RELEASE);
 }
 
@@ -82,12 +90,17 @@ void gumball_release (void)
 
 void sw_gumball_exit_handler (void)
 {
+	if (task_kill_gid (GID_GUMBALL_EXIT_EXPECTED))
+	{
+		/* A ball successfully came out of the gumball machine. */
+	}
 }
 
 void sw_gumball_geneva_handler (void)
 {
 	dbprintf ("Geneva tripped.\n");
 	gumball_geneva_tripped = TRUE;
+	timer_restart_free (GID_GUMBALL_EXIT_EXPECTED, TIME_2S);
 }
 
 void sw_gumball_enter_handler (void)

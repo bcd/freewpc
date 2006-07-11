@@ -34,6 +34,21 @@ __nvram__ volatile U8 credit_count;
 __nvram__ volatile U8 unit_count;
 
 
+void coin_reset (void)
+{
+	credit_count = unit_count = 0;
+}
+
+
+__nvram__ U8 coin_csum;
+const struct area_csum coin_csum_info = {
+	.area = &credit_count,
+	.length = sizeof (credit_count) + sizeof (unit_count),
+	.csum = &coin_csum,
+	.reset = coin_reset,
+};
+
+
 void credits_render (void)
 {
 #ifdef FREE_ONLY

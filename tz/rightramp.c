@@ -21,6 +21,9 @@
 #include <freewpc.h>
 
 
+__local__ U8 battle_power_lit;
+
+
 void right_ramp_default_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -29,8 +32,18 @@ void right_ramp_default_deff (void)
 }
 
 
+void sw_right_ramp_powerfield_task (void)
+{
+	task_set_flags (TASK_PROTECTED);
+	sol_on (SOL_RIGHT_RAMP_DIV);
+	task_sleep_sec (5);
+	sol_off (SOL_RIGHT_RAMP_DIV);
+}
+
+
 void sw_right_ramp_task (void)
 {
+	task_set_flags (TASK_PROTECTED);
 	task_sleep_sec (2);
 	sound_send (SND_RIGHT_RAMP_EXIT);
 	sol_on (SOL_RIGHT_RAMP_DIV);
@@ -42,29 +55,38 @@ void sw_right_ramp_task (void)
 
 void sw_right_ramp_handler (void)
 {
-	if (in_game && !in_tilt)
-	{
-		score_add_current_const (SCORE_5K);
-	}
+	if (!in_live_game)
+		return;
+
+	score_add_current_const (SCORE_5K);
 
 	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))
 	{
-		if (in_game && !in_tilt)
+		if (battle_power_lit)
+		{
+			sound_send (SND_RAMP_ENTERS_POWERFIELD);
+			task_create_gid (GID_RIGHT_RAMP_ENTERED, 
+				sw_right_ramp_powerfield_task);
+		}
+		else
+		{
 			sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
-		task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_task);
+			task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_task);
+		}
 	}
 }
 
 
-void sw_right_ramp_init (void)
+CALLSET (right_ramp, init)
 {
+	battle_power_lit = 0;
 }
 
 
 DECLARE_SWITCH_DRIVER (sw_right_ramp)
 {
 	.fn = sw_right_ramp_handler,
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 };
 
 

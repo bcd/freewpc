@@ -58,6 +58,10 @@ void scores_draw_credits (void)
 void scores_draw_current (void)
 {
 	sprintf ("%8b", current_score);
+#if 0
+	sprintf ("%02X%02X%02X%02X", 
+		current_score[0], current_score[1], current_score[2], current_score[3]);
+#endif
 	font_render_string_center (&font_lucida9, 64, 10, sprintf_buffer);
 }
 

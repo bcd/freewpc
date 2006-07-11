@@ -54,6 +54,16 @@ void handle_outhole (void)
 
 void sw_outhole_handler (void)
 {
+	if (task_kill_gid (GID_DRAIN_BY_OUTLANE))
+	{
+		/* drained via outlane */
+	}
+	else
+	{
+		/* drained down the center */
+		audit_increment (&system_audits.center_drains);
+	}
+
 	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
 }
 

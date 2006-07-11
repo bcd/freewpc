@@ -145,6 +145,7 @@ extern U8 irq_count;
 #include <status.h>
 #include <replay.h>
 #include <knocker.h>
+#include <csum.h>
 
 /* Game-specific defines.  'mach' should point to
  * the machine-specific directory */

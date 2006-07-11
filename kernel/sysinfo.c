@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -27,9 +26,4 @@
 #include <freewpc.h>
 
 const char copyright[] = "FreeWPC System ROM.  Written by Brian Dominy.  Licensed under the GNU General Public License (GPL)";
-
-#if 0
-const U8 system_major_version = FREEWPC_MAJOR_VERSION;
-const U8 system_minor_version = FREEWPC_MINOR_VERSION;
-#endif
 
