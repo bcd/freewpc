@@ -293,21 +293,6 @@ else
 CFLAGS += -DAS_VERSION=1.5.2
 endif
 
-# Enables debugging (using DBX) or profiling.
-# -fomit-frame-pointer cannot be used in either case.
-ifdef DBX
-CFLAGS += -g
-endif
-ifdef PROFILE
-CFLAGS += -pg
-endif
-
-ifndef DBX
-ifndef PROFILE
-CFLAGS += -fomit-frame-pointer
-endif
-endif
-
 # Options to control the output section names
 CFLAGS += -mcode-section=sysrom -mdata-section=sysrom -mbss-section=ram
 

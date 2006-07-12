@@ -43,9 +43,10 @@
  * code register directly.  This requires a newer version of the
  * gcc6809 compiler to work OK. */
 #ifdef GCC4
-volatile 
-#endif
+volatile unsigned char cc_reg asm ("cc");
+#else
 register unsigned char cc_reg asm ("cc");
+#endif
 
 
 extern inline void set_stack_pointer (const uint16_t s)
