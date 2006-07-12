@@ -1991,13 +1991,13 @@ void single_switch_draw (void)
 	font_render_string_center (&font_mono5, 80, 4, "SINGLE SW.");
 
 	(*browser_item_number) (menu_selection);
-	font_render_string (&font_mono5, 96, 12, sprintf_buffer);
+	font_render_string_center (&font_mono5, 80, 12, sprintf_buffer);
 
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 
 	sprintf ("%s%s", opto, state);
-	font_render_string (&font_mono5, 86, 20, sprintf_buffer);
+	font_render_string_center (&font_mono5, 80, 20, sprintf_buffer);
 	
 	dmd_show_low ();
 }
@@ -2495,8 +2495,10 @@ void empty_balls_test_init (void)
 
 	for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
 		device_request_empty (dev);
+#ifdef MACHINE_TZ
 	for (count = 3; count > 0; --count)
 		gumball_release ();
+#endif
 }
 
 void empty_balls_test_draw (void)
