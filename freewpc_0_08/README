@@ -1,0 +1,13 @@
+
+This is FreeWPC, an open source operating system for the Williams
+Pinball Controller (WPC) family of pinball machines.  FreeWPC is
+licensed under the GNU General Public License, Version 2.
+
+The sources for the common routines are located in 'kernel', while
+the game-specific code can be found in a subdirectory based on the
+machine name.
+
+You will need several other tools in order to make final ROM images.
+See the file doc/build.html for more detailed information.  Most
+importantly, you'll need a copy of the gcc6809 cross-compiler.
+
