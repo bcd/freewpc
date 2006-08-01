@@ -81,5 +81,6 @@ enum wpc_debugger_response {
 void db_init (void);
 void db_dump_switches (void);
 void db_idle_task (void);
+void msgbox (void);
 
 #endif /* _SYS_DEBUG_H */

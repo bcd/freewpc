@@ -21,38 +21,40 @@
 #include <freewpc.h>
 
 
-void match_award (void)
+void
+match_award (void)
 {
 	audit_increment (&system_audits.match_credits);
 }
 
-void match_deff (void)
+
+void
+match_deff (void)
 {
 }
 
-void do_match (volatile bool will_match)
+
+void 
+do_match (volatile U8 match_count)
 {
 }
 
-void match_start (void) 
+
+void
+match_start (void) 
 {
 	U8 match_flag;
+	U8 match_count = 0;
 
 	/* Nothing to do if match has been disabled */
 	if (system_config.match_feature == 0)
 		return;
 
 	/* Randomly decide whether or not to award a match. */
-	match_flag = random () >> 3; /* returns 0-31 */
-	match_flag *= 3; /* now between 0-96, pretty close */
+	match_flag = random_scaled (100);
 	if (match_flag <= system_config.match_feature)
-	{
-		/* Yep, will match */
-		do_match (TRUE);
-	}
-	else
-	{
-		do_match (FALSE);
-	}
+		match_count++;
+
+	do_match (match_count);
 }
 

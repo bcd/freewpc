@@ -53,6 +53,11 @@ U8 player_up;
 /** The number of the current ball in play */
 U8 ball_up;
 
+#ifdef CONFIG_TIMED_GAME
+/** Nonzero if the current ball will automatically end after a certain
+period of time.  The value indicates the number of seconds. */
+U8 timed_game_timer;
+#endif
 
 void start_ball (void);
 
@@ -238,14 +243,19 @@ void end_ball (void)
 		}
 	}
 
+#ifndef CONFIG_TIMED_GAME
 	/* If all players have had a turn, then increment the
-	 * current ball number. */
+	 * current ball number.
+	 * In timed game, this step is skipped, as the game is
+	 * automatically over at the end of the *first ball".
+	 */
 	ball_up++;
 	if (ball_up <= system_config.balls_per_game)
 	{
 		start_ball ();
 		goto done;
 	}
+#endif
 
 	/* After the max balls per game have been played, go into
 	 * end game */
@@ -258,6 +268,44 @@ done:
 #endif
 	return;
 }
+
+
+#ifdef CONFIG_TIMED_GAME
+void timed_game_monitor (void)
+{
+	while (timed_game_timer > 0)
+	{
+		/* Look for conditions in which the game timer should not run. */
+		if (!ball_in_play ||
+				(0 /* any balls are "locked up" preventing play */))
+		{
+			task_sleep_sec (1);
+			continue;
+		}
+
+		/* OK, drop the timer by one second. */
+		task_sleep_sec (1);
+		timed_game_timer--;
+		score_change++;
+	}
+
+	/* Short grace period after the timer expires */
+	task_sleep_sec (1);
+
+	/* OK, the game is going to end soon... Disable the flippers. */
+	flipper_disable ();
+
+	/* Start end game effects.  The ball should drain soon, and thte
+	 * normal end-of-game logic will kick in. */
+#ifdef CONFIG_TIMED_GAME_OVER_DEFF
+	deff_restart (CONFIG_TIMED_GAME_OVER_DEFF);
+#endif
+#ifdef CONFIG_TIMED_GAME_OVER_SOUND
+	sound_send (CONFIG_TIMED_GAME_OVER_SOUND);
+#endif
+	task_exit ();
+}
+#endif
 
 
 void start_ball (void)
@@ -279,6 +327,10 @@ void start_ball (void)
 	triac_enable (TRIAC_GI_MASK);
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
+#ifdef CONFIG_TIMED_GAME
+	timed_game_timer = CONFIG_TIMED_GAME;
+	task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
+#endif
 }
 
 void mark_ball_in_play (void)

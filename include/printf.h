@@ -38,7 +38,7 @@ do { \
 #define va_end(va)
 
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
-int printf (const char *format, ...);
+U8 printf (const char *format, ...);
 #define sprintf printf
 
 #ifdef DEBUGGER

@@ -255,4 +255,6 @@ void release_gumball_proc (void);
 extern struct menu tz_clock_test_item;
 extern struct menu tz_gumball_test_item;
 
+#define CONFIG_TIMED_GAME 15
+
 #endif /* MACH_CONFIG_H */

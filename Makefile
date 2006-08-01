@@ -187,6 +187,7 @@ KERNEL_OBJS = \
 	kernel/lampset.o \
 	kernel/leff.o \
 	kernel/misc.o \
+	kernel/msg.o \
 	kernel/player.o \
 	kernel/printf.o \
 	kernel/random.o \
@@ -561,7 +562,10 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(GAME_ROM)
 #
 # Use 'make build' to build the ROM without installing it.
 #
-build : $(GAME_ROM)
+build : $(GAME_ROM) post_build
+
+post_build :
+	@echo "Cleaning .i files..." && rm -f *.i
 
 #
 # How to make a ROM image, which is the concatenation of each of the

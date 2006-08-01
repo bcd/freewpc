@@ -343,10 +343,11 @@ void free_award_render (U8 val)
 {
 	switch (val)
 	{
-		case 0: sprintf ("CREDIT"); return;
-		case 1: sprintf ("EXTRA BALL"); return;
-		case 2: sprintf ("TICKET"); return;
-		case 3: sprintf ("POINTS"); return;
+		case 0: sprintf ("OFF"); return;
+		case 1: sprintf ("CREDIT"); return;
+		case 2: sprintf ("EXTRA BALL"); return;
+		case 3: sprintf ("TICKET"); return;
+		case 4: sprintf ("POINTS"); return;
 	}
 }
 
@@ -1442,12 +1443,6 @@ struct menu dev_soundedit_item = {
 
 void dev_random_test_enter (void)
 {
-#if 0
-	dmd_alloc_low_clean ();
-	sprintf ("%d", random ());
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-	dmd_show_low ();
-#else
 	long int i;
 	static U8 rowcount[32];
 
@@ -1473,7 +1468,6 @@ void dev_random_test_enter (void)
 	dmd_invert_page (dmd_low_buffer);
 	task_sleep (TIME_200MS);
 	dmd_invert_page (dmd_low_buffer);
-#endif
 }
 
 struct window_ops dev_random_test_window = {
@@ -1658,30 +1652,48 @@ struct preset
 };
 
 struct preset preset_3ball = {
-	.name = "INSTALL 3-BALL",
+	.name = "3-BALL",
 };
 struct preset_component preset_3ball_comps[] = {
 	{ NULL, 0 },
 };
 
 struct preset preset_5ball = {
-	.name = "INSTALL 5-BALL",
+	.name = "5-BALL",
 };
 struct preset_component preset_5ball_comps[] = {
 	{ NULL, 0 },
 };
 
 struct preset preset_tournament = {
-	.name = "INSTALL TOURNAMENT",
+	.name = "TOURNAMENT",
 };
 struct preset_component preset_tournament_comps[] = {
+	{ &system_config.balls_per_game, 3 },
+	{ &system_config.replay_award, 0 },
+	{ &system_config.special_award, 0 },
+	{ &price_config.free_play, YES },
+	{ &system_config.game_restart, 0 },
+	{ &system_config.max_ebs, 0 },
+	{ &system_config.match_feature, OFF },
+	{ &system_config.tournament_mode, ON },
 	{ NULL, 0 },
 };
+
+
+struct preset preset_show = {
+	.name = "SHOW",
+};
+struct preset_component preset_show_comps[] = {
+	{ NULL, 0 },
+};
+
 
 struct preset *preset_table[] = {
 	&preset_3ball,
 	&preset_5ball,
 	&preset_tournament,
+	&preset_show,
 };
 
 
@@ -1697,7 +1709,7 @@ void presets_draw (void)
 
 	dmd_alloc_low_clean ();
 
-	sprintf ("%d. %s", menu_selection+1, pre->name);
+	sprintf ("%d. INSTALL %s", menu_selection+1, pre->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
 	/* TODO : Is it installed? */	
@@ -1712,6 +1724,17 @@ void presets_draw (void)
 
 void presets_enter (void)
 {
+	struct preset *pre = preset_table[menu_selection];
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
+	font_render_string_center (&font_mono5, 64, 16, pre->name);
+	dmd_show_low ();
+}
+
+
+void presets_start (void)
+{
 }
 
 
@@ -1720,6 +1743,7 @@ struct window_ops presets_window = {
 	.init = presets_init,
 	.draw = presets_draw,
 	.enter = presets_enter,
+	.start = presets_start,
 };
 
 struct menu presets_menu_item = {
@@ -1991,13 +2015,13 @@ void single_switch_draw (void)
 	font_render_string_center (&font_mono5, 80, 4, "SINGLE SW.");
 
 	(*browser_item_number) (menu_selection);
-	font_render_string_center (&font_mono5, 80, 12, sprintf_buffer);
+	font_render_string (&font_mono5, 64, 12, sprintf_buffer);
 
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 
 	sprintf ("%s%s", opto, state);
-	font_render_string_center (&font_mono5, 80, 20, sprintf_buffer);
+	font_render_string (&font_mono5, 48, 20, sprintf_buffer);
 	
 	dmd_show_low ();
 }

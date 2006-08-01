@@ -52,7 +52,7 @@ void window_init (void);
 struct menu
 {
 	const char *name;
-	int flags;
+	U8 flags;
 	union {
 		struct menu **submenus;
 		struct {

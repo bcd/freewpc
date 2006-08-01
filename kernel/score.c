@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -36,8 +35,10 @@ U8 debug_value;
 
 void scores_draw_ball (void)
 {
-#ifdef SHOW_DEBUG_VALUE
+#if defined(SHOW_DEBUG_VALUE)
 	sprintf ("DEBUG %d", debug_value);
+#elif defined (CONFIG_TIMED_GAME)
+	sprintf ("TIME: 0:%02d", timed_game_timer);
 #else
 	sprintf ("%1iUP", player_up);
 #endif
@@ -152,6 +153,17 @@ void score_add_current (bcd_t *s)
 	score_add (current_score, s, sizeof (score_t));
 	score_change++;
 	/* TODO : check replay */
+}
+
+
+/* score[sizeof(score_t)-1] = ones
+ * score[sizeof(score_t)-2] = hundreds
+ * score[sizeof(score_t)-3] = ten thousands
+ * score[sizeof(score_t)-4] = millions
+ */
+void score_add_millions_current (U8 mils)
+{
+	score_add (current_score + sizeof (score_t) - 4, &mils, sizeof (U8));
 }
 
 

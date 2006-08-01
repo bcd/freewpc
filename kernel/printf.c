@@ -137,7 +137,7 @@ void insert_numeric_separators (void)
 }
 
 
-int printf (const char *format, ...)
+U8 printf (const char *format, ...)
 {
 	static va_list va;
 	static char *buf;

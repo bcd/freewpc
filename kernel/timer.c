@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -103,6 +102,11 @@ task_t *timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 	task_t *tp = task_create_gid (gid, fn);
 	task_set_arg (tp, ticks);
 	return (tp);
+}
+
+
+void timer_pause_for_secs (U8 secs)
+{
 }
 
 

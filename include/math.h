@@ -21,9 +21,11 @@
 #ifndef _MATH_H
 #define _MATH_H
 
+/** Returns a random true/false value */
 #define random_bool()	(random() & 0x80)
 
 U8 random (void);
+U8 random_scaled (U8);
 void random_reseed (void);
 void random_init (void);
 

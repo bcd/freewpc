@@ -42,6 +42,7 @@ void bonus_deff (void)
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
 	sound_send (SND_GREED_ROUND_BOOM);
+	score_add_millions_current (door_panels_started);
 	task_sleep_sec (1);
 
 	dmd_alloc_low_clean ();

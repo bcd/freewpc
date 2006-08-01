@@ -23,14 +23,17 @@
 
 #define MAX_PLAYERS 4
 
-extern uint8_t in_game;
-extern uint8_t in_bonus;
-extern uint8_t in_tilt;
-extern uint8_t in_test;
-extern uint8_t ball_in_play;
-extern uint8_t num_players;
-extern uint8_t player_up;
-extern uint8_t ball_up;
+extern U8 in_game;
+extern U8 in_bonus;
+extern U8 in_tilt;
+extern U8 in_test;
+extern U8 ball_in_play;
+extern U8 num_players;
+extern U8 player_up;
+extern U8 ball_up;
+#ifdef CONFIG_TIMED_GAME
+extern U8 timed_game_timer;
+#endif
 
 #define in_live_game		(in_game && !in_tilt)
 
