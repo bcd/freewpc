@@ -21,6 +21,12 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief AC/zerocross circuit handling
+ *
+ * This module is not yet complete and is not used.
+ */
 
 U8 ac_last_zerocross_reading;
 U8 ac_zerocross_same_count;

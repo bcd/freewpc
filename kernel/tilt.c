@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -19,11 +18,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
-
 /**
  * \brief Common tilt functions
+ *
+ * This module handles all of the tilt switches, start game-specific
+ * effects when they occur, and updates the core state machines
+ * appropriately (in the case of a slam tilt, this will abort the
+ * game).
  */
+
+#include <freewpc.h>
 
 
 /** The number of tilt warnings that have been issued on this ball. */

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -26,6 +25,24 @@
  * \brief The main game state machine logic.
  *
  * This module implements the standard state machine of a pinball game.
+ * The lifecycle is generally:
+ * 1. Attract mode
+ * 2. Start game
+ * 3. Start player
+ * 4. Start ball
+ * 5. End ball
+ * 6. End player
+ * 7. End game
+ * 8. High score entry
+ * 9. Match
+ *
+ * Bonus is not really a separate state, but is part of endball.
+ *
+ * There is experimental support here for timed game, aka Safecracker.
+ *
+ * The main inputs to this module are the start button, for initiating
+ * a game, and the end_of_ball condition, which is signalled based on
+ * trough entry (when only one ball is in play).
  */
 
 

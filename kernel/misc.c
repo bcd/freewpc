@@ -22,17 +22,20 @@
 #include <freewpc.h>
 
 
+/** A function that does nothing */
 void null_function (void)
 {
 }
 
 
+/** A function that always returns true */
 bool null_true_function (void)
 {
 	return TRUE;
 }
 
 
+/** A function that always returns false */
 bool null_false_function (void)
 {
 	return FALSE;

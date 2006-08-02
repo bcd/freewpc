@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -22,6 +21,11 @@
 /**
  * \file
  * \brief Coin switch handlers
+ *
+ * This module processes coin switches to increment the number of credits
+ * available.  It also contains functions for displaying credits to the
+ * player in the right format, and for updating the start button lamp
+ * to indicate that a game can be started.
  */
 
 #include <freewpc.h>

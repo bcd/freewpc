@@ -196,6 +196,14 @@ I8 score_compare (score_t s1, score_t s2)
 	return (0);
 }
 
+void score_ladder_init (score_t s, score_ladder_t *ladder)
+{
+}
+
+
+void score_from_ladder (score_t s, score_ladder_t *ladder)
+{
+}
 
 void scores_reset (void)
 {

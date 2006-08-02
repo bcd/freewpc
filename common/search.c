@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -21,6 +20,26 @@
 
 #include <freewpc.h>
 
+
+/**
+ * \file
+ * \brief Ball search logic
+ *
+ * Ball search is triggered based on idle time during a game with no
+ * playfield switch closures.  While a game is in progress, a monitor
+ * task runs which decrements a timer.  Various conditions are checked
+ * that pause the timer; e.g. when the ball is known to be at the
+ * plunger.  The switch module resets the timer every time a playfield
+ * switch closes.  If the timer hits zero, it triggers an actual ball
+ * search, which pulses all of the playfield solenoids that might
+ * legitimiately free the ball.  This logic avoids drives attached
+ * to flashers or to any game-defined devices that should be avoided,
+ * like the knocker or device kickout coils.
+ *
+ * Ball search is currently indefinite and will gladly run forever.
+ * A real machine would give up after a while, or kick another ball
+ * into play.
+ */
 
 U8 ball_search_timer;
 U8 ball_search_timeout;

@@ -22,6 +22,16 @@
 /**
  * \file
  * \brief Common trough logic
+ *
+ * The trough device is present on all games.  The logic here handles
+ * variations such as different number of switches, and different types
+ * of kicker coils.
+ *
+ * The key action performed by the trough callbacks is to update the
+ * number of "live balls".  When a ball enters/exits the trough, this
+ * count is adjusted.  When live balls goes to zero, this creates the
+ * end of ball condition.  When it goes up, it indicates that a ball
+ * was successfully added to play.
  */
 
 #include <freewpc.h>

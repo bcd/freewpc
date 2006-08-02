@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -19,6 +18,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Simple debugger interface
+ *
+ * This module reads/writes to the WPC debugger port.  A simple
+ * companion utility has been written to display these messages,
+ * and to pass input keystrokes to the running program.  This
+ * requires a patched version of pinmame.  On real hardware, these
+ * functions are not required.
+ *
+ * Define DEBUGGER if you want to compile in debugger support.
+ * Without it, the program will run slightly faster, and be
+ * considerably smaller.
+ */
 #include <freewpc.h>
 #include <m6809/math.h>
 

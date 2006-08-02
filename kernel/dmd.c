@@ -23,6 +23,44 @@
 /**
  * \file
  * \brief Manages the dot matrix controller (DMD)
+ *
+ * The DMD modules manages the physical DMD resources.  The DMD
+ * supports 16 pages which can be written to.  One of these pages
+ * can be designated as "visible", which is what the player sees.
+ * Two of these pages can be "mapped" into address space for
+ * write access; unmapped pages aren't accessible.  The visible
+ * and mapped pages may or may not be the same.
+ *
+ * 4-color images are supported through the use of page flipping.
+ * Two DMD pages are reserved, one to hold the "dark" bits, another
+ * to hold the "bright" bits.  The FIRQ handler switches the
+ * visible image rapidly to fool the eye into seeing 4 colors.
+ * The dark bits are shown 1/3 of the time; the bright bits are
+ * shown 2/3 of the time.  When a mono image is desired, page
+ * flipping still happens, but the dark page and the bright page
+ * are the same.
+ *
+ * Two virtual registers, low_page and high_page, are implemented
+ * in RAM over the real mapping registers.  This is because the
+ * hardware registers are not readable.  Likewise, two virtual
+ * registers named dark_page and bright_page, track which pages
+ * have been allocated for 4-color imaging.
+ *
+ * This module also implements the generic transition algorithm.
+ * All transitions share some common logic that is done here.  The
+ * specifics of a particular transition are implemented in callback
+ * functions defined in dmdtrans.c.
+ *
+ * The typical usage model for a display effect or any other code
+ * that wants to write to the DMD is to (1) allocate fresh DMD pages,
+ * (2) draw on them, and (3) show them.  This is so that during the
+ * time the pages are being rendered, the old image continues to be
+ * visible, with no drawing artifacts.
+ *
+ * Allocation is done very simply by iteration.  Pages are always
+ * allocated in pairs in case 4-colors are desired.  No more than
+ * two pairs are ever needed at once, so there is no concern for
+ * overflow.
  */
 
 #if (MACHINE_DMD == 1)

@@ -58,8 +58,12 @@ typedef bcd_t score_t[BYTES_PER_SCORE];
 #define SCORE_500K	0x500000ULL
 #define SCORE_750K	0x750000ULL
 #define SCORE_1M		0x1000000ULL
+#define SCORE_2M		0x1000000ULL
+#define SCORE_3M		0x1000000ULL
+#define SCORE_4M		0x1000000ULL
 #define SCORE_5M		0x5000000ULL
 
+/** Some additional macros for constructing nonstandard score values */
 
 #define SCORE2(tens,ones) \
 	((SCORE_10 * tens) + ones)
@@ -70,7 +74,13 @@ typedef bcd_t score_t[BYTES_PER_SCORE];
 #define SCORE4(thous,huns,tens,ones) \
 	((SCORE_1K * thous) + SCORE3(huns,tens,ones))
 
-/** Macros for adding to the CURRENT score; these are shortcuts **/
+
+typedef struct
+{
+	score_t min;
+	score_t step;
+	score_t max;
+} score_ladder_t;
 
 extern U8 score_change;
 extern score_t scores[];
@@ -89,6 +99,7 @@ I8 score_compare (score_t s1, score_t s2);
 void scores_reset (void);
 void score_init (void);
 
+/** Macros for adding to the CURRENT score; these are shortcuts **/
 
 #define score_decl(val) \
 	{ \
@@ -98,6 +109,12 @@ void score_init (void);
 		((val) & 0x000000FFULL) \
 	}
 
+#define score_ladder_decl(min,step,max) \
+	{ \
+		.min = score_decl (min), \
+		.step = score_decl (step), \
+		.max = score_decl (max), \
+	}
 
 #define score_add_current_const(val) \
 { \

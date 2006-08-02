@@ -515,9 +515,9 @@ GENDEFINES = \
 ###	Set Default Target
 #######################################################################
 ifdef TARGET_ROMPATH
-default_target : clean_err check_prereqs install
+default_target : clean_err check_prereqs install post_build
 else
-default_target : clean_err check_prereqs build
+default_target : clean_err check_prereqs build post_build
 endif
 
 #######################################################################
@@ -562,7 +562,7 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(GAME_ROM)
 #
 # Use 'make build' to build the ROM without installing it.
 #
-build : $(GAME_ROM) post_build
+build : $(GAME_ROM)
 
 post_build :
 	@echo "Cleaning .i files..." && rm -f *.i
