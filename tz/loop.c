@@ -22,21 +22,24 @@
 
 void enter_loop (void)
 {
-	score_add_current_const (SCORE_1K);
+	score (SC_1K);
 	sound_send (SND_LOOP_ENTER);
 }
 
 
 void award_loop (void)
 {
-	score_add_current_const (SCORE_50K);
+	if (lamp_test (LM_PANEL_SPIRAL))
+		score (SC_250K);
+	else
+		score (SC_50K);
 	sound_send (SND_SPIRAL_AWARDED);
 }
 
 
 void abort_loop (void)
 {
-	score_add_current_const (SCORE_1K);
+	score (SC_1K);
 	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
 }
 
@@ -87,9 +90,14 @@ void sw_right_loop_handler (void)
 
 	if (in_live_game)
 	{
-		if (task_kill_gid (GID_LOOP_DISABLED_BY_LOCK_EXIT))
+		if (event_did_follow (lock_exit, right_loop))
 		{
 			/* Ignore right loop switch after lock kickout */
+			return;
+		}
+		else if (event_did_follow (autolaunch, right_loop))
+		{
+			/* Ignore right loop switch after an autolaunch */
 			return;
 		}
 		else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))

@@ -96,3 +96,16 @@ CALLSET_ENTRY (tz, start_without_credits)
 }
 
 
+CALLSET_ENTRY (tz, timed_game_tick)
+{
+	switch (timed_game_timer)
+	{
+		case 5: sound_send (SND_FIVE); break;
+		case 4: sound_send (SND_FOUR); break;
+		case 3: sound_send (SND_THREE); break;
+		case 2: sound_send (SND_TWO); break;
+		case 1: sound_send (SND_ONE); break;
+		default: break;
+	}
+}
+

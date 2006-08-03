@@ -27,11 +27,11 @@
 #define CALLSET_BOOL_ENTRY(module,set) \
 	bool module ## _ ## set (void)
 
-#define callset_invoke(set)	VOIDCALL(callset_ ## set)
+#define callset_invoke(set)	SECTION_VOIDCALL(__event__, callset_ ## set)
 
 #define callset_invoke_boolean(set)	\
 ({ \
-	extern bool callset_ ## set (void); \
+	extern __event__ bool callset_ ## set (void); \
 	callset_ ## set (); \
 })
 

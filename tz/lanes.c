@@ -34,12 +34,12 @@ void handle_outlane (void)
 
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
-	timer_restart_free (GID_DRAIN_BY_OUTLANE, TIME_7S);
+	event_can_follow (any_outlane, center_drain, TIME_7S);
 }
 
 void sw_left_outlane_handler (void)
 {
-	score_add_current_const (SCORE_10K);
+	score (SC_10K);
 	handle_outlane ();
 	audit_increment (&system_audits.left_drains);
 	if (flag_test (FLAG_LEFT_OUTLANE_LIT))
@@ -49,7 +49,7 @@ void sw_left_outlane_handler (void)
 
 void sw_right_outlane_handler (void)
 {
-	score_add_current_const (SCORE_10K);
+	score (SC_10K);
 	handle_outlane ();
 	audit_increment (&system_audits.right_drains);
 	if (flag_test (FLAG_RIGHT_OUTLANE_LIT))
@@ -59,22 +59,18 @@ void sw_right_outlane_handler (void)
 
 void sw_left_inlane_1_handler (void)
 {
-	score_add_current_const (SCORE_1K);
+	score (SC_1K);
 	timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 }
 
 void sw_left_inlane_2_handler (void)
 {
-	extern void door_award_enable ();
-
-	score_add_current_const (SCORE_1K);
-	door_award_enable ();
-	slot_update_lamps ();
+	score (SC_1K);
 }
 
 void sw_right_inlane_handler (void)
 {
-	score_add_current_const (SCORE_1K);
+	score (SC_1K);
 	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
 	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
 }

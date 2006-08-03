@@ -61,12 +61,19 @@
 #define __far__(x)      __attribute__((far(x)))
 #define __system__		__attribute__((section("sysrom")))
 #define __common__		__far__(C_STRING(COMMON_PAGE))
+#define __event__		   __far__(C_STRING(EVENT_PAGE))
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 #endif
 
 #define __naked__       __attribute__((naked))
+
+#define SECTION_VOIDCALL(section,fn) \
+{ \
+	extern section void fn (void); \
+	fn (); \
+}
 
 #define VOIDCALL(fn) \
 { \

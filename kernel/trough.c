@@ -64,7 +64,7 @@ void handle_outhole (void)
 
 void sw_outhole_handler (void)
 {
-	if (task_kill_gid (GID_DRAIN_BY_OUTLANE))
+	if (event_did_follow (any_outlane, center_drain))
 	{
 		/* drained via outlane */
 	}

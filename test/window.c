@@ -343,11 +343,11 @@ void free_award_render (U8 val)
 {
 	switch (val)
 	{
-		case 0: sprintf ("OFF"); return;
-		case 1: sprintf ("CREDIT"); return;
-		case 2: sprintf ("EXTRA BALL"); return;
-		case 3: sprintf ("TICKET"); return;
-		case 4: sprintf ("POINTS"); return;
+		case FREE_AWARD_OFF: sprintf ("OFF"); return;
+		case FREE_AWARD_CREDIT: sprintf ("CREDIT"); return;
+		case FREE_AWARD_EB: sprintf ("EXTRA BALL"); return;
+		case FREE_AWARD_TICKET: sprintf ("TICKET"); return;
+		case FREE_AWARD_POINTS: sprintf ("POINTS"); return;
 	}
 }
 
@@ -355,9 +355,9 @@ void game_restart_render (U8 val)
 {
 	switch (val)
 	{
-		case 0: sprintf ("ALWAYS"); return;
-		case 1: sprintf ("SLOW"); return;
-		case 2: sprintf ("NEVER"); return;
+		case GAME_RESTART_ALWAYS: sprintf ("ALWAYS"); return;
+		case GAME_RESTART_SLOW: sprintf ("SLOW"); return;
+		case GAME_RESTART_NEVER: sprintf ("NEVER"); return;
 	}
 }
 
@@ -374,7 +374,7 @@ struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
-struct adjustment_value players_per_game_value = { 1, 4, 1, decimal_render };
+struct adjustment_value players_per_game_value = { 1, MAX_PLAYERS, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
 struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
@@ -1653,6 +1653,7 @@ struct preset preset_3ball = {
 	.name = "3-BALL",
 };
 struct preset_component preset_3ball_comps[] = {
+	{ &system_config.balls_per_game, 3 },
 	{ NULL, 0 },
 };
 
@@ -1660,6 +1661,7 @@ struct preset preset_5ball = {
 	.name = "5-BALL",
 };
 struct preset_component preset_5ball_comps[] = {
+	{ &system_config.balls_per_game, 5 },
 	{ NULL, 0 },
 };
 
@@ -1671,7 +1673,7 @@ struct preset_component preset_tournament_comps[] = {
 	{ &system_config.replay_award, 0 },
 	{ &system_config.special_award, 0 },
 	{ &price_config.free_play, YES },
-	{ &system_config.game_restart, 0 },
+	{ &system_config.game_restart, GAME_RESTART_SLOW },
 	{ &system_config.max_ebs, 0 },
 	{ &system_config.match_feature, OFF },
 	{ &system_config.tournament_mode, ON },
@@ -1687,11 +1689,19 @@ struct preset_component preset_show_comps[] = {
 };
 
 
+struct preset preset_timed_game = {
+	.name = "TIMED GAME",
+};
+struct preset_component preset_timed_comps[] = {
+	{ NULL, 0 },
+};
+
 struct preset *preset_table[] = {
 	&preset_3ball,
 	&preset_5ball,
 	&preset_tournament,
 	&preset_show,
+	&preset_timed_game,
 };
 
 
@@ -1704,16 +1714,21 @@ void presets_init (void)
 void presets_draw (void)
 {
 	struct preset *pre = preset_table[menu_selection];
+	struct preset_component *comps = pre->comps;
 
 	dmd_alloc_low_clean ();
 
 	sprintf ("%d. INSTALL %s", menu_selection+1, pre->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
-	/* TODO : Is it installed? */	
-	if (1)
+	/* Is it installed? */	
+	while (comps->adj != NULL)
 	{
-		font_render_string_center (&font_mono5, 32, 20, "INSTALLED");
+		if (*(comps->adj) != comps->value)
+			break;
+		comps++;
+		if (comps->adj == NULL)
+			font_render_string_center (&font_mono5, 32, 20, "INSTALLED");
 	}
 
 	dmd_show_low ();

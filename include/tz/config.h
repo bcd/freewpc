@@ -255,6 +255,9 @@ void release_gumball_proc (void);
 extern struct menu tz_clock_test_item;
 extern struct menu tz_gumball_test_item;
 
-#define CONFIG_TIMED_GAME 30
+/* Timed game parameters */
+#define CONFIG_TIMED_GAME 60
+#define CONFIG_TIMED_GAME_MAX 180
+#define CONFIG_TIMED_GAME_OVER_SOUND SND_CLOCK_GONG
 
 #endif /* MACH_CONFIG_H */

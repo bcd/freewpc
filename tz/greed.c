@@ -43,7 +43,7 @@ void common_greed_handler (U8 target)
 		greed_set |= target;
 
 		sound_send (SND_THUNDER1);
-		score_add_current_const (SCORE_50K);
+		score (SC_50K);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (swinfo->lamp);
 
@@ -57,7 +57,7 @@ void common_greed_handler (U8 target)
 		if (greed_sound_index >= 4)
 			greed_sound_index = 0;
 		sound_send (greed_sounds[greed_sound_index]);
-		score_add_current_const (SCORE_5K);
+		score (SC_5K);
 	}
 }
 

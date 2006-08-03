@@ -45,7 +45,8 @@ void sw_left_ramp_handler (void)
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	left_ramps++;
-	score_add_current_const (SCORE_10K);
+	score (SC_10K);
+	callset_invoke (left_ramp);
 }
 
 

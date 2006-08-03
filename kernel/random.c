@@ -80,6 +80,15 @@ random_reseed (void)
 
 
 /**
+ * Reseed the random number generator during system idle time.
+ */
+CALLSET_ENTRY (random, idle)
+{
+	random_reseed ();
+}
+
+
+/**
  * Initialize the random number generator.
  */
 void

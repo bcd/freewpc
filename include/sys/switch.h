@@ -139,6 +139,18 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 }
 
 
+/** Declare that another switch is guaranteed to follow the one that just
+ * closed. */
+#define switch_can_follow(first,second,timeout) \
+	timer_restart_free (GID_ ## second ## _FOLLOWED_BY_ ## first, timeout)
+
+#define switch_did_follow(first,second) \
+	timer_kill_gid (GID_ ## second ## _FOLLOWED_BY_ ## first)
+
+#define event_should_follow(f,s,t) switch_can_follow(f,s,t)
+#define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
+#define event_did_follow(f,s)		switch_did_follow(f,s)
+
 void switch_init (void);
 void switch_rtt (void);
 void switch_sched (void);

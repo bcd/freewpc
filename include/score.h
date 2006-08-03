@@ -35,44 +35,44 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE];
 
-/** Defines for score values */
-#define SCORE_10		0x10ULL
-#define SCORE_100		0x100ULL
-#define SCORE_500		0x500ULL
-#define SCORE_1K		0x1000ULL
-#define SCORE_2500	0x2500ULL
-#define SCORE_5K		0x5000ULL
-#define SCORE_7500	0x7500ULL
-#define SCORE_10K		0x10000ULL
-#define SCORE_20K		0x20000ULL
-#define SCORE_25K		0x25000ULL
-#define SCORE_30K		0x30000ULL
-#define SCORE_40K		0x40000ULL
-#define SCORE_50K		0x50000ULL
-#define SCORE_75K		0x75000ULL
-#define SCORE_100K	0x100000ULL
-#define SCORE_200K	0x200000ULL
-#define SCORE_250K	0x250000ULL
-#define SCORE_300K	0x300000ULL
-#define SCORE_400K	0x400000ULL
-#define SCORE_500K	0x500000ULL
-#define SCORE_750K	0x750000ULL
-#define SCORE_1M		0x1000000ULL
-#define SCORE_2M		0x1000000ULL
-#define SCORE_3M		0x1000000ULL
-#define SCORE_4M		0x1000000ULL
-#define SCORE_5M		0x5000000ULL
-
-/** Some additional macros for constructing nonstandard score values */
-
-#define SCORE2(tens,ones) \
-	((SCORE_10 * tens) + ones)
-
-#define SCORE3(huns,tens,ones) \
-	((SCORE_100 * huns) + SCORE2(tens,ones))
-
-#define SCORE4(thous,huns,tens,ones) \
-	((SCORE_1K * thous) + SCORE3(huns,tens,ones))
+/** Score IDs, which are indices into the score table */
+typedef enum {
+	SC_10,
+	SC_100,
+	SC_500,
+	SC_1K,
+	SC_2500,
+	SC_5K,
+	SC_5130,
+	SC_10K,
+	SC_15K,
+	SC_20K,
+	SC_25K,
+	SC_30K,
+	SC_40K,
+	SC_50K,
+	SC_75K,
+	SC_100K,
+	SC_200K,
+	SC_250K,
+	SC_500K,
+	SC_750K,
+	SC_1M,
+	SC_2M,
+	SC_3M,
+	SC_4M,
+	SC_5M,
+	SC_10M,
+	SC_20M,
+	SC_30M,
+	SC_40M,
+	SC_50M,
+	SC_100M,
+	SC_200M,
+	SC_250M,
+	SC_500M,
+	SC_1B,
+} score_id_t;
 
 
 typedef struct
@@ -92,7 +92,8 @@ void scores_draw_current (void);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
 void score_add (bcd_t *s1, bcd_t *s2, U8 len);
-void score_add_current (bcd_t *s);
+void score_add_current (const bcd_t *s);
+void score (score_id_t id);
 void score_sub (score_t s1, score_t s2);
 void score_mul (score_t s1, uint8_t multiplier);
 I8 score_compare (score_t s1, score_t s2);
@@ -101,6 +102,7 @@ void score_init (void);
 
 /** Macros for adding to the CURRENT score; these are shortcuts **/
 
+#if 0
 #define score_decl(val) \
 	{ \
 		((val) & 0xFF000000ULL) >> 24, \
@@ -121,6 +123,7 @@ void score_init (void);
 	static const U8 score[] = score_decl(val); \
 	score_add_current (score); \
 }
+#endif
 
 #define MAKE_BCD(b)	0x##b
 

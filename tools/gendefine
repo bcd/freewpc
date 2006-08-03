@@ -88,15 +88,24 @@ foreach $dir (@dirs) {
 # ---------------------------------------------------------------------
 # Scan through all files and search for instances of the define
 # pattern.  When found, add an entry to the define hash, mapping
-# its name to a new value.
+# its name to a new value.  If the name has already been found once
+# before, no new value is allocated.
 # ---------------------------------------------------------------------
 my $nextval = $firstval;
 my $count = 0;
+my $line;
 foreach $src (@srclist) {
 	open FH, $src;
 	while (<FH>) {
 		chomp;
-		if (/[^a-zA-Z0-9_](${prefix}[a-zA-Z0-9_]*)/) {
+
+		if (/(switch|event)_did_follow[ \t]*\(([a-zA-Z0-9_]+), ([a-zA-Z0-9_]+)/) {
+			$line = " GID_" . $3 . "_FOLLOWED_BY_" . $2;
+		} else {
+			$line = $_;
+		}
+
+		if ($line =~ m/[^a-zA-Z0-9_](${prefix}[a-zA-Z0-9_]*)/) {
 			my $define = $1;
 			if (!defined $definehash{$define})
 			{

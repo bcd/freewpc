@@ -46,17 +46,17 @@ void add_player (void);
 void start_game (void);
 void stop_game (void);
 bool verify_start_ok (void);
+#ifdef CONFIG_TIMED_GAME
+void timed_game_extend (U8 secs);
+#endif
 void sw_start_button_handler (void) __taskentry__;
 void sw_buy_in_button_handler (void) __taskentry__;
-
 void sw_tilt_handler (void) __taskentry__;
 void sw_slam_tilt_handler (void) __taskentry__;
 void tilt_start_ball (void);
-
 void timed_game_pause (task_ticks_t delay);
 
 void game_init (void);
-
 
 #endif /* GAME_H */
 

@@ -29,23 +29,6 @@ DECLARE_SWITCH_DRIVER (sw_slot)
 };
 
 
-CALLSET_ENTRY (slot, update_lamps)
-{
-	if (flag_test (FLAG_DOOR_AWARD_LIT))
-	{
-		extern void door_award_rotate (void);
-		lamp_tristate_on (LM_SLOT_MACHINE);
-		lamp_tristate_off (LM_LEFT_INLANE2);
-		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
-	}
-	else
-	{
-		lamp_tristate_off (LM_SLOT_MACHINE);
-		lamp_tristate_on (LM_LEFT_INLANE2);
-		task_kill_gid (GID_DOOR_AWARD_ROTATE);
-	}
-}
-
 void slot_kick_sound (void)
 {
 	sound_send (SND_SLOT_KICKOUT_2);
@@ -59,30 +42,32 @@ void slot_enter (device_t *dev)
 
 	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 	mark_ball_in_play ();
-	score_add_current_const (SCORE_1K);
+	score (SC_1K);
 
-	if (task_kill_gid (GID_SLOT_DISABLED_BY_PIANO))
+	if (switch_did_follow (slot_proximity, slot))
+	{
+	}
+
+	if (switch_did_follow (dead_end, slot))
+	{
+	}
+	else if (switch_did_follow (piano, slot))
 	{
 		/* piano was recently hit, so ignore slot */
 	}
-	else if (task_kill_gid (GID_SLOT_DISABLED_BY_CAMERA))
+	else if (switch_did_follow (camera, slot))
 	{
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (task_kill_gid (GID_SLOT_DISABLED_BY_SKILL_SWITCH))
+	else if (switch_did_follow (any_skill_switch, slot))
 	{
 		/* skill switch was recently hit, so ignore slot */
 	}
 	else
 	{
-		score_add_current_const (SCORE_5K);
-
-		if (flag_test (FLAG_DOOR_AWARD_LIT))
-		{
+		score (SC_5K);
+		if (lamp_flash_test (LM_SLOT_MACHINE))
 			door_award_flashing ();
-			flag_off (FLAG_DOOR_AWARD_LIT);
-			slot_update_lamps ();
-		}
 	}
 }
 
@@ -97,12 +82,6 @@ void slot_kick_attempt (device_t *dev)
 		task_sleep (TIME_100MS * 5);
 		task_create_gid (0, slot_kick_sound);
 	}
-}
-
-
-CALLSET_ENTRY(slot, start_ball)
-{
-	slot_update_lamps ();
 }
 
 

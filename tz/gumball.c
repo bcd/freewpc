@@ -90,17 +90,19 @@ void gumball_release (void)
 
 void sw_gumball_exit_handler (void)
 {
-	if (task_kill_gid (GID_GUMBALL_EXIT_EXPECTED))
+	if (event_did_follow (gumball_geneva, gumball_exit))
 	{
 		/* A ball successfully came out of the gumball machine. */
 	}
+
+	event_should_follow (gumball_exit, camera, TIME_3S);
 }
 
 void sw_gumball_geneva_handler (void)
 {
 	dbprintf ("Geneva tripped.\n");
 	gumball_geneva_tripped = TRUE;
-	timer_restart_free (GID_GUMBALL_EXIT_EXPECTED, TIME_2S);
+	event_should_follow (gumball_geneva, gumball_exit, TIME_2S);
 }
 
 void sw_gumball_enter_handler (void)

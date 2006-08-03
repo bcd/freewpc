@@ -58,7 +58,7 @@ void sw_right_ramp_handler (void)
 	if (!in_live_game)
 		return;
 
-	score_add_current_const (SCORE_5K);
+	score (SC_5K);
 
 	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))
 	{
@@ -74,6 +74,8 @@ void sw_right_ramp_handler (void)
 			task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_task);
 		}
 	}
+
+	callset_invoke (right_ramp);
 }
 
 

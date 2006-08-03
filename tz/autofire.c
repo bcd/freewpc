@@ -26,13 +26,13 @@ U8 autofire_request_count;
 
 void sw_autofire1_handler (void)
 {
-	score_add_current_const (SCORE_100);
+	score (SC_100);
 }
 
 
 void sw_autofire2_handler (void)
 {
-	score_add_current_const (SCORE_100 * 2);
+	score (SC_100);
 	if (autofire_request_count == 0)
 	{
 	}
@@ -87,6 +87,7 @@ retry:
 		task_sleep (TIME_100MS * 5);
 
 		sol_pulse (SOL_AUTOFIRE);
+		event_can_follow (autolaunch, right_loop, TIME_4S);
 		task_sleep (TIME_100MS * 5);
 
 		/* Close diverter */

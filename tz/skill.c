@@ -40,11 +40,21 @@ void award_skill_shot (void)
 	disable_skill_shot ();
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
+	door_award_flashing ();
 	switch (skill_switch_reached)
 	{
-		case 1: score_add_current_const (SCORE_25K); break;
-		case 2: score_add_current_const (SCORE_50K); break;
-		case 3: score_add_current_const (SCORE_100K); break;
+		case 1: 
+			score (SC_25K);
+			timed_game_extend (5);
+			break;
+		case 2: 
+			score (SC_50K); 
+			timed_game_extend (10);
+			break;
+		case 3: 
+			score (SC_100K); 
+			timed_game_extend (15);
+			break;
 	}
 }
 
@@ -61,7 +71,7 @@ void skill_switch_monitor (void) __taskentry__
 
 void award_skill_switch (U8 sw)
 {
-	timer_restart (GID_SLOT_DISABLED_BY_SKILL_SWITCH, TIME_3S, freerunning_timer_function);
+	switch_can_follow (any_skill_switch, slot, TIME_3S);
 
 	if (skill_switch_reached < sw)
 	{

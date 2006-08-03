@@ -40,7 +40,11 @@ void hitchhiker_deff (void)
 
 void sw_hitch_handler (void)
 {
-	score_add_current_const (SCORE_100K);
+	event_did_follow (rocket, hitchhiker);
+	if (lamp_test (LM_PANEL_HH))
+		score (SC_500K);
+	else
+		score (SC_100K);
 	hitch_count++;
 	sound_send (SND_HITCHHIKER_DRIVE_BY);
 	deff_start (DEFF_HITCHHIKER);
@@ -49,7 +53,7 @@ void sw_hitch_handler (void)
 
 CALLSET_ENTRY(hitch, start_player)
 {
-	hitch_count = 0;
+	hitch_count = 1;
 }
 
 

@@ -31,9 +31,9 @@ CALLSET_ENTRY (deadend, start_ball)
 
 void sw_deadend_handler (void)
 {
-	score_add_current_const (SCORE_100K);
-	timer_restart_free (GID_SLOT_DISABLED_BY_DEAD_END, TIME_8S);
-	timer_restart_free (GID_CAMERA_DISABLED_BY_DEAD_END, TIME_4S);
+	score (SC_100K);
+	switch_can_follow (dead_end, slot, TIME_8S);
+	switch_can_follow (dead_end, camera, TIME_4S);
 }
 
 

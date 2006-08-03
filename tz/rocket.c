@@ -34,7 +34,7 @@ DECLARE_SWITCH_DRIVER (sw_rocket)
 
 void rocket_enter (device_t *dev)
 {
-	score_add_current_const(SCORE_10K);
+	score (SC_10K);
 }
 
 __taskentry__ void rocket_kick_sound (void)
@@ -46,6 +46,7 @@ __taskentry__ void rocket_kick_sound (void)
 
 void rocket_kick_attempt (device_t *dev)
 {
+	event_should_follow (rocket, hitchhiker, TIME_2S);
 	if (in_live_game)
 	{
 		db_puts ("Sending rocket kick sound\n");

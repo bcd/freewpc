@@ -40,8 +40,11 @@ void replay_award (void)
 			add_credit ();
 			break;
 
-		case FREE_AWARD_EXTRA_BALL:
+		case FREE_AWARD_EB:
 			increment_extra_balls ();
+			break;
+
+		case FREE_AWARD_OFF:
 			break;
 	}
 	deff_start (DEFF_REPLAY);

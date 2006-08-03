@@ -570,11 +570,12 @@ void task_dispatcher (void)
 #ifdef DEBUGGER
 				db_idle_task ();
 #endif
+				callset_invoke (idle);
+				/* TODO - change all of these to event catchers */
 				switch_idle_task ();
 				ac_idle_task ();
 				nvram_idle_task ();
 				rtc_idle_task ();
-				random_reseed ();
 			} 
 
 			/* Reset to beginning of the task list */

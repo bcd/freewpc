@@ -50,6 +50,10 @@ void ballsave_disable (void)
 
 bool ballsave_test_active (void)
 {
+#ifdef CONFIG_TIMED_GAME
+	if (timed_game_timer > 10)
+		return TRUE;
+#endif
 	return task_find_gid (GID_BALLSAVER) ? TRUE : FALSE;
 }
 
@@ -61,6 +65,9 @@ void ballsave_launch (void)
 	autofire_add_ball ();
 	deff_start (DEFF_BALL_SAVE);
 	ballsave_disable ();
+#ifdef CONFIG_TIMED_GAME
+	timed_game_extend (5);
+#endif
 }
 
 

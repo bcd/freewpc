@@ -20,49 +20,6 @@
 
 #include <freewpc.h>
 
-__local__ U8 lock_shots_made;
-__local__ U8 multiballs_played;
-__local__ U8 balls_locked;
-__local__ U8 locks_lit;
-__local__ U8 shots_for_lock;
-
-
-CALLSET_ENTRY (lock, update_lamps)
-{
-	if (locks_lit > 0)
-	{
-		lamp_tristate_flash (LM_LOCK_ARROW);
-	}
-	else if (balls_locked > 0)
-	{
-		lamp_tristate_on (LM_LOCK_ARROW);
-	}
-	else
-	{
-		lamp_tristate_off (LM_LOCK_ARROW);
-	}
-}
-
-
-CALLSET_ENTRY(lock, start_game)
-{
-}
-
-
-CALLSET_ENTRY(lock, start_player)
-{
-	lock_shots_made = 0;
-	multiballs_played = 0;
-	balls_locked = 0;
-	locks_lit = 1;
-	shots_for_lock = 0;
-}
-
-
-CALLSET_ENTRY(lock, start_ball)
-{
-}
-
 
 DECLARE_SWITCH_DRIVER (sw_lock)
 {
@@ -72,38 +29,18 @@ DECLARE_SWITCH_DRIVER (sw_lock)
 		
 void lock_enter (device_t *dev)
 {
-	score_add_current_const (SCORE_75K);
-
-	if (locks_lit != 0)
-	{
-		balls_locked++;
-		locks_lit--;
-		sound_send (SND_FAST_LOCK_STARTED);
-	}
+	if (lamp_test (LM_PANEL_FAST_LOCK))
+		score (SC_250K);
 	else
-	{
-		lock_shots_made++;
-		if (lock_shots_made == shots_for_lock)
-		{
-			lock_shots_made = 0;
-			locks_lit++;
-			shots_for_lock++;
-			sound_send (SND_SUPER_ROBOT_2);
-		}
-		else
-		{
-			sound_send (SND_ROBOT_AWARD);
-		}
-	}
-	lock_update_lamps ();
-	task_sleep_sec (1);
+		score (SC_50K);
+	callset_invoke (lock);
 }
 
 
 void lock_kick_attempt (device_t *dev)
 {
 	sound_send (SND_LOCK_KICKOUT);
-	timer_restart_free (GID_LOOP_DISABLED_BY_LOCK_EXIT, TIME_3S);
+	switch_can_follow (lock_exit, right_loop, TIME_3S);
 }
 
 

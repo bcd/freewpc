@@ -23,15 +23,21 @@
 
 void sw_camera_handler (void)
 {
-	if (task_kill_gid (GID_CAMERA_DISABLED_BY_DEAD_END))
+	if (event_did_follow (gumball_exit, camera))
+	{
+	}
+	else if (event_did_follow (dead_end, camera))
 	{
 	}
 	else
 	{
-		score_add_current_const (SCORE_10K * 3);
+		if (lamp_test (LM_PANEL_CAMERA))
+			score (SC_100K);
+		else
+			score (SC_50K);
 		sound_send (SND_JET_BUMPER_ADDED);
 	}
-	timer_restart_free (GID_SLOT_DISABLED_BY_CAMERA, TIME_4S);
+	switch_can_follow (camera, slot, TIME_4S);
 }
 
 

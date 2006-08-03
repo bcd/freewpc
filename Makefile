@@ -167,7 +167,6 @@ PATH_REQUIRED += $(BC)
 FIXED_SECTION = sysrom
 
 KERNEL_OBJS = \
-	build/callset.o \
 	kernel/ac.o \
 	kernel/adj.o \
 	kernel/audit.o \
@@ -216,6 +215,7 @@ COMMON_OBJS = \
 	common/search.o \
 	common/status.o \
 
+EVENT_OBJS = build/callset.o
 
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o \
@@ -243,7 +243,7 @@ FON_OBJS = \
 	fonts/schu.o \
 	fonts/miscfixed.o \
 
-FON_OBJS += fonts/test.o
+# FON_OBJS += fonts/test.o
 
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o
@@ -464,7 +464,7 @@ SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 # for when the code wants to switch the page to a particular
 # class of function.
 #
-page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS)
+page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS) $(EVENT_OBJS)
 page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS)
 page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
 page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS)
@@ -472,7 +472,7 @@ page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
 page61_OBJS = $(BLD)/page61.o $(FONT_OBJS) $(FON_OBJS)
 SYSTEM_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
-$(COMMON_OBJS) : PAGE=56
+$(COMMON_OBJS) $(EVENT_OBJS) : PAGE=56
 $(TRANS_OBJS) : PAGE=57
 $(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
 $(MACHINE_PAGED_OBJS) : PAGE=59
@@ -480,7 +480,7 @@ $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
-PAGE_DEFINES := -DCOMMON_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
+PAGE_DEFINES := -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
 CFLAGS += $(PAGE_DEFINES)
 
 
@@ -493,7 +493,7 @@ PAGE_HEADER_OBJS = $(BLD)/page56.o $(BLD)/page57.o $(BLD)/page58.o $(BLD)/page59
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
-C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(TRANS_OBJS) $(TEST_OBJS) \
+C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) $(TRANS_OBJS) $(TEST_OBJS) \
 	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
 	$(FONT_OBJS)
 

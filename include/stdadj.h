@@ -35,6 +35,17 @@ typedef uint8_t adjval_t;
 #define DATE_TIME_STYLE_US 0
 #define DATE_TIME_STYLE_EURO 1
 
+/* Game restart setting */
+#define GAME_RESTART_NEVER 0
+#define GAME_RESTART_SLOW 1
+#define GAME_RESTART_ALWAYS 2
+
+/* Free awards */
+#define FREE_AWARD_OFF 0
+#define FREE_AWARD_CREDIT 1
+#define FREE_AWARD_EB 2
+#define FREE_AWARD_TICKET 3
+#define FREE_AWARD_POINTS 4
 
 typedef struct
 {

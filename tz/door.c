@@ -57,13 +57,13 @@ const char *door_award_goals[] = {
 	"LOCK LANE",
 	"SLOT MACHINE",
 	"CLOCK TARGET",
-	"LEFT LOOP",
+	"THE LOOPS",
 	"RIGHT RAMP",
 	"ANYTHING",
 	"STANDUPS",
-	"THE CAMERA",
-	"HITCHHIKER",
-	"POWER PAYOFF",
+	"THE LEFT HOLE",
+	"THE SIDE LANE",
+	"CLOCK TARGET",
 	"LEFT RAMP",
 	"LOCK LANE",
 	"RIGHT LOOP",
@@ -113,8 +113,8 @@ void door_advance_flashing (void)
 
 void door_award_rotate (void) __taskentry__
 {
-	task_sleep_sec (3);
-	while (in_live_game && ball_in_play)
+	task_sleep_sec (2);
+	while (in_live_game)
 	{
 		door_advance_flashing ();
 		task_sleep_sec (1);
@@ -142,6 +142,14 @@ void door_award_deff (void)
 }
 
 
+void door_award_enable (void)
+{
+	lamp_tristate_flash (LM_SLOT_MACHINE);
+	lamp_tristate_flash (LM_PIANO_PANEL);
+	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
+}
+
+
 void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
@@ -151,14 +159,9 @@ void door_award_flashing (void)
 	deff_start (DEFF_DOOR_AWARD);
 	task_sleep (TIME_100MS);
 	door_advance_flashing ();
-	score_add_current_const (SCORE_50K);
-}
-
-
-void door_award_enable (void)
-{
-	flag_on (FLAG_DOOR_AWARD_LIT);
-	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
+	score (SC_50K);
+	door_award_enable ();
+	timed_game_extend (10);
 }
 
 

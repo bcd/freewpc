@@ -39,6 +39,7 @@ void sw_slot_prox_handler (void)
 	/* If the ball came from the piano or camera, it must
 	 * be steel.  Stop the detector task.
 	 */
+	switch_can_follow (slot_proximity, slot, TIME_3S);
 
 	/* The powerball is definitely in play */
 }

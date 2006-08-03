@@ -23,7 +23,6 @@
 
 int jet_sound_index;
 
-__local__ BCD jet_value;
 __local__ int jets_scored;
 __local__ int jets_for_bonus;
 
@@ -61,13 +60,13 @@ CALLSET_ENTRY(jet, start_player)
 }
 
 
-CALLSET_ENTRY(jet, start_ball)
-{
-	jet_value = MAKE_BCD(25);
-}
+sound_code_t jet_sounds[] = { 
+	SND_HORN1, SND_HORN2, SND_HORN3
+};
 
-
-sound_code_t jet_sounds[] = { SND_HORN1, SND_HORN2, SND_HORN3 };
+sound_code_t super_jet_sounds[] = { 
+	SND_TSM_HIT_1, SND_TSM_HIT_2, SND_TSM_HIT_3
+};
 
 void sw_jet_sound (void)
 {
@@ -75,7 +74,10 @@ void sw_jet_sound (void)
 	if (jet_sound_index >= 3)
 		jet_sound_index = 0;
 
-	sound_send (jet_sounds[jet_sound_index]);
+	if (lamp_test (LM_PANEL_TSM))
+		sound_send (super_jet_sounds[jet_sound_index]);
+	else
+		sound_send (jet_sounds[jet_sound_index]);
 	flasher_pulse (FLASH_JETS);
 	task_sleep (TIME_100MS * 2);
 	task_exit ();
@@ -83,7 +85,10 @@ void sw_jet_sound (void)
 
 void sw_jet_handler (void)
 {
-	score_add_current_const (SCORE_25K);
+	if (lamp_test (LM_PANEL_TSM))
+		score (SC_100K);
+	else
+		score (SC_25K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 

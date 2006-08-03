@@ -292,7 +292,7 @@ done:
 #ifdef CONFIG_TIMED_GAME
 void timed_game_monitor (void)
 {
-	while (timed_game_timer > 0)
+	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
 		/* Look for conditions in which the game timer should not run. */
 		if (!ball_in_play ||
@@ -309,23 +309,38 @@ void timed_game_monitor (void)
 		task_sleep_sec (1);
 		timed_game_timer--;
 		score_change++;
+		callset_invoke (timed_game_tick);
 	}
 
-	/* Short grace period after the timer expires */
-	task_sleep_sec (1);
+	/* Start end game effects.  The ball should drain soon, and the
+	 * normal end-of-game logic will kick in. */
+	if (in_game && !in_bonus)
+	{
+#ifdef CONFIG_TIMED_GAME_OVER_DEFF
+		deff_restart (CONFIG_TIMED_GAME_OVER_DEFF);
+#endif
+#ifdef CONFIG_TIMED_GAME_OVER_SOUND
+		sound_send (CONFIG_TIMED_GAME_OVER_SOUND);
+#endif
+
+		/* Short grace period after the timer expires */
+		task_sleep (TIME_500MS);
+
+	}
 
 	/* OK, the game is going to end soon... Disable the flippers. */
 	flipper_disable ();
-
-	/* Start end game effects.  The ball should drain soon, and thte
-	 * normal end-of-game logic will kick in. */
-#ifdef CONFIG_TIMED_GAME_OVER_DEFF
-	deff_restart (CONFIG_TIMED_GAME_OVER_DEFF);
-#endif
-#ifdef CONFIG_TIMED_GAME_OVER_SOUND
-	sound_send (CONFIG_TIMED_GAME_OVER_SOUND);
-#endif
 	task_exit ();
+}
+
+
+void timed_game_extend (U8 secs)
+{
+	timed_game_timer += secs;
+#ifdef CONFIG_TIMED_GAME_MAX
+	if (timed_game_timer > CONFIG_TIMED_GAME_MAX)
+		timed_game_timer = CONFIG_TIMED_GAME_MAX;
+#endif
 }
 
 
@@ -346,7 +361,7 @@ void timed_game_pause (task_ticks_t delay)
 	timer_restart_free (GID_TIMED_GAME_PAUSED, delay);
 }
 
-#endif
+#endif /* CONFIG_TIMED_GAME */
 
 
 void start_ball (void)
@@ -483,20 +498,11 @@ void sw_start_button_handler (void) __taskentry__
 	else
 	{
 		/* A game is already in progress.  If still at
-		 * ball 1, we can add a new player. */
-		if (ball_up == 1)
+		 * ball 1, and we haven't reached the maximum number
+		 * of players, we can add a new player. */
+		if ((ball_up == 1) && (num_players < system_config.max_players))
 		{
-			/* Yep, but don't add more than the maximum number
-			 * of players. */
-			if (num_players < system_config.max_players)
-			{
-				add_player ();
-			}
-			else
-			{
-				/* Nothing to do if trying to add more players
-				 * than the system supports. */
-			}
+			add_player ();
 		}
 
 		/* Nope, can't add a player.  Treat this as a
@@ -505,14 +511,14 @@ void sw_start_button_handler (void) __taskentry__
 		{
 			switch (system_config.game_restart)
 			{
-				case 0: /* always */
+				case GAME_RESTART_SLOW:
+					/* TODO */
+					break;
+				case GAME_RESTART_ALWAYS:
 					stop_game ();
 					start_game ();
 					break;
-				case 1: /* slow */
-					/* TODO */
-					break;
-				default: case 2: /* never */
+				default: case GAME_RESTART_NEVER:
 					break;
 			}
 		}
