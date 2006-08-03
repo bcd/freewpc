@@ -76,8 +76,12 @@ inline bool sound_queue_empty (void)
 void music_set (music_code_t code)
 {
 	*music_head = code;
-	if ((current_volume > 0) || (code == MUS_OFF))
+
+	if ((current_volume > 0) 
+		|| (code == MUS_OFF))
 	{
+		if (system_config.game_music == OFF)
+			return;
 #if (MACHINE_DCS == 1)
 		sound_queue_insert (0);
 #endif

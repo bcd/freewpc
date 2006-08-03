@@ -74,6 +74,8 @@ U8 ball_up;
 /** Nonzero if the current ball will automatically end after a certain
 period of time.  The value indicates the number of seconds. */
 U8 timed_game_timer;
+
+U8 timed_game_suspend_count;
 #endif
 
 void start_ball (void);
@@ -294,9 +296,12 @@ void timed_game_monitor (void)
 	{
 		/* Look for conditions in which the game timer should not run. */
 		if (!ball_in_play ||
-				(0 /* any balls are "locked up" preventing play */))
+				timer_find_gid (GID_TIMED_GAME_PAUSED) ||
+				timed_game_suspend_count)
 		{
-			task_sleep_sec (1);
+			dbprintf ("Timed game suspended, suspend_count=%d\n",
+				timed_game_suspend_count);
+			task_sleep (TIME_500MS);
 			continue;
 		}
 
@@ -322,6 +327,25 @@ void timed_game_monitor (void)
 #endif
 	task_exit ();
 }
+
+
+void timed_game_suspend (void)
+{
+	timed_game_suspend_count = 1;
+}
+
+
+void timed_game_resume (void)
+{
+	timed_game_suspend_count = 0;
+}
+
+
+void timed_game_pause (task_ticks_t delay)
+{
+	timer_restart_free (GID_TIMED_GAME_PAUSED, delay);
+}
+
 #endif
 
 
@@ -346,6 +370,7 @@ void start_ball (void)
 	ball_search_monitor_start ();
 #ifdef CONFIG_TIMED_GAME
 	timed_game_timer = CONFIG_TIMED_GAME;
+	timed_game_suspend_count = 0;
 	task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 #endif
 }

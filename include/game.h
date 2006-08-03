@@ -53,6 +53,8 @@ void sw_tilt_handler (void) __taskentry__;
 void sw_slam_tilt_handler (void) __taskentry__;
 void tilt_start_ball (void);
 
+void timed_game_pause (task_ticks_t delay);
+
 void game_init (void);
 
 

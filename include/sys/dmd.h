@@ -142,6 +142,7 @@ void dmd_draw_image (const U8 *image_bits);
 void dmd_draw_image2 (const U8 *image_bits);
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
+void dmd_erase_region (U8 x, U8 y, U8 width, U8 height);
 void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);

@@ -421,13 +421,11 @@ struct adjustment feature_adjustments[] = {
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
-
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
-
 #ifdef MACHINE_HAS_NOVICE_MODE
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
 #endif
-
+	{ "GAME MUSIC", &on_off_value, ON, &system_config.game_music },
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_ADJUSTMENTS
 #endif

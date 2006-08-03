@@ -449,6 +449,25 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 }
 
 
+/** Erase a specific region of the DMD low buffer, given its
+ * location and size */
+void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
+{
+	int i, j;
+	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
+	U16 *image_data = (U16 *)image_bits;
+
+	for (j=0; j < height; j++)
+	{
+		for (i=0; i < ((width / 8) / 2); i++)
+		{
+			dbuf[x + i] = 0;
+		}
+		dbuf += (16 / 2);
+	}
+}
+
+
 #ifdef INCLUDE_COLOR_TEST
 /**
  * The color test was used to prove that the 4-color imaging is

@@ -562,7 +562,7 @@ void switch_sched (void)
 	 * causes the compiler to crash...????  */
 	dbprintf ("Handling switch #%d\n", sw);
 #else
-	dbprintf ("Handling switch %p", swinfo);
+	dbprintf ("Handling switch %p\n", swinfo);
 #endif
 
 	/* Don't service switches marked SW_IN_GAME at all, if we're

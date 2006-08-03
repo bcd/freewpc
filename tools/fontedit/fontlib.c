@@ -273,8 +273,8 @@ int
 main (int argc, char *argv[])
 {
 	font_file_read (argv[1]);
-	// font_scale_width (2);
-	font_rename ("term6_w2");
+	font_scale_height (2);
+	font_rename ("test");
 	font_file_write ("");
 	return (0);
 }

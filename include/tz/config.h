@@ -154,7 +154,7 @@ typedef struct
 	{ "DISABLE CLOCK", &yes_no_value, NO, &feature_config.disable_clock }, \
 	{ "DISABLE GUMBALL", &yes_no_value, NO, &feature_config.disable_gumball }, \
 	{ "POWERBALL MISSING", &yes_no_value, NO, &feature_config.powerball_missing }, \
-	{ "3RD MAGNET INSTALLED", &yes_no_value, NO, &feature_config.third_magnet },
+	{ "HAVE 3RD MAGNET", &yes_no_value, NO, &feature_config.third_magnet },
 
 /* Declare the array of opto bits, defined elsewhere */
 extern const uint8_t mach_opto_mask[];
@@ -255,6 +255,6 @@ void release_gumball_proc (void);
 extern struct menu tz_clock_test_item;
 extern struct menu tz_gumball_test_item;
 
-#define CONFIG_TIMED_GAME 15
+#define CONFIG_TIMED_GAME 30
 
 #endif /* MACH_CONFIG_H */

@@ -281,6 +281,9 @@ wait_and_recount:
 			device_call_op (dev, kick_attempt);
 		
 			sol_pulse (dev->props->sol);
+#ifdef CONFIG_TIMED_GAME
+			timed_game_pause (TIME_1S);
+#endif
 			goto wait_and_recount;
 		}
 	}
@@ -328,6 +331,7 @@ void device_request_empty (device_t *dev)
 void device_update_globals (void)
 {
 	devicenum_t devno;
+	U8 held_balls = 0;
 
 	/* Recount the number of balls that are held */
 	counted_balls = 0;
@@ -335,6 +339,9 @@ void device_update_globals (void)
 	{
 		device_t *dev = device_entry (devno);
 		counted_balls += dev->actual_count;
+
+		if (devno != DEVNO_TROUGH)
+			held_balls += dev->actual_count - dev->max_count;
 	}
 
 	/* Count how many balls are missing */
@@ -347,6 +354,22 @@ void device_update_globals (void)
 	{
 		/* TODO : Number of balls not accounted for is NOT what we expect */
 		db_puts ("Missing != Live\n");
+	}
+
+	/* If any balls are held up temporarily (more than "max" are
+	 * in the device presently), then delay timers */
+	dbprintf ("held_balls = %d\n", held_balls);
+	if (held_balls > 0)
+	{
+#ifdef CONFIG_TIMED_GAME
+		timed_game_suspend ();
+#endif
+	}
+	else
+	{
+#ifdef CONFIG_TIMED_GAME
+		timed_game_resume ();
+#endif
 	}
 }
 

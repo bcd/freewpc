@@ -35,17 +35,19 @@ U8 debug_value;
 
 void scores_draw_ball (void)
 {
+#if defined (CONFIG_TIMED_GAME)
+	sprintf ("TIME REMAINING: 0:%02d", timed_game_timer);
+	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+#else
 #if defined(SHOW_DEBUG_VALUE)
 	sprintf ("DEBUG %d", debug_value);
-#elif defined (CONFIG_TIMED_GAME)
-	sprintf ("TIME: 0:%02d", timed_game_timer);
 #else
 	sprintf ("%1iUP", player_up);
 #endif
 	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
-
 	sprintf ("BALL %1i", ball_up);
 	font_render_string_center (&font_mono5, 96, 26, sprintf_buffer);
+#endif
 }
 
 

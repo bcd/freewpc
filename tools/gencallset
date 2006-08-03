@@ -39,7 +39,7 @@
 # Invocations are indicated by calls to callset_invoke() or
 # callset_invoke_boolean().
 #
-# The output of this script is a file callset/callset.c, which
+# The output of this script is a file build/callset.c, which
 # defines the global event handlers making calls to all of
 # the interested modules.
 #

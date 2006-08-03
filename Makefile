@@ -243,6 +243,8 @@ FON_OBJS = \
 	fonts/schu.o \
 	fonts/miscfixed.o \
 
+FON_OBJS += fonts/test.o
+
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o
 
