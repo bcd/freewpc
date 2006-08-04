@@ -150,11 +150,17 @@ void ball_search_monitor_task (void)
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
 			{
+#ifdef CONFIG_TIMED_GAME
+				timed_game_suspend ();
+#endif
 				while (ball_search_timer != 0)
 				{
 					ball_search_run ();
 					task_sleep_sec (15);
 				}
+#ifdef CONFIG_TIMED_GAME
+				timed_game_resume ();
+#endif
 			}
 		}
 	}

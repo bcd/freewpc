@@ -20,6 +20,9 @@
 
 #include <freewpc.h>
 
+__local__ U8 ball_save_count;
+
+
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
 	dmd_alloc_low_high ();
@@ -121,9 +124,27 @@ void ballsave_deff (void)
 	dmd_copy_low_to_high ();
 	font_render_string_center (&font_fixed6, 64, 21, "BALL SAVED");
 	dmd_show_low ();
-	deff_swap_low_high (32, TIME_100MS);
+
+	switch (ball_save_count)
+	{
+		case 0:
+			sound_send (SND_POWER_HUH_3);
+			break;
+		case 1:
+			sound_send (SND_POWER_HUH_4);
+			break;
+		default:
+			break;
+	}
+	ball_save_count++;
+
+	deff_swap_low_high (24, TIME_100MS);
 	deff_exit ();
 }
 
 
+CALLSET_ENTRY (deff, start_player)
+{
+	ball_save_count = 0;
+}
 

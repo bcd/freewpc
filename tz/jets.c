@@ -60,6 +60,16 @@ CALLSET_ENTRY(jet, start_player)
 }
 
 
+CALLSET_ENTRY (jet, door_panel_awarded)
+{
+	if (lamp_test (LM_PANEL_TSM))
+	{
+		lamp_tristate_flash (LM_LEFT_JET);
+		lamp_tristate_flash (LM_LOWER_JET);
+		lamp_tristate_flash (LM_RIGHT_JET);
+	}
+}
+
 sound_code_t jet_sounds[] = { 
 	SND_HORN1, SND_HORN2, SND_HORN3
 };

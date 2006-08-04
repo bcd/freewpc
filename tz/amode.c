@@ -93,9 +93,9 @@ void egg_brian_image_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_draw_image2 (brianhead_bits);
-	font_render_string_center (&font_cu17, 66, 18, "BCD");
+	font_render_string_center (&font_term6, 66, 11, "ARE YOU READY");
 	dmd_flip_low_high ();
-	font_render_string_center (&font_cu17, 64, 16, "BCD");
+	font_render_string_center (&font_term6, 66, 22, "TO BATTLE...");
 	dmd_flip_low_high ();
 	dmd_show2 ();
 	task_sleep_sec (8);

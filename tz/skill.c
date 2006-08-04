@@ -45,15 +45,14 @@ void award_skill_shot (void)
 	{
 		case 1: 
 			score (SC_25K);
-			timed_game_extend (5);
 			break;
 		case 2: 
 			score (SC_50K); 
-			timed_game_extend (10);
+			timed_game_extend (5);
 			break;
 		case 3: 
 			score (SC_100K); 
-			timed_game_extend (15);
+			timed_game_extend (10);
 			break;
 	}
 }

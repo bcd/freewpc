@@ -31,6 +31,7 @@ void sw_piano_handler (void)
 	sound_send (SND_ODD_CHANGE_BEGIN);
 	if (lamp_flash_test (LM_SLOT_MACHINE))
 		door_award_flashing ();
+	callset_invoke (piano);
 }
 
 

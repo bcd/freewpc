@@ -56,6 +56,14 @@ const uint8_t mach_edge_switches[] = {
 };
 
 
+U8 faster_quote_given;
+
+CALLSET_ENTRY (tz, start_ball)
+{
+	faster_quote_given = 0;
+}
+
+
 CALLSET_ENTRY (tz, add_player)
 {
 #ifdef CONFIG_TZONE_IP
@@ -98,13 +106,21 @@ CALLSET_ENTRY (tz, start_without_credits)
 
 CALLSET_ENTRY (tz, timed_game_tick)
 {
+	if (!in_live_game || in_bonus)
+		return;
 	switch (timed_game_timer)
 	{
+		case 10: 
+			if (faster_quote_given == 0)
+				sound_send (SND_FASTER); 
+			faster_quote_given = 1;
+			break;
 		case 5: sound_send (SND_FIVE); break;
 		case 4: sound_send (SND_FOUR); break;
 		case 3: sound_send (SND_THREE); break;
 		case 2: sound_send (SND_TWO); break;
 		case 1: sound_send (SND_ONE); break;
+		case 0: music_set (MUS_MULTIBALL_LIT_PLUNGER); break;
 		default: break;
 	}
 }

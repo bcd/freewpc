@@ -77,11 +77,13 @@ void music_set (music_code_t code)
 {
 	*music_head = code;
 
-	if ((current_volume > 0) 
+	/* Music codes are not emitted if volume is set to zero, or
+	 * if game music has been disabled.  But MUS_OFF is always
+	 * sent to the sound board, regardless of everything else. */
+	if (((current_volume > 0)
+			&& (system_config.game_music == ON))
 		|| (code == MUS_OFF))
 	{
-		if (system_config.game_music == OFF)
-			return;
 #if (MACHINE_DCS == 1)
 		sound_queue_insert (0);
 #endif

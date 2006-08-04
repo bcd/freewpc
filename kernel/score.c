@@ -68,7 +68,15 @@ U8 debug_value;
 void scores_draw_ball (void)
 {
 #if defined (CONFIG_TIMED_GAME)
-	sprintf ("TIME REMAINING: 0:%02d", timed_game_timer);
+	U8 time_minutes, time_seconds;
+	time_minutes = 0;
+	time_seconds = timed_game_timer;
+	while (time_seconds >= 60)
+	{
+		time_minutes++;
+		time_seconds -= 60;
+	}
+	sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
 	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 #else
 #if defined(SHOW_DEBUG_VALUE)
@@ -198,6 +206,7 @@ void score (score_id_t id)
 
 void score_multiple (score_id_t id, U8 multiplier)
 {
+#if 0
 	score_t mult_score;
 	const bcd_t *base_score = score_table[id];
 	S8 i;
@@ -209,6 +218,17 @@ void score_multiple (score_id_t id, U8 multiplier)
 	}
 
 	score_add_current (&mult_score);
+#else
+	if (!in_live_game)
+		return;
+
+	while (multiplier > 0)
+	{
+		score_add (current_score, score_table[id], sizeof (score_t));
+		multiplier--;
+	}
+	score_change++;
+#endif
 }
 
 

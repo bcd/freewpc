@@ -97,8 +97,39 @@ void flash_all_leff (void)
 void slot_kickout_leff (void)
 {
 	int i;
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 4; i++)
+	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+		task_sleep (TIME_33MS);
+	}
+	leff_exit ();
+}
+
+
+void gumball_strobe_leff (void)
+{
+	int i;
+	for (i = 0; i < 8 ; i++)
+	{
+		flasher_pulse (FLASH_GUMBALL_HIGH);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_GUMBALL_MID);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_GUMBALL_LOW);
+		task_sleep (TIME_33MS);
+	}
+	leff_exit ();
+}
+
+
+void clock_target_leff (void)
+{
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+		flasher_pulse (FLASH_CLOCK_TARGET);
+		task_sleep (TIME_33MS);
+	}
 	leff_exit ();
 }
 

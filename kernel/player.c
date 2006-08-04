@@ -44,6 +44,9 @@
 __local__ U8 __unused_local__;
 
 
+extern U8 *bit_matrix_array;
+
+
 void player_start_game (void)
 {
 	/* Clear all player local variables */
@@ -55,11 +58,21 @@ void player_start_game (void)
 
 void player_save (void)
 {
-	__blockcopy16 (LOCAL_SAVE_BASE(player_up), LOCAL_BASE, LOCAL_SIZE);
+	/* Copy lamps/bits into the save area */
+	__blockcopy16 (LOCAL_SAVE_BASE(player_up), &bit_matrix_array, NUM_LAMP_COLS * 2);
+
+	/* Copy player locals into the save area */
+	__blockcopy16 (LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, LOCAL_BASE, LOCAL_SIZE);
+
 }
 
 void player_restore (void)
 {
-	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up), LOCAL_SIZE);
+	/* Restore lamps/bits from the save area */
+	__blockcopy16 (&bit_matrix_array, LOCAL_SAVE_BASE(player_up), NUM_LAMP_COLS * 2);
+	
+	/* Restore player locals from the save area */
+	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, LOCAL_SIZE);
+
 }
 

@@ -65,7 +65,15 @@ void slot_enter (device_t *dev)
 	}
 	else
 	{
-		score (SC_5K);
+		if (lamp_test (LM_PANEL_SUPER_SLOT))
+		{
+			sound_send (SND_KACHING);
+			score (SC_250K);
+			task_sleep_sec (1);
+		}
+		else
+			score (SC_50K);
+
 		if (lamp_flash_test (LM_SLOT_MACHINE))
 			door_award_flashing ();
 	}

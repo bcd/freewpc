@@ -155,13 +155,14 @@ void door_award_flashing (void)
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_on (door_active_lamp);
+	timed_game_extend (10);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
 	task_sleep (TIME_100MS);
 	door_advance_flashing ();
 	score (SC_50K);
 	door_award_enable ();
-	timed_game_extend (10);
+	callset_invoke (door_panel_awarded);
 }
 
 

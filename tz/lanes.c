@@ -73,6 +73,7 @@ void sw_right_inlane_handler (void)
 	score (SC_1K);
 	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
 	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
+	lamp_on (LM_DEAD_END);
 }
 
 

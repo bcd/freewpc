@@ -20,20 +20,49 @@
 
 #include <freewpc.h>
 
-__local__ U8 dead_end_value;
+__local__ U8 dead_end_count;
 
 
-CALLSET_ENTRY (deadend, start_ball)
+CALLSET_ENTRY (deadend, start_player)
 {
-	dead_end_value = 100;
+	dead_end_count = 0;
 }
 
 
 void sw_deadend_handler (void)
 {
-	score (SC_100K);
 	switch_can_follow (dead_end, slot, TIME_8S);
 	switch_can_follow (dead_end, camera, TIME_4S);
+	if (lamp_test (LM_DEAD_END))
+	{
+		dead_end_count++;
+		sound_send (SND_DEAD_END_SCREECH);
+		task_sleep_sec (1);
+		sound_send (SND_DEAD_END_CRASH);
+		switch (dead_end_count)
+		{
+			case 1:
+				score (SC_250K);
+				timed_game_extend (15);
+				break;
+			case 2:
+				score (SC_500K);
+				timed_game_extend (20);
+				break;
+			case 3:
+			default:
+				score (SC_1M);
+				timed_game_extend (30);
+				break;
+		}
+		lamp_off (LM_DEAD_END);
+	}
+	else
+	{
+		score (SC_100K);
+		sound_send (SND_TOWN_SQUARE_AWARD);
+		timed_game_pause (TIME_3S);
+	}
 }
 
 
@@ -41,6 +70,5 @@ void sw_deadend_handler (void)
 DECLARE_SWITCH_DRIVER (sw_deadend)
 {
 	.fn = sw_deadend_handler,
-	.sound = SND_DEAD_END_SCREECH,
 };
 

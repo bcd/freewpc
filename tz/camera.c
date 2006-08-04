@@ -41,9 +41,16 @@ void sw_camera_handler (void)
 }
 
 
-CALLSET_ENTRY(camera, start_ball)
+CALLSET_ENTRY (camera, start_player)
 {
-	lamp_tristate_flash (LM_CAMERA);
+	lamp_tristate_off (LM_CAMERA);
+}
+
+
+CALLSET_ENTRY (camera, door_panel_awarded)
+{
+	if (lamp_test (LM_PANEL_CAMERA))
+		lamp_tristate_flash (LM_CAMERA);
 }
 
 

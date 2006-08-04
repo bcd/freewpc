@@ -30,10 +30,15 @@ void enter_loop (void)
 void award_loop (void)
 {
 	if (lamp_test (LM_PANEL_SPIRAL))
+	{
+		sound_send (SND_SPIRAL_ROUND_AWARD_3);
 		score (SC_250K);
+	}
 	else
+	{
 		score (SC_50K);
-	sound_send (SND_SPIRAL_AWARDED);
+		sound_send (SND_SPIRAL_AWARDED);
+	}
 }
 
 
@@ -93,11 +98,13 @@ void sw_right_loop_handler (void)
 		if (event_did_follow (lock_exit, right_loop))
 		{
 			/* Ignore right loop switch after lock kickout */
+			enter_loop ();
 			return;
 		}
 		else if (event_did_follow (autolaunch, right_loop))
 		{
 			/* Ignore right loop switch after an autolaunch */
+			enter_loop ();
 			return;
 		}
 		else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))

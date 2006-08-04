@@ -39,10 +39,17 @@ void slingshot_rtt (void)
 }
 
 
+void sw_sling_handler (void)
+{
+	score (SC_10);
+}
+
+
 DECLARE_SWITCH_DRIVER (sw_left_sling)
 {
 	.flags = SW_PLAYFIELD,
 	.sound = SND_SLINGSHOT,
+	.fn = sw_sling_handler,
 };
 
 
@@ -50,5 +57,6 @@ DECLARE_SWITCH_DRIVER (sw_right_sling)
 {
 	.flags = SW_PLAYFIELD,
 	.sound = SND_SLINGSHOT,
+	.fn = sw_sling_handler,
 };
 

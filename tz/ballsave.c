@@ -24,9 +24,11 @@
  * become a true leff. */
 static void ballsave_monitor (void)
 {
-	int i;
-	lamp_leff_allocate (LM_SHOOT_AGAIN);
-	for (i=0; i < 40; i++)
+#ifdef CONFIG_TIMED_GAME
+	while (timed_game_timer > 10)
+#else
+	for (;;) /* game-specific timeout put here */
+#endif
 	{
 		leff_on (LM_SHOOT_AGAIN);
 		task_sleep (TIME_100MS);
@@ -34,18 +36,19 @@ static void ballsave_monitor (void)
 		task_sleep (TIME_100MS);
 	}
 	lamp_leff_free (LM_SHOOT_AGAIN);
-	task_sleep_sec (2);
 	task_exit ();
 }
 
 void ballsave_enable (void)
 {
+	lamp_leff_allocate (LM_SHOOT_AGAIN);
 	task_recreate_gid (GID_BALLSAVER, ballsave_monitor);
 }
 
 void ballsave_disable (void)
 {
 	task_kill_gid (GID_BALLSAVER);
+	lamp_leff_free (LM_SHOOT_AGAIN);
 }
 
 bool ballsave_test_active (void)
@@ -64,9 +67,10 @@ void ballsave_launch (void)
 
 	autofire_add_ball ();
 	deff_start (DEFF_BALL_SAVE);
-	ballsave_disable ();
 #ifdef CONFIG_TIMED_GAME
-	timed_game_extend (5);
+	timed_game_extend (2);
+#else
+	ballsave_disable ();
 #endif
 }
 

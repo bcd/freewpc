@@ -336,11 +336,14 @@ void timed_game_monitor (void)
 
 void timed_game_extend (U8 secs)
 {
-	timed_game_timer += secs;
+	if (timed_game_timer > 0)
+	{
+		timed_game_timer += secs;
 #ifdef CONFIG_TIMED_GAME_MAX
-	if (timed_game_timer > CONFIG_TIMED_GAME_MAX)
-		timed_game_timer = CONFIG_TIMED_GAME_MAX;
+		if (timed_game_timer > CONFIG_TIMED_GAME_MAX)
+			timed_game_timer = CONFIG_TIMED_GAME_MAX;
 #endif
+	}
 }
 
 

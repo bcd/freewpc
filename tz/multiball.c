@@ -24,10 +24,18 @@ __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 
+
+void mball_lock_lamp_update (void)
+{
+	if (mball_locks_lit)
+		lamp_tristate_flash (LM_LOCK_ARROW);
+}
+
 void mball_light_lock (void)
 {
 	mball_locks_lit++;
 	lamp_tristate_flash (LM_LOCK_ARROW);
+	sound_send (SND_GUMBALL_COMBO);
 }
 
 
@@ -59,11 +67,23 @@ CALLSET_ENTRY (mball, right_ramp)
 	}
 }
 
+
+CALLSET_ENTRY (mball, piano)
+{
+	if (lamp_flash_test (LM_PIANO_JACKPOT))
+	{
+		music_change (MUS_MULTIBALL);
+		lamp_tristate_off (LM_PIANO_JACKPOT);
+	}
+}
+
+
 CALLSET_ENTRY (mball, lock)
 {
 	if (mball_locks_lit > 0)
 	{
 		mball_locks_lit--;
+		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{
 			lamp_off (LM_GUM);

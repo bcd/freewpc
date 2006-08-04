@@ -76,7 +76,6 @@ typedef U8 lampset_id_t;
  * mechanism to construct new lampsets.
  */
 
-#define LAMP_MACRO_RANGE_OP		(NUM_LAMPS + 1)
 #define LAMP_END_OP					(NUM_LAMPS + 2)
 #define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
 
@@ -85,9 +84,6 @@ typedef U8 lampset_id_t;
  * When defining a lampset, you can use the following C macros
  * to emit proper lamp macro code into the array.
  */
-#define LAMP_MACRO_RANGE(p,q) \
-	LAMP_MACRO_RANGE_OP, (p), (q)
-
 #define LAMP_END LAMP_END_OP
 
 

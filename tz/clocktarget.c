@@ -48,7 +48,8 @@ void sw_clock_target_handler (void)
 		return;
 	}
 
-	sound_send (SND_CLOCK_GONG);
+	sound_send (SND_CLOCK_BELL);
+	leff_start (LEFF_CLOCK_TARGET);
 	for (n=0 ; n < clock_multiplier; n++)
 		score (clock_score_table[clock_hits]);
 	if (clock_hits < 4)
@@ -67,6 +68,13 @@ CALLSET_ENTRY(clocktarget, start_player)
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	clock_hits = 0;
 	clock_multiplier = 1;
+}
+
+
+CALLSET_ENTRY (clocktarget, door_panel_awarded)
+{
+	if (lamp_test (LM_PANEL_CLOCK_MIL))
+		lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
 
