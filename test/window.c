@@ -1243,20 +1243,23 @@ void dev_balldev_test_draw (void)
 		sprintf ("DEV %d   %s", menu_selection, dev->props->name);
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 	
-		sprintf ("SIZE %d", dev->size);
-		font_render_string (&font_mono5, 8, 7, sprintf_buffer);
+		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
+		font_render_string (&font_mono5, 4, 7, sprintf_buffer);
 
-		sprintf ("COUNT %d", dev->actual_count);
-		font_render_string (&font_mono5, 8, 13, sprintf_buffer);
+		sprintf ("HOLD %d", dev->max_count);
+		font_render_string (&font_mono5, 4, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_mono5, 8, 19, sprintf_buffer);
+		font_render_string (&font_mono5, 4, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_mono5, 72, 7, sprintf_buffer);
+		font_render_string (&font_mono5, 64, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_mono5, 72, 13, sprintf_buffer);
+		font_render_string (&font_mono5, 64, 13, sprintf_buffer);
+
+		sprintf ("LIVE/LK %d%d", live_balls, kickout_locks);
+		font_render_string (&font_mono5, 64, 19, sprintf_buffer);
 
 		switch (browser_action)
 		{

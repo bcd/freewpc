@@ -164,6 +164,7 @@ extern const uint8_t mach_edge_switches[];
 
 /* Declare the display effects that this machine implements */
 #define MACHINE_DISPLAY_EFFECTS \
+	DECL_DEFF (DEFF_INSPECTOR, D_RUNNING, PRI_DEBUGGER, inspector_deff) \
 	DECL_DEFF (DEFF_AMODE, D_RUNNING, PRI_AMODE, amode_deff) \
 	DECL_DEFF (DEFF_BRIAN_IMAGE, D_NORMAL, PRI_EGG1, egg_brian_image_deff) \
 	DECL_DEFF (DEFF_BONUS, D_RUNNING, PRI_BONUS, bonus_deff) \

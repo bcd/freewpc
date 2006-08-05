@@ -388,8 +388,20 @@ void device_probe (void)
 		device_t *dev = device_entry (devno);
 		device_recount (dev);
 		dev->previous_count = dev->actual_count;
+
+		/* If there are more balls in the device than ought to be,
+		 * schedule the extras to be emptied. */
+		if (dev->actual_count > dev->max_count)
+		{
+			U8 kick_count = dev->actual_count - dev->max_count;
+			do {
+				device_request_kick (dev);
+			} while (--kick_count != 0);
+		}
 	}
 
+	/* Update the global state information again based on the
+	 * new counts */
 	device_update_globals ();
 
 	device_ss_state = 1;
@@ -474,6 +486,9 @@ void device_multiball_set (U8 count)
  * in the trough. */
 bool device_check_start_ok (void)
 {
+	/* Reset any kickout locks, just in case */
+	kickout_locks = 0;
+
 	/* OK to start game */
 	return TRUE;
 }
@@ -506,18 +521,6 @@ void device_lock_ball (device_t *dev)
 	{
 		device_unlock_ball (dev);
 	}
-}
-
-
-void kickout_lock_get (void)
-{
-	kickout_locks++;
-}
-
-
-void kickout_lock_put (void)
-{
-	kickout_locks--;
 }
 
 

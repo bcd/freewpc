@@ -211,7 +211,7 @@ void end_ball (void)
 	audit_increment (&system_audits.balls_played);
 
 	/* Stop the ball search monitor */
-	ball_search_monitor_start ();
+	ball_search_monitor_stop ();
 
 	/* If the ball was not tilted, start bonus.
 	 * The tilt flag is then cleared. */
@@ -541,6 +541,7 @@ void sw_start_button_handler (void) __taskentry__
  */
 void sw_buy_in_button_handler (void) __taskentry__
 {
+	inspector_buyin_button ();
 }
 
 /*

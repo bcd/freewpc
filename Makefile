@@ -208,6 +208,7 @@ COMMON_OBJS = \
 	common/buyin.o \
 	common/eb.o \
 	common/highscore.o \
+	common/inspector.o \
 	common/knocker.o \
 	common/match.o \
 	common/replay.o \

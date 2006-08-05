@@ -189,7 +189,10 @@ typedef U8 devicenum_t;
 #define device_enable_lock(dev)	(dev->max_count++)
 
 extern device_t device_table[];
+extern U8 counted_balls;
+extern U8 missing_balls;
 extern U8 live_balls;
+extern U8 kickout_locks;
 
 void device_clear (device_t *dev);
 void device_register (devicenum_t devno, device_properties_t *props);
@@ -205,8 +208,12 @@ void device_multiball_set (U8 count);
 bool device_check_start_ok (void);
 void device_unlock_ball (device_t *dev);
 void device_lock_ball (device_t *dev);
-void kickout_lock_get (void);
-void kickout_lock_put (void);
+
+#define kickout_lock(by)	do { kickout_locks |= (by); } while (0)
+#define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)
+
+#define KLOCK_DEFF 0x1
+
 void device_init (void);
 
 void trough_init (void);

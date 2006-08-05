@@ -161,6 +161,18 @@ static deffnum_t deff_get_highest_priority (void)
 	return best;
 }
 
+static void deff_stop_task (void)
+{
+	dmd_reset_transition ();
+	kickout_unlock (KLOCK_DEFF);
+}
+
+static void deff_start_task (const deff_t *deff)
+{
+	deff_stop_task ();
+	task_recreate_gid (GID_DEFF, deff->fn);
+}
+
 
 void deff_start (deffnum_t dn)
 {
@@ -177,8 +189,7 @@ void deff_start (deffnum_t dn)
 			/* This is the new active running deff */
 			db_puts ("Requested deff is now highest priority\n");
 			deff_active = dn;
-			dmd_reset_transition ();
-			task_recreate_gid (GID_DEFF, deff->fn);
+			deff_start_task (deff);
 		}
 		else
 		{
@@ -193,8 +204,7 @@ void deff_start (deffnum_t dn)
 		{
 			db_puts ("Restarting quick deff with high pri\n");
 			deff_active = dn;
-			dmd_reset_transition ();
-			task_recreate_gid (GID_DEFF, deff->fn);
+			deff_start_task (deff);
 		}
 		else
 		{
@@ -222,8 +232,7 @@ void deff_restart (deffnum_t dn)
 	if (dn == deff_active)
 	{
 		const deff_t *deff = &deff_table[dn];
-		dmd_reset_transition ();
-		task_recreate_gid (GID_DEFF, deff->fn);
+		deff_start_task (deff);
 	}
 	else
 	{
@@ -247,7 +256,7 @@ void deff_start_highest_priority (void)
 {
 	db_puts ("Restarting highest priority deff\n");
 
-	dmd_reset_transition ();
+	deff_stop_task ();
 	deff_active = deff_get_highest_priority ();
 	if (deff_active != DEFF_NULL)
 	{
@@ -301,7 +310,7 @@ void deff_init (void)
 void deff_stop_all (void)
 {
 	task_kill_gid (GID_DEFF);
-	dmd_reset_transition ();
+	deff_stop_task ();
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 	deff_init ();

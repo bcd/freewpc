@@ -73,7 +73,7 @@ typedef enum _priority {
 	PRI_MATCH,
 	PRI_1COIN_BUYIN,
 	PRI_SLAMTILT,
-
+	PRI_DEBUGGER,
 } priority_t;
 
 #endif /* _PRIORITY_H */

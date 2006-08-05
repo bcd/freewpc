@@ -22,33 +22,53 @@
 
 /* TODO : you cannot page through the status report now. */
 
-void status_report_deff (void)
+void status_page_init (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	font_render_string_center (&font_fixed6, 64, 16, "STATUS REPORT");
-	dmd_show_low ();
-	task_sleep_sec (2);
+}
 
-	dmd_alloc_low_clean ();
-	dmd_draw_border (dmd_low_buffer);
+void status_page_complete (void)
+{
+	task_ticks_t timeout = TIME_3S / TIME_66MS;
+	dmd_show_low ();
+	while (timeout > 0)
+	{
+		task_sleep (TIME_66MS);
+		timeout--;
+	}
+}
+
+void status_report_deff (void)
+{
+	status_page_init ();
+	font_render_string_center (&font_fixed6, 64, 16, "STATUS REPORT");
+	status_page_complete ();
+
+	status_page_init ();
 	sprintf ("BALL %d", ball_up);
 	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
 	credits_render ();
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (3);
+	status_page_complete ();
 
 	rtc_show_date_time ();
 	dmd_draw_border (dmd_low_buffer);
-	task_sleep_sec (3);
+	status_page_complete ();
 
-	dmd_alloc_low_clean ();
-	dmd_draw_border (dmd_low_buffer);
+	status_page_init ();
 	font_render_string_center (&font_mono5, 64, 11, "REPLAY AT");
 	font_render_string_center (&font_mono5, 64, 21, "TBD");
-	dmd_show_low ();
-	task_sleep_sec (3);
+	status_page_complete ();
+
+#ifdef DEBUGGER
+	status_page_init ();
+	sprintf ("CNT %1d MIS %1d", counted_balls, missing_balls);
+	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+	sprintf ("LIVE %1d KLOCKS %1d", live_balls, kickout_locks);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	status_page_complete ();
+#endif
 
 #ifdef MACHINE_STATUS_REPORT
 	MACHINE_STATUS_REPORT
