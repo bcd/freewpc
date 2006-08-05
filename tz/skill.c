@@ -71,6 +71,8 @@ void skill_switch_monitor (void) __taskentry__
 void award_skill_switch (U8 sw)
 {
 	switch_can_follow (any_skill_switch, slot, TIME_3S);
+	if (!skill_shot_enabled)
+		return;
 
 	if (skill_switch_reached < sw)
 	{
@@ -88,28 +90,19 @@ void award_skill_switch (U8 sw)
 
 void sw_lower_skill_handler (void) __taskentry__
 {
-	if (skill_shot_enabled)
-	{
-		award_skill_switch (1);
-	}
+	award_skill_switch (1);
 }
 
 
 void sw_center_skill_handler (void) __taskentry__
 {
-	if (skill_shot_enabled)
-	{
-		award_skill_switch (2);
-	}
+	award_skill_switch (2);
 }
 
 
 void sw_upper_skill_handler (void) __taskentry__
 {
-	if (skill_shot_enabled)
-	{
-		award_skill_switch (3);
-	}
+	award_skill_switch (3);
 }
 
 

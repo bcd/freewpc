@@ -27,7 +27,14 @@ void left_ramp_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("%d LEFT RAMPS", left_ramps);
-	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+
+	if (left_ramps < 3)
+		sprintf ("EXTRA TIME AT 3");
+	else if (left_ramps < 6)
+		sprintf ("SPOT PANEL AT 6");
+	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
+
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -40,13 +47,20 @@ CALLSET_ENTRY(leftramp, start_player)
 }
 
 
-void sw_left_ramp_handler (void)
+CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	left_ramps++;
 	score (SC_10K);
-	callset_invoke (left_ramp);
+	if (left_ramps == 3)
+	{
+		timed_game_extend (15);
+	}
+	else if (left_ramps == 6)
+	{
+		door_award_flashing ();
+	}
 }
 
 
@@ -59,9 +73,9 @@ DECLARE_SWITCH_DRIVER (sw_left_ramp_enter)
 
 DECLARE_SWITCH_DRIVER (sw_left_ramp_exit)
 {
+	DECLARE_SWITCH_EVENT (sw_left_ramp_exit),
 	.flags = SW_PLAYFIELD,
 	.sound = SND_LEFT_RAMP_MADE,
-	.fn = sw_left_ramp_handler,
 };
 
 

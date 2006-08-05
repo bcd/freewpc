@@ -181,7 +181,7 @@ extern const uint8_t mach_edge_switches[];
 DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, flasher_happy_leff) \
 DECL_LEFF (LEFF_GUMBALL_STROBE, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, gumball_strobe_leff) \
 DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_NOGI, left_ramp_leff) \
-DECL_LEFF (LEFF_CLOCK_TARGET, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_NOGI, clock_target_leff) \
+DECL_LEFF (LEFF_CLOCK_TARGET, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_ALL_GI, clock_target_leff) \
 DECL_LEFF (LEFF_NO_GI, L_NORMAL, PRI_LEFF3, L_NOLAMPS, L_NOGI, no_gi_leff) \
 DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, PRI_LEFF3, L_NOLAMPS, L_NOGI, slot_kickout_leff) \
 DECL_LEFF (LEFF_AMODE, L_RUNNING, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
@@ -262,4 +262,20 @@ extern struct menu tz_gumball_test_item;
 #define CONFIG_TIMED_GAME_MAX 120
 #define CONFIG_TIMED_GAME_OVER_SOUND SND_CLOCK_GONG
 
+/* Default high scores */
+#define MACHINE_GRAND_CHAMPION_INITIALS { 'Q', 'Q', 'Q' }
+#define MACHINE_GRAND_CHAMPION_SCORE { 0x15, 0x00, 0x00, 0x00 }
+
+#define MACHINE_HIGH_SCORE_INITIALS \
+	{ 'C', 'C', 'D' }, \
+	{ 'M', 'L', 'D' }, \
+	{ 'B', 'D', 'D' }, \
+	{ 'N', 'W', 'U' }
+#define MACHINE_HIGH_SCORES \
+	{ 0x10, 0x00, 0x00, 0x00 }, \
+	{ 0x09, 0x00, 0x00, 0x00 }, \
+	{ 0x08, 0x00, 0x00, 0x00 }, \
+	{ 0x07, 0x00, 0x00, 0x00 },
+
 #endif /* MACH_CONFIG_H */
+

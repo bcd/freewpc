@@ -53,6 +53,8 @@ U8 ball_search_timeout;
  */
 static bool ball_search_solenoid_ok (U8 sol)
 {
+	device_t *dev;
+
 #if !defined(MACHINE_SOL_FLASHERP)
 	/* If the machine description is not proper, then we can't know
 	 * for sure which solenoids are OK, so don't fire _any_.  */
@@ -73,7 +75,13 @@ static bool ball_search_solenoid_ok (U8 sol)
 #endif
 		 )
 		return (FALSE);
-	/* TODO - add check for all ball device kick coils */
+
+	/* Also check for all ball device kick coils */
+	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
+	{
+		if (sol == dev->props->sol)
+			return (FALSE);
+	}
 #endif
 
 	/* OK, you can use it. */
@@ -134,7 +142,7 @@ void ball_search_monitor_task (void)
 {
 	extern U8 live_balls;
 
-	for (;;)
+	while (in_game)
 	{
 		task_sleep_sec (1);
 
@@ -164,6 +172,7 @@ void ball_search_monitor_task (void)
 			}
 		}
 	}
+	task_exit ();
 }
 
 

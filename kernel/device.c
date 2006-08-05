@@ -113,6 +113,7 @@ void device_register (devicenum_t devno, device_properties_t *props)
 {
 	device_t *dev = &device_table[devno];
 	dev->devno = devno;
+	dev->devno_mask = (1 << devno);
 	dev->props = props;
 	dev->size = props->sw_count;
 	dev->max_count = props->init_max_count;
@@ -346,14 +347,16 @@ void device_update_globals (void)
 
 	/* Count how many balls are missing */
 	missing_balls = max_balls - counted_balls;
-	if (missing_balls == live_balls)
+	if (missing_balls != live_balls)
 	{
-		/* Number of balls not accounted for is what we expect */
-	}
-	else
-	{
-		/* TODO : Number of balls not accounted for is NOT what we expect */
+		/* Number of balls not accounted for is NOT what we expect */
 		db_puts ("Missing != Live\n");
+#if 0 /* this isn't right */
+		if (missing_balls + 1 == live_balls)
+		{
+			device_request_kick (device_entry (DEVNO_TROUGH));
+		}
+#endif
 	}
 
 	/* If any balls are held up temporarily (more than "max" are
@@ -475,6 +478,35 @@ bool device_check_start_ok (void)
 	return TRUE;
 }
 
+void device_unlock_ball (device_t *dev)
+{
+	if (dev->max_count > 0)
+	{
+		device_disable_lock (dev);
+		device_request_kick (dev);
+	}
+	else
+		fatal (ERR_UNLOCK_EMPTY_DEVICE);
+}
+
+
+void device_lock_ball (device_t *dev)
+{
+	device_t *trough = device_entry (DEVNO_TROUGH);
+
+	if (dev->max_count >= dev->size)
+		fatal (ERR_LOCK_FULL_DEVICE);
+
+	device_enable_lock (dev);
+	if (trough->actual_count > 0)
+	{
+		device_request_kick (trough);
+	}
+	else
+	{
+		device_unlock_ball (dev);
+	}
+}
 
 
 void kickout_lock_get (void)

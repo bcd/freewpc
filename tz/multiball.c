@@ -49,7 +49,7 @@ void mball_check_light_lock (void)
 }
 
 
-CALLSET_ENTRY (mball, left_ramp)
+CALLSET_ENTRY (mball, sw_left_ramp_exit)
 {
 	if (!lamp_test (LM_GUM))
 	{
@@ -83,6 +83,7 @@ CALLSET_ENTRY (mball, lock)
 	if (mball_locks_lit > 0)
 	{
 		mball_locks_lit--;
+		device_lock_ball (device_entry (DEVNO_LOCK));
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{

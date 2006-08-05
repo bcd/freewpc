@@ -26,9 +26,9 @@ int jet_sound_index;
 __local__ int jets_scored;
 __local__ int jets_for_bonus;
 
-U8 rtsol_left_jet;
-U8 rtsol_right_jet;
-U8 rtsol_bottom_jet;
+__fastram__ U8 rtsol_left_jet;
+__fastram__ U8 rtsol_right_jet;
+__fastram__ U8 rtsol_bottom_jet;
 
 
 void jets_rtt (void)
@@ -96,9 +96,9 @@ void sw_jet_sound (void)
 void sw_jet_handler (void)
 {
 	if (lamp_test (LM_PANEL_TSM))
-		score (SC_100K);
+		score (SC_50K);
 	else
-		score (SC_25K);
+		score (SC_10K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 

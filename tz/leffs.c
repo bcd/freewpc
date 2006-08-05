@@ -20,6 +20,20 @@
 
 #include <freewpc.h>
 
+void gi_cycle_leff (void)
+{
+	U8 i;
+	for (;;)
+	{
+		for (i=0; i < 5; i++)
+		{
+			triac_disable (TRIAC_GI_MASK);
+			triac_enable (TRIAC_GI_STRING (i));
+			task_sleep (TIME_33MS);
+		}
+	}
+}
+
 
 void flasher_happy_leff (void)
 {
@@ -97,10 +111,10 @@ void flash_all_leff (void)
 void slot_kickout_leff (void)
 {
 	int i;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 6; i++)
 	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_200MS);
 	}
 	leff_exit ();
 }
@@ -109,14 +123,14 @@ void slot_kickout_leff (void)
 void gumball_strobe_leff (void)
 {
 	int i;
-	for (i = 0; i < 8 ; i++)
+	for (i = 0; i < 6 ; i++)
 	{
 		flasher_pulse (FLASH_GUMBALL_HIGH);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS);
 		flasher_pulse (FLASH_GUMBALL_MID);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS);
 		flasher_pulse (FLASH_GUMBALL_LOW);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS * 2);
 	}
 	leff_exit ();
 }
@@ -125,11 +139,14 @@ void gumball_strobe_leff (void)
 void clock_target_leff (void)
 {
 	int i;
-	for (i = 0; i < 4; i++)
+
+	task_create_child (gi_cycle_leff);
+	for (i = 0; i < 12; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_200MS);
 	}
+	task_kill_gid (task_getgid ());
 	leff_exit ();
 }
 

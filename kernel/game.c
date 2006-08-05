@@ -295,9 +295,11 @@ void timed_game_monitor (void)
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
 		/* Look for conditions in which the game timer should not run. */
-		if (!ball_in_play ||
-				timer_find_gid (GID_TIMED_GAME_PAUSED) ||
-				timed_game_suspend_count)
+		if (!ball_in_play
+				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
+				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
+						(live_balls <= 1))
+				|| timed_game_suspend_count)
 		{
 			dbprintf ("Timed game suspended, suspend_count=%d\n",
 				timed_game_suspend_count);

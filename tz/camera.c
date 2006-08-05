@@ -21,6 +21,35 @@
 #include <freewpc.h>
 
 
+__local__ U8 camera_award_count;
+
+
+void do_camera_award (void)
+{
+	switch (camera_award_count)
+	{
+		case 0:
+			/* Light Lock */
+			break;
+		case 1:
+			/* Spot Door Panel */
+			break;
+		case 2:
+			/* Extra Time: 30 seconds */
+			break;
+		case 3:
+			/* Quick Multiball */
+			break;
+		case 4:
+			/* Big Points: 250K */
+			break;
+	}
+	camera_award_count++;
+	if (camera_award_count > 4)
+		camera_award_count = 0;
+}
+
+
 void sw_camera_handler (void)
 {
 	if (event_did_follow (gumball_exit, camera))
@@ -32,7 +61,10 @@ void sw_camera_handler (void)
 	else
 	{
 		if (lamp_test (LM_PANEL_CAMERA))
+		{
+			do_camera_award ();
 			score (SC_100K);
+		}
 		else
 			score (SC_50K);
 		sound_send (SND_JET_BUMPER_ADDED);
@@ -44,6 +76,7 @@ void sw_camera_handler (void)
 CALLSET_ENTRY (camera, start_player)
 {
 	lamp_tristate_off (LM_CAMERA);
+	camera_award_count = 0;
 }
 
 

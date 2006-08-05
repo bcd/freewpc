@@ -468,6 +468,8 @@ void task_kill_pid (task_t *tp)
 
 /**
  * Kill all tasks with the given group ID.
+ * A task can call this function with its own group ID: that will not
+ * kill itself, but will kill all peer tasks that share its group ID.
  */
 bool task_kill_gid (task_gid_t gid)
 {

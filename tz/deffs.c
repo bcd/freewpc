@@ -120,9 +120,9 @@ void ballsave_deff (void)
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
 	printf ("PLAYER %d", player_up);
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
 	dmd_copy_low_to_high ();
-	font_render_string_center (&font_fixed6, 64, 21, "BALL SAVED");
+	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
 	dmd_show_low ();
 
 	switch (ball_save_count)

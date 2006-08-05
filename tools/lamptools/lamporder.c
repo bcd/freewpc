@@ -1,4 +1,24 @@
+/*
+ * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
+/* System includes */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -8,6 +28,7 @@
 #define MAX_LAMPS 64
 typedef unsigned char U8, task_ticks_t;
 
+/* Target includes */
 #include <sys/lamp.h>
 #include <mach/lamp.h>
 
@@ -285,6 +306,13 @@ main (int argc, char *argv[])
 						/* Prune the lamps by color */
 						n_lamps = prune_color (n_lamps, argv[++argn]);
 						break;
+
+					case 'h':
+						printf ("lamporder [-t <order>] [-s <speed>] [-c]\n");
+						printf ("-t   Specify the order to output the lamps\n");
+						printf ("-s   Specify the output speed\n");
+						printf ("-c   Only output certain color lamps\n");
+						exit (0);
 				}
 				break;
 

@@ -36,19 +36,22 @@ void bonus_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 8, "BONUS");
 
-	sprintf ("%d DOOR PANELS", door_panels_started);
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
-	if (door_panels_started < 10)
-		sprintf ("%d00,000", door_panels_started);
-	else
-		sprintf ("1,%d00,000", door_panels_started - 10);
-	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+	if (door_panels_started > 0)
+	{
+		score_multiple (SC_100K, door_panels_started);
+
+		sprintf ("%d DOOR PANELS", door_panels_started);
+		font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+		if (door_panels_started < 10)
+			sprintf ("%d00,000", door_panels_started);
+		else
+			sprintf ("1,%d00,000", door_panels_started - 10);
+		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+	}
 
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
-
 	sound_send (SND_GREED_ROUND_BOOM);
-	score_multiple (SC_100K, door_panels_started);
 	task_sleep_sec (1);
 
 	dmd_alloc_low_clean ();

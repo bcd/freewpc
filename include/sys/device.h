@@ -118,12 +118,12 @@ typedef struct device_properties
 	solnum_t sol;
 
 	/** The number of switches in the device for counting balls */
-	uint8_t sw_count;
+	U8 sw_count;
 
 	/** The initial number of switches that ought to be closed;
 	 * i.e. the number of balls that the device is allowed to hold
 	 * at initialization time.  Any extra balls found will be kicked. */
-	uint8_t init_max_count;
+	U8 init_max_count;
 
 	/** The switch numbers for the switches; switch 0 always refers to
 	 * the first switch that would close when a ball enters the device,
@@ -149,31 +149,35 @@ typedef struct device_properties
 typedef struct device
 {
 	/** Device number assigned to this device */
-	uint8_t devno;
+	U8 devno;
+
+	/** A bitmask unique to this device.  These are assigned at
+	 * initialization based on the device number. */
+	U8 devno_mask;
 
 	/** The size of the device, same as the number of counting switches */
-	uint8_t size;
+	U8 size;
 
 	/** The current count of balls */
-	uint8_t actual_count;
+	U8 actual_count;
 
 	/** The previous count of balls */
-	uint8_t previous_count;
+	U8 previous_count;
 
 	/** The maximum number of balls that can be held here. */
-	uint8_t max_count;
+	U8 max_count;
 
 	/** The number of balls needed to be kicked out */
-	uint8_t kicks_needed;
+	U8 kicks_needed;
 
 	/** The operational state of the device */
-	uint8_t state;
+	U8 state;
 
 	/** Pointer to the device property structure */
 	device_properties_t *props;
 } device_t;
 
-typedef uint8_t devicenum_t;
+typedef U8 devicenum_t;
 
 #define device_entry(devno)	(&device_table[devno])
 #define device_devno(dev)		(dev->devno)
@@ -185,19 +189,22 @@ typedef uint8_t devicenum_t;
 #define device_enable_lock(dev)	(dev->max_count++)
 
 extern device_t device_table[];
+extern U8 live_balls;
 
 void device_clear (device_t *dev);
 void device_register (devicenum_t devno, device_properties_t *props);
-uint8_t device_recount (device_t *dev);
+U8 device_recount (device_t *dev);
 void device_update_globals (void);
 void device_probe (void);
 void device_request_kick (device_t *dev);
 void device_request_empty (device_t *dev);
-void device_sw_handler (uint8_t devno);
+void device_sw_handler (U8 devno);
 void device_add_live (void);
 void device_remove_live (void);
 void device_multiball_set (U8 count);
 bool device_check_start_ok (void);
+void device_unlock_ball (device_t *dev);
+void device_lock_ball (device_t *dev);
 void kickout_lock_get (void);
 void kickout_lock_put (void);
 void device_init (void);

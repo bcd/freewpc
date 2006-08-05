@@ -45,7 +45,7 @@
 #define L_NOLAMPS		0x0
 #define L_ALL_LAMPS	0xFF
 #define L_NOGI			0
-
+#define L_ALL_GI		0x1F
 
 /* Declare externs for all of the deff functions */
 #define DECL_LEFF(num, flags, pri, b1, b2, fn) \

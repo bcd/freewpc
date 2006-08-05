@@ -21,6 +21,12 @@
 #ifndef _MACH_LAMP_H
 #define _MACH_LAMP_H
 
+#define GI_LOWER_LEFT			TRIAC_GI_STRING(0)
+#define GI_POWERFIELD			TRIAC_GI_STRING(1)
+#define GI_CLOCK					TRIAC_GI_STRING(2)
+#define GI_MYSTERY				TRIAC_GI_STRING(3)
+#define GI_LOWER_RIGHT			TRIAC_GI_STRING(4)
+
 /* Note: Visual Pinball has a bug where the "GUMBALL LANE"
  * lamp lights in place of "RIGHT SPIRAL". */
 

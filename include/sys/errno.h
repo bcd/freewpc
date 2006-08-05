@@ -44,6 +44,9 @@
 #define ERR_NVRAM_UNLOCKED			20
 #define ERR_SOL_CKSUM_ERROR      21
 #define ERR_NVRAM                22
+#define ERR_UNLOCK_EMPTY_DEVICE  23
+#define ERR_LOCK_FULL_DEVICE     24
+
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);

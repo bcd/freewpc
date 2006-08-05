@@ -68,7 +68,13 @@ typedef struct
 } switch_info_t;
 
 
-#define DECLARE_SWITCH_DRIVER(name)	const switch_info_t name =
+#define DECLARE_SWITCH_DRIVER(name)	\
+	extern __event__ void callset_ ## name (void); \
+	const switch_info_t name =
+
+#define DECLARE_SWITCH_EVENT(name) \
+	.fn = callset_ ## name, \
+	.fnpage = EVENT_PAGE \
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 

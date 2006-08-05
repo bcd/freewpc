@@ -33,12 +33,12 @@ enum mech_clock_mode
 
 
 /* Current state of the clock switches, as read during the last rtt */
-U8 clock_sw;
+__fastram__ U8 clock_sw;
 
 /* Mode that drives the rtt state machine */
-enum mech_clock_mode clock_mode;
+__fastram__ enum mech_clock_mode clock_mode;
 
-/* Configured speed of the clock.  When set to higher values, the
+/** Configured speed of the clock.  When set to higher values, the
  * clock will run more slowly.  This represents the number of idle
  * rtt cycles between pulses to the clock motor drives. */
 U8 clock_speed;
@@ -46,21 +46,24 @@ U8 clock_speed;
 /** The current clock delay counter */
 U8 clock_delay_time;
 
-/* Clock switches which have been seen to be active */
-U8 clock_sw_seen_active;
+/** Clock switches which have been seen to be active */
+__fastram__ U8 clock_sw_seen_active;
 
-/* Clock switches which have been seen to be inactive */
-U8 clock_sw_seen_inactive;
+/** Clock switches which have been seen to be inactive */
+__fastram__ U8 clock_sw_seen_inactive;
 
-/* Indicates the target switch values that will trigger the
+/** Indicates the target switch values that will trigger the
  * clock to stop moving */
-U8 clock_find_target;
+__fastram__ U8 clock_find_target;
 
-/* Clock switches seen on the last rtt cycle, used to detect
+/** Clock switches seen on the last rtt cycle, used to detect
  * switch transitions */
-U8 clock_last_sw;
+__fastram__ U8 clock_last_sw;
 
-U8 clock_calibration_ticks;
+/* For measuring the speed of the clock motor */
+#if 0
+__fastram__ U8 clock_calibration_ticks;
+#endif
 
 void tz_dump_clock (void)
 {
@@ -246,7 +249,9 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
 	clock_delay_time = clock_speed = 1;
+#if 0
 	clock_calibration_ticks = 3;
+#endif
 	clock_mode = CLOCK_CALIBRATING;
 }
 

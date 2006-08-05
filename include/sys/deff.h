@@ -37,8 +37,8 @@ typedef void (*deff_function_t) (void) __taskentry__;
 /** Type for a display effect definition */
 typedef struct
 {
-	uint8_t flags;
-	uint8_t prio;
+	U8 flags;
+	U8 prio;
 	deff_function_t fn;
 } deff_t;
 
