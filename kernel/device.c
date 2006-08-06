@@ -342,7 +342,8 @@ void device_update_globals (void)
 		counted_balls += dev->actual_count;
 
 		if (devno != DEVNO_TROUGH)
-			held_balls += dev->actual_count - dev->max_count;
+			if (dev->actual_count >= dev->max_count)
+				held_balls += dev->actual_count - dev->max_count;
 	}
 
 	/* Count how many balls are missing */
@@ -391,6 +392,7 @@ void device_probe (void)
 
 		/* If there are more balls in the device than ought to be,
 		 * schedule the extras to be emptied. */
+		dev->max_count = dev->props->init_max_count;
 		if (dev->actual_count > dev->max_count)
 		{
 			U8 kick_count = dev->actual_count - dev->max_count;
@@ -447,9 +449,19 @@ void device_add_live (void)
 }
 
 
+/** Called by the trough when a ball has entered it.
+ * The intent is to signal that there is one less live ball than before.
+ */
 void device_remove_live (void)
 {
-	if (live_balls > 0)
+	/* If any balls were missing, and now one is rediscovered in the
+	 * trough, then just hold onto it.  This condition was seen when
+	 * the game thought 1 ball was in play, but 2 were on the playfield. */
+	if (missing_balls > live_balls)
+	{
+		missing_balls--;
+	}
+	else if (live_balls > 0)
 	{
 		live_balls--;
 		if ((live_balls == 0) && in_game)
@@ -497,7 +509,9 @@ void device_unlock_ball (device_t *dev)
 {
 	if (dev->max_count > 0)
 	{
+		dbprintf ("Unlock ball in devno %d\n", dev->devno);
 		device_disable_lock (dev);
+		live_balls++;
 		device_request_kick (dev);
 	}
 	else
@@ -512,7 +526,9 @@ void device_lock_ball (device_t *dev)
 	if (dev->max_count >= dev->size)
 		fatal (ERR_LOCK_FULL_DEVICE);
 
+	dbprintf ("Lock ball in devno %d\n", dev->devno);
 	device_enable_lock (dev);
+	live_balls--;
 	if (trough->actual_count > 0)
 	{
 		device_request_kick (trough);
@@ -522,6 +538,14 @@ void device_lock_ball (device_t *dev)
 		if (!callset_invoke_boolean (empty_trough_kick))
 			device_unlock_ball (dev);
 	}
+}
+
+
+CALLSET_ENTRY (device, start_game)
+{
+	live_balls = 0;
+	kickout_locks = 0;
+	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 }
 
 

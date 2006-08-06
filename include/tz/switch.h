@@ -112,7 +112,7 @@
 
 #define MACHINE_SW21				sw_slam_tilt
 #define MACHINE_SW23				sw_buyin_button
-// #define MACHINE_SW25       sw_far_left_trough
+#define MACHINE_SW25       	sw_far_left_trough
 #define MACHINE_SW26				sw_trough_prox
 // #define MACHINE_SW27			sw_shooter
 #define MACHINE_SW28				sw_rocket

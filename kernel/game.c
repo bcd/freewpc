@@ -110,6 +110,7 @@ void amode_start (void)
 	leff_start (LEFF_AMODE);
 #endif
 	lamp_start_update ();
+	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 }
 
 
@@ -149,7 +150,6 @@ void end_game (void)
 		/* TODO : do match sequence */
 	
 		callset_invoke (end_game);
-		task_create_gid (GID_DEVICE_PROBE, device_probe);
 
 		/*
 		 * Make sure all effects and flippers are killed before
@@ -301,10 +301,9 @@ void timed_game_monitor (void)
 				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
 						(live_balls <= 1))
 				|| timed_game_suspend_count
-				|| kickout_locks)
+				|| kickout_locks
+				|| ball_search_timed_out ())
 		{
-			dbprintf ("Timed game suspended, suspend_count=%d\n",
-				timed_game_suspend_count);
 			task_sleep (TIME_500MS);
 			continue;
 		}

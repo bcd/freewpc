@@ -225,11 +225,13 @@ void do_reset (void)
 	task_create_gid (GID_DCS_INIT, sound_init);
 #endif
 
+#if 0
 	/* Also run a probe on all of the ball devices, to see
 	 * if they are working properly and empty out any
 	 * balls in them that don't belong there yet. */
 	sys_init_pending_tasks++;
 	task_create_gid (GID_DEVICE_PROBE, device_probe);
+#endif
 
 	/* The system can run itself now, this task is done! */
 	task_exit ();

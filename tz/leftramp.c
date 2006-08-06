@@ -26,7 +26,10 @@ __local__ U8 left_ramps;
 void left_ramp_deff (void)
 {
 	dmd_alloc_low_clean ();
-	sprintf ("%d LEFT RAMPS", left_ramps);
+	if (left_ramps > 1)
+		sprintf ("%d LEFT RAMPS", left_ramps);
+	else
+		sprintf ("1 LEFT RAMP");
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
 	if (left_ramps < 3)

@@ -27,6 +27,7 @@ void enable_skill_shot (void)
 {
 	skill_shot_enabled = TRUE;
 	skill_switch_reached = 0;
+	/* TODO : start display effect here to show skill shot ready */
 }
 
 void disable_skill_shot (void)
@@ -38,6 +39,7 @@ void award_skill_shot (void)
 {
 	mark_ball_in_play ();
 	disable_skill_shot ();
+	/* TODO : start display effect here to show award */
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	door_award_flashing ();

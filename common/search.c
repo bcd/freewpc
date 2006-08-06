@@ -81,7 +81,7 @@ static bool ball_search_solenoid_ok (U8 sol)
 	 * Balls should never be trapped here anyway. */
 	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
 	{
-		if ((sol == dev->props->sol) && (dev->max_count > 1))
+		if ((sol == dev->props->sol) && (dev->size > 1))
 			return (FALSE);
 	}
 #endif
@@ -103,7 +103,7 @@ void ball_search_timer_reset (void)
 }
 
 
-static bool ball_search_timed_out (void)
+bool ball_search_timed_out (void)
 {
 	return (ball_search_timer >= ball_search_timeout);
 }
@@ -160,17 +160,11 @@ void ball_search_monitor_task (void)
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
 			{
-#ifdef CONFIG_TIMED_GAME
-				timed_game_suspend ();
-#endif
 				while (ball_search_timer != 0)
 				{
 					ball_search_run ();
 					task_sleep_sec (15);
 				}
-#ifdef CONFIG_TIMED_GAME
-				timed_game_resume ();
-#endif
 			}
 		}
 	}

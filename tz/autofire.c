@@ -87,7 +87,8 @@ retry:
 		task_sleep (TIME_100MS * 5);
 
 		sol_pulse (SOL_AUTOFIRE);
-		sound_send (SND_EXPLOSION_1);
+		if (in_live_game)
+			sound_send (SND_EXPLOSION_1);
 		event_can_follow (autolaunch, right_loop, TIME_4S);
 		task_sleep (TIME_100MS * 5);
 

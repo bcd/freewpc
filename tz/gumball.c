@@ -63,6 +63,7 @@ void gumball_load_from_trough (void)
 {
 	extern void autofire_add_ball (void);
 
+	dbprintf ("Gumball load requested\n");
 	gumball_load_enable ();
 	autofire_add_ball ();
 }
@@ -74,6 +75,7 @@ void gumball_release (void)
 	/* TODO : multiple release requests from multiple threads are
 	 * not handled */
 
+	dbprintf ("Gumball release requested\n");
 	gumball_geneva_tripped = FALSE;
 	sol_on (SOL_GUMBALL_RELEASE);
 
@@ -147,6 +149,26 @@ void sw_gumball_lane_handler (void)
 	gumball_load_disable ();
 }
 
+void sw_far_left_trough_monitor (void)
+{
+	U8 timeout = TIME_3S / TIME_200MS;
+	while (timeout > 0)
+	{
+		task_sleep (TIME_200MS);
+		if (!switch_poll_logical (SW_FAR_LEFT_TROUGH))
+			task_exit ();
+		timeout--;
+	}
+	dbprintf ("Far left trough stuck; need to reload gumball\n");
+	task_exit ();
+}
+
+
+void sw_far_left_trough_handler (void)
+{
+	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
+}
+
 
 DECLARE_SWITCH_DRIVER (sw_gumball_exit)
 {
@@ -173,6 +195,10 @@ DECLARE_SWITCH_DRIVER (sw_gumball_lane)
 	.fn = sw_gumball_lane_handler,
 };
 
+DECLARE_SWITCH_DRIVER (sw_far_left_trough)
+{
+	.fn = sw_far_left_trough_handler,
+};
 
 
 /*************************************************************/
