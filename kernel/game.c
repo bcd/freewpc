@@ -149,6 +149,7 @@ void end_game (void)
 		/* TODO : do match sequence */
 	
 		callset_invoke (end_game);
+		task_create_gid (GID_DEVICE_PROBE, device_probe);
 
 		/*
 		 * Make sure all effects and flippers are killed before
@@ -299,7 +300,8 @@ void timed_game_monitor (void)
 				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
 				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
 						(live_balls <= 1))
-				|| timed_game_suspend_count)
+				|| timed_game_suspend_count
+				|| kickout_locks)
 		{
 			dbprintf ("Timed game suspended, suspend_count=%d\n",
 				timed_game_suspend_count);

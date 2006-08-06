@@ -519,7 +519,8 @@ void device_lock_ball (device_t *dev)
 	}
 	else
 	{
-		device_unlock_ball (dev);
+		if (!callset_invoke_boolean (empty_trough_kick))
+			device_unlock_ball (dev);
 	}
 }
 

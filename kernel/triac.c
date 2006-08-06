@@ -80,6 +80,9 @@ void triac_rtt (void)
 	gi_recalc_zerocross ();
 
 	triac_bits = triac_enables;
+	triac_bits &= ~triac_leff_alloc;
+	triac_bits |= triac_leff_bits;
+#if 0
 	if ((tick_count & gi_brightness_table[gi_brightness]) == tick_count)
 	{
 		triac_bits &= ~triac_leff_alloc;
@@ -89,6 +92,7 @@ void triac_rtt (void)
 	{
 		triac_bits &= ~TRIAC_GI_MASK;
 	}
+#endif
 	triac_write (triac_enables);
 }
 

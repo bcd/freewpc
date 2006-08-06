@@ -27,8 +27,8 @@ void gi_cycle_leff (void)
 	{
 		for (i=0; i < 5; i++)
 		{
-			triac_disable (TRIAC_GI_MASK);
-			triac_enable (TRIAC_GI_STRING (i));
+			triac_leff_disable (TRIAC_GI_MASK);
+			triac_leff_enable (TRIAC_GI_STRING (i));
 			task_sleep (TIME_33MS);
 		}
 	}
@@ -75,7 +75,7 @@ void left_ramp_leff (void)
 
 void no_lights_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_leff_disable (TRIAC_GI_MASK);
 	for (;;)
 		task_sleep_sec (5);
 }
@@ -83,9 +83,8 @@ void no_lights_leff (void)
 
 void no_gi_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_leff_disable (TRIAC_GI_MASK);
 	task_sleep_sec (1);
-	triac_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -95,7 +94,7 @@ void flash_all_leff (void)
 	int i;
 
 	lampset_set_apply_delay (0);
-	triac_enable (TRIAC_GI_MASK);
+	triac_leff_enable (TRIAC_GI_MASK);
 	lampset_apply_leff_alternating (LAMPSET_AMODE_ALL, 0);
 	for (i=0; i < 32; i++)
 	{

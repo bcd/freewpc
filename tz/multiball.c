@@ -84,6 +84,7 @@ CALLSET_ENTRY (mball, lock)
 	{
 		mball_locks_lit--;
 		device_lock_ball (device_entry (DEVNO_LOCK));
+		enable_skill_shot ();
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{
