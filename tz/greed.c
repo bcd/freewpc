@@ -38,12 +38,17 @@ void common_greed_handler (U8 target)
 	const U8 sw = task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-	if ((greed_set & target) == 0)
+	if (lamp_test (LM_PANEL_GREED))
+	{
+		score (SC_50K);
+		sound_send (SND_GREED_ROUND_BOOM);
+	}
+	else if ((greed_set & target) == 0)
 	{
 		greed_set |= target;
 
 		sound_send (SND_THUNDER1);
-		score (SC_50K);
+		score (SC_25K);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (swinfo->lamp);
 
@@ -61,7 +66,23 @@ void common_greed_handler (U8 target)
 	}
 }
 
-CALLSET_ENTRY(greed, start_player)
+
+CALLSET_ENTRY (greed, door_panel_award)
+{
+	if (lamp_test (LM_PANEL_GREED))
+	{
+		lamp_tristate_flash (LM_LL_5M);
+		lamp_tristate_flash (LM_ML_5M);
+		lamp_tristate_flash (LM_UL_5M);
+		lamp_tristate_flash (LM_UR_5M);
+		lamp_tristate_flash (LM_MR1_5M);
+		lamp_tristate_flash (LM_MR2_5M);
+		lamp_tristate_flash (LM_LR_5M);
+	}
+}
+
+
+CALLSET_ENTRY (greed, start_player)
 {
 	greed_set = 0;
 }

@@ -213,6 +213,7 @@ void device_lock_ball (device_t *dev);
 #define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)
 
 #define KLOCK_DEFF 0x1
+#define KLOCK_DEBUGGER 0x2
 
 void device_init (void);
 

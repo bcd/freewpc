@@ -35,24 +35,54 @@ void inspector_buyin_button (void)
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
 		deff_stop (DEFF_INSPECTOR);
+		kickout_unlock (KLOCK_DEBUGGER);
 	}
 	else
 	{
 		deff_start (DEFF_INSPECTOR);
+		kickout_lock (KLOCK_DEBUGGER);
 	}
+}
+
+void inspector_fast_page_down (void)
+{
+	task_sleep (TIME_500MS);
+	while (switch_poll_logical (SW_LL_FLIP_SW))
+	{
+		inspector_addr -= INSPECTOR_PAGE_SIZE * 4;
+		task_sleep (TIME_33MS);
+	}
+	task_exit ();
 }
 
 void inspector_left_flipper (void)
 {
 	if (deff_get_active () == DEFF_INSPECTOR)
+	{
 		if (inspector_addr > 0)
 			inspector_addr -= INSPECTOR_PAGE_SIZE;
+		task_recreate_gid (GID_INSPECTOR_FAST_PAGE, inspector_fast_page_down);
+	}
+}
+
+void inspector_fast_page_up (void)
+{
+	task_sleep (TIME_500MS);
+	while (switch_poll_logical (SW_LR_FLIP_SW))
+	{
+		inspector_addr += INSPECTOR_PAGE_SIZE * 4;
+		task_sleep (TIME_33MS);
+	}
+	task_exit ();
 }
 
 void inspector_right_flipper (void)
 {
 	if (deff_get_active () == DEFF_INSPECTOR)
+	{
 		inspector_addr += INSPECTOR_PAGE_SIZE;
+		task_recreate_gid (GID_INSPECTOR_FAST_PAGE, inspector_fast_page_up);
+	}
 }
 
 CALLSET_ENTRY (inspector, init)

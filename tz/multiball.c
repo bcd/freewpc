@@ -25,6 +25,26 @@ __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 
 
+void lock_is_lit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, 64, 16, "LOCK IS LIT");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+void multiball_is_lit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, 64, 8, "MULTIBALL IS LIT");
+	font_render_string_center (&font_fixed10, 64, 24, "SHOOT PIANO");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+
 void mball_lock_lamp_update (void)
 {
 	if (mball_locks_lit)
@@ -36,6 +56,7 @@ void mball_light_lock (void)
 	mball_locks_lit++;
 	lamp_tristate_flash (LM_LOCK_ARROW);
 	sound_send (SND_GUMBALL_COMBO);
+	deff_start (DEFF_LOCK_LIT);
 }
 
 
@@ -74,6 +95,11 @@ CALLSET_ENTRY (mball, piano)
 	{
 		music_change (MUS_MULTIBALL);
 		lamp_tristate_off (LM_PIANO_JACKPOT);
+		mball_locks_lit = 0;
+		mball_locks_made = 0;
+		lamp_tristate_off (LM_LOCK_ARROW);
+		lamp_off (LM_GUM);
+		lamp_off (LM_BALL);
 	}
 }
 
@@ -97,6 +123,7 @@ CALLSET_ENTRY (mball, lock)
 		if (mball_locks_made == 2)
 			lamp_on (LM_LOCK2);
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
+		deff_start (DEFF_MB_LIT);
 	}
 }
 

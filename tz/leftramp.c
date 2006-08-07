@@ -36,6 +36,8 @@ void left_ramp_deff (void)
 		sprintf ("EXTRA TIME AT 3");
 	else if (left_ramps < 6)
 		sprintf ("SPOT PANEL AT 6");
+	else
+		sprintf ("");
 	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
 
 	dmd_show_low ();

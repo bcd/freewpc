@@ -35,11 +35,35 @@ void disable_skill_shot (void)
 	skill_shot_enabled = FALSE;
 }
 
+void skill_shot_made_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fixed10, 64, 8, "SKILL SHOT");
+	switch (skill_switch_reached)
+	{
+		case 1:
+			sprintf ("RED  25,000");
+			break;
+		case 2:
+			sprintf ("ORANGE  50,000");
+			break;
+		case 3:
+			sprintf ("YELLOW  100,000");
+			break;
+	}
+	font_render_string_center (&font_fixed10, 64, 23, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
+
 void award_skill_shot (void)
 {
 	mark_ball_in_play ();
 	disable_skill_shot ();
-	/* TODO : start display effect here to show award */
+	deff_start (DEFF_SKILL_SHOT_MADE);
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	door_award_flashing ();

@@ -92,7 +92,11 @@ extern inline void rt_solenoid_update1 (
 	const U8 sol_on_irqs,
 	const U8 sol_off_irqs )
 {
-	if (*rt_sol_state < 0)
+	if (!in_game)
+	{
+		/* If not in a game, then do nothing */
+	}
+	else if (*rt_sol_state < 0)
 	{
 		/* Solenoid is in its off-phase */
 		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);

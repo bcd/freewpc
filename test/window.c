@@ -2762,6 +2762,8 @@ void sysinfo_stats2 (void) {
 #ifdef TASKCOUNT
 	extern U16 task_max_count;
 	sprintf ("MAX TASKS %d", task_max_count);
+#else
+	sprintf ("");
 #endif
 }
 #endif

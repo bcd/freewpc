@@ -176,9 +176,7 @@ void leff_create_handler (const leff_t *leff)
 
 	/* Allocate general illumination needed by the lamp effect */
 	if (leff->gi != 0)
-	{
 		triac_leff_allocate (leff->gi);
-	}
 
 	task_recreate_gid (GID_LEFF, leff->fn);
 }
@@ -228,13 +226,13 @@ void leff_stop (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-
 	if (leff->flags & L_RUNNING)
 	{
 		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
 		lamp_leff1_free_all ();
-		triac_leff_free (TRIAC_GI_MASK);
+		if (leff->gi != 0)
+			triac_leff_free (leff->gi);
 		leff_start_highest_priority ();
 	}
 }
@@ -283,7 +281,11 @@ void leff_start_highest_priority (void)
 
 __noreturn__ void leff_exit (void)
 {
+	const leff_t *leff = &leff_table[leff_active];
+
 	db_puts ("Exiting leff\n");
+	if (leff->gi != 0)
+		triac_leff_free (leff->gi);
 	task_setgid (GID_LEFF_EXITING);
 	leff_remove_queue (leff_active);
 	leff_start_highest_priority ();
@@ -302,6 +304,7 @@ void leff_init (void)
 void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
+	triac_leff_free (TRIAC_GI_MASK);
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();
 	lamp_leff2_free_all ();

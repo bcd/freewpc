@@ -25,7 +25,7 @@
 static void ballsave_monitor (void)
 {
 #ifdef CONFIG_TIMED_GAME
-	while (timed_game_timer > 10)
+	while (timed_game_timer > 5)
 #else
 	for (;;) /* game-specific timeout put here */
 #endif

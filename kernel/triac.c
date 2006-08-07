@@ -43,8 +43,14 @@
 
 __fastram__ U8 triac_io_cache;
 
+/** Which triac outputs should be enabled normally */
 __fastram__ U8 triac_enables;
+
+/** Which triac outputs are allocated to the current running lamp effect */
 __fastram__ U8 triac_leff_alloc;
+
+/** Which triac outputs should be enabled for the current lamp effect.
+ * This overrides the normal triac enables. */
 __fastram__ U8 triac_leff_bits;
 
 U8 gi_brightness;
@@ -93,7 +99,7 @@ void triac_rtt (void)
 		triac_bits &= ~TRIAC_GI_MASK;
 	}
 #endif
-	triac_write (triac_enables);
+	triac_write (triac_bits);
 }
 
 
