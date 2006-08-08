@@ -45,9 +45,9 @@
 /*
  * Define the size of the saved process stack.
  *
- * This value + 17 should equate a power of 2.
+ * This value + 21 should equate a power of 2.
  */
-#define TASK_STACK_SIZE		47
+#define TASK_STACK_SIZE		43
 
 /** Type for the group ID (gid) */
 typedef U8 task_gid_t;
@@ -71,21 +71,65 @@ typedef void (*task_function_t) (void);
  */
 typedef struct
 {
+	/** The task group ID.  This is a compile-time assigned value
+	 * used to identify the task.   Multiple running tasks can also
+	 * share the same group ID; operations on a group will affect
+	 * *all* tasks with that ID, in most cases. */
 	task_gid_t	gid;
+
+	/** Intended to be used internally as a chain pointer to the next task.
+	 * Not currently used, though, since the task table is just an array
+	 * and we step through it sequentially now */
 	U16			next;
+
+	/** The saved PC for the task, while it is asleep */
 	U16			pc;
+
+	/** The saved Y register for the task, while it is asleep */
 	U16			y;
+
+	/** The saved U register for the task, while it is asleep */
 	U16			u;
+
+	/** The saved ROM page register for the task, while it is asleep */
 	U8				rom_page;
+
 	U8				stack_word_count;
 	U8				flags;
 	U8				delay;
 	U8				asleep;
+
+	/** The execution state of the task.  It can be TASK_FREE, if the
+	 * task entry isn't being used at all; TASK_USED for a running/waiting
+	 * task; or TASK_BLOCKED for a sleeping task. */
 	U8				state;
+
+	/** The task argument pointer.  This is a primitive way of passing
+	 * initialization data to a new task.  The creator of the task can
+	 * assign this argument pointer, after creating the task but before
+	 * the next schedule. */
 	U16			arg;
+
+	/** Thread local data.  Some types of tasks need to maintain local
+	 * state information, where each task has its own copy of the data.
+	 * The task structure reserves 4 bytes for this purpose; tasks are
+	 * free to use this however they choose.   See include/sys/leff.h
+	 * for one example of how this is done. */
+	U8          thread_data[4];
+
+	/** The task stack save area.  This is NOT used as the live stack
+	 * area; the live stack is copied here when the task blocks.
+	 * Because of this, tasks can use a much larger stack size if needed,
+	 * as long as they don't try to block while holding that much space.
+	 * Practically, this means that you shouldn't sleep in a deeply
+	 * nested set of function calls.
+	 */
 	U8				stack[TASK_STACK_SIZE];
 } task_t;
 
+
+/** A process ID, or PID, is just a pointer to the task block.
+ * PIDs are rarely used as they are dynamic in value. */
 typedef task_t *task_pid_t;
 
 extern bool task_dispatching_ok;
@@ -107,6 +151,10 @@ extern inline task_gid_t task_getgid (void)
 	return task_current->gid;
 }
 
+extern inline U8 *task_get_thread_data_ptr (U8 n)
+{
+	return &task_current->thread_data[n];
+}
 
 /*******************************/
 /*     Debug Timing            */
@@ -148,9 +196,11 @@ U16 task_get_arg (void);
 void task_set_arg (task_t *tp, U16 arg);
 __noreturn__ void task_dispatcher (void);
 
-#define task_create_child(fn)		task_create_gid (task_getgid (), fn)
+#define task_create_peer(fn)		task_create_gid (task_getgid (), fn)
 
 #define task_create_anon(fn)		task_create_gid (0, fn)
+
+#define task_kill_peers()			task_kill_gid (task_getgid ())
 
 #define task_yield()					task_sleep (0)
 

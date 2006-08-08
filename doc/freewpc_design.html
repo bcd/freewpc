@@ -11,13 +11,16 @@ Controller (WPC) chip.  This includes all pinballs made by the
 company between 1990-1999, starting with <i>Funhouse</i> and
 ending with <i>Cactus Canyon</i>.
 
-<p>FreeWPC is a work-in-progress, with much room for improvement, so
-what is described here may not totally match the most recent
-implementation.
+<p>This document is at version 2.0, which contains many enhancements
+over the original release after much of the system has been implemented.
+FreeWPC is still a work-in-progress, with much room for improvement.
+Some of the ideas here are theoretically understood but not implemented.
+Likewise, some of what is implemented in the latest builds may not
+be described here at all.
 
 <h2>The Hardware</h2>
 
-<p>The WPC chip is essentially a giant address decoder that maps
+<p>The WPC ASIC is essentially a giant address decoder that maps
 a bunch of peripheral devices into the address space of the CPU, a
 Motorola 6809.  By reading/writing addresses between $3F00 and $3FFF,
 the CPU is able to access the peripherals.  This includes all of
@@ -72,9 +75,9 @@ in assembly language.  In some ways this is better, since the developer
 has completely control of what the CPU is doing.  Good compilers were
 not available for the 6809 back in 1990, so assembly was the only available
 choice when WPC was first developed.  Today, there is a gcc port for
-the 6809 which, although I was skeptical at first, is adequate
-to get the project rolling.  Using C also allows more people to get
-involved in the project and understand what is going on.
+the 6809 which is sufficient for producing decent performing code.
+Using C also allows more people to get involved in the project 
+and understand what is going on.
 </ul>
 
 <h2>Scheduling</h2>
@@ -159,7 +162,7 @@ as possible, algorithms which are common to nearly all machines are
 put into the shared kernel, with allowances for machines to provide
 extensions or overrides.
 
-<h2>Inputs and Outputs</h2>
+<h2>Physical Inputs and Outputs</h2>
 
 <p>Aside from the multitasking, the kernel is mostly concerned with the
 management of hardware resources: input and output devices.  Here is
@@ -205,6 +208,33 @@ normally closed and open when they become active.  Software must use
 <p>Some hardware registers are write-only, which requires that software
 remember the last value written if it will ever need to be "read".  The
 read then comes from the cached value rather than touching the hardware.
+
+<h2>Logical Inputs: Events</h2>
+
+<p>Switch inputs and timers comprise the physical inputs of the system.
+It is useful to generalize the notion of an input to software constructs
+as well.  The generic term used here is an <i>event</i>.
+
+<p>An event is associated with two entities: that which <i>creates</i>
+the event, and that which <i>receives</i> or handles the event.
+For example, when a ball enters an eject hole, the switch closure
+creates an event that says, &quot;the ball entered this eject&quot;.
+Multiple event receivers can be informed of this: there may be
+multiple game modes that need to respond to the event, the ball
+tracking system will want to know that the ball should be ejected, etc.
+
+<p>The key observation used throughout FreeWPC is that static events
+can be modelled as simple function calls at compile time.  Creating
+an event is equivalent to calling a unique function associated with
+that event.  This function's sole job is to inform all event receivers
+that the event occurred, again by direct function calls.  Each receiver
+is a function that is called by the event generator.  In most
+cases, for well-known events, no storage need be maintained to model
+events at all.
+
+<p>When a FreeWPC program is compiled, the source code is scanned to
+see what events are created, and which events are received.  The
+event generation functions can then automatically be created.
 
 <h2>Effect Management</h2>
 

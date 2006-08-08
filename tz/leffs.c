@@ -27,9 +27,9 @@ void gi_cycle_leff (void)
 	{
 		for (i=0; i < 5; i++)
 		{
-			triac_leff_disable (TRIAC_GI_MASK);
-			triac_leff_enable (TRIAC_GI_STRING (i));
+			triac_leff_disable (TRIAC_GI_STRING (i));
 			task_sleep (TIME_33MS);
+			triac_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}
 }
@@ -139,7 +139,7 @@ void clock_target_leff (void)
 {
 	int i;
 
-	task_create_child (gi_cycle_leff);
+	task_create_peer (gi_cycle_leff);
 	for (i = 0; i < 12; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
@@ -149,4 +149,31 @@ void clock_target_leff (void)
 	leff_exit ();
 }
 
+
+void game_timeout_leff (void)
+{
+	U8 i;
+	for (i=0; i < 3; i++)
+	{
+		task_sleep (TIME_500MS);
+		triac_leff_enable (GI_POWERFIELD+GI_CLOCK);
+		task_sleep (TIME_100MS);
+		triac_leff_disable (GI_POWERFIELD+GI_CLOCK);
+	}
+	leff_exit ();
+}
+
+
+void clock_round_started_leff (void)
+{
+	U8 i;
+	for (i=0; i < 3; i++)
+	{
+		triac_leff_enable (GI_CLOCK);
+		task_sleep (TIME_100MS);
+		triac_leff_disable (GI_CLOCK);
+		task_sleep (TIME_200MS);
+	}
+	leff_exit ();
+}
 

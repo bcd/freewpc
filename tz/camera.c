@@ -62,8 +62,11 @@ void sw_camera_handler (void)
 	{
 		if (lamp_test (LM_PANEL_CAMERA))
 		{
+			sound_send (SND_CAMERA_PICTURE_EJECT_1);
 			do_camera_award ();
 			score (SC_100K);
+			task_sleep (TIME_100MS);
+			sound_send (SND_CAMERA_PICTURE_EJECT_2);
 		}
 		else
 			score (SC_50K);

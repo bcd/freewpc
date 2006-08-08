@@ -142,6 +142,12 @@ void ballsave_deff (void)
 	deff_exit ();
 }
 
+void multiball_start_deff (void)
+{
+	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
+	printf ("MULTIBALL");
+	flash_and_exit_deff (20, TIME_100MS);
+}
 
 CALLSET_ENTRY (deff, start_player)
 {

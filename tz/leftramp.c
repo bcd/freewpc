@@ -34,8 +34,12 @@ void left_ramp_deff (void)
 
 	if (left_ramps < 3)
 		sprintf ("EXTRA TIME AT 3");
+	else if (left_ramps == 3)
+		sprintf ("15 SECS. ADDED");
 	else if (left_ramps < 6)
 		sprintf ("SPOT PANEL AT 6");
+	else if (left_ramps == 6)
+		sprintf ("DOOR PANEL SPOTTED");
 	else
 		sprintf ("");
 	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
@@ -60,10 +64,13 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	score (SC_10K);
 	if (left_ramps == 3)
 	{
+		sound_send (SND_ROBOT_AWARD);
 		timed_game_extend (15);
 	}
 	else if (left_ramps == 6)
 	{
+		sound_send (SND_ROBOT_AWARD);
+		task_sleep_sec (1);
 		door_award_flashing ();
 	}
 }

@@ -39,7 +39,8 @@
  * Temporary light shows act more like display effects and can only
  * be one at a time.  Other lamp effects "share" one of the leff
  * matrices, and can run concurrently.  The caller is expected not
- * to start multiple of these which overlap.
+ * to start multiple of these which overlap (of course this can be
+ * verified).
  */
 
 #define L_NOLAMPS		0x0
@@ -83,23 +84,35 @@ U8 leff_prio;
 
 /** Queue of all leffs that have been scheduled to run, even
  * if they are low in priority.  The actively running leff
- * is also in this queue. */
+ * is also in this queue.
+ *
+ * Each nonzero value in this array represents a leff number
+ * for a lamp effect that is in the running state.  Zero
+ * entries are ignored.  The leff that actually runs
+ * depends on the priority settings of each leff, which are
+ * statically configured. */
 static U8 leff_queue[MAX_QUEUED_LEFFS];
 
 
+/** Returns the index of the current active lamp effect. */
 U8 leff_get_active (void)
 {
 	return leff_active;
 }
 
+
+/** Adds a lamp effect number into the running queue. */
 static void leff_add_queue (leffnum_t dn)
 {
 	U8 i;
 
+	/* First scan the queue and see if it's already in there; if so
+	 * then there's nothing to do */
 	for (i=0; i < MAX_QUEUED_LEFFS; i++)
 		if (leff_queue[i] == dn)
 			return;
 
+	/* Now scan the queue for the first free space. */
 	for (i=0; i < MAX_QUEUED_LEFFS; i++)
 		if (leff_queue[i] == 0)
 		{
@@ -107,10 +120,12 @@ static void leff_add_queue (leffnum_t dn)
 			return;
 		}
 
+	/* Throw an error if the queue ever gets full. */
 	fatal (ERR_LEFF_QUEUE_FULL);
 }
 
 
+/** Removes a lamp effect number from the running queue. */
 static void leff_remove_queue (leffnum_t dn)
 {
 	U8 i;
@@ -120,6 +135,11 @@ static void leff_remove_queue (leffnum_t dn)
 }
 
 
+/** Returns the lamp effect number that is the highest priority
+ * in the queue right now.
+ * This function also updates the global leff_prio to the
+ * selected leff's priority value.
+ */
 static leffnum_t leff_get_highest_priority (void)
 {
 	U8 i;
@@ -152,43 +172,58 @@ static leffnum_t leff_get_highest_priority (void)
  *
  * If the leff has declared a lampset, then those lamps
  * are allocated.  Likewise, if it needs GI, then those
- * strings are allocated.
+ * strings are allocated.  Allocation disables the normal
+ * outputs and gives the effect priority.
  */
 void leff_create_handler (const leff_t *leff)
 {
 	/* Allocate lamps needed by the lamp effect */
-	if (leff->lampset != 0)
+	if (leff->lampset != L_NOLAMPS)
 	{
 		lamp_leff1_erase ();
-		/* For legacy code that doesn't declare a
-		 * lampset, assume the leff needs everything. */
-		if (leff->lampset == 0xFF)
+
+		/* L_ALL_LAMPS is equivalent to LAMPSET_ALL and will cause
+		 * all lamps to be allocated.  Other values will only
+		 * allocate a subset of the lamps */
+		if (leff->lampset == L_ALL_LAMPS)
 		{
 			lamp_leff1_allocate_all ();
 		}
 		else
 		{
+			/* Allocate specific lamps.
+			 * Start by freeing up any allocations that are lingering. */
+			/* TODO : this won't work with multiple concurrent leffs */
 			lamp_leff1_free_all ();
+
+			/* Apply the allocation function to each element of the lampset.
+			 * Ensure the apply delay is zero first. */
 			lampset_set_apply_delay (0);
 			lampset_apply (leff->lampset, lamp_leff_allocate);
 		}
 	}
 
 	/* Allocate general illumination needed by the lamp effect */
-	if (leff->gi != 0)
+	if (leff->gi != L_NOGI)
 		triac_leff_allocate (leff->gi);
 
+	/* Now all allocations are in place, start the lamp effect task.
+	 * This implicitly stops whatever leff was previously running. */
 	task_recreate_gid (GID_LEFF, leff->fn);
 }
 
 
+/** Start a lamp effect.  dn indicates the LEFF_xxx code for which one to start. */
 void leff_start (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
 	dbprintf ("Leff start request for #%d\n", dn);
 
-	if (leff->flags & L_RUNNING)
+	if (leff->flags & L_SHARED)
+	{
+	}
+	else if (leff->flags & L_RUNNING)
 	{
 		db_puts ("Adding running leff to queue\n");
 		leff_add_queue (dn);
@@ -222,25 +257,33 @@ void leff_start (leffnum_t dn)
 }
 
 
+/** Stops a lamp effect from running. */
 void leff_stop (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	if (leff->flags & L_RUNNING)
+	if (leff->flags & L_SHARED)
+	{
+	}
+	else if (leff->flags & L_RUNNING)
 	{
 		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
 		lamp_leff1_free_all ();
-		if (leff->gi != 0)
+		if (leff->gi != L_NOGI)
 			triac_leff_free (leff->gi);
 		leff_start_highest_priority ();
 	}
 }
 
 
+/** Restart a lamp effect. */
 void leff_restart (leffnum_t dn)
 {
-	if (dn == leff_active)
+	if (leff_table[dn].flags & L_SHARED)
+	{
+	}
+	else if (dn == leff_active)
 	{
 		const leff_t *leff = &leff_table[dn];
 		leff_create_handler (leff);
@@ -252,6 +295,8 @@ void leff_restart (leffnum_t dn)
 }
 
 
+/** The default (null) lamp effect function.  It never exits
+ * once started and can only be stopped explicitly. */
 void leff_default (void)
 {
 	for (;;)
@@ -259,6 +304,8 @@ void leff_default (void)
 }
 
 
+/** Restarts the lamp effect handler for the highest priority
+ * leff that has been started. */
 void leff_start_highest_priority (void)
 {
 	db_puts ("Restarting highest priority leff\n");
@@ -279,12 +326,17 @@ void leff_start_highest_priority (void)
 }
 
 
+/** Called from a lamp effect that wants to exit.
+ * It will check to see if any other lamp effects are queued and
+ * if so, start the highest priority one, after removing itself
+ * from the queue.
+ */
 __noreturn__ void leff_exit (void)
 {
 	const leff_t *leff = &leff_table[leff_active];
 
 	db_puts ("Exiting leff\n");
-	if (leff->gi != 0)
+	if (leff->gi != L_NOGI)
 		triac_leff_free (leff->gi);
 	task_setgid (GID_LEFF_EXITING);
 	leff_remove_queue (leff_active);
@@ -293,6 +345,7 @@ __noreturn__ void leff_exit (void)
 }
 
 
+/** Initialize the lamp effect subsystem at startup */
 void leff_init (void)
 {
 	leff_prio = 0;
@@ -301,6 +354,9 @@ void leff_init (void)
 }
 
 
+/** Stops all lamp effects.  This is similar to
+ * leff_init but takes care of stopping anything that might
+ * be running. */
 void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
@@ -311,5 +367,4 @@ void leff_stop_all (void)
 	lamp_leff2_erase ();
 	leff_init ();
 }
-
 

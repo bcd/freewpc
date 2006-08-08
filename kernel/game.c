@@ -322,6 +322,9 @@ void timed_game_monitor (void)
 #ifdef CONFIG_TIMED_GAME_OVER_DEFF
 		deff_restart (CONFIG_TIMED_GAME_OVER_DEFF);
 #endif
+#ifdef CONFIG_TIMED_GAME_OVER_LEFF
+		leff_start (CONFIG_TIMED_GAME_OVER_LEFF);
+#endif
 #ifdef CONFIG_TIMED_GAME_OVER_SOUND
 		sound_send (CONFIG_TIMED_GAME_OVER_SOUND);
 #endif

@@ -52,7 +52,7 @@ void skill_shot_made_deff (void)
 			sprintf ("YELLOW  100,000");
 			break;
 	}
-	font_render_string_center (&font_fixed10, 64, 23, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();

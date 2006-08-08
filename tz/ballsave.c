@@ -54,7 +54,7 @@ void ballsave_disable (void)
 bool ballsave_test_active (void)
 {
 #ifdef CONFIG_TIMED_GAME
-	if (timed_game_timer > 10)
+	if (timed_game_timer > 5)
 		return TRUE;
 #endif
 	return task_find_gid (GID_BALLSAVER) ? TRUE : FALSE;

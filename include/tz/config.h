@@ -178,6 +178,7 @@ extern const uint8_t mach_edge_switches[];
 	DECL_DEFF (DEFF_BALL_SAVE, D_NORMAL, PRI_GAME_MODE1+3, ballsave_deff) \
 	DECL_DEFF (DEFF_HITCHHIKER, D_NORMAL, PRI_GAME_MODE1+4, hitchhiker_deff) \
 	DECL_DEFF (DEFF_DOOR_AWARD, D_NORMAL, PRI_GAME_MODE1+5, door_award_deff) \
+	DECL_DEFF (DEFF_MB_START, D_NORMAL, PRI_GAME_MODE1+5, multiball_start_deff) \
 	DECL_DEFF (DEFF_SKILL_SHOT_MADE, D_NORMAL, PRI_GAME_MODE1+8, skill_shot_made_deff) \
 
 /* Declare the lamp effects that this machine implements */
@@ -193,6 +194,9 @@ DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, flash
 DECL_LEFF (LEFF_BONUS, L_RUNNING, PRI_BONUS, L_ALL_LAMPS, L_NOGI, bonus_leff) \
 DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, PRI_TILT_WARNING, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
 DECL_LEFF (LEFF_TILT, L_RUNNING, PRI_TILT, L_ALL_LAMPS, L_ALL_GI, no_lights_leff) \
+DECL_LEFF (LEFF_JETS_ACTIVE, L_SHARED, 0, LAMPSET_JETS, L_NOGI, leff_exit) \
+DECL_LEFF (LEFF_GAME_TIMEOUT, L_NORMAL, PRI_TILT, L_NOLAMPS, L_ALL_GI, game_timeout_leff) \
+DECL_LEFF (LEFF_CLOCK_START, L_NORMAL, PRI_LEFF4, L_NOLAMPS, L_ALL_GI, clock_round_started_leff)
 
 /* Declares the lampsets that should be instantiated */
 #define MACHINE_LAMPSETS \
@@ -265,6 +269,7 @@ extern struct menu tz_gumball_test_item;
 #define CONFIG_TIMED_GAME 60
 #define CONFIG_TIMED_GAME_MAX 120
 #define CONFIG_TIMED_GAME_OVER_SOUND SND_CLOCK_GONG
+#define CONFIG_TIMED_GAME_OVER_LEFF LEFF_GAME_TIMEOUT
 
 /* Default high scores */
 #define MACHINE_GRAND_CHAMPION_INITIALS { 'Q', 'Q', 'Q' }

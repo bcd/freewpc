@@ -68,11 +68,13 @@ __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 U8 lamp_flash_max;
 U8 lamp_flash_count;
-U8 lamp_apply_delay;
+/// U8 lamp_apply_delay;
 
 __fastram__ U8 lamp_strobe_mask;
 __fastram__ U8 lamp_strobe_column;
 
+
+/** Initialize the lamp subsystem at startup. */
 void lamp_init (void)
 {
 	memset (&bit_matrix_array, 0, sizeof (bit_matrix_array));
@@ -84,7 +86,7 @@ void lamp_init (void)
 	lamp_leff2_free_all ();
 
 	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
-	lamp_apply_delay = 0;
+	//// lamp_apply_delay = 0;
 
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
@@ -126,7 +128,10 @@ void lamp_rtt (void)
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
 
-	/* OR in the flashing lamp values */
+	/* OR in the flashing lamp values.  These are guaranteed to be
+	 * zero for any lamps where the flash is turned off.
+	 * Otherwise, these bits are periodically inverted by the
+	 * (slower) flash rtt function above. */
 	bits |= lamp_flash_matrix_now[lamp_strobe_column];
 
 	/* Override with the lamp effect lamps.
@@ -239,6 +244,12 @@ void lamp_global_update ()
 }
 
 
+/*
+ * lamp_all_on / lamp_all_off are optimized and should be used
+ * if all lamps are affected, rather than setting them one at
+ * a time.
+ */
+
 void lamp_all_on (void)
 {
 	disable_interrupts ();
@@ -257,6 +268,13 @@ void lamp_all_off (void)
 	enable_interrupts ();
 	lamp_global_update ();
 }
+
+/*
+ * Lamp effect allocation/free functions.  These are called
+ * during leff creation/shutdown time to override some of the
+ * lamp bits for use by the lamp effect routine.
+ *
+ */
 
 void lamp_leff1_allocate_all (void)
 {
@@ -299,6 +317,16 @@ void lamp_leff_free (lampnum_t lamp)
 }
 
 
+/*
+ * The leff_ functions below are used to set/clear/toggle/test
+ * bits from a lamp effect function.  Otherwise they work
+ * identically to the lamp_ versions.
+ *
+ * TODO  : these functions are hardcoding usage of the
+ * leff1 matrix now.  These should be checking the leff
+ * flags to see if it's a partial leff and use leff2 matrix
+ * instead.
+ */
 void leff_on (lampnum_t lamp)
 {
 	register bitset p = lamp_leff1_matrix;

@@ -123,7 +123,7 @@ int leff_test (lampnum_t lamp);
 #define lamp_tristate_off(lamp) \
 	do { lamp_flash_off(lamp); lamp_off(lamp); } while (0)
 #define lamp_tristate_flash(lamp) \
-	do { lamp_flash_on(lamp); } while (0)
+	do { lamp_flash_on(lamp); lamp_off(lamp); } while (0)
 
 void lamp_all_on (void);
 void lamp_all_off (void);

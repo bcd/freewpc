@@ -110,7 +110,7 @@ void star_task (void)
 #define star_create(x,y) \
 do \
 { \
-	task_t *tp = task_create_child (star_task); \
+	task_t *tp = task_create_peer (star_task); \
 	task_set_arg (tp, (U16)(dmd_low_buffer + ((U16)y << 4) + x)); \
 } while (0)
 

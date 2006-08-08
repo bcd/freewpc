@@ -37,8 +37,8 @@ void lock_is_lit_deff (void)
 void multiball_is_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 8, "MULTIBALL IS LIT");
-	font_render_string_center (&font_fixed10, 64, 24, "SHOOT PIANO");
+	font_render_string_center (&font_fixed6, 64, 8, "MULTIBALL IS LIT");
+	font_render_string_center (&font_fixed6, 64, 24, "SHOOT PIANO");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -93,6 +93,7 @@ CALLSET_ENTRY (mball, piano)
 {
 	if (lamp_flash_test (LM_PIANO_JACKPOT))
 	{
+		deff_start (DEFF_MB_START);
 		music_change (MUS_MULTIBALL);
 		lamp_tristate_off (LM_PIANO_JACKPOT);
 		mball_locks_lit = 0;

@@ -42,6 +42,7 @@ void common_greed_handler (U8 target)
 	{
 		score (SC_50K);
 		sound_send (SND_GREED_ROUND_BOOM);
+		lamp_tristate_flash (swinfo->lamp);
 	}
 	else if ((greed_set & target) == 0)
 	{
@@ -67,7 +68,7 @@ void common_greed_handler (U8 target)
 }
 
 
-CALLSET_ENTRY (greed, door_panel_award)
+CALLSET_ENTRY (greed, door_panel_awarded)
 {
 	if (lamp_test (LM_PANEL_GREED))
 	{

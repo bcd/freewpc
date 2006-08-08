@@ -71,6 +71,7 @@ task_ticks_t lampset_apply_delay;
 
 U8 lampset_alternation_state;
 
+#if 0 /* see include/sys/leff.h */
 /* During a lampset_apply operation, this variable contains the
  * index of the lamp that is currently being processed.
  * The apply callbacks can scan this value to control the actions.
@@ -81,7 +82,7 @@ U8 lampset_alternation_state;
 U8 lampset_apply_count;
 
 U8 lampset_private_data;
-
+#endif
 
 static inline void lampset_invoke_operator (
 	lampnum_t lamp, lamp_operator_t op )

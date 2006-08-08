@@ -389,6 +389,8 @@ void device_probe (void)
 		device_t *dev = device_entry (devno);
 		device_recount (dev);
 		dev->previous_count = dev->actual_count;
+		dev->kicks_needed = 0;
+		task_kill_gid (DEVICE_GID(devno));
 
 		/* If there are more balls in the device than ought to be,
 		 * schedule the extras to be emptied. */
@@ -459,14 +461,26 @@ void device_remove_live (void)
 	 * the game thought 1 ball was in play, but 2 were on the playfield. */
 	if (missing_balls > live_balls)
 	{
+		callset_invoke (missing_ball_found);
 		missing_balls--;
 	}
 	else if (live_balls > 0)
 	{
 		live_balls--;
-		if ((live_balls == 0) && in_game)
+		if (in_game)
 		{
-			end_ball ();
+			callset_invoke (ball_drain);
+			switch (live_balls)
+			{
+				case 0:
+					end_ball ();
+					break;
+				case 1:
+					callset_invoke (single_ball_play);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }
@@ -500,6 +514,14 @@ bool device_check_start_ok (void)
 {
 	/* Reset any kickout locks, just in case */
 	kickout_locks = 0;
+
+	/* If any balls are missing, don't allow the game to start
+	 * without first trying a device probe. */
+	if ((missing_balls > 0) || task_find_gid (GID_DEVICE_PROBE))
+	{
+		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
+		return FALSE;
+	}
 
 	/* OK to start game */
 	return TRUE;
@@ -545,7 +567,6 @@ CALLSET_ENTRY (device, start_game)
 {
 	live_balls = 0;
 	kickout_locks = 0;
-	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 }
 
 
