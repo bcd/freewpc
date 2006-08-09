@@ -120,8 +120,24 @@ CALLSET_ENTRY (tz, timed_game_tick)
 		case 3: sound_send (SND_THREE); break;
 		case 2: sound_send (SND_TWO); break;
 		case 1: sound_send (SND_ONE); break;
-		case 0: music_set (MUS_MULTIBALL_LIT_PLUNGER); break;
+		case 0: callset_invoke (music_update); break;
 		default: break;
 	}
+}
+
+
+CALLSET_ENTRY (tz, music_update)
+{
+#ifdef CONFIG_TIMED_GAME
+	if (timed_game_timer == 0)
+		music_change (MUS_MULTIBALL_LIT_PLUNGER);
+	else
+#endif
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+		music_change (MUS_MULTIBALL);
+	else if (!ball_in_play)
+		music_change (MUS_MULTIBALL_LIT_PLUNGER);
+	else
+		music_change (MUS_MULTIBALL_LIT);
 }
 

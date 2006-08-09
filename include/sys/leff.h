@@ -65,6 +65,7 @@ typedef struct
 /** Per-leff state variables, stored in the task thread data area */
 #define lampset_apply_count	(*(task_get_thread_data_ptr (0)))
 #define lampset_private_data	(*(task_get_thread_data_ptr (1)))
+#define leff_running_flags		(*(task_get_thread_data_ptr (2)))
 
 uint8_t leff_get_active (void);
 void leff_start (leffnum_t dn);

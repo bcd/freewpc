@@ -177,3 +177,17 @@ void clock_round_started_leff (void)
 	leff_exit ();
 }
 
+
+void multiball_running_leff (void)
+{
+	leff_on (LM_GUM);
+	leff_off (LM_BALL);
+	leff_off (LM_LOCK1);
+	leff_on (LM_LOCK2);
+	for (;;)
+	{
+		lampset_apply_leff_toggle (LAMPSET_DOOR_LOCKS_AND_GUMBALL);
+		task_sleep (TIME_200MS);
+	}
+}
+

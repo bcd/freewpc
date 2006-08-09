@@ -96,6 +96,15 @@ dmd_transition_t trans_scroll_up = {
 	.count = 8,
 };
 
+dmd_transition_t trans_scroll_up_avg = {
+	.composite_init = trans_scroll_up_init,
+	.composite_old = trans_scroll_up_old,
+	.composite_new = trans_scroll_up_new,
+	.delay = TIME_100MS,
+	.arg = 2 * 16, /* 2 lines at a time */
+	.count = 16,
+};
+
 dmd_transition_t trans_scroll_up_slow = {
 	.composite_init = trans_scroll_up_init,
 	.composite_old = trans_scroll_up_old,

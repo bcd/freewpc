@@ -38,6 +38,7 @@ void sw_right_ramp_powerfield_task (void)
 	sol_on (SOL_RIGHT_RAMP_DIV);
 	task_sleep_sec (5);
 	sol_off (SOL_RIGHT_RAMP_DIV);
+	task_exit ();
 }
 
 
@@ -53,7 +54,7 @@ void sw_right_ramp_task (void)
 }
 
 
-void sw_right_ramp_handler (void)
+CALLSET_ENTRY (right_ramp, sw_right_ramp)
 {
 	if (!in_live_game)
 		return;
@@ -74,8 +75,6 @@ void sw_right_ramp_handler (void)
 			task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_task);
 		}
 	}
-
-	callset_invoke (right_ramp);
 }
 
 
@@ -87,7 +86,7 @@ CALLSET (right_ramp, init)
 
 DECLARE_SWITCH_DRIVER (sw_right_ramp)
 {
-	.fn = sw_right_ramp_handler,
+	DECLARE_SWITCH_EVENT (sw_right_ramp),
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 };
 

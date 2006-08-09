@@ -3,11 +3,16 @@
 #include <rtsol.h>
 
 
-/* Magnet RTT runs every 8 ms */
-#define MAG_RTT_FREQ 8
+/* Magnet switch RTT runs every 8 ms */
+#define MAG_SWITCH_RTT_FREQ 8
+#define MAG_DRIVE_RTT_FREQ 32
 
-#define MAG_POWER_TIME (400 / MAG_RTT_FREQ)
-#define MAG_HOLD_TIME (1100 / MAG_RTT_FREQ)
+#define MAG_POWER_TIME (400 / MAG_DRIVE_RTT_FREQ)
+#define MAG_HOLD_TIME (1100 / MAG_DRIVE_RTT_FREQ)
+
+#define MAG_LEFT
+#define MAG_UPPER_RIGHT
+#define MAG_RIGHT
 
 
 enum magnet_state {
@@ -29,10 +34,12 @@ static inline void magnet_rtt_switch_handler (
 	enum magnet_state *state,
 	U8 *timer )
 {
+	/* rt_switch_poll is inverted because it is an opto */
 	if ((*state == MAG_ENABLED) &&
-		 (rt_switch_poll (sw_magnet)))
+		 (!rt_switch_poll (sw_magnet)))
 	{
 		*state = MAG_ON_POWER;
+		*timer = MAG_POWER_TIME;
 	}
 }
 
@@ -50,16 +57,8 @@ static inline void magnet_rtt_duty_handler (
 	switch (*state)
 	{
 		case MAG_DISABLED:
-			/* nothing to do - magnet should already be off */
-			break;
-
 		case MAG_ENABLED:
-			/* magnet will switch to MAG_ON_POWER if switch closes */
-
-			/* switch to POWER - 100% on */
-			rt_sol_enable (sol_magnet);
-			*timer = MAG_POWER_TIME;
-			*state = MAG_ON_POWER;
+			rt_sol_disable (sol_magnet);
 			break;
 
 		case MAG_ON_POWER:
@@ -71,6 +70,11 @@ static inline void magnet_rtt_duty_handler (
 				/* switch to HOLD */
 				*timer = MAG_HOLD_TIME;
 				*state = MAG_ON_HOLD;
+			}
+			else
+			{
+				/* magnet is on 100% */
+				rt_sol_enable (sol_magnet);
 			}
 			break;
 
@@ -85,6 +89,7 @@ static inline void magnet_rtt_duty_handler (
 			}
 			else
 			{
+				/* magnet is on 25% */
 				if ((*timer % 4) == 0)
 				{
 					rt_sol_enable (sol_magnet);
@@ -99,6 +104,7 @@ static inline void magnet_rtt_duty_handler (
 }
 
 
+/* Realtime function to poll the magnet switches. */
 void magnet_switch_rtt (void)
 {
 	magnet_rtt_switch_handler (SW_LEFT_MAGNET,
@@ -112,6 +118,7 @@ void magnet_switch_rtt (void)
 }
 
 
+/* Realtime function to duty cycle the magnet drives */
 void magnet_duty_rtt (void)
 {
 	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
@@ -122,6 +129,20 @@ void magnet_duty_rtt (void)
 	
 	magnet_rtt_duty_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
 		&lower_right_magnet_state, &lower_right_magnet_timer);
+}
+
+
+void magnet_enable_catch (U8 magnet)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	magstates[magnet] = MAG_ENABLED;
+}
+
+
+void magnet_disable_catch (U8 magnet)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	magstates[magnet] = MAG_DISABLED;
 }
 
 

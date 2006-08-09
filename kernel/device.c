@@ -409,7 +409,6 @@ void device_probe (void)
 	device_update_globals ();
 
 	device_ss_state = 1;
-	sys_init_pending_tasks--;
 
 	device_debug ();
 	task_exit ();
@@ -517,12 +516,13 @@ bool device_check_start_ok (void)
 
 	/* If any balls are missing, don't allow the game to start
 	 * without first trying a device probe. */
-	if ((missing_balls > 0) || task_find_gid (GID_DEVICE_PROBE))
+ 	if (task_find_gid (GID_DEVICE_PROBE)) 
+		return FALSE;
+	else if (missing_balls > 0)
 	{
 		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 		return FALSE;
 	}
-
 	/* OK to start game */
 	return TRUE;
 }

@@ -45,6 +45,22 @@ void multiball_is_lit_deff (void)
 }
 
 
+void multiball_start_deff (void)
+{
+	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
+	printf ("MULTIBALL");
+	flash_and_exit_deff (20, TIME_100MS);
+}
+
+
+void multiball_running_deff (void)
+{
+	for (;;)
+	{
+	}
+}
+
+
 void mball_lock_lamp_update (void)
 {
 	if (mball_locks_lit)
@@ -70,18 +86,50 @@ void mball_check_light_lock (void)
 }
 
 
+CALLSET_ENTRY (mball, mball_start)
+{
+	if (!flag_test (FLAG_MULTIBALL_RUNNING))
+	{
+		flag_on (FLAG_MULTIBALL_RUNNING);
+		deff_start (DEFF_MB_START);
+		leff_start (LEFF_MB_RUNNING);
+		// deff_start (DEFF_MB_RUNNING);
+		callset_invoke (music_update);
+		mball_locks_lit = 0;
+		mball_locks_made = 0;
+		mballs_played++;
+		lamp_tristate_off (LM_LOCK_ARROW);
+		lamp_off (LM_GUM);
+		lamp_off (LM_BALL);
+	}
+}
+
+
+CALLSET_ENTRY (mball, mball_stop)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	{
+		flag_off (FLAG_MULTIBALL_RUNNING);
+		deff_stop (DEFF_MB_RUNNING);
+		leff_stop (LEFF_MB_RUNNING);
+	}
+}
+
+
 CALLSET_ENTRY (mball, sw_left_ramp_exit)
 {
-	if (!lamp_test (LM_GUM))
+	if (flag_test (FLAG_MULTIBALL_RUNNING));
+	else if (!lamp_test (LM_GUM))
 	{
 		lamp_on (LM_GUM);
 		mball_check_light_lock ();
 	}
 }
 
-CALLSET_ENTRY (mball, right_ramp)
+CALLSET_ENTRY (mball, sw_right_ramp)
 {
-	if (!lamp_test (LM_BALL))
+	if (flag_test (FLAG_MULTIBALL_RUNNING));
+	else if (!lamp_test (LM_BALL))
 	{
 		lamp_on (LM_BALL);
 		mball_check_light_lock ();
@@ -93,15 +141,24 @@ CALLSET_ENTRY (mball, piano)
 {
 	if (lamp_flash_test (LM_PIANO_JACKPOT))
 	{
-		deff_start (DEFF_MB_START);
-		music_change (MUS_MULTIBALL);
 		lamp_tristate_off (LM_PIANO_JACKPOT);
-		mball_locks_lit = 0;
-		mball_locks_made = 0;
-		lamp_tristate_off (LM_LOCK_ARROW);
-		lamp_off (LM_GUM);
-		lamp_off (LM_BALL);
+		callset_invoke (mball_start);
 	}
+}
+
+
+CALLSET_ENTRY (mball, any_pf_switch)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	{
+		score (SC_20K);
+	}
+}
+
+
+CALLSET_ENTRY (mball, single_ball_play)
+{
+	callset_invoke (mball_stop);
 }
 
 
@@ -139,5 +196,6 @@ CALLSET_ENTRY (mball, start_player)
 	mball_locks_lit = 0;
 	mball_locks_made = 0;
 	mballs_played = 0;
+	flag_off (FLAG_MULTIBALL_RUNNING);
 }
 

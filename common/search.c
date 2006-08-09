@@ -144,6 +144,7 @@ void ball_search_monitor_task (void)
 {
 	extern U8 live_balls;
 
+	ball_search_timer_reset ();
 	while (in_game)
 	{
 		task_sleep_sec (1);
@@ -174,6 +175,7 @@ void ball_search_monitor_task (void)
 
 void ball_search_monitor_start (void)
 {
+	ball_search_timeout_set (BS_TIMEOUT_DEFAULT);
 	task_create_gid1 (GID_BALL_SEARCH_MONITOR, ball_search_monitor_task);
 }
 

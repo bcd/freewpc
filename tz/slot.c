@@ -74,8 +74,7 @@ void slot_enter (device_t *dev)
 		else
 			score (SC_50K);
 
-		if (lamp_flash_test (LM_SLOT_MACHINE))
-			door_award_flashing ();
+		callset_invoke (slot_machine);
 	}
 }
 

@@ -106,6 +106,7 @@ extern dmd_transition_t *dmd_transition;
 
 extern dmd_transition_t 
 	trans_scroll_up,
+	trans_scroll_up_avg,
 	trans_scroll_up_slow,
 	trans_scroll_down,
 	trans_scroll_left,

@@ -41,6 +41,18 @@ extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 U8 printf (const char *format, ...);
 #define sprintf printf
 
+/** psprintf() is like sprintf() but it has TWO format control
+ * strings.  The first is used when the value is singular, and
+ * the second when it is plural.  You can only printf a single
+ * value at a time this way. */
+#define psprintf(fmt1, fmtn, val) \
+do { \
+	if (val == 1) \
+		sprintf (fmt1, val); \
+	else \
+		sprintf (fmtn, val); \
+} while (0)
+
 #ifdef DEBUGGER
 #define dbprintf(format, rest...) \
 	do { \

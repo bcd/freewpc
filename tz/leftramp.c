@@ -26,10 +26,7 @@ __local__ U8 left_ramps;
 void left_ramp_deff (void)
 {
 	dmd_alloc_low_clean ();
-	if (left_ramps > 1)
-		sprintf ("%d LEFT RAMPS", left_ramps);
-	else
-		sprintf ("1 LEFT RAMP");
+	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
 	if (left_ramps < 3)
@@ -39,7 +36,7 @@ void left_ramp_deff (void)
 	else if (left_ramps < 6)
 		sprintf ("SPOT PANEL AT 6");
 	else if (left_ramps == 6)
-		sprintf ("DOOR PANEL SPOTTED");
+		sprintf ("PANEL SPOTTED");
 	else
 		sprintf ("");
 	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
@@ -78,7 +75,7 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 
 DECLARE_SWITCH_DRIVER (sw_left_ramp_enter)
 {
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.sound = SND_LEFT_RAMP_ENTER,
 };
 
@@ -86,7 +83,7 @@ DECLARE_SWITCH_DRIVER (sw_left_ramp_enter)
 DECLARE_SWITCH_DRIVER (sw_left_ramp_exit)
 {
 	DECLARE_SWITCH_EVENT (sw_left_ramp_exit),
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.sound = SND_LEFT_RAMP_MADE,
 };
 

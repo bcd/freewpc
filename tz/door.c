@@ -33,6 +33,11 @@ __local__ U8 door_panels_completed;
 U8 door_active_lamp;
 
 
+/** Total number of door panels, not counting the handle */
+#define NUM_DOOR_PANELS 14
+
+#define LITZ_DOOR_INDEX (NUM_DOOR_PANELS+1)
+
 /** Names of all the door panels, in order */
 const char *door_panel_names[] = {
 	"TOWN SQUARE MADNESS",
@@ -72,7 +77,7 @@ const char *door_award_goals[] = {
 
 extern inline const U8 *door_get_lamps (void)
 {
-	return lampset_lookup (LAMPSET_DOOR_PANELS);
+	return lampset_lookup (LAMPSET_DOOR_PANELS_AND_HANDLE);
 }
 
 
@@ -96,17 +101,18 @@ void door_advance_flashing (void)
 	const U8 *door_lamps = door_get_lamps ();
 	U8 new_door_index;
 
-	if (door_panels_started < 14)
+	if (door_panels_started < NUM_DOOR_PANELS)
 	{
 		new_door_index = door_index;
 		do {
 			new_door_index++;
-			if (new_door_index >= 14)
+			if (new_door_index >= NUM_DOOR_PANELS)
 				new_door_index = 0;
 		} while (lamp_test (door_lamps[new_door_index]));
 	}
 	else
-		new_door_index = 14;
+		/* Light the door handle */
+		new_door_index = LITZ_DOOR_INDEX;
 
 	door_set_flashing (new_door_index);
 }
@@ -125,19 +131,16 @@ void door_award_rotate (void) __taskentry__
 
 void door_award_deff (void)
 {
+	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 	printf ("%s", door_panel_names[door_index]);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	printf (
-		(door_panels_started != 1) ? "%d DOOR PANELS" : "%d DOOR PANEL", 
-		door_panels_started);
+	psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
 	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);
-	kickout_lock (KLOCK_DEFF);
 	dmd_show_low ();
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	task_sleep_sec (2);
 	kickout_unlock (KLOCK_DEFF);
-	task_sleep_sec (1);
 	deff_exit ();
 }
 
@@ -163,6 +166,40 @@ void door_award_flashing (void)
 	score (SC_50K);
 	door_award_enable ();
 	callset_invoke (door_panel_awarded);
+}
+
+
+static void door_check_piano_or_slot (void)
+{
+	if (live_balls > 1)
+	{
+		/* Panels not awarded during Multiball */
+	}
+	else if (flag_test (FLAG_BTTZ_RUNNING))
+	{
+		/* No more panels can be awarded after BTTZ */
+	}
+	else if (door_index == LITZ_DOOR_INDEX)
+	{
+		flag_on (FLAG_BTTZ_RUNNING);
+		/* start BTTZ */
+	}
+	else if (lamp_flash_test (LM_SLOT_MACHINE))
+	{
+		door_award_flashing ();
+	}
+}
+
+
+CALLSET_ENTRY(door, piano)
+{
+	door_check_piano_or_slot ();
+}
+
+
+CALLSET_ENTRY(door, slot_machine)
+{
+	door_check_piano_or_slot ();
 }
 
 

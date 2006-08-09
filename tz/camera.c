@@ -24,6 +24,41 @@
 __local__ U8 camera_award_count;
 
 
+void camera_award_deff (void)
+{
+	kickout_lock (KLOCK_DEFF);
+	dmd_alloc_low_clean ();
+	dmd_draw_border (dmd_low_buffer);
+	sprintf ("CAMERA AWARD %d", camera_award_count);
+	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
+	switch (camera_award_count)
+	{
+		case 0:
+			sprintf ("LIGHT LOCK");
+			break;
+		case 1:
+			sprintf ("SPOT DOOR PANEL");
+			break;
+		case 2:
+			sprintf ("20 SECONDS");
+			break;
+		case 3:
+			sprintf ("QUICK MULTIBALL");
+			break;
+		case 4:
+			sprintf ("250,000");
+			break;
+	}
+	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_up_avg);
+	dmd_show_low ();
+	sound_send (SND_GUMBALL_LOADED);
+	task_sleep_sec (3);
+	kickout_unlock (KLOCK_DEFF);
+	deff_exit ();
+}
+
+
 void do_camera_award (void)
 {
 	switch (camera_award_count)
@@ -35,7 +70,7 @@ void do_camera_award (void)
 			/* Spot Door Panel */
 			break;
 		case 2:
-			/* Extra Time: 30 seconds */
+			/* Extra Time: 20 seconds */
 			break;
 		case 3:
 			/* Quick Multiball */

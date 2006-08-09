@@ -301,6 +301,8 @@ void lamp_leff2_free_all (void)
 	memset (lamp_leff2_allocated, 0xFF, NUM_LAMP_COLS);
 }
 
+
+
 void lamp_leff_allocate (lampnum_t lamp)
 {
 	register bitset p = lamp_leff1_allocated;

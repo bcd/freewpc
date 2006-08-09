@@ -55,6 +55,7 @@ DECLARE_SWITCH_DRIVER(sw_autofire2)
 
 __taskentry__ void autofire_handler (void)
 {
+	task_set_flags (TASK_PROTECTED);
 	while (autofire_request_count > 0)
 	{
 		/* Open autofire diverter */

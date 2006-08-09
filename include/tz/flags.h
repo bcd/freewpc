@@ -26,9 +26,9 @@
 #define FLAG_RIGHT_OUTLANE_LIT        2
 #define FLAG_QUICK_MULTIBALL_RUNNING  3
 #define FLAG_BTTZ_RUNNING             4
+#define FLAG_MULTIBALL_RUNNING        5
 #define FLAG_BATTLE_THE_POWER_LIT     6
 #define FLAG_POWERBALL_IN_PLAY        7
 #define FLAG_SKILL_SHOT_LIT           8
 #define FLAG_NO_DRAIN_PENALTY         9
-
 #endif /* _MACH_LAMP_H */

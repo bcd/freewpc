@@ -213,6 +213,20 @@ void leff_create_handler (const leff_t *leff)
 }
 
 
+void leff_create_shared_handler (const leff_t *leff)
+{
+#if 0 /* TODO */
+	lampset_set_apply_delay (0);
+	lampset_apply (leff->lampset, lamp_leff2_allocate);
+	task_create_gid (GID_SHARED_LEFF1, leff->fn);
+#endif
+}
+
+void leff_stop_shared_handler (const leff_t *leff)
+{
+}
+
+
 /** Start a lamp effect.  dn indicates the LEFF_xxx code for which one to start. */
 void leff_start (leffnum_t dn)
 {
@@ -222,6 +236,7 @@ void leff_start (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
+		leff_create_shared_handler (leff);
 	}
 	else if (leff->flags & L_RUNNING)
 	{
@@ -264,6 +279,7 @@ void leff_stop (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
+		leff_stop_shared_handler (leff);
 	}
 	else if (leff->flags & L_RUNNING)
 	{
