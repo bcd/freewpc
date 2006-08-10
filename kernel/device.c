@@ -322,6 +322,9 @@ void device_request_empty (device_t *dev)
 		task_gid_t gid = DEVICE_GID (device_devno (dev));
 
 		dev->kicks_needed += dev->actual_count;
+		dev->max_count -= dev->actual_count;
+		if (device_devno (dev) != DEVNO_TROUGH)
+			live_balls++;
 		task_create_gid1 (gid, device_update);
 	}
 }

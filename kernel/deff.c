@@ -59,8 +59,9 @@
 
 
 /** Declare externs for all of the deff functions */
-#define DECL_DEFF(num, flags, pri, fn) \
-	extern void fn (void);
+#define DECL_DEFF(num, flags, pri, fn) extern void fn (void);
+#define DECL_DEFF_FAST(num, pri, fn) DECL_DEFF (num, D_NORMAL, pri, fn)
+#define DECL_DEFF_MODE(num, pri, fn) DECL_DEFF (num, D_RUNNING, pri, fn)
 
 SYSTEM_DISPLAY_EFFECTS
 #ifdef MACHINE_DISPLAY_EFFECTS

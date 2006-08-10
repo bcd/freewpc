@@ -24,6 +24,7 @@
  * become a true leff. */
 static void ballsave_monitor (void)
 {
+start:
 #ifdef CONFIG_TIMED_GAME
 	while (timed_game_timer > 5)
 #else
@@ -36,6 +37,12 @@ static void ballsave_monitor (void)
 		task_sleep (TIME_100MS);
 	}
 	lamp_leff_free (LM_SHOOT_AGAIN);
+	while (timed_game_timer != 0)
+	{
+		task_sleep (TIME_500MS);
+		if (timed_game_timer >= 5)
+			goto start;
+	}
 	task_exit ();
 }
 

@@ -93,6 +93,8 @@ U8 leff_prio;
  * statically configured. */
 static U8 leff_queue[MAX_QUEUED_LEFFS];
 
+#define MAX_SHARED_LEFFS 8
+static U8 shared_leff_queue[MAX_SHARED_LEFFS];
 
 /** Returns the index of the current active lamp effect. */
 U8 leff_get_active (void)
@@ -213,14 +215,26 @@ void leff_create_handler (const leff_t *leff)
 }
 
 
-void leff_create_shared_handler (const leff_t *leff)
+void leff_create_shared_handler (leffnum_t dn)
 {
-#if 0 /* TODO */
+	const leff_t *leff = &leff_table[dn];
+	task_t *tp;
+
+#if 0
 	lampset_set_apply_delay (0);
 	lampset_apply (leff->lampset, lamp_leff2_allocate);
-	task_create_gid (GID_SHARED_LEFF1, leff->fn);
+
+	/* Create the lamp effect function */
+	tp = task_create_gid (GID_SHARED_LEFF1, leff->fn);
+
+	/* Tell the lamp effect function which leff # it is
+	 * running, using thread private data.  There may be
+	 * multiple of these active, so we can't use a global
+	 * here. */
+	tp->thread_data[3] = dn;
 #endif
 }
+
 
 void leff_stop_shared_handler (const leff_t *leff)
 {
@@ -367,6 +381,7 @@ void leff_init (void)
 	leff_prio = 0;
 	leff_active = LEFF_NULL;
 	memset (leff_queue, 0, MAX_QUEUED_LEFFS);
+	memset (shared_leff_queue, 0, MAX_SHARED_LEFFS);
 }
 
 

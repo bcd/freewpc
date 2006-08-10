@@ -32,11 +32,13 @@ __local__ U8 door_panels_completed;
 
 U8 door_active_lamp;
 
+U8 door_start_with_bttz;
+
 
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
-#define LITZ_DOOR_INDEX (NUM_DOOR_PANELS+1)
+#define LITZ_DOOR_INDEX NUM_DOOR_PANELS
 
 /** Names of all the door panels, in order */
 const char *door_panel_names[] = {
@@ -214,5 +216,10 @@ CALLSET_ENTRY(door, start_ball)
 {
 	door_set_flashing (door_index);
 	door_award_enable ();
+}
+
+CALLSET_ENTRY (door, init)
+{
+	door_start_with_bttz = 1;
 }
 

@@ -22,7 +22,7 @@
 
 void bonus_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	triac_leff_disable (TRIAC_GI_MASK);
 	for (;;)
 		task_sleep_sec (5);
 }
@@ -59,7 +59,12 @@ void bonus_deff (void)
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
 	sound_send (SND_GREED_ROUND_BOOM);
-	task_sleep_sec (2);
+
+	if (0) /* if (random_scaled (100) < 5) */
+	{
+	}
+	else
+		task_sleep_sec (2);
 	
 	deff_exit ();
 }

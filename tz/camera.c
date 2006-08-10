@@ -23,6 +23,8 @@
 
 __local__ U8 camera_award_count;
 
+__local__ U8 camera_default_count;
+
 
 void camera_award_deff (void)
 {
@@ -54,23 +56,27 @@ void camera_award_deff (void)
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
 	task_sleep_sec (3);
-	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 
 
 void do_camera_award (void)
 {
+	deff_start (DEFF_CAMERA_AWARD);
+	task_sleep (TIME_100MS);
 	switch (camera_award_count)
 	{
 		case 0:
 			/* Light Lock */
+			mball_light_lock ();
 			break;
 		case 1:
 			/* Spot Door Panel */
+			door_award_flashing ();
 			break;
 		case 2:
 			/* Extra Time: 20 seconds */
+			timed_game_extend (20);
 			break;
 		case 3:
 			/* Quick Multiball */
@@ -95,16 +101,23 @@ void sw_camera_handler (void)
 	}
 	else
 	{
-		if (lamp_test (LM_PANEL_CAMERA))
+		if (lamp_flash_test (LM_PANEL_CAMERA))
 		{
-			sound_send (SND_CAMERA_PICTURE_EJECT_1);
 			do_camera_award ();
 			score (SC_100K);
 			task_sleep (TIME_100MS);
-			sound_send (SND_CAMERA_PICTURE_EJECT_2);
 		}
 		else
+		{
 			score (SC_50K);
+			camera_default_count++;
+			if (camera_default_count == 3)
+			{
+				camera_default_count = 0;
+				do_camera_award ();
+				task_sleep (TIME_100MS);
+			}
+		}
 		sound_send (SND_JET_BUMPER_ADDED);
 	}
 	switch_can_follow (camera, slot, TIME_4S);
@@ -115,6 +128,7 @@ CALLSET_ENTRY (camera, start_player)
 {
 	lamp_tristate_off (LM_CAMERA);
 	camera_award_count = 0;
+	camera_default_count = 0;
 }
 
 

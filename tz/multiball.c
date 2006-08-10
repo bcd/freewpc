@@ -47,8 +47,12 @@ void multiball_is_lit_deff (void)
 
 void multiball_start_deff (void)
 {
+	kickout_lock (KLOCK_DEFF);
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
 	printf ("MULTIBALL");
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+	task_sleep_sec (1);
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
@@ -69,10 +73,13 @@ void mball_lock_lamp_update (void)
 
 void mball_light_lock (void)
 {
-	mball_locks_lit++;
-	lamp_tristate_flash (LM_LOCK_ARROW);
-	sound_send (SND_GUMBALL_COMBO);
-	deff_start (DEFF_LOCK_LIT);
+	if (mball_locks_lit < 2)
+	{
+		mball_locks_lit++;
+		lamp_tristate_flash (LM_LOCK_ARROW);
+		sound_send (SND_GUMBALL_COMBO);
+		deff_start (DEFF_LOCK_LIT);
+	}
 }
 
 
@@ -101,6 +108,7 @@ CALLSET_ENTRY (mball, mball_start)
 		lamp_tristate_off (LM_LOCK_ARROW);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
+		device_request_empty (device_entry (DEVNO_LOCK));
 	}
 }
 
@@ -112,6 +120,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		flag_off (FLAG_MULTIBALL_RUNNING);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
+		callset_invoke (music_update);
 	}
 }
 

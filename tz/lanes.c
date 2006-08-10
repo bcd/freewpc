@@ -61,6 +61,7 @@ void sw_left_inlane_1_handler (void)
 {
 	score (SC_1K);
 	timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
+	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
 void sw_left_inlane_2_handler (void)
@@ -74,12 +75,12 @@ void sw_right_inlane_handler (void)
 	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
 	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
 	lamp_on (LM_DEAD_END);
+	event_can_follow (right_inlane, left_loop, TIME_3S);
 }
 
 
 CALLSET_ENTRY(lanes, start_player)
 {
-	lamp_flash_on (LM_SPIRAL_2M);
 	lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_RIGHT_INLANE);
 }

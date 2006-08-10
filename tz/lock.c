@@ -34,7 +34,7 @@ void lock_enter (device_t *dev)
 	else
 		score (SC_50K);
 	callset_invoke (lock);
-	task_sleep_sec (1);
+	// task_sleep_sec (1);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 }
 

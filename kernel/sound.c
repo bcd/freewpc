@@ -348,6 +348,7 @@ CALLSET_ENTRY(sound, start_game)
 #ifdef MACHINE_START_GAME_SOUND
 	sound_send (MACHINE_START_GAME_SOUND);
 #endif
+	callset_invoke (music_update);
 }
 
 
@@ -356,6 +357,7 @@ CALLSET_ENTRY(sound, start_ball)
 #ifdef MACHINE_START_BALL_MUSIC
 	music_set (MACHINE_START_BALL_MUSIC);
 #endif
+	callset_invoke (music_update);
 }
 
 
@@ -364,6 +366,7 @@ CALLSET_ENTRY (sound, ball_in_play)
 #ifdef MACHINE_BALL_IN_PLAY_MUSIC
 	music_set (MACHINE_BALL_IN_PLAY_MUSIC);
 #endif
+	callset_invoke (music_update);
 }
 
 
@@ -379,5 +382,10 @@ CALLSET_ENTRY(sound, end_game)
 	if (!in_test)
 		music_set (MACHINE_END_GAME_MUSIC);
 #endif
+}
+
+CALLSET_ENTRY (sound, single_ball_play)
+{
+	callset_invoke (music_update);
 }
 
