@@ -68,7 +68,7 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	{
 		sound_send (SND_ROBOT_AWARD);
 		task_sleep_sec (1);
-		door_award_flashing ();
+		door_award_if_possible ();
 	}
 }
 

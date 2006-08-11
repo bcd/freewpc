@@ -134,6 +134,8 @@ void lamp_leff2_erase (void);
 void lamp_leff2_free_all (void);
 void lamp_leff_allocate (lampnum_t lamp);
 void lamp_leff_free (lampnum_t lamp);
+void lamp_leff2_allocate (lampnum_t lamp);
+void lamp_leff2_free (lampnum_t lamp);
 U8 *get_bit_base (void);
 
 const U8 *lampset_lookup (lampset_id_t id);

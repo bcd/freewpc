@@ -189,5 +189,6 @@ void multiball_running_leff (void)
 		lampset_apply_leff_toggle (LAMPSET_DOOR_LOCKS_AND_GUMBALL);
 		task_sleep (TIME_200MS);
 	}
+	leff_exit ();
 }
 

@@ -66,7 +66,7 @@ void award_skill_shot (void)
 	deff_start (DEFF_SKILL_SHOT_MADE);
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
-	door_award_flashing ();
+	door_award_if_possible ();
 	switch (skill_switch_reached)
 	{
 		case 1: 

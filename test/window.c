@@ -426,6 +426,9 @@ struct adjustment feature_adjustments[] = {
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
 #endif
 	{ "GAME MUSIC", &on_off_value, ON, &system_config.game_music },
+#ifdef CONFIG_TIMED_GAME
+	{ "TIMED GAME", &yes_no_value, YES, &system_config.timed_game },
+#endif
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_ADJUSTMENTS
 #endif

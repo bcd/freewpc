@@ -35,7 +35,8 @@ __nvram__ volatile U8 nvram_test_byte;
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
 
-
+U8 last_nonfatal_error_code;
+task_gid_t last_nonfatal_error_gid;
 
 /*
  * fatal is the entry point for errors that are nonrecoverable.
@@ -65,9 +66,34 @@ void fatal (errcode_t error_code)
 }
 
 
+void nonfatal_error_deff (void)
+{
+#ifdef DEBUGGER
+	dmd_alloc_low_clean ();
+	sprintf ("NONFATAL %d", system_audits.non_fatal_errors);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	dmd_show_low ();
+	sound_send (SND_TEST_ALERT);
+	task_sleep (TIME_200MS);
+	sound_send (SND_TEST_ALERT);
+	task_sleep (TIME_200MS);
+	sound_send (SND_TEST_ALERT);
+	task_sleep_sec (4);
+#endif
+	deff_exit ();
+}
+
+
 void nonfatal (errcode_t error_code)
 {
 	audit_increment (&system_audits.non_fatal_errors);
+#ifdef DEBUGGER
+	last_nonfatal_error_code = error_code;
+	last_nonfatal_error_gid = task_current->gid;
+	deff_start (DEFF_NONFATAL_ERROR);
+#endif
 }
 
 
@@ -134,7 +160,7 @@ void do_reset (void)
 	} while (ramptr != 0);
 
 	/** Install the null pointer catcher, by programming
-	 * an actual instruction at address 0x0 */
+	 * an actual instruction at address 0x0 (branch to self) */
 	*(U8 *)0 = 0x20;
 	*(U8 *)1 = 0xFE;
 

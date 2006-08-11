@@ -179,6 +179,8 @@ static leffnum_t leff_get_highest_priority (void)
  */
 void leff_create_handler (const leff_t *leff)
 {
+	task_t *tp;
+
 	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != L_NOLAMPS)
 	{
@@ -189,19 +191,25 @@ void leff_create_handler (const leff_t *leff)
 		 * allocate a subset of the lamps */
 		if (leff->lampset == L_ALL_LAMPS)
 		{
-			lamp_leff1_allocate_all ();
+			if (leff->flags & L_SHARED)
+				fatal (ERR_INVALID_LEFF_CONFIG);	
+			else
+				lamp_leff1_allocate_all ();
 		}
 		else
 		{
-			/* Allocate specific lamps.
-			 * Start by freeing up any allocations that are lingering. */
-			/* TODO : this won't work with multiple concurrent leffs */
-			lamp_leff1_free_all ();
-
+			/* Allocate specific lamps. */
 			/* Apply the allocation function to each element of the lampset.
 			 * Ensure the apply delay is zero first. */
 			lampset_set_apply_delay (0);
-			lampset_apply (leff->lampset, lamp_leff_allocate);
+			if (leff->flags & L_SHARED)
+				lampset_apply (leff->lampset, lamp_leff2_allocate);
+			else
+			{
+				/* Start by freeing up any allocations that are lingering. */
+				lamp_leff1_free_all ();
+				lampset_apply (leff->lampset, lamp_leff_allocate);
+			}
 		}
 	}
 
@@ -210,34 +218,18 @@ void leff_create_handler (const leff_t *leff)
 		triac_leff_allocate (leff->gi);
 
 	/* Now all allocations are in place, start the lamp effect task.
-	 * This implicitly stops whatever leff was previously running. */
-	task_recreate_gid (GID_LEFF, leff->fn);
-}
+	 * This implicitly stops whatever leff was previously running
+	 * for a running task. */
+	if (leff->flags & L_SHARED)
+		tp = task_create_gid (GID_SHARED_LEFF, leff->fn);
+	else
+		tp = task_recreate_gid (GID_LEFF, leff->fn);
 
-
-void leff_create_shared_handler (leffnum_t dn)
-{
-	const leff_t *leff = &leff_table[dn];
-	task_t *tp;
-
-#if 0
-	lampset_set_apply_delay (0);
-	lampset_apply (leff->lampset, lamp_leff2_allocate);
-
-	/* Create the lamp effect function */
-	tp = task_create_gid (GID_SHARED_LEFF1, leff->fn);
-
-	/* Tell the lamp effect function which leff # it is
-	 * running, using thread private data.  There may be
-	 * multiple of these active, so we can't use a global
-	 * here. */
-	tp->thread_data[3] = dn;
-#endif
-}
-
-
-void leff_stop_shared_handler (const leff_t *leff)
-{
+	/* Initialize the new leff's private data before it runs */
+	tp->thread_data[L_PRIV_APPLY_COUNT] = 0;
+	tp->thread_data[L_PRIV_DATA] = 0;
+	tp->thread_data[L_PRIV_FLAGS] = leff->flags;
+	tp->thread_data[L_PRIV_ID] = leff - leff_table;
 }
 
 
@@ -250,7 +242,7 @@ void leff_start (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
-		leff_create_shared_handler (leff);
+		leff_create_handler (leff);
 	}
 	else if (leff->flags & L_RUNNING)
 	{
@@ -276,6 +268,7 @@ void leff_start (leffnum_t dn)
 		{
 			db_puts ("Restarting quick leff with high pri\n");
 			leff_active = dn;
+			leff_prio = leff->prio;
 			leff_create_handler (leff);
 		}
 		else
@@ -293,7 +286,10 @@ void leff_stop (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
-		leff_stop_shared_handler (leff);
+		/* TODO - search through all shared leffs that are
+		running for the one we want to stop.  No need to
+		dequeue it, but its allocations must be freed and
+		the task stopped. */
 	}
 	else if (leff->flags & L_RUNNING)
 	{

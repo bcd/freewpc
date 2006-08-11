@@ -116,6 +116,9 @@ void credits_deff (void)
 }
 
 
+/** Update the start button lamp.  It will flash when a new game
+ * can be started, or be solid on during a game.   It will be
+ * off only when there are no credits. */
 void lamp_start_update (void)
 {
 	/* TODO : start button is flashing very early after reset, before
@@ -123,18 +126,12 @@ void lamp_start_update (void)
 	if (has_credits_p ())
 	{
 		if (!in_game)
-			lamp_flash_on (MACHINE_START_LAMP);
+			lamp_tristate_flash (MACHINE_START_LAMP);
 		else
-		{
-			lamp_flash_off (MACHINE_START_LAMP);
-			lamp_on (MACHINE_START_LAMP);
-		}
+			lamp_tristate_on (MACHINE_START_LAMP);
 	}
 	else
-	{
-		lamp_off (MACHINE_START_LAMP);
-		lamp_flash_off (MACHINE_START_LAMP);
-	}
+		lamp_tristate_off (MACHINE_START_LAMP);
 }
 
 

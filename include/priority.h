@@ -35,6 +35,7 @@ typedef enum _priority {
 	PRI_EGG4=PRI_EGG1+3,
 
 	PRI_SCORES,
+	PRI_STATUS,
 
 	PRI_GAME_LOW1,
 	PRI_GAME_LOW16=PRI_GAME_LOW1+15,
@@ -55,7 +56,6 @@ typedef enum _priority {
 	PRI_LEFF4,
 	PRI_LEFF5,
 
-	PRI_STATUS,
 	PRI_REPLAY,
 	PRI_SPECIAL,
 	PRI_VOLUME_CHANGE,

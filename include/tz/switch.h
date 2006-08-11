@@ -129,9 +129,9 @@
 #define MACHINE_SW41				sw_deadend
 #define MACHINE_SW42				sw_camera
 #define MACHINE_SW43				sw_piano
-// #define MACHINE_SW44			sw_mpf_enter
-// #define MACHINE_SW45			sw_mpf_left
-// #define MACHINE_SW46			sw_mpf_right
+#define MACHINE_SW44				sw_mpf_enter
+#define MACHINE_SW45				sw_mpf_left
+#define MACHINE_SW46				sw_mpf_right
 #define MACHINE_SW47          sw_clock_target
 #define MACHINE_SW48				sw_greed1
 
@@ -157,8 +157,8 @@
 #define MACHINE_SW72				sw_autofire2
 #define MACHINE_SW73				sw_right_ramp
 #define MACHINE_SW74				sw_gumball_popper
-//#define MACHINE_SW75			sw_mpf_top
-//#define MACHINE_SW76			sw_mpf_exit
+#define MACHINE_SW75				sw_mpf_top
+#define MACHINE_SW76				sw_mpf_exit
 #define MACHINE_SW77				sw_greed2
 #define MACHINE_SW78				sw_greed3
 

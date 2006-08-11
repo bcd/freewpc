@@ -63,10 +63,15 @@ typedef struct
 #define MAX_QUEUED_LEFFS 8
 
 /** Per-leff state variables, stored in the task thread data area */
-#define lampset_apply_count	(*(task_get_thread_data_ptr (0)))
-#define lampset_private_data	(*(task_get_thread_data_ptr (1)))
-#define leff_running_flags		(*(task_get_thread_data_ptr (2)))
-#define leff_self_id				(*(task_get_thread_data_ptr (3)))
+#define L_PRIV_APPLY_COUNT 0
+#define L_PRIV_DATA 1
+#define L_PRIV_FLAGS 2
+#define L_PRIV_ID 3
+
+#define lampset_apply_count	(*(task_get_thread_data_ptr (L_PRIV_APPLY_COUNT)))
+#define lampset_private_data	(*(task_get_thread_data_ptr (L_PRIV_DATA)))
+#define leff_running_flags		(*(task_get_thread_data_ptr (L_PRIV_FLAGS)))
+#define leff_self_id				(*(task_get_thread_data_ptr (L_PRIV_ID)))
 
 uint8_t leff_get_active (void);
 void leff_start (leffnum_t dn);

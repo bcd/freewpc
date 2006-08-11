@@ -34,8 +34,22 @@
 
 
 /** Values for the 'flags' field */
+
+/* TASK_PROTECTED means that a task is immune to task_kill_gid.
+ * It can only exit by means of dying, i.e. task_exit.
+ * A task should set this upon entry before it begins anything
+ * urgent. */
 #define TASK_PROTECTED   0x01
 
+/* The TASK_HEAP_SIZE field is not currently used.  It is
+ * intended to represent how much memory, in bytes, has been
+ * stolen from the stack for task-local variables.  Bytes are
+ * always allocated in pairs, so the heap size may be 0, 2,
+ * 4, or 6 at most.  The heap area cuts into the stack size
+ * as set below in TASK_STACK_SIZE, so it should be used
+ * cautiously.  Most tasks will not need any heap storage.
+ */
+#define TASK_HEAP_SIZE   (0x02 + 0x04)
 
 /** The maximum number of tasks that can be running at once.
  * Space for this many task structures is statically allocated.
@@ -69,7 +83,7 @@ typedef void (*task_function_t) (void);
  * TASK_STACK_SIZE above accordingly so that the total size is
  * a power of 2.
  */
-typedef struct
+typedef struct task_struct
 {
 	/** The task group ID.  This is a compile-time assigned value
 	 * used to identify the task.   Multiple running tasks can also
@@ -80,7 +94,7 @@ typedef struct
 	/** Intended to be used internally as a chain pointer to the next task.
 	 * Not currently used, though, since the task table is just an array
 	 * and we step through it sequentially now */
-	U16			next;
+	struct task_struct *next;
 
 	/** The saved PC for the task, while it is asleep */
 	U16			pc;
@@ -94,8 +108,13 @@ typedef struct
 	/** The saved ROM page register for the task, while it is asleep */
 	U8				rom_page;
 
+	/** The amount of stack space, in words, that has been saved into
+	 * the task's stack area */
 	U8				stack_word_count;
+
+	/** Miscellaneous control flags */
 	U8				flags;
+
 	U8				delay;
 	U8				asleep;
 

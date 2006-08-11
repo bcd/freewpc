@@ -83,9 +83,11 @@ void sw_left_loop_handler (void)
 }
 
 
+#ifdef CONFIG_SUPPORT_THIRD_MAGNET
 void sw_right_loop_top_handler (void)
 {
 }
+#endif
 
 
 void sw_right_loop_handler (void)
@@ -93,38 +95,38 @@ void sw_right_loop_handler (void)
 	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
 
-	if (in_live_game)
+	if (event_did_follow (lock_exit, right_loop))
 	{
-		if (event_did_follow (lock_exit, right_loop))
-		{
-			/* Ignore right loop switch after lock kickout */
-			enter_loop ();
-			return;
-		}
-		else if (event_did_follow (autolaunch, right_loop))
-		{
-			/* Ignore right loop switch after an autolaunch */
-			enter_loop ();
-			return;
-		}
-		else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
-		{
-			/* Left loop completed */
-			award_left_loop ();
-		}
-		else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
-		{
-			/* Right loop aborted */
-			abort_loop ();
-		}
-		else
-		{
-			/* Right loop started */
-			timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
-			enter_loop ();
-			sw_gumball_right_loop_entered ();
-		}
+		/* Ignore right loop switch after lock kickout */
+		enter_loop ();
 	}
+	else if (event_did_follow (autolaunch, right_loop))
+	{
+		/* Ignore right loop switch after an autolaunch */
+		enter_loop ();
+	}
+	else if (!in_live_game)
+	{
+	}
+	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
+	{
+		/* Left loop completed */
+		award_left_loop ();
+	}
+	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
+	{
+		/* Right loop aborted */
+		abort_loop ();
+	}
+	else
+	{
+		/* Right loop started */
+		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
+		enter_loop ();
+	}
+
+	/* Inform gumball module that a ball may be approaching */
+	sw_gumball_right_loop_entered ();
 }
 
 
@@ -134,17 +136,23 @@ DECLARE_SWITCH_DRIVER (sw_left_loop)
 	.fn = sw_left_loop_handler,
 };
 
+/* The right loop switches are needed outside of game mode in order
+ * to load the gumball machine, so don't use SW_IN_GAME here. */
 
 DECLARE_SWITCH_DRIVER (sw_right_loop_top)
 {
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_TEST,
+#ifdef CONFIG_SUPPORT_THIRD_MAGNET
 	.fn = sw_right_loop_top_handler,
+#else
+	.fn = null_function,
+#endif
 };
 
 
 DECLARE_SWITCH_DRIVER (sw_right_loop)
 {
-	.flags = SW_PLAYFIELD,
+	.flags = SW_PLAYFIELD | SW_IN_TEST,
 	.fn = sw_right_loop_handler,
 };
 

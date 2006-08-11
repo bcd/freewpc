@@ -55,7 +55,8 @@
 	DECL_DEFF (DEFF_GAME_OVER, D_RUNNING, PRI_GAME_OVER, game_over_deff) \
 	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, PRI_VOLUME_CHANGE, volume_deff) \
 	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff) \
-	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff)
+	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff) \
+	DECL_DEFF (DEFF_NONFATAL_ERROR, D_NORMAL, PRI_DEBUGGER, nonfatal_error_deff)
 
 
 /** Declare externs for all of the deff functions */
@@ -108,13 +109,24 @@ uint8_t deff_get_active (void)
 	return deff_active;
 }
 
+
+bool deff_is_running (deffnum_t dn)
+{
+	U8 i;
+
+	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+		if (deff_queue[i] == dn)
+			return TRUE;
+	return FALSE;
+}
+
+
 static void deff_add_queue (deffnum_t dn)
 {
 	uint8_t i;
 
-	for (i=0; i < MAX_QUEUED_DEFFS; i++)
-		if (deff_queue[i] == dn)
-			return;
+	if (deff_is_running (dn))
+		return;
 
 	for (i=0; i < MAX_QUEUED_DEFFS; i++)
 		if (deff_queue[i] == 0)
@@ -205,6 +217,7 @@ void deff_start (deffnum_t dn)
 		{
 			db_puts ("Restarting quick deff with high pri\n");
 			deff_active = dn;
+			deff_prio = deff->prio;
 			deff_start_task (deff);
 		}
 		else

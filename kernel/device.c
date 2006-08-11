@@ -181,6 +181,7 @@ wait_and_recount:
 			 * the device without explicitly kicking it.
 			 */
 			db_puts ("Idle but ball lost\n");
+			nonfatal (ERR_IDLE_BALL_LOST);
 		}
 		else if (dev->actual_count > dev->previous_count)
 		{
@@ -201,11 +202,13 @@ wait_and_recount:
 			/* TODO : infinite retries are being done now.
 			 * At some point, we must give up... */
 			db_puts ("Kick did not change anything\n");
+			nonfatal (ERR_FAILED_KICK);
 			device_call_op (dev, kick_failure);
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
-			/* The count decreased as expected.  Hopefully by 1... */
+			/* The count decreased as expected.  Hopefully by the
+			 * same number as the number of kicks requested. */
 			if (dev->actual_count == dev->previous_count - 1)
 			{
 				/* Well done */
@@ -222,6 +225,7 @@ wait_and_recount:
 			{
 				/* More than one ball was released */
 				db_puts ("Kick succeeded, but an extra ball came out\n");
+				nonfatal (ERR_KICK_TOO_MANY);
 			}
 		}
 		else if (dev->actual_count > dev->previous_count)
@@ -230,6 +234,7 @@ wait_and_recount:
 			 * kicks_needed is presumably still nonzero, so
 			 * the code below should attempt the kick again. */
 			db_puts ("After kick, count increased\n");
+			nonfatal (ERR_KICK_CAUSED_INCREASE);
 		}
 	}
 
@@ -294,39 +299,47 @@ wait_and_recount:
 }
 
 
+/** Returns the number of balls that can be kicked out of
+ * a device.  This is the number of balls in the device,
+ * minus any pending kicks. */
+static inline U8 device_kickable_count (device_t *dev)
+{
+	return (dev->actual_count - dev->kicks_needed);
+}
+
+
 /** Request that a device eject 1 ball */
 void device_request_kick (device_t *dev)
 {
-	dbprintf ("Request to kick from %s\n", dev->props->name);
-	
-	if ((dev->actual_count - dev->kicks_needed) > 0)
+	task_gid_t gid = DEVICE_GID (device_devno (dev));
+	task_kill_gid (gid);
+	if (device_kickable_count (dev) > 0)
 	{
-		task_gid_t gid = DEVICE_GID (device_devno (dev));
-		
 		dev->kicks_needed++;
-		dbprintf ("Creating task with gid=%02x\n", gid);
-		task_create_gid1 (gid, device_update);
+		/* TODO - this logic probably belongs somewhere else */
+		if (device_devno (dev) != DEVNO_TROUGH)
+			live_balls++;
 	}
-	else
-	{
-		dbprintf ("No balls to kick!\n");
-	}
+	task_create_gid1 (gid, device_update);
 }
 
 
 /** Request that a device ejects all balls */
 void device_request_empty (device_t *dev)
 {
-	if ((dev->actual_count - dev->kicks_needed) > 0)
-	{
-		task_gid_t gid = DEVICE_GID (device_devno (dev));
+	U8 can_kick;
 
-		dev->kicks_needed += dev->actual_count;
-		dev->max_count -= dev->actual_count;
+	task_gid_t gid = DEVICE_GID (device_devno (dev));
+	task_kill_gid (gid);
+	if ((can_kick = device_kickable_count (dev)) > 0)
+	{
+		dev->kicks_needed += can_kick;
+		dev->max_count -= can_kick;
+		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
-			live_balls++;
-		task_create_gid1 (gid, device_update);
+			live_balls += can_kick;
 	}
+	task_create_gid1 (gid, device_update);
 }
 
 
@@ -381,6 +394,12 @@ void device_update_globals (void)
 }
 
 
+/** Probes all devices to see if any balls are present that
+ * shouldn't be.  Balls are kicked as necessary.
+ *
+ * For example, this clears out the balls of a lockup device
+ * at the end of a game.
+ */
 void device_probe (void)
 {
 	devicenum_t devno;

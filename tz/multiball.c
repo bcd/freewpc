@@ -37,8 +37,10 @@ void lock_is_lit_deff (void)
 void multiball_is_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 8, "MULTIBALL IS LIT");
-	font_render_string_center (&font_fixed6, 64, 24, "SHOOT PIANO");
+	sprintf ("BALL %d LOCKED", mball_locks_made);
+	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 18, "SHOOT PIANO TO");
+	font_render_string_center (&font_mono5, 64, 27, "START MULTIBALL");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

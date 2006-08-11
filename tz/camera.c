@@ -62,7 +62,6 @@ void camera_award_deff (void)
 
 void do_camera_award (void)
 {
-	deff_start (DEFF_CAMERA_AWARD);
 	task_sleep (TIME_100MS);
 	switch (camera_award_count)
 	{
@@ -72,7 +71,7 @@ void do_camera_award (void)
 			break;
 		case 1:
 			/* Spot Door Panel */
-			door_award_flashing ();
+			door_award_if_possible ();
 			break;
 		case 2:
 			/* Extra Time: 20 seconds */
@@ -86,6 +85,7 @@ void do_camera_award (void)
 			break;
 	}
 	camera_award_count++;
+	deff_start (DEFF_CAMERA_AWARD);
 	if (camera_award_count > 4)
 		camera_award_count = 0;
 }
@@ -93,7 +93,11 @@ void do_camera_award (void)
 
 void sw_camera_handler (void)
 {
-	if (event_did_follow (gumball_exit, camera))
+	if (event_did_follow (mpf_top, camera))
+	{
+		callset_invoke (mpf_top_exit);
+	}
+	else if (event_did_follow (gumball_exit, camera))
 	{
 	}
 	else if (event_did_follow (dead_end, camera))
@@ -101,7 +105,7 @@ void sw_camera_handler (void)
 	}
 	else
 	{
-		if (lamp_flash_test (LM_PANEL_CAMERA))
+		if (lamp_test (LM_PANEL_CAMERA))
 		{
 			do_camera_award ();
 			score (SC_100K);

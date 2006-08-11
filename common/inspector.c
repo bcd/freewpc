@@ -48,6 +48,7 @@ void inspector_deff (void)
 {
 	U8 *addr, *p;
 	U8 y;
+	U8 timeout = TIME_500MS / TIME_100MS;
 
 	for (;;)
 	{
@@ -61,9 +62,7 @@ void inspector_deff (void)
 			font_render_string_left (&font_mono5, 2, y, sprintf_buffer);
 		}
 		dmd_show_low ();
-
-		while (addr == inspector_addr)
-			task_sleep (TIME_66MS);
+		task_sleep (TIME_200MS);
 	}
 	deff_exit ();
 }

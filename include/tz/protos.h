@@ -70,7 +70,7 @@ void door_set_flashing(U8 id);
 void door_advance_flashing(void);
 void door_award_rotate(void);
 void door_award_deff(void);
-void door_award_flashing(void);
+void door_award_if_possible(void);
 void door_award_enable(void);
 void door_start_player(void);
 void door_start_ball(void);

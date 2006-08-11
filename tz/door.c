@@ -130,9 +130,23 @@ void door_award_rotate (void) __taskentry__
 	task_exit ();
 }
 
+/* TODO - move to common include */
+inline void deff_wait_for_other (deffnum_t dn)
+{
+	if (deff_is_running (dn))
+	{
+		U8 timeout = TIME_3S / TIME_100MS;
+		while (deff_is_running (dn))
+		{
+			timeout--;
+			task_sleep (TIME_100MS);
+		}
+	}
+}
 
 void door_award_deff (void)
 {
+	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 	printf ("%s", door_panel_names[door_index]);
@@ -155,7 +169,7 @@ void door_award_enable (void)
 }
 
 
-void door_award_flashing (void)
+static void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
@@ -171,7 +185,7 @@ void door_award_flashing (void)
 }
 
 
-static void door_check_piano_or_slot (void)
+void door_award_if_possible (void)
 {
 	if (live_balls > 1)
 	{
@@ -195,13 +209,13 @@ static void door_check_piano_or_slot (void)
 
 CALLSET_ENTRY(door, piano)
 {
-	door_check_piano_or_slot ();
+	door_award_if_possible ();
 }
 
 
 CALLSET_ENTRY(door, slot_machine)
 {
-	door_check_piano_or_slot ();
+	door_award_if_possible ();
 }
 
 

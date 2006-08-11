@@ -46,7 +46,12 @@
 #define ERR_NVRAM                22
 #define ERR_UNLOCK_EMPTY_DEVICE  23
 #define ERR_LOCK_FULL_DEVICE     24
-
+#define ERR_INVALID_LEFF_CONFIG  25
+#define ERR_FAILED_KICK				26
+#define ERR_KICK_TOO_MANY        27
+#define ERR_KICK_CAUSED_INCREASE 28
+#define ERR_IDLE_BALL_LOST       29
+#define ERR_DEVICE_NO_CHANGE     30
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);
