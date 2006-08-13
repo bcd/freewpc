@@ -42,7 +42,7 @@ void multiball_is_lit_deff (void)
 	font_render_string_center (&font_mono5, 64, 18, "SHOOT PIANO TO");
 	font_render_string_center (&font_mono5, 64, 27, "START MULTIBALL");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 

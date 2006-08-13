@@ -1072,36 +1072,48 @@ struct menu dev_font_test_item = {
 struct deff_leff_ops {
 	void (*start) (U8 id);
 	void (*stop) (U8 id);
-	U8 (*get_active) (void);
+	bool (*is_running) (U8);
 };
 
 struct deff_leff_ops *deff_leff_test_ops;
-U8 deff_leff_last_active;
+bool deff_leff_last_active;
 
+static bool deff_test_running (U8 id)
+{
+	return (deff_get_active () == id);
+}
+
+static bool leff_test_running (U8 id)
+{
+	return (leff_get_active () == id);
+	// return task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, id);
+}
 
 struct deff_leff_ops dev_deff_ops = {
 	.start = deff_start,
 	.stop = deff_stop,
-	.get_active = deff_get_active,
+	.is_running = deff_test_running,
 };
 
 struct deff_leff_ops dev_leff_ops = {
 	.start = leff_start,
 	.stop = leff_stop,
-	.get_active = leff_get_active,
+	.is_running = leff_test_running,
 };
 
 void deff_leff_thread (void)
 {
+	bool is_active = deff_leff_test_ops->is_running (menu_selection);
+	deff_leff_last_active = !is_active;
 	browser_draw ();
+
 	for (;;)
 	{
-		U8 is_active = deff_leff_test_ops->get_active ();
 		if (is_active != deff_leff_last_active)
 		{
 			if (deff_leff_test_ops == &dev_deff_ops) 
 			{
-				if (is_active != menu_selection)
+				if (is_active == FALSE)
 				{
 					browser_draw ();
 					browser_print_operation ("STOPPED");
@@ -1111,7 +1123,7 @@ void deff_leff_thread (void)
 			else
 			{
 				browser_draw ();
-				if (is_active == menu_selection)
+				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
 					browser_print_operation ("STOPPED");
@@ -1119,6 +1131,7 @@ void deff_leff_thread (void)
 		}
 		deff_leff_last_active = is_active;
 		task_sleep (TIME_100MS * 4);
+		is_active = deff_leff_test_ops->is_running (menu_selection);
 	}
 }
 
@@ -1142,7 +1155,7 @@ void deff_leff_init (void)
 		deff_leff_test_ops = &dev_leff_ops;
 		browser_max = MAX_LEFFS;
 	}
-	deff_leff_last_active = 0xEE;
+	deff_leff_last_active = FALSE;
 }
 
 void deff_leff_up (void) { browser_up (); deff_leff_last_active++; }
@@ -1150,17 +1163,18 @@ void deff_leff_down (void) { browser_down (); deff_leff_last_active++; }
 
 void deff_leff_enter (void)
 {
-	if (deff_leff_test_ops->get_active () == menu_selection)
+	if (deff_leff_test_ops->is_running (menu_selection))
 	{
 		/* deff/leff already running, so stop it */
 		deff_leff_test_ops->stop (menu_selection);
+		sound_send (SND_TEST_ESCAPE);
 	}
 	else
 	{
 		/* deff/leff not running, so start it */
 		deff_leff_test_ops->start (menu_selection);
+		sound_send (SND_TEST_ENTER);
 	}
-	sound_send (SND_TEST_ENTER);
 	deff_leff_last_active++;
 }
 
@@ -1187,28 +1201,43 @@ struct menu dev_leff_test_item = {
 
 /*********** Lampsets **********************/
 
+U8 lampset_update_mode;
+
 void lampset_init (void)
 {
 	browser_init ();
 	browser_min = 1;
 	browser_max = MAX_LAMPSET;
 	browser_item_number = browser_decimal_item_number;
+	lampset_update_mode = 0;
 }
 
-void lampset_draw (void)
+
+void lampset_update (void)
 {
-	browser_draw ();
-	lamp_all_off ();
-	lampset_set_apply_delay (0);
-	lampset_apply_on (menu_selection);
-
+	for (;;)
+	{
+		lampset_set_apply_delay (TIME_33MS);
+		lamp_all_off ();
+		switch (lampset_update_mode)
+		{
+			case 0: lampset_apply_on (menu_selection); break;
+			case 1: lampset_apply_toggle (menu_selection); break;
+			case 2: lampset_step_increment (menu_selection); break;
+			case 3: lampset_step_decrement (menu_selection); break;
+			case 4: lampset_build_increment (menu_selection); break;
+			case 5: lampset_build_decrement (menu_selection); break;
+		}
+		task_sleep_sec (1);
+	}
 }
+
 
 struct window_ops dev_lampset_window = {
 	INHERIT_FROM_BROWSER,
 	.init = lampset_init,
-	.draw = lampset_draw,
 	.exit = lamp_all_off,
+	.thread = lampset_update,
 };
 
 struct menu dev_lampset_test_item = {
@@ -1361,6 +1390,58 @@ struct menu dev_balldev_test_item = {
 	.var = { .subwindow = { &dev_balldev_test_window, NULL } },
 };
 
+/************* Transition Test ******************/
+
+
+const dmd_transition_t *transition_table[] = {
+	&trans_scroll_up,
+	&trans_scroll_up_avg,
+	&trans_scroll_up_slow,
+	&trans_scroll_down,
+	&trans_scroll_left,
+	&trans_scroll_right,
+	&trans_sequential_boxfade,
+	&trans_random_boxfade,
+	&trans_vstripe_left2right,
+	&trans_vstripe_right2left
+};
+
+#define NUM_TRANSITIONS \
+	(sizeof (transition_table) / sizeof (dmd_transition_t *))
+
+void dev_trans_test_init (void)
+{
+	browser_init ();
+	browser_max = NUM_TRANSITIONS-1;
+}
+
+void dev_trans_test_draw (void)
+{
+	browser_draw ();
+	rtc_render_date ();
+	font_render_string_center (&font_mono5, 80, 15, sprintf_buffer);
+	rtc_render_time ();
+	font_render_string_center (&font_mono5, 80, 23, sprintf_buffer);
+}
+
+void dev_trans_test_enter (void)
+{
+	dmd_sched_transition (transition_table[menu_selection]);
+	dev_trans_test_draw ();
+}
+
+struct window_ops dev_trans_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = dev_trans_test_init,
+	.enter = dev_trans_test_enter,
+};
+
+struct menu dev_trans_test_item = {
+	.name = "DMD TRANSITIONS",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &dev_trans_test_window, NULL } },
+};
+
 /*************** Sound Editor *************************/
 
 #define SOUNDEDIT_NOP		0xFFFF
@@ -1495,6 +1576,7 @@ struct menu *dev_menu_items[] = {
 	&dev_balldev_test_item,
 	&dev_soundedit_item,
 	&dev_random_test_item,
+	&dev_trans_test_item,
 	NULL,
 };
 
@@ -1916,6 +1998,10 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
+void switch_test_add_queue (U8 sw)
+{
+}
+
 void switch_matrix_draw (void)
 {
 	U8 row, col;
@@ -2031,7 +2117,7 @@ void single_switch_draw (void)
 
 	dmd_alloc_low_clean ();
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SINGLE SW.");
+	font_render_string_center (&font_mono5, 80, 4, "SINGLE SWITCH");
 
 	(*browser_item_number) (menu_selection);
 	font_render_string (&font_mono5, 64, 12, sprintf_buffer);

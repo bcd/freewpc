@@ -55,6 +55,10 @@ __fastram__ U8 triac_leff_bits;
 
 U8 gi_brightness;
 
+/** For each GI triac, a dimming factor that controls the brightness of
+ * that particular string.  The factor determines the amount of time
+ * in which the triac is kept off.  A value of 0 means full brightness,
+ * on all the time in which software has enabled it. */
 U8 triac_dim_level[NUM_GI_TRIACS];
 
 

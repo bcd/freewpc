@@ -286,10 +286,15 @@ void leff_stop (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
-		/* TODO - search through all shared leffs that are
+		/* Search through all shared leffs that are
 		running for the one we want to stop.  No need to
 		dequeue it, but its allocations must be freed and
 		the task stopped. */
+		task_t *tp = task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, dn);
+		if (tp)
+		{
+			task_kill_pid (tp);
+		}
 	}
 	else if (leff->flags & L_RUNNING)
 	{

@@ -369,7 +369,6 @@ void leff_toggle (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;
-	// register bitset p = lamp_leff1_matrix;
 	register U8 v = lamp;
 	__togglebit(p, v);
 }

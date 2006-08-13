@@ -565,6 +565,13 @@ void switch_sched (void)
 	dbprintf ("Handling switch %p\n", swinfo);
 #endif
 
+#if 0 /* not working */
+	/* In test mode, always queue switch closures into the
+	 * special switch test queue. */
+	if (in_test)
+		switch_test_add_queue (sw);
+#endif
+
 	/* Don't service switches marked SW_IN_GAME at all, if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)

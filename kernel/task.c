@@ -451,6 +451,20 @@ task_t *task_find_gid (task_gid_t gid)
 }
 
 
+task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val)
+{
+	register short t;
+	register task_t *tp;
+
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if ((tp->state != TASK_FREE) 
+			&& (tp->gid == gid) 
+			&& (tp->thread_data[off] == val))
+			return (tp);
+	return (NULL);
+}
+
+
 /**
  * Kills the given task.
  */

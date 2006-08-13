@@ -123,14 +123,12 @@ struct audit
 	audit_t *nvram;
 };
 
-
 void menu_init (void);
 void menu_draw (void);
 void menu_enter (void);
 void menu_up (void);
 void menu_down (void);
 void menu_start (void);
-
 
 void test_init (void);
 void test_up_button (void);
@@ -140,5 +138,7 @@ void test_right_flipper_button (void);
 void test_enter_button (void);
 void test_escape_button (void);
 void test_start_button (void);
+
+__test__ void switch_test_add_queue (void);
 
 #endif /* _TEST_H */

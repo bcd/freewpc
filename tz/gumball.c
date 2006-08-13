@@ -172,26 +172,31 @@ void sw_far_left_trough_handler (void)
 
 DECLARE_SWITCH_DRIVER (sw_gumball_exit)
 {
+	.flags = SW_IN_TEST,
 	.fn = sw_gumball_exit_handler,
 };
 
 DECLARE_SWITCH_DRIVER (sw_gumball_geneva)
 {
+	.flags = SW_IN_TEST,
 	.fn = sw_gumball_geneva_handler,
 };
 
 DECLARE_SWITCH_DRIVER (sw_gumball_enter)
 {
+	.flags = SW_IN_TEST,
 	.fn = sw_gumball_enter_handler,
 };
 
 DECLARE_SWITCH_DRIVER (sw_gumball_popper)
 {
+	.flags = SW_IN_TEST,
 	.fn = sw_gumball_popper_handler,
 };
 
 DECLARE_SWITCH_DRIVER (sw_gumball_lane)
 {
+	.flags = SW_IN_TEST,
 	.fn = sw_gumball_lane_handler,
 };
 
