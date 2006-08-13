@@ -10,7 +10,7 @@ for <b>MACHINE</b>, which determines the target machine.  The value of
 MACHINE is cached by creating symbolic links into the target source/include
 directories, so this only really needs to be specified when changing targets.
 MACHINE can be specified on the command-line; another way is to assign in
-a file called <b>user.mak</b> in the current directory/your home directory.
+a file called <b>user.make</b> in the current directory/your home directory.
 <li>Autogenerate defines.  Certain #defines are automatically set for you
 by scanning the source code to find all uses.
 <li>Compile the source code.
@@ -23,7 +23,7 @@ blanks (0xFF).
 
 <h2>Other Configuration Options</h2>
 
-<p>Like MACHINE, these are most easily set by using a user.mak file.  <b>TBD</b></p>
+<p>Like MACHINE, these are most easily set by using a <b>user.make</b> file.  <b>TBD</b></p>
 
 <h2>System Requirements</h2>
 
@@ -38,7 +38,7 @@ if using Cygwin, you may not get them all by default.  You should have:</p>
 <li>The bc program, for doing math to determine proper ROM section sizes</li>
 <li>zip and unzip, in order to manipulate xpinmame ROM bundles</li>
 <li>The bash shell</li>
-<li>Perl</li>, for some helper scripts
+<li>Perl, for some helper scripts
 <li>doxygen, if you want to be able to autogenerate documentation files
 (optional)</li>
 <li>Other basic UNIX utilities, like cat, rm, mv, mkdir, etc. which are almost
