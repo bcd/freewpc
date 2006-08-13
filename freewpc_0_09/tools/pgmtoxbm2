@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# pgmtoxbm2 - converts a PGM grayscale image into 2 XBM images
+# suitable for loading into FreeWPC
+#
+# A PGM file is a graymap, where each pixel may have 255 different
+# shades of gray.  FreeWPC only supports displaying images with
+# 4 colors (pixel off, pixel 33% on, 66% on, and pixel 100% on).
+# This script generates two bitmaps in XBM formats that are the
+# best approximation of the original data.  Gray shades are
+# rounded to the nearest of the 4 allowed values, and the
+# 2-bit image is then split into two separate bitmaps that can
+# quickly page flipped to simulate the original image.
+
+# TODO : pgmtopbm is an obsolete program.  Use pamditherbw instead.
+
+../tools/n2.pl p1 < $1.pgm | pgmtopbm | pbmtoxbm | sed -e "s/noname/$1/g" > $1_1.xbm
+../tools/n2.pl p2 < $1.pgm | pgmtopbm | pbmtoxbm | sed -e "s/noname/$1_2/g" > $1_2.xbm
