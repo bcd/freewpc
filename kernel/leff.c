@@ -229,7 +229,11 @@ void leff_create_handler (const leff_t *leff)
 	tp->thread_data[L_PRIV_APPLY_COUNT] = 0;
 	tp->thread_data[L_PRIV_DATA] = 0;
 	tp->thread_data[L_PRIV_FLAGS] = leff->flags;
+#if 0
 	tp->thread_data[L_PRIV_ID] = leff - leff_table;
+#else
+	tp->thread_data[L_PRIV_ID] = 0;
+#endif
 }
 
 
