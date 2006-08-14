@@ -229,7 +229,7 @@ TEST_OBJS = test/window.o
 
 TRANS_OBJS = kernel/dmdtrans.o
 
-FONT_OBJS = fonts/mono5.o fonts/mono9.o
+FONT_OBJS = fonts/mono5.o fonts/mono9.o fonts/var5.o
 
 FON_OBJS = \
 	fonts/fixed10.o \
@@ -243,8 +243,6 @@ FON_OBJS = \
 	fonts/utopia.o \
 	fonts/schu.o \
 	fonts/miscfixed.o \
-
-# FON_OBJS += fonts/test.o
 
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o

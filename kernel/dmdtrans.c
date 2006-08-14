@@ -190,7 +190,7 @@ dmd_transition_t trans_scroll_left = {
 
 void trans_scroll_right_old (void)
 {
-	__blockcopy16 (dmd_high_buffer+1, dmd_low_buffer, DMD_PAGE_SIZE-1);
+	__blockcopy16 (dmd_high_buffer+1, dmd_low_buffer, DMD_PAGE_SIZE);
 }
 
 void trans_scroll_right_new (void)

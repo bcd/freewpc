@@ -57,8 +57,7 @@ extern const font_t font_schu;
 extern const font_t font_misctype;
 extern const font_t font_utopia;
 extern const font_t font_test;
-extern const font_t font_legacy5x5;
-extern const font_t font_legacy9x6;
+extern const font_t font_var5;
 
 
 /**
