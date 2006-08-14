@@ -15,7 +15,7 @@ struct font_char
 {
 	int width;
 	int height;
-	unsigned long rows[32]; /* 32=max height */
+	unsigned long rows[64]; /* 64=max height */
 } fchar[256];
 
 
@@ -258,13 +258,13 @@ font_scale_height (int factor)
 	font_max_height *= factor;
 	for (i=0; i < 256; i++)
 	{
-		if (!fchar[i].width || !fchar[i].height)
+		if (!fchar[i].width && !fchar[i].height)
 			continue;
 
-		fchar[i].height *= factor;
 		for (j = fchar[i].height-1; j >= 0; --j)
 			for (k=0; k < factor; k++)
 				fchar[i].rows[j*factor+k] = fchar[i].rows[j];
+		fchar[i].height *= factor;
 	}
 }
 
