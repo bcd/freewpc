@@ -37,30 +37,30 @@ void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 
 void printf_millions (U8 n)
 {
-	printf ("%d,000,000", n);
+	sprintf ("%d,000,000", n);
 }
 
 void printf_thousands (U8 n)
 {
-	printf ("%d,000", n);
+	sprintf ("%d,000", n);
 }
 
 void replay_deff (void)
 {
-	printf ("REPLAY");
+	sprintf ("REPLAY");
 	knocker_fire ();
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
 void extra_ball_deff (void)
 {
-	printf ("EXTRA BALL");
+	sprintf ("EXTRA BALL");
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
 void special_deff (void)
 {
-	printf ("SPECIAL");
+	sprintf ("SPECIAL");
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
@@ -119,7 +119,7 @@ void ballsave_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
-	printf ("PLAYER %d", player_up);
+	sprintf ("PLAYER %d", player_up);
 	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
 	dmd_copy_low_to_high ();
 	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
