@@ -127,12 +127,20 @@ TMPFILES += $(BLD)/*
 #######################################################################
 
 # Path to the compiler and linker
+ifeq ($(PLATFORM),wpc)
 GCC_ROOT = /usr/local/m6809/bin
+else
+GCC_ROOT = /usr/bin
+GCC_VERSION =
+endif
+
 ifdef GCC_VERSION
 CC := $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
 CC := $(GCC_ROOT)/gcc
 endif
+
+HOSTCC = gcc
 
 # We use the latest versions of astools, version 4.1.0
 LD6809 = $(GCC_ROOT)/aslink
@@ -140,7 +148,11 @@ LD = $(GCC_ROOT)/ld
 AS6809 = $(GCC_ROOT)/as6809
 AS = $(GCC_ROOT)/as
 
+ifeq ($(PLATFORM),wpc)
 REQUIRED += $(CC) $(LD6809) $(AS6809) $(LD) $(AS)
+else
+REQUIRED += $(CC) $(LD) $(AS)
+endif
 
 # Name of the S-record converter
 SR = tools/srec2bin/srec2bin
@@ -175,7 +187,6 @@ KERNEL_OBJS = \
 	kernel/db.o \
 	kernel/deff.o \
 	kernel/device.o \
-	kernel/div10.o \
 	kernel/dmd.o \
 	kernel/flasher.o \
 	kernel/flip.o \
@@ -188,7 +199,6 @@ KERNEL_OBJS = \
 	kernel/misc.o \
 	kernel/msg.o \
 	kernel/player.o \
-	kernel/printf.o \
 	kernel/random.o \
 	kernel/reset.o \
 	kernel/score.o \
@@ -197,12 +207,23 @@ KERNEL_OBJS = \
 	kernel/sound.o \
 	kernel/switches.o \
 	kernel/sysinfo.o \
-	kernel/task.o \
 	kernel/timer.o \
 	kernel/triac.o \
 	kernel/trough.o \
-	kernel/tilt.o \
+	kernel/tilt.o
+
+ifeq ($(PLATFORM),wpc)
+KERNEL_OBJS += \
+	kernel/div10.o \
+	kernel/printf.o \
+	kernel/task.o \
 	kernel/vector.o
+endif
+ifeq ($(PLATFORM),linux)
+KERNEL_OBJS += \
+	kernel/task_linux.o
+endif
+
 
 COMMON_OBJS = \
 	common/buyin.o \
@@ -233,6 +254,7 @@ FONT_OBJS = fonts/mono5.o fonts/mono9.o fonts/var5.o
 
 FON_OBJS = \
 	fonts/fixed10.o \
+	fonts/fixed12.o \
 	fonts/fixed6.o \
 	fonts/lucida9.o \
 	fonts/cu17.o \
@@ -245,7 +267,11 @@ FON_OBJS = \
 	fonts/miscfixed.o \
 
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
-	images/freewpc_logo_1.o images/freewpc_logo_2.o
+	images/freewpc_logo_1.o images/freewpc_logo_2.o 
+	
+XBM_GEN_OBJS = images/mborder.o images/msqback.o images/ballborder.o
+
+XBM_OBJS +=	$(XBM_GEN_OBJS)
 
 OS_INCLUDES = include/freewpc.h include/wpc.h
 
@@ -296,10 +322,14 @@ CFLAGS += -DAS_VERSION=1.5.2
 endif
 
 # Options to control the output section names
+ifeq ($(PLATFORM),wpc)
 CFLAGS += -mcode-section=sysrom -mdata-section=sysrom -mbss-section=ram
+endif
 
 # Use 8-bit integers by default for now.
+ifeq ($(PLATFORM),wpc)
 CFLAGS += -mint8
+endif
 
 # Default optimizations.  -O2 works OK for me, but hasn't always; you might
 # want to fall back to -O1 if you have problems.
@@ -309,7 +339,11 @@ endif
 CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
 # Default machine flags.  We enable WPC extensions here.
-CFLAGS += -mwpc
+ifeq ($(PLATFORM),wpc)
+CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin
+else
+CFLAGS += -DCONFIG_PLATFORM_LINUX
+endif
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -318,7 +352,6 @@ ifdef UNROLL_LOOPS
 CFLAGS += -funroll-loops
 endif
 
-CFLAGS += -fno-builtin
 
 # Throw some extra information in the assembler logs
 # (disabled because it doesn't really help much)
@@ -366,6 +399,8 @@ CFLAGS += -DMACHINE_MINOR_VERSION=$(MACHINE_MINOR)
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
+
+ifeq ($(PLATFORM),wpc)
 ifeq ($(USE_DIRECT_PAGE),y)
 CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
 else
@@ -374,6 +409,8 @@ endif
 ifeq ($(USE_LIBC),y)
 CFLAGS += -DHAVE_LIBC
 endif
+endif
+
 ifeq ($(FREE_ONLY),y)
 CFLAGS += -DFREE_ONLY
 endif
@@ -497,7 +534,11 @@ C_OBJS = $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) $(TRANS_OBJS) $(TEST_OBJS) 
 	$(FONT_OBJS)
 
 
+ifeq ($(PLATFORM),wpc)
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
+else
+OBJS = $(C_OBJS) $(XBM_OBJS) $(FON_OBJS)
+endif
 
 MACH_LINKS = .mach .include_mach
 
@@ -515,10 +556,14 @@ GENDEFINES = \
 #######################################################################
 ###	Set Default Target
 #######################################################################
+ifeq ($(PLATFORM),linux)
+default_target : freewpc
+else
 ifdef TARGET_ROMPATH
 default_target : clean_err check_prereqs install post_build
 else
 default_target : clean_err check_prereqs build post_build
+endif
 endif
 
 #######################################################################
@@ -597,8 +642,15 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 # General rule for linking a group of object files.  The linker produces
 # a Motorola S-record file by default (S19).
 #
+ifeq ($(PLATFORM),wpc)
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
 	@echo Linking $@... && $(LD6809) -f $< >> $(ERR) 2>&1
+endif
+
+ifeq ($(PLATFORM),linux)
+freewpc : $(OBJS)
+	@echo Linking ... && $(LD) -o freewpc $(OBJS) >> $(ERR) 2>&1
+endif
 
 #
 # How to make the linker command file for a paged section.
@@ -707,14 +759,14 @@ $(LINKCMD) : $(MAKE_DEPS)
 # is invoked first.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
-	@echo Assembling $< ... && $(AS) -o $@ $< > $(ERR) 2>&1
+	@echo Assembling $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED) $(DEPS)
-	@echo Assembling page header $< ... && $(AS) -o $@ $< > $(ERR) 2>&1
+	@echo Assembling page header $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build any C or XBM module.
@@ -736,7 +788,11 @@ $(XBM_OBJS) : %.o : %.xbm
 $(FON_OBJS) : %.o : %.fon
 
 $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< > $(ERR) 2>&1
+ifeq ($(PLATFORM),wpc)
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
+else
+	@echo "Compiling $< ..." && $(CC) -o $@ $(CFLAGS) -c $(GCC_LANG) $< >> $(ERR) 2>&1
+endif
 
 #
 # For testing the compiler on sample code
@@ -757,7 +813,7 @@ cpptest:
 
 xbmprotos: $(XBM_H)
 
-$(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
+$(XBM_H) : build/xbmgen $(XBM_SRCS) $(XBMPROTO)
 	@echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
 
 
@@ -819,6 +875,31 @@ fonts clean-fonts:
 #
 $(SR) : $(SR).c
 	cd tools/srec2bin && $(MAKE) srec2bin
+
+
+#######################################################################
+###	XBM Generators
+#######################################################################
+
+xbmgen_clean :
+	rm -f build/xbmgen build/sysgen.o build/pgmlib.o build/borders.o build/backgrounds.o
+
+build/xbmgen : build/sysgen.o build/pgmlib.o build/borders.o build/backgrounds.o
+	@echo "Generating XBM files..." && $(HOSTCC) -o $@ build/pgmlib.o build/sysgen.o build/borders.o build/backgrounds.o
+
+build/borders.o : images/borders.c 
+	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+
+build/backgrounds.o : images/backgrounds.c 
+	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+
+build/sysgen.o : images/sysgen.c 
+	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+
+build/pgmlib.o : tools/pgmlib/pgmlib.c
+	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+
+
 
 kernel/switches.o : include/$(MACHINE)/switch.h
 
