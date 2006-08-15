@@ -1017,11 +1017,9 @@ const font_t *font_test_lookup (void)
 		case 9: return &font_schu;
 		case 10: return &font_misctype;
 		case 11: return &font_utopia;
-		case 12: return &font_var5;
-#if 0
-				  /* Not working */
-		case 100: return &font_cu17;
-#endif
+		case 12: return &font_fixed12;
+		case 13: return &font_var5;
+		case 14: return &font_cu17;
 	}
 }
 
@@ -1029,7 +1027,7 @@ const font_t *font_test_lookup (void)
 void font_test_init (void)
 {
 	browser_init ();
-	browser_max = 12; /* set to highest valid font number */
+	browser_max = 14; /* set to highest valid font number */
 }
 
 void font_test_draw (void)
@@ -1042,15 +1040,34 @@ void font_test_draw (void)
 	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 
 	dmd_show_low ();
-	task_sleep (TIME_100MS * 5);
+	task_sleep (TIME_100MS * 3);
 
 	dmd_alloc_low_clean ();
-	font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-	task_dispatching_ok = TRUE;
-	font_render_string (font, 0, 10, "NOPQRSTUVWXYZ");
-	task_dispatching_ok = TRUE;
-	font_render_string (font, 0, 20, "0123456789");
-	task_dispatching_ok = TRUE;
+
+	if (font->glyphs['A'] == NULL)
+	{
+		font_render_string (font, 0, 0, "0123456789");
+	}
+	else if (font->height < 10)
+	{
+		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+		task_dispatching_ok = TRUE;
+		font_render_string (font, 0, 10, "NOPQRSTUVWXYZ");
+		task_dispatching_ok = TRUE;
+		font_render_string (font, 0, 20, "0123456789");
+	}
+	else if (font->height < 15)
+	{
+		task_dispatching_ok = TRUE;
+		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+		task_dispatching_ok = TRUE;
+		font_render_string (font, 0, 16, "NOPQRSTUVWXYZ");
+	}
+	else
+	{
+		task_dispatching_ok = TRUE;
+		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
+	}
 	dmd_show_low ();
 }
 
@@ -1394,7 +1411,7 @@ struct menu dev_balldev_test_item = {
 /************* Transition Test ******************/
 
 
-const dmd_transition_t *transition_table[] = {
+dmd_transition_t *transition_table[] = {
 	&trans_scroll_up,
 	&trans_scroll_up_avg,
 	&trans_scroll_up_slow,
