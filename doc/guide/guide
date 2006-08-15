@@ -19,19 +19,21 @@ my $headingBottomMargin = ($tocFlag ? "0px" : "8px");
 my $headingWeight = ($tocFlag ? "normal" : "bold");
 my $indentation = "20px";
 
+# my $cssDecl = <<END;
+# <style type="text/css" media="screen">
+# body { margin-left: 10%; margin-right: 10% }
+# h1, h2, h3, h4, h5, h6 { 
+# 	font-size: 16px; 
+# 	font-weight: $headingWeight;
+# 	margin-top: $headingTopMargin;
+# 	margin-bottom: $headingBottomMargin; 
+# }
+# .S { padding-left: $indentation; }
+# </style>
+# END
 my $cssDecl = <<END;
-<style type="text/css" media="screen">
-body { margin-left: 10%; margin-right: 10% }
-h1, h2, h3, h4, h5, h6 { 
-	font-size: 16px; 
-	font-weight: $headingWeight;
-	margin-top: $headingTopMargin;
-	margin-bottom: $headingBottomMargin; 
-}
-.S { padding-left: $indentation; }
-</style>
+<link rel="stylesheet" type="text/css" href="/style.css">
 END
-
 
 sub printHeader
 {
@@ -42,7 +44,8 @@ sub printHeader
 $cssDecl
 </head>
 <body>
-<h1>$docTitle</h1>
+<div id="main">
+<p>$docTitle</p>
 <p>
 <i>Brian Dominy</i><br>
 <i>$currentDate</i><br>
@@ -53,6 +56,7 @@ END
 sub printFooter
 {
 	print OFH <<END;
+</div>
 </body>
 </html>
 END
@@ -144,12 +148,12 @@ sub printContent
 
 sub printLevelStart ()
 {
-	print OFH "<div class=\"S\">\n" if ($sectionLevel > 0);
+	print OFH "<div class=\"S\"> # $sectionLevel\n" if ($sectionLevel >= 0);
 }
 
 sub printLevelEnd ()
 {
-	print OFH "</div>\n" if ($sectionLevel > 0);
+	print OFH "</div> # $sectionLevel\n" if ($sectionLevel >= 0);
 }
 
 
