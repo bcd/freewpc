@@ -48,7 +48,6 @@ void inspector_deff (void)
 {
 	U8 *addr, *p;
 	U8 y;
-	U8 timeout = TIME_500MS / TIME_100MS;
 
 	for (;;)
 	{
@@ -114,7 +113,7 @@ void inspector_fast_page_up (void)
 	task_sleep (TIME_500MS);
 	while (switch_poll_logical (SW_LR_FLIP_SW))
 	{
-		if (inspector_addr < RAM_SIZE-INSPECTOR_PAGE_SIZE)
+		if (inspector_addr < (U8 *)RAM_SIZE-INSPECTOR_PAGE_SIZE)
 			inspector_addr += INSPECTOR_PAGE_SIZE * 4;
 		task_sleep (TIME_33MS);
 	}
@@ -125,7 +124,7 @@ void inspector_right_flipper (void)
 {
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
-		if (inspector_addr < RAM_SIZE-INSPECTOR_PAGE_SIZE)
+		if (inspector_addr < (U8 *)(RAM_SIZE-INSPECTOR_PAGE_SIZE))
 			inspector_addr += INSPECTOR_PAGE_SIZE;
 		task_recreate_gid (GID_INSPECTOR_FAST_PAGE, inspector_fast_page_up);
 	}
