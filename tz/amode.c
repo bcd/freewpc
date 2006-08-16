@@ -206,6 +206,12 @@ void amode_deff (void) __taskentry__
 	int design_credit_counter = 3;
 
 	tz_clock_reset ();
+#if 1
+	dmd_alloc_low_high ();
+	dmd_draw_image2 (tileback0_bits);
+	dmd_show2 ();
+	task_sleep_sec (10);
+#endif
 	for (;;)
 	{
 		/** Display last set of player scores **/

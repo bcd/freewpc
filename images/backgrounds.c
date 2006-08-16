@@ -51,3 +51,42 @@ gen_multisquare_background (void)
 	pgm_free (main);
 }
 
+
+void
+gen_dithered_dark_background (void)
+{
+	PGM *pgm;
+	unsigned int x, y, count;
+
+	pgm = pgm_alloc ();
+	pgm_set_four_color (pgm);
+
+	for (y = 0; y < 32; y += 4)
+		for (x = 0 + (y % 16) / 4; x < 128; x += 4)
+			if ((y % 8) == 0)
+				pgm_draw_pixel (pgm, x, y, PGM_DARK(pgm));
+			else
+				pgm_draw_pixel (pgm, x, y, PGM_BRIGHT(pgm));
+
+	pgm_write_xbmset (pgm, "images/ditdark.xbm", "ditdark");
+	pgm_free (pgm);
+}
+
+
+void
+gen_tile_background (void)
+{
+	PGM *pgm;
+	unsigned int x, y;
+
+	pgm = pgm_alloc ();
+	pgm_set_four_color (pgm);
+
+	for (y = 0; y < 32; y ++)
+		for (x = 0; x < 128; x ++)
+			pgm_draw_pixel (pgm, x, y, ((x / 8) + (y / 8)) % 3);
+
+	pgm_write_xbmset (pgm, "images/tileback.xbm", "tileback");
+	pgm_free (pgm);
+}
+

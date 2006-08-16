@@ -80,6 +80,20 @@ DEBUG_COMPILER ?= n
 -include user.make
 
 #######################################################################
+###	Set Default Target
+#######################################################################
+ifeq ($(PLATFORM),linux)
+default_target : freewpc
+else
+ifdef TARGET_ROMPATH
+default_target : clean_err check_prereqs install post_build
+else
+default_target : clean_err check_prereqs build post_build
+endif
+endif
+
+
+#######################################################################
 ###	Directories
 #######################################################################
 
@@ -269,9 +283,8 @@ FON_OBJS = \
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o 
 	
-XBM_GEN_OBJS = images/mborder.o images/msqback.o images/ballborder.o
-
-XBM_OBJS +=	$(XBM_GEN_OBJS)
+-include build/Makefile.xbms
+XBM_OBJS +=	$(XBMGEN_OBJS)
 
 OS_INCLUDES = include/freewpc.h include/wpc.h
 
@@ -544,7 +557,7 @@ MACH_LINKS = .mach .include_mach
 
 
 MAKE_DEPS = Makefile $(MACHINE)/Makefile user.make
-DEPS = $(MAKE_DEPS) $(INCLUDES) $(XBM_H) $(MACH_LINKS)
+DEPS = $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = \
 	include/gendefine_gid.h \
@@ -552,19 +565,6 @@ GENDEFINES = \
 	include/gendefine_leff.h \
 	include/gendefine_lampset.h \
 	include/gendefine_devno.h
-
-#######################################################################
-###	Set Default Target
-#######################################################################
-ifeq ($(PLATFORM),linux)
-default_target : freewpc
-else
-ifdef TARGET_ROMPATH
-default_target : clean_err check_prereqs install post_build
-else
-default_target : clean_err check_prereqs build post_build
-endif
-endif
 
 #######################################################################
 ###	Begin Makefile Targets
@@ -575,7 +575,7 @@ clean_err:
 	@rm -f $(ERR)
 
 .PHONY : check_prereqs
-check_prereqs :
+check_prereqs : xbmgen_run xbmprotos
 
 install : $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip
 
@@ -693,7 +693,7 @@ else
 DUP_PAGE_OBJ = -x
 endif
 
-$(PAGED_LINKCMD) : $(MAKE_DEPS)
+$(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 	@echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
@@ -732,7 +732,7 @@ $(BLD)/page%.s:
 #
 # How to make the linker command file for the system section.
 #
-$(LINKCMD) : $(MAKE_DEPS)
+$(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 	@echo Creating linker command file $@ ... ;\
 	rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
@@ -813,9 +813,8 @@ cpptest:
 
 xbmprotos: $(XBM_H)
 
-$(XBM_H) : build/xbmgen $(XBM_SRCS) $(XBMPROTO)
+$(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
 	@echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
-
 
 #
 # How to automake files of #defines
@@ -881,25 +880,36 @@ $(SR) : $(SR).c
 ###	XBM Generators
 #######################################################################
 
+HOST_XBM_LIBS = build/pgmlib.o
+
+HOST_XBM_OBJS = \
+	build/sysgen.o build/borders.o build/backgrounds.o
+
+HOST_XBM_CFLAGS = -Itools/pgmlib -g
+
 xbmgen_clean :
-	rm -f build/xbmgen build/sysgen.o build/pgmlib.o build/borders.o build/backgrounds.o
+	@echo "Cleaning host XBM files..." && \
+	rm -f build/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
 
-build/xbmgen : build/sysgen.o build/pgmlib.o build/borders.o build/backgrounds.o
-	@echo "Generating XBM files..." && $(HOSTCC) -o $@ build/pgmlib.o build/sysgen.o build/borders.o build/backgrounds.o
+.PHONY : xbmgen_run
+xbmgen_run : build/xbmgen
+	@make xbmgen_objs
 
-build/borders.o : images/borders.c 
-	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+build/Makefile.xbms build/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
+	@echo "Linking XBM generator..." && \
+	$(HOSTCC) -o build/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS) && \
+	echo "Generating XBM files..." && build/xbmgen
 
-build/backgrounds.o : images/backgrounds.c 
-	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
-
-build/sysgen.o : images/sysgen.c 
-	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+$(HOST_XBM_OBJS) : build/%.o : images/%.c
+	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
 build/pgmlib.o : tools/pgmlib/pgmlib.c
-	$(HOSTCC) -o $@ -c $< -Itools/pgmlib
+	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
 
+#######################################################################
+###	Standard Dependencies
+#######################################################################
 
 kernel/switches.o : include/$(MACHINE)/switch.h
 
