@@ -22,20 +22,36 @@
 #include <inttypes.h>
 
 
+static int irq_percent_array[256] = { 0, };
+static int irq_percent_count[256] = { 0, };
+int cycle_offset = 0;
+
 void
 read_cycle_stat (int fd)
 {
-	char buf[16];
-	int irq_cycle_count;
+	int irq_cycle_count, irq_percent;
 	uint8_t val;
 
 	read (fd, &val, 1);
 
-	irq_cycle_count = val * 16;
-	sprintf (buf, "%d (%d)\n", 
-		irq_cycle_count,
-		(irq_cycle_count * 100UL) / 1952);
-	write (1, buf, strlen(buf));
+	irq_cycle_count = (val * 16) - 24;
+	irq_percent = (irq_cycle_count * 100UL) / 1952;
+
+	irq_percent_array[cycle_offset] += irq_percent;
+	irq_percent_count[cycle_offset]++;
+	cycle_offset++;
+	if (cycle_offset == 256)
+	{
+		int i;
+		for (i=0; i < 256; i++)
+		{
+			printf ("%d ", irq_percent_array[i] / irq_percent_count[i]);
+			if ((i % 16) == 15)
+				putchar ('\n');
+		}
+		putchar ('\n');
+		cycle_offset = 0;
+	}
 }
 
 
