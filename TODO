@@ -1,5 +1,4 @@
 
-Add Transitional effects
 Use inheritance in switch drivers to set all fields correctly for
 	various kinds of switches
 Rudimentary animations by panning over a static image larger than the

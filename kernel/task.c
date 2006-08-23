@@ -78,13 +78,19 @@ task_t task_buffer[NUM_TASKS];
  * The IRQ will reset the system when this happens. */
 bool task_dispatching_ok;
 
+#ifdef CONFIG_DEBUG_STACK
 /** For debug, this tells us the largest stack size that we've had
  * to deal with so far.  This helps to determine how big the stack
  * area in the task structure needs to be */
 U8 task_largest_stack;
 
+U16 task_small_stacks;
+U16 task_medium_stacks;
+U16 task_large_stacks;
+#endif
+
 /** Also for debug, this tracks the maximum number of tasks needed. */
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 U8 task_count;
 U8 task_max_count;
 #endif
@@ -101,7 +107,7 @@ void task_dump (void)
 	register task_t *tp;
 
 	dbprintf ("\nCurrent = %p\n", task_current);
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	dbprintf ("Max tasks = %d\n", task_max_count);
 #endif
 	db_puts ("----------------------\n");
@@ -213,10 +219,19 @@ void task_save (void)
 		/* TODO : check for overflow during copy */
 	}
 
+#ifdef CONFIG_DEBUG_STACK
 	if ((__x->stack_word_count = __b) > task_largest_stack)
-	{
 		task_largest_stack = __b;
-	}
+
+#if 0
+	if (__b > 32)
+		task_large_stacks++;
+	else if (__b > 16)
+		task_medium_stacks++;
+	else
+		task_small_stacks++;
+#endif
+#endif
 
 	/* Save current ROM page */
 	__x->rom_page = wpc_get_rom_page ();
@@ -336,7 +351,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count++;
 	if (task_count > task_max_count)
 		task_max_count = task_count;
@@ -423,7 +438,7 @@ void task_exit (void)
 
 	task_current->state = TASK_FREE;
 	task_current = 0;
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
 #endif
 	task_dispatcher ();
@@ -474,7 +489,7 @@ void task_kill_pid (task_t *tp)
 		fatal (ERR_TASK_KILL_CURRENT);
 	tp->state = TASK_FREE;
 	tp->gid = 0;
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
 #endif
 }
@@ -638,9 +653,14 @@ void task_init (void)
 	task_dispatching_ok = TRUE;
 
 	/* Init debugging of largest stack */
+#ifdef CONFIG_DEBUG_STACK
 	task_largest_stack = 0;
+	task_small_stacks = 0;
+	task_medium_stacks = 0;
+	task_large_stacks = 0;
+#endif
 
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count = task_max_count = 1;
 #endif
 

@@ -25,6 +25,8 @@
  */
 
 #include <freewpc.h>
+#include <test.h>
+
 
 /** TRUE if the flipper coils are enabled */
 bool flippers_enabled;
@@ -39,8 +41,6 @@ U8 flipper_outputs;
 /** Handle left flipper presses. */
 void sw_left_flipper_handler (void) 
 {
-	extern __test__ void test_left_flipper_button (void);
-
 	inspector_left_flipper ();
 	if (in_test)
 		test_left_flipper_button ();
@@ -64,8 +64,6 @@ void sw_left_flipper_handler (void)
 /** Handle right flipper presses. */
 void sw_right_flipper_handler (void)
 {
-	extern __test__ void test_right_flipper_button (void);
-
 	inspector_right_flipper ();
 	if (in_test)
 		test_right_flipper_button ();

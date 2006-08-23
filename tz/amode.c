@@ -28,6 +28,10 @@ extern void starfield_start (void);
 extern void starfield_stop (void);
 
 
+/* Attract mode display delay function.
+ * This function waits for the specified amount of time, but
+ * returns immediately if either flipper is pressed.
+ * Returns whether or not the timeout was aborted. */
 bool amode_page_delay (U8 secs)
 {
 	U8 amode_flippers;
@@ -182,16 +186,16 @@ void amode_show_design_credits (void)
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_mono5, 64, 12, "BY BRIAN DOMINY");
-	font_render_string_center (&font_mono5, 64, 19, "RELEASED UNDER THE");
-	font_render_string_center (&font_mono5, 64, 25, "GNU PUBLIC LICENSE");
+	font_render_string_center (&font_var5, 64, 3, "FREEWPC WAS DESIGNED");
+	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
+	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
+	font_render_string_center (&font_var5, 64, 25, "GENERAL PUBLIC LICENSE");
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 5, "VISIT ODDCHANGE.COM");
-	font_render_string_center (&font_mono5, 64, 12, "FOR MORE INFO");
+	font_render_string_center (&font_var5, 64, 5, "VISIT ODDCHANGE.COM");
+	font_render_string_center (&font_var5, 64, 12, "FOR MORE INFORMATION");
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 
@@ -201,17 +205,37 @@ void amode_show_design_credits (void)
 }
 
 
+void amode_high_score_test (void)
+{
+	current_score[0] = 0x11;
+	current_score[1] = 0x40;
+	current_score[2] = 0x75;
+	current_score[3] = 0x20;
+	high_score_check ();
+	task_exit ();
+}
+
+
 void amode_deff (void) __taskentry__
 {
 	int design_credit_counter = 3;
 
 	tz_clock_reset ();
-#if 1
-	dmd_alloc_low_high ();
-	dmd_draw_image2 (tileback0_bits);
-	dmd_show2 ();
-	task_sleep_sec (10);
+#if 0
+{
+	static int flag = 0;
+	if (flag == 0)
+		task_create_anon (amode_high_score_test);
+	flag++;
+}
 #endif
+
+	dmd_alloc_low_high ();
+	dmd_draw_image2 (readtest0_bits);
+	font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
+	dmd_show2 ();
+	amode_page_delay (7);
+
 	for (;;)
 	{
 		/** Display last set of player scores **/

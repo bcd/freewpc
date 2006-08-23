@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <test.h>
 
 /**
  * \file
@@ -147,7 +148,7 @@ void end_game (void)
 		in_tilt = 0;
 
 		high_score_check ();
-		/* TODO : do match sequence */
+		match_start ();
 	
 		callset_invoke (end_game);
 
@@ -470,8 +471,6 @@ bool verify_start_ok (void)
  */
 void sw_start_button_handler (void) __taskentry__
 {
-	extern __test__ void test_start_button (void);
-
 	/* If in test mode, let test handle it completely. */
 	if (in_test)
 	{
@@ -545,6 +544,7 @@ void sw_start_button_handler (void) __taskentry__
  */
 void sw_buy_in_button_handler (void) __taskentry__
 {
+	/* TODO: the inspector should be a build time option */
 	inspector_buyin_button ();
 }
 

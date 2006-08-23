@@ -240,6 +240,7 @@ endif
 
 
 COMMON_OBJS = \
+	common/audio.o \
 	common/buyin.o \
 	common/eb.o \
 	common/highscore.o \

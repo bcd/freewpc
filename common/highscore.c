@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -47,6 +46,13 @@ struct area_csum highscore_csum_info = {
 	.csum = &high_score_csum,
 	.reset = high_score_reset,
 };
+
+
+/* During high score entry, indicates the table position to insert at */
+U8 high_score_position;
+
+/* Indicates the player number being checked */
+U8 high_score_player;
 
 
 /** The default grand champion score */
@@ -161,13 +167,57 @@ void high_score_award (void)
 }
 
 
+void high_score_entry_deff (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("PLAYER %d", high_score_player);
+	font_render_string_center (&font_fixed6, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 22, "ENTER INITIALS");
+	dmd_sched_transition (&trans_scroll_up);
+	dmd_show_low ();
+	task_sleep_sec (2);
+
+	dmd_alloc_low_clean ();
+	if (high_score_position == 0)
+		sprintf ("GRAND CHAMPION");
+	else
+		sprintf ("HIGH SCORE %d", high_score_position);
+	font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
+	dmd_sched_transition (&trans_vstripe_left2right);
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
 void high_score_reset_check (void)
 {
 }
 
 
+/* Check to see if the current player score qualifies for the
+high score board. */
 void high_score_check (void)
 {
+	U8 hs;
+
+	high_score_player = 1;
+	if ((score_compare (current_score, gc_score)) > 0)
+	{
+		/* This is a grand champion score */
+		high_score_position = 0;
+		deff_start (DEFF_HSENTRY);
+		return;
+	}
+
+	for (hs = 0; hs < NUM_HIGH_SCORES; hs++)
+		if ((score_compare (current_score, highest_scores[hs])) > 0)
+		{
+			/* This is a regular high score */
+			high_score_position = hs+1;
+			deff_start (DEFF_HSENTRY);
+			return;
+		}
 }
 
 

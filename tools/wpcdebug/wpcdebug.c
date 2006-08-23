@@ -31,6 +31,15 @@
 #include "core.h"
 #endif
 
+/* 
+This is the standalone WPC debugger program.
+WPC calls their version 'orkin', for obvious reasons...
+
+The ORKIN registers act very much like another serial port.
+PinMAME has been patched to forward reads/writes to the ORKIN
+registers to this file for processing.  A socket interface
+is used to allow the debugger and the emulator to run together.
+*/
 
 #ifdef WPC_ORKIN_DEBUG
 #define orkin_debug(fmt, rest...)		printf (fmt , ## rest )

@@ -56,7 +56,9 @@
 	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, PRI_VOLUME_CHANGE, volume_deff) \
 	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff) \
 	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff) \
-	DECL_DEFF (DEFF_NONFATAL_ERROR, D_NORMAL, PRI_DEBUGGER, nonfatal_error_deff)
+	DECL_DEFF (DEFF_NONFATAL_ERROR, D_NORMAL, PRI_DEBUGGER, nonfatal_error_deff) \
+	DECL_DEFF (DEFF_HSENTRY, D_RUNNING, PRI_HSENTRY, high_score_entry_deff) \
+	DECL_DEFF (DEFF_MATCH, D_RUNNING, PRI_MATCH, match_deff)
 
 
 /** Declare externs for all of the deff functions */

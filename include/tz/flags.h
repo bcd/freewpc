@@ -31,4 +31,8 @@
 #define FLAG_POWERBALL_IN_PLAY        7
 #define FLAG_SKILL_SHOT_LIT           8
 #define FLAG_NO_DRAIN_PENALTY         9
+#define FLAG_STEEL_IN_TROUGH          10
+#define FLAG_STEEL_IN_TUNNEL          11
+#define FLAG_PB_ALONE_IN_PLAY         12
+
 #endif /* _MACH_LAMP_H */

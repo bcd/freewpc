@@ -130,15 +130,15 @@ void menu_up (void);
 void menu_down (void);
 void menu_start (void);
 
-void test_init (void);
-void test_up_button (void);
-void test_down_button (void);
-void test_left_flipper_button (void);
-void test_right_flipper_button (void);
-void test_enter_button (void);
-void test_escape_button (void);
-void test_start_button (void);
+__test__ void test_init (void);
+__test__ void test_up_button (void);
+__test__ void test_down_button (void);
+__test__ void test_left_flipper_button (void);
+__test__ void test_right_flipper_button (void);
+__test__ void test_enter_button (void);
+__test__ void test_escape_button (void);
+__test__ void test_start_button (void);
 
-__test__ void switch_test_add_queue (void);
+__test__ void switch_test_add_queue (U8 sw);
 
 #endif /* _TEST_H */

@@ -180,29 +180,6 @@ void window_init (void)
 
 /***************************************************/
 
-/* The menu object, which is shared between real menus
- * and menu items that aren't menus themselves.
- *
- * The M_xxx macros are used in the menu flags.
- */
-
-#define M_MENU 0x1
-#define M_ITEM 0x2
-#define M_LETTER_PREFIX 0x4
-
-struct menu
-{
-	const char *name;
-	int flags;
-	union {
-		struct menu **submenus;
-		struct {
-			struct window_ops *ops;
-			void *priv;
-		} subwindow;
-	} var;
-};
-
 extern struct menu main_menu;
 extern struct window_ops menu_window;
 
@@ -298,26 +275,6 @@ void browser_print_operation (const char *s)
  * but the enter key can be used to go into edit mode
  * and change the value of the item.
  */
-
-#define ADJ_BROWSING 0
-#define ADJ_EDITING 1
-#define ADJ_CONFIRMING 2
-
-struct adjustment_value
-{
-	U8 min;
-	U8 max;
-	U8 step;
-	void (*render) (U8 val);
-};
-
-struct adjustment
-{
-	const char *name;
-	struct adjustment_value *values;
-	U8 factory_default;
-	U8 *nvram;
-};
 
 struct adjustment *browser_adjs;
 U8 adj_edit_value;
@@ -710,13 +667,6 @@ struct window_ops adj_browser_window = {
 };
 
 /*****************************************************/
-
-struct audit
-{
-	const char *name;
-	void (*render) (audit_t);
-	audit_t *nvram;
-};
 
 
 void integer_audit (audit_t val) 

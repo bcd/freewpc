@@ -95,7 +95,10 @@ typedef enum {
 	refers to a 2-element set, with each element having eight possible
 	values.  Those values refer to the character map.  This allows semi-random
 	data to be compressed more efficiently. */
-	XBMOP_CHARMAP_REF=0x90,
+	XBMOP_CHARMAP_REF=0xA0,
+
+	/* Opcode 0xFF indicates end of image */
+	XBMOP_EOI=0xEF,
 } XBMOP;
 
 typedef struct xbm_prog_elem {

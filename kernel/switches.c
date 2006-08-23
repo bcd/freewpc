@@ -615,10 +615,7 @@ void switch_sched (void)
 	if ((swinfo->sound != 0) && in_live_game)
 		sound_send (swinfo->sound);
 
-	/* If the switch declares a processing function, call it.
-	 * Note: processing functions used to be full-fledged tasks a long
-	 * time ago, but not anymore.  These functions should 'return' and
-	 * not do a 'task_exit'. */
+	/* If the switch declares a processing function, call it. */
 	if (swinfo->fn)
 	{
 		if (swinfo->fnpage != 0)
@@ -635,7 +632,7 @@ cleanup:
 
 	/* Debounce period after the switch has been handled */
 	if (swinfo->inactive_time == 0)
-		task_sleep (TIME_100MS * 1); /* was 300ms!!! */
+		task_sleep (TIME_100MS * 1);
 	else
 		task_sleep (swinfo->inactive_time);
 

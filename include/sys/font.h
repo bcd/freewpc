@@ -85,8 +85,12 @@ void font_get_string_area (const font_t *font, const char *s);
 void fontargs_render_string_center (const fontargs_t *args);
 void fontargs_render_string_right (const fontargs_t *args);
 void fontargs_render_string_left (const fontargs_t *args);
+void fontargs_render_string_center2 (const fontargs_t *args);
+void fontargs_render_string_right2 (const fontargs_t *args);
+void fontargs_render_string_left2 (const fontargs_t *args);
 
 
+#if 0
 #define DECL_FONTARGS_CONST(_f,_x,_y,_s) \
 	static fontargs_t args = { \
 		.font = _f, \
@@ -94,7 +98,7 @@ void fontargs_render_string_left (const fontargs_t *args);
 		.y = _y, \
 		.s = _s, \
 	};
-
+#endif
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
@@ -123,5 +127,10 @@ void fontargs_render_string_left (const fontargs_t *args);
 	fontargs_render_string_right (&font_args); \
 }
 
+#define font_render_string_center2(f,x,y,s) \
+{ \
+	DECL_FONTARGS(f,x,y,s); \
+	fontargs_render_string_center2 (&font_args); \
+}
 
 #endif /* _SYS_FONT_H */

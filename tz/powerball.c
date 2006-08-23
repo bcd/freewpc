@@ -25,10 +25,30 @@
  */
 
 
+void pb_is_in_trough (void)
+{
+}
+
+
+void pb_is_in_slot (void)
+{
+}
+
+
+CALLSET_ENTRY (pb, start_game)
+{
+	/* TODO : poll the trough prox switch */
+	flag_off (FLAG_STEEL_IN_TROUGH);
+	flag_off (FLAG_STEEL_IN_TUNNEL);
+	flag_off (FLAG_PB_ALONE_IN_PLAY);
+}
+
+
 void sw_trough_prox_handler (void)
 {
 	/* The next ball to be served from the trough is
 	 * definitely a steel ball. */
+	flag_on (FLAG_STEEL_IN_TROUGH);
 
 	/* The powerball is definitely not in play */
 }
@@ -39,9 +59,8 @@ void sw_slot_prox_handler (void)
 	/* If the ball came from the piano or camera, it must
 	 * be steel.  Stop the detector task.
 	 */
+	flag_on (FLAG_STEEL_IN_TUNNEL);
 	switch_can_follow (slot_proximity, slot, TIME_3S);
-
-	/* The powerball is definitely in play */
 }
 
 

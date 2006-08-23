@@ -109,7 +109,6 @@ void do_reset (void)
 {
 	register uint8_t *ramptr asm ("x");
 
-	extern __test__ void test_init (void);
 	extern void system_reset (void);
 
 	/** Disable hardware interrupts in the 6809 */

@@ -450,7 +450,11 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 
 
 /** Erase a specific region of the DMD low buffer, given its
- * location and size */
+ * location and size.
+ *
+ * For now, it is assumed that x, y, width, and height are all multiples
+ * of 8.
+ */
 void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 {
 	int i, j;
@@ -464,6 +468,15 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 		}
 		dbuf += (16 / 2);
 	}
+}
+
+/* FBM (FreeWPC) bitmap render function.
+ *
+ * The image is stored as a series of encoded instructions, which
+ * is expanded at runtime by the following interpreter.
+ */ 
+void dmd_draw_fbm (const U8 *image_bits)
+{
 }
 
 

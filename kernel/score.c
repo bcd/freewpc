@@ -258,28 +258,23 @@ void score_mul (score_t s1, uint8_t multiplier)
 I8 score_compare (score_t s1, score_t s2)
 {
 	register int len = sizeof (score_t);
-	register I8 diff;
 
 	while (len > 0)
 	{
-		diff = *s1 - *s2;
-		if (diff != 0)
-			return (diff);
-		s1++;
-		s2++;
-		len--;
+		if (*s1 > *s2)
+			return (1);
+		else if (*s1 < *s2)
+			return (-1);
+		else
+		{
+			s1++;
+			s2++;
+			len--;
+		}
 	}
 	return (0);
 }
 
-void score_ladder_init (score_t s, score_ladder_t *ladder)
-{
-}
-
-
-void score_from_ladder (score_t s, score_ladder_t *ladder)
-{
-}
 
 void scores_reset (void)
 {

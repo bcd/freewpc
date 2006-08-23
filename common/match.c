@@ -31,12 +31,21 @@ match_award (void)
 void
 match_deff (void)
 {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "MATCH");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
 }
 
 
+
 void 
-do_match (volatile U8 match_count)
+do_match (bool will_match)
 {
+	deff_start (DEFF_MATCH);
+	while (deff_get_active () == DEFF_MATCH)
+		task_sleep (TIME_100MS);
 }
 
 
@@ -50,11 +59,17 @@ match_start (void)
 	if (system_config.match_feature == 0)
 		return;
 
-	/* Randomly decide whether or not to award a match. */
+	/* Randomly decide whether or not to award a match.
+	 * TODO : This algorithm is too simple, it will not work
+	 * for multi-player games. */
 	match_flag = random_scaled (100);
 	if (match_flag <= system_config.match_feature)
-		match_count++;
-
-	do_match (match_count);
+	{
+		do_match (TRUE);
+	}
+	else
+	{
+		do_match (FALSE);
+	}
 }
 

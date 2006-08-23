@@ -196,7 +196,7 @@ void rtc_render_time (void)
 		case DATE_TIME_STYLE_US:
 		default:
 			sprintf ("%d:%02d %s", 
-				rtc_us_hours[hour], minute, (hour > 12)?"PM":"AM");
+				rtc_us_hours[hour], minute, (hour >= 12)?"PM":"AM");
 			break;
 
 		case DATE_TIME_STYLE_EURO:

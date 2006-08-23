@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -20,17 +19,12 @@
  */
 
 #include <freewpc.h>
+#include <test.h>
 
 /**
  * \file
  * \brief Handle the service button switches inside the coin door.
  */
-
-extern __test__ void test_escape_button (void);
-extern __test__ void test_down_button (void);
-extern __test__ void test_up_button (void);
-extern __test__ void test_enter_button (void);
-
 
 void sw_escape_button_handler (void)
 {
@@ -67,7 +61,14 @@ void sw_enter_button_handler (void)
 
 void sw_coin_door_closed_handler (void)
 {
-	dbprintf ("Coin door closed");
+	if (switch_poll_logical (SW_COINDOOR_CLOSED))
+	{
+		/* Coin door is closed */
+	}
+	else
+	{
+		/* Coin door is opened */
+	}
 }
 
 
@@ -76,6 +77,7 @@ void sw_coin_door_closed_handler (void)
 DECLARE_SWITCH_DRIVER (sw_coin_door_closed)
 {
 	.fn = sw_coin_door_closed_handler,
+	.flags = SW_EDGE,
 };
 
 DECLARE_SWITCH_DRIVER (sw_escape_button)

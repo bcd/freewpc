@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 
+#define CONFIG_BLIT
+
 /**
  * \file
  * \brief Routines for writing text to the DMD in a particular font.
@@ -99,34 +101,82 @@ U8 *font_lookup (const font_t *font, char c)
 	}
 }
 
+U8 blit_xpos;
+
+U8 *blit_dmd;
+
+#ifdef CONFIG_BLIT
+
+U8 *blit_data;
+
+STATIC void font_blit (void)
+{
+	switch (blit_xpos % 8)
+	{
+		default: /* should not happen */
+		case 0:
+			blit_dmd[0] = *blit_data;
+			break;
+		case 1:
+			blit_dmd[0] |= *blit_data << 1;
+			blit_dmd[1] = (*blit_data >> 7) | blit_dmd[1];
+			break;
+		case 2:
+			blit_dmd[0] |= *blit_data << 2;
+			blit_dmd[1] = (*blit_data >> 6) | blit_dmd[1];
+			break;
+		case 3:
+			blit_dmd[0] |= *blit_data << 3;
+			blit_dmd[1] = (*blit_data >> 5) | blit_dmd[1];
+			break;
+		case 4:
+			blit_dmd[0] |= *blit_data << 4;
+			blit_dmd[1] = (*blit_data >> 4) | blit_dmd[1];
+			break;
+		case 5:
+			blit_dmd[0] |= *blit_data << 5;
+			blit_dmd[1] = (*blit_data >> 3) | blit_dmd[1];
+			break;
+		case 6:
+			blit_dmd[0] |= *blit_data << 6;
+			blit_dmd[1] = (*blit_data >> 2) | blit_dmd[1];
+			break;
+		case 7:
+			blit_dmd[0] |= *blit_data << 7;
+			blit_dmd[1] = (*blit_data >> 1) | blit_dmd[1];
+			break;
+	}
+	blit_data++;
+}
+
+#endif
 
 /** Renders a string whose characteristics have already been
  * computed.  font_args contains the font type, starting
  * coordinates (from the upper left), and pointer to the string
  * data. */
-static void fontargs_render_string (void)
+STATIC void fontargs_render_string (void)
 {
 	static U8 *dmd_base;
 	static const char *s;
-	U8 x;
 	char c;
 	const fontargs_t *args = &font_args;
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
-  	x = args->x;
+  	blit_xpos = args->x;
 
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */
 	wpc_push_page (FONT_PAGE);
 
-	while ((c = *s) != '\0')
+	while ((c = *s++) != '\0')
 	{
 		static U8 i, j;
 		static U8 xb;
 		static U8 top_space;
 		register U8 *data;
-		register U8 *dmd;
+		// register U8 *dmd;
 
 		/* Nonprintable characters are skipped. */
 		if (c < ' ')
@@ -143,65 +193,72 @@ static void fontargs_render_string (void)
 		else
 			top_space = 0;
 
-		xb = x / 8;
+		xb = blit_xpos / 8;
 
 		for (i=0; i < font_height; i++)
 		{
 			task_dispatching_ok = TRUE;
 			for (j=0; j < font_byte_width; j++)
 			{
-				dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
-				switch (x % 8)
+				// dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
+				blit_dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
+#ifdef CONFIG_BLIT
+				blit_data = data;
+				// blit_dmd = dmd;
+				font_blit ();
+				data = blit_data;
+#else
+				switch (blit_xpos % 8)
 				{
 					default: /* should not happen */
 					case 0:
-						dmd[0] = *data++;
+						blit_dmd[0] = *data++;
 						break;
 					case 1:
-						dmd[0] |= *data << 1;
-						dmd[1] = (*data >> 7) | dmd[1];
+						blit_dmd[0] |= *data << 1;
+						blit_dmd[1] = (*data >> 7) | blit_dmd[1];
 						data++;
 						break;
 					case 2:
-						dmd[0] |= *data << 2;
-						dmd[1] = (*data >> 6) | dmd[1];
+						blit_dmd[0] |= *data << 2;
+						blit_dmd[1] = (*data >> 6) | blit_dmd[1];
 						data++;
 						break;
 					case 3:
-						dmd[0] |= *data << 3;
-						dmd[1] = (*data >> 5) | dmd[1];
+						blit_dmd[0] |= *data << 3;
+						blit_dmd[1] = (*data >> 5) | blit_dmd[1];
 						data++;
 						break;
 					case 4:
-						dmd[0] |= *data << 4;
-						dmd[1] = (*data >> 4) | dmd[1];
+						blit_dmd[0] |= *data << 4;
+						blit_dmd[1] = (*data >> 4) | blit_dmd[1];
 						data++;
 						break;
 					case 5:
-						dmd[0] |= *data << 5;
-						dmd[1] = (*data >> 3) | dmd[1];
+						blit_dmd[0] |= *data << 5;
+						blit_dmd[1] = (*data >> 3) | blit_dmd[1];
 						data++;
 						break;
 					case 6:
-						dmd[0] |= *data << 6;
-						dmd[1] = (*data >> 2) | dmd[1];
+						blit_dmd[0] |= *data << 6;
+						blit_dmd[1] = (*data >> 2) | blit_dmd[1];
 						data++;
 						break;
 					case 7:
-						dmd[0] |= *data << 7;
-						dmd[1] = (*data >> 1) | dmd[1];
+						blit_dmd[0] |= *data << 7;
+						blit_dmd[1] = (*data >> 1) | blit_dmd[1];
 						data++;
 						break;
 				}
-			}
-		}
+#endif
+			} /* end for each byte in same row */
+		} /* end for each row */
 
 		/* advance by 1 char ... args->font->width */
-		x += font_width;
-		s++;
+		blit_xpos += font_width;
 		if (top_space != 0)
 			dmd_base -= top_space;
-	}
+	} /* end for each character in the string */
 	wpc_pop_page ();
 }
 
@@ -246,8 +303,7 @@ void font_get_string_area (const font_t *font, const char *s)
 	task_dispatching_ok = TRUE;
 }
 
-
-void fontargs_render_string_left (const fontargs_t *args)
+static void fontargs_prep_left (const fontargs_t *args)
 {
 	font_get_string_area (args->font, args->s);
 	if (args != &font_args)
@@ -257,11 +313,9 @@ void fontargs_render_string_left (const fontargs_t *args)
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
-	fontargs_render_string ();
 }
 
-
-void fontargs_render_string_center (const fontargs_t *args)
+static void fontargs_prep_center (const fontargs_t *args)
 {
 	font_get_string_area (args->font, args->s);
 	font_args.x = args->x - (font_string_width / 2);
@@ -271,11 +325,9 @@ void fontargs_render_string_center (const fontargs_t *args)
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
-	fontargs_render_string ();
 }
 
-
-void fontargs_render_string_right (const fontargs_t *args)
+static void fontargs_prep_right (const fontargs_t *args)
 {
 	font_get_string_area (args->font, args->s);
 	font_args.x = args->x - font_string_width;
@@ -285,6 +337,56 @@ void fontargs_render_string_right (const fontargs_t *args)
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
+}
+
+
+void fontargs_render_string_left (const fontargs_t *args)
+{
+	fontargs_prep_left (args);
 	fontargs_render_string ();
+}
+
+
+void fontargs_render_string_center (const fontargs_t *args)
+{
+	fontargs_prep_center (args);
+	fontargs_render_string ();
+}
+
+
+void fontargs_render_string_right (const fontargs_t *args)
+{
+	fontargs_prep_right (args);
+	fontargs_render_string ();
+}
+
+
+void fontargs_render_string_left2 (const fontargs_t *args)
+{
+	fontargs_prep_left (args);
+	fontargs_render_string ();
+	dmd_flip_low_high ();
+	fontargs_render_string ();
+	dmd_flip_low_high ();
+}
+
+
+void fontargs_render_string_center2 (const fontargs_t *args)
+{
+	fontargs_prep_center (args);
+	fontargs_render_string ();
+	dmd_flip_low_high ();
+	fontargs_render_string ();
+	dmd_flip_low_high ();
+}
+
+
+void fontargs_render_string_right2 (const fontargs_t *args)
+{
+	fontargs_prep_right (args);
+	fontargs_render_string ();
+	dmd_flip_low_high ();
+	fontargs_render_string ();
+	dmd_flip_low_high ();
 }
 

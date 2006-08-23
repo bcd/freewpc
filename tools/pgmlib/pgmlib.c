@@ -27,7 +27,7 @@ unsigned int opt_debug = 0;
 
 unsigned int opt_verbose = 1;
 
-unsigned int opt_compress = 0;
+unsigned int opt_compress = 1;
 
 const char *opt_makefile_fragment_name = "build/Makefile.xbms";
 
@@ -273,10 +273,30 @@ xbm_unique_byte_count (XBM * xbm)
 }
 
 
+int
+xbm_zero_count (XBM *xbm)
+{
+	unsigned int x, y;
+	unsigned int zero_count = 0;
+
+	for (y = 0; y < xbm->height; y++)
+		for (x = 0; x < (xbm->width + 7) / 8; x++)
+		{
+			if (xbm->bytes[y][x] == 0)
+				zero_count++;
+		}
+
+	return zero_count;
+}
+
+
 void
 xbm_write_stats (FILE *fp, XBM *xbm)
 {
-	fprintf (fp, "unique_byte_count = %d\n", xbm_unique_byte_count (xbm));
+	fprintf (fp, "/* Statistics:\n");
+	fprintf (fp, " * unique_byte_count = %d\n", xbm_unique_byte_count (xbm));
+	fprintf (fp, " * zero_byte_count = %d\n", xbm_zero_count (xbm));
+	fprintf (fp, " */\n");
 }
 
 
@@ -316,6 +336,7 @@ xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags)
 
 	if (opt_compress)
 	{
+		xbm_write_stats (fp, xbm);
 		XBMPROG *xbmprog = xbm_make_prog (xbm);
 		xbmprog_write (fp, xbmprog);
 	}
@@ -539,6 +560,67 @@ pgm_change_maxval (PGM *pgm, unsigned int new_maxval)
 	for (y = 0; y < pgm->height; y++)
 		for (x = 0; x < pgm->width; x++)
 			pgm->bits[y][x] = ((pgm->bits[y][x] + 1) / factor) - 1;
+	pgm->maxval = new_maxval;
+}
+
+
+void
+pgm_pixel_add_saturated (PGM *pgm, unsigned int x, unsigned int y, int delta)
+{
+	int val = pgm->bits[y][x];
+	val += delta;
+	if (val < 0)
+		val = 0;
+	if (val > pgm->maxval)
+		val = pgm->maxval;
+	pgm->bits[y][x] = val;
+}
+
+
+void
+pgm_dither (PGM *pgm, unsigned int new_maxval)
+{
+	unsigned int x, y;
+	int factor;
+
+	/* Dithering not appropriate here -- just bump the values */
+	if (new_maxval >= pgm->maxval)
+	{
+		pgm_change_maxval (pgm, new_maxval);
+		return;
+	}
+
+	factor = (pgm->maxval + 1) / (new_maxval+1);
+
+	/* Apply the Floyd-Steinberg dithering algorithm. */
+	for (y = 0; y < pgm->height; y++)
+		for (x = 0; x < pgm->width; x++)
+		{
+			/* Calculate the new value for this pixel, after applying
+			the scaling factor. */
+			/* e.g. from 256 to 4 colors:
+			0 -> 0
+			64 -> 1
+			128 -> 2
+			192 -> 3
+			(256) -> (4)
+			*/
+			unsigned int newval = (pgm->bits[y][x] / factor) * factor;
+
+			/* Calculate the (signed) difference from the existing value */
+			int diff = pgm->bits[y][x] - newval;
+
+			/* Distribute the difference to adjacent cells.
+			Take care not to underflow/overflow the values. */
+			pgm_pixel_add_saturated (pgm, x-1, y+1, (3 * diff) >> 4);
+			pgm_pixel_add_saturated (pgm, x, y+1, (5 * diff) >> 4);
+			pgm_pixel_add_saturated (pgm, x+1, y+1, (1 * diff) >> 4);
+			pgm_pixel_add_saturated (pgm, x+1, y, (7 * diff) >> 4);
+		}
+
+	for (y = 0; y < pgm->height; y++)
+		for (x = 0; x < pgm->width; x++)
+			pgm->bits[y][x] /= factor;
 	pgm->maxval = new_maxval;
 }
 
