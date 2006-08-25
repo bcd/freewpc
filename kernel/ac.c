@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -28,8 +27,8 @@
  * This module is not yet complete and is not used.
  */
 
-U8 ac_last_zerocross_reading;
-U8 ac_zerocross_same_count;
+__fastram__ U8 ac_last_zerocross_reading;
+__fastram__ U8 ac_zerocross_same_count;
 bool ac_zerocross_broken;
 
 void ac_rtt (void)
