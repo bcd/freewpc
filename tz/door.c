@@ -149,7 +149,7 @@ void door_award_deff (void)
 	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
-	printf ("%s", door_panel_names[door_index]);
+	sprintf ("%s", door_panel_names[door_index]);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
 	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);

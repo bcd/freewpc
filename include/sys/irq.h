@@ -21,6 +21,8 @@
 #ifndef _SYS_IRQ_H
 #define _SYS_IRQ_H
 
+#ifdef __m6809__
+
 /** GCC4.1 does not compile the new style 'ccreg' instructions
  * correctly, so we revert back to the old way of using
  * hand-coded assembly. */
@@ -45,6 +47,15 @@
 #define disable_firq()	cc_reg |= CC_FIRQ
 #define enable_firq()	cc_reg &= ~CC_FIRQ
 #endif
+
+#else /* __m6809__ */
+
+#define disable_irq()
+#define disable_firq()
+#define enable_irq()
+#define enable_firq()
+
+#endif /* __m6809__ */
 
 /** How to enable/disable all interrupts */
 #ifdef NO_CC_REG

@@ -51,7 +51,7 @@ void multiball_start_deff (void)
 {
 	kickout_lock (KLOCK_DEFF);
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
-	printf ("MULTIBALL");
+	sprintf ("MULTIBALL");
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 	task_sleep_sec (1);

@@ -26,7 +26,7 @@
 #include <freewpc.h>
 
 const char copyright[] = 
-	// "FreeWPC System ROM\n"
+	"FreeWPC System ROM\n"
 	"FreeWPC by Brian Dominy (brian@oddchange.com)\n"
 	"Licensed under the GNU General Public License (GPL)\n";
 

@@ -162,10 +162,14 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 	bcd1 += len-1;
 	bcd2 += len-1;
 
+#ifdef __m6809__
 	asm volatile ("lda\t%0" :: "m" (*bcd1));
 	asm volatile ("adda\t%0" :: "m" (*bcd2));
 	asm volatile ("daa");
 	asm volatile ("sta\t%0" :: "m" (*bcd1));
+#else
+	fatal (ERR_NOT_IMPLEMENTED_YET);
+#endif
 	bcd1--;
 	bcd2--;
   	len--;
@@ -176,10 +180,14 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 		* be done here. (in older implementation)
 		* stb ,x; leax -1,x => stb ,-x
 		*/
+#ifdef __m6809__
 		asm volatile ("lda\t%0" :: "m" (*bcd1));
 		asm volatile ("adca\t%0" :: "m" (*bcd2));
 		asm volatile ("daa");
 		asm volatile ("sta\t%0" :: "m" (*bcd1));
+#else
+	fatal (ERR_NOT_IMPLEMENTED_YET);
+#endif
 		bcd1--;
 		bcd2--;
 		len--;

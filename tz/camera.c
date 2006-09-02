@@ -124,7 +124,7 @@ void sw_camera_handler (void)
 		}
 		sound_send (SND_JET_BUMPER_ADDED);
 	}
-	switch_can_follow (camera, slot, TIME_4S);
+	switch_can_follow (camera, slot, TIME_5S);
 }
 
 

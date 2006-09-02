@@ -38,8 +38,11 @@ do { \
 #define va_end(va)
 
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
-U8 printf (const char *format, ...);
-#define sprintf printf
+U8 sprintf (const char *format, ...);
+
+#ifdef CONFIG_PLATFORM_LINUX
+#define sprintf(format,rest...) sprintf(sprintf_buffer, format, ## rest)
+#endif
 
 /** psprintf() is like sprintf() but it has TWO format control
  * strings.  The first is used when the value is singular, and
@@ -56,7 +59,7 @@ do { \
 #ifdef DEBUGGER
 #define dbprintf(format, rest...) \
 	do { \
-		printf (format, ## rest ); \
+		sprintf (format, ## rest ); \
 		db_puts (sprintf_buffer); \
 	} while (0)
 #else

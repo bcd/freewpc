@@ -36,7 +36,7 @@ const U8 csum_paging_info_table[] = {
 
 
 void
-csum_area_update (struct area_csum *csi)
+csum_area_update (const struct area_csum *csi)
 {
 	U8 csum;
 	U8 *ptr;
@@ -54,7 +54,7 @@ csum_area_update (struct area_csum *csi)
 
 
 void
-csum_area_check (struct area_csum *csi)
+csum_area_check (const struct area_csum *csi)
 {
 	U8 csum;
 	U8 *ptr;

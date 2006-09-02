@@ -30,8 +30,8 @@ struct area_csum
 	U8 reset_page;
 };
 
-void csum_area_update (struct area_csum *csi);
-void csum_area_check (struct area_csum *csi);
+void csum_area_update (const struct area_csum *csi);
+void csum_area_check (const struct area_csum *csi);
 void csum_area_check_all (void);
 
 #endif /* __CSUM_H */

@@ -2810,11 +2810,15 @@ void sysinfo_compiler_version (void) {
 	sprintf ("GCC %s  ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
 }
 
-#ifdef DEBUGGER
 void sysinfo_stats1 (void) {
+#ifdef CONFIG_DEBUG_STACK
 	extern U8 task_largest_stack;
 	sprintf ("MAX STACK %d", task_largest_stack);
+#else
+	sprintf ("");
+#endif
 }
+
 void sysinfo_stats2 (void) {
 #ifdef TASKCOUNT
 	extern U16 task_max_count;
@@ -2823,7 +2827,6 @@ void sysinfo_stats2 (void) {
 	sprintf ("");
 #endif
 }
-#endif
 
 scroller_item sysinfo_scroller[] = {
 	sysinfo_machine_name, sysinfo_machine_version,

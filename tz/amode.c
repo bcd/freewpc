@@ -221,20 +221,6 @@ void amode_deff (void) __taskentry__
 	int design_credit_counter = 3;
 
 	tz_clock_reset ();
-#if 0
-{
-	static int flag = 0;
-	if (flag == 0)
-		task_create_anon (amode_high_score_test);
-	flag++;
-}
-#endif
-
-	dmd_alloc_low_high ();
-	dmd_draw_image2 (readtest0_bits);
-	font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
-	dmd_show2 ();
-	amode_page_delay (7);
 
 	for (;;)
 	{
@@ -247,7 +233,8 @@ void amode_deff (void) __taskentry__
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
-		dmd_draw_image2 (freewpc_logo_bits);
+		dmd_draw_image2 (readtest0_bits);
+		font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
 		dmd_sched_transition (&trans_random_boxfade);
 		dmd_show2 ();
 		if (amode_page_delay (5) && system_config.tournament_mode)
@@ -271,10 +258,15 @@ void amode_deff (void) __taskentry__
 
 		/** Display PLAY PINBALL message **/
 		dmd_sched_transition (&trans_scroll_left);
-		dmd_alloc_low_clean ();
+		dmd_alloc_low_high ();
+		dmd_draw_image2 (mborder0_bits);
 		font_render_string_center (&font_fixed10, 64, 16, 
 			"PLAY PINBALL");
-		dmd_show_low ();
+		dmd_flip_low_high ();
+		font_render_string_center (&font_fixed10, 64, 16, 
+			"PLAY PINBALL");
+		dmd_flip_low_high ();
+		dmd_show2 ();
 		if (amode_page_delay (3) && system_config.tournament_mode)
 			continue;
 

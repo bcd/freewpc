@@ -38,6 +38,10 @@ U8 sys_init_pending_tasks;
 U8 last_nonfatal_error_code;
 task_gid_t last_nonfatal_error_gid;
 
+#ifdef CONFIG_PLATFORM_LINUX
+char sprintf_buffer[PRINTF_BUFFER_SIZE];
+#endif
+
 /*
  * fatal is the entry point for errors that are nonrecoverable.
  * error_code is one of the values in include/sys/errno.h.
@@ -70,7 +74,7 @@ void nonfatal_error_deff (void)
 {
 #ifdef DEBUGGER
 	dmd_alloc_low_clean ();
-	sprintf ("NONFATAL %d", system_audits.non_fatal_errors);
+	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
@@ -107,13 +111,16 @@ void irq_init (void)
 __naked__ __noreturn__ 
 void do_reset (void)
 {
+#ifdef __m6809__
 	register uint8_t *ramptr asm ("x");
+#endif
 
 	extern void system_reset (void);
 
 	/** Disable hardware interrupts in the 6809 */
 	disable_interrupts ();
 
+#ifdef __m6809__
 	/** Initialize the direct page pointer.  This hardware register
 	 * determines where 'direct' addressing instructions are targeted.
 	 * By setting to zero, direct addresses are mapped to 0000h-00FFh.
@@ -162,6 +169,7 @@ void do_reset (void)
 	 * an actual instruction at address 0x0 (branch to self) */
 	*(U8 *)0 = 0x20;
 	*(U8 *)1 = 0xFE;
+#endif /* __m6809__ */
 
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
@@ -305,7 +313,7 @@ void nvram_idle_task (void)
  * You MUST keep processing in this function to the absolute
  * minimum, as it must be fast!
  */
-__attribute__((interrupt))
+__interrupt__
 void do_irq (void)
 {
 	/** Clear the source of the interrupt */
@@ -388,10 +396,12 @@ void do_irq (void)
  * The peripheral timer is currently unused.  Real WPC games only used
  * it on the alphanumeric machines, supposedly.
  */
-__attribute__((interrupt))
+__interrupt__
 void do_firq (void)
 {
+#ifdef __m6809__
 	asm __volatile__ ("pshs\ta,b");
+#endif
 
 	if (*(U8 *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR & 0x80)
 	{
@@ -404,32 +414,34 @@ void do_firq (void)
 		dmd_rtt ();
 	}
 
+#ifdef __m6809__
 	asm __volatile__ ("puls\ta,b");
+#endif
 }
 
 
-__attribute__((interrupt))
+__interrupt__
 void do_nmi (void)
 {
 	fatal (ERR_NMI);
 }
 
 
-__attribute__((interrupt))
+__interrupt__
 void do_swi (void)
 {
 	fatal (ERR_SWI);
 }
 
 
-__attribute__((interrupt))
+__interrupt__
 void do_swi2 (void)
 {
 	fatal (ERR_SWI2);
 }
 
 
-__attribute__((interrupt))
+__interrupt__
 void do_swi3 (void)
 {
 	fatal (ERR_SWI3);

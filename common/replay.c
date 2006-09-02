@@ -29,7 +29,9 @@ const struct area_csum replay_csum_info = {
 	.length = HIGH_SCORE_WIDTH,
 	.csum = &replay_csum,
 	.reset = replay_reset,
+#ifdef HAVE_PAGING
 	.reset_page = PAGE,
+#endif
 };
 
 void replay_award (void)

@@ -59,9 +59,9 @@
 /*
  * Define the size of the saved process stack.
  *
- * This value + 21 should equate a power of 2.
+ * This value + 23 should equate a power of 2.
  */
-#define TASK_STACK_SIZE		43
+#define TASK_STACK_SIZE		41
 
 /** Type for the group ID (gid) */
 typedef U8 task_gid_t;
@@ -95,6 +95,8 @@ typedef struct task_struct
 	 * Not currently used, though, since the task table is just an array
 	 * and we step through it sequentially now */
 	struct task_struct *next;
+
+	struct task_struct *prev;
 
 	/** The saved PC for the task, while it is asleep */
 	U16			pc;
@@ -207,6 +209,8 @@ void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
 __noreturn__ void task_exit (void);
 task_t *task_find_gid (task_gid_t);
+task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val);
+void task_kill_pid (task_t *tp);
 bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
 void task_set_flags (U8 flags);

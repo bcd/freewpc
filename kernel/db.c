@@ -33,7 +33,9 @@
  * considerably smaller.
  */
 #include <freewpc.h>
+#ifdef __m6809__
 #include <m6809/math.h>
+#endif
 
 /** Initially zero, this is set to 1 when a remote debugger is
  * detected */

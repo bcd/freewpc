@@ -255,9 +255,14 @@ void sound_send (sound_code_t code)
 	if (current_volume == 0)
 		return;
 
+#ifdef __m6809__
 	asm ("ldd\t%0" :: "m" (code));
 	asm ("sta\t%0" :: "m" (code_hi));
 	asm ("stb\t%0" :: "m" (code_lo));
+#else
+	code_lo = code & 0xFF;
+	code_hi = code >> 8;
+#endif
 
 #if (MACHINE_DCS == 0)
 	if (code_hi == 0)

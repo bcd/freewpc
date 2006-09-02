@@ -23,6 +23,8 @@
 
 typedef uint8_t *bitset;
 
+#ifdef CONFIG_PLATFORM_WPC
+
 /** WPC_BITOP is an assembly macro for accessing the WPC shifter
  * hardware. */
 #define WPC_BITOP(bs, index, bitop)				\
@@ -50,5 +52,14 @@ do {														\
 
 #define __testbit(bs, index) \
 	WPC_BITOP (bs, index, "\tand%1\t,%0\n")
+
+#else
+
+#define __setbit(bs,index) (bs[index / 8] |= (1 << (index % 8)))
+#define __clearbit(bs,index) (bs[index / 8] &= ~(1 << (index % 8)))
+#define __togglebit(bs,index) (bs[index / 8] ^= (1 << (index % 8)))
+#define __testbit(bs,index) (bs[index / 8] & (1 << (index % 8)))
+
+#endif /* __wpc__ */
 
 #endif /* _SYS_BITARRAY_H */

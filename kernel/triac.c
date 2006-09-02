@@ -83,8 +83,9 @@ void gi_recalc_zerocross ()
 
 void triac_rtt (void)
 {
+#if 0
 	extern U8 tick_count;
-
+#endif
 	U8 triac_bits;
 
 	gi_recalc_zerocross ();

@@ -409,6 +409,7 @@ void switch_init (void)
 
 extern inline void switch_rowpoll (const U8 col)
 {
+#ifdef __m6809__
 	/* Read the switch column from the hardware.
 	 * Column 0 corresponds to the cabinet switches.
 	 * Columns 1-8 refer to the playfield columns.
@@ -481,6 +482,9 @@ extern inline void switch_rowpoll (const U8 col)
 	/* Enqueue any stable changes into the pending array */
 	asm __volatile__ ("\tora\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
 	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
+#else
+	fatal (ERR_NOT_IMPLEMENTED_YET);
+#endif
 }
 
 

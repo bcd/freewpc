@@ -27,9 +27,12 @@
 
 /* Declare that certain things exist.  This is true of the 6809
  * but may change later as we port to different architectures. */
+#ifdef CONFIG_PLATFORM_WPC
 #define HAVE_NVRAM_SECTION
 #define HAVE_LOCAL_SECTION
 #define HAVE_PAGING
+#define HAVE_INTERRUPT_ATTRIBUTE
+#endif
 
 /** noreturn is a standard GCC attribute and is always
  * available */
@@ -53,6 +56,8 @@
 
 #ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))
+#else
+#define __nvram__
 #endif
 
 #ifdef HAVE_LOCAL_SECTION
@@ -69,9 +74,27 @@
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
+#else
+#define __far__(x)
+#define __system__
+#define __common__
+#define __event__
+#define __transition__
+#define __test__
+#define __machine__
 #endif
 
+#ifdef HAVE_INTERRUPT_ATTRIBUTE
+#define __interrupt__ __attribute__((interrupt))
+#else
+#define __interrupt__
+#endif
+
+#ifdef CONFIG_PLATFORM_WPC
 #define __naked__       __attribute__((naked))
+#else
+#define __naked__
+#endif
 
 #define SECTION_VOIDCALL(section,fn) \
 { \

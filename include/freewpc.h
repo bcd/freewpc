@@ -50,9 +50,14 @@ typedef unsigned char uint8_t, U8;
 #if defined(__m6809__) && defined(__int16__)
 typedef int int16_t, I16, S16;
 typedef unsigned int uint16_t, U16;
+typedef U16 INTPTR;
+#elif defined(CONFIG_PLATFORM_LINUX)
+typedef short int16_t, I16, S16;
+typedef unsigned short uint16_t, U16;
 #else /* default assumes -mint8 on wpc */
 typedef long int16_t, I16, S16;
 typedef unsigned long uint16_t, U16;
+typedef unsigned int INTPTR;
 #endif
 
 /* TODO - move these elsewhere */
@@ -77,6 +82,10 @@ extern U8 irq_count;
 #define C_STRING(x)	C_STR(x)
 #define C_STR(x)		#x
 
+#ifdef CONFIG_PLATFORM_LINUX
+#define DIV10(x,q,r)     ({ q = x / 10; r = x % 10; })
+#endif
+
 /* Include the standard header files that are needed
  * by most modules */
 
@@ -84,10 +93,11 @@ extern U8 irq_count;
 #include <mach/config.h>
 
 /* Processor specifics */
-#ifdef __M6809__
+#ifdef __m6809__
 #include <m6809/m6809.h>
-#endif
-#ifdef __I386__
+#else
+#define __blockcopy16(s1,s2,n) memcpy(s1,s2,n)
+#define __blockclear16(s,n) memset(s,'0',n)
 #endif
 
 /* Build system information */
