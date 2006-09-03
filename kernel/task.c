@@ -231,6 +231,9 @@ void task_save (void)
 	else
 		task_small_stacks++;
 #endif
+
+#else
+	__x->stack_word_count = __b;
 #endif
 
 	/* Save current ROM page */
