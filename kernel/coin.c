@@ -121,6 +121,7 @@ void credits_deff (void)
  * off only when there are no credits. */
 void lamp_start_update (void)
 {
+#ifdef MACHINE_START_LAMP
 	/* TODO : start button is flashing very early after reset, before
 	 * a game can actually be started. */
 	if (has_credits_p ())
@@ -132,6 +133,7 @@ void lamp_start_update (void)
 	}
 	else
 		lamp_tristate_off (MACHINE_START_LAMP);
+#endif
 }
 
 

@@ -912,7 +912,7 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 ###	Standard Dependencies
 #######################################################################
 
-kernel/switches.o : include/$(MACHINE)/switch.h
+# kernel/switches.o : include/$(MACHINE)/switch.h
 
 
 #

@@ -21,8 +21,6 @@
 #ifndef _SYS_SOL_H
 #define _SYS_SOL_H
 
-#include <mach/coil.h>
-
 typedef U8 solnum_t;
 
 #define SOL_COUNT 48

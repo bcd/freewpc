@@ -247,10 +247,15 @@ void do_reset (void)
 	 * Now, start the display effect that runs at powerup.
 	 */
 
+#ifdef MACHINE_TEST_ONLY
+	sys_init_complete++;
+	test_enter_button ();
+#else
 	task_create_gid (GID_SYSTEM_RESET, system_reset);
 
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
+#endif
 
 	/* Initialize the sound board further */
 #if (MACHINE_DCS == 1)

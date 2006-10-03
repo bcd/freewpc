@@ -150,8 +150,10 @@ void window_pop_quiet (void)
 
 	if (win_top == &win_stack[0])
 	{
+#ifndef MACHINE_TEST_ONLY
 		window_pop_first ();
 		win_top = NULL;
+#endif
 	}
 	else
 	{
@@ -2691,11 +2693,18 @@ struct menu *test_menu_items[] = {
 #ifdef MACHINE_TEST_MENU_ITEMS
 	MACHINE_TEST_MENU_ITEMS
 #endif
+#ifdef MACHINE_TEST_ONLY
+	&development_menu,
+#endif
 	NULL,
 };
 
 struct menu test_menu = {
+#ifdef MACHINE_TEST_ONLY
+	.name = MACHINE_NAME,
+#else
 	.name = "TESTS",
+#endif
 	.flags = M_MENU | M_LETTER_PREFIX,
 	.var = { .submenus = test_menu_items, },
 };
@@ -2928,7 +2937,11 @@ void test_enter_button (void)
 {
 	if (!win_top)
 	{
+#ifdef MACHINE_TEST_ONLY
+		window_push (&menu_window, &test_menu);
+#else
 		window_push (&sysinfo_scroller_window, &sysinfo_scroller);
+#endif
 	}
 	else
 	{

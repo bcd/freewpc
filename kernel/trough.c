@@ -35,9 +35,6 @@
  */
 
 #include <freewpc.h>
-#include <mach/switch.h>
-#include <mach/coil.h>
-
 
 /* For games with an outhole switch.
  *
@@ -147,7 +144,11 @@ device_ops_t trough_ops = {
 device_properties_t trough_props = {
 	.ops = &trough_ops,
 	.name = "TROUGH",
+#ifdef MACHINE_BALL_SERVE_SOLENOID
 	.sol = MACHINE_BALL_SERVE_SOLENOID,
+#else
+	.sol = 0,
+#endif
 	.sw_count = MACHINE_TROUGH_SIZE,
 	.init_max_count = MACHINE_TROUGH_SIZE,
 	.sw = {

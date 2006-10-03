@@ -55,6 +55,15 @@ typedef struct
 __fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
+#ifdef MACHINE_NEW_SWITCH_TYPES
+const U8 mach_opto_mask[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+const U8 mach_edge_switches[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+#endif
+
 /*
  * Entry for unused switches.
  */

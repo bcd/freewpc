@@ -587,6 +587,9 @@ void task_dispatcher (void)
 		 * them all. */
 		if (tp == &task_buffer[NUM_TASKS])
 		{
+			/* Wait for next task tick before continuing */
+			while (tick_start_count == *(volatile U8 *)&tick_count);
+	
 			/* If the system is fully initialized, also
 			 * run the idle tasks once every pass through
 			 * the list. */
@@ -596,9 +599,6 @@ void task_dispatcher (void)
 
 				/* Execute idle tasks on system stack */
 				set_stack_pointer (STACK_BASE);
-	
-				/* Wait for next task tick before continuing */
-				while (tick_start_count == *(volatile U8 *)&tick_count);
 	
 				/* Call idle tasks */
 #ifdef DEBUGGER

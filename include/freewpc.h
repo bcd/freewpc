@@ -89,7 +89,7 @@ extern U8 irq_count;
 /* Include the standard header files that are needed
  * by most modules */
 
-/* Main configuration - game specific */
+/* Main configuration - game specific.  All machines MUST define one */
 #include <mach/config.h>
 
 /* Processor specifics */
@@ -159,16 +159,33 @@ extern U8 irq_count;
 #include <inspector.h>
 #include <test.h>
 
-/* Game-specific defines.  'mach' should point to
- * the machine-specific directory */
+
+/* Game-specific defines.  'mach' should point to the machine-specific 
+ * directory.  These files are optional; if a machine does not need
+ * one of these, it should define the corresponding flag.
+ */
+#ifndef MACHINE_LACKS_ALL_INCLUDES
+#ifndef MACHINE_LACKS_SWITCH_H
 #include <mach/switch.h>
+#endif
+#ifndef MACHINE_LACKS_COIL_H
 #include <mach/coil.h>
+#endif
+#ifndef MACHINE_LACKS_SOUND_H
 #include <mach/sound.h>
+#endif
+#ifndef MACHINE_LACKS_LAMP_H
 #include <mach/lamp.h>
+#endif MACHINE_LACKS_LAMP_H
+#ifndef MACHINE_LACKS_FLAGS_H
 #ifdef MACHINE_INCLUDE_FLAGS
 #include <mach/flags.h>
 #endif
+#endif
+#ifndef MACHINE_LACKS_PROTOS_H
 #include <mach/protos.h>
+#endif
+#endif /* MACHINE_LACKS_ALL_INCLUDES */
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>

@@ -154,7 +154,9 @@ void ball_search_monitor_task (void)
 		if (in_live_game 
 				&& !in_bonus 
 				&& live_balls 
+#ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
+#endif
 				&& !switch_poll_logical (SW_LL_FLIP_SW) 
 				&& !switch_poll_logical (SW_LR_FLIP_SW))
 		{
