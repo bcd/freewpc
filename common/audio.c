@@ -74,8 +74,8 @@ bool audio_start (audio_channel_id_t id,
 	{
 		ch->task = task_create_gid (ch->gid, audio_control_task);
 		task_set_arg (ch->task, (U16)ch);
-		*((U16 *)(&ch->task->thread_data[0])) = fn;
-		*((U8 *)(&ch->task->thread_data[2])) = fnpage;
+		// *((U16 *)(&ch->task->thread_data[0])) = fn;
+		////  *((U8 *)(&ch->task->thread_data[2])) = fnpage;
 	}
 }
 
