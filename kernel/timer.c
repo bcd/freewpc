@@ -81,25 +81,25 @@ __taskentry__ void live_ball_timer_function (void)
 }
 
 
-task_t *timer_restart (task_gid_t gid, U16 ticks, task_function_t fn)
+task_pid_t timer_restart (task_gid_t gid, U16 ticks, task_function_t fn)
 {
-	task_t *tp = task_recreate_gid (gid, fn);
+	task_pid_t tp = task_recreate_gid (gid, fn);
 	task_set_arg (tp, ticks);
 	return (tp);
 }
 
 
-task_t *timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn)
+task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn)
 {
-	task_t *tp = task_create_gid1 (gid, fn);
+	task_pid_t tp = task_create_gid1 (gid, fn);
 	task_set_arg (tp, ticks);
 	return (tp);
 }
 
 
-task_t *timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
+task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 {
-	task_t *tp = task_create_gid (gid, fn);
+	task_pid_t tp = task_create_gid (gid, fn);
 	task_set_arg (tp, ticks);
 	return (tp);
 }

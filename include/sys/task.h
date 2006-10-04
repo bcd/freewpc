@@ -43,7 +43,7 @@ extern bool task_dispatching_ok;
 
 #include <pth.h>
 
-typedef pth_t task_t;
+typedef pth_t task_pid_t;
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
@@ -211,40 +211,40 @@ extern inline void task_set_thread_data (task_t *pid, U8 n, U8 v)
 		__debug_timer, irq_count); \
 }
 
+/** A process ID, or PID, is just a pointer to the task block.
+ * PIDs are rarely used as they are dynamic in value. */
+typedef task_t *task_pid_t;
+
 #endif
 
 /********************************/
 /*     Function Prototypes      */
 /********************************/
 
-/** A process ID, or PID, is just a pointer to the task block.
- * PIDs are rarely used as they are dynamic in value. */
-typedef task_t *task_pid_t;
-
 void task_dump (void);
 void task_init (void);
 void task_create (void);
-task_t *task_create_gid (task_gid_t, task_function_t fn);
-task_t *task_create_gid1 (task_gid_t, task_function_t fn);
-task_t *task_recreate_gid (task_gid_t, task_function_t fn);
-task_t *task_getpid (void);
+task_pid_t task_create_gid (task_gid_t, task_function_t fn);
+task_pid_t task_create_gid1 (task_gid_t, task_function_t fn);
+task_pid_t task_recreate_gid (task_gid_t, task_function_t fn);
+task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
 __noreturn__ void task_exit (void);
-task_t *task_find_gid (task_gid_t);
-task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val);
-void task_kill_pid (task_t *tp);
+task_pid_t task_find_gid (task_gid_t);
+task_pid_t task_find_gid_data (task_gid_t gid, U8 off, U8 val);
+void task_kill_pid (task_pid_t tp);
 bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
 void task_set_flags (U8 flags);
 void task_clear_flags (U8 flags);
 U16 task_get_arg (void);
-void task_set_arg (task_t *tp, U16 arg);
+void task_set_arg (task_pid_t tp, U16 arg);
 __noreturn__ void task_dispatcher (void);
 #ifdef CONFIG_PLATFORM_LINUX
-task_t *task_getpid (void);
+task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 U8 task_get_thread_data (task_pid_t pid, U8 n);
 void task_set_thread_data (task_pid_t pid, U8 n, U8 v);

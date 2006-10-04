@@ -619,7 +619,7 @@ void switch_sched (void)
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
-		task_t *tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
+		task_pid_t tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
 		task_set_arg (tp, (U16)swinfo);
 	}
 
@@ -712,7 +712,7 @@ void switch_idle_task (void)
 					 * of some switch handlers taking longer to execute
 					 * than others.
 					 */
-					task_t *tp = task_create_gid (GID_SW_HANDLER, switch_sched);
+					task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched);
 					task_set_arg (tp, sw);
 				}
 			}

@@ -784,7 +784,7 @@ $(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))
 $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
 else
 $(C_OBJS) : PAGEFLAGS=-DDECLARE_PAGED=
-$(XBM_OBJS) $(FON_OBJS): PAGEFLAGS=-DNOSTATIC
+$(XBM_OBJS) : PAGEFLAGS=-Dstatic=
 endif
 
 $(C_OBJS) : GCC_LANG=

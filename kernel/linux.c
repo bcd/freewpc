@@ -49,8 +49,18 @@ U8 linux_asic_read (U16 addr)
 }
 
 
+void linux_realtime_thread (void)
+{
+	for (;;)
+	{
+		printf ("In linux_realtime_thread\n");
+		task_sleep (0);
+	}
+}
+
 void linux_init (void)
 {
+	task_create_gid (GID_LINUX_REALTIME, linux_realtime_thread);
 }
 
 

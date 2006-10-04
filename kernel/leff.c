@@ -179,7 +179,7 @@ static leffnum_t leff_get_highest_priority (void)
  */
 void leff_create_handler (const leff_t *leff)
 {
-	task_t *tp;
+	task_pid_t tp;
 
 	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != L_NOLAMPS)
@@ -294,7 +294,7 @@ void leff_stop (leffnum_t dn)
 		running for the one we want to stop.  No need to
 		dequeue it, but its allocations must be freed and
 		the task stopped. */
-		task_t *tp = task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, dn);
+		task_pid_t tp = task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, dn);
 		if (tp)
 		{
 			task_kill_pid (tp);

@@ -21,9 +21,9 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 
-task_t *timer_restart (task_gid_t gid, U16 ticks, task_function_t fn);
-task_t *timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
-task_t *timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
+task_pid_t timer_restart (task_gid_t gid, U16 ticks, task_function_t fn);
+task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
+task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
 void timer_init (void);
 
 #define timer_kill_gid 	task_kill_gid
