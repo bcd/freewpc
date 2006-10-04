@@ -158,6 +158,10 @@ void db_idle_task (void)
 
 void db_init (void)
 {
+#ifdef CONFIG_PLATFORM_LINUX
+	db_attached = 1;
+#else
 	db_attached = 0;
+#endif
 }
 
