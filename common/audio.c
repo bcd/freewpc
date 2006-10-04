@@ -39,7 +39,7 @@ typedef enum {
 
 
 typedef struct {
-	task_t *task;
+	task_pid_t task;
 	task_ticks_t gap;
 	task_gid_t gid;
 } audio_channel_t;
