@@ -86,16 +86,19 @@ typedef struct
 	/** Extra data used to create multiple transitions using common
 	 * code but with slight differences.  Each transition interprets
 	 * this field differently.  It could be used to hold a pointer or
-	 * an offset. */
-	U16 arg;
+	 * an offset, so a union is used. */
+	union {
+		U16 u16;
+		void *ptr;
+	} arg;
 
 	/** Number of iterations in the transition */
 	U8 count;
 } dmd_transition_t;
 
 
-#define wpc_dmd_firq_row		(*(uint8_t *)WPC_DMD_FIRQ_ROW_VALUE)
-#define wpc_dmd_visible_page	(*(uint8_t *)WPC_DMD_ACTIVE_PAGE)
+#define wpc_dmd_set_firq_row(v)		wpc_asic_write (WPC_DMD_FIRQ_ROW_VALUE, v)
+#define wpc_dmd_set_visible_page(v)	wpc_asic_write (WPC_DMD_ACTIVE_PAGE, v)
 
 #define dmd_low_buffer			((dmd_buffer_t)DMD_LOW_BASE)
 #define dmd_high_buffer			((dmd_buffer_t)DMD_HIGH_BASE)

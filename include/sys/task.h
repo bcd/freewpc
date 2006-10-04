@@ -21,6 +21,35 @@
 #ifndef _SYS_TASK_H
 #define _SYS_TASK_H
 
+/*
+ * The first section contains common defines that are always available.
+ */
+
+extern bool task_dispatching_ok;
+
+/** Values for the 'flags' field */
+
+/* TASK_PROTECTED means that a task is immune to task_kill_gid.
+ * It can only exit by means of dying, i.e. task_exit.
+ * A task should set this upon entry before it begins anything
+ * urgent. */
+#define TASK_PROTECTED   0x01
+
+
+
+/* Now, the platform specific defines. */
+
+#ifdef CONFIG_PLATFORM_LINUX
+
+#include <pth.h>
+
+typedef pth_t task_t;
+typedef unsigned int task_gid_t;
+typedef unsigned int task_ticks_t;
+typedef void (*task_function_t) (void);
+
+#else /* !CONFIG_PLATFORM_LINUX */
+
 #include <env.h>
 #ifdef HAVE_LIBC
 #include <sys/types.h>
@@ -32,14 +61,6 @@
 #define TASK_USED		1
 #define TASK_BLOCKED	2
 
-
-/** Values for the 'flags' field */
-
-/* TASK_PROTECTED means that a task is immune to task_kill_gid.
- * It can only exit by means of dying, i.e. task_exit.
- * A task should set this upon entry before it begins anything
- * urgent. */
-#define TASK_PROTECTED   0x01
 
 /* The TASK_HEAP_SIZE field is not currently used.  It is
  * intended to represent how much memory, in bytes, has been
@@ -149,12 +170,6 @@ typedef struct task_struct
 } task_t;
 
 
-/** A process ID, or PID, is just a pointer to the task block.
- * PIDs are rarely used as they are dynamic in value. */
-typedef task_t *task_pid_t;
-
-extern bool task_dispatching_ok;
-
 extern task_t *task_current;
 
 
@@ -172,9 +187,14 @@ extern inline task_gid_t task_getgid (void)
 	return task_current->gid;
 }
 
-extern inline U8 *task_get_thread_data_ptr (U8 n)
+extern inline U8 task_get_thread_data (task_t *pid, U8 n)
 {
-	return &task_current->thread_data[n];
+	return pid->thread_data[n];
+}
+
+extern inline void task_set_thread_data (task_t *pid, U8 n, U8 v)
+{
+	pid->thread_data[n] = v;
 }
 
 /*******************************/
@@ -191,10 +211,15 @@ extern inline U8 *task_get_thread_data_ptr (U8 n)
 		__debug_timer, irq_count); \
 }
 
+#endif
 
 /********************************/
 /*     Function Prototypes      */
 /********************************/
+
+/** A process ID, or PID, is just a pointer to the task block.
+ * PIDs are rarely used as they are dynamic in value. */
+typedef task_t *task_pid_t;
 
 void task_dump (void);
 void task_init (void);
@@ -218,6 +243,12 @@ void task_clear_flags (U8 flags);
 U16 task_get_arg (void);
 void task_set_arg (task_t *tp, U16 arg);
 __noreturn__ void task_dispatcher (void);
+#ifdef CONFIG_PLATFORM_LINUX
+task_t *task_getpid (void);
+task_gid_t task_getgid (void);
+U8 task_get_thread_data (task_pid_t pid, U8 n);
+void task_set_thread_data (task_pid_t pid, U8 n, U8 v);
+#endif
 
 #define task_create_peer(fn)		task_create_gid (task_getgid (), fn)
 

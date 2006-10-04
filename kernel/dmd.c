@@ -132,7 +132,7 @@ U8 dmd_composite_page;
 
 inline void wpc_dmd_set_low_page (U8 val)
 {
-	*(U8 *)WPC_DMD_LOW_PAGE = dmd_low_page = val;
+	wpc_asic_write (WPC_DMD_LOW_PAGE, dmd_low_page = val);
 }
 
 inline U8 wpc_dmd_get_low_page (void)
@@ -142,7 +142,7 @@ inline U8 wpc_dmd_get_low_page (void)
 
 inline void wpc_dmd_set_high_page (U8 val)
 {
-	*(U8 *)WPC_DMD_HIGH_PAGE = dmd_high_page = val;
+	wpc_asic_write (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
 }
 
 inline U8 wpc_dmd_get_high_page (void)
@@ -157,13 +157,13 @@ inline U8 wpc_dmd_get_high_page (void)
 void dmd_init (void)
 {
 	/* Program the DMD controller to generate interrupts */
-	wpc_dmd_firq_row = 30;
+	wpc_dmd_set_firq_row (30);
 
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
 	wpc_dmd_set_low_page (0);
 	wpc_dmd_set_high_page (0);
-	dmd_dark_page = dmd_bright_page = wpc_dmd_visible_page = 0;
+	wpc_dmd_set_visible_page (dmd_dark_page = dmd_bright_page = 0);
 	dmd_free_page = 2;
 	dmd_page_flip_count = 2;
 }
@@ -187,19 +187,19 @@ void dmd_rtt (void)
 	if (dmd_page_flip_count >= 2)
 	{
 		/* Show the dark page 1/3 of the time */
-		wpc_dmd_visible_page = dmd_dark_page;
+		wpc_dmd_set_visible_page (dmd_dark_page);
 		dmd_page_flip_count = 0;
 	}
 	else
 	{
 		/* Show the bright page 2/3 of the time */
-		wpc_dmd_visible_page = dmd_bright_page;
+		wpc_dmd_set_visible_page (dmd_bright_page);
 		dmd_page_flip_count++;
 	}
 
 	/* Reprogram the controller to generate another interrupt
 	 * after the next refresh. */
-	wpc_dmd_firq_row = 30;
+	wpc_dmd_set_firq_row (30);
 }
 
 

@@ -21,27 +21,30 @@
 #ifndef _PRINTF_H
 #define _PRINTF_H
 
-
 typedef U8 *va_list;
 
 #define PRINTF_BUFFER_SIZE		48
 
 
+#undef va_start
 #define va_start(va, fmt) \
 do { \
 	va = (va_list)((unsigned char *)&fmt + sizeof (fmt)); \
 } while (0) \
 
 
+#undef va_arg
 #define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
 
+#undef va_end
 #define va_end(va)
 
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
-U8 sprintf (const char *format, ...);
 
 #ifdef CONFIG_PLATFORM_LINUX
 #define sprintf(format,rest...) sprintf(sprintf_buffer, format, ## rest)
+#else
+U8 sprintf (const char *format, ...);
 #endif
 
 /** psprintf() is like sprintf() but it has TWO format control

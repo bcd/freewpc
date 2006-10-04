@@ -83,7 +83,7 @@ DEBUG_COMPILER ?= n
 ###	Set Default Target
 #######################################################################
 ifeq ($(PLATFORM),linux)
-default_target : freewpc
+default_target : clean_err check_prereqs freewpc
 else
 ifdef TARGET_ROMPATH
 default_target : clean_err check_prereqs install post_build
@@ -235,6 +235,7 @@ KERNEL_OBJS += \
 endif
 ifeq ($(PLATFORM),linux)
 KERNEL_OBJS += \
+	kernel/linux.o \
 	kernel/task_linux.o
 endif
 
@@ -319,6 +320,10 @@ ifeq ($(USE_LIBC),y)
 CFLAGS += -I$(LIBC_DIR)/include
 endif
 
+ifeq ($(PLATFORM),linux)
+CFLAGS += -I`pth-config --cflags`
+endif
+
 # Program include directories
 CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
@@ -356,7 +361,7 @@ CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize
 ifeq ($(PLATFORM),wpc)
 CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin
 else
-CFLAGS += -DCONFIG_PLATFORM_LINUX
+CFLAGS += -DCONFIG_PLATFORM_LINUX -g
 endif
 
 # This didn't work before, but now it does!
@@ -650,7 +655,7 @@ endif
 
 ifeq ($(PLATFORM),linux)
 freewpc : $(OBJS)
-	@echo Linking ... && $(LD) -o freewpc $(OBJS) >> $(ERR) 2>&1
+	@echo Linking ... && $(HOSTCC) `pth-config --ldflags` -o freewpc $(OBJS) -lpth >> $(ERR) 2>&1
 endif
 
 #
@@ -774,8 +779,13 @@ $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED) $(DEPS)
 # The basic rule is the same, but with a few differences that are
 # handled through some extra variables:
 #
+ifeq ($(PLATFORM),wpc)
 $(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))"
 $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
+else
+$(C_OBJS) : PAGEFLAGS=-DDECLARE_PAGED=
+$(XBM_OBJS) $(FON_OBJS): PAGEFLAGS=-DNOSTATIC
+endif
 
 $(C_OBJS) : GCC_LANG=
 $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
@@ -792,7 +802,7 @@ $(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
 ifeq ($(PLATFORM),wpc)
 	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
 else
-	@echo "Compiling $< ..." && $(CC) -o $@ $(CFLAGS) -c $(GCC_LANG) $< >> $(ERR) 2>&1
+	@echo "Compiling $< ..." && $(HOSTCC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< >> $(ERR) 2>&1
 endif
 
 #

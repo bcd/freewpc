@@ -55,7 +55,7 @@ void fatal (errcode_t error_code)
 	
 	dmd_alloc_low_clean ();
 
-	dbprintf ("Fatal error: %i", error_code);
+	dbprintf ("Fatal error: %i\n", error_code);
 
 	sprintf ("ERRNO %i", error_code);
 	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
@@ -65,8 +65,12 @@ void fatal (errcode_t error_code)
 
 	dmd_show_low ();
 	task_dump ();
+#ifdef CONFIG_PLATFORM_LINUX
+	exit (1);
+#else
 	/* TODO : reset hardware here!! */
 	for (;;);
+#endif
 }
 
 
@@ -95,7 +99,7 @@ void nonfatal (errcode_t error_code)
 	audit_increment (&system_audits.non_fatal_errors);
 #ifdef DEBUGGER
 	last_nonfatal_error_code = error_code;
-	last_nonfatal_error_gid = task_current->gid;
+	last_nonfatal_error_gid = task_getgid ();
 	deff_start (DEFF_NONFATAL_ERROR);
 #endif
 }
@@ -171,6 +175,10 @@ void do_reset (void)
 	*(U8 *)1 = 0xFE;
 #endif /* __m6809__ */
 
+#ifdef CONFIG_PLATFORM_LINUX
+	linux_init ();
+#endif
+
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (RAM_LOCK_2K);
@@ -183,12 +191,12 @@ void do_reset (void)
 
 	/** Initialize other critical WPC output registers relating
 	 * to hardware */
-	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = 0;
-	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = 0;
-	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = 0;
-	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = 0;
-	*(volatile U8 *)WPC_LAMP_ROW_OUTPUT = 0;
-	*(volatile U8 *)WPC_GI_TRIAC = 0;
+	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
+	wpc_asic_write (WPC_GI_TRIAC, 0);
 
 	/** Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
@@ -332,7 +340,7 @@ void do_irq (void)
 	 * based on these writes.  This should never be defined
 	 * for real hardware. */
 #ifdef IRQPROFILE
-	*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT = 0;
+	wpc_asic_write (WPC_PINMAME_CYCLE_COUNT, 0);
 #endif
 
 	irq_count++;
@@ -385,7 +393,7 @@ void do_irq (void)
 	 * by writing these markers. */
 #ifdef IRQPROFILE
 	db_putc (0xDD);
-	db_putc (*(volatile U8 *)WPC_PINMAME_CYCLE_COUNT);
+	db_putc (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
 #endif
 }
 

@@ -75,8 +75,11 @@ U8 lampset_alternation_state;
 static inline void lampset_invoke_operator (
 	lampnum_t lamp, lamp_operator_t op )
 {
+	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT,
+		task_get_thread_data (task_getpid (), L_PRIV_APPLY_COUNT) + 1);
+
 	(*op) (lamp);
-	lampset_apply_count++;
+
 	if (lampset_apply_delay > 0)
 		task_sleep (lampset_apply_delay);
 }
@@ -103,8 +106,8 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 	int lset_stack_offset = 0;
 
 	lset_stack[lset_stack_offset++] = 0;
-	lampset_apply_count = 0;
-	lampset_private_data = 0;
+	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT, 0);
+	task_set_thread_data (task_getpid (), L_PRIV_DATA, 0);
 
 	while (lset)
 	{
@@ -188,10 +191,10 @@ void lampset_step_increment_handler (lampnum_t lamp)
 	if (lamp_test (lamp))
 	{
 		lamp_off (lamp);
-		lamp_on (lampset_private_data);
+		lamp_on (task_get_thread_data (task_getpid (), L_PRIV_DATA));
 	}
 
-	lampset_private_data = lamp;
+	task_set_thread_data (task_getpid (), L_PRIV_DATA, lamp);
 }
 
 void lampset_step_increment (lampset_id_t id)
@@ -205,15 +208,15 @@ void lampset_step_decrement_handler (lampnum_t lamp)
 {
 	/* Find the first lamp that is on; turn it off, and turn the
 	 * previous lamp in the sequence on */
-	if (lampset_private_data)
+	if (task_get_thread_data (task_getpid (), L_PRIV_DATA))
 	{
 		lamp_on (lamp);
-		lampset_private_data = 0;
+		task_set_thread_data (task_getpid (), L_PRIV_DATA, 0);
 	}
 	else if (lamp_test (lamp))
 	{
 		lamp_off (lamp);
-		lampset_private_data = 1;
+		task_set_thread_data (task_getpid (), L_PRIV_DATA, 1);
 	}
 }
 

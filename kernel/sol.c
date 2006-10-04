@@ -38,18 +38,17 @@ void
 sol_rtt (void)
 {
 	/* TODO - align adjacent registers to do 16-bit writes? */
-	*(volatile U8 *)WPC_SOL_HIGHPOWER_OUTPUT = 
-		sol_state[sol_cycle][0] | sol_rt_state[0];
-	*(volatile U8 *)WPC_SOL_LOWPOWER_OUTPUT = 
-		sol_state[sol_cycle][1] | sol_rt_state[1];
-	*(volatile U8 *)WPC_SOL_FLASH1_OUTPUT = 
-		sol_state[sol_cycle][2] | sol_rt_state[2];
-	*(volatile U8 *)WPC_SOL_FLASH2_OUTPUT = 
-		sol_state[sol_cycle][3] | sol_rt_state[3];
+	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT,
+		sol_state[sol_cycle][0] | sol_rt_state[0]);
+	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT,
+		sol_state[sol_cycle][1] | sol_rt_state[1]);
+	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT,
+		sol_state[sol_cycle][2] | sol_rt_state[2]);
+	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT,
+		sol_state[sol_cycle][3] | sol_rt_state[3]);
 
 #ifdef MACHINE_SOL_EXTBOARD1
-	*(volatile U8 *)WPC_EXTBOARD1 = 
-		sol_state[sol_cycle][5] | sol_rt_state[5];
+	wpc_asic_write (WPC_EXTBOARD1, sol_state[sol_cycle][5] | sol_rt_state[5]);
 #endif
 
 	/* Advance cycle counter */

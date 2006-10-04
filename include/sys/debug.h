@@ -26,7 +26,7 @@
 
 extern inline U8 wpc_debug_get_status (void)
 {
-	return *(volatile U8 *)WPC_DEBUG_CONTROL_PORT;
+	return wpc_asic_read (WPC_DEBUG_CONTROL_PORT);
 }
 
 extern inline U8 wpc_debug_write_ready (void)
@@ -41,12 +41,12 @@ extern inline U8 wpc_debug_read_ready (void)
 
 extern inline void wpc_debug_write (U8 data)
 {
-	*(volatile U8 *)WPC_DEBUG_DATA_PORT = data;
+	wpc_asic_write (WPC_DEBUG_DATA_PORT, data);
 }
 
 extern inline U8 wpc_debug_read (void)
 {
-	return *(volatile U8 *)WPC_DEBUG_DATA_PORT;
+	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
 }
 
 

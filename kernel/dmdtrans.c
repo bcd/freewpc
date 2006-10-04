@@ -64,7 +64,7 @@ void trans_scroll_up_old (void)
 {
 	/* dmd_low_buffer = old image data */
 	/* dmd_high_buffer = composite buffer */
-	register U16 arg = dmd_transition->arg;
+	register U16 arg = dmd_transition->arg.u16;
 	
 	/* Use __blockcopy16 to do a fast memcpy when size is
 	 * guaranteed to be a multiple of 16 bytes and nonzero. */
@@ -76,7 +76,7 @@ void trans_scroll_up_new (void)
 {
 	/* dmd_low_buffer = new image data */
 	/* dmd_high_buffer = composite buffer */
-	register U16 arg = dmd_transition->arg;
+	register U16 arg = dmd_transition->arg.u16;
 
 	__blockcopy16 (dmd_high_buffer + DMD_PAGE_SIZE - arg,
 		dmd_trans_data_ptr, arg);
@@ -92,7 +92,7 @@ dmd_transition_t trans_scroll_up = {
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_33MS,
-	.arg = 4 * 16, /* 4 lines at a time */
+	.arg = { .u16 = 4 * 16 }, /* 4 lines at a time */
 	.count = 8,
 };
 
@@ -101,7 +101,7 @@ dmd_transition_t trans_scroll_up_avg = {
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_66MS,
-	.arg = 2 * 16, /* 2 lines at a time */
+	.arg = { .u16 = 2 * 16 }, /* 2 lines at a time */
 	.count = 16,
 };
 
@@ -110,7 +110,7 @@ dmd_transition_t trans_scroll_up_slow = {
 	.composite_old = trans_scroll_up_old,
 	.composite_new = trans_scroll_up_new,
 	.delay = TIME_100MS,
-	.arg = 1 * 16, /* 1 line at a time */
+	.arg = { .u16 = 1 * 16 }, /* 1 line at a time */
 	.count = 32,
 };
 
@@ -118,20 +118,20 @@ dmd_transition_t trans_scroll_up_slow = {
 
 void trans_scroll_down_init (void)
 {
-	register U16 arg = dmd_transition->arg;
+	register U16 arg = dmd_transition->arg.u16;
 	dmd_trans_data_ptr = dmd_low_buffer + DMD_PAGE_SIZE - arg;
 }
 
 void trans_scroll_down_old (void)
 {
-	register U16 arg = dmd_transition->arg;
+	register U16 arg = dmd_transition->arg.u16;
 	__blockcopy16 (dmd_high_buffer + arg, 
 		dmd_low_buffer, DMD_PAGE_SIZE - arg);
 }
 
 void trans_scroll_down_new (void)
 {
-	register U16 arg = dmd_transition->arg;
+	register U16 arg = dmd_transition->arg.u16;
 	__blockcopy16 (dmd_high_buffer, dmd_trans_data_ptr, arg);
 	dmd_trans_data_ptr -= arg;
 	if (dmd_trans_data_ptr < dmd_low_buffer)
@@ -143,7 +143,7 @@ dmd_transition_t trans_scroll_down = {
 	.composite_old = trans_scroll_down_old,
 	.composite_new = trans_scroll_down_new,
 	.delay = TIME_33MS,
-	.arg = 4 * 16,
+	.arg = { .u16 = 4 * 16 },
 	.count = 8,
 };
 
@@ -181,7 +181,7 @@ dmd_transition_t trans_scroll_left = {
 	.composite_old = trans_scroll_left_old,
 	.composite_new = trans_scroll_left_new,
 	.delay = TIME_33MS,
-	.arg = 0,
+	.arg = { .u16 = 0 },
 	.count = 16,
 };
 
@@ -220,7 +220,7 @@ dmd_transition_t trans_scroll_right = {
 	.composite_old = trans_scroll_right_old,
 	.composite_new = trans_scroll_right_new,
 	.delay = TIME_33MS,
-	.arg = 0,
+	.arg = { .u16 = 0 },
 	.count = 16,
 };
 
@@ -249,7 +249,7 @@ void trans_fade_new (void)
 	U16 offset;
 
 	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = (U8 *)dmd_transition->arg;
+		dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
 
 	offset = *(U16 *)dmd_trans_data_ptr;
 
@@ -263,7 +263,8 @@ void trans_fade_new (void)
 	dmd_high_buffer[112 + offset] = dmd_low_buffer[112 + offset];
 
 	dmd_trans_data_ptr += sizeof (U16);
-	if ((U16)dmd_trans_data_ptr == dmd_transition->arg + 64 * sizeof (U16))
+	if (dmd_trans_data_ptr == 
+		((U8 *)dmd_transition->arg.ptr) + 64 * sizeof (U16))
 		dmd_in_transition = FALSE;
 }
 
@@ -271,7 +272,7 @@ dmd_transition_t trans_sequential_boxfade = {
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
-	.arg = (U16)sequential_boxfade_offset_table,
+	.arg = { .ptr = sequential_boxfade_offset_table },
 	.count = 64,
 };
 
@@ -279,7 +280,7 @@ dmd_transition_t trans_random_boxfade = {
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
-	.arg = (U16)random_boxfade_offset_table,
+	.arg = { .ptr = random_boxfade_offset_table },
 	.count = 64,
 };
 
@@ -295,7 +296,7 @@ void trans_vstripe_new (void)
 	U8 i;
 
 	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = (U8 *)dmd_transition->arg;
+		dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
 
 	col = dmd_trans_data_ptr[0];
 	mask = dmd_trans_data_ptr[1];
@@ -351,7 +352,7 @@ dmd_transition_t trans_vstripe_left2right = {
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_vstripe_new,
 	.delay = TIME_33MS,
-	.arg = (U16)vstripe_left2right_data_table,
+	.arg = { .ptr = vstripe_left2right_data_table },
 };
 
 
@@ -379,6 +380,6 @@ dmd_transition_t trans_vstripe_right2left = {
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_vstripe_new,
 	.delay = TIME_33MS,
-	.arg = (U16)vstripe_right2left_data_table,
+	.arg = { .ptr = vstripe_right2left_data_table },
 };
 

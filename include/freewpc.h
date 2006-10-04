@@ -98,6 +98,8 @@ extern U8 irq_count;
 #else
 #define __blockcopy16(s1,s2,n) memcpy(s1,s2,n)
 #define __blockclear16(s,n) memset(s,'0',n)
+#include <stdio.h>
+#include <string.h>
 #endif
 
 /* Build system information */
@@ -176,7 +178,7 @@ extern U8 irq_count;
 #endif
 #ifndef MACHINE_LACKS_LAMP_H
 #include <mach/lamp.h>
-#endif MACHINE_LACKS_LAMP_H
+#endif
 #ifndef MACHINE_LACKS_FLAGS_H
 #ifdef MACHINE_INCLUDE_FLAGS
 #include <mach/flags.h>
@@ -218,6 +220,10 @@ extern U8 irq_count;
 #define PAGE_PRAGMA
 #endif
 PAGE_PRAGMA
+#endif
+
+#ifdef NOSTATIC
+#define static
 #endif
 
 #ifdef __cplusplus

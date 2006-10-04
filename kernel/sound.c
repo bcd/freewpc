@@ -107,12 +107,12 @@ void music_change (music_code_t code)
 
 U8 sound_board_poll (void)
 {
-	U8 status = *(volatile U8 *)WPCS_CONTROL_STATUS;
+	U8 status = wpc_asic_read (WPCS_CONTROL_STATUS);
 	U8 in_data;
 
 	if (status & 0x80)
 	{
-		in_data = *(volatile U8 *)WPCS_DATA;
+		in_data = wpc_asic_read (WPCS_DATA);
 		return (in_data);
 	}
 	else
@@ -137,7 +137,7 @@ void sound_rtt (void)
 {
 	if (!sound_queue_empty ())
 	{
-		*(volatile U8 *)WPCS_DATA = sound_queue_remove ();
+		wpc_asic_write (WPCS_DATA, sound_queue_remove ());
 	}
 }
 
@@ -160,7 +160,7 @@ void sound_init (void)
 #if (MACHINE_DCS == 0)
 	/* TODO : WPC sound also need to run as a background thread,
 	 * waiting for sync from the sound board */
-	*(U8 *)WPCS_CONTROL_STATUS = 0;
+	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
 	sound_ready ();
 #else
 	int i;

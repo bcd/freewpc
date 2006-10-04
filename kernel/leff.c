@@ -226,13 +226,13 @@ void leff_create_handler (const leff_t *leff)
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
 
 	/* Initialize the new leff's private data before it runs */
-	tp->thread_data[L_PRIV_APPLY_COUNT] = 0;
-	tp->thread_data[L_PRIV_DATA] = 0;
-	tp->thread_data[L_PRIV_FLAGS] = leff->flags;
+	task_set_thread_data (tp, L_PRIV_APPLY_COUNT, 0);
+	task_set_thread_data (tp, L_PRIV_DATA, 0);
+	task_set_thread_data (tp, L_PRIV_FLAGS, leff->flags);
 #if 0
-	tp->thread_data[L_PRIV_ID] = leff - leff_table;
+	task_set_thread_data (tp, L_PRIV_ID, leff - leff_table);
 #else
-	tp->thread_data[L_PRIV_ID] = 0;
+	task_set_thread_data (tp, L_PRIV_ID, 0);
 #endif
 }
 

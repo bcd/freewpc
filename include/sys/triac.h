@@ -44,7 +44,8 @@
 
 #define triac_write(v) \
 do { \
-	triac_io_cache = *(volatile U8 *)WPC_GI_TRIAC = (v); \
+	triac_io_cache = v; \
+	wpc_asic_write (WPC_GI_TRIAC, v); \
 } while (0)
 
 #define ac_zerocross_set()			(*(U8 *)WPC_ZEROCROSS & 0x80)

@@ -26,6 +26,45 @@
 #ifndef _WPC_H
 #define _WPC_H
 
+
+/***************************************************************
+ * ASIC interface
+ *
+ * The intent of these functions is to encapsulate all I/O
+ * reads and writes, so that they can be simulated in
+ * environments where a direct memory map is not present.
+ ***************************************************************/
+extern inline void wpc_asic_write (U16 addr, U8 val)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	extern void linux_asic_write (U16 addr, U8 val);
+	linux_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr = val;
+#endif
+}
+
+extern inline U8 wpc_asic_read (U16 addr)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	extern U8 linux_asic_read (U16 addr);
+	return linux_asic_read (addr);
+#else
+	return *(volatile U8 *)addr;
+#endif
+}
+
+extern inline void wpc_asic_xor (U16 addr, U8 val)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	U8 reg = wpc_asic_read (addr);
+	reg ^= val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr ^= val;
+#endif
+}
+
 /***************************************************************
  * Peripheral timer
  ***************************************************************/
@@ -136,8 +175,15 @@
  * ASIC / DMD memory map
  ***************************************************************/
 
+#ifdef CONFIG_PLATFORM_LINUX
+extern U8 linux_dmd_low_buffer[0x200];
+extern U8 linux_dmd_high_buffer[0x200];
+#define DMD_LOW_BASE linux_dmd_low_buffer
+#define DMD_HIGH_BASE linux_dmd_high_buffer
+#else
 #define DMD_LOW_BASE 					0x3800
 #define DMD_HIGH_BASE 					0x3A00
+#endif
 
 #define WPC_DEBUG_DATA_PORT			0x3D60
 #define WPC_DEBUG_CONTROL_PORT		0x3D61
@@ -229,21 +275,21 @@
 
 extern inline void wpc_led_toggle (void)
 {
-	*(volatile U8 *)WPC_LEDS ^= 0x80;
+	wpc_asic_xor (WPC_LEDS, 0x80);
 }
 
 /********************************************/
 /* RAM Protection Circuit                   */
 /********************************************/
 
-extern inline void wpc_set_ram_protect (uint8_t prot)
+extern inline void wpc_set_ram_protect (U8 prot)
 {
-	*(volatile uint8_t *)WPC_RAM_LOCK = prot;
+	wpc_asic_write (WPC_RAM_LOCK, prot);
 }
 
-extern inline void wpc_set_ram_protect_size (uint8_t sz)
+extern inline void wpc_set_ram_protect_size (U8 sz)
 {
-	*(volatile uint8_t *)WPC_RAM_LOCKSIZE = sz;
+	wpc_asic_write (WPC_RAM_LOCKSIZE, sz);
 }
 
 #define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
@@ -273,14 +319,14 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 /* ROM Paging                               */
 /********************************************/
 
-extern inline uint8_t wpc_get_rom_page (void)
+extern inline U8 wpc_get_rom_page (void)
 {
-	return *(U8 *)WPC_ROM_BANK;
+	return wpc_asic_read (WPC_ROM_BANK);
 }
 
-extern inline void wpc_set_rom_page (uint8_t page)
+extern inline void wpc_set_rom_page (U8 page)
 {
-	*(U8 *)WPC_ROM_BANK = page;
+	wpc_asic_write (WPC_ROM_BANK, page);
 }
 
 #define call_far(page, fncall) \
@@ -306,14 +352,14 @@ do { \
 /* RAM Paging                               */
 /********************************************/
 
-extern inline uint8_t wpc_get_ram_page (void)
+extern inline U8 wpc_get_ram_page (void)
 {
-	return *(volatile uint8_t *)WPC_RAM_BANK;
+	return *(volatile U8 *)WPC_RAM_BANK;
 }
 
-extern inline void wpc_set_ram_page (uint8_t page)
+extern inline void wpc_set_ram_page (U8 page)
 {
-	*(volatile uint8_t *)WPC_RAM_BANK = page;
+	*(volatile U8 *)WPC_RAM_BANK = page;
 }
 
 /********************************************/
@@ -334,12 +380,12 @@ extern inline void wpc_set_ram_page (uint8_t page)
 
 extern inline void wpc_write_irq_clear (U8 val)
 {
-	*(volatile U8 *)WPC_ZEROCROSS_IRQ_CLEAR = val;
+	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR, val);
 }
 
 extern inline U8 wpc_read_ac_zerocross (void)
 {
-	U8 val = *(volatile U8 *)WPC_ZEROCROSS_IRQ_CLEAR;
+	U8 val = wpc_asic_read (WPC_ZEROCROSS_IRQ_CLEAR);
 	return (val & 0x80);
 }
 
@@ -368,31 +414,31 @@ extern inline U8 wpc_read_ac_zerocross (void)
 
 extern inline U8 wpc_read_flippers (void)
 {
-	return *(volatile U8 *)WPC_FLIPTRONIC_PORT_A;
+	return wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
 }
 
 
 extern inline void wpc_write_flippers (U8 val)
 {
-	*(volatile U8 *)WPC_FLIPTRONIC_PORT_A = val;
+	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, val);
 }
 
 
 extern inline U8 wpc_get_jumpers (void)
 {
-	return *(volatile U8 *)WPC_SW_JUMPER_INPUT;
+	return wpc_asic_read (WPC_SW_JUMPER_INPUT);
 }
 
 
 extern inline U8 wpc_read_ticket (void)
 {
-	return *(volatile U8 *)WPC_TICKET_DISPENSE;
+	return wpc_asic_read (WPC_TICKET_DISPENSE);
 }
 
 
 extern inline void wpc_write_ticket (U8 val)
 {
-	*(volatile U8 *)WPC_TICKET_DISPENSE = val;
+	wpc_asic_write (WPC_TICKET_DISPENSE, val);
 }
 
 
