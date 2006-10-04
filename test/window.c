@@ -464,8 +464,11 @@ void adj_reset (struct adjustment *adjs)
 	wpc_nvram_get ();
 	while (adjs->name != NULL)
 	{
-		*(adjs->nvram) = adjs->factory_default;
-		adjs++;
+		if (adjs->nvram)
+		{
+			*(adjs->nvram) = adjs->factory_default;
+			adjs++;
+		}
 	}
 	wpc_nvram_put ();
 }
@@ -477,12 +480,15 @@ void adj_verify (struct adjustment *adjs)
 
 	while (adjs->name != NULL)
 	{
-		val = *(adjs->nvram);
-		if ((val < adjs->values->min) || (val > adjs->values->max))
+		if (adjs->nvram)
 		{
-			wpc_nvram_get ();
-			*(adjs->nvram) = adjs->factory_default;
-			wpc_nvram_put ();
+			val = *(adjs->nvram);
+			if ((val < adjs->values->min) || (val > adjs->values->max))
+			{
+				wpc_nvram_get ();
+				*(adjs->nvram) = adjs->factory_default;
+				wpc_nvram_put ();
+			}
 		}
 		adjs++;
 	}
