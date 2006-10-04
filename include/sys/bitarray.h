@@ -58,7 +58,7 @@ do {														\
 #define __setbit(bs,index) (bs[index / 8] |= (1 << (index % 8)))
 #define __clearbit(bs,index) (bs[index / 8] &= ~(1 << (index % 8)))
 #define __togglebit(bs,index) (bs[index / 8] ^= (1 << (index % 8)))
-#define __testbit(bs,index) (bs[index / 8] & (1 << (index % 8)))
+#define __testbit(bs,index) (index = (bs[index / 8] & (1 << (index % 8))))
 
 #endif /* __wpc__ */
 
