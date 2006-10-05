@@ -50,10 +50,13 @@
 
 #else /* __m6809__ */
 
-#define disable_irq()
-#define disable_firq()
-#define enable_irq()
-#define enable_firq()
+extern bool linux_irq_enable;
+extern bool linux_firq_enable;
+
+#define disable_irq()	linux_irq_enable = FALSE;
+#define disable_firq()	linux_firq_enable = FALSE;
+#define enable_irq()		linux_irq_enable = TRUE;
+#define enable_firq()	linux_firq_enable = TRUE;
 
 #endif /* __m6809__ */
 

@@ -308,9 +308,13 @@ do_long_hex_integer:
 
 				case 'p':
 				{
+// #ifdef CONFIG_PLATFORM_LINUX
+/* TODO - handle 32-bit pointers */
+// #else
 					sprintf_leading_zeroes = TRUE;
 					sprintf_width = 4;
 					goto do_long_hex_integer;
+// #endif
 				}
 			}
 		}

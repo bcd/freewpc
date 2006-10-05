@@ -280,7 +280,11 @@ void do_reset (void)
 	task_exit ();
 #else
 	while (1)
-		task_sleep_sec (1);
+	{
+		/* TODO - drop priority for idle tasks */
+		task_sleep (TIME_66MS);
+		idle ();
+	}
 #endif
 }
 
@@ -315,12 +319,14 @@ void lockup_check_rtt (void)
 
 void nvram_idle_task (void)
 {
+#ifndef CONFIG_PLATFORM_LINUX
 	U8 data = nvram_test_byte;
 	++nvram_test_byte;
 	if (data != nvram_test_byte)
 	{
 		fatal (ERR_NVRAM_UNLOCKED);
 	}
+#endif
 }
 
 

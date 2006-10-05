@@ -192,9 +192,9 @@ void task_kill_pid (task_pid_t tp)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
-			break;
+			pth_abort (tp);
+			return;
 		}
-	pth_abort (tp);
 }
 
 bool task_kill_gid (task_gid_t gid)

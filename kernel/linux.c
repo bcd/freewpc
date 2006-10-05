@@ -107,7 +107,7 @@ static int scanbit (U8 bits)
 	else if (bits & 0x08) return 3;
 	else if (bits & 0x04) return 2;
 	else if (bits & 0x02) return 1;
-	else if (bits & 0x00) return 0;
+	else if (bits & 0x01) return 0;
 	else return -1;
 }
 
@@ -243,6 +243,7 @@ static void linux_realtime_thread (void)
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
 
+	task_set_flags (TASK_PROTECTED);
 	for (;;)
 	{
 		/** Sleep until the next iteration.
@@ -296,6 +297,7 @@ static void linux_interface_thread (void)
 	tio.c_lflag &= ~ICANON;
 	tcsetattr (0, TCSANOW, &tio);
 
+	task_set_flags (TASK_PROTECTED);
 	for (;;)
 	{
 		task_sleep (IF_THREAD_FREQ);
@@ -345,9 +347,8 @@ static void linux_interface_thread (void)
 void linux_init (void)
 {
 	switchnum_t sw;
-
+	
 	task_create_gid (GID_LINUX_REALTIME, linux_realtime_thread);
-
 	task_create_gid (GID_LINUX_INTERFACE, linux_interface_thread);
 
 	/* Initialize the state of the opto switches, so that they appear

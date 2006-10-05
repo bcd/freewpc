@@ -599,17 +599,9 @@ void task_dispatcher (void)
 
 				/* Execute idle tasks on system stack */
 				set_stack_pointer (STACK_BASE);
-	
+				
 				/* Call idle tasks */
-#ifdef DEBUGGER
-				db_idle_task ();
-#endif
-				callset_invoke (idle);
-				/* TODO - change all of these to event catchers */
-				switch_idle_task ();
-				ac_idle_task ();
-				nvram_idle_task ();
-				rtc_idle_task ();
+				idle ();	
 			} 
 
 			/* Reset to beginning of the task list */

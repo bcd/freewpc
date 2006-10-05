@@ -354,6 +354,7 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 
 const switch_info_t *switch_lookup (U8 sw)
 {
+	dbprintf ("switch_lookup(%d)\n", sw);
 	return switch_table[sw];
 }
 

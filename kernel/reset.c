@@ -41,6 +41,10 @@ void system_accept_freewpc (void)
 {
 	extern void adj_reset_all (void);
 
+#ifdef CONFIG_PLATFORM_LINUX
+	return;
+#endif
+
 	if ((freewpc_accepted[0] == ACCEPT_1) &&
 		 (freewpc_accepted[1] == ACCEPT_2) &&
 		 (freewpc_accepted[2] == ACCEPT_3))
@@ -54,6 +58,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -63,6 +68,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -72,6 +78,7 @@ void system_accept_freewpc (void)
 	dmd_show_low ();
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+
 	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
 
