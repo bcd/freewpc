@@ -416,9 +416,38 @@ void switch_init (void)
 }
 
 
+/** Inline assembler is great for the 6809, but it won't work in simulation.
+ * These macros abstract the 6809 opcodes so they can be simulated. */
+#ifdef __m6809__
+#define SW_LDA_IO(var)		asm __volatile__ ("\tlda\t" C_STRING(var))
+#define SW_LDA_MEM(var)		asm __volatile__ ("\tlda\t%0" :: "m" (var))
+#define SW_ORA_MEM(var)		asm __volatile__ ("\tora\t%0" :: "m" (var))
+#define SW_STA_MEM(var)		asm __volatile__ ("\tsta\t%0" :: "m" (var))
+#define SW_COMA()          asm __volatile__ ("\tcoma\t")
+
+#define SW_LDB_MEM(var)		asm __volatile__ ("\tldb\t%0" :: "m" (var))
+#define SW_EORB_MEM(var)	asm __volatile__ ("\teorb\t%0" :: "m" (var))
+#define SW_STB_IO(var)		asm __volatile__ ("\tstb\t" C_STRING(var))
+#define SW_STB_MEM(var)		asm __volatile__ ("\tstb\t%0" :: "m" (var))
+#define SW_LDB_CONST(n)		asm __volatile__ ("\tldb\t%0" :: "g" (n))
+#else
+
+static U8 areg, breg;
+#define SW_LDA_MEM(var)		areg = var
+#define SW_LDA_IO(var)		areg = wpc_asic_read (var)
+#define SW_ORA_MEM(var)		areg |= var
+#define SW_STA_MEM(var)		var = areg
+#define SW_COMA()          areg = ~areg;
+
+#define SW_LDB_MEM(var)		breg = var
+#define SW_STB_MEM(var)		var = breg
+#define SW_STB_IO(var)		wpc_asic_write (var, breg)
+#define SW_EORB_MEM(var)	breg ^= var
+#define SW_LDB_CONST(n)		breg = n
+#endif
+
 extern inline void switch_rowpoll (const U8 col)
 {
-#ifdef __m6809__
 	/* Read the switch column from the hardware.
 	 * Column 0 corresponds to the cabinet switches.
 	 * Columns 1-8 refer to the playfield columns.
@@ -427,14 +456,14 @@ extern inline void switch_rowpoll (const U8 col)
 	 * the next read will come from column N+1.
 	 */
 	if (col == 0)
-		asm __volatile__ ("\tlda\t" C_STRING(WPC_SW_CABINET_INPUT));
+		SW_LDA_IO (WPC_SW_CABINET_INPUT);
 	else if (col <= 8)
-		asm __volatile__ ("\tlda\t" C_STRING(WPC_SW_ROW_INPUT));
+		SW_LDA_IO (WPC_SW_ROW_INPUT);
 	else /* if (col == 9) */
 #if (MACHINE_WPC95 == 1)
-		asm __volatile__ ("\tlda\t" C_STRING(WPC95_FLIPPER_SWITCH_INPUT));
+		SW_LDA_IO (WPC95_FLIPPER_SWITCH_INPUT);
 #else
-		asm __volatile__ ("\tlda\t" C_STRING(WPC_FLIPTRONIC_PORT_A));
+		SW_LDA_IO (WPC_FLIPTRONIC_PORT_A);
 #endif
 
 	/* Set up the column strobe for the next read (on the next
@@ -442,11 +471,11 @@ extern inline void switch_rowpoll (const U8 col)
 	if (col < 8)
 	{
 #if defined (MACHINE_PIC) && (MACHINE_PIC == 1)
-		asm __volatile__ ("\tldb\t%0" :: "g" (col + 0x16));
+		SW_LDB_CONST (col + 0x16);
 #else
-		asm __volatile__ ("\tldb\t%0" :: "g" (1 << col));
+		SW_LDB_CONST (1 << col);
 #endif
-		asm __volatile__ ("\tstb\t" C_STRING(WPC_SW_COL_STROBE));
+		SW_STB_IO (WPC_SW_COL_STROBE);
 	}
 
 	/* Process the switch column.
@@ -466,34 +495,31 @@ extern inline void switch_rowpoll (const U8 col)
 	 * switch can be processed by the idle task.
 	 */
 	/* Load previous raw state of switch */
-	asm __volatile__ ("\tldb\t%0" 	:: "m" (switch_bits[AR_RAW][col]));
+	SW_LDB_MEM (switch_bits[AR_RAW][col]);
 
 	/* Save current raw state of switch */
-	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_RAW][col]));
+	SW_STA_MEM (switch_bits[AR_RAW][col]);
 	
 	/* Did switch change? B=0: no change, B=1: change */
-	asm __volatile__ ("\teorb\t%0"  	:: "m" (switch_bits[AR_RAW][col]));
+	SW_EORB_MEM (switch_bits[AR_RAW][col]);
 
 	/* Did the switch change states the last time? */
-	asm __volatile__ ("\tlda\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
+	SW_LDA_MEM (switch_bits[AR_CHANGED][col]);
 
 	/* Save current change state of switch */
-	asm __volatile__ ("\tstb\t%0"		:: "m" (switch_bits[AR_CHANGED][col]));
+	SW_STB_MEM (switch_bits[AR_CHANGED][col]);
 
 	/* Is this a stable switch change?  This occurs when a change
 	 * is followed by no-change; i.e. the current change value is 0
 	 * and the previous change value is 1.  The following computes
 	 * A=0: not a stable change, A=1: stable change */
-	asm __volatile__ ("\tcoma");
-	asm __volatile__ ("\tora\t%0"  	:: "m" (switch_bits[AR_CHANGED][col]));
-	asm __volatile__ ("\tcoma");
+	SW_COMA ();
+	SW_ORA_MEM (switch_bits[AR_CHANGED][col]);
+	SW_COMA ();
 
 	/* Enqueue any stable changes into the pending array */
-	asm __volatile__ ("\tora\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
-	asm __volatile__ ("\tsta\t%0"		:: "m" (switch_bits[AR_PENDING][col]));
-#else
-	fatal (ERR_NOT_IMPLEMENTED_YET);
-#endif
+	SW_ORA_MEM (switch_bits[AR_PENDING][col]);
+	SW_STA_MEM (switch_bits[AR_PENDING][col]);
 }
 
 
