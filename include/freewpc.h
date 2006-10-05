@@ -71,9 +71,9 @@ extern U8 irq_count;
  * Define TRUE and FALSE to suitable values.
  */
 #undef TRUE
-#define TRUE ((bool)1)
+#define TRUE (1)
 #undef FALSE
-#define FALSE ((bool)0)
+#define FALSE (0)
 
 /* Define NULL */
 #define NULL 0UL

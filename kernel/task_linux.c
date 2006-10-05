@@ -327,5 +327,6 @@ void task_init (void)
 
 	task_data_table[0].pid = task_getpid ();
 	task_data_table[0].gid = GID_FIRST_TASK;
+	task_data_table[0].flags = TASK_PROTECTED;
 }
 

@@ -52,6 +52,7 @@
 #define ERR_KICK_CAUSED_INCREASE 28
 #define ERR_IDLE_BALL_LOST       29
 #define ERR_DEVICE_NO_CHANGE     30
+#define ERR_CANT_GET_HERE        31
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);

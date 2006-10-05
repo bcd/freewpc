@@ -26,11 +26,11 @@
 #include <termios.h>
 #include <freewpc.h>
 
-/** The number of IRQs per second */
+/** The number of IRQs per second. */ 
 #define IRQS_PER_SEC 1024
 
 /** The frequency of the realtime thread, in milliseconds */
-#define RT_THREAD_FREQ 100
+#define RT_THREAD_FREQ 50
 
 /** The frequency of the interface thread, in milliseconds */
 #define IF_THREAD_FREQ 50
@@ -38,6 +38,9 @@
 /** The number of IRQs that need to be asserted on every
  * iteration of the realtime thread. */
 #define RT_ITERATION_IRQS ((IRQS_PER_SEC * RT_THREAD_FREQ) / 1000)
+
+/** The rate at which the simulated clock should run */
+int linux_irq_multiplier = 1;
 
 /** An array of DMD page buffers */
 U8 linux_dmd_pages[DMD_PAGE_COUNT][DMD_PAGE_SIZE];
@@ -72,14 +75,14 @@ U8 linux_flipper_inputs;
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
 
-/** True if an IRQ is pending */
-bool linux_irq_pending;
+/** Nonzero if an IRQ is pending */
+int linux_irq_pending;
 
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-/** True if an FIRQ is pending */
-bool linux_firq_pending;
+/** Nonzero if an FIRQ is pending */
+int linux_firq_pending;
 
 /** The number of IRQ cycles */
 int linux_irq_count;
@@ -130,6 +133,11 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_DEBUG_DATA_PORT:
 			putchar (val);
 			break;
+
+		case WPC_SHIFTADDR:
+		case WPC_SHIFTBIT:
+		case WPC_SHIFTBIT2:
+			fatal (ERR_CANT_GET_HERE);
 
 		case WPC_FLIPTRONIC_PORT_A:
 			linux_flipper_outputs = val;
@@ -242,22 +250,24 @@ static void linux_realtime_thread (void)
 		 * less, based on how long it took to do the real work. */
 		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 
-		for (i=0; i < RT_ITERATION_IRQS; i++)
-		{
-			/** Advance the simulator clock */
-			linux_time_step ();
+		linux_irq_pending += RT_ITERATION_IRQS * linux_irq_multiplier;
 
-			/** Invoke IRQ handler */
-			if (linux_irq_enable)
+		if (linux_irq_enable)
+			while (linux_irq_pending-- > 0)
+			{
+				/** Advance the simulator clock */
+				linux_time_step ();
+	
+				/** Invoke IRQ handler */
 				do_irq ();
+			}
 
-			/** Check for external interrupts on the FIRQ line */
-			if (linux_firq_enable && linux_firq_pending)
+		/** Check for external interrupts on the FIRQ line */
+		if (linux_firq_enable)
+			while (linux_firq_pending-- > 0)
 			{
 				do_firq ();
-				linux_firq_pending--;
 			}
-		}
 	}
 }
 
@@ -356,11 +366,12 @@ void linux_init (void)
 int main (int argc, char *argv[])
 {
 	extern __noreturn__ void do_reset (void);
+	int argn = 1;
 
 	/** Do initialization that the hardware would normally do, before
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
-	linux_irq_pending = linux_firq_pending = FALSE;
+	linux_irq_pending = linux_firq_pending = 0;
 	linux_irq_count = 0;
 
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
@@ -369,6 +380,21 @@ int main (int argc, char *argv[])
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
 
+	/* Parse command-line arguments */
+	while (argn < argc)
+	{
+		const char *arg = argv[argn++];
+		if (!strcmp (arg, "-h"))
+		{
+			printf ("Syntax: freewpc [<options>]\n");
+			exit (0);
+		}
+		else if (!strcmp (arg, "-s"))
+		{
+			linux_irq_multiplier = strtoul (argv[argn++], NULL, 0);
+		}
+	}
+	
 	/* Jump to the reset vector */
 	do_reset ();
 	return 0;
