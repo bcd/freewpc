@@ -175,10 +175,6 @@ void do_reset (void)
 	*(U8 *)1 = 0xFE;
 #endif /* __m6809__ */
 
-#ifdef CONFIG_PLATFORM_LINUX
-	linux_init ();
-#endif
-
 	/** Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (RAM_LOCK_2K);
@@ -232,6 +228,7 @@ void do_reset (void)
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
 	task_init ();
+
 	timer_init ();
 	deff_init ();
 	leff_init ();
@@ -248,6 +245,9 @@ void do_reset (void)
 
 	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
+#ifdef CONFIG_PLATFORM_LINUX
+	linux_init ();
+#endif
 	wpc_write_irq_clear (0x06);
 	enable_interrupts ();
 
@@ -271,8 +271,17 @@ void do_reset (void)
 	task_create_gid (GID_DCS_INIT, sound_init);
 #endif
 
-	/* The system can run itself now, this task is done! */
+	/* The system can run itself now, this task is done!
+	 *
+	 * In the simulator, the main task is not supposed to exit, so there
+	 * is a conditional for that.
+	 */
+#ifndef CONFIG_PLATFORM_LINUX
 	task_exit ();
+#else
+	while (1)
+		task_sleep_sec (1);
+#endif
 }
 
 
@@ -380,8 +389,12 @@ void do_irq (void)
 
 			if ((irq_count & 127) == 0)
 			{
-				/* Execute rtts every 128ms */
+				/* Execute rtts every 128ms.  Broken on the simulator. */
+#ifndef CONFIG_PLATFORM_LINUX
 				lockup_check_rtt ();
+#endif
+
+				/* Execute machine-specific rtts */
 #ifdef MACHINE_128MS_RTTS
 				MACHINE_128MS_RTTS
 #endif
@@ -416,10 +429,10 @@ void do_firq (void)
 	asm __volatile__ ("pshs\ta,b");
 #endif
 
-	if (*(U8 *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR & 0x80)
+	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
 		/* Timer interrupt */
-		*(uint8_t *)WPC_PERIPHERAL_TIMER_FIRQ_CLEAR  = 0;
+		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
 	}
 	else
 	{

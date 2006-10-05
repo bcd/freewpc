@@ -170,6 +170,9 @@ typedef struct device
 	/** The number of balls needed to be kicked out */
 	U8 kicks_needed;
 
+	/** The number of consecutive kick errors */
+	U8 kick_errors;
+
 	/** The operational state of the device */
 	U8 state;
 

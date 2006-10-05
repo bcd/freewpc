@@ -34,7 +34,11 @@ do { \
 
 
 #undef va_arg
+#ifdef CONFIG_PLATFORM_LINUX
+#define va_arg(va, type)	((va += sizeof (int)), (type *)(((int *)va)[-1]))
+#else
 #define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
+#endif
 
 #undef va_end
 #define va_end(va)
@@ -42,7 +46,9 @@ do { \
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
 #ifdef CONFIG_PLATFORM_LINUX
-#define sprintf(format,rest...) sprintf(sprintf_buffer, format, ## rest)
+#undef sprintf
+#define sprintf freewpc_sprintf
+U8 freewpc_sprintf (const char *format, ...);
 #else
 U8 sprintf (const char *format, ...);
 #endif

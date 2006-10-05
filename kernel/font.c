@@ -166,6 +166,10 @@ STATIC void fontargs_render_string (void)
 	s = sprintf_buffer;
   	blit_xpos = args->x;
 
+#ifdef CONFIG_PLATFORM_LINUX
+	linux_write_string (s);
+#endif
+
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */
 	wpc_push_page (FONT_PAGE);

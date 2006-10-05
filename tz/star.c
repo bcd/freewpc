@@ -111,7 +111,7 @@ void star_task (void)
 do \
 { \
 	task_pid_t tp = task_create_peer (star_task); \
-	task_set_arg (tp, (U16)(dmd_low_buffer + ((U16)y << 4) + x)); \
+	task_set_arg (tp, (PTR_OR_U16)(dmd_low_buffer + ((U16)y << 4) + x)); \
 } while (0)
 
 void starfield_task (void)

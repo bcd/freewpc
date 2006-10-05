@@ -19,7 +19,9 @@
  */
 
 #include <freewpc.h>
+#ifdef __m6809__
 #include <m6809/math.h>
+#endif
 
 /**
  * \file

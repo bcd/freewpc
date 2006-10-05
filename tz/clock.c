@@ -108,12 +108,12 @@ static U8 tz_clock_opto_to_hour[] =
 
 extern inline void wpc_ext1_enable (U8 bits)
 {
-	*(volatile U8 *)WPC_EXTBOARD1 |= bits;
+	wpc_asic_setbits (WPC_EXTBOARD1, bits);
 }
 
 extern inline void wpc_ext1_disable (U8 bits)
 {
-	*(volatile U8 *)WPC_EXTBOARD1 &= ~bits;
+	wpc_asic_clearbits (WPC_EXTBOARD1, bits);
 }
 
 void tz_clock_rtt (void)
@@ -121,7 +121,7 @@ void tz_clock_rtt (void)
 	/* Read latest switch state */
 	wpc_ext1_enable (CLK_DRV_SWITCH_STROBE);
 	clock_last_sw = clock_sw;
-	clock_sw = ~ (*(volatile U8 *)WPC_SW_ROW_INPUT);
+	clock_sw = ~ wpc_asic_read (WPC_SW_ROW_INPUT);
 	wpc_ext1_disable (CLK_DRV_SWITCH_STROBE);
 
 	/* Update solenoid drives based on desired direction

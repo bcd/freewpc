@@ -65,6 +65,29 @@ extern inline void wpc_asic_xor (U16 addr, U8 val)
 #endif
 }
 
+extern inline void wpc_asic_setbits (U16 addr, U8 val)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	U8 reg = wpc_asic_read (addr);
+	reg |= val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr |= val;
+#endif
+}
+
+extern inline void wpc_asic_clearbits (U16 addr, U8 val)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	U8 reg = wpc_asic_read (addr);
+	reg &= ~val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr &= ~val;
+#endif
+}
+
+
 /***************************************************************
  * Peripheral timer
  ***************************************************************/
@@ -176,10 +199,10 @@ extern inline void wpc_asic_xor (U16 addr, U8 val)
  ***************************************************************/
 
 #ifdef CONFIG_PLATFORM_LINUX
-extern U8 linux_dmd_low_buffer[0x200];
-extern U8 linux_dmd_high_buffer[0x200];
-#define DMD_LOW_BASE linux_dmd_low_buffer
-#define DMD_HIGH_BASE linux_dmd_high_buffer
+extern U8 *linux_dmd_low_page;
+extern U8 *linux_dmd_high_page;
+#define DMD_LOW_BASE linux_dmd_low_page
+#define DMD_HIGH_BASE linux_dmd_high_page
 #else
 #define DMD_LOW_BASE 					0x3800
 #define DMD_HIGH_BASE 					0x3A00

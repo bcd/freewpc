@@ -150,7 +150,7 @@ typedef struct task_struct
 	 * initialization data to a new task.  The creator of the task can
 	 * assign this argument pointer, after creating the task but before
 	 * the next schedule. */
-	U16			arg;
+	PTR_OR_U16	arg;
 
 	/** Thread local data.  Some types of tasks need to maintain local
 	 * state information, where each task has its own copy of the data.
@@ -240,8 +240,8 @@ bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
 void task_set_flags (U8 flags);
 void task_clear_flags (U8 flags);
-U16 task_get_arg (void);
-void task_set_arg (task_pid_t tp, U16 arg);
+PTR_OR_U16 task_get_arg (void);
+void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
 __noreturn__ void task_dispatcher (void);
 #ifdef CONFIG_PLATFORM_LINUX
 task_pid_t task_getpid (void);

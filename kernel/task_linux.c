@@ -26,7 +26,9 @@
  * task scheduler under Linux.  This uses the GNU pth library.
  */
 
-#define PTHDEBUG
+
+/** Enable this to turn on verbose debugging of the task subsystem. */
+//#define PTHDEBUG
 
 bool task_dispatching_ok = TRUE;
 
@@ -40,15 +42,36 @@ U8 task_max_count = 0;
 
 #define MAX_TASKS 256
 
-pth_key_t pth_key_arg;
-pth_key_t pth_key_flags;
 
+typedef struct
+{
+	pth_t pid;
+	task_gid_t gid;
+	PTR_OR_U16 arg;
+	U8 flags;
+	U8 thread_data[4];
+} aux_task_data_t;
 
-pth_t pth_gid_table[MAX_TASKS];
+aux_task_data_t task_data_table[MAX_TASKS];
 
 
 void task_dump (void)
 {
+	int i;
+
+	printf ("\nPID         GID   ARG    FLAGS\n");
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		aux_task_data_t *td = &task_data_table[i];
+
+		if (td->pid != 0)
+		{
+			printf ("%p%c   %d    %08X   %02X\n",
+				td->pid, 
+				(td->pid == task_getpid ()) ? '*' : ' ', 
+				td->gid, td->arg, td->flags);
+		}
+	}
 }
 
 
@@ -69,9 +92,16 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	pid = pth_spawn (attr, fn, 0);
 
 	for (i=0; i < MAX_TASKS; i++)
-		if (pth_gid_table[i] == 0)
+		if (task_data_table[i].pid == 0)
 		{
-			pth_gid_table[i] = pid;
+			task_data_table[i].pid = pid;
+			task_data_table[i].gid = gid;
+			task_data_table[i].flags = 0;
+			task_data_table[i].arg = 0;
+			task_data_table[i].thread_data[0] = 0;
+			task_data_table[i].thread_data[1] = 0;
+			task_data_table[i].thread_data[2] = 0;
+			task_data_table[i].thread_data[3] = 0;
 			break;
 		}
 
@@ -97,7 +127,13 @@ task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn) //2
 
 void task_setgid (task_gid_t gid)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+		if (task_data_table[i].pid == task_getpid ())
+		{
+			task_data_table[i].gid = gid;
+			break;
+		}
 }
 
 void task_sleep (task_ticks_t ticks)
@@ -119,15 +155,29 @@ void task_sleep_sec (int8_t secs)
 __naked__ __noreturn__ 
 void task_exit (void)
 {
+	int i;
 #ifdef PTHDEBUG
 	printf ("task_exit: pid=%p\n", task_getpid ());
 #endif
+	for (i=0; i < MAX_TASKS; i++)
+		if (task_data_table[i].pid == task_getpid ())
+		{
+			task_data_table[i].pid = 0;
+			break;
+		}
 	pth_exit (0);
 }
 
 task_pid_t task_find_gid (task_gid_t gid)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if ((task_data_table[i].gid == gid)
+			&& (task_data_table[i].pid != 0))
+			return task_data_table[i].pid;
+	}
+	return NULL;
 }
 
 task_pid_t task_find_gid_data (task_gid_t gid, U8 off, U8 val)
@@ -137,42 +187,92 @@ task_pid_t task_find_gid_data (task_gid_t gid, U8 off, U8 val)
 
 void task_kill_pid (task_pid_t tp)
 {
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+		if (task_data_table[i].pid == tp)
+		{
+			task_data_table[i].pid = 0;
+			break;
+		}
 	pth_abort (tp);
 }
 
 bool task_kill_gid (task_gid_t gid)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if ((task_data_table[i].gid == gid) &&
+			 (task_data_table[i].pid != 0) &&
+			 (task_data_table[i].pid != task_getpid ()))
+			task_kill_pid (task_data_table[i].pid);
+	}
 }
 
 
 void task_kill_all (void)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if ((task_data_table[i].pid != 0) &&
+			 (task_data_table[i].pid != task_getpid ()) &&
+			 !(task_data_table[i].flags & TASK_PROTECTED))
+			task_kill_pid (task_data_table[i].pid);
+	}
 }
 
 
 void task_set_flags (U8 flags)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+		{
+			task_data_table[i].flags |= flags;
+			break;
+		}
+	}
 }
 
 
 void task_clear_flags (U8 flags)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+		{
+			task_data_table[i].flags &= ~flags;
+			break;
+		}
+	}
 }
 
 
-U16 task_get_arg (void)
+PTR_OR_U16 task_get_arg (void)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+			return task_data_table[i].arg;
+	}
 }
 
 
-void task_set_arg (task_pid_t tp, U16 arg)
+void task_set_arg (task_pid_t tp, PTR_OR_U16 arg)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == tp)
+		{
+			task_data_table[i].arg = arg;
+		}
+	}
 }
 
 
@@ -184,27 +284,48 @@ task_pid_t task_getpid (void)
 
 task_gid_t task_getgid (void)
 {
-	return 0;
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+			return task_data_table[i].gid;
+	}
+	return 255;
 }
 
 
 U8 task_get_thread_data (task_pid_t pid, U8 n)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == pid)
+			return task_data_table[i].thread_data[n];
+	}
 }
 
 
 void task_set_thread_data (task_pid_t pid, U8 n, U8 v)
 {
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == pid)
+		{
+			task_data_table[i].thread_data[n] = v;
+			return;
+		}
+	}
 }
 
 
 void task_init (void)
 {
+	memset (task_data_table, 0, sizeof (task_data_table));
+	
 	pth_init ();
-	pth_key_create (&pth_key_arg, 0);
-	pth_key_create (&pth_key_flags, 0);
 
-	memset (pth_gid_table, 0, sizeof (pth_gid_table));
+	task_data_table[0].pid = task_getpid ();
+	task_data_table[0].gid = GID_FIRST_TASK;
 }
 

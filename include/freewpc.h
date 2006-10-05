@@ -54,10 +54,12 @@ typedef U16 INTPTR;
 #elif defined(CONFIG_PLATFORM_LINUX)
 typedef short int16_t, I16, S16;
 typedef unsigned short uint16_t, U16;
+typedef unsigned long PTR_OR_U16;
 #else /* default assumes -mint8 on wpc */
 typedef long int16_t, I16, S16;
 typedef unsigned long uint16_t, U16;
 typedef unsigned int INTPTR;
+typedef U16 PTR_OR_U16;
 #endif
 
 /* TODO - move these elsewhere */
