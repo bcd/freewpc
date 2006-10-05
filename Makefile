@@ -213,6 +213,7 @@ KERNEL_OBJS = \
 	kernel/misc.o \
 	kernel/msg.o \
 	kernel/player.o \
+	kernel/printf.o \
 	kernel/random.o \
 	kernel/reset.o \
 	kernel/score.o \
@@ -229,7 +230,6 @@ KERNEL_OBJS = \
 ifeq ($(PLATFORM),wpc)
 KERNEL_OBJS += \
 	kernel/div10.o \
-	kernel/printf.o \
 	kernel/task.o \
 	kernel/vector.o
 endif
