@@ -467,8 +467,8 @@ void adj_reset (struct adjustment *adjs)
 		if (adjs->nvram)
 		{
 			*(adjs->nvram) = adjs->factory_default;
-			adjs++;
 		}
+		adjs++;
 	}
 	wpc_nvram_put ();
 }
