@@ -105,6 +105,7 @@ void device_clear (device_t *dev)
 	dev->previous_count = 0;
 	dev->max_count = 0;
 	dev->kicks_needed = 0;
+	dev->kick_errors = 0;
 	dev->state = DEV_STATE_IDLE;
 	dev->props = NULL;
 }
@@ -197,13 +198,20 @@ wait_and_recount:
 		{
 			/* After attempting a release, the count did not
 			 * change ... the kick must have failed, and we
-			 * should retry */
-
-			/* TODO : infinite retries are being done now.
-			 * At some point, we must give up... */
+			 * should retry up to a point.  Since no state
+			 * is changed, the code will get reinvoked. */
 			db_puts ("Kick did not change anything\n");
 			nonfatal (ERR_FAILED_KICK);
 			device_call_op (dev, kick_failure);
+
+			if (++dev->kick_errors == 5)
+			{
+				/* OK, we tried 5 times and still know ball came out.
+				 * Cancel all kick requests. */
+				db_puts ("Cancelling kick requests\n");
+				dev->kicks_needed = 0;
+				dev->state = DEV_STATE_IDLE;
+			}
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
@@ -254,6 +262,7 @@ wait_and_recount:
 		{
 			device_call_op (dev, full);
 			dev->kicks_needed++;
+			dev->kick_errors = 0;
 		}
 	}
 
@@ -316,6 +325,7 @@ void device_request_kick (device_t *dev)
 	if (device_kickable_count (dev) > 0)
 	{
 		dev->kicks_needed++;
+		dev->kick_errors = 0;
 		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
 			live_balls++;
@@ -334,6 +344,7 @@ void device_request_empty (device_t *dev)
 	if ((can_kick = device_kickable_count (dev)) > 0)
 	{
 		dev->kicks_needed += can_kick;
+		dev->kick_errors = 0;
 		dev->max_count -= can_kick;
 		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
@@ -412,6 +423,7 @@ void device_probe (void)
 		device_recount (dev);
 		dev->previous_count = dev->actual_count;
 		dev->kicks_needed = 0;
+		dev->kick_errors = 0;
 		task_kill_gid (DEVICE_GID(devno));
 
 		/* If there are more balls in the device than ought to be,
