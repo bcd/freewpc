@@ -122,8 +122,8 @@ void lamp_rtt (void)
 	U8 bits;
 
 	/* Setup the strobe */
-	*(U8 *)WPC_LAMP_ROW_OUTPUT = 0;
-	*(U8 *)WPC_LAMP_COL_STROBE = lamp_strobe_mask;
+	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
+	wpc_asic_write (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
@@ -145,7 +145,7 @@ void lamp_rtt (void)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
-	*(U8 *)WPC_LAMP_ROW_OUTPUT = bits;
+	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, bits);
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
