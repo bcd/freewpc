@@ -127,7 +127,7 @@ TMPFILES += $(LINKCMD)
 TMPFILES += *.o
 TMPFILES += *.rom
 TMPFILES += *.lst
-TMPFILES += *.S
+TMPFILES += *.s
 TMPFILES += *.i
 TMPFILES += *.c.[0-9]*.* 
 TMPFILES += *.fon.[0-9]*.* 
@@ -360,9 +360,9 @@ CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize
 
 # Default machine flags.  We enable WPC extensions here.
 ifeq ($(PLATFORM),wpc)
-CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME
+CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN
 else
-CFLAGS += -DCONFIG_PLATFORM_LINUX -g
+CFLAGS += -DCONFIG_PLATFORM_LINUX -g -DCONFIG_LITTLE_ENDIAN
 endif
 
 # This didn't work before, but now it does!
