@@ -205,7 +205,8 @@ STATIC void fontargs_render_string (void)
 			for (j=0; j < font_byte_width; j++)
 			{
 				// dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
-				blit_dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
+				blit_dmd = wpc_dmd_addr_verify (dmd_base 
+					+ xb + i * DMD_BYTE_WIDTH + j);
 #ifdef CONFIG_BLIT
 				blit_data = data;
 				// blit_dmd = dmd;

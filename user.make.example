@@ -4,11 +4,19 @@
 # and change anything you don't like.
 #
 
+# Set the platform you are trying to build.
+# By default, code to run directly on the WPC hardware is generated.
+# If you want to simulate, use the 'linux' platform.
+#PLATFORM = linux
+
 # Set the machine you are trying to build.
 # If you are primarily working with a single machine type, it is
 # easier to specify it here than saying MACHINE=xxx every time you run
 # make.
 #MACHINE = tz
+#MACHINE = afm
+#MACHINE = wcs
+#MACHINE = tester
 
 #
 # Set this to the directory in which mame roms should be installed.
@@ -48,4 +56,6 @@
 # Uncomment if you want to build a FREE ONLY ROM.
 #FREE_ONLY := y
 
+# If you have special flags to pass to the compiler, define them here.
+#EXTRA_CFLAGS := ...
 

@@ -120,6 +120,19 @@ extern dmd_transition_t
 	trans_vstripe_right2left
 	;
 
+extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
+{
+#ifdef CONFIG_PLATFORM_LINUX
+	if ((addr >= DMD_LOW_BASE) && (addr <= DMD_LOW_BASE + DMD_PAGE_SIZE))
+		return addr;
+	else if ((addr >= DMD_HIGH_BASE) && (addr <= DMD_HIGH_BASE + DMD_PAGE_SIZE))
+		return addr;
+	else
+		fatal (ERR_INVALID_IO_ADDR);
+#endif
+	return addr;
+}
+
 void dmd_init (void);
 void dmd_rtt (void);
 void dmd_alloc_low (void);

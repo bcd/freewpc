@@ -25,6 +25,9 @@
 
 #include <termios.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <freewpc.h>
 
 
@@ -43,9 +46,6 @@ extern void exit (int);
 
 /** The frequency of the realtime thread, in milliseconds */
 #define RT_THREAD_FREQ 50
-
-/** The frequency of the interface thread, in milliseconds */
-#define IF_THREAD_FREQ 50
 
 /** The number of IRQs that need to be asserted on every
  * iteration of the realtime thread. */
@@ -117,6 +117,43 @@ U8 linux_cpu_leds;
 /** The initial number of balls to 'install' */
 int linux_installed_balls = -1;
 
+/** The file descriptor to read from for input */
+int linux_input_fd = 0;
+
+/** The stream to write to for output */
+FILE *linux_output_stream;
+
+/** Debug output buffer */
+char linux_debug_output_buffer[256];
+char *linux_debug_output_ptr;
+
+enum sim_log_class
+{
+	SLC_DEBUG,
+	SLC_TEXT,
+	SLC_DEBUG_PORT,
+};
+
+
+/** Prints log messages, requested status, etc. to the console.
+ * This is the only function that should use printf.
+ */
+static void simlog (enum sim_log_class class, const char *format, ...)
+{
+	va_list ap;
+
+	switch (class)
+	{
+		case SLC_DEBUG: putchar ('d'); break;
+		case SLC_TEXT: putchar ('t'); break;
+		case SLC_DEBUG_PORT: putchar ('>'); break;
+	}
+
+	va_start (ap, format);
+	(void)vfprintf (linux_output_stream, format, ap);
+	va_end (ap);
+	putchar ('\n');
+}
 
 /** Find the highest numbered bit set in a bitmask.
  * Returns -1 if no bits are set. */
@@ -136,14 +173,14 @@ static int scanbit (U8 bits)
 
 static void linux_shutdown (void)
 {
-	printf ("Shutting down simulation.\n");
+	simlog (SLC_DEBUG, "Shutting down simulation.");
 	exit (0);
 }
 
 
 void linux_write_string (const char *s)
 {
-	printf ("write_string: %s\n", s);
+	simlog (SLC_TEXT, "%s", s);
 }
 
 
@@ -153,7 +190,13 @@ void linux_asic_write (U16 addr, U8 val)
 	switch (addr)
 	{
 		case WPC_DEBUG_DATA_PORT:
-			putchar (val);
+			*linux_debug_output_ptr++ = val;
+			if (val == '\n')
+			{
+				*--linux_debug_output_ptr = '\0';
+				simlog (SLC_DEBUG_PORT, linux_debug_output_buffer);
+				linux_debug_output_ptr = linux_debug_output_buffer;
+			}
 			break;
 
 		case WPC_SHIFTADDR:
@@ -331,6 +374,7 @@ static void linux_switch_depress (unsigned int sw)
 	linux_switch_toggle (sw);
 	task_sleep (TIME_100MS);
 	linux_switch_toggle (sw);
+	task_sleep (TIME_100MS);
 }
 
 
@@ -352,13 +396,27 @@ static switchnum_t keymaps[256] = {
 	[' '] = MACHINE_TILT_SWITCH,
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
 #ifdef MACHINE_LAUNCH_SWITCH
-	['\r'] = MACHINE_LAUNCH_SWITCH,
+	['/'] = MACHINE_LAUNCH_SWITCH,
 #endif
 };
 
+
+static char linux_interface_readchar (void)
+{
+	char inbuf;
+	ssize_t res = pth_read (linux_input_fd, &inbuf, 1);
+	if (res <= 0)
+	{
+		task_sleep_sec (2);
+		linux_shutdown ();
+	}
+	return inbuf;
+}
+
+
 static void linux_interface_thread (void)
 {
-	char inbuf[1];
+	char inbuf[2];
 	switchnum_t sw;
 	struct termios tio;
 
@@ -367,33 +425,59 @@ static void linux_interface_thread (void)
 	tcsetattr (0, TCSANOW, &tio);
 
 	task_set_flags (TASK_PROTECTED);
+	task_sleep_sec (3);
 	for (;;)
 	{
-		// task_sleep (IF_THREAD_FREQ);
-		ssize_t res = pth_read (0, inbuf, 1);
-		if (res > 0)
+		*inbuf = linux_interface_readchar ();
+		switch (*inbuf)
 		{
-			switch (*inbuf)
-			{
-				case 'q':
-					linux_shutdown ();
-					break;
+			case '\r':
+			case '\n':
+				break;
 
-				case 'T':
-					task_dump ();
-					break;
+			case 'q':
+				linux_shutdown ();
+				break;
 
-				default:
-					sw = keymaps[(int)*inbuf];
-					if (sw)
-						linux_switch_depress (sw);
-					else if (*inbuf == '3')
-						linux_switch_depress (SW_LEFT_COIN);
-					else
-						printf ("invalid key '%c' pressed (0x%02X)", 
-							*inbuf, *inbuf);
+			case 'T':
+				task_dump ();
+				break;
+
+			case 'S':
+				*inbuf = linux_interface_readchar ();
+				task_sleep_sec (*inbuf - '0');
+				break;
+
+			case 's':
+				inbuf[0] = linux_interface_readchar ();
+				inbuf[1] = linux_interface_readchar ();
+
+				if (inbuf[0] == 'D')
+					sw = inbuf[1] - '1';
+				else if (inbuf[0] == 'F')
+					sw = (inbuf[1] - '1') 
+						+ NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES;
+				else
+					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
+				linux_switch_depress (sw);
+				break;
+
+			case '#':
+				do {
+					*inbuf = linux_interface_readchar ();
+				} while (*inbuf != '\n');
+				break;
+
+			default:
+				sw = keymaps[(int)*inbuf];
+				if (sw)
+					linux_switch_depress (sw);
+				else if (*inbuf == '3')
+					linux_switch_depress (SW_LEFT_COIN);
+				else
+					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)", 
+						*inbuf, *inbuf);
 			}
-		}
 	}
 }
 
@@ -446,6 +530,8 @@ int main (int argc, char *argv[])
 	linux_irq_enable = linux_firq_enable = TRUE;
 	linux_irq_pending = linux_firq_pending = 0;
 	linux_irq_count = 0;
+	linux_output_stream = stdout;
+	linux_debug_output_ptr = linux_debug_output_buffer;
 
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
 	linux_asic_write (WPC_SW_COL_STROBE, 0x1);
@@ -471,6 +557,10 @@ int main (int argc, char *argv[])
 		else if (!strcmp (arg, "--balls"))
 		{
 			linux_installed_balls = strtoul (argv[argn++], NULL, 0);
+		}
+		else if (!strcmp (arg, "-f"))
+		{
+			linux_input_fd = open (argv[argn++], O_RDONLY);
 		}
 	}
 	

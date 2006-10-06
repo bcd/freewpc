@@ -42,7 +42,7 @@ extern int linux_irq_multiplier;
 
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
-#define MAX_TASKS 256
+#define MAX_TASKS 32
 
 
 typedef struct

@@ -72,8 +72,13 @@ typedef struct
 	const font_t *font;
 	union {
 		struct {
+#ifdef CONFIG_BIG_ENDIAN
 			U8 x;
 			U8 y;
+#else
+			U8 y;
+			U8 x;
+#endif
 		};
 		U16 xy;
 	};
