@@ -206,6 +206,7 @@ KERNEL_OBJS = \
 	kernel/flip.o \
 	kernel/font.o \
 	kernel/game.o \
+	kernel/idle.o \
 	kernel/init.o \
 	kernel/lamp.o \
 	kernel/lampset.o \
@@ -359,7 +360,7 @@ CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize
 
 # Default machine flags.  We enable WPC extensions here.
 ifeq ($(PLATFORM),wpc)
-CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin
+CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME
 else
 CFLAGS += -DCONFIG_PLATFORM_LINUX -g
 endif
@@ -393,12 +394,17 @@ CFLAGS += -Wall -Wno-format
 # Define lots of other things based on make parameters
 #
 CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
+
 ifeq ($(FREEWPC_DEBUGGER),y)
-CFLAGS += -DDEBUGGER
+CFLAGS += -DDEBUGGER 
+ifneq ($(PLATFORM),linux)
+CFLAGS += -DCONFIG_INSPECTOR
+endif
 ifeq ($(FREEWPC_IRQPROFILE),y)
 CFLAGS += -DIRQPROFILE
 endif
 endif
+
 ifndef SYSTEM_MAJOR
 SYSTEM_MAJOR = 0
 endif
