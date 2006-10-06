@@ -38,7 +38,9 @@ U8 task_count = 0;
 
 U8 task_max_count = 0;
 
-#define PTH_USECS_PER_TICK 16000
+extern int linux_irq_multiplier;
+
+#define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
 #define MAX_TASKS 256
 
@@ -165,7 +167,8 @@ void task_exit (void)
 			task_data_table[i].pid = 0;
 			break;
 		}
-	pth_exit (0);
+	for (;;)
+		pth_exit (0);
 }
 
 task_pid_t task_find_gid (task_gid_t gid)
@@ -192,7 +195,10 @@ void task_kill_pid (task_pid_t tp)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
-			pth_abort (tp);
+			printf ("pth_abort(%d), pid=%p, gid=%d\n", 
+				i, tp, task_data_table[i].gid);
+			if (tp != 0)
+				pth_abort (tp);
 			return;
 		}
 }
@@ -260,6 +266,7 @@ PTR_OR_U16 task_get_arg (void)
 		if (task_data_table[i].pid == task_getpid ())
 			return task_data_table[i].arg;
 	}
+	fatal (ERR_CANT_GET_HERE);
 }
 
 
@@ -302,6 +309,7 @@ U8 task_get_thread_data (task_pid_t pid, U8 n)
 		if (task_data_table[i].pid == pid)
 			return task_data_table[i].thread_data[n];
 	}
+	fatal (ERR_CANT_GET_HERE);
 }
 
 

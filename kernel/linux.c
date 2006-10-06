@@ -24,7 +24,19 @@
  */
 
 #include <termios.h>
+#include <time.h>
 #include <freewpc.h>
+
+
+extern void do_reset (void);
+extern void do_swi3 (void);
+extern void do_swi2 (void);
+extern void do_firq (void);
+extern void do_irq (void);
+extern void do_swi (void);
+extern void do_nmi (void);
+
+extern void exit (int);
 
 /** The number of IRQs per second. */ 
 #define IRQS_PER_SEC 1024
@@ -96,6 +108,16 @@ U8 *linux_lamp_data_ptr;
 /** The jumper settings */
 U8 linux_jumpers = 0;
 
+/** The actual time at which the simulation was started */
+time_t linux_boot_time;
+
+/** The status of the CPU board LEDs */
+U8 linux_cpu_leds;
+
+/** The initial number of balls to 'install' */
+int linux_installed_balls = -1;
+
+
 /** Find the highest numbered bit set in a bitmask.
  * Returns -1 if no bits are set. */
 static int scanbit (U8 bits)
@@ -143,11 +165,14 @@ void linux_asic_write (U16 addr, U8 val)
 			linux_flipper_outputs = val;
 			break;
 
+		case WPC_LEDS:
+			linux_cpu_leds = val;
+			break;
+
 		case WPC_RAM_BANK:
 		case WPC_RAM_LOCK:
 		case WPC_RAM_LOCKSIZE:
 		case WPC_ROM_LOCK:
-		case WPC_LEDS:
 		case WPC_ZEROCROSS_IRQ_CLEAR:
 		case WPC_ROM_BANK:
 			/* nothing to do */
@@ -182,8 +207,13 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_SW_COL_STROBE:
+#if defined (MACHINE_PIC) && (MACHINE_PIC == 1)
+			if ((val >= 0x16) && (val < 0x16 + 8))
+				linux_switch_data_ptr = linux_switch_matrix + val - 1;
+#else
 			if (val != 0)
 				linux_switch_data_ptr = linux_switch_matrix + 1 + scanbit (val);
+#endif
 			break;
 
 		default:
@@ -197,6 +227,22 @@ U8 linux_asic_read (U16 addr)
 {
 	switch (addr)
 	{
+		case WPC_LEDS:
+			return linux_cpu_leds;
+			break;
+
+		case WPC_CLK_HOURS_DAYS:
+		case WPC_CLK_MINS:
+		{
+			time_t now = time (NULL);
+			int minutes_on = (now - linux_boot_time) / 60;
+			if (addr == WPC_CLK_HOURS_DAYS)
+				return minutes_on / 60;
+			else
+				return minutes_on % 60;
+			break;
+		}
+
 		case WPC_SW_ROW_INPUT:
 			return *linux_switch_data_ptr;
 
@@ -251,7 +297,7 @@ static void linux_realtime_thread (void)
 		 * less, based on how long it took to do the real work. */
 		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 
-		linux_irq_pending += RT_ITERATION_IRQS * linux_irq_multiplier;
+		linux_irq_pending += RT_ITERATION_IRQS;
 
 		if (linux_irq_enable)
 			while (linux_irq_pending-- > 0)
@@ -287,10 +333,32 @@ static void linux_switch_depress (unsigned int sw)
 }
 
 
+static switchnum_t keymaps[256] = {
+	['1'] = MACHINE_START_SWITCH,
+#ifdef MACHINE_BUYIN_SWITCH
+	['2'] = MACHINE_BUYIN_SWITCH,
+#endif
+	['4'] = SW_CENTER_COIN,
+	['5'] = SW_RIGHT_COIN,
+	['6'] = SW_FOURTH_COIN,
+	['7'] = SW_ESCAPE,
+	['8'] = SW_DOWN,
+	['9'] = SW_UP,
+	['0'] = SW_ENTER,
+	[','] = SW_LL_FLIP_SW,
+	['.'] = SW_LR_FLIP_SW,
+	['`'] = SW_COINDOOR_CLOSED,
+	[' '] = MACHINE_TILT_SWITCH,
+	['!'] = MACHINE_SLAM_TILT_SWITCH,
+#ifdef MACHINE_LAUNCH_SWITCH
+	['\r'] = MACHINE_LAUNCH_SWITCH,
+#endif
+};
+
 static void linux_interface_thread (void)
 {
 	char inbuf[1];
-
+	switchnum_t sw;
 	struct termios tio;
 
 	tcgetattr (0, &tio);
@@ -300,7 +368,7 @@ static void linux_interface_thread (void)
 	task_set_flags (TASK_PROTECTED);
 	for (;;)
 	{
-		task_sleep (IF_THREAD_FREQ);
+		// task_sleep (IF_THREAD_FREQ);
 		ssize_t res = pth_read (0, inbuf, 1);
 		if (res > 0)
 		{
@@ -314,29 +382,30 @@ static void linux_interface_thread (void)
 					task_dump ();
 					break;
 
-				case '1':
-					linux_switch_depress (SW_ESCAPE);
-					break;
-
-				case '2':
-					linux_switch_depress (SW_DOWN);
-					break;
-
-				case '3':
-					linux_switch_depress (SW_UP);
-					break;
-
-				case '4':
-					linux_switch_depress (SW_ENTER);
-					break;
-
 				default:
-					printf ("invalid key '%c' pressed (0x%02X)", *inbuf, *inbuf);
-					break;
+					sw = keymaps[(int)*inbuf];
+					if (sw)
+						linux_switch_depress (sw);
+					else if (*inbuf == '3')
+						linux_switch_depress (SW_LEFT_COIN);
+					else
+						printf ("invalid key '%c' pressed (0x%02X)", 
+							*inbuf, *inbuf);
 			}
 		}
 	}
 }
+
+
+void linux_trough_init (int balls)
+{
+	int i;
+
+	device_t *dev = &device_table[DEVNO_TROUGH];
+	for (i=0; i < dev->props->sw_count && balls; i++, balls--)
+		linux_switch_toggle (dev->props->sw[i]);
+}
+
 
 
 /** Initialize the Linux simulation.
@@ -356,6 +425,9 @@ void linux_init (void)
 	for (sw = 0; sw < NUM_SWITCHES; sw++)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
+
+	/* Initial the trough to contain all the balls */
+	linux_trough_init (linux_installed_balls);
 }
 
 
@@ -366,7 +438,6 @@ void linux_init (void)
  */
 int main (int argc, char *argv[])
 {
-	extern __noreturn__ void do_reset (void);
 	int argn = 1;
 
 	/** Do initialization that the hardware would normally do, before
@@ -381,6 +452,8 @@ int main (int argc, char *argv[])
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
 
+	linux_boot_time = time (NULL);
+
 	/* Parse command-line arguments */
 	while (argn < argc)
 	{
@@ -393,6 +466,10 @@ int main (int argc, char *argv[])
 		else if (!strcmp (arg, "-s"))
 		{
 			linux_irq_multiplier = strtoul (argv[argn++], NULL, 0);
+		}
+		else if (!strcmp (arg, "--balls"))
+		{
+			linux_installed_balls = strtoul (argv[argn++], NULL, 0);
 		}
 	}
 	
