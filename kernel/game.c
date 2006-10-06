@@ -544,8 +544,9 @@ void sw_start_button_handler (void) __taskentry__
  */
 void sw_buy_in_button_handler (void) __taskentry__
 {
-	/* TODO: the inspector should be a build time option */
+#ifdef CONFIG_INSPECTOR
 	inspector_buyin_button ();
+#endif
 }
 
 /*

@@ -41,7 +41,9 @@ U8 flipper_outputs;
 /** Handle left flipper presses. */
 void sw_left_flipper_handler (void) 
 {
+#ifdef CONFIG_INSPECTOR
 	inspector_left_flipper ();
+#endif
 	if (in_test)
 		test_left_flipper_button ();
 	else if (in_live_game)
@@ -64,7 +66,9 @@ void sw_left_flipper_handler (void)
 /** Handle right flipper presses. */
 void sw_right_flipper_handler (void)
 {
+#ifdef CONFIG_INSPECTOR
 	inspector_right_flipper ();
+#endif
 	if (in_test)
 		test_right_flipper_button ();
 	else if (in_live_game)
