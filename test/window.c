@@ -2646,7 +2646,7 @@ void asic_register_init (void)
 void asic_register_draw (void)
 {
 	browser_draw ();
-	sprintf ("%02X", *(U8 *)(ASIC_REG_BASE + menu_selection));
+	sprintf ("%02X", wpc_asic_read (ASIC_REG_BASE + menu_selection));
 	browser_print_operation (sprintf_buffer);
 }
 
