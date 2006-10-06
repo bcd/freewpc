@@ -43,6 +43,15 @@
  * declare at least one here */
 __local__ U8 __unused_local__;
 
+/** In simulation, we have to declare the save areas explicitly. */
+#ifdef CONFIG_PLATFORM_LINUX
+U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
+
+#undef LOCAL_BASE
+#define LOCAL_BASE (&local_save_area[0][0])
+#undef LOCAL_SAVE_BASE
+#define LOCAL_SAVE_BASE(p) (&local_save_area[p][0])
+#endif
 
 extern U8 *bit_matrix_array;
 
