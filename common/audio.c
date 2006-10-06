@@ -77,6 +77,7 @@ bool audio_start (audio_channel_id_t id,
 		// *((U16 *)(&ch->task->thread_data[0])) = fn;
 		////  *((U8 *)(&ch->task->thread_data[2])) = fnpage;
 	}
+	return TRUE;
 }
 
 

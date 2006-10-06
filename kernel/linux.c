@@ -235,7 +235,8 @@ U8 linux_asic_read (U16 addr)
 		case WPC_CLK_MINS:
 		{
 			time_t now = time (NULL);
-			int minutes_on = (now - linux_boot_time) / 60;
+			int minutes_on = 
+				(now - linux_boot_time) * linux_irq_multiplier / 60;
 			if (addr == WPC_CLK_HOURS_DAYS)
 				return minutes_on / 60;
 			else

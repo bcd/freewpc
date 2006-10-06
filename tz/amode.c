@@ -247,11 +247,15 @@ void amode_deff (void) __taskentry__
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_mono5, 64, 10, "BACK TO THE ZONE");
+#ifndef CONFIG_PLATFORM_LINUX
 		starfield_start ();
+#endif
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_mono5, 64, 20, "TZ 2006");
 		deff_swap_low_high (19, TIME_100MS * 2);
+#ifndef CONFIG_PLATFORM_LINUX
 		starfield_stop ();
+#endif
 
 		/** Display high scores **/
 		high_score_amode_show ();
