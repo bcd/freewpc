@@ -127,7 +127,6 @@ TMPFILES += $(LINKCMD)
 TMPFILES += *.o
 TMPFILES += *.rom
 TMPFILES += *.lst
-TMPFILES += *.s
 TMPFILES += *.i
 TMPFILES += *.c.[0-9]*.* 
 TMPFILES += *.fon.[0-9]*.* 
@@ -1013,7 +1012,8 @@ clean_derived:
 	@for file in `echo $(XBM_H) mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
-		rm -rf .mach .include_mach
+		rm -rf .mach .include_mach && \
+		rm -f *.s *.i
 
 show_objs:
 	@echo $(OBJS)
