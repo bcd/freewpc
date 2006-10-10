@@ -168,13 +168,18 @@ do_format_chars:
 			switch (*format)
 			{
 				case '0':
-					sprintf_leading_zeroes = TRUE;
-					goto do_format_chars;
+					if (sprintf_leading_zeroes == FALSE)
+					{
+						sprintf_leading_zeroes = TRUE;
+						goto do_format_chars;
+					}
+					/* FALLTHRU on purpose */
 
 				case '1': case '2': case '3':
 				case '4': case '5': case '6':
 				case '7': case '8': case '9':
-					sprintf_width = *format - '0';
+					sprintf_width <<= 4;
+					sprintf_width += *format - '0';
 					goto do_format_chars;
 
 				case 'd':
@@ -293,8 +298,13 @@ do_long_hex_integer:
 				{
 					register const char *s = va_arg (va, const char *);
 					register char *_buf = buf;
-					while (*s)
-						*_buf++ = *s++;
+					if (sprintf_width == 0)
+						while (*s)
+							*_buf++ = *s++;
+					else
+						while (sprintf_width--)
+							*_buf++ = *s++;
+
 					buf = _buf;
 					break;
 				}
