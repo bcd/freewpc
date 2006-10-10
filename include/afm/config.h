@@ -64,7 +64,7 @@
 
 /* Define the locations of optional switches.  These may not be
  * defined for all games. */
-#define MACHINE_BUYIN_SWITCH
+#undef MACHINE_BUYIN_SWITCH
 #define MACHINE_LAUNCH_SWITCH 	SW_LAUNCH_BUTTON
 
 /* Define the number and location of the trough switches.
