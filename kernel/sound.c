@@ -177,13 +177,13 @@ void sound_init (void)
 	{
 		for (j=0; j < 4; j++)
 		{
-			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
 			task_sleep (1); /* 16ms */
-			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
 			task_sleep (1); /* 16ms */
-			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
 			task_sleep (1); /* 16ms */
-			*(U8 *)WPCS_CONTROL_STATUS = dcs_init_string[i];
+			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
 			task_sleep (1); /* 16ms */
 		}
 	}
