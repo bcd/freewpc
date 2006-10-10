@@ -20,6 +20,12 @@
 
 #include "pgmlib.h"
 
+/**
+ * \file
+ * \brief Generates some generic frame borders.
+ *
+ */
+
 
 /* Generate the multi-color border */
 void

@@ -20,6 +20,13 @@
 
 #include "pgmlib.h"
 
+/**
+ * \file
+ * \brief Generates background DMD frames.
+ * This file is compiled and executed on the build machine.  When run,
+ * it produces .xbm files that are suitable to be compiled into the
+ * target image.
+ */
 
 void
 gen_multisquare_background (void)
