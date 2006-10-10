@@ -1,110 +1,112 @@
-   .area sysrom
+;;; Copyright 2006 by Brian Dominy <brian@oddchange.com>
+;;; 
+;;; This file is part of FreeWPC.
+;;;
+;;; FreeWPC is free software; you can redistribute it and/or modify
+;;; it under the terms of the GNU General Public License as published by
+;;; the Free Software Foundation; either version 2 of the License, or
+;;; (at your option) any later version.
+;;; 
+;;; FreeWPC is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; GNU General Public License for more details.
+;;; 
+;;; You should have received a copy of the GNU General Public License
+;;; along with FreeWPC; if not, write to the Free Software
+;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+;;;
+
+
+	;-----------------------------------------------------
+	; task_save
+	;-----------------------------------------------------
+	.area sysrom	
 	.globl _task_save
 _task_save:
-	stu	*_task_save_U	;movhi: R:u -> *_task_save_U
-	stx	*_task_save_X	;movhi: R:x -> *_task_save_X
-; Begin inline assembler code
+	stu	*_task_save_U
 	puls	u
-; End of inline assembler code
-	ldx	*_task_current	;movhi: *_task_current -> R:x
-	stu	2,x	;movhi: R:u -> 2,x
-	ldu	*_task_save_U	;movhi: *_task_save_U -> R:u
-	stu	12,x	;movhi: R:u -> 12,x
-	ldu	*_task_save_X	;movhi: *_task_save_X -> R:u
-	stu	6,x	;movhi: R:u -> 6,x
-; Begin inline assembler code
-	sty	8,x
+	ldx	*_task_current
+	stu	5,x
+	ldu	*_task_save_U
+	stu	9,x
+	sty	7,x
 	leau	,s
-; End of inline assembler code
-	leay	21,x	;addhi: R:y = R:x + #21
-; Begin inline assembler code
+	leay	23,x
 	leay	,y
-; End of inline assembler code
-	clrb		;movqi: ZERO -> R:b
-	bra	L33	;length = 2
-L34:
-; Begin inline assembler code
+	clrb
+	bra	L32
+L33:
 	lda	,u+
 	sta	,y+
-; End of inline assembler code
-	incb		;addqi: R:b ++
-L33:
-	cmpu	#6135	;cmphi:
-	bls	L34	;length = 2
-	stb	10,x	;movqi: R:b -> 10,x
-	cmpb	_task_largest_stack	;cmpqi:
-	bls	L29	;length = 2
-	stb	_task_largest_stack	;movqi: R:b -> _task_largest_stack
-L29:
-	ldb	16380	;movqi: 16380 -> R:b
-	stb	17,x	;movqi: R:b -> 17,x
-; Begin inline assembler code
+	incb
+L32:
+	cmpu	#6135
+	bls	L33
+	stb	12,x
+	ldb	16380
+	stb	11,x
 	jmp _task_dispatcher
-; End of inline assembler code
+
+
+	;-----------------------------------------------------
+	; task_restore
+	;-----------------------------------------------------
+
+	.area sysrom	
 	.globl _task_restore
 _task_restore:
-	stx	*_task_current	;movhi: R:x -> *_task_current
-; Begin inline assembler code
-	orcc	#(0x10|0x40)
-	ldu	#6136
-; End of inline assembler code
-	ldb	10,x	;zero_extendqihi: 10,x -> R:d
+	stx	*_task_current	
+	orcc	#80
+	ldb	12,x
 	clra
-	leay	d,x	;addhi: R:y = R:x + R:d
-	leay	21,y	;addhi: R:y = R:y + #21
-; Begin inline assembler code
-	leay	,y
-; End of inline assembler code
-	ldb	10,x	;movqi: 10,x -> R:b
-	bra	L42	;length = 2
+	leau	d,x
+	leau	23,u
+	leay	,u
+	ldu	#6136
+	ldb	12,x
+	bra	L42
 L43:
-; Begin inline assembler code
 	lda	,-y
 	sta	,-u
-; End of inline assembler code
-	decb		;addqi: R:b --
+	decb
 L42:
-	tstb		;tstqi: R:b
-	bne	L43	;length = 2
-; Begin inline assembler code
+	tstb
+	bne	L43
 	leas	,u
-	andcc	#~0x40
-	andcc	#~0x10
-; End of inline assembler code
-	ldb	17,x	;movqi: 17,x -> R:b
-	stb	16380	;movqi: R:b -> 16380
-; Begin inline assembler code
-	ldu	2,x
+	andcc	#-81
+	ldb	11,x
+	stb	16380
+	ldu	5,x
 	pshs	u
-	ldy	8,x
-	ldu	12,x
-; End of inline assembler code
-	clr	14,x	;movqi: ZERO -> R:14,x
-; Begin inline assembler code
-	ldx	6,x
+	ldy	7,x
+	ldu	9,x
+	clr	14,x
 	rts
-; End of inline assembler code
+
+	;-----------------------------------------------------
+	; task_create
+	;
+	; Input: X = initial PC for new task
+	; Output: X = pointer to task block
+	;-----------------------------------------------------
+
+	.area sysrom	
 	.globl _task_create
 _task_create:
-; Begin inline assembler code
-	pshs	d,u,y
+	pshs	u,y
 	pshs	d,u
 	tfr	x,u
-; End of inline assembler code
-	jsr	_task_allocate	;CALL: R:x = _task_allocate (0 bytes)
-; Begin inline assembler code
-	stu	2,x
+	jsr	_task_allocate
+	stu	5,x
 	puls	d,u
-	sty	8,x
-	stu	12,x
-; End of inline assembler code
-	clr	,x	;movqi: ZERO -> R:,x
-	ldd	#0	;movhi: #0 -> R:d
-	std	19,x	;movhi: R:d -> 19,x
-	ldb	16380	;movqi: 16380 -> R:b
-	stb	17,x	;movqi: R:b -> 17,x
-	clr	10,x	;movqi: ZERO -> R:10,x
-; Begin inline assembler code
-	puls	d,u,y,pc
-; End of inline assembler code
+	sty	7,x
+	stu	9,x
+	clr	,x
+	ldd	#0
+	std	17,x
+	ldb	16380
+	stb	11,x
+	clr	12,x
+	puls	u,y,pc
 
