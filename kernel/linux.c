@@ -108,6 +108,9 @@ U8 *linux_lamp_data_ptr;
 /** The jumper settings */
 U8 linux_jumpers = 0;
 
+/** The triac outputs */
+U8 linux_triac_outputs;
+
 /** The actual time at which the simulation was started */
 time_t linux_boot_time;
 
@@ -154,6 +157,7 @@ static void simlog (enum sim_log_class class, const char *format, ...)
 	va_end (ap);
 	putchar ('\n');
 }
+
 
 /** Find the highest numbered bit set in a bitmask.
  * Returns -1 if no bits are set. */
@@ -231,6 +235,10 @@ void linux_asic_write (U16 addr, U8 val)
 
 		case WPC_DMD_ACTIVE_PAGE:
 			linux_dmd_visible_page = linux_dmd_pages[val];
+			break;
+
+		case WPC_GI_TRIAC:
+			linux_triac_outputs = val;
 			break;
 
 		case WPC_SOL_FLASH2_OUTPUT:
@@ -511,7 +519,9 @@ void linux_init (void)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
 
-	/* Initial the trough to contain all the balls */
+	/* Initial the trough to contain all the balls.  By default,
+	 * it will fill the trough, based on its actual size.  You
+	 * can use the --balls option to override this. */
 	linux_trough_init (linux_installed_balls);
 }
 
