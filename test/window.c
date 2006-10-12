@@ -2846,7 +2846,7 @@ void sysinfo_stats2 (void) {
 scroller_item sysinfo_scroller[] = {
 	sysinfo_machine_name, sysinfo_machine_version,
 	sysinfo_system_version, sysinfo_compiler_version,
-#ifdef DEBUGGER
+#if defined(CONFIG_DEBUG_STACK) || defined(TASKCOUNT)
 	sysinfo_stats1, sysinfo_stats2,
 #endif
 	NULL
