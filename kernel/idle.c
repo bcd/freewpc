@@ -20,6 +20,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief The idle function that is executed whenever there is nothing
+ * else important to do at the moment.
+ */
 
 void idle (void)
 {
@@ -27,10 +32,5 @@ void idle (void)
 	db_idle_task ();
 #endif
 	callset_invoke (idle);
-	/* TODO - change all of these to event catchers */
-	switch_idle_task ();
-	ac_idle_task ();
-	nvram_idle_task ();
-	rtc_idle_task ();
 }
 

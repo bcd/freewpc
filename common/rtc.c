@@ -157,7 +157,7 @@ static void rtc_pinmame_read (void)
 }
 
 
-void rtc_idle_task (void)
+CALLSET_ENTRY (rtc, idle)
 {
 	rtc_hw_read ();
 	rtc_normalize ();

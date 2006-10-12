@@ -317,8 +317,9 @@ void lockup_check_rtt (void)
 }
 
 
-void nvram_idle_task (void)
+CALLSET_ENTRY (nvram, idle)
 {
+#ifndef GCC4
 #ifndef CONFIG_PLATFORM_LINUX
 	U8 data = nvram_test_byte;
 	++nvram_test_byte;
@@ -326,6 +327,7 @@ void nvram_idle_task (void)
 	{
 		fatal (ERR_NVRAM_UNLOCKED);
 	}
+#endif
 #endif
 }
 

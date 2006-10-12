@@ -54,7 +54,7 @@ void ac_rtt (void)
 }
 
 
-void ac_idle_task (void)
+CALLSET_ENTRY (ac, idle)
 {
 	/** If zerocross is working, we are in a real machine.
 	 * Pinmame doesn't support this yet. */
