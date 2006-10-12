@@ -20,6 +20,13 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Implements the status report feature.
+ * To activate status report, hold both flippers in while a game is in
+ * progress.
+ */
+
 /* TODO : you cannot page through the status report now. */
 
 void status_page_init (void)

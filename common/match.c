@@ -20,6 +20,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Implements the match function
+ *
+ */
 
 void
 match_award (void)

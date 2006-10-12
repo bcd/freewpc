@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
@@ -21,7 +20,7 @@
 
 /*
  * \file
- * \brief 6809 interrupt vector table
+ * \brief The 6809 interrupt vector table
  *
  * This module defines the contents of the vector table and places the
  * structure at a fixed location, named "vector", which is mapped at

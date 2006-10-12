@@ -20,6 +20,11 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Implements the one-coin buyin.  
+ * This feature was never really used that much, AFAIK.
+ */
 
 static void onecoin_buyin_offer_deff (void)
 {

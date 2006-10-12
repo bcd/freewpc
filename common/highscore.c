@@ -20,6 +20,13 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Maintains high scores
+ *
+ */
+
+
 /** The grand champion score */
 __nvram__ U8 gc_score[HIGH_SCORE_WIDTH];
 /** The initials of the grand champion */

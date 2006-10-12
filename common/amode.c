@@ -20,6 +20,12 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Common attract mode module
+ * This file implements a basic attract mode that can be used by any game.
+ * Machines can override this with their own amode if desired.
+ */
 
 bool amode_page_delay (U8 secs)
 {
