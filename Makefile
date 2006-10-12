@@ -67,6 +67,9 @@ SAVE_ASM ?= n
 # Set to 'y' if you want to link with libc.
 USE_LIBC ?= n
 
+# Low-level task support is stable, so make it the default
+TASK_LL_SUPPORT ?= y
+
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
 
@@ -245,6 +248,7 @@ COMMON_OBJS = \
 	common/buyin.o \
 	common/eb.o \
 	common/highscore.o \
+	common/initials.o \
 	common/inspector.o \
 	common/knocker.o \
 	common/match.o \
