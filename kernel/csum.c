@@ -18,23 +18,42 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Generic checksum calculation/verification routines.
+ *
+ */
+
 #include <freewpc.h>
+
 
 extern const struct area_csum coin_csum_info;
 extern const struct area_csum replay_csum_info;
+extern const struct area_csum champion_csum_info;
+extern const struct area_csum highscore_csum_info;
+extern const struct area_csum rtc_csum_info;
 
 
 const struct area_csum *csum_info_table[] = {
 	&coin_csum_info,
 	&replay_csum_info,
+	&champion_csum_info,
+	&highscore_csum_info,
+	&rtc_csum_info,
 };
 
 const U8 csum_paging_info_table[] = {
 	SYS_PAGE,
 	COMMON_PAGE,
+	COMMON_PAGE,
+	COMMON_PAGE,
+	COMMON_PAGE,
 };
 
 
+/*
+ * Updates a checksummed region after an update.
+ */
 void
 csum_area_update (const struct area_csum *csi)
 {
@@ -53,6 +72,10 @@ csum_area_update (const struct area_csum *csi)
 }
 
 
+/*
+ * Checks a checksummed region for correctness.
+ * If the checksum fails, the data is reset to defaults.
+ */
 void
 csum_area_check (const struct area_csum *csi)
 {
@@ -80,6 +103,10 @@ csum_area_check (const struct area_csum *csi)
 }
 
 
+/*
+ * Checks all checksummed regions for correctness.
+ * This is called during system initialization.
+ */
 void
 csum_area_check_all (void)
 {
@@ -93,5 +120,4 @@ csum_area_check_all (void)
 		wpc_pop_page ();
 	}
 }
-
 
