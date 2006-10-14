@@ -73,7 +73,7 @@ struct window_ops
 /** The default window constructor.
  *
  * We use a gcc trick here to simulate object-oriented
- * behavior.  In a structue, if you have two named
+ * behavior.  In a structure, if you have two named
  * field definitions in an initializer, only the last one
  * is used.  We start our structure initializers with
  * DEFAULT_WINDOW to give them default values, in case no
