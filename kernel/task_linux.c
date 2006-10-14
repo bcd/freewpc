@@ -195,8 +195,6 @@ void task_kill_pid (task_pid_t tp)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
-			printf ("pth_abort(%d), pid=%p, gid=%d\n", 
-				i, tp, task_data_table[i].gid);
 			if (tp != 0)
 				pth_abort (tp);
 			return;
