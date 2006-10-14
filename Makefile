@@ -55,17 +55,11 @@ endif
 # Which version of the compiler to use
 GCC_VERSION ?= 3.4.6
 
-# Set to 'y' if you want to use the direct page
-USE_DIRECT_PAGE := y
-
 # Set to 'y' if you want to enable multiplayer games
 USE_LOCALS ?= y
 
 # Set to 'y' if you want to save the assembly sources
 SAVE_ASM ?= n
-
-# Set to 'y' if you want to link with libc.
-USE_LIBC ?= n
 
 # Low-level task support is stable, so make it the default
 TASK_LL_SUPPORT ?= y
@@ -100,7 +94,6 @@ endif
 ###	Directories
 #######################################################################
 
-LIBC_DIR = ./libc
 INCLUDE_DIR = ./include
 MACHINE_DIR = ./$(MACHINE)
 
@@ -165,9 +158,9 @@ AS6809 = $(GCC_ROOT)/as6809
 AS = $(GCC_ROOT)/as
 
 ifeq ($(PLATFORM),wpc)
-REQUIRED += $(CC) $(LD6809) $(AS6809) $(LD) $(AS)
+REQUIRED += $(CC) $(LD6809) $(AS6809) $(LD)
 else
-REQUIRED += $(CC) $(LD) $(AS)
+REQUIRED += $(CC) $(LD)
 endif
 
 # Name of the S-record converter
@@ -246,6 +239,7 @@ endif
 COMMON_OBJS = \
 	common/audio.o \
 	common/buyin.o \
+	common/diag.o \
 	common/eb.o \
 	common/highscore.o \
 	common/initials.o \
@@ -262,7 +256,7 @@ EVENT_OBJS = build/callset.o
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o \
 
-ifdef TASK_LL_SUPPORT
+ifeq ($(TASK_LL_SUPPORT),y)
 KERNEL_ASM_OBJS += kernel/task_6809.o
 endif
 
@@ -315,13 +309,8 @@ ifeq ($(USE_LOCALS),y)
 CFLAGS += -DCONFIG_MULTIPLAYER
 endif
 
-ifdef TASK_LL_SUPPORT
+ifeq ($(TASK_LL_SUPPORT),y)
 CFLAGS += -DTASK_LL_SUPPORT
-endif
-
-# System include directories.  FreeWPC doesn't use libc currently.
-ifeq ($(USE_LIBC),y)
-CFLAGS += -I$(LIBC_DIR)/include
 endif
 
 ifeq ($(PLATFORM),linux)
@@ -335,7 +324,7 @@ CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 ifdef GCC_VERSION
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 else
-CFLAGS += -DGCC_VERSION=3.3.6
+CFLAGS += -DGCC_VERSION=3.4.6
 endif
 
 ifdef ASVER
@@ -427,18 +416,9 @@ CFLAGS += -DMACHINE_MINOR_VERSION=$(MACHINE_MINOR)
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
-
 ifeq ($(PLATFORM),wpc)
-ifeq ($(USE_DIRECT_PAGE),y)
 CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
-else
-CFLAGS += -mnodirect
 endif
-ifeq ($(USE_LIBC),y)
-CFLAGS += -DHAVE_LIBC
-endif
-endif
-
 ifeq ($(FREE_ONLY),y)
 CFLAGS += -DFREE_ONLY
 endif
@@ -483,14 +463,9 @@ BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
 # particular function.
 #
 
-ifeq ($(USE_DIRECT_PAGE),y)
 DIRECT_AREA = 0x4
 RAM_AREA = 0x100
 DIRECT_LNK_CMD = "-b direct = $(DIRECT_AREA)"
-else
-RAM_AREA = 0x4
-DIRECT_LNK_CMD = "-x"
-endif
 
 ifeq ($(USE_LOCALS),y)
 LOCAL_AREA = 0x1200
@@ -726,8 +701,6 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 	for f in `echo $(call OBJ_PAGE_LIST,$@)` ;\
 	   do echo $$f >> $@ ;\
 	done ;\
-	echo "-k $(LIBC_DIR)/" >> $@ ;\
-	echo "-l c.a" >> $@ ;\
 	echo "-e" >> $@
 
 #
@@ -762,8 +735,6 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 	for f in `echo $(BLD)/freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-v" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
-	echo "-k $(LIBC_DIR)/" >> $(LINKCMD) ;\
-	echo "-l c.a" >> $(LINKCMD) ;\
 	echo "-e" >> $(LINKCMD)
 
 
@@ -931,8 +902,6 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 ###	Standard Dependencies
 #######################################################################
 
-# kernel/switches.o : include/$(MACHINE)/switch.h
-
 
 #
 # Symbolic links to the machine code.  Once set, code can reference
@@ -996,7 +965,7 @@ info:
 	@echo "CC = $(CC)"
 	-@$(CC) -v
 	@echo "AS = $(AS)"
-	-@$(AS)
+	-@$(AS) --version
 	@echo "CFLAGS = $(CFLAGS)"
 	@echo "PAGEFLAGS = $(PAGEFLAGS)"
 	@echo "BLANK_SIZE = $(BLANK_SIZE)"
