@@ -212,11 +212,9 @@ void task_save (void)
 	__b = 0;
 	while (__u < STACK_BASE)
 	{
-		/* TODO : use X register to transfer data faster */
 		__asm__ volatile ("lda\t,u+");
 		__asm__ volatile ("sta\t,y+");
 		__b ++;
-		/* TODO : check for overflow during copy */
 	}
 
 #ifdef CONFIG_DEBUG_STACK
@@ -238,8 +236,6 @@ void task_save (void)
 
 	/* Save current ROM page */
 	__x->rom_page = wpc_get_rom_page ();
-
-	/* TODO : add test for stack overflow */
 
 	/* Jump to the task dispatcher */
 	__asm__ volatile ("jmp _task_dispatcher");
@@ -272,7 +268,6 @@ void task_restore (void)
 	__b = __x->stack_word_count;
 	while (__b != 0)
 	{
-		/* TODO : use X register to transfer data */
 		__asm__ volatile ("lda\t,-y");
 		__asm__ volatile ("sta\t,-u");
 		__b --;
@@ -333,13 +328,6 @@ void task_create (void)
 	tp->arg = 0;
 	tp->rom_page = wpc_get_rom_page ();
 	tp->stack_word_count = 0;
-
-	/* TODO?? : push the address of task_exit onto the
-	 * stack so that the task can simply return and it
-	 * will exit automatically.  All tasks will need
-	 * to do this and this will save the code space of
-	 * a function call (though replaced by stack space)
-	 */
 
 	__asm__ volatile ("puls\td,u,y,pc");
 }
