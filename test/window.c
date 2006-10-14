@@ -683,20 +683,53 @@ void integer_audit (audit_t val)
 }
 
 
+void currency_audit (audit_t val)
+{
+	sprintf ("$%ld.%02ld", val / 4, (val % 4) * 25);
+}
+
+
 struct audit *browser_audits;
 
 
-struct audit standard_audits[] = {
-	{ "LEFT COINS", &integer_audit, &system_audits.coins_added[0] },
-	{ "CENTER COINS", &integer_audit, &system_audits.coins_added[1] },
-	{ "RIGHT COINS", &integer_audit, &system_audits.coins_added[2] },
-	{ "4TH SLOT COINS", &integer_audit, &system_audits.coins_added[3] },
+struct audit main_audits[] = {
+	{ "TOTAL EARNINGS", &currency_audit, &system_audits.total_units },
+	{ "RECENT EARNINGS", },
+	{ "FREEPLAY PERCENT", },
+	{ "AVG. BALL TIME", },
+	{ "TIME PER CREDIT", },
+	{ "TOTAL PLAYS", },
+	{ "REPLAY AWARDS", },
+	{ "PERCENT REPLAYS", },
+	{ "EXTRA BALLS", },
+	{ "PERCENT EX. BALL", },
+	{ NULL, NULL, NULL },
+};
+
+struct audit earnings_audits[] = {
+	{ "LEFT SLOT", &integer_audit, &system_audits.coins_added[0] },
+	{ "CENTER SLOT", &integer_audit, &system_audits.coins_added[1] },
+	{ "RIGHT SLOT", &integer_audit, &system_audits.coins_added[2] },
+	{ "4TH SLOT SLOT", &integer_audit, &system_audits.coins_added[3] },
 	{ "PAID CREDITS", &integer_audit, &system_audits.paid_credits },
 	{ "SERVICE CREDITS", &integer_audit, &system_audits.service_credits },
+	{ NULL, NULL, NULL },
+};
+
+
+struct audit standard_audits[] = {
 	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
 	{ "TILTS", &integer_audit, &system_audits.tilts },
 	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
 	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },
+	{ "CENTER DRAINS", &integer_audit, &system_audits.center_drains },
+	{ "POWER UPS", &integer_audit, &system_audits.power_ups },
+	{ "SLAM TILTS", &integer_audit, &system_audits.slam_tilts },
+	{ "PLUMB BOB TILTS", &integer_audit, &system_audits.plumb_bob_tilts },
+	{ "FATAL ERRORS", &integer_audit, &system_audits.fatal_errors },
+	{ "NON-FATAL ERRORS", &integer_audit, &system_audits.non_fatal_errors },
+	{ "LEFT FLIPPER", &integer_audit, &system_audits.left_flippers },
+	{ "RIGHT FLIPPER", &integer_audit, &system_audits.right_flippers },
 	{ NULL, NULL, NULL },
 };
 
@@ -729,9 +762,11 @@ void audit_browser_draw (void)
 	sprintf ("%d. %s", menu_selection+1, aud->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
-	if (aud->nvram)
+	if (aud->nvram && aud->render)
+	{
 		aud->render (*(aud->nvram));
-	font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
+		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
+	}
 
 	dmd_show_low ();
 }
@@ -1785,11 +1820,15 @@ void presets_draw (void)
 	sprintf ("%d. INSTALL %s", menu_selection+1, pre->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
-	/* Is it installed? */	
+	/* Is it installed now? */	
 	while (comps->adj != NULL)
 	{
 		if (*(comps->adj) != comps->value)
+		{
+			font_render_string_center (&font_mono5, 32, 20, "NOT INSTALLED");
 			break;
+		}
+
 		comps++;
 		if (comps->adj == NULL)
 			font_render_string_center (&font_mono5, 32, 20, "INSTALLED");
@@ -1802,11 +1841,18 @@ void presets_draw (void)
 void presets_enter (void)
 {
 	struct preset *pre = preset_table[menu_selection];
+	struct preset_component *comps = pre->comps;
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
 	font_render_string_center (&font_mono5, 64, 16, pre->name);
 	dmd_show_low ();
+	task_sleep_sec (2);
+
+	wpc_nvram_get ();
+	while (comps->adj != NULL)
+		*(comps->adj) = comps->value;
+	wpc_nvram_put ();
 }
 
 
@@ -1888,11 +1934,13 @@ struct menu utilities_menu = {
 struct menu main_audits_item = {
 	.name = "MAIN AUDITS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &audit_browser_window, main_audits } },
 };
 
 struct menu earnings_audits_item = {
 	.name = "EARNINGS AUDITS",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &audit_browser_window, earnings_audits } },
 };
 
 struct menu standard_audits_item = {
@@ -1909,11 +1957,24 @@ struct menu feature_audits_item = {
 #endif
 };
 
+struct menu histogram_audits_item = {
+	.name = "HISTOGRAMS",
+	.flags = M_ITEM,
+};
+
+
+struct menu timestamp_audits_item = {
+	.name = "TIME-STAMPS",
+	.flags = M_ITEM,
+};
+
 struct menu *audit_menu_items[] = {
 	&main_audits_item,
 	&earnings_audits_item,
 	&standard_audits_item,
 	&feature_audits_item,
+	&histogram_audits_item,
+	&timestamp_audits_item,
 	NULL,
 };
 
