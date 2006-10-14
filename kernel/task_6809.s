@@ -1,5 +1,6 @@
+;;;
 ;;; Copyright 2006 by Brian Dominy <brian@oddchange.com>
-;;; 
+;;;
 ;;; This file is part of FreeWPC.
 ;;;
 ;;; FreeWPC is free software; you can redistribute it and/or modify
@@ -17,6 +18,12 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
+STACK_BASE         = 6133
+WPC_ROM_BANK       = 0x3FFC
+YREG_SAVE_OFF      = 7
+UREG_SAVE_OFF      = 9
+ROMPAGE_SAVE_OFF   = 11
+SAVED_STACK_SIZE   = 12
 
 	;-----------------------------------------------------
 	; task_save
@@ -29,23 +36,25 @@ _task_save:
 	ldx	*_task_current
 	stu	5,x
 	ldu	*_task_save_U
-	stu	9,x
-	sty	7,x
+	stu	UREG_SAVE_OFF,x
+	sty	YREG_SAVE_OFF,x
 	leau	,s
 	leay	23,x
-	leay	,y
 	clrb
 	bra	L32
 L33:
+	;;; TODO : use X register to transfer data faster
+	;;; TODO : check for overflow during copy
+	;;; Q: can we use S directly in this loop instead of U?
 	lda	,u+
 	sta	,y+
 	incb
 L32:
-	cmpu	#6135
-	bls	L33
-	stb	12,x
-	ldb	16380
-	stb	11,x
+	cmpu	#STACK_BASE
+	blt	L33
+	stb	SAVED_STACK_SIZE,x
+	ldb	WPC_ROM_BANK
+	stb	ROMPAGE_SAVE_OFF,x
 	jmp _task_dispatcher
 
 
@@ -61,12 +70,12 @@ _task_restore:
 	ldb	12,x
 	clra
 	leau	d,x
-	leau	23,u
-	leay	,u
-	ldu	#6136
-	ldb	12,x
+	leay	23,u
+	ldu	#STACK_BASE
+	ldb	SAVED_STACK_SIZE,x
 	bra	L42
 L43:
+	;;; TODO : use X register to transfer data
 	lda	,-y
 	sta	,-u
 	decb
@@ -75,12 +84,12 @@ L42:
 	bne	L43
 	leas	,u
 	andcc	#-81
-	ldb	11,x
-	stb	16380
+	ldb	ROMPAGE_SAVE_OFF,x
+	stb	WPC_ROM_BANK
 	ldu	5,x
 	pshs	u
-	ldy	7,x
-	ldu	9,x
+	ldy	YREG_SAVE_OFF,x
+	ldu	UREG_SAVE_OFF,x
 	clr	14,x
 	rts
 
@@ -95,18 +104,24 @@ L42:
 	.globl _task_create
 _task_create:
 	pshs	u,y
-	pshs	d,u
+	pshs	u
 	tfr	x,u
 	jsr	_task_allocate
 	stu	5,x
-	puls	d,u
-	sty	7,x
-	stu	9,x
+	puls	u
+	sty	YREG_SAVE_OFF,x
+	stu	UREG_SAVE_OFF,x
 	clr	,x
 	ldd	#0
 	std	17,x
-	ldb	16380
-	stb	11,x
-	clr	12,x
+	ldb	WPC_ROM_BANK
+	stb	ROMPAGE_SAVE_OFF,x
+	;;; clr	SAVED_STACK_SIZE,x
+
+	;;; TODO?? : push the address of task_exit onto the
+	;;; stack so that the task can simply return and it
+	;;; will exit automatically.  All tasks will need
+	;;; to do this and this will save the code space of
+	;;; function call (though replaced by stack space)
 	puls	u,y,pc
 
