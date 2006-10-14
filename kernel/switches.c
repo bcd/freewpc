@@ -419,17 +419,17 @@ void switch_init (void)
 /** Inline assembler is great for the 6809, but it won't work in simulation.
  * These macros abstract the 6809 opcodes so they can be simulated. */
 #ifdef __m6809__
-#define SW_LDA_IO(var)		asm __volatile__ ("\tlda\t" C_STRING(var))
-#define SW_LDA_MEM(var)		asm __volatile__ ("\tlda\t%0" :: "m" (var))
-#define SW_ORA_MEM(var)		asm __volatile__ ("\tora\t%0" :: "m" (var))
-#define SW_STA_MEM(var)		asm __volatile__ ("\tsta\t%0" :: "m" (var))
-#define SW_COMA()          asm __volatile__ ("\tcoma\t")
+#define SW_LDA_IO(var)		asm __volatile__ ("lda\t" C_STRING(var))
+#define SW_LDA_MEM(var)		asm __volatile__ ("lda\t%0" :: "m" (var))
+#define SW_ORA_MEM(var)		asm __volatile__ ("ora\t%0" :: "m" (var))
+#define SW_STA_MEM(var)		asm __volatile__ ("sta\t%0" :: "m" (var))
+#define SW_COMA()          asm __volatile__ ("coma\t")
 
-#define SW_LDB_MEM(var)		asm __volatile__ ("\tldb\t%0" :: "m" (var))
-#define SW_EORB_MEM(var)	asm __volatile__ ("\teorb\t%0" :: "m" (var))
-#define SW_STB_IO(var)		asm __volatile__ ("\tstb\t" C_STRING(var))
-#define SW_STB_MEM(var)		asm __volatile__ ("\tstb\t%0" :: "m" (var))
-#define SW_LDB_CONST(n)		asm __volatile__ ("\tldb\t%0" :: "g" (n))
+#define SW_LDB_MEM(var)		asm __volatile__ ("ldb\t%0" :: "m" (var))
+#define SW_EORB_MEM(var)	asm __volatile__ ("eorb\t%0" :: "m" (var))
+#define SW_STB_IO(var)		asm __volatile__ ("stb\t" C_STRING(var))
+#define SW_STB_MEM(var)		asm __volatile__ ("stb\t%0" :: "m" (var))
+#define SW_LDB_CONST(n)		asm __volatile__ ("ldb\t%0" :: "g" (n))
 #else
 
 static U8 areg, breg;
@@ -686,7 +686,7 @@ cleanup:
 }
 
 
-void switch_idle_task (void)
+CALLSET_ENTRY (switch, idle)
 {
 	U8 rawbits, pendbits;
 	U8 col;
