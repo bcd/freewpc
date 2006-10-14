@@ -1,0 +1,10 @@
+#!/bin/sh
+
+DIRS="asm-3.4.6 asm-4.2.0"
+
+for dir in $DIRS; do
+	cd $dir
+	../tools/alphaglob *.s > ag
+	cd -
+done
+diff -w asm-3.4.6/ag asm-4.2.0/ag > DIFFS.ag
