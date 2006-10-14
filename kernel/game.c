@@ -458,11 +458,17 @@ void stop_game (void)
 bool verify_start_ok (void)
 {
 	// check enough credits
-	// check balls stable
-	return (has_credits_p ()
-		&& device_check_start_ok ());
+	if (!has_credits_p ())
+		return FALSE;
 
-	// check game not already in progress
+	// check balls stable
+	if (!device_check_start_ok ())
+	{
+		deff_start (DEFF_LOCATING_BALLS);
+		return FALSE; 
+	}
+
+	return TRUE;
 }
 
 
@@ -500,7 +506,8 @@ void sw_start_button_handler (void) __taskentry__
 		else
 		{
 			/* For some reason, game couldn't be started...
-			 * No indication is given to the player of why. */
+			 * verify_start_ok() should display an error to the
+			 * player if possible, depending on what's wrong. */
 		}
 	}
 	else
@@ -538,13 +545,17 @@ void sw_start_button_handler (void) __taskentry__
 }
 
 
+// #define TEST_INITIALS_ENTRY
+
 /**
  * Handle the extra-ball buy-in button.
  * Not all games have one of these.
  */
 void sw_buy_in_button_handler (void) __taskentry__
 {
-#ifdef CONFIG_INSPECTOR
+#ifdef TEST_INITIALS_ENTRY
+	initials_enter ();
+#else
 	inspector_buyin_button ();
 #endif
 }

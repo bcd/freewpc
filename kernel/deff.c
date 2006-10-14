@@ -58,7 +58,8 @@
 	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff) \
 	DECL_DEFF (DEFF_NONFATAL_ERROR, D_NORMAL, PRI_DEBUGGER, nonfatal_error_deff) \
 	DECL_DEFF (DEFF_HSENTRY, D_RUNNING, PRI_HSENTRY, high_score_entry_deff) \
-	DECL_DEFF (DEFF_MATCH, D_RUNNING, PRI_MATCH, match_deff)
+	DECL_DEFF (DEFF_MATCH, D_RUNNING, PRI_MATCH, match_deff) \
+	DECL_DEFF (DEFF_LOCATING_BALLS, D_NORMAL, PRI_BALL_SEARCH, locating_balls_deff)
 
 
 /** Declare externs for all of the deff functions */
