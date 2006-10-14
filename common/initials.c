@@ -70,6 +70,8 @@ void initials_enter_start (void)
 
 
 struct window_ops initials_enter_window = {
+	DEFAULT_WINDOW,
+	.escape = null_function,
 	.init = initials_enter_init,
 	.draw = initials_enter_draw,
 	.left = initials_enter_left,
