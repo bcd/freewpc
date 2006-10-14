@@ -160,6 +160,7 @@ void add_credit (void)
 {
 	wpc_nvram_get ();
 	increment_credit_count ();
+	csum_area_update (&coin_csum_info);
 	wpc_nvram_put ();
 }
 
@@ -184,6 +185,7 @@ void remove_credit (void)
 	{
 		wpc_nvram_get ();
 		credit_count--;
+		csum_area_update (&coin_csum_info);
 		wpc_nvram_put ();
 
 		lamp_start_update ();
@@ -214,6 +216,7 @@ void add_units (U8 n)
 #endif
 		deff_restart (DEFF_CREDITS);
 	}
+	csum_area_update (&coin_csum_info);
 	wpc_nvram_put ();
 }
 
@@ -233,6 +236,7 @@ static void do_coin (uint8_t slot)
 {
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
+	audit_add (&system_audits.total_units, price_config.slot_values[slot]);
 }
 
 void sw_left_coin_handler (void)
@@ -285,6 +289,7 @@ void credits_clear (void)
 	wpc_nvram_get ();
 	credit_count = 0;
 	unit_count = 0;
+	csum_area_update (&coin_csum_info);
 	wpc_nvram_put ();
 }
 
