@@ -34,6 +34,7 @@
 
 #include <freewpc.h>
 
+
 /** The number of bytes per page to display */
 #define INSPECTOR_PAGE_SIZE 16
 
@@ -98,7 +99,7 @@ void inspector_fast_page_down (void)
 	task_exit ();
 }
 
-void inspector_left_flipper (void)
+CALLSET_ENTRY (inspector, left_flipper_press)
 {
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
@@ -120,7 +121,8 @@ void inspector_fast_page_up (void)
 	task_exit ();
 }
 
-void inspector_right_flipper (void)
+
+CALLSET_ENTRY (inspector, right_flipper_press)
 {
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
@@ -134,4 +136,3 @@ CALLSET_ENTRY (inspector, init)
 {
 	inspector_addr = 0;
 }
-
