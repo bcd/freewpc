@@ -1,22 +1,21 @@
 
 #include <freewpc.h>
 
-#define MAX_DIAG_ERRORS 4
 
-U8 diag_error_list[MAX_DIAG_ERRORS];
+diag_error_code_t diag_error_list[MAX_DIAG_ERRORS];
 
 U8 diag_error_count;
 
 
 void
-diag_post_error (U8 errcode)
+diag_post_error (diag_error_code_t errcode)
 {
 	if (diag_error_count < MAX_DIAG_ERRORS)
 		diag_error_list[diag_error_count++] = errcode;
 }
 
 void
-diag_post_fatal_error (U8 errcode)
+diag_post_fatal_error (diag_error_code_t errcode)
 {
 }
 
