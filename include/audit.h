@@ -32,6 +32,7 @@ typedef uint16_t audit_t;
  */
 typedef struct
 {
+	audit_t total_units;
 	audit_t coins_added[4];
 	audit_t paid_credits;
 	audit_t service_credits;
@@ -64,6 +65,7 @@ extern __nvram__ std_audits_t system_audits;
 
 void audit_reset (void);
 void audit_increment (audit_t *aud);
+void audit_add (audit_t *aud, U8 val);
 void audit_init (void);
 
 #endif /* _STDADJ_H */
