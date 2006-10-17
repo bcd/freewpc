@@ -42,16 +42,6 @@ BLD ?= build
 # There is no default value.
 TARGET_ROMPATH =
 
-# Which version of the assembler tools to use
-# Version 1.5.2 is no longer supported; it generates .rel files instead of .o
-ASVER ?= 4.1.0
-ifeq ($(ASVER),)
-ASVER := 4.1.0
-endif
-ifeq ($(ASVER),1.5.2)
-error astools version 1.5.2 no longer supported
-endif
-
 # Which version of the compiler to use
 GCC_VERSION ?= 3.4.6
 
@@ -60,9 +50,6 @@ USE_LOCALS ?= y
 
 # Set to 'y' if you want to save the assembly sources
 SAVE_ASM ?= n
-
-# Low-level task support is stable, so make it the default
-TASK_LL_SUPPORT ?= y
 
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
@@ -95,7 +82,7 @@ endif
 #######################################################################
 
 INCLUDE_DIR = ./include
-MACHINE_DIR = ./$(MACHINE)
+MACHINE_DIR = machine/$(MACHINE)
 
 #######################################################################
 ###	Filenames
@@ -154,11 +141,10 @@ HOSTCC = gcc
 # We use the latest versions of astools, version 4.1.0
 LD6809 = $(GCC_ROOT)/aslink
 LD = $(GCC_ROOT)/ld
-AS6809 = $(GCC_ROOT)/as6809
 AS = $(GCC_ROOT)/as
 
 ifeq ($(PLATFORM),wpc)
-REQUIRED += $(CC) $(LD6809) $(AS6809) $(LD)
+REQUIRED += $(CC) $(LD6809) $(LD)
 else
 REQUIRED += $(CC) $(LD)
 endif
@@ -184,8 +170,6 @@ PATH_REQUIRED += $(BC)
 #######################################################################
 ###	Source and Binary Filenames
 #######################################################################
-
-FIXED_SECTION = sysrom
 
 KERNEL_OBJS = \
 	kernel/ac.o \
@@ -255,10 +239,7 @@ EVENT_OBJS = build/callset.o
 
 KERNEL_ASM_OBJS = \
 	kernel/farcall.o \
-
-ifeq ($(TASK_LL_SUPPORT),y)
-KERNEL_ASM_OBJS += kernel/task_6809.o
-endif
+	kernel/task_6809.o
 
 TEST_OBJS = test/window.o
 
@@ -309,14 +290,6 @@ ifeq ($(USE_LOCALS),y)
 CFLAGS += -DCONFIG_MULTIPLAYER
 endif
 
-ifeq ($(TASK_LL_SUPPORT),y)
-CFLAGS += -DTASK_LL_SUPPORT
-endif
-
-ifeq ($(PLATFORM),linux)
-CFLAGS += -I`pth-config --cflags`
-endif
-
 # Program include directories
 CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
@@ -327,35 +300,12 @@ else
 CFLAGS += -DGCC_VERSION=3.4.6
 endif
 
-ifdef ASVER
-CFLAGS += -DAS_VERSION=$(ASVER)
-else
-CFLAGS += -DAS_VERSION=1.5.2
-endif
-
-# Options to control the output section names
-ifeq ($(PLATFORM),wpc)
-CFLAGS += -mcode-section=sysrom -mdata-section=sysrom -mbss-section=ram
-endif
-
-# Use 8-bit integers by default for now.
-ifeq ($(PLATFORM),wpc)
-CFLAGS += -mint8
-endif
-
 # Default optimizations.  -O2 works OK for me, but hasn't always; you might
 # want to fall back to -O1 if you have problems.
 ifndef OPT
 OPT = -O2
 endif
 CFLAGS += $(OPT) -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
-
-# Default machine flags.  We enable WPC extensions here.
-ifeq ($(PLATFORM),wpc)
-CFLAGS += -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN
-else
-CFLAGS += -DCONFIG_PLATFORM_LINUX -g -DCONFIG_LITTLE_ENDIAN
-endif
 
 # This didn't work before, but now it does!
 # However, it is still disabled by default.
@@ -364,10 +314,6 @@ ifdef UNROLL_LOOPS
 CFLAGS += -funroll-loops
 endif
 
-
-# Throw some extra information in the assembler logs
-# (disabled because it doesn't really help much)
-# CFLAGS += -fverbose-asm
 
 # Turn on compiler debug.  This will cause a bunch of compiler
 # debug files to get written out during every phase of the build.
@@ -379,8 +325,6 @@ endif
 # because we define those differently than ANSI C.
 CFLAGS += -Wall -Wno-format
 
-# I'd like to use this sometimes, but some things don't compile with it...
-# CFLAGS += -fno-defer-pop
 
 #
 # Define lots of other things based on make parameters
@@ -389,9 +333,6 @@ CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
 
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER 
-ifneq ($(PLATFORM),linux)
-CFLAGS += -DCONFIG_INSPECTOR
-endif
 ifeq ($(FREEWPC_IRQPROFILE),y)
 CFLAGS += -DIRQPROFILE
 endif
@@ -416,9 +357,6 @@ CFLAGS += -DMACHINE_MINOR_VERSION=$(MACHINE_MINOR)
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
-ifeq ($(PLATFORM),wpc)
-CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect
-endif
 ifeq ($(FREE_ONLY),y)
 CFLAGS += -DFREE_ONLY
 endif
@@ -426,7 +364,7 @@ endif
 #######################################################################
 ###	Include Machine Extensions
 #######################################################################
-include $(MACHINE)/Makefile
+include $(MACHINE_DIR)/Makefile
 
 #######################################################################
 ###	Include Platform Extensions
@@ -490,9 +428,9 @@ PAGED_AREA = 0x4000
 FIXED_AREA = 0x8000
 VECTOR_AREA = 0xFFF0
 
-MACHINE_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_OBJS))
-MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_TEST_OBJS))
-MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE)/%,$(GAME_PAGED_OBJS))
+MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
+MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
+MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
 SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 
 #
@@ -546,7 +484,7 @@ endif
 MACH_LINKS = .mach .include_mach
 
 
-MAKE_DEPS = Makefile $(MACHINE)/Makefile user.make
+MAKE_DEPS = Makefile $(MACHINE_DIR)/Makefile user.make
 DEPS = $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = \
@@ -623,17 +561,17 @@ $(BLD)/blankpage.bin: $(SR)
 	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x8000 -l 0x8000 -f 0 $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s $(FIXED_AREA) -l 0x8000 -f 0 $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s 0x4000 -l 0x4000 -f 0xFF $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s $(PAGED_AREA) -l 0x4000 -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces
 # a Motorola S-record file by default (S19).
 #
 ifeq ($(PLATFORM),wpc)
-$(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
+$(BINFILES:.bin=.s19) : %.s19 : %.lnk $(LD6809) $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
 	@echo Linking $@... && $(LD6809) -f $< >> $(ERR) 2>&1
 endif
 
@@ -676,12 +614,7 @@ OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:
 # Note: the object filenames of the form pageXX.o are skipped as the
 # bash code below already outputs these explicitly.
 OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(patsubst $(BLD)/%,%,$1)))
-
-ifeq ($(ASVER),4.1.0)
 DUP_PAGE_OBJ = $1
-else
-DUP_PAGE_OBJ = -x
-endif
 
 $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 	@echo Creating linker command file $@ ... ;\
@@ -909,7 +842,7 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 #
 .mach:
 	@echo Setting symbolic link for machine source code &&\
-		touch .mach && ln -s $(MACHINE) mach
+		touch .mach && ln -s $(MACHINE_DIR) mach
 
 .include_mach:
 	@echo Setting symbolic link for machine include files &&\
@@ -944,8 +877,8 @@ endif
 #
 # Documentation (doxygen)
 #
-.PHONY : doc
-doc: Doxyfile
+.PHONY : doxygen
+doxygen: Doxyfile
 	doxygen
 
 #
@@ -977,7 +910,7 @@ info:
 #
 .PHONY : clean
 clean: clean_derived clean_gendefines
-	@for dir in `echo . kernel common fonts images test $(MACHINE)`;\
+	@for dir in `echo . kernel common fonts images test $(MACHINE_DIR)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
