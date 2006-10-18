@@ -20,6 +20,22 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Handles updating the solenoids.
+ * The state of the solenoids is maintained in memory; the
+ * actual I/O is written at IRQ time to refresh the hardware.
+ *
+ * Normal solenoids that are pulsed are updated using a cyclical
+ * buffer of solenoid states.  A coil can be pulsed with a "mask"
+ * where each 1 bit indicates that the coil should be on, and 0
+ * keeps it off.  So a mask of 0x55 would turn on the coil at
+ * 50% power.  The ports to be turned on at any given IRQ are
+ * precalculated at the time the coil is turned on/off for
+ * efficiency.
+ */
+
+
 /** The current stage of the solenoid update cycle */
 static U8 sol_cycle;
 
@@ -61,9 +77,6 @@ sol_rtt (void)
  * Turns on/off a solenoid.
  * The cycle_mask controls the "strength" at which the coil will be
  * on. */
-#ifdef GCC4
-#undef sol_modify
-#endif
 void
 sol_modify (solnum_t sol, U8 cycle_mask)
 {
@@ -84,9 +97,10 @@ sol_modify (solnum_t sol, U8 cycle_mask)
 }
 
 
-#ifdef GCC4
-#undef sol_modify_pulse
-#endif
+/*
+ * Pulses a solenoid.  The solenoid is turned on, a delay occurs,
+ * and then it is turned off.
+ */
 void
 sol_modify_pulse (solnum_t sol, U8 cycle_mask)
 {
