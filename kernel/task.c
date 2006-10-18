@@ -152,188 +152,7 @@ task_t *task_allocate (void)
 }
 
 
-#ifndef TASK_LL_SUPPORT
-/**
- * Save the current execution state into the current task block.
- */
-__naked__
-void task_save (void)
-{
-	register U16 __u asm ("u");
-	register task_t * __x asm ("x");
-	register U8 __b asm ("d");
-
-	/* Save U, X immediately to memory to free up some regs for
-	 * the rest of the function */
-	task_save_U = (U16)__u;
-#ifdef SAVE_X
-	task_save_X = (U16)__x;
-#endif
-
-	/* Get the PC by popping it off the stack */
-	__asm__ volatile ("puls\tu");
-
-	/* Force load of the current task structure into X */
-	__x = task_current;
-
-	/* Save PC (in U) */
-	__x->pc = __u;
-
-	/* Save U (in task_save_U).  Use U to hold the data. */
-	__x->u = __u = task_save_U;
-
-#ifdef SAVE_X
-	/* Save X (in task_save_X).  Use U to hold the data. */
-	__x->x = __u = task_save_X;
-#endif
-
-	/* Save D and Y, already in registers */
-#if 0 /* A,B are volatile and do not need to be saved */
-	__asm__ volatile ("sta	%0" :: "m" (__x->a));
-	__asm__ volatile ("stb	%0" :: "m" (__x->b));
-#endif
-	__asm__ volatile ("sty	%0" :: "m" (__x->y));
-
-	/* Save current stack */
-	/* In the new scheme, tasks execute on a system stack, and
-	 * during swap out, the stack data is copied into the task
-	 * block.  This allows tasks to use large stack space as
-	 * long as they don't sleep in the middle of such usage.
-	 * This also protects the task data a little better; stack
-	 * overflows won't corrupt anything critical.
-	 */
-
-	/* Get current stack pointer in u */
-	__asm__ volatile ("leau\t,s");
-
-	/* Get stack save area pointer in y */
-	__asm__ volatile ("leay\t,%0" :: "a" (__x->stack));
-
-	__b = 0;
-	while (__u < STACK_BASE)
-	{
-		__asm__ volatile ("lda\t,u+");
-		__asm__ volatile ("sta\t,y+");
-		__b ++;
-	}
-
-#ifdef CONFIG_DEBUG_STACK
-	if ((__x->stack_word_count = __b) > task_largest_stack)
-		task_largest_stack = __b;
-
-#if 0
-	if (__b > 32)
-		task_large_stacks++;
-	else if (__b > 16)
-		task_medium_stacks++;
-	else
-		task_small_stacks++;
-#endif
-
-#else
-	__x->stack_word_count = __b;
-#endif
-
-	/* Save current ROM page */
-	__x->rom_page = wpc_get_rom_page ();
-
-	/* Jump to the task dispatcher */
-	__asm__ volatile ("jmp _task_dispatcher");
-}
-
-
-__naked__
-void task_restore (void)
-{
-	register task_t * __x asm ("x");
-	register U16 __u asm ("u") __attribute__ ((unused));
-	register U8 __b asm ("d");
-
-	task_current = __x;
-
-	/* Restore stack.  This must be done with interrupts disabled. */
-	disable_irq ();
-	disable_firq ();
-
-	/* Get stack save area pointer in y */
-	__asm__ volatile ("leay\t,%0" :: "a" (__x->stack + __x->stack_word_count));
-
-	/* Get live stack area pointer in u.
-	 * Note, this must be done AFTER the previous statement, since it might
-	 * use the U register in the calculation (seen in newer GCC builds).
-	 */
-	__asm__ volatile ("ldu\t%0" :: "i" (STACK_BASE));
-
-	/* Copy */
-	__b = __x->stack_word_count;
-	while (__b != 0)
-	{
-		__asm__ volatile ("lda\t,-y");
-		__asm__ volatile ("sta\t,-u");
-		__b --;
-	}
-
-	/* Save stack pointer to S */
-	__asm__ volatile ("leas\t,u");
-
-	enable_firq ();
-	enable_irq ();
-
-	/* Restore ROM page register */
-	wpc_set_rom_page (__x->rom_page);
-
-	__asm__ volatile ("ldu	%0" :: "m" (__x->pc));
-	__asm__ volatile ("pshs\tu");
-	__asm__ volatile ("ldy	%0" :: "m" (__x->y));
-#if 0
-	__asm__ volatile ("lda	%0" :: "m" (__x->a));
-	__asm__ volatile ("ldb	%0" :: "m" (__x->b));
-#endif
-	__asm__ volatile ("ldu	%0" :: "m" (__x->u));
-
-	__x->delay = 0;
-
-#ifdef SAVE_X
-	__asm__ volatile ("ldx	%0" :: "m" (__x->x));
-#endif
-
-	__asm__ volatile ("rts");
-}
-
-
-__naked__
-void task_create (void)
-{
-	register task_t *tp asm ("x");
-
-	__asm__ volatile ("pshs\td,u,y");
-	
-	__asm__ volatile ("pshs\td,u");
-	__asm__ volatile ("tfr\tx,u");
-
-	tp = task_allocate ();
-
-	__asm__ volatile ("stu	%0" :: "m" (tp->pc));
-
-	__asm__ volatile ("puls\td,u");
-
-#if 0
-	__asm__ volatile ("sta	%0" :: "m" (tp->a));
-	__asm__ volatile ("stb	%0" :: "m" (tp->b));
-#endif
-	__asm__ volatile ("sty	%0" :: "m" (tp->y));
-	__asm__ volatile ("stu	%0" :: "m" (tp->u));
-
-	tp->gid = 0;
-	tp->arg = 0;
-	tp->rom_page = wpc_get_rom_page ();
-	tp->stack_word_count = 0;
-
-	__asm__ volatile ("puls\td,u,y,pc");
-}
-#endif /* TASK_LL_SUPPORT */
-
-
+/** Create a task with a specific group ID (GID). */
 task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	register task_function_t fn_x asm ("x") = fn;
@@ -373,11 +192,15 @@ task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
 	return task_create_gid (gid, fn);
 }
 
+
+/** Change the GID of the currently running task */
 void task_setgid (task_gid_t gid)
 {
 	task_current->gid = gid;
 }
 
+
+/** Suspend the current task for a period of time */
 void task_sleep (task_ticks_t ticks)
 {
 	extern uint8_t tick_count;
@@ -399,6 +222,7 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
+/** Suspend the current task for a number of seconds */
 void task_sleep_sec (int8_t secs)
 {
 	while (secs > 0)
