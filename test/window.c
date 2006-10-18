@@ -2883,7 +2883,7 @@ void sysinfo_system_version (void) {
 #endif
 }
 void sysinfo_compiler_version (void) { 
-	sprintf ("GCC %s  ASM %s", C_STRING(GCC_VERSION), C_STRING(AS_VERSION));
+	sprintf ("GCC %s", C_STRING(GCC_VERSION));
 }
 
 void sysinfo_stats1 (void) {
