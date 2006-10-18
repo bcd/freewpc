@@ -7,7 +7,7 @@
 
 rm -f stressbuild.out
 for plat in `echo linux wpc`; do
-	for mach in `echo tz wcs afm`; do
+	for mach in `echo tz wcs afm tester`; do
 		for debugger in `echo y n`; do
 			for target in `echo clean default_target`; do
 				if [ "$plat" = "wpc" ]; then
