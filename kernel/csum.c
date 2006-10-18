@@ -32,6 +32,8 @@ extern const struct area_csum replay_csum_info;
 extern const struct area_csum champion_csum_info;
 extern const struct area_csum highscore_csum_info;
 extern const struct area_csum rtc_csum_info;
+extern const struct area_csum adj_csum_info;
+extern const struct area_csum audit_csum_info;
 
 
 const struct area_csum *csum_info_table[] = {
@@ -40,6 +42,8 @@ const struct area_csum *csum_info_table[] = {
 	&champion_csum_info,
 	&highscore_csum_info,
 	&rtc_csum_info,
+	&adj_csum_info,
+	&audit_csum_info,
 };
 
 const U8 csum_paging_info_table[] = {
@@ -48,6 +52,8 @@ const U8 csum_paging_info_table[] = {
 	COMMON_PAGE,
 	COMMON_PAGE,
 	COMMON_PAGE,
+	SYS_PAGE,
+	SYS_PAGE,
 };
 
 

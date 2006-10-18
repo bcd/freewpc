@@ -124,6 +124,7 @@ static void rtc_normalize (void)
 		month = 1;
 	if ((day < 1) || (day > 31))
 		day = 1;
+	csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
 }
 
@@ -151,6 +152,7 @@ static void rtc_pinmame_read (void)
 		year = clock_data->year - 2000;
 		month = clock_data->month;
 		day = clock_data->day;
+		csum_area_update (&rtc_csum_info);
 		wpc_nvram_put ();
 	}
 #endif

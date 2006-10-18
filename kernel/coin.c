@@ -236,7 +236,6 @@ static void do_coin (uint8_t slot)
 {
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
-	audit_add (&system_audits.total_units, price_config.slot_values[slot]);
 }
 
 void sw_left_coin_handler (void)

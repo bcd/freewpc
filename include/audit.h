@@ -32,7 +32,6 @@ typedef uint16_t audit_t;
  */
 typedef struct
 {
-	audit_t total_units;
 	audit_t coins_added[4];
 	audit_t paid_credits;
 	audit_t service_credits;

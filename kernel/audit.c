@@ -30,29 +30,43 @@
 
 __nvram__ std_audits_t system_audits;
 
+__nvram__ U8 audit_csum;
+
+const struct area_csum audit_csum_info = {
+	.area = &system_audits,
+	.length = sizeof (system_audits),
+	.csum = &audit_csum,
+	.reset = audit_reset,
+};
+
+
 
 /** Resets all audits to zero */
 void audit_reset (void)
 {
 	wpc_nvram_get ();
 	memset (&system_audits, 0, sizeof (system_audits));
+	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();
 }
 
 
-/** Increment an audit */
+/** Increment an audit by 1 */
 void audit_increment (audit_t *aud)
 {
 	wpc_nvram_get ();
 	(*aud)++;
+	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();
 }
 
 
+/** Increment an audit by an arbitrary value */
 void audit_add (audit_t *aud, U8 val)
 {
 	wpc_nvram_get ();
 	(*aud) += val;
+	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();
 }
 
@@ -60,6 +74,5 @@ void audit_add (audit_t *aud, U8 val)
 /** Initialize audits at powerup */
 void audit_init (void)
 {
-	/* TODO : validate that audit structure is sane */	
 }
 
