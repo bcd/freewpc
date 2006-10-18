@@ -676,6 +676,17 @@ struct window_ops adj_browser_window = {
 
 /*****************************************************/
 
+void total_earnings_audit (audit_t val __attribute__((unused)))
+{
+	sprintf ("$0.00");
+}
+
+
+void percentage_of_games_audit (audit_t val)
+{
+	sprintf ("XX%%");
+}
+
 
 void integer_audit (audit_t val) 
 { 
@@ -693,8 +704,7 @@ struct audit *browser_audits;
 
 
 struct audit main_audits[] = {
-	{ "TOTAL EARNINGS", &currency_audit, &system_audits.total_units },
-	{ "RECENT EARNINGS", },
+	{ "EARNINGS", &total_earnings_audit, 0xeeee },
 	{ "FREEPLAY PERCENT", },
 	{ "AVG. BALL TIME", },
 	{ "TIME PER CREDIT", },
@@ -707,6 +717,7 @@ struct audit main_audits[] = {
 };
 
 struct audit earnings_audits[] = {
+	{ "EARNINGS", &total_earnings_audit, 0xeeee },
 	{ "LEFT SLOT", &integer_audit, &system_audits.coins_added[0] },
 	{ "CENTER SLOT", &integer_audit, &system_audits.coins_added[1] },
 	{ "RIGHT SLOT", &integer_audit, &system_audits.coins_added[2] },
@@ -719,6 +730,9 @@ struct audit earnings_audits[] = {
 
 struct audit standard_audits[] = {
 	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
+	{ "TOTAL PLAYS", },
+	{ "TOTAL FREE PLAY", },
+	{ "FREEPLAY PERCENT", },
 	{ "TILTS", &integer_audit, &system_audits.tilts },
 	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
 	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },
@@ -1825,13 +1839,13 @@ void presets_draw (void)
 	{
 		if (*(comps->adj) != comps->value)
 		{
-			font_render_string_center (&font_mono5, 32, 20, "NOT INSTALLED");
+			font_render_string_left (&font_mono5, 32, 20, "NOT INSTALLED");
 			break;
 		}
 
 		comps++;
 		if (comps->adj == NULL)
-			font_render_string_center (&font_mono5, 32, 20, "INSTALLED");
+			font_render_string_left (&font_mono5, 32, 20, "INSTALLED");
 	}
 
 	dmd_show_low ();
