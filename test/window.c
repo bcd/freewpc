@@ -676,15 +676,17 @@ struct window_ops adj_browser_window = {
 
 /*****************************************************/
 
-void total_earnings_audit (audit_t val __attribute__((unused)))
-{
-	sprintf ("$0.00");
-}
-
-
 void percentage_of_games_audit (audit_t val)
 {
-	sprintf ("XX%%");
+	if (system_audits.total_plays == 0)
+	{
+		sprintf ("0%");
+		return;
+	}
+
+#ifndef __m6809__
+	sprintf ("%d%%", 100 * val / system_audits.total_plays);
+#endif
 }
 
 
@@ -694,36 +696,61 @@ void integer_audit (audit_t val)
 }
 
 
+void secs_audit (audit_t val)
+{
+	int mins = 0;
+	while (val > 60)
+	{
+		val -= 60;
+		mins++;
+	}
+	sprintf ("%d:%02d", mins, (U8)val);
+}
+
+
 void currency_audit (audit_t val)
 {
-	sprintf ("$%ld.%02ld", val / 4, (val % 4) * 25);
+	sprintf ("%ld.%ld", val / 4, (val % 4) * 25);
+}
+
+
+void total_earnings_audit (audit_t val __attribute__((unused)))
+{
+	audit_t total_coins = 0;
+	int i;
+	for (i=0; i < 4; i++)
+		total_coins += system_audits.coins_added[i];
+	currency_audit (total_coins);
 }
 
 
 struct audit *browser_audits;
 
 
+audit_t default_audit_value;
+
+
 struct audit main_audits[] = {
-	{ "EARNINGS", &total_earnings_audit, 0xeeee },
+	{ "EARNINGS", total_earnings_audit, &default_audit_value },
 	{ "FREEPLAY PERCENT", },
 	{ "AVG. BALL TIME", },
-	{ "TIME PER CREDIT", },
+	{ "TIME PER CREDIT", secs_audit, &default_audit_value },
 	{ "TOTAL PLAYS", },
-	{ "REPLAY AWARDS", },
-	{ "PERCENT REPLAYS", },
-	{ "EXTRA BALLS", },
-	{ "PERCENT EX. BALL", },
+	{ "REPLAY AWARDS", integer_audit, &system_audits.replays },
+	{ "PERCENT REPLAYS", percentage_of_games_audit, &system_audits.replays },
+	{ "EXTRA BALLS", integer_audit, &system_audits.extra_balls_awarded },
+	{ "PERCENT EX. BALL", percentage_of_games_audit, &system_audits.extra_balls_awarded },
 	{ NULL, NULL, NULL },
 };
 
 struct audit earnings_audits[] = {
-	{ "EARNINGS", &total_earnings_audit, 0xeeee },
-	{ "LEFT SLOT", &integer_audit, &system_audits.coins_added[0] },
-	{ "CENTER SLOT", &integer_audit, &system_audits.coins_added[1] },
-	{ "RIGHT SLOT", &integer_audit, &system_audits.coins_added[2] },
-	{ "4TH SLOT SLOT", &integer_audit, &system_audits.coins_added[3] },
-	{ "PAID CREDITS", &integer_audit, &system_audits.paid_credits },
-	{ "SERVICE CREDITS", &integer_audit, &system_audits.service_credits },
+	{ "EARNINGS", total_earnings_audit, &default_audit_value },
+	{ "LEFT SLOT", integer_audit, &system_audits.coins_added[0] },
+	{ "CENTER SLOT", integer_audit, &system_audits.coins_added[1] },
+	{ "RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
+	{ "4TH SLOT SLOT", integer_audit, &system_audits.coins_added[3] },
+	{ "PAID CREDITS", integer_audit, &system_audits.paid_credits },
+	{ "SERVICE CREDITS", integer_audit, &system_audits.service_credits },
 	{ NULL, NULL, NULL },
 };
 
