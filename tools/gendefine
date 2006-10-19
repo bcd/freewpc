@@ -49,7 +49,9 @@ my @dirs = (
 	"common",
 	"mach", 
 	"fonts", 
-	"test"
+	"test",
+	"platform/linux",
+	"platform/wpc",
 	);
 
 my $firstval = 1;
