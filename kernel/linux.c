@@ -135,6 +135,8 @@ enum sim_log_class
 	SLC_DEBUG,
 	SLC_TEXT,
 	SLC_DEBUG_PORT,
+	SLC_LAMPS,
+	SLC_SOUNDCALL,
 };
 
 
@@ -150,12 +152,15 @@ static void simlog (enum sim_log_class class, const char *format, ...)
 		case SLC_DEBUG: putchar ('d'); break;
 		case SLC_TEXT: putchar ('t'); break;
 		case SLC_DEBUG_PORT: putchar ('>'); break;
+		case SLC_LAMPS: putchar ('L'); break;
+		case SLC_SOUNDCALL: putchar ('S'); break;
 	}
 
 	va_start (ap, format);
 	(void)vfprintf (linux_output_stream, format, ap);
 	va_end (ap);
 	putchar ('\n');
+	fflush (linux_output_stream);
 }
 
 
@@ -185,6 +190,19 @@ static void linux_shutdown (void)
 void linux_write_string (const char *s)
 {
 	simlog (SLC_TEXT, "%s", s);
+}
+
+
+void linux_write_lamps (void)
+{
+	int lamp;
+	char buffer[NUM_LAMPS+8];
+
+	for (lamp=0; lamp < NUM_LAMPS; lamp++)
+		buffer[lamp] = (linux_lamp_matrix[lamp/8] & (1 << (lamp % 8))) ?
+			'+' : '-';
+	buffer[NUM_LAMPS] = '\0';
+	simlog (SLC_LAMPS, buffer);
 }
 
 
@@ -249,12 +267,15 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_LAMP_ROW_OUTPUT:
-			*linux_lamp_data_ptr = val;
+			if (linux_lamp_data_ptr != NULL)
+				*linux_lamp_data_ptr = val;
 			break;
 
 		case WPC_LAMP_COL_STROBE:
 			if (val != 0)
 				linux_lamp_data_ptr = linux_lamp_matrix + scanbit (val);
+			else
+				linux_lamp_data_ptr = NULL;
 			break;
 
 		case WPC_SW_COL_STROBE:
@@ -266,6 +287,12 @@ void linux_asic_write (U16 addr, U8 val)
 				linux_switch_data_ptr = linux_switch_matrix + 1 + scanbit (val);
 #endif
 			break;
+
+#if (MACHINE_DCS == 0)
+		case WPCS_DATA:
+			simlog (SLC_SOUNDCALL, "%02X", val);
+			break;
+#endif
 
 		default:
 			; // printf ("Error: invalid I/O write to 0x%04X, val=0x%02X\n", addr, val);
@@ -449,6 +476,10 @@ static void linux_interface_thread (void)
 
 			case 'T':
 				task_dump ();
+				break;
+
+			case 'L':
+				linux_write_lamps ();
 				break;
 
 			case 'S':

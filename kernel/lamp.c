@@ -122,7 +122,9 @@ void lamp_rtt (void)
 	U8 bits;
 
 	/* Setup the strobe */
+#if 0
 	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
+#endif
 	wpc_asic_write (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
 
 	/* Grab the default lamp values */

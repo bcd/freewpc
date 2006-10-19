@@ -83,6 +83,7 @@ endif
 
 INCLUDE_DIR = ./include
 MACHINE_DIR = machine/$(MACHINE)
+PLATFORM_DIR = platform/$(PLATFORM)
 
 #######################################################################
 ###	Filenames
@@ -207,19 +208,6 @@ KERNEL_OBJS = \
 	kernel/trough.o \
 	kernel/tilt.o
 
-ifeq ($(PLATFORM),wpc)
-KERNEL_OBJS += \
-	kernel/div10.o \
-	kernel/task.o \
-	kernel/vector.o
-endif
-ifeq ($(PLATFORM),linux)
-KERNEL_OBJS += \
-	kernel/linux.o \
-	kernel/task_linux.o
-endif
-
-
 COMMON_OBJS = \
 	common/audio.o \
 	common/buyin.o \
@@ -236,10 +224,6 @@ COMMON_OBJS = \
 	common/status.o \
 
 EVENT_OBJS = build/callset.o
-
-KERNEL_ASM_OBJS = \
-	kernel/farcall.o \
-	kernel/task_6809.o
 
 TEST_OBJS = test/window.o
 
@@ -364,12 +348,12 @@ endif
 #######################################################################
 ###	Include Machine Extensions
 #######################################################################
-include $(MACHINE_DIR)/Makefile
+include machine/$(MACHINE)/Makefile
 
 #######################################################################
 ###	Include Platform Extensions
 #######################################################################
--include Makefile.$(PLATFORM)
+include platform/$(PLATFORM)/Makefile
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
@@ -718,15 +702,6 @@ else
 	@echo "Compiling $< ..." && $(HOSTCC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< >> $(ERR) 2>&1
 endif
 
-#
-# For testing the compiler on sample code
-#
-ctest:
-	echo "Test compiling $< ..." && $(CC) -o ctest.o $(CFLAGS) -c ctest.c
-
-cpptest:
-	@echo Test compiling $< ... && $(CC) -o cpptest.S $(CFLAGS) -c cpptest.cpp
-
 #######################################################################
 ###	Header File Targets
 #######################################################################
@@ -910,7 +885,7 @@ info:
 #
 .PHONY : clean
 clean: clean_derived clean_gendefines
-	@for dir in `echo . kernel common fonts images test $(MACHINE_DIR)`;\
+	@for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 

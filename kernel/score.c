@@ -101,10 +101,6 @@ void scores_draw_credits (void)
 void scores_draw_current (void)
 {
 	sprintf ("%8b", current_score);
-#if 0
-	sprintf ("%02X%02X%02X%02X", 
-		current_score[0], current_score[1], current_score[2], current_score[3]);
-#endif
 	font_render_string_center (&font_lucida9, 64, 10, sprintf_buffer);
 }
 
@@ -163,6 +159,7 @@ void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
 	bcd2 += len-1;
 
 #ifdef __m6809__
+	/* TODO - move into m6809/m6809.h */
 	asm volatile ("lda\t%0" :: "m" (*bcd1));
 	asm volatile ("adda\t%0" :: "m" (*bcd2));
 	asm volatile ("daa");

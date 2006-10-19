@@ -159,8 +159,8 @@ void do_reset (void)
 	 * loop and pulse the diagnostic LED with a flash code to
 	 * report the error.  We can't reply on the DMD working
 	 * properly to help us here.
-	 * TODO
 	 */
+	//diag_run_at_reset ();
 
 	/** Initialize RAM to all zeroes */
 	ramptr = (uint8_t *)USER_RAM_SIZE;
@@ -242,6 +242,8 @@ void do_reset (void)
 	knocker_init ();
 	random_init ();
 	callset_invoke (init);
+
+	csum_area_check_all ();
 
 	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
