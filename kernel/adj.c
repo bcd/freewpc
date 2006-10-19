@@ -39,6 +39,12 @@ __nvram__ feature_adj_t feature_config;
 #endif
 
 
+void adj_csum_failure (void)
+{
+	adj_reset_all ();
+}
+
+
 __nvram__ U8 adj_csum;
 const struct area_csum adj_csum_info = {
 	.area = &system_config,
@@ -49,8 +55,9 @@ const struct area_csum adj_csum_info = {
 #endif
 											,
 	.csum = &adj_csum,
-	.reset = adj_reset_all,
+	.reset = adj_csum_failure,
 };
+
 
 /** Initialize the adjustment module.
  *
