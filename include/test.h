@@ -106,10 +106,10 @@ struct adjustment
 	U8 *nvram;
 };
 
-void adj_reset (struct adjustment *adjs);
-void adj_verify (struct adjustment *adjs);
-void adj_reset_all (void);
-void adj_verify_all (void);
+__test__ void adj_reset (struct adjustment *adjs);
+__test__ void adj_verify (struct adjustment *adjs);
+__test__ void adj_reset_all (void);
+__test__ void adj_verify_all (void);
 
 
 /**
