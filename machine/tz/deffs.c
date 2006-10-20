@@ -66,18 +66,6 @@ void special_deff (void)
 
 void jackpot_deff (void)
 {
-#if 0
-	dmd_alloc_low_clean ();
-	sprintf ("JACKPOT");
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	printf_millions (50);
-	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
-	dmd_sched_transition (&trans_scroll_up);
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-#endif
-
 	int i;
 	for (i=1; i < 8; i++)
 	{
