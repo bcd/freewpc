@@ -135,6 +135,9 @@ void award_right_loop(void);
 void sw_left_loop_handler(void);
 void sw_right_loop_top_handler(void);
 void sw_right_loop_handler(void);
+/* mball.c */
+void mball_light_lock (void);
+void mball_check_light_lock (void);
 /* piano.c */
 void piano_to_slot_timer(void);
 void sw_piano_handler(void);

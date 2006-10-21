@@ -34,7 +34,7 @@ __nvram__ U8 gc_initials[HIGH_SCORE_NAMESZ];
 
 __nvram__ U8 gc_csum;
 struct area_csum champion_csum_info = {
-	.area = gc_score,
+	.area = (U8 *)gc_score,
 	.length = HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ,
 	.csum = &gc_csum,
 	.reset = high_score_reset,
@@ -48,7 +48,7 @@ __nvram__ U8 high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ];
 
 __nvram__ U8 high_score_csum;
 struct area_csum highscore_csum_info = {
-	.area = highest_scores,
+	.area = (U8 *)highest_scores,
 	.length = (HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ) * NUM_HIGH_SCORES,
 	.csum = &high_score_csum,
 	.reset = high_score_reset,

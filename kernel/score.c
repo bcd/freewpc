@@ -149,10 +149,10 @@ void score_zero (score_t *s)
 }
 
 
-void score_add (bcd_t *s1, bcd_t *s2, U8 _len)
+void score_add (bcd_t *s1, const bcd_t *s2, U8 _len)
 {
 	register bcd_t *bcd1 = s1;
-	register bcd_t *bcd2 = s2;
+	register const bcd_t *bcd2 = s2;
 	register U8 len = _len;
 
 	bcd1 += len-1;
@@ -248,7 +248,7 @@ void score_add_millions_current (U8 mils)
 }
 
 
-void score_sub (score_t s1, score_t s2)
+void score_sub (score_t s1, const score_t s2)
 {
 }
 
@@ -260,7 +260,7 @@ void score_mul (score_t s1, uint8_t multiplier)
 }
 
 
-I8 score_compare (score_t s1, score_t s2)
+I8 score_compare (const score_t s1, const score_t s2)
 {
 	register int len = sizeof (score_t);
 

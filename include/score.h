@@ -91,12 +91,13 @@ void scores_draw_ball (void);
 void scores_draw_current (void);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
-void score_add (bcd_t *s1, bcd_t *s2, U8 len);
+void score_add (bcd_t *s1, const bcd_t *s2, U8 len);
 void score_add_current (const bcd_t *s);
 void score (score_id_t id);
-void score_sub (score_t s1, score_t s2);
+void score_multiple (score_id_t id, U8 multiplier);
+void score_sub (score_t s1, const score_t s2);
 void score_mul (score_t s1, uint8_t multiplier);
-I8 score_compare (score_t s1, score_t s2);
+I8 score_compare (const score_t s1, const score_t s2);
 void scores_reset (void);
 void score_init (void);
 

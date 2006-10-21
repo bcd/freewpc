@@ -46,7 +46,7 @@ void coin_reset (void)
 
 __nvram__ U8 coin_csum;
 const struct area_csum coin_csum_info = {
-	.area = &credit_count,
+	.area = (U8 *)&credit_count,
 	.length = sizeof (credit_count) + sizeof (unit_count),
 	.csum = &coin_csum,
 	.reset = coin_reset,

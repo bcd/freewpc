@@ -47,7 +47,7 @@ void adj_csum_failure (void)
 
 __nvram__ U8 adj_csum;
 const struct area_csum adj_csum_info = {
-	.area = &system_config,
+	.area = (U8 *)&system_config,
 	.length = sizeof (system_config) + sizeof (price_config)
 		+ sizeof (hstd_config)
 #ifdef MACHINE_FEATURE_ADJUSTMENTS

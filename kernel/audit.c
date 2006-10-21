@@ -33,7 +33,7 @@ __nvram__ std_audits_t system_audits;
 __nvram__ U8 audit_csum;
 
 const struct area_csum audit_csum_info = {
-	.area = &system_audits,
+	.area = (U8 *)&system_audits,
 	.length = sizeof (system_audits),
 	.csum = &audit_csum,
 	.reset = audit_reset,

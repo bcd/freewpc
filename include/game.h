@@ -48,6 +48,8 @@ void stop_game (void);
 bool verify_start_ok (void);
 #ifdef CONFIG_TIMED_GAME
 void timed_game_extend (U8 secs);
+void timed_game_suspend (void);
+void timed_game_resume (void);
 #endif
 void sw_start_button_handler (void) __taskentry__;
 void sw_buy_in_button_handler (void) __taskentry__;
