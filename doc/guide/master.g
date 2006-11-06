@@ -36,8 +36,7 @@
 	Developers should be familiar
 	with basic embedded systems programming concepts and the C programming
 	language.  Familiarity with 6809 assembler is ///highly/// recommended.
-	Also, knowledge of WPC pinball machines is expected, but I'm assuming
-	anyone interested would probably meet that requirement.
+	Also, knowledge of WPC pinball machines is very helpful.
 
 	Note: this document is a work-in-progress and incomplete.
 
@@ -80,22 +79,22 @@
 
 	}
 	{Build System : How the source code gets compiled into a ROM image
-		An older overview of the build system is 
-		<a href="/freewpc/build.html">here</a>.
+		An older overview of the build system is %url(freewpc/build.html)
 
 		{System Requirements : What you need in order to compile the program
 			FreeWPC requires a UNIX or UNIX-compatible system in order
 			to compile game ROMs.  The build system relies heavily on an
-			assorted to standard UNIX utilities to perform many tasks.
+			assortment of standard UNIX utilities to perform many tasks.
 			In addition, a few nonstandard utilities may be required as well.
 		}
 		{Directory Layout : How the files are organized
 			At the root of a particular branch of the source code tree,
-			FreeWPC files are divided into several more subdirectories:
+			FreeWPC files are divided into several subdirectories:
 			{Kernel Sources
 				The %file(kernel) directory contains the source files
 				for the kernel functions.  These are linked into the
-				system region of the ROM.
+				system region of the ROM.  These functions are available
+				on all machines.
 			}
 			{Kernel Includes
 				The %file(include) directory contains all of the
@@ -126,18 +125,11 @@
 			configuration.
 
 			{Make Variables
-				{Compiler and Assembler Options
+				{C Compiler Options
 					<GCC_VERSION
 						Specifies the version of the gcc6809 compiler
 						to use.  If not specified, this defaults to
-						gcc 3.4.5.
-					<ASVER
-						Specifies the version of the as6809 assembler
-						to use.  If not specified, this defaults to
-						as 3.0.0.
-					<NEWAS
-						When using as 3.0.0 or higher, this should be
-						set to 1.
+						gcc 3.4.6.
 					<SAVE_ASM
 						When set to 'y', the intermediate assembler code
 						is saved.  This defaults to 'n'.
@@ -211,19 +203,44 @@
 				need to be compiled, then the final ROM image must be
 				padded with blanks.  The %tool(dd) command is used
 				to generate a file named '''blankxxx.bin''', where ///xxx///
-				is the size of the file in kilobytes (KB).
+				is the size of the file in kilobytes (KB).  This file
+				is then concatenated with the actual game code to produce
+				a final ROM of the required size.
 			<Create Linker Command Files
+				The linker is invoked several times, once per page or
+				bank of ROM.  Different options are passed each time
+				to place the correct object file into that section, and
+				to resolve references correctly; all of these options
+				are written to linker command files, which have the .lnk
+				extension and are placed in the ///build/// directory.
 			<Create XBM Prototypes
+				The file ///xbmproto.h/// contains externs for XBMs
+				(simple bitmap files).
 			<Setting the Machine Symbolic Links
+				The symbol link ///mach/// is set to point to the correct
+				machine directory, based on the value of the MACHINE
+				make variable.
 			<Generating Defines
+				Some #defines are generally automatically by scanning the
+				code for uses.  These includes begin with the prefix
+				///gendefine/// and are created by a script also named
+				///gendefine/// in the ///tools/// directory.
 			<Generating Callsets
+				Callsets are a mechanism for implementing a simple
+				event subscription/invocation mechanism that is fully
+				described at compile-time.  Event handling code is
+				emitted in a C file named ///callset.c///.
 			<Compiling and Assembling Source Code
 				Source code is compiled using the GCC6809 compiler.
-				The compiler generates assembler code with the '''.S'''
+				The compiler generates assembler code with the '''.s'''
 				extension.  These files are then assembled using the
 				asxxxx assembler tools into object files with the '''.o'''
 				extension.
 			<Compiling Page Headers
+				Because the linker requires each section to contain at
+				least one object file, a dummy file is assembly per
+				section to ensure that this doesn't happen.  The page
+				header is 1 byte long and contains the page number.
 			<Linking Pages
 				The aslink utility is used to create one S-record file,
 				with the '''.s19''' extension, for each page of ROM.
@@ -245,7 +262,7 @@
 				debug output, etc.
 			<doc
 				Generates the %tool(doxygen) documentation from the
-				source code.  The files are placed in the %file(doc)
+				source code.  The files are placed in the %file(doxygen)
 				directory.
 			<gendefines_again
 				Recreates all of the gendefine header files.

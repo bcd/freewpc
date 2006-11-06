@@ -15,25 +15,30 @@ my $tocFlag = 0;
 my $specificSectionFlag = undef;
 
 my $headingTopMargin = ($tocFlag ? "0px" : "8px");
-my $headingBottomMargin = ($tocFlag ? "0px" : "8px");
+my $headingBottomMargin = ($tocFlag ? "0px" : "12px");
 my $headingWeight = ($tocFlag ? "normal" : "bold");
 my $indentation = "20px";
 
-# my $cssDecl = <<END;
-# <style type="text/css" media="screen">
-# body { margin-left: 10%; margin-right: 10% }
-# h1, h2, h3, h4, h5, h6 { 
-# 	font-size: 16px; 
-# 	font-weight: $headingWeight;
-# 	margin-top: $headingTopMargin;
-# 	margin-bottom: $headingBottomMargin; 
-# }
-# .S { padding-left: $indentation; }
-# </style>
-# END
 my $cssDecl = <<END;
-<link rel="stylesheet" type="text/css" href="/style.css">
+<style type="text/css" media="screen">
+body { margin-left: 10%; margin-right: 20% }
+h1 { background: #c44; }
+h2 { background: #e88; }
+h3 { background: #4c4; }
+h4 { background: #8e8; }
+h5 { background: #66f; }
+h1, h2, h3, h4, h5, h6 { 
+	font-size: 16px; 
+	font-weight: $headingWeight;
+	margin-top: $headingTopMargin;
+	margin-bottom: $headingBottomMargin; 
+	width: 100%;
+}
+.S { padding-left: $indentation; }
+a { text-decoration: none; }
+</style>
 END
+# <link rel="stylesheet" type="text/css" href="/style.css">
 
 sub printHeader
 {
@@ -87,7 +92,7 @@ sub printListItemStart
 	} else {
 		print OFH "<ul>\n";
 	}
-	$item =~ s/%api\(([^,]*)\)/<a href="$apiRoot\/$1">$1<\/a>/g;
+	$item =~ s/\%api\(([^,]*)\)/<a href="$apiRoot\/$1">$1<\/a>/g;
 	print OFH "<li>" . $item;
 	$inList = 1;
 }
@@ -148,12 +153,14 @@ sub printContent
 
 sub printLevelStart ()
 {
-	print OFH "<div class=\"S\"> # $sectionLevel\n" if ($sectionLevel >= 0);
+	# print OFH "<div class=\"S\"> # $sectionLevel\n" if ($sectionLevel >= 0);
+	print OFH "<div class=\"S\">\n" if ($sectionLevel >= 0);
 }
 
 sub printLevelEnd ()
 {
-	print OFH "</div> # $sectionLevel\n" if ($sectionLevel >= 0);
+	# print OFH "</div> # $sectionLevel\n" if ($sectionLevel >= 0);
+	print OFH "</div>\n" if ($sectionLevel >= 0);
 }
 
 
