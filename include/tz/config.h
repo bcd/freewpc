@@ -271,10 +271,12 @@ extern struct menu tz_clock_test_item;
 extern struct menu tz_gumball_test_item;
 
 /* Timed game parameters */
+#ifdef CONFIG_TZ_TIMED_GAME
 #define CONFIG_TIMED_GAME 60
 #define CONFIG_TIMED_GAME_MAX 120
 #define CONFIG_TIMED_GAME_OVER_SOUND SND_CLOCK_GONG
 #define CONFIG_TIMED_GAME_OVER_LEFF LEFF_GAME_TIMEOUT
+#endif
 
 /* Default high scores */
 #define MACHINE_GRAND_CHAMPION_INITIALS { 'Q', 'Q', 'Q' }
