@@ -297,7 +297,12 @@ void leff_stop (leffnum_t dn)
 		task_pid_t tp = task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, dn);
 		if (tp)
 		{
+			dbprintf ("Stopping sharing leff %d, pid=%p\n", dn, tp);
 			task_kill_pid (tp);
+		}
+		else
+		{
+			dbprintf ("Couldn't find shared leff %d\n", dn);
 		}
 	}
 	else if (leff->flags & L_RUNNING)
