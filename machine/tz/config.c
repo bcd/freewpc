@@ -196,6 +196,7 @@ CALLSET_ENTRY (tz, start_without_credits)
 
 CALLSET_ENTRY (tz, timed_game_tick)
 {
+#ifdef CONFIG_TIMED_GAME
 	if (!in_live_game || in_bonus)
 		return;
 	switch (timed_game_timer)
@@ -213,6 +214,7 @@ CALLSET_ENTRY (tz, timed_game_tick)
 		case 0: callset_invoke (music_update); break;
 		default: break;
 	}
+#endif
 }
 
 
