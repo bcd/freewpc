@@ -192,7 +192,6 @@ KERNEL_OBJS = \
 	kernel/lampset.o \
 	kernel/leff.o \
 	kernel/misc.o \
-	kernel/msg.o \
 	kernel/player.o \
 	kernel/printf.o \
 	kernel/random.o \
@@ -207,6 +206,8 @@ KERNEL_OBJS = \
 	kernel/triac.o \
 	kernel/trough.o \
 	kernel/tilt.o
+#kernel/msg.o
+
 
 COMMON_OBJS = \
 	common/audio.o \
