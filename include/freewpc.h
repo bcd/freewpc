@@ -51,6 +51,7 @@ typedef unsigned char uint8_t, U8;
 typedef int int16_t, I16, S16;
 typedef unsigned int uint16_t, U16;
 typedef U16 INTPTR;
+typedef U16 PTR_OR_U16;
 #elif defined(CONFIG_PLATFORM_LINUX)
 typedef short int16_t, I16, S16;
 typedef unsigned short uint16_t, U16;
