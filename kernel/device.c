@@ -542,8 +542,8 @@ void device_multiball_set (U8 count)
 void locating_balls_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 11, "LOCATING BALLS");
-	font_render_string_center (&font_fixed10, 64, 22, "PLEASE WAIT...");
+	font_render_string_center (&font_fixed6, 64, 11, "LOCATING BALLS");
+	font_render_string_center (&font_fixed6, 64, 22, "PLEASE WAIT...");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
