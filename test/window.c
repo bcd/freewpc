@@ -295,7 +295,11 @@ void hs_reset_render (U8 val)
 	if (val == 0)
 		sprintf ("OFF");
 	else
+#if defined(__m6809__) && defined(__int16__)
+		sprintf ("%d", val * 250);
+#else
 		sprintf ("%ld", val * 250UL);
+#endif
 }
 
 void free_award_render (U8 val)
@@ -333,7 +337,16 @@ struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
-struct adjustment_value players_per_game_value = { 1, MAX_PLAYERS, 1, decimal_render };
+
+struct adjustment_value players_per_game_value = { 
+#ifdef CONFIG_TIMED_GAME
+	1, 1,
+#else
+	1, MAX_PLAYERS,
+#endif
+	1, decimal_render 
+};
+
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
 struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
@@ -350,7 +363,13 @@ struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
-	{ "MAX PLAYERS", &players_per_game_value, 1, &system_config.max_players },
+	{ "MAX PLAYERS", &players_per_game_value, 
+#ifdef CONFIG_TIMED_GAME
+		1, 
+#else
+		MAX_PLAYERS,
+#endif
+		&system_config.max_players },
 	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
@@ -590,13 +609,14 @@ void adj_browser_enter (void)
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
-		//browser_action = ADJ_CONFIRMING;
-
+		/* TODO - confirmation of changes not done yet */
 		if (*(browser_adjs[menu_selection].nvram) != adj_edit_value)
 		{
+			/* Modify the adjustment */
 			wpc_nvram_get ();
 			*(browser_adjs[menu_selection].nvram) = adj_edit_value;
 			wpc_nvram_put ();
+			adj_modified ();
 			sound_send (SND_TEST_CONFIRM);
 		}
 		browser_action = ADJ_BROWSING;
@@ -686,6 +706,8 @@ void percentage_of_games_audit (audit_t val)
 
 #ifndef __m6809__
 	sprintf ("%d%%", 100 * val / system_audits.total_plays);
+#else
+	/* TODO */
 #endif
 }
 
@@ -1120,6 +1142,8 @@ struct menu dev_font_test_item = {
 
 /**********************************************************/
 
+/* TODO : escaping out of a running deff in test mode
+will cause a crash */
 
 struct deff_leff_ops {
 	void (*start) (U8 id);
@@ -1825,6 +1849,7 @@ struct preset preset_show = {
 	.name = "SHOW",
 };
 struct preset_component preset_show_comps[] = {
+	{ &system_config.replay_award, 0 },
 	{ NULL, 0 },
 };
 
@@ -1833,6 +1858,7 @@ struct preset preset_timed_game = {
 	.name = "TIMED GAME",
 };
 struct preset_component preset_timed_comps[] = {
+	{ &system_config.max_players, 1 },
 	{ NULL, 0 },
 };
 
@@ -1890,10 +1916,15 @@ void presets_enter (void)
 	dmd_show_low ();
 	task_sleep_sec (2);
 
+	/* Modify all of the adjustments affected by the preset */
 	wpc_nvram_get ();
 	while (comps->adj != NULL)
 		*(comps->adj) = comps->value;
 	wpc_nvram_put ();
+
+	/* Update the checksums to match the new values */
+	adj_modified ();
+	sound_send (SND_TEST_CONFIRM);
 }
 
 

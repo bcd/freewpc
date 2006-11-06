@@ -131,6 +131,7 @@ extern __nvram__ hstd_adj_t hstd_config;
 extern __nvram__ feature_adj_t feature_config;
 #endif
 
+void adj_modified (void);
 void adj_init (void);
 
 #endif /* _STDADJ_H */

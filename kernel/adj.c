@@ -59,6 +59,12 @@ const struct area_csum adj_csum_info = {
 };
 
 
+void adj_modified (void)
+{
+	csum_area_update (&adj_csum_info);
+}
+
+
 /** Initialize the adjustment module.
  *
  * Verify that all adjustments are sane; if any values are out-of-range
