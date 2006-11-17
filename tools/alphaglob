@@ -12,15 +12,10 @@ while (<>) {
 	s/L[0-9]+/Lxx/;
 	s/LC[0-9]+/LCxx/;
 
-	if (/\.globl (.*)$/) {
+	if (/[ \t]*\.globl[ \t]+(.*)$/) {
 		$symbol = $1;
-		# $def{$symbol} .= "$1:\n";
 	}
 	elsif (/[ \t]*\.(byte|word|blkb|module|area|ascii)/) {}
-	#elsif (/LC[0-9]+:/) {
-	#	$symbol = $_;
-	#	$def{$symbol} .= "$_\n";
-	#}
 	elsif (/^[ \t]*$/) {}
 	else {
 		$def{$symbol} .= "$_\n";

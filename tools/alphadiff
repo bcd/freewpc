@@ -1,10 +1,21 @@
 #!/bin/sh
 
-DIRS="asm-3.4.6 asm-4.2.0"
+#dir1=asm-3.4.6
+#dir2=asm-4.2.0
+dir1=oldshift
+dir2=newshift
 
-for dir in $DIRS; do
+#make clean
+#make GCC_VERSION=3.4.6 MACHINE=tz SAVE_ASM=y FREE_ONLY=y FREEWPC_DEBUGGER=y FREEWPC_IRQPROFILE=n SYSTEM_MAJOR=0 SYSTEM_MINOR=10
+#cp -p *.s $dir1
+
+#make clean
+#make GCC_VERSION=trunk MACHINE=tz SAVE_ASM=y OPT=-O2 EXTRA_CFLAGS=-DGCC4 FREE_ONLY=y FREEWPC_DEBUGGER=y FREEWPC_IRQPROFILE=n SYSTEM_MAJOR=0 SYSTEM_MINOR=10
+#cp -p *.s $dir2
+
+for dir in `echo $dir1 $dir2`; do
 	cd $dir
 	../tools/alphaglob *.s > ag
-	cd -
+	cd - >/dev/null 2>&1
 done
-diff -w asm-3.4.6/ag asm-4.2.0/ag > DIFFS.ag
+diff -w $dir1/ag $dir2/ag > DIFFS.ag
