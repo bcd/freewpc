@@ -1,0 +1,117 @@
+#!/bin/sh
+#
+# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------
+# fontgen - font generator
+# ------------------------------------------------------------------
+# fontgen generates a FreeWPC font file (.fon) from an existing
+# X windows font.  You specify the font name and size, and it
+# generates a .fon file, which is just C code that can be
+# compiled to represent the font.
+#
+# Options:
+# -n will only output numbers and not alphabetical and punctuation.
+# -id sets the name of the font to be used in the C code; it need
+# not be the same as the name used by X.
+# -1 will generate a PBM file instead of a .fon file, and write it
+# to stdout; you can preview this to see how the font looks.
+#
+# fontgen requires the NetPBM utilities installed in order to run
+# properly.
+#
+
+alphas="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+digits="0 1 2 3 4 5 6 7 8 9"
+puncs=". , / & - ! $ %"
+
+xfont=-"*-fixed-bold-r-*-*-10"
+cfont="test"
+size=8
+fonfile=test.fon
+chars=`echo $alphas $digits $puncs`
+
+function charname ()
+{
+	char=$1;
+	if [ "$char" = "," ]; then echo "comma"; return; fi
+	if [ "$char" = "." ]; then echo "period"; return; fi
+	if [ "$char" = "/" ]; then echo "slash"; return; fi
+	if [ "$char" = "&" ]; then echo "amp"; return; fi
+	if [ "$char" = "-" ]; then echo "minus"; return; fi
+	if [ "$char" = "$" ]; then echo "dollar"; return; fi
+	if [ "$char" = "%" ]; then echo "percent"; return; fi
+	if [ "$char" = "!" ]; then echo "bang"; return; fi
+	echo "$char";
+}
+
+while [ "$1" != "" ]; do
+	arg=$1; shift
+	case $arg in
+		-o)
+			fonfile=$1; shift
+			;;
+		-n)
+			chars=`echo $digits $puncs`
+			;;
+		-fn)
+			xfont=$1; shift
+			;;
+		-fs)
+			size=$1; shift
+			;;
+		-id)
+			cfont=$1; shift
+			;;
+		-1)
+			pbmtextps -font \"$xfont\" -fontsize $size $chars | pnmcrop
+			exit 0
+			;;
+	esac
+done
+
+echo "#include <freewpc.h>" > $fonfile
+echo "#pragma section (\"page61\")" >> $fonfile
+
+for char in `echo $chars`; do
+	charname=`charname $char`;
+	base="glyph_${cfont}_${charname}";
+	pbmtextps -font \"$xfont\" -fontsize $size $char | pnmcrop | pbmtoxbm | sed -e "s/noname/$base/g" -e "s/{/& ${base}_width, ${base}_height,/" >> $fonfile
+done
+
+echo "static char *${cfont}_glyphs[] = {" >> $fonfile
+for char in `echo $chars`; do
+	charname=`charname $char`;
+	base="glyph_${cfont}_${charname}";
+	echo "   ['$char'] = ${base}_bits," >> $fonfile
+done
+echo "};" >> $fonfile
+
+
+(cat <<END
+const font_t font_$cfont = {
+	.width = 0,
+	.bytewidth = 0,
+	.spacing = 2,
+	.height = `grep "#define.*0_height" $fonfile | awk '{print $3}'`,
+	.glyphs = ${cfont}_glyphs,
+};
+END
+) >> $fonfile
+

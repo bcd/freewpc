@@ -1,0 +1,8 @@
+
+Use inheritance in switch drivers to set all fields correctly for
+	various kinds of switches
+Rudimentary animations by panning over a static image larger than the
+	display
+Add image compression/decompression algorithms
+Do proper switch debouncing/queueing
+Better DMD function names (low? used everywhere)
