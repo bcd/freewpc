@@ -354,12 +354,18 @@ void task_kill_all (void)
 }
 
 
+/**
+ * Sets task flags.
+ */
 void task_set_flags (U8 flags)
 {
 	task_current->flags |= flags;
 }
 
 
+/**
+ * Clears task flags.
+ */
 void task_clear_flags (U8 flags)
 {
 	task_current->flags &= ~flags;
