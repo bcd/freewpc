@@ -1,4 +1,26 @@
 #!/usr/bin/perl
+#
+# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------
+# genmachine - autogenerate declarations from machine description
+# ------------------------------------------------------------------
 
 use Data::Dumper;
 
@@ -13,16 +35,18 @@ my %contextDefinitionRe = (
 	"" => ".*",
 	"switches" => "[1-8FD][1-8]",
 	"lamps" => "[1-8][1-8]",
-	"drives" => "[HLGX][1-8]",
+	"drives" => "[HLGAX][1-8]",
 	"gi" => "[0-9]+",
 	"lampsets" => "AUTO",
 	"containers" => "AUTO",
 	"shots" => "AUTO",
+	"tests" => "[^:]+",
 );
 
 my %BinaryProperties = (
 	"switches" => { 
 		"button" => 1,
+		"service" => 1,
 		"micro" => 1,
 		"opto" => 1, 
 		"device" => 1, 
@@ -32,7 +56,7 @@ my %BinaryProperties = (
 		"fast" => 1,
 		"outhole" => $GLOBAL_OBJECT,
 		"shooter" => $GLOBAL_OBJECT,
-		"plumb-tilt" => $GLOBAL_OBJECT,
+		"tilt" => $GLOBAL_OBJECT,
 		"slam-tilt" => $GLOBAL_OBJECT,
 		"buyin-button" => $GLOBAL_OBJECT,
 		"launch-button" => $GLOBAL_OBJECT,
@@ -51,6 +75,10 @@ my %BinaryProperties = (
 		"upkick" => 1,
 		"eject" => 1,
 		"flash" => 1,
+		"nosearch" => 1,
+	},
+	"containers" => {
+		"trough" => $GLOBAL_OBJECT,
 	},
 );
 
@@ -117,9 +145,10 @@ sub close_switch {
 sub close_drive {
 	my ($drive) = @_;
 	$drive->{'ID'} =~ m/(.)(.)/;
-	$drive->{'number'} = $2 - 1;
+	$drive->{'number'} = $2 - 1; # assume 'H'
 	$drive->{'number'} += 8 if ($1 eq "L");
 	$drive->{'number'} += 16 if ($1 eq "G");
+	$drive->{'number'} += 24 if ($1 eq "A");
 	$drive->{'number'} += 40 if ($1 eq "X");
 	$drive->{'c_ident'} =~ s/^SOL_/FLASH_/ if (defined $drive->{'flash'});
 }
@@ -136,12 +165,18 @@ sub close_container {
 	$container->{'init_max_count'} = 0 if (!defined $container->{'init_max_count'});
 }
 
+sub close_gi {
+	my ($gi) = @_;
+	$gi->{'number'} = "TRIAC_GI_STRING(" .
+		$gi->{'ID'} . ")";
+}
 
 my %ContextClosures = (
 	"switches" => \&close_switch,
 	"lamps" => \&close_switch_or_lamp,
 	"drives" => \&close_drive,
 	"containers" => \&close_container,
+	"gi" => \&close_gi,
 );
 
 
@@ -200,7 +235,6 @@ LINE:
 				if (!defined $def->{'name'}) {
 					$mc->{$parm} = $def;
 					$def->{'name'} = $parm;
-
 					next;
 				}
 
@@ -238,7 +272,7 @@ LINE:
 			# Derive C strings from the human readable name
 			my $c_string = $def->{'name'};
 			$c_string =~ tr/a-z/A-Z/;
-			$def->{'c_string'} = $c_string;
+			$def->{'c_string'} = "\"$c_string\"";
 
 			my $c_ident = $c_string;
 			$c_ident =~ s/[ :-]+/_/g;
@@ -270,9 +304,9 @@ LINE:
 }
 
 
-
 sub machine_dump {
-	print Dumper ($m);
+	print "\n/* Internal database representation */\n";
+	print "/* " . Dumper ($m) . "*/\n";
 }
 
 sub print_boolean {
@@ -287,7 +321,9 @@ sub print_boolean {
 sub print_value {
 	my ($def, $symbol) = @_;
 	if (defined $def && defined $def->{'name'}) {
-		print "#define $symbol \"" . $def->{'name'} . "\"\n";
+		my $value = $def->{'name'};
+		$value =~ tr/a-z/A-Z/;
+		print "#define $symbol \"" . $value . "\"\n";
 	}
 }
 
@@ -325,15 +361,21 @@ sub machine_write_defines {
 			$number = $def->{'ID'} if (!defined $number);
 			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
 		}
+		print "\n";
 	}
 
 	# Print extra defines
+	print "/* Extra defines */\n";
 	if (defined ($extra_defs = $m->{'Extra-Defines'})) {
-		my @defs = split /,[ \t]*/, $extra_defs->{'name'};
+		my $defines = $extra_defs->{'name'};
+		$defines .= ", " . $extra_defs->{'props'} if (defined $extra_defs->{'props'});
+		my @defs = split /,[ \t]*/, $defines;
 		foreach $def (@defs) { print "#define $def\n"; }
 	}
+	print "\n";
 
 	# Print machine configuration
+	print "/* Global configuration */\n";
 	print_value ($m->{'Title'}, "MACHINE_NAME");
 	print_boolean ($m->{'DMD'}, "MACHINE_DMD");
 	print_boolean ($m->{'Fliptronic'}, "MACHINE_FLIPTRONIC");
@@ -353,21 +395,64 @@ sub machine_write_defines {
 	print_c_ident ($m->{'*lamps:start'}, "MACHINE_START_LAMP");
 	print_c_ident ($m->{'*lamps:buyin'}, "MACHINE_BUYIN_LAMP");
 
-	print_c_ident ($m->{'*drives-launch'}, "MACHINE_LAUNCH_SOLENOID");
-	print_c_ident ($m->{'*drives-knocker'}, "MACHINE_KNOCKER_SOLENOID");
-	print_c_ident ($m->{'*drives-ballserve'}, "MACHINE_BALL_SERVE_SOLENOID");
+	print_c_ident ($m->{'*drives:launch'}, "MACHINE_LAUNCH_SOLENOID");
+	print_c_ident ($m->{'*drives:knocker'}, "MACHINE_KNOCKER_SOLENOID");
+	print_c_ident ($m->{'*drives:ballserve'}, "MACHINE_BALL_SERVE_SOLENOID");
+
+	my $trough = $m->{'*containers:trough'};
+	my $troughsize = $trough->{'size'};
+	print "#define MACHINE_TROUGH_SIZE $troughsize\n";
+	my $troughsws = $trough->{'switches'};
+	foreach $swname (@$troughsws) {
+		$n++;
+		my $sw = ($m->{"switches"})->{$swname};
+		print "#define MACHINE_TROUGH$n " . $sw->{'c_ident'} . "\n";
+	}
 
 	# Print MACHINE_SOL_FLASHERP(sol), which returns true if SOL is
 	# a flasher.
+	my $drives = $m->{"drives"};
+	print "#define MACHINE_SOL_FLASHERP(sol) (\\\n";
+	foreach $drivename (keys %$drives) {
+		my $drive = $drives->{$drivename};
+		if (defined $drive->{'flash'}) {
+			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
+		}
+	}
+	print "0)\n\n";
 
 	# Print MACHINE_SOL_NOSEARCHP(sol), which returns true if SOL should
 	# not be fired during ball search.  Flashers need not be considered.
+	print "#define MACHINE_SOL_NOSEARCHP(sol) (\\\n";
+	foreach $drivename (keys %$drives) {
+		my $drive = $drives->{$drivename};
+		if (defined $drive->{'nosearch'}) {
+			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
+		}
+	}
+	print "0)\n\n";
 }
+
 
 sub machine_write_switch_decls {
+	my $switches = $m->{"switches"};
+	foreach $sw (sort values %$switches) {
+		next if (defined $sw->{'*X'});
+		my $ident = $sw->{'c_ident'};
+		my $string = $sw->{'c_string'};
+		print "[$ident] = { $string },\n";
+		$sw->{'*X'} = 1;
+	}
 }
 
-machine_load ("tz.md");
+$infile = $ARGV[0] or "machine/tz/tz.md";
+machine_load ($infile);
+
+print "#ifndef _MACH_CONFIG_H\n";
+print "#define _MACH_CONFIG_H\n";
 machine_write_defines ();
-machine_write_switch_decls ();
+# machine_write_switch_decls ();
 machine_dump ();
+print "#endif /* _MACH_CONFIG_H */\n";
+
+

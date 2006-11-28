@@ -22,7 +22,7 @@
 #define _MACH_COIL_H
 
 #define SOL_SLOT				0
-#define SOL_ROCKET			1
+#define SOL_ROCKET_KICKER	1
 #define SOL_AUTOFIRE			2
 #define SOL_POPPER			3
 #define SOL_RIGHT_RAMP_DIV	4

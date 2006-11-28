@@ -41,7 +41,7 @@
 #define SW_FAR_LEFT_TROUGH		MAKE_SW(2,5)
 #define SW_TROUGH_PROX			MAKE_SW(2,6)
 #define SW_SHOOTER				MAKE_SW(2,7)
-#define SW_ROCKET					MAKE_SW(2,8)
+#define SW_ROCKET_KICKER		MAKE_SW(2,8)
 
 #define SW_LEFT_JET				MAKE_SW(3,1)
 #define SW_RIGHT_JET				MAKE_SW(3,2)

@@ -267,6 +267,10 @@ export FON_SRCS
 
 CFLAGS = $(EXTRA_CFLAGS)
 
+ifeq ($(USE_MD), y)
+CFLAGS += -DUSE_MD
+endif
+
 ifeq ($(SAVE_ASM),y)
 CFLAGS += -save-temps
 endif
@@ -276,7 +280,7 @@ CFLAGS += -DCONFIG_MULTIPLAYER
 endif
 
 # Program include directories
-CFLAGS += -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
+CFLAGS += -Ibuild -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
 # Additional defines
 ifdef GCC_VERSION
@@ -468,8 +472,10 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
+MACH_DESC = $(MACHINE_DIR)/$(MACHINE).md
 
-MAKE_DEPS = Makefile $(MACHINE_DIR)/Makefile user.make
+MAKE_DEPS = Makefile $(MACHINE_DIR)/Makefile user.make build/mach-config.h
+
 DEPS = $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = \
@@ -701,6 +707,13 @@ ifeq ($(PLATFORM),wpc)
 	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
 else
 	@echo "Compiling $< ..." && $(HOSTCC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< >> $(ERR) 2>&1
+endif
+
+# General rule for how to compile the machine description.
+# Several files are generated.
+ifdef USE_MD
+build/mach-config.h : $(MACH_DESC) tools/genmachine
+	tools/genmachine $< > $@
 endif
 
 #######################################################################

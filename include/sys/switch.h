@@ -68,6 +68,11 @@ typedef struct
 } switch_info_t;
 
 
+#ifdef USE_MD
+extern const U8 mach_opto_mask[];
+extern const U8 mach_edge_switches[];
+#endif
+
 #define DECLARE_SWITCH_DRIVER(name)	\
 	extern __event__ void callset_ ## name (void); \
 	const switch_info_t name =

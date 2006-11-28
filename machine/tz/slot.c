@@ -19,9 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <mach/switch.h>
-#include <mach/coil.h>
-
 
 DECLARE_SWITCH_DRIVER (sw_slot)
 {

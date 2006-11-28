@@ -19,8 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <mach/switch.h>
-#include <mach/coil.h>
 
 void sw_rocket_handler (void)
 {
@@ -67,10 +65,10 @@ device_ops_t rocket_ops = {
 device_properties_t rocket_props = {
 	.ops = &rocket_ops,
 	.name = "ROCKET KICKER",
-	.sol = SOL_ROCKET,
+	.sol = SOL_ROCKET_KICKER,
 	.sw_count = 1,
 	.init_max_count = 0,
-	.sw = { SW_ROCKET },
+	.sw = { SW_ROCKET_KICKER },
 };
 
 
