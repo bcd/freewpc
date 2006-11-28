@@ -1,0 +1,373 @@
+#!/usr/bin/perl
+
+use Data::Dumper;
+
+my $contextName = "";
+my $m = {};
+my $mc = $m;
+my $autoid;
+
+my $GLOBAL_OBJECT = 2;
+
+my %contextDefinitionRe = (
+	"" => ".*",
+	"switches" => "[1-8FD][1-8]",
+	"lamps" => "[1-8][1-8]",
+	"drives" => "[HLGX][1-8]",
+	"gi" => "[0-9]+",
+	"lampsets" => "AUTO",
+	"containers" => "AUTO",
+	"shots" => "AUTO",
+);
+
+my %BinaryProperties = (
+	"switches" => { 
+		"button" => 1,
+		"micro" => 1,
+		"opto" => 1, 
+		"device" => 1, 
+		"virtual" => 1,
+		"drain-switch" => 1,
+		"standup" => 1,
+		"fast" => 1,
+		"outhole" => $GLOBAL_OBJECT,
+		"shooter" => $GLOBAL_OBJECT,
+		"plumb-tilt" => $GLOBAL_OBJECT,
+		"slam-tilt" => $GLOBAL_OBJECT,
+		"buyin-button" => $GLOBAL_OBJECT,
+		"launch-button" => $GLOBAL_OBJECT,
+		"start-button" => $GLOBAL_OBJECT,
+	},
+	"lamps" => {
+		"start" => $GLOBAL_OBJECT,
+		"buyin" => $GLOBAL_OBJECT,
+	},
+	"drives" => {
+		"ballserve" => $GLOBAL_OBJECT,
+		"knocker" => $GLOBAL_OBJECT,
+		"motor" => 1,
+		"magnet" => 1,
+		"popper" => 1,
+		"upkick" => 1,
+		"eject" => 1,
+		"flash" => 1,
+	},
+);
+
+my %EnumeratedProperties = (
+	"lamps" => {
+		"color" => {
+			"amber" => 1,
+			"white" => 1,
+			"red" => 1, 
+			"orange" => 1, 
+			"yellow" => 1,
+			"green" => 1,
+			"blue" => 1,
+		},
+	},
+);
+
+my %ContextPrefixes = (
+	"switches" => "SW",
+	"lamps" => "LM",
+	"lampsets" => "LMSET",
+	"drives" => "SOL",
+	"gi" => "GI",
+	"containers" => "DEV",
+	"shots" => "SHOT",
+);
+
+sub check_define_global {
+	my ($context, $def) = @_;
+	my $props = $BinaryProperties{$context};
+
+	foreach $propname (keys %$props) {
+		if ($props->{$propname} == $GLOBAL_OBJECT) {
+			if (defined $def->{$propname}) {
+				$m->{"*${context}:${propname}"} = $def;
+			}
+		}
+	}
+}
+
+sub close_switch_or_lamp {
+	my ($def) = @_;
+	$def->{'ID'} =~ m/(.)(.)/;
+	my ($first, $second) = ($1, $2);
+	if ($first eq "D") {
+		$def->{'number'} = $second - 1;
+	}
+	elsif ($first eq "F") {
+		$def->{'number'} = 72 + $second - 1;
+	}
+	elsif ($def->{'c_ident'} =~ /^SW_/) {
+		$def->{'number'} = 8 + ($first - 1) * 8 + $second - 1;
+	}
+	else {
+		$def->{'number'} = ($first - 1) * 8 + $second - 1;
+	}
+}
+
+sub close_switch {
+	my ($def) = @_;
+	close_switch_or_lamp ($def);
+}
+
+sub close_drive {
+	my ($drive) = @_;
+	$drive->{'ID'} =~ m/(.)(.)/;
+	$drive->{'number'} = $2 - 1;
+	$drive->{'number'} += 8 if ($1 eq "L");
+	$drive->{'number'} += 16 if ($1 eq "G");
+	$drive->{'number'} += 40 if ($1 eq "X");
+	$drive->{'c_ident'} =~ s/^SOL_/FLASH_/ if (defined $drive->{'flash'});
+}
+
+sub close_container {
+	my ($container) = @_;
+	my ($coilname, @switchnames) = split /,[ \t]*/, $container->{'props'};
+	$container->{'coil'} = $coilname;
+	$container->{'size'} = scalar @switchnames;
+	$container->{'switches'} = \@switchnames;
+	foreach $sw (@switchnames) {
+		(($m->{"switches"})->{$sw})->{"container"} = $container;
+	}
+	$container->{'init_max_count'} = 0 if (!defined $container->{'init_max_count'});
+}
+
+
+my %ContextClosures = (
+	"switches" => \&close_switch,
+	"lamps" => \&close_switch_or_lamp,
+	"drives" => \&close_drive,
+	"containers" => \&close_container,
+);
+
+
+####################################################################
+#
+# machine_load
+#
+# Load a machine description and parse into the internal format.
+#
+####################################################################
+sub machine_load {
+	my ($file) = @_;
+	open FH, $file or die;
+	my $lineno = 0;
+LINE: 
+	while (<FH>) {
+		$lineno++;
+		# Remove newline character
+		chomp;
+		# Remove leading/trailing spaces and tabs
+		s/^[ \t]//; s/[ \t]$//;
+		# Ignore comments and blank lines
+		next if /^#/; next if /^$/;
+
+		# Check for a context change
+		if (/^\[(.*)\]$/) {
+			$contextName = $1;
+			if (!defined $m->{$contextName}) { $m->{$contextName} = {}; }
+			$mc = $m->{$contextName};
+			$autoid = 0;
+			next;
+		}
+
+		# Check for a data definition.  The syntax depends on the context.
+		my $re = $contextDefinitionRe{$contextName};
+		if (($re eq "AUTO") || (/^($re):(.*)$/)) {
+			my ($ID, $parms, $name);
+			if ($re eq "AUTO") {
+				/^([^:]+):(.*)$/;
+				($ID, $parms, $name) = ($autoid++, $2, $1);
+			}
+			else {
+				($ID, $parms, $name) = ($1, $2, undef);
+			}
+			my $def = $mc->{$ID} = {};
+			$def->{'ID'} = $ID;
+			$mc->{$name} = $def if (defined $name);
+			$def->{'name'} = $name;
+
+			# Parse the parameters to the definition
+			my @parmlist = split /,/, $parms;
+			PARM: foreach $parm (@parmlist) {
+				$parm =~ s/^[ \t]//; $parm =~ s/[ \t]$//;
+
+				# The first parm is always the name
+				if (!defined $def->{'name'}) {
+					$mc->{$parm} = $def;
+					$def->{'name'} = $parm;
+
+					next;
+				}
+
+				# Is it a binary property?
+				my $binprops = $BinaryProperties{$contextName};
+				if (defined $binprops->{$parm}) {
+					$def->{$parm} = $binprops->{$parm};
+					next PARM;
+				}
+
+				# Is it an enumerated property?
+				my $enumprops = $EnumeratedProperties{$contextName};
+				foreach $epropname (keys %$enumprops) {
+					my $eprop = $enumprops->{$epropname};
+					if (defined $eprop->{$parm}) {
+						$def->{$epropname} = $parm;
+						next PARM;
+					}
+				}
+
+				# Is the field stated explicitly?
+				if ($parm =~ /(.*)\((.*)\)/) {
+					$def->{$1} = $2;
+					next;
+				}
+
+				# Any other property is added to the default list
+				if (defined $def->{'props'}) {
+					$def->{'props'} .= ",$parm";
+				} else {
+					$def->{'props'} = "$parm";
+				}
+			}
+
+			# Derive C strings from the human readable name
+			my $c_string = $def->{'name'};
+			$c_string =~ tr/a-z/A-Z/;
+			$def->{'c_string'} = $c_string;
+
+			my $c_ident = $c_string;
+			$c_ident =~ s/[ :-]+/_/g;
+			$c_ident =~ s/[.\']//g;
+			my $prefix = $ContextPrefixes{$contextName};
+			if (defined $prefix) {
+				$prefix .= "_";
+			} else {
+				$prefix = "";
+			}
+			$def->{'c_ident'} = $prefix . $c_ident;
+
+			# Invoke the closure if there is one
+			if (defined $ContextClosures{$contextName}) {
+				$ContextClosures{$contextName} ($def);
+			}
+
+			check_define_global ($contextName, $def);
+
+			next;
+		}
+
+		else {
+			# Handle lines that aren't data definitions.
+			die "Unrecognized element at line " . $lineno . "\n";
+		}
+	}
+	close FH;
+}
+
+
+
+sub machine_dump {
+	print Dumper ($m);
+}
+
+sub print_boolean {
+	my ($def, $symbol) = @_;
+	if (defined $def && $def->{'name'} =~ /[yY]es/) {
+		print "#define $symbol 1\n";
+	} else {
+		print "#define $symbol 0\n";
+	}
+}
+
+sub print_value {
+	my ($def, $symbol) = @_;
+	if (defined $def && defined $def->{'name'}) {
+		print "#define $symbol \"" . $def->{'name'} . "\"\n";
+	}
+}
+
+sub print_define {
+	my ($def, $symbol) = @_;
+	if (defined $def) {
+		print "#define $symbol\n";
+	} else {
+		print "#undef $symbol\n";
+	}
+}
+
+sub print_c_ident {
+	my ($def, $symbol) = @_;
+	if (defined $def) {
+		my $value = $def->{'c_ident'};
+		print "#define $symbol $value\n";
+	} else {
+		print "#undef $symbol\n";
+	}
+}
+
+sub machine_write_defines {
+	# Print object IDs
+	foreach $context (keys %ContextPrefixes) {
+		my $mc = $m->{$context};
+		my $indexRe = $contextDefinitionRe{$context};
+		$indexRe = "[0-9]+" if ($indexRe eq "AUTO");
+		print "/* Definitions of $context */\n";
+		foreach my $id (
+		sort { $mc->{$a}->{'number'} <=> $mc->{$b}->{'number'} } keys %$mc) {
+			next if (!($id =~ /$indexRe/));
+			my $def = $mc->{$id};
+			my $number = $def->{'number'};
+			$number = $def->{'ID'} if (!defined $number);
+			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+		}
+	}
+
+	# Print extra defines
+	if (defined ($extra_defs = $m->{'Extra-Defines'})) {
+		my @defs = split /,[ \t]*/, $extra_defs->{'name'};
+		foreach $def (@defs) { print "#define $def\n"; }
+	}
+
+	# Print machine configuration
+	print_value ($m->{'Title'}, "MACHINE_NAME");
+	print_boolean ($m->{'DMD'}, "MACHINE_DMD");
+	print_boolean ($m->{'Fliptronic'}, "MACHINE_FLIPTRONIC");
+	print_boolean ($m->{'DCS'}, "MACHINE_DCS");
+	print_boolean ($m->{'WPC95'}, "MACHINE_WPC95");
+	print_define ($m->{'*switches:has-ul'}, "MACHINE_HAS_UPPER_LEFT_FLIPPER");
+	print_define ($m->{'*switches:has-ur'}, "MACHINE_HAS_UPPER_RIGHT_FLIPPER");
+
+	print_c_ident ($m->{'*switches:shooter'}, "MACHINE_SHOOTER_SWITCH");
+	print_c_ident ($m->{'*switches:tilt'}, "MACHINE_TILT_SWITCH");
+	print_c_ident ($m->{'*switches:slam-tilt'}, "MACHINE_SLAM_TILT_SWITCH");
+	print_c_ident ($m->{'*switches:start-button'}, "MACHINE_START_SWITCH");
+	print_c_ident ($m->{'*switches:buyin-button'}, "MACHINE_BUYIN_SWITCH");
+	print_c_ident ($m->{'*switches:launch-button'}, "MACHINE_LAUNCH_SWITCH");
+	print_c_ident ($m->{'*switches:outhole'}, "MACHINE_OUTHOLE_SWITCH");
+	
+	print_c_ident ($m->{'*lamps:start'}, "MACHINE_START_LAMP");
+	print_c_ident ($m->{'*lamps:buyin'}, "MACHINE_BUYIN_LAMP");
+
+	print_c_ident ($m->{'*drives-launch'}, "MACHINE_LAUNCH_SOLENOID");
+	print_c_ident ($m->{'*drives-knocker'}, "MACHINE_KNOCKER_SOLENOID");
+	print_c_ident ($m->{'*drives-ballserve'}, "MACHINE_BALL_SERVE_SOLENOID");
+
+	# Print MACHINE_SOL_FLASHERP(sol), which returns true if SOL is
+	# a flasher.
+
+	# Print MACHINE_SOL_NOSEARCHP(sol), which returns true if SOL should
+	# not be fired during ball search.  Flashers need not be considered.
+}
+
+sub machine_write_switch_decls {
+}
+
+machine_load ("tz.md");
+machine_write_defines ();
+machine_write_switch_decls ();
+machine_dump ();
