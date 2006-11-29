@@ -26,6 +26,7 @@
  * in game-specific ways.
  */
 
+#ifndef USE_MD
 
 /** An array in which each 1 bit represents an opto switch
  * and 0 represents a normal switch.  This is used for
@@ -144,6 +145,8 @@ const U8 mach_edge_switches[] = {
 	0x00
 };
 #endif
+
+#endif /* USE_MD */
 
 U8 faster_quote_given;
 
