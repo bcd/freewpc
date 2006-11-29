@@ -40,7 +40,16 @@ my %contextDefinitionRe = (
 	"lampsets" => "AUTO",
 	"containers" => "AUTO",
 	"shots" => "AUTO",
-	"tests" => "[^:]+",
+	"drivers" => "AUTO",
+	"tests" => "AUTO",
+	"deffs" => "AUTO",
+	"leffs" => "AUTO",
+	"adjustments" => "AUTO",
+	"audits" => "AUTO",
+	"system_sounds" => "AUTO",
+	"system_music" => "AUTO",
+	"highscores" => "GC|1|2|3|4",
+	"flags" => "AUTO",
 );
 
 my %BinaryProperties = (
@@ -54,6 +63,7 @@ my %BinaryProperties = (
 		"drain-switch" => 1,
 		"standup" => 1,
 		"fast" => 1,
+		"edge" => 1,
 		"outhole" => $GLOBAL_OBJECT,
 		"shooter" => $GLOBAL_OBJECT,
 		"tilt" => $GLOBAL_OBJECT,
@@ -80,6 +90,14 @@ my %BinaryProperties = (
 	"containers" => {
 		"trough" => $GLOBAL_OBJECT,
 	},
+	"deffs" => {
+		"amode" => $GLOBAL_OBJECT,
+		"runner" => 1,
+	},
+	"leffs" => {
+		"amode" => $GLOBAL_OBJECT,
+		"runner" => 1,
+	},
 );
 
 my %EnumeratedProperties = (
@@ -94,6 +112,16 @@ my %EnumeratedProperties = (
 			"blue" => 1,
 		},
 	},
+	"adjustments" => {
+		"type" => {
+			"integer" => 1,
+			"yes_no" => 1,
+			"on_off" => 1,
+			"score" => 1,
+			"percent" => 1,
+			"credit_count" => 1,
+		},
+	},
 );
 
 my %ContextPrefixes = (
@@ -102,9 +130,35 @@ my %ContextPrefixes = (
 	"lampsets" => "LMSET",
 	"drives" => "SOL",
 	"gi" => "GI",
-	"containers" => "DEV",
+	"containers" => "DEVNO",
 	"shots" => "SHOT",
+	"flags" => "FLAG",
 );
+
+my %ContextMaxima = (
+	"containers" => "NUM_DEVICES",
+	"shots" => "NUM_SHOTS",
+	"flags" => "MAX_FLAGS",
+);
+
+
+sub unique {
+	my ($category) = @_;
+	my @result;
+	my $integer = 1;
+	foreach $defname (keys %$category) {
+		my $def = $category->{$defname};
+		next if ($defname ne $def->{'ID'});
+		push @result, $def;
+		$integer = 0 if (!($def->{'number'} =~ m/^[0-9]/));
+	}
+	if ($integer) {
+		@result = sort { $a->{'number'} <=> $b->{'number'} } @result;
+	} else {
+		@result = sort { $a->{'ID'} cmp $b->{'ID'} } @result;
+	}
+	return @result;
+}
 
 sub check_define_global {
 	my ($context, $def) = @_;
@@ -222,8 +276,8 @@ LINE:
 				($ID, $parms, $name) = ($1, $2, undef);
 			}
 			my $def = $mc->{$ID} = {};
-			$def->{'ID'} = $ID;
-			$mc->{$name} = $def if (defined $name);
+			$def->{'ID'} = $def->{'number'} = $ID;
+			$mc->{$name} = $def if ((defined $name) && ($name ne $ID));
 			$def->{'name'} = $name;
 
 			# Parse the parameters to the definition
@@ -283,7 +337,9 @@ LINE:
 			} else {
 				$prefix = "";
 			}
-			$def->{'c_ident'} = $prefix . $c_ident;
+			my $c_ident = $def->{'c_ident'} = $prefix . $c_ident;
+			$c_ident =~ tr/A-Z/a-z/;
+			$def->{'c_decl'} = $c_ident;
 
 			# Invoke the closure if there is one
 			if (defined $ContextClosures{$contextName}) {
@@ -301,6 +357,16 @@ LINE:
 		}
 	}
 	close FH;
+
+	#----------------------------------------------------------------
+	# After loading the file, certain transformations may need to be
+	# made to the data, after everything is known.  Do those here.
+	#----------------------------------------------------------------
+
+	# Any switch that is part of a container should be marked as an
+	# edge switch
+	foreach $cnt (unique ($m->{"containers"})) {
+	}
 }
 
 
@@ -351,15 +417,17 @@ sub machine_write_defines {
 	foreach $context (keys %ContextPrefixes) {
 		my $mc = $m->{$context};
 		my $indexRe = $contextDefinitionRe{$context};
+		my $number;
 		$indexRe = "[0-9]+" if ($indexRe eq "AUTO");
 		print "/* Definitions of $context */\n";
-		foreach my $id (
-		sort { $mc->{$a}->{'number'} <=> $mc->{$b}->{'number'} } keys %$mc) {
-			next if (!($id =~ /$indexRe/));
-			my $def = $mc->{$id};
-			my $number = $def->{'number'};
-			$number = $def->{'ID'} if (!defined $number);
+		foreach my $def (unique ($mc)) {
+			$number = $def->{'number'};
 			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+		}
+		my $max = $ContextMaxima{$context};
+		if (defined $max) {
+			$number++;
+			print "#define $max $number\n";
 		}
 		print "\n";
 	}
@@ -431,28 +499,150 @@ sub machine_write_defines {
 		}
 	}
 	print "0)\n\n";
+
+	# Print MACHINE_xxMS_RTTS defines
+	my @pollcounts = (1, 8, 32, 128);
+	my $drivers = $m->{"drivers"};
+	for $poll (@pollcounts) {
+		my @calls = ();
+		for $drv (unique ($drivers)) {
+			my $drv = $drivers->{$drvkey};
+			my $drvname = $drv->{'name'};
+			if ($drv->{'poll'} == $poll) {
+				push @calls, "   VOIDCALL(${drvname}_rtt) \\";
+			}
+		}
+		if (@calls) {
+			print "#define MACHINE_${poll}MS_RTTS \\\n";
+			foreach my $call (@calls) {
+				print "$call\n";
+			}
+			print "\n";
+		} else {
+			print "#undef MACHINE_${poll}MS_RTTS\n";
+		}
+	}
+	print "\n";
+
+	# Print feature_adj_t and MACHINE_FEATURE_ADJUSTMENTS
+	print "typedef struct {\n";
+	foreach $feature (unique ($m->{"adjustments"})) {
+		my $ident = $feature->{'c_decl'};
+		print "   U8 $ident;\n";
+	}
+	print "} feature_adj_t;\n\n";
+
+	print "#define MACHINE_FEATURE_ADJUSTMENTS \\\n";
+	foreach $feature (unique ($m->{"adjustments"})) {
+		my $ident = $feature->{'c_decl'};
+		my $type = $feature->{'type'};
+		my $default = $feature->{'props'};
+		my $string = $feature->{'c_string'};
+		print "  { $string, \&${type}_value, $default, \&feature_config.$ident }, \\\n";
+	}
+	print "\n\n";
+
+
+	# Print MACHINE_TEST_MENU_ITEMS
+	my $tests = $m->{"tests"};
+	print "#define MACHINE_TEST_MENU_ITEMS \\\n";
+	foreach $test (unique ($tests)) {
+		my $ident = $test->{'c_decl'};
+		print "   \&${ident}_test_item, \\\n";
+	}
+	print "\n";
+	foreach $test (unique ($tests)) {
+		my $ident = $test->{'c_decl'};
+		print "extern struct menu ${ident}_test_item;\n";
+	}
+	print "\n";
+
+	# Print system sounds and music
+	foreach my $snd (unique ($m->{"system_sounds"})) {
+		my $id = $snd->{'c_ident'};
+		my $value = $snd->{'props'};
+		print "#define MACHINE_${id}_SOUND $value\n";
+	}
+	foreach my $mus (unique ($m->{"system_music"})) {
+		my $id = $mus->{'c_ident'};
+		my $value = $mus->{'props'};
+		print "#define MACHINE_${id}_MUSIC $value\n";
+	}
+	print "\n";
+
+	# Print other things that need to be captured somewhere.
+	print "#define MACHINE_SCORE_DIGITS 8\n";
+
 }
 
 
-sub machine_write_switch_decls {
-	my $switches = $m->{"switches"};
-	foreach $sw (sort values %$switches) {
-		next if (defined $sw->{'*X'});
-		my $ident = $sw->{'c_ident'};
-		my $string = $sw->{'c_string'};
-		print "[$ident] = { $string },\n";
-		$sw->{'*X'} = 1;
+sub machine_write_decl_names {
+	my ($categoryname) = @_;
+	print "const char *names_of_${categoryname} [] = {\n";
+	foreach $def (unique ($m->{$categoryname})) {
+		my $ident = $def->{'c_ident'};
+		my $string = $def->{'c_string'};
+		print "   [$ident] = $string,\n";
 	}
+	print "};\n\n";
 }
 
 $infile = $ARGV[0] or "machine/tz/tz.md";
+$command = $ARGV[1];
+
 machine_load ($infile);
 
-print "#ifndef _MACH_CONFIG_H\n";
-print "#define _MACH_CONFIG_H\n";
-machine_write_defines ();
-# machine_write_switch_decls ();
-machine_dump ();
-print "#endif /* _MACH_CONFIG_H */\n";
+print "/* Autogenerated from $infile by genmachine */\n\n";
+if ($command eq "config") {
+	print "#ifndef _MACH_CONFIG_H\n";
+	print "#define _MACH_CONFIG_H\n";
+	machine_write_defines ();
+	print "\n#endif /* _MACH_CONFIG_H */\n";
+}
+elsif ($command eq "strings") {
+	print "#include <freewpc.h>\n\n";
+	for $context ("switches", "drives", "lamps", "containers") {
+		machine_write_decl_names ($context);
+	}
+}
+elsif ($command eq "switchmasks") {
+	print "#include <freewpc.h>\n\n";
+	my @opto_mask;
+	for my $i (0..9) { $opto_mask[$i] = 0; }
+	foreach $sw (unique ($m->{"switches"})) {
+		if (defined $sw->{'opto'}) {
+			my $num = $sw->{'number'};
+			my $col = $num / 8;
+			my $row = $num % 8;
+			$opto_mask[$col] |= 1 << $row;
+		}
+	}
+	print "const U8 mach_opto_mask[] = {\n   ";
+	for my $i (0..9) {
+		my $val = sprintf "0x%02X", $opto_mask[$i];
+		print "$val, ";
+	}
+	print "\n};\n";
+
+	my @edge_mask;
+	for my $i (0..9) { $edge_mask[$i] = 0; }
+	foreach $sw (unique ($m->{"switches"})) {
+		if (defined $sw->{'edge'}) {
+			my $num = $sw->{'number'};
+			my $col = $num / 8;
+			my $row = $num % 8;
+			$opto_mask[$col] |= 1 << $row;
+		}
+	}
+	print "const U8 mach_edge_switches[] = {\n   ";
+	for my $i (0..9) {
+		my $val = sprintf "0x%02X", $edge_mask[$i];
+		print "$val, ";
+	}
+	print "\n};\n";
+}
+elsif ($command eq "dump") {
+	machine_dump ();
+}
 
 
