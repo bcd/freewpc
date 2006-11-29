@@ -485,6 +485,7 @@ MACH_LINKS = .mach .include_mach
 MAKE_DEPS = Makefile $(MACHINE_DIR)/Makefile user.make 
 
 ifdef MACHINE_FILE
+DEPS += build/mach-config.h
 MAKE_DEPS += $(CONFIG_FILES)
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 CFLAGS += -DUSE_MD

@@ -348,3 +348,25 @@ output_char:
 	return 0;
 }
 
+
+void
+sprintf_far_string (const char **srcp)
+{
+	char *dst = sprintf_buffer;
+	const char *src;
+	
+	wpc_push_page (MD_PAGE);
+	
+	src = *srcp;
+	if (src != NULL)
+	{
+		while (*src != '\0')
+		{
+			*dst++ = *src++;
+		}
+	}
+
+	*dst++ = '\0';
+	wpc_pop_page ();
+}
+

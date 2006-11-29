@@ -52,6 +52,7 @@ U8 freewpc_sprintf (const char *format, ...);
 #else
 U8 sprintf (const char *format, ...);
 #endif
+void sprintf_far_string (const char **srcp);
 
 /** psprintf() is like sprintf() but it has TWO format control
  * strings.  The first is used when the value is singular, and
@@ -64,6 +65,7 @@ do { \
 	else \
 		sprintf (fmtn, val); \
 } while (0)
+
 
 #ifdef DEBUGGER
 #define dbprintf(format, rest...) \

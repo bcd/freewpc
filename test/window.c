@@ -267,7 +267,7 @@ struct window_ops browser_window = {
 
 void browser_print_operation (const char *s)
 {
-	font_render_string (&font_mono5, 56, 20, s);
+	font_render_string_right (&font_mono5, 127, 20, s);
 }
 
 /**********************************************************/
@@ -1343,31 +1343,31 @@ void dev_balldev_test_draw (void)
 
 	if ((dev == NULL) || (dev->props == NULL))
 	{
-		sprintf ("DEV %d NOT INSTALLED", menu_selection);
+		sprintf ("DEV %d. NOT INSTALLED", menu_selection);
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 	}
 	else
 	{
-		sprintf ("DEV %d   %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+		sprintf ("DEV %d. %s", menu_selection, dev->props->name);
+		font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
-		font_render_string (&font_mono5, 4, 7, sprintf_buffer);
+		font_render_string (&font_var5, 4, 7, sprintf_buffer);
 
 		sprintf ("HOLD %d", dev->max_count);
-		font_render_string (&font_mono5, 4, 13, sprintf_buffer);
+		font_render_string (&font_var5, 4, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_mono5, 4, 19, sprintf_buffer);
+		font_render_string (&font_var5, 4, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_mono5, 64, 7, sprintf_buffer);
+		font_render_string (&font_var5, 64, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_mono5, 64, 13, sprintf_buffer);
+		font_render_string (&font_var5, 64, 13, sprintf_buffer);
 
-		sprintf ("LIVE/LK %d%d", live_balls, kickout_locks);
-		font_render_string (&font_mono5, 64, 19, sprintf_buffer);
+		sprintf ("LIVE/LOCKS %d/%d", live_balls, kickout_locks);
+		font_render_string (&font_var5, 64, 19, sprintf_buffer);
 
 		switch (browser_action)
 		{
@@ -2207,7 +2207,7 @@ void switch_item_number (U8 val)
 	else
 	{
 		val -= 8;
-		sprintf ("SW%d%d", (val / 8)+1, (val % 8)+1);
+		sprintf ("%d%d", (val / 8)+1, (val % 8)+1);
 	}
 }
 
@@ -2229,13 +2229,15 @@ void single_switch_draw (void)
 	font_render_string_center (&font_mono5, 80, 4, "SINGLE SWITCH");
 
 	(*browser_item_number) (menu_selection);
-	font_render_string (&font_mono5, 64, 12, sprintf_buffer);
+	font_render_string (&font_mono5, 36, 12, sprintf_buffer);
 
+	sprintf_far_string (names_of_switches + menu_selection);
+	font_render_string (&font_var5, 50, 12, sprintf_buffer);
+	
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
-
 	sprintf ("%s%s", opto, state);
-	font_render_string (&font_mono5, 48, 20, sprintf_buffer);
+	font_render_string_center (&font_mono5, 80, 20, sprintf_buffer);
 	
 	dmd_show_low ();
 }
@@ -2410,6 +2412,7 @@ void solenoid_test_draw (void)
 	char *s;
 
 	browser_draw ();
+#if 0
 	switch (browser_action)
 	{
 		default: s = "UNKNOWN PULSE"; break;
@@ -2420,19 +2423,18 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "VERY HARD PULSE"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
+#endif
+	sprintf_far_string (names_of_drives + menu_selection);
+	browser_print_operation (sprintf_buffer);
 }
 
 void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
-	browser_print_operation ("PULSING");
 	task_sleep (TIME_100MS * 3);
-
 	sol_on (sel);
 	task_sleep (browser_action);
 	sol_off (sel);
-
-	browser_print_operation ("PULSE OFF");
 	task_sleep (TIME_100MS);
 }
 
@@ -2544,7 +2546,7 @@ struct menu gi_test_item = {
 
 void lamp_test_item_number (U8 val)
 {
-	sprintf ("LAMP%1d%1d", (val / 8) + 1, (val % 8) + 1);
+	sprintf ("%1d%1d", (val / 8) + 1, (val % 8) + 1);
 }
 
 void lamp_test_init (void)
@@ -2558,7 +2560,9 @@ void lamp_test_draw (void)
 {
 	lamp_flash_on (menu_selection);
 	browser_draw ();
-	browser_print_operation ("FLASHING");
+	sprintf_far_string (names_of_lamps + menu_selection);
+	browser_print_operation (sprintf_buffer);
+	// font_render_string (&font_var5, 32, 20, sprintf_buffer);
 }
 
 void lamp_test_up (void)
