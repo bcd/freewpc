@@ -107,8 +107,8 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 
 /** Renders a single high score table entry.
  * If pos is zero, then no position is drawn. */
-static void high_score_draw_single (int pos, const U8 *initials, 
-	const U8 *score, int row)
+static void high_score_draw_single (U8 pos, const U8 *initials, 
+	const U8 *score, U8 row)
 {
 	if (pos != 0)
 		sprintf ("%d. %c%c%c", pos, initials[0], initials[1], initials[2]);

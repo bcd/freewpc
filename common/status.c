@@ -93,7 +93,7 @@ void status_report_deff (void)
 void status_report_monitor (void)
 {
 	/* A count of 50 equates to a 5s hold down period. */
-	int count = 50;
+	U8 count = 50;
 
 	/* Wait until the player has kept the flipper button(s) down
 	 * for an extended period of time.  Abort as soon as the

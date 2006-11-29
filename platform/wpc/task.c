@@ -103,7 +103,7 @@ U8 task_max_count;
 void task_dump (void)
 {
 #ifdef DEBUGGER
-	register long int t;
+	register U8 t;
 	register task_t *tp;
 
 	dbprintf ("\nCurrent = %p\n", task_current);
@@ -135,7 +135,7 @@ void task_dump (void)
  */
 task_t *task_allocate (void)
 {
-	register short t;
+	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
@@ -271,7 +271,7 @@ void task_exit (void)
  */
 task_t *task_find_gid (task_gid_t gid)
 {
-	register short t;
+	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
@@ -283,7 +283,7 @@ task_t *task_find_gid (task_gid_t gid)
 
 task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val)
 {
-	register short t;
+	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
@@ -317,7 +317,7 @@ void task_kill_pid (task_t *tp)
  */
 bool task_kill_gid (task_gid_t gid)
 {
-	register short t;
+	register U8 t;
 	register task_t *tp;
 	bool rc = FALSE;
 
@@ -341,7 +341,7 @@ bool task_kill_gid (task_gid_t gid)
  */
 void task_kill_all (void)
 {
-	register short t;
+	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)

@@ -45,7 +45,7 @@
 register unsigned char cc_reg asm ("cc");
 
 
-extern inline void set_stack_pointer (const uint16_t s)
+extern inline void set_stack_pointer (const U16 s)
 {
 	asm __volatile__ ("lds\t%0" :: "g" (s) : "d");
 }
@@ -58,7 +58,7 @@ extern inline U16 get_stack_pointer (void)
 	return result;
 }
 
-extern inline void set_direct_page_pointer (const uint8_t dp)
+extern inline void set_direct_page_pointer (const U8 dp)
 {
 	asm __volatile__ ("tfr\tb, dp" :: "q" (dp));
 }
@@ -72,7 +72,7 @@ extern inline void set_direct_page_pointer (const uint8_t dp)
  * When 2-byte aligned, copy a word at a time.
  * Otherwise, copy one byte at a time.
  */
-extern inline void *memset (void *s, int c, long unsigned int n)
+extern inline void *memset (void *s, U8 c, U16 n)
 {
 	if ((n % 8) == 0)
 	{
@@ -110,7 +110,7 @@ extern inline void *memset (void *s, int c, long unsigned int n)
 }
 
 
-extern inline void __blockclear16 (void *s1, long unsigned int n)
+extern inline void __blockclear16 (void *s1, U16 n)
 {
 	register U16 *_s1 = (U16 *)s1;
 	do
@@ -128,7 +128,7 @@ extern inline void __blockclear16 (void *s1, long unsigned int n)
 }
 
 
-extern inline void *memcpy (void *s1, const void *s2, long unsigned int n)
+extern inline void *memcpy (void *s1, const void *s2, U16 n)
 {
 	register char *_s1 = (char *)s1;
 	register char *_s2 = (char *)s2;
@@ -141,7 +141,7 @@ extern inline void *memcpy (void *s1, const void *s2, long unsigned int n)
 }
 
 
-extern inline void __blockcopy16 (void *s1, const void *s2, long unsigned int n)
+extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 {
 	register U16 *_s1 = (U16 *)s1;
 	register U16 *_s2 = (U16 *)s2;
@@ -161,16 +161,16 @@ extern inline void __blockcopy16 (void *s1, const void *s2, long unsigned int n)
 
 
 
-extern inline void *memmove (void *s1, const void *s2, long unsigned int n)
+extern inline void *memmove (void *s1, const void *s2, U16 n)
 {
 	/* TODO - memcpy isn't always going to work */
 	return memcpy (s1, s2, n);
 }
 
 
-extern inline long unsigned int strlen (const char *s)
+extern inline U16 strlen (const char *s)
 {
-	long unsigned int len = 0;
+	U16 len = 0;
 	while (*s != '\0')
 	{
 		len++;

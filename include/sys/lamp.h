@@ -94,14 +94,14 @@ void lamp_rtt (void);
 void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
 void lamp_toggle (lampnum_t lamp);
-int lamp_test (lampnum_t lamp);
+bool lamp_test (lampnum_t lamp);
 void lamp_flash_on (lampnum_t lamp);
 void lamp_flash_off (lampnum_t lamp);
-int lamp_flash_test (lampnum_t lamp);
+bool lamp_flash_test (lampnum_t lamp);
 void leff_on (lampnum_t lamp);
 void leff_off (lampnum_t lamp);
 void leff_toggle (lampnum_t lamp);
-int leff_test (lampnum_t lamp);
+bool leff_test (lampnum_t lamp);
 
 #define flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
 #define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)

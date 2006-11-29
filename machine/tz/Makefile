@@ -3,6 +3,8 @@
 # Game specific Makefile extensions
 #
 
+MACHINE_FILE = tz.md
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.

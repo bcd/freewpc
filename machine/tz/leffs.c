@@ -37,7 +37,7 @@ void gi_cycle_leff (void)
 
 void flasher_happy_leff (void)
 {
-	int i;
+	U8 i;
 	for (i=0; i < 8; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
@@ -59,7 +59,7 @@ void flasher_happy_leff (void)
 
 void left_ramp_leff (void)
 {
-	int i;
+	U8 i;
 	for (i=0; i < 4; i++)
 	{
 		flasher_pulse (FLASH_RAMP1);
@@ -91,7 +91,7 @@ void no_gi_leff (void)
 
 void flash_all_leff (void)
 {
-	int i;
+	U8 i;
 
 	lampset_set_apply_delay (0);
 	triac_leff_enable (TRIAC_GI_MASK);
@@ -109,7 +109,7 @@ void flash_all_leff (void)
 
 void slot_kickout_leff (void)
 {
-	int i;
+	U8 i;
 	for (i = 0; i < 6; i++)
 	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
@@ -121,7 +121,7 @@ void slot_kickout_leff (void)
 
 void gumball_strobe_leff (void)
 {
-	int i;
+	U8 i;
 	for (i = 0; i < 6 ; i++)
 	{
 		flasher_pulse (FLASH_GUMBALL_HIGH);
@@ -137,7 +137,7 @@ void gumball_strobe_leff (void)
 
 void clock_target_leff (void)
 {
-	int i;
+	U8 i;
 
 	task_create_peer (gi_cycle_leff);
 	for (i = 0; i < 12; i++)

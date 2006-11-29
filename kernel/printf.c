@@ -23,6 +23,13 @@
 #include <m6809/math.h>
 #endif
 
+#ifdef __mint16__
+#define PROMOTED_U8 U16
+#else
+#define PROMOTED_U8 U8
+#endif
+
+
 /**
  * \file
  * \brief An implementation of the C printf() routine (non-standard).
@@ -87,7 +94,7 @@ char *do_sprintf_long_decimal (char *buf, U16 w)
 		*buf++ = '0';
 	else while (*current_power_of_ten != 0)
 	{
-		int digit = 0;
+		U8 digit = 0;
 		while (w >= *current_power_of_ten)
 		{
 			digit++;
@@ -185,7 +192,7 @@ do_format_chars:
 				case 'd':
 				case 'i':
 				{
-					register U8 b = va_arg (va, U8);
+					register U8 b = va_arg (va, PROMOTED_U8);
 					endbuf = do_sprintf_decimal (buf, b);
 fixup_number:
 					leading_zero_count = 0;
@@ -239,7 +246,7 @@ fixup_number:
 
 				case 'x': case 'X':
 				{
-					register U8 b = va_arg (va, U8);
+					register U8 b = va_arg (va, PROMOTED_U8);
 					endbuf = do_sprintf_hex_byte (buf, b);
 					goto fixup_number;
 					break;
@@ -311,7 +318,7 @@ do_long_hex_integer:
 
 				case 'c':
 				{
-					register const char c = va_arg (va, const char);
+					register const char c = va_arg (va, PROMOTED_U8);
 					*buf++ = c;
 					break;
 				}

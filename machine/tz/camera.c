@@ -20,8 +20,16 @@
 
 #include <freewpc.h>
 
+typedef enum {
+	CAMERA_AWARD_LIGHT_LOCK=0,
+	CAMERA_AWARD_DOOR_PANEL,
+	CAMERA_AWARD_20_SECS,
+	CAMERA_AWARD_QUICK_MB,
+	CAMERA_AWARD_250K,
+	MAX_CAMERA_AWARDS,
+} camera_award_t;
 
-__local__ U8 camera_award_count;
+__local__ camera_award_t camera_award_count;
 
 __local__ U8 camera_default_count;
 
@@ -35,19 +43,19 @@ void camera_award_deff (void)
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
 	switch (camera_award_count)
 	{
-		case 0:
+		case CAMERA_AWARD_LIGHT_LOCK:
 			sprintf ("LIGHT LOCK");
 			break;
-		case 1:
+		case CAMERA_AWARD_DOOR_PANEL:
 			sprintf ("SPOT DOOR PANEL");
 			break;
-		case 2:
+		case CAMERA_AWARD_20_SECS:
 			sprintf ("20 SECONDS");
 			break;
-		case 3:
+		case CAMERA_AWARD_QUICK_MB:
 			sprintf ("QUICK MULTIBALL");
 			break;
-		case 4:
+		case CAMERA_AWARD_250K:
 			sprintf ("250,000");
 			break;
 	}
@@ -65,28 +73,28 @@ void do_camera_award (void)
 	task_sleep (TIME_100MS);
 	switch (camera_award_count)
 	{
-		case 0:
+		case CAMERA_AWARD_LIGHT_LOCK:
 			/* Light Lock */
 			mball_light_lock ();
 			break;
-		case 1:
+		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
 			door_award_if_possible ();
 			break;
-		case 2:
+		case CAMERA_AWARD_20_SECS:
 			/* Extra Time: 20 seconds */
 			timed_game_extend (20);
 			break;
-		case 3:
+		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
 			break;
-		case 4:
+		case CAMERA_AWARD_250K:
 			/* Big Points: 250K */
 			break;
 	}
 	camera_award_count++;
 	deff_start (DEFF_CAMERA_AWARD);
-	if (camera_award_count > 4)
+	if (camera_award_count >= MAX_CAMERA_AWARDS)
 		camera_award_count = 0;
 }
 

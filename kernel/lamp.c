@@ -199,7 +199,7 @@ void lamp_toggle (lampnum_t lamp)
 }
 
 
-int lamp_test (lampnum_t lamp)
+bool lamp_test (lampnum_t lamp)
 {
 	register bitset p = lamp_matrix;
 	register U8 v = lamp;
@@ -228,7 +228,7 @@ void lamp_flash_off (lampnum_t lamp)
 }
 
 
-int lamp_flash_test (lampnum_t lamp)
+bool lamp_flash_test (lampnum_t lamp)
 {
 	register bitset p = lamp_flash_matrix;
 	register U8 v = lamp;
@@ -374,7 +374,7 @@ void leff_toggle (lampnum_t lamp)
 }
 
 
-int leff_test (lampnum_t lamp)
+bool leff_test (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;

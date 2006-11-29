@@ -64,7 +64,7 @@ typedef struct
 
 	/** If nonzero, indicates the device driver associated with this
 	 *switch. */
-	int devno;
+	U8 devno;
 } switch_info_t;
 
 

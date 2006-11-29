@@ -87,13 +87,13 @@ void db_put4x (uint16_t v)
 
 void db_dump_switches (void)
 {
-	uint8_t row, col;
+	U8 row, col;
 
 	for (row=1; row <= 8; row++)
 	{
 		for (col=1; col <= 8; col++)
 		{
-			int level = switch_poll_logical (MAKE_SW(col,row));
+			U8 level = switch_poll_logical (MAKE_SW(col,row));
 			db_putc (level ? '+' : '-');
 		}
 		db_putc ('\n');

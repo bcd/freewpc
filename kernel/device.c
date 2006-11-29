@@ -134,7 +134,7 @@ uint8_t device_recount (device_t *dev)
 	for (i=0; i < dev->size; i++)
 	{
 		switchnum_t sw = dev->props->sw[i];
-		int level = switch_poll_logical (sw);
+		U8 level = switch_poll_logical (sw);
 		if (level)
 			count++;
 	}

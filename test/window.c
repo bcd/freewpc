@@ -720,7 +720,7 @@ void integer_audit (audit_t val)
 
 void secs_audit (audit_t val)
 {
-	int mins = 0;
+	U8 mins = 0;
 	while (val > 60)
 	{
 		val -= 60;
@@ -739,7 +739,7 @@ void currency_audit (audit_t val)
 void total_earnings_audit (audit_t val __attribute__((unused)))
 {
 	audit_t total_coins = 0;
-	int i;
+	U8 i;
 	for (i=0; i < 4; i++)
 		total_coins += system_audits.coins_added[i];
 	currency_audit (total_coins);
@@ -931,9 +931,9 @@ struct window_ops confirm_window = {
 
 /* A window class for actual menus */
 
-static int count_submenus (struct menu *m)
+static U8 count_submenus (struct menu *m)
 {
-	int count = 0;
+	U8 count = 0;
 	struct menu **submenus = m->var.submenus;
 	if (submenus == NULL)
 		return 0;
@@ -1387,7 +1387,7 @@ void dev_balldev_test_thread (void)
 {
 	U8 last_count = 0;
 	device_t *last_dev = &device_table[menu_selection];
-	int i;
+	U8 i;
 
 	for (;;)
 	{
@@ -1547,7 +1547,7 @@ void dev_soundedit_init (void)
 
 void dev_soundedit_draw (void)
 {
-	int i;
+	U8 i;
 
 	dmd_alloc_low_clean ();
 	for (i=0; i < 4; i++)
@@ -1604,7 +1604,7 @@ struct menu dev_soundedit_item = {
 
 void dev_random_test_enter (void)
 {
-	long int i;
+	U16 i;
 	static U8 rowcount[32];
 
 	for (i=0; i < 32; i++)
@@ -2244,8 +2244,8 @@ void single_switch_thread (void)
 {
 	U8 *sel = &win_top->w_class.menu.selected;
 	U8 selected = *sel;
-	int sw_state = switch_poll (*sel);
-	int sw_poll;
+	U8 sw_state = switch_poll (*sel);
+	U8 sw_poll;
 
 	for (;;)
 	{
@@ -2332,7 +2332,7 @@ void sound_test_set_change (void)
 
 void sound_test_play (U8 sel)
 {
-	sound_code_t snd = ((unsigned long)sound_test_set << 8) + sel;
+	sound_code_t snd = ((U16)sound_test_set << 8) + sel;
 	sound_send (snd);
 }
 
@@ -2639,7 +2639,7 @@ void lamp_row_col_test_down (void)
 void lamp_row_col_test_item_number (U8 val)
 {
 	U8 lamp;
-	int i;
+	U8 i;
 
 	if (val < NUM_LAMP_COLS)
 	{
@@ -3016,7 +3016,7 @@ void test_init (void)
 
 void test_up_button (void)
 {
-	int i;
+	U8 i;
 	if (!win_top) return;
 
 	window_call_op (win_top, up);
@@ -3038,7 +3038,7 @@ void test_up_button (void)
 
 void test_down_button (void)
 {
-	int i;
+	U8 i;
 	if (!win_top) return;
 
 	window_call_op (win_top, down);

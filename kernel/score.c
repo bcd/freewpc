@@ -254,7 +254,7 @@ void score_sub (score_t s1, const score_t s2)
 
 void score_mul (score_t s1, uint8_t multiplier)
 {
-	register int off = sizeof (score_t);
+	register U8 off = sizeof (score_t);
 	register bcd_t *bcd = s1 + off - 1;
 	bcd_t overflow = 0;
 }
@@ -262,7 +262,7 @@ void score_mul (score_t s1, uint8_t multiplier)
 
 I8 score_compare (const score_t s1, const score_t s2)
 {
-	register int len = sizeof (score_t);
+	register U8 len = sizeof (score_t);
 
 	while (len > 0)
 	{

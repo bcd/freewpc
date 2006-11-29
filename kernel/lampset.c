@@ -103,7 +103,7 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 	register uint8_t opcode;
 	register const lampnum_t *lset = lampset_table[id];
 	static const lampnum_t *lset_stack[4];
-	int lset_stack_offset = 0;
+	U8 lset_stack_offset = 0;
 
 	lset_stack[lset_stack_offset++] = 0;
 	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT, 0);

@@ -19,7 +19,7 @@ diag_post_fatal_error (diag_error_code_t errcode)
 {
 }
 
-int
+U8
 diag_get_error_count (void)
 {
 	return diag_error_count;

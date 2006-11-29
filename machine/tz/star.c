@@ -51,7 +51,7 @@ void new_star_task (void)
 
 void new_starfield_start (void)
 {
-	int i;
+	U8 i;
 	for (i=0; i < 16; i++)
 		task_create_gid (GID_NEW_STAR, new_star_task);
 }
@@ -66,7 +66,7 @@ void new_starfield_stop (void)
 void star_task (void)
 {
 	U8 *dmd = (U8 *)task_get_arg ();
-	int i;
+	U8 i;
 
 	for (i=3; i>0; i--)
 	{

@@ -372,7 +372,7 @@ void dmd_draw_border (U8 *dbuf)
 	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
 	register uint16_t *dbuf16 = (uint16_t *)dbuf;
 	register uint16_t *dbuf16_bot = (uint16_t *)dbuf_bot;
-	int i;
+	U8 i;
 
 	for (i=0; i < 16; i++)
 		*dbuf16_bot++ = *dbuf16++ = 0xFFFFUL;
@@ -432,7 +432,7 @@ void dmd_draw_image2 (const U8 *image_bits)
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height)
 {
-	int i, j;
+	U8 i, j;
 	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
 	U16 *image_data = (U16 *)image_bits;
 
@@ -457,7 +457,7 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
  */
 void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 {
-	int i, j;
+	U8 i, j;
 	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
 
 	for (j=0; j < height; j++)
@@ -488,7 +488,7 @@ void dmd_draw_fbm (const U8 *image_bits)
 void dmd_color_test (void)
 {
 	U16 *buf;
-	long int n;
+	U16 n;
 
 	dmd_alloc_low_high ();
 	dmd_clean_page (dmd_low_buffer);

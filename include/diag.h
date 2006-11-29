@@ -11,7 +11,7 @@ typedef enum {
 } diag_error_code_t;
 
 
-__common__ int diag_get_error_count (void);
+__common__ U8 diag_get_error_count (void);
 __common__ void diag_test_cpu (void);
 __common__ void diag_test_ram (void);
 __common__ void diag_test_rom (void);

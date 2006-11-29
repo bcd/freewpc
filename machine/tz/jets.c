@@ -21,10 +21,10 @@
 #include <freewpc.h>
 #include <rtsol.h>
 
-int jet_sound_index;
+U8 jet_sound_index;
 
-__local__ int jets_scored;
-__local__ int jets_for_bonus;
+__local__ U8 jets_scored;
+__local__ U8 jets_for_bonus;
 
 __fastram__ U8 rtsol_left_jet;
 __fastram__ U8 rtsol_right_jet;

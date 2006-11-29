@@ -81,7 +81,7 @@ void
 sol_modify (solnum_t sol, U8 cycle_mask)
 {
 	/* Set a bit in each of the 8 bitarrays */
-	int count;
+	U8 count;
 	for (count = 0; count < SOL_CYCLES; count++)
 	{
 		register bitset p = &sol_state[count][0];

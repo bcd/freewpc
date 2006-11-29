@@ -66,7 +66,7 @@ void special_deff (void)
 
 void jackpot_deff (void)
 {
-	int i;
+	U8 i;
 	for (i=1; i < 8; i++)
 	{
 		dmd_alloc_low_clean ();

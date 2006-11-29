@@ -156,7 +156,7 @@ void trans_scroll_left_old (void)
 
 void trans_scroll_left_new (void)
 {
-	long int i;
+	U16 i;
 
 	if (dmd_trans_data_ptr == NULL)
 		dmd_trans_data_ptr = dmd_low_buffer;
@@ -195,7 +195,7 @@ void trans_scroll_right_old (void)
 
 void trans_scroll_right_new (void)
 {
-	long int i;
+	U16 i;
 
 	if (dmd_trans_data_ptr == NULL)
 		dmd_trans_data_ptr = dmd_low_buffer+15;

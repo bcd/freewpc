@@ -218,7 +218,7 @@ void amode_high_score_test (void)
 
 void amode_deff (void) __taskentry__
 {
-	int design_credit_counter = 3;
+	U8 design_credit_counter = 3;
 
 	tz_clock_reset ();
 

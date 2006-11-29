@@ -63,6 +63,10 @@ typedef unsigned int INTPTR;
 typedef U16 PTR_OR_U16;
 #endif
 
+#define short short_not_supported
+#define int int_not_supported
+#define long long_not_supported
+
 /* TODO - move these elsewhere */
 extern U8 sys_init_complete;
 extern U8 sys_init_pending_tasks;
@@ -187,14 +191,14 @@ extern U8 irq_count;
 #ifndef MACHINE_LACKS_LAMP_H
 #include <mach/lamp.h>
 #endif
-#endif /* USE_MD */
-#ifndef MACHINE_LACKS_SOUND_H
-#include <mach/sound.h>
-#endif
 #ifndef MACHINE_LACKS_FLAGS_H
 #ifdef MACHINE_INCLUDE_FLAGS
 #include <mach/flags.h>
 #endif
+#endif
+#endif /* USE_MD */
+#ifndef MACHINE_LACKS_SOUND_H
+#include <mach/sound.h>
 #endif
 #ifndef MACHINE_LACKS_PROTOS_H
 #include <mach/protos.h>
