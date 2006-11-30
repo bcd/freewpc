@@ -174,7 +174,7 @@ void high_score_award (void)
 }
 
 
-void high_score_entry_deff (void)
+void hsentry_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("PLAYER %d", high_score_player);

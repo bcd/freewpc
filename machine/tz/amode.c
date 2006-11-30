@@ -93,7 +93,7 @@ void egg_left_flipper (void)
 	egg_code_values[egg_index]++;
 }
 
-void egg_brian_image_deff (void)
+void brian_image_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_draw_image2 (brianhead_bits);

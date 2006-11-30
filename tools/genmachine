@@ -21,16 +21,40 @@
 # ------------------------------------------------------------------
 # genmachine - autogenerate declarations from machine description
 # ------------------------------------------------------------------
+# Syntax: genmachine <mdfile> <command>
+# where command can be:
+#    config - generate .h of all machine declarations/defines
+#    switchmasks - generate opto/edge trigger bitarrays
+#    strings - generate tables of strings of items
+#    dump - generate Perl hash structure of the database
+# All output is sent to stdout.
 
 use Data::Dumper;
 
-my $contextName = "";
+############### Global Variables ####################
+
+# m is a handle to the global database.  It is divided into categories,
+# or contexts, each of which is itself a hash table.  The context names
+# correspond to the section dividers in the machine description file.
 my $m = {};
+
+# The name of the current context
+my $contextName = "";
+
+# mc is the context handle, which points to the part of the database
+# for the current context
 my $mc = $m;
+
+# When autogenerating object IDs, $autoid is the next ID to be given out.
 my $autoid;
+
+
+################## Constants #######################
 
 my $GLOBAL_OBJECT = 2;
 
+# A table of regular expressions that says how object IDs are formatted
+# per context.
 my %contextDefinitionRe = (
 	"" => ".*",
 	"switches" => "[1-8FD][1-8]",
@@ -53,6 +77,18 @@ my %contextDefinitionRe = (
 	"scores" => "AUTO",
 );
 
+# A table of binary properties per context.  During any object declaration,
+# if one of these names is seen in the property list, then a named element
+# of the object declaration is created.  For example, if $sw is a handle
+# to a new switch object, then specifying "button" would set
+# $sw->{"button"}.  The table gives the value assigned, but usually it is
+# irrelevant what the actual value is.
+#
+# For properties marked $GLOBAL_OBJECT, there is assumed to be only one
+# object of this type in the system.  An element of the global database
+# ($m) is set as a shortcut to the object based on the property name.
+# For example, $m->{"*switches:outhole"} is a quick way of getting to the
+# (single) outhole switch object.
 my %BinaryProperties = (
 	"switches" => { 
 		"button" => 1,
@@ -98,9 +134,14 @@ my %BinaryProperties = (
 	"leffs" => {
 		"amode" => $GLOBAL_OBJECT,
 		"runner" => 1,
+		"shared" => 1,
 	},
 );
 
+# A table of enumerated properties per context.  Similar to binary
+# properties, but the property name is given here in the table and the
+# value is the name specified in the property list itself.  For example,
+# a lamp declared "yellow" would set $lamp->{"color"} = "yellow".
 my %EnumeratedProperties = (
 	"lamps" => {
 		"color" => {
@@ -125,24 +166,52 @@ my %EnumeratedProperties = (
 	},
 );
 
+# When outputting defines for object IDs, specifies the prefix to use per
+# context.  For example, a switch "Example" is given an object ID named
+# SW_EXAMPLE.
 my %ContextPrefixes = (
 	"switches" => "SW",
 	"lamps" => "LM",
-	"lampsets" => "LMSET",
+	"lampsets" => "LAMPSET",
 	"drives" => "SOL",
 	"gi" => "GI",
 	"containers" => "DEVNO",
 	"shots" => "SHOT",
 	"flags" => "FLAG",
+	"scores" => "SC",
+	"adjustments" => "FAD",
+	"audits" => "FAU",
+	"deffs" => "DEFF",
+	"leffs" => "LEFF",
 );
 
+# Optionally, a name for the define to use for the maximum number of
+# elements in a particular object set.
 my %ContextMaxima = (
 	"containers" => "NUM_DEVICES",
 	"shots" => "NUM_SHOTS",
 	"flags" => "MAX_FLAGS",
+	"adjustments" => "NUM_FEATURE_ADJUSTMENTS",
+	"audits" => "NUM_FEATURE_AUDITS",
+	"deffs" => "MAX_DEFFS",
+	"drives" => "NUM_POWER_DRIVES",
+	"lampsets" => "MAX_LAMPSET",
 );
 
 
+# The contexts for which strings should be written out.
+@stringcontexts = ("switches", "drives", "lamps", "containers", 
+	"deffs", "leffs");
+
+
+###################################################################
+
+#
+# unique <context>
+#
+# Returns a sorted set of all of the elements within a particular
+# context, with no duplicates.
+#
 sub unique {
 	my ($category) = @_;
 	my @result;
@@ -161,6 +230,24 @@ sub unique {
 	return @result;
 }
 
+sub add_flag {
+	my ($def, $property_name, $flag_field_name, $flag_name) = @_;
+	if (defined $def->{$property_name}) {
+		if (defined ($def->{$flag_field_name})) {
+			$def->{$flag_field_name} .= " | $flag_name";
+		} else {
+			$def->{$flag_field_name} = $flag_name;
+		}
+	}
+}
+
+
+#
+# check_define_global <context>, <object_reference>
+#
+# Checks to see if an object satisfies any of the GLOBAL_OBJECTs for its
+# type.  If so, marks the top-level database with a shortcut.
+#
 sub check_define_global {
 	my ($context, $def) = @_;
 	my $props = $BinaryProperties{$context};
@@ -195,6 +282,8 @@ sub close_switch_or_lamp {
 sub close_switch {
 	my ($def) = @_;
 	close_switch_or_lamp ($def);
+	$def->{'fn'} = "callset_" . $def->{'c_decl'};
+	$def->{'fnpage'} = "EVENT_PAGE";
 }
 
 sub close_drive {
@@ -211,11 +300,13 @@ sub close_drive {
 sub close_container {
 	my ($container) = @_;
 	my ($coilname, @switchnames) = split /,[ \t]*/, $container->{'props'};
-	$container->{'coil'} = $coilname;
+	$container->{'coil'} = ($m->{'drives'})->{$coilname};
 	$container->{'size'} = scalar @switchnames;
 	$container->{'switches'} = \@switchnames;
-	foreach $sw (@switchnames) {
-		(($m->{"switches"})->{$sw})->{"container"} = $container;
+	foreach $swname (@switchnames) {
+		my $sw = ($m->{"switches"})->{$swname};
+		$sw->{"container"} = $container;
+		$sw->{"devno"} = $container->{'c_ident'};
 	}
 	$container->{'init_max_count'} = 0 if (!defined $container->{'init_max_count'});
 }
@@ -226,12 +317,44 @@ sub close_gi {
 		$gi->{'ID'} . ")";
 }
 
+
+sub int_to_long_bcd {
+	my ($val) = @_;
+	my $res = "{ ";
+	$place = 1000000;
+	while (int ($place) > 0) {
+		$res .= "0x" . int ($val / $place) . ", ";
+		$val %= $place;
+		$place /= 100;
+	}
+	$res .= " }";
+	return $res;
+}
+
+
+sub close_score {
+	my ($score) = @_;
+	my $id = $score->{'name'};
+	my $val;
+
+	if ($id =~ /(\d+)K$/) { $val = $1 * 1000; }
+	elsif ($id =~ /(\d+)M$/) { $val = $1 * 1000000; }
+	else { $val = $id + 0; }
+
+	$score->{'value'} = $val;
+}
+
+
+# A table of "closure functions", which are invoked on a new object
+# declaration after the initial parse.  Use functions here to "fixup"
+# any objects that require any special processing.
 my %ContextClosures = (
 	"switches" => \&close_switch,
 	"lamps" => \&close_switch_or_lamp,
 	"drives" => \&close_drive,
 	"containers" => \&close_container,
 	"gi" => \&close_gi,
+	"scores" => \&close_score
 );
 
 
@@ -246,6 +369,10 @@ sub machine_load {
 	my ($file) = @_;
 	open FH, $file or die;
 	my $lineno = 0;
+
+	sub warning { print STDERR "$file:$lineno: warning: " . (shift) . "\n"; }
+	sub error { die "$file:$lineno: error: " . (shift) . "\n"; }
+
 LINE: 
 	while (<FH>) {
 		$lineno++;
@@ -356,9 +483,12 @@ LINE:
 			} else {
 				$prefix = "";
 			}
+
 			my $c_ident = $def->{'c_ident'} = $prefix . $c_ident;
-			$c_ident =~ tr/A-Z/a-z/;
-			$def->{'c_decl'} = $c_ident;
+			if (!defined ($def->{'c_decl'})) {
+				$c_ident =~ tr/A-Z/a-z/;
+				$def->{'c_decl'} = $c_ident;
+			}
 
 			# Invoke the closure if there is one
 			if (defined $ContextClosures{$contextName}) {
@@ -367,12 +497,19 @@ LINE:
 
 			check_define_global ($contextName, $def);
 
+			# Check for a c_string that is too long.  Try to
+			# abbreviate it if possible.
+			while (length $def->{'c_string'} > 24) {
+				warning $def->{'c_string'} . " may be too long to display";
+				last;
+			}
+
 			next;
 		}
 
 		else {
 			# Handle lines that aren't data definitions.
-			die "Unrecognized element at line " . $lineno . "\n";
+			error "unrecognized element at line " . $lineno . "\n";
 		}
 	}
 	close FH;
@@ -396,6 +533,8 @@ LINE:
 	# Does the machine have upper flippers that need to be serviced?
 	$m->{'*switches:has-ul'} = 1;
 	$m->{'*switches:has-ur'} = 1;
+
+	# Are there any GLOBAL_OBJECTS that aren't defined?
 }
 
 
@@ -451,6 +590,7 @@ sub machine_write_defines {
 		print "/* Definitions of $context */\n";
 		foreach my $def (unique ($mc)) {
 			$number = $def->{'number'};
+			# next if (!defined $def->{'c_ident'});
 			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
 		}
 		my $max = $ContextMaxima{$context};
@@ -551,10 +691,12 @@ sub machine_write_defines {
 	}
 	print "\n";
 
-	# Print feature_adj_t and MACHINE_FEATURE_ADJUSTMENTS
+	# Print feature_adj_t and MACHINE_FEATURE_ADJUSTMENTS.  Since it's
+	# part of a structure, strip out the fad_ prefix.
 	print "typedef struct {\n";
 	foreach $feature (unique ($m->{"adjustments"})) {
 		my $ident = $feature->{'c_decl'};
+		$ident =~ s/^fad_//;
 		print "   U8 $ident;\n";
 	}
 	print "} feature_adj_t;\n\n";
@@ -562,6 +704,7 @@ sub machine_write_defines {
 	print "#define MACHINE_FEATURE_ADJUSTMENTS \\\n";
 	foreach $feature (unique ($m->{"adjustments"})) {
 		my $ident = $feature->{'c_decl'};
+		$ident =~ s/^fad_//;
 		my $type = $feature->{'type'};
 		my $default = $feature->{'props'};
 		my $string = $feature->{'c_string'};
@@ -569,6 +712,17 @@ sub machine_write_defines {
 	}
 	print "\n\n";
 
+	# Print display effects
+	print "#define MACHINE_DISPLAY_EFFECTS \\\n";
+	foreach $deff (unique ($m->{"deffs"})) {
+		$fn = $deff->{'c_decl'};
+		$fn =~ s/deff_(.*)/$1_deff/;
+		print "   DECL_DEFF_" . 
+			($deff->{'runner'} ? "MODE" : "FAST") .
+			" (" . $deff->{'c_ident'} . ", " .
+			$deff->{'props'} .  ", $fn) \\\n";
+	}
+	print "\n";
 
 	# Print MACHINE_TEST_MENU_ITEMS
 	my $tests = $m->{"tests"};
@@ -596,6 +750,17 @@ sub machine_write_defines {
 		print "#define MACHINE_${id}_MUSIC $value\n";
 	}
 	print "\n";
+
+	# Print MACHINE_SWxx defines
+	for my $col (1 .. 8) {
+		for my $row (1 .. 8) {
+			my $swname = "$col$row";
+			my $sw = ($m->{"switches"})->{$swname};
+			my $swdecl = $sw->{'c_decl'} or "sw_unused";
+			print "#define MACHINE_SW$swname $swdecl\n";
+		}
+	}
+	print "\n";
 }
 
 
@@ -610,8 +775,106 @@ sub machine_write_decl_names {
 	print "};\n\n";
 }
 
+sub machine_write_container_decls {
+	print $START_SOURCE;
+	print "device_properties_t device_table[] = {\n";
+	foreach $def (unique ($m->{"containers"})) {
+		my $name = $def->{'c_decl'};
+		my $coilname = ($def->{'coil'})->{'c_ident'};
+		my $sw_count = $def->{'size'};
+		my $sws = $def->{'switches'};
+		my $init_max_count = $def->{'init_max_count'};
+		print "[" . $def->{'c_ident'} . "] = {\n";
+		print "   .ops = \&${name}_ops,\n";
+		print "   .name = " . $def->{'c_string'} . ",\n";
+		print "   .sol = $coilname,\n";
+		print "   .sw_count = $sw_count,\n";
+		print "   .init_max_count = $init_max_count,\n";
+		print "   .sw = { },\n";
+		print "},\n";
+	}
+	print "};\n";
+	print $END_SOURCE;
+};
 
-@stringcontexts = ("switches", "drives", "lamps", "containers");
+
+sub machine_write_switch_decls {
+	print $START_SOURCE;
+	print "const switch_info_t switch_table[] = {\n";
+	for $sw (unique ($m->{'switches'})) {
+		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
+		add_flag ($sw, "edge", "flags", "SW_EDGE");
+		add_flag ($sw, "noplay", "flags", "SW_NOPLAY");
+		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
+		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
+
+		my $c_decl = $sw->{'c_decl'};
+		my $c_ident = $sw->{'c_ident'};
+		print "   [" . $c_ident . "] = {\n";
+		for $field ("fn", "fnpage", "flags", "lamp", "sound",
+			"active_time", "inactive_time", "devno") {
+			$val = $sw->{$field};
+			print "      .$field = $val,\n" if defined $val;
+		}
+		print "   },\n";
+	}
+	print "}\n";
+	print $END_SOURCE;
+}
+
+sub machine_lamp_get_value {
+	my ($lamp) = @_;
+	$lamp = ($m->{'lamps'})->{$lamp};
+	return $lamp->{'number'};
+}
+
+sub machine_write_lampset_decls {
+	print $START_SOURCE;
+
+	for $ls (unique ($m->{"lampsets"})) {
+		print "const lampnum_t " . $ls->{'c_decl'} . "[] = {\n   ";
+
+		my @lamps = split /,[ \t]*/, $ls->{'props'};
+		foreach $lamp (@lamps) {
+			if ($lamp =~ m/(.*)\.\.(.*)/) {
+				($min, $max) = (machine_lamp_get_value ($1),
+					machine_lamp_get_value ($2));
+				for my $i ($min..$max) {
+					print "$i, ";
+				}
+			} else {
+				$lamp = machine_lamp_get_value ($lamp);
+				print "$lamp, ";
+			}
+		}
+
+		print "LAMP_END\n";
+		print "};\n";
+	}
+
+	print "const lampnum_t *lampset_table[] = {\n";
+	for $ls (unique ($m->{"lampsets"})) {
+		print "\&" . $ls->{'c_decl'} . ",\n";
+	}
+	print "};\n";
+	print $END_SOURCE;
+}
+
+sub machine_write_score_decls {
+	print $START_SOURCE;
+	print "const score_t score_table[] = {\n";
+	for $score (unique ($m->{'scores'})) {
+		$val = $score->{'value'};
+		print "[" . $score->{'c_ident'} . "] = " . int_to_long_bcd ($val)
+			. ",\n";
+	}
+	print "};\n";
+	print $END_SOURCE;
+}
+
+$infile = $ARGV[0] or "machine/tz/tz.md";
+$command = $ARGV[1];
+
 
 my $START_SOURCE = <<END;
 /* Autogenerated from $infile by genmachine */
@@ -622,8 +885,6 @@ END
 
 my $END_SOURCE = "\n";
 
-$infile = $ARGV[0] or "machine/tz/tz.md";
-$command = $ARGV[1];
 
 machine_load ($infile);
 
@@ -699,7 +960,29 @@ elsif ($command eq "switchmasks") {
 #  generate build/mach-lampsets.c
 #######################################################
 elsif ($command eq "lampsets") {
+	machine_write_lampset_decls ();
 }
+
+#######################################################
+#  generate build/mach-containers.c
+#######################################################
+elsif ($command eq "containers") {
+	machine_write_container_decls ();
+}
+
+#######################################################
+#  generate build/mach-switches.c
+#######################################################
+elsif ($command eq "switches") {
+	machine_write_switch_decls ();
+}
+#######################################################
+#  generate build/mach-scores.c
+#######################################################
+elsif ($command eq "scores") {
+	machine_write_score_decls ();
+}
+
 
 elsif ($command eq "dump") {
 	machine_dump ();

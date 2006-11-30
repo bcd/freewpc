@@ -54,7 +54,7 @@ CALLSET_ENTRY(hitch, start_player)
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_hitch)
+DECLARE_SWITCH_DRIVER (sw_hitchhiker)
 {
 	.fn = sw_hitch_handler,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,

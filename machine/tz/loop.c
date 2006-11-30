@@ -130,7 +130,7 @@ void sw_right_loop_handler (void)
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_left_loop)
+DECLARE_SWITCH_DRIVER (sw_left_magnet)
 {
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.fn = sw_left_loop_handler,
@@ -139,7 +139,7 @@ DECLARE_SWITCH_DRIVER (sw_left_loop)
 /* The right loop switches are needed outside of game mode in order
  * to load the gumball machine, so don't use SW_IN_GAME here. */
 
-DECLARE_SWITCH_DRIVER (sw_right_loop_top)
+DECLARE_SWITCH_DRIVER (sw_upper_right_magnet)
 {
 	.flags = SW_PLAYFIELD | SW_IN_TEST,
 #ifdef CONFIG_SUPPORT_THIRD_MAGNET
@@ -150,7 +150,7 @@ DECLARE_SWITCH_DRIVER (sw_right_loop_top)
 };
 
 
-DECLARE_SWITCH_DRIVER (sw_right_loop)
+DECLARE_SWITCH_DRIVER (sw_lower_right_magnet)
 {
 	.flags = SW_PLAYFIELD | SW_IN_TEST,
 	.fn = sw_right_loop_handler,

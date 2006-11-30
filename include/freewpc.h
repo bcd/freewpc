@@ -207,10 +207,12 @@ extern U8 irq_count;
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>
-#include <gendefine_deff.h>
-#include <gendefine_leff.h>
-#include <gendefine_lampset.h>
 #ifndef USE_MD
+#include <gendefine_deff.h>
+#endif
+#include <gendefine_leff.h>
+#ifndef USE_MD
+#include <gendefine_lampset.h>
 #include <gendefine_devno.h>
 #endif
 #include <../images/xbmproto.h>

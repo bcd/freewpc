@@ -64,14 +64,14 @@ void sw_slot_prox_handler (void)
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_trough_prox)
+DECLARE_SWITCH_DRIVER (sw_trough_proximity)
 {
 	.fn = sw_trough_prox_handler,
 	.flags = SW_IN_GAME,
 };
 
 
-DECLARE_SWITCH_DRIVER (sw_slot_prox)
+DECLARE_SWITCH_DRIVER (sw_slot_proximity)
 {
 	.fn = sw_slot_prox_handler,
 	.flags = SW_IN_GAME,

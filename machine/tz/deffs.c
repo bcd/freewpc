@@ -103,7 +103,7 @@ void jackpot_deff (void)
 	deff_exit ();
 }
 
-void ballsave_deff (void)
+void ball_save_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();

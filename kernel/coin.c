@@ -221,7 +221,7 @@ void add_units (U8 n)
 }
 
 
-void coin_deff (void) __taskentry__
+void coin_insert_deff (void) __taskentry__
 {
 	register int8_t z = 4;
 	while (--z > 0)

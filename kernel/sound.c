@@ -309,7 +309,7 @@ void volume_set (U8 vol)
 }
 
 
-void volume_deff (void) __taskentry__
+void volume_change_deff (void) __taskentry__
 {
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);

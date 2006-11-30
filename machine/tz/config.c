@@ -235,7 +235,7 @@ CALLSET_ENTRY (tz, music_update)
 	else if (flag_test (FLAG_MULTIBALL_RUNNING))
 		music_change (MUS_MULTIBALL);
 
-	else if (flag_test (FLAG_QUICK_MULTIBALL_RUNNING))
+	else if (flag_test (FLAG_QUICK_MB_RUNNING))
 		music_change (MUS_SPIRAL_ROUND);
 
 	else if (!ball_in_play)

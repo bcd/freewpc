@@ -126,49 +126,49 @@ void sw_greed_handler7 (void)
 
 
 
-DECLARE_SWITCH_DRIVER (sw_greed1)
+DECLARE_SWITCH_DRIVER (sw_standup_1)
 {
 	.fn = sw_greed_handler1,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_LL_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed2)
+DECLARE_SWITCH_DRIVER (sw_standup_2)
 {
 	.fn = sw_greed_handler2,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_ML_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed3)
+DECLARE_SWITCH_DRIVER (sw_standup_3)
 {
 	.fn = sw_greed_handler3,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_UL_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed4)
+DECLARE_SWITCH_DRIVER (sw_standup_4)
 {
 	.fn = sw_greed_handler4,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_UR_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed5)
+DECLARE_SWITCH_DRIVER (sw_standup_5)
 {
 	.fn = sw_greed_handler5,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_MR1_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed6)
+DECLARE_SWITCH_DRIVER (sw_standup_6)
 {
 	.fn = sw_greed_handler6,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.lamp = LM_MR2_5M,
 };
 
-DECLARE_SWITCH_DRIVER (sw_greed7)
+DECLARE_SWITCH_DRIVER (sw_standup_7)
 {
 	.fn = sw_greed_handler7,
 	.flags = SW_PLAYFIELD | SW_IN_GAME,

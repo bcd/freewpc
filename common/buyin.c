@@ -46,7 +46,7 @@ void buyin_offer_deff (void)
 void buyin_offer (void)
 {
 	buyin_offer_timer = BUYIN_TIMEOUT;
-	deff_start (DEFF_BUYIN);
+	deff_start (DEFF_BUYIN_OFFER);
 	while (buyin_offer_timer > 0)
 	{
 		task_sleep_sec (1);

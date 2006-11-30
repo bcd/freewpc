@@ -232,7 +232,7 @@ void browser_draw (void)
 	if (browser_item_number)
 	{
 		(*browser_item_number) (menu_selection);
-		font_render_string (&font_mono5, 8, 20, sprintf_buffer);
+		font_render_string (&font_mono5, 4, 20, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -1192,6 +1192,8 @@ void deff_leff_thread (void)
 				if (is_active == FALSE)
 				{
 					browser_draw ();
+					sprintf_far_string (names_of_deffs + menu_selection);
+					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 					browser_print_operation ("STOPPED");
 					sound_reset ();
 				}
@@ -2405,6 +2407,7 @@ void solenoid_test_init (void)
 {
 	browser_init ();
 	browser_action = TIME_66MS;
+	browser_max = NUM_POWER_DRIVES;
 }
 
 void solenoid_test_draw (void)
@@ -2562,7 +2565,6 @@ void lamp_test_draw (void)
 	browser_draw ();
 	sprintf_far_string (names_of_lamps + menu_selection);
 	browser_print_operation (sprintf_buffer);
-	// font_render_string (&font_var5, 32, 20, sprintf_buffer);
 }
 
 void lamp_test_up (void)

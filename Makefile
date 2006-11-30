@@ -729,7 +729,9 @@ endif
 # General rule for how to compile the machine description.
 # Several files are generated.
 ifdef MACHINE_FILE
-CONFIG_FILES = build/mach-config.h build/mach-strings.c build/mach-switchmasks.c
+CONFIG_CMDS = strings switchmasks containers switches scores lampsets
+CONFIG_SRCS = $(CONFIG_CMDS:%=build/mach-%.c)
+CONFIG_FILES = build/mach-config.h $(CONFIG_SRCS)
 
 .PHONY : config
 config : $(CONFIG_FILES)
@@ -737,11 +739,10 @@ config : $(CONFIG_FILES)
 build/mach-config.h : $(MACH_DESC) tools/genmachine
 	tools/genmachine $< config > $@
 
-build/mach-strings.c : $(MACH_DESC) tools/genmachine build/mach-config.h
-	tools/genmachine $< strings > $@
+build/mach-%.c : $(MACH_DESC) tools/genmachine build/mach-config.h
+	tools/genmachine $< $(@:build/mach-%.c=%) > $@
 
-build/mach-switchmasks.c : $(MACH_DESC) tools/genmachine build/mach-config.h
-	tools/genmachine $< switchmasks > $@
+kernel/score.o : build/mach-scores.c
 endif
 
 #######################################################################

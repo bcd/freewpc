@@ -16,7 +16,6 @@ Pinmame-ROM: tzone9_2.rom
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
-define MACHINE_SCORE_DIGITS 8
 define MACHINE_AMODE_LEFT_FLIPPER_HANDLER amode_left_flipper
 define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
@@ -100,17 +99,17 @@ D8: Enter, service
 12: Right Outlane, micro
 13: Start Button, start-button
 14: Tilt, tilt
-15: Right Trough
-16: Center Trough
-17: Left Trough
+15: Right Trough, c_decl(sw_trough)
+16: Center Trough, c_decl(sw_trough)
+17: Left Trough, c_decl(sw_trough)
 18: Outhole, outhole
 21: Slam Tilt, slam-tilt
 22: Coin Door Closed
 23: Buyin Button, buyin-button
-24: Always Closed, virtual, opto
+24: Always Closed, virtual, opto, c_decl(sw_unused)
 25: Far Left Trough
 26: Trough Proximity, opto
-27: Shooter, shooter
+27: Shooter, shooter, c_decl(sw_unused)
 28: Rocket Kicker
 31: Left Jet, fast, Left Jet
 32: Right Jet, fast, Right Jet
@@ -136,11 +135,11 @@ D8: Enter, service
 56: Gumball Exit
 57: Slot Proximity
 58: Slot
-61: Skill Bottom
+61: Skill Bottom, c_decl(sw_skill
 62: Skill Center
 63: Skill Top
 64: Standup 4, standup
-65: Power Payoff
+65: Power Payoff, c_decl(sw_unused)
 66: Standup 5, standup
 67: Standup 6, standup
 68: Standup 7, standup
@@ -155,19 +154,19 @@ D8: Enter, service
 81: Lower Right Magnet, opto
 82: Upper Right Magnet, opto
 83: Left Magnet, opto
-84: Lock Center, opto
-85: Lock Upper, opto
-86: Clock Passage, opto
+84: Lock Center, opto, c_decl(sw_lock)
+85: Lock Upper, opto, c_decl(sw_lock)
+86: Clock Passage, opto, c_decl(sw_unused)
 87: Gumball Enter, opto
-88: Lock Lower
-F1: Lower Right Flipper EOS
-F2: Lower Right Flipper Button, button
-F3: Lower Left Flipper EOS
-F4: Lower Left Flipper Button, button
-F5: Upper Right Flipper EOS
-F6: Upper Right Flipper Button, button
-F7: Upper Left Flipper EOS
-F8: Upper Left Flipper Button, button
+88: Lock Lower, c_decl(sw_lock)
+F1: L. R. Flipper EOS, opto
+F2: L. R. Flipper Button, button, opto
+F3: L. L. Flipper EOS, opto
+F4: L. L. Flipper Button, button, opto
+F5: U. R. Flipper EOS, opto
+F6: U. R. Flipper Button, button, opto
+F7: U. L. Flipper EOS, opto
+F8: U. L. Flipper Button, button, opto
 
 [drives]
 H1: Slot
@@ -230,27 +229,36 @@ tz_gumball:
 
 #############################################################
 
-#[lampsets]
-#Door Panel Awards: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
-#Door Panels and Handle:
-#Door Locks:
-#Door Gumball:
-#Door Locks and Gumball:
-#Left Ramp Awards:
-#Lock Awards:
-#Piano Awards:
-#Greed Targets:
-#Powerfield Values:
-#Jets:
-#Lower Lanes:
-#Spiral Awards:
-#Amode All:
+[lampsets]
+ALL: 11..88
+Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
+Door Panels and Handle:
+Door Locks:
+Door Gumball:
+Door Locks and Gumball:
+Left Ramp Awards:
+Lock Awards:
+Piano Awards:
+Greed Targets:
+Powerfield Values:
+Jets:
+Lower Lanes:
+Spiral Awards:
+Amode All:
+Amode Rand:
 
 [containers]
-Trough: Ball Serve, Left Trough, Center Trough, Right Trough, trough, init_max_count(3)
-Lock: Lock Release, Lock Upper, Lock Center, Lock Lower
-Rocket: Rocket Kicker, Rocket Kicker
-Slot: Slot, Slot
+Trough: Ball Serve, trough, init_max_count(3), \
+	Left Trough, Center Trough, Right Trough
+
+Lock: Lock Release, \
+	Lock Upper, Lock Center, Lock Lower
+
+Rocket: Rocket Kicker, \
+	Rocket Kicker
+
+Slot: Slot, \
+	Slot
 
 [targetbanks]
 
@@ -272,11 +280,14 @@ Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
 
 [audits]
+3 Panels:
+6 Panels:
+9 Panels:
+12 Panels:
 
 [system_sounds]
 Add Coin: SND_LIGHT_SLOT_TIMED
 Add Credit: SND_THUD
-Volume Change: MUS_SUPER_SLOT
 Start Game: SND_ARE_YOU_READY_TO_BATTLE
 Tilt Warning: SND_TILT_WARNING
 Tilt: SND_TILT
@@ -285,11 +296,39 @@ Tilt: SND_TILT
 Start Ball: MUS_MULTIBALL_LIT_PLUNGER
 Ball in Play: MUS_MULTIBALL_LIT
 End Game: MUS_POWERBALL_MANIA
+Volume Change: MUS_SUPER_SLOT
 
 [scores]
-25K: 25.000
-50K: 50.000
-75K: 75.000
+10:
+100:
+500:
+1K:
+2500:
+5K:
+5130:
+10K:
+15K:
+20K:
+25K:
+30K:
+40K:
+50K:
+75K:
+100K:
+200K:
+250K:
+500K:
+750K:
+1M:
+2M:
+3M:
+4M:
+5M:
+10M:
+20M:
+30M:
+40M:
+50M:
 
 [highscores]
 GC: QQQ, 15.000.000
@@ -302,7 +341,7 @@ GC: QQQ, 15.000.000
 DOOR_AWARD_LIT:
 LEFT_OUTLANE_LIT:
 RIGHT_OUTLANE_LIT:
-QUICK_MULTIBALL_RUNNING:
+QUICK_MB_RUNNING:
 BTTZ_RUNNING:
 MULTIBALL_RUNNING:
 BATTLE_THE_POWER_LIT:
@@ -313,26 +352,61 @@ STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
 
-###################################################################
+[deffs]
+NULL: 0
+Scores: runner, PRI_SCORES
+Coin Insert: PRI_COINS
+Credits: PRI_CREDITS
+Tilt Warning: PRI_TILT_WARNING
+Tilt: runner, PRI_TILT
+Game Over: PRI_GAME_OVER
+Volume Change: runner, PRI_VOLUME_CHANGE
+Slam Tilt: runner, PRI_SLAMTILT
+Status Report: runner, PRI_STATUS
+Nonfatal Error: PRI_DEBUGGER
+HSEntry: runner, PRI_HSENTRY
+Match: runner, PRI_MATCH
+Locating Balls: PRI_BALL_SEARCH
+Buyin Offer: PRI_MATCH
 
-define MACHINE_DISPLAY_EFFECTS \
-	DECL_DEFF_MODE (DEFF_INSPECTOR, PRI_DEBUGGER, inspector_deff) \
-	DECL_DEFF_MODE (DEFF_AMODE, PRI_AMODE, amode_deff) \
-	DECL_DEFF_MODE (DEFF_BONUS, PRI_BONUS, bonus_deff) \
-	DECL_DEFF_FAST (DEFF_BRIAN_IMAGE, PRI_EGG1, egg_brian_image_deff) \
-	DECL_DEFF_FAST (DEFF_REPLAY, PRI_REPLAY, replay_deff) \
-	DECL_DEFF_FAST (DEFF_JACKPOT, PRI_JACKPOT, jackpot_deff) \
-	DECL_DEFF_FAST (DEFF_SPECIAL, PRI_SPECIAL, special_deff) \
-	DECL_DEFF_FAST (DEFF_EXTRA_BALL, PRI_EB, extra_ball_deff) \
-	DECL_DEFF_FAST (DEFF_LEFT_RAMP, PRI_GAME_MODE1+1, left_ramp_deff) \
-	DECL_DEFF_FAST (DEFF_LOCK_LIT, PRI_GAME_MODE1+2, lock_is_lit_deff) \
-	DECL_DEFF_FAST (DEFF_MB_LIT, PRI_GAME_MODE1+2, multiball_is_lit_deff) \
-	DECL_DEFF_FAST (DEFF_BALL_SAVE, PRI_GAME_MODE1+3, ballsave_deff) \
-	DECL_DEFF_FAST (DEFF_HITCHHIKER, PRI_GAME_MODE1+4, hitchhiker_deff) \
-	DECL_DEFF_FAST (DEFF_CAMERA_AWARD, PRI_GAME_MODE1+5, camera_award_deff) \
-	DECL_DEFF_FAST (DEFF_DOOR_AWARD, PRI_GAME_MODE1+5, door_award_deff) \
-	DECL_DEFF_FAST (DEFF_MB_START, PRI_GAME_MODE1+7, multiball_start_deff) \
-	DECL_DEFF_FAST (DEFF_SKILL_SHOT_MADE, PRI_GAME_MODE1+8, skill_shot_made_deff) \
+Inspector: runner, PRI_DEBUGGER
+Amode: runner, PRI_AMODE
+Bonus: runner, PRI_BONUS
+BRIAN_IMAGE: PRI_EGG1
+REPLAY: PRI_REPLAY
+JACKPOT: PRI_JACKPOT
+SPECIAL: PRI_SPECIAL
+EXTRA_BALL: PRI_EB
+LEFT_RAMP: PRI_GAME_MODE1+1
+LOCK_LIT: PRI_GAME_MODE1+2
+MB_LIT: PRI_GAME_MODE1+2
+BALL_SAVE: PRI_GAME_MODE1+3
+HITCHHIKER: PRI_GAME_MODE1+4
+CAMERA_AWARD: PRI_GAME_MODE1+5
+DOOR_AWARD: PRI_GAME_MODE1+5
+MB_START: PRI_GAME_MODE1+7
+SKILL_SHOT_MADE: PRI_GAME_MODE1+8
+MB_RUNNING: PRI_GAME_MODE1+2
+
+[leffs]
+#FLASHER_HAPPY: PRI_LEFF1
+#GUMBALL_STROBE: PRI_LEFF1
+#LEFT_RAMP: PRI_LEFF2
+#CLOCK_TARGET: PRI_LEFF2, GI(ALL)
+#NO_GI: L_NORMAL: PRI_LEFF3, GI(ALL)
+#SLOT_KICKOUT: PRI_LEFF3
+#AMODE: L_RUNNING, PRI_LEFF5, LAMPS(AMODE_ALL)
+#FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
+#BONUS: L_RUNNING, PRI_BONUS, LAMPS(ALL), GI(ALL)
+#TILT_WARNING: runner, PRI_TILT_WARNING, LAMPS(ALL)
+#TILT: runner, PRI_TILT, LAMPS(ALL), GI(ALL)
+#JETS_ACTIVE: shared, 0, LAMPS(JETS)
+#GAME_TIMEOUT: PRI_TILT, GI(ALL)
+#CLOCK_START: PRI_LEFF4, GI(ALL)
+#MB_RUNNING, shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL)
+
+
+###################################################################
 
 define MACHINE_LAMP_EFFECTS \
 DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, flasher_happy_leff) \

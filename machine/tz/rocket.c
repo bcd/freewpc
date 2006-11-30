@@ -24,7 +24,7 @@ void sw_rocket_handler (void)
 {
 }
 
-DECLARE_SWITCH_DRIVER (sw_rocket)
+DECLARE_SWITCH_DRIVER (sw_rocket_kicker)
 {
 	.fn = sw_rocket_handler,
 	.devno = SW_DEVICE_DECL(DEVNO_ROCKET),

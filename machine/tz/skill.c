@@ -132,21 +132,21 @@ void sw_upper_skill_handler (void) __taskentry__
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_lower_skill)
+DECLARE_SWITCH_DRIVER (sw_skill_bottom)
 {
 	.fn = sw_lower_skill_handler,
 	.flags = SW_IN_GAME,
 };
 
 
-DECLARE_SWITCH_DRIVER (sw_center_skill)
+DECLARE_SWITCH_DRIVER (sw_skill_center)
 {
 	.fn = sw_center_skill_handler,
 	.flags = SW_IN_GAME,
 };
 
 
-DECLARE_SWITCH_DRIVER (sw_upper_skill)
+DECLARE_SWITCH_DRIVER (sw_skill_top)
 {
 	.fn = sw_upper_skill_handler,
 	.flags = SW_IN_GAME,

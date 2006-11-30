@@ -67,7 +67,7 @@ void sw_deadend_handler (void)
 
 
 
-DECLARE_SWITCH_DRIVER (sw_deadend)
+DECLARE_SWITCH_DRIVER (sw_dead_end)
 {
 	.flags = SW_PLAYFIELD | SW_IN_GAME,
 	.fn = sw_deadend_handler,

@@ -25,7 +25,7 @@ __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 
 
-void lock_is_lit_deff (void)
+void lock_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "LOCK IS LIT");
@@ -34,7 +34,7 @@ void lock_is_lit_deff (void)
 	deff_exit ();
 }
 
-void multiball_is_lit_deff (void)
+void mb_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
@@ -47,7 +47,7 @@ void multiball_is_lit_deff (void)
 }
 
 
-void multiball_start_deff (void)
+void mb_start_deff (void)
 {
 	kickout_lock (KLOCK_DEFF);
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
@@ -59,7 +59,7 @@ void multiball_start_deff (void)
 }
 
 
-void multiball_running_deff (void)
+void mb_running_deff (void)
 {
 	for (;;)
 	{
