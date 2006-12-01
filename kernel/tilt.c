@@ -108,7 +108,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 }
 
 
-void tilt_start_ball (void)
+CALLSET_ENTRY (tilt, start_ball)
 {
 	tilt_warnings = 0;
 }

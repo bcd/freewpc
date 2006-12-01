@@ -40,8 +40,6 @@ U8 flipper_outputs;
 
 CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 {
-	callset_invoke (left_flipper_press);
-
 	if (in_test)
 		test_left_flipper_button ();
 	else if (in_live_game)
@@ -63,8 +61,6 @@ CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 
 CALLSET_ENTRY (flip, sw_l_r_flipper_button)
 {
-	callset_invoke (right_flipper_press);
-
 	if (in_test)
 		test_right_flipper_button ();
 	else if (in_live_game)

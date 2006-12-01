@@ -71,7 +71,6 @@ typedef struct
 #ifdef USE_MD
 extern const U8 mach_opto_mask[];
 extern const U8 mach_edge_switches[];
-#endif
 
 #define DECLARE_SWITCH_DRIVER(name)	\
 	extern __event__ void callset_ ## name (void); \
@@ -80,6 +79,8 @@ extern const U8 mach_edge_switches[];
 #define DECLARE_SWITCH_EVENT(name) \
 	.fn = callset_ ## name, \
 	.fnpage = EVENT_PAGE \
+
+#endif
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
@@ -102,6 +103,8 @@ extern const U8 mach_edge_switches[];
 
 #define MAKE_SWITCH(col,row)	((col * 8) + row - 1)
 #define MAKE_SW(row,col)  MAKE_SWITCH(row,col)
+
+#ifndef USE_MD
 
 /* Coin Door Switch Numbers */
 #define SW_LEFT_COIN				0
@@ -132,6 +135,8 @@ extern const U8 mach_edge_switches[];
 #ifndef SW_COINDOOR_CLOSED
 #define SW_COINDOOR_CLOSED		MAKE_SWITCH(2,2)
 #endif
+
+#endif /* USE_MD */
 
 /* Array types. */
 #define AR_RAW			0

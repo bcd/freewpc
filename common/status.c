@@ -100,8 +100,8 @@ void status_report_monitor (void)
 	 * flippers are released. */
 	while (--count > 0)
 	{
-		if (!switch_poll_logical (SW_LL_FLIP_SW) 
-			&& !switch_poll_logical (SW_LR_FLIP_SW))
+		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
+			&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
 			goto done;
 		task_sleep (TIME_100MS);
 	}
@@ -117,8 +117,8 @@ start:
 	 * again. */
 	for (;;)
 	{
-		if (!switch_poll_logical (SW_LL_FLIP_SW) 
-			&& !switch_poll_logical (SW_LR_FLIP_SW))
+		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
+			&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
 			break;
 
 		if (deff_get_active () != DEFF_STATUS_REPORT)

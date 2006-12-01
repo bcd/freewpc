@@ -40,11 +40,11 @@ bool amode_page_delay (U8 secs)
 	/* Convert secs to 66ms ticks */
 	secs <<= 4;
 
-	amode_flippers_start = switch_poll_logical (SW_LL_FLIP_SW);
+	amode_flippers_start = switch_poll_logical (SW_L_L_FLIPPER_BUTTON);
 	while (secs != 0)
 	{
 		task_sleep (TIME_66MS);
-		amode_flippers = switch_poll_logical (SW_LL_FLIP_SW);
+		amode_flippers = switch_poll_logical (SW_L_L_FLIPPER_BUTTON);
 
 		if ((amode_flippers != amode_flippers_start) &&
 			 (amode_flippers != 0))

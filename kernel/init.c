@@ -236,7 +236,6 @@ void do_reset (void)
 	score_init ();
 	coin_init ();
 	adj_init ();
-	audit_init ();
 	high_score_init ();
 	ball_search_init ();
 	knocker_init ();

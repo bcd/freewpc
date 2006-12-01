@@ -48,16 +48,19 @@ PINMAME_OTHER_ROMS = tzu*.rom
 # Object files exported by this game
 #
 
-GAME_OBJS = config.o clock.o deffs.o leffs.o \
-	amode.o lanes.o lock.o magnet.o \
+GAME_OBJS = config.o \
+	clock.o deffs.o leffs.o \
+	amode.o lock.o magnet.o \
 	slot.o sling.o jets.o rightramp.o rocket.o star.o \
-	leftramp.o greed.o piano.o camera.o deadend.o skill.o \
+	greed.o piano.o camera.o deadend.o \
 	loop.o bonus.o door.o autofire.o gumball.o \
 	clocktarget.o hitch.o ballsave.o powerball.o \
-	multiball.o mpf.o
+	multiball.o mpf.o leftramp.o skill.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS =
+# These should eventually move to the machine page!
+GAME_OBJS += lanes.o leftramp.o skill.o deadend.o camera.o
+

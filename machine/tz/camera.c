@@ -58,6 +58,8 @@ void camera_award_deff (void)
 		case CAMERA_AWARD_250K:
 			sprintf ("250,000");
 			break;
+		default:
+			break;
 	}
 	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
 	dmd_sched_transition (&trans_scroll_up_avg);
@@ -90,6 +92,8 @@ void do_camera_award (void)
 			break;
 		case CAMERA_AWARD_250K:
 			/* Big Points: 250K */
+			break;
+		default:
 			break;
 	}
 	camera_award_count++;

@@ -80,9 +80,3 @@ void audit_add (audit_t *aud, U8 val)
 	wpc_nvram_put ();
 }
 
-
-/** Initialize audits at powerup */
-void audit_init (void)
-{
-}
-

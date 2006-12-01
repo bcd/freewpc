@@ -163,8 +163,8 @@ void sound_init (void)
 	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
 	sound_ready ();
 #else
-	int i;
-	long int j;
+	U8 i;
+	U16 j;
 #if 1
 	static U8 dcs_init_string[] = {
 		0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,

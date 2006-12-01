@@ -879,6 +879,7 @@ sub machine_write_switch_decls {
 sub machine_lamp_get_value {
 	my ($lamp) = @_;
 	$lamp = ($m->{'lamps'})->{$lamp};
+	die "undefined lamp $lamp" if (!defined $lamp);
 	return $lamp->{'number'};
 }
 
@@ -889,21 +890,24 @@ sub machine_write_lampset_decls {
 		print "const lampnum_t " . $ls->{'c_decl'} . "[] = {\n   ";
 
 		my @lamps = split /,[ \t]*/, $ls->{'props'};
+		my $lampset = "";
 		foreach $lamp (@lamps) {
 			if ($lamp =~ m/(.*)\.\.(.*)/) {
 				($min, $max) = (machine_lamp_get_value ($1),
 					machine_lamp_get_value ($2));
 				for my $i ($min..$max) {
-					print "$i, ";
+					$lampset .= "$i, ";
 				}
+			} elsif ($parent = ($m->{"lampsets"})->{$lamp}) {
+				$lampset .= $parent->{'value'};
 			} else {
 				$lamp = machine_lamp_get_value ($lamp);
-				print "$lamp, ";
+				$lampset .= "$lamp, ";
 			}
 		}
-
-		print "LAMP_END\n";
+		print "${lampset}LAMP_END\n";
 		print "};\n";
+		$ls->{'value'} = $lampset;
 	}
 
 	print "const lampnum_t *lampset_table[] = {\n";

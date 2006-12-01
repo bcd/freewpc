@@ -220,16 +220,16 @@ tz_gumball:
 
 [lampsets]
 Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
-Door Panels and Handle:
-Door Locks:
-Door Gumball:
-Door Locks and Gumball:
-Left Ramp Awards:
-Lock Awards:
-Piano Awards:
+Door Panels and Handle: Door Panels, Panel LITZ
+Door Locks: Lock1, Lock2
+Door Gumball: GUM, BALL
+Door Locks and Gumball: Door Locks, Door Gumball
+Left Ramp Awards: Bonus X, Multiball, Super Skill
+Lock Awards: Lock Arrow, Lock EB
+Piano Awards: Piano Panel, Piano Jackpot
 Greed Targets:
 Powerfield Values:
-Jets:
+Jets: Left Jet..Right Jet
 Lower Lanes:
 Spiral Awards:
 Amode All:
@@ -367,14 +367,15 @@ LEFT_RAMP: PRI_LEFF2
 CLOCK_TARGET: PRI_LEFF2, GI(ALL)
 NO_GI: L_NORMAL, PRI_LEFF3, GI(ALL)
 SLOT_KICKOUT: PRI_LEFF3
-AMODE: L_RUNNING, PRI_LEFF5, LAMPS(AMODE_ALL)
+AMODE: runner, PRI_LEFF5, LAMPS(AMODE_ALL)
 FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
-BONUS: L_RUNNING, PRI_BONUS, LAMPS(ALL), GI(ALL)
+BONUS: runner PRI_BONUS, LAMPS(ALL), GI(ALL)
 JETS_ACTIVE: shared, 0, LAMPS(JETS), c_decl(null_leff)
 GAME_TIMEOUT: PRI_TILT, GI(ALL)
 CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
 MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
 
+[fonts]
 
 ###################################################################
 

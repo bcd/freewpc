@@ -59,7 +59,7 @@ void skill_shot_made_deff (void)
 }
 
 
-void award_skill_shot (void)
+static void award_skill_shot (void)
 {
 	mark_ball_in_play ();
 	disable_skill_shot ();
@@ -83,7 +83,7 @@ void award_skill_shot (void)
 	}
 }
 
-void skill_switch_monitor (void) __taskentry__
+static void skill_switch_monitor (void) __taskentry__
 {
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);
@@ -94,7 +94,7 @@ void skill_switch_monitor (void) __taskentry__
 }
 
 
-void award_skill_switch (U8 sw)
+static void award_skill_switch (U8 sw)
 {
 	switch_can_follow (any_skill_switch, slot, TIME_3S);
 	if (!skill_shot_enabled)

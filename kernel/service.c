@@ -61,7 +61,7 @@ CALLSET_ENTRY (service, sw_enter)
 
 CALLSET_ENTRY (service, sw_coin_door_closed)
 {
-	if (switch_poll_logical (SW_COINDOOR_CLOSED))
+	if (switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
 		/* Coin door is closed */
 	}

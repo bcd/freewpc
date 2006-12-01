@@ -766,13 +766,13 @@ include/gendefine_gid.h :
 		$(GENDEFINE) -p GID_ > $@
 
 ifndef MACHINE_FILE
-include/gendefine_deff.h :
-	@echo Autogenerating display effect IDs... && \
-		$(GENDEFINE) -p DEFF_ -c MAX_DEFFS > $@
-
 include/gendefine_leff.h :
 	@echo Autogenerating lamp effect IDs... && \
 		$(GENDEFINE) -p LEFF_ -c MAX_LEFFS > $@
+
+include/gendefine_deff.h :
+	@echo Autogenerating display effect IDs... && \
+		$(GENDEFINE) -p DEFF_ -c MAX_DEFFS > $@
 
 include/gendefine_lampset.h :
 	@echo Autogenerating lampset IDs... && \
@@ -781,7 +781,6 @@ include/gendefine_lampset.h :
 include/gendefine_devno.h :
 	@echo Autogenerating device IDs... && \
 		$(GENDEFINE) -p DEVNO_ -f 0 -c NUM_DEVICES > $@
-
 endif
 
 .PHONY : clean_gendefines

@@ -157,6 +157,9 @@ foreach $set (keys %functionhash) {
 		if ($modulehash{$module} =~ /^common/) {
 			$modifier = " __common__";
 		}
+		elsif ($modulehash{$module} =~ /^mach/) {
+			$modifier = " __machine__";
+		}
 		else {
 			$modifier = "";
 		}

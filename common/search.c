@@ -157,8 +157,8 @@ void ball_search_monitor_task (void)
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif
-				&& !switch_poll_logical (SW_LL_FLIP_SW) 
-				&& !switch_poll_logical (SW_LR_FLIP_SW))
+				&& !switch_poll_logical (SW_L_L_FLIPPER_BUTTON)
+				&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
 		{
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())

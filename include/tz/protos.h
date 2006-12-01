@@ -157,15 +157,8 @@ void rocket_kick_sound(void);
 void rocket_kick_attempt(device_t *dev);
 void rocket_init(void);
 /* skill.c */
-void enable_skill_shot(void);
-void disable_skill_shot(void);
-void award_skill_shot(void);
-void skill_switch_monitor(void);
-void award_skill_switch(U8 sw);
-void sw_lower_skill_handler(void);
-void sw_center_skill_handler(void);
-void sw_upper_skill_handler(void);
-void skill_end_game(void);
+__machine__ void enable_skill_shot (void);
+__machine__ void disable_skill_shot (void);
 /* sling.c */
 void slingshot_rtt(void);
 /* slot.c */

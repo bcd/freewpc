@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 
-void handle_outlane (void)
+static void handle_outlane (void)
 {
 	/* Reenable the ballsaver to its maximum timeout.
 	 * The actual save is still triggered when the ball lands

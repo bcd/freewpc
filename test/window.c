@@ -1192,8 +1192,10 @@ void deff_leff_thread (void)
 				if (is_active == FALSE)
 				{
 					browser_draw ();
+#ifdef USE_MD
 					sprintf_far_string (names_of_deffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+#endif
 					browser_print_operation ("STOPPED");
 					sound_reset ();
 				}
@@ -1812,28 +1814,21 @@ struct preset_component
 struct preset
 {
 	char *name;
-	struct preset_component comps[0];
+	struct preset_component *comps;
 };
 
-struct preset preset_3ball = {
-	.name = "3-BALL",
-};
 struct preset_component preset_3ball_comps[] = {
 	{ &system_config.balls_per_game, 3 },
 	{ NULL, 0 },
 };
+struct preset preset_3ball = { .name = "3-BALL", &preset_3ball_comps };
 
-struct preset preset_5ball = {
-	.name = "5-BALL",
-};
 struct preset_component preset_5ball_comps[] = {
 	{ &system_config.balls_per_game, 5 },
 	{ NULL, 0 },
 };
+struct preset preset_5ball = { .name = "5-BALL", &preset_5ball_comps };
 
-struct preset preset_tournament = {
-	.name = "TOURNAMENT",
-};
 struct preset_component preset_tournament_comps[] = {
 	{ &system_config.balls_per_game, 3 },
 	{ &system_config.replay_award, 0 },
@@ -1845,24 +1840,21 @@ struct preset_component preset_tournament_comps[] = {
 	{ &system_config.tournament_mode, ON },
 	{ NULL, 0 },
 };
+struct preset preset_tournament = { .name = "TOURNAMENT", &preset_tournament_comps };
 
 
-struct preset preset_show = {
-	.name = "SHOW",
-};
 struct preset_component preset_show_comps[] = {
 	{ &system_config.replay_award, 0 },
 	{ NULL, 0 },
 };
+struct preset preset_show = { .name = "SHOW", &preset_show_comps };
 
 
-struct preset preset_timed_game = {
-	.name = "TIMED GAME",
-};
 struct preset_component preset_timed_comps[] = {
 	{ &system_config.max_players, 1 },
 	{ NULL, 0 },
 };
+struct preset preset_timed_game = { .name = "TIMED GAME", &preset_timed_comps };
 
 struct preset *preset_table[] = {
 	&preset_3ball,
@@ -1876,7 +1868,7 @@ struct preset *preset_table[] = {
 void presets_init (void)
 {
 	browser_init ();
-	browser_max = (sizeof (preset_table) / sizeof (struct preset)) - 1;
+	browser_max = (sizeof (preset_table) / sizeof (struct preset *)) - 1;
 }
 
 void presets_draw (void)
@@ -1894,6 +1886,8 @@ void presets_draw (void)
 	{
 		if (*(comps->adj) != comps->value)
 		{
+			dbprintf ("Preset failed: adj %p equals %d, not %d\n",
+				comps->adj, *(comps->adj), comps->value);
 			font_render_string_left (&font_mono5, 32, 20, "NOT INSTALLED");
 			break;
 		}
@@ -2202,13 +2196,13 @@ struct menu switch_levels_item = {
 
 void switch_item_number (U8 val)
 {
-	if (val < 8)
+	if (val < NUM_DEDICATED_SWITCHES)
 		sprintf ("D%d", val+1);
-	else if (val >= SW_LR_FLIP_EOS)
-		sprintf ("F%d", val - SW_LR_FLIP_EOS + 1);
+	else if (val >= NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES)
+		sprintf ("F%d", val - (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES) + 1);
 	else
 	{
-		val -= 8;
+		val -= NUM_DEDICATED_SWITCHES;
 		sprintf ("%d%d", (val / 8)+1, (val % 8)+1);
 	}
 }
@@ -2233,9 +2227,11 @@ void single_switch_draw (void)
 	(*browser_item_number) (menu_selection);
 	font_render_string (&font_mono5, 36, 12, sprintf_buffer);
 
+#ifdef USE_MD
 	sprintf_far_string (names_of_switches + menu_selection);
 	font_render_string (&font_var5, 50, 12, sprintf_buffer);
-	
+#endif
+
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 	sprintf ("%s%s", opto, state);
@@ -2407,7 +2403,9 @@ void solenoid_test_init (void)
 {
 	browser_init ();
 	browser_action = TIME_66MS;
+#ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES;
+#endif
 }
 
 void solenoid_test_draw (void)
@@ -2415,7 +2413,6 @@ void solenoid_test_draw (void)
 	char *s;
 
 	browser_draw ();
-#if 0
 	switch (browser_action)
 	{
 		default: s = "UNKNOWN PULSE"; break;
@@ -2426,9 +2423,10 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "VERY HARD PULSE"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
-#endif
+#ifdef USE_MD
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
+#endif
 }
 
 void solenoid_test_enter (void)
@@ -2563,8 +2561,10 @@ void lamp_test_draw (void)
 {
 	lamp_flash_on (menu_selection);
 	browser_draw ();
+#ifdef USE_MD
 	sprintf_far_string (names_of_lamps + menu_selection);
 	browser_print_operation (sprintf_buffer);
+#endif
 }
 
 void lamp_test_up (void)

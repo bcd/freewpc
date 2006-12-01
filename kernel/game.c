@@ -392,7 +392,6 @@ void start_ball (void)
 #ifdef DEVNO_TROUGH
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
-	tilt_start_ball ();
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);
 	ball_search_timeout_set (12);
