@@ -37,7 +37,7 @@ void clock_multiplier_monitor (void)
 	task_exit ();
 }
 
-void sw_clock_target_handler (void)
+CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
 	U8 n;
 
@@ -77,11 +77,4 @@ CALLSET_ENTRY (clocktarget, door_panel_awarded)
 		lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
-
-DECLARE_SWITCH_DRIVER (sw_clock_target)
-{
-	.fn = sw_clock_target_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.lamp = LM_CLOCK_MILLIONS,
-};
 

@@ -72,19 +72,3 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	}
 }
 
-
-DECLARE_SWITCH_DRIVER (sw_left_ramp_enter)
-{
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_LEFT_RAMP_ENTER,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_left_ramp_exit)
-{
-	DECLARE_SWITCH_EVENT (sw_left_ramp_exit),
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_LEFT_RAMP_MADE,
-};
-
-

@@ -169,6 +169,6 @@ void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
-const switch_info_t *switch_lookup (U8 sw);
+U8 switch_lookup_lamp (const switchnum_t sw);
 
 #endif /* _SYS_SWITCH_H */

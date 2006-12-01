@@ -26,7 +26,7 @@
  * \brief Handle the service button switches inside the coin door.
  */
 
-void sw_escape_button_handler (void)
+CALLSET_ENTRY (service, sw_escape)
 {
 	if (!in_test)
 	{
@@ -37,7 +37,7 @@ void sw_escape_button_handler (void)
 		test_escape_button ();
 }
 
-void sw_down_button_handler (void)
+CALLSET_ENTRY (service, sw_down)
 {
 	test_down_button ();
 
@@ -45,7 +45,7 @@ void sw_down_button_handler (void)
 		volume_down ();
 }
 
-void sw_up_button_handler (void)
+CALLSET_ENTRY (service, sw_up)
 {
 	test_up_button ();
 	
@@ -53,13 +53,13 @@ void sw_up_button_handler (void)
 		volume_up ();
 }
 
-void sw_enter_button_handler (void)
+CALLSET_ENTRY (service, sw_enter)
 {
 	test_enter_button ();
 }
 
 
-void sw_coin_door_closed_handler (void)
+CALLSET_ENTRY (service, sw_coin_door_closed)
 {
 	if (switch_poll_logical (SW_COINDOOR_CLOSED))
 	{
@@ -70,37 +70,4 @@ void sw_coin_door_closed_handler (void)
 		/* Coin door is opened */
 	}
 }
-
-
-/* Declare switch drivers for the coin door & its buttons */
-
-DECLARE_SWITCH_DRIVER (sw_coin_door_closed)
-{
-	.fn = sw_coin_door_closed_handler,
-	.flags = SW_EDGE,
-};
-
-DECLARE_SWITCH_DRIVER (sw_escape_button)
-{
-	.fn = sw_escape_button_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_down_button)
-{
-	.fn = sw_down_button_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_up_button)
-{
-	.fn = sw_up_button_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_enter_button)
-{
-	.fn = sw_enter_button_handler,
-	.flags = SW_IN_TEST,
-};
 

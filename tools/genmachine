@@ -91,16 +91,19 @@ my %contextDefinitionRe = (
 # (single) outhole switch object.
 my %BinaryProperties = (
 	"switches" => { 
+		"opto" => 1, 
+		"edge" => 1,
+		"noplay" => 1,
+		"ingame" => 1,
+		"intest" => 1,
 		"button" => 1,
 		"service" => 1,
 		"micro" => 1,
-		"opto" => 1, 
 		"device" => 1, 
 		"virtual" => 1,
 		"drain-switch" => 1,
 		"standup" => 1,
 		"fast" => 1,
-		"edge" => 1,
 		"outhole" => $GLOBAL_OBJECT,
 		"shooter" => $GLOBAL_OBJECT,
 		"tilt" => $GLOBAL_OBJECT,
@@ -194,14 +197,16 @@ my %ContextMaxima = (
 	"adjustments" => "NUM_FEATURE_ADJUSTMENTS",
 	"audits" => "NUM_FEATURE_AUDITS",
 	"deffs" => "MAX_DEFFS",
+	"leffs" => "MAX_LEFFS",
 	"drives" => "NUM_POWER_DRIVES",
 	"lampsets" => "MAX_LAMPSET",
+	"scores" => "NUM_SCORES"
 );
 
 
 # The contexts for which strings should be written out.
 @stringcontexts = ("switches", "drives", "lamps", "containers", 
-	"deffs", "leffs");
+	"deffs", "leffs", "lampsets");
 
 
 ###################################################################
@@ -306,7 +311,7 @@ sub close_container {
 	foreach $swname (@switchnames) {
 		my $sw = ($m->{"switches"})->{$swname};
 		$sw->{"container"} = $container;
-		$sw->{"devno"} = $container->{'c_ident'};
+		$sw->{"devno"} = "SW_DEVICE_DECL (" . $container->{'c_ident'} . ")";
 	}
 	$container->{'init_max_count'} = 0 if (!defined $container->{'init_max_count'});
 }
@@ -367,12 +372,13 @@ my %ContextClosures = (
 ####################################################################
 sub machine_load {
 	my ($file) = @_;
-	open FH, $file or die;
 	my $lineno = 0;
+	local *FH;
 
 	sub warning { print STDERR "$file:$lineno: warning: " . (shift) . "\n"; }
-	sub error { die "$file:$lineno: error: " . (shift) . "\n"; }
+	sub error { print STDERR "$file:$lineno: error: " . (shift) . "\n"; die; }
 
+	open FH, $file or error ("cannot open $file");
 LINE: 
 	while (<FH>) {
 		$lineno++;
@@ -391,6 +397,12 @@ LINE:
 			$lineno++;
 		}
 
+		# Check for the include directive
+		if (/^include[ \t]+(.*)/) {
+			machine_load ($1);
+			next;
+		}
+
 		# Check for a literal define
 		if (/^define[ \t]+(.*)/) {
 			if (!defined ($m->{'Extra-Defines'})) {
@@ -403,10 +415,15 @@ LINE:
 
 		# Check for a context change
 		if (/^\[(.*)\]$/) {
+			$mc->{'autoid'} = $autoid if ($contextName ne "");
 			$contextName = $1;
-			if (!defined $m->{$contextName}) { $m->{$contextName} = {}; }
-			$mc = $m->{$contextName};
-			$autoid = 0;
+			if (!defined $m->{$contextName}) { 
+				$mc = $m->{$contextName} = {}; 
+				$autoid = 0;
+			} else {
+				$mc = $m->{$contextName};
+				$autoid = $mc->{'autoid'};
+			}
 			next;
 		}
 
@@ -513,7 +530,10 @@ LINE:
 		}
 	}
 	close FH;
+}
 
+
+sub machine_finish {
 	#----------------------------------------------------------------
 	# After loading the file, certain transformations may need to be
 	# made to the data, after everything is known.  Do those here.
@@ -637,6 +657,7 @@ sub machine_write_defines {
 
 	my $trough = $m->{'*containers:trough'};
 	my $troughsize = $trough->{'size'};
+	$troughsize = 0 if ($troughsize eq "");
 	print "#define MACHINE_TROUGH_SIZE $troughsize\n";
 	my $troughsws = $trough->{'switches'};
 	foreach $swname (@$troughsws) {
@@ -649,7 +670,7 @@ sub machine_write_defines {
 	# a flasher.
 	my $drives = $m->{"drives"};
 	print "#define MACHINE_SOL_FLASHERP(sol) (\\\n";
-	foreach $drive (unique (%$drives)) {
+	foreach $drive (unique ($drives)) {
 		if (defined $drive->{'flash'}) {
 			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
 		}
@@ -659,8 +680,7 @@ sub machine_write_defines {
 	# Print MACHINE_SOL_NOSEARCHP(sol), which returns true if SOL should
 	# not be fired during ball search.  Flashers need not be considered.
 	print "#define MACHINE_SOL_NOSEARCHP(sol) (\\\n";
-	foreach $drive (unique (%$drives)) {
-		my $drive = $drives->{$drivename};
+	foreach $drive (unique ($drives)) {
 		if (defined $drive->{'nosearch'}) {
 			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
 		}
@@ -724,6 +744,28 @@ sub machine_write_defines {
 	}
 	print "\n";
 
+	# Print lamp effects
+	print "#define MACHINE_LAMP_EFFECTS \\\n";
+	foreach $leff (unique ($m->{"leffs"})) {
+		$fn = $leff->{'c_decl'};
+		$fn =~ s/leff_(.*)/$1_leff/;
+		
+		if ($leff->{'props'} =~ /(PRI_[a-zA-Z0-9]+)/) {
+			$prio = $1;
+		} else {
+			$prio = 0;
+		}
+		print "   DECL_LEFF (" . 
+			$leff->{'c_ident'} . ", " .
+			($leff->{'runner'} ? "L_RUNNING" :
+				$leff->{'shared'} ? "L_SHARED" : "L_NORMAL") .
+			", " . $prio .  ", " .
+			"L_NOLAMPS, " .
+			"L_NOGI, " .
+			"$fn) \\\n";
+	}
+	print "\n";
+
 	# Print MACHINE_TEST_MENU_ITEMS
 	my $tests = $m->{"tests"};
 	print "#define MACHINE_TEST_MENU_ITEMS \\\n";
@@ -755,8 +797,10 @@ sub machine_write_defines {
 	for my $col (1 .. 8) {
 		for my $row (1 .. 8) {
 			my $swname = "$col$row";
+			my $swnum = $col * 8 + $row - 1;
 			my $sw = ($m->{"switches"})->{$swname};
-			my $swdecl = $sw->{'c_decl'} or "sw_unused";
+			my $swdecl = $sw->{'c_decl'};
+			$swdecl = "sw_unused" if ($swdecl eq "");
 			print "#define MACHINE_SW$swname $swdecl\n";
 		}
 	}
@@ -800,6 +844,15 @@ sub machine_write_container_decls {
 
 sub machine_write_switch_decls {
 	print $START_SOURCE;
+
+	for $sw (unique ($m->{'switches'})) {
+		$fn = $sw->{'fn'};
+		next if (!defined $fn);
+		$swname = $sw->{'c_decl'};
+		print "extern void $fn (void); /* callset_invoke ($swname) */\n";
+	}
+	print "\n";
+
 	print "const switch_info_t switch_table[] = {\n";
 	for $sw (unique ($m->{'switches'})) {
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
@@ -818,7 +871,8 @@ sub machine_write_switch_decls {
 		}
 		print "   },\n";
 	}
-	print "}\n";
+	print "};\n";
+
 	print $END_SOURCE;
 }
 
@@ -876,17 +930,18 @@ $infile = $ARGV[0] or "machine/tz/tz.md";
 $command = $ARGV[1];
 
 
-my $START_SOURCE = <<END;
+$START_SOURCE = <<END;
 /* Autogenerated from $infile by genmachine */
 
 #include <freewpc.h>
 
 END
 
-my $END_SOURCE = "\n";
+$END_SOURCE = "\n";
 
 
 machine_load ($infile);
+machine_finish;
 
 #######################################################
 #  generate build/mach-config.h

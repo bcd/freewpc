@@ -55,15 +55,6 @@ typedef struct
 __fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
-#ifdef MACHINE_NEW_SWITCH_TYPES
-const U8 mach_opto_mask[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-const U8 mach_edge_switches[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-#endif
-
 /*
  * Entry for unused switches.
  */
@@ -72,6 +63,8 @@ void sw_unused_handler (void)
 {
 	dbprintf ("Unregistered switch\n");
 }
+
+#ifndef USE_MD
 
 const switch_info_t sw_unused =
 {
@@ -350,12 +343,28 @@ static const switch_info_t *switch_table[NUM_SWITCHES] = {
 	&sw_unused, &sw_upper_right_flipper, &sw_unused, &sw_upper_left_flipper,
 };
 
+#endif
 
 
-const switch_info_t *switch_lookup (U8 sw)
+static const switch_info_t *switch_lookup (U8 sw)
 {
+#ifdef USE_MD
+	extern const switch_info_t switch_table[];
+	return &switch_table[sw];
+#else
 	return switch_table[sw];
+#endif
 }
+
+
+U8 switch_lookup_lamp (const switchnum_t sw)
+{
+	U8 lamp;
+	const switch_info_t *swinfo = switch_lookup (sw);
+	lamp = swinfo->lamp;
+	return lamp;
+}
+
 
 #ifdef DEBUGGER
 void switch_check_masks (void)
@@ -373,7 +382,7 @@ void switch_check_masks (void)
 		edge_mask = 0;
 		for (row = 7; row >= 0; --row)
 		{
-			const switch_info_t *sw = switch_table[MAKE_SWITCH (col,row)];
+			const switch_info_t *sw = switch_lookup (MAKE_SWITCH (col,row));
 
 			opto_mask <<= 1;
 			edge_mask <<= 1;

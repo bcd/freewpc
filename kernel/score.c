@@ -25,9 +25,7 @@
 
 #include <freewpc.h>
 
-#ifdef USE_MD
-#include <../build/mach-scores.c>
-#else
+#ifndef USE_MD
 static const score_t score_table[] = {
 	[SC_10]      = { 0x00, 0x00, 0x00, 0x10 },
 	[SC_100]     = { 0x00, 0x00, 0x01, 0x00 },
@@ -60,6 +58,8 @@ static const score_t score_table[] = {
 	[SC_40M]     = { 0x40, 0x00, 0x00, 0x00 },
 	[SC_50M]     = { 0x50, 0x00, 0x00, 0x00 },
 };
+#else
+extern const score_t score_table[];
 #endif
 
 

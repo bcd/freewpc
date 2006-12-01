@@ -45,7 +45,7 @@
 #
 
 # A list of directories to be searched.
-my @SearchDirs = ("kernel", "common", "mach", "platform/linux", "platform/wpc");
+my @SearchDirs = ("build", "kernel", "common", "mach", "platform/linux", "platform/wpc");
 
 # A hash that maps an event name to a list of
 # interested modules.  The module names are stored as a single

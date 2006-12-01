@@ -37,7 +37,7 @@ void handle_outlane (void)
 	event_can_follow (any_outlane, center_drain, TIME_7S);
 }
 
-void sw_left_outlane_handler (void)
+CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
@@ -47,7 +47,7 @@ void sw_left_outlane_handler (void)
 	}
 }
 
-void sw_right_outlane_handler (void)
+CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
@@ -57,19 +57,19 @@ void sw_right_outlane_handler (void)
 	}
 }
 
-void sw_left_inlane_1_handler (void)
+CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
 	score (SC_1K);
 	timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
-void sw_left_inlane_2_handler (void)
+CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
 	score (SC_1K);
 }
 
-void sw_right_inlane_handler (void)
+CALLSET_ENTRY (lanes, sw_right_inlane)
 {
 	score (SC_1K);
 	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
@@ -84,43 +84,4 @@ CALLSET_ENTRY(lanes, start_player)
 	lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_RIGHT_INLANE);
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_left_outlane)
-{
-	.fn = sw_left_outlane_handler,
-	.flags = SW_PLAYFIELD,
-	.sound = SND_DRAIN,
-};
-
-DECLARE_SWITCH_DRIVER (sw_right_outlane)
-{
-	.fn = sw_right_outlane_handler,
-	.flags = SW_PLAYFIELD,
-	.sound = SND_DRAIN,
-};
-
-DECLARE_SWITCH_DRIVER (sw_left_inlane_1)
-{
-	.fn = sw_left_inlane_1_handler,
-	.flags = SW_PLAYFIELD,
-	.sound = SND_INSIDE_LEFT_INLANE,
-	.lamp = LM_LEFT_INLANE1,
-};
-
-DECLARE_SWITCH_DRIVER (sw_left_inlane_2)
-{
-	.fn = sw_left_inlane_2_handler,
-	.flags = SW_PLAYFIELD,
-	.sound = SND_INSIDE_LEFT_INLANE,
-	.lamp = LM_LEFT_INLANE2,
-};
-
-DECLARE_SWITCH_DRIVER (sw_right_inlane)
-{
-	.fn = sw_right_inlane_handler,
-	.flags = SW_PLAYFIELD,
-	.sound = SND_INSIDE_LEFT_INLANE,
-	.lamp = LM_RIGHT_INLANE,
-};
 

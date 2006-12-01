@@ -150,9 +150,12 @@ static void increment_credit_count (void)
 #ifdef MACHINE_ADD_CREDIT_SOUND
 	sound_send (MACHINE_ADD_CREDIT_SOUND);
 #endif
-
+#ifdef LEFF_FLASH_ALL
 	leff_start (LEFF_FLASH_ALL);
+#endif
+#ifdef DEFF_CREDITS
 	deff_restart (DEFF_CREDITS);
+#endif
 }
 
 
@@ -238,49 +241,25 @@ static void do_coin (uint8_t slot)
 	audit_increment (&system_audits.coins_added[slot]);
 }
 
-void sw_left_coin_handler (void)
+CALLSET_ENTRY (coin, sw_left_coin)
 {
 	do_coin (0);
 }
 
-void sw_center_coin_handler (void)
+CALLSET_ENTRY (coin, sw_center_coin)
 {
 	do_coin (1);
 }
 
-void sw_right_coin_handler (void)
+CALLSET_ENTRY (coin, sw_right_coin)
 {
 	do_coin (2);
 }
 
-void sw_fourth_coin_handler (void)
+CALLSET_ENTRY (coin, sw_fourth_coin)
 {
 	do_coin (3);
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_left_coin)
-{
-	.fn = sw_left_coin_handler,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_center_coin)
-{
-	.fn = sw_center_coin_handler,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_right_coin)
-{
-	.fn = sw_right_coin_handler,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_fourth_coin)
-{
-	.fn = sw_fourth_coin_handler,
-};
 
 
 void credits_clear (void)

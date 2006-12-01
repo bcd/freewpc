@@ -13,6 +13,8 @@ WPC95: No
 Pinmame-Zip: tz_92.zip
 Pinmame-ROM: tzone9_2.rom
 
+include kernel/freewpc.md
+
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
@@ -86,71 +88,62 @@ define MACHINE_CUSTOM_AMODE
 87: Buy-In Button, yellow, buyin
 88: Start Button, yellow, start
 
+# Mark playfield flags! (or opposite?!)
 [switches]
-D1: Left Coin
-D2: Center Coin
-D3: Right Coin
-D4: Fourth Coin
-D5: Escape, service
-D6: Down, service
-D7: Up, service
-D8: Enter, service
-11: Right Inlane, micro
-12: Right Outlane, micro
-13: Start Button, start-button
-14: Tilt, tilt
+11: Right Inlane, micro, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
+12: Right Outlane, micro, sound(SND_DRAIN)
+13: Start Button, start-button, intest
+14: Tilt, tilt, ingame
 15: Right Trough, c_decl(sw_trough)
 16: Center Trough, c_decl(sw_trough)
 17: Left Trough, c_decl(sw_trough)
-18: Outhole, outhole
-21: Slam Tilt, slam-tilt
-22: Coin Door Closed
+18: Outhole, outhole, intest
+21: Slam Tilt, slam-tilt, ingame
 23: Buyin Button, buyin-button
-24: Always Closed, virtual, opto, c_decl(sw_unused)
 25: Far Left Trough
 26: Trough Proximity, opto
 27: Shooter, shooter, c_decl(sw_unused)
 28: Rocket Kicker
-31: Left Jet, fast, Left Jet
-32: Right Jet, fast, Right Jet
-33: Bottom Jet, fast, Bottom Jet
-34: Left Sling, fast, Left Slingshot
-35: Right Sling, fast, Right Slingshot
-36: Left Outlane
-37: Left Inlane 1
-38: Left Inlane 2
-41: Dead End
-42: Camera
+31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet
+32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet
+33: Bottom Jet, ingame, c_decl(sw_jet), fast, Bottom Jet
+34: Left Sling, ingame, c_decl(sw_sling), fast, Left Slingshot
+35: Right Sling, ingame, c_decl(sw_sling), fast, Right Slingshot
+36: Left Outlane, sound(SND_DRAIN)
+37: Left Inlane 1, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE1)
+38: Left Inlane 2, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE2)
+41: Dead End, ingame
+42: Camera, ingame
 43: Piano
-44: MPF Enter
-45: MPF Left
-46: MPF Right
-47: Clock Target, standup
-48: Standup 1, standup
+44: MPF Enter, ingame
+45: MPF Left, ingame
+46: MPF Right, ingame
+47: Clock Target, standup, ingame, lamp(LM_CLOCK_MILLIONS)
+48: Standup 1, standup, ingame, lamp(LM_LL_5M)
 51: Gumball Lane
-52: Hitchhiker
-53: Left Ramp Enter
-54: Left Ramp Exit
+52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
+53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
+54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
 55: Gumball Geneva, opto
 56: Gumball Exit
 57: Slot Proximity
 58: Slot
-61: Skill Bottom, c_decl(sw_skill
-62: Skill Center
-63: Skill Top
-64: Standup 4, standup
+61: Skill Bottom, ingame
+62: Skill Center, ingame
+63: Skill Top, ingame
+64: Standup 4, standup, ingame, lamp(LM_UR_5M)
 65: Power Payoff, c_decl(sw_unused)
-66: Standup 5, standup
-67: Standup 6, standup
-68: Standup 7, standup
+66: Standup 5, standup, ingame, lamp(LM_MR1_5M)
+67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
+68: Standup 7, standup, ingame, lamp(LM_LR_5M)
 71: Autofire1, opto
 72: Autofire2, opto
-73: Right Ramp, opto
+73: Right Ramp, opto, ingame
 74: Gumball Popper, opto
-75: MPF Top, opto
-76: MPF Exit, opto
-77: Standup 2, standup
-78: Standup 3, standup
+75: MPF Top, opto, ingame
+76: MPF Exit, opto, ingame
+77: Standup 2, standup, ingame, lamp(LM_ML_5M)
+78: Standup 3, standup, ingame, lamp(LM_UL_5M)
 81: Lower Right Magnet, opto
 82: Upper Right Magnet, opto
 83: Left Magnet, opto
@@ -159,10 +152,6 @@ D8: Enter, service
 86: Clock Passage, opto, c_decl(sw_unused)
 87: Gumball Enter, opto
 88: Lock Lower, c_decl(sw_lock)
-F1: L. R. Flipper EOS, opto
-F2: L. R. Flipper Button, button, opto
-F3: L. L. Flipper EOS, opto
-F4: L. L. Flipper Button, button, opto
 F5: U. R. Flipper EOS, opto
 F6: U. R. Flipper Button, button, opto
 F7: U. L. Flipper EOS, opto
@@ -230,7 +219,6 @@ tz_gumball:
 #############################################################
 
 [lampsets]
-ALL: 11..88
 Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
 Door Panels and Handle:
 Door Locks:
@@ -337,6 +325,7 @@ GC: QQQ, 15.000.000
 3: BDD, 8.000.000
 4: NWU, 7.000.000
 
+
 [flags]
 DOOR_AWARD_LIT:
 LEFT_OUTLANE_LIT:
@@ -353,23 +342,6 @@ STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
 
 [deffs]
-NULL: 0
-Scores: runner, PRI_SCORES
-Coin Insert: PRI_COINS
-Credits: PRI_CREDITS
-Tilt Warning: PRI_TILT_WARNING
-Tilt: runner, PRI_TILT
-Game Over: PRI_GAME_OVER
-Volume Change: runner, PRI_VOLUME_CHANGE
-Slam Tilt: runner, PRI_SLAMTILT
-Status Report: runner, PRI_STATUS
-Nonfatal Error: PRI_DEBUGGER
-HSEntry: runner, PRI_HSENTRY
-Match: runner, PRI_MATCH
-Locating Balls: PRI_BALL_SEARCH
-Buyin Offer: PRI_MATCH
-
-Inspector: runner, PRI_DEBUGGER
 Amode: runner, PRI_AMODE
 Bonus: runner, PRI_BONUS
 BRIAN_IMAGE: PRI_EGG1
@@ -389,41 +361,22 @@ SKILL_SHOT_MADE: PRI_GAME_MODE1+8
 MB_RUNNING: PRI_GAME_MODE1+2
 
 [leffs]
-#FLASHER_HAPPY: PRI_LEFF1
-#GUMBALL_STROBE: PRI_LEFF1
-#LEFT_RAMP: PRI_LEFF2
-#CLOCK_TARGET: PRI_LEFF2, GI(ALL)
-#NO_GI: L_NORMAL: PRI_LEFF3, GI(ALL)
-#SLOT_KICKOUT: PRI_LEFF3
-#AMODE: L_RUNNING, PRI_LEFF5, LAMPS(AMODE_ALL)
-#FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
-#BONUS: L_RUNNING, PRI_BONUS, LAMPS(ALL), GI(ALL)
-#TILT_WARNING: runner, PRI_TILT_WARNING, LAMPS(ALL)
-#TILT: runner, PRI_TILT, LAMPS(ALL), GI(ALL)
-#JETS_ACTIVE: shared, 0, LAMPS(JETS)
-#GAME_TIMEOUT: PRI_TILT, GI(ALL)
-#CLOCK_START: PRI_LEFF4, GI(ALL)
-#MB_RUNNING, shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL)
+FLASHER_HAPPY: PRI_LEFF1
+GUMBALL_STROBE: PRI_LEFF1
+LEFT_RAMP: PRI_LEFF2
+CLOCK_TARGET: PRI_LEFF2, GI(ALL)
+NO_GI: L_NORMAL, PRI_LEFF3, GI(ALL)
+SLOT_KICKOUT: PRI_LEFF3
+AMODE: L_RUNNING, PRI_LEFF5, LAMPS(AMODE_ALL)
+FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
+BONUS: L_RUNNING, PRI_BONUS, LAMPS(ALL), GI(ALL)
+JETS_ACTIVE: shared, 0, LAMPS(JETS), c_decl(null_leff)
+GAME_TIMEOUT: PRI_TILT, GI(ALL)
+CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
+MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
 
 
 ###################################################################
-
-define MACHINE_LAMP_EFFECTS \
-DECL_LEFF (LEFF_FLASHER_HAPPY, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, flasher_happy_leff) \
-DECL_LEFF (LEFF_GUMBALL_STROBE, L_NORMAL, PRI_LEFF1, L_NOLAMPS, L_NOGI, gumball_strobe_leff) \
-DECL_LEFF (LEFF_LEFT_RAMP, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_NOGI, left_ramp_leff) \
-DECL_LEFF (LEFF_CLOCK_TARGET, L_NORMAL, PRI_LEFF2, L_NOLAMPS, L_ALL_GI, clock_target_leff) \
-DECL_LEFF (LEFF_NO_GI, L_NORMAL, PRI_LEFF3, L_NOLAMPS, L_ALL_GI, no_gi_leff) \
-DECL_LEFF (LEFF_SLOT_KICKOUT, L_NORMAL, PRI_LEFF3, L_NOLAMPS, L_NOGI, slot_kickout_leff) \
-DECL_LEFF (LEFF_AMODE, L_RUNNING, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, amode_leff) \
-DECL_LEFF (LEFF_FLASH_ALL, L_NORMAL, PRI_LEFF5, LAMPSET_AMODE_ALL, L_NOGI, flash_all_leff) \
-DECL_LEFF (LEFF_BONUS, L_RUNNING, PRI_BONUS, L_ALL_LAMPS, L_ALL_GI, bonus_leff) \
-DECL_LEFF (LEFF_TILT_WARNING, L_RUNNING, PRI_TILT_WARNING, L_ALL_LAMPS, L_NOGI, no_lights_leff) \
-DECL_LEFF (LEFF_TILT, L_RUNNING, PRI_TILT, L_ALL_LAMPS, L_ALL_GI, no_lights_leff) \
-DECL_LEFF (LEFF_JETS_ACTIVE, L_SHARED, 0, LAMPSET_JETS, L_NOGI, leff_exit) \
-DECL_LEFF (LEFF_GAME_TIMEOUT, L_NORMAL, PRI_TILT, L_NOLAMPS, L_ALL_GI, game_timeout_leff) \
-DECL_LEFF (LEFF_CLOCK_START, L_NORMAL, PRI_LEFF4, L_NOLAMPS, L_ALL_GI, clock_round_started_leff) \
-DECL_LEFF (LEFF_MB_RUNNING, L_SHARED, PRI_LEFF2, LAMPSET_DOOR_LOCKS_AND_GUMBALL, L_NOGI, multiball_running_leff)
 
 define MACHINE_LAMPSETS \
 	DECL_LAMPSET(LAMPSET_DOOR_PANELS, LMSET_DOOR_PANEL_AWARDS) \

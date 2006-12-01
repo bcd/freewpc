@@ -77,5 +77,9 @@ void deff_stop_all (void);
 void default_amode_deff (void);
 #endif
 
+#ifndef DEFF_AMODE
+#define DEFF_AMODE 1
+#endif
+
 #endif /* _SYS_DEFF_H */
 

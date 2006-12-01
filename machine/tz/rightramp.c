@@ -84,10 +84,3 @@ CALLSET_ENTRY (right_ramp, init)
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_right_ramp)
-{
-	DECLARE_SWITCH_EVENT (sw_right_ramp),
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-};
-
-

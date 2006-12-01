@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 
-void sw_piano_handler (void)
+CALLSET_ENTRY (piano, sw_piano)
 {
 	extern void door_award_flashing (void);
 
@@ -36,10 +36,4 @@ void sw_piano_handler (void)
 CALLSET_ENTRY(piano, start_ball)
 {
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_piano)
-{
-	.fn = sw_piano_handler,
-};
 

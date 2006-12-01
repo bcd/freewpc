@@ -326,9 +326,11 @@ void device_request_kick (device_t *dev)
 	{
 		dev->kicks_needed++;
 		dev->kick_errors = 0;
+#ifdef DEVNO_TROUGH
 		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
 			live_balls++;
+#endif
 	}
 	task_create_gid1 (gid, device_update);
 }
@@ -346,9 +348,11 @@ void device_request_empty (device_t *dev)
 		dev->kicks_needed += can_kick;
 		dev->kick_errors = 0;
 		dev->max_count -= can_kick;
+#ifdef DEVNO_TROUGH
 		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
 			live_balls += can_kick;
+#endif
 	}
 	task_create_gid1 (gid, device_update);
 }
@@ -368,9 +372,11 @@ void device_update_globals (void)
 		device_t *dev = device_entry (devno);
 		counted_balls += dev->actual_count;
 
+#ifdef DEVNO_TROUGH
 		if (devno != DEVNO_TROUGH)
 			if (dev->actual_count >= dev->max_count)
 				held_balls += dev->actual_count - dev->max_count;
+#endif
 	}
 
 	/* Count how many balls are missing */
@@ -519,6 +525,7 @@ void device_remove_live (void)
 }
 
 
+#ifdef DEVNO_TROUGH
 /** Sets the desired number of balls to be in play. */
 void device_multiball_set (U8 count)
 {
@@ -537,6 +544,7 @@ void device_multiball_set (U8 count)
 		kicks--;
 	}
 }
+#endif
 
 
 void locating_balls_deff (void)
@@ -589,7 +597,9 @@ void device_unlock_ball (device_t *dev)
 
 void device_lock_ball (device_t *dev)
 {
+#ifdef DEVNO_TROUGH
 	device_t *trough = device_entry (DEVNO_TROUGH);
+#endif
 
 	if (dev->max_count >= dev->size)
 		fatal (ERR_LOCK_FULL_DEVICE);
@@ -597,17 +607,18 @@ void device_lock_ball (device_t *dev)
 	dbprintf ("Lock ball in devno %d\n", dev->devno);
 	device_enable_lock (dev);
 	live_balls--;
+#ifdef DEVNO_TROUGH
 	if (trough->actual_count > 0)
 	{
 		device_request_kick (trough);
 	}
 	else
+#endif
 	{
 		if (!callset_invoke_boolean (empty_trough_kick))
 			device_unlock_ball (dev);
 	}
 }
-
 
 CALLSET_ENTRY (device, start_game)
 {

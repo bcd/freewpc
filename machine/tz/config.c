@@ -40,51 +40,6 @@ const uint8_t mach_opto_mask[] = {
 	0x00, 0x00, 0x28, 0x0, 0x0, 0x10, 0x0, 0x3F, 0x5D, 0xFF,
 };
 
-#if 0
-
-#ifndef SW_11_OPTO_P
-#define SW_11_OPTO_P 0
-#endif
-etc.
-
-const U8 mach_opto_mask[] = {
-	0x00,
-	SW_11_OPTO_P+ (SW_12_OPTO_P << 1) +
-		(SW_13_OPTO_P << 2) + (SW_14_OPTO_P << 3) +
-		(SW_15_OPTO_P << 4) + (SW_16_OPTO_P << 5) +
-		(SW_17_OPTO_P << 6) + (SW_18_OPTO_P << 7),
-	SW_21_OPTO_P+ (SW_22_OPTO_P << 1) +
-		(SW_23_OPTO_P << 2) + (SW_24_OPTO_P << 3) +
-		(SW_25_OPTO_P << 4) + (SW_26_OPTO_P << 5) +
-		(SW_27_OPTO_P << 6) + (SW_28_OPTO_P << 7),
-	SW_31_OPTO_P+ (SW_32_OPTO_P << 1) +
-		(SW_33_OPTO_P << 2) + (SW_34_OPTO_P << 3) +
-		(SW_35_OPTO_P << 4) + (SW_36_OPTO_P << 5) +
-		(SW_37_OPTO_P << 6) + (SW_38_OPTO_P << 7),
-	SW_41_OPTO_P+ (SW_42_OPTO_P << 1) +
-		(SW_43_OPTO_P << 2) + (SW_44_OPTO_P << 3) +
-		(SW_45_OPTO_P << 4) + (SW_46_OPTO_P << 5) +
-		(SW_47_OPTO_P << 6) + (SW_48_OPTO_P << 7),
-	SW_51_OPTO_P+ (SW_52_OPTO_P << 1) +
-		(SW_53_OPTO_P << 2) + (SW_54_OPTO_P << 3) +
-		(SW_55_OPTO_P << 4) + (SW_56_OPTO_P << 5) +
-		(SW_57_OPTO_P << 6) + (SW_58_OPTO_P << 7),
-	SW_61_OPTO_P+ (SW_62_OPTO_P << 1) +
-		(SW_63_OPTO_P << 2) + (SW_64_OPTO_P << 3) +
-		(SW_65_OPTO_P << 4) + (SW_66_OPTO_P << 5) +
-		(SW_67_OPTO_P << 6) + (SW_68_OPTO_P << 7),
-	SW_71_OPTO_P+ (SW_72_OPTO_P << 1) +
-		(SW_73_OPTO_P << 2) + (SW_74_OPTO_P << 3) +
-		(SW_75_OPTO_P << 4) + (SW_76_OPTO_P << 5) +
-		(SW_77_OPTO_P << 6) + (SW_78_OPTO_P << 7),
-	SW_81_OPTO_P+ (SW_82_OPTO_P << 1) +
-		(SW_83_OPTO_P << 2) + (SW_84_OPTO_P << 3) +
-		(SW_85_OPTO_P << 4) + (SW_86_OPTO_P << 5) +
-		(SW_87_OPTO_P << 6) + (SW_88_OPTO_P << 7),
-	0xFF
-};
-#endif
-
 /** An array in which each 0 bit indicates a 'normal'
  * playfield switch where the switch is serviced only
  * when it transitions from inactive->active.  When set
@@ -99,52 +54,6 @@ const U8 mach_opto_mask[] = {
 const uint8_t mach_edge_switches[] = {
 	0x00, 0x70, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x98, 0x00,
 };
-
-
-#if 0
-
-#ifndef SW_11_EDGE_P
-#define SW_11_EDGE_P 0
-#endif
-etc.
-
-const U8 mach_edge_switches[] = {
-	0x00,
-	SW_11_EDGE_P+ (SW_12_EDGE_P << 1) +
-		(SW_13_EDGE_P << 2) + (SW_14_EDGE_P << 3) +
-		(SW_15_EDGE_P << 4) + (SW_16_EDGE_P << 5) +
-		(SW_17_EDGE_P << 6) + (SW_18_EDGE_P << 7),
-	SW_21_EDGE_P+ (SW_22_EDGE_P << 1) +
-		(SW_23_EDGE_P << 2) + (SW_24_EDGE_P << 3) +
-		(SW_25_EDGE_P << 4) + (SW_26_EDGE_P << 5) +
-		(SW_27_EDGE_P << 6) + (SW_28_EDGE_P << 7),
-	SW_31_EDGE_P+ (SW_32_EDGE_P << 1) +
-		(SW_33_EDGE_P << 2) + (SW_34_EDGE_P << 3) +
-		(SW_35_EDGE_P << 4) + (SW_36_EDGE_P << 5) +
-		(SW_37_EDGE_P << 6) + (SW_38_EDGE_P << 7),
-	SW_41_EDGE_P+ (SW_42_EDGE_P << 1) +
-		(SW_43_EDGE_P << 2) + (SW_44_EDGE_P << 3) +
-		(SW_45_EDGE_P << 4) + (SW_46_EDGE_P << 5) +
-		(SW_47_EDGE_P << 6) + (SW_48_EDGE_P << 7),
-	SW_51_EDGE_P+ (SW_52_EDGE_P << 1) +
-		(SW_53_EDGE_P << 2) + (SW_54_EDGE_P << 3) +
-		(SW_55_EDGE_P << 4) + (SW_56_EDGE_P << 5) +
-		(SW_57_EDGE_P << 6) + (SW_58_EDGE_P << 7),
-	SW_61_EDGE_P+ (SW_62_EDGE_P << 1) +
-		(SW_63_EDGE_P << 2) + (SW_64_EDGE_P << 3) +
-		(SW_65_EDGE_P << 4) + (SW_66_EDGE_P << 5) +
-		(SW_67_EDGE_P << 6) + (SW_68_EDGE_P << 7),
-	SW_71_EDGE_P+ (SW_72_EDGE_P << 1) +
-		(SW_73_EDGE_P << 2) + (SW_74_EDGE_P << 3) +
-		(SW_75_EDGE_P << 4) + (SW_76_EDGE_P << 5) +
-		(SW_77_EDGE_P << 6) + (SW_78_EDGE_P << 7),
-	SW_81_EDGE_P+ (SW_82_EDGE_P << 1) +
-		(SW_83_EDGE_P << 2) + (SW_84_EDGE_P << 3) +
-		(SW_85_EDGE_P << 4) + (SW_86_EDGE_P << 5) +
-		(SW_87_EDGE_P << 6) + (SW_88_EDGE_P << 7),
-	0x00
-};
-#endif
 
 #endif /* USE_MD */
 

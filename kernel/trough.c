@@ -41,12 +41,6 @@
  * The outhole switch is simple; just trigger the kicker
  * to move the balls into the trough.
  */
-DECLARE_SWITCH_DRIVER (sw_trough)
-{
-	.devno = SW_DEVICE_DECL(DEVNO_TROUGH),
-};
-
-
 #ifdef MACHINE_OUTHOLE_SWITCH
 
 void handle_outhole (void)
@@ -59,7 +53,7 @@ void handle_outhole (void)
 	task_exit ();
 }
 
-void sw_outhole_handler (void)
+CALLSET_ENTRY (trough, sw_outhole)
 {
 	if (event_did_follow (any_outlane, center_drain))
 	{
@@ -74,32 +68,18 @@ void sw_outhole_handler (void)
 	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
 }
 
-DECLARE_SWITCH_DRIVER (sw_outhole)
-{
-	.fn = sw_outhole_handler,
-	.flags = SW_IN_TEST,
-};
-
 #endif /* MACHINE_OUTHOLE_SWITCH */
 
 
-#if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
-
-void sw_launch_handler (void)
+CALLSET_ENTRY (trough, sw_launch)
 {
+#if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
 	if (switch_poll (MACHINE_SHOOTER_SWITCH))
 	{
 		sol_pulse (MACHINE_LAUNCH_SOLENOID);
 	}
-}
-
-DECLARE_SWITCH_DRIVER (sw_launch_button)
-{
-	.fn = sw_launch_handler,
-	.flags = SW_IN_GAME,
-};
-
 #endif
+}
 
 void trough_enter (device_t *dev)
 {
@@ -176,6 +156,8 @@ device_properties_t trough_props = {
 
 void trough_init (void)
 {
+#ifdef DEVNO_TROUGH
 	device_register (DEVNO_TROUGH, &trough_props);
+#endif
 }
 

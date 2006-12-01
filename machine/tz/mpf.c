@@ -86,37 +86,8 @@ CALLSET_ENTRY (mpf, start_player)
 	mpf_enable_count = 0;
 }
 
-CALLSET_ENTRY (mpf, mpf_top_exit)
+CALLSET_ENTRY (mpf, sw_mpf_top_exit)
 {
 }
 
-DECLARE_SWITCH_DRIVER (sw_mpf_top)
-{
-	DECLARE_SWITCH_EVENT (sw_mpf_top),
-	.flags = SW_PLAYFIELD | SW_IN_GAME
-};
-
-DECLARE_SWITCH_DRIVER (sw_mpf_exit)
-{
-	DECLARE_SWITCH_EVENT (sw_mpf_exit),
-	.flags = SW_PLAYFIELD | SW_IN_GAME
-};
-
-DECLARE_SWITCH_DRIVER (sw_mpf_enter)
-{
-	DECLARE_SWITCH_EVENT (sw_mpf_enter),
-	.flags = SW_PLAYFIELD | SW_IN_GAME
-};
-
-DECLARE_SWITCH_DRIVER (sw_mpf_left)
-{
-	DECLARE_SWITCH_EVENT (sw_mpf_left),
-	.flags = SW_PLAYFIELD | SW_IN_GAME
-};
-
-DECLARE_SWITCH_DRIVER (sw_mpf_right)
-{
-	DECLARE_SWITCH_EVENT (sw_mpf_right),
-	.flags = SW_PLAYFIELD | SW_IN_GAME
-};
 

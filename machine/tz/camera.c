@@ -99,7 +99,7 @@ void do_camera_award (void)
 }
 
 
-void sw_camera_handler (void)
+CALLSET_ENTRY (camera, sw_camera_handler)
 {
 	if (event_did_follow (mpf_top, camera))
 	{
@@ -150,10 +150,4 @@ CALLSET_ENTRY (camera, door_panel_awarded)
 		lamp_tristate_flash (LM_CAMERA);
 }
 
-
-DECLARE_SWITCH_DRIVER (sw_camera)
-{
-	.fn = sw_camera_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-};
 

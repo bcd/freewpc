@@ -93,7 +93,7 @@ void sw_jet_sound (void)
 	task_exit ();
 }
 
-void sw_jet_handler (void)
+CALLSET_ENTRY (jet, sw_jet)
 {
 	if (lamp_test (LM_PANEL_TSM))
 		score (SC_50K);
@@ -101,22 +101,4 @@ void sw_jet_handler (void)
 		score (SC_10K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
-
-DECLARE_SWITCH_DRIVER (sw_left_jet)
-{
-	.fn = sw_jet_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-};
-
-DECLARE_SWITCH_DRIVER (sw_right_jet)
-{
-	.fn = sw_jet_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-};
-
-DECLARE_SWITCH_DRIVER (sw_bottom_jet)
-{
-	.fn = sw_jet_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-};
 

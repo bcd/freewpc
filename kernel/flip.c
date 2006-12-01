@@ -38,8 +38,7 @@ U8 flipper_inputs;
 U8 flipper_outputs;
 
 
-/** Handle left flipper presses. */
-void sw_left_flipper_handler (void) 
+CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 {
 	callset_invoke (left_flipper_press);
 
@@ -62,8 +61,7 @@ void sw_left_flipper_handler (void)
 }
 
 
-/** Handle right flipper presses. */
-void sw_right_flipper_handler (void)
+CALLSET_ENTRY (flip, sw_l_r_flipper_button)
 {
 	callset_invoke (right_flipper_press);
 
@@ -84,33 +82,6 @@ void sw_right_flipper_handler (void)
 	}
 #endif
 }
-
-void sw_upper_left_flipper_handler (void)
-{
-}
-
-void sw_upper_right_flipper_handler (void)
-{
-}
-
-
-DECLARE_SWITCH_DRIVER (sw_left_flipper) {
-	.fn = sw_left_flipper_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_right_flipper) {
-	.fn = sw_right_flipper_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_upper_left_flipper) {
-	.fn = sw_upper_left_flipper_handler,
-};
-
-DECLARE_SWITCH_DRIVER (sw_upper_right_flipper) {
-	.fn = sw_upper_right_flipper_handler,
-};
 
 
 void flipper_enable (void)

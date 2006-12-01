@@ -29,10 +29,8 @@
 
 #include <freewpc.h>
 
-
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
-
 
 void tilt_deff (void) __taskentry__
 {
@@ -76,7 +74,7 @@ void slam_tilt_deff (void) __taskentry__
 }
 
 
-void sw_tilt_handler (void)
+CALLSET_ENTRY (tilt, sw_tilt)
 {
 	extern bool in_tilt;
 
@@ -102,25 +100,12 @@ void sw_tilt_handler (void)
 }
 
 
-void sw_slam_tilt_handler (void)
+CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
 	deff_start (DEFF_SLAM_TILT);
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_tilt)
-{
-	.fn = sw_tilt_handler,
-	.flags = SW_IN_GAME,
-};
-
-DECLARE_SWITCH_DRIVER (sw_slam_tilt)
-{
-	.fn = sw_slam_tilt_handler,
-	.flags = SW_IN_GAME,
-};
 
 
 void tilt_start_ball (void)

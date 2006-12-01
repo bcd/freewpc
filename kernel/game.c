@@ -186,11 +186,13 @@ void end_ball (void)
 	 * failed and it fell back into the trough.  Return the
 	 * ball to the plunger lane in these cases.
 	 */
+#ifdef DEVNO_TROUGH
 	if (!ball_in_play && !in_tilt)
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
 		goto done;
 	}
+#endif
 
 	/*
 	 * Call the machine hook to verify that end_ball can
@@ -387,7 +389,9 @@ void start_ball (void)
 
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
+#ifdef DEVNO_TROUGH
 	device_request_kick (device_entry (DEVNO_TROUGH));
+#endif
 	tilt_start_ball ();
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);
@@ -457,6 +461,10 @@ void stop_game (void)
 /* Perform final checks before allowing a game to start. */
 bool verify_start_ok (void)
 {
+#ifndef DEVNO_TROUGH
+	return FALSE;
+#endif
+
 	// check enough credits
 	if (!has_credits_p ())
 		return FALSE;
@@ -475,7 +483,7 @@ bool verify_start_ok (void)
 /**
  * Handle the start button.
  */
-void sw_start_button_handler (void) __taskentry__
+CALLSET_ENTRY (game, sw_start_button)
 {
 	/* If in test mode, let test handle it completely. */
 	if (in_test)
@@ -545,13 +553,11 @@ void sw_start_button_handler (void) __taskentry__
 }
 
 
-// #define TEST_INITIALS_ENTRY
-
 /**
- * Handle the extra-ball buy-in button.
- * Not all games have one of these.
+ * Handle the extra-ball buy-in button.  Not all games have one of these.
  */
-void sw_buy_in_button_handler (void) __taskentry__
+#ifdef SW_BUYIN_BUTTON
+CALLSET_ENTRY (game, sw_buyin_button)
 {
 #ifdef TEST_INITIALS_ENTRY
 	initials_enter ();
@@ -559,21 +565,7 @@ void sw_buy_in_button_handler (void) __taskentry__
 	inspector_buyin_button ();
 #endif
 }
-
-/*
- * Switches declared by the game module:
- * start & buy-in buttons
- */
-DECLARE_SWITCH_DRIVER (sw_start_button)
-{
-	.fn = sw_start_button_handler,
-	.flags = SW_IN_TEST,
-};
-
-DECLARE_SWITCH_DRIVER (sw_buyin_button)
-{
-	.fn = sw_buy_in_button_handler,
-};
+#endif
 
 
 /** Initialize the game subsystem.  */

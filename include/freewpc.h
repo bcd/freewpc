@@ -63,9 +63,11 @@ typedef unsigned int INTPTR;
 typedef U16 PTR_OR_U16;
 #endif
 
+#ifndef CONFIG_PLATFORM_LINUX
 #define short short_not_supported
 #define int int_not_supported
 #define long long_not_supported
+#endif
 
 /* TODO - move these elsewhere */
 extern U8 sys_init_complete;
@@ -209,9 +211,7 @@ extern U8 irq_count;
 #include <gendefine_gid.h>
 #ifndef USE_MD
 #include <gendefine_deff.h>
-#endif
 #include <gendefine_leff.h>
-#ifndef USE_MD
 #include <gendefine_lampset.h>
 #include <gendefine_devno.h>
 #endif

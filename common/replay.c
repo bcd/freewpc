@@ -49,7 +49,9 @@ void replay_award (void)
 		case FREE_AWARD_OFF:
 			break;
 	}
+#ifdef DEFF_REPLAY
 	deff_start (DEFF_REPLAY);
+#endif
 	audit_increment (&system_audits.replays);
 }
 

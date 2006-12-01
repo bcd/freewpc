@@ -35,7 +35,7 @@ void hitchhiker_deff (void)
 }
 
 
-void sw_hitch_handler (void)
+CALLSET_ENTRY (hitch, sw_hitch_handler)
 {
 	event_did_follow (rocket, hitchhiker);
 	if (lamp_test (LM_PANEL_HH))
@@ -54,10 +54,4 @@ CALLSET_ENTRY(hitch, start_player)
 }
 
 
-DECLARE_SWITCH_DRIVER (sw_hitchhiker)
-{
-	.fn = sw_hitch_handler,
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.sound = SND_HITCHHIKER_DRIVE_BY
-};
 

@@ -114,43 +114,22 @@ void award_skill_switch (U8 sw)
 }
 
 
-void sw_lower_skill_handler (void) __taskentry__
+CALLSET_ENTRY (skill, sw_skill_bottom)
 {
 	award_skill_switch (1);
 }
 
 
-void sw_center_skill_handler (void) __taskentry__
+CALLSET_ENTRY (skill, sw_skill_center)
 {
 	award_skill_switch (2);
 }
 
 
-void sw_upper_skill_handler (void) __taskentry__
+CALLSET_ENTRY (skill, sw_skill_top)
 {
 	award_skill_switch (3);
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_skill_bottom)
-{
-	.fn = sw_lower_skill_handler,
-	.flags = SW_IN_GAME,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_skill_center)
-{
-	.fn = sw_center_skill_handler,
-	.flags = SW_IN_GAME,
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_skill_top)
-{
-	.fn = sw_upper_skill_handler,
-	.flags = SW_IN_GAME,
-};
 
 
 CALLSET_ENTRY (skill, start_ball)

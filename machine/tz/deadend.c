@@ -29,7 +29,7 @@ CALLSET_ENTRY (deadend, start_player)
 }
 
 
-void sw_deadend_handler (void)
+CALLSET_ENTRY (deadend, sw_deadend)
 {
 	switch_can_follow (dead_end, slot, TIME_8S);
 	switch_can_follow (dead_end, camera, TIME_4S);
@@ -64,12 +64,4 @@ void sw_deadend_handler (void)
 		timed_game_pause (TIME_3S);
 	}
 }
-
-
-
-DECLARE_SWITCH_DRIVER (sw_dead_end)
-{
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.fn = sw_deadend_handler,
-};
 

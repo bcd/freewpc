@@ -3,11 +3,13 @@
 # Game specific Makefile extensions
 #
 
+MACHINE_FILE = tester.md
+
 ifeq ($(hw),)
 hw=WPC_TEST_DMD
 endif
 
-CFLAGS += -D$(hw)
+CFLAGS += -D$(hw) -DMACHINE_LACKS_ALL_INCLUDES
 
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable

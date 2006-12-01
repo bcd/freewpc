@@ -20,11 +20,6 @@
 
 #include <freewpc.h>
 
-DECLARE_SWITCH_DRIVER (sw_slot)
-{
-	.devno = SW_DEVICE_DECL(DEVNO_SLOT),
-};
-
 
 void slot_kick_sound (void)
 {
