@@ -1301,7 +1301,7 @@ void lampset_draw (void)
 {
 	browser_draw ();
 #ifdef USE_MD
-	sprintf_far_string (names_of_leffs + menu_selection);
+	sprintf_far_string (names_of_lampsets + menu_selection);
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 #endif
 }
