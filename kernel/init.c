@@ -42,68 +42,6 @@ task_gid_t last_nonfatal_error_gid;
 char sprintf_buffer[PRINTF_BUFFER_SIZE];
 #endif
 
-/*
- * fatal is the entry point for errors that are nonrecoverable.
- * error_code is one of the values in include/sys/errno.h.
- */
-__noreturn__ 
-void fatal (errcode_t error_code)
-{
-	disable_irq ();
-
-	audit_increment (&system_audits.fatal_errors);
-	
-	dmd_alloc_low_clean ();
-
-	dbprintf ("Fatal error: %i\n", error_code);
-
-	sprintf ("ERRNO %i", error_code);
-	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
-
-	sprintf ("GID %i", task_getgid ());
-	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
-
-	dmd_show_low ();
-	task_dump ();
-#ifdef CONFIG_PLATFORM_LINUX
-	exit (1);
-#else
-	/* TODO : reset hardware here!! */
-	for (;;);
-#endif
-}
-
-
-void nonfatal_error_deff (void)
-{
-#ifdef DEBUGGER
-	dmd_alloc_low_clean ();
-	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_show_low ();
-	sound_send (SND_TEST_ALERT);
-	task_sleep (TIME_200MS);
-	sound_send (SND_TEST_ALERT);
-	task_sleep (TIME_200MS);
-	sound_send (SND_TEST_ALERT);
-	task_sleep_sec (4);
-#endif
-	deff_exit ();
-}
-
-
-void nonfatal (errcode_t error_code)
-{
-	audit_increment (&system_audits.non_fatal_errors);
-#ifdef DEBUGGER
-	last_nonfatal_error_code = error_code;
-	last_nonfatal_error_gid = task_getgid ();
-	deff_start (DEFF_NONFATAL_ERROR);
-#endif
-}
-
 
 void irq_init (void)
 {
@@ -315,6 +253,69 @@ void lockup_check_rtt (void)
 	{
 		task_dispatching_ok = FALSE;
 	}
+}
+
+/*
+ * fatal is the entry point for errors that are nonrecoverable.
+ * error_code is one of the values in include/sys/errno.h.
+ */
+__noreturn__ 
+void fatal (errcode_t error_code)
+{
+	disable_irq ();
+
+	audit_increment (&system_audits.fatal_errors);
+	
+	dmd_alloc_low_clean ();
+
+	dbprintf ("Fatal error: %i\n", error_code);
+
+	sprintf ("ERRNO %i", error_code);
+	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
+
+	sprintf ("GID %i", task_getgid ());
+	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
+
+	dmd_show_low ();
+	task_dump ();
+#ifdef CONFIG_PLATFORM_LINUX
+	exit (1);
+#else
+	/* TODO : reset hardware here!! */
+	task_sleep_sec (10);
+	do_reset ();
+#endif
+}
+
+
+void nonfatal_error_deff (void)
+{
+#ifdef DEBUGGER
+	dmd_alloc_low_clean ();
+	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	dmd_show_low ();
+	sound_send (SND_TEST_ALERT);
+	task_sleep (TIME_200MS);
+	sound_send (SND_TEST_ALERT);
+	task_sleep (TIME_200MS);
+	sound_send (SND_TEST_ALERT);
+	task_sleep_sec (4);
+#endif
+	deff_exit ();
+}
+
+
+void nonfatal (errcode_t error_code)
+{
+	audit_increment (&system_audits.non_fatal_errors);
+#ifdef DEBUGGER
+	last_nonfatal_error_code = error_code;
+	last_nonfatal_error_gid = task_getgid ();
+	deff_start (DEFF_NONFATAL_ERROR);
+#endif
 }
 
 
