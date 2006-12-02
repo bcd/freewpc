@@ -41,9 +41,9 @@
  * The outhole switch is simple; just trigger the kicker
  * to move the balls into the trough.
  */
-#ifdef MACHINE_OUTHOLE_SWITCH
 
-void handle_outhole (void)
+#ifdef MACHINE_OUTHOLE_SWITCH
+static void handle_outhole (void)
 {
 	while (switch_poll (SW_OUTHOLE))
 	{
@@ -52,9 +52,11 @@ void handle_outhole (void)
 	}
 	task_exit ();
 }
+#endif
 
 CALLSET_ENTRY (trough, sw_outhole)
 {
+#ifdef MACHINE_OUTHOLE_SWITCH
 	if (event_did_follow (any_outlane, center_drain))
 	{
 		/* drained via outlane */
@@ -66,9 +68,8 @@ CALLSET_ENTRY (trough, sw_outhole)
 	}
 
 	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
-}
-
 #endif /* MACHINE_OUTHOLE_SWITCH */
+}
 
 
 CALLSET_ENTRY (trough, sw_launch)

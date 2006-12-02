@@ -171,7 +171,12 @@ PATH_REQUIRED += $(BC)
 ###	Source and Binary Filenames
 #######################################################################
 
-KERNEL_OBJS = \
+KERNEL_BASIC_OBJS = \
+	kernel/misc.o \
+	kernel/random.o \
+	kernel/sysinfo.o
+
+KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/ac.o \
 	kernel/adj.o \
 	kernel/audit.o \
@@ -190,36 +195,33 @@ KERNEL_OBJS = \
 	kernel/lamp.o \
 	kernel/lampset.o \
 	kernel/leff.o \
-	kernel/misc.o \
 	kernel/player.o \
 	kernel/printf.o \
-	kernel/random.o \
 	kernel/reset.o \
 	kernel/score.o \
 	kernel/service.o \
 	kernel/sol.o \
 	kernel/sound.o \
 	kernel/switches.o \
-	kernel/sysinfo.o \
 	kernel/timer.o \
 	kernel/triac.o \
 	kernel/trough.o \
 	kernel/tilt.o
-#kernel/msg.o
 
-
-COMMON_OBJS = \
+COMMON_BASIC_OBJS = \
 	common/audio.o \
+	common/initials.o \
+	common/match.o \
+	common/rtc.o \
+
+COMMON_OBJS = $(COMMON_BASIC_OBJS) \
 	common/buyin.o \
 	common/diag.o \
 	common/eb.o \
 	common/highscore.o \
-	common/initials.o \
 	common/inspector.o \
 	common/knocker.o \
-	common/match.o \
 	common/replay.o \
-	common/rtc.o \
 	common/search.o \
 	common/status.o \
 
@@ -247,7 +249,9 @@ FON_OBJS = \
 
 XBM_OBJS = images/freewpc.o images/brianhead_1.o images/brianhead_2.o \
 	images/freewpc_logo_1.o images/freewpc_logo_2.o 
-	
+
+BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
+
 -include build/Makefile.xbms
 XBM_OBJS +=	$(XBMGEN_OBJS)
 
@@ -477,16 +481,16 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
-
+ifneq ($(nodefs),y)
 MAKE_DEPS = Makefile $(MACHINE_DIR)/Makefile user.make 
+endif
 
 ifdef MACHINE_FILE
-DEPS += build/mach-config.h
+C_DEPS += build/mach-config.h
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 CFLAGS += -DUSE_MD
 endif
-
-DEPS = $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
+C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = include/gendefine_gid.h
 ifndef MACHINE_FILE
@@ -676,19 +680,17 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms
 
 
 #
-# General rule for how to build any assembler file.  We use gcc to do
-# it rather than invoking the assembler directly.  This lets us embed
-# #include, #define, etc. within the assembly code, since the C preprocessor
-# is invoked first.
+# General rule for how to build any assembler file.  This uses the native
+# assembler and not gcc.
 #
-$(AS_OBJS) : %.o : %.s $(REQUIRED) $(DEPS)
+$(AS_OBJS) : %.o : %.s $(REQUIRED)
 	@echo Assembling $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
-$(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED) $(DEPS)
+$(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED)
 	@echo Assembling page header $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
 
 #
@@ -709,7 +711,8 @@ $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c 
 
-$(C_OBJS) : $(DEPS) $(GENDEFINES) $(REQUIRED)
+$(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
+$(BASIC_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(XBM_OBJS) : %.o : %.xbm
 
@@ -733,11 +736,13 @@ CONFIG_FILES = build/mach-config.h $(CONFIG_SRCS)
 config : $(CONFIG_FILES)
 
 build/mach-config.h : $(MACH_DESC)
-	tools/genmachine $< config > $@
-
-build/mach-%.c : $(MACH_DESC) build/mach-config.h
 	@echo "Regenerating $@ if necessary..." && \
-	tools/genmachine $< $(@:build/mach-%.c=%) > $@.tmp && \
+	tools/genmachine $< config > $@.tmp && \
+	tools/move-if-change $@.tmp $@
+	
+build/mach-%.c : build/mach-config.h
+	@echo "Regenerating $@ if necessary..." && \
+	tools/genmachine $(MACH_DESC) $(@:build/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 
 $(CONFIG_FILES) : tools/genmachine kernel/freewpc.md
@@ -796,7 +801,7 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLD)/callset.o
 
-$(BLD)/callset.c : $(MACH_LINKS) tools/gencallset
+$(BLD)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
 	@echo "Generating callsets ... " && tools/gencallset
 
 .PHONY : callset_again

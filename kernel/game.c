@@ -555,16 +555,16 @@ CALLSET_ENTRY (game, sw_start_button)
 /**
  * Handle the extra-ball buy-in button.  Not all games have one of these.
  */
-#ifdef SW_BUYIN_BUTTON
 CALLSET_ENTRY (game, sw_buyin_button)
 {
+#ifdef SW_BUYIN_BUTTON
 #ifdef TEST_INITIALS_ENTRY
 	initials_enter ();
 #else
 	inspector_buyin_button ();
 #endif
-}
 #endif
+}
 
 
 /** Initialize the game subsystem.  */

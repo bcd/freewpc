@@ -41,8 +41,6 @@
 #define SW_LEFT_POPPER			MAKE_SW(3,6)
 #define SW_RIGHT_POPPER			MAKE_SW(3,7)
 
-#define SW_CENTER_TROUGH		MAKE_SW(7,8)
-
 /*
  * Declare switch drivers.  Each macro defines the name of a driver object
  * which contains all of the properties of that switch.

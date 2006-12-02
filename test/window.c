@@ -1203,6 +1203,10 @@ void deff_leff_thread (void)
 			else
 			{
 				browser_draw ();
+#ifdef USE_MD
+					sprintf_far_string (names_of_leffs + menu_selection);
+					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+#endif
 				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
@@ -1293,6 +1297,16 @@ void lampset_init (void)
 }
 
 
+void lampset_draw (void)
+{
+	browser_draw ();
+#ifdef USE_MD
+	sprintf_far_string (names_of_leffs + menu_selection);
+	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+#endif
+}
+
+
 void lampset_update (void)
 {
 	for (;;)
@@ -1317,6 +1331,7 @@ struct window_ops dev_lampset_window = {
 	INHERIT_FROM_BROWSER,
 	.init = lampset_init,
 	.exit = lamp_all_off,
+	.draw = lampset_draw,
 	.thread = lampset_update,
 };
 
@@ -1437,10 +1452,10 @@ void dev_balldev_test_enter (void)
 			device_request_empty (dev);
 			break;
 		case 2:
-			/* enable lock */
+			device_enable_lock (dev);
 			break;
 		case 3:
-			/* disable lock */
+			device_disable_lock (dev);
 			break;
 	}
 }
@@ -1522,87 +1537,6 @@ struct menu dev_trans_test_item = {
 	.var = { .subwindow = { &dev_trans_test_window, NULL } },
 };
 
-/*************** Sound Editor *************************/
-
-#define SOUNDEDIT_NOP		0xFFFF
-#define SOUNDEDIT_SOUND(x)	(0x0000 + (x))
-#define SOUNDEDIT_DELAY(x)	(0x4000 + (x))
-
-U16 dev_soundedit_program[64];
-U8 dev_soundedit_cursor;
-U8 dev_soundedit_page_start;
-
-void dev_soundedit_print_op (U16 op)
-{
-	if (op == SOUNDEDIT_NOP)
-		sprintf ("");
-	else if (op < SOUNDEDIT_DELAY(0))
-		sprintf ("SND %04lx", op);
-	else
-		sprintf ("WAIT %04lx", op - 0x4000);
-}
-
-void dev_soundedit_init (void)
-{
-	memset (dev_soundedit_program, 0xFF, sizeof (dev_soundedit_program));
-	dev_soundedit_cursor = 0;
-	dev_soundedit_page_start = 0;
-}
-
-void dev_soundedit_draw (void)
-{
-	U8 i;
-
-	dmd_alloc_low_clean ();
-	for (i=0; i < 4; i++)
-	{
-		sprintf ("%s %02d",
-			(dev_soundedit_page_start+i == dev_soundedit_cursor) ? "X" : "O",
-			dev_soundedit_page_start+i);
-		font_render_string (&font_mono5, 16, i*6+1, sprintf_buffer);
-		dev_soundedit_print_op (dev_soundedit_program[dev_soundedit_page_start+i]);
-		font_render_string (&font_mono5, 48, i*6+1, sprintf_buffer);
-	}
-	dmd_show_low ();
-}
-
-void dev_soundedit_up (void)
-{
-	dev_soundedit_cursor++;
-	dev_soundedit_cursor %= 64;
-
-	if (dev_soundedit_cursor / 4 != dev_soundedit_page_start / 4)
-	{
-		dev_soundedit_page_start += 4;
-		dev_soundedit_page_start %= 64;
-	}
-}
-
-void dev_soundedit_down (void)
-{	
-	dev_soundedit_cursor--;
-	dev_soundedit_cursor %= 64;
-
-	if (dev_soundedit_cursor / 4 != dev_soundedit_page_start / 4)
-	{
-		dev_soundedit_page_start -= 4;
-		dev_soundedit_page_start %= 64;
-	}
-}
-
-struct window_ops dev_soundedit_window = {
-	DEFAULT_WINDOW,
-	.init = dev_soundedit_init,
-	.up = dev_soundedit_up,
-	.down = dev_soundedit_down,
-	.draw = dev_soundedit_draw,
-};
-
-struct menu dev_soundedit_item = {
-	.name = "SOUND EDITOR",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &dev_soundedit_window, NULL } },
-};
 
 /**********************************************************************/
 
@@ -1654,7 +1588,6 @@ struct menu *dev_menu_items[] = {
 	&dev_leff_test_item,
 	&dev_lampset_test_item,
 	&dev_balldev_test_item,
-	&dev_soundedit_item,
 	&dev_random_test_item,
 	&dev_trans_test_item,
 	NULL,

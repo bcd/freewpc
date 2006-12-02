@@ -99,6 +99,17 @@ static U8 leff_queue[MAX_QUEUED_LEFFS];
 #define MAX_SHARED_LEFFS 8
 static U8 shared_leff_queue[MAX_SHARED_LEFFS];
 
+
+/** Lamp effect function for a leff that turns all lights off.
+ * Used by the system-defined tilt function. */
+void no_lights_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	for (;;)
+		task_sleep_sec (5);
+}
+
+
 /** Returns the index of the current active lamp effect. */
 U8 leff_get_active (void)
 {

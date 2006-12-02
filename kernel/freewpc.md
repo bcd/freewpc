@@ -3,7 +3,14 @@
 # (C) Copyright 2006 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
+#
+# All machine descriptions should "include kernel/freewpc.md" in order to
+# get the common definitions that apply to all WPC-era games.
 #--------------------------------------------------------------------------
+
+[lamps]
+11:
+88:
 
 [switches]
 D1: Left Coin
@@ -50,6 +57,15 @@ G6: General Sol. 6
 G7: General Sol. 7
 G8: General Sol. 8
 
+A1: Aux. Sol. 1
+A2: Aux. Sol. 2
+A3: Aux. Sol. 3
+A4: Aux. Sol. 4
+A5: Aux. Sol. 5
+A6: Aux. Sol. 6
+A7: Aux. Sol. 7
+A8: Aux. Sol. 8
+
 [lampsets]
 ALL: 11..88
 
@@ -75,3 +91,5 @@ Buyin Offer: PRI_MATCH
 NULL: 0
 Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff)
+
+

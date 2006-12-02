@@ -23,12 +23,6 @@
 #include <mach/coil.h>
 
 
-
-DECLARE_SWITCH_DRIVER (sw_lefthole)
-{
-	.devno = SW_DEVICE_DECL(DEVNO_LEFTHOLE),
-};
-
 void lefthole_kick_sound (void)
 {
 	task_exit ();
@@ -68,6 +62,6 @@ device_properties_t lefthole_props = {
 
 CALLSET_ENTRY (lefthole, init)
 {
-	device_register (DEVNO_LEFTHOLE, &lefthole_props);
+	device_register (DEVNO_LEFT_HOLE, &lefthole_props);
 }
 

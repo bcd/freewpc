@@ -73,13 +73,6 @@ void left_ramp_leff (void)
 }
 
 
-void no_lights_leff (void)
-{
-	triac_leff_disable (TRIAC_GI_MASK);
-	for (;;)
-		task_sleep_sec (5);
-}
-
 
 void no_gi_leff (void)
 {

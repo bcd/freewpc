@@ -23,17 +23,6 @@
 #include <mach/coil.h>
 
 
-void sw_righthole_handler (void)
-{
-}
-
-
-DECLARE_SWITCH_DRIVER (sw_righthole)
-{
-	.fn = sw_righthole_handler,
-	.devno = SW_DEVICE_DECL(DEVNO_RIGHTHOLE),
-};
-
 void righthole_kick_sound (void)
 {
 	task_exit ();
@@ -73,6 +62,6 @@ device_properties_t righthole_props = {
 
 CALLSET_ENTRY (righthole, init)
 {
-	device_register (DEVNO_RIGHTHOLE, &righthole_props);
+	device_register (DEVNO_RIGHT_HOLE, &righthole_props);
 }
 

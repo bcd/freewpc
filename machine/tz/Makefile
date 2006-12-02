@@ -52,10 +52,10 @@ GAME_OBJS = config.o \
 	clock.o deffs.o leffs.o \
 	amode.o lock.o magnet.o \
 	slot.o sling.o jets.o rightramp.o rocket.o star.o \
-	greed.o piano.o camera.o deadend.o \
+	greed.o piano.o \
 	loop.o bonus.o door.o autofire.o gumball.o \
 	clocktarget.o hitch.o ballsave.o powerball.o \
-	multiball.o mpf.o leftramp.o skill.o
+	multiball.o mpf.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o
 
