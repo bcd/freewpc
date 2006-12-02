@@ -147,10 +147,12 @@ void end_game (void)
 		ball_up = 0;
 		in_tilt = 0;
 
-		high_score_check ();
-		match_start ();
-	
-		callset_invoke (end_game);
+		if (!in_test)
+		{
+			high_score_check ();
+			match_start ();
+			callset_invoke (end_game);
+		}
 
 		/*
 		 * Make sure all effects and flippers are killed before
