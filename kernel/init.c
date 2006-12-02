@@ -282,7 +282,22 @@ void fatal (errcode_t error_code)
 	exit (1);
 #else
 	/* TODO : reset hardware here!! */
-	task_sleep_sec (10);
+	{
+		U16 count, secs;
+		for (secs = 0; secs < 10; secs++)
+		{
+			for (count = 0; count < 25000; count++)
+			{
+				/* 4 nops = 8 cycles.  Loop overhead is about 6, so
+				 * that's 14 cycles total for the inner loop.
+				 * At 2M cycles per sec, we need ~15000 iterations per second */
+				asm ("nop"); 
+				asm ("nop");
+				asm ("nop");
+				asm ("nop");
+			}
+		}
+	}
 	do_reset ();
 #endif
 }
