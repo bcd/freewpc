@@ -54,7 +54,7 @@ void ballsave_enable (void)
 {
 	lamp_leff_allocate (LM_SHOOT_AGAIN);
 #ifndef CONFIG_TIMED_GAME
-	timer_restart_free (GID_BALLSAVER_TIMER, TIME_7S);
+	timer_restart_free (GID_BALLSAVER_TIMER, TIME_10S);
 #endif
 	task_recreate_gid (GID_BALLSAVER, ballsave_monitor);
 }
