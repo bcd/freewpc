@@ -636,20 +636,6 @@ void switch_sched (void)
 		goto cleanup;
 	}
 
-	/* If a switch is marked SW_PLAYFIELD and we're in a game,
-	 * then call the global playfield switch handler and mark
-	 * the ball 'in play'.  Don't do the last bit if the switch
-	 * specifically doesn't want this to happen.  Also, kick
-	 * the ball search timer so that it doesn't expire.
-	 */
-	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
-	{
-		callset_invoke (any_pf_switch);
-		if (!(swinfo->flags & SW_NOPLAY) && !ball_in_play)
-			mark_ball_in_play ();
-		ball_search_timer_reset ();
-	}
-
 	/* If the switch has an associated lamp, then flicker the lamp when
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
@@ -670,6 +656,20 @@ void switch_sched (void)
 			call_far (swinfo->fnpage, (*swinfo->fn) ());
 		else
 			(*swinfo->fn) ();
+	}
+
+	/* If a switch is marked SW_PLAYFIELD and we're in a game,
+	 * then call the global playfield switch handler and mark
+	 * the ball 'in play'.  Don't do the last bit if the switch
+	 * specifically doesn't want this to happen.  Also, kick
+	 * the ball search timer so that it doesn't expire.
+	 */
+	if ((swinfo->flags & SW_PLAYFIELD) && in_game)
+	{
+		callset_invoke (any_pf_switch);
+		if (!(swinfo->flags & SW_NOPLAY) && !ball_in_play)
+			mark_ball_in_play ();
+		ball_search_timer_reset ();
 	}
 
 cleanup:
