@@ -73,7 +73,6 @@ void adj_modified (void)
  */
 void adj_init (void)
 {
-	extern void adj_verify_all (void);
-	call_far (TEST_PAGE, adj_verify_all ());
+	adj_verify_all ();
 }
 

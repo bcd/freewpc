@@ -39,8 +39,6 @@ __nvram__ U8 freewpc_accepted[3];
 
 void system_accept_freewpc (void)
 {
-	extern void adj_reset_all (void);
-
 #ifdef CONFIG_PLATFORM_LINUX
 	return;
 #endif
@@ -92,7 +90,7 @@ void system_accept_freewpc (void)
 	freewpc_accepted[2] = ACCEPT_3;
 	wpc_nvram_put ();
 
-	call_far (TEST_PAGE, adj_reset_all ());
+	adj_reset_all ();
 	rtc_factory_reset ();
 }
 
