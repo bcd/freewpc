@@ -406,20 +406,21 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
  */
 void dmd_draw_image (const U8 *image_bits)
 {
-	call_far (XBM_PAGE, (dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
+	wpc_push_page (XBM_PAGE);
+	dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits);
+	wpc_pop_page ();
 }
 
 
 /**
- * Draw a 4-color image.
+ * Draw a 4-color image.  The image is stored as two adjacent XBM files.
  */
 void dmd_draw_image2 (const U8 *image_bits)
 {
-	call_far (XBM_PAGE, 
-		(dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits)));
-	call_far (XBM_PAGE,
-		(dmd_copy_page (dmd_high_buffer, ((dmd_buffer_t)image_bits 
-													 	+ DMD_PAGE_SIZE))));
+	wpc_push_page (XBM_PAGE);
+	dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits);
+	dmd_copy_page (dmd_high_buffer, ((dmd_buffer_t)image_bits + DMD_PAGE_SIZE));
+	wpc_pop_page ();
 }
 
 
