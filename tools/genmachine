@@ -75,6 +75,7 @@ my %contextDefinitionRe = (
 	"highscores" => "GC|1|2|3|4",
 	"flags" => "AUTO",
 	"scores" => "AUTO",
+	"fonts" => "AUTO",
 );
 
 # A table of binary properties per context.  During any object declaration,
@@ -98,6 +99,7 @@ my %BinaryProperties = (
 		"intest" => 1,
 		"button" => 1,
 		"service" => 1,
+		"cabinet" => 1,
 		"micro" => 1,
 		"device" => 1, 
 		"virtual" => 1,
@@ -186,6 +188,7 @@ my %ContextPrefixes = (
 	"audits" => "FAU",
 	"deffs" => "DEFF",
 	"leffs" => "LEFF",
+	"fonts" => "FON",
 );
 
 # Optionally, a name for the define to use for the maximum number of
@@ -200,13 +203,14 @@ my %ContextMaxima = (
 	"leffs" => "MAX_LEFFS",
 	"drives" => "NUM_POWER_DRIVES",
 	"lampsets" => "MAX_LAMPSET",
-	"scores" => "NUM_SCORES"
+	"scores" => "NUM_SCORES",
+	"fonts" => "MAX_FONTS",
 );
 
 
 # The contexts for which strings should be written out.
 @stringcontexts = ("switches", "drives", "lamps", "containers", 
-	"deffs", "leffs", "lampsets");
+	"deffs", "leffs", "lampsets", "gi", "fonts");
 
 
 ###################################################################
@@ -289,6 +293,8 @@ sub close_switch {
 	close_switch_or_lamp ($def);
 	$def->{'fn'} = "callset_" . $def->{'c_decl'};
 	$def->{'fnpage'} = "EVENT_PAGE";
+	$def->{'button'} = 1 if (defined $def->{'start-button'})
+		|| (defined $def->{'buyin-button'});
 }
 
 sub close_drive {
@@ -694,7 +700,6 @@ sub machine_write_defines {
 	for $poll (@pollcounts) {
 		my @calls = ();
 		for $drv (unique ($drivers)) {
-			my $drv = $drivers->{$drvkey};
 			my $drvname = $drv->{'name'};
 			if ($drv->{'poll'} == $poll) {
 				push @calls, "   VOIDCALL(${drvname}_rtt) \\";
@@ -750,19 +755,27 @@ sub machine_write_defines {
 	foreach $leff (unique ($m->{"leffs"})) {
 		$fn = $leff->{'c_decl'};
 		$fn =~ s/leff_(.*)/$1_leff/;
+		my $gi = $leff->{'GI'};
+		my $lamps = $leff->{'LAMPS'};
 		
 		if ($leff->{'props'} =~ /(PRI_[a-zA-Z0-9]+)/) {
 			$prio = $1;
 		} else {
 			$prio = 0;
 		}
+
+		if (!defined $gi) { $gi = "0" }
+		if (!defined $lamps) { $lamps = "0" } else { $lamps = "LAMPSET_" . $lamps; }
+		$gi = "L_ALL_GI" if ($gi eq "ALL");
+		$lamps = "L_ALL_LAMPS" if ($lamps eq "LAMPSET_ALL");
+
 		print "   DECL_LEFF (" . 
 			$leff->{'c_ident'} . ", " .
 			($leff->{'runner'} ? "L_RUNNING" :
 				$leff->{'shared'} ? "L_SHARED" : "L_NORMAL") .
 			", " . $prio .  ", " .
-			"L_NOLAMPS, " .
-			"L_NOGI, " .
+			"$lamps, " .
+			"$gi, " .
 			"$fn) \\\n";
 	}
 	print "\n";
@@ -861,6 +874,10 @@ sub machine_write_switch_decls {
 		add_flag ($sw, "noplay", "flags", "SW_NOPLAY");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
+		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
+			(!defined $sw->{'cabinet'}) &&
+			(!defined $sw->{'service'}));
+		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
 
 		my $c_decl = $sw->{'c_decl'};
 		my $c_ident = $sw->{'c_ident'};
@@ -969,6 +986,7 @@ if ($command eq "config") {
 #######################################################
 elsif ($command eq "strings") {
 	print $START_SOURCE;
+	print "#define TRIAC_GI_STRING(x) (x)\n\n";
 	for $context (@stringcontexts) {
 		machine_write_decl_names ($context);
 	}
