@@ -210,6 +210,7 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 
 COMMON_BASIC_OBJS = \
 	common/audio.o \
+	common/event-audit.o \
 	common/initials.o \
 	common/match.o \
 	common/rtc.o \
