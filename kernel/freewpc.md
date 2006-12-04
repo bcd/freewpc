@@ -13,19 +13,19 @@
 88:
 
 [switches]
-D1: Left Coin
-D2: Center Coin
-D3: Right Coin
-D4: Fourth Coin
-D5: Escape, service, intest
-D6: Down, service, intest
-D7: Up, service, intest
-D8: Enter, service, intest
-22: Coin Door Closed
+D1: Left Coin, cabinet
+D2: Center Coin, cabinet
+D3: Right Coin, cabinet
+D4: Fourth Coin, cabinet
+D5: Escape, service, intest, cabinet
+D6: Down, service, intest, cabinet
+D7: Up, service, intest, cabinet
+D8: Enter, service, intest, cabinet
+22: Coin Door Closed, cabinet
 24: Always Closed, virtual, opto, c_decl(sw_unused)
-F1: L. R. Flipper EOS, opto
+F1: L. R. Flipper EOS, opto, cabinet
 F2: L. R. Flipper Button, button, opto, intest
-F3: L. L. Flipper EOS, opto
+F3: L. L. Flipper EOS, opto, cabinet
 F4: L. L. Flipper Button, button, opto, intest
 F8: SW. F8, c_decl(sw_unused)
 
