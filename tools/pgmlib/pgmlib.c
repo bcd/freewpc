@@ -724,6 +724,7 @@ pgm_write_xbmset (PGM *pgm, const char *filename, const char *name)
 
 
 /** Main function for PGM library programs. */
+#ifndef NO_MAIN
 int
 main (int argc, char *argv[])
 {
@@ -755,4 +756,4 @@ main (int argc, char *argv[])
 	pgm_finish_output_file ();
 	exit (0);
 }
-
+#endif /* NO_MAIN */
