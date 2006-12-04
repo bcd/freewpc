@@ -71,8 +71,11 @@ struct window win_stack[8];
 void window_push_first (void)
 {
 	in_test = 1;
+	db_puts ("Calling end_game\n");
 	end_game ();
+	db_puts ("Calling sound_reset\n");
 	sound_reset ();
+	db_puts ("Calling deff/leff stop\n");
 	deff_stop_all ();
 	leff_stop_all ();
 	/* Ensure the lamp effects stop before resetting all lamps. */
@@ -1232,12 +1235,12 @@ void deff_leff_init (void)
 	if (m == &dev_deff_test_item)
 	{
 		deff_leff_test_ops = &dev_deff_ops;
-		browser_max = MAX_DEFFS;
+		browser_max = MAX_DEFFS-1;
 	}
 	else
 	{
 		deff_leff_test_ops = &dev_leff_ops;
-		browser_max = MAX_LEFFS;
+		browser_max = MAX_LEFFS-1;
 	}
 	deff_leff_last_active = FALSE;
 }
@@ -1291,9 +1294,9 @@ void lampset_init (void)
 {
 	browser_init ();
 	browser_min = 1;
-	browser_max = MAX_LAMPSET;
+	browser_max = MAX_LAMPSET-1;
 	browser_item_number = browser_decimal_item_number;
-	lampset_update_mode = 0;
+	lampset_update_mode = 1;
 }
 
 
@@ -1311,7 +1314,7 @@ void lampset_update (void)
 {
 	for (;;)
 	{
-		lampset_set_apply_delay (TIME_33MS);
+		lampset_set_apply_delay (TIME_66MS);
 		lamp_all_off ();
 		switch (lampset_update_mode)
 		{
@@ -1322,7 +1325,6 @@ void lampset_update (void)
 			case 4: lampset_build_increment (menu_selection); break;
 			case 5: lampset_build_decrement (menu_selection); break;
 		}
-		task_sleep_sec (1);
 	}
 }
 
@@ -1582,6 +1584,56 @@ struct menu dev_random_test_item = {
 
 /**********************************************************************/
 
+void dev_force_error_init (void)
+{
+	fatal (ERR_NMI);
+}
+
+struct window_ops dev_force_error_window = {
+	DEFAULT_WINDOW,
+	.init = dev_force_error_init,
+};
+
+struct menu dev_force_error_item = {
+	.name = "FORCE ERROR",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &dev_force_error_window, NULL } },
+};
+
+
+/**********************************************************************/
+
+void dev_frametest_draw (void)
+{
+	const char *data = 0x4001 + menu_selection * DMD_PAGE_SIZE;
+	if (switch_poll_logical (SW_ENTER))
+	{
+		dmd_alloc_low_high ();
+		dmd_draw_image2 (data);
+		dmd_show2 ();
+	}
+	else
+	{
+		dmd_alloc_low ();
+		dmd_draw_image (data);
+		dmd_show_low ();
+	}
+}
+
+struct window_ops dev_frametest_window = {
+	INHERIT_FROM_BROWSER,
+	.draw = dev_frametest_draw,
+};
+
+struct menu dev_frametest_item = {
+	.name = "DMD FRAME TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &dev_frametest_window, NULL } },
+};
+
+
+/**********************************************************************/
+
 struct menu *dev_menu_items[] = {
 	&dev_font_test_item,
 	&dev_deff_test_item,
@@ -1590,6 +1642,8 @@ struct menu *dev_menu_items[] = {
 	&dev_balldev_test_item,
 	&dev_random_test_item,
 	&dev_trans_test_item,
+	&dev_force_error_item,
+	&dev_frametest_item,
 	NULL,
 };
 
@@ -1812,7 +1866,7 @@ void presets_draw (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%d. INSTALL %s", menu_selection+1, pre->name);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
 
 	/* Is it installed now? */	
 	while (comps->adj != NULL)
@@ -1821,13 +1875,13 @@ void presets_draw (void)
 		{
 			dbprintf ("Preset failed: adj %p equals %d, not %d\n",
 				comps->adj, *(comps->adj), comps->value);
-			font_render_string_left (&font_mono5, 32, 20, "NOT INSTALLED");
+			font_render_string_center (&font_mono5, 64, 13, "NOT INSTALLED");
 			break;
 		}
 
 		comps++;
 		if (comps->adj == NULL)
-			font_render_string_left (&font_mono5, 32, 20, "INSTALLED");
+			font_render_string_center (&font_mono5, 64, 13, "INSTALLED");
 	}
 
 	dmd_show_low ();
@@ -2421,11 +2475,19 @@ U8 gi_test_values[] = {
 
 const char *gi_test_names[] = {
 	"ALL OFF",
+#ifdef USE_MD
+	&names_of_gi[0],
+	&names_of_gi[1],
+	&names_of_gi[2],
+	&names_of_gi[3],
+	&names_of_gi[4],
+#else
 	"STRING 1 ON",
 	"STRING 2 ON",
 	"STRING 3 ON",
 	"STRING 4 ON",
 	"STRING 5 ON",
+#endif
 	"ALL ON",
 };
 
