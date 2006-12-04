@@ -328,6 +328,10 @@ void leff_stop (leffnum_t dn)
 			triac_leff_free (leff->gi);
 		leff_start_highest_priority ();
 	}
+	else
+	{
+		dbprintf ("leff_stop : not shared or running?\n");
+	}
 }
 
 
