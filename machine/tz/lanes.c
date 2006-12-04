@@ -41,7 +41,6 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
-	audit_increment (&system_audits.left_drains);
 	if (flag_test (FLAG_LEFT_OUTLANE_LIT))
 	{
 	}
@@ -51,7 +50,6 @@ CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
-	audit_increment (&system_audits.right_drains);
 	if (flag_test (FLAG_RIGHT_OUTLANE_LIT))
 	{
 	}

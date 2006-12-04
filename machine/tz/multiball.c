@@ -51,19 +51,32 @@ void mb_start_deff (void)
 {
 	kickout_lock (KLOCK_DEFF);
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
-	sprintf ("MULTIBALL");
 	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 	dmd_show_low ();
-	task_sleep_sec (1);
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
 
 void mb_running_deff (void)
 {
+	extern U8 score_change;
 	for (;;)
 	{
-		/* TODO */
+		score_change = 0;
+		dmd_alloc_low_high ();
+		dmd_clean_page_low ();
+		sprintf ("%8b", current_score);
+		font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 27, "SHOOT PIANO FOR JACKPOT");
+		dmd_copy_low_to_high ();
+		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+		dmd_show_low ();
+		while (score_change == 0)
+		{
+			task_sleep (TIME_133MS);
+			dmd_show_other ();
+		}
 	}
 }
 
@@ -103,7 +116,7 @@ CALLSET_ENTRY (mball, mball_start)
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
-		// deff_start (DEFF_MB_RUNNING);
+		deff_start (DEFF_MB_RUNNING);
 		callset_invoke (music_update);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
@@ -121,6 +134,7 @@ CALLSET_ENTRY (mball, mball_stop)
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_off (FLAG_MULTIBALL_RUNNING);
+		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
 		callset_invoke (music_update);

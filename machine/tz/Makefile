@@ -62,5 +62,5 @@ GAME_TEST_OBJS = test.o clocktest.o gumball_test.o
 GAME_INCLUDES =
 
 # These should eventually move to the machine page!
-GAME_OBJS += lanes.o leftramp.o skill.o deadend.o camera.o
+GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o
 

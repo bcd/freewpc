@@ -94,21 +94,21 @@ define MACHINE_CUSTOM_AMODE
 12: Right Outlane, micro, sound(SND_DRAIN)
 13: Start Button, start-button, intest
 14: Tilt, tilt, ingame
-15: Right Trough, c_decl(sw_trough)
-16: Center Trough, c_decl(sw_trough)
-17: Left Trough, c_decl(sw_trough)
-18: Outhole, outhole, intest
-21: Slam Tilt, slam-tilt, ingame
+15: Right Trough, c_decl(sw_trough), noplay
+16: Center Trough, c_decl(sw_trough), noplay
+17: Left Trough, c_decl(sw_trough), noplay
+18: Outhole, outhole, intest, noplay
+21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
-25: Far Left Trough
-26: Trough Proximity, opto
-27: Shooter, shooter, c_decl(sw_unused)
+25: Far Left Trough, noplay
+26: Trough Proximity, opto, noplay
+27: Shooter, shooter, c_decl(sw_unused), noplay
 28: Rocket Kicker
-31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet
-32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet
-33: Bottom Jet, ingame, c_decl(sw_jet), fast, Bottom Jet
-34: Left Sling, ingame, c_decl(sw_sling), fast, Left Slingshot
-35: Right Sling, ingame, c_decl(sw_sling), fast, Right Slingshot
+31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
+32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
+33: Bottom Jet, ingame, c_decl(sw_jet), fast, Bottom Jet, noplay
+34: Left Sling, ingame, c_decl(sw_sling), fast, Left Slingshot, noplay
+35: Right Sling, ingame, c_decl(sw_sling), fast, Right Slingshot, noplay
 36: Left Outlane, sound(SND_DRAIN)
 37: Left Inlane 1, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE1)
 38: Left Inlane 2, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE2)
@@ -120,41 +120,41 @@ define MACHINE_CUSTOM_AMODE
 46: MPF Right, ingame
 47: Clock Target, standup, ingame, lamp(LM_CLOCK_MILLIONS)
 48: Standup 1, standup, ingame, lamp(LM_LL_5M)
-51: Gumball Lane
+51: Gumball Lane, intest
 52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, opto
-56: Gumball Exit
+55: Gumball Geneva, opto, intest
+56: Gumball Exit, intest
 57: Slot Proximity
 58: Slot
-61: Skill Bottom, ingame
-62: Skill Center, ingame
-63: Skill Top, ingame
+61: Skill Bottom, ingame, noplay
+62: Skill Center, ingame, noplay
+63: Skill Top, ingame, noplay
 64: Standup 4, standup, ingame, lamp(LM_UR_5M)
 65: Power Payoff, c_decl(sw_unused)
 66: Standup 5, standup, ingame, lamp(LM_MR1_5M)
 67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
 68: Standup 7, standup, ingame, lamp(LM_LR_5M)
-71: Autofire1, opto
-72: Autofire2, opto
+71: Autofire1, opto, noplay, ingame
+72: Autofire2, opto, noplay, ingame
 73: Right Ramp, opto, ingame
-74: Gumball Popper, opto
+74: Gumball Popper, opto, intest
 75: MPF Top, opto, ingame
 76: MPF Exit, opto, ingame
 77: Standup 2, standup, ingame, lamp(LM_ML_5M)
 78: Standup 3, standup, ingame, lamp(LM_UL_5M)
-81: Lower Right Magnet, opto
-82: Upper Right Magnet, opto
-83: Left Magnet, opto
+81: Lower Right Magnet, opto, intest
+82: Upper Right Magnet, opto, intest
+83: Left Magnet, opto, intest
 84: Lock Center, opto, c_decl(sw_lock)
 85: Lock Upper, opto, c_decl(sw_lock)
 86: Clock Passage, opto, c_decl(sw_unused)
-87: Gumball Enter, opto
+87: Gumball Enter, opto, intest
 88: Lock Lower, c_decl(sw_lock)
-F5: U. R. Flipper EOS, opto
+F5: U. R. Flipper EOS, opto, cabinet
 F6: U. R. Flipper Button, button, opto
-F7: U. L. Flipper EOS, opto
+F7: U. L. Flipper EOS, opto, cabinet
 F8: U. L. Flipper Button, button, opto
 
 [drives]
@@ -344,21 +344,21 @@ PB_ALONE_IN_PLAY:
 [deffs]
 Amode: runner, PRI_AMODE
 Bonus: runner, PRI_BONUS
-BRIAN_IMAGE: PRI_EGG1
+Brian Image: PRI_EGG1
 REPLAY: PRI_REPLAY
 JACKPOT: PRI_JACKPOT
 SPECIAL: PRI_SPECIAL
-EXTRA_BALL: PRI_EB
-LEFT_RAMP: PRI_GAME_MODE1+1
-LOCK_LIT: PRI_GAME_MODE1+2
-MB_LIT: PRI_GAME_MODE1+2
-BALL_SAVE: PRI_GAME_MODE1+3
+Extra Ball: PRI_EB
+Left Ramp: PRI_GAME_MODE1+1
+Lock Lit: PRI_GAME_MODE1+2
+MB Lit: PRI_GAME_MODE1+2
+Ball Save: PRI_GAME_MODE1+3
 HITCHHIKER: PRI_GAME_MODE1+4
 CAMERA_AWARD: PRI_GAME_MODE1+5
 DOOR_AWARD: PRI_GAME_MODE1+5
-MB_START: PRI_GAME_MODE1+7
+MB Start: PRI_GAME_MODE1+7
 SKILL_SHOT_MADE: PRI_GAME_MODE1+8
-MB_RUNNING: PRI_GAME_MODE1+2
+MB Running: runner, PRI_GAME_MODE1+2
 
 [leffs]
 FLASHER_HAPPY: PRI_LEFF1
@@ -367,15 +367,30 @@ LEFT_RAMP: PRI_LEFF2
 CLOCK_TARGET: PRI_LEFF2, GI(ALL)
 NO_GI: L_NORMAL, PRI_LEFF3, GI(ALL)
 SLOT_KICKOUT: PRI_LEFF3
-AMODE: runner, PRI_LEFF5, LAMPS(AMODE_ALL)
+AMODE: runner, PRI_LEFF5, LAMPS(AMODE_ALL), GI(ALL)
 FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
-BONUS: runner PRI_BONUS, LAMPS(ALL), GI(ALL)
+BONUS: runner, PRI_BONUS, LAMPS(ALL), GI(ALL)
 JETS_ACTIVE: shared, 0, LAMPS(JETS), c_decl(null_leff)
 GAME_TIMEOUT: PRI_TILT, GI(ALL)
 CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
 MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
 
 [fonts]
+mono5:
+mono9:
+fixed10:
+fixed6:
+lucida9:
+term6:
+times8:
+times10:
+helv8:
+schu:
+misctype:
+utopia:
+fixed12:
+var5:
+cu17:
 
 ###################################################################
 

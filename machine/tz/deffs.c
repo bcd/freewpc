@@ -130,6 +130,8 @@ void ball_save_deff (void)
 	deff_exit ();
 }
 
+
+
 CALLSET_ENTRY (deff, start_player)
 {
 	ball_save_count = 0;

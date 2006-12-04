@@ -70,7 +70,7 @@ void camera_award_deff (void)
 }
 
 
-void do_camera_award (void)
+static void do_camera_award (void)
 {
 	task_sleep (TIME_100MS);
 	switch (camera_award_count)

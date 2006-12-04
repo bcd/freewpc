@@ -29,7 +29,7 @@ CALLSET_ENTRY (deadend, start_player)
 }
 
 
-CALLSET_ENTRY (deadend, sw_deadend)
+CALLSET_ENTRY (deadend, sw_dead_end)
 {
 	switch_can_follow (dead_end, slot, TIME_8S);
 	switch_can_follow (dead_end, camera, TIME_4S);

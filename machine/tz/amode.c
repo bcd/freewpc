@@ -138,45 +138,39 @@ void amode_right_flipper (void)
 	egg_right_flipper ();
 }
 
-void amode_lamp_toggle_task (void) __taskentry__
+void amode_lamp_toggle_task (void)
 {
 	lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
 	task_exit ();
 }
 
+U8 amode_leff_subset;
 
-void amode_leff (void) __taskentry__
+void amode_leff_subset_task (void)
+{
+	register U8 lampset = amode_leff_subset;
+	lampset_set_apply_delay (TIME_100MS);
+	for (;;) lampset_apply_leff_toggle (lampset);
+}
+
+void amode_leff (void)
 {
 	U8 i;
 
 	triac_enable (TRIAC_GI_MASK);
-	lampset_set_apply_delay (0);
-	for (;;)
+	leff_on (LM_SLOT_MACHINE);
+	leff_on (LM_RAMP_BATTLE);
+	leff_on (LM_CLOCK_MILLIONS);
+	for (amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+		amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
+		amode_leff_subset++)
 	{
-		lampset_apply_leff_off (LAMPSET_AMODE_ALL);
-
-		lampset_set_apply_delay (TIME_16MS);
-		for (i=0; i < 6; i++)
-		{
-			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
-			task_sleep (TIME_100MS * 3);
-		}
-
-		lampset_set_apply_delay (0);
-		lampset_apply_leff_alternating (LAMPSET_AMODE_ALL, 0);
-		for (i=0; i < 20; i++)
-		{
-			lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
-			task_sleep (TIME_100MS * 2);
-		}
-
-		lampset_apply_leff_alternating (LAMPSET_AMODE_RAND, 0);
-		for (i=0; i < 60; i++)
-		{
-			lampset_apply_leff_toggle (LAMPSET_AMODE_RAND);
-			task_sleep (TIME_100MS);
-		}
+		if (amode_leff_subset == LAMPSET_DOOR_LOCKS_AND_GUMBALL)
+			continue;
+		task_create_peer (amode_leff_subset_task);
+		task_sleep (TIME_33MS);
 	}
+	task_exit ();
 }
 
 
@@ -222,8 +216,20 @@ void amode_deff (void) __taskentry__
 
 	tz_clock_reset ();
 
+
 	for (;;)
 	{
+#if 1
+		dmd_alloc_low_high ();
+		dmd_draw_image2 (hitcher0_bits);
+		dmd_show2 ();
+		task_sleep_sec (5);
+		
+		dmd_alloc_low_high ();
+		dmd_draw_image2 (cow0_bits);
+		dmd_show2 ();
+		task_sleep_sec (5);
+#else
 		/** Display last set of player scores **/
 		dmd_alloc_low_clean ();
 		scores_draw ();
@@ -281,14 +287,14 @@ void amode_deff (void) __taskentry__
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
-		/* Kill music if it is running */
-		music_set (MUS_OFF);
-
 		if (--design_credit_counter == 0)
 		{
 			design_credit_counter = 3;
 			amode_show_design_credits ();
 		}
+#endif
+		/* Kill music if it is running */
+		music_set (MUS_OFF);
 	}
 }
 

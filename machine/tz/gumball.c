@@ -90,7 +90,7 @@ void gumball_release (void)
 /* Switch Handlers                                           */
 /*************************************************************/
 
-void sw_gumball_exit_handler (void)
+CALLSET_ENTRY (gumball, sw_gumball_exit)
 {
 	if (event_did_follow (gumball_geneva, gumball_exit))
 	{
@@ -100,14 +100,14 @@ void sw_gumball_exit_handler (void)
 	event_should_follow (gumball_exit, camera, TIME_3S);
 }
 
-void sw_gumball_geneva_handler (void)
+CALLSET_ENTRY (gumball, sw_gumball_geneva)
 {
 	dbprintf ("Geneva tripped.\n");
 	gumball_geneva_tripped = TRUE;
 	event_should_follow (gumball_geneva, gumball_exit, TIME_2S);
 }
 
-void sw_gumball_enter_handler (void)
+CALLSET_ENTRY (gumball, sw_gumball_enter)
 {
 	/* Ball has entered the gumball machine.
 	 * Increment virtual count of balls inside.
@@ -115,7 +115,7 @@ void sw_gumball_enter_handler (void)
 	dbprintf ("Gumball entered.\n");
 }
 
-void sw_gumball_popper_handler (void)
+CALLSET_ENTRY (gumball, sw_gumball_popper)
 {
 	/* Wait for ball to settle, then pop
 	 * ball into the gumball machine. */
@@ -140,7 +140,7 @@ void sw_gumball_right_loop_entered (void)
 	}
 }
 
-void sw_gumball_lane_handler (void)
+CALLSET_ENTRY (gumball, sw_gumball_lane)
 {
 	/* Ball is approaching popper.
 	 * Gumball diverter can be closed now. */
@@ -169,36 +169,6 @@ void sw_far_left_trough_handler (void)
 	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 }
 
-
-DECLARE_SWITCH_DRIVER (sw_gumball_exit)
-{
-	.flags = SW_IN_TEST,
-	.fn = sw_gumball_exit_handler,
-};
-
-DECLARE_SWITCH_DRIVER (sw_gumball_geneva)
-{
-	.flags = SW_IN_TEST,
-	.fn = sw_gumball_geneva_handler,
-};
-
-DECLARE_SWITCH_DRIVER (sw_gumball_enter)
-{
-	.flags = SW_IN_TEST,
-	.fn = sw_gumball_enter_handler,
-};
-
-DECLARE_SWITCH_DRIVER (sw_gumball_popper)
-{
-	.flags = SW_IN_TEST,
-	.fn = sw_gumball_popper_handler,
-};
-
-DECLARE_SWITCH_DRIVER (sw_gumball_lane)
-{
-	.flags = SW_IN_TEST,
-	.fn = sw_gumball_lane_handler,
-};
 
 DECLARE_SWITCH_DRIVER (sw_far_left_trough)
 {

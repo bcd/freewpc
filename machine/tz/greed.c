@@ -89,37 +89,37 @@ CALLSET_ENTRY (greed, start_player)
 }
 
 
-CALLSET_ENTRY (greed, sw_greed_handler1)
+CALLSET_ENTRY (greed, sw_standup_1)
 {
 	common_greed_handler (0x1);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler2)
+CALLSET_ENTRY (greed, sw_standup_2)
 {
 	common_greed_handler (0x2);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler3)
+CALLSET_ENTRY (greed, sw_standup_3)
 {
 	common_greed_handler (0x4);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler4)
+CALLSET_ENTRY (greed, sw_standup_4)
 {
 	common_greed_handler (0x8);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler5)
+CALLSET_ENTRY (greed, sw_standup_5)
 {
 	common_greed_handler (0x10);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler6)
+CALLSET_ENTRY (greed, sw_standup_6)
 {
 	common_greed_handler (0x20);
 }
 
-CALLSET_ENTRY (greed, sw_greed_handler7)
+CALLSET_ENTRY (greed, sw_standup_7)
 {
 	common_greed_handler (0x40);
 }

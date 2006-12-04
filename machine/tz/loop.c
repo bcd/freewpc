@@ -62,7 +62,7 @@ void award_right_loop (void)
 
 
 
-void sw_left_loop_handler (void)
+CALLSET_ENTRY (loop, sw_left_magnet)
 {
 	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
@@ -83,14 +83,12 @@ void sw_left_loop_handler (void)
 }
 
 
-#ifdef CONFIG_SUPPORT_THIRD_MAGNET
-void sw_right_loop_top_handler (void)
+CALLSET_ENTRY (loop, sw_upper_right_magnet)
 {
 }
-#endif
 
 
-void sw_right_loop_handler (void)
+CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
 	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
@@ -128,31 +126,4 @@ void sw_right_loop_handler (void)
 	/* Inform gumball module that a ball may be approaching */
 	sw_gumball_right_loop_entered ();
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_left_magnet)
-{
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.fn = sw_left_loop_handler,
-};
-
-/* The right loop switches are needed outside of game mode in order
- * to load the gumball machine, so don't use SW_IN_GAME here. */
-
-DECLARE_SWITCH_DRIVER (sw_upper_right_magnet)
-{
-	.flags = SW_PLAYFIELD | SW_IN_TEST,
-#ifdef CONFIG_SUPPORT_THIRD_MAGNET
-	.fn = sw_right_loop_top_handler,
-#else
-	.fn = null_function,
-#endif
-};
-
-
-DECLARE_SWITCH_DRIVER (sw_lower_right_magnet)
-{
-	.flags = SW_PLAYFIELD | SW_IN_TEST,
-	.fn = sw_right_loop_handler,
-};
 

@@ -24,33 +24,19 @@
 U8 autofire_request_count;
 
 
-void sw_autofire1_handler (void)
+CALLSET_ENTRY (autofire, sw_autofire1)
 {
 	score (SC_100);
 }
 
 
-void sw_autofire2_handler (void)
+CALLSET_ENTRY (autofire, sw_autofire2)
 {
 	score (SC_100);
 	if (autofire_request_count == 0)
 	{
 	}
 }
-
-
-DECLARE_SWITCH_DRIVER(sw_autofire1)
-{
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.fn = sw_autofire1_handler,
-};
-
-
-DECLARE_SWITCH_DRIVER(sw_autofire2)
-{
-	.flags = SW_PLAYFIELD | SW_IN_GAME,
-	.fn = sw_autofire2_handler,
-};
 
 
 __taskentry__ void autofire_handler (void)

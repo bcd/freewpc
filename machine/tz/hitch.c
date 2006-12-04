@@ -35,7 +35,7 @@ void hitchhiker_deff (void)
 }
 
 
-CALLSET_ENTRY (hitch, sw_hitch_handler)
+CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
 	event_did_follow (rocket, hitchhiker);
 	if (lamp_test (LM_PANEL_HH))
