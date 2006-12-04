@@ -18,16 +18,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#define TRUE 1
+#define FALSE 0
 #include "pgmlib.h"
 
 void
-pgm_read_test (void)
+pgm_to_xbmset (const char *name, int invert_flag)
 {
-	PGM *pgm = pgm_read ("images/brianhead.pgm");
+	char infilename[64];
+	char outfilename[64];
+
+	sprintf (infilename, "images/%s.pgm", name);
+	sprintf (outfilename, "images/%s.xbm", name);
+
+	PGM *pgm = pgm_read (infilename);
 	pgm_change_maxval (pgm, 3);
-	// pgm_dither (pgm, 3);
-	pgm_invert (pgm);
-	pgm_write_xbmset (pgm, "images/readtest.xbm", "readtest");
+
+	pgm_dither (pgm, 3);
+
+	if (invert_flag)
+		pgm_invert (pgm);
+	pgm_write_xbmset (pgm, outfilename, name);
 }
 
 
@@ -43,9 +54,11 @@ pgm_read_test (void)
 void
 machgen (void)
 {
-#if 1
-	pgm_read_test ();
-#endif
+	pgm_to_xbmset ("cow", FALSE);
+	pgm_to_xbmset ("hitcher", TRUE);
+	pgm_to_xbmset ("coinstack", FALSE);
+	pgm_to_xbmset ("oldcar", FALSE);
+
 	gen_mborder ();
 	gen_multisquare_background ();
 	gen_dithered_dark_background ();
