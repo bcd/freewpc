@@ -1,0 +1,225 @@
+#!/usr/bin/perl
+
+use Data::Dumper;
+
+# TODO:
+# Optimizations:
+# * If a timer is started from only one state, then the existence of the timer running
+# equates to the state being active.  Remove the state from the list.  Remove the
+# state variable if all states can be eliminated this way.
+# * Use a bit flag if there are only two states.
+# * Merge identical code blocks, for readability
+
+my %states;
+my %inputs;
+my %transitions;
+my %actions;
+my $fsm_name;
+my $enum_prefix;
+my $fsm_state_var;
+my $timernum = 0;
+my %timer_transition_from;
+my %timer_duration;
+
+sub state_enum { 
+	my ($state) = @_;
+	$state =~ tr/a-z/A-Z/;
+	return "${enum_prefix}_STATE_" . $state;
+}
+
+sub fsm_stop_timers {
+	for my $i (0 .. $timernum) {
+		print OFH "task_stop_gid (GID_${fsm_name}_TIMER_${i})\n";
+	}
+}
+
+sub fsm_start_timer {
+	my ($t) = @_;
+	for my $i (0 .. $timernum) {
+		if ($t == $i) {
+			print OFH "task_restart_gid (GID_${fsm_name}_TIMER_${i})\n";
+		} else {
+			print OFH "task_stop_gid (GID_${fsm_name}_TIMER_${i})\n";
+		}
+	}
+}
+
+sub timer_gid {
+	my $t = shift;
+	my $id = $fsm_name . "_" . $t;
+	$id =~ tr/a-z/A-Z/;
+	return "GID_${id}";
+}
+
+sub timer_function {
+	my $t = shift;
+	my $id = $fsm_name . "_" . $t;
+	return "${id}_task";
+}
+
+sub fsm_finish {
+	my $fsm_state_var = "${fsm_name}_fsm_state";
+
+	print OFH "/* Automatically generated from FSM $fsm_name */\n\n";
+
+	print OFH "#include <freewpc.h>\n\n";
+
+	print OFH "typedef enum {\n";
+	foreach $state (keys %states) {
+		print OFH "   " . state_enum ($state) . ",\n";
+	}
+	print OFH "} ${fsm_name}_state;\n\n";
+
+	print OFH "static ${fsm_name}_state ${fsm_state_var};\n\n";
+
+	foreach $input (keys %inputs) {
+		if ($input =~ /^timer_/) {
+			print OFH "static void " . timer_function ($input) . " (void) {\n";
+			print OFH "   task_sleep (" . $timer_duration{$input} . ");\n";
+		}
+		else {
+			print OFH "CALLSET_ENTRY ($fsm_name, $input)\n{\n";
+		}
+
+		print OFH "   switch ($fsm_state_var) {\n";
+
+		if (defined  $transitions{"*,$input"}) {
+			foreach $state (keys %states) {
+				$transitions{"$state,$input"} = $transitions{"*,$input"};
+				$actions{"$state,$input"} = $actions{"*,$input"};
+			}
+			$transitions{"*,$input"} = undef;
+			$actions{"*,$input"} = undef;
+		}
+
+		foreach $state (keys %states) {
+			my $transition = $transitions{"$state,$input"};
+			if (defined $transition) {
+				print OFH "      case " . state_enum ($state) . ":\n";
+
+				# If transition from a state in which a timer was running, then
+				# stop the timer (unless we are in the timer function)
+				# i.e. if $transition{state,TIME_xxx} is defined.
+				for $key (keys %transitions) {
+					if ($key =~ /$state,(timer_.*)/) {
+						if ($1 ne $input) {
+							print OFH "         task_kill_gid (" .  timer_gid ($1) .  ");\n";
+						}
+					}
+				}
+				#if (my $timers = $timer_transition_from{$state}) {
+				#	for $timernum (split " ", $timers) {
+				#		if ($input ne $timernum) {
+				#		}
+				#	}
+				#}
+
+				# If transitioning to a state that may be followed by a timer,
+				# then start the timer.
+				# i.e. for all timers T where $transition{$transition,T} is defined.
+				for $key (keys %transitions) {
+					if ($key =~ /$transition,(timer_.*)/) {
+						print OFH "         task_restart_gid (" . 
+							timer_gid ($1) . ", " . timer_function ($1) .
+							");\n";
+					}
+				}
+
+				#if (my $timers = $timer_transition_from{$transition}) {
+				#	for $timernum (split " ", $timers) {
+				#	}
+				#}
+
+				my $action = $actions{"$state,$input"};
+				if ($action ne "") {
+					print OFH "         $action\n";
+				}
+
+				print OFH "         $fsm_state_var = " . state_enum ($transition) . ";\n";
+				print OFH "         break;\n";
+			}
+		}
+		print OFH "      default:\n";
+		print OFH "         break;\n";
+		print OFH "   }\n";
+
+		if ($input =~ /^timer_/) {
+			print OFH "   task_exit ();\n";
+		}
+		print OFH "}\n\n";
+	}
+}
+
+sub fsm_new {
+	$fsm_name = shift;
+	$enum_prefix = $fsm_name;
+	$enum_prefix =~ tr/a-z/A-Z/;
+	$timernum = 0;
+	my $in_action = 0;
+
+	while (<IFH>) {
+		chomp;
+		s/^[ \t]+//;
+		if (/^{/) {
+			$in_action = 1;
+		}
+		elsif (/^}/) {
+			if ($in_action == 1) {
+				$in_action = 0;
+			}
+			else {
+				fsm_finish;
+				return;
+			}
+		}
+		elsif (/(.*):(.*)[ \t]+=>[ \t]+(\w+)[ \t]*$/) {
+			my ($init_states, $event, $new_state) = ($1, $2, $3);
+			$init_states =~ s/[ \t]//g;
+			$event =~ s/[ \t]//g;
+			$new_state =~ s/[ \t]//g;
+			print "$init_states : $event => $new_state\n";
+			if ($init_states ne "*") {
+				@init_state_array = split /,/, $init_states;
+				foreach $init_state (@init_state_array) {
+					if ($event =~ m/^TIME_/) {
+						++$timernum;
+						$timer_transition_from{$init_state} .= "timer_" . $timernum . " ";
+						$timer_duration{"timer_" . $timernum} = $event;
+						$event = "timer_" . $timernum;
+					}
+					$states{$init_state} = 1;
+					$states{$new_state} = 1;
+					$inputs{$event} = 1;
+					$transitions{"$init_state,$event"} = $new_state;
+					$actions{"$init_state,$event"} = "";
+					$current_action = \$actions{"$init_state,$event"};
+				}
+			}
+			else {
+				$inputs{$event} = 1;
+				$transitions{"*,$event"} = $new_state;
+				$actions{"*,$event"} = "";
+				$current_action = \$actions{"*,$event"};
+			}
+		}
+		else {
+			if ($in_action) {
+				s/throw[ \t]+(.*);/callset_invoke ($1);/g;
+				$$current_action .= $_;
+			}
+		}
+	}
+}
+
+
+open IFH, "loop.fsm";
+open OFH, ">fsm-loop.c";
+while (<IFH>)
+{
+	chomp;
+	if (/^(\w+)[ \t]+\{$/) {
+		fsm_new ($1);
+	}
+}
+
+print OFH "/*" . Dumper(%timer_transition_from) . "*/\n";

@@ -1,0 +1,22 @@
+
+loop {
+	* : start_ball => INIT
+	INIT : sw_left_magnet => left_loop_started 
+	INIT : sw_right_magnet => right_loop_started
+	INIT : sw_lower_right_magnet => right_loop_started
+	left_loop_started : sw_right_magnet => left_loop_made
+		{
+			throw shot_left_loop;
+		}
+	left_loop_started : sw_lower_right_magnet => left_loop_made
+		{
+			throw shot_left_loop;
+		}
+	right_loop_started : sw_left_magnet => right_loop_made
+		{
+			throw shot_right_loop;
+		}
+	left_loop_started, right_loop_started : TIME_3S => INIT
+	left_loop_made, right_loop_made : TIME_1S => INIT
+}
+
