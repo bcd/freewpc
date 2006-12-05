@@ -41,7 +41,6 @@ my %transitions;
 my %actions;
 my $fsm_name;
 my $enum_prefix;
-my $fsm_state_var;
 my $timernum = 0;
 my %timer_transition_from;
 my %timer_duration;
@@ -85,6 +84,7 @@ sub timer_function {
 }
 
 sub fsm_finish {
+	next if (!defined $states{"INIT"});
 	my $fsm_state_var = "${fsm_name}_fsm_state";
 
 	print OFH "/* Automatically generated from FSM $fsm_name */\n\n";
@@ -178,7 +178,7 @@ sub fsm_finish {
 				debug "$state";
 				debug " : ";
 				debug "$input";
-				debug "=> ";
+				debug " => ";
 				debug "$transition";
 				debug "\n";
 
@@ -198,11 +198,18 @@ sub fsm_finish {
 	}
 }
 
+
 sub fsm_new {
+	%states = ();
+	%inputs = ();
+	%transitions = ();
+	%actions = ();
 	$fsm_name = shift;
 	$enum_prefix = $fsm_name;
 	$enum_prefix =~ tr/a-z/A-Z/;
 	$timernum = 0;
+	%timer_transition_from = ();
+	%timer_duration = ();
 	my $in_action = 0;
 
 	while (<IFH>) {
