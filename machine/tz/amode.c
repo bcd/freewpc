@@ -209,17 +209,23 @@ void amode_high_score_test (void)
 	task_exit ();
 }
 
+CALLSET_ENTRY (tz_amode, amode_start)
+{
+	tz_clock_reset ();
+}
+
+CALLSET_ENTRY (tz_amode, amode_stop)
+{
+	tz_clock_stop ();
+}
 
 void amode_deff (void) __taskentry__
 {
 	U8 design_credit_counter = 3;
 
-	tz_clock_reset ();
-
-
 	for (;;)
 	{
-#if 1
+#if 0
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (hitcher0_bits);
 		dmd_show2 ();
@@ -239,7 +245,7 @@ void amode_deff (void) __taskentry__
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
-		dmd_draw_image2 (readtest0_bits);
+		dmd_draw_image2 (brianhead_bits);
 		font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
 		dmd_sched_transition (&trans_random_boxfade);
 		dmd_show2 ();

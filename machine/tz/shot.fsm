@@ -1,10 +1,19 @@
+#
+# FSM for Twilight Zone shots
+# (C) Copyright 2006 by Brian Dominy.  All Rights Reserved.
+#
 
-loop {
+
+#################################################################
+# Recognize loop shots.
+#################################################################
+
+loopshots {
 	* : start_ball => INIT
 	INIT : sw_left_magnet => left_loop_started 
-	INIT : sw_right_magnet => right_loop_started
+	INIT : sw_upper_right_magnet => right_loop_started
 	INIT : sw_lower_right_magnet => right_loop_started
-	left_loop_started : sw_right_magnet => left_loop_made
+	left_loop_started : sw_upper_right_magnet => left_loop_made
 		{
 			throw shot_left_loop;
 		}
@@ -19,4 +28,5 @@ loop {
 	left_loop_started, right_loop_started : TIME_3S => INIT
 	left_loop_made, right_loop_made : TIME_1S => INIT
 }
+
 

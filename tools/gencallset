@@ -160,6 +160,9 @@ foreach $set (keys %functionhash) {
 		elsif ($modulehash{$module} =~ /^mach/) {
 			$modifier = " __machine__";
 		}
+		elsif ($modulehash{$module} =~ /^build/) {
+			$modifier = " __machine__";
+		}
 		else {
 			$modifier = "";
 		}

@@ -112,6 +112,7 @@ void amode_start (void)
 #endif
 	lamp_start_update ();
 	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
+	callset_invoke (amode_start);
 }
 
 
@@ -123,6 +124,7 @@ void amode_stop (void)
 #endif
 	lamp_all_off ();
 	music_set (MUS_OFF);
+	callset_invoke (amode_stop);
 }
 
 #ifdef DEBUGGER
@@ -391,9 +393,14 @@ void start_ball (void)
 
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
+
+	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+	{
 #ifdef DEVNO_TROUGH
-	device_request_kick (device_entry (DEVNO_TROUGH));
+		device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
+	}
+
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);
 	ball_search_timeout_set (12);

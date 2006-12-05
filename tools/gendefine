@@ -52,6 +52,7 @@ my @dirs = (
 	"test",
 	"platform/linux",
 	"platform/wpc",
+	"build",
 	);
 
 my $firstval = 1;

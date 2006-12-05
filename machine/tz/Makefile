@@ -64,3 +64,4 @@ GAME_INCLUDES =
 # These should eventually move to the machine page!
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o
 
+GAME_FSMS = shot.fsm

@@ -1,15 +1,40 @@
 #!/usr/bin/perl
+#
+# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------
+# fsmgen - compile a finite state machine description
+# ------------------------------------------------------------------
+
 
 use Data::Dumper;
 
 # TODO:
 # Optimizations:
-# * If a timer is started from only one state, then the existence of the timer running
-# equates to the state being active.  Remove the state from the list.  Remove the
-# state variable if all states can be eliminated this way.
+# * If a timer is started from only one state, then the existence of 
+# the timer running equates to the state being active.  Remove the state 
+# from the list.  Remove the state variable if all states can be 
+# eliminated this way.
 # * Use a bit flag if there are only two states.
 # * Merge identical code blocks, for readability
 
+my $debug = 0;
 my %states;
 my %inputs;
 my %transitions;
@@ -21,27 +46,29 @@ my $timernum = 0;
 my %timer_transition_from;
 my %timer_duration;
 
+sub debug {
+	return if (!$debug);
+	my $separator = "";
+	print OFH "          db_puts (\"";
+	for $arg (@_) {
+		my $arg2 = $arg;
+		$arg2 =~ s/\n/\\n/g;
+		print OFH "$separator$arg2";
+		$separator = ", ";
+	}
+	print OFH "\");\n";
+}
+
+sub skip {
+	$_ = shift;
+	return 1 if /^[ \t]*#/;
+	return 0;
+}
+
 sub state_enum { 
 	my ($state) = @_;
 	$state =~ tr/a-z/A-Z/;
 	return "${enum_prefix}_STATE_" . $state;
-}
-
-sub fsm_stop_timers {
-	for my $i (0 .. $timernum) {
-		print OFH "task_stop_gid (GID_${fsm_name}_TIMER_${i})\n";
-	}
-}
-
-sub fsm_start_timer {
-	my ($t) = @_;
-	for my $i (0 .. $timernum) {
-		if ($t == $i) {
-			print OFH "task_restart_gid (GID_${fsm_name}_TIMER_${i})\n";
-		} else {
-			print OFH "task_stop_gid (GID_${fsm_name}_TIMER_${i})\n";
-		}
-	}
 }
 
 sub timer_gid {
@@ -70,12 +97,20 @@ sub fsm_finish {
 	}
 	print OFH "} ${fsm_name}_state;\n\n";
 
+	for my $timer (1 .. $timernum) {
+		print OFH "static void " . timer_function ("timer_" . $timer) . 
+			" (void);\n";
+	}
+	print "\n";
+
 	print OFH "static ${fsm_name}_state ${fsm_state_var};\n\n";
 
 	foreach $input (keys %inputs) {
 		if ($input =~ /^timer_/) {
 			print OFH "static void " . timer_function ($input) . " (void) {\n";
+			debug "$input is running\n";
 			print OFH "   task_sleep (" . $timer_duration{$input} . ");\n";
+			debug "$input has expired\n";
 		}
 		else {
 			print OFH "CALLSET_ENTRY ($fsm_name, $input)\n{\n";
@@ -95,6 +130,9 @@ sub fsm_finish {
 		foreach $state (keys %states) {
 			my $transition = $transitions{"$state,$input"};
 			if (defined $transition) {
+				if (($transition eq $state) && ((length values %states) == 1)) {
+					print OFH "      default:\n";
+				}
 				print OFH "      case " . state_enum ($state) . ":\n";
 
 				# If transition from a state in which a timer was running, then
@@ -103,6 +141,7 @@ sub fsm_finish {
 				for $key (keys %transitions) {
 					if ($key =~ /$state,(timer_.*)/) {
 						if ($1 ne $input) {
+							debug "$1 stopped\n";
 							print OFH "         task_kill_gid (" .  timer_gid ($1) .  ");\n";
 						}
 					}
@@ -119,7 +158,8 @@ sub fsm_finish {
 				# i.e. for all timers T where $transition{$transition,T} is defined.
 				for $key (keys %transitions) {
 					if ($key =~ /$transition,(timer_.*)/) {
-						print OFH "         task_restart_gid (" . 
+						debug "$1 started\n";
+						print OFH "         task_recreate_gid (" . 
 							timer_gid ($1) . ", " . timer_function ($1) .
 							");\n";
 					}
@@ -135,12 +175,20 @@ sub fsm_finish {
 					print OFH "         $action\n";
 				}
 
-				print OFH "         $fsm_state_var = " . state_enum ($transition) . ";\n";
+				debug "$state";
+				debug " : ";
+				debug "$input";
+				debug "=> ";
+				debug "$transition";
+				debug "\n";
+
+				print OFH "         $fsm_state_var = " . 
+					state_enum ($transition) . ";\n";
 				print OFH "         break;\n";
 			}
 		}
-		print OFH "      default:\n";
-		print OFH "         break;\n";
+		#print OFH "      default:\n";
+		#print OFH "         break;\n";
 		print OFH "   }\n";
 
 		if ($input =~ /^timer_/) {
@@ -158,6 +206,7 @@ sub fsm_new {
 	my $in_action = 0;
 
 	while (<IFH>) {
+		next if (skip $_);
 		chomp;
 		s/^[ \t]+//;
 		if (/^{/) {
@@ -177,7 +226,7 @@ sub fsm_new {
 			$init_states =~ s/[ \t]//g;
 			$event =~ s/[ \t]//g;
 			$new_state =~ s/[ \t]//g;
-			print "$init_states : $event => $new_state\n";
+			# print "$init_states : $event => $new_state\n";
 			if ($init_states ne "*") {
 				@init_state_array = split /,/, $init_states;
 				foreach $init_state (@init_state_array) {
@@ -212,14 +261,32 @@ sub fsm_new {
 }
 
 
-open IFH, "loop.fsm";
-open OFH, ">fsm-loop.c";
+while (my $arg = shift @ARGV) {
+	if ($arg =~ /-o/) {
+		$outfile = shift @ARGV;
+	}
+	elsif ($arg =~ /-d/) {
+		$debug = 1;
+	}
+	else {
+		$infile = $arg;
+	}
+}
+
+if (!defined $outfile) {
+	$outfile = $infile;
+	$outfile =~ s/\.fsm$/.c/;
+}
+
+open IFH, $infile or die "can't open $infile for reading\n";
+open OFH, ">$outfile" or die "can't open $outfile for writing\n";
 while (<IFH>)
 {
 	chomp;
+	next if (skip $_);
 	if (/^(\w+)[ \t]+\{$/) {
 		fsm_new ($1);
 	}
 }
 
-print OFH "/*" . Dumper(%timer_transition_from) . "*/\n";
+#print OFH "/*" . Dumper(%timer_transition_from) . "*/\n";
