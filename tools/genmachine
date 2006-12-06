@@ -964,7 +964,7 @@ sub machine_write_lampset_decls {
 		$ls->{'value'} = $lampset;
 	}
 
-	print "const lampnum_t *lampset_table[] = {\n";
+	print "const lampnum_t * const lampset_table[] = {\n";
 	for $ls (unique ($m->{"lampsets"})) {
 		print "\&" . $ls->{'c_decl'} . ",\n";
 	}
