@@ -174,7 +174,6 @@ STATIC void fontargs_render_string (void)
 		static U8 i, j;
 		static U8 xb;
 		static U8 top_space;
-		register U8 *data;
 
 		/* Nonprintable characters are skipped. */
 		if (c < ' ')
