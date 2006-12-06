@@ -24,56 +24,125 @@
  * them.  The powerball is detected by the lack of such closures.
  */
 
+typedef enum {
+	PB_MISSING,
+	PB_IN_LOCK,
+	PB_IN_TROUGH,
+	PB_IN_GUMBALL,
+	PB_IN_PLAY,
+	PB_MAYBE_IN_PLAY,
+} pb_location_t;
 
-void pb_is_in_trough (void)
+typedef enum {
+	PF_STEEL_DETECTED,
+	PF_PB_DETECTED,
+	TROUGH_STEEL_DETECTED,
+	TROUGH_PB_DETECTED,
+} pb_event_t;
+
+/** The general location of the powerball */
+pb_location_t pb_location;
+
+/** If in lock or trough, the number of kicks before the 
+ * powerball is back in play. */
+U8 pb_depth;
+
+U8 pb_announce_needed;
+
+#define switch_poll_trough_metal(sw)		switch_poll_logical(SW_TROUGH_PROXIMITY)
+#define switch_poll_trough_powerball(sw)	(!switch_poll_logical(SW_TROUGH_PROXIMITY))
+
+void pb_set_location (pb_location_t location, U8 depth)
 {
 }
 
-
-void pb_is_in_slot (void)
+void pb_detect_event (pb_event_t event)
 {
+	switch (event)
+	{
+		case PF_STEEL_DETECTED:
+			if (live_balls == 1)
+			{
+				if ((pb_location == PB_IN_PLAY) || (pb_location == PB_MAYBE_IN_PLAY))
+					pb_set_location (PB_MISSING, 0);
+			}
+			break;
+
+		case PF_PB_DETECTED:
+			pb_set_location (PB_IN_PLAY, 0);
+			break;
+
+		case TROUGH_STEEL_DETECTED:
+			break;
+
+		case TROUGH_PB_DETECTED:
+			pb_set_location (PB_IN_TROUGH, 1);
+			break;
+	}
 }
 
-
-CALLSET_ENTRY (pb, start_game)
+void pb_announce (void)
 {
-	/* TODO : poll the trough prox switch */
-	flag_off (FLAG_STEEL_IN_TROUGH);
-	flag_off (FLAG_STEEL_IN_TUNNEL);
-	flag_off (FLAG_PB_ALONE_IN_PLAY);
+	if (pb_announce_needed)
+	{
+	}
 }
 
-
-void sw_trough_prox_handler (void)
+void pb_poll_trough (void)
 {
-	/* The next ball to be served from the trough is
-	 * definitely a steel ball. */
-	flag_on (FLAG_STEEL_IN_TROUGH);
-
-	/* The powerball is definitely not in play */
+	if (switch_poll_trough_metal ())
+	{
+		pb_detect_event (TROUGH_STEEL_DETECTED);
+	}
+	else
+	{
+		pb_detect_event (TROUGH_PB_DETECTED);
+	}
 }
 
-
-void sw_slot_prox_handler (void)
+CALLSET_ENTRY (pb_detect, init)
 {
-	/* If the ball came from the piano or camera, it must
-	 * be steel.  Stop the detector task.
-	 */
-	flag_on (FLAG_STEEL_IN_TUNNEL);
-	switch_can_follow (slot_proximity, slot, TIME_3S);
+	pb_location = PB_MISSING;
+	pb_depth = 0;
 }
 
-
-DECLARE_SWITCH_DRIVER (sw_trough_proximity)
+CALLSET_ENTRY (pb_detect, sw_camera)
 {
-	.fn = sw_trough_prox_handler,
-	.flags = SW_IN_GAME,
-};
+	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+}
 
-
-DECLARE_SWITCH_DRIVER (sw_slot_proximity)
+CALLSET_ENTRY (pb_detect, sw_piano)
 {
-	.fn = sw_slot_prox_handler,
-	.flags = SW_IN_GAME,
-};
+	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+}
+
+CALLSET_ENTRY (pb_detect, sw_slot_proximity)
+{
+	/* Ball in tunnel is not the powerball */
+	/* If balls in play == 1, then powerball is definitely not in play */
+	event_did_follow (camera_or_piano, slot_prox);
+	pb_detect_event (PF_STEEL_DETECTED);
+}
+
+CALLSET_ENTRY (pb_detect, dev_slot_enter)
+{
+	if (event_did_follow (camera_or_piano, slot_prox))
+	{
+		/* Proximity sensor did not trip ; must be the powerball */
+		pb_detect_event (PF_PB_DETECTED);
+	}
+	pb_announce ();
+}
+
+CALLSET_ENTRY (pb_detect, start_game)
+{
+	pb_poll_trough ();
+}
+
+CALLSET_ENTRY (pb_detect, trough_kick_success)
+{
+	pb_announce ();
+	pb_poll_trough ();
+}
+
 
