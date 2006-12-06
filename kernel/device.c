@@ -112,7 +112,12 @@ void device_clear (device_t *dev)
 
 void device_register (devicenum_t devno, device_properties_t *props)
 {
-	device_t *dev = &device_table[devno];
+	device_t *dev;
+	
+	dev = &device_table[devno];
+	if (dev->props != NULL)
+		return;
+
 	dev->devno = devno;
 	dev->devno_mask = (1 << devno);
 	dev->props = props;
@@ -180,9 +185,13 @@ wait_and_recount:
 		{
 			/* Also unusual in that a ball came out of
 			 * the device without explicitly kicking it.
+			 * (Although this can happen in test mode.)
 			 */
-			db_puts ("Idle but ball lost\n");
-			nonfatal (ERR_IDLE_BALL_LOST);
+			if (!in_test)
+			{
+				db_puts ("Idle but ball lost\n");
+				nonfatal (ERR_IDLE_BALL_LOST);
+			}
 		}
 		else if (dev->actual_count > dev->previous_count)
 		{
@@ -632,6 +641,7 @@ CALLSET_ENTRY (device, start_game)
 void device_init (void)
 {
 	device_t *dev;
+	U8 i;
 
 	device_ss_state = 0;
 	max_balls = MACHINE_TROUGH_SIZE;
@@ -640,12 +650,25 @@ void device_init (void)
 	live_balls = 0;
 	kickout_locks = 0;
 
+#ifdef USE_MD
+	extern device_properties_t device_properties_table[];
+
+	device_count = 0;
+	for (i=0; i < NUM_DEVICES; i++)
+	{
+		dev = device_entry (i);
+		device_clear (dev);
+		device_register (i, &device_properties_table[i]);
+		device_call_op (dev, power_up);
+	}
+#else
 	device_count = 0;
 	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
 	{
 		device_clear (dev);
 		device_call_op (dev, power_up);
 	}
+#endif
 }
 
 

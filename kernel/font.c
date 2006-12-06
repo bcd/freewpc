@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-#define CONFIG_BLIT
-
 /**
  * \file
  * \brief Routines for writing text to the DMD in a particular font.
@@ -105,8 +103,6 @@ U8 blit_xpos;
 
 U8 *blit_dmd;
 
-#ifdef CONFIG_BLIT
-
 U8 *blit_data;
 
 STATIC void font_blit (void)
@@ -149,7 +145,6 @@ STATIC void font_blit (void)
 	blit_data++;
 }
 
-#endif
 
 /** Renders a string whose characteristics have already been
  * computed.  font_args contains the font type, starting
@@ -180,13 +175,12 @@ STATIC void fontargs_render_string (void)
 		static U8 xb;
 		static U8 top_space;
 		register U8 *data;
-		// register U8 *dmd;
 
 		/* Nonprintable characters are skipped. */
 		if (c < ' ')
 			continue;
 
-		data = font_lookup (args->font, c);
+		blit_data = font_lookup (args->font, c);
 
 		if (font_height < args->font->height)
 		{
@@ -204,58 +198,9 @@ STATIC void fontargs_render_string (void)
 			task_dispatching_ok = TRUE;
 			for (j=0; j < font_byte_width; j++)
 			{
-				// dmd = dmd_base + xb + i * DMD_BYTE_WIDTH + j;
 				blit_dmd = wpc_dmd_addr_verify (dmd_base 
 					+ xb + i * DMD_BYTE_WIDTH + j);
-#ifdef CONFIG_BLIT
-				blit_data = data;
-				// blit_dmd = dmd;
 				font_blit ();
-				data = blit_data;
-#else
-				switch (blit_xpos % 8)
-				{
-					default: /* should not happen */
-					case 0:
-						blit_dmd[0] = *data++;
-						break;
-					case 1:
-						blit_dmd[0] |= *data << 1;
-						blit_dmd[1] = (*data >> 7) | blit_dmd[1];
-						data++;
-						break;
-					case 2:
-						blit_dmd[0] |= *data << 2;
-						blit_dmd[1] = (*data >> 6) | blit_dmd[1];
-						data++;
-						break;
-					case 3:
-						blit_dmd[0] |= *data << 3;
-						blit_dmd[1] = (*data >> 5) | blit_dmd[1];
-						data++;
-						break;
-					case 4:
-						blit_dmd[0] |= *data << 4;
-						blit_dmd[1] = (*data >> 4) | blit_dmd[1];
-						data++;
-						break;
-					case 5:
-						blit_dmd[0] |= *data << 5;
-						blit_dmd[1] = (*data >> 3) | blit_dmd[1];
-						data++;
-						break;
-					case 6:
-						blit_dmd[0] |= *data << 6;
-						blit_dmd[1] = (*data >> 2) | blit_dmd[1];
-						data++;
-						break;
-					case 7:
-						blit_dmd[0] |= *data << 7;
-						blit_dmd[1] = (*data >> 1) | blit_dmd[1];
-						data++;
-						break;
-				}
-#endif
 			} /* end for each byte in same row */
 		} /* end for each row */
 

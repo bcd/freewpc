@@ -82,13 +82,13 @@ CALLSET_ENTRY (trough, sw_launch)
 #endif
 }
 
-void trough_enter (device_t *dev)
+CALLSET_ENTRY (trough, dev_trough_enter)
 {
 	device_remove_live ();
 }
 
 
-void trough_kick_attempt (device_t *dev)
+CALLSET_ENTRY (trough, dev_trough_kick_attempt)
 {
 	/* Wait for any conditions that should delay a trough
 	 * kick.
@@ -99,66 +99,13 @@ void trough_kick_attempt (device_t *dev)
 }
 
 
-void trough_kick_success (device_t *dev)
+CALLSET_ENTRY (trough, dev_trough_kick_success)
 {
 	device_add_live ();
 }
 
-void trough_full (device_t *dev)
+CALLSET_ENTRY (trough, dev_trough_full)
 {
 	db_puts ("Trough is full!\n");
-}
-
-
-device_ops_t trough_ops = {
-	.enter = trough_enter,
-	.kick_attempt = trough_kick_attempt,
-	.kick_success = trough_kick_success,
-	.full = trough_full,
-};
-
-
-/*
- * The trough device properties.  Most of this is machine
- * dependent and therefore uses MACHINE_xxx defines heavily.
- */
-device_properties_t trough_props = {
-	.ops = &trough_ops,
-	.name = "TROUGH",
-#ifdef MACHINE_BALL_SERVE_SOLENOID
-	.sol = MACHINE_BALL_SERVE_SOLENOID,
-#else
-	.sol = 0,
-#endif
-	.sw_count = MACHINE_TROUGH_SIZE,
-	.init_max_count = MACHINE_TROUGH_SIZE,
-	.sw = {
-#ifdef MACHINE_TROUGH1
-		MACHINE_TROUGH1,
-#endif
-#ifdef MACHINE_TROUGH2
-		MACHINE_TROUGH2,
-#endif
-#ifdef MACHINE_TROUGH3
-		MACHINE_TROUGH3,
-#endif
-#ifdef MACHINE_TROUGH4
-		MACHINE_TROUGH4,
-#endif
-#ifdef MACHINE_TROUGH5
-		MACHINE_TROUGH5,
-#endif
-#ifdef MACHINE_TROUGH6
-		MACHINE_TROUGH6,
-#endif
-	}
-};
-
-
-void trough_init (void)
-{
-#ifdef DEVNO_TROUGH
-	device_register (DEVNO_TROUGH, &trough_props);
-#endif
 }
 

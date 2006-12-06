@@ -117,6 +117,7 @@ my %BinaryProperties = (
 	"lamps" => {
 		"start" => $GLOBAL_OBJECT,
 		"buyin" => $GLOBAL_OBJECT,
+		"cabinet" => 1,
 	},
 	"drives" => {
 		"ballserve" => $GLOBAL_OBJECT,
@@ -835,9 +836,33 @@ sub machine_write_decl_names {
 
 sub machine_write_container_decls {
 	print $START_SOURCE;
-	print "device_properties_t device_table[] = {\n";
+
 	foreach $def (unique ($m->{"containers"})) {
 		my $name = $def->{'c_decl'};
+		$name =~ s/^devno/dev/;
+		for $event ("power_up", "game_start", "enter", "kick_attempt",
+			"kick_success", "kick_failure", "full", "empty") {
+			print "extern void callset_${name}_${event} (void);" .
+				"  /* callset_invoke (${name}_${event}) */\n";
+		}
+	}
+	print "\n";
+
+	foreach $def (unique ($m->{"containers"})) {
+		my $name = $def->{'c_decl'};
+		$name =~ s/^devno/dev/;
+		print "device_ops_t ${name}_ops = {\n";
+		for $event ("power_up", "game_start", "enter", "kick_attempt",
+			"kick_success", "kick_failure", "full", "empty") {
+			print "   .$event = callset_${name}_${event},\n";
+		}
+		print "};\n\n";
+	}
+
+	print "device_properties_t device_properties_table[] = {\n";
+	foreach $def (unique ($m->{"containers"})) {
+		my $name = $def->{'c_decl'};
+		$name =~ s/^devno/dev/;
 		my $coilname = ($def->{'coil'})->{'c_ident'};
 		my $sw_count = $def->{'size'};
 		my $sws = $def->{'switches'};
@@ -848,8 +873,12 @@ sub machine_write_container_decls {
 		print "   .sol = $coilname,\n";
 		print "   .sw_count = $sw_count,\n";
 		print "   .init_max_count = $init_max_count,\n";
-		print "   .sw = { },\n";
-		print "},\n";
+		print "   .sw = { ";
+		for $swname (@$sws) {
+			my $sw = ($m->{'switches'})->{$swname};
+			print $sw->{'c_ident'} . ", ";
+		}
+		print "},\n},";
 	}
 	print "};\n";
 	print $END_SOURCE;
@@ -913,8 +942,15 @@ sub machine_write_lampset_decls {
 			if ($lamp =~ m/(.*)\.\.(.*)/) {
 				($min, $max) = (machine_lamp_get_value ($1),
 					machine_lamp_get_value ($2));
-				for my $i ($min..$max) {
-					$lampset .= "$i, ";
+				if ($min < $max) {
+					for ($i = $min; $i <= $max; $i++) {
+						$lampset .= "$i, ";
+					}
+				}
+				else {
+					for ($i = $min; $i >= $max; $i--) {
+						$lampset .= "$i, ";
+					}
 				}
 			} elsif ($parent = ($m->{"lampsets"})->{$lamp}) {
 				$lampset .= $parent->{'value'};

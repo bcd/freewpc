@@ -156,7 +156,6 @@ void do_reset (void)
 #endif
 	lamp_init ();
 	device_init ();
-	trough_init ();
 
 	wpc_led_toggle ();
 	irq_init ();

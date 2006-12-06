@@ -43,16 +43,16 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
-			sprintf ("RED  25,000");
+			sprintf ("25,000");
 			break;
 		case 2:
-			sprintf ("ORANGE  50,000");
+			sprintf ("50,000");
 			break;
 		case 3:
-			sprintf ("YELLOW  100,000");
+			sprintf ("100,000");
 			break;
 	}
-	font_render_string_center (&font_fixed6, 64, 23, sprintf_buffer);
+	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();

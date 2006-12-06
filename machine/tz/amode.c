@@ -157,16 +157,19 @@ void amode_leff (void)
 {
 	U8 i;
 
-	triac_enable (TRIAC_GI_MASK);
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_on (LM_SLOT_MACHINE);
 	leff_on (LM_RAMP_BATTLE);
 	leff_on (LM_CLOCK_MILLIONS);
-	for (amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+
+	amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+	task_create_peer (amode_leff_subset_task);
+	task_sleep (TIME_33MS);
+
+	for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
 		amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
 		amode_leff_subset++)
 	{
-		if (amode_leff_subset == LAMPSET_DOOR_LOCKS_AND_GUMBALL)
-			continue;
 		task_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
 	}

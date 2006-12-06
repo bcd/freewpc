@@ -28,7 +28,7 @@ void slot_kick_sound (void)
 }
 
 
-void slot_enter (device_t *dev)
+CALLSET_ENTRY (slot, dev_slot_enter)
 {
 	extern void door_award_flashing (void);
 
@@ -71,7 +71,7 @@ void slot_enter (device_t *dev)
 }
 
 
-void slot_kick_attempt (device_t *dev)
+CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
 	db_puts ("Sending slot kick sound\n");
 	if (in_game && !in_tilt)
@@ -81,26 +81,5 @@ void slot_kick_attempt (device_t *dev)
 		task_sleep (TIME_100MS * 5);
 		task_create_gid (0, slot_kick_sound);
 	}
-}
-
-
-device_ops_t slot_ops = {
-	.enter = slot_enter,
-	.kick_attempt = slot_kick_attempt,
-};
-
-device_properties_t slot_props = {
-	.ops = &slot_ops,
-	.name = "SLOT KICKOUT",
-	.sol = SOL_SLOT,
-	.sw_count = 1,
-	.init_max_count = 0,
-	.sw = { SW_SLOT },
-};
-
-
-CALLSET_ENTRY (slot, init)
-{
-	device_register (DEVNO_SLOT, &slot_props);
 }
 

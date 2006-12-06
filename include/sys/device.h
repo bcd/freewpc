@@ -60,31 +60,36 @@ struct device;
  * by the common code here. */
 typedef struct device_ops
 {
+#ifdef USE_MD
+#define DEVARGS void
+#else
+#define DEVARGS struct device *dev
+#endif
 	/** Called when the machine is powered up */
-	void (*power_up) (struct device *dev);
+	void (*power_up) (DEVARGS);
 
 	/** Called whenever a game is started */
-	void (*game_start) (struct device *dev);
+	void (*game_start) (DEVARGS);
 
 	/** Called whenever a ball enters the device */
-	void (*enter) (struct device *dev);
+	void (*enter) (DEVARGS);
 
 	/** Called whenever the game tries to kick a ball from the device */
-	void (*kick_attempt) (struct device *dev);
+	void (*kick_attempt) (DEVARGS);
 
 	/** Called when a kick is successful.
 	 * If a delay is needed in between kicks, enforce that by
 	 * putting a delay in this routine. */
-	void (*kick_success) (struct device *dev);
+	void (*kick_success) (DEVARGS);
 
 	/** Called when a kick is not successful */
-	void (*kick_failure) (struct device *dev);
+	void (*kick_failure) (DEVARGS);
 
 	/** Called when the device becomes full */
-	void (*full) (struct device *dev);
+	void (*full) (DEVARGS);
 
 	/** Called when the device becomes empty */
-	void (*empty) (struct device *dev);
+	void (*empty) (DEVARGS);
 } device_ops_t;
 
 
@@ -94,13 +99,25 @@ typedef struct device_ops
  * These hooks are only called during an actual game; the system
  * is fully in charge during test/attract mode.
  */
+#ifdef USE_MD
+#define DEVCALLARG
+#define DEVCALL_PUSH wpc_push_page (EVENT_PAGE)
+#define DEVCALL_POP wpc_pop_page ()
+#else
+#define DEVCALLARG dev
+#define DEVCALL_PUSH
+#define DEVCALL_POP
+#endif
+
 #define device_call_op(dev, op) \
 do { \
 	dbprintf ("Calling device hook %s\n", #op); \
 	if (in_live_game && (dev->props->ops->op)) \
 	{ \
-		(*dev->props->ops->op) (dev); \
-	} \
+		DEVCALL_PUSH; \
+		(*dev->props->ops->op) (DEVCALLARG); \
+		DEVCALL_POP; \
+	}  \
 } while (0)
 
 

@@ -103,7 +103,7 @@ static void do_camera_award (void)
 }
 
 
-CALLSET_ENTRY (camera, sw_camera_handler)
+CALLSET_ENTRY (camera, sw_camera)
 {
 	if (event_did_follow (mpf_top, camera))
 	{

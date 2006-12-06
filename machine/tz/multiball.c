@@ -188,7 +188,7 @@ CALLSET_ENTRY (mball, single_ball_play)
 }
 
 
-CALLSET_ENTRY (mball, lock)
+CALLSET_ENTRY (mball, dev_lock_enter)
 {
 	if (mball_locks_lit > 0)
 	{

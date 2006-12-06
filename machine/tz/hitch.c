@@ -26,8 +26,9 @@ __local__ U8 hitch_count;
 void hitchhiker_deff (void)
 {
 	dmd_alloc_low_clean ();
+	dmd_draw_image (hitcher0_bits);
 	psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
-	font_render_string_center (&font_term6, 64, 16, sprintf_buffer);	
+	font_render_string_center (&font_var5, 80, 10, sprintf_buffer);	
 	dmd_sched_transition (&trans_scroll_left);
 	dmd_show_low ();
 	task_sleep_sec (2);

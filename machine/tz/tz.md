@@ -12,6 +12,8 @@ DCS: No
 WPC95: No
 Pinmame-Zip: tz_92.zip
 Pinmame-ROM: tzone9_2.rom
+Lamp-Matrix-Width: 39
+Lamp-Matrix-Height: 29
 
 include kernel/freewpc.md
 
@@ -22,71 +24,72 @@ define MACHINE_AMODE_LEFT_FLIPPER_HANDLER amode_left_flipper
 define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
 
+
 [lamps]
-11: Panel Camera, amber
-12: Panel H.H., amber
-13: Panel Clock Chaos, amber
-14: Panel Super Skill, amber
-15: Panel Fast Lock, amber
-16: Panel Gumball, amber
-17: Panel TSM, amber
-18: Panel EB, amber
-21: Lock2, red
-22: Panel Greed, amber
-23: Panel 10M, amber
-24: Panel Battle Power, amber
-25: Panel Spiral, amber
-26: Panel Clock Mil., amber
-27: Panel Super Slot, amber
-28: BALL, red
-31: Left Outlane, red
-32: Lock1
-33: Left Inlane1, white
-34: Panel LITZ, white
-35: Left Inlane2, white
-36: GUM, red
-37: LL 5M, yellow
-38: Dead End, white
-41: Spiral 2M, yellow
-42: Spiral 3M, yellow
-43: Spiral 4M, yellow
-44: Spiral 5M, yellow
-45: Spiral 10M, yellow
-46: Spiral EB, orange
-47: Shoot Again, red
-48: Right Inlane, white
-51: Bonus X, white
-52: Multiball, white
-53: Super Skill, orange
-54: Left Powerball, white
-55: Camera, white
-56: Ramp Battle, orange
-57: Lock EB, red
-58: Lock Arrow, orange
-61: Left Jet
-62: Lower Jet
-63: Right Jet
-64: ML 5M, yellow
-65: UL 5M, yellow
-66: Right Outlane, red
-67: Right Powerball, white
-68: Right Spiral, yellow
-71: LR 5M
-72: MR1 5M
-73: MR2 5M
-74: Power Payoff
-75: UR 5M
-76: MPF 500K
-77: MPF 750K
-78: MPF 1M
-81: Left Spiral, yellow
-82: Clock Millions, white
-83: Piano Panel, yellow
-84: Piano Jackpot, red
-85: Slot Machine, yellow
-86: Gumball Lane, red
-87: Buy-In Button, yellow, buyin
-88: Start Button, yellow, start
+11: Panel Camera, amber ,x(28), y(13)
+12: Panel H.H., amber ,x(28), y(10)
+13: Panel Clock Chaos, amber ,x(26), y(10)
+14: Panel Super Skill, amber ,x(24), y(10)
+15: Panel Fast Lock, amber ,x(22), y(10)
+16: Panel Gumball, amber ,x(20), y(10)
+17: Panel TSM, amber ,x(18), y(10)
+18: Panel EB, amber ,x(18), y(13)
+21: Lock2, red ,x(25), y(14)
+22: Panel Greed, amber ,x(28), y(16)
+23: Panel 10M, amber ,x(26), y(16)
+24: Panel Battle Power, amber ,x(24), y(16)
+25: Panel Spiral, amber ,x(22), y(16)
+26: Panel Clock Mil., amber ,x(20), y(16)
+27: Panel Super Slot, amber ,x(18), y(16)
+28: BALL, red ,x(21), y(14)
+31: Left Outlane, red ,x(27), y( 1)
+32: Lock1 ,x(25), y(12)
+33: Left Inlane1, white ,x(26), y( 3)
+34: Panel LITZ, white ,x(23), y(12)
+35: Left Inlane2, white ,x(26), y( 5)
+36: GUM, red ,x(21), y(12)
+37: LL 5M, yellow ,x(23), y( 4)
+38: Dead End, white ,x(20), y( 5)
+41: Spiral 2M, yellow ,x(32), y( 8)
+42: Spiral 3M, yellow ,x(31), y(10)
+43: Spiral 4M, yellow ,x(30), y(12)
+44: Spiral 5M, yellow ,x(30), y(14)
+45: Spiral 10M, yellow ,x(31), y(16)
+46: Spiral EB, orange ,x(32), y(18)
+47: Shoot Again, red ,x(36), y(13)
+48: Right Inlane, white ,x(26), y(21)
+51: Bonus X, white ,x( 5), y(11)
+52: Multiball, white ,x( 7), y(12)
+53: Super Skill, orange ,x( 9), y(13)
+54: Left Powerball, white ,x( 6), y( 9)
+55: Camera, white ,x(14), y(11)
+56: Ramp Battle, orange ,x( 6), y(17)
+57: Lock EB, red ,x( 3), y(19)
+58: Lock Arrow, orange ,x( 1), y(20)
+61: Left Jet ,x(17), y( 1)
+62: Lower Jet ,x(22), y( 3)
+63: Right Jet ,x(17), y( 6)
+64: ML 5M, yellow ,x(19), y( 7)
+65: UL 5M, yellow ,x(17), y( 8)
+66: Right Outlane, red ,x(27), y(23)
+67: Right Powerball, white ,x(14), y(22)
+68: Right Spiral, yellow ,x(12), y(23)
+71: LR 5M ,x(16), y(17)
+72: MR1 5M ,x(14), y(16)
+73: MR2 5M ,x(12), y(16)
+74: Power Payoff ,x(10), y(18)
+75: UR 5M ,x( 5), y(20)
+76: MPF 500K ,x( 9), y( 3)
+77: MPF 750K ,x( 7), y( 2)
+78: MPF 1M ,x( 7), y( 4)
+81: Left Spiral, yellow ,x( 5), y( 6)
+82: Clock Millions, white ,x( 5), y(15)
+83: Piano Panel, yellow ,x( 8), y(21)
+84: Piano Jackpot, red ,x( 7), y(21)
+85: Slot Machine, yellow ,x(14), y(19)
+86: Gumball Lane, red ,x(15), y(23)
+87: Buy-In Button, yellow, buyin, cabinet, x(38), y(27)
+88: Start Button, yellow, start, cabinet, x(38), y( 1)
 
 # Mark playfield flags! (or opposite?!)
 [switches]
@@ -227,13 +230,15 @@ Door Locks and Gumball: Door Locks, Door Gumball
 Left Ramp Awards: Bonus X, Multiball, Super Skill
 Lock Awards: Lock Arrow, Lock EB
 Piano Awards: Piano Panel, Piano Jackpot
-Greed Targets:
-Powerfield Values:
+Greed Targets: LL 5M, ML 5M, UL 5M, UR 5M, MR2 5M, MR1 5M, LR 5M
+Powerfield Values: MPF 500K..MPF 1M
 Jets: Left Jet..Right Jet
-Lower Lanes:
-Spiral Awards:
-Amode All:
-Amode Rand:
+Lower Lanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outlane
+Loop Awards: Left Spiral, Left Powerball, Right Spiral, Right Powerball
+Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again
+Spiral Awards: Spiral 2M..Spiral EB
+Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
+Amode Rand: Amode All
 
 [containers]
 Trough: Ball Serve, trough, init_max_count(3), \
@@ -356,9 +361,9 @@ Ball Save: PRI_GAME_MODE1+3
 HITCHHIKER: PRI_GAME_MODE1+4
 CAMERA_AWARD: PRI_GAME_MODE1+5
 DOOR_AWARD: PRI_GAME_MODE1+5
-MB Start: PRI_GAME_MODE1+7
-SKILL_SHOT_MADE: PRI_GAME_MODE1+8
-MB Running: runner, PRI_GAME_MODE1+2
+MB Start: PRI_GAME_QUICK1+8
+SKILL_SHOT_MADE: PRI_GAME_MODE1+6
+MB Running: runner, PRI_GAME_MODE1+8
 
 [leffs]
 FLASHER_HAPPY: PRI_LEFF1
@@ -394,85 +399,85 @@ cu17:
 
 ###################################################################
 
-define MACHINE_LAMPSETS \
-	DECL_LAMPSET(LAMPSET_DOOR_PANELS, LMSET_DOOR_PANEL_AWARDS) \
-	DECL_LAMPSET(LAMPSET_DOOR_PANELS_AND_HANDLE, LMSET_DOOR_PANELS_AND_HANDLE) \
-	DECL_LAMPSET(LAMPSET_DOOR_LOCKS, LMSET_DOOR_LOCKS) \
-	DECL_LAMPSET(LAMPSET_DOOR_GUMBALL, LMSET_DOOR_GUMBALL) \
-	DECL_LAMPSET(LAMPSET_DOOR_LOCKS_AND_GUMBALL, LMSET_DOOR_LOCKS_AND_GUMBALL) \
-	DECL_LAMPSET(LAMPSET_LEFT_RAMP_AWARDS, LMSET_LEFT_RAMP_AWARDS) \
-	DECL_LAMPSET(LAMPSET_LOCK_AWARDS, LMSET_LOCK_AWARDS) \
-	DECL_LAMPSET(LAMPSET_PIANO_AWARDS, LMSET_PIANO_AWARDS) \
-	DECL_LAMPSET(LAMPSET_GREED_TARGETS, LMSET_GREED_TARGETS) \
-	DECL_LAMPSET(LAMPSET_POWERFIELD_VALUES, LMSET_POWERFIELD_VALUES) \
-	DECL_LAMPSET(LAMPSET_JETS, LMSET_JETS) \
-	DECL_LAMPSET(LAMPSET_LOWER_LANES, LMSET_LOWER_LANES) \
-	DECL_LAMPSET(LAMPSET_SPIRAL_AWARDS, LMSET_SPIRAL_AWARDS) \
-	DECL_LAMPSET(LAMPSET_AMODE_ALL, LMSET_AMODE_ALL) \
-	DECL_LAMPSET(LAMPSET_AMODE_RAND, LMSET_AMODE_RAND)
-
-define LMSET_DOOR_PANEL_AWARDS \
-	LM_PANEL_TSM, LM_PANEL_EB, LM_PANEL_SUPER_SLOT, \
-	LM_PANEL_CLOCK_MIL, \
-	LM_PANEL_SPIRAL, \
-	LM_PANEL_BATTLE_POWER, \
-	LM_PANEL_10M, \
-	LM_PANEL_GREED, LM_PANEL_CAMERA, LM_PANEL_HH, \
-	LM_PANEL_CLOCK_CHAOS, \
-	LM_PANEL_SUPER_SKILL, \
-	LM_PANEL_FAST_LOCK, \
-	LM_PANEL_GUMBALL
-
-define LMSET_DOOR_PANELS_AND_HANDLE \
-	LMSET_DOOR_PANEL_AWARDS, LM_PANEL_LITZ
-
-define LMSET_DOOR_LOCKS			LM_LOCK1, LM_LOCK2
-
-define LMSET_DOOR_GUMBALL 		LM_GUM, LM_BALL
-
-define LMSET_DOOR_LOCKS_AND_GUMBALL  LMSET_DOOR_LOCKS, LMSET_DOOR_GUMBALL
-
-define LMSET_LEFT_RAMP_AWARDS	LM_BONUS_X, LM_MULTIBALL, LM_SUPER_SKILL
-
-define LMSET_LOCK_AWARDS			LM_LOCK_ARROW, LM_LOCK_EB
-
-define LMSET_PIANO_AWARDS			LM_PIANO_PANEL, LM_PIANO_JACKPOT
-
-define LMSET_GREED_TARGETS \
-	LM_LL_5M, LM_ML_5M, LM_UL_5M, LM_UR_5M, LM_MR2_5M, LM_MR1_5M, LM_LR_5M
-
-define LMSET_POWERFIELD_VALUES	LM_MPF_500K, LM_MPF_750K, LM_MPF_1M
-
-define LMSET_JETS					LM_LEFT_JET, LM_RIGHT_JET, LM_LOWER_JET
-
-define LMSET_LOWER_LANES \
-	LM_LEFT_OUTLANE, LM_LEFT_INLANE1, LM_LEFT_INLANE2, LM_RIGHT_INLANE, \
-	LM_RIGHT_OUTLANE
-
-define LMSET_SPIRAL_AWARDS \
-	LM_SPIRAL_2M, LM_SPIRAL_3M, LM_SPIRAL_4M, \
-	LM_SPIRAL_5M, LM_SPIRAL_10M, LM_SPIRAL_EB
-
-define LMSET_AMODE_ALL \
-	LMSET_DOOR_PANELS_AND_HANDLE, \
-	LMSET_DOOR_LOCKS, \
-	LMSET_DOOR_GUMBALL, \
-	LMSET_SPIRAL_AWARDS, \
-	LMSET_LOWER_LANES, \
-	LMSET_JETS, \
-	LMSET_POWERFIELD_VALUES, \
-	LM_LEFT_SPIRAL, LM_LEFT_POWERBALL, \
-	LMSET_LEFT_RAMP_AWARDS, \
-	LM_RAMP_BATTLE, \
-	LMSET_LOCK_AWARDS, \
-	LMSET_PIANO_AWARDS, \
-	LM_RIGHT_SPIRAL, \
-	LM_RIGHT_POWERBALL, \
-	LMSET_GREED_TARGETS, \
-	LM_DEAD_END, \
-	LM_SLOT_MACHINE, \
-	LM_CAMERA
-
-define LMSET_AMODE_RAND 22,21,2,58,13,15,49,12,38,54,59,42,37,39,40,28,45,17,4,10,26,52,11,53,34,43,50,56,3,44,41,23,46,14,55,31,18,32,16,9,61,8,1,19,0,24,35,29,27,6,7,20,25,33,5,48 
-
+#define MACHINE_LAMPSETS \
+#	DECL_LAMPSET(LAMPSET_DOOR_PANELS, LMSET_DOOR_PANEL_AWARDS) \
+#	DECL_LAMPSET(LAMPSET_DOOR_PANELS_AND_HANDLE, LMSET_DOOR_PANELS_AND_HANDLE) \
+#	DECL_LAMPSET(LAMPSET_DOOR_LOCKS, LMSET_DOOR_LOCKS) \
+#	DECL_LAMPSET(LAMPSET_DOOR_GUMBALL, LMSET_DOOR_GUMBALL) \
+#	DECL_LAMPSET(LAMPSET_DOOR_LOCKS_AND_GUMBALL, LMSET_DOOR_LOCKS_AND_GUMBALL) \
+#	DECL_LAMPSET(LAMPSET_LEFT_RAMP_AWARDS, LMSET_LEFT_RAMP_AWARDS) \
+#	DECL_LAMPSET(LAMPSET_LOCK_AWARDS, LMSET_LOCK_AWARDS) \
+#	DECL_LAMPSET(LAMPSET_PIANO_AWARDS, LMSET_PIANO_AWARDS) \
+#	DECL_LAMPSET(LAMPSET_GREED_TARGETS, LMSET_GREED_TARGETS) \
+#	DECL_LAMPSET(LAMPSET_POWERFIELD_VALUES, LMSET_POWERFIELD_VALUES) \
+#	DECL_LAMPSET(LAMPSET_JETS, LMSET_JETS) \
+#	DECL_LAMPSET(LAMPSET_LOWER_LANES, LMSET_LOWER_LANES) \
+#	DECL_LAMPSET(LAMPSET_SPIRAL_AWARDS, LMSET_SPIRAL_AWARDS) \
+#	DECL_LAMPSET(LAMPSET_AMODE_ALL, LMSET_AMODE_ALL) \
+#	DECL_LAMPSET(LAMPSET_AMODE_RAND, LMSET_AMODE_RAND)
+#
+#define LMSET_DOOR_PANEL_AWARDS \
+#	LM_PANEL_TSM, LM_PANEL_EB, LM_PANEL_SUPER_SLOT, \
+#	LM_PANEL_CLOCK_MIL, \
+#	LM_PANEL_SPIRAL, \
+#	LM_PANEL_BATTLE_POWER, \
+#	LM_PANEL_10M, \
+#	LM_PANEL_GREED, LM_PANEL_CAMERA, LM_PANEL_HH, \
+#	LM_PANEL_CLOCK_CHAOS, \
+#	LM_PANEL_SUPER_SKILL, \
+#	LM_PANEL_FAST_LOCK, \
+#	LM_PANEL_GUMBALL
+#
+#define LMSET_DOOR_PANELS_AND_HANDLE \
+#	LMSET_DOOR_PANEL_AWARDS, LM_PANEL_LITZ
+#
+#define LMSET_DOOR_LOCKS			LM_LOCK1, LM_LOCK2
+#
+#define LMSET_DOOR_GUMBALL 		LM_GUM, LM_BALL
+#
+#define LMSET_DOOR_LOCKS_AND_GUMBALL  LMSET_DOOR_LOCKS, LMSET_DOOR_GUMBALL
+#
+#define LMSET_LEFT_RAMP_AWARDS	LM_BONUS_X, LM_MULTIBALL, LM_SUPER_SKILL
+#
+#define LMSET_LOCK_AWARDS			LM_LOCK_ARROW, LM_LOCK_EB
+#
+#define LMSET_PIANO_AWARDS			LM_PIANO_PANEL, LM_PIANO_JACKPOT
+#
+#define LMSET_GREED_TARGETS \
+#	LM_LL_5M, LM_ML_5M, LM_UL_5M, LM_UR_5M, LM_MR2_5M, LM_MR1_5M, LM_LR_5M
+#
+#define LMSET_POWERFIELD_VALUES	LM_MPF_500K, LM_MPF_750K, LM_MPF_1M
+#
+#define LMSET_JETS					LM_LEFT_JET, LM_RIGHT_JET, LM_LOWER_JET
+#
+#define LMSET_LOWER_LANES \
+#	LM_LEFT_OUTLANE, LM_LEFT_INLANE1, LM_LEFT_INLANE2, LM_RIGHT_INLANE, \
+#	LM_RIGHT_OUTLANE
+#
+#define LMSET_SPIRAL_AWARDS \
+#	LM_SPIRAL_2M, LM_SPIRAL_3M, LM_SPIRAL_4M, \
+#	LM_SPIRAL_5M, LM_SPIRAL_10M, LM_SPIRAL_EB
+#
+#define LMSET_AMODE_ALL \
+#	LMSET_DOOR_PANELS_AND_HANDLE, \
+#	LMSET_DOOR_LOCKS, \
+#	LMSET_DOOR_GUMBALL, \
+#	LMSET_SPIRAL_AWARDS, \
+#	LMSET_LOWER_LANES, \
+#	LMSET_JETS, \
+#	LMSET_POWERFIELD_VALUES, \
+#	LM_LEFT_SPIRAL, LM_LEFT_POWERBALL, \
+#	LMSET_LEFT_RAMP_AWARDS, \
+#	LM_RAMP_BATTLE, \
+#	LMSET_LOCK_AWARDS, \
+#	LMSET_PIANO_AWARDS, \
+#	LM_RIGHT_SPIRAL, \
+#	LM_RIGHT_POWERBALL, \
+#	LMSET_GREED_TARGETS, \
+#	LM_DEAD_END, \
+#	LM_SLOT_MACHINE, \
+#	LM_CAMERA
+#
+#define LMSET_AMODE_RAND 22,21,2,58,13,15,49,12,38,54,59,42,37,39,40,28,45,17,4,10,26,52,11,53,34,43,50,56,3,44,41,23,46,14,55,31,18,32,16,9,61,8,1,19,0,24,35,29,27,6,7,20,25,33,5,48 
+#
 

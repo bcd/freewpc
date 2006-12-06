@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 
-void rocket_enter (device_t *dev)
+CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
 	score (SC_10K);
 }
@@ -33,7 +33,7 @@ __taskentry__ void rocket_kick_sound (void)
 	task_exit ();
 }
 
-void rocket_kick_attempt (device_t *dev)
+CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	event_should_follow (rocket, hitchhiker, TIME_2S);
 	if (in_live_game)
@@ -44,27 +44,5 @@ void rocket_kick_attempt (device_t *dev)
 		task_sleep (TIME_100MS * 8);
 		task_create_gid (0, rocket_kick_sound);
 	}
-}
-
-
-
-device_ops_t rocket_ops = {
-	.enter = rocket_enter,
-	.kick_attempt = rocket_kick_attempt,
-};
-
-device_properties_t rocket_props = {
-	.ops = &rocket_ops,
-	.name = "ROCKET KICKER",
-	.sol = SOL_ROCKET_KICKER,
-	.sw_count = 1,
-	.init_max_count = 0,
-	.sw = { SW_ROCKET_KICKER },
-};
-
-
-CALLSET_ENTRY (rocket, init)
-{
-	device_register (DEVNO_ROCKET, &rocket_props);
 }
 

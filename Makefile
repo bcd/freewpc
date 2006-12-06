@@ -376,7 +376,9 @@ PAGED_MD_OBJS = \
 SYSTEM_MD_OBJS = \
 	build/mach-switchmasks.o \
 	build/mach-scores.o \
-	build/mach-switches.o
+	build/mach-switches.o \
+	build/mach-containers.o \
+	build/mach-lampsets.o
 
 MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 endif
