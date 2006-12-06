@@ -152,28 +152,32 @@ CALLSET_ENTRY (gumball, sw_gumball_lane)
 void sw_far_left_trough_monitor (void)
 {
 	U8 timeout = TIME_3S / TIME_200MS;
+	device_t *dev = device_entry (DEVNO_TROUGH);
+
 	while (timeout > 0)
 	{
 		task_sleep (TIME_200MS);
-		if (!switch_poll_logical (SW_FAR_LEFT_TROUGH))
+		if ((!switch_poll_logical (SW_FAR_LEFT_TROUGH))
+			|| (dev->actual_count != dev->size))
+		{
 			task_exit ();
+		}
 		timeout--;
 	}
-	dbprintf ("Far left trough stuck; need to reload gumball\n");
+
+	while (ball_in_play)
+		task_sleep_sec (1);
+
+	gumball_load_from_trough ();
 	task_exit ();
 }
 
 
-void sw_far_left_trough_handler (void)
+CALLSET_ENTRY (gumball, sw_far_left_trough)
 {
-	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
+	if (!in_test)
+		task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 }
-
-
-DECLARE_SWITCH_DRIVER (sw_far_left_trough)
-{
-	.fn = sw_far_left_trough_handler,
-};
 
 
 /*************************************************************/
