@@ -40,7 +40,7 @@ void bonus_deff (void)
 	{
 		score_multiple (SC_100K, door_panels_started);
 
-		sprintf ("%d DOOR PANELS", door_panels_started);
+		psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
 		font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
 		if (door_panels_started < 10)
 			sprintf ("%d00,000", door_panels_started);
