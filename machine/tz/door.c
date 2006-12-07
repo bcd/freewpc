@@ -74,7 +74,7 @@ const char *door_award_goals[] = {
 	"LEFT RAMP",
 	"LOCK LANE",
 	"RIGHT LOOP",
-	"PIANO!",
+	"PIANO NOW",
 };
 
 extern inline const U8 *door_get_lamps (void)
@@ -149,22 +149,29 @@ void door_award_deff (void)
 	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
-	sprintf ("%s", door_panel_names[door_index]);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
-	font_render_string_center (&font_term6, 64, 21, sprintf_buffer);
+	sprintf ("DOOR PANEL %d", door_panels_started);
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 21, door_panel_names[door_index]);
 	dmd_show_low ();
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
+	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[door_index]);
+	dmd_sched_transition (&trans_scroll_left);
+	sound_send (SND_STATIC);
+	dmd_show_low ();
+	task_sleep_sec (1);
 	kickout_unlock (KLOCK_DEFF);
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
 
 void door_award_enable (void)
 {
-	lamp_tristate_flash (LM_SLOT_MACHINE);
-	lamp_tristate_flash (LM_PIANO_PANEL);
+	lamp_tristate_on (LM_PIANO_PANEL);
 	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
@@ -200,20 +207,14 @@ void door_award_if_possible (void)
 		flag_on (FLAG_BTTZ_RUNNING);
 		/* start BTTZ */
 	}
-	else if (lamp_flash_test (LM_SLOT_MACHINE))
+	else if (lamp_test (LM_PIANO_PANEL))
 	{
 		door_award_flashing ();
 	}
 }
 
 
-CALLSET_ENTRY(door, piano)
-{
-	door_award_if_possible ();
-}
-
-
-CALLSET_ENTRY(door, slot_machine)
+CALLSET_ENTRY(door, sw_piano)
 {
 	door_award_if_possible ();
 }

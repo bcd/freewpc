@@ -27,9 +27,11 @@ CALLSET_ENTRY (piano, sw_piano)
 
 	switch_can_follow (piano, slot, TIME_4S);
 
-	score (SC_5130);
-	sound_send (SND_ODD_CHANGE_BEGIN);
-	callset_invoke (piano);
+	if (!lamp_flash_test (LM_SLOT_MACHINE))
+	{
+		score (SC_5130);
+		sound_send (SND_ODD_CHANGE_BEGIN);
+	}
 }
 
 

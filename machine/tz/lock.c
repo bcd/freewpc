@@ -27,7 +27,6 @@ CALLSET_ENTRY (lock, dev_lock_enter)
 		score (SC_250K);
 	else
 		score (SC_50K);
-	// task_sleep_sec (1);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 }
 
@@ -35,6 +34,6 @@ CALLSET_ENTRY (lock, dev_lock_enter)
 CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 {
 	sound_send (SND_LOCK_KICKOUT);
-	switch_can_follow (lock_exit, right_loop, TIME_3S);
+	switch_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
 }
 

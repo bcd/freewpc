@@ -522,7 +522,10 @@ void device_remove_live (void)
 			{
 				case 0:
 					end_ball ();
-					break;
+					/* FALLTHRU : end_ball may be cancelled due to a
+					ball save, but must be treated as going back to
+					single_ball_play */
+
 				case 1:
 					callset_invoke (single_ball_play);
 					break;

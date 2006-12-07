@@ -66,7 +66,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		else
 			score (SC_50K);
 
-		callset_invoke (slot_machine);
+		callset_invoke (shot_slot_machine);
 	}
 }
 

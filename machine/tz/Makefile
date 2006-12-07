@@ -57,7 +57,7 @@ GAME_OBJS = config.o \
 	clocktarget.o hitch.o ballsave.o powerball.o \
 	multiball.o mpf.o
 
-GAME_TEST_OBJS = test.o clocktest.o gumball_test.o
+GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
 
 GAME_INCLUDES =
 

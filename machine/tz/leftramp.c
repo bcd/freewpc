@@ -29,10 +29,14 @@ void left_ramp_deff (void)
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
-	if (left_ramps < 3)
+	if (left_ramps < 3 && system_config.timed_game)
 		sprintf ("EXTRA TIME AT 3");
-	else if (left_ramps == 3)
+	else if (left_ramps == 3 && system_config.timed_game)
 		sprintf ("15 SECS. ADDED");
+	else if (left_ramps < 3 && !system_config.timed_game)
+		sprintf ("MYSTERY AT 3");
+	else if (left_ramps == 3 && !system_config.timed_game)
+		sprintf ("MYSTERY IS LIT");
 	else if (left_ramps < 6)
 		sprintf ("SPOT PANEL AT 6");
 	else if (left_ramps == 6)
@@ -62,7 +66,10 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	if (left_ramps == 3)
 	{
 		sound_send (SND_ROBOT_AWARD);
-		timed_game_extend (15);
+		if (system_config.timed_game)
+			timed_game_extend (15);
+		else
+			; /* light mystery */
 	}
 	else if (left_ramps == 6)
 	{

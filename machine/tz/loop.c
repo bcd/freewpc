@@ -29,6 +29,12 @@ void enter_loop (void)
 
 void award_loop (void)
 {
+	if (flag_test (FLAG_POWERBALL_IN_PLAY))
+	{
+		sound_send (SND_SPIRAL_BREAKTHRU);
+		sound_send (SND_POWERBALL_QUOTE);
+	}
+
 	if (lamp_test (LM_PANEL_SPIRAL))
 	{
 		sound_send (SND_SPIRAL_ROUND_AWARD_3);
@@ -44,20 +50,29 @@ void award_loop (void)
 
 void abort_loop (void)
 {
-	score (SC_1K);
-	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	if (!in_game)
+	{
+		score (SC_1K);
+		sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
+	}
 }
 
 
 void award_left_loop (void)
 {
-	award_loop ();
+	if (!in_game)
+	{
+		award_loop ();
+	}
 }
 
 
 void award_right_loop (void)
 {
-	award_loop ();
+	if (!in_game)
+	{
+		award_loop ();
+	}
 }
 
 
@@ -93,10 +108,8 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
 
-	if (event_did_follow (lock_exit, right_loop))
+	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
-		/* Ignore right loop switch after lock kickout */
-		enter_loop ();
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{

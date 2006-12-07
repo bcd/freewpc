@@ -132,6 +132,8 @@ CALLSET_ENTRY (tz, timed_game_tick)
 
 CALLSET_ENTRY (tz, music_update)
 {
+	if (!in_game)
+		return;
 #ifdef CONFIG_TIMED_GAME
 	if (ball_in_play && (timed_game_timer == 0))
 		music_change (MUS_ENDGAME);

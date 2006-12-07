@@ -91,8 +91,10 @@ foreach $dir (@SearchDirs) {
 
 foreach $src (@srclist) {
 	open FH, $src;
+	$lineno = 0;
 	while (<FH>) {
 		chomp;
+		++$lineno;
 		if ((/CALLSET_ENTRY[ \t]*\((.*)\)/) 
 			|| (/CALLSET_BOOL_ENTRY[ \t]*\((.*)\)/)) {
 			my $callset_entry_args = $1;
@@ -111,12 +113,14 @@ foreach $src (@srclist) {
 				$functionhash{$1} = "";
 				$fntypehash{$1} = "void";
 			}
+			$invocation{$1} .= "$src:$lineno ";
 		}
 		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
 				$fntypehash{$1} = $bool_type;
 			}
+			$invocation{$1} .= "$src:$lineno ";
 		}
 	}
 	close FH;
@@ -152,6 +156,17 @@ foreach $set (keys %functionhash) {
 	my $rettype = $fntypehash{$set};
 	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
 	print FH "$rettype\ncallset_$set (void)\n{\n";
+
+	my @callers = split " ", $invocation{$set};
+	my $num_callers = 0;
+	foreach $caller (@callers) {
+		print FH "   /* Invoked by $caller */\n";
+		++$num_callers;
+	}
+	if ($num_callers == 0) {
+		print STDERR "warning: event $set is never thrown\n";
+	}
+
 	my @modules = split " ", $functionhash{$set};
 	foreach $module (@modules) {
 		if ($modulehash{$module} =~ /^common/) {

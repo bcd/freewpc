@@ -104,8 +104,8 @@ define MACHINE_CUSTOM_AMODE
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noplay
-26: Trough Proximity, opto, noplay
-27: Shooter, shooter, c_decl(sw_unused), noplay
+26: Trough Proximity, noplay
+27: Shooter, shooter, noplay
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
 32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
@@ -129,7 +129,7 @@ define MACHINE_CUSTOM_AMODE
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
 55: Gumball Geneva, opto, intest
 56: Gumball Exit, intest
-57: Slot Proximity
+57: Slot Proximity, noplay
 58: Slot
 61: Skill Bottom, ingame, noplay
 62: Skill Center, ingame, noplay
@@ -218,6 +218,7 @@ magnet_duty: poll(32)
 [tests]
 tz_clock:
 tz_gumball:
+tz_magnet:
 
 #############################################################
 
@@ -364,6 +365,7 @@ DOOR_AWARD: PRI_GAME_MODE1+5
 MB Start: PRI_GAME_QUICK1+8
 SKILL_SHOT_MADE: PRI_GAME_MODE1+6
 MB Running: runner, PRI_GAME_MODE1+8
+PB Detect: PRI_GAME_QUICK1+12
 
 [leffs]
 FLASHER_HAPPY: PRI_LEFF1

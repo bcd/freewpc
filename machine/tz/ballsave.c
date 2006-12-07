@@ -25,7 +25,9 @@
 static void ballsave_monitor (void)
 {
 start:
-#ifdef CONFIG_TIMED_GAME
+#if defined (INFINITE_BALL_SAVER)
+	for (;;)
+#elif defined (CONFIG_TIMED_GAME)
 	while (timed_game_timer > 5)
 #else
 	while (timer_find_gid (GID_BALLSAVER_TIMER))
@@ -61,8 +63,10 @@ void ballsave_enable (void)
 
 void ballsave_disable (void)
 {
+#ifndef INFINITE_BALL_SAVER
 	task_kill_gid (GID_BALLSAVER);
 	lamp_leff_free (LM_SHOOT_AGAIN);
+#endif
 }
 
 bool ballsave_test_active (void)

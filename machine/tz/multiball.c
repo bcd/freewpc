@@ -163,7 +163,7 @@ CALLSET_ENTRY (mball, sw_right_ramp)
 }
 
 
-CALLSET_ENTRY (mball, piano)
+CALLSET_ENTRY (mball, sw_piano)
 {
 	if (lamp_flash_test (LM_PIANO_JACKPOT))
 	{

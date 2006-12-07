@@ -28,22 +28,6 @@ bool gumball_geneva_tripped;
 /* Gumball APIs                                              */
 /*************************************************************/
 
-void gumball_mech_activate (void)
-{
-}
-
-void gumball_mech_deactivate (void)
-{
-}
-
-void gumball_diverter_open (void)
-{
-}
-
-void gumball_diverter_close (void)
-{
-}
-
 bool gumball_load_is_enabled (void)
 {
 	return gumball_load_enabled;
@@ -79,9 +63,9 @@ void gumball_release (void)
 	gumball_geneva_tripped = FALSE;
 	sol_on (SOL_GUMBALL_RELEASE);
 
-	timeout = 64;
+	timeout = 120;
 	while ((gumball_geneva_tripped == FALSE) && (--timeout > 0))
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_16MS);
 
 	sol_off (SOL_GUMBALL_RELEASE);
 }
@@ -179,10 +163,6 @@ CALLSET_ENTRY (gumball, sw_far_left_trough)
 		task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 }
 
-
-/*************************************************************/
-/* Callbacks                                                 */
-/*************************************************************/
 
 CALLSET_ENTRY (gumball, init)
 {

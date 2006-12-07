@@ -86,8 +86,3 @@ CALLSET_ENTRY (mpf, start_player)
 	mpf_enable_count = 0;
 }
 
-CALLSET_ENTRY (mpf, sw_mpf_top_exit)
-{
-}
-
-

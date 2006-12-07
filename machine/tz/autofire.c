@@ -44,6 +44,9 @@ __taskentry__ void autofire_handler (void)
 	task_set_flags (TASK_PROTECTED);
 	while (autofire_request_count > 0)
 	{
+		while (kickout_locks > 0)
+			task_sleep (TIME_33MS);
+
 		/* Open autofire diverter */
 		sol_on (SOL_SHOOTER_DIV);
 
