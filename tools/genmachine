@@ -930,6 +930,36 @@ sub machine_lamp_get_value {
 	return $lamp->{'number'};
 }
 
+sub lamp_sort_bottom_to_top {
+	return -($a->{'x'} <=> $b->{'x'}) || ($a->{'y'} <=> $b->{'y'});
+}
+
+sub lamp_sort_top_to_bottom {
+	return ($a->{'x'} <=> $b->{'x'}) || ($a->{'y'} <=> $b->{'y'});
+}
+
+sub lamp_sort_left_to_right {
+	return ($a->{'y'} <=> $b->{'y'}) || ($a->{'x'} <=> $b->{'x'});
+}
+
+sub lamp_sort_right_to_left {
+	return -($a->{'y'} <=> $b->{'y'}) || ($a->{'x'} <=> $b->{'x'});
+}
+
+sub pf_lamps {
+	my ($sortfn) = @_;
+	my @lamps;
+	my $lampset = "";
+	for $lamp (unique ($m->{"lamps"})) {
+		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
+	}
+	@lamps = sort $sortfn @lamps;
+	foreach $lamp (@lamps) {
+		$lampset .= $lamp->{'number'} . ", ";
+	}
+	return $lampset;
+}
+
 sub machine_write_lampset_decls {
 	print $START_SOURCE;
 
@@ -939,7 +969,10 @@ sub machine_write_lampset_decls {
 		my @lamps = split /,[ \t]*/, $ls->{'props'};
 		my $lampset = "";
 		foreach $lamp (@lamps) {
-			if ($lamp =~ m/(.*)\.\.(.*)/) {
+			if ($lamp =~ m/PF:(.*)/) {
+				$lampset .= pf_lamps ("$1");
+			}
+			elsif ($lamp =~ m/(.*)\.\.(.*)/) {
 				($min, $max) = (machine_lamp_get_value ($1),
 					machine_lamp_get_value ($2));
 				if ($min < $max) {

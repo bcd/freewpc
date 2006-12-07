@@ -104,7 +104,7 @@ define MACHINE_CUSTOM_AMODE
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noplay
-26: Trough Proximity, noplay
+26: Trough Proximity, noplay, ingame
 27: Shooter, shooter, noplay
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
@@ -129,7 +129,7 @@ define MACHINE_CUSTOM_AMODE
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
 55: Gumball Geneva, opto, intest
 56: Gumball Exit, intest
-57: Slot Proximity, noplay
+57: Slot Proximity, noplay, ingame
 58: Slot
 61: Skill Bottom, ingame, noplay
 62: Skill Center, ingame, noplay
@@ -240,6 +240,10 @@ Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again
 Spiral Awards: Spiral 2M..Spiral EB
 Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
 Amode Rand: Amode All
+Sort1: PF:lamp_sort_bottom_to_top
+Sort2: PF:lamp_sort_top_to_bottom
+Sort3: PF:lamp_sort_left_to_right
+Sort4: PF:lamp_sort_right_to_left
 
 [containers]
 Trough: Ball Serve, trough, init_max_count(3), \

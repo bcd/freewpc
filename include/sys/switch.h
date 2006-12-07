@@ -155,11 +155,13 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 }
 
 
-/** Declare that another switch is guaranteed to follow the one that just
- * closed. */
+/** Declare that another switch can follow the one that just closed. */
 #define switch_can_follow(first,second,timeout) \
 	timer_restart_free (GID_ ## second ## _FOLLOWED_BY_ ## first, timeout)
 
+/** Indicate that the second switch did indeed follow.
+ * If this returns TRUE, it means it happened within the timeout after the
+ * first switch closure. */
 #define switch_did_follow(first,second) \
 	timer_kill_gid (GID_ ## second ## _FOLLOWED_BY_ ## first)
 

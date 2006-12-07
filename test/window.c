@@ -1312,9 +1312,9 @@ void lampset_draw (void)
 
 void lampset_update (void)
 {
+	lampset_set_apply_delay (TIME_16MS);
 	for (;;)
 	{
-		lampset_set_apply_delay (TIME_66MS);
 		lamp_all_off ();
 		switch (lampset_update_mode)
 		{
@@ -1325,6 +1325,7 @@ void lampset_update (void)
 			case 4: lampset_build_increment (menu_selection); break;
 			case 5: lampset_build_decrement (menu_selection); break;
 		}
+		task_sleep (TIME_200MS);
 	}
 }
 
