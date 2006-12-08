@@ -191,7 +191,7 @@ static leffnum_t leff_get_highest_priority (void)
  * strings are allocated.  Allocation disables the normal
  * outputs and gives the effect priority.
  */
-void leff_create_handler (const leff_t *leff)
+task_t *leff_create_handler (const leff_t *leff)
 {
 	task_pid_t tp;
 
@@ -227,9 +227,6 @@ void leff_create_handler (const leff_t *leff)
 		}
 	}
 
-	/* Allocate general illumination needed by the lamp effect */
-	if (leff->gi != L_NOGI)
-		triac_leff_allocate (leff->gi);
 
 	/* Now all allocations are in place, start the lamp effect task.
 	 * This implicitly stops whatever leff was previously running
@@ -237,17 +234,20 @@ void leff_create_handler (const leff_t *leff)
 	if (leff->flags & L_SHARED)
 		tp = task_create_gid (GID_SHARED_LEFF, leff->fn);
 	else
+	{
+		/* Allocate general illumination needed by the lamp effect */
+		if (leff->gi != L_NOGI)
+			triac_leff_allocate (leff->gi);
+
+		/* Start the task */
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
+	}
 
 	/* Initialize the new leff's private data before it runs */
 	task_set_thread_data (tp, L_PRIV_APPLY_COUNT, 0);
 	task_set_thread_data (tp, L_PRIV_DATA, 0);
 	task_set_thread_data (tp, L_PRIV_FLAGS, leff->flags);
-#if 0
-	task_set_thread_data (tp, L_PRIV_ID, leff - leff_table);
-#else
-	task_set_thread_data (tp, L_PRIV_ID, 0);
-#endif
+	return tp;
 }
 
 
@@ -260,7 +260,8 @@ void leff_start (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
-		leff_create_handler (leff);
+		task_t *tp = leff_create_handler (leff);
+		task_set_thread_data (tp, L_PRIV_ID, dn);
 	}
 	else if (leff->flags & L_RUNNING)
 	{
@@ -312,6 +313,9 @@ void leff_stop (leffnum_t dn)
 		if (tp)
 		{
 			dbprintf ("Stopping sharing leff %d, pid=%p\n", dn, tp);
+
+			lampset_set_apply_delay (0);
+			lampset_apply (leff->lampset, lamp_leff2_free);
 			task_kill_pid (tp);
 		}
 		else
@@ -319,7 +323,7 @@ void leff_stop (leffnum_t dn)
 			dbprintf ("Couldn't find shared leff %d\n", dn);
 		}
 	}
-	else if (leff->flags & L_RUNNING)
+	else if ((leff->flags & L_RUNNING) || (dn == leff_active))
 	{
 		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
@@ -327,10 +331,6 @@ void leff_stop (leffnum_t dn)
 		if (leff->gi != L_NOGI)
 			triac_leff_free (leff->gi);
 		leff_start_highest_priority ();
-	}
-	else
-	{
-		dbprintf ("leff_stop : not shared or running?\n");
 	}
 }
 
@@ -340,6 +340,7 @@ void leff_restart (leffnum_t dn)
 {
 	if (leff_table[dn].flags & L_SHARED)
 	{
+		dbprintf ("leff_restart shared\n");
 	}
 	else if (dn == leff_active)
 	{
