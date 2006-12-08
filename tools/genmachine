@@ -931,31 +931,41 @@ sub machine_lamp_get_value {
 }
 
 sub lamp_sort_bottom_to_top {
-	return -($a->{'x'} <=> $b->{'x'}) || ($a->{'y'} <=> $b->{'y'});
+	return -($a->{'x'} <=> $b->{'x'});
 }
 
 sub lamp_sort_top_to_bottom {
-	return ($a->{'x'} <=> $b->{'x'}) || ($a->{'y'} <=> $b->{'y'});
+	return ($a->{'x'} <=> $b->{'x'});
 }
 
 sub lamp_sort_left_to_right {
-	return ($a->{'y'} <=> $b->{'y'}) || ($a->{'x'} <=> $b->{'x'});
+	return ($a->{'y'} <=> $b->{'y'});
 }
 
 sub lamp_sort_right_to_left {
-	return -($a->{'y'} <=> $b->{'y'}) || ($a->{'x'} <=> $b->{'x'});
+	return -($a->{'y'} <=> $b->{'y'});
 }
 
 sub pf_lamps {
 	my ($sortfn) = @_;
 	my @lamps;
+	my $lastlamp = undef;
 	my $lampset = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
 	}
 	@lamps = sort $sortfn @lamps;
+	$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 	foreach $lamp (@lamps) {
-		$lampset .= $lamp->{'number'} . ", ";
+		if (defined $lastlamp) {
+			$a = $lastlamp;
+			$b = $lamp;
+			if (&$sortfn() != 0) {
+				$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+			}
+		}
+		$lampset .= $lamp->{'c_ident'} . ",\n   ";
+		$lastlamp = $lamp;
 	}
 	return $lampset;
 }
@@ -999,7 +1009,7 @@ sub machine_write_lampset_decls {
 
 	print "const lampnum_t * const lampset_table[] = {\n";
 	for $ls (unique ($m->{"lampsets"})) {
-		print "\&" . $ls->{'c_decl'} . ",\n";
+		print "   \&" . $ls->{'c_decl'} . ",\n";
 	}
 	print "};\n";
 	print $END_SOURCE;
