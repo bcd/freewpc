@@ -212,15 +212,7 @@ void amode_high_score_test (void)
 	task_exit ();
 }
 
-CALLSET_ENTRY (tz_amode, amode_start)
-{
-	tz_clock_reset ();
-}
 
-CALLSET_ENTRY (tz_amode, amode_stop)
-{
-	tz_clock_stop ();
-}
 
 void amode_deff (void) __taskentry__
 {
