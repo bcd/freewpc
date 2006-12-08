@@ -110,6 +110,7 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 	register const lampnum_t *lset = lampset_table[id];
 	static const lampnum_t *lset_stack[4];
 	U8 lset_stack_offset = 0;
+	U8 lampset_intermediate_delay = 0;
 
 	lset_stack[lset_stack_offset++] = 0;
 	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT, 0);
@@ -122,7 +123,12 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 		switch (opcode)
 		{
 			case LAMP_MACRO_SLEEP_OP:
-				task_sleep (*lset++);
+				if (lampset_intermediate_delay == 0)
+				{
+					lampset_intermediate_delay = lampset_apply_delay;
+					lampset_apply_delay = 0;
+				}
+				task_sleep (lampset_intermediate_delay);
 				break;
 
 			case LAMP_END:
