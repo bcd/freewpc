@@ -10,9 +10,9 @@
 #define MAG_POWER_TIME (400 / MAG_DRIVE_RTT_FREQ)
 #define MAG_HOLD_TIME (1100 / MAG_DRIVE_RTT_FREQ)
 
-#define MAG_LEFT
-#define MAG_UPPER_RIGHT
-#define MAG_RIGHT
+#define MAG_LEFT 0
+#define MAG_UPPER_RIGHT 1
+#define MAG_RIGHT 2
 
 
 enum magnet_state {
@@ -145,12 +145,21 @@ void magnet_disable_catch (U8 magnet)
 	magstates[magnet] = MAG_DISABLED;
 }
 
-
-void magnet_init (void)
+void magnet_reset (void)
 {
 	left_magnet_state = upper_right_magnet_state = 
 		lower_right_magnet_state = MAG_DISABLED;
 	left_magnet_timer = upper_right_magnet_timer = 
 		lower_right_magnet_timer = 0;
+}
+
+CALLSET_ENTRY (magnet, start_ball)
+{
+	magnet_reset ();
+}
+
+CALLSET_ENTRY (magnet, init)
+{
+	magnet_reset ();
 }
 
