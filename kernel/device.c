@@ -495,6 +495,10 @@ void device_add_live (void)
 	{
 		missing_balls--;
 		live_balls++;
+		if (in_game)
+		{
+			callset_invoke (ball_count_change);
+		}
 	}
 }
 
@@ -517,6 +521,7 @@ void device_remove_live (void)
 		live_balls--;
 		if (in_game)
 		{
+			callset_invoke (ball_count_change);
 			callset_invoke (ball_drain);
 			switch (live_balls)
 			{
