@@ -54,6 +54,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	else if (switch_did_follow (any_skill_switch, slot))
 	{
 		/* skill switch was recently hit, so ignore slot */
+		deff_stop (DEFF_SKILL_SHOT_READY);
 	}
 	else
 	{
