@@ -22,8 +22,11 @@
 
 void enter_loop (void)
 {
-	score (SC_1K);
-	sound_send (SND_LOOP_ENTER);
+	if (in_live_game)
+	{
+		score (SC_1K);
+		sound_send (SND_LOOP_ENTER);
+	}
 }
 
 
