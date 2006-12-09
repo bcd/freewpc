@@ -201,3 +201,31 @@ void strobe_up_leff (void)
 	leff_exit ();
 }
 
+void multi_strobe1_subtask (void)
+{ for (;;) { lampset_apply_leff_toggle (LAMPSET_SORT1); task_sleep (TIME_500MS); } }
+void multi_strobe2_subtask (void)
+{ for (;;) { lampset_apply_leff_toggle (LAMPSET_SORT2); task_sleep (TIME_500MS); } }
+void multi_strobe3_subtask (void)
+{ for (;;) { lampset_apply_leff_toggle (LAMPSET_SORT3); task_sleep (TIME_500MS); } }
+
+void multi_strobe_leff (void)
+{
+	U8 i;
+
+	lampset_set_apply_delay (TIME_66MS);
+	task_create_peer (multi_strobe1_subtask);
+	task_sleep (TIME_300MS);
+	task_create_peer (multi_strobe2_subtask);
+	task_sleep (TIME_300MS);
+	task_create_peer (multi_strobe3_subtask);
+	task_sleep (TIME_300MS);
+
+	for (i=0; i< 3; i++)
+	{
+		lampset_apply_leff_toggle (LAMPSET_SORT4);
+		task_sleep (TIME_500MS);
+	}
+	task_kill_peers ();
+	leff_exit ();
+}
+
