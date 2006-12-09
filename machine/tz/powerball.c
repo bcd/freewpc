@@ -87,6 +87,7 @@ void pb_detect_deff (void)
 	dmd_sched_transition (&trans_vstripe_right2left);
 	sound_send (SND_POWERBALL_QUOTE);
 	dmd_show_low ();
+	task_sleep_sec (1);
 	dmd_alloc_high ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);

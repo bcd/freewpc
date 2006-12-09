@@ -105,7 +105,7 @@ define MACHINE_CUSTOM_AMODE
 23: Buyin Button, buyin-button
 25: Far Left Trough, noplay
 26: Trough Proximity, noplay, ingame
-27: Shooter, shooter, noplay
+27: Shooter, edge, shooter, noplay
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
 32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
@@ -385,6 +385,7 @@ JETS_ACTIVE: shared, 0, LAMPS(JETS), c_decl(null_leff)
 GAME_TIMEOUT: PRI_TILT, GI(ALL)
 CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
 MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
+Strobe Up: PRI_LEFF2, LAMPS(ALL)
 
 [fonts]
 mono5:

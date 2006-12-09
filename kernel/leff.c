@@ -198,7 +198,6 @@ task_t *leff_create_handler (const leff_t *leff)
 	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != L_NOLAMPS)
 	{
-		lamp_leff1_erase ();
 
 		/* L_ALL_LAMPS is equivalent to LAMPSET_ALL and will cause
 		 * all lamps to be allocated.  Other values will only
@@ -208,7 +207,10 @@ task_t *leff_create_handler (const leff_t *leff)
 			if (leff->flags & L_SHARED)
 				fatal (ERR_INVALID_LEFF_CONFIG);	
 			else
+			{
+				lamp_leff1_erase ();
 				lamp_leff1_allocate_all ();
+			}
 		}
 		else
 		{
@@ -217,10 +219,13 @@ task_t *leff_create_handler (const leff_t *leff)
 			 * Ensure the apply delay is zero first. */
 			lampset_set_apply_delay (0);
 			if (leff->flags & L_SHARED)
+			{
 				lampset_apply (leff->lampset, lamp_leff2_allocate);
+			}
 			else
 			{
 				/* Start by freeing up any allocations that are lingering. */
+				lamp_leff1_erase ();
 				lamp_leff1_free_all ();
 				lampset_apply (leff->lampset, lamp_leff_allocate);
 			}
@@ -315,8 +320,8 @@ void leff_stop (leffnum_t dn)
 			dbprintf ("Stopping sharing leff %d, pid=%p\n", dn, tp);
 
 			lampset_set_apply_delay (0);
-			lampset_apply (leff->lampset, lamp_leff2_free);
 			task_kill_pid (tp);
+			lampset_apply (leff->lampset, lamp_leff2_free);
 		}
 		else
 		{

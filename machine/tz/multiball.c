@@ -115,8 +115,8 @@ CALLSET_ENTRY (mball, mball_start)
 	{
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		deff_start (DEFF_MB_START);
-		leff_start (LEFF_MB_RUNNING);
 		deff_start (DEFF_MB_RUNNING);
+		leff_start (LEFF_MB_RUNNING);
 		callset_invoke (music_update);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;

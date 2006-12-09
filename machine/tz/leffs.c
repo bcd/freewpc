@@ -185,3 +185,19 @@ void multiball_running_leff (void)
 	leff_exit ();
 }
 
+void pf_strobe_up_subtask (void)
+{
+	for (;;) lampset_apply_leff_toggle (LAMPSET_SORT1);
+}
+
+void strobe_up_leff (void)
+{
+	lampset_set_apply_delay (TIME_16MS);
+	task_create_peer (pf_strobe_up_subtask);
+	task_sleep (TIME_200MS);
+	task_create_peer (pf_strobe_up_subtask);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+

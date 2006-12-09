@@ -323,8 +323,12 @@ void lamp_leff_free (lampnum_t lamp)
 
 void lamp_leff2_allocate (lampnum_t lamp)
 {
-	register bitset p = lamp_leff2_allocated;
+	register bitset p = lamp_leff2_matrix;
 	register U8 v = lamp;
+	__clearbit(p, v);
+
+	p = lamp_leff2_allocated;
+	v = lamp;
 	__clearbit(p, v);
 }
 

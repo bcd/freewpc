@@ -146,21 +146,23 @@ inline void deff_wait_for_other (deffnum_t dn)
 
 void door_award_deff (void)
 {
+	U8 index = door_index;
+
 	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 	sprintf ("DOOR PANEL %d", door_panels_started);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 21, door_panel_names[door_index]);
+	font_render_string_center (&font_mono5, 64, 21, door_panel_names[index]);
 	dmd_show_low ();
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	task_sleep_sec (1);
+	task_sleep_sec (2);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
-	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[door_index]);
+	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[index]);
 	dmd_sched_transition (&trans_scroll_left);
-	sound_send (SND_STATIC);
+	sound_send (SND_THUNDER1);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	kickout_unlock (KLOCK_DEFF);

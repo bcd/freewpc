@@ -50,7 +50,7 @@ void award_loop (void)
 
 void abort_loop (void)
 {
-	if (!in_game)
+	if (in_live_game)
 	{
 		score (SC_1K);
 		sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
@@ -60,7 +60,7 @@ void abort_loop (void)
 
 void award_left_loop (void)
 {
-	if (!in_game)
+	if (in_live_game)
 	{
 		award_loop ();
 	}
@@ -69,7 +69,7 @@ void award_left_loop (void)
 
 void award_right_loop (void)
 {
-	if (!in_game)
+	if (in_live_game)
 	{
 		award_loop ();
 	}
@@ -115,9 +115,6 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	{
 		/* Ignore right loop switch after an autolaunch */
 		enter_loop ();
-	}
-	else if (!in_live_game)
-	{
 	}
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{

@@ -149,3 +149,19 @@ CALLSET_ENTRY (skill, end_game)
 	disable_skill_shot ();
 }
 
+CALLSET_ENTRY (skill, sw_shooter)
+{
+	if (!switch_poll_logical (SW_SHOOTER))
+	{
+		if (skill_shot_enabled)
+		{
+			sound_send (SND_SHOOTER_PULL);
+			leff_restart (LEFF_STROBE_UP);
+		}
+	}
+	else
+	{
+		leff_stop (LEFF_STROBE_UP);
+	}
+}
+
