@@ -1064,21 +1064,21 @@ const font_t *font_test_lookup (void)
 {
 	switch (menu_selection)
 	{
-		case 0: default: return &font_mono5;
-		case 1: return &font_mono9;
-		case 2: return &font_fixed10;
-		case 3: return &font_fixed6;
-		case 4: return &font_lucida9;
-		case 5: return &font_term6;
-		case 6: return &font_times8;
-		case 7: return &font_times10;
-		case 8: return &font_helv8;
-		case 9: return &font_schu;
-		case 10: return &font_misctype;
-		case 11: return &font_utopia;
-		case 12: return &font_fixed12;
-		case 13: return &font_var5;
-		case 14: return &font_cu17;
+		case FON_MONO5: default: return &font_mono5;
+		case FON_MONO9: return &font_mono9;
+		case FON_FIXED10: return &font_fixed10;
+		case FON_FIXED6: return &font_fixed6;
+		case FON_LUCIDA9: return &font_lucida9;
+		case FON_TERM6: return &font_term6;
+		case FON_TIMES8: return &font_times8;
+		case FON_TIMES10: return &font_times10;
+		case FON_HELV8: return &font_helv8;
+		case FON_SCHU: return &font_schu;
+		case FON_MISCTYPE: return &font_misctype;
+		case FON_UTOPIA: return &font_utopia;
+		case FON_FIXED12: return &font_fixed12;
+		case FON_VAR5: return &font_var5;
+		case FON_CU17: return &font_cu17;
 	}
 }
 
@@ -1086,7 +1086,7 @@ const font_t *font_test_lookup (void)
 void font_test_init (void)
 {
 	browser_init ();
-	browser_max = 14; /* set to highest valid font number */
+	browser_max = MAX_FONTS-1; /* set to highest valid font number */
 }
 
 void font_test_draw (void)
