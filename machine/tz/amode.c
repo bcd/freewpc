@@ -95,14 +95,13 @@ void egg_left_flipper (void)
 
 void brian_image_deff (void)
 {
-	dmd_alloc_low_high ();
-	dmd_draw_image2 (brianhead_bits);
-	font_render_string_center (&font_term6, 76, 11, "ARE YOU READY");
-	dmd_flip_low_high ();
-	font_render_string_center (&font_term6, 76, 22, "TO BATTLE...");
-	dmd_flip_low_high ();
-	dmd_show2 ();
-	task_sleep_sec (8);
+	dmd_alloc_low ();
+	dmd_draw_image (cow0_bits);
+	font_render_string_center (&font_var5, 40, 11, "THE POWER");
+	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
+	dmd_show_low ();
+	sound_send (SND_POWER_GRUNT_1);
+	task_sleep_sec (6);
 	deff_exit ();
 }
 
