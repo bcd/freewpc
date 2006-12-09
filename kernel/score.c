@@ -87,11 +87,11 @@ void scores_draw_ball (void)
 #if defined(SHOW_DEBUG_VALUE)
 	sprintf ("DEBUG %d", debug_value);
 #else
-	sprintf ("%1iUP", player_up);
+	sprintf ("PLAYER %1i", player_up);
 #endif
-	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
-	sprintf ("BALL %1i", ball_up);
 	font_render_string_center (&font_mono5, 96, 26, sprintf_buffer);
+	sprintf ("BALL %1i", ball_up);
+	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
 #endif
 }
 
@@ -141,7 +141,9 @@ void scores_deff (void) __taskentry__
 		/* Wait for a score change */
 		while (score_change == 0)
 		{
-			task_sleep (ball_in_play ? TIME_100MS * 2 : TIME_100MS);
+			task_sleep (ball_in_play ? TIME_500MS : TIME_100MS);
+			dmd_show_other ();
+			task_sleep (ball_in_play ? TIME_200MS : TIME_100MS);
 			dmd_show_other ();
 		}
 	}
@@ -200,7 +202,10 @@ void score_add (bcd_t *s1, const bcd_t *s2, U8 _len)
 void score_add_current (const bcd_t *s)
 {
 	if (!in_live_game)
+	{
+		nonfatal (ERR_SCORE_NOT_IN_GAME);
 		return;
+	}
 
 	score_add (current_score, s, sizeof (score_t));
 	score_change++;

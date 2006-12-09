@@ -54,6 +54,7 @@
 #define ERR_DEVICE_NO_CHANGE     30
 #define ERR_CANT_GET_HERE        31
 #define ERR_INVALID_IO_ADDR      32
+#define ERR_SCORE_NOT_IN_GAME    33
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);
