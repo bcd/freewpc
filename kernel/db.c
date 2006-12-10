@@ -103,7 +103,7 @@ void db_dump_switches (void)
 #endif /* DEBUGGER */
 
 
-void db_idle_task (void)
+CALLSET_ENTRY (db, idle)
 {
 #ifdef DEBUGGER
 	if (!db_attached)

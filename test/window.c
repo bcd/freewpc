@@ -1195,10 +1195,8 @@ void deff_leff_thread (void)
 				if (is_active == FALSE)
 				{
 					browser_draw ();
-#ifdef USE_MD
 					sprintf_far_string (names_of_deffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
-#endif
 					browser_print_operation ("STOPPED");
 					sound_reset ();
 				}
@@ -1206,10 +1204,8 @@ void deff_leff_thread (void)
 			else
 			{
 				browser_draw ();
-#ifdef USE_MD
 					sprintf_far_string (names_of_leffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
-#endif
 				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
@@ -1289,6 +1285,7 @@ struct menu dev_leff_test_item = {
 /*********** Lampsets **********************/
 
 U8 lampset_update_mode;
+U8 lampset_update_speed;
 
 void lampset_init (void)
 {
@@ -1296,29 +1293,35 @@ void lampset_init (void)
 	browser_min = 1;
 	browser_max = MAX_LAMPSET-1;
 	browser_item_number = browser_decimal_item_number;
-	lampset_update_mode = 1;
+	lampset_update_mode = 0;
+	lampset_update_speed = TIME_16MS;
 }
 
 
 void lampset_draw (void)
 {
 	browser_draw ();
-#ifdef USE_MD
 	sprintf_far_string (names_of_lampsets + menu_selection);
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
-#endif
+	sprintf ("SPEED %d", lampset_update_speed);
+	font_render_string_center (&font_var5, 50, 21, sprintf_buffer);
+	sprintf ("MODE %d", lampset_update_mode);
+	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
 }
 
 
 void lampset_update (void)
 {
-	lampset_set_apply_delay (TIME_16MS);
+	lamp_all_off ();
 	for (;;)
 	{
-		lamp_all_off ();
+		lampset_set_apply_delay (lampset_update_speed);
 		switch (lampset_update_mode)
 		{
-			case 0: lampset_apply_on (menu_selection); break;
+			case 0: 
+				lamp_all_off ();
+				lampset_apply_on (menu_selection); 
+				break;
 			case 1: lampset_apply_toggle (menu_selection); break;
 			case 2: lampset_step_increment (menu_selection); break;
 			case 3: lampset_step_decrement (menu_selection); break;
@@ -1329,6 +1332,23 @@ void lampset_update (void)
 	}
 }
 
+void lampset_test_slower (void)
+{
+	if (lampset_update_speed > 1)
+		lampset_update_speed--;
+}
+
+void lampset_test_faster (void)
+{
+	lampset_update_speed++;
+}
+
+void lampset_test_mode_change (void)
+{
+	lampset_update_mode++;
+	if (lampset_update_mode == 6)
+		lampset_update_mode = 0;
+}
 
 struct window_ops dev_lampset_window = {
 	INHERIT_FROM_BROWSER,
@@ -1336,6 +1356,9 @@ struct window_ops dev_lampset_window = {
 	.exit = lamp_all_off,
 	.draw = lampset_draw,
 	.thread = lampset_update,
+	.left = lampset_test_slower,
+	.right = lampset_test_faster,
+	.enter = lampset_test_mode_change,
 };
 
 struct menu dev_lampset_test_item = {
@@ -2215,10 +2238,8 @@ void single_switch_draw (void)
 	(*browser_item_number) (menu_selection);
 	font_render_string (&font_mono5, 36, 12, sprintf_buffer);
 
-#ifdef USE_MD
 	sprintf_far_string (names_of_switches + menu_selection);
 	font_render_string (&font_var5, 50, 12, sprintf_buffer);
-#endif
 
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
@@ -2411,10 +2432,8 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "VERY HARD PULSE"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
-#ifdef USE_MD
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
-#endif
 }
 
 void solenoid_test_enter (void)
@@ -2476,19 +2495,11 @@ U8 gi_test_values[] = {
 
 const char *gi_test_names[] = {
 	"ALL OFF",
-#ifdef USE_MD
 	&names_of_gi[0],
 	&names_of_gi[1],
 	&names_of_gi[2],
 	&names_of_gi[3],
 	&names_of_gi[4],
-#else
-	"STRING 1 ON",
-	"STRING 2 ON",
-	"STRING 3 ON",
-	"STRING 4 ON",
-	"STRING 5 ON",
-#endif
 	"ALL ON",
 };
 
@@ -2557,10 +2568,8 @@ void lamp_test_draw (void)
 {
 	lamp_flash_on (menu_selection);
 	browser_draw ();
-#ifdef USE_MD
 	sprintf_far_string (names_of_lamps + menu_selection);
 	browser_print_operation (sprintf_buffer);
-#endif
 }
 
 void lamp_test_up (void)

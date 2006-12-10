@@ -45,32 +45,11 @@
  */
 
 
-/** Define the standard system display effect entries. */
-#ifndef USE_MD
-#define SYSTEM_DISPLAY_EFFECTS \
-	DECL_DEFF (DEFF_SCORES, D_RUNNING, PRI_SCORES, scores_deff) \
-	DECL_DEFF (DEFF_COIN_INSERT, D_NORMAL, PRI_COINS, coin_insert_deff) \
-	DECL_DEFF (DEFF_CREDITS, D_NORMAL, PRI_CREDITS, credits_deff) \
-	DECL_DEFF (DEFF_TILT_WARNING, D_NORMAL, PRI_TILT_WARNING, tilt_warning_deff) \
-	DECL_DEFF (DEFF_TILT, D_RUNNING, PRI_TILT, tilt_deff) \
-	DECL_DEFF (DEFF_GAME_OVER, D_RUNNING, PRI_GAME_OVER, game_over_deff) \
-	DECL_DEFF (DEFF_VOLUME_CHANGE, D_RUNNING, PRI_VOLUME_CHANGE, volume_change_deff) \
-	DECL_DEFF (DEFF_SLAM_TILT, D_RUNNING, PRI_SLAMTILT, slam_tilt_deff) \
-	DECL_DEFF (DEFF_STATUS_REPORT, D_RUNNING, PRI_STATUS, status_report_deff) \
-	DECL_DEFF (DEFF_NONFATAL_ERROR, D_NORMAL, PRI_DEBUGGER, nonfatal_error_deff) \
-	DECL_DEFF (DEFF_HSENTRY, D_RUNNING, PRI_HSENTRY, hsentry_deff) \
-	DECL_DEFF (DEFF_MATCH, D_RUNNING, PRI_MATCH, match_deff) \
-	DECL_DEFF (DEFF_LOCATING_BALLS, D_NORMAL, PRI_BALL_SEARCH, locating_balls_deff)
-#else
-#define SYSTEM_DISPLAY_EFFECTS
-#endif
-
 /** Declare externs for all of the deff functions */
 #define DECL_DEFF(num, flags, pri, fn) extern void fn (void);
 #define DECL_DEFF_FAST(num, pri, fn) DECL_DEFF (num, D_NORMAL, pri, fn)
 #define DECL_DEFF_MODE(num, pri, fn) DECL_DEFF (num, D_RUNNING, pri, fn)
 
-SYSTEM_DISPLAY_EFFECTS
 #ifdef MACHINE_DISPLAY_EFFECTS
 MACHINE_DISPLAY_EFFECTS
 #endif
@@ -82,12 +61,7 @@ MACHINE_DISPLAY_EFFECTS
 
 
 static const deff_t deff_table[] = {
-#ifndef USE_MD
-	[DEFF_NULL] = { D_NORMAL, 0, deff_exit },
-#else
 #define null_deff deff_exit
-#endif
-	SYSTEM_DISPLAY_EFFECTS
 #ifdef MACHINE_DISPLAY_EFFECTS
 	MACHINE_DISPLAY_EFFECTS
 #endif

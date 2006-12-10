@@ -99,11 +99,7 @@ extern U8 irq_count;
  * by most modules */
 
 /* Main configuration - game specific.  All machines MUST define one */
-#ifdef USE_MD
 #include <mach-config.h>
-#else
-#include <mach/config.h>
-#endif
 
 /* Processor specifics */
 #ifdef __m6809__
@@ -181,24 +177,6 @@ extern U8 irq_count;
  * one of these, it should define the corresponding flag.
  */
 #ifndef MACHINE_LACKS_ALL_INCLUDES
-#ifdef USE_MD
-/* don't include any of these with USE_MD */
-#else /* !USE_MD */
-#ifndef MACHINE_LACKS_SWITCH_H
-#include <mach/switch.h>
-#endif
-#ifndef MACHINE_LACKS_COIL_H
-#include <mach/coil.h>
-#endif
-#ifndef MACHINE_LACKS_LAMP_H
-#include <mach/lamp.h>
-#endif
-#ifndef MACHINE_LACKS_FLAGS_H
-#ifdef MACHINE_INCLUDE_FLAGS
-#include <mach/flags.h>
-#endif
-#endif
-#endif /* USE_MD */
 #ifndef MACHINE_LACKS_SOUND_H
 #include <mach/sound.h>
 #endif
@@ -209,12 +187,6 @@ extern U8 irq_count;
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>
-#ifndef USE_MD
-#include <gendefine_deff.h>
-#include <gendefine_leff.h>
-#include <gendefine_lampset.h>
-#include <gendefine_devno.h>
-#endif
 #include <../images/xbmproto.h>
 
 

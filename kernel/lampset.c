@@ -29,49 +29,7 @@
 
 #include <freewpc.h>
 
-#ifdef USE_MD
 extern const lampnum_t *lampset_table[];
-#else
-
-/* The default lampset for all lamps */
-#define LMSET_ALL_LAMPS 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
-
-/* The list of all system-defined lampsets */
-#define SYSTEM_LAMPSETS \
-	DECL_LAMPSET (LAMPSET_ALL, LMSET_ALL_LAMPS)
-
-/*
- * Declare the lampset arrays.  Here, the actual storage space is
- * defined.  Each lampset appears as an array of lamp values, terminated
- * by the special value LAMP_END.
- */
-
-#undef DECL_LAMPSET
-#define DECL_LAMPSET(idx, lampdata)	DECL_LAMPSET_INSTANCE(idx, lampdata)
-
-SYSTEM_LAMPSETS
-#ifdef MACHINE_LAMPSETS
-MACHINE_LAMPSETS
-#endif
-
-/*
- * Declare the lampset table.  This is an array of pointers to each of
- * the lampsets defined above.  Lampsets can be referred to by index
- * instead of pointer this way.
- */
-
-#undef DECL_LAMPSET
-#define DECL_LAMPSET(idx, lampdata)	DECL_LAMPSET_TABLE_ENTRY(idx, lampdata)
-
-const lampnum_t *lampset_table[] = {
-	SYSTEM_LAMPSETS
-#ifdef MACHINE_LAMPSETS
-	MACHINE_LAMPSETS
-#endif
-};
-
-#endif /* USE_MD */
-
 
 task_ticks_t lampset_apply_delay;
 

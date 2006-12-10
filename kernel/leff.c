@@ -62,9 +62,7 @@ MACHINE_LAMP_EFFECTS
 	[num] = { flags, pri, b1, b2, fn },
 
 static const leff_t leff_table[] = {
-#ifdef USE_MD
 #define null_leff leff_exit
-#endif
 	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL },
 #ifdef MACHINE_LAMP_EFFECTS
 	MACHINE_LAMP_EFFECTS

@@ -946,6 +946,16 @@ sub lamp_sort_right_to_left {
 	return -($a->{'y'} <=> $b->{'y'});
 }
 
+sub lamp_sort_circle_out {
+	my $xcenter = 23;
+	my $ycenter = 12;
+	return 
+	int sqrt (((($a->{'x'} - $xcenter) ** 2) + (($a->{'y'} - $ycenter) ** 2)))
+	<=>
+	int sqrt (((($b->{'x'} - $xcenter) ** 2) + (($b->{'y'} - $ycenter) ** 2)));
+}
+
+
 sub pf_lamps {
 	my ($sortfn) = @_;
 	my @lamps;
@@ -1009,7 +1019,7 @@ sub machine_write_lampset_decls {
 
 	print "const lampnum_t * const lampset_table[] = {\n";
 	for $ls (unique ($m->{"lampsets"})) {
-		print "   \&" . $ls->{'c_decl'} . ",\n";
+		print "   " . $ls->{'c_decl'} . ",\n";
 	}
 	print "};\n";
 	print $END_SOURCE;

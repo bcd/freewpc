@@ -68,7 +68,6 @@ typedef struct
 } switch_info_t;
 
 
-#ifdef USE_MD
 extern const U8 mach_opto_mask[];
 extern const U8 mach_edge_switches[];
 
@@ -79,8 +78,6 @@ extern const U8 mach_edge_switches[];
 #define DECLARE_SWITCH_EVENT(name) \
 	.fn = callset_ ## name, \
 	.fnpage = EVENT_PAGE \
-
-#endif
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
@@ -103,40 +100,6 @@ extern const U8 mach_edge_switches[];
 
 #define MAKE_SWITCH(col,row)	((col * 8) + row - 1)
 #define MAKE_SW(row,col)  MAKE_SWITCH(row,col)
-
-#ifndef USE_MD
-
-/* Coin Door Switch Numbers */
-#define SW_LEFT_COIN				0
-#define SW_CENTER_COIN			1
-#define SW_RIGHT_COIN			2
-#define SW_FOURTH_COIN			3
-#define SW_ESCAPE					4
-#define SW_DOWN					5
-#define SW_UP						6
-#define SW_ENTER					7
-
-/* Flipper switches */
-#define SW_LR_FLIP_EOS			MAKE_SWITCH(9,1)
-#define SW_LR_FLIP_SW			MAKE_SWITCH(9,2)
-#define SW_LL_FLIP_EOS			MAKE_SWITCH(9,3)
-#define SW_LL_FLIP_SW			MAKE_SWITCH(9,4)
-#define SW_UR_FLIP_EOS			MAKE_SWITCH(9,5)
-#define SW_UR_FLIP_SW			MAKE_SWITCH(9,6)
-#define SW_UL_FLIP_EOS			MAKE_SWITCH(9,7)
-#define SW_UL_FLIP_SW			MAKE_SWITCH(9,8)
-
-/* Always closed switch */
-#ifndef SW_ALWAYS_CLOSED
-#define SW_ALWAYS_CLOSED		MAKE_SWITCH(2,4)
-#endif
-
-/* Coin door closed switch */
-#ifndef SW_COINDOOR_CLOSED
-#define SW_COINDOOR_CLOSED		MAKE_SWITCH(2,2)
-#endif
-
-#endif /* USE_MD */
 
 /* Array types. */
 #define AR_RAW			0

@@ -35,48 +35,7 @@
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE];
 
-#ifndef USE_MD
-/** Score IDs, which are indices into the score table */
-typedef enum {
-	SC_10,
-	SC_100,
-	SC_500,
-	SC_1K,
-	SC_2500,
-	SC_5K,
-	SC_5130,
-	SC_10K,
-	SC_15K,
-	SC_20K,
-	SC_25K,
-	SC_30K,
-	SC_40K,
-	SC_50K,
-	SC_75K,
-	SC_100K,
-	SC_200K,
-	SC_250K,
-	SC_500K,
-	SC_750K,
-	SC_1M,
-	SC_2M,
-	SC_3M,
-	SC_4M,
-	SC_5M,
-	SC_10M,
-	SC_20M,
-	SC_30M,
-	SC_40M,
-	SC_50M,
-	SC_100M,
-	SC_200M,
-	SC_250M,
-	SC_500M,
-	SC_1B,
-} score_id_t;
-#else
 typedef U8 score_id_t;
-#endif /* USE_MD */
 
 typedef struct
 {

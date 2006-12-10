@@ -26,15 +26,25 @@
  * can hold and/or release a pinball.  Typically, a device consists of
  * one or more switches used to keep track of the number of balls in
  * the device, and a coil for ejecting a single ball from the device.
- * Examples include ejects (single ball), poppers, scoops, etc.
+ * Examples include ejects (single ball), poppers, scoops, troughs, etc.
+ * Devices are also sometimes referred to as containers.
  *
- * Devices are managed by the kernel for the most part.  Each
- * implementation of a device declares "operation" routines that act
- * as callbacks and get called at the appropriate times for device-
- * specific behavior.
+ * The machine description file declares the containers and their
+ * properties.  This module contains all of the common code
+ * for servicing requests from the rest of the kernel.  This module
+ * exposes several per-device events that can be caught by the game
+ * code, for example, when a ball enters a device or a kickout is
+ * successful.
+ *
+ * The ball device code is also responsible for determining when
+ * end-of-ball occurs, and keeps track of the total number of balls
+ * in play at all times.
  */
 
 #include <freewpc.h>
+
+/** Pointer to the device properties table generated from the md */
+extern device_properties_t device_properties_table[];
 
 /** Runtime status about each device */
 device_t device_table[NUM_DEVICES];
@@ -518,20 +528,25 @@ void device_remove_live (void)
 	}
 	else if (live_balls > 0)
 	{
+		/* Decrement the count of balls in play.  Now what? */
 		live_balls--;
 		if (in_game)
 		{
+			/* Notify that the ball count changed, and that a ball drained */
 			callset_invoke (ball_count_change);
 			callset_invoke (ball_drain);
 			switch (live_balls)
 			{
 				case 0:
+					/* With zero balls in play, this might be end of ball. */
 					end_ball ();
+
 					/* FALLTHRU : end_ball may be cancelled due to a
 					ball save, but must be treated as going back to
 					single_ball_play */
 
 				case 1:
+					/* Multiball modules like to know when single ball play resumes. */
 					callset_invoke (single_ball_play);
 					break;
 				default:
@@ -542,8 +557,8 @@ void device_remove_live (void)
 }
 
 
-#ifdef DEVNO_TROUGH
 /** Sets the desired number of balls to be in play. */
+#ifdef DEVNO_TROUGH
 void device_multiball_set (U8 count)
 {
 	device_t *dev = device_entry (DEVNO_TROUGH);
@@ -658,9 +673,6 @@ void device_init (void)
 	live_balls = 0;
 	kickout_locks = 0;
 
-#ifdef USE_MD
-	extern device_properties_t device_properties_table[];
-
 	device_count = 0;
 	for (i=0; i < NUM_DEVICES; i++)
 	{
@@ -669,14 +681,6 @@ void device_init (void)
 		device_register (i, &device_properties_table[i]);
 		device_call_op (dev, power_up);
 	}
-#else
-	device_count = 0;
-	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
-	{
-		device_clear (dev);
-		device_call_op (dev, power_up);
-	}
-#endif
 }
 
 

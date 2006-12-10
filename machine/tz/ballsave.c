@@ -24,10 +24,10 @@
  * become a true leff. */
 static void ballsave_monitor (void)
 {
-start:
 #if defined (INFINITE_BALL_SAVER)
 	for (;;)
 #elif defined (CONFIG_TIMED_GAME)
+start:
 	while (timed_game_timer > 5)
 #else
 	while (timer_find_gid (GID_BALLSAVER_TIMER))

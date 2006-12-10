@@ -154,8 +154,6 @@ void amode_leff_subset_task (void)
 
 void amode_leff (void)
 {
-	U8 i;
-
 	triac_leff_enable (TRIAC_GI_MASK);
 	leff_on (LM_SLOT_MACHINE);
 	leff_on (LM_RAMP_BATTLE);

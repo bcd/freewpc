@@ -190,7 +190,6 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/flip.o \
 	kernel/font.o \
 	kernel/game.o \
-	kernel/idle.o \
 	kernel/init.o \
 	kernel/lamp.o \
 	kernel/lampset.o \
@@ -530,7 +529,7 @@ $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 		mv $(PINMAME_MACHINE).zip $(PINMAME_MACHINE).zip.original; \
 	fi; \
 	rm -f $(PINMAME_MACHINE).zip; \
-	zip -9 $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
+	zip $(PINMAME_MACHINE).zip $(PINMAME_GAME_ROM) $(PINMAME_OTHER_ROMS)
 
 uninstall :
 	@cd $(TARGET_ROMPATH) && \

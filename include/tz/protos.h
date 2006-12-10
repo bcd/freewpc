@@ -101,7 +101,6 @@ void jet_start_ball(void);
 void sw_jet_sound(void);
 void sw_jet_handler(void);
 /* lanes.c */
-void handle_outlane(void);
 void sw_left_outlane_handler(void);
 void sw_right_outlane_handler(void);
 void sw_left_inlane_1_handler(void);

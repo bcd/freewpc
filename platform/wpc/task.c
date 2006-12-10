@@ -419,7 +419,7 @@ void task_dispatcher (void)
 				set_stack_pointer (STACK_BASE);
 				
 				/* Call idle tasks */
-				idle ();	
+				callset_invoke (idle);
 			} 
 
 			/* Reset to beginning of the task list */
@@ -433,7 +433,7 @@ void task_dispatcher (void)
 		}
 		else if (tp->state == TASK_USED)
 		{
-			asm volatile ("jmp _task_restore");
+			asm volatile ("jmp\t_task_restore");
 		}
 		else if (tp->state != TASK_USED+TASK_BLOCKED)
 		{
@@ -447,7 +447,7 @@ void task_dispatcher (void)
 			else
 			{
 				tp->state &= ~TASK_BLOCKED;
-				asm volatile ("jmp _task_restore");
+				asm volatile ("jmp\t_task_restore");
 			}
 		}
 	}

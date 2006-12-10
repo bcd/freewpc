@@ -151,10 +151,10 @@ static char glyph_fixed6_8_bits[] = { glyph_fixed6_8_width, glyph_fixed6_8_heigh
 #define glyph_fixed6_9_height 9
 static char glyph_fixed6_9_bits[] = { glyph_fixed6_9_width, glyph_fixed6_9_height,
  0x1e,0x37,0x63,0x63,0x77,0x7e,0x60,0x37,0x1e};
-#define glyph_fixed6_period_width 3
+#define glyph_fixed6_period_width 2
 #define glyph_fixed6_period_height 2
 static char glyph_fixed6_period_bits[] = { glyph_fixed6_period_width, glyph_fixed6_period_height,
- 0x06,0x07};
+ 0x06,0x06};
 #define glyph_fixed6_comma_width 2
 #define glyph_fixed6_comma_height 4
 static char glyph_fixed6_comma_bits[] = { glyph_fixed6_comma_width, glyph_fixed6_comma_height,
