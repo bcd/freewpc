@@ -58,7 +58,6 @@ void
 match_start (void) 
 {
 	U8 match_flag;
-	U8 match_count = 0;
 
 	/* Nothing to do if match has been disabled */
 	if (system_config.match_feature == 0)
