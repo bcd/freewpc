@@ -47,21 +47,27 @@ PINMAME_OTHER_ROMS = tzu*.rom
 #
 # Object files exported by this game
 #
+# GAME_OBJS go into the system page, which should be a last resort or for common
+# functions, or for those which have to for some reason.  All feature tests can
+# go into GAME_TEST_OBJS.  Preferably, game functions go into GAME_PAGED_OBJS.
+# This works safely for any file that only uses CALLSET_ENTRY functions, deffs,
+# and leffs.  RTTs must go into GAME_OBJS.
+#
 
-GAME_OBJS = config.o \
-	clock.o deffs.o leffs.o \
+GAME_OBJS = clock.o deffs.o leffs.o \
 	amode.o lock.o magnet.o \
-	slot.o sling.o jets.o rightramp.o rocket.o star.o \
-	greed.o piano.o \
+	slot.o sling.o jets.o rocket.o star.o \
+	greed.o \
 	loop.o bonus.o door.o autofire.o gumball.o \
-	clocktarget.o hitch.o ballsave.o powerball.o \
+	clocktarget.o ballsave.o powerball.o \
 	multiball.o mpf.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
 
 GAME_INCLUDES =
 
-# These should eventually move to the machine page!
-GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o
+GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
+	config.o rightramp.o hitch.o piano.o
 
 GAME_FSMS = shot.fsm
+
