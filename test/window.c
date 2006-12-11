@@ -1164,8 +1164,8 @@ static bool deff_test_running (U8 id)
 
 static bool leff_test_running (U8 id)
 {
-	return (leff_get_active () == id);
-	// return task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, id);
+	return (leff_get_active () == id) ||
+		task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, id);
 }
 
 struct deff_leff_ops dev_deff_ops = {
@@ -1204,8 +1204,8 @@ void deff_leff_thread (void)
 			else
 			{
 				browser_draw ();
-					sprintf_far_string (names_of_leffs + menu_selection);
-					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+				sprintf_far_string (names_of_leffs + menu_selection);
+				font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
@@ -1246,6 +1246,7 @@ void deff_leff_down (void) { browser_down (); deff_leff_last_active++; }
 
 void deff_leff_enter (void)
 {
+	deff_leff_last_active = 0x55;
 	if (deff_leff_test_ops->is_running (menu_selection))
 	{
 		/* deff/leff already running, so stop it */
