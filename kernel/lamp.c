@@ -99,7 +99,7 @@ void lamp_update_all (void)
 }
 
 
-/* Runs periodically to invert any lamps in the flashing state */
+/** Runs periodically to invert any lamps in the flashing state */
 void lamp_flash_rtt (void)
 {
 	--lamp_flash_count;
@@ -117,6 +117,7 @@ void lamp_flash_rtt (void)
 }
 
 
+/** Runs periodically to update the physical lamp state */
 void lamp_rtt (void)
 {
 	U8 bits;
@@ -131,13 +132,18 @@ void lamp_rtt (void)
 	/* OR in the flashing lamp values.  These are guaranteed to be
 	 * zero for any lamps where the flash is turned off.
 	 * Otherwise, these bits are periodically inverted by the
-	 * (slower) flash rtt function above. */
+	 * (slower) flash rtt function above.
+	 * This means that for the flash to work, the default bit
+	 * must be OFF when the flash bit is ON.  (Use the tristate
+	 * macros to ensure this.)
+	 */
 	bits |= lamp_flash_matrix_now[lamp_strobe_column];
 
 	/* Override with the lamp effect lamps.
 	 * Leff2 bits are low priority and used for long-running
 	 * lamp effects.  Leff1 is higher priority and used
-	 * for quick effects.
+	 * for quick effects.  Therefore leff2 is applied first,
+	 * and leff1 may override it.
 	 */
 	bits &= lamp_leff2_allocated[lamp_strobe_column];
 	bits |= lamp_leff2_matrix[lamp_strobe_column];
@@ -338,6 +344,10 @@ void lamp_leff2_free (lampnum_t lamp)
 	register bitset p = lamp_leff2_allocated;
 	register U8 v = lamp;
 	__setbit(p, v);
+
+	p = lamp_leff2_matrix;
+	v = lamp;
+	__clearbit(p, v);
 }
 
 
@@ -346,10 +356,10 @@ void lamp_leff2_free (lampnum_t lamp)
  * bits from a lamp effect function.  Otherwise they work
  * identically to the lamp_ versions.
  *
- * TODO  : these functions are hardcoding usage of the
- * leff1 matrix now.  These should be checking the leff
- * flags to see if it's a partial leff and use leff2 matrix
- * instead.
+ * The functions manipulate either the leff1 or leff2 matrix,
+ * depending on whether the leff is shared or not.  Quick leffs
+ * used for light shows use leff1.  Shared leffs that run
+ * longer and may overlap with other shared leffs use leff2.
  */
 void leff_on (lampnum_t lamp)
 {

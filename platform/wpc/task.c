@@ -121,7 +121,11 @@ void task_dump (void)
 				tp, tp->state, tp->gid, tp->pc);
 			db_puts ("  STKW ");
 			db_put2x (tp->stack_word_count);
-			dbprintf ("  ARG %04X\n", tp->arg);
+			dbprintf ("  ARG %04X", tp->arg);
+			db_puts ("  TD ");
+			dbprintf ("%02X %02X %02X %02X\n",
+				tp->thread_data[0], tp->thread_data[1],
+				tp->thread_data[2], tp->thread_data[3]);
 		}
 	}
 	db_puts ("----------------------\n");

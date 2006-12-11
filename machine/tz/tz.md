@@ -382,7 +382,7 @@ SLOT_KICKOUT: PRI_LEFF3
 AMODE: runner, PRI_LEFF5, LAMPS(AMODE_ALL), GI(ALL)
 FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
 BONUS: runner, PRI_BONUS, LAMPS(ALL), GI(ALL)
-JETS_ACTIVE: shared, 0, LAMPS(JETS), c_decl(null_leff)
+Jets Active: shared, 0, LAMPS(JETS)
 GAME_TIMEOUT: PRI_TILT, GI(ALL)
 CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
 MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)

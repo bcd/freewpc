@@ -229,3 +229,11 @@ void multi_strobe_leff (void)
 	leff_exit ();
 }
 
+
+void jets_active_leff (void)
+{
+	lampset_set_apply_delay (TIME_300MS);
+	for (;;)
+		lampset_leff_step_increment (LAMPSET_JETS);
+}
+

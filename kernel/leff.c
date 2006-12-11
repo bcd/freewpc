@@ -247,7 +247,7 @@ task_t *leff_create_handler (const leff_t *leff)
 	}
 
 	/* Initialize the new leff's private data before it runs */
-	task_set_thread_data (tp, L_PRIV_APPLY_COUNT, 0);
+	task_set_thread_data (tp, L_PRIV_APPLY_DELAY, 0);
 	task_set_thread_data (tp, L_PRIV_DATA, 0);
 	task_set_thread_data (tp, L_PRIV_FLAGS, leff->flags);
 	return tp;
@@ -423,6 +423,7 @@ void leff_init (void)
 void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
+	task_kill_gid (GID_SHARED_LEFF);
 	triac_leff_free (TRIAC_GI_MASK);
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();

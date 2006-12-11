@@ -31,17 +31,11 @@
 
 extern const lampnum_t *lampset_table[];
 
-task_ticks_t lampset_apply_delay;
-
 U8 lampset_alternation_state;
-
 
 static inline void lampset_invoke_operator (
 	lampnum_t lamp, lamp_operator_t op )
 {
-	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT,
-		task_get_thread_data (task_getpid (), L_PRIV_APPLY_COUNT) + 1);
-
 	(*op) (lamp);
 
 	if (lampset_apply_delay > 0)
@@ -51,7 +45,7 @@ static inline void lampset_invoke_operator (
 
 void lampset_set_apply_delay (task_ticks_t delay)
 {
-	lampset_apply_delay = delay;
+	task_set_thread_data (task_getpid (), L_PRIV_APPLY_DELAY, delay);
 }
 
 
@@ -66,31 +60,19 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register uint8_t opcode;
 	register const lampnum_t *lset = lampset_table[id];
-	static const lampnum_t *lset_stack[4];
-	U8 lset_stack_offset = 0;
 	U8 lampset_intermediate_delay = 0;
 
-	lset_stack[lset_stack_offset++] = 0;
-	task_set_thread_data (task_getpid (), L_PRIV_APPLY_COUNT, 0);
-	task_set_thread_data (task_getpid (), L_PRIV_DATA, 0);
-
-	while (lset)
+	while ((opcode = *lset++) != LAMP_END)
 	{
-		opcode = *lset++;
-
 		switch (opcode)
 		{
 			case LAMP_MACRO_SLEEP_OP:
 				if (lampset_intermediate_delay == 0)
 				{
 					lampset_intermediate_delay = lampset_apply_delay;
-					lampset_apply_delay = 0;
+					task_set_thread_data (task_getpid (), L_PRIV_APPLY_DELAY, 0);
 				}
 				task_sleep (lampset_intermediate_delay);
-				break;
-
-			case LAMP_END:
-				lset = lset_stack[--lset_stack_offset];
 				break;
 
 			default:
@@ -167,11 +149,27 @@ void lampset_step_increment_handler (lampnum_t lamp)
 	task_set_thread_data (task_getpid (), L_PRIV_DATA, lamp);
 }
 
+void lampset_leff_step_increment_handler (lampnum_t lamp)
+{
+	U8 prev = task_get_thread_data (task_getpid (), L_PRIV_DATA);
+
+	dbprintf ("lamp = %d, prev = %d\n", lamp, prev);
+	if (prev != 0)
+		leff_off (prev);
+	leff_on (lamp);
+	task_set_thread_data (task_getpid (), L_PRIV_DATA, lamp);
+}
+
+
 void lampset_step_increment (lampset_id_t id)
 {
 	lampset_apply (id, lampset_step_increment_handler);
 }
 
+void lampset_leff_step_increment (lampset_id_t id)
+{
+	lampset_apply (id, lampset_leff_step_increment_handler);
+}
 
 
 void lampset_step_decrement_handler (lampnum_t lamp)
