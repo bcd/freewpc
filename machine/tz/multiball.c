@@ -39,8 +39,8 @@ void mb_lit_deff (void)
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 18, "SHOOT PIANO TO");
-	font_render_string_center (&font_mono5, 64, 27, "START MULTIBALL");
+	font_render_string_center (&font_mono5, 64, 18, "SHOOT LEFT RAMP");
+	font_render_string_center (&font_mono5, 64, 27, "FOR MULTIBALL");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -54,7 +54,7 @@ void mb_start_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 	dmd_show_low ();
-	flash_and_exit_deff (20, TIME_100MS);
+	flash_and_exit_deff (40, TIME_100MS);
 }
 
 
@@ -81,10 +81,12 @@ void mb_running_deff (void)
 }
 
 
-void mball_lock_lamp_update (void)
+CALLSET_ENTRY (mball, lamp_update)
 {
 	if (mball_locks_lit)
 		lamp_tristate_flash (LM_LOCK_ARROW);
+	else
+		lamp_tristate_off (LM_LOCK_ARROW);
 }
 
 void mball_light_lock (void)
@@ -95,6 +97,10 @@ void mball_light_lock (void)
 		lamp_tristate_flash (LM_LOCK_ARROW);
 		sound_send (SND_GUMBALL_COMBO);
 		deff_start (DEFF_LOCK_LIT);
+	}
+	else
+	{
+		/* TODO : award gumball combo while lock at max */
 	}
 }
 
@@ -124,6 +130,9 @@ CALLSET_ENTRY (mball, mball_start)
 		lamp_tristate_off (LM_LOCK_ARROW);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
+		lamp_tristate_flash (LM_PIANO_JACKPOT);
+		lamp_tristate_off (LM_PIANO_PANEL);
+		lamp_tristate_off (LM_SLOT_MACHINE);
 		device_request_empty (device_entry (DEVNO_LOCK));
 	}
 }
@@ -134,6 +143,7 @@ CALLSET_ENTRY (mball, mball_stop)
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_off (FLAG_MULTIBALL_RUNNING);
+		lamp_tristate_off (LM_PIANO_JACKPOT);
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
@@ -145,6 +155,11 @@ CALLSET_ENTRY (mball, mball_stop)
 CALLSET_ENTRY (mball, sw_left_ramp_exit)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING));
+	else if (lamp_flash_test (LM_MULTIBALL))
+	{
+		lamp_tristate_off (LM_MULTIBALL);
+		callset_invoke (mball_start);
+	}
 	else if (!lamp_test (LM_GUM))
 	{
 		lamp_on (LM_GUM);
@@ -159,16 +174,6 @@ CALLSET_ENTRY (mball, sw_right_ramp)
 	{
 		lamp_on (LM_BALL);
 		mball_check_light_lock ();
-	}
-}
-
-
-CALLSET_ENTRY (mball, sw_piano)
-{
-	if (lamp_flash_test (LM_PIANO_JACKPOT))
-	{
-		lamp_tristate_off (LM_PIANO_JACKPOT);
-		callset_invoke (mball_start);
 	}
 }
 
@@ -206,7 +211,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		lamp_on (LM_LOCK1);
 		if (mball_locks_made == 2)
 			lamp_on (LM_LOCK2);
-		lamp_tristate_flash (LM_PIANO_JACKPOT);
+		lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
 	}
 }
@@ -218,6 +223,7 @@ CALLSET_ENTRY (mball, start_player)
 	lamp_off (LM_LOCK1);
 	lamp_off (LM_LOCK2);
 	lamp_tristate_off (LM_LOCK_ARROW);
+	lamp_tristate_off (LM_MULTIBALL);
 	lamp_tristate_off (LM_PIANO_JACKPOT);
 	mball_locks_lit = 0;
 	mball_locks_made = 0;

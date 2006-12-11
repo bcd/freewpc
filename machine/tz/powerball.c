@@ -87,7 +87,7 @@ void pb_detect_deff (void)
 	dmd_sched_transition (&trans_vstripe_right2left);
 	sound_send (SND_POWERBALL_QUOTE);
 	dmd_show_low ();
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	dmd_alloc_high ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -111,8 +111,14 @@ void pb_set_location (U8 location, U8 depth)
 			lamp_tristate_flash (LM_LEFT_POWERBALL);
 			lamp_tristate_flash (LM_RIGHT_POWERBALL);
 			flag_on (FLAG_POWERBALL_IN_PLAY);
-			if (!pb_announce_needed)
-				pb_announce_needed = 1;
+			pb_announce_needed = 1;
+		}
+		else if (pb_location & PB_MAYBE_IN_PLAY)
+		{
+			lamp_tristate_on (LM_LEFT_POWERBALL);
+			lamp_tristate_on (LM_RIGHT_POWERBALL);
+			flag_off (FLAG_POWERBALL_IN_PLAY);
+			pb_announce_needed = 0;
 		}
 	}
 }
@@ -125,8 +131,7 @@ void pb_clear_location (U8 location)
 		lamp_tristate_off (LM_LEFT_POWERBALL);
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 		flag_off (FLAG_POWERBALL_IN_PLAY);
-		if (pb_announce_needed)
-			pb_announce_needed = 0;
+		pb_announce_needed = 0;
 		deff_stop (DEFF_PB_DETECT);
 	}
 }
@@ -191,10 +196,35 @@ void pb_poll_trough (void)
 
 void pb_container_enter (U8 location, U8 devno)
 {
-	if ((pb_location == PB_IN_PLAY) && (live_balls <= 1))
+	device_t *dev = device_entry (devno);
+
+	if (pb_location == PB_IN_PLAY)
 	{
-		pb_clear_location (PB_IN_PLAY);
-		pb_set_location (location, device_entry (devno)->actual_count);
+		if (live_balls <= 1)
+		{
+			/* Normal case is single ball play */
+			if ((dev->actual_count > 1) &&
+					(dev->actual_count >= dev->max_count))
+			{
+				pb_clear_location (PB_IN_PLAY);
+				pb_set_location (location, dev->actual_count);
+			}
+			else
+			{
+			}
+		}
+		else
+		{
+			/* In multiball, container enter might mean the
+			powerball entered it or not... we just don't
+			know */
+			pb_set_location (PB_MAYBE_IN_PLAY, 0);
+		}
+	}
+	else
+	{
+		/* If balls is not in play, then a container enter
+		event isn't important */
 	}
 }
 
@@ -257,6 +287,7 @@ CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)
 CALLSET_ENTRY (pb_detect, dev_trough_kick_success)
 {
 	pb_container_exit (PB_IN_TROUGH);
+	pb_poll_trough ();
 }
 
 CALLSET_ENTRY (pb_detect, dev_lock_kick_success)

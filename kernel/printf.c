@@ -47,8 +47,9 @@ S16 number_length;
 
 U8 min_width;
 
-bool sprintf_commas;
+U8 comma_positions;
 
+U8 commas_written;
 
 
 char digit2char (uint8_t digit)
@@ -110,7 +111,21 @@ char *do_sprintf_long_decimal (char *buf, U16 w)
 char *do_sprintf_hex_byte (char *buf, uint8_t b)
 {
 	*buf++ = digit2char (b >> 4);
+	if (comma_positions & 0x1)
+	{
+		*buf++ = ',';
+		commas_written++;
+	}
+	comma_positions >>= 1;
+
 	*buf++ = digit2char (b & 0x0F);
+	if (comma_positions & 0x1)
+	{
+		*buf++ = ',';
+		commas_written++;
+	}
+	comma_positions >>= 1;
+
 	return buf;
 }
 
@@ -123,26 +138,6 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 	buf = do_sprintf_hex_byte (buf, HIGHBYTE(w));
 	buf = do_sprintf_hex_byte (buf, LOWBYTE (w));
 	return buf;
-}
-
-
-void insert_numeric_separators (void)
-{
-	switch (number_length)
-	{
-		case 0: case 1: case 2: case 3:
-			break;
-
-		case 4: 
-		case 5:
-		case 6:
-			/* Insert one comma */
-			break;
-
-		case 7: case 8:
-			/* Insert two commas */
-			break;
-	}
 }
 
 
@@ -167,8 +162,9 @@ U8 sprintf (const char *format, ...)
 
 			sprintf_width = 0;
 			sprintf_leading_zeroes = FALSE;
-			sprintf_commas = TRUE;
 			min_width = 1;
+			comma_positions = 0;
+			commas_written = 0;
 
 do_format_chars:
 			format++;
@@ -196,7 +192,8 @@ do_format_chars:
 					endbuf = do_sprintf_decimal (buf, b);
 fixup_number:
 					leading_zero_count = 0;
-					while ((buf[leading_zero_count] == '0') &&
+					while (((buf[leading_zero_count] == '0') ||
+						(buf[leading_zero_count] == ',')) &&
 						(buf + leading_zero_count < endbuf))
 					{
 						leading_zero_count++;
@@ -234,12 +231,6 @@ fixup_number:
 
 							buf = endbuf - leading_zero_count;
 						}
-					}
-
-					if (sprintf_commas)
-					{
-						/* Need to inject commas into the string of
-						digits. */
 					}
 					break;
 				}
@@ -291,6 +282,7 @@ do_long_hex_integer:
 					static bcd_t *bcd;
 					bcd = va_arg (va, bcd_t *);
 					endbuf = buf;
+					comma_positions = 0x12;
 					while (sprintf_width != 0)
 					{
 						endbuf = do_sprintf_hex_byte (endbuf, *bcd++);

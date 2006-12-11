@@ -100,8 +100,9 @@ void brian_image_deff (void)
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show_low ();
+	task_sleep_sec (2);
 	sound_send (SND_POWER_GRUNT_1);
-	task_sleep_sec (6);
+	task_sleep_sec (4);
 	deff_exit ();
 }
 
@@ -154,23 +155,32 @@ void amode_leff_subset_task (void)
 
 void amode_leff (void)
 {
+	U8 i;
 	triac_leff_enable (TRIAC_GI_MASK);
-	leff_on (LM_SLOT_MACHINE);
-	leff_on (LM_RAMP_BATTLE);
-	leff_on (LM_CLOCK_MILLIONS);
 
-	amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
-	task_create_peer (amode_leff_subset_task);
-	task_sleep (TIME_33MS);
-
-	for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
-		amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
-		amode_leff_subset++)
+	for (;;)
 	{
+		amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
 		task_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
+	
+		for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
+			amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
+			amode_leff_subset++)
+		{
+			task_create_peer (amode_leff_subset_task);
+			task_sleep (TIME_33MS);
+		}
+
+		task_sleep_sec (15);
+		task_kill_peers ();
+
+		lampset_set_apply_delay (0);
+		lampset_apply_leff_off (LAMPSET_SORT1);
+		lampset_set_apply_delay (TIME_66MS);
+		for (i=0 ; i < 10; i++)
+			lampset_apply_leff_toggle (LAMPSET_SORT1);
 	}
-	task_exit ();
 }
 
 

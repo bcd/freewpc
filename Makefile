@@ -747,7 +747,7 @@ build/mach-config.h : $(MACH_DESC)
 	tools/genmachine $< config > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 	
-build/mach-%.c : build/mach-config.h
+build/mach-%.c : $(MACH_DESC) build/mach-config.h
 	@echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $(MACH_DESC) $(@:build/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@

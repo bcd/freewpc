@@ -229,10 +229,46 @@ void multi_strobe_leff (void)
 	leff_exit ();
 }
 
+void door_strobe_subtask (void)
+{
+	lampset_set_apply_delay (TIME_16MS);
+	for (;;)
+		lampset_apply_leff_toggle (LAMPSET_DOOR_PANELS);
+}
+
+void door_strobe_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	lampset_apply_leff_off (LAMPSET_DOOR_PANELS);
+	lampset_set_apply_delay (TIME_33MS);
+	task_create_peer (door_strobe_subtask);
+	task_sleep (TIME_100MS);
+	task_create_peer (door_strobe_subtask);
+	task_sleep_sec (2);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+void right_loop_leff (void)
+{
+	lampset_set_apply_delay (TIME_16MS);
+	lampset_apply_leff_toggle (LAMPSET_SORT4);
+	lampset_apply_leff_toggle (LAMPSET_SORT4);
+	leff_exit ();
+}
+
+void left_loop_leff (void)
+{
+	lampset_set_apply_delay (TIME_16MS);
+	lampset_apply_leff_toggle (LAMPSET_SORT3);
+	lampset_apply_leff_toggle (LAMPSET_SORT3);
+	leff_exit ();
+}
+
 
 void jets_active_leff (void)
 {
-	lampset_set_apply_delay (TIME_300MS);
+	lampset_set_apply_delay (TIME_100MS);
 	for (;;)
 		lampset_leff_step_increment (LAMPSET_JETS);
 }

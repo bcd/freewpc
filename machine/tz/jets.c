@@ -64,9 +64,7 @@ CALLSET_ENTRY (jet, door_panel_awarded)
 {
 	if (lamp_test (LM_PANEL_TSM))
 	{
-		lamp_tristate_flash (LM_LEFT_JET);
-		lamp_tristate_flash (LM_LOWER_JET);
-		lamp_tristate_flash (LM_RIGHT_JET);
+		leff_start (LEFF_JETS_ACTIVE);
 	}
 }
 

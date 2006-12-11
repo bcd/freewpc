@@ -23,16 +23,37 @@
 bool skill_shot_enabled;
 U8 skill_switch_reached;
 
+void skill_shot_ready_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	font_render_string (&font_mono5, 2, 3, "YELLOW");
+	font_render_string (&font_mono5, 2, 12, "ORANGE");
+	font_render_string (&font_mono5, 2, 21, "RED");
+
+	dmd_copy_low_to_high ();
+	font_render_string_right (&font_mono5, 120, 3, "100,000");
+	font_render_string_right (&font_mono5, 120, 12, "50,000");
+	font_render_string_right (&font_mono5, 120, 21, "25,000");
+	dmd_show_low ();
+	for (;;)
+	{
+		task_sleep (TIME_100MS);
+		dmd_show_other ();
+	}
+}
+
 void enable_skill_shot (void)
 {
 	skill_shot_enabled = TRUE;
 	skill_switch_reached = 0;
-	/* TODO : start display effect here to show skill shot ready */
+	deff_start (DEFF_SKILL_SHOT_READY);
 }
 
 void disable_skill_shot (void)
 {
 	skill_shot_enabled = FALSE;
+	deff_stop (DEFF_SKILL_SHOT_READY);
 }
 
 void skill_shot_made_deff (void)
@@ -62,11 +83,10 @@ void skill_shot_made_deff (void)
 static void award_skill_shot (void)
 {
 	mark_ball_in_play ();
-	disable_skill_shot ();
 	deff_start (DEFF_SKILL_SHOT_MADE);
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
-	door_award_if_possible ();
+	disable_skill_shot ();
 	switch (skill_switch_reached)
 	{
 		case 1: 

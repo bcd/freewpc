@@ -1308,6 +1308,10 @@ void lampset_draw (void)
 	font_render_string_center (&font_var5, 50, 21, sprintf_buffer);
 	sprintf ("MODE %d", lampset_update_mode);
 	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
+
+	/* Restart the update thread so that the old lamps are
+	cleared before the new effect is started */
+	window_start_thread ();
 }
 
 

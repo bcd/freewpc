@@ -23,19 +23,5 @@
 
 CALLSET_ENTRY (piano, sw_piano)
 {
-	extern void door_award_flashing (void);
-
 	switch_can_follow (piano, slot, TIME_4S);
-
-	if (!lamp_flash_test (LM_SLOT_MACHINE))
-	{
-		score (SC_5130);
-		sound_send (SND_ODD_CHANGE_BEGIN);
-	}
 }
-
-
-CALLSET_ENTRY(piano, start_ball)
-{
-}
-

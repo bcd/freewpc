@@ -56,9 +56,26 @@ CALLSET_ENTRY(leftramp, start_player)
 	left_ramps = 0;
 }
 
+static void maybe_ramp_divert (void)
+{
+	if (lamp_flash_test (LM_MULTIBALL))
+	{
+		ramp_divert_to_autoplunger ();
+	}
+	else if (lamp_test (LM_SUPER_SKILL))
+	{
+		ramp_divert ();
+	}
+}
+
+CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
+{
+	maybe_ramp_divert ();
+}
 
 CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
+	maybe_ramp_divert ();
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	left_ramps++;

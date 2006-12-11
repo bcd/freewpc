@@ -243,6 +243,11 @@ void tz_clock_reset (void)
 }
 
 
+CALLSET_ENTRY (tz_clock, init)
+{
+	clock_mode = CLOCK_STOPPED;
+}
+
 CALLSET_ENTRY (tz_clock, amode_start)
 {
 	clock_sw = 0;
@@ -252,7 +257,13 @@ CALLSET_ENTRY (tz_clock, amode_start)
 #if 0
 	clock_calibration_ticks = 3;
 #endif
-	clock_mode = CLOCK_CALIBRATING;
+	if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+	{
+	}
+	else
+	{
+		clock_mode = CLOCK_CALIBRATING;
+	}
 }
 
 

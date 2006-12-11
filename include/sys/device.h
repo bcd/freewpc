@@ -112,7 +112,7 @@ typedef struct device_ops
 #define device_call_op(dev, op) \
 do { \
 	dbprintf ("Calling device hook %s\n", #op); \
-	if (in_live_game && (dev->props->ops->op)) \
+	if (in_game && (dev->props->ops->op)) \
 	{ \
 		DEVCALL_PUSH; \
 		(*dev->props->ops->op) (DEVCALLARG); \

@@ -219,6 +219,25 @@ wait_and_recount:
 			 * change ... the kick must have failed, and we
 			 * should retry up to a point.  Since no state
 			 * is changed, the code will get reinvoked. */
+
+			/* TODO : not completely true.  A second ball could enter
+			the device immediately after the kick.  The kick didn't
+			really fail, but this is difficult to detect.  Of course
+			this can only be the case during a multiball.
+
+			If this is a multi-switch device, we can detect the difference
+			because the first switch would trip again, as opposed to only
+			the last switch tripping in a failed kick.  The current scheme
+			only relies on ball count and doesn't care which switch caused
+			the change.
+
+			For a single-switch device, even this won't help.  However,
+			for such devices we never lock a ball anyway, so treating it
+			as a failure and rekicking is harmless (except that points
+			may not be scored the second time).
+
+			In any case, this is common enough that a nonfatal shouldn't
+			be thrown. */
 			db_puts ("Kick did not change anything\n");
 			nonfatal (ERR_FAILED_KICK);
 			device_call_op (dev, kick_failure);
@@ -260,6 +279,8 @@ wait_and_recount:
 			/* The count went up during a kick cycle.
 			 * kicks_needed is presumably still nonzero, so
 			 * the code below should attempt the kick again. */
+
+			/* See long TODO comment above -- it applies here too. */
 			db_puts ("After kick, count increased\n");
 			nonfatal (ERR_KICK_CAUSED_INCREASE);
 		}

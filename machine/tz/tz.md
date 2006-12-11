@@ -236,7 +236,7 @@ Powerfield Values: MPF 500K..MPF 1M
 Jets: Left Jet..Right Jet
 Lower Lanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outlane
 Loop Awards: Left Spiral, Left Powerball, Right Spiral, Right Powerball
-Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again
+Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again, Power Payoff, Gumball Lane
 Spiral Awards: Spiral 2M..Spiral EB
 Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
 Amode Rand: Amode All
@@ -338,7 +338,8 @@ GC: QQQ, 15.000.000
 
 
 [flags]
-DOOR_AWARD_LIT:
+Piano Door Lit:
+Slot Door Lit:
 LEFT_OUTLANE_LIT:
 RIGHT_OUTLANE_LIT:
 QUICK_MB_RUNNING:
@@ -360,17 +361,21 @@ REPLAY: PRI_REPLAY
 JACKPOT: PRI_JACKPOT
 SPECIAL: PRI_SPECIAL
 Extra Ball: PRI_EB
-Left Ramp: PRI_GAME_MODE1+1
-Lock Lit: PRI_GAME_MODE1+2
-MB Lit: PRI_GAME_MODE1+2
-Ball Save: PRI_GAME_MODE1+3
-HITCHHIKER: PRI_GAME_MODE1+4
-CAMERA_AWARD: PRI_GAME_MODE1+5
-DOOR_AWARD: PRI_GAME_MODE1+5
-MB Start: PRI_GAME_QUICK1+8
-SKILL_SHOT_MADE: PRI_GAME_MODE1+6
+
+Skill Shot Ready: runner, PRI_GAME_MODE1+4
 MB Running: runner, PRI_GAME_MODE1+8
-PB Detect: PRI_GAME_QUICK1+12
+
+Left Ramp: PRI_GAME_QUICK1+1
+Camera Award: PRI_GAME_QUICK1+4
+Hitchhiker: PRI_GAME_QUICK1+4
+Door Award: PRI_GAME_QUICK1+6
+Lock Lit: PRI_GAME_QUICK1+8
+MB Start: PRI_GAME_QUICK1+8
+MB Lit: PRI_GAME_MODE1+8
+PB Detect: PRI_GAME_QUICK1+10
+Skill Shot Made: PRI_GAME_QUICK1+11
+Ball Save: PRI_GAME_QUICK1+12
+LITZ Award: PRI_GAME_QUICK1+15
 
 [leffs]
 FLASHER_HAPPY: PRI_LEFF1
@@ -379,7 +384,7 @@ LEFT_RAMP: PRI_LEFF2
 CLOCK_TARGET: PRI_LEFF2, GI(ALL)
 NO_GI: L_NORMAL, PRI_LEFF3, GI(ALL)
 SLOT_KICKOUT: PRI_LEFF3
-AMODE: runner, PRI_LEFF5, LAMPS(AMODE_ALL), GI(ALL)
+AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL)
 FLASH_ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
 BONUS: runner, PRI_BONUS, LAMPS(ALL), GI(ALL)
 Jets Active: shared, 0, LAMPS(JETS)
@@ -387,6 +392,10 @@ GAME_TIMEOUT: PRI_TILT, GI(ALL)
 CLOCK_START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
 MB_RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
 Strobe Up: PRI_LEFF2, LAMPS(ALL)
+Multi Strobe: PRI_LEFF2, LAMPS(ALL)
+Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL)
+Left Loop: PRI_LEFF1, LAMPS(SORT3)
+Right Loop: PRI_LEFF1, LAMPS(SORT4)
 
 [fonts]
 mono5:

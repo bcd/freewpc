@@ -65,6 +65,7 @@ void award_left_loop (void)
 {
 	if (in_live_game)
 	{
+		leff_start (LEFF_LEFT_LOOP);
 		award_loop ();
 	}
 }
@@ -74,6 +75,7 @@ void award_right_loop (void)
 {
 	if (in_live_game)
 	{
+		leff_start (LEFF_RIGHT_LOOP);
 		award_loop ();
 	}
 }

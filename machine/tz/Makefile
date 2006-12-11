@@ -60,7 +60,7 @@ GAME_OBJS = clock.o deffs.o leffs.o \
 	greed.o \
 	loop.o bonus.o door.o autofire.o gumball.o \
 	clocktarget.o ballsave.o powerball.o \
-	multiball.o mpf.o
+	multiball.o mpf.o rampdiv.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
 

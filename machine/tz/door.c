@@ -27,9 +27,6 @@ __local__ U8 door_index;
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
 
-/** Number of door panels that have been completed */
-__local__ U8 door_panels_completed;
-
 U8 door_active_lamp;
 
 U8 door_start_with_bttz;
@@ -162,7 +159,7 @@ void door_award_deff (void)
 	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
 	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[index]);
 	dmd_sched_transition (&trans_scroll_left);
-	sound_send (SND_THUNDER1);
+	sound_send (SND_SPIRAL_EB_LIT);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	kickout_unlock (KLOCK_DEFF);
@@ -170,6 +167,20 @@ void door_award_deff (void)
 	deff_exit ();
 }
 
+void litz_award_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+	sound_send (SND_FIST_BOOM1);
+	task_sleep_sec (1);
+	sound_send (SND_FIST_BOOM1);
+	task_sleep_sec (1);
+	sound_send (SND_FIST_BOOM1);
+	task_sleep_sec (1);
+	sound_send (SND_FIST_BOOM1);
+	task_sleep_sec (1);
+	deff_exit ();
+}
 
 void door_award_enable (void)
 {
@@ -186,6 +197,7 @@ static void door_award_flashing (void)
 	timed_game_extend (10);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
+	leff_start (LEFF_DOOR_STROBE);
 	task_sleep (TIME_100MS);
 	door_advance_flashing ();
 	score (SC_50K);
@@ -193,40 +205,98 @@ static void door_award_flashing (void)
 	callset_invoke (door_panel_awarded);
 }
 
-
-void door_award_if_possible (void)
+static void door_award_litz (void)
 {
+	deff_start (DEFF_LITZ_AWARD);
+}
+
+bool can_award_door_panel (void)
+{
+	/* Panels not awarded during any multiball */
 	if (live_balls > 1)
-	{
-		/* Panels not awarded during Multiball */
-	}
-	else if (flag_test (FLAG_BTTZ_RUNNING))
-	{
-		/* No more panels can be awarded after BTTZ */
-	}
-	else if (door_index == LITZ_DOOR_INDEX)
+		return FALSE;
+
+	/* No more panels can be awarded after BTTZ */
+	if (flag_test (FLAG_BTTZ_RUNNING))
+		return FALSE;
+
+	return TRUE;
+}
+
+CALLSET_ENTRY (door, lamp_update)
+{
+	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
+		lamp_on (LM_PIANO_PANEL);
+	else
+		lamp_off (LM_PIANO_PANEL);
+
+	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
+		lamp_on (LM_SLOT_MACHINE);
+	else
+		lamp_off (LM_SLOT_MACHINE);
+}
+
+void award_door_panel (void)
+{
+	if (door_index == LITZ_DOOR_INDEX)
 	{
 		flag_on (FLAG_BTTZ_RUNNING);
-		/* start BTTZ */
+		flag_off (FLAG_PIANO_DOOR_LIT);
+		flag_off (FLAG_SLOT_DOOR_LIT);
+		door_award_litz ();
 	}
-	else if (lamp_test (LM_PIANO_PANEL))
+	else
 	{
 		door_award_flashing ();
 	}
+	door_lamp_update ();
 }
 
+void door_award_if_possible (void)
+{
+	if (can_award_door_panel ())
+	{
+		award_door_panel ();
+	}
+}
+
+CALLSET_ENTRY (door, ball_count_change)
+{
+	door_lamp_update ();
+}
 
 CALLSET_ENTRY(door, sw_piano)
 {
-	door_award_if_possible ();
+	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
+	{
+		flag_off (FLAG_PIANO_DOOR_LIT);
+		flag_on (FLAG_SLOT_DOOR_LIT);
+		award_door_panel ();
+	}
+	else
+	{
+		score (SC_5130);
+		sound_send (SND_ODD_CHANGE_BEGIN);
+	}
 }
 
+CALLSET_ENTRY (door, shot_slot_machine)
+{
+	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
+	{
+		flag_off (FLAG_SLOT_DOOR_LIT);
+		flag_on (FLAG_PIANO_DOOR_LIT);
+		award_door_panel ();
+	}
+}
 
 CALLSET_ENTRY(door, start_player)
 {
 	door_index = 0;
 	door_panels_started = 0;
-	door_panels_completed = 0;
+	flag_on (FLAG_PIANO_DOOR_LIT);
+	flag_on (FLAG_SLOT_DOOR_LIT);
+	door_lamp_update ();
 }
 
 CALLSET_ENTRY(door, start_ball)

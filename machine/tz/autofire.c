@@ -103,6 +103,10 @@ void autofire_add_ball (void)
 	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_handler);
 }
 
+void autofire_catch (void)
+{
+}
+
 CALLSET_ENTRY (autofire, init)
 {
 	autofire_request_count = 0;
