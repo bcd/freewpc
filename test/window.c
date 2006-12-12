@@ -1064,6 +1064,7 @@ const font_t *font_test_lookup (void)
 {
 	switch (menu_selection)
 	{
+#if (MAX_FONTS > 0)
 		case FON_MONO5: default: return &font_mono5;
 		case FON_MONO9: return &font_mono9;
 		case FON_FIXED10: return &font_fixed10;
@@ -1079,6 +1080,7 @@ const font_t *font_test_lookup (void)
 		case FON_FIXED12: return &font_fixed12;
 		case FON_VAR5: return &font_var5;
 		case FON_CU17: return &font_cu17;
+#endif
 	}
 }
 
@@ -1513,7 +1515,9 @@ struct window_ops dev_balldev_test_window = {
 struct menu dev_balldev_test_item = {
 	.name = "BALL DEVICES",
 	.flags = M_ITEM,
+#if (NUM_DEVICES > 0)
 	.var = { .subwindow = { &dev_balldev_test_window, NULL } },
+#endif
 };
 
 /************* Transition Test ******************/
@@ -2773,7 +2777,9 @@ struct window_ops empty_balls_test_window = {
 struct menu empty_balls_test_item = {
 	.name = "EMPTY BALLS TEST",
 	.flags = M_ITEM,
+#if (NUM_DEVICES > 0)
 	.var = { .subwindow = { &empty_balls_test_window, NULL } },
+#endif
 };
 
 /****************** WPC ASIC Tests ***********************/
