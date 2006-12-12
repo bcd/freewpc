@@ -29,39 +29,9 @@ void righthole_kick_sound (void)
 }
 
 
-void righthole_enter (device_t *dev)
+CALLSET_ENTRY (righthole, enter)
 {
 	mark_ball_in_play ();
 	score (SC_1K);
-}
-
-
-void righthole_kick_attempt (device_t *dev)
-{
-	db_puts ("Sending righthole kick sound\n");
-	if (in_game && !in_tilt)
-	{
-	}
-}
-
-
-device_ops_t righthole_ops = {
-	.enter = righthole_enter,
-	.kick_attempt = righthole_kick_attempt,
-};
-
-device_properties_t righthole_props = {
-	.ops = &righthole_ops,
-	.name = "RIGHT POPPER",
-	.sol = SOL_RIGHT_POPPER,
-	.sw_count = 1,
-	.init_max_count = 0,
-	.sw = { SW_RIGHT_POPPER },
-};
-
-
-CALLSET_ENTRY (righthole, init)
-{
-	device_register (DEVNO_RIGHT_HOLE, &righthole_props);
 }
 

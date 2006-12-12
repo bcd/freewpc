@@ -29,39 +29,14 @@ void lefthole_kick_sound (void)
 }
 
 
-void lefthole_enter (device_t *dev)
+CALLSET_ENTRY (lefthole, enter)
 {
 	mark_ball_in_play ();
 	score (SC_1K);
 }
 
 
-void lefthole_kick_attempt (device_t *dev)
+CALLSET_ENTRY (lefthole, kick_attempt)
 {
-	db_puts ("Sending lefthole kick sound\n");
-	if (in_game && !in_tilt)
-	{
-	}
-}
-
-
-device_ops_t lefthole_ops = {
-	.enter = lefthole_enter,
-	.kick_attempt = lefthole_kick_attempt,
-};
-
-device_properties_t lefthole_props = {
-	.ops = &lefthole_ops,
-	.name = "LEFT POPPER",
-	.sol = SOL_LEFT_POPPER,
-	.sw_count = 1,
-	.init_max_count = 0,
-	.sw = { SW_LEFT_POPPER },
-};
-
-
-CALLSET_ENTRY (lefthole, init)
-{
-	device_register (DEVNO_LEFT_HOLE, &lefthole_props);
 }
 

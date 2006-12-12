@@ -36,6 +36,8 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
+MACHINE_FILE = wcs.md
+
 PINMAME_MACHINE = wcs_l2
 
 PINMAME_GAME_ROM = wcup_lx2.rom
