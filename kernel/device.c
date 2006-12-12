@@ -624,8 +624,10 @@ bool device_check_start_ok (void)
 	 * without first trying a device probe. */
  	if (task_find_gid (GID_DEVICE_PROBE)) 
 		return FALSE;
+#ifdef MACHINE_SHOOTER_SWITCH
 	else if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 		return TRUE;
+#endif
 	else if (missing_balls > 0)
 	{
 		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
