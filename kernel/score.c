@@ -53,9 +53,9 @@ void scores_draw_ball (void)
 #else
 	sprintf ("PLAYER %1i", player_up);
 #endif
-	font_render_string_center (&font_mono5, 96, 26, sprintf_buffer);
+	font_render_string_center (&font_mono5, 96, 27, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_mono5, 32, 26, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 27, sprintf_buffer);
 #endif
 }
 
@@ -85,8 +85,11 @@ void scores_draw (void)
 
 void scores_deff (void) __taskentry__
 {
+	U8 delay;
+
 	for (;;)
 	{
+redraw:
 		/* Clear score change flag */
 		score_change = 0;
 
@@ -103,12 +106,27 @@ void scores_deff (void) __taskentry__
 		/* Restart score effects */
 
 		/* Wait for a score change */
-		while (score_change == 0)
+		for (;;)
 		{
-			task_sleep (ball_in_play ? TIME_500MS : TIME_100MS);
+			delay = ball_in_play ? TIME_500MS : TIME_100MS;
+			while (delay > 0)
+			{
+				task_sleep (TIME_33MS);
+				delay -= TIME_33MS;
+				if (score_change != 0)
+					goto redraw;
+			}
 			dmd_show_other ();
-			task_sleep (ball_in_play ? TIME_200MS : TIME_100MS);
+
+			delay = ball_in_play ? TIME_200MS : TIME_100MS;
 			dmd_show_other ();
+			while (delay > 0)
+			{
+				task_sleep (TIME_33MS);
+				delay -= TIME_33MS;
+				if (score_change != 0)
+					goto redraw;
+			}
 		}
 	}
 }
