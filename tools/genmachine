@@ -612,7 +612,7 @@ sub machine_write_defines {
 	foreach $context (keys %ContextPrefixes) {
 		my $mc = $m->{$context};
 		my $indexRe = $contextDefinitionRe{$context};
-		my $number;
+		my $number = -1;
 		$indexRe = "[0-9]+" if ($indexRe eq "AUTO");
 		print "/* Definitions of $context */\n";
 		foreach my $def (unique ($mc)) {
@@ -911,7 +911,7 @@ sub machine_write_switch_decls {
 		my $c_decl = $sw->{'c_decl'};
 		my $c_ident = $sw->{'c_ident'};
 		print "   [" . $c_ident . "] = {\n";
-		for $field ("fn", "fnpage", "flags", "lamp", "sound",
+		for $field ("fn", "flags", "lamp", "sound",
 			"active_time", "inactive_time", "devno") {
 			$val = $sw->{$field};
 			print "      .$field = $val,\n" if defined $val;
