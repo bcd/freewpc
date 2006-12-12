@@ -20,8 +20,16 @@
 
 #include <freewpc.h>
 
+/** Bitmask referring to all 7 standup targets */
+#define NO_TARGETS 0x0
+#define ALL_TARGETS 0x7f
+
 U8 greed_sound_index;
 
+/** Which default standups are lit */
+__local__ U8 default_set;
+
+/** Which standups are lit for the GREED round */
 __local__ U8 greed_set;
 
 
@@ -33,27 +41,60 @@ U8 greed_sounds[] = {
 };
 
 
+void standup_lamp_update1 (U8 mask, U8 lamp)
+{
+	if (lamp_test (LM_PANEL_GREED))
+	{
+		if (greed_set & mask)
+		{
+			lamp_tristate_flash (lamp);
+		}
+		else
+		{
+			lamp_tristate_off (lamp);
+		}
+	}
+	else if (default_set & mask)
+	{
+		lamp_tristate_off (lamp);
+	}
+	else
+	{
+		lamp_tristate_on (lamp);
+	}
+}
+
+CALLSET_ENTRY (standup, lamp_update)
+{
+	standup_lamp_update1 (0x1, LM_LL_5M);
+	standup_lamp_update1 (0x2, LM_ML_5M);
+	standup_lamp_update1 (0x4, LM_UL_5M);
+	standup_lamp_update1 (0x8, LM_UR_5M);
+	standup_lamp_update1 (0x10, LM_MR1_5M);
+	standup_lamp_update1 (0x20, LM_MR2_5M);
+	standup_lamp_update1 (0x40, LM_LR_5M);
+}
+
+
+/** target is given as a bitmask */
 void common_greed_handler (U8 target)
 {
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
 
-	if (lamp_test (LM_PANEL_GREED))
+	if (lamp_test (LM_PANEL_GREED) && (greed_set & target))
 	{
+		greed_set &= ~target;
 		score (SC_50K);
 		sound_send (SND_GREED_ROUND_BOOM);
-		lamp_tristate_flash (lamp);
 	}
-	else if ((greed_set & target) == 0)
+	else if ((default_set & target) == 0)
 	{
-		greed_set |= target;
-
-		sound_send (SND_THUNDER1);
+		default_set &= ~target;
 		score (SC_25K);
-		task_sleep (TIME_500MS);
-		lamp_tristate_on (lamp);
+		sound_send (SND_THUNDER1);
 
-		if (greed_set == 0x7F)
+		if (default_set == NO_TARGETS)
 		{
 		}
 	}
@@ -65,6 +106,8 @@ void common_greed_handler (U8 target)
 		sound_send (greed_sounds[greed_sound_index]);
 		score (SC_5K);
 	}
+
+	standup_lamp_update1 (target, lamp);
 }
 
 
@@ -72,20 +115,17 @@ CALLSET_ENTRY (greed, door_panel_awarded)
 {
 	if (lamp_test (LM_PANEL_GREED))
 	{
-		lamp_tristate_flash (LM_LL_5M);
-		lamp_tristate_flash (LM_ML_5M);
-		lamp_tristate_flash (LM_UL_5M);
-		lamp_tristate_flash (LM_UR_5M);
-		lamp_tristate_flash (LM_MR1_5M);
-		lamp_tristate_flash (LM_MR2_5M);
-		lamp_tristate_flash (LM_LR_5M);
+		standup_lamp_update ();
 	}
 }
 
 
 CALLSET_ENTRY (greed, start_player)
 {
-	greed_set = 0;
+	/* Light all 7 'default' lamps */
+	default_set = ALL_TARGETS;
+	greed_set = ALL_TARGETS;
+	standup_lamp_update ();
 }
 
 

@@ -36,12 +36,9 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	mark_ball_in_play ();
 	score (SC_1K);
 
-	if (switch_did_follow (slot_proximity, slot))
-	{
-	}
-
 	if (switch_did_follow (dead_end, slot))
 	{
+		/* dead end was recently hit, so ignore slot */
 	}
 	else if (switch_did_follow (piano, slot))
 	{
@@ -74,8 +71,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
-	db_puts ("Sending slot kick sound\n");
-	if (in_game && !in_tilt)
+	if (in_live_game)
 	{
 		sound_send (SND_SLOT_KICKOUT_1);
 		leff_start (LEFF_SLOT_KICKOUT);

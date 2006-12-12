@@ -74,6 +74,52 @@ const char *door_award_goals[] = {
 	"PIANO NOW",
 };
 
+
+void door_start_event (U8 id)
+{
+	switch (id)
+	{
+		case 0: callset_invoke (door_start_tsm); break;
+		case 1: callset_invoke (door_start_eb); break;
+		case 2: callset_invoke (door_start_super_slot); break;
+		case 3: callset_invoke (door_start_clock_millions); break;
+		case 4: callset_invoke (door_start_spiral); break;
+		case 5: callset_invoke (door_start_battle_power); break;
+		case 6: callset_invoke (door_start_10M); break;
+		case 7: callset_invoke (door_start_greed); break;
+		case 8: callset_invoke (door_start_camera); break;
+		case 9: callset_invoke (door_start_hitchhiker); break;
+		case 10: callset_invoke (door_start_clock_chaos); break;
+		case 11: callset_invoke (door_start_super_skill); break;
+		case 12: callset_invoke (door_start_fast_lock); break;
+		case 13: callset_invoke (door_start_light_gumball); break;
+		case 14: callset_invoke (door_start_litz); break;
+	}
+}
+
+void door_stop_event (U8 id)
+{
+	switch (id)
+	{
+		case 0: callset_invoke (door_stop_tsm); break;
+		case 1: callset_invoke (door_stop_eb); break;
+		case 2: callset_invoke (door_stop_super_slot); break;
+		case 3: callset_invoke (door_stop_clock_millions); break;
+		case 4: callset_invoke (door_stop_spiral); break;
+		case 5: callset_invoke (door_stop_battle_power); break;
+		case 6: callset_invoke (door_stop_10M); break;
+		case 7: callset_invoke (door_stop_greed); break;
+		case 8: callset_invoke (door_stop_camera); break;
+		case 9: callset_invoke (door_stop_hitchhiker); break;
+		case 10: callset_invoke (door_stop_clock_chaos); break;
+		case 11: callset_invoke (door_stop_super_skill); break;
+		case 12: callset_invoke (door_stop_fast_lock); break;
+		case 13: callset_invoke (door_stop_light_gumball); break;
+		case 14: callset_invoke (door_stop_litz); break;
+	}
+}
+
+
 extern inline const U8 *door_get_lamps (void)
 {
 	return lampset_lookup (LAMPSET_DOOR_PANELS_AND_HANDLE);
@@ -194,6 +240,7 @@ static void door_award_flashing (void)
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_on (door_active_lamp);
+	door_start_event (door_active_lamp);
 	timed_game_extend (10);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);
@@ -207,6 +254,7 @@ static void door_award_flashing (void)
 
 static void door_award_litz (void)
 {
+	door_start_event (14);
 	deff_start (DEFF_LITZ_AWARD);
 }
 
@@ -301,6 +349,10 @@ CALLSET_ENTRY(door, start_player)
 
 CALLSET_ENTRY(door, start_ball)
 {
+	U8 id;
+
+	for (id = 0; id < 15; id++)
+		door_stop_event (id);
 	door_set_flashing (door_index);
 	door_award_enable ();
 }

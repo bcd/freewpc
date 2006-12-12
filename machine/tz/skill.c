@@ -27,18 +27,24 @@ void skill_shot_ready_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
-	font_render_string (&font_mono5, 2, 3, "YELLOW");
-	font_render_string (&font_mono5, 2, 12, "ORANGE");
-	font_render_string (&font_mono5, 2, 21, "RED");
+
+	sprintf ("%8b", current_score);
+	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
+
+	font_render_string (&font_mono5, 2, 10, "YELLOW");
+	font_render_string (&font_mono5, 2, 16, "ORANGE");
+	font_render_string (&font_mono5, 2, 22, "RED");
 
 	dmd_copy_low_to_high ();
-	font_render_string_right (&font_mono5, 120, 3, "100,000");
-	font_render_string_right (&font_mono5, 120, 12, "50,000");
-	font_render_string_right (&font_mono5, 120, 21, "25,000");
+	font_render_string_right (&font_mono5, 120, 10, "100,000");
+	font_render_string_right (&font_mono5, 120, 16, "50,000");
+	font_render_string_right (&font_mono5, 120, 22, "25,000");
 	dmd_show_low ();
 	for (;;)
 	{
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_100MS * 7);
+		dmd_show_other ();
+		task_sleep (TIME_100MS * 3);
 		dmd_show_other ();
 	}
 }
@@ -76,6 +82,7 @@ void skill_shot_made_deff (void)
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
+	dmd_sched_transition (&trans_scroll_down);
 	deff_exit ();
 }
 

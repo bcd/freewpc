@@ -26,7 +26,7 @@ CALLSET_ENTRY (rocket, dev_rocket_enter)
 	score (SC_10K);
 }
 
-__taskentry__ void rocket_kick_sound (void)
+void rocket_kick_sound (void)
 {
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);
@@ -38,7 +38,6 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 	event_should_follow (rocket, hitchhiker, TIME_2S);
 	if (in_live_game)
 	{
-		db_puts ("Sending rocket kick sound\n");
 		leff_start (LEFF_NO_GI);
 		sound_send (SND_ROCKET_KICK_REVVING);
 		task_sleep (TIME_100MS * 8);

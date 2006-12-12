@@ -92,6 +92,7 @@ void pb_detect_deff (void)
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (32, TIME_100MS);
+	dmd_sched_transition (&trans_scroll_up);
 #endif
 	deff_exit ();
 }
