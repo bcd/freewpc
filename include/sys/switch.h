@@ -42,9 +42,6 @@ typedef struct
 	/** A function to call when the switch produces an event */
 	void (*fn) (void);
 
-	/** The ROM page in which the above function resides */
-	U8 fnpage;
-
 	/** A set of flags that control when switch events are produced */
 	U8 flags;
 

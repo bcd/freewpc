@@ -363,13 +363,11 @@ void switch_sched (void)
 	if ((swinfo->sound != 0) && in_live_game)
 		sound_send (swinfo->sound);
 
-	/* If the switch declares a processing function, call it. */
+	/* If the switch declares a processing function, call it.
+	 * All functions are in the EVENT_PAGE. */
 	if (swinfo->fn)
 	{
-		if (swinfo->fnpage != 0)
-			call_far (swinfo->fnpage, (*swinfo->fn) ());
-		else
-			(*swinfo->fn) ();
+		call_far (EVENT_PAGE, (*swinfo->fn) ());
 	}
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
