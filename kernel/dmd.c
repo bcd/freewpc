@@ -24,7 +24,7 @@
  * \file
  * \brief Manages the dot matrix controller (DMD)
  *
- * The DMD modules manages the physical DMD resources.  The DMD
+ * The DMD module manages the physical DMD resources.  The DMD
  * supports 16 pages which can be written to.  One of these pages
  * can be designated as "visible", which is what the player sees.
  * Two of these pages can be "mapped" into address space for
@@ -385,6 +385,9 @@ void dmd_draw_border (U8 *dbuf)
 	}
 }
 
+/**
+ * Draw a horizontal line at the specified y-coordinate.
+ */
 void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 {
 	dbuf += y * (16 / 2);
@@ -479,55 +482,6 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 void dmd_draw_fbm (const U8 *image_bits)
 {
 }
-
-
-#ifdef INCLUDE_COLOR_TEST
-/**
- * The color test was used to prove that the 4-color imaging is
- * working correctly.  It is not required in a production build.
- */
-void dmd_color_test (void)
-{
-	U16 *buf;
-	U16 n;
-
-	dmd_alloc_low_high ();
-	dmd_clean_page (dmd_low_buffer);
-
-	/* Draw the bright page first. */
-	buf = (U16 *)dmd_low_buffer + 6;
-	for (n=0; n < 16; n++)
-	{
-		buf[0] = 0xFFFFUL;
-		buf[1] = 0xFFFFUL;
-		buf += 8;
-	}
-	dmd_copy_low_to_high ();
-
-	/* Draw the medium intensity on the high page,
-	 * after the copy of the brightest pixels */
-	buf = (U16 *)dmd_high_buffer + 4;
-	for (n=0; n < 16; n++)
-	{
-		buf[0] = 0xFFFFUL;
-		buf[1] = 0xFFFFUL;
-		buf += 8;
-	}
-
-
-	/* Draw the dark page second */
-	/* Install low page as dark, high page as bright */
-	buf = (U16 *)dmd_low_buffer + 2;
-	for (n=0; n < 16; n++)
-	{
-		buf[0] = 0xFFFFUL;
-		buf[1] = 0xFFFFUL;
-		buf += 8;
-	}
-
-	dmd_show2 ();
-}
-#endif
 
 
 /*
@@ -688,6 +642,12 @@ void dmd_sched_transition (dmd_transition_t *trans)
 	dmd_in_transition = TRUE;
 }
 
+
+/**
+ * Cancel a scheduled transition.  This is needed in case an effect
+ * has scheduled a transition, but is stopped or replaced by a higher
+ * priority effect.
+ */
 void dmd_reset_transition (void)
 {
 	dmd_in_transition = FALSE;

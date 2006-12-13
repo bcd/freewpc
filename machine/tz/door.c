@@ -241,6 +241,7 @@ static void door_award_flashing (void)
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_on (door_active_lamp);
 	door_start_event (door_active_lamp);
+	score (SC_5M);
 	timed_game_extend (10);
 	door_panels_started++;
 	deff_start (DEFF_DOOR_AWARD);

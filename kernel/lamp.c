@@ -339,6 +339,14 @@ void lamp_leff2_allocate (lampnum_t lamp)
 }
 
 
+bool lamp_leff2_test_allocated (lampnum_t lamp)
+{	
+	register bitset p = lamp_leff2_matrix;
+	register U8 v = lamp;
+	__testbit(p, v);
+	return v;
+}
+
 void lamp_leff2_free (lampnum_t lamp)
 {
 	register bitset p = lamp_leff2_allocated;

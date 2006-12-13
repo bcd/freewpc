@@ -23,6 +23,7 @@ define MACHINE_SOL_EXTBOARD1
 define MACHINE_AMODE_LEFT_FLIPPER_HANDLER amode_left_flipper
 define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
+define MACHINE_SCORE_DIGITS 10
 
 
 [lamps]
@@ -93,8 +94,8 @@ define MACHINE_CUSTOM_AMODE
 
 # Mark playfield flags! (or opposite?!)
 [switches]
-11: Right Inlane, micro, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
-12: Right Outlane, micro, sound(SND_DRAIN)
+11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
+12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
 14: Tilt, tilt, ingame
 15: Right Trough, c_decl(sw_trough), noplay
@@ -112,9 +113,9 @@ define MACHINE_CUSTOM_AMODE
 33: Bottom Jet, ingame, c_decl(sw_jet), fast, Bottom Jet, noplay
 34: Left Sling, ingame, c_decl(sw_sling), fast, Left Slingshot, noplay
 35: Right Sling, ingame, c_decl(sw_sling), fast, Right Slingshot, noplay
-36: Left Outlane, sound(SND_DRAIN)
-37: Left Inlane 1, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE1)
-38: Left Inlane 2, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE2)
+36: Left Outlane, ingame, sound(SND_DRAIN)
+37: Left Inlane 1, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE1)
+38: Left Inlane 2, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE2)
 41: Dead End, ingame
 42: Camera, ingame
 43: Piano

@@ -81,6 +81,8 @@ U8 *font_lookup (const font_t *font, char c)
 {
 	if (c == ' ')
 	{
+		/* TODO : if every font had an entry for the 'space' character,
+		this test could be removed */
 		char *data = font->glyphs[(U8)'I'];
 		font_width = *data++;
 		font_byte_width = (font_width + 7) >> 3;
@@ -199,7 +201,11 @@ STATIC void fontargs_render_string (void)
 			{
 				blit_dmd = wpc_dmd_addr_verify (dmd_base 
 					+ xb + i * DMD_BYTE_WIDTH + j);
+
+				/* TODO : font_blit is applicable to more than just
+				fonts; it could be used for arbitrary-sized bitmaps. */
 				font_blit ();
+
 			} /* end for each byte in same row */
 		} /* end for each row */
 

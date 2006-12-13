@@ -381,9 +381,9 @@ void leff_start_highest_priority (void)
 	}
 	else
 	{
+		task_recreate_gid (GID_LEFF, leff_default);
 		lamp_leff1_erase ();
 		lamp_leff1_free_all ();
-		task_recreate_gid (GID_LEFF, leff_default);
 	}
 }
 

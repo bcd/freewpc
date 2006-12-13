@@ -394,12 +394,12 @@ void start_ball (void)
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
 
+#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
-#ifdef DEVNO_TROUGH
 		device_request_kick (device_entry (DEVNO_TROUGH));
-#endif
 	}
+#endif
 
 	flipper_enable ();
 	triac_enable (TRIAC_GI_MASK);
@@ -566,8 +566,9 @@ CALLSET_ENTRY (game, sw_start_button)
  */
 CALLSET_ENTRY (game, sw_buyin_button)
 {
-#ifdef SW_BUYIN_BUTTON
+#ifdef MACHINE_BUYIN_SWITCH
 #ifdef TEST_INITIALS_ENTRY
+	extern __common__ void initials_enter (void);
 	initials_enter ();
 #else
 	inspector_buyin_button ();

@@ -109,7 +109,7 @@ redraw:
 		for (;;)
 		{
 			delay = ball_in_play ? TIME_500MS : TIME_100MS;
-			while (delay > 0)
+			while (delay != 0)
 			{
 				task_sleep (TIME_33MS);
 				delay -= TIME_33MS;
@@ -120,7 +120,7 @@ redraw:
 
 			delay = ball_in_play ? TIME_200MS : TIME_100MS;
 			dmd_show_other ();
-			while (delay > 0)
+			while (delay != 0)
 			{
 				task_sleep (TIME_33MS);
 				delay -= TIME_33MS;

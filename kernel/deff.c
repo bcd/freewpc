@@ -158,9 +158,20 @@ static deffnum_t deff_get_highest_priority (void)
 	return best;
 }
 
+/**
+ * Common processing that must occur when stopping a deff.
+ * This function is called both when a deff exits and when
+ * other code stops the deff.
+ * In both cases kickout locks should be cleared.
+ * The DMD transition should only be cancelled when a deff
+ * is killed externally.  If a deff exits cleanly, it may
+ * schedule a transition to be used when the new deff renders
+ * its first frame.
+ */
 static void deff_stop_task (void)
 {
-	dmd_reset_transition ();
+	/* if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
+		dmd_reset_transition ();
 	kickout_unlock (KLOCK_DEFF);
 }
 

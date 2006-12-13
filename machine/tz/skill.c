@@ -36,9 +36,9 @@ void skill_shot_ready_deff (void)
 	font_render_string (&font_mono5, 2, 22, "RED");
 
 	dmd_copy_low_to_high ();
-	font_render_string_right (&font_mono5, 120, 10, "100,000");
-	font_render_string_right (&font_mono5, 120, 16, "50,000");
-	font_render_string_right (&font_mono5, 120, 22, "25,000");
+	font_render_string_right (&font_mono5, 120, 10, "5,000,000");
+	font_render_string_right (&font_mono5, 120, 16, "3,000,000");
+	font_render_string_right (&font_mono5, 120, 22, "1,000,000");
 	dmd_show_low ();
 	for (;;)
 	{
@@ -70,13 +70,13 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
-			sprintf ("25,000");
+			sprintf ("1,000,000");
 			break;
 		case 2:
-			sprintf ("50,000");
+			sprintf ("3,000,000");
 			break;
 		case 3:
-			sprintf ("100,000");
+			sprintf ("5,000,000");
 			break;
 	}
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
@@ -97,14 +97,14 @@ static void award_skill_shot (void)
 	switch (skill_switch_reached)
 	{
 		case 1: 
-			score (SC_25K);
+			score (SC_1M);
 			break;
 		case 2: 
-			score (SC_50K); 
+			score (SC_3M); 
 			timed_game_extend (5);
 			break;
 		case 3: 
-			score (SC_100K); 
+			score (SC_5M); 
 			timed_game_extend (10);
 			break;
 	}

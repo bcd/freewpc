@@ -291,20 +291,23 @@ void switch_rtt (void)
 void switch_lamp_pulse (void)
 {
 	const switch_info_t * const swinfo = (switch_info_t *)task_get_arg ();
-	dbprintf ("Pulsing lamp %d\n", swinfo->lamp);
 
-	lamp_leff_allocate (swinfo->lamp);
+	task_set_thread_data (task_getpid (), L_PRIV_FLAGS, L_SHARED);
+	if (!lamp_leff2_test_allocated (swinfo->lamp))
+	{
+		lamp_leff2_allocate (swinfo->lamp);
 
-	if (lamp_test (swinfo->lamp))
-		leff_off (swinfo->lamp);
-	else
-		leff_on (swinfo->lamp);
-	task_sleep (TIME_100MS * 2);
+		if (lamp_test (swinfo->lamp))
+			leff_off (swinfo->lamp);
+		else
+			leff_on (swinfo->lamp);
+		task_sleep (TIME_100MS * 2);
 	
-	leff_toggle (swinfo->lamp);
-	task_sleep (TIME_100MS * 2);
+		leff_toggle (swinfo->lamp);
+		task_sleep (TIME_100MS * 2);
 
-	lamp_leff_free (swinfo->lamp);
+		lamp_leff2_free (swinfo->lamp);
+	}
 	task_exit ();
 }
 
@@ -354,7 +357,7 @@ void switch_sched (void)
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
-		task_pid_t tp = task_create_gid (GID_SWITCH_LAMP_PULSE, switch_lamp_pulse);
+		task_pid_t tp = task_create_gid (GID_SHARED_LEFF, switch_lamp_pulse);
 		task_set_arg (tp, (U16)swinfo);
 	}
 

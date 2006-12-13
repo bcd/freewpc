@@ -88,7 +88,8 @@ void do_reset (void)
 	wpc_set_ram_page (0);
 
 	/** Perform basic diagnostics to ensure that everything is
-	 * more or less working.
+	 * more or less working.  (Diags must be in the system page
+	 * since the paging hardware may be broken.)
 	 * 1. Verify ROM is good first, since that ensures that this
 	 * code is not corrupted somehow.
 	 * 2. Verify RAM next, using a read-write test.
@@ -97,6 +98,10 @@ void do_reset (void)
 	 * loop and pulse the diagnostic LED with a flash code to
 	 * report the error.  We can't reply on the DMD working
 	 * properly to help us here.
+	 *
+	 * Once diags prove the system working, ALL of the remaining
+	 * code should be moved into a separate page and run from there,
+	 * as it is only run once.
 	 */
 	//diag_run_at_reset ();
 
@@ -240,7 +245,8 @@ void do_reset (void)
  * NOTE: if a task _really_ does take that long to execute before
  * switching out, it should set "task_dispatching_ok = TRUE"
  * periodically, to avoid a time out here.  This should rarely be
- * used.
+ * used.  (Even better, it should "task_yield" and let other tasks
+ * run for a while.)
  */
 void lockup_check_rtt (void)
 {
@@ -261,10 +267,14 @@ void lockup_check_rtt (void)
 __noreturn__ 
 void fatal (errcode_t error_code)
 {
+	/* Don't allow any more interrupts, since they might be the
+	source of the error. */
 	disable_irq ();
 
 	audit_increment (&system_audits.fatal_errors);
-	
+
+	/* Try to display the error on the DMD.  This may not work,
+	you know. */
 	dmd_alloc_low_clean ();
 
 	dbprintf ("Fatal error: %i\n", error_code);
@@ -276,11 +286,17 @@ void fatal (errcode_t error_code)
 	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
 
 	dmd_show_low ();
+
+	/* Dump all of the task information to the debugger port. */
 	task_dump ();
+
 #ifdef CONFIG_PLATFORM_LINUX
 	exit (1);
 #else
 	/* TODO : reset hardware here!! */
+
+	/* Go into a loop, long enough for the error message to be visible.
+	Then reset the system. */
 	{
 		U16 count, secs;
 		for (secs = 0; secs < 10; secs++)

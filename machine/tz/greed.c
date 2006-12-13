@@ -111,20 +111,23 @@ void common_greed_handler (U8 target)
 }
 
 
-CALLSET_ENTRY (greed, door_panel_awarded)
+CALLSET_ENTRY (greed, door_start_greed)
 {
-	if (lamp_test (LM_PANEL_GREED))
-	{
-		standup_lamp_update ();
-	}
+	greed_set = ALL_TARGETS;
+	standup_lamp_update ();
 }
 
+CALLSET_ENTRY (greed, door_stop_greed)
+{
+	greed_set = NO_TARGETS;
+	standup_lamp_update ();
+}
 
 CALLSET_ENTRY (greed, start_player)
 {
 	/* Light all 7 'default' lamps */
 	default_set = ALL_TARGETS;
-	greed_set = ALL_TARGETS;
+	greed_set = NO_TARGETS;
 	standup_lamp_update ();
 }
 

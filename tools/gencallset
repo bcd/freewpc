@@ -43,6 +43,15 @@
 # defines the global event handlers making calls to all of
 # the interested modules.
 #
+#
+# TODO:
+# A more efficient solution would merge identical functions.
+# 	* If there are no subscribers to an event, then the call can be NOPed.
+#    Easiest way is to emit a #define that expands to nothing, or emit
+#    multiple assembler labels for the same function.
+#  * We may need to emit build/callset.h with prototypes and/or macros.
+#
+
 
 # A list of directories to be searched.
 my @SearchDirs = ("build", "kernel", "common", "mach", "platform/linux", "platform/wpc");

@@ -333,7 +333,11 @@ sub close_gi {
 sub int_to_long_bcd {
 	my ($val) = @_;
 	my $res = "{ ";
-	$place = 1000000;
+	my $digits = 10; # TODO
+
+	$place = 1000000 if ($digits == 8);
+	$place = 100000000 if ($digits == 10);
+
 	while (int ($place) > 0) {
 		$res .= "0x" . int ($val / $place) . ", ";
 		$val %= $place;

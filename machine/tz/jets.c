@@ -94,9 +94,9 @@ void sw_jet_sound (void)
 CALLSET_ENTRY (jet, sw_jet)
 {
 	if (lamp_test (LM_PANEL_TSM))
-		score (SC_50K);
+		score (SC_500K);
 	else
-		score (SC_10K);
+		score (SC_250K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 
