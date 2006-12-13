@@ -221,7 +221,7 @@ void do_reset (void)
 	{
 		/* TODO - drop priority for idle tasks */
 		task_sleep (TIME_66MS);
-		idle ();
+		callset_invoke (idle);
 	}
 #endif
 }
