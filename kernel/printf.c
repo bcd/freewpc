@@ -379,9 +379,9 @@ void
 sprintf_score (U8 *score)
 {
 #if (MACHINE_SCORE_DIGITS == 8)
-	sprintf ("%8b", current_score);
+	sprintf ("%8b", score);
 #elif (MACHINE_SCORE_DIGITS == 10)
-	sprintf ("%10b", current_score);
+	sprintf ("%10b", score);
 #else
 #error
 #endif
