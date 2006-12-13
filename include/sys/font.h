@@ -43,6 +43,7 @@ typedef struct
 	char **glyphs;
 } font_t;
 
+/* TODO : autogenerate from the md file */
 extern const font_t font_mono5;
 extern const font_t font_mono9;
 extern const font_t font_fixed10;
@@ -88,23 +89,17 @@ typedef struct
 extern fontargs_t font_args;
 
 void font_get_string_area (const font_t *font, const char *s);
+
 void fontargs_render_string_center (const fontargs_t *args);
 void fontargs_render_string_right (const fontargs_t *args);
 void fontargs_render_string_left (const fontargs_t *args);
+
+/* The _2 versions will render the string to both mapped pages
+(low and high), and are more efficient than writing twice by hand. */
 void fontargs_render_string_center2 (const fontargs_t *args);
 void fontargs_render_string_right2 (const fontargs_t *args);
 void fontargs_render_string_left2 (const fontargs_t *args);
 
-
-#if 0
-#define DECL_FONTARGS_CONST(_f,_x,_y,_s) \
-	static fontargs_t args = { \
-		.font = _f, \
-		.x = _x, \
-		.y = _y, \
-		.s = _s, \
-	};
-#endif
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
