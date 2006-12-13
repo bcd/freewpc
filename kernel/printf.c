@@ -146,7 +146,7 @@ U8 sprintf (const char *format, ...)
 	static va_list va;
 	static char *buf;
 	static char *endbuf;
-	
+
 	buf = sprintf_buffer;
 
 	va_start (va, format);
@@ -171,9 +171,10 @@ do_format_chars:
 			switch (*format)
 			{
 				case '0':
-					if (sprintf_leading_zeroes == FALSE)
+					if (sprintf_width == 0)
 					{
 						sprintf_leading_zeroes = TRUE;
+						sprintf_width = 1;
 						goto do_format_chars;
 					}
 					/* FALLTHRU on purpose */
@@ -181,7 +182,7 @@ do_format_chars:
 				case '1': case '2': case '3':
 				case '4': case '5': case '6':
 				case '7': case '8': case '9':
-					sprintf_width <<= 4;
+					sprintf_width *= 10;
 					sprintf_width += *format - '0';
 					goto do_format_chars;
 
@@ -282,7 +283,18 @@ do_long_hex_integer:
 					static bcd_t *bcd;
 					bcd = va_arg (va, bcd_t *);
 					endbuf = buf;
-					comma_positions = 0x12;
+
+					switch (sprintf_width)
+					{
+						case 8:
+							comma_positions = 0x2 | 0x10;
+							break;
+
+						case 10:
+							comma_positions = 0x8 | 0x40;
+							break;
+					}
+
 					while (sprintf_width != 0)
 					{
 						endbuf = do_sprintf_hex_byte (endbuf, *bcd++);
@@ -364,8 +376,13 @@ sprintf_far_string (const char **srcp)
 
 
 void
-sprintf_current_score (void)
+sprintf_score (U8 *score)
 {
-	sprintf ("%8b", current_score);
+	sprintf ("%10b", score);
+//#if (MACHINE_SCORE_DIGITS == 8)
+//#elif (MACHINE_SCORE_DIGITS == 10)
+//#else
+//#error
+//#endif
 }
 

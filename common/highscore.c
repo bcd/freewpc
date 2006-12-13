@@ -65,7 +65,7 @@ U8 high_score_player;
 /** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] = 
 #ifndef MACHINE_GRAND_CHAMPION_SCORE
-	{ 0x10, 0x00, 0x00, 0x00 }
+	{ 0x05, 0x00, 0x00, 0x00, 0x00 }
 #else
 	MACHINE_GRAND_CHAMPION_SCORE
 #endif
@@ -83,10 +83,10 @@ static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 
 static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 #ifndef MACHINE_HIGH_SCORES
-	{ 0x08, 0x00, 0x00, 0x00 },
-	{ 0x07, 0x00, 0x00, 0x00 },
-	{ 0x06, 0x00, 0x00, 0x00 },
-	{ 0x05, 0x00, 0x00, 0x00 },
+	{ 0x04, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x03, 0x50, 0x00, 0x00, 0x00 },
+	{ 0x03, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x02, 0x50, 0x00, 0x00, 0x00 },
 #else
 	MACHINE_HIGH_SCORES
 #endif
@@ -116,7 +116,7 @@ static void high_score_draw_single (U8 pos, const U8 *initials,
 		sprintf ("%c%c%c", initials[0], initials[1], initials[2]);
 	font_render_string_left (&font_fixed6, 2, row, sprintf_buffer);
 
-	sprintf ("%8b", score);
+	sprintf_score (score);
 	font_render_string_right (&font_fixed6, 126, row, sprintf_buffer);
 }
 

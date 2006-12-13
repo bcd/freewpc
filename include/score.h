@@ -25,7 +25,7 @@
 #ifdef MACHINE_SCORE_DIGITS
 #define MAX_SCORE_DIGITS MACHINE_SCORE_DIGITS
 #else
-#define MAX_SCORE_DIGITS 8
+#define MAX_SCORE_DIGITS 10
 #endif
 
 /** BYTES_PER_SCORE rounds the number of digits to the next highest
