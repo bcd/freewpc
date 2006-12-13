@@ -27,6 +27,9 @@
  * them.  The powerball is detected by the lack of such closures.
  */
 
+/* Each of these represents a possible state for the powerball
+ * detector.  They are mutually exclusive, but expressed as bitmasks
+ * so that ranges can be tested more easily. */
 #define PB_MISSING       0x0
 #define PB_IN_LOCK       0x1
 #define PB_IN_TROUGH     0x2
@@ -52,8 +55,10 @@ U8 pb_location;
  * powerball is back in play. */
 U8 pb_depth;
 
+/** Nonzero if the powerball has been detected and needs to be announced. */
 U8 pb_announce_needed;
 
+/** For debugging, this stores the last PB event that was asserted */
 U8 last_pb_event;
 
 #define switch_poll_trough_metal() switch_poll_logical(SW_TROUGH_PROXIMITY)
@@ -97,6 +102,14 @@ void pb_detect_deff (void)
 	deff_exit ();
 }
 
+/** Called when the powerball is known to be in a particular location.
+ *
+ * PB_IN_PLAY is used when it is guaranteed to be in play, even during
+ * multiball.
+ *
+ * PB_MAYBE_IN_PLAY is used when it might be in play, but it is uncertain.
+ * It *was* in play prior to some event during multiball.
+ */
 void pb_set_location (U8 location, U8 depth)
 {
 	if (pb_location != location)
@@ -124,6 +137,8 @@ void pb_set_location (U8 location, U8 depth)
 	}
 }
 
+/** Called when the powerball is known *NOT* to be in a particular 
+ * location. */
 void pb_clear_location (U8 location)
 {
 	if (pb_location == location)
@@ -138,11 +153,14 @@ void pb_clear_location (U8 location)
 }
 
 
+/** Asserts a powerball detection event.  The significance depends on
+ * the current state. */
 void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
 	switch (event)
 	{
+		/* Steel ball detected on playfield, via Slot Proximity */
 		case PF_STEEL_DETECTED:
 			if (live_balls == 1)
 				pb_clear_location (PB_IN_PLAY);
@@ -152,6 +170,7 @@ void pb_detect_event (pb_event_t event)
 #endif
 			break;
 
+		/* Powerball detected on playfield, via Slot Proximity */
 		case PF_PB_DETECTED:
 			pb_set_location (PB_IN_PLAY, 0);
 			break;
@@ -195,17 +214,29 @@ void pb_poll_trough (void)
 	}
 }
 
+
+/** Called when a ball enters the trough or the lock. */
 void pb_container_enter (U8 location, U8 devno)
 {
 	device_t *dev = device_entry (devno);
 
+	/* If the powerball is known to be in play, then the act
+	of a ball entering a device is significant. */
 	if (pb_location == PB_IN_PLAY)
 	{
 		if (live_balls <= 1)
 		{
-			/* Normal case is single ball play */
-			if ((dev->actual_count > 1) &&
-					(dev->actual_count >= dev->max_count))
+			/* In single ball play, things are fairly deterministic.
+			 * We know the powerball is not in play, and it is in
+			 * the device it just entered at a specific location.
+			 *
+			 * It is also possible that we might kick out the 
+			 * ball immediately from the same device.  Changing
+			 * the state here and then back again will cause the
+			 * powerball to be reannounced.  So optimize this slightly
+			 * and don't change anything.
+			 */
+			if (dev->actual_count <= dev->max_count)
 			{
 				pb_clear_location (PB_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
@@ -224,11 +255,14 @@ void pb_container_enter (U8 location, U8 devno)
 	}
 	else
 	{
-		/* If balls is not in play, then a container enter
-		event isn't important */
+		/* If balls is not known to be in play, then a container enter
+		event isn't important.  (Either it's in a device somewhere or
+		we're in the "maybe" state.) */
 	}
 }
 
+
+/** Called when a ball exits the trough or the lock. */
 void pb_container_exit (U8 location)
 {
 	if (pb_location == location)
