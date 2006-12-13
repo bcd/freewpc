@@ -66,7 +66,7 @@ void mb_running_deff (void)
 		score_change = 0;
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
-		sprintf ("%8b", current_score);
+		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "SHOOT PIANO FOR JACKPOT");
 		dmd_copy_low_to_high ();

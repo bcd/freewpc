@@ -53,6 +53,7 @@ U8 freewpc_sprintf (const char *format, ...);
 U8 sprintf (const char *format, ...);
 #endif
 void sprintf_far_string (const char **srcp);
+void sprintf_current_score (void);
 
 /** psprintf() is like sprintf() but it has TWO format control
  * strings.  The first is used when the value is singular, and

@@ -362,3 +362,10 @@ sprintf_far_string (const char **srcp)
 	wpc_pop_page ();
 }
 
+
+void
+sprintf_current_score (void)
+{
+	sprintf ("%8b", current_score);
+}
+
