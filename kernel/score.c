@@ -119,7 +119,6 @@ redraw:
 			dmd_show_other ();
 
 			delay = ball_in_play ? TIME_200MS : TIME_100MS;
-			dmd_show_other ();
 			while (delay != 0)
 			{
 				task_sleep (TIME_33MS);
@@ -127,6 +126,7 @@ redraw:
 				if (score_change != 0)
 					goto redraw;
 			}
+			dmd_show_other ();
 		}
 	}
 }
