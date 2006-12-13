@@ -378,11 +378,12 @@ sprintf_far_string (const char **srcp)
 void
 sprintf_score (U8 *score)
 {
-	sprintf ("%10b", score);
-//#if (MACHINE_SCORE_DIGITS == 8)
-//#elif (MACHINE_SCORE_DIGITS == 10)
-//#else
-//#error
-//#endif
+#if (MACHINE_SCORE_DIGITS == 8)
+	sprintf ("%8b", current_score);
+#elif (MACHINE_SCORE_DIGITS == 10)
+	sprintf ("%10b", current_score);
+#else
+#error
+#endif
 }
 
