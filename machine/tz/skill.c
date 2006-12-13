@@ -28,7 +28,7 @@ void skill_shot_ready_deff (void)
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
 
-	sprintf ("%8b", current_score);
+	sprintf_current_score ();
 	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
 
 	font_render_string (&font_mono5, 2, 10, "YELLOW");
