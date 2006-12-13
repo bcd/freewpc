@@ -189,7 +189,7 @@ static leffnum_t leff_get_highest_priority (void)
  * strings are allocated.  Allocation disables the normal
  * outputs and gives the effect priority.
  */
-task_t *leff_create_handler (const leff_t *leff)
+task_pid_t leff_create_handler (const leff_t *leff)
 {
 	task_pid_t tp;
 
@@ -263,7 +263,7 @@ void leff_start (leffnum_t dn)
 
 	if (leff->flags & L_SHARED)
 	{
-		task_t *tp = leff_create_handler (leff);
+		task_pid_t tp = leff_create_handler (leff);
 		task_set_thread_data (tp, L_PRIV_ID, dn);
 	}
 	else if (leff->flags & L_RUNNING)
