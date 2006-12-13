@@ -425,9 +425,9 @@ static switchnum_t keymaps[256] = {
 	['8'] = SW_DOWN,
 	['9'] = SW_UP,
 	['0'] = SW_ENTER,
-	[','] = SW_LL_FLIP_SW,
-	['.'] = SW_LR_FLIP_SW,
-	['`'] = SW_COINDOOR_CLOSED,
+	[','] = SW_L_L_FLIPPER_BUTTON,
+	['.'] = SW_L_R_FLIPPER_BUTTON,
+	['`'] = SW_COIN_DOOR_CLOSED,
 	[' '] = MACHINE_TILT_SWITCH,
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
 #ifdef MACHINE_LAUNCH_SWITCH
