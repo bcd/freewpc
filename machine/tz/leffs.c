@@ -268,7 +268,7 @@ void left_loop_leff (void)
 
 void jets_active_leff (void)
 {
-	lampset_set_apply_delay (TIME_100MS);
+	lampset_set_apply_delay (TIME_200MS);
 	for (;;)
 		lampset_leff_step_increment (LAMPSET_JETS);
 }

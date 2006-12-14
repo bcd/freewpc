@@ -162,14 +162,14 @@ void amode_leff (void)
 	for (;;)
 	{
 		amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
-		task_create_peer (amode_leff_subset_task);
+		leff_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
 	
 		for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
 			amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
 			amode_leff_subset++)
 		{
-			task_create_peer (amode_leff_subset_task);
+			leff_create_peer (amode_leff_subset_task);
 			task_sleep (TIME_33MS);
 		}
 

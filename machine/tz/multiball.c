@@ -130,6 +130,8 @@ CALLSET_ENTRY (mball, mball_start)
 		lamp_tristate_off (LM_LOCK_ARROW);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
+		lamp_off (LM_LOCK1);
+		lamp_off (LM_LOCK2);
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 		lamp_tristate_off (LM_PIANO_PANEL);
 		lamp_tristate_off (LM_SLOT_MACHINE);

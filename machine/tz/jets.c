@@ -60,7 +60,7 @@ CALLSET_ENTRY(jet, start_player)
 }
 
 
-CALLSET_ENTRY (jet, door_panel_awarded)
+CALLSET_ENTRY (jet, door_start_tsm)
 {
 	if (lamp_test (LM_PANEL_TSM))
 	{
