@@ -225,6 +225,18 @@ void deff_start (deffnum_t dn)
 }
 
 
+void deff_start_nopage (deffnum_t dn)
+{
+	const deff_t *deff = &deff_table[dn];
+
+#ifdef __m6809__
+	if ((U16)deff->fn >= 0x8000)
+#endif
+		deff_start (dn);
+}
+
+
+
 void deff_stop (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];

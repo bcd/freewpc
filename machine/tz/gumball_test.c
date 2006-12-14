@@ -29,6 +29,52 @@
 U8 gumball_op;
 
 
+typedef struct {
+	U8 sw;
+	U16 *name;
+	union dmd_coordinate box_coord;
+	union dmd_coordinate text_coord;
+} switch_monitor_t;
+
+#define SW_MON_COORD(x,y) \
+	.box_coord = MKCOORD(x, y), .text_coord = MKCOORD(x+6, y)
+
+const switch_monitor_t tz_gumball_test_switch_monitor[] = {
+	{ SW_LOWER_RIGHT_MAGNET, "MAGNET", SW_MON_COORD(1, 17), },
+	{ SW_GUMBALL_LANE, "LANE", SW_MON_COORD(1, 24), },
+	{ SW_GUMBALL_POPPER, "POPPER", SW_MON_COORD (45, 17), },
+	{ SW_GUMBALL_ENTER, "ENTER", SW_MON_COORD(45, 24), },
+	{ SW_GUMBALL_GENEVA, "GENEVA", SW_MON_COORD(90, 17), },
+	{ SW_GUMBALL_EXIT, "EXIT", SW_MON_COORD(90, 24), },
+};
+
+#define NUM_GUMBALL_SWITCHES	\
+	(sizeof(tz_gumball_test_switch_monitor) /  \
+		sizeof (tz_gumball_test_switch_monitor[0]))
+
+
+void switch_monitor_draw (const switch_monitor_t *monitor, U8 count)
+{
+	while (count > 0)
+	{
+		// blit_erase (monitor->box_coord, 5, 5);
+		if (switch_poll_logical (monitor->sw))
+		{
+			bitmap_draw (monitor->box_coord, BM_X5);
+		}
+		else
+		{
+			bitmap_draw (monitor->box_coord, BM_BOX5);
+		}
+		font_render_string_left (&font_var5, 
+			monitor->text_coord.x, monitor->text_coord.y,
+			monitor->name);
+		count--;
+		monitor++;
+	}
+}
+
+
 void tz_gumball_test_init (void)
 {
 	gumball_op = 0;
@@ -47,9 +93,22 @@ void tz_gumball_test_draw (void)
 			sprintf ("RELEASE"); break;
 	}
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+
+	switch_monitor_draw (tz_gumball_test_switch_monitor, NUM_GUMBALL_SWITCHES);
+
 	dmd_show_low ();
 }
 
+
+void tz_gumball_test_thread (void)
+{
+	for (;;)
+	{
+		/* TODO - poll more frequently, and draw less often */
+		tz_gumball_test_draw ();
+		task_sleep (TIME_33MS);
+	}
+}
 
 void tz_gumball_test_down (void)
 {
@@ -85,6 +144,7 @@ struct window_ops tz_gumball_test_window = {
 	.up = tz_gumball_test_up,
 	.down = tz_gumball_test_down,
 	.enter = tz_gumball_test_enter,
+	.thread = tz_gumball_test_thread,
 };
 
 

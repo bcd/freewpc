@@ -63,6 +63,7 @@ U8 deff_get_count (void);
 bool deff_is_running (deffnum_t dn);
 uint8_t deff_get_active (void);
 void deff_start (deffnum_t dn);
+void deff_start_nopage (deffnum_t dn);
 void deff_stop (deffnum_t dn);
 void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);

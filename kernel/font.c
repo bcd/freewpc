@@ -159,9 +159,9 @@ static void fontargs_render_string (void)
 	char c;
 	const fontargs_t *args = &font_args;
 
-	dmd_base = ((U8 *)dmd_low_buffer) + args->y * DMD_BYTE_WIDTH;
+	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
-  	blit_xpos = args->x;
+  	blit_xpos = args->coord.x;
 
 #ifdef CONFIG_PLATFORM_LINUX
 	linux_write_string (s);
@@ -214,6 +214,49 @@ static void fontargs_render_string (void)
 }
 
 
+void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
+{
+	static U8 *dmd_base;
+	static U8 i;
+	static U8 xb;
+	static U8 xr;
+	static U8 partial_left[] = { 
+		0x0, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1 };
+	static U8 partial_right[] = { 
+		0x0, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80 };
+
+	dmd_base = ((U8 *)dmd_low_buffer) + coord.y * DMD_BYTE_WIDTH;
+	xb = coord.x / 8;
+	xr = coord.x % 8;
+	if (xr)
+	{
+		/* Erase partial left region */
+		U8 mask = partial_left[(8 - xr)];
+		width -= xr;
+		for (i=0 ; i < height; i++)
+			dmd_base[xb] &= mask;
+		xb++;
+	}
+
+	while (width >= 8)
+	{
+		/* Erase middle region */
+		for (i=0 ; i < height; i++)
+			dmd_base[xb] = 0;
+		xb++;
+		width -= 8;
+	}
+
+	if (width)
+	{
+		/* Erase partial right region */
+		U8 mask = partial_right[width];
+		for (i=0 ; i < height; i++)
+			dmd_base[xb] &= mask;
+	}
+}
+
+
 /** Calculate font_string_width and font_string_height
  * in advance for a particular string to be rendered in a
  * particular font.  This is needed when doing centered or
@@ -259,8 +302,7 @@ static void fontargs_prep_left (const fontargs_t *args)
 	font_get_string_area (args->font, args->s);
 	if (args != &font_args)
 	{
-		font_args.x = args->x;
-		font_args.y = args->y;
+		font_args.coord = args->coord;
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
@@ -269,8 +311,8 @@ static void fontargs_prep_left (const fontargs_t *args)
 static void fontargs_prep_center (const fontargs_t *args)
 {
 	font_get_string_area (args->font, args->s);
-	font_args.x = args->x - (font_string_width / 2);
-	font_args.y = args->y - (font_string_height / 2);
+	font_args.coord.x = args->coord.x - (font_string_width / 2);
+	font_args.coord.y = args->coord.y - (font_string_height / 2);
 	if (args != &font_args)
 	{
 		font_args.font = args->font;
@@ -281,10 +323,10 @@ static void fontargs_prep_center (const fontargs_t *args)
 static void fontargs_prep_right (const fontargs_t *args)
 {
 	font_get_string_area (args->font, args->s);
-	font_args.x = args->x - font_string_width;
+	font_args.coord.x = args->coord.x - font_string_width;
 	if (args != &font_args)
 	{
-		font_args.y = args->y;
+		font_args.coord.y = args->coord.y;
 		font_args.font = args->font;
 		font_args.s = args->s;
 	}
@@ -342,16 +384,15 @@ void fontargs_render_string_right2 (const fontargs_t *args)
 }
 
 
-void bitmap_draw (U16 xy, U8 c)
+void bitmap_draw (union dmd_coordinate coord, U8 c)
 {
 	extern const font_t font_bitmap_common;
 
 	sprintf_buffer[0] = c;
 	sprintf_buffer[1] = '\0';
 
-	//font_args.font = &font_var5;
 	font_args.font = &font_bitmap_common;
-	font_args.xy = xy;
+	font_args.coord = coord;
 	font_args.s = sprintf_buffer;
 
 	fontargs_render_string ();

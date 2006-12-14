@@ -127,7 +127,7 @@ define MACHINE_SCORE_DIGITS 10
 52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, opto, intest
+55: Gumball Geneva, intest
 56: Gumball Exit, intest
 57: Slot Proximity, noplay, ingame
 58: Slot

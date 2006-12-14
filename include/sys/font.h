@@ -62,6 +62,29 @@ extern const font_t font_var5;
 extern const font_t font_fixed12;
 
 
+enum {
+	BM_FIRST=0, /* force first value to be '1' */
+
+	BM_BOX3, BM_X3, BM_PLUS3,
+
+	BM_BOX5, BM_X5,
+
+	BM_LAST,
+};
+
+union dmd_coordinate {
+	U16 xy;
+	struct {
+#ifdef CONFIG_BIG_ENDIAN
+		U8 x;
+		U8 y;
+#else
+		U8 y;
+		U8 x;
+#endif
+	};
+};
+
 /**
  *  A descriptor that encapsulates a font, a position
  *  on the display, and a constant string to be rendered
@@ -71,18 +94,7 @@ extern const font_t font_fixed12;
 typedef struct
 {
 	const font_t *font;
-	union {
-		struct {
-#ifdef CONFIG_BIG_ENDIAN
-			U8 x;
-			U8 y;
-#else
-			U8 y;
-			U8 x;
-#endif
-		};
-		U16 xy;
-	};
+	union dmd_coordinate coord;
 	const char *s;
 } fontargs_t;
 
@@ -100,10 +112,15 @@ void fontargs_render_string_center2 (const fontargs_t *args);
 void fontargs_render_string_right2 (const fontargs_t *args);
 void fontargs_render_string_left2 (const fontargs_t *args);
 
+void bitmap_draw (union dmd_coordinate coord, U8 c);
+void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
+
+#define MKCOORD(x,y) { .xy = ((U16)x<<8)|y, }
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
-	font_args.xy = ((((U16)(_x)) << 8) | (_y)); \
+	font_args.coord.x = _x; \
+	font_args.coord.y = _y; \
 	font_args.s = _s;
 
 

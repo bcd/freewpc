@@ -1171,7 +1171,7 @@ static bool leff_test_running (U8 id)
 }
 
 struct deff_leff_ops dev_deff_ops = {
-	.start = deff_start,
+	.start = deff_start_nopage,
 	.stop = deff_stop,
 	.is_running = deff_test_running,
 };
@@ -1284,6 +1284,85 @@ struct menu dev_leff_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &deff_leff_window, NULL } },
 };
+
+/******* Display Stress Test ***************/
+
+
+void deff_stress_thread (void)
+{
+	U8 dn;
+	U8 start_stop_flag;
+	U8 delay;
+
+	for (;;)
+	{
+		dn = random_scaled (MAX_DEFFS);
+		start_stop_flag = random_scaled (2);
+		delay = random_scaled (TIME_500MS);
+		delay += TIME_100MS;
+
+		dbprintf ("Deff %d, start_stop %d, delay %d\n",
+			dn, start_stop_flag, delay);
+
+		if (start_stop_flag)
+		{
+			deff_start_nopage (dn);
+			sound_send (SND_TEST_UP);
+		}
+		else
+		{
+			deff_stop (dn);
+			sound_send (SND_TEST_DOWN);
+		}
+
+		task_sleep (delay);
+	}
+}
+
+struct window_ops deff_stress_window = {
+	DEFAULT_WINDOW,
+	.thread = deff_stress_thread,
+	.exit = deff_stop_all,
+};
+
+struct menu dev_deff_stress_test_item = {
+	.name = "DEFF STRESS TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &deff_stress_window, NULL } },
+};
+
+
+/************ Symbol Test *****************/
+
+void symbol_test_init (void)
+{
+	browser_init ();
+	browser_max = BM_LAST-1;
+}
+
+void symbol_test_draw (void)
+{
+	union dmd_coordinate coord;
+	
+	browser_draw ();
+	coord.x = 96;
+	coord.y = 20;
+	bitmap_draw (coord, menu_selection+1);
+}
+
+struct window_ops symbol_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = symbol_test_init,
+	.draw = symbol_test_draw,
+};
+
+struct menu symbol_test_item = {
+	.name = "SYMBOL BROWSER",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &symbol_test_window, NULL } },
+};
+
+
 
 /*********** Lampsets **********************/
 
@@ -1677,6 +1756,8 @@ struct menu *dev_menu_items[] = {
 	&dev_trans_test_item,
 	&dev_force_error_item,
 	&dev_frametest_item,
+	&dev_deff_stress_test_item,
+	&symbol_test_item,
 	NULL,
 };
 
