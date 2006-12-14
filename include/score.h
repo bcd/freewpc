@@ -22,11 +22,12 @@
 #define _SCORE_H
 
 /** Define the number of digits contained in standard-length scores. */
-#ifdef MACHINE_SCORE_DIGITS
-#define MAX_SCORE_DIGITS MACHINE_SCORE_DIGITS
-#else
-#define MAX_SCORE_DIGITS 10
+#ifndef MACHINE_SCORE_DIGITS
+#define MACHINE_SCORE_DIGITS 10
 #endif
+
+/* TODO - these are the same */
+#define MAX_SCORE_DIGITS MACHINE_SCORE_DIGITS
 
 /** BYTES_PER_SCORE rounds the number of digits to the next highest
  * multiple of 2, since scores are kept in packed BCD */

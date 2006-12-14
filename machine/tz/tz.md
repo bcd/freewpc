@@ -25,7 +25,6 @@ define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS 10
 
-
 [lamps]
 11: Panel Camera, amber ,x(28), y(13)
 12: Panel H.H., amber ,x(28), y(10)
@@ -246,6 +245,7 @@ Sort2: PF:lamp_sort_top_to_bottom
 Sort3: PF:lamp_sort_left_to_right
 Sort4: PF:lamp_sort_right_to_left
 Circle Out: PF:lamp_sort_circle_out
+Lock Test: PF:build_lampset_from_lock
 
 [containers]
 Trough: Ball Serve, trough, init_max_count(3), \
@@ -331,11 +331,11 @@ Volume Change: MUS_SUPER_SLOT
 50M:
 
 [highscores]
-GC: QQQ, 15.000.000
-1: CCD, 10.000.000
-2: MLD, 9.000.000
-3: BDD, 8.000.000
-4: NWU, 7.000.000
+GC: QQQ, 500.000.000
+1: CCD, 400.000.000
+2: MLD, 350.000.000
+3: BDD, 300.000.000
+4: NWU, 250.000.000
 
 
 [flags]
@@ -379,6 +379,7 @@ Skill Shot Made: PRI_GAME_QUICK1+11
 LITZ Award: PRI_GAME_QUICK1+15
 
 [leffs]
+perlinclude machine/tz/leff.pl
 FLASHER_HAPPY: PRI_LEFF1
 GUMBALL_STROBE: PRI_LEFF1
 LEFT_RAMP: PRI_LEFF2

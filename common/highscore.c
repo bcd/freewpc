@@ -83,7 +83,7 @@ static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 
 static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 #ifndef MACHINE_HIGH_SCORES
-	{ 0x04, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x14, 0x00, 0x00, 0x00, 0x00 },
 	{ 0x03, 0x50, 0x00, 0x00, 0x00 },
 	{ 0x03, 0x00, 0x00, 0x00, 0x00 },
 	{ 0x02, 0x50, 0x00, 0x00, 0x00 },
@@ -114,10 +114,10 @@ static void high_score_draw_single (U8 pos, const U8 *initials,
 		sprintf ("%d. %c%c%c", pos, initials[0], initials[1], initials[2]);
 	else
 		sprintf ("%c%c%c", initials[0], initials[1], initials[2]);
-	font_render_string_left (&font_fixed6, 2, row, sprintf_buffer);
+	font_render_string_left (&font_fixed6, 1, row, sprintf_buffer);
 
 	sprintf_score (score);
-	font_render_string_right (&font_fixed6, 126, row, sprintf_buffer);
+	font_render_string_right (&font_fixed6, 127, row, sprintf_buffer);
 }
 
 

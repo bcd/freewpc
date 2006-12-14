@@ -363,8 +363,6 @@ static void linux_time_step (void)
  */
 static void linux_realtime_thread (void)
 {
-	int i;
-
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
 
@@ -414,7 +412,9 @@ static void linux_switch_depress (unsigned int sw)
 
 
 static switchnum_t keymaps[256] = {
+#ifdef MACHINE_START_SWITCH
 	['1'] = MACHINE_START_SWITCH,
+#endif
 #ifdef MACHINE_BUYIN_SWITCH
 	['2'] = MACHINE_BUYIN_SWITCH,
 #endif
@@ -428,8 +428,12 @@ static switchnum_t keymaps[256] = {
 	[','] = SW_L_L_FLIPPER_BUTTON,
 	['.'] = SW_L_R_FLIPPER_BUTTON,
 	['`'] = SW_COIN_DOOR_CLOSED,
+#ifdef MACHINE_TILT_SWITCH
 	[' '] = MACHINE_TILT_SWITCH,
+#endif
+#ifdef MACHINE_SLAM_TILT_SWITCH
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
+#endif
 #ifdef MACHINE_LAUNCH_SWITCH
 	['/'] = MACHINE_LAUNCH_SWITCH,
 #endif
@@ -525,9 +529,11 @@ void linux_trough_init (int balls)
 {
 	int i;
 
+#ifdef DEVNO_TROUGH
 	device_t *dev = &device_table[DEVNO_TROUGH];
 	for (i=0; i < dev->props->sw_count && balls; i++, balls--)
 		linux_switch_toggle (dev->props->sw[i]);
+#endif
 }
 
 

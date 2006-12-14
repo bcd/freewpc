@@ -31,12 +31,14 @@
 
 use Data::Dumper;
 
+@EXPORT = qw (m);
+
 ############### Global Variables ####################
 
 # m is a handle to the global database.  It is divided into categories,
 # or contexts, each of which is itself a hash table.  The context names
 # correspond to the section dividers in the machine description file.
-my $m = {};
+our $m = {};
 
 # The name of the current context
 my $contextName = "";
@@ -413,6 +415,13 @@ LINE:
 			machine_load ($1);
 			next;
 		}
+
+		# Check for the perlinclude directive
+		if (/^perlinclude[ \t]+(.*)/) {
+			require $1;
+			next;
+		}
+
 
 		# Check for a literal define
 		if (/^define[ \t]+(.*)/) {

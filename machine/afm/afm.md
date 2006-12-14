@@ -71,6 +71,7 @@ Right Hole: Right Popper, Right Popper
 [system_music]
 
 [scores]
+1K:
 
 [highscores]
 

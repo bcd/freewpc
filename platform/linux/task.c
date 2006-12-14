@@ -77,6 +77,22 @@ void task_dump (void)
 }
 
 
+void task_inherit_thread_data (task_pid_t pid)
+{
+	int i, j;
+		
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == pid)
+		{
+			for (j=0; j < 4; i++)
+				task_data_table[i].thread_data[j] = 0; /* TODO */
+			return;
+		}
+	}
+}
+
+
 task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	pth_t pid;

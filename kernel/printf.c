@@ -216,6 +216,7 @@ fixup_number:
 						if (number_length == leading_zero_count)
 						{
 							number_length = min_width;
+							buf[min_width-1] = '0';
 							buf += min_width;
 						}
 						else
@@ -291,7 +292,7 @@ do_long_hex_integer:
 							break;
 
 						case 10:
-							comma_positions = 0x8 | 0x40;
+							comma_positions = 0x1 | 0x8 | 0x40;
 							break;
 					}
 
