@@ -132,7 +132,7 @@ void clock_target_leff (void)
 {
 	U8 i;
 
-	task_create_peer (gi_cycle_leff);
+	leff_create_peer (gi_cycle_leff);
 	for (i = 0; i < 12; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
@@ -193,9 +193,9 @@ void pf_strobe_up_subtask (void)
 void strobe_up_leff (void)
 {
 	lampset_set_apply_delay (TIME_16MS);
-	task_create_peer (pf_strobe_up_subtask);
+	leff_create_peer (pf_strobe_up_subtask);
 	task_sleep (TIME_200MS);
-	task_create_peer (pf_strobe_up_subtask);
+	leff_create_peer (pf_strobe_up_subtask);
 	task_sleep_sec (1);
 	task_kill_peers ();
 	leff_exit ();
@@ -213,11 +213,11 @@ void multi_strobe_leff (void)
 	U8 i;
 
 	lampset_set_apply_delay (TIME_66MS);
-	task_create_peer (multi_strobe1_subtask);
+	leff_create_peer (multi_strobe1_subtask);
 	task_sleep (TIME_300MS);
-	task_create_peer (multi_strobe2_subtask);
+	leff_create_peer (multi_strobe2_subtask);
 	task_sleep (TIME_300MS);
-	task_create_peer (multi_strobe3_subtask);
+	leff_create_peer (multi_strobe3_subtask);
 	task_sleep (TIME_300MS);
 
 	for (i=0; i< 3; i++)
@@ -241,9 +241,9 @@ void door_strobe_leff (void)
 	triac_leff_disable (TRIAC_GI_MASK);
 	lampset_apply_leff_off (LAMPSET_DOOR_PANELS);
 	lampset_set_apply_delay (TIME_33MS);
-	task_create_peer (door_strobe_subtask);
+	leff_create_peer (door_strobe_subtask);
 	task_sleep (TIME_100MS);
-	task_create_peer (door_strobe_subtask);
+	leff_create_peer (door_strobe_subtask);
 	task_sleep_sec (2);
 	task_kill_peers ();
 	leff_exit ();

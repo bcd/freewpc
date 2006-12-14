@@ -48,9 +48,11 @@ void db_puts (const char *s)
 {
 	if (db_attached)
 		while (*s)
-			db_putc (*s++);
+			wpc_debug_write (*s++);
 }
 
+/* These functions are all deprecated ... use dbprintf instead */
+#if 0
 void db_puti (uint8_t v)
 {
 	uint8_t quot;
@@ -83,8 +85,11 @@ void db_put4x (uint16_t v)
 	db_put2x (v >> 8);
 	db_put2x (v & 0xFF);
 }
+#endif
 
 
+/* This hasn't been touched in a year. */
+#if 0
 void db_dump_switches (void)
 {
 	U8 row, col;
@@ -99,6 +104,7 @@ void db_dump_switches (void)
 		db_putc ('\n');
 	}
 }
+#endif
 
 #endif /* DEBUGGER */
 

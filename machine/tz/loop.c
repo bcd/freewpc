@@ -41,7 +41,7 @@ void award_loop (void)
 	if (lamp_test (LM_PANEL_SPIRAL))
 	{
 		sound_send (SND_SPIRAL_ROUND_AWARD_3);
-		score (SC_200K);
+		score (SC_10M);
 	}
 	else
 	{

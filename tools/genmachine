@@ -1079,6 +1079,7 @@ if ($command eq "config") {
 #######################################################
 elsif ($command eq "strings") {
 	print $START_SOURCE;
+	print "#undef TRIAC_GI_STRING\n";
 	print "#define TRIAC_GI_STRING(x) (x)\n\n";
 	for $context (@stringcontexts) {
 		machine_write_decl_names ($context);

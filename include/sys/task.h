@@ -224,6 +224,7 @@ typedef task_t *task_pid_t;
 void task_dump (void);
 void task_init (void);
 void task_create (void);
+void task_inherit_thread_data (task_pid_t tp);
 task_pid_t task_create_gid (task_gid_t, task_function_t fn);
 task_pid_t task_create_gid1 (task_gid_t, task_function_t fn);
 task_pid_t task_recreate_gid (task_gid_t, task_function_t fn);
@@ -251,6 +252,8 @@ void task_set_thread_data (task_pid_t pid, U8 n, U8 v);
 #endif
 
 #define task_create_peer(fn)		task_create_gid (task_getgid (), fn)
+
+#define leff_create_peer(fn)     task_inherit_thread_data (task_create_peer(fn))
 
 #define task_create_anon(fn)		task_create_gid (0, fn)
 

@@ -110,7 +110,7 @@ void task_dump (void)
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	dbprintf ("Max tasks = %d\n", task_max_count);
 #endif
-	db_puts ("----------------------\n");
+	dbprintf ("----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
 #ifndef DUMP_ALL_TASKS
@@ -119,16 +119,16 @@ void task_dump (void)
 		{
 			dbprintf ("PID %p  State %02X  GID %02X  PC %p",
 				tp, tp->state, tp->gid, tp->pc);
-			db_puts ("  STKW ");
-			db_put2x (tp->stack_word_count);
+			dbprintf ("  STKW ");
+			dbprintf ("%02X", tp->stack_word_count);
 			dbprintf ("  ARG %04X", tp->arg);
-			db_puts ("  TD ");
+			dbprintf ("  TD ");
 			dbprintf ("%02X %02X %02X %02X\n",
 				tp->thread_data[0], tp->thread_data[1],
 				tp->thread_data[2], tp->thread_data[3]);
 		}
 	}
-	db_puts ("----------------------\n");
+	dbprintf ("----------------------\n");
 #endif
 }
 
@@ -153,6 +153,13 @@ task_t *task_allocate (void)
 		}
 	fatal (ERR_NO_FREE_TASKS);
 	return 0;
+}
+
+void task_inherit_thread_data (task_t *tp)
+{
+	U8 i;
+	for (i=0; i < 4; i++)
+		tp->thread_data[i] = task_current->thread_data[i];
 }
 
 

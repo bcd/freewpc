@@ -113,7 +113,8 @@ void egg_right_flipper (void)
 	egg_index++;
 	if (egg_index == 3)
 	{
-		dbprintf ("\nEgg code %d %d %d entered\n", egg_code_values[0], egg_code_values[1], egg_code_values[2]);
+		dbprintf ("\nEgg code %d %d %d entered\n", 
+			egg_code_values[0], egg_code_values[1], egg_code_values[2]);
 		if ((egg_code_values[0] == 2) &&
 			 (egg_code_values[1] == 3) &&
 			 (egg_code_values[2] == 4))
@@ -207,18 +208,6 @@ void amode_show_design_credits (void)
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 }
-
-
-void amode_high_score_test (void)
-{
-	current_score[0] = 0x11;
-	current_score[1] = 0x40;
-	current_score[2] = 0x75;
-	current_score[3] = 0x20;
-	high_score_check ();
-	task_exit ();
-}
-
 
 
 void amode_deff (void) __taskentry__

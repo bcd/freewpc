@@ -76,23 +76,9 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
 CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
 	maybe_ramp_divert ();
+	left_ramps++;
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
-	left_ramps++;
-	score (SC_10K);
-	if (left_ramps == 3)
-	{
-		sound_send (SND_ROBOT_AWARD);
-		if (system_config.timed_game)
-			timed_game_extend (15);
-		else
-			; /* light mystery */
-	}
-	else if (left_ramps == 6)
-	{
-		sound_send (SND_ROBOT_AWARD);
-		task_sleep_sec (1);
-		door_award_if_possible ();
-	}
+	score (SC_250K);
 }
 

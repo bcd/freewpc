@@ -107,7 +107,7 @@ U8 *blit_dmd;
 
 U8 *blit_data;
 
-STATIC void font_blit (void)
+static void font_blit (void)
 {
 	switch (blit_xpos % 8)
 	{
@@ -152,7 +152,7 @@ STATIC void font_blit (void)
  * computed.  font_args contains the font type, starting
  * coordinates (from the upper left), and pointer to the string
  * data. */
-STATIC void fontargs_render_string (void)
+static void fontargs_render_string (void)
 {
 	static U8 *dmd_base;
 	static const char *s;
@@ -176,10 +176,6 @@ STATIC void fontargs_render_string (void)
 		static U8 i, j;
 		static U8 xb;
 		static U8 top_space;
-
-		/* Nonprintable characters are skipped. */
-		if (c < ' ')
-			continue;
 
 		blit_data = font_lookup (args->font, c);
 
@@ -343,5 +339,21 @@ void fontargs_render_string_right2 (const fontargs_t *args)
 	dmd_flip_low_high ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
+}
+
+
+void bitmap_draw (U16 xy, U8 c)
+{
+	extern const font_t font_bitmap_common;
+
+	sprintf_buffer[0] = c;
+	sprintf_buffer[1] = '\0';
+
+	//font_args.font = &font_var5;
+	font_args.font = &font_bitmap_common;
+	font_args.xy = xy;
+	font_args.s = sprintf_buffer;
+
+	fontargs_render_string ();
 }
 

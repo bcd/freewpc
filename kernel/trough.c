@@ -106,6 +106,6 @@ CALLSET_ENTRY (trough, dev_trough_kick_success)
 
 CALLSET_ENTRY (trough, dev_trough_full)
 {
-	db_puts ("Trough is full!\n");
+	dbprintf ("Trough is full!\n");
 }
 

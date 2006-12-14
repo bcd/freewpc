@@ -392,9 +392,10 @@ extern inline void wpc_set_ram_page (U8 page)
 #define LED_DIAGNOSTIC		0x80
 
 /* 0x4 | 0x2 are always set when writing this register.
- * One of these is probably to clear blanking.
+ * One of these is probably to reset the hardware watchdog.
  * 0x80 and 0x10 are also set when clearing the IRQ from the
- * IRQ handler.
+ * IRQ handler.  These are probably interrupt enable/status
+ * lines.
  */
 
 /********************************************/

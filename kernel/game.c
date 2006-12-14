@@ -382,7 +382,7 @@ void timed_game_pause (task_ticks_t delay)
 
 void start_ball (void)
 {
-	db_puts ("In startball\n");
+	dbprintf ("In startball\n");
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
 

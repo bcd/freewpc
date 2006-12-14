@@ -21,6 +21,7 @@
 /**
  * \file
  * \brief Definitions/macros related to the Sega Whitestar hardware
+ * Note: this is not yet implemented and only a stub.
  */
 
 #ifndef _WHITESTAR_H

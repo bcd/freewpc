@@ -177,8 +177,9 @@ static void deff_stop_task (void)
 
 static void deff_start_task (const deff_t *deff)
 {
+	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
-	task_recreate_gid (GID_DEFF, deff->fn);
+	task_create_gid (GID_DEFF, deff->fn);
 }
 
 
@@ -190,13 +191,13 @@ void deff_start (deffnum_t dn)
 
 	if (deff->flags & D_RUNNING)
 	{
-		db_puts ("Adding running deff to queue\n");
+		dbprintf ("Adding running deff to queue\n");
 		deff_add_queue (dn);
 		if ((deff->prio > deff_prio)
 			&& (dn == deff_get_highest_priority ()))
 		{
 			/* This is the new active running deff */
-			db_puts ("Requested deff is now highest priority\n");
+			dbprintf ("Requested deff is now highest priority\n");
 			deff_active = dn;
 			deff_start_task (deff);
 		}
@@ -204,21 +205,21 @@ void deff_start (deffnum_t dn)
 		{
 			/* This deff cannot run now, because there is a
 			 * higher priority deff running. */
-			db_puts ("Can't run because higher priority active\n");
+			dbprintf ("Can't run because higher priority active\n");
 		}
 	}
 	else
 	{
 		if (deff->prio > deff_prio)
 		{
-			db_puts ("Restarting quick deff with high pri\n");
+			dbprintf ("Restarting quick deff with high pri\n");
 			deff_active = dn;
 			deff_prio = deff->prio;
 			deff_start_task (deff);
 		}
 		else
 		{
-			db_puts ("Quick deff lacks pri to run\n");
+			dbprintf ("Quick deff lacks pri to run\n");
 		}
 	}
 }
@@ -233,7 +234,7 @@ void deff_stop (deffnum_t dn)
 		dbprintf ("Stopping deff #%d\n", dn);
 		deff_remove_queue (dn);
 		if (dn == deff_active)
-			deff_start_highest_priority ();
+	 		deff_start_highest_priority ();
 	}
 }
 
@@ -281,7 +282,7 @@ void deff_start_highest_priority (void)
 
 __noreturn__ void deff_exit (void)
 {
-	db_puts ("Exiting deff\n");
+	dbprintf ("Exiting deff\n");
 	task_setgid (GID_DEFF_EXITING);
 	deff_remove_queue (deff_active);
 	deff_start_highest_priority ();

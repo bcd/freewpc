@@ -73,6 +73,7 @@ do { \
 #ifdef DEBUGGER
 #define dbprintf(format, rest...) \
 	do { \
+		extern void db_puts (const char *); \
 		sprintf (format, ## rest ); \
 		db_puts (sprintf_buffer); \
 	} while (0)

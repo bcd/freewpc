@@ -292,7 +292,10 @@ void switch_lamp_pulse (void)
 {
 	const switch_info_t * const swinfo = (switch_info_t *)task_get_arg ();
 
+	/* Although not a true leff, this fools the lamp draw to doing
+	 * the right thing. */
 	task_set_thread_data (task_getpid (), L_PRIV_FLAGS, L_SHARED);
+
 	if (!lamp_leff2_test_allocated (swinfo->lamp))
 	{
 		lamp_leff2_allocate (swinfo->lamp);
@@ -357,7 +360,8 @@ void switch_sched (void)
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
-		task_pid_t tp = task_create_gid (GID_SHARED_LEFF, switch_lamp_pulse);
+		task_pid_t tp = task_create_gid (GID_SWITCH_LAMP_PULSE, 
+			switch_lamp_pulse);
 		task_set_arg (tp, (U16)swinfo);
 	}
 

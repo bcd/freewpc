@@ -71,11 +71,11 @@ struct window win_stack[8];
 void window_push_first (void)
 {
 	in_test = 1;
-	db_puts ("Calling end_game\n");
+	dbprintf ("Calling end_game\n");
 	end_game ();
-	db_puts ("Calling sound_reset\n");
+	dbprintf ("Calling sound_reset\n");
 	sound_reset ();
-	db_puts ("Calling deff/leff stop\n");
+	dbprintf ("Calling deff/leff stop\n");
 	deff_stop_all ();
 	leff_stop_all ();
 	/* Ensure the lamp effects stop before resetting all lamps. */
@@ -1841,13 +1841,13 @@ struct preset_component preset_3ball_comps[] = {
 	{ &system_config.balls_per_game, 3 },
 	{ NULL, 0 },
 };
-struct preset preset_3ball = { .name = "3-BALL", &preset_3ball_comps };
+struct preset preset_3ball = { .name = "3-BALL", preset_3ball_comps };
 
 struct preset_component preset_5ball_comps[] = {
 	{ &system_config.balls_per_game, 5 },
 	{ NULL, 0 },
 };
-struct preset preset_5ball = { .name = "5-BALL", &preset_5ball_comps };
+struct preset preset_5ball = { .name = "5-BALL", preset_5ball_comps };
 
 struct preset_component preset_tournament_comps[] = {
 	{ &system_config.balls_per_game, 3 },
@@ -1860,21 +1860,21 @@ struct preset_component preset_tournament_comps[] = {
 	{ &system_config.tournament_mode, ON },
 	{ NULL, 0 },
 };
-struct preset preset_tournament = { .name = "TOURNAMENT", &preset_tournament_comps };
+struct preset preset_tournament = { .name = "TOURNAMENT", preset_tournament_comps };
 
 
 struct preset_component preset_show_comps[] = {
 	{ &system_config.replay_award, 0 },
 	{ NULL, 0 },
 };
-struct preset preset_show = { .name = "SHOW", &preset_show_comps };
+struct preset preset_show = { .name = "SHOW", preset_show_comps };
 
 
 struct preset_component preset_timed_comps[] = {
 	{ &system_config.max_players, 1 },
 	{ NULL, 0 },
 };
-struct preset preset_timed_game = { .name = "TIMED GAME", &preset_timed_comps };
+struct preset preset_timed_game = { .name = "TIMED GAME", preset_timed_comps };
 
 struct preset *preset_table[] = {
 	&preset_3ball,

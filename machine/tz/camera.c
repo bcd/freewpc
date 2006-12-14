@@ -117,24 +117,16 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
+		score (SC_250K);
 		if (lamp_test (LM_PANEL_CAMERA))
 		{
-			do_camera_award ();
-			score (SC_100K);
+			score (SC_10M);
 			task_sleep (TIME_100MS);
 		}
 		else
 		{
-			score (SC_50K);
-			camera_default_count++;
-			if (camera_default_count == 3)
-			{
-				camera_default_count = 0;
-				do_camera_award ();
-				task_sleep (TIME_100MS);
-			}
+			sound_send (SND_JET_BUMPER_ADDED);
 		}
-		sound_send (SND_JET_BUMPER_ADDED);
 	}
 	switch_can_follow (camera, slot, TIME_5S);
 }
@@ -148,10 +140,14 @@ CALLSET_ENTRY (camera, start_player)
 }
 
 
-CALLSET_ENTRY (camera, door_panel_awarded)
+CALLSET_ENTRY (camera, door_start_camera)
 {
-	if (lamp_test (LM_PANEL_CAMERA))
-		lamp_tristate_flash (LM_CAMERA);
+	lamp_tristate_flash (LM_CAMERA);
+}
+
+CALLSET_ENTRY (camera, door_stop_camera)
+{
+	lamp_off (LM_CAMERA);
 }
 
 

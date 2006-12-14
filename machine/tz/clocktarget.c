@@ -21,45 +21,23 @@
 #include <freewpc.h>
 
 U8 clock_hits;
-U8 clock_multiplier;
 
-static score_id_t clock_score_table[] = {
-	SC_10K, SC_20K, SC_30K, SC_40K, SC_50K
-};
-
-void clock_multiplier_monitor (void)
-{
-	while (clock_multiplier > 1)
-	{
-		task_sleep_sec (5);
-		clock_multiplier--;
-	}
-	task_exit ();
-}
 
 CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
-	U8 n;
-
 	if (!lamp_test (LM_PANEL_CLOCK_MIL) && !lamp_test (LM_PANEL_CLOCK_CHAOS))
 	{
-		score (SC_5K);
+		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
 		return;
 	}
 
 	sound_send (SND_CLOCK_BELL);
 	leff_start (LEFF_CLOCK_TARGET);
-	for (n=0 ; n < clock_multiplier; n++)
-		score (clock_score_table[clock_hits]);
+	score (SC_5M);
+
 	if (clock_hits < 4)
 		clock_hits++;
-
-	if (lamp_test (LM_PANEL_CLOCK_MIL))
-	{
-		clock_multiplier++;
-		task_recreate_gid (GID_CLOCK_MIL_MULTIPLIER, clock_multiplier_monitor);
-	}
 }
 
 
@@ -67,14 +45,17 @@ CALLSET_ENTRY(clocktarget, start_player)
 {
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	clock_hits = 0;
-	clock_multiplier = 1;
 }
 
 
-CALLSET_ENTRY (clocktarget, door_panel_awarded)
+CALLSET_ENTRY (clocktarget, door_start_clock_millions)
 {
-	if (lamp_test (LM_PANEL_CLOCK_MIL))
-		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
+
+CALLSET_ENTRY (clocktarget, door_stop_clock_millions)
+{
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
+}
 

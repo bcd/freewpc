@@ -49,23 +49,7 @@ extern inline U8 wpc_debug_read (void)
 	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
 }
 
-
-#ifdef DEBUGGER
-#define db_putc(b) wpc_debug_write(b)
-void db_puts (const char *s);
-void db_puti (U8 v);
-void db_put2x (U8 v);
-void db_put4x (U16 v);
-#else
-#define db_puts(s)
-#define db_puti(i)
-#define db_put2x(v)
-#define db_put4x(v)
-#define db_putc(b)
-#endif
-
-#define db_putp(p)	db_put4x ((U16)p)
-
+#pragma GCC poison db_puti db_putc
 
 enum wpc_debugger_request {
 	WPC_DBREQ_TASK_DUMP=0x80,

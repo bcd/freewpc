@@ -83,21 +83,14 @@ void device_debug (void)
 	for (devno = 0; devno < device_count; devno++)
 	{
 		device_t *dev = &device_table[devno];
+		
+		dbprintf ("%d) %s: %d -> %d", 
+			devno, dev->props->name,
+			dev->previous_count, dev->actual_count);
 
-		db_puti (devno); 
-		db_puts (") " ); 
-		db_puts (dev->props->name);
-		db_puts (" : "); 
-		db_puti (dev->previous_count); 
-		db_puts (" -> ");
-		db_puti (dev->actual_count); 
-		db_puts (", max ");
-		db_puti (dev->max_count); 
-		db_puts (", pending kicks ");
-		db_puti (dev->kicks_needed); 
-		db_puts (", state ");
-		db_puts ((dev->state == DEV_STATE_IDLE) ? "IDLE" : "RELEASING");
-		db_putc ('\n');
+		dbprintf ("max %d, need %d kicks, state %s\n",
+			dev->max_count, dev->kicks_needed,
+			(dev->state == DEV_STATE_IDLE) ? "IDLE" : "RELEASING");
 	}
 
 	dbprintf ("Counted %d Missing %d Live %d\n", 
@@ -189,7 +182,7 @@ wait_and_recount:
 			 * detected but in the end, the count did not
 			 * change.  Nothing to do...
 			 */
-			db_puts ("Idle but count same, ignoring.\n");
+			dbprintf ("Idle but count same, ignoring.\n");
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
@@ -199,7 +192,7 @@ wait_and_recount:
 			 */
 			if (!in_test)
 			{
-				db_puts ("Idle but ball lost\n");
+				dbprintf ("Idle but ball lost\n");
 				nonfatal (ERR_IDLE_BALL_LOST);
 			}
 		}
@@ -238,7 +231,7 @@ wait_and_recount:
 
 			In any case, this is common enough that a nonfatal shouldn't
 			be thrown. */
-			db_puts ("Kick did not change anything\n");
+			dbprintf ("Kick did not change anything\n");
 			nonfatal (ERR_FAILED_KICK);
 			device_call_op (dev, kick_failure);
 
@@ -246,7 +239,7 @@ wait_and_recount:
 			{
 				/* OK, we tried 5 times and still know ball came out.
 				 * Cancel all kick requests. */
-				db_puts ("Cancelling kick requests\n");
+				dbprintf ("Cancelling kick requests\n");
 				dev->kicks_needed = 0;
 				dev->state = DEV_STATE_IDLE;
 			}
@@ -258,7 +251,7 @@ wait_and_recount:
 			if (dev->actual_count == dev->previous_count - 1)
 			{
 				/* Well done */
-				db_puts ("Kick succeeded\n");
+				dbprintf ("Kick succeeded\n");
 				device_call_op (dev, kick_success);
 				dev->kicks_needed--;
 				if (dev->kicks_needed == 0)
@@ -270,7 +263,7 @@ wait_and_recount:
 			else
 			{
 				/* More than one ball was released */
-				db_puts ("Kick succeeded, but an extra ball came out\n");
+				dbprintf ("Kick succeeded, but an extra ball came out\n");
 				nonfatal (ERR_KICK_TOO_MANY);
 			}
 		}
@@ -281,7 +274,7 @@ wait_and_recount:
 			 * the code below should attempt the kick again. */
 
 			/* See long TODO comment above -- it applies here too. */
-			db_puts ("After kick, count increased\n");
+			dbprintf ("After kick, count increased\n");
 			nonfatal (ERR_KICK_CAUSED_INCREASE);
 		}
 	}
@@ -316,7 +309,7 @@ wait_and_recount:
 		{
 			/* Container has fewer balls in it than we
 			 * would like */
-			db_puts ("Can't kick when no balls available!\n");
+			dbprintf ("Can't kick when no balls available!\n");
 		}
 		else if (kickout_locks > 0)
 		{
@@ -327,7 +320,7 @@ wait_and_recount:
 		else 
 		{
 			/* Container has balls ready to kick */
-			db_puts ("About to call kick_attempt\n");
+			dbprintf ("About to call kick_attempt\n");
 
 			/* Mark state as releasing if still idle */
 			if (dev->state == DEV_STATE_IDLE)
@@ -424,7 +417,7 @@ void device_update_globals (void)
 	if (missing_balls != live_balls)
 	{
 		/* Number of balls not accounted for is NOT what we expect */
-		db_puts ("Missing != Live\n");
+		dbprintf ("Missing != Live\n");
 #if 0 /* this isn't right */
 		if (missing_balls + 1 == live_balls)
 		{

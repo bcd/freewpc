@@ -21,10 +21,6 @@
 #ifndef _ENV_H
 #define _ENV_H
 
-/* Declare a function as static, but don't actually pass on to the
- * compiler.  static sometimes hinders debugging. */
-#define STATIC
-
 /* Declare that certain things exist.  This is true of the 6809
  * but may change later as we port to different architectures. */
 #ifdef CONFIG_PLATFORM_WPC

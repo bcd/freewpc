@@ -94,9 +94,6 @@ U8 leff_prio;
  * statically configured. */
 static U8 leff_queue[MAX_QUEUED_LEFFS];
 
-#define MAX_SHARED_LEFFS 8
-static U8 shared_leff_queue[MAX_SHARED_LEFFS];
-
 
 /** Lamp effect function for a leff that turns all lights off.
  * Used by the system-defined tilt function. */
@@ -223,6 +220,7 @@ task_pid_t leff_create_handler (const leff_t *leff)
 			else
 			{
 				/* Start by freeing up any allocations that are lingering. */
+				task_kill_gid (GID_LEFF);
 				lamp_leff1_erase ();
 				lamp_leff1_free_all ();
 				lampset_apply (leff->lampset, lamp_leff_allocate);
@@ -268,12 +266,12 @@ void leff_start (leffnum_t dn)
 	}
 	else if (leff->flags & L_RUNNING)
 	{
-		db_puts ("Adding running leff to queue\n");
+		dbprintf ("Adding running leff to queue\n");
 		leff_add_queue (dn);
 		if (dn == leff_get_highest_priority ())
 		{
 			/* This is the new active running leff */
-			db_puts ("Requested leff is now highest priority\n");
+			dbprintf ("Requested leff is now highest priority\n");
 			leff_active = dn;
 			leff_create_handler (leff);
 		}
@@ -281,21 +279,21 @@ void leff_start (leffnum_t dn)
 		{
 			/* This leff cannot run now, because there is a
 			 * higher priority leff running. */
-			db_puts ("Can't run because higher priority active\n");
+			dbprintf ("Can't run because higher priority active\n");
 		}
 	}
 	else
 	{
 		if (leff->prio > leff_prio)
 		{
-			db_puts ("Restarting quick leff with high pri\n");
+			dbprintf ("Restarting quick leff with high pri\n");
 			leff_active = dn;
 			leff_prio = leff->prio;
 			leff_create_handler (leff);
 		}
 		else
 		{
-			db_puts ("Quick leff lacks pri to run\n");
+			dbprintf ("Quick leff lacks pri to run\n");
 		}
 	}
 }
@@ -370,13 +368,13 @@ void leff_default (void)
  * leff that has been started. */
 void leff_start_highest_priority (void)
 {
-	db_puts ("Restarting highest priority leff\n");
+	dbprintf ("Restarting highest priority leff\n");
 
 	leff_active = leff_get_highest_priority ();
 	if (leff_active != LEFF_NULL)
 	{
 		const leff_t *leff = &leff_table[leff_active];
-		db_puts ("Recreating leff task\n");
+		dbprintf ("Recreating leff task\n");
 		leff_create_handler (leff);
 	}
 	else
@@ -397,7 +395,7 @@ __noreturn__ void leff_exit (void)
 {
 	const leff_t *leff = &leff_table[leff_active];
 
-	db_puts ("Exiting leff\n");
+	dbprintf ("Exiting leff\n");
 	if (leff->gi != L_NOGI)
 		triac_leff_free (leff->gi);
 	task_setgid (GID_LEFF_EXITING);
@@ -413,7 +411,6 @@ void leff_init (void)
 	leff_prio = 0;
 	leff_active = LEFF_NULL;
 	memset (leff_queue, 0, MAX_QUEUED_LEFFS);
-	memset (shared_leff_queue, 0, MAX_SHARED_LEFFS);
 }
 
 
