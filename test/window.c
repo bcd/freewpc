@@ -380,7 +380,7 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY AWARD", &free_award_value, 0, &system_config.replay_award },
 	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
-	{ "MATCH FEATURE", &percent_value, 7, &system_config.match_feature },
+	{ "MATCH FEATURE", &percent_value, OFF, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },

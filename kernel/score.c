@@ -48,11 +48,7 @@ void scores_draw_ball (void)
 	sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
 	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 #else
-#if defined(SHOW_DEBUG_VALUE)
-	sprintf ("DEBUG %d", debug_value);
-#else
 	sprintf ("PLAYER %1i", player_up);
-#endif
 	font_render_string_center (&font_mono5, 96, 27, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
 	font_render_string_center (&font_mono5, 32, 27, sprintf_buffer);
@@ -70,6 +66,8 @@ void scores_draw_credits (void)
 void scores_draw_current (void)
 {
 	sprintf_current_score ();
+	/* TODO - this is only drawing player 1's score.  We need to choose
+	 * an appropriate font for all of the scores. */
 	font_render_string_center (&font_lucida9, 64, 10, sprintf_buffer);
 }
 
@@ -219,6 +217,7 @@ void score_multiple (score_id_t id, U8 multiplier)
 	if (!in_live_game)
 		return;
 
+	/* TODO - this is cheating */
 	while (multiplier > 0)
 	{
 		score_add (current_score, score_table[id], sizeof (score_t));

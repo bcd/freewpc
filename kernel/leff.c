@@ -393,14 +393,25 @@ void leff_start_highest_priority (void)
  */
 __noreturn__ void leff_exit (void)
 {
-	const leff_t *leff = &leff_table[leff_active];
-
+	const leff_t *leff;
+	
 	dbprintf ("Exiting leff\n");
-	if (leff->gi != L_NOGI)
-		triac_leff_free (leff->gi);
-	task_setgid (GID_LEFF_EXITING);
-	leff_remove_queue (leff_active);
-	leff_start_highest_priority ();
+	if (leff_running_flags & L_SHARED)
+	{
+		leff = &leff_table[leff_self_id];
+		task_kill_peers ();
+		lampset_set_apply_delay (0);
+		lampset_apply (leff->lampset, lamp_leff2_free);
+	}
+	else
+	{
+		leff = &leff_table[leff_active];
+		if (leff->gi != L_NOGI)
+			triac_leff_free (leff->gi);
+		task_setgid (GID_LEFF_EXITING);
+		leff_remove_queue (leff_active);
+		leff_start_highest_priority ();
+	}
 	task_exit ();
 }
 

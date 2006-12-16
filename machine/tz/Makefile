@@ -58,15 +58,16 @@ GAME_OBJS = clock.o deffs.o leffs.o \
 	amode.o lock.o magnet.o \
 	sling.o jets.o star.o greed.o \
 	loop.o bonus.o door.o autofire.o gumball.o \
-	clocktarget.o ballsave.o powerball.o \
-	multiball.o mpf.o rampdiv.o
+	clocktarget.o ballsave.o \
+	multiball.o rampdiv.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
 
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
-	config.o rightramp.o hitch.o piano.o rocket.o slot.o
+	config.o rightramp.o hitch.o piano.o rocket.o slot.o \
+	mpf.o powerball.o
 
 GAME_FSMS = shot.fsm
 

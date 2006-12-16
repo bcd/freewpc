@@ -84,7 +84,7 @@ void device_debug (void)
 	{
 		device_t *dev = &device_table[devno];
 		
-		dbprintf ("%d) %s: %d -> %d", 
+		dbprintf ("%d) %s: %d -> %d, ", 
 			devno, dev->props->name,
 			dev->previous_count, dev->actual_count);
 

@@ -137,6 +137,8 @@ void sw_right_loop_handler(void);
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
+/* mpf.c */
+__machine__ void mpf_enable (void);
 /* piano.c */
 void piano_to_slot_timer(void);
 void sw_piano_handler(void);

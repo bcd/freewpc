@@ -246,6 +246,7 @@ Sort3: PF:lamp_sort_left_to_right
 Sort4: PF:lamp_sort_right_to_left
 Circle Out: PF:lamp_sort_circle_out
 Lock Test: PF:build_lampset_from_lock
+Ball Save: Shoot Again
 
 [containers]
 Trough: Ball Serve, trough, init_max_count(3), \
@@ -398,6 +399,7 @@ Multi Strobe: PRI_LEFF2, LAMPS(ALL)
 Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL)
 Left Loop: PRI_LEFF1, LAMPS(SORT3)
 Right Loop: PRI_LEFF1, LAMPS(SORT4)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 
 [fonts]
 mono5:

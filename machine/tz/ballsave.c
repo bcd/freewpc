@@ -20,9 +20,7 @@
 
 #include <freewpc.h>
 
-/* TODO: when multiple leffs are supported, this function should
- * become a true leff. */
-static void ballsave_monitor (void)
+void ball_save_leff (void)
 {
 #if defined (INFINITE_BALL_SAVER)
 	for (;;)
@@ -38,7 +36,6 @@ start:
 		leff_off (LM_SHOOT_AGAIN);
 		task_sleep (TIME_100MS);
 	}
-	lamp_leff_free (LM_SHOOT_AGAIN);
 
 #ifdef CONFIG_TIMED_GAME
 	while (timed_game_timer != 0)
@@ -48,24 +45,22 @@ start:
 			goto start;
 	}
 #endif
-
-	task_exit ();
+	leff_exit ();
 }
 
 void ballsave_enable (void)
 {
-	lamp_leff_allocate (LM_SHOOT_AGAIN);
 #ifndef CONFIG_TIMED_GAME
 	timer_restart_free (GID_BALLSAVER_TIMER, TIME_10S);
 #endif
-	task_recreate_gid (GID_BALLSAVER, ballsave_monitor);
+	leff_start (LEFF_BALL_SAVE);
 }
 
 void ballsave_disable (void)
 {
 #ifndef INFINITE_BALL_SAVER
 	task_kill_gid (GID_BALLSAVER);
-	lamp_leff_free (LM_SHOOT_AGAIN);
+	leff_stop (LEFF_BALL_SAVE);
 #endif
 }
 
