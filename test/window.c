@@ -1,5 +1,22 @@
-
-#include <freewpc.h>
+/*
+ * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 /**
  * \file
@@ -45,6 +62,8 @@
  * At present, the test implementations are also included in this same
  * file, although for modularity's sake they should be moved elsewhere.
  */
+
+#include <freewpc.h>
 
 
 struct window;
@@ -131,6 +150,10 @@ void window_push (struct window_ops *ops, void *priv)
 	{
 		window_call_op (win_top, suspend);
 		win_top++;
+	}
+	else
+	{
+		/* TODO - too many windows, throw an error */
 	}
 
 	win_top->ops = ops;
@@ -1298,8 +1321,8 @@ void deff_stress_thread (void)
 	{
 		dn = random_scaled (MAX_DEFFS);
 		start_stop_flag = random_scaled (2);
-		delay = random_scaled (TIME_500MS);
-		delay += TIME_100MS;
+		delay = random_scaled (TIME_200MS);
+		delay += TIME_33MS;
 
 		dbprintf ("Deff %d, start_stop %d, delay %d\n",
 			dn, start_stop_flag, delay);

@@ -80,9 +80,10 @@ typedef void (*task_function_t) (void);
 /*
  * Define the size of the saved process stack.
  *
- * This value + 23 should equate a power of 2.
+ * This value + 23 should equal a power of 2.
  */
-#define TASK_STACK_SIZE		41
+//#define TASK_STACK_SIZE		41
+#define TASK_STACK_SIZE		57
 
 /** Type for the group ID (gid) */
 typedef U8 task_gid_t;
@@ -131,9 +132,9 @@ typedef struct task_struct
 	/** The saved ROM page register for the task, while it is asleep */
 	U8				rom_page;
 
-	/** The amount of stack space, in words, that has been saved into
+	/** The amount of stack space, in bytes, that has been saved into
 	 * the task's stack area */
-	U8				stack_word_count;
+	U8				stack_size;
 
 	/** Miscellaneous control flags */
 	U8				flags;

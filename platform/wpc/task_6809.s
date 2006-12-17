@@ -53,10 +53,14 @@ L32:
 	cmpu	#STACK_BASE
 	blt	L33
 	stb	SAVED_STACK_SIZE,x
+	cmpb  #56
+	bgt   _stack_too_large
 	ldb	WPC_ROM_BANK
 	stb	ROMPAGE_SAVE_OFF,x
 	jmp _task_dispatcher
-
+_stack_too_large:
+	ldb	#99
+	jmp	_fatal
 
 	;-----------------------------------------------------
 	; task_restore

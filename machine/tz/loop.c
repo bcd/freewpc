@@ -36,6 +36,7 @@ void award_loop (void)
 	{
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		sound_send (SND_POWERBALL_QUOTE);
+		score (SC_5M);
 	}
 
 	if (lamp_test (LM_PANEL_SPIRAL))

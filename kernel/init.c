@@ -433,7 +433,6 @@ void do_irq (void)
 #ifndef CONFIG_PLATFORM_LINUX
 				lockup_check_rtt ();
 #endif
-
 				/* Execute machine-specific rtts */
 #ifdef MACHINE_128MS_RTTS
 				MACHINE_128MS_RTTS

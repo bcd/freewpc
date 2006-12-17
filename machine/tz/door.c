@@ -162,13 +162,13 @@ void door_advance_flashing (void)
 	door_set_flashing (new_door_index);
 }
 
-void door_award_rotate (void) __taskentry__
+void door_award_rotate (void)
 {
 	task_sleep_sec (2);
 	while (in_live_game)
 	{
 		door_advance_flashing ();
-		task_sleep_sec (1);
+		task_sleep_sec (2);
 	}
 	task_exit ();
 }
@@ -179,7 +179,7 @@ inline void deff_wait_for_other (deffnum_t dn)
 	if (deff_is_running (dn))
 	{
 		U8 timeout = TIME_3S / TIME_100MS;
-		while (deff_is_running (dn))
+		while (timeout && deff_is_running (dn))
 		{
 			timeout--;
 			task_sleep (TIME_100MS);
@@ -191,9 +191,12 @@ void door_award_deff (void)
 {
 	U8 index = door_index;
 
+	dbprintf ("Waiting\n");
 	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
+
+	dbprintf ("Award panel %d\n", index);
 	sprintf ("DOOR PANEL %d", door_panels_started);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_mono5, 64, 21, door_panel_names[index]);
@@ -360,6 +363,6 @@ CALLSET_ENTRY(door, start_ball)
 
 CALLSET_ENTRY (door, init)
 {
-	door_start_with_bttz = 1;
+	door_start_with_bttz = 0;
 }
 

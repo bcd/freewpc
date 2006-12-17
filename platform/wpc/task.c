@@ -95,6 +95,7 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
+
 /** Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
 //#define DUMP_ALL_TASKS
@@ -120,7 +121,7 @@ void task_dump (void)
 			dbprintf ("PID %p  State %02X  GID %02X  PC %p",
 				tp, tp->state, tp->gid, tp->pc);
 			dbprintf ("  STKW ");
-			dbprintf ("%02X", tp->stack_word_count);
+			dbprintf ("%02X", tp->stack_size);
 			dbprintf ("  ARG %04X", tp->arg);
 			dbprintf ("  TD ");
 			dbprintf ("%02X %02X %02X %02X\n",
@@ -147,7 +148,7 @@ task_t *task_allocate (void)
 		{
 			tp->state = TASK_USED;
 			tp->delay = 0;
-			tp->stack_word_count = 0;
+			tp->stack_size = 0;
 			tp->flags = 0;
 			return tp;
 		}

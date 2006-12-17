@@ -69,6 +69,8 @@ enum {
 
 	BM_BOX5, BM_X5,
 
+	BM_LEFT_ARROW5, BM_RIGHT_ARROW5,
+
 	BM_LAST,
 };
 
@@ -115,12 +117,12 @@ void fontargs_render_string_left2 (const fontargs_t *args);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 
-#define MKCOORD(x,y) { .xy = ((U16)x<<8)|y, }
+#define MKCOORD1(x,y) (((U16)x<<8)|y)
+#define MKCOORD(x,y) { .xy = MKCOORD1(x,y), }
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
-	font_args.coord.x = _x; \
-	font_args.coord.y = _y; \
+	font_args.coord.xy = MKCOORD1 (_x, _y); \
 	font_args.s = _s;
 
 

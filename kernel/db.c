@@ -47,46 +47,17 @@ U8 db_attached;
 void db_puts (const char *s)
 {
 	if (db_attached)
+	{
 		while (*s)
+		{
+#if 1
+			wpc_parport_write (*s++);
+#else
 			wpc_debug_write (*s++);
-}
-
-/* These functions are all deprecated ... use dbprintf instead */
-#if 0
-void db_puti (uint8_t v)
-{
-	uint8_t quot;
-	uint8_t rem;
-
-	DIV10 (v, quot, rem);
-
-	db_putc (quot + '0');
-	db_putc (rem + '0');
-}
-
-
-static char db_get_nibble_char (uint8_t v)
-{
-	if (v > 9)
-		return v - 10 + 'A';
-	else
-		return v + '0';
-}
-
-
-void db_put2x (uint8_t v)
-{
-	db_putc (db_get_nibble_char (v >> 4));
-	db_putc (db_get_nibble_char (v & 0x0F));
-}
-
-void db_put4x (uint16_t v)
-{
-	db_put2x (v >> 8);
-	db_put2x (v & 0xFF);
-}
 #endif
-
+		}
+	}
+}
 
 /* This hasn't been touched in a year. */
 #if 0
@@ -167,7 +138,11 @@ void db_init (void)
 #ifdef CONFIG_PLATFORM_LINUX
 	db_attached = 1;
 #else
+#if 1
+	db_attached = 1;
+#else
 	db_attached = 0;
+#endif
 #endif
 }
 

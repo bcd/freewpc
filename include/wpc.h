@@ -295,10 +295,33 @@ extern U8 *linux_dmd_high_page;
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
+/********************************************/
+/* LED                                      */
+/********************************************/
 
 extern inline void wpc_led_toggle (void)
 {
 	wpc_asic_xor (WPC_LEDS, 0x80);
+}
+
+
+/********************************************/
+/* Printer / Parallel Port                  */
+/********************************************/
+
+extern inline void wpc_parport_write (U8 data)
+{
+	wpc_asic_write (WPC_PARALLEL_DATA_PORT, data);
+	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x0);
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	asm ("nop");
+	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x1);
 }
 
 /********************************************/

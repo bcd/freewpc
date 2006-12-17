@@ -216,34 +216,45 @@ static void fontargs_render_string (void)
 
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 {
-	static U8 *dmd_base;
-	static U8 i;
-	static U8 xb;
+	U8 *dmd_base;
 	static U8 xr;
 	static U8 partial_left[] = { 
 		0x0, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1 };
 	static U8 partial_right[] = { 
 		0x0, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80 };
+	static U16 hoffset;
+	S16 hoff;
 
-	dmd_base = ((U8 *)dmd_low_buffer) + coord.y * DMD_BYTE_WIDTH;
-	xb = coord.x / 8;
+	dmd_base = ((U8 *)dmd_low_buffer) + coord.y * DMD_BYTE_WIDTH +
+		coord.x / 8;
 	xr = coord.x % 8;
+	hoffset = height * DMD_BYTE_WIDTH;
+	
 	if (xr)
 	{
 		/* Erase partial left region */
 		U8 mask = partial_left[(8 - xr)];
 		width -= xr;
-		for (i=0 ; i < height; i++)
-			dmd_base[xb] &= mask;
-		xb++;
+		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
+			dmd_base[hoff] &= mask;
+		dmd_base++;
+	}
+
+	while (width >= 16)
+	{
+		/* Erase middle region */
+		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
+			((U16 *)dmd_base)[hoff] = 0;
+		dmd_base += 2;
+		width -= 16;
 	}
 
 	while (width >= 8)
 	{
 		/* Erase middle region */
-		for (i=0 ; i < height; i++)
-			dmd_base[xb] = 0;
-		xb++;
+		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
+			dmd_base[hoff] = 0;
+		dmd_base++;
 		width -= 8;
 	}
 
@@ -251,8 +262,8 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 	{
 		/* Erase partial right region */
 		U8 mask = partial_right[width];
-		for (i=0 ; i < height; i++)
-			dmd_base[xb] &= mask;
+		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
+			dmd_base[hoff] &= mask;
 	}
 }
 

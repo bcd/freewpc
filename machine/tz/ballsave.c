@@ -87,6 +87,23 @@ void ballsave_launch (void)
 #endif
 }
 
+CALLSET_ENTRY (ballsave, sw_left_outlane)
+{
+#ifndef CONFIG_TIMED_GAME
+	if (timer_find_gid (GID_BALLSAVER_TIMER))
+		timer_restart_free (GID_BALLSAVER_TIMER, TIME_10S);
+#endif
+}
+
+CALLSET_ENTRY (ballsave, sw_right_outlane)
+{
+	ballsave_sw_left_outlane ();
+}
+
+CALLSET_ENTRY (ballsave, sw_outhole)
+{
+	ballsave_sw_left_outlane ();
+}
 
 CALLSET_ENTRY (ballsave, ball_in_play)
 {
