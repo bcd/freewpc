@@ -204,6 +204,10 @@ extern U8 *linux_dmd_high_page;
 #define DMD_LOW_BASE linux_dmd_low_page
 #define DMD_HIGH_BASE linux_dmd_high_page
 #else
+/* WPC can map up to 6 of the DMD pages into address space.
+ * FreeWPC only uses page 4 (low) and page 5 (high).
+ */
+#define DMD_PAGE(n)						(0x3000 + (n * 0x200))
 #define DMD_LOW_BASE 					0x3800
 #define DMD_HIGH_BASE 					0x3A00
 #endif
