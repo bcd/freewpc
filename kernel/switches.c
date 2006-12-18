@@ -209,6 +209,7 @@ extern inline void switch_rowpoll (const U8 col)
 	 *
 	 * AR_CHANGED - '1' means the raw reading changed since the last
 	 * poll.  This is computed as the XOR of the previous two readings.
+	 * The purpose of this is to perform a quick and dirty debounce.
 	 *
 	 * AR_PENDING - '1' means the switch changed and is waiting to be
 	 * processed.  When AR_CHANGED becomes asserted, and does not
@@ -428,16 +429,20 @@ CALLSET_ENTRY (switch, idle)
 		/* Disable interrupts while fiddling with the bits */
 		disable_irq ();
 
-		/* Grab the raw bits */
+		/* Grab the raw bits : 0=open, 1=closed */
 		rawbits = switch_bits[AR_RAW][col];
 
-		/* Invert for optos */
+		/* Invert for optos: 0=inactive, 1=active */
 		rawbits ^= mach_opto_mask[col];
 
-		/* Convert to active level */
+		/* Convert to active level: 0=inactive, 1=active or edge */
 		rawbits |= mach_edge_switches[col];
 
-		/* Grab the current set of pending bits */
+		/* Grab the current set of pending bits, masked with rawbits.
+		 * pendbits is only 1 if the switch is marked pending and it
+		 * is currently active.  For edge-triggered switches, it is
+		 * invoked active or inactive.
+		 */
 		pendbits = switch_bits[AR_PENDING][col] & rawbits;
 
 		/* Only service the active bits */
