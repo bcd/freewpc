@@ -467,22 +467,24 @@ __interrupt__
 void do_firq (void)
 {
 #ifdef __m6809__
-	asm __volatile__ ("pshs\ta,b");
+	asm __volatile__ ("pshs\tb,x");
 #endif
 
+#ifdef CONFIG_WPC_PERIPHERAL_TIMER
 	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
 		/* Timer interrupt */
 		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
 	}
 	else
+#endif /* CONFIG_WPC_PERIPHERAL_TIMER */
 	{
 		/* DMD interrupt */
 		dmd_rtt ();
 	}
 
 #ifdef __m6809__
-	asm __volatile__ ("puls\ta,b");
+	asm __volatile__ ("puls\tb,x");
 #endif
 }
 

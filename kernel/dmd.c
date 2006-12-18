@@ -85,10 +85,6 @@ dmd_pagenum_t dmd_high_page;
 __fastram__ dmd_pagenum_t dmd_dark_page;
 __fastram__ dmd_pagenum_t dmd_bright_page;
 
-/** Page flip state.  The FIRQ routine uses this to
- * determine whether to show the dark or bright page. */
-__fastram__ U8 dmd_page_flip_count;
-
 
 /** dmd_show_hook is normally set to a nop function.
  * However, whenever a deff is started/stopped that defines
@@ -101,6 +97,8 @@ bool dmd_in_transition;
 /** Pointer to the current transition in effect.  This is
  * only used by the transition show hook. */
 dmd_transition_t *dmd_transition;
+
+__fastram__ void (*dmd_rtt) (void);
 
 
 /** The trans data pointer provides transition functions with
@@ -120,6 +118,10 @@ U8 *dmd_trans_data_ptr2;
  * this holds the lower of the two values (the dark page).
  */
 U8 dmd_composite_page;
+
+void dmd_rtt0 (void);
+void dmd_rtt1 (void);
+void dmd_rtt2 (void);
 
 
 /**
@@ -156,16 +158,16 @@ inline U8 wpc_dmd_get_high_page (void)
  */
 void dmd_init (void)
 {
-	/* Program the DMD controller to generate interrupts */
-	wpc_dmd_set_firq_row (30);
-
+	dmd_rtt = dmd_rtt0;
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
 	wpc_dmd_set_low_page (0);
 	wpc_dmd_set_high_page (0);
 	wpc_dmd_set_visible_page (dmd_dark_page = dmd_bright_page = 0);
 	dmd_free_page = 2;
-	dmd_page_flip_count = 2;
+
+	/* Program the DMD controller to generate interrupts */
+	wpc_dmd_set_firq_row (30);
 }
 
 
@@ -181,25 +183,25 @@ void dmd_init (void)
  * contain the same value, and the flipping effectively doesn't
  * change anything.
  */
-void dmd_rtt (void)
-{
-	/* Switch between dark and bright */
-	if (dmd_page_flip_count >= 2)
-	{
-		/* Show the dark page 1/3 of the time */
-		wpc_dmd_set_visible_page (dmd_dark_page);
-		dmd_page_flip_count = 0;
-	}
-	else
-	{
-		/* Show the bright page 2/3 of the time */
-		wpc_dmd_set_visible_page (dmd_bright_page);
-		dmd_page_flip_count++;
-	}
 
-	/* Reprogram the controller to generate another interrupt
-	 * after the next refresh. */
+void dmd_rtt0 (void)
+{
+	wpc_dmd_set_visible_page (dmd_dark_page);
 	wpc_dmd_set_firq_row (30);
+	dmd_rtt = dmd_rtt1;
+}
+
+void dmd_rtt1 (void)
+{
+	wpc_dmd_set_visible_page (dmd_bright_page);
+	wpc_dmd_set_firq_row (30);
+	dmd_rtt = dmd_rtt2;
+}
+
+void dmd_rtt2 (void)
+{
+	wpc_dmd_set_firq_row (30);
+	dmd_rtt = dmd_rtt0;
 }
 
 

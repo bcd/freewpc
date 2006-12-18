@@ -134,7 +134,7 @@ extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 }
 
 void dmd_init (void);
-void dmd_rtt (void);
+extern __fastram__ void (*dmd_rtt) (void);
 void dmd_alloc_low (void);
 void dmd_alloc_high (void);
 void dmd_alloc_low_high (void);
