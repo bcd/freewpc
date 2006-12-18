@@ -101,6 +101,10 @@ U8 task_max_count;
 //#define DUMP_ALL_TASKS
 
 
+/* Private functions written in assembly used internally. */
+__noreturn__ void task_save (void);
+__noreturn__ void task_restore (void);
+
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -216,21 +220,22 @@ void task_setgid (task_gid_t gid)
 void task_sleep (task_ticks_t ticks)
 {
 	extern uint8_t tick_count;
+	register task_t *tp = task_current;
 
-	if (task_current == 0)
+	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
-	if (task_current->state != TASK_USED)
-	{
-		dbprintf ("Warning: task_current = %p, state = %02X\n",
-			task_current, task_current->state);
-	}
+	tp->delay = ticks;
+	tp->asleep = tick_count;
 
-	task_current->delay = ticks;
-	task_current->asleep = tick_count;
-	task_current->state = TASK_BLOCKED+TASK_USED; /* was |= */
+#if 0
+	if (tp->state != TASK_USED)
+		fatal (99);
+#endif
+	tp->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
-	__asm__ volatile ("jsr\t_task_save");
+	task_save ();
+	// __asm__ volatile ("jmp\t_task_save");
 }
 
 
@@ -445,6 +450,7 @@ void task_dispatcher (void)
 		}
 		else if (tp->state == TASK_USED)
 		{
+			// task_restore ();
 			asm volatile ("jmp\t_task_restore");
 		}
 		else if (tp->state != TASK_USED+TASK_BLOCKED)
@@ -459,6 +465,7 @@ void task_dispatcher (void)
 			else
 			{
 				tp->state &= ~TASK_BLOCKED;
+				// task_restore ();
 				asm volatile ("jmp\t_task_restore");
 			}
 		}
