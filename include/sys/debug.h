@@ -62,9 +62,7 @@ enum wpc_debugger_response {
 	WPC_DBRSP_IDLE_RUN,
 };
 
-void db_init (void);
-void db_dump_switches (void);
-void db_idle_task (void);
-void msgbox (void);
+__common__ void db_init (void);
+__common__ void db_puts (const char *s);
 
 #endif /* _SYS_DEBUG_H */
