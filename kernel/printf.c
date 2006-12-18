@@ -392,6 +392,8 @@ sprintf_score (U8 *score)
 void
 dbprintf1 (void)
 {
+#ifdef DEBUGGER
 	db_puts (sprintf_buffer);
+#endif
 }
 
