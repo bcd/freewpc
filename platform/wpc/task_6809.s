@@ -25,6 +25,7 @@ YREG_SAVE_OFF      = 7
 UREG_SAVE_OFF      = 9
 ROMPAGE_SAVE_OFF   = 11
 SAVED_STACK_SIZE   = 12
+STACK_SAVE_OFF     = 23
 
 	;-----------------------------------------------------
 	; task_save
@@ -40,8 +41,10 @@ _task_save:
 	stu	UREG_SAVE_OFF,x
 	sty	YREG_SAVE_OFF,x
 	leau	,s
-	leay	23,x
+	leay	STACK_SAVE_OFF,x
 	clrb
+
+	;;;;;;cmpu	#STACK_BASE
 	bra	L32
 L33:
 	;;; TODO : use X register to transfer data faster
@@ -71,7 +74,7 @@ L32:
 	stb	ROMPAGE_SAVE_OFF,x
 	jmp _task_dispatcher
 _stack_too_large:
-	ldb	#99
+	ldb	#2    ; ERR_TASK_STACK_OVERFLOW
 	jmp	_fatal
 
 	;-----------------------------------------------------
@@ -83,21 +86,18 @@ _stack_too_large:
 _task_restore:
 	stx	*_task_current	
 	orcc	#80
-	ldb	12,x
-	clra
-	leau	d,x
-	leay	23,u
 	ldu	#STACK_BASE
 	ldb	SAVED_STACK_SIZE,x
-	bra	L42
+	beq	L42
+	leay	b,x
+	leay	STACK_SAVE_OFF,y
 L43:
 	;;; TODO : use X register to transfer data
 	lda	,-y
 	sta	,-u
 	decb
-L42:
-	tstb
 	bne	L43
+L42:
 	leas	,u
 	andcc	#-81
 	ldb	ROMPAGE_SAVE_OFF,x

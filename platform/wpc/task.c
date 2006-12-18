@@ -115,16 +115,15 @@ void task_dump (void)
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	dbprintf ("Max tasks = %d\n", task_max_count);
 #endif
-	dbprintf ("----------------------\n");
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
 #ifndef DUMP_ALL_TASKS
 		if (tp->state != TASK_FREE)
 #endif
 		{
-			dbprintf ("PID %p  State %02X  GID %02X  PC %p",
-				tp, tp->state, tp->gid, tp->pc);
-			dbprintf ("  STKW ");
+			dbprintf ("%p: GID %02X  PC %p",
+				tp, tp->gid, tp->pc);
+			dbprintf ("  ST ");
 			dbprintf ("%02X", tp->stack_size);
 			dbprintf ("  ARG %04X", tp->arg);
 			dbprintf ("  TD ");
@@ -133,7 +132,7 @@ void task_dump (void)
 				tp->thread_data[2], tp->thread_data[3]);
 		}
 	}
-	dbprintf ("----------------------\n");
+	dbprintf ("\n\n");
 #endif
 }
 
