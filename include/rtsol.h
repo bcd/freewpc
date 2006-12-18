@@ -59,7 +59,7 @@ extern inline void rt_sol_on (U8 *sol_cache, U8 bitmask, U8 active_high)
 
 extern inline U8 rt_sol_active (U8 *sol_cache, U8 bitmask, U8 active_high)
 {
-	return (in_live_game && (*sol_cache & bitmask));
+	return (*sol_cache & bitmask);
 }
 
 
@@ -92,17 +92,33 @@ extern inline void rt_solenoid_update1 (
 	const U8 sol_on_irqs,
 	const U8 sol_off_irqs )
 {
-	if (!in_game)
+	/* Declaring state as a local register variable improves the performance.
+	 * 'a' can be used here safely since 'D' is not. */
+#ifdef __m6809__
+	register U8 state asm ("a");
+#else	
+	register U8 state;
+#endif
+
+	state = *rt_sol_state;
+	if (state == 0)
 	{
-		/* If not in a game, then do nothing */
+		/* Solenoid is idle - normal case */
+		/* Only here are allowed to poll the switch */
+		if (rt_sol_active (sw_cache, sw_bitmask, sw_active_high))
+		{
+			/* Yes, the switch is active, so the solenoid can
+			 * be scheduled to activate now */
+			*rt_sol_state = sol_on_irqs;
+		}
 	}
-	else if (*rt_sol_state < 0)
+	else if (state < 0)
 	{
 		/* Solenoid is in its off-phase */
 		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);
 		(*rt_sol_state)++;
 	}
-	else if (*rt_sol_state > 0)
+	else if (state > 0)
 	{
 		/* Solenoid is in its on-phase */
 		rt_sol_on (sol_cache, sol_bitmask, sol_active_high);
@@ -112,19 +128,21 @@ extern inline void rt_solenoid_update1 (
 			*rt_sol_state = -sol_off_irqs;
 		}
 	}
-	else
-	{
-		/* Solenoid is idle */
-		/* Only here are allowed to poll the switch */
-		if (rt_sol_active (sw_cache, sw_bitmask, sw_active_high))
-		{
-			/* Yes, the switch is active, so the solenoid can
-			 * be scheduled to activate now */
-			*rt_sol_state = sol_on_irqs;
-		}
-	}
 }
 
+
+/**
+ * rt_solenoid_update is the main interface for realtime drivers like
+ * slingshots and jet bumpers.  It will poll the switch of the device
+ * to see if it's being actuated, and then begin a short phase pulse
+ * to the solenoid, followed by a minimum off-phase.  It then goes back
+ * to polling the switch.
+ *
+ * The switch & solenoid are parameterized so that this macro may be
+ * used in multiple places (at the cost of duplicating the code).
+ * The on/off phase time and the switch/solenoid polarity can also be
+ * given (in case the switch is an opto, or the drive goes from on to off?)
+ */
 extern inline void rt_solenoid_update (
 	S8 *rt_sol_state,
 	const U8 sol_num,

@@ -27,15 +27,18 @@ __fastram__ U8 rtsol_right_sling;
 
 void slingshot_rtt (void)
 {
-	rt_solenoid_update (&rtsol_left_sling,
-		SOL_LEFT_SLING, RTSOL_ACTIVE_HIGH,
-		SW_LEFT_SLING, RTSW_ACTIVE_HIGH,
-		8, 8);
-
-	rt_solenoid_update (&rtsol_right_sling,
-		SOL_RIGHT_SLING, RTSOL_ACTIVE_HIGH,
-		SW_RIGHT_SLING, RTSW_ACTIVE_HIGH,
-		8, 8);
+	if (in_live_game)
+	{
+		rt_solenoid_update (&rtsol_left_sling,
+			SOL_LEFT_SLING, RTSOL_ACTIVE_HIGH,
+			SW_LEFT_SLING, RTSW_ACTIVE_HIGH,
+			8, 8);
+	
+		rt_solenoid_update (&rtsol_right_sling,
+			SOL_RIGHT_SLING, RTSOL_ACTIVE_HIGH,
+			SW_RIGHT_SLING, RTSW_ACTIVE_HIGH,
+			8, 8);
+	}
 }
 
 
