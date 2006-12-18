@@ -388,3 +388,10 @@ sprintf_score (U8 *score)
 #endif
 }
 
+
+void
+dbprintf1 (void)
+{
+	db_puts (sprintf_buffer);
+}
+
