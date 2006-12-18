@@ -410,7 +410,9 @@ void do_irq (void)
 	{
 		/* Execute rtts every 8ms */
 		sol_rtt ();
+#if 0
 		ac_rtt ();
+#endif
 		triac_rtt ();
 		flasher_rtt ();
 #ifdef MACHINE_8MS_RTTS
@@ -444,8 +446,8 @@ void do_irq (void)
 	/** Again, for profiling, we mark the end of an IRQ
 	 * by writing these markers. */
 #ifdef IRQPROFILE
-	db_putc (0xDD);
-	db_putc (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
+	wpc_debug_write (0xDD);
+	wpc_debug_write (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
 #endif
 }
 
