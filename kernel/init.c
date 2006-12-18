@@ -27,10 +27,15 @@
 
 U8 errcode;
 
-__fastram__ U8 irq_count;
+/** The number of IRQ loops executed.  A loop consists of 8 IRQs. */
+__fastram__ U8 irq_loop_count;
+
+/** The number of task ticks executed.  A tick equals 16 IRQs. */
 __fastram__ U8 tick_count;
 
 __nvram__ volatile U8 nvram_test_byte;
+
+__fastram__ void (*irq_function) (void);
 
 U8 sys_init_complete;
 U8 sys_init_pending_tasks;
@@ -43,9 +48,19 @@ char sprintf_buffer[PRINTF_BUFFER_SIZE];
 #endif
 
 
+__interrupt__ void do_irq0 (void);
+__interrupt__ void do_irq1 (void);
+__interrupt__ void do_irq2 (void);
+__interrupt__ void do_irq3 (void);
+__interrupt__ void do_irq4 (void);
+__interrupt__ void do_irq5 (void);
+__interrupt__ void do_irq6 (void);
+__interrupt__ void do_irq7 (void);
+
 void irq_init (void)
 {
-	irq_count = 0;
+	irq_loop_count = 0;
+	irq_function = do_irq0;
 }
 
 
@@ -146,6 +161,7 @@ void do_reset (void)
 	 * starting with the hardware-centric ones and moving on
 	 * to software features. */
 	wpc_led_toggle ();
+	irq_init ();
 #ifdef DEBUGGER
 	db_init ();
 #endif
@@ -157,13 +173,13 @@ void do_reset (void)
 	switch_init ();
 	flipper_init ();
 #if (MACHINE_DCS == 0)
+	/* TODO - this function is turning on interrupt before we want them on! */
 	sound_init ();
 #endif
 	lamp_init ();
 	device_init ();
 
 	wpc_led_toggle ();
-	irq_init ();
 
 	/** task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
@@ -364,19 +380,7 @@ CALLSET_ENTRY (nvram, idle)
 }
 
 
-/**
- * do_irq is the entry point from the IRQ vector.  Due to the
- * way the hardware works, the CPU will stop whatever it is doing
- * and jump to this location every 976 microseconds (1024 times
- * per second).  This function is used for time-critical operations
- * which won't necessarily get scheduled accurately from the
- * nonpreemptive tasks.
- *
- * You MUST keep processing in this function to the absolute
- * minimum, as it must be fast!
- */
-__interrupt__
-void do_irq (void)
+static inline void do_irq_1ms (void)
 {
 	/** Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);
@@ -392,36 +396,57 @@ void do_irq (void)
 	wpc_asic_write (WPC_PINMAME_CYCLE_COUNT, 0);
 #endif
 
-	irq_count++;
-	if ((irq_count & 15) == 0)
-		tick_count++;
-
-	/* Execute rtts every 1ms */
-	flipper_rtt ();
-	if (irq_count & 0x1)
-		lamp_rtt ();
-	else
-		switch_rtt ();
 #ifdef MACHINE_1MS_RTTS
 	MACHINE_1MS_RTTS
 #endif
+}
 
-	if ((irq_count & 7) == 0)
-	{
-		/* Execute rtts every 8ms */
-		sol_rtt ();
+static inline void do_irq_1ms_end (void)
+{
+	/** Again, for profiling, we mark the end of an IRQ
+	 * by writing these markers. */
+#ifdef IRQPROFILE
+	wpc_debug_write (0xDD);
+	wpc_debug_write (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
+#endif
+}
+
+static inline void do_irq_2ms_a (void)
+{
+	lamp_rtt ();
+	/* Update flippers */
+	flipper_rtt ();
+}
+
+static inline void do_irq_2ms_b (void)
+{
+	switch_rtt ();
+}
+
+static inline void do_irq_8ms (void)
+{
+	/* Execute rtts every 8ms */
+	sol_rtt ();
 #if 0
-		ac_rtt ();
+	ac_rtt ();
 #endif
-		triac_rtt ();
-		flasher_rtt ();
+	triac_rtt ();
+	flasher_rtt ();
 #ifdef MACHINE_8MS_RTTS
-		MACHINE_8MS_RTTS
+	MACHINE_8MS_RTTS
 #endif
 
-		if ((irq_count & 31) == 0)
+	/* Increment total number of IRQ loops */
+	irq_loop_count++;
+
+	/* Every other 8ms (i.e. every 16ms), bump the tick count */
+	if ((irq_loop_count & 1) == 0)
+	{
+		tick_count++;
+
+		/* Every 4 loops, run the 32ms rtts */
+		if ((irq_loop_count & 3) == 0)
 		{
-			/* Execute rtts every 32ms */
 			wpc_led_toggle ();
 			sound_rtt ();
 			lamp_flash_rtt ();
@@ -429,9 +454,9 @@ void do_irq (void)
 			MACHINE_32MS_RTTS
 #endif
 
-			if ((irq_count & 127) == 0)
+			/* Every 16 loops, execute the 128ms rtts */
+			if ((irq_loop_count & 15) == 0)
 			{
-				/* Execute rtts every 128ms.  Broken on the simulator. */
 #ifndef CONFIG_PLATFORM_LINUX
 				lockup_check_rtt ();
 #endif
@@ -442,15 +467,109 @@ void do_irq (void)
 			}
 		}
 	}
-
-	/** Again, for profiling, we mark the end of an IRQ
-	 * by writing these markers. */
-#ifdef IRQPROFILE
-	wpc_debug_write (0xDD);
-	wpc_debug_write (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
-#endif
 }
 
+__interrupt__ void do_irq0 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_a ();
+	irq_function = do_irq1;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq1 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_b ();
+	irq_function = do_irq2;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq2 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_a ();
+	irq_function = do_irq3;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq3 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_b ();
+	irq_function = do_irq4;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq4 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_a ();
+	irq_function = do_irq5;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq5 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_b ();
+	irq_function = do_irq6;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq6 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_a ();
+	irq_function = do_irq7;
+	do_irq_1ms_end ();
+}
+
+__interrupt__ void do_irq7 (void)
+{
+	do_irq_1ms ();
+	do_irq_2ms_b ();
+	do_irq_8ms ();
+	irq_function = do_irq0;
+	do_irq_1ms_end ();
+}
+
+void do_irq (void)
+{
+	(*irq_function) ();
+}
+
+
+#if 0
+/**
+ * do_irq is the entry point from the IRQ vector.  Due to the
+ * way the hardware works, the CPU will stop whatever it is doing
+ * and jump to this location every 976 microseconds (1024 times
+ * per second).  This function is used for time-critical operations
+ * which won't necessarily get scheduled accurately from the
+ * nonpreemptive tasks.
+ *
+ * You MUST keep processing in this function to the absolute
+ * minimum, as it must be fast!
+ */
+__interrupt__
+void do_irq_legacy (void)
+{
+	do_irq_1ms ();
+
+	if (irq_count & 1)
+		do_irq_2ms_a ();
+	else
+		do_irq_2ms_b ();
+
+	if ((irq_count & 7) == 0)
+	{
+		do_irq_8ms ();
+	}
+
+	do_irq_1ms_end ();
+}
+#endif
 
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
@@ -461,7 +580,8 @@ void do_irq (void)
  * can be determined by reading the peripheral timer register.
  *
  * The peripheral timer is currently unused.  Real WPC games only used
- * it on the alphanumeric machines, supposedly.
+ * it on the alphanumeric machines, supposedly.  PinMAME doesn't handle
+ * it correctly, so the check is kept.
  */
 __interrupt__
 void do_firq (void)
@@ -470,14 +590,12 @@ void do_firq (void)
 	asm __volatile__ ("pshs\tb,x");
 #endif
 
-#ifdef CONFIG_WPC_PERIPHERAL_TIMER
 	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
 		/* Timer interrupt */
 		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
 	}
 	else
-#endif /* CONFIG_WPC_PERIPHERAL_TIMER */
 	{
 		/* DMD interrupt */
 		dmd_rtt ();

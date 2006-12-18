@@ -135,6 +135,10 @@ U8 sound_board_read (U8 retries)
 
 void sound_rtt (void)
 {
+	/* PinMAME is generating FIRQs continuously if we don't read
+	 * this register occasionally. */
+	(void) wpc_asic_read (WPCS_CONTROL_STATUS);
+
 	if (!sound_queue_empty ())
 	{
 		wpc_asic_write (WPCS_DATA, sound_queue_remove ());
