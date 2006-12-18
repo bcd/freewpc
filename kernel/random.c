@@ -30,8 +30,6 @@
  * Xn+1 = (A(Xn) + C) mod M, where A=33, C=1, and M=255.  This is
  * fairly easy to do with shifts and adds.
  * 2. a timing component, based on the number of IRQs asserted
- * 3. a secondary timing component, skewed to #2, based on the number
- * of FIRQs asserted.  IRQ is regular but FIRQ is not.
  */
 
 
@@ -47,14 +45,12 @@ U8
 random (void)
 {
 	register U8 r;
-	extern U8 dmd_page_flip_count;
 
 	r = random_cong_seed << 5;
 	r += random_cong_seed;
 	r++;
 	random_cong_seed = r;
 	r ^= irq_count;
-	r ^= dmd_page_flip_count;
 	return r;
 }
 
