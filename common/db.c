@@ -31,6 +31,9 @@
  * Define DEBUGGER if you want to compile in debugger support.
  * Without it, the program will run slightly faster, and be
  * considerably smaller.
+ *
+ * Also, you can now define CONFIG_PARALLEL_DEBUG if you want the
+ * debug output to go out the parallel port instead.
  */
 #include <freewpc.h>
 #ifdef __m6809__
@@ -41,6 +44,7 @@
  * detected */
 U8 db_attached;
 
+U8 db_paused;
 
 #ifdef DEBUGGER
 
@@ -50,7 +54,7 @@ void db_puts (const char *s)
 	{
 		while (*s)
 		{
-#if 1
+#ifdef CONFIG_PARALLEL_DEBUG
 			wpc_parport_write (*s++);
 #else
 			wpc_debug_write (*s++);
@@ -127,6 +131,17 @@ CALLSET_ENTRY (db, idle)
 					break;
 				}
 #endif
+
+				case 'p':
+				{
+					db_paused = 1 - db_paused;
+					while (db_paused == 1)
+					{
+						task_dispatching_ok = TRUE;
+						db_idle ();
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -138,11 +153,12 @@ void db_init (void)
 #ifdef CONFIG_PLATFORM_LINUX
 	db_attached = 1;
 #else
-#if 1
+#ifdef CONFIG_PARALLEL_DEBUG
 	db_attached = 1;
 #else
 	db_attached = 0;
 #endif
 #endif
+	db_paused = 0;
 }
 

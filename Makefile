@@ -182,7 +182,6 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/audit.o \
 	kernel/coin.o \
 	kernel/csum.o \
-	kernel/db.o \
 	kernel/deff.o \
 	kernel/device.o \
 	kernel/dmd.o \
@@ -198,21 +197,22 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/printf.o \
 	kernel/reset.o \
 	kernel/score.o \
-	kernel/service.o \
 	kernel/sol.o \
 	kernel/sound.o \
 	kernel/switches.o \
 	kernel/timer.o \
 	kernel/triac.o \
-	kernel/trough.o \
 	kernel/tilt.o
 
 COMMON_BASIC_OBJS = \
 	common/audio.o \
+	common/db.o \
 	common/event-audit.o \
 	common/initials.o \
 	common/match.o \
 	common/rtc.o \
+	common/service.o \
+	common/trough.o \
 
 COMMON_OBJS = $(COMMON_BASIC_OBJS) \
 	common/buyin.o \
