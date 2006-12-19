@@ -31,7 +31,7 @@ typedef struct {
 } flasher_pulse_t;
 
 
-flasher_pulse_t flashers_active[MAX_ACTIVE_FLASHERS];
+__fastram__ flasher_pulse_t flashers_active[MAX_ACTIVE_FLASHERS];
 
 
 void flasher_pulse (solnum_t n)
