@@ -33,6 +33,8 @@ __fastram__ U8 irq_loop_count;
 /** The number of task ticks executed.  A tick equals 16 IRQs. */
 __fastram__ U8 tick_count;
 
+__fastram__ U8 firq_count;
+
 __nvram__ volatile U8 nvram_test_byte;
 
 __fastram__ void (*irq_function) (void);
@@ -599,6 +601,7 @@ void do_firq (void)
 	{
 		/* DMD interrupt */
 		dmd_rtt ();
+		firq_count++;
 	}
 
 #ifdef __m6809__

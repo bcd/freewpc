@@ -44,14 +44,14 @@ U8 random_cong_seed;
 U8
 random (void)
 {
-	extern U8 tick_count;
 	register U8 r;
+	extern U8 firq_count;
 
 	r = random_cong_seed << 5;
 	r += random_cong_seed;
 	r++;
 	random_cong_seed = r;
-	r ^= tick_count;
+	r ^= firq_count;
 	return r;
 }
 
