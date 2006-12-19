@@ -32,10 +32,10 @@
 bool flippers_enabled;
 
 /** Cache of the last values read from the flipper input switches */
-U8 flipper_inputs;
+__fastram__ U8 flipper_inputs;
 
 /** Cache of the next/last value to be written to the flipper outputs */
-U8 flipper_outputs;
+__fastram__ U8 flipper_outputs;
 
 
 CALLSET_ENTRY (flip, sw_l_l_flipper_button)
