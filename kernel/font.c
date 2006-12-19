@@ -190,19 +190,21 @@ static void fontargs_render_string (void)
 
 		xb = blit_xpos / 8;
 
+		blit_dmd = wpc_dmd_addr_verify (dmd_base + xb);
 		for (i=0; i < font_height; i++)
 		{
 			task_dispatching_ok = TRUE;
 			for (j=0; j < font_byte_width; j++)
 			{
-				blit_dmd = wpc_dmd_addr_verify (dmd_base 
-					+ xb + i * DMD_BYTE_WIDTH + j);
-
 				/* TODO : font_blit is applicable to more than just
 				fonts; it could be used for arbitrary-sized bitmaps. */
 				font_blit ();
+				blit_dmd = wpc_dmd_addr_verify (blit_dmd + 1);
 
 			} /* end for each byte in same row */
+
+			blit_dmd = wpc_dmd_addr_verify (blit_dmd - font_byte_width);
+			blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 		} /* end for each row */
 
 		/* advance by 1 char ... args->font->width */
