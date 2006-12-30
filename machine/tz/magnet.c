@@ -34,15 +34,16 @@
 #define MAG_RIGHT 2
 
 
-enum magnet_state {
+__fastram__ enum magnet_state {
 	MAG_DISABLED,
 	MAG_ENABLED,
 	MAG_ON_POWER,
 	MAG_ON_HOLD,
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
-U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
-
+__fastram__ U8 left_magnet_timer, 
+					upper_right_magnet_timer, 
+					lower_right_magnet_timer;
 
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
