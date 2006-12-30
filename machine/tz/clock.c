@@ -67,14 +67,11 @@ __fastram__ U8 clock_calibration_ticks;
 
 void tz_dump_clock (void)
 {
-	dbprintf ("%02x ", clock_sw);
-#if 0
 	dbprintf ("\nClock switches now active: %02x\n", clock_sw);
 	dbprintf ("Seen active: %02x\n", clock_sw_seen_active);
 	dbprintf ("Seen inactive: %02x\n", clock_sw_seen_inactive);
 	dbprintf ("State machine: %02x\n", clock_mode);
 	dbprintf ("Target switches: %02x\n", clock_find_target);
-#endif
 }
 
 
