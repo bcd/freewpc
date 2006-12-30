@@ -388,6 +388,11 @@ void task_clear_flags (U8 flags)
 }
 
 
+/**
+ * Get/set the task argument word.
+ * TODO : why not just set the B/X register directly here and then
+ * the task can take the arg as a normal function argument?
+ */
 U16 task_get_arg (void)
 {
 	return task_current->arg;
