@@ -63,24 +63,6 @@ void db_puts (const char *s)
 	}
 }
 
-/* This hasn't been touched in a year. */
-#if 0
-void db_dump_switches (void)
-{
-	U8 row, col;
-
-	for (row=1; row <= 8; row++)
-	{
-		for (col=1; col <= 8; col++)
-		{
-			U8 level = switch_poll_logical (MAKE_SW(col,row));
-			db_putc (level ? '+' : '-');
-		}
-		db_putc ('\n');
-	}
-}
-#endif
-
 #endif /* DEBUGGER */
 
 
@@ -106,6 +88,12 @@ CALLSET_ENTRY (db, idle)
 				{
 					extern void task_dump (void);
 					task_dump ();
+					break;
+				}
+
+				case 'm':
+				{
+					slow_timer_dump ();
 					break;
 				}
 

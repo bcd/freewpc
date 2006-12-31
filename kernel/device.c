@@ -68,6 +68,11 @@ U8 missing_balls;
  * the table.  This includes balls in the plunger lane. */
 U8 live_balls;
 
+/** The number of balls that are held in a container, other than the trough,
+ * excluding locked balls.  These are balls "in transition" which are
+ * pending kickout. */
+U8 held_balls;
+
 /** The number of kickout locks currently held.
  * Normally this is zero, and kickouts occur as soon as possible.
  * When nonzero, kickouts are delayed, e.g. to allow an effect to
@@ -93,8 +98,8 @@ void device_debug (void)
 			(dev->state == DEV_STATE_IDLE) ? "IDLE" : "RELEASING");
 	}
 
-	dbprintf ("Counted %d Missing %d Live %d\n", 
-		counted_balls, missing_balls, live_balls);
+	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
+		counted_balls, missing_balls, live_balls, held_balls);
 }
 #else
 #define device_debug()
@@ -396,10 +401,11 @@ void device_request_empty (device_t *dev)
 void device_update_globals (void)
 {
 	devicenum_t devno;
-	U8 held_balls = 0;
+	U8 held_balls_now = 0;
 
-	/* Recount the number of balls that are held */
+	/* Recount the number of balls that are held, excluding those that are locked. */
 	counted_balls = 0;
+	held_balls_now = 0;
 	for (devno = 0; devno < device_count; devno++)
 	{
 		device_t *dev = device_entry (devno);
@@ -407,10 +413,11 @@ void device_update_globals (void)
 
 #ifdef DEVNO_TROUGH
 		if (devno != DEVNO_TROUGH)
-			if (dev->actual_count >= dev->max_count)
-				held_balls += dev->actual_count - dev->max_count;
 #endif
+			if (dev->actual_count >= dev->max_count)
+				held_balls_now += dev->actual_count - dev->max_count;
 	}
+	held_balls = held_balls_now;
 
 	/* Count how many balls are missing */
 	missing_balls = max_balls - counted_balls;
@@ -441,6 +448,13 @@ void device_update_globals (void)
 		timed_game_resume ();
 #endif
 	}
+}
+
+
+/** Returns the number of balls held up temporarily. */
+U8 device_holdup_count (void)
+{
+	return held_balls + timer_find_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
 }
 
 
@@ -509,6 +523,7 @@ void device_sw_handler (uint8_t devno)
 		return;
 	}
 
+	timer_kill_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
 	task_create_gid (DEVICE_GID (devno), device_update);
 }
 
@@ -688,6 +703,7 @@ void device_init (void)
 	missing_balls = 0;
 	live_balls = 0;
 	kickout_locks = 0;
+	held_balls = 0;
 
 	device_count = 0;
 	for (i=0; i < NUM_DEVICES; i++)

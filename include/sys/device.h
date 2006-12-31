@@ -228,6 +228,7 @@ void device_multiball_set (U8 count);
 bool device_check_start_ok (void);
 void device_unlock_ball (device_t *dev);
 void device_lock_ball (device_t *dev);
+U8 device_holdup_count (void);
 
 #define kickout_lock(by)	do { kickout_locks |= (by); } while (0)
 #define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)

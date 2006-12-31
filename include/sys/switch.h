@@ -119,6 +119,12 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 #define switch_can_follow(first,second,timeout) \
 	timer_restart_free (GID_ ## second ## _FOLLOWED_BY_ ## first, timeout)
 
+#define device_switch_can_follow(first, second, timeout) \
+	do { \
+		switch_can_follow (first, second, timeout); \
+		timer_restart_free (GID_DEVICE_SWITCH_WILL_FOLLOW, timeout); \
+	} while (0)
+
 /** Indicate that the second switch did indeed follow.
  * If this returns TRUE, it means it happened within the timeout after the
  * first switch closure. */

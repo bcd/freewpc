@@ -212,6 +212,7 @@ COMMON_BASIC_OBJS = \
 	common/match.o \
 	common/rtc.o \
 	common/service.o \
+	common/slowtimer.o \
 	common/trough.o \
 
 COMMON_OBJS = $(COMMON_BASIC_OBJS) \
