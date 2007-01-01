@@ -18,8 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
-
 /**
  * \file
  * \brief Manages the dot matrix controller (DMD)
@@ -63,7 +61,8 @@
  * overflow.
  */
 
-#if (MACHINE_DMD == 1)
+#include <freewpc.h>
+
 
 /** Points to the next free page that can be allocated */
 dmd_pagenum_t dmd_free_page;
@@ -119,12 +118,13 @@ U8 *dmd_trans_data_ptr2;
  */
 U8 dmd_composite_page;
 
+/* Forward declarations of the 3 phases of the DMD FIRQ functions */
 void dmd_rtt0 (void);
 void dmd_rtt1 (void);
 void dmd_rtt2 (void);
 
 
-/**
+/*
  * The DMD controller has two registers for controlling which pages
  * are mapped into addressable memory.  
  *
@@ -176,8 +176,10 @@ void dmd_init (void)
  * the display.  This function is invoked from the FIRQ handler.
  *
  * We support 4-color images through rapid page flipping.  One page
- * is shown 2/3 of the time; the other 1/3 of the time.  Here, we
- * flip between the pages.
+ * is shown 2/3 of the time; the other 1/3 of the time.  There are
+ * 3 distinct phases; each is implemented by a separate function
+ * to minimize control flow instructions.  The pointer 'dmd_rtt'
+ * points to the next phase to be invoked.
  *
  * If a mono image needs to be drawn, then the bright/dark pages
  * contain the same value, and the flipping effectively doesn't
@@ -236,6 +238,8 @@ void dmd_alloc_low (void)
 	wpc_dmd_set_high_page (wpc_dmd_get_low_page ());	
 }
 
+
+/** Allocate and map a single page, into the 'high' region. */
 void dmd_alloc_high (void)
 {
 	wpc_dmd_set_high_page (dmd_alloc ());	
@@ -273,6 +277,8 @@ void dmd_show_high (void)
 		dmd_dark_page = dmd_bright_page = dmd_high_page;
 }
 
+
+/** Flip the mapping between low and high pages. */
 void dmd_flip_low_high (void)
 {
 	/* Note: tmp is made volatile here, to ensure that
@@ -286,7 +292,7 @@ void dmd_flip_low_high (void)
 	wpc_dmd_set_high_page (tmp);
 }
 
-
+/** Flip the currently visible page, alternating between the two currently mapped */
 void dmd_show_other (void)
 {
 	if (dmd_dark_page == dmd_low_page)
@@ -329,6 +335,8 @@ void dmd_clean_page_high (void)
 }
 
 
+/** Invert all pixels in a given page.  This function is unrolled by hand for
+ * better performance. */
 void dmd_invert_page (dmd_buffer_t dbuf)
 {
 	register int16_t count = DMD_PAGE_SIZE / (2 * 4);
@@ -363,12 +371,15 @@ void dmd_alloc_low_clean (void)
 	dmd_clean_page (dmd_low_buffer);
 }
 
+
 void dmd_alloc_high_clean (void)
 {
 	dmd_alloc_high ();
 	dmd_clean_page (dmd_high_buffer);
 }
 
+
+/** Draw a thin border around the given display page */
 void dmd_draw_border (U8 *dbuf)
 {
 	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
@@ -655,6 +666,4 @@ void dmd_reset_transition (void)
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
 }
-
-#endif /* MACHINE_DMD */
 
