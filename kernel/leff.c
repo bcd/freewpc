@@ -29,23 +29,28 @@
  * independently, but identically to the display effect module.
  * See deff.c for details.
  *
- * TODO : multiple lamp effects should be allowed to run concurrently,
- * as long as they do not use the same lamps.  There are really two
- * different kinds of lamp effects: temporary "light shows" and
+ * Multiple lamp effects are allowed to run concurrently.
+ * (TODO : as long as they do not use the same lamps!.)   There are 
+ * really two different kinds of lamp effects: temporary "light shows" and
  * long-running effects.  Light shows can be skipped if possible,
  * but other effects indicate critical information to the player;
  * e.g. ballsaver is active, jets at max, etc.  The latter usually
  * do not overlap.  The strategy should be to treat these separately.
  * Temporary light shows act more like display effects and can only
  * be one at a time.  Other lamp effects "share" one of the leff
- * matrices, and can run concurrently.  The caller is expected not
- * to start multiple of these which overlap (of course this can be
- * verified).
+ * matrices, and can run concurrently.
  */
 
+/** Indicates in a leff definition that it does not allocate any lamps */
 #define L_NOLAMPS		0x0
+
+/** Indicates in a leff definition that it allocates all lamps */
 #define L_ALL_LAMPS	0xFF
+
+/** Indicates in a leff definition that it does not allocate any GI */
 #define L_NOGI			0
+
+/** Indicates in a leff definition that it allocates all GI */
 #define L_ALL_GI		0x1F
 
 /* Declare externs for all of the deff functions */
@@ -178,7 +183,7 @@ static leffnum_t leff_get_highest_priority (void)
 }
 
 
-/* Start the lamp effect function, but do a little
+/** Start the lamp effect function, but do a little
  * housekeeping before starting the task...
  *
  * If the leff has declared a lampset, then those lamps
