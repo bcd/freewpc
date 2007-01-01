@@ -32,6 +32,9 @@ U8 door_active_lamp;
 U8 door_start_with_bttz;
 
 
+/* For testing -- only enables GREED mode */
+#define GREED_ONLY
+
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
@@ -233,7 +236,9 @@ void litz_award_deff (void)
 
 void door_award_enable (void)
 {
+#ifndef GREED_ONLY
 	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
+#endif
 }
 
 
@@ -251,7 +256,9 @@ static void door_award_flashing (void)
 	task_sleep (TIME_100MS);
 	door_advance_flashing ();
 	score (SC_50K);
+#ifndef GREED_ONLY
 	door_award_enable ();
+#endif
 	callset_invoke (door_panel_awarded);
 }
 
@@ -343,7 +350,11 @@ CALLSET_ENTRY (door, shot_slot_machine)
 
 CALLSET_ENTRY(door, start_player)
 {
+#ifdef GREED_ONLY
+	door_index = 7;
+#else
 	door_index = 0;
+#endif
 	door_panels_started = 0;
 	flag_on (FLAG_PIANO_DOOR_LIT);
 	flag_on (FLAG_SLOT_DOOR_LIT);

@@ -128,7 +128,7 @@ CALLSET_ENTRY (camera, sw_camera)
 			sound_send (SND_JET_BUMPER_ADDED);
 		}
 	}
-	switch_can_follow (camera, slot, TIME_5S);
+	device_switch_can_follow (camera, slot, TIME_5S);
 }
 
 

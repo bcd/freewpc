@@ -5,6 +5,13 @@
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
 
+# This file describes many characteristics of a pinball machine,
+# mostly physical stuff, although some rules can be coded here also.
+
+##########################################################################
+# General section (before a [section] header is given.
+# Miscellaneous parameters are specified here.
+##########################################################################
 Title: Twilight Zone
 DMD: Yes
 Fliptronic: Yes
@@ -15,8 +22,16 @@ Pinmame-ROM: tzone9_2.rom
 Lamp-Matrix-Width: 39
 Lamp-Matrix-Height: 29
 
+##########################################################################
+# Include standard definitions that apply to all WPC games.
+# This will set some defaults for things you leave out here.
+##########################################################################
 include kernel/freewpc.md
 
+##########################################################################
+# Use 'define' to emit a plain #define for anything not covered by
+# some other means.
+##########################################################################
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
@@ -25,6 +40,14 @@ define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS 10
 
+##########################################################################
+# Lamp Description
+# The key is given in column/row format.  The first parameter must be
+# the lamp name.  Optionally you can specify a color, and x() and y()
+# for the location on the playfield.  Only a subset of lamp colors are
+# recognized; see tools/genmachine for details.  Lamp location is
+# given in terms of the Lamp-Matrix-Width and Lamp-Matrix-Height.
+##########################################################################
 [lamps]
 11: Panel Camera, amber ,x(28), y(13)
 12: Panel H.H., amber ,x(28), y(10)
@@ -91,7 +114,27 @@ define MACHINE_SCORE_DIGITS 10
 87: Buy-In Button, yellow, buyin, cabinet, x(38), y(27)
 88: Start Button, yellow, start, cabinet, x(38), y( 1)
 
-# Mark playfield flags! (or opposite?!)
+##########################################################################
+# Switch Description
+# The key is in column/row format.  The first parameter must be the switch
+# name.  Options can be given in any order:
+#    ingame - only service the switch during a game
+#    intest - also service the switch in test mode
+#    noplay - tripping this switch does NOT mark ball in play
+#    standup - this is a standup
+#    button - this is a button
+#    edge - this switch should be serviced on either transition
+#    opto - this switch is optical and activates on closed->open
+#
+# These parameters mark various well-known switches.  Only one of these
+# can exist per type:
+#    outhole, slam-tilt, tilt, shooter, start-button, buyin-button
+#
+# Use sound() to invoke a sound call automatically when the switch activates.
+# Use lamp() to flicker a lamp automatically on activation.
+# Use c_decl() to override the default name of the switch event.
+#
+##########################################################################
 [switches]
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
@@ -160,6 +203,23 @@ F6: U. R. Flipper Button, button, opto
 F7: U. L. Flipper EOS, opto, cabinet
 F8: U. L. Flipper Button, button, opto
 
+##########################################################################
+# Drives
+# This describes the names of the solenoid/motor drives.
+# Hn = high power solenoids
+# Ln = low power solenoids
+# Gn = general purpose solenoids
+# etc.
+#
+# The following options are supported:
+#    flash - this is a flasher (default is solenoid)
+#    motor - this is a motor (default is solenoid)
+#    nosearch - do not activate this during ball search
+#
+# The following options denote well-known drives:
+#    knocker, ballserve
+#
+##########################################################################
 [drives]
 H1: Slot
 H2: Rocket Kicker
@@ -201,6 +261,10 @@ X5: Ramp2, flash
 X6: Clock Reverse, motor, nosearch
 X7: Clock Forward, motor, nosearch
 
+
+##########################################################################
+# General Illumination
+##########################################################################
 [gi]
 0: Lower Left Playfield
 1: Powerfield
@@ -208,6 +272,14 @@ X7: Clock Forward, motor, nosearch
 3: Mystery
 4: Lower Right Playfield
 
+##########################################################################
+# Drivers
+# These are functions that need to be called periodically to service
+# the hardware real-time.  The key determines the name of the service
+# routine (e.g. slingshot_rtt for the slingshots).  The poll() option
+# denotes how often they need to be called, in milliseconds.
+# Supported values are 1, 8, 32, and 128.
+##########################################################################
 [drivers]
 slingshot: poll(8)
 jets: poll(8)
@@ -215,13 +287,33 @@ magnet_switch: poll(8)
 tz_clock: poll(32)
 magnet_duty: poll(32)
 
+##########################################################################
+# Tests
+# These are additional test items that should appear in the TESTS menu.
+##########################################################################
 [tests]
 tz_clock:
 tz_gumball:
 tz_magnet:
 
-#############################################################
 
+##########################################################################
+# Lampsets
+# These denote logical groupings of lamps.
+# The key is a textual name for the set.  The options specify which lamps
+# are a part of that set.  You can specify 1 or more lamp values,
+# separated by commas, where each value can be: 1) a single lamp name,
+# 2) another lampset name, already defined, or 3) a lamp range in the
+# form lamp1..lampN.
+#
+# The special construct PF:function indicates that a Perl subroutine
+# should be used to select and sort the lamps.  Some functions are
+# builtin to genmachine; others can be defined by you and included
+# via the 'perlinclude' directive.
+#
+# Note that a lampset may contain only one lamp.  The lampset is the
+# unit of 'allocation' for a lamp effect.
+##########################################################################
 [lampsets]
 Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
 Door Panels and Handle: Door Panels, Panel LITZ
@@ -248,6 +340,17 @@ Circle Out: PF:lamp_sort_circle_out
 Lock Test: PF:build_lampset_from_lock
 Ball Save: Shoot Again
 
+
+##########################################################################
+# Containers
+# These denote devices that can hold, count, and eject pinballs.
+# The key is the name of the device.  The first parameter is the name
+# of the solenoid that kicks out a ball.  The 'trough' parameter should
+# be specified on the single trough device.  The 'init_max_count'
+# parameter should say how many balls are normally held in this device
+# at startup.  The remaining parameters are the names of the switches
+# that count pinball, in front from entry to exit.
+##########################################################################
 [containers]
 Trough: Ball Serve, trough, init_max_count(3), \
 	Left Trough, Center Trough, Right Trough
@@ -269,8 +372,15 @@ Left Loop Aborted:
 Right Loop Complete:
 Right Loop Aborted:
 
-#############################################################
+#------------------------------------------------------------------------
+# The remaining sections describe software aspects, and not the physical
+# machine.
+#------------------------------------------------------------------------
 
+##########################################################################
+# Items for the Feature Adjustments menu.  Parameters indicate the
+# type of adjustment and the default value.
+##########################################################################
 [adjustments]
 Ball Saves: integer, 1
 Ball Save Time: integer, 7
@@ -280,12 +390,18 @@ Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
 
+##########################################################################
+# Items for the Feature Audits menu.
+##########################################################################
 [audits]
 3 Panels:
 6 Panels:
 9 Panels:
 12 Panels:
 
+##########################################################################
+# Sound calls for well-known events
+##########################################################################
 [system_sounds]
 Add Coin: SND_LIGHT_SLOT_TIMED
 Add Credit: SND_THUD
@@ -293,12 +409,18 @@ Start Game: SND_ARE_YOU_READY_TO_BATTLE
 Tilt Warning: SND_TILT_WARNING
 Tilt: SND_TILT
 
+##########################################################################
+# Music calls for well-known events
+##########################################################################
 [system_music]
 Start Ball: MUS_MULTIBALL_LIT_PLUNGER
 Ball in Play: MUS_MULTIBALL_LIT
 End Game: MUS_POWERBALL_MANIA
 Volume Change: MUS_SUPER_SLOT
 
+##########################################################################
+# A list of all scores needed by the game rules.
+##########################################################################
 [scores]
 10:
 100:
@@ -331,6 +453,12 @@ Volume Change: MUS_SUPER_SLOT
 40M:
 50M:
 
+##########################################################################
+# The default high scores.  Use GC to indicate the grand champion.
+# The parameters are the initials followed by the score value.  Periods
+# may optionally be used to group digits, but they are not necessary.
+# Commas _cannot_ be used for this purpose since they separate parameters.
+##########################################################################
 [highscores]
 GC: QQQ, 500.000.000
 1: CCD, 400.000.000
@@ -339,6 +467,9 @@ GC: QQQ, 500.000.000
 4: NWU, 250.000.000
 
 
+##########################################################################
+# Bit flags.
+##########################################################################
 [flags]
 Piano Door Lit:
 Slot Door Lit:
@@ -355,6 +486,9 @@ STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
 
+##########################################################################
+# Display effects
+##########################################################################
 [deffs]
 Amode: runner, PRI_AMODE
 Bonus: runner, PRI_BONUS
@@ -364,6 +498,7 @@ JACKPOT: PRI_JACKPOT
 SPECIAL: PRI_SPECIAL
 Extra Ball: PRI_EB
 
+Greed Round: runner, PRI_GAME_MODE1+2
 Skill Shot Ready: runner, PRI_GAME_MODE1+4
 MB Running: runner, PRI_GAME_MODE1+8
 
@@ -379,6 +514,9 @@ PB Detect: PRI_GAME_QUICK1+10
 Skill Shot Made: PRI_GAME_QUICK1+11
 LITZ Award: PRI_GAME_QUICK1+15
 
+##########################################################################
+# Lamp effects
+##########################################################################
 [leffs]
 perlinclude machine/tz/leff.pl
 FLASHER HAPPY: PRI_LEFF1
@@ -401,6 +539,9 @@ Left Loop: PRI_LEFF1, LAMPS(SORT3)
 Right Loop: PRI_LEFF1, LAMPS(SORT4)
 Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 
+##########################################################################
+# Fonts used in this game.
+##########################################################################
 [fonts]
 mono5:
 mono9:

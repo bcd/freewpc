@@ -41,6 +41,42 @@ U8 greed_sounds[] = {
 };
 
 
+extern void callset_door_stop_greed (void);
+static const slow_timer_config_t greed_round_timer = {
+	.duration = 20,
+	.grace = 2,
+	.expire_func = callset_door_stop_greed,
+	.flags = SLOW_TIMER_KILL_END_BALL,
+};
+
+
+void greed_round_deff (void)
+{
+	slow_timer_t *timer = slow_timer_find (&greed_round_timer);
+	if (timer == NULL)
+	{
+		dbprintf ("can't find timer!!!\n");
+		deff_exit ();
+	}
+
+	dbprintf ("greed round deff running, timer=%p\n", timer);
+	while (timer->flags & SLOW_TIMER_RUNNING)
+	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed6, 64, 8, "GREED");
+		sprintf_current_score ();
+		font_render_string_center (&font_fixed6, 64, 20, sprintf_buffer);
+		sprintf ("%d", slow_timer_get_count (timer));
+		font_render_string (&font_var5, 2, 2, sprintf_buffer);
+		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep (TIME_200MS);
+	}
+	dbprintf ("greed round deff exiting\n");
+	deff_exit ();
+}
+
+
 void standup_lamp_update1 (U8 mask, U8 lamp)
 {
 	if (lamp_test (LM_PANEL_GREED))
@@ -115,12 +151,16 @@ CALLSET_ENTRY (greed, door_start_greed)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
+
+	slow_timer_create (&greed_round_timer);
+	deff_start (DEFF_GREED_ROUND);
 }
 
 CALLSET_ENTRY (greed, door_stop_greed)
 {
 	greed_set = NO_TARGETS;
 	standup_lamp_update ();
+	deff_stop (DEFF_GREED_ROUND);
 }
 
 CALLSET_ENTRY (greed, start_player)

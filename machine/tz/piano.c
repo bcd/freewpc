@@ -23,5 +23,5 @@
 
 CALLSET_ENTRY (piano, sw_piano)
 {
-	switch_can_follow (piano, slot, TIME_4S);
+	device_switch_can_follow (piano, slot, TIME_4S);
 }
