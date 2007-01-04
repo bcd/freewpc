@@ -43,6 +43,7 @@ static __nvram__ U8 year;
 static __nvram__ U8 month;
 static __nvram__ U8 day;
 static __nvram__ U8 hour;
+/* TODO - day of week is not currently calculated */
 
 /** Checksum descriptor for the RTC info */
 static __nvram__ U8 rtc_csum;
@@ -86,7 +87,9 @@ void rtc_factory_reset (void)
 }
 
 
-/** Returns the number of days in the current month. */
+/** Returns the number of days in the current month.
+ * This handles leap years in February correctly until 2100,
+ * which is not be a leap year but will be detected as such. */
 static U8 rtc_days_in_current_month (void)
 {
 	U8 days = days_in_month_table[month-1];
@@ -97,7 +100,7 @@ static U8 rtc_days_in_current_month (void)
 }
 
 
-/** Normalizes the current date */
+/** Normalizes the current date and time. */
 static void rtc_normalize (void)
 {
 	wpc_nvram_get ();
@@ -116,14 +119,20 @@ static void rtc_normalize (void)
 			{
 				month = 1;
 				year++;
+				/* FreeWPC stores the year in nvram as the offset from
+				the year 2000; therefore, this won't overflow until
+				the year 2256. */
 			}
 		}
 	}
 
+	/* Perform sanity checks, just in case. */
 	if ((month < 1) || (month > 12))
 		month = 1;
 	if ((day < 1) || (day > 31))
 		day = 1;
+
+	/* Update checksums and save */
 	csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
 }
@@ -140,6 +149,10 @@ static void rtc_hw_read (void)
 }
 
 
+/** Re-read pinmame's simulated time values.  This contains the
+ * year, month, and day as determined from the simulator's
+ * operating system.  On real hardware, this value would need
+ * to be configured in the utilities menu. */
 static void rtc_pinmame_read (void)
 {
 #ifdef CONFIG_PINMAME
@@ -161,20 +174,24 @@ static void rtc_pinmame_read (void)
 
 CALLSET_ENTRY (rtc, idle)
 {
+	/* Re-read the timer hardware registers and normalize the values. */
 	rtc_hw_read ();
 	rtc_normalize ();
 
+	/* Did the minute value change? */
 	if (minute != last_minute)
 	{
 		rtc_pinmame_read ();
 		/* Note: the assumption here is that the idle task will
 		 * always get called at least once per minute. */
 		audit_increment (&system_audits.minutes_on);
+		callset_invoke (minute_elapsed);
 	}
 	last_minute = minute;
 }
 
 
+/** Render the current date to the printf buffer */
 void rtc_render_date (void)
 {
 	switch (system_config.clock_style)
@@ -191,6 +208,7 @@ void rtc_render_date (void)
 }
 
 
+/** Render the current time to the printf buffer */
 void rtc_render_time (void)
 {
 	static const U8 rtc_us_hours[] = {
@@ -213,6 +231,7 @@ void rtc_render_time (void)
 }
 
 
+/** Show the current date/time on the DMD */
 void rtc_show_date_time (void)
 {
 	dmd_alloc_low_clean ();
@@ -224,10 +243,3 @@ void rtc_show_date_time (void)
 
 	dmd_show_low ();
 }
-
-
-/** Initialize the RTC */
-void rtc_init (void)
-{
-}
-
