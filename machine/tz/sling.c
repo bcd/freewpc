@@ -45,5 +45,6 @@ void slingshot_rtt (void)
 CALLSET_ENTRY (sling, sw_sling)
 {
 	score (SC_10);
+	sound_send (SND_SLINGSHOT);
 }
 
