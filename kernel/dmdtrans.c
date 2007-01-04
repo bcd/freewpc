@@ -22,8 +22,30 @@
 
 /**
  * \file
- * \brief Handle DMD transitions: gradual changes between one display
- * effect and another.
+ * \brief Handle DMD transitions: gradual changes between one display effect and another.
+ *
+ * Conceptually, there are 3 buffers involved in a transition: the
+ * "old" page that is currently visible; the "new" page that will eventually
+ * be drawn completely, and a temporary buffer to hold the intermediate
+ * frames.  At the time the transition starts, the old and new pages
+ * are already rendered; the transition's only job is to render the 
+ * intermediate frames.
+ *
+ * During each "step" of the transition, the intermediate frame is
+ * constructed as a function of both the old and new frames.  Two functions
+ * are called to do this, "old" and "new".  The high display page
+ * is always mapped to the intermediate frame page, while the low
+ * display page is mapped to the old/new page (depending on whether
+ * the old/new function is being called).
+ *
+ * Also, the transition structure can define the delay between frames.
+ * Multiple transitions can be defined with the same compositing
+ * functions but different delays.
+ *
+ * arg is a pointer/integer union that defines an additional free
+ * parameter.  If needed, the 'init' method should initialize
+ * dmd_trans_data_ptr with it; the pointer variable is kept
+ * between each step of the transition.
  *
  * There are inherently 3 classes of transitions:
  * 1. Old image remains static, new image overlays it.  For this class,
@@ -32,7 +54,8 @@
  *
  * 2. Old image moves away, revealing static new image underneath it.
  *
- * 3. Both old image and new image move during the transition.
+ * 3. Both old image and new image move during the transition (e.g.
+ one image "pushes" another one).
  */
 
 
