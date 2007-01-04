@@ -170,6 +170,7 @@ extern U8 irq_count;
 #include <inspector.h>
 #include <test.h>
 #include <diag.h>
+#include <audio.h>
 #include <slowtimer.h>
 
 /* Game-specific defines.  'mach' should point to the machine-specific 

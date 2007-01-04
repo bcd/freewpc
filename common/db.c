@@ -84,6 +84,13 @@ CALLSET_ENTRY (db, idle)
 			char c = wpc_debug_read (); 
 			switch (c)
 			{
+				case 'a':
+				{
+					extern __common__ void audio_dump (void);
+					audio_dump ();
+					break;
+				}
+
 				case 't':
 				{
 					extern void task_dump (void);

@@ -20,69 +20,187 @@
 
 #include <freewpc.h>
 
-/* Common audio routines.  This is a layer of abstraction
-above the raw kernel functions.   It works similar to the display
-effect functions. */
+/* 
+ * \brief Common audio routines.
+ * This is a layer of abstraction above the raw kernel functions.   
+ * It works similar to the display effect functions. */
 
-typedef enum {
-	CH_SOUND1=0,
-	CH_SOUND2,
-	CH_SPEECH1,
-	CH_SPEECH2,
-	MAX_AUDIO_CHANNELS,
-} audio_channel_id_t;
+/** The background track stack.
+ * Each element of this array represents a background track
+ * that has been enabled for play on the background music channel.
+ * Only the highest priority track is allowed to run at any time.
+ */
+audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
 
-#define AUDIO_REF0	DEFF_CH_SOUND1
-#define AUDIO_REF1	DEFF_CH_SOUND2
-#define AUDIO_REF2	DEFF_CH_SPEECH1
-#define AUDIO_REF3	DEFF_CH_SPEECH2
-
-
-typedef struct {
-	task_pid_t task;
-	task_ticks_t gap;
-	task_gid_t gid;
-} audio_channel_t;
+/** The audio channel control table.
+ * For each channel, there is a separate entry that describes the
+ * current state of the channel. */
+audio_channel_t audio_channel_table[NUM_AUDIO_CHANNELS];
 
 
-audio_channel_t audio_channel_table[MAX_AUDIO_CHANNELS];
-
-
-void audio_channel_config (audio_channel_id_t id,
-	task_ticks_t gap)
+/** Dump the audio data to the debugger port. */
+void audio_dump (void)
 {
+	U8 i;
+
+	/* Dump the channel table */
+	for (i=0; i < NUM_AUDIO_CHANNELS; i++)
+	{
+		dbprintf ("Ch%d : %p\n", audio_channel_table[i].pid);
+	}
+
+	/* Dump the track table */
+	for (i=0; i < NUM_STACKED_TRACKS; i++)
+	{
+		audio_track_t *track = audio_bg_track_table[i];
+		if (track)
+		{
+			dbprintf ("Track %d : %02X  %d\n", track->code, track->prio);
+		}
+	}
 }
 
 
-void audio_control_task (void)
+/**
+ * Start an audio clip.
+ * id identifies the channel that should be used.
+ * fn is the function that plays the clip.
+ * fnpage is the bank where the function resides.
+ * data is task-specific data that can be initialized.
+ */
+void audio_start (
+	U8 channel_mask, 
+	task_function_t fn, 
+	U8 fnpage,
+	U16 data)
 {
-	audio_channel_t *ch = (audio_channel_t *)task_get_arg ();
+	U8 channel_id;
+	audio_channel_t *ch;
 
-	task_sleep (ch->gap);
+	for (channel_id = 0; channel_id < NUM_AUDIO_CHANNELS; channel_id++)
+	{
+		/* Don't try to use this channel if it is not
+		specified in the channel mask. */
+		if ((channel_mask & (1 << channel_id)) == 0)
+			continue;
 
-	ch->task = 0;
+		/* Don't use this channel if the channel is
+		currently allocated.  TODO: look at priority here */
+		ch = &audio_channel_table[channel_id];
+		if (ch->pid != NULL)
+			continue;
+
+		/* OK, use this channel. */
+		ch->pid = task_create_gid (GID_AUDIO_TASK, fn);
+#ifdef __m6809__
+		ch->pid->rom_page = fnpage;
+		ch->pid->flags = TASK_PROTECTED;
+#endif
+		task_set_arg (ch->pid, data);
+		return;
+	}
+
+	/* No channel found for this data! */
+}
+
+
+/** Stop the audio on a particular channel. */
+void audio_stop (U8 channel_id)
+{
+	audio_channel_t *ch = &audio_channel_table[channel_id];
+	if (ch->pid != NULL)
+	{
+		task_kill_pid (ch->pid);
+		ch->pid = NULL;
+	}
+}
+
+
+/** Exit an audio task.  This resets the channel, too. */
+void audio_exit (void)
+{
+	U8 channel_id;
+
+	for (channel_id = 0; channel_id < NUM_AUDIO_CHANNELS; channel_id++)
+	{
+		audio_channel_t *ch = &audio_channel_table[channel_id];
+		if (ch->pid == task_current)
+		{
+			ch->pid = NULL;
+			break;
+		}
+	}
 	task_exit ();
 }
 
 
-bool audio_start (audio_channel_id_t id,
-	task_function_t fn,
-	U8 fnpage)
+static void bg_music_task (void)
 {
-	audio_channel_t *ch = &audio_channel_table[id];
-	if (ch->task == NULL)
+	U8 i;
+	audio_track_t *current = NULL;
+
+	task_set_flags (TASK_PROTECTED);
+
+	/* Determine which of the stacked tracks has the highest priority. */
+	for (i=0 ; i < NUM_STACKED_TRACKS; i++)
 	{
-		ch->task = task_create_gid (ch->gid, audio_control_task);
-		task_set_arg (ch->task, (U16)ch);
-		// *((U16 *)(&ch->task->thread_data[0])) = fn;
-		////  *((U8 *)(&ch->task->thread_data[2])) = fnpage;
+		audio_track_t *track = audio_bg_track_table[i];
+		if (track)
+		{
+			if (current == NULL)
+				current = track;
+			else if (track->prio > current->prio)
+				current = track;
+		}
 	}
-	return TRUE;
+
+	if (current == NULL)
+	{
+		music_off ();
+		audio_exit ();
+	}
+
+	/* Play the track, and reinitialize it every so often */
+	for (;;)
+	{
+		music_set (current->code);
+		task_sleep_sec (1);
+	}
 }
 
 
-void audio_init (void)
+void bg_music_start (audio_track_t *track)
+{
+	U8 i;
+
+	for (i=0; i < NUM_STACKED_TRACKS; i++)
+		if (audio_bg_track_table[i] == NULL)
+		{
+			audio_bg_track_table[i] = track;
+			audio_stop (AUDIO_CH_BACKGROUND);
+			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
+			return;
+		}
+}
+
+void bg_music_stop (audio_track_t *track)
+{
+	U8 i;
+
+	for (i=0; i < NUM_STACKED_TRACKS; i++)
+		if (audio_bg_track_table[i] == track)
+		{
+			audio_bg_track_table[i] = NULL;
+			audio_stop (AUDIO_CH_BACKGROUND);
+			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
+		}
+}
+
+
+/** Initialize the audio subsystem. */
+CALLSET_ENTRY (audio, init)
 {
 	memset (audio_channel_table, 0, sizeof (audio_channel_table));
+	memset (audio_bg_track_table, 0, sizeof (audio_bg_track_table));
 }
 
