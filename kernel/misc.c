@@ -19,6 +19,11 @@
  */
 
 
+/**
+ * \file
+ * \brief Empty functions that can be used when a trivial handler is needed.
+ */
+
 #include <freewpc.h>
 
 

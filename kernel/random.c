@@ -20,12 +20,13 @@
 
 #include <freewpc.h>
 
-/*
- * This module implements a simple random number generator.
+/**
+ * \file
+ * \brief This module implements a simple random number generator.
  * This generator does not satisfy the properties required for a really
  * good generator, but is adequate for what pinball machines need.
  *
- * There are 3 independent components to each random number:
+ * There are 2 independent components to each random number:
  * 1. a linear congruential component, derived from the relation
  * Xn+1 = (A(Xn) + C) mod M, where A=33, C=1, and M=255.  This is
  * fairly easy to do with shifts and adds.

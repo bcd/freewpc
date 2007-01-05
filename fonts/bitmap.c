@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief A collection of random, small bitmap images.
+ * These are collected together into a single 'font'; writing in this font
+ * then produces sequences of the symbols on the display.
+ */
 
 #include <freewpc.h>
 

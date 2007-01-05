@@ -19,12 +19,14 @@
  */
 
 /**
+ * \file
  * \brief Common tilt functions
  *
  * This module handles all of the tilt switches, start game-specific
  * effects when they occur, and updates the core state machines
  * appropriately (in the case of a slam tilt, this will abort the
- * game).
+ * game).  It also provides the display and lamp effects that go along
+ * with them.
  */
 
 #include <freewpc.h>

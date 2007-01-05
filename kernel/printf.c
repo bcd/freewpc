@@ -32,13 +32,37 @@
 
 /**
  * \file
- * \brief An implementation of the C printf() routine (non-standard).
+ * \brief An implementation of the C sprintf() routine (non-standard).  The
+ * destination buffer is implicit; data is always written to 'sprintf_buffer'.
+ * The buffer should immediately be written to the display or debugger port
+ * without sleeping, to avoid reentrancy problems.
+ *
+ * The following format specifiers are supported:
+ * %d - 8-bit decimal
+ * %ld - 16-bit long decimal
+ * %x - 8-bit hex
+ * %lx - 16-bit long hex
+ * %s - string
+ * %c - character
+ * %b - BCD string (with commas)
+ * %p - pointer (same as 16-bit hex on the 6809)
+ *
+ * A number preceding any specifier indicates the desired length.  A '0'
+ * prefix to that will always keep any leading zeroes; normally, they are
+ * removed.
+ *
+ * This function is used even when running a native build.  The system's
+ * 'sprintf' is never used.
  */
 
+
+/** The destination buffer for all printing. */
 char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
 U8 sprintf_width;
 
+/** Nonzero if leading zeroes are permitted.  When zero, sprintf will
+ * remove any leading zeroes from numbers. */
 bool sprintf_leading_zeroes;
 
 U8 leading_zero_count;

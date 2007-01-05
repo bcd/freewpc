@@ -2825,8 +2825,8 @@ void dipsw_test_draw (void)
 	{
 		dipsw_render_single (sw+1, dipsw & 0x1);
 		font_render_string (&font_mono5, 
-			(sw <= 3) ? 8 : 72, 
-			(sw % 4) * 6 + 9, 
+			((sw <= 3) ? 8 : 72), 
+			((sw % 4) * 6 + 9), 
 			sprintf_buffer);
 		dipsw >>= 1;
 	}

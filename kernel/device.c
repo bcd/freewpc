@@ -454,7 +454,8 @@ void device_update_globals (void)
 /** Returns the number of balls held up temporarily. */
 U8 device_holdup_count (void)
 {
-	return held_balls + timer_find_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
+	return held_balls + 
+		(timer_find_gid (GID_DEVICE_SWITCH_WILL_FOLLOW) ? 1 : 0);
 }
 
 

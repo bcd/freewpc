@@ -19,6 +19,10 @@
  */
 
 /*
+ * \file
+ * \brief Manage the triacs, which controls the general illumination strings and
+ * some additional I/O.
+ *
  * Theory of operation.
  *
  * The CPU generates an IRQ once every 960 msec.
