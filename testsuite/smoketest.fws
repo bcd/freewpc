@@ -1,4 +1,7 @@
 # Smoke test for FreeWPC
+# This only works with the Linux simulated build.  Invoke it as follows:
+# freewpc < file
+#
 
 # Go into test mode
 0

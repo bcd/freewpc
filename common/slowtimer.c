@@ -21,6 +21,11 @@
 #include <freewpc.h>
 
 
+/**
+ * \file
+ * \brief The slow timer APIs, which operate at 1s granularity and add support for exit routines, grace periods, etc.
+ */
+
 /** The table of slow timer objects */
 slow_timer_t slow_timers[MAX_SLOW_TIMERS];
 
