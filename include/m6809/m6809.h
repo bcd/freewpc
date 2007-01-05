@@ -113,6 +113,10 @@ extern inline void *memset (void *s, U8 c, U16 n)
 extern inline void __blockclear16 (void *s1, U16 n)
 {
 	register U16 *_s1 = (U16 *)s1;
+
+	/* It is tempting to predivide n by 16, and then
+	just decrement it inside the loop, but this does
+	not actually help any. */
 	do
 	{
 		*_s1++ = 0UL;
@@ -145,6 +149,10 @@ extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 {
 	register U16 *_s1 = (U16 *)s1;
 	register U16 *_s2 = (U16 *)s2;
+
+	/* It is tempting to predivide n by 16, and then
+	just decrement it inside the loop, but this does
+	not actually help any. */
 	do
 	{
 		*_s1++ = *_s2++;

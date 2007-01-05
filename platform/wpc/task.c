@@ -234,26 +234,15 @@ void task_sleep (task_ticks_t ticks)
 	tp->state = TASK_BLOCKED+TASK_USED; /* was |= */
 
 	task_save ();
-	// __asm__ volatile ("jmp\t_task_save");
 }
 
 
 /** Suspend the current task for a number of seconds */
 void task_sleep_sec (int8_t secs)
 {
-	while (secs > 0)
-	{
-		if (secs == 1)
-		{
-			task_sleep (TIME_1S);
-			return;
-		}
-		else
-		{
-			secs -= 2;
-			task_sleep (TIME_2S);
-		}
-	}
+	do {
+		task_sleep (TIME_1S);
+	} while (--secs > 0);
 }
 
 
@@ -280,29 +269,28 @@ void task_exit (void)
  * Find the task that has the given group ID.
  *
  * If more than one task matches, only the first can be returned by
- * this API.
+ * this API.  Which one is first in the table is indeterminable.
  *
  * If no task is found, then NULL is returned; otherwise, a pointer
  * to the task structure is returned.
  */
 task_t *task_find_gid (task_gid_t gid)
 {
-	register U8 t;
 	register task_t *tp;
-
-	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
 		if ((tp->state != TASK_FREE) && (tp->gid == gid))
 			return (tp);
 	return (NULL);
 }
 
 
+/**
+ * Find the task that has private data 'val' at location 'off'.
+ */
 task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val)
 {
-	register U8 t;
 	register task_t *tp;
-
-	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
 		if ((tp->state != TASK_FREE) 
 			&& (tp->gid == gid) 
 			&& (tp->thread_data[off] == val))
@@ -407,6 +395,7 @@ void task_set_arg (task_t *tp, U16 arg)
 
 /**
  * The task dispatcher.  This function selects a new task to run.
+ * On entry, X points to the current task block.
  */
 __naked__ __noreturn__
 void task_dispatcher (void)
@@ -416,12 +405,9 @@ void task_dispatcher (void)
 	U8 tick_start_count;
 
 	tick_start_count = tick_count;
+	task_dispatching_ok = TRUE;
 	for (tp++;; tp++)
 	{
-		/* Increment counter for number of times we run
-		 * the dispatcher code. */
-		task_dispatching_ok = TRUE;
-
 		/* Reset task pointer to top of list after scanning
 		 * them all. */
 		if (tp == &task_buffer[NUM_TASKS])
@@ -434,11 +420,10 @@ void task_dispatcher (void)
 			 * the list. */
 			if (sys_init_complete)
 			{
-				extern void nvram_idle_task (void);
-
+#if 0
 				/* Execute idle tasks on system stack */
 				set_stack_pointer (STACK_BASE);
-				
+#endif
 				/* Call idle tasks */
 				callset_invoke (idle);
 			} 
@@ -446,6 +431,7 @@ void task_dispatcher (void)
 			/* Reset to beginning of the task list */
 			tp = &task_buffer[0];
 			tick_start_count = tick_count;
+			task_dispatching_ok = TRUE;
 		}
 
 		if (tp->state == TASK_FREE)
@@ -471,6 +457,7 @@ void task_dispatcher (void)
 				tp->state &= ~TASK_BLOCKED;
 				// task_restore ();
 				asm volatile ("jmp\t_task_restore");
+				// while (1); /* can't get here */
 			}
 		}
 	}

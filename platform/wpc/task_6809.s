@@ -33,6 +33,9 @@ STACK_SAVE_OFF     = 23
 	.area sysrom	
 	.globl _task_save
 _task_save:
+	;;; First, save all of the volatile registers: U, Y, and PC.
+	;;; The PC value kept here is actually the address of the
+	;;; caller to task_sleep(), since it does "jmp" here.
 	stu	*_task_save_U
 	puls	u
 	ldx	*_task_current
@@ -40,21 +43,46 @@ _task_save:
 	ldu	*_task_save_U
 	stu	UREG_SAVE_OFF,x
 	sty	YREG_SAVE_OFF,x
-	leau	,s
+
+	;;; Copy the runtime stack into the task save area.
+	;;; For efficiency, copy 4 bytes at a time, even if some of the
+	;;; bytes are garbage.  After this loop, B contains the number
+	;;; of 4-byte blocks saved.  Y points to the save area.
 	leay	STACK_SAVE_OFF,x
 	clrb
-
-	;;;;;;cmpu	#STACK_BASE
-	bra	L32
-L33:
-	;;; TODO : use X register to transfer data faster
-	;;; Q: can we use S directly in this loop instead of U?
-	lda	,u+
-	sta	,y+
+	bra	save_stack_check
+save_stack:
+	ldu	,s++
+	stu	,y++
+	ldu	,s++
+	stu	,y++
 	incb
-L32:
-	cmpu	#STACK_BASE
-	blt	L33
+save_stack_check:
+	cmps	#STACK_BASE
+	blt	save_stack
+
+	;;; Convert B from blocks to bytes
+	aslb
+	aslb
+
+	;;; We may have copied too much.  The S register needs to be
+	;;; equal to STACK_BASE, and B needs to be adjusted down, too.
+backtrack:
+	cmps	#STACK_BASE
+	beq   backtrack_not_necessary
+	decb
+	cmps	#STACK_BASE+1
+	beq	backtrack_done
+	decb
+	cmps	#STACK_BASE+2
+	beq	backtrack_done
+	decb
+	;;; S had better be STACK_BASE+3 here!
+
+	;;; Save the number of bytes truly saved.
+backtrack_done:
+	lds	#STACK_BASE
+backtrack_not_necessary:
 	stb	SAVED_STACK_SIZE,x
 
 	;;; Now it is possible that the task yielded control deep
@@ -63,6 +91,12 @@ L32:
 	;;; Check for this now and halt the system immediately.
 	;;; TODO: We could do this check before the loop, by
 	;;; comparing U against STACK_BASE-size.
+	;;;
+	;;; TODO: Even better, don't allocate so many bytes by
+	;;; default, since most tasks won't use this much.
+	;;; Start with a stack size that works in most cases, and
+	;;; allow it to "grow" larger if necessary.  However, a check
+	;;; for exceeding this maximum is still required.
 	cmpb  #56
 	bgt   _stack_too_large
 
@@ -72,7 +106,7 @@ L32:
 	;;; current ROM bank and the saved value are already equal.
 	ldb	WPC_ROM_BANK
 	stb	ROMPAGE_SAVE_OFF,x
-	jmp _task_dispatcher
+	jmp   _task_dispatcher
 _stack_too_large:
 	ldb	#2    ; ERR_TASK_STACK_OVERFLOW
 	jmp	_fatal
