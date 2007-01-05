@@ -24,6 +24,7 @@
  * \file
  * \brief This module implements the round-robin, non-realtime, non-preemptive
  * task scheduler under Linux.  This uses the GNU pth library.
+ * It exposes the same task_ API functions, with similar semantics.
  */
 
 
@@ -45,6 +46,8 @@ extern int linux_irq_multiplier;
 #define MAX_TASKS 32
 
 
+/* Some WPC per-task data must be stored separately, outside of the pth
+ * context.  The aux_task_data_t structure holds this. */
 typedef struct
 {
 	pth_t pid;

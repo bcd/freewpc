@@ -34,7 +34,9 @@
  *
  * The group ID of a task can be declared when it is created; multiple
  * tasks can share the same group ID.  Killing a group ID kills all
- * tasks in the group, e.g.
+ * tasks in the group.  Group IDs exist in order to make it easier to
+ * find tasks based on a small fixed data value, rather than requiring
+ * process IDs to be stored in costly RAM.
  *
  * Most of the module is written in portable C.  The task structure
  * and the register save/restore routines are written in lots of
@@ -96,7 +98,7 @@ U8 task_max_count;
 #endif
 
 
-/** Uncomment this to turn on dumping of entire task table.
+/* Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
 //#define DUMP_ALL_TASKS
 
@@ -105,6 +107,9 @@ U8 task_max_count;
 __noreturn__ void task_save (void);
 __noreturn__ void task_restore (void);
 
+
+/** For debugging, dump the entire contents of the task table to the
+ * debug port. */
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -159,6 +164,9 @@ task_t *task_allocate (void)
 	return 0;
 }
 
+
+/** Initialize the thread data of a different task to have the same values
+ * as the thread data of the currently running task. */
 void task_inherit_thread_data (task_t *tp)
 {
 	U8 i;
@@ -395,7 +403,22 @@ void task_set_arg (task_t *tp, U16 arg)
 
 /**
  * The task dispatcher.  This function selects a new task to run.
- * On entry, X points to the current task block.
+ *
+ * This is called from two places: when a task exits, or when a
+ * task sleeps/yields.  The 'x' register is expected to be loaded with
+ * the exiting task's task structure pointer.  The search for a new
+ * task to run starts with the next task in the table.  Code then
+ * jumps back to the first candidate that is eligible, via
+ * task_restore().
+ *
+ * If the entire task table is scanned, and no task is ready to run,
+ * then we wait until the tick count advances to indicate that 1ms
+ * has elapsed.  Then we execute all of the idle functions.  This
+ * means that idle functions are never called if there is also at
+ * least one task in the ready state; it also limits their invocation
+ * to once per second.  The 1ms delay is also useful because it is the
+ * minimum delay before which a blocked task might reach the end of its
+ * wait period; there is no sense checking more frequently.
  */
 __naked__ __noreturn__
 void task_dispatcher (void)
@@ -415,6 +438,8 @@ void task_dispatcher (void)
 			/* Wait for next task tick before continuing */
 			while (tick_start_count == *(volatile U8 *)&tick_count);
 	
+			db_idle ();
+
 			/* If the system is fully initialized, also
 			 * run the idle tasks once every pass through
 			 * the list. */
@@ -449,13 +474,20 @@ void task_dispatcher (void)
 		}
 		else 
 		{
+			/* The task exists, but is sleeping.
+			 * tp->asleep holds the time at which it went to sleep,
+			 * and tp->delay is the time for which it should sleep.
+			 * Examine the current tick count, and see if it should
+			 * be woken up.
+			 */
 			register uint8_t ticks_elapsed = tick_count - tp->asleep;
 			if (ticks_elapsed < tp->delay)
 				continue;
 			else
 			{
+				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
-				// task_restore ();
+				// task_restore ();  /* this didn't work for some reason? */
 				asm volatile ("jmp\t_task_restore");
 				// while (1); /* can't get here */
 			}
@@ -465,7 +497,8 @@ void task_dispatcher (void)
 
 
 /**
- * Initialize the task subsystem.
+ * Initialize the task subsystem.  This transforms the caller into a
+ * legitimate task, which can then sleep, yield, etc.
  */
 void task_init (void)
 {
@@ -475,8 +508,8 @@ void task_init (void)
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;
 
-	/* Init debugging of largest stack */
 #ifdef CONFIG_DEBUG_STACK
+	/* Init debugging of largest stack */
 	task_largest_stack = 0;
 	task_small_stacks = 0;
 	task_medium_stacks = 0;
