@@ -1,6 +1,7 @@
 
 	.area		sysrom
 
+WPC_DEBUG_PORT = 0x3D60
 WPC_LEDS       = 0x3FF2
 WPC_ROM_BANK   = 0x3FFC
 
@@ -19,9 +20,6 @@ FIXED_SIZE     = 0x8000
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.globl	_rom_diag
 _rom_diag:
-	ldx	#4
-	jmp	diag_error
-
 	; Initialize checksum
 	ldd	#0
 
@@ -103,26 +101,39 @@ ram_error:
 
 	;;; Input: X = diagnostic error code
 diag_error:
-	ldy	#500
-	ldu	#500
+	tfr	x,d             ; Double X
+	leax	d,x
+
+	tfr	x,u             ; Copy count to iterator U
 
 flash_loop:
-	lda	WPC_LEDS        ; Toggle the LED
-	eora	#-128
-	sta	WPC_LEDS
-	tfr	y,d             ; Save the loop count
+	ldb	WPC_LEDS        ; Toggle the LED
+	eorb	#-128
+	stb	WPC_LEDS
 
+	ldy	#0x8000
 outer_flash_loop:        ; Hold the LED state
-	ldx	#5000
-inner_flash_loop:
-	leax	-1,x
-	cmpx	#0
-	bne	inner_flash_loop
+	mul
+	ldb	WPC_LEDS
+	stb	WPC_LEDS
 	leay	-1,y
 	cmpy	#0
 	bne	outer_flash_loop
 
-	tfr	d,y             ; Restore the loop count
-	exg	y,u             ; Switch with second count value
-	bra	flash_loop      ; Repeat
+	leau	-1,u
+	cmpu	#0
+	bne	flash_loop
+
+	ldy	#0xFFFF
+delay_loop:
+	mul
+	mul
+	mul
+	mul
+	leay	-1,y
+	cmpy	#0
+	bne	delay_loop
+
+	tfr	x,u
+	bra	flash_loop
 
