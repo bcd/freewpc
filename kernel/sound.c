@@ -340,16 +340,22 @@ void volume_change_deff (void) __taskentry__
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
 	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
-	if (!in_game)
+	dmd_show_low ();
+
+	if (current_music == MUS_OFF)
+	{
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 		music_change (MACHINE_VOLUME_CHANGE_MUSIC);
 #else
 		music_change (1);
 #endif
-	dmd_show_low ();
-	task_sleep_sec (4);
-	if (!in_game)
+		task_sleep_sec (4);
 		music_off ();
+	}
+	else
+	{
+		task_sleep_sec (4);
+	}
 	deff_exit ();
 }
 

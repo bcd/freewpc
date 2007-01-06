@@ -153,6 +153,10 @@ endif
 SR = tools/srec2bin/srec2bin
 REQUIRED += $(PWD)/$(SR)
 
+# Name of the checksum update tool
+CSUM = tools/csum/csum
+# REQUIRED += $(PWD)/$(CSUM)
+
 # Name of the blanker to use
 BLANKER = dd
 PATH_REQUIRED += $(BLANKER)
@@ -558,9 +562,11 @@ post_build :
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES)
+$(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 	@echo Padding ... && \
 		cat $(BLD)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILES) > $@
+	@echo Updating ROM checksum ... && \
+		$(CSUM) -f $(GAME_ROM) -v 0x12 -u
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
@@ -833,8 +839,15 @@ fonts clean-fonts:
 # binary converter suitable for what we need.
 #
 $(SR) : $(SR).c
-	cd tools/srec2bin && $(MAKE) srec2bin
+	@echo "Making S-Record utility..." && \
+		cd tools/srec2bin && $(MAKE) srec2bin
 
+#
+# How to build the csum utility
+#
+$(CSUM) : $(CSUM).c
+	@echo Making checksum utility... && \
+		cd tools/csum && $(MAKE) csum CC=$(HOSTCC)
 
 #######################################################################
 ###	XBM Generators

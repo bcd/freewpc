@@ -18,13 +18,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _SYS_SEGMENT_H
-#define _SYS_SEGMENT_H
-
-/* This file is not used by FreeWPC.  It was used in the early
+/** This file is not used by FreeWPC now.  It was used in the early
  * days of development when the alphanumeric display was still
  * supported.
  */
+
+#ifndef _SYS_SEGMENT_H
+#define _SYS_SEGMENT_H
+
+/* Bit values for the various segments in a character */
 #define SEG_TOP			0x1
 #define SEG_UPR_RIGHT	0x2
 #define SEG_LWR_RIGHT	0x4
@@ -34,15 +36,22 @@
 #define SEG_MID			0x40
 #define SEG_VERT			0x80
 
+/* Shortcuts */
 #define SEG_RIGHT			(SEG_UPR_RIGHT+SEG_LWR_RIGHT)
 #define SEG_LEFT			(SEG_UPR_LEFT+SEG_LWR_LEFT)
 
 #define SEG_ROWS			4
 #define SEG_COLS			16
 #define SEG_DATA_SIZE	(SEG_ROWS * SEG_COLS)
+
+/** The number of pages supported by the system.  Each page requires
+memory to buffer the output. */
 #define SEG_PAGES			4
 
-#define SEG_ADDR(p,r,c)		((p * 0x40) + (r * 0x10) + c)
+/** A macro for determining the byte address at which segment data is
+stored.  'p' is the pointer to the page, 'r' is the row number, and
+'c' is the column number.  Rows/columns are zero-based. */
+#define SEG_ADDR(p,r,c)		((p * SEG_DATA_SIZE) + (r * SEG_COLS) + c)
 
 #define SEG_PAGE_0 0x0
 #define SEG_PAGE_1 0x40
@@ -71,16 +80,20 @@
 #define SEG_COL_14 0xD
 #define SEG_COL_15 0xE
 
-typedef uint8_t segaddr_t;
-typedef uint8_t segbits_t;
+/* An encoding of a segment address, which is smaller than a pointer. */
+typedef U8 segaddr_t;
 
+/* A set of packed segment bits */
+typedef U8 segbits_t;
+
+/* Function prototypes */
 void seg_set (segaddr_t sa, segbits_t bits);
 segbits_t seg_translate_char (char c);
 void seg_write_char (segaddr_t sa, char c);
-void seg_write_digit (segaddr_t sa, uint8_t digit);
+void seg_write_digit (segaddr_t sa, U8 digit);
 void seg_write_bcd (segaddr_t sa, bcd_t bcd);
-void seg_write_uint8 (segaddr_t sa, uint8_t u8);
-void seg_write_hex16 (segaddr_t sa, uint16_t u16);
+void seg_write_uint8 (segaddr_t sa, U8 u8);
+void seg_write_hex16 (segaddr_t sa, U16 u16);
 void seg_write_string (segaddr_t sa, const char *s);
 void seg_erase (segaddr_t sa, int8_t len);
 

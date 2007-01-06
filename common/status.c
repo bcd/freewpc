@@ -77,6 +77,10 @@ void status_report_deff (void)
 	status_page_complete ();
 #endif
 
+	/* Allow other modules to report status as well.
+	 * The order is unspecified. */
+	callset_invoke (status_report);
+
 #ifdef MACHINE_STATUS_REPORT
 	MACHINE_STATUS_REPORT
 #endif

@@ -22,14 +22,14 @@
 #define _SYS_ERRNO_H
 
 
-#define ERR_NO_FREE_TASKS 			1
-#define ERR_TASK_STACK_OVERFLOW 	2
-#define ERR_TASK_KILL_CURRENT 	3
+#define ERR_NO_FREE_TASKS 			1   /* Too many tasks are running */
+#define ERR_TASK_STACK_OVERFLOW 	2   /* A process overflowed its stack */
+#define ERR_TASK_KILL_CURRENT 	3   /* Task tried to commit suicide */
 #define ERR_TASK_REGISTER_SAVE 	4
-#define ERR_NMI 						5
-#define ERR_SWI 						6
-#define ERR_SWI2 						7
-#define ERR_SWI3 						8
+#define ERR_NMI 						5   /* NMI was taken */
+#define ERR_SWI 						6   /* SWI was taken */
+#define ERR_SWI2 						7   /* SWI2 was taken */
+#define ERR_SWI3 						8   /* SWI3 was taken */
 #define ERR_IDLE_CANNOT_SLEEP 	9
 #define ERR_IDLE_CANNOT_EXIT 		10
 #define ERR_INVALID_LAMP_NUM		11

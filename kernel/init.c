@@ -108,8 +108,12 @@ void do_reset (void)
 	 * more or less working.  (Diags must be in the system page
 	 * since the paging hardware may be broken.)
 	 * 1. Verify ROM is good first, since that ensures that this
-	 * code is not corrupted somehow.
+	 * code is not corrupted somehow.  Take care NOT to use RAM
+	 * at all during this stage; this is tricky and may require
+	 * assembler macros.
+	 *
 	 * 2. Verify RAM next, using a read-write test.
+	 *
 	 * 3. Verify WPC ASIC functions.
 	 * At any point, if something goes wrong, we go into a hard
 	 * loop and pulse the diagnostic LED with a flash code to
@@ -120,7 +124,11 @@ void do_reset (void)
 	 * code should be moved into a separate page and run from there,
 	 * as it is only run once.
 	 */
-	//diag_run_at_reset ();
+#if 0
+#ifdef __m6809__
+	asm volatile ("jmp\t_rom_diag");
+#endif
+#endif
 
 	/** Initialize RAM to all zeroes */
 	ramptr = (uint8_t *)USER_RAM_SIZE;
@@ -130,7 +138,8 @@ void do_reset (void)
 	} while (ramptr != 0);
 
 	/** Install the null pointer catcher, by programming
-	 * an actual instruction at address 0x0 (branch to self) */
+	 * an actual instruction at address 0x0 (branch to self)
+	 * TODO : disable interrupts, too? */
 	*(U8 *)0 = 0x20;
 	*(U8 *)1 = 0xFE;
 #endif /* __m6809__ */

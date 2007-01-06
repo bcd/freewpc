@@ -18,8 +18,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * This file implements basic queueing functions.
+/**
+ * \file
+ * \brief This file implements basic queueing functions.
  *
  * All functions are inline.
  *
@@ -34,6 +35,12 @@
  * Queue full conditions are not checked...
  */
 
+
+/** A generic queue management structure.  This contains a pointer to
+ * the head and tail of the elements, which are expected to appear
+ * immediately afterwards.  Pointers are actually maintained as
+ * byte offsets, and all elements are also assumed to be bytes.
+ */
 typedef struct
 {
 	U8 head_off;
@@ -42,12 +49,14 @@ typedef struct
 } queue_t;
 
 
+/** Initialize a generic queue */
 extern inline void queue_init (queue_t *q)
 {
 	q->head_off = q->tail_off = 0;
 }
 
 
+/** Insert an element into a generic queue */
 extern inline void queue_insert (queue_t *q, U8 qlen, U8 v)
 {
 	q->elems[q->tail_off] = v;
@@ -56,6 +65,9 @@ extern inline void queue_insert (queue_t *q, U8 qlen, U8 v)
 }
 
 
+/** Remove an element from a generic queue.  It is expected that 
+the caller has already checked to see that there is something in
+the queue, by verifying !queue_empty(). */
 extern inline U8 queue_remove (queue_t *q, U8 qlen)
 {
 	U8 v = q->elems[q->head_off];
@@ -69,6 +81,7 @@ extern inline U8 queue_remove (queue_t *q, U8 qlen)
 }
 
 
+/** Check if a generic queue is empty. */
 extern inline bool queue_empty (queue_t *q)
 {
 	return (q->head_off == q->tail_off);

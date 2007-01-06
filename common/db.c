@@ -50,14 +50,16 @@ U8 db_paused;
 
 void db_puts (const char *s)
 {
+	register U8 c;
+
 	if (db_attached)
 	{
-		while (*s)
+		while ((c = *s++) != '\0')
 		{
 #ifdef CONFIG_PARALLEL_DEBUG
-			wpc_parport_write (*s++);
+			wpc_parport_write (c);
 #else
-			wpc_debug_write (*s++);
+			wpc_debug_write (c);
 #endif
 		}
 	}

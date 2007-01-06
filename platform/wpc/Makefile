@@ -10,5 +10,5 @@ endif
 
 KERNEL_OBJS += platform/wpc/div10.o platform/wpc/task.o platform/wpc/vector.o
 
-KERNEL_ASM_OBJS = platform/wpc/farcall.o platform/wpc/task_6809.o
+KERNEL_ASM_OBJS = platform/wpc/farcall.o platform/wpc/task_6809.o platform/wpc/post.o
 
