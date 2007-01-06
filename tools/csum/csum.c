@@ -24,6 +24,7 @@ original WPC ROMS and also those running FreeWPC. */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 
 /** The sector size.  The ROM file is read in chunks of this amount. */
