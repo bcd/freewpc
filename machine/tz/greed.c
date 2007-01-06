@@ -49,6 +49,10 @@ static const slow_timer_config_t greed_round_timer = {
 	.flags = SLOW_TIMER_KILL_END_BALL,
 };
 
+static const audio_track_t greed_round_music = {
+	.prio = PRI_GAME_MODE1,
+	.code = MUS_GREED_ROUND,
+};
 
 void greed_round_deff (void)
 {
@@ -153,6 +157,7 @@ CALLSET_ENTRY (greed, door_start_greed)
 	standup_lamp_update ();
 
 	slow_timer_create (&greed_round_timer);
+	bg_music_start (&greed_round_music);
 	deff_start (DEFF_GREED_ROUND);
 }
 
@@ -161,6 +166,7 @@ CALLSET_ENTRY (greed, door_stop_greed)
 	greed_set = NO_TARGETS;
 	standup_lamp_update ();
 	deff_stop (DEFF_GREED_ROUND);
+	bg_music_stop (&greed_round_music);
 }
 
 CALLSET_ENTRY (greed, start_player)

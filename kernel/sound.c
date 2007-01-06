@@ -24,31 +24,41 @@
 /**
  * \file
  * \brief Sound and music control
+ * This file implements the interface to the sound board hardware, both the WPC
+ * and DCS versions.
  */
 
+
+/** The length of the sound queue buffer.  These are bytes pending transmit from
+ * the CPU board to the sound board. */
 #define SOUND_QUEUE_LEN 8
 
+
+/** The sound queue structure.  head and tail are offsets; elems hold the actual
+ * data bytes to be transmitted. */
 struct {
 	U8 head;
 	U8 tail;
 	U8 elems[SOUND_QUEUE_LEN];
 } sound_queue;
 
-#define MUSIC_STACK_SIZE 8
+/** The last music code transmitted */
+__fastram__ music_code_t current_music;
 
-__fastram__ music_code_t music_stack[MUSIC_STACK_SIZE];
-__fastram__ music_code_t *music_head;
-
+/** The current master volume.  Individual sound clips may override this
+ * temporarily, but this is the default. */
 __nvram__ U8 current_volume;
 
 U8 sound_error_code;
 
 U8 sound_version_major;
+
 U8 sound_version_minor;
 
 #define sound_version sound_version_major
 
 
+/** Initialize the sound transmit code */
 static void sound_queue_init (void)
 {
 	disable_irq ();
@@ -56,16 +66,22 @@ static void sound_queue_init (void)
 	enable_irq ();
 }
 
+
+/** Queues a byte for transmit to the sound board */
 static void sound_queue_insert (U8 val)
 {
 	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val);
 }
 
+
+/** Dequeues a byte for transmit to the sound board */
 static U8 sound_queue_remove (void)
 {
 	return queue_remove ((queue_t *)&sound_queue, SOUND_QUEUE_LEN);
 }
 
+
+/** Empties the sound transmit queue */
 inline bool sound_queue_empty (void)
 {
 	return queue_empty ((queue_t *)&sound_queue);
@@ -74,7 +90,7 @@ inline bool sound_queue_empty (void)
 
 void music_set (music_code_t code)
 {
-	*music_head = code;
+	current_music = code;
 
 	/* Music codes are not emitted if volume is set to zero, or
 	 * if game music has been disabled.  But MUS_OFF is always
@@ -86,31 +102,34 @@ void music_set (music_code_t code)
 #if (MACHINE_DCS == 1)
 		sound_queue_insert (0);
 #endif
-		sound_queue_insert (*music_head);
+		sound_queue_insert (current_music);
 	}
 }
 
 void music_off (void)
 {
-	music_head = music_stack;
 	music_set (MUS_OFF);
 }
 
+
 void music_change (music_code_t code)
 {
-	if (code != *music_head)
+	if (code != current_music)
 		music_set (code);
 }
 
 
-#if (MACHINE_DCS == 1)
 
 U8 sound_board_poll (void)
 {
 	U8 status = wpc_asic_read (WPCS_CONTROL_STATUS);
 	U8 in_data;
 
+#if (MACHINE_DCS == 1)
 	if (status & 0x80)
+#else
+	if (status & 0x1)
+#endif
 	{
 		in_data = wpc_asic_read (WPCS_DATA);
 		return (in_data);
@@ -131,8 +150,9 @@ U8 sound_board_read (U8 retries)
 	return (0xFF);
 }
 
-#endif /* DCS */
 
+/** Real time task for the sound board.
+ * Transmit one pending byte of data to the sound board. */
 void sound_rtt (void)
 {
 	/* PinMAME is generating FIRQs continuously if we don't read
@@ -152,58 +172,38 @@ void sound_reset (void)
 }
 
 
-void sound_ready (void)
-{
-	sound_queue_init ();
-	music_off ();
-	volume_set (DEFAULT_VOLUME);
-}
-
 void sound_init (void)
 {
-#if (MACHINE_DCS == 0)
-	/* TODO : WPC sound also need to run as a background thread,
-	 * waiting for sync from the sound board */
-	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
-	sound_ready ();
-#else
 	U8 i;
 	U16 j;
-#if 1
-	static U8 dcs_init_string[] = {
-		0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
+	U8 sound_board_type;
+
+#if (MACHINE_DCS == 0)
+	static U8 init_string[] = {
+		0x00, 0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
 		0xC4, 0xAA, 0x83, 0x37, 0x28, 0xC8, 0xE6, 0xE7, 0xD4, 0x85,
 		0xD9, 0x16, 0x10, 0x64, 0x58, 0xC6, 0xCC, 0x93, 0x85, 0x0F,
 		0x7C
 	};
 
-	for (i=0; i < sizeof (dcs_init_string); i++)
+	for (i=0; i < sizeof (init_string); i++)
 	{
-		for (j=0; j < 4; j++)
-		{
-			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
-			task_sleep (1); /* 16ms */
-			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
-			task_sleep (1); /* 16ms */
-			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
-			task_sleep (1); /* 16ms */
-			wpc_asic_write (WPCS_CONTROL_STATUS, dcs_init_string[i]);
-			task_sleep (1); /* 16ms */
-		}
+		wpc_asic_write (WPCS_CONTROL_STATUS, init_string[i]);
+		task_sleep (TIME_16MS);
 	}
 #endif
 
-	/* Wait for the sound board to report its presence, by
-	 * reading a value of 0x79. */
+
+	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	i = 100;
+	i = 100; /* wait for up to 10 seconds */
 	for (;;)
 	{
-		if ((sound_board_poll ()) == 0x79)
+		if ((sound_board_type = sound_board_poll ()) != 0xFF)
 			break;
 		else
 		{
-			task_sleep (TIME_33MS);
+			task_sleep (TIME_100MS);
 			if (i-- == 0)
 			{
 				dbprintf ("Error: sound board not detected\n");
@@ -212,15 +212,30 @@ void sound_init (void)
 		}
 	}
 	(void)sound_board_poll ();
+	dbprintf ("Sound board type: %02X\n", sound_board_type);
 
-	dbprintf ("Checking for errors...\n");
-	sound_error_code = sound_board_read (100);
+	/* Read its boot code as well */
+	dbprintf ("Checking boot code...\n");
+	i = 20; /* wait for up to 2 seconds */
+	for (;;)
+	{
+		if ((sound_error_code = sound_board_poll ()) != 0xFF)
+			break;
+		else
+		{
+			task_sleep (TIME_100MS);
+			if (i-- == 0)
+				break;
+		}
+	}
 	(void)sound_board_poll ();
+	dbprintf ("Sound board boot code: %02X\n", sound_error_code);
 
+	/* Initialize the sound queue.  We cannot transmit anything before here. */
 	sound_queue_init ();
 	task_sleep_sec (1);
 
-	dbprintf ("Error flag is %02X ; checking version...\n", sound_error_code);
+	/* Read the sound board version.  DCS does two reads here; WPC only one? */
 	i = 8;
 	do {
 		sound_send (SND_GET_VERSION_CMD);
@@ -229,6 +244,7 @@ void sound_init (void)
 	} while ((sound_version == 255) && (--i != 0));
 	(void)sound_board_poll ();
 
+#if (MACHINE_DCS == 1)
 	i = 8;
 	do {
 		sound_send (SND_GET_UNKNOWN_CMD);
@@ -236,6 +252,7 @@ void sound_init (void)
 		sound_version_minor = sound_board_poll ();
 	} while ((sound_version_minor == 255) && (--i != 0));
 	(void)sound_board_poll ();
+#endif
 
 #if (MACHINE_DCS == 1)
 	dbprintf ("Detected %d.%d sound.\n", sound_version >> 4, sound_version & 0x0F);
@@ -243,14 +260,16 @@ void sound_init (void)
 	dbprintf ("Detected L-%d sound.\n", sound_version);
 #endif
 
+	/* TODO  - use nvram value if it's sensible */
 	volume_set (DEFAULT_VOLUME);
 
 exit_func:
 	sys_init_pending_tasks--;
 	task_exit ();
-#endif
 }
 
+
+/** Send a command to the sound board. */
 void sound_send (sound_code_t code)
 {
 	U8 code_lo;
@@ -286,8 +305,11 @@ void sound_send (sound_code_t code)
 }
 
 
+/** Send a volume set command to the sound board */
 void volume_set (U8 vol)
 {
+	/* Save the volume level in nvram.
+	 * TODO : checksum this? */
 	wpc_nvram_get ();
 	current_volume = vol;
 	wpc_nvram_put ();
@@ -332,6 +354,7 @@ void volume_change_deff (void) __taskentry__
 }
 
 
+/** Decrease the master volume */
 void volume_down (void)
 {
 	if (current_volume > MIN_VOLUME)
@@ -342,6 +365,7 @@ void volume_down (void)
 }
 
 
+/** Increase the master volume */
 void volume_up (void)
 {
 	if (current_volume < MAX_VOLUME)
@@ -349,52 +373,5 @@ void volume_up (void)
 		volume_set (current_volume+1);
 	}
 	deff_restart (DEFF_VOLUME_CHANGE);
-}
-
-
-CALLSET_ENTRY(sound, start_game)
-{
-#ifdef MACHINE_START_GAME_SOUND
-	sound_send (MACHINE_START_GAME_SOUND);
-#endif
-	callset_invoke (music_update);
-}
-
-
-CALLSET_ENTRY(sound, start_ball)
-{
-#ifdef MACHINE_START_BALL_MUSIC
-	music_set (MACHINE_START_BALL_MUSIC);
-#endif
-	callset_invoke (music_update);
-}
-
-
-CALLSET_ENTRY (sound, ball_in_play)
-{
-#ifdef MACHINE_BALL_IN_PLAY_MUSIC
-	music_set (MACHINE_BALL_IN_PLAY_MUSIC);
-#endif
-	callset_invoke (music_update);
-}
-
-
-CALLSET_ENTRY(sound, end_ball)
-{
-	sound_reset ();
-}
-
-
-CALLSET_ENTRY(sound, end_game)
-{
-#ifdef MACHINE_END_GAME_MUSIC
-	if (!in_test)
-		music_set (MACHINE_END_GAME_MUSIC);
-#endif
-}
-
-CALLSET_ENTRY (sound, single_ball_play)
-{
-	callset_invoke (music_update);
 }
 

@@ -50,6 +50,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pgmlib.h"
+#include "xbmprog.h"
 
 unsigned int opt_debug = 0;
 
@@ -84,6 +85,19 @@ xbmprog_alloc (void)
 }
 
 
+void
+xbmprog_free (XBMPROG *prog)
+{
+	XBMPROG * elem = prog;
+	XBMPROG * tmp;
+	do {
+		tmp = elem->next;
+		free (elem);
+		elem = tmp;
+	} while (elem != prog);
+}
+
+
 /** Returns zero if two XBM program elements are the same */
 int
 xbmprog_equal_p (XBMPROG *prog1, XBMPROG *prog2)
@@ -112,27 +126,41 @@ xbmprog_equal_p (XBMPROG *prog1, XBMPROG *prog2)
 
 /** Writes an XBM image to a file. */
 void
-xbmprog_write (FILE *fp, XBMPROG *xbmprog)
+xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog)
 {
 	int i;
 	unsigned int size = 0;
 	XBMPROG *head = xbmprog;
 
-	fprintf (fp, "/* -- compressed representation\n");
+	fprintf (fp, "#include <freewpc.h>\n");
+	fprintf (fp, "#include <xbmprog.h>\n");
+	fprintf (fp, "__xbmprog__ unsigned char %s%d_prg[] = { 0x%02X,\n",
+		name, plane, head->stats.flags);
 	do {
 		switch (xbmprog->op)
 		{
 			case XBMOP_LITERAL:
 				for (i=0; i < xbmprog->args.literal.count; i++)
-					fprintf (fp, "%02X, ", xbmprog->args.literal.bytes[i]);
+				{
+					unsigned char c = xbmprog->args.literal.bytes[i];
+					if ((c == XBMPROG_RLE_SKIP) || (c == XBMPROG_RLE_REPEAT))
+					{
+						// TODO
+						fprintf (fp, "0x%02X, ", c);
+					}
+					else
+					{
+						fprintf (fp, "0x%02X, ", c);
+					}
+				}
 				size += xbmprog->args.literal.count + 1;
 				break;
 			case XBMOP_SKIP:
-				fprintf (fp, "skip %d, ", xbmprog->args.skip.count);
+				fprintf (fp, "XBMPROG_RLE_SKIP, %d, ", xbmprog->args.skip.count);
 				size++;
 				break;
 			case XBMOP_REPEAT_BYTE:
-				fprintf (fp, "repeat %02X x %d, ", 
+				fprintf (fp, "XBMPROG_RLE_REPEAT, 0x%02X, %d, ", 
 					xbmprog->args.repeat.data, xbmprog->args.repeat.count);
 				size += 2;
 				break;
@@ -144,8 +172,8 @@ xbmprog_write (FILE *fp, XBMPROG *xbmprog)
 	} while (xbmprog != head);
 
 done:
-	fprintf (fp, "\ncompressed size = %d\n", size);
-	fprintf (fp, "*/\n");
+	fprintf (fp, "\n// size = %d\n", head->stats.size);
+	fprintf (fp, "};\n");
 }
 
 
@@ -169,6 +197,7 @@ xbm_make_prog (XBM *xbm)
 	unsigned int byte;
 	unsigned int count;
 	XBMPROG *elem;
+	unsigned int size = 0;
 
 	n_bytes = ((xbm->width + 7) / 8) * xbm->height;
 	dprintf ("Image has %d bytes total.\n", n_bytes);
@@ -206,6 +235,7 @@ xbm_make_prog (XBM *xbm)
 				elem->args.literal.bytes [ elem->args.literal.count++ ] = byte;
 			}
 			off++;
+			size++;
 		}
 		else if (byte == 0)
 		{
@@ -215,6 +245,10 @@ xbm_make_prog (XBM *xbm)
 			elem->op = XBMOP_SKIP;
 			elem->args.skip.count = count;
 			off += count;
+			size += 2;
+
+			// TODO
+			if (count > 255) {}
 		}
 		else
 		{
@@ -224,6 +258,10 @@ xbm_make_prog (XBM *xbm)
 			elem->args.repeat.count = count;
 			elem->args.repeat.data = byte;
 			off += count;
+			size += 3;
+
+			// TODO
+			if (count > 255) {}
 		}
 
 		if (elem)
@@ -244,34 +282,41 @@ xbm_make_prog (XBM *xbm)
 		}
 	}
 
+	head->stats.flags = XBMPROG_METHOD_RLE;
+	head->stats.size = size;
 	return (head);
 }
 
 
 XBMSET *
-pgm_make_xbmset (PGM *pgm)
+pgm_append_xbmset (XBMSET *xbmset, PGM *pgm)
 {
 	unsigned int plane, x, y;
-	XBMSET *xbmset = xmalloc (sizeof (XBMSET));
 	XBM *xbm;
 
-	xbmset->c_name = "image";
-	switch (pgm->maxval)
+	if (xbmset == NULL)
 	{
-		case 1:
-			xbmset->n_planes = 1;
-			break;
-		case 3:
-			xbmset->n_planes = 2;
-			break;
-		default:
-			fprintf (stderr, "Invalid maxval %d for XBM conversion", pgm->maxval);
-			exit (1);
+		xbmset = xmalloc (sizeof (XBMSET));
+		xbmset->frame_count = 0;
+		xbmset->c_name = "image";
+
+		switch (pgm->maxval)
+		{
+			case 1:
+				xbmset->n_planes = 1;
+				break;
+			case 3:
+				xbmset->n_planes = 2;
+				break;
+			default:
+				fprintf (stderr, "Invalid maxval %d for XBM conversion", pgm->maxval);
+				exit (1);
+		}
 	}
 
 	for (plane = 0; plane < xbmset->n_planes; plane++)
 	{
-		xbm = xbmset->planes[plane] = xmalloc (sizeof (XBM));
+		xbm = xbmset->planes[plane][xbmset->frame_count] = xmalloc (sizeof (XBM));
 		xbm->width = pgm->width;
 		xbm->height = pgm->height;
 		memset (xbm->bytes, 0, sizeof (xbm->bytes));
@@ -286,6 +331,7 @@ pgm_make_xbmset (PGM *pgm)
 		}
 	}
 
+	xbmset->frame_count++;
 	return (xbmset);
 }
 
@@ -336,6 +382,24 @@ xbm_write_stats (FILE *fp, XBM *xbm)
 }
 
 
+void
+xbmset_write_animation (FILE *fp, XBMSET *xbmset)
+{
+	int plane, frame;
+
+	fprintf (fp, "#include <xbmprog.h>\n");
+	fprintf (fp, "unsigned char __end = XBMPROG_METHOD_END;\n");
+	for (plane = xbmset->n_planes-1; plane >=0; plane--)
+		for (frame = xbmset->frame_count-1; frame >= 0; frame--)
+		{
+			XBM *xbm = xbmset->planes[plane][frame];
+			XBMPROG *xbmprog = xbm_make_prog (xbm);
+			xbmprog_write (fp, xbmset->c_name, plane, xbmprog);
+			xbmprog_free (xbmprog);
+		}
+}
+
+
 /** Writes an XBMSET to a file. */
 void
 xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags)
@@ -352,7 +416,7 @@ xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags)
 		return;
 	}
 
-	xbm = xbmset->planes[plane];
+	xbm = xbmset->planes[plane][0];
 
 	fprintf (fp, "#define %s%d_width %d\n", xbmset->c_name, plane, xbm->width);
 	fprintf (fp, "#define %s%d_height %d\n", xbmset->c_name, plane, xbm->height);
@@ -375,7 +439,10 @@ xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags)
 	{
 		xbm_write_stats (fp, xbm);
 		XBMPROG *xbmprog = xbm_make_prog (xbm);
-		xbmprog_write (fp, xbmprog);
+		fprintf (fp, "/* -- compressed representation\n");
+		xbmprog_write (fp, xbmset->c_name, plane, xbmprog);
+		fprintf (fp, "*/\n");
+		xbmprog_free (xbmprog);
 	}
 }
 
@@ -384,6 +451,13 @@ void
 xbmset_free (XBMSET *xbmset)
 {
 	free (xbmset);
+}
+
+
+XBM *
+xbmset_plane (XBMSET *xbmset, int plane)
+{
+	return xbmset->planes[plane][0];
 }
 
 
@@ -459,10 +533,11 @@ pgm_read (const char *filename)
 
 
 void
-pgm_write (FILE *fp, PGM *pgm)
+pgm_write (PGM *pgm, const char *filename)
 {
 	unsigned int x, y;
 
+	FILE *fp = fopen (filename, "wb");
 	fprintf (fp, "P2\n");
 	fprintf (fp, "#\n");
 	fprintf (fp, "%d %d\n", pgm->width, pgm->height);
@@ -470,6 +545,7 @@ pgm_write (FILE *fp, PGM *pgm)
 	for (y = 0; y < pgm->height; y++)
 		for (x = 0; x < pgm->width; x++)
 			fprintf (fp, "%d\n", pgm->bits[y][x]);
+	fclose (fp);
 }
 
 
@@ -563,6 +639,10 @@ pgm_paste (PGM *dst, PGM *src, unsigned int xpos, unsigned int ypos)
 	unsigned int x, y;
 	for (x = 0; x < src->width; x++)
 		for (y = 0; y < src->height; y++)
+			if ((xpos+x >= 0)
+				&& (xpos+x < dst->width)
+				&& (ypos+y >= 0)
+				&& (ypos+y < dst->height))
 			pgm_draw_pixel (dst, xpos+x, ypos+y, pgm_read_pixel (src, x, y));
 }
 
@@ -678,6 +758,7 @@ pgm_invert (PGM *pgm)
 void
 pgm_output_file (const char *filename)
 {
+#ifndef NO_MAIN
 	FILE *fp;
 	static int first_output = 0;
 	char objname[64], *p;
@@ -695,6 +776,7 @@ pgm_output_file (const char *filename)
 	fprintf (fp, "%s : %s\n", objname, filename);
 	fprintf (fp, "XBMGEN_OBJS += %s\n", objname);
 	fclose (fp);
+#endif
 }
 
 
@@ -718,6 +800,22 @@ pgm_write_xbmset (PGM *pgm, const char *filename, const char *name)
 	fp = fopen (filename, "wb");
 	pgm_output_file (filename);
 	xbmset_write (fp, xbmset, XBMSET_ALL_PLANES, 0);
+	fclose (fp);
+	xbmset_free (xbmset);
+}
+
+
+void
+pgm_write_xbm (PGM *pgm, const char *filename, const char *name, int plane)
+{
+	XBMSET *xbmset;
+	FILE *fp;
+
+	xbmset = pgm_make_xbmset (pgm);
+	xbmset_name (xbmset, name);
+	fp = fopen (filename, "wb");
+	pgm_output_file (filename);
+	xbmset_write (fp, xbmset, plane, 0);
 	fclose (fp);
 	xbmset_free (xbmset);
 }

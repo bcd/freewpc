@@ -442,7 +442,7 @@ SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 #
 page55_OBJS = $(BLD)/page55.o $(PAGED_MD_OBJS)
 page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS) $(EVENT_OBJS)
-page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS)
+page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS) $(PRG_OBJS)
 page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
 page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS) $(FSM_OBJS)
 page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
@@ -451,14 +451,14 @@ SYSTEM_OBJS = $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNE
 
 $(PAGED_MD_OBJS) : PAGE=55
 $(COMMON_OBJS) $(EVENT_OBJS) : PAGE=56
-$(TRANS_OBJS) : PAGE=57
+$(TRANS_OBJS) $(PRG_OBJS): PAGE=57
 $(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
 $(MACHINE_PAGED_OBJS) $(FSM_OBJS): PAGE=59
 $(XBM_OBJS) : PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
-PAGE_DEFINES := -DMD_PAGE=55 -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
+PAGE_DEFINES := -DMD_PAGE=55 -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DPRG_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
 CFLAGS += $(PAGE_DEFINES)
 
 
@@ -478,9 +478,9 @@ C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 
 
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS) $(PRG_OBJS)
 else
-OBJS = $(C_OBJS) $(XBM_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS)
 endif
 
 MACH_LINKS = .mach .include_mach
@@ -711,7 +711,7 @@ $(XBM_OBJS) : PAGEFLAGS=-Dstatic=
 endif
 
 $(C_OBJS) : GCC_LANG=
-$(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
+$(PRG_OBJS) $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c 
 
@@ -722,7 +722,9 @@ $(XBM_OBJS) : %.o : %.xbm
 
 $(FON_OBJS) : %.o : %.fon
 
-$(C_OBJS) $(XBM_OBJS) $(FON_OBJS):
+$(PRG_OBJS) : %.o : %.prg
+
+$(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS):
 ifeq ($(PLATFORM),wpc)
 	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
 else
@@ -843,7 +845,7 @@ HOST_XBM_LIBS = build/pgmlib.o
 HOST_XBM_OBJS = \
 	build/sysgen.o build/borders.o build/backgrounds.o
 
-HOST_XBM_CFLAGS = -Itools/pgmlib -g
+HOST_XBM_CFLAGS = -Itools/pgmlib -Iinclude -g
 
 xbmgen_clean :
 	@echo "Cleaning host XBM files..." && \

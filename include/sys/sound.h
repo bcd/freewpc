@@ -35,9 +35,10 @@
 #define SND_TEST_SCROLL			0x59
 #define SND_GET_VERSION_CMD	0x5F 
 #define SND_SET_VOLUME_CMD    0x79
-#define SND_START_EXTENDED		0x7A 
+#define SND_START_EXTENDED		0x7A  /* write to CVSD instead of DAC */
 #define SND_STOP_SOUND			0x7D 
 #define SND_STOP_MUSIC			0x7E 
+#define SND_STOP_DAC          0x7F
 #else
 
 #define MUSIC_SND(x)				((0UL << 8) + (x))
@@ -68,7 +69,7 @@ typedef uint16_t music_code_t, sound_code_t;
 
 void music_off (void);
 void music_set (music_code_t code);
-void music_change (music_code_t code);
+void music_change (music_code_t code) __attribute__ ((deprecated));
 void sound_rtt (void);
 void sound_init (void);
 void sound_send (sound_code_t code);

@@ -33,7 +33,7 @@ U8 door_start_with_bttz;
 
 
 /* For testing -- only enables GREED mode */
-#define GREED_ONLY
+//#define GREED_ONLY
 
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14

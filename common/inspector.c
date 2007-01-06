@@ -18,7 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* \file
+/*
+ * \file
  * \brief Built-in memory inspection tool for debugging
  *
  * The inspector is a simple memory dump tool to the DMD display.

@@ -70,6 +70,7 @@
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
+#define __xbmprog__     __far__(C_STRING(PRG_PAGE))
 #else
 #define __far__(x)
 #define __system__
@@ -78,6 +79,7 @@
 #define __transition__
 #define __test__
 #define __machine__
+#define __xbmprog__
 #endif
 
 #ifdef HAVE_INTERRUPT_ATTRIBUTE

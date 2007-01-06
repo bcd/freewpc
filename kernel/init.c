@@ -174,10 +174,6 @@ void do_reset (void)
 	dmd_init ();
 	switch_init ();
 	flipper_init ();
-#if (MACHINE_DCS == 0)
-	/* TODO - this function is turning on interrupt before we want them on! */
-	sound_init ();
-#endif
 	lamp_init ();
 	device_init ();
 
@@ -227,10 +223,8 @@ void do_reset (void)
 #endif
 
 	/* Initialize the sound board further */
-#if (MACHINE_DCS == 1)
 	sys_init_pending_tasks++;
 	task_create_gid (GID_DCS_INIT, sound_init);
-#endif
 
 	/* The system can run itself now, this task is done!
 	 *

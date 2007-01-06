@@ -216,6 +216,16 @@ void amode_deff (void) __taskentry__
 
 	for (;;)
 	{
+
+		extern const U8 cow_anim0_prg[];
+		//dmd_animate (cow_anim0_prg, TIME_66MS);
+#if 1
+		dmd_alloc_low ();
+		dmd_draw_xbmprog (cow_anim0_prg);
+		dmd_show_low ();
+		task_sleep_sec (7);
+#endif
+
 #if 0
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (hitcher0_bits);

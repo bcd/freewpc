@@ -63,6 +63,7 @@ enum wpc_debugger_response {
 };
 
 __common__ void db_init (void);
+__common__ void db_idle (void);
 __common__ void db_puts (const char *s);
 
 #endif /* _SYS_DEBUG_H */

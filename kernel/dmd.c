@@ -62,7 +62,7 @@
  */
 
 #include <freewpc.h>
-
+#include <xbmprog.h>
 
 /** Points to the next free page that can be allocated */
 dmd_pagenum_t dmd_free_page;
@@ -487,13 +487,93 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 	}
 }
 
-/* FBM (FreeWPC) bitmap render function.
- *
- * The image is stored as a series of encoded instructions, which
- * is expanded at runtime by the following interpreter.
- */ 
-void dmd_draw_fbm (const U8 *image_bits)
+/** Draw an XBM program (xbmprog).  */ 
+const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 {
+	U8 *dbuf = dmd_low_buffer;
+#ifdef __m6809__
+	register U8 c asm ("a");
+#else
+	U8 c;
+#endif
+	U8 c2;
+
+	wpc_push_page (PRG_PAGE);
+
+	/* Read the flags */
+	c = *xbmprog++;
+	switch (c)
+	{
+		case XBMPROG_METHOD_RAW:
+			dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)xbmprog);
+			xbmprog += (dmd_high_buffer - dmd_low_buffer);
+			break;
+
+		case XBMPROG_METHOD_RLE:
+			while (dbuf < dmd_high_buffer)
+			{
+				c = *xbmprog++;
+				if (c == XBMPROG_RLE_SKIP)
+				{
+					c = *xbmprog++;
+					do {
+						*dbuf++ = 0;
+						c--;
+					} while (c != 0);
+				}
+				else if (c == XBMPROG_RLE_REPEAT)
+				{
+					c = *xbmprog++; /* data */
+					c2 = *xbmprog++; /* count */
+					do {
+						*dbuf++ = c;
+						c2--;
+					} while (c2 != 0);
+				}
+				else
+					*dbuf++ = c;
+			}
+			break;
+
+		case XBMPROG_METHOD_RLE_DELTA:
+			while (dbuf < dmd_high_buffer)
+			{
+				c = *xbmprog++;
+				if (c == XBMPROG_RLE_SKIP)
+				{
+					c = *xbmprog++;
+					dbuf += c;
+				}
+				else if (c == XBMPROG_RLE_REPEAT)
+				{
+					c = *xbmprog++; /* data */
+					c2 = *xbmprog++; /* count */
+					do {
+						*dbuf++ |= c;
+						c2--;
+					} while (c2 != 0);
+				}
+				else
+					*dbuf++ |= c;
+			}
+			break;
+	}
+
+	wpc_pop_page ();
+	return xbmprog;
+}
+
+
+/** Run a DMD animation on the display. */
+void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
+{
+	while (*xbmprog != XBMPROG_METHOD_END)
+	{
+		dmd_alloc_low ();
+		xbmprog = dmd_draw_xbmprog (xbmprog);
+		dmd_show_low ();
+		task_sleep (delay);
+	}
 }
 
 

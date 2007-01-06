@@ -39,6 +39,8 @@ define MACHINE_AMODE_LEFT_FLIPPER_HANDLER amode_left_flipper
 define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS 10
+define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
+define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 
 ##########################################################################
 # Lamp Description

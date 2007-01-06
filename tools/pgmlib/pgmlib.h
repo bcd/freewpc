@@ -27,6 +27,7 @@
 #define MAX_HEIGHT 32
 #define MAX_MAXVAL 15
 #define MAX_XBMSET_PLANES 4
+#define MAX_XBMSET_FRAMES 256
 
 #define PGM_COLOR(pgm, percent)	((unsigned int)(((pgm)->maxval) * (percent)))
 #define PGM_BLACK(pgm)	PGM_COLOR(pgm, 0.0)
@@ -62,7 +63,8 @@ typedef struct {
 typedef struct {
 	const char *c_name;
 	unsigned int n_planes;
-	XBM *planes[MAX_XBMSET_PLANES];
+	unsigned int frame_count;
+	XBM *planes[MAX_XBMSET_PLANES][MAX_XBMSET_FRAMES];
 } XBMSET;
 
 #define XBMOP_MAX_LITERALS	0x20
@@ -119,21 +121,28 @@ typedef struct xbm_prog_elem {
 		struct {
 		} set_cursor;
 	} args;
+	struct {
+		unsigned int flags;
+		unsigned int size;
+	} stats;
 } XBMPROG;
 
 
-XBMSET * pgm_make_xbmset (PGM *pgm);
+#define pgm_make_xbmset(pgm)  pgm_append_xbmset (NULL, pgm)
 
+XBMSET * pgm_append_xbmset (XBMSET *xbmset, PGM *pgm);
 int xbm_unique_byte_count (XBM * xbm);
 void xbm_write_stats (FILE *fp, XBM *xbm);
 void xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags);
 void xbmset_free (XBMSET *xbmset);
+XBM *xbmset_plane (XBMSET *xbmset, int plane);
+XBMPROG *xbm_make_prog (XBM *xbm);
 
 PGM * pgm_alloc (void);
 void pgm_free (PGM *pgm);
 void pgm_resize (PGM *pgm, unsigned int width, unsigned int height);
 void pgm_set_maxval (PGM *pgm, unsigned int depth);
-void pgm_write (FILE *fp, PGM *pgm);
+void pgm_write (PGM *pgm, const char *filename);
 void pgm_draw_pixel (PGM *pgm, unsigned int x, unsigned int y, unsigned int val);
 unsigned int pgm_read_pixel (PGM *pgm, unsigned int x, unsigned int y);
 void pgm_draw_hline (PGM *pgm, unsigned int x1, unsigned int x2, unsigned int y, unsigned int val);
@@ -147,6 +156,7 @@ void pgm_paste (PGM *dst, PGM *src, unsigned int xpos, unsigned int ypos);
 void pgm_scale (PGM *pgm, double factor);
 void pgm_xor (PGM *dst, PGM *src1, PGM *src2);
 void pgm_write_xbmset (PGM *pgm, const char *filename, const char *name);
+void pgm_write_xbm (PGM *pgm, const char *filename, const char *name, int plane);
 void pgm_change_maxval (PGM *pgm, unsigned int new_maxval);
 PGM * pgm_read (const char *filename);
 void pgm_invert (PGM *pgm);

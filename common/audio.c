@@ -20,7 +20,8 @@
 
 #include <freewpc.h>
 
-/* 
+/**
+ * \file
  * \brief Common audio routines.
  * This is a layer of abstraction above the raw kernel functions.   
  * It works similar to the display effect functions. */
@@ -37,6 +38,10 @@ audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
  * current state of the channel. */
 audio_channel_t audio_channel_table[NUM_AUDIO_CHANNELS];
 
+static const char *audio_channel_names[] = {
+	"Sample 1", "Sample 2", "Sample 3",
+	"BG", "Speech 1", "Speech 2", "FG", "Reserved",
+};
 
 /** Dump the audio data to the debugger port. */
 void audio_dump (void)
@@ -44,9 +49,11 @@ void audio_dump (void)
 	U8 i;
 
 	/* Dump the channel table */
+	db_puts ("\n");
 	for (i=0; i < NUM_AUDIO_CHANNELS; i++)
 	{
-		dbprintf ("Ch%d : %p\n", audio_channel_table[i].pid);
+		dbprintf ("CH %d (%s) : %p\n",
+			i, audio_channel_names[i], audio_channel_table[i].pid);
 	}
 
 	/* Dump the track table */
@@ -55,7 +62,7 @@ void audio_dump (void)
 		audio_track_t *track = audio_bg_track_table[i];
 		if (track)
 		{
-			dbprintf ("Track %d : %02X  %d\n", track->code, track->prio);
+			dbprintf ("Track %d : %02X  P%d\n", i, track->code, track->prio);
 		}
 	}
 }
@@ -124,7 +131,7 @@ void audio_exit (void)
 	for (channel_id = 0; channel_id < NUM_AUDIO_CHANNELS; channel_id++)
 	{
 		audio_channel_t *ch = &audio_channel_table[channel_id];
-		if (ch->pid == task_current)
+		if (ch->pid == task_getpid ())
 		{
 			ch->pid = NULL;
 			break;
@@ -160,16 +167,13 @@ static void bg_music_task (void)
 		audio_exit ();
 	}
 
-	/* Play the track, and reinitialize it every so often */
-	for (;;)
-	{
-		music_set (current->code);
-		task_sleep_sec (1);
-	}
+	/* Play the track */
+	music_set (current->code);
+	audio_exit ();
 }
 
 
-void bg_music_start (audio_track_t *track)
+void bg_music_start (const audio_track_t *track)
 {
 	U8 i;
 
@@ -183,7 +187,7 @@ void bg_music_start (audio_track_t *track)
 		}
 }
 
-void bg_music_stop (audio_track_t *track)
+void bg_music_stop (const audio_track_t *track)
 {
 	U8 i;
 
@@ -197,10 +201,77 @@ void bg_music_stop (audio_track_t *track)
 }
 
 
+void bg_music_stop_all (void)
+{
+	U8 i;
+
+	for (i=0; i < NUM_STACKED_TRACKS; i++)
+		audio_bg_track_table[i] = NULL;
+	audio_stop (AUDIO_CH_BACKGROUND);
+}
+
+
 /** Initialize the audio subsystem. */
 CALLSET_ENTRY (audio, init)
 {
 	memset (audio_channel_table, 0, sizeof (audio_channel_table));
 	memset (audio_bg_track_table, 0, sizeof (audio_bg_track_table));
+}
+
+
+static const audio_track_t default_music_track = {
+	.prio = 1,
+#ifdef MACHINE_BALL_IN_PLAY_MUSIC
+	.code = MACHINE_BALL_IN_PLAY_MUSIC,
+#else
+	.code = 2,
+#endif
+};
+
+static const audio_track_t start_ball_music_track = {
+	.prio = 0,
+#ifdef MACHINE_START_BALL_MUSIC
+	.code = MACHINE_START_BALL_MUSIC,
+#else
+	.code = 2,
+#endif
+};
+
+
+CALLSET_ENTRY(sound, start_ball)
+{
+	bg_music_start (&start_ball_music_track);
+}
+
+
+CALLSET_ENTRY (audio, ball_in_play)
+{
+	bg_music_stop (&start_ball_music_track);
+	bg_music_start (&default_music_track);
+}
+
+
+CALLSET_ENTRY (audio, end_ball)
+{
+	bg_music_stop_all ();
+}
+
+
+CALLSET_ENTRY (audio, end_game)
+{
+	bg_music_stop_all ();
+	if (!in_test)
+	{
+		// TODO - start timed with fade out
+		// music_set (MACHINE_END_GAME_MUSIC);
+	}
+}
+
+
+CALLSET_ENTRY(sound, start_game)
+{
+#ifdef MACHINE_START_GAME_SOUND
+	sound_send (MACHINE_START_GAME_SOUND);
+#endif
 }
 

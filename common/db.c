@@ -66,7 +66,7 @@ void db_puts (const char *s)
 #endif /* DEBUGGER */
 
 
-CALLSET_ENTRY (db, idle)
+void db_idle (void)
 {
 #ifdef DEBUGGER
 	if (!db_attached)
@@ -75,6 +75,10 @@ CALLSET_ENTRY (db, idle)
 		{
 			wpc_debug_write (0);
 			db_attached = 1;
+			db_puts ("\n\n"
+				"----------------------------------------------------------\n"
+				"FREEWPC DEBUGGER\n"
+				"----------------------------------------------------------\n\n");
 		}
 	}
 	else
@@ -142,6 +146,7 @@ CALLSET_ENTRY (db, idle)
 	}
 #endif /* DEBUGGER */
 }
+
 
 void db_init (void)
 {

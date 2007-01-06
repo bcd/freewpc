@@ -123,7 +123,8 @@ void amode_stop (void)
 	leff_stop (LEFF_AMODE);
 #endif
 	lamp_all_off ();
-	music_set (MUS_OFF);
+	music_set (MUS_OFF); // TODO - deprecated
+	bg_music_stop_all ();
 	callset_invoke (amode_stop);
 }
 
