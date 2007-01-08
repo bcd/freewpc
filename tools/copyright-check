@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# copyright-check
+#
+# This script should be invoked from the top-level directory; e.g.
+# run "tools/copyright-check".
+#
+
+for dir in `echo include machine kernel common test`; do
+	cd $dir
+	for f in `find . -name "*.[ch]" -newer ../tools/timestamp.2007`; do
+		echo -n "Checking $dir/$f ... "
+		grep "Copyright.*2007" $f > /dev/null 2>&1
+		if [ "$?" != "0" ]; then
+			grep "Copyright.*2006" $f > /dev/null 2>&1
+			if [ "$?" != "0" ]; then
+				echo "No copyright at all!";
+			else
+				echo "Copyright needs updating";
+			fi
+		else
+			echo "OK";
+		fi
+	done
+	cd ..
+done
