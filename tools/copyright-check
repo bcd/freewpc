@@ -17,6 +17,7 @@ for dir in `echo include machine kernel common test`; do
 				echo "No copyright at all!";
 			else
 				echo "Copyright needs updating";
+				sed -i -e "s/Copyright.*2006/&, 2007/" $f
 			fi
 		else
 			echo "OK";
