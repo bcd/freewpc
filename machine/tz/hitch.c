@@ -40,11 +40,16 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
 	event_did_follow (rocket, hitchhiker);
 	if (lamp_test (LM_PANEL_HH))
+	{
 		score (SC_10M);
+		sound_send (SND_HITCHHIKER_COUNT);
+	}
 	else
+	{
 		score (SC_250K);
+		sound_send (SND_HITCHHIKER_DRIVE_BY);
+	}
 	hitch_count++;
-	sound_send (SND_HITCHHIKER_DRIVE_BY);
 	deff_start (DEFF_HITCHHIKER);
 }
 

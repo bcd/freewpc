@@ -62,15 +62,6 @@ CALLSET_ENTRY(jet, start_player)
 	lamp_tristate_on (LM_RIGHT_JET);
 }
 
-
-CALLSET_ENTRY (jet, door_start_tsm)
-{
-	if (lamp_test (LM_PANEL_TSM))
-	{
-		leff_start (LEFF_JETS_ACTIVE);
-	}
-}
-
 sound_code_t jet_sounds[] = { 
 	SND_HORN1, SND_HORN2, SND_HORN3
 };
@@ -101,5 +92,17 @@ CALLSET_ENTRY (jet, sw_jet)
 	else
 		score (SC_250K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
+}
+
+CALLSET_ENTRY (jet, door_start_tsm)
+{
+	if (lamp_test (LM_PANEL_TSM))
+	{
+		leff_start (LEFF_JETS_ACTIVE);
+	}
+}
+
+CALLSET_ENTRY (jet, door_stop_tsm)
+{
 }
 

@@ -117,14 +117,14 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
-		score (SC_250K);
 		if (lamp_test (LM_PANEL_CAMERA))
 		{
 			score (SC_10M);
-			task_sleep (TIME_100MS);
+			sound_send (SND_CAMERA_AWARD_SHOWN);
 		}
 		else
 		{
+			score (SC_250K);
 			sound_send (SND_JET_BUMPER_ADDED);
 		}
 	}
