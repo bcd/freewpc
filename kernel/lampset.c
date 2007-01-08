@@ -51,7 +51,9 @@ void lampset_set_apply_delay (task_ticks_t delay)
 
 const U8 *lampset_lookup (lampset_id_t id)
 {
+	wpc_push_page (MD_PAGE);
 	return lampset_table[id];
+	wpc_pop_page ();
 }
 
 
@@ -59,8 +61,12 @@ const U8 *lampset_lookup (lampset_id_t id)
 void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register uint8_t opcode;
-	register const lampnum_t *lset = lampset_table[id];
+	register const lampnum_t *lset;
 	U8 lampset_intermediate_delay = 0;
+
+	wpc_push_page (MD_PAGE);
+
+	lset = lampset_table[id];
 
 	while ((opcode = *lset++) != LAMP_END)
 	{
@@ -80,6 +86,7 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				break;
 		}
 	}
+	wpc_pop_page ();
 }
 
 /* Common uses of apply */

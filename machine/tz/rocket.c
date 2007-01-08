@@ -26,7 +26,7 @@ CALLSET_ENTRY (rocket, dev_rocket_enter)
 	score (SC_10K);
 }
 
-void rocket_kick_sound (void)
+static void rocket_kick_sound (void)
 {
 	sound_send (SND_ROCKET_KICK_DONE);
 	flasher_pulse (FLASH_UR_FLIPPER);

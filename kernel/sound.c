@@ -48,12 +48,15 @@ __fastram__ music_code_t current_music;
 /** The current master volume.  Individual sound clips may override this
  * temporarily, but this is the default. */
 __nvram__ U8 current_volume;
+__nvram__ U8 current_volume_checksum;
 
 U8 sound_error_code;
 
 U8 sound_version_major;
 
 U8 sound_version_minor;
+
+U8 sound_board_return;
 
 #define sound_version sound_version_major
 
@@ -120,6 +123,8 @@ void music_change (music_code_t code)
 
 
 
+/** Poll the sound board for data.
+ * If no data is ready, returns 0xFF. */
 U8 sound_board_poll (void)
 {
 	U8 status = wpc_asic_read (WPCS_CONTROL_STATUS);
@@ -138,6 +143,10 @@ U8 sound_board_poll (void)
 		return (0xFF);
 }
 
+
+/** Read an expected value from the sound board.
+ * If data is not available, a number of retries will be performed
+ * before bailing and returning 0xFF. */
 U8 sound_board_read (U8 retries)
 {
 	do {
@@ -145,9 +154,35 @@ U8 sound_board_read (U8 retries)
 		if (in != 0xFF)
 			return (in);
 		else
-			task_sleep (TIME_66MS);
+			task_sleep (TIME_100MS);
 	} while (--retries != 0);
 	return (0xFF);
+}
+
+
+U8 sound_board_command (U8 cmd, U8 retries)
+{
+	do {
+		sound_queue_insert (cmd);
+		task_sleep (TIME_33MS);
+		U8 in = sound_board_poll ();
+		if (in != 0xFF)
+			return (in);
+		else
+			task_sleep (TIME_100MS);
+	} while (--retries != 0);
+	return (0xFF);
+}
+
+
+CALLSET_ENTRY (sound, idle)
+{
+	static U8 last_return = 0;
+	if (sound_board_return != last_return)
+	{
+		dbprintf ("Sound board return: %02Xh\n", sound_board_return);
+		last_return = sound_board_return;
+	}
 }
 
 
@@ -157,7 +192,10 @@ void sound_rtt (void)
 {
 	/* PinMAME is generating FIRQs continuously if we don't read
 	 * this register occasionally. */
-	(void) wpc_asic_read (WPCS_CONTROL_STATUS);
+	if (wpc_asic_read (WPCS_CONTROL_STATUS) & 0x1)
+	{
+		sound_board_return = wpc_asic_read (WPCS_DATA);
+	}
 
 	if (!sound_queue_empty ())
 	{
@@ -178,6 +216,7 @@ void sound_init (void)
 	U16 j;
 	U8 sound_board_type;
 
+#if 0
 #if (MACHINE_DCS == 0)
 	static U8 init_string[] = {
 		0x00, 0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
@@ -192,66 +231,35 @@ void sound_init (void)
 		task_sleep (TIME_16MS);
 	}
 #endif
-
+#endif
 
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	i = 100; /* wait for up to 10 seconds */
-	for (;;)
+	if ((sound_board_type = sound_board_read (100)) == 0xFF)
 	{
-		if ((sound_board_type = sound_board_poll ()) != 0xFF)
-			break;
-		else
-		{
-			task_sleep (TIME_100MS);
-			if (i-- == 0)
-			{
-				dbprintf ("Error: sound board not detected\n");
-				goto exit_func;
-			}
-		}
+		dbprintf ("Error: sound board not detected\n");
+		goto exit_func;
 	}
-	(void)sound_board_poll ();
-	dbprintf ("Sound board type: %02X\n", sound_board_type);
+	dbprintf ("Sound board detected: type %02X\n", sound_board_type);
 
-	/* Read its boot code as well */
+	/* Check for sound board errors.
+	 * If no value is read, this is OK... otherwise it is an error
+	 * code */
 	dbprintf ("Checking boot code...\n");
-	i = 20; /* wait for up to 2 seconds */
-	for (;;)
+	if ((sound_error_code = sound_board_read (20)) != 0xFF)
 	{
-		if ((sound_error_code = sound_board_poll ()) != 0xFF)
-			break;
-		else
-		{
-			task_sleep (TIME_100MS);
-			if (i-- == 0)
-				break;
-		}
+		dbprintf ("Sound board boot code: %02X\n", sound_error_code);
+		goto exit_func;
 	}
-	(void)sound_board_poll ();
-	dbprintf ("Sound board boot code: %02X\n", sound_error_code);
 
 	/* Initialize the sound queue.  We cannot transmit anything before here. */
 	sound_queue_init ();
 	task_sleep_sec (1);
 
-	/* Read the sound board version.  DCS does two reads here; WPC only one? */
-	i = 8;
-	do {
-		sound_send (SND_GET_VERSION_CMD);
-		task_sleep (TIME_100MS);
-		sound_version = sound_board_poll ();
-	} while ((sound_version == 255) && (--i != 0));
-	(void)sound_board_poll ();
-
+	/* Read the sound board version. */
+	sound_version = sound_board_command (SND_GET_VERSION_CMD, 20);
 #if (MACHINE_DCS == 1)
-	i = 8;
-	do {
-		sound_send (SND_GET_UNKNOWN_CMD);
-		task_sleep (TIME_100MS);
-		sound_version_minor = sound_board_poll ();
-	} while ((sound_version_minor == 255) && (--i != 0));
-	(void)sound_board_poll ();
+	sound_version_minor = sound_board_command (SND_GET_MINOR_VERSION_CMD, 20);
 #endif
 
 #if (MACHINE_DCS == 1)
@@ -260,8 +268,11 @@ void sound_init (void)
 	dbprintf ("Detected L-%d sound.\n", sound_version);
 #endif
 
-	/* TODO  - use nvram value if it's sensible */
-	volume_set (DEFAULT_VOLUME);
+	/* Use nvram value if it's sensible */
+	if (current_volume_checksum == ~current_volume)
+		volume_set (current_volume);
+	else
+		volume_set (DEFAULT_VOLUME);
 
 exit_func:
 	sys_init_pending_tasks--;
@@ -312,6 +323,7 @@ void volume_set (U8 vol)
 	 * TODO : checksum this? */
 	wpc_nvram_get ();
 	current_volume = vol;
+	current_volume_checksum = ~vol;
 	wpc_nvram_put ();
 
 	if (current_volume == 0)

@@ -1,0 +1,48 @@
+
+#ifndef _SNDHW_H
+#define _SNDHW_H
+
+/* I/O registers */
+
+#define WPCS_ROM_BANK        0x2000
+#define WPCS_FM_ADDR_STATUS  0x2400
+#define WPCS_FM_DATA         0x2401
+#define WPCS_DAC_DATA        0x2800
+#define WPCS_CVSD_DATA       0x2C00
+#define WPCS_CPU_INPUT       0x3000
+#define WPCS_CVSD_CLEAR      0x3400
+#define WPCS_VOLUME          0x3800
+#define WPCS_CPU_OUTPUT      0x3C00
+
+
+/* FM chip addresses */
+
+#define FM_ADDR_TEST_LFO_RESET 0x1
+#define FM_ADDR_KEY_ON 0x8
+#define FM_ADDR_NOISE_ENABLE 0xF
+#define FM_ADDR_CLOCK_A1 0x11 
+#define FM_ADDR_CLOCK_A2 0x12 
+#define FM_ADDR_CLOCK_B 0x13 
+#define FM_ADDR_CLOCK_FUNCTIONS 0x14 
+#define FM_ADDR_LOW_FREQUENCY 0x18 
+#define FM_ADDR_PHASE_AMP_MOD 0x19 
+#define FM_ADDR_CONTROL_WAVEFORM 0x1B 
+#define FM_ADDR_CHANNEL_CTRL 0x20 
+#define FM_ADDR_KEYCODE0 0x28 
+#define FM_ADDR_KEYCODE1 0x29 
+#define FM_ADDR_KEYCODE2 0x2A 
+#define FM_ADDR_KEYCODE3 0x2B 
+#define FM_ADDR_KEYCODE4 0x2C 
+#define FM_ADDR_KEYCODE5 0x2D 
+#define FM_ADDR_KEYCODE6 0x2E 
+#define FM_ADDR_KEYCODE7 0x2F 
+#define FM_ADDR_FRACTION0 0x30 
+#define FM_ADDR_FRACTION1 0x31 
+#define FM_ADDR_FRACTION2 0x32 
+#define FM_ADDR_FRACTION3 0x33 
+#define FM_ADDR_FRACTION4 0x34 
+#define FM_ADDR_FRACTION5 0x35 
+#define FM_ADDR_FRACTION6 0x36 
+#define FM_ADDR_FRACTION7 0x37 
+
+#endif /* _SNDHW */

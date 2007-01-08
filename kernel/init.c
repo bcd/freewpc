@@ -76,17 +76,7 @@ void do_reset (void)
 
 	extern void system_reset (void);
 
-	/** Disable hardware interrupts in the 6809 */
-	disable_interrupts ();
-
 #ifdef __m6809__
-	/** Initialize the direct page pointer.  This hardware register
-	 * determines where 'direct' addressing instructions are targeted.
-	 * By setting to zero, direct addresses are mapped to 0000h-00FFh.
-	 * We can use shorter instructions when referencing variables here.
-	 */
-	set_direct_page_pointer (0);
-
 	/** Initialize the stack pointer.  We can now make
 	 * function calls!  Note that this stack is only used
 	 * for execution that is not task-based.  Once tasks
@@ -101,34 +91,11 @@ void do_reset (void)
 	 */
 	set_stack_pointer (STACK_BASE - 8);
 
+	/* Reset the sound board... the earlier the better */
+	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
+
 	/** Initializing the RAM page */
 	wpc_set_ram_page (0);
-
-	/** Perform basic diagnostics to ensure that everything is
-	 * more or less working.  (Diags must be in the system page
-	 * since the paging hardware may be broken.)
-	 * 1. Verify ROM is good first, since that ensures that this
-	 * code is not corrupted somehow.  Take care NOT to use RAM
-	 * at all during this stage; this is tricky and may require
-	 * assembler macros.
-	 *
-	 * 2. Verify RAM next, using a read-write test.
-	 *
-	 * 3. Verify WPC ASIC functions.
-	 * At any point, if something goes wrong, we go into a hard
-	 * loop and pulse the diagnostic LED with a flash code to
-	 * report the error.  We can't reply on the DMD working
-	 * properly to help us here.
-	 *
-	 * Once diags prove the system working, ALL of the remaining
-	 * code should be moved into a separate page and run from there,
-	 * as it is only run once.
-	 */
-#if 0
-#ifdef __m6809__
-	asm volatile ("jmp\t_rom_diag");
-#endif
-#endif
 
 	/** Initialize RAM to all zeroes */
 	ramptr = (uint8_t *)USER_RAM_SIZE;
@@ -194,6 +161,12 @@ void do_reset (void)
 	 * thread of execution, too. */
 	task_init ();
 
+	/* Initialize the sound board first.  This is started as a background
+	 * thread, since it involves polling for data back from the sound board,
+	 * which may take unknown (or even infinite) time. */
+	sys_init_pending_tasks++;
+	task_create_gid (GID_DCS_INIT, sound_init);
+
 	timer_init ();
 	deff_init ();
 	leff_init ();
@@ -230,10 +203,6 @@ void do_reset (void)
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
 #endif
-
-	/* Initialize the sound board further */
-	sys_init_pending_tasks++;
-	task_create_gid (GID_DCS_INIT, sound_init);
 
 	/* The system can run itself now, this task is done!
 	 *

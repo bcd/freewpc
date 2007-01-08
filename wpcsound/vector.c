@@ -27,13 +27,9 @@
  * link-time to address 0xFFF0.
  */
 
-extern void start (void);
-extern void do_swi3 (void);
-extern void do_swi2 (void);
-extern void do_firq (void);
-extern void do_irq (void);
-extern void do_swi (void);
-extern void do_nmi (void);
+extern void wpc_sound_reset (void);
+extern void wpc_sound_irq (void);
+extern void wpc_sound_firq (void);
 
 
 /** The 6809 vector table structure */
@@ -51,14 +47,14 @@ typedef struct
 
 
 /** The interrupt vector table */
-__attribute__((section("vector"))) m6809_vector_table_t vectors = {
-	.unused = start,
-	.swi3 = do_swi3,
-	.swi2 = do_swi2,
-	.firq = do_firq,
-	.irq = do_irq,
-	.swi = do_swi,
-	.nmi = do_nmi,
-	.reset = start,
+__attribute__((section("vector"))) m6809_vector_table_t m6809_vectors = {
+	.unused = wpc_sound_reset,
+	.swi3 = wpc_sound_reset,
+	.swi2 = wpc_sound_reset,
+	.firq = wpc_sound_firq,
+	.irq = wpc_sound_irq,
+	.swi = wpc_sound_reset,
+	.nmi = wpc_sound_reset,
+	.reset = wpc_sound_reset,
 };
 

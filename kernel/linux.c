@@ -611,7 +611,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	
-	/* Jump to the reset vector */
+	/* Jump to the reset function */
 	do_reset ();
 	return 0;
 }
