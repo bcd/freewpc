@@ -106,8 +106,6 @@ echo "};" >> $fonfile
 
 (cat <<END
 const font_t font_$cfont = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = `grep "#define.*0_height" $fonfile | awk '{print $3}'`,
 	.glyphs = ${cfont}_glyphs,

@@ -252,8 +252,6 @@ static char *helv8_glyphs[] = {
    ['%'] = glyph_helv8_percent_bits,
 };
 const font_t font_helv8 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 12,
 	.glyphs = helv8_glyphs,

@@ -252,8 +252,6 @@ static char *fixed10_glyphs[] = {
    ['%'] = glyph_fixed10_percent_bits,
 };
 const font_t font_fixed10 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 12,
 	.glyphs = fixed10_glyphs,

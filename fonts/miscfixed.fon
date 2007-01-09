@@ -93,8 +93,6 @@ static char *misctype_glyphs[] = {
    ['%'] = glyph_misctype_percent_bits,
 };
 const font_t font_misctype = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 11,
 	.glyphs = misctype_glyphs,

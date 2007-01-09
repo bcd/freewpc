@@ -223,8 +223,6 @@ static char *term6_glyphs[] = {
    ['%'] = glyph_term6_percent_bits,
 };
 const font_t font_term6 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 8,
 	.glyphs = term6_glyphs,

@@ -93,8 +93,6 @@ static unsigned char *luctype_glyphs[] = {
    ['%'] = glyph_luctype_percent_bits,
 };
 const font_t font_luctype = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 10,
 	.glyphs = luctype_glyphs,

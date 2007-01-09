@@ -326,8 +326,6 @@ static char *cu17_glyphs[] = {
    ['%'] = glyph_cu17_percent_bits,
 };
 const font_t font_cu17 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 22,
 	.glyphs = cu17_glyphs,

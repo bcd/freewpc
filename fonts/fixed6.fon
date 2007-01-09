@@ -231,8 +231,6 @@ static char *fixed6_glyphs[] = {
    ['%'] = glyph_fixed6_percent_bits,
 };
 const font_t font_fixed6 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 9,
 	.glyphs = fixed6_glyphs,

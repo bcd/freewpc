@@ -252,8 +252,6 @@ static char *times10_glyphs[] = {
    ['%'] = glyph_times10_percent_bits,
 };
 const font_t font_times10 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 12,
 	.glyphs = times10_glyphs,

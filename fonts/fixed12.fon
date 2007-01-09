@@ -223,8 +223,6 @@ static char *fixed12_glyphs[] = {
    ['Z'] = glyph_test_Z_bits,
 };
 const font_t font_fixed12 = {
-   .width = 0,
-   .bytewidth = 0,
    .spacing = 2,
    .height = 18,
    .glyphs = fixed12_glyphs,

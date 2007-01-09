@@ -262,8 +262,6 @@ static char *lucida9_glyphs[] = {
    ['%'] = glyph_lucida9_percent_bits,
 };
 const font_t font_lucida9 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 13,
 	.glyphs = lucida9_glyphs,

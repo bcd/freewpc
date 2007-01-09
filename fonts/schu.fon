@@ -93,8 +93,6 @@ static char *schu_glyphs[] = {
    ['%'] = glyph_schu_percent_bits,
 };
 const font_t font_schu = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 11,
 	.glyphs = schu_glyphs,

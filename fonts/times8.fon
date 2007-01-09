@@ -252,8 +252,6 @@ static char *times8_glyphs[] = {
    ['%'] = glyph_times8_percent_bits,
 };
 const font_t font_times8 = {
-	.width = 0,
-	.bytewidth = 0,
 	.spacing = 2,
 	.height = 12,
 	.glyphs = times8_glyphs,

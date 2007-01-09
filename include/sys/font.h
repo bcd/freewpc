@@ -27,12 +27,6 @@
  */
 typedef struct
 {
-	/** The maximum character width, in bits */
-	U8 width;
-
-	/** The maximum character width, in bytes */
-	U8 bytewidth;
-
 	/** The preferred spacing between characters, in bits */
 	U8 spacing;
 
