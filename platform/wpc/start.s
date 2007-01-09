@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright 2006 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
@@ -19,11 +19,16 @@
 ;;;
 
 
+;;; Hardware registers needed
 WPC_DEBUG_PORT = 0x3D60
 WPC_LEDS       = 0x3FF2
 WPC_ROM_BANK   = 0x3FFC
 
+;;; The ROM bank value for the lowest page this ROM uses
 BOTTOM_BANK    = 0x20
+
+;;; The ROM bank value for the highest page this ROM uses,
+;;; excluding the fixed system pages.
 TOP_BANK       = 0x3D
 
 FLASH_DELAY    = 100
@@ -156,10 +161,31 @@ ram_error:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 asic_test:
 
-test_done:
-	jmp	_do_reset
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;;   IRQ POST DIAGNOSTIC CHECK
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+irq_test:
+	; TODO : set irq_function to a custom IRQ handler that
+	; does nothing but increment a counter.  Use hand-tuned
+	; delays, then verify that the IRQ is firing at (about)
+	; the expected rate.
 
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;;   FIRQ POST DIAGNOSTIC CHECK
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+firq_test:
+
+	;;; END OF DIAGNOSTICS
+test_done:
+	jmp	_do_reset   ; Jump into C code
+
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;; diag_error
+	;;; Handles a diagnstics error by flashing the diag LED.
+   ;;;
 	;;; Input: X = diagnostic error code
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 diag_error:
 	tfr	x,d             ; Double X
 	leax	d,x
