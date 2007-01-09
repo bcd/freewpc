@@ -23,10 +23,19 @@
 
 struct area_csum
 {
+	/** A pointer to the beginning of the NVRAM block */
 	/* __nvram__ */ U8 *area;
+
+	/** The length of the NVRAM block, in bytes */
 	U8 length;
+
+	/** A pointer to the variable that actually holds the checksum */
 	/* __nvram__ */ U8 *csum;
+
+	/** A function that will reset the NVRAM block to factory defaults */
 	void (*reset) (void);
+
+	/** The ROM page in which the reset function resides */
 	U8 reset_page;
 };
 

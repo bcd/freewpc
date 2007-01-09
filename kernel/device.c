@@ -106,6 +106,7 @@ void device_debug (void)
 #endif
 
 
+/** Clears the state of a device to power on settings. */
 void device_clear (device_t *dev)
 {
 	dev->size = 0;
@@ -118,6 +119,9 @@ void device_clear (device_t *dev)
 	dev->props = NULL;
 }
 
+
+/** Register a device in the device table.  This initializes the
+device state with information from the device properties structure. */
 void device_register (devicenum_t devno, device_properties_t *props)
 {
 	device_t *dev;
@@ -157,8 +161,7 @@ uint8_t device_recount (device_t *dev)
 }
 
 
-/*
- * The core function for handling a device.
+/** The core function for handling a device.
  * This function is invoked (within its own task context) whenever
  * a switch closure occurs on a device, or when a request is made to
  * kick a ball from a device.
@@ -503,7 +506,7 @@ void device_probe (void)
 }
 
 
-/* Called from a switch handler to do the common processing */
+/** Called from a switch handler to do the common processing */
 void device_sw_handler (uint8_t devno)
 {
 #ifdef DEBUGGER
@@ -529,6 +532,7 @@ void device_sw_handler (uint8_t devno)
 }
 
 
+/** Called when the number of 'live balls' in play should be increased. */
 void device_add_live (void)
 {
 	if (missing_balls > 0)
@@ -647,6 +651,8 @@ bool device_check_start_ok (void)
 	return TRUE;
 }
 
+
+/** Requests that a device 'unlock' a ball. */
 void device_unlock_ball (device_t *dev)
 {
 	if (dev->max_count > 0)
@@ -661,6 +667,7 @@ void device_unlock_ball (device_t *dev)
 }
 
 
+/** Requests that a device allow a ball lock. */
 void device_lock_ball (device_t *dev)
 {
 #ifdef DEVNO_TROUGH
@@ -693,6 +700,7 @@ CALLSET_ENTRY (device, start_game)
 }
 
 
+/** Initialize the device subsystem */
 void device_init (void)
 {
 	device_t *dev;

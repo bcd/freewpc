@@ -55,15 +55,7 @@ typedef struct
 __fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
-/*
- * Entry for unused switches.
- */
-
-void sw_unused_handler (void)
-{
-	dbprintf ("Unregistered switch\n");
-}
-
+/** Return the switch table entry for a switch */
 static const switch_info_t *switch_lookup (U8 sw)
 {
 	extern const switch_info_t switch_table[];
@@ -71,6 +63,7 @@ static const switch_info_t *switch_lookup (U8 sw)
 }
 
 
+/** Return the lamp associated with a switch */
 U8 switch_lookup_lamp (const switchnum_t sw)
 {
 	U8 lamp;
@@ -133,13 +126,15 @@ void switch_check_masks (void)
 }
 #endif
 
+
+/** Initialize the switch subsystem */
 void switch_init (void)
 {
 	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
 }
 
 
-/** Inline assembler is great for the 6809, but it won't work in simulation.
+/* Inline assembler is great for the 6809, but it won't work in simulation.
  * These macros abstract the 6809 opcodes so they can be simulated. */
 #ifdef __m6809__
 #define SW_LDA_IO(var)		asm __volatile__ ("lda\t" C_STRING(var))
@@ -169,6 +164,8 @@ static U8 areg, breg;
 #define SW_LDB_CONST(n)		breg = n
 #endif
 
+
+/** Macro to update the internal state of a particular switch column. */
 extern inline void switch_rowpoll (const U8 col)
 {
 	/* Read the switch column from the hardware.
@@ -247,6 +244,7 @@ extern inline void switch_rowpoll (const U8 col)
 }
 
 
+/** Return TRUE if the given switch is CLOSED. */
 bool switch_poll (const switchnum_t sw)
 {
 	register bitset p = (bitset)switch_raw_bits;
@@ -255,6 +253,10 @@ bool switch_poll (const switchnum_t sw)
 	return v;
 }
 
+
+/** Return TRUE if the given switch is an opto.  Optos
+are defined in the opto mask array, which is auto generated from
+the machine description. */
 bool switch_is_opto (const switchnum_t sw)
 {
 	register bitset p = (bitset)mach_opto_mask;
@@ -263,12 +265,19 @@ bool switch_is_opto (const switchnum_t sw)
 	return v;
 }
 
+
+/** Return TRUE if the given switch is ACTIVE.  This takes into
+ * account whether or not the switch is an opto. */
 bool switch_poll_logical (const switchnum_t sw)
 {
 	return switch_poll (sw) ^ switch_is_opto (sw);
 }
 
 
+/** The realtime switch processing.
+ * All that is done is to poll all of the switches and store the
+ * updated values in memory.  The idle function will come along
+ * later, scan them, and do any real processing. */
 void switch_rtt (void)
 {
 	/* Poll the cabinet switches */
@@ -289,6 +298,11 @@ void switch_rtt (void)
 }
 
 
+/** Task that performs a switch lamp pulse.
+ * Some switches are inherently tied to a lamp.  When the switch
+ * triggers, the lamp can be automatically flickered.  This is
+ * implemented as a pseudo-lamp effect, so the true state of the
+ * lamp is not disturbed. */
 void switch_lamp_pulse (void)
 {
 	const switch_info_t * const swinfo = (switch_info_t *)task_get_arg ();
@@ -297,19 +311,25 @@ void switch_lamp_pulse (void)
 	 * the right thing. */
 	task_set_thread_data (task_getpid (), L_PRIV_FLAGS, L_SHARED);
 
+	/* If the lamp is already allocated by another lamp effect,
+	then don't bother trying to do the pulse. */
 	if (!lamp_leff2_test_allocated (swinfo->lamp))
 	{
+		/* Allocate the lamp */
 		lamp_leff2_allocate (swinfo->lamp);
 
+		/* Change the state of the lamp */
 		if (lamp_test (swinfo->lamp))
 			leff_off (swinfo->lamp);
 		else
 			leff_on (swinfo->lamp);
 		task_sleep (TIME_100MS * 2);
-	
+
+		/* Change it back */
 		leff_toggle (swinfo->lamp);
 		task_sleep (TIME_100MS * 2);
 
+		/* Free the lamp */
 		lamp_leff2_free (swinfo->lamp);
 	}
 	task_exit ();
@@ -398,7 +418,8 @@ cleanup:
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
-	/* Debounce period after the switch has been handled */
+	/* Debounce period after the switch has been handled.
+	TODO : this is not really working now. */
 	if (swinfo->inactive_time == 0)
 		task_sleep (TIME_100MS * 1);
 	else
@@ -415,12 +436,18 @@ cleanup:
 }
 
 
+/** Idle time switch processing.
+ * 'Pending switches' are scanned and handlers are spawned for each
+ * of them (each is a separate task).
+ */
 CALLSET_ENTRY (switch, idle)
 {
 	U8 rawbits, pendbits;
 	U8 col;
 	extern U8 sys_init_complete;
 
+	/* Prior to system initialization, switches are not serviced.
+	Any switch closures during this time continued to be queued up. */
 	if (sys_init_complete == 0)
 		return;
 

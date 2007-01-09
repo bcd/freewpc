@@ -27,7 +27,6 @@
  * This module implements the standard logic for awarding extra balls.
  */
 
-
 /** Number of extra balls earned */
 U8 extra_balls;
 
@@ -38,6 +37,8 @@ __local__ U8 extra_balls_earned;
 U8 extra_balls_earned_this_bip;
 
 
+/** Update the extra ball lamp to reflect the number of
+collected extra balls by the current player up. */
 static void update_extra_ball_lamp (void)
 {
 #ifdef MACHINE_EXTRA_BALL_LAMP

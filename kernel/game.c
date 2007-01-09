@@ -83,6 +83,8 @@ void start_ball (void);
 
 
 #ifndef MACHINE_CUSTOM_AMODE
+/** A default attract mode display effect to be used when the machine
+doesn't define one */
 void default_amode_deff (void)
 {
 	dmd_alloc_low_high ();
@@ -94,6 +96,8 @@ void default_amode_deff (void)
 #endif
 
 
+/** The display effect that appears immediately at the end of a game,
+before returning to attract mode */
 void game_over_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -104,6 +108,7 @@ void game_over_deff (void)
 }
 
 
+/** Starts the attract mode */
 void amode_start (void)
 {
 	deff_start (DEFF_AMODE);
@@ -116,6 +121,7 @@ void amode_start (void)
 }
 
 
+/** Stops the attract mode */
 void amode_stop (void)
 {
 	deff_stop (DEFF_AMODE);
@@ -129,6 +135,7 @@ void amode_stop (void)
 }
 
 #ifdef DEBUGGER
+/** Dump the game state to the debugger port */
 void dump_game (void)
 {
 	extern U8 extra_balls;
@@ -142,6 +149,8 @@ void dump_game (void)
 #endif
 
 
+/** Handles the end game condition.
+ * This is called directly from the trough update function. */
 void end_game (void)
 {
 	if (in_game)
@@ -422,6 +431,8 @@ void mark_ball_in_play (void)
 	}
 }
 
+
+/** Adds an additional player to the current game in progress */
 void add_player (void)
 {
 	remove_credit ();
@@ -430,6 +441,7 @@ void add_player (void)
 }
 
 
+/** Starts a new game */
 void start_game (void)
 {
 	if (!in_game)
@@ -489,9 +501,6 @@ bool verify_start_ok (void)
 }
 
 
-/**
- * Handle the start button.
- */
 CALLSET_ENTRY (game, sw_start_button)
 {
 	/* If in test mode, let test handle it completely. */

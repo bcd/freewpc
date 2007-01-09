@@ -21,7 +21,9 @@
 /**
  * \file
  * \brief Generic checksum calculation/verification routines.
- *
+ * Each module that uses the NVRAM should declare a structure of
+ * type "struct area_csum" that says how that memory should be
+ * managed.
  */
 
 #include <freewpc.h>
@@ -36,6 +38,9 @@ extern const struct area_csum adj_csum_info;
 extern const struct area_csum audit_csum_info;
 
 
+/** A table of all csum info structures.  All of these
+will be scanned during initialization to ensure that the
+NVRAM is valid. */
 const struct area_csum *csum_info_table[] = {
 	&coin_csum_info,
 	&replay_csum_info,
@@ -46,6 +51,8 @@ const struct area_csum *csum_info_table[] = {
 	&audit_csum_info,
 };
 
+
+/** A table of the csum info page locations */
 const U8 csum_paging_info_table[] = {
 	SYS_PAGE,
 	COMMON_PAGE,
@@ -57,8 +64,10 @@ const U8 csum_paging_info_table[] = {
 };
 
 
-/*
+/**
  * Updates a checksummed region after an update.
+ * This should be invoked immediately after any changes to NVRAM
+ * data.
  */
 void
 csum_area_update (const struct area_csum *csi)
@@ -78,7 +87,7 @@ csum_area_update (const struct area_csum *csi)
 }
 
 
-/*
+/**
  * Checks a checksummed region for correctness.
  * If the checksum fails, the data is reset to defaults.
  */
@@ -109,7 +118,7 @@ csum_area_check (const struct area_csum *csi)
 }
 
 
-/*
+/**
  * Checks all checksummed regions for correctness.
  * This is called during system initialization.
  */

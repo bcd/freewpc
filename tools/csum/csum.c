@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -78,10 +78,10 @@ main (int argc, char *argv[])
                         
          case 'h':
             printf ("FreeWPC Checksum Utility\n");
-				printf ("-f <name>         Sets input filename to name.rom\n");
+				printf ("-f <filename>     Sets input filename\n");
 				printf ("-v <version>      Sets desired version number\n");
-				printf ("-u                Update mode\n");
-				printf ("-d                Disable checksum verification\n");
+				printf ("-u                Update mode (default: read-only)\n");
+				printf ("-d                Disable existing checksum verification\n");
 				printf ("-s                Screw up the ROM so checksum will fail\n");
             exit (0);
             break;

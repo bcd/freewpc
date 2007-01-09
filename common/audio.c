@@ -238,7 +238,7 @@ static const audio_track_t start_ball_music_track = {
 };
 
 
-CALLSET_ENTRY(sound, start_ball)
+CALLSET_ENTRY(audio, start_ball)
 {
 	bg_music_start (&start_ball_music_track);
 }
@@ -268,7 +268,7 @@ CALLSET_ENTRY (audio, end_game)
 }
 
 
-CALLSET_ENTRY(sound, start_game)
+CALLSET_ENTRY(audio, start_game)
 {
 #ifdef MACHINE_START_GAME_SOUND
 	sound_send (MACHINE_START_GAME_SOUND);

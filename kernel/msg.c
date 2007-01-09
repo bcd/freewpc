@@ -1,4 +1,11 @@
 
+/*
+ * This module is not yet finished.
+ * The intent is to allow for system messages to be displayed over the
+ * DMD, similar to a 'console'.
+ *
+ */
+
 #include <freewpc.h>
 
 char msg_buffer[PRINTF_BUFFER_SIZE];

@@ -33,16 +33,20 @@ __fastram__ U8 irq_loop_count;
 /** The number of task ticks executed.  A tick equals 16 IRQs. */
 __fastram__ U8 tick_count;
 
+/** The number of FIRQs asserted */
 __fastram__ U8 firq_count;
 
+/** An area of NVRAM used to test that it is kept locked. */
 __nvram__ volatile U8 nvram_test_byte;
 
 __fastram__ void (*irq_function) (void);
 
 U8 sys_init_complete;
+
 U8 sys_init_pending_tasks;
 
 U8 last_nonfatal_error_code;
+
 task_gid_t last_nonfatal_error_gid;
 
 #ifdef CONFIG_PLATFORM_LINUX

@@ -130,10 +130,19 @@ FILE *linux_output_stream;
 char linux_debug_output_buffer[256];
 char *linux_debug_output_ptr;
 
+/** A simulation log class.  All output from the simulator is
+categorized into one of the following classes; the output is then
+preceded with a class identifier.  This makes the output consumable
+by other utilities, which can filter the stream for specific content. */
 enum sim_log_class
 {
+	/** Debug information from the simulator itself */
 	SLC_DEBUG,
+
+	/** Text that was rendered to the DMD */
 	SLC_TEXT,
+
+	/** Debug information written by the game ROM to the debugger */
 	SLC_DEBUG_PORT,
 	SLC_LAMPS,
 	SLC_SOUNDCALL,
@@ -193,6 +202,7 @@ void linux_write_string (const char *s)
 }
 
 
+/** Print the current state of the simulated lamp matrix. */
 void linux_write_lamps (void)
 {
 	int lamp;
@@ -221,6 +231,8 @@ void linux_asic_write (U16 addr, U8 val)
 			}
 			break;
 
+		/* In simulation, the hardware shifter is not used;
+		rather, native shift instructions are used. */
 		case WPC_SHIFTADDR:
 		case WPC_SHIFTBIT:
 		case WPC_SHIFTBIT2:
@@ -264,6 +276,8 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_SOL_FLASH1_OUTPUT:
 		case WPC_SOL_LOWPOWER_OUTPUT:
 			linux_solenoid_outputs[addr-WPC_SOL_FLASH2_OUTPUT] = val;
+			/* TODO : if turning on a solenoid that controls a device,
+			then this should simulate a ball kick. */
 			break;
 
 		case WPC_LAMP_ROW_OUTPUT:
@@ -295,7 +309,7 @@ void linux_asic_write (U16 addr, U8 val)
 #endif
 
 		default:
-			; // printf ("Error: invalid I/O write to 0x%04X, val=0x%02X\n", addr, val);
+			printf ("Error: unhandled I/O write to 0x%04X, val=0x%02X\n", addr, val);
 	}
 }
 
@@ -312,6 +326,8 @@ U8 linux_asic_read (U16 addr)
 		case WPC_CLK_HOURS_DAYS:
 		case WPC_CLK_MINS:
 		{
+			/* The time-of-day registers return the system time of the
+			simulator itself. */
 			time_t now = time (NULL);
 			int minutes_on = 
 				(now - linux_boot_time) * linux_irq_multiplier / 60;
@@ -341,12 +357,14 @@ U8 linux_asic_read (U16 addr)
 			return 0;
 
 		default:
-			; // printf ("Error: invalid I/O read from 0x%04X\n", addr);
+			printf ("Error: unhandled I/O read from 0x%04X\n", addr);
 			return 0;
 	}
 }
 
 
+/** Simulate the passage of a single 'time step', which is 1ms
+ * or 1 IRQ. */
 static void linux_time_step (void)
 {
 	++linux_irq_count;
@@ -396,12 +414,14 @@ static void linux_realtime_thread (void)
 }
 
 
+/** Toggle the state of a switch */
 static void linux_switch_toggle (unsigned int sw)
 {
 	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
 }
 
 
+/** Simulate a switch trigger */
 static void linux_switch_depress (unsigned int sw)
 {
 	linux_switch_toggle (sw);
@@ -411,6 +431,7 @@ static void linux_switch_depress (unsigned int sw)
 }
 
 
+/** A mapping from keyboard command to switch */
 static switchnum_t keymaps[256] = {
 #ifdef MACHINE_START_SWITCH
 	['1'] = MACHINE_START_SWITCH,
@@ -440,6 +461,8 @@ static switchnum_t keymaps[256] = {
 };
 
 
+/** Read a character from the keyboard.
+ * If input is closed, shutdown the program. */
 static char linux_interface_readchar (void)
 {
 	char inbuf;
@@ -453,18 +476,25 @@ static char linux_interface_readchar (void)
 }
 
 
+/** Main loop for handling the user interface. */
 static void linux_interface_thread (void)
 {
 	char inbuf[2];
 	switchnum_t sw;
 	struct termios tio;
 
+	/* Put stdin in raw mode so that 'enter' doesn't have to
+	be pressed after each keystroke. */
 	tcgetattr (0, &tio);
 	tio.c_lflag &= ~ICANON;
 	tcsetattr (0, TCSANOW, &tio);
 
+	/* Don't ever let this task be killed */
 	task_set_flags (TASK_PROTECTED);
+
+	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
+
 	for (;;)
 	{
 		*inbuf = linux_interface_readchar ();
@@ -506,12 +536,16 @@ static void linux_interface_thread (void)
 				break;
 
 			case '#':
+				/* Treat '#' as a comment until end of line.
+				This is useful for creating scripts. */
 				do {
 					*inbuf = linux_interface_readchar ();
 				} while (*inbuf != '\n');
 				break;
 
 			default:
+				/* For all other keystrokes, use the keymap table
+				to turn the keystroke into a switch trigger. */
 				sw = keymaps[(int)*inbuf];
 				if (sw)
 					linux_switch_depress (sw);
@@ -525,6 +559,8 @@ static void linux_interface_thread (void)
 }
 
 
+/** Initialize the simulated trough.
+ * At startup, assume that all balls are in the trough. */
 void linux_trough_init (int balls)
 {
 	int i;

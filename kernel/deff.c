@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -183,6 +183,7 @@ static void deff_start_task (const deff_t *deff)
 }
 
 
+/** Start a display effect */
 void deff_start (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
@@ -225,6 +226,7 @@ void deff_start (deffnum_t dn)
 }
 
 
+/** Start a deff, but only if the function is in the system page. */
 void deff_start_nopage (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
@@ -236,7 +238,7 @@ void deff_start_nopage (deffnum_t dn)
 }
 
 
-
+/** Stop a running deff */
 void deff_stop (deffnum_t dn)
 {
 	const deff_t *deff = &deff_table[dn];
@@ -251,6 +253,8 @@ void deff_stop (deffnum_t dn)
 }
 
 
+/** Restart a deff.  If the deff is already running, it is stopped
+first. */
 void deff_restart (deffnum_t dn)
 {
 	if (dn == deff_active)
@@ -265,6 +269,8 @@ void deff_restart (deffnum_t dn)
 }
 
 
+/** The default running deff that runs when no other deff exists.
+It simply keeps the display blank. */
 void deff_default (void)
 {
 	dmd_alloc_low_clean ();
@@ -276,6 +282,7 @@ void deff_default (void)
 }
 
 
+/** Start a task for the running deff that ought to be running */
 void deff_start_highest_priority (void)
 {
 	deff_stop_task ();
@@ -292,6 +299,7 @@ void deff_start_highest_priority (void)
 }
 
 
+/** Called directly from a deff when it wants to exit */
 __noreturn__ void deff_exit (void)
 {
 	dbprintf ("Exiting deff\n");
@@ -319,6 +327,7 @@ void deff_swap_low_high (int8_t count, task_ticks_t delay)
 }
 
 
+/** Initialize the display effect subsystem. */
 void deff_init (void)
 {
 	deff_prio = 0;
@@ -327,6 +336,7 @@ void deff_init (void)
 }
 
 
+/** Stop all running deffs */
 void deff_stop_all (void)
 {
 	task_kill_gid (GID_DEFF);

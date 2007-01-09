@@ -1,21 +1,60 @@
+/*
+ * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef _SNDHW_H
 #define _SNDHW_H
 
-/* I/O registers */
+/* Williams sound board I/O registers */
 
+/** ROM bank register */
 #define WPCS_ROM_BANK        0x2000
+
+/** Address (W) / status (R) register for the FM chip (YM2151) */
 #define WPCS_FM_ADDR_STATUS  0x2400
+
+/** Data register (R/W) for the FM chip */
 #define WPCS_FM_DATA         0x2401
+
+/** DAC output register */
 #define WPCS_DAC_DATA        0x2800
+
+/** CVSD output register */
 #define WPCS_CVSD_DATA       0x2C00
+
+/** Input from the CPU board.  When the CPU writes a value to
+the sound board, an IRQ is generated on the sound board and
+the value is available here. */
 #define WPCS_CPU_INPUT       0x3000
+
+/** CVSD clear register */
 #define WPCS_CVSD_CLEAR      0x3400
+
+/** Volume control (e-pot) register */
 #define WPCS_VOLUME          0x3800
+
+/** Output to the CPU board.  The value is latched so that the CPU
+can retrieve it when it is ready. */
 #define WPCS_CPU_OUTPUT      0x3C00
 
 
-/* FM chip addresses */
+/* YM2151 FM chip addresses */
 
 #define FM_ADDR_TEST_LFO_RESET 0x1
 #define FM_ADDR_KEY_ON 0x8
