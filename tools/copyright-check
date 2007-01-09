@@ -6,7 +6,7 @@
 # run "tools/copyright-check".
 #
 
-for dir in `echo include machine kernel common test`; do
+for dir in `echo include machine kernel common test tools wpcsound`; do
 	cd $dir
 	for f in `find . -name "*.[ch]" -newer ../tools/timestamp.2007`; do
 		echo -n "Checking $dir/$f ... "
