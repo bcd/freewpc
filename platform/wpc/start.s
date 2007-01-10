@@ -18,11 +18,16 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
+STACK_BASE     = 6133
 
 ;;; Hardware registers needed
 WPC_DEBUG_PORT = 0x3D60
 WPC_LEDS       = 0x3FF2
 WPC_ROM_BANK   = 0x3FFC
+WPC_RAM_LOCK   = 0x3FFD
+WPC_RAM_LOCKSIZE = 0x3FFE
+WPC_RAM_UNLOCKED = 0xB4
+WPC_RAM_LOCK_2K = 0x1
 
 ;;; The ROM bank value for the lowest page this ROM uses
 BOTTOM_BANK    = 0x20
@@ -130,6 +135,12 @@ rom_checksum_error:
 	;;;   RAM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ram_test:
+	lda	#WPC_RAM_UNLOCKED
+	sta	WPC_RAM_LOCK
+	lda	#WPC_RAM_LOCK_2K
+	sta	WPC_RAM_LOCKSIZE
+	clr	WPC_RAM_LOCK
+
 	ldx	#0
 	ldu	#0x55AA
 ram_loop1:
@@ -137,7 +148,7 @@ ram_loop1:
 	ldu	,x++
 	cmpu	#0x55AA
 	bne	ram_error
-	cmpx	#0x800
+	cmpx	#0x1700
 	blo	ram_loop1
 
 	ldx	#0
@@ -147,8 +158,18 @@ ram_loop2:
 	ldu	,x++
 	cmpu	#0xAA55
 	bne	ram_error
-	cmpx	#0x800
+	cmpx	#0x1700
 	blo	ram_loop2
+
+	ldx	#0
+	ldu	#0
+ram_loop3:
+	stu	,x
+	ldu	,x++
+	cmpu	#0
+	bne	ram_error
+	cmpx	#0x1700
+	blo	ram_loop3
 	bra	asic_test
 
 ram_error:
@@ -174,9 +195,22 @@ irq_test:
 	;;;   FIRQ POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 firq_test:
+	; TODO
 
 	;;; END OF DIAGNOSTICS
 test_done:
+	; Initialize the stack pointer.  We can now make
+	; function calls!  Note that this stack is only used
+	; for execution that is not task-based.  Once tasks
+	; can be run, each task will use its own stack pointer
+	; separate from this one.
+	;
+	; The initial stack pointer is shifted down from the
+	; available stack size, because do_reset() may
+	; use local variables, and will assume that it already
+	; has space allocated for them; the naked attribute prevents
+	; them from being allocated explicitly.
+	lds	#STACK_BASE-8
 	jmp	_do_reset   ; Jump into C code
 
 

@@ -74,39 +74,14 @@ void irq_init (void)
 __naked__ __noreturn__ 
 void do_reset (void)
 {
-#ifdef __m6809__
-	register uint8_t *ramptr asm ("x");
-#endif
-
 	extern void system_reset (void);
 
 #ifdef __m6809__
-	/** Initialize the stack pointer.  We can now make
-	 * function calls!  Note that this stack is only used
-	 * for execution that is not task-based.  Once tasks
-	 * can be run, each task will use its own stack pointer
-	 * separate from this one.
-	 *
-	 * The initial stack pointer is shifted down from the
-	 * available stack size, because do_reset() may
-	 * use local variables, and will assume that it already
-	 * has space allocated for them; the naked attribute prevents
-	 * them from being allocated explicitly.
-	 */
-	set_stack_pointer (STACK_BASE - 8);
-
-	/* Reset the sound board... the earlier the better */
+		/* Reset the sound board... the earlier the better */
 	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
 
 	/** Initializing the RAM page */
 	wpc_set_ram_page (0);
-
-	/** Initialize RAM to all zeroes */
-	ramptr = (uint8_t *)USER_RAM_SIZE;
-	do
-	{
-		*ramptr-- = 0;
-	} while (ramptr != 0);
 
 	/** Install the null pointer catcher, by programming
 	 * an actual instruction at address 0x0 (branch to self)
@@ -254,8 +229,9 @@ void lockup_check_rtt (void)
 	}
 }
 
-/*
- * fatal is the entry point for errors that are nonrecoverable.
+
+/**
+ * Entry point for errors that are nonrecoverable.
  * error_code is one of the values in include/sys/errno.h.
  */
 __noreturn__ 
@@ -358,6 +334,7 @@ CALLSET_ENTRY (nvram, idle)
 }
 
 
+/** Realtime function that is called every 1ms */
 static inline void do_irq_1ms (void)
 {
 	/** Clear the source of the interrupt */
@@ -401,6 +378,8 @@ static inline void do_irq_2ms_b (void)
 	switch_rtt ();
 }
 
+
+/** Realtime function that is called every 8ms */
 static inline void do_irq_8ms (void)
 {
 	/* Execute rtts every 8ms */
