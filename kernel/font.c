@@ -38,9 +38,11 @@
 /* Space characters are not embedded in each font, because it would
  * just be a bunch of zero characters.  All fonts share the same
  * space glyph data, given here */
-static U8 font_space[16] = { 0, };
+static const U8 font_space[16] = { 0, };
 
 
+/* Fonts define their own inter-character space width, but
+this is not currently used... we always use a single pixel */
 #if 1
 #define GET_FONT_SPACING(font)	1
 #else
@@ -101,11 +103,14 @@ U8 *font_lookup (const font_t *font, char c)
 	}
 }
 
+
+/** The current x-coordinate where a character is being written */
 U8 blit_xpos;
 
 U8 *blit_dmd;
 
 U8 *blit_data;
+
 
 static void font_blit (void)
 {
@@ -216,6 +221,7 @@ static void fontargs_render_string (void)
 }
 
 
+/** Erase an arbitrary region of the DMD. */
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 {
 	U8 *dmd_base;
@@ -300,15 +306,25 @@ void font_get_string_area (const font_t *font, const char *s)
 
 	while ((c = *s++) != '\0')
 	{
+		/* The character data is irrelevant; we just call this
+		to set font_width and font_height. */
 		(void)font_lookup (font, c);
+
+		/* Update the total width */
 		font_string_width += font_width;
+
+		/* Update the total height */
 		if (font_height > font_string_height)
 			font_string_height = font_height;
 	}
 
 	wpc_pop_page ();
+
+	/* This can take a while for long strings; don't let the
+	software watchdog expire */
 	task_dispatching_ok = TRUE;
 }
+
 
 static void fontargs_prep_left (const fontargs_t *args)
 {
