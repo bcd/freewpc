@@ -1766,6 +1766,59 @@ struct menu dev_frametest_item = {
 	.var = { .subwindow = { &dev_frametest_window, NULL } },
 };
 
+/**********************************************************************/
+
+#define SCHED_TEST_DURATION TIME_2S
+#define SCHED_TEST_WORKERS  16
+
+U16 sched_test_count;
+
+void sched_test_task (void)
+{
+	for (;;)
+	{
+		sched_test_count++;
+		task_yield ();
+	}
+}
+
+void sched_test_init (void)
+{
+	U8 i;
+	sched_test_count = 0;
+
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+
+	for (i=0 ; i < SCHED_TEST_WORKERS; i++)
+		task_create_gid (GID_SCHED_TEST_WORKER, sched_test_task);
+	task_sleep (SCHED_TEST_DURATION);
+
+	task_kill_gid (GID_SCHED_TEST_WORKER);
+}
+
+
+void sched_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("SCHED COUNT %ld", sched_test_count);
+	font_render_string_left (&font_var5, 2, 3, sprintf_buffer);
+	dmd_show_low ();
+}
+
+
+struct window_ops sched_test_window = {
+	DEFAULT_WINDOW,
+	.init = sched_test_init,
+	.draw = sched_test_draw,
+	.enter = sched_test_init,
+};
+
+struct menu sched_test_item = {
+	.name = "SCHEDULER TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &sched_test_window, NULL } },
+};
 
 /**********************************************************************/
 
@@ -1781,6 +1834,7 @@ struct menu *dev_menu_items[] = {
 	&dev_frametest_item,
 	&dev_deff_stress_test_item,
 	&symbol_test_item,
+	&sched_test_item,
 	NULL,
 };
 
