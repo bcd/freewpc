@@ -1770,11 +1770,14 @@ struct menu dev_frametest_item = {
 
 #define SCHED_TEST_DURATION TIME_2S
 #define SCHED_TEST_WORKERS  16
+#define SCHED_LOCAL_COUNT   16
 
 U16 sched_test_count;
 
 void sched_test_task (void)
 {
+	volatile U8 local_data[SCHED_LOCAL_COUNT];
+
 	for (;;)
 	{
 		sched_test_count++;
