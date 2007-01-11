@@ -308,6 +308,9 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 #endif
 
+		case WPCS_CONTROL_STATUS:
+			break;
+
 		default:
 			printf ("Error: unhandled I/O write to 0x%04X, val=0x%02X\n", addr, val);
 	}
@@ -354,6 +357,9 @@ U8 linux_asic_read (U16 addr)
 			return linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
+			return 0;
+
+		case WPCS_CONTROL_STATUS:
 			return 0;
 
 		default:
