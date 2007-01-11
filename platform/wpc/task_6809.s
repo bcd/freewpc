@@ -25,6 +25,8 @@ YREG_SAVE_OFF      = 7
 UREG_SAVE_OFF      = 9
 ROMPAGE_SAVE_OFF   = 11
 SAVED_STACK_SIZE   = 12
+FLAGS_OFF          = 13
+DELAY_OFF          = 14
 STACK_SAVE_OFF     = 23
 
 	;-----------------------------------------------------
@@ -120,7 +122,7 @@ _stack_too_large:
 _task_restore:
 	stx	*_task_current	
 	orcc	#80
-	ldu	#STACK_BASE
+	lds	#STACK_BASE
 	ldb	SAVED_STACK_SIZE,x
 	beq	L42
 	leay	b,x
@@ -128,11 +130,10 @@ _task_restore:
 L43:
 	;;; TODO : use X register to transfer data
 	lda	,-y
-	sta	,-u
+	sta	,-s
 	decb
 	bne	L43
 L42:
-	leas	,u
 	andcc	#-81
 	ldb	ROMPAGE_SAVE_OFF,x
 	stb	WPC_ROM_BANK
@@ -140,7 +141,7 @@ L42:
 	pshs	u
 	ldy	YREG_SAVE_OFF,x
 	ldu	UREG_SAVE_OFF,x
-	clr	14,x
+	clr	DELAY_OFF,x
 	rts
 
 	;-----------------------------------------------------

@@ -80,6 +80,8 @@ task_t task_buffer[NUM_TASKS];
  * The IRQ will reset the system when this happens. */
 bool task_dispatching_ok;
 
+__fastram__ U8 tick_start_count;
+
 #ifdef CONFIG_DEBUG_STACK
 /** For debug, this tells us the largest stack size that we've had
  * to deal with so far.  This helps to determine how big the stack
@@ -425,54 +427,52 @@ void task_dispatcher (void)
 {
 	extern U8 tick_count;
 	register task_t *tp asm ("x");
-	U8 tick_start_count;
+	task_t *first = tp;
 
 	tick_start_count = tick_count;
 	task_dispatching_ok = TRUE;
-	for (tp++;; tp++)
-	{
-		/* Reset task pointer to top of list after scanning
-		 * them all. */
-		if (tp == &task_buffer[NUM_TASKS])
-		{
-			/* Wait for next task tick before continuing */
-			while (tick_start_count == *(volatile U8 *)&tick_count);
-	
-			db_idle ();
 
+	/* Set 'first' to the first task block to try. */
+	for (tp++; ; tp++)
+	{
+		/* Reset task pointer to top of list after reaching the
+		 * bottom of the table. */
+		if (tp == &task_buffer[NUM_TASKS])
+			tp = &task_buffer[0];
+
+		/* All task blocks were scanned, and no free task was found. */
+		if (first == tp)
+		{
+			/* Wait for next task tick before continuing.
+			Ensure that the idle function is not invoked more than once
+			per 16ms.  TODO - this is a long time!! */
+			while (tick_start_count == *(volatile U8 *)&tick_count);
+			
+			db_idle ();
+		
 			/* If the system is fully initialized, also
 			 * run the idle tasks once every pass through
 			 * the list. */
 			if (sys_init_complete)
-			{
-#if 0
-				/* Execute idle tasks on system stack */
-				set_stack_pointer (STACK_BASE);
-#endif
-				/* Call idle tasks */
-				callset_invoke (idle);
-			} 
+					callset_invoke (idle);
 
-			/* Reset to beginning of the task list */
-			tp = &task_buffer[0];
+			/* Reset timer and kick watchdog again */
 			tick_start_count = tick_count;
 			task_dispatching_ok = TRUE;
+
+			/* Ensure that 'tp', which is in register X, is reloaded
+			with the correct task pointer.  The above functions may
+			trash its value. */
+			tp = first;
 		}
 
-		if (tp->state == TASK_FREE)
+		if (tp->state == TASK_USED)
 		{
-			continue;
+			/* The task exits, and is not sleeping.  It can be
+			started immediately. */
+			task_restore ();
 		}
-		else if (tp->state == TASK_USED)
-		{
-			// task_restore ();
-			asm volatile ("jmp\t_task_restore");
-		}
-		else if (tp->state != TASK_USED+TASK_BLOCKED)
-		{
-			continue;
-		}
-		else 
+		else if (tp->state == TASK_USED+TASK_BLOCKED)
 		{
 			/* The task exists, but is sleeping.
 			 * tp->asleep holds the time at which it went to sleep,
@@ -481,15 +481,11 @@ void task_dispatcher (void)
 			 * be woken up.
 			 */
 			register uint8_t ticks_elapsed = tick_count - tp->asleep;
-			if (ticks_elapsed < tp->delay)
-				continue;
-			else
+			if (ticks_elapsed >= tp->delay)
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
-				// task_restore ();  /* this didn't work for some reason? */
-				asm volatile ("jmp\t_task_restore");
-				// while (1); /* can't get here */
+				task_restore ();
 			}
 		}
 	}
