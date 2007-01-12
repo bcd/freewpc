@@ -6,9 +6,9 @@
 # run "tools/copyright-check".
 #
 
-for dir in `echo include machine kernel common test tools wpcsound`; do
+for dir in `echo include machine kernel common test tools wpcsound platform`; do
 	cd $dir
-	for f in `find . -name "*.[ch]" -newer ../tools/timestamp.2007`; do
+	for f in `find . -name "*.[chs]" -newer ../tools/timestamp.2007`; do
 		echo -n "Checking $dir/$f ... "
 		grep "Copyright.*2007" $f > /dev/null 2>&1
 		if [ "$?" != "0" ]; then
