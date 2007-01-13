@@ -1,6 +1,6 @@
 
 CC = /usr/local/m6809/bin/gcc
-CFLAGS = -I. -I../include -save-temps -O2 -Wall -fno-builtin -mdirect
+CFLAGS = -I. -I../include -save-temps -O2 -Wall -Wno-format -fno-builtin -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -mdirect -mint8
 
 C_OBJS = sndhw.o vector.o
 ASM_OBJS = delay.o
@@ -50,7 +50,7 @@ $(SREC): $(OBJS) $(DEPS)
 
 $(OBJS) : $(DEPS)
 
-$(C_OBJS) : %.o : %.c
+$(C_OBJS) : %.o : %.c sndhw.h
 	@echo "Compiling $<..." && $(CC) $(CFLAGS) -o $@ -c $<
 
 $(ASM_OBJS) : %.o : %.s
