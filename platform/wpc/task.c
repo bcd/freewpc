@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -162,6 +162,16 @@ task_t *task_allocate (void)
 			tp->flags = 0;
 			return tp;
 		}
+
+	/* TODO : if there are no free blocks, it might be possible
+	to kill some other non-critical tasks to make way for this
+	one.  We have no idea what the criticality of the current task
+	is, though, so this could actually be harmful.  Some tasks
+	that are candidates for death by lethal injection:
+	lamp effects (GID_LEFF, GID_LEFF_EXITING); switch lamp flickers
+	(GID_SWITCH_LAMP_PULSE); pending switch handlers that have been
+	started but not yet begun (GID_SW_HANDLER) -- this would be as if
+	the switch never triggered. */
 	fatal (ERR_NO_FREE_TASKS);
 	return 0;
 }
@@ -370,6 +380,11 @@ void task_kill_all (void)
 
 /**
  * Sets task flags.
+ *
+ * TODO : this is a race condition here with regard to TASK_PROTECTED;
+ * the task might be killed after it has been created, but before it
+ * gets a chance to set TASK_PROTECTED.  The caller is probably aware
+ * of the special status and should be able to set it at creation time.
  */
 void task_set_flags (U8 flags)
 {
@@ -389,7 +404,12 @@ void task_clear_flags (U8 flags)
 /**
  * Get/set the task argument word.
  * TODO : why not just set the B/X register directly here and then
- * the task can take the arg as a normal function argument?
+ * the task can take the arg as a normal function argument?  The
+ * task block doesn't save B/X normally, but for the first call it
+ * would be easier to have it this way.  Or maybe just push all
+ * arguments onto the stack... at least the 'arg' overhead is not
+ * required for every task this way.  (It would be like a variadic
+ * function.)
  */
 U16 task_get_arg (void)
 {
