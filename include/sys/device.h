@@ -154,8 +154,14 @@ typedef struct device_properties
  * machine; these values dictate the various states that
  * a device can be in.
  */
+
+/** The device is idle (initial state).  No kicks are in progress. */
 #define DEV_STATE_IDLE			0
+
+/** An 'enter' event has been detected due to a switch closure. */
 #define DEV_STATE_ENTERED		1
+
+/** The device is in the process of kicking a ball out. */
 #define DEV_STATE_RELEASING	2
 
 /** The device info structure.  This is a read-write
@@ -181,7 +187,11 @@ typedef struct device
 	/** The previous count of balls */
 	U8 previous_count;
 
-	/** The maximum number of balls that can be held here. */
+	/** The maximum number of balls that can be held here permanently.
+	 * If a ball enters the device and this count is not exceeded, then
+	 * the ball is kept here.  Otherwise, the ball is automatically
+	 * kicked out.  This field basically implements 'ball locking'
+	 * at the physical level. */
 	U8 max_count;
 
 	/** The number of balls needed to be kicked out */
@@ -190,7 +200,7 @@ typedef struct device
 	/** The number of consecutive kick errors */
 	U8 kick_errors;
 
-	/** The operational state of the device */
+	/** The operational state of the device, one of the DEV_STATE_ values */
 	U8 state;
 
 	/** Pointer to the device property structure */
@@ -230,10 +240,16 @@ void device_unlock_ball (device_t *dev);
 void device_lock_ball (device_t *dev);
 U8 device_holdup_count (void);
 
+/** Acquire a kickout lock */
 #define kickout_lock(by)	do { kickout_locks |= (by); } while (0)
+
+/** Release a kickout lock */
 #define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)
 
+/** Kickout is being locked by a display effect */
 #define KLOCK_DEFF 0x1
+
+/** Kickout is being locked by the debugger */
 #define KLOCK_DEBUGGER 0x2
 
 void device_init (void);
