@@ -24,8 +24,12 @@
 /** The maximum number of physical lamps supported */
 #define NUM_LAMPS 64
 
+/** Lamp numbers in this range refer to software flags */
 #define FLAG_OFFSET					0x40
+
+/** Lamp numbers in this range refer to the flash state of the lamps */
 #define LAMP_FLASH_OFFSET			0x80
+
 #define LAMP_FAST_FLASH_OFFSET	0xC0
 
 #define NUM_LAMP_COLS	8
@@ -76,7 +80,10 @@ typedef U8 lampset_id_t;
  * mechanism to construct new lampsets.
  */
 
+/** Indicates the end of a lampset */
 #define LAMP_END_OP					(NUM_LAMPS + 2)
+
+/** Indicates a time delay within a lampset */
 #define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
 
 
