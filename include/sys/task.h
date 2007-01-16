@@ -57,10 +57,10 @@ typedef void (*task_function_t) (void);
 
 
 /** Values for the 'state' field in the task structure */
-#define TASK_FREE		0
-#define TASK_USED		1
-#define TASK_BLOCKED	2
-
+#define TASK_FREE    0
+#define TASK_USED    1
+#define TASK_BLOCKED 2
+#define TASK_MALLOC  4
 
 /* The TASK_HEAP_SIZE field is not currently used.  It is
  * intended to represent how much memory, in bytes, has been
