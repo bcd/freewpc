@@ -1,4 +1,4 @@
-;;; Copyright 2006 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
 ;;; 
 ;;; This file is part of FreeWPC.
 ;;;
@@ -40,7 +40,11 @@ __far_call_address: .blkb 2
 	;;; before the call, thereby keeping the total stack space down
 	;;; at the cost of an extra store.  (In most cases, this is still a
 	;;; win as any sleep done by the target will require saving the stack,
-	;;; so keeping this small is a big plus.
+	;;; so keeping this small is a big plus.  The call happens once
+	;;; but the task might sleep many times over its lifetime.)
+	;;;
+	;;; Overhead is about 70 cycles as compared to a normal function
+	;;; call.
 	;;;
 	.area sysrom
 	.globl __far_call_handler
