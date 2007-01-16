@@ -34,7 +34,7 @@ use Data::Dumper;
 # * Use a bit flag if there are only two states.
 # * Merge identical code blocks, for readability
 
-my $debug = 0;
+my $debug_enabled = 0;
 my %states;
 my %inputs;
 my %transitions;
@@ -46,7 +46,7 @@ my %timer_transition_from;
 my %timer_duration;
 
 sub debug {
-	return if (!$debug);
+	return if (!$debug_enabled);
 	my $separator = "";
 	my $function = shift;
 	print OFH "          $function (";
@@ -85,18 +85,17 @@ sub timer_function {
 }
 
 sub write_debug_functions {
-	return if (!$debug);
+	return if (!$debug_enabled);
 	print OFH <<END;
-#define db_print_transition(init, event, new) \
-db_puts (init); db_puts (" : "); \
-db_puts (event); db_puts (" => "); \
-db_puts (new); db_putchar ('\\n')
+#define db_print_transition(init, event, new) \\
+db_puts (init); db_puts (" : "); \\
+db_puts (event); db_puts (" => "); \\
+db_puts (new); wpc_debug_write ('\\n')
+
 END
 }
 
 sub fsm_finish {
-	next if (!defined $states{"INIT"});
-	my $fsm_state_var = "${fsm_name}_fsm_state";
 
 	if (!$header_written) {
 		print OFH "#include <freewpc.h>\n\n";
@@ -106,6 +105,11 @@ sub fsm_finish {
 
 	print OFH "/* Automatically generated from FSM $fsm_name */\n\n";
 
+	if (!defined $states{"INIT"}) {
+		print STDERR "Warning: '$fsm_name' does not define an INIT state\n";
+	}
+
+	my $fsm_state_var = "${fsm_name}_fsm_state";
 	print OFH "typedef enum {\n";
 	foreach $state (keys %states) {
 		print OFH "   " . state_enum ($state) . ",\n";
@@ -238,7 +242,7 @@ sub fsm_new {
 			}
 		}
 		elsif (/(.*):(.*)[ \t]+=>[ \t]+(\w+)[ \t]*$/) {
-			my ($init_states, $event, $new_state) = ($1, $2, $3);
+			my ($init_states, $events, $new_state) = ($1, $2, $3);
 			$init_states =~ s/[ \t]//g;
 			$events =~ s/[ \t]//g;
 			$new_state =~ s/[ \t]//g;
@@ -253,6 +257,7 @@ sub fsm_new {
 							$timer_duration{"timer_" . $timernum} = $event;
 							$event = "timer_" . $timernum;
 						}
+
 						$states{$init_state} = 1;
 						$states{$new_state} = 1;
 						$inputs{$event} = 1;
@@ -278,6 +283,7 @@ sub fsm_new {
 			}
 		}
 	}
+	print STDERR "Internal error: FSM '$fsm_name' did not codegen\n";
 }
 
 
@@ -286,7 +292,7 @@ while (my $arg = shift @ARGV) {
 		$outfile = shift @ARGV;
 	}
 	elsif ($arg =~ /-d/) {
-		$debug = 1;
+		$debug_enabled = 1;
 	}
 	else {
 		$infile = $arg;
