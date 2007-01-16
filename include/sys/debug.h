@@ -49,7 +49,7 @@ extern inline U8 wpc_debug_read (void)
 	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
 }
 
-#pragma GCC poison db_puti db_putc
+#pragma GCC poison db_puti db_putc db_putchar
 
 enum wpc_debugger_request {
 	WPC_DBREQ_TASK_DUMP=0x80,
@@ -64,6 +64,6 @@ enum wpc_debugger_response {
 
 __common__ void db_init (void);
 __common__ void db_idle (void);
-__common__ void db_puts (const char *s);
+void db_puts (const char *s); /* moved to kernel for efficiency */
 
 #endif /* _SYS_DEBUG_H */

@@ -40,106 +40,25 @@
 #include <m6809/math.h>
 #endif
 
-/** Initially zero, this is set to 1 when a remote debugger is
- * detected */
-U8 db_attached;
-
-U8 db_paused;
+extern U8 db_attached;
 
 
-void db_idle (void)
+void db_puts (const char *s)
 {
 #ifdef DEBUGGER
-	if (!db_attached)
+	register U8 c;
+
+	if (db_attached)
 	{
-		if (wpc_debug_read_ready ())
+		while ((c = *s++) != '\0')
 		{
-			wpc_debug_write (0);
-			db_attached = 1;
-			db_puts ("\n\n"
-				"----------------------------------------------------------\n"
-				"FREEWPC DEBUGGER\n"
-				"----------------------------------------------------------\n\n");
-		}
-	}
-	else
-	{
-		if (wpc_debug_read_ready ())
-		{
-			char c = wpc_debug_read (); 
-			switch (c)
-			{
-				case 'a':
-				{
-					extern __common__ void audio_dump (void);
-					audio_dump ();
-					break;
-				}
-
-				case 't':
-				{
-					extern void task_dump (void);
-					task_dump ();
-					break;
-				}
-
-				case 'm':
-				{
-					slow_timer_dump ();
-					break;
-				}
-
-				case 'g':
-				{
-					extern void dump_game (void);
-					dump_game ();
-					break;
-				}
-
-				case 's':
-				{
-					extern void switch_check_masks (void);
-					switch_check_masks ();
-					break;
-				}
-
-#ifdef MACHINE_TZ
-				case 'c':
-				{
-					extern void tz_dump_clock (void);
-					tz_dump_clock ();
-					break;
-				}
+#ifdef CONFIG_PARALLEL_DEBUG
+			wpc_parport_write (c);
+#else
+			wpc_debug_write (c);
 #endif
-
-				case 'p':
-				{
-					db_paused = 1 - db_paused;
-					while (db_paused == 1)
-					{
-						task_dispatching_ok = TRUE;
-						db_idle ();
-					}
-					break;
-				}
-			}
 		}
 	}
 #endif /* DEBUGGER */
-}
-
-
-void db_init (void)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	db_attached = 1;
-#else
-#ifdef CONFIG_PARALLEL_DEBUG
-	db_attached = 1;
-#else
-	db_attached = 0;
-#endif
-#endif
-	db_paused = 0;
 }
 

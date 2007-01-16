@@ -177,6 +177,7 @@ PATH_REQUIRED += $(BC)
 
 KERNEL_BASIC_OBJS = \
 	kernel/misc.o \
+	kernel/puts.o \
 	kernel/random.o \
 	kernel/sysinfo.o
 
@@ -763,7 +764,7 @@ endif
 
 ifdef GAME_FSMS
 $(FSM_SRCS) : build/%.c : $(MACHINE_DIR)/%.fsm tools/fsmgen
-	tools/fsmgen -d -o $@ $<
+	tools/fsmgen $(FSMFLAGS) -o $@ $<
 endif
 
 #######################################################################
