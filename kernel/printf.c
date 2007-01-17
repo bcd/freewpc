@@ -23,6 +23,8 @@
 #include <m6809/math.h>
 #endif
 
+/* When building with -mint16, 8-bit values are converted to 16-bits
+before they are passed as arguments.  */
 #ifdef __mint16__
 #define PROMOTED_U8 U16
 #else
@@ -65,6 +67,7 @@ U8 sprintf_width;
  * remove any leading zeroes from numbers. */
 bool sprintf_leading_zeroes;
 
+/** The number of leading zeroes in the last rendered number */
 U8 leading_zero_count;
 
 S16 number_length;
@@ -76,6 +79,7 @@ U8 comma_positions;
 U8 commas_written;
 
 
+/** Convert a hex digit to its character representation */
 char digit2char (uint8_t digit)
 {
 	if (digit <= 9)
@@ -85,11 +89,18 @@ char digit2char (uint8_t digit)
 }
 
 
+/** Write an 8-bit decimal value 'b' to the buffer 'buf'.
+ * The hundreds digit, if any, is checked first and then removed
+ * to leave a value in the range of 0-99.  The DIV10() macro is
+ * then called to divide the value by 10, producing the tens and
+ * the ones digit.  The division is slightly more efficient than
+ * the method using below for 16-bit values. */
 char *do_sprintf_decimal (char *buf, U8 b)
 {
 	uint8_t quot;
 	uint8_t rem;
 
+	/* Print the hundreds digit and remove it from 'b'. */
 	if (b >= 200)
 	{
 		*buf++ = '2';
@@ -101,15 +112,19 @@ char *do_sprintf_decimal (char *buf, U8 b)
 		b -= 100;
 	}
 
+	/* Calculate (b / 10, b % 10). */
 	DIV10 (b, quot, rem);
 
+	/* Output the tens and ones digits. */
 	*buf++ = quot + '0';
 	*buf++ = rem + '0';
 	return buf;
 }
 
 
-
+/** Write a 16-bit decimal value 'w' to the buffer 'buf'.
+ * Since there is no division algorithm implemented currently,
+ * this function is fairly slow. */
 char *do_sprintf_long_decimal (char *buf, U16 w)
 {
 	static const U16 powers_of_ten[] = { 10000, 1000, 100, 10, 1, 0 };
@@ -132,6 +147,7 @@ char *do_sprintf_long_decimal (char *buf, U16 w)
 }
 
 
+/** Write an 8-bit hexadecimal value 'b' to the buffer 'buf'. */
 char *do_sprintf_hex_byte (char *buf, uint8_t b)
 {
 	*buf++ = digit2char (b >> 4);
@@ -157,6 +173,8 @@ char *do_sprintf_hex_byte (char *buf, uint8_t b)
 #define HIGHBYTE(w)	(((U8 *)&w)[0])
 #define LOWBYTE(w)	(((U8 *)&w)[1])
 
+
+/** Write a 16-bit hexadecimal value 'w' to the buffer 'buf'. */
 char *do_sprintf_hex (char *buf, uint16_t w)
 {
 	buf = do_sprintf_hex_byte (buf, HIGHBYTE(w));
@@ -165,6 +183,8 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 }
 
 
+/** Generated formatted data based on the format string 'format'
+ * into the buffer 'sprintf_buffer'. */
 U8 sprintf (const char *format, ...)
 {
 	static va_list va;
@@ -309,6 +329,11 @@ do_long_hex_integer:
 					bcd = va_arg (va, bcd_t *);
 					endbuf = buf;
 
+					/* Initialize 'comma_positions' based on the length
+					of the number.  When the least significant bit is
+					set, it means that a comma should be printed AFTER
+					the next digit is output.  As digits are printed,
+					this variable is right-shifted. */
 					switch (sprintf_width)
 					{
 						case 8:
@@ -374,10 +399,14 @@ output_char:
 	va_end (va);
 
 	*buf = '\0';
+
+	/* TODO : sprintf always returns zero -- seems useless */
 	return 0;
 }
 
 
+/** Output a constant string in the far string page to
+ * 'sprintf_buffer'.  srcp is a pointer to the string. */
 void
 sprintf_far_string (const char **srcp)
 {
@@ -400,6 +429,7 @@ sprintf_far_string (const char **srcp)
 }
 
 
+/** Output a BCD-encoded score */
 void
 sprintf_score (U8 *score)
 {
@@ -413,6 +443,7 @@ sprintf_score (U8 *score)
 }
 
 
+/** Output the contents of the sprintf buffer to the debugger port. */
 void
 dbprintf1 (void)
 {
