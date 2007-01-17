@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright 2006 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
@@ -27,6 +27,7 @@ ROMPAGE_SAVE_OFF   = 11
 SAVED_STACK_SIZE   = 12
 FLAGS_OFF          = 13
 DELAY_OFF          = 14
+ARG_OFF            = 17
 STACK_SAVE_OFF     = 23
 
 	;-----------------------------------------------------
@@ -154,17 +155,14 @@ L42:
 	.area sysrom	
 	.globl _task_create
 _task_create:
-	pshs	u,y
 	pshs	u
 	tfr	x,u
 	jsr	_task_allocate
-	stu	5,x
+	stu	PCREG_SAVE_OFF,x
 	puls	u
-	sty	YREG_SAVE_OFF,x
-	stu	UREG_SAVE_OFF,x
 	clr	,x
 	ldd	#0
-	std	17,x
+	std	ARG_OFF,x
 	ldb	WPC_ROM_BANK
 	stb	ROMPAGE_SAVE_OFF,x
 
@@ -176,5 +174,5 @@ _task_create:
 	;;; stack space.  Stack space is more precious and therefore
 	;;; shouldn't be used where other means are possible.  So
 	;;; don't consider that anymore.
-	puls	u,y,pc
+	rts
 
