@@ -38,55 +38,55 @@ STACK_SAVE_OFF     = 23
 _task_save:
 	;;; First, save all of the volatile registers: U, Y, and PC.
 	;;; The PC value kept here is actually the address of the
-	;;; caller to task_sleep(), since it does "jmp" here.
-	stu	*_task_save_U
-	puls	u
-	ldx	*_task_current
-	stu	PCREG_SAVE_OFF,x
-	ldu	*_task_save_U
-	stu	UREG_SAVE_OFF,x
-	sty	YREG_SAVE_OFF,x
+	;;; caller to task_sleep(), since it does "jmp" here. (41 cycles)
+	stu	*_task_save_U          ; 5 cycles
+	puls	u                      ; 7 cycles
+	ldx	*_task_current         ; 5 cycles
+	stu	PCREG_SAVE_OFF,x       ; 6 cycles
+	ldu	*_task_save_U          ; 5 cycles
+	stu	UREG_SAVE_OFF,x        ; 6 cycles
+	sty	YREG_SAVE_OFF,x        ; 7 cycles
 
 	;;; Copy the runtime stack into the task save area.
 	;;; For efficiency, copy 4 bytes at a time, even if some of the
 	;;; bytes are garbage.  After this loop, B contains the number
 	;;; of 4-byte blocks saved.  Y points to the save area.
-	leay	STACK_SAVE_OFF,x
-	clrb
+	leay	STACK_SAVE_OFF,x       ; 5 cycles
+	clrb                         ; 2 cycles
 	bra	save_stack_check
-save_stack:
-	ldu	,s++
-	stu	,y++
-	ldu	,s++
-	stu	,y++
-	incb
+save_stack:  ; loop kernel takes 35+N cycles per 4 bytes
+	ldu	,s++                   ; 7 cycles
+	stu	,y++                   ; 7 cycles
+	ldu	,s++                   ; 7 cycles
+	stu	,y++                   ; 7 cycles
+	incb                         ; 2 cycles
 save_stack_check:
-	cmps	#STACK_BASE
-	blt	save_stack
+	cmps	#STACK_BASE            ; 5 cycles
+	blt	save_stack             ; N cycles
 
 	;;; Convert B from blocks to bytes
-	aslb
-	aslb
+	aslb                         ; 2 cycles
+	aslb                         ; 2 cycles
 
 	;;; We may have copied too much.  The S register needs to be
 	;;; equal to STACK_BASE, and B needs to be adjusted down, too.
 backtrack:
-	cmps	#STACK_BASE
+	cmps	#STACK_BASE            ; 5 cycles
 	beq   backtrack_not_necessary
-	decb
-	cmps	#STACK_BASE+1
+	decb                         ; 2 cycles
+	cmps	#STACK_BASE+1          ; 5 cycles
 	beq	backtrack_done
-	decb
-	cmps	#STACK_BASE+2
+	decb                         ; 2 cycles
+	cmps	#STACK_BASE+2          ; 5 cycles
 	beq	backtrack_done
-	decb
+	decb                         ; 2 cycles
 	;;; S had better be STACK_BASE+3 here!
 
 	;;; Save the number of bytes truly saved.
 backtrack_done:
-	lds	#STACK_BASE
+	lds	#STACK_BASE            ; 4 cycles
 backtrack_not_necessary:
-	stb	SAVED_STACK_SIZE,x
+	stb	SAVED_STACK_SIZE,x     ; 5 cycles
 
 	;;; Now it is possible that the task yielded control deep
 	;;; into its stack, so that the copy above overflowed the
@@ -100,15 +100,15 @@ backtrack_not_necessary:
 	;;; Start with a stack size that works in most cases, and
 	;;; allow it to "grow" larger if necessary.  However, a check
 	;;; for exceeding this maximum is still required.
-	cmpb  #56
+	cmpb  #56                    ; 2 cycles
 	bgt   _stack_too_large
 
 	;;; TODO??? would it make more sense to save this every time
 	;;; the ROM bank value changes, i.e. have the farcall handler
 	;;; do this?  It seems like most times when we come here, the
 	;;; current ROM bank and the saved value are already equal.
-	ldb	WPC_ROM_BANK
-	stb	ROMPAGE_SAVE_OFF,x
+	ldb	WPC_ROM_BANK           ; 5 cycles
+	stb	ROMPAGE_SAVE_OFF,x     ; 5 cycles
 	jmp   _task_dispatcher
 _stack_too_large:
 	ldb	#2    ; ERR_TASK_STACK_OVERFLOW
