@@ -56,3 +56,4 @@
 # If you have special flags to pass to the compiler, define them here.
 #EXTRA_CFLAGS := ...
 
+# vim: set filetype=make:
