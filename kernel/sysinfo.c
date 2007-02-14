@@ -27,6 +27,8 @@
 
 const char copyright[] = 
 	"FreeWPC System ROM\n"
+#ifndef CONFIG_SHORT_STRINGS_ONLY
 	"FreeWPC by Brian Dominy (brian@oddchange.com)\n"
-	"Licensed under the GNU General Public License (GPL)\n";
-
+	"Licensed under the GNU General Public License (GPL)\n"
+#endif
+	;
