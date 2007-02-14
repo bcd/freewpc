@@ -39,7 +39,7 @@
 
 #include <freewpc.h>
 
-/** GCC gets angry if there are no local variables declared, so always
+/** aslink gets angry if there are no local variables declared, so always
  * declare at least one here */
 __local__ U8 __unused_local__;
 
@@ -72,7 +72,6 @@ void player_save (void)
 
 	/* Copy player locals into the save area */
 	__blockcopy16 (LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, LOCAL_BASE, LOCAL_SIZE);
-
 }
 
 void player_restore (void)
