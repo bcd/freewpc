@@ -90,7 +90,7 @@ sub write_debug_functions {
 #define db_print_transition(init, event, new) \\
 db_puts (init); db_puts (" : "); \\
 db_puts (event); db_puts (" => "); \\
-db_puts (new); wpc_debug_write ('\\n')
+db_puts (new); db_puts ("\\n")
 
 END
 }
