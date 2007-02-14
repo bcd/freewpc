@@ -56,10 +56,14 @@ void db_idle (void)
 		{
 			wpc_debug_write (0);
 			db_attached = 1;
+#ifdef CONFIG_SHORT_STRINGS_ONLY
+			db_puts ("FREEWPC\n");
+#else
 			db_puts ("\n\n"
 				"----------------------------------------------------------\n"
 				"FREEWPC DEBUGGER\n"
 				"----------------------------------------------------------\n\n");
+#endif
 		}
 	}
 	else
