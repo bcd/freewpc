@@ -131,12 +131,12 @@ GCC_VERSION =
 endif
 
 ifdef GCC_VERSION
-CC := $(GCC_ROOT)/gcc-$(GCC_VERSION)
+CC := $(CCACHE) $(GCC_ROOT)/gcc-$(GCC_VERSION)
 else
-CC := $(GCC_ROOT)/gcc
+CC := $(CCACHE) $(GCC_ROOT)/gcc
 endif
 
-HOSTCC = gcc
+HOSTCC = $(CCACHE) gcc
 
 # We use the latest versions of astools, version 4.1.0
 LD6809 = $(GCC_ROOT)/aslink
@@ -144,9 +144,9 @@ LD = $(GCC_ROOT)/ld
 AS = $(GCC_ROOT)/as
 
 ifeq ($(PLATFORM),wpc)
-REQUIRED += $(CC) $(LD6809) $(LD)
+REQUIRED += $(CC:$(CCACHE)=) $(LD6809) $(LD)
 else
-REQUIRED += $(CC) $(LD)
+REQUIRED += $(CC:$(CCACHE)=) $(LD)
 endif
 
 # Name of the S-record converter
@@ -350,6 +350,7 @@ endif
 ifeq ($(FREE_ONLY),y)
 CFLAGS += -DFREE_ONLY
 endif
+
 
 #######################################################################
 ###	Include Machine Extensions
@@ -722,14 +723,15 @@ $(PRG_OBJS) $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c 
 
-$(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
-$(BASIC_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
-
 $(XBM_OBJS) : %.o : %.xbm
 
 $(FON_OBJS) : %.o : %.fon
 
 $(PRG_OBJS) : %.o : %.prg
+
+$(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
+
+$(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS):
 ifeq ($(PLATFORM),wpc)
