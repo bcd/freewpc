@@ -216,26 +216,9 @@ void sound_init (void)
 	U16 j;
 	U8 sound_board_type;
 
-#if 0
-#if (MACHINE_DCS == 0)
-	static U8 init_string[] = {
-		0x00, 0x8C, 0xB2, 0x7B, 0x40, 0x49, 0xFB, 0xE5, 0xAF, 0x59, 0x7B,
-		0xC4, 0xAA, 0x83, 0x37, 0x28, 0xC8, 0xE6, 0xE7, 0xD4, 0x85,
-		0xD9, 0x16, 0x10, 0x64, 0x58, 0xC6, 0xCC, 0x93, 0x85, 0x0F,
-		0x7C
-	};
-
-	for (i=0; i < sizeof (init_string); i++)
-	{
-		wpc_asic_write (WPCS_CONTROL_STATUS, init_string[i]);
-		task_sleep (TIME_16MS);
-	}
-#endif
-#endif
-
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	if ((sound_board_type = sound_board_read (100)) == 0xFF)
+	if ((sound_board_type = sound_board_read (50)) == 0xFF)
 	{
 		dbprintf ("Error: sound board not detected\n");
 		goto exit_func;
