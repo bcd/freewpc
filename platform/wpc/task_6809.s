@@ -18,17 +18,22 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
+
+;;; Defines that are in .h files which can't be included directly.
+;;; Also offsets within structs since C-structs can't be used here either.
 STACK_BASE         = 6133
 WPC_ROM_BANK       = 0x3FFC
-PCREG_SAVE_OFF     = 5
-YREG_SAVE_OFF      = 7
-UREG_SAVE_OFF      = 9
-ROMPAGE_SAVE_OFF   = 11
-SAVED_STACK_SIZE   = 12
-FLAGS_OFF          = 13
-DELAY_OFF          = 14
-ARG_OFF            = 17
-STACK_SAVE_OFF     = 23
+PCREG_SAVE_OFF     = 2
+YREG_SAVE_OFF      = 4
+UREG_SAVE_OFF      = 6
+ROMPAGE_SAVE_OFF   = 8
+SAVED_STACK_SIZE   = 9
+FLAGS_OFF          = 10
+DELAY_OFF          = 11
+ARG_OFF            = 13
+AUX_STACK_OFF      = 19
+STACK_SAVE_OFF     = 20
+TASK_STACK_SIZE    = 60
 
 	;-----------------------------------------------------
 	; task_save
@@ -48,11 +53,20 @@ _task_save:
 	sty	YREG_SAVE_OFF,x        ; 7 cycles
 
 	;;; Copy the runtime stack into the task save area.
+	;;; Y points to the save area (destination), while S points
+	;;; to the live stack (source).  S is modified on the fly so
+	;;; no local variables can be used inside this code.
+	;;;
 	;;; For efficiency, copy 4 bytes at a time, even if some of the
 	;;; bytes are garbage.  After this loop, B contains the number
 	;;; of 4-byte blocks saved.  Y points to the save area.
+	;;;
+	;;; The total number of bytes saved could be precomputed -- it
+	;;; is STACK_BASE - s.  If this number is greater than
+	;;; TASK_STACK_SIZE, then more work needs to be done here...
 	leay	STACK_SAVE_OFF,x       ; 5 cycles
 	clrb                         ; 2 cycles
+
 	bra	save_stack_check
 save_stack:  ; loop kernel takes 35+N cycles per 4 bytes
 	ldu	,s++                   ; 7 cycles
@@ -60,6 +74,7 @@ save_stack:  ; loop kernel takes 35+N cycles per 4 bytes
 	ldu	,s++                   ; 7 cycles
 	stu	,y++                   ; 7 cycles
 	incb                         ; 2 cycles
+
 save_stack_check:
 	cmps	#STACK_BASE            ; 5 cycles
 	blt	save_stack             ; N cycles
@@ -69,7 +84,8 @@ save_stack_check:
 	aslb                         ; 2 cycles
 
 	;;; We may have copied too much.  The S register needs to be
-	;;; equal to STACK_BASE, and B needs to be adjusted down, too.
+	;;; equal to STACK_BASE, and B needs to be adjusted down to
+	;;; the actual number of saved bytes.
 backtrack:
 	cmps	#STACK_BASE            ; 5 cycles
 	beq   backtrack_not_necessary
@@ -122,20 +138,46 @@ _stack_too_large:
 	.globl _task_restore
 _task_restore:
 	stx	*_task_current	
-	orcc	#80
-	lds	#STACK_BASE
+
+	;;; Check if stack restore needed before entering the critical section.
+	;;; The only thing that needs to be protected is resetting S
+	;;; to STACK_BASE and writing to the stack.
 	ldb	SAVED_STACK_SIZE,x
-	beq	L42
-	leay	b,x
+	beq	restore_stack_not_required
+
+	;;; Set Y = offset of first byte in the save area to be
+	;;; pushed back onto stack.
 	leay	STACK_SAVE_OFF,y
-L43:
-	;;; TODO : use X register to transfer data
-	lda	,-y
-	sta	,-s
+	leay	b,x
+
+	;;; Convert the number of bytes to be restored into
+	;;; the number of blocks.  The remainder is moved into
+	;;; A to adjust the stack pointer after the copy.
+	tfr	b,a
+	anda	#1
+	incb
+	lsrb
+
+	;;; Disable interrupts during stack restore
+	orcc	#80
+
+	;;; Reset the stack pointer.  Copy all bytes out of the
+	;;; save area back to the stack.  At the end, S has the
+	;;; correct value (points to top of stack).
+	lds	#STACK_BASE
+
+	;;; Fast copy of bytes from task block to live stack
+restore_stack:
+	ldu	,--y
+	stu	,--s
 	decb
-	bne	L43
-L42:
+	bne	restore_stack
+	leas	a,s
+
+	;;; Enable interrupts again
 	andcc	#-81
+
+restore_stack_done:
 	ldb	ROMPAGE_SAVE_OFF,x
 	stb	WPC_ROM_BANK
 	ldu	PCREG_SAVE_OFF,x
@@ -145,6 +187,11 @@ L42:
 	clr	DELAY_OFF,x
 	rts
 
+restore_stack_not_required:
+	lds	#STACK_BASE
+	bra	restore_stack_done
+
+	
 	;-----------------------------------------------------
 	; task_create
 	;
@@ -160,7 +207,6 @@ _task_create:
 	jsr	_task_allocate
 	stu	PCREG_SAVE_OFF,x
 	puls	u
-	clr	,x
 	ldd	#0
 	std	ARG_OFF,x
 	ldb	WPC_ROM_BANK

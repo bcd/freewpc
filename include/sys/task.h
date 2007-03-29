@@ -57,10 +57,12 @@ typedef void (*task_function_t) (void);
 
 
 /** Values for the 'state' field in the task structure */
-#define TASK_FREE    0
-#define TASK_USED    1
-#define TASK_BLOCKED 2
-#define TASK_MALLOC  4
+#define TASK_FREE    0x0
+#define TASK_USED    0x1
+#define TASK_BLOCKED 0x2
+#define TASK_MALLOC  0x4
+#define TASK_TASK		0x8
+#define TASK_STACK	0x10
 
 /* The TASK_HEAP_SIZE field is not currently used.  It is
  * intended to represent how much memory, in bytes, has been
@@ -80,10 +82,9 @@ typedef void (*task_function_t) (void);
 /*
  * Define the size of the saved process stack.
  *
- * This value + 23 should equal a power of 2.
+ * This value + 20 should equal a power of 2.
  */
-//#define TASK_STACK_SIZE		41
-#define TASK_STACK_SIZE		57
+#define TASK_STACK_SIZE		60
 
 /** Type for the group ID (gid) */
 typedef U8 task_gid_t;
@@ -107,18 +108,16 @@ typedef void (*task_function_t) (void);
  */
 typedef struct task_struct
 {
+	/** The execution state of the task.  It can be TASK_FREE, if the
+	 * task entry isn't being used at all; TASK_USED for a running/waiting
+	 * task; or TASK_BLOCKED for a sleeping task. */
+	U8				state;
+
 	/** The task group ID.  This is a compile-time assigned value
 	 * used to identify the task.   Multiple running tasks can also
 	 * share the same group ID; operations on a group will affect
 	 * *all* tasks with that ID, in most cases. */
 	task_gid_t	gid;
-
-	/** Intended to be used internally as a chain pointer to the next task.
-	 * Not currently used, though, since the task table is just an array
-	 * and we step through it sequentially now */
-	struct task_struct *next;
-
-	struct task_struct *prev;
 
 	/** The saved PC for the task, while it is asleep */
 	U16			pc;
@@ -139,13 +138,15 @@ typedef struct task_struct
 	/** Miscellaneous control flags */
 	U8				flags;
 
+	/** The amount of time that a blocked task has requested to
+	sleep */
 	U8				delay;
-	U8				asleep;
 
-	/** The execution state of the task.  It can be TASK_FREE, if the
-	 * task entry isn't being used at all; TASK_USED for a running/waiting
-	 * task; or TASK_BLOCKED for a sleeping task. */
-	U8				state;
+	/** The time at which the task went to sleep.  To see if a task
+	needs to be awakened, compute current time - asleep, and if
+	see if that is greater than or equal to the intended delay.
+	This method handles the 8-bit overflow properly. */
+	U8				asleep;
 
 	/** The task argument pointer.  This is a primitive way of passing
 	 * initialization data to a new task.  The creator of the task can
@@ -159,6 +160,12 @@ typedef struct task_struct
 	 * free to use this however they choose.   See include/sys/leff.h
 	 * for one example of how this is done. */
 	U8          thread_data[4];
+
+	/** The index of an auxiliary memory block used to store
+	 * additional stack data.  This is used when the stack space
+	 * within the task block itself is not large enough.  When set
+	 * to -1, it means there is no auxiliary storage. */
+	U8				aux_stack_block;
 
 	/** The task stack save area.  This is NOT used as the live stack
 	 * area; the live stack is copied here when the task blocks.

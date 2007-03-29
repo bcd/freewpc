@@ -144,36 +144,105 @@ void task_dump (void)
 }
 
 
-/**
- * Allocate a new task block, by searching the array (linearly)
- * for the first entry that is TASK_FREE.
+/** Allocate a dynamic block of memory, by searching the block
+ * array (linearly) for the first entry that is in the TASK_FREE
+ * state.  Returns a pointer to the newly allocated block.
  */
-task_t *task_allocate (void)
+task_t *block_allocate (void)
 {
 	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if ((tp->state == TASK_FREE) && (tp != task_current))
+		if (tp->state == TASK_FREE)
 		{
 			tp->state = TASK_USED;
-			tp->delay = 0;
-			tp->stack_size = 0;
-			tp->flags = 0;
+			tp->aux_stack_block = t;
 			return tp;
 		}
+	return NULL;
+}
 
-	/* TODO : if there are no free blocks, it might be possible
-	to kill some other non-critical tasks to make way for this
-	one.  We have no idea what the criticality of the current task
-	is, though, so this could actually be harmful.  Some tasks
-	that are candidates for death by lethal injection:
-	lamp effects (GID_LEFF, GID_LEFF_EXITING); switch lamp flickers
-	(GID_SWITCH_LAMP_PULSE); pending switch handlers that have been
-	started but not yet begun (GID_SW_HANDLER) -- this would be as if
-	the switch never triggered. */
-	fatal (ERR_NO_FREE_TASKS);
-	return 0;
+
+/** Free a dynamic block of memory. */
+void block_free (task_t *tp)
+{
+	tp->state = TASK_FREE;
+}
+
+
+/**
+ * Allocate a block for a new task.  Failure to allocate a block
+ * is considered fatal.  If successfully allocated, the block
+ * is initialized to indicate that it is being used for
+ * a task.
+ */
+task_t *task_allocate (void)
+{
+	task_t *tp = block_allocate ();
+	if (tp)
+	{
+#if 0 /* this check was here before, but doesn't seem necessary... */
+		if (tp == task_current)
+			fatal (ERR_NO_FREE_TASKS);
+#endif
+		tp->state |= TASK_TASK;
+		tp->delay = 0;
+		tp->stack_size = 0;
+		tp->aux_stack_block = -1;
+		tp->flags = 0;
+		return tp;
+	}
+	else
+	{
+		/* TODO : if there are no free blocks, it might be possible
+		to kill some other non-critical tasks to make way for this
+		one.  We have no idea what the criticality of the current task
+		is, though, so this could actually be harmful.  Some tasks
+		that are candidates for death by lethal injection:
+		lamp effects (GID_LEFF, GID_LEFF_EXITING); switch lamp flickers
+		(GID_SWITCH_LAMP_PULSE); pending switch handlers that have been
+		started but not yet begun (GID_SW_HANDLER) -- this would be as if
+		the switch never triggered. */
+		fatal (ERR_NO_FREE_TASKS);
+		return 0;
+	}
+}
+
+
+/** Allocate additional stack space.  tp can be a normal task
+block, or it can be a stack block; blocks may be chained
+to arbitrary lengths.  The 'aux_stack_block' field is the
+offset of the next block in the chain. */
+task_t *task_expand_stack (task_t *tp)
+{
+	task_t *sp = block_allocate ();
+	if (sp)
+	{
+		sp->state |= TASK_STACK;
+		tp->aux_stack_block = sp->aux_stack_block;
+		sp->aux_stack_block = -1;
+	}
+	else
+	{
+		fatal (ERR_NO_FREE_TASKS);
+		return 0;
+	}
+}
+
+
+/** Free a task block for a task that no longer exists. */
+void task_free (task_t *tp)
+{
+#if 0
+	/* Free any auxiliary stack blocks first.  This
+	is recurse, in case the chain is more than 1 block long. */
+	if (tp->aux_stack_block != -1)
+		task_free (&task_buffer[tp->aux_stack_block]);
+#endif
+
+	/* Free the task block */
+	block_free (tp);
 }
 
 
@@ -246,12 +315,7 @@ void task_sleep (task_ticks_t ticks)
 
 	tp->delay = ticks;
 	tp->asleep = tick_count;
-
-#if 0
-	if (tp->state != TASK_USED)
-		fatal (99);
-#endif
-	tp->state = TASK_BLOCKED+TASK_USED; /* was |= */
+	tp->state = TASK_TASK+TASK_BLOCKED+TASK_USED;
 
 	task_save ();
 }
@@ -276,7 +340,7 @@ void task_exit (void)
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
-	task_current->state = TASK_FREE;
+	task_free (task_current);
 	task_current = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
@@ -298,7 +362,7 @@ task_t *task_find_gid (task_gid_t gid)
 {
 	register task_t *tp;
 	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
-		if ((tp->state != TASK_FREE) && (tp->gid == gid))
+		if ((tp->state & TASK_TASK) && (tp->gid == gid))
 			return (tp);
 	return (NULL);
 }
@@ -311,8 +375,7 @@ task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val)
 {
 	register task_t *tp;
 	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
-		if ((tp->state != TASK_FREE) 
-			&& (tp->gid == gid) 
+		if ((tp->state & TASK_TASK) && (tp->gid == gid) 
 			&& (tp->thread_data[off] == val))
 			return (tp);
 	return (NULL);
@@ -326,7 +389,7 @@ void task_kill_pid (task_t *tp)
 {
 	if (tp == task_current)
 		fatal (ERR_TASK_KILL_CURRENT);
-	tp->state = TASK_FREE;
+	task_free (tp);
 	tp->gid = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
@@ -347,7 +410,7 @@ bool task_kill_gid (task_gid_t gid)
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
-				(tp->state != TASK_FREE) && 
+				(tp->state & TASK_TASK) && 
 				(tp->gid == gid) )
 		{
 			task_kill_pid (tp);
@@ -370,7 +433,7 @@ void task_kill_all (void)
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
-				(tp->state != TASK_FREE) && 
+				(tp->state & TASK_TASK) && 
 				!(tp->flags & TASK_PROTECTED) )
 		{
 			task_kill_pid (tp);
@@ -463,16 +526,14 @@ void task_dispatcher (void)
 		/* All task blocks were scanned, and no free task was found. */
 		if (first == tp)
 		{
-			/* Wait for next task tick before continuing.
-			Ensure that the idle function is not invoked more than once
-			per 16ms.  TODO - this is a long time!! */
-			while (tick_start_count == *(volatile U8 *)&tick_count);
-			
+			/* Call the debugger.  This is not implemented as a true
+			'idle' event below because it should _always_ be called,
+			even when 'sys_init_complete' is not true.  This lets us
+			debug very early initialization. */
 			db_idle ();
 		
-			/* If the system is fully initialized, also
-			 * run the idle tasks once every pass through
-			 * the list. */
+			/* If the system is fully initialized, run
+			 * the idle functions. */
 			if (sys_init_complete)
 					callset_invoke (idle);
 
@@ -480,19 +541,26 @@ void task_dispatcher (void)
 			tick_start_count = tick_count;
 			task_dispatching_ok = TRUE;
 
+			/* Wait for next task tick before continuing.
+			This ensures that the idle function is not invoked more than once
+			per 16ms.  Do this AFTER calling the idle functions, so
+			that we wait as little as possible; idle calls themselves may
+			take a long time. */
+			while (tick_start_count == *(volatile U8 *)&tick_count);
+			
 			/* Ensure that 'tp', which is in register X, is reloaded
 			with the correct task pointer.  The above functions may
 			trash its value. */
 			tp = first;
 		}
 
-		if (tp->state == TASK_USED)
+		if (tp->state == TASK_TASK+TASK_USED)
 		{
 			/* The task exits, and is not sleeping.  It can be
 			started immediately. */
 			task_restore ();
 		}
-		else if (tp->state == TASK_USED+TASK_BLOCKED)
+		else if (tp->state == TASK_TASK+TASK_USED+TASK_BLOCKED)
 		{
 			/* The task exists, but is sleeping.
 			 * tp->asleep holds the time at which it went to sleep,
@@ -540,9 +608,7 @@ void task_init (void)
 	 * The calling routine can then sleep and/or create new tasks
 	 * after this point. */
 	task_current = task_allocate ();
-	task_current->state = TASK_USED;
-	task_current->arg = 0;
 	task_current->gid = GID_FIRST_TASK;
-	task_current->delay = 0;
+	task_current->arg = 0;
 }
 
