@@ -42,16 +42,16 @@ do {														\
 
 
 #define __setbit(bs, index) \
-	WPC_BITOP (bs, index, "\tor%1\t,%0\n\tst%1\t,%0\n")
+	WPC_BITOP (bs, index, "\tor%1\t,%0\n\tst%1\t,%0")
 
 #define __clearbit(bs, index) \
-	WPC_BITOP (bs, index, "\tcom%1\n\tand%1\t,%0\n\tst%1\t,%0\n")
+	WPC_BITOP (bs, index, "\tcom%1\n\tand%1\t,%0\n\tst%1\t,%0")
 
 #define __togglebit(bs, index) \
-	WPC_BITOP (bs, index, "\teor%1\t,%0\n\tst%1\t,%0\n")
+	WPC_BITOP (bs, index, "\teor%1\t,%0\n\tst%1\t,%0")
 
 #define __testbit(bs, index) \
-	WPC_BITOP (bs, index, "\tand%1\t,%0\n")
+	WPC_BITOP (bs, index, "\tand%1\t,%0")
 
 #else
 
