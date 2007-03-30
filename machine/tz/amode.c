@@ -178,9 +178,11 @@ void amode_leff (void)
 
 		lampset_set_apply_delay (0);
 		lampset_apply_leff_off (LAMPSET_SORT1);
-		lampset_set_apply_delay (TIME_66MS);
 		for (i=0 ; i < 10; i++)
+		{
+			lampset_set_apply_delay (TIME_16MS);
 			lampset_apply_leff_toggle (LAMPSET_SORT1);
+		}
 	}
 }
 
@@ -216,27 +218,18 @@ void amode_deff (void) __taskentry__
 
 	for (;;)
 	{
-
+#if 0
 		extern const U8 cow_anim0_prg[];
-		//dmd_animate (cow_anim0_prg, TIME_66MS);
-#if 1
+		dmd_animate (cow_anim0_prg, TIME_66MS);
+#endif
+
+#if 0
 		dmd_alloc_low ();
 		dmd_draw_xbmprog (cow_anim0_prg);
 		dmd_show_low ();
 		task_sleep_sec (7);
 #endif
 
-#if 0
-		dmd_alloc_low_high ();
-		dmd_draw_image2 (hitcher0_bits);
-		dmd_show2 ();
-		task_sleep_sec (5);
-		
-		dmd_alloc_low_high ();
-		dmd_draw_image2 (cow0_bits);
-		dmd_show2 ();
-		task_sleep_sec (5);
-#else
 		/** Display last set of player scores **/
 		dmd_alloc_low_clean ();
 		scores_draw ();
@@ -299,7 +292,7 @@ void amode_deff (void) __taskentry__
 			design_credit_counter = 3;
 			amode_show_design_credits ();
 		}
-#endif
+
 		/* Kill music if it is running */
 		music_set (MUS_OFF);
 	}
