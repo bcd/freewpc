@@ -147,8 +147,8 @@ _task_restore:
 
 	;;; Set Y = offset of first byte in the save area to be
 	;;; pushed back onto stack.
-	leay	STACK_SAVE_OFF,y
 	leay	b,x
+	leay	STACK_SAVE_OFF,y
 
 	;;; Convert the number of bytes to be restored into
 	;;; the number of blocks.  The remainder is moved into
