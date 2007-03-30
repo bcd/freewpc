@@ -4,6 +4,14 @@
 
 print "/* Included $1 */\n\n";
 
+#
+# build_lampset_explode_from_lamp
+#
+# This is a generic lampset generator that orders all playfield
+# lamps based on distance to a given lamp.  When the lamps are
+# rapidly turned on/off, it appears as if the lamps are 'exploding'
+# outwards from the starting location.
+#
 sub build_lampset_explode_from_lamp {
 	my ($lamp) = @_;
 	die "no such lamp" if (!defined $lamp);
@@ -15,6 +23,10 @@ sub build_lampset_explode_from_lamp {
    	<=> int sqrt (((($b_x - $C_x) ** 2) + (($b_y - $C_y) ** 2)));
 }
 
+#
+# build_lampset_from_lock - an instance of the above which originates
+# from TZ's green lock arrow.
+#
 sub build_lampset_from_lock {
 	my $lamps = $m->{'lamps'};
 	my $lamp = $lamps->{'Lock Arrow'};
