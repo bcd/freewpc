@@ -188,6 +188,7 @@ void tz_clock_rtt (void)
 			}
 			else if ((clock_sw & 0xF0) == (clock_find_target & 0xF0) && (clock_speed < 2))
 			{
+				/* If the clock is 'close' to its target, then slow down. */
 				clock_speed = 3;
 				goto clock_stopped;
 			}
@@ -197,7 +198,8 @@ void tz_clock_rtt (void)
 			}
 			else
 			{
-				/* Direction to move depends on current state */
+				/* TODO : direction to move depends on current state.
+				 * This is inefficient. */
 				goto clock_running_backward;
 			}
 			break;
@@ -222,7 +224,7 @@ void tz_clock_start_backward (void)
 
 void tz_clock_set_speed (U8 speed)
 {
-	clock_speed = speed;
+	clock_delay_time = clock_speed = speed;
 }
 
 
@@ -234,6 +236,7 @@ void tz_clock_stop (void)
 
 void tz_clock_reset (void)
 {
+	/* Find the home position at super speed */
 	tz_clock_set_speed (1);
 	clock_mode = CLOCK_FIND;
 	clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
@@ -243,29 +246,53 @@ void tz_clock_reset (void)
 CALLSET_ENTRY (tz_clock, init)
 {
 	clock_mode = CLOCK_STOPPED;
+	clock_sw_seen_active = 0;
+	clock_sw_seen_inactive = 0;
+	clock_sw = 0;
 }
 
 CALLSET_ENTRY (tz_clock, amode_start)
 {
-	clock_sw = 0;
-	clock_sw_seen_active = 0;
-	clock_sw_seen_inactive = 0;
-	clock_delay_time = clock_speed = 1;
+	/* If not all of the other clock switches have been seen in both
+	 * active and inactive states, start the clock. */
+	if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
+	{
+		tz_clock_set_speed (1);
 #if 0
-	clock_calibration_ticks = 3;
+		clock_calibration_ticks = 3;
 #endif
-	if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
-	{
-	}
-	else
-	{
 		clock_mode = CLOCK_CALIBRATING;
 	}
 }
 
 
-CALLSET_ENTRY (tz_amode, amode_stop)
+CALLSET_ENTRY (tz_clock, amode_stop)
 {
-	clock_mode = CLOCK_STOPPED;
+	/* Stop the calibration or real-time clock display that
+	 * runs in the attract mode. */
+	tz_clock_stop ();
+}
+
+
+CALLSET_ENTRY (tz_clock, test_start)
+{
+	/* Stop the clock unconditionally when entering test mode. */
+	tz_clock_stop ();
+}
+
+CALLSET_ENTRY (tz_clock, start_game)
+{
+}
+
+CALLSET_ENTRY (tz_clock, start_ball)
+{
+	/* Reset the clock to 12:00 at the start of ball */
+	tz_clock_reset ();
+}
+
+CALLSET_ENTRY (tz_clock, end_ball)
+{
+	/* Reset the clock to 12:00 at the end of ball */
+	tz_clock_reset ();
 }
 
