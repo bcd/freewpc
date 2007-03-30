@@ -27,48 +27,36 @@
  * This module is not yet complete and is not used.
  */
 
-__fastram__ U8 ac_last_zerocross_reading;
-__fastram__ U8 ac_zerocross_same_count;
-bool ac_zerocross_broken;
+__fastram__ U8 ac_zc_count;
+
+__fastram__ U8 ac_zc_period;
+
 
 void ac_rtt (void)
 {
-#if 0
-	U8 ac_current_zerocross_reading = wpc_read_ac_zerocross ();
-
-	if (ac_current_zerocross_reading == ac_last_zerocross_reading)
+#ifdef CONFIG_ZEROCROSS
+	if ( wpc_read_ac_zerocross () )
 	{
-		ac_zerocross_same_count++;
-		if (ac_zerocross_same_count >= 32)
-		{
-			ac_zerocross_broken = TRUE;
-		}
+		/* At zero cross point */
+		ac_zc_count = 0;
 	}
 	else
 	{
-		ac_zerocross_broken = FALSE;
+		/* Not at zero cross point */
+		ac_zc_count++;
 	}
-
-	ac_last_zerocross_reading = ac_current_zerocross_reading;
-#endif
+#endif /* CONFIG_ZEROCROSS */
 }
 
 
 CALLSET_ENTRY (ac, idle)
 {
-	/** If zerocross is working, we are in a real machine.
-	 * Pinmame doesn't support this yet. */
-	if (!ac_zerocross_broken)
-	{
-		fatal (ERR_REAL_HARDWARE);
-	}
 }
 
 
 void ac_init (void)
 {
-	ac_last_zerocross_reading = 0;
-	ac_zerocross_same_count = 0;
-	ac_zerocross_broken = TRUE;
+	ac_zc_count = 0;
+	ac_zc_period = 8;
 }
 
