@@ -51,9 +51,12 @@ void lampset_set_apply_delay (task_ticks_t delay)
 
 const U8 *lampset_lookup (lampset_id_t id)
 {
+	U8 *lampset;
+
 	wpc_push_page (MD_PAGE);
-	return lampset_table[id];
+	lampset = lampset_table[id];
 	wpc_pop_page ();
+	return lampset;
 }
 
 
