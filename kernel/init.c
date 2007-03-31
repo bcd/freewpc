@@ -155,7 +155,6 @@ void do_reset (void)
 	adj_init ();
 	high_score_init ();
 	ball_search_init ();
-	knocker_init ();
 	random_init ();
 	callset_invoke (init);
 

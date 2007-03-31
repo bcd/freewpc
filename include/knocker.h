@@ -21,7 +21,6 @@
 #ifndef _KNOCKER_H
 #define _KNOCKER_H
 
-__common__ void knocker_init (void);
 __common__ void knocker_fire (void);
 
 #endif /* _KNOCKER_H */

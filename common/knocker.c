@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 
+#define MAX_PENDING_KNOCKS 5
+
 U8 knock_count;
 
 
@@ -31,22 +33,30 @@ static void knocker_fire_task (void)
 #ifdef MACHINE_KNOCKER_SOLENOID
 		sol_pulse (MACHINE_KNOCKER_SOLENOID);
 #endif
+#ifdef MACHINE_KNOCKER_SOUND
+		sound_send (MACHINE_KNOCKER_SOUND);
+#endif
 		task_sleep (TIME_500MS);
 	} while (--knock_count > 0);
 	task_exit ();
 }
 
 
-/** Requests that the knocker be fired. */
+/** Requests that the knocker be fired.
+ * We bump a count and then let a background task do the firing,
+ * taking care to pause between thwacks. */
 void knocker_fire (void)
 {
-	/* TODO - don't fire knocker in certain instances */
-	knock_count++;
-	task_create_gid1 (GID_KNOCKER_FIRE, knocker_fire_task);
+	if (knock_count < MAX_PENDING_KNOCKS) /* prevent runaway knocking */
+	{
+		/* TODO - don't fire knocker in certain instances */
+		knock_count++;
+		task_create_gid1 (GID_KNOCKER_FIRE, knocker_fire_task);
+	}
 }
 
 
-void knocker_init (void)
+CALLSET_ENTRY (knocker, init)
 {
 	knock_count = 0;
 }
