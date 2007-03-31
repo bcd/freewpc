@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -178,6 +178,12 @@ CALLSET_ENTRY (skill, end_game)
 
 CALLSET_ENTRY (skill, sw_shooter)
 {
+	/* Because the shooter switch is declared as an 'edge' switch,
+	an event is generated on both transitions.  Check the current
+	state of the switch to see which transition occurred.
+	TODO : genmachine can be made to generate two events here,
+	say 'sw_shooter_active' and 'sw_shooter_inactive', which would
+	eliminate the need for every handler to check this. */
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
 		if (skill_shot_enabled)

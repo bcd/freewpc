@@ -131,6 +131,30 @@ void ball_save_deff (void)
 }
 
 
+void tv_static_deff (void)
+{
+	U8 loop;
+	U8 count;
+	register U8 *dmd = dmd_low_buffer;
+	U8 r;
+
+	for (loop = 0; loop < 16; loop++)
+	{
+		for (count = 0; count < 37; count++)
+		{
+			r = random ();
+			dmd[count] = r;
+			dmd[37 + count] = r;
+			dmd[37*2 + count] = r;
+			dmd[37*3 + count] = r;
+		}
+		dmd_alloc_low_high ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
+	deff_exit ();
+}
+
 
 CALLSET_ENTRY (deff, start_player)
 {

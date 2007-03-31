@@ -505,6 +505,7 @@ Skill Shot Ready: runner, PRI_GAME_MODE1+4
 MB Running: runner, PRI_GAME_MODE1+8
 
 Left Ramp: PRI_GAME_QUICK1+1
+TV Static: PRI_GAME_QUICK1+2
 Camera Award: PRI_GAME_QUICK1+4
 Hitchhiker: PRI_GAME_QUICK1+4
 Door Award: PRI_GAME_QUICK1+6
