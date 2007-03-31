@@ -39,7 +39,9 @@ typedef void (*switch_handler_t) (void);
  * about a particular switch */
 typedef struct
 {
-	/** A function to call when the switch produces an event */
+	/** A function to call when the switch produces an event.
+	 * All functions are assumed to be callsets, and located in the
+	 * callset page of the ROM. */
 	void (*fn) (void);
 
 	/** A set of flags that control when switch events are produced */
@@ -119,6 +121,10 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 #define switch_can_follow(first,second,timeout) \
 	timer_restart_free (GID_ ## second ## _FOLLOWED_BY_ ## first, timeout)
 
+/** Declare that a 'device switch' can follow the one that just closed.
+ * This is equivalent to 'switch_can_follow', but it also freezes all
+ * timers temporarily, since the ball is effectively not in play and
+ * is eventually to a device, where timers will stop anyway. */
 #define device_switch_can_follow(first, second, timeout) \
 	do { \
 		switch_can_follow (first, second, timeout); \
@@ -130,6 +136,9 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * first switch closure. */
 #define switch_did_follow(first,second) \
 	timer_kill_gid (GID_ ## second ## _FOLLOWED_BY_ ## first)
+
+/* The above macros are generic enough to apply to any event, not
+ * just switch events */
 
 #define event_should_follow(f,s,t) switch_can_follow(f,s,t)
 #define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
