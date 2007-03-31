@@ -179,6 +179,7 @@ void score_add (bcd_t *s1, const bcd_t *s2, U8 _len)
 }
 
 
+/** Adds to the current score.  The input score is given as a BCD-string. */
 void score_add_current (const bcd_t *s)
 {
 	if (!in_live_game)
@@ -189,10 +190,11 @@ void score_add_current (const bcd_t *s)
 
 	score_add (current_score, s, sizeof (score_t));
 	score_change++;
-	/* TODO : check replay */
+	replay_check_current ();
 }
 
 
+/** Adds to the current score.  The input score is given as a score ID. */
 void score (score_id_t id)
 {
 	score_add_current (score_table[id]);
@@ -201,19 +203,6 @@ void score (score_id_t id)
 
 void score_multiple (score_id_t id, U8 multiplier)
 {
-#if 0
-	score_t mult_score;
-	const bcd_t *base_score = score_table[id];
-	S8 i;
-
-	/* TODO - calculate the multiplied score */
-	for (i=sizeof(score_t)-1; i >=0 ; --i)
-	{
-		mult_score[i] = base_score[i] * multiplier;
-	}
-
-	score_add_current (&mult_score);
-#else
 	if (!in_live_game)
 		return;
 
@@ -224,7 +213,6 @@ void score_multiple (score_id_t id, U8 multiplier)
 		multiplier--;
 	}
 	score_change++;
-#endif
 }
 
 
