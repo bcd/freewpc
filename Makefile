@@ -185,7 +185,6 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/ac.o \
 	kernel/adj.o \
 	kernel/audit.o \
-	kernel/coin.o \
 	kernel/csum.o \
 	kernel/deff.o \
 	kernel/device.o \
@@ -211,6 +210,7 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 
 COMMON_BASIC_OBJS = \
 	common/audio.o \
+	kernel/coin.o \
 	common/db.o \
 	common/event-audit.o \
 	common/initials.o \
