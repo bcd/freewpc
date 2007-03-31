@@ -213,6 +213,7 @@ COMMON_BASIC_OBJS = \
 	kernel/coin.o \
 	common/db.o \
 	common/event-audit.o \
+	common/flipcode.o \
 	common/initials.o \
 	common/match.o \
 	common/rtc.o \
