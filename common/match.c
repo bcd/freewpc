@@ -30,6 +30,8 @@ void
 match_award (void)
 {
 	audit_increment (&system_audits.match_credits);
+	add_credit ();
+	knocker_fire ();
 }
 
 
@@ -46,11 +48,19 @@ match_deff (void)
 
 
 void 
-do_match (bool will_match)
+do_match (bcd_t value, U8 count)
 {
+	/* Start the match effect, then wait until it finishes. */
 	deff_start (DEFF_MATCH);
 	while (deff_get_active () == DEFF_MATCH)
 		task_sleep (TIME_100MS);
+
+	/* Award credits */
+	while (count > 0)
+	{
+		count--;
+		match_award ();
+	}
 }
 
 
@@ -69,11 +79,11 @@ match_start (void)
 	match_flag = random_scaled (100);
 	if (match_flag <= system_config.match_feature)
 	{
-		do_match (TRUE);
+		do_match (0, 0);
 	}
 	else
 	{
-		do_match (FALSE);
+		do_match (0, 1);
 	}
 }
 
