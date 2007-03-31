@@ -100,6 +100,8 @@ sol_modify (solnum_t sol, U8 cycle_mask)
 /*
  * Pulses a solenoid.  The solenoid is turned on, a delay occurs,
  * and then it is turned off.
+ * TODO - should this be performed in a new task context, to avoid
+ * blocking the caller?
  */
 void
 sol_modify_pulse (solnum_t sol, U8 cycle_mask)
