@@ -21,9 +21,10 @@ for plat in `echo linux wpc`; do
 						PLATFORM=$plat MACHINE=$mach DEBUGGER=$debugger \
 						GCC_VERSION=$gcc $target | tee -a stressbuild.out
 					make PLATFORM=$plat MACHINE=$mach GCC_VERSION=$gcc \
-						DEBUGGER=$debugger $target \
-						2>&1 >> stressbuild.out
-	          	if [ $? != 0 ]; then exit 1; fi
+						DEBUGGER=$debugger $target | tee -a stressbuild.out
+					rc=$?
+					echo "rc=$rc"
+	          	if [ "$rc" != "0" ]; then exit $rc; fi
 				done
 			done
 		done
