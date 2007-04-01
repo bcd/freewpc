@@ -263,6 +263,10 @@ CALLSET_ENTRY (tz_clock, amode_start)
 #endif
 		clock_mode = CLOCK_CALIBRATING;
 	}
+	else
+	{
+		tz_clock_reset ();
+	}
 }
 
 
