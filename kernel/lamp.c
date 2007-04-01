@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -73,6 +73,17 @@ __fastram__ U8 lamp_strobe_mask;
 __fastram__ U8 lamp_strobe_column;
 
 
+const U16 lamp_strobe_mask_table[] = {
+	0x4444,
+	0xAAAA,
+	0xDDDD,
+	0xFFFF,
+	0xDDDD,
+	0xAAAA,
+	0x4444,
+};
+
+
 /** Initialize the lamp subsystem at startup. */
 void lamp_init (void)
 {
@@ -119,6 +130,10 @@ void lamp_flash_rtt (void)
 void lamp_rtt (void)
 {
 	U8 bits;
+
+	/* TODO : implement lamp power saver level.  For some number N
+	 * iterations, just clear the lamp outputs and be done.
+	 * But only do this outside of a game. */
 
 	/* Setup the strobe */
 	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);

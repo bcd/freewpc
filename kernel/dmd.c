@@ -190,6 +190,10 @@ void dmd_rtt0 (void)
 {
 	wpc_dmd_set_visible_page (dmd_dark_page);
 	wpc_dmd_set_firq_row (30);
+	/* TODO : only the last byte of 'dmd_rtt' needs to be
+	 * updated, as long as all three functions reside within
+	 * the same 256-byte region, which could be verified at
+	 * init time */
 	dmd_rtt = dmd_rtt1;
 }
 
