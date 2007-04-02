@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+#
+# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------
+# gendefine - generate include files of #defines automatically
+# ------------------------------------------------------------------
+# Scan all source files in the given directories and grep them for
+# defines that match a particular pattern.  For each
+# one, generate a unique value for it.  This allows new values to be
+# created simply by using them, rather than adding to a separate
+# .h file by hand.
+#
+# Options:
+# -p <prefix>
+# 		Sets the prefix to scan for.
+# -f <first_value>
+# 		Sets the first value that will be assigned.  The default is 1.
+# -c <count_name>
+# 		If given, specifies the name of a #define that will be generated
+# 		whose value is the number of previous defines that have been
+# 		generated.  This define is always emitted last.
+#
+
+
+my $prefix = "GID_";
+
+my @dirs = (
+	"include", 
+	"include/sys", 
+	"include/mach", 
+	"kernel", 
+	"common",
+	"mach", 
+	"fonts", 
+	"test",
+	"platform/linux",
+	"platform/wpc",
+	"build",
+	);
+
+my $firstval = 1;
+my $count_define = undef;
+
+my @defines = ();
+
+my %definehash;
+
+# ---------------------------------------------------------------------
+# Parse command-line arguments
+# ---------------------------------------------------------------------
+while ($arg = shift)
+{
+	if ($arg =~ m/-p/) {
+		$prefix = shift;
+	} elsif ($arg =~ m/-f/) {
+		$firstval = shift;
+	} elsif ($arg =~ m/-c/) {
+		$count_define = shift;
+	}
+}
+
+# ---------------------------------------------------------------------
+# Build a list of files to be searched, based on the list of
+# directories.
+# ---------------------------------------------------------------------
+foreach $dir (@dirs) {
+	my @files = split /\n+/, 
+		`cd $dir && find . -maxdepth 1 -name "*.[ch]"`;
+	foreach $file (@files) {
+		push @srclist, "$dir/" . $file;
+	}
+}
+
+# ---------------------------------------------------------------------
+# Scan through all files and search for instances of the define
+# pattern.  When found, add an entry to the define hash, mapping
+# its name to a new value.  If the name has already been found once
+# before, no new value is allocated.
+# ---------------------------------------------------------------------
+my $nextval = $firstval;
+my $count = 0;
+my $line;
+foreach $src (@srclist) {
+	open FH, $src;
+	while (<FH>) {
+		chomp;
+
+		if (/(switch|event)_(can|did)_follow[ \t]*\(([a-zA-Z0-9_]+), ([a-zA-Z0-9_]+)/) {
+			$line = " GID_" . $4 . "_FOLLOWED_BY_" . $3;
+		} else {
+			$line = $_;
+		}
+
+		if ($line =~ m/[^a-zA-Z0-9_](${prefix}[a-zA-Z0-9_]*)/) {
+			my $define = $1;
+			if (!defined $definehash{$define})
+			{
+				push @defines, $define;
+				$definehash{$define} = $nextval;
+				$nextval++;
+				$count++;
+			}
+		}
+	}
+	close FH;
+}
+
+# ---------------------------------------------------------------------
+# Generate the output file.
+# ---------------------------------------------------------------------
+print "#ifndef __GENDEFINE_" . $prefix . "\n";
+print "#define __GENDEFINE_" . $prefix . "\n";
+foreach $define (@defines) {
+	print "#define $define " . $definehash{$define} . "\n";
+}
+if (defined $count_define) {
+	print "#define $count_define " . $count . "\n";
+}
+print "#endif /* __GENDEFINE_" . $prefix . " */\n";
+

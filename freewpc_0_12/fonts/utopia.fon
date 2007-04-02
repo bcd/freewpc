@@ -1,0 +1,99 @@
+#include <freewpc.h>
+#pragma section ("page61")
+#define glyph_utopia_0_width 6
+#define glyph_utopia_0_height 11
+static char glyph_utopia_0_bits[] = { glyph_utopia_0_width, glyph_utopia_0_height,
+ 0x04,0x1e,0x23,0x21,0x21,0x21,0x21,0x21,0x21,0x33,0x1e};
+#define glyph_utopia_1_width 6
+#define glyph_utopia_1_height 10
+static char glyph_utopia_1_bits[] = { glyph_utopia_1_width, glyph_utopia_1_height,
+ 0x0e,0x09,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x3f};
+#define glyph_utopia_2_width 7
+#define glyph_utopia_2_height 11
+static char glyph_utopia_2_bits[] = { glyph_utopia_2_width, glyph_utopia_2_height,
+ 0x08,0x3c,0x42,0x40,0x40,0x20,0x10,0x08,0x04,0x42,0x7f};
+#define glyph_utopia_3_width 7
+#define glyph_utopia_3_height 11
+static char glyph_utopia_3_bits[] = { glyph_utopia_3_width, glyph_utopia_3_height,
+ 0x08,0x3e,0x40,0x40,0x60,0x38,0x20,0x40,0x40,0x61,0x3e};
+#define glyph_utopia_4_width 6
+#define glyph_utopia_4_height 10
+static char glyph_utopia_4_bits[] = { glyph_utopia_4_width, glyph_utopia_4_height,
+ 0x18,0x18,0x14,0x16,0x12,0x11,0x3f,0x10,0x10,0x3c};
+#define glyph_utopia_5_width 6
+#define glyph_utopia_5_height 10
+static char glyph_utopia_5_bits[] = { glyph_utopia_5_width, glyph_utopia_5_height,
+ 0x1f,0x3f,0x01,0x1f,0x33,0x20,0x20,0x20,0x31,0x1f};
+#define glyph_utopia_6_width 7
+#define glyph_utopia_6_height 11
+static char glyph_utopia_6_bits[] = { glyph_utopia_6_width, glyph_utopia_6_height,
+ 0x20,0x78,0x04,0x02,0x03,0x3d,0x67,0x43,0x43,0x66,0x3c};
+#define glyph_utopia_7_width 7
+#define glyph_utopia_7_height 10
+static char glyph_utopia_7_bits[] = { glyph_utopia_7_width, glyph_utopia_7_height,
+ 0x7f,0x3f,0x20,0x20,0x10,0x10,0x10,0x18,0x08,0x08};
+#define glyph_utopia_8_width 6
+#define glyph_utopia_8_height 11
+static char glyph_utopia_8_bits[] = { glyph_utopia_8_width, glyph_utopia_8_height,
+ 0x04,0x1e,0x21,0x21,0x33,0x1e,0x12,0x21,0x21,0x33,0x1e};
+#define glyph_utopia_9_width 6
+#define glyph_utopia_9_height 11
+static char glyph_utopia_9_bits[] = { glyph_utopia_9_width, glyph_utopia_9_height,
+ 0x04,0x1e,0x31,0x21,0x21,0x33,0x2e,0x20,0x30,0x18,0x0f};
+#define glyph_utopia_period_width 2
+#define glyph_utopia_period_height 2
+static char glyph_utopia_period_bits[] = { glyph_utopia_period_width, glyph_utopia_period_height,
+ 0x03,0x03};
+#define glyph_utopia_comma_width 4
+#define glyph_utopia_comma_height 5
+static char glyph_utopia_comma_bits[] = { glyph_utopia_comma_width, glyph_utopia_comma_height,
+ 0x0c,0x06,0x06,0x03,0x03};
+#define glyph_utopia_slash_width 6
+#define glyph_utopia_slash_height 12
+static char glyph_utopia_slash_bits[] = { glyph_utopia_slash_width, glyph_utopia_slash_height,
+ 0x20,0x20,0x10,0x10,0x08,0x08,0x04,0x04,0x02,0x02,0x01,0x01};
+#define glyph_utopia_amp_width 7
+#define glyph_utopia_amp_height 9
+static char glyph_utopia_amp_bits[] = { glyph_utopia_amp_width, glyph_utopia_amp_height,
+ 0x38,0x14,0x04,0x04,0x0c,0x4b,0x31,0x33,0x7e};
+#define glyph_utopia_minus_width 8
+#define glyph_utopia_minus_height 1
+static char glyph_utopia_minus_bits[] = { glyph_utopia_minus_width, glyph_utopia_minus_height,
+ 0xff};
+#define glyph_utopia_bang_width 2
+#define glyph_utopia_bang_height 10
+static char glyph_utopia_bang_bits[] = { glyph_utopia_bang_width, glyph_utopia_bang_height,
+ 0x03,0x03,0x03,0x03,0x03,0x03,0x00,0x00,0x03,0x03};
+#define glyph_utopia_dollar_width 6
+#define glyph_utopia_dollar_height 12
+static char glyph_utopia_dollar_bits[] = { glyph_utopia_dollar_width, glyph_utopia_dollar_height,
+ 0x08,0x0c,0x33,0x21,0x01,0x1e,0x30,0x20,0x31,0x1f,0x08,0x08};
+#define glyph_utopia_percent_width 8
+#define glyph_utopia_percent_height 10
+static char glyph_utopia_percent_bits[] = { glyph_utopia_percent_width, glyph_utopia_percent_height,
+ 0x0e,0x12,0x12,0x8c,0x70,0x0e,0x31,0x48,0x48,0x30};
+static char *utopia_glyphs[] = {
+   ['0'] = glyph_utopia_0_bits,
+   ['1'] = glyph_utopia_1_bits,
+   ['2'] = glyph_utopia_2_bits,
+   ['3'] = glyph_utopia_3_bits,
+   ['4'] = glyph_utopia_4_bits,
+   ['5'] = glyph_utopia_5_bits,
+   ['6'] = glyph_utopia_6_bits,
+   ['7'] = glyph_utopia_7_bits,
+   ['8'] = glyph_utopia_8_bits,
+   ['9'] = glyph_utopia_9_bits,
+   ['.'] = glyph_utopia_period_bits,
+   [','] = glyph_utopia_comma_bits,
+   ['/'] = glyph_utopia_slash_bits,
+   ['&'] = glyph_utopia_amp_bits,
+   ['-'] = glyph_utopia_minus_bits,
+   ['!'] = glyph_utopia_bang_bits,
+   ['$'] = glyph_utopia_dollar_bits,
+   ['%'] = glyph_utopia_percent_bits,
+};
+const font_t font_utopia = {
+	.spacing = 2,
+	.height = 11,
+	.glyphs = utopia_glyphs,
+};

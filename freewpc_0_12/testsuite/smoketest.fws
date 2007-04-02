@@ -1,0 +1,51 @@
+# Smoke test for FreeWPC
+# This only works with the Linux simulated build.  Invoke it as follows:
+# freewpc < file
+#
+
+# Go into test mode
+0
+# Skip the test messages
+0
+
+# We start at the Bookkeeping Menu.
+# Go into the Test Menu
+990
+
+# Enter each test, exit, and proceed to the next test.
+# Within each test, cycle up/down several times.
+099999999999988888888888898989898989898979 # switch edges
+099999999999988888888888898989898989898979 # switch levels
+099999999999988888888888898989898989898979 # single switches
+09 # display - not implemented
+099999999999988888888888898989898989898979 # solenoid test
+099999999999988888888888898989898989898979 # gi test
+099999999999988888888888898989898989898979 # sound test
+099999999999988888888888898989898989898979 # lamp test
+099999999999988888888888898989898989898979 # all lamp test
+099999999999988888888888898989898989898979 # lamp row col
+099999999999988888888888898989898989898979 # dipsw
+09 # flipper - not impl
+099999999999988888888888898989898989898979 # asic
+09 # debugger - not impl
+099999999999988888888888898989898989898979 # empty balls
+
+# Exit test menu
+7
+
+# Exit main menu
+7
+
+# Exit to attract mode
+7
+S5
+
+# Test volume change in attract mode
+99999999999999999999888888888888888888888888888888899999999
+
+# Test coin switches
+34563456345634563456
+
+# Start a game
+1
+S5
