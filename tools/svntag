@@ -30,7 +30,7 @@ case $1 in
 		svn copy $SVNROOT/trunk $SVNROOT/tags/$tag
 		;;
 	list)
-		svn list $SVNROOT/tags
+		svn list $SVNROOT/tags/$2
 		;;
 	help|*)
 		echo "Syntax: svntag [set|list] [tagname]"
