@@ -51,12 +51,9 @@ void lampset_set_apply_delay (task_ticks_t delay)
 
 const U8 *lampset_lookup (lampset_id_t id)
 {
-	U8 *lampset;
-
 	wpc_push_page (MD_PAGE);
-	lampset = lampset_table[id];
+	return lampset_table[id];
 	wpc_pop_page ();
-	return lampset;
 }
 
 
@@ -89,6 +86,10 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 				break;
 		}
 	}
+
+	if (lampset_intermediate_delay != 0)
+		task_set_thread_data (task_getpid (), L_PRIV_APPLY_DELAY, lampset_intermediate_delay);
+
 	wpc_pop_page ();
 }
 
