@@ -47,6 +47,7 @@ typedef pth_t task_pid_t;
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
+//extern void task_set_rom_page (task_t *pid, U8 rom_page);
 
 #else /* !CONFIG_PLATFORM_LINUX */
 
@@ -205,6 +206,11 @@ extern inline void task_set_thread_data (task_t *pid, U8 n, U8 v)
 	pid->thread_data[n] = v;
 }
 
+extern inline void task_set_rom_page (task_t *pid, U8 rom_page)
+{
+	pid->rom_page = rom_page;
+}
+
 /*******************************/
 /*     Debug Timing            */
 /*******************************/
@@ -223,7 +229,8 @@ extern inline void task_set_thread_data (task_t *pid, U8 n, U8 v)
  * PIDs are rarely used as they are dynamic in value. */
 typedef task_t *task_pid_t;
 
-#endif
+#endif /* CONFIG_PLATFORM_LINUX */
+
 
 /********************************/
 /*     Function Prototypes      */
@@ -268,5 +275,29 @@ void task_set_thread_data (task_pid_t pid, U8 n, U8 v);
 #define task_kill_peers()			task_kill_gid (task_getgid ())
 
 #define task_yield()					task_sleep (0)
+
+extern inline task_pid_t
+far_task_create_gid (task_gid_t gid, task_function_t fn, U8 page)
+{
+	task_pid_t pid = task_create_gid (gid, fn);
+	task_set_rom_page (pid, page);
+	return pid;
+}
+
+extern inline task_pid_t
+far_task_create_gid1 (task_gid_t gid, task_function_t fn, U8 page)
+{
+	task_pid_t pid = task_create_gid1 (gid, fn);
+	task_set_rom_page (pid, page);
+	return pid;
+}
+
+extern inline task_pid_t
+far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
+{
+	task_pid_t pid = task_recreate_gid (gid, fn);
+	task_set_rom_page (pid, page);
+	return pid;
+}
 
 #endif /* _SYS_TASK_H */
