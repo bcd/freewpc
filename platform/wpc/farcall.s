@@ -25,6 +25,9 @@ RETADDR=5
 ;;; I/O address of the bank switching register.
 WPC_ROM_PAGE_REG=0x3FFC
 
+	.module farcall.s
+
+	;;; Declare a fast variable to hold the target address
 	.area direct
 	.globl __far_call_address
 __far_call_address: .blkb 2

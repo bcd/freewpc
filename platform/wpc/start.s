@@ -65,6 +65,7 @@ FIXED_SIZE     = 0x8000
 ;;; as it is only run once.
 ;;;
 
+	.module start.s
 	.area	sysrom
 	.globl _start
 _start:

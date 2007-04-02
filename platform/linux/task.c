@@ -344,6 +344,11 @@ void task_set_thread_data (task_pid_t pid, U8 n, U8 v)
 }
 
 
+void task_set_rom_page (task_t *pid, U8 rom_page)
+{
+}
+
+
 void task_init (void)
 {
 	memset (task_data_table, 0, sizeof (task_data_table));
