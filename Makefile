@@ -58,7 +58,6 @@ DEBUG_COMPILER ?= n
 ###	Include User Settings
 #######################################################################
 -include user.make
-.IGNORE : user.make
 
 #######################################################################
 ###	Set Default Target
@@ -155,7 +154,7 @@ REQUIRED += $(PWD)/$(SR)
 
 # Name of the checksum update tool
 CSUM = tools/csum/csum
-# REQUIRED += $(PWD)/$(CSUM)
+#REQUIRED += $(PWD)/$(CSUM)
 
 # Name of the blanker to use
 BLANKER = dd
@@ -851,7 +850,7 @@ $(SR) : $(SR).c
 #
 $(CSUM) : $(CSUM).c
 	@echo Making checksum utility... && \
-		cd tools/csum && $(MAKE) csum CC=$(HOSTCC)
+		cd tools/csum && $(MAKE) csum CC="$(HOSTCC)"
 
 #######################################################################
 ###	XBM Generators
@@ -888,6 +887,11 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 ###	Standard Dependencies
 #######################################################################
 
+# Provide a target for user.make, but don't generate an error if
+# it doesn't exist.  If it does exist, changes to it will be considered
+# as a prerequisite for rebuilding nearly everything.
+.IGNORE : user.make
+user.make:
 
 #
 # Symbolic links to the machine code.  Once set, code can reference
