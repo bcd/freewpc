@@ -128,7 +128,7 @@ void task_dump (void)
 		if (tp->state != TASK_FREE)
 #endif
 		{
-			dbprintf ("%p: GID %02X  PC %p",
+			dbprintf ("%p: GID %02d  PC %p",
 				tp, tp->gid, tp->pc);
 			dbprintf ("  ST ");
 			dbprintf ("%02X", tp->stack_size);
