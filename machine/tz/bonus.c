@@ -20,13 +20,6 @@
 
 #include <freewpc.h>
 
-void bonus_leff (void)
-{
-	triac_leff_disable (TRIAC_GI_MASK);
-	for (;;)
-		task_sleep_sec (5);
-}
-
 void bonus_deff (void)
 {
 	extern U8 door_panels_started;

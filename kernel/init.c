@@ -70,37 +70,41 @@ void irq_init (void)
 }
 
 
-/** do_reset is the entry point to the program.  It all starts here. */
+/** do_reset is the beginning of the C code.
+ * When building for the 6809, control transfers here from the
+ * assembly bootup code in start.s.
+ * Under Linux emulation, this function is called from main().
+ */
 __naked__ __noreturn__ 
 void do_reset (void)
 {
 	extern void system_reset (void);
 
 #ifdef __m6809__
-		/* Reset the sound board... the earlier the better */
+	/* Reset the sound board... the earlier the better */
 	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
 
-	/** Initializing the RAM page */
+	/* Initializing the RAM page */
 	wpc_set_ram_page (0);
 
-	/** Install the null pointer catcher, by programming
+	/* Install the null pointer catcher, by programming
 	 * an actual instruction at address 0x0 (branch to self)
 	 * TODO : disable interrupts, too? */
 	*(U8 *)0 = 0x20;
 	*(U8 *)1 = 0xFE;
 #endif /* __m6809__ */
 
-	/** Set up protected RAM */
+	/* Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (RAM_LOCK_2K);
 	wpc_set_ram_protect (RAM_LOCKED);
 
-	/** Initialize the ROM page register 
+	/* Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped.
 	 * This is the default location for machine-specific files. */
 	wpc_set_rom_page (MACHINE_PAGE);
 
-	/** Initialize other critical WPC output registers relating
+	/* Initialize other critical WPC output registers relating
 	 * to hardware */
 	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
 	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
@@ -109,12 +113,12 @@ void do_reset (void)
 	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
 	wpc_asic_write (WPC_GI_TRIAC, 0);
 
-	/** Set init complete flag to false.  When everything is
+	/* Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
 	sys_init_complete = 0;
 	sys_init_pending_tasks = 0;
 
-	/** Initialize all of the other kernel subsystems,
+	/* Initialize all of the other kernel subsystems,
 	 * starting with the hardware-centric ones and moving on
 	 * to software features. */
 	wpc_led_toggle ();
@@ -134,7 +138,7 @@ void do_reset (void)
 
 	wpc_led_toggle ();
 
-	/** task_init is somewhat special in that it transforms the system
+	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
@@ -156,11 +160,12 @@ void do_reset (void)
 	high_score_init ();
 	ball_search_init ();
 	random_init ();
+	game_init ();
 	callset_invoke (init);
 
 	csum_area_check_all ();
 
-	/** Enable interrupts (IRQs and FIRQs) at the source (WPC) and
+	/* Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
 #ifdef CONFIG_PLATFORM_LINUX
 	linux_init ();
@@ -168,7 +173,7 @@ void do_reset (void)
 	wpc_write_irq_clear (0x06);
 	enable_interrupts ();
 
-	/** The system is mostly usable at this point.
+	/* The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
 	 */
 
@@ -240,6 +245,19 @@ void fatal (errcode_t error_code)
 	source of the error. */
 	disable_irq ();
 
+	/* Reset hardware outputs */
+	wpc_write_flippers (0);
+	wpc_write_ticket (0);
+	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
+	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
+#ifdef MACHINE_SOL_EXTBOARD1
+	wpc_asic_write (WPC_EXTBOARD1, 0);
+#endif
+	wpc_asic_write (WPC_GI_TRIAC, 0);
+
+	/* Audit the error.  TODO : log the error code also */
 	audit_increment (&system_audits.fatal_errors);
 
 	/* Try to display the error on the DMD.  This may not work,
@@ -262,8 +280,6 @@ void fatal (errcode_t error_code)
 #ifdef CONFIG_PLATFORM_LINUX
 	exit (1);
 #else
-	/* TODO : reset hardware here!! */
-
 	/* Go into a loop, long enough for the error message to be visible.
 	Then reset the system. */
 	{
@@ -336,10 +352,12 @@ CALLSET_ENTRY (nvram, idle)
 /** Realtime function that is called every 1ms */
 static inline void do_irq_1ms (void)
 {
-	/** Clear the source of the interrupt */
+	/* TODO - newer WPC roms clear WPC_RAM_BANK here */
+
+	/* Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);
 
-	/** When building a profiling program, count the
+	/* When building a profiling program, count the
 	 * number of IRQs by writing to the pseudoregister
 	 * WPC_PINMAME_CYCLE_COUNT every time we take an IRQ.
 	 * Pinmame has been modified to understand this and
@@ -357,7 +375,7 @@ static inline void do_irq_1ms (void)
 
 static inline void do_irq_1ms_end (void)
 {
-	/** Again, for profiling, we mark the end of an IRQ
+	/* Again, for profiling, we mark the end of an IRQ
 	 * by writing these markers. */
 #ifdef IRQPROFILE
 	wpc_debug_write (0xDD);
@@ -375,6 +393,9 @@ static inline void do_irq_2ms_a (void)
 static inline void do_irq_2ms_b (void)
 {
 	switch_rtt ();
+#ifdef CONFIG_ZEROCROSS
+	ac_rtt ();
+#endif
 }
 
 
@@ -383,9 +404,6 @@ static inline void do_irq_8ms (void)
 {
 	/* Execute rtts every 8ms */
 	sol_rtt ();
-#if 0
-	ac_rtt ();
-#endif
 	triac_rtt ();
 	flasher_rtt ();
 #ifdef MACHINE_8MS_RTTS
@@ -496,37 +514,6 @@ void do_irq (void)
 }
 
 
-#if 0
-/**
- * do_irq is the entry point from the IRQ vector.  Due to the
- * way the hardware works, the CPU will stop whatever it is doing
- * and jump to this location every 976 microseconds (1024 times
- * per second).  This function is used for time-critical operations
- * which won't necessarily get scheduled accurately from the
- * nonpreemptive tasks.
- *
- * You MUST keep processing in this function to the absolute
- * minimum, as it must be fast!
- */
-__interrupt__
-void do_irq_legacy (void)
-{
-	do_irq_1ms ();
-
-	if (irq_count & 1)
-		do_irq_2ms_a ();
-	else
-		do_irq_2ms_b ();
-
-	if ((irq_count & 7) == 0)
-	{
-		do_irq_8ms ();
-	}
-
-	do_irq_1ms_end ();
-}
-#endif
-
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
  * is generated from the WPC ASIC on two different occasions: (1)
@@ -543,7 +530,7 @@ __interrupt__
 void do_firq (void)
 {
 #ifdef __m6809__
-	asm __volatile__ ("pshs\tb,x");
+	asm __volatile__ ("pshs\td,x");
 #endif
 
 	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
@@ -559,7 +546,7 @@ void do_firq (void)
 	}
 
 #ifdef __m6809__
-	asm __volatile__ ("puls\tb,x");
+	asm __volatile__ ("puls\td,x");
 #endif
 }
 

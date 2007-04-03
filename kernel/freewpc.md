@@ -71,21 +71,22 @@ ALL: 11..88
 
 [deffs]
 NULL: 0
-Inspector: runner, PRI_DEBUGGER
+Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
 Scores: runner, PRI_SCORES
-Coin Insert: PRI_COINS
-Credits: PRI_CREDITS
+Coin Insert: page(COMMON_PAGE), PRI_COINS
+Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: PRI_TILT_WARNING
 Tilt: runner, PRI_TILT
 Game Over: PRI_GAME_OVER
 Volume Change: runner, PRI_VOLUME_CHANGE
 Slam Tilt: runner, PRI_SLAMTILT
-Status Report: runner, PRI_STATUS
+Status Report: page(COMMON_PAGE), runner, PRI_STATUS
 Nonfatal Error: PRI_DEBUGGER
-HSEntry: runner, PRI_HSENTRY
-Match: runner, PRI_MATCH
+HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
+Match: page(COMMON_PAGE), runner, PRI_MATCH
 Locating Balls: PRI_BALL_SEARCH
-Buyin Offer: PRI_MATCH
+Buyin Offer: page(COMMON_PAGE), PRI_MATCH
+Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 
 [leffs]
 NULL: 0

@@ -143,3 +143,9 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	sw_gumball_right_loop_entered ();
 }
 
+
+CALLSET_ENTRY (loop, end_ball)
+{
+	/* TODO */
+}
+

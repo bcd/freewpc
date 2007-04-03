@@ -138,11 +138,13 @@ my %BinaryProperties = (
 	"deffs" => {
 		"amode" => $GLOBAL_OBJECT,
 		"runner" => 1,
+		"external" => 1,
 	},
 	"leffs" => {
 		"amode" => $GLOBAL_OBJECT,
 		"runner" => 1,
 		"shared" => 1,
+		"external" => 1,
 	},
 );
 
@@ -760,7 +762,9 @@ sub machine_write_defines {
 		print "   DECL_DEFF_" . 
 			($deff->{'runner'} ? "MODE" : "FAST") .
 			" (" . $deff->{'c_ident'} . ", " .
-			$deff->{'props'} .  ", $fn) \\\n";
+			$deff->{'props'} .  ", $fn, " .
+			($deff->{'page'} ? $deff->{'page'} : -1) .
+			") \\\n";
 	}
 	print "\n";
 

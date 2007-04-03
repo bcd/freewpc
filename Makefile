@@ -208,6 +208,7 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/tilt.o
 
 COMMON_BASIC_OBJS = \
+	common/abort.o \
 	common/audio.o \
 	kernel/coin.o \
 	common/db.o \
@@ -215,6 +216,7 @@ COMMON_BASIC_OBJS = \
 	common/flipcode.o \
 	common/initials.o \
 	common/match.o \
+	common/plunger.o \
 	common/rtc.o \
 	common/service.o \
 	common/slowtimer.o \
@@ -227,6 +229,7 @@ COMMON_OBJS = $(COMMON_BASIC_OBJS) \
 	common/highscore.o \
 	common/inspector.o \
 	common/knocker.o \
+	common/onecoin.o \
 	common/replay.o \
 	common/search.o \
 	common/status.o \

@@ -71,6 +71,12 @@ extern inline void set_direct_page_pointer (const U8 dp)
  * 8-byte aligned sizes will copy 4 words at a time.
  * When 2-byte aligned, copy a word at a time.
  * Otherwise, copy one byte at a time.
+ *
+ * TODO - for small, odd values of N, no optimization is
+ * done and the memset occurs one byte at a time; with small
+ * N the loop overhead is significant.  Better to do it
+ * inline, completely unrolled.  Try a recursive call to
+ * this function...
  */
 extern inline void *memset (void *s, U8 c, U16 n)
 {
@@ -97,6 +103,14 @@ extern inline void *memset (void *s, U8 c, U16 n)
 			n--;
 		}
 	}
+#if 0
+	else if (n <= 7)
+	{
+		register U8 *s1 = (U8 *)s;
+		*s1++ = c;
+		(void) memset (s1, c, n-1);
+	}
+#endif
 	else
 	{
 		register char *s1 = (char *)s;

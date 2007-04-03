@@ -90,19 +90,16 @@ struct window win_stack[8];
 void window_push_first (void)
 {
 	in_test = 1;
-	dbprintf ("Calling end_game\n");
 	end_game ();
-	dbprintf ("Calling sound_reset\n");
 	sound_reset ();
-	dbprintf ("Calling deff/leff stop\n");
 	deff_stop_all ();
 	leff_stop_all ();
 	/* Ensure the lamp effects stop before resetting all lamps. */
 	task_sleep (TIME_33MS);
 	lamp_all_off ();
-
 	/* Kill any other tasks still running */
 	task_kill_all ();
+	callset_invoke (test_start);
 }
 
 
@@ -1194,7 +1191,7 @@ static bool leff_test_running (U8 id)
 }
 
 struct deff_leff_ops dev_deff_ops = {
-	.start = deff_start_nopage,
+	.start = deff_start,
 	.stop = deff_stop,
 	.is_running = deff_test_running,
 };
@@ -1329,7 +1326,7 @@ void deff_stress_thread (void)
 
 		if (start_stop_flag)
 		{
-			deff_start_nopage (dn);
+			deff_start (dn);
 			sound_send (SND_TEST_UP);
 		}
 		else
@@ -2663,14 +2660,14 @@ U8 gi_test_values[] = {
 	TRIAC_GI_MASK,
 };
 
-const char *gi_test_names[] = {
-	"ALL OFF",
+const char **gi_test_names[] = {
+	&"ALL OFF",
 	&names_of_gi[0],
 	&names_of_gi[1],
 	&names_of_gi[2],
 	&names_of_gi[3],
 	&names_of_gi[4],
-	"ALL ON",
+	&"ALL ON",
 };
 
 void gi_test_init (void)
@@ -2682,7 +2679,7 @@ void gi_test_init (void)
 void gi_test_draw (void)
 {
 	browser_draw ();
-	browser_print_operation (gi_test_names[menu_selection]);
+	browser_print_operation (*gi_test_names[menu_selection]);
 	sprintf ("BRIGHTNESS %d", triac_get_brightness ());
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,25 +22,22 @@
 
 /**
  * \file
- * \brief Implements the one-coin buyin.  
- * This feature was never really used that much, AFAIK.
+ * \brief Common plunger routines.
  */
 
-void onecoin_buyin_deff (void)
+CALLSET_ENTRY (plunger, sw_shooter)
 {
-	dmd_alloc_low_clean ();
-	/* TODO */
-	deff_exit ();
 }
 
-
-void onecoin_buyin_offer (void)
+CALLSET_ENTRY (plunger, sw_l_l_flipper_button)
 {
-	deff_start (DEFF_ONECOIN_BUYIN);
 }
 
+CALLSET_ENTRY (plunger, sw_l_r_flipper_button)
+{
+}
 
-CALLSET_ENTRY (onecoin_buyin, init)
+CALLSET_ENTRY (plunger, sw_launch_button)
 {
 }
 

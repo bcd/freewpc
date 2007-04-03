@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -140,15 +140,29 @@ void tv_static_deff (void)
 
 	for (loop = 0; loop < 16; loop++)
 	{
-		for (count = 0; count < 37; count++)
+		dmd_alloc_low_high ();
+#define _N 69
+		for (count = 0; count < _N; count++)
 		{
 			r = random ();
 			dmd[count] = r;
-			dmd[37 + count] = r;
-			dmd[37*2 + count] = r;
-			dmd[37*3 + count] = r;
+			dmd[_N + count] = r;
+			dmd[_N*2 + count] = r;
+			dmd[_N*3 + count] = r;
+			dmd[_N*4 + count] = r;
+			dmd[_N*5 + count] = r;
+			dmd[_N*6 + count] = r;
+			dmd[_N*7 + count] = r;
+
+#if 0
+			r = random ();
+			dmd[count + 512] = r;
+			dmd[_N + count + 512] = r;
+			dmd[_N*3 + count + 512] = r;
+			dmd[_N*5 + count + 512] = r;
+			dmd[_N*7 + count + 512] = r;
+#endif
 		}
-		dmd_alloc_low_high ();
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
 	}

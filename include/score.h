@@ -26,12 +26,9 @@
 #define MACHINE_SCORE_DIGITS 10
 #endif
 
-/* TODO - these are the same */
-#define MAX_SCORE_DIGITS MACHINE_SCORE_DIGITS
-
 /** BYTES_PER_SCORE rounds the number of digits to the next highest
  * multiple of 2, since scores are kept in packed BCD */
-#define BYTES_PER_SCORE ((MAX_SCORE_DIGITS+1)/2)
+#define BYTES_PER_SCORE ((MACHINE_SCORE_DIGITS+1)/2)
 
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE];

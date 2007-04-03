@@ -493,28 +493,29 @@ PB_ALONE_IN_PLAY:
 ##########################################################################
 [deffs]
 Amode: runner, PRI_AMODE
-Bonus: runner, PRI_BONUS
+Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 Brian Image: PRI_EGG1
-REPLAY: PRI_REPLAY
-JACKPOT: PRI_JACKPOT
-SPECIAL: PRI_SPECIAL
-Extra Ball: PRI_EB
+REPLAY: page(MACHINE_PAGE), PRI_REPLAY
+JACKPOT: page(MACHINE_PAGE), PRI_JACKPOT
+SPECIAL: page(MACHINE_PAGE), PRI_SPECIAL
+Extra Ball: page(MACHINE_PAGE), PRI_EB
 
-Greed Round: runner, PRI_GAME_MODE1+2
-Skill Shot Ready: runner, PRI_GAME_MODE1+4
-MB Running: runner, PRI_GAME_MODE1+8
+Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+2
+Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+4
+MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+8
+Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE1+12
 
-Left Ramp: PRI_GAME_QUICK1+1
-TV Static: PRI_GAME_QUICK1+2
-Camera Award: PRI_GAME_QUICK1+4
-Hitchhiker: PRI_GAME_QUICK1+4
+Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK1+1
+TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
+Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK1+4
+Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK1+4
 Door Award: PRI_GAME_QUICK1+6
-Lock Lit: PRI_GAME_QUICK1+8
-MB Start: PRI_GAME_QUICK1+8
-MB Lit: PRI_GAME_MODE1+8
-Ball Save: PRI_GAME_QUICK1+9
-PB Detect: PRI_GAME_QUICK1+10
-Skill Shot Made: PRI_GAME_QUICK1+11
+Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
+MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE1+8
+Ball Save: page(MACHINE_PAGE), PRI_GAME_QUICK1+9
+PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK1+10
+Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1+11
 LITZ Award: PRI_GAME_QUICK1+15
 
 ##########################################################################

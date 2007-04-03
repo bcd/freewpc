@@ -153,6 +153,10 @@ typedef struct task_struct
 	 * initialization data to a new task.  The creator of the task can
 	 * assign this argument pointer, after creating the task but before
 	 * the next schedule. */
+	/* TODO - few  tasks need an arg, and this is wasting RAM for those
+	 * that don't.  Better to push any arguments onto the new task's stack
+	 * and declare the task function to accept those arguments, with
+	 * an ellipsis to prevent assuming they are in registers. */
 	PTR_OR_U16	arg;
 
 	/** Thread local data.  Some types of tasks need to maintain local
@@ -160,6 +164,8 @@ typedef struct task_struct
 	 * The task structure reserves 4 bytes for this purpose; tasks are
 	 * free to use this however they choose.   See include/sys/leff.h
 	 * for one example of how this is done. */
+	/* TODO - should this be overlaid at the bottom of the stack?
+	 * Again, most functions won't need this. */
 	U8          thread_data[4];
 
 	/** The index of an auxiliary memory block used to store

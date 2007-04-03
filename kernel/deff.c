@@ -46,9 +46,9 @@
 
 
 /** Declare externs for all of the deff functions */
-#define DECL_DEFF(num, flags, pri, fn) extern void fn (void);
-#define DECL_DEFF_FAST(num, pri, fn) DECL_DEFF (num, D_NORMAL, pri, fn)
-#define DECL_DEFF_MODE(num, pri, fn) DECL_DEFF (num, D_RUNNING, pri, fn)
+#define DECL_DEFF(num, flags, pri, fn, page) extern void fn (void);
+#define DECL_DEFF_FAST(num, pri, fn, page) DECL_DEFF (num, D_NORMAL, pri, fn, page)
+#define DECL_DEFF_MODE(num, pri, fn, page) DECL_DEFF (num, D_RUNNING, pri, fn, page)
 
 #ifdef MACHINE_DISPLAY_EFFECTS
 MACHINE_DISPLAY_EFFECTS
@@ -56,8 +56,8 @@ MACHINE_DISPLAY_EFFECTS
 
 /** Now declare the deff table itself */
 #undef DECL_DEFF
-#define DECL_DEFF(num, flags, pri, fn) \
-	[num] = { flags, pri, fn },
+#define DECL_DEFF(num, flags, pri, fn, page) \
+	[num] = { flags, pri, fn, page },
 
 
 static const deff_t deff_table[] = {
@@ -66,7 +66,7 @@ static const deff_t deff_table[] = {
 	MACHINE_DISPLAY_EFFECTS
 #endif
 #ifndef MACHINE_CUSTOM_AMODE
-	[DEFF_AMODE] = { D_RUNNING, PRI_AMODE, default_amode_deff },
+	[DEFF_AMODE] = { D_RUNNING, PRI_AMODE, default_amode_deff, -1 },
 #endif
 };
 
@@ -177,9 +177,14 @@ static void deff_stop_task (void)
 
 static void deff_start_task (const deff_t *deff)
 {
+	task_t *tp;
+
 	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
-	task_create_gid (GID_DEFF, deff->fn);
+	dbprintf ("active deff = %d\n", deff_active);
+	tp = task_create_gid (GID_DEFF, deff->fn);
+	if (deff->page != -1)
+		task_set_rom_page (tp, deff->page);
 }
 
 
@@ -287,10 +292,13 @@ void deff_start_highest_priority (void)
 {
 	deff_stop_task ();
 	deff_active = deff_get_highest_priority ();
+	dbprintf ("active deff = %d\n", deff_active);
 	if (deff_active != DEFF_NULL)
 	{
 		const deff_t *deff = &deff_table[deff_active];
-		task_recreate_gid (GID_DEFF, deff->fn);
+		task_pid_t *tp = task_recreate_gid (GID_DEFF, deff->fn);
+		if (deff->page != -1)
+			task_set_rom_page (tp, deff->page);
 	}
 	else
 	{

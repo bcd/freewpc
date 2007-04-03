@@ -52,7 +52,7 @@ void inspector_deff (void)
 	U8 *addr, *p;
 	U8 y;
 
-	for (;;)
+	while (!in_test)
 	{
 		addr = inspector_addr;
 		

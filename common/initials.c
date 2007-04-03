@@ -60,7 +60,7 @@ void initials_enter_init (void)
 void initials_enter_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_left (&font_fixed6, 2, 11, "ENTER INITIALS");
+	font_render_string_left (&font_fixed6, 2, 9, "ENTER INITIALS");
 	sprintf ("%8s", initial_chars + initials_index);
 	font_render_string_left (&font_fixed6, 2, 22, sprintf_buffer);
 	dmd_show_low ();

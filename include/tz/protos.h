@@ -56,14 +56,14 @@ void tz_clock_init(void);
 /* deadend.c */
 void deadend_start_ball(void);
 /* deffs.c */
-void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
-void printf_millions(U8 n);
-void printf_thousands(U8 n);
-void replay_deff(void);
-void extra_ball_deff(void);
-void special_deff(void);
-void jackpot_deff(void);
-void ballsave_deff(void);
+__machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
+__machine__ void printf_millions(U8 n);
+__machine__ void printf_thousands(U8 n);
+__machine__ void replay_deff(void);
+__machine__ void extra_ball_deff(void);
+__machine__ void special_deff(void);
+__machine__ void jackpot_deff(void);
+__machine__ void ballsave_deff(void);
 /* door.c */
 void door_set_flashing(U8 id);
 void door_advance_flashing(void);
@@ -73,7 +73,6 @@ void door_award_if_possible(void);
 void door_award_enable(void);
 void door_start_player(void);
 void door_start_ball(void);
-/* greed.c */
 /* gumball.c */
 void gumball_mech_activate(void);
 void gumball_mech_deactivate(void);
@@ -90,7 +89,6 @@ void gumball_init(void);
 void jet_start_player(void);
 void jet_start_ball(void);
 void sw_jet_sound(void);
-/* lanes.c */
 /* leffs.c */
 void flasher_happy_leff(void);
 void left_ramp_leff(void);
@@ -109,11 +107,11 @@ void lock_enter(device_t *dev);
 void lock_kick_attempt(device_t *dev);
 void lock_init(void);
 /* loop.c */
-void enter_loop(void);
-void award_loop(void);
-void abort_loop(void);
-void award_left_loop(void);
-void award_right_loop(void);
+__machine__ void enter_loop(void);
+__machine__ void award_loop(void);
+__machine__ void abort_loop(void);
+__machine__ void award_left_loop(void);
+__machine__ void award_right_loop(void);
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
@@ -136,13 +134,13 @@ void slot_kick_attempt(device_t *dev);
 void slot_start_ball(void);
 void slot_init(void);
 /* star.c */
-void new_star_task(void);
-void new_starfield_start(void);
-void new_starfield_stop(void);
-void star_task(void);
-void starfield_task(void);
-void starfield_start(void);
-void starfield_stop(void);
+__machine__ void new_star_task(void);
+__machine__ void new_starfield_start(void);
+__machine__ void new_starfield_stop(void);
+__machine__ void star_task(void);
+__machine__ void starfield_task(void);
+__machine__ void starfield_start(void);
+__machine__ void starfield_stop(void);
 /* test.c */
 void autofire_launch_proc(void);
 void autofire_to_gumball_proc(void);

@@ -54,20 +54,17 @@ PINMAME_OTHER_ROMS = tzu*.rom
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-GAME_OBJS = clock.o deffs.o leffs.o \
-	amode.o lock.o magnet.o \
-	sling.o jets.o star.o greed.o \
-	loop.o bonus.o door.o autofire.o gumball.o \
-	ballsave.o \
-	multiball.o rampdiv.o
+GAME_OBJS = clock.o leffs.o magnet.o sling.o jets.o autofire.o gumball.o rampdiv.o \
+	amode.o lock.o door.o ballsave.o
 
 GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
 
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
-	config.o rightramp.o hitch.o piano.o rocket.o slot.o \
-	mpf.o powerball.o clocktarget.o
+	config.o rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
+	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
+	multiball.o loop.o
 
 GAME_FSMS = shot.fsm
 

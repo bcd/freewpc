@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,25 +22,34 @@
 
 /**
  * \file
- * \brief Implements the one-coin buyin.  
- * This feature was never really used that much, AFAIK.
+ * \brief Generate the abort event, when both flippers are pressed simultaneously.
  */
 
-void onecoin_buyin_deff (void)
+void abort_monitor_task (void)
 {
-	dmd_alloc_low_clean ();
-	/* TODO */
-	deff_exit ();
+	U8 count = 3;
+	while (count > 0)
+	{
+		task_sleep (TIME_100MS);
+		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
+			|| !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+		{
+			task_exit ();
+		}
+		count--;
+	}
+	callset_invoke (flipper_abort);
+	task_exit ();
 }
 
 
-void onecoin_buyin_offer (void)
+CALLSET_ENTRY (abort, sw_l_l_flipper_button)
 {
-	deff_start (DEFF_ONECOIN_BUYIN);
+	task_recreate_gid (GID_FLIPPER_ABORT_MONITOR, abort_monitor_task);
 }
 
-
-CALLSET_ENTRY (onecoin_buyin, init)
+CALLSET_ENTRY (abort, sw_l_r_flipper_button)
 {
+	abort_sw_l_l_flipper_button ();
 }
 

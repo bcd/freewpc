@@ -40,6 +40,7 @@ typedef struct
 	U8 flags;
 	U8 prio;
 	deff_function_t fn;
+	U8 page;
 } deff_t;
 
 
@@ -49,12 +50,13 @@ typedef struct
 #define MAX_QUEUED_DEFFS 16
 
 
-#define DECLARE_DEFF(id, _flags, _prio) \
+#define DECLARE_DEFF(id, _flags, _prio, _page) \
 	extern void id##_func (void); \
 	const deff_t id##_deff = { \
 		.flags = _flags, \
 		.prio = _prio, \
 		.fn = id##_func, \
+		.page = _page, \
 	}; \
 	void id##_func (void) __taskentry__
 
