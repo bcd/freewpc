@@ -172,6 +172,11 @@ dmd_transition_t trans_scroll_down = {
 
 /*********************************************************************/
 
+void trans_scroll_left_init (void)
+{
+	dmd_trans_data_ptr = dmd_low_buffer;
+}
+
 void trans_scroll_left_old (void)
 {
 	__blockcopy16 (dmd_high_buffer, dmd_low_buffer + 1, DMD_PAGE_SIZE);
@@ -181,8 +186,6 @@ void trans_scroll_left_new (void)
 {
 	U16 i;
 
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = dmd_low_buffer;
 
 	register U8 *src = dmd_trans_data_ptr;
 	register U8 *dst = dmd_high_buffer + 15;
@@ -201,6 +204,7 @@ void trans_scroll_left_new (void)
 
 
 dmd_transition_t trans_scroll_left = {
+	.composite_init = trans_scroll_left_init,
 	.composite_old = trans_scroll_left_old,
 	.composite_new = trans_scroll_left_new,
 	.delay = TIME_33MS,
@@ -211,6 +215,11 @@ dmd_transition_t trans_scroll_left = {
 
 /*********************************************************************/
 
+void trans_scroll_right_init (void)
+{
+	dmd_trans_data_ptr = dmd_low_buffer+15;
+}
+
 void trans_scroll_right_old (void)
 {
 	__blockcopy16 (dmd_high_buffer+1, dmd_low_buffer, DMD_PAGE_SIZE);
@@ -219,9 +228,6 @@ void trans_scroll_right_old (void)
 void trans_scroll_right_new (void)
 {
 	U16 i;
-
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = dmd_low_buffer+15;
 
 	register U8 *src = dmd_trans_data_ptr;
 	register U8 *dst = dmd_high_buffer;
@@ -240,6 +246,7 @@ void trans_scroll_right_new (void)
 
 
 dmd_transition_t trans_scroll_right = {
+	.composite_init = trans_scroll_right_init,
 	.composite_old = trans_scroll_right_old,
 	.composite_new = trans_scroll_right_new,
 	.delay = TIME_33MS,
@@ -266,13 +273,14 @@ static U16 random_boxfade_offset_table[] = {
 	7, 129, 14, 259, 260, 385, 266, 271,
 };
 
+void trans_fade_init (void)
+{
+	dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
+}
 
 void trans_fade_new (void)
 {
 	U16 offset;
-
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
 
 	offset = *(U16 *)dmd_trans_data_ptr;
 
@@ -292,6 +300,7 @@ void trans_fade_new (void)
 }
 
 dmd_transition_t trans_sequential_boxfade = {
+	.composite_init = trans_fade_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
@@ -300,6 +309,7 @@ dmd_transition_t trans_sequential_boxfade = {
 };
 
 dmd_transition_t trans_random_boxfade = {
+	.composite_init = trans_fade_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
 	.delay = TIME_33MS,
@@ -310,6 +320,10 @@ dmd_transition_t trans_random_boxfade = {
 
 /*********************************************************************/
 
+void trans_vstripe_init (void)
+{
+	dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
+}
 
 void trans_vstripe_new (void)
 {
@@ -317,9 +331,6 @@ void trans_vstripe_new (void)
 	U8 mask;
 	U8 *src, *dst;
 	U8 i;
-
-	if (dmd_trans_data_ptr == NULL)
-		dmd_trans_data_ptr = (U8 *)dmd_transition->arg.ptr;
 
 	col = dmd_trans_data_ptr[0];
 	mask = dmd_trans_data_ptr[1];
@@ -372,6 +383,7 @@ static U8 vstripe_left2right_data_table[] = {
 };
 
 dmd_transition_t trans_vstripe_left2right = {
+	.composite_init = trans_vstripe_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_vstripe_new,
 	.delay = TIME_33MS,
@@ -400,9 +412,82 @@ static U8 vstripe_right2left_data_table[] = {
 };
 
 dmd_transition_t trans_vstripe_right2left = {
+	.composite_init = trans_vstripe_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_vstripe_new,
 	.delay = TIME_33MS,
 	.arg = { .ptr = vstripe_right2left_data_table },
+};
+
+
+/*********************************************************************/
+
+U8 trans_bitfade_mask_table[] = {
+	0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF,
+	0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF,
+	0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF,
+	0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF,
+};
+
+void trans_bitfade_init (void)
+{
+	dmd_trans_data_ptr = trans_bitfade_mask_table;
+}
+
+void trans_bitfade_old (void)
+{
+	register U8 *mask = dmd_trans_data_ptr;
+	register U8 *src = dmd_low_buffer;
+	register U8 *dst = dmd_high_buffer;
+	register U16 i;
+
+	if (mask[0] != 0xFF)
+	{
+		for (i=0; i < 32L * 16; i++)
+		{
+			dst[i] = src[i] & ~mask[0];
+		}
+	}
+}
+
+void trans_bitfade_new (void)
+{
+	register U8 *mask = dmd_trans_data_ptr++;
+	register U8 *src = dmd_low_buffer;
+	register U8 *dst = dmd_high_buffer;
+	register U16 i;
+
+	if (mask[0] == 0xFF)
+	{
+		dmd_copy_low_to_high ();
+		dmd_in_transition = FALSE;
+	}
+	else
+	{
+		for (i=0; i < 32L * 16; i ++)
+		{
+			dst[i] |= src[i] & mask[0];
+		}
+	}
+}
+
+
+dmd_transition_t trans_bitfade_slow = {
+	.composite_init = trans_bitfade_init,
+	.composite_old = trans_bitfade_old,
+	.composite_new = trans_bitfade_new,
+	.delay = TIME_66MS,
+	.arg = { .u16 = 0 },
+	.count = 8,
+};
+
+
+dmd_transition_t trans_bitfade_fast = {
+	.composite_init = trans_bitfade_init,
+	.composite_old = trans_bitfade_old,
+	.composite_new = trans_bitfade_new,
+	.delay = TIME_33MS,
+	.arg = { .u16 = 0 },
+	.count = 8,
 };
 

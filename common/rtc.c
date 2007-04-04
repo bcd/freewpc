@@ -43,13 +43,14 @@ static __nvram__ U8 year;
 static __nvram__ U8 month;
 static __nvram__ U8 day;
 static __nvram__ U8 hour;
-/* TODO - day of week is not currently calculated */
+static __nvram__ U8 day_of_week;
+
 
 /** Checksum descriptor for the RTC info */
 static __nvram__ U8 rtc_csum;
 const struct area_csum rtc_csum_info = {
 	.area = &year,
-	.length = 4,
+	.length = 5,
 	.csum = &rtc_csum,
 	.reset = rtc_factory_reset,
 #ifdef HAVE_PAGING
@@ -74,17 +75,10 @@ static const char *month_names[] = {
 };
 
 
-void rtc_factory_reset (void)
-{
-
-	/* Reset the date to Jan. 1, 2006 */
-	year = 6;
-	month = 1;
-	day = 1;
-	hour = 0;
-	minute = 0;
-	last_minute = 0;
-}
+static const char *day_names[] = {
+	"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY",
+	"THURSDAY", "FRIDAY", "SATURDAY"
+};
 
 
 /** Returns the number of days in the current month.
@@ -97,6 +91,39 @@ static U8 rtc_days_in_current_month (void)
 	if ((month == 2) && ((year % 4) == 0))
 		days++;
 	return (days);
+}
+
+
+/** Calculate the day of the week (0=Sunday, 6=Saturday)
+from the current values of year, month, and day. */
+static void rtc_calc_day_of_week (void)
+{
+	static U8 day_of_week_month_code[] = {
+		0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5
+	};
+
+	/* Compute (6 + year + (year/4) + month code + day - N) mod 7.
+	N is 1 if it is a leap year and the month is January or February,
+	else it is zero. */
+	day_of_week += year;
+	day_of_week += (year / 4);
+	day_of_week += day_of_week_month_code[month-1];
+	day_of_week += day;
+	day_of_week	+= ((year % 4) ? 0 : 1);
+	day_of_week -= 2;
+
+	/* The mod 7 is the hard part to do on the 6809.  */
+#ifndef __m6809__
+	day_of_week %= 7;
+#else
+	while (day_of_week >= 7)
+	{
+		if (day_of_week > 64)
+			day_of_week -= (64 - 1);
+		else
+			day_of_week -= 7;
+	}
+#endif
 }
 
 
@@ -124,6 +151,7 @@ static void rtc_normalize (void)
 				the year 2256. */
 			}
 		}
+		rtc_calc_day_of_week ();
 	}
 
 	/* Perform sanity checks, just in case. */
@@ -165,10 +193,35 @@ static void rtc_pinmame_read (void)
 		year = clock_data->year - 2000;
 		month = clock_data->month;
 		day = clock_data->day;
+		rtc_calc_day_of_week ();
 		csum_area_update (&rtc_csum_info);
 		wpc_nvram_put ();
 	}
 #endif
+}
+
+
+void rtc_factory_reset (void)
+{
+	/* Reset the date to Jan. 1, 2006 */
+	year = 6;
+	month = 1;
+	day = 1;
+	hour = 0;
+	minute = 0;
+	last_minute = 0;
+	rtc_calc_day_of_week ();
+}
+
+
+CALLSET_ENTRY (rtc, init)
+{
+	/* Once, during initialization, read the values of year, month, and
+	day from memory locations that PinMAME writes.  It gets these
+	from the system on which it is running.  Afterwards, FreeWPC will
+	increment these correctly.  (And therefore, clock changes on the
+	host system are ignored.) */
+	rtc_pinmame_read ();
 }
 
 
@@ -181,7 +234,6 @@ CALLSET_ENTRY (rtc, idle)
 	/* Did the minute value change? */
 	if (minute != last_minute)
 	{
-		rtc_pinmame_read ();
 		/* Note: the assumption here is that the idle task will
 		 * always get called at least once per minute. */
 		audit_increment (&system_audits.minutes_on);
@@ -236,10 +288,12 @@ void rtc_show_date_time (void)
 {
 	dmd_alloc_low_clean ();
 
+	sprintf ("%s", day_names[day_of_week]);
+	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
 	rtc_render_date ();
-	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	rtc_render_time ();
-	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 
 	dmd_show_low ();
 }

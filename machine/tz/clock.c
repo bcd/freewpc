@@ -41,10 +41,10 @@ __fastram__ enum mech_clock_mode clock_mode;
 /** Configured speed of the clock.  When set to higher values, the
  * clock will run more slowly.  This represents the number of idle
  * rtt cycles between pulses to the clock motor drives. */
-U8 clock_speed;
+__fastram__ U8 clock_speed;
 
 /** The current clock delay counter */
-U8 clock_delay_time;
+__fastram__ U8 clock_delay_time;
 
 /** Clock switches which have been seen to be active */
 __fastram__ U8 clock_sw_seen_active;

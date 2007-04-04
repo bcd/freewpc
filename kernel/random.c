@@ -30,7 +30,7 @@
  * 1. a linear congruential component, derived from the relation
  * Xn+1 = (A(Xn) + C) mod M, where A=33, C=1, and M=255.  This is
  * fairly easy to do with shifts and adds.
- * 2. a timing component, based on the number of IRQs asserted
+ * 2. a timing component, based on the number of FIRQs asserted
  */
 
 
@@ -52,6 +52,7 @@ random (void)
 	r += random_cong_seed;
 	r++;
 	random_cong_seed = r;
+	//r ^= ac_zc_count;
 	r ^= firq_count;
 	return r;
 }

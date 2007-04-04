@@ -75,7 +75,7 @@ struct window *win_top;
 /* Equivalent to (win_top != NULL), but as a byte, this can
  * be tested with a single instruction.
  * TODO - these two variables could be overlapped into a union. */
-U8 in_test;
+__fastram__ U8 in_test;
 
 
 /* The window stack keeps track of where you came from, so when you
@@ -150,7 +150,8 @@ void window_push (struct window_ops *ops, void *priv)
 	}
 	else
 	{
-		/* TODO - too many windows, throw an error */
+		nonfatal (ERR_WINDOW_STACK_OVERFLOW);
+		return;
 	}
 
 	win_top->ops = ops;
@@ -1080,6 +1081,8 @@ struct window_ops menu_window = {
 
 /*******************  Font Test  ************************/
 
+U8 font_test_offset;
+
 const font_t *font_test_lookup (void)
 {
 	switch (menu_selection)
@@ -1104,58 +1107,51 @@ const font_t *font_test_lookup (void)
 	}
 }
 
+char font_test_alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 
 void font_test_init (void)
 {
 	browser_init ();
 	browser_max = MAX_FONTS-1; /* set to highest valid font number */
+	font_test_offset = 0;
 }
 
 void font_test_draw (void)
 {
 	const font_t *font = font_test_lookup ();
+	U8 len = 8;
 
 	dmd_alloc_low_clean ();
 
 	sprintf ("FONT %d", menu_selection+1);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
+	dmd_draw_horiz_line (dmd_low_buffer, 9);
 
+	sprintf ("%8s", font_test_alphabet + font_test_offset);
+	font_render_string_center (font, 64, 20, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep (TIME_100MS * 3);
+}
 
-	dmd_alloc_low_clean ();
+void font_test_left (void)
+{
+	if (font_test_offset > 0)
+		font_test_offset--;
+	sound_send (SND_TEST_CHANGE);
+}
 
-	if (font->glyphs['A'] == NULL)
-	{
-		font_render_string (font, 0, 0, "0123456789");
-	}
-	else if (font->height < 10)
-	{
-		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-		task_dispatching_ok = TRUE;
-		font_render_string (font, 0, 10, "NOPQRSTUVWXYZ");
-		task_dispatching_ok = TRUE;
-		font_render_string (font, 0, 20, "0123456789");
-	}
-	else if (font->height < 15)
-	{
-		task_dispatching_ok = TRUE;
-		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-		task_dispatching_ok = TRUE;
-		font_render_string (font, 0, 16, "NOPQRSTUVWXYZ");
-	}
-	else
-	{
-		task_dispatching_ok = TRUE;
-		font_render_string (font, 0, 0, "ABCDEFGHIJKLM");
-	}
-	dmd_show_low ();
+void font_test_right (void)
+{
+	font_test_offset++;
+	sound_send (SND_TEST_CHANGE);
 }
 
 struct window_ops font_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = font_test_init,
 	.draw = font_test_draw,
+	.left = font_test_left,
+	.right = font_test_right,
 };
 
 
@@ -1284,6 +1280,12 @@ void deff_leff_enter (void)
 	deff_leff_last_active++;
 }
 
+void deff_leff_exit (void)
+{
+	deff_stop_all ();
+	leff_stop_all ();
+}
+
 struct window_ops deff_leff_window = {
 	INHERIT_FROM_BROWSER,
 	.init = deff_leff_init,
@@ -1291,6 +1293,7 @@ struct window_ops deff_leff_window = {
 	.enter = deff_leff_enter,
 	.up = deff_leff_up,
 	.down = deff_leff_down,
+	.exit = deff_leff_exit,
 };
 
 struct menu dev_deff_test_item = {
@@ -1628,11 +1631,13 @@ dmd_transition_t *transition_table[] = {
 	&trans_scroll_up_slow,
 	&trans_scroll_down,
 	&trans_scroll_left,
-	&trans_scroll_right,
+	&trans_scroll_right, /* TODO : broken */
 	&trans_sequential_boxfade,
 	&trans_random_boxfade,
 	&trans_vstripe_left2right,
-	&trans_vstripe_right2left
+	&trans_vstripe_right2left,
+	&trans_bitfade_slow,
+	&trans_bitfade_fast,
 };
 
 #define NUM_TRANSITIONS \
@@ -1641,22 +1646,18 @@ dmd_transition_t *transition_table[] = {
 void dev_trans_test_init (void)
 {
 	browser_init ();
+	browser_item_number = browser_decimal_item_number;
 	browser_max = NUM_TRANSITIONS-1;
 }
 
-void dev_trans_test_draw (void)
-{
-	browser_draw ();
-	rtc_render_date ();
-	font_render_string_center (&font_mono5, 80, 15, sprintf_buffer);
-	rtc_render_time ();
-	font_render_string_center (&font_mono5, 80, 23, sprintf_buffer);
-}
 
 void dev_trans_test_enter (void)
 {
+	dmd_alloc_low_clean ();
 	dmd_sched_transition (transition_table[menu_selection]);
-	dev_trans_test_draw ();
+	font_render_string_center (&font_fixed10, 64, 16, "TRANSITION");
+	dmd_show_low ();
+	task_sleep_sec (1);
 }
 
 struct window_ops dev_trans_test_window = {
@@ -1940,10 +1941,24 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
+void set_time_window_confirm (void)
+{
+	rtc_factory_reset ();
+	confirm_enter ();
+}
+
+struct window_ops set_time_window = {
+	INHERIT_FROM_CONFIRM_WINDOW,
+	.enter = set_time_window_confirm,
+};
+
 struct menu set_time_item = {
 	.name = "SET TIME/DATE",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &set_time_window, NULL } },
 };
+
+/**********************************************************************/
 
 struct menu custom_message_item = {
 	.name = "CUSTOM MESSAGE",
@@ -1976,16 +1991,44 @@ struct menu clear_credits_item = {
 
 /**********************************************************************/
 
+void burnin_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+}
+
+
+void burnin_test_thread (void)
+{
+	extern void all_lamp_test_thread (void);
+
+	task_create_anon (all_lamp_test_thread);
+	task_exit ();
+}
+
+void burnin_test_exit (void)
+{
+}
+
+struct window_ops burnin_test_window = {
+	DEFAULT_WINDOW,
+	.draw = burnin_test_draw,
+	.thread = burnin_test_thread,
+	.exit = burnin_test_exit,
+};
+
 struct menu burnin_item = {
 	.name = "AUTO BURN-IN",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &burnin_test_window, NULL } },
 };
 
 /**********************************************************************/
 
 struct preset_component
 {
-	U8 *adj;
+	struct adjustment *info;
+	U8 *nvram;
 	U8 value;
 };
 
@@ -1996,40 +2039,40 @@ struct preset
 };
 
 struct preset_component preset_3ball_comps[] = {
-	{ &system_config.balls_per_game, 3 },
+	{ standard_adjustments, &system_config.balls_per_game, 3 },
 	{ NULL, 0 },
 };
 struct preset preset_3ball = { .name = "3-BALL", preset_3ball_comps };
 
 struct preset_component preset_5ball_comps[] = {
-	{ &system_config.balls_per_game, 5 },
+	{ standard_adjustments, &system_config.balls_per_game, 5 },
 	{ NULL, 0 },
 };
 struct preset preset_5ball = { .name = "5-BALL", preset_5ball_comps };
 
 struct preset_component preset_tournament_comps[] = {
-	{ &system_config.balls_per_game, 3 },
-	{ &system_config.replay_award, 0 },
-	{ &system_config.special_award, 0 },
-	{ &price_config.free_play, YES },
-	{ &system_config.game_restart, GAME_RESTART_SLOW },
-	{ &system_config.max_ebs, 0 },
-	{ &system_config.match_feature, OFF },
-	{ &system_config.tournament_mode, ON },
+	{ standard_adjustments, &system_config.balls_per_game, 3 },
+	{ standard_adjustments, &system_config.replay_award, 0 },
+	{ standard_adjustments, &system_config.special_award, 0 },
+	{ pricing_adjustments, &price_config.free_play, YES },
+	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_SLOW },
+	{ standard_adjustments, &system_config.max_ebs, 0 },
+	{ standard_adjustments, &system_config.match_feature, OFF },
+	{ standard_adjustments, &system_config.tournament_mode, ON },
 	{ NULL, 0 },
 };
 struct preset preset_tournament = { .name = "TOURNAMENT", preset_tournament_comps };
 
 
 struct preset_component preset_show_comps[] = {
-	{ &system_config.replay_award, 0 },
+	{ standard_adjustments, &system_config.replay_award, 0 },
 	{ NULL, 0 },
 };
 struct preset preset_show = { .name = "SHOW", preset_show_comps };
 
 
 struct preset_component preset_timed_comps[] = {
-	{ &system_config.max_players, 1 },
+	{ standard_adjustments, &system_config.max_players, 1 },
 	{ NULL, 0 },
 };
 struct preset preset_timed_game = { .name = "TIMED GAME", preset_timed_comps };
@@ -2060,18 +2103,16 @@ void presets_draw (void)
 	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
 
 	/* Is it installed now? */	
-	while (comps->adj != NULL)
+	while (comps->nvram != NULL)
 	{
-		if (*(comps->adj) != comps->value)
+		if (*(comps->nvram) != comps->value)
 		{
-			dbprintf ("Preset failed: adj %p equals %d, not %d\n",
-				comps->adj, *(comps->adj), comps->value);
 			font_render_string_center (&font_mono5, 64, 13, "NOT INSTALLED");
 			break;
 		}
 
 		comps++;
-		if (comps->adj == NULL)
+		if (comps->nvram == NULL)
 			font_render_string_center (&font_mono5, 64, 13, "INSTALLED");
 	}
 
@@ -2089,21 +2130,77 @@ void presets_enter (void)
 	font_render_string_center (&font_mono5, 64, 16, pre->name);
 	dmd_show_low ();
 	task_sleep_sec (2);
+	sound_send (SND_TEST_CONFIRM);
 
 	/* Modify all of the adjustments affected by the preset */
 	wpc_nvram_get ();
-	while (comps->adj != NULL)
-		*(comps->adj) = comps->value;
+	while (comps->nvram != NULL)
+	{
+		*(comps->nvram) = comps->value;
+		comps++;
+	}
 	wpc_nvram_put ();
 
 	/* Update the checksums to match the new values */
 	adj_modified ();
-	sound_send (SND_TEST_CONFIRM);
 }
 
 
 void presets_start (void)
 {
+	struct preset *pre = preset_table[menu_selection];
+	struct preset_component *comps = pre->comps;
+	struct adjustment *info;
+	union dmd_coordinate coord;
+
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_left);
+	font_render_string_center (&font_mono5, 64, 5, pre->name);
+	dmd_draw_horiz_line (dmd_low_buffer, 11);
+	sound_send (SND_TEST_SCROLL);
+	dmd_show_low ();
+	task_sleep (TIME_1S + TIME_500MS);
+
+	while (comps->nvram != NULL)
+	{
+		info = comps->info;
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_mono5, 64, 5, pre->name);
+		dmd_draw_horiz_line (dmd_low_buffer, 11);
+		if (info == NULL)
+		{
+			sprintf ("SET %p TO %02X", comps->nvram, comps->value);
+			font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+		}
+		else
+		{
+			while (info != NULL)
+			{
+				if (info->nvram == comps->nvram)
+				{
+					font_render_string_center (&font_mono5, 64, 16, info->name);
+					(*info->values->render) (comps->value);
+					font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
+					coord.x = 24;
+					coord.y = 24;
+					if (*comps->nvram == comps->value)
+					{
+						bitmap_draw (coord, BM_X5);
+					}
+					else
+					{
+						bitmap_draw (coord, BM_BOX5);
+					}
+					break;
+				}
+				info++;
+			}
+		}
+		dmd_show_low ();
+		sound_send (SND_TEST_CONFIRM);
+		task_sleep (TIME_1S + TIME_500MS);
+		comps++;
+	}
 }
 
 
@@ -3248,21 +3345,28 @@ void test_down_button (void)
 	}
 }
 
-void test_left_flipper_button (void)
+
+CALLSET_ENTRY (test_mode, sw_l_l_flipper_button)
 {
-	if (!win_top) return;
-	window_call_op (win_top, left);
-	window_call_op (win_top, draw);
+	if (win_top)
+	{
+		window_call_op (win_top, left);
+		window_call_op (win_top, draw);
+	}
 }
 
-void test_right_flipper_button (void)
+
+CALLSET_ENTRY (test_mode, sw_l_r_flipper_button)
 {
-	if (!win_top) return;
-	window_call_op (win_top, right);
-	window_call_op (win_top, draw);
+	if (win_top)
+	{
+		window_call_op (win_top, right);
+		window_call_op (win_top, draw);
+	}
 }
 
-void test_enter_button (void)
+
+CALLSET_ENTRY (test_mode, sw_enter)
 {
 	if (!win_top)
 	{
@@ -3279,20 +3383,24 @@ void test_enter_button (void)
 	}
 }
 
-void test_escape_button (void)
+CALLSET_ENTRY (test_mode, sw_escape)
 {
-	if (!win_top) return;
-	window_call_op (win_top, escape);
-	if (!win_top)
-		return;
-	else
-		window_call_op (win_top, draw);
+	if (win_top)
+	{
+		window_call_op (win_top, escape);
+		if (!win_top)
+			return;
+		else
+			window_call_op (win_top, draw);
+	}
 }
 
-void test_start_button (void)
+CALLSET_ENTRY (test_mode, sw_start_button)
 {
-	if (!win_top) return;
-	window_call_op (win_top, start);
-	window_call_op (win_top, draw);
+	if (win_top)
+	{
+		window_call_op (win_top, start);
+		window_call_op (win_top, draw);
+	}
 }
 

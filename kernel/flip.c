@@ -40,15 +40,8 @@ __fastram__ U8 flipper_outputs;
 
 CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 {
-	if (in_test)
-		test_left_flipper_button ();
-	else if (in_live_game)
-	{
-		status_report_check ();
-		audit_increment (&system_audits.left_flippers);
-	}
 #ifdef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
-	else if (deff_get_active () == DEFF_AMODE)
+	if (deff_get_active () == DEFF_AMODE)
 	{
 		extern void MACHINE_AMODE_LEFT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_LEFT_FLIPPER_HANDLER ();
@@ -61,15 +54,8 @@ CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 
 CALLSET_ENTRY (flip, sw_l_r_flipper_button)
 {
-	if (in_test)
-		test_right_flipper_button ();
-	else if (in_live_game)
-	{
-		status_report_check ();
-		audit_increment (&system_audits.right_flippers);
-	}
 #ifdef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
-	else if (deff_get_active () == DEFF_AMODE)
+	if (deff_get_active () == DEFF_AMODE)
 	{
 		extern void MACHINE_AMODE_RIGHT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_RIGHT_FLIPPER_HANDLER ();

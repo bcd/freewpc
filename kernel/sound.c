@@ -36,7 +36,7 @@
 
 /** The sound queue structure.  head and tail are offsets; elems hold the actual
  * data bytes to be transmitted. */
-struct {
+__fastram__ struct {
 	U8 head;
 	U8 tail;
 	U8 elems[SOUND_QUEUE_LEN];
@@ -302,8 +302,7 @@ void sound_send (sound_code_t code)
 /** Send a volume set command to the sound board */
 void volume_set (U8 vol)
 {
-	/* Save the volume level in nvram.
-	 * TODO : checksum this? */
+	/* Save the volume level in nvram. */
 	wpc_nvram_get ();
 	current_volume = vol;
 	current_volume_checksum = ~vol;
@@ -356,7 +355,7 @@ void volume_change_deff (void) __taskentry__
 
 
 /** Decrease the master volume */
-void volume_down (void)
+CALLSET_ENTRY (sound, volume_down)
 {
 	if (current_volume > MIN_VOLUME)
 	{
@@ -367,7 +366,7 @@ void volume_down (void)
 
 
 /** Increase the master volume */
-void volume_up (void)
+CALLSET_ENTRY (sound, volume_up)
 {
 	if (current_volume < MAX_VOLUME)
 	{

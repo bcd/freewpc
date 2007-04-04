@@ -505,10 +505,7 @@ CALLSET_ENTRY (game, sw_start_button)
 {
 	/* If in test mode, let test handle it completely. */
 	if (in_test)
-	{
-		test_start_button ();
 		return;
-	}
 
 	/* If not enough credits, inform the player.
 	 * Also call machine hook, e.g. to make a sound. */
@@ -588,7 +585,7 @@ CALLSET_ENTRY (game, sw_buyin_button)
 
 
 /** Initialize the game subsystem.  */
-void game_init (void)
+CALLSET_ENTRY (game, init)
 {
 	num_players = 1;
 	in_game = FALSE;

@@ -35,4 +35,6 @@
 	callset_ ## set (); \
 })
 
+#define callset_invoke_pointer(callset_ptr)	call_far (EVENT_PAGE, (*callset_ptr) ())
+
 #endif /* _CALLSET_H */

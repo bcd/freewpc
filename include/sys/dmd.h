@@ -117,7 +117,9 @@ extern dmd_transition_t
 	trans_sequential_boxfade,
 	trans_random_boxfade,
 	trans_vstripe_left2right,
-	trans_vstripe_right2left
+	trans_vstripe_right2left,
+	trans_bitfade_slow,
+	trans_bitfade_fast
 	;
 
 extern inline U8 *wpc_dmd_addr_verify (U8 *addr)

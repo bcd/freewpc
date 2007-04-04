@@ -53,17 +53,34 @@ void replay_award (void)
 	deff_start (DEFF_REPLAY);
 #endif
 	audit_increment (&system_audits.replays);
+	knocker_fire ();
 }
 
+
+/** Check if the current score has exceeded the next replay level. */
 void replay_check_current (void)
 {
+	if (0)
+	{
+		replay_award ();
+	}
 }
 
+/** Reset the replay score to its default value. */
 void replay_reset (void)
 {
 }
 
-void replay_init (void) 
+
+CALLSET_ENTRY (replay, end_game)
 {
+	/* After so many games, auto-adjust the replay score if
+	configured to do so. */
+}
+
+
+CALLSET_ENTRY (replay, init)
+{
+	/* Initialize the replay subsystem. */
 }
 

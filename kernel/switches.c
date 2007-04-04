@@ -395,7 +395,8 @@ void switch_sched (void)
 	 * All functions are in the EVENT_PAGE. */
 	if (swinfo->fn)
 	{
-		call_far (EVENT_PAGE, (*swinfo->fn) ());
+		/* TODO: remove: call_far (EVENT_PAGE, (*swinfo->fn) ()); */
+		callset_invoke_pointer (swinfo->fn);
 	}
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
@@ -504,5 +505,21 @@ CALLSET_ENTRY (switch, idle)
 			}
 		}
 	}
+}
+
+
+void bar (TASK_DECL_ARGS(U8 arg1, U8 arg2))
+{
+	dbprintf ("arg1 = %d\n", arg1);
+	dbprintf ("arg2 = %d\n", arg2);
+	task_exit ();
+}
+
+void foo (void)
+{
+	task_pid_t tp = task_create_anon (bar);
+	task_push_arg (tp, (U8)10);
+	task_push_arg (tp, (U8)5);
+	task_push_args_done (tp);
 }
 

@@ -27,12 +27,6 @@
 #include <freewpc.h>
 
 
-/** A function that does nothing */
-void null_function (void)
-{
-}
-
-
 /** A function that always returns true */
 bool null_true_function (void)
 {
@@ -45,3 +39,10 @@ bool null_false_function (void)
 {
 	return FALSE;
 }
+
+
+/** A function that does nothing */
+void null_function (void)
+{
+}
+

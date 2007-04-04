@@ -28,10 +28,26 @@
 
 CALLSET_ENTRY (audit, sw_left_outlane)
 {
-	audit_increment (&system_audits.left_drains);
+	if (in_live_game)
+		audit_increment (&system_audits.left_drains);
 }
 
 CALLSET_ENTRY (audit, sw_right_outlane)
 {
-	audit_increment (&system_audits.right_drains);
+	if (in_live_game)
+		audit_increment (&system_audits.right_drains);
 }
+
+CALLSET_ENTRY (audit, sw_l_l_flipper_button)
+{
+	if (in_live_game)
+		audit_increment (&system_audits.left_flippers);
+}
+
+CALLSET_ENTRY (audit, sw_l_r_flipper_button)
+{
+	if (in_live_game)
+		audit_increment (&system_audits.right_flippers);
+}
+
+

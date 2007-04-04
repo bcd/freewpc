@@ -91,7 +91,9 @@ typedef struct
 /** Defines the state of an allocated timer.  This is a read-write object. */
 typedef struct slow_timer
 {
-	/** Pointer to the configuration for this timer */
+	/** Pointer to the configuration for this timer.
+	TODO : no bank switching is performed when reading this, so modules
+	using slowtimers have to be in the fixed area. */
 	slow_timer_config_t *config;
 
 	/** The current count */

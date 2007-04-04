@@ -306,4 +306,26 @@ far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
 	return pid;
 }
 
+
+
+#ifdef CONFIG_PLATFORM_LINUX
+
+#else /* !CONFIG_PLATFORM_LINUX */
+
+#define TASK_DECL_ARGS(args...) args, ...
+
+#define TASK_GET_ARG(arg) arg
+
+#define task_top_of_stack(tp)	(&tp->stack[TASK_STACK_SIZE - tp->stack_size])
+
+#define task_push_arg(tp, arg) \
+do { \
+	tp->stack_size += sizeof (arg); \
+	*((typeof (arg) *)task_top_of_stack(tp)) = arg; \
+} while (0)
+
+#define task_push_args_done(tp) task_push_arg(tp, ((U16)task_exit))
+
+#endif
+
 #endif /* _SYS_TASK_H */

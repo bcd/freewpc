@@ -359,6 +359,33 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 }
 
 
+void dmd_mask_page (dmd_buffer_t dbuf, U16 mask)
+{
+	register int16_t count = DMD_PAGE_SIZE / (2 * 8);
+	register uint16_t *dbuf16 = (uint16_t *)dbuf;
+	while (--count >= 0)
+	{
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		*dbuf16 &= mask;
+		dbuf16++;
+		mask = ~mask;
+	}
+}
+
+
 void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 {
 	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
@@ -601,7 +628,7 @@ inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 	wpc_dmd_set_low_page (new_page);
 
 	/* Update the composite using the new image data.
-	 * This function should set dmd_transition to NULL when
+	 * This function should set dmd_in_transition to FALSE when
 	 * the transition is done. */
 	dmd_transition->composite_new ();
 }
@@ -665,7 +692,10 @@ void dmd_do_transition (void)
 	wpc_push_page (TRANS_PAGE);
 	
 	if (dmd_transition->composite_init)
+	{
 		(*dmd_transition->composite_init) ();
+		dmd_trans_data_ptr2 = dmd_trans_data_ptr;
+	}
 
 	while (dmd_in_transition)
 	{

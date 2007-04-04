@@ -56,6 +56,8 @@
 #define ERR_INVALID_IO_ADDR      32
 #define ERR_SCORE_NOT_IN_GAME    33
 #define ERR_NO_MORE_SLOW_TIMERS  34
+#define ERR_WINDOW_STACK_OVERFLOW 35
+
 
 typedef uint8_t errcode_t;
 __noreturn__ void fatal (errcode_t errcode);

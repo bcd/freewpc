@@ -145,3 +145,18 @@ void status_report_check (void)
 {
 	task_create_gid1 (GID_STATUS_REPORT_MONITOR, status_report_monitor);
 }
+
+
+CALLSET_ENTRY (status_report, sw_l_l_flipper_button)
+{
+	if (in_live_game)
+		status_report_check ();
+}
+
+
+CALLSET_ENTRY (status_report, sw_l_r_flipper_button)
+{
+	if (in_live_game)
+		status_report_check ();
+}
+

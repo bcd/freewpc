@@ -214,6 +214,9 @@ do_format_chars:
 			format++;
 			switch (*format)
 			{
+				/* TODO : handle format char '*' to dynamically set
+				the width from a parameter */
+
 				case '0':
 					if (sprintf_width == 0)
 					{

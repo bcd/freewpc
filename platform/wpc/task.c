@@ -78,7 +78,7 @@ task_t task_buffer[NUM_TASKS];
  * Case (1) is theoretically OK, but we consider it just as bad as
  * case (2), which could lead to all kinds of weird behavior.
  * The IRQ will reset the system when this happens. */
-bool task_dispatching_ok;
+__fastram__ bool task_dispatching_ok;
 
 __fastram__ U8 tick_start_count;
 

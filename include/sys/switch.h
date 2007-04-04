@@ -144,6 +144,27 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 #define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
 #define event_did_follow(f,s)		switch_did_follow(f,s)
 
+/** A macro for button event handlers, which need to be behave
+differently when the button is kept pressed. */
+#define callset_invoke_held(sw,delay,repeat,event) \
+	do { \
+		U8 i; \
+		callset_invoke (event); \
+		for (i=0; i < 8; i++) \
+			if (!switch_poll (sw)) \
+				goto done; \
+			else \
+				task_sleep (delay / 8); \
+	 \
+		while (switch_poll (sw)) \
+		{ \
+			callset_invoke (event); \
+			task_sleep (repeat); \
+		} \
+	done:; \
+	} while (0)
+
+
 void switch_init (void);
 void switch_rtt (void);
 void switch_sched (void);

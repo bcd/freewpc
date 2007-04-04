@@ -33,8 +33,6 @@ CALLSET_ENTRY (service, sw_escape)
 		add_credit ();
 		audit_increment (&system_audits.service_credits);
 	}
-	else
-		test_escape_button ();
 }
 
 CALLSET_ENTRY (service, sw_down)
@@ -42,7 +40,7 @@ CALLSET_ENTRY (service, sw_down)
 	test_down_button ();
 
 	if (!in_test)
-		volume_down ();
+		callset_invoke_held (SW_DOWN, TIME_500MS, TIME_100MS, volume_down);
 }
 
 CALLSET_ENTRY (service, sw_up)
@@ -50,12 +48,7 @@ CALLSET_ENTRY (service, sw_up)
 	test_up_button ();
 	
 	if (!in_test)
-		volume_up ();
-}
-
-CALLSET_ENTRY (service, sw_enter)
-{
-	test_enter_button ();
+		callset_invoke_held (SW_UP, TIME_500MS, TIME_100MS, volume_up);
 }
 
 

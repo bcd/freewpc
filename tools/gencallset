@@ -118,11 +118,13 @@ foreach $src (@srclist) {
 			}
 		}
 		elsif (/callset_invoke \(([^)]*)\)/) {
-			if (!defined $functionhash{$1}) {
-				$functionhash{$1} = "";
-				$fntypehash{$1} = "void";
+			if ($1 ne "event") {
+				if (!defined $functionhash{$1}) {
+					$functionhash{$1} = "";
+					$fntypehash{$1} = "void";
+				}
+				$invocation{$1} .= "$src:$lineno ";
 			}
-			$invocation{$1} .= "$src:$lineno ";
 		}
 		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
@@ -178,7 +180,10 @@ foreach $set (keys %functionhash) {
 
 	my @modules = split " ", $functionhash{$set};
 	foreach $module (@modules) {
-		if ($modulehash{$module} =~ /^common/) {
+		if ($modulehash{$module} =~ /^test/) {
+			$modifier = " __test__";
+		}
+		elsif ($modulehash{$module} =~ /^common/) {
 			$modifier = " __common__";
 		}
 		elsif ($modulehash{$module} =~ /^mach/) {
