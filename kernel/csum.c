@@ -54,7 +54,7 @@ const struct area_csum *csum_info_table[] = {
 
 /** A table of the csum info page locations */
 const U8 csum_paging_info_table[] = {
-	SYS_PAGE,
+	COMMON_PAGE,
 	COMMON_PAGE,
 	COMMON_PAGE,
 	COMMON_PAGE,

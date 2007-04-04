@@ -275,8 +275,5 @@ void credits_clear (void)
 }
 
 
-void coin_init (void)
-{
-	lamp_start_update ();
-}
+// lamp_start_update (); at coin_init ();
 

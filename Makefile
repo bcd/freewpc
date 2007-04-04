@@ -210,7 +210,7 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 COMMON_BASIC_OBJS = \
 	common/abort.o \
 	common/audio.o \
-	kernel/coin.o \
+	common/coin.o \
 	common/db.o \
 	common/event-audit.o \
 	common/flipcode.o \
