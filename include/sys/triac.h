@@ -23,6 +23,8 @@
 
 #define NUM_GI_TRIACS	5
 
+#define NUM_BRIGHTNESS_LEVELS 8
+
 #define TRIAC_GI_STRING(n)			(1 << (n))
 #define TRIAC_COINDOOR_INTERLOCK	0x40
 #define TRIAC_FLIPPER_ENABLE		0x80
@@ -60,7 +62,6 @@ do { \
 
 typedef U8 triacbits_t;
 
-void gi_recalc_zerocross (void);
 void triac_rtt (void);
 void triac_enable (triacbits_t bits);
 void triac_disable (triacbits_t bits);
@@ -68,8 +69,8 @@ void triac_leff_allocate (U8 triac);
 void triac_leff_free (U8 triac);
 void triac_leff_enable (U8 triac);
 void triac_leff_disable (U8 triac);
-U8 triac_get_brightness (void);
-void triac_set_brightness (U8 bits);
+U8 triac_get_brightness (U8 triac);
+void triac_set_brightness (U8 bits, U8 brightness);
 
 void triac_init (void);
 

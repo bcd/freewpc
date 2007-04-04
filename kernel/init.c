@@ -155,7 +155,6 @@ void do_reset (void)
 	leff_init ();
 	test_init ();
 	score_init ();
-	coin_init ();
 	adj_init ();
 	high_score_init ();
 	ball_search_init ();
@@ -386,16 +385,14 @@ static inline void do_irq_1ms_end (void)
 static inline void do_irq_2ms_a (void)
 {
 	lamp_rtt ();
-	/* Update flippers */
 	flipper_rtt ();
+	triac_rtt ();
 }
 
 static inline void do_irq_2ms_b (void)
 {
 	switch_rtt ();
-#ifdef CONFIG_ZEROCROSS
 	ac_rtt ();
-#endif
 }
 
 
@@ -404,7 +401,6 @@ static inline void do_irq_8ms (void)
 {
 	/* Execute rtts every 8ms */
 	sol_rtt ();
-	triac_rtt ();
 	flasher_rtt ();
 #ifdef MACHINE_8MS_RTTS
 	MACHINE_8MS_RTTS

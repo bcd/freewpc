@@ -24,18 +24,28 @@
  * \file
  * \brief AC/zerocross circuit handling
  *
- * This module is not yet complete and is not used.
+ * This module is not yet complete.
  */
 
 __fastram__ U8 ac_zc_count;
 
 __fastram__ U8 ac_zc_period;
 
+__fastram__ U8 ac_zc_poll_count;
+
+__fastram__ bool ac_zc_broken;
+
 
 void ac_rtt (void)
 {
-#ifdef CONFIG_ZEROCROSS
-	if ( wpc_read_ac_zerocross () )
+#if 0
+	if (ac_zc_broken)
+	{
+		ac_zc_count = 7;
+	}
+	else
+#endif
+	if (wpc_read_ac_zerocross () )
 	{
 		/* At zero cross point */
 		ac_zc_count = 0;
@@ -44,13 +54,29 @@ void ac_rtt (void)
 	{
 		/* Not at zero cross point */
 		ac_zc_count++;
+		ac_zc_count %= 8; /* limit to 0-7 */
 	}
-#endif /* CONFIG_ZEROCROSS */
 }
 
 
 CALLSET_ENTRY (ac, idle)
 {
+	if (!ac_zc_broken)
+	{
+		if (ac_zc_poll_count < 250)
+		{
+			++ac_zc_poll_count;
+			if (ac_zc_count != 0)
+			{
+				ac_zc_poll_count = 0;
+			}
+		}
+		else
+		{
+			ac_zc_broken = TRUE;
+			dbprintf ("Zerocross circuit not working.\n");
+		}
+	}
 }
 
 
@@ -58,5 +84,7 @@ void ac_init (void)
 {
 	ac_zc_count = 0;
 	ac_zc_period = 8;
+	ac_zc_poll_count = 0;
+	ac_zc_broken = FALSE;
 }
 

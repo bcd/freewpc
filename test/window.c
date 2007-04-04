@@ -2650,6 +2650,8 @@ struct menu solenoid_test_item = {
 
 /****************** GI Test **************************/
 
+U8 gi_test_brightness;
+
 U8 gi_test_values[] = {
 	0,
 	TRIAC_GI_STRING(0),	
@@ -2660,51 +2662,59 @@ U8 gi_test_values[] = {
 	TRIAC_GI_MASK,
 };
 
-const char **gi_test_names[] = {
-	&"ALL OFF",
-	&names_of_gi[0],
-	&names_of_gi[1],
-	&names_of_gi[2],
-	&names_of_gi[3],
-	&names_of_gi[4],
-	&"ALL ON",
+const char *gi_test_names[] = {
+	"ALL OFF",
+	"STRING 1",
+	"STRING 2",
+	"STRING 3",
+	"STRING 4",
+	"STRING 5",
+	"ALL ON",
 };
 
 void gi_test_init (void)
 {
 	browser_init ();
 	browser_max = NUM_GI_TRIACS+1;
+	gi_test_brightness = 8;
+	triac_disable (TRIAC_GI_MASK);
+	triac_leff_allocate (TRIAC_GI_MASK);
+}
+
+void gi_test_exit (void)
+{
+	triac_leff_free (TRIAC_GI_MASK);
+	triac_enable (TRIAC_GI_MASK);
 }
 
 void gi_test_draw (void)
 {
 	browser_draw ();
-	browser_print_operation (*gi_test_names[menu_selection]);
-	sprintf ("BRIGHTNESS %d", triac_get_brightness ());
+	browser_print_operation (gi_test_names[menu_selection]);
+	sprintf ("BRIGHTNESS %d", gi_test_brightness);
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 
-	triac_disable (TRIAC_GI_MASK);
-	triac_enable (gi_test_values[menu_selection]);
+	triac_leff_disable (TRIAC_GI_MASK);
+	triac_set_brightness (gi_test_values[menu_selection], gi_test_brightness);
 }
 
 void gi_test_right (void)
 {
-	U8 n = triac_get_brightness ();
-	if (n < 8)
-		triac_set_brightness (n+1);
+	if (gi_test_brightness < 8)
+		gi_test_brightness++;
 }
 
 void gi_test_left (void)
 {
-	U8 n = triac_get_brightness ();
-	if (n != 0)
-		triac_set_brightness (n-1);
+	if (gi_test_brightness > 1)
+		gi_test_brightness--;
 }
 
 
 struct window_ops gi_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = gi_test_init,
+	.exit = gi_test_exit,
 	.draw = gi_test_draw,
 	.left = gi_test_left,
 	.right = gi_test_right,
