@@ -130,44 +130,87 @@ void ball_save_deff (void)
 	deff_exit ();
 }
 
+U16 *tv_static_data[] = {
+	0x4964, 0x3561, 0x2957, 0x1865, 
+	0x8643, 0x8583, 0x18C9, 0x9438,
+	0x2391, 0x1684, 0x6593,
+};
 
 void tv_static_deff (void)
 {
 	U8 loop;
 	U8 count;
-	register U8 *dmd = dmd_low_buffer;
+	register U16 *dmd;
 	U8 r;
 
-	for (loop = 0; loop < 16; loop++)
+	for (loop = 0; loop < 32; loop++)
 	{
 		dmd_alloc_low_high ();
-#define _N 69
-		for (count = 0; count < _N; count++)
-		{
-			r = random ();
-			dmd[count] = r;
-			dmd[_N + count] = r;
-			dmd[_N*2 + count] = r;
-			dmd[_N*3 + count] = r;
-			dmd[_N*4 + count] = r;
-			dmd[_N*5 + count] = r;
-			dmd[_N*6 + count] = r;
-			dmd[_N*7 + count] = r;
 
-#if 0
-			r = random ();
-			dmd[count + 512] = r;
-			dmd[_N + count + 512] = r;
-			dmd[_N*3 + count + 512] = r;
-			dmd[_N*5 + count + 512] = r;
-			dmd[_N*7 + count + 512] = r;
-#endif
+		dmd = (U16 *)dmd_low_buffer;
+		while (dmd < dmd_high_buffer)
+		{
+			r = random_scaled (11);
+			*dmd++ = tv_static_data[r++];
+			*dmd++ = tv_static_data[r++];
+		}
+
+		dmd = (U16 *)dmd_high_buffer;
+		while (dmd < (dmd_high_buffer + DMD_PAGE_SIZE))
+		{
+			r = random_scaled (11);
+			*dmd++ = tv_static_data[r++];
+			*dmd++ = tv_static_data[r++];
 		}
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 	}
 	deff_exit ();
 }
+
+
+void text_color_flash_deff (void)
+{
+	U8 count = 6;
+
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	dmd_clean_page_high ();
+	font_render_string_center (&font_fixed10, 64, 9, "QUICK");
+	font_render_string_center (&font_fixed10, 64, 22, "MULTIBALL");
+
+	/* low = text, high = blank */
+	while (--count > 0)
+	{
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+
+		dmd_flip_low_high ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+
+		dmd_show_high ();
+		task_sleep (TIME_166MS);
+
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_flip_low_high ();
+	}
+
+	deff_exit ();	
+}
+
+
+void car_fadein_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_sched_transition (&trans_sequential_boxfade);
+	dmd_draw_image2 (oldcar0_bits);
+	dmd_show2 ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
 
 
 CALLSET_ENTRY (deff, start_player)
