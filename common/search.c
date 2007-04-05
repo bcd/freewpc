@@ -188,7 +188,7 @@ void ball_search_monitor_stop (void)
 }
 
 
-void ball_search_init (void)
+CALLSET_ENTRY (ball_search, init)
 {
 	ball_search_timeout_set (BS_TIMEOUT_DEFAULT);
 }

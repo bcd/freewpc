@@ -38,6 +38,9 @@ struct area_csum champion_csum_info = {
 	.length = HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ,
 	.csum = &gc_csum,
 	.reset = high_score_reset,
+#ifdef HAVE_PAGING
+	.reset_page = PAGE,
+#endif
 };
 
 
@@ -52,6 +55,9 @@ struct area_csum highscore_csum_info = {
 	.length = (HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ) * NUM_HIGH_SCORES,
 	.csum = &high_score_csum,
 	.reset = high_score_reset,
+#ifdef HAVE_PAGING
+	.reset_page = PAGE,
+#endif
 };
 
 

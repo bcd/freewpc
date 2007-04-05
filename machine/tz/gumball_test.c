@@ -112,12 +112,14 @@ void tz_gumball_test_thread (void)
 
 void tz_gumball_test_down (void)
 {
+	sound_send (SND_TEST_UP);
 	gumball_op = 1 - gumball_op;
 }
 
 
 void tz_gumball_test_up (void)
 {
+	sound_send (SND_TEST_DOWN);
 	gumball_op = 1 - gumball_op;
 }
 
@@ -134,6 +136,7 @@ void tz_gumball_test_enter (void)
 			gumball_release ();
 			break;
 	}
+	sound_send (SND_TEST_ENTER);
 }
 
 

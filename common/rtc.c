@@ -289,11 +289,11 @@ void rtc_show_date_time (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%s", day_names[day_of_week]);
-	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	rtc_render_date ();
 	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	rtc_render_time ();
-	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 25, sprintf_buffer);
 
 	dmd_show_low ();
 }

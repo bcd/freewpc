@@ -27,11 +27,13 @@
 
 extern const score_t score_table[];
 
+/** Nonzero if the current score has changed and needs to be redrawn */
 U8 score_change;
+
 score_t scores[MAX_PLAYERS];
+
 U8 *current_score;
-score_t bonus_score;
-U8 debug_value;
+
 
 
 void scores_draw_ball (void)
@@ -46,12 +48,12 @@ void scores_draw_ball (void)
 		time_seconds -= 60;
 	}
 	sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
-	font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 #else
-	sprintf ("PLAYER %1i", player_up);
-	font_render_string_center (&font_mono5, 96, 27, sprintf_buffer);
+	credits_render ();
+	font_render_string_center (&font_var5, 96, 27, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_mono5, 32, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 32, 27, sprintf_buffer);
 #endif
 }
 

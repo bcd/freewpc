@@ -27,7 +27,9 @@
  * progress.
  */
 
-/* TODO : you cannot page through the status report now. */
+
+U8 status_report_cancel_delay;
+
 
 void status_page_init (void)
 {
@@ -35,19 +37,23 @@ void status_page_init (void)
 	dmd_draw_border (dmd_low_buffer);
 }
 
+
 void status_page_complete (void)
 {
 	task_ticks_t timeout = TIME_3S / TIME_66MS;
 	dmd_show_low ();
-	while (timeout > 0)
+	status_report_cancel_delay = FALSE;
+	while (!status_report_cancel_delay && (timeout > 0))
 	{
 		task_sleep (TIME_66MS);
 		timeout--;
 	}
 }
 
+
 void status_report_deff (void)
 {
+
 	status_page_init ();
 	font_render_string_center (&font_fixed6, 64, 16, "STATUS REPORT");
 	status_page_complete ();
@@ -81,10 +87,6 @@ void status_report_deff (void)
 	 * The order is unspecified. */
 	callset_invoke (status_report);
 
-#ifdef MACHINE_STATUS_REPORT
-	MACHINE_STATUS_REPORT
-#endif
-
 	deff_exit ();
 }
 
@@ -96,8 +98,8 @@ void status_report_deff (void)
  */
 void status_report_monitor (void)
 {
-	/* A count of 50 equates to a 5s hold down period. */
-	U8 count = 50;
+	/* A count of 40 equates to a 4s hold down period. */
+	U8 count = 40;
 
 	/* Wait until the player has kept the flipper button(s) down
 	 * for an extended period of time.  Abort as soon as the
@@ -143,7 +145,12 @@ done:
 
 void status_report_check (void)
 {
-	task_create_gid1 (GID_STATUS_REPORT_MONITOR, status_report_monitor);
+	if (task_find_gid (GID_STATUS_REPORT_MONITOR))
+	{
+		status_report_cancel_delay = TRUE;
+	}
+	else
+		task_create_gid (GID_STATUS_REPORT_MONITOR, status_report_monitor);
 }
 
 
