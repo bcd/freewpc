@@ -156,6 +156,7 @@ void end_game (void)
 	if (in_game)
 	{
 		in_game = 0;
+		player_up = 0;
 		ball_up = 0;
 		in_tilt = 0;
 
@@ -256,10 +257,19 @@ void end_ball (void)
 	}
 
 	/* If this is the last ball of the game for this player,
-	 * then offer to buy an extra ball if enabled */
-	if ((ball_up == system_config.balls_per_game) && FALSE)
+	 * then offer to buy an extra ball if enabled.  Also,
+	 * if 1-coin buyin is enabled, offer this too. */
+	if (ball_up == system_config.balls_per_game)
 	{
-		buyin_offer ();
+		if (0)
+		{
+			buyin_offer ();
+		}
+
+		if (price_config.one_coin_buyin == YES)
+		{
+			onecoin_buyin_offer ();
+		}
 	}
 
 	/* Advance to the next player. */
@@ -284,7 +294,7 @@ void end_ball (void)
 	/* If all players have had a turn, then increment the
 	 * current ball number.
 	 * In timed game, this step is skipped, as the game is
-	 * automatically over at the end of the *first ball".
+	 * automatically over at the end of the *first ball*.
 	 */
 	ball_up++;
 	if (ball_up <= system_config.balls_per_game)
@@ -437,7 +447,9 @@ void add_player (void)
 {
 	remove_credit ();
 	num_players++;
+	deff_start (DEFF_SCORES_IMPORTANT);
 	callset_invoke (add_player);
+	score_change++;
 }
 
 
@@ -457,7 +469,6 @@ void start_game (void)
 		add_player ();
 		player_up = 1;
 		ball_up = 1;
-		clear_extra_balls ();
 	
 		deff_start (DEFF_SCORES);
 		amode_stop ();
@@ -486,12 +497,12 @@ bool verify_start_ok (void)
 	return FALSE;
 #endif
 
-	// check enough credits
+	/* check enough credits */
 	if (!has_credits_p ())
 		return FALSE;
 
-	// check balls stable
-	if (!device_check_start_ok ())
+	/* check balls stable */
+	if (!in_game && !device_check_start_ok ())
 	{
 		deff_start (DEFF_LOCATING_BALLS);
 		return FALSE; 
@@ -508,8 +519,9 @@ CALLSET_ENTRY (game, sw_start_button)
 		return;
 
 	/* If not enough credits, inform the player.
-	 * Also call machine hook, e.g. to make a sound. */
-	if (!has_credits_p ())
+	 * Also call machine hook, e.g. to make a sound.
+	 * But don't do this during a game. */
+	if (!in_game && !has_credits_p ())
 	{
 		deff_start (DEFF_CREDITS);
 		callset_invoke (start_without_credits);
@@ -533,12 +545,12 @@ CALLSET_ENTRY (game, sw_start_button)
 			 * player if possible, depending on what's wrong. */
 		}
 	}
-	else
+	else if (num_players < system_config.max_players)
 	{
 		/* A game is already in progress.  If still at
 		 * ball 1, and we haven't reached the maximum number
 		 * of players, we can add a new player. */
-		if ((ball_up == 1) && (num_players < system_config.max_players))
+		if (ball_up == 1)
 		{
 			add_player ();
 		}
@@ -551,12 +563,21 @@ CALLSET_ENTRY (game, sw_start_button)
 			{
 				case GAME_RESTART_SLOW:
 					/* TODO */
-					break;
+					task_sleep_sec (1);
+					if (!switch_poll_logical (MACHINE_START_SWITCH))
+						break;
+					task_sleep_sec (1);
+					if (!switch_poll_logical (MACHINE_START_SWITCH))
+						break;
+					/* fallthru if start button held down */
+
 				case GAME_RESTART_ALWAYS:
 					stop_game ();
 					start_game ();
 					break;
-				default: case GAME_RESTART_NEVER:
+
+				default:
+				case GAME_RESTART_NEVER:
 					break;
 			}
 		}
@@ -587,11 +608,12 @@ CALLSET_ENTRY (game, sw_buyin_button)
 /** Initialize the game subsystem.  */
 CALLSET_ENTRY (game, init)
 {
+	/* TODO : if the last game was multiplayer, then don't reset this */
 	num_players = 1;
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
+	player_up = 0;
 }
-
 

@@ -107,6 +107,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	deff_start (DEFF_SLAM_TILT);
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);
+   /* TODO : check for slamtilt penalty */
 }
 
 

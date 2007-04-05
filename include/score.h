@@ -48,7 +48,7 @@ extern U8 *current_score;
 
 void scores_draw (void);
 void scores_draw_ball (void);
-void scores_draw_current (void);
+void scores_draw_current (U8 skip_player);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
 void score_add (bcd_t *s1, const bcd_t *s2, U8 len);

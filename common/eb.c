@@ -54,6 +54,8 @@ static void update_extra_ball_lamp (void)
 }
 
 
+/** Award an extra ball to the current player.  If an extra ball
+cannot be awarded, then it is skipped. */
 void increment_extra_balls (void)
 {
 	if ((extra_balls_earned < system_config.max_ebs)
@@ -66,10 +68,20 @@ void increment_extra_balls (void)
 
 		extra_balls_earned++;
 		extra_balls_earned_this_bip++;
+#ifdef DEFF_EXTRA_BALL
+		deff_start (DEFF_EXTRA_BALL);
+#endif
+#ifdef LEFF_EXTRA_BALL
+		leff_start (LEFF_EXTRA_BALL);
+#endif
 	}
 }
 
 
+/** Decreases the current player's extra ball at the end of
+ball, if necessary.  Returns TRUE if the current player should
+be kept, or FALSE if should advance to the next player/ball
+number. */
 bool decrement_extra_balls (void)
 {
 	if (extra_balls > 0)
@@ -86,13 +98,13 @@ bool decrement_extra_balls (void)
 }
 
 
-CALLSET_ENTRY(extra_ball, start_player)
+CALLSET_ENTRY (extra_ball, start_player)
 {
 	extra_balls_earned = 0;
 }
 
 
-void clear_extra_balls (void)
+CALLSET_ENTRY (extra_ball, start_game)
 {
 	extra_balls = 0;
 }

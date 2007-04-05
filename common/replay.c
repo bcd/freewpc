@@ -52,6 +52,9 @@ void replay_award (void)
 #ifdef DEFF_REPLAY
 	deff_start (DEFF_REPLAY);
 #endif
+#ifdef LEFF_REPLAY
+	leff_start (LEFF_REPLAY);
+#endif
 	audit_increment (&system_audits.replays);
 	knocker_fire ();
 }

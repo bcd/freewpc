@@ -48,7 +48,6 @@ void printf_thousands (U8 n)
 void replay_deff (void)
 {
 	sprintf ("REPLAY");
-	knocker_fire ();
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
@@ -203,19 +202,20 @@ void text_color_flash_deff (void)
 
 void car_fadein_deff (void)
 {
-	U8 count = 30;
+	U8 count = 15;
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 9, "SHOOT LOCK");
 	font_render_string_center (&font_fixed10, 64, 22, "FOR MULTIBALL");
 	dmd_copy_low_to_high ();
 	dmd_mask_page (dmd_low_buffer, 0xAAAA);
-	dmd_mask_page (dmd_high_buffer, 0x5555);
-	dmd_show_low ();
+	//dmd_mask_page (dmd_high_buffer, 0x5555);
+	dmd_show2 ();
 	while (--count > 0)
 	{
-		task_sleep (TIME_100MS);
-		dmd_show_other ();
+		task_sleep (TIME_200MS);
+		dmd_flip_low_high ();
+		dmd_show2 ();
 	}
 	deff_exit ();
 }

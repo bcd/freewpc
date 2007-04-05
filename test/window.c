@@ -413,7 +413,7 @@ struct adjustment standard_adjustments[] = {
 	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
-	{ "GAME RESTART", &game_restart_value, 0, &system_config.game_restart },
+	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -454,11 +454,11 @@ struct adjustment pricing_adjustments[] = {
 	{ "FREE PLAY", &yes_no_value, NO, &price_config.free_play },
 #endif
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
-	{ "1-COIN BUY-IN", &yes_no_value, NO, NULL },
+	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
 	{ "COIN METER UNITS", &integer_value, 0, NULL },
 	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
-	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, NULL },
-	{ "SLAMTILT PENALTY", &yes_no_value, YES, NULL },
+	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
+	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, NULL },
 	{ "CREDIT FRACTION", &on_off_value, OFF, NULL },
 	{ NULL, NULL, 0, NULL },
@@ -2052,20 +2052,27 @@ struct preset preset_5ball = { .name = "5-BALL", preset_5ball_comps };
 
 struct preset_component preset_tournament_comps[] = {
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
-	{ standard_adjustments, &system_config.replay_award, 0 },
-	{ standard_adjustments, &system_config.special_award, 0 },
+	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
+	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ pricing_adjustments, &price_config.free_play, YES },
-	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_SLOW },
+	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_NEVER },
 	{ standard_adjustments, &system_config.max_ebs, 0 },
 	{ standard_adjustments, &system_config.match_feature, OFF },
 	{ standard_adjustments, &system_config.tournament_mode, ON },
+	{ standard_adjustments, &system_config.no_bonus_flips, NO },
+	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
+	/* TODO : once extra ball buyin is implemented, disable it here */
 	{ NULL, 0 },
 };
 struct preset preset_tournament = { .name = "TOURNAMENT", preset_tournament_comps };
 
 
 struct preset_component preset_show_comps[] = {
-	{ standard_adjustments, &system_config.replay_award, 0 },
+	{ pricing_adjustments, &price_config.free_play, YES },
+	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
+	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
+	{ standard_adjustments, &system_config.match_feature, OFF },
+	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
 	{ NULL, 0 },
 };
 struct preset preset_show = { .name = "SHOW", preset_show_comps };

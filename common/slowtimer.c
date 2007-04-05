@@ -23,7 +23,8 @@
 
 /**
  * \file
- * \brief The slow timer APIs, which operate at 1s granularity and add support for exit routines, grace periods, etc.
+ * \brief The slow timer APIs, which operate at 1s granularity and add support for 
+ * exit routines, grace periods, etc.
  */
 
 /** The table of slow timer objects */

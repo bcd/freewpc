@@ -30,6 +30,7 @@ extern const score_t score_table[];
 /** Nonzero if the current score has changed and needs to be redrawn */
 U8 score_change;
 
+/* TODO : scores should be in nvram */
 score_t scores[MAX_PLAYERS];
 
 U8 *current_score;
@@ -65,12 +66,65 @@ void scores_draw_credits (void)
 }
 
 
-void scores_draw_current (void)
+#define SCORE_POS_CENTER_LARGE 0
+#define SCORE_POS_UL_SMALL 1
+#define SCORE_POS_UR_SMALL 2
+#define SCORE_POS_LL_SMALL 3
+#define SCORE_POS_LR_SMALL 4
+#define SCORE_POS_UL_LARGE 5
+#define SCORE_POS_LR_LARGE 6
+
+
+const struct score_font_info 
 {
-	sprintf_current_score ();
-	/* TODO - this is only drawing player 1's score.  We need to choose
-	 * an appropriate font for all of the scores. */
-	font_render_string_center (&font_lucida9, 64, 10, sprintf_buffer);
+	void (*render) (fontargs_t *);
+	font_t *font;
+	U8 x;
+	U8 y;
+} score_font_info_table[] = {
+	[SCORE_POS_CENTER_LARGE] = { fontargs_render_string_center, &font_lucida9, 64, 10 },
+	[SCORE_POS_UL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 1 },
+	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 10 },
+	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
+	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
+	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 14 },
+	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 14 },
+};
+
+
+/* The lookup is [num_players-1][player_up][score_to_draw-1] */
+const U8 score_font_info_key[4][4][4] = {
+	/* 1 player */  {
+		{SCORE_POS_CENTER_LARGE},
+		{SCORE_POS_CENTER_LARGE},
+	},
+	/* 2 players */ {
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL }, 
+		{SCORE_POS_UL_LARGE, SCORE_POS_LR_SMALL }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_LR_LARGE }
+	},
+	/* TODO - more */
+};
+
+
+/** Render the default score screen. */
+void scores_draw_current (U8 skip_player)
+{
+	U8 p;
+	struct score_font_info *info;
+
+	for (p=0; p < num_players; p++)
+	{
+		if (p+1 == skip_player)
+			continue;
+
+		sprintf_score (scores[p]);
+		
+		info = &score_font_info_table[
+			score_font_info_key[num_players-1][player_up][p] ];
+		DECL_FONTARGS (info->font, info->x, info->y, sprintf_buffer);
+		(*info->render) (&font_args);
+	}
 }
 
 
@@ -80,8 +134,25 @@ void scores_draw (void)
 		scores_draw_ball ();
 	else
 		scores_draw_credits ();
-	scores_draw_current ();
+	scores_draw_current (0);
 }
+
+
+void score_screen_update (void)
+{
+}
+
+
+void scores_important_deff (void)
+{
+	dmd_alloc_low_clean ();
+	scores_draw_ball ();
+	scores_draw_current (0);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
 
 void scores_deff (void) __taskentry__
 {
@@ -99,8 +170,9 @@ redraw:
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		scores_draw_ball ();
+		scores_draw_current (player_up);
 		dmd_copy_low_to_high ();
-		scores_draw_current ();
+		scores_draw_current (0);
 		dmd_show_low ();
 		
 		/* Restart score effects */
