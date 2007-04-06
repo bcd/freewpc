@@ -67,3 +67,16 @@ __far_call_handler:
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	rts
 
+
+	.globl __far_indirect_call_handler
+__far_indirect_call_handler:
+	pshs	b,u,x                 ; Save all registers used for parameters
+	stx   *__far_call_address   ; Move function offset to memory
+	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
+	puls	b,u,x                 ; Restore parameters
+	pshs	a                     ; Save bank switch value to be restored
+	jsr	[__far_call_address]  ; Call function
+	puls	a                     ; Restore A
+	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
+	rts

@@ -531,22 +531,35 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 
 	wpc_push_page (PRG_PAGE);
 
-	/* Read the flags */
+	/* The first byte of an xbmprog is a 'method', which
+	says the overlap manner in which the image has been
+	compressed. */
 	c = *xbmprog++;
 	switch (c)
 	{
 		case XBMPROG_METHOD_RAW:
+			/* In the 'raw' method, no compression was done at
+			all.  The following 512 bytes are copied verbatim to
+			the display buffer. */
 			dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)xbmprog);
 			xbmprog += (dmd_high_buffer - dmd_low_buffer);
 			break;
 
 		case XBMPROG_METHOD_RLE:
+			/* In the 'run-length encoding (RLE)' method,
+			certain long sequences of the same byte are replaced
+			by a flag, the byte, and a count. */
 			while (dbuf < dmd_high_buffer)
 			{
 				c = *xbmprog++;
 				if (c == XBMPROG_RLE_SKIP)
 				{
+					/* The 'skip' flag indicates an RLE sequence where
+					the data byte is assumed to be zero.  The zero byte 
+					is not present in the stream.  The zero case occurs 
+					frequently, and is thus given special treatment. */
 					c = *xbmprog++;
+					/* TODO - use word copies if possible */
 					do {
 						*dbuf++ = 0;
 						c--;
@@ -554,19 +567,30 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 				}
 				else if (c == XBMPROG_RLE_REPEAT)
 				{
+					/* The 'repeat' flag is the usual RLE case and can
+					support a sequence of any byte value. */
 					c = *xbmprog++; /* data */
 					c2 = *xbmprog++; /* count */
+					/* TODO - use word copies if possible */
 					do {
 						*dbuf++ = c;
 						c2--;
 					} while (c2 != 0);
 				}
 				else
+					/* Unrecognized flags are interpreted as literals.
+					Note that a literal value that matches a flag value
+					above will need to be encoded as an RLE sequence of
+					1, since no escape character is defined. */
 					*dbuf++ = c;
 			}
 			break;
 
 		case XBMPROG_METHOD_RLE_DELTA:
+			/* The RLE delta method is almost identical to the
+			RLE method above, but the input stream is overlaid on
+			top of the existing image data, using OR operations
+			instead of simple assignment. */
 			while (dbuf < dmd_high_buffer)
 			{
 				c = *xbmprog++;
@@ -595,7 +619,12 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 }
 
 
-/** Run a DMD animation on the display. */
+/** Run a DMD animation on the display.
+ * An animation is given as a set of adjacent xbmprogs.
+ * The delay between frames can be specified.  The
+ * special flag value XBMPROG_METHOD_END is placed at
+ * the end of the sequence.
+ */
 void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
 {
 	while (*xbmprog != XBMPROG_METHOD_END)
@@ -603,6 +632,21 @@ void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
 		dmd_alloc_low ();
 		xbmprog = dmd_draw_xbmprog (xbmprog);
 		dmd_show_low ();
+		task_sleep (delay);
+	}
+}
+
+
+void dmd_animate2 (const U8 *xbmprog, task_ticks_t delay)
+{
+	while (*xbmprog != XBMPROG_METHOD_END)
+	{
+		dmd_alloc_low_high ();
+		xbmprog = dmd_draw_xbmprog (xbmprog);
+		dmd_flip_low_high ();
+		xbmprog = dmd_draw_xbmprog (xbmprog);
+		dmd_flip_low_high ();
+		dmd_show2 ();
 		task_sleep (delay);
 	}
 }

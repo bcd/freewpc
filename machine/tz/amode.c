@@ -239,7 +239,7 @@ void amode_deff (void) __taskentry__
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
-		dmd_draw_image2 (bcd0_bits);
+		dmd_draw_image2 (brianhead0_bits);
 		font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
 		dmd_sched_transition (&trans_random_boxfade);
 		dmd_show2 ();

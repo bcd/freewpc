@@ -34,7 +34,7 @@
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
 
-void tilt_deff (void) __taskentry__
+void tilt_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_cu17, 64, 13, "TILT");
@@ -54,7 +54,7 @@ void tilt_deff (void) __taskentry__
 }
 
 
-void tilt_warning_deff (void) __taskentry__
+void tilt_warning_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_alloc_high_clean ();
@@ -66,7 +66,7 @@ void tilt_warning_deff (void) __taskentry__
 }
 
 
-void slam_tilt_deff (void) __taskentry__
+void slam_tilt_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");

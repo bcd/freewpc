@@ -116,7 +116,7 @@ void amode_start (void)
 	leff_start (LEFF_AMODE);
 #endif
 	lamp_start_update ();
-	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
+	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	callset_invoke (amode_start);
 }
 

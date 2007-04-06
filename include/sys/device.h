@@ -60,38 +60,34 @@ struct device;
  * by the common code here. */
 typedef struct device_ops
 {
-#ifdef USE_MD
-#define DEVARGS void
-#else
-#define DEVARGS struct device *dev
-#endif
 	/** Called when the machine is powered up */
-	void (*power_up) (DEVARGS);
+	void (*power_up) (void);
 
 	/** Called whenever a game is started */
-	void (*game_start) (DEVARGS);
+	void (*game_start) (void);
 
 	/** Called whenever a ball enters the device */
-	void (*enter) (DEVARGS);
+	void (*enter) (void);
 
 	/** Called whenever the game tries to kick a ball from the device */
-	void (*kick_attempt) (DEVARGS);
+	void (*kick_attempt) (void);
 
 	/** Called when a kick is successful.
 	 * If a delay is needed in between kicks, enforce that by
 	 * putting a delay in this routine. */
-	void (*kick_success) (DEVARGS);
+	void (*kick_success) (void);
 
 	/** Called when a kick is not successful */
-	void (*kick_failure) (DEVARGS);
+	void (*kick_failure) (void);
 
 	/** Called when the device becomes full */
-	void (*full) (DEVARGS);
+	void (*full) (void);
 
 	/** Called when the device becomes empty */
-	void (*empty) (DEVARGS);
+	void (*empty) (void);
 } device_ops_t;
 
+extern void _far_indirect_call_handler (void *address, U8 page);
 
 /** Macro used by the device module to invoke callback operations.
  * If an operation isn't defined, then it is skipped, so you need
@@ -99,24 +95,12 @@ typedef struct device_ops
  * These hooks are only called during an actual game; the system
  * is fully in charge during test/attract mode.
  */
-#ifdef USE_MD
-#define DEVCALLARG
-#define DEVCALL_PUSH wpc_push_page (EVENT_PAGE)
-#define DEVCALL_POP wpc_pop_page ()
-#else
-#define DEVCALLARG dev
-#define DEVCALL_PUSH
-#define DEVCALL_POP
-#endif
-
 #define device_call_op(dev, op) \
 do { \
 	dbprintf ("Calling device hook %s\n", #op); \
 	if (in_game && (dev->props->ops->op)) \
 	{ \
-		DEVCALL_PUSH; \
-		(*dev->props->ops->op) (DEVCALLARG); \
-		DEVCALL_POP; \
+		_far_indirect_call_handler (dev->props->ops->op, EVENT_PAGE); \
 	}  \
 } while (0)
 
@@ -224,21 +208,22 @@ extern U8 missing_balls;
 extern U8 live_balls;
 extern U8 kickout_locks;
 
-void device_clear (device_t *dev);
-void device_register (devicenum_t devno, device_properties_t *props);
-U8 device_recount (device_t *dev);
-void device_update_globals (void);
-void device_probe (void);
-void device_request_kick (device_t *dev);
-void device_request_empty (device_t *dev);
-void device_sw_handler (U8 devno);
-void device_add_live (void);
-void device_remove_live (void);
-void device_multiball_set (U8 count);
-bool device_check_start_ok (void);
-void device_unlock_ball (device_t *dev);
-void device_lock_ball (device_t *dev);
-U8 device_holdup_count (void);
+__common__ void device_clear (device_t *dev);
+__common__ void device_register (devicenum_t devno, device_properties_t *props);
+__common__ U8 device_recount (device_t *dev);
+__common__ void device_update_globals (void);
+__common__ void device_probe (void);
+__common__ void device_request_kick (device_t *dev);
+__common__ void device_request_empty (device_t *dev);
+__common__ void device_sw_handler (U8 devno);
+__common__ void device_add_live (void);
+__common__ void device_remove_live (void);
+__common__ void device_multiball_set (U8 count);
+__common__ bool device_check_start_ok (void);
+__common__ void device_unlock_ball (device_t *dev);
+__common__ void device_lock_ball (device_t *dev);
+__common__ U8 device_holdup_count (void);
+__common__ void device_init (void);
 
 /** Acquire a kickout lock */
 #define kickout_lock(by)	do { kickout_locks |= (by); } while (0)
@@ -252,8 +237,5 @@ U8 device_holdup_count (void);
 /** Kickout is being locked by the debugger */
 #define KLOCK_DEBUGGER 0x2
 
-void device_init (void);
-
-void trough_init (void);
 
 #endif /* _SYS_DEVICE_H */

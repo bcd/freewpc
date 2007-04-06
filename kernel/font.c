@@ -318,6 +318,9 @@ void font_get_string_area (const font_t *font, const char *s)
 			font_string_height = font_height;
 	}
 
+	/* Don't count the space at the end of the string */
+	font_string_width -= GET_FONT_SPACING (font);
+
 	wpc_pop_page ();
 
 	/* This can take a while for long strings; don't let the

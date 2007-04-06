@@ -76,11 +76,11 @@ Scores: runner, PRI_SCORES
 Scores Important: PRI_SCORES_IMPORTANT
 Coin Insert: page(COMMON_PAGE), PRI_COINS
 Credits: page(COMMON_PAGE), PRI_CREDITS
-Tilt Warning: PRI_TILT_WARNING
-Tilt: runner, PRI_TILT
+Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
+Tilt: runner, page(COMMON_PAGE), PRI_TILT
 Game Over: PRI_GAME_OVER
 Volume Change: runner, PRI_VOLUME_CHANGE
-Slam Tilt: runner, PRI_SLAMTILT
+Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
 Status Report: page(COMMON_PAGE), runner, PRI_STATUS
 Nonfatal Error: PRI_DEBUGGER
 HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY

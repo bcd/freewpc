@@ -33,10 +33,10 @@ pgm_to_xbmset (const char *name, int invert_flag)
 
 	PGM *pgm = pgm_read (infilename);
 	pgm_change_maxval (pgm, 3);
-	// pgm_dither (pgm, 3);
 
 	if (invert_flag)
 		pgm_invert (pgm);
+
 	pgm_write_xbmset (pgm, outfilename, name);
 }
 
@@ -59,7 +59,7 @@ machgen (void)
 	pgm_to_xbmset ("oldcar", FALSE);
 	pgm_to_xbmset ("pyramid", TRUE);
 	pgm_to_xbmset ("robot", TRUE);
-	pgm_to_xbmset ("bcd", TRUE);
+	pgm_to_xbmset ("brianhead", TRUE);
 
 	gen_mborder ();
 	gen_multisquare_background ();

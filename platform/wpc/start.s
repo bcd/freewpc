@@ -57,7 +57,7 @@ FIXED_SIZE     = 0x8000
 ;;; 3. Verify WPC ASIC functions.
 ;;; At any point, if something goes wrong, we go into a hard
 ;;; loop and pulse the diagnostic LED with a flash code to
-;;; report the error.  We can't reply on the DMD working
+;;; report the error.  We can't rely on the DMD working
 ;;; properly to help us here.
 ;;; 
 ;;; Once diags prove the system working, ALL of the remaining
@@ -65,11 +65,16 @@ FIXED_SIZE     = 0x8000
 ;;; as it is only run once.
 ;;;
 
+
+	;;;
+	;;; start - reset entry point
+	;;;
 	.module start.s
 	.area	sysrom
 	.globl _start
 _start:
-	; Disable interrupts (IRQ and FIRQ)
+	; Disable interrupts (IRQ and FIRQ) until the system is
+	; initialized.
 	orcc	#0x50
 
 	; Initialize the direct page pointer.  This hardware register
@@ -79,7 +84,7 @@ _start:
 	clra
 	tfr	a,dp
 
-	jmp	ram_test    ; Bypass ROM test; there's a bug here
+	jmp	ram_test    ; TODO : Bypass ROM test; there's a bug here
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
@@ -247,6 +252,10 @@ outer_flash_loop:        ; Hold the LED state
 
 	ldy	#0xFFFF
 delay_loop:
+	; Use 'mul' instructions here because they are the
+	; shortest instructions that give the longest delay.
+	; The actual values computed don't matter (but
+	; note that it destroys values in D).
 	mul
 	mul
 	mul

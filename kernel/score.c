@@ -138,11 +138,6 @@ void scores_draw (void)
 }
 
 
-void score_screen_update (void)
-{
-}
-
-
 void scores_important_deff (void)
 {
 	dmd_alloc_low_clean ();

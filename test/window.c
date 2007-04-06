@@ -1855,7 +1855,7 @@ void score_test_up (void)
 	{
 		num_players++;
 		player_up = 1;
-		if (num_players == 2)
+		if (num_players > 2)
 			num_players = 1;
 	}
 	else
