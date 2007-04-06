@@ -59,6 +59,7 @@ machgen (void)
 	pgm_to_xbmset ("oldcar", FALSE);
 	pgm_to_xbmset ("pyramid", TRUE);
 	pgm_to_xbmset ("robot", TRUE);
+	pgm_to_xbmset ("bcd", TRUE);
 
 	gen_mborder ();
 	gen_multisquare_background ();

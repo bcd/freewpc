@@ -413,6 +413,7 @@ void start_ball (void)
 
 	current_score = scores[player_up - 1];
 	deff_restart (DEFF_SCORES);
+	deff_start (DEFF_SCORES_IMPORTANT);
 
 #if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
@@ -447,7 +448,6 @@ void add_player (void)
 {
 	remove_credit ();
 	num_players++;
-	deff_start (DEFF_SCORES_IMPORTANT);
 	callset_invoke (add_player);
 	score_change++;
 }

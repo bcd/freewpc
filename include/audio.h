@@ -67,7 +67,11 @@ typedef struct {
 
 /** A background track */
 typedef struct {
+	/** The priority of the track.  Only the highest priority track queued
+	 * will be audible */
 	priority_t prio;
+
+	/** The sound board code for the track */
 	U8 code;
 } audio_track_t;
 

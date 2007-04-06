@@ -70,9 +70,9 @@ void audio_dump (void)
 
 /**
  * Start an audio clip.
- * id identifies the channel that should be used.
+ * channel_mask identifies the possible channels that may be used.
  * fn is the function that plays the clip.
- * fnpage is the bank where the function resides.
+ * fnpage is the ROM bank where the function resides.
  * data is task-specific data that can be initialized.
  */
 void audio_start (
@@ -141,12 +141,12 @@ void audio_exit (void)
 }
 
 
+/** The audio task provided by the system for managing the
+ * background music. */
 static void bg_music_task (void)
 {
 	U8 i;
 	audio_track_t *current = NULL;
-
-	task_set_flags (TASK_PROTECTED);
 
 	/* Determine which of the stacked tracks has the highest priority. */
 	for (i=0 ; i < NUM_STACKED_TRACKS; i++)
@@ -166,13 +166,16 @@ static void bg_music_task (void)
 		music_off ();
 		audio_exit ();
 	}
-
-	/* Play the track */
-	music_set (current->code);
-	audio_exit ();
+	else
+	{
+		/* Play the track */
+		music_set (current->code);
+		audio_exit ();
+	}
 }
 
 
+/** Start a background music track. */
 void bg_music_start (const audio_track_t *track)
 {
 	U8 i;
@@ -185,8 +188,14 @@ void bg_music_start (const audio_track_t *track)
 			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
 			return;
 		}
+
+	/* TODO: could not allocate a track... too many already running?
+	 * We may need to kick one out.  Lose the one with lowest priority, but
+	 * not certain ones like default, etc. */
 }
 
+
+/** Stop a background music track. */
 void bg_music_stop (const audio_track_t *track)
 {
 	U8 i;
@@ -197,10 +206,12 @@ void bg_music_stop (const audio_track_t *track)
 			audio_bg_track_table[i] = NULL;
 			audio_stop (AUDIO_CH_BACKGROUND);
 			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
+			return;
 		}
 }
 
 
+/** Stop all background music tracks */
 void bg_music_stop_all (void)
 {
 	U8 i;
@@ -219,8 +230,9 @@ CALLSET_ENTRY (audio, init)
 }
 
 
+/** The predefined system track for the default background music */
 static const audio_track_t default_music_track = {
-	.prio = 1,
+	.prio = PRI_SCORES,
 #ifdef MACHINE_BALL_IN_PLAY_MUSIC
 	.code = MACHINE_BALL_IN_PLAY_MUSIC,
 #else
@@ -228,8 +240,10 @@ static const audio_track_t default_music_track = {
 #endif
 };
 
+
+/** The predefined system track for the start ball music */
 static const audio_track_t start_ball_music_track = {
-	.prio = 0,
+	.prio = PRI_NULL,
 #ifdef MACHINE_START_BALL_MUSIC
 	.code = MACHINE_START_BALL_MUSIC,
 #else
@@ -246,6 +260,7 @@ CALLSET_ENTRY(audio, start_ball)
 
 CALLSET_ENTRY (audio, ball_in_play)
 {
+	/* TODO : optimize to a single call */
 	bg_music_stop (&start_ball_music_track);
 	bg_music_start (&default_music_track);
 }

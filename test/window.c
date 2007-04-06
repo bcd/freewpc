@@ -1095,12 +1095,12 @@ const font_t *font_test_lookup (void)
 		case FON_LUCIDA9: return &font_lucida9;
 		case FON_TERM6: return &font_term6;
 		case FON_TIMES8: return &font_times8;
-		case FON_TIMES10: return &font_times10;
+		case FON_TIMES10: return &font_times10; /* this and helv8 are the same? */
 		case FON_HELV8: return &font_helv8;
 		case FON_SCHU: return &font_schu;
-		case FON_MISCTYPE: return &font_misctype;
-		case FON_UTOPIA: return &font_utopia;
-		case FON_FIXED12: return &font_fixed12;
+		case FON_MISCTYPE: return &font_misctype; /* broken! */
+		case FON_UTOPIA: return &font_utopia; /* broken! */
+		case FON_FIXED12: return &font_fixed12; /* broken! */
 		case FON_VAR5: return &font_var5;
 		case FON_CU17: return &font_cu17;
 #endif
@@ -1120,9 +1120,14 @@ void font_test_init (void)
 void font_test_draw (void)
 {
 	const font_t *font = font_test_lookup ();
-	U8 len = 8;
 
 	dmd_alloc_low_clean ();
+
+	if ((font->glyphs['A'] == NULL)
+		&& (font_test_offset < 26))
+	{
+		font_test_offset = 0;
+	}
 
 	sprintf ("FONT %d", menu_selection+1);
 	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
@@ -1823,6 +1828,72 @@ struct menu sched_test_item = {
 
 /**********************************************************************/
 
+const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
+
+void score_test_init (void)
+{
+	score_t *s;
+	for (s = &scores[0]; s < &scores[4]; s++)
+	{
+		score_zero (s);
+		score_add (s, score_test_increment, sizeof (score_t));
+	}
+	num_players = 1;
+	player_up = 1;
+}
+
+void score_test_draw (void)
+{
+	dmd_alloc_low_clean ();
+	scores_draw ();
+	dmd_show_low ();
+}
+
+void score_test_up (void)
+{
+	if (num_players == player_up)
+	{
+		num_players++;
+		player_up = 1;
+		if (num_players == 2)
+			num_players = 1;
+	}
+	else
+	{
+		player_up++;
+	}
+}
+
+void score_test_down (void)
+{
+	player_up--;
+	if (player_up == 0)
+	{
+		num_players--;
+		if (num_players == 0)
+		{
+			num_players = 2;
+		}
+		player_up = num_players;
+	}
+}
+
+struct window_ops score_test_window = {
+	DEFAULT_WINDOW,
+	.init = score_test_init,
+	.draw = score_test_draw,
+	.up = score_test_up,
+	.down = score_test_down,
+};
+
+struct menu score_test_item = {
+	.name = "SCORE TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &score_test_window, NULL } },
+};
+
+/**********************************************************************/
+
 struct menu *dev_menu_items[] = {
 	&dev_font_test_item,
 	&dev_deff_test_item,
@@ -1836,6 +1907,7 @@ struct menu *dev_menu_items[] = {
 	&dev_deff_stress_test_item,
 	&symbol_test_item,
 	&sched_test_item,
+	&score_test_item,
 	NULL,
 };
 

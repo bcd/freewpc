@@ -87,15 +87,15 @@ const struct score_font_info
 	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 10 },
 	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
 	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
-	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 14 },
-	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 14 },
+	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 16 },
+	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 16 },
 };
 
 
 /* The lookup is [num_players-1][player_up][score_to_draw-1] */
-const U8 score_font_info_key[4][4][4] = {
+const U8 score_font_info_key[4][5][4] = {
 	/* 1 player */  {
-		{SCORE_POS_CENTER_LARGE},
+		{SCORE_POS_UL_SMALL},
 		{SCORE_POS_CENTER_LARGE},
 	},
 	/* 2 players */ {
@@ -149,7 +149,7 @@ void scores_important_deff (void)
 	scores_draw_ball ();
 	scores_draw_current (0);
 	dmd_show_low ();
-	task_sleep_sec (1);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 

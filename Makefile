@@ -234,8 +234,8 @@ COMMON_OBJS = $(COMMON_BASIC_OBJS) \
 	common/onecoin.o \
 	common/replay.o \
 	common/search.o \
-	common/special.o \
 	common/status.o \
+	# common/special.o
 
 EVENT_OBJS = build/callset.o
 

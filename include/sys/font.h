@@ -120,6 +120,11 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 	font_args.s = _s;
 
 
+/* TODO : note that all of these fontargs_render_ functions take
+ * the _same_, constant argument every time.  Avoid setting up
+ * this parameter by just modifying the functions to work on
+ * font_args all the time. */
+
 #define font_render_string_left(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
