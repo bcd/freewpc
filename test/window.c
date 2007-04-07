@@ -722,9 +722,10 @@ struct window_ops adj_browser_window = {
 
 void percentage_of_games_audit (audit_t val)
 {
+	/* Avoid divide-by-zero error */
 	if (system_audits.total_plays == 0)
 	{
-		sprintf ("0%");
+		sprintf ("0%%");
 		return;
 	}
 
@@ -756,7 +757,7 @@ void secs_audit (audit_t val)
 
 void currency_audit (audit_t val)
 {
-	sprintf ("%ld.%ld", val / 4, (val % 4) * 25);
+	sprintf ("$%ld.%02d", val / 4, (val % 4) * 25);
 }
 
 
@@ -1103,6 +1104,7 @@ const font_t *font_test_lookup (void)
 		case FON_FIXED12: return &font_fixed12; /* broken! */
 		case FON_VAR5: return &font_var5;
 		case FON_CU17: return &font_cu17;
+		case FON_TINYNUM: return &font_tinynum;
 #endif
 	}
 }
@@ -1126,11 +1128,13 @@ void font_test_draw (void)
 	if ((font->glyphs['A'] == NULL)
 		&& (font_test_offset < 26))
 	{
-		font_test_offset = 0;
+		font_test_offset = 26;
 	}
 
 	sprintf ("FONT %d", menu_selection+1);
-	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
+	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
+	sprintf_far_string (names_of_fonts + menu_selection);
+	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 	dmd_draw_horiz_line (dmd_low_buffer, 9);
 
 	sprintf ("%8s", font_test_alphabet + font_test_offset);
@@ -2015,12 +2019,22 @@ struct menu reset_hstd_item = {
 
 void set_time_window_confirm (void)
 {
-	rtc_factory_reset ();
-	confirm_enter ();
+}
+
+void set_time_window_draw (void)
+{
+	rtc_show_date_time ();
+}
+
+void set_time_window_up (void)
+{
+	rtc_advance_day ();
 }
 
 struct window_ops set_time_window = {
-	INHERIT_FROM_CONFIRM_WINDOW,
+	DEFAULT_WINDOW,
+	.draw = set_time_window_draw,
+	.up = set_time_window_up,
 	.enter = set_time_window_confirm,
 };
 

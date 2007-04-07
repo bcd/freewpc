@@ -87,7 +87,6 @@ typedef struct device_ops
 	void (*empty) (void);
 } device_ops_t;
 
-extern void _far_indirect_call_handler (void *address, U8 page);
 
 /** Macro used by the device module to invoke callback operations.
  * If an operation isn't defined, then it is skipped, so you need

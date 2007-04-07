@@ -105,12 +105,12 @@ static void rtc_calc_day_of_week (void)
 	/* Compute (6 + year + (year/4) + month code + day - N) mod 7.
 	N is 1 if it is a leap year and the month is January or February,
 	else it is zero. */
-	day_of_week += year;
+	day_of_week = year;
 	day_of_week += (year / 4);
 	day_of_week += day_of_week_month_code[month-1];
 	day_of_week += day;
 	day_of_week	+= ((year % 4) ? 0 : 1);
-	day_of_week -= 2;
+	day_of_week --;
 
 	/* The mod 7 is the hard part to do on the 6809.  */
 #ifndef __m6809__
@@ -297,3 +297,13 @@ void rtc_show_date_time (void)
 
 	dmd_show_low ();
 }
+
+
+void rtc_advance_day (void)
+{
+	wpc_nvram_get ();
+	hour += 24;
+	wpc_nvram_put ();
+	rtc_normalize ();
+}
+

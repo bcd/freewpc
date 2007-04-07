@@ -508,6 +508,7 @@ CALLSET_ENTRY (switch, idle)
 }
 
 
+#if 0
 void bar (TASK_DECL_ARGS(U8 arg1, U8 arg2))
 {
 	dbprintf ("arg1 = %d\n", arg1);
@@ -522,4 +523,5 @@ void foo (void)
 	task_push_arg (tp, (U8)5);
 	task_push_args_done (tp);
 }
+#endif
 

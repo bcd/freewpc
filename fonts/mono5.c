@@ -47,6 +47,7 @@ static char font_5x5_digit[][7] = {
 	{ 5, 5, 14, 17, 30, 16, 14 },
 };
 
+ 
 static char font_5x5_sep[][7] = {
 	/* period */ { 2, 5, 0, 0, 0, 0, 2 },
 	/* comma */ { 2, 5, 0, 0, 0, 2, 1 },
@@ -54,6 +55,7 @@ static char font_5x5_sep[][7] = {
 	/* colon */ { 2, 5, 0, 2, 0, 2, 0 },
 	/* hyphen */ { 3, 5, 0, 0, 7, 0, 0 },
 	/* percent */ { 5, 5, 18, 8, 4, 2, 9 },
+	/* dollar sign */ { 5, 5, 14, 5, 14, 20, 14 },
 };
 
 static char *mono5_glyphs[] = {
@@ -99,6 +101,7 @@ static char *mono5_glyphs[] = {
    [':'] = font_5x5_sep[3],
    ['-'] = font_5x5_sep[4],
    ['%'] = font_5x5_sep[5],
+   ['$'] = font_5x5_sep[6],
 };
 
 const font_t font_mono5 = {

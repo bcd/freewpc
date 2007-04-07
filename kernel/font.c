@@ -38,7 +38,7 @@
 /* Space characters are not embedded in each font, because it would
  * just be a bunch of zero characters.  All fonts share the same
  * space glyph data, given here */
-static const U8 font_space[16] = { 0, };
+static U8 font_space[16] = { 0, };
 
 
 /* Fonts define their own inter-character space width, but

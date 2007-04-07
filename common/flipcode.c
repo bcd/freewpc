@@ -55,7 +55,7 @@ U8 flipcode_pos;
 
 U8 flipcode_value;
 
-const void (*flipcode_handler[]) (void) = FLIPCODE_HANDLERS;
+static void (*flipcode_handler[]) (void) = FLIPCODE_HANDLERS;
 
 const char flipcodes[][MAX_FLIPCODE_CHARS+1] = FLIPCODE_LIST;
 

@@ -193,10 +193,10 @@ void amode_show_design_credits (void)
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC WAS DESIGNED");
+	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
-	font_render_string_center (&font_var5, 64, 25, "GENERAL PUBLIC LICENSE");
+	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE");
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 

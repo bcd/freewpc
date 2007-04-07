@@ -243,7 +243,9 @@ TEST_OBJS = test/window.o
 
 TRANS_OBJS = kernel/dmdtrans.o
 
-FONT_OBJS = fonts/mono5.o fonts/mono9.o fonts/var5.o fonts/bitmap.o
+# TODO : only link in the fonts that the machine/system require
+FONT_OBJS = fonts/mono5.o fonts/mono9.o fonts/var5.o fonts/tinynum.o \
+fonts/bitmap.o
 
 FON_OBJS = \
 	fonts/fixed10.o \

@@ -77,8 +77,8 @@ void scores_draw_credits (void)
 
 const struct score_font_info 
 {
-	void (*render) (fontargs_t *);
-	font_t *font;
+	void (*render) (const fontargs_t *);
+	const font_t *font;
 	U8 x;
 	U8 y;
 } score_font_info_table[] = {
@@ -305,6 +305,7 @@ void score_mul (score_t s1, uint8_t multiplier)
 	register U8 off = sizeof (score_t);
 	register bcd_t *bcd = s1 + off - 1;
 	bcd_t overflow = 0;
+	/* TODO */
 }
 
 

@@ -54,6 +54,7 @@ extern const font_t font_utopia;
 extern const font_t font_fixed12;
 extern const font_t font_var5;
 extern const font_t font_fixed12;
+extern const font_t font_tinynum;
 
 
 enum {

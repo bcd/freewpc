@@ -39,6 +39,10 @@
 #define CC_FIRQ 		0x40
 #define CC_E 			0x80
 
+/* Defines for various assembler routines that can be called from C */
+__attribute__((noreturn)) void start (void);
+void _far_indirect_call_handler (void *address, U8 page);
+
 /** Declare a variable that can be used to access the condition
  * code register directly.  This requires a newer version of the
  * gcc6809 compiler to work OK. */

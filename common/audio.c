@@ -30,6 +30,7 @@
  * Each element of this array represents a background track
  * that has been enabled for play on the background music channel.
  * Only the highest priority track is allowed to run at any time.
+ * TODO : paging not being handled here at all!
  */
 audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
 
@@ -180,6 +181,11 @@ void bg_music_start (const audio_track_t *track)
 {
 	U8 i;
 
+	/* If the track is already running, then return. */
+	for (i=0; i < NUM_STACKED_TRACKS; i++)
+		if (audio_bg_track_table[i] == track)
+			return;
+
 	for (i=0; i < NUM_STACKED_TRACKS; i++)
 		if (audio_bg_track_table[i] == NULL)
 		{
@@ -202,12 +208,10 @@ void bg_music_stop (const audio_track_t *track)
 
 	for (i=0; i < NUM_STACKED_TRACKS; i++)
 		if (audio_bg_track_table[i] == track)
-		{
 			audio_bg_track_table[i] = NULL;
-			audio_stop (AUDIO_CH_BACKGROUND);
-			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
-			return;
-		}
+
+	audio_stop (AUDIO_CH_BACKGROUND);
+	audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
 }
 
 
@@ -250,6 +254,7 @@ static const audio_track_t start_ball_music_track = {
 	.code = 2,
 #endif
 };
+
 
 
 CALLSET_ENTRY(audio, start_ball)

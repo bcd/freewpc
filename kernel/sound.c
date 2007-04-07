@@ -61,6 +61,17 @@ U8 sound_board_return;
 #define sound_version sound_version_major
 
 
+/** The default audio track to be played when setting volume. */
+static const audio_track_t volume_change_music_track = {
+	.prio = PRI_NULL,
+#ifdef MACHINE_VOLUME_CHANGE_MUSIC
+	.code = MACHINE_VOLUME_CHANGE_MUSIC
+#else
+	.code = 1,
+#endif
+};
+
+
 /** Initialize the sound transmit code */
 static void sound_queue_init (void)
 {
@@ -212,8 +223,6 @@ void sound_reset (void)
 
 void sound_init (void)
 {
-	U8 i;
-	U16 j;
 	U8 sound_board_type;
 
 	/* Wait for the sound board to report its presence/type code */
@@ -335,21 +344,8 @@ void volume_change_deff (void) __taskentry__
 	sprintf ("VOLUME %d", current_volume);
 	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
 	dmd_show_low ();
-
-	if (current_music == MUS_OFF)
-	{
-#ifdef MACHINE_VOLUME_CHANGE_MUSIC
-		music_change (MACHINE_VOLUME_CHANGE_MUSIC);
-#else
-		music_change (1);
-#endif
-		task_sleep_sec (4);
-		music_off ();
-	}
-	else
-	{
-		task_sleep_sec (4);
-	}
+	task_sleep_sec (5);
+	bg_music_stop (&volume_change_music_track);
 	deff_exit ();
 }
 
@@ -361,6 +357,7 @@ CALLSET_ENTRY (sound, volume_down)
 	{
 		volume_set (current_volume-1);
 	}
+	bg_music_start (&volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
 
@@ -372,6 +369,7 @@ CALLSET_ENTRY (sound, volume_up)
 	{
 		volume_set (current_volume+1);
 	}
+	bg_music_start (&volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
 
