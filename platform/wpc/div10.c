@@ -41,6 +41,7 @@ uint16_t div10 (uint8_t v)
 	register uint16_t res asm ("d");
 	uint8_t i = v;
 
+	/* TODO : compute how many cycles this is taking */
 	__asm__ volatile (
 	   "\ttfr b,a\n"
 	   "\tsta	%0\n"

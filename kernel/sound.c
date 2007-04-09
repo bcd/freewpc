@@ -62,7 +62,7 @@ U8 sound_board_return;
 
 
 /** The default audio track to be played when setting volume. */
-static const audio_track_t volume_change_music_track = {
+const audio_track_t volume_change_music_track = {
 	.prio = PRI_NULL,
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 	.code = MACHINE_VOLUME_CHANGE_MUSIC
@@ -335,18 +335,6 @@ void volume_set (U8 vol)
 		sound_queue_insert (~current_volume);
 #endif
 	}
-}
-
-
-void volume_change_deff (void) __taskentry__
-{
-	dmd_alloc_low_clean ();
-	sprintf ("VOLUME %d", current_volume);
-	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (5);
-	bg_music_stop (&volume_change_music_track);
-	deff_exit ();
 }
 
 

@@ -629,17 +629,6 @@ void device_multiball_set (U8 count)
 #endif
 
 
-void locating_balls_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 11, "LOCATING BALLS");
-	font_render_string_center (&font_fixed6, 64, 22, "PLEASE WAIT...");
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-}
-
-
 /** Called at game start time to see if it is OK to
  * start a game.  This routine should check that all
  * balls are accounted for, and at least 1 ball is

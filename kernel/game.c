@@ -96,17 +96,6 @@ void default_amode_deff (void)
 #endif
 
 
-/** The display effect that appears immediately at the end of a game,
-before returning to attract mode */
-void game_over_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-}
-
 
 /** Starts the attract mode */
 void amode_start (void)

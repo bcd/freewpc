@@ -78,16 +78,16 @@ Coin Insert: page(COMMON_PAGE), PRI_COINS
 Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
 Tilt: runner, page(COMMON_PAGE), PRI_TILT
-Game Over: PRI_GAME_OVER
-Volume Change: runner, PRI_VOLUME_CHANGE
+Game Over: page(EFFECT_PAGE), PRI_GAME_OVER
+Volume Change: page(EFFECT_PAGE), runner, PRI_VOLUME_CHANGE
 Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
 Status Report: page(COMMON_PAGE), runner, PRI_STATUS
-Nonfatal Error: PRI_DEBUGGER
+Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
 HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
 Match: page(COMMON_PAGE), runner, PRI_MATCH
-Locating Balls: PRI_BALL_SEARCH
 Buyin Offer: page(COMMON_PAGE), PRI_MATCH
 Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
+Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 
 [leffs]
 NULL: 0

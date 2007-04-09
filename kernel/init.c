@@ -305,26 +305,6 @@ void fatal (errcode_t error_code)
 }
 
 
-void nonfatal_error_deff (void)
-{
-#ifdef DEBUGGER
-	dmd_alloc_low_clean ();
-	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_show_low ();
-	sound_send (SND_TEST_ALERT);
-	task_sleep (TIME_200MS);
-	sound_send (SND_TEST_ALERT);
-	task_sleep (TIME_200MS);
-	sound_send (SND_TEST_ALERT);
-	task_sleep_sec (4);
-#endif
-	deff_exit ();
-}
-
-
 void nonfatal (errcode_t error_code)
 {
 	audit_increment (&system_audits.non_fatal_errors);

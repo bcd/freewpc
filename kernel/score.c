@@ -281,6 +281,14 @@ void score_multiple (score_id_t id, U8 multiplier)
 		score_add (current_score, score_table[id], sizeof (score_t));
 		multiplier--;
 	}
+
+#if 0
+	/* The proper way is to calculate the product (score_table[id] x N)
+	and do a single score_add() of that value.  Also, there is currently no
+	way to do a multiplication without adding it to the current score...
+	Since packed BCD cannot be multiplied directly, we have to convert the
+	BCD value to decimal and then do normal binary multiplication. */
+#endif
 	score_change++;
 }
 
@@ -298,6 +306,7 @@ void score_add_millions_current (U8 mils)
 
 void score_sub (score_t s1, const score_t s2)
 {
+	/* TODO */
 }
 
 void score_mul (score_t s1, uint8_t multiplier)
