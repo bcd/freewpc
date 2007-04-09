@@ -80,7 +80,7 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 43: Spiral 4M, yellow ,x(30), y(12)
 44: Spiral 5M, yellow ,x(30), y(14)
 45: Spiral 10M, yellow ,x(31), y(16)
-46: Spiral EB, orange ,x(32), y(18)
+46: Spiral EB, red ,x(32), y(18)
 47: Shoot Again, red ,x(36), y(13)
 48: Right Inlane, white ,x(26), y(21)
 51: Bonus X, white ,x( 5), y(11)
@@ -98,7 +98,7 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 65: UL 5M, yellow ,x(17), y( 8)
 66: Right Outlane, red ,x(27), y(23)
 67: Right Powerball, white ,x(14), y(22)
-68: Right Spiral, yellow ,x(12), y(23)
+68: Right Spiral, orange ,x(12), y(23)
 71: LR 5M ,x(16), y(17)
 72: MR1 5M ,x(14), y(16)
 73: MR2 5M ,x(12), y(16)
@@ -341,7 +341,13 @@ Sort4: PF:lamp_sort_right_to_left
 Circle Out: PF:lamp_sort_circle_out
 Lock Test: PF:build_lampset_from_lock
 Ball Save: Shoot Again
-
+Red Lamps: COLOR:red
+White Lamps: COLOR:white
+Orange Lamps: COLOR:orange
+Yellow Lamps: COLOR:yellow
+Green Lamps: COLOR:green
+Blue Lamps: COLOR:blue
+Amber Lamps: COLOR:amber
 
 ##########################################################################
 # Containers

@@ -60,8 +60,14 @@ void tz_clock_test_init (void)
 }
 
 
+extern __fastram__ U8 clock_sw;
+extern U8 tz_clock_opto_to_hour[];
+
 void tz_clock_test_draw (void)
 {
+	U8 hour;
+	U8 minute;
+
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 2, "CLOCK MECH. TEST");
 	switch (clock_test_setting)
@@ -73,6 +79,16 @@ void tz_clock_test_draw (void)
 		case 2: sprintf ("FORWARD FAST"); break;
 	}
 	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+
+	/* TODO : this should be common logic */
+	hour = tz_clock_opto_to_hour[clock_sw >> 4];
+	if (hour == 0)
+		hour = 12;
+	minute = 0;
+
+	sprintf ("%02d:%02d", hour, minute);
+	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+
 	dmd_show_low ();
 }
 
@@ -98,6 +114,14 @@ void tz_clock_test_enter (void)
 	/* Start/stop the clock */
 }
 
+void tz_clock_test_thread (void)
+{
+	for (;;)
+	{
+		tz_clock_test_draw ();
+		task_sleep (TIME_100MS);
+	}
+}
 
 struct window_ops tz_clock_test_window = {
 	DEFAULT_WINDOW,
@@ -106,6 +130,7 @@ struct window_ops tz_clock_test_window = {
 	.up = tz_clock_test_up,
 	.down = tz_clock_test_down,
 	.exit = tz_clock_stop,
+	.thread = tz_clock_test_thread,
 };
 
 

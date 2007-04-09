@@ -41,8 +41,8 @@ do { \
 	extern U8 pausable_timer_locks; pausable_timer_locks--; \
 } while (0);
 
-__taskentry__ void freerunning_timer_function (void);
-__taskentry__ void pausable_timer_function (void);
+void freerunning_timer_function (void);
+void pausable_timer_function (void);
 
 #define timer_restart_free(g,t)	timer_restart(g,t,freerunning_timer_function)
 #define timer_start1_free(g,t)	timer_start1(g,t,freerunning_timer_function)

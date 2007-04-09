@@ -195,10 +195,16 @@ typedef U8 devicenum_t;
 #define device_entry(devno)	(&device_table[devno])
 #define device_devno(dev)		(dev->devno)
 
+/** True if the given device is empty */
 #define device_empty_p(dev)	(dev->actual_count == 0)
+
+/** True if the given device is full */
 #define device_full_p(dev)		(dev->actual_count == dev->max_count)
 
+/** Disable an automatic ball lock on this device */
 #define device_disable_lock(dev)	(dev->max_count--)
+
+/** Enable an automatic ball lock on this device */
 #define device_enable_lock(dev)	(dev->max_count++)
 
 extern device_t device_table[];
@@ -224,7 +230,8 @@ __common__ void device_lock_ball (device_t *dev);
 __common__ U8 device_holdup_count (void);
 __common__ void device_init (void);
 
-/** Acquire a kickout lock */
+/** Acquire a kickout lock.  When at least kickout lock is
+ * held, then all kicks are postponed. */
 #define kickout_lock(by)	do { kickout_locks |= (by); } while (0)
 
 /** Release a kickout lock */

@@ -29,13 +29,13 @@ void left_ramp_deff (void)
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
-	if (left_ramps < 3 && system_config.timed_game)
+	if (left_ramps < 3 && timed_game_p)
 		sprintf ("EXTRA TIME AT 3");
-	else if (left_ramps == 3 && system_config.timed_game)
+	else if (left_ramps == 3 && timed_game_p)
 		sprintf ("15 SECS. ADDED");
-	else if (left_ramps < 3 && !system_config.timed_game)
+	else if (left_ramps < 3 && !timed_game_p)
 		sprintf ("MYSTERY AT 3");
-	else if (left_ramps == 3 && !system_config.timed_game)
+	else if (left_ramps == 3 && !timed_game_p)
 		sprintf ("MYSTERY IS LIT");
 	else if (left_ramps < 6)
 		sprintf ("SPOT PANEL AT 6");

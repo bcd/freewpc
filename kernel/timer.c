@@ -41,7 +41,7 @@
 U8 pausable_timer_locks;
 
 
-__taskentry__ void freerunning_timer_function (void)
+void freerunning_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
 	while (ticks > 0)
@@ -53,7 +53,7 @@ __taskentry__ void freerunning_timer_function (void)
 }
 
 
-__taskentry__ void pausable_timer_function (void)
+void pausable_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
 	while (ticks > 0)
@@ -67,7 +67,7 @@ __taskentry__ void pausable_timer_function (void)
 }
 
 
-__taskentry__ void live_ball_timer_function (void)
+void live_ball_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
 	while (ticks > 0)

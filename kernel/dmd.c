@@ -315,8 +315,10 @@ void dmd_show2 (void)
 		dmd_do_transition ();
 	else
 	{
+		disable_firq ();
 		dmd_dark_page = dmd_low_page;
 		dmd_bright_page = dmd_high_page;
+		enable_firq ();
 	}
 }
 
@@ -630,6 +632,7 @@ void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
 	while (*xbmprog != XBMPROG_METHOD_END)
 	{
 		dmd_alloc_low ();
+		/* TODO : broken because the xbmprogs are in the wrong order! */
 		xbmprog = dmd_draw_xbmprog (xbmprog);
 		dmd_show_low ();
 		task_sleep (delay);

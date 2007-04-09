@@ -273,6 +273,10 @@ wait_and_recount:
 				/* More than one ball was released */
 				dbprintf ("Kick succeeded, but an extra ball came out\n");
 				nonfatal (ERR_KICK_TOO_MANY);
+				/* TODO : update kicks_needed and dev->state like above,
+				 * even in this case.  Weird case: if 2 kicks were requested,
+				 * and the first kick somehow caused two balls to come out,
+				 * then that is actually OK. */
 			}
 		}
 		else if (dev->actual_count > dev->previous_count)
@@ -281,7 +285,8 @@ wait_and_recount:
 			 * kicks_needed is presumably still nonzero, so
 			 * the code below should attempt the kick again. */
 
-			/* See long TODO comment above -- it applies here too. */
+			/* See long TODO comment above -- it applies here too if
+			 * multiple balls enter the device during a kick cycle. */
 			dbprintf ("After kick, count increased\n");
 			nonfatal (ERR_KICK_CAUSED_INCREASE);
 		}
@@ -318,6 +323,7 @@ wait_and_recount:
 			/* Container has fewer balls in it than we
 			 * would like */
 			dbprintf ("Can't kick when no balls available!\n");
+			dev->kicks_needed = 0;
 		}
 		else if (kickout_locks > 0)
 		{
@@ -334,9 +340,19 @@ wait_and_recount:
 			if (dev->state == DEV_STATE_IDLE)
 				dev->state = DEV_STATE_RELEASING;
 
+			/* Give the device heads-up that a kick is
+			 * coming.  TODO: TZ should use this hook to
+			 * decide whether or not to open the autofire
+			 * divertor, then the MACHINE_TZ define can be
+			 * eliminated. */
 			device_call_op (dev, kick_attempt);
-		
+
+			/* Pulse the solenoid */
 			sol_pulse (dev->props->sol);
+
+			/* In timed games, a device kick will pause the game timer.
+			 * TODO : this should be a global event that other modules
+			 * can catch as well. */
 #ifdef CONFIG_TIMED_GAME
 			timed_game_pause (TIME_1S);
 #endif

@@ -170,7 +170,7 @@ void tv_static_deff (void)
 
 void text_color_flash_deff (void)
 {
-	U8 count = 6;
+	U8 count = 8;
 
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
@@ -182,17 +182,17 @@ void text_color_flash_deff (void)
 	while (--count > 0)
 	{
 		dmd_show2 ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 
 		dmd_flip_low_high ();
 		dmd_show2 ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 
 		dmd_show_high ();
 		task_sleep (TIME_200MS);
 
 		dmd_show2 ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 		dmd_flip_low_high ();
 	}
 
@@ -205,11 +205,10 @@ void car_fadein_deff (void)
 	U8 count = 15;
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 9, "SHOOT LOCK");
-	font_render_string_center (&font_fixed10, 64, 22, "FOR MULTIBALL");
+	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 	dmd_copy_low_to_high ();
-	dmd_mask_page (dmd_low_buffer, 0xAAAA);
-	//dmd_mask_page (dmd_high_buffer, 0x5555);
+	dmd_mask_page (dmd_low_buffer, 0xA2A2);
+	//dmd_mask_page (dmd_high_buffer, 0x1515);
 	dmd_show2 ();
 	while (--count > 0)
 	{

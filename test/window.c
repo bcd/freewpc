@@ -361,16 +361,7 @@ struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
-
-struct adjustment_value players_per_game_value = { 
-#ifdef CONFIG_TIMED_GAME
-	1, 1,
-#else
-	1, MAX_PLAYERS,
-#endif
-	1, decimal_render 
-};
-
+struct adjustment_value players_per_game_value = { 1, MAX_PLAYERS, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
 struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
 struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
@@ -387,13 +378,7 @@ struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
-	{ "MAX PLAYERS", &players_per_game_value, 
-#ifdef CONFIG_TIMED_GAME
-		1, 
-#else
-		MAX_PLAYERS,
-#endif
-		&system_config.max_players },
+	{ "MAX PLAYERS", &players_per_game_value, MAX_PLAYERS, &system_config.max_players },
 	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
@@ -2088,7 +2073,7 @@ void burnin_test_thread (void)
 {
 	extern void all_lamp_test_thread (void);
 
-	task_create_anon (all_lamp_test_thread);
+	task_create_peer (all_lamp_test_thread);
 	task_exit ();
 }
 
@@ -3140,40 +3125,8 @@ struct menu empty_balls_test_item = {
 #endif
 };
 
-/****************** WPC ASIC Tests ***********************/
 
-#define ASIC_REG_BASE 0x3FD0
-#define ASIC_REG_COUNT 0x30
-
-void asic_register_item_number (U8 val)
-{
-	sprintf ("%04lX", ASIC_REG_BASE + val);
-}
-
-void asic_register_init (void)
-{
-	browser_item_number = asic_register_item_number;
-	browser_max = ASIC_REG_COUNT-1;
-}
-
-void asic_register_draw (void)
-{
-	browser_draw ();
-	sprintf ("%02X", wpc_asic_read (ASIC_REG_BASE + menu_selection));
-	browser_print_operation (sprintf_buffer);
-}
-
-struct window_ops asic_register_window = {
-	INHERIT_FROM_BROWSER,
-	.init = asic_register_init,
-	.draw = asic_register_draw,
-};
-
-struct menu asic_register_item = {
-	.name = "ASIC TEST",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &asic_register_window, NULL } },
-};
+/*****************************************************/
 
 struct menu flipper_test_item = {
 	.name = "FLIPPER TEST",
@@ -3185,10 +3138,6 @@ struct menu display_test_item = {
 	.flags = M_ITEM,
 };
 
-struct menu debugger_test_item = {
-	.name = "DEBUGGER TEST",
-	.flags = M_ITEM,
-};
 
 
 /****************** TEST MENU **************************/
@@ -3206,8 +3155,6 @@ struct menu *test_menu_items[] = {
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
 	&flipper_test_item,
-	&asic_register_item,
-	&debugger_test_item,
 	&empty_balls_test_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
 	MACHINE_TEST_MENU_ITEMS

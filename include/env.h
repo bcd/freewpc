@@ -44,11 +44,7 @@
 #define __fastram__
 #endif
 
-#ifdef HAVE_TASKENTRY_ATTRIBUTE
-#define __taskentry__ __attribute__((__taskentry__))
-#else
 #define __taskentry__
-#endif
 
 #ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))

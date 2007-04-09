@@ -129,7 +129,6 @@ void amode_stop (void)
 	leff_stop (LEFF_AMODE);
 #endif
 	lamp_all_off ();
-	music_set (MUS_OFF); // TODO - deprecated
 	bg_music_stop_all ();
 	callset_invoke (amode_stop);
 }
@@ -290,19 +289,22 @@ void end_ball (void)
 		}
 	}
 
-#ifndef CONFIG_TIMED_GAME
 	/* If all players have had a turn, then increment the
 	 * current ball number.
 	 * In timed game, this step is skipped, as the game is
 	 * automatically over at the end of the *first ball*.
 	 */
-	ball_up++;
-	if (ball_up <= system_config.balls_per_game)
-	{
-		start_ball ();
-		goto done;
-	}
+#ifdef CONFIG_TIMED_GAME
+	if (system_config.timed_game == OFF)
 #endif
+	{
+		ball_up++;
+		if (ball_up <= system_config.balls_per_game)
+		{
+			start_ball ();
+			goto done;
+		}
+	}
 
 	/* After the max balls per game have been played, go into
 	 * end game */
@@ -412,9 +414,19 @@ void start_ball (void)
 	lamp_update_all ();
 
 	current_score = scores[player_up - 1];
+
+	/* Enable the game scores on the display.  The first deff started
+	 * is low in priority and is shown whenever there is nothing else
+	 * going on.  The second deff runs briefly at high priority, to
+	 * ensure that the scores are shown at least briefly at the start of
+	 * ball (e.g., in case a skill shot deff gets started). */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
 
+	/* Serve a ball to the plunger, by requesting a kick from the
+	 * trough device.  However, a ball is detected in the plunger lane
+	 * for whatever reason, then don't kick a new ball, just use the
+	 * one that is there. */
 #if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
@@ -432,6 +444,7 @@ void start_ball (void)
 	task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 #endif
 }
+
 
 void mark_ball_in_play (void)
 {
@@ -562,7 +575,6 @@ CALLSET_ENTRY (game, sw_start_button)
 			switch (system_config.game_restart)
 			{
 				case GAME_RESTART_SLOW:
-					/* TODO */
 					task_sleep_sec (1);
 					if (!switch_poll_logical (MACHINE_START_SWITCH))
 						break;

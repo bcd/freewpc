@@ -41,11 +41,6 @@ void ballsave_enable(void);
 void ballsave_disable(void);
 bool ballsave_test_active(void);
 void ballsave_launch(void);
-/* bonus.c */
-void bonus_leff(void);
-void bonus_deff(void);
-/* camera.c */
-void camera_start_ball(void);
 /* clock.c */
 void tz_dump_clock(void);
 void tz_clock_rtt(void);
@@ -53,8 +48,6 @@ void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);
 void tz_clock_init(void);
-/* deadend.c */
-void deadend_start_ball(void);
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);
@@ -71,8 +64,6 @@ void door_award_rotate(void);
 void door_award_deff(void);
 void door_award_if_possible(void);
 void door_award_enable(void);
-void door_start_player(void);
-void door_start_ball(void);
 /* gumball.c */
 void gumball_mech_activate(void);
 void gumball_mech_deactivate(void);
@@ -85,10 +76,6 @@ void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
 void gumball_init(void);
-/* jets.c */
-void jet_start_player(void);
-void jet_start_ball(void);
-void sw_jet_sound(void);
 /* leffs.c */
 void flasher_happy_leff(void);
 void left_ramp_leff(void);
@@ -96,13 +83,8 @@ void no_lights_leff(void);
 void no_gi_leff(void);
 void flash_all_leff(void);
 void slot_kickout_leff(void);
-/* leftramp.c */
-void left_ramp_deff(void);
-void leftramp_start_player(void);
 /* lock.c */
 void lock_update_lamps(void);
-void lock_start_player(void);
-void lock_start_ball(void);
 void lock_enter(device_t *dev);
 void lock_kick_attempt(device_t *dev);
 void lock_init(void);
@@ -117,22 +99,11 @@ void mball_light_lock (void);
 void mball_check_light_lock (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
-/* rightramp.c */
-void right_ramp_default_deff(void);
-void sw_right_ramp_task(void);
-void sw_right_ramp_init(void);
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
 /* sling.c */
 void slingshot_rtt(void);
-/* slot.c */
-void slot_update_lamps(void);
-void slot_kick_sound(void);
-void slot_enter(device_t *dev);
-void slot_kick_attempt(device_t *dev);
-void slot_start_ball(void);
-void slot_init(void);
 /* star.c */
 __machine__ void new_star_task(void);
 __machine__ void new_starfield_start(void);
@@ -141,7 +112,4 @@ __machine__ void star_task(void);
 __machine__ void starfield_task(void);
 __machine__ void starfield_start(void);
 __machine__ void starfield_stop(void);
-/* test.c */
-void autofire_launch_proc(void);
-void autofire_to_gumball_proc(void);
-void release_gumball_proc(void);
+

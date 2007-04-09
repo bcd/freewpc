@@ -295,15 +295,5 @@ extern inline U8 wpc_get_jumpers (void)
 }
 
 
-extern inline U8 wpc_read_ticket (void)
-{
-}
-
-
-extern inline void wpc_write_ticket (U8 val)
-{
-}
-
-
 #endif /* _WHITESTAR_H */
 

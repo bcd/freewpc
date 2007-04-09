@@ -87,7 +87,9 @@ typedef struct
 	adjval_t timed_plunger;
 #endif
 	adjval_t game_music;
+#ifdef CONFIG_TIMED_GAME
 	adjval_t timed_game;
+#endif
 } std_adj_t;
 
 extern __nvram__ std_adj_t system_config;

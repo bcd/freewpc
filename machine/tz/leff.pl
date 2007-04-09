@@ -33,4 +33,5 @@ sub build_lampset_from_lock {
 	return build_lampset_explode_from_lamp ($lamp);
 }
 
+
 1;

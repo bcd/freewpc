@@ -223,7 +223,8 @@ void amode_deff (void) __taskentry__
 		dmd_animate (cow_anim0_prg, TIME_66MS);
 #endif
 
-#if 0
+#if 1
+		extern const U8 cow_anim0_prg[];
 		dmd_alloc_low ();
 		dmd_draw_xbmprog (cow_anim0_prg);
 		dmd_show_low ();

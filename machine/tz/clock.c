@@ -87,7 +87,7 @@ static U8 tz_clock_hour_to_opto[] =
 
 /* The same information, in reverse: given an opto reading,
  * returns the hour value */
-static U8 tz_clock_opto_to_hour[] =
+U8 tz_clock_opto_to_hour[] =
 { 1, 0, 8, 9, 2, 5, 7, 6, 0, 11, 0, 10, 3, 4, 0, 0 };
 
 /* The lower nibble of the current clock switch reading
@@ -198,9 +198,10 @@ void tz_clock_rtt (void)
 			}
 			else
 			{
-				/* TODO : direction to move depends on current state.
-				 * This is inefficient. */
-				goto clock_running_backward;
+				if (1) /* TODO : (tz_clock_opto_to_hour[clock_sw >> 4] <= 6) */
+					goto clock_running_backward;
+				else
+					goto clock_running_forward;
 			}
 			break;
 	}

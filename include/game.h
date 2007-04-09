@@ -37,6 +37,12 @@ extern U8 timed_game_timer;
 
 #define in_live_game		(in_game && !in_tilt)
 
+#ifdef CONFIG_TIMED_GAME
+#define timed_game_p (&system_config.timed_game)
+#else
+#define timed_game_p 0
+#endif
+
 void start_ball (void);
 void end_game (void);
 void end_ball (void);
@@ -58,12 +64,6 @@ void timed_game_pause (task_ticks_t delay);
 #define timed_game_resume()
 #define timed_game_pause(delay)
 #endif
-
-void sw_start_button_handler (void) __taskentry__;
-void sw_buy_in_button_handler (void) __taskentry__;
-void sw_tilt_handler (void) __taskentry__;
-void sw_slam_tilt_handler (void) __taskentry__;
-void tilt_start_ball (void);
 
 void game_init (void);
 

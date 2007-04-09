@@ -57,7 +57,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 GAME_OBJS = clock.o leffs.o magnet.o sling.o jets.o autofire.o gumball.o rampdiv.o \
 	amode.o lock.o door.o ballsave.o
 
-GAME_TEST_OBJS = test.o clocktest.o gumball_test.o magtest.o
+GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o
 
 GAME_INCLUDES =
 

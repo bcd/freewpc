@@ -825,18 +825,19 @@ sub machine_write_defines {
 	}
 	print "\n";
 
+	# TODO - remove this, not needed anymore
 	# Print MACHINE_SWxx defines
-	for my $col (1 .. 8) {
-		for my $row (1 .. 8) {
-			my $swname = "$col$row";
-			my $swnum = $col * 8 + $row - 1;
-			my $sw = ($m->{"switches"})->{$swname};
-			my $swdecl = $sw->{'c_decl'};
-			$swdecl = "sw_unused" if ($swdecl eq "");
-			print "#define MACHINE_SW$swname $swdecl\n";
-		}
-	}
-	print "\n";
+	#for my $col (1 .. 8) {
+	#	for my $row (1 .. 8) {
+	#		my $swname = "$col$row";
+	#		my $swnum = $col * 8 + $row - 1;
+	#		my $sw = ($m->{"switches"})->{$swname};
+	#		my $swdecl = $sw->{'c_decl'};
+	#		$swdecl = "sw_unused" if ($swdecl eq "");
+	#		print "#define MACHINE_SW$swname $swdecl\n";
+	#	}
+	#}
+	#print "\n";
 }
 
 
@@ -973,6 +974,17 @@ sub lamp_sort_circle_out {
 }
 
 
+sub colored_lamps {
+	my ($color) = @_;
+	my $lampset = "";
+	for $lamp (unique ($m->{"lamps"})) {
+		if ($lamp->{'color'} eq $color) {
+			$lampset .= $lamp->{'c_ident'} . ",\n   ";
+		}
+	}
+	return $lampset;
+}
+
 sub pf_lamps {
 	my ($sortfn) = @_;
 	my @lamps;
@@ -1006,7 +1018,10 @@ sub machine_write_lampset_decls {
 		my @lamps = split /,[ \t]*/, $ls->{'props'};
 		my $lampset = "";
 		foreach $lamp (@lamps) {
-			if ($lamp =~ m/PF:(.*)/) {
+			if ($lamp =~ m/COLOR:(.*)/) {
+				$lampset .= colored_lamps ("$1");
+			}
+			elsif ($lamp =~ m/PF:(.*)/) {
 				$lampset .= pf_lamps ("$1");
 			}
 			elsif ($lamp =~ m/(.*)\.\.(.*)/) {

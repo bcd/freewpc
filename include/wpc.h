@@ -379,6 +379,12 @@ extern inline void wpc_set_rom_page (U8 page)
 	wpc_asic_write (WPC_ROM_BANK, page);
 }
 
+
+/** The call_far, wpc_push_page, and wpc_pop_page
+ * macros are only safe when calling from the system
+ * page, so don't define them otherwise. */
+#if (PAGE == SYS_PAGE)
+
 #define call_far(page, fncall) \
 do { \
 	U8 __saved_page = wpc_get_rom_page (); \
@@ -397,6 +403,8 @@ do { \
 #define wpc_pop_page() \
 	wpc_set_rom_page (__saved_page); \
 }
+
+#endif /* PAGE == SYS_PAGE */
 
 /********************************************/
 /* RAM Paging                               */
@@ -444,15 +452,6 @@ extern inline U8 wpc_read_ac_zerocross (void)
  * Flippers
  ***************************************************************/
 
-#define WPC_LR_FLIP_POWER	0x1
-#define WPC_LR_FLIP_HOLD	0x2
-#define WPC_LL_FLIP_POWER	0x4
-#define WPC_LL_FLIP_HOLD	0x8
-#define WPC_UR_FLIP_POWER	0x10
-#define WPC_UR_FLIP_HOLD	0x20
-#define WPC_UL_FLIP_POWER	0x40
-#define WPC_UL_FLIP_HOLD	0x80
-
 #define WPC_LR_FLIP_EOS		0x1
 #define WPC_LR_FLIP_SW		0x2
 #define WPC_LL_FLIP_EOS		0x4
@@ -467,6 +466,15 @@ extern inline U8 wpc_read_flippers (void)
 	return wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
 }
 
+
+#define WPC_LR_FLIP_POWER	0x1
+#define WPC_LR_FLIP_HOLD	0x2
+#define WPC_LL_FLIP_POWER	0x4
+#define WPC_LL_FLIP_HOLD	0x8
+#define WPC_UR_FLIP_POWER	0x10
+#define WPC_UR_FLIP_HOLD	0x20
+#define WPC_UL_FLIP_POWER	0x40
+#define WPC_UL_FLIP_HOLD	0x80
 
 extern inline void wpc_write_flippers (U8 val)
 {

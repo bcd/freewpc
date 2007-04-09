@@ -21,28 +21,39 @@
 #ifndef _PRINTF_H
 #define _PRINTF_H
 
+/* TODO : much of this is implementing a 'varargs' type facility.
+ * Split that into a separate header. */
+
+/** va_list is just a byte pointer onto the stack */
 typedef U8 *va_list;
 
-#define PRINTF_BUFFER_SIZE		48
-
-
+/* Ensure that the system versions of the va functions are not being used. */
 #undef va_start
+#undef va_arg
+#undef va_end
+
+/** Begins a variable argument list access */
 #define va_start(va, fmt) \
 do { \
 	va = (va_list)((unsigned char *)&fmt + sizeof (fmt)); \
 } while (0) \
 
-
-#undef va_arg
+/** Access the next argument in the va_list 'va' with type 'type'. */
 #ifdef CONFIG_PLATFORM_LINUX
 #define va_arg(va, type)	((va += sizeof (int)), (type *)(((int *)va)[-1]))
 #else
 #define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
 #endif
 
-#undef va_end
+/** Ends a variable argument list access.  Nothing required. */
 #define va_end(va)
 
+
+
+/** The size of the single print buffer */
+#define PRINTF_BUFFER_SIZE		48
+
+/** The name of the single print buffer */
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
 #ifdef CONFIG_PLATFORM_LINUX

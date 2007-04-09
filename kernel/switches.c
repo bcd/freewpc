@@ -394,10 +394,7 @@ void switch_sched (void)
 	/* If the switch declares a processing function, call it.
 	 * All functions are in the EVENT_PAGE. */
 	if (swinfo->fn)
-	{
-		/* TODO: remove: call_far (EVENT_PAGE, (*swinfo->fn) ()); */
 		callset_invoke_pointer (swinfo->fn);
-	}
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and mark

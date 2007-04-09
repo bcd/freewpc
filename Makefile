@@ -506,7 +506,8 @@ endif
 ifdef MACHINE_FILE
 C_DEPS += build/mach-config.h
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
-CFLAGS += -DUSE_MD
+else
+$(error MACHINE_FILE is not defined)
 endif
 C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
