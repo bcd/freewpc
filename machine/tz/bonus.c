@@ -20,11 +20,10 @@
 
 #include <freewpc.h>
 
+
 void bonus_deff (void)
 {
 	extern U8 door_panels_started;
-
-	music_set (MUS_BONUS_START);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 8, "BONUS");

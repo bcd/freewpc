@@ -551,8 +551,7 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 			/* In the 'run-length encoding (RLE)' method,
 			certain long sequences of the same byte are replaced
 			by a flag, the byte, and a count. */
-			while (dbuf < dmd_high_buffer)
-			{
+			do {
 				c = *xbmprog++;
 				if (c == XBMPROG_RLE_SKIP)
 				{
@@ -561,11 +560,15 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 					is not present in the stream.  The zero case occurs 
 					frequently, and is thus given special treatment. */
 					c = *xbmprog++;
+#if 1
 					/* TODO - use word copies if possible */
 					do {
 						*dbuf++ = 0;
 						c--;
 					} while (c != 0);
+#else
+					memset (dbuf, 0, c);
+#endif
 				}
 				else if (c == XBMPROG_RLE_REPEAT)
 				{
@@ -585,16 +588,17 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 					above will need to be encoded as an RLE sequence of
 					1, since no escape character is defined. */
 					*dbuf++ = c;
-			}
+			} while (dbuf < dmd_high_buffer);
 			break;
 
 		case XBMPROG_METHOD_RLE_DELTA:
 			/* The RLE delta method is almost identical to the
 			RLE method above, but the input stream is overlaid on
-			top of the existing image data, using OR operations
-			instead of simple assignment. */
-			while (dbuf < dmd_high_buffer)
-			{
+			top of the existing image data, using XOR operations
+			instead of simple assignment.  This is useful for animations
+			in which a subsequent frame is quite similar to its
+			precedent. */
+			do {
 				c = *xbmprog++;
 				if (c == XBMPROG_RLE_SKIP)
 				{
@@ -606,13 +610,13 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 					c = *xbmprog++; /* data */
 					c2 = *xbmprog++; /* count */
 					do {
-						*dbuf++ |= c;
+						*dbuf++ ^= c;
 						c2--;
 					} while (c2 != 0);
 				}
 				else
-					*dbuf++ |= c;
-			}
+					*dbuf++ ^= c;
+			} while (dbuf < dmd_high_buffer);
 			break;
 	}
 

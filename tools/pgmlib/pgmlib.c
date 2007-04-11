@@ -33,17 +33,20 @@
  *
  * PGM is the preferred internal image format.  If you're generating a 
  * new image from scratch, create a PGM using pgm_alloc().  You should 
- * also set the number of planes using pgm_set_plane_count() 
- * if it's a multi-color image.
+ * also set the number of planes using pgm_set_mono() or pgm_set_four_color().
  *
- * XBM is a simpler format, but it only supports 1 bit plane.
+ * XBM is a simpler format, but it only supports 1 bit plane.  Use
+ * pgm_write_xbm() to downconvert a PGM into XBM format.
  *
  * XBMSET is a FreeWPC construction, where multiple XBM images are 
- * output in the same file.  This is the only supported output format.
- * Use pgm_write_xbmset() to write an internal PGM to a file.
+ * output in the same file.  This is the preferred output format.
+ * Use pgm_write_xbmset() to downconvert a PGM to an xbmset.
  * 
- * XBMPROG is a future construction.  It is intended to be a compressed 
- * XBM format.
+ * XBMPROG is also a FreeWPC construction.  It is a compressed 
+ * XBM format, similar to XBM (1-bit) but with certain byte values
+ * assigned special meaning.  It requires a decoder in order to display
+ * these.  FreeWPC dmd.c can show these using the dmd_draw_xbmprog()
+ * routine.
  **/
 
 #include <stdio.h>
@@ -70,21 +73,23 @@ const char *opt_makefile_fragment_name = "build/Makefile.xbms";
 	if (opt_debug) fprintf (stderr, format, ## rest)
 
 
+/** Allocate some memory */
 inline void *xmalloc (size_t size)
 {
 	return malloc (size);
 }
 
 
+/** Allocate a new xbmprog */
 XBMPROG *
 xbmprog_alloc (void)
 {
 	XBMPROG *xbmprog = xmalloc (sizeof (XBMPROG));
-
 	return (xbmprog);
 }
 
 
+/** Free an xbmprog */
 void
 xbmprog_free (XBMPROG *prog)
 {
@@ -124,7 +129,7 @@ xbmprog_equal_p (XBMPROG *prog1, XBMPROG *prog2)
 }
 
 
-/** Writes an XBM image to a file. */
+/** Writes an XBMPROG to a file. */
 void
 xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog)
 {
@@ -132,21 +137,32 @@ xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog)
 	unsigned int size = 0;
 	XBMPROG *head = xbmprog;
 
-	fprintf (fp, "#include <freewpc.h>\n");
-	fprintf (fp, "#include <xbmprog.h>\n");
-	fprintf (fp, "__xbmprog__ unsigned char %s%d_prg[] = { 0x%02X,\n",
-		name, plane, head->stats.flags);
+	if (name)
+	{
+		/* xbmprog.h is not normally included and thus must be added */
+		fprintf (fp, "#include <freewpc.h>\n");
+		fprintf (fp, "#include <xbmprog.h>\n");
+	
+		/* Start the declaration */
+		fprintf (fp, "__xbmprog__ unsigned char %s%d_prg[] = { 0x%02X,\n",
+			name, plane, head->stats.flags);
+	}
+
+	/* Write each element of the xbmprog */
 	do {
 		switch (xbmprog->op)
 		{
 			case XBMOP_LITERAL:
+				/* Write 1 or more literal bytes that couldn't be compressed */
 				for (i=0; i < xbmprog->args.literal.count; i++)
 				{
 					unsigned char c = xbmprog->args.literal.bytes[i];
 					if ((c == XBMPROG_RLE_SKIP) || (c == XBMPROG_RLE_REPEAT))
 					{
-						// TODO
-						fprintf (fp, "0x%02X, ", c);
+						/* We can't output a literal for any byte that matches
+						a prefix flag.  This must be encoded as sequences of 1
+						byte. */
+						fprintf (fp, "XBMPROG_RLE_REPEAT, 0x%02X, 1, ", c);
 					}
 					else
 					{
@@ -156,10 +172,12 @@ xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog)
 				size += xbmprog->args.literal.count + 1;
 				break;
 			case XBMOP_SKIP:
+				/* Write a skip sequence */
 				fprintf (fp, "XBMPROG_RLE_SKIP, %d, ", xbmprog->args.skip.count);
 				size++;
 				break;
 			case XBMOP_REPEAT_BYTE:
+				/* Write a repeat sequence */
 				fprintf (fp, "XBMPROG_RLE_REPEAT, 0x%02X, %d, ", 
 					xbmprog->args.repeat.data, xbmprog->args.repeat.count);
 				size += 2;
@@ -172,8 +190,12 @@ xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog)
 	} while (xbmprog != head);
 
 done:
-	fprintf (fp, "\n// size = %d\n", head->stats.size);
-	fprintf (fp, "};\n");
+	/* Finish the declaration */
+	if (name)
+	{
+		fprintf (fp, "\n// size = %d\n", head->stats.size);
+		fprintf (fp, "};\n");
+	}
 }
 
 
@@ -186,7 +208,10 @@ xbm_read_byte (XBM *xbm, int offset)
 }
 
 
-/** Makes an XBM Program from an XBM image.
+/** Makes an XBM Program from an XBM image.  This effectively
+ * compressed the XBM.  The XBMPROG is not the final encoded form
+ * of the program, but rather an internal format that can be
+ * further manipulated before writing it.
  */
 XBMPROG *
 xbm_make_prog (XBM *xbm)
@@ -382,13 +407,17 @@ xbm_write_stats (FILE *fp, XBM *xbm)
 }
 
 
+/** Write an animation: a sequence of frames contained within an
+xbmset */
 void
 xbmset_write_animation (FILE *fp, XBMSET *xbmset)
 {
 	int plane, frame;
 
 	fprintf (fp, "#include <xbmprog.h>\n");
-	fprintf (fp, "unsigned char __end = XBMPROG_METHOD_END;\n");
+
+	/* TODO : need to work on this */
+	fprintf (fp, "static unsigned char __end = XBMPROG_METHOD_END;\n");
 	for (plane = xbmset->n_planes-1; plane >=0; plane--)
 		for (frame = xbmset->frame_count-1; frame >= 0; frame--)
 		{

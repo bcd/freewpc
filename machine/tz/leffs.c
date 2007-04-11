@@ -282,3 +282,37 @@ void jets_active_leff (void)
 		lampset_leff_step_increment (LAMPSET_JETS);
 }
 
+
+void color_cycle_leff (void)
+{
+	U8 i;
+
+	task_create_peer (gi_cycle_leff);
+
+	lampset_set_apply_delay (0);
+
+	i = 15;
+	lampset_apply_leff_on (LAMPSET_RED_LAMPS);
+	do {
+		lampset_apply_leff_toggle (LAMPSET_RED_LAMPS);
+		task_sleep (TIME_100MS);
+	} while (--i != 0);
+
+	i = 15;
+	lampset_apply_leff_on (LAMPSET_WHITE_LAMPS);
+	do {
+		lampset_apply_leff_toggle (LAMPSET_WHITE_LAMPS);
+		task_sleep (TIME_100MS);
+	} while (--i != 0);
+
+	i = 15;
+	lampset_apply_leff_on (LAMPSET_YELLOW_LAMPS);
+	do {
+		lampset_apply_leff_toggle (LAMPSET_YELLOW_LAMPS);
+		task_sleep (TIME_100MS);
+	} while (--i != 0);
+
+	task_kill_peers ();
+	leff_exit ();
+}
+

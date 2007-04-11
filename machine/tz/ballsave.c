@@ -70,7 +70,7 @@ bool ballsave_test_active (void)
 	if (timed_game_timer > 5)
 		return TRUE;
 #endif
-	return task_find_gid (GID_BALLSAVER) ? TRUE : FALSE;
+	return timer_find_gid (GID_BALLSAVER) ? TRUE : FALSE;
 }
 
 

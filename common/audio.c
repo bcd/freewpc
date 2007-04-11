@@ -163,16 +163,11 @@ static void bg_music_task (void)
 	}
 
 	if (current == NULL)
-	{
 		music_off ();
-		audio_exit ();
-	}
 	else
-	{
-		/* Play the track */
 		music_set (current->code);
-		audio_exit ();
-	}
+	
+	audio_exit ();
 }
 
 
@@ -271,6 +266,12 @@ CALLSET_ENTRY (audio, ball_in_play)
 }
 
 
+CALLSET_ENTRY (audio, bonus)
+{
+	bg_music_stop_all ();
+}
+
+
 CALLSET_ENTRY (audio, end_ball)
 {
 	bg_music_stop_all ();
@@ -282,8 +283,8 @@ CALLSET_ENTRY (audio, end_game)
 	bg_music_stop_all ();
 	if (!in_test)
 	{
-		// TODO - start timed with fade out
-		// music_set (MACHINE_END_GAME_MUSIC);
+		/* TODO - start timed with fade out */
+		music_set (MACHINE_END_GAME_MUSIC);
 	}
 }
 

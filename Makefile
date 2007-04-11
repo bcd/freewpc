@@ -462,7 +462,7 @@ page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS) $(EVENT_OBJS)
 page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS) $(PRG_OBJS)
 page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
 page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS) $(FSM_OBJS)
-page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
+page60_OBJS = $(BLD)/page60.o $(XBM_OBJS) $(FIF_OBJS)
 page61_OBJS = $(BLD)/page61.o $(FONT_OBJS) $(FON_OBJS)
 SYSTEM_OBJS = $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
@@ -471,7 +471,7 @@ $(COMMON_OBJS) $(EVENT_OBJS) : PAGE=56
 $(TRANS_OBJS) $(PRG_OBJS): PAGE=57
 $(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
 $(MACHINE_PAGED_OBJS) $(FSM_OBJS): PAGE=59
-$(XBM_OBJS) : PAGE=60
+$(XBM_OBJS) $(FIF_OBJS): PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
@@ -741,6 +741,8 @@ $(FON_OBJS) : %.o : %.fon
 
 $(PRG_OBJS) : %.o : %.prg
 
+$(FIF_OBJS) : %.o : %.fif tools/fiftool
+
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
@@ -894,6 +896,8 @@ $(HOST_XBM_OBJS) : build/%.o : images/%.c
 build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
+tools/fiftool :
+	cd tools/fiftool && $(MAKE)
 
 #######################################################################
 ###	Standard Dependencies

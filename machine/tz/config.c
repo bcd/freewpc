@@ -28,6 +28,12 @@
 
 U8 faster_quote_given;
 
+static const audio_track_t bonus_music_track = {
+	.prio = PRI_BONUS,
+	.code = MUS_BONUS_START,
+};
+
+
 CALLSET_ENTRY (tz, start_ball)
 {
 	faster_quote_given = 0;
@@ -45,6 +51,7 @@ CALLSET_ENTRY (tz, add_player)
 
 CALLSET_ENTRY (tz, bonus)
 {
+	bg_music_start (&bonus_music_track);
 	task_sleep_sec (1);
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
@@ -52,6 +59,7 @@ CALLSET_ENTRY (tz, bonus)
 	while (deff_get_active () == DEFF_BONUS)
 		task_sleep (TIME_33MS);
 	leff_stop (LEFF_BONUS);
+	bg_music_stop (&bonus_music_track);
 }
 
 
@@ -98,16 +106,7 @@ CALLSET_ENTRY (tz, timed_game_tick)
 }
 
 
-// music_update
 #if 0
-	if (!in_game)
-		return;
-#ifdef CONFIG_TIMED_GAME
-	if (ball_in_play && (timed_game_timer == 0))
-		music_change (MUS_ENDGAME);
-	else
-#endif
-
 	if (flag_test (FLAG_BTTZ_RUNNING))
 		music_change (MUS_JACKPOT);
 
