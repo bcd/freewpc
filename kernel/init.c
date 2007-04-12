@@ -150,14 +150,11 @@ void do_reset (void)
 	sys_init_pending_tasks++;
 	task_create_gid (GID_DCS_INIT, sound_init);
 
-	timer_init ();
 	deff_init ();
 	leff_init ();
 	test_init ();
-	score_init ();
 	adj_init ();
 	high_score_init ();
-	random_init ();
 	game_init ();
 	callset_invoke (init);
 

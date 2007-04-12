@@ -329,7 +329,7 @@ void timed_game_monitor (void)
 		/* OK, drop the timer by one second. */
 		task_sleep_sec (1);
 		timed_game_timer--;
-		score_change++;
+		score_update_request ();
 		callset_invoke (timed_game_tick);
 	}
 
@@ -451,7 +451,7 @@ void add_player (void)
 	remove_credit ();
 	num_players++;
 	callset_invoke (add_player);
-	score_change++;
+	score_update_request ();
 }
 
 

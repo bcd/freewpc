@@ -38,16 +38,15 @@
 /** Lamps 80h through BFh are the same as the regular lamps, but
  * control the flash state */
 
-/** Lamps C0h through FFh are similarly used to control the
- * 'fast flash' state of the lamp.  Fast flash overrides slow
- * flash, which overrides the steady value. */
+/** Lamps C0h through FFh are bits like 40h to 7Fh, but they are
+ * global and not saved from player to player. */
 
 __fastram__ struct bit_matrix_table
 {
 	U8 solid_lamps[NUM_LAMP_COLS];
 	U8 bits[NUM_VLAMP_COLS];
 	U8 flashing_lamps[NUM_LAMP_COLS];
-	U8 fast_flashing_lamps[NUM_LAMP_COLS];
+	U8 global_bits[NUM_LAMP_COLS];
 
 	U8 flashing_lamps_now[NUM_LAMP_COLS];
 } bit_matrix_array;
@@ -55,7 +54,6 @@ __fastram__ struct bit_matrix_table
 #define lamp_matrix					bit_matrix_array.solid_lamps
 #define bit_matrix					bit_matrix_array.bits
 #define lamp_flash_matrix			bit_matrix_array.flashing_lamps
-#define lamp_fast_flash_matrix	bit_matrix_array.fast_flashing_lamps
 #define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
 
 /** Bitsets for doing temporary lamp effects, which hide the
@@ -67,26 +65,18 @@ __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 
 U8 lamp_flash_max;
+
 U8 lamp_flash_count;
 
 __fastram__ U8 lamp_strobe_mask;
+
 __fastram__ U8 lamp_strobe_column;
-
-
-const U16 lamp_strobe_mask_table[] = {
-	0x4444,
-	0xAAAA,
-	0xDDDD,
-	0xFFFF,
-	0xDDDD,
-	0xAAAA,
-	0x4444,
-};
 
 
 /** Initialize the lamp subsystem at startup. */
 void lamp_init (void)
 {
+	/* Clear all lamps/flags */
 	memset (&bit_matrix_array, 0, sizeof (bit_matrix_array));
 
 	/* Lamp effect allocation matrices are "backwards",
@@ -411,11 +401,4 @@ bool leff_test (lampnum_t lamp)
 	__testbit(p, v);
 	return v;
 }
-
-
-U8 *get_bit_base (void)
-{
-	return bit_matrix;
-}
-
 

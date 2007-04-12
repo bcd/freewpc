@@ -24,9 +24,6 @@
 U8 egg_code_values[3];
 U8 egg_index;
 
-extern void starfield_start (void);
-extern void starfield_stop (void);
-
 
 /* Attract mode display delay function.
  * This function waits for the specified amount of time, but
@@ -59,9 +56,7 @@ bool amode_page_delay (U8 secs)
 
 void amode_flipper_sound_debounce_timer (void)
 {
-	task_sleep_sec (10);
-	task_sleep_sec (10);
-	task_sleep_sec (10);
+	task_sleep_sec (30);
 	task_exit ();
 }
 
@@ -73,10 +68,6 @@ void amode_flipper_sound (void)
 			amode_flipper_sound_debounce_timer);
 		sound_send (SND_THUD);
 	}
-}
-
-void amode_scroll (void)
-{
 }
 
 
@@ -127,7 +118,6 @@ void egg_right_flipper (void)
 void amode_left_flipper (void)
 {
 	amode_flipper_sound ();
-	amode_scroll ();
 	egg_left_flipper ();
 }
 
@@ -135,7 +125,6 @@ void amode_left_flipper (void)
 void amode_right_flipper (void)
 {
 	amode_flipper_sound ();
-	amode_scroll ();
 	egg_right_flipper ();
 }
 
@@ -278,12 +267,8 @@ void amode_deff (void) __taskentry__
 		dmd_sched_transition (&trans_scroll_left);
 		dmd_alloc_low_high ();
 		dmd_draw_image2 (mborder0_bits);
-		font_render_string_center (&font_fixed10, 64, 16, 
+		font_render_string_center2 (&font_fixed10, 64, 16, 
 			"PLAY PINBALL");
-		dmd_flip_low_high ();
-		font_render_string_center (&font_fixed10, 64, 16, 
-			"PLAY PINBALL");
-		dmd_flip_low_high ();
 		dmd_show2 ();
 		if (amode_page_delay (3) && system_config.tournament_mode)
 			continue;

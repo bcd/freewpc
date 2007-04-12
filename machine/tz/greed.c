@@ -157,26 +157,13 @@ void greed_round_end (void)
 
 void greed_round_task (void)
 {
-#if 0
-	extern void greed_door_stop_greed (void);
-	do {
-		task_sleep (TIME_1S + TIME_100MS);
-		if (kickout_locks)
-			continue;
-		greed_round_timer--;
-	} while (greed_round_timer > 0);
-	task_sleep_sec (1);
-	greed_door_stop_greed ();
-	task_exit ();
-#else
-	mode_start (greed_round_begin, greed_round_expire, greed_round_end,
+	mode_task (greed_round_begin, greed_round_expire, greed_round_end,
 		&greed_round_timer, 20, 3);
-#endif
 }
 
 CALLSET_ENTRY (greed, door_start_greed)
 {
-	task_create_gid1 (GID_GREED_ROUND_RUNNING, greed_round_task);
+	mode_start (GID_GREED_ROUND_RUNNING, greed_round_task);
 }
 
 CALLSET_ENTRY (greed, door_stop_greed)

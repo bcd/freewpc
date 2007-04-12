@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,9 +33,6 @@ CALLSET_ENTRY (autofire, sw_autofire1)
 CALLSET_ENTRY (autofire, sw_autofire2)
 {
 	score (SC_100);
-	if (autofire_request_count == 0)
-	{
-	}
 }
 
 
@@ -97,15 +94,35 @@ retry:
 	task_exit ();
 }
 
+
 void autofire_add_ball (void)
 {
 	autofire_request_count++;
 	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_handler);
 }
 
+
+/* Signals that a ball is headed to the autofire lane from the ramp
+divertor and that it needs to be caught in the autoplunger, rather than
+falling into the manual plunger lane */
 void autofire_catch (void)
 {
 }
+
+
+CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
+{
+	/* Decide whether or not to open the autofire divertor before
+	kicking the ball.  If so, then also wait until the autofire
+	lane is clear before allowing the ball to go. */
+
+	/* The default strategy is to autofire only when live_balls >= 2. */
+	if (live_balls >= 2)
+	{
+		/* Need to open the divertor */
+	}
+}
+
 
 CALLSET_ENTRY (autofire, init)
 {

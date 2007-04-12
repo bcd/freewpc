@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -71,6 +71,7 @@ static void maybe_ramp_divert (void)
 CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
 {
 	maybe_ramp_divert ();
+	score (SC_1K);
 }
 
 CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)

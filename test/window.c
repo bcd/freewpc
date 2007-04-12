@@ -1083,9 +1083,7 @@ const font_t *font_test_lookup (void)
 		case FON_TIMES8: return &font_times8;
 		case FON_TIMES10: return &font_times10; /* this and helv8 are the same? */
 		case FON_HELV8: return &font_helv8;
-		case FON_SCHU: return &font_schu;
 		case FON_MISCTYPE: return &font_misctype; /* broken! */
-		case FON_UTOPIA: return &font_utopia; /* broken! */
 		case FON_FIXED12: return &font_fixed12; /* broken! */
 		case FON_VAR5: return &font_var5;
 		case FON_CU17: return &font_cu17;
@@ -2476,6 +2474,8 @@ void switch_matrix_draw (void)
 			register U8 *dmd = dmd_low_buffer +
 				((U16)row << 6) + (col >> 1);
 			U8 mask = (col & 1) ? 0x0E : 0xE0;
+
+			/* TODO : use bitmap_draw for these */
 			if (state_p)
 			{
 				dmd[0 * DMD_BYTE_WIDTH] |= mask;

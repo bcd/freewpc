@@ -115,11 +115,6 @@ bool leff_test (lampnum_t lamp);
 #define flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
 #define flag_test(lamp)		lamp_test (lamp + FLAG_OFFSET)
 
-#define lamp_fast_flash_on(lamp)			lamp_on (lamp + LAMP_FAST_FLASH_OFFSET)
-#define lamp_fast_flash_off(lamp)		lamp_off (lamp + LAMP_FAST_FLASH_OFFSET)
-#define lamp_fast_flash_toggle(lamp)	lamp_toggle (lamp + LAMP_FAST_FLASH_OFFSET)
-#define lamp_fast_flash_test(lamp)		lamp_test (lamp + LAMP_FAST_FLASH_OFFSET)
-
 #define long_leff_allocate(lamp)		lamp_leff_allocate(lamp + 0x80)
 #define long_leff_free(lamp)			lamp_leff_free(lamp + 0x80)
 #define long_leff_on(lamp)				leff_on(lamp + 0x80)
@@ -144,7 +139,6 @@ void lamp_leff_free (lampnum_t lamp);
 void lamp_leff2_allocate (lampnum_t lamp);
 bool lamp_leff2_test_allocated (lampnum_t lamp);
 void lamp_leff2_free (lampnum_t lamp);
-U8 *get_bit_base (void);
 
 const U8 *lampset_lookup (lampset_id_t id);
 void lampset_apply (lampset_id_t id, lamp_operator_t op);

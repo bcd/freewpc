@@ -53,6 +53,7 @@ static void handle_outhole (void)
 }
 #endif
 
+
 CALLSET_ENTRY (trough, sw_outhole)
 {
 #ifdef MACHINE_OUTHOLE_SWITCH
@@ -70,16 +71,6 @@ CALLSET_ENTRY (trough, sw_outhole)
 #endif /* MACHINE_OUTHOLE_SWITCH */
 }
 
-
-CALLSET_ENTRY (trough, sw_launch)
-{
-#if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
-	if (switch_poll (MACHINE_SHOOTER_SWITCH))
-	{
-		sol_pulse (MACHINE_LAUNCH_SOLENOID);
-	}
-#endif
-}
 
 CALLSET_ENTRY (trough, dev_trough_enter)
 {

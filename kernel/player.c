@@ -61,26 +61,31 @@ void player_start_game (void)
 	/* Clear all player local variables */
 	__blockclear16 (LOCAL_BASE, LOCAL_SIZE);
 
-	/* Clear the local bitflags */
-	memset (get_bit_base (), 0, 8);
+	/* Clear lamps/flags */
+	__blockclear16 (&bit_matrix_array, NUM_LAMP_COLS * 2);
 }
+
 
 void player_save (void)
 {
-	/* Copy lamps/bits into the save area */
-	__blockcopy16 (LOCAL_SAVE_BASE(player_up), &bit_matrix_array, NUM_LAMP_COLS * 2);
+	/* Copy lamps/local flags into the save area */
+	__blockcopy16 (LOCAL_SAVE_BASE(player_up), &bit_matrix_array,
+		NUM_LAMP_COLS * 2);
 
 	/* Copy player locals into the save area */
-	__blockcopy16 (LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, LOCAL_BASE, LOCAL_SIZE);
+	__blockcopy16 (LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, 
+		LOCAL_BASE, LOCAL_SIZE);
 }
+
 
 void player_restore (void)
 {
 	/* Restore lamps/bits from the save area */
-	__blockcopy16 (&bit_matrix_array, LOCAL_SAVE_BASE(player_up), NUM_LAMP_COLS * 2);
+	__blockcopy16 (&bit_matrix_array, LOCAL_SAVE_BASE(player_up),
+		NUM_LAMP_COLS * 2);
 	
 	/* Restore player locals from the save area */
-	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, LOCAL_SIZE);
-
+	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2,
+		LOCAL_SIZE);
 }
 

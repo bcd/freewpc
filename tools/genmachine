@@ -755,6 +755,7 @@ sub machine_write_defines {
 	print "\n\n";
 
 	# Print display effects
+	my $deff_runners = 0;
 	print "#define MACHINE_DISPLAY_EFFECTS \\\n";
 	foreach $deff (unique ($m->{"deffs"})) {
 		$fn = $deff->{'c_decl'};
@@ -765,8 +766,10 @@ sub machine_write_defines {
 			$deff->{'props'} .  ", $fn, " .
 			($deff->{'page'} ? $deff->{'page'} : -1) .
 			") \\\n";
+		$deff_runners++ if ($deff->{'runner'});
 	}
 	print "\n";
+	print "#define MAX_RUNNING_DEFFS " . $deff_runners . "\n\n";
 
 	# Print lamp effects
 	print "#define MACHINE_LAMP_EFFECTS \\\n";

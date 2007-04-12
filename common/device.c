@@ -214,40 +214,25 @@ wait_and_recount:
 	else if ((dev->state == DEV_STATE_RELEASING) && (dev->kicks_needed > 0))
 	{
 		/* Device is in the middle of a release cycle */
-		if (dev->actual_count == dev->previous_count)
+		if (dev->actual_count >= dev->previous_count)
 		{
-			/* After attempting a release, the count did not
-			 * change ... the kick must have failed, and we
-			 * should retry up to a point.  Since no state
+			/* After attempting a release, the count did not go down ... the kick 
+			 * probably failed, and we should retry up to a point.  Since no state
 			 * is changed, the code will get reinvoked. */
 
-			/* TODO : not completely true.  A second ball could enter
+			/* Note: during multiball, it is possible for a second ball to enter
 			the device immediately after the kick.  The kick didn't
-			really fail, but this is difficult to detect.  Of course
-			this can only be the case during a multiball.
+			really fail, but there's no way to tell the difference. */
 
-			If this is a multi-switch device, we can detect the difference
-			because the first switch would trip again, as opposed to only
-			the last switch tripping in a failed kick.  The current scheme
-			only relies on ball count and doesn't care which switch caused
-			the change.
-
-			For a single-switch device, even this won't help.  However,
-			for such devices we never lock a ball anyway, so treating it
-			as a failure and rekicking is harmless (except that points
-			may not be scored the second time).
-
-			In any case, this is common enough that a nonfatal shouldn't
-			be thrown. */
-			dbprintf ("Kick did not change anything\n");
-			nonfatal (ERR_FAILED_KICK);
+			dbprintf ("Kick failed\n");
 			device_call_op (dev, kick_failure);
 
 			if (++dev->kick_errors == 5)
 			{
-				/* OK, we tried 5 times and still know ball came out.
-				 * Cancel all kick requests. */
+				/* OK, we tried 5 times and still no ball came out.
+				 * Cancel all kick requests for this device. */
 				dbprintf ("Cancelling kick requests\n");
+				nonfatal (ERR_FAILED_KICK);
 				dev->kicks_needed = 0;
 				dev->state = DEV_STATE_IDLE;
 			}
@@ -278,17 +263,6 @@ wait_and_recount:
 				 * and the first kick somehow caused two balls to come out,
 				 * then that is actually OK. */
 			}
-		}
-		else if (dev->actual_count > dev->previous_count)
-		{
-			/* The count went up during a kick cycle.
-			 * kicks_needed is presumably still nonzero, so
-			 * the code below should attempt the kick again. */
-
-			/* See long TODO comment above -- it applies here too if
-			 * multiple balls enter the device during a kick cycle. */
-			dbprintf ("After kick, count increased\n");
-			nonfatal (ERR_KICK_CAUSED_INCREASE);
 		}
 	}
 
@@ -340,11 +314,9 @@ wait_and_recount:
 			if (dev->state == DEV_STATE_IDLE)
 				dev->state = DEV_STATE_RELEASING;
 
-			/* Give the device heads-up that a kick is
-			 * coming.  TODO: TZ should use this hook to
-			 * decide whether or not to open the autofire
-			 * divertor, then the MACHINE_TZ define can be
-			 * eliminated. */
+			/* Give the device heads-up that a kick is coming.  TODO: TZ should use 
+			 * this hook to decide whether or not to open the autofire
+			 * divertor, then the MACHINE_TZ define can be eliminated. */
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid */
@@ -384,7 +356,9 @@ void device_request_kick (device_t *dev)
 		dev->kicks_needed++;
 		dev->kick_errors = 0;
 #ifdef DEVNO_TROUGH
-		/* TODO - this logic probably belongs somewhere else */
+		/* TODO - this logic probably belongs somewhere else.
+		We're increment live balls very early here, before the
+		balls are actually added to play. */
 		if (device_devno (dev) != DEVNO_TROUGH)
 			live_balls++;
 #endif
@@ -612,17 +586,15 @@ void device_remove_live (void)
 void device_multiball_set (U8 count)
 {
 	device_t *dev = device_entry (DEVNO_TROUGH);
+
+	/* Calculate the number of balls that need to be added to play,
+	to reach the desired total count. */
 	U8 kicks = count - (live_balls + dev->kicks_needed);
+
+	/* Add that balls into play */
 	while (kicks > 0)
 	{
-#ifdef MACHINE_LAUNCH_SOLENOID
 		device_request_kick (dev);
-#else
-#ifdef MACHINE_TZ
-		extern void autofire_add_ball (void);
-		autofire_add_ball ();
-#endif
-#endif
 		kicks--;
 	}
 }

@@ -128,15 +128,30 @@ void task_dump (void)
 		if (tp->state != TASK_FREE)
 #endif
 		{
-			dbprintf ("%p: GID %02d  PC %p",
-				tp, tp->gid, tp->pc);
-			dbprintf ("  ST ");
-			dbprintf ("%02X", tp->stack_size);
-			dbprintf ("  ARG %04X", tp->arg);
-			dbprintf ("  TD ");
-			dbprintf ("%02X %02X %02X %02X\n",
-				tp->thread_data[0], tp->thread_data[1],
-				tp->thread_data[2], tp->thread_data[3]);
+			dbprintf ("%p: ", tp);
+
+			if (tp->state & TASK_TASK)
+			{
+				dbprintf ("GID %02d  PC %p", tp->gid, tp->pc);
+				dbprintf ("  ST %02X", tp->stack_size);
+				dbprintf ("  ARG %04X", tp->arg);
+				dbprintf ("  TD ");
+				dbprintf ("%02X %02X %02X %02X\n",
+					tp->thread_data[0], tp->thread_data[1],
+					tp->thread_data[2], tp->thread_data[3]);
+			}
+			else if (tp->state & TASK_MALLOC)
+			{
+				dbprintf ("malloc\n");
+			}
+			else if (tp->state & TASK_STACK)
+			{
+				dbprintf ("aux stack\n");
+			}
+			else
+			{
+				dbprintf ("???\n");
+			}
 		}
 	}
 	dbprintf ("\n\n");

@@ -116,37 +116,37 @@ static void font_blit (void)
 {
 	switch (blit_xpos % 8)
 	{
-		default: /* should not happen */
+		default:
 		case 0:
-			blit_dmd[0] = *blit_data;
+			blit_dmd[0] ^= *blit_data;
 			break;
 		case 1:
-			blit_dmd[0] |= *blit_data << 1;
-			blit_dmd[1] = (*blit_data >> 7) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 1;
+			blit_dmd[1] = (*blit_data >> 7) ^ blit_dmd[1];
 			break;
 		case 2:
-			blit_dmd[0] |= *blit_data << 2;
-			blit_dmd[1] = (*blit_data >> 6) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 2;
+			blit_dmd[1] = (*blit_data >> 6) ^ blit_dmd[1];
 			break;
 		case 3:
-			blit_dmd[0] |= *blit_data << 3;
-			blit_dmd[1] = (*blit_data >> 5) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 3;
+			blit_dmd[1] = (*blit_data >> 5) ^ blit_dmd[1];
 			break;
 		case 4:
-			blit_dmd[0] |= *blit_data << 4;
-			blit_dmd[1] = (*blit_data >> 4) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 4;
+			blit_dmd[1] = (*blit_data >> 4) ^ blit_dmd[1];
 			break;
 		case 5:
-			blit_dmd[0] |= *blit_data << 5;
-			blit_dmd[1] = (*blit_data >> 3) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 5;
+			blit_dmd[1] = (*blit_data >> 3) ^ blit_dmd[1];
 			break;
 		case 6:
-			blit_dmd[0] |= *blit_data << 6;
-			blit_dmd[1] = (*blit_data >> 2) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 6;
+			blit_dmd[1] = (*blit_data >> 2) ^ blit_dmd[1];
 			break;
 		case 7:
-			blit_dmd[0] |= *blit_data << 7;
-			blit_dmd[1] = (*blit_data >> 1) | blit_dmd[1];
+			blit_dmd[0] ^= *blit_data << 7;
+			blit_dmd[1] = (*blit_data >> 1) ^ blit_dmd[1];
 			break;
 	}
 	blit_data++;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -110,7 +110,7 @@ void timer_pause_for_secs (U8 secs)
 }
 
 
-void timer_init (void)
+CALLSET_ENTRY (timer, init)
 {
 	pausable_timer_locks = 0;
 }

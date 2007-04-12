@@ -64,10 +64,9 @@ void mb_start_deff (void)
 
 void mb_running_deff (void)
 {
-	extern U8 score_change;
 	for (;;)
 	{
-		score_change = 0;
+		score_update_start ();
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
@@ -76,7 +75,7 @@ void mb_running_deff (void)
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 		dmd_show_low ();
-		while (score_change == 0)
+		while (!score_update_required ())
 		{
 			task_sleep (TIME_133MS);
 			dmd_show_other ();

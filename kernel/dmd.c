@@ -412,7 +412,7 @@ void dmd_alloc_high_clean (void)
 }
 
 
-/** Draw a thin border around the given display page */
+/** Draw a thin border 2 pixels wide around the given display page. */
 void dmd_draw_border (U8 *dbuf)
 {
 	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);

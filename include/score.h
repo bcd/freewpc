@@ -42,9 +42,24 @@ typedef struct
 	score_t max;
 } score_ladder_t;
 
-extern U8 score_change;
+extern U8 score_update_needed;
 extern score_t scores[];
 extern U8 *current_score;
+
+extern inline void score_update_start (void)
+{
+	score_update_needed = FALSE;
+}
+
+extern inline bool score_update_required (void)
+{
+	return (score_update_needed);
+}
+
+extern inline void score_update_request (void)
+{
+	score_update_needed = TRUE;
+}
 
 void scores_draw (void);
 void scores_draw_ball (void);

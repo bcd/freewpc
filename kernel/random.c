@@ -90,8 +90,7 @@ CALLSET_ENTRY (random, idle)
 /**
  * Initialize the random number generator.
  */
-void
-random_init (void)
+CALLSET_ENTRY (random, init)
 {
 	random_cong_seed = 1;
 }

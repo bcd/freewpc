@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,15 @@
 #ifndef _MODE_H
 #define _MODE_H
 
-extern inline void mode_start (
+/** The task that runs a mode.
+ * begin, expire, and end are all optional function pointers to be
+ * invoked at various points during the lifecycle of the mode.
+ * expire is called when the timer hits zero; end is called when the
+ * grace period is finished.
+ * timer is a pointer to the 1-byte timer object.
+ * mode_time and grace_time give the duration of the mode in seconds.
+ */
+extern inline void mode_task (
 	void (*begin) (void),
 	void (*expire) (void),
 	void (*end) (void),
@@ -30,18 +38,26 @@ extern inline void mode_start (
 	U8 grace_time
 	)
 {
+	/* Mark the task as protected, because killing it will not do all
+	of the cleanup needed for ending the mode.  The proper way to end
+	a mode is to invoke mode_stop(). */
 	task_set_flags (TASK_PROTECTED);
 
+	/* Initialize the timer and invoke the mode's begin hook */
 	*timer = mode_time;
 	if (begin)
 		begin ();
 
+	/* Run the timer down to zero.  Check for balls held up in
+	devices temporarily; this will pause the timer. */
 	do {
-		task_sleep (TIME_1S + TIME_66MS);
-		if (held_balls)
-			continue;
+		do { 
+			task_sleep (TIME_1S + TIME_66MS);
+		} while (device_holdup_count ());
 	} while (--*timer != 0);
 
+	/* If a grace period is required, then run the first second 
+	of it here. */
 	if ((grace_time >= 1)
 		&& !in_tilt
 		&& !in_bonus)
@@ -49,9 +65,11 @@ extern inline void mode_start (
 		task_sleep_sec (1);
 	}
 
+	/* Invoke the expire hook */
 	if (expire)
 		expire ();
 
+	/* Run the rest of the grace period out */
 	if ((grace_time >= 1)
 		&& !in_tilt
 		&& !in_bonus)
@@ -59,12 +77,36 @@ extern inline void mode_start (
 		task_sleep_sec (grace_time-1);
 	}
 
+	/* Invoke the end hook */
 	if (end)
 		end ();
+
+	/* End the mode */
 	task_exit ();
 }
 
 
+/** Starts a mode task */
+extern inline void mode_start (U8 gid, void (*task_function) (void))
+{
+	task_create_gid1 (gid, task_function);
+}
+
+
+extern inline bool mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
+{
+	return task_find_gid (gid) ? TRUE : FALSE;
+}
+
+
+extern inline bool mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
+{
+	return (*timer != 0);
+}
+
+
+/** Stops a mode task by setting its timer to zero.  The mode task will
+detect this and exit on its own */
 extern inline void mode_stop (U8 *timer)
 {
 	*timer = 0;

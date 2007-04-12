@@ -565,9 +565,7 @@ term6:
 times8:
 times10:
 helv8:
-schu:
 misctype:
-utopia:
 fixed12:
 var5:
 cu17:

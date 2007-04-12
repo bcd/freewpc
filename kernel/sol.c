@@ -107,7 +107,7 @@ void
 sol_modify_pulse (solnum_t sol, U8 cycle_mask)
 {
 	sol_modify (sol, cycle_mask);
-	task_sleep (TIME_66MS);
+	task_sleep (TIME_66MS); /* TODO : how long to pulse for? */
 	sol_modify (sol, 0);
 }
 

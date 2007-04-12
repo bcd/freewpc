@@ -24,6 +24,10 @@
 __local__ U8 mpf_enable_count;
 
 
+/** Number of balls currently on the mini-playfield */
+U8 mpf_ball_count;
+
+
 void mpf_battle_lamp_update (void)
 {
 	if (mpf_enable_count > 0)
@@ -48,41 +52,81 @@ void mpf_start (void)
 	task_create_gid1 (GID_BATTLE_RUNNING, mpf_battle_running);
 }
 
+
 void mpf_stop (void)
 {
 	task_kill_gid (GID_BATTLE_RUNNING);
 }
+
+
+CALLSET_ENTRY (mpf, sw_camera)
+{
+	if (event_did_follow (mpf_top, camera))
+	{
+		callset_invoke (powerfield_win);
+	}
+}
+
 
 CALLSET_ENTRY (mpf, sw_mpf_top)
 {
 	event_can_follow (mpf_top, camera, TIME_4S);
 }
 
+
 CALLSET_ENTRY (mpf, sw_mpf_enter)
 {
-	/* signal ramp divertor that ball passed */
-	mpf_start ();
+	/* If tripped immediately after the right ramp opto, then a ball
+	has truly entered the mini-playfield.  Note this may trip later
+	on when a ball is already in play. */
+	if (event_did_follow (right_ramp, mpf_enter))
+	{
+		if (mpf_ball_count == 0)
+		{
+			callset_invoke (powerfield_begin);
+			mpf_start ();
+		}
+
+		mpf_ball_count++;
+		callset_invoke (powerfield_enter);
+	}
 }
+
 
 CALLSET_ENTRY (mpf, sw_mpf_exit)
 {
-	mpf_stop ();
+	mpf_ball_count--;
+	callset_invoke (powerfield_exit);
+
+	if (mpf_ball_count == 0)
+	{
+		callset_invoke (powerfield_end);
+		mpf_stop ();
+	}
 }
+
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
 }
 
+
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
 }
 
+
 CALLSET_ENTRY (mpf, sw_right_ramp)
 {
+	/* If the mini-playfield is enabled, open the ramp
+	divertor fully.  The ordinary catch and drop is bypassed. */
+
+	event_should_follow (right_ramp, mpf_enter, TIME_3S);
 }
 
 CALLSET_ENTRY (mpf, start_player)
 {
 	mpf_enable_count = 0;
+	mpf_ball_count = 0;
 }
 

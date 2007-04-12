@@ -28,9 +28,9 @@
 extern const score_t score_table[];
 
 /** Nonzero if the current score has changed and needs to be redrawn */
-U8 score_change;
+bool score_update_needed;
 
-/* TODO : scores should be in nvram */
+/* TODO : scores should be in nvram and checksummed */
 score_t scores[MAX_PLAYERS];
 
 U8 *current_score;
@@ -157,7 +157,7 @@ void scores_deff (void) __taskentry__
 	{
 redraw:
 		/* Clear score change flag */
-		score_change = 0;
+		score_update_start ();
 
 		/* Stop any score effects (i.e. flashing) */
 
@@ -180,7 +180,7 @@ redraw:
 			{
 				task_sleep (TIME_33MS);
 				delay -= TIME_33MS;
-				if (score_change != 0)
+				if (score_update_required ())
 					goto redraw;
 			}
 			dmd_show_other ();
@@ -190,7 +190,7 @@ redraw:
 			{
 				task_sleep (TIME_33MS);
 				delay -= TIME_33MS;
-				if (score_change != 0)
+				if (score_update_required ())
 					goto redraw;
 			}
 			dmd_show_other ();
@@ -205,6 +205,11 @@ void score_zero (score_t *s)
 }
 
 
+/** Adds two arbitrary scores together.  s1 and s2 point
+ * to BCD-encoded score buffers of length 'len' bytes each.
+ * The value of s2 is added to s1, and the result is stored
+ * in s1.
+ */
 void score_add (bcd_t *s1, const bcd_t *s2, U8 _len)
 {
 	register bcd_t *bcd1 = s1;
@@ -258,7 +263,7 @@ void score_add_current (const bcd_t *s)
 	}
 
 	score_add (current_score, s, sizeof (score_t));
-	score_change++;
+	score_update_request ();
 	replay_check_current ();
 }
 
@@ -289,7 +294,7 @@ void score_multiple (score_id_t id, U8 multiplier)
 	Since packed BCD cannot be multiplied directly, we have to convert the
 	BCD value to decimal and then do normal binary multiplication. */
 #endif
-	score_change++;
+	score_update_request ();
 }
 
 
@@ -341,13 +346,13 @@ I8 score_compare (const score_t s1, const score_t s2)
 
 void scores_reset (void)
 {
-	score_change = 0;
+	score_update_start ();
 	memset ((U8 *)scores, 0, sizeof (scores));
 	current_score = &scores[0][0];
 }
 
 
-void score_init (void)
+CALLSET_ENTRY (score, init)
 {
 	scores_reset ();
 }
