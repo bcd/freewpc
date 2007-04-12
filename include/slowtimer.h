@@ -95,6 +95,7 @@ typedef struct slow_timer
 	TODO : no bank switching is performed when reading this, so modules
 	using slowtimers have to be in the fixed area. */
 	slow_timer_config_t *config;
+	U8 config_page;
 
 	/** The current count */
 	U8 count;

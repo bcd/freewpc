@@ -99,7 +99,7 @@ do { \
 	dbprintf ("Calling device hook %s\n", #op); \
 	if (in_game && (dev->props->ops->op)) \
 	{ \
-		_far_indirect_call_handler (dev->props->ops->op, EVENT_PAGE); \
+		far_indirect_call_handler (dev->props->ops->op, EVENT_PAGE); \
 	}  \
 } while (0)
 
@@ -211,6 +211,7 @@ extern device_t device_table[];
 extern U8 counted_balls;
 extern U8 missing_balls;
 extern U8 live_balls;
+extern U8 held_balls;
 extern U8 kickout_locks;
 
 __common__ void device_clear (device_t *dev);

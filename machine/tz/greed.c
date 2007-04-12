@@ -40,14 +40,8 @@ U8 greed_sounds[] = {
 	SND_GREED_DEFAULT_4,
 };
 
+U8 greed_round_timer;
 
-extern void callset_door_stop_greed (void);
-static const slow_timer_config_t greed_round_timer = {
-	.duration = 20,
-	.grace = 2,
-	.expire_func = callset_door_stop_greed,
-	.flags = SLOW_TIMER_KILL_END_BALL,
-};
 
 static const audio_track_t greed_round_music = {
 	.prio = PRI_GAME_MODE1,
@@ -56,28 +50,18 @@ static const audio_track_t greed_round_music = {
 
 void greed_round_deff (void)
 {
-	slow_timer_t *timer = slow_timer_find (&greed_round_timer);
-	if (timer == NULL)
-	{
-		dbprintf ("can't find timer!!!\n");
-		deff_exit ();
-	}
-
-	dbprintf ("greed round deff running, timer=%p\n", timer);
-	while (timer->flags & SLOW_TIMER_RUNNING)
+	for (;;)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 8, "GREED");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 20, sprintf_buffer);
-		sprintf ("%d", slow_timer_get_count (timer));
+		sprintf ("%d", greed_round_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}
-	dbprintf ("greed round deff exiting\n");
-	deff_exit ();
 }
 
 
@@ -151,22 +135,53 @@ void common_greed_handler (U8 target)
 }
 
 
-CALLSET_ENTRY (greed, door_start_greed)
+void greed_round_begin (void)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
-
-	slow_timer_create (&greed_round_timer);
 	bg_music_start (&greed_round_music);
 	deff_start (DEFF_GREED_ROUND);
 }
 
-CALLSET_ENTRY (greed, door_stop_greed)
+void greed_round_expire (void)
+{
+	deff_stop (DEFF_GREED_ROUND);
+	bg_music_stop (&greed_round_music);
+}
+
+void greed_round_end (void)
 {
 	greed_set = NO_TARGETS;
 	standup_lamp_update ();
-	deff_stop (DEFF_GREED_ROUND);
-	bg_music_stop (&greed_round_music);
+}
+
+void greed_round_task (void)
+{
+#if 0
+	extern void greed_door_stop_greed (void);
+	do {
+		task_sleep (TIME_1S + TIME_100MS);
+		if (kickout_locks)
+			continue;
+		greed_round_timer--;
+	} while (greed_round_timer > 0);
+	task_sleep_sec (1);
+	greed_door_stop_greed ();
+	task_exit ();
+#else
+	mode_start (greed_round_begin, greed_round_expire, greed_round_end,
+		&greed_round_timer, 20, 3);
+#endif
+}
+
+CALLSET_ENTRY (greed, door_start_greed)
+{
+	task_create_gid1 (GID_GREED_ROUND_RUNNING, greed_round_task);
+}
+
+CALLSET_ENTRY (greed, door_stop_greed)
+{
+	mode_stop (&greed_round_timer);
 }
 
 CALLSET_ENTRY (greed, start_player)

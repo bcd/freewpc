@@ -27,6 +27,8 @@
  * exit routines, grace periods, etc.
  */
 
+
+
 /** The table of slow timer objects */
 slow_timer_t slow_timers[MAX_SLOW_TIMERS];
 
@@ -48,8 +50,8 @@ void slow_timer_dump (void)
 		{
 			dbprintf ("   %p   %02X %02X", 
 				timer->config, 
-				timer->config->duration,
-				timer->config->warning);
+				far_read8 (&timer->config->duration, timer->config_page),
+				far_read8 (&timer->config->warning, timer->config_page));
 		}
 		dbprintf ("\n");
 	}
@@ -250,9 +252,11 @@ CALLSET_ENTRY (slow_timer, end_ball)
 
 CALLSET_ENTRY (slow_timer, init)
 {
+#if 0
 	/* Initialize the slow timer subsystem.
 	 * A dedicated thread runs continuously to update all of the timers. */
 	memset (slow_timers, 0, sizeof (slow_timers));
 	task_create_gid (GID_TIMER_THREAD, slow_timer_thread);
+#endif
 }
 

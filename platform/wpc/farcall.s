@@ -68,8 +68,12 @@ __far_call_handler:
 	rts
 
 
-	.globl __far_indirect_call_handler
-__far_indirect_call_handler:
+	;;; Call through a far pointer.  This is identical to above, except the
+	;;; address is already in X/B and is not loaded from the program inline.
+	;;; Note: this only works if the function is void (*)(void).  If it
+	;;; takes parameters, this gets tricky...
+	.globl _far_indirect_call_handler
+_far_indirect_call_handler:
 	pshs	b,u,x                 ; Save all registers used for parameters
 	stx   *__far_call_address   ; Move function offset to memory
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
@@ -80,3 +84,29 @@ __far_indirect_call_handler:
 	puls	a                     ; Restore A
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	rts
+
+
+	;;; Read 8-bit value at a far address.  The offset is in X and the page in B.
+	;;; The return value is in B.
+	.globl _far_read8
+_far_read8:
+	pshs	a
+	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
+	ldb	,x                    ; Read the value
+	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
+	puls	a,pc
+
+
+	;;; Read 16-bit value at a far address.  The offset is in X and the page in B.
+	;;; The return value is in X.
+	.globl _far_read16
+_far_read16:
+	pshs	a
+	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
+	ldx	,x                    ; Read the value
+	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
+	puls	a,pc
+
+

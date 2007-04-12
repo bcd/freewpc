@@ -87,12 +87,6 @@ void db_idle (void)
 					break;
 				}
 
-				case 'm':
-				{
-					slow_timer_dump ();
-					break;
-				}
-
 				case 'g':
 				{
 					extern void dump_game (void);

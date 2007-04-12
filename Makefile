@@ -265,7 +265,8 @@ FON_OBJS = \
 	fonts/miscfixed.o \
 
 XBM_OBJS = images/freewpc.o \
-	images/freewpc_logo_1.o images/freewpc_logo_2.o 
+	images/freewpc_logo_1.o images/freewpc_logo_2.o  \
+	images/tripbrian.o
 
 BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
 

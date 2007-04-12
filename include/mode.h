@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,31 +18,59 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
+#ifndef _MODE_H
+#define _MODE_H
 
-
-CALLSET_ENTRY (rocket, dev_rocket_enter)
+extern inline void mode_start (
+	void (*begin) (void),
+	void (*expire) (void),
+	void (*end) (void),
+	U8 *timer,
+	U8 mode_time,
+	U8 grace_time
+	)
 {
-	disable_skill_shot ();
-	score (SC_10K);
-}
+	task_set_flags (TASK_PROTECTED);
 
-static void rocket_kick_sound (void)
-{
-	sound_send (SND_ROCKET_KICK_DONE);
-	flasher_pulse (FLASH_UR_FLIPPER);
+	*timer = mode_time;
+	if (begin)
+		begin ();
+
+	do {
+		task_sleep (TIME_1S + TIME_66MS);
+		if (held_balls)
+			continue;
+	} while (--*timer != 0);
+
+	if ((grace_time >= 1)
+		&& !in_tilt
+		&& !in_bonus)
+	{
+		task_sleep_sec (1);
+	}
+
+	if (expire)
+		expire ();
+
+	if ((grace_time >= 1)
+		&& !in_tilt
+		&& !in_bonus)
+	{
+		task_sleep_sec (grace_time-1);
+	}
+
+	if (end)
+		end ();
 	task_exit ();
 }
 
-CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
+
+extern inline void mode_stop (U8 *timer)
 {
-	event_should_follow (rocket, hitchhiker, TIME_2S);
-	if (in_live_game)
-	{
-		leff_start (LEFF_NO_GI);
-		sound_send (SND_ROCKET_KICK_REVVING);
-		task_sleep (TIME_100MS * 8);
-		task_create_gid (0, rocket_kick_sound);
-	}
+	*timer = 0;
 }
 
+
+#endif /* _MODE_H */
+
+/* vim: set ts=3: */

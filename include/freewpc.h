@@ -175,6 +175,7 @@ extern U8 irq_count;
 #include <diag.h>
 #include <audio.h>
 #include <slowtimer.h>
+#include <mode.h>
 
 /* Game-specific defines.  'mach' should point to the machine-specific 
  * directory.  These files are optional; if a machine does not need
