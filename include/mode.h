@@ -105,6 +105,20 @@ extern inline bool mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *tim
 }
 
 
+extern inline void mode_extend (U8 *timer, U8 extra_time, U8 max_time)
+{
+	if (*timer == 0)
+	{
+	}
+
+	*timer += extra_time;
+	if (*timer >= max_time)
+	{
+		*timer = max_time;
+	}
+}
+
+
 /** Stops a mode task by setting its timer to zero.  The mode task will
 detect this and exit on its own */
 extern inline void mode_stop (U8 *timer)

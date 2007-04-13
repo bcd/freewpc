@@ -186,6 +186,22 @@ void block_free (task_t *tp)
 }
 
 
+void *malloc (U8 size)
+{
+	task_t *tp = block_allocate ();
+	tp->state |= TASK_MALLOC;
+	void *ptr = ((char *)tp) + 1;
+	return ptr;
+}
+
+
+void free (void *ptr)
+{
+	task_t *tp = (task_t *)(((char *)ptr) - 1);
+	block_free (tp);
+}
+
+
 /**
  * Allocate a block for a new task.  Failure to allocate a block
  * is considered fatal.  If successfully allocated, the block

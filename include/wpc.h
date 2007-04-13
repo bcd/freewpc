@@ -123,10 +123,6 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
-/** The layout of the malloc area */
-#define MALLOC_BASE		((U8 *)0x1400)
-#define MALLOC_SIZE		0x200UL
-
 /***************************************************************
  * System timing
  ***************************************************************/

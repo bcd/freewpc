@@ -119,7 +119,7 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 
 /** Declare that another switch can follow the one that just closed. */
 #define switch_can_follow(first,second,timeout) \
-	timer_restart_free (GID_ ## second ## _FOLLOWED_BY_ ## first, timeout)
+	timer_restart_free (GID_ ## first ## _FOLLOWED_BY_ ## second, timeout)
 
 /** Declare that a 'device switch' can follow the one that just closed.
  * This is equivalent to 'switch_can_follow', but it also freezes all
@@ -135,7 +135,7 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * If this returns TRUE, it means it happened within the timeout after the
  * first switch closure. */
 #define switch_did_follow(first,second) \
-	timer_kill_gid (GID_ ## second ## _FOLLOWED_BY_ ## first)
+	timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second)
 
 /* The above macros are generic enough to apply to any event, not
  * just switch events */

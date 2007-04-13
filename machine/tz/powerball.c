@@ -331,6 +331,12 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 }
 
 
+CALLSET_ENTRY (pb_detect, start_ball)
+{
+	pb_clear_location (PB_IN_PLAY);
+}
+
+
 CALLSET_ENTRY (pb_detect, init)
 {
 	pb_location = 0;

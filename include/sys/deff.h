@@ -47,8 +47,9 @@ typedef struct
 /** The maximum number of display effects that can be queued (i.e.
  * waiting to run, but blocked by a higher priority effect).
  */
-#define MAX_QUEUED_DEFFS 16
-
+#ifndef MAX_RUNNING_DEFFS
+#define MAX_RUNNING_DEFFS 16
+#endif
 
 #define DECLARE_DEFF(id, _flags, _prio, _page) \
 	extern void id##_func (void); \
@@ -69,7 +70,7 @@ void deff_stop (deffnum_t dn);
 void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);
 __noreturn__ void deff_exit (void);
-void deff_delay_and_exit (task_ticks_t ticks);
+__noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (int8_t count, task_ticks_t delay);
 void deff_init (void);
 void deff_stop_all (void);

@@ -103,7 +103,7 @@ foreach $src (@srclist) {
 		chomp;
 
 		if (/(switch|event)_(can|did)_follow[ \t]*\(([a-zA-Z0-9_]+), ([a-zA-Z0-9_]+)/) {
-			$line = " GID_" . $4 . "_FOLLOWED_BY_" . $3;
+			$line = " GID_" . $3 . "_FOLLOWED_BY_" . $4;
 		} else {
 			$line = $_;
 		}

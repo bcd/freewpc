@@ -59,7 +59,7 @@ void ballsave_enable (void)
 void ballsave_disable (void)
 {
 #ifndef INFINITE_BALL_SAVER
-	task_kill_gid (GID_BALLSAVER);
+	task_kill_gid (GID_BALLSAVER_TIMER);
 	leff_stop (LEFF_BALL_SAVE);
 #endif
 }
@@ -70,7 +70,7 @@ bool ballsave_test_active (void)
 	if (timed_game_timer > 5)
 		return TRUE;
 #endif
-	return timer_find_gid (GID_BALLSAVER) ? TRUE : FALSE;
+	return timer_find_gid (GID_BALLSAVER_TIMER) ? TRUE : FALSE;
 }
 
 
@@ -116,10 +116,14 @@ CALLSET_BOOL_ENTRY(ballsave, end_ball_check)
 {
 	if (ballsave_test_active ())
 	{
+		dbprintf ("Need to save ball!\n");
 		ballsave_launch ();
 		return FALSE;
 	}
 	else
+	{
+		dbprintf ("No ball save needed\n");
 		return TRUE;
+	}
 }
 

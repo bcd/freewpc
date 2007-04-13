@@ -80,7 +80,7 @@ uint8_t deff_prio;
 /** Queue of all deffs that have been scheduled to run, even
  * if they are low in priority.  The actively running deff
  * is also in this queue. */
-static uint8_t deff_queue[MAX_QUEUED_DEFFS];
+static uint8_t deff_queue[MAX_RUNNING_DEFFS];
 
 
 U8 deff_get_count (void)
@@ -98,7 +98,7 @@ bool deff_is_running (deffnum_t dn)
 {
 	U8 i;
 
-	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 		if (deff_queue[i] == dn)
 			return TRUE;
 	return FALSE;
@@ -112,7 +112,7 @@ static void deff_add_queue (deffnum_t dn)
 	if (deff_is_running (dn))
 		return;
 
-	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 		if (deff_queue[i] == 0)
 		{
 			deff_queue[i] = dn;
@@ -126,7 +126,7 @@ static void deff_add_queue (deffnum_t dn)
 static void deff_remove_queue (deffnum_t dn)
 {
 	uint8_t i;
-	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 		if (deff_queue[i] == dn)
 			deff_queue[i] = 0;
 }
@@ -138,7 +138,7 @@ static deffnum_t deff_get_highest_priority (void)
 	uint8_t prio = 0;
 	uint8_t best = DEFF_NULL;
 
-	for (i=0; i < MAX_QUEUED_DEFFS; i++)
+	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 	{
 		if (deff_queue[i] != 0)
 		{
@@ -306,7 +306,7 @@ __noreturn__ void deff_exit (void)
 }
 
 
-void deff_delay_and_exit (task_ticks_t ticks)
+__noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 {
 	task_sleep (ticks);
 	deff_exit ();
@@ -328,7 +328,7 @@ void deff_init (void)
 {
 	deff_prio = 0;
 	deff_active = DEFF_NULL;
-	memset (deff_queue, 0, MAX_QUEUED_DEFFS);
+	memset (deff_queue, 0, MAX_RUNNING_DEFFS);
 }
 
 

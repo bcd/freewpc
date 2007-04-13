@@ -49,6 +49,9 @@ __far_call_address: .blkb 2
 	;;; Overhead is about 70 cycles as compared to a normal function
 	;;; call.
 	;;;
+	;;; TODO? - put the saved bank into a global so that the callee can
+	;;; get to it, for accessing caller data?
+	;;;
 	.area sysrom
 	.globl __far_call_handler
 __far_call_handler:
