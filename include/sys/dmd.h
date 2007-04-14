@@ -148,6 +148,7 @@ void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t dbuf);
 void dmd_clean_page_low (void);
 void dmd_clean_page_high (void);
+void dmd_fill_page_low (void);
 void dmd_invert_page (dmd_buffer_t dbuf);
 void dmd_mask_page (dmd_buffer_t dbuf, U16 mask);
 void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src);

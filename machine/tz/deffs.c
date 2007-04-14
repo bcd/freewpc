@@ -138,7 +138,6 @@ U16 *tv_static_data[] = {
 void tv_static_deff (void)
 {
 	U8 loop;
-	U8 count;
 	register U16 *dmd;
 	U8 r;
 
@@ -200,8 +199,19 @@ void text_color_flash_deff (void)
 }
 
 
-void car_fadein_deff (void)
+void spell_test_deff (void)
 {
+	U8 count = 4;
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	sprintf ("%*s", count, "FASTLOCK");
+	font_render_string_left (&font_fixed10, 16, 9, sprintf_buffer);
+	dmd_flip_low_high ();
+	dmd_clean_page_low ();
+	font_render_string_left (&font_fixed10, 16, 9, "FASTLOCK");
+	dmd_flip_low_high ();
+	dmd_show2 ();
+	task_sleep_sec (3);
 	deff_exit ();	
 }
 

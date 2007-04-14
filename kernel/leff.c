@@ -401,9 +401,9 @@ __noreturn__ void leff_exit (void)
 	const leff_t *leff;
 	
 	dbprintf ("Exiting leff\n");
-	task_kill_peers ();
 	if (leff_running_flags & L_SHARED)
 	{
+		task_kill_peers ();
 		leff = &leff_table[leff_self_id];
 		lampset_set_apply_delay (0);
 		lampset_apply (leff->lampset, lamp_leff2_free);

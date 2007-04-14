@@ -22,7 +22,11 @@ void sssmb_running_deff (void)
 
 		dmd_copy_low_to_high ();
 
-		if (sssmb_ramps_to_divert == 0)
+		if (timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
+		{
+			sprintf ("SKILL SHOT SCORES JACKPOT");
+		}
+		else if (sssmb_ramps_to_divert == 0)
 		{
 			sprintf ("SHOOT RAMP NOW");
 		}
@@ -105,6 +109,7 @@ void sssmb_award_jackpot (void)
 
 void sssmb_jackpot_ready_task (void)
 {
+	dbprintf ("Jackpot ready.\n");
 	sound_send (SND_HEEHEE);
 	task_sleep_sec (4);
 	sound_send (SND_FASTER);
@@ -193,22 +198,22 @@ CALLSET_ENTRY (sssmb, sw_left_ramp_exit)
 		{
 			if (!timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 			{
-				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_3S);
+				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_6S);
 				ramp_divert ();
 			}
 		}
 		else
 		{
 			sssmb_ramps_to_divert--;
-			score_update_required ();
 		}
+		score_update_required ();
 	}
 }
 
 CALLSET_ENTRY (sssmb, sw_shooter)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& !sssmb_ramps_to_divert)
+		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;
 		skill_switch_reached = 0;
@@ -218,6 +223,7 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 
 CALLSET_ENTRY (sssmb, any_skill_switch)
 {
+	dbprintf ("Jackpot ready cancelled\n");
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 }
 

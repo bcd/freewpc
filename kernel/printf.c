@@ -214,8 +214,11 @@ do_format_chars:
 			format++;
 			switch (*format)
 			{
-				/* TODO : handle format char '*' to dynamically set
+				/* Handle format char '*' to dynamically set
 				the width from a parameter */
+				case '*':
+					sprintf_width = va_arg (va, PROMOTED_U8);
+					goto do_format_chars;
 
 				case '0':
 					if (sprintf_width == 0)

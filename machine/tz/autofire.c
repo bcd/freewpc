@@ -40,8 +40,12 @@ void autofire_monitor (void)
 {
 	/* Catch the ball */
 	task_sleep_sec (1);
+	dbprintf ("Closing autofire divertor");
 	sol_off (SOL_SHOOTER_DIV);
 
+	/* Wait for the ball to settle */
+	task_sleep_sec (2);
+	
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
 		task_sleep (TIME_33MS);
@@ -64,6 +68,7 @@ void autofire_monitor (void)
 
 void autofire_open_for_trough (void)
 {
+	dbprintf ("Opening autofire divertor");
 	while (task_find_gid (GID_AUTOFIRE_HANDLER))
 		task_sleep_sec (1);
 	sol_on (SOL_SHOOTER_DIV);
@@ -72,6 +77,7 @@ void autofire_open_for_trough (void)
 }
 
 
+#if 0
 /* TODO : deprecate this function */
 void autofire_handler (void)
 {
@@ -123,12 +129,13 @@ retry:
 	}
 	task_exit ();
 }
+#endif
 
 
 void autofire_add_ball (void)
 {
 	autofire_request_count++;
-	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_handler);
+	device_request_kick (device_entry (DEVNO_TROUGH));
 }
 
 
@@ -149,13 +156,18 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	/* The default strategy is to autofire only when live_balls >= 2.
 	This would apply at the beginning of a multiball.  (Note:
 	live_balls is updated *prior* to the kick of the new ball). */
-	if (live_balls + autofire_request_count >= 2)
+	if (in_live_game
+		&& (live_balls || autofire_request_count))
 	{
 		if (autofire_request_count > 0)
 			autofire_request_count--;
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
+	}
+	else
+	{
+		dbprintf ("Sending ball to manual plunger\n");
 	}
 }
 

@@ -116,13 +116,11 @@ CALLSET_BOOL_ENTRY(ballsave, end_ball_check)
 {
 	if (ballsave_test_active ())
 	{
-		dbprintf ("Need to save ball!\n");
 		ballsave_launch ();
 		return FALSE;
 	}
 	else
 	{
-		dbprintf ("No ball save needed\n");
 		return TRUE;
 	}
 }

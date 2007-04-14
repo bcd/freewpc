@@ -39,9 +39,9 @@ void skill_shot_ready_deff (void)
 	font_render_string (&font_mono5, 16, 22, "RED    ");
 
 	dmd_copy_low_to_high ();
-	font_render_string_right (&font_var5, 110, 10, "5,000,000");
-	font_render_string_right (&font_var5, 110, 16, "3,000,000");
-	font_render_string_right (&font_var5, 110, 22, "1,000,000");
+	font_render_string_right (&font_mono5, 110, 10, "5,000,000");
+	font_render_string_right (&font_mono5, 110, 16, "3,000,000");
+	font_render_string_right (&font_mono5, 110, 22, "1,000,000");
 	dmd_show_low ();
 	for (;;)
 	{

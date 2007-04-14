@@ -329,6 +329,12 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 }
 
 
+void dmd_fill_page_low (void)
+{
+	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
+}
+
+
 void dmd_clean_page_low (void)
 {
 	dmd_clean_page (dmd_low_buffer);
