@@ -213,13 +213,6 @@ void amode_deff (void) __taskentry__
 #endif
 
 #if 0
-		dmd_alloc_low_high ();
-		dmd_draw_image2 (tripbrian_bits);
-		dmd_show2 ();
-		task_sleep_sec (7);
-#endif
-
-#if 0
 		extern const U8 cow_anim0_prg[];
 		dmd_alloc_low ();
 		dmd_draw_xbmprog (cow_anim0_prg);

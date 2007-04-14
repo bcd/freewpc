@@ -46,7 +46,6 @@ CALLSET_ENTRY (flip, sw_l_l_flipper_button)
 		extern void MACHINE_AMODE_LEFT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_LEFT_FLIPPER_HANDLER ();
 		/* TODO : check enable player tournament mode here */
-		/* TODO : check flipper plunger */
 	}
 #endif
 }
@@ -60,7 +59,6 @@ CALLSET_ENTRY (flip, sw_l_r_flipper_button)
 		extern void MACHINE_AMODE_RIGHT_FLIPPER_HANDLER (void);
 		MACHINE_AMODE_RIGHT_FLIPPER_HANDLER ();
 		/* TODO : check enable player tournament mode here */
-		/* TODO : check flipper plunger */
 	}
 #endif
 }

@@ -346,7 +346,7 @@ void dmd_clean_page_high (void)
 void dmd_invert_page (dmd_buffer_t dbuf)
 {
 	register int16_t count = DMD_PAGE_SIZE / (2 * 4);
-	register uint16_t *dbuf16 = (uint16_t *)dbuf;
+	register U16 *dbuf16 = (U16 *)dbuf;
 	while (--count >= 0)
 	{
 		*dbuf16 = ~*dbuf16;
@@ -364,7 +364,7 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 void dmd_mask_page (dmd_buffer_t dbuf, U16 mask)
 {
 	register int16_t count = DMD_PAGE_SIZE / (2 * 8);
-	register uint16_t *dbuf16 = (uint16_t *)dbuf;
+	register U16 *dbuf16 = (U16 *)dbuf;
 	while (--count >= 0)
 	{
 		*dbuf16 &= mask;
@@ -416,8 +416,8 @@ void dmd_alloc_high_clean (void)
 void dmd_draw_border (U8 *dbuf)
 {
 	const dmd_buffer_t dbuf_bot = (dmd_buffer_t)((char *)dbuf + 480);
-	register uint16_t *dbuf16 = (uint16_t *)dbuf;
-	register uint16_t *dbuf16_bot = (uint16_t *)dbuf_bot;
+	register U16 *dbuf16 = (U16 *)dbuf;
+	register U16 *dbuf16_bot = (U16 *)dbuf_bot;
 	U8 i;
 
 	for (i=0; i < 16; i++)
@@ -750,11 +750,11 @@ void dmd_do_transition (void)
 
 	while (dmd_in_transition)
 	{
-#ifdef STEP_TRANSITION
-		while (!switch_poll (SW_LAUNCH_BUTTON))
+#if defined(STEP_TRANSITION) && defined(MACHINE_LAUNCH_SWITCH)
+		while (!switch_poll (MACHINE_LAUNCH_SWITCH))
 			task_sleep (TIME_33MS);
 		task_sleep (TIME_100MS);
-		while (switch_poll (SW_LAUNCH_BUTTON))
+		while (switch_poll (MACHINE_LAUNCH_SWITCH))
 			task_sleep (TIME_33MS);
 #else
 		task_sleep (dmd_transition->delay);

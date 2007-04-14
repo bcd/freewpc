@@ -33,9 +33,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 {
 	device_switch_can_follow (dead_end, slot, TIME_8S);
 	switch_can_follow (dead_end, camera, TIME_4S);
-#if 1
-	vmode_start ();
-#endif
+
 	if (lamp_test (LM_DEAD_END))
 	{
 		dead_end_count++;

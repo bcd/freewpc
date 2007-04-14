@@ -21,36 +21,36 @@
 
 typedef struct duty_pulse
 {
-	uint8_t on_time;
-	uint8_t off_time;
+	U8 on_time;
+	U8 off_time;
 } duty_pulse_t;
 
 
-typedef uint8_t duty_state_t;
+typedef U8 duty_state_t;
 
 
 typedef struct duty_entry
 {
 	const duty_pulse_t *pulse;
 	const duty_ops_t *ops;
-	uint8_t id;
+	U8 id;
 	duty_state_t state;
-	uint8_t cycle_limit;
+	U8 cycle_limit;
 } duty_entry_t;
 
 
 typedef struct duty_ops
 {
-	void (*on) (uint8_t id);
-	void (*off) (uint8_t id);
-	void (*limit) (uint8_t id);
+	void (*on) (U8 id);
+	void (*off) (U8 id);
+	void (*limit) (U8 id);
 } duty_ops_t;
 
 
 void duty_init (
 	duty_entry_t *entry, 
 	duty_ops_t *ops, 
-	uint8_t id, 
+	U8 id, 
 	const duty_pulse_t *pulse )
 {
 	entry->pulse = pulse;

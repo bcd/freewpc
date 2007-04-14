@@ -127,7 +127,7 @@ void triac_set_brightness (U8 triac, U8 brightness)
 		else	
 			triac_leff_bits[i] &= ~triac;
 	}
-#if 1
+#ifdef TRIAC_DEBUG
 	dbprintf ("triac bits:");
 	for (i=0; i< NUM_BRIGHTNESS_LEVELS; i++)
 		dbprintf ("%02X ", triac_leff_bits[i]);

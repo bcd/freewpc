@@ -538,7 +538,7 @@ LINE:
 
 			# Check for a c_string that is too long.  Try to
 			# abbreviate it if possible.
-			while (length $def->{'c_string'} > 24) {
+			while (length $def->{'c_string'} > 32) {
 				warning $def->{'c_string'} . " may be too long to display";
 				last;
 			}

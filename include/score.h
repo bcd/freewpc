@@ -35,16 +35,17 @@ typedef bcd_t score_t[BYTES_PER_SCORE];
 
 typedef U8 score_id_t;
 
-typedef struct
-{
-	score_t min;
-	score_t step;
-	score_t max;
-} score_ladder_t;
 
+/** A flag that is nonzero when the score screen needs to be updated */
 extern U8 score_update_needed;
+
+/** The array of player scores */
 extern score_t scores[];
+
+/** A pointer to the current score in the scores[] array */
 extern U8 *current_score;
+
+
 
 extern inline void score_update_start (void)
 {
@@ -61,6 +62,7 @@ extern inline void score_update_request (void)
 	score_update_needed = TRUE;
 }
 
+
 void scores_draw (void);
 void scores_draw_ball (void);
 void scores_draw_current (U8 skip_player);
@@ -75,32 +77,5 @@ void score_mul (score_t s1, uint8_t multiplier);
 I8 score_compare (const score_t s1, const score_t s2);
 void scores_reset (void);
 void score_init (void);
-
-/** Macros for adding to the CURRENT score; these are shortcuts **/
-
-#if 0
-#define score_decl(val) \
-	{ \
-		((val) & 0xFF000000ULL) >> 24, \
-		((val) & 0x00FF0000ULL) >> 16, \
-		((val) & 0x0000FF00ULL) >> 8, \
-		((val) & 0x000000FFULL) \
-	}
-
-#define score_ladder_decl(min,step,max) \
-	{ \
-		.min = score_decl (min), \
-		.step = score_decl (step), \
-		.max = score_decl (max), \
-	}
-
-#define score_add_current_const(val) \
-{ \
-	static const U8 score[] = score_decl(val); \
-	score_add_current (score); \
-}
-#endif
-
-#define MAKE_BCD(b)	0x##b
 
 #endif /* _SCORE_H */

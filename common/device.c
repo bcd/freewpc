@@ -396,7 +396,8 @@ void device_update_globals (void)
 	devicenum_t devno;
 	U8 held_balls_now = 0;
 
-	/* Recount the number of balls that are held, excluding those that are locked. */
+	/* Recount the number of balls that are held, 
+	excluding those that are locked. */
 	counted_balls = 0;
 	held_balls_now = 0;
 	for (devno = 0; devno < device_count; devno++)
@@ -410,19 +411,20 @@ void device_update_globals (void)
 			if (dev->actual_count >= dev->max_count)
 				held_balls_now += dev->actual_count - dev->max_count;
 	}
+
+	/* Update held_balls atomically */
 	held_balls = held_balls_now;
 
 	/* Count how many balls are missing */
 	missing_balls = max_balls - counted_balls;
+
 	if (missing_balls != live_balls)
 	{
 		/* Number of balls not accounted for is NOT what we expect */
-		dbprintf ("Missing != Live\n");
-#if 0 /* this isn't right */
+		/* TODO : this isn't right */
+#if 0
 		if (missing_balls + 1 == live_balls)
-		{
 			device_request_kick (device_entry (DEVNO_TROUGH));
-		}
 #endif
 	}
 

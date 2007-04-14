@@ -2,7 +2,7 @@
 
 checkpage ()
 {
-	sz=`grep "l_$1" build/freewpc.map | awk '{print $1}'`
+	sz=`grep " l_$1" build/freewpc.map | awk '{print $1}'`
 	objs=`grep "^$1_OBJS" Makefile`
 	echo "$1 ($objs) : $sz of $2";
 }

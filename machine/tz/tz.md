@@ -494,6 +494,12 @@ STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
 
+SSSMB_RUNNING:
+SSSMB_RED_JACKPOT:
+SSSMB_ORANGE_JACKPOT:
+SSSMB_YELLOW_JACKPOT:
+
+
 ##########################################################################
 # Display effects
 ##########################################################################
@@ -525,6 +531,9 @@ Ball Save: page(MACHINE_PAGE), PRI_GAME_QUICK1+9
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK1+10
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1+11
 LITZ Award: PRI_GAME_QUICK1+15
+
+SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT
+SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
 
 ##########################################################################
 # Lamp effects

@@ -53,9 +53,10 @@ void greed_round_deff (void)
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 8, "GREED");
+		font_render_string_center (&font_fixed6, 64, 5, "GREED");
 		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 20, sprintf_buffer);
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
 		sprintf ("%d", greed_round_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);

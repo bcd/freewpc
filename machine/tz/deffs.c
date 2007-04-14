@@ -202,21 +202,7 @@ void text_color_flash_deff (void)
 
 void car_fadein_deff (void)
 {
-	U8 count = 15;
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
-	dmd_copy_low_to_high ();
-	dmd_mask_page (dmd_low_buffer, 0xA2A2);
-	//dmd_mask_page (dmd_high_buffer, 0x1515);
-	dmd_show2 ();
-	while (--count > 0)
-	{
-		task_sleep (TIME_200MS);
-		dmd_flip_low_high ();
-		dmd_show2 ();
-	}
-	deff_exit ();
+	deff_exit ();	
 }
 
 

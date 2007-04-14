@@ -154,7 +154,6 @@ void do_reset (void)
 	leff_init ();
 	test_init ();
 	adj_init ();
-	high_score_init ();
 	game_init ();
 	callset_invoke (init);
 
@@ -201,10 +200,9 @@ void do_reset (void)
 
 
 /**
- * The lockup check routine examines 'task_dispatch_count', which
- * should normally be incrementing continually as normal task
- * scheduling occurs.  If this value stops moving, something
- * is very wrong.
+ * The lockup check routine examines 'task_dispatch_ok', which
+ * should normally be true as normal task scheduling occurs.  
+ * If this value stays false, something is very wrong.
  *
  * This check occurs every 128 IRQs.  No task should run for
  * that long without giving up control.  If the count doesn't

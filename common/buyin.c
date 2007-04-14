@@ -30,9 +30,12 @@ U8 buyin_offer_timer;
 /** Display effect that runs during the extra ball buyin */
 void buyin_offer_deff (void)
 {
-	while (buyin_offer_timer != 0)
+	dmd_sched_transition (&trans_bitfade_slow);
+	for (;;)
 	{
 		dmd_alloc_low_clean ();
+		dmd_draw_border (dmd_low_buffer);
+		font_render_string_center (&font_term6, 64, 4, "CONTINUE GAME");
 		/* TODO : draw timer */
 		dmd_show_low ();
 		task_sleep (TIME_500MS);
@@ -53,6 +56,7 @@ void buyin_offer (void)
 		buyin_offer_timer--;
 	}
 	task_sleep_sec (1);
+	deff_stop (DEFF_BUYIN_OFFER);
 }
 
 

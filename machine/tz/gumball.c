@@ -24,6 +24,8 @@ bool gumball_load_enabled;
 
 bool gumball_geneva_tripped;
 
+U8 gumball_pending_releases;
+
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
@@ -52,23 +54,32 @@ void gumball_load_from_trough (void)
 	autofire_add_ball ();
 }
 
-void gumball_release (void)
+void gumball_release_task (void)
 {
 	U8 timeout;
 
-	/* TODO : multiple release requests from multiple threads are
-	 * not handled */
-
-	dbprintf ("Gumball release requested\n");
-	gumball_geneva_tripped = FALSE;
-	sol_on (SOL_GUMBALL_RELEASE);
-
-	timeout = 120;
-	while ((gumball_geneva_tripped == FALSE) && (--timeout > 0))
-		task_sleep (TIME_16MS);
-
-	sol_off (SOL_GUMBALL_RELEASE);
+	while (gumball_pending_releases > 0)
+	{
+		gumball_geneva_tripped = FALSE;
+		sol_on (SOL_GUMBALL_RELEASE);
+	
+		timeout = 120;
+		while ((gumball_geneva_tripped == FALSE) && (--timeout > 0))
+			task_sleep (TIME_16MS);
+	
+		sol_off (SOL_GUMBALL_RELEASE);
+		gumball_pending_releases--;
+	}
+	task_exit ();
 }
+
+
+void gumball_release (void)
+{
+	gumball_pending_releases++;
+	task_create_gid1 (GID_GUMBALL_RELEASE, gumball_release_task);
+}
+
 
 /*************************************************************/
 /* Switch Handlers                                           */
@@ -103,12 +114,9 @@ CALLSET_ENTRY (gumball, sw_gumball_popper)
 {
 	/* Wait for ball to settle, then pop
 	 * ball into the gumball machine. */
+	/* TODO - sleep in sw handler bad */
 	task_sleep (TIME_100MS * 5);
-
-	dbprintf ("Pulsing popper\n");
-	sol_on (SOL_POPPER);
-	task_sleep (TIME_100MS);
-	sol_off (SOL_POPPER);
+	sol_pulse (SOL_POPPER);
 }
 
 void sw_gumball_right_loop_entered (void)
@@ -133,11 +141,20 @@ CALLSET_ENTRY (gumball, sw_gumball_lane)
 	gumball_load_disable ();
 }
 
+
+/* Called whenever the far left trough switch is tripped.
+The sole purpose of this to determine when there are too 
+many balls in the trough, and one needs to be fired into the
+gumball out of the way.  If a ball remains on this switch for
+3 seconds, then it is assumed there are 4 balls in the trough
+and one must be loaded. */
 void sw_far_left_trough_monitor (void)
 {
 	U8 timeout = TIME_3S / TIME_200MS;
 	device_t *dev = device_entry (DEVNO_TROUGH);
 
+	/* Poll the switch continuously.  If it ever opens,
+	then abort. */
 	while (timeout > 0)
 	{
 		task_sleep (TIME_200MS);
@@ -149,9 +166,12 @@ void sw_far_left_trough_monitor (void)
 		timeout--;
 	}
 
+	/* If a ball is known to be in play, then delay the
+	load */
 	while (ball_in_play)
 		task_sleep_sec (1);
 
+	/* Start the load */
 	gumball_load_from_trough ();
 	task_exit ();
 }

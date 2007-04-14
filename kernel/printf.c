@@ -80,7 +80,7 @@ U8 commas_written;
 
 
 /** Convert a hex digit to its character representation */
-char digit2char (uint8_t digit)
+char digit2char (U8 digit)
 {
 	if (digit <= 9)
 		return digit + '0';
@@ -97,8 +97,8 @@ char digit2char (uint8_t digit)
  * the method using below for 16-bit values. */
 char *do_sprintf_decimal (char *buf, U8 b)
 {
-	uint8_t quot;
-	uint8_t rem;
+	U8 quot;
+	U8 rem;
 
 	/* Print the hundreds digit and remove it from 'b'. */
 	if (b >= 200)
@@ -148,7 +148,7 @@ char *do_sprintf_long_decimal (char *buf, U16 w)
 
 
 /** Write an 8-bit hexadecimal value 'b' to the buffer 'buf'. */
-char *do_sprintf_hex_byte (char *buf, uint8_t b)
+char *do_sprintf_hex_byte (char *buf, U8 b)
 {
 	*buf++ = digit2char (b >> 4);
 	if (comma_positions & 0x1)

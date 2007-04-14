@@ -72,7 +72,7 @@ void inspector_deff (void)
 
 
 /** Handles the buyin button for starting/stopping the inspector */
-void inspector_buyin_button (void)
+CALLSET_ENTRY (inspector, sw_buyin_button)
 {
 #ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)

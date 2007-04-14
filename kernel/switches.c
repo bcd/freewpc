@@ -346,13 +346,7 @@ void switch_sched (void)
 	const U8 sw = (U8)task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-#if 1 /* TODO */
-	/* Under the newest version of gcc6809, this statement
-	 * causes the compiler to crash...????  */
 	dbprintf ("Handling switch #%d\n", sw);
-#else
-	dbprintf ("Handling switch %p\n", swinfo);
-#endif
 
 #if 0 /* not working */
 	/* In test mode, always queue switch closures into the

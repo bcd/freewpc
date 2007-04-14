@@ -28,23 +28,26 @@ void skill_shot_ready_deff (void)
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
 
-	sprintf_current_score ();
-	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
+	sprintf ("PLAYER %d", player_up);
+	font_render_string_left (&font_mono5, 1, 2, sprintf_buffer);
 
-	font_render_string (&font_mono5, 2, 10, "YELLOW");
-	font_render_string (&font_mono5, 2, 16, "ORANGE");
-	font_render_string (&font_mono5, 2, 22, "RED");
+	sprintf_current_score ();
+	font_render_string_right (&font_mono5, 127, 2, sprintf_buffer);
+
+	font_render_string (&font_mono5, 16, 10, "YELLOW ");
+	font_render_string (&font_mono5, 16, 16, "ORANGE ");
+	font_render_string (&font_mono5, 16, 22, "RED    ");
 
 	dmd_copy_low_to_high ();
-	font_render_string_right (&font_mono5, 120, 10, "5,000,000");
-	font_render_string_right (&font_mono5, 120, 16, "3,000,000");
-	font_render_string_right (&font_mono5, 120, 22, "1,000,000");
+	font_render_string_right (&font_var5, 110, 10, "5,000,000");
+	font_render_string_right (&font_var5, 110, 16, "3,000,000");
+	font_render_string_right (&font_var5, 110, 22, "1,000,000");
 	dmd_show_low ();
 	for (;;)
 	{
-		task_sleep (TIME_100MS * 7);
+		task_sleep (TIME_100MS * 5);
 		dmd_show_other ();
-		task_sleep (TIME_100MS * 3);
+		task_sleep (TIME_100MS * 2);
 		dmd_show_other ();
 	}
 }
@@ -96,14 +99,17 @@ static void award_skill_shot (void)
 	disable_skill_shot ();
 	switch (skill_switch_reached)
 	{
-		case 1: 
+		case 1:
+			callset_invoke (skill_red);
 			score (SC_1M);
 			break;
 		case 2: 
+			callset_invoke (skill_orange);
 			score (SC_3M); 
 			timed_game_extend (5);
 			break;
 		case 3: 
+			callset_invoke (skill_yellow);
 			score (SC_5M); 
 			timed_game_extend (10);
 			break;
@@ -124,7 +130,7 @@ static void skill_switch_monitor (void) __taskentry__
 static void award_skill_switch (U8 sw)
 {
 	switch_can_follow (any_skill_switch, slot, TIME_3S);
-	if (!skill_shot_enabled)
+	if (!skill_shot_enabled && !flag_test (FLAG_SSSMB_RUNNING))
 		return;
 
 	if (skill_switch_reached < sw)

@@ -31,11 +31,22 @@
  * \brief Common plunger routines.
  */
 
+void timed_plunger_monitor (void)
+{
+	/* TODO */
+	task_exit ();
+}
+
+
 CALLSET_ENTRY (plunger, sw_shooter)
 {
 #ifdef INCLUDE_AUTOPLUNGER
-	/* TODO: if timed plunger is enabled, then start a timer
+	/* If timed plunger is enabled, then start a timer
 	to autoplunge the ball regardless of button press */
+	if (system_config.timed_plunger == ON)
+	{
+		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
+	}
 #endif
 }
 

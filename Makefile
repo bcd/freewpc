@@ -1,7 +1,7 @@
 #
 # FreeWPC makefile
 #
-# (C) Copyright 2005-2006 by Brian Dominy.
+# (C) Copyright 2005-2007 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
@@ -432,7 +432,6 @@ DIRECT_LNK_CMD = "-b direct = $(DIRECT_AREA)"
 
 LOCAL_AREA = 0x1400
 LOCAL_AREA_SIZE = 0xA0
-LOCAL_SAVE_AREA = 0x12A0
 LOCAL_LNK_CMD = "-b local = $(LOCAL_AREA)"
 
 STACK_AREA = 0x1600
@@ -898,7 +897,7 @@ $(HOST_XBM_OBJS) : build/%.o : images/%.c
 build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
-tools/fiftool :
+tools/fiftool/fiftool :
 	cd tools/fiftool && $(MAKE)
 
 #######################################################################

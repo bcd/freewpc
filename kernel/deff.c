@@ -72,15 +72,19 @@ static const deff_t deff_table[] = {
 
 
 /** Indicates the id of the deff currently active */
-static uint8_t deff_active;
+static U8 deff_active;
 
 /** Indicates the priority of the deff currently running */
-uint8_t deff_prio;
+U8 deff_prio;
 
 /** Queue of all deffs that have been scheduled to run, even
  * if they are low in priority.  The actively running deff
  * is also in this queue. */
-static uint8_t deff_queue[MAX_RUNNING_DEFFS];
+static U8 deff_queue[MAX_RUNNING_DEFFS];
+
+/** Optional feature for use by deffs that need to manage different
+parts of the display independently. */
+void (*deff_component_table[4]) (void);
 
 
 U8 deff_get_count (void)
@@ -88,7 +92,7 @@ U8 deff_get_count (void)
 	return sizeof (deff_table) / sizeof (deff_t);
 }
 
-uint8_t deff_get_active (void)
+U8 deff_get_active (void)
 {
 	return deff_active;
 }
@@ -107,7 +111,7 @@ bool deff_is_running (deffnum_t dn)
 
 static void deff_add_queue (deffnum_t dn)
 {
-	uint8_t i;
+	U8 i;
 
 	if (deff_is_running (dn))
 		return;
@@ -125,7 +129,7 @@ static void deff_add_queue (deffnum_t dn)
 
 static void deff_remove_queue (deffnum_t dn)
 {
-	uint8_t i;
+	U8 i;
 	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 		if (deff_queue[i] == dn)
 			deff_queue[i] = 0;
@@ -134,9 +138,9 @@ static void deff_remove_queue (deffnum_t dn)
 
 static deffnum_t deff_get_highest_priority (void)
 {
-	uint8_t i;
-	uint8_t prio = 0;
-	uint8_t best = DEFF_NULL;
+	U8 i;
+	U8 prio = 0;
+	U8 best = DEFF_NULL;
 
 	for (i=0; i < MAX_RUNNING_DEFFS; i++)
 	{

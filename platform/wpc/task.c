@@ -188,8 +188,19 @@ void block_free (task_t *tp)
 
 void *malloc (U8 size)
 {
-	task_t *tp = block_allocate ();
+	task_t *tp;
+
+	/* For sanity, make sure the size requested fits within
+	a single task block */
+	if (size > sizeof (task_t)-1)
+		fatal (ERR_NO_FREE_TASKS);
+
+	/* Allocate a block and mark it as being used by malloc(). */
+	tp = block_allocate ();
 	tp->state |= TASK_MALLOC;
+
+	/* Return a pointer to one byte past the beginning, where
+	the 'state' is kept */
 	void *ptr = ((char *)tp) + 1;
 	return ptr;
 }

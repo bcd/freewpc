@@ -61,6 +61,7 @@ typedef struct
 	}; \
 	void id##_func (void) __taskentry__
 
+extern void (*deff_component_table[4]) (void);
 
 U8 deff_get_count (void);
 bool deff_is_running (deffnum_t dn);
@@ -74,6 +75,44 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (int8_t count, task_ticks_t delay);
 void deff_init (void);
 void deff_stop_all (void);
+
+
+extern inline void deff_init_components (void)
+{
+	deff_component_table[0] = null_function;
+	deff_component_table[1] = null_function;
+	deff_component_table[2] = null_function;
+	deff_component_table[3] = null_function;
+}
+
+
+extern inline void deff_set_component (U8 cnum, void (*function) (void))
+{
+	deff_component_table[cnum] = function;
+}
+
+
+extern inline void deff_call_components (void)
+{
+	(*deff_component_table[0]) ();
+	(*deff_component_table[1]) ();
+	(*deff_component_table[2]) ();
+	(*deff_component_table[3]) ();
+}
+
+
+extern inline void deff_wait_for_other (deffnum_t dn)
+{
+	if (deff_is_running (dn))
+	{
+		U8 timeout = TIME_3S / TIME_100MS;
+		while (timeout && deff_is_running (dn))
+		{
+			timeout--;
+			task_sleep (TIME_100MS);
+		}
+	}
+}
 
 
 #ifndef MACHINE_CUSTOM_AMODE

@@ -109,17 +109,17 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 /** The protected RAM size -- whatever is left */
 #define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
-/** The base address of the (dynamic) heap */
-#define HEAP_BASE 		0x800UL
-
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200UL
 #define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
-/** The layout of the player local area */
-#define LOCAL_BASE		((U8 *)0x1200)
-#define LOCAL_SIZE		0xA0U
+/** The layout of the player local area.
+ * There are 5 "copies" of the local area: the lowest address is active
+ * for the current player up, and the next 4 are save areas to hold
+ * values between players in a multi-player game. */
+#define LOCAL_BASE		((U8 *)0x1400)
+#define LOCAL_SIZE		0x40U
 
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
@@ -155,14 +155,15 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 #define TIME_300MS	(TIME_100MS * 3U)
 #define TIME_400MS	(TIME_100MS * 4U)
 #define TIME_500MS	(TIME_100MS * 5U)
-#define TIME_1S 		(TIME_100MS * 10U) /* 4 * 3 * 10 = 120 ticks */
-#define TIME_2S 		(TIME_1S * 2U)     /* 240 ticks */
-
-/*
- * These time values can only be used for timer functions.
- */
+#define TIME_1S 		(TIME_100MS * 10U) /* 2 * 3 * 10 = 60 ticks */
+#define TIME_2S 		(TIME_1S * 2U)     /* 120 ticks */
 #define TIME_3S 		(TIME_1S * 3UL)
 #define TIME_4S 		(TIME_1S * 4UL)
+
+/*
+ * These time values can only be used for low-level timers,
+ * because they use a 16-bit ticks field.
+ */
 #define TIME_5S 		(TIME_1S * 5UL)
 #define TIME_6S 		(TIME_1S * 6UL)
 #define TIME_7S 		(TIME_1S * 7UL)

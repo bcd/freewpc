@@ -176,30 +176,14 @@ void door_award_rotate (void)
 	task_exit ();
 }
 
-/* TODO - move to common include */
-inline void deff_wait_for_other (deffnum_t dn)
-{
-	if (deff_is_running (dn))
-	{
-		U8 timeout = TIME_3S / TIME_100MS;
-		while (timeout && deff_is_running (dn))
-		{
-			timeout--;
-			task_sleep (TIME_100MS);
-		}
-	}
-}
-
 void door_award_deff (void)
 {
 	U8 index = door_index;
 
-	dbprintf ("Waiting\n");
 	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 
-	dbprintf ("Award panel %d\n", index);
 	sprintf ("DOOR PANEL %d", door_panels_started);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_mono5, 64, 21, door_panel_names[index]);

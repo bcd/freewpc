@@ -25,6 +25,7 @@ extern task_gid_t last_nonfatal_error_gid;
 extern __nvram__ U8 current_volume;
 extern const audio_track_t volume_change_music_track;
 
+
 /** Display effect when locating missing balls prior to game start */
 void locating_balls_deff (void)
 {
@@ -49,6 +50,7 @@ void game_over_deff (void)
 }
 
 
+/** The display effect for a volume change */
 void volume_change_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -60,6 +62,8 @@ void volume_change_deff (void)
 	deff_exit ();
 }
 
+
+/** The display effect for a non-fatal error */
 void nonfatal_error_deff (void)
 {
 #ifdef DEBUGGER

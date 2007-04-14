@@ -36,7 +36,7 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
-__taskentry__ void autofire_handler (void)
+void autofire_handler (void)
 {
 	task_set_flags (TASK_PROTECTED);
 	while (autofire_request_count > 0)

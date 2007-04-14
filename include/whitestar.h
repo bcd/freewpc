@@ -41,9 +41,6 @@
 /** The protected RAM size -- whatever is left */
 #define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
-/** The base address of the (dynamic) heap */
-#define HEAP_BASE 		0x800UL
-
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200UL
@@ -239,11 +236,6 @@ extern inline void wpc_set_ram_page (uint8_t page)
 
 #define LED_DIAGNOSTIC		0x80
 
-/* 0x4 | 0x2 are always set when writing this register.
- * One of these is probably to clear blanking.
- * 0x80 and 0x10 are also set when clearing the IRQ from the
- * IRQ handler.
- */
 
 /********************************************/
 /* Zero Crossing/IRQ Clear Register         */

@@ -595,14 +595,7 @@ CALLSET_ENTRY (game, sw_start_button)
  */
 CALLSET_ENTRY (game, sw_buyin_button)
 {
-#ifdef MACHINE_BUYIN_SWITCH
-#ifdef TEST_INITIALS_ENTRY
-	extern __common__ void initials_enter (void);
-	initials_enter ();
-#else
-	inspector_buyin_button ();
-#endif
-#endif
+	/* TODO */
 }
 
 

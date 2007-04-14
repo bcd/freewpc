@@ -104,6 +104,9 @@ __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
 /* sling.c */
 void slingshot_rtt(void);
+/* sssmb.c */
+__machine__ void sssmb_start (void);
+__machine__ void sssmb_stop (void);
 /* star.c */
 __machine__ void new_star_task(void);
 __machine__ void new_starfield_start(void);

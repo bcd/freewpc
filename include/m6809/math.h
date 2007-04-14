@@ -21,13 +21,15 @@
 #ifndef _M6809_MATH_H
 #define _M6809_MATH_H
 
-uint16_t div10 (uint8_t val);
+/* Prototype for div10 */
+U16 div10 (U8 val);
 
-
+/* Frontend macro for div10, which extracts the quotient and remainder
+from the 16-bit result and puts this into separate 8-bit locations */
 #define DIV10(u8, quot, rem) \
 do \
 { \
-	uint16_t __unused_quot_rem __attribute__ ((unused)) = div10 (u8); \
+	U16 __unused_quot_rem __attribute__ ((unused)) = div10 (u8); \
 	asm ("sta\t%0" :: "m" (quot)); \
 	asm ("stb\t%0" :: "m" (rem)); \
 } while (0)

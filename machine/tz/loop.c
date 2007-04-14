@@ -106,6 +106,7 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 
 CALLSET_ENTRY (loop, sw_upper_right_magnet)
 {
+	/* Could autodetect present of third magnet using this switch? */
 }
 
 
@@ -146,6 +147,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 
 CALLSET_ENTRY (loop, end_ball)
 {
-	/* TODO */
+	timer_kill_gid (GID_LEFT_LOOP_ENTERED);
+	timer_kill_gid (GID_RIGHT_LOOP_ENTERED);
 }
 

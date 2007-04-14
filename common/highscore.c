@@ -234,7 +234,7 @@ void high_score_check (void)
 }
 
 
-void high_score_init (void) 
+CALLSET_ENTRY (high_score, init)
 {
 	high_score_reset ();
 }

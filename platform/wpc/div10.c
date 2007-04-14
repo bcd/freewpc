@@ -35,11 +35,11 @@
  */
 
 
-uint16_t div10 (uint8_t v)
+U16 div10 (U8 v)
 {
 #ifdef __M6809__
 	register uint16_t res asm ("d");
-	uint8_t i = v;
+	U8 i = v;
 
 	/* TODO : compute how many cycles this is taking */
 	__asm__ volatile (

@@ -7,7 +7,8 @@ Common scenarios:
 - you have a PGM (at most 2 bitplanes) generated through external means.
 You want to convert it to FIF.  Use fiftool -o image.fif -c image.pgm.
 
-- Or maybe it's in XBM format.  That works too: fiftool -o image.fif -c image.xbm
+- Or maybe it's in XBM format.  That works too: 
+fiftool -o image.fif -c image.xbm
 
 - If you have a sequence of FIF frames... you want a FAF, 
 FreeWPC Animation Format.  Do: fiftool -o anim.faf -c image1.fif image2.fif...
@@ -111,6 +112,7 @@ void write_fif (void)
 	XBMSET *xbmset;
 	XBMPROG *xbmprog;
 	enum image_format format;
+	int n_planes = 2;
 
 	ofp = output_file_open ();
 	for (n=0 ; n < n_infiles; n++)
@@ -123,18 +125,19 @@ void write_fif (void)
 
 		switch (format)
 		{
-			case FORMAT_XBM: /* not supported */
-				break;
+			case FORMAT_XBM:
+				n_planes = 1;
+				/* FALLTHROUGH */
 
 			case FORMAT_PGM:	
 				/* Convert PGM to FIF.
 				First we have to convert the PGM to two XBMs. */
 				/* Then convert each XBM in turn to FIF. */
 				pgm = pgm_read (infile[n]);
-				pgm_change_maxval (pgm, 3);
+				pgm_change_maxval (pgm, (1 << n_planes) - 1);
 				pgm_invert (pgm);
 				xbmset = pgm_make_xbmset (pgm);
-				for (plane = 0; plane < 2; plane++)
+				for (plane = 0; plane < n_planes; plane++)
 				{
 					xbm = xbmset_plane (xbmset, plane);
 					xbmprog = xbm_make_prog (xbm);

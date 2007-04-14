@@ -57,7 +57,6 @@ void switch_monitor_draw (const switch_monitor_t *monitor, U8 count)
 {
 	while (count > 0)
 	{
-		// blit_erase (monitor->box_coord, 5, 5);
 		if (switch_poll_logical (monitor->sw))
 		{
 			bitmap_draw (monitor->box_coord, BM_X5);

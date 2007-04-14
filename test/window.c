@@ -600,12 +600,8 @@ void adj_browser_init (void)
 		browser_adjs = empty_adjustments;
 		browser_max = 0;
 	}
-
-#if 0 /* not working */
-	while (!*browser_adjs[menu_selection].name);
-		browser_up ();
-#endif
 }
+
 
 void adj_browser_enter (void)
 {
