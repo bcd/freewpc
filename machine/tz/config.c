@@ -28,7 +28,7 @@
 
 U8 faster_quote_given;
 
-static const audio_track_t bonus_music_track = {
+const audio_track_t bonus_music_track = {
 	.prio = PRI_BONUS,
 	.code = MUS_BONUS_START,
 };

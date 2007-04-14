@@ -129,6 +129,7 @@ static void skill_switch_monitor (void) __taskentry__
 
 static void award_skill_switch (U8 sw)
 {
+	callset_invoke (any_skill_switch);
 	switch_can_follow (any_skill_switch, slot, TIME_3S);
 	if (!skill_shot_enabled && !flag_test (FLAG_SSSMB_RUNNING))
 		return;

@@ -36,6 +36,43 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
+void autofire_monitor (void)
+{
+	/* Catch the ball */
+	task_sleep_sec (1);
+	sol_off (SOL_SHOOTER_DIV);
+
+	/* Wait until allowed to kickout */
+	while (kickout_locks > 0)
+		task_sleep (TIME_33MS);
+
+	/* Kick the ball */
+
+	/* Open diverter again and kick ball */
+	sol_on (SOL_SHOOTER_DIV);
+	task_sleep (TIME_500MS);
+	sol_pulse (SOL_AUTOFIRE);
+	if (in_live_game)
+		sound_send (SND_EXPLOSION_1);
+	event_can_follow (autolaunch, right_loop, TIME_4S);
+	task_sleep (TIME_500MS);
+	sol_off (SOL_SHOOTER_DIV);
+	task_sleep_sec (2);
+	task_exit ();
+}	
+
+
+void autofire_open_for_trough (void)
+{
+	while (task_find_gid (GID_AUTOFIRE_HANDLER))
+		task_sleep_sec (1);
+	sol_on (SOL_SHOOTER_DIV);
+	task_sleep_sec (1);
+	task_create_gid (GID_AUTOFIRE_HANDLER, autofire_monitor);
+}
+
+
+/* TODO : deprecate this function */
 void autofire_handler (void)
 {
 	task_set_flags (TASK_PROTECTED);
@@ -51,14 +88,7 @@ void autofire_handler (void)
 		device_request_kick (device_entry (DEVNO_TROUGH));
 
 		/* Wait for autofire switch to go off once */
-		/* TODO : add timeout here */
-		task_sleep_sec (1);
-#if 0
-		while (!switch_poll_logical (SW_AUTOFIRE2))
-			task_sleep (TIME_66MS);
-#else
-		task_sleep_sec (1);
-#endif
+		task_sleep_sec (2);
 
 		/* Close autofire diverter */
 		sol_off (SOL_SHOOTER_DIV);
@@ -116,10 +146,16 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	kicking the ball.  If so, then also wait until the autofire
 	lane is clear before allowing the ball to go. */
 
-	/* The default strategy is to autofire only when live_balls >= 2. */
-	if (live_balls >= 2)
+	/* The default strategy is to autofire only when live_balls >= 2.
+	This would apply at the beginning of a multiball.  (Note:
+	live_balls is updated *prior* to the kick of the new ball). */
+	if (live_balls + autofire_request_count >= 2)
 	{
+		if (autofire_request_count > 0)
+			autofire_request_count--;
+
 		/* Need to open the divertor */
+		autofire_open_for_trough ();
 	}
 }
 
