@@ -54,7 +54,12 @@ extern inline void mode_task (
 		do { 
 			task_sleep (TIME_1S + TIME_66MS);
 		} while (device_holdup_count ());
-	} while (--*timer != 0);
+
+		if (*timer > 0)
+		{
+			*timer--;
+		}
+	} while (*timer != 0);
 
 	/* If a grace period is required, then run the first second 
 	of it here. */
@@ -87,9 +92,9 @@ extern inline void mode_task (
 
 
 /** Starts a mode task */
-extern inline void mode_start (U8 gid, void (*task_function) (void))
+extern inline task_pid_t mode_start (U8 gid, void (*task_function) (void))
 {
-	task_create_gid1 (gid, task_function);
+	return task_create_gid1 (gid, task_function);
 }
 
 

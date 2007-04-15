@@ -22,16 +22,6 @@
 
 static void handle_outlane (void)
 {
-	/* Reenable the ballsaver to its maximum timeout.
-	 * The actual save is still triggered when the ball lands
-	 * in the trough and calls endball.
-	 */
-	if (ballsave_test_active ())
-	{
-		ballsave_enable ();
-		ball_search_timer_reset ();
-	}
-
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
 	event_can_follow (any_outlane, center_drain, TIME_7S);

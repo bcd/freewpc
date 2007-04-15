@@ -101,7 +101,13 @@ extern inline void rt_solenoid_update1 (
 #endif
 
 	state = *rt_sol_state;
-	if (state == 0)
+	
+	if (!in_live_game)
+	{
+		/* Solenoid is never pulsed except during a game */
+		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);
+	}
+	else if (state == 0)
 	{
 		/* Solenoid is idle - normal case */
 		/* Only here are allowed to poll the switch */

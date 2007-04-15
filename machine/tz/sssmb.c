@@ -131,27 +131,34 @@ void sssmb_jackpot_ready_task (void)
 
 void sssmb_start (void)
 {
-	deff_start (DEFF_SSSMB_RUNNING);
-	flag_on (FLAG_SSSMB_RUNNING);
-	flag_on (FLAG_SSSMB_RED_JACKPOT);
-	flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
-	flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
-	sssmb_initial_ramps_to_divert = 1;
-	sssmb_ramps_to_divert = 0;
-	sssmb_jackpot_value = 20;
-	device_multiball_set (2);
+	if (!flag_test (FLAG_SSSMB_RUNNING))
+	{
+		deff_start (DEFF_SSSMB_RUNNING);
+		flag_on (FLAG_SSSMB_RUNNING);
+		flag_on (FLAG_SSSMB_RED_JACKPOT);
+		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
+		flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
+		sssmb_initial_ramps_to_divert = 1;
+		sssmb_ramps_to_divert = 0;
+		sssmb_jackpot_value = 20;
+		device_multiball_set (2);
+		ballsave_add_time (15);
+	}
 }
 
 
 void sssmb_stop (void)
 {
-	flag_off (FLAG_SSSMB_RUNNING);
-	flag_off (FLAG_SSSMB_RED_JACKPOT);
-	flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
-	flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
-	timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
-	task_kill_gid (GID_SSSMB_JACKPOT_READY);
-	deff_stop (DEFF_SSSMB_RUNNING);
+	if (flag_test (FLAG_SSSMB_RUNNING))
+	{
+		flag_off (FLAG_SSSMB_RUNNING);
+		flag_off (FLAG_SSSMB_RED_JACKPOT);
+		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
+		flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
+		timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
+		task_kill_gid (GID_SSSMB_JACKPOT_READY);
+		deff_stop (DEFF_SSSMB_RUNNING);
+	}
 }
 
 

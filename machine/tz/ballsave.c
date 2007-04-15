@@ -20,79 +20,82 @@
 
 #include <freewpc.h>
 
+U8 ball_save_timer;
+
+
 void ball_save_leff (void)
 {
-#if defined (INFINITE_BALL_SAVER)
 	for (;;)
-#elif defined (CONFIG_TIMED_GAME)
-start:
-	while (timed_game_timer > 5)
-#else
-	while (timer_find_gid (GID_BALLSAVER_TIMER))
-#endif
 	{
 		leff_on (LM_SHOOT_AGAIN);
 		task_sleep (TIME_100MS);
 		leff_off (LM_SHOOT_AGAIN);
 		task_sleep (TIME_100MS);
 	}
-
-#ifdef CONFIG_TIMED_GAME
-	while (timed_game_timer != 0)
-	{
-		task_sleep (TIME_500MS);
-		if (timed_game_timer >= 5)
-			goto start;
-	}
-#endif
-	leff_exit ();
 }
 
-void ballsave_enable (void)
+void ballsave_timer_begin (void)
 {
-#ifndef CONFIG_TIMED_GAME
-	timer_restart_free (GID_BALLSAVER_TIMER, TIME_10S);
-#endif
 	leff_start (LEFF_BALL_SAVE);
+}
+
+void ballsave_timer_expire (void)
+{
+	leff_stop (LEFF_BALL_SAVE);
+}
+
+void ballsave_timer_end (void)
+{
+}
+
+void ballsave_timer_task (void)
+{
+	U8 secs = (U8)task_get_arg ();
+	mode_task (ballsave_timer_begin, ballsave_timer_expire, ballsave_timer_end,
+		&ball_save_timer, secs, 3);
+}
+
+void ballsave_add_time (U8 secs)
+{
+	if (mode_timer_running_p (GID_BALLSAVER_TIMER, &ball_save_timer))
+	{
+		mode_extend (&ball_save_timer, secs, 20);
+	}
+	else
+	{
+		task_pid_t tp = mode_start (GID_BALLSAVER_TIMER, ballsave_timer_task);
+		task_set_arg (tp, secs);
+	}
 }
 
 void ballsave_disable (void)
 {
-#ifndef INFINITE_BALL_SAVER
-	task_kill_gid (GID_BALLSAVER_TIMER);
-	leff_stop (LEFF_BALL_SAVE);
-#endif
+	mode_stop (&ball_save_timer);
 }
+
 
 bool ballsave_test_active (void)
 {
-#ifdef CONFIG_TIMED_GAME
-	if (timed_game_timer > 5)
-		return TRUE;
-#endif
-	return timer_find_gid (GID_BALLSAVER_TIMER) ? TRUE : FALSE;
+	return mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
 }
 
 
 void ballsave_launch (void)
 {
-	extern void autofire_add_ball (void);
-
 	autofire_add_ball ();
 	deff_start (DEFF_BALL_SAVE);
 #ifdef CONFIG_TIMED_GAME
 	timed_game_extend (2);
-#else
-	ballsave_disable ();
 #endif
 }
 
 CALLSET_ENTRY (ballsave, sw_left_outlane)
 {
-#ifndef CONFIG_TIMED_GAME
-	if (timer_find_gid (GID_BALLSAVER_TIMER))
-		timer_restart_free (GID_BALLSAVER_TIMER, TIME_10S);
-#endif
+	if (live_balls == 1
+		&& ballsave_test_active ())
+	{
+		ballsave_add_time (5);
+	}
 }
 
 CALLSET_ENTRY (ballsave, sw_right_outlane)
@@ -107,8 +110,13 @@ CALLSET_ENTRY (ballsave, sw_outhole)
 
 CALLSET_ENTRY (ballsave, ball_in_play)
 {
-	/* start ballsaver if enabled */
-	ballsave_enable ();
+	/* Start default ballsaver */
+	ballsave_add_time (10);
+}
+
+CALLSET_ENTRY (ballsave, single_ball_play)
+{
+	ballsave_disable ();
 }
 
 

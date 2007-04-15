@@ -37,7 +37,7 @@ void autofire_handler(void);
 void autofire_add_ball(void);
 void autofire_init(void);
 /* ballsave.c */
-void ballsave_enable(void);
+void ballsave_add_time(U8 secs);
 void ballsave_disable(void);
 bool ballsave_test_active(void);
 void ballsave_launch(void);

@@ -86,7 +86,8 @@ void mb_running_deff (void)
 
 CALLSET_ENTRY (mball, lamp_update)
 {
-	if (mball_locks_lit)
+	if (mball_locks_lit
+		&& !flag_test (FLAG_SSSMB_RUNNING))
 		lamp_tristate_flash (LM_LOCK_ARROW);
 	else
 		lamp_tristate_off (LM_LOCK_ARROW);
@@ -160,6 +161,7 @@ CALLSET_ENTRY (mball, mball_stop)
 CALLSET_ENTRY (mball, sw_left_ramp_exit)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING));
+	else if (flag_test (FLAG_SSSMB_RUNNING));
 	else if (lamp_flash_test (LM_MULTIBALL))
 	{
 		lamp_tristate_off (LM_MULTIBALL);
@@ -200,7 +202,8 @@ CALLSET_ENTRY (mball, single_ball_play)
 
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
-	if (mball_locks_lit > 0)
+	if (flag_test (FLAG_SSSMB_RUNNING));
+	else if (mball_locks_lit > 0)
 	{
 		mball_locks_lit--;
 		device_lock_ball (device_entry (DEVNO_LOCK));
