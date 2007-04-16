@@ -534,6 +534,7 @@ LITZ Award: PRI_GAME_QUICK1+15
 
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT
 SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
+SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+6
 
 ##########################################################################
 # Lamp effects

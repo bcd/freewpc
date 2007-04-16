@@ -94,13 +94,6 @@ void db_idle (void)
 					break;
 				}
 
-				case 's':
-				{
-					extern void switch_check_masks (void);
-					switch_check_masks ();
-					break;
-				}
-
 #ifdef MACHINE_TZ
 				case 'c':
 				{

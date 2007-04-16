@@ -28,7 +28,7 @@ void sssmb_running_deff (void)
 		}
 		else if (sssmb_ramps_to_divert == 0)
 		{
-			sprintf ("SHOOT RAMP NOW");
+			sprintf ("SHOOT LEFT RAMP NOW");
 		}
 		else if (sssmb_ramps_to_divert == 1)
 		{
@@ -109,7 +109,7 @@ void sssmb_award_jackpot (void)
 
 void sssmb_jackpot_ready_task (void)
 {
-	dbprintf ("Jackpot ready.\n");
+	deff_start (DEFF_SSSMB_JACKPOT_LIT);
 	sound_send (SND_HEEHEE);
 	task_sleep_sec (4);
 	sound_send (SND_FASTER);
@@ -224,6 +224,8 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 	{
 		extern U8 skill_switch_reached;
 		skill_switch_reached = 0;
+		/* TODO: handle case where red jackpot switch is tripped but
+		ball falls back to plunger lane */
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}
 }
@@ -232,6 +234,7 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 {
 	dbprintf ("Jackpot ready cancelled\n");
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
+	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
 }
 
 CALLSET_ENTRY (sssmb, start_game)

@@ -21,6 +21,7 @@
 #include <freewpc.h>
 
 
+/** A count of the number of pending autolaunches. */
 U8 autofire_request_count;
 
 
@@ -36,15 +37,17 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
+/** A task that manages the autolaunching of balls.
+Upon entry, the autofire divertor solenoid is already pulsing
+and a ball is being kicked from the trough. */
 void autofire_monitor (void)
 {
 	/* Catch the ball */
 	task_sleep_sec (1);
-	dbprintf ("Closing autofire divertor");
 	sol_off (SOL_SHOOTER_DIV);
 
 	/* Wait for the ball to settle */
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
@@ -66,9 +69,10 @@ void autofire_monitor (void)
 }	
 
 
+/** Called just before the trough kicks a ball when it ought to
+go to the autofire lane rather than the manual plunger. */
 void autofire_open_for_trough (void)
 {
-	dbprintf ("Opening autofire divertor");
 	while (task_find_gid (GID_AUTOFIRE_HANDLER))
 		task_sleep_sec (1);
 	sol_on (SOL_SHOOTER_DIV);
@@ -77,61 +81,7 @@ void autofire_open_for_trough (void)
 }
 
 
-#if 0
-/* TODO : deprecate this function */
-void autofire_handler (void)
-{
-	task_set_flags (TASK_PROTECTED);
-	while (autofire_request_count > 0)
-	{
-		while (kickout_locks > 0)
-			task_sleep (TIME_33MS);
-
-		/* Open autofire diverter */
-		sol_on (SOL_SHOOTER_DIV);
-
-		/* Request kick from trough */
-		device_request_kick (device_entry (DEVNO_TROUGH));
-
-		/* Wait for autofire switch to go off once */
-		task_sleep_sec (2);
-
-		/* Close autofire diverter */
-		sol_off (SOL_SHOOTER_DIV);
-
-		/* Wait for the ball to settle */
-		task_sleep_sec (1);
-
-retry:
-		/* Disable right orbit shots */
-
-		/* Open diverter again and kick ball */
-		sol_on (SOL_SHOOTER_DIV);
-		task_sleep (TIME_100MS * 5);
-
-		sol_pulse (SOL_AUTOFIRE);
-		if (in_live_game)
-			sound_send (SND_EXPLOSION_1);
-		event_can_follow (autolaunch, right_loop, TIME_4S);
-		task_sleep (TIME_100MS * 5);
-
-		/* Close diverter */
-		sol_off (SOL_SHOOTER_DIV);
-
-		/* Check that ball actually launched OK.
-		 * If it didn't, then retry the kick. */
-		task_sleep_sec (2);
-		if (switch_poll_logical (SW_AUTOFIRE2))
-			goto retry;
-
-		/* Decrement request count */
-		autofire_request_count--;
-	}
-	task_exit ();
-}
-#endif
-
-
+/** Request that a new ball be autolaunched into play. */
 void autofire_add_ball (void)
 {
 	autofire_request_count++;
@@ -139,11 +89,15 @@ void autofire_add_ball (void)
 }
 
 
-/* Signals that a ball is headed to the autofire lane from the ramp
+/** Signals that a ball is headed to the autofire lane from the ramp
 divertor and that it needs to be caught in the autoplunger, rather than
 falling into the manual plunger lane */
 void autofire_catch (void)
 {
+	task_sleep_sec (1);
+	sol_on (SOL_SHOOTER_DIV);
+	task_sleep_sec (2);
+	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_monitor);
 }
 
 
@@ -153,9 +107,7 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	kicking the ball.  If so, then also wait until the autofire
 	lane is clear before allowing the ball to go. */
 
-	/* The default strategy is to autofire only when live_balls >= 2.
-	This would apply at the beginning of a multiball.  (Note:
-	live_balls is updated *prior* to the kick of the new ball). */
+	/* The default strategy is to autofire only when in multiball. */
 	if (in_live_game
 		&& (live_balls || autofire_request_count))
 	{

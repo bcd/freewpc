@@ -73,60 +73,6 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 }
 
 
-#ifdef DEBUGGER
-void switch_check_masks (void)
-{
-	U8 col;
-	S8 row;
-	U8 opto_mask;
-	U8 edge_mask;
-	const U8 *mach_optos = mach_opto_mask;
-	const U8 *mach_edges = mach_edge_switches;
-
-	for (col = 0; col < SWITCH_BITS_SIZE; col++)
-	{
-		opto_mask = 0;
-		edge_mask = 0;
-		for (row = 7; row >= 0; --row)
-		{
-			const switch_info_t *sw = switch_lookup (MAKE_SWITCH (col,row));
-
-			opto_mask <<= 1;
-			edge_mask <<= 1;
-
-			if (sw->flags & SW_OPTICAL)
-				opto_mask |= 1;
-			if (sw->flags & SW_EDGE)
-				edge_mask |= 1;
-		}
-
-		if (opto_mask != *mach_optos)
-		{
-			dbprintf ("Column %d optos: mach %02X driver %02X read %02X\n",
-				col, *mach_optos, opto_mask, switch_bits[AR_RAW][col]);
-		}
-		else
-		{
-			dbprintf ("Column %d optos OK\n", col);
-		}
-
-		if (edge_mask != *mach_edges)
-		{
-			dbprintf ("Column %d edges: mach %02X driver %02X\n\n",
-				col, *mach_edges, edge_mask);
-		}
-		else
-		{
-			dbprintf ("Column %d edges OK\n\n", col);
-		}
-
-		mach_optos++;
-		mach_edges++;
-	}
-}
-#endif
-
-
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
@@ -337,9 +283,9 @@ void switch_lamp_pulse (void)
 
 
 /*
- * Any switch transition is handled by this routine.  It performs
- * some of the common switch handling logic before calling the
- * switch-specific function.
+ * The entry point for processing a switch transition.  It performs
+ * some of the common switch handling logic before calling all
+ * event handlers.  Then it also performs some common post-processing.
  */
 void switch_sched (void)
 {

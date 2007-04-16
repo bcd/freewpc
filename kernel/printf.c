@@ -184,8 +184,9 @@ char *do_sprintf_hex (char *buf, uint16_t w)
 
 
 /** Generated formatted data based on the format string 'format'
- * into the buffer 'sprintf_buffer'. */
-U8 sprintf (const char *format, ...)
+ * into the buffer 'sprintf_buffer'.  Note that unlike the
+ * real sprintf, this function doesn't return a value. */
+void sprintf (const char *format, ...)
 {
 	static va_list va;
 	static char *buf;
@@ -405,9 +406,6 @@ output_char:
 	va_end (va);
 
 	*buf = '\0';
-
-	/* TODO : sprintf always returns zero -- seems useless */
-	return 0;
 }
 
 

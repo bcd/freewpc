@@ -154,7 +154,6 @@ void do_reset (void)
 	leff_init ();
 	test_init ();
 	adj_init ();
-	game_init ();
 	callset_invoke (init);
 
 	csum_area_check_all ();
@@ -250,8 +249,10 @@ void fatal (errcode_t error_code)
 #endif
 	wpc_asic_write (WPC_GI_TRIAC, 0);
 
-	/* Audit the error.  TODO : log the error code also */
+	/* Audit the error. */
 	audit_increment (&system_audits.fatal_errors);
+	audit_assign (&system_audits.lockup1_addr, error_code);
+	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 
 	/* Try to display the error on the DMD.  This may not work,
 	you know. */

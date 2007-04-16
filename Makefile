@@ -221,6 +221,7 @@ COMMON_BASIC_OBJS = \
 	common/service.o \
 	common/slowtimer.o \
 	common/tilt.o \
+	common/tournament.o \
 	common/trough.o \
 
 COMMON_OBJS = $(COMMON_BASIC_OBJS) \

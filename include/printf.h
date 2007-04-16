@@ -59,9 +59,9 @@ extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 #ifdef CONFIG_PLATFORM_LINUX
 #undef sprintf
 #define sprintf freewpc_sprintf
-U8 freewpc_sprintf (const char *format, ...);
+void freewpc_sprintf (const char *format, ...);
 #else
-U8 sprintf (const char *format, ...);
+void sprintf (const char *format, ...);
 #endif
 void sprintf_far_string (const char **srcp);
 void sprintf_score (U8 *score);

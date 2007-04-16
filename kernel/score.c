@@ -73,7 +73,8 @@ void scores_draw_credits (void)
 #define SCORE_POS_LR_SMALL 4
 #define SCORE_POS_UL_LARGE 5
 #define SCORE_POS_LR_LARGE 6
-
+#define SCORE_POS_LL_LARGE 7
+#define SCORE_POS_UR_LARGE 8
 
 const struct score_font_info 
 {
@@ -83,8 +84,12 @@ const struct score_font_info
 	U8 y;
 } score_font_info_table[] = {
 	[SCORE_POS_CENTER_LARGE] = { fontargs_render_string_center, &font_lucida9, 64, 10 },
+
 	[SCORE_POS_UL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 1 },
+	[SCORE_POS_UR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 1 },
+	[SCORE_POS_LL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 10 },
 	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 10 },
+
 	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
 	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
 	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 16 },
@@ -103,7 +108,16 @@ const U8 score_font_info_key[4][5][4] = {
 		{SCORE_POS_UL_LARGE, SCORE_POS_LR_SMALL }, 
 		{SCORE_POS_UL_SMALL, SCORE_POS_LR_LARGE }
 	},
-	/* TODO - more */
+	/* 3 players */ {
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
+		{SCORE_POS_UL_LARGE, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_LARGE, SCORE_POS_LL_SMALL }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_LARGE }, 
+	},
+	/* 4 players */ {
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL, 
+			SCORE_POS_LR_SMALL }, 
+	},
 };
 
 
@@ -202,6 +216,31 @@ redraw:
 void score_zero (score_t *s)
 {
 	memset (s, 0, sizeof (score_t));
+}
+
+
+#define __bcd_add8(px, py, carry) \
+do { \
+	asm volatile ("lda\t,%0+" :: "a" (s1)); \
+	if (carry) \
+		asm volatile ("adca\t,%0" :: "a" (s2)); \
+	else \
+		asm volatile ("adda\t,%0" :: "a" (s2)); \
+	asm volatile ("daa"); \
+	asm volatile ("sta\t,%0+" :: "a" (s2)); \
+} while (0)
+
+
+void score_add_new (bcd_t *s1, const bcd_t *s2)
+{
+	s1 += 6-1;
+	s2 += 6-1;
+	__bcd_add8 (s1, s2, 0);
+	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, 1);
 }
 
 

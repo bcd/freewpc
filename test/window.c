@@ -713,7 +713,7 @@ void percentage_of_games_audit (audit_t val)
 #ifndef __m6809__
 	sprintf ("%d%%", 100 * val / system_audits.total_plays);
 #else
-	/* TODO */
+	sprintf ("TODO"); /* TODO */
 #endif
 }
 

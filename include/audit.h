@@ -58,6 +58,8 @@ typedef struct
 	audit_t non_fatal_errors;
 	audit_t left_flippers;
 	audit_t right_flippers;
+	audit_t lockup1_addr;
+	audit_t lockup1_pid_lef;
 } std_audits_t;
 
 extern __nvram__ std_audits_t system_audits;
@@ -65,5 +67,6 @@ extern __nvram__ std_audits_t system_audits;
 void audit_reset (void);
 void audit_increment (audit_t *aud);
 void audit_add (audit_t *aud, U8 val);
+void audit_assign (audit_t *aud, audit_t val);
 
 #endif /* _STDADJ_H */

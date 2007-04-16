@@ -80,3 +80,13 @@ void audit_add (audit_t *aud, U8 val)
 	wpc_nvram_put ();
 }
 
+
+/** Assign an audit value directly */
+void audit_assign (audit_t *aud, audit_t val)
+{
+	wpc_nvram_get ();
+	(*aud) = val;
+	csum_area_update (&audit_csum_info);
+	wpc_nvram_put ();
+}
+

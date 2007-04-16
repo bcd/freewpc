@@ -38,31 +38,6 @@ __fastram__ U8 flipper_inputs;
 __fastram__ U8 flipper_outputs;
 
 
-CALLSET_ENTRY (flip, sw_l_l_flipper_button)
-{
-#ifdef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
-	if (deff_get_active () == DEFF_AMODE)
-	{
-		extern void MACHINE_AMODE_LEFT_FLIPPER_HANDLER (void);
-		MACHINE_AMODE_LEFT_FLIPPER_HANDLER ();
-		/* TODO : check enable player tournament mode here */
-	}
-#endif
-}
-
-
-CALLSET_ENTRY (flip, sw_l_r_flipper_button)
-{
-#ifdef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
-	if (deff_get_active () == DEFF_AMODE)
-	{
-		extern void MACHINE_AMODE_RIGHT_FLIPPER_HANDLER (void);
-		MACHINE_AMODE_RIGHT_FLIPPER_HANDLER ();
-		/* TODO : check enable player tournament mode here */
-	}
-#endif
-}
-
 
 void flipper_enable (void)
 {

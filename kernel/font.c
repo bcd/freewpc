@@ -112,6 +112,9 @@ U8 *blit_dmd;
 U8 *blit_data;
 
 
+/** Write an 8-bit value to an arbitrary location on the DMD.  
+All inputs to this function are kept in global variables that must be 
+initialized prior to entry. */
 static void font_blit (void)
 {
 	switch (blit_xpos % 8)
@@ -168,6 +171,12 @@ static void fontargs_render_string (void)
 	s = sprintf_buffer;
   	blit_xpos = args->coord.x;
 
+	/* When running in native mode, there is no DMD.  However it
+	is useful to know what text the program is trying to display,
+	so output the text string to the console instead.  Note that
+	there is no return here, so the remaining code is still executed,
+	and the 'virtual' DMD buffer is indeed written to, although it
+	can't actually be seen. */
 #ifdef CONFIG_PLATFORM_LINUX
 	linux_write_string (s);
 #endif
