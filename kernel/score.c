@@ -75,6 +75,10 @@ void scores_draw_credits (void)
 #define SCORE_POS_LR_LARGE 6
 #define SCORE_POS_LL_LARGE 7
 #define SCORE_POS_UR_LARGE 8
+#define SCORE_POS_UL_TINY 9
+#define SCORE_POS_LR_TINY 10
+#define SCORE_POS_LL_TINY 11
+#define SCORE_POS_UR_TINY 12
 
 const struct score_font_info 
 {
@@ -94,6 +98,11 @@ const struct score_font_info
 	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
 	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 16 },
 	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 16 },
+
+	[SCORE_POS_UL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 1 },
+	[SCORE_POS_UR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 1 },
+	[SCORE_POS_LL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 16 },
+	[SCORE_POS_LR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 16 },
 };
 
 
@@ -110,9 +119,9 @@ const U8 score_font_info_key[4][5][4] = {
 	},
 	/* 3 players */ {
 		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
-		{SCORE_POS_UL_LARGE, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_LARGE, SCORE_POS_LL_SMALL }, 
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_LARGE }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY }, 
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_LARGE }, 
 	},
 	/* 4 players */ {
 		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL, 
@@ -219,76 +228,43 @@ void score_zero (score_t *s)
 }
 
 
+#ifdef __m6809__
 #define __bcd_add8(px, py, carry) \
 do { \
-	asm volatile ("lda\t,%0+" :: "a" (s1)); \
+	asm volatile ("lda\t,-%0" :: "a" (s1)); \
 	if (carry) \
-		asm volatile ("adca\t,%0" :: "a" (s2)); \
+		asm volatile ("adca\t,-%0" :: "a" (s2)); \
 	else \
-		asm volatile ("adda\t,%0" :: "a" (s2)); \
+		asm volatile ("adda\t,-%0" :: "a" (s2)); \
 	asm volatile ("daa"); \
-	asm volatile ("sta\t,%0+" :: "a" (s2)); \
+	asm volatile ("sta\t,%0" :: "a" (s1)); \
 } while (0)
+#else
+/* TODO */
+#define __bcd_add8(px, py, carry)
+#endif
 
 
-void score_add_new (bcd_t *s1, const bcd_t *s2)
+void score_add (score_t s1, const score_t s2)
 {
-	s1 += 6-1;
-	s2 += 6-1;
+	s1 += BYTES_PER_SCORE;
+	s2 += BYTES_PER_SCORE;
+
+#if (BYTES_PER_SCORE >= 5)
 	__bcd_add8 (s1, s2, 0);
-	__bcd_add8 (s1, s2, 1);
-	__bcd_add8 (s1, s2, 1);
-	__bcd_add8 (s1, s2, 1);
-	__bcd_add8 (s1, s2, 1);
-	__bcd_add8 (s1, s2, 1);
-}
-
-
-/** Adds two arbitrary scores together.  s1 and s2 point
- * to BCD-encoded score buffers of length 'len' bytes each.
- * The value of s2 is added to s1, and the result is stored
- * in s1.
- */
-void score_add (bcd_t *s1, const bcd_t *s2, U8 _len)
-{
-	register bcd_t *bcd1 = s1;
-	register const bcd_t *bcd2 = s2;
-	register U8 len = _len;
-
-	bcd1 += len-1;
-	bcd2 += len-1;
-
-#ifdef __m6809__
-	/* TODO - move into m6809/m6809.h */
-	asm volatile ("lda\t%0" :: "m" (*bcd1));
-	asm volatile ("adda\t%0" :: "m" (*bcd2));
-	asm volatile ("daa");
-	asm volatile ("sta\t%0" :: "m" (*bcd1));
-#else
-	fatal (ERR_NOT_IMPLEMENTED_YET);
 #endif
-	bcd1--;
-	bcd2--;
-  	len--;
-
-	while (len > 0)
-	{
-	  /* TODO : possible compiler optimization could
-		* be done here. (in older implementation)
-		* stb ,x; leax -1,x => stb ,-x
-		*/
-#ifdef __m6809__
-		asm volatile ("lda\t%0" :: "m" (*bcd1));
-		asm volatile ("adca\t%0" :: "m" (*bcd2));
-		asm volatile ("daa");
-		asm volatile ("sta\t%0" :: "m" (*bcd1));
-#else
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+#if (BYTES_PER_SCORE >= 4)
+	__bcd_add8 (s1, s2, 1);
 #endif
-		bcd1--;
-		bcd2--;
-		len--;
-	}
+#if (BYTES_PER_SCORE >= 3)
+	__bcd_add8 (s1, s2, 1);
+#endif
+#if (BYTES_PER_SCORE >= 2)
+	__bcd_add8 (s1, s2, 1);
+#endif
+#if (BYTES_PER_SCORE >= 1)
+	__bcd_add8 (s1, s2, 1);
+#endif
 }
 
 
@@ -301,7 +277,7 @@ void score_add_current (const bcd_t *s)
 		return;
 	}
 
-	score_add (current_score, s, sizeof (score_t));
+	score_add (current_score, s);
 	score_update_request ();
 	replay_check_current ();
 }
@@ -322,7 +298,7 @@ void score_multiple (score_id_t id, U8 multiplier)
 	/* TODO - this is cheating */
 	while (multiplier > 0)
 	{
-		score_add (current_score, score_table[id], sizeof (score_t));
+		score_add (current_score, score_table[id]);
 		multiplier--;
 	}
 
@@ -342,18 +318,13 @@ void score_multiple (score_id_t id, U8 multiplier)
  * score[sizeof(score_t)-3] = ten thousands
  * score[sizeof(score_t)-4] = millions
  */
-void score_add_millions_current (U8 mils)
-{
-	score_add (current_score + sizeof (score_t) - 4, &mils, sizeof (U8));
-}
-
 
 void score_sub (score_t s1, const score_t s2)
 {
 	/* TODO */
 }
 
-void score_mul (score_t s1, uint8_t multiplier)
+void score_mul (score_t s1, U8 multiplier)
 {
 	register U8 off = sizeof (score_t);
 	register bcd_t *bcd = s1 + off - 1;

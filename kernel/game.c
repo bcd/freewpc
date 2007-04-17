@@ -520,6 +520,7 @@ CALLSET_ENTRY (game, sw_start_button)
 	if (in_test)
 		return;
 
+#ifdef MACHINE_START_SWITCH
 	/* If not enough credits, inform the player.
 	 * Also call machine hook, e.g. to make a sound.
 	 * But don't do this during a game. */
@@ -587,6 +588,7 @@ CALLSET_ENTRY (game, sw_start_button)
 #ifdef DEBUGGER
 	dump_game ();
 #endif
+#endif /* MACHINE_START_SWITCH */
 }
 
 

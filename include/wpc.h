@@ -380,7 +380,7 @@ extern inline void wpc_set_rom_page (U8 page)
 /** The call_far, wpc_push_page, and wpc_pop_page
  * macros are only safe when calling from the system
  * page, so don't define them otherwise. */
-#if (PAGE == SYS_PAGE)
+#if (PAGE == SYS_PAGE) || !defined(HAVE_PAGING)
 
 #define call_far(page, fncall) \
 do { \

@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 
-U8 clock_hits;
+__local__ U8 clock_hits;
 
 
 CALLSET_ENTRY (clocktarget, sw_clock_target)

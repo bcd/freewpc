@@ -57,7 +57,7 @@ extern inline void mode_task (
 
 		if (*timer > 0)
 		{
-			*timer--;
+			(*timer)--;
 		}
 	} while (*timer != 0);
 

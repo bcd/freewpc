@@ -47,7 +47,7 @@ typedef pth_t task_pid_t;
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
-//extern void task_set_rom_page (task_t *pid, U8 rom_page);
+extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 
 #else /* !CONFIG_PLATFORM_LINUX */
 
@@ -82,8 +82,6 @@ typedef void (*task_function_t) (void);
 
 /*
  * Define the size of the saved process stack.
- *
- * This value + 20 should equal a power of 2.
  */
 #define TASK_STACK_SIZE		60
 
@@ -105,7 +103,7 @@ typedef void (*task_function_t) (void);
  *
  * When adding/removing fields to this structure, adjust
  * TASK_STACK_SIZE above accordingly so that the total size is
- * a power of 2.
+ * suitably aligned.
  */
 typedef struct task_struct
 {

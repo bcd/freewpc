@@ -32,21 +32,24 @@
  * Only the highest priority track is allowed to run at any time.
  * TODO : paging not being handled here at all!
  */
-audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
+const audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
 
 /** The audio channel control table.
  * For each channel, there is a separate entry that describes the
  * current state of the channel. */
 audio_channel_t audio_channel_table[NUM_AUDIO_CHANNELS];
 
+#ifdef DEBUGGER
 static const char *audio_channel_names[] = {
 	"Sample 1", "Sample 2", "Sample 3",
 	"BG", "Speech 1", "Speech 2", "FG", "Reserved",
 };
+#endif
 
 /** Dump the audio data to the debugger port. */
 void audio_dump (void)
 {
+#ifdef DEBUGGER
 	U8 i;
 
 	/* Dump the channel table */
@@ -66,6 +69,7 @@ void audio_dump (void)
 			dbprintf ("Track %d : %02X  P%d\n", i, track->code, track->prio);
 		}
 	}
+#endif /* DEBUGGER */
 }
 
 
@@ -284,7 +288,9 @@ CALLSET_ENTRY (audio, end_game)
 	if (!in_test)
 	{
 		/* TODO - start timed with fade out */
+#ifdef MACHINE_END_GAME_MUSIC
 		music_set (MACHINE_END_GAME_MUSIC);
+#endif
 	}
 }
 

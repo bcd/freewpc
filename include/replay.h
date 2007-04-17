@@ -21,6 +21,7 @@
 #ifndef _REPLAY_H
 #define _REPLAY_H
 
+__common__ void replay_draw (void);
 __common__ void replay_award (void);
 __common__ void replay_check_current (void);
 __common__ void replay_reset (void);

@@ -330,7 +330,11 @@ CALLSET_ENTRY (nvram, idle)
 /** Realtime function that is called every 1ms */
 static inline void do_irq_1ms (void)
 {
-	/* TODO - newer WPC roms clear WPC_RAM_BANK here */
+	/* If using the RAM paging facility, ensure that page 0
+	 * is visible for the IRQ */
+#ifdef CONFIG_PAGED_RAM
+	wpc_set_ram_page (0);
+#endif
 
 	/* Clear the source of the interrupt */
 	wpc_write_irq_clear (0x96);

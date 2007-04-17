@@ -229,7 +229,9 @@ bool task_kill_gid (task_gid_t gid)
 			 (task_data_table[i].pid != 0) &&
 			 (task_data_table[i].pid != task_getpid ()))
 			task_kill_pid (task_data_table[i].pid);
+			return TRUE;
 	}
+	return FALSE;
 }
 
 
@@ -344,7 +346,7 @@ void task_set_thread_data (task_pid_t pid, U8 n, U8 v)
 }
 
 
-void task_set_rom_page (task_t *pid, U8 rom_page)
+void task_set_rom_page (task_pid_t pid, U8 rom_page)
 {
 }
 

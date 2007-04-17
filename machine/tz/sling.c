@@ -21,8 +21,8 @@
 #include <freewpc.h>
 #include <rtsol.h>
 
-__fastram__ U8 rtsol_left_sling;
-__fastram__ U8 rtsol_right_sling;
+__fastram__ S8 rtsol_left_sling;
+__fastram__ S8 rtsol_right_sling;
 
 
 void slingshot_rtt (void)

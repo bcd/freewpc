@@ -239,6 +239,11 @@ void amode_deff (void) __taskentry__
 		/** Display credits message **/
 		credits_draw ();
 
+		/** Display replay */
+		replay_draw ();
+		if (amode_page_delay (5) && system_config.tournament_mode)
+			continue;
+
 		/** Display game title message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();

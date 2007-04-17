@@ -1811,6 +1811,8 @@ struct menu sched_test_item = {
 
 /**********************************************************************/
 
+#define SCORE_TEST_PLAYERS 3
+
 const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
 
 void score_test_init (void)
@@ -1819,10 +1821,10 @@ void score_test_init (void)
 	for (s = &scores[0]; s < &scores[4]; s++)
 	{
 		score_zero (s);
-		score_add (s, score_test_increment, sizeof (score_t));
+		score_add (s, score_test_increment);
 	}
 	num_players = 1;
-	player_up = 1;
+	player_up = 0;
 }
 
 void score_test_draw (void)
@@ -1837,8 +1839,8 @@ void score_test_up (void)
 	if (num_players == player_up)
 	{
 		num_players++;
-		player_up = 1;
-		if (num_players > 2)
+		player_up = 0;
+		if (num_players > SCORE_TEST_PLAYERS)
 			num_players = 1;
 	}
 	else
@@ -1850,12 +1852,12 @@ void score_test_up (void)
 void score_test_down (void)
 {
 	player_up--;
-	if (player_up == 0)
+	if (player_up == 0xFF)
 	{
 		num_players--;
 		if (num_players == 0)
 		{
-			num_players = 2;
+			num_players = SCORE_TEST_PLAYERS;
 		}
 		player_up = num_players;
 	}

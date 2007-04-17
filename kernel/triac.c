@@ -139,11 +139,6 @@ void triac_set_brightness (U8 triac, U8 brightness)
 }
 
 
-U8 triac_get_brightness (U8 triac)
-{
-}
-
-
 void triac_init (void)
 {
 	triac_enables = 0;

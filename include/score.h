@@ -68,7 +68,7 @@ void scores_draw_ball (void);
 void scores_draw_current (U8 skip_player);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
-void score_add (bcd_t *s1, const bcd_t *s2, U8 len);
+void score_add (bcd_t *s1, const bcd_t *s2);
 void score_add_current (const bcd_t *s);
 void score (score_id_t id);
 void score_multiple (score_id_t id, U8 multiplier);

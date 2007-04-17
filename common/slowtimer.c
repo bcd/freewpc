@@ -74,7 +74,7 @@ static bool slow_timer_default_pause (void)
  * The slow timer thread is a single task that handles the updates of all the
  * timer entries in the table.
  */
-static void slow_timer_thread (void)
+void slow_timer_thread (void)
 {
 	U8 i;
 

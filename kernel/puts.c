@@ -43,6 +43,7 @@
 extern U8 db_attached;
 
 
+/** Writes a constant string to the debugger port */
 void db_puts (const char *s)
 {
 #ifdef DEBUGGER

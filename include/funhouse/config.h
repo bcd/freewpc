@@ -59,12 +59,6 @@
 /* Define optional lamps */
 #define MACHINE_BUYIN_LAMP
 
-/* Define the names of functions to handle flipper buttons
- * in attract mode.  Leave undefined if not needed.
- * The functions should not take any arguments. */
-#undef MACHINE_AMODE_LEFT_FLIPPER_HANDLER
-#undef MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
-
 /* Define if the game provides its own attract mode functions.
  * If so, they must be named amode_start() and amode_stop().
  * If undefined, the system will use a default function.

@@ -181,7 +181,7 @@ static void deff_stop_task (void)
 
 static void deff_start_task (const deff_t *deff)
 {
-	task_t *tp;
+	task_pid_t tp;
 
 	task_kill_gid (GID_DEFF);
 	deff_stop_task ();

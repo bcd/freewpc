@@ -34,6 +34,8 @@ void onecoin_buyin_deff (void)
 }
 
 
+/** Called during end_ball when it is the last ball for a player
+ * and the 1-coin buyin option is enabled */
 void onecoin_buyin_offer (void)
 {
 	deff_start (DEFF_ONECOIN_BUYIN);

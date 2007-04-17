@@ -19,8 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <mach/switch.h>
-#include <mach/coil.h>
 
 
 void lefthole_kick_sound (void)

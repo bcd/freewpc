@@ -183,6 +183,7 @@ KERNEL_BASIC_OBJS = \
 KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 	kernel/ac.o \
 	kernel/adj.o \
+	kernel/audio.o \
 	kernel/audit.o \
 	kernel/csum.o \
 	kernel/deff.o \
@@ -209,7 +210,6 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) \
 # .h files.
 COMMON_BASIC_OBJS = \
 	common/abort.o \
-	common/audio.o \
 	common/coin.o \
 	common/db.o \
 	common/event-audit.o \

@@ -271,7 +271,6 @@ void leff_start (leffnum_t dn)
 	}
 	else if (leff->flags & L_RUNNING)
 	{
-		dbprintf ("Adding running leff to queue\n");
 		leff_add_queue (dn);
 		if (dn == leff_get_highest_priority ())
 		{
@@ -284,7 +283,6 @@ void leff_start (leffnum_t dn)
 		{
 			/* This leff cannot run now, because there is a
 			 * higher priority leff running. */
-			dbprintf ("Can't run because higher priority active\n");
 		}
 	}
 	else
@@ -295,10 +293,6 @@ void leff_start (leffnum_t dn)
 			leff_active = dn;
 			leff_prio = leff->prio;
 			leff_create_handler (leff);
-		}
-		else
-		{
-			dbprintf ("Quick leff lacks pri to run\n");
 		}
 	}
 }

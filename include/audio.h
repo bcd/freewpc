@@ -75,12 +75,12 @@ typedef struct {
 	U8 code;
 } audio_track_t;
 
-__common__ void audio_dump (void);
-__common__ void audio_start (U8 channel_mask, task_function_t fn, U8 fnpage, U16 data);
-__common__ void audio_stop (U8 channel_id);
-__common__ void audio_exit (void);
-__common__ void bg_music_start (const audio_track_t *track);
-__common__ void bg_music_stop (const audio_track_t *track);
-__common__ void bg_music_stop_all (void);
+void audio_dump (void);
+void audio_start (U8 channel_mask, task_function_t fn, U8 fnpage, U16 data);
+void audio_stop (U8 channel_id);
+void audio_exit (void);
+void bg_music_start (const audio_track_t *track);
+void bg_music_stop (const audio_track_t *track);
+void bg_music_stop_all (void);
 
 #endif /* __AUDIO_H */
