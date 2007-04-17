@@ -21,8 +21,7 @@
 #ifndef _SYS_DEBUG_H
 #define _SYS_DEBUG_H
 
-/* Include ASIC address definitions */
-#include <wpc.h>
+#include <freewpc.h>
 
 extern inline U8 wpc_debug_get_status (void)
 {

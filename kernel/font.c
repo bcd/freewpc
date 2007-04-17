@@ -230,6 +230,31 @@ static void fontargs_render_string (void)
 }
 
 
+/** Draw a bitmap to an arbitrary screen location */
+void bitmap_blit (const U8 *blit_data, U8 x, U8 y)
+{
+	U8 i, j;
+	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
+  	blit_xpos = x;
+	wpc_push_page (FONT_PAGE);
+	font_width = *blit_data++;
+	font_byte_width = (font_width + 7) >> 3;
+	font_height = *blit_data++;
+	blit_dmd = wpc_dmd_addr_verify (dmd_base + (blit_xpos / 8));
+	for (i=0; i < font_height; i++)
+	{
+		for (j=0; j < font_byte_width; j++)
+		{
+			font_blit ();
+			blit_dmd = wpc_dmd_addr_verify (blit_dmd + 1);
+		}
+		blit_dmd = wpc_dmd_addr_verify (blit_dmd - font_byte_width);
+		blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
+	}
+	wpc_pop_page ();
+}
+
+
 /** Erase an arbitrary region of the DMD. */
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 {

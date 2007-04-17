@@ -89,6 +89,7 @@ void credits_render (void)
 }
 
 
+/** Draw the current credits full screen */
 void credits_draw (void)
 {
 	dmd_alloc_low_clean ();
@@ -112,10 +113,11 @@ void credits_draw (void)
 }
 
 
+/** The display effect function for showing the number of credits. */
 void credits_deff (void)
 {
 	credits_draw ();
-	deff_delay_and_exit (TIME_100MS * 10);
+	deff_delay_and_exit (TIME_1S);
 }
 
 
@@ -125,8 +127,6 @@ void credits_deff (void)
 void lamp_start_update (void)
 {
 #ifdef MACHINE_START_LAMP
-	/* TODO : start button is flashing very early after reset, before
-	 * a game can actually be started. */
 	if (has_credits_p ())
 	{
 		if (!in_game)
@@ -273,7 +273,4 @@ void credits_clear (void)
 	csum_area_update (&coin_csum_info);
 	wpc_nvram_put ();
 }
-
-
-// lamp_start_update (); at coin_init ();
 

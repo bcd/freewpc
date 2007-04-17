@@ -23,6 +23,9 @@
 __nvram__ U8 replay_score[BYTES_PER_SCORE];
 __nvram__ U8 replay_csum;
 
+
+/** The default replay score.  TODO : this should be machine-specific
+and come from an adjustment */
 const score_t default_replay_score = { 0x02, 0x50, 0x00, 0x00, 0x00 };
 
 
@@ -37,9 +40,11 @@ const struct area_csum replay_csum_info = {
 };
 
 
+/** The number of replays awarded to the current player */
 __local__ U8 replay_award_count;
 
 
+/** Draw the replay screen, as used in attract mode */
 void replay_draw (void)
 {
 	dmd_alloc_low_clean ();
@@ -105,8 +110,10 @@ CALLSET_ENTRY (replay, start_player)
 
 CALLSET_ENTRY (replay, end_game)
 {
+	/* Add the scores from this game to the score histograms */
+
 	/* After so many games, auto-adjust the replay score if
-	configured to do so. */
+	necessary */
 }
 
 

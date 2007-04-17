@@ -78,17 +78,6 @@ CALLSET_ENTRY (trough, dev_trough_enter)
 }
 
 
-CALLSET_ENTRY (trough, dev_trough_kick_attempt)
-{
-	/* TODO : Wait for any conditions that should delay a trough
-	 * kick.
-	 *
-	 * On autoplunging games, always wait for the plunger
-	 * area to clear.
-	 */
-}
-
-
 CALLSET_ENTRY (trough, dev_trough_kick_success)
 {
 	device_add_live ();

@@ -112,7 +112,6 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200UL
-#define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
 /** The layout of the player local area.
  * There are 5 "copies" of the local area: the lowest address is active

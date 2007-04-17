@@ -311,6 +311,10 @@ void sound_send (sound_code_t code)
 /** Send a volume set command to the sound board */
 void volume_set (U8 vol)
 {
+	/* Adhere to the minimum volume override */
+	if (vol < system_config.min_volume_control)
+		vol = system_config.min_volume_control;
+
 	/* Save the volume level in nvram. */
 	wpc_nvram_get ();
 	current_volume = vol;

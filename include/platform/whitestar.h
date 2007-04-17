@@ -44,7 +44,6 @@
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200UL
-#define STACK_MIN			(STACK_BASE - STACK_SIZE)
 
 /** The layout of the player local area */
 #define LOCAL_BASE		((U8 *)0x1200)

@@ -231,13 +231,15 @@ void score_zero (score_t *s)
 #ifdef __m6809__
 #define __bcd_add8(px, py, carry) \
 do { \
-	asm volatile ("lda\t,-%0" :: "a" (s1)); \
-	if (carry) \
-		asm volatile ("adca\t,-%0" :: "a" (s2)); \
+	asm volatile ("lda\t,-%0" :: "a" (px)); \
+	if (carry == 2) \
+		asm volatile ("adca\t#0"); \
+	else if (carry == 1) \
+		asm volatile ("adca\t,-%0" :: "a" (py)); \
 	else \
-		asm volatile ("adda\t,-%0" :: "a" (s2)); \
+		asm volatile ("adda\t,-%0" :: "a" (py)); \
 	asm volatile ("daa"); \
-	asm volatile ("sta\t,%0" :: "a" (s1)); \
+	asm volatile ("sta\t,%0" :: "a" (px)); \
 } while (0)
 #else
 /* TODO */
@@ -245,11 +247,14 @@ do { \
 #endif
 
 
+/** Adds one binary-coded decimal score to another. */
 void score_add (score_t s1, const score_t s2)
 {
+	/* Advance to just past the end of each score */
 	s1 += BYTES_PER_SCORE;
 	s2 += BYTES_PER_SCORE;
 
+	/* Add one byte at a time, however many times it takes */
 #if (BYTES_PER_SCORE >= 5)
 	__bcd_add8 (s1, s2, 0);
 #endif
@@ -265,6 +270,17 @@ void score_add (score_t s1, const score_t s2)
 #if (BYTES_PER_SCORE >= 1)
 	__bcd_add8 (s1, s2, 1);
 #endif
+}
+
+
+void score_add_byte (score_t s1, U8 offset, bcd_t val)
+{
+	s1 += BYTES_PER_SCORE - offset;
+	__bcd_add8 (s1, &val, 0);
+	while (offset < BYTES_PER_SCORE)
+	{
+		__bcd_add8 (s1, NULL, 2);
+	}
 }
 
 

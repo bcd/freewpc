@@ -87,17 +87,23 @@ parts of the display independently. */
 void (*deff_component_table[4]) (void);
 
 
+/** Returns the number of display effects installed. */
 U8 deff_get_count (void)
 {
 	return sizeof (deff_table) / sizeof (deff_t);
 }
 
+
+/** Returns the ID of the currently active display effect. */
 U8 deff_get_active (void)
 {
 	return deff_active;
 }
 
 
+/** Returns true if the specific display effect is running.  It is
+not necessarily 'active', i.e. it may be queued but a higher
+priority deff actually has the display. */
 bool deff_is_running (deffnum_t dn)
 {
 	U8 i;
@@ -310,6 +316,7 @@ __noreturn__ void deff_exit (void)
 }
 
 
+/** Called from a deff when it wants to exit after a certain delay */
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 {
 	task_sleep (ticks);

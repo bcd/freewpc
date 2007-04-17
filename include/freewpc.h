@@ -42,7 +42,7 @@ typedef unsigned char bool;
 #endif
 
 /* 8-bit integers are always 'char' */
-typedef unsigned char bcd_t, BCD;
+typedef unsigned char bcd_t;
 typedef signed char int8_t, I8, S8;
 typedef unsigned char uint8_t, U8;
 
@@ -95,6 +95,10 @@ extern U8 irq_count;
 #define C_STR(x)		#x
 
 #ifdef CONFIG_PLATFORM_LINUX
+#include <platform/linux.h>
+#endif
+
+#ifdef CONFIG_PLATFORM_LINUX
 #define DIV10(x,q,r)     ({ q = x / 10; r = x % 10; })
 #endif
 
@@ -119,9 +123,9 @@ extern U8 irq_count;
 
 /* Platform specifics */
 #ifdef MACHINE_PLATFORM_WHITESTAR
-#include <whitestar.h>
+#include <platform/whitestar.h>
 #else
-#include <wpc.h>
+#include <platform/wpc.h> /* note: included even on native builds */
 #endif
 
 #include <version.h>

@@ -65,13 +65,12 @@ void status_report_deff (void)
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	status_page_complete ();
 
-	rtc_show_date_time ();
-	dmd_draw_border (dmd_low_buffer);
+	status_page_init ();
+	replay_draw ();
 	status_page_complete ();
 
-	status_page_init ();
-	font_render_string_center (&font_mono5, 64, 11, "REPLAY AT");
-	font_render_string_center (&font_mono5, 64, 21, "TBD");
+	rtc_show_date_time ();
+	dmd_draw_border (dmd_low_buffer);
 	status_page_complete ();
 
 #ifdef DEBUGGER

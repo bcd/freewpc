@@ -143,10 +143,10 @@ void end_game (void)
 {
 	if (in_game)
 	{
-		in_game = 0;
+		in_game = FALSE;
 		player_up = 0;
 		ball_up = 0;
-		in_tilt = 0;
+		in_tilt = FALSE;
 
 		if (!in_test)
 		{
@@ -240,6 +240,12 @@ void end_ball (void)
 	 * next ball without changing the current player up. */
 	if (decrement_extra_balls ())
 	{
+#ifdef DEFF_SHOOT_AGAIN
+		deff_start (DEFF_SHOOT_AGAIN);
+#endif
+#ifdef LEFF_SHOOT_AGAIN
+		leff_start (LEFF_SHOOT_AGAIN);
+#endif
 		start_ball ();
 		goto done;
 	}
@@ -402,6 +408,7 @@ void start_ball (void)
 	callset_invoke (start_ball);
 	lamp_update_all ();
 
+	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
 
 	/* Enable the game scores on the display.  The first deff started
@@ -413,13 +420,18 @@ void start_ball (void)
 	deff_start (DEFF_SCORES_IMPORTANT);
 
 	/* Serve a ball to the plunger, by requesting a kick from the
-	 * trough device.  However, a ball is detected in the plunger lane
+	 * trough device.  However, if a ball is detected in the plunger lane
 	 * for whatever reason, then don't kick a new ball, just use the
 	 * one that is there. */
 #if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
+	}
+	else
+	{
+		/* TODO - this scenario causes problems, something else is
+		needed here */
 	}
 #endif
 
@@ -435,6 +447,8 @@ void start_ball (void)
 }
 
 
+/** Called when the ball is marked as 'in play'.  This happens on
+most, but not all, playfield switch closures. */
 void mark_ball_in_play (void)
 {
 	if (in_game && !ball_in_play)
@@ -483,16 +497,21 @@ void start_game (void)
 
 
 /**
- * stop_game is called whenever a game is restarted.
+ * stop_game is called whenever a game is restarted.  It is
+ * functionally equivalent to end_game aside from normal end
+ * game features like match, high score check, etc.  Also it
+ * can (and should) assume that a new game is being started.
  */
 void stop_game (void)
 {
+	in_game = FALSE;
+	in_tilt = FALSE;
 	deff_stop_all ();
 	leff_stop_all ();
 }
 
 
-/* Perform final checks before allowing a game to start. */
+/** Perform final checks before allowing a game to start. */
 bool verify_start_ok (void)
 {
 #ifndef DEVNO_TROUGH

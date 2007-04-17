@@ -557,4 +557,3 @@ void do_swi3 (void)
 	fatal (ERR_SWI3);
 }
 
-

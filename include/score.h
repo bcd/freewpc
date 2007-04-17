@@ -69,6 +69,7 @@ void scores_draw_current (U8 skip_player);
 void scores_deff (void) __taskentry__;
 void score_zero (score_t *s);
 void score_add (bcd_t *s1, const bcd_t *s2);
+void score_add_byte (score_t s1, U8 offset, bcd_t val);
 void score_add_current (const bcd_t *s);
 void score (score_id_t id);
 void score_multiple (score_id_t id, U8 multiplier);
@@ -77,5 +78,22 @@ void score_mul (score_t s1, uint8_t multiplier);
 I8 score_compare (const score_t s1, const score_t s2);
 void scores_reset (void);
 void score_init (void);
+
+
+extern inline void score_10K (U8 count)
+{
+	score_add_byte (current_score, 2, count);
+}
+
+extern inline void score_1M (U8 count)
+{
+	score_add_byte (current_score, 3, count);
+}
+
+extern inline void score_100M (U8 count)
+{
+	score_add_byte (current_score, 4, count);
+}
+
 
 #endif /* _SCORE_H */

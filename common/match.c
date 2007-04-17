@@ -26,6 +26,11 @@
  *
  */
 
+U8 match_count;
+
+bcd_t match_value;
+
+
 void
 match_award (void)
 {
@@ -39,31 +44,16 @@ void
 match_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 16, "MATCH");
+	font_render_string_right (&font_fixed6, 126, 2, "MATCH");
+	sprintf ("%2b", match_value);
+	font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
 
 
-
-void 
-do_match (bcd_t value, U8 count)
-{
-	/* Start the match effect, then wait until it finishes. */
-	deff_start (DEFF_MATCH);
-	while (deff_get_active () == DEFF_MATCH)
-		task_sleep (TIME_100MS);
-
-	/* Award credits */
-	while (count > 0)
-	{
-		count--;
-		match_award ();
-	}
-}
-
-
+/** Runs the match sequence if necessary */
 void
 match_start (void) 
 {
@@ -77,13 +67,19 @@ match_start (void)
 	 * TODO : This algorithm is too simple, it will not work
 	 * for multi-player games. */
 	match_flag = random_scaled (100);
-	if (match_flag <= system_config.match_feature)
+	match_value = 0x50;
+	match_count = 0;
+
+	/* Start the match effect, then wait until it finishes. */
+	deff_start (DEFF_MATCH);
+	while (deff_get_active () == DEFF_MATCH)
+		task_sleep (TIME_100MS);
+
+	/* Award credits */
+	while (match_count > 0)
 	{
-		do_match (0, 0);
-	}
-	else
-	{
-		do_match (0, 1);
+		match_count--;
+		match_award ();
 	}
 }
 

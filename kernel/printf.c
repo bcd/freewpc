@@ -153,7 +153,7 @@ char *do_sprintf_hex_byte (char *buf, U8 b)
 	*buf++ = digit2char (b >> 4);
 	if (comma_positions & 0x1)
 	{
-		*buf++ = ',';
+		*buf++ = (system_config.euro_digit_sep ? '.' : ',');
 		commas_written++;
 	}
 	comma_positions >>= 1;
@@ -161,7 +161,7 @@ char *do_sprintf_hex_byte (char *buf, U8 b)
 	*buf++ = digit2char (b & 0x0F);
 	if (comma_positions & 0x1)
 	{
-		*buf++ = ',';
+		*buf++ = (system_config.euro_digit_sep ? '.' : ',');
 		commas_written++;
 	}
 	comma_positions >>= 1;

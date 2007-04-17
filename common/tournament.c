@@ -65,6 +65,14 @@ void tournament_check_player_enable (void)
 }
 
 
+CALLSET_ENTRY (tournament, sw_escape_button)
+{
+	if (in_game && tournament_mode_enabled)
+	{
+	}
+}
+
+
 CALLSET_ENTRY (tournament, sw_l_l_flipper_button)
 {
 	tournament_check_player_enable ();

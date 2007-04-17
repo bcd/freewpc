@@ -2,8 +2,6 @@
 
 @EXPORT = qw (build_lampset_from_lock);
 
-print "/* Included $1 */\n\n";
-
 #
 # build_lampset_explode_from_lamp
 #
