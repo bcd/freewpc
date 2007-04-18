@@ -1204,7 +1204,7 @@ void deff_leff_thread (void)
 					sprintf_far_string (names_of_deffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 					browser_print_operation ("STOPPED");
-					sound_reset ();
+					// sound_reset ();
 				}
 			}
 			else
@@ -1219,7 +1219,7 @@ void deff_leff_thread (void)
 			}
 		}
 		deff_leff_last_active = is_active;
-		task_sleep (TIME_100MS * 4);
+		task_sleep (TIME_200MS);
 		is_active = deff_leff_test_ops->is_running (menu_selection);
 	}
 }
@@ -1726,7 +1726,7 @@ struct menu dev_force_error_item = {
 
 void dev_frametest_draw (void)
 {
-	const char *data = 0x4001 + menu_selection * DMD_PAGE_SIZE;
+	const U8 *data = 0x4001 + menu_selection * DMD_PAGE_SIZE;
 	if (switch_poll_logical (SW_ENTER))
 	{
 		dmd_alloc_low_high ();
@@ -2151,12 +2151,20 @@ struct preset_component preset_timed_comps[] = {
 };
 struct preset preset_timed_game = { .name = "TIMED GAME", preset_timed_comps };
 
+
+struct preset_component preset_europe_comps[] = {
+	{ NULL, 0 },
+};
+struct preset preset_europe = { .name = "EUROPE", preset_europe_comps };
+
+
 struct preset *preset_table[] = {
 	&preset_3ball,
 	&preset_5ball,
 	&preset_tournament,
 	&preset_show,
 	&preset_timed_game,
+	&preset_europe,
 };
 
 

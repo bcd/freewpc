@@ -362,6 +362,9 @@ U8 linux_asic_read (U16 addr)
 		case WPCS_CONTROL_STATUS:
 			return 0;
 
+		case WPC_ZEROCROSS_IRQ_CLEAR:
+			return 0;
+
 		default:
 			printf ("Error: unhandled I/O read from 0x%04X\n", addr);
 			return 0;

@@ -63,7 +63,7 @@ void audio_dump (void)
 	/* Dump the track table */
 	for (i=0; i < NUM_STACKED_TRACKS; i++)
 	{
-		audio_track_t *track = audio_bg_track_table[i];
+		const audio_track_t *track = audio_bg_track_table[i];
 		if (track)
 		{
 			dbprintf ("Track %d : %02X  P%d\n", i, track->code, track->prio);
@@ -151,12 +151,12 @@ void audio_exit (void)
 static void bg_music_task (void)
 {
 	U8 i;
-	audio_track_t *current = NULL;
+	const audio_track_t *current = NULL;
 
 	/* Determine which of the stacked tracks has the highest priority. */
 	for (i=0 ; i < NUM_STACKED_TRACKS; i++)
 	{
-		audio_track_t *track = audio_bg_track_table[i];
+		const audio_track_t *track = audio_bg_track_table[i];
 		if (track)
 		{
 			if (current == NULL)

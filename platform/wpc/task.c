@@ -264,6 +264,7 @@ task_t *task_expand_stack (task_t *tp)
 		sp->state |= TASK_STACK;
 		tp->aux_stack_block = sp->aux_stack_block;
 		sp->aux_stack_block = -1;
+		return sp;
 	}
 	else
 	{

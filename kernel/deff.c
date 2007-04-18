@@ -295,7 +295,7 @@ void deff_start_highest_priority (void)
 	{
 		const deff_t *deff = &deff_table[deff_active];
 		task_pid_t *tp = task_recreate_gid (GID_DEFF, deff->fn);
-		if (deff->page != -1)
+		if (deff->page != ((U8)-1))
 			task_set_rom_page (tp, deff->page);
 	}
 	else

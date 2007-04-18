@@ -232,6 +232,9 @@ void amode_deff (void) __taskentry__
 		dmd_draw_image2 (brianhead0_bits);
 		font_render_string_center2 (&font_times10, 80, 16, "FREEWPC");
 		dmd_sched_transition (&trans_random_boxfade);
+#if 0
+		bitmap_blit (&bitmap_common_box3, 64, 25);
+#endif
 		dmd_show2 ();
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;

@@ -59,7 +59,9 @@
 #define ERR_WINDOW_STACK_OVERFLOW 35
 
 
-typedef uint8_t errcode_t;
+typedef U8 errcode_t;
+
+
 __noreturn__ void fatal (errcode_t errcode);
 void nonfatal (errcode_t errcode);
 

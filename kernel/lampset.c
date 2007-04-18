@@ -60,7 +60,7 @@ const U8 *lampset_lookup (lampset_id_t id)
 /* Apply an operator to each element of a lampset, one by one */
 void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
-	register uint8_t opcode;
+	register U8 opcode;
 	register const lampnum_t *lset;
 	U8 lampset_intermediate_delay = 0;
 

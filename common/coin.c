@@ -238,7 +238,7 @@ void coin_insert_deff (void) __taskentry__
 	deff_exit ();
 }
 
-static void do_coin (uint8_t slot)
+static void do_coin (U8 slot)
 {
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);

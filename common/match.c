@@ -45,7 +45,7 @@ match_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_right (&font_fixed6, 126, 2, "MATCH");
-	sprintf ("%2b", match_value);
+	sprintf ("%2b", &match_value);
 	font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);

@@ -141,10 +141,10 @@ void device_register (devicenum_t devno, device_properties_t *props)
 }
 
 /* Return the number of balls currently present in the device */
-uint8_t device_recount (device_t *dev)
+U8 device_recount (device_t *dev)
 {
-	uint8_t i;
-	uint8_t count = 0;
+	U8 i;
+	U8 count = 0;
 
 	dev->previous_count = dev->actual_count;
 
@@ -499,7 +499,7 @@ void device_probe (void)
 
 
 /** Called from a switch handler to do the common processing */
-void device_sw_handler (uint8_t devno)
+void device_sw_handler (U8 devno)
 {
 #ifdef DEBUGGER
 	device_t *dev = device_entry (devno);

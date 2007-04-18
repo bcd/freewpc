@@ -342,9 +342,6 @@ void score_sub (score_t s1, const score_t s2)
 
 void score_mul (score_t s1, U8 multiplier)
 {
-	register U8 off = sizeof (score_t);
-	register bcd_t *bcd = s1 + off - 1;
-	bcd_t overflow = 0;
 	/* TODO */
 }
 

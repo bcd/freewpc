@@ -52,15 +52,15 @@ void sssmb_running_deff (void)
 void sssmb_jackpot_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 10, "GET THE");
-	font_render_string_center (&font_fixed10, 64, 21, "JACKPOT");
+	font_render_string_center (&font_fixed10, 64, 9, "GET THE");
+	font_render_string_center (&font_fixed10, 64, 22, "JACKPOT");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
-		sprintf ("JACKPOT = %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_fixed10, 64, 21, sprintf_buffer);
+		sprintf ("JACKPOT VALUE %d,000,000", sssmb_jackpot_value);
+		font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}

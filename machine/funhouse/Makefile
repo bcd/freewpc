@@ -46,7 +46,7 @@ PINMAME_OTHER_ROMS = fh_u*
 # Object files exported by this game
 #
 
-GAME_OBJS = config.o 
+GAME_OBJS =
 
 GAME_INCLUDES =
 

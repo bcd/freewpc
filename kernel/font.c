@@ -105,9 +105,9 @@ U8 *font_lookup (const font_t *font, char c)
 
 
 /** The current x-coordinate where a character is being written */
-U8 blit_xpos;
+__fastram__ U8 blit_xpos;
 
-U8 *blit_dmd;
+__fastram__ U8 *blit_dmd;
 
 U8 *blit_data;
 
@@ -231,11 +231,12 @@ static void fontargs_render_string (void)
 
 
 /** Draw a bitmap to an arbitrary screen location */
-void bitmap_blit (const U8 *blit_data, U8 x, U8 y)
+void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 {
 	U8 i, j;
 	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
   	blit_xpos = x;
+	blit_data = _blit_data;
 	wpc_push_page (FONT_PAGE);
 	font_width = *blit_data++;
 	font_byte_width = (font_width + 7) >> 3;
@@ -252,6 +253,15 @@ void bitmap_blit (const U8 *blit_data, U8 x, U8 y)
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 	}
 	wpc_pop_page ();
+}
+
+
+void bitmap_blit2 (const U8 *_blit_data, U8 x, U8 y)
+{
+	bitmap_blit (_blit_data, x, y);
+	dmd_flip_low_high ();
+	bitmap_blit (_blit_data, x, y);
+	dmd_flip_low_high ();
 }
 
 

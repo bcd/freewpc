@@ -30,7 +30,7 @@
 /* For each bitmap image, declare a character array with the width, height,
 and data.  Bits appear in row-major order. */
 
-static char bitmap_common_box3[] = { 3, 3, 0x7, 0x5, 0x7 };
+char bitmap_common_box3[] = { 3, 3, 0x7, 0x5, 0x7 };
 static char bitmap_common_x3[] = { 3, 3, 0x5, 0x2, 0x5 };
 static char bitmap_common_plus3[] = { 3, 3, 0x2, 0x7, 0x2 };
 

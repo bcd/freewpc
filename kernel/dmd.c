@@ -291,7 +291,7 @@ void dmd_flip_low_high (void)
 	 * to read from the hardware register, which doesn't
 	 * work.
 	 */
-	volatile dmd_pagenum_t tmp = wpc_dmd_get_low_page ();
+	register dmd_pagenum_t tmp asm ("a") = wpc_dmd_get_low_page ();
 	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
 	wpc_dmd_set_high_page (tmp);
 }

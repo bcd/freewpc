@@ -29,7 +29,7 @@ void skill_shot_ready_deff (void)
 	dmd_clean_page_low ();
 
 	sprintf ("PLAYER %d", player_up);
-	font_render_string_left (&font_mono5, 1, 2, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 2, sprintf_buffer);
 
 	sprintf_current_score ();
 	font_render_string_right (&font_mono5, 127, 2, sprintf_buffer);
@@ -45,9 +45,9 @@ void skill_shot_ready_deff (void)
 	dmd_show_low ();
 	for (;;)
 	{
-		task_sleep (TIME_100MS * 5);
+		task_sleep (TIME_100MS * 3);
 		dmd_show_other ();
-		task_sleep (TIME_100MS * 2);
+		task_sleep (TIME_100MS * 1);
 		dmd_show_other ();
 	}
 }

@@ -21,20 +21,9 @@
 #include <freewpc.h>
 
 
-void lefthole_kick_sound (void)
-{
-	task_exit ();
-}
-
-
 CALLSET_ENTRY (lefthole, enter)
 {
 	mark_ball_in_play ();
 	score (SC_1K);
-}
-
-
-CALLSET_ENTRY (lefthole, kick_attempt)
-{
 }
 

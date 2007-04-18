@@ -21,7 +21,7 @@
 #ifndef _STDADJ_H
 #define _STDADJ_H
 
-typedef uint8_t adjval_t;
+typedef U8 adjval_t;
 
 /* Yes/No value defines */
 #define YES 1

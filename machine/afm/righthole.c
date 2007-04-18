@@ -20,11 +20,6 @@
 
 #include <freewpc.h>
 
-void righthole_kick_sound (void)
-{
-	task_exit ();
-}
-
 
 CALLSET_ENTRY (righthole, enter)
 {

@@ -343,6 +343,10 @@ do_long_hex_integer:
 					this variable is right-shifted. */
 					switch (sprintf_width)
 					{
+						default:
+							comma_positions = 0;
+							break;
+
 						case 8:
 							comma_positions = 0x2 | 0x10;
 							break;

@@ -86,7 +86,9 @@ extern U8 irq_count;
 #define FALSE (0)
 
 /* Define NULL */
+#ifndef NULL
 #define NULL 0UL
+#endif
 
 /*
  * Define macros that let us print #defines which are strings.

@@ -111,7 +111,7 @@ void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 
-#define MKCOORD1(x,y) (((U16)x<<8)|y)
+#define MKCOORD1(x,y) (((U16)(x)<<8)|(y))
 #define MKCOORD(x,y) { .xy = MKCOORD1(x,y), }
 
 #define DECL_FONTARGS(_f,_x,_y,_s) \
