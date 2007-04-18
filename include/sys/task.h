@@ -35,6 +35,10 @@ extern bool task_dispatching_ok;
  * urgent. */
 #define TASK_PROTECTED   0x01
 
+/* TASK_QUICK is set on any task that ought not to sleep.
+ * In the current implementation, only a warning is generated.
+ * These ought to be cleaned up. */
+#define TASK_QUICK 0x02
 
 
 /* Now, the platform specific defines. */

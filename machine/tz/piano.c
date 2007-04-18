@@ -23,5 +23,10 @@
 
 CALLSET_ENTRY (piano, sw_piano)
 {
+	/* Say that a ball entering this device is destined to
+	enter the slot machine device, within a certain amount
+	of time.  This information can only be used reliably
+	during single-ball play.  It is currently used for 
+	pausing timers. */
 	device_switch_can_follow (piano, slot, TIME_4S);
 }

@@ -70,13 +70,6 @@ typedef struct
 extern const U8 mach_opto_mask[];
 extern const U8 mach_edge_switches[];
 
-#define DECLARE_SWITCH_DRIVER(name)	\
-	extern __event__ void callset_ ## name (void); \
-	const switch_info_t name =
-
-#define DECLARE_SWITCH_EVENT(name) \
-	.fn = callset_ ## name, \
-	.fnpage = EVENT_PAGE \
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
@@ -133,9 +126,12 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 
 /** Indicate that the second switch did indeed follow.
  * If this returns TRUE, it means it happened within the timeout after the
- * first switch closure. */
+ * first switch closure.  This will always return FALSE during a
+ * multiball, since multiple closures cannot assume that they are from
+ * the same ball. */
 #define switch_did_follow(first,second) \
-	timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second)
+	((live_balls > 1) \
+		&& timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))
 
 /* The above macros are generic enough to apply to any event, not
  * just switch events */

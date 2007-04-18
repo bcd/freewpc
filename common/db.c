@@ -74,33 +74,21 @@ void db_idle (void)
 			switch (c)
 			{
 				case 'a':
-				{
-					extern __common__ void audio_dump (void);
-					audio_dump ();
+					SECTION_VOIDCALL (__common__, audio_dump);
 					break;
-				}
 
 				case 't':
-				{
-					extern void task_dump (void);
-					task_dump ();
+					VOIDCALL (task_dump);
 					break;
-				}
 
 				case 'g':
-				{
-					extern void dump_game (void);
-					dump_game ();
+					VOIDCALL (dump_game);
 					break;
-				}
 
-#ifdef MACHINE_TZ
+#ifdef MACHINE_TZ /* TODO : last use of MACHINE_TZ */
 				case 'c':
-				{
-					extern void tz_dump_clock (void);
-					tz_dump_clock ();
+					VOIDCALL (tz_dump_clock);
 					break;
-				}
 #endif
 
 				case 'p':

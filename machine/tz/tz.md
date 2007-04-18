@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # TZ machine description for FreeWPC
-# (C) Copyright 2006 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -35,8 +35,6 @@ include kernel/freewpc.md
 define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
-define MACHINE_AMODE_LEFT_FLIPPER_HANDLER amode_left_flipper
-define MACHINE_AMODE_RIGHT_FLIPPER_HANDLER amode_right_flipper
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS 10
 define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
@@ -133,7 +131,8 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 #    outhole, slam-tilt, tilt, shooter, start-button, buyin-button
 #
 # Use sound() to invoke a sound call automatically when the switch activates.
-# Use lamp() to flicker a lamp automatically on activation.
+# Use lamp() to flicker a lamp automatically on activation.  TODO:
+#   this requires the c_name, and not the friendly md name.
 # Use c_decl() to override the default name of the switch event.
 #
 ##########################################################################
@@ -214,7 +213,7 @@ F8: U. L. Flipper Button, button, opto
 # etc.
 #
 # The following options are supported:
-#    flash - this is a flasher (default is solenoid)
+#    flash - this is a flasher (default is solenoid, flash implies nosearch)
 #    motor - this is a motor (default is solenoid)
 #    nosearch - do not activate this during ball search
 #

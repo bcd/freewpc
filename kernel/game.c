@@ -399,7 +399,6 @@ void timed_game_pause (task_ticks_t delay)
 
 void start_ball (void)
 {
-	dbprintf ("In startball\n");
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
 
@@ -608,15 +607,6 @@ CALLSET_ENTRY (game, sw_start_button)
 	dump_game ();
 #endif
 #endif /* MACHINE_START_SWITCH */
-}
-
-
-/**
- * Handle the extra-ball buy-in button.  Not all games have one of these.
- */
-CALLSET_ENTRY (game, sw_buyin_button)
-{
-	/* TODO */
 }
 
 

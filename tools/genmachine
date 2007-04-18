@@ -899,7 +899,7 @@ sub machine_write_container_decls {
 			my $sw = ($m->{'switches'})->{$swname};
 			print $sw->{'c_ident'} . ", ";
 		}
-		print "},\n},";
+		print "},\n},\n";
 	}
 	print "};\n";
 	print $END_SOURCE;

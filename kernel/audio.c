@@ -30,7 +30,6 @@
  * Each element of this array represents a background track
  * that has been enabled for play on the background music channel.
  * Only the highest priority track is allowed to run at any time.
- * TODO : paging not being handled here at all!
  */
 const audio_track_t *audio_bg_track_table[NUM_STACKED_TRACKS];
 

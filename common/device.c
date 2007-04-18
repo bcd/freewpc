@@ -186,34 +186,37 @@ wait_and_recount:
 		/* Device is idle */
 		if (dev->actual_count == dev->previous_count)
 		{
-			/* Strange condition; switch closures were
-			 * detected but in the end, the count did not
-			 * change.  Nothing to do...
+			/* Switch closures were detected but in the end, after becoming
+			 * stable, the count did not change.  This is OK, perhaps
+			 * there is some vibration...
 			 */
-			dbprintf ("Idle but count same, ignoring.\n");
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
-			/* Also unusual in that a ball came out of
-			 * the device without explicitly kicking it.
-			 * (Although this can happen in test mode.)
+			/* Also unusual in that a ball came out of the device without 
+			 * explicitly kicking it.  (Although this can happen in test mode.)
+			 * Throw a nonfatal if it happens during a game.
 			 */
 			if (!in_test)
-			{
-				dbprintf ("Idle but ball lost\n");
 				nonfatal (ERR_IDLE_BALL_LOST);
-			}
 		}
 		else if (dev->actual_count > dev->previous_count)
 		{
-			/* More typical : when idle, the count should
-			 * have gone up */
-			device_call_op (dev, enter);
+			/* More typical : when idle, the count should only go up.
+			 * Treat this as an enter event (or multiple events, if the
+			 * count goes down by more than 1). */
+			U8 enter_count = dev->actual_count - dev->previous_count;
+			while (enter_count > 0)
+			{
+				device_call_op (dev, enter);
+				enter_count--;
+			}
 		}
 	}
 	else if ((dev->state == DEV_STATE_RELEASING) && (dev->kicks_needed > 0))
 	{
-		/* Device is in the middle of a release cycle */
+		/* Device is in the middle of a release cycle.
+		 * See if the count changed. */
 		if (dev->actual_count >= dev->previous_count)
 		{
 			/* After attempting a release, the count did not go down ... the kick 
@@ -231,7 +234,6 @@ wait_and_recount:
 			{
 				/* OK, we tried 5 times and still no ball came out.
 				 * Cancel all kick requests for this device. */
-				dbprintf ("Cancelling kick requests\n");
 				nonfatal (ERR_FAILED_KICK);
 				dev->kicks_needed = 0;
 				dev->state = DEV_STATE_IDLE;
@@ -240,29 +242,31 @@ wait_and_recount:
 		else if (dev->actual_count < dev->previous_count)
 		{
 			/* The count decreased as expected.  Hopefully by the
-			 * same number as the number of kicks requested. */
-			if (dev->actual_count == dev->previous_count - 1)
+			 * same number as the number of kicks requested.
+			 * As we only kick 1 ball at a time, then really it
+			 * only should have gone down by 1, but the logic
+			 * should work even if more than 1 ball is ejected. */
+			U8 kicked_balls = dev->previous_count - dev->actual_count;
+
+			/* If too many balls were kicked, throw an error.
+			Only process as many as were requested. */
+			if (kicked_balls > dev->kicks_needed)
 			{
-				/* Well done */
-				dbprintf ("Kick succeeded\n");
+				nonfatal (ERR_KICK_TOO_MANY); /* akin to ERR_IDLE_BALL_LOST */
+				kicked_balls = dev->kicks_needed;
+			}
+
+			/* Throw a kick success event for each ball that was kicked */
+			while (kicked_balls > 0)
+			{
 				device_call_op (dev, kick_success);
 				dev->kicks_needed--;
-				if (dev->kicks_needed == 0)
-				{
-					/* All kicks done */
-					dev->state = DEV_STATE_IDLE;
-				}
+				kicked_balls--;
 			}
-			else
-			{
-				/* More than one ball was released */
-				dbprintf ("Kick succeeded, but an extra ball came out\n");
-				nonfatal (ERR_KICK_TOO_MANY);
-				/* TODO : update kicks_needed and dev->state like above,
-				 * even in this case.  Weird case: if 2 kicks were requested,
-				 * and the first kick somehow caused two balls to come out,
-				 * then that is actually OK. */
-			}
+
+			/* If no more kicks are required, then go back to idle state. */
+			if (dev->kicks_needed == 0)
+				dev->state = DEV_STATE_IDLE;
 		}
 	}
 
@@ -314,9 +318,7 @@ wait_and_recount:
 			if (dev->state == DEV_STATE_IDLE)
 				dev->state = DEV_STATE_RELEASING;
 
-			/* Give the device heads-up that a kick is coming.  TODO: TZ should use 
-			 * this hook to decide whether or not to open the autofire
-			 * divertor, then the MACHINE_TZ define can be eliminated. */
+			/* Give the device heads-up that a kick is coming. */
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid */
@@ -324,7 +326,7 @@ wait_and_recount:
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
-			 * can catch as well. */
+			 * can catch as well.  Deal with this like we do slowtimers. */
 #ifdef CONFIG_TIMED_GAME
 			timed_game_pause (TIME_1S);
 #endif

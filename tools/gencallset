@@ -71,6 +71,10 @@ my %fntypehash;
 # allows for calls into paged areas.
 my %modulehash;
 
+
+# Nonzero if we should optimize the output for the 6809.
+my $m6809 = 0;
+
 # The target boolean type name
 my $bool_type = "bool";
 
@@ -151,6 +155,9 @@ while (my $arg = shift @ARGV) {
 	elsif ($arg =~ /^-D$/) {
 		push @SearchDirs, (shift @ARGV);
 	}
+	elsif ($arg =~ /^--m6809$/) {
+		$m6809 = 1;
+	}
 }
 
 #############################################################
@@ -179,6 +186,11 @@ foreach $set (keys %functionhash) {
 	}
 
 	my @modules = split " ", $functionhash{$set};
+
+	if (@modules == 0) {
+		print FH "   /* warning: nobody cares about $set */\n";
+	}
+
 	foreach $module (@modules) {
 		if ($modulehash{$module} =~ /^test/) {
 			$modifier = " __test__";

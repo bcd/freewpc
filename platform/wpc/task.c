@@ -353,18 +353,50 @@ void task_sleep (task_ticks_t ticks)
 	extern uint8_t tick_count;
 	register task_t *tp = task_current;
 
+	/* Fail if the idle task tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
+#if 1
+	/* Complain if a quick task tries to sleep. */
+	if (tp->flags & TASK_QUICK)
+	{
+		dbprintf ("warning: quick gid %d did sleep\n", task_getgid ());
+	}
+#endif
+
+	/* Mark the task as blocked, set the time at which it blocks,
+	and set how long it should wait for. 
+
+	TODO : the accuracy here is a bit wonky.  For example, a task could
+	want to sleep 16ms (1 tick), and then almost right away, the 16th
+	IRQ could fire and decrement the tick count, causing the task to
+	wake up having slept nearly 0ms.  Essentially, accuracy is only
+	good to within 16ms. 
+	
+	One solution is to keep these counters in terms of raw IRQs, but
+	enforce a minimum sleep time of 16ms still.  Also, we could
+	examine 'irq_count' here and adjust ticks accordingly, if we are
+	close to the 16 IRQ cycle boundary.  (If 'irq_count' > 8, then
+	increment ticks; this improves the resolution.)  Third, we could
+	always bump ticks by 1, so that tasks always guarantee to sleep
+	for *at least* the quantity asked for, but more frequently, they
+	will always sleep a little longer (as much as 16ms longer).  For
+	this last approach, consider bumping all of the TIME_ defines
+	to make this a static change. */
 	tp->delay = ticks;
 	tp->asleep = tick_count;
 	tp->state = TASK_TASK+TASK_BLOCKED+TASK_USED;
 
+	/* Save the task, and start another one.  This call returns
+	whenever the task is eventually unblocked. */
 	task_save ();
 }
 
 
-/** Suspend the current task for a number of seconds */
+/** Suspend the current task for a number of seconds.  This works
+around the limitation that the 'delay' field is 8-bit and cannot
+store large timeouts. */
 void task_sleep_sec (int8_t secs)
 {
 	do {
@@ -508,7 +540,7 @@ void task_clear_flags (U8 flags)
 
 
 /**
- * Get/set the task argument word.
+ * Get the task argument word.
  * TODO : why not just set the B/X register directly here and then
  * the task can take the arg as a normal function argument?  The
  * task block doesn't save B/X normally, but for the first call it
@@ -523,6 +555,9 @@ U16 task_get_arg (void)
 }
 
 
+/**
+ * Set the task argument word.
+ */
 void task_set_arg (task_t *tp, U16 arg)
 {
 	tp->arg = arg;
@@ -542,9 +577,9 @@ void task_set_arg (task_t *tp, U16 arg)
  * If the entire task table is scanned, and no task is ready to run,
  * then we wait until the tick count advances to indicate that 1ms
  * has elapsed.  Then we execute all of the idle functions.  This
- * means that idle functions are never called if there is also at
- * least one task in the ready state; it also limits their invocation
- * to once per second.  The 1ms delay is also useful because it is the
+ * means that idle functions are never called if there is always at
+ * least one task in the ready state; it also limits their invocation to
+ * once per millisecond.  The 1ms delay is also useful because it is the
  * minimum delay before which a blocked task might reach the end of its
  * wait period; there is no sense checking more frequently.
  */

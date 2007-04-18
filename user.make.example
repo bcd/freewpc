@@ -42,7 +42,8 @@
 
 #
 # Set to an arbitrary string to be included in the final binary
-# for identification purposes.
+# for identification purposes.  It will show up in the initial
+# splash screen.
 #
 #USER_TAG = "MY TAG"
 

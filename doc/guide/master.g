@@ -1,5 +1,5 @@
 # FreeWPC master internals documentation
-# (C) Copyright 2006 by Brian Dominy.
+# (C) Copyright 2006, 2007 by Brian Dominy.
 # This file is processed by the 'guide' perl script to generate
 # the final documentation.
 
