@@ -90,7 +90,7 @@ _start:
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 rom_test:
-	; Initialize checksum
+	; Initialize 16-bit checksum
 	ldd	#0
 
 	; Compute checksum for fixed region (0x8000-0xFFFF).

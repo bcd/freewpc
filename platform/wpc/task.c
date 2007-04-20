@@ -186,6 +186,7 @@ void block_free (task_t *tp)
 }
 
 
+/** A limited version of the standard malloc() function */
 void *malloc (U8 size)
 {
 	task_t *tp;
@@ -206,8 +207,10 @@ void *malloc (U8 size)
 }
 
 
+/** A limited version of the standard free() function */
 void free (void *ptr)
 {
+	/* TODO : for sanity make sure pointer is actually from malloc */
 	task_t *tp = (task_t *)(((char *)ptr) - 1);
 	block_free (tp);
 }
@@ -224,10 +227,6 @@ task_t *task_allocate (void)
 	task_t *tp = block_allocate ();
 	if (tp)
 	{
-#if 0 /* this check was here before, but doesn't seem necessary... */
-		if (tp == task_current)
-			fatal (ERR_NO_FREE_TASKS);
-#endif
 		tp->state |= TASK_TASK;
 		tp->delay = 0;
 		tp->stack_size = 0;

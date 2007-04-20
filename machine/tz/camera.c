@@ -121,6 +121,7 @@ CALLSET_ENTRY (camera, sw_camera)
 		{
 			score (SC_10M);
 			sound_send (SND_CAMERA_AWARD_SHOWN);
+			do_camera_award ();
 		}
 		else
 		{

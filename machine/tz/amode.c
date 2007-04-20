@@ -70,7 +70,7 @@ void amode_flipper_sound (void)
 	}
 }
 
-
+/* TODO : use flipcode module to implement this */
 void egg_left_flipper (void)
 {
 	if (!task_find_gid (GID_EGG_TIMER))

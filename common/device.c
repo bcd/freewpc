@@ -93,9 +93,9 @@ void device_debug (void)
 			devno, dev->props->name,
 			dev->previous_count, dev->actual_count);
 
-		dbprintf ("max %d, need %d kicks, state %s\n",
+		dbprintf ("max %d, need %d kicks, %s\n",
 			dev->max_count, dev->kicks_needed,
-			(dev->state == DEV_STATE_IDLE) ? "IDLE" : "RELEASING");
+			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 

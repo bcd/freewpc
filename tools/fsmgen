@@ -136,6 +136,7 @@ sub fsm_finish {
 		}
 
 		print OFH "   switch ($fsm_state_var) {\n";
+		$needsDefault = 1;
 
 		if (defined  $transitions{"*,$input"}) {
 			foreach $state (keys %states) {
@@ -151,6 +152,7 @@ sub fsm_finish {
 			if (defined $transition) {
 				if (($transition eq $state) && ((length values %states) == 1)) {
 					print OFH "      default:\n";
+					$needsDefault = 0;
 				}
 				print OFH "      case " . state_enum ($state) . ":\n";
 
@@ -200,8 +202,12 @@ sub fsm_finish {
 				print OFH "         break;\n";
 			}
 		}
-		#print OFH "      default:\n";
-		#print OFH "         break;\n";
+
+		if ($needsDefault) {
+			print OFH "      default:\n";
+			print OFH "         break;\n";
+		}
+
 		print OFH "   }\n";
 
 		if ($input =~ /^timer_/) {

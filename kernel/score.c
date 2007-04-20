@@ -134,7 +134,7 @@ const U8 score_font_info_key[4][5][4] = {
 void scores_draw_current (U8 skip_player)
 {
 	U8 p;
-	struct score_font_info *info;
+	const struct score_font_info *info;
 
 	for (p=0; p < num_players; p++)
 	{

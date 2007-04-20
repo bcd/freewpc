@@ -153,6 +153,7 @@ extern U8 irq_count;
 #include <sys/rtc.h>
 
 /* Other software structures */
+/* TODO - including these from _every_ file is bad */
 #include <sys/deff.h>
 #include <sys/leff.h>
 #include <sys/debug.h>

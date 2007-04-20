@@ -61,6 +61,7 @@ main (int argc, char *argv[])
    const char *options = "f:uhs:v:";
    int screwup = 0;
    int disable_cksum = 0;
+	int verbose = 0;
 	
 	/* Process command-line options. */
    while ((c = getopt (argc, argv, options)) != -1)
@@ -98,6 +99,10 @@ main (int argc, char *argv[])
          case 'd':
             disable_cksum = 1;
             break;
+
+			case 'V':
+				verbose = 1;
+				break;
       }
    }
   
@@ -168,7 +173,8 @@ main (int argc, char *argv[])
 
 	/* If the checksum doesn't match, or the version component of the
 	checksum is wrong, then correct it. */
-	else if ((cksum != rom_cksum) || (desired_ver != CKSUM_VER(rom_cksum)))
+	else if ((cksum != rom_cksum) 
+		|| (desired_ver && (desired_ver != CKSUM_VER(rom_cksum))))
 	{
       printf ("Figuring out how to correct checksum...\n");
 

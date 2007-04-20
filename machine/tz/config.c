@@ -105,15 +105,3 @@ CALLSET_ENTRY (tz, timed_game_tick)
 #endif
 }
 
-
-#if 0
-	if (flag_test (FLAG_BTTZ_RUNNING))
-		music_change (MUS_JACKPOT);
-
-	else if (flag_test (FLAG_MULTIBALL_RUNNING))
-		music_change (MUS_MULTIBALL);
-
-	else if (flag_test (FLAG_QUICK_MB_RUNNING))
-		music_change (MUS_SPIRAL_ROUND);
-#endif
-

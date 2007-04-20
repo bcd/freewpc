@@ -126,14 +126,6 @@ void music_off (void)
 }
 
 
-void music_change (music_code_t code)
-{
-	if (code != current_music)
-		music_set (code);
-}
-
-
-
 /** Poll the sound board for data.
  * If no data is ready, returns 0xFF. */
 U8 sound_board_poll (void)
@@ -323,7 +315,8 @@ void volume_set (U8 vol)
 
 	if (current_volume == 0)
 	{
-		music_change (MUS_OFF);
+		/* TODO : kill bg audio task */
+		music_off ();
 	}
 	else
 	{

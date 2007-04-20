@@ -109,7 +109,7 @@ __fastram__ U8 blit_xpos;
 
 __fastram__ U8 *blit_dmd;
 
-U8 *blit_data;
+const U8 *blit_data;
 
 
 /** Write an 8-bit value to an arbitrary location on the DMD.  
