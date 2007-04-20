@@ -60,7 +60,7 @@ void sssmb_jackpot_lit_deff (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("JACKPOT VALUE %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}

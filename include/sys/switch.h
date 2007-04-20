@@ -42,7 +42,7 @@ typedef struct
 	/** A function to call when the switch produces an event.
 	 * All functions are assumed to be callsets, and located in the
 	 * callset page of the ROM. */
-	void (*fn) (void);
+	switch_handler_t fn;
 
 	/** A set of flags that control when switch events are produced */
 	U8 flags;

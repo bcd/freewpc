@@ -192,11 +192,10 @@ main (int argc, char *argv[])
          if (test_delta == DISABLE_CKSUM_DELTA)
             continue;
             
-			for (test_cksum = 0; test_cksum <= 0xFFFF; test_cksum++)
+			for (test_cksum = desired_ver; 
+					test_cksum <= 0xFFFF; 
+					test_cksum += 0x0100)
 			{
-            if (CKSUM_VER(test_cksum) != desired_ver)
-               continue;
-               
 				adj_cksum = (cksum + HI (test_cksum) + LO (test_cksum)
 					+ HI(test_delta) + LO(test_delta)) & 0xFFFF;
 				if (adj_cksum == test_cksum)

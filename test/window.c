@@ -2769,9 +2769,10 @@ struct menu sound_test_item = {
 void solenoid_test_init (void)
 {
 	browser_init ();
+	browser_item_number = browser_decimal_item_number;
 	browser_action = TIME_66MS;
 #ifdef NUM_POWER_DRIVES
-	browser_max = NUM_POWER_DRIVES;
+	browser_max = NUM_POWER_DRIVES-1;
 #endif
 }
 

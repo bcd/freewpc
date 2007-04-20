@@ -411,6 +411,10 @@ void start_ball (void)
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
 
+	/* TODO : if this is the final ball for the player, then
+	display the 'goal', i.e. replay or extra ball target score;
+	or the next high score level */
+
 	/* Enable the game scores on the display.  The first deff started
 	 * is low in priority and is shown whenever there is nothing else
 	 * going on.  The second deff runs briefly at high priority, to

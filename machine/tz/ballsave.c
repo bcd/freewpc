@@ -51,32 +51,33 @@ void ballsave_timer_end (void)
 void ballsave_timer_task (void)
 {
 	U8 secs = (U8)task_get_arg ();
-	mode_task (ballsave_timer_begin, ballsave_timer_expire, ballsave_timer_end,
+	timed_mode_task (ballsave_timer_begin, 
+		ballsave_timer_expire, ballsave_timer_end,
 		&ball_save_timer, secs, 3);
 }
 
 void ballsave_add_time (U8 secs)
 {
-	if (mode_timer_running_p (GID_BALLSAVER_TIMER, &ball_save_timer))
+	if (timed_mode_timer_running_p (GID_BALLSAVER_TIMER, &ball_save_timer))
 	{
-		mode_extend (&ball_save_timer, secs, 20);
+		timed_mode_extend (&ball_save_timer, secs, 20);
 	}
 	else
 	{
-		task_pid_t tp = mode_start (GID_BALLSAVER_TIMER, ballsave_timer_task);
+		task_pid_t tp = timed_mode_start (GID_BALLSAVER_TIMER, ballsave_timer_task);
 		task_set_arg (tp, secs);
 	}
 }
 
 void ballsave_disable (void)
 {
-	mode_stop (&ball_save_timer);
+	timed_mode_stop (&ball_save_timer);
 }
 
 
-bool ballsave_test_active (void)
+static bool ballsave_test_active (void)
 {
-	return mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
+	return timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
 }
 
 

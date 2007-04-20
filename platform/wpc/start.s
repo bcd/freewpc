@@ -30,6 +30,7 @@ WPC_RAM_UNLOCKED = 0xB4
 WPC_RAM_LOCK_2K = 0x1
 
 ;;; The ROM bank value for the lowest page this ROM uses
+;;; TODO : this has to be configurable.
 BOTTOM_BANK    = 0x20
 
 ;;; The ROM bank value for the highest page this ROM uses,
@@ -42,6 +43,8 @@ PAGED_REGION   = 0x4000
 PAGED_SIZE     = 0x4000
 FIXED_REGION   = 0x8000
 FIXED_SIZE     = 0x8000
+
+CKSUM_REV      = 0xFFEE
 
 ;;;
 ;;; Perform basic diagnostics to ensure that everything is
@@ -84,8 +87,6 @@ _start:
 	clra
 	tfr	a,dp
 
-	jmp	ram_test    ; TODO : Bypass ROM test; there's a bug here
-
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -127,9 +128,10 @@ paged_inner_loop:
 	bhi	paged_inner_loop
 	leay	-1,y
 	cmpy	#BOTTOM_BANK
-	ble	paged_loop
+	bhi	paged_loop
 
 	; Did checksum validate?
+	subd	CKSUM_REV
 	cmpd	#0
 	beq	ram_test
 rom_checksum_error:

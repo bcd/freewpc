@@ -67,6 +67,7 @@ void flipcode_reset (void)
 	task_kill_gid (GID_FLIPCODE_ACTIVE);
 }
 
+
 void flipcode_active_task (void)
 {
 #ifdef DEBUG_FLIPCODE

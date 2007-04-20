@@ -158,18 +158,18 @@ void greed_round_end (void)
 
 void greed_round_task (void)
 {
-	mode_task (greed_round_begin, greed_round_expire, greed_round_end,
+	timed_mode_task (greed_round_begin, greed_round_expire, greed_round_end,
 		&greed_round_timer, 20, 3);
 }
 
 CALLSET_ENTRY (greed, door_start_greed)
 {
-	mode_start (GID_GREED_ROUND_RUNNING, greed_round_task);
+	timed_mode_start (GID_GREED_ROUND_RUNNING, greed_round_task);
 }
 
 CALLSET_ENTRY (greed, door_stop_greed)
 {
-	mode_stop (&greed_round_timer);
+	timed_mode_stop (&greed_round_timer);
 }
 
 CALLSET_ENTRY (greed, start_player)

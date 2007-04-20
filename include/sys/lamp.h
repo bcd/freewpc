@@ -24,13 +24,14 @@
 /** The maximum number of physical lamps supported */
 #define NUM_LAMPS 64
 
-/** Lamp numbers in this range refer to software flags */
+/** Lamp numbers in this range refer to per-player flags */
 #define FLAG_OFFSET					0x40
 
 /** Lamp numbers in this range refer to the flash state of the lamps */
 #define LAMP_FLASH_OFFSET			0x80
 
-#define LAMP_FAST_FLASH_OFFSET	0xC0
+/** Lamp numbers in this range refer to global flags */
+#define GLOBAL_FLAG_OFFSET	      0xC0
 
 #define NUM_LAMP_COLS	8
 
@@ -81,17 +82,10 @@ typedef U8 lampset_id_t;
  */
 
 /** Indicates the end of a lampset */
-#define LAMP_END_OP					(NUM_LAMPS + 2)
+#define LAMP_END						(NUM_LAMPS + 2)
 
 /** Indicates a time delay within a lampset */
 #define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
-
-
-/**
- * When defining a lampset, you can use the following C macros
- * to emit proper lamp macro code into the array.
- */
-#define LAMP_END LAMP_END_OP
 
 
 void lamp_init (void);
@@ -113,6 +107,11 @@ bool leff_test (lampnum_t lamp);
 #define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
 #define flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
 #define flag_test(lamp)		lamp_test (lamp + FLAG_OFFSET)
+
+#define global_flag_on(lamp)		lamp_on (lamp + GLOBAL_FLAG_OFFSET)
+#define global_flag_off(lamp)		lamp_off (lamp + GLOBAL_FLAG_OFFSET)
+#define global_flag_toggle(lamp)	lamp_toggle (lamp + GLOBAL_FLAG_OFFSET)
+#define global_flag_test(lamp)		lamp_test (lamp + GLOBAL_FLAG_OFFSET)
 
 #define long_leff_allocate(lamp)		lamp_leff_allocate(lamp + 0x80)
 #define long_leff_free(lamp)			lamp_leff_free(lamp + 0x80)

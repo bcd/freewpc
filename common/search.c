@@ -113,11 +113,10 @@ static void ball_search_run (void)
 {
 	U8 sol;
 
-	dbprintf ("Ball search triggered\n");
-
 	/* Fire all solenoids */
 	/* Skip over solenoids known not to be pertinent to ball
 	 * search, and others defined by the machine description */
+	callset_invoke (ball_search);
 	for (sol = 0; sol < 8*4; sol++)
 	{
 		if (ball_search_solenoid_ok (sol))

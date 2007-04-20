@@ -21,7 +21,7 @@
 #ifndef _MODE_H
 #define _MODE_H
 
-/** The task that runs a mode.
+/** The task that runs a timed mode.
  * begin, expire, and end are all optional function pointers to be
  * invoked at various points during the lifecycle of the mode.
  * expire is called when the timer hits zero; end is called when the
@@ -29,7 +29,7 @@
  * timer is a pointer to the 1-byte timer object.
  * mode_time and grace_time give the duration of the mode in seconds.
  */
-extern inline void mode_task (
+extern inline void timed_mode_task (
 	void (*begin) (void),
 	void (*expire) (void),
 	void (*end) (void),
@@ -92,28 +92,29 @@ extern inline void mode_task (
 
 
 /** Starts a mode task */
-extern inline task_pid_t mode_start (U8 gid, void (*task_function) (void))
+extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 {
 	return task_create_gid1 (gid, task_function);
 }
 
 
-extern inline bool mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
+extern inline bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
 {
 	return task_find_gid (gid) ? TRUE : FALSE;
 }
 
 
-extern inline bool mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
+extern inline bool timed_mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
 {
 	return (*timer != 0);
 }
 
 
-extern inline void mode_extend (U8 *timer, U8 extra_time, U8 max_time)
+extern inline void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 {
 	if (*timer == 0)
 	{
+		/* TODO */
 	}
 
 	*timer += extra_time;
@@ -126,7 +127,7 @@ extern inline void mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 
 /** Stops a mode task by setting its timer to zero.  The mode task will
 detect this and exit on its own */
-extern inline void mode_stop (U8 *timer)
+extern inline void timed_mode_stop (U8 *timer)
 {
 	*timer = 0;
 }
