@@ -90,7 +90,7 @@ skillshot {
 	ready : sw_skill_bottom => red
 	ready, red : sw_skill_center => orange
 	ready, red, orange : sw_skill_top => yellow
-	ready, red, orange, yellow : sw_slot_machine => missed
+	ready, red, orange, yellow : sw_slot => missed
 	{
 		throw skill_shot_miss;
 	}

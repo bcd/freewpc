@@ -194,6 +194,8 @@ void pb_announce (void)
 {
 	if (pb_announce_needed)
 	{
+		/* At ball start, the important score screen may pre-empt us */
+		deff_wait_for_other (DEFF_SCORES_IMPORTANT);
 		deff_restart (DEFF_PB_DETECT);
 		pb_announce_needed = 0;
 	}

@@ -50,4 +50,8 @@ CALLSET_ENTRY (audit, sw_l_r_flipper_button)
 		audit_increment (&system_audits.right_flippers);
 }
 
+CALLSET_ENTRY (audit, minute_elapsed)
+{
+	audit_increment (&system_audits.minutes_on);
+}
 

@@ -80,10 +80,13 @@ CALLSET_ENTRY (tilt, sw_tilt)
 {
 	extern bool in_tilt;
 
+	/* Ignore tilt switch activity while already in tilt state */
 	if (in_tilt)
 		return;
+
 	else if (++tilt_warnings == system_config.tilt_warnings)
 	{
+		/* Warnings exceeded... tilt the current ball */
 		sound_reset ();
 		triac_disable (TRIAC_GI_MASK);
 		deff_start (DEFF_TILT);
@@ -96,6 +99,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	}
 	else
 	{
+		/* Give a warning this time */
 		deff_start (DEFF_TILT_WARNING);
 		callset_invoke (tilt_warning);
 	}
@@ -104,11 +108,14 @@ CALLSET_ENTRY (tilt, sw_tilt)
 
 CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
+	/* TODO : ignore right after a coin door open/close */
+	/* TODO : disable coins briefly, the whole point of the slam tilt */
 	deff_start (DEFF_SLAM_TILT);
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
+	/* TODO : abort current game */
 }
 
 

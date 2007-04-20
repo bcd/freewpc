@@ -44,6 +44,9 @@
  * detected */
 U8 db_attached;
 
+
+/** Nonzero when the system (all tasks except for interrupts)
+is paused */
 U8 db_paused;
 
 
@@ -85,14 +88,11 @@ void db_idle (void)
 					VOIDCALL (dump_game);
 					break;
 
-#ifdef MACHINE_TZ /* TODO : last use of MACHINE_TZ */
-				case 'c':
-					VOIDCALL (tz_dump_clock);
-					break;
-#endif
-
 				case 'p':
 				{
+					/* Toggle the pause state.  When paused, tasks
+					do not run and the system polls for debugger
+					commands in a hard loop. */
 					db_paused = 1 - db_paused;
 					while (db_paused == 1)
 					{
@@ -101,6 +101,19 @@ void db_idle (void)
 					}
 					break;
 				}
+
+#ifdef MACHINE_TZ /* TODO : last use of MACHINE_TZ */
+				case 'c':
+					VOIDCALL (tz_dump_clock);
+					break;
+#endif
+
+				default:
+					/* Allow the machine to define additional commands */
+#ifdef MACHINE_DEBUGGER_COMMANDS
+					MACHINE_DEBUGGER_COMMANDS
+#endif
+					break;
 			}
 		}
 	}
@@ -108,6 +121,7 @@ void db_idle (void)
 }
 
 
+/** Initialize the debugger */
 void db_init (void)
 {
 #ifdef CONFIG_PLATFORM_LINUX

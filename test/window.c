@@ -440,7 +440,7 @@ struct adjustment pricing_adjustments[] = {
 #endif
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
 	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
-	{ "COIN METER UNITS", &integer_value, 0, NULL },
+	{ "COIN METER UNITS", &integer_value, 0, &price_config.coin_meter_units },
 	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
@@ -749,6 +749,16 @@ void total_earnings_audit (audit_t val __attribute__((unused)))
 	for (i=0; i < 4; i++)
 		total_coins += system_audits.coins_added[i];
 	currency_audit (total_coins);
+}
+
+
+void average_per_game_audit (audit_t val)
+{
+}
+
+
+void average_per_ball_audit (audit_t val)
+{
 }
 
 

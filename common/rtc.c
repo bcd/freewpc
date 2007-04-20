@@ -236,7 +236,6 @@ CALLSET_ENTRY (rtc, idle)
 	{
 		/* Note: the assumption here is that the idle task will
 		 * always get called at least once per minute. */
-		audit_increment (&system_audits.minutes_on);
 		callset_invoke (minute_elapsed);
 	}
 	last_minute = minute;

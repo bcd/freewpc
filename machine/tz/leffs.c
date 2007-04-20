@@ -32,12 +32,13 @@ void bonus_leff (void)
 void gi_cycle_leff (void)
 {
 	U8 i;
+	triac_leff_enable (TRIAC_GI_MASK);
 	for (;;)
 	{
 		for (i=0; i < 5; i++)
 		{
 			triac_leff_disable (TRIAC_GI_STRING (i));
-			task_sleep (TIME_33MS);
+			task_sleep (TIME_100MS);
 			triac_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}

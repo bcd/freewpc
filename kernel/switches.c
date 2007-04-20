@@ -397,6 +397,9 @@ CALLSET_ENTRY (switch, idle)
 		/* Grab the raw bits : 0=open, 1=closed */
 		rawbits = switch_bits[AR_RAW][col];
 
+		/* TODO : catch shorts of all rows in this column, when
+		rawbits == 0xFF */
+
 		/* Invert for optos: 0=inactive, 1=active */
 		rawbits ^= mach_opto_mask[col];
 

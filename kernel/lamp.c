@@ -92,12 +92,6 @@ void lamp_init (void)
 }
 
 
-void lamp_update_all (void)
-{
-	callset_invoke (update_lamps);
-}
-
-
 /** Runs periodically to invert any lamps in the flashing state */
 void lamp_flash_rtt (void)
 {

@@ -26,7 +26,7 @@ __nvram__ U8 replay_csum;
 
 /** The default replay score.  TODO : this should be machine-specific
 and come from an adjustment */
-const score_t default_replay_score = { 0x02, 0x50, 0x00, 0x00, 0x00 };
+const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 
 
 const struct area_csum replay_csum_info = {
@@ -87,7 +87,7 @@ void replay_award (void)
 void replay_check_current (void)
 {
 	if ((replay_award_count == 0)
-		&& (score_compare (replay_score, current_score) > 0))
+		&& (score_compare (replay_score, current_score) <= 0))
 	{
 		replay_award ();
 	}

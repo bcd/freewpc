@@ -130,7 +130,7 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * multiball, since multiple closures cannot assume that they are from
  * the same ball. */
 #define switch_did_follow(first,second) \
-	((live_balls > 1) \
+	((live_balls == 1) \
 		&& timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))
 
 /* The above macros are generic enough to apply to any event, not

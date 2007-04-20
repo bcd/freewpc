@@ -31,7 +31,7 @@ U8 gumball_op;
 
 typedef struct {
 	U8 sw;
-	U16 *name;
+	U8 *name;
 	union dmd_coordinate box_coord;
 	union dmd_coordinate text_coord;
 } switch_monitor_t;

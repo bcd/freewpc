@@ -41,6 +41,10 @@ H4: Right Popper
 L6: Saucer Shake
 L7: Drop Target
 
+# TODO : Divertor Power = 34
+# TODO : Divertor Hold = 35
+# TODO : Strobe Light = 38
+
 [gi]
 
 [drivers]

@@ -95,7 +95,6 @@ typedef U8 lampset_id_t;
 
 
 void lamp_init (void);
-void lamp_update_all (void);
 void lamp_flash_rtt (void);
 void lamp_rtt (void);
 void lamp_on (lampnum_t lamp);

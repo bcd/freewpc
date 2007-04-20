@@ -240,6 +240,7 @@ void coin_insert_deff (void) __taskentry__
 
 static void do_coin (U8 slot)
 {
+	/* TODO : ignore coins after slam tilt */
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
 }

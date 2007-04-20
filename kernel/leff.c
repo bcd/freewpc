@@ -397,13 +397,15 @@ __noreturn__ void leff_exit (void)
 	dbprintf ("Exiting leff\n");
 	if (leff_running_flags & L_SHARED)
 	{
-		task_kill_peers ();
 		leff = &leff_table[leff_self_id];
 		lampset_set_apply_delay (0);
 		lampset_apply (leff->lampset, lamp_leff2_free);
 	}
 	else
 	{
+		/* Note: global leffs can do leff_exit with peer
+		tasks still running ... they will eventually be
+		stopped, too */
 		leff = &leff_table[leff_active];
 		if (leff->gi != L_NOGI)
 			triac_leff_free (leff->gi);

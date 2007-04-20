@@ -60,6 +60,9 @@ typedef struct
 	audit_t right_flippers;
 	audit_t lockup1_addr;
 	audit_t lockup1_pid_lef;
+	audit_t nplayer_games[4];
+	audit_t exec_lockups;
+	audit_t trough_rescue;
 } std_audits_t;
 
 extern __nvram__ std_audits_t system_audits;

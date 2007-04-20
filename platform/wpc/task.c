@@ -357,7 +357,7 @@ void task_sleep (task_ticks_t ticks)
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
-#if 1
+#if 0
 	/* Complain if a quick task tries to sleep. */
 	if (tp->flags & TASK_QUICK)
 	{

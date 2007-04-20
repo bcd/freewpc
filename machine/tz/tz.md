@@ -66,7 +66,7 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 27: Panel Super Slot, amber ,x(18), y(16)
 28: BALL, red ,x(21), y(14)
 31: Left Outlane, red ,x(27), y( 1)
-32: Lock1 ,x(25), y(12)
+32: Lock1 , red, x(25), y(12)
 33: Left Inlane1, white ,x(26), y( 3)
 34: Panel LITZ, white ,x(23), y(12)
 35: Left Inlane2, white ,x(26), y( 5)

@@ -259,7 +259,7 @@ void score_add (score_t s1, const score_t s2)
 	__bcd_add8 (s1, s2, 0);
 #endif
 #if (BYTES_PER_SCORE >= 4)
-	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, 1); /* TODO : carry wrong if BYTES_PER_SCORE != 5 */
 #endif
 #if (BYTES_PER_SCORE >= 3)
 	__bcd_add8 (s1, s2, 1);
@@ -273,13 +273,23 @@ void score_add (score_t s1, const score_t s2)
 }
 
 
+/** Increments a binary-coded decimal score by another value
+ * in which only one byte is nonzero (e.g. 40K = 04 00 00).
+ * 'offset' identifies the position of the nonzero byte, with
+ * zero always meaning the 'ones' byte, and higher values
+ * referring to larger place values.  'val' gives the byte
+ * value. */
 void score_add_byte (score_t s1, U8 offset, bcd_t val)
 {
 	s1 += BYTES_PER_SCORE - offset;
 	__bcd_add8 (s1, &val, 0);
 	while (offset < BYTES_PER_SCORE)
 	{
+		/* TODO : unroll this by hand like above for better performance */
+		/* TODO : provide multiplier version of this.  May be able to
+		do better than naive repeated addition for this type */
 		__bcd_add8 (s1, NULL, 2);
+		offset--;
 	}
 }
 
@@ -299,41 +309,33 @@ void score_add_current (const bcd_t *s)
 }
 
 
-/** Adds to the current score.  The input score is given as a score ID. */
-void score (score_id_t id)
-{
-	score_add_current (score_table[id]);
-}
-
-
 void score_multiple (score_id_t id, U8 multiplier)
 {
 	if (!in_live_game)
 		return;
 
-	/* TODO - this is cheating */
+	/* Some things to consider:
+	 * 1. Multiplication is expensive on BCD values.
+	 * 2. Multiplied scores will not be common.
+	 * 3. Multiplier will often be small.
+	 *
+	 * Considering all of that, it makes sense to ignore
+	 * multiplication entirely and just do repeated additions. */
 	while (multiplier > 0)
 	{
-		score_add (current_score, score_table[id]);
+		score_add_current (score_table[id]);
 		multiplier--;
 	}
-
-#if 0
-	/* The proper way is to calculate the product (score_table[id] x N)
-	and do a single score_add() of that value.  Also, there is currently no
-	way to do a multiplication without adding it to the current score...
-	Since packed BCD cannot be multiplied directly, we have to convert the
-	BCD value to decimal and then do normal binary multiplication. */
-#endif
 	score_update_request ();
 }
 
 
-/* score[sizeof(score_t)-1] = ones
- * score[sizeof(score_t)-2] = hundreds
- * score[sizeof(score_t)-3] = ten thousands
- * score[sizeof(score_t)-4] = millions
- */
+/** Adds to the current score.  The input score is given as a score ID. */
+void score (score_id_t id)
+{
+	score_multiple (id, 1);
+}
+
 
 void score_sub (score_t s1, const score_t s2)
 {
@@ -372,6 +374,13 @@ void scores_reset (void)
 	score_update_start ();
 	memset ((U8 *)scores, 0, sizeof (scores));
 	current_score = &scores[0][0];
+}
+
+
+CALLSET_ENTRY (score, start_ball)
+{
+	/* TODO : once playfield multipliers are implemented, make sure
+	to reset the multiplier at the start of the next ball */
 }
 
 

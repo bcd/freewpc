@@ -129,7 +129,7 @@ void ball_save_deff (void)
 	deff_exit ();
 }
 
-U16 *tv_static_data[] = {
+U16 tv_static_data[] = {
 	0x4964UL, 0x3561UL, 0x2957UL, 0x1865UL, 
 	0x8643UL, 0x8583UL, 0x18C9UL, 0x9438UL,
 	0x2391UL, 0x1684UL, 0x6593UL,
@@ -146,7 +146,7 @@ void tv_static_deff (void)
 		dmd_alloc_low_high ();
 
 		dmd = (U16 *)dmd_low_buffer;
-		while (dmd < dmd_high_buffer)
+		while (dmd < (U16 *)dmd_high_buffer)
 		{
 			r = random_scaled (11);
 			*dmd++ = tv_static_data[r++];
@@ -154,7 +154,7 @@ void tv_static_deff (void)
 		}
 
 		dmd = (U16 *)dmd_high_buffer;
-		while (dmd < (dmd_high_buffer + DMD_PAGE_SIZE))
+		while (dmd < ((U16 *)(dmd_high_buffer + DMD_PAGE_SIZE)))
 		{
 			r = random_scaled (11);
 			*dmd++ = tv_static_data[r++];

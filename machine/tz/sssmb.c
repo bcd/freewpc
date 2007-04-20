@@ -89,6 +89,7 @@ void sssmb_relight_all_jackpots (void)
 
 void sssmb_award_jackpot (void)
 {
+	score_1M (sssmb_jackpot_value);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
 	sound_send (SND_EXPLOSION_1);
 

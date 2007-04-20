@@ -13,7 +13,7 @@ void dmd_console_deff (void)
 
 	for (;;)
 	{
-		last_read_off = console_read_off;
+		last read_off = console_read_off;
 
 		dmd_alloc_low_clean ();
 			
@@ -42,7 +42,8 @@ void dmd_console_toggle (void)
 
 void dmd_console_putc (char c)
 {
-	console_data[console_write_off++] = c;
+	console_data[console_write_off] = c;
+	console_write_off = (console_write_off + 1) % 64;
 }
 
 

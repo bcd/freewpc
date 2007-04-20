@@ -64,7 +64,7 @@ void freewpc_sprintf (const char *format, ...);
 void sprintf (const char *format, ...);
 #endif
 void sprintf_far_string (const char **srcp);
-void sprintf_score (U8 *score);
+void sprintf_score (const U8 *score);
 void dbprintf1 (void);
 
 #define sprintf_current_score() sprintf_score (current_score)

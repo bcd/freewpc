@@ -439,7 +439,7 @@ sprintf_far_string (const char **srcp)
 
 /** Output a BCD-encoded score */
 void
-sprintf_score (U8 *score)
+sprintf_score (const U8 *score)
 {
 #if (MACHINE_SCORE_DIGITS == 8)
 	sprintf ("%8b", score);

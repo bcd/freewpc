@@ -26,6 +26,9 @@
  * \brief Handle the service button switches inside the coin door.
  */
 
+/* TODO : coin door may be closed, in which case button presses
+ought to generate a warning message */
+
 CALLSET_ENTRY (service, sw_escape)
 {
 	if (!in_test)
@@ -54,6 +57,9 @@ CALLSET_ENTRY (service, sw_up)
 
 CALLSET_ENTRY (service, sw_coin_door_closed)
 {
+	/* TODO : be kind and ignore slam tilt switch briefly after the
+	coin door is opened/closed */
+
 	if (switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
 		/* Coin door is closed */

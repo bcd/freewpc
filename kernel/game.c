@@ -271,16 +271,17 @@ void end_ball (void)
 	{
 		player_save ();
 		player_up++;
-		player_restore ();
 
 		if (player_up <= num_players)
 		{
+			player_restore ();
 			start_ball ();
 			goto done;
 		}
 		else
 		{
 			player_up = 1;
+			player_restore ();
 		}
 	}
 
@@ -405,7 +406,7 @@ void start_ball (void)
 	if (ball_up == 1)
 		callset_invoke (start_player);
 	callset_invoke (start_ball);
-	lamp_update_all ();
+	callset_invoke (update_lamps);
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
@@ -464,6 +465,7 @@ void add_player (void)
 	remove_credit ();
 	num_players++;
 	callset_invoke (add_player);
+	deff_start (DEFF_SCORES_IMPORTANT);
 	score_update_request ();
 }
 

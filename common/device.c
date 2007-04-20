@@ -208,6 +208,7 @@ wait_and_recount:
 			U8 enter_count = dev->actual_count - dev->previous_count;
 			while (enter_count > 0)
 			{
+				callset_invoke (any_device_enter);
 				device_call_op (dev, enter);
 				enter_count--;
 			}
@@ -318,7 +319,8 @@ wait_and_recount:
 			if (dev->state == DEV_STATE_IDLE)
 				dev->state = DEV_STATE_RELEASING;
 
-			/* Give the device heads-up that a kick is coming. */
+			/* Generate events that a kick attempt is coming */
+			callset_invoke (any_kick_attempt);
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid */
@@ -574,7 +576,7 @@ void device_remove_live (void)
 					single_ball_play */
 
 				case 1:
-					/* Multiball modules like to know when single ball play resumes. */
+					/* Multiball modes like to know when single ball play resumes. */
 					callset_invoke (single_ball_play);
 					break;
 				default:

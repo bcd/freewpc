@@ -20,14 +20,17 @@
 
 #include <freewpc.h>
 
+/* For sanity, don't allow more than this many knocks to queue up */
 #define MAX_PENDING_KNOCKS 5
 
+/** The number of pending knocks */
 U8 knock_count;
 
 
 /** Fires the knocker */
 static void knocker_fire_task (void)
 {
+	task_sleep_sec (1);
 	do
 	{
 #ifdef MACHINE_KNOCKER_SOLENOID
@@ -44,12 +47,15 @@ static void knocker_fire_task (void)
 
 /** Requests that the knocker be fired.
  * We bump a count and then let a background task do the firing,
- * taking care to pause between thwacks. */
+ * taking care to pause between thwacks.
+ *
+ * Also, if the knocker is being used for coin metering, then don't
+ * use it for free play awards. */
 void knocker_fire (void)
 {
-	if (knock_count < MAX_PENDING_KNOCKS) /* prevent runaway knocking */
+	if ((knock_count < MAX_PENDING_KNOCKS) /* prevent runaway knocking */
+		&& (price_config.coin_meter_units == 0))
 	{
-		/* TODO - don't fire knocker in certain instances */
 		knock_count++;
 		task_create_gid1 (GID_KNOCKER_FIRE, knocker_fire_task);
 	}
