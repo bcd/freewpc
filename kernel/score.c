@@ -309,6 +309,20 @@ void score_add_current (const bcd_t *s)
 }
 
 
+void score_add_byte_current (U8 offset, bcd_t val)
+{
+	if (!in_live_game)
+	{
+		nonfatal (ERR_SCORE_NOT_IN_GAME);
+		return;
+	}
+
+	score_add_byte (current_score, offset, val);
+	score_update_request ();
+	replay_check_current ();
+}
+
+
 void score_multiple (score_id_t id, U8 multiplier)
 {
 	if (!in_live_game)

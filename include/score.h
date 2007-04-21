@@ -71,6 +71,7 @@ void score_zero (score_t *s);
 void score_add (score_t s1, const score_t s2);
 void score_add_byte (score_t s1, U8 offset, bcd_t val);
 void score_add_current (const bcd_t *s);
+void score_add_byte_current (U8 offset, bcd_t val);
 void score (score_id_t id);
 void score_multiple (score_id_t id, U8 multiplier);
 void score_sub (score_t s1, const score_t s2);
@@ -82,17 +83,17 @@ void score_init (void);
 
 extern inline void score_10K (U8 count)
 {
-	score_add_byte (current_score, 2, count);
+	score_add_byte_current (2, count);
 }
 
 extern inline void score_1M (U8 count)
 {
-	score_add_byte (current_score, 3, count);
+	score_add_byte_current (3, count);
 }
 
 extern inline void score_100M (U8 count)
 {
-	score_add_byte (current_score, 4, count);
+	score_add_byte_current (4, count);
 }
 
 
