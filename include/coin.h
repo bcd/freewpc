@@ -28,7 +28,7 @@ __common__ void lamp_start_update (void);
 __common__ void add_credit (void);
 __common__ bool has_credits_p (void);
 __common__ void remove_credit (void);
-__common__ void coin_deff (void) __taskentry__;
+__common__ void coin_deff (void);
 __common__ void credits_clear (void);
 __common__ void coin_init (void);
 

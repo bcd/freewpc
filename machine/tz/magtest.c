@@ -19,7 +19,9 @@
  */
 
 #include <freewpc.h>
+#include <window.h>
 #include <test.h>
+
 
 struct magnet_test_option {
 	U8 sw;

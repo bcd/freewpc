@@ -44,21 +44,21 @@ typedef unsigned char bool;
 /* 8-bit integers are always 'char' */
 typedef unsigned char bcd_t;
 typedef signed char int8_t, I8, S8;
-typedef unsigned char uint8_t, U8;
+typedef unsigned char U8;
 
 /* 16-bit integers depend on the compiler */
 #if defined(__m6809__) && defined(__int16__)
 typedef int int16_t, I16, S16;
-typedef unsigned int uint16_t, U16;
+typedef unsigned int U16;
 typedef U16 INTPTR;
 typedef U16 PTR_OR_U16;
 #elif defined(CONFIG_PLATFORM_LINUX)
 typedef short int16_t, I16, S16;
-typedef unsigned short uint16_t, U16;
+typedef unsigned short U16;
 typedef unsigned long PTR_OR_U16;
 #else /* default assumes -mint8 on wpc */
 typedef long int16_t, I16, S16;
-typedef unsigned long uint16_t, U16;
+typedef unsigned long U16;
 typedef unsigned int INTPTR;
 typedef U16 PTR_OR_U16;
 #endif
@@ -152,37 +152,37 @@ extern U8 irq_count;
 #include <sys/irq.h>
 #include <sys/rtc.h>
 
-/* Other software structures */
-/* TODO - including these from _every_ file is bad */
+/* Common software structures */
 #include <sys/deff.h>
 #include <sys/leff.h>
-#include <sys/debug.h>
 #include <sys/device.h>
 #include <timer.h>
 #include <score.h>
-#include <coin.h>
 #include <game.h>
-#include <player.h>
 #include <stdadj.h>
 #include <audit.h>
 #include <printf.h>
-#include <amode.h>
-#include <window.h>
 #include <callset.h>
 #include <priority.h>
 #include <eb.h>
-#include <highscore.h>
 #include <search.h>
-#include <status.h>
 #include <replay.h>
 #include <knocker.h>
 #include <csum.h>
 #include <inspector.h>
-#include <test.h>
-#include <diag.h>
 #include <audio.h>
 #include <slowtimer.h>
 #include <mode.h>
+
+
+/* Uncommon software modules - TODO : shouldn't automatically include */
+#include <player.h>
+#include <coin.h>
+#include <sys/debug.h>
+#include <amode.h>
+#include <highscore.h>
+#include <test.h>
+
 
 /* Game-specific defines.  'mach' should point to the machine-specific 
  * directory.  These files are optional; if a machine does not need

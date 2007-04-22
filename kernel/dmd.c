@@ -291,7 +291,7 @@ void dmd_flip_low_high (void)
 	 * to read from the hardware register, which doesn't
 	 * work.
 	 */
-	register dmd_pagenum_t tmp asm ("a") = wpc_dmd_get_low_page ();
+	register dmd_pagenum_t tmp __areg__ = wpc_dmd_get_low_page ();
 	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
 	wpc_dmd_set_high_page (tmp);
 }
@@ -530,11 +530,7 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 {
 	U8 *dbuf = dmd_low_buffer;
-#ifdef __m6809__
-	register U8 c asm ("a");
-#else
-	U8 c;
-#endif
+	register U8 c __areg__;
 	U8 c2;
 
 	wpc_push_page (PRG_PAGE);

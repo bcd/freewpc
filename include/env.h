@@ -44,8 +44,6 @@
 #define __fastram__
 #endif
 
-#define __taskentry__
-
 #ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))
 #else
@@ -90,6 +88,12 @@
 #define __naked__       __attribute__((naked))
 #else
 #define __naked__
+#endif
+
+#ifdef __m6809__
+#define __areg__    asm ("a")
+#else
+#define __areg__
 #endif
 
 #define SECTION_VOIDCALL(section,fn) \

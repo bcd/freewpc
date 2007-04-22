@@ -38,7 +38,7 @@
 U16 div10 (U8 v)
 {
 #ifdef __M6809__
-	register uint16_t res asm ("d");
+	register U16 res asm ("d");
 	U8 i = v;
 
 	/* Note: this takes about 83 cycles */

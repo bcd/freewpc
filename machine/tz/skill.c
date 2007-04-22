@@ -116,7 +116,7 @@ static void award_skill_shot (void)
 	}
 }
 
-static void skill_switch_monitor (void) __taskentry__
+static void skill_switch_monitor (void)
 {
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);

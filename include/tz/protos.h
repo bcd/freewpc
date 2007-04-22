@@ -39,7 +39,6 @@ void autofire_init(void);
 /* ballsave.c */
 void ballsave_add_time(U8 secs);
 void ballsave_disable(void);
-bool ballsave_test_active(void);
 void ballsave_launch(void);
 /* clock.c */
 void tz_dump_clock(void);

@@ -175,7 +175,7 @@ char *do_sprintf_hex_byte (char *buf, U8 b)
 
 
 /** Write a 16-bit hexadecimal value 'w' to the buffer 'buf'. */
-char *do_sprintf_hex (char *buf, uint16_t w)
+char *do_sprintf_hex (char *buf, U16 w)
 {
 	buf = do_sprintf_hex_byte (buf, HIGHBYTE(w));
 	buf = do_sprintf_hex_byte (buf, LOWBYTE (w));

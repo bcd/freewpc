@@ -111,7 +111,7 @@ void no_lights_leff (void)
 
 
 /** Returns the index of the current active lamp effect. */
-U8 leff_get_active (void)
+leffnum_t leff_get_active (void)
 {
 	return leff_active;
 }

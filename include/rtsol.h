@@ -94,11 +94,7 @@ extern inline void rt_solenoid_update1 (
 {
 	/* Declaring state as a local register variable improves the performance.
 	 * 'a' can be used here safely since 'D' is not. */
-#ifdef __m6809__
-	register S8 state asm ("a");
-#else	
-	register S8 state;
-#endif
+	register S8 state __areg__;
 
 	state = *rt_sol_state;
 	

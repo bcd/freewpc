@@ -167,7 +167,7 @@ CALLSET_ENTRY (greed, door_start_greed)
 	timed_mode_start (GID_GREED_ROUND_RUNNING, greed_round_task);
 }
 
-CALLSET_ENTRY (greed, door_stop_greed)
+CALLSET_ENTRY (greed, end_ball)
 {
 	timed_mode_stop (&greed_round_timer);
 }

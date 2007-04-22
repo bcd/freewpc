@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <window.h>
 #include <test.h>
 
 #define TEST_GUMBALL_LOAD 0

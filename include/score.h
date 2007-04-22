@@ -66,7 +66,7 @@ extern inline void score_update_request (void)
 void scores_draw (void);
 void scores_draw_ball (void);
 void scores_draw_current (U8 skip_player);
-void scores_deff (void) __taskentry__;
+void scores_deff (void);
 void score_zero (score_t *s);
 void score_add (score_t s1, const score_t s2);
 void score_add_byte (score_t s1, U8 offset, bcd_t val);
@@ -75,7 +75,7 @@ void score_add_byte_current (U8 offset, bcd_t val);
 void score (score_id_t id);
 void score_multiple (score_id_t id, U8 multiplier);
 void score_sub (score_t s1, const score_t s2);
-void score_mul (score_t s1, uint8_t multiplier);
+void score_mul (score_t s1, U8 multiplier);
 I8 score_compare (const score_t s1, const score_t s2);
 void scores_reset (void);
 void score_init (void);

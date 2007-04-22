@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <diag.h>
 
 
 diag_error_code_t diag_error_list[MAX_DIAG_ERRORS];

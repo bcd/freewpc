@@ -349,7 +349,7 @@ void task_setgid (task_gid_t gid)
 /** Suspend the current task for a period of time */
 void task_sleep (task_ticks_t ticks)
 {
-	extern uint8_t tick_count;
+	extern U8 tick_count;
 	register task_t *tp = task_current;
 
 	/* Fail if the idle task tries to sleep. */
@@ -645,7 +645,7 @@ void task_dispatcher (void)
 			 * Examine the current tick count, and see if it should
 			 * be woken up.
 			 */
-			register uint8_t ticks_elapsed = tick_count - tp->asleep;
+			register U8 ticks_elapsed = tick_count - tp->asleep;
 			if (ticks_elapsed >= tp->delay)
 			{
 				/* Yes, it is ready to run again. */

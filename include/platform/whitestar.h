@@ -155,11 +155,11 @@ extern inline void wpc_led_toggle (void)
 /* RAM Protection Circuit                   */
 /********************************************/
 
-extern inline void wpc_set_ram_protect (uint8_t prot)
+extern inline void wpc_set_ram_protect (U8 prot)
 {
 }
 
-extern inline void wpc_set_ram_protect_size (uint8_t sz)
+extern inline void wpc_set_ram_protect_size (U8 sz)
 {
 }
 
@@ -190,11 +190,11 @@ extern inline void wpc_set_ram_protect_size (uint8_t sz)
 /* ROM Paging                               */
 /********************************************/
 
-extern inline uint8_t wpc_get_rom_page (void)
+extern inline U8 wpc_get_rom_page (void)
 {
 }
 
-extern inline void wpc_set_rom_page (uint8_t page)
+extern inline void wpc_set_rom_page (U8 page)
 {
 }
 
@@ -221,11 +221,11 @@ do { \
 /* RAM Paging                               */
 /********************************************/
 
-extern inline uint8_t wpc_get_ram_page (void)
+extern inline U8 wpc_get_ram_page (void)
 {
 }
 
-extern inline void wpc_set_ram_page (uint8_t page)
+extern inline void wpc_set_ram_page (U8 page)
 {
 }
 

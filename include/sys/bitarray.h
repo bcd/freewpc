@@ -21,7 +21,7 @@
 #ifndef _SYS_BITARRAY_H
 #define _SYS_BITARRAY_H
 
-typedef uint8_t *bitset;
+typedef U8 *bitset;
 
 #ifdef CONFIG_PLATFORM_WPC
 

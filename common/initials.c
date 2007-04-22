@@ -19,7 +19,8 @@
  */
 
 #include <freewpc.h>
- 
+#include <window.h>
+
 /**
  * \file
  * \brief Entry of player's initials

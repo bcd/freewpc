@@ -43,19 +43,18 @@ CALLSET_ENTRY (clocktarget, sw_clock_target)
 
 CALLSET_ENTRY(clocktarget, start_player)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	clock_hits = 0;
+}
+
+
+CALLSET_ENTRY (clocktarget, start_ball)
+{
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
 
 CALLSET_ENTRY (clocktarget, door_start_clock_millions)
 {
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
-}
-
-
-CALLSET_ENTRY (clocktarget, door_stop_clock_millions)
-{
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 

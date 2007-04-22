@@ -64,9 +64,8 @@
  */
 
 #include <freewpc.h>
+#include <window.h>
 
-
-struct window;
 
 /** win_top always points to the current window, or NULL if
  * no window is open. */
@@ -1080,7 +1079,7 @@ const font_t *font_test_lookup (void)
 	switch (menu_selection)
 	{
 #if (MAX_FONTS > 0)
-		case FON_MONO5: default: return &font_mono5;
+		case FON_MONO5: return &font_mono5;
 		case FON_MONO9: return &font_mono9;
 		case FON_FIXED10: return &font_fixed10;
 		case FON_FIXED6: return &font_fixed6;
@@ -1095,6 +1094,8 @@ const font_t *font_test_lookup (void)
 		case FON_CU17: return &font_cu17;
 		case FON_TINYNUM: return &font_tinynum;
 #endif
+		default:
+			return &font_mono5;
 	}
 }
 

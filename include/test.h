@@ -22,6 +22,7 @@
 #define _TEST_H
 
 struct window;
+struct window_ops;
 
 void window_push_first (void);
 void window_pop_first (void);

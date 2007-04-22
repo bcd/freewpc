@@ -201,7 +201,7 @@ void amode_show_design_credits (void)
 }
 
 
-void amode_deff (void) __taskentry__
+void amode_deff (void)
 {
 	U8 design_credit_counter = 3;
 

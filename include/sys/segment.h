@@ -95,7 +95,7 @@ void seg_write_bcd (segaddr_t sa, bcd_t bcd);
 void seg_write_uint8 (segaddr_t sa, U8 u8);
 void seg_write_hex16 (segaddr_t sa, U16 u16);
 void seg_write_string (segaddr_t sa, const char *s);
-void seg_erase (segaddr_t sa, int8_t len);
+void seg_erase (segaddr_t sa, S8 len);
 
 #endif
 

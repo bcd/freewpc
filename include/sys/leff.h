@@ -23,7 +23,7 @@
 
 typedef U8 leffnum_t;
 
-typedef void (*leff_function_t) (void) __taskentry__;
+typedef void (*leff_function_t) (void);
 
 #define L_NORMAL	0x0
 
@@ -73,7 +73,7 @@ typedef struct
 #define leff_running_flags		task_get_thread_data (task_getpid (), L_PRIV_FLAGS)
 #define leff_self_id				task_get_thread_data (task_getpid (), L_PRIV_ID)
 
-uint8_t leff_get_active (void);
+leffnum_t leff_get_active (void);
 void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
 void leff_restart (leffnum_t dn);

@@ -25,7 +25,7 @@
  * An audit variable.  Audits are 16-bit integers stored in
  * non-volatile memory.
  */
-typedef uint16_t audit_t;
+typedef U16 audit_t;
 
 /**
  * The table of standard WPC system audits.

@@ -21,7 +21,7 @@
 #ifndef _EB_H
 #define _EB_H
 
-extern uint8_t extra_balls;
+extern U8 extra_balls;
 
 __common__ void increment_extra_balls (void);
 __common__ bool decrement_extra_balls (void);

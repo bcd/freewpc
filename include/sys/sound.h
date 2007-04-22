@@ -65,7 +65,7 @@
 #define MAX_VOLUME				31
 #define DEFAULT_VOLUME			8
 
-typedef uint16_t music_code_t, sound_code_t;
+typedef U16 music_code_t, sound_code_t;
 
 void music_off (void);
 void music_set (music_code_t code);

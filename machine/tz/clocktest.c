@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <window.h>
 #include <test.h>
 #include <tz/clock.h>
 

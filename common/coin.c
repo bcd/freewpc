@@ -227,9 +227,9 @@ void add_units (U8 n)
 }
 
 
-void coin_insert_deff (void) __taskentry__
+void coin_insert_deff (void)
 {
-	register int8_t z = 4;
+	register S8 z = 4;
 	while (--z > 0)
 	{
 		dmd_invert_page (dmd_low_buffer);

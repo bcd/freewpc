@@ -20,10 +20,10 @@
 
 /* Taken blatantly from freewpc.h */
 typedef unsigned char bcd_t, BCD;
-typedef signed char int8_t, I8, S8;
-typedef unsigned char uint8_t, U8;
+typedef signed char I8, S8;
+typedef unsigned char U8;
 typedef long int16_t, I16, S16;
-typedef unsigned long uint16_t, U16;
+typedef unsigned long U16;
 typedef unsigned int INTPTR;
 typedef U8 bool;
 #define TRUE (1)

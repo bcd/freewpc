@@ -172,7 +172,7 @@ void scores_important_deff (void)
 }
 
 
-void scores_deff (void) __taskentry__
+void scores_deff (void)
 {
 	U8 delay;
 

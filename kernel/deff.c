@@ -193,7 +193,7 @@ static void deff_start_task (const deff_t *deff)
 	deff_stop_task ();
 	dbprintf ("active deff = %d\n", deff_active);
 	tp = task_create_gid (GID_DEFF, deff->fn);
-	if (deff->page != -1)
+	if (deff->page != 0xFF)
 		task_set_rom_page (tp, deff->page);
 }
 
@@ -324,7 +324,7 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 }
 
 
-void deff_swap_low_high (int8_t count, task_ticks_t delay)
+void deff_swap_low_high (S8 count, task_ticks_t delay)
 {
 	while (--count >= 0)
 	{

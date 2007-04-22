@@ -101,7 +101,7 @@ extern const U8 mach_edge_switches[];
 #define AR_RUNNING   4
 #define NUM_SWITCH_ARRAYS 	5
 
-extern uint8_t switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
 extern inline U8 rt_switch_poll (const switchnum_t sw_num)

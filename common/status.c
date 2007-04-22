@@ -142,7 +142,8 @@ done:
 	task_exit ();
 }
 
-void status_report_check (void)
+
+static void status_report_check (void)
 {
 	if (task_find_gid (GID_STATUS_REPORT_MONITOR))
 	{

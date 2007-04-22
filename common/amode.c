@@ -85,7 +85,7 @@ void amode_right_flipper (void)
 }
 
 
-void amode_deff (void) __taskentry__
+void amode_deff (void)
 {
 #ifdef MACHINE_AMODE_INIT
 	MACHINE_AMODE_INIT ();

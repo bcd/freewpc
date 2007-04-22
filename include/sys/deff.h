@@ -26,7 +26,7 @@
 typedef U8 deffnum_t;
 
 /** Type for a display effect function */
-typedef void (*deff_function_t) (void) __taskentry__;
+typedef void (*deff_function_t) (void);
 
 #define D_NORMAL	0x0
 
@@ -51,16 +51,6 @@ typedef struct
 #define MAX_RUNNING_DEFFS 16
 #endif
 
-#define DECLARE_DEFF(id, _flags, _prio, _page) \
-	extern void id##_func (void); \
-	const deff_t id##_deff = { \
-		.flags = _flags, \
-		.prio = _prio, \
-		.fn = id##_func, \
-		.page = _page, \
-	}; \
-	void id##_func (void) __taskentry__
-
 extern void (*deff_component_table[4]) (void);
 
 U8 deff_get_count (void);
@@ -72,7 +62,7 @@ void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);
 __noreturn__ void deff_exit (void);
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
-void deff_swap_low_high (int8_t count, task_ticks_t delay);
+void deff_swap_low_high (S8 count, task_ticks_t delay);
 void deff_init (void);
 void deff_stop_all (void);
 

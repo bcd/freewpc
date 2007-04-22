@@ -85,6 +85,12 @@ void sw_jet_sound (void)
 	task_exit ();
 }
 
+
+CALLSET_ENTRY (jet, start_ball)
+{
+}
+
+
 CALLSET_ENTRY (jet, sw_jet)
 {
 	if (lamp_test (LM_PANEL_TSM))
@@ -100,9 +106,5 @@ CALLSET_ENTRY (jet, door_start_tsm)
 	{
 		leff_start (LEFF_JETS_ACTIVE);
 	}
-}
-
-CALLSET_ENTRY (jet, door_stop_tsm)
-{
 }
 

@@ -133,6 +133,12 @@ CALLSET_ENTRY (camera, sw_camera)
 }
 
 
+CALLSET_ENTRY (camera, start_ball)
+{
+	lamp_off (LM_CAMERA);
+}
+
+
 CALLSET_ENTRY (camera, start_player)
 {
 	lamp_tristate_off (LM_CAMERA);
@@ -144,11 +150,6 @@ CALLSET_ENTRY (camera, start_player)
 CALLSET_ENTRY (camera, door_start_camera)
 {
 	lamp_tristate_flash (LM_CAMERA);
-}
-
-CALLSET_ENTRY (camera, door_stop_camera)
-{
-	lamp_off (LM_CAMERA);
 }
 
 

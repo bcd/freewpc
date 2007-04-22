@@ -100,28 +100,6 @@ void door_start_event (U8 id)
 	}
 }
 
-void door_stop_event (U8 id)
-{
-	switch (id)
-	{
-		case 0: callset_invoke (door_stop_tsm); break;
-		case 1: callset_invoke (door_stop_eb); break;
-		case 2: callset_invoke (door_stop_super_slot); break;
-		case 3: callset_invoke (door_stop_clock_millions); break;
-		case 4: callset_invoke (door_stop_spiral); break;
-		case 5: callset_invoke (door_stop_battle_power); break;
-		case 6: callset_invoke (door_stop_10M); break;
-		case 7: callset_invoke (door_stop_greed); break;
-		case 8: callset_invoke (door_stop_camera); break;
-		case 9: callset_invoke (door_stop_hitchhiker); break;
-		case 10: callset_invoke (door_stop_clock_chaos); break;
-		case 11: callset_invoke (door_stop_super_skill); break;
-		case 12: callset_invoke (door_stop_fast_lock); break;
-		case 13: callset_invoke (door_stop_light_gumball); break;
-		case 14: callset_invoke (door_stop_litz); break;
-	}
-}
-
 
 extern inline const U8 *door_get_lamps (void)
 {
@@ -347,13 +325,10 @@ CALLSET_ENTRY(door, start_player)
 
 CALLSET_ENTRY(door, start_ball)
 {
-	U8 id;
-
-	for (id = 0; id < 15; id++)
-		door_stop_event (id);
 	door_set_flashing (door_index);
 	door_award_enable ();
 }
+
 
 CALLSET_ENTRY (door, init)
 {
