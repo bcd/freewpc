@@ -281,6 +281,7 @@ void score_add (score_t s1, const score_t s2)
  * value. */
 void score_add_byte (score_t s1, U8 offset, bcd_t val)
 {
+#if 0
 	s1 += BYTES_PER_SCORE - offset;
 	__bcd_add8 (s1, &val, 0);
 	while (offset < BYTES_PER_SCORE)
@@ -291,6 +292,12 @@ void score_add_byte (score_t s1, U8 offset, bcd_t val)
 		__bcd_add8 (s1, NULL, 2);
 		offset--;
 	}
+#endif
+	score_t s2;
+
+	memset (s2, 0, sizeof (score_t));
+	s2[BYTES_PER_SCORE - offset] = val;
+	score_add (s1, s2);
 }
 
 

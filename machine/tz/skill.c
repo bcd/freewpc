@@ -101,16 +101,19 @@ static void award_skill_shot (void)
 	{
 		case 1:
 			callset_invoke (skill_red);
-			score (SC_1M);
+			//score (SC_1M);
+			score_1M (1);
 			break;
 		case 2: 
 			callset_invoke (skill_orange);
-			score (SC_3M); 
+			//score (SC_3M); 
+			score_1M (3);
 			timed_game_extend (5);
 			break;
 		case 3: 
 			callset_invoke (skill_yellow);
-			score (SC_5M); 
+			//score (SC_5M); 
+			score_1M (5);
 			timed_game_extend (10);
 			break;
 	}
@@ -193,10 +196,12 @@ CALLSET_ENTRY (skill, sw_shooter)
 	eliminate the need for every handler to check this. */
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
-		if (skill_shot_enabled)
+		if (skill_shot_enabled
+			&& !timer_find_gid (GID_SHOOTER_SOUND_DEBOUNCE))
 		{
 			sound_send (SND_SHOOTER_PULL);
 			leff_restart (LEFF_STROBE_UP);
+			timer_restart_free (GID_SHOOTER_SOUND_DEBOUNCE, TIME_3S);
 		}
 	}
 	else

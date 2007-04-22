@@ -83,17 +83,17 @@ void score_init (void);
 
 extern inline void score_10K (U8 count)
 {
-	score_add_byte_current (2, count);
+	score_add_byte_current (3, count);
 }
 
 extern inline void score_1M (U8 count)
 {
-	score_add_byte_current (3, count);
+	score_add_byte_current (4, count);
 }
 
 extern inline void score_100M (U8 count)
 {
-	score_add_byte_current (4, count);
+	score_add_byte_current (5, count);
 }
 
 
