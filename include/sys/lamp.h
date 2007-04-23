@@ -149,6 +149,7 @@ void lampset_apply_leff_toggle (lampset_id_t id);
 void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on);
 void lampset_set_apply_delay (task_ticks_t ticks);
 void lampset_step_increment (lampset_id_t id);
+void lampset_leff_step_increment (lampset_id_t id);
 void lampset_step_decrement (lampset_id_t id);
 void lampset_build_increment (lampset_id_t id);
 void lampset_build_decrement (lampset_id_t id);

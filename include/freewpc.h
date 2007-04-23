@@ -118,6 +118,7 @@ extern U8 irq_count;
 #define __blockclear16(s,n) memset(s,'0',n)
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #endif
 
 /* Build system information */
@@ -204,6 +205,7 @@ extern U8 irq_count;
 
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */
+#ifndef CONFIG_PLATFORM_LINUX
 #ifdef PAGE
 #if (PAGE == 54)
 #define PAGE_PRAGMA _Pragma ("section (\"page54\")")
@@ -226,6 +228,7 @@ extern U8 irq_count;
 #endif
 PAGE_PRAGMA
 #endif
+#endif /* !CONFIG_PLATFORM_LINUX */
 
 #ifdef NOSTATIC
 #define static

@@ -24,6 +24,11 @@
 /** Returns a random true/false value */
 #define random_bool()	(random() & 0x80)
 
+#ifdef CONFIG_PLATFORM_LINUX
+#undef random
+#define random freewpc_random
+#endif
+
 U8 random (void);
 U8 random_scaled (U8);
 void random_reseed (void);

@@ -33,9 +33,8 @@ void amode_leff(void);
 void amode_show_design_credits(void);
 void amode_deff(void);
 /* autofire.c */
-void autofire_handler(void);
+void autofire_catch(void);
 void autofire_add_ball(void);
-void autofire_init(void);
 /* ballsave.c */
 void ballsave_add_time(U8 secs);
 void ballsave_disable(void);
@@ -94,8 +93,6 @@ __machine__ void mpf_enable (void);
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
-/* sling.c */
-void slingshot_rtt(void);
 /* sssmb.c */
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
