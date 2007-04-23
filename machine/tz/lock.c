@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,6 +33,13 @@ CALLSET_ENTRY (lock, dev_lock_enter)
 
 CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 {
+	for (;;)
+	{
+		if (!task_find_gid (GID_AUTOFIRE_HANDLER))
+			break;
+		task_sleep (TIME_100MS);
+	}
+
 	sound_send (SND_LOCK_KICKOUT);
 	switch_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
 }

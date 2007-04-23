@@ -63,7 +63,7 @@ U8 sound_board_return;
 
 /** The default audio track to be played when setting volume. */
 const audio_track_t volume_change_music_track = {
-	.prio = PRI_NULL,
+	.prio = PRI_VOLUME_CHANGE,
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 	.code = MACHINE_VOLUME_CHANGE_MUSIC
 #else
@@ -342,7 +342,7 @@ CALLSET_ENTRY (sound, volume_down)
 	{
 		volume_set (current_volume-1);
 	}
-	bg_music_start (&volume_change_music_track);
+	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
 
@@ -354,7 +354,7 @@ CALLSET_ENTRY (sound, volume_up)
 	{
 		volume_set (current_volume+1);
 	}
-	bg_music_start (&volume_change_music_track);
+	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
 }
 

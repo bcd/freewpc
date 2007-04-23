@@ -145,85 +145,6 @@ void audio_exit (void)
 }
 
 
-/** The audio task provided by the system for managing the
- * background music. */
-static void bg_music_task (void)
-{
-	U8 i;
-	const audio_track_t *current = NULL;
-
-	/* Determine which of the stacked tracks has the highest priority. */
-	for (i=0 ; i < NUM_STACKED_TRACKS; i++)
-	{
-		const audio_track_t *track = audio_bg_track_table[i];
-		if (track)
-		{
-			if (current == NULL)
-				current = track;
-			else if (track->prio > current->prio)
-				current = track;
-		}
-	}
-
-	if (current == NULL)
-		music_off ();
-	else
-		music_set (current->code);
-	
-	audio_exit ();
-}
-
-
-/** Start a background music track. */
-void bg_music_start (const audio_track_t *track)
-{
-	U8 i;
-
-	/* If the track is already running, then return. */
-	for (i=0; i < NUM_STACKED_TRACKS; i++)
-		if (audio_bg_track_table[i] == track)
-			return;
-
-	for (i=0; i < NUM_STACKED_TRACKS; i++)
-		if (audio_bg_track_table[i] == NULL)
-		{
-			audio_bg_track_table[i] = track;
-			audio_stop (AUDIO_CH_BACKGROUND);
-			audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
-			return;
-		}
-
-	/* TODO: could not allocate a track... too many already running?
-	 * We may need to kick one out.  Lose the one with lowest priority, but
-	 * not certain ones like default, etc. */
-}
-
-
-/** Stop a background music track. */
-void bg_music_stop (const audio_track_t *track)
-{
-	U8 i;
-
-	for (i=0; i < NUM_STACKED_TRACKS; i++)
-		if (audio_bg_track_table[i] == track)
-			audio_bg_track_table[i] = NULL;
-
-	audio_stop (AUDIO_CH_BACKGROUND);
-	audio_start (AUDIO_BACKGROUND_MUSIC, bg_music_task, COMMON_PAGE, 0);
-}
-
-
-/** Stop all background music tracks */
-void bg_music_stop_all (void)
-{
-	U8 i;
-
-	for (i=0; i < NUM_STACKED_TRACKS; i++)
-		audio_bg_track_table[i] = NULL;
-	audio_stop (AUDIO_CH_BACKGROUND);
-}
-
-
 /** Initialize the audio subsystem. */
 CALLSET_ENTRY (audio, init)
 {
@@ -257,33 +178,33 @@ static const audio_track_t start_ball_music_track = {
 
 CALLSET_ENTRY(audio, start_ball)
 {
-	bg_music_start (&start_ball_music_track);
+	music_start (start_ball_music_track);
 }
 
 
 CALLSET_ENTRY (audio, ball_in_play)
 {
 	/* TODO : optimize to a single call */
-	bg_music_stop (&start_ball_music_track);
-	bg_music_start (&default_music_track);
+	music_stop (start_ball_music_track);
+	music_start (default_music_track);
 }
 
 
 CALLSET_ENTRY (audio, bonus)
 {
-	bg_music_stop_all ();
+	music_stop_all ();
 }
 
 
 CALLSET_ENTRY (audio, end_ball)
 {
-	bg_music_stop_all ();
+	music_stop_all ();
 }
 
 
 CALLSET_ENTRY (audio, end_game)
 {
-	bg_music_stop_all ();
+	music_stop_all ();
 	if (!in_test)
 	{
 		/* TODO - start timed with fade out */

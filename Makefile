@@ -216,6 +216,7 @@ COMMON_BASIC_OBJS = \
 	common/flipcode.o \
 	common/initials.o \
 	common/match.o \
+	common/music.o \
 	common/plunger.o \
 	common/rtc.o \
 	common/service.o \

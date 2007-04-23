@@ -58,7 +58,7 @@ void volume_change_deff (void)
 	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (5);
-	bg_music_stop (&volume_change_music_track);
+	music_stop (volume_change_music_track);
 	deff_exit ();
 }
 

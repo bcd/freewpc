@@ -83,4 +83,12 @@ void bg_music_start (const audio_track_t *track);
 void bg_music_stop (const audio_track_t *track);
 void bg_music_stop_all (void);
 
+/* New style */
+
+
+#define MAX_TRACKS 8
+__common__ void music_start (const audio_track_t track);
+__common__ void music_stop (const audio_track_t track);
+__common__ void music_stop_all (void);
+
 #endif /* __AUDIO_H */

@@ -51,7 +51,7 @@ CALLSET_ENTRY (tz, add_player)
 
 CALLSET_ENTRY (tz, bonus)
 {
-	bg_music_start (&bonus_music_track);
+	music_start (bonus_music_track);
 	task_sleep_sec (1);
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
@@ -59,7 +59,7 @@ CALLSET_ENTRY (tz, bonus)
 	while (deff_get_active () == DEFF_BONUS)
 		task_sleep (TIME_33MS);
 	leff_stop (LEFF_BONUS);
-	bg_music_stop (&bonus_music_track);
+	music_stop (bonus_music_track);
 }
 
 

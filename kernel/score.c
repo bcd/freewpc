@@ -30,7 +30,6 @@ extern const score_t score_table[];
 /** Nonzero if the current score has changed and needs to be redrawn */
 bool score_update_needed;
 
-/* TODO : scores should be in nvram and checksummed */
 score_t scores[MAX_PLAYERS];
 
 U8 *current_score;

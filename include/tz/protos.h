@@ -46,7 +46,6 @@ void tz_clock_rtt(void);
 void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);
-void tz_clock_init(void);
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);
@@ -74,7 +73,6 @@ void gumball_load_enable(void);
 void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
-void gumball_init(void);
 /* leffs.c */
 void flasher_happy_leff(void);
 void left_ramp_leff(void);
@@ -82,11 +80,6 @@ void no_lights_leff(void);
 void no_gi_leff(void);
 void flash_all_leff(void);
 void slot_kickout_leff(void);
-/* lock.c */
-void lock_update_lamps(void);
-void lock_enter(device_t *dev);
-void lock_kick_attempt(device_t *dev);
-void lock_init(void);
 /* loop.c */
 __machine__ void enter_loop(void);
 __machine__ void award_loop(void);

@@ -140,14 +140,14 @@ void greed_round_begin (void)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
-	bg_music_start (&greed_round_music);
+	music_start (greed_round_music);
 	deff_start (DEFF_GREED_ROUND);
 }
 
 void greed_round_expire (void)
 {
 	deff_stop (DEFF_GREED_ROUND);
-	bg_music_stop (&greed_round_music);
+	music_stop (greed_round_music);
 }
 
 void greed_round_end (void)

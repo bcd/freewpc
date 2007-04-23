@@ -118,7 +118,7 @@ void amode_stop (void)
 	leff_stop (LEFF_AMODE);
 #endif
 	lamp_all_off ();
-	bg_music_stop_all ();
+	music_stop_all ();
 	callset_invoke (amode_stop);
 }
 

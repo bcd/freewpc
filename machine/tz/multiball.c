@@ -127,7 +127,7 @@ CALLSET_ENTRY (mball, mball_start)
 		deff_start (DEFF_MB_START);
 		deff_start (DEFF_MB_RUNNING);
 		leff_start (LEFF_MB_RUNNING);
-		bg_music_start (&multiball_track);
+		music_start (multiball_track);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
 		mballs_played++;
@@ -153,7 +153,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
-		bg_music_stop (&multiball_track);
+		music_stop (multiball_track);
 	}
 }
 
