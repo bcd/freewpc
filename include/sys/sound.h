@@ -33,9 +33,12 @@
 #define SND_TEST_ENTER			0x57
 #define SND_TEST_ESCAPE			0x58
 #define SND_TEST_SCROLL			0x59
-#define SND_GET_VERSION_CMD	0x5F 
+#define SND_GET_VERSION_CMD	0x5F
+#define SND_EVENT_ENABLE		0x76
 #define SND_SET_VOLUME_CMD    0x79
-#define SND_START_EXTENDED		0x7A  /* write to CVSD instead of DAC */
+#define SND_START_EXTENDED		0x7A
+#define SND_GET_VERSION_CMD2	0x7B
+#define SND_EVENT_DISABLE		0x7C
 #define SND_STOP_SOUND			0x7D 
 #define SND_STOP_MUSIC			0x7E 
 #define SND_STOP_DAC          0x7F

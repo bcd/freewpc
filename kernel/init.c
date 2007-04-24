@@ -43,6 +43,8 @@ __fastram__ void (*irq_function) (void);
 
 U8 sys_init_complete;
 
+U8 idle_ok;
+
 U8 sys_init_pending_tasks;
 
 U8 last_nonfatal_error_code;
@@ -116,6 +118,7 @@ void do_reset (void)
 	/* Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
 	sys_init_complete = 0;
+	idle_ok = 0;
 	sys_init_pending_tasks = 0;
 
 	/* Initialize all of the other kernel subsystems,
@@ -169,7 +172,7 @@ void do_reset (void)
 	/* The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
 	 */
-
+	idle_ok = 1;
 #ifdef MACHINE_TEST_ONLY
 	sys_init_complete++;
 	test_enter_button ();

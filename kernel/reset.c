@@ -119,6 +119,11 @@ void system_reset (void)
 
 	dmd_show_low ();
 
+#ifdef MACHINE_CUSTOM_AMODE
+	leff_start (LEFF_AMODE);
+#endif
+	triac_enable (TRIAC_GI_MASK);
+
 	task_sleep_sec (2);
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);

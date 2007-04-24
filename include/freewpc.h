@@ -76,6 +76,7 @@ typedef U16 PTR_OR_U16;
 extern U8 sys_init_complete;
 extern U8 sys_init_pending_tasks;
 extern U8 irq_count;
+extern U8 idle_ok;
 
 /*
  * Define TRUE and FALSE to suitable values.

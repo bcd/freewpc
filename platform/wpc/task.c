@@ -611,7 +611,7 @@ void task_dispatcher (void)
 		
 			/* If the system is fully initialized, run
 			 * the idle functions. */
-			if (sys_init_complete)
+			if (idle_ok)
 					callset_invoke (idle);
 
 			/* Reset timer and kick watchdog again */

@@ -34,13 +34,19 @@
 #define SOUND_QUEUE_LEN 8
 
 
-/** The sound queue structure.  head and tail are offsets; elems hold the actual
+/** The sound write queue.  head and tail are offsets; elems hold the actual
  * data bytes to be transmitted. */
 __fastram__ struct {
 	U8 head;
 	U8 tail;
 	U8 elems[SOUND_QUEUE_LEN];
-} sound_queue;
+} sound_write_queue;
+
+__fastram__ struct {
+	U8 head;
+	U8 tail;
+	U8 elems[SOUND_QUEUE_LEN];
+} sound_read_queue;
 
 /** The last music code transmitted */
 __fastram__ music_code_t current_music;
@@ -56,7 +62,6 @@ U8 sound_version_major;
 
 U8 sound_version_minor;
 
-U8 sound_board_return;
 
 #define sound_version sound_version_major
 
@@ -72,33 +77,41 @@ const audio_track_t volume_change_music_track = {
 };
 
 
-/** Initialize the sound transmit code */
-static void sound_queue_init (void)
+/** Initialize the sound write queue */
+static void sound_write_queue_init (void)
 {
 	disable_irq ();
-	queue_init ((queue_t *)&sound_queue);
+	queue_init ((queue_t *)&sound_write_queue);
+	enable_irq ();
+}
+
+/** Initialize the sound read queue */
+static void sound_read_queue_init (void)
+{
+	disable_irq ();
+	queue_init ((queue_t *)&sound_read_queue);
 	enable_irq ();
 }
 
 
 /** Queues a byte for transmit to the sound board */
-static void sound_queue_insert (U8 val)
+static void sound_write_queue_insert (U8 val)
 {
-	queue_insert ((queue_t *)&sound_queue, SOUND_QUEUE_LEN, val);
+	queue_insert ((queue_t *)&sound_write_queue, SOUND_QUEUE_LEN, val);
 }
 
 
 /** Dequeues a byte for transmit to the sound board */
-static U8 sound_queue_remove (void)
+static U8 sound_write_queue_remove (void)
 {
-	return queue_remove ((queue_t *)&sound_queue, SOUND_QUEUE_LEN);
+	return queue_remove ((queue_t *)&sound_write_queue, SOUND_QUEUE_LEN);
 }
 
 
-/** Empties the sound transmit queue */
-inline bool sound_queue_empty (void)
+/** Checks whether the write queue is empty or not */
+inline bool sound_write_queue_empty_p (void)
 {
-	return queue_empty ((queue_t *)&sound_queue);
+	return queue_empty ((queue_t *)&sound_write_queue);
 }
 
 
@@ -114,9 +127,9 @@ void music_set (music_code_t code)
 		|| (code == MUS_OFF))
 	{
 #if (MACHINE_DCS == 1)
-		sound_queue_insert (0);
+		sound_write_queue_insert (0);
 #endif
-		sound_queue_insert (current_music);
+		sound_write_queue_insert (current_music);
 	}
 }
 
@@ -153,11 +166,13 @@ U8 sound_board_poll (void)
 U8 sound_board_read (U8 retries)
 {
 	do {
-		U8 in = sound_board_poll ();
-		if (in != 0xFF)
-			return (in);
-		else
+		if (queue_empty ((queue_t *)&sound_read_queue))
 			task_sleep (TIME_100MS);
+		else
+		{
+			U8 in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
+			return in;
+		}
 	} while (--retries != 0);
 	return (0xFF);
 }
@@ -166,13 +181,16 @@ U8 sound_board_read (U8 retries)
 U8 sound_board_command (U8 cmd, U8 retries)
 {
 	do {
-		sound_queue_insert (cmd);
+		sound_write_queue_insert (cmd);
 		task_sleep (TIME_33MS);
-		U8 in = sound_board_poll ();
-		if (in != 0xFF)
-			return (in);
-		else
+
+		if (queue_empty ((queue_t *)&sound_read_queue))
 			task_sleep (TIME_100MS);
+		else
+		{
+			U8 in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
+			return in;
+		}
 	} while (--retries != 0);
 	return (0xFF);
 }
@@ -180,11 +198,13 @@ U8 sound_board_command (U8 cmd, U8 retries)
 
 CALLSET_ENTRY (sound, idle)
 {
-	static U8 last_return = 0;
-	if (sound_board_return != last_return)
+	U8 in;
+
+	if (sys_init_complete
+		&& !queue_empty ((queue_t *)&sound_read_queue))
 	{
-		dbprintf ("Sound board return: %02Xh\n", sound_board_return);
-		last_return = sound_board_return;
+		in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
+		dbprintf ("Idle sound board read: %02Xh\n", in);
 	}
 }
 
@@ -193,16 +213,17 @@ CALLSET_ENTRY (sound, idle)
  * Transmit one pending byte of data to the sound board. */
 void sound_rtt (void)
 {
-	/* PinMAME is generating FIRQs continuously if we don't read
-	 * this register occasionally. */
+	/* Read back from sound board if bytes ready */
 	if (wpc_asic_read (WPCS_CONTROL_STATUS) & 0x1)
 	{
-		sound_board_return = wpc_asic_read (WPCS_DATA);
+		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
+			wpc_asic_read (WPCS_DATA));
 	}
 
-	if (!sound_queue_empty ())
+	/* Write a pending byte to the sound board */
+	if (!sound_write_queue_empty_p ())
 	{
-		wpc_asic_write (WPCS_DATA, sound_queue_remove ());
+		wpc_asic_write (WPCS_DATA, sound_write_queue_remove ());
 	}
 }
 
@@ -219,7 +240,7 @@ void sound_init (void)
 
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	if ((sound_board_type = sound_board_read (50)) == 0xFF)
+	if ((sound_board_type = sound_board_read (100)) == 0xFF)
 	{
 		dbprintf ("Error: sound board not detected\n");
 		goto exit_func;
@@ -237,7 +258,8 @@ void sound_init (void)
 	}
 
 	/* Initialize the sound queue.  We cannot transmit anything before here. */
-	sound_queue_init ();
+	sound_write_queue_init ();
+	sound_read_queue_init ();
 	task_sleep_sec (1);
 
 	/* Read the sound board version. */
@@ -257,6 +279,9 @@ void sound_init (void)
 		volume_set (current_volume);
 	else
 		volume_set (DEFAULT_VOLUME);
+
+	/* Enable events */
+	sound_write_queue_insert (SND_EVENT_ENABLE);
 
 exit_func:
 	sys_init_pending_tasks--;
@@ -285,17 +310,17 @@ void sound_send (sound_code_t code)
 #if (MACHINE_DCS == 0)
 	if (code_hi == 0)
 	{
-		sound_queue_insert (code_lo);
+		sound_write_queue_insert (code_lo);
 	}
 	else
 #endif
 	{
 #if (MACHINE_DCS == 1)
-		sound_queue_insert (code_hi);
+		sound_write_queue_insert (code_hi);
 #else
-		sound_queue_insert (SND_START_EXTENDED);
+		sound_write_queue_insert (SND_START_EXTENDED);
 #endif
-		sound_queue_insert (code_lo);
+		sound_write_queue_insert (code_lo);
 	}
 }
 
@@ -322,14 +347,14 @@ void volume_set (U8 vol)
 	{
 #if (MACHINE_DCS == 1)
 		U8 code = current_volume * 8;
-		sound_queue_insert (0x55);
-		sound_queue_insert (0xAA);
-		sound_queue_insert (code);
-		sound_queue_insert (~code);
+		sound_write_queue_insert (0x55);
+		sound_write_queue_insert (0xAA);
+		sound_write_queue_insert (code);
+		sound_write_queue_insert (~code);
 #else
-		sound_queue_insert (SND_SET_VOLUME_CMD);
-		sound_queue_insert (current_volume);
-		sound_queue_insert (~current_volume);
+		sound_write_queue_insert (SND_SET_VOLUME_CMD);
+		sound_write_queue_insert (current_volume);
+		sound_write_queue_insert (~current_volume);
 #endif
 	}
 }

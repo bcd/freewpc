@@ -115,6 +115,13 @@ paged_loop:
 	exg	d,y
 	stb	WPC_ROM_BANK
 	exg	d,y
+
+	; Toggle LED occasionally
+	tfr	d,u
+	ldb	WPC_LEDS
+	eorb	#-128
+	stb	WPC_LEDS
+	tfr	u,d
 paged_inner_loop:
 	addb	,-x
 	adca	#0

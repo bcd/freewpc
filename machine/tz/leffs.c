@@ -292,24 +292,38 @@ void color_cycle_leff (void)
 
 	lampset_set_apply_delay (0);
 
-	i = 15;
+	i = 11;
 	lampset_apply_leff_on (LAMPSET_RED_LAMPS);
 	do {
 		lampset_apply_leff_toggle (LAMPSET_RED_LAMPS);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 15;
+	i = 11;
 	lampset_apply_leff_on (LAMPSET_WHITE_LAMPS);
 	do {
 		lampset_apply_leff_toggle (LAMPSET_WHITE_LAMPS);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 15;
+	i = 11;
 	lampset_apply_leff_on (LAMPSET_YELLOW_LAMPS);
 	do {
 		lampset_apply_leff_toggle (LAMPSET_YELLOW_LAMPS);
+		task_sleep (TIME_100MS);
+	} while (--i != 0);
+
+	i = 11;
+	lampset_apply_leff_on (LAMPSET_ORANGE_LAMPS);
+	do {
+		lampset_apply_leff_toggle (LAMPSET_ORANGE_LAMPS);
+		task_sleep (TIME_100MS);
+	} while (--i != 0);
+
+	i = 11;
+	lampset_apply_leff_on (LAMPSET_AMBER_LAMPS);
+	do {
+		lampset_apply_leff_toggle (LAMPSET_AMBER_LAMPS);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 

@@ -162,9 +162,32 @@ void lamp_rtt (void)
 	}
 }
 
+/* Basic bit manipulation routines */
+
+void bit_on (bitset matrix, U8 bit)
+{
+	__setbit (matrix, bit);
+}
+
+void bit_off (bitset matrix, U8 bit)
+{
+	__clearbit (matrix, bit);
+}
+
+void bit_toggle (bitset matrix, U8 bit)
+{
+	__togglebit (matrix, bit);
+}
+
+bool bit_test (bitset matrix, U8 bit)
+{
+	__testbit (matrix, bit);
+	return bit;
+}
+
 
 /*
- * Basic lamp manipulation routines
+ * Lamp manipulation routines
  *
  * These control the main lamp matrix and also the flash
  * matrix.  They can be modified at any time without the
@@ -172,66 +195,24 @@ void lamp_rtt (void)
  *
  */
 
-void lamp_on (lampnum_t lamp)
-{
-	register bitset p = lamp_matrix;
-	register U8 v = lamp;
-	__setbit(p, v);
+void lamp_on (lampnum_t lamp) { bit_on (lamp_matrix, lamp); }
+void lamp_off (lampnum_t lamp) { bit_off (lamp_matrix, lamp); }
+void lamp_toggle (lampnum_t lamp) { bit_toggle (lamp_matrix, lamp); }
+bool lamp_test (lampnum_t lamp) { return bit_test (lamp_matrix, lamp); }
+
+void lamp_flash_on (lampnum_t lamp) { 
+	bit_on (lamp_flash_matrix, lamp);
 }
 
-
-void lamp_off (lampnum_t lamp)
-{
-	register bitset p = lamp_matrix;
-	register U8 v = lamp;
-	__clearbit(p, v);
+void lamp_flash_off (lampnum_t lamp) { 
+	bit_off (lamp_flash_matrix, lamp); 
+	bit_off (lamp_flash_matrix_now, lamp);
 }
 
-
-void lamp_toggle (lampnum_t lamp)
-{
-	register bitset p = lamp_matrix;
-	register U8 v = lamp;
-	__togglebit(p, v);
+bool lamp_flash_test (lampnum_t lamp) {
+	return bit_test (lamp_flash_matrix, lamp);
 }
 
-
-bool lamp_test (lampnum_t lamp)
-{
-	register bitset p = lamp_matrix;
-	register U8 v = lamp;
-	__testbit(p, v);
-	return v;
-}
-
-
-void lamp_flash_on (lampnum_t lamp)
-{
-	register bitset p = lamp_flash_matrix;
-	register U8 v = lamp;
-	__setbit(p, v);
-}
-
-
-void lamp_flash_off (lampnum_t lamp)
-{
-	register bitset p = lamp_flash_matrix;
-	register U8 v = lamp;
-	__clearbit(p, v);
-
-	p = lamp_flash_matrix_now;
-	v = lamp;
-	__clearbit(p, v);
-}
-
-
-bool lamp_flash_test (lampnum_t lamp)
-{
-	register bitset p = lamp_flash_matrix;
-	register U8 v = lamp;
-	__testbit(p, v);
-	return v;
-}
 
 void lamp_global_update ()
 {
@@ -302,53 +283,25 @@ void lamp_leff2_free_all (void)
 }
 
 
-void lamp_leff_allocate (lampnum_t lamp)
-{
-	register bitset p = lamp_leff1_allocated;
-	register U8 v = lamp;
-	__clearbit(p, v);
-}
-
-
-void lamp_leff_free (lampnum_t lamp)
-{
-	register bitset p = lamp_leff1_allocated;
-	register U8 v = lamp;
-	__setbit(p, v);
-}
-
+void lamp_leff_allocate (lampnum_t lamp) { bit_off (lamp_leff1_allocated, lamp); }
+void lamp_leff_free (lampnum_t lamp) { bit_on (lamp_leff1_allocated, lamp); }
 
 void lamp_leff2_allocate (lampnum_t lamp)
-{
-	register bitset p = lamp_leff2_matrix;
-	register U8 v = lamp;
-	__clearbit(p, v);
-
-	p = lamp_leff2_allocated;
-	v = lamp;
-	__clearbit(p, v);
+{ 
+	bit_off (lamp_leff2_matrix, lamp);
+	bit_off (lamp_leff2_allocated, lamp);
 }
-
 
 bool lamp_leff2_test_allocated (lampnum_t lamp)
 {	
-	register bitset p = lamp_leff2_matrix;
-	register U8 v = lamp;
-	__testbit(p, v);
-	return v;
+	return bit_test (lamp_leff2_matrix, lamp);
 }
 
 void lamp_leff2_free (lampnum_t lamp)
 {
-	register bitset p = lamp_leff2_allocated;
-	register U8 v = lamp;
-	__setbit(p, v);
-
-	p = lamp_leff2_matrix;
-	v = lamp;
-	__clearbit(p, v);
+	bit_on (lamp_leff2_allocated, lamp);
+	bit_off (lamp_leff2_matrix, lamp);
 }
-
 
 /*
  * The leff_ functions below are used to set/clear/toggle/test
@@ -364,8 +317,7 @@ void leff_on (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;
-	register U8 v = lamp;
-	__setbit(p, v);
+	bit_on (p, lamp);
 }
 
 
@@ -373,8 +325,7 @@ void leff_off (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;
-	register U8 v = lamp;
-	__clearbit(p, v);
+	bit_off (p, lamp);
 }
 
 
@@ -382,8 +333,7 @@ void leff_toggle (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;
-	register U8 v = lamp;
-	__togglebit(p, v);
+	bit_toggle (p, lamp);
 }
 
 
@@ -391,8 +341,6 @@ bool leff_test (lampnum_t lamp)
 {
 	register bitset p = (leff_running_flags & L_SHARED) ? 
 		lamp_leff2_matrix : lamp_leff1_matrix;
-	register U8 v = lamp;
-	__testbit(p, v);
-	return v;
+	return bit_test (p, lamp);
 }
 
