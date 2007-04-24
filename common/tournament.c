@@ -27,13 +27,17 @@
 #include <freewpc.h>
 
 
+/** Nonzero if the next game started will be played with tournament rules. */
 U8 tournament_mode_enabled;
 
 
 void tournament_player_enable_deff (void)
 {
 	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 10, "TOURNAMENT MODE");
+	font_render_string_center (&font_mono5, 64, 22, "ENABLED");
 	dmd_show_low ();
+	task_sleep_sec (3);
 	deff_exit ();
 }
 
@@ -52,6 +56,7 @@ void tournament_player_detect (void)
 		hold--;
 	}
 
+	tournament_mode_enabled = ON;
 	task_exit ();
 }
 
@@ -60,7 +65,8 @@ void tournament_check_player_enable (void)
 {
 	if (!in_game && !in_test)
 	{
-		task_recreate_gid (GID_PLAYER_TOURNAMENT_DETECT, tournament_player_detect);
+		task_recreate_gid (GID_PLAYER_TOURNAMENT_DETECT, 
+			tournament_player_detect);
 	}
 }
 

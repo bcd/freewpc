@@ -27,7 +27,6 @@
 
 __common__ void high_score_amode_show (void);
 __common__ void high_score_reset (void);
-__common__ void high_score_init (void);
 __common__ void high_score_reset_check (void);
 __common__ void high_score_check (void);
 

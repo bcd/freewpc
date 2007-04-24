@@ -66,7 +66,5 @@ void timed_game_pause (task_ticks_t delay);
 #define timed_game_pause(delay)
 #endif
 
-void game_init (void);
-
 #endif /* GAME_H */
 

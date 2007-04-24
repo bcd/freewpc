@@ -128,7 +128,8 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * If this returns TRUE, it means it happened within the timeout after the
  * first switch closure.  This will always return FALSE during a
  * multiball, since multiple closures cannot assume that they are from
- * the same ball. */
+ * the same ball.  TODO : the check for live balls should not apply in
+ * some cases, e.g. non-playfield switches */
 #define switch_did_follow(first,second) \
 	((live_balls == 1) \
 		&& timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))

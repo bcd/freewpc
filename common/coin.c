@@ -240,7 +240,10 @@ void coin_insert_deff (void)
 
 static void do_coin (U8 slot)
 {
-	/* TODO : ignore coins after slam tilt */
+	/* Ignore coins after slam tilt */
+	if (event_did_follow (sw_slam_tilt, sw_coin))
+		return;
+
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
 }

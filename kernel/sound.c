@@ -42,6 +42,8 @@ __fastram__ struct {
 	U8 elems[SOUND_QUEUE_LEN];
 } sound_write_queue;
 
+/** The sound read queue, which works just like the write queue but takes
+back data from the sound board. */
 __fastram__ struct {
 	U8 head;
 	U8 tail;
@@ -61,9 +63,6 @@ U8 sound_error_code;
 U8 sound_version_major;
 
 U8 sound_version_minor;
-
-
-#define sound_version sound_version_major
 
 
 /** The default audio track to be played when setting volume. */
@@ -111,15 +110,22 @@ static U8 sound_write_queue_remove (void)
 /** Checks whether the write queue is empty or not */
 inline bool sound_write_queue_empty_p (void)
 {
-	return queue_empty ((queue_t *)&sound_write_queue);
+	return queue_empty_p ((queue_t *)&sound_write_queue);
 }
 
 
 void music_set (music_code_t code)
 {
+	/* Don't send the command again if the same music is already
+	running. */
+	if ((code != MUS_OFF) && (current_music == code))
+		return;
+
+	/* Update cache of currently running music */
 	current_music = code;
 
-	/* Music codes are not emitted if volume is set to zero, or
+	/* Write to the sound hardware.
+	 * Music codes are not emitted if volume is set to zero, or
 	 * if game music has been disabled.  But MUS_OFF is always
 	 * sent to the sound board, regardless of everything else. */
 	if (((current_volume > 0)
@@ -133,6 +139,8 @@ void music_set (music_code_t code)
 	}
 }
 
+
+/** Stop whatever music is currently playing. */
 void music_off (void)
 {
 	music_set (MUS_OFF);
@@ -166,7 +174,7 @@ U8 sound_board_poll (void)
 U8 sound_board_read (U8 retries)
 {
 	do {
-		if (queue_empty ((queue_t *)&sound_read_queue))
+		if (queue_empty_p ((queue_t *)&sound_read_queue))
 			task_sleep (TIME_100MS);
 		else
 		{
@@ -184,7 +192,7 @@ U8 sound_board_command (U8 cmd, U8 retries)
 		sound_write_queue_insert (cmd);
 		task_sleep (TIME_33MS);
 
-		if (queue_empty ((queue_t *)&sound_read_queue))
+		if (queue_empty_p ((queue_t *)&sound_read_queue))
 			task_sleep (TIME_100MS);
 		else
 		{
@@ -201,7 +209,7 @@ CALLSET_ENTRY (sound, idle)
 	U8 in;
 
 	if (sys_init_complete
-		&& !queue_empty ((queue_t *)&sound_read_queue))
+		&& !queue_empty_p ((queue_t *)&sound_read_queue))
 	{
 		in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
 		dbprintf ("Idle sound board read: %02Xh\n", in);
@@ -263,15 +271,16 @@ void sound_init (void)
 	task_sleep_sec (1);
 
 	/* Read the sound board version. */
-	sound_version = sound_board_command (SND_GET_VERSION_CMD, 20);
+	sound_version_major = sound_board_command (SND_GET_VERSION_CMD, 20);
 #if (MACHINE_DCS == 1)
 	sound_version_minor = sound_board_command (SND_GET_MINOR_VERSION_CMD, 20);
 #endif
 
 #if (MACHINE_DCS == 1)
-	dbprintf ("Detected %d.%d sound.\n", sound_version >> 4, sound_version & 0x0F);
+	dbprintf ("Detected %d.%d sound.\n",
+		sound_version_major >> 4, sound_version_major & 0x0F);
 #else
-	dbprintf ("Detected L-%d sound.\n", sound_version);
+	dbprintf ("Detected L-%d sound.\n", sound_version_major);
 #endif
 
 	/* Use nvram value if it's sensible */
@@ -340,7 +349,9 @@ void volume_set (U8 vol)
 
 	if (current_volume == 0)
 	{
-		/* TODO : kill bg audio task */
+		/* Note: if music is currently running, it is not
+		explicitly stopped, although future sound board writes
+		will not be transmitted. */
 		music_off ();
 	}
 	else

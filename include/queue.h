@@ -82,7 +82,7 @@ extern inline U8 queue_remove (queue_t *q, U8 qlen)
 
 
 /** Check if a generic queue is empty. */
-extern inline bool queue_empty (queue_t *q)
+extern inline bool queue_empty_p (queue_t *q)
 {
 	return (q->head_off == q->tail_off);
 }

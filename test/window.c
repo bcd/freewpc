@@ -355,6 +355,16 @@ void percent_render (U8 val)
 		sprintf ("%d%%", val);
 }
 
+void replay_score_render (U8 val)
+{
+#ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	score_t score;
+	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
+	sprintf_score (score);
+#else
+	sprintf ("CODE %02X", val);
+#endif
+}
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
@@ -374,6 +384,7 @@ struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 3, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
+struct adjustment_value replay_score_value = { 0, 250, 5, replay_score_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
@@ -382,9 +393,19 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
+	{ "REPLAY PERCENT", &percent_value, 7, &system_config.replay_percent },
+	{ "REPLAY START", &replay_score_value, 0, &system_config.replay_start },
+	{ "REPLAY LEVELS", &integer_value, 1, &system_config.replay_levels },
+	{ "REPLAY 1 LEVEL", &replay_score_value, 0, &system_config.replay_level[0] },
+	{ "REPLAY 2 LEVEL", &replay_score_value, 0, &system_config.replay_level[1] },
+	{ "REPLAY 3 LEVEL", &replay_score_value, 0, &system_config.replay_level[2] },
+	{ "REPLAY 4 LEVEL", &replay_score_value, 0, &system_config.replay_level[3] },
+	{ "REPLAY BOOST", &yes_no_value, NO, &system_config.replay_boost },
 	{ "REPLAY AWARD", &free_award_value, 0, &system_config.replay_award },
 	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
+	/* EXTRA BALL TICKET */
+	/* MAX TICKETS/PLAYER */
 	{ "MATCH FEATURE", &percent_value, OFF, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
@@ -395,6 +416,8 @@ struct adjustment standard_adjustments[] = {
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
 	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	/* GI POWER SAVER */
+	/* POWER SAVER LEVEL */
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },

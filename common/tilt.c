@@ -108,8 +108,13 @@ CALLSET_ENTRY (tilt, sw_tilt)
 
 CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
-	/* TODO : ignore right after a coin door open/close */
-	/* TODO : disable coins briefly, the whole point of the slam tilt */
+	/* Ignore right after a coin door open/close */
+	if (event_did_follow (sw_coin_door_closed, sw_slam_tilt))
+		return;
+
+	/* Disable coins briefly, the whole point of the slam tilt */
+	event_can_follow (sw_slam_tilt, sw_coin, TIME_5S);
+
 	deff_start (DEFF_SLAM_TILT);
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);

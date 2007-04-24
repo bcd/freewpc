@@ -24,8 +24,8 @@ __nvram__ U8 replay_score[BYTES_PER_SCORE];
 __nvram__ U8 replay_csum;
 
 
-/** The default replay score.  TODO : this should be machine-specific
-and come from an adjustment */
+/** The default replay score.  This is only used if the machine does not
+define a method for taking replay scores from the standard adjustment. */
 const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 
 
@@ -96,8 +96,15 @@ void replay_check_current (void)
 /** Reset the replay score to its default value. */
 void replay_reset (void)
 {
+	U8 replay_code;
+
+	replay_code = &system_config.replay_level[0];
 	wpc_nvram_get ();
+#ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	MACHINE_REPLAY_CODE_TO_SCORE (replay_score, replay_code);
+#else
 	memcpy (replay_score, default_replay_score, sizeof (score_t));
+#endif
 	wpc_nvram_put ();
 }
 

@@ -57,8 +57,9 @@ CALLSET_ENTRY (service, sw_up)
 
 CALLSET_ENTRY (service, sw_coin_door_closed)
 {
-	/* TODO : be kind and ignore slam tilt switch briefly after the
+	/* Be kind and ignore slam tilt switch briefly after the
 	coin door is opened/closed */
+	event_can_follow (sw_coin_door_closed, sw_slam_tilt, TIME_5S);
 
 	if (switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
