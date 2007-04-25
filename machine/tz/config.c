@@ -21,9 +21,8 @@
 #include <freewpc.h>
 
 /** Filename: mach/config.c
- * Machine-specific functions.  These are all callbacks
- * from the main kernel code to handle various events
- * in game-specific ways.
+ *
+ * Machine-specific miscellaneous functions.
  */
 
 U8 faster_quote_given;
@@ -32,6 +31,12 @@ const audio_track_t bonus_music_track = {
 	.prio = PRI_BONUS,
 	.code = MUS_BONUS_START,
 };
+
+
+void replay_code_to_score (score_t s, U8 val)
+{
+	s[1] = val;
+}
 
 
 CALLSET_ENTRY (tz, start_ball)
@@ -51,15 +56,12 @@ CALLSET_ENTRY (tz, add_player)
 
 CALLSET_ENTRY (tz, bonus)
 {
-	task_sleep_sec (1);
-	music_start (bonus_music_track);
 	deff_start (DEFF_BONUS);
 	leff_start (LEFF_BONUS);
 	task_sleep_sec (1);
 	while (deff_get_active () == DEFF_BONUS)
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	leff_stop (LEFF_BONUS);
-	music_stop (bonus_music_track);
 }
 
 

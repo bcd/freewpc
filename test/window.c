@@ -358,7 +358,9 @@ void percent_render (U8 val)
 void replay_score_render (U8 val)
 {
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
 	score_t score;
+	score_zero (score);
 	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
 	sprintf_score (score);
 #else
@@ -569,7 +571,9 @@ void adj_browser_draw (void)
 {
 	struct adjustment *ad = browser_adjs + menu_selection;
 
-	dmd_alloc_low_clean ();
+	window_stop_thread ();
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
 
 	sprintf ("%d. %s", menu_selection+1, ad->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
@@ -577,24 +581,36 @@ void adj_browser_draw (void)
 	if (ad->nvram == NULL)
 	{
 		font_render_string_center (&font_mono5, 32, 20, "N/A");
+		dmd_copy_low_to_high ();
 	}
 	else
 	{
-		if (browser_action == ADJ_EDITING)
-			ad->values->render (adj_edit_value);
-		else if (ad->nvram)
-			ad->values->render (adj_edit_value = *(ad->nvram));
-
-		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
+		if (ad->nvram && (browser_action != ADJ_EDITING))
+			adj_edit_value = *(ad->nvram);
 
 		if (adj_edit_value == ad->factory_default)
-			font_render_string_center (&font_mono5, 96, 21, "DEFAULT");
+			font_render_string_center (&font_var5, 96, 21, "(FAC. DEFAULT)");
+		dmd_copy_low_to_high ();
+
+		if (ad->nvram)
+			ad->values->render (adj_edit_value);
+
+		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 	}
+	window_start_thread ();
+}
 
-	if (browser_action == ADJ_EDITING)
-		dmd_invert_page (dmd_low_buffer);
 
-	dmd_show_low ();
+void adj_browser_thread (void)
+{
+	for (;;)
+	{
+		if (browser_action == ADJ_EDITING)
+			dmd_show_other ();
+		else
+			dmd_show_low ();
+		task_sleep (TIME_100MS);
+	}
 }
 
 
@@ -656,12 +672,9 @@ void adj_browser_escape (void)
 	if (browser_action == ADJ_EDITING)
 	{
 		/* abort */
-		sound_send (SND_TEST_ABORT);
+		if (adj_edit_value != *(browser_adjs[menu_selection].nvram))
+			sound_send (SND_TEST_ABORT);
 		browser_action = ADJ_BROWSING;
-	}
-	else if (browser_action == ADJ_CONFIRMING)
-	{
-		browser_action = ADJ_EDITING;
 	}
 	else
 	{
@@ -715,7 +728,8 @@ void adj_browser_down (void)
 	.enter = adj_browser_enter, \
 	.escape = adj_browser_escape, \
 	.up = adj_browser_up, \
-	.down = adj_browser_down
+	.down = adj_browser_down, \
+	.thread = adj_browser_thread
 
 struct window_ops adj_browser_window = {
 	INHERIT_FROM_ADJ_BROWSER,
@@ -2758,8 +2772,10 @@ void sound_test_enter (void)
 {
 	browser_action = ~browser_action;
 	browser_last_selection_update = menu_selection + 1;
+#if 0
 	if (browser_action == 0)
 		sound_reset ();
+#endif
 	browser_draw ();
 }
 

@@ -530,7 +530,7 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 {
 	U8 *dbuf = dmd_low_buffer;
-	register U8 c __areg__;
+	U8 c;
 	U8 c2;
 
 	wpc_push_page (PRG_PAGE);
@@ -539,6 +539,7 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 	says the overlap manner in which the image has been
 	compressed. */
 	c = *xbmprog++;
+	dbprintf ("xbmprog %p mode = %d\n", xbmprog, c);
 	switch (c)
 	{
 		case XBMPROG_METHOD_RAW:
@@ -624,6 +625,27 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 
 	wpc_pop_page ();
 	return xbmprog;
+}
+
+
+const U8 *dmd_draw_fif (const U8 *fif)
+{
+	U8 depth;
+
+	wpc_push_page (PRG_PAGE);
+	depth = *fif++;
+	wpc_pop_page ();
+
+	dbprintf ("fif %p depth = %d\n", fif, depth);
+
+	fif = dmd_draw_xbmprog (fif);
+	if (depth == 2)
+	{
+		dmd_flip_low_high ();
+		fif = dmd_draw_xbmprog (fif);
+		dmd_flip_low_high ();
+	}
+	return fif;
 }
 
 

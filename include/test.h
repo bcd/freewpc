@@ -69,8 +69,6 @@ extern struct window_ops menu_window;
 
 #define ADJ_BROWSING 0
 #define ADJ_EDITING 1
-#define ADJ_CONFIRMING 2
-
 
 /**
  * An adjustment value descriptor, which controls the range of values

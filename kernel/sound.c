@@ -58,12 +58,18 @@ __fastram__ music_code_t current_music;
 __nvram__ U8 current_volume;
 __nvram__ U8 current_volume_checksum;
 
+
+/** -1 if the sound board booted OK, otherwise an error code returned from
+ * the sound board indicating the problem */
 U8 sound_error_code;
 
+/** The major version of the sound board */
 U8 sound_version_major;
 
+#ifdef MACHINE_DCS
+/** The minor version of the sound board, on DCS machines */
 U8 sound_version_minor;
-
+#endif
 
 /** The default audio track to be played when setting volume. */
 const audio_track_t volume_change_music_track = {
@@ -246,6 +252,8 @@ void sound_init (void)
 {
 	U8 sound_board_type;
 
+	sound_read_queue_init ();
+
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
 	if ((sound_board_type = sound_board_read (100)) == 0xFF)
@@ -267,8 +275,7 @@ void sound_init (void)
 
 	/* Initialize the sound queue.  We cannot transmit anything before here. */
 	sound_write_queue_init ();
-	sound_read_queue_init ();
-	task_sleep_sec (1);
+	task_sleep (TIME_200MS); /* TODO : needed? */
 
 	/* Read the sound board version. */
 	sound_version_major = sound_board_command (SND_GET_VERSION_CMD, 20);

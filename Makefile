@@ -266,10 +266,12 @@ FON_OBJS = \
 	fonts/schu.o \
 	fonts/miscfixed.o \
 
-XBM_OBJS = images/freewpc.o \
-	images/freewpc_logo_1.o images/freewpc_logo_2.o
+XBM_OBJS = images/freewpc.o
 
-FIF_OBJS = $(patsubst %.pgm,%.fif,$(FIF_SRCS))
+FIF_SRCS += \
+	images/freewpc_logo.fif
+
+FIF_OBJS = $(patsubst %.fif,%.o,$(FIF_SRCS))
 
 BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
 
@@ -467,23 +469,23 @@ SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 #
 page55_OBJS = $(BLD)/page55.o $(PAGED_MD_OBJS) $(EFFECT_OBJS)
 page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS) $(EVENT_OBJS)
-page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS) $(PRG_OBJS)
+page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS) $(PRG_OBJS) $(FIF_OBJS)
 page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
 page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS) $(FSM_OBJS)
-page60_OBJS = $(BLD)/page60.o $(XBM_OBJS) $(FIF_OBJS)
+page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
 page61_OBJS = $(BLD)/page61.o $(FONT_OBJS) $(FON_OBJS)
 SYSTEM_OBJS = $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
 $(PAGED_MD_OBJS) $(EFFECT_OBJS): PAGE=55
 $(COMMON_OBJS) $(EVENT_OBJS) : PAGE=56
-$(TRANS_OBJS) $(PRG_OBJS): PAGE=57
+$(TRANS_OBJS) $(PRG_OBJS) $(FIF_OBJS): PAGE=57
 $(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
 $(MACHINE_PAGED_OBJS) $(FSM_OBJS): PAGE=59
-$(XBM_OBJS) $(FIF_OBJS): PAGE=60
+$(XBM_OBJS): PAGE=60
 $(FONT_OBJS) $(FON_OBJS) : PAGE=61
 $(SYSTEM_OBJS) : PAGE=62
 
-PAGE_DEFINES := -DMD_PAGE=55 -DEFFECT_PAGE=55 -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DPRG_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
+PAGE_DEFINES := -DMD_PAGE=55 -DEFFECT_PAGE=55 -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DPRG_PAGE=57 -DFIF_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
 CFLAGS += $(PAGE_DEFINES)
 
 
@@ -503,9 +505,9 @@ C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 
 
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FON_OBJS) $(PRG_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FIF_OBJS) $(FON_OBJS) $(PRG_OBJS)
 else
-OBJS = $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FIF_OBJS) $(FON_OBJS)
 endif
 
 MACH_LINKS = .mach .include_mach
@@ -729,7 +731,7 @@ $(XBM_OBJS) : PAGEFLAGS=-Dstatic=
 endif
 
 $(C_OBJS) : GCC_LANG=
-$(PRG_OBJS) $(XBM_OBJS) $(FON_OBJS): GCC_LANG=-x c
+$(PRG_OBJS) $(XBM_OBJS) $(FON_OBJS) $(FIF_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c 
 
@@ -739,13 +741,13 @@ $(FON_OBJS) : %.o : %.fon
 
 $(PRG_OBJS) : %.o : %.prg
 
-$(FIF_OBJS) : %.o : %.fif tools/fiftool
+$(FIF_OBJS) : %.o : %.fif tools/fiftool/fiftool
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
-$(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS):
+$(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(PLATFORM),wpc)
 	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
 else
@@ -879,7 +881,7 @@ $(HOST_XBM_OBJS) : build/%.o : images/%.c
 build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
-tools/fiftool/fiftool :
+tools/fiftool/fiftool : tools/fiftool/fiftool.c
 	cd tools/fiftool && $(MAKE)
 
 #######################################################################
@@ -954,6 +956,7 @@ info:
 	@echo "BLANK_SIZE = $(BLANK_SIZE)"
 	@echo "REQUIRED = $(REQUIRED)"
 	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"
+	@echo "FIF_OBJS = $(FIF_OBJS)"
 
 #
 # 'make clean' does what you think.

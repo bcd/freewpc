@@ -213,6 +213,14 @@ void amode_deff (void)
 #endif
 
 #if 0
+		extern const U8 fif_freewpc_logo[];
+		dmd_alloc_low_high ();
+		dmd_draw_fif (fif_freewpc_logo);
+		dmd_show2 ();
+		task_sleep_sec (7);
+#endif
+
+#if 0
 		extern const U8 cow_anim0_prg[];
 		dmd_alloc_low ();
 		dmd_draw_xbmprog (cow_anim0_prg);

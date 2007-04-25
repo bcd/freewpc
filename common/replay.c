@@ -101,6 +101,7 @@ void replay_reset (void)
 	replay_code = &system_config.replay_level[0];
 	wpc_nvram_get ();
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
 	MACHINE_REPLAY_CODE_TO_SCORE (replay_score, replay_code);
 #else
 	memcpy (replay_score, default_replay_score, sizeof (score_t));

@@ -39,6 +39,7 @@ define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS 10
 define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
 define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
+# define MACHINE_REPLAY_CODE_TO_SCORE replay_code_to_score
 
 ##########################################################################
 # Lamp Description

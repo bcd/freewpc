@@ -74,7 +74,7 @@ enum image_format get_file_format (const char *filename)
 FILE *output_file_open (void)
 {
 	FILE *fp;
-	char symbol_name[64];
+	char symbol_name[64], *sym;
 	char *sep;
 
 	fp = fopen (outfile, "w");
@@ -85,12 +85,17 @@ FILE *output_file_open (void)
 	fprintf (fp, "#include <xbmprog.h>\n\n");
 
 	sprintf (symbol_name, "%s", outfile);
-	sep = strrchr (symbol_name, '.');
+
+	sym = symbol_name;
+	while ((sep = strchr (sym, '/')) != NULL)
+		sym = sep+1;
+
+	sep = strrchr (sym, '.');
 	if (!sep)
 		error ("invalid output file name");
-
 	*sep++ = '\0';
-	fprintf (fp, "const U8 %s_%s[] = {\n", sep, symbol_name);
+
+	fprintf (fp, "const U8 %s_%s[] = {\n", sep, sym);
 	return fp;
 }
 
@@ -141,6 +146,7 @@ void write_fif (void)
 				{
 					xbm = xbmset_plane (xbmset, plane);
 					xbmprog = xbm_make_prog (xbm);
+					fprintf (ofp, "\nXBMPROG_METHOD_RLE, ");
 					xbmprog_write (ofp, NULL, 0, xbmprog);
 					xbmprog_free (xbmprog);
 				}

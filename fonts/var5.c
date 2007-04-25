@@ -54,6 +54,9 @@ static char font_var5x5_sep[][7] = {
 	/* colon */ { 3, 5, 0, 2, 0, 2, 0 },
 	/* hyphen */ { 3, 5, 0, 0, 7, 0, 0 },
 	/* percent */ { 5, 5, 18, 8, 4, 2, 9 },
+	/* equal */ { 3, 5, 0, 7, 0, 7, 0 },
+	/* lparen */ { 2, 5, 2, 1, 1, 1, 2 },
+	/* rparen */ { 2, 5, 1, 2, 2, 2, 1 },
 };
 
 static char *var5_glyphs[] = {
@@ -99,6 +102,9 @@ static char *var5_glyphs[] = {
    [':'] = font_var5x5_sep[3],
    ['-'] = font_var5x5_sep[4],
    ['%'] = font_var5x5_sep[5],
+	['='] = font_var5x5_sep[6],
+	['('] = font_var5x5_sep[7],
+	[')'] = font_var5x5_sep[8],
 };
 
 const font_t font_var5 = {
