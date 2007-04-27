@@ -120,7 +120,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	audit_increment (&system_audits.slam_tilts);
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
-	/* TODO : abort current game */
+	stop_game ();
 }
 
 
