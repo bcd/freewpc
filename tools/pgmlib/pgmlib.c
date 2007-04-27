@@ -704,11 +704,11 @@ pgm_change_maxval (PGM *pgm, unsigned int new_maxval)
 	if (new_maxval == pgm->maxval)
 		return;
 
-	factor = (pgm->maxval + 1) / (new_maxval+1);
-
+	factor = pgm->maxval / new_maxval;
 	for (y = 0; y < pgm->height; y++)
 		for (x = 0; x < pgm->width; x++)
-			pgm->bits[y][x] = ((pgm->bits[y][x] + 1) / factor) - 1;
+			pgm->bits[y][x] = ((unsigned int)(
+				((double)pgm->bits[y][x] / factor) + 0.5));
 	pgm->maxval = new_maxval;
 }
 
