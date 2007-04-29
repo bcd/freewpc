@@ -239,3 +239,14 @@ CALLSET_ENTRY (mball, start_player)
 	flag_off (FLAG_MULTIBALL_RUNNING);
 }
 
+
+CALLSET_ENTRY (mball, status_report)
+{
+	status_page_init ();
+	sprintf ("%d LOCKS LIT", mball_locks_lit);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	sprintf ("%d BALLS LOCKED", mball_locks_made);
+	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+	status_page_complete ();
+}
+

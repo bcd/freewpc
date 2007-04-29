@@ -41,6 +41,12 @@
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
 
+static const audio_track_t pb_in_play_music = {
+	.prio = PRI_GAME_MODE3,
+	.code = MUS_POWERBALL_IN_PLAY,
+};
+
+
 typedef enum {
 	PF_STEEL_DETECTED = 1,
 	PF_PB_DETECTED,
@@ -148,6 +154,7 @@ void pb_clear_location (U8 location)
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 		flag_off (FLAG_POWERBALL_IN_PLAY);
 		pb_announce_needed = 0;
+		music_stop (pb_in_play_music);
 		deff_stop (DEFF_PB_DETECT);
 	}
 }
@@ -197,6 +204,7 @@ void pb_announce (void)
 		/* At ball start, the important score screen may pre-empt us */
 		deff_wait_for_other (DEFF_SCORES_IMPORTANT);
 		deff_restart (DEFF_PB_DETECT);
+		music_start (pb_in_play_music);
 		pb_announce_needed = 0;
 	}
 }

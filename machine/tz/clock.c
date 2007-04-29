@@ -213,19 +213,22 @@ void tz_clock_rtt (void)
 
 void tz_clock_start_forward (void)
 {
-	clock_mode = CLOCK_RUNNING_FORWARD;
+	if (feature_config.disable_clock == NO)
+		clock_mode = CLOCK_RUNNING_FORWARD;
 }
 
 
 void tz_clock_start_backward (void)
 {
-	clock_mode = CLOCK_RUNNING_BACKWARD;
+	if (feature_config.disable_clock == NO)
+		clock_mode = CLOCK_RUNNING_BACKWARD;
 }
 
 
 void tz_clock_set_speed (U8 speed)
 {
-	clock_delay_time = clock_speed = speed;
+	if (feature_config.disable_clock == NO)
+		clock_delay_time = clock_speed = speed;
 }
 
 
@@ -237,6 +240,12 @@ void tz_clock_stop (void)
 
 void tz_clock_reset (void)
 {
+	if (feature_config.disable_clock == YES)
+	{
+		tz_clock_stop ();
+		return;
+	}
+
 	/* Find the home position at super speed */
 	tz_clock_set_speed (1);
 	clock_mode = CLOCK_FIND;

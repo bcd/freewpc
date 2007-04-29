@@ -58,13 +58,14 @@ void ballsave_timer_task (void)
 
 void ballsave_add_time (U8 secs)
 {
-	if (timed_mode_timer_running_p (GID_BALLSAVER_TIMER, &ball_save_timer))
+	if (timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer))
 	{
 		timed_mode_extend (&ball_save_timer, secs, 20);
 	}
 	else
 	{
-		task_pid_t tp = timed_mode_start (GID_BALLSAVER_TIMER, ballsave_timer_task);
+		task_pid_t tp = timed_mode_start (GID_BALLSAVER_TIMER, 
+			ballsave_timer_task);
 		task_set_arg (tp, secs);
 	}
 }
