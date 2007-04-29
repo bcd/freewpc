@@ -311,6 +311,9 @@ done:
 #ifdef DEBUGGER
 	dump_game ();
 #endif
+
+	/* TODO : should this be task_exit?  device.c calls here and
+	is treating a return like end_ball was cancelled. */
 	return;
 }
 
@@ -411,17 +414,25 @@ void start_ball (void)
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
 
-	/* TODO : if this is the final ball for the player, then
-	display the 'goal', i.e. replay or extra ball target score;
-	or the next high score level */
 
 	/* Enable the game scores on the display.  The first deff started
 	 * is low in priority and is shown whenever there is nothing else
 	 * going on.  The second deff runs briefly at high priority, to
 	 * ensure that the scores are shown at least briefly at the start of
-	 * ball (e.g., in case a skill shot deff gets started). */
+	 * ball (e.g., in case a skill shot deff gets started).
+	 *
+	 * If this is the final ball for the player, then
+	 * display the 'goal', i.e. replay or extra ball target score;
+	 * or the next high score level.
+	 */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
+#if 0 /* TODO : not working??? */
+	if (ball_up == system_config.balls_per_game)
+		deff_start (DEFF_SCORE_GOAL);
+#endif
+
+	/* TODO : chalk game played audits at the beginning of the final ball */
 
 	/* Serve a ball to the plunger, by requesting a kick from the
 	 * trough device.  However, if a ball is detected in the plunger lane
@@ -436,6 +447,8 @@ void start_ball (void)
 	{
 		/* TODO - this scenario causes problems, something else is
 		needed here */
+		/* How about this? */
+		device_add_live ();
 	}
 #endif
 
@@ -494,7 +507,9 @@ void start_game (void)
 		deff_start (DEFF_SCORES);
 		amode_stop ();
 		callset_invoke (start_game);
-	
+
+		/* Note: explicitly call this out last, after all other events
+		for start_game have been handled */
 		player_start_game ();
 		start_ball ();
 	}
@@ -504,12 +519,12 @@ void start_game (void)
 /**
  * stop_game is called whenever a game is restarted.  It is
  * functionally equivalent to end_game aside from normal end
- * game features like match, high score check, etc.  Also it
- * can (and should) assume that a new game is being started.
+ * game features like match, high score check, etc.
  */
 void stop_game (void)
 {
 	in_game = FALSE;
+	in_bonus = FALSE;
 	in_tilt = FALSE;
 	deff_stop_all ();
 	leff_stop_all ();

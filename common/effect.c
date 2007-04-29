@@ -83,3 +83,15 @@ void nonfatal_error_deff (void)
 	deff_exit ();
 }
 
+
+/** The display effect for the final ball goal */
+void score_goal_deff (void)
+{
+	if (system_config.replay_award != FREE_AWARD_OFF)
+	{
+		replay_draw ();
+		task_sleep_sec (2);
+	}
+	deff_exit ();
+}
+
