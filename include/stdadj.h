@@ -114,6 +114,8 @@ typedef struct
 	adjval_t dollar_bill_slot;
 	adjval_t min_coin_msec;
 	adjval_t slamtilt_penalty;
+	adjval_t allow_hundredths;
+	adjval_t credit_fraction;
 } pricing_adj_t;
 
 extern __nvram__ pricing_adj_t price_config;

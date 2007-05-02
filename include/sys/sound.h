@@ -65,8 +65,13 @@
 #define MUS_OFF					0
 
 #define MIN_VOLUME				0
+
 #define MAX_VOLUME				31
+
 #define DEFAULT_VOLUME			8
+
+/** Returned by the sound board when the last sound clip finishes. */
+#define SND_FINISHED				0x80
 
 typedef U16 music_code_t, sound_code_t;
 
@@ -77,5 +82,6 @@ void sound_init (void);
 void sound_send (sound_code_t code);
 void sound_reset (void);
 void volume_set (U8);
+bool sound_version_render (void);
 
 #endif /* _SYS_SOUND_H */

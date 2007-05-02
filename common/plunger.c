@@ -31,20 +31,37 @@
  * \brief Common plunger routines.
  */
 
+#ifdef INCLUDE_AUTOPLUNGER
 void timed_plunger_monitor (void)
 {
-	/* TODO */
+	task_sleep_sec (7);
+	VOIDCALL (plunger_sw_launch_button);
 	task_exit ();
+#endif
+
+
+CALLSET_ENTRY (plunger, ball_in_play)
+{
+#ifdef INCLUDE_AUTOPLUNGER
+	task_kill_gid (GID_TIMED_PLUNGER_MONITOR);
+#endif
 }
 
 
 CALLSET_ENTRY (plunger, sw_shooter)
 {
 #ifdef INCLUDE_AUTOPLUNGER
-	/* If timed plunger is enabled, then start a timer
-	to autoplunge the ball regardless of button press */
-	if (system_config.timed_plunger == ON)
+	if (ball_in_play)
 	{
+		/* If ball is already in play, then autolaunch any balls
+		right away.  TODO : UNLESS the coin door is open, or in
+		tournament mode. */
+		VOIDCALL (plunger_sw_launch_button);
+	}
+	else if (system_config.timed_plunger == ON)
+	{
+		/* If timed plunger is enabled, then start a timer
+		to autoplunge the ball regardless of button press */
 		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
 	}
 #endif

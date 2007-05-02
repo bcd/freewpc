@@ -364,9 +364,31 @@ void replay_score_render (U8 val)
 	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
 	sprintf_score (score);
 #else
-	sprintf ("CODE %02X", val);
+	sprintf ("CODE %d", val);
 #endif
 }
+
+
+void minutes_render (U8 val)
+{
+	if (val == 0)
+		sprintf ("OFF");
+	else
+		sprintf ("%d MIN.", val);
+}
+
+
+void brightness_render (U8 val)
+{
+	switch (val)
+	{
+		case 4: sprintf ("4.DIMMEST");
+		case 5: sprintf ("5.DIM");
+		case 6: sprintf ("6.BRIGHT");
+		case 7: sprintf ("7.BRIGHTEST");
+	}
+}
+
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
@@ -387,11 +409,14 @@ struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 3, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 struct adjustment_value replay_score_value = { 0, 250, 5, replay_score_render };
+struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
+struct adjustment_value gi_power_saver_value = { 0, 60, 1, minutes_render };
+struct adjustment_value power_saver_level_value = { 4, 7, 1, brightness_render };
 
 struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
 	{ "MAX PLAYERS", &players_per_game_value, MAX_PLAYERS, &system_config.max_players },
-	{ "TILT WARNINGS", &integer_value, 3, &system_config.tilt_warnings },
+	{ "TILT WARNINGS", &balls_per_game_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
@@ -407,7 +432,7 @@ struct adjustment standard_adjustments[] = {
 	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
 	/* EXTRA BALL TICKET */
-	/* MAX TICKETS/PLAYER */
+	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 0, &system_config.max_tickets_per_player },
 	{ "MATCH FEATURE", &percent_value, OFF, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
@@ -418,8 +443,8 @@ struct adjustment standard_adjustments[] = {
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
 	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
-	/* GI POWER SAVER */
-	/* POWER SAVER LEVEL */
+	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
+	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
@@ -449,6 +474,10 @@ struct adjustment feature_adjustments[] = {
 
 
 struct adjustment pricing_adjustments[] = {
+	{ "LEFT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[0] },
+	{ "CENTER COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
+	{ "RIGHT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
+	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
 	{ "UNITS PER CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
 	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
@@ -468,8 +497,8 @@ struct adjustment pricing_adjustments[] = {
 	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
-	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, NULL },
-	{ "CREDIT FRACTION", &on_off_value, OFF, NULL },
+	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
+	{ "CREDIT FRACTION", &on_off_value, ON, &price_config.credit_fraction },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -919,17 +948,21 @@ void confirm_init (void)
 void confirm_draw (void)
 {
 	dmd_alloc_low_clean ();
+
 	sprintf ("%d", confirm_timer);
 	font_render_string_left (&font_mono5, 2, 2, sprintf_buffer);
 	font_render_string_left (&font_mono5, 120, 2, sprintf_buffer);
+
+	sprintf ("CONFIRM"); /* TODO : display operation here */
+	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
 	font_render_string_center (&font_mono5, 64, 14, "ENTER TO SAVE");
 	font_render_string_center (&font_mono5, 64, 20, "ESCAPE TO CANCEL");
+
 	dmd_show_low ();
 }
 
 void confirm_enter (void)
 {
-	dbprintf ("Confirming adjustment change.\n");
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 10, "SAVING NEW");
@@ -1954,6 +1987,8 @@ struct menu development_menu = {
 
 void factory_adjust_confirm (void)
 {
+	/* TODO : confirm is not handled at all!  We are performing
+	the operation before displaying the confirm screen. */
 	adj_reset_all ();
 	confirm_enter ();
 }
@@ -2157,13 +2192,19 @@ struct preset_component preset_3ball_comps[] = {
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
 	{ NULL, 0 },
 };
-struct preset preset_3ball = { .name = "3-BALL", preset_3ball_comps };
+struct preset preset_3ball = { 
+	.name = "3-BALL", 
+	.comps = preset_3ball_comps
+};
 
 struct preset_component preset_5ball_comps[] = {
 	{ standard_adjustments, &system_config.balls_per_game, 5 },
 	{ NULL, 0 },
 };
-struct preset preset_5ball = { .name = "5-BALL", preset_5ball_comps };
+struct preset preset_5ball = { 
+	.name = "5-BALL", 
+	.comps = preset_5ball_comps
+};
 
 struct preset_component preset_tournament_comps[] = {
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
@@ -2179,7 +2220,10 @@ struct preset_component preset_tournament_comps[] = {
 	/* TODO : once extra ball buyin is implemented, disable it here */
 	{ NULL, 0 },
 };
-struct preset preset_tournament = { .name = "TOURNAMENT", preset_tournament_comps };
+struct preset preset_tournament = { 
+	.name = "TOURNAMENT",
+	.comps = preset_tournament_comps
+};
 
 
 struct preset_component preset_show_comps[] = {
@@ -2200,19 +2244,12 @@ struct preset_component preset_timed_comps[] = {
 struct preset preset_timed_game = { .name = "TIMED GAME", preset_timed_comps };
 
 
-struct preset_component preset_europe_comps[] = {
-	{ NULL, 0 },
-};
-struct preset preset_europe = { .name = "EUROPE", preset_europe_comps };
-
-
 struct preset *preset_table[] = {
 	&preset_3ball,
 	&preset_5ball,
 	&preset_tournament,
 	&preset_show,
 	&preset_timed_game,
-	&preset_europe,
 };
 
 
@@ -2640,7 +2677,7 @@ void single_switch_draw (void)
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 	sprintf ("%s%s", opto, state);
-	font_render_string_center (&font_mono5, 80, 20, sprintf_buffer);
+	font_render_string_center (&font_mono5, 80, 22, sprintf_buffer);
 	
 	dmd_show_low ();
 }

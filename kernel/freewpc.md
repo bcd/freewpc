@@ -89,6 +89,7 @@ Match: page(COMMON_PAGE), runner, PRI_MATCH
 Buyin Offer: page(COMMON_PAGE), PRI_MATCH
 Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
+Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
 
 [leffs]
 NULL: 0

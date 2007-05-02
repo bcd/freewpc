@@ -370,7 +370,7 @@ static inline void do_irq_1ms_end (void)
 
 static inline void do_irq_2ms_a (void)
 {
-	lamp_rtt ();
+	lamp_rtt (); /* split into 2 rtts for strobing */
 	flipper_rtt ();
 	triac_rtt ();
 }

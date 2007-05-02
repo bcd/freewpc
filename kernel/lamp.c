@@ -111,7 +111,7 @@ void lamp_flash_rtt (void)
 
 
 /** Runs periodically to update the physical lamp state */
-void lamp_rtt (void)
+extern inline void lamp_rtt_common (U8 mode)
 {
 	U8 bits;
 
@@ -135,6 +135,12 @@ void lamp_rtt (void)
 	 * macros to ensure this.)
 	 */
 	bits |= lamp_flash_matrix_now[lamp_strobe_column];
+
+	/* TODO : implement lamp strobing, like the newer Stern games
+	do.  Implement like DMD page flipping, alternating between 2
+	different lamp matrices rapidly to present 4 different
+	intensities.  A background task, like the flash_rtt above,
+	would toggle the intensities at a slower rate. */
 
 	/* Override with the lamp effect lamps.
 	 * Leff2 bits are low priority and used for long-running
@@ -161,6 +167,25 @@ void lamp_rtt (void)
 		lamp_strobe_mask = 0x1;
 	}
 }
+
+
+void lamp_rtt (void)
+{
+	lamp_rtt_common (0);
+}
+
+
+void lamp_rtt_1 (void)
+{
+	lamp_rtt_common (1);
+}
+
+
+void lamp_rtt_2 (void)
+{
+	lamp_rtt_common (2);
+}
+
 
 /* Basic bit manipulation routines */
 

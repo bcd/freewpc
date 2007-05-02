@@ -82,6 +82,25 @@ const audio_track_t volume_change_music_track = {
 };
 
 
+/** Renders the sound board version into the print buffer. */
+bool sound_version_render (void)
+{
+	if (sound_error_code == 0xFF)
+	{
+		return FALSE;
+	}
+	else
+	{
+#ifdef MACHINE_DCS
+		sprintf ("%d.%d", sound_version_major, sound_version_minor);
+#else
+		sprintf ("L-%d", sound_version_major);
+#endif
+		return TRUE;
+	}
+}
+
+
 /** Initialize the sound write queue */
 static void sound_write_queue_init (void)
 {
@@ -214,6 +233,10 @@ CALLSET_ENTRY (sound, idle)
 {
 	U8 in;
 
+	/* TODO : remove this eventually.  We're emptying out status bytes
+	sent from the sound board, and just printing them out.  This info
+	isn't really needed now, but could be used for synchronous sound
+	effects. */
 	if (sys_init_complete
 		&& !queue_empty_p ((queue_t *)&sound_read_queue))
 	{

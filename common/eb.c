@@ -54,12 +54,21 @@ static void update_extra_ball_lamp (void)
 }
 
 
+/** Returns whether or not an extra ball can be awarded.  Game logic
+can use this function to avoid lighting an extra ball if it will
+be impossible to collect it. */
+bool can_award_extra_ball (void)
+{
+	return ((extra_balls_earned < system_config.max_ebs)
+		&& (extra_balls_earned_this_bip < system_config.max_ebs_per_bip));
+}
+
+
 /** Award an extra ball to the current player.  If an extra ball
 cannot be awarded, then it is skipped. */
 void increment_extra_balls (void)
 {
-	if ((extra_balls_earned < system_config.max_ebs)
-		&& (extra_balls_earned_this_bip < system_config.max_ebs_per_bip))
+	if (can_award_extra_ball ())
 	{
 		extra_balls++;
 		update_extra_ball_lamp ();

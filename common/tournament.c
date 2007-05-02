@@ -31,13 +31,23 @@
 U8 tournament_mode_enabled;
 
 
-void tournament_player_enable_deff (void)
+void player_tournament_ready_deff (void)
 {
+	U8 timer;
+
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 10, "TOURNAMENT MODE");
-	font_render_string_center (&font_mono5, 64, 22, "ENABLED");
+	font_render_string_center (&font_fixed6, 64, 5, "TOURNAMENT MODE");
+	font_render_string_center (&font_fixed6, 64, 15, "ENABLED NOW");
+	font_render_string_center (&font_var5, 64, 28, "PRESS START NOW");
 	dmd_show_low ();
-	task_sleep_sec (3);
+
+	timer = 10;
+	do {
+		sound_send (SND_TEST_CONFIRM);
+		task_sleep_sec (1);
+	} while (--timer != 0);
+
+	tournament_mode_enabled = OFF;
 	deff_exit ();
 }
 
@@ -57,6 +67,7 @@ void tournament_player_detect (void)
 	}
 
 	tournament_mode_enabled = ON;
+	deff_start (DEFF_PLAYER_TOURNAMENT_READY);
 	task_exit ();
 }
 

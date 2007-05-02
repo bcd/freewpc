@@ -50,22 +50,26 @@ extern device_properties_t device_properties_table[];
 device_t device_table[NUM_DEVICES];
 
 /** The global state of the entire device subsystem */
+/* TODO : is this needed?  Can use sys_init_complete instead? */
 U8 device_ss_state;
 
-/** The number of devices registered */
-U8 device_count;
-
-/** The maximum number of balls that this machine should have */
+/** The maximum number of balls that this machine should have installed
+in the standard devices */
 U8 max_balls;
 
-/** The number of balls accounted for */
+/** The number of balls accounted for, the last time a full recount was
+done. */
 U8 counted_balls;
 
-/** The number of balls that have gone missing */
+/** The number of balls that have gone missing.  This is always the
+difference between max_balls and counted_balls.  Note that missing does
+not really mean missing... it means that the balls are not held up.
+They could be legitimately in play, or truly missing. */
 U8 missing_balls;
 
 /** The number of unaccounted balls that are assumed to be on
- * the table.  This includes balls in the plunger lane. */
+ * the table.  This includes balls in the plunger lane.  Normally,
+ * missing == live.  If missing > live, then something is wrong. */
 U8 live_balls;
 
 /** The number of balls that are held in a container, other than the trough,
@@ -85,7 +89,7 @@ void device_debug (void)
 {
 	devicenum_t devno;
 
-	for (devno = 0; devno < device_count; devno++)
+	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_t *dev = &device_table[devno];
 		
@@ -135,9 +139,6 @@ void device_register (devicenum_t devno, device_properties_t *props)
 	dev->props = props;
 	dev->size = props->sw_count;
 	dev->max_count = props->init_max_count;
-	device_count++;
-
-	dbprintf ("Registering device, total count is now %d\n", device_count);
 }
 
 /* Return the number of balls currently present in the device */
@@ -404,7 +405,7 @@ void device_update_globals (void)
 	excluding those that are locked. */
 	counted_balls = 0;
 	held_balls_now = 0;
-	for (devno = 0; devno < device_count; devno++)
+	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_t *dev = device_entry (devno);
 		counted_balls += dev->actual_count;
@@ -425,11 +426,7 @@ void device_update_globals (void)
 	if (missing_balls != live_balls)
 	{
 		/* Number of balls not accounted for is NOT what we expect */
-		/* TODO : this isn't right */
-#if 0
-		if (missing_balls + 1 == live_balls)
-			device_request_kick (device_entry (DEVNO_TROUGH));
-#endif
+		dbprintf ("Error: missing=%d, live=%d\n", missing_balls, live_balls);
 	}
 
 	/* If any balls are held up temporarily (more than "max" are
@@ -463,6 +460,9 @@ U8 device_holdup_count (void)
  *
  * For example, this clears out the balls of a lockup device
  * at the end of a game.
+ *
+ * This is always done as a background task, because it may
+ * take some time, although this seems unnecessary...
  */
 void device_probe (void)
 {
@@ -470,9 +470,12 @@ void device_probe (void)
 
 	task_sleep_sec (1);
 
-	for (devno = 0; devno < device_count; devno++)
+	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_t *dev = device_entry (devno);
+
+		/* Recount the number of balls in the device, and reset
+		 * other device data. */
 		device_recount (dev);
 		dev->previous_count = dev->actual_count;
 		dev->kicks_needed = 0;
@@ -489,6 +492,14 @@ void device_probe (void)
 				device_request_kick (dev);
 			} while (--kick_count != 0);
 		}
+#if 0 /* TODO */
+		else if (dev->actual_count < dev->max_count)
+		{
+			/* The device normally holds more balls than are present in
+			it.  If possible, launch a ball here.  (For example, ST:TNG
+			or Whodunnit.) */
+		}
+#endif
 	}
 
 	/* Update the global state information again based on the
@@ -511,17 +522,14 @@ void device_sw_handler (U8 devno)
 
 	dbprintf ("Device switch handler for %s\n", dev->props->name);
 
+	/* Ignore device switches until device SS is initialized. */
 	if (device_ss_state == 0)
-	{
-		dbprintf ("Aborting because haven't probed yet\n");
 		return;
-	}
 
+	/* Ignore device switches if the device update task is already running.
+	 * It is polling the device count and will deal with this event. */
 	if (task_find_gid (DEVICE_GID (devno)))
-	{
-		dbprintf ("Aborting because update already running\n");
 		return;
-	}
 
 	timer_kill_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
 	task_create_gid (DEVICE_GID (devno), device_update);
@@ -573,7 +581,8 @@ void device_remove_live (void)
 
 					/* FALLTHRU : end_ball may be cancelled due to a
 					ball save, but must be treated as going back to
-					single_ball_play */
+					single_ball_play.  If the ball really ends, we won't
+					come back here. */
 
 				case 1:
 					/* Multiball modes like to know when single ball play resumes. */
@@ -617,20 +626,30 @@ bool device_check_start_ok (void)
 	kickout_locks = 0;
 
 	/* If any balls are missing, don't allow the game to start
-	 * without first trying a device probe. */
+	 * without first trying a device probe.
+	 *
+	 * If the device probe is alread in progress, then just
+	 * return. */
  	if (task_find_gid (GID_DEVICE_PROBE)) 
 		return FALSE;
+
+	/* If a ball is on the shooter switch, then allow the
+	 * game to start anyway. */
 #ifdef MACHINE_SHOOTER_SWITCH
 	else if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 		return TRUE;
 #endif
+
+	/* If some balls are unaccounted for, and not on the shooter,
+	 * then start a device probe and a ball search. */
 	else if (missing_balls > 0)
 	{
 		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 		/* TODO : a ball search here is probably needed also. */
 		return FALSE;
 	}
-	/* OK to start game */
+
+	/* All checks pass : OK to start game now */
 	return TRUE;
 }
 
@@ -690,14 +709,17 @@ void device_init (void)
 	U8 i;
 
 	device_ss_state = 0;
+#ifdef MACHINE_MAX_BALLS
+	max_balls = MACHINE_MAX_BALLS ();
+#else
 	max_balls = MACHINE_TROUGH_SIZE;
+#endif
 	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
 	kickout_locks = 0;
 	held_balls = 0;
 
-	device_count = 0;
 	for (i=0; i < NUM_DEVICES; i++)
 	{
 		dev = device_entry (i);

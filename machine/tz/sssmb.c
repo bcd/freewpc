@@ -253,9 +253,9 @@ CALLSET_ENTRY (sssmb, start_game)
 
 CALLSET_ENTRY (sssmb, sw_buyin_button)
 {
+#if 0
 	if (in_live_game)
-	{
 		sssmb_start ();
-	}
+#endif
 }
 

@@ -37,9 +37,9 @@
 # properly.
 #
 
-alphas="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
-digits="0 1 2 3 4 5 6 7 8 9"
-puncs=". , / & - ! $ %"
+alphas="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z space"
+digits="0 1 2 3 4 5 6 7 8 9 . ,"
+puncs="/ & - + ! $ % = @"
 
 xfont=-"*-fixed-bold-r-*-*-10"
 cfont="test"
@@ -58,6 +58,9 @@ function charname ()
 	if [ "$char" = "$" ]; then echo "dollar"; return; fi
 	if [ "$char" = "%" ]; then echo "percent"; return; fi
 	if [ "$char" = "!" ]; then echo "bang"; return; fi
+	if [ "$char" = "+" ]; then echo "plus"; return; fi
+	if [ "$char" = "=" ]; then echo "equal"; return; fi
+	if [ "$char" = "@" ]; then echo "at"; return; fi
 	echo "$char";
 }
 
@@ -92,13 +95,20 @@ echo "#pragma section (\"page61\")" >> $fonfile
 for char in `echo $chars`; do
 	charname=`charname $char`;
 	base="glyph_${cfont}_${charname}";
-	pbmtextps -font \"$xfont\" -fontsize $size $char | pnmcrop | pbmtoxbm | sed -e "s/noname/$base/g" -e "s/{/& ${base}_width, ${base}_height,/" >> $fonfile
+	if [ "$char" != "space" ]; then
+		pbmtextps -font \"$xfont\" -fontsize $size $char | pnmcrop | pbmtoxbm | sed -e "s/noname/$base/g" -e "s/{/& ${base}_width, ${base}_height,/" >> $fonfile
+	else
+		echo "static char glyph_${cfont}_space_bits[] = { glyph_${cfont}_I_width, glyph_${cfont}_I_height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };" >> $fonfile
+	fi
 done
 
 echo "static char *${cfont}_glyphs[] = {" >> $fonfile
 for char in `echo $chars`; do
 	charname=`charname $char`;
 	base="glyph_${cfont}_${charname}";
+	if [ "$char" = "space" ]; then
+		char=" ";
+	fi
 	echo "   ['$char'] = ${base}_bits," >> $fonfile
 done
 echo "};" >> $fonfile

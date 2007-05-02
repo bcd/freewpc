@@ -60,7 +60,7 @@ MACHINE_DISPLAY_EFFECTS
 	[num] = { flags, pri, fn, page },
 
 
-static const deff_t deff_table[] = {
+const deff_t deff_table[] = {
 #define null_deff deff_exit
 #ifdef MACHINE_DISPLAY_EFFECTS
 	MACHINE_DISPLAY_EFFECTS

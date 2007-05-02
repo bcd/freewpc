@@ -48,7 +48,15 @@ __local__ U8 replay_award_count;
 void replay_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 9, "REPLAY AT");
+	switch (system_config.replay_award)
+	{
+		case FREE_AWARD_CREDIT:
+			font_render_string_center (&font_fixed6, 64, 8, "REPLAY AT");
+			break;
+		case FREE_AWARD_EB:
+			font_render_string_center (&font_fixed6, 64, 8, "EXTRA BALL AT");
+			break;
+	}
 	sprintf_score (replay_score);
 	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);
 	dmd_show_low ();

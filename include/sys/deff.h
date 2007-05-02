@@ -44,6 +44,9 @@ typedef struct
 } deff_t;
 
 
+extern const deff_t deff_table[];
+
+
 /** The maximum number of display effects that can be queued (i.e.
  * waiting to run, but blocked by a higher priority effect).
  */
