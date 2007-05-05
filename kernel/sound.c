@@ -231,18 +231,17 @@ U8 sound_board_command (U8 cmd, U8 retries)
 
 CALLSET_ENTRY (sound, idle)
 {
-	U8 in;
+#if 0
 
-	/* TODO : remove this eventually.  We're emptying out status bytes
-	sent from the sound board, and just printing them out.  This info
-	isn't really needed now, but could be used for synchronous sound
-	effects. */
+	U8 in;
+	/* TODO : do something like this elsewhere for sound syncing */
 	if (sys_init_complete
 		&& !queue_empty_p ((queue_t *)&sound_read_queue))
 	{
 		in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
 		dbprintf ("Idle sound board read: %02Xh\n", in);
 	}
+#endif
 }
 
 

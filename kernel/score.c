@@ -30,8 +30,10 @@ extern const score_t score_table[];
 /** Nonzero if the current score has changed and needs to be redrawn */
 bool score_update_needed;
 
+/** The array of player scores */
 score_t scores[MAX_PLAYERS];
 
+/** A pointer to the score for the current player up */
 U8 *current_score;
 
 
@@ -255,19 +257,19 @@ void score_add (score_t s1, const score_t s2)
 
 	/* Add one byte at a time, however many times it takes */
 #if (BYTES_PER_SCORE >= 5)
-	__bcd_add8 (s1, s2, 0);
+	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 4)
-	__bcd_add8 (s1, s2, 1); /* TODO : carry wrong if BYTES_PER_SCORE != 5 */
+	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 3)
-	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 2)
-	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 1)
-	__bcd_add8 (s1, s2, 1);
+	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
 #endif
 }
 
@@ -280,18 +282,6 @@ void score_add (score_t s1, const score_t s2)
  * value. */
 void score_add_byte (score_t s1, U8 offset, bcd_t val)
 {
-#if 0
-	s1 += BYTES_PER_SCORE - offset;
-	__bcd_add8 (s1, &val, 0);
-	while (offset < BYTES_PER_SCORE)
-	{
-		/* TODO : unroll this by hand like above for better performance */
-		/* TODO : provide multiplier version of this.  May be able to
-		do better than naive repeated addition for this type */
-		__bcd_add8 (s1, NULL, 2);
-		offset--;
-	}
-#endif
 	score_t s2;
 
 	memset (s2, 0, sizeof (score_t));
@@ -368,6 +358,7 @@ void score_mul (score_t s1, U8 multiplier)
 }
 
 
+/** Compares two scores.  Returns -1, 0, or 1 accordingly, like memcmp. */
 I8 score_compare (const score_t s1, const score_t s2)
 {
 	register U8 len = sizeof (score_t);
@@ -389,6 +380,7 @@ I8 score_compare (const score_t s1, const score_t s2)
 }
 
 
+/** Reset all scores to zero */
 void scores_reset (void)
 {
 	score_update_start ();
@@ -406,6 +398,7 @@ CALLSET_ENTRY (score, start_ball)
 
 CALLSET_ENTRY (score, init)
 {
+	/* TODO : scores should persist across a reset */
 	scores_reset ();
 }
 

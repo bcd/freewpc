@@ -63,11 +63,11 @@ CALLSET_ENTRY (service, sw_coin_door_closed)
 
 	if (switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
-		/* Coin door is closed */
+		dbprintf ("Coin door is closed\n");
 	}
 	else
 	{
-		/* Coin door is opened */
+		dbprintf ("Coin door is open\n");
 	}
 }
 

@@ -229,7 +229,16 @@ void end_ball (void)
 		in_bonus = FALSE;
 	}
 	else
+	{
+		dbprintf ("Clearing tilt flag, deff should stop\n");
+#ifdef DEFF_TILT
+		deff_stop (DEFF_TILT);
+#endif
+#ifdef LEFF_TILT
+		leff_stop (LEFF_TILT);
+#endif
 		in_tilt = FALSE;
+	}
 
 	/* Stop everything running except for this task.
 	 * Any task that has protected itself is immune to this.
