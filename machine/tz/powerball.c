@@ -154,6 +154,8 @@ void pb_clear_location (U8 location)
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 		flag_off (FLAG_POWERBALL_IN_PLAY);
 		pb_announce_needed = 0;
+		/* TODO : music is not being stopped correctly if Powerball
+		drains during multiball and game doesn't know where it is. */
 		music_stop (pb_in_play_music);
 		deff_stop (DEFF_PB_DETECT);
 	}

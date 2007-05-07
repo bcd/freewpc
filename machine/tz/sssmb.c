@@ -170,6 +170,12 @@ void sssmb_stop (void)
 }
 
 
+CALLSET_ENTRY (sssmb, door_start_super_skill)
+{
+	sssmb_start ();
+}
+
+
 CALLSET_ENTRY (sssmb, single_ball_play)
 {
 	sssmb_stop ();

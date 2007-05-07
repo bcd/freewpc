@@ -63,7 +63,7 @@ extern inline bool multiball_mode_stop (U8 flag, U8 deff, U8 leff, U8 music)
 				audio_track_t track;
 				track.code = music;
 				track.prio = deff_table[deff].prio;
-				music_start (track);
+				music_stop (track);
 			}
 		}
 		if (leff != LEFF_NULL)
@@ -136,6 +136,7 @@ void chaosmb_start (void)
 	{
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 0;
+		device_multiball_set (3);
 	}
 }
 
@@ -154,6 +155,11 @@ void chaosmb_check_level (U8 level)
 	{
 		chaosmb_score_jackpot ();
 	}
+}
+
+CALLSET_ENTRY (chaosmb, door_start_clock_chaos)
+{
+	chaosmb_start ();
 }
 
 
