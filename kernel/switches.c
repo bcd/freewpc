@@ -292,7 +292,12 @@ void switch_sched (void)
 	const U8 sw = (U8)task_get_arg ();
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
-	dbprintf ("Handling switch #%d\n", sw);
+#ifdef DEBUGGER
+	dbprintf ("Handling switch ");
+	sprintf_far_string (names_of_switches + sw);
+	dbprintf1 ();
+	dbprintf ("\n");
+#endif
 
 #if 0 /* not working */
 	/* In test mode, always queue switch closures into the
