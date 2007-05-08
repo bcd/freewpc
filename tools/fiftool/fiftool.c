@@ -140,7 +140,6 @@ void write_fif (void)
 				/* Then convert each XBM in turn to FIF. */
 				pgm = pgm_read (infile[n]);
 				pgm_change_maxval (pgm, (1 << n_planes) - 1);
-				pgm_invert (pgm);
 				xbmset = pgm_make_xbmset (pgm);
 				for (plane = 0; plane < n_planes; plane++)
 				{
