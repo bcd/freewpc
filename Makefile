@@ -140,7 +140,7 @@ HOSTCC = $(CCACHE) gcc
 # We use the latest versions of astools, version 4.1.0
 LD6809 = $(GCC_ROOT)/aslink
 LD = $(GCC_ROOT)/ld
-AS = $(GCC_ROOT)/as
+AS = $(GCC_ROOT)/gcc -xassembler-with-cpp
 
 ifeq ($(PLATFORM),wpc)
 REQUIRED += $(CC:$(CCACHE)=) $(LD6809) $(LD)
@@ -269,7 +269,8 @@ FON_OBJS = \
 XBM_OBJS = images/freewpc.o
 
 FIF_SRCS += \
-	images/freewpc_logo.fif
+	images/freewpc_logo.fif \
+	images/tuxlogo.fif
 
 FIF_OBJS = $(patsubst %.fif,%.o,$(FIF_SRCS))
 
@@ -708,14 +709,14 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
 # assembler and not gcc.
 #
 $(AS_OBJS) : %.o : %.s $(REQUIRED)
-	@echo Assembling $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
+	@echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED)
-	@echo Assembling page header $< ... && $(AS) -o $@ $< >> $(ERR) 2>&1
+	@echo Assembling page header $< ... && $(AS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build any C or XBM module.
@@ -882,7 +883,7 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
 tools/fiftool/fiftool : tools/fiftool/fiftool.c
-	cd tools/fiftool && $(MAKE)
+	cd tools/fiftool && $(MAKE) CC=$(HOSTCC)
 
 #######################################################################
 ###	Standard Dependencies
