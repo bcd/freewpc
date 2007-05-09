@@ -131,7 +131,7 @@ static void rtc_calc_day_of_week (void)
 static void rtc_normalize (void)
 {
 	wpc_nvram_get ();
-	while (hour > 24)
+	while (hour >= 24)
 	{
 		hour -= 24;
 		wpc_asic_write (WPC_CLK_HOURS_DAYS,
