@@ -213,7 +213,6 @@ void amode_deff (void)
 #endif
 
 		/** Display FreeWPC logo **/
-		extern const U8 fif_freewpc_logo[];
 		dmd_alloc_low_high ();
 		dmd_draw_fif (fif_freewpc_logo);
 		dmd_show2 ();
@@ -287,6 +286,16 @@ void amode_deff (void)
 		{
 			design_credit_counter = 3;
 			amode_show_design_credits ();
+		
+			dmd_alloc_low_high ();
+			dmd_draw_fif (fif_tuxlogo);
+			dmd_flip_low_high ();
+			font_render_string_center (&font_var5, 80, 3, "DEVELOPED ON LINUX");
+			font_render_string_center (&font_mono5, 80, 18, "SUPPORT OPEN");
+			font_render_string_center (&font_mono5, 80, 27, "SOURCE SOFTWARE");
+			dmd_flip_low_high ();
+			dmd_show2 ();
+			task_sleep_sec (7);
 		}
 
 		/* Kill music if it is running */

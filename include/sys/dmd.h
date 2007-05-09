@@ -169,6 +169,12 @@ void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
 const U8 *dmd_draw_xbmprog (const U8 *xbmprog);
-const U8 *dmd_draw_fif (const U8 *fif);
+const U8 *dmd_draw_fif1 (const U8 *fif);
+
+#define dmd_draw_fif(fif) \
+do { \
+	extern const U8 fif[]; \
+	dmd_draw_fif1 (fif); \
+} while (0)
 
 #endif /* _SYS_DMD_H */

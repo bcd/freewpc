@@ -46,8 +46,15 @@ static void handle_outhole (void)
 {
 	while (switch_poll (SW_OUTHOLE))
 	{
-		sol_pulse (SOL_OUTHOLE);
-		task_sleep_sec (2);
+		if (device_full_p (device_entry (DEVNO_TROUGH)))
+		{
+			task_sleep_sec (1);
+		}
+		else
+		{
+			sol_pulse (SOL_OUTHOLE);
+			task_sleep_sec (2);
+		}
 	}
 	task_exit ();
 }

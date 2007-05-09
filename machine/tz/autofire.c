@@ -45,6 +45,7 @@ void autofire_monitor (void)
 	/* Catch the ball */
 	task_sleep_sec (1);
 	sol_off (SOL_SHOOTER_DIV);
+	dbprintf ("Shooter divertor catch done\n");
 
 	/* Wait for the ball to settle */
 	task_sleep_sec (1);
@@ -75,9 +76,11 @@ void autofire_open_for_trough (void)
 {
 	while (task_find_gid (GID_AUTOFIRE_HANDLER))
 		task_sleep_sec (1);
+	dbprintf ("Shooter divertor open to catch\n");
 	sol_on (SOL_SHOOTER_DIV);
 	task_sleep_sec (1);
 	task_create_gid (GID_AUTOFIRE_HANDLER, autofire_monitor);
+	task_sleep_sec (1);
 }
 
 
@@ -108,8 +111,7 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	lane is clear before allowing the ball to go. */
 
 	/* The default strategy is to autofire only when in multiball. */
-	if (in_live_game
-		&& (live_balls || autofire_request_count))
+	if (live_balls || autofire_request_count)
 	{
 		if (autofire_request_count > 0)
 			autofire_request_count--;

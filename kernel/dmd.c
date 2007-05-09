@@ -628,15 +628,15 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 }
 
 
-const U8 *dmd_draw_fif (const U8 *fif)
+/** Draws a FreeWPC formatted image, which is just a 4-color
+ * compressed XBMPROG. */
+const U8 *dmd_draw_fif1 (const U8 *fif)
 {
 	U8 depth;
 
 	wpc_push_page (PRG_PAGE);
 	depth = *fif++;
 	wpc_pop_page ();
-
-	dbprintf ("fif %p depth = %d\n", fif, depth);
 
 	fif = dmd_draw_xbmprog (fif);
 	if (depth == 2)

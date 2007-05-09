@@ -87,6 +87,7 @@ _start:
 	clra
 	tfr	a,dp
 
+#ifndef FASTBOOT
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,7 +145,7 @@ paged_inner_loop:
 rom_checksum_error:
 	ldx	#1
 	jmp	diag_error
-
+#endif /* FASTBOOT */
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   RAM POST DIAGNOSTIC CHECK

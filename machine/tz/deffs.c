@@ -216,6 +216,22 @@ void spell_test_deff (void)
 }
 
 
+void two_color_flash_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	dmd_clean_page_high ();
+	dmd_flip_low_high ();
+	font_render_string_center (&font_fixed6, 64, 9, "DARK");
+	dmd_flip_low_high ();
+	font_render_string_center2 (&font_fixed6, 64, 21, "BRIGHT");
+	dmd_show2 ();
+	task_sleep_sec (3);
+	dmd_show_high ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
 
 CALLSET_ENTRY (deff, start_player)
 {
