@@ -1,0 +1,114 @@
+#include <freewpc.h>
+#pragma section ("page61")
+#define glyph_schu_0_width 6
+#define glyph_schu_0_height 10
+static char glyph_schu_0_bits[] = { glyph_schu_0_width, glyph_schu_0_height,
+ 0x1e,0x31,0x21,0x21,0x21,0x21,0x21,0x21,0x12,0x0e};
+#define glyph_schu_1_width 6
+#define glyph_schu_1_height 10
+static char glyph_schu_1_bits[] = { glyph_schu_1_width, glyph_schu_1_height,
+ 0x0e,0x09,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x3f};
+#define glyph_schu_2_width 6
+#define glyph_schu_2_height 10
+static char glyph_schu_2_bits[] = { glyph_schu_2_width, glyph_schu_2_height,
+ 0x1e,0x21,0x20,0x20,0x10,0x08,0x04,0x02,0x21,0x3f};
+#define glyph_schu_3_width 7
+#define glyph_schu_3_height 10
+static char glyph_schu_3_bits[] = { glyph_schu_3_width, glyph_schu_3_height,
+ 0x3e,0x40,0x40,0x20,0x18,0x20,0x40,0x40,0x60,0x1f};
+#define glyph_schu_4_width 6
+#define glyph_schu_4_height 10
+static char glyph_schu_4_bits[] = { glyph_schu_4_width, glyph_schu_4_height,
+ 0x18,0x18,0x14,0x12,0x12,0x11,0x3f,0x10,0x10,0x3c};
+#define glyph_schu_5_width 7
+#define glyph_schu_5_height 10
+static char glyph_schu_5_bits[] = { glyph_schu_5_width, glyph_schu_5_height,
+ 0x3e,0x02,0x02,0x3e,0x62,0x40,0x40,0x40,0x23,0x1c};
+#define glyph_schu_6_width 7
+#define glyph_schu_6_height 10
+static char glyph_schu_6_bits[] = { glyph_schu_6_width, glyph_schu_6_height,
+ 0x78,0x06,0x02,0x01,0x3d,0x67,0x43,0x43,0x62,0x3c};
+#define glyph_schu_7_width 6
+#define glyph_schu_7_height 10
+static char glyph_schu_7_bits[] = { glyph_schu_7_width, glyph_schu_7_height,
+ 0x3f,0x21,0x20,0x20,0x20,0x10,0x10,0x10,0x08,0x08};
+#define glyph_schu_8_width 6
+#define glyph_schu_8_height 10
+static char glyph_schu_8_bits[] = { glyph_schu_8_width, glyph_schu_8_height,
+ 0x1e,0x21,0x21,0x33,0x1e,0x12,0x21,0x21,0x33,0x1e};
+#define glyph_schu_9_width 6
+#define glyph_schu_9_height 10
+static char glyph_schu_9_bits[] = { glyph_schu_9_width, glyph_schu_9_height,
+ 0x1e,0x11,0x21,0x21,0x33,0x2e,0x20,0x10,0x18,0x07};
+#define glyph_schu_period_width 2
+#define glyph_schu_period_height 2
+static char glyph_schu_period_bits[] = { glyph_schu_period_width, glyph_schu_period_height,
+ 0x03,0x03};
+#define glyph_schu_comma_width 3
+#define glyph_schu_comma_height 4
+static char glyph_schu_comma_bits[] = { glyph_schu_comma_width, glyph_schu_comma_height,
+ 0x06,0x06,0x02,0x03};
+#define glyph_schu_slash_width 6
+#define glyph_schu_slash_height 12
+static char glyph_schu_slash_bits[] = { glyph_schu_slash_width, glyph_schu_slash_height,
+ 0x20,0x20,0x10,0x10,0x08,0x08,0x04,0x04,0x02,0x02,0x01,0x01};
+#define glyph_schu_amp_width 7
+#define glyph_schu_amp_height 9
+static char glyph_schu_amp_bits[] = { glyph_schu_amp_width, glyph_schu_amp_height,
+ 0x38,0x04,0x04,0x04,0x0e,0x49,0x31,0x21,0x7e};
+#define glyph_schu_minus_width 8
+#define glyph_schu_minus_height 1
+static char glyph_schu_minus_bits[] = { glyph_schu_minus_width, glyph_schu_minus_height,
+ 0xff};
+#define glyph_schu_plus_width 8
+#define glyph_schu_plus_height 8
+static char glyph_schu_plus_bits[] = { glyph_schu_plus_width, glyph_schu_plus_height,
+ 0x08,0x08,0x08,0xff,0x08,0x08,0x08,0x08};
+#define glyph_schu_bang_width 2
+#define glyph_schu_bang_height 10
+static char glyph_schu_bang_bits[] = { glyph_schu_bang_width, glyph_schu_bang_height,
+ 0x03,0x03,0x03,0x01,0x01,0x01,0x00,0x00,0x03,0x03};
+#define glyph_schu_dollar_width 6
+#define glyph_schu_dollar_height 12
+static char glyph_schu_dollar_bits[] = { glyph_schu_dollar_width, glyph_schu_dollar_height,
+ 0x08,0x0c,0x13,0x11,0x03,0x1c,0x20,0x20,0x31,0x1f,0x08,0x08};
+#define glyph_schu_percent_width 6
+#define glyph_schu_percent_height 10
+static char glyph_schu_percent_bits[] = { glyph_schu_percent_width, glyph_schu_percent_height,
+ 0x06,0x09,0x09,0x06,0x38,0x07,0x18,0x24,0x24,0x18};
+#define glyph_schu_equal_width 8
+#define glyph_schu_equal_height 3
+static char glyph_schu_equal_bits[] = { glyph_schu_equal_width, glyph_schu_equal_height,
+ 0xff,0x00,0xff};
+#define glyph_schu_at_width 6
+#define glyph_schu_at_height 12
+static char glyph_schu_at_bits[] = { glyph_schu_at_width, glyph_schu_at_height,
+ 0x08,0x16,0x22,0x21,0x39,0x2d,0x25,0x25,0x39,0x01,0x02,0x1c};
+static char *schu_glyphs[] = {
+   ['0'] = glyph_schu_0_bits,
+   ['1'] = glyph_schu_1_bits,
+   ['2'] = glyph_schu_2_bits,
+   ['3'] = glyph_schu_3_bits,
+   ['4'] = glyph_schu_4_bits,
+   ['5'] = glyph_schu_5_bits,
+   ['6'] = glyph_schu_6_bits,
+   ['7'] = glyph_schu_7_bits,
+   ['8'] = glyph_schu_8_bits,
+   ['9'] = glyph_schu_9_bits,
+   ['.'] = glyph_schu_period_bits,
+   [','] = glyph_schu_comma_bits,
+   ['/'] = glyph_schu_slash_bits,
+   ['&'] = glyph_schu_amp_bits,
+   ['-'] = glyph_schu_minus_bits,
+   ['+'] = glyph_schu_plus_bits,
+   ['!'] = glyph_schu_bang_bits,
+   ['$'] = glyph_schu_dollar_bits,
+   ['%'] = glyph_schu_percent_bits,
+   ['='] = glyph_schu_equal_bits,
+   ['@'] = glyph_schu_at_bits,
+};
+const font_t font_schu = {
+	.spacing = 2,
+	.height = 10,
+	.glyphs = schu_glyphs,
+};

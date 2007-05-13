@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# stressbuild - test many different build configurations at once
+#
+
+rm -f stressbuild.log
+for plat in `echo linux wpc`; do
+	for mach in `echo tz wcs afm tester`; do
+		for debugger in `echo y n`; do
+			for target in `echo clean default_target`; do
+				if [ "$plat" = "wpc" ]; then
+					gcctargets=`echo 3.4.6`; # removed trunk
+				else
+					gcctargets=`echo nop`;
+				fi
+				for gcc in $gcctargets; do
+					if [ "$gcc" = "nop" ]; then gcc=; fi
+					echo Execing make \
+						PLATFORM=$plat MACHINE=$mach DEBUGGER=$debugger \
+						GCC_VERSION=$gcc $target | tee -a stressbuild.log
+					make PLATFORM=$plat MACHINE=$mach GCC_VERSION=$gcc \
+						DEBUGGER=$debugger $target | tee -a stressbuild.log
+					if [ -f err ]; then cat err | tee -a stressbuild.log; fi
+					rc=$?
+					echo "rc=$rc"
+	          	if [ "$rc" != "0" ]; then exit $rc; fi
+				done
+			done
+		done
+	done
+done
+echo "All done".
+exit 0

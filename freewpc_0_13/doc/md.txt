@@ -1,0 +1,64 @@
+
+This text describes the machine description file format.
+
+Machines may optionally provide configuration in the form of an "md" file.
+In the past this was done by directly writing a .h file with the required
+information.  The .h file approach is more cumbersome and somewhat error-
+prone.
+
+In the new approach, the md file is "compiled" by the script "genmachine".
+which writes out the .h file and also some .c files that get linked in.
+genmachine will do some consistency checking on the input to make sure it
+is sane.  It will derive some of the required #defines that can be inferred
+from other definitions, so you have less to write up when starting a new
+machine.  
+
+It will enforce naming consistency between identifiers, declarations,
+and strings.  For example, the start button gets a define for its switch
+number (SW_START_BUTTON), an identifier for its properties (sw_start_button)
+and its handler (sw_start_button_handler), and a string in the menus
+("START BUTTON").  gendefine can produce all of these automatically from
+a single "Start Button:" declaration in the .md file.
+
+
+File Format
+
+
+Blank lines and lines beginning with a '#' are ignored, like in a shell script.
+
+Long lines can be broken up like in C, with a backslash at the end of each line.
+
+The file is divided into sections, which begin with a section header in
+square brackets.  (It's a throwback to the old .ini file days.)  Only
+section names that are known to genmachine are permitted.
+
+There's also a default section that is in effect at the top of a file,
+before you declare any sections yourself.  Some global data goes in the
+default section.
+
+Within a section, you declare items that fit that category.  All
+declarations begin with a "key", followed by a colon, followed by a comma-
+separated list of properties.  The key and/or properties can contain any
+characters, including spaces, but not commas or colons.
+
+There are two types of declarations.  In one style, the key refers to the
+object's physical identification, such as the switch, lamp, or solenoid
+number.  Here the key is generally numeric, although for solenoids the
+syntax is slightly different to specify the solenoid bank.  The first
+property of these declarations should always be the human readable name
+of the object.  Depending on the type of declaration, genmachine can
+validate that the key name is valid.
+
+In the other style, there is no physical identifier, and so the name before
+the colon is the human readable name.  For these genmachine automatically
+creates the number based on the order of the declarations.
+
+
+Directives
+
+
+The include directive
+
+The define directive
+
+

@@ -1,0 +1,224 @@
+#!/usr/bin/perl
+#
+# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ------------------------------------------------------------------
+# gencallset - generate function call lists automatically
+# ------------------------------------------------------------------
+#
+# Scan all source files and search them for callset entries
+# and callset invocations.
+#
+# A callset entry is a function that is intended to be called
+# when a certain global event occurs, such as "end ball" or
+# "start game".  An invocation is a generation of the global
+# event and causes all of the entries to be called, one by one.
+#
+# Entries are declared using the macro CALLSET_ENTRY(module, event),
+# where module is an arbitrary string identifying the module
+# declaring the callset, and event is the well-known event name.
+# Most callsets do not return any values; for those that do, use
+# CALLSET_BOOLEAN_ENTRY instead.
+#
+# Invocations are indicated by calls to callset_invoke() or
+# callset_invoke_boolean().
+#
+# The output of this script is a file build/callset.c, which
+# defines the global event handlers making calls to all of
+# the interested modules.
+#
+#
+# TODO:
+# A more efficient solution would merge identical functions.
+# 	* If there are no subscribers to an event, then the call can be NOPed.
+#    Easiest way is to emit a #define that expands to nothing, or emit
+#    multiple assembler labels for the same function.
+#  * We may need to emit build/callset.h with prototypes and/or macros.
+#
+
+
+# A list of directories to be searched.
+my @SearchDirs = ("build", "kernel", "common", "mach", "test", "platform/linux", "platform/wpc");
+
+# A hash that maps an event name to a list of
+# interested modules.  The module names are stored as a single
+# string, with spaces between each name.
+my %functionhash;
+
+# A hash that maps an event name to its return type.
+# Normally this is "void", but is sometimes "bool".
+my %fntypehash;
+
+# A hash that maps a module name to the filename in which
+# it was declared.  This is necessary in order to generate
+# proper prototypes for each call into the module; this
+# allows for calls into paged areas.
+my %modulehash;
+
+
+# Nonzero if we should optimize the output for the 6809.
+my $m6809 = 0;
+
+# The target boolean type name
+my $bool_type = "bool";
+
+# The output file name
+$OutputFile = "build/callset.c";
+
+# A list of all include files that the result file will need
+# to include
+@IncludeFiles = ("freewpc.h");
+
+
+#############################################################
+# Build the list of all filenames to be searched.
+#############################################################
+
+foreach $dir (@SearchDirs) {
+	my @files = split /\n+/, 
+		`cd $dir && find . -name "*.c" -or -name "*.h"`;
+	foreach $file (@files) {
+		push @srclist, "$dir/" . $file;
+	}
+}
+
+#############################################################
+# For each file, search for entries and invocations.
+#############################################################
+
+foreach $src (@srclist) {
+	open FH, $src;
+	$lineno = 0;
+	while (<FH>) {
+		chomp;
+		++$lineno;
+		if ((/CALLSET_ENTRY[ \t]*\((.*)\)/) 
+			|| (/CALLSET_BOOL_ENTRY[ \t]*\((.*)\)/)) {
+			my $callset_entry_args = $1;
+			my ($module, $set) = split /, */, $callset_entry_args;
+			next if (!defined $module or !defined $set);
+			if (!defined $functionhash{$set}) {
+				$functionhash{$set} = "";
+			}
+			$functionhash{$set} .= "$module ";
+			if (!defined $modulehash{$module}) {
+				$modulehash{$module} = $src;
+			}
+		}
+		elsif (/callset_invoke \(([^)]*)\)/) {
+			if ($1 ne "event") {
+				if (!defined $functionhash{$1}) {
+					$functionhash{$1} = "";
+					$fntypehash{$1} = "void";
+				}
+				$invocation{$1} .= "$src:$lineno ";
+			}
+		}
+		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
+			if (!defined $functionhash{$1}) {
+				$functionhash{$1} = "";
+				$fntypehash{$1} = $bool_type;
+			}
+			$invocation{$1} .= "$src:$lineno ";
+		}
+	}
+	close FH;
+}
+
+#############################################################
+# Parse command-line arguments
+#############################################################
+
+while (my $arg = shift @ARGV) {
+	if ($arg =~ /^-o$/) {
+		$OutputFile = shift @ARGV;
+	}
+	elsif ($arg =~ /^--include$/) {
+		push @IncludeFileList, (shift @ARGV);
+	}
+	elsif ($arg =~ /^-D$/) {
+		push @SearchDirs, (shift @ARGV);
+	}
+	elsif ($arg =~ /^--m6809$/) {
+		$m6809 = 1;
+	}
+}
+
+#############################################################
+# Write the output file.
+#############################################################
+
+open FH, ">$OutputFile";
+for $include (@IncludeFiles) {
+	print FH "/* Automatically generated by gencallset */\n";
+	print FH "\n#include <$include>\n";
+}
+
+foreach $set (keys %functionhash) {
+	my $rettype = $fntypehash{$set};
+	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
+	print FH "$rettype\ncallset_$set (void)\n{\n";
+
+	my @callers = split " ", $invocation{$set};
+	my $num_callers = 0;
+	foreach $caller (@callers) {
+		print FH "   /* Invoked by $caller */\n";
+		++$num_callers;
+	}
+	if ($num_callers == 0) {
+		print STDERR "warning: event $set is never thrown\n";
+	}
+
+	my @modules = split " ", $functionhash{$set};
+
+	if (@modules == 0) {
+		print FH "   /* warning: nobody cares about $set */\n";
+	}
+
+	foreach $module (@modules) {
+		if ($modulehash{$module} =~ /^test/) {
+			$modifier = " __test__";
+		}
+		elsif ($modulehash{$module} =~ /^common/) {
+			$modifier = " __common__";
+		}
+		elsif ($modulehash{$module} =~ /^mach/) {
+			$modifier = " __machine__";
+		}
+		elsif ($modulehash{$module} =~ /^build/) {
+			$modifier = " __machine__";
+		}
+		else {
+			$modifier = "";
+		}
+		print FH "   extern$modifier $rettype ${module}_$set (void);\n";
+		if ($rettype eq $bool_type) {
+			print FH "   if (!${module}_$set ()) return FALSE;\n";
+		}
+		else {
+			print FH "   ${module}_$set ();\n";
+		}
+	}
+	if ($rettype eq $bool_type) {
+		print FH "   return TRUE;\n";
+	}
+	print FH "}\n\n";
+}
+close FH;
+
