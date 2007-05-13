@@ -266,7 +266,7 @@ FON_OBJS = \
 	fonts/schu.o \
 	fonts/miscfixed.o \
 
-XBM_OBJS = images/freewpc.o
+XBM_OBJS =
 
 FIF_SRCS += \
 	images/freewpc_logo.fif \
