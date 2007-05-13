@@ -88,7 +88,7 @@ doesn't define one */
 void default_amode_deff (void)
 {
 	dmd_alloc_low_high ();
-	dmd_draw_image2 (freewpc_logo_bits);
+	dmd_draw_fif (fif_freewpc_logo);
 	dmd_show2 ();
 	for (;;)
 		task_sleep_sec (5);

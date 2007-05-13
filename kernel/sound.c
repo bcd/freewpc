@@ -318,9 +318,6 @@ void sound_init (void)
 	else
 		volume_set (DEFAULT_VOLUME);
 
-	/* Enable events */
-	sound_write_queue_insert (SND_EVENT_ENABLE);
-
 exit_func:
 	sys_init_pending_tasks--;
 	task_exit ();
