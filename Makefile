@@ -883,7 +883,7 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
 
 tools/fiftool/fiftool : tools/fiftool/fiftool.c
-	cd tools/fiftool && $(MAKE) CC=$(HOSTCC)
+	cd tools/fiftool && $(MAKE) CC="$(HOSTCC)"
 
 #######################################################################
 ###	Standard Dependencies
