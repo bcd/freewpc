@@ -3040,7 +3040,7 @@ struct window_ops lamp_test_window = {
 };
 
 struct menu lamp_test_item = {
-	.name = "LAMP TEST",
+	.name = "SINGLE LAMP TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &lamp_test_window, NULL } },
 };
@@ -3140,10 +3140,12 @@ struct menu lamp_row_col_test_item = {
 
 /***************** DIP Switch Test **********************/
 
-void dipsw_render_single (U8 sw, U8 state)
-{
-	sprintf ("SW%d %s", sw, state ? "OFF" : "ON");
-}
+const char *locale_names[] = {
+	"USA/CANADA 1", "FRANCE", "GERMANY", "FRANCE 20F",
+	"INVALID", "INVALID", "INVALID", "GERMANY 2",
+	"INVALID", "FRANCE 3", "EXPORT", "FRANCE 4",
+	"UNITED KINGDOM", "EUROPE", "SPAIN", "USA/CANADA 2",
+};
 
 void dipsw_test_draw (void)
 {
@@ -3151,28 +3153,51 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCHES");
+	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCH TEST");
 
-#ifndef GCC4
+	sprintf ("%s", locale_names[(dipsw & 0x3C) >> 2]);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+
 	for (sw = 0; sw < 8; sw++)
 	{
-		dipsw_render_single (sw+1, dipsw & 0x1);
-		font_render_string (&font_mono5, 
-			((sw <= 3) ? 8 : 72), 
-			((sw % 4) * 6 + 9), 
-			sprintf_buffer);
+#if (MACHINE_WPC95 == 1) || (MACHINE_PIC == 1)
+		sprintf ("SW%d", sw+1);
+#else
+		sprintf ("W%d", sw+13);
+#endif
+		font_render_string_center (&font_var5, sw*16+8, 18, sprintf_buffer);
+
+
+#if (MACHINE_WPC95 == 1) || (MACHINE_PIC == 1)
+		sprintf (dipsw ? "ON" : "OFF");
+#else
+		sprintf (dipsw ? "OUT" : "IN");
+#endif
+		font_render_string_center (&font_var5, sw*16+8, 25, sprintf_buffer);
+
 		dipsw >>= 1;
 	}
-#endif
 
 	dmd_show_low ();
 }
+
+
+void dipsw_test_thread (void)
+{
+	for (;;)
+	{
+		dipsw_test_draw ();
+		task_sleep (TIME_100MS);
+	}
+}
+
 
 struct window_ops dipsw_test_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = dipsw_test_draw,
 	.up = null_function,
 	.down = null_function,
+	.thread = dipsw_test_thread,
 };
 
 struct menu dipsw_test_item = {
@@ -3240,22 +3265,25 @@ struct menu *test_menu_items[] = {
 	&switch_edges_item,
 	&switch_levels_item,
 	&single_switches_item,
-	&display_test_item,
 	&solenoid_test_item,
+	/* TODO : flasher_test_item */
 	&gi_test_item,
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,
+	/* TODO : lamp_flasher_test_item */
+	&display_test_item,
+	&flipper_test_item,
+	/* TODO : ordered_lamp_test_item */
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
-	&flipper_test_item,
-	&empty_balls_test_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
 	MACHINE_TEST_MENU_ITEMS
 #endif
 #ifdef MACHINE_TEST_ONLY
 	&development_menu,
 #endif
+	&empty_balls_test_item,
 	NULL,
 };
 
