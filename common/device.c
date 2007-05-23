@@ -506,9 +506,10 @@ void device_probe (void)
 	 * new counts */
 	device_update_globals ();
 
-	device_ss_state = 1;
-
+	dbprintf ("\nDevices initialized.\n");
 	device_debug ();
+
+	device_ss_state = 1;
 	task_exit ();
 }
 
@@ -519,8 +520,6 @@ void device_sw_handler (U8 devno)
 #ifdef DEBUGGER
 	device_t *dev = device_entry (devno);
 #endif
-
-	dbprintf ("Device switch handler for %s\n", dev->props->name);
 
 	/* Ignore device switches until device SS is initialized. */
 	if (device_ss_state == 0)
