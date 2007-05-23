@@ -56,7 +56,7 @@ L7: Drop Target
 [lampsets]
 
 [containers]
-Trough: trough, Trough Release, Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
+Trough: trough, Trough Release, Trough 1, Trough 2, Trough 3, Trough 4, Trough 5, init_max_count(4)
 Left Hole: Left Popper, Left Popper
 Right Hole: Right Popper, Right Popper
 

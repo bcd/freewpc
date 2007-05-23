@@ -200,10 +200,6 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 86: Clock Passage, opto, c_decl(sw_unused)
 87: Gumball Enter, opto, intest
 88: Lock Lower, c_decl(sw_lock)
-F5: U. R. Flipper EOS, opto, cabinet
-F6: U. R. Flipper Button, button, opto
-F7: U. L. Flipper EOS, opto, cabinet
-F8: U. L. Flipper Button, button, opto
 
 ##########################################################################
 # Drives
