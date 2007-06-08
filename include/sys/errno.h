@@ -57,7 +57,7 @@
 #define ERR_SCORE_NOT_IN_GAME    33
 #define ERR_NO_MORE_SLOW_TIMERS  34
 #define ERR_WINDOW_STACK_OVERFLOW 35
-
+#define ERR_LIBC_ABORT           36
 
 typedef U8 errcode_t;
 
