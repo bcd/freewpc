@@ -106,8 +106,8 @@ U8 task_max_count;
 
 
 /* Private functions written in assembly used internally. */
-__noreturn__ void task_save (void);
-__noreturn__ void task_restore (void);
+__noreturn__ void task_save (task_t *tp);
+__noreturn__ void task_restore (task_t *tp);
 
 
 /** For debugging, dump the entire contents of the task table to the
@@ -389,7 +389,7 @@ void task_sleep (task_ticks_t ticks)
 
 	/* Save the task, and start another one.  This call returns
 	whenever the task is eventually unblocked. */
-	task_save ();
+	task_save (tp);
 }
 
 
@@ -612,7 +612,7 @@ void task_dispatcher (void)
 			/* If the system is fully initialized, run
 			 * the idle functions. */
 			if (idle_ok)
-					callset_invoke (idle);
+				callset_invoke (idle);
 
 			/* Reset timer and kick watchdog again */
 			tick_start_count = tick_count;
@@ -623,7 +623,10 @@ void task_dispatcher (void)
 			per 16ms.  Do this AFTER calling the idle functions, so
 			that we wait as little as possible; idle calls themselves may
 			take a long time. */
-			while (tick_start_count == *(volatile U8 *)&tick_count);
+			while (tick_start_count == *(volatile U8 *)&tick_count)
+			{
+				asm ("; nop" ::: "memory");
+			}
 			
 			/* Ensure that 'tp', which is in register X, is reloaded
 			with the correct task pointer.  The above functions may
@@ -635,7 +638,7 @@ void task_dispatcher (void)
 		{
 			/* The task exits, and is not sleeping.  It can be
 			started immediately. */
-			task_restore ();
+			task_restore (tp);
 		}
 		else if (tp->state == TASK_TASK+TASK_USED+TASK_BLOCKED)
 		{
@@ -650,7 +653,7 @@ void task_dispatcher (void)
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
-				task_restore ();
+				task_restore (tp);
 			}
 		}
 	}
