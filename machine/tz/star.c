@@ -23,7 +23,6 @@
 
 void new_star_task (void)
 {
-#ifndef GCC4
 	U16 offset = ((U16)random () & 0x3F) * 4;
 	U8 rand8;
 	U8 mask; 
@@ -45,7 +44,6 @@ void new_star_task (void)
 		dmd_low_buffer[offset] &= ~mask;
 		dmd_low_buffer[offset+16] &= ~mask;
 	}
-#endif
 }
 
 
