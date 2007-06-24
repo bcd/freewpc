@@ -152,10 +152,7 @@ U8 slow_timer_get_count (slow_timer_t *timer)
 /** Resets the count of a running timer. */
 void slow_timer_set_count (slow_timer_t *timer, U8 count)
 {
-#ifdef GCC4 /* TODO */
-#else
 	timer->count = (count + timer->config->grace) * SLOW_TIMER_UPDATE_COUNT;
-#endif
 }
 
 
@@ -179,11 +176,8 @@ slow_timer_t *slow_timer_alloc (slow_timer_config_t *cfg)
 /** Start the timer. */
 void slow_timer_start (slow_timer_t *timer)
 {
-#ifdef GCC4 /* TODO */
-#else
 	timer->count = (timer->config->duration + timer->config->grace)
 		* SLOW_TIMER_UPDATE_COUNT;
-#endif
 	timer->flags |= SLOW_TIMER_RUNNING;
 }
 
