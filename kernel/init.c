@@ -295,6 +295,11 @@ void fatal (errcode_t error_code)
 			}
 		}
 	}
+
+#ifdef STOP_ON_ERROR
+	while (1);
+#endif
+
 #ifdef __m6809__
 	start ();
 #else
