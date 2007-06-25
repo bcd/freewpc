@@ -58,6 +58,7 @@
 #define ERR_NO_MORE_SLOW_TIMERS  34
 #define ERR_WINDOW_STACK_OVERFLOW 35
 #define ERR_LIBC_ABORT           36
+#define ERR_MALLOC               37
 
 typedef U8 errcode_t;
 

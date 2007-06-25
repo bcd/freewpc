@@ -142,7 +142,7 @@ void task_dump (void)
 			}
 			else if (tp->state & TASK_MALLOC)
 			{
-				dbprintf ("malloc\n");
+				malloc_chunk_dump (tp);
 			}
 			else if (tp->state & TASK_STACK)
 			{
@@ -183,36 +183,6 @@ task_t *block_allocate (void)
 void block_free (task_t *tp)
 {
 	tp->state = TASK_FREE;
-}
-
-
-/** A limited version of the standard malloc() function */
-void *malloc (U8 size)
-{
-	task_t *tp;
-
-	/* For sanity, make sure the size requested fits within
-	a single task block */
-	if (size > sizeof (task_t)-1)
-		fatal (ERR_NO_FREE_TASKS);
-
-	/* Allocate a block and mark it as being used by malloc(). */
-	tp = block_allocate ();
-	tp->state |= TASK_MALLOC;
-
-	/* Return a pointer to one byte past the beginning, where
-	the 'state' is kept */
-	void *ptr = ((char *)tp) + 1;
-	return ptr;
-}
-
-
-/** A limited version of the standard free() function */
-void free (void *ptr)
-{
-	/* TODO : for sanity make sure pointer is actually from malloc */
-	task_t *tp = (task_t *)(((char *)ptr) - 1);
-	block_free (tp);
 }
 
 

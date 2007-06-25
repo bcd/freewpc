@@ -11,7 +11,7 @@ else
 CFLAGS += -mint8
 endif
 
-KERNEL_OBJS += $(P)/div10.o $(P)/task.o $(P)/vector.o
+KERNEL_OBJS += $(P)/div10.o $(P)/malloc.o $(P)/task.o $(P)/vector.o
 
 KERNEL_ASM_OBJS = $(P)/farcall.o $(P)/task_6809.o $(P)/start.o
 

@@ -6,3 +6,28 @@ Rudimentary animations by panning over a static image larger than the
 Add image compression/decompression algorithms
 Do proper switch debouncing/queueing
 Better DMD function names (low? used everywhere)
+
+
+Display Effects
+---------------
+Currently there are only two types of effects: normal and "running".  Running
+deffs are queued up and will continue to compete for the display until
+explicitly stopped.  Normal deffs will give up if they don't have enough
+priority to start.
+
+This works OK except for when lots of deffs try to compete for the display
+at once.  Then only the highest priority at any time wins.
+
+Consider adding "retry" capability to a deff so that if doesn't get the DMD,
+it can wait for some time (a running deff then is defined to have infinite
+retry).  When a ball is in a lockup device, this is a good time to "catch up"
+and give all of the deffs a shot.
+
+Consider alternating display effects when they have equal priority.
+
+Consider using linked list of dynamic memory to manage deffs, rather than
+the current static scheme (it is easier and more flexible, but we need a good
+malloc.)  This should definitely help with time constraints since iteration
+can be cut down in many cases, not just deffs.
+
+
