@@ -1389,7 +1389,9 @@ void deff_stress_thread (void)
 
 	for (;;)
 	{
-		dn = random_scaled (MAX_DEFFS);
+		do {
+			dn = random_scaled (MAX_DEFFS);
+		} while (dn == DEFF_NULL);
 		start_stop_flag = random_scaled (2);
 		delay = random_scaled (TIME_200MS);
 		delay += TIME_33MS;
@@ -3401,7 +3403,8 @@ void sysinfo_system_version (void) {
 	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SY %s.%s", FREEWPC_MAJOR_VERSION, FREEWPC_MINOR_VERSION);
+	sprintf ("SY %s.%s", 
+		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
 void sysinfo_compiler_version (void) { 
