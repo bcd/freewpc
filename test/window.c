@@ -1211,7 +1211,8 @@ void font_test_left (void)
 
 void font_test_right (void)
 {
-	font_test_offset++;
+	if (font_test_offset < sizeof (font_test_alphabet) - 8 - 1)
+		font_test_offset++;
 	sound_send (SND_TEST_CHANGE);
 }
 
