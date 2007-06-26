@@ -171,9 +171,8 @@ extern U8 idle_ok;
 #include <replay.h>
 #include <csum.h>
 #include <audio.h>
-#include <slowtimer.h>
 #include <mode.h>
-
+#include <list.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #include <player.h>

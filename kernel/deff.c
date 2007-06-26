@@ -44,6 +44,12 @@
  * and subject to get it later if priorities change.
  */
 
+#ifdef DEFF_DEBUG
+#define deff_debug(fmt, rest...) dbprintf(fmt, ## rest)
+#else
+#define deff_debug(fmt, rest...)
+#endif
+
 
 /** Declare externs for all of the deff functions */
 #define DECL_DEFF(num, flags, pri, fn, page) extern void fn (void);
@@ -71,204 +77,78 @@ const deff_t deff_table[] = {
 };
 
 
-/** Indicates the id of the deff currently active */
-static U8 deff_active;
+/** A deff entry.  These are created dynamically as display effects
+need to be started. */
+typedef struct
+{
+	struct dll_header dll;
+	U8 id;
+	U8 prio;
+	U8 flags;
+	U8 reserved;
+} deff_entry_t;
 
-/** Indicates the priority of the deff currently running */
-U8 deff_prio;
-
-/** Queue of all deffs that have been scheduled to run, even
- * if they are low in priority.  The actively running deff
- * is also in this queue. */
-static U8 deff_queue[MAX_RUNNING_DEFFS];
 
 /** Optional feature for use by deffs that need to manage different
 parts of the display independently. */
 void (*deff_component_table[4]) (void);
 
 
-/** Returns the number of display effects installed. */
-U8 deff_get_count (void)
+/* The list of all deffs that want to run, but can't */
+deff_entry_t *deff_waitqueue;
+
+/* The single deff that is currently driving the display */
+deff_entry_t *deff_runqueue;
+
+
+deff_entry_t *deff_entry_create (deffnum_t id)
 {
-	return sizeof (deff_table) / sizeof (deff_t);
+	const deff_t *deff = &deff_table[id];
+	deff_entry_t *entry;
+	
+	entry = malloc (sizeof (deff_entry_t));
+	if (entry == NULL)
+		return NULL;
+
+	dll_init_element (entry);
+	entry->prio = deff->prio;
+	entry->id = id;
+	entry->flags = deff->flags;
+	return entry;
+}
+
+static inline void deff_enqueue (deff_entry_t **queue, deff_entry_t *entry)
+{
+	dll_add_front (queue, entry);
 }
 
 
-/** Returns the ID of the currently active display effect. */
-U8 deff_get_active (void)
+static inline void deff_dequeue (deff_entry_t **queue, deff_entry_t *entry)
 {
-	return deff_active;
+	dll_remove (queue, entry);
 }
 
 
-/** Returns true if the specific display effect is running.  It is
-not necessarily 'active', i.e. it may be queued but a higher
-priority deff actually has the display. */
-bool deff_is_running (deffnum_t dn)
+deff_entry_t *deff_entry_find_waiting (deffnum_t id)
 {
-	U8 i;
-
-	for (i=0; i < MAX_RUNNING_DEFFS; i++)
-		if (deff_queue[i] == dn)
-			return TRUE;
-	return FALSE;
-}
-
-
-static void deff_add_queue (deffnum_t dn)
-{
-	U8 i;
-
-	if (deff_is_running (dn))
-		return;
-
-	for (i=0; i < MAX_RUNNING_DEFFS; i++)
-		if (deff_queue[i] == 0)
-		{
-			deff_queue[i] = dn;
-			return;
-		}
-
-	fatal (ERR_DEFF_QUEUE_FULL);
-}
-
-
-static void deff_remove_queue (deffnum_t dn)
-{
-	U8 i;
-	for (i=0; i < MAX_RUNNING_DEFFS; i++)
-		if (deff_queue[i] == dn)
-			deff_queue[i] = 0;
-}
-
-
-static deffnum_t deff_get_highest_priority (void)
-{
-	U8 i;
-	U8 prio = 0;
-	U8 best = DEFF_NULL;
-
-	for (i=0; i < MAX_RUNNING_DEFFS; i++)
+	deff_entry_t *entry = deff_waitqueue;
+	if (entry)
 	{
-		if (deff_queue[i] != 0)
-		{
-			const deff_t *deff = &deff_table[deff_queue[i]];
-			if (deff->prio > prio)
-			{
-				prio = deff->prio;
-				best = deff_queue[i];
-			}
-		}
+		do {
+			deff_debug ("find_waiting: %p\n", entry);
+			if (entry->id == id)
+				return entry;
+			else
+				entry = entry->dll.next;
+		} while (entry != deff_waitqueue);
 	}
-
-	/* Save the priority of the best deff here */
-	deff_prio = prio;
-
-	/* Return the deffnum of the best deff to the caller */
-	return best;
-}
-
-/**
- * Common processing that must occur when stopping a deff.
- * This function is called both when a deff exits and when
- * other code stops the deff.
- * In both cases kickout locks should be cleared.
- * The DMD transition should only be cancelled when a deff
- * is killed externally.  If a deff exits cleanly, it may
- * schedule a transition to be used when the new deff renders
- * its first frame.
- */
-static void deff_stop_task (void)
-{
-	/* if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
-		dmd_reset_transition ();
-	kickout_unlock (KLOCK_DEFF);
-}
-
-static void deff_start_task (const deff_t *deff)
-{
-	task_pid_t tp;
-
-	task_kill_gid (GID_DEFF);
-	deff_stop_task ();
-	dbprintf ("active deff = %d\n", deff_active);
-	tp = task_create_gid (GID_DEFF, deff->fn);
-	if (deff->page != 0xFF)
-		task_set_rom_page (tp, deff->page);
+	return NULL;
 }
 
 
-/** Start a display effect */
-void deff_start (deffnum_t dn)
+static inline void deff_entry_free (deff_entry_t *entry)
 {
-	const deff_t *deff = &deff_table[dn];
-
-	dbprintf ("Deff %d start request\n", dn);
-
-	if (deff->flags & D_RUNNING)
-	{
-		dbprintf ("Adding running deff to queue\n");
-		deff_add_queue (dn);
-		if ((deff->prio > deff_prio)
-			&& (dn == deff_get_highest_priority ()))
-		{
-			/* This is the new active running deff */
-			dbprintf ("Requested deff is now highest priority\n");
-			deff_active = dn;
-			deff_start_task (deff);
-		}
-		else
-		{
-			/* This deff cannot run now, because there is a
-			 * higher priority deff running. */
-			dbprintf ("Can't run because higher priority active\n");
-		}
-	}
-	else
-	{
-		if (deff->prio > deff_prio)
-		{
-			dbprintf ("Restarting quick deff with high pri\n");
-			deff_active = dn;
-			deff_prio = deff->prio;
-			deff_start_task (deff);
-		}
-		else
-		{
-			dbprintf ("Quick deff lacks pri to run\n");
-		}
-	}
-}
-
-
-/** Stop a running deff */
-void deff_stop (deffnum_t dn)
-{
-	const deff_t *deff = &deff_table[dn];
-
-	if (deff->flags & D_RUNNING)
-	{
-		dbprintf ("Stopping deff #%d\n", dn);
-		deff_remove_queue (dn);
-		if (dn == deff_active)
-	 		deff_start_highest_priority ();
-	}
-}
-
-
-/** Restart a deff.  If the deff is already running, it is stopped
-first. */
-void deff_restart (deffnum_t dn)
-{
-	if (dn == deff_active)
-	{
-		const deff_t *deff = &deff_table[dn];
-		deff_start_task (deff);
-	}
-	else
-	{
-		deff_start (dn);
-	}
+	free (entry);
 }
 
 
@@ -285,22 +165,218 @@ void deff_default (void)
 }
 
 
-/** Start a task for the running deff that ought to be running */
-void deff_start_highest_priority (void)
+/** Returns the ID of the currently active display effect. */
+U8 deff_get_active (void)
 {
+	return deff_runqueue ? deff_runqueue->id : DEFF_NULL;
+}
+
+
+/** Returns non-NULL if the specific display effect is started.  It is
+not necessarily 'active', i.e. it may be queued but a higher
+priority deff actually has the display. */
+deff_entry_t *deff_entry_find (deffnum_t id)
+{
+	deff_entry_t *entry;
+
+	/* Search the runqueue */
+	if (deff_runqueue->id == id)
+		return deff_runqueue;
+
+	/* Search the waitqueue */
+	if ((entry = deff_entry_find_waiting (id)) != NULL)
+		return entry;
+
+	/* Not found on either queue */
+	return NULL;
+}
+
+
+/** For compatibility with the old deff system */
+bool deff_is_running (deffnum_t id)
+{
+	return deff_entry_find (id) != NULL;
+}
+
+
+/**
+ * Common processing that must occur when stopping a running deff.
+ * This function is called both when a deff exits and when
+ * other code stops the deff.
+ * In both cases kickout locks should be cleared.
+ * The DMD transition should only be cancelled when a deff
+ * is killed externally.  If a deff exits cleanly, it may
+ * schedule a transition to be used when the new deff renders
+ * its first frame.
+ */
+static void deff_stop_task (void)
+{
+	/* if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
+		dmd_reset_transition ();
+	kickout_unlock (KLOCK_DEFF);
+}
+
+
+/** Starts the thread for the currently running display effect. */
+static void deff_start_task (const deff_t *deff)
+{
+	task_pid_t tp;
+
+	/* Stop whatever deff is running now */
+	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
-	deff_active = deff_get_highest_priority ();
-	dbprintf ("active deff = %d\n", deff_active);
-	if (deff_active != DEFF_NULL)
+
+	/* Create a task for the new deff */
+	tp = task_create_gid (GID_DEFF, deff->fn);
+	if (deff->page != 0xFF)
+		task_set_rom_page (tp, deff->page);
+}
+
+
+/** Start a task for the running deff that ought to be running */
+void deff_reschedule (void)
+{
+	deff_entry_t *entry;
+	U8 prio = 0;
+	deff_entry_t *best = NULL;
+
+	/* Clean up before starting a new task */
+	dll_init (&deff_runqueue);
+
+	/* Select a deff from the waitqueue */
+	if (deff_waitqueue)
 	{
-		const deff_t *deff = &deff_table[deff_active];
-		task_pid_t tp = task_recreate_gid (GID_DEFF, deff->fn);
-		if (deff->page != ((U8)-1))
-			task_set_rom_page (tp, deff->page);
+		deff_debug ("Scanning waitqueue\n");
+		entry = deff_waitqueue;
+		do {
+			deff_debug ("Checking %p, id %d, prio %d\n",
+				entry, entry->id, entry->prio);
+			if (entry->prio > prio)
+				best = entry;
+			entry = entry->dll.next;
+		} while (entry != deff_waitqueue);
+	}
+
+	/* If there's something to run, move it to the runqueue and
+	start it */
+	if (best != NULL)
+	{
+		deff_debug ("Best is %d\n", best->id);
+		deff_dequeue (&deff_waitqueue, best);
+		deff_enqueue (&deff_runqueue, best);
+		deff_start_task (&deff_table[best->id]);
 	}
 	else
 	{
+		/* Start the default deff.  Note that it does not
+		have an entry for it */
+		deff_debug ("Nothing to run\n");
+		deff_stop_task ();
 		task_recreate_gid (GID_DEFF, deff_default);
+	}
+}
+
+
+/** Start a display effect */
+void deff_start (deffnum_t dn)
+{
+	deff_entry_t *entry;
+
+	dbprintf ("Deff %d start request\n", dn);
+
+	/* See if an entry is already tracking this deff.
+	 * If so, just return.  To truly restart the deff,
+	 * you need to call deff_restart(). */
+	entry = deff_entry_find (dn);
+	if (entry == NULL)
+	{
+		entry = deff_entry_create (dn);
+		if (entry == NULL)
+			return;
+	}
+	else
+		return;
+
+	if (!deff_runqueue || entry->prio > deff_runqueue->prio)
+	{
+		/* This is the new active running deff */
+		/* If something else is running, it must be stopped */
+		if (deff_runqueue)
+		{
+			deff_entry_t *oldentry = deff_runqueue;
+			deff_dequeue (&deff_runqueue, oldentry);
+
+			/* Move the running deff onto the wait list if
+			it's a runner.  Otherwise it's a goner. */
+			if (oldentry->flags & D_RUNNING)
+			{
+				deff_debug ("Moving deff %d to waitqueue\n", oldentry->id);
+				dll_add_front (&deff_waitqueue, oldentry);
+			}
+			else
+			{
+				deff_debug ("Removing low pri deff %d\n", oldentry->id);
+				deff_entry_free (oldentry);
+			}
+		}
+		deff_debug ("Adding deff %d to runqueue now\n", dn);
+		deff_enqueue (&deff_runqueue, entry);
+		deff_start_task (&deff_table[entry->id]);
+	}
+	else if (entry->flags & D_RUNNING)
+	{
+		/* This deff cannot run now, but it wants to wait. */
+		deff_debug ("Can't run because higher priority active\n");
+		dll_add_front (&deff_waitqueue, entry);
+	}
+	else
+	{
+		deff_debug ("Quick deff lacks priority\n");
+		deff_entry_free (entry);
+	}
+}
+
+
+/** Stop a running or waiting deff */
+void deff_stop (deffnum_t dn)
+{
+	deff_entry_t *entry;
+
+	dbprintf ("Stopping deff #%d\n", dn);
+	if (deff_runqueue && deff_runqueue->id == dn)
+	{
+		entry = deff_runqueue;
+ 		deff_reschedule ();
+	}
+	else if ((entry = deff_entry_find_waiting (dn)) != NULL)
+	{
+		deff_debug ("Dequeueing waiting deff %d\n", dn);
+		deff_dequeue (&deff_waitqueue, entry);
+	}
+	else
+	{
+		deff_debug ("Deff not started %d\n", dn);
+		return;
+	}
+
+	deff_entry_free (entry);
+}
+
+
+/** Restart a deff.  If the deff is already running, its thread is stopped
+and then restarted.  If it is queued but not active, nothing happens.
+If it isn't even in the queue, then it is treated just like deff_start(). */
+void deff_restart (deffnum_t dn)
+{
+	if (deff_runqueue && deff_runqueue->id == dn)
+	{
+		deff_start_task (&deff_table[dn]);
+	}
+	else
+	{
+		deff_entry_t *entry = deff_entry_find_waiting (dn);
+		if (entry == NULL)
+			deff_start (dn);
 	}
 }
 
@@ -310,8 +386,8 @@ __noreturn__ void deff_exit (void)
 {
 	dbprintf ("Exiting deff\n");
 	task_setgid (GID_DEFF_EXITING);
-	deff_remove_queue (deff_active);
-	deff_start_highest_priority ();
+	deff_entry_free (deff_runqueue);
+	deff_reschedule ();
 	task_exit ();
 }
 
@@ -337,9 +413,8 @@ void deff_swap_low_high (S8 count, task_ticks_t delay)
 /** Initialize the display effect subsystem. */
 void deff_init (void)
 {
-	deff_prio = 0;
-	deff_active = DEFF_NULL;
-	memset (deff_queue, 0, MAX_RUNNING_DEFFS);
+	dll_init (&deff_runqueue);
+	dll_init (&deff_waitqueue);
 }
 
 
@@ -350,6 +425,23 @@ void deff_stop_all (void)
 	deff_stop_task ();
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+
+	deff_debug ("stop_all runqueue\n");
+	if (deff_runqueue)
+		deff_entry_free (deff_runqueue);
+
+	deff_debug ("stop_all waitqueue\n");
+	if (deff_waitqueue)
+	{
+		deff_entry_t *entry = deff_waitqueue;
+		do {
+			deff_entry_t *next = entry->dll.next;
+			deff_entry_free (entry);
+			entry = next;
+		} while (entry != deff_waitqueue);
+	}
+
+	deff_debug ("stop_all reinit\n");
 	deff_init ();
 }
 

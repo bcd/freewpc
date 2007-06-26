@@ -28,11 +28,23 @@ typedef U8 deffnum_t;
 /** Type for a display effect function */
 typedef void (*deff_function_t) (void);
 
+
+/** The flags for a normal display effect with no special requirements */
 #define D_NORMAL	0x0
 
-/** A running deff is long-lived and continues to be active
- * until it is explicitly stopped. */
+/** Set for a deff that is long-lived and runs until explicitly stopped */
 #define D_RUNNING 0x1
+
+/** Set for a deff that will only run for a short time once it gets the
+display, but would like to wait if the display is currently busy.
+After a certain period of time, waiting deffs are cancelled. */
+#define D_WAITING 0x2
+
+/** Set for a deff that can run with only 16 rows -- half of the display.
+The deff function should call deff_get_current_size() to find out which
+rows are available. */
+#define D_HALFSIZE 0x4
+
 
 /** Type for a display effect definition */
 typedef struct
@@ -56,7 +68,6 @@ extern const deff_t deff_table[];
 
 extern void (*deff_component_table[4]) (void);
 
-U8 deff_get_count (void);
 bool deff_is_running (deffnum_t dn);
 deffnum_t deff_get_active (void);
 void deff_start (deffnum_t dn);
