@@ -58,9 +58,10 @@ enum chunk_type
 
 typedef struct _user_header
 {
-	/* allocated is nonzero if the user block has been allocated.
-	This is not technically needed but kept for debug purposes now. */
-	U8 allocated : 1;
+	/* Not used.  Keep the reserved bits at the top, as GCC
+	puts earlier fields into the high order bits, which is the
+	least efficient place for them. */
+	U8 reserved : 3;
 
 	/* type says which size chunk this is.  This is written
 	during chunk allocation and remains constant thereafter. */
@@ -70,8 +71,6 @@ typedef struct _user_header
 	This is written during chunk allocation and remains
 	constant thereafter. */
 	U8 blocknum : 3;
-
-	U8 reserved : 2;
 } user_header_t;
 
 
@@ -140,11 +139,7 @@ static const U8 first_one_table[16] = {
 };
 
 
-/* The number of blocks per chunk, for the various chunk types */
-static const U8 blocks_per_chunk[] = {
-};
-
-enum chunk_type get_chunk_type_for_size (U8 size)
+static inline enum chunk_type get_chunk_type_for_size (U8 size)
 {
 	/* Note, we favor smaller allocations by checking
 	the sizes in increasing order. */
@@ -184,6 +179,7 @@ U8 find_first_one (U8 bits)
 }
 
 
+#if 0
 /** Dump a userblock's status */
 void userblock_dump (enum chunk_type type, U8 blocknum, user_header_t *flags)
 {
@@ -204,6 +200,7 @@ void userblock_dump (enum chunk_type type, U8 blocknum, user_header_t *flags)
 		dbprintf ("X");
 	}
 }
+#endif
 
 
 /* Dump the structure of a task block that is used for malloc(). */
@@ -211,7 +208,7 @@ void malloc_chunk_dump (task_t *task)
 {
 	malloc_chunk_t *chunk = (malloc_chunk_t *)(((char *)task) + 1);
 	enum chunk_type type = chunk->u.len8.blocks[0].flags.type;
-	U8 block;
+	U8 block, blocks;
 
 	dbprintf ("nx=%p  pv=%p  ", chunk->next, chunk->prev);
 
@@ -224,20 +221,30 @@ void malloc_chunk_dump (task_t *task)
 	{
 		case CHUNK_TYPE_LEN8:
 			dbprintf ("MEM(8)  ");
-			for (block = 0; block < 8; block++)
-				userblock_dump (type, block, &chunk->u.len8.blocks[block].flags);
+			blocks = 8;
 			break;
 		case CHUNK_TYPE_LEN16:
 			dbprintf ("MEM(16) ");
-			for (block = 0; block < 4; block++)
-				userblock_dump (type, block, &chunk->u.len16.blocks[block].flags);
+			blocks = 4;
 			break;
 		case CHUNK_TYPE_LEN32:
 			dbprintf ("MEM(32) ");
-			for (block = 0; block < 2; block++)
-				userblock_dump (type, block, &chunk->u.len32.blocks[block].flags);
+			blocks = 2;
 			break;
 	}
+
+	for (block = 0; block < blocks; block++)
+	{
+		if (chunk->available & (1 << blocks))
+		{
+			dbprintf (".");
+		}
+		else
+		{
+			dbprintf ("X");
+		}
+	}
+
 	dbprintf ("  %02X\n", chunk->available);
 }
 
@@ -262,8 +269,6 @@ malloc_chunk_t *chunk_allocate (enum chunk_type type)
 	task->state |= TASK_MALLOC;
 	chunk = (malloc_chunk_t *)(((char *)task) + 1);
 
-	chunk->next = chunk->prev = chunk;
-
 	/* Initialize each of the user blocks in the chunk */
 	switch (type)
 	{
@@ -271,27 +276,30 @@ malloc_chunk_t *chunk_allocate (enum chunk_type type)
 			chunk->available = 0xFF;
 			for (block = 0; block < 8; block++)
 			{
-				chunk->u.len8.blocks[block].flags.allocated = 0;
-				chunk->u.len8.blocks[block].flags.type = CHUNK_TYPE_LEN8;
-				chunk->u.len8.blocks[block].flags.blocknum = block;
+				struct userblock8 *ub = &chunk->u.len8.blocks[block];
+				ub->flags.reserved = 0;
+				ub->flags.type = CHUNK_TYPE_LEN8;
+				ub->flags.blocknum = block;
 			}
 			break;
 		case CHUNK_TYPE_LEN16:
 			chunk->available = 0x0F;
 			for (block = 0; block < 4; block++)
 			{
-				chunk->u.len16.blocks[block].flags.allocated = 0;
-				chunk->u.len16.blocks[block].flags.type = CHUNK_TYPE_LEN16;
-				chunk->u.len16.blocks[block].flags.blocknum = block;
+				struct userblock16 *ub = &chunk->u.len16.blocks[block];
+				ub->flags.reserved = 0;
+				ub->flags.type = CHUNK_TYPE_LEN16;
+				ub->flags.blocknum = block;
 			}
 			break;
 		case CHUNK_TYPE_LEN32:
 			chunk->available = 0x03;
 			for (block = 0; block < 2; block++)
 			{
-				chunk->u.len32.blocks[block].flags.allocated = 0;
-				chunk->u.len32.blocks[block].flags.type = CHUNK_TYPE_LEN32;
-				chunk->u.len32.blocks[block].flags.blocknum = block;
+				struct userblock32 *ub = &chunk->u.len32.blocks[block];
+				ub->flags.reserved = 0;
+				ub->flags.type = CHUNK_TYPE_LEN32;
+				ub->flags.blocknum = block;
 			}
 			break;
 
@@ -312,8 +320,6 @@ void *malloc (U8 size)
 	enum chunk_type type;
 	void *ptr;
 
-	dbprintf ("=== malloc(%d) ===\n", size);
-
 	/* Find the first free chunk that can satisfy a request of
 	this size. */
 	type = get_chunk_type_for_size (size);
@@ -327,8 +333,8 @@ void *malloc (U8 size)
 	{
 		/* No chunks of this size are free now.  We need to create
 		a new chunk.  Make it the head of its free list. */
-		chunk = chunk_allocate (type);
-		*chunkptr = chunk;
+		chunk = *chunkptr = chunk_allocate (type);
+		chunk->next = chunk->prev = chunk;
 	}
 
 find_free:
@@ -340,31 +346,32 @@ find_free:
 	back to the front. */
 	first = chunk;
 	do {
-		//dbprintf ("find_free: from %p\n", chunk);
 		if (chunk->available)
 		{
 			/* There's at least 1 free block here... take the first one */
 			blocknum = find_first_one (chunk->available);
-			//dbprintf ("find_first_one (%02X) = %d\n", chunk->available,
-			//		blocknum);
 			chunk->available &= clear_bit_mask[blocknum];
-			//dbprintf ("available is now %02X\n", chunk->available);
 
-			/* TODO - for sanity, check that 'allocated' is 0. */
 			switch (type)
 			{
 				case CHUNK_TYPE_LEN8:
-					chunk->u.len8.blocks[blocknum].flags.allocated = 1;
-					ptr = chunk->u.len8.blocks[blocknum].data;
+				{
+					struct userblock8 *ub = &chunk->u.len8.blocks[blocknum];
+					ptr = ub->data;
 					break;
+				}
 				case CHUNK_TYPE_LEN16:
-					chunk->u.len16.blocks[blocknum].flags.allocated = 1;
-					ptr = chunk->u.len16.blocks[blocknum].data;
+				{
+					struct userblock16 *ub = &chunk->u.len16.blocks[blocknum];
+					ptr = ub->data;
 					break;
+				}
 				case CHUNK_TYPE_LEN32:
-					chunk->u.len32.blocks[blocknum].flags.allocated = 1;
-					ptr = chunk->u.len32.blocks[blocknum].data;
+				{
+					struct userblock32 *ub = &chunk->u.len32.blocks[blocknum];
+					ptr = ub->data;
 					break;
+				}
 				default:
 					dbprintf ("invalid type %d in find_free\n", type);
 					fatal (ERR_MALLOC);
@@ -423,9 +430,19 @@ void free (void *ptr)
 
 	/* Mark the block as available again */
 	chunk->available |= set_bit_mask[blocknum];
-	flags->allocated = 0;
+
+	/* TODO : if all userblocks in this chunk are free, then
+	return the entire chunk back to the block allocator. */
 }
 
+
+/** An indication that a minimum of 'count' buffers, each of
+length 'size', is required by the caller.  This is used
+as an early indicator of memory requirements in order to
+speed up the allocations. */
+void prealloc (U8 size, U8 count)
+{
+}
 
 
 #ifdef MALLOC_TEST
@@ -494,14 +511,6 @@ CALLSET_ENTRY (malloc, init)
 		dbprintf ("chunk is too large\n");
 		fatal (ERR_MALLOC);
 	}
-
-	/* Initialize the free lists with one chunk each */
-	for (type = 0; type < NUM_CHUNK_TYPES; type++)
-		chunk_lists[type] = chunk_allocate (type);
-
-#ifdef DEBUGGER
-	task_dump ();
-#endif
 
 #ifdef MALLOC_TEST
 	task_create_anon (malloc_test_thread);
