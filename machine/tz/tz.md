@@ -172,8 +172,8 @@ define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, intest
-56: Gumball Exit, intest
+55: Gumball Geneva, intest, noplay
+56: Gumball Exit, intest, noplay
 57: Slot Proximity, noplay, ingame
 58: Slot
 61: Skill Bottom, ingame, noplay
