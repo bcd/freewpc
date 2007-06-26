@@ -325,7 +325,7 @@ void *malloc (U8 size)
 	type = get_chunk_type_for_size (size);
 	chunkptr = get_chunks_for_type (type);
 
-	if (chunkptr)
+	if (*chunkptr)
 	{
 		chunk = *chunkptr;
 	}
@@ -511,6 +511,8 @@ CALLSET_ENTRY (malloc, init)
 		dbprintf ("chunk is too large\n");
 		fatal (ERR_MALLOC);
 	}
+
+	memset (chunk_lists, 0, sizeof (chunk_lists));
 
 #ifdef MALLOC_TEST
 	task_create_anon (malloc_test_thread);
