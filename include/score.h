@@ -37,7 +37,7 @@ typedef U8 score_id_t;
 
 
 /** A flag that is nonzero when the score screen needs to be updated */
-extern U8 score_update_needed;
+extern bool score_update_needed;
 
 /** The array of player scores */
 extern score_t scores[];

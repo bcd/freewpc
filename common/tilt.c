@@ -78,7 +78,7 @@ void slam_tilt_deff (void)
 
 CALLSET_ENTRY (tilt, sw_tilt)
 {
-	extern bool in_tilt;
+	extern U8 in_tilt;
 
 	/* Ignore tilt switch activity while already in tilt state */
 	if (in_tilt)
