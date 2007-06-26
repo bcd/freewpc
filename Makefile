@@ -175,6 +175,7 @@ PATH_REQUIRED += $(BC)
 #######################################################################
 
 KERNEL_BASIC_OBJS = \
+	kernel/list.o \
 	kernel/misc.o \
 	kernel/puts.o \
 	kernel/random.o \
@@ -220,7 +221,6 @@ COMMON_BASIC_OBJS = \
 	common/plunger.o \
 	common/rtc.o \
 	common/service.o \
-	common/slowtimer.o \
 	common/tilt.o \
 	common/tournament.o \
 	common/trough.o \
