@@ -129,6 +129,7 @@ void task_dump (void)
 #endif
 		{
 			dbprintf ("%p: ", tp);
+			task_dispatching_ok = TRUE;
 
 			if (tp->state & TASK_TASK)
 			{
