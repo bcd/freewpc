@@ -23,30 +23,17 @@
 
 #ifdef __m6809__
 
-/** GCC4.1 does not compile the new style 'ccreg' instructions
- * correctly, so we revert back to the old way of using
- * hand-coded assembly. */
-//#ifdef GCC4
-//#define NO_CC_REG
-//#endif
-
 /** How to enable/disable the IRQ */
-#ifdef NO_CC_REG
-#define disable_irq()	asm ("orcc\t#" C_STRING(CC_IRQ))
-#define enable_irq()		asm ("andcc\t#" C_STRING(~CC_IRQ))
-#else
-#define disable_irq()	cc_reg |= CC_IRQ
-#define enable_irq()	cc_reg &= ~CC_IRQ
-#endif
+#define disable_irq()	do { cc_reg |= CC_IRQ; __builtin_blockage (); } while (0)
+#define enable_irq()    do { cc_reg &= ~CC_IRQ; __builtin_blockage (); } while (0)
 
 /** How to enable/disable the FIRQ */
-#ifdef NO_CC_REG
-#define disable_firq()	asm ("orcc\t#" C_STRING(CC_FIRQ))
-#define enable_firq()	asm ("andcc\t#" C_STRING(~CC_FIRQ))
-#else
-#define disable_firq()	cc_reg |= CC_FIRQ
-#define enable_firq()	cc_reg &= ~CC_FIRQ
-#endif
+#define disable_firq()	do { cc_reg |= CC_FIRQ; __builtin_blockage (); } while (0)
+#define enable_firq()	do { cc_reg &= ~CC_FIRQ; __builtin_blockage (); } while (0)
+
+/** How to enable/disable all interrupts */
+#define disable_interrupts()	do { cc_reg |= (CC_IRQ|CC_FIRQ); __builtin_blockage (); } while (0)
+#define enable_interrupts()	do { cc_reg &= ~(CC_IRQ|CC_FIRQ); __builtin_blockage (); } while (0)
 
 #else /* __m6809__ */
 
@@ -57,18 +44,9 @@ extern bool linux_firq_enable;
 #define disable_firq()	linux_firq_enable = FALSE;
 #define enable_irq()		linux_irq_enable = TRUE;
 #define enable_firq()	linux_firq_enable = TRUE;
-
-#endif /* __m6809__ */
-
-/** How to enable/disable all interrupts */
-#ifdef NO_CC_REG
-#define disable_interrupts()	asm ("orcc\t#" C_STRING(CC_IRQ|CC_FIRQ))
-#define enable_interrupts()	asm ("andcc\t#" C_STRING(~(CC_IRQ|CC_FIRQ)))
-#else
-//#define disable_interrupts()	cc_reg |= (CC_IRQ + CC_FIRQ)
-//#define enable_interrupts()	cc_reg &= ~(CC_IRQ + CC_FIRQ)
 #define disable_interrupts()	do { disable_irq(); disable_firq(); } while (0)
 #define enable_interrupts()	do { enable_irq(); enable_firq(); } while (0)
-#endif
+
+#endif /* __m6809__ */
 
 #endif /* _SYS_IRQ_H */
