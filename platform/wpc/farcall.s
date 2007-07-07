@@ -52,7 +52,7 @@ __far_call_address: .blkb 2
 	;;; TODO? - put the saved bank into a global so that the callee can
 	;;; get to it, for accessing caller data?
 	;;;
-	.area sysrom
+	.area .text
 	.globl __far_call_handler
 __far_call_handler:
 	pshs	b,u,x                 ; Save all registers used for parameters

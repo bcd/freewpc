@@ -1,6 +1,6 @@
 
 # Additional CFLAGS required on the Linux platform
-CFLAGS += -I`pth-config --cflags` -DCONFIG_PLATFORM_LINUX -g -DCONFIG_LITTLE_ENDIAN -pg
+CFLAGS += -O -I`pth-config --cflags` -DCONFIG_PLATFORM_LINUX -g -DCONFIG_LITTLE_ENDIAN -pg
 HOST_LFLAGS += -pg
 HOST_LIBS += -lpth
 

@@ -54,7 +54,7 @@
 
 
 # A list of directories to be searched.
-my @SearchDirs = ("build", "kernel", "common", "mach", "test", "platform/linux", "platform/wpc");
+my @SearchDirs = ();
 
 # A hash that maps an event name to a list of
 # interested modules.  The module names are stored as a single
@@ -84,6 +84,27 @@ $OutputFile = "build/callset.c";
 # A list of all include files that the result file will need
 # to include
 @IncludeFiles = ("freewpc.h");
+
+
+#############################################################
+# Parse command-line arguments
+#############################################################
+
+while (my $arg = shift @ARGV) {
+	if ($arg =~ /^-o$/) {
+		$OutputFile = shift @ARGV;
+	}
+	elsif ($arg =~ /^--include$/) {
+		push @IncludeFileList, (shift @ARGV);
+	}
+	elsif ($arg =~ /^-D$/) {
+		$arg = shift @ARGV;
+		push @SearchDirs, $arg;
+	}
+	elsif ($arg =~ /^--m6809$/) {
+		$m6809 = 1;
+	}
+}
 
 
 #############################################################
@@ -139,25 +160,6 @@ foreach $src (@srclist) {
 		}
 	}
 	close FH;
-}
-
-#############################################################
-# Parse command-line arguments
-#############################################################
-
-while (my $arg = shift @ARGV) {
-	if ($arg =~ /^-o$/) {
-		$OutputFile = shift @ARGV;
-	}
-	elsif ($arg =~ /^--include$/) {
-		push @IncludeFileList, (shift @ARGV);
-	}
-	elsif ($arg =~ /^-D$/) {
-		push @SearchDirs, (shift @ARGV);
-	}
-	elsif ($arg =~ /^--m6809$/) {
-		$m6809 = 1;
-	}
 }
 
 #############################################################

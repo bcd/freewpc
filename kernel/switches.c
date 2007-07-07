@@ -39,7 +39,13 @@
  */
 typedef struct
 {
-	U8 id;
+	/* The switch number that is pending */
+	U8 id : 7;
+
+	/* Nonzero if the switch is pending an inactive->active transition. */
+	U8 going_active : 1;
+	
+	/* The amount of time left before the transition completes. */
 	U8 timer;
 } pending_switch_t;
 
@@ -53,6 +59,15 @@ typedef struct
 
 /** The global array of switch bits, all in one place */
 __fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+
+
+#ifdef QUEUE_SWITCHES
+/** A list of switches that have triggered but are being debounced
+ * further */
+#define MAX_QUEUED_SWITCHES 8
+
+pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
+#endif
 
 
 /** Return the switch table entry for a switch */
@@ -76,6 +91,8 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
+	/* TODO : initialize the switch state based on mach_opto_mask,
+	 * so that the optos don't all trigger at initialization. */
 	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
 }
 
@@ -386,6 +403,9 @@ cleanup:
 CALLSET_ENTRY (switch, idle)
 {
 	U8 rawbits, pendbits;
+#ifdef QUEUE_SWITCHES
+	U8 queued_bits;
+#endif
 	U8 col;
 	extern U8 sys_init_complete;
 
@@ -438,14 +458,28 @@ CALLSET_ENTRY (switch, idle)
 			{
 				if (pendbits & 1)
 				{
-					/* TODO : rather than handling the switch right away,
-					 * we should queue it up, and then process the switches
+#ifdef QUEUE_SWITCHES
+					/* OK, the switch has changed state and is stable,
+					 * according to the IRQ.
+					 * 
+					 * See if we already have entered this switch into
+					 * the wait queue.
+					 */
+					if (queued_bits & 1)
+					{
+					/* TODO : Rather than handling the switch right away,
+					 * queue it up, and then process the switches
 					 * later in queue order.  This would solve the problem
 					 * of some switch handlers taking longer to execute
 					 * than others.
 					 */
+					}
+#else
+					/* The old way : just start a thread and process the
+					 * switch right away */
 					task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched);
 					task_set_arg (tp, sw);
+#endif /* QUEUE_SWITCHES */
 				}
 			}
 		}

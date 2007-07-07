@@ -37,7 +37,7 @@ __fastram__ U8 tick_count;
 __fastram__ U8 firq_count;
 
 /** An area of NVRAM used to test that it is kept locked. */
-__nvram__ volatile U8 nvram_test_byte;
+__nvram__ U8 nvram_test_byte;
 
 __fastram__ void (*irq_function) (void);
 
@@ -173,9 +173,11 @@ void do_reset (void)
 	 * Now, start the display effect that runs at powerup.
 	 */
 	idle_ok = 1;
+	//db_idle ();
+
 #ifdef MACHINE_TEST_ONLY
 	sys_init_complete++;
-	test_enter_button ();
+	callset_invoke (sw_enter);
 #else
 	task_create_gid (GID_SYSTEM_RESET, system_reset);
 
@@ -309,6 +311,12 @@ void fatal (errcode_t error_code)
 }
 
 
+#ifndef CONFIG_PLATFORM_LINUX
+S16 main (void)
+{
+}
+#endif
+
 void nonfatal (errcode_t error_code)
 {
 	audit_increment (&system_audits.non_fatal_errors);
@@ -322,15 +330,14 @@ void nonfatal (errcode_t error_code)
 
 CALLSET_ENTRY (nvram, idle)
 {
-#ifndef GCC4
 #ifndef CONFIG_PLATFORM_LINUX
 	U8 data = nvram_test_byte;
 	++nvram_test_byte;
+	asm ("; nop" ::: "memory");
 	if (data != nvram_test_byte)
 	{
 		fatal (ERR_NVRAM_UNLOCKED);
 	}
-#endif
 #endif
 }
 

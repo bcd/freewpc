@@ -452,11 +452,11 @@ sprintf_score (const U8 *score)
 
 
 /** Output the contents of the sprintf buffer to the debugger port. */
+#ifdef DEBUGGER
 void
 dbprintf1 (void)
 {
-#ifdef DEBUGGER
 	db_puts (sprintf_buffer);
-#endif
 }
+#endif
 

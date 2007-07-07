@@ -73,7 +73,7 @@ CKSUM_REV      = 0xFFEE
 	;;; start - reset entry point
 	;;;
 	.module start.s
-	.area	sysrom
+	.area	.text
 	.globl _start
 _start:
 	; Disable interrupts (IRQ and FIRQ) until the system is

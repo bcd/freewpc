@@ -40,7 +40,7 @@ TASK_STACK_SIZE    = 60
 	;-----------------------------------------------------
 	; task_save
 	;-----------------------------------------------------
-	.area sysrom	
+	.area .text
 	.globl _task_save
 _task_save:
 	;;; First, save all of the volatile registers: U, Y, and PC.
@@ -136,7 +136,7 @@ _stack_too_large:
 	; task_restore
 	;-----------------------------------------------------
 
-	.area sysrom	
+	.area .text
 	.globl _task_restore
 _task_restore:
 	stx	*_task_current	
@@ -201,7 +201,7 @@ restore_stack_not_required:
 	; Output: X = pointer to task block
 	;-----------------------------------------------------
 
-	.area sysrom	
+	.area .text	
 	.globl _task_create
 _task_create:
 	pshs	u
