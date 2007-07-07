@@ -100,6 +100,9 @@ static int client_sd = 0;
 static int write_ready = 1;
 
 
+static int one_shot_mode = 0;
+
+
 static int
 orkin_select (int sd)
 {
@@ -344,7 +347,10 @@ start:
 			if (read (fd, &val, 1) == 0)
 			{
 				close (fd);
-				goto start;
+				if (one_shot_mode)
+					exit (0);
+				else
+					goto start;
 			}
 			process_input (fd, val);
 			continue;
@@ -360,17 +366,29 @@ start:
 int
 main (int argc, char *argv[])
 {
-	if (argc <= 1)
-		return orkin_client (argc, argv);
-		
-	orkin_init ();
-	for (;;)
+	if (argc > 1)
 	{
-		printf ("CTL %02X DATA %02X\n",
-				orkin_control_read (), orkin_data_read ());
-		orkin_data_write ('.');
-		sleep (1);
+		char option = argv[1][1];
+		switch (option)
+		{
+			case '1':
+				one_shot_mode = 1;
+				break;
+
+			case 's':
+			{
+				orkin_init ();
+				for (;;)
+				{
+					printf ("CTL %02X DATA %02X\n",
+						orkin_control_read (), orkin_data_read ());
+					orkin_data_write ('.');
+					sleep (1);
+				}
+			}
+		}
 	}
+	return orkin_client (argc, argv);
 }
 #endif
 
