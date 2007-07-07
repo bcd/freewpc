@@ -48,9 +48,7 @@ random (void)
 	register U8 r;
 	extern U8 firq_count;
 
-	r = random_cong_seed << 5;
-	r += random_cong_seed;
-	r++;
+	r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
 	//r ^= ac_zc_count;
 	r ^= firq_count;
