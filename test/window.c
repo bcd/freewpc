@@ -1843,11 +1843,13 @@ struct menu dev_frametest_item = {
 #define SCHED_LOCAL_COUNT   16
 
 U16 sched_test_count;
+U8 *local_data_pointer;
 
 void sched_test_task (void)
 {
 	volatile U8 local_data[SCHED_LOCAL_COUNT];
 
+	local_data_pointer = local_data;
 	for (;;)
 	{
 		sched_test_count++;
