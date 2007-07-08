@@ -539,7 +539,6 @@ const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
 	says the overlap manner in which the image has been
 	compressed. */
 	c = *xbmprog++;
-	dbprintf ("xbmprog %p mode = %d\n", xbmprog, c);
 	switch (c)
 	{
 		case XBMPROG_METHOD_RAW:
