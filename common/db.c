@@ -50,6 +50,37 @@ is paused */
 U8 db_paused;
 
 
+
+/** Read a character from the debug port, and wait for it if
+ * it isn't there yet. */
+U8 db_read_sync (void)
+{
+	while (!wpc_debug_read_ready ())
+	{
+		task_dispatching_ok = TRUE;
+	}
+	return wpc_debug_read ();
+}
+
+
+U16 db_read_address (void)
+{
+	U16 addr = 0;
+	U16 i;
+
+	for (i=0 ; i < 4; i++)
+	{
+		U8 c = db_read_sync ();
+		if (c > '9')
+			c = c - 'A' + 10;
+		else
+			c = c - '0';
+		addr = (addr << 4) | c;
+	}
+	return addr;
+}
+
+
 void db_idle (void)
 {
 #ifdef DEBUGGER
@@ -87,6 +118,13 @@ void db_idle (void)
 				case 'g':
 					VOIDCALL (dump_game);
 					break;
+
+				case 'r':
+				{
+					U8 *addr = (U8 *)db_read_address ();
+					dbprintf ("%02X\n", *addr);
+					break;
+				}
 
 				case 'p':
 				{
