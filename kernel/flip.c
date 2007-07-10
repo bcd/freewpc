@@ -53,7 +53,7 @@ void flipper_disable (void)
 }
 
 
-__attribute__((always_inline)) void flipper_service (
+static inline void flipper_service (
 	U8 sw_button,
 	U8 sw_eos,
 	U8 sol_power,
