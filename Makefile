@@ -549,6 +549,11 @@ run: install
 	# Start pinmame up and let it run indefinitely.
 	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
+.PHONY : debug
+debug: install
+	# Start pinmame up and let it run indefinitely.
+	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
+
 .PHONY : rund
 rund: install run $(DBCON)
 	xterm -e "$(DBCON) -1" &
