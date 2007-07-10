@@ -9,7 +9,7 @@ for plat in `echo linux wpc`; do
 		for debugger in `echo y n`; do
 			for target in `echo clean default_target`; do
 				if [ "$plat" = "wpc" ]; then
-					gcctargets=`echo 3.4.6 4.2.0 trunk`;
+					gcctargets=`echo 3.4.6 4.2.0 4.3.0`;
 				else
 					gcctargets=`echo nop`;
 				fi
