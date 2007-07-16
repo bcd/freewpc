@@ -830,19 +830,12 @@ sub machine_write_defines {
 	}
 	print "\n";
 
-	# TODO - remove this, not needed anymore
-	# Print MACHINE_SWxx defines
-	#for my $col (1 .. 8) {
-	#	for my $row (1 .. 8) {
-	#		my $swname = "$col$row";
-	#		my $swnum = $col * 8 + $row - 1;
-	#		my $sw = ($m->{"switches"})->{$swname};
-	#		my $swdecl = $sw->{'c_decl'};
-	#		$swdecl = "sw_unused" if ($swdecl eq "");
-	#		print "#define MACHINE_SW$swname $swdecl\n";
-	#	}
-	#}
-	#print "\n";
+	# Print externs for fonts needed
+	foreach $font (unique ($m->{"fonts"})) {
+		$fontname = $font->{'c_decl'};
+		$fontname =~ s/fon_/font_/;
+		print "extern const struct font $fontname;\n";
+	}
 }
 
 

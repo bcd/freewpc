@@ -25,7 +25,7 @@
 /**
  * The font descriptor structure.
  */
-typedef struct
+typedef struct font
 {
 	/** The preferred spacing between characters, in bits */
 	U8 spacing;
@@ -37,25 +37,13 @@ typedef struct
 	char **glyphs;
 } font_t;
 
-/* TODO : autogenerate from the md file */
-extern const font_t font_mono5;
-extern const font_t font_mono9;
-extern const font_t font_fixed10;
-extern const font_t font_fixed6;
-extern const font_t font_lucida9;
-extern const font_t font_cu17;
-extern const font_t font_term6;
-extern const font_t font_times8;
-extern const font_t font_times10;
-extern const font_t font_helv8;
-extern const font_t font_misctype;
-extern const font_t font_fixed12;
-extern const font_t font_var5;
-extern const font_t font_fixed12;
-extern const font_t font_tinynum;
 
 
-enum {
+/**
+ * An identifier for a symbol, which is just a character within the
+ * special symbol font.
+ */
+typedef enum {
 	BM_FIRST=0, /* force first value to be '1' */
 
 	BM_BOX3, BM_X3, BM_PLUS3,
@@ -65,8 +53,11 @@ enum {
 	BM_LEFT_ARROW5, BM_RIGHT_ARROW5,
 
 	BM_LAST,
-};
+} symbol_t;
 
+
+/** A DMD coordinate, sometimes given as separate x and y values,
+ * and sometimes combined into a single 16-bit number. */
 union dmd_coordinate {
 	U16 xy;
 	struct {
