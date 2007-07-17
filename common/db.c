@@ -140,16 +140,11 @@ void db_idle (void)
 					break;
 				}
 
-#ifdef MACHINE_TZ /* TODO : last use of MACHINE_TZ */
-				case 'c':
-					VOIDCALL (tz_dump_clock);
-					break;
-#endif
-
 				default:
-					/* Allow the machine to define additional commands */
-#ifdef MACHINE_DEBUGGER_COMMANDS
-					MACHINE_DEBUGGER_COMMANDS
+					/* Allow the machine to define additional commands.
+					 * This function must reside in the system page. */
+#ifdef MACHINE_DEBUGGER_HOOK
+					MACHINE_DEBUGGER_HOOK (c);
 #endif
 					break;
 			}
