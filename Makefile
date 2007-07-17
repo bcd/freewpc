@@ -211,6 +211,7 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) \
 	kernel/flasher.o \
 	kernel/flip.o \
 	kernel/init.o \
+	kernel/irq.o \
 	kernel/lamp.o \
 	kernel/leff.o \
 	kernel/reset.o \

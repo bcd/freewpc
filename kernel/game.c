@@ -63,7 +63,7 @@ __fastram__ U8 in_tilt;
 U8 ball_in_play;
 
 /** The number of players in the current game */
-U8 num_players;
+__nvram__ U8 num_players;
 
 /** The number of the player that is currently up. */
 U8 player_up;
@@ -143,11 +143,14 @@ void end_game (void)
 {
 	if (in_game)
 	{
+		/* Mark the game as complete */
 		in_game = FALSE;
 		player_up = 0;
 		ball_up = 0;
 		in_tilt = FALSE;
 
+		/* If in test mode now (i.e. the game was aborted
+		by pressing Enter), then skip over the end game effects. */
 		if (!in_test)
 		{
 			high_score_check ();
@@ -487,7 +490,9 @@ void mark_ball_in_play (void)
 void add_player (void)
 {
 	remove_credit ();
+	wpc_nvram_get ();
 	num_players++;
+	wpc_nvram_put ();
 	callset_invoke (add_player);
 	deff_start (DEFF_SCORES_IMPORTANT);
 	score_update_request ();
@@ -503,7 +508,9 @@ void start_game (void)
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
+		wpc_nvram_get ();
 		num_players = 0;
+		wpc_nvram_put ();
 		scores_reset ();
 		high_score_reset_check ();
 	
@@ -641,8 +648,13 @@ CALLSET_ENTRY (game, sw_start_button)
 /** Initialize the game subsystem.  */
 CALLSET_ENTRY (game, init)
 {
-	/* TODO : if the last game was multiplayer, then don't reset this */
-	num_players = 1;
+	/* Make sure this value is sane */
+	if ((num_players == 0) || (num_players > MAX_PLAYERS))
+	{
+		wpc_nvram_get ();
+		num_players = 1;
+		wpc_nvram_put ();
+	}
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;

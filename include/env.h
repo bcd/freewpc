@@ -31,7 +31,7 @@
 #endif
 
 /** noreturn is a standard GCC attribute and is always
- * available */
+ * available.  This is just shorthand. */
 #define __noreturn__ __attribute__((__noreturn__))
 
 /* The remaining attributes are gcc6809 specific and may
@@ -90,11 +90,19 @@
 #define __naked__
 #endif
 
+/* GCC6809 won't allocate the 'a' register, but we can sometimes
+generate more efficient code if 'a' is used.  In these cases,
+use __areg__ after the declaration (which must begin with 'register')
+to force use of the 'a' register. */
 #ifdef __m6809__
 #define __areg__    asm ("a")
 #else
 #define __areg__
 #endif
+
+
+/* The VOIDCALL macros let you call a function without declaring
+a prototype. */
 
 #define SECTION_VOIDCALL(section,fn) \
 { \

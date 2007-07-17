@@ -73,6 +73,8 @@ void credits_render (void)
 			}
 			else
 			{
+				/* TODO: Fractional credit display does not show the
+				fraction in its most reduced form, e.g. 2/4 instead of 1/2. */
 				sprintf ("%d %d/%d CREDITS",
 					credit_count, unit_count, price_config.units_per_credit);
 			}

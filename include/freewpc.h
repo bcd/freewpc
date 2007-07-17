@@ -37,7 +37,13 @@ extern "C" {
 /*
  * Standard types
  */
-#ifndef __cplusplus
+
+/* The boolean type is normally just a 'char' but the 6809 compiler
+ * supports an optimal form. */
+#if defined(__m6809__) && defined(HAVE_BOOLEAN_ATTRIBUTE)
+#define bool __boolean_bit_register
+typedef unsigned char __boolean_bit_register __attribute__ ((boolean));
+#else
 typedef unsigned char bool;
 #endif
 

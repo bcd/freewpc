@@ -29,37 +29,38 @@ typedef U16 audit_t;
 
 /**
  * The table of standard WPC system audits.
+ * Items marked with 'done' are actually being incremented.
  */
 typedef struct
 {
-	audit_t coins_added[4];
-	audit_t paid_credits;
-	audit_t service_credits;
-	audit_t games_started;
+	audit_t coins_added[4]; /* done */
+	audit_t paid_credits; /* done */
+	audit_t service_credits; /* done */
+	audit_t games_started; /* done */
 	audit_t total_plays;
 	audit_t total_free_plays;
-	audit_t replays;
+	audit_t replays; /* done */
 	audit_t specials;
-	audit_t match_credits;
-	audit_t hstd_credits;
+	audit_t match_credits; /* done */
+	audit_t hstd_credits; /* done */
 	audit_t tickets_awarded;
-	audit_t extra_balls_awarded;
+	audit_t extra_balls_awarded; /* done */
 	audit_t total_game_time;
-	audit_t minutes_on;
-	audit_t balls_played;
-	audit_t tilts;
-	audit_t left_drains;
-	audit_t right_drains;
+	audit_t minutes_on; /* done */
+	audit_t balls_played; /* done */
+	audit_t tilts; /* done */
+	audit_t left_drains; /* done */
+	audit_t right_drains; /* done */
 	audit_t center_drains;
-	audit_t power_ups;
-	audit_t slam_tilts;
-	audit_t plumb_bob_tilts;
-	audit_t fatal_errors;
-	audit_t non_fatal_errors;
-	audit_t left_flippers;
-	audit_t right_flippers;
-	audit_t lockup1_addr;
-	audit_t lockup1_pid_lef;
+	audit_t power_ups; /* done */
+	audit_t slam_tilts; /* done */
+	audit_t plumb_bob_tilts; /* done */
+	audit_t fatal_errors; /* done */
+	audit_t non_fatal_errors; /* done */
+	audit_t left_flippers; /* done */
+	audit_t right_flippers; /* done */
+	audit_t lockup1_addr; /* done */
+	audit_t lockup1_pid_lef; /* done */
 	audit_t nplayer_games[4];
 	audit_t exec_lockups;
 	audit_t trough_rescue;

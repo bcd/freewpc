@@ -203,9 +203,12 @@ void pb_announce (void)
 {
 	if (pb_announce_needed)
 	{
-		/* At ball start, the important score screen may pre-empt us */
+		/* At ball start, the important score screen may pre-empt us.
+		TODO : better deff management would eliminate the need for
+		this. */
 		deff_wait_for_other (DEFF_SCORES_IMPORTANT);
-		deff_restart (DEFF_PB_DETECT);
+
+		deff_start (DEFF_PB_DETECT);
 		music_start (pb_in_play_music);
 		pb_announce_needed = 0;
 	}

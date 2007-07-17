@@ -95,7 +95,6 @@ typedef struct device_ops
  */
 #define device_call_op(dev, op) \
 do { \
-	dbprintf ("Calling device hook %s\n", #op); \
 	if (in_game) \
 	{ \
 		far_indirect_call_handler (dev->props->ops->op, EVENT_PAGE); \

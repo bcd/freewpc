@@ -3,7 +3,7 @@
 P=platform/wpc
 
 # Additional CFLAGS required on the WPC platform
-CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram 
+CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram 
 
 ifdef CONFIG_16BIT
 CFLAGS += -fshort-enums

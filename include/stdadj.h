@@ -47,6 +47,9 @@ typedef U8 adjval_t;
 #define FREE_AWARD_TICKET 3
 #define FREE_AWARD_POINTS 4
 
+/* Currency types */
+#define CUR_US_DOLLAR 0
+
 typedef struct
 {
 	adjval_t balls_per_game;

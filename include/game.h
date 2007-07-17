@@ -28,7 +28,7 @@ extern U8 in_bonus;
 extern U8 in_tilt;
 extern U8 in_test;
 extern U8 ball_in_play;
-extern U8 num_players;
+extern __nvram__ U8 num_players;
 extern U8 player_up;
 extern U8 ball_up;
 #ifdef CONFIG_TIMED_GAME

@@ -440,6 +440,9 @@ xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags)
 
 	if (plane == XBMSET_ALL_PLANES)
 	{
+		/* TODO - the order in which planes are output should be
+		different depending on the version of GCC being used.
+		FreeWPC needs the planes in a particular order. */
 		for (plane = xbmset->n_planes-1; plane >=0; plane--)
 			xbmset_write (fp, xbmset, plane, write_flags);
 		return;

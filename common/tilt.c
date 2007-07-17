@@ -118,6 +118,8 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	deff_start (DEFF_SLAM_TILT);
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);
+
+	/* When slamtilt penalty adjustment is enabled, remove a credit. */
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
 	stop_game ();

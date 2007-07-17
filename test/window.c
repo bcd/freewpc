@@ -83,7 +83,6 @@ __fastram__ U8 in_test;
 struct window win_stack[8];
 
 
-
 /** Push the first window onto the stack.  This ends any game in progress
  * marks 'in test'.  It also resets sound, display, and lamps. */
 void window_push_first (void)
@@ -305,7 +304,6 @@ struct adjustment *browser_adjs;
 U8 adj_edit_value;
 
 void decimal_render (U8 val) { sprintf ("%d", val); }
-void hex_render (U8 val) { sprintf ("%X", val); }
 void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
 void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
 void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
@@ -313,6 +311,8 @@ void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
 void lang_render (U8 val) { sprintf ("ENGLISH"); }
 void replay_system_render (U8 val) { sprintf (val ? "AUTO" : "MANUAL"); }
 
+
+/* The high score reset counter is stored in units of 250 games. */
 void hs_reset_render (U8 val)
 { 
 	if (val == 0)
@@ -406,7 +406,7 @@ struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
-struct adjustment_value free_award_value = { 0, 3, 1, free_award_render };
+struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 struct adjustment_value replay_score_value = { 0, 250, 5, replay_score_render };
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
@@ -431,7 +431,7 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY AWARD", &free_award_value, 0, &system_config.replay_award },
 	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
-	/* EXTRA BALL TICKET */
+	{ "EXTRA BALL TICKET", &yes_no_value, NO, &system_config.extra_ball_ticket },
 	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 0, &system_config.max_tickets_per_player },
 	{ "MATCH FEATURE", &percent_value, OFF, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
@@ -453,6 +453,8 @@ struct adjustment standard_adjustments[] = {
 
 
 struct adjustment feature_adjustments[] = {
+	/* The first few feature adjustments are provided by the core
+	system but only enabled if the game supports it. */
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
@@ -465,6 +467,8 @@ struct adjustment feature_adjustments[] = {
 #ifdef CONFIG_TIMED_GAME
 	{ "TIMED GAME", &yes_no_value, YES, &system_config.timed_game },
 #endif
+
+	/* The game-specific feature adjustments go here. */
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_ADJUSTMENTS
 #endif
@@ -486,11 +490,17 @@ struct adjustment pricing_adjustments[] = {
 	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
 	{ "4TH SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[3] },
 	{ "MAXIMUM CREDITS", &nonzero_integer_value, 10, &price_config.max_credits },
+
+	/* When FREE_ONLY is defined, the option to set free play is removed from
+	the menu entirely (by virtue of the null string).  The adjustment is still
+	used for presets/factory reset and in this case, the default value of YES
+	given here applies. */
 #ifdef FREE_ONLY
 	{ "", &yes_no_value, YES, &price_config.free_play },
 #else
 	{ "FREE PLAY", &yes_no_value, NO, &price_config.free_play },
 #endif
+
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
 	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
 	{ "COIN METER UNITS", &integer_value, 0, &price_config.coin_meter_units },
@@ -778,7 +788,7 @@ void percentage_of_games_audit (audit_t val)
 #ifndef __m6809__
 	sprintf ("%d%%", 100 * val / system_audits.total_plays);
 #else
-	sprintf ("TODO"); /* TODO */
+	sprintf ("%d%%", 100 * val / system_audits.total_plays);
 #endif
 }
 
@@ -801,9 +811,20 @@ void secs_audit (audit_t val)
 }
 
 
-void currency_audit (audit_t val)
+void us_dollar_audit (audit_t val)
 {
 	sprintf ("$%ld.%02d", val / 4, (val % 4) * 25);
+}
+
+
+void currency_audit (audit_t val)
+{
+	switch (0)
+	{
+		default:
+			us_dollar_audit (val);
+			break;
+	}
 }
 
 
@@ -819,11 +840,27 @@ void total_earnings_audit (audit_t val __attribute__((unused)))
 
 void average_per_game_audit (audit_t val)
 {
+	/* Avoid divide-by-zero error */
+	if (system_audits.total_plays == 0)
+	{
+		sprintf ("N/A");
+		return;
+	}
+
+	sprintf ("%d", val / system_audits.total_plays);
 }
 
 
 void average_per_ball_audit (audit_t val)
 {
+	/* Avoid divide-by-zero error */
+	if (system_audits.balls_played == 0)
+	{
+		sprintf ("N/A");
+		return;
+	}
+
+	sprintf ("%d", val / system_audits.balls_played);
 }
 
 
@@ -838,7 +875,7 @@ struct audit main_audits[] = {
 	{ "FREEPLAY PERCENT", },
 	{ "AVG. BALL TIME", },
 	{ "TIME PER CREDIT", secs_audit, &default_audit_value },
-	{ "TOTAL PLAYS", },
+	{ "TOTAL PLAYS", integer_audit, &system_audits.total_plays },
 	{ "REPLAY AWARDS", integer_audit, &system_audits.replays },
 	{ "PERCENT REPLAYS", percentage_of_games_audit, &system_audits.replays },
 	{ "EXTRA BALLS", integer_audit, &system_audits.extra_balls_awarded },
@@ -851,7 +888,7 @@ struct audit earnings_audits[] = {
 	{ "LEFT SLOT", integer_audit, &system_audits.coins_added[0] },
 	{ "CENTER SLOT", integer_audit, &system_audits.coins_added[1] },
 	{ "RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
-	{ "4TH SLOT SLOT", integer_audit, &system_audits.coins_added[3] },
+	{ "4TH SLOT", integer_audit, &system_audits.coins_added[3] },
 	{ "PAID CREDITS", integer_audit, &system_audits.paid_credits },
 	{ "SERVICE CREDITS", integer_audit, &system_audits.service_credits },
 	{ NULL, NULL, NULL },
@@ -860,9 +897,9 @@ struct audit earnings_audits[] = {
 
 struct audit standard_audits[] = {
 	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
-	{ "TOTAL PLAYS", },
-	{ "TOTAL FREE PLAY", },
-	{ "FREEPLAY PERCENT", },
+	{ "TOTAL PLAYS", integer_audit, &system_audits.total_plays },
+	{ "TOTAL FREE PLAY", integer_audit, &system_audits.total_free_plays },
+	{ "FREEPLAY PERCENT", percentage_of_games_audit, &system_audits.total_free_plays },
 	{ "TILTS", &integer_audit, &system_audits.tilts },
 	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
 	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },
@@ -1122,9 +1159,6 @@ void menu_down (void)
 	}
 }
 
-void menu_start (void)
-{
-}
 
 struct window_ops menu_window = {
 	DEFAULT_WINDOW,
@@ -1133,7 +1167,6 @@ struct window_ops menu_window = {
 	.enter = menu_enter,
 	.up = menu_up,
 	.down = menu_down,
-	.start = menu_start
 };
 
 /**********************************************************/
@@ -1286,7 +1319,6 @@ void deff_leff_thread (void)
 					sprintf_far_string (names_of_deffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 					browser_print_operation ("STOPPED");
-					// sound_reset ();
 				}
 			}
 			else
@@ -1480,9 +1512,19 @@ void lampset_draw (void)
 	browser_draw ();
 	sprintf_far_string (names_of_lampsets + menu_selection);
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+
 	sprintf ("SPEED %d", lampset_update_speed);
 	font_render_string_center (&font_var5, 50, 21, sprintf_buffer);
-	sprintf ("MODE %d", lampset_update_mode);
+
+	switch (lampset_update_mode)
+	{
+		case 0: sprintf ("ENABLE"); break;
+		case 1: sprintf ("TOGGLE"); break;
+		case 2: sprintf ("STEP UP"); break;
+		case 3: sprintf ("STEP DOWN"); break;
+		case 4: sprintf ("BUILD UP"); break;
+		case 5: sprintf ("BUILD DOWN"); break;
+	}
 	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
 
 	/* Restart the update thread so that the old lamps are
@@ -1750,7 +1792,11 @@ struct menu dev_trans_test_item = {
 void dev_random_test_enter (void)
 {
 	U16 i;
-	static U8 rowcount[32];
+	U8 *rowcount;
+
+	rowcount = malloc (32);
+	if (rowcount == NULL)
+		return;
 
 	for (i=0; i < 32; i++)
 		rowcount[i] = 0;
@@ -1768,12 +1814,14 @@ void dev_random_test_enter (void)
 			dmd_low_buffer[offset] = 0xFF;
 			rowcount[r]++;
 		}
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 
 	dmd_invert_page (dmd_low_buffer);
 	task_sleep (TIME_200MS);
 	dmd_invert_page (dmd_low_buffer);
+
+	free (rowcount);
 }
 
 struct window_ops dev_random_test_window = {
