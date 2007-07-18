@@ -58,14 +58,6 @@ typedef struct
 
 extern const deff_t deff_table[];
 
-
-/** The maximum number of display effects that can be queued (i.e.
- * waiting to run, but blocked by a higher priority effect).
- */
-#ifndef MAX_RUNNING_DEFFS
-#define MAX_RUNNING_DEFFS 16
-#endif
-
 extern void (*deff_component_table[4]) (void);
 
 bool deff_is_running (deffnum_t dn);
@@ -105,6 +97,7 @@ extern inline void deff_call_components (void)
 }
 
 
+/* TODO - this function should be deprecated */
 extern inline void deff_wait_for_other (deffnum_t dn)
 {
 	if (deff_is_running (dn))

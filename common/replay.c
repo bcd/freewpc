@@ -56,6 +56,11 @@ void replay_draw (void)
 		case FREE_AWARD_EB:
 			font_render_string_center (&font_fixed6, 64, 8, "EXTRA BALL AT");
 			break;
+		case FREE_AWARD_TICKET:
+			font_render_string_center (&font_fixed6, 64, 8, "TICKET AT");
+			break;
+		case FREE_AWARD_OFF:
+			return;
 	}
 	sprintf_score (replay_score);
 	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);

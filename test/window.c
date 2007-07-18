@@ -382,10 +382,10 @@ void brightness_render (U8 val)
 {
 	switch (val)
 	{
-		case 4: sprintf ("4.DIMMEST");
-		case 5: sprintf ("5.DIM");
-		case 6: sprintf ("6.BRIGHT");
-		case 7: sprintf ("7.BRIGHTEST");
+		case 4: sprintf ("4.DIMMEST"); break;
+		case 5: sprintf ("5.DIM"); break;
+		case 6: sprintf ("6.BRIGHT"); break;
+		case 7: sprintf ("7.BRIGHTEST"); break;
 	}
 }
 
@@ -428,12 +428,12 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY 3 LEVEL", &replay_score_value, 0, &system_config.replay_level[2] },
 	{ "REPLAY 4 LEVEL", &replay_score_value, 0, &system_config.replay_level[3] },
 	{ "REPLAY BOOST", &yes_no_value, NO, &system_config.replay_boost },
-	{ "REPLAY AWARD", &free_award_value, 0, &system_config.replay_award },
-	{ "SPECIAL AWARD", &free_award_value, 0, &system_config.special_award },
-	{ "MATCH AWARD", &free_award_value, 0, &system_config.match_award },
+	{ "REPLAY AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.replay_award },
+	{ "SPECIAL AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.special_award },
+	{ "MATCH AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.match_award },
 	{ "EXTRA BALL TICKET", &yes_no_value, NO, &system_config.extra_ball_ticket },
-	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 0, &system_config.max_tickets_per_player },
-	{ "MATCH FEATURE", &percent_value, OFF, &system_config.match_feature },
+	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 25, &system_config.max_tickets_per_player },
+	{ "MATCH FEATURE", &percent_value, ON, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },

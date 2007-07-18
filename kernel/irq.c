@@ -100,7 +100,6 @@ static inline void do_irq_end (void)
 
 static inline void do_irq_2ms_a (void)
 {
-	lamp_rtt (); /* TODO : split into 2 rtts for strobing */
 	flipper_rtt ();
 	triac_rtt ();
 }
@@ -165,6 +164,7 @@ __interrupt__ void do_irq0 (void)
 	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
+	lamp_rtt_0 ();
 	irq_function = do_irq1;
 	do_irq_end ();
 }
@@ -183,6 +183,7 @@ __interrupt__ void do_irq2 (void)
 	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
+	lamp_rtt_1 ();
 	irq_function = do_irq3;
 	do_irq_end ();
 }
@@ -201,6 +202,7 @@ __interrupt__ void do_irq4 (void)
 	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
+	lamp_rtt_2 ();
 	irq_function = do_irq5;
 	do_irq_end ();
 }
@@ -219,6 +221,7 @@ __interrupt__ void do_irq6 (void)
 	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
+	lamp_rtt_3 ();
 	irq_function = do_irq7;
 	do_irq_end ();
 }

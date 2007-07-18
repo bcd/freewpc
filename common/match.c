@@ -49,11 +49,23 @@ match_award (void)
 void
 match_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_right (&font_fixed6, 126, 2, "MATCH");
-	sprintf ("%2b", &match_value);
-	font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
-	dmd_show_low ();
+	U8 value;
+	U8 n;
+	
+	for (n=0; n < 32; n++)
+	{
+		if (n == 29)
+			value = match_value;
+		else
+			value = random_scaled (10) * 0x10;
+
+		dmd_alloc_low_clean ();
+		font_render_string_right (&font_fixed6, 126, 2, "MATCH");
+		sprintf ("%2b", &value);
+		font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep (TIME_100MS);
+	}
 	task_sleep_sec (2);
 	deff_exit ();
 }

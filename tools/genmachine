@@ -836,6 +836,7 @@ sub machine_write_defines {
 		$fontname =~ s/fon_/font_/;
 		print "extern const struct font $fontname;\n";
 	}
+	print "\n";
 }
 
 
@@ -1089,7 +1090,7 @@ sub machine_write_score_decls {
 	print $END_SOURCE;
 }
 
-$infile = $ARGV[0] or "machine/tz/tz.md";
+$infile = $ARGV[0];
 $command = $ARGV[1];
 
 

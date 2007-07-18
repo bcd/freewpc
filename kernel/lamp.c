@@ -72,6 +72,8 @@ __fastram__ U8 lamp_strobe_mask;
 
 __fastram__ U8 lamp_strobe_column;
 
+#define NUM_LAMP_RTTS 4
+
 
 /** Initialize the lamp subsystem at startup. */
 void lamp_init (void)
@@ -123,6 +125,16 @@ extern inline void lamp_rtt_common (U8 mode)
 	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
 	wpc_asic_write (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
 
+	/* Advance the strobe value for the next iteration.
+	Keep this together with the above so that lamp_strobe_mask
+	is already in a register. */
+	lamp_strobe_mask <<= 1;
+	if (mode == NUM_LAMP_RTTS-1 && lamp_strobe_mask == 0)
+	{
+		/* All columns strobed : reset strobe */
+		lamp_strobe_mask = 0x1;
+	}
+
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
 
@@ -158,18 +170,12 @@ extern inline void lamp_rtt_common (U8 mode)
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
-	lamp_strobe_column &= 7;
-
-	lamp_strobe_mask <<= 1;
-	if (lamp_strobe_mask == 0)
-	{
-		/* All columns strobed : reset strobe */
-		lamp_strobe_mask = 0x1;
-	}
+	if (mode == NUM_LAMP_RTTS-1)
+		lamp_strobe_column &= 7;
 }
 
 
-void lamp_rtt (void)
+void lamp_rtt_0 (void)
 {
 	lamp_rtt_common (0);
 }
@@ -184,6 +190,12 @@ void lamp_rtt_1 (void)
 void lamp_rtt_2 (void)
 {
 	lamp_rtt_common (2);
+}
+
+
+void lamp_rtt_3 (void)
+{
+	lamp_rtt_common (3);
 }
 
 
