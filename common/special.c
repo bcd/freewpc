@@ -51,5 +51,6 @@ void special_award (void)
 	leff_start (LEFF_SPECIAL);
 #endif
 	knocker_fire ();
+	audit_increment (&system_audits.specials);
 }
 
