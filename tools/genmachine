@@ -730,7 +730,7 @@ sub machine_write_defines {
 			}
 			print "\n";
 		} else {
-			print "#undef MACHINE_${poll}MS_RTTS\n";
+			print "#undef MACHINE_${poll}MS_RTTS\n\n";
 		}
 	}
 	print "\n";

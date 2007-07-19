@@ -473,8 +473,13 @@ void dmd_draw_image (const U8 *image_bits)
 void dmd_draw_image2 (const U8 *image_bits)
 {
 	wpc_push_page (XBM_PAGE);
+#ifdef HAVE_BRIGHT_BITS_FIRST
+	dmd_copy_page (dmd_high_buffer, (dmd_buffer_t)image_bits);
+	dmd_copy_page (dmd_low_buffer, ((dmd_buffer_t)image_bits + DMD_PAGE_SIZE));
+#else
 	dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits);
 	dmd_copy_page (dmd_high_buffer, ((dmd_buffer_t)image_bits + DMD_PAGE_SIZE));
+#endif
 	wpc_pop_page ();
 }
 

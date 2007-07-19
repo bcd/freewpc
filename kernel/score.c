@@ -229,25 +229,6 @@ void score_zero (score_t *s)
 }
 
 
-#ifdef __m6809__
-#define __bcd_add8(px, py, carry) \
-do { \
-	asm volatile ("lda\t,-%0" :: "a" (px)); \
-	if (carry == 2) \
-		asm volatile ("adca\t#0"); \
-	else if (carry == 1) \
-		asm volatile ("adca\t,-%0" :: "a" (py)); \
-	else \
-		asm volatile ("adda\t,-%0" :: "a" (py)); \
-	asm volatile ("daa"); \
-	asm volatile ("sta\t,%0" :: "a" (px)); \
-} while (0)
-#else
-/* TODO */
-#define __bcd_add8(px, py, carry)
-#endif
-
-
 /** Adds one binary-coded decimal score to another. */
 void score_add (score_t s1, const score_t s2)
 {
@@ -257,19 +238,19 @@ void score_add (score_t s1, const score_t s2)
 
 	/* Add one byte at a time, however many times it takes */
 #if (BYTES_PER_SCORE >= 5)
-	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 4)
-	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 3)
-	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 2)
-	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
 #endif
 #if (BYTES_PER_SCORE >= 1)
-	__bcd_add8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
 #endif
 }
 
@@ -349,8 +330,28 @@ void score (score_id_t id)
 
 void score_sub (score_t s1, const score_t s2)
 {
-	/* TODO */
+	/* Advance to just past the end of each score */
+	s1 += BYTES_PER_SCORE;
+	s2 += BYTES_PER_SCORE;
+
+	/* Subtract one byte at a time, however many times it takes */
+#if (BYTES_PER_SCORE >= 5)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
+#endif
+#if (BYTES_PER_SCORE >= 4)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
+#endif
+#if (BYTES_PER_SCORE >= 3)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
+#endif
+#if (BYTES_PER_SCORE >= 2)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
+#endif
+#if (BYTES_PER_SCORE >= 1)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
+#endif
 }
+
 
 void score_mul (score_t s1, U8 multiplier)
 {

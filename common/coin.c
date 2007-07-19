@@ -56,6 +56,35 @@ const struct area_csum coin_csum_info = {
 };
 
 
+static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
+{
+	switch (*units_per_credit)
+	{
+		case 4:
+			if (*units == 2)
+			{
+				*units = 1;
+				*units_per_credit = 2;
+			}
+			break;
+
+		case 6:
+			switch (*units)
+			{
+				case 2:
+					*units = 1;
+					*units_per_credit = 3;
+					break;
+				case 4:
+					*units = 2;
+					*units_per_credit = 3;
+					break;
+			}
+			break;
+	}
+}
+
+
 void credits_render (void)
 {
 #ifdef FREE_ONLY
@@ -67,16 +96,21 @@ void credits_render (void)
 	{
 		if (unit_count != 0)
 		{
+			U8 units = unit_count;
+			U8 units_per_credit = price_config.units_per_credit;
+
+			reduce_unit_fraction (&units, &units_per_credit);
+
 			if (credit_count == 0)
 			{
-				sprintf ("%d/%d CREDIT", unit_count, price_config.units_per_credit);
+				sprintf ("%d/%d CREDIT", units, units_per_credit);
 			}
 			else
 			{
 				/* TODO: Fractional credit display does not show the
 				fraction in its most reduced form, e.g. 2/4 instead of 1/2. */
 				sprintf ("%d %d/%d CREDITS",
-					credit_count, unit_count, price_config.units_per_credit);
+					credit_count, units, units_per_credit);
 			}
 		}
 		else

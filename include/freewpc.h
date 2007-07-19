@@ -188,6 +188,7 @@ extern U8 idle_ok;
 #include <highscore.h>
 #include <test.h>
 #include <knocker.h>
+#include <bcd.h>
 
 
 /* Game-specific defines.  'mach' should point to the machine-specific 

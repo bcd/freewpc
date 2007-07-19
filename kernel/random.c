@@ -35,7 +35,7 @@
 
 
 /** The seed for the linear congruential component of the random numbers. */
-U8 random_cong_seed;
+U16 random_cong_seed;
 
 
 
@@ -45,14 +45,14 @@ U8 random_cong_seed;
 U8
 random (void)
 {
-	register U8 r;
+	register U16 r;
 	extern U8 firq_count;
 
 	r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
 	//r ^= ac_zc_count;
 	r ^= firq_count;
-	return r;
+	return (r >> 8);
 }
 
 
@@ -90,6 +90,6 @@ CALLSET_ENTRY (random, idle)
  */
 CALLSET_ENTRY (random, init)
 {
-	random_cong_seed = 1;
+	random_cong_seed = 0x1745;
 }
 
