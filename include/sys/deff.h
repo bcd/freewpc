@@ -45,6 +45,8 @@ The deff function should call deff_get_current_size() to find out which
 rows are available. */
 #define D_HALFSIZE 0x4
 
+/** Set for a deff that is abortable (by pressing both flipper buttons). */
+#define D_ABORTABLE 0x8
 
 /** Type for a display effect definition */
 typedef struct

@@ -56,7 +56,7 @@ do { \
 /** The name of the single print buffer */
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
-#undef printf
+#define printf printf_is_bad
 #ifdef CONFIG_PLATFORM_LINUX
 #undef sprintf
 #define sprintf freewpc_sprintf

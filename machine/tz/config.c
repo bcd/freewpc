@@ -25,7 +25,9 @@
  * Machine-specific miscellaneous functions.
  */
 
+#ifdef CONFIG_TIMED_GAME
 U8 faster_quote_given;
+#endif
 
 const audio_track_t bonus_music_track = {
 	.prio = PRI_BONUS,
@@ -33,15 +35,27 @@ const audio_track_t bonus_music_track = {
 };
 
 
+static inline U8 decimal_to_bcd_byte (U8 decimal)
+{
+#ifdef __m6809__
+	return __builtin_add_decimal (decimal, 0);
+#else
+	return ((decimal / 10) << 4) + (decimal % 10);
+#endif
+}
+
+
 void replay_code_to_score (score_t s, U8 val)
 {
-	s[1] = val;
+	s[1] = decimal_to_bcd_byte (val);
 }
 
 
 CALLSET_ENTRY (tz, start_ball)
 {
+#ifdef CONFIG_TIMED_GAME
 	faster_quote_given = 0;
+#endif
 }
 
 

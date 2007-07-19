@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2006 by Brian Dominy <brian@oddchange.com>
+# Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
 #
 # This file is part of FreeWPC.
 #
@@ -1090,6 +1090,29 @@ sub machine_write_score_decls {
 	print $END_SOURCE;
 }
 
+
+sub machine_write_deff_decls {
+	print $START_SOURCE;
+
+	for $deff (unique ($m->{'deffs'})) {
+		print "extern void " . $deff->{'c_decl'} . " (void);\n";
+	}
+	print "\n";
+
+	print "const deff_t deff_table[] = {\n";
+	for $deff (unique ($m->{'deffs'})) {
+		print "   [" . $deff->{'c_ident'} . "] = {\n";
+		print "      .flags = 0,\n";
+		print "      .prio = 0,\n";
+		print "      .fn = 0,\n";
+		print "      .page = 0,\n";
+		print "   },\n";
+	}
+	print "};\n";
+	print $END_SOURCE;
+}
+
+
 $infile = $ARGV[0];
 $command = $ARGV[1];
 
@@ -1209,6 +1232,13 @@ elsif ($command eq "switches") {
 #######################################################
 elsif ($command eq "scores") {
 	machine_write_score_decls ();
+}
+
+#######################################################
+#  generate build/mach-scores.c
+#######################################################
+elsif ($command eq "deffs") {
+	machine_write_deff_decls ();
 }
 
 

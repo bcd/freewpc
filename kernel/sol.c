@@ -37,10 +37,10 @@
 
 
 /** The current stage of the solenoid update cycle */
-static U8 sol_cycle;
+__fastram__ U8 sol_cycle;
 
 /** The current state of the duty cycled solenoids */
-static U8 sol_state[SOL_CYCLES][SOL_ARRAY_WIDTH];
+U8 sol_state[SOL_CYCLES][SOL_ARRAY_WIDTH];
 
 /** The current state of the non-duty cycled solenoids */
 __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];

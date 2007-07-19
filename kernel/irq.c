@@ -54,7 +54,7 @@ void irq_init (void)
 }
 
 
-/** Realtime function that is called every 1ms */
+/** Called at the beginning of every IRQ */
 static inline void do_irq_begin (void)
 {
 	/* If using the RAM paging facility, ensure that page 0
@@ -80,14 +80,8 @@ static inline void do_irq_begin (void)
 }
 
 
-static inline void do_irq_1ms (void)
-{
-#ifdef MACHINE_1MS_RTTS
-	MACHINE_1MS_RTTS
-#endif
-}
 
-
+/** Called at the end of every IRQ */
 static inline void do_irq_end (void)
 {
 	/* Again, for profiling, we mark the end of an IRQ
@@ -97,6 +91,16 @@ static inline void do_irq_end (void)
 	wpc_debug_write (wpc_asic_read (WPC_PINMAME_CYCLE_COUNT));
 #endif
 }
+
+
+/** Realtime functions to be invoked every 1ms */
+static inline void do_irq_1ms (void)
+{
+#ifdef MACHINE_1MS_RTTS
+	MACHINE_1MS_RTTS
+#endif
+}
+
 
 static inline void do_irq_2ms_a (void)
 {

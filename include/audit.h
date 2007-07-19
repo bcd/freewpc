@@ -40,7 +40,7 @@ typedef struct
 	audit_t total_plays;
 	audit_t total_free_plays;
 	audit_t replays; /* done */
-	audit_t specials;
+	audit_t specials; /* done */
 	audit_t match_credits; /* done */
 	audit_t hstd_credits; /* done */
 	audit_t tickets_awarded;

@@ -57,17 +57,22 @@ void music_update (void)
 		}
 	}
 
-	dbprintf ("Current track = (%02X, %d)\n", 
-		music_tracks[music_track_current].code,
-		music_tracks[music_track_current].prio);
-
 	if (music_track_current == 0xFF)
+	{
+		dbprintf ("Music should be OFF.\n");
 		music_off ();
+	}
 	else
+	{
+		dbprintf ("Music change to %02X, prio %d\n", 
+			music_tracks[music_track_current].code,
+			music_tracks[music_track_current].prio);
+
 		/* Note: if for some reason this code is already playing, then
 		'music_set' will NOT write it to the sound board again, causing
 		the track to restart. */
 		music_set (music_tracks[music_track_current].code);
+	}
 }
 
 

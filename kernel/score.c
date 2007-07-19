@@ -173,6 +173,9 @@ void scores_important_deff (void)
 }
 
 
+/** The score screen display effect.  This function redraws the scores
+ * in the default manner when there are no other high priority effects
+ * running. */
 void scores_deff (void)
 {
 	U8 delay;
@@ -185,7 +188,8 @@ redraw:
 
 		/* Stop any score effects (i.e. flashing) */
 
-		/* Redraw the scores on the screen */
+		/* Redraw the scores.  player_up signals which score
+		 * should be drawn larger and will flash. */
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		scores_draw_ball ();
@@ -196,7 +200,7 @@ redraw:
 		
 		/* Restart score effects */
 
-		/* Wait for a score change */
+		/* Wait for a score change. */
 		for (;;)
 		{
 			delay = ball_in_play ? TIME_500MS : TIME_100MS;
@@ -308,7 +312,7 @@ void score_multiple (score_id_t id, U8 multiplier)
 	/* Some things to consider:
 	 * 1. Multiplication is expensive on BCD values.
 	 * 2. Multiplied scores will not be common.
-	 * 3. Multiplier will often be small.
+	 * 3. Even if the multiplier > 1, it will often be small.
 	 *
 	 * Considering all of that, it makes sense to ignore
 	 * multiplication entirely and just do repeated additions. */

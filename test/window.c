@@ -433,7 +433,7 @@ struct adjustment standard_adjustments[] = {
 	{ "MATCH AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.match_award },
 	{ "EXTRA BALL TICKET", &yes_no_value, NO, &system_config.extra_ball_ticket },
 	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 25, &system_config.max_tickets_per_player },
-	{ "MATCH FEATURE", &percent_value, ON, &system_config.match_feature },
+	{ "MATCH FEATURE", &percent_value, 7, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
 	{ "LANGUAGE", &lang_value, 0, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },

@@ -78,6 +78,10 @@ my $m6809 = 0;
 # The target boolean type name
 my $bool_type = "bool";
 
+# Nonzero if emitting debug prints
+my $debug = 0;
+
+
 # The output file name
 $OutputFile = "build/callset.c";
 
@@ -103,6 +107,9 @@ while (my $arg = shift @ARGV) {
 	}
 	elsif ($arg =~ /^--m6809$/) {
 		$m6809 = 1;
+	}
+	elsif ($arg =~ /^-d/) {
+		$debug = 1;
 	}
 }
 
@@ -214,7 +221,11 @@ foreach $set (keys %functionhash) {
 			print FH "   if (!${module}_$set ()) return FALSE;\n";
 		}
 		else {
-			print FH "   ${module}_$set ();\n";
+			if ($debug) {
+				print FH "   dbprintf (\"$debug_id\\n\");\n";
+				$debug_id++;
+			}
+			print FH "   ${module}_$set (); /* $modulehash{$module} */\n";
 		}
 	}
 	if ($rettype eq $bool_type) {

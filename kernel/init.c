@@ -54,6 +54,7 @@ void exit (void)
 
 void abort (void)
 {
+	fatal (ERR_LIBC_ABORT);
 }
 
 /** do_reset is the beginning of the C code.

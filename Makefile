@@ -868,7 +868,7 @@ callset: $(BLD)/callset.o
 $(BLD)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
 	@echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset -D build -D kernel -D common -D mach -D test \
-			-D platform/$(PLATFORM)
+			-D platform/$(PLATFORM) $(CALLSET_FLAGS)
 
 .PHONY : callset_again
 callset_again:

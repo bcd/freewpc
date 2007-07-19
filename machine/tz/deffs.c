@@ -233,7 +233,7 @@ void two_color_flash_deff (void)
 }
 
 
-CALLSET_ENTRY (deff, start_player)
+CALLSET_ENTRY (tz_deff, start_player)
 {
 	ball_save_count = 0;
 }

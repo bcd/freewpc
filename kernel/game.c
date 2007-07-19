@@ -420,12 +420,12 @@ void start_ball (void)
 
 	if (ball_up == 1)
 		callset_invoke (start_player);
+	dbprintf ("start_ball hook\n");
 	callset_invoke (start_ball);
 	callset_invoke (update_lamps);
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
-
 
 	/* Enable the game scores on the display.  The first deff started
 	 * is low in priority and is shown whenever there is nothing else
@@ -437,6 +437,7 @@ void start_ball (void)
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */
+	dbprintf ("start_ball deffs\n");
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
 	if (ball_up == system_config.balls_per_game)

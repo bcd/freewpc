@@ -44,6 +44,8 @@
  * and subject to get it later if priorities change.
  */
 
+#define DEFF_DEBUG
+
 #ifdef DEFF_DEBUG
 #define deff_debug(fmt, rest...) dbprintf(fmt, ## rest)
 #else
@@ -251,7 +253,7 @@ void deff_reschedule (void)
 		do {
 			deff_debug ("Checking %p, id %d, prio %d\n",
 				entry, entry->id, entry->prio);
-			if (entry->prio > prio)
+			if (!best || entry->prio > best->prio)
 				best = entry;
 			entry = entry->dll.next;
 		} while (entry != deff_waitqueue);
@@ -426,11 +428,9 @@ void deff_stop_all (void)
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 
-	deff_debug ("stop_all runqueue\n");
 	if (deff_runqueue)
 		deff_entry_free (deff_runqueue);
 
-	deff_debug ("stop_all waitqueue\n");
 	if (deff_waitqueue)
 	{
 		deff_entry_t *entry = deff_waitqueue;
@@ -441,8 +441,16 @@ void deff_stop_all (void)
 		} while (entry != deff_waitqueue);
 	}
 
-	deff_debug ("stop_all reinit\n");
 	deff_init ();
 }
 
+
+CALLSET_ENTRY (deff, flipper_abort)
+{
+	if (deff_runqueue 
+		&& deff_runqueue->flags & D_ABORTABLE)
+	{
+		deff_stop (deff_runqueue->id);
+	}
+}
 
