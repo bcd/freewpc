@@ -3305,11 +3305,46 @@ struct menu flipper_test_item = {
 	.flags = M_ITEM,
 };
 
+/************   Display Test   **************************/
+
+
+void display_test_init (void)
+{
+	browser_init ();
+	browser_max = 100;
+}
+
+
+void display_test_draw (void)
+{
+	U8 n = menu_selection;
+
+	if (n < 16)
+	{
+		wpc_dmd_set_low_page (menu_selection);
+		dmd_clean_page_low ();
+		dmd_draw_border (dmd_low_buffer);
+		sprintf ("PAGE %d", n);
+		font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+		dmd_show_low ();
+		return;
+	}
+	else
+		n -= 16;
+}
+
+
+struct window_ops display_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = display_test_init,
+	.draw = display_test_draw,
+};
+
 struct menu display_test_item = {
 	.name = "DISPLAY TEST",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &display_test_window, NULL } },
 };
-
 
 
 /****************** TEST MENU **************************/

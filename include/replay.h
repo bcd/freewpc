@@ -25,5 +25,6 @@ __common__ void replay_draw (void);
 __common__ void replay_award (void);
 __common__ void replay_check_current (void);
 __common__ void replay_reset (void);
+__common__ bool replay_can_be_awarded (void);
 
 #endif /* _REPLAY_H */

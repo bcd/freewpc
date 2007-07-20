@@ -127,6 +127,17 @@ static void high_score_draw_single (U8 pos, const U8 *initials,
 }
 
 
+/** Shows the current grand champion score before the final ball. */
+void grand_champion_draw (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 8, "HIGHEST SCORE AT");
+	sprintf_score (gc_score);
+	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);
+	dmd_show_low ();
+}
+
+
 /** Shows all of the high scores.  Called from attract mode. */
 void high_score_amode_show (void)
 {

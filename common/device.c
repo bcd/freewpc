@@ -162,10 +162,12 @@ U8 device_recount (device_t *dev)
 }
 
 
+/** Gets the current task's GID and makes sure (optionally) that it is
+ * in the range of valid GIDs for devices. */
 static inline U8 device_getgid (void)
 {
 	U8 gid = task_getgid ();
-#if 1
+#if 0
 	if ((gid < DEVICE_GID_BASE) || (gid >= DEVICE_GID_BASE + NUM_DEVICES))
 	{
 		dbprintf ("Bad GID %02X for device\n", gid);
@@ -369,11 +371,6 @@ static inline U8 device_kickable_count (device_t *dev)
 void device_request_kick (device_t *dev)
 {
 	task_gid_t gid = DEVICE_GID (device_devno (dev));
-
-#if 1
-	dbprintf ("device_request_kick, gid %d\n", gid);
-#endif
-
 	task_kill_gid (gid);
 	if (device_kickable_count (dev) > 0)
 	{

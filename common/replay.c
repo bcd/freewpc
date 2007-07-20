@@ -99,12 +99,20 @@ void replay_award (void)
 /** Check if the current score has exceeded the next replay level. */
 void replay_check_current (void)
 {
-	if ((replay_award_count == 0)
-		&& (score_compare (replay_score, current_score) <= 0))
+	if (system_config.replay_award != FREE_AWARD_OFF
+		&& replay_award_count == 0
+		&& score_compare (replay_score, current_score) <= 0)
 	{
 		replay_award ();
 	}
 }
+
+bool replay_can_be_awarded (void)
+{
+	return (system_config.replay_award != FREE_AWARD_OFF
+		&& replay_award_count == 0);
+}
+
 
 /** Reset the replay score to its default value. */
 void replay_reset (void)

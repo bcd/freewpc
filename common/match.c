@@ -52,9 +52,9 @@ match_deff (void)
 	U8 value;
 	U8 n;
 	
-	for (n=0; n < 32; n++)
+	for (n=0; n < 20; n++)
 	{
-		if (n == 29)
+		if (n == 19)
 			value = match_value;
 		else
 			value = random_scaled (10) * 0x10;

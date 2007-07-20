@@ -29,5 +29,6 @@ __common__ void high_score_amode_show (void);
 __common__ void high_score_reset (void);
 __common__ void high_score_reset_check (void);
 __common__ void high_score_check (void);
+__common__ void grand_champion_draw (void);
 
 #endif /* _HIGHSCORE_H */
