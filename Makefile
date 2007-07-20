@@ -413,7 +413,8 @@ SYSTEM_MD_OBJS = \
 	build/mach-switchmasks.o \
 	build/mach-scores.o \
 	build/mach-switches.o \
-	build/mach-containers.o
+	build/mach-containers.o \
+	build/mach-deffs.o
 
 MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 
@@ -801,7 +802,7 @@ endif
 #######################################################################
 ###	Machine Description Compiler
 #######################################################################
-CONFIG_CMDS = dump strings switchmasks containers switches scores lampsets
+CONFIG_CMDS = dump strings switchmasks containers switches scores lampsets deffs
 CONFIG_SRCS = $(CONFIG_CMDS:%=build/mach-%.c)
 CONFIG_FILES = build/mach-config.h $(CONFIG_SRCS)
 

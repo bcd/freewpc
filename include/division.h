@@ -1,4 +1,6 @@
 
+/* Macros for implementing fast division by a constant. */
+
 #ifdef STANDALONE
 typedef unsigned char U8;
 #define FASTREG
@@ -6,6 +8,7 @@ typedef unsigned char U8;
 #include <freewpc.h>
 #define FASTREG asm ("a")
 #endif
+
 
 #define shiftbit(quotient, dividend, divisor, n) \
 do { \

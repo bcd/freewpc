@@ -25,6 +25,20 @@
 
 #include <freewpc.h>
 
+/* Machines that want flipper codes should define the following macros
+in the .md file:
+
+   MAX_FLIPCODE_CHARS - the maximum number of characters per flipper
+	code sequence.
+
+   FLIPCODE_LIST - an array of flipper code sequences.  Each sequence
+	is given as an array of bytes, the first being the sequence length
+	and the remaining being the character codes.
+
+	FLIPCODE_HANDLERS - an array of flipper code handlers.  The size
+	of this array should match the size of FLIPCODE_LIST.
+*/
+
 #ifndef MAX_FLIPCODE_CHARS
 #define MAX_FLIPCODE_CHARS 4
 #endif
@@ -78,6 +92,7 @@ void flipcode_active_task (void)
 	flipcode_reset ();
 	task_exit ();
 }
+
 
 void flipcode_test (void)
 {

@@ -300,7 +300,7 @@ void end_ball (void)
 	/* If all players have had a turn, then increment the
 	 * current ball number.
 	 * In timed game, this step is skipped, as the game is
-	 * automatically over at the end of the *first ball*.
+	 * automatically over at the end of the "first ball".
 	 */
 #ifdef CONFIG_TIMED_GAME
 	if (system_config.timed_game == OFF)

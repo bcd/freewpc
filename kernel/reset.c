@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
@@ -112,10 +111,8 @@ void system_reset (void)
 
 #ifdef USER_TAG
 	font_render_string_center (&font_mono5, 64, 20, C_STRING(USER_TAG));
-	font_render_string_center (&font_mono5, 64, 28, "TESTING...");
-#else
-	font_render_string_center (&font_mono5, 64, 24, "TESTING...");
 #endif
+	font_render_string_center (&font_mono5, 64, 28, "TESTING...");
 
 	dmd_show_low ();
 

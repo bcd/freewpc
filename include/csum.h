@@ -21,6 +21,11 @@
 #ifndef __CSUM_H
 #define __CSUM_H
 
+
+/** Describes an area of NVRAM that should be checksummed.
+The data area and the checksum itself need not be contiguous.
+A reset function is provided which says what to do to the block
+if checksum validation fails. */
 struct area_csum
 {
 	/** A pointer to the beginning of the NVRAM block */

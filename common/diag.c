@@ -79,8 +79,7 @@ diag_run (void)
 
 
 
-void
-diag_run_at_reset (void)
+CALLSET_ENTRY (diag, init)
 {
 	diag_run ();
 	if (diag_get_error_count () > 0)

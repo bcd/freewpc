@@ -138,14 +138,16 @@ my %BinaryProperties = (
 	},
 	"deffs" => {
 		"amode" => $GLOBAL_OBJECT,
-		"runner" => 1,
-		"external" => 1,
+		"runner" => 1, # TODO : synonymous for queue
+		"queue" => 1,
+		"timeout" => 1,
+		"abortable" => 1,
+		"halfsize" => 1,
 	},
 	"leffs" => {
 		"amode" => $GLOBAL_OBJECT,
 		"runner" => 1,
 		"shared" => 1,
-		"external" => 1,
 	},
 );
 
@@ -528,6 +530,10 @@ LINE:
 			my $c_ident = $def->{'c_ident'} = $prefix . $c_ident;
 			if (!defined ($def->{'c_decl'})) {
 				$c_ident =~ tr/A-Z/a-z/;
+				if ($prefix eq "DEFF_") {
+					$c_ident =~ s/^deff_//;
+					$c_ident .= "_deff";
+				}
 				$def->{'c_decl'} = $c_ident;
 			}
 
@@ -757,21 +763,23 @@ sub machine_write_defines {
 	print "\n\n";
 
 	# Print display effects
-	my $deff_runners = 0;
-	print "#define MACHINE_DISPLAY_EFFECTS \\\n";
-	foreach $deff (unique ($m->{"deffs"})) {
-		$fn = $deff->{'c_decl'};
-		$fn =~ s/deff_(.*)/$1_deff/;
-		print "   DECL_DEFF_" . 
-			($deff->{'runner'} ? "MODE" : "FAST") .
-			" (" . $deff->{'c_ident'} . ", " .
-			$deff->{'props'} .  ", $fn, " .
-			($deff->{'page'} ? $deff->{'page'} : -1) .
-			") \\\n";
-		$deff_runners++ if ($deff->{'runner'});
-	}
-	print "\n";
-	print "#define MAX_RUNNING_DEFFS " . $deff_runners . "\n\n";
+	#my $deff_runners = 0;
+	#print "#define MACHINE_DISPLAY_EFFECTS \\\n";
+	#foreach $deff (unique ($m->{"deffs"})) {
+	#	$fn = $deff->{'c_decl'};
+	#	$fn =~ s/deff_(.*)/$1_deff/;
+	#	print "   DECL_DEFF_" . 
+	#		($deff->{'runner'} ? "MODE" : "FAST") .
+	#		" (" . $deff->{'c_ident'} . ", " .
+	#		$deff->{'props'} .  ", $fn, " .
+	#		($deff->{'page'} ? $deff->{'page'} : -1) .
+	#		") \\\n";
+	#	$deff_runners++ if ($deff->{'runner'});
+	#}
+	#print "\n";
+	## TODO : MAX_RUNNING_DEFFS is not needed now that deffs
+	## dynamically allocated.
+	#print "#define MAX_RUNNING_DEFFS " . $deff_runners . "\n\n";
 
 	# Print lamp effects
 	print "#define MACHINE_LAMP_EFFECTS \\\n";
@@ -1095,17 +1103,22 @@ sub machine_write_deff_decls {
 	print $START_SOURCE;
 
 	for $deff (unique ($m->{'deffs'})) {
-		print "extern void " . $deff->{'c_decl'} . " (void);\n";
+		print "extern /* page? */ void " . $deff->{'c_decl'} . " (void);\n";
 	}
 	print "\n";
 
 	print "const deff_t deff_table[] = {\n";
 	for $deff (unique ($m->{'deffs'})) {
+		my ($prio, $flags) = split / /, $deff->{'props'};
+		if (!defined $flags) {
+			$flags = $deff->{'runner'} ? "D_QUEUED" : "D_NORMAL";
+		}
+		my $page = $deff->{'page'} || "-1";
 		print "   [" . $deff->{'c_ident'} . "] = {\n";
-		print "      .flags = 0,\n";
-		print "      .prio = 0,\n";
-		print "      .fn = 0,\n";
-		print "      .page = 0,\n";
+		print "      .flags = $flags,\n";
+		print "      .prio = $prio,\n";
+		print "      .fn = " . $deff->{'c_decl'} . ",\n";
+		print "      .page = $page\n";
 		print "   },\n";
 	}
 	print "};\n";

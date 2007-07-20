@@ -122,6 +122,10 @@ void credits_render (void)
 		}
 	}
 #endif
+	if (diag_get_error_count ())
+	{
+		sprintf ("%E.");
+	}
 }
 
 

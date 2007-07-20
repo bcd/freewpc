@@ -50,6 +50,9 @@ this is not currently used... we always use a single pixel */
 #endif
 
 
+/** A global structure that describes all of the attributes for
+the next font rendering: location, font, and string.  Using this
+avoids passing long argument lists to lots of functions. */
 fontargs_t font_args;
 
 /** The width of the current character being rendered in bits */

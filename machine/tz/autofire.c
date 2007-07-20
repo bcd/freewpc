@@ -43,7 +43,7 @@ and a ball is being kicked from the trough. */
 void autofire_monitor (void)
 {
 	/* Catch the ball */
-	task_sleep_sec (1);
+	task_sleep_sec (2); /* TODO - continue if autofire switch closes */
 	sol_off (SOL_SHOOTER_DIV);
 	dbprintf ("Shooter divertor catch done\n");
 
@@ -54,15 +54,17 @@ void autofire_monitor (void)
 	while (kickout_locks > 0)
 		task_sleep (TIME_33MS);
 
-	/* Kick the ball */
-
 	/* Open diverter again and kick ball */
 	sol_on (SOL_SHOOTER_DIV);
 	task_sleep (TIME_500MS);
 	sol_pulse (SOL_AUTOFIRE);
 	if (in_live_game)
 		sound_send (SND_EXPLOSION_1);
+
+	/* Say that the ball is heading into the right loop */
 	event_can_follow (autolaunch, right_loop, TIME_4S);
+
+	/* Close the diverter for good */
 	task_sleep (TIME_500MS);
 	sol_off (SOL_SHOOTER_DIV);
 	task_sleep_sec (2);
@@ -74,8 +76,11 @@ void autofire_monitor (void)
 go to the autofire lane rather than the manual plunger. */
 void autofire_open_for_trough (void)
 {
+	/* Do not proceed if another ball is in the process of
+	being autofired. */
 	while (task_find_gid (GID_AUTOFIRE_HANDLER))
 		task_sleep_sec (1);
+
 	dbprintf ("Shooter divertor open to catch\n");
 	sol_on (SOL_SHOOTER_DIV);
 	task_sleep_sec (1);
@@ -99,7 +104,11 @@ void autofire_catch (void)
 {
 	task_sleep_sec (1);
 	sol_on (SOL_SHOOTER_DIV);
-	task_sleep_sec (2);
+	task_sleep_sec (3); /* TODO - abort when autofire sw. closes */
+
+	/* TODO - don't always want to launch right away, e.g. for
+	a start multiball animation */
+
 	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_monitor);
 }
 

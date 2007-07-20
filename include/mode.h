@@ -41,6 +41,7 @@ extern inline void timed_mode_task (
 	/* Mark the task as protected, because killing it will not do all
 	of the cleanup needed for ending the mode.  The proper way to end
 	a mode is to invoke mode_stop(). */
+	/* TODO - this may be unnecessary and dangerous */
 	task_set_flags (TASK_PROTECTED);
 
 	/* Initialize the timer and invoke the mode's begin hook */
@@ -98,25 +99,39 @@ extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 }
 
 
+/** Returns true if the mode with gid GID and timer TIMER
+is still active.  It may be in its grace period. */
 extern inline bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
 {
 	return task_find_gid (gid) ? TRUE : FALSE;
 }
 
 
+/** Returns true if a mode is running with a nonzero timer.  A mode
+in grace period is considered to be running. */
 extern inline bool timed_mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
 {
 	return (*timer != 0);
 }
 
 
+/** Extends a mode timer by some amount, up to a fixed value. */
 extern inline void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 {
 	if (*timer == 0)
 	{
 		/* TODO */
+		/* Here, the mode is technically not running but still
+		active in its grace period, and more timer is being added.
+		Just incrementing the timer will not signal the mode task
+		to go out of grace period back into its normal loop; something
+		more is needed... */
+
+		/* Note this means that the 'expire' hook can be called
+		multiple times. */
 	}
 
+	/* Just increment the timer */
 	*timer += extra_time;
 	if (*timer >= max_time)
 	{
@@ -126,7 +141,8 @@ extern inline void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 
 
 /** Stops a mode task by setting its timer to zero.  The mode task will
-detect this and exit on its own */
+detect this and exit on its own.  The end_ball hook for a mode module
+should stop the timer this way. */
 extern inline void timed_mode_stop (U8 *timer)
 {
 	*timer = 0;

@@ -29,6 +29,7 @@
 /** PinMAME expects address 0x1800 in nvram to contain the
  * following date structure, as apparently all real WPC
  * ROMs put this information there. */
+#ifdef CONFIG_PINMAME
 struct wpc_pinmame_clock_data
 {
 	U16 year;
@@ -36,6 +37,7 @@ struct wpc_pinmame_clock_data
 	U8 day;
 	U8 day_of_week;
 };
+#endif
 
 
 /* Year is stored as an offset from 2000 */

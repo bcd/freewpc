@@ -596,8 +596,9 @@ void device_remove_live (void)
 
 					/* FALLTHRU : end_ball may be cancelled due to a
 					ball save, but must be treated as going back to
-					single_ball_play.  If the ball really ends, we won't
-					come back here. */
+					single_ball_play as well.  If the ball really ends, we will
+					come back here and invoke single ball play anyway,
+					which should be harmless. */
 
 				case 1:
 					/* Multiball modes like to know when single ball play resumes. */

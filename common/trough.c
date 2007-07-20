@@ -71,6 +71,8 @@ CALLSET_ENTRY (trough, sw_outhole)
 	else
 	{
 		/* drained down the center */
+		/* TODO - do this in dev_trough_enter, in case there is no
+		outhole */
 		audit_increment (&system_audits.center_drains);
 	}
 

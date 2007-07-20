@@ -44,39 +44,11 @@
  * and subject to get it later if priorities change.
  */
 
-#define DEFF_DEBUG
-
 #ifdef DEFF_DEBUG
 #define deff_debug(fmt, rest...) dbprintf(fmt, ## rest)
 #else
 #define deff_debug(fmt, rest...)
 #endif
-
-
-/** Declare externs for all of the deff functions */
-#define DECL_DEFF(num, flags, pri, fn, page) extern void fn (void);
-#define DECL_DEFF_FAST(num, pri, fn, page) DECL_DEFF (num, D_NORMAL, pri, fn, page)
-#define DECL_DEFF_MODE(num, pri, fn, page) DECL_DEFF (num, D_RUNNING, pri, fn, page)
-
-#ifdef MACHINE_DISPLAY_EFFECTS
-MACHINE_DISPLAY_EFFECTS
-#endif
-
-/** Now declare the deff table itself */
-#undef DECL_DEFF
-#define DECL_DEFF(num, flags, pri, fn, page) \
-	[num] = { flags, pri, fn, page },
-
-
-const deff_t deff_table[] = {
-#define null_deff deff_exit
-#ifdef MACHINE_DISPLAY_EFFECTS
-	MACHINE_DISPLAY_EFFECTS
-#endif
-#ifndef MACHINE_CUSTOM_AMODE
-	[DEFF_AMODE] = { D_RUNNING, PRI_AMODE, default_amode_deff, -1 },
-#endif
-};
 
 
 /** A deff entry.  These are created dynamically as display effects
@@ -309,8 +281,8 @@ void deff_start (deffnum_t dn)
 			deff_dequeue (&deff_runqueue, oldentry);
 
 			/* Move the running deff onto the wait list if
-			it's a runner.  Otherwise it's a goner. */
-			if (oldentry->flags & D_RUNNING)
+			it wants to be queued.  Otherwise it's a goner. */
+			if (oldentry->flags & D_QUEUED)
 			{
 				deff_debug ("Moving deff %d to waitqueue\n", oldentry->id);
 				dll_add_front (&deff_waitqueue, oldentry);
@@ -325,7 +297,7 @@ void deff_start (deffnum_t dn)
 		deff_enqueue (&deff_runqueue, entry);
 		deff_start_task (&deff_table[entry->id]);
 	}
-	else if (entry->flags & D_RUNNING)
+	else if (entry->flags & D_QUEUED)
 	{
 		/* This deff cannot run now, but it wants to wait. */
 		deff_debug ("Can't run because higher priority active\n");

@@ -73,7 +73,8 @@ A8: Aux. Sol. 8
 ALL: 11..88
 
 [deffs]
-NULL: 0
+NULL: c_decl(deff_exit), 0
+Amode: page(EFFECT_PAGE), c_decl(default_amode_deff), runner, PRI_AMODE
 Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
 Scores: runner, PRI_SCORES
 Scores Important: PRI_SCORES_IMPORTANT

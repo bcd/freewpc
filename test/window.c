@@ -871,7 +871,8 @@ audit_t default_audit_value;
 
 
 struct audit main_audits[] = {
-	{ "EARNINGS", total_earnings_audit, &default_audit_value },
+	{ "TOTAL EARNINGS", total_earnings_audit, &default_audit_value },
+	{ "RECENT EARNINGS", NULL, NULL },
 	{ "FREEPLAY PERCENT", },
 	{ "AVG. BALL TIME", },
 	{ "TIME PER CREDIT", secs_audit, &default_audit_value },
@@ -884,13 +885,13 @@ struct audit main_audits[] = {
 };
 
 struct audit earnings_audits[] = {
-	{ "EARNINGS", total_earnings_audit, &default_audit_value },
-	{ "LEFT SLOT", integer_audit, &system_audits.coins_added[0] },
-	{ "CENTER SLOT", integer_audit, &system_audits.coins_added[1] },
-	{ "RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
-	{ "4TH SLOT", integer_audit, &system_audits.coins_added[3] },
-	{ "PAID CREDITS", integer_audit, &system_audits.paid_credits },
-	{ "SERVICE CREDITS", integer_audit, &system_audits.service_credits },
+	{ "RECENT EARNINGS", total_earnings_audit, &default_audit_value },
+	{ "RECENT LEFT SLOT", integer_audit, &system_audits.coins_added[0] },
+	{ "RECENT CENTER SLOT", integer_audit, &system_audits.coins_added[1] },
+	{ "RECENT RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
+	{ "RECENT 4TH SLOT", integer_audit, &system_audits.coins_added[3] },
+	{ "RECENT PAID CREDITS", integer_audit, &system_audits.paid_credits },
+	{ "RECENT SERVICE CREDITS", integer_audit, &system_audits.service_credits },
 	{ NULL, NULL, NULL },
 };
 
@@ -898,8 +899,16 @@ struct audit earnings_audits[] = {
 struct audit standard_audits[] = {
 	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
 	{ "TOTAL PLAYS", integer_audit, &system_audits.total_plays },
-	{ "TOTAL FREE PLAY", integer_audit, &system_audits.total_free_plays },
+	{ "TOTAL FREE PLAYS", integer_audit, &system_audits.total_free_plays },
 	{ "FREEPLAY PERCENT", percentage_of_games_audit, &system_audits.total_free_plays },
+	{ "REPLAY AWARDS", integer_audit, &system_audits.replays },
+	{ "PERCENT REPLAYS", percentage_of_games_audit, &system_audits.replays },
+	{ "SPECIAL AWARDS", integer_audit, &system_audits.specials },
+	{ "PERCENT SPECIAL", percentage_of_games_audit, &system_audits.specials },
+	{ "MATCH AWARDS", integer_audit, &system_audits.match_credits },
+	{ "PERCENT MATCH", percentage_of_games_audit, &system_audits.match_credits },
+	{ "EXTRA BALLS", integer_audit, &system_audits.extra_balls_awarded },
+	{ "PERCENT EX. BALL", percentage_of_games_audit, &system_audits.extra_balls_awarded },
 	{ "TILTS", &integer_audit, &system_audits.tilts },
 	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
 	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },

@@ -215,6 +215,15 @@ do_format_chars:
 			format++;
 			switch (*format)
 			{
+				/* '%E' is a nonstandard form that means to preserve
+				the previous buffer and move to the end of it for
+				writing additional characters.  It only makes sense to
+				put this at the beginning of a format string. */
+				case 'E':
+					while (*buf != '\0')
+						buf++;
+					break;
+
 				/* Handle format char '*' to dynamically set
 				the width from a parameter */
 				case '*':

@@ -32,15 +32,27 @@ typedef void (*deff_function_t) (void);
 /** The flags for a normal display effect with no special requirements */
 #define D_NORMAL	0x0
 
-/** Set for a deff that is long-lived and runs until explicitly stopped */
-#define D_RUNNING 0x1
+/** Set for a deff that wants to run indefinitely, regardless of whether
+or not it can get the display.  When this bit is clear, if the deff cannot 
+be started right away, it is immediately dropped.  Otherwise, it is placed 
+onto the deff queue.  Likewise, the deff may be preempted by a higher-
+priority deff later, and this bit will ensure that the deff is requeued
+and can be restarted later.  A deff marked D_QUEUED may need to be
+explicitly stopped via deff_stop() when conditions change, or the deff
+itself may exit on its own if it decides it no longer needs to run. */
+#define D_QUEUED 0x1
 
-/** Set for a deff that will only run for a short time once it gets the
-display, but would like to wait if the display is currently busy.
-After a certain period of time, waiting deffs are cancelled. */
-#define D_WAITING 0x2
+/** TODO : Set for a deff that should not be queued for a long period of time,
+should it fail to get the display.  This setting also requires that
+D_QUEUED be set.  When a deff is queued, it is timestamped and if the
+deff remains on the queue for longer than some predetermined amount
+of time, it is automatically stopped.  Note that the timeout varies
+depending on what is going on; if a ball becomes locked up in a device,
+we can hold the ball and service more deffs than if the ball is
+on the playfield. */
+#define D_TIMEOUT 0x2
 
-/** Set for a deff that can run with only 16 rows -- half of the display.
+/** TODO : Set for a deff that can run with only 16 rows -- half of the display.
 The deff function should call deff_get_current_size() to find out which
 rows are available. */
 #define D_HALFSIZE 0x4
@@ -48,12 +60,21 @@ rows are available. */
 /** Set for a deff that is abortable (by pressing both flipper buttons). */
 #define D_ABORTABLE 0x8
 
-/** Type for a display effect definition */
+
+
+/** A constant descriptor for a display effect. */
 typedef struct
 {
+	/** Various flags (the D_ values given above) */
 	U8 flags;
+
+	/** The priority of the effect */
 	U8 prio;
+
+	/** The function to be spawned as a task to implement the effect */
 	deff_function_t fn;
+
+	/** The ROM page in which the function resides */
 	U8 page;
 } deff_t;
 
