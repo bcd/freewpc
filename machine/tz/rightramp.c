@@ -78,7 +78,7 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 }
 
 
-CALLSET_ENTRY (right_ramp, init)
+CALLSET_ENTRY (right_ramp, start_player)
 {
 	battle_power_lit = 0;
 }

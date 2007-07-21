@@ -459,7 +459,13 @@ LINE:
 			my ($ID, $parms, $name);
 			if ($re eq "AUTO") {
 				/^([^:]+):(.*)$/;
-				($ID, $parms, $name) = ($autoid++, $2, $1);
+				($ID, $parms, $name) = ($autoid, $2, $1);
+
+				# If redeclaring, use the ID given before.
+				if (defined $mc->{$name}) {
+					$ID = $mc->{$name}->{'ID'};
+				}
+				$autoid++;
 			}
 			else {
 				($ID, $parms, $name) = ($1, $2, undef);

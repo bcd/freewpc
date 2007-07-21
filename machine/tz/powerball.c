@@ -108,6 +108,13 @@ void pb_detect_deff (void)
 	deff_exit ();
 }
 
+
+void pb_loop_deff (void)
+{
+	generic_twoline_deff ("POWERBALL LOOP", "10,000,000");
+}
+
+
 /** Called when the powerball is known to be in a particular location.
  *
  * PB_IN_PLAY is used when it is guaranteed to be in play, even during
@@ -139,6 +146,8 @@ void pb_set_location (U8 location, U8 depth)
 			lamp_tristate_on (LM_RIGHT_POWERBALL);
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
+			/* TODO - in the 'maybe' state, pulse magnets to
+			figure out the ball type */
 		}
 	}
 }
@@ -214,8 +223,9 @@ void pb_announce (void)
 	}
 }
 
-void pb_poll_trough (void)
+void pb_poll_trough_task (void)
 {
+	task_sleep (TIME_200MS);
 	if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
 		if (switch_poll_trough_metal ())
@@ -227,6 +237,13 @@ void pb_poll_trough (void)
 			pb_detect_event (TROUGH_PB_DETECTED);
 		}
 	}
+	task_exit ();
+}
+
+
+void pb_poll_trough (void)
+{
+	task_recreate_gid (GID_PB_POLL_TROUGH, pb_poll_trough_task);
 }
 
 
@@ -305,6 +322,11 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 {
 	event_did_follow (camera_or_piano, slot_prox);
 	pb_detect_event (PF_STEEL_DETECTED);
+}
+
+CALLSET_ENTRY (pb_detect, sw_trough_proximity)
+{
+	pb_poll_trough ();
 }
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)

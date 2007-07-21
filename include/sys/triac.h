@@ -21,14 +21,23 @@
 #ifndef _SYS_TRIAC_H
 #define _SYS_TRIAC_H
 
+/** The number of triacs provided by the hardware */
 #define NUM_GI_TRIACS	5
 
+/** The number of brightness levels for a GI circuit.
+The state of the triac can be rapidly switched this many times
+per AC cycle */
 #define NUM_BRIGHTNESS_LEVELS 8
 
 #define TRIAC_GI_STRING(n)			(1 << (n))
+
+/** The coindoor interlock triac ID */
 #define TRIAC_COINDOOR_INTERLOCK	0x40
+
+/** The flipper enable triac ID */
 #define TRIAC_FLIPPER_ENABLE		0x80
 
+/** Represents all of the GI triacs */
 #define TRIAC_GI_MASK \
 	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
 	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
@@ -36,11 +45,17 @@
 #define TRIAC_CONTROL_MASK		(TRIAC_COINDOOR_INTERLOCK | TRIAC_FLIPPER_ENABLE)
 
 
+/* Macros for enabling/disabling the flippers */
 #define flipper_triac_enable()	triac_enable (TRIAC_FLIPPER_ENABLE)
 #define flipper_triac_disable()	triac_disable (TRIAC_FLIPPER_ENABLE)
 
+/* Macros for enabling/disabling the coindoor interlock */
 #define coindoor_triac_enable()	triac_enable (TRIAC_COINDOOR_INTERLOCK)
 #define coindoor_triac_disable()	triac_disable (TRIAC_COINDOOR_INTERLOCK)
+
+
+/* The triac register is write-only; therefore, writes to it are
+cached in memory so that the current state can be read back. */
 
 #define triac_read()					triac_io_cache
 
@@ -57,8 +72,6 @@ do { \
 #define TRIAC_GI2					0x04
 #define TRIAC_GI3					0x08
 #define TRIAC_GI4					0x10
-#define TRIAC_COIN_INTERLOCK	0x20
-#define TRIAC_FLIPPER_ENABLE	0x80
 
 typedef U8 triacbits_t;
 

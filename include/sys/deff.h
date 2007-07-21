@@ -96,6 +96,10 @@ void deff_init (void);
 void deff_stop_all (void);
 
 
+/* The deff components module offers inline functions for
+display effects that want to update multiple parts of the display
+independently. */
+
 extern inline void deff_init_components (void)
 {
 	deff_component_table[0] = null_function;
@@ -134,6 +138,8 @@ extern inline void deff_wait_for_other (deffnum_t dn)
 	}
 }
 
+__common__ __noreturn__ void generic_oneline_deff (const char *);
+__common__ __noreturn__ void generic_twoline_deff (const char *, const char *);
 
 #ifndef MACHINE_CUSTOM_AMODE
 void default_amode_deff (void);

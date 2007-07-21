@@ -171,9 +171,7 @@ void text_color_flash_deff (void)
 {
 	U8 count = 8;
 
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
+	dmd_alloc_pair_clean ();
 	font_render_string_center (&font_fixed10, 64, 9, "QUICK");
 	font_render_string_center (&font_fixed10, 64, 22, "MULTIBALL");
 
@@ -218,9 +216,7 @@ void spell_test_deff (void)
 
 void two_color_flash_deff (void)
 {
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	dmd_clean_page_high ();
+	dmd_alloc_pair_clean ();
 	dmd_flip_low_high ();
 	font_render_string_center (&font_fixed6, 64, 9, "DARK");
 	dmd_flip_low_high ();

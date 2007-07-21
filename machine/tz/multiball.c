@@ -162,6 +162,7 @@ CALLSET_ENTRY (mball, sw_left_ramp_exit)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING));
 	else if (flag_test (FLAG_SSSMB_RUNNING));
+	else if (flag_test (FLAG_CHAOSMB_RUNNING));
 	else if (lamp_flash_test (LM_MULTIBALL))
 	{
 		lamp_tristate_off (LM_MULTIBALL);

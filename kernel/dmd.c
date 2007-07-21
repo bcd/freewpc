@@ -296,7 +296,9 @@ void dmd_flip_low_high (void)
 	wpc_dmd_set_high_page (tmp);
 }
 
-/** Flip the currently visible page, alternating between the two currently mapped */
+
+/** Flip the currently visible page, alternating between the two 
+currently mapped */
 void dmd_show_other (void)
 {
 	if (dmd_dark_page == dmd_low_page)
@@ -399,10 +401,12 @@ void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
 	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
 }
 
+
 void dmd_copy_low_to_high (void)
 {
 	dmd_copy_page (dmd_high_buffer, dmd_low_buffer);
 }
+
 
 void dmd_alloc_low_clean (void)
 {
@@ -411,9 +415,10 @@ void dmd_alloc_low_clean (void)
 }
 
 
-void dmd_alloc_high_clean (void)
+void dmd_alloc_pair_clean (void)
 {
-	dmd_alloc_high ();
+	dmd_alloc_low_high ();
+	dmd_clean_page (dmd_low_buffer);
 	dmd_clean_page (dmd_high_buffer);
 }
 

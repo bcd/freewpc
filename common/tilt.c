@@ -56,8 +56,7 @@ void tilt_deff (void)
 
 void tilt_warning_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_alloc_high_clean ();
+	dmd_alloc_pair_clean ();
 	font_render_string_center (&font_mono5, 64, 13, 
 			!(tilt_warnings % 1) ? "DANGER" : "DANGER  DANGER");
 	dmd_show_low ();

@@ -32,7 +32,7 @@
 
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */
-#define __noreturn__ __attribute__((__noreturn__))
+#define __noreturn__ __attribute__((noreturn))
 
 /* The remaining attributes are gcc6809 specific and may
  * or may not be available depending on the compiler

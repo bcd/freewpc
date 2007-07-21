@@ -62,29 +62,41 @@ __fastram__ U8 triac_leff_alloc;
 __fastram__ U8 triac_leff_bits[NUM_BRIGHTNESS_LEVELS];
 
 
+/** Update the triacs at interrupt time */
 void triac_rtt (void)
 {
 	U8 triac_bits;
 
+	/* Get the default triac states */
 	triac_bits = triac_enables;
+
+	/* Override with the lamp effect states.
+	This can vary according to the position of the AC wave from the
+	zerocross point. */
 	triac_bits &= ~triac_leff_alloc;
 	triac_bits |= triac_leff_bits[ac_zc_count];
+
+	/* Update the triac hardware */
 	triac_write (triac_bits);
 }
 
 
+/** Turns on one or more triacs */
 void triac_enable (U8 triac)
 {
 	triac_enables |= triac;
 }
 
 
+/** Turns off one or more triacs */
 void triac_disable (U8 triac)
 {
 	triac_enables &= ~triac;
 }
 
 
+/** Allocates one or more triacs for a lamp effect.
+The leff can override the default value for the triac. */
 void triac_leff_allocate (U8 triac)
 {
 	U8 i;
@@ -94,12 +106,14 @@ void triac_leff_allocate (U8 triac)
 }
 
 
+/** Frees a set of triacs at the end of a lamp effect */
 void triac_leff_free (U8 triac)
 {
 	triac_leff_alloc &= ~triac;
 }
 
 
+/** Enables a triac from a lamp effect at full brightness */
 void triac_leff_enable (U8 triac)
 {
 	U8 i;
@@ -108,6 +122,7 @@ void triac_leff_enable (U8 triac)
 }
 
 
+/** Disables a triac from a lamp effect */
 void triac_leff_disable (U8 triac)
 {
 	U8 i;
@@ -116,6 +131,7 @@ void triac_leff_disable (U8 triac)
 }
 
 
+/** Sets the intensity (brightness) of a single GI triac */
 void triac_set_brightness (U8 triac, U8 brightness)
 {
 	U8 i;
@@ -139,6 +155,7 @@ void triac_set_brightness (U8 triac, U8 brightness)
 }
 
 
+/** Initialize the triac module */
 void triac_init (void)
 {
 	triac_enables = 0;

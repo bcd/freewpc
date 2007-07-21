@@ -489,7 +489,7 @@ void task_kill_all (void)
 /**
  * Sets task flags.
  *
- * TODO : this is a race condition here with regard to TASK_PROTECTED;
+ * TODO : there is a race condition here with regard to TASK_PROTECTED;
  * the task might be killed after it has been created, but before it
  * gets a chance to set TASK_PROTECTED.  The caller is probably aware
  * of the special status and should be able to set it at creation time.

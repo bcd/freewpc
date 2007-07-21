@@ -23,6 +23,17 @@
 __local__ U8 clock_hits;
 
 
+void clock_millions_hit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_var5, 64, 8, "CLOCK MILLIONS");
+	font_render_string_center (&font_fixed6, 64, 18, "5,000,000");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+
 CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
 	if (!lamp_test (LM_PANEL_CLOCK_MIL) && !lamp_test (LM_PANEL_CLOCK_CHAOS))
@@ -34,6 +45,7 @@ CALLSET_ENTRY (clocktarget, sw_clock_target)
 
 	sound_send (SND_CLOCK_BELL);
 	leff_start (LEFF_CLOCK_TARGET);
+	deff_start (DEFF_CLOCK_MILLIONS_HIT);
 	score (SC_5M);
 
 	if (clock_hits < 4)

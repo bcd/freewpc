@@ -94,6 +94,7 @@ deff_entry_t *deff_entry_create (deffnum_t id)
 static inline void deff_enqueue (deff_entry_t **queue, deff_entry_t *entry)
 {
 	dll_add_front (queue, entry);
+	/* TODO : Handle D_TIMEOUT if the entry should expire */
 }
 
 
@@ -285,7 +286,7 @@ void deff_start (deffnum_t dn)
 			if (oldentry->flags & D_QUEUED)
 			{
 				deff_debug ("Moving deff %d to waitqueue\n", oldentry->id);
-				dll_add_front (&deff_waitqueue, oldentry);
+				deff_enqueue (&deff_waitqueue, oldentry);
 			}
 			else
 			{
@@ -301,7 +302,7 @@ void deff_start (deffnum_t dn)
 	{
 		/* This deff cannot run now, but it wants to wait. */
 		deff_debug ("Can't run because higher priority active\n");
-		dll_add_front (&deff_waitqueue, entry);
+		deff_enqueue (&deff_waitqueue, entry);
 	}
 	else
 	{
@@ -380,6 +381,20 @@ void deff_swap_low_high (S8 count, task_ticks_t delay)
 	{
 		dmd_show_other ();
 		task_sleep (delay);
+	}
+}
+
+
+/** Lower the priority of the currently running display effect.
+This may cause it to be preempted by something more important. */
+void deff_nice (enum _priority prio)
+{
+	/* If increasing the priority, then accept the change but
+	nothing else really happens at the moment. */
+	if (prio >= deff_runqueue->prio)
+	{
+		deff_runqueue->prio = prio;
+		return;
 	}
 }
 

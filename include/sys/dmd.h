@@ -154,7 +154,7 @@ void dmd_mask_page (dmd_buffer_t dbuf, U16 mask);
 void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src);
 void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
-void dmd_alloc_high_clean (void);
+void dmd_alloc_pair_clean (void);
 void dmd_draw_border (U8 *dbuf);
 void dmd_draw_horiz_line (U16 *dbuf, U8 y);
 void dmd_shift_up (dmd_buffer_t dbuf);
@@ -164,7 +164,6 @@ void dmd_draw_image2 (const U8 *image_bits);
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
 void dmd_erase_region (U8 x, U8 y, U8 width, U8 height);
-void dmd_nop_hook (U8 new_dark_page, U8 new_bright_page);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);

@@ -66,11 +66,21 @@ diag_test_wpc (void)
 {
 }
 
+
+void
+diag_report_errors (void)
+{
+}
+
+
 void
 diag_run (void)
 {
 	diag_error_count = 0;
 
+#if 0
+	diag_post_error (DIAG_NOT_IMPLEMENTED);
+#endif
 	diag_test_cpu ();
 	diag_test_ram ();
 	diag_test_rom ();

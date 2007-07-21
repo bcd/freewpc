@@ -64,9 +64,9 @@ __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
 
-U8 lamp_flash_max;
+__fastram__ U8 lamp_flash_max;
 
-U8 lamp_flash_count;
+__fastram__ U8 lamp_flash_count;
 
 __fastram__ U8 lamp_strobe_mask;
 

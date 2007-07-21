@@ -34,6 +34,7 @@ void award_loop (void)
 {
 	if (flag_test (FLAG_POWERBALL_IN_PLAY))
 	{
+		deff_start (DEFF_PB_LOOP);
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		sound_send (SND_POWERBALL_QUOTE);
 		score (SC_5M);

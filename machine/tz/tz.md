@@ -142,7 +142,7 @@ define MACHINE_DEBUGGER_HOOK tz_debugger_hook
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
-14: Tilt, tilt, ingame
+14: Tilt, tilt, ingame, noplay
 15: Right Trough, c_decl(sw_trough), noplay
 16: Center Trough, c_decl(sw_trough), noplay
 17: Left Trough, c_decl(sw_trough), noplay
@@ -150,7 +150,7 @@ define MACHINE_DEBUGGER_HOOK tz_debugger_hook
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noplay
-26: Trough Proximity, noplay, ingame
+26: Trough Proximity, edge, noplay, ingame
 27: Shooter, edge, shooter, noplay
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
@@ -522,7 +522,9 @@ Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
 Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK1+4
 Door Award: PRI_GAME_QUICK1+6
+Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK1+7
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
+PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE1+8
 Ball Save: page(MACHINE_PAGE), PRI_GAME_QUICK1+9

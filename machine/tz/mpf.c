@@ -44,6 +44,7 @@ void mpf_enable (void)
 
 void mpf_battle_running (void)
 {
+	task_sleep_sec (5);
 	task_exit ();
 }
 
@@ -56,6 +57,12 @@ void mpf_start (void)
 void mpf_stop (void)
 {
 	task_kill_gid (GID_BATTLE_RUNNING);
+}
+
+
+CALLSET_ENTRY (mpf, door_start_battle_power)
+{
+	mpf_enable ();
 }
 
 
@@ -116,11 +123,20 @@ CALLSET_ENTRY (mpf, sw_mpf_right)
 }
 
 
+CALLSET_ENTRY (mpf, sw_l_l_flipper_button)
+{
+}
+
+
+CALLSET_ENTRY (mpf, sw_l_r_flipper_button)
+{
+}
+
+
 CALLSET_ENTRY (mpf, sw_right_ramp)
 {
 	/* If the mini-playfield is enabled, open the ramp
 	divertor fully.  The ordinary catch and drop is bypassed. */
-
 	event_should_follow (right_ramp, mpf_enter, TIME_3S);
 }
 
