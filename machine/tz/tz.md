@@ -327,7 +327,7 @@ Powerfield Values: MPF 500K..MPF 1M
 Jets: Left Jet..Right Jet
 Lower Lanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outlane
 Loop Awards: Left Spiral, Left Powerball, Right Spiral, Right Powerball
-Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again, Power Payoff, Gumball Lane
+Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again, Power Payoff, Gumball Lane, Camera, Dead End
 Spiral Awards: Spiral 2M..Spiral EB
 Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
 Amode Rand: Amode All

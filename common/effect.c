@@ -26,31 +26,10 @@ extern __nvram__ U8 current_volume;
 extern const audio_track_t volume_change_music_track;
 
 
-__noreturn__ void generic_oneline_deff (const char *line)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 16, line);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}
-
-
-__noreturn__ void generic_twoline_deff (const char *line1, const char *line2)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 10, line1);
-	font_render_string_center (&font_fixed6, 64, 21, line1);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}
-
-
 /** Display effect when locating missing balls prior to game start */
 void locating_balls_deff (void)
 {
-	generic_twoline_deff ("LOCATING BALLS", "PLEASE WAIT...");
+	generic_deff ("LOCATING BALLS", "PLEASE WAIT...");
 }
 
 
@@ -58,7 +37,7 @@ void locating_balls_deff (void)
 before returning to attract mode */
 void game_over_deff (void)
 {
-	generic_oneline_deff ("GAME OVER");
+	generic_deff ("GAME OVER", NULL);
 }
 
 

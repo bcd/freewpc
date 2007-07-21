@@ -73,7 +73,7 @@ U8 sound_version_minor;
 
 /** The default audio track to be played when setting volume. */
 const audio_track_t volume_change_music_track = {
-	.prio = PRI_VOLUME_CHANGE,
+	.prio = PRI_VOLUME_CHANGE_MUSIC,
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 	.code = MACHINE_VOLUME_CHANGE_MUSIC
 #else

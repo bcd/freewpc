@@ -21,7 +21,9 @@
 #include <freewpc.h>
 
 
-__local__ U8 battle_power_lit;
+extern __local__ U8 mpf_enable_count;
+
+U8 right_ramps_entered;
 
 
 void right_ramp_default_deff (void)
@@ -32,23 +34,24 @@ void right_ramp_default_deff (void)
 }
 
 
-void sw_right_ramp_powerfield_task (void)
+void sw_right_ramp_enter_task (void)
 {
 	task_set_flags (TASK_PROTECTED);
-	sol_on (SOL_RIGHT_RAMP_DIV);
-	task_sleep_sec (5);
-	sol_off (SOL_RIGHT_RAMP_DIV);
-	task_exit ();
-}
-
-
-void sw_right_ramp_task (void)
-{
-	task_set_flags (TASK_PROTECTED);
-	task_sleep_sec (2);
-	sound_send (SND_RIGHT_RAMP_EXIT);
-	sol_on (SOL_RIGHT_RAMP_DIV);
-	task_sleep (TIME_100MS * 2);
+	do {
+		if (mpf_enable_count)
+		{
+			sol_on (SOL_RIGHT_RAMP_DIV);
+			task_sleep_sec (4);
+		}
+		else
+		{
+			task_sleep_sec (2);
+			sol_on (SOL_RIGHT_RAMP_DIV);
+			sound_send (SND_RIGHT_RAMP_EXIT);
+			task_sleep (TIME_100MS * 2);
+			sol_off (SOL_RIGHT_RAMP_DIV);
+		}
+	} while (--right_ramps_entered > 0);
 	sol_off (SOL_RIGHT_RAMP_DIV);
 	task_exit ();
 }
@@ -61,26 +64,23 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 
 	score (SC_10K);
 
+	right_ramps_entered++;
 	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))
+		task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_enter_task);
+
+	if (mpf_enable_count > 0)
 	{
-		if (battle_power_lit)
-		{
-			sound_send (SND_RAMP_ENTERS_POWERFIELD);
-			task_create_gid (GID_RIGHT_RAMP_ENTERED, 
-				sw_right_ramp_powerfield_task);
-		}
-		else
-		{
-			sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
-			task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_task);
-		}
+		sound_send (SND_RAMP_ENTERS_POWERFIELD);
+	}
+	else
+	{
+		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
 	}
 }
 
 
-CALLSET_ENTRY (right_ramp, start_player)
+CALLSET_ENTRY (right_ramp, start_ball)
 {
-	battle_power_lit = 0;
+	right_ramps_entered = 0;
 }
-
 

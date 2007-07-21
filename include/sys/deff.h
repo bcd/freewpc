@@ -138,8 +138,24 @@ extern inline void deff_wait_for_other (deffnum_t dn)
 	}
 }
 
-__common__ __noreturn__ void generic_oneline_deff (const char *);
-__common__ __noreturn__ void generic_twoline_deff (const char *, const char *);
+extern inline __noreturn__ void generic_deff (
+	const char *line1, const char *line2)
+{
+	dmd_alloc_low_clean ();
+	if (line1 && line2)
+	{
+		font_render_string_center (&font_fixed6, 64, 10, line1);
+		font_render_string_center (&font_fixed6, 64, 21, line2);
+	}
+	else
+	{
+		font_render_string_center (&font_fixed6, 64, 16, line1);
+	}
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
 
 #ifndef MACHINE_CUSTOM_AMODE
 void default_amode_deff (void);

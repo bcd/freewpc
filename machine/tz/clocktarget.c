@@ -25,12 +25,7 @@ __local__ U8 clock_hits;
 
 void clock_millions_hit_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 8, "CLOCK MILLIONS");
-	font_render_string_center (&font_fixed6, 64, 18, "5,000,000");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
+	generic_deff ("CLOCK MILLIONS", "5,000,000");
 }
 
 

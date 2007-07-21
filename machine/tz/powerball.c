@@ -111,7 +111,7 @@ void pb_detect_deff (void)
 
 void pb_loop_deff (void)
 {
-	generic_twoline_deff ("POWERBALL LOOP", "10,000,000");
+	generic_deff ("POWERBALL LOOP", "10,000,000");
 }
 
 
@@ -208,6 +208,10 @@ void pb_detect_event (pb_event_t event)
 	}
 }
 
+
+/** Announce that the powerball is in play, if it is.  This is
+only called at certain points when we want to announce this.
+The powerball may have been detected sometime earlier. */
 void pb_announce (void)
 {
 	if (pb_announce_needed)
@@ -223,9 +227,12 @@ void pb_announce (void)
 	}
 }
 
-void pb_poll_trough_task (void)
+
+/** Poll the trough proximity switch to see if the next ball
+to be served is a steel ball or the powerball.   This is
+called anytime the trough changes in some way. */
+void pb_poll_trough (void)
 {
-	task_sleep (TIME_200MS);
 	if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
 		if (switch_poll_trough_metal ())
@@ -237,13 +244,6 @@ void pb_poll_trough_task (void)
 			pb_detect_event (TROUGH_PB_DETECTED);
 		}
 	}
-	task_exit ();
-}
-
-
-void pb_poll_trough (void)
-{
-	task_recreate_gid (GID_PB_POLL_TROUGH, pb_poll_trough_task);
 }
 
 
@@ -344,6 +344,7 @@ CALLSET_ENTRY (pb_detect, dev_trough_enter)
 	/* Note: during the call to enter, live_balls has not been updated
 	and reflects the value prior to the ball entering the device. */
 	pb_container_enter (PB_IN_TROUGH, DEVNO_TROUGH);
+	pb_poll_trough ();
 }
 
 CALLSET_ENTRY (pb_detect, dev_lock_enter)

@@ -246,6 +246,8 @@ void end_ball (void)
 	/* Stop everything running except for this task.
 	 * Any task that has protected itself is immune to this.
 	 * Normally, this is not necessary. */
+	deff_stop_all ();
+	leff_stop_all ();
 	task_kill_all ();
 
 	/* If the player has extra balls stacked, then start the

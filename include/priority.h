@@ -28,6 +28,7 @@
  */
 typedef enum _priority {
 	PRI_NULL,
+	PRI_VOLUME_CHANGE_MUSIC,
 	PRI_AMODE,
 	PRI_COINS,
 	PRI_EGG1, PRI_EGG2, PRI_EGG3, PRI_EGG4,
@@ -60,7 +61,7 @@ typedef enum _priority {
 	PRI_REPLAY,
 	PRI_SPECIAL,
 	PRI_BALL_SEARCH,
-	PRI_VOLUME_CHANGE,
+	PRI_VOLUME_CHANGE_DISPLAY,
 	PRI_TILT_WARNING,
 
 	/* Every priority greater than PRI_SOLO indicates
