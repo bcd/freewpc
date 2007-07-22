@@ -114,7 +114,7 @@ deff_entry_t *deff_entry_find_waiting (deffnum_t id)
 			if (entry->id == id)
 				return entry;
 			else
-				entry = entry->dll.next;
+				entry = (deff_entry_t *)entry->dll.next;
 		} while (entry != deff_waitqueue);
 	}
 	return NULL;
@@ -212,11 +212,10 @@ static void deff_start_task (const deff_t *deff)
 void deff_reschedule (void)
 {
 	deff_entry_t *entry;
-	U8 prio = 0;
 	deff_entry_t *best = NULL;
 
 	/* Clean up before starting a new task */
-	dll_init (&deff_runqueue);
+	dll_init (&deff_runqueue->dll);
 
 	/* Select a deff from the waitqueue */
 	if (deff_waitqueue)
@@ -228,7 +227,7 @@ void deff_reschedule (void)
 				entry, entry->id, entry->prio);
 			if (!best || entry->prio > best->prio)
 				best = entry;
-			entry = entry->dll.next;
+			entry = (deff_entry_t *)entry->dll.next;
 		} while (entry != deff_waitqueue);
 	}
 
@@ -402,8 +401,8 @@ void deff_nice (enum _priority prio)
 /** Initialize the display effect subsystem. */
 void deff_init (void)
 {
-	dll_init (&deff_runqueue);
-	dll_init (&deff_waitqueue);
+	dll_init (&deff_runqueue->dll);
+	dll_init (&deff_waitqueue->dll);
 }
 
 
@@ -422,7 +421,7 @@ void deff_stop_all (void)
 	{
 		deff_entry_t *entry = deff_waitqueue;
 		do {
-			deff_entry_t *next = entry->dll.next;
+			deff_entry_t *next = (deff_entry_t *)entry->dll.next;
 			deff_entry_free (entry);
 			entry = next;
 		} while (entry != deff_waitqueue);

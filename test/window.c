@@ -1190,21 +1190,30 @@ const font_t *font_test_lookup (void)
 {
 	switch (menu_selection)
 	{
-#if (MAX_FONTS > 0)
 		case FON_MONO5: return &font_mono5;
-		case FON_MONO9: return &font_mono9;
 		case FON_FIXED10: return &font_fixed10;
 		case FON_FIXED6: return &font_fixed6;
 		case FON_LUCIDA9: return &font_lucida9;
 		case FON_TERM6: return &font_term6;
 		case FON_TIMES8: return &font_times8;
-		case FON_TIMES10: return &font_times10; /* this and helv8 are the same? */
-		case FON_HELV8: return &font_helv8;
-		case FON_MISCTYPE: return &font_misctype; /* broken! */
-		case FON_FIXED12: return &font_fixed12; /* broken! */
 		case FON_VAR5: return &font_var5;
 		case FON_CU17: return &font_cu17;
 		case FON_TINYNUM: return &font_tinynum;
+
+#ifdef FON_MONO9
+		case FON_MONO9: return &font_mono9;
+#endif
+#ifdef FON_TIMES10
+		case FON_TIMES10: return &font_times10; /* this and helv8 are the same? */
+#endif
+#ifdef FON_HELV8
+		case FON_HELV8: return &font_helv8;
+#endif
+#ifdef FON_MISCTYPE
+		case FON_MISCTYPE: return &font_misctype; /* broken! */
+#endif
+#ifdef FON_FIXED12
+		case FON_FIXED12: return &font_fixed12; /* broken! */
 #endif
 		default:
 			return &font_mono5;
@@ -1867,7 +1876,7 @@ struct menu dev_force_error_item = {
 
 void dev_frametest_draw (void)
 {
-	const U8 *data = 0x4001 + menu_selection * DMD_PAGE_SIZE;
+	const U8 *data = (U8 *)0x4001 + menu_selection * DMD_PAGE_SIZE;
 	if (switch_poll_logical (SW_ENTER))
 	{
 		dmd_alloc_low_high ();
@@ -1900,7 +1909,7 @@ struct menu dev_frametest_item = {
 #define SCHED_LOCAL_COUNT   16
 
 U16 sched_test_count;
-U8 *local_data_pointer;
+volatile U8 *local_data_pointer;
 
 void sched_test_task (void)
 {
@@ -1960,8 +1969,8 @@ const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
 
 void score_test_init (void)
 {
-	score_t *s;
-	for (s = &scores[0]; s < &scores[4]; s++)
+	bcd_t *s;
+	for (s = &scores[0][0]; s < &scores[4][0]; s++)
 	{
 		score_zero (s);
 		score_add (s, score_test_increment);

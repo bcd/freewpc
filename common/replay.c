@@ -119,7 +119,7 @@ void replay_reset (void)
 {
 	U8 replay_code;
 
-	replay_code = &system_config.replay_level[0];
+	replay_code = system_config.replay_level[0];
 	wpc_nvram_get ();
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
 	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);

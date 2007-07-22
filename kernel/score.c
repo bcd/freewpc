@@ -227,7 +227,7 @@ redraw:
 }
 
 
-void score_zero (score_t *s)
+void score_zero (score_t s)
 {
 	memset (s, 0, sizeof (score_t));
 }

@@ -48,6 +48,7 @@ char sprintf_buffer[PRINTF_BUFFER_SIZE];
 #endif
 
 
+#ifdef __m6809__
 void exit (void)
 {
 }
@@ -56,6 +57,8 @@ void abort (void)
 {
 	fatal (ERR_LIBC_ABORT);
 }
+
+#endif
 
 /** do_reset is the beginning of the C code.
  * When building for the 6809, control transfers here from the
@@ -302,6 +305,7 @@ void fatal (errcode_t error_code)
 #ifndef CONFIG_PLATFORM_LINUX
 S16 main (void)
 {
+	return 0;
 }
 #endif
 

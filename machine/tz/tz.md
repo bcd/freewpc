@@ -569,17 +569,8 @@ Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL)
 # Fonts used in this game.
 ##########################################################################
 [fonts]
-mono5:
 mono9:
-fixed10:
-fixed6:
-lucida9:
-term6:
-times8:
 times10:
 helv8:
 misctype:
 fixed12:
-var5:
-cu17:
-tinynum:

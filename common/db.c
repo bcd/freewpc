@@ -141,12 +141,15 @@ void db_idle (void)
 				}
 
 				default:
+				{
+#ifdef MACHINE_DEBUGGER_HOOK
 					/* Allow the machine to define additional commands.
 					 * This function must reside in the system page. */
-#ifdef MACHINE_DEBUGGER_HOOK
+					extern void MACHINE_DEBUGGER_HOOK (U8);
 					MACHINE_DEBUGGER_HOOK (c);
 #endif
 					break;
+				}
 			}
 		}
 	}

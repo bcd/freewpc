@@ -533,10 +533,6 @@ void device_probe (void)
 /** Called from a switch handler to do the common processing */
 void device_sw_handler (U8 devno)
 {
-#ifdef DEBUGGER
-	device_t *dev = device_entry (devno);
-#endif
-
 	/* Ignore device switches until device SS is initialized. */
 	if (device_ss_state == 0)
 		return;

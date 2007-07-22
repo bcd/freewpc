@@ -52,9 +52,9 @@ enum chunk_type
 	CHUNK_TYPE_LEN8 = 0,
 	CHUNK_TYPE_LEN16,
 	CHUNK_TYPE_LEN32,
-	NUM_CHUNK_TYPES
 };
 
+#define NUM_CHUNK_TYPES 3
 
 typedef struct _user_header
 {
@@ -230,6 +230,9 @@ void malloc_chunk_dump (task_t *task)
 		case CHUNK_TYPE_LEN32:
 			dbprintf ("MEM(32) ");
 			blocks = 2;
+			break;
+		default:
+			blocks = 0;
 			break;
 	}
 
@@ -503,8 +506,6 @@ void malloc_test_thread (void)
 /** Initialize the malloc subsystem */
 CALLSET_ENTRY (malloc, init)
 {
-	enum chunk_type type;
-
 	/* Make sure malloc_chunk fits into a task_t */
 	if (sizeof (malloc_chunk_t) > sizeof (task_t) - 1)
 	{

@@ -29,6 +29,8 @@
  */
 
 #include <freewpc.h>
+#include <diag.h>
+
 
 /** The number of credits */
 __nvram__ volatile U8 credit_count;
