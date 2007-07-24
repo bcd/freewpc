@@ -463,6 +463,18 @@ extern inline U8 wpc_read_flippers (void)
 }
 
 
+extern inline U8 wpc_read_flipper_buttons (void)
+{
+	return wpc_read_flippers () & 0xAA;
+}
+
+
+extern inline U8 wpc_read_flipper_eos (void)
+{
+	return wpc_read_flippers () & 0x55;
+}
+
+
 #define WPC_LR_FLIP_POWER	0x1
 #define WPC_LR_FLIP_HOLD	0x2
 #define WPC_LL_FLIP_POWER	0x4

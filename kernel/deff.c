@@ -59,7 +59,7 @@ typedef struct
 	U8 id;
 	U8 prio;
 	U8 flags;
-	U8 reserved;
+	U8 timeout;
 } deff_entry_t;
 
 
@@ -73,6 +73,11 @@ deff_entry_t *deff_waitqueue;
 
 /* The single deff that is currently driving the display */
 deff_entry_t *deff_runqueue;
+
+/** The number of elapsed ticks since the last reschedule */
+U8 deff_time_last_idle;
+
+U8 deff_timeout_disabled;
 
 
 deff_entry_t *deff_entry_create (deffnum_t id)
@@ -225,8 +230,10 @@ void deff_reschedule (void)
 		do {
 			deff_debug ("Checking %p, id %d, prio %d\n",
 				entry, entry->id, entry->prio);
+
 			if (!best || entry->prio > best->prio)
 				best = entry;
+
 			entry = (deff_entry_t *)entry->dll.next;
 		} while (entry != deff_waitqueue);
 	}
@@ -302,6 +309,10 @@ void deff_start (deffnum_t dn)
 		/* This deff cannot run now, but it wants to wait. */
 		deff_debug ("Can't run because higher priority active\n");
 		deff_enqueue (&deff_waitqueue, entry);
+
+		/* If it wants to timeout automatically, initialize the timeout value. */
+		if (entry->flags & D_TIMEOUT)
+			entry->timeout = 5; /* wait 5 secs. */
 	}
 	else
 	{
@@ -395,6 +406,8 @@ void deff_nice (enum _priority prio)
 		deff_runqueue->prio = prio;
 		return;
 	}
+
+	/* TODO */
 }
 
 
@@ -403,6 +416,8 @@ void deff_init (void)
 {
 	dll_init (&deff_runqueue->dll);
 	dll_init (&deff_waitqueue->dll);
+	deff_time_last_idle = 0;
+	deff_timeout_disabled = 0;
 }
 
 
@@ -428,6 +443,50 @@ void deff_stop_all (void)
 	}
 
 	deff_init ();
+}
+
+
+/** At idle time, stop any queued deffs that have timed out. */
+CALLSET_ENTRY (deff, idle)
+{
+	extern U8 tick_count;
+	U8 elapsed_ticks;
+
+	/* See how many ticks went by since the last idle processing */
+	elapsed_ticks = tick_count - deff_time_last_idle;
+
+	/* Was it at least 1 second? (the minimum timeout granularity?) */
+	if (elapsed_ticks >= TIME_1S)
+	{
+		dbprintf ("Deff idle\n");
+		/* Yes, update all of the queued timer entries that have D_TIMEOUT set. */
+		/* But if timers are disabled, then don't do this. */
+		if (deff_timeout_disabled == 0)
+		{
+restart:
+			if (deff_waitqueue)
+			{
+				deff_entry_t *entry = deff_waitqueue;
+				do {
+					if (entry->flags & D_TIMEOUT)
+					{
+						entry->timeout--;
+						dbprintf ("Deff %d timer at %d\n", entry->id, entry->timeout);
+						if (entry->timeout == 0)
+						{
+							/* Remove this entry from the list and restart */
+							deff_dequeue (&deff_waitqueue, entry);
+							goto restart;
+						}
+					}
+					entry = (deff_entry_t *)entry->dll.next;
+				} while (entry != deff_waitqueue);
+			}
+		}
+
+		/* Update local time count */
+		deff_time_last_idle += TIME_1S;
+	}
 }
 
 

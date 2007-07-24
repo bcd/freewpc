@@ -1115,7 +1115,7 @@ sub machine_write_deff_decls {
 
 	print "const deff_t deff_table[] = {\n";
 	for $deff (unique ($m->{'deffs'})) {
-		my ($prio, $flags) = split / /, $deff->{'props'};
+		my ($prio, $flags) = split /[ \t,]/, $deff->{'props'};
 		if (!defined $flags) {
 			$flags = $deff->{'runner'} ? "D_QUEUED" : "D_NORMAL";
 		}
