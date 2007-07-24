@@ -246,8 +246,6 @@ void end_ball (void)
 	/* Stop everything running except for this task.
 	 * Any task that has protected itself is immune to this.
 	 * Normally, this is not necessary. */
-	deff_stop_all ();
-	leff_stop_all ();
 	task_kill_all ();
 
 	/* If the player has extra balls stacked, then start the
@@ -269,14 +267,14 @@ void end_ball (void)
 	 * if 1-coin buyin is enabled, offer this too. */
 	if (ball_up == system_config.balls_per_game)
 	{
-		if (0)
+		if (0) /* TODO - check if buyin is enabled */
 		{
-			buyin_offer ();
+			SECTION_VOIDCALL (__common__, buyin_offer);
 		}
 
 		if (price_config.one_coin_buyin == YES)
 		{
-			onecoin_buyin_offer ();
+			SECTION_VOIDCALL (__common__, onecoin_buyin_offer);
 		}
 	}
 

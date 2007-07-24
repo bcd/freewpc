@@ -259,7 +259,7 @@ EFFECT_OBJS = \
 
 EVENT_OBJS = build/callset.o
 
-TEST_OBJS = test/window.o
+TEST_OBJS = test/window.o test/mix.o
 
 TRANS_OBJS = kernel/dmdtrans.o
 

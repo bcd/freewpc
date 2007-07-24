@@ -276,13 +276,6 @@ void browser_down (void)
 		menu_selection = browser_max;
 }
 
-#define INHERIT_FROM_BROWSER \
-	DEFAULT_WINDOW, \
-	.init = browser_init, \
-	.draw = browser_draw, \
-	.up = browser_up, \
-	.down = browser_down \
-
 struct window_ops browser_window = {
 	INHERIT_FROM_BROWSER,
 };
@@ -1452,12 +1445,10 @@ void deff_stress_thread (void)
 		if (start_stop_flag)
 		{
 			deff_start (dn);
-			sound_send (SND_TEST_UP);
 		}
 		else
 		{
 			deff_stop (dn);
-			sound_send (SND_TEST_DOWN);
 		}
 
 		task_sleep (delay);
@@ -2031,6 +2022,8 @@ struct menu score_test_item = {
 
 /**********************************************************************/
 
+extern const struct menu music_mix_menu;
+
 struct menu *dev_menu_items[] = {
 	&dev_font_test_item,
 	&dev_deff_test_item,
@@ -2045,6 +2038,7 @@ struct menu *dev_menu_items[] = {
 	&symbol_test_item,
 	&sched_test_item,
 	&score_test_item,
+	&music_mix_menu,
 	NULL,
 };
 

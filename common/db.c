@@ -119,6 +119,10 @@ void db_idle (void)
 					VOIDCALL (dump_game);
 					break;
 
+				case 'd':
+					VOIDCALL (dump_deffs);
+					break;
+
 				case 'r':
 				{
 					U8 *addr = (U8 *)db_read_address ();

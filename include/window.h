@@ -103,6 +103,20 @@ struct window_ops
 	.thread = NULL
 
 
+/* The browser window constructor */
+
+#define INHERIT_FROM_BROWSER \
+	DEFAULT_WINDOW, \
+	.init = browser_init, \
+	.draw = browser_draw, \
+	.up = browser_up, \
+	.down = browser_down \
+
+extern __test__ void browser_init (void);
+extern __test__ void browser_draw (void);
+extern __test__ void browser_up (void);
+extern __test__ void browser_down (void);
+
 struct menu;
 
 

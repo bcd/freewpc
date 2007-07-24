@@ -132,6 +132,22 @@ static inline void deff_entry_free (deff_entry_t *entry)
 }
 
 
+void dump_deffs (void)
+{
+	if (deff_runqueue)
+		dbprintf ("Running: %d\n", deff_runqueue->id);
+	else
+		dbprintf ("No Running\n");
+
+	if (deff_waitqueue)
+	{
+		dbprintf ("Waiting:\n");
+	}
+	else
+		dbprintf ("No waiting\n");
+}
+
+
 /** The default running deff that runs when no other deff exists.
 It simply keeps the display blank. */
 void deff_default (void)
@@ -220,7 +236,7 @@ void deff_reschedule (void)
 	deff_entry_t *best = NULL;
 
 	/* Clean up before starting a new task */
-	dll_init (&deff_runqueue->dll);
+	dll_init ((struct dll_header *)&deff_runqueue);
 
 	/* Select a deff from the waitqueue */
 	if (deff_waitqueue)
@@ -273,10 +289,16 @@ void deff_start (deffnum_t dn)
 	{
 		entry = deff_entry_create (dn);
 		if (entry == NULL)
+		{
+			dbprintf ("Failed to alloc entry for deff %d\n", dn);
 			return;
+		}
 	}
 	else
+	{
+		dbprintf ("Deff %d already running\n", dn);
 		return;
+	}
 
 	if (!deff_runqueue || entry->prio > deff_runqueue->prio)
 	{
@@ -330,21 +352,20 @@ void deff_stop (deffnum_t dn)
 	dbprintf ("Stopping deff #%d\n", dn);
 	if (deff_runqueue && deff_runqueue->id == dn)
 	{
-		entry = deff_runqueue;
+		deff_debug ("Dequeueing running deff %d\n", dn);
+		deff_entry_free (deff_runqueue);
  		deff_reschedule ();
 	}
 	else if ((entry = deff_entry_find_waiting (dn)) != NULL)
 	{
 		deff_debug ("Dequeueing waiting deff %d\n", dn);
 		deff_dequeue (&deff_waitqueue, entry);
+		deff_entry_free (entry);
 	}
 	else
 	{
 		deff_debug ("Deff not started %d\n", dn);
-		return;
 	}
-
-	deff_entry_free (entry);
 }
 
 
@@ -414,8 +435,8 @@ void deff_nice (enum _priority prio)
 /** Initialize the display effect subsystem. */
 void deff_init (void)
 {
-	dll_init (&deff_runqueue->dll);
-	dll_init (&deff_waitqueue->dll);
+	dll_init ((struct dll_header *)&deff_runqueue);
+	dll_init ((struct dll_header *)&deff_waitqueue);
 	deff_time_last_idle = 0;
 	deff_timeout_disabled = 0;
 }
@@ -429,6 +450,7 @@ void deff_stop_all (void)
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 
+	dbprintf ("deff_stop_all\n");
 	if (deff_runqueue)
 		deff_entry_free (deff_runqueue);
 
@@ -458,7 +480,6 @@ CALLSET_ENTRY (deff, idle)
 	/* Was it at least 1 second? (the minimum timeout granularity?) */
 	if (elapsed_ticks >= TIME_1S)
 	{
-		dbprintf ("Deff idle\n");
 		/* Yes, update all of the queued timer entries that have D_TIMEOUT set. */
 		/* But if timers are disabled, then don't do this. */
 		if (deff_timeout_disabled == 0)
