@@ -296,6 +296,8 @@ void browser_print_operation (const char *s)
 struct adjustment *browser_adjs;
 U8 adj_edit_value;
 
+/* TODO : move all of the rendering functions to a separate page */
+
 void decimal_render (U8 val) { sprintf ("%d", val); }
 void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
 void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
@@ -2874,10 +2876,12 @@ void sound_test_enter (void)
 {
 	browser_action = ~browser_action;
 	browser_last_selection_update = menu_selection + 1;
-#if 0
+
 	if (browser_action == 0)
+	{
+		task_sleep (TIME_100MS);
 		sound_reset ();
-#endif
+	}
 	browser_draw ();
 }
 

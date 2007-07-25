@@ -274,32 +274,12 @@ void deff_reschedule (void)
 }
 
 
-/** Start a display effect */
-void deff_start (deffnum_t dn)
+/** Try to start a display effect described by entry.
+ * If it can't be started, it is either queued or freed.
+ * If it preempts another deff, that one will be queued or freed
+ * as well. */
+static void deff_entry_start (deff_entry_t *entry)
 {
-	deff_entry_t *entry;
-
-	dbprintf ("Deff %d start request\n", dn);
-
-	/* See if an entry is already tracking this deff.
-	 * If so, just return.  To truly restart the deff,
-	 * you need to call deff_restart(). */
-	entry = deff_entry_find (dn);
-	if (entry == NULL)
-	{
-		entry = deff_entry_create (dn);
-		if (entry == NULL)
-		{
-			dbprintf ("Failed to alloc entry for deff %d\n", dn);
-			return;
-		}
-	}
-	else
-	{
-		dbprintf ("Deff %d already running\n", dn);
-		return;
-	}
-
 	if (!deff_runqueue || entry->prio > deff_runqueue->prio)
 	{
 		/* This is the new active running deff */
@@ -341,6 +321,36 @@ void deff_start (deffnum_t dn)
 		deff_debug ("Quick deff lacks priority\n");
 		deff_entry_free (entry);
 	}
+}
+
+
+/** Start a statically defined display effect */
+void deff_start (deffnum_t dn)
+{
+	deff_entry_t *entry;
+
+	dbprintf ("Deff %d start request\n", dn);
+
+	/* See if an entry is already tracking this deff.
+	 * If so, just return.  To truly restart the deff,
+	 * you need to call deff_restart(). */
+	entry = deff_entry_find (dn);
+	if (entry == NULL)
+	{
+		entry = deff_entry_create (dn);
+		if (entry == NULL)
+		{
+			dbprintf ("Failed to alloc entry for deff %d\n", dn);
+			return;
+		}
+	}
+	else
+	{
+		dbprintf ("Deff %d already running\n", dn);
+		return;
+	}
+
+	deff_entry_start (entry);
 }
 
 
@@ -468,6 +478,14 @@ void deff_stop_all (void)
 }
 
 
+CALLSET_ENTRY (deff, any_device_enter)
+{
+	/* TODO : If there are any pending, short-lived deffs with D_TIMEOUT set,
+	 * and there are no balls live on the playfield, wait here and give
+	 * the deffs a chance to dequeue before returning. */
+}
+
+
 /** At idle time, stop any queued deffs that have timed out. */
 CALLSET_ENTRY (deff, idle)
 {
@@ -511,11 +529,15 @@ restart:
 }
 
 
+/** If both flippers are pressed and the current running deff
+ * is abortable, then stop it. */
 CALLSET_ENTRY (deff, flipper_abort)
 {
+	dbprintf ("Both flippers pressed.\n");
 	if (deff_runqueue 
 		&& deff_runqueue->flags & D_ABORTABLE)
 	{
+		dbprintf ("Deff %d aborted.\n", deff_runqueue->id);
 		deff_stop (deff_runqueue->id);
 	}
 }

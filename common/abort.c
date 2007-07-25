@@ -30,7 +30,7 @@ void abort_monitor_task (void)
 	U8 count = 3;
 	while (count > 0)
 	{
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
 			|| !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
 		{

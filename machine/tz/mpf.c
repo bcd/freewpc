@@ -19,13 +19,45 @@
  */
 
 #include <freewpc.h>
+#include <rtsol.h>
 
-
+/** The number of balls enabled to go to the MPF */
 __local__ U8 mpf_enable_count;
 
+/** Nonzero when the MPF is active */
+U8 mpf_active;
+
+__fastram__ S8 rtsol_mpf_left;
+
+__fastram__ S8 rtsol_mpf_right;
 
 /** Number of balls currently on the mini-playfield */
 U8 mpf_ball_count;
+
+
+void mpf_rtt (void) /* TODO : move to system page */
+{
+	if (mpf_active && in_live_game)
+	{
+		rt_solenoid_update (&rtsol_mpf_left,
+			SOL_MPF_LEFT_MAGNET, RTSOL_ACTIVE_HIGH,
+			SW_L_L_FLIPPER_BUTTON, RTSW_ACTIVE_HIGH,
+			8, 8);
+	
+		rt_solenoid_update (&rtsol_mpf_right,
+			SOL_MPF_RIGHT_MAGNET, RTSOL_ACTIVE_HIGH,
+			SW_L_R_FLIPPER_BUTTON, RTSW_ACTIVE_HIGH,
+			8, 8);
+	}
+}
+
+
+void mpf_active_deff (void)
+{
+	while (mpf_active)
+	{
+	}
+}
 
 
 void mpf_battle_lamp_update (void)
@@ -41,6 +73,24 @@ void mpf_enable (void)
 	mpf_enable_count++;
 	mpf_battle_lamp_update ();
 }
+
+
+void mpf_activate (void)
+{
+	if (mpf_enable_count > 0)
+	{
+		mpf_enable_count--;
+		mpf_active = 1;
+		mpf_ball_count++;
+	}
+}
+
+
+void mpf_deactivate (void)
+{
+	mpf_active = 0;
+}
+
 
 void mpf_battle_running (void)
 {
@@ -119,16 +169,6 @@ CALLSET_ENTRY (mpf, sw_mpf_left)
 
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
-{
-}
-
-
-CALLSET_ENTRY (mpf, sw_l_l_flipper_button)
-{
-}
-
-
-CALLSET_ENTRY (mpf, sw_l_r_flipper_button)
 {
 }
 

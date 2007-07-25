@@ -59,6 +59,9 @@ const struct area_csum adj_csum_info = {
 };
 
 
+/** Called when an adjustment has been changed.  The checksum area
+ * needs to be recalculated, and modules may want to know about the
+ * change. */
 void adj_modified (void)
 {
 	csum_area_update (&adj_csum_info);

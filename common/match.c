@@ -51,13 +51,18 @@ match_deff (void)
 {
 	U8 value;
 	U8 n;
+	U8 last_value = 0xFF;
 	
 	for (n=0; n < 20; n++)
 	{
 		if (n == 19)
 			value = match_value;
 		else
-			value = random_scaled (10) * 0x10;
+		{
+			do {
+				value = random_scaled (10) * 0x10;
+			} while (value == last_value);
+		}
 
 		dmd_alloc_low_clean ();
 		font_render_string_right (&font_fixed6, 126, 2, "MATCH");

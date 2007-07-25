@@ -74,9 +74,9 @@ void jackpot_deff (void)
 			sprintf_buffer[i] = '\0';
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep (TIME_100MS);
+		sound_send (SND_CLOCK_CHAOS_END_BOOM);
+		task_sleep (TIME_500MS);
 	}
-	task_sleep (TIME_500MS);
 
 	for (i=0; i < 8; i++)
 	{
@@ -95,9 +95,12 @@ void jackpot_deff (void)
 		dmd_show_low ();
 	}
 
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	dmd_copy_low_to_high ();
+	dmd_show_low ();
 	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (16, TIME_66MS);
+	deff_swap_low_high (30, TIME_100MS);
 	task_sleep_sec (1);
 	deff_exit ();
 }
@@ -216,15 +219,20 @@ void spell_test_deff (void)
 
 void two_color_flash_deff (void)
 {
+	U8 n;
+
 	dmd_alloc_pair_clean ();
 	dmd_flip_low_high ();
 	font_render_string_center (&font_fixed6, 64, 9, "DARK");
 	dmd_flip_low_high ();
 	font_render_string_center2 (&font_fixed6, 64, 21, "BRIGHT");
-	dmd_show2 ();
-	task_sleep_sec (3);
-	dmd_show_high ();
-	task_sleep_sec (3);
+	for (n = 0; n < 5; n++)
+	{
+		dmd_show2 ();
+		task_sleep (TIME_500MS);
+		dmd_show_high ();
+		task_sleep (TIME_500MS);
+	}
 	deff_exit ();
 }
 

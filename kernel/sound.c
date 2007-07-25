@@ -231,8 +231,7 @@ U8 sound_board_command (U8 cmd, U8 retries)
 
 CALLSET_ENTRY (sound, idle)
 {
-#if 0
-
+#if 1
 	U8 in;
 	/* TODO : do something like this elsewhere for sound syncing */
 	if (sys_init_complete

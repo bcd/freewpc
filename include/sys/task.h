@@ -311,7 +311,7 @@ far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
 
 
 #ifdef CONFIG_PLATFORM_LINUX
-
+/* TODO */
 #else /* !CONFIG_PLATFORM_LINUX */
 
 #define TASK_DECL_ARGS(args...) args, ...

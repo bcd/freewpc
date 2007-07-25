@@ -61,7 +61,6 @@ rows are available. */
 #define D_ABORTABLE 0x8
 
 
-
 /** A constant descriptor for a display effect. */
 typedef struct
 {

@@ -245,7 +245,7 @@ task_t *task_expand_stack (task_t *tp)
 
 
 /** Free a task block for a task that no longer exists. */
-void task_free (task_t *tp)
+static void task_free (task_t *tp)
 {
 #if 0
 	/* Free any auxiliary stack blocks first.  This

@@ -43,8 +43,8 @@ void mb_lit_deff (void)
 	dmd_alloc_low_clean ();
 	sprintf ("BALL %d LOCKED", mball_locks_made);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 19, "SHOOT LEFT RAMP");
-	font_render_string_center (&font_mono5, 64, 27, "FOR MULTIBALL");
+	font_render_string_center (&font_mono5, 64, 20, "SHOOT LEFT RAMP");
+	font_render_string_center (&font_mono5, 64, 26, "FOR MULTIBALL");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -58,7 +58,7 @@ void mb_start_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 	dmd_show_low ();
-	flash_and_exit_deff (40, TIME_100MS);
+	flash_and_exit_deff (50, TIME_100MS);
 }
 
 

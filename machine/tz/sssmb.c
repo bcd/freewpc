@@ -60,6 +60,7 @@ void sssmb_jackpot_lit_deff (void)
 	font_render_string_center (&font_fixed10, 64, 9, "GET THE");
 	font_render_string_center (&font_fixed10, 64, 22, "JACKPOT");
 	dmd_show_low ();
+	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
 	for (;;)
 	{
@@ -77,8 +78,11 @@ void sssmb_jackpot_collected_deff (void)
 	font_render_string_center (&font_term6, 64, 10, "SKILL JACKPOT");
 	printf_millions (sssmb_jackpot_value);
 	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
+	sound_send (SND_SKILL_SHOT_CRASH_3);
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+	sound_send (SND_SKILL_SHOT_CRASH_3);
+	task_sleep_sec (1);
 	deff_exit ();
 }
 

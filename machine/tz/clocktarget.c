@@ -20,7 +20,9 @@
 
 #include <freewpc.h>
 
-__local__ U8 clock_hits;
+__local__ U8 clock_round_hits;
+
+__local__ U8 clock_default_hits;
 
 
 void clock_millions_hit_deff (void)
@@ -29,28 +31,44 @@ void clock_millions_hit_deff (void)
 }
 
 
+void clock_default_hit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("CLOCK HIT %d", clock_default_hits);
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 21, "50,000");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+
 CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
-	if (!lamp_test (LM_PANEL_CLOCK_MIL) && !lamp_test (LM_PANEL_CLOCK_CHAOS))
+	if (!lamp_test (LM_PANEL_CLOCK_MIL))
 	{
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
-		return;
 	}
-
-	sound_send (SND_CLOCK_BELL);
-	leff_start (LEFF_CLOCK_TARGET);
-	deff_start (DEFF_CLOCK_MILLIONS_HIT);
-	score (SC_5M);
-
-	if (clock_hits < 4)
-		clock_hits++;
+	else
+	{
+		sound_send (SND_CLOCK_BELL);
+		leff_start (LEFF_CLOCK_TARGET);
+		deff_start (DEFF_CLOCK_MILLIONS_HIT);
+		score (SC_5M);
+	
+		if (clock_round_hits <= 4)
+		{
+			clock_round_hits++;
+		}
+	}
 }
 
 
 CALLSET_ENTRY(clocktarget, start_player)
 {
-	clock_hits = 0;
+	clock_default_hits = 0;
+	clock_round_hits = 0;
 }
 
 

@@ -41,9 +41,8 @@ void player_tournament_ready_deff (void)
 	font_render_string_center (&font_var5, 64, 28, "PRESS START NOW");
 	dmd_show_low ();
 
-	timer = 10;
+	timer = 7;
 	do {
-		sound_send (SND_TEST_CONFIRM);
 		task_sleep_sec (1);
 	} while (--timer != 0);
 
