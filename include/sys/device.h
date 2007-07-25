@@ -102,8 +102,8 @@ do { \
 } while (0)
 
 
-/** The device structure is a read-only descriptor that
- * contains various device properties. */
+/** The device properties structure is a read-only descriptor that
+ * contains various compile-time attributes. */
 typedef struct device_properties
 {
 	/** Pointer to the operations structure */
@@ -139,52 +139,56 @@ typedef struct device_properties
 /** The device is idle (initial state).  No kicks are in progress. */
 #define DEV_STATE_IDLE			0
 
-/** An 'enter' event has been detected due to a switch closure. */
+/** An 'enter' event has been detected due to switch closure(s). */
 #define DEV_STATE_ENTERED		1
 
 /** The device is in the process of kicking a ball out. */
 #define DEV_STATE_RELEASING	2
 
+
 /** The device info structure.  This is a read-write
- * structure that maintains the current state of a device.
+ * structure that maintains the current status of a device.
  * Included is the state machine state, as well as other
- * properties like how many balls are currently in the
+ * things like how many balls are currently in the
  * device. */
 typedef struct device
 {
-	/** Device number assigned to this device */
+	/** Device number assigned to this device.  This is actually
+	fixed, but kept here for convenience. */
 	U8 devno;
 
-	/** A bitmask unique to this device.  These are assigned at
-	 * initialization based on the device number. */
+	/** A bitmask unique to this device.  This is equivalent to
+	the devno, but in bitmask form. */
 	U8 devno_mask;
 
 	/** The size of the device, same as the number of counting switches */
 	U8 size;
 
-	/** The current count of balls */
+	/** The current count of balls in the device, as determined by
+	the most recent recount. */
 	U8 actual_count;
 
-	/** The previous count of balls */
+	/** The previous count of balls, before the last recount.  Two
+	successive recounts are used to determine what changes occurred. */
 	U8 previous_count;
 
-	/** The maximum number of balls that can be held here permanently.
+	/** The maximum number of balls that we want held here.
 	 * If a ball enters the device and this count is not exceeded, then
-	 * the ball is kept here.  Otherwise, the ball is automatically
-	 * kicked out.  This field basically implements 'ball locking'
+	 * the ball is kept here.  Otherwise, the ball needs to be
+	 * kicked out.  This variable basically implements 'ball locking'
 	 * at the physical level. */
 	U8 max_count;
 
-	/** The number of balls needed to be kicked out */
+	/** The number of balls that we've determined need to be kicked out */
 	U8 kicks_needed;
 
-	/** The number of consecutive kick errors */
+	/** The number of consecutive kick errors.  This is used for retrying. */
 	U8 kick_errors;
 
 	/** The operational state of the device, one of the DEV_STATE_ values */
 	U8 state;
 
-	/** Pointer to the device property structure */
+	/** Pointer to the read-only device properties */
 	device_properties_t *props;
 } device_t;
 
