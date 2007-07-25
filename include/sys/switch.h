@@ -104,9 +104,11 @@ extern const U8 mach_edge_switches[];
 extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
 
+/** Poll the raw state of a switch.  Returns zero if open, nonzero
+if closed. */
 extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 {
-	return switch_bits[0][(sw_num / 8)] & (1 << (sw_num % 8));
+	return switch_bits[AR_RAW][SW_COL(sw_num)] & SW_ROWMASK(sw_num);
 }
 
 
@@ -141,8 +143,14 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 #define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
 #define event_did_follow(f,s)		switch_did_follow(f,s)
 
-/** A macro for button event handlers, which need to be behave
-differently when the button is kept pressed. */
+/** A macro for implementing button event handlers, which need to behave
+differently when the button is kept pressed.
+	SW is the id of the switch.
+	EVENT is the name of an event that is thrown to do the actual processing.
+	DELAY is the amount of time that the button must be held before
+	it is considered to repeat.
+	REPEAT is the frequency at which the event is rethrown while held.
+ */
 #define callset_invoke_held(sw,delay,repeat,event) \
 	do { \
 		U8 i; \
