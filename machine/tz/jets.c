@@ -86,11 +86,6 @@ void sw_jet_sound (void)
 }
 
 
-CALLSET_ENTRY (jet, start_ball)
-{
-}
-
-
 CALLSET_ENTRY (jet, sw_jet)
 {
 	if (lamp_test (LM_PANEL_TSM))
@@ -99,6 +94,7 @@ CALLSET_ENTRY (jet, sw_jet)
 		score (SC_250K);
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
+
 
 CALLSET_ENTRY (jet, door_start_tsm)
 {

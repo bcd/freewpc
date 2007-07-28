@@ -28,6 +28,7 @@
 #define HAVE_LOCAL_SECTION
 #define HAVE_PAGING
 #define HAVE_INTERRUPT_ATTRIBUTE
+#define HAVE_FLAG_SECTION
 #endif
 
 /** noreturn is a standard GCC attribute and is always
@@ -55,6 +56,14 @@
 #else
 #define __local__
 #endif
+
+typedef U8 flag_t;
+#ifdef HAVE_FLAG_SECTION
+#define __flagdef__ __attribute__((section ("flags"))) volatile flag_t
+#else
+#define __flagdef__
+#endif
+
 
 #ifdef HAVE_PAGING
 #define __far__(x)      __attribute__((far(x)))

@@ -58,6 +58,7 @@ const struct area_csum coin_csum_info = {
 };
 
 
+/** Reduce a credit fraction to simplest terms. */
 static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
 {
 	switch (*units_per_credit)
@@ -87,6 +88,7 @@ static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
 }
 
 
+/** Render the number of credits */
 void credits_render (void)
 {
 #ifdef FREE_ONLY
@@ -182,6 +184,7 @@ void lamp_start_update (void)
 }
 
 
+/** Increment the credit count by 1. */
 static void increment_credit_count (void)
 {
 	if (credit_count >= price_config.max_credits)
@@ -204,6 +207,7 @@ static void increment_credit_count (void)
 }
 
 
+/** Add a credit. */
 void add_credit (void)
 {
 	wpc_nvram_get ();
@@ -213,6 +217,8 @@ void add_credit (void)
 }
 
 
+/** Returns true if there are credits available.  This also returns
+true if the game is in free play mode. */
 bool has_credits_p (void)
 {
 #ifndef FREE_ONLY
@@ -226,6 +232,7 @@ bool has_credits_p (void)
 }
 
 
+/** Decrement the credit count by 1. */
 void remove_credit (void)
 {
 #ifndef FREE_ONLY
@@ -242,6 +249,7 @@ void remove_credit (void)
 }
 
 
+/** Increment the coin units counter. */
 void add_units (U8 n)
 {
 	if (credit_count >= price_config.max_credits)
@@ -269,6 +277,7 @@ void add_units (U8 n)
 }
 
 
+#if 0
 void coin_insert_deff (void)
 {
 	register S8 z = 4;
@@ -279,7 +288,10 @@ void coin_insert_deff (void)
 	}
 	deff_exit ();
 }
+#endif
 
+
+/** Handle the Nth coin slot switch. */
 static void do_coin (U8 slot)
 {
 	/* Ignore coins after slam tilt */
@@ -289,6 +301,7 @@ static void do_coin (U8 slot)
 	add_units (price_config.slot_values[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
 }
+
 
 CALLSET_ENTRY (coin, sw_left_coin)
 {
@@ -311,6 +324,7 @@ CALLSET_ENTRY (coin, sw_fourth_coin)
 }
 
 
+/** Clear the units and credits counters. */
 void credits_clear (void)
 {
 	wpc_nvram_get ();

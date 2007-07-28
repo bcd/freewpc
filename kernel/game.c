@@ -27,22 +27,24 @@
  *
  * This module implements the standard state machine of a pinball game.
  * The lifecycle is generally:
- * 1. Attract mode
- * 2. Start game
- * 3. Start player
- * 4. Start ball
- * 5. End ball
- * 6. End player
- * 7. End game
- * 8. High score entry
- * 9. Match
+ * <ol>
+ * <li>Attract mode
+ * <li>Start game
+ * <li>Start player
+ * <li>Start ball
+ * <li>End ball
+ * <li>End player
+ * <li>End game
+ * <li>High score entry
+ * <li>Match
+ * </ol>
  *
  * Bonus is not really a separate state, but is part of endball.
  *
  * There is experimental support here for timed game, aka Safecracker.
  *
  * The main inputs to this module are the start button, for initiating
- * a game, and the end_of_ball condition, which is signalled based on
+ * a game, and the end-of-ball condition, which is signalled based on
  * trough entry (when only one ball is in play).
  */
 
@@ -413,6 +415,7 @@ void timed_game_pause (task_ticks_t delay)
 #endif /* CONFIG_TIMED_GAME */
 
 
+/** Handle start-of-ball. */
 void start_ball (void)
 {
 	in_tilt = FALSE;

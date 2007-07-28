@@ -63,11 +63,22 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 
 /** Values for the 'state' field in the task structure */
 #define TASK_FREE    0x0
+
+/* Says that the block is in use */
 #define TASK_USED    0x1
+
+/* Says that the task is in the blocked state */
 #define TASK_BLOCKED 0x2
+
+/* Says that the malloc is used by the 'malloc' function */
 #define TASK_MALLOC  0x4
+
+/* Says that the block is used by the task scheduler */
 #define TASK_TASK		0x8
+
+/* Says that the block is used to hold a task stack */
 #define TASK_STACK	0x10
+
 
 /* The TASK_HEAP_SIZE field is not currently used.  It is
  * intended to represent how much memory, in bytes, has been

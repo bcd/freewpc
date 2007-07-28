@@ -21,6 +21,13 @@
 /**
  * \file
  * \brief The top-level IRQ handler
+ *
+ * The IRQ is asserted by the WPC 1024 times per second, and is the basis
+ * of all system timing.  To speed up interrupt processing, there are 8
+ * interrupt handlers which are executed in a repeating cycle.  A
+ * pointer ("irq_function") says which function to call.  This effectively
+ * unrolls the interrupt handler and avoids many if-tests.
+ *
  */
 
 #include <freewpc.h>

@@ -163,6 +163,9 @@ void task_dump (void)
 /** Allocate a dynamic block of memory, by searching the block
  * array (linearly) for the first entry that is in the TASK_FREE
  * state.  Returns a pointer to the newly allocated block.
+ *
+ * The 'aux_stack_block' field of a new block is initialized to
+ * that block's index.
  */
 task_t *block_allocate (void)
 {
@@ -222,37 +225,35 @@ task_t *task_allocate (void)
 }
 
 
-/** Allocate additional stack space.  tp can be a normal task
-block, or it can be a stack block; blocks may be chained
-to arbitrary lengths.  The 'aux_stack_block' field is the
-offset of the next block in the chain. */
+/** Expand the stack space for a given task. */ 
 task_t *task_expand_stack (task_t *tp)
 {
-	task_t *sp = block_allocate ();
-	if (sp)
-	{
-		sp->state |= TASK_STACK;
-		tp->aux_stack_block = sp->aux_stack_block;
-		sp->aux_stack_block = -1;
-		return sp;
-	}
-	else
-	{
+	task_t *sp;
+
+	/* Make sure tp is of type TASK_TASK */
+	if (!(tp->state & TASK_TASK))
+		fatal (ERR_LIBC_ABORT);
+
+	/* Allocate a block for the new stack */
+	sp = block_allocate ();
+	if (!sp)
 		fatal (ERR_NO_FREE_TASKS);
-		return 0;
-	}
+
+	/* Mark it as a stack block, and associate it with the
+	given stack */
+	sp->state |= TASK_STACK;
+	tp->aux_stack_block = sp->aux_stack_block;
+	sp->aux_stack_block = -1;
+	return sp;
 }
 
 
 /** Free a task block for a task that no longer exists. */
 static void task_free (task_t *tp)
 {
-#if 0
-	/* Free any auxiliary stack blocks first.  This
-	is recurse, in case the chain is more than 1 block long. */
+	/* Free the auxiliary stack block first if it exists */
 	if (tp->aux_stack_block != -1)
-		task_free (&task_buffer[tp->aux_stack_block]);
-#endif
+		block_free (&task_buffer[tp->aux_stack_block]);
 
 	/* Free the task block */
 	block_free (tp);

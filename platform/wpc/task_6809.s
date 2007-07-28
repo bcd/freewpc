@@ -195,7 +195,8 @@ restore_stack_not_required:
 
 	
 	;-----------------------------------------------------
-	; task_create
+	; task_create - low level routine to create and
+	; initialize a new task block.
 	;
 	; Input: X = initial PC for new task
 	; Output: X = pointer to task block

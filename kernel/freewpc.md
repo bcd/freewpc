@@ -79,7 +79,6 @@ Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
 Scores: runner, PRI_SCORES
 Scores Important: PRI_SCORES_IMPORTANT
 Score Goal: page(EFFECT_PAGE), runner, PRI_SCORE_GOAL
-Coin Insert: page(COMMON_PAGE), PRI_COINS
 Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
 Tilt: runner, page(COMMON_PAGE), PRI_TILT

@@ -61,17 +61,6 @@ typedef const lampnum_t lampset_t[];
 typedef U8 lampset_id_t;
 
 
-/** Macros used to instantiate a lampset.  Lampsets are declared
- * as a simple list of lamp values; instantiation turns the
- * list into an actual array declaration, properly terminated. */
-#define DECL_LAMPSET_INSTANCE(idx, lampdata...) \
-	static const lampnum_t __ ## lampset_ ## idx ## _data[] = { lampdata, LAMP_END }; \
-
-
-#define DECL_LAMPSET_TABLE_ENTRY(idx, lampdata...) \
-	[idx] = __ ## lampset_ ## idx ## _data,
-
-
 /**
  * Lamp macros are lampset members which calculate actual
  * lamp values at runtime.
@@ -106,10 +95,51 @@ void leff_off (lampnum_t lamp);
 void leff_toggle (lampnum_t lamp);
 bool leff_test (lampnum_t lamp);
 
-#define flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
-#define flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
-#define flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
-#define flag_test(lamp)		lamp_test (lamp + FLAG_OFFSET)
+#define old_flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
+#define old_flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
+#define old_flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
+#define old_flag_test(lamp)	lamp_test (lamp + FLAG_OFFSET)
+
+
+#ifdef NEW_FLAGS
+
+#define flag_address(flagname,lampfn) \
+	asm volatile ("ldb\t#<%0" :: "X" (flagname)); \
+	asm volatile ("jsr\t%c0" :: "i"(lampfn)); \
+
+#define flag_address_output(flagname,lampfn,output) \
+	asm volatile ("ldb\t#<%0" :: "X" (flagname)); \
+	asm volatile ("jsr\t%c1" : "=q"(output) : "i"(lampfn)); \
+
+#else
+
+#define flag_address(flagname,lampfn) lampfn (flagname)
+#define flag_address_output(flagname,lampfn,output) output = lampfn (flagname)
+
+#endif
+
+extern inline void flag_on (volatile flag_t f)
+{
+	flag_address (f, lamp_on);
+}
+
+extern inline void flag_off (volatile flag_t f)
+{
+	flag_address (f, lamp_off);
+}
+
+extern inline void flag_toggle (volatile flag_t f)
+{
+	flag_address (f, lamp_toggle);
+}
+
+extern inline bool flag_test (volatile flag_t f)
+{
+	register U8 result;
+	flag_address_output (f, lamp_test, result);
+	return result;
+}
+
 
 #define global_flag_on(lamp)		lamp_on (lamp + GLOBAL_FLAG_OFFSET)
 #define global_flag_off(lamp)		lamp_off (lamp + GLOBAL_FLAG_OFFSET)
@@ -158,6 +188,5 @@ void lampset_build_increment (lampset_id_t id);
 void lampset_build_decrement (lampset_id_t id);
 void lampset_rotate_next (lampset_id_t id);
 void lampset_rotate_previous (lampset_id_t id);
-
 
 #endif /* _SYS_LAMP_H */

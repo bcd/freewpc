@@ -91,9 +91,12 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
-	/* TODO : initialize the switch state based on mach_opto_mask,
-	 * so that the optos don't all trigger at initialization. */
+	/* Clear the whole bit buffers */
 	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
+
+	/* Initialize the raw state based on mach_opto_mask,
+	 * so that the optos don't all trigger at initialization. */
+	memcpy (&switch_bits[0][0], mach_opto_mask, sizeof (switch_bits));
 }
 
 
@@ -487,7 +490,7 @@ CALLSET_ENTRY (switch, idle)
 }
 
 
-#if 0
+#if 0 /* just for testing */
 void bar (TASK_DECL_ARGS(U8 arg1, U8 arg2))
 {
 	dbprintf ("arg1 = %d\n", arg1);

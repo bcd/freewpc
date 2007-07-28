@@ -22,7 +22,7 @@
 
 /**
  * \file
- * \brief Driver for the WPC real-time clock (RTC)
+ * \brief The driver for the WPC real-time clock (RTC).
  */
 
 

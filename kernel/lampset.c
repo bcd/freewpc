@@ -25,6 +25,12 @@
  * A lampset is a descriptor that represents a set of lamps.
  * Often, related lamps are modified together; these routines
  * provide the common logic.
+ *
+ * A lampset is the minimum allocation unit.  Lamp effects specify
+ * the lampset that they want to use.
+ *
+ * Lampset themselves are declared in the machine configuration file,
+ * producing mach-lampsets.c.
  */
 
 #include <freewpc.h>
@@ -57,7 +63,7 @@ const U8 *lampset_lookup (lampset_id_t id)
 }
 
 
-/* Apply an operator to each element of a lampset, one by one */
+/** Apply an operator to each element of a lampset, one by one */
 void lampset_apply (lampset_id_t id, lamp_operator_t op)
 {
 	register U8 opcode;
@@ -93,38 +99,46 @@ void lampset_apply (lampset_id_t id, lamp_operator_t op)
 	wpc_pop_page ();
 }
 
-/* Common uses of apply */
+/** Turn on all of the lamps in a lampset. */
 void lampset_apply_on (lampset_id_t id)
 {
 	lampset_apply (id, lamp_on);
 }
 
+/** Turn off all of the lamps in a lampset. */
 void lampset_apply_off (lampset_id_t id)
 {
 	lampset_apply (id, lamp_off);
 }
 
+/** Toggle all of the lamps in a lampset. */
 void lampset_apply_toggle (lampset_id_t id)
 {
 	lampset_apply (id, lamp_toggle);
 }
 
 
-
+/** Turn on all of the lamps in a lampset from a lamp effect. */
 void lampset_apply_leff_on (lampset_id_t id)
 {
 	lampset_apply (id, leff_on);
 }
 
+
+/** Turn off all of the lamps in a lampset from a lamp effect. */
 void lampset_apply_leff_off (lampset_id_t id)
 {
 	lampset_apply (id, leff_off);
 }
 
+
+/** Toggle all of the lamps in a lampset from a lamp effect. */
 void lampset_apply_leff_toggle (lampset_id_t id)
 {
 	lampset_apply (id, leff_toggle);
 }
+
+
 
 void lamp_alternating (lampnum_t lamp)
 {
@@ -160,6 +174,7 @@ void lampset_step_increment_handler (lampnum_t lamp)
 	task_set_thread_data (task_getpid (), L_PRIV_DATA, lamp);
 }
 
+
 void lampset_leff_step_increment_handler (lampnum_t lamp)
 {
 	U8 prev = task_get_thread_data (task_getpid (), L_PRIV_DATA);
@@ -176,6 +191,7 @@ void lampset_step_increment (lampset_id_t id)
 {
 	lampset_apply (id, lampset_step_increment_handler);
 }
+
 
 void lampset_leff_step_increment (lampset_id_t id)
 {
