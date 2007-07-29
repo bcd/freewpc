@@ -26,6 +26,7 @@ bool gumball_geneva_tripped;
 
 U8 gumball_pending_releases;
 
+
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
@@ -181,6 +182,14 @@ CALLSET_ENTRY (gumball, sw_far_left_trough)
 {
 	if (!in_test)
 		task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
+}
+
+
+CALLSET_ENTRY (gumball, empty_balls_test)
+{
+	U8 count;
+	for (count = 3; count > 0; --count)
+		gumball_release ();
 }
 
 

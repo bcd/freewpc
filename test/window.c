@@ -3280,14 +3280,10 @@ struct menu dipsw_test_item = {
 void empty_balls_test_init (void)
 {
 	device_t *dev;
-	U8 count;
 
 	for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
 		device_request_empty (dev);
-#ifdef MACHINE_TZ
-	for (count = 3; count > 0; --count)
-		gumball_release ();
-#endif
+	callset_invoke (empty_balls_test);
 }
 
 void empty_balls_test_draw (void)
