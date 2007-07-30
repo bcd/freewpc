@@ -24,6 +24,8 @@
  */
 
 #include <freewpc.h>
+#include <coin.h>
+#include <bcd.h>
 
 extern const score_t score_table[];
 

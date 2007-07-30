@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 #include <tz/clock.h>
+#include <coin.h>
+
 
 U8 egg_code_values[3];
 U8 egg_index;

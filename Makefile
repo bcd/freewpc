@@ -33,9 +33,6 @@ PLATFORM ?= wpc
 #PLATFORM = whitestar
 #PLATFORM = linux
 
-# Set the location for temporary build output files
-BLD ?= build
-
 # Set this to the path where the final ROM image should be installed
 # This is left blank on purpose: set this in your user.make file.
 # There is no default value.
@@ -44,19 +41,12 @@ TARGET_ROMPATH =
 # Which version of the 6809 compiler to use.  This is ignored for native builds.
 GCC_VERSION ?= 3.4.6
 
-# Set to 'y' if you want to save the assembly sources
-SAVE_ASM ?= n
-
 # Set to 'y' if the tools have been configured to generate profiling
 # information after each source file is compiled.
 TOOL_PROFILING ?= n
 
 # Build date (now)
 BUILD_DATE = \"$(shell date +%m/%d/%y)\"
-
-# Uncomment this if you want extra debug notes from the compiler.
-# Normally, you do not want to turn this on.
-DEBUG_COMPILER ?= n
 
 #######################################################################
 ###	Include User Settings
@@ -81,6 +71,7 @@ endif
 ###	Directories
 #######################################################################
 
+BLD := build
 INCLUDE_DIR = ./include
 MACHINE_DIR = machine/$(MACHINE)
 PLATFORM_DIR = platform/$(PLATFORM)
@@ -95,17 +86,21 @@ TMPFILES += $(ERR)
 
 # The linker command file (generated dynamically)
 LINKCMD = $(BLD)/freewpc.lnk
-PAGED_LINKCMD = $(BLD)/page55.lnk $(BLD)/page56.lnk \
-	$(BLD)/page57.lnk $(BLD)/page58.lnk \
-	$(BLD)/page59.lnk $(BLD)/page60.lnk $(BLD)/page61.lnk
+
+PAGED_LINKCMD = $(PAGED_SECTIONS:%=$(BLD)/%.lnk)
+#PAGED_LINKCMD = $(BLD)/page55.lnk $(BLD)/page56.lnk \
+#$(BLD)/page57.lnk $(BLD)/page58.lnk \
+#$(BLD)/page59.lnk $(BLD)/page60.lnk $(BLD)/page61.lnk
 
 # The XBM prototype header file
 XBM_H = images/xbmproto.h
 
 SYSTEM_BINFILES = $(BLD)/freewpc.bin
-PAGED_BINFILES = $(BLD)/page55.bin $(BLD)/page56.bin $(BLD)/page57.bin \
-	$(BLD)/page58.bin \
-	$(BLD)/page59.bin $(BLD)/page60.bin $(BLD)/page61.bin
+
+PAGED_BINFILES = $(PAGED_SECTIONS:%=$(BLD)/%.bin)
+#PAGED_BINFILES = $(BLD)/page55.bin $(BLD)/page56.bin $(BLD)/page57.bin \
+#	$(BLD)/page58.bin \
+#	$(BLD)/page59.bin $(BLD)/page60.bin $(BLD)/page61.bin
 
 BINFILES = $(SYSTEM_BINFILES) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
@@ -140,15 +135,25 @@ else
 GCC_VERSION = NATIVE
 endif
 
-HOSTCC = $(CCACHE) gcc
+HOSTCC := $(CCACHE) gcc
 
-# Name of the S-record converter
-SR = tools/srec2bin/srec2bin
-REQUIRED += $(PWD)/$(SR)
+TOOLS :=
+HOST_OBJS :=
 
-# Name of the checksum update tool
-CSUM = tools/csum/csum
-#REQUIRED += $(PWD)/$(CSUM)
+D := tools/srec2bin
+include $(D)/srec2bin.make
+
+D := tools/csum
+include $(D)/csum.make
+
+D := tools/wpcdebug
+include $(D)/wpcdebug.make
+
+D := tools/sched
+include $(D)/sched.make
+
+D := tools/fiftool
+include $(D)/fiftool.make
 
 # Name of the blanker to use
 BLANKER = dd
@@ -164,12 +169,12 @@ GENDEFINE = tools/gendefine
 BC = bc
 PATH_REQUIRED += $(BC)
 
+# All internal tools are marked required for now
+REQUIRED += $(TOOLS)
+
 # Where pinmame is located
 PINMAME ?= xpinmamed.x11
 PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_FLAGS)
-
-# Where the debug console is located
-DBCON = tools/wpcdebug/wpcdebug
 
 
 #######################################################################
@@ -261,6 +266,8 @@ EVENT_OBJS = build/callset.o
 
 TEST_OBJS = test/window.o test/mix.o
 
+TEST2_OBJS = test/format.o
+
 TRANS_OBJS = kernel/dmdtrans.o
 
 
@@ -312,11 +319,7 @@ export FON_SRCS
 ###	Compiler / Assembler / Linker Flags
 #######################################################################
 
-CFLAGS = $(EXTRA_CFLAGS)
-
-ifeq ($(SAVE_ASM),y)
-CFLAGS += -save-temps
-endif
+CFLAGS :=
 
 # Program include directories
 CFLAGS += -Ibuild -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
@@ -324,16 +327,8 @@ CFLAGS += -Ibuild -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 # Additional defines
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
 
-# Turn on compiler debug.  This will cause a bunch of compiler
-# debug files to get written out during every phase of the build.
-# This is really only needed for debugging the 6809 compiler.
-ifeq ($(DEBUG_COMPILER),y)
-CFLAGS += -da -dA
-endif
-
-# Please, turn on all warnings!  But don't check format strings,
-# because we define those differently than ANSI C.
-CFLAGS += -Wall -Wno-format
+# Please, turn on all warnings!
+CFLAGS += -Wall -Wstrict-prototypes
 
 #
 # Define lots of other things based on make parameters
@@ -342,9 +337,6 @@ CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
 
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER 
-endif
-ifeq ($(FREEWPC_IRQPROFILE),y)
-CFLAGS += -DIRQPROFILE
 endif
 
 ifndef SYSTEM_MAJOR
@@ -366,12 +358,8 @@ CFLAGS += -DMACHINE_MINOR_VERSION=$(MACHINE_MINOR)
 ifdef USER_TAG
 CFLAGS += -DUSER_TAG=$(USER_TAG)
 endif
-ifeq ($(FREE_ONLY),y)
-CFLAGS += -DFREE_ONLY
-endif
 
-# Pass options to the linker for bringing in the gcc and C libraries
-# LDOPTS += -b .text=0xFE00 -k /usr/local/lib/gcc/m6809/$(GCC_VERSION)/ -k /usr/local/m6809/lib/ -l as-libgcc.a -l as-libc.a -l as-libgcc.a
+CFLAGS += $(EXTRA_CFLAGS)
 
 #######################################################################
 ###	Include Autogenerated Machine Extensions
@@ -429,13 +417,13 @@ MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 # TODO : if you overflow a page, bad things will happen.
 # We should really check for this here.
 
-PAGED_SECTIONS = page55 page56 page57 page58 page59 page60 page61
+# A list of the paged sections that we will use.  Not all pages
+# are currently needed.
+PAGE_NUMBERS = 55 56 57 58 59 60 61
 
-NUM_PAGED_SECTIONS := 7
-
-NUM_BLANK_PAGES := \
-	$(shell echo $(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS) | $(BC))
-
+PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
+NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
+NUM_BLANK_PAGES := $(shell echo $(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS) | $(BC))
 BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
 
 #
@@ -443,30 +431,32 @@ BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
 # The build procedure can control which section is used for a
 # particular function.
 #
-
-DIRECT_AREA = 0x4
-RAM_AREA = 0x100
-DIRECT_LNK_CMD = "-b direct = $(DIRECT_AREA)"
-
-LOCAL_AREA = 0x1400
-LOCAL_AREA_SIZE = 0xA0
-LOCAL_LNK_CMD = "-b local = $(LOCAL_AREA)"
-
-STACK_AREA = 0x1600
-STACK_AREA_SIZE = 0x200
-
 # The first 16-bytes of the nonvolatile area are reserved.
 # PinMAME has a hack that overwrites this area.
-NVRAM_AREA = 0x1810
 
-PAGED_AREA = 0x4000
-FIXED_AREA = 0x8000
-VECTOR_AREA = 0xFFF0
+AREA_LIST :=
+define AREA_SETUP
+ifneq ($(strip $4),virtual)
+AREA_LIST += $(1)
+endif
+AREA_$(strip $1) = $(2)
+AREASIZE_$(strip $1) = $(3)
+endef
+
+$(eval $(call AREA_SETUP, direct,    0x0004,   0x00FC))
+$(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
+$(eval $(call AREA_SETUP, local,     0x1400,   0x00A0))
+$(eval $(call AREA_SETUP, stack,     0x1600,   0x0200,  virtual))
+$(eval $(call AREA_SETUP, nvram,     0x1810,   0x07F0))
+$(eval $(call AREA_SETUP, paged,     0x4000,   0x4000,  virtual))
+$(eval $(call AREA_SETUP, sysrom,    0x8000,   0x7FF0,  virtual))
+$(eval $(call AREA_SETUP, vector,    0xFFF0,   0x0010,  virtual))
+
 
 MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
 MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
-SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
+SYSTEM_HEADER_OBJS =
 
 #
 # Define a mapping between object files and page numbers in
@@ -476,39 +466,57 @@ SYSTEM_HEADER_OBJS =	$(BLD)/freewpc.o
 # for when the code wants to switch the page to a particular
 # class of function.
 #
-page55_OBJS = $(BLD)/page55.o $(PAGED_MD_OBJS) $(EFFECT_OBJS)
-page56_OBJS = $(BLD)/page56.o $(COMMON_OBJS) $(EVENT_OBJS)
-page57_OBJS = $(BLD)/page57.o $(TRANS_OBJS) $(PRG_OBJS) $(FIF_OBJS)
-page58_OBJS = $(BLD)/page58.o $(TEST_OBJS) $(MACHINE_TEST_OBJS)
-page59_OBJS = $(BLD)/page59.o $(MACHINE_PAGED_OBJS) $(FSM_OBJS)
-page60_OBJS = $(BLD)/page60.o $(XBM_OBJS)
-page61_OBJS = $(BLD)/page61.o $(FONT_OBJS) $(FON_OBJS)
-SYSTEM_OBJS = $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 
-$(PAGED_MD_OBJS) $(EFFECT_OBJS): PAGE=55
-$(COMMON_OBJS) $(EVENT_OBJS) : PAGE=56
-$(TRANS_OBJS) $(PRG_OBJS) $(FIF_OBJS): PAGE=57
-$(TEST_OBJS) $(MACHINE_TEST_OBJS): PAGE=58
-$(MACHINE_PAGED_OBJS) $(FSM_OBJS): PAGE=59
-$(XBM_OBJS): PAGE=60
-$(FONT_OBJS) $(FON_OBJS) : PAGE=61
+# PAGE_INIT : Initialize each page to contain the page header object.
+# $1 = the page number
+define PAGE_INIT
+page$(strip $1)_OBJS := $(BLD)/page$(strip $1).o
+endef
+
+# PAGE_ALLOC : Allocate a paged region for a particular class of objects.
+# $1 = the page number
+# $2 = the object class
+# $3 = the page define (derived if $2 if not given)
+# Example : PAGE_ALLOC(55,EFFECT)
+define PAGE_ALLOC
+page$(strip $1)_OBJS += $($(strip $2)_OBJS)
+$($(strip $2)_OBJS) : PAGE=$(strip $1)
+ifneq ($(strip $3),)
+CFLAGS += -D$(strip $3)_PAGE=$(strip $1)
+else
+CFLAGS += -D$(strip $2)_PAGE=$(strip $1)
+endif
+endef
+
+$(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
+$(eval $(call PAGE_ALLOC, 55, PAGED_MD, MD))
+$(eval $(call PAGE_ALLOC, 55, EFFECT))
+$(eval $(call PAGE_ALLOC, 56, COMMON))
+$(eval $(call PAGE_ALLOC, 56, EVENT))
+$(eval $(call PAGE_ALLOC, 57, TRANS))
+$(eval $(call PAGE_ALLOC, 57, PRG))
+$(eval $(call PAGE_ALLOC, 57, FIF))
+$(eval $(call PAGE_ALLOC, 58, TEST))
+$(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
+$(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
+$(eval $(call PAGE_ALLOC, 59, FSM))
+$(eval $(call PAGE_ALLOC, 60, XBM))
+$(eval $(call PAGE_ALLOC, 60, TEST2))
+$(eval $(call PAGE_ALLOC, 61, FONT))
+$(eval $(call PAGE_ALLOC, 61, FON))
+
+SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
 $(SYSTEM_OBJS) : PAGE=62
+CFLAGS += -DSYS_PAGE=62
 
-PAGE_DEFINES := -DMD_PAGE=55 -DEFFECT_PAGE=55 -DCOMMON_PAGE=56 -DEVENT_PAGE=56 -DTRANS_PAGE=57 -DPRG_PAGE=57 -DFIF_PAGE=57 -DTEST_PAGE=58 -DMACHINE_PAGE=59 -DXBM_PAGE=60 -DFONT_PAGE=61 -DSYS_PAGE=62
-CFLAGS += $(PAGE_DEFINES)
+PAGED_OBJS = $(foreach area,$(PAGED_SECTIONS),$($(area)_OBJS))
 
-
-PAGED_OBJS = $(page55_OBJS) $(page56_OBJS) $(page57_OBJS) \
-				 $(page58_OBJS) $(page59_OBJS) $(page60_OBJS) $(page61_OBJS)
-
-
-PAGE_HEADER_OBJS = $(BLD)/page55.o $(BLD)/page56.o $(BLD)/page57.o \
-	$(BLD)/page58.o $(BLD)/page59.o $(BLD)/page60.o $(BLD)/page61.o
+PAGE_HEADER_OBJS = $(foreach area,$(PAGED_SECTIONS),$(BLD)/$(area).o)
 
 AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
 C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
-	$(TRANS_OBJS) $(TEST_OBJS) $(FSM_OBJS) \
+	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) $(FSM_OBJS) \
 	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
 	$(FONT_OBJS) $(EFFECT_OBJS)
 
@@ -634,10 +642,10 @@ $(BLD)/blankpage.bin: $(SR)
 	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
 
 $(SYSTEM_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s $(FIXED_AREA) -l 0x8000 -f 0 $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0 $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s $(PAGED_AREA) -l 0x4000 -f 0xFF $<
+	@echo Converting $< to binary ... && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces
@@ -645,7 +653,7 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 #
 ifeq ($(PLATFORM),wpc)
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
-	@echo Linking $@... && $(CC) -Wl,-v -Wl,-T -Wl,$< >> $(ERR) 2>&1
+	@echo Linking $@... && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
 endif
 
 ifeq ($(PLATFORM),linux)
@@ -665,6 +673,10 @@ endif
 # link step, a different set of -o and -v flags are used, depending on
 # which page we are trying to build.
 #
+# It is _extremely_ important that the order in which object files are
+# named here is the same for every page, otherwise references won't match
+# up with definitions.
+#
 # Two helper functions are defined.  OBJ_PAGE_LINKOPT returns the
 # right linker option followed by the name of the object file, given
 # an object filename and the name of the linker command file.
@@ -673,7 +685,6 @@ endif
 # options/filenames on a single line; the linker requires that they all
 # be on separate lines.  We use a for loop in the bash code to iterate
 # over the OBJ_PAGE_LIST output to split it into multiple lines.
-#
 
 # OBJ_PAGE_LINKOPT : Expands to either -o if in the page or -v if not
 # $1 = object file name
@@ -693,14 +704,11 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefil
 	@echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
-	echo $(DIRECT_LNK_CMD) >> $@ ;\
-	echo "-b ram = $(RAM_AREA)" >> $@ ;\
-	echo $(LOCAL_LNK_CMD) >> $@ ;\
-	echo "-b nvram = $(NVRAM_AREA)" >> $@ ;\
+	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $@ ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
-		do echo "-b $$f = $(PAGED_AREA)" >> $@ ;\
+		do echo "-b $$f = $(AREA_paged)" >> $@ ;\
 	done ;\
-	echo "-b .text = $(FIXED_AREA)" >> $@ ;\
+	echo "-b .text = $(AREA_sysrom)" >> $@ ;\
 	echo "-o" >> $@ ;\
 	echo "$(@:.lnk=.o)" >> $@ ;\
 	echo "$(call DUP_PAGE_OBJ,$(@:.lnk=.o))" >> $@ ;\
@@ -709,19 +717,16 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefil
 	done ;\
 	echo "-e" >> $@
 
-#
-# How to build the system page header source file.
-#
-$(BLD)/freewpc.s:
-	@echo ".area .text" > $@
 
+$(BLD)/freewpc.s:
+	@echo ".area .text" >> $@
 
 #
 # How to build a page header source file.
 #
 $(BLD)/page%.s:
 	@echo ".area page$*" >> $@
-	@echo ".db 0" >> $@
+	@echo ".db $*" >> $@
 
 #
 # How to make the linker command file for the system section.
@@ -730,15 +735,13 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
 	@echo Creating linker command file $@ ... ;\
 	rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
-	echo $(DIRECT_LNK_CMD) >> $(LINKCMD) ;\
-	echo "-b ram = $(RAM_AREA)" >> $(LINKCMD) ;\
-	echo $(LOCAL_LNK_CMD) >> $(LINKCMD) ;\
-	echo "-b nvram = $(NVRAM_AREA)" >> $(LINKCMD) ;\
+	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
-		do echo "-b $$f = $(PAGED_AREA)" >> $(LINKCMD); done ;\
-	echo "-b .text = $(FIXED_AREA)" >> $(LINKCMD) ;\
-	echo "-b vector = $(VECTOR_AREA)" >> $(LINKCMD) ;\
-	for f in `echo $(BLD)/freewpc.o $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
+		do echo "-b $$f = $(AREA_paged)" >> $(LINKCMD); done ;\
+	echo "-b .text = $(AREA_sysrom)" >> $(LINKCMD) ;\
+	echo "-b vector = $(AREA_vector)" >> $(LINKCMD) ;\
+	echo "$(BLD)/freewpc.o" >> $(LINKCMD) ;\
+	for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-v" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-e" >> $(LINKCMD)
@@ -880,27 +883,17 @@ fonts clean-fonts:
 	@echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
 
 #######################################################################
-###	Tools
+###	Host Tools
 #######################################################################
 
-#
-# How to build the srec2bin utility, which is a simple S-record to
-# binary converter suitable for what we need.
-#
-$(SR) : $(SR).c
-	@echo "Making S-Record utility..." && \
-		cd tools/srec2bin && $(MAKE) srec2bin
+tools : $(TOOLS)
 
-#
-# How to build the csum utility
-#
-$(CSUM) : $(CSUM).c
-	@echo Making checksum utility... && \
-		cd tools/csum && $(MAKE) csum CC="$(HOSTCC)"
+$(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC) 
 
-$(DBCON) :
-	@echo "Making debug console utility..." && \
-		cd tools/wpcdebug && $(MAKE) CC="$(HOSTCC)"
+$(HOST_OBJS) : CFLAGS=-Wall -I.
+
+$(HOST_OBJS) : %.o : %.c
+	$(CC) $(CFLAGS) $(TOOL_CFLAGS) -o $@ -c $<
 
 #######################################################################
 ###	XBM Generators
@@ -931,9 +924,6 @@ $(HOST_XBM_OBJS) : build/%.o : images/%.c
 
 build/pgmlib.o : tools/pgmlib/pgmlib.c
 	$(HOSTCC) -o $@ -c $< $(HOST_XBM_CFLAGS)
-
-tools/fiftool/fiftool : tools/fiftool/fiftool.c
-	cd tools/fiftool && $(MAKE) CC="$(HOSTCC)"
 
 #######################################################################
 ###	Standard Dependencies
@@ -1003,8 +993,7 @@ info:
 	@echo "AS = $(AS)"
 	-@$(AS) --version
 	@echo "CFLAGS = $(CFLAGS)"
-	@echo "PAGEFLAGS = $(PAGEFLAGS)"
-	@echo "BLANK_SIZE = $(BLANK_SIZE)"
+	@echo "TOOLS = $(TOOLS)"
 	@echo "REQUIRED = $(REQUIRED)"
 	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 	@echo "FIF_OBJS = $(FIF_OBJS)"
@@ -1013,11 +1002,12 @@ info:
 # 'make clean' does what you think.
 #
 .PHONY : clean
-clean: clean_derived clean_gendefines
+clean: clean_derived clean_gendefines clean_tools
 	@for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
+.PHONY : clean_derived
 clean_derived:
 	@for file in `echo $(XBM_H) mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
@@ -1025,6 +1015,11 @@ clean_derived:
 		rm -rf .mach .include_mach && \
 		rm -f *.s *.i
 
+.PHONY : clean_tools
+clean_tools:
+	rm -f $(HOST_OBJS) $(TOOLS)
+
+.PHONY : show_objs
 show_objs:
 	@echo $(OBJS)
 

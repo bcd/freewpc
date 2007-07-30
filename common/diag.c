@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Hardware diagnostic checks.
+ * Failures detected by this module result in the "credit dot".
+ */
+
 #include <freewpc.h>
 #include <diag.h>
 

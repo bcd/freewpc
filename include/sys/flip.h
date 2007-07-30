@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,6 @@
 void flipper_enable (void);
 void flipper_disable (void);
 void flipper_init (void);
-void flipper_rtt (void);
+void fliptronic_rtt (void);
 
 #endif /* _SYS_FLIP_H */

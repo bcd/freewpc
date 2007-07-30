@@ -768,29 +768,12 @@ sub machine_write_defines {
 	}
 	print "\n\n";
 
-	# Print display effects
-	#my $deff_runners = 0;
-	#print "#define MACHINE_DISPLAY_EFFECTS \\\n";
-	#foreach $deff (unique ($m->{"deffs"})) {
-	#	$fn = $deff->{'c_decl'};
-	#	$fn =~ s/deff_(.*)/$1_deff/;
-	#	print "   DECL_DEFF_" . 
-	#		($deff->{'runner'} ? "MODE" : "FAST") .
-	#		" (" . $deff->{'c_ident'} . ", " .
-	#		$deff->{'props'} .  ", $fn, " .
-	#		($deff->{'page'} ? $deff->{'page'} : -1) .
-	#		") \\\n";
-	#	$deff_runners++ if ($deff->{'runner'});
-	#}
-	#print "\n";
-	## TODO : MAX_RUNNING_DEFFS is not needed now that deffs
-	## dynamically allocated.
-	#print "#define MAX_RUNNING_DEFFS " . $deff_runners . "\n\n";
 
 	# Print lamp effects
 	print "#define MACHINE_LAMP_EFFECTS \\\n";
 	foreach $leff (unique ($m->{"leffs"})) {
 		$fn = $leff->{'c_decl'};
+		$fnpage = $leff->{'page'} || "-1";
 		$fn =~ s/leff_(.*)/$1_leff/;
 		my $gi = $leff->{'GI'};
 		my $lamps = $leff->{'LAMPS'};
@@ -813,7 +796,8 @@ sub machine_write_defines {
 			", " . $prio .  ", " .
 			"$lamps, " .
 			"$gi, " .
-			"$fn) \\\n";
+			"$fn, " .
+			"$fnpage) \\\n";
 	}
 	print "\n";
 

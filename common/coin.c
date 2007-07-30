@@ -29,6 +29,7 @@
  */
 
 #include <freewpc.h>
+#include <coin.h>
 #include <diag.h>
 
 

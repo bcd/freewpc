@@ -65,7 +65,8 @@
 
 #include <freewpc.h>
 #include <window.h>
-
+#include <format.h>
+#include <coin.h>
 
 /** win_top always points to the current window, or NULL if
  * no window is open. */
@@ -295,95 +296,6 @@ void browser_print_operation (const char *s)
 
 struct adjustment *browser_adjs;
 U8 adj_edit_value;
-
-/* TODO : move all of the rendering functions to a separate page */
-
-void decimal_render (U8 val) { sprintf ("%d", val); }
-void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
-void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
-void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }
-void date_style_render (U8 val) { sprintf (val ? "D/M/Y" : "M/D/Y"); }
-void lang_render (U8 val) { sprintf ("ENGLISH"); }
-void replay_system_render (U8 val) { sprintf (val ? "AUTO" : "MANUAL"); }
-
-
-/* The high score reset counter is stored in units of 250 games. */
-void hs_reset_render (U8 val)
-{ 
-	if (val == 0)
-		sprintf ("OFF");
-	else
-#if defined(__m6809__) && defined(__int16__)
-		sprintf ("%d", val * 250);
-#else
-		sprintf ("%ld", val * 250UL);
-#endif
-}
-
-void free_award_render (U8 val)
-{
-	switch (val)
-	{
-		case FREE_AWARD_OFF: sprintf ("OFF"); return;
-		case FREE_AWARD_CREDIT: sprintf ("CREDIT"); return;
-		case FREE_AWARD_EB: sprintf ("EXTRA BALL"); return;
-		case FREE_AWARD_TICKET: sprintf ("TICKET"); return;
-		case FREE_AWARD_POINTS: sprintf ("POINTS"); return;
-	}
-}
-
-void game_restart_render (U8 val)
-{
-	switch (val)
-	{
-		case GAME_RESTART_ALWAYS: sprintf ("ALWAYS"); return;
-		case GAME_RESTART_SLOW: sprintf ("SLOW"); return;
-		case GAME_RESTART_NEVER: sprintf ("NEVER"); return;
-	}
-}
-
-void percent_render (U8 val)
-{
-	if (val == 0)
-		sprintf ("OFF");
-	else
-		sprintf ("%d%%", val);
-}
-
-void replay_score_render (U8 val)
-{
-#ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
-	score_t score;
-	score_zero (score);
-	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
-	sprintf_score (score);
-#else
-	sprintf ("CODE %d", val);
-#endif
-}
-
-
-void minutes_render (U8 val)
-{
-	if (val == 0)
-		sprintf ("OFF");
-	else
-		sprintf ("%d MIN.", val);
-}
-
-
-void brightness_render (U8 val)
-{
-	switch (val)
-	{
-		case 4: sprintf ("4.DIMMEST"); break;
-		case 5: sprintf ("5.DIM"); break;
-		case 6: sprintf ("6.BRIGHT"); break;
-		case 7: sprintf ("7.BRIGHTEST"); break;
-	}
-}
-
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
@@ -771,96 +683,7 @@ struct window_ops adj_browser_window = {
 
 /*****************************************************/
 
-void percentage_of_games_audit (audit_t val)
-{
-	/* Avoid divide-by-zero error */
-	if (system_audits.total_plays == 0)
-	{
-		sprintf ("0%%");
-		return;
-	}
-
-#ifndef __m6809__
-	sprintf ("%d%%", 100 * val / system_audits.total_plays);
-#else
-	sprintf ("%d%%", 100 * val / system_audits.total_plays);
-#endif
-}
-
-
-void integer_audit (audit_t val) 
-{ 
-	sprintf ("%ld", val);
-}
-
-
-void secs_audit (audit_t val)
-{
-	U8 mins = 0;
-	while (val > 60)
-	{
-		val -= 60;
-		mins++;
-	}
-	sprintf ("%d:%02d", mins, (U8)val);
-}
-
-
-void us_dollar_audit (audit_t val)
-{
-	sprintf ("$%ld.%02d", val / 4, (val % 4) * 25);
-}
-
-
-void currency_audit (audit_t val)
-{
-	switch (0)
-	{
-		default:
-			us_dollar_audit (val);
-			break;
-	}
-}
-
-
-void total_earnings_audit (audit_t val __attribute__((unused)))
-{
-	audit_t total_coins = 0;
-	U8 i;
-	for (i=0; i < 4; i++)
-		total_coins += system_audits.coins_added[i];
-	currency_audit (total_coins);
-}
-
-
-void average_per_game_audit (audit_t val)
-{
-	/* Avoid divide-by-zero error */
-	if (system_audits.total_plays == 0)
-	{
-		sprintf ("N/A");
-		return;
-	}
-
-	sprintf ("%d", val / system_audits.total_plays);
-}
-
-
-void average_per_ball_audit (audit_t val)
-{
-	/* Avoid divide-by-zero error */
-	if (system_audits.balls_played == 0)
-	{
-		sprintf ("N/A");
-		return;
-	}
-
-	sprintf ("%d", val / system_audits.balls_played);
-}
-
-
 struct audit *browser_audits;
-
 
 audit_t default_audit_value;
 
@@ -1440,9 +1263,6 @@ void deff_stress_thread (void)
 		start_stop_flag = random_scaled (2);
 		delay = random_scaled (TIME_200MS);
 		delay += TIME_33MS;
-
-		dbprintf ("Deff %d, start_stop %d, delay %d\n",
-			dn, start_stop_flag, delay);
 
 		if (start_stop_flag)
 		{

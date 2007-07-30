@@ -48,7 +48,6 @@ extern inline U8 wpc_debug_read (void)
 	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
 }
 
-#pragma GCC poison db_puti db_putc db_putchar
 
 enum wpc_debugger_request {
 	WPC_DBREQ_TASK_DUMP=0x80,

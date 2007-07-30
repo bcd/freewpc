@@ -99,7 +99,6 @@ deff_entry_t *deff_entry_create (deffnum_t id)
 static inline void deff_enqueue (deff_entry_t **queue, deff_entry_t *entry)
 {
 	dll_add_front (queue, entry);
-	/* TODO : Handle D_TIMEOUT if the entry should expire */
 }
 
 
@@ -416,6 +415,10 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 }
 
 
+/** Called from a deff when it wants to toggle between two images
+ * on the low and high mapped pages, both in mono mode.
+ * COUNT is the number of times to toggle.
+ * DELAY is how long to wait between each change. */
 void deff_swap_low_high (S8 count, task_ticks_t delay)
 {
 	while (--count >= 0)
@@ -486,7 +489,9 @@ CALLSET_ENTRY (deff, any_device_enter)
 }
 
 
-/** At idle time, stop any queued deffs that have timed out. */
+/** At idle time, stop any queued deffs that have timed out.
+ * This routine is called whenever the CPU is idle, but it only
+ * checks for timed out deffs about once per second. */
 CALLSET_ENTRY (deff, idle)
 {
 	extern U8 tick_count;

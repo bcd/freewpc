@@ -35,10 +35,6 @@ extern bool task_dispatching_ok;
  * urgent. */
 #define TASK_PROTECTED   0x01
 
-/* TASK_QUICK is set on any task that ought not to sleep.
- * In the current implementation, only a warning is generated.
- * These ought to be cleaned up. */
-#define TASK_QUICK 0x02
 
 
 /* Now, the platform specific defines. */
@@ -79,21 +75,12 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 /* Says that the block is used to hold a task stack */
 #define TASK_STACK	0x10
 
+/* TODO - heap size counter removed.  Replace this with...??? */
 
-/* The TASK_HEAP_SIZE field is not currently used.  It is
- * intended to represent how much memory, in bytes, has been
- * stolen from the stack for task-local variables.  Bytes are
- * always allocated in pairs, so the heap size may be 0, 2,
- * 4, or 6 at most.  The heap area cuts into the stack size
- * as set below in TASK_STACK_SIZE, so it should be used
- * cautiously.  Most tasks will not need any heap storage.
- */
-#define TASK_HEAP_SIZE   (0x02 + 0x04)
 
 /** The maximum number of tasks that can be running at once.
- * Space for this many task structures is statically allocated.
- */
-#define NUM_TASKS 48
+ * Space for this many task structures is statically allocated. */
+#define NUM_TASKS 32
 
 /*
  * Define the size of the saved process stack.

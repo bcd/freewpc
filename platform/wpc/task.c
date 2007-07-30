@@ -99,6 +99,12 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
+#ifdef IDLE_PROFILE
+U8 idle_rtt_calls;
+U16 idle_time;
+U16 last_idle_time;
+#endif
+
 
 /* Uncomment this to turn on dumping of entire task table.
  * Normally, only the running entries are displayed. */
@@ -108,6 +114,40 @@ U8 task_max_count;
 /* Private functions written in assembly used internally. */
 __noreturn__ void task_save (task_t *tp);
 __noreturn__ void task_restore (task_t *tp);
+
+
+#ifdef IDLE_PROFILE
+void idle_profile_rtt (void)
+{
+	wpc_debug_write ('.');
+	if (--idle_rtt_calls == 0)
+	{
+		last_idle_time += idle_time;
+		idle_time = 0;
+		idle_rtt_calls = 8;
+	}
+}
+
+void idle_profile_idle (void)
+{
+	/* last_idle_time represents the number of idle loops done
+	 * within the last 1 second (approximate).  Each loop is
+	 * about 24 cycles now. */
+	U16 printed_idle_time;
+
+	/* Read and clear the idle loop count */
+	disable_irq ();
+	printed_idle_time = last_idle_time;
+	last_idle_time = 0;
+	enable_irq ();
+
+	/* If nonzero, then print it */
+	if (printed_idle_time != 0)
+		dbprintf ("Idle %ld\n", printed_idle_time);
+	else
+		wpc_debug_write ('*');
+}
+#endif
 
 
 /** For debugging, dump the entire contents of the task table to the
@@ -327,14 +367,6 @@ void task_sleep (task_ticks_t ticks)
 	/* Fail if the idle task tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
-
-#if 0
-	/* Complain if a quick task tries to sleep. */
-	if (tp->flags & TASK_QUICK)
-	{
-		dbprintf ("warning: quick gid %d did sleep\n", task_getgid ());
-	}
-#endif
 
 	/* Mark the task as blocked, set the time at which it blocks,
 	and set how long it should wait for. 
@@ -580,7 +612,10 @@ void task_dispatcher (void)
 			even when 'sys_init_complete' is not true.  This lets us
 			debug very early initialization. */
 			db_idle ();
-		
+#ifdef IDLE_PROFILE
+			idle_profile_idle ();
+#endif	
+
 			/* If the system is fully initialized, run
 			 * the idle functions. */
 			if (idle_ok)
@@ -597,7 +632,15 @@ void task_dispatcher (void)
 			take a long time. */
 			while (tick_start_count == *(volatile U8 *)&tick_count)
 			{
+#ifdef IDLE_PROFILE
+				asm ("nop" ::: "memory");
+				asm ("nop" ::: "memory");
+				asm ("nop" ::: "memory");
+				asm ("nop" ::: "memory");
+				idle_time++;
+#else
 				asm ("; nop" ::: "memory");
+#endif
 			}
 			
 			/* Ensure that 'tp', which is in register X, is reloaded
@@ -654,6 +697,12 @@ void task_init (void)
 
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count = task_max_count = 1;
+#endif
+
+#ifdef IDLE_PROFILE
+	idle_time = 0;
+	last_idle_time = 0;
+	idle_rtt_calls = 8;
 #endif
 
 	/* Allocate a task for the first (current) thread of execution.

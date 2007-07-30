@@ -58,6 +58,9 @@ typedef struct
 
 	/** The function implementing the leff */
 	leff_function_t fn;
+
+	/** The ROM page where the function is located */
+	U8 page;
 } leff_t;
 
 #define MAX_QUEUED_LEFFS 8

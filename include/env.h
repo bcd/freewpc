@@ -64,7 +64,14 @@ typedef U8 flag_t;
 #define __flagdef__
 #endif
 
-
+/** Section declaration modifiers.  These attributes are used
+ * on function prototypes and data externs to denote which
+ * page of ROM the definitions will be found in.  These are
+ * not used on the definitions themselves, as they would have
+ * no effect; only by configuring the linker correctly will that
+ * happen.  Take care to use these correctly to match what's being
+ * done in the Makefile.
+ */
 #ifdef HAVE_PAGING
 #define __far__(x)      __attribute__((far(x)))
 #define __system__		__attribute__((section(".text")))
@@ -72,6 +79,7 @@ typedef U8 flag_t;
 #define __event__		   __far__(C_STRING(EVENT_PAGE))
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
 #define __test__			__far__(C_STRING(TEST_PAGE))
+#define __test2__			__far__(C_STRING(TEST2_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 #define __xbmprog__     __far__(C_STRING(PRG_PAGE))
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
@@ -82,6 +90,7 @@ typedef U8 flag_t;
 #define __event__
 #define __transition__
 #define __test__
+#define __test2__
 #define __machine__
 #define __xbmprog__
 #define __effect__

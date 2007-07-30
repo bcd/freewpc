@@ -111,7 +111,9 @@ static inline void do_irq_1ms (void)
 
 static inline void do_irq_2ms_a (void)
 {
-	flipper_rtt ();
+#ifdef MACHINE_FLIPTRONIC
+	fliptronic_rtt ();
+#endif
 	triac_rtt ();
 }
 
@@ -155,7 +157,11 @@ static inline void do_irq_8ms (void)
 			{
 #ifndef CONFIG_PLATFORM_LINUX
 				lockup_check_rtt ();
+#ifdef IDLE_PROFILE
+				idle_profile_rtt ();
 #endif
+#endif
+
 				/* Execute machine-specific rtts */
 #ifdef MACHINE_128MS_RTTS
 				MACHINE_128MS_RTTS
@@ -172,7 +178,6 @@ cycled through in an 8ms period. */
 
 __interrupt__ void do_irq0 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
 	lamp_rtt_0 ();
@@ -182,7 +187,6 @@ __interrupt__ void do_irq0 (void)
 
 __interrupt__ void do_irq1 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_b ();
 	irq_function = do_irq2;
@@ -191,7 +195,6 @@ __interrupt__ void do_irq1 (void)
 
 __interrupt__ void do_irq2 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
 	lamp_rtt_1 ();
@@ -201,7 +204,6 @@ __interrupt__ void do_irq2 (void)
 
 __interrupt__ void do_irq3 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_b ();
 	irq_function = do_irq4;
@@ -210,7 +212,6 @@ __interrupt__ void do_irq3 (void)
 
 __interrupt__ void do_irq4 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
 	lamp_rtt_2 ();
@@ -220,7 +221,6 @@ __interrupt__ void do_irq4 (void)
 
 __interrupt__ void do_irq5 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_b ();
 	irq_function = do_irq6;
@@ -229,7 +229,6 @@ __interrupt__ void do_irq5 (void)
 
 __interrupt__ void do_irq6 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_a ();
 	lamp_rtt_3 ();
@@ -239,7 +238,6 @@ __interrupt__ void do_irq6 (void)
 
 __interrupt__ void do_irq7 (void)
 {
-	do_irq_begin ();
 	do_irq_1ms ();
 	do_irq_2ms_b ();
 	do_irq_8ms ();
@@ -253,6 +251,7 @@ vector.  This is a small function that just calls the real handler
 through a pointer. */
 void do_irq (void)
 {
+	do_irq_begin ();
 	(*irq_function) ();
 }
 

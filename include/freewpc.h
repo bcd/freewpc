@@ -18,6 +18,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Top-level include file for FreeWPC
+ *
+ * All source files should include this one first in order to 
+ * get all of the required definitions and a lot of the more 
+ * commonly used features.
+ */
+
 #ifndef _FREEWPC_H
 #define _FREEWPC_H
 
@@ -25,13 +34,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- * This is the top-level include file for FreeWPC.  All files
- * should include this one first in order to get all of the
- * required definitions and a lot of the more commonly used
- * features.
- */
 
 
 /*
@@ -182,13 +184,10 @@ extern U8 idle_ok;
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #include <player.h>
-#include <coin.h>
 #include <sys/debug.h>
 #include <amode.h>
 #include <highscore.h>
 #include <test.h>
-#include <knocker.h>
-#include <bcd.h>
 
 
 /* Game-specific defines.  'mach' should point to the machine-specific 

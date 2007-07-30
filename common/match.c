@@ -19,6 +19,8 @@
  */
 
 #include <freewpc.h>
+#include <knocker.h>
+#include <coin.h>
 
 /**
  * \file

@@ -12,6 +12,7 @@ void music_mix_init (void)
 
 void music_mix_play (void)
 {
+#if 0
 	music_set (MUS_SPIRAL_ROUND);
 	for (;;)
 	{
@@ -20,6 +21,7 @@ void music_mix_play (void)
 		task_sleep (tempo);
 		sound_send (SND_FIST_BOOM1);
 	}
+#endif
 }
 
 void music_mix_draw (void)

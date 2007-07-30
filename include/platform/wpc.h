@@ -20,7 +20,7 @@
 
 /**
  * \file
- * \brief Definitions/macros related to the WPC hardware
+ * \brief Definitions/macros specific to the WPC hardware
  */
 
 #ifndef _WPC_H
@@ -34,6 +34,7 @@
  * reads and writes, so that they can be simulated in
  * environments where a direct memory map is not present.
  ***************************************************************/
+
 extern inline void wpc_asic_write (U16 addr, U8 val)
 {
 #ifdef CONFIG_PLATFORM_LINUX
@@ -100,6 +101,20 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
  * Memory usage
  ***************************************************************/
 
+#define ASM_DECL(name) name asm (#name)
+
+#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
+
+#define AREA_BASE(name) (&s_ ## name)
+#define AREA_SIZE(name) ((U16)(&l_ ## name))
+
+AREA_DECL(direct)
+AREA_DECL(ram)
+AREA_DECL(local)
+AREA_DECL(heap)
+AREA_DECL(stack)
+AREA_DECL(nvram)
+
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
 
@@ -117,7 +132,7 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
  * There are 5 "copies" of the local area: the lowest address is active
  * for the current player up, and the next 4 are save areas to hold
  * values between players in a multi-player game. */
-#define LOCAL_BASE		((U8 *)0x1400)
+#define LOCAL_BASE		AREA_BASE(local)
 #define LOCAL_SIZE		0x40U
 
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
@@ -172,23 +187,6 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 #define TIME_15S 		(TIME_1S * 15UL)
 #define TIME_30S 		(TIME_1S * 30UL)
 
-/***************************************************************
- * RAM Protection Circuit
- ***************************************************************/
-
-/** When the lock register(s) contain these values, the upper
- * N bytes of the RAM are write protected. */
-#define RAM_LOCK_4K			0x0
-#define RAM_LOCK_2K			0x1
-#define RAM_LOCK_1K			0x3
-#define RAM_LOCK_512			0x7
-#define RAM_LOCK_256			0xF
-
-#define RAM_LOCKED			0x0
-
-/** When the lock register contains this value, the memory
- * protection circuit is disabled */
-#define RAM_UNLOCKED			0xB4
 
 /***************************************************************
  * ASIC / DMD memory map
@@ -295,10 +293,13 @@ extern U8 *linux_dmd_high_page;
 #define WPC_RAM_LOCKSIZE 				0x3FFE
 #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 
+
 /********************************************/
 /* LED                                      */
 /********************************************/
 
+
+/** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
 {
 	wpc_asic_xor (WPC_LEDS, 0x80);
@@ -309,6 +310,10 @@ extern inline void wpc_led_toggle (void)
 /* Printer / Parallel Port                  */
 /********************************************/
 
+
+/** Writes a single byte to the parallel port.  The data
+ * is first latched into the data register, then the
+ * strobe line is brought low and then released. */
 extern inline void wpc_parport_write (U8 data)
 {
 	wpc_asic_write (WPC_PARALLEL_DATA_PORT, data);
@@ -328,19 +333,46 @@ extern inline void wpc_parport_write (U8 data)
 /* RAM Protection Circuit                   */
 /********************************************/
 
+/** When the lock register(s) contain these values, the upper
+ * N bytes of the RAM are write protected. */
+#define RAM_LOCK_4K			0x0
+#define RAM_LOCK_2K			0x1
+#define RAM_LOCK_1K			0x3
+#define RAM_LOCK_512			0x7
+#define RAM_LOCK_256			0xF
+
+/** When the lock register contains this value, the memory
+ * protection circuit is enabled, and the protected
+ * region cannot be written. */
+#define RAM_LOCKED			0x0
+
+/** When the lock register contains this value, the memory
+ * protection circuit is disabled */
+#define RAM_UNLOCKED			0xB4
+
+
+/** Write to the WPC's RAM protect register */
 extern inline void wpc_set_ram_protect (U8 prot)
 {
 	wpc_asic_write (WPC_RAM_LOCK, prot);
 }
 
+
+/** Write to the WPC's RAM protect size register */
 extern inline void wpc_set_ram_protect_size (U8 sz)
 {
 	wpc_asic_write (WPC_RAM_LOCKSIZE, sz);
 }
 
+
+/** Acquire write access to the NVRAM */
 #define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
+
+/** Release write access to the NVRAM */
 #define wpc_nvram_put()		wpc_set_ram_protect(RAM_LOCKED)
 
+
+/** Atomically increment a variable in NVRAM by N. */
 #define wpc_nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -349,6 +381,8 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 		wpc_nvram_put (); \
 	} while (0)
 
+
+/** Atomically decrement a variable in NVRAM by N. */
 #define wpc_nvram_subtract(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -356,10 +390,6 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 		*pvar -= n; \
 		wpc_nvram_put (); \
 	} while (0)
-
-/********************************************/
-/* DIP Switches                             */
-/********************************************/
 
 /********************************************/
 /* ROM Paging                               */
@@ -489,6 +519,10 @@ extern inline void wpc_write_flippers (U8 val)
 	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, val);
 }
 
+
+/********************************************/
+/* Jumpers                                  */
+/********************************************/
 
 #define WPC_JUMPER_USA_CANADA 0
 #define WPC_JUMPER_FRANCE 1

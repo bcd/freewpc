@@ -543,27 +543,29 @@ ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
 # Lamp effects
 ##########################################################################
 [leffs]
+
 perlinclude machine/tz/leff.pl
-FLASHER HAPPY: PRI_LEFF1
-GUMBALL STROBE: PRI_LEFF1
-LEFT RAMP: PRI_LEFF2
-CLOCK TARGET: PRI_LEFF2, GI(ALL)
-NO GI: L_NORMAL, PRI_LEFF3, GI(ALL)
-SLOT KICKOUT: PRI_LEFF3
-AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL)
-FLASH ALL: PRI_LEFF5, LAMPS(AMODE_ALL)
-BONUS: runner, PRI_BONUS, LAMPS(ALL), GI(ALL)
-Jets Active: shared, 0, LAMPS(JETS)
-GAME TIMEOUT: PRI_TILT, GI(ALL)
-CLOCK START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff)
-MB RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff)
-Strobe Up: PRI_LEFF2, LAMPS(ALL)
-Multi Strobe: PRI_LEFF2, LAMPS(ALL)
-Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL)
-Left Loop: PRI_LEFF1, LAMPS(SORT3)
-Right Loop: PRI_LEFF1, LAMPS(SORT4)
+
+Flasher Happy: PRI_LEFF1, page(MACHINE_PAGE)
+GUMBALL STROBE: PRI_LEFF1, page(MACHINE_PAGE)
+Left Ramp: PRI_LEFF2, page(MACHINE_PAGE)
+CLOCK TARGET: PRI_LEFF2, GI(ALL), page(MACHINE_PAGE)
+No GI: L_NORMAL, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
+SLOT KICKOUT: PRI_LEFF3, page(MACHINE_PAGE)
+AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
+FLASH ALL: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE_PAGE)
+Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Jets Active: shared, 0, LAMPS(JETS), page(MACHINE_PAGE)
+GAME TIMEOUT: PRI_TILT, GI(ALL), page(MACHINE_PAGE)
+CLOCK START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff), page(MACHINE_PAGE)
+MB RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff), page(MACHINE_PAGE)
+Strobe Up: PRI_LEFF2, LAMPS(ALL), page(MACHINE_PAGE)
+Multi Strobe: PRI_LEFF2, LAMPS(ALL), page(MACHINE_PAGE)
+Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL), page(MACHINE_PAGE)
+Left Loop: PRI_LEFF1, LAMPS(SORT3), page(MACHINE_PAGE)
+Right Loop: PRI_LEFF1, LAMPS(SORT4), page(MACHINE_PAGE)
 Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
-Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL)
+Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 
 ##########################################################################
 # Fonts used in this game.

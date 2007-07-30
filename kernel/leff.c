@@ -54,7 +54,7 @@
 #define L_ALL_GI		0x1F
 
 /* Declare externs for all of the deff functions */
-#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
+#define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
 	extern void fn (void);
 
 #ifdef MACHINE_LAMP_EFFECTS
@@ -63,12 +63,12 @@ MACHINE_LAMP_EFFECTS
 
 /* Now declare the deff table itself */
 #undef DECL_LEFF
-#define DECL_LEFF(num, flags, pri, b1, b2, fn) \
-	[num] = { flags, pri, b1, b2, fn },
+#define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
+	[num] = { flags, pri, b1, b2, fn, fnpage },
 
 static const leff_t leff_table[] = {
 #define null_leff leff_exit
-	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL },
+	[LEFF_NULL] = { L_NORMAL, 0, 0, 0, NULL, 0 },
 #ifdef MACHINE_LAMP_EFFECTS
 	MACHINE_LAMP_EFFECTS
 #endif
@@ -248,6 +248,10 @@ task_pid_t leff_create_handler (const leff_t *leff)
 		/* Start the task */
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
 	}
+
+	/* If it resides outside of the system page, set that up. */
+	if (leff->page != 0xFF)
+		task_set_rom_page (tp, leff->page);
 
 	/* Initialize the new leff's private data before it runs */
 	task_set_thread_data (tp, L_PRIV_APPLY_DELAY, 0);

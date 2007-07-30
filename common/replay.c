@@ -19,8 +19,12 @@
  */
 
 #include <freewpc.h>
+#include <knocker.h>
 
+/** The current replay score */
 __nvram__ U8 replay_score[BYTES_PER_SCORE];
+
+/** The checksum for the current replay score */
 __nvram__ U8 replay_csum;
 
 
@@ -29,6 +33,7 @@ define a method for taking replay scores from the standard adjustment. */
 const score_t default_replay_score = { 0x00, 0x50, 0x00, 0x00, 0x00 };
 
 
+/** The replay checksum descriptor */
 const struct area_csum replay_csum_info = {
 	.area = replay_score,
 	.length = BYTES_PER_SCORE,
@@ -68,6 +73,7 @@ void replay_draw (void)
 }
 
 
+/** Award a single replay to the player up */
 void replay_award (void)
 {
 	switch (system_config.replay_award)
@@ -96,7 +102,8 @@ void replay_award (void)
 }
 
 
-/** Check if the current score has exceeded the next replay level. */
+/** Check if the current score has exceeded the next replay level,
+ * and a replay needs to be awarded */
 void replay_check_current (void)
 {
 	if (system_config.replay_award != FREE_AWARD_OFF
@@ -107,6 +114,9 @@ void replay_check_current (void)
 	}
 }
 
+
+/** Returns true if it is possible to give out a replay award.
+ * Returns false if not for some reason. */
 bool replay_can_be_awarded (void)
 {
 	return (system_config.replay_award != FREE_AWARD_OFF

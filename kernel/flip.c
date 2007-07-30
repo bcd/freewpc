@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
  *
@@ -28,15 +27,14 @@
 #include <test.h>
 
 
-/** TRUE if the flipper coils are enabled */
-bool flippers_enabled;
+/** Says whether or not the flipper coils are enabled */
+U8 flippers_enabled;
 
-/** Cache of the last values read from the flipper input switches */
-__fastram__ U8 flipper_inputs;
 
-/** Cache of the next/last value to be written to the flipper outputs */
-__fastram__ U8 flipper_outputs;
-
+/** Software controlled flipper inputs for Fliptronic games. */
+#ifdef MACHINE_FLIPTRONIC
+__fastram__ U8 flipper_overrides;
+#endif
 
 
 void flipper_enable (void)
@@ -53,47 +51,72 @@ void flipper_disable (void)
 }
 
 
+#ifdef MACHINE_FLIPTRONIC
+
+
+void flipper_override_on (U8 sw_button)
+{
+}
+
+
+void flipper_override_off (U8 sw_button)
+{
+}
+
+
+/** Perform real-time processing for a single flipper. */
 static inline void flipper_service (
+	U8 inputs,
+	U8 *outputs,
 	U8 sw_button,
 	U8 sw_eos,
 	U8 sol_power,
 	U8 sol_hold )
 {
-	if (flipper_inputs & sw_button)
+	/* TODO : this function is incredibly simplistic for now.
+	 * There is no duty cycling, no debouncing, no error handling. */
+
+	if (inputs & sw_button)
 	{
-		if (flipper_inputs & sw_eos)
+		if (inputs & sw_eos)
 		{
-			flipper_outputs |= sol_hold;
+			*outputs |= sol_hold;
 		}
 		else
 		{
-			flipper_outputs |= sol_power;
+			*outputs |= sol_power;
 		}
 	}
 }
 
 
-void flipper_rtt (void)
+/** Real-time function that services all of the flipper switches and coils.
+ * On non-Fliptronic games, the CPU has no visibility to the flippers so
+ * this isn't necessary. */
+void fliptronic_rtt (void)
 {
-	flipper_inputs = ~wpc_read_flippers ();
-	flipper_outputs = 0;
+	register U8 inputs __areg__ = ~wpc_read_flippers () | flipper_overrides;
+	U8 outputs = 0;
 
 	if (flippers_enabled)
 	{
-		flipper_service (WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
-		flipper_service (WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
+		flipper_service (inputs, &outputs, WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
+		flipper_service (inputs, &outputs, WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
 
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
-		flipper_service (WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+		flipper_service (inputs, &outputs, WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
 #endif
 
 #ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER
-		flipper_service (WPC_UR_FLIP_SW, WPC_UR_FLIP_EOS, WPC_UR_FLIP_POWER, WPC_UR_FLIP_HOLD);
+		flipper_service (inputs, &outputs, WPC_UR_FLIP_SW, WPC_UR_FLIP_EOS, WPC_UR_FLIP_POWER, WPC_UR_FLIP_HOLD);
 #endif
 	}
 
-	wpc_write_flippers (~flipper_outputs);
+	wpc_write_flippers (~outputs);
 }
+
+#endif /* MACHINE_FLIPTRONIC */
+
 
 void flipper_init (void)
 {
