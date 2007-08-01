@@ -123,7 +123,7 @@ void write_tick_driver (FILE *f)
 				{
 					if ((div > 1) && (used == 0))
 					{
-						fprintf (f, "   if (%s_divider & %d)\n   {\n", prefix, div-1);
+						fprintf (f, "   if (!(%s_divider & %d))\n   {\n", prefix, div-1);
 						used = 1;
 						divider_count++;
 					}
@@ -304,6 +304,10 @@ void parse_schedule (FILE *f)
 		fscanf (f, "%s %d %f\n", name, &period, &len);
 		if (feof (f))
 			break;
+		if (*name == '#')
+			continue;
+		if (*name == '\0')
+			continue;
 		add_task (name, period, len);
 	}
 }

@@ -1,5 +1,4 @@
 do_irq_begin          1       0.01
-do_irq_end            1       0.01
 fliptronic_rtt        2       0.01
 triac_rtt             2       0.01
 switch_rtt            2       0.01
@@ -11,8 +10,9 @@ lamp_rtt_1            8       0.01
 lamp_rtt_2            8       0.01
 lamp_rtt_3            8       0.01
 !clock_advance        16      0.01
-wpc_led_toggle        32      0.01
+!wpc_led_toggle       32      0.01
 sound_rtt             32      0.01
 lamp_flash_rtt        32      0.01
 lockup_check_rtt      128     0.01
-idle_profile_rtt      128     0.01
+#idle_profile_rtt      128     0.01
+do_irq_end            1       0.01

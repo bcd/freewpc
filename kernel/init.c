@@ -108,7 +108,13 @@ void do_reset (void)
 	 * starting with the hardware-centric ones and moving on
 	 * to software features. */
 	wpc_led_toggle ();
+
+#ifdef STATIC_SCHEDULER
+	tick_init ();
+#else
 	irq_init ();
+#endif
+
 #ifdef DEBUGGER
 	db_init ();
 #endif

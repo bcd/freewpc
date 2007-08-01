@@ -125,6 +125,7 @@ void system_reset (void)
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
+	dbprintf ("Init complete.\n");
 	sys_init_complete++;
 
 	amode_start ();
