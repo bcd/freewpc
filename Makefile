@@ -46,7 +46,7 @@ GCC_VERSION ?= 3.4.6
 TOOL_PROFILING ?= n
 
 # Build date (now)
-BUILD_DATE = \"$(shell date +%m/%d/%y)\"
+BUILD_DATE := \"$(shell date +%m/%d/%y)\"
 
 #######################################################################
 ###	Include User Settings
@@ -169,9 +169,6 @@ GENDEFINE = tools/gendefine
 BC = bc
 PATH_REQUIRED += $(BC)
 
-# All internal tools are marked required for now
-REQUIRED += $(TOOLS)
-
 # Where pinmame is located
 PINMAME ?= xpinmamed.x11
 PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_FLAGS)
@@ -180,6 +177,9 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 #######################################################################
 ###	Source and Binary Filenames
 #######################################################################
+
+SCHED_SRCS := build/system-drivers.c
+SCHED_OBJS := $(SCHED_SRCS:.c=.o)
 
 # Basic kernel modules are generic and do not depend on
 # the machine type at all.
@@ -505,7 +505,7 @@ $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
 
-SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS)
+SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) $(SCHED_OBJS)
 $(SYSTEM_OBJS) : PAGE=62
 CFLAGS += -DSYS_PAGE=62
 
@@ -518,7 +518,7 @@ AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) $(FSM_OBJS) \
 	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
-	$(FONT_OBJS) $(EFFECT_OBJS)
+	$(FONT_OBJS) $(EFFECT_OBJS) $(SCHED_OBJS)
 
 
 ifeq ($(PLATFORM),wpc)
@@ -552,7 +552,7 @@ clean_err:
 	@rm -f $(ERR)
 
 .PHONY : check_prereqs
-check_prereqs : xbmgen_run xbmprotos
+check_prereqs : tools sched xbmgen_run xbmprotos
 
 .PHONY : run
 run: install
@@ -751,14 +751,14 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
 # General rule for how to build any assembler file.  This uses the native
 # assembler and not gcc.
 #
-$(AS_OBJS) : %.o : %.s $(REQUIRED)
+$(AS_OBJS) : %.o : %.s $(CC)
 	@echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
-$(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(REQUIRED)
+$(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(CC)
 	@echo Assembling page header $< ... && $(AS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
@@ -883,6 +883,17 @@ fonts clean-fonts:
 	@echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
 
 #######################################################################
+###	Static Scheduling
+#######################################################################
+
+.PHONY : sched
+sched: $(SCHED_SRCS)
+
+build/system-drivers.c : kernel/system.sched $(SCHED) $(MAKE_DEPS)
+	$(SCHED) -o $@ -i freewpc.h -i interrupt.h $<
+
+
+#######################################################################
 ###	Host Tools
 #######################################################################
 
@@ -890,7 +901,7 @@ tools : $(TOOLS)
 
 $(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC) 
 
-$(HOST_OBJS) : CFLAGS=-Wall -I.
+$(HOST_OBJS) : CFLAGS=-Wall -I. -g
 
 $(HOST_OBJS) : %.o : %.c
 	$(CC) $(CFLAGS) $(TOOL_CFLAGS) -o $@ -c $<
@@ -990,8 +1001,6 @@ info:
 	@echo "GCC_VERSION = $(GCC_VERSION)"
 	@echo "CC = $(CC)"
 	-@$(CC) -v
-	@echo "AS = $(AS)"
-	-@$(AS) --version
 	@echo "CFLAGS = $(CFLAGS)"
 	@echo "TOOLS = $(TOOLS)"
 	@echo "REQUIRED = $(REQUIRED)"

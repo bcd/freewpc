@@ -539,7 +539,7 @@ void adj_browser_draw (void)
 		dmd_copy_low_to_high ();
 
 		if (ad->nvram)
-			ad->values->render (adj_edit_value);
+			far_call_pointer (ad->values->render, TEST2_PAGE, adj_edit_value);
 
 		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 	}
@@ -709,7 +709,7 @@ struct audit earnings_audits[] = {
 	{ "RECENT RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
 	{ "RECENT 4TH SLOT", integer_audit, &system_audits.coins_added[3] },
 	{ "RECENT PAID CREDITS", integer_audit, &system_audits.paid_credits },
-	{ "RECENT SERVICE CREDITS", integer_audit, &system_audits.service_credits },
+	{ "RECENT SERV. CREDITS", integer_audit, &system_audits.service_credits },
 	{ NULL, NULL, NULL },
 };
 
@@ -772,7 +772,7 @@ void audit_browser_draw (void)
 
 	if (aud->nvram && aud->render)
 	{
-		aud->render (*(aud->nvram));
+		far_call_pointer (aud->render, TEST2_PAGE, (*(aud->nvram)));
 		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 	}
 

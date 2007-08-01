@@ -46,6 +46,21 @@ U16 far_read16 (U16 *address, U8 page);
 typedef void (*void_function) (void);
 void far_indirect_call_handler (void_function address, U8 page);
 
+
+extern void *_far_call_address;
+extern U8 _far_call_page;
+
+#define far_call_pointer(function, page, arg) \
+do { \
+	_far_call_address = (void *)function; \
+	_far_call_page = page; \
+	if (sizeof (arg) == 1) \
+		asm (";short arg" :: "q" (arg)); \
+	else \
+		asm (";long arg" :: "a" (arg)); \
+	asm ("jsr\t_far_call_pointer_handler"); \
+} while (0);
+
 void *malloc (U8 size);
 void free (void *ptr);
 

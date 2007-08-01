@@ -31,7 +31,11 @@ extern void start (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);
+#ifdef STATIC_SCHEDULER
+extern void tick_driver (void);
+#else
 extern void do_irq (void);
+#endif
 extern void do_swi (void);
 extern void do_nmi (void);
 
@@ -56,7 +60,11 @@ __attribute__((section("vector"))) m6809_vector_table_t vectors = {
 	.swi3 = do_swi3,
 	.swi2 = do_swi2,
 	.firq = do_firq,
+#ifdef STATIC_SCHEDULER
+	.irq = tick_driver,
+#else
 	.irq = do_irq,
+#endif
 	.swi = do_swi,
 	.nmi = do_nmi,
 	.reset = start,

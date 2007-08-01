@@ -32,6 +32,9 @@ WPC_ROM_PAGE_REG=0x3FFC
 	.globl __far_call_address
 __far_call_address: .blkb 2
 
+	.globl __far_call_page
+__far_call_page: .blkb 1
+
 	;;; Notes:
 	;;; 1. The 'A' register is clobbered by the call.  This is OK
 	;;; since the ABI only define B and X for return codes.
@@ -82,6 +85,20 @@ _far_indirect_call_handler:
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	puls	b,u,x                 ; Restore parameters
+	pshs	a                     ; Save bank switch value to be restored
+	jsr	[__far_call_address]  ; Call function
+	puls	a                     ; Restore A
+	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
+	rts
+
+
+	.globl _far_call_pointer_handler
+_far_call_pointer_handler:
+	pshs	b,x                   ; Save all registers used for parameters
+	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	ldb	__far_call_page
+	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
+	puls	b,x                   ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A

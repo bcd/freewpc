@@ -535,7 +535,10 @@ void device_sw_handler (U8 devno)
 {
 	/* Ignore device switches until device SS is initialized. */
 	if (device_ss_state == 0)
+	{
+		dbprintf ("Device system not ready.\n");
 		return;
+	}
 
 	/* Ignore device switches if the device update task is already running.
 	 * It is polling the device count and will deal with this event. */

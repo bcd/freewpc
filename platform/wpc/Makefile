@@ -32,7 +32,11 @@ endif
 # Optimization flags
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
 
-KERNEL_SW_OBJS += $(P)/div10.o $(P)/malloc.o $(P)/task.o $(P)/vector.o
+KERNEL_SW_OBJS +=  \
+	$(P)/div10.o  \
+	$(P)/malloc.o  \
+	$(P)/task.o  \
+	$(P)/vector.o \
 
 KERNEL_ASM_OBJS = $(P)/farcall.o $(P)/task_6809.o $(P)/start.o
 

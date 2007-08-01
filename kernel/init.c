@@ -25,13 +25,8 @@
  * \brief Entry point to the game program.
  */
 
-U8 errcode;
-
 /** The number of FIRQs asserted */
 __fastram__ U8 firq_count;
-
-/** An area of NVRAM used to test that it is kept locked. */
-__nvram__ U8 nvram_test_byte;
 
 U8 sys_init_complete;
 
@@ -43,9 +38,9 @@ U8 last_nonfatal_error_code;
 
 task_gid_t last_nonfatal_error_gid;
 
-#ifdef CONFIG_PLATFORM_LINUX
-char sprintf_buffer[PRINTF_BUFFER_SIZE];
-#endif
+//#ifdef CONFIG_PLATFORM_LINUX
+//char sprintf_buffer[PRINTF_BUFFER_SIZE];
+//#endif
 
 
 #ifdef __m6809__
@@ -161,7 +156,6 @@ void do_reset (void)
 	 * Now, start the display effect that runs at powerup.
 	 */
 	idle_ok = 1;
-	//db_idle ();
 
 #ifdef MACHINE_TEST_ONLY
 	sys_init_complete++;
@@ -210,7 +204,7 @@ void lockup_check_rtt (void)
 {
 	if (sys_init_complete && !task_dispatching_ok)
 	{
-		fatal (ERR_FCFS_LOCKUP);
+		fatal (ERR_TASK_LOCKUP);
 	}
 	else
 	{
@@ -316,20 +310,6 @@ void nonfatal (errcode_t error_code)
 	last_nonfatal_error_code = error_code;
 	last_nonfatal_error_gid = task_getgid ();
 	deff_start (DEFF_NONFATAL_ERROR);
-#endif
-}
-
-
-CALLSET_ENTRY (nvram, idle)
-{
-#ifdef HAVE_NVRAM
-	U8 data = nvram_test_byte;
-	++nvram_test_byte;
-	asm ("; nop" ::: "memory");
-	if (data != nvram_test_byte)
-	{
-		fatal (ERR_NVRAM_UNLOCKED);
-	}
 #endif
 }
 

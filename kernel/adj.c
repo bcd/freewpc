@@ -28,6 +28,10 @@
 #include <freewpc.h>
 #include <test.h>
 
+
+/** An area of NVRAM used to test that it is kept locked. */
+__nvram__ U8 nvram_test_byte;
+
 __nvram__ std_adj_t system_config;
 
 __nvram__ pricing_adj_t price_config;
@@ -77,5 +81,21 @@ void adj_modified (void)
 void adj_init (void)
 {
 	adj_verify_all ();
+}
+
+
+/** Check the NVRAM at idle time to make sure that it is locked.
+ * Halt the system if found unlocked. */
+CALLSET_ENTRY (nvram, idle)
+{
+#ifdef HAVE_NVRAM
+	U8 data = nvram_test_byte;
+	++nvram_test_byte;
+	asm ("; nop" ::: "memory");
+	if (data != nvram_test_byte)
+	{
+		fatal (ERR_NVRAM_UNLOCKED);
+	}
+#endif
 }
 
