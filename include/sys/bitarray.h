@@ -35,8 +35,7 @@ do {														\
 		"\tld%0\t" C_STRING(WPC_SHIFTADDR) "\n"\
 		"\tld%1\t" C_STRING(WPC_SHIFTBIT) "\n"	\
 		bitop												\
-		: "=a" (bs), "=q" (index)					\
-		: "a" (bs), "q" (index)						\
+		: "+a" (bs), "+q" (index)				   \
 	);														\
 } while (0)
 
