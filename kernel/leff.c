@@ -331,6 +331,7 @@ void leff_stop (leffnum_t dn)
 	{
 		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
+		lamp_leff1_erase (); /* TODO : these two functions go together */
 		lamp_leff1_free_all ();
 		if (leff->gi != L_NOGI)
 			triac_leff_free (leff->gi);
