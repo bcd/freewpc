@@ -37,6 +37,9 @@ void right_ramp_default_deff (void)
 void sw_right_ramp_enter_task (void)
 {
 	task_set_flags (TASK_PROTECTED);
+	/* Decide whether to let the ball onto the mini-playfield,
+	or dump it.  Do this once for each balls that enters the
+	ramp. */
 	do {
 		if (mpf_enable_count)
 		{
@@ -59,23 +62,20 @@ void sw_right_ramp_enter_task (void)
 
 CALLSET_ENTRY (right_ramp, sw_right_ramp)
 {
+	/* Handle all balls entering the ramp unconditionally, so that
+	they are disposed of properly. */
+	right_ramps_entered++;
+	task_recreate_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_enter_task);
+
+	/* Scoring functions only happen during a game */
 	if (!in_live_game)
 		return;
 
 	score (SC_10K);
-
-	right_ramps_entered++;
-	if (!task_find_gid (GID_RIGHT_RAMP_ENTERED))
-		task_create_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_enter_task);
-
 	if (mpf_enable_count > 0)
-	{
 		sound_send (SND_RAMP_ENTERS_POWERFIELD);
-	}
 	else
-	{
 		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
-	}
 }
 
 
