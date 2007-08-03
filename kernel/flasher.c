@@ -54,11 +54,14 @@ void flasher_rtt (void)
 	{
 		if (flashers_active[i].flasher != 0)
 		{
-			rt_sol_enable (flashers_active[i].flasher);
 			if (--flashers_active[i].duration == 0)
 			{
 				rt_sol_disable (flashers_active[i].flasher);
 				flashers_active[i].flasher = 0;
+			}
+			else
+			{
+				rt_sol_enable (flashers_active[i].flasher);
 			}
 		}
 	}
