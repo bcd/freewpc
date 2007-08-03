@@ -38,10 +38,6 @@ U8 last_nonfatal_error_code;
 
 task_gid_t last_nonfatal_error_gid;
 
-//#ifdef CONFIG_PLATFORM_LINUX
-//char sprintf_buffer[PRINTF_BUFFER_SIZE];
-//#endif
-
 
 #ifdef __m6809__
 void exit (void)
