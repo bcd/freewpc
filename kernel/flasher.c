@@ -20,7 +20,7 @@
  */
 
 #include <freewpc.h>
-
+#include <rtsol.h>
 
 #define MAX_ACTIVE_FLASHERS 4
 
@@ -54,10 +54,10 @@ void flasher_rtt (void)
 	{
 		if (flashers_active[i].flasher != 0)
 		{
-			sol_on (flashers_active[i].flasher);
+			rt_sol_enable (flashers_active[i].flasher);
 			if (--flashers_active[i].duration == 0)
 			{
-				sol_off (flashers_active[i].flasher);
+				rt_sol_disable (flashers_active[i].flasher);
 				flashers_active[i].flasher = 0;
 			}
 		}
