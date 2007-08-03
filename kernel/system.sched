@@ -22,37 +22,40 @@
 # Schedule for FreeWPC's core real-time tasks
 
 # Common processing required at the beginning of every IRQ.
-do_irq_begin          1       0.01
+do_irq_begin          1       8c
 
 # Read the flipper switches and update the flipper coils
-fliptronic_rtt        2       0.01
+fliptronic_rtt        2       250c
 
 # Update the triacs
-triac_rtt             2       0.01
+triac_rtt             2       60c
 
 # Read the regular switch matrix and coin door
-switch_rtt            2       0.01
+switch_rtt            2       500c
 
 # Resynchronize to the AC zero cross point.
-ac_rtt                2       0.01
+ac_rtt                2       30c
 
 # Update the solenoids
-sol_rtt               8       0.01
+sol_rtt               8       125c
 
 # Update flashers
-flasher_rtt           8       0.01
+# TODO : this routine needs help.  The estimate is
+# for idle; when it actually has to pulse a flasher,
+# it is MUCH worse
+flasher_rtt           8       170c
 
 # Update the lamps
-lamp_rtt_0            8       0.01
-lamp_rtt_1            8       0.01
-lamp_rtt_2            8       0.01
-lamp_rtt_3            8       0.01
+lamp_rtt_0            8       90c
+lamp_rtt_1            8       90c
+lamp_rtt_2            8       90c
+lamp_rtt_3            8       90c
 
 # Advance the system clock
-!clock_advance        16      0.01
+!clock_advance        16      4c
 
 # Toggle the CPU board LED
-!wpc_led_toggle       32      0.01
+!wpc_led_toggle       32      14c
 
 # Read/write the sound board
 sound_rtt             32      0.01
@@ -71,7 +74,7 @@ lockup_check_rtt      128     0.01
 #if IDLE_PROFILE idle_profile_rtt      128     0.01
 
 # Common processing required at the end of every IRQ
-do_irq_end            1       0.01
+do_irq_end            1       0c
 
 
 # TODO : service the coin switches correctly to ensure proper timing
