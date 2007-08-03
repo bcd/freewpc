@@ -42,7 +42,7 @@ explicitly stopped via deff_stop() when conditions change, or the deff
 itself may exit on its own if it decides it no longer needs to run. */
 #define D_QUEUED 0x1
 
-/** TODO : Set for a deff that should not be queued for a long period of time,
+/** Set for a deff that should not be queued for a long period of time,
 should it fail to get the display.  This setting also requires that
 D_QUEUED be set.  When a deff is queued, it is timestamped and if the
 deff remains on the queue for longer than some predetermined amount
