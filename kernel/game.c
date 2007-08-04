@@ -226,15 +226,17 @@ void end_ball (void)
 	/* Stop the ball search monitor */
 	ball_search_monitor_stop ();
 
-	/* If the ball was not tilted, start bonus.
-	 * The tilt flag is then cleared. */
+	/* If the ball was not tilted, start bonus. */
 	if (!in_tilt)
 	{
 		in_bonus = TRUE;
 		callset_invoke (bonus);
 		in_bonus = FALSE;
 	}
-	else
+
+	/* Clear the tilt flag.  Note, this is not combined
+	with the above to handle tilt while bonus is running. */
+	if (in_tilt)
 	{
 		dbprintf ("Clearing tilt flag, deff should stop\n");
 #ifdef DEFF_TILT
