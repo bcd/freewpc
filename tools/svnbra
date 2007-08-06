@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# svn branch related commands:
+#
+
+# create a new branch
+# 1. svn copy <trunk_url> <dest_url>
+# 2. In a working copy of the trunk, do svnmerge init <dest_url>
+# 3. Commit the svnmerge change: svn ci -F svnmerge-commit-message.txt; rm -f svnmerge-commit-message.txt
+# 4. In a working copy of the branch, do svnmerge init
+# 5. Repeat step 3 as before, this time in the branch directory.
+
+# merge from trunk -> branch (rebase)
+# In the branch WC, do svnmerge merge.
+
+# merge from branch -> trunk (deliver)
+# In the trunk WC, do svnmerge merge --bidirectional -S <branch_name>

@@ -109,7 +109,7 @@ bool ball_search_timed_out (void)
 }
 
 
-static void ball_search_run (void)
+void ball_search_run (void)
 {
 	U8 sol;
 

@@ -101,6 +101,20 @@ void chaosmb_lamp_update (void)
 }
 
 
+void chaos_jackpot_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 12, "CHAOS");
+	font_render_string_center (&font_fixed10, 64, 20, "JACKPOT");
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (15, TIME_100MS);
+	deff_exit ();
+}
+
+
 void chaosmb_running_deff (void)
 {
 	for (;;)
@@ -125,6 +139,7 @@ void chaosmb_score_jackpot (void)
 {
 	chaosmb_level++;
 	chaosmb_hits_to_relight = chaosmb_level * 2;
+	deff_start (DEFF_CHAOS_JACKPOT);
 	sound_send (SND_EXPLOSION_1);
 }
 
@@ -199,10 +214,6 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 		&& (chaosmb_hits_to_relight > 0))
 	{
 		chaosmb_hits_to_relight--;
-		if (chaosmb_hits_to_relight == 0)
-		{
-			chaosmb_level++;
-		}
 	}
 }
 

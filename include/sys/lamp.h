@@ -113,8 +113,8 @@ bool leff_test (lampnum_t lamp);
 
 #else
 
-#define flag_address(flagname,lampfn) lampfn (flagname)
-#define flag_address_output(flagname,lampfn,output) output = lampfn (flagname)
+#define flag_address(flagname,lampfn) lampfn (flagname + FLAG_OFFSET)
+#define flag_address_output(flagname,lampfn,output) output = lampfn (flagname + FLAG_OFFSET)
 
 #endif
 

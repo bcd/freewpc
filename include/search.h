@@ -26,7 +26,8 @@ __common__ void ball_search_timeout_set (U8 secs);
 __common__ bool ball_search_timed_out (void);
 __common__ void ball_search_monitor_start (void);
 __common__ void ball_search_monitor_stop (void);
+__common__ void ball_search_run (void);
 
-#define BS_TIMEOUT_DEFAULT	20
+#define BS_TIMEOUT_DEFAULT	15
 
 #endif /* _SEARCH_H */
