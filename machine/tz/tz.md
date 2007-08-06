@@ -538,6 +538,7 @@ SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
 SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+6
 
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
+Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_MODE1+13
 
 ##########################################################################
 # Lamp effects
