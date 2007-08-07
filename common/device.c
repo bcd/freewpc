@@ -637,6 +637,8 @@ void device_multiball_set (U8 count)
  * in the trough. */
 bool device_check_start_ok (void)
 {
+	U8 truly_missing_balls;
+
 	/* Reset any kickout locks, just in case */
 	kickout_locks = 0;
 
@@ -644,23 +646,30 @@ bool device_check_start_ok (void)
 	 * without first trying a device probe.
 	 *
 	 * If the device probe is alread in progress, then just
-	 * return. */
+	 * return right away. */
  	if (task_find_gid (GID_DEVICE_PROBE)) 
 		return FALSE;
 
 	/* If a ball is on the shooter switch, then allow the
 	 * game to start anyway. */
+	truly_missing_balls = missing_balls;
 #ifdef MACHINE_SHOOTER_SWITCH
-	else if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
-		return TRUE;
+	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+		truly_missing_balls--;
 #endif
 
 	/* If some balls are unaccounted for, and not on the shooter,
 	 * then start a device probe and a ball search. */
-	else if (missing_balls > 0)
+	if (truly_missing_balls > 0)
 	{
 		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
-		/* TODO : a ball search here is probably needed also. */
+		ball_search_run ();
+		deff_start (DEFF_LOCATING_BALLS);
+		/* TODO : after so many attempts, if a ball is still
+		missing then allow the game to start anyway */
+
+		while (task_find_gid (GID_DEVICE_PROBE))
+			task_sleep_sec (TIME_500MS);
 		return FALSE;
 	}
 

@@ -129,15 +129,16 @@ void replay_reset (void)
 {
 	U8 replay_code;
 
-	replay_code = system_config.replay_level[0];
+	replay_code = system_config.replay_start;
 	wpc_nvram_get ();
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
+	score_zero (replay_score);
 	MACHINE_REPLAY_CODE_TO_SCORE (replay_score, replay_code);
 #else
 	memcpy (replay_score, default_replay_score, sizeof (score_t));
 #endif
 	wpc_nvram_put ();
+	csum_area_update (&replay_csum_info);
 }
 
 
@@ -158,7 +159,14 @@ CALLSET_ENTRY (replay, end_game)
 
 CALLSET_ENTRY (replay, init)
 {
-	/* Initialize the replay subsystem. */
+	/* Initialize the replay score from the menu adjustment. */
+	replay_reset ();
+}
+
+
+CALLSET_ENTRY (replay, amode_start)
+{
+	/* Initialize the replay score from the menu adjustment. */
 	replay_reset ();
 }
 

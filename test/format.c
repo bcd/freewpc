@@ -80,7 +80,6 @@ void percent_render (U8 val)
 void replay_score_render (U8 val)
 {
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
-	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
 	score_t score;
 	score_zero (score);
 	MACHINE_REPLAY_CODE_TO_SCORE (score, val);

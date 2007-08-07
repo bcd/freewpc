@@ -44,7 +44,7 @@ void sw_right_ramp_enter_task (void)
 		if (mpf_enable_count)
 		{
 			sol_on (SOL_RIGHT_RAMP_DIV);
-			task_sleep_sec (4);
+			task_sleep_sec (3);
 		}
 		else
 		{

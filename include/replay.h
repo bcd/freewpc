@@ -27,4 +27,8 @@ __common__ void replay_check_current (void);
 __common__ void replay_reset (void);
 __common__ bool replay_can_be_awarded (void);
 
+#ifdef MACHINE_REPLAY_CODE_TO_SCORE
+__machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
+#endif
+
 #endif /* _REPLAY_H */

@@ -51,11 +51,15 @@ CALLSET_ENTRY (plunger, ball_in_play)
 CALLSET_ENTRY (plunger, sw_shooter)
 {
 #ifdef INCLUDE_AUTOPLUNGER
-	if (ball_in_play)
+	if (ball_in_play
+		&& !tournament_mode_enabled 
+		&& switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
-		/* If ball is already in play, then autolaunch any balls
-		right away.  TODO : UNLESS the coin door is open, or in
-		tournament mode. */
+		/* Autolaunch balls right away during a game if they land
+		in the autoplunger lane. */
+		/* TODO - after locking a ball, adding a new ball to the
+		plunger while ball_in_play is TRUE: this will launch
+		prematurely */
 		VOIDCALL (plunger_sw_launch_button);
 	}
 	else if (system_config.timed_plunger == ON)

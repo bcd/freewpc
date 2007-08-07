@@ -47,7 +47,7 @@ static inline U8 decimal_to_bcd_byte (U8 decimal)
 
 void replay_code_to_score (score_t s, U8 val)
 {
-	s[1] = decimal_to_bcd_byte (val);
+	s[1] = decimal_to_bcd_byte (val * 10);
 }
 
 
