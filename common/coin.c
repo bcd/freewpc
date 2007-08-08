@@ -104,19 +104,16 @@ void credits_render (void)
 			U8 units = unit_count;
 			U8 units_per_credit = price_config.units_per_credit;
 
+			/* There are fractional credits.  Reduce to the
+			 * lowest common denominator before printing. */
+
 			reduce_unit_fraction (&units, &units_per_credit);
 
 			if (credit_count == 0)
-			{
 				sprintf ("%d/%d CREDIT", units, units_per_credit);
-			}
 			else
-			{
-				/* TODO: Fractional credit display does not show the
-				fraction in its most reduced form, e.g. 2/4 instead of 1/2. */
 				sprintf ("%d %d/%d CREDITS",
 					credit_count, units, units_per_credit);
-			}
 		}
 		else
 		{

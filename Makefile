@@ -210,12 +210,15 @@ KERNEL_OBJS = $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) \
 	kernel/csum.o \
 	kernel/dmd.o \
 	kernel/flasher.o \
+	kernel/hardtimer.o \
 	kernel/flip.o \
-	kernel/init.o \
-	kernel/irq.o \
+	kernel/init.o
+ifeq ($(REMOVE_OLD_IRQ),)
+KERNEL_OBJS += kernel/irq.o
+endif
+KERNEL_OBJS += \
 	kernel/lamp.o \
 	kernel/leff.o \
-	kernel/reset.o \
 	kernel/sol.o \
 	kernel/sound.o \
 	kernel/switches.o \
@@ -234,6 +237,7 @@ COMMON_BASIC_OBJS = \
 	common/match.o \
 	common/music.o \
 	common/plunger.o \
+	common/reset.o \
 	common/rtc.o \
 	common/service.o \
 	common/tilt.o \
@@ -899,7 +903,7 @@ $(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC)
 $(HOST_OBJS) : CFLAGS=-Wall -I. -g
 
 $(HOST_OBJS) : %.o : %.c
-	$(CC) $(CFLAGS) $(TOOL_CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(TOOL_CFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #######################################################################
 ###	XBM Generators

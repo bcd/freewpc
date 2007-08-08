@@ -90,6 +90,9 @@ void mball_light_lock (void);
 void mball_check_light_lock (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
+/* rampdiv.c */
+void ramp_divert (void);
+void ramp_divert_to_autoplunger (void);
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);

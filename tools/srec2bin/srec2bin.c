@@ -58,7 +58,6 @@ int main (int argc, char *argv[])
 	int i;
 	char *srec_file = "freewpc.s19";
 	char *bin_file = "freewpc.bin";
-	char *option;
 	int start_offset = 0;
 	int write_length = 0;
 	int coco_bin_format = 0;

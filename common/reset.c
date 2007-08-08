@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <amode.h>
 
 /**
  * \file
@@ -29,11 +30,21 @@
 #define ACCEPT_2	0x75
 #define ACCEPT_3	0xB9
 
-volatile const char gcc_version[] = C_STRING(GCC_VERSION);
+volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
-char build_date[] = BUILD_DATE;
+static char build_date[] = BUILD_DATE;
 
 __nvram__ U8 freewpc_accepted[3];
+
+
+extern inline void wait_for_button (const U8 swno)
+{
+	while (!switch_poll (swno))
+		task_sleep (TIME_66MS);
+
+	while (switch_poll (swno))
+		task_sleep (TIME_66MS);
+}
 
 
 void system_accept_freewpc (void)
@@ -54,8 +65,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "THIS SOFTWARE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
-	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -64,8 +74,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "TO REAL MACHINE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
-	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -73,11 +82,8 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 15, "WANT TO CONTINUE");
 	font_render_string_center (&font_mono5, 64, 21, "PRESS ENTER TWICE");
 	dmd_show_low ();
-	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
-	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
-
-	while (!switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
-	while (switch_poll (SW_ENTER)) task_sleep (TIME_66MS);
+	wait_for_button (SW_ENTER);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
@@ -94,9 +100,8 @@ void system_accept_freewpc (void)
 }
 
 
-void system_reset (void)
+void system_reset_deff (void)
 {
-	system_accept_freewpc ();
 	dmd_alloc_low_clean ();
 
 	font_render_string_center (&font_mono5, 64, 4, MACHINE_NAME);
@@ -116,20 +121,23 @@ void system_reset (void)
 
 	dmd_show_low ();
 
-#ifdef MACHINE_CUSTOM_AMODE
-	leff_start (LEFF_AMODE);
-#endif
-	triac_enable (TRIAC_GI_MASK);
-
 	task_sleep_sec (2);
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
+	deff_exit ();
+}
+
+
+
+void system_reset (void)
+{
+	system_accept_freewpc ();
+	deff_start (DEFF_SYSTEM_RESET);
+	amode_start ();
+	triac_enable (TRIAC_GI_MASK); /* TODO: amode_start should do this */
+	
 	dbprintf ("Init complete.\n");
 	sys_init_complete++;
-
-	amode_start ();
-
-	task_exit ();
 }
 

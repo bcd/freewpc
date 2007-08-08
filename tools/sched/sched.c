@@ -59,9 +59,22 @@ struct include_file
 
 struct task
 {
+	/* The function to be called to run this task.  The
+	function must take no parameters and not return anything. */
 	char name[128];
+
+	/* The frequency in ticks that the task should be called */
 	unsigned int period;
+
+	/* The estimated length of time, in ticks, that it takes
+	this task to complete during each iteration */
 	double len;
+
+	/* Nonzero if the function uses the "next" macro to finish
+	rather than just returning.  This allows the function to
+	call the next function in the chain directly, without
+	the need for a call and return.  This is optional. */
+	unsigned int next_p;
 };
 
 struct slot

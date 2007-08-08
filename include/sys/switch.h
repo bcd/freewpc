@@ -143,15 +143,17 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 #define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
 #define event_did_follow(f,s)		switch_did_follow(f,s)
 
-/** A macro for implementing button event handlers, which need to behave
-differently when the button is kept pressed.
+/** A macro for implementing button event handlers, which need to be called
+when a button is first pressed and continually as it is held.
 	SW is the id of the switch.
 	EVENT is the name of an event that is thrown to do the actual processing.
 	DELAY is the amount of time that the button must be held before
-	it is considered to repeat.
+	it is considered to repeat.  Only one call to EVENT happens during
+	this initial time period.
 	REPEAT is the frequency at which the event is rethrown while held.
+	After the initial delay, the EVENT is called every REPEAT.
  */
-#define callset_invoke_held(sw,delay,repeat,event) \
+#define button_invoke(sw,event,delay,repeat) \
 	do { \
 		U8 i; \
 		callset_invoke (event); \

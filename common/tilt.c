@@ -30,6 +30,7 @@
  */
 
 #include <freewpc.h>
+#include <coin.h>
 
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;

@@ -79,7 +79,10 @@ void autofire_open_for_trough (void)
 	/* Do not proceed if another ball is in the process of
 	being autofired. */
 	while (task_find_gid (GID_AUTOFIRE_HANDLER))
+	{
+		dbprintf ("Autofire waiting for previous.\n");
 		task_sleep_sec (1);
+	}
 
 	dbprintf ("Shooter divertor open to catch\n");
 	sol_on (SOL_SHOOTER_DIV);
@@ -119,9 +122,11 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	kicking the ball.  If so, then also wait until the autofire
 	lane is clear before allowing the ball to go. */
 
+	dbprintf ("need to autofire? ");
 	/* The default strategy is to autofire only when in multiball. */
 	if (live_balls || autofire_request_count)
 	{
+		dbprintf ("yes.\n");
 		if (autofire_request_count > 0)
 			autofire_request_count--;
 
@@ -130,7 +135,7 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	}
 	else
 	{
-		dbprintf ("Sending ball to manual plunger\n");
+		dbprintf ("no.\n");
 	}
 }
 

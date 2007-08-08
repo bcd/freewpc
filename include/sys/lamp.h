@@ -61,6 +61,40 @@ typedef const lampnum_t lampset_t[];
 typedef U8 lampset_id_t;
 
 
+/** Lamps 00h through 3Fh correspond to the physical lamp locations */
+
+/** Lamps 40h through 7Fh are 'virtual' and don't really exist, but
+ * they can be used to store boolean values.
+ * These two bitsets are kept adjacent, so the same functions can
+ * be used to bit-twiddle both of them.
+ * Both of these bitsets are also saved from player to player.
+ * Note the flash sets are NOT saved and must be recalculated from
+ * ball to ball. */
+
+/** Lamps 80h through BFh are the same as the regular lamps, but
+ * control the flash state */
+
+/** Lamps C0h through FFh are bits like 40h to 7Fh, but they are
+ * global and not saved from player to player. */
+
+struct bit_matrix_table
+{
+	U8 solid_lamps[NUM_LAMP_COLS];
+	U8 bits[NUM_VLAMP_COLS];
+	U8 flashing_lamps[NUM_LAMP_COLS];
+	U8 global_bits[NUM_LAMP_COLS];
+
+	U8 flashing_lamps_now[NUM_LAMP_COLS];
+};
+
+extern __fastram__ struct bit_matrix_table bit_matrix_array;
+
+#define lamp_matrix					bit_matrix_array.solid_lamps
+#define bit_matrix					bit_matrix_array.bits
+#define lamp_flash_matrix			bit_matrix_array.flashing_lamps
+#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
+
+
 /**
  * Lamp macros are lampset members which calculate actual
  * lamp values at runtime.
@@ -83,6 +117,7 @@ void lamp_rtt_0 (void);
 void lamp_rtt_1 (void);
 void lamp_rtt_2 (void);
 void lamp_rtt_3 (void);
+
 void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
 void lamp_toggle (lampnum_t lamp);

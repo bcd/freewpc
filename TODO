@@ -24,10 +24,3 @@ retry).  When a ball is in a lockup device, this is a good time to "catch up"
 and give all of the deffs a shot.
 
 Consider alternating display effects when they have equal priority.
-
-Consider using linked list of dynamic memory to manage deffs, rather than
-the current static scheme (it is easier and more flexible, but we need a good
-malloc.)  This should definitely help with time constraints since iteration
-can be cut down in many cases, not just deffs.
-
-

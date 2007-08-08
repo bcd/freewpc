@@ -25,36 +25,7 @@
 
 #include <freewpc.h>
 
-/** Lamps 00h through 3Fh correspond to the physical lamp locations */
-
-/** Lamps 40h through 7Fh are 'virtual' and don't really exist, but
- * they can be used to store boolean values.
- * These two bitsets are kept adjacent, so the same functions can
- * be used to bit-twiddle both of them.
- * Both of these bitsets are also saved from player to player.
- * Note the flash sets are NOT saved and must be recalculated from
- * ball to ball. */
-
-/** Lamps 80h through BFh are the same as the regular lamps, but
- * control the flash state */
-
-/** Lamps C0h through FFh are bits like 40h to 7Fh, but they are
- * global and not saved from player to player. */
-
-__fastram__ struct bit_matrix_table
-{
-	U8 solid_lamps[NUM_LAMP_COLS];
-	U8 bits[NUM_VLAMP_COLS];
-	U8 flashing_lamps[NUM_LAMP_COLS];
-	U8 global_bits[NUM_LAMP_COLS];
-
-	U8 flashing_lamps_now[NUM_LAMP_COLS];
-} bit_matrix_array;
-
-#define lamp_matrix					bit_matrix_array.solid_lamps
-#define bit_matrix					bit_matrix_array.bits
-#define lamp_flash_matrix			bit_matrix_array.flashing_lamps
-#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
+__fastram__ struct bit_matrix_table bit_matrix_array;
 
 /** Bitsets for doing temporary lamp effects, which hide the
  * normal state of the lamps */
@@ -112,7 +83,11 @@ void lamp_flash_rtt (void)
 }
 
 
-/** Runs periodically to update the physical lamp state */
+/** Runs periodically to update the physical lamp state.
+ * MODE ranges from 0 .. NUM_LAMP_RTTS-1, and says which version
+ * of the routine is needed, because of loop unrolling.
+ * For efficiency, not all iterations need to do everything.
+ */
 extern inline void lamp_rtt_common (U8 mode)
 {
 	U8 bits;
@@ -199,27 +174,28 @@ void lamp_rtt_3 (void)
 }
 
 
-/* Basic bit manipulation routines */
+/* Basic bit manipulation routines.  These will
+always use the WPC shift hardware and may not be
+optimal.  The bitarray macros are preferred. */
 
 void bit_on (bitset matrix, U8 bit)
 {
-	__setbit (matrix, bit);
+	bitarray_set (matrix, bit);
 }
 
 void bit_off (bitset matrix, U8 bit)
 {
-	__clearbit (matrix, bit);
+	bitarray_clear (matrix, bit);
 }
 
 void bit_toggle (bitset matrix, U8 bit)
 {
-	__togglebit (matrix, bit);
+	bitarray_toggle (matrix, bit);
 }
 
 bool bit_test (bitset matrix, U8 bit)
 {
-	__testbit (matrix, bit);
-	return bit;
+	return bitarray_test (matrix, bit);
 }
 
 
@@ -231,11 +207,11 @@ bool bit_test (bitset matrix, U8 bit)
  * need for allocation.
  *
  */
-
 void lamp_on (lampnum_t lamp) { bit_on (lamp_matrix, lamp); }
 void lamp_off (lampnum_t lamp) { bit_off (lamp_matrix, lamp); }
 void lamp_toggle (lampnum_t lamp) { bit_toggle (lamp_matrix, lamp); }
 bool lamp_test (lampnum_t lamp) { return bit_test (lamp_matrix, lamp); }
+
 
 void lamp_flash_on (lampnum_t lamp) { 
 	bit_on (lamp_flash_matrix, lamp);
@@ -243,7 +219,7 @@ void lamp_flash_on (lampnum_t lamp) {
 
 void lamp_flash_off (lampnum_t lamp) { 
 	bit_off (lamp_flash_matrix, lamp); 
-	bit_off (lamp_flash_matrix_now, lamp);
+	bit_off (lamp_flash_matrix_now, lamp); /* TODO : no no */
 }
 
 bool lamp_flash_test (lampnum_t lamp) {
@@ -251,7 +227,7 @@ bool lamp_flash_test (lampnum_t lamp) {
 }
 
 
-void lamp_global_update ()
+void lamp_global_update (void)
 {
 	callset_invoke (lamp_refresh);
 	if (!in_test)

@@ -53,8 +53,6 @@ U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
 #define LOCAL_SAVE_BASE(p) (&local_save_area[p][0])
 #endif
 
-extern U8 *bit_matrix_array;
-
 
 void player_start_game (void)
 {

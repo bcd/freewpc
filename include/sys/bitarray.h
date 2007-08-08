@@ -23,42 +23,97 @@
 
 typedef U8 *bitset;
 
+#define bitarray_const_offset(bits, bitno) (bits[(bitno) / 8])
+
+#define bitarray_const_mask(bits, bitno) (1 << ((bitno) % 8))
+
+/* Non-optimized macros for twiddling bits.
+ *
+ * These work well when the bit number is a constant
+ * as the location in the bitarray and the mask can all be 
+ * computed at compile time efficiently.
+ *
+ * These macros will work for non-constants, too, but this should
+ * be avoided on the WPC because the code will not be optimal.
+ * Under Linux simulation, these macros are always used.
+ * WPC has shifter harwdare that can do a better job when the
+ * bitno is non-constant. */
+
+#define bitarray_const_set(bits, bitno) \
+	(bitarray_const_offset (bits, bitno) |= bitarray_const_mask (bits, bitno))
+
+#define bitarray_const_clear(bits, bitno) \
+	(bitarray_const_offset (bits, bitno) &= ~bitarray_const_mask (bits, bitno))
+
+#define bitarray_const_toggle(bits, bitno) \
+	(bitarray_const_offset (bits, bitno) ^= ~bitarray_const_mask (bits, bitno))
+
+#define bitarray_const_test(bits, bitno) \
+	(bitarray_const_offset (bits, bitno) & bitarray_const_mask (bits, bitno))
+
+
+/* WPC shifter macros.  When compiling on a different platform,
+ * these macros are never used, but are defined anyway (to zero)
+ * just to avoid compile errors. */
+
 #ifdef CONFIG_PLATFORM_WPC
 
-/** WPC_BITOP is an assembly macro for accessing the WPC shifter
- * hardware. */
+#define __bitarray_constant_p(bitno) __builtin_constant_p (bitno)
+
 #define WPC_BITOP(bs, index, bitop)				\
-do {														\
-	__asm__ volatile (								\
+	({ unsigned char *bs1 = (unsigned char *)bs; \
+	   unsigned char v = (unsigned char)index; \
+      __asm__ volatile (                     \
 		"st%0\t" C_STRING(WPC_SHIFTADDR) "\n"	\
 		"\tst%1\t" C_STRING(WPC_SHIFTBIT) "\n" \
 		"\tld%0\t" C_STRING(WPC_SHIFTADDR) "\n"\
 		"\tld%1\t" C_STRING(WPC_SHIFTBIT) "\n"	\
 		bitop												\
-		: "+a" (bs), "+q" (index)				   \
-	);														\
-} while (0)
+		: "+a" (bs1), "+q" (v)             \
+	); v; })
 
-
-#define __setbit(bs, index) \
+#define wpc_setbit(bs, index) \
 	WPC_BITOP (bs, index, "\tor%1\t,%0\n\tst%1\t,%0")
 
-#define __clearbit(bs, index) \
+#define wpc_clearbit(bs, index) \
 	WPC_BITOP (bs, index, "\tcom%1\n\tand%1\t,%0\n\tst%1\t,%0")
 
-#define __togglebit(bs, index) \
+#define wpc_togglebit(bs, index) \
 	WPC_BITOP (bs, index, "\teor%1\t,%0\n\tst%1\t,%0")
 
-#define __testbit(bs, index) \
+#define wpc_testbit(bs, index) \
 	WPC_BITOP (bs, index, "\tand%1\t,%0")
 
-#else
+#else /* !CONFIG_PLATFORM_WPC */
 
-#define __setbit(bs,index) (bs[index / 8] |= (1 << (index % 8)))
-#define __clearbit(bs,index) (bs[index / 8] &= ~(1 << (index % 8)))
-#define __togglebit(bs,index) (bs[index / 8] ^= (1 << (index % 8)))
-#define __testbit(bs,index) (index = (bs[index / 8] & (1 << (index % 8))))
+#define __bitarray_constant_p(bitno) 1
+#define wpc_setbit(bits,bitno) 0
+#define wpc_clearbit(bits,bitno) 0
+#define wpc_togglebit(bits,bitno) 0
+#define wpc_testbit(bits,bitno) 0
 
-#endif /* __wpc__ */
+#endif
+
+
+/* Generic macros that work on both constant and non-constant
+ * bit numbers.  This uses a GCC extension that knows what's a constant
+ * and what's not, so you can just use these and the best call
+ * will be made. */
+
+#define bitarray_set(bits, bitno) \
+	(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_set (bits, bitno) : wpc_setbit(bits, bitno))
+
+#define bitarray_clear(bits, bitno) \
+	(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_clear (bits, bitno) : wpc_clearbit(bits, bitno))
+
+#define bitarray_toggle(bits, bitno) \
+	(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_toggle (bits, bitno) : wpc_togglebit(bits, bitno))
+
+#define bitarray_test(bits, bitno) \
+	(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_test (bits, bitno) : wpc_testbit(bits, bitno))
 
 #endif /* _SYS_BITARRAY_H */

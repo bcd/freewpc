@@ -93,6 +93,7 @@ Buyin Offer: page(COMMON_PAGE), PRI_MATCH
 Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
+System Reset: PRI_RESET
 
 [leffs]
 NULL: 0

@@ -30,11 +30,19 @@ original WPC ROMS and also those running FreeWPC. */
 /** The sector size.  The ROM file is read in chunks of this amount. */
 #define SECTOR_SIZE   0x8000
 
+/** The offset within the system page (uppermost 32KB) where the
+16-bit checksum resides. */
 #define CKSUM_OFFSET  0xFFEE - 0x8000
 
+/** The offset within the system page (uppermost 32KB) where the
+16-bit delta resides.  This location is used to 'correct' the
+checksum so that it is valid. */
 #define DELTA_OFFSET  0xFFEC - 0x8000
 
-#define DISABLE_CKSUM_DELTA      0x00FF
+/** The value of the delta field that causes the software to ignore
+the checksum.  This is not implemented on FreeWPC but most real WPC
+ROMs do this. */
+#define DISABLE_CKSUM_DELTA 0x00FF
 
 /** Returns the high byte of a 16-bit word */
 #define HI(x)   ((x) / 256)
@@ -49,19 +57,17 @@ original WPC ROMS and also those running FreeWPC. */
 int
 main (int argc, char *argv[])
 {
-	char *szGameName = argv[1];
 	char szRomName[128];
 	FILE *fpRom;
 	unsigned char sector[SECTOR_SIZE];
 	uint32_t cksum = 0, rom_cksum = 0, rom_delta = 0;
 	uint32_t rc, i, test_cksum = 0, adj_cksum;
-	uint32_t subst_found = 0, cksum_found = 0;
+	uint32_t subst_found = 0;
 	uint32_t update = 0, test_delta = 0, desired_ver = 0; 
    int c;
    const char *options = "f:uhs:v:";
    int screwup = 0;
    int disable_cksum = 0;
-	int verbose = 0;
 	
 	/* Process command-line options. */
    while ((c = getopt (argc, argv, options)) != -1)
@@ -69,10 +75,13 @@ main (int argc, char *argv[])
       switch (c)
       {
          case 'f':
+				/* -f sets the name of the input/output ROM file */
             sprintf (szRomName, "%s", optarg);
             break;
 
          case 'u':
+				/* -u enables update mode, which causes the checksum
+				to be recalculated and saved back */
             update = 1;
         		printf ("Autoupdate enabled\n");
             break;
@@ -88,6 +97,9 @@ main (int argc, char *argv[])
             break;
             
          case 's':
+				/* -s causes the input file data to be distorted (in memory,
+				not on disk).  This should cause checksum verification to
+				fail. */
             printf ("screwup enabled\n");
             screwup = strtoul (optarg, NULL, 0);
             break;
@@ -99,10 +111,6 @@ main (int argc, char *argv[])
          case 'd':
             disable_cksum = 1;
             break;
-
-			case 'V':
-				verbose = 1;
-				break;
       }
    }
   

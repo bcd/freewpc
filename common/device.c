@@ -178,6 +178,18 @@ static inline U8 device_getgid (void)
 }
 
 
+/** Returns TRUE if any devices have pending kicks. */
+bool device_kicks_pending (void)
+{
+	devicenum_t devno;
+
+	for (devno = 0; devno < NUM_DEVICES; devno++)
+		if (device_table[devno].kicks_needed > 0)
+			return TRUE;
+	return FALSE;
+}
+
+
 /** The core function for handling a device.
  * This function is invoked (within its own task context) whenever
  * a switch closure occurs on a device, or when a request is made to
@@ -448,17 +460,20 @@ void device_update_globals (void)
 	/* If any balls are held up temporarily (more than "max" are
 	 * in the device presently), then delay timers */
 	dbprintf ("held_balls = %d\n", held_balls);
-	if (held_balls > 0)
+	if (in_live_game)
 	{
+		if (held_balls > 0)
+		{
 #ifdef CONFIG_TIMED_GAME
-		timed_game_suspend ();
+			timed_game_suspend ();
 #endif
-	}
-	else
-	{
+		}
+		else
+		{
 #ifdef CONFIG_TIMED_GAME
 		timed_game_resume ();
 #endif
+		}
 	}
 }
 
@@ -478,7 +493,8 @@ U8 device_holdup_count (void)
  * at the end of a game.
  *
  * This is always done as a background task, because it may
- * take some time, although this seems unnecessary...
+ * take some time and this function waits for any kicked
+ * balls to successfully exit before it returns.
  */
 void device_probe (void)
 {
@@ -518,8 +534,29 @@ void device_probe (void)
 #endif
 	}
 
-	/* Update the global state information again based on the
-	 * new counts */
+	/* If kicks are in progress, then wait for them to finish.
+	If kicks fail, eventually they will timeout so this is guaranteed
+	to finish. */
+	while (device_kicks_pending ())
+		task_sleep_sec (1);
+
+	/* At this point, all kicks have been made, but balls may be
+	on the playfield heading for the trough.  We still should wait
+	until 'missing_balls' goes (hopefully) to zero.
+   We'll give it three tries. */ 
+	if (missing_balls != 0)
+	{
+		task_sleep_sec (2);
+		if (missing_balls != 0)
+		{
+			task_sleep_sec (2);
+			if (missing_balls != 0)
+			{
+				task_sleep_sec (2);
+			}
+		}
+	}
+
 	device_update_globals ();
 
 	dbprintf ("\nDevices initialized.\n");
@@ -651,7 +688,8 @@ bool device_check_start_ok (void)
 		return FALSE;
 
 	/* If a ball is on the shooter switch, then allow the
-	 * game to start anyway. */
+	 * game to start anyway.  TODO : the ball count logic
+	 * gets confused if you do this. */
 	truly_missing_balls = missing_balls;
 #ifdef MACHINE_SHOOTER_SWITCH
 	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
@@ -659,7 +697,8 @@ bool device_check_start_ok (void)
 #endif
 
 	/* If some balls are unaccounted for, and not on the shooter,
-	 * then start a device probe and a ball search. */
+	 * then start a device probe and a ball search.  Alert the user
+	 * by displaying a message. */
 	if (truly_missing_balls > 0)
 	{
 		task_recreate_gid (GID_DEVICE_PROBE, device_probe);

@@ -21,6 +21,8 @@
 #include <freewpc.h>
 #include <coin.h>
 #include <test.h>
+#include <player.h>
+#include <amode.h>
 
 /**
  * \file
@@ -49,6 +51,7 @@
  * trough entry (when only one ball is in play).
  */
 
+/* TODO : this code isn't important enough to stay in the system page. */
 
 /** Nonzero if a game is currently in progress. */
 __fastram__ U8 in_game;
@@ -116,10 +119,8 @@ void amode_start (void)
 /** Stops the attract mode */
 void amode_stop (void)
 {
-	deff_stop (DEFF_AMODE);
-#ifdef MACHINE_CUSTOM_AMODE
-	leff_stop (LEFF_AMODE);
-#endif
+	deff_stop_all ();
+	leff_stop_all ();
 	lamp_all_off ();
 	music_stop_all ();
 	callset_invoke (amode_stop);
@@ -525,8 +526,8 @@ void start_game (void)
 		player_up = 1;
 		ball_up = 1;
 	
-		deff_start (DEFF_SCORES);
 		amode_stop ();
+		deff_start (DEFF_SCORES);
 		callset_invoke (start_game);
 
 		/* Note: explicitly call this out last, after all other events
@@ -563,12 +564,9 @@ bool verify_start_ok (void)
 	if (!has_credits_p ())
 		return FALSE;
 
-	/* check balls stable */
+	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
-	{
-		deff_start (DEFF_LOCATING_BALLS);
 		return FALSE; 
-	}
 
 	return TRUE;
 }

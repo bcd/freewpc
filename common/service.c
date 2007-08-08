@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <test.h>
+#include <coin.h>
 
 /**
  * \file
@@ -43,7 +44,7 @@ CALLSET_ENTRY (service, sw_down)
 	test_down_button ();
 
 	if (!in_test)
-		callset_invoke_held (SW_DOWN, TIME_500MS, TIME_100MS, volume_down);
+		button_invoke (SW_DOWN, volume_down, TIME_500MS, TIME_100MS);
 }
 
 CALLSET_ENTRY (service, sw_up)
@@ -51,7 +52,7 @@ CALLSET_ENTRY (service, sw_up)
 	test_up_button ();
 	
 	if (!in_test)
-		callset_invoke_held (SW_UP, TIME_500MS, TIME_100MS, volume_up);
+		button_invoke (SW_UP, volume_up, TIME_500MS, TIME_100MS);
 }
 
 

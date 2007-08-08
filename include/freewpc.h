@@ -109,10 +109,6 @@ extern U8 idle_ok;
 #include <platform/linux.h>
 #endif
 
-#ifdef CONFIG_PLATFORM_LINUX
-#define DIV10(x,q,r)     ({ q = x / 10; r = x % 10; })
-#endif
-
 /* Include the standard header files that are needed
  * by most modules */
 
@@ -180,12 +176,10 @@ extern U8 idle_ok;
 #include <csum.h>
 #include <audio.h>
 #include <mode.h>
-#include <list.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
-#include <player.h>
+#include <list.h>
 #include <sys/debug.h>
-#include <amode.h>
 #include <highscore.h>
 #include <test.h>
 

@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <knocker.h>
+#include <coin.h>
 
 /** The current replay score */
 __nvram__ U8 replay_score[BYTES_PER_SCORE];

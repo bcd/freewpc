@@ -156,18 +156,9 @@ foreach $src (@srclist) {
 			} else {
 				if ($modulehash{$module} ne $src) {
 					my $oldsrc = $modulehash{$module};
-					print "Error: $src:$lineno: module '$module' was already declared in $oldsrc\n";
+					print "error: $src:$lineno: module '$module' was already declared in $oldsrc\n";
 					exit 1
 				}
-			}
-		}
-		elsif (/callset_invoke \(([^)]*)\)/) {
-			if ($1 ne "event") {
-				if (!defined $functionhash{$1}) {
-					$functionhash{$1} = "";
-					$fntypehash{$1} = "void";
-				}
-				$invocation{$1} .= "$src:$lineno ";
 			}
 		}
 		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
@@ -176,6 +167,17 @@ foreach $src (@srclist) {
 				$fntypehash{$1} = $bool_type;
 			}
 			$invocation{$1} .= "$src:$lineno ";
+		}
+		elsif (/callset_invoke[_a-z]* \(([^)]*)\)/) {
+			if ($1 ne "event") {
+				if (!defined $functionhash{$1}) {
+					$functionhash{$1} = "";
+					$fntypehash{$1} = "void";
+				}
+				$invocation{$1} .= "$src:$lineno ";
+			} else {
+				print "warning: $src:$lineno: ignoring invocation of '$1'\n";
+			}
 		}
 	}
 	close FH;

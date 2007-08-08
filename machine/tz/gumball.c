@@ -154,14 +154,20 @@ void sw_far_left_trough_monitor (void)
 	U8 timeout = TIME_3S / TIME_200MS;
 	device_t *dev = device_entry (DEVNO_TROUGH);
 
-	/* Poll the switch continuously.  If it ever opens,
-	then abort. */
+ 	while (task_find_gid (GID_DEVICE_PROBE))
+		task_sleep_sec (1);
+
+	dbprintf ("Far left trough check\n");
+	/* Poll the switch for up to 3 seconds.  If it ever opens,
+	then abort.  It must stay closed and the trough must
+	remain full in order for us to continue. */
 	while (timeout > 0)
 	{
 		task_sleep (TIME_200MS);
 		if ((!switch_poll_logical (SW_FAR_LEFT_TROUGH))
 			|| (dev->actual_count != dev->size))
 		{
+			dbprintf ("Far left trough not stable\n");
 			task_exit ();
 		}
 		timeout--;
@@ -170,9 +176,13 @@ void sw_far_left_trough_monitor (void)
 	/* If a ball is known to be in play, then delay the
 	load */
 	while (ball_in_play)
+	{
+		dbprintf ("Far left trough : waiting to load\n");
 		task_sleep_sec (1);
+	}
 
 	/* Start the load */
+	dbprintf ("Far left trough stable : loading gumball\n");
 	gumball_load_from_trough ();
 	task_exit ();
 }
@@ -182,6 +192,18 @@ CALLSET_ENTRY (gumball, sw_far_left_trough)
 {
 	if (!in_test)
 		task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
+}
+
+
+CALLSET_ENTRY (gumball, start_ball)
+{
+	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
+}
+
+
+CALLSET_ENTRY (gumball, amode_start)
+{
+	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 }
 
 

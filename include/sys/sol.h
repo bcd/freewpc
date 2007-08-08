@@ -25,11 +25,14 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
-#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
+//#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
+#define SOL_ARRAY_WIDTH	8
 
 extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
 
 /** Number of stages in a duty cycle */
+/* TODO : since the IRQ has been unrolled, this can be optimized.
+Provide 8 different versions of the rtt, one per stage in the cycle. */
 #define SOL_CYCLES 8
 
 /** Duty cycle values */

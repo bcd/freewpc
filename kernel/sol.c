@@ -37,7 +37,7 @@
 
 
 /** The current stage of the solenoid update cycle */
-__fastram__ U8 sol_cycle;
+__fastram__ U8 sol_cycle_offset;
 
 /** The current state of the duty cycled solenoids */
 U8 sol_state[SOL_CYCLES][SOL_ARRAY_WIDTH];
@@ -54,29 +54,31 @@ void
 sol_rtt (void)
 {
 	/* TODO - align adjacent registers to do 16-bit writes? */
-	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT,
-		sol_state[sol_cycle][0] | sol_rt_state[0]);
-	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT,
-		sol_state[sol_cycle][1] | sol_rt_state[1]);
-	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT,
-		sol_state[sol_cycle][2] | sol_rt_state[2]);
-	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT,
-		sol_state[sol_cycle][3] | sol_rt_state[3]);
+
+	U8 *cycle_data = (U8 *)sol_state + sol_cycle_offset;
+
+	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, cycle_data[0] | sol_rt_state[0]);
+	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, cycle_data[1] | sol_rt_state[1]);
+	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, cycle_data[2] | sol_rt_state[2]);
+	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, cycle_data[3] | sol_rt_state[3]);
 
 #ifdef MACHINE_SOL_EXTBOARD1
-	wpc_asic_write (WPC_EXTBOARD1, sol_state[sol_cycle][5] | sol_rt_state[5]);
+	wpc_asic_write (WPC_EXTBOARD1, cycle_data[5] | sol_rt_state[5]);
 #endif
 
 	/* Advance cycle counter */
-	sol_cycle++;
-	sol_cycle %= SOL_CYCLES;
+	sol_cycle_offset += 8;
+	sol_cycle_offset %= SOL_CYCLES * SOL_ARRAY_WIDTH;
 }
 
 
 /*
  * Turns on/off a solenoid.
  * The cycle_mask controls the "strength" at which the coil will be
- * on. */
+ * on.
+ * TODO - this function is inefficient and can be optimized for the
+ * common cases (i.e. not all 256 cycle_mask values will be used).
+ */
 void
 sol_modify (solnum_t sol, U8 cycle_mask)
 {
@@ -84,13 +86,10 @@ sol_modify (solnum_t sol, U8 cycle_mask)
 	U8 count;
 	for (count = 0; count < SOL_CYCLES; count++)
 	{
-		register bitset p = &sol_state[count][0];
-		register U8 v = sol;
-
 		if (cycle_mask & 1)
-			__setbit (p, v);
+			bitarray_set (sol_state[count], sol);
 		else
-			__clearbit (p, v);
+			bitarray_clear (sol_state[count], sol);
 
 		cycle_mask >>= 1;
 	}
@@ -117,6 +116,6 @@ sol_init (void)
 {
 	memset (sol_state, 0, sizeof (sol_state));
 	memset (sol_rt_state, 0, sizeof (sol_rt_state));
-	sol_cycle = 0;
+	sol_cycle_offset = 0;
 }
 

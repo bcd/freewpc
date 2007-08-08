@@ -100,6 +100,14 @@ void switch_init (void)
 }
 
 
+void switch_short_detect_rtt (void)
+{
+	/* TODO : if any row/column is all 1s, then that
+	row/column is in error and should be ignored
+	until the condition clears. */
+}
+
+
 /* Inline assembler is great for the 6809, but it won't work in simulation.
  * These macros abstract the 6809 opcodes so they can be simulated. */
 #ifdef __m6809__
@@ -213,10 +221,7 @@ extern inline void switch_rowpoll (const U8 col)
 /** Return TRUE if the given switch is CLOSED. */
 bool switch_poll (const switchnum_t sw)
 {
-	register bitset p = (bitset)switch_raw_bits;
-	register U8 v = sw;
-	__testbit(p, v);
-	return v;
+	return bitarray_test (switch_raw_bits, sw);
 }
 
 
@@ -225,10 +230,7 @@ are defined in the opto mask array, which is auto generated from
 the machine description. */
 bool switch_is_opto (const switchnum_t sw)
 {
-	register bitset p = (bitset)mach_opto_mask;
-	register U8 v = sw;
-	__testbit(p, v);
-	return v;
+	return bitarray_test (mach_opto_mask, sw);
 }
 
 
@@ -359,7 +361,7 @@ void switch_sched (void)
 	/* If the switch declares a processing function, call it.
 	 * All functions are in the EVENT_PAGE. */
 	if (swinfo->fn)
-		callset_invoke_pointer (swinfo->fn);
+		callset_pointer_invoke (swinfo->fn);
 
 	/* If a switch is marked SW_PLAYFIELD and we're in a game,
 	 * then call the global playfield switch handler and mark
@@ -392,7 +394,7 @@ cleanup:
 	/* This code isn't needed at the moment */
 	register bitset p = (bitset)switch_bits[AR_QUEUED];
 	register U8 v = sw;
-	__clearbit(p, v);
+	bitarray_clear (p, v);
 #endif
 
 	task_exit ();
@@ -424,9 +426,6 @@ CALLSET_ENTRY (switch, idle)
 
 		/* Grab the raw bits : 0=open, 1=closed */
 		rawbits = switch_bits[AR_RAW][col];
-
-		/* TODO : catch shorts of all rows in this column, when
-		rawbits == 0xFF */
 
 		/* Invert for optos: 0=inactive, 1=active */
 		rawbits ^= mach_opto_mask[col];

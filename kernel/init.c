@@ -25,6 +25,9 @@
  * \brief Entry point to the game program.
  */
 
+/** The number of task ticks executed.  A tick equals 16 IRQs. */
+__fastram__ U8 tick_count;
+
 /** The number of FIRQs asserted */
 __fastram__ U8 firq_count;
 
@@ -59,7 +62,7 @@ void abort (void)
 __naked__ __noreturn__ 
 void do_reset (void)
 {
-	extern void system_reset (void);
+	extern __common__ void system_reset (void);
 
 #ifdef __m6809__
 	/* Reset the sound board... the earlier the better */
@@ -106,7 +109,7 @@ void do_reset (void)
 	wpc_led_toggle ();
 
 #ifdef STATIC_SCHEDULER
-	tick_init ();
+	VOIDCALL (tick_init);
 #else
 	irq_init ();
 #endif
@@ -163,7 +166,7 @@ void do_reset (void)
 	sys_init_complete++;
 	callset_invoke (sw_enter);
 #else
-	task_create_gid (GID_SYSTEM_RESET, system_reset);
+	system_reset ();
 
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
@@ -223,8 +226,9 @@ __noreturn__
 void fatal (errcode_t error_code)
 {
 	/* Don't allow any more interrupts, since they might be the
-	source of the error. */
-	disable_irq ();
+	source of the error.  Since FIRQ is disabled, we can only
+	do mono display at this point. */
+	disable_interrupts ();
 
 	/* Reset hardware outputs */
 	wpc_write_flippers (0);

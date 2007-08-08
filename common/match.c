@@ -35,6 +35,10 @@ U8 match_count;
 bcd_t match_value;
 
 
+/* TODO - get rid of all these externs, move them into a .h */
+extern const score_t score_table[];
+
+
 /** Give out the award for a single match. */
 void
 match_award (void)
@@ -67,13 +71,24 @@ match_deff (void)
 		}
 
 		dmd_alloc_low_clean ();
+		sprintf ("%2b", &score_table[0][sizeof (score_t)-1]);
+		font_render_string_left (&font_fixed6, 0, 0, sprintf_buffer);
+
 		font_render_string_right (&font_fixed6, 126, 2, "MATCH");
 		sprintf ("%2b", &value);
 		font_render_string_right (&font_fixed6, 126, 22, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
-	task_sleep_sec (2);
+
+	if (match_count)
+	{
+		callset_invoke (match_awarded);
+	}
+	else
+	{
+		task_sleep_sec (2);
+	}
 	deff_exit ();
 }
 
@@ -82,8 +97,6 @@ match_deff (void)
 void
 match_start (void) 
 {
-	/* TODO - get rid of all these externs, move them into a .h */
-	extern const score_t score_table[];
 	U8 match_flag;
 	U8 starting_match_value;
 

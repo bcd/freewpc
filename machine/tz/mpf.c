@@ -35,23 +35,6 @@ __fastram__ S8 rtsol_mpf_right;
 U8 mpf_ball_count;
 
 
-void mpf_rtt (void) /* TODO : move to system page */
-{
-	if (mpf_active && in_live_game)
-	{
-		rt_solenoid_update (&rtsol_mpf_left,
-			SOL_MPF_LEFT_MAGNET, RTSOL_ACTIVE_HIGH,
-			SW_L_L_FLIPPER_BUTTON, RTSW_ACTIVE_HIGH,
-			8, 8);
-	
-		rt_solenoid_update (&rtsol_mpf_right,
-			SOL_MPF_RIGHT_MAGNET, RTSOL_ACTIVE_HIGH,
-			SW_L_R_FLIPPER_BUTTON, RTSW_ACTIVE_HIGH,
-			8, 8);
-	}
-}
-
-
 void mpf_active_deff (void)
 {
 	while (mpf_active)
@@ -68,6 +51,7 @@ void mpf_battle_lamp_update (void)
 		lamp_tristate_off (LM_RAMP_BATTLE);
 }
 
+
 void mpf_enable (void)
 {
 	mpf_enable_count++;
@@ -75,44 +59,43 @@ void mpf_enable (void)
 }
 
 
-void mpf_activate (void)
-{
-	if (mpf_enable_count > 0)
-	{
-		mpf_enable_count--;
-		mpf_active = 1;
-		mpf_ball_count++;
-	}
-}
-
-
-void mpf_deactivate (void)
-{
-	mpf_active = 0;
-}
-
-
-void mpf_battle_running (void)
+void mpf_active_monitor (void)
 {
 	task_sleep_sec (5);
 	task_exit ();
 }
 
+
 void mpf_start (void)
 {
-	task_create_gid1 (GID_BATTLE_RUNNING, mpf_battle_running);
+	if (mpf_enable_count > 0)
+	{
+		mpf_enable_count--;
+		mpf_ball_count++;
+		if (mpf_active == 0)
+		{
+			mpf_active = 1;
+			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
+		}
+	}
 }
 
 
 void mpf_stop (void)
 {
-	task_kill_gid (GID_BATTLE_RUNNING);
+	if (mpf_active)
+	{
+		mpf_active = 0;
+		task_kill_gid (GID_MPF_ACTIVE);
+		sound_send (SND_POWER_HUH_3);
+	}
 }
 
 
 CALLSET_ENTRY (mpf, door_start_battle_power)
 {
 	mpf_enable ();
+	sound_send (SND_ARE_YOU_READY_TO_BATTLE);
 }
 
 
@@ -165,11 +148,13 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
+	sound_send (SND_POWER_GRUNT_1);
 }
 
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
+	sound_send (SND_POWER_GRUNT_2);
 }
 
 

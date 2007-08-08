@@ -48,7 +48,10 @@ void buyin_offer_deff (void)
  * machine when it detects that a player has played his last ball. */
 void buyin_offer (void)
 {
-	/* TODO : update buyin lamp as appropriate throughout */
+#ifdef MACHINE_BUYIN_LAMP
+	lamp_tristate_flash (MACHINE_BUYIN_LAMP);
+#endif
+
 	buyin_offer_timer = BUYIN_TIMEOUT;
 	deff_start (DEFF_BUYIN_OFFER);
 	do
@@ -58,6 +61,10 @@ void buyin_offer (void)
 	} while (buyin_offer_timer > 0);
 	task_sleep_sec (1);
 	deff_stop (DEFF_BUYIN_OFFER);
+
+#ifdef MACHINE_BUYIN_LAMP
+	lamp_tristate_off (MACHINE_BUYIN_LAMP);
+#endif
 }
 
 

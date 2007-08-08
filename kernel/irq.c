@@ -20,7 +20,7 @@
 
 /**
  * \file
- * \brief The top-level IRQ handler
+ * \brief The old, static top-level IRQ handler
  *
  * The IRQ is asserted by the WPC 1024 times per second, and is the basis
  * of all system timing.  To speed up interrupt processing, there are 8
@@ -28,15 +28,15 @@
  * pointer ("irq_function") says which function to call.  This effectively
  * unrolls the interrupt handler and avoids many if-tests.
  *
+ * This file is deprecated.  Use the code generator 'sched' instead.
  */
 
 #include <freewpc.h>
 
+extern __fastram__ U8 tick_count;
+
 /** The number of IRQ loops executed.  A loop consists of 8 IRQs. */
 __fastram__ U8 irq_loop_count;
-
-/** The number of task ticks executed.  A tick equals 16 IRQs. */
-__fastram__ U8 tick_count;
 
 /** A pointer to the currently installed IRQ function handler. */
 __fastram__ void (*irq_function) (void);

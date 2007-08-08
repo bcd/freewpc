@@ -26,52 +26,15 @@
  * then driving the appropriate solenoids.
  */
 
-#define RTSOL_ACTIVE_HIGH	0xff
-#define RTSOL_ACTIVE_LOW	0x0
-
-#define RTSW_ACTIVE_HIGH	0xff
-#define RTSW_ACTIVE_LOW		0x0
-
-
-extern inline void rt_sol_off (U8 *sol_cache, U8 bitmask, U8 active_high)
+extern inline void rt_sol_enable (const U8 sol)
 {
-	if (active_high == RTSOL_ACTIVE_HIGH)
-	{
-		*sol_cache &= ~bitmask;
-	}
-	else
-	{
-		*sol_cache |= bitmask;
-	}
-}
-
-extern inline void rt_sol_on (U8 *sol_cache, U8 bitmask, U8 active_high)
-{
-	if (active_high == RTSOL_ACTIVE_HIGH)
-	{
-		*sol_cache |= bitmask;
-	}
-	else
-	{
-		*sol_cache &= ~bitmask;
-	}
-}
-
-extern inline U8 rt_sol_active (U8 *sol_cache, U8 bitmask, U8 active_high)
-{
-	return (*sol_cache & bitmask);
+	bitarray_set (sol_rt_state, sol);
 }
 
 
-extern inline void rt_sol_enable (U8 sol)
+extern inline void rt_sol_disable (const U8 sol)
 {
-	rt_sol_on (sol_rt_state + (sol / 8), 1 << (sol % 8), RTSOL_ACTIVE_HIGH);
-}
-
-
-extern inline void rt_sol_disable (U8 sol)
-{
-	rt_sol_off (sol_rt_state + (sol / 8), 1 << (sol % 8), RTSOL_ACTIVE_HIGH);
+	bitarray_clear (sol_rt_state, sol);
 }
 
 
@@ -81,53 +44,43 @@ extern inline void rt_sol_disable (U8 sol)
  * 1-bit for whether the solenoid is in its on/off phase,
  * and 7-bits for the timer coutdown/countup.
  */
-extern inline void rt_solenoid_update1 (
-	U8 *sol_cache,
-	const U8 sol_bitmask,
-	const U8 sol_active_high,
-	U8 *sw_cache,
-	const U8 sw_bitmask,
-	const U8 sw_active_high,
-	S8 *rt_sol_state,
+extern inline void rt_solenoid_update (
+	S8 * state,
+	const U8 solno,
+	const U8 swno,
 	const U8 sol_on_irqs,
 	const U8 sol_off_irqs )
 {
-	/* Declaring state as a local register variable improves the performance.
-	 * 'a' can be used here safely since 'D' is not. */
-	register S8 state __areg__;
-
-	state = *rt_sol_state;
-	
 	if (!in_live_game)
 	{
 		/* Solenoid is never pulsed except during a game */
-		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);
+		rt_sol_disable (solno);
 	}
-	else if (state == 0)
+	else if (*state == 0)
 	{
 		/* Solenoid is idle - normal case */
 		/* Only here are allowed to poll the switch */
-		if (rt_sol_active (sw_cache, sw_bitmask, sw_active_high))
+		if (rt_switch_poll (swno))
 		{
 			/* Yes, the switch is active, so the solenoid can
 			 * be scheduled to activate now */
-			*rt_sol_state = sol_on_irqs;
+			*state = sol_on_irqs;
 		}
 	}
-	else if (state < 0)
+	else if (*state < 0)
 	{
 		/* Solenoid is in its off-phase */
-		rt_sol_off (sol_cache, sol_bitmask, sol_active_high);
-		(*rt_sol_state)++;
+		rt_sol_disable (solno);
+		(*state)++;
 	}
-	else if (state > 0)
+	else if (*state > 0)
 	{
 		/* Solenoid is in its on-phase */
-		rt_sol_on (sol_cache, sol_bitmask, sol_active_high);
-		(*rt_sol_state)--;
-		if (*rt_sol_state == 0)
+		rt_sol_enable (solno);
+		(*state)--;
+		if (*state == 0)
 		{
-			*rt_sol_state = -sol_off_irqs;
+			*state = -sol_off_irqs;
 		}
 	}
 }
@@ -145,23 +98,6 @@ extern inline void rt_solenoid_update1 (
  * The on/off phase time and the switch/solenoid polarity can also be
  * given (in case the switch is an opto, or the drive goes from on to off?)
  */
-extern inline void rt_solenoid_update (
-	S8 *rt_sol_state,
-	const U8 sol_num,
-	const U8 sol_active_high,
-	const U8 sw_num,
-	const U8 sw_active_high,
-	const U8 sol_on_irqs,
-	const U8 sol_off_irqs )
-{
-	rt_solenoid_update1 (
-		(U8 *)&sol_rt_state + (sol_num / 8), 1 << (sol_num % 8),
-		sol_active_high,
-		&switch_bits[0][0] + (sw_num / 8), 1 << (sw_num % 8),
-		sw_active_high, 
-		rt_sol_state,
-		sol_on_irqs, sol_off_irqs );
-}
 
 #endif /* _RTSOL_H */
 

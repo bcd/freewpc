@@ -89,15 +89,18 @@ struct window win_stack[8];
 void window_push_first (void)
 {
 	in_test = 1;
-	end_game ();
-	sound_reset ();
-	deff_stop_all ();
-	leff_stop_all ();
-	/* Ensure the lamp effects stop before resetting all lamps. */
-	task_sleep (TIME_33MS);
-	lamp_all_off ();
-	/* Kill any other tasks still running */
-	task_kill_all ();
+	if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+	{
+		end_game ();
+		sound_reset ();
+		deff_stop_all ();
+		leff_stop_all ();
+		/* Ensure the lamp effects stop before resetting all lamps. */
+		task_sleep (TIME_33MS);
+		lamp_all_off ();
+		/* Kill any other tasks still running */
+		task_kill_all ();
+	}
 	callset_invoke (test_start);
 }
 
@@ -112,7 +115,10 @@ void window_pop_first (void)
 	 * exiting test mode; this keeps extra presses 
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
-	amode_start ();
+	if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+	{
+		amode_start ();
+	}
 	in_test = 0;
 }
 
@@ -130,6 +136,15 @@ void window_start_thread (void)
 void window_stop_thread (void)
 {
 	task_kill_gid (GID_WINDOW_THREAD);
+}
+
+
+/** Redraws the current window. */
+void window_redraw (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	window_call_op (win_top, draw);
 }
 
 
@@ -157,7 +172,7 @@ void window_push (struct window_ops *ops, void *priv)
 	win_top->w_class.priv = priv;
 	sound_send (SND_TEST_ENTER);
 	window_call_op (win_top, init);
-	window_call_op (win_top, draw);
+	window_redraw ();
 	window_start_thread ();
 }
 
@@ -182,7 +197,7 @@ void window_pop_quiet (void)
 	{
 		win_top--;
 		window_call_op (win_top, resume);
-		window_call_op (win_top, draw);
+		window_redraw ();
 		window_start_thread ();
 	}
 }
@@ -247,8 +262,6 @@ void browser_init (void)
 void browser_draw (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
-
-	dmd_alloc_low_clean ();
 
 	font_render_string_center (&font_mono5, 64, 2, m->name);
 
@@ -315,7 +328,12 @@ struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
-struct adjustment_value replay_score_value = { 0, 250, 5, replay_score_render };
+
+#ifndef MACHINE_REPLAY_SCORE_CHOICES
+#define MACHINE_REPLAY_SCORE_CHOICES 250
+#endif
+struct adjustment_value replay_score_value = { 0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render };
+
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
 struct adjustment_value gi_power_saver_value = { 0, 60, 1, minutes_render };
 struct adjustment_value power_saver_level_value = { 4, 7, 1, brightness_render };
@@ -518,8 +536,6 @@ void adj_browser_draw (void)
 	struct adjustment *ad = browser_adjs + menu_selection;
 
 	window_stop_thread ();
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
 
 	sprintf ("%d. %s", menu_selection+1, ad->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
@@ -765,8 +781,6 @@ void audit_browser_draw (void)
 {
 	struct audit *aud = browser_audits + menu_selection;
 
-	dmd_alloc_low_clean ();
-
 	sprintf ("%d. %s", menu_selection+1, aud->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
@@ -811,8 +825,6 @@ void confirm_init (void)
 
 void confirm_draw (void)
 {
-	dmd_alloc_low_clean ();
-
 	sprintf ("%d", confirm_timer);
 	font_render_string_left (&font_mono5, 2, 2, sprintf_buffer);
 	font_render_string_left (&font_mono5, 120, 2, sprintf_buffer);
@@ -910,8 +922,6 @@ void menu_draw (void)
 	struct menu *m = win_top->w_class.menu.self;
 	struct menu **subm;
 	U8 *sel = &win_top->w_class.menu.selected;
-
-	dmd_alloc_low_clean ();
 
 	font_render_string (&font_mono5, 8, 4, m->name);
 
@@ -1052,8 +1062,6 @@ void font_test_draw (void)
 {
 	const font_t *font = font_test_lookup ();
 
-	dmd_alloc_low_clean ();
-
 	if ((font->glyphs['A'] == NULL)
 		&& (font_test_offset < 26))
 	{
@@ -1102,9 +1110,6 @@ struct menu dev_font_test_item = {
 
 /**********************************************************/
 
-/* TODO : escaping out of a running deff in test mode
-will cause a crash */
-
 struct deff_leff_ops {
 	void (*start) (U8 id);
 	void (*stop) (U8 id);
@@ -1141,7 +1146,7 @@ void deff_leff_thread (void)
 {
 	bool is_active = deff_leff_test_ops->is_running (menu_selection);
 	deff_leff_last_active = !is_active;
-	browser_draw ();
+	window_redraw ();
 
 	for (;;)
 	{
@@ -1151,7 +1156,7 @@ void deff_leff_thread (void)
 			{
 				if (is_active == FALSE)
 				{
-					browser_draw ();
+					window_redraw ();
 					sprintf_far_string (names_of_deffs + menu_selection);
 					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 					browser_print_operation ("STOPPED");
@@ -1159,7 +1164,7 @@ void deff_leff_thread (void)
 			}
 			else
 			{
-				browser_draw ();
+				window_redraw ();
 				sprintf_far_string (names_of_leffs + menu_selection);
 				font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 				if (is_active == TRUE)
@@ -1220,6 +1225,9 @@ void deff_leff_enter (void)
 
 void deff_leff_exit (void)
 {
+	/* Note : escaping out of a running deff in test mode
+	has been known to cause a crash, but this hasn't been
+	seen in a while. */
 	deff_stop_all ();
 	leff_stop_all ();
 }
@@ -1437,8 +1445,6 @@ void dev_balldev_test_draw (void)
 	char *s;
 
 	dev = &device_table[menu_selection];
-
-	dmd_alloc_low_clean ();
 
 	if ((dev == NULL) || (dev->props == NULL))
 	{
@@ -1692,13 +1698,11 @@ void dev_frametest_draw (void)
 	const U8 *data = (U8 *)0x4001 + menu_selection * DMD_PAGE_SIZE;
 	if (switch_poll_logical (SW_ENTER))
 	{
-		dmd_alloc_low_high ();
 		dmd_draw_image2 (data);
 		dmd_show2 ();
 	}
 	else
 	{
-		dmd_alloc_low ();
 		dmd_draw_image (data);
 		dmd_show_low ();
 	}
@@ -1754,7 +1758,6 @@ void sched_test_init (void)
 
 void sched_test_draw (void)
 {
-	dmd_alloc_low_clean ();
 	sprintf ("SCHED COUNT %ld", sched_test_count);
 	font_render_string_left (&font_var5, 2, 3, sprintf_buffer);
 	dmd_show_low ();
@@ -1794,7 +1797,6 @@ void score_test_init (void)
 
 void score_test_draw (void)
 {
-	dmd_alloc_low_clean ();
 	scores_draw ();
 	dmd_show_low ();
 }
@@ -1847,7 +1849,9 @@ struct menu score_test_item = {
 extern const struct menu music_mix_menu;
 
 struct menu *dev_menu_items[] = {
+#if MACHINE_DMD
 	&dev_font_test_item,
+#endif
 	&dev_deff_test_item,
 	&dev_leff_test_item,
 	&dev_lampset_test_item,
@@ -1857,10 +1861,14 @@ struct menu *dev_menu_items[] = {
 	&dev_force_error_item,
 	&dev_frametest_item,
 	&dev_deff_stress_test_item,
+#if MACHINE_DMD
 	&symbol_test_item,
+#endif
 	&sched_test_item,
 	&score_test_item,
+#if 0
 	&music_mix_menu,
+#endif
 	NULL,
 };
 
@@ -2030,7 +2038,6 @@ struct menu clear_credits_item = {
 
 void burnin_test_draw (void)
 {
-	dmd_alloc_low_clean ();
 	dmd_show_low ();
 }
 
@@ -2151,25 +2158,26 @@ void presets_draw (void)
 	struct preset *pre = preset_table[menu_selection];
 	struct preset_component *comps = pre->comps;
 
-	dmd_alloc_low_clean ();
-
-	sprintf ("%d. INSTALL %s", menu_selection+1, pre->name);
-	font_render_string_center (&font_mono5, 64, 5, sprintf_buffer);
+	font_render_string_left (&font_mono5, 0, 1, "PRESETS");
+	sprintf ("%d. %s", menu_selection+1, pre->name);
+	font_render_string_left (&font_mono5, 0, 9, sprintf_buffer);
 
 	/* Is it installed now? */	
 	while (comps->nvram != NULL)
 	{
 		if (*(comps->nvram) != comps->value)
 		{
-			font_render_string_center (&font_mono5, 64, 13, "NOT INSTALLED");
+			font_render_string_right (&font_mono5, 127, 9, "NO");
 			break;
 		}
 
 		comps++;
 		if (comps->nvram == NULL)
-			font_render_string_center (&font_mono5, 64, 13, "INSTALLED");
+			font_render_string_right (&font_mono5, 127, 9, "YES");
 	}
 
+	font_render_string_center (&font_var5, 64, 19, "PRESS ENTER TO INSTALL");
+	font_render_string_center (&font_var5, 64, 26, "PRESS START TO VIEW DETAILS");
 	dmd_show_low ();
 }
 
@@ -2233,7 +2241,7 @@ void presets_start (void)
 				if (info->nvram == comps->nvram)
 				{
 					font_render_string_center (&font_mono5, 64, 16, info->name);
-					(*info->values->render) (comps->value);
+					far_call_pointer (*info->values->render, TEST2_PAGE, comps->value);
 					font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
 					coord.x = 24;
 					coord.y = 24;
@@ -2472,7 +2480,6 @@ void switch_matrix_draw (void)
 
 void switch_edges_draw (void)
 {
-	dmd_alloc_low_clean ();
 	switch_matrix_draw ();
 	font_render_string_center (&font_mono5, 80, 4, "SWITCH EDGES");
 	dmd_show_low ();
@@ -2503,7 +2510,6 @@ struct menu switch_edges_item = {
 
 void switch_levels_draw (void)
 {
-	dmd_alloc_low_clean ();
 	switch_matrix_draw ();
 	font_render_string_center (&font_mono5, 80, 4, "SWITCH LEVELS");
 	dmd_show_low ();
@@ -2551,7 +2557,6 @@ void single_switch_draw (void)
 	const char *state;
 	const char *opto;
 
-	dmd_alloc_low_clean ();
 	switch_matrix_draw ();
 	font_render_string_center (&font_mono5, 80, 4, "SINGLE SWITCH");
 
@@ -2728,13 +2733,25 @@ struct menu sound_test_item = {
 	.var = { .subwindow = { &sound_test_window, NULL } },
 };
 
-/****************** Solenoid Test **************************/
+/************ Solenoid and Flasher Test ********************/
 
 /* The browser action stores the pulse width */
+
+
+bool solenoid_test_selection_ok (void)
+{
+	extern struct window_ops flasher_test_window;
+
+	return (win_top->ops == &flasher_test_window)
+		== (MACHINE_SOL_FLASHERP (menu_selection));
+}
+
 
 void solenoid_test_init (void)
 {
 	browser_init ();
+	while (!solenoid_test_selection_ok ())
+		menu_selection++;
 	browser_item_number = browser_decimal_item_number;
 	browser_action = TIME_66MS;
 #ifdef NUM_POWER_DRIVES
@@ -2771,6 +2788,20 @@ void solenoid_test_enter (void)
 	task_sleep (TIME_100MS);
 }
 
+void solenoid_test_up (void)
+{
+	do {
+		browser_up ();
+	} while (!solenoid_test_selection_ok ());
+}
+
+void solenoid_test_down (void)
+{
+	do {
+		browser_down ();
+	} while (!solenoid_test_selection_ok ());
+}
+
 void solenoid_test_right (void)
 {
 	if (browser_action == TIME_133MS)
@@ -2798,12 +2829,32 @@ struct window_ops solenoid_test_window = {
 	.enter = solenoid_test_enter,
 	.left = solenoid_test_left,
 	.right = solenoid_test_right,
+	.up = solenoid_test_up,
+	.down = solenoid_test_down,
 };
+
+struct window_ops flasher_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = solenoid_test_init,
+	.draw = solenoid_test_draw,
+	.enter = solenoid_test_enter,
+	.left = solenoid_test_left,
+	.right = solenoid_test_right,
+	.up = solenoid_test_up,
+	.down = solenoid_test_down,
+};
+
 
 struct menu solenoid_test_item = {
 	.name = "SOLENOID TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &solenoid_test_window, NULL } },
+};
+
+struct menu flasher_test_item = {
+	.name = "FLASHER TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &flasher_test_window, NULL } },
 };
 
 /****************** GI Test **************************/
@@ -3041,7 +3092,6 @@ void dipsw_test_draw (void)
 	U8 sw;
 	U8 dipsw = wpc_get_jumpers ();
 
-	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCH TEST");
 
 	sprintf ("%s", locale_names[(dipsw & 0x3C) >> 2]);
@@ -3108,7 +3158,6 @@ void empty_balls_test_init (void)
 
 void empty_balls_test_draw (void)
 {
-	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
 	dmd_show_low ();
 }
@@ -3130,12 +3179,44 @@ struct menu empty_balls_test_item = {
 };
 
 
-/*****************************************************/
+/******* Fliptronic Flipper Test ***********************/
+
+#if MACHINE_FLIPTRONIC
+
+
+void flipper_item_number (U8 val)
+{
+	sprintf ("F%d", val+1);
+}
+
+
+void flipper_test_init (void)
+{
+	browser_init ();
+	browser_max = 8;
+	browser_item_number = flipper_item_number;
+}
+
+
+void flipper_test_draw (void)
+{
+	browser_draw ();
+}
+
+
+struct window_ops flipper_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = flipper_test_init,
+	.draw = flipper_test_draw,
+};
+
 
 struct menu flipper_test_item = {
 	.name = "FLIPPER TEST",
 	.flags = M_ITEM,
 };
+
+#endif /* MACHINE_FLIPTRONIC */
 
 /************   Display Test   **************************/
 
@@ -3186,14 +3267,16 @@ struct menu *test_menu_items[] = {
 	&switch_levels_item,
 	&single_switches_item,
 	&solenoid_test_item,
-	/* TODO : flasher_test_item */
+	&flasher_test_item,
 	&gi_test_item,
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,
 	/* TODO : lamp_flasher_test_item */
 	&display_test_item,
+#if MACHINE_FLIPTRONIC
 	&flipper_test_item,
+#endif
 	/* TODO : ordered_lamp_test_item */
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
@@ -3259,7 +3342,6 @@ void scroller_draw (void)
 	scroller s = win_top->w_class.scroller.funcs;
 	U8 offset = win_top->w_class.scroller.offset;
 
-	dmd_alloc_low_clean ();
 	s[offset * 2] ();
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	s[offset * 2 + 1] ();
@@ -3303,18 +3385,19 @@ struct window_ops scroller_window = {
 /* A scroller instance for system information */
 
 void sysinfo_machine_name (void) { sprintf (MACHINE_NAME); }
+
 void sysinfo_machine_version (void) {
-	extern char build_date[];
 #ifdef DEBUGGER
 	sprintf ("D%s.%s  %s", 
 		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
-		build_date);
+		BUILD_DATE);
 #else
 	sprintf ("R%s.%s  %s", 
 		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
-		build_date);
+		BUILD_DATE);
 #endif
 }
+
 void sysinfo_system_version (void) { 
 #ifdef USER_TAG
 	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
@@ -3324,6 +3407,7 @@ void sysinfo_system_version (void) {
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
+
 void sysinfo_compiler_version (void) { 
 	sprintf ("GCC %s", C_STRING(GCC_VERSION));
 }
@@ -3390,7 +3474,7 @@ void test_up_button (void)
 	if (!win_top) return;
 
 	window_call_op (win_top, up);
-	window_call_op (win_top, draw);
+	window_redraw ();
 
 	for (i=0; i < 16; i++)
 		if (!switch_poll (SW_UP))
@@ -3401,7 +3485,7 @@ void test_up_button (void)
 	while (switch_poll (SW_UP))
 	{
 		window_call_op (win_top, up);
-		window_call_op (win_top, draw);
+		window_redraw ();
 		task_sleep (TIME_33MS);
 	}
 }
@@ -3412,7 +3496,7 @@ void test_down_button (void)
 	if (!win_top) return;
 
 	window_call_op (win_top, down);
-	window_call_op (win_top, draw);
+	window_redraw ();
 
 	for (i=0; i < 16; i++)
 		if (!switch_poll (SW_DOWN))
@@ -3423,7 +3507,7 @@ void test_down_button (void)
 	while (switch_poll (SW_DOWN))
 	{
 		window_call_op (win_top, down);
-		window_call_op (win_top, draw);
+		window_redraw ();
 		task_sleep (TIME_33MS);
 	}
 }
@@ -3434,7 +3518,7 @@ CALLSET_ENTRY (test_mode, sw_l_l_flipper_button)
 	if (win_top)
 	{
 		window_call_op (win_top, left);
-		window_call_op (win_top, draw);
+		window_redraw ();
 	}
 }
 
@@ -3444,7 +3528,7 @@ CALLSET_ENTRY (test_mode, sw_l_r_flipper_button)
 	if (win_top)
 	{
 		window_call_op (win_top, right);
-		window_call_op (win_top, draw);
+		window_redraw ();
 	}
 }
 
@@ -3462,7 +3546,7 @@ CALLSET_ENTRY (test_mode, sw_enter)
 	else
 	{
 		window_call_op (win_top, enter);
-		window_call_op (win_top, draw);
+		window_redraw ();
 	}
 }
 
@@ -3474,7 +3558,7 @@ CALLSET_ENTRY (test_mode, sw_escape)
 		if (!win_top)
 			return;
 		else
-			window_call_op (win_top, draw);
+			window_redraw ();
 	}
 }
 
@@ -3483,7 +3567,17 @@ CALLSET_ENTRY (test_mode, sw_start_button)
 	if (win_top)
 	{
 		window_call_op (win_top, start);
-		window_call_op (win_top, draw);
+		window_redraw ();
+	}
+}
+
+
+CALLSET_ENTRY (test_mode, sw_buyin_button)
+{
+	if (win_top)
+	{
+		dmd_alloc_low_clean ();
+		dmd_show_low ();
 	}
 }
 

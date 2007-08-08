@@ -112,14 +112,18 @@ xbmprog_equal_p (XBMPROG *prog1, XBMPROG *prog2)
 
 	switch (prog1->op)
 	{
+		default:
+			return 0;
 		case XBMOP_LITERAL:
 			return prog1->args.literal.count == prog2->args.literal.count
 				&& !memcmp (prog1->args.literal.bytes,
 						prog2->args.literal.bytes,
 						prog1->args.literal.count);
+
 		case XBMOP_REPEAT_BYTE:
 			return prog1->args.repeat.count == prog2->args.repeat.count
 				&& prog1->args.repeat.data && prog2->args.repeat.data;
+
 		case XBMOP_REPEAT_WORD:
 		case XBMOP_SKIP:
 			return prog1->args.skip.count == prog2->args.skip.count;
