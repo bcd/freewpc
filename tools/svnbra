@@ -87,6 +87,6 @@ esac
 echo "Command:     svnmerge ${cmd} ${options} ..."
 echo "Press ENTER."
 read akey
-# svnmerge ${cmd} ${options}
+svnmerge ${cmd} ${options}
 exit $?
 

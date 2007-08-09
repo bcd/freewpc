@@ -21,6 +21,8 @@
 #include <freewpc.h>
 #ifdef __m6809__
 #include <m6809/math.h>
+#else
+#include <native/math.h>
 #endif
 
 /* When building with -mint16, 8-bit values are converted to 16-bits
@@ -77,6 +79,8 @@ U8 min_width;
 U8 comma_positions;
 
 U8 commas_written;
+
+char separator_char;
 
 
 /** Convert a hex digit to its character representation */
@@ -153,7 +157,7 @@ char *do_sprintf_hex_byte (char *buf, U8 b)
 	*buf++ = digit2char (b >> 4);
 	if (comma_positions & 0x1)
 	{
-		*buf++ = (system_config.euro_digit_sep ? '.' : ',');
+		*buf++ = separator_char;
 		commas_written++;
 	}
 	comma_positions >>= 1;
@@ -161,7 +165,7 @@ char *do_sprintf_hex_byte (char *buf, U8 b)
 	*buf++ = digit2char (b & 0x0F);
 	if (comma_positions & 0x1)
 	{
-		*buf++ = (system_config.euro_digit_sep ? '.' : ',');
+		*buf++ = separator_char;
 		commas_written++;
 	}
 	comma_positions >>= 1;
@@ -254,7 +258,7 @@ do_format_chars:
 fixup_number:
 					leading_zero_count = 0;
 					while (((buf[leading_zero_count] == '0') ||
-						(buf[leading_zero_count] == ',')) &&
+						(buf[leading_zero_count] == separator_char)) &&
 						(buf + leading_zero_count < endbuf))
 					{
 						leading_zero_count++;
@@ -468,4 +472,20 @@ dbprintf1 (void)
 	db_puts (sprintf_buffer);
 }
 #endif
+
+
+CALLSET_ENTRY (printf, amode_start)
+{
+	if (system_config.euro_digit_sep)
+		separator_char = '.';
+	else
+		separator_char = ',';
+}
+
+
+CALLSET_ENTRY (printf, init)
+{
+	printf_amode_start ();
+}
+
 

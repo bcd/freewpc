@@ -28,16 +28,16 @@
 #endif
 
 /** How to enable/disable the IRQ */
-#define disable_irq()	do { cc_reg |= CC_IRQ; __builtin_blockage (); } while (0)
-#define enable_irq()    do { cc_reg &= ~CC_IRQ; __builtin_blockage (); } while (0)
+#define disable_irq() m6809_orcc (CC_IRQ)
+#define enable_irq() m6809_andcc (~CC_IRQ)
 
 /** How to enable/disable the FIRQ */
-#define disable_firq()	do { cc_reg |= CC_FIRQ; __builtin_blockage (); } while (0)
-#define enable_firq()	do { cc_reg &= ~CC_FIRQ; __builtin_blockage (); } while (0)
+#define disable_firq() m6809_orcc (CC_FIRQ)
+#define enable_firq() m6809_andcc (CC_FIRQ)
 
 /** How to enable/disable all interrupts */
-#define disable_interrupts()	do { cc_reg |= (CC_IRQ|CC_FIRQ); __builtin_blockage (); } while (0)
-#define enable_interrupts()	do { cc_reg &= ~(CC_IRQ|CC_FIRQ); __builtin_blockage (); } while (0)
+#define disable_interrupts() m6809_orcc (CC_IRQ|CC_FIRQ)
+#define enable_interrupts() m6809_andcc (~(CC_IRQ|CC_FIRQ))
 
 #else /* __m6809__ */
 

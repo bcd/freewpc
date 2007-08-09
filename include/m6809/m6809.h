@@ -65,12 +65,6 @@ void *malloc (U8 size);
 void free (void *ptr);
 
 
-/** Declare a variable that can be used to access the condition
- * code register directly.  This requires a newer version of the
- * gcc6809 compiler to work OK. */
-register unsigned char cc_reg asm ("cc");
-
-
 extern inline void set_stack_pointer (const U16 s)
 {
 	asm __volatile__ ("lds\t%0" :: "g" (s) : "d");
@@ -87,6 +81,18 @@ extern inline U16 get_stack_pointer (void)
 extern inline void set_direct_page_pointer (const U8 dp)
 {
 	asm __volatile__ ("tfr\tb, dp" :: "q" (dp));
+}
+
+
+extern inline void m6809_andcc (const U8 bits)
+{
+	asm __volatile__ ("andcc\t%0" :: "i" (bits));
+}
+
+
+extern inline void m6809_orcc (const U8 bits)
+{
+	asm __volatile__ ("orcc\t%0" :: "i" (bits));
 }
 
 
