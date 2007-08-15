@@ -140,6 +140,7 @@ CALLSET_ENTRY (mball, mball_start)
 		lamp_tristate_off (LM_PIANO_PANEL);
 		lamp_tristate_off (LM_SLOT_MACHINE);
 		device_request_empty (device_entry (DEVNO_LOCK));
+		ballsave_add_time (10);
 	}
 }
 

@@ -71,8 +71,8 @@ match_deff (void)
 		}
 
 		dmd_alloc_low_clean ();
-		sprintf ("%2b", &score_table[0][sizeof (score_t)-1]);
-		font_render_string_left (&font_fixed6, 0, 0, sprintf_buffer);
+		sprintf ("%2b", &score_table[0][BYTES_PER_SCORE-1]);
+		font_render_string_left (&font_mono5, 0, 0, sprintf_buffer);
 
 		font_render_string_right (&font_fixed6, 126, 2, "MATCH");
 		sprintf ("%2b", &value);

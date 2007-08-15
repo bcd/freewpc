@@ -41,18 +41,18 @@ CALLSET_ENTRY (service, sw_escape)
 
 CALLSET_ENTRY (service, sw_down)
 {
-	test_down_button ();
-
 	if (!in_test)
 		button_invoke (SW_DOWN, volume_down, TIME_500MS, TIME_100MS);
+	else	
+		test_down_button ();
 }
 
 CALLSET_ENTRY (service, sw_up)
 {
-	test_up_button ();
-	
 	if (!in_test)
 		button_invoke (SW_UP, volume_up, TIME_500MS, TIME_100MS);
+	else
+		test_up_button ();
 }
 
 

@@ -153,22 +153,22 @@ bool leff_test (lampnum_t lamp);
 
 #endif
 
-extern inline void flag_on (volatile flag_t f)
+extern inline void flag_on (const flag_t f)
 {
 	flag_address (f, lamp_on);
 }
 
-extern inline void flag_off (volatile flag_t f)
+extern inline void flag_off (const flag_t f)
 {
 	flag_address (f, lamp_off);
 }
 
-extern inline void flag_toggle (volatile flag_t f)
+extern inline void flag_toggle (const flag_t f)
 {
 	flag_address (f, lamp_toggle);
 }
 
-extern inline bool flag_test (volatile flag_t f)
+extern inline bool flag_test (const flag_t f)
 {
 	register U8 result;
 	flag_address_output (f, lamp_test, result);

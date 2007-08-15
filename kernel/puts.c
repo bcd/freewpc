@@ -38,6 +38,8 @@
 #include <freewpc.h>
 #ifdef __m6809__
 #include <m6809/math.h>
+#else
+#include <native/math.h>
 #endif
 
 extern U8 db_attached;

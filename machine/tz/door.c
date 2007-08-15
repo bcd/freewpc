@@ -276,7 +276,9 @@ void door_award_if_possible (void)
 {
 	if (can_award_door_panel ())
 	{
-		award_door_panel ();
+		/* TODO : When called from the camera award, this always
+		causes a crash??? */
+		//award_door_panel ();
 	}
 }
 

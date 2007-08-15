@@ -175,7 +175,7 @@ deff_entry_t *deff_entry_find (deffnum_t id)
 	deff_entry_t *entry;
 
 	/* Search the runqueue */
-	if (deff_runqueue->id == id)
+	if (id == deff_get_active ())
 		return deff_runqueue;
 
 	/* Search the waitqueue */
