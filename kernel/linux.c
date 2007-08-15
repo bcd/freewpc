@@ -410,7 +410,11 @@ static void linux_realtime_thread (void)
 				linux_time_step ();
 	
 				/** Invoke IRQ handler */
+#ifdef STATIC_SCHEDULER
+				tick_driver ();
+#else
 				do_irq ();
+#endif
 			}
 
 		/** Check for external interrupts on the FIRQ line */

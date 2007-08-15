@@ -432,6 +432,11 @@ do { \
 
 #endif /* PAGE == SYS_PAGE */
 
+#ifndef __m6809__
+#define far_call_pointer(fn, page, arg) (fn) (arg)
+#endif
+
+
 /********************************************/
 /* RAM Paging                               */
 /********************************************/
