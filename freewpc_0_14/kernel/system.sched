@@ -1,0 +1,82 @@
+#
+# Copyright 2007 by Brian Dominy <brian@oddchange.com>
+# 
+# This file is part of FreeWPC.
+# 
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# 
+
+
+# Schedule for FreeWPC's core real-time tasks
+
+# Common processing required at the beginning of every IRQ.
+do_irq_begin          1       8c
+
+# Read the flipper switches and update the flipper coils
+fliptronic_rtt        2       250c
+
+# Update the triacs
+triac_rtt             2       60c
+
+# Read the regular switch matrix and coin door
+switch_rtt            2       500c
+
+# Resynchronize to the AC zero cross point.
+ac_rtt                2       30c
+
+# Update the solenoids
+sol_rtt               8       125c
+
+# Update flashers
+# TODO : this routine needs help.  The estimate is
+# for idle; when it actually has to pulse a flasher,
+# it is MUCH worse
+flasher_rtt           8       170c
+
+# Update the lamps
+lamp_rtt_0            8       90c
+lamp_rtt_1            8       90c
+lamp_rtt_2            8       90c
+lamp_rtt_3            8       90c
+
+# Advance the system clock
+!clock_advance        16      4c
+
+# Toggle the CPU board LED
+!wpc_led_toggle       32      14c
+
+# Read/write the sound board
+sound_rtt             32      0.01
+
+# Toggle lamps that are in 'flash' mode
+# TODO : the flash handler is really only toggling every
+# 128ms, so this can be reduced
+lamp_flash_rtt        32      0.01
+
+# Check for task-level lockup
+# TODO : this may be more often than necessary, once all
+# critical functions are done here outside of task level.
+lockup_check_rtt      128     0.01
+
+# Accumulate idle-time statistics when enabled
+#if IDLE_PROFILE idle_profile_rtt      128     0.01
+
+# Common processing required at the end of every IRQ
+do_irq_end            1       0c
+
+
+# TODO : service the coin switches correctly to ensure proper timing
+
+

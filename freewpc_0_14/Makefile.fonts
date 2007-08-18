@@ -1,0 +1,59 @@
+#
+# Makefile.fonts - creates FreeWPC font files from scratch
+#
+# The standard fonts are already checked into source control and
+# should not need to be recreated.  The fontgen script uses several
+# 3rd party utilities which might not be available on all systems.
+# Thus, font rebuilding is not required when doing a clean build.
+#
+# The main makefile includes this one, so all of these targets are
+# available from the standard make command.
+#
+
+fonts : $(FON_SRCS)
+
+clean-fonts :
+	rm -f $(FON_SRCS)
+
+$(FON_SRCS) : tools/fontgen
+
+fonts/fixed10.fon :
+	tools/fontgen -o $@ -fn "fixed-bold-r-*-*-10" -fs 8 -id fixed10
+
+fonts/fixed6.fon :
+	tools/fontgen -o $@ -fn "fixed-bold-r-*-*-6" -fs 6 -id fixed6
+
+fonts/lucida9.fon :
+	tools/fontgen -o $@ -fn "lucida-bold-9" -fs 9 -id lucida9
+
+fonts/cu17.fon :
+	tools/fontgen -o $@ -fn "clearlyu-17" -fs 17 -id cu17
+
+fonts/term6.fon :
+	tools/fontgen -o $@ -fn "terminal-6" -fs 6 -id term6
+
+fonts/times10.fon :
+	tools/fontgen -o $@ -fn "-adobe-times-bold-r-*-*-10-*-75" -id times10
+
+fonts/times8.fon :
+	tools/fontgen -o $@ -fn "-adobe-times-bold-r-*-*-8-*-75" -id times8
+
+fonts/helv8.fon :
+	tools/fontgen -o $@ -fn "-adobe-helvetica-bold-r-*-*-8-*-75" -id helv8
+
+###################################################
+# Experimental
+###################################################
+
+fonts/schu.fon :
+	tools/fontgen -n -o $@ -fn "-schumacher-clean-*-r-*-*-0" -id schu
+
+fonts/utopia.fon :
+	tools/fontgen -n -o $@ -fn "-adobe-utopia-regular-*-normal-*-0" -id utopia
+
+fonts/luctype.fon :
+	tools/fontgen -n -o $@ -fn "-b&h-lucidatypewriter-medium-r-normal-*-0-0" -id luctype
+
+fonts/miscfixed.fon :
+	tools/fontgen -n -o $@ -fn "-misc-fixed-medium-r-semicondensed-*-0-0" -id misctype
+

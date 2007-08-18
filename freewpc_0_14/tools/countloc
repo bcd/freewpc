@@ -1,0 +1,2 @@
+#!/bin/sh
+find . -regex '.*\.\(c\|h\|md\)' -print0 | xargs -0 cat | wc -l

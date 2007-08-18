@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+#
+# alphaglob - sorts 6809 function definitions in their assembly form in
+# alphabetical order.  Different GCC versions output the assembly for
+# a file in different order, which makes diffing between the two difficult.
+# This script tries to normalize things.
+#
+
+while (<>) {
+	chomp;
+	s/;.*$//;
+	s/L[0-9]+/Lxx/;
+	s/LC[0-9]+/LCxx/;
+
+	if (/[ \t]*\.globl[ \t]+(.*)$/) {
+		$symbol = $1;
+	}
+	elsif (/[ \t]*\.(byte|word|blkb|module|area|ascii)/) {}
+	elsif (/^[ \t]*$/) {}
+	else {
+		$def{$symbol} .= "$_\n";
+	}
+}
+
+for $symbol (sort (keys %def)) {
+	next if $symbol =~ /^[^_]/;
+	my @lines = split /\n+/, $def{$symbol};
+	for $line (@lines) {
+		print "$symbol    --->   $line\n";
+	}
+	print "\n\n";
+}

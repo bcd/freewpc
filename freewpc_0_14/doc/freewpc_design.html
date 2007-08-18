@@ -1,0 +1,563 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>The Design of the FreeWPC Pinball Operating System</TITLE>
+<META NAME="description" CONTENT="The Design of the FreeWPC Pinball Operating System">
+<META NAME="keywords" CONTENT="freewpc_design">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="freewpc_design.css">
+
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="file:/usr/lib/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev_g.png">   
+<BR>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<P>
+
+<P>
+
+<P>
+
+<P>
+<H1 ALIGN="CENTER">The Design of the FreeWPC Pinball Operating System</H1>
+<DIV>
+
+<P ALIGN="CENTER"><STRONG>Brian Dominy (brian@oddchange.com)</STRONG></P>
+<P ALIGN="CENTER"><STRONG>August 27, 2006</STRONG></P>
+</DIV>
+
+<H3>Abstract:</H3>
+<DIV>
+This paper describes the design and development of FreeWPC, a replacement
+operating system for Bally/Williams pinball machines utilizing the
+Williams Pinball Controller (WPC) chip. This includes all pinballs
+made by the company between 1990-1999, starting with Funhouse and
+ending with Cactus Canyon.
+</DIV>
+<P>
+FreeWPC is still a work-in-progress, with much room for improvement.
+Some of the ideas expressed here are theoretically understood but
+not yet implemented. Likewise, some of what is implemented in the
+latest builds may not be described here at all. FreeWPC source code
+is freely available for inspection and can be obtained at http://www.oddchange.com/freewpc.
+
+<P>
+
+<H1><A NAME="SECTION00010000000000000000">
+1 The WPC Hardware</A>
+</H1>
+
+<P>
+The WPC is an ASIC located on the CPU board. It is essentially a giant
+address decoder that maps a bunch of peripheral devices into the address
+space of the Motorola 6809 CPU. By reading/writing addresses between
+$3F00 and $3FFF, the CPU is able to access the peripherals. This
+includes all of the playfield switches, the solenoids, the lamps,
+etc. It also includes a number of other functions that are builtin
+to the ASIC directly, such as the real-time clock and a bit shifter.
+Earlier generations of Williams pinballs mapped I/O using custom TTL
+logic like PIAs. The WPC is a cleaner design since it uses a single
+ASIC.
+
+<P>
+Also mapped into the 64KB address space are the dot matrix controller
+pages. The DMD controller contains enough memory for 16 full screens
+of data, and can be programmed to show any one of them at a time.
+Up to 2 of the page buffers can be mapped into the 6809 address space
+at $3800 and $3A00. 
+
+<P>
+RAM is located at the lowest addresses, between $0000 and $1FFF,
+for a total of 8KB. A configurable portion of upper RAM can be programmed
+as read-only.
+
+<P>
+The CPU board supports up to 1MB of ROM space for program code and
+constant data. Because the 6809 can only address a total of 64KB at
+a time, a paging mechanism is used. The upper 32KB of any ROM, regardless
+of the ROM size, is mapped from $8000 to $FFFF permanently. Any
+other 16KB of the ROM can be mapped from $4000 to $7FFF; a ROM page
+register in the WPC is programmed to determine which page is currently
+visible. Pages are numbered starting from 0 for the lowest 16KB up
+to $3D for the highest, non-permanent 16KB page. If the ROM size
+is less than 1MB, then pages are renumbered so that the highest page
+remains $3D.
+
+<P>
+
+<H2><A NAME="SECTION00011000000000000000">
+1.1 Initialization</A>
+</H2>
+
+<P>
+Control begins by branching to RESET routine; the RESET vector at
+the top of memory must be programmed with this address so the 6809
+can find it when it powers up. 
+
+<P>
+It is best not to make any assumptions about the values of I/O registers
+immediately after booting. Therefore, one of the first things that
+normally happens in embedded systems is to program all of the registers
+with sane values.
+
+<P>
+It is unknown what the WPC bank switching register starts at, so to
+be safe, make sure the reset routine resides in the non-paged portion
+of the address space ($8000 to $FFFF).
+
+<P>
+The 6809 has a direct page register, DP, which controls which 256
+bytes of RAM are addressed by the 1-byte form of effective address.
+FreeWPC places commonly used variables from $0000 to $00FF so DP
+should be programmed to zero before accessing any RAM.
+
+<P>
+During initialization, keep all interrupts disabled until all data
+structures are setup that need to be in place for the interrupt handlers
+to work properly.
+
+<P>
+Each module of the kernel is initialized in turn, starting with the
+hardware related modules and moving up to the software-only modules.
+Once init is complete, the kernel can enable interrupts and then jump
+into the task scheduler. The <I>first task</I> is started before
+doing so, to ensure that there is some work to be done. The first
+task takes care of switch scheduling, which drives all of the other
+functions, and starts up the initial attract mode.
+
+<P>
+
+<H1><A NAME="SECTION00020000000000000000">
+2 General Requirements</A>
+</H1>
+
+<P>
+There are numerous ways to approach the construction of an embedded
+system. Here are the some of the general requirements that have influenced
+the design of FreeWPC:
+
+<P>
+
+<UL>
+<LI>It must provide realtime capabilities. People don't expect machines
+to miss switch closures, in the way that Windows users sometime experience
+moments where the system &#34;freezes&#34; when it becomes
+busy. Also, some operations require extremely fine timing control,
+like the pulsing of a solenoid, which needs millisecond-level control.
+(Modern desktop operating systems typically can only provide 10ms
+granularity, by comparison.)
+</LI>
+<LI>It needs multitasking. Machines have to manage lots of physical devices
+at the same time. Switches need to be polled at the same time as the
+sounds, lights, and display are updated. At a higher layer, game rules
+often involve multiple &#34;modes&#34; running at the same
+time. At the same time, interprocess communication (IPC) features
+are generally not required, as most of the different tasks are independent.
+</LI>
+<LI>It must cope with a small amount of RAM. 8KB is not a lot of room
+to work with. Keeping dynamic data structures as small as possible
+is a challenge.
+</LI>
+<LI>It should be written in C as much as possible. This is a requirement
+I imposed on the system myself. Software engineers from Williams have
+repeatedly indicated that they wrote the games directly in assembly
+language. In some ways this is better, since the developer has completely
+control of what the CPU is doing. Good compilers were not available
+for the 6809 back in 1990, so assembly was the only available choice
+when WPC was first developed. Today, there is a gcc port for the 6809
+which is sufficient for producing decent performing code. Using C
+also allows more people to get involved in the project and understand
+what is going on.
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00030000000000000000">
+3 Scheduling</A>
+</H1>
+
+<P>
+FreeWPC contains a small microkernel which supports nonpreemptive,
+first-come first-serve (FCFS) multitasking and multigranular soft
+realtime processes. That is:
+
+<P>
+
+<UL>
+<LI>FreeWPC is a multitasking system, which provides the illusion of multiple
+threads running in parallel.
+</LI>
+<LI>There are two classes of tasks, ordinary and realtime. 
+</LI>
+<LI>The realtime tasks have priority and are scheduled at compile-time
+to one of several periods (e.g. every 1ms, every 8ms, etc.) Realtime
+tasks cannot sleep. They are triggered to run based on the IRQ interrupt,
+which fires about once per 1ms.
+</LI>
+<LI>The FCFS tasks take whatever CPU time is remaining. Each task will
+continue to run until it explicitly gives up control to the next FCFS
+task (that's the nonpreemptive part). These tasks can sleep. They
+can only be interrupted by the periodic realtime tasks.
+</LI>
+</UL>
+This design is simple enough for what we need. There is no explicit
+support for multitask communications like queues or semaphores. In
+most cases, locking support is not needed: the only time would be
+when you need to synchronize between a realtime and an FCFS task.
+The solution is for the FCFS task to disable the IRQ interrupt around
+the critical section, since that keeps the realtime tasks from getting
+scheduled. These critical sections need to be kept extremely small,
+though.
+
+<P>
+The WPC chip drives the IRQ line of the 6809 to generate an interrupt
+once every 976 microseconds... The timing of the IRQ is fairly accurate
+as it is derived from the 32Khz oscillator on the CPU board. Thus,
+the IRQ is used as the main timing source for the kernel.
+
+<P>
+Realtime functions are called directly from the IRQ vector. FCFS tasks
+which are sleeping have their &#34;time-until-ready-to-run&#34;
+counters updated based on the number of IRQs that have happened.
+
+<P>
+It is possible to compute the percentage of time spent running at
+the IRQ level, since the functions are mostly fixed. (There will always
+be some variations due to whether or not some conditional branches
+are taken.) The more efficient the realtime functions, the more time
+available for other tasks.
+
+<P>
+At 2MHz, the IRQ is triggered about once every 1952 CPU cycles, which
+is not much, especially considering that 6809 instructions often require
+3 or 4 cycles to execute. There is a fine balance to be found here.
+Realtime functions need to run every so often, but not more often
+than that. Polling more frequently than necessary is simply a waste
+of time, for example.
+
+<P>
+Realtime tasks are scheduled in terms of &#34;IRQ ticks&#34;.
+If a function needs to run every 8ms, and the IRQ occurs once every
+1ms, then the function should only be called once out of every 8 IRQs.
+However, the functions should be scheduled in such a way that the
+total duration of realtime calls during a single IRQ does not exceed
+the time between IRQs; when this happens, the realtime guarantee has
+failed.
+
+<P>
+
+<H1><A NAME="SECTION00040000000000000000">
+4 Modularity</A>
+</H1>
+
+<P>
+The system is designed to be as modular as possible. Each hardware
+component, such as switches, lamps, or solenoids, is managed by a
+different module in the kernel, which normally is implemented in a
+single .c file in the kernel directory. The kernel provides standard
+APIs for accessing the hardware. &#34;User code&#34; should
+never directly write to a WPC hardware register. Most hardware modules
+provide a periodic realtime function that does the very low-level
+I/O, e.g. polling switches or redrawing the lamp matrix. FCFS code
+rarely will touch the hardware directly; instead, it will either queue
+the request (if it is to drive an output), or read from an internal
+buffer (if it is a read request - which will retrieve the last value
+polled by the realtime function).
+
+<P>
+There is also the modularity between the kernel and the user code.
+Each machine can define special &#34;hook&#34; functions
+that need to be invoked when certain events occur. These are implemented
+as callback functions. This allows the kernel to be &#34;extended&#34;
+to suit the needs of a particular machine. Also, there are a number
+of constants which are machine-specific. Each machine has a &#34;config.h&#34;
+file that contains all of those values. As much as possible, algorithms
+which are common to nearly all machines are put into the shared kernel,
+with allowances for machines to provide extensions or overrides.
+
+<P>
+
+<H1><A NAME="SECTION00050000000000000000">
+5 Physical Inputs and Outputs</A>
+</H1>
+
+<P>
+Aside from the multitasking, the kernel is mostly concerned with the
+management of hardware resources: input and output devices. Here is
+where the differences between an emulator like PinMAME and actual
+hardware vastly differ. What has been implemented so far works pretty
+well in the emulations, though.
+
+<P>
+The major input devices are, of course, the various switches and buttons.
+There's also the DIP switches on the CPU board, the real time clock,
+and the AC zero-cross detection circuit. Switches are the easiest
+to describe because they work in theory in the simplest possible way.
+Every switch is just a binary input, either 1 (active) or 0 (inactive). 
+
+<P>
+Of course, it's much more complicated than that. First and foremost
+is the need for debouncing with the mechanical (non-opto) type switches,
+in which a significant amount of vibration occurs upon closure, causing
+the CPU to see tens of closures instead of one. Debounce logic takes
+the raw switch signal and filters it to produce a smoother, more binary
+type signal. Transitions only occur if they hold their new state for
+a certain period of time (which may be dependent on the type of switch
+and its location on the playfield).
+
+<P>
+Output devices like lamps and solenoids are just the opposite: they
+are binary outputs, which in theory are logically on (1) or off (0).
+The exact opposite of debouncing needs to be performed here, though:
+to prevent fatigue of a coil, a logical &#34;1&#34; signal
+needs to be &#34;bounced&#34; so that it is really only
+a &#34;1&#34; every so often, and &#34;0&#34;
+otherwise. This is called &#34;duty cycling&#34;. The algorithm
+could be different depending on the type of coil or duration of the
+pulse.
+
+<P>
+Switches and lamps have an additional complicating factor in WPC:
+they can't all be addressed at the same time. Instead, they are arranged
+into an 8x8 matrix. At any given time, only one column (8 switches
+or 8 lamps) is addressable for reading/writing. Another register must
+first be programmed with the column value to determine which of the
+8 columns it will be. For lamps, this adds inherent duty cycling as
+no more than 8 of the lamps will ever be on at a time. For switches,
+there is the complication of optos, which are normally closed and
+open when they become active. Software must use &#34;backwards
+logic&#34; on these.
+
+<P>
+Some hardware registers are write-only, which requires that software
+remember the last value written if it will ever need to be &#34;read&#34;.
+The read then comes from the cached value rather than touching the
+hardware.
+
+<P>
+
+<H1><A NAME="SECTION00060000000000000000">
+6 Logical Inputs = Events</A>
+</H1>
+
+<P>
+Switch inputs and timers comprise the physical inputs of the system.
+It is useful to generalize the notion of an input to software constructs
+as well. The generic term used here is an event. An event is associated
+with two entities: that which creates the event, and that which receives
+or handles the event.
+
+<P>
+For example, when a ball enters an eject hole, the switch closure
+creates an event that reflects the ball entering the eject. Multiple
+event receivers may be interested in processing this event: there
+may be multiple game modes that need to respond to the event, the
+ball tracking system will want to know that the ball should be ejected,
+etc.
+
+<P>
+The key observation used throughout FreeWPC is that static events
+can be modelled as simple function calls at compile time. Creating
+an event is equivalent to calling a unique function associated with
+that event. This function's sole job is to inform all event receivers
+that the event occurred, again by direct function calls. Each receiver
+is a function that is called by the event generator. In most cases,
+for well-known events, no storage need be maintained to model events
+at all.
+
+<P>
+When a FreeWPC program is compiled, the source code is scanned to
+see what events are created, and which events are received. The event
+generation functions can then automatically be created.
+
+<P>
+
+<H1><A NAME="SECTION00070000000000000000">
+7 Logical Outputs = Effects</A>
+</H1>
+
+<P>
+At a layer above the physical hardware, management must be provided
+for output devices when there are multiple tasks wanting to access
+them. The dot matrix, lamps, solenoids, and music playing can all
+be controlled fairly easily, but if multiple tasks want to use them
+at the same time, what do you do?
+
+<P>
+The solution implemented in FreeWPC involves hardcoded priorities.
+When a task wants to use a resource, it first tries to allocate that
+resource, passing a priority value. The allocation/free approach is
+very similar to the way that files or other devices are opened/closed
+on traditional UNIX systems. Only the task with the highest priority
+is allowed to use the resource. This usage is preemptive, unlike task
+scheduling: when a higher priority task takes over control over a
+resource, the lower priority task must stop using it immediately.
+Likewise, when the higher priority task is done, control should be
+returned to the lower priority task.
+
+<P>
+This approach is implemented by a data structure called a priority
+queue. Priority queueing is often used in realtime operating systems
+for task scheduling, but it is slightly different here. Our FCFS tasks
+have no concept of priority; they all run equally first-come, first-serve.
+We want to partition them into different sets based on the resources
+that they need. All tasks using the display would be in one set; all
+tasks requiring the lamps would be in another set. Tasks in different
+sets are disjoint and can be scheduled independently. However, within
+a single set, only the single task with the highest priority gets
+to use that resource.
+
+<P>
+This is how I think it should work in theory. There are additional
+complications. What about tasks that require multiple resources, like
+a jackpot animation that wants to drive the display, lamps, and make
+some explosion sounds? These are three distinct resources, and not
+all of them may be available at the time of the effect. In the current
+FreeWPC approach, it would require three separate tasks to do all
+of these things. They could all have different priorities even. So
+if the lamps are busy, at least the other two things can happen. For
+something like a jackpot animation, this probably indicates a flaw
+in the priority assignments, but for some effects, this might make
+sense.
+
+<P>
+Also, consider the granularity of the resource. In the simplest approach,
+all of the lamps could be treated as a single resource, so you get
+all or none of them. But you could break it down further and manage
+each lamp separately, so that a lamp effect might run but only be
+able to update some of the lamps. The net effect is that you could
+have multiple tasks operating on different &#34;parts&#34;
+of a resource at the same time. To implement the priority queueing
+properly, a task that wants to implement some part of an effect needs
+to be standalone from any other processing. That way, that particular
+task can be stopped/started by the kernel's resource management routines
+as priorities change. Only the tasks that are actively controlling
+the resource will be running. The kernel simply remembers all of the
+tasks that have been queued up which can't run now.
+
+<P>
+
+<H2><A NAME="SECTION00071000000000000000">
+7.1 Display Effects</A>
+</H2>
+
+<P>
+The dot matrix display is treated as a single resource that is owned
+by only one ``display effect'' at a time. Multiple display effects
+(referred to as deffs in the source code) may be started, but only
+the one with the highest priority is allowed to use the display. 
+
+<P>
+
+<H2><A NAME="SECTION00072000000000000000">
+7.2 Lamp Effects</A>
+</H2>
+
+<P>
+Lamp effects are handled similarly to display effects.
+
+<P>
+
+<H2><A NAME="SECTION00073000000000000000">
+7.3 Sound Effects</A>
+</H2>
+
+<P>
+
+<H1><A NAME="SECTION00080000000000000000">
+8 Performance</A>
+</H1>
+
+<P>
+
+<H2><A NAME="SECTION00081000000000000000">
+8.1 Measurements</A>
+</H2>
+
+<P>
+
+<H2><A NAME="SECTION00082000000000000000">
+8.2 Realtime Performance</A>
+</H2>
+
+<P>
+
+<H1><A NAME="SECTION00090000000000000000">
+9 Miscellaneous Features</A>
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION000100000000000000000">
+10 For Future Discussion</A>
+</H1>
+
+<P>
+Other topics that should be added here:
+
+<P>
+
+<UL>
+<LI>Dot matrix handling, including shading and transitional effects
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION000110000000000000000">
+About this document ...</A>
+</H1>
+ <STRONG>The Design of the FreeWPC Pinball Operating System</STRONG><P>
+This document was generated using the
+<A HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2002-2-1 (1.71)
+<P>
+Copyright &#169; 1993, 1994, 1995, 1996,
+<A HREF="http://cbl.leeds.ac.uk/nikos/personal.html">Nikos Drakos</A>, 
+Computer Based Learning Unit, University of Leeds.
+<BR>
+Copyright &#169; 1997, 1998, 1999,
+<A HREF="http://www.maths.mq.edu.au/~ross/">Ross Moore</A>, 
+Mathematics Department, Macquarie University, Sydney.
+<P>
+The command line arguments were: <BR>
+ <STRONG>latex2html</STRONG> <TT>-no_subdir -split 0 -show_section_numbers /tmp/lyx_tmpdir25620y4aeJh/lyx_tmpbuf2/freewpc_design.tex</TT>
+<P>
+The translation was initiated by  on 2006-08-28<HR>
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="file:/usr/lib/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev_g.png">   
+<BR>
+<!--End of Navigation Panel-->
+<ADDRESS>
+
+2006-08-28
+</ADDRESS>
+</BODY>
+</HTML>

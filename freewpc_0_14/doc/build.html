@@ -1,0 +1,47 @@
+
+<h2>Overview of the FreeWPC Build Procedure</h2>
+
+In order to build a FreeWPC ROM from scratch, the following steps
+are taken by the Makefile:
+
+<ol>
+<li>Determine the configuration.  At a minimum, you must specify a value
+for <b>MACHINE</b>, which determines the target machine.  The value of
+MACHINE is cached by creating symbolic links into the target source/include
+directories, so this only really needs to be specified when changing targets.
+MACHINE can be specified on the command-line; another way is to assign in
+a file called <b>user.make</b> in the current directory/your home directory.
+<li>Autogenerate defines.  Certain #defines are automatically set for you
+by scanning the source code to find all uses.
+<li>Compile the source code.
+<li>Generate callsets and compile the generated code.
+<li>Build an executable ROM image.  This involves linking all of the object
+files together correctly, building each paged section, and then combining
+them all together into one ROM file.  Unused sections of ROM are padded with
+blanks (0xFF).
+</ol>
+
+<h2>Other Configuration Options</h2>
+
+<p>Like MACHINE, these are most easily set by using a <b>user.make</b> file.  <b>TBD</b></p>
+
+<h2>System Requirements</h2>
+
+<p>The build procedure uses several other applications that will need
+to be installed on your build system.  Most Linux systems have all of these;
+if using Cygwin, you may not get them all by default.  You should have:</p>
+
+<ul>
+<li>The gcc6809 toolchain, installed in /usr/local/m6809</li>
+<li>The asxxxx assembler and linker</li>
+<li>The dd program, for generating the blank portions of the ROM file</li>
+<li>The bc program, for doing math to determine proper ROM section sizes</li>
+<li>zip and unzip, in order to manipulate xpinmame ROM bundles</li>
+<li>The bash shell</li>
+<li>Perl, for some helper scripts
+<li>doxygen, if you want to be able to autogenerate documentation files
+(optional)</li>
+<li>Other basic UNIX utilities, like cat, rm, mv, mkdir, etc. which are almost
+certainly present</li>
+</ul>
+

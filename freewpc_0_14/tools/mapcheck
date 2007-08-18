@@ -1,0 +1,20 @@
+#!/bin/sh
+
+checkpage ()
+{
+	sz=`grep " l_$1" build/freewpc.map | awk '{print $1}'`
+	objs=`grep "^$1_OBJS" Makefile`
+	echo "$1 ($objs) : $sz of $2";
+}
+
+checkpage "direct" "100";
+checkpage "ram"    "1300";
+checkpage "local"  "A0";
+checkpage "nvram"  "800";
+checkpage "page56" "4000";
+checkpage "page57" "4000";
+checkpage "page58" "4000";
+checkpage "page59" "4000";
+checkpage "page60" "4000";
+checkpage "page61" "4000";
+checkpage "sysrom" "8000";
