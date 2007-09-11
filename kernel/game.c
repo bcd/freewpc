@@ -147,12 +147,6 @@ void end_game (void)
 {
 	if (in_game)
 	{
-		/* Mark the game as complete */
-		in_game = FALSE;
-		player_up = 0;
-		ball_up = 0;
-		in_tilt = FALSE;
-
 		/* If in test mode now (i.e. the game was aborted
 		by pressing Enter), then skip over the end game effects. */
 		if (!in_test)
@@ -162,14 +156,21 @@ void end_game (void)
 			callset_invoke (end_game);
 		}
 
-		/*
-		 * Make sure all effects and flippers are killed before
-		 * going back to the attract mode.
-		 */
-		lamp_all_off ();
-		flipper_disable ();
-		deff_stop_all ();
-		leff_stop_all ();
+		/* Mark the game as complete */
+		in_game = FALSE;
+		player_up = 0;
+		ball_up = 0;
+		in_tilt = FALSE;
+		ball_in_play = FALSE;
+	}
+
+	leff_stop_all ();
+	task_sleep (TIME_33MS); /* not needed? */
+	lamp_all_off ();
+	deff_stop_all ();
+
+	if (!in_test)
+	{
 		deff_start (DEFF_GAME_OVER);
 		amode_start ();
 	}

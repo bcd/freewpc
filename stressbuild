@@ -4,18 +4,18 @@
 #
 
 rm -f stressbuild.log
-for plat in `echo linux wpc`; do
-	for mach in `echo tz wcs afm tester`; do
+for plat in `echo wpc`; do # removed linux for now
+	for mach in `echo t2 tz wcs afm tester`; do
 		for debugger in `echo y n`; do
-			for target in `echo clean default_target`; do
-				if [ "$plat" = "wpc" ]; then
-					gcctargets=`echo 3.4.6 4.2.0 4.3.0`;
-				else
-					gcctargets=`echo nop`;
-				fi
+			if [ "$plat" = "wpc" ]; then
+				gcctargets=`echo 3.4.6 4.2.1`; # removed 4.3.0 for now
+			else
+				gcctargets=`echo nop`;
+			fi
 
-				for gcc in $gcctargets; do
-					if [ "$gcc" = "nop" ]; then gcc=; fi
+			for gcc in $gcctargets; do
+				if [ "$gcc" = "nop" ]; then gcc=; fi
+				for target in `echo clean default_target`; do
 					echo Execing make \
 						PLATFORM=$plat MACHINE=$mach DEBUGGER=$debugger \
 						GCC_VERSION=$gcc $target | tee -a stressbuild.log

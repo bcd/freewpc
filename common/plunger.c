@@ -37,6 +37,7 @@ void timed_plunger_monitor (void)
 	task_sleep_sec (7);
 	VOIDCALL (plunger_sw_launch_button);
 	task_exit ();
+}
 #endif
 
 

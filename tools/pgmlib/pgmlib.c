@@ -241,7 +241,7 @@ xbm_make_prog (XBM *xbm)
 		byte = xbm_read_byte (xbm, off);
 		count = 1;
 		while ((xbm_read_byte (xbm, off+count) == byte)
-			&& (off+count < n_bytes))
+			&& (off+count < n_bytes) && (count < 255))
 			count++;
 
 		if (count <= 2)
@@ -275,9 +275,6 @@ xbm_make_prog (XBM *xbm)
 			elem->args.skip.count = count;
 			off += count;
 			size += 2;
-
-			// TODO
-			if (count > 255) {}
 		}
 		else
 		{
@@ -288,9 +285,6 @@ xbm_make_prog (XBM *xbm)
 			elem->args.repeat.data = byte;
 			off += count;
 			size += 3;
-
-			// TODO
-			if (count > 255) {}
 		}
 
 		if (elem)

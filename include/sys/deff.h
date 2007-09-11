@@ -52,13 +52,8 @@ we can hold the ball and service more deffs than if the ball is
 on the playfield. */
 #define D_TIMEOUT 0x2
 
-/** TODO : Set for a deff that can run with only 16 rows -- half of the display.
-The deff function should call deff_get_current_size() to find out which
-rows are available. */
-#define D_HALFSIZE 0x4
-
 /** Set for a deff that is abortable (by pressing both flipper buttons). */
-#define D_ABORTABLE 0x8
+#define D_ABORTABLE 0x4
 
 
 /** A constant descriptor for a display effect. */

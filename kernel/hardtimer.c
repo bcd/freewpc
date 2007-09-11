@@ -29,8 +29,13 @@
 until it expires, and a pointer to the function to be called at expiry. */
 struct timer
 {
+	/** The number of IRQs until the timer expires */
 	U8 timeout;
+
+	/** The handler to be called on expiration */
 	void (*handler) (U8);
+
+	/** A single byte of instance data to pass to the handler */
 	U8 data;
 };
 
@@ -39,11 +44,10 @@ struct timer
 then the queue is empty though. */
 U8 hard_timer_head;
 
-
 /** An index to the last valid entry in the table. */
 U8 hard_timer_tail;
 
-
+/** The table of all hard timers.  These are not infinitely many. */
 struct timer timer_table[MAX_TIMERS];
 
 
@@ -67,11 +71,12 @@ static inline bool timer_queue_full_p (void)
 }
 
 
+/** The hard timer periodic function.  It is designed to be called once
+every IRQ. */
 void hard_timer_rtt (void)
 {
-	/* Scan each entry in the queue, and decreases its timeout count
-	by 1.  If any entry has reached zero, then 
-	remove its entry and call its handler. */
+	/* Scan the first entry in the queue, and decreases its timeout count
+	by 1.  If it reaches zero, then remove its entry and call its handler. */
 	if (__builtin_expect (!!(hard_timer_head != hard_timer_tail), 0))
 	{
 		struct timer *tmr = &timer_table[hard_timer_head];
@@ -80,6 +85,7 @@ void hard_timer_rtt (void)
 		{
 			(*tmr->handler) (tmr->data);
 			increment_modulo (&hard_timer_head, MAX_TIMERS);
+			/* On a expiry, check the next entry in the queue as well */
 			hard_timer_rtt ();
 		}
 	}

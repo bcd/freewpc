@@ -209,6 +209,7 @@ int main (int argc, char *argv[])
 		default:
 			error ("invalid output file format (%d) for %s", format, outfile);
 	}
+	return 0;
 }
 
 

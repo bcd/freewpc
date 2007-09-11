@@ -39,7 +39,7 @@ void camera_award_deff (void)
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	sprintf ("CAMERA AWARD %d", camera_award_count);
+	sprintf ("CAMERA AWARD %d", camera_award_count+1);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
 	switch (camera_award_count)
 	{
@@ -72,7 +72,9 @@ void camera_award_deff (void)
 
 static void do_camera_award (void)
 {
-	task_sleep (TIME_100MS);
+	deff_start (DEFF_CAMERA_AWARD);
+	task_sleep_sec (2);
+
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -97,9 +99,9 @@ static void do_camera_award (void)
 			break;
 	}
 	camera_award_count++;
-	deff_start (DEFF_CAMERA_AWARD);
 	if (camera_award_count >= MAX_CAMERA_AWARDS)
 		camera_award_count = 0;
+	task_exit ();
 }
 
 
@@ -117,11 +119,11 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
-		if (lamp_test (LM_PANEL_CAMERA))
+		if (lamp_flash_test (LM_CAMERA))
 		{
 			score (SC_10M);
 			sound_send (SND_CAMERA_AWARD_SHOWN);
-			do_camera_award ();
+			task_create_anon (do_camera_award);
 		}
 		else
 		{
@@ -135,7 +137,7 @@ CALLSET_ENTRY (camera, sw_camera)
 
 CALLSET_ENTRY (camera, start_ball)
 {
-	lamp_off (LM_CAMERA);
+	lamp_tristate_off (LM_CAMERA);
 }
 
 

@@ -48,6 +48,8 @@ void music_update (void)
 	U8 i;
 	U8 best_prio = 0;
 
+	/* If set to 0xFF, we recalculate the highest priority.
+	Otherwise, assume the caller set it to the correct value. */
 	if (music_track_current == 0xFF)
 	{
 		for (i=0; i < MAX_TRACKS; i++)
@@ -96,6 +98,8 @@ void music_start (audio_track_t track)
 
 	dbprintf ("music_start (%02X, %d)\n", track.code, track.prio);
 
+	/* If the requested track is already in the queue, then
+	nothing to do */
 	i = music_find (track);
 	if (i != 0xFF)
 	{
@@ -103,14 +107,20 @@ void music_start (audio_track_t track)
 		return;
 	}
 
+	/* Find a free slot in the track table */
 	i = music_find (zero_track);
 	if (i != 0xFF)
 	{
 		music_tracks[i] = track;
 
+		/* If no music is currently playing, or the active music
+		is lower in priority than the requested track, then start
+		the requested track. */
 		if ((music_track_current == 0xFF)
 			|| (music_tracks[music_track_current].prio < track.prio))
 		{
+			/* We know this is the highest priority, so give the
+			updater a hint */
 			music_track_current = i;
 			music_update ();
 		}
