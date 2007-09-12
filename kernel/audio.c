@@ -170,7 +170,7 @@ static const audio_track_t start_ball_music_track = {
 #ifdef MACHINE_START_BALL_MUSIC
 	.code = MACHINE_START_BALL_MUSIC,
 #else
-	.code = 2,
+	.code = 3,
 #endif
 };
 

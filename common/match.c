@@ -35,10 +35,6 @@ U8 match_count;
 bcd_t match_value;
 
 
-/* TODO - get rid of all these externs, move them into a .h */
-extern const score_t score_table[];
-
-
 /** Give out the award for a single match. */
 void
 match_award (void)
@@ -71,7 +67,7 @@ match_deff (void)
 		}
 
 		dmd_alloc_low_clean ();
-		sprintf ("%2b", &score_table[0][BYTES_PER_SCORE-1]);
+		sprintf ("%2b", &scores[0][BYTES_PER_SCORE-1]);
 		font_render_string_left (&font_mono5, 0, 0, sprintf_buffer);
 
 		font_render_string_right (&font_fixed6, 126, 2, "MATCH");
@@ -132,7 +128,7 @@ match_start (void)
 		U8 p;
 		for (p = 0; p < num_players; p++)
 		{
-			if (score_table[p][BYTES_PER_SCORE-1] == match_value)
+			if (scores[p][BYTES_PER_SCORE-1] == match_value)
 			{
 				/* This player's score matches, and we wanted a match.
 				Use this value. */

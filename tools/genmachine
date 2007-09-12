@@ -464,8 +464,9 @@ LINE:
 				# If redeclaring, use the ID given before.
 				if (defined $mc->{$name}) {
 					$ID = $mc->{$name}->{'ID'};
+				} else {
+					$autoid++;
 				}
-				$autoid++;
 			}
 			else {
 				($ID, $parms, $name) = ($1, $2, undef);

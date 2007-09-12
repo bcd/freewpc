@@ -90,8 +90,7 @@ extern const U8 mach_edge_switches[];
 #define SW_ROW(x)			((x) & 0x07)
 #define SW_ROWMASK(x)	(1 << SW_ROW(x))
 
-#define MAKE_SWITCH(col,row)	((col * 8) + row - 1)
-#define MAKE_SW(row,col)  MAKE_SWITCH(row,col)
+#define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
 
 /* Array types. */
 #define AR_RAW			0

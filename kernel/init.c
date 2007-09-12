@@ -58,6 +58,7 @@ void abort (void)
  * When building for the 6809, control transfers here from the
  * assembly bootup code in start.s.
  * Under Linux emulation, this function is called from main().
+ * TODO : On the 6809 this should _be_ main().
  */
 __naked__ __noreturn__ 
 void do_reset (void)
@@ -121,7 +122,9 @@ void do_reset (void)
 	sol_init ();
 	flasher_init ();
 	triac_init ();
+#if (MACHINE_DMD == 1)
 	dmd_init ();
+#endif
 	switch_init ();
 	flipper_init ();
 	lamp_init ();
@@ -247,6 +250,7 @@ void fatal (errcode_t error_code)
 	audit_assign (&system_audits.lockup1_addr, error_code);
 	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 
+#if (MACHINE_DMD == 1)
 	/* Try to display the error on the DMD.  This may not work,
 	you know. */
 	dmd_alloc_low_clean ();
@@ -260,6 +264,7 @@ void fatal (errcode_t error_code)
 	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
 
 	dmd_show_low ();
+#endif
 
 	/* Dump all of the task information to the debugger port. */
 	task_dump ();
@@ -346,10 +351,12 @@ void do_firq (void)
 	}
 	else
 	{
+#if (MACHINE_DMD == 1)
 		/* DMD interrupt */
 		dmd_rtt ();
-		firq_count++;
+#endif
 	}
+	firq_count++;
 
 #ifdef __m6809__
 	asm __volatile__ ("puls\td,x");

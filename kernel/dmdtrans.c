@@ -239,9 +239,10 @@ void trans_scroll_right_new (void)
 		dst[i+48] = src[i+48];
 	}
 
-	dmd_trans_data_ptr++;
-	if (dmd_trans_data_ptr == dmd_low_buffer + 31)
+	if (dmd_trans_data_ptr == dmd_low_buffer)
 		dmd_in_transition = FALSE;
+	else
+		dmd_trans_data_ptr--;
 }
 
 

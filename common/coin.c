@@ -275,20 +275,6 @@ void add_units (U8 n)
 }
 
 
-#if 0
-void coin_insert_deff (void)
-{
-	register S8 z = 4;
-	while (--z > 0)
-	{
-		dmd_invert_page (dmd_low_buffer);
-		task_sleep (TIME_100MS * 2);
-	}
-	deff_exit ();
-}
-#endif
-
-
 /** Handle the Nth coin slot switch. */
 static void do_coin (U8 slot)
 {
