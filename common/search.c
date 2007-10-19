@@ -41,15 +41,22 @@
  * into play.
  */
 
+
+/** The current value of the timer, which counts up from zero at the
+last switch closure. */
 U8 ball_search_timer;
+
+/** The threshold for the timer at which ball search should begin */
 U8 ball_search_timeout;
 
+U8 ball_search_count;
 
 /** Returns true if the given solenoid is OK to fire during
  * a ball search.  The following should be avoided:
  * - kickout coils from ball devices
  * - the knocker
  * - flashers
+ * - anything else the machine description says not to fire
  */
 static bool ball_search_solenoid_ok (U8 sol)
 {
@@ -91,7 +98,7 @@ static bool ball_search_solenoid_ok (U8 sol)
 }
 
 
-static void ball_search_timer_step (void)
+static inline void ball_search_timer_step (void)
 {
 	ball_search_timer++;
 }
@@ -103,30 +110,33 @@ void ball_search_timer_reset (void)
 }
 
 
-bool ball_search_timed_out (void)
+static bool ball_search_timed_out (void)
 {
 	return (ball_search_timer >= ball_search_timeout);
 }
 
 
+/** Run through all solenoids to try to find a ball. */
 void ball_search_run (void)
 {
 	U8 sol;
 
-	/* Fire all solenoids */
-	/* Skip over solenoids known not to be pertinent to ball
-	 * search, and others defined by the machine description */
+	ball_search_count++;
+
+	/* Fire all solenoids.  Skip over solenoids known not to be 
+	pertinent to ball search.  Before starting, throw an event
+	so machines can do special handling on their own. */
 	callset_invoke (ball_search);
+
 	for (sol = 0; sol < 8*4; sol++)
 	{
 		if (ball_search_solenoid_ok (sol))
 		{
 			sol_pulse (sol);
-			task_sleep (TIME_100MS * 1);
+			task_sleep (TIME_200MS);
 		}
 
-		/* If a switch triggered, stop the ball
-		 * search immediately */
+		/* If a switch triggered, stop the ball search immediately */
 		if (ball_search_timer == 0)
 			break;
 	}
@@ -139,6 +149,11 @@ void ball_search_timeout_set (U8 secs)
 }
 
 
+/** A monitor task that checks whether or not a ball search is
+necessary.  This task periodically bumps a counter, which is
+normally reset as scoring switches are triggered.  If the
+counter reaches a threshold, and ball search is allowed to run,
+then it is initiated. */
 void ball_search_monitor_task (void)
 {
 	extern U8 live_balls;
@@ -146,27 +161,35 @@ void ball_search_monitor_task (void)
 	ball_search_timer_reset ();
 	while (in_game)
 	{
-		task_sleep_sec (1);
+		task_sleep (TIME_1S);
 
 		/* Step the ball search timer as long as a game
-		 * is in progess. */
-		if (in_live_game 
-				&& !in_bonus 
-				&& live_balls 
+		 * is in progess.  But don't allow a ball search in
+		 * some situations:
+		 *
+		 * - ball is on the shooter switch
+		 * - either flipper button is held
+		 */
+		if (in_live_game && !in_bonus && live_balls 
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif
-				&& !switch_poll_logical (SW_L_L_FLIPPER_BUTTON)
-				&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+				&& !switch_poll_logical (SW_LEFT_BUTTON)
+				&& !switch_poll_logical (SW_RIGHT_BUTTON))
 		{
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
 			{
+				ball_search_count = 0;
 				while (ball_search_timer != 0)
 				{
 					ball_search_run ();
+
+					/* TODO - after so many ball searches, try other
+					things. */
 					task_sleep_sec (15);
 				}
+				ball_search_count = 0;
 			}
 		}
 	}

@@ -65,8 +65,12 @@
 
 #include <freewpc.h>
 #include <window.h>
+#include <test.h>
 #include <format.h>
 #include <coin.h>
+#include <highscore.h>
+
+#undef CONFIG_TEST_DURING_GAME
 
 /** win_top always points to the current window, or NULL if
  * no window is open. */
@@ -74,7 +78,7 @@ struct window *win_top;
 
 /* Equivalent to (win_top != NULL), but as a byte, this can
  * be tested with a single instruction.
- * TODO - these two variables could be overlapped into a union. */
+ * IDEA: these two variables could be overlapped into a union. */
 __fastram__ U8 in_test;
 
 
@@ -89,15 +93,12 @@ struct window win_stack[8];
 void window_push_first (void)
 {
 	in_test = 1;
-	if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+#ifdef CONFIG_TEST_DURING_GAME
+	if (!switch_poll_logical (SW_LEFT_BUTTON))
+#endif
 	{
 		end_game ();
 		sound_reset ();
-		deff_stop_all ();
-		leff_stop_all ();
-		/* Ensure the lamp effects stop before resetting all lamps. */
-		task_sleep (TIME_33MS);
-		lamp_all_off ();
 		/* Kill any other tasks still running */
 		task_kill_all ();
 	}
@@ -115,7 +116,9 @@ void window_pop_first (void)
 	 * exiting test mode; this keeps extra presses 
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
-	if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+#ifdef CONFIG_TEST_DURING_GAME
+	if (!switch_poll_logical (SW_LEFT_BUTTON))
+#endif
 	{
 		amode_start ();
 	}
@@ -159,7 +162,6 @@ void window_push (struct window_ops *ops, void *priv)
 	}
 	else if (win_top < &win_stack[8])
 	{
-		window_call_op (win_top, suspend);
 		win_top++;
 	}
 	else
@@ -332,7 +334,12 @@ struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
 #endif
-struct adjustment_value replay_score_value = { 0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render };
+#ifndef MACHINE_REPLAY_START_CHOICE
+#define MACHINE_REPLAY_START_CHOICE 0
+#endif
+struct adjustment_value replay_score_value = { 
+	0, MACHINE_REPLAY_SCORE_CHOICES-1, 1, replay_score_render
+};
 
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
 struct adjustment_value gi_power_saver_value = { 0, 60, 1, minutes_render };
@@ -346,9 +353,9 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
 	{ "REPLAY PERCENT", &percent_value, 7, &system_config.replay_percent },
-	{ "REPLAY START", &replay_score_value, 0, &system_config.replay_start },
+	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
 	{ "REPLAY LEVELS", &integer_value, 1, &system_config.replay_levels },
-	{ "REPLAY 1 LEVEL", &replay_score_value, 0, &system_config.replay_level[0] },
+	{ "REPLAY 1 LEVEL", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_level[0] },
 	{ "REPLAY 2 LEVEL", &replay_score_value, 0, &system_config.replay_level[1] },
 	{ "REPLAY 3 LEVEL", &replay_score_value, 0, &system_config.replay_level[2] },
 	{ "REPLAY 4 LEVEL", &replay_score_value, 0, &system_config.replay_level[3] },
@@ -377,18 +384,27 @@ struct adjustment standard_adjustments[] = {
 };
 
 
+/* TODO - these really belong in feature_config.  They are not being
+verified/initialized correctly because of this */
 struct adjustment feature_adjustments[] = {
 	/* The first few feature adjustments are provided by the core
 	system but only enabled if the game supports it. */
+
+	{ "BUY EXTRA BALL", &yes_no_value, NO, &system_config.buy_extra_ball },
+
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
+
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+
 #ifdef MACHINE_HAS_NOVICE_MODE
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
 #endif
+
 	{ "GAME MUSIC", &on_off_value, ON, &system_config.game_music },
+
 #ifdef CONFIG_TIMED_GAME
 	{ "TIMED GAME", &yes_no_value, YES, &system_config.timed_game },
 #endif
@@ -705,56 +721,56 @@ audit_t default_audit_value;
 
 
 struct audit main_audits[] = {
-	{ "TOTAL EARNINGS", total_earnings_audit, &default_audit_value },
-	{ "RECENT EARNINGS", NULL, NULL },
-	{ "FREEPLAY PERCENT", },
-	{ "AVG. BALL TIME", },
-	{ "TIME PER CREDIT", secs_audit, &default_audit_value },
-	{ "TOTAL PLAYS", integer_audit, &system_audits.total_plays },
-	{ "REPLAY AWARDS", integer_audit, &system_audits.replays },
-	{ "PERCENT REPLAYS", percentage_of_games_audit, &system_audits.replays },
-	{ "EXTRA BALLS", integer_audit, &system_audits.extra_balls_awarded },
-	{ "PERCENT EX. BALL", percentage_of_games_audit, &system_audits.extra_balls_awarded },
-	{ NULL, NULL, NULL },
+	{ "TOTAL EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
+	{ "RECENT EARNINGS", AUDIT_TYPE_NONE, NULL },
+	{ "FREEPLAY PERCENT", AUDIT_TYPE_NONE, NULL },
+	{ "AVG. BALL TIME", AUDIT_TYPE_NONE, NULL },
+	{ "TIME PER CREDIT", AUDIT_TYPE_SECS, &default_audit_value },
+	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
+	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
+	{ "PERCENT REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
+	{ "EXTRA BALLS", AUDIT_TYPE_INT, &system_audits.extra_balls_awarded },
+	{ "PERCENT EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
+	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
 struct audit earnings_audits[] = {
-	{ "RECENT EARNINGS", total_earnings_audit, &default_audit_value },
-	{ "RECENT LEFT SLOT", integer_audit, &system_audits.coins_added[0] },
-	{ "RECENT CENTER SLOT", integer_audit, &system_audits.coins_added[1] },
-	{ "RECENT RIGHT SLOT", integer_audit, &system_audits.coins_added[2] },
-	{ "RECENT 4TH SLOT", integer_audit, &system_audits.coins_added[3] },
-	{ "RECENT PAID CREDITS", integer_audit, &system_audits.paid_credits },
-	{ "RECENT SERV. CREDITS", integer_audit, &system_audits.service_credits },
-	{ NULL, NULL, NULL },
+	{ "RECENT EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
+	{ "RECENT LEFT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[0] },
+	{ "RECENT CENTER SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
+	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
+	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
+	{ "RECENT PAID CREDITS", AUDIT_TYPE_INT, &system_audits.paid_credits },
+	{ "RECENT SERV. CREDITS", AUDIT_TYPE_INT, &system_audits.service_credits },
+	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
 
 struct audit standard_audits[] = {
-	{ "GAMES STARTED", &integer_audit, &system_audits.games_started },
-	{ "TOTAL PLAYS", integer_audit, &system_audits.total_plays },
-	{ "TOTAL FREE PLAYS", integer_audit, &system_audits.total_free_plays },
-	{ "FREEPLAY PERCENT", percentage_of_games_audit, &system_audits.total_free_plays },
-	{ "REPLAY AWARDS", integer_audit, &system_audits.replays },
-	{ "PERCENT REPLAYS", percentage_of_games_audit, &system_audits.replays },
-	{ "SPECIAL AWARDS", integer_audit, &system_audits.specials },
-	{ "PERCENT SPECIAL", percentage_of_games_audit, &system_audits.specials },
-	{ "MATCH AWARDS", integer_audit, &system_audits.match_credits },
-	{ "PERCENT MATCH", percentage_of_games_audit, &system_audits.match_credits },
-	{ "EXTRA BALLS", integer_audit, &system_audits.extra_balls_awarded },
-	{ "PERCENT EX. BALL", percentage_of_games_audit, &system_audits.extra_balls_awarded },
-	{ "TILTS", &integer_audit, &system_audits.tilts },
-	{ "LEFT DRAINS", &integer_audit, &system_audits.left_drains },
-	{ "RIGHT DRAINS", &integer_audit, &system_audits.right_drains },
-	{ "CENTER DRAINS", &integer_audit, &system_audits.center_drains },
-	{ "POWER UPS", &integer_audit, &system_audits.power_ups },
-	{ "SLAM TILTS", &integer_audit, &system_audits.slam_tilts },
-	{ "PLUMB BOB TILTS", &integer_audit, &system_audits.plumb_bob_tilts },
-	{ "FATAL ERRORS", &integer_audit, &system_audits.fatal_errors },
-	{ "NON-FATAL ERRORS", &integer_audit, &system_audits.non_fatal_errors },
-	{ "LEFT FLIPPER", &integer_audit, &system_audits.left_flippers },
-	{ "RIGHT FLIPPER", &integer_audit, &system_audits.right_flippers },
-	{ NULL, NULL, NULL },
+	{ "GAMES STARTED", AUDIT_TYPE_INT, &system_audits.games_started },
+	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
+	{ "TOTAL FREE PLAYS", AUDIT_TYPE_INT, &system_audits.total_free_plays },
+	{ "FREEPLAY PERCENT", AUDIT_TYPE_GAME_PERCENT, &system_audits.total_free_plays },
+	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
+	{ "PERCENT REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
+	{ "SPECIAL AWARDS", AUDIT_TYPE_INT, &system_audits.specials },
+	{ "PERCENT SPECIAL", AUDIT_TYPE_GAME_PERCENT, &system_audits.specials },
+	{ "MATCH AWARDS", AUDIT_TYPE_INT, &system_audits.match_credits },
+	{ "PERCENT MATCH", AUDIT_TYPE_GAME_PERCENT, &system_audits.match_credits },
+	{ "EXTRA BALLS", AUDIT_TYPE_INT, &system_audits.extra_balls_awarded },
+	{ "PERCENT EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
+	{ "TILTS", AUDIT_TYPE_INT, &system_audits.tilts },
+	{ "LEFT DRAINS", AUDIT_TYPE_INT, &system_audits.left_drains },
+	{ "RIGHT DRAINS", AUDIT_TYPE_INT, &system_audits.right_drains },
+	{ "CENTER DRAINS", AUDIT_TYPE_INT, &system_audits.center_drains },
+	{ "POWER UPS", AUDIT_TYPE_INT, &system_audits.power_ups },
+	{ "SLAM TILTS", AUDIT_TYPE_INT, &system_audits.slam_tilts },
+	{ "PLUMB BOB TILTS", AUDIT_TYPE_INT, &system_audits.plumb_bob_tilts },
+	{ "FATAL ERRORS", AUDIT_TYPE_INT, &system_audits.fatal_errors },
+	{ "NON-FATAL ERRORS", AUDIT_TYPE_INT, &system_audits.non_fatal_errors },
+	{ "LEFT FLIPPER", AUDIT_TYPE_INT, &system_audits.left_flippers },
+	{ "RIGHT FLIPPER", AUDIT_TYPE_INT, &system_audits.right_flippers },
+	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
 
@@ -784,9 +800,9 @@ void audit_browser_draw (void)
 	sprintf ("%d. %s", menu_selection+1, aud->name);
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
-	if (aud->nvram && aud->render)
+	if (aud->nvram)
 	{
-		far_call_pointer (aud->render, TEST2_PAGE, (*(aud->nvram)));
+		render_audit (*(aud->nvram), aud->format);
 		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 	}
 
@@ -813,26 +829,27 @@ struct window_ops audit_browser_window = {
  * customizable.
  */
 
-void (*confirm_banner) (void);
-void (*confirm_action) (void);
 U8 confirm_timer;
 
 void confirm_init (void)
 {
-	confirm_banner = confirm_action = null_function;
 	confirm_timer = 7;
 }
 
 void confirm_draw (void)
 {
-	sprintf ("%d", confirm_timer);
-	font_render_string_left (&font_mono5, 2, 2, sprintf_buffer);
-	font_render_string_left (&font_mono5, 120, 2, sprintf_buffer);
+	struct menu *m = (win_top-1)->w_class.priv;
+	U8 sel = (win_top-1)->w_class.menu.selected;
+	m = m->var.submenus[sel];
 
-	sprintf ("CONFIRM"); /* TODO : display operation here */
+	sprintf ("%d", confirm_timer);
+	font_render_string_left (&font_mono5, 1, 1, sprintf_buffer);
+	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
+
+	sprintf ("%s", m->name);
 	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 14, "ENTER TO SAVE");
-	font_render_string_center (&font_mono5, 64, 20, "ESCAPE TO CANCEL");
+	font_render_string_center (&font_var5, 64, 18, "PRESS ENTER TO CONFIRM");
+	font_render_string_center (&font_var5, 64, 24, "PRESS ESCAPE TO CANCEL");
 
 	dmd_show_low ();
 }
@@ -868,6 +885,7 @@ void confirm_thread (void)
 		sound_send (SND_TEST_HSRESET);
 		task_sleep_sec (1);
 		confirm_timer--;
+		dmd_alloc_low_clean ();
 		confirm_draw ();
 	}
 	task_sleep (TIME_100MS * 5);
@@ -1013,6 +1031,7 @@ struct window_ops menu_window = {
 /*******************  Font Test  ************************/
 
 U8 font_test_offset;
+U8 font_test_char_width;
 
 const font_t *font_test_lookup (void)
 {
@@ -1056,25 +1075,46 @@ void font_test_init (void)
 	browser_init ();
 	browser_max = MAX_FONTS-1; /* set to highest valid font number */
 	font_test_offset = 0;
+	font_test_char_width = 8;
 }
 
 void font_test_draw (void)
 {
 	const font_t *font = font_test_lookup ();
+	char *gl;
+	char bitwidth;
 
-	if ((font->glyphs['A'] == NULL)
-		&& (font_test_offset < 26))
+	/* TODO : this won't work because the font data is in a different page!
+	 * Need to add a function in FONT_PAGE : char *font_get_glyph(font, char)
+	 * that returns a pointer to the glyph for a character.  Then you can
+	 * use the following code, although macros would be better:
+	 * glyph_get_width(), glyph_get_height(), etc. */
+
+	gl = (char *)far_read16 ((PTR_OR_U16 *)&font->glyphs['A'], FONT_PAGE);
+	if (gl == NULL) 
 	{
-		font_test_offset = 26;
+		if (font_test_offset < 26)
+			font_test_offset = 26;
 	}
+	else
+		gl = (char *)far_read16 ((PTR_OR_U16 *)&font->glyphs['0'], FONT_PAGE);
+
+	bitwidth = (char)far_read8 ((U8 *)&gl[0], FONT_PAGE);
+	if (bitwidth <= 8)
+		font_test_char_width = 14;
+	else if (bitwidth <= 12)
+		font_test_char_width = 10;
+	else
+		font_test_char_width = 8;
+
 
 	sprintf ("FONT %d", menu_selection+1);
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
 	sprintf_far_string (names_of_fonts + menu_selection);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
-	dmd_draw_horiz_line (dmd_low_buffer, 9);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 9);
 
-	sprintf ("%8s", font_test_alphabet + font_test_offset);
+	sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
 	font_render_string_center (font, 64, 20, sprintf_buffer);
 	dmd_show_low ();
 }
@@ -1088,7 +1128,7 @@ void font_test_left (void)
 
 void font_test_right (void)
 {
-	if (font_test_offset < sizeof (font_test_alphabet) - 8 - 1)
+	if (font_test_offset < sizeof (font_test_alphabet) - font_test_char_width - 1)
 		font_test_offset++;
 	sound_send (SND_TEST_CHANGE);
 }
@@ -1126,8 +1166,7 @@ static bool deff_test_running (U8 id)
 
 static bool leff_test_running (U8 id)
 {
-	return (leff_get_active () == id) ||
-		task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, id);
+	return (leff_get_active () == id) || leff_find_shared (id);
 }
 
 struct deff_leff_ops dev_deff_ops = {
@@ -1363,6 +1402,8 @@ void lampset_draw (void)
 		case 3: sprintf ("STEP DOWN"); break;
 		case 4: sprintf ("BUILD UP"); break;
 		case 5: sprintf ("BUILD DOWN"); break;
+		case 6: sprintf ("ROTATE NEXT"); break;
+		case 7: sprintf ("ROTATE PREV"); break;
 	}
 	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
 
@@ -1374,21 +1415,32 @@ void lampset_draw (void)
 
 void lampset_update (void)
 {
+	leff_data_t *cdata;
+	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
 	for (;;)
 	{
-		lampset_set_apply_delay (lampset_update_speed);
+		cdata->apply_delay = lampset_update_speed;
 		switch (lampset_update_mode)
 		{
 			case 0: 
 				lamp_all_off ();
-				lampset_apply_on (menu_selection); 
+				lampset_apply (menu_selection, lamp_on); 
 				break;
-			case 1: lampset_apply_toggle (menu_selection); break;
-			case 2: lampset_step_increment (menu_selection); break;
-			case 3: lampset_step_decrement (menu_selection); break;
-			case 4: lampset_build_increment (menu_selection); break;
-			case 5: lampset_build_decrement (menu_selection); break;
+			case 1: lampset_apply (menu_selection, lamp_toggle);
+				break;
+			case 2: lampset_step_increment (menu_selection, lamp_matrix);
+				break;
+			case 3: lampset_step_decrement (menu_selection, lamp_matrix);
+				break;
+			case 4: lampset_build_increment (menu_selection, lamp_matrix);
+				break;
+			case 5: lampset_build_decrement (menu_selection, lamp_matrix);
+				break;
+			case 6: lampset_rotate_next (menu_selection, lamp_matrix);
+				break;
+			case 7: lampset_rotate_previous (menu_selection, lamp_matrix);
+				break;
 		}
 		task_sleep (TIME_200MS);
 	}
@@ -1408,7 +1460,7 @@ void lampset_test_faster (void)
 void lampset_test_mode_change (void)
 {
 	lampset_update_mode++;
-	if (lampset_update_mode == 6)
+	if (lampset_update_mode == 8)
 		lampset_update_mode = 0;
 }
 
@@ -1504,11 +1556,14 @@ void dev_balldev_test_thread (void)
 				(last_dev == dev))
 			{
 				sound_send (SND_TEST_CHANGE);
+				dmd_alloc_low_clean ();
 				dev_balldev_test_draw ();
 			}
 			else if (i == 7)
+			{
+				dmd_alloc_low_clean ();
 				dev_balldev_test_draw ();
-
+			}
 			last_count = dev->actual_count;
 			last_dev = dev;
 			task_sleep (TIME_66MS);
@@ -1582,7 +1637,7 @@ dmd_transition_t *transition_table[] = {
 	&trans_scroll_up_slow,
 	&trans_scroll_down,
 	&trans_scroll_left,
-	&trans_scroll_right, /* TODO : broken */
+	&trans_scroll_right,
 	&trans_sequential_boxfade,
 	&trans_random_boxfade,
 	&trans_vstripe_left2right,
@@ -1626,7 +1681,7 @@ struct menu dev_trans_test_item = {
 
 /**********************************************************************/
 
-void dev_random_test_enter (void)
+void dev_random_test_task (void)
 {
 	U16 i;
 	U8 *rowcount;
@@ -1657,12 +1712,26 @@ void dev_random_test_enter (void)
 	dmd_invert_page (dmd_low_buffer);
 	task_sleep (TIME_200MS);
 	dmd_invert_page (dmd_low_buffer);
+	font_render_string_right (&font_var5, 127, 1, "PRESS ENTER");
+	font_render_string_right (&font_var5, 127, 7, "TO REPEAT");
 
 	free (rowcount);
+	task_exit ();
+}
+
+void dev_random_test_enter (void)
+{
+	task_create_gid1 (GID_WINDOW_THREAD, dev_random_test_task);
+}
+
+void dev_random_test_init (void)
+{
+	dev_random_test_enter ();
 }
 
 struct window_ops dev_random_test_window = {
 	DEFAULT_WINDOW,
+	.init = dev_random_test_init,
 	.enter = dev_random_test_enter,
 };
 
@@ -1849,7 +1918,7 @@ struct menu score_test_item = {
 extern const struct menu music_mix_menu;
 
 struct menu *dev_menu_items[] = {
-#if MACHINE_DMD
+#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
@@ -1861,7 +1930,7 @@ struct menu *dev_menu_items[] = {
 	&dev_force_error_item,
 	&dev_frametest_item,
 	&dev_deff_stress_test_item,
-#if MACHINE_DMD
+#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
 	&symbol_test_item,
 #endif
 	&sched_test_item,
@@ -1882,8 +1951,6 @@ struct menu development_menu = {
 
 void factory_adjust_confirm (void)
 {
-	/* TODO : confirm is not handled at all!  We are performing
-	the operation before displaying the confirm screen. */
 	adj_reset_all ();
 	confirm_enter ();
 }
@@ -1904,6 +1971,8 @@ struct menu factory_adjust_item = {
 void factory_reset_confirm (void)
 {
 	adj_reset_all ();
+	/* TODO : this should also clear audits, reset the high scores,
+	 * and reset the custom message/game ID */
 	confirm_enter ();
 }
 
@@ -1978,6 +2047,7 @@ struct menu reset_hstd_item = {
 
 void set_time_window_confirm (void)
 {
+	confirm_enter ();
 }
 
 void set_time_window_draw (void)
@@ -1985,15 +2055,10 @@ void set_time_window_draw (void)
 	rtc_show_date_time ();
 }
 
-void set_time_window_up (void)
-{
-	rtc_advance_day ();
-}
 
 struct window_ops set_time_window = {
 	DEFAULT_WINDOW,
 	.draw = set_time_window_draw,
-	.up = set_time_window_up,
 	.enter = set_time_window_confirm,
 };
 
@@ -2082,25 +2147,29 @@ struct preset
 	struct preset_component *comps;
 };
 
-struct preset_component preset_3ball_comps[] = {
+#define PRESET_BEGIN(name) \
+struct preset_component preset_ ## name ## _comps[] = {
+
+#define PRESET_END(N, string) \
+	{ NULL, 0 }, \
+}; \
+struct preset preset_ ## N = {  \
+	.name = string,  \
+	.comps = preset_ ## N ## _comps \
+};
+
+
+PRESET_BEGIN (3ball)
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
-	{ NULL, 0 },
-};
-struct preset preset_3ball = { 
-	.name = "3-BALL", 
-	.comps = preset_3ball_comps
-};
+PRESET_END (3ball, "3-BALL")
 
-struct preset_component preset_5ball_comps[] = {
+
+PRESET_BEGIN (5ball)
 	{ standard_adjustments, &system_config.balls_per_game, 5 },
-	{ NULL, 0 },
-};
-struct preset preset_5ball = { 
-	.name = "5-BALL", 
-	.comps = preset_5ball_comps
-};
+PRESET_END (5ball, "5-BALL")
 
-struct preset_component preset_tournament_comps[] = {
+
+PRESET_BEGIN (tournament)
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
 	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
@@ -2111,39 +2180,57 @@ struct preset_component preset_tournament_comps[] = {
 	{ standard_adjustments, &system_config.tournament_mode, ON },
 	{ standard_adjustments, &system_config.no_bonus_flips, NO },
 	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
-	/* TODO : once extra ball buyin is implemented, disable it here */
-	{ NULL, 0 },
-};
-struct preset preset_tournament = { 
-	.name = "TOURNAMENT",
-	.comps = preset_tournament_comps
-};
+	{ feature_adjustments, &system_config.buy_extra_ball, NO },
+PRESET_END (tournament, "TOURNAMENT")
 
 
-struct preset_component preset_show_comps[] = {
+PRESET_BEGIN (show)
 	{ pricing_adjustments, &price_config.free_play, YES },
 	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.match_feature, OFF },
 	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
-	{ NULL, 0 },
-};
-struct preset preset_show = { .name = "SHOW", preset_show_comps };
+PRESET_END (show, "SHOW")
 
 
-struct preset_component preset_timed_comps[] = {
+PRESET_BEGIN (timed_game)
 	{ standard_adjustments, &system_config.max_players, 1 },
-	{ NULL, 0 },
-};
-struct preset preset_timed_game = { .name = "TIMED GAME", preset_timed_comps };
+PRESET_END (timed_game, "TIMED GAME")
+
+
+PRESET_BEGIN (american)
+	{ standard_adjustments, &system_config.euro_digit_sep, NO },
+	{ standard_adjustments, &system_config.date_style, 0 },
+PRESET_END (american, "AMERICAN")
+
+
+PRESET_BEGIN (french)
+	{ standard_adjustments, &system_config.euro_digit_sep, YES },
+	{ standard_adjustments, &system_config.date_style, 1 },
+PRESET_END (french, "FRENCH")
+
+
+PRESET_BEGIN (german)
+	{ standard_adjustments, &system_config.euro_digit_sep, YES },
+	{ standard_adjustments, &system_config.date_style, 1 },
+PRESET_END (german, "GERMAN")
 
 
 struct preset *preset_table[] = {
+	/* Easy-Hard */
+	/* Add-a-Ball */
+	/* Ticket */
+	/* Novelty */
+	/* Serial Capture */
+	/* German 1-6 */
+	/* French 1-6 */
 	&preset_3ball,
 	&preset_5ball,
 	&preset_tournament,
 	&preset_show,
 	&preset_timed_game,
+	&preset_french,
+	&preset_german,
 };
 
 
@@ -2158,9 +2245,9 @@ void presets_draw (void)
 	struct preset *pre = preset_table[menu_selection];
 	struct preset_component *comps = pre->comps;
 
-	font_render_string_left (&font_mono5, 0, 1, "PRESETS");
+	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
 	sprintf ("%d. %s", menu_selection+1, pre->name);
-	font_render_string_left (&font_mono5, 0, 9, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 
 	/* Is it installed now? */	
 	while (comps->nvram != NULL)
@@ -2176,24 +2263,14 @@ void presets_draw (void)
 			font_render_string_right (&font_mono5, 127, 9, "YES");
 	}
 
-	font_render_string_center (&font_var5, 64, 19, "PRESS ENTER TO INSTALL");
-	font_render_string_center (&font_var5, 64, 26, "PRESS START TO VIEW DETAILS");
+	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
+	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
 	dmd_show_low ();
 }
 
 
-void presets_enter (void)
+void preset_install (struct preset_component *comps)
 {
-	struct preset *pre = preset_table[menu_selection];
-	struct preset_component *comps = pre->comps;
-
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
-	font_render_string_center (&font_mono5, 64, 16, pre->name);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	sound_send (SND_TEST_CONFIRM);
-
 	/* Modify all of the adjustments affected by the preset */
 	wpc_nvram_get ();
 	while (comps->nvram != NULL)
@@ -2208,6 +2285,56 @@ void presets_enter (void)
 }
 
 
+/** Install the presets for a particular country.
+ * The code is determined from the DIP switches. */
+void preset_install_country_code (U8 code)
+{
+	dbprintf ("Installing preset for country code %d\n", code);
+	switch (code)
+	{
+		case WPC_JUMPER_USA_CANADA:
+		case WPC_JUMPER_USA_CANADA2:
+			preset_install (preset_american_comps);
+			break;
+
+		case WPC_JUMPER_FRANCE:
+		case WPC_JUMPER_FRANCE2:
+		case WPC_JUMPER_FRANCE3:
+		case WPC_JUMPER_FRANCE4:
+			preset_install (preset_french_comps);
+			break;
+
+		case WPC_JUMPER_GERMANY:
+			preset_install (preset_german_comps);
+			break;
+
+		case WPC_JUMPER_EXPORT_ENGLISH:
+		case WPC_JUMPER_EXPORT:
+		case WPC_JUMPER_UK:
+		case WPC_JUMPER_EUROPE:
+			break;
+
+		case WPC_JUMPER_SPAIN:
+			break;
+	}
+}
+
+
+void presets_enter (void)
+{
+	struct preset *pre = preset_table[menu_selection];
+	struct preset_component *comps = pre->comps;
+
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
+	font_render_string_center (&font_mono5, 64, 16, pre->name);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	sound_send (SND_TEST_CONFIRM);
+	preset_install (comps);
+}
+
+
 void presets_start (void)
 {
 	struct preset *pre = preset_table[menu_selection];
@@ -2218,7 +2345,7 @@ void presets_start (void)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_left);
 	font_render_string_center (&font_mono5, 64, 5, pre->name);
-	dmd_draw_horiz_line (dmd_low_buffer, 11);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
 	sound_send (SND_TEST_SCROLL);
 	dmd_show_low ();
 	task_sleep (TIME_1S + TIME_500MS);
@@ -2228,7 +2355,7 @@ void presets_start (void)
 		info = comps->info;
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 5, pre->name);
-		dmd_draw_horiz_line (dmd_low_buffer, 11);
+		dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
 		if (info == NULL)
 		{
 			sprintf ("SET %p TO %02X", comps->nvram, comps->value);
@@ -2285,7 +2412,7 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern void do_reset (void);
+	extern void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
@@ -2297,7 +2424,7 @@ void revoke_init (void)
 	freewpc_accepted[2] = 0;
 	wpc_nvram_put ();
 
-	do_reset ();
+	freewpc_init ();
 }
 
 struct window_ops revoke_window = {
@@ -2440,10 +2567,6 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
-void switch_test_add_queue (U8 sw)
-{
-}
-
 void switch_matrix_draw (void)
 {
 	U8 row, col;
@@ -2487,7 +2610,17 @@ void switch_edges_draw (void)
 
 void switch_edges_thread (void)
 {
-	for (;;) {
+	for (;;)
+	{
+		/* TODO : here's what needs to happen.
+		We begin by drawing the switch matrix normally, then we
+		take a snapshot of raw switches.  Every 16ms, we do
+		a compare of the current raw switches vs. our snapshot.
+		If the same, nothing to be done.  If different, save
+		current as the new snapshot and redraw the switch matrix.
+		Also show the transition that just occurred.
+		(For switch levels, iterate through the active switches
+		accounting for backwards optos continually.) */
 		task_sleep (TIME_100MS);
 		switch_matrix_draw ();
 	}
@@ -2558,18 +2691,18 @@ void single_switch_draw (void)
 	const char *opto;
 
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SINGLE SWITCH");
+	font_render_string_center (&font_mono5, 80, 3, "SINGLE SWITCH");
 
 	(*browser_item_number) (menu_selection);
-	font_render_string (&font_mono5, 36, 12, sprintf_buffer);
+	font_render_string_center (&font_mono5, 40, 10, sprintf_buffer);
 
 	sprintf_far_string (names_of_switches + menu_selection);
-	font_render_string (&font_var5, 50, 12, sprintf_buffer);
+	font_render_string_center (&font_var5, 80, 17, sprintf_buffer);
 
 	state = switch_poll (sel) ? "CLOSED" : "OPEN";
 	opto = switch_is_opto (sel) ? "OPTO " : "";
 	sprintf ("%s%s", opto, state);
-	font_render_string_center (&font_mono5, 80, 22, sprintf_buffer);
+	font_render_string_center (&font_mono5, 88, 10, sprintf_buffer);
 	
 	dmd_show_low ();
 }
@@ -2781,10 +2914,10 @@ void solenoid_test_draw (void)
 void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
-	task_sleep (TIME_100MS * 3);
-	sol_on (sel);
-	task_sleep (browser_action);
-	sol_off (sel);
+	task_sleep (TIME_100MS);
+	/* TODO : Use 100% duty cycle for now; this probably ought to
+	change for certain coils. */
+	sol_start (sel, 0xFF, browser_action);
 	task_sleep (TIME_100MS);
 }
 
@@ -2871,15 +3004,6 @@ U8 gi_test_values[] = {
 	TRIAC_GI_MASK,
 };
 
-const char *gi_test_names[] = {
-	"ALL OFF",
-	"STRING 1",
-	"STRING 2",
-	"STRING 3",
-	"STRING 4",
-	"STRING 5",
-	"ALL ON",
-};
 
 void gi_test_init (void)
 {
@@ -2899,7 +3023,17 @@ void gi_test_exit (void)
 void gi_test_draw (void)
 {
 	browser_draw ();
-	browser_print_operation (gi_test_names[menu_selection]);
+
+	if (menu_selection == 0)
+		browser_print_operation ("ALL OFF");
+	else if (menu_selection == NUM_GI_TRIACS+1)
+		browser_print_operation ("ALL ON");
+	else
+	{
+		sprintf_far_string (names_of_gi + menu_selection - 1);
+		browser_print_operation (sprintf_buffer);
+	}
+
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 
@@ -3080,21 +3214,15 @@ struct menu lamp_row_col_test_item = {
 
 /***************** DIP Switch Test **********************/
 
-const char *locale_names[] = {
-	"USA/CANADA 1", "FRANCE", "GERMANY", "FRANCE 20F",
-	"INVALID", "INVALID", "INVALID", "GERMANY 2",
-	"INVALID", "FRANCE 3", "EXPORT", "FRANCE 4",
-	"UNITED KINGDOM", "EUROPE", "SPAIN", "USA/CANADA 2",
-};
-
 void dipsw_test_draw (void)
 {
 	U8 sw;
 	U8 dipsw = wpc_get_jumpers ();
+	extern __common__ void locale_render (U8 locale);
 
 	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCH TEST");
 
-	sprintf ("%s", locale_names[(dipsw & 0x3C) >> 2]);
+	locale_render ( (dipsw & 0x3C) >> 2 );
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 
 	for (sw = 0; sw < 8; sw++)
@@ -3125,8 +3253,9 @@ void dipsw_test_thread (void)
 {
 	for (;;)
 	{
+		task_sleep (TIME_500MS);
+		dmd_alloc_low_clean ();
 		dipsw_test_draw ();
-		task_sleep (TIME_100MS);
 	}
 }
 
@@ -3193,7 +3322,7 @@ void flipper_item_number (U8 val)
 void flipper_test_init (void)
 {
 	browser_init ();
-	browser_max = 8;
+	browser_max = NUM_FLIPTRONIC_SWITCHES-1;
 	browser_item_number = flipper_item_number;
 }
 
@@ -3214,6 +3343,7 @@ struct window_ops flipper_test_window = {
 struct menu flipper_test_item = {
 	.name = "FLIPPER TEST",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &flipper_test_window, NULL } },
 };
 
 #endif /* MACHINE_FLIPTRONIC */
@@ -3387,14 +3517,14 @@ struct window_ops scroller_window = {
 void sysinfo_machine_name (void) { sprintf (MACHINE_NAME); }
 
 void sysinfo_machine_version (void) {
+	extern __common__ void render_build_date (void);
+	render_build_date ();
 #ifdef DEBUGGER
-	sprintf ("D%s.%s  %s", 
-		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
-		BUILD_DATE);
+	sprintf ("%E   D%s.%s", 
+		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
-	sprintf ("R%s.%s  %s", 
-		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION), 
-		BUILD_DATE);
+	sprintf ("%E   R%s.%s",
+		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #endif
 }
 
@@ -3512,8 +3642,7 @@ void test_down_button (void)
 	}
 }
 
-
-CALLSET_ENTRY (test_mode, sw_l_l_flipper_button)
+CALLSET_ENTRY (test_mode, sw_left_button)
 {
 	if (win_top)
 	{
@@ -3523,7 +3652,7 @@ CALLSET_ENTRY (test_mode, sw_l_l_flipper_button)
 }
 
 
-CALLSET_ENTRY (test_mode, sw_l_r_flipper_button)
+CALLSET_ENTRY (test_mode, sw_right_button)
 {
 	if (win_top)
 	{

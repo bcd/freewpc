@@ -36,13 +36,15 @@ __test2__ void replay_score_render (U8 val);
 __test2__ void minutes_render (U8 val);
 __test2__ void brightness_render (U8 val);
 
-__test2__ void percentage_of_games_audit (audit_t val);
 __test2__ void integer_audit (audit_t val) ;
+__test2__ void percentage_of_games_audit (audit_t val);
 __test2__ void secs_audit (audit_t val);
 __test2__ void us_dollar_audit (audit_t val);
 __test2__ void currency_audit (audit_t val);
 __test2__ void total_earnings_audit (audit_t val __attribute__((unused)));
 __test2__ void average_per_game_audit (audit_t val);
 __test2__ void average_per_ball_audit (audit_t val);
+
+__test2__ void render_audit (audit_t val, audit_format_type_t);
 
 #endif /* __FORMAT_H */

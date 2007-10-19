@@ -46,6 +46,21 @@ FIXED_SIZE     = 0x8000
 
 CKSUM_REV      = 0xFFEE
 
+	.module start.s
+
+
+	.area direct
+
+	; TODO - don't do this if soft regs not needed
+	.globl m0
+m0: .blkb 1
+	.globl m1
+m1: .blkb 1
+	.globl m2
+m2: .blkb 1
+	.globl m3
+m3: .blkb 1
+
 ;;;
 ;;; Perform basic diagnostics to ensure that everything is
 ;;; more or less working.  (Diags must be in the system page
@@ -72,7 +87,6 @@ CKSUM_REV      = 0xFFEE
 	;;;
 	;;; start - reset entry point
 	;;;
-	.module start.s
 	.area	.text
 	.globl _start
 _start:
@@ -117,12 +131,6 @@ paged_loop:
 	stb	WPC_ROM_BANK
 	exg	d,y
 
-	; Toggle LED occasionally
-	tfr	d,u
-	ldb	WPC_LEDS
-	eorb	#-128
-	stb	WPC_LEDS
-	tfr	u,d
 paged_inner_loop:
 	addb	,-x
 	adca	#0
@@ -136,7 +144,7 @@ paged_inner_loop:
 	bhi	paged_inner_loop
 	leay	-1,y
 	cmpy	#BOTTOM_BANK
-	bhi	paged_loop
+	bge	paged_loop
 
 	; Did checksum validate?
 	subd	CKSUM_REV
@@ -227,7 +235,7 @@ test_done:
 	; has space allocated for them; the naked attribute prevents
 	; them from being allocated explicitly.
 	lds	#STACK_BASE-8
-	jmp	_do_reset   ; Jump into C code
+	jmp	_main   ; Jump into C code
 
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

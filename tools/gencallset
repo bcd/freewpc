@@ -206,6 +206,7 @@ foreach $set (keys %functionhash) {
 	}
 	if ($num_callers == 0) {
 		print STDERR "warning: event $set is never thrown\n";
+		print FH "   /* warning: event $set is never thrown */\n";
 	}
 
 	my @modules = split " ", $functionhash{$set};

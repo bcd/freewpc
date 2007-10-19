@@ -1,20 +1,46 @@
 #!/bin/sh
+#
+# mapcheck - check map file to see if sections overflowed.
+#
+# The 6809 linker does not check to see if more objects are placed into
+# a section than it can hold, because only a base address is given --
+# there is no specified size.  Here, we scan the map file and compare
+# the final length of each section to its predetermined maximum size,
+# using a series of shell commands.  
+#
+# If any section overflows, it returns nonzero and the build will halt.
+#
+# If any section is more than 95% full, a warning is printed but the
+# build continues.  This allows some time for handling how to reorganize
+# things before it becomes critical.
+#
 
 checkpage ()
 {
 	sz=`grep " l_$1" build/freewpc.map | awk '{print $1}'`
-	objs=`grep "^$1_OBJS" Makefile`
-	echo "$1 ($objs) : $sz of $2";
+	max=$(($2));
+	used=$((0x$sz));
+	avail=$(($max - 0x$sz));
+	percent_used=$(( $used * 100 / $max ));
+	if [ "$percent_used" -ge 100 ]; then
+		echo "error: section '$1' overflow" 
+		exit 1
+	fi
+	if [ "$percent_used" -gt 95 ]; then
+		echo "warning: section '$1' is $percent_used% full" 
+	fi
+	return 0
 }
 
-checkpage "direct" "100";
-checkpage "ram"    "1300";
-checkpage "local"  "A0";
-checkpage "nvram"  "800";
-checkpage "page56" "4000";
-checkpage "page57" "4000";
-checkpage "page58" "4000";
-checkpage "page59" "4000";
-checkpage "page60" "4000";
-checkpage "page61" "4000";
-checkpage "sysrom" "8000";
+checkpage "direct" "0x100";
+checkpage "ram"    "0x1300";
+checkpage "local"  "0xA0";
+checkpage "nvram"  "0x800";
+checkpage "page56" "0x4000";
+checkpage "page57" "0x4000";
+checkpage "page58" "0x4000";
+checkpage "page59" "0x4000";
+checkpage "page60" "0x4000";
+checkpage "page61" "0x4000";
+checkpage "sysrom" "0x8000";
+exit 0

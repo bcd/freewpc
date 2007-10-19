@@ -19,6 +19,9 @@
  */
 
 #include <freewpc.h>
+#include <animation.h>
+#include <highscore.h>
+
 
 extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
@@ -38,6 +41,7 @@ before returning to attract mode */
 void game_over_deff (void)
 {
 	generic_deff ("GAME OVER", NULL);
+	/* TODO - need to show the scores briefly here */
 }
 
 
@@ -78,7 +82,6 @@ void nonfatal_error_deff (void)
 /** The display effect for the final ball goal */
 void score_goal_deff (void)
 {
-	dmd_alloc_low_clean ();
 	/* Show the replay if it is enabled and hasn't been awarded yet. */
 	if (replay_can_be_awarded ())
 	{
@@ -92,4 +95,58 @@ void score_goal_deff (void)
 	deff_exit ();
 }
 
+
+void animation_test1 (struct animation_object *obj)
+{
+	U8 *x = &obj->data.u8;
+	sprintf ("TOP %d", *x);
+	font_render_string_center (&font_var5, 64, 4, sprintf_buffer);
+	(*x) ++;
+}
+
+void animation_test2 (struct animation_object *obj)
+{
+	U8 *x = &obj->data.u8;
+	sprintf ("MIDDLE %d", *x);
+	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+	(*x) += 2;
+}
+
+void animation_test3 (struct animation_object *obj)
+{
+	U8 *x = &obj->data.u8;
+	sprintf ("BOTTOM %d", *x);
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	(*x) += 3;
+}
+
+void animation_test_deff (void)
+{
+	U8 n;
+	animation_begin (AN_MONO+AN_CLEAN);
+	animation_set_speed (TIME_66MS);
+	animation_add (0, 0, animation_test1);
+	animation_add (0, 0, animation_test2);
+	animation_add (0, 0, animation_test3);
+	for (n=0; n < 100; n++)
+		animation_step ();
+	animation_end ();
+	deff_exit ();
+}
+
+
+#ifndef CONFIG_NATIVE
+void exit_handler_test (void)
+{
+	__label__ sighandler;
+	void *p;
+
+	task_set_sighandler (&&sighandler);
+	p = malloc (10);
+	task_sleep_sec (3);
+sighandler:
+	free (p);
+	task_exit ();
+}
+#endif /* !CONFIG_NATIVE */
 

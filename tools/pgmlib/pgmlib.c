@@ -213,7 +213,7 @@ xbm_read_byte (XBM *xbm, int offset)
 
 
 /** Makes an XBM Program from an XBM image.  This effectively
- * compressed the XBM.  The XBMPROG is not the final encoded form
+ * compresses the XBM.  The XBMPROG is not the final encoded form
  * of the program, but rather an internal format that can be
  * further manipulated before writing it.
  */
@@ -540,6 +540,11 @@ pgm_read (const char *filename)
 
 	pgm = pgm_alloc ();
 	fp = fopen (filename, "r");
+	if (!fp)
+	{
+		pgm_free (pgm);
+		return NULL;
+	}
 
 	fgets (line, 79, fp); /* magic */
 	fgets (line, 79, fp); /* comment */
@@ -660,6 +665,18 @@ void
 pgm_translate (PGM *dst, PGM *src,
 	int xshift, int yshift)
 {
+	unsigned int x, y;
+	for (x = 0; x < src->width; x++)
+		for (y = 0; y < src->height; y++)
+		{
+			unsigned int pixel = pgm_read_pixel (src, x, y);
+			
+			if ((x+xshift >= 0) && (x+xshift < dst->width)
+				&& (y+yshift >= 0) && (y+yshift < dst->height))
+			{
+				pgm_draw_pixel (dst, x+xshift, y+yshift, pixel);
+			}
+		}
 }
 
 
@@ -673,7 +690,7 @@ pgm_paste (PGM *dst, PGM *src, unsigned int xpos, unsigned int ypos)
 				&& (xpos+x < dst->width)
 				&& (ypos+y >= 0)
 				&& (ypos+y < dst->height))
-			pgm_draw_pixel (dst, xpos+x, ypos+y, pgm_read_pixel (src, x, y));
+				pgm_draw_pixel (dst, xpos+x, ypos+y, pgm_read_pixel (src, x, y));
 }
 
 

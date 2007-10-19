@@ -106,8 +106,8 @@ void status_report_monitor (void)
 	 * flippers are released. */
 	while (--count > 0)
 	{
-		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
-			&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+		if (!switch_poll_logical (SW_LEFT_BUTTON) 
+			&& !switch_poll_logical (SW_RIGHT_BUTTON))
 			goto done;
 		task_sleep (TIME_100MS);
 	}
@@ -123,8 +123,8 @@ start:
 	 * again. */
 	for (;;)
 	{
-		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
-			&& !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+		if (!switch_poll_logical (SW_LEFT_BUTTON) 
+			&& !switch_poll_logical (SW_RIGHT_BUTTON))
 			break;
 
 		if (deff_get_active () != DEFF_STATUS_REPORT)
@@ -155,14 +155,14 @@ static void status_report_check (void)
 }
 
 
-CALLSET_ENTRY (status_report, sw_l_l_flipper_button)
+CALLSET_ENTRY (status_report, sw_left_button)
 {
 	if (in_live_game)
 		status_report_check ();
 }
 
 
-CALLSET_ENTRY (status_report, sw_l_r_flipper_button)
+CALLSET_ENTRY (status_report, sw_right_button)
 {
 	if (in_live_game)
 		status_report_check ();

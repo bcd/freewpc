@@ -7,6 +7,10 @@ MACHINE_FILE = tz.md
 
 MACHINE_SCHEDULE = $(M)/tz.sched
 
+SCHED_FLAGS += -i tz/driver.h
+
+MUX_SRCS := build/tz-mux.c
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
@@ -59,7 +63,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
 	rampdiv.o amode.o lock.o door.o ballsave.o
 
-GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o
+GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o powerball_test.o
 
 GAME_INCLUDES =
 
@@ -70,20 +74,5 @@ GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 
 GAME_FSMS = shot.fsm
 
-PRG_OBJS += build/cow2.o
+FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 
-cow1 : build/cow1.xbm
-
-cow2 : build/cow2.o
-
-build/cow1.xbm build/cow2.prg: build/pgmtest
-	build/pgmtest
-
-build/pgmtest : build/pgmtest.o tools/pgmlib/pgmlib2.o
-	$(HOSTCC) -o $@ build/pgmtest.o tools/pgmlib/pgmlib2.o
-
-build/pgmtest.o : machine/tz/pgmtest.c
-	$(HOSTCC) -o $@ -Itools/pgmlib -c $<
-
-tools/pgmlib/pgmlib2.o : tools/pgmlib/pgmlib.c
-	$(HOSTCC) -o $@ -DNO_MAIN -Itools/pgmlib -Iinclude -c $<

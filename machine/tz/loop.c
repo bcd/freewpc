@@ -35,6 +35,8 @@ void award_loop (void)
 	if (flag_test (FLAG_POWERBALL_IN_PLAY))
 	{
 		deff_start (DEFF_PB_LOOP);
+		/* TODO : count powerball loops and award bonuses
+		at certain levels */
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		sound_send (SND_POWERBALL_QUOTE);
 		score (SC_5M);
@@ -113,11 +115,11 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
-	/* Tell gumball module that ball is present */
 	extern void sw_gumball_right_loop_entered (void);
 
 	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
+		return;
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{

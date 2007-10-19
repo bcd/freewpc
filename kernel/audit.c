@@ -34,15 +34,14 @@ __nvram__ U8 audit_csum;
 
 #ifdef MACHINE_FEATURE_AUDITS
 __nvram__ feature_audits_t feature_audits;
+#define MACHINE_FEATURE_AUDIT_SIZE sizeof (feature_audits)
+#else
+#define MACHINE_FEATURE_AUDIT_SIZE 0
 #endif
 
 const struct area_csum audit_csum_info = {
 	.area = (U8 *)&system_audits,
-	.length = sizeof (system_audits)
-#ifdef MACHINE_FEATURE_AUDITS
-	+ sizeof (feature_audits)
-#endif
-												,
+	.length = sizeof (system_audits) + MACHINE_FEATURE_AUDIT_SIZE,
 	.csum = &audit_csum,
 	.reset = audit_reset,
 };
@@ -55,6 +54,7 @@ void audit_reset (void)
 	wpc_nvram_get ();
 	memset (&system_audits, 0, sizeof (system_audits));
 #ifdef MACHINE_FEATURE_AUDITS
+	memset (&feature_audits, 0, sizeof (feature_audits));
 #endif
 	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();

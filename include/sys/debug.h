@@ -25,27 +25,37 @@
 
 extern inline U8 wpc_debug_get_status (void)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	return wpc_asic_read (WPC_DEBUG_CONTROL_PORT);
+#endif
 }
 
 extern inline U8 wpc_debug_write_ready (void)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	return wpc_debug_get_status () & 0x1;
+#endif
 }
 
 extern inline U8 wpc_debug_read_ready (void)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	return wpc_debug_get_status () & 0x2;
+#endif
 }
 
 extern inline void wpc_debug_write (U8 data)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	wpc_asic_write (WPC_DEBUG_DATA_PORT, data);
+#endif
 }
 
 extern inline U8 wpc_debug_read (void)
 {
+#ifdef CONFIG_PLATFORM_WPC
 	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
+#endif
 }
 
 

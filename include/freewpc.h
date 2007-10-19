@@ -60,7 +60,7 @@ typedef int int16_t, I16, S16;
 typedef unsigned int U16;
 typedef U16 INTPTR;
 typedef U16 PTR_OR_U16;
-#elif defined(CONFIG_PLATFORM_LINUX)
+#elif defined(CONFIG_NATIVE)
 typedef short int16_t, I16, S16;
 typedef unsigned short U16;
 typedef unsigned long PTR_OR_U16;
@@ -74,7 +74,7 @@ typedef U16 PTR_OR_U16;
 /* After this point, do not permit native types like
  * short, int, long to be used; use one of the types
  * defined above instead. */
-#ifndef CONFIG_PLATFORM_LINUX
+#ifndef CONFIG_NATIVE
 #define short short_not_supported
 #define int int_not_supported
 #define long long_not_supported
@@ -94,10 +94,6 @@ extern U8 idle_ok;
 #undef FALSE
 #define FALSE (0)
 
-/* Define NULL */
-#ifndef NULL
-#define NULL 0UL
-#endif
 
 /*
  * Define macros that let us print #defines which are strings.
@@ -105,8 +101,8 @@ extern U8 idle_ok;
 #define C_STRING(x)	C_STR(x)
 #define C_STR(x)		#x
 
-#ifdef CONFIG_PLATFORM_LINUX
-#include <platform/linux.h>
+#ifdef CONFIG_NATIVE
+#include <platform/linux.h> /* TODO : rename this file */
 #endif
 
 /* Include the standard header files that are needed
@@ -117,34 +113,51 @@ extern U8 idle_ok;
 
 /* Processor specifics */
 #ifdef __m6809__
+
 #include <m6809/m6809.h>
+#ifndef NULL
+#define NULL 0UL
+#endif
+
 #else
+
 #define __blockcopy16(s1,s2,n) memcpy(s1,s2,n)
 #define __blockclear16(s,n) memset(s,'0',n)
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #endif
+
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x)  __builtin_expect(!!(x), 0)
+
 
 /* Build system information */
 #include <env.h>
+#include <version.h>
 
 /* Platform specifics */
 #ifdef MACHINE_PLATFORM_WHITESTAR
 #include <platform/whitestar.h>
 #else
-#include <platform/wpc.h> /* note: included even on native builds */
+#include <platform/wpc.h>
 #endif
 
-#include <version.h>
-#include <misc.h>
-#include <math.h>
 
 /* Core software structures */
 #include <sys/bitarray.h>
 #include <sys/errno.h>
 #include <sys/task.h>
+#if (MACHINE_DMD == 1)
 #include <sys/font.h>
+#endif
+
+/* Basic data structures */
+
+#include <misc.h>
+#include <list.h>
 
 /* Hardware modules */
 #include <sys/ac.h>
@@ -153,7 +166,9 @@ extern U8 idle_ok;
 #include <sys/sound.h>
 #include <sys/switch.h>
 #include <sys/flip.h>
+#if (MACHINE_DMD == 1)
 #include <sys/dmd.h>
+#endif
 #include <sys/triac.h>
 #include <sys/irq.h>
 #include <sys/rtc.h>
@@ -162,6 +177,7 @@ extern U8 idle_ok;
 #include <sys/deff.h>
 #include <sys/leff.h>
 #include <sys/device.h>
+#include <math.h>
 #include <timer.h>
 #include <score.h>
 #include <game.h>
@@ -178,11 +194,8 @@ extern U8 idle_ok;
 #include <mode.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
-#include <list.h>
 #include <sys/debug.h>
-#include <highscore.h>
-#include <test.h>
-
+#include <test.h> /* this one HAS to be here for now, for callset.c */
 
 /* Game-specific defines.  'mach' should point to the machine-specific 
  * directory.  These files are optional; if a machine does not need
@@ -204,7 +217,7 @@ extern U8 idle_ok;
 
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */
-#ifndef CONFIG_PLATFORM_LINUX
+#ifndef CONFIG_NATIVE
 #ifdef PAGE
 #if (PAGE == 54)
 #define PAGE_PRAGMA _Pragma ("section (\"page54\")")
@@ -227,7 +240,7 @@ extern U8 idle_ok;
 #endif
 PAGE_PRAGMA
 #endif
-#endif /* !CONFIG_PLATFORM_LINUX */
+#endif /* !CONFIG_NATIVE */
 
 #ifdef NOSTATIC
 #define static

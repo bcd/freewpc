@@ -65,24 +65,7 @@ U8 db_read_sync (void)
 }
 
 
-U16 db_read_address (void)
-{
-	U16 addr = 0;
-	U16 i;
-
-	for (i=0 ; i < 4; i++)
-	{
-		U8 c = db_read_sync ();
-		if (c > '9')
-			c = c - 'A' + 10;
-		else
-			c = c - '0';
-		addr = (addr << 4) | c;
-	}
-	return addr;
-}
-
-
+/** Check for debug input at idle time */
 void db_idle (void)
 {
 #ifdef DEBUGGER
@@ -110,26 +93,39 @@ void db_idle (void)
 			switch (c)
 			{
 				case 'a':
+					/* Dump the audio table */
 					SECTION_VOIDCALL (__common__, audio_dump);
 					break;
 
 				case 't':
+					/* Dump the task table */
 					VOIDCALL (task_dump);
 					break;
 
 				case 'g':
+					/* Dump the game state */
 					VOIDCALL (dump_game);
 					break;
 
 				case 'd':
+					/* Dump the running/queued display effects */
 					VOIDCALL (dump_deffs);
 					break;
 
-				case 'r':
+				case 's':
 				{
-					U8 *addr = (U8 *)db_read_address ();
-					dbprintf ("%02X\n", *addr);
-					break;
+					/* Simulate a switch closure.  The switch column/row must be given
+					in ASCII.  This completes bypassing the real switch matrix and
+					just calls the handler. */
+					U8 row, col, sw;
+					task_pid_t tp;
+
+					row = db_read_sync ();
+					col = db_read_sync ();
+					sw = MAKE_SWITCH (col - '0', row - '0');
+
+					tp = task_create_gid (GID_SW_HANDLER, switch_sched);
+					task_set_arg (tp, sw);
 				}
 
 				case 'p':
@@ -137,12 +133,20 @@ void db_idle (void)
 					/* Toggle the pause state.  When paused, tasks
 					do not run and the system polls for debugger
 					commands in a hard loop. */
+#ifdef CONFIG_NATIVE
+					extern char linux_interface_readchar (void);
+					while (linux_interface_readchar () != 'p')
+					{
+						task_sleep (TIME_16MS);
+					}
+#else
 					db_paused = 1 - db_paused;
 					while (db_paused == 1)
 					{
 						task_dispatching_ok = TRUE;
 						db_idle ();
 					}
+#endif
 					break;
 				}
 
@@ -166,7 +170,7 @@ void db_idle (void)
 /** Initialize the debugger */
 void db_init (void)
 {
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 	db_attached = 1;
 #else
 #ifdef CONFIG_PARALLEL_DEBUG

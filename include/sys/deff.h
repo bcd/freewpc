@@ -132,9 +132,11 @@ extern inline void deff_wait_for_other (deffnum_t dn)
 	}
 }
 
+
 extern inline __noreturn__ void generic_deff (
 	const char *line1, const char *line2)
 {
+#if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
 	if (line1 && line2)
 	{
@@ -146,6 +148,9 @@ extern inline __noreturn__ void generic_deff (
 		font_render_string_center (&font_fixed6, 64, 16, line1);
 	}
 	dmd_show_low ();
+#else
+/* TBD */
+#endif
 	task_sleep_sec (2);
 	deff_exit ();
 }

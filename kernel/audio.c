@@ -105,7 +105,7 @@ void audio_start (
 		ch->pid = task_create_gid (GID_AUDIO_TASK, fn);
 #ifdef __m6809__
 		ch->pid->rom_page = fnpage;
-		ch->pid->flags = TASK_PROTECTED;
+		ch->pid->state |= TASK_PROTECTED;
 #endif
 		task_set_arg (ch->pid, data);
 		return;

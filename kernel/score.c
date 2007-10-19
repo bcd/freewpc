@@ -38,8 +38,11 @@ score_t scores[MAX_PLAYERS];
 /** A pointer to the score for the current player up */
 U8 *current_score;
 
+/** The all-inclusive score multiplier */
+U8 global_score_multiplier;
 
 
+/** Draw the current ball number at the bottom of the display. */
 void scores_draw_ball (void)
 {
 #if defined (CONFIG_TIMED_GAME)
@@ -62,6 +65,7 @@ void scores_draw_ball (void)
 }
 
 
+/** Draw the current credit count at the bottom of the display. */
 void scores_draw_credits (void)
 {
 	credits_render ();
@@ -83,9 +87,11 @@ void scores_draw_credits (void)
 #define SCORE_POS_LL_TINY 11
 #define SCORE_POS_UR_TINY 12
 
+
+/** A lookup table for mapping a 'score font key' into a font and location on the DMD. */
 const struct score_font_info 
 {
-	void (*render) (const fontargs_t *);
+	void (*render) (void);
 	const font_t *font;
 	U8 x;
 	U8 y;
@@ -139,21 +145,33 @@ void scores_draw_current (U8 skip_player)
 	U8 p;
 	const struct score_font_info *info;
 
+	/* Each player's score is drawn in turn.
+	If skip_player is not 0, then it will cause a particular
+	player's score *NOT* to be drawn, which can be used to
+	implement a single flashing score. */
 	for (p=0; p < num_players; p++)
 	{
 		if (p+1 == skip_player)
 			continue;
 
+		/* Render the score into the print buffer */
 		sprintf_score (scores[p]);
-		
+	
+		/* Figure out what font to use and where to print it */
 		info = &score_font_info_table[
 			score_font_info_key[num_players-1][player_up][p] ];
+
+		/* Load the font info into the appropriate registers. */	
 		DECL_FONTARGS (info->font, info->x, info->y, sprintf_buffer);
-		(*info->render) (&font_args);
+
+		/* Start printing to the display */
+		info->render ();
 	}
 }
 
 
+/** Draw the entire score screen statically.  In this mode,
+no scores are flashing; everything is fixed. */
 void scores_draw (void)
 {
 	if (in_game)
@@ -164,6 +182,9 @@ void scores_draw (void)
 }
 
 
+/** A display effect for showing all the scores, without
+flashing.  This is used when new players are added or
+at ball start. */
 void scores_important_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -177,11 +198,12 @@ void scores_important_deff (void)
 
 /** The score screen display effect.  This function redraws the scores
  * in the default manner when there are no other high priority effects
- * running. */
+ * running.  In ths mode, the current player's score will flash. */
 void scores_deff (void)
 {
 	U8 delay;
 
+	/* This effect always runs, until it is preempted. */
 	for (;;)
 	{
 redraw:
@@ -191,13 +213,17 @@ redraw:
 		/* Stop any score effects (i.e. flashing) */
 
 		/* Redraw the scores.  player_up signals which score
-		 * should be drawn larger and will flash. */
+		 * should be drawn larger and will flash.
+		 *
+		 * First, the static elements are drawn: the opponents' scores
+		 * and the ball number.  Then the flashing element, the current
+		 * player's score is drawn. */
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		scores_draw_ball ();
 		scores_draw_current (player_up);
 		dmd_copy_low_to_high ();
-		scores_draw_current (0);
+		scores_draw_current (0); /* TODO - this is redrawing other players ! */
 		dmd_show_low ();
 		
 		/* Restart score effects */
@@ -205,6 +231,8 @@ redraw:
 		/* Wait for a score change. */
 		for (;;)
 		{
+			/* TODO - use a sweeping effect rather than the flashing
+			when ball is in play. */
 			delay = ball_in_play ? TIME_500MS : TIME_100MS;
 			while (delay != 0)
 			{
@@ -229,9 +257,17 @@ redraw:
 }
 
 
+/** Clears a score */
 void score_zero (score_t s)
 {
 	memset (s, 0, sizeof (score_t));
+}
+
+
+/** Copy from one score to another */
+void score_copy (score_t dst, const score_t src)
+{
+	memcpy (dst, src, sizeof (score_t));
 }
 
 
@@ -292,6 +328,7 @@ void score_add_current (const bcd_t *s)
 }
 
 
+/** Like score_add_byte, but modifies the current player's score */
 void score_add_byte_current (U8 offset, bcd_t val)
 {
 	if (!in_live_game)
@@ -306,10 +343,15 @@ void score_add_byte_current (U8 offset, bcd_t val)
 }
 
 
+/** Adds to the current score, multiplied by some amount.
+ * The multiplier is subject to further multiplication by the
+ * global score multiplier. */
 void score_multiple (score_id_t id, U8 multiplier)
 {
 	if (!in_live_game)
 		return;
+
+	multiplier *= global_score_multiplier;
 
 	/* Some things to consider:
 	 * 1. Multiplication is expensive on BCD values.
@@ -359,9 +401,21 @@ void score_sub (score_t s1, const score_t s2)
 }
 
 
-void score_mul (score_t s1, U8 multiplier)
+/** Multiply a score (in place) by the given value. */
+void score_mul (score_t s, U8 multiplier)
 {
 	/* TODO */
+	if (multiplier > 1)
+	{
+		score_t copy;
+		score_copy (copy, s);
+	
+		do {
+			score_add (s, copy);
+		} while (--multiplier > 1);
+
+		score_copy (s, copy);
+	}
 }
 
 
@@ -400,6 +454,7 @@ CALLSET_ENTRY (score, start_ball)
 {
 	/* TODO : once playfield multipliers are implemented, make sure
 	to reset the multiplier at the start of the next ball */
+	global_score_multiplier = 1;
 }
 
 

@@ -21,9 +21,14 @@
 /**
  * \file
  * \brief Formatting functions for audit and adjustment types
+ *
+ * Rendering functions take an adjustment or audit value, and
+ * convert it to human-readable form in the print buffer for
+ * later display.
  */
 
 #include <freewpc.h>
+#include <test.h>
 
 void decimal_render (U8 val) { sprintf ("%d", val); }
 void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
@@ -197,4 +202,39 @@ void average_per_ball_audit (audit_t val)
 
 	sprintf ("%d", val / system_audits.balls_played);
 }
+
+
+void render_audit (audit_t val, audit_format_type_t type)
+{
+	switch (type)
+	{
+		case AUDIT_TYPE_INT:
+			integer_audit (val);
+			break;
+		case AUDIT_TYPE_GAME_PERCENT:
+			percentage_of_games_audit (val);
+			break;
+		case AUDIT_TYPE_SECS:
+			secs_audit (val);
+			break;
+		case AUDIT_TYPE_US_DOLLAR:
+			us_dollar_audit (val);
+			break;
+		case AUDIT_TYPE_CURRENCY:
+			currency_audit (val);
+			break;
+		case AUDIT_TYPE_TOTAL_EARNINGS:
+			total_earnings_audit (val);
+			break;
+		case AUDIT_TYPE_AVG_PER_GAME:
+			average_per_game_audit (val);
+			break;
+		case AUDIT_TYPE_AVG_PER_BALL:
+			average_per_ball_audit (val);
+			break;
+		default:
+			break;
+	}
+}
+
 

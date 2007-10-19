@@ -124,7 +124,7 @@ extern dmd_transition_t
 
 extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 {
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 	if ((addr >= DMD_LOW_BASE) && (addr <= DMD_LOW_BASE + DMD_PAGE_SIZE))
 		return addr;
 	else if ((addr >= DMD_HIGH_BASE) && (addr <= DMD_HIGH_BASE + DMD_PAGE_SIZE))
@@ -134,6 +134,39 @@ extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 #endif
 	return addr;
 }
+
+/*
+ * The DMD controller has two registers for controlling which pages
+ * are mapped into addressable memory.  
+ *
+ * Because these registers are write-only, writes are also cached into
+ * variables.  Then reads can be done using the cached values.
+ */
+
+extern inline void wpc_dmd_set_low_page (U8 val)
+{
+	extern U8 dmd_low_page;
+	wpc_asic_write (WPC_DMD_LOW_PAGE, dmd_low_page = val);
+}
+
+extern inline U8 wpc_dmd_get_low_page (void)
+{
+	extern U8 dmd_low_page;
+	return dmd_low_page;
+}
+
+extern inline void wpc_dmd_set_high_page (U8 val)
+{
+	extern U8 dmd_high_page;
+	wpc_asic_write (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
+}
+
+extern inline U8 wpc_dmd_get_high_page (void)
+{
+	extern U8 dmd_high_page;
+	return dmd_high_page;
+}
+
 
 void dmd_init (void);
 extern __fastram__ void (*dmd_rtt) (void);
@@ -151,7 +184,7 @@ void dmd_clean_page_high (void);
 void dmd_fill_page_low (void);
 void dmd_invert_page (dmd_buffer_t dbuf);
 void dmd_mask_page (dmd_buffer_t dbuf, U16 mask);
-void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src);
+void dmd_copy_page (dmd_buffer_t dst, const dmd_buffer_t src);
 void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
 void dmd_alloc_pair_clean (void);
@@ -159,15 +192,14 @@ void dmd_draw_border (U8 *dbuf);
 void dmd_draw_horiz_line (U16 *dbuf, U8 y);
 void dmd_shift_up (dmd_buffer_t dbuf);
 void dmd_shift_down (dmd_buffer_t dbuf);
-void dmd_draw_image (const U8 *image_bits);
-void dmd_draw_image2 (const U8 *image_bits);
+__attribute__((deprecated)) void dmd_draw_image (const U8 *image_bits);
+__attribute__((deprecated)) void dmd_draw_image2 (const U8 *image_bits);
 void dmd_draw_bitmap (dmd_buffer_t image_bits, 
 	U8 x, U8 y, U8 width, U8 height);
 void dmd_erase_region (U8 x, U8 y, U8 width, U8 height);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
-const U8 *dmd_draw_xbmprog (const U8 *xbmprog);
 const U8 *dmd_draw_fif1 (const U8 *fif);
 
 #define dmd_draw_fif(fif) \

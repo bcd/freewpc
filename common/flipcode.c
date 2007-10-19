@@ -149,14 +149,14 @@ void flipcode_lock_char (void)
 }
 
 
-CALLSET_ENTRY (flipcode, sw_l_l_flipper_button)
+CALLSET_ENTRY (flipcode, sw_left_button)
 {
 	if (deff_get_active () != DEFF_AMODE)
 		return;
 	flipcode_advance_char ();
 }
 
-CALLSET_ENTRY (flipcode, sw_l_r_flipper_button)
+CALLSET_ENTRY (flipcode, sw_right_button)
 {
 	if (deff_get_active () != DEFF_AMODE)
 		return;

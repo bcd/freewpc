@@ -48,7 +48,7 @@
 #include <stdlib.h>
 
 #define MAX_TICKS 32
-#define MAX_SLOTS_PER_TICK 16
+#define MAX_SLOTS_PER_TICK 32
 #define MAX_TASKS 64
 
 struct include_file
@@ -75,6 +75,8 @@ struct task
 	call the next function in the chain directly, without
 	the need for a call and return.  This is optional. */
 	unsigned int next_p;
+
+	int already_unrolled_count;
 };
 
 struct slot
@@ -164,7 +166,7 @@ do { \
 #define c_block_end(ind, file) \
 	do { ind--; cfprintf (ind, file, "}\n"); } while (0)
 
-#define ATTR_INTERRUPT "__attribute__((interrupt))"
+#define ATTR_INTERRUPT "__interrupt__"
 
 #define ATTR_FASTVAR "__attribute__((section (\"direct\")))"
 
@@ -190,7 +192,7 @@ void write_tick_driver (FILE *f)
 {
 	unsigned int n;
 	unsigned int div;
-	const char *task_name;
+	char task_name[64];
 	unsigned int indent = 0;
 	double tick_len;
 
@@ -236,11 +238,19 @@ void write_tick_driver (FILE *f)
 						divider_count++;
 					}
 
-					task_name = slot->task->name;
-					if (*task_name == '!')
-						task_name++;
-					else
-						cfprintf (indent, f, "extern void %s (void);\n", task_name);
+					strcpy (task_name, 
+						slot->task->name + (*slot->task->name == '!'));
+
+					if (slot->task->already_unrolled_count)
+					{
+						unsigned int n1 = n % 
+							(slot->task->already_unrolled_count * slot->task->period);
+						unsigned int suffix = n1 / slot->task->period;
+
+						sprintf (task_name + strlen (task_name), "_%d", suffix);
+					}
+
+					cfprintf (indent, f, "extern void %s (void);\n", task_name);
 
 					cfprintf (indent, f, "%s (); ", task_name);
 					write_time_comment (f, slot->task->len);
@@ -370,6 +380,13 @@ unsigned int find_best_tick (unsigned int period, unsigned int count, double len
 struct slot *alloc_slot (unsigned int tickno)
 {
 	struct tick *tick = &ticks[tickno];
+
+	if (tick->n_slots+1 == MAX_SLOTS_PER_TICK)
+	{
+		fprintf (stderr, "error: too many tasks scheduled in same tick\n");
+		fprintf (stderr, "Please increase MAX_SLOTS_PER_TICK and rebuild scheduler\n");
+		exit (1);
+	}
 	return &tick->slots[tick->n_slots++];
 }
 
@@ -383,11 +400,20 @@ void add_task (char *name, unsigned int period, double len)
 	struct slot *slot;
 	struct task *task;
 	unsigned int divider = 1;
+	char *end = name + strlen (name) - 2;
+	unsigned int already_unrolled_count = 0;
+
+	if (*end == '/')
+	{
+		already_unrolled_count = end[1] - '0';
+		*end = '\0';
+	}
 
 	task = &tasks[n_tasks++];
 	strcpy (task->name, name);
 	task->period = period;
 	task->len = len;
+	task->already_unrolled_count = already_unrolled_count;
 
 	if (period > n_ticks)
 	{
@@ -456,6 +482,7 @@ void parse_schedule (FILE *f)
 	unsigned int period;
 	float len;
 	char line[512];
+	int lineno = 0;
 	const char *delims = " \t\n";
 
 	for (;;)
@@ -463,6 +490,10 @@ void parse_schedule (FILE *f)
 		fgets (line, 511, f);
 		if (feof (f))
 			break;
+		lineno++;
+#if 0
+		fprintf (stderr, "<<%03d>>  %s", lineno, line);
+#endif
 
 		name = strtok (line, delims);
 		if (!name || *name == '#')

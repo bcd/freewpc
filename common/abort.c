@@ -31,8 +31,8 @@ void abort_monitor_task (void)
 	while (count > 0)
 	{
 		task_sleep (TIME_66MS);
-		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON) 
-			|| !switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+		if (!switch_poll_logical (SW_LEFT_BUTTON) 
+			|| !switch_poll_logical (SW_RIGHT_BUTTON))
 		{
 			task_exit ();
 		}
@@ -43,13 +43,13 @@ void abort_monitor_task (void)
 }
 
 
-CALLSET_ENTRY (abort, sw_l_l_flipper_button)
+CALLSET_ENTRY (abort, sw_left_button)
 {
 	task_recreate_gid (GID_FLIPPER_ABORT_MONITOR, abort_monitor_task);
 }
 
-CALLSET_ENTRY (abort, sw_l_r_flipper_button)
+CALLSET_ENTRY (abort, sw_right_button)
 {
-	abort_sw_l_l_flipper_button ();
+	abort_sw_left_button ();
 }
 

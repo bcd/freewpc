@@ -64,18 +64,6 @@ static void handle_outhole (void)
 CALLSET_ENTRY (trough, sw_outhole)
 {
 #ifdef MACHINE_OUTHOLE_SWITCH
-	if (event_did_follow (any_outlane, center_drain))
-	{
-		/* drained via outlane */
-	}
-	else
-	{
-		/* drained down the center */
-		/* TODO - do this in dev_trough_enter, in case there is no
-		outhole */
-		audit_increment (&system_audits.center_drains);
-	}
-
 	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
 #endif /* MACHINE_OUTHOLE_SWITCH */
 }
@@ -83,11 +71,20 @@ CALLSET_ENTRY (trough, sw_outhole)
 
 CALLSET_ENTRY (trough, dev_trough_enter)
 {
+	/* Audit center drains (outlanes are audited in their respective
+	 * switches) */
+	if (!event_did_follow (any_outlane, center_drain))
+	{
+		audit_increment (&system_audits.center_drains);
+	}
+
+	/* Note that there is one less ball in play now */
 	device_remove_live ();
 }
 
 
 CALLSET_ENTRY (trough, dev_trough_kick_success)
 {
+	/* Note that there is one more ball in play now */
 	device_add_live ();
 }

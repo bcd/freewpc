@@ -20,43 +20,49 @@
 # zip, so that things are back to the way that they started.
 #
 
+# TODO : migrate to .config
+ifndef NOCONFIG
+-include user.make
+-include .config
+endif
+
+define require
+$(if $($1),,$(error $1 is not defined : $($1)))
+endef
+
 #######################################################################
 ###	Configuration
 #######################################################################
 
-# Set this to the name of the machine for which you are targetting.
-MACHINE ?= tz
+# Set MACHINE to the name of the machine for which you are targetting.
+$(eval $(call require,MACHINE))
 
-# Set this to the name of the platform.  Normally this should be set
-# by the machine's Makefile.  Default to WPC for now.
-PLATFORM ?= wpc
-#PLATFORM = whitestar
-#PLATFORM = linux
+# Set PLATFORM to the name of the hardware platform.  Valid values
+# are 'wpc' and 'whitestar'.  TODO: this should be set in the
+# machine-specific Makefile, based on the game you choose.
+$(eval $(call require,PLATFORM))
 
-# Set this to the path where the final ROM image should be installed
-# This is left blank on purpose: set this in your user.make file.
-# There is no default value.
-TARGET_ROMPATH =
+# Set this to the name of the CPU.  This comes from the platform,
+# but now it's only 6809...
+ifdef NATIVE
+CPU := native
+else
+CPU := m6809
+endif
 
 # Which version of the 6809 compiler to use.  This is ignored for native builds.
 GCC_VERSION ?= 3.4.6
 
-# Set to 'y' if the tools have been configured to generate profiling
-# information after each source file is compiled.
-TOOL_PROFILING ?= n
-
 # Build date (now)
-BUILD_DATE := \"$(shell date +%m/%d/%y)\"
+BUILD_MONTH := $(shell date +%-m)
+BUILD_DAY := $(shell date +%-d)
+BUILD_YEAR := $(shell date +%Y)
 
-#######################################################################
-###	Include User Settings
-#######################################################################
--include user.make
 
 #######################################################################
 ###	Set Default Target
 #######################################################################
-ifeq ($(PLATFORM),linux)
+ifdef NATIVE
 default_target : clean_err check_prereqs freewpc
 else
 ifdef TARGET_ROMPATH
@@ -116,7 +122,7 @@ TMPFILES += $(BLD)/*
 
 # Path to the compiler and linker
 # Define GCC4 if GCC_VERSION begins with 4.
-ifeq ($(PLATFORM),wpc)
+ifeq ($(CPU),m6809)
 GCC_ROOT = /usr/local/bin
 CC := $(CCACHE) $(GCC_ROOT)/m6809-gcc-$(GCC_VERSION)
 AS = $(CC) -xassembler-with-cpp
@@ -134,20 +140,19 @@ HOSTCC := $(CCACHE) gcc
 TOOLS :=
 HOST_OBJS :=
 
-D := tools/srec2bin
-include $(D)/srec2bin.make
+define include-tool
+D := tools/$1
+include tools/$1/$1.make
+endef
 
-D := tools/csum
-include $(D)/csum.make
+$(eval $(call include-tool,srec2bin))
+$(eval $(call include-tool,csum))
+$(eval $(call include-tool,wpcdebug))
+$(eval $(call include-tool,sched))
+$(eval $(call include-tool,fiftool))
+$(eval $(call include-tool,softscope))
+$(eval $(call include-tool,scope))
 
-D := tools/wpcdebug
-include $(D)/wpcdebug.make
-
-D := tools/sched
-include $(D)/sched.make
-
-D := tools/fiftool
-include $(D)/fiftool.make
 
 # Name of the blanker to use
 BLANKER = dd
@@ -159,10 +164,6 @@ XBMPROTO = tools/xbmproto
 # The gendefine script
 GENDEFINE = tools/gendefine
 
-# The Unix calculator
-BC = bc
-PATH_REQUIRED += $(BC)
-
 # Where pinmame is located
 PINMAME ?= xpinmamed.x11
 PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_FLAGS)
@@ -172,126 +173,21 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 ###	Source and Binary Filenames
 #######################################################################
 
-SYSTEM_SCHEDULE := kernel/system.sched
+CONFIG_WPC=y
+CONFIG_FONT=y
+CONFIG_AC=y
+CONFIG_DMD=y
+CONFIG_ANIMATION=y
 
-SCHED_SRC := build/sched_irq.c
-SCHED_OBJ := $(SCHED_SRC:.c=.o)
-
-# Basic kernel modules are generic and do not depend on
-# the machine type at all.
-KERNEL_BASIC_OBJS = \
-	kernel/list.o \
-	kernel/misc.o \
-	kernel/puts.o \
-	kernel/random.o \
-	kernel/sysinfo.o
-
-# Software kernel modules are hardware-agnostic, but may depend
-# on machine flags and so need to be recompiled when the machine
-# flags change.
-KERNEL_SW_OBJS = \
-	kernel/deff.o \
-	kernel/font.o \
-	kernel/game.o \
-	kernel/lampset.o \
-	kernel/player.o \
-	kernel/printf.o \
-	kernel/score.o
-
-# Hardware kernel modules are incredibly hardware dependent,
-# and are subject to change on different hardware platforms.
-# This isn't really supported yet but it might be in the future
-# (e.g. supporting System 11, or Whitestar, etc.)
-KERNEL_OBJS = $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) \
-	kernel/ac.o \
-	kernel/adj.o \
-	kernel/audio.o \
-	kernel/audit.o \
-	kernel/csum.o \
-	kernel/dmd.o \
-	kernel/flasher.o \
-	kernel/hardtimer.o \
-	kernel/flip.o \
-	kernel/init.o
-ifeq ($(REMOVE_OLD_IRQ),)
-KERNEL_OBJS += kernel/irq.o
-endif
-KERNEL_OBJS += \
-	kernel/lamp.o \
-	kernel/leff.o \
-	kernel/sol.o \
-	kernel/sound.o \
-	kernel/switches.o \
-	kernel/timer.o \
-	kernel/triac.o
-
-# The 'common basic objects' are those that do not depend on autogenerated
-# .h files, but are not important enough to do into the system region.
-COMMON_BASIC_OBJS = \
-	common/abort.o \
-	common/coin.o \
-	common/db.o \
-	common/event-audit.o \
-	common/flipcode.o \
-	common/initials.o \
-	common/match.o \
-	common/music.o \
-	common/plunger.o \
-	common/reset.o \
-	common/rtc.o \
-	common/service.o \
-	common/tilt.o \
-	common/tournament.o \
-	common/trough.o \
-
-# The other common objects are dependent on autogenerated .h files as well.
-COMMON_OBJS = $(COMMON_BASIC_OBJS) \
-	common/buyin.o \
-	common/device.o \
-	common/diag.o \
-	common/eb.o \
-	common/highscore.o \
-	common/inspector.o \
-	common/knocker.o \
-	common/onecoin.o \
-	common/replay.o \
-	common/search.o \
-	common/status.o \
-	common/special.o
-
-EFFECT_OBJS = \
-	common/effect.o
+include kernel/Makefile
+include common/Makefile
+include fonts/Makefile
 
 EVENT_OBJS = build/callset.o
 
-TEST_OBJS = test/window.o test/mix.o
+TEST_OBJS = test/window.o
 
 TEST2_OBJS = test/format.o
-
-TRANS_OBJS = kernel/dmdtrans.o
-
-
-# FONT_OBJS are manually constructed and maintained in .c code.
-# FON_OBJS are autogenerated from X fonts.  They are maintained as .fon
-# files in source control, but can always be regenerated if necessary.
-# TODO : only link in the fonts that the machine/system require
-
-FONT_OBJS = fonts/mono5.o fonts/mono9.o fonts/var5.o fonts/tinynum.o \
-fonts/bitmap.o
-
-FON_OBJS = \
-	fonts/fixed10.o \
-	fonts/fixed12.o \
-	fonts/fixed6.o \
-	fonts/lucida9.o \
-	fonts/cu17.o \
-	fonts/term6.o \
-	fonts/times10.o \
-	fonts/times8.o \
-	fonts/helv8.o \
-	fonts/utopia.o \
-	fonts/schu.o \
-	fonts/miscfixed.o \
 
 XBM_OBJS =
 
@@ -333,10 +229,11 @@ CFLAGS += -Wall -Wstrict-prototypes
 #
 # Define lots of other things based on make parameters
 #
-CFLAGS += -DBUILD_DATE=$(BUILD_DATE)
+CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(BUILD_YEAR)
 
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER 
+EXTRA_ASFLAGS += -DDEBUGGER 
 endif
 
 ifndef SYSTEM_MAJOR
@@ -361,6 +258,8 @@ endif
 
 CFLAGS += $(EXTRA_CFLAGS)
 
+SCHED_FLAGS := -i freewpc.h -i interrupt.h
+
 #######################################################################
 ###	Include Autogenerated Machine Extensions
 #######################################################################
@@ -375,7 +274,11 @@ include machine/$(MACHINE)/Makefile
 #######################################################################
 ###	Include Platform Extensions
 #######################################################################
-include platform/$(PLATFORM)/Makefile
+ifdef NATIVE
+include platform/linux/Makefile
+else
+-include platform/$(PLATFORM)/Makefile
+endif
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
@@ -407,6 +310,7 @@ SYSTEM_MD_OBJS = \
 
 MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 
+MUX_OBJS := $(MUX_SRCS:.c=.o)
 
 #######################################################################
 ###	Object File Distribution
@@ -415,17 +319,19 @@ MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 # Because WPC uses ROM paging, the linking job is more
 # difficult to get right.  We require that the programmer
 # explicitly state which pages things should belong in.
-# TODO : if you overflow a page, bad things will happen.
-# We should really check for this here.
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
+ifeq ($(ROM_PAGE_COUNT),8)
+PAGE_NUMBERS = 56 57 58 59 60 61
+else
 PAGE_NUMBERS = 55 56 57 58 59 60 61
+endif
 
 PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
 NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
-NUM_BLANK_PAGES := $(shell echo $(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS) | $(BC))
-BLANK_SIZE := $(shell echo $(NUM_BLANK_PAGES) \* 16 | $(BC))
+NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS))))
+BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
 
 #
 # Memory Map
@@ -497,6 +403,7 @@ $(eval $(call PAGE_ALLOC, 56, EVENT))
 $(eval $(call PAGE_ALLOC, 57, TRANS))
 $(eval $(call PAGE_ALLOC, 57, PRG))
 $(eval $(call PAGE_ALLOC, 57, FIF))
+$(eval $(call PAGE_ALLOC, 57, MUX))
 $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
@@ -518,13 +425,17 @@ AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) $(FSM_OBJS) \
 	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
-	$(FONT_OBJS) $(EFFECT_OBJS) $(SCHED_OBJ)
+	$(FONT_OBJS) $(EFFECT_OBJS) $(SCHED_OBJ) $(MUX_OBJS)
 
 
 ifeq ($(PLATFORM),wpc)
 OBJS = $(C_OBJS) $(AS_OBJS) $(XBM_OBJS) $(FIF_OBJS) $(FON_OBJS) $(PRG_OBJS)
 else
+ifeq ($(PLATFORM),whitestar)
+OBJS = $(C_OBJS) $(AS_OBJS)
+else
 OBJS = $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FIF_OBJS) $(FON_OBJS)
+endif
 endif
 
 MACH_LINKS = .mach .include_mach
@@ -636,29 +547,33 @@ $(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 # in multiples of 1KB.
 #
 $(BLD)/blank%.bin: $(BLD)/blankpage.bin
-	@echo "Creating $*KB blank file ..." && $(BLANKER) if=/dev/zero of=$@ bs=1k count=$* > /dev/null 2>&1
+	@echo "Creating $*KB blank file ..." && $(BLANKER) if=$(BLD)/blankpage.bin of=$@ bs=1k count=$* > /dev/null 2>&1
 
 $(BLD)/blankpage.bin: $(SR)
-	@echo "Creating blank 16KB page ..." && $(SR) -o $@ -l 0x4000 -f 0 -B
+	@echo "Creating blank 32KB page ..." && $(SR) -o $@.1 -l 0x8000 -f 0xFF -B
+	@( for ((a=0; a < 32; a++)); do cat $@.1; done ) > $@
+	@rm -f $@.1
+
 
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0 $<
+	@echo "Checking for overflow..." && tools/mapcheck
+	@echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo Converting $< to binary ... && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
+	@echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces
 # a Motorola S-record file by default (S19).
 #
-ifeq ($(PLATFORM),wpc)
+ifeq ($(CPU),m6809)
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
-	@echo Linking $@... && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
+	@echo "Linking $@..." && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
 endif
 
-ifeq ($(PLATFORM),linux)
+ifeq ($(CPU),native)
 freewpc : $(OBJS)
-	@echo Linking ... && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	@echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -748,10 +663,11 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
 
 
 #
-# General rule for how to build any assembler file.  This uses the native
-# assembler and not gcc.
+# General rule for how to build any assembler file.  This uses GCC
+# as a front end to the actual assembler, so the preprocessor is
+# available.
 #
-$(AS_OBJS) : %.o : %.s $(CC)
+$(AS_OBJS) : %.o : %.s $(CC) $(MAKE_DEPS)
 	@echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
@@ -766,16 +682,29 @@ $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(CC)
 # This includes ordinary .c files but also other file types that
 # actually contain C code.
 #
-ifeq ($(PLATFORM),wpc)
-$(C_OBJS) : PAGEFLAGS="-DDECLARE_PAGED=__attribute__((section(\"page$(PAGE)\")))"
+# Many options are passed to gcc, and these differ depending on the type
+# of file being compiled:
+#
+#    PAGEFLAGS sets a macro 'DECLARED_PAGED' to be used on function
+#    and variable definitions for asserting what page they are in.
+#    Only the XBM image files need this defined.
+#
+#    SOFTREG_CFLAGS says how many soft registers should be used, if any.
+#    It is unsafe to use soft registers in any file which declares
+#    interrupt-level functions.
+#
+#    PAGE is a macro set to the current page setting, so the code
+#    knows what page it is being compiled in.  (-mfar-code-page tells
+#    only GCC; this tells the code itself.  Ideally, GCC would define
+#    something for us.)
+# 
+
+ifeq ($(CPU),m6809)
 $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
+$(BASIC_OBJS) kernel/font.o kernel/printf.o: SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 else
-$(C_OBJS) : PAGEFLAGS=-DDECLARE_PAGED=
 $(XBM_OBJS) : PAGEFLAGS=-Dstatic=
 endif
-
-$(C_OBJS) : GCC_LANG=
-$(PRG_OBJS) $(XBM_OBJS) $(FON_OBJS) $(FIF_OBJS): GCC_LANG=-x c
 
 $(C_OBJS) : %.o : %.c 
 
@@ -791,13 +720,16 @@ $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
+$(KERNEL_OBJS) : kernel/Makefile
+$(COMMON_OBJS) : common/Makefile
+
 $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS) $(FIF_OBJS):
-ifeq ($(PLATFORM),wpc)
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(GCC_LANG) $< >> $(ERR) 2>&1
+ifeq ($(CPU),m6809)
+	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
-	@echo "Compiling $< ..." && $(HOSTCC) -o $@ $(CFLAGS) -c $(PAGEFLAGS) $(GCC_LANG) $< >> $(ERR) 2>&1
+	@echo "Compiling $< ..." && $(HOSTCC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
 endif
-ifeq ($(TOOL_PROFILING),y)
+ifeq ($(CONFIG_PROFILING),y)
 	@mkdir -p gprof.data
 	$(shell mv gmon.out gprof.data/gmon.$$RANDOM.out)
 endif
@@ -814,20 +746,18 @@ config : $(CONFIG_FILES)
 
 build/mach-Makefile : $(MACH_DESC)
 	@echo "Regenerating $@ if necessary..." && \
-	tools/genmachine $< makefile > $@.tmp && \
-	tools/move-if-change $@.tmp $@
+	tools/genmachine $< makefile > $@.tmp && tools/move-if-change $@.tmp $@
 
 build/mach-config.h : $(MACH_DESC)
 	@echo "Regenerating $@ if necessary..." && \
-	tools/genmachine $< config > $@.tmp && \
-	tools/move-if-change $@.tmp $@
+	tools/genmachine $< config > $@.tmp && tools/move-if-change $@.tmp $@
 	
 $(CONFIG_SRCS) : build/mach-%.c : $(MACH_DESC) build/mach-config.h
 	@echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $(MACH_DESC) $(@:build/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 
-$(CONFIG_FILES) : tools/genmachine kernel/freewpc.md
+$(CONFIG_FILES) : tools/genmachine platform/$(PLATFORM)/$(PLATFORM).md
 
 ifdef GAME_FSMS
 $(FSM_SRCS) : build/%.c : $(MACHINE_DIR)/%.fsm tools/fsmgen
@@ -871,8 +801,7 @@ callset: $(BLD)/callset.o
 
 $(BLD)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
 	@echo "Generating callsets ... " && rm -f $@ \
-		&& tools/gencallset -D build -D kernel -D common -D mach -D test \
-			-D platform/$(PLATFORM) $(CALLSET_FLAGS)
+		&& tools/gencallset -D build -D kernel -D common -D mach -D test $(CALLSET_FLAGS)
 
 .PHONY : callset_again
 callset_again:
@@ -890,7 +819,17 @@ fonts clean-fonts:
 sched: $(SCHED_SRC) tools/sched/sched.make
 
 $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(MAKE_DEPS)
-	$(SCHED) -o $@ -i freewpc.h -i interrupt.h $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
+	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
+
+#######################################################################
+###	Multiplexers
+#######################################################################
+
+.PHONY : muxes
+muxes: $(MUX_SRCS) tools/sched/sched.make
+
+$(MUX_SRCS): build/%-mux.c : $(MACHINE_DIR)/%.mux $(MAKE_DEPS)
+	tools/genvio -o $@ -h $(@:.c=.h) -c $<
 
 #######################################################################
 ###	Host Tools
@@ -911,8 +850,7 @@ $(HOST_OBJS) : %.o : %.c
 
 HOST_XBM_LIBS = build/pgmlib.o
 
-HOST_XBM_OBJS = \
-	build/sysgen.o build/borders.o build/backgrounds.o
+HOST_XBM_OBJS = build/sysgen.o build/borders.o build/backgrounds.o
 
 HOST_XBM_CFLAGS = -Itools/pgmlib -Iinclude -g
 
@@ -922,7 +860,9 @@ xbmgen_clean :
 
 .PHONY : xbmgen_run
 xbmgen_run : build/xbmgen
+ifeq ($(PLATFORM),wpc)
 	@$(MAKE) xbmgen_objs
+endif
 
 build/Makefile.xbms build/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
 	@echo "Linking XBM generator..." && \
@@ -944,6 +884,9 @@ build/pgmlib.o : tools/pgmlib/pgmlib.c
 # as a prerequisite for rebuilding nearly everything.
 .IGNORE : user.make
 user.make:
+
+.IGNORE : .config
+.config:
 
 #
 # Symbolic links to the machine code.  Once set, code can reference
@@ -995,7 +938,7 @@ doxygen: Doxyfile
 #
 .PHONY : info
 info:
-	@echo "Machine : $(MACHINE)"
+	@echo "MACHINE : $(MACHINE)"
 	@echo "GAME_ROM : $(GAME_ROM)"
 	@echo "GCC_VERSION = $(GCC_VERSION)"
 	@echo "CC = $(CC)"
@@ -1006,6 +949,7 @@ info:
 	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 	@echo "FIF_OBJS = $(FIF_OBJS)"
 	@echo "PRG_OBJS = $(PRG_OBJS)"
+	@echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 
 #
 # 'make clean' does what you think.

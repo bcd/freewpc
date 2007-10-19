@@ -43,7 +43,7 @@ extern int linux_irq_multiplier;
 
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
-#define MAX_TASKS 32
+#define MAX_TASKS (NUM_TASKS)
 
 
 /* Some WPC per-task data must be stored separately, outside of the pth
@@ -54,7 +54,7 @@ typedef struct
 	task_gid_t gid;
 	PTR_OR_U16 arg;
 	U8 flags;
-	U8 thread_data[4];
+	void *class_data;
 } aux_task_data_t;
 
 aux_task_data_t task_data_table[MAX_TASKS];
@@ -75,22 +75,6 @@ void task_dump (void)
 				td->pid, 
 				(td->pid == task_getpid ()) ? '*' : ' ', 
 				td->gid, td->arg, td->flags);
-		}
-	}
-}
-
-
-void task_inherit_thread_data (task_pid_t pid)
-{
-	int i, j;
-		
-	for (i=0; i < MAX_TASKS; i++)
-	{
-		if (task_data_table[i].pid == pid)
-		{
-			for (j=0; j < 4; i++)
-				task_data_table[i].thread_data[j] = 0; /* TODO */
-			return;
 		}
 	}
 }
@@ -119,14 +103,14 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 			task_data_table[i].gid = gid;
 			task_data_table[i].flags = 0;
 			task_data_table[i].arg = 0;
-			task_data_table[i].thread_data[0] = 0;
-			task_data_table[i].thread_data[1] = 0;
-			task_data_table[i].thread_data[2] = 0;
-			task_data_table[i].thread_data[3] = 0;
-			break;
+			task_data_table[i].class_data = NULL;
+#ifdef CURSES	
+			ui_write_task (i, gid);
+#endif
+			return (pid);
 		}
 
-	return (pid);
+	fatal (ERR_NO_FREE_TASKS);
 }
 
 task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn) //2
@@ -141,8 +125,10 @@ task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn) //2
 task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn) //2
 {
 	task_kill_gid (gid);
+#ifdef PARANOID
 	if (task_find_gid (gid))
 		fatal (ERR_TASK_KILL_FAILED);
+#endif
 	return task_create_gid (gid, fn);
 }
 
@@ -159,7 +145,7 @@ void task_setgid (task_gid_t gid)
 
 void task_sleep (task_ticks_t ticks)
 {
-#ifdef PTHDEBUG
+#ifdef PTHDEBUG2
 	printf ("task_sleep(%d)\n", ticks);
 #endif
 	pth_nap (pth_time (0, ticks * PTH_USECS_PER_TICK));
@@ -173,7 +159,7 @@ void task_sleep_sec (int8_t secs)
 }
 
 
-__naked__ __noreturn__ 
+__noreturn__ 
 void task_exit (void)
 {
 	int i;
@@ -184,10 +170,13 @@ void task_exit (void)
 		if (task_data_table[i].pid == task_getpid ())
 		{
 			task_data_table[i].pid = 0;
-			break;
+#ifdef CURSES	
+			ui_write_task (i, 0);
+#endif
+			for (;;)
+				pth_exit (0);
 		}
-	for (;;)
-		pth_exit (0);
+	fatal (ERR_TASK_KILL_FAILED);
 }
 
 task_pid_t task_find_gid (task_gid_t gid)
@@ -202,18 +191,29 @@ task_pid_t task_find_gid (task_gid_t gid)
 	return NULL;
 }
 
-task_pid_t task_find_gid_data (task_gid_t gid, U8 off, U8 val)
+
+task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
 {
-	fatal (ERR_NOT_IMPLEMENTED_YET);
+	/* TODO */
+	return NULL;
 }
+
 
 void task_kill_pid (task_pid_t tp)
 {
 	int i;
+
+#ifdef PTHDEBUG
+	printf ("task_kill_pid: pid=%p\n", tp);
+#endif
+
 	for (i=0; i < MAX_TASKS; i++)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
+#ifdef CURSES	
+			ui_write_task (i, 0);
+#endif
 			if (tp != 0)
 				pth_abort (tp);
 			return;
@@ -223,15 +223,19 @@ void task_kill_pid (task_pid_t tp)
 bool task_kill_gid (task_gid_t gid)
 {
 	int i;
+	bool rc = FALSE;
+
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		if ((task_data_table[i].gid == gid) &&
 			 (task_data_table[i].pid != 0) &&
 			 (task_data_table[i].pid != task_getpid ()))
+		{
 			task_kill_pid (task_data_table[i].pid);
-			return TRUE;
+			rc = TRUE;
+		}
 	}
-	return FALSE;
+	return (rc);
 }
 
 
@@ -320,34 +324,39 @@ task_gid_t task_getgid (void)
 }
 
 
-U8 task_get_thread_data (task_pid_t pid, U8 n)
-{
-	int i;
-	for (i=0; i < MAX_TASKS; i++)
-	{
-		if (task_data_table[i].pid == pid)
-			return task_data_table[i].thread_data[n];
-	}
-	fatal (ERR_CANT_GET_HERE);
-}
-
-
-void task_set_thread_data (task_pid_t pid, U8 n, U8 v)
-{
-	int i;
-	for (i=0; i < MAX_TASKS; i++)
-	{
-		if (task_data_table[i].pid == pid)
-		{
-			task_data_table[i].thread_data[n] = v;
-			return;
-		}
-	}
-}
-
-
 void task_set_rom_page (task_pid_t pid, U8 rom_page)
 {
+}
+
+
+void *task_get_class_data (task_pid_t pid)
+{
+	int i;
+	static char zero_class_data[32] = { 0, };
+
+	for (i=0; i < MAX_TASKS; i++)
+		if (task_data_table[i].pid == pid)
+		{
+			if (task_data_table[i].class_data == NULL)
+				return &zero_class_data;
+			else
+				return task_data_table[i].class_data;
+		}
+
+	printf ("task_get_class_data for pid %d failed\n", pid);
+	return &zero_class_data;
+	//return NULL;
+}
+
+void task_set_class_data (task_pid_t pid, size_t size)
+{
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+		if (task_data_table[i].pid == pid)
+		{
+			task_data_table[i].class_data = malloc (size);
+			return;
+		}
 }
 
 

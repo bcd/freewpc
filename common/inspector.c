@@ -95,7 +95,7 @@ CALLSET_ENTRY (inspector, sw_buyin_button)
 void inspector_fast_page_down (void)
 {
 	task_sleep (TIME_500MS);
-	while (switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+	while (switch_poll_logical (SW_LEFT_BUTTON))
 	{
 		if (inspector_addr > 0)
 			inspector_addr -= INSPECTOR_PAGE_SIZE * 4;
@@ -104,7 +104,7 @@ void inspector_fast_page_down (void)
 	task_exit ();
 }
 
-CALLSET_ENTRY (inspector, sw_l_l_flipper_button)
+CALLSET_ENTRY (inspector, sw_left_button)
 {
 #ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)
@@ -119,7 +119,7 @@ CALLSET_ENTRY (inspector, sw_l_l_flipper_button)
 void inspector_fast_page_up (void)
 {
 	task_sleep (TIME_500MS);
-	while (switch_poll_logical (SW_L_R_FLIPPER_BUTTON))
+	while (switch_poll_logical (SW_RIGHT_BUTTON))
 	{
 		if (inspector_addr < (U8 *)RAM_SIZE-INSPECTOR_PAGE_SIZE)
 			inspector_addr += INSPECTOR_PAGE_SIZE * 4;
@@ -129,7 +129,7 @@ void inspector_fast_page_up (void)
 }
 
 
-CALLSET_ENTRY (inspector, sw_l_r_flipper_button)
+CALLSET_ENTRY (inspector, sw_right_button)
 {
 #ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)

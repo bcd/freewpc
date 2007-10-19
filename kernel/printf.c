@@ -403,8 +403,7 @@ do_long_hex_integer:
 
 				case 'p':
 				{
-// #ifdef CONFIG_PLATFORM_LINUX
-/* TODO - handle 32-bit pointers */
+// #ifdef CONFIG_NATIVE /* TODO - handle 32-bit pointers */
 // #else
 					sprintf_leading_zeroes = TRUE;
 					sprintf_width = 4;
@@ -474,6 +473,8 @@ dbprintf1 (void)
 #endif
 
 
+/** Initialize the digit separation every time attract mode is
+entered, in case the operator changes it in test mode. */
 CALLSET_ENTRY (printf, amode_start)
 {
 	if (system_config.euro_digit_sep)

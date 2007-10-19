@@ -23,13 +23,16 @@
 
 /* Declare that certain things exist.  This is true of the 6809
  * but may change later as we port to different architectures. */
-#ifdef CONFIG_PLATFORM_WPC
-#define HAVE_NVRAM_SECTION
-#define HAVE_LOCAL_SECTION
+#ifdef __m6809__
 #define HAVE_PAGING
 #define HAVE_INTERRUPT_ATTRIBUTE
 #define HAVE_FLAG_SECTION
 #endif
+
+/* All CPUs support sections for now */
+#define HAVE_NVRAM_SECTION
+#define HAVE_LOCAL_SECTION
+
 
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */
@@ -83,6 +86,7 @@ typedef U8 flag_t;
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 #define __xbmprog__     __far__(C_STRING(PRG_PAGE))
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
+#define __mux__         __far__(C_STRING(MUX_PAGE))
 #else
 #define __far__(x)
 #define __system__
@@ -94,6 +98,7 @@ typedef U8 flag_t;
 #define __machine__
 #define __xbmprog__
 #define __effect__
+#define __mux__
 #endif
 
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
@@ -102,7 +107,7 @@ typedef U8 flag_t;
 #define __interrupt__
 #endif
 
-#ifdef CONFIG_PLATFORM_WPC
+#ifdef __m6809__
 #define __naked__       __attribute__((naked))
 #else
 #define __naked__
@@ -119,6 +124,20 @@ to force use of the 'a' register. */
 #endif
 
 
+/* noop() invokes an actual no-op instruction in assembly on
+the target CPU */
+#ifdef __m6809__
+#define noop() asm ("nop" ::: "memory")
+#else
+#define noop()
+#endif
+
+
+/* barrier() is used in several places to tell the compiler not
+to perform certain optimizations across both sides of the barrier. */
+#define barrier() asm ("; nop" ::: "memory")
+
+
 /* The VOIDCALL macros let you call a function without declaring
 a prototype. */
 
@@ -133,5 +152,69 @@ a prototype. */
 	extern void fn (void); \
 	fn (); \
 }
+
+
+/***************************************************************
+ * I/O accessor functions
+ *
+ * The intent of these functions is to encapsulate all I/O
+ * reads and writes, so that they can be simulated in
+ * environments where a direct memory map is not present.
+ ***************************************************************/
+
+extern inline void wpc_asic_write (U16 addr, U8 val)
+{
+#ifdef CONFIG_NATIVE
+	extern void linux_asic_write (U16 addr, U8 val);
+	linux_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr = val;
+#endif
+}
+
+extern inline U8 wpc_asic_read (U16 addr)
+{
+#ifdef CONFIG_NATIVE
+	extern U8 linux_asic_read (U16 addr);
+	return linux_asic_read (addr);
+#else
+	return *(volatile U8 *)addr;
+#endif
+}
+
+extern inline void wpc_asic_xor (U16 addr, U8 val)
+{
+#ifdef CONFIG_NATIVE
+	U8 reg = wpc_asic_read (addr);
+	reg ^= val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr ^= val;
+#endif
+}
+
+extern inline void wpc_asic_setbits (U16 addr, U8 val)
+{
+#ifdef CONFIG_NATIVE
+	U8 reg = wpc_asic_read (addr);
+	reg |= val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr |= val;
+#endif
+}
+
+extern inline void wpc_asic_clearbits (U16 addr, U8 val)
+{
+#ifdef CONFIG_NATIVE
+	U8 reg = wpc_asic_read (addr);
+	reg &= ~val;
+	wpc_asic_write (addr, val);
+#else
+	*(volatile U8 *)addr &= ~val;
+#endif
+}
+
+
 
 #endif /* _ENV_H */

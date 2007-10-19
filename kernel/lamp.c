@@ -25,15 +25,23 @@
 
 #include <freewpc.h>
 
-__fastram__ struct bit_matrix_table bit_matrix_array;
+__fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
-/** Bitsets for doing temporary lamp effects, which hide the
- * normal state of the lamps */
+__fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+
+__fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
+
 __fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
+
 __fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
+
 __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
+
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
+__fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+
+__fastram__ U8 global_bits[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_flash_max;
 
@@ -50,7 +58,13 @@ __fastram__ U8 lamp_strobe_column;
 void lamp_init (void)
 {
 	/* Clear all lamps/flags */
-	memset (&bit_matrix_array, 0, sizeof (bit_matrix_array));
+	matrix_all_off (lamp_matrix);
+	matrix_all_off (lamp_flash_matrix);
+	matrix_all_off (lamp_flash_matrix_now);
+	matrix_all_off (lamp_leff1_matrix);
+	matrix_all_off (lamp_leff2_matrix);
+	matrix_all_off (bit_matrix);
+	matrix_all_off (global_bits);
 
 	/* Lamp effect allocation matrices are "backwards",
 	 * in the sense that a '1' means free, and '0' means
@@ -88,10 +102,9 @@ void lamp_flash_rtt (void)
  * of the routine is needed, because of loop unrolling.
  * For efficiency, not all iterations need to do everything.
  */
-extern inline void lamp_rtt_common (U8 mode)
+extern inline void lamp_rtt_common (const U8 mode)
 {
 	U8 bits;
-
 	/* TODO : implement lamp power saver level.  For some number N
 	 * iterations, just clear the lamp outputs and be done.
 	 * But only do this outside of a game. */
@@ -198,6 +211,53 @@ bool bit_test (bitset matrix, U8 bit)
 	return bitarray_test (matrix, bit);
 }
 
+bool bit_test_all_on (bitset matrix)
+{
+	return matrix[0] && matrix[1]
+		&& matrix[2] && matrix[3]
+		&& matrix[4] && matrix[5]
+		&& matrix[6] && matrix[7];
+}
+
+bool bit_test_all_off (bitset matrix)
+{
+	return !matrix[0] && !matrix[1]
+		&& !matrix[2] && !matrix[3]
+		&& !matrix[4] && !matrix[5]
+		&& !matrix[6] && !matrix[7];
+}
+
+
+__attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id)
+{
+	switch (id)
+	{
+		case LMX_DEFAULT:
+			return lamp_matrix;
+		case LMX_FLASH:
+			return lamp_flash_matrix;
+		case LMX_EFFECT1_ALLOC:
+			return lamp_leff1_allocated;
+		case LMX_EFFECT1_LAMPS:
+			return lamp_leff1_matrix;
+		case LMX_EFFECT2_ALLOC:
+			return lamp_leff2_allocated;
+		case LMX_EFFECT2_LAMPS:
+			return lamp_leff2_matrix;
+	}
+	fatal (ERR_INVALID_MATRIX);
+}
+
+void matrix_all_on (bitset matrix)
+{
+	memset (matrix, 0xFF, NUM_LAMP_COLS);
+}
+
+void matrix_all_off (bitset matrix)
+{
+	memset (matrix, 0, NUM_LAMP_COLS);
+}
+
 
 /*
  * Lamp manipulation routines
@@ -207,29 +267,53 @@ bool bit_test (bitset matrix, U8 bit)
  * need for allocation.
  *
  */
-void lamp_on (lampnum_t lamp) { bit_on (lamp_matrix, lamp); }
-void lamp_off (lampnum_t lamp) { bit_off (lamp_matrix, lamp); }
-void lamp_toggle (lampnum_t lamp) { bit_toggle (lamp_matrix, lamp); }
-bool lamp_test (lampnum_t lamp) { return bit_test (lamp_matrix, lamp); }
+void lamp_on (lampnum_t lamp)
+{
+	bit_on (lamp_matrix, lamp);
+}
+
+void lamp_off (lampnum_t lamp)
+{
+	bit_off (lamp_matrix, lamp);
+}
+
+void lamp_toggle (lampnum_t lamp)
+{
+	bit_toggle (lamp_matrix, lamp);
+}
+
+bool lamp_test (lampnum_t lamp)
+{
+	return bit_test (lamp_matrix, lamp);
+}
+
+bool lamp_test_off (lampnum_t lamp)
+{ 
+	return !bit_test (lamp_matrix, lamp);
+}
 
 
-void lamp_flash_on (lampnum_t lamp) { 
+void lamp_flash_on (lampnum_t lamp)
+{
 	bit_on (lamp_flash_matrix, lamp);
 }
 
-void lamp_flash_off (lampnum_t lamp) { 
+void lamp_flash_off (lampnum_t lamp)
+{
 	bit_off (lamp_flash_matrix, lamp); 
-	bit_off (lamp_flash_matrix_now, lamp); /* TODO : no no */
+	bit_off (lamp_flash_matrix_now, lamp);
 }
 
-bool lamp_flash_test (lampnum_t lamp) {
+bool lamp_flash_test (lampnum_t lamp)
+{
 	return bit_test (lamp_flash_matrix, lamp);
 }
 
 
 void lamp_global_update (void)
 {
-	callset_invoke (lamp_refresh);
+	if (in_live_game)
+		callset_invoke (lamp_update);
 	if (!in_test)
 		lamp_start_update ();
 }
@@ -244,9 +328,10 @@ void lamp_global_update (void)
 void lamp_all_on (void)
 {
 	disable_interrupts ();
-	memset (lamp_flash_matrix, 0, 3 * NUM_LAMP_COLS);
-	memset (lamp_matrix, 0xff, NUM_LAMP_COLS);
+	matrix_all_off (lamp_flash_matrix);
+	matrix_all_off (lamp_flash_matrix_now);
 	enable_interrupts ();
+	matrix_all_on (lamp_matrix);
 	lamp_global_update ();
 }
 
@@ -254,9 +339,12 @@ void lamp_all_on (void)
 void lamp_all_off (void)
 {
 	disable_interrupts ();
-	memset (lamp_flash_matrix, 0, 3 * NUM_LAMP_COLS);
-	memset (lamp_matrix, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_flash_matrix);
+	matrix_all_off (lamp_flash_matrix_now);
+	matrix_all_off (lamp_leff1_matrix);
+	matrix_all_off (lamp_leff2_matrix);
 	enable_interrupts ();
+	matrix_all_off (lamp_matrix);
 	lamp_global_update ();
 }
 
@@ -296,8 +384,15 @@ void lamp_leff2_free_all (void)
 }
 
 
-void lamp_leff_allocate (lampnum_t lamp) { bit_off (lamp_leff1_allocated, lamp); }
-void lamp_leff_free (lampnum_t lamp) { bit_on (lamp_leff1_allocated, lamp); }
+void lamp_leff_allocate (lampnum_t lamp)
+{ 
+	bit_off (lamp_leff1_allocated, lamp);
+}
+
+void lamp_leff_free (lampnum_t lamp)
+{ 
+	bit_on (lamp_leff1_allocated, lamp);
+}
 
 void lamp_leff2_allocate (lampnum_t lamp)
 { 

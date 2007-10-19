@@ -62,7 +62,6 @@
  */
 
 #include <freewpc.h>
-#include <xbmprog.h>
 
 /** Points to the next free page that can be allocated */
 dmd_pagenum_t dmd_free_page;
@@ -124,34 +123,6 @@ void dmd_rtt1 (void);
 void dmd_rtt2 (void);
 
 
-/*
- * The DMD controller has two registers for controlling which pages
- * are mapped into addressable memory.  
- *
- * Because these registers are write-only, writes are also cached into
- * variables.  Then reads can be done using the cached values.
- */
-
-inline void wpc_dmd_set_low_page (U8 val)
-{
-	wpc_asic_write (WPC_DMD_LOW_PAGE, dmd_low_page = val);
-}
-
-inline U8 wpc_dmd_get_low_page (void)
-{
-	return dmd_low_page;
-}
-
-inline void wpc_dmd_set_high_page (U8 val)
-{
-	wpc_asic_write (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
-}
-
-inline U8 wpc_dmd_get_high_page (void)
-{
-	return dmd_high_page;
-}
-
 
 /**
  * Initialize the DMD subsystem.
@@ -190,7 +161,7 @@ void dmd_rtt0 (void)
 {
 	wpc_dmd_set_visible_page (dmd_dark_page);
 	wpc_dmd_set_firq_row (30);
-	/* TODO : only the last byte of 'dmd_rtt' needs to be
+	/* IDEA: only the last byte of 'dmd_rtt' needs to be
 	 * updated, as long as all three functions reside within
 	 * the same 256-byte region, which could be verified at
 	 * init time */
@@ -327,7 +298,17 @@ void dmd_show2 (void)
 
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
+#ifdef __m6809__
+	extern void dmd_zero (void *);
+	dmd_zero (dbuf);
+#else
 	__blockclear16 (dbuf, DMD_PAGE_SIZE);
+#endif
+
+#ifdef CONFIG_UI
+	extern void ui_clear_dmd_text (int);
+	ui_clear_dmd_text ((dbuf == dmd_low_buffer) ? dmd_low_page : dmd_high_page);
+#endif
 }
 
 
@@ -396,7 +377,7 @@ void dmd_mask_page (dmd_buffer_t dbuf, U16 mask)
 }
 
 
-void dmd_copy_page (dmd_buffer_t dst, dmd_buffer_t src)
+void dmd_copy_page (dmd_buffer_t dst, const dmd_buffer_t src)
 {
 	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
 }
@@ -536,168 +517,13 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
 	}
 }
 
-/** Draw an XBM program (xbmprog).  */ 
-const U8 *dmd_draw_xbmprog (const U8 *xbmprog)
-{
-	U8 *dbuf = dmd_low_buffer;
-	U8 c;
-	U8 c2;
-
-	wpc_push_page (PRG_PAGE);
-
-	/* The first byte of an xbmprog is a 'method', which
-	says the overlap manner in which the image has been
-	compressed. */
-	c = *xbmprog++;
-	switch (c)
-	{
-		case XBMPROG_METHOD_RAW:
-			/* In the 'raw' method, no compression was done at
-			all.  The following 512 bytes are copied verbatim to
-			the display buffer. */
-			dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)xbmprog);
-			xbmprog += (dmd_high_buffer - dmd_low_buffer);
-			break;
-
-		case XBMPROG_METHOD_RLE:
-			/* In the 'run-length encoding (RLE)' method,
-			certain long sequences of the same byte are replaced
-			by a flag, the byte, and a count. */
-			do {
-				c = *xbmprog++;
-				if (c == XBMPROG_RLE_SKIP)
-				{
-					/* The 'skip' flag indicates an RLE sequence where
-					the data byte is assumed to be zero.  The zero byte 
-					is not present in the stream.  The zero case occurs 
-					frequently, and is thus given special treatment. */
-					c = *xbmprog++;
-#if 1
-					/* TODO - use word copies if possible */
-					do {
-						*dbuf++ = 0;
-						c--;
-					} while (c != 0);
-#else
-					memset (dbuf, 0, c);
-#endif
-				}
-				else if (c == XBMPROG_RLE_REPEAT)
-				{
-					/* The 'repeat' flag is the usual RLE case and can
-					support a sequence of any byte value. */
-					c = *xbmprog++; /* data */
-					c2 = *xbmprog++; /* count */
-					/* TODO - use word copies if possible */
-					do {
-						*dbuf++ = c;
-						c2--;
-					} while (c2 != 0);
-				}
-				else
-					/* Unrecognized flags are interpreted as literals.
-					Note that a literal value that matches a flag value
-					above will need to be encoded as an RLE sequence of
-					1, since no escape character is defined. */
-					*dbuf++ = c;
-			} while (dbuf < dmd_high_buffer);
-			break;
-
-		case XBMPROG_METHOD_RLE_DELTA:
-			/* The RLE delta method is almost identical to the
-			RLE method above, but the input stream is overlaid on
-			top of the existing image data, using XOR operations
-			instead of simple assignment.  This is useful for animations
-			in which a subsequent frame is quite similar to its
-			precedent. */
-			do {
-				c = *xbmprog++;
-				if (c == XBMPROG_RLE_SKIP)
-				{
-					c = *xbmprog++;
-					dbuf += c;
-				}
-				else if (c == XBMPROG_RLE_REPEAT)
-				{
-					c = *xbmprog++; /* data */
-					c2 = *xbmprog++; /* count */
-					do {
-						*dbuf++ ^= c;
-						c2--;
-					} while (c2 != 0);
-				}
-				else
-					*dbuf++ ^= c;
-			} while (dbuf < dmd_high_buffer);
-			break;
-	}
-
-	wpc_pop_page ();
-	return xbmprog;
-}
-
-
-/** Draws a FreeWPC formatted image, which is just a 4-color
- * compressed XBMPROG. */
-const U8 *dmd_draw_fif1 (const U8 *fif)
-{
-	U8 depth;
-
-	wpc_push_page (PRG_PAGE);
-	depth = *fif++;
-	wpc_pop_page ();
-
-	fif = dmd_draw_xbmprog (fif);
-	if (depth == 2)
-	{
-		dmd_flip_low_high ();
-		fif = dmd_draw_xbmprog (fif);
-		dmd_flip_low_high ();
-	}
-	return fif;
-}
-
-
-/** Run a DMD animation on the display.
- * An animation is given as a set of adjacent xbmprogs.
- * The delay between frames can be specified.  The
- * special flag value XBMPROG_METHOD_END is placed at
- * the end of the sequence.
- */
-void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
-{
-	while (*xbmprog != XBMPROG_METHOD_END)
-	{
-		dmd_alloc_low ();
-		/* TODO : broken because the xbmprogs are in the wrong order! */
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_show_low ();
-		task_sleep (delay);
-	}
-}
-
-
-void dmd_animate2 (const U8 *xbmprog, task_ticks_t delay)
-{
-	while (*xbmprog != XBMPROG_METHOD_END)
-	{
-		dmd_alloc_low_high ();
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_flip_low_high ();
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_flip_low_high ();
-		dmd_show2 ();
-		task_sleep (delay);
-	}
-}
-
 
 /*
  * Helper function used to do a DMD transition.
  * This contains common logic that needs to happen several times during
  * a transition.
  */
-inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
+static inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 {
 	/* On entry, the composite buffer must be mapped into the 
 	 * high page. */

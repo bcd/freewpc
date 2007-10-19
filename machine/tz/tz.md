@@ -26,7 +26,7 @@ Lamp-Matrix-Height: 29
 # Include standard definitions that apply to all WPC games.
 # This will set some defaults for things you leave out here.
 ##########################################################################
-include kernel/freewpc.md
+include platform/wpc/wpc.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
@@ -41,6 +41,9 @@ define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
 define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE replay_code_to_score
 define MACHINE_DEBUGGER_HOOK tz_debugger_hook
+define MACHINE_REPLAY_SCORE_CHOICES 10
+define MACHINE_REPLAY_START_CHOICE 5
+define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 
 ##########################################################################
 # Lamp Description
@@ -181,7 +184,7 @@ define MACHINE_DEBUGGER_HOOK tz_debugger_hook
 62: Skill Center, ingame, noplay
 63: Skill Top, ingame, noplay
 64: Standup 4, standup, ingame, lamp(LM_UR_5M)
-65: Power Payoff, c_decl(sw_unused)
+65: Power Payoff, standup, ingame
 66: Standup 5, standup, ingame, lamp(LM_MR1_5M)
 67: Standup 6, standup, ingame, lamp(LM_MR2_5M)
 68: Standup 7, standup, ingame, lamp(LM_LR_5M)
@@ -265,26 +268,11 @@ X7: Clock Forward, motor, nosearch
 # General Illumination
 ##########################################################################
 [gi]
-0: Lower Left Playfield
+0: L.Left Playfield
 1: Powerfield
 2: Clock
 3: Mystery
-4: Lower Right Playfield
-
-##########################################################################
-# Drivers
-# These are functions that need to be called periodically to service
-# the hardware real-time.  The key determines the name of the service
-# routine (e.g. slingshot_rtt for the slingshots).  The poll() option
-# denotes how often they need to be called, in milliseconds.
-# Supported values are 1, 8, 32, and 128.
-##########################################################################
-[drivers]
-slingshot: poll(8)
-jets: poll(8)
-magnet_switch: poll(8)
-tz_clock: poll(32)
-magnet_duty: poll(32)
+4: L.Right Playfield
 
 ##########################################################################
 # Tests
@@ -294,6 +282,7 @@ magnet_duty: poll(32)
 tz_clock:
 tz_gumball:
 tz_magnet:
+tz_powerball:
 
 
 ##########################################################################
@@ -521,13 +510,13 @@ Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
 Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK1+4
-Door Award: PRI_GAME_QUICK1+6
+Door Award: PRI_GAME_QUICK1+6, D_QUEUED+D_TIMEOUT
 Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK1+7
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
 PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK1+8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE1+8
-Ball Save: page(MACHINE_PAGE), PRI_GAME_QUICK1+9
+Ball Save: page(MACHINE_PAGE), PRI_GAME_LOW3
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK1+10, D_QUEUED+D_TIMEOUT
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1+11
 Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK1+12
@@ -538,7 +527,9 @@ SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
 SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+6
 
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
-Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_MODE1+13
+Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK1+13
+
+Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE1+1
 
 ##########################################################################
 # Lamp effects
@@ -567,6 +558,8 @@ Left Loop: PRI_LEFF1, LAMPS(SORT3), page(MACHINE_PAGE)
 Right Loop: PRI_LEFF1, LAMPS(SORT4), page(MACHINE_PAGE)
 Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
+Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)
 
 ##########################################################################
 # Fonts used in this game.

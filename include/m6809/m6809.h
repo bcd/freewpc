@@ -95,6 +95,15 @@ extern inline void m6809_orcc (const U8 bits)
 	asm __volatile__ ("orcc\t%0" :: "i" (bits));
 }
 
+extern inline void m6809_firq_save_regs (void)
+{
+	asm __volatile__ ("pshs\td,x");
+}
+
+extern inline void m6809_firq_restore_regs (void)
+{
+	asm __volatile__ ("puls\td,x");
+}
 
 /** Optimized memset function.
  * The length n should be a constant.

@@ -4,26 +4,30 @@
 #
 
 rm -f stressbuild.log
-for plat in `echo wpc`; do # removed linux for now
+for native in `echo n y`; do
+	if [ "$native" = "y" ]; then
+		NATIVE=y; export NATIVE
+	else
+		unset NATIVE
+	fi
 	for mach in `echo t2 tz wcs afm tester`; do
 		for debugger in `echo y n`; do
-			if [ "$plat" = "wpc" ]; then
+			if [ "$native" = "n" ]; then
 				gcctargets=`echo 3.4.6 4.2.1`; # removed 4.3.0 for now
 			else
 				gcctargets=`echo nop`;
 			fi
-
 			for gcc in $gcctargets; do
 				if [ "$gcc" = "nop" ]; then gcc=; fi
 				for target in `echo clean default_target`; do
 					echo Execing make \
-						PLATFORM=$plat MACHINE=$mach DEBUGGER=$debugger \
+						PLATFORM=wpc MACHINE=$mach DEBUGGER=$debugger \
 						GCC_VERSION=$gcc $target | tee -a stressbuild.log
-					make PLATFORM=$plat MACHINE=$mach GCC_VERSION=$gcc \
-						DEBUGGER=$debugger $target 2>&1 >> stressbuild.log
+					make NOCONFIG=y PLATFORM=wpc MACHINE=$mach GCC_VERSION=$gcc \
+						FREEWPC_DEBUGGER=$debugger $target 2>&1 >> stressbuild.log
 					rc="$?"
 					if [ -f err ]; then cat err | tee -a stressbuild.log; fi
-					echo rc=$rc PLATFORM=$plat MACHINE=$mach DEBUGGER=$debugger \
+					echo rc=$rc NATIVE=$native MACHINE=$mach DEBUGGER=$debugger \
 						GCC_VERSION=$gcc $target | tee -a stressbuild.log
 	          	if [ "$rc" != "0" ]; then exit $rc; fi
 				done

@@ -41,7 +41,7 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 	{
 		leff_start (LEFF_NO_GI);
 		sound_send (SND_ROCKET_KICK_REVVING);
-		task_sleep (TIME_100MS * 8);
+		task_sleep (TIME_500MS);
 		task_create_gid (0, rocket_kick_sound);
 	}
 }

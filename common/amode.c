@@ -101,7 +101,7 @@ void amode_deff (void)
 
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
-		dmd_draw_image2 (freewpc_logo_bits);
+		dmd_draw_fif (fif_freewpc);
 		dmd_sched_transition (&trans_random_boxfade);
 		dmd_show2 ();
 		if (amode_page_delay (5) && system_config.tournament_mode)

@@ -21,12 +21,39 @@
 #include <freewpc.h>
 
 bool skill_shot_enabled;
+
 U8 skill_switch_reached;
 
-void skill_shot_ready_deff (void)
+__local__ U8 skill_min_value;
+
+
+extern inline void flash_deff_begin_static (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
+}
+
+extern inline void flash_deff_begin_flashing (void)
+{
+	dmd_copy_low_to_high ();
+}
+
+extern inline __noreturn__ void flash_deff_run (void)
+{
+	dmd_show_low ();
+	for (;;)
+	{
+		task_sleep (TIME_100MS * 3); /* all text on */
+		dmd_show_other ();
+		task_sleep (TIME_100MS * 1); /* flashing text on */
+		dmd_show_other ();
+	}
+}
+
+
+void skill_shot_ready_deff (void)
+{
+	flash_deff_begin_static ();
 
 	sprintf ("PLAYER %d", player_up);
 	font_render_string_left (&font_var5, 1, 2, sprintf_buffer);
@@ -34,23 +61,22 @@ void skill_shot_ready_deff (void)
 	sprintf_current_score ();
 	font_render_string_right (&font_mono5, 127, 2, sprintf_buffer);
 
-	font_render_string (&font_mono5, 16, 10, "YELLOW ");
-	font_render_string (&font_mono5, 16, 16, "ORANGE ");
-	font_render_string (&font_mono5, 16, 22, "RED    ");
+	font_render_string (&font_mono5, 16, 10, "YELLOW");
+	font_render_string (&font_mono5, 16, 16, "ORANGE");
+	font_render_string (&font_mono5, 16, 22, "RED");
 
-	dmd_copy_low_to_high ();
-	font_render_string_right (&font_mono5, 110, 10, "5,000,000");
-	font_render_string_right (&font_mono5, 110, 16, "3,000,000");
-	font_render_string_right (&font_mono5, 110, 22, "1,000,000");
-	dmd_show_low ();
-	for (;;)
-	{
-		task_sleep (TIME_100MS * 3);
-		dmd_show_other ();
-		task_sleep (TIME_100MS * 1);
-		dmd_show_other ();
-	}
+	flash_deff_begin_flashing ();
+
+	sprintf ("%d,000,000", skill_min_value+3);
+	font_render_string_right (&font_mono5, 110, 10, sprintf_buffer);
+	sprintf ("%d,000,000", skill_min_value+1);
+	font_render_string_right (&font_mono5, 110, 16, sprintf_buffer);
+	sprintf ("%d,000,000", skill_min_value);
+	font_render_string_right (&font_mono5, 110, 22, sprintf_buffer);
+
+	flash_deff_run ();
 }
+
 
 void enable_skill_shot (void)
 {
@@ -73,13 +99,13 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
-			sprintf ("1,000,000");
+			sprintf ("%d,000,000", skill_min_value);
 			break;
 		case 2:
-			sprintf ("3,000,000");
+			sprintf ("%d,000,000", skill_min_value+1);
 			break;
 		case 3:
-			sprintf ("5,000,000");
+			sprintf ("%d,000,000", skill_min_value+3);
 			break;
 	}
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
@@ -94,6 +120,7 @@ static void award_skill_shot (void)
 {
 	mark_ball_in_play ();
 	deff_start (DEFF_SKILL_SHOT_MADE);
+	task_sleep (TIME_66MS);
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	disable_skill_shot ();
@@ -101,22 +128,23 @@ static void award_skill_shot (void)
 	{
 		case 1:
 			callset_invoke (skill_red);
-			//score (SC_1M);
-			score_1M (1);
+			score_1M (skill_min_value);
 			break;
 		case 2: 
 			callset_invoke (skill_orange);
-			//score (SC_3M); 
-			score_1M (3);
+			score_1M (skill_min_value+1);
+			skill_min_value++;
 			timed_game_extend (5);
 			break;
 		case 3: 
 			callset_invoke (skill_yellow);
-			//score (SC_5M); 
-			score_1M (5);
+			score_1M (skill_min_value+3);
+			skill_min_value += 2;
 			timed_game_extend (10);
 			break;
 	}
+	if (skill_min_value > 7)
+		skill_min_value = 7;
 }
 
 static void skill_switch_monitor (void)
@@ -166,6 +194,12 @@ CALLSET_ENTRY (skill, sw_skill_center)
 CALLSET_ENTRY (skill, sw_skill_top)
 {
 	award_skill_switch (3);
+}
+
+
+CALLSET_ENTRY (skill, start_player)
+{
+	skill_min_value = 1;
 }
 
 

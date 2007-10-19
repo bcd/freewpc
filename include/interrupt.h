@@ -29,7 +29,7 @@ extern inline void do_irq_begin (void)
 #endif
 
 	/* Clear the source of the interrupt */
-	wpc_write_irq_clear (0x96);
+	wpc_int_clear ();
 
 	/* When building a profiling program, count the
 	 * number of IRQs by writing to the pseudoregister

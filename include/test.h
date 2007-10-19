@@ -101,6 +101,8 @@ struct adjustment
 {
 	const char *name;
 	struct adjustment_value *values;
+	/* TODO : factory default should differ depending on country code,
+	 * at least in some cases */
 	U8 factory_default;
 	U8 *nvram;
 };
@@ -110,6 +112,22 @@ __test__ void adj_verify (struct adjustment *adjs);
 __test__ void adj_reset_all (void);
 __test__ void adj_verify_all (void);
 
+__test__ void preset_install_country_code (U8 code);
+
+
+typedef enum
+{
+	AUDIT_TYPE_NONE,
+	AUDIT_TYPE_INT,
+	AUDIT_TYPE_GAME_PERCENT,
+	AUDIT_TYPE_SECS,
+	AUDIT_TYPE_US_DOLLAR,
+	AUDIT_TYPE_CURRENCY,
+	AUDIT_TYPE_TOTAL_EARNINGS,
+	AUDIT_TYPE_AVG_PER_GAME,
+	AUDIT_TYPE_AVG_PER_BALL,
+} audit_format_type_t;
+
 
 /**
  * An audit descriptor, which correlates an audit's storage location
@@ -118,7 +136,7 @@ __test__ void adj_verify_all (void);
 struct audit
 {
 	const char *name;
-	void (*render) (audit_t);
+	audit_format_type_t format;
 	audit_t *nvram;
 };
 

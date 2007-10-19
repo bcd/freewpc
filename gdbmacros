@@ -1,0 +1,37 @@
+#---------------------------------------------------
+break gdb_break
+#---------------------------------------------------
+define show-game
+	printf "Player : %d of %d\n", player_up, num_players
+	printf "Ball : %d\n", ball_up
+	printf "Score: "
+	x/5b current_score
+end
+document show-game
+	Displays status of the game in progress
+end
+#---------------------------------------------------
+define show-adj
+	p/d system_config
+	p/d feature_config
+	p/d price_config
+	p/d hstd_config
+end
+document show-adj
+	Displays the current adjustments in effect
+end
+#---------------------------------------------------
+define show-tasks
+	p task_data_table
+end
+document show-tasks
+	Displays the task table
+end
+#---------------------------------------------------
+define show-effects
+	printf "Display effect: %d\n", deff_runqueue->id
+end
+document show-effects
+	Displays which effects are currently running
+end
+#---------------------------------------------------

@@ -3,4 +3,4 @@ DMD: Yes
 Fliptronic: Yes
 DCS: No
 WPC95: No
-include kernel/freewpc.md
+include platform/wpc/wpc.md

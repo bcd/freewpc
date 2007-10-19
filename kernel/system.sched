@@ -31,25 +31,17 @@ fliptronic_rtt        2       250c
 triac_rtt             2       60c
 
 # Read the regular switch matrix and coin door
-switch_rtt            2       500c
+switch_rtt/4          1       140c
 
 # Resynchronize to the AC zero cross point.
 ac_rtt                2       30c
 
-# Update the solenoids
-sol_rtt               8       125c
-
-# Update flashers
-# TODO : this routine needs help.  The estimate is
-# for idle; when it actually has to pulse a flasher,
-# it is MUCH worse
-flasher_rtt           8       170c
+# Update the solenoids.  Each bank of 8 is updated
+# once every 4ms (the 4 banks are alternated every 1ms).
+sol_update_rtt/4      1       60c
 
 # Update the lamps
-lamp_rtt_0            8       90c
-lamp_rtt_1            8       90c
-lamp_rtt_2            8       90c
-lamp_rtt_3            8       90c
+lamp_rtt/4            2       100c
 
 # Advance the system clock
 !clock_advance        16      4c
@@ -58,7 +50,7 @@ lamp_rtt_3            8       90c
 !wpc_led_toggle       32      14c
 
 # Read/write the sound board
-sound_rtt             32      0.01
+sound_rtt             2       50c
 
 # Toggle lamps that are in 'flash' mode
 # TODO : the flash handler is really only toggling every
@@ -70,6 +62,9 @@ lamp_flash_rtt        32      0.01
 # critical functions are done here outside of task level.
 lockup_check_rtt      128     0.01
 
+# Free running hardware-quality timers
+free_timer_rtt        32		100c
+
 # Accumulate idle-time statistics when enabled
 #if IDLE_PROFILE idle_profile_rtt      128     0.01
 
@@ -79,4 +74,4 @@ do_irq_end            1       0c
 
 # TODO : service the coin switches correctly to ensure proper timing
 
-
+# TODO : add hardtimer_rtt

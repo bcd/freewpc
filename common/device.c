@@ -83,6 +83,11 @@ U8 held_balls;
  * run.  The lock is then released and things continue. */
 U8 kickout_locks;
 
+/** The number of times in a row that game start was tried,
+but failed due to missing balls.  After so many errors, the
+game is started anyway. */
+U8 device_game_start_errors;
+
 
 #ifdef DEBUGGER
 void device_debug (void)
@@ -97,8 +102,8 @@ void device_debug (void)
 			devno, dev->props->name,
 			dev->previous_count, dev->actual_count);
 
-		dbprintf ("max %d, need %d kicks, %s\n",
-			dev->max_count, dev->kicks_needed,
+		dbprintf ("max %d, need %d kicks, %d errors, %s\n",
+			dev->max_count, dev->kicks_needed, dev->kick_errors,
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
@@ -257,8 +262,11 @@ wait_and_recount:
 			the device immediately after the kick.  The kick didn't
 			really fail, but there's no way to tell the difference. */
 
-			dbprintf ("Kick failed\n");
-			device_call_op (dev, kick_failure);
+			if (dev->kick_errors > 0)
+			{
+				dbprintf ("Kick error %d\n", dev->kick_errors);
+				device_call_op (dev, kick_failure);
+			}
 
 			if (++dev->kick_errors == 5)
 			{
@@ -352,8 +360,9 @@ wait_and_recount:
 			callset_invoke (any_kick_attempt);
 			device_call_op (dev, kick_attempt);
 
-			/* Pulse the solenoid */
-			sol_pulse (dev->props->sol);
+			/* Pulse the solenoid.
+			 * TODO - how to do this is also device-specific. */
+			sol_start (dev->props->sol, SOL_DUTY_100, TIME_66MS);
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
@@ -457,9 +466,11 @@ void device_update_globals (void)
 		dbprintf ("Error: missing=%d, live=%d\n", missing_balls, live_balls);
 	}
 
+	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
+		counted_balls, missing_balls, live_balls, held_balls);
+
 	/* If any balls are held up temporarily (more than "max" are
 	 * in the device presently), then delay timers */
-	dbprintf ("held_balls = %d\n", held_balls);
 	if (in_live_game)
 	{
 		if (held_balls > 0)
@@ -500,7 +511,11 @@ void device_probe (void)
 {
 	devicenum_t devno;
 
-	task_sleep_sec (1);
+	while (unlikely (sys_init_complete == 0))
+		task_sleep (TIME_100MS);
+	task_sleep_sec (2);
+
+	dbprintf ("Probing devices\n");
 
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
@@ -557,6 +572,7 @@ void device_probe (void)
 		}
 	}
 
+	dbprintf ("Checking globals after probe\n");
 	device_update_globals ();
 
 	dbprintf ("\nDevices initialized.\n");
@@ -567,11 +583,13 @@ void device_probe (void)
 }
 
 
-/** Called from a switch handler to do the common processing */
+/** Called from a switch handler to do the common processing.
+ * The input is the device number.  The actual switch that 
+ * transitioned is unknown, as we don't really care. */
 void device_sw_handler (U8 devno)
 {
 	/* Ignore device switches until device SS is initialized. */
-	if (device_ss_state == 0)
+	if ((device_ss_state == 0) || (sys_init_complete == 0))
 	{
 		dbprintf ("Device system not ready.\n");
 		return;
@@ -624,10 +642,17 @@ void device_remove_live (void)
 			/* Notify that the ball count changed, and that a ball drained */
 			callset_invoke (ball_count_change);
 			callset_invoke (ball_drain);
-			switch (live_balls)
+
+			switch (live_balls
+#ifdef DEVNO_TROUGH
+				 + device_entry (DEVNO_TROUGH)->kicks_needed
+#endif
+				)
 			{
 				case 0:
-					/* With zero balls in play, this might be end of ball. */
+					/* With zero balls in play, this might be end of ball.
+					 * If there are pending ball serves from the trough, then
+					 * don't end the ball just yet. */
 					end_ball ();
 
 					/* FALLTHRU : end_ball may be cancelled due to a
@@ -701,15 +726,17 @@ bool device_check_start_ok (void)
 	 * by displaying a message. */
 	if (truly_missing_balls > 0)
 	{
-		task_recreate_gid (GID_DEVICE_PROBE, device_probe);
-		ball_search_run ();
-		deff_start (DEFF_LOCATING_BALLS);
-		/* TODO : after so many attempts, if a ball is still
-		missing then allow the game to start anyway */
-
-		while (task_find_gid (GID_DEVICE_PROBE))
-			task_sleep_sec (TIME_500MS);
-		return FALSE;
+		if (++device_game_start_errors < 5)
+		{
+			task_recreate_gid (GID_DEVICE_PROBE, device_probe);
+			ball_search_run ();
+			deff_start (DEFF_LOCATING_BALLS);
+			while (task_find_gid (GID_DEVICE_PROBE))
+				task_sleep_sec (TIME_500MS);
+			return FALSE;
+		}
+		else
+			return TRUE;
 	}
 
 	/* All checks pass : OK to start game now */
@@ -765,6 +792,13 @@ CALLSET_ENTRY (device, start_game)
 }
 
 
+CALLSET_ENTRY (device, amode_start)
+{
+	live_balls = 0;
+	device_game_start_errors = 0;
+}
+
+
 /** Initialize the device subsystem */
 void device_init (void)
 {
@@ -782,13 +816,13 @@ void device_init (void)
 	live_balls = 0;
 	kickout_locks = 0;
 	held_balls = 0;
+	device_game_start_errors = 0;
 
 	for (i=0; i < NUM_DEVICES; i++)
 	{
 		dev = device_entry (i);
 		device_clear (dev);
 		device_register (i, &device_properties_table[i]);
-		device_call_op (dev, power_up);
 	}
 }
 

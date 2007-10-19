@@ -25,12 +25,14 @@ void dll_init_element1 (ELEM *elem)
 }
 
 
+/** Initialize a doubly-linked list. */
 void dll_init1 (ELEM **head)
 {
 	*head = NULL;
 }
 
 
+/** Add an element to the front of a doubly-linked list. */
 void dll_add_front1 (ELEM **head, ELEM *elem)
 {
 	if (*head == NULL)
@@ -50,16 +52,15 @@ void dll_add_front1 (ELEM **head, ELEM *elem)
 }
 
 
+/** Add an element to the back of a doubly-linked list. */
 void dll_add_back1 (ELEM **head, ELEM *elem)
 {
 }
 
 
+/** Remove an element from a doubly-linked list. */
 void dll_remove1 (ELEM **head, ELEM *elem)
 {
-	/* TODO : Removing the last element in a nontrivial list
-	appears to be broken */
-
 	if (elem->next == elem)
 	{
 		/* If the list only has 1 element, it becomes empty. */

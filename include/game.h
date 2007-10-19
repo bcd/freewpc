@@ -53,6 +53,8 @@ void add_player (void);
 void start_game (void);
 void stop_game (void);
 bool verify_start_ok (void);
+void match_start (void);
+void amode_start (void);
 
 #ifdef CONFIG_TIMED_GAME
 void timed_game_extend (U8 secs);

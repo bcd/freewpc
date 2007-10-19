@@ -71,6 +71,8 @@ U8 font_string_width;
  * is the maximum height of all its characters */
 U8 font_string_height;
 
+extern const font_t font_bitmap_common;
+
 
 /* Returns a pointer to the glyph data for a character 'c'
  * in the font 'font'.  This points directly to the raw bytes
@@ -115,11 +117,52 @@ __fastram__ U8 *blit_dmd;
 const U8 *blit_data;
 
 
+/* Warning: experimental */
+#ifdef NEW_BLIT_MACRO
+static inline void font_blit_internal (U8 * const dst, 
+	const U8 * const src, const U8 shift)
+{
+	*dst ^= *src << shift;
+	if (shift > 0)
+		dst[1] = (*src >> (8-shift)) ^ src[1];
+}
+#endif /* NEW_BLIT_MACRO */
+
+
 /** Write an 8-bit value to an arbitrary location on the DMD.  
 All inputs to this function are kept in global variables that must be 
 initialized prior to entry. */
 static void font_blit (void)
 {
+#ifdef NEW_BLIT_MACRO
+	switch (blit_xpos % 8)
+	{
+		case 0:
+			font_blit_internal (blit_dmd, blit_data++, 0);
+			break;
+		case 1:
+			font_blit_internal (blit_dmd, blit_data++, 1);
+			break;
+		case 2:
+			font_blit_internal (blit_dmd, blit_data++, 2);
+			break;
+		case 3:
+			font_blit_internal (blit_dmd, blit_data++, 3);
+			break;
+		case 4:
+			font_blit_internal (blit_dmd, blit_data++, 4);
+			break;
+		case 5:
+			font_blit_internal (blit_dmd, blit_data++, 5);
+			break;
+		case 6:
+			font_blit_internal (blit_dmd, blit_data++, 6);
+			break;
+		case 7:
+			font_blit_internal (blit_dmd, blit_data++, 7);
+			break;
+	}
+#else
 	switch (blit_xpos % 8)
 	{
 		default:
@@ -156,6 +199,7 @@ static void font_blit (void)
 			break;
 	}
 	blit_data++;
+#endif /* NEW_BLIT_MACRO */
 }
 
 
@@ -180,8 +224,9 @@ static void fontargs_render_string (void)
 	there is no return here, so the remaining code is still executed,
 	and the 'virtual' DMD buffer is indeed written to, although it
 	can't actually be seen. */
-#ifdef CONFIG_PLATFORM_LINUX
-	linux_write_string (s);
+#ifdef CONFIG_UI
+	if (args->font != &font_bitmap_common)
+		ui_write_dmd_text (args->coord.x, args->coord.y, s);
 #endif
 
 	/* Font data is stored in a separate page of ROM; switch
@@ -196,6 +241,12 @@ static void fontargs_render_string (void)
 
 		blit_data = font_lookup (args->font, c);
 
+		/* If the height of this glyph is not the same as the
+		height of the overall string, then the character should
+		be bottom aligned.  This is needed for commas and periods.
+		The starting address is moved down the required number
+		of rows.  The amount of space added is saved away so that
+		it can be reclaimed later. */
 		if (font_height < args->font->height)
 		{
 			top_space = (args->font->height - font_height);
@@ -207,10 +258,29 @@ static void fontargs_render_string (void)
 
 		xb = blit_xpos / 8;
 
+		/* Set the starting address */
 		blit_dmd = wpc_dmd_addr_verify (dmd_base + xb);
+
+		/* Write the character.
+		 * The glyph is drawn one row at a time.
+		 * TODO - this is pretty inefficient.  Several things could be done
+		 * better:
+		 *    Draw row first rather than column first???.  A lot of the
+		 *    complexity is in calculating bitmasks for drawing unaligned
+		 *    pixels.  Much of this would go away in row first mode.
+		 *
+		 *    When a glyph is more than 8 bits wide and unaligned, we are
+		 *    performing way more reads and writes than necessary.  We
+		 *    have to read a byte, set only the affected bits, write it back.
+		 *    Some sort of pipelined approach where we only write to the
+		 *    DMD memory when we are done with a byte would be better.
+		 *
+		 *    We only write 1 byte at a time.  For >8 bits wide, we can
+		 *    do better writing 16-bits at a time.  This is probably easier
+		 *    in column first mode but I think it could be done either way.
+		 */
 		for (i=0; i < font_height; i++)
 		{
-			task_dispatching_ok = TRUE;
 			for (j=0; j < font_byte_width; j++)
 			{
 				/* TODO : font_blit is applicable to more than just
@@ -226,14 +296,28 @@ static void fontargs_render_string (void)
 
 		/* advance by 1 char ... args->font->width */
 		blit_xpos += font_width;
+
+		/* If the height was adjusted just for this character, restore
+		back to the original starting row */
 		if (top_space != 0)
 			dmd_base -= top_space;
+
+		/* Because this is slow, assert that everything is OK so
+		the software watchdog doesn't expire. */
+		task_dispatching_ok = TRUE;
+
 	} /* end for each character in the string */
 	wpc_pop_page ();
 }
 
 
-/** Draw a bitmap to an arbitrary screen location */
+/** Draw a bitmap to an arbitrary screen location.  The image is
+a single color and drawn into the low-mapped display page.
+The format of the image data is the same as for a font glyph:
+the first byte is its bit-width, the second byte is its
+bit-height, and the remaining bytes are the image data, going
+from top to bottom and then left to right.  Also, the image
+data must reside in FONT_PAGE for now. */
 void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 {
 	U8 i, j;
@@ -259,6 +343,8 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 }
 
 
+/** Draw a single color bitmap onto both the low and high
+mapped display pages. */
 void bitmap_blit2 (const U8 *_blit_data, U8 x, U8 y)
 {
 	bitmap_blit (_blit_data, x, y);
@@ -268,7 +354,8 @@ void bitmap_blit2 (const U8 *_blit_data, U8 x, U8 y)
 }
 
 
-/** Erase an arbitrary region of the DMD. */
+/** Erase an arbitrary region of the DMD.  coord gives the
+upper-left corner of the region.  width and height specify the size. */
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 {
 	U8 *dmd_base;
@@ -339,10 +426,11 @@ void font_get_string_area (const font_t *font, const char *s)
 	 */
 	if (s != sprintf_buffer)
 	{
+		/* TODO - use a real strcpy() here that is more efficient */
 		char *ram = sprintf_buffer;
-		while (*s != '\0')
-			*ram++ = *s++;
-		*ram = '\0';
+		do {
+			*ram++ = *s;
+		} while (*s++ != '\0');
 		s = sprintf_buffer;
 	}
 
@@ -376,66 +464,49 @@ void font_get_string_area (const font_t *font, const char *s)
 }
 
 
-static void fontargs_prep_left (const fontargs_t *args)
+static void fontargs_prep_left (void)
 {
-	font_get_string_area (args->font, args->s);
-	if (args != &font_args)
-	{
-		font_args.coord = args->coord;
-		font_args.font = args->font;
-		font_args.s = args->s;
-	}
+	font_get_string_area (font_args.font, font_args.s);
 }
 
-static void fontargs_prep_center (const fontargs_t *args)
+static void fontargs_prep_center (void)
 {
-	font_get_string_area (args->font, args->s);
-	font_args.coord.x = args->coord.x - (font_string_width / 2);
-	font_args.coord.y = args->coord.y - (font_string_height / 2);
-	if (args != &font_args)
-	{
-		font_args.font = args->font;
-		font_args.s = args->s;
-	}
+	font_get_string_area (font_args.font, font_args.s);
+	font_args.coord.x = font_args.coord.x - (font_string_width / 2);
+	font_args.coord.y = font_args.coord.y - (font_string_height / 2);
 }
 
-static void fontargs_prep_right (const fontargs_t *args)
+static void fontargs_prep_right (void)
 {
-	font_get_string_area (args->font, args->s);
-	font_args.coord.x = args->coord.x - font_string_width;
-	if (args != &font_args)
-	{
-		font_args.coord.y = args->coord.y;
-		font_args.font = args->font;
-		font_args.s = args->s;
-	}
+	font_get_string_area (font_args.font, font_args.s);
+	font_args.coord.x = font_args.coord.x - font_string_width;
 }
 
 
-void fontargs_render_string_left (const fontargs_t *args)
+void fontargs_render_string_left (void)
 {
-	fontargs_prep_left (args);
+	fontargs_prep_left ();
 	fontargs_render_string ();
 }
 
 
-void fontargs_render_string_center (const fontargs_t *args)
+void fontargs_render_string_center (void)
 {
-	fontargs_prep_center (args);
+	fontargs_prep_center ();
 	fontargs_render_string ();
 }
 
 
-void fontargs_render_string_right (const fontargs_t *args)
+void fontargs_render_string_right (void)
 {
-	fontargs_prep_right (args);
+	fontargs_prep_right ();
 	fontargs_render_string ();
 }
 
 
-void fontargs_render_string_left2 (const fontargs_t *args)
+void fontargs_render_string_left2 (void)
 {
-	fontargs_prep_left (args);
+	fontargs_prep_left ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
 	fontargs_render_string ();
@@ -443,9 +514,9 @@ void fontargs_render_string_left2 (const fontargs_t *args)
 }
 
 
-void fontargs_render_string_center2 (const fontargs_t *args)
+void fontargs_render_string_center2 (void)
 {
-	fontargs_prep_center (args);
+	fontargs_prep_center ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
 	fontargs_render_string ();
@@ -453,9 +524,9 @@ void fontargs_render_string_center2 (const fontargs_t *args)
 }
 
 
-void fontargs_render_string_right2 (const fontargs_t *args)
+void fontargs_render_string_right2 (void)
 {
-	fontargs_prep_right (args);
+	fontargs_prep_right ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
 	fontargs_render_string ();
@@ -463,10 +534,10 @@ void fontargs_render_string_right2 (const fontargs_t *args)
 }
 
 
+/** Draw a bitmap from the 'symbol' font onto the display.
+The character selects which symbol to be drawn. */
 void bitmap_draw (union dmd_coordinate coord, U8 c)
 {
-	extern const font_t font_bitmap_common;
-
 	sprintf_buffer[0] = c;
 	sprintf_buffer[1] = '\0';
 

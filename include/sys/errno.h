@@ -59,6 +59,8 @@
 #define ERR_WINDOW_STACK_OVERFLOW 35
 #define ERR_LIBC_ABORT           36
 #define ERR_MALLOC               37
+#define ERR_MUST_BE_LEFF         38
+#define ERR_INVALID_MATRIX       39
 
 typedef U8 errcode_t;
 

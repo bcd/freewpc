@@ -91,7 +91,7 @@ void pb_detect_deff (void)
 	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 	
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (3);
 #else
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");
@@ -116,6 +116,10 @@ void pb_loop_deff (void)
 
 
 /** Called when the powerball is known to be in a particular location.
+ * Because there is only one powerball installed in the machine, this
+ * information is definitive.  The location says where the ball is;
+ * for a container device, depth says how many kicks it would take to
+ * eject the powerball from it.
  *
  * PB_IN_PLAY is used when it is guaranteed to be in play, even during
  * multiball.
@@ -139,6 +143,7 @@ void pb_set_location (U8 location, U8 depth)
 			lamp_tristate_flash (LM_RIGHT_POWERBALL);
 			flag_on (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 1;
+			callset_invoke (powerball_present);
 		}
 		else if (pb_location & PB_MAYBE_IN_PLAY)
 		{
@@ -146,6 +151,7 @@ void pb_set_location (U8 location, U8 depth)
 			lamp_tristate_on (LM_RIGHT_POWERBALL);
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
+			callset_invoke (powerball_lost);
 			/* TODO - in the 'maybe' state, pulse magnets to
 			figure out the ball type */
 		}
@@ -153,7 +159,8 @@ void pb_set_location (U8 location, U8 depth)
 }
 
 /** Called when the powerball is known *NOT* to be in a particular 
- * location. */
+ * location.  If that's where we thought the powerball was before,
+ * then it's missing.  Otherwise, nothing is learned. */
 void pb_clear_location (U8 location)
 {
 	if (pb_location == location)
@@ -163,16 +170,24 @@ void pb_clear_location (U8 location)
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 		flag_off (FLAG_POWERBALL_IN_PLAY);
 		pb_announce_needed = 0;
+		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
 		drains during multiball and game doesn't know where it is. */
 		music_stop (pb_in_play_music);
+#ifdef PB_DEBUG
+		deff_restart (DEFF_PB_DETECT);
+#else
 		deff_stop (DEFF_PB_DETECT);
+#endif
 	}
 }
 
 
 /** Asserts a powerball detection event.  The significance depends on
- * the current state. */
+ * the current state.
+ * Because proximity sensors trigger only when steel balls move over them
+ * (assuming they are working correctly), we can trust an assertion of
+ * steel ball a little more than one about the Powerball. */
 void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
@@ -188,7 +203,8 @@ void pb_detect_event (pb_event_t event)
 #endif
 			break;
 
-		/* Powerball detected on playfield, via Slot Proximity */
+		/* Powerball detected on playfield, because Slot Proximity
+		 * did not trigger when a ball had to travel over it. */
 		case PF_PB_DETECTED:
 			pb_set_location (PB_IN_PLAY, 0);
 			break;
@@ -221,7 +237,11 @@ void pb_announce (void)
 		this. */
 		deff_wait_for_other (DEFF_SCORES_IMPORTANT);
 
+#ifdef PB_DEBUG
+		deff_restart (DEFF_PB_DETECT);
+#else
 		deff_start (DEFF_PB_DETECT);
+#endif
 		music_start (pb_in_play_music);
 		pb_announce_needed = 0;
 	}
@@ -238,11 +258,17 @@ void pb_poll_trough (void)
 		if (switch_poll_trough_metal ())
 		{
 			pb_detect_event (TROUGH_STEEL_DETECTED);
+			dbprintf ("pb: trough steel\n");
 		}
 		else
 		{
 			pb_detect_event (TROUGH_PB_DETECTED);
+			dbprintf ("pb: trough white ball\n");
 		}
+	}
+	else
+	{
+		dbprintf ("pb: trough empty\n");
 	}
 }
 
@@ -256,25 +282,28 @@ void pb_container_enter (U8 location, U8 devno)
 	of a ball entering a device is significant. */
 	if (pb_location == PB_IN_PLAY)
 	{
-		if (live_balls <= 1)
+		if (live_balls <= 1) /* ball count before entering the device */
 		{
 			/* In single ball play, things are fairly deterministic.
-			 * We know the powerball is not in play, and it is in
+			 * We know the powerball is no longer in play, and it is in
 			 * the device it just entered at a specific location.
 			 *
 			 * It is also possible that we might kick out the 
 			 * ball immediately from the same device.  Changing
 			 * the state here and then back again will cause the
 			 * powerball to be reannounced.  So optimize this slightly
-			 * and don't change anything.
+			 * and don't change anything if it won't stay here long.
 			 */
 			if (dev->actual_count <= dev->max_count)
 			{
+				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
 			}
 			else
 			{
+				/* Powerball will be returned to play, so leave
+				 * it 'in play' */
 			}
 		}
 		else
@@ -287,14 +316,16 @@ void pb_container_enter (U8 location, U8 devno)
 	}
 	else
 	{
-		/* If balls is not known to be in play, then a container enter
+		/* If the Powerball is not known to be in play, then a container enter
 		event isn't important.  (Either it's in a device somewhere or
 		we're in the "maybe" state.) */
 	}
 }
 
 
-/** Called when a ball exits the trough or the lock. */
+/** Called when a ball successfully exits the trough or the lock.
+ * If the powerball was known to be in the device, then its depth
+ * shifts down by 1, and it may be in play now. */
 void pb_container_exit (U8 location)
 {
 	if (pb_location == location)
@@ -321,13 +352,11 @@ CALLSET_ENTRY (pb_detect, sw_piano)
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 {
 	event_did_follow (camera_or_piano, slot_prox);
+	/* TODO : if this switch triggers and we did not expect
+	 * a ball in the undertrough....??? */
 	pb_detect_event (PF_STEEL_DETECTED);
 }
 
-CALLSET_ENTRY (pb_detect, sw_trough_proximity)
-{
-	pb_poll_trough ();
-}
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {
@@ -343,6 +372,7 @@ CALLSET_ENTRY (pb_detect, dev_trough_enter)
 {
 	/* Note: during the call to enter, live_balls has not been updated
 	and reflects the value prior to the ball entering the device. */
+	dbprintf ("PB: trough entered\n");
 	pb_container_enter (PB_IN_TROUGH, DEVNO_TROUGH);
 	pb_poll_trough ();
 }
@@ -354,11 +384,13 @@ CALLSET_ENTRY (pb_detect, dev_lock_enter)
 
 CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)
 {
+	dbprintf ("PB: about to kick trough\n");
 	pb_poll_trough ();
 }
 
 CALLSET_ENTRY (pb_detect, dev_trough_kick_success)
 {
+	dbprintf ("PB: trough kick OK\n");
 	pb_container_exit (PB_IN_TROUGH);
 	pb_poll_trough ();
 }
@@ -377,7 +409,8 @@ CALLSET_ENTRY (pb_detect, start_ball)
 
 CALLSET_ENTRY (pb_detect, init)
 {
-	pb_location = 0;
+	pb_location = PB_MISSING;
 	last_pb_event = 0;
+	pb_poll_trough ();
 }
 

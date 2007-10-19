@@ -65,6 +65,10 @@ __fastram__ U8 clock_last_sw;
 __fastram__ U8 clock_calibration_ticks;
 #endif
 
+U16 clock_calibration_time;
+
+U8 clock_is_working;
+
 
 void tz_dump_clock (void)
 {
@@ -191,6 +195,11 @@ void tz_clock_rtt (void)
 						tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
 				}
 			}
+			if (--clock_calibration_time == 0)
+			{
+				clock_mode = CLOCK_STOPPED;
+				clock_is_working = 0;
+			}
 			goto clock_running_forward;
 			break;
 
@@ -227,21 +236,21 @@ void tz_clock_rtt (void)
 
 void tz_clock_start_forward (void)
 {
-	if (feature_config.disable_clock == NO)
+	if (clock_is_working && feature_config.disable_clock == NO)
 		clock_mode = CLOCK_RUNNING_FORWARD;
 }
 
 
 void tz_clock_start_backward (void)
 {
-	if (feature_config.disable_clock == NO)
+	if (clock_is_working && feature_config.disable_clock == NO)
 		clock_mode = CLOCK_RUNNING_BACKWARD;
 }
 
 
 void tz_clock_set_speed (U8 speed)
 {
-	if (feature_config.disable_clock == NO)
+	if (clock_is_working && feature_config.disable_clock == NO)
 		clock_delay_time = clock_speed = speed;
 }
 
@@ -273,6 +282,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
 	clock_sw = 0;
+	clock_is_working = 1;
 }
 
 CALLSET_ENTRY (tz_clock, amode_start)
@@ -285,6 +295,8 @@ CALLSET_ENTRY (tz_clock, amode_start)
 #if 0
 		clock_calibration_ticks = 3;
 #endif
+		clock_is_working = 1;
+		clock_calibration_time = 500;
 		clock_mode = CLOCK_CALIBRATING;
 	}
 	else

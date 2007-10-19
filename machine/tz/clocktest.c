@@ -25,30 +25,37 @@
 
 S8 clock_test_setting;
 
+U8 clock_can_run;
+
 
 void tz_clock_test_update (void)
 {
-	switch (clock_test_setting)
+	if (!clock_can_run)
+		tz_clock_stop ();
+	else
 	{
-		case -2:
-			tz_clock_set_speed (1);
-			tz_clock_start_backward ();
-			break;
-		case -1:
-			tz_clock_set_speed (2);
-			tz_clock_start_backward ();
-			break;
-		case 0:
-			tz_clock_stop ();
-			break;
-		case 1:
-			tz_clock_set_speed (2);
-			tz_clock_start_forward ();
-			break;
-		case 2:
-			tz_clock_set_speed (1);
-			tz_clock_start_forward ();
-			break;
+		switch (clock_test_setting)
+		{
+			case -2:
+				tz_clock_set_speed (2);
+				tz_clock_start_backward ();
+				break;
+			case -1:
+				tz_clock_set_speed (4);
+				tz_clock_start_backward ();
+				break;
+			case 0:
+				tz_clock_stop ();
+				break;
+			case 1:
+				tz_clock_set_speed (4);
+				tz_clock_start_forward ();
+				break;
+			case 2:
+				tz_clock_set_speed (2);
+				tz_clock_start_forward ();
+				break;
+		}
 	}
 }
 
@@ -57,6 +64,7 @@ void tz_clock_test_init (void)
 {
 	tz_clock_stop ();
 	clock_test_setting = 0;
+	clock_can_run = 1;
 	tz_clock_test_update ();
 }
 
@@ -73,13 +81,16 @@ void tz_clock_test_draw (void)
 	font_render_string_center (&font_mono5, 64, 2, "CLOCK MECH. TEST");
 	switch (clock_test_setting)
 	{
-		case -2: sprintf ("BACKWARD FAST"); break;
-		case -1: sprintf ("BACKWARD SLOW"); break;
-		case 0: sprintf ("STOPPED"); break;
-		case 1: sprintf ("FORWARD SLOW"); break;
-		case 2: sprintf ("FORWARD FAST"); break;
+		case -2: sprintf ("REV. FAST"); break;
+		case -1: sprintf ("REV. SLOW"); break;
+		case 0: sprintf ("NO SPEED"); break;
+		case 1: sprintf ("FWD. SLOW"); break;
+		case 2: sprintf ("FWD. FAST"); break;
 	}
-	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 11, sprintf_buffer);
+
+	font_render_string_center (&font_mono5, 96, 11,
+		clock_can_run ? "RUNNING" : "STOPPED");
 
 	/* TODO : this should be common logic */
 	hour = tz_clock_opto_to_hour[clock_sw >> 4];
@@ -88,7 +99,10 @@ void tz_clock_test_draw (void)
 	minute = 0;
 
 	sprintf ("%02d:%02d", hour, minute);
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_mono5, 32, 18, sprintf_buffer);
+
+	sprintf ("SW.: %02X", clock_sw);
+	font_render_string_center (&font_mono5, 96, 18, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -113,6 +127,8 @@ void tz_clock_test_up (void)
 void tz_clock_test_enter (void)
 {
 	/* Start/stop the clock */
+	clock_can_run ^= 1;
+	tz_clock_test_update ();
 }
 
 void tz_clock_test_thread (void)
@@ -120,7 +136,7 @@ void tz_clock_test_thread (void)
 	for (;;)
 	{
 		tz_clock_test_draw ();
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 	}
 }
 
@@ -131,6 +147,7 @@ struct window_ops tz_clock_test_window = {
 	.up = tz_clock_test_up,
 	.down = tz_clock_test_down,
 	.exit = tz_clock_stop,
+	.enter = tz_clock_test_enter,
 	.thread = tz_clock_test_thread,
 };
 

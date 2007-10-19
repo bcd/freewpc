@@ -25,36 +25,38 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
-//#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
-#define SOL_ARRAY_WIDTH	8
+#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
 
-extern __fastram__ U8 sol_rt_state[SOL_ARRAY_WIDTH];
+extern U8 sol_timers[];
 
-/** Number of stages in a duty cycle */
-/* TODO : since the IRQ has been unrolled, this can be optimized.
-Provide 8 different versions of the rtt, one per stage in the cycle. */
-#define SOL_CYCLES 8
 
-/** Duty cycle values */
+/** Duty cycle values.  The first value is the on time,
+the second value is the off time */
 #define SOL_DUTY_0		0x0
-#define SOL_DUTY_12_88	0x40
-#define SOL_DUTY_25_75	0x22
-#define SOL_DUTY_50_50	0x55
-#define SOL_DUTY_75_25	0x77
+#define SOL_DUTY_12		0x40
+#define SOL_DUTY_25		0x22
+#define SOL_DUTY_50		0x55
+#define SOL_DUTY_75		0x77
 #define SOL_DUTY_100		0xFF
 
-#define sol_on(id)     sol_modify(id, SOL_DUTY_100)
-#define sol_off(id)    sol_modify(id, SOL_DUTY_0)
-#define sol_pulse(id)  sol_modify_pulse(id, SOL_DUTY_100)
-
-#define sol_serve(id)  sol_modify_pulse(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88)
-
-void sol_rtt (void);
-void sol_modify (solnum_t sol, U8 cycle_mask);
-void sol_modify_pulse (solnum_t sol, U8 cycle_mask);
+/* Function prototypes */
+void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
+void sol_stop (solnum_t sol);
 void sol_init (void);
-void flasher_pulse (solnum_t n);
-void flasher_rtt (void);
-void flasher_init (void);
+
+/* sol_start is a macro because the 'time' value must be scaled
+to the correct resolution.  Ticks are normally 1 per 16ms, but
+we need 1 per 4ms for solenoids, so scale accordingly. */
+#define sol_start(sol,mask,time) \
+	sol_start_real (sol, mask, (4 * time))
+
+/* Standard flasher pulse is full strength, for 33ms */
+#define flasher_pulse(id) sol_start (id, SOL_DUTY_100, TIME_33MS)
+
+/* Standard solenoid pulse is full strength for 100ms */
+#define sol_pulse(id)      sol_start(id, SOL_DUTY_100, TIME_100MS)
+
+/* Ball serve pulse - TODO - this isn't right */
+#define sol_serve(id)      sol_start(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88, TIME_100MS)
 
 #endif /* _SYS_SOL_H */

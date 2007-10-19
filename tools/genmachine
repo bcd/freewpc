@@ -79,6 +79,7 @@ my %contextDefinitionRe = (
 	"scores" => "AUTO",
 	"fonts" => "AUTO",
 	"fifs" => "AUTO",
+	"timers" => "AUTO",
 );
 
 # A table of binary properties per context.  During any object declaration,
@@ -125,6 +126,7 @@ my %BinaryProperties = (
 	"drives" => {
 		"ballserve" => $GLOBAL_OBJECT,
 		"knocker" => $GLOBAL_OBJECT,
+		"launch" => $GLOBAL_OBJECT,
 		"motor" => 1,
 		"magnet" => 1,
 		"popper" => 1,
@@ -142,7 +144,6 @@ my %BinaryProperties = (
 		"queue" => 1,
 		"timeout" => 1,
 		"abortable" => 1,
-		"halfsize" => 1,
 	},
 	"leffs" => {
 		"amode" => $GLOBAL_OBJECT,
@@ -198,6 +199,7 @@ my %ContextPrefixes = (
 	"leffs" => "LEFF",
 	"fonts" => "FON",
 	"fifs" => "FIF",
+	"timers" => "TIM",
 );
 
 # Optionally, a name for the define to use for the maximum number of
@@ -214,6 +216,7 @@ my %ContextMaxima = (
 	"lampsets" => "MAX_LAMPSET",
 	"scores" => "NUM_SCORES",
 	"fonts" => "MAX_FONTS",
+	"timers" => "MAX_TIMERS",
 );
 
 
@@ -591,7 +594,7 @@ sub machine_finish {
 	$m->{'*switches:has-ul'} = 1;
 	$m->{'*switches:has-ur'} = 1;
 
-	# Are there any GLOBAL_OBJECTS that aren't defined?
+	# TODO : Are there any GLOBAL_OBJECTS that aren't defined?
 }
 
 
@@ -856,7 +859,7 @@ sub machine_write_container_decls {
 	foreach $def (unique ($m->{"containers"})) {
 		my $name = $def->{'c_decl'};
 		$name =~ s/^devno/dev/;
-		for $event ("power_up", "game_start", "enter", "kick_attempt",
+		for $event ("enter", "kick_attempt",
 			"kick_success", "kick_failure", "full", "empty") {
 			print "extern void callset_${name}_${event} (void);" .
 				"  /* callset_invoke (${name}_${event}) */\n";
@@ -868,7 +871,7 @@ sub machine_write_container_decls {
 		my $name = $def->{'c_decl'};
 		$name =~ s/^devno/dev/;
 		print "device_ops_t ${name}_ops = {\n";
-		for $event ("power_up", "game_start", "enter", "kick_attempt",
+		for $event ("enter", "kick_attempt",
 			"kick_success", "kick_failure", "full", "empty") {
 			print "   .$event = callset_${name}_${event},\n";
 		}

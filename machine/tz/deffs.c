@@ -229,9 +229,9 @@ void two_color_flash_deff (void)
 	for (n = 0; n < 5; n++)
 	{
 		dmd_show2 ();
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_300MS);
 		dmd_show_high ();
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_300MS);
 	}
 	deff_exit ();
 }

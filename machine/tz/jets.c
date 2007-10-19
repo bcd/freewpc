@@ -75,7 +75,7 @@ void sw_jet_sound (void)
 	else
 		sound_send (jet_sounds[jet_sound_index]);
 	flasher_pulse (FLASH_JETS);
-	task_sleep (TIME_100MS * 2);
+	task_sleep (TIME_200MS);
 	task_exit ();
 }
 

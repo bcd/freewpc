@@ -77,9 +77,16 @@ const audio_track_t volume_change_music_track = {
 #ifdef MACHINE_VOLUME_CHANGE_MUSIC
 	.code = MACHINE_VOLUME_CHANGE_MUSIC
 #else
-	.code = 1,
+	.code = 2,
 #endif
 };
+
+
+#if (MACHINE_DCS == 1)
+#define WPCS_READ_READY	0x80
+#else
+#define WPCS_READ_READY	0x01
+#endif
 
 
 /** Renders the sound board version into the print buffer. */
@@ -179,11 +186,7 @@ U8 sound_board_poll (void)
 	U8 status = wpc_asic_read (WPCS_CONTROL_STATUS);
 	U8 in_data;
 
-#if (MACHINE_DCS == 1)
-	if (status & 0x80)
-#else
-	if (status & 0x1)
-#endif
+	if (status & WPCS_READ_READY)
 	{
 		in_data = wpc_asic_read (WPCS_DATA);
 		return (in_data);
@@ -198,6 +201,7 @@ U8 sound_board_poll (void)
  * before bailing and returning 0xFF. */
 U8 sound_board_read (U8 retries)
 {
+#ifndef CONFIG_NATIVE
 	do {
 		if (queue_empty_p ((queue_t *)&sound_read_queue))
 			task_sleep (TIME_100MS);
@@ -207,12 +211,18 @@ U8 sound_board_read (U8 retries)
 			return in;
 		}
 	} while (--retries != 0);
+#endif
 	return (0xFF);
 }
 
 
+/** Send a command to the sound board and wait for a reply.
+ * If no reply is ready, a number of retries will be performed
+ * before bailing and returning 0xFF.  On each retry, the
+ * command is sent again. */
 U8 sound_board_command (U8 cmd, U8 retries)
 {
+#ifndef CONFIG_NATIVE
 	do {
 		sound_write_queue_insert (cmd);
 		task_sleep (TIME_33MS);
@@ -225,13 +235,15 @@ U8 sound_board_command (U8 cmd, U8 retries)
 			return in;
 		}
 	} while (--retries != 0);
+#endif
 	return (0xFF);
 }
 
 
+/** At idle time, poll the sound board for asynchronous events. */
 CALLSET_ENTRY (sound, idle)
 {
-#if 1
+#if 0
 	U8 in;
 	/* TODO : do something like this elsewhere for sound syncing */
 	if (sys_init_complete
@@ -245,11 +257,12 @@ CALLSET_ENTRY (sound, idle)
 
 
 /** Real time task for the sound board.
- * Transmit one pending byte of data to the sound board. */
+ * Transmit one pending byte of data to the sound board.
+ * Receive up to one pending byte of data from it. */
 void sound_rtt (void)
 {
 	/* Read back from sound board if bytes ready */
-	if (wpc_asic_read (WPCS_CONTROL_STATUS) & 0x1)
+	if (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY)
 	{
 		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
 			wpc_asic_read (WPCS_DATA));
@@ -269,6 +282,8 @@ void sound_reset (void)
 }
 
 
+/** Initialize the sound board.  Because this involves a separate
+device, this function is run in the background in a separate task. */
 void sound_init (void)
 {
 	U8 sound_board_type;
@@ -294,14 +309,14 @@ void sound_init (void)
 		goto exit_func;
 	}
 
-	/* Initialize the sound queue.  We cannot transmit anything before here. */
+	/* Initialize the write queue.  We cannot transmit anything before here. */
 	sound_write_queue_init ();
 	task_sleep (TIME_200MS); /* TODO : needed? */
 
 	/* Read the sound board version. */
-	sound_version_major = sound_board_command (SND_GET_VERSION_CMD, 20);
+	sound_version_major = sound_board_command (SND_GET_VERSION_CMD, 40);
 #if (MACHINE_DCS == 1)
-	sound_version_minor = sound_board_command (SND_GET_MINOR_VERSION_CMD, 20);
+	sound_version_minor = sound_board_command (SND_GET_MINOR_VERSION_CMD, 40);
 #endif
 
 #if (MACHINE_DCS == 1)
@@ -312,7 +327,7 @@ void sound_init (void)
 #endif
 
 	/* Use nvram value if it's sensible */
-	if (current_volume_checksum == ~current_volume)
+	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
 		volume_set (current_volume);
 	else
 		volume_set (DEFAULT_VOLUME);
@@ -333,6 +348,8 @@ void sound_send (sound_code_t code)
 		return;
 
 #ifdef __m6809__
+	/* TODO - see if gcc is doing this better now, so we don't
+	have to hand assemble it. */
 	asm ("ldd\t%0" :: "m" (code));
 	asm ("sta\t%0" :: "m" (code_hi));
 	asm ("stb\t%0" :: "m" (code_lo));
@@ -402,6 +419,7 @@ CALLSET_ENTRY (sound, volume_down)
 	if (current_volume > MIN_VOLUME)
 	{
 		volume_set (current_volume-1);
+		task_sleep (TIME_100MS);
 	}
 	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
@@ -414,6 +432,7 @@ CALLSET_ENTRY (sound, volume_up)
 	if (current_volume < MAX_VOLUME)
 	{
 		volume_set (current_volume+1);
+		task_sleep (TIME_100MS);
 	}
 	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);

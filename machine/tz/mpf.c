@@ -35,10 +35,16 @@ __fastram__ S8 rtsol_mpf_right;
 U8 mpf_ball_count;
 
 
+static const audio_track_t powerfield_music = {
+	.prio = PRI_GAME_MODE2,
+	.code = MUS_POWERFIELD,
+};
+
 void mpf_active_deff (void)
 {
 	while (mpf_active)
 	{
+		task_sleep (TIME_66MS);
 	}
 }
 
@@ -76,6 +82,7 @@ void mpf_start (void)
 		{
 			mpf_active = 1;
 			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
+			music_start (powerfield_music);
 		}
 	}
 }
@@ -88,6 +95,7 @@ void mpf_stop (void)
 		mpf_active = 0;
 		task_kill_gid (GID_MPF_ACTIVE);
 		sound_send (SND_POWER_HUH_3);
+		music_stop (powerfield_music);
 	}
 }
 
@@ -127,7 +135,6 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 			mpf_start ();
 		}
 
-		mpf_ball_count++;
 		callset_invoke (powerfield_enter);
 	}
 }
@@ -135,13 +142,17 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 
 CALLSET_ENTRY (mpf, sw_mpf_exit)
 {
-	mpf_ball_count--;
-	callset_invoke (powerfield_exit);
-
-	if (mpf_ball_count == 0)
+	if (mpf_ball_count > 0)
 	{
-		callset_invoke (powerfield_end);
-		mpf_stop ();
+		mpf_ball_count--;
+		callset_invoke (powerfield_exit);
+	
+		if (mpf_ball_count == 0)
+		{
+			callset_invoke (powerfield_end);
+			mpf_stop ();
+			sound_send (SND_HAHA_POWERFIELD_EXIT);
+		}
 	}
 }
 

@@ -96,6 +96,13 @@ deff_entry_t *deff_entry_create (deffnum_t id)
 	return entry;
 }
 
+
+static inline void deff_initqueue (deff_entry_t **queue)
+{
+	dll_init (queue);
+}
+
+
 static inline void deff_enqueue (deff_entry_t **queue, deff_entry_t *entry)
 {
 	dll_add_front (queue, entry);
@@ -235,7 +242,7 @@ void deff_reschedule (void)
 	deff_entry_t *best = NULL;
 
 	/* Clean up before starting a new task */
-	dll_init ((struct dll_header *)&deff_runqueue);
+	deff_initqueue (&deff_runqueue);
 
 	/* Select a deff from the waitqueue */
 	if (deff_waitqueue)
@@ -328,7 +335,7 @@ void deff_start (deffnum_t dn)
 {
 	deff_entry_t *entry;
 
-	dbprintf ("Deff %d start request\n", dn);
+	dbprintf ("Deff %d start\n", dn);
 
 	/* See if an entry is already tracking this deff.
 	 * If so, just return.  To truly restart the deff,
@@ -339,13 +346,12 @@ void deff_start (deffnum_t dn)
 		entry = deff_entry_create (dn);
 		if (entry == NULL)
 		{
-			dbprintf ("Failed to alloc entry for deff %d\n", dn);
+			dbprintf ("Failed to alloc deff entry %d\n", dn);
 			return;
 		}
 	}
 	else
 	{
-		dbprintf ("Deff %d already running\n", dn);
 		return;
 	}
 
@@ -448,8 +454,8 @@ void deff_nice (enum _priority prio)
 /** Initialize the display effect subsystem. */
 void deff_init (void)
 {
-	dll_init ((struct dll_header *)&deff_runqueue);
-	dll_init ((struct dll_header *)&deff_waitqueue);
+	deff_initqueue (&deff_runqueue);
+	deff_initqueue (&deff_waitqueue);
 	deff_time_last_idle = 0;
 	deff_timeout_disabled = 0;
 }
@@ -538,7 +544,6 @@ restart:
  * is abortable, then stop it. */
 CALLSET_ENTRY (deff, flipper_abort)
 {
-	dbprintf ("Both flippers pressed.\n");
 	if (deff_runqueue 
 		&& deff_runqueue->flags & D_ABORTABLE)
 	{

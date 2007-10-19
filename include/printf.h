@@ -39,7 +39,7 @@ do { \
 } while (0) \
 
 /** Access the next argument in the va_list 'va' with type 'type'. */
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 #define va_arg(va, type)	((va += sizeof (int)), (type *)(((int *)va)[-1]))
 #else
 #define va_arg(va, type)	((va += sizeof (type)), ((type *)va)[-1])
@@ -56,7 +56,7 @@ do { \
 /** The name of the single print buffer */
 extern char sprintf_buffer[PRINTF_BUFFER_SIZE];
 
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 #undef sprintf
 #define sprintf freewpc_sprintf
 void freewpc_sprintf (const char *format, ...);

@@ -22,24 +22,33 @@
 #include <rtsol.h>
 
 
-U8 ramp_divertor_state;
 
 static void ramp_divert_task (void)
 {
+	U8 n;
+
 	task_set_flags (TASK_PROTECTED);
-	sol_modify (SOL_RAMP_DIVERTOR, SOL_DUTY_50_50);
-	task_sleep (TIME_100MS);
-	sol_modify (SOL_RAMP_DIVERTOR, SOL_DUTY_12_88);
-	task_sleep_sec (3);
-	sol_off (SOL_RAMP_DIVERTOR);
+
+	sol_start (SOL_RAMP_DIVERTOR, SOL_DUTY_50, TIME_1S);
+	task_sleep (TIME_500MS);
+
+	for (n = 0; n < 5; n++)
+	{
+		sol_start (SOL_RAMP_DIVERTOR, SOL_DUTY_12, TIME_1S);
+		task_sleep (TIME_500MS);
+	}
+
+	sol_stop (SOL_RAMP_DIVERTOR);
 	task_exit ();
 }
+
 
 void ramp_divert (void)
 {
 	task_recreate_gid (GID_RAMP_DIVERTING, ramp_divert_task);
 	task_yield ();
 }
+
 
 void ramp_divert_to_autoplunger (void)
 {

@@ -43,19 +43,23 @@ void sw_right_ramp_enter_task (void)
 	do {
 		if (mpf_enable_count)
 		{
-			sol_on (SOL_RIGHT_RAMP_DIV);
-			task_sleep_sec (3);
+			U8 n;
+			for (n = 0; n < 6; n++)
+			{
+				sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_1S);
+				task_sleep (TIME_500MS);
+			}
 		}
 		else
 		{
 			task_sleep_sec (2);
-			sol_on (SOL_RIGHT_RAMP_DIV);
 			sound_send (SND_RIGHT_RAMP_EXIT);
-			task_sleep (TIME_100MS * 2);
-			sol_off (SOL_RIGHT_RAMP_DIV);
+
+			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_500MS);
+			task_sleep (TIME_200MS);
+			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_25, TIME_1S);
 		}
 	} while (--right_ramps_entered > 0);
-	sol_off (SOL_RIGHT_RAMP_DIV);
 	task_exit ();
 }
 

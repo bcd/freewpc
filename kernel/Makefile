@@ -1,0 +1,50 @@
+
+SYSTEM_SCHEDULE := kernel/system.sched
+SCHED_SRC := build/sched_irq.c
+SCHED_OBJ := $(SCHED_SRC:.c=.o)
+
+# Basic kernel modules are generic and do not depend on
+# the machine type at all.
+KERNEL_BASIC_OBJS += $(if $(CONFIG_ANIMATION), kernel/animation.o)
+KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
+KERNEL_BASIC_OBJS += kernel/list.o
+KERNEL_BASIC_OBJS += kernel/misc.o
+KERNEL_BASIC_OBJS += kernel/puts.o
+KERNEL_BASIC_OBJS += kernel/random.o
+KERNEL_BASIC_OBJS += kernel/sysinfo.o
+
+# Software kernel modules are hardware-agnostic, but may depend
+# on machine flags and so need to be recompiled when the machine
+# flags change.
+KERNEL_SW_OBJS += kernel/deff.o
+KERNEL_SW_OBJS += $(if $(CONFIG_FONT), kernel/font.o)
+KERNEL_SW_OBJS += kernel/game.o
+KERNEL_SW_OBJS += kernel/lampset.o
+KERNEL_SW_OBJS += kernel/player.o
+KERNEL_SW_OBJS += kernel/printf.o
+KERNEL_SW_OBJS += kernel/score.o
+
+
+# Hardware kernel modules are incredibly hardware dependent,
+# and are subject to change on different hardware platforms.
+# This isn't really supported yet but it might be in the future
+# (e.g. supporting System 11, or Whitestar, etc.)
+KERNEL_HW_OBJS += $(if $(CONFIG_AC), kernel/ac.o)
+KERNEL_HW_OBJS += kernel/adj.o
+KERNEL_HW_OBJS += kernel/audio.o
+KERNEL_HW_OBJS += kernel/audit.o
+KERNEL_HW_OBJS += kernel/csum.o
+KERNEL_HW_OBJS += $(if $(CONFIG_DMD), kernel/dmd.o)
+KERNEL_HW_OBJS += kernel/flip.o
+KERNEL_HW_OBJS += kernel/freetimer.o
+KERNEL_HW_OBJS += kernel/init.o
+KERNEL_HW_OBJS += kernel/lamp.o
+KERNEL_HW_OBJS += kernel/leff.o
+KERNEL_HW_OBJS += kernel/sol.o
+KERNEL_HW_OBJS += kernel/sound.o
+KERNEL_HW_OBJS += kernel/switches.o
+KERNEL_HW_OBJS += kernel/timer.o
+KERNEL_HW_OBJS += kernel/triac.o
+
+KERNEL_OBJS = $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) $(KERNEL_HW_OBJS)
+

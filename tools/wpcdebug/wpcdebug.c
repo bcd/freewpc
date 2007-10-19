@@ -140,11 +140,13 @@ orkin_readable (int sd)
 }
 
 
+#if 0
 static int
 orkin_writeable (int sd)
 {
 	return !!(orkin_select (sd) & SOCK_WRITEABLE);
 }
+#endif
 
 
 static int

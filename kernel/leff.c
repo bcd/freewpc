@@ -194,11 +194,11 @@ static leffnum_t leff_get_highest_priority (void)
 task_pid_t leff_create_handler (const leff_t *leff)
 {
 	task_pid_t tp;
+	leff_data_t *cdata;
 
 	/* Allocate lamps needed by the lamp effect */
 	if (leff->lampset != L_NOLAMPS)
 	{
-
 		/* L_ALL_LAMPS is equivalent to LAMPSET_ALL and will cause
 		 * all lamps to be allocated.  Other values will only
 		 * allocate a subset of the lamps */
@@ -217,10 +217,9 @@ task_pid_t leff_create_handler (const leff_t *leff)
 			/* Allocate specific lamps. */
 			/* Apply the allocation function to each element of the lampset.
 			 * Ensure the apply delay is zero first. */
-			lampset_set_apply_delay (0);
 			if (leff->flags & L_SHARED)
 			{
-				lampset_apply (leff->lampset, lamp_leff2_allocate);
+				lampset_apply_nomacro (leff->lampset, lamp_leff2_allocate);
 			}
 			else
 			{
@@ -228,7 +227,7 @@ task_pid_t leff_create_handler (const leff_t *leff)
 				task_kill_gid (GID_LEFF);
 				lamp_leff1_erase ();
 				lamp_leff1_free_all ();
-				lampset_apply (leff->lampset, lamp_leff_allocate);
+				lampset_apply_nomacro (leff->lampset, lamp_leff_allocate);
 			}
 		}
 	}
@@ -249,14 +248,16 @@ task_pid_t leff_create_handler (const leff_t *leff)
 		tp = task_recreate_gid (GID_LEFF, leff->fn);
 	}
 
+	/* Initialize the new leff's private data before it runs */
+	cdata = task_init_class_data (tp, leff_data_t);
+	cdata->apply_delay = 0;
+	cdata->data = 0;
+	cdata->flags = leff->flags;
+
 	/* If it resides outside of the system page, set that up. */
 	if (leff->page != 0xFF)
 		task_set_rom_page (tp, leff->page);
 
-	/* Initialize the new leff's private data before it runs */
-	task_set_thread_data (tp, L_PRIV_APPLY_DELAY, 0);
-	task_set_thread_data (tp, L_PRIV_DATA, 0);
-	task_set_thread_data (tp, L_PRIV_FLAGS, leff->flags);
 	return tp;
 }
 
@@ -266,12 +267,12 @@ void leff_start (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	dbprintf ("Leff start request for #%d\n", dn);
+	dbprintf ("Leff start %d\n", dn);
 
 	if (leff->flags & L_SHARED)
 	{
 		task_pid_t tp = leff_create_handler (leff);
-		task_set_thread_data (tp, L_PRIV_ID, dn);
+		(task_class_data (tp, leff_data_t))->id = dn;
 	}
 	else if (leff->flags & L_RUNNING)
 	{
@@ -279,7 +280,7 @@ void leff_start (leffnum_t dn)
 		if (dn == leff_get_highest_priority ())
 		{
 			/* This is the new active running leff */
-			dbprintf ("Requested leff is now highest priority\n");
+			dbprintf ("Requested leff now active\n");
 			leff_active = dn;
 			leff_create_handler (leff);
 		}
@@ -302,25 +303,36 @@ void leff_start (leffnum_t dn)
 }
 
 
+/** Find the task that is running the specified lamp effect.
+Returns NULL if the task can't be found. */
+task_pid_t leff_find_shared (leffnum_t dn)
+{
+	task_pid_t tp = task_find_gid (GID_SHARED_LEFF);
+	while (tp && ((task_class_data (tp, leff_data_t))->id != dn))
+	{
+		tp = task_find_gid_next (tp, GID_SHARED_LEFF);
+	}
+	return tp;
+}
+
+
 /** Stops a lamp effect from running. */
 void leff_stop (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
+	dbprintf ("Leff stop %d\n", dn);
 	if (leff->flags & L_SHARED)
 	{
 		/* Search through all shared leffs that are
 		running for the one we want to stop.  No need to
 		dequeue it, but its allocations must be freed and
 		the task stopped. */
-		task_pid_t tp = task_find_gid_data (GID_SHARED_LEFF, L_PRIV_ID, dn);
+		task_pid_t tp = leff_find_shared (dn);
 		if (tp)
 		{
-			dbprintf ("Stopping sharing leff %d, pid=%p\n", dn, tp);
-
-			lampset_set_apply_delay (0);
 			task_kill_pid (tp);
-			lampset_apply (leff->lampset, lamp_leff2_free);
+			lampset_apply_nomacro (leff->lampset, lamp_leff2_free);
 		}
 		else
 		{
@@ -329,7 +341,6 @@ void leff_stop (leffnum_t dn)
 	}
 	else if ((leff->flags & L_RUNNING) || (dn == leff_active))
 	{
-		dbprintf ("Stopping leff #%d\n", dn);
 		leff_remove_queue (dn);
 		lamp_leff1_erase (); /* TODO : these two functions go together */
 		lamp_leff1_free_all ();
@@ -345,7 +356,6 @@ void leff_restart (leffnum_t dn)
 {
 	if (leff_table[dn].flags & L_SHARED)
 	{
-		dbprintf ("leff_restart shared\n");
 	}
 	else if (dn == leff_active)
 	{
@@ -372,13 +382,10 @@ void leff_default (void)
  * leff that has been started. */
 void leff_start_highest_priority (void)
 {
-	dbprintf ("Restarting highest priority leff\n");
-
 	leff_active = leff_get_highest_priority ();
 	if (leff_active != LEFF_NULL)
 	{
 		const leff_t *leff = &leff_table[leff_active];
-		dbprintf ("Recreating leff task\n");
 		leff_create_handler (leff);
 	}
 	else
@@ -403,8 +410,7 @@ __noreturn__ void leff_exit (void)
 	if (leff_running_flags & L_SHARED)
 	{
 		leff = &leff_table[leff_self_id];
-		lampset_set_apply_delay (0);
-		lampset_apply (leff->lampset, lamp_leff2_free);
+		lampset_apply_nomacro (leff->lampset, lamp_leff2_free);
 	}
 	else
 	{

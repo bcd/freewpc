@@ -14,7 +14,7 @@ WPC95: No
 Pinmame-Zip: wcs_l2.zip
 Pinmame-ROM: wcup_lx2.bin
 
-include kernel/freewpc.md
+include platform/wpc/wpc.md
 
 [lamps]
 
@@ -27,13 +27,27 @@ include kernel/freewpc.md
 33: Trough 3, trough, opto
 34: Trough 4, trough, opto
 35: Trough 5, trough, opto
-36: Trough Stack
+36: Trough Stack, opto
 38: Shooter, shooter
 41: Goal Trough, opto
 42: Goal Popper, opto
 43: Goalie Left, opto
 44: Goalie Right, opto
 45: TV Popper, opto
+48: Goalie Target
+51: Skill Shot Front, opto
+52: Skill Shot Center, opto
+53: Skill Shot Rear, opto
+54: Right Eject
+55: Upper Eject
+56: Left Eject
+71: Left Ramp Divert.
+72: Left Ramp Enter
+74: Left Ramp Exit
+75: Right Ramp Enter
+76: Lock Low
+77: Lock High
+78: Right Ramp Exit
 
 [drives]
 H1: Goal Popper
@@ -56,8 +70,6 @@ L8: Divertor Hold
 
 [gi]
 
-[drivers]
-
 [tests]
 
 #############################################################
@@ -68,6 +80,10 @@ L8: Divertor Hold
 Trough: trough, Trough Release, Trough 1, Trough 2, Trough 3, Trough 4, Trough 5, init_max_count(5)
 Goal Popper: Goal Popper, Goal Popper
 TV Popper: TV Popper, TV Popper
+Left Eject: Left Eject, Left Eject
+Right Eject: Right Eject, Right Eject
+Upper Eject: Upper Eject, Upper Eject
+Lock: Lock Release, Lock High, Lock Low
 
 [targetbanks]
 

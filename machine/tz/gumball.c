@@ -62,13 +62,16 @@ void gumball_release_task (void)
 	while (gumball_pending_releases > 0)
 	{
 		gumball_geneva_tripped = FALSE;
-		sol_on (SOL_GUMBALL_RELEASE);
-	
-		timeout = 120;
+
+		/* Timeout is 90x33ms = 3sec */
+		timeout = 90;
 		while ((gumball_geneva_tripped == FALSE) && (--timeout > 0))
-			task_sleep (TIME_16MS);
-	
-		sol_off (SOL_GUMBALL_RELEASE);
+		{
+			sol_start (SOL_GUMBALL_RELEASE, SOL_DUTY_25, TIME_66MS);
+			task_sleep (TIME_33MS);
+		}
+
+		sol_stop (SOL_GUMBALL_RELEASE);
 		gumball_pending_releases--;
 	}
 	task_exit ();
@@ -91,6 +94,8 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 	if (event_did_follow (gumball_geneva, gumball_exit))
 	{
 		/* A ball successfully came out of the gumball machine. */
+		/* When trying to release a ball, signal the release motor
+		to stop */
 	}
 
 	event_should_follow (gumball_exit, camera, TIME_3S);
@@ -103,42 +108,85 @@ CALLSET_ENTRY (gumball, sw_gumball_geneva)
 	event_should_follow (gumball_geneva, gumball_exit, TIME_2S);
 }
 
+
 CALLSET_ENTRY (gumball, sw_gumball_enter)
 {
 	/* Ball has entered the gumball machine.
-	 * Increment virtual count of balls inside.
 	 * Tell popper to quit retrying. */
 	dbprintf ("Gumball entered.\n");
+	task_kill_gid (GID_GUMBALL_POPPER_TASK);
 }
+
+
+void gumball_popper_task (void)
+{
+	task_sleep (TIME_500MS);
+	for (;;)
+	{
+		if (switch_poll_logical (SW_GUMBALL_POPPER))
+		{
+			sol_start (SOL_POPPER, SOL_DUTY_100, TIME_200MS);
+			task_sleep_sec (2);
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
 
 CALLSET_ENTRY (gumball, sw_gumball_popper)
 {
-	/* Wait for ball to settle, then pop
-	 * ball into the gumball machine. */
-	/* TODO - sleep in sw handler bad */
-	task_sleep (TIME_100MS * 5);
-	sol_pulse (SOL_POPPER);
+	/* Wait for ball to settle, then pop ball into the gumball 
+	machine.  We never keep a ball here. */
+	task_create_gid1 (GID_GUMBALL_POPPER_TASK, gumball_popper_task);
 }
+
+
+void gumball_divertor_hold_task (void)
+{
+	U8 n;
+
+	task_set_flags (TASK_PROTECTED);
+
+	for (n=0 ; n < 12; n++)
+	{
+		sol_start (SOL_GUMBALL_DIV, SOL_DUTY_25, TIME_1S);
+		task_sleep (TIME_500MS);
+	}
+	task_exit ();
+}
+
+
+void gumball_divertor_open (void)
+{
+	sol_start (SOL_GUMBALL_DIV, SOL_DUTY_100, TIME_100MS);
+	task_recreate_gid (GID_GUMBALL_DIVERTOR_HOLD, gumball_divertor_hold_task);
+}
+
+
+void gumball_divertor_close (void)
+{
+	task_kill_gid (GID_GUMBALL_DIVERTOR_HOLD);
+	sol_stop (SOL_GUMBALL_DIV);
+}
+
 
 void sw_gumball_right_loop_entered (void)
 {
 	if (gumball_load_is_enabled ())
 	{
-		dbprintf ("Gumball load enabled; diverter on\n");
-		sol_on (SOL_GUMBALL_DIV);
-	}
-	else
-	{
-		dbprintf ("Gumball load not enabled.\n");
+		gumball_divertor_open ();
 	}
 }
+
 
 CALLSET_ENTRY (gumball, sw_gumball_lane)
 {
 	/* Ball is approaching popper.
 	 * Gumball diverter can be closed now. */
-	dbprintf ("Gumball lane reached; diverter off\n");
-	sol_off (SOL_GUMBALL_DIV);
+	gumball_divertor_close ();
 	gumball_load_disable ();
 }
 
@@ -215,8 +263,16 @@ CALLSET_ENTRY (gumball, empty_balls_test)
 }
 
 
+CALLSET_ENTRY (gumball, ball_search)
+{
+	/* TODO : when ball searching at game start, see if the
+	extra balls are in the gumball and try to release 1. */
+}
+
+
 CALLSET_ENTRY (gumball, init)
 {
 	gumball_load_disable ();
 }
+
 

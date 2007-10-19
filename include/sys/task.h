@@ -21,25 +21,13 @@
 #ifndef _SYS_TASK_H
 #define _SYS_TASK_H
 
-/*
- * The first section contains common defines that are always available.
- */
-
 extern bool task_dispatching_ok;
 
-/** Values for the 'flags' field */
+/** The maximum number of tasks that can be running at once.
+ * Space for this many task structures is statically allocated. */
+#define NUM_TASKS 48
 
-/* TASK_PROTECTED means that a task is immune to task_kill_gid.
- * It can only exit by means of dying, i.e. task_exit.
- * A task should set this upon entry before it begins anything
- * urgent. */
-#define TASK_PROTECTED   0x01
-
-
-
-/* Now, the platform specific defines. */
-
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 
 #include <pth.h>
 
@@ -49,7 +37,9 @@ typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
 extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 
-#else /* !CONFIG_PLATFORM_LINUX */
+#define TASK_PROTECTED 0x40
+
+#else /* !CONFIG_NATIVE */
 
 #include <env.h>
 #ifdef HAVE_LIBC
@@ -58,34 +48,37 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 
 
 /** Values for the 'state' field in the task structure */
-#define TASK_FREE    0x0
+#define BLOCK_FREE 0x0
 
 /* Says that the block is in use */
-#define TASK_USED    0x1
+#define BLOCK_USED  0x1
 
-/* Says that the task is in the blocked state */
-#define TASK_BLOCKED 0x2
-
-/* Says that the malloc is used by the 'malloc' function */
-#define TASK_MALLOC  0x4
+/* Says that the block is used by the 'malloc' function */
+#define BLOCK_MALLOC 0x2
 
 /* Says that the block is used by the task scheduler */
-#define TASK_TASK		0x8
+#define BLOCK_TASK 0x4
 
 /* Says that the block is used to hold a task stack */
-#define TASK_STACK	0x10
+#define BLOCK_STACK	0x8
 
-/* TODO - heap size counter removed.  Replace this with...??? */
+/* Says that this block and all blocks after it are guaranteed to
+be free. */
+#define TASK_LAST_FREE 0x10
+
+/* Says that the task is in the blocked state */
+#define TASK_BLOCKED 0x20
+
+/* TASK_PROTECTED means that a task is immune to task_kill_gid.
+ * It can only exit by means of dying, i.e. task_exit.
+ * A task should set this upon entry before it begins anything
+ * urgent. */
+#define TASK_PROTECTED 0x40
 
 
-/** The maximum number of tasks that can be running at once.
- * Space for this many task structures is statically allocated. */
-#define NUM_TASKS 32
+/** Define the size of the saved process stack. */
+#define TASK_STACK_SIZE 32
 
-/*
- * Define the size of the saved process stack.
- */
-#define TASK_STACK_SIZE		60
 
 /** Type for the group ID (gid) */
 typedef U8 task_gid_t;
@@ -109,8 +102,8 @@ typedef void (*task_function_t) (void);
  */
 typedef struct task_struct
 {
-	/** The execution state of the task.  It can be TASK_FREE, if the
-	 * task entry isn't being used at all; TASK_USED for a running/waiting
+	/** The execution state of the task.  It can be BLOCK_FREE, if the
+	 * task entry isn't being used at all; BLOCK_USED for a running/waiting
 	 * task; or TASK_BLOCKED for a sleeping task. */
 	U8				state;
 
@@ -136,8 +129,7 @@ typedef struct task_struct
 	 * the task's stack area */
 	U8				stack_size;
 
-	/** Miscellaneous control flags */
-	U8				flags;
+	U8          reserved;
 
 	/** The amount of time that a blocked task has requested to
 	sleep */
@@ -153,20 +145,11 @@ typedef struct task_struct
 	 * initialization data to a new task.  The creator of the task can
 	 * assign this argument pointer, after creating the task but before
 	 * the next schedule. */
-	/* TODO - few  tasks need an arg, and this is wasting RAM for those
+	/* TODO - few tasks need an arg, and this is wasting RAM for those
 	 * that don't.  Better to push any arguments onto the new task's stack
 	 * and declare the task function to accept those arguments, with
 	 * an ellipsis to prevent assuming they are in registers. */
 	PTR_OR_U16	arg;
-
-	/** Thread local data.  Some types of tasks need to maintain local
-	 * state information, where each task has its own copy of the data.
-	 * The task structure reserves 4 bytes for this purpose; tasks are
-	 * free to use this however they choose.   See include/sys/leff.h
-	 * for one example of how this is done. */
-	/* TODO - should this be overlaid at the bottom of the stack?
-	 * Again, most functions won't need this. */
-	U8          thread_data[4];
 
 	/** The index of an auxiliary memory block used to store
 	 * additional stack data.  This is used when the stack space
@@ -174,13 +157,19 @@ typedef struct task_struct
 	 * to -1, it means there is no auxiliary storage. */
 	U8				aux_stack_block;
 
+   /** If non-NULL, the address to switch to when the task is
+	killed.  When NULL, killing a task frees it immediately.  When
+	non-NULL, the task will be rescheduled at this address.  The
+	function runs in the context of the task so has access to all
+	task local data. */
+   void      (*sighandler) (void);
+
 	/** The task stack save area.  This is NOT used as the live stack
 	 * area; the live stack is copied here when the task blocks.
 	 * Because of this, tasks can use a much larger stack size if needed,
 	 * as long as they don't try to block while holding that much space.
 	 * Practically, this means that you shouldn't sleep in a deeply
-	 * nested set of function calls.
-	 */
+	 * nested set of function calls. */
 	U8				stack[TASK_STACK_SIZE];
 } task_t;
 
@@ -202,20 +191,16 @@ extern inline task_gid_t task_getgid (void)
 	return task_current->gid;
 }
 
-extern inline U8 task_get_thread_data (task_t *pid, U8 n)
-{
-	return pid->thread_data[n];
-}
-
-extern inline void task_set_thread_data (task_t *pid, U8 n, U8 v)
-{
-	pid->thread_data[n] = v;
-}
-
 extern inline void task_set_rom_page (task_t *pid, U8 rom_page)
 {
 	pid->rom_page = rom_page;
 }
+
+extern inline void task_set_sighandler (task_function_t sighandler)
+{
+	task_current->sighandler = sighandler;
+}
+
 
 /*******************************/
 /*     Debug Timing            */
@@ -235,17 +220,22 @@ extern inline void task_set_rom_page (task_t *pid, U8 rom_page)
  * PIDs are rarely used as they are dynamic in value. */
 typedef task_t *task_pid_t;
 
-#endif /* CONFIG_PLATFORM_LINUX */
+#endif /* CONFIG_NATIVE */
 
 
 /********************************/
 /*     Function Prototypes      */
 /********************************/
 
+#ifndef CONFIG_NATIVE
+task_t *block_allocate (void);
+void block_free (task_t *tp);
+void malloc_chunk_dump (task_t *task);
+#endif
+
 void task_dump (void);
 void task_init (void);
 void task_create (void);
-void task_inherit_thread_data (task_pid_t tp);
 task_pid_t task_create_gid (task_gid_t, task_function_t fn);
 task_pid_t task_create_gid1 (task_gid_t, task_function_t fn);
 task_pid_t task_recreate_gid (task_gid_t, task_function_t fn);
@@ -256,7 +246,7 @@ void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
 __noreturn__ void task_exit (void);
 task_pid_t task_find_gid (task_gid_t);
-task_pid_t task_find_gid_data (task_gid_t gid, U8 off, U8 val);
+task_pid_t task_find_gid_next (task_pid_t first, task_gid_t gid);
 void task_kill_pid (task_pid_t tp);
 bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
@@ -265,21 +255,23 @@ void task_clear_flags (U8 flags);
 PTR_OR_U16 task_get_arg (void);
 void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
 __noreturn__ void task_dispatcher (void);
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
-U8 task_get_thread_data (task_pid_t pid, U8 n);
-void task_set_thread_data (task_pid_t pid, U8 n, U8 v);
 #endif
 
+
+/** Create a new task that has the same group ID as the current one. */
 #define task_create_peer(fn)		task_create_gid (task_getgid (), fn)
 
-#define leff_create_peer(fn)     task_inherit_thread_data (task_create_peer(fn))
-
+/** Create a new task with group ID zero (anonymous) */
 #define task_create_anon(fn)		task_create_gid (0, fn)
 
+/** Kill all of the other tasks that have the same group ID as
+ * the current one. */
 #define task_kill_peers()			task_kill_gid (task_getgid ())
 
+/** Yield control to another task, but do not impose a minimum sleep time. */
 #define task_yield()					task_sleep (0)
 
 extern inline task_pid_t
@@ -308,9 +300,16 @@ far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
 
 
 
-#ifdef CONFIG_PLATFORM_LINUX
-/* TODO */
-#else /* !CONFIG_PLATFORM_LINUX */
+#ifdef CONFIG_NATIVE
+
+extern void *task_get_class_data (task_pid_t);
+extern void task_set_class_data (task_pid_t, size_t);
+
+#define task_class_data(tp, type) ((type *)task_get_class_data (tp))
+
+#define task_init_class_data(tp, type) ({ task_set_class_data (tp, sizeof (type)); task_class_data (tp, type); })
+
+#else /* !CONFIG_NATIVE */
 
 #define TASK_DECL_ARGS(args...) args, ...
 
@@ -326,6 +325,32 @@ do { \
 
 #define task_push_args_done(tp) task_push_arg(tp, ((U16)task_exit))
 
-#endif
+
+/** Returns the pointer to the class data for a task.
+ * This is a structure located at the top of the task's
+ * stack in a fixed location, where it is visible to other
+ * tasks as well.
+ * tp identifies the task.  type is the C structure that says
+ * how the area should be viewed.
+ */
+#define task_class_data(tp, type) ((type *)(&(tp)->stack[0]))
+
+/** Initializes the class data area for a new task. */
+#define task_init_class_data(tp, type) ({ task_class_data (tp, type); })
+
+#endif /* CONFIG_NATIVE */
+
+/** Returns the pointer to the class data for the current task. */
+#define task_current_class_data(type) task_class_data(task_getpid (), type)
+
+/** Copies the class data from the currently running task to a recently
+ * created task.  The new task is said to inherit the data from the
+ * current one. */
+#define task_inherit_class_data(tp, type) \
+do { \
+	type *src = task_current_class_data (type); \
+	type *dst = task_init_class_data (tp, type); \
+	memcpy (dst, src, sizeof (type)); \
+} while (0)
 
 #endif /* _SYS_TASK_H */

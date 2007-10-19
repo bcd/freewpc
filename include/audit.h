@@ -23,7 +23,8 @@
 
 /**
  * An audit variable.  Audits are 16-bit integers stored in
- * non-volatile memory.
+ * non-volatile memory.  TODO - this isn't large enough.
+ * We really need multibyte BCD vars here.
  */
 typedef U16 audit_t;
 

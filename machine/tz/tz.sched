@@ -34,7 +34,9 @@ tz_clock_rtt       32    0.1
 # Update the loop magnet
 magnet_duty_rtt    32    0.1
 
-# TODO: update mini-playfield magnets
+# Update mini-playfield magnets
+mpf_driver         8     0.1
+
 # TODO: duty cycle bridge divertor
 # TODO : duty cycle ramp divertor
 # TODO : duty cycle gumball divertor

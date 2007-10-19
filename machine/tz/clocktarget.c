@@ -45,7 +45,7 @@ void clock_default_hit_deff (void)
 
 CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
-	if (!lamp_test (LM_PANEL_CLOCK_MIL))
+	if (!lamp_flash_test (LM_CLOCK_MILLIONS))
 	{
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
@@ -80,6 +80,7 @@ CALLSET_ENTRY (clocktarget, start_ball)
 
 CALLSET_ENTRY (clocktarget, door_start_clock_millions)
 {
+	/* TODO : need to start a round timer here */
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 

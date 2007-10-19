@@ -73,16 +73,27 @@ extern const U8 mach_edge_switches[];
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
+/** True if a switch is part of a ball container */
 #define SW_HAS_DEVICE(sw)	(sw->devno != 0)
 
+/** Returns the container ID that a switch belongs to */
 #define SW_GET_DEVICE(sw)	(sw->devno - 1)
 
-
 #define NUM_PF_SWITCHES 64
-#define NUM_DEDICATED_SWITCHES 8
-#define NUM_FLIPPER_SWITCHES 8
 
-#define NUM_SWITCHES (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES + NUM_FLIPPER_SWITCHES)
+#define NUM_DEDICATED_SWITCHES 8
+
+#if (MACHINE_FLIPTRONIC == 1)
+#define NUM_FLIPTRONIC_SWITCHES 8
+#define SW_LEFT_BUTTON SW_L_L_FLIPPER_BUTTON
+#define SW_RIGHT_BUTTON SW_L_R_FLIPPER_BUTTON
+#else
+#define NUM_FLIPTRONIC_SWITCHES 0
+#define SW_LEFT_BUTTON SW_LEFT_FLIPPER
+#define SW_RIGHT_BUTTON SW_RIGHT_FLIPPER
+#endif
+
+#define NUM_SWITCHES (NUM_DEDICATED_SWITCHES + NUM_PF_SWITCHES + NUM_FLIPTRONIC_SWITCHES)
 
 #define SWITCH_BITS_SIZE	(NUM_SWITCHES / 8)
 
@@ -92,12 +103,12 @@ extern const U8 mach_edge_switches[];
 
 #define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
 
-/* Array types. */
+/* Switch array indices */
 #define AR_RAW			0
 #define AR_CHANGED 	1
 #define AR_PENDING 	2
 #define AR_QUEUED 	3
-#define AR_RUNNING   4
+#define AR_LATCHED   4
 #define NUM_SWITCH_ARRAYS 	5
 
 extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
@@ -178,6 +189,7 @@ void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
+const switch_info_t *switch_lookup (U8 sw);
 U8 switch_lookup_lamp (const switchnum_t sw);
 
 #endif /* _SYS_SWITCH_H */

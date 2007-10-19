@@ -81,11 +81,38 @@ match_deff (void)
 	{
 		callset_invoke (match_awarded);
 	}
-	else
-	{
-		task_sleep_sec (2);
-	}
+
+	task_sleep_sec (2);
 	deff_exit ();
+}
+
+
+U8
+match_value_score (U8 want_match, U8 val)
+{
+	U8 score = 0;
+	U8 p;
+	for (p = 0; p < num_players; p++)
+	{
+		if (scores[p][BYTES_PER_SCORE-1] == match_value)
+		{
+			if (want_match)
+				score++;
+		}
+		else
+		{
+			if (!want_match)
+				score++;
+		}
+	}
+
+	if (want_match && score > 0)
+	{
+		score = 4 - score;
+	}
+
+	dbprintf ("%s, %02X = %d\n", want_match ? "match" : "no match", val, score);
+	return score;
 }
 
 
@@ -95,6 +122,9 @@ match_start (void)
 {
 	U8 match_flag;
 	U8 starting_match_value;
+	U8 score;
+	U8 best_score = 0;
+	U8 best_match_value = 0;
 
 	/* Nothing to do if match has been disabled */
 	if (system_config.match_feature == 0)
@@ -118,60 +148,53 @@ match_start (void)
 		match_flag = 0;
 	}
 
-	/* Set the match value so that the above decision holds true.
-	 * Start with a random number for the match value, and increase
-	 * it until the condition is satisfied. */
+	/* Find a value for the match that works best. */
 	starting_match_value = match_value = random_scaled (10) * 0x10;
-	match_count = 0;
-	for (;;)
-	{
-		U8 p;
-		for (p = 0; p < num_players; p++)
+	do {
+		score = match_value_score (match_flag, match_value);
+		if (score > best_score)
 		{
-			if (scores[p][BYTES_PER_SCORE-1] == match_value)
-			{
-				/* This player's score matches, and we wanted a match.
-				Use this value. */
-				if (match_flag == 1)
-					break;
-				/* Otherwise, we don't want a match; maybe the next
-				player's score won't match */
-			}
-			else
-			{
-				/* This player's score does not match, and we did not
-				want to match.  Use this value. */
-				if (match_flag == 0)
-					break;
-				/* Otherwise, we want a match; maybe the next
-				player's score will match */
-			}
+			best_score = score;
+			best_match_value = match_value;
 		}
 
-value_ok:
-		break;
-
-next:
-		/* Try the next value */
 		match_value += 0x10;
 		if (match_value > 0x90)
-		{
 			match_value = 0x00;
-		}
-		/* Note: this could theoretically be an infinite loop, but
-		we must break at some point if the scores aren't corrupted. */
-	}
+	} while (match_value != starting_match_value);
+
+	dbprintf ("Chose match value %02X\n", match_value);
+	match_value = best_match_value;
 
 	/* Start the match effect, then wait until it finishes. */
 	deff_start (DEFF_MATCH);
 	while (deff_get_active () == DEFF_MATCH)
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 
 	/* Award any credits */
 	while (match_count > 0)
 	{
 		match_count--;
 		match_award ();
+	}
+}
+
+
+CALLSET_ENTRY (match, sw_buyin_button)
+{
+	U8 p;
+	if (!in_game && !in_test)
+	{
+		num_players = random_scaled (4) + 1;
+		dbprintf ("num_players = %d\n", num_players);
+		for (p=0; p < num_players; p++)
+		{
+			scores[p][BYTES_PER_SCORE-1] = random_scaled (10) * 0x10;
+			dbprintf ("player %d = %02X\n", p+1, scores[p][BYTES_PER_SCORE-1]);
+		}
+		deff_start (DEFF_SCORES_IMPORTANT);
+		task_sleep (TIME_1S);
+		match_start ();
 	}
 }
 

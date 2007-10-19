@@ -28,13 +28,13 @@
 
 extern inline void rt_sol_enable (const U8 sol)
 {
-	bitarray_set (sol_rt_state, sol);
+	sol_timers[sol] = 0xFF;
 }
 
 
 extern inline void rt_sol_disable (const U8 sol)
 {
-	bitarray_clear (sol_rt_state, sol);
+	sol_timers[sol] = 0;
 }
 
 

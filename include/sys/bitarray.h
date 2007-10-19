@@ -56,7 +56,7 @@ typedef U8 *bitset;
  * these macros are never used, but are defined anyway (to zero)
  * just to avoid compile errors. */
 
-#ifdef CONFIG_PLATFORM_WPC
+#if defined(CONFIG_PLATFORM_WPC) && !defined(CONFIG_NATIVE)
 
 #define __bitarray_constant_p(bitno) __builtin_constant_p (bitno)
 
@@ -87,10 +87,10 @@ typedef U8 *bitset;
 #else /* !CONFIG_PLATFORM_WPC */
 
 #define __bitarray_constant_p(bitno) 1
-#define wpc_setbit(bits,bitno) 0
-#define wpc_clearbit(bits,bitno) 0
-#define wpc_togglebit(bits,bitno) 0
-#define wpc_testbit(bits,bitno) 0
+#define wpc_setbit(bits,bitno) bitarray_const_set(bits,bitno)
+#define wpc_clearbit(bits,bitno) bitarray_const_clear(bits,bitno)
+#define wpc_togglebit(bits,bitno) bitarray_const_toggle(bits,bitno)
+#define wpc_testbit(bits,bitno) bitarray_const_test(bits,bitno)
 
 #endif
 

@@ -93,6 +93,7 @@ typedef struct
 #ifdef CONFIG_TIMED_GAME
 	adjval_t timed_game;
 #endif
+	adjval_t buy_extra_ball;
 } std_adj_t;
 
 extern __nvram__ std_adj_t system_config;

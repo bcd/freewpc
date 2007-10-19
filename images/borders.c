@@ -40,6 +40,7 @@ gen_mborder (void)
 	pgm_draw_border (pgm, 3, PGM_DARK(pgm));
 	pgm_draw_border (pgm, 2, PGM_BRIGHT(pgm));
 	pgm_draw_border (pgm, 1, PGM_WHITE(pgm));
+	pgm_write (pgm, "images/mborder.pgm");
 	pgm_write_xbmset (pgm, "images/mborder.xbm", "mborder");
 	pgm_free (pgm);
 }
@@ -76,6 +77,7 @@ gen_ball_border (void)
 	for (x=128-4; x >= 0; x -= 8)
 		pgm_paste (main, next, x, 31-4);
 
+	pgm_write (main, "images/ballborder.pgm");
 	pgm_write_xbmset (main, "images/ballborder.xbm", "ballborder");
 	pgm_free (main);
 }

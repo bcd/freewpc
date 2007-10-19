@@ -122,7 +122,7 @@ CALLSET_ENTRY (ballsave, single_ball_play)
 }
 
 
-CALLSET_BOOL_ENTRY(ballsave, end_ball_check)
+CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 {
 	if (ballsave_test_active ())
 	{

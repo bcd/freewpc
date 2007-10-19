@@ -26,6 +26,8 @@
 #ifndef _PLATFORM_NATIVE_H
 #define _PLATFORM_NATIVE_H
 
+#define far_call_pointer(function, page, arg) (*function) (arg)
+
 extern inline U8 far_read8 (U8 *address, U8 page)
 {
 	return *address;

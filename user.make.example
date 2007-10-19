@@ -5,9 +5,11 @@
 #
 
 # Set the platform you are trying to build.
-# By default, code to run directly on the WPC hardware is generated.
-# If you want to simulate, use the 'linux' platform.
-#PLATFORM = linux
+#PLATFORM := wpc
+#PLATFORM := whitestar
+
+# If you want to simulate, enable NATIVE.
+#NATIVE := y
 
 # Set the machine you are trying to build.
 # If you are primarily working with a single machine type, it is

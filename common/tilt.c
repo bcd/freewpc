@@ -71,7 +71,7 @@ void slam_tilt_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
 	dmd_show_low ();
-	task_sleep_sec (5);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 
@@ -112,17 +112,25 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	if (event_did_follow (sw_coin_door_closed, sw_slam_tilt))
 		return;
 
+	/* Kill the current game */
+	stop_game ();
+
 	/* Disable coins briefly, the whole point of the slam tilt */
 	event_can_follow (sw_slam_tilt, sw_coin, TIME_5S);
 
+	/* Start the slam tilt effect */
 	deff_start (DEFF_SLAM_TILT);
+	lamp_all_off ();
+
 	audit_increment (&system_audits.tilts);
 	audit_increment (&system_audits.slam_tilts);
-
 	/* When slamtilt penalty adjustment is enabled, remove a credit. */
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
-	stop_game ();
+
+	while (deff_get_active () == DEFF_SLAM_TILT)
+		task_sleep (TIME_66MS);
+	amode_start ();
 }
 
 

@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <test.h>
 
 /**
  * \file
@@ -31,23 +32,26 @@ __fastram__ U8 tick_count;
 /** The number of FIRQs asserted */
 __fastram__ U8 firq_count;
 
+/** Nonzero when the system has finished initializing */
 U8 sys_init_complete;
 
+/** Nonzero when it is OK to call idle functions */
 U8 idle_ok;
 
+/** The number of background initialization tasks that are still
+running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
+/** Indicates the last nonfatal error taken */
 U8 last_nonfatal_error_code;
 
+/** Indicate the task that was running when the last nonfatal happened */
 task_gid_t last_nonfatal_error_gid;
 
 
-#ifdef __m6809__
-void exit (void)
-{
-}
 
-void abort (void)
+/** Initialize the FreeWPC program. */
+void freewpc_init (void)
 {
 	fatal (ERR_LIBC_ABORT);
 }
@@ -63,20 +67,20 @@ void abort (void)
 __naked__ __noreturn__ 
 void do_reset (void)
 {
+>>>>>>> .r2169
 	extern __common__ void system_reset (void);
 
-#ifdef __m6809__
 	/* Reset the sound board... the earlier the better */
 	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
 
 	/* Initializing the RAM page */
 	wpc_set_ram_page (0);
 
+#ifdef __m6809__
 	/* Install the null pointer catcher, by programming
-	 * an actual instruction at address 0x0 (branch to self)
-	 * TODO : disable interrupts, too? */
-	*(U8 *)0 = 0x20;
-	*(U8 *)1 = 0xFE;
+	 * some SWI instructions at zero. */
+	*(U8 *)0 = 0x3F;
+	*(U8 *)1 = 0x3F;
 #endif /* __m6809__ */
 
 	/* Set up protected RAM */
@@ -109,18 +113,16 @@ void do_reset (void)
 	 * to software features. */
 	wpc_led_toggle ();
 
-#ifdef STATIC_SCHEDULER
+	/* Initialize the real-time scheduler.  The periodic functions
+	are scheduled at compile-time  using the 'gensched' utility. */
 	VOIDCALL (tick_init);
-#else
-	irq_init ();
-#endif
 
+	/* Initialize the hardware */
 #ifdef DEBUGGER
 	db_init ();
 #endif
 	ac_init ();
 	sol_init ();
-	flasher_init ();
 	triac_init ();
 #if (MACHINE_DMD == 1)
 	dmd_init ();
@@ -138,33 +140,39 @@ void do_reset (void)
 	 * thread of execution, too. */
 	task_init ();
 
-	/* Initialize the sound board first.  This is started as a background
-	 * thread, since it involves polling for data back from the sound board,
+#ifdef CONFIG_NATIVE
+	linux_init ();
+#endif
+
+	/* Initialize the sound board early in a background
+	 * thread, since it involves polling for data back from it,
 	 * which may take unknown (or even infinite) time. */
 	sys_init_pending_tasks++;
-	task_create_gid (GID_DCS_INIT, sound_init);
+	task_create_gid (GID_SOUND_INIT, sound_init);
 
+	/* Initialize everything else.  Some of these are given explicitly
+	to force a particular order, since callsets do not guarantee the
+	order of invocation.  For most things the order doesn't matter. */
 	deff_init ();
 	leff_init ();
 	test_init ();
 	adj_init ();
 	callset_invoke (init);
 
+	/* Check all adjustments and make sure that their checksums are valid.
+	If problems are found, those adjustments will be made sane again. */
 	csum_area_check_all ();
 
 	/* Enable interrupts (IRQs and FIRQs) at the source (WPC) and
 	 * in the 6809 */
-#ifdef CONFIG_PLATFORM_LINUX
-	linux_init ();
-#endif
-	wpc_write_irq_clear (0x06);
+	wpc_int_enable ();
 	enable_interrupts ();
+	idle_ok = 1;
 
 	/* The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
+	 * But in a test-only build, go directly to test mode.
 	 */
-	idle_ok = 1;
-
 #ifdef MACHINE_TEST_ONLY
 	sys_init_complete++;
 	callset_invoke (sw_enter);
@@ -180,13 +188,14 @@ void do_reset (void)
 	 * In the simulator, the main task is not supposed to exit, so there
 	 * is a conditional for that.
 	 */
-#ifndef CONFIG_PLATFORM_LINUX
+#ifndef CONFIG_NATIVE
 	task_exit ();
 #else
 	while (1)
 	{
 		/* TODO - drop priority for idle tasks */
 		task_sleep (TIME_66MS);
+		db_idle ();
 		callset_invoke (idle);
 	}
 #endif
@@ -210,6 +219,7 @@ void do_reset (void)
  */
 void lockup_check_rtt (void)
 {
+#ifndef CONFIG_NATIVE
 	if (sys_init_complete && !task_dispatching_ok)
 	{
 		fatal (ERR_TASK_LOCKUP);
@@ -218,6 +228,7 @@ void lockup_check_rtt (void)
 	{
 		task_dispatching_ok = FALSE;
 	}
+#endif
 }
 
 
@@ -234,7 +245,8 @@ void fatal (errcode_t error_code)
 	disable_interrupts ();
 
 	/* Reset hardware outputs */
-	wpc_write_flippers (0);
+	wpc_asic_write (WPC_GI_TRIAC, 0);
+	wpc_write_flippers (~0);
 	wpc_write_ticket (0);
 	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
 	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
@@ -243,7 +255,6 @@ void fatal (errcode_t error_code)
 #ifdef MACHINE_SOL_EXTBOARD1
 	wpc_asic_write (WPC_EXTBOARD1, 0);
 #endif
-	wpc_asic_write (WPC_GI_TRIAC, 0);
 
 	/* Audit the error. */
 	audit_increment (&system_audits.fatal_errors);
@@ -269,8 +280,8 @@ void fatal (errcode_t error_code)
 	/* Dump all of the task information to the debugger port. */
 	task_dump ();
 
-#ifdef CONFIG_PLATFORM_LINUX
-	exit (1);
+#ifdef CONFIG_NATIVE
+	linux_shutdown ();
 #else
 	/* Go into a loop, long enough for the error message to be visible.
 	Then reset the system. */
@@ -283,10 +294,10 @@ void fatal (errcode_t error_code)
 				/* 4 nops = 8 cycles.  Loop overhead is about 6, so
 				 * that's 14 cycles total for the inner loop.
 				 * At 2M cycles per sec, we need ~15000 iterations per second */
-				asm ("nop"); 
-				asm ("nop");
-				asm ("nop");
-				asm ("nop");
+				noop ();
+				noop ();
+				noop ();
+				noop ();
 			}
 		}
 	}
@@ -301,18 +312,11 @@ void fatal (errcode_t error_code)
 #ifdef __m6809__
 	start ();
 #else
-	do_reset ();
+	freewpc_init ();
 #endif
 #endif
 }
 
-
-#ifndef CONFIG_PLATFORM_LINUX
-S16 main (void)
-{
-	return 0;
-}
-#endif
 
 void nonfatal (errcode_t error_code)
 {
@@ -340,26 +344,41 @@ void nonfatal (errcode_t error_code)
 __interrupt__
 void do_firq (void)
 {
+	/* The processor does not save/restore all registers on
+	entry to an FIRQ, unlike IRQ.  So the handler is responsibly
+	for doing this for all registers that might be used which are
+	not ordinarily saved automatically.  The 6809 toolchain
+	does not save X and D automatically, thus they need to be
+	saved explicitly.  (It is possible that an application may
+	know definitely that they are *not* used and thus this step
+	can be skipped, but FreeWPC does not make any assumptions.) */
 #ifdef __m6809__
-	asm __volatile__ ("pshs\td,x");
+	m6809_firq_save_regs ();
 #endif
 
+	/* Read the peripheral timer register.
+	 * If bit 7 is set, it is a timer interrupt.  Otherwise,
+	 * it is a DMD interrupt. */
 	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
-		/* Timer interrupt */
+		/* It is a timer interrupt.
+		 * Clear the interrupt by writing back to the same register. */
 		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
+
+		/* If we were using the timer, we would process the interrupt
+		here... */
 	}
 	else
 	{
+		/* It is a DMD interrupt. */
 #if (MACHINE_DMD == 1)
-		/* DMD interrupt */
 		dmd_rtt ();
 #endif
 	}
 	firq_count++;
 
 #ifdef __m6809__
-	asm __volatile__ ("puls\td,x");
+	m6809_firq_restore_regs ();
 #endif
 }
 

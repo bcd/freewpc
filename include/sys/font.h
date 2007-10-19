@@ -88,15 +88,15 @@ extern fontargs_t font_args;
 
 void font_get_string_area (const font_t *font, const char *s);
 
-void fontargs_render_string_center (const fontargs_t *args);
-void fontargs_render_string_right (const fontargs_t *args);
-void fontargs_render_string_left (const fontargs_t *args);
+void fontargs_render_string_center (void);
+void fontargs_render_string_right (void);
+void fontargs_render_string_left (void);
 
 /* The _2 versions will render the string to both mapped pages
 (low and high), and are more efficient than writing twice by hand. */
-void fontargs_render_string_center2 (const fontargs_t *args);
-void fontargs_render_string_right2 (const fontargs_t *args);
-void fontargs_render_string_left2 (const fontargs_t *args);
+void fontargs_render_string_center2 (void);
+void fontargs_render_string_right2 (void);
+void fontargs_render_string_left2 (void);
 
 void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
@@ -110,16 +110,10 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 	font_args.coord.xy = MKCOORD1 (_x, _y); \
 	font_args.s = _s;
 
-
-/* TODO : note that all of these fontargs_render_ functions take
- * the _same_, constant argument every time.  Avoid setting up
- * this parameter by just modifying the functions to work on
- * font_args all the time. */
-
 #define font_render_string_left(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_left (&font_args); \
+	fontargs_render_string_left (); \
 }
 
 #define font_render_string font_render_string_left
@@ -128,19 +122,19 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 #define font_render_string_center(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_center (&font_args); \
+	fontargs_render_string_center (); \
 }
 
 #define font_render_string_right(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_right (&font_args); \
+	fontargs_render_string_right (); \
 }
 
 #define font_render_string_center2(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_center2 (&font_args); \
+	fontargs_render_string_center2 (); \
 }
 
 #endif /* _SYS_FONT_H */

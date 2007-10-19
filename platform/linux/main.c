@@ -29,9 +29,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <freewpc.h>
+#include <simulation.h>
 
-
-extern void do_reset (void);
+extern void freewpc_init (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);
@@ -41,15 +41,9 @@ extern void do_nmi (void);
 
 extern void exit (int);
 
-/** The number of IRQs per second. */ 
-#define IRQS_PER_SEC 1024
+extern const device_properties_t device_properties_table[];
+extern const switch_info_t switch_table[];
 
-/** The frequency of the realtime thread, in milliseconds */
-#define RT_THREAD_FREQ 50
-
-/** The number of IRQs that need to be asserted on every
- * iteration of the realtime thread. */
-#define RT_ITERATION_IRQS ((IRQS_PER_SEC * RT_THREAD_FREQ) / 1000)
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
@@ -70,16 +64,13 @@ U8 *linux_dmd_visible_page;
  * simulation code and the actual product code, but it serves the same 
  * purpose.  Only one matrix is needed, however. 
  */
-U8 linux_switch_matrix[SWITCH_BITS_SIZE];
+U8 linux_switch_matrix[SWITCH_BITS_SIZE+1];
 
 /** The simulated lamp matrix outputs. */
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
 
 /** The simulated solenoid outputs */
 U8 linux_solenoid_outputs[SOL_ARRAY_WIDTH];
-
-/** The simulated flipper outputs */
-U8 linux_flipper_outputs;
 
 /** The simulated flipper inputs */
 U8 linux_flipper_inputs;
@@ -96,8 +87,14 @@ bool linux_firq_enable;
 /** Nonzero if an FIRQ is pending */
 int linux_firq_pending;
 
+/** When zero, at a zero cross reading; otherwise, the amount of time
+ * until the next zerocross */
+int simulated_zerocross;
+
 /** The number of IRQ cycles */
 int linux_irq_count;
+
+int show_switch_levels = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -106,7 +103,7 @@ U8 *linux_switch_data_ptr;
 U8 *linux_lamp_data_ptr;
 
 /** The jumper settings */
-U8 linux_jumpers = 0;
+U8 linux_jumpers = WPC_JUMPER_USA_CANADA;
 
 /** The triac outputs */
 U8 linux_triac_outputs;
@@ -117,8 +114,18 @@ time_t linux_boot_time;
 /** The status of the CPU board LEDs */
 U8 linux_cpu_leds;
 
-/** The initial number of balls to 'install' */
-int linux_installed_balls = -1;
+U8 simulated_orkin_control_port = 0x1;
+
+U8 simulated_orkin_data_port = 0x0;
+
+int col9_enabled = 0;
+
+/** The initial number of balls to 'install' as given on the command-line. */
+#ifdef DEVNO_TROUGH
+int linux_installed_balls = MACHINE_TROUGH_SIZE;
+#else
+int linux_installed_balls = 0;
+#endif
 
 /** The file descriptor to read from for input */
 int linux_input_fd = 0;
@@ -130,46 +137,61 @@ FILE *linux_output_stream;
 char linux_debug_output_buffer[256];
 char *linux_debug_output_ptr;
 
-/** A simulation log class.  All output from the simulator is
-categorized into one of the following classes; the output is then
-preceded with a class identifier.  This makes the output consumable
-by other utilities, which can filter the stream for specific content. */
-enum sim_log_class
+/** When nonzero, the next write to the lamp matrix is actually applied
+to the UI.  This is toggled, because every other write is actually just
+a failsafe to clear the lamps. */
+int linux_lamp_write_flag = 1;
+
+static void sim_switch_effects (int swno);
+
+
+void gdb_break (void)
 {
-	/** Debug information from the simulator itself */
-	SLC_DEBUG,
-
-	/** Text that was rendered to the DMD */
-	SLC_TEXT,
-
-	/** Debug information written by the game ROM to the debugger */
-	SLC_DEBUG_PORT,
-	SLC_LAMPS,
-	SLC_SOUNDCALL,
-};
-
+	barrier ();
+}
 
 /** Prints log messages, requested status, etc. to the console.
  * This is the only function that should use printf.
  */
-static void simlog (enum sim_log_class class, const char *format, ...)
+void simlog (enum sim_log_class class, const char *format, ...)
 {
 	va_list ap;
-
-	switch (class)
-	{
-		case SLC_DEBUG: putchar ('d'); break;
-		case SLC_TEXT: putchar ('t'); break;
-		case SLC_DEBUG_PORT: putchar ('>'); break;
-		case SLC_LAMPS: putchar ('L'); break;
-		case SLC_SOUNDCALL: putchar ('S'); break;
-	}
+	FILE *ofp;
+	char class_code;
 
 	va_start (ap, format);
-	(void)vfprintf (linux_output_stream, format, ap);
+
+#ifdef CONFIG_UI
+	ui_write_debug (format, ap);
+
+	if (linux_output_stream == stdout)
+		ofp = NULL;
+	else
+		ofp = linux_output_stream;
+
+#else
+	ofp = linux_output_stream;
+#endif
+
+	if (ofp)
+	{
+		switch (class)
+		{
+			case SLC_DEBUG: class_code = 'd'; break;
+			case SLC_TEXT: class_code = 't'; break;
+			case SLC_DEBUG_PORT: class_code = '>'; break;
+			case SLC_LAMPS: class_code = 'L'; break;
+			case SLC_SOUNDCALL: class_code = 'S'; break;
+			default: return;
+		}
+	
+		fputc (class_code, ofp);
+		(void)vfprintf (ofp, format, ap);
+		fputc ('\n', ofp);
+		fflush (ofp);
+	}
+
 	va_end (ap);
-	putchar ('\n');
-	fflush (linux_output_stream);
 }
 
 
@@ -189,9 +211,13 @@ static int scanbit (U8 bits)
 }
 
 
-static void linux_shutdown (void)
+void linux_shutdown (void)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
+	protected_memory_save ();
+#ifdef CONFIG_UI
+	ui_exit ();
+#endif
 	exit (0);
 }
 
@@ -216,11 +242,160 @@ void linux_write_lamps (void)
 }
 
 
+static bool linux_switch_poll_logical (unsigned int sw)
+{
+	return (linux_switch_matrix[sw/8] & (1 << (sw%8))) ^ switch_is_opto (sw);
+}
+
+
+/** Toggle the state of a switch */
+static void linux_switch_toggle (unsigned int sw)
+{
+	U8 level;
+
+	/* Update the current state of the switch */
+	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
+
+	/* Redraw the switch */
+	level = linux_switch_matrix[sw/8] & (1 << (sw%8));
+#ifdef CONFIG_UI
+	if (show_switch_levels)
+		ui_write_switch (sw, level);
+	else
+		ui_write_switch (sw, level ^ switch_is_opto (sw));
+#endif
+
+	/* Some switch closures require additional simulation... */
+	if (level ^ switch_is_opto (sw))
+		sim_switch_effects (sw);
+}
+
+
+/** Simulate a switch trigger */
+static void linux_switch_depress (unsigned int sw)
+{
+	linux_switch_toggle (sw);
+	task_sleep (TIME_100MS);
+	linux_switch_toggle (sw);
+	task_sleep (TIME_100MS);
+}
+
+
+
+/** Write to a multiplexed output; i.e. a register in which distinct
+ * outputs are multiplexed together into a single I/O location. */
+static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 newval)
+{
+#ifdef CONFIG_UI
+	U8 oldval = *memp;
+	int n;
+	for (n = 0; n < 8; n++)
+	{
+		if ((newval & (1 << n)) != (oldval & (1 << n)))
+			ui_update (index + n, newval & (1 << n));
+	}
+#endif
+	*memp = newval;
+}
+
+
+static void sim_sol_write (int index, U8 *memp, U8 val)
+{
+	U8 newly_enabled;
+	int devno;
+	int n;
+
+	/* Find which solenoids transitioned from off to on */
+	newly_enabled = (*memp ^ val) & val;
+	for (n = 0; n < 8; n++)
+		if (newly_enabled & (1 << n))
+		{
+			int solno = index+n;
+			/* Solenoid index+n just turned on */
+
+			if (solno >= NUM_POWER_DRIVES)
+				return;
+
+			/* See if it's the outhole kicker */
+#if defined(MACHINE_OUTHOLE_SWITCH) && defined(DEVNO_TROUGH)
+			if (solno == SOL_OUTHOLE && 
+				linux_switch_poll_logical (MACHINE_OUTHOLE_SWITCH))
+			{
+				/* Simulate kicking the ball off the outhole into the trough */
+				simlog (SLC_DEBUG, "Outhole kick");
+				linux_switch_toggle (MACHINE_OUTHOLE_SWITCH);
+				linux_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
+			}
+			else
+#endif
+	
+			/* See if it's attached to a device */
+			for (devno = 0; devno < NUM_DEVICES; devno++)
+			{
+				device_properties_t *props = &device_properties_table[devno];
+				if (props->sol == solno)
+				{
+					int n;
+					for (n = 0; n < props->sw_count; n++)
+					{
+						if (linux_switch_poll_logical (props->sw[n]))
+						{
+							simlog (SLC_DEBUG, "Device %d release", devno);
+							linux_switch_toggle (props->sw[n]);
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+
+	mux_write (ui_write_solenoid, index, memp, val);
+}
+
+
+static void sim_switch_effects (int swno)
+{
+	/* If this is the first switch in a device, then simulate
+	the 'rolling' to the farthest possible point in the device. */
+	int devno;
+	int n;
+
+	for (devno = 0; devno < NUM_DEVICES; devno++)
+	{
+		device_properties_t *props = &device_properties_table[devno];
+
+		if (props->sw_count > 1)
+			for (n = 0; n < props->sw_count-1; n++)
+			{
+				if ((props->sw[n] == swno) && !linux_switch_poll_logical (props->sw[n+1]))
+				{
+					/* Turn off these switch, and turn on the next one */
+					simlog (SLC_DEBUG, "Move from switch %d to %d",
+						swno, props->sw[n+1]);
+					linux_switch_toggle (swno);
+					linux_switch_toggle (props->sw[n+1]);
+					break;
+				}
+			}
+	}
+}
+
+
+static void wpc_sound_reset (void)
+{
+}
+
+
 /** Simulated write of an I/O register */
 void linux_asic_write (U16 addr, U8 val)
 {
 	switch (addr)
 	{
+		case WPC_PARALLEL_STROBE_PORT:
+			break;
+
+		case WPC_PARALLEL_DATA_PORT:
 		case WPC_DEBUG_DATA_PORT:
 			*linux_debug_output_ptr++ = val;
 			if (val == '\n')
@@ -232,14 +407,15 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		/* In simulation, the hardware shifter is not used;
-		rather, native shift instructions are used. */
+		rather, native shift instructions are used.   So these
+		writes should never occur. */
 		case WPC_SHIFTADDR:
 		case WPC_SHIFTBIT:
 		case WPC_SHIFTBIT2:
 			fatal (ERR_CANT_GET_HERE);
 
 		case WPC_FLIPTRONIC_PORT_A:
-			linux_flipper_outputs = val;
+			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
 			break;
 
 		case WPC_LEDS:
@@ -267,22 +443,40 @@ void linux_asic_write (U16 addr, U8 val)
 			linux_dmd_visible_page = linux_dmd_pages[val];
 			break;
 
+		case WPC_DMD_FIRQ_ROW_VALUE:
+			break;
+
 		case WPC_GI_TRIAC:
-			linux_triac_outputs = val;
+			mux_write (ui_write_triac, 0, &linux_triac_outputs, val);
 			break;
 
 		case WPC_SOL_FLASH2_OUTPUT:
+			sim_sol_write (24, &linux_solenoid_outputs[3], val);
+			break;
+
 		case WPC_SOL_HIGHPOWER_OUTPUT:
+			sim_sol_write (0, &linux_solenoid_outputs[0], val);
+			break;
+
 		case WPC_SOL_FLASH1_OUTPUT:
+			sim_sol_write (16, &linux_solenoid_outputs[2], val);
+			break;
+
 		case WPC_SOL_LOWPOWER_OUTPUT:
-			linux_solenoid_outputs[addr-WPC_SOL_FLASH2_OUTPUT] = val;
-			/* TODO : if turning on a solenoid that controls a device,
-			then this should simulate a ball kick. */
+			sim_sol_write (8, &linux_solenoid_outputs[1], val);
+			break;
+
+		case WPC_EXTBOARD1:
+#ifdef MACHINE_SOL_EXTBOARD1
+			sim_sol_write (40, &linux_solenoid_outputs[5], val);
+#endif
 			break;
 
 		case WPC_LAMP_ROW_OUTPUT:
-			if (linux_lamp_data_ptr != NULL)
-				*linux_lamp_data_ptr = val;
+			if ((linux_lamp_data_ptr != NULL) && linux_lamp_write_flag)
+				mux_write (ui_write_lamp, 8 * (linux_lamp_data_ptr - linux_lamp_matrix),
+					linux_lamp_data_ptr, val);
+			linux_lamp_write_flag ^= 1;
 			break;
 
 		case WPC_LAMP_COL_STROBE:
@@ -302,13 +496,15 @@ void linux_asic_write (U16 addr, U8 val)
 #endif
 			break;
 
-#if (MACHINE_DCS == 0)
 		case WPCS_DATA:
+#ifdef CONFIG_UI
+			ui_write_sound_call (val);
+#endif
 			simlog (SLC_SOUNDCALL, "%02X", val);
 			break;
-#endif
 
 		case WPCS_CONTROL_STATUS:
+			wpc_sound_reset ();
 			break;
 
 		default:
@@ -322,8 +518,20 @@ U8 linux_asic_read (U16 addr)
 {
 	switch (addr)
 	{
+		case WPC_DEBUG_DATA_PORT:
+			if (simulated_orkin_control_port & 0x2)
+			{
+				simulated_orkin_control_port ^= 0x2;
+				return simulated_orkin_data_port;
+			}
+			else
+				return 0;
+
+		case WPC_DEBUG_CONTROL_PORT:
+			return simulated_orkin_control_port;
+
 		case WPC_LEDS:
-			return linux_cpu_leds;
+			return linux_cpu_leds; /* don't think the LEDs can actually be read? */
 			break;
 
 		case WPC_CLK_HOURS_DAYS:
@@ -342,7 +550,10 @@ U8 linux_asic_read (U16 addr)
 		}
 
 		case WPC_SW_ROW_INPUT:
-			return *linux_switch_data_ptr;
+			if (col9_enabled)
+				return linux_switch_matrix[9];
+			else
+				return *linux_switch_data_ptr;
 
 		case WPC_SW_JUMPER_INPUT:
 			return linux_jumpers;
@@ -354,7 +565,7 @@ U8 linux_asic_read (U16 addr)
 			return 0;
 
 		case WPC_FLIPTRONIC_PORT_A:
-			return linux_flipper_inputs;
+			return ~linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
 			return 0;
@@ -363,6 +574,9 @@ U8 linux_asic_read (U16 addr)
 			return 0;
 
 		case WPC_ZEROCROSS_IRQ_CLEAR:
+			return simulated_zerocross;
+
+		case WPC_EXTBOARD1:
 			return 0;
 
 		default:
@@ -392,7 +606,6 @@ static void linux_realtime_thread (void)
 {
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
-
 	task_set_flags (TASK_PROTECTED);
 	for (;;)
 	{
@@ -410,11 +623,7 @@ static void linux_realtime_thread (void)
 				linux_time_step ();
 	
 				/** Invoke IRQ handler */
-#ifdef STATIC_SCHEDULER
 				tick_driver ();
-#else
-				do_irq ();
-#endif
 			}
 
 		/** Check for external interrupts on the FIRQ line */
@@ -427,22 +636,6 @@ static void linux_realtime_thread (void)
 }
 
 
-/** Toggle the state of a switch */
-static void linux_switch_toggle (unsigned int sw)
-{
-	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
-}
-
-
-/** Simulate a switch trigger */
-static void linux_switch_depress (unsigned int sw)
-{
-	linux_switch_toggle (sw);
-	task_sleep (TIME_100MS);
-	linux_switch_toggle (sw);
-	task_sleep (TIME_100MS);
-}
-
 
 /** A mapping from keyboard command to switch */
 static switchnum_t keymaps[256] = {
@@ -452,6 +645,7 @@ static switchnum_t keymaps[256] = {
 #ifdef MACHINE_BUYIN_SWITCH
 	['2'] = MACHINE_BUYIN_SWITCH,
 #endif
+	/* '3': SW_LEFT_COIN is omitted on purpose... see below */
 	['4'] = SW_CENTER_COIN,
 	['5'] = SW_RIGHT_COIN,
 	['6'] = SW_FOURTH_COIN,
@@ -463,7 +657,7 @@ static switchnum_t keymaps[256] = {
 	['.'] = SW_L_R_FLIPPER_BUTTON,
 	['`'] = SW_COIN_DOOR_CLOSED,
 #ifdef MACHINE_TILT_SWITCH
-	[' '] = MACHINE_TILT_SWITCH,
+	['t'] = MACHINE_TILT_SWITCH,
 #endif
 #ifdef MACHINE_SLAM_TILT_SWITCH
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
@@ -471,12 +665,21 @@ static switchnum_t keymaps[256] = {
 #ifdef MACHINE_LAUNCH_SWITCH
 	['/'] = MACHINE_LAUNCH_SWITCH,
 #endif
+#ifdef MACHINE_SHOOTER_SWITCH
+	[' '] = MACHINE_SHOOTER_SWITCH,
+#endif
 };
+
+
+void linux_key_install (char key, unsigned int swno)
+{
+	keymaps[key] = swno;
+}
 
 
 /** Read a character from the keyboard.
  * If input is closed, shutdown the program. */
-static char linux_interface_readchar (void)
+char linux_interface_readchar (void)
 {
 	char inbuf;
 	ssize_t res = pth_read (linux_input_fd, &inbuf, 1);
@@ -495,6 +698,7 @@ static void linux_interface_thread (void)
 	char inbuf[2];
 	switchnum_t sw;
 	struct termios tio;
+	int simulator_keys = 1;
 
 	/* Put stdin in raw mode so that 'enter' doesn't have to
 	be pressed after each keystroke. */
@@ -511,13 +715,44 @@ static void linux_interface_thread (void)
 	for (;;)
 	{
 		*inbuf = linux_interface_readchar ();
+
+		if (simulator_keys == 0)
+		{
+			if (*inbuf == '`')
+				simulator_keys ^= 1;
+			else if ((simulated_orkin_control_port & 0x2) == 0)
+			{
+				simulated_orkin_control_port |= 0x2;
+				simulated_orkin_data_port = *inbuf;
+			}
+			continue;
+		}
+
 		switch (*inbuf)
 		{
 			case '\r':
 			case '\n':
 				break;
 
+			case 'C':
+				gdb_break ();
+				break;
+
 			case 'q':
+#ifdef DEVNO_TROUGH
+#ifdef MACHINE_OUTHOLE_SWITCH
+				linux_switch_toggle (MACHINE_OUTHOLE_SWITCH);
+#else
+				linux_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
+#endif /* MACHINE_OUTHOLE_SWITCH */
+#endif	
+				break;
+
+			case '`':
+				simulator_keys ^= 1;
+				break;
+				
+			case '\x1b':
 				linux_shutdown ();
 				break;
 
@@ -534,7 +769,7 @@ static void linux_interface_thread (void)
 				task_sleep_sec (*inbuf - '0');
 				break;
 
-			case 's':
+			case '+':
 				inbuf[0] = linux_interface_readchar ();
 				inbuf[1] = linux_interface_readchar ();
 
@@ -546,6 +781,10 @@ static void linux_interface_thread (void)
 				else
 					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
 				linux_switch_depress (sw);
+				break;
+
+			case '3':
+				linux_switch_depress (SW_LEFT_COIN);
 				break;
 
 			case '#':
@@ -561,9 +800,12 @@ static void linux_interface_thread (void)
 				to turn the keystroke into a switch trigger. */
 				sw = keymaps[(int)*inbuf];
 				if (sw)
-					linux_switch_depress (sw);
-				else if (*inbuf == '3')
-					linux_switch_depress (SW_LEFT_COIN);
+				{
+					if (switch_table[sw].flags & SW_EDGE)
+						linux_switch_toggle (sw);
+					else
+						linux_switch_depress (sw);
+				}
 				else
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)", 
 						*inbuf, *inbuf);
@@ -576,12 +818,23 @@ static void linux_interface_thread (void)
  * At startup, assume that all balls are in the trough. */
 void linux_trough_init (int balls)
 {
-	int i;
-
 #ifdef DEVNO_TROUGH
-	device_t *dev = &device_table[DEVNO_TROUGH];
-	for (i=0; i < dev->props->sw_count && balls; i++, balls--)
-		linux_switch_toggle (dev->props->sw[i]);
+	int i;
+	device_properties_t *trough_props;
+
+	if (balls >= 0)
+	{
+		simlog (SLC_DEBUG, "Installing %d balls into device %d",
+			balls, DEVNO_TROUGH);
+
+		trough_props = &device_properties_table[DEVNO_TROUGH];
+		for (i=trough_props->sw_count-1; i >= 0 && balls; i--, balls--)
+		{
+			U8 sw = trough_props->sw[i];
+			simlog (SLC_DEBUG, "Loading trough switch %d", sw);
+			linux_switch_toggle (sw);
+		}
+	}
 #endif
 }
 
@@ -594,21 +847,21 @@ void linux_trough_init (int balls)
  */
 void linux_init (void)
 {
-	switchnum_t sw;
-	
+	/* This is done here, because the task subsystem isn't ready
+	inside main () */
 	task_create_gid (GID_LINUX_REALTIME, linux_realtime_thread);
 	task_create_gid (GID_LINUX_INTERFACE, linux_interface_thread);
-
-	/* Initialize the state of the opto switches, so that they appear
-	 * reversed correctly. */
-	for (sw = 0; sw < NUM_SWITCHES; sw++)
-		if (switch_is_opto (sw))
-			linux_switch_toggle (sw);
 
 	/* Initial the trough to contain all the balls.  By default,
 	 * it will fill the trough, based on its actual size.  You
 	 * can use the --balls option to override this. */
 	linux_trough_init (linux_installed_balls);
+	linux_boot_time = time (NULL);
+}
+
+
+void malloc_init (void)
+{
 }
 
 
@@ -620,6 +873,11 @@ void linux_init (void)
 int main (int argc, char *argv[])
 {
 	int argn = 1;
+	switchnum_t sw;
+
+#ifdef CONFIG_UI
+	ui_init ();
+#endif
 
 	/** Do initialization that the hardware would normally do, before
 	 * the reset vector is invoked. */
@@ -628,14 +886,34 @@ int main (int argc, char *argv[])
 	linux_irq_count = 0;
 	linux_output_stream = stdout;
 	linux_debug_output_ptr = linux_debug_output_buffer;
+	simulated_orkin_control_port = 0;
+	simulated_zerocross = 0;
 
+	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
 	linux_asic_write (WPC_SW_COL_STROBE, 0x1);
 	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
 
-	linux_boot_time = time (NULL);
+	/* Initialize the state of the switches; optos are backwards */
+	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
+	for (sw = 0; sw < NUM_SWITCHES; sw++)
+		if (switch_is_opto (sw))
+			linux_switch_toggle (sw);
+
+	/* Load the protected memory area */
+	protected_memory_load ();
+
+	/* Invoke the machine-specific simulation function */
+#ifdef MACHINE_TZ
+	linux_key_install ('s', SW_SLOT);
+	linux_key_install ('z', SW_PIANO);
+	linux_key_install ('l', SW_LEFT_RAMP_EXIT);
+	linux_key_install ('r', SW_RIGHT_RAMP);
+	linux_key_install ('h', SW_HITCHHIKER);
+	linux_key_install ('c', SW_CAMERA);
+#endif
 
 	/* Parse command-line arguments */
 	while (argn < argc)
@@ -658,10 +936,23 @@ int main (int argc, char *argv[])
 		{
 			linux_input_fd = open (argv[argn++], O_RDONLY);
 		}
+		else if (!strcmp (arg, "-o"))
+		{
+			linux_output_stream = fopen (argv[argn++], "w");
+			if (linux_output_stream == NULL)
+			{
+				printf ("Error: could not open log file\n");
+				exit (1);
+			}
+		}
+		else if (!strcmp (arg, "--locale"))
+		{
+			linux_jumpers = strtoul (argv[argn++], NULL, 0) << 2;
+		}
 	}
-	
+
 	/* Jump to the reset function */
-	do_reset ();
+	freewpc_init ();
 	return 0;
 }
 

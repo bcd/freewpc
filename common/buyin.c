@@ -36,7 +36,9 @@ void buyin_offer_deff (void)
 		dmd_alloc_low_clean ();
 		dmd_draw_border (dmd_low_buffer);
 		font_render_string_center (&font_term6, 64, 4, "CONTINUE GAME");
-		/* TODO : draw timer */
+		sprintf ("%d", buyin_offer_timer);
+		font_render_string_left (&font_mono5, 1, 0, sprintf_buffer);
+		font_render_string_right (&font_mono5, 126, 0, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_500MS);
 	}
@@ -48,6 +50,7 @@ void buyin_offer_deff (void)
  * machine when it detects that a player has played his last ball. */
 void buyin_offer (void)
 {
+#ifdef MACHINE_BUYIN_SWITCH
 #ifdef MACHINE_BUYIN_LAMP
 	lamp_tristate_flash (MACHINE_BUYIN_LAMP);
 #endif
@@ -65,6 +68,7 @@ void buyin_offer (void)
 #ifdef MACHINE_BUYIN_LAMP
 	lamp_tristate_off (MACHINE_BUYIN_LAMP);
 #endif
+#endif /* MACHINE_BUYIN_SWITCH */
 }
 
 

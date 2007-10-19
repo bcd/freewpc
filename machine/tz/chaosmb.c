@@ -105,8 +105,8 @@ void chaos_jackpot_deff (void)
 {
 	dmd_alloc_low_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 12, "CHAOS");
-	font_render_string_center (&font_fixed10, 64, 20, "JACKPOT");
+	font_render_string_center (&font_fixed10, 64, 9, "CHAOS");
+	font_render_string_center (&font_fixed10, 64, 23, "JACKPOT");
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -124,6 +124,11 @@ void chaosmb_running_deff (void)
 		{
 			sprintf ("SHOOT %s", chaosmb_shots[chaosmb_level].shot_name);
 			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+		}
+		else if (chaosmb_hits_to_relight == 1)
+		{
+			font_render_string_center (&font_var5, 64, 27,
+				"HIT CLOCK TO LIGHT JACKPOT");
 		}
 		else
 		{
@@ -152,6 +157,7 @@ void chaosmb_start (void)
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 0;
 		device_multiball_set (3);
+		ballsave_add_time (10);
 	}
 }
 
@@ -166,7 +172,8 @@ void chaosmb_stop (void)
 void chaosmb_check_level (U8 level)
 {
 	if (flag_test (FLAG_CHAOSMB_RUNNING)
-		&& (chaosmb_level == level))
+		&& (chaosmb_level == level)
+		&& (chaosmb_hits_to_relight == 0))
 	{
 		chaosmb_score_jackpot ();
 	}

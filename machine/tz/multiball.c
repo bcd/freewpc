@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <status.h>
 
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
@@ -124,10 +125,10 @@ CALLSET_ENTRY (mball, mball_start)
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_on (FLAG_MULTIBALL_RUNNING);
+		music_start (multiball_track);
 		deff_start (DEFF_MB_START);
 		deff_start (DEFF_MB_RUNNING);
 		leff_start (LEFF_MB_RUNNING);
-		music_start (multiball_track);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
 		mballs_played++;

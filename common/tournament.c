@@ -89,7 +89,7 @@ CALLSET_ENTRY (tournament, sw_escape)
 }
 
 
-CALLSET_ENTRY (tournament, sw_l_l_flipper_button)
+CALLSET_ENTRY (tournament, sw_left_button)
 {
 	tournament_check_player_enable ();
 }

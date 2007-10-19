@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 /*
- * Division by 10 table.
+ * Divide an 8-bit value by 10 efficiently.
  *
  * Approximate the quotient as q = i*0.00011001101 (binary):
  *    q = ((i>>2) + i) >> 1; times 0.101
@@ -33,11 +33,9 @@
  *    r = ((q<<2) + q) << 1; times 1010.
  *    r = i - r;
  */
-
-
 U16 div10 (U8 v)
 {
-#ifdef __M6809__
+#ifdef __m6809__
 	register U16 res asm ("d");
 	U8 i = v;
 

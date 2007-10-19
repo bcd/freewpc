@@ -14,7 +14,7 @@ WPC95: Yes
 Pinmame-Zip: afm_113b.zip
 Pinmame-ROM: afm_113b.bin
 
-include kernel/freewpc.md
+include platform/wpc/wpc95.md
 
 [lamps]
 
@@ -46,8 +46,6 @@ L7: Drop Target
 # TODO : Strobe Light = 38
 
 [gi]
-
-[drivers]
 
 [tests]
 

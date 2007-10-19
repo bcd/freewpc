@@ -53,7 +53,6 @@ pgm_to_xbmset (const char *name, int invert_flag)
 void
 machgen (void)
 {
-	pgm_to_xbmset ("cow", FALSE);
 	pgm_to_xbmset ("hitcher", TRUE);
 	pgm_to_xbmset ("coinstack", FALSE);
 	pgm_to_xbmset ("oldcar", FALSE);
@@ -61,7 +60,7 @@ machgen (void)
 	pgm_to_xbmset ("robot", TRUE);
 	pgm_to_xbmset ("brianhead", TRUE);
 
-	gen_mborder ();
+	//gen_mborder ();
 	gen_multisquare_background ();
 	gen_dithered_dark_background ();
 	gen_tile_background ();

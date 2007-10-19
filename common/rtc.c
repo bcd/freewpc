@@ -71,12 +71,6 @@ static U8 days_in_month_table[] = {
 	31, 31, 30, 31, 30, 31,
 };
 
-static const char *month_names[] = {
-	"JAN.", "FEB.", "MAR.", "APR.", "MAY", "JUN.",
-	"JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC.",
-};
-
-
 static const char *day_names[] = {
 	"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY",
 	"THURSDAY", "FRIDAY", "SATURDAY"
@@ -196,6 +190,7 @@ static void rtc_pinmame_read (void)
 		month = clock_data->month;
 		day = clock_data->day;
 		rtc_calc_day_of_week ();
+		rtc_normalize ();
 		csum_area_update (&rtc_csum_info);
 		wpc_nvram_put ();
 	}
@@ -247,17 +242,8 @@ CALLSET_ENTRY (rtc, idle)
 /** Render the current date to the printf buffer */
 void rtc_render_date (void)
 {
-	switch (system_config.clock_style)
-	{
-		case DATE_TIME_STYLE_US:
-		default:
-			sprintf ("%s %d, 20%02d", month_names[month-1], day, year);
-			break;
-
-		case DATE_TIME_STYLE_EURO:
-			sprintf ("%d %s 20%02d", day, month_names[month-1], year);
-			break;
-	}
+	extern __common__ void locale_render_date (U8, U8, U16);
+	locale_render_date (month, day, 2000+year);
 }
 
 

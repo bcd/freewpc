@@ -32,9 +32,13 @@
 
 volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
-static char build_date[] = BUILD_DATE;
-
 __nvram__ U8 freewpc_accepted[3];
+
+
+void render_build_date (void)
+{
+	locale_render_date (BUILD_MONTH, BUILD_DAY, BUILD_YEAR);
+}
 
 
 extern inline void wait_for_button (const U8 swno)
@@ -49,7 +53,7 @@ extern inline void wait_for_button (const U8 swno)
 
 void system_accept_freewpc (void)
 {
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 	return;
 #endif
 
@@ -100,6 +104,7 @@ void system_accept_freewpc (void)
 }
 
 
+/** Display effect for system reset */
 void system_reset_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -111,8 +116,10 @@ void system_reset_deff (void)
 #else
 	sprintf ("R%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #endif
-	font_render_string_center (&font_mono5, 32, 12, sprintf_buffer);
-	font_render_string_center (&font_mono5, 96, 12, build_date);
+	font_render_string_left (&font_mono5, 8, 10, sprintf_buffer);
+
+	render_build_date ();
+	font_render_string_right (&font_mono5, 120, 10, sprintf_buffer);
 
 #ifdef USER_TAG
 	font_render_string_center (&font_mono5, 64, 20, C_STRING(USER_TAG));
@@ -125,6 +132,8 @@ void system_reset_deff (void)
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
+	dbprintf ("System initialized.\n");
+	sys_init_complete++;
 	deff_exit ();
 }
 
@@ -135,9 +144,5 @@ void system_reset (void)
 	system_accept_freewpc ();
 	deff_start (DEFF_SYSTEM_RESET);
 	amode_start ();
-	triac_enable (TRIAC_GI_MASK); /* TODO: amode_start should do this */
-	
-	dbprintf ("Init complete.\n");
-	sys_init_complete++;
 }
 

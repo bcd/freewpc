@@ -101,10 +101,10 @@ void flash_all_leff (void)
 	lampset_apply_leff_alternating (LAMPSET_AMODE_ALL, 0);
 	for (i=0; i < 32; i++)
 	{
-		lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
+		lampset_apply (LAMPSET_AMODE_ALL, leff_toggle);
 		task_sleep (TIME_66MS);
 	}
-	lampset_apply_leff_on (LAMPSET_AMODE_ALL);
+	lampset_apply (LAMPSET_AMODE_ALL, leff_on);
 	task_sleep_sec (1);
 	leff_exit ();
 }
@@ -189,7 +189,7 @@ void multiball_running_leff (void)
 	leff_on (LM_LOCK2);
 	for (;;)
 	{
-		lampset_apply_leff_toggle (LAMPSET_DOOR_LOCKS_AND_GUMBALL);
+		lampset_apply (LAMPSET_DOOR_LOCKS_AND_GUMBALL, leff_toggle);
 		task_sleep (TIME_200MS);
 	}
 	leff_exit ();
@@ -197,7 +197,8 @@ void multiball_running_leff (void)
 
 void pf_strobe_up_subtask (void)
 {
-	for (;;) lampset_apply_leff_toggle (LAMPSET_SORT1);
+	for (;;)
+		lampset_apply (LAMPSET_SORT1, leff_toggle);
 }
 
 void strobe_up_leff (void)
@@ -212,11 +213,11 @@ void strobe_up_leff (void)
 }
 
 void multi_strobe1_subtask (void)
-{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply_leff_toggle (LAMPSET_SORT1); task_sleep (TIME_500MS); } }
+{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply (LAMPSET_SORT1, leff_toggle); task_sleep (TIME_500MS); } }
 void multi_strobe2_subtask (void)
-{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply_leff_toggle (LAMPSET_SORT2); task_sleep (TIME_500MS); } }
+{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply (LAMPSET_SORT2, leff_toggle); task_sleep (TIME_500MS); } }
 void multi_strobe3_subtask (void)
-{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply_leff_toggle (LAMPSET_SORT3); task_sleep (TIME_500MS); } }
+{ for (;;) { lampset_set_apply_delay (TIME_33MS); lampset_apply (LAMPSET_SORT3, leff_toggle); task_sleep (TIME_500MS); } }
 
 void multi_strobe_leff (void)
 {
@@ -232,7 +233,7 @@ void multi_strobe_leff (void)
 	for (i=0; i< 2; i++)
 	{
 		lampset_set_apply_delay (TIME_33MS);
-		lampset_apply_leff_toggle (LAMPSET_SORT4);
+		lampset_apply (LAMPSET_SORT4, leff_toggle);
 		task_sleep (TIME_500MS);
 	}
 	task_kill_peers ();
@@ -243,13 +244,13 @@ void door_strobe_subtask (void)
 {
 	lampset_set_apply_delay (TIME_16MS);
 	for (;;)
-		lampset_apply_leff_toggle (LAMPSET_DOOR_PANELS);
+		lampset_apply (LAMPSET_DOOR_PANELS, leff_toggle);
 }
 
 void door_strobe_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
-	lampset_apply_leff_off (LAMPSET_DOOR_PANELS);
+	lampset_apply (LAMPSET_DOOR_PANELS, leff_off);
 	lampset_set_apply_delay (TIME_33MS);
 	leff_create_peer (door_strobe_subtask);
 	task_sleep (TIME_100MS);
@@ -262,72 +263,98 @@ void door_strobe_leff (void)
 void right_loop_leff (void)
 {
 	lampset_set_apply_delay (TIME_16MS);
-	lampset_apply_leff_toggle (LAMPSET_SORT4);
-	lampset_apply_leff_toggle (LAMPSET_SORT4);
+	lampset_apply (LAMPSET_SORT4, leff_toggle);
+	lampset_apply (LAMPSET_SORT4, leff_toggle);
 	leff_exit ();
 }
 
 void left_loop_leff (void)
 {
 	lampset_set_apply_delay (TIME_16MS);
-	lampset_apply_leff_toggle (LAMPSET_SORT3);
-	lampset_apply_leff_toggle (LAMPSET_SORT3);
+	lampset_apply (LAMPSET_SORT3, leff_toggle);
+	lampset_apply (LAMPSET_SORT3, leff_toggle);
 	leff_exit ();
 }
 
 
 void jets_active_leff (void)
 {
-	lampset_set_apply_delay (TIME_200MS);
+	lampset_set_apply_delay (TIME_100MS);
 	for (;;)
-		lampset_leff_step_increment (LAMPSET_JETS);
+		lampset_step_increment (LAMPSET_JETS, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
+}
+
+
+void circle_out_leff (void)
+{
+	lampset_set_apply_delay (TIME_33MS);
+	lampset_apply (LAMPSET_CIRCLE_OUT, leff_toggle);
+	lampset_apply (LAMPSET_CIRCLE_OUT, leff_toggle);
+	leff_exit ();
 }
 
 
 void color_cycle_leff (void)
 {
 	U8 i;
-
-	task_create_peer (gi_cycle_leff);
+	const U8 count = 9;
 
 	lampset_set_apply_delay (0);
 
-	i = 11;
-	lampset_apply_leff_on (LAMPSET_RED_LAMPS);
+	i = count;
+	lampset_apply (LAMPSET_RED_LAMPS, leff_on);
 	do {
-		lampset_apply_leff_toggle (LAMPSET_RED_LAMPS);
+		lampset_apply (LAMPSET_RED_LAMPS, leff_toggle);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 11;
-	lampset_apply_leff_on (LAMPSET_WHITE_LAMPS);
+	i = count;
+	lampset_apply (LAMPSET_WHITE_LAMPS, leff_on);
 	do {
-		lampset_apply_leff_toggle (LAMPSET_WHITE_LAMPS);
+		lampset_apply (LAMPSET_WHITE_LAMPS, leff_toggle);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 11;
-	lampset_apply_leff_on (LAMPSET_YELLOW_LAMPS);
+	i = count;
+	lampset_apply (LAMPSET_YELLOW_LAMPS, leff_on);
 	do {
-		lampset_apply_leff_toggle (LAMPSET_YELLOW_LAMPS);
+		lampset_apply (LAMPSET_YELLOW_LAMPS, leff_toggle);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 11;
-	lampset_apply_leff_on (LAMPSET_ORANGE_LAMPS);
+	i = count;
+	lampset_apply (LAMPSET_ORANGE_LAMPS, leff_on);
 	do {
-		lampset_apply_leff_toggle (LAMPSET_ORANGE_LAMPS);
+		lampset_apply (LAMPSET_ORANGE_LAMPS, leff_toggle);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	i = 11;
-	lampset_apply_leff_on (LAMPSET_AMBER_LAMPS);
+	i = count;
+	lampset_apply (LAMPSET_AMBER_LAMPS, leff_on);
 	do {
-		lampset_apply_leff_toggle (LAMPSET_AMBER_LAMPS);
+		lampset_apply (LAMPSET_AMBER_LAMPS, leff_toggle);
 		task_sleep (TIME_100MS);
 	} while (--i != 0);
 
-	task_kill_peers ();
+	leff_exit ();
+}
+
+
+void lock_leff_task (void)
+{
+	lampset_apply (LAMPSET_LOCK_TEST, leff_toggle);
+	task_exit ();
+}
+
+
+void lock_leff (void)
+{
+	lampset_set_apply_delay (TIME_16MS);
+	leff_create_peer (lock_leff_task);
+	task_sleep (TIME_300MS);
+	lampset_apply (LAMPSET_LOCK_TEST, leff_toggle);
+	task_sleep (TIME_200MS);
 	leff_exit ();
 }
 

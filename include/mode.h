@@ -41,7 +41,7 @@ extern inline void timed_mode_task (
 	/* Mark the task as protected, because killing it will not do all
 	of the cleanup needed for ending the mode.  The proper way to end
 	a mode is to invoke mode_stop(). */
-	/* TODO - this may be unnecessary and dangerous */
+	/* TODO - replace with a sighandler */
 	task_set_flags (TASK_PROTECTED);
 
 	/* Initialize the timer and invoke the mode's begin hook */

@@ -78,13 +78,13 @@ CALLSET_ENTRY (plunger, sw_launch_button)
 #ifdef INCLUDE_AUTOPLUNGER
 	if (switch_poll (MACHINE_SHOOTER_SWITCH))
 	{
-		sol_pulse (MACHINE_LAUNCH_SOLENOID);
+		sol_start (MACHINE_LAUNCH_SOLENOID, SOL_DUTY_100, TIME_66MS);
 	}
 #endif
 }
 
 
-CALLSET_ENTRY (plunger, sw_l_l_flipper_button)
+CALLSET_ENTRY (plunger, sw_left_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	if (system_config.flipper_plunger == ON)
@@ -93,7 +93,7 @@ CALLSET_ENTRY (plunger, sw_l_l_flipper_button)
 }
 
 
-CALLSET_ENTRY (plunger, sw_l_r_flipper_button)
+CALLSET_ENTRY (plunger, sw_right_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	if (system_config.flipper_plunger == ON)

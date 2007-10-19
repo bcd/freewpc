@@ -36,11 +36,9 @@ struct window_ops
 	 * the window is destroyed */
 	void (*exit) (void);
 
-	/** suspend/resume are called whenever the
-	 * current window is swapped out due to a new
-	 * window being loaded, or being swapped back
-	 * in when the new window exits. */
-	void (*suspend) (void);
+	/** The resume function, which is called whenever the
+	 * window becomes active again after a later window
+	 * is popped off the stack. */
 	void (*resume) (void);
 
 	/** The draw function, called just about every
@@ -90,7 +88,6 @@ struct window_ops
 #define DEFAULT_WINDOW \
 	.init = null_function, \
 	.exit = null_function, \
-	.suspend = null_function, \
 	.resume = null_function, \
 	.draw = null_function, \
 	.escape = window_pop, \

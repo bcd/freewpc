@@ -22,6 +22,7 @@
 #include <coin.h>
 #include <test.h>
 #include <player.h>
+#include <highscore.h>
 #include <amode.h>
 
 /**
@@ -77,7 +78,7 @@ U8 player_up;
 /** The number of the current ball in play */
 U8 ball_up;
 
-#ifdef CONFIG_TIMED_GAME
+#ifdef CONFIG_TIMED_GAME /* TODO - remove this define, it is adjustable */
 /** Nonzero if the current ball will automatically end after a certain
 period of time.  The value indicates the number of seconds. */
 U8 timed_game_timer;
@@ -93,11 +94,13 @@ void start_ball (void);
 doesn't define one */
 void default_amode_deff (void)
 {
+#if (MACHINE_DMD == 1)
 	dmd_alloc_low_high ();
 	dmd_draw_fif (fif_freewpc_logo);
 	dmd_show2 ();
 	for (;;)
 		task_sleep_sec (5);
+#endif
 }
 #endif
 
@@ -110,6 +113,7 @@ void amode_start (void)
 #ifdef MACHINE_CUSTOM_AMODE
 	leff_start (LEFF_AMODE);
 #endif
+	triac_enable (TRIAC_GI_MASK);
 	lamp_start_update ();
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	callset_invoke (amode_start);
@@ -147,6 +151,12 @@ void end_game (void)
 {
 	if (in_game)
 	{
+		/* Kill the flippers in case still enabled */
+		flipper_disable ();
+
+		/* Stop the long-running score screen */
+		deff_stop (DEFF_SCORES);
+
 		/* If in test mode now (i.e. the game was aborted
 		by pressing Enter), then skip over the end game effects. */
 		if (!in_test)
@@ -181,6 +191,7 @@ void end_game (void)
  * Handle end-of-ball.  This is called from the ball device
  * subsystem whenever it detects that the number of balls in play
  * is zero.
+ * TODO - make this __noreturn__.
  */
 void end_ball (void)
 {
@@ -205,17 +216,7 @@ void end_ball (void)
 	}
 #endif
 
-	/*
-	 * Call the machine hook to verify that end_ball can
-	 * proceed.  It may return false if we don't want to 
-	 * consider this the end of the ball; in such cases,
-	 * it must explicitly put another ball back into play.
-	 * (Game code should check for ball saves here.)
-	 */
-	if (!callset_invoke_boolean (end_ball_check) && !in_tilt)
-		goto done;
-
-	/* OK, we're committing to ending the ball now. */
+	/* Notify everybody that wants to know about it */
 	callset_invoke (end_ball);
 
 	/* First, disable the flippers if enabled by adjustment. */
@@ -269,12 +270,15 @@ void end_ball (void)
 		goto done;
 	}
 
+	/* TODO : a tilt here seems to end the _next_ ball
+	immediately */
+
 	/* If this is the last ball of the game for this player,
 	 * then offer to buy an extra ball if enabled.  Also,
 	 * if 1-coin buyin is enabled, offer this too. */
 	if (ball_up == system_config.balls_per_game)
 	{
-		if (0) /* TODO - check if buyin is enabled */
+		if (system_config.buy_extra_ball == YES)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
 		}
@@ -285,7 +289,8 @@ void end_ball (void)
 		}
 	}
 
-	/* Advance to the next player. */
+	/* Advance to the next player in a multiplayer game.
+	 * Save and restore the local player data. */
 	if (num_players > 1)
 	{
 		player_save ();
@@ -426,9 +431,14 @@ void start_ball (void)
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
 
+	/* Since lamp effects from previous balls could have been killed,
+	ensure that no lamps for leffs are allocated, causing incorrect
+	lamp matrix draw.  Do this early, before start_ball which might
+	want to start up a leff. */
+	leff_stop_all ();
+
 	if (ball_up == 1)
 		callset_invoke (start_player);
-	dbprintf ("start_ball hook\n");
 	callset_invoke (start_ball);
 	callset_invoke (update_lamps);
 
@@ -445,7 +455,6 @@ void start_ball (void)
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */
-	dbprintf ("start_ball deffs\n");
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
 	if (ball_up == system_config.balls_per_game)
@@ -456,7 +465,8 @@ void start_ball (void)
 	/* Serve a ball to the plunger, by requesting a kick from the
 	 * trough device.  However, if a ball is detected in the plunger lane
 	 * for whatever reason, then don't kick a new ball, just use the
-	 * one that is there. */
+	 * one that is there.  In that case, need to increment live ball count
+	 * manually. */
 #if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
@@ -464,9 +474,6 @@ void start_ball (void)
 	}
 	else
 	{
-		/* TODO - this scenario causes problems, something else is
-		needed here */
-		/* How about this? */
 		device_add_live ();
 	}
 #endif
@@ -503,6 +510,8 @@ void add_player (void)
 	num_players++;
 	wpc_nvram_put ();
 	callset_invoke (add_player);
+
+	/* Acknowledge the new player by showing the scores briefly */
 	deff_start (DEFF_SCORES_IMPORTANT);
 	score_update_request ();
 }

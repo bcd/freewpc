@@ -3,10 +3,9 @@
 # (C) Copyright 2006 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
-#
-# All machine descriptions should "include kernel/freewpc.md" in order to
-# get the common definitions that apply to all WPC-era games.
 #--------------------------------------------------------------------------
+
+include platform/wpc/wpc-common.md
 
 [lamps]
 11: First Lamp
@@ -24,9 +23,9 @@ D8: Enter, service, intest, cabinet
 22: Coin Door Closed, cabinet, edge, opto
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 F1: L. R. Flipper EOS, opto, cabinet
-F2: L. R. Flipper Button, button, opto, intest
+F2: L. R. Flipper Button, button, opto, intest, c_decl(sw_right_button)
 F3: L. L. Flipper EOS, opto, cabinet
-F4: L. L. Flipper Button, button, opto, intest
+F4: L. L. Flipper Button, button, opto, intest, c_decl(sw_left_button)
 F5: U. R. Flipper EOS, opto, cabinet
 F6: U. R. Flipper Button, button, opto
 F7: U. L. Flipper EOS, opto, cabinet
@@ -93,7 +92,7 @@ Buyin Offer: page(COMMON_PAGE), PRI_MATCH
 Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
-System Reset: PRI_RESET
+System Reset: PRI_RESET, page(COMMON_PAGE)
 
 [leffs]
 NULL: 0

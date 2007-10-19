@@ -165,27 +165,23 @@ void task_dump (void)
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
 #ifndef DUMP_ALL_TASKS
-		if (tp->state != TASK_FREE)
+		if (tp->state != BLOCK_FREE)
 #endif
 		{
 			dbprintf ("%p: ", tp);
 			task_dispatching_ok = TRUE;
 
-			if (tp->state & TASK_TASK)
+			if (tp->state & BLOCK_TASK)
 			{
 				dbprintf ("GID %02d  PC %p", tp->gid, tp->pc);
 				dbprintf ("  ST %02X", tp->stack_size);
-				dbprintf ("  ARG %04X", tp->arg);
-				dbprintf ("  TD ");
-				dbprintf ("%02X %02X %02X %02X\n",
-					tp->thread_data[0], tp->thread_data[1],
-					tp->thread_data[2], tp->thread_data[3]);
+				dbprintf ("  ARG %04X\n", tp->arg);
 			}
-			else if (tp->state & TASK_MALLOC)
+			else if (tp->state & BLOCK_MALLOC)
 			{
 				malloc_chunk_dump (tp);
 			}
-			else if (tp->state & TASK_STACK)
+			else if (tp->state & BLOCK_STACK)
 			{
 				dbprintf ("aux stack\n");
 			}
@@ -195,13 +191,13 @@ void task_dump (void)
 			}
 		}
 	}
-	dbprintf ("\n\n");
+	dbprintf ("\n");
 #endif
 }
 
 
 /** Allocate a dynamic block of memory, by searching the block
- * array (linearly) for the first entry that is in the TASK_FREE
+ * array (linearly) for the first entry that is in the BLOCK_FREE
  * state.  Returns a pointer to the newly allocated block.
  *
  * The 'aux_stack_block' field of a new block is initialized to
@@ -213,9 +209,9 @@ task_t *block_allocate (void)
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (tp->state == TASK_FREE)
+		if (tp->state == BLOCK_FREE)
 		{
-			tp->state = TASK_USED;
+			tp->state = BLOCK_USED;
 			tp->aux_stack_block = t;
 			return tp;
 		}
@@ -226,7 +222,7 @@ task_t *block_allocate (void)
 /** Free a dynamic block of memory. */
 void block_free (task_t *tp)
 {
-	tp->state = TASK_FREE;
+	tp->state = BLOCK_FREE;
 }
 
 
@@ -241,11 +237,11 @@ task_t *task_allocate (void)
 	task_t *tp = block_allocate ();
 	if (tp)
 	{
-		tp->state |= TASK_TASK;
+		tp->state |= BLOCK_TASK;
 		tp->delay = 0;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
-		tp->flags = 0;
+		tp->sighandler = NULL;
 		return tp;
 	}
 	else
@@ -270,8 +266,8 @@ task_t *task_expand_stack (task_t *tp)
 {
 	task_t *sp;
 
-	/* Make sure tp is of type TASK_TASK */
-	if (!(tp->state & TASK_TASK))
+	/* Make sure tp is of type BLOCK_TASK */
+	if (!(tp->state & BLOCK_TASK))
 		fatal (ERR_LIBC_ABORT);
 
 	/* Allocate a block for the new stack */
@@ -281,7 +277,7 @@ task_t *task_expand_stack (task_t *tp)
 
 	/* Mark it as a stack block, and associate it with the
 	given stack */
-	sp->state |= TASK_STACK;
+	sp->state |= BLOCK_STACK;
 	tp->aux_stack_block = sp->aux_stack_block;
 	sp->aux_stack_block = -1;
 	return sp;
@@ -297,16 +293,6 @@ static void task_free (task_t *tp)
 
 	/* Free the task block */
 	block_free (tp);
-}
-
-
-/** Initialize the thread data of a different task to have the same values
- * as the thread data of the currently running task. */
-void task_inherit_thread_data (task_t *tp)
-{
-	U8 i;
-	for (i=0; i < 4; i++)
-		tp->thread_data[i] = task_current->thread_data[i];
 }
 
 
@@ -364,7 +350,7 @@ void task_sleep (task_ticks_t ticks)
 	extern U8 tick_count;
 	register task_t *tp = task_current;
 
-	/* Fail if the idle task tries to sleep. */
+	/* Fail if the idle function tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
@@ -389,7 +375,7 @@ void task_sleep (task_ticks_t ticks)
 	to make this a static change. */
 	tp->delay = ticks;
 	tp->asleep = tick_count;
-	tp->state = TASK_TASK+TASK_BLOCKED+TASK_USED;
+	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
 	whenever the task is eventually unblocked. */
@@ -436,27 +422,18 @@ void task_exit (void)
  * If no task is found, then NULL is returned; otherwise, a pointer
  * to the task structure is returned.
  */
-task_t *task_find_gid (task_gid_t gid)
+task_t *task_find_gid_next (task_t *last, task_gid_t gid)
 {
 	register task_t *tp;
-	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
-		if ((tp->state & TASK_TASK) && (tp->gid == gid))
+	for (tp = last+1; tp < &task_buffer[NUM_TASKS]; tp++)
+		if ((tp->state & BLOCK_TASK) && (tp->gid == gid))
 			return (tp);
 	return (NULL);
 }
 
-
-/**
- * Find the task that has private data 'val' at location 'off'.
- */
-task_t *task_find_gid_data (task_gid_t gid, U8 off, U8 val)
+task_t *task_find_gid (task_gid_t gid)
 {
-	register task_t *tp;
-	for (tp = task_buffer; tp < &task_buffer[NUM_TASKS]; tp++)
-		if ((tp->state & TASK_TASK) && (tp->gid == gid) 
-			&& (tp->thread_data[off] == val))
-			return (tp);
-	return (NULL);
+	return task_find_gid_next (task_buffer-1, gid);
 }
 
 
@@ -467,11 +444,19 @@ void task_kill_pid (task_t *tp)
 {
 	if (tp == task_current)
 		fatal (ERR_TASK_KILL_CURRENT);
-	task_free (tp);
-	tp->gid = 0;
+	else if (tp->sighandler == NULL)
+	{
+		task_free (tp);
+		tp->gid = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
-	task_count--;
+		task_count--;
 #endif
+	}
+	else
+	{
+		tp->u = 1;
+		tp->pc = (U16)tp->sighandler;
+	}
 }
 
 
@@ -488,7 +473,7 @@ bool task_kill_gid (task_gid_t gid)
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
-				(tp->state & TASK_TASK) && 
+				(tp->state & BLOCK_TASK) && 
 				(tp->gid == gid) )
 		{
 			task_kill_pid (tp);
@@ -511,8 +496,8 @@ void task_kill_all (void)
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
-				(tp->state & TASK_TASK) && 
-				!(tp->flags & TASK_PROTECTED) )
+				(tp->state & BLOCK_TASK) && 
+				!(tp->state & TASK_PROTECTED) )
 		{
 			task_kill_pid (tp);
 		}
@@ -529,7 +514,7 @@ void task_kill_all (void)
  */
 void task_set_flags (U8 flags)
 {
-	task_current->flags |= flags;
+	task_current->state |= flags;
 }
 
 
@@ -538,7 +523,7 @@ void task_set_flags (U8 flags)
  */
 void task_clear_flags (U8 flags)
 {
-	task_current->flags &= ~flags;
+	task_current->state &= ~flags;
 }
 
 
@@ -567,6 +552,15 @@ void task_set_arg (task_t *tp, U16 arg)
 }
 
 
+/** Allocate stack size from another task.  This should only be
+called immediately after the task is created before it gets a chance
+to run. */
+void task_alloca (task_t *tp, U8 size)
+{
+	tp->stack_size = size;
+}
+
+
 /**
  * The task dispatcher.  This function selects a new task to run.
  *
@@ -578,11 +572,11 @@ void task_set_arg (task_t *tp, U16 arg)
  * task_restore().
  *
  * If the entire task table is scanned, and no task is ready to run,
- * then we wait until the tick count advances to indicate that 1ms
+ * then we wait until the tick count advances to indicate that 16ms
  * has elapsed.  Then we execute all of the idle functions.  This
  * means that idle functions are never called if there is always at
  * least one task in the ready state; it also limits their invocation to
- * once per millisecond.  The 1ms delay is also useful because it is the
+ * once per 16ms.  This delay is also useful because it is the
  * minimum delay before which a blocked task might reach the end of its
  * wait period; there is no sense checking more frequently.
  */
@@ -633,13 +627,13 @@ void task_dispatcher (void)
 			while (tick_start_count == *(volatile U8 *)&tick_count)
 			{
 #ifdef IDLE_PROFILE
-				asm ("nop" ::: "memory");
-				asm ("nop" ::: "memory");
-				asm ("nop" ::: "memory");
-				asm ("nop" ::: "memory");
+				noop ();
+				noop ();
+				noop ();
+				noop ();
 				idle_time++;
 #else
-				asm ("; nop" ::: "memory");
+				barrier ();
 #endif
 			}
 			
@@ -649,13 +643,7 @@ void task_dispatcher (void)
 			tp = first;
 		}
 
-		if (tp->state == TASK_TASK+TASK_USED)
-		{
-			/* The task exits, and is not sleeping.  It can be
-			started immediately. */
-			task_restore (tp);
-		}
-		else if (tp->state == TASK_TASK+TASK_USED+TASK_BLOCKED)
+		if (tp->state & (BLOCK_TASK | TASK_BLOCKED))
 		{
 			/* The task exists, but is sleeping.
 			 * tp->asleep holds the time at which it went to sleep,
@@ -670,6 +658,12 @@ void task_dispatcher (void)
 				tp->state &= ~TASK_BLOCKED;
 				task_restore (tp);
 			}
+		}
+		else if (tp->state & BLOCK_TASK)
+		{
+			/* The task exists, and is not sleeping.  It can be
+			started immediately. */
+			task_restore (tp);
 		}
 	}
 }

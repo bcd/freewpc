@@ -28,6 +28,7 @@ CALLSET_ENTRY (lock, dev_lock_enter)
 	else
 		score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
+	leff_start (LEFF_LOCK);
 }
 
 

@@ -65,21 +65,33 @@ typedef struct
 
 #define MAX_QUEUED_LEFFS 8
 
-/** Per-leff state variables, stored in the task thread data area */
-#define L_PRIV_APPLY_DELAY 0
-#define L_PRIV_DATA 1
-#define L_PRIV_FLAGS 2
-#define L_PRIV_ID 3
 
-#define lampset_apply_delay	task_get_thread_data (task_getpid (), L_PRIV_APPLY_DELAY)
-#define lampset_private_data	task_get_thread_data (task_getpid (), L_PRIV_DATA)
-#define leff_running_flags		task_get_thread_data (task_getpid (), L_PRIV_FLAGS)
-#define leff_self_id				task_get_thread_data (task_getpid (), L_PRIV_ID)
+/** Per-leff state variables */
+typedef struct
+{
+	U8 apply_delay;
+	U8 data;
+	U8 flags;
+	U8 id;
+} leff_data_t;
+
+
+#define lampset_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)
+#define lampset_private_data	(task_current_class_data (leff_data_t)->data)
+#define leff_running_flags		(task_current_class_data (leff_data_t)->flags)
+#define leff_self_id				(task_current_class_data (leff_data_t)->id)
+
+extern inline void leff_create_peer (void (*fn)(void))
+{
+	task_pid_t tp = task_create_peer (fn);
+	task_inherit_class_data (tp, leff_data_t);
+}
 
 leffnum_t leff_get_active (void);
 void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
 void leff_restart (leffnum_t dn);
+task_pid_t leff_find_shared (leffnum_t dn);
 void leff_start_highest_priority (void);
 __noreturn__ void leff_exit (void);
 void leff_init (void);

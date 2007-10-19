@@ -60,12 +60,6 @@ struct device;
  * by the common code here. */
 typedef struct device_ops
 {
-	/** Called when the machine is powered up */
-	void (*power_up) (void);
-
-	/** Called whenever a game is started */
-	void (*game_start) (void);
-
 	/** Called whenever a ball enters the device */
 	void (*enter) (void);
 

@@ -21,7 +21,7 @@
 #include <freewpc.h>
 #include <tz/clock.h>
 #include <coin.h>
-
+#include <highscore.h>
 
 U8 egg_code_values[3];
 U8 egg_index;
@@ -89,7 +89,7 @@ void egg_left_flipper (void)
 void brian_image_deff (void)
 {
 	dmd_alloc_low ();
-	dmd_draw_image (cow0_bits);
+	dmd_draw_fif (fif_cow);
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show_low ();
@@ -132,7 +132,7 @@ void amode_right_flipper (void)
 
 void amode_lamp_toggle_task (void)
 {
-	lampset_apply_leff_toggle (LAMPSET_AMODE_ALL);
+	lampset_apply (LAMPSET_AMODE_ALL, leff_toggle);
 	task_exit ();
 }
 
@@ -142,7 +142,8 @@ void amode_leff_subset_task (void)
 {
 	register U8 lampset = amode_leff_subset;
 	lampset_set_apply_delay (TIME_100MS);
-	for (;;) lampset_apply_leff_toggle (lampset);
+	for (;;)
+		lampset_apply (lampset, leff_toggle);
 }
 
 void amode_leff (void)
@@ -168,11 +169,11 @@ void amode_leff (void)
 		task_kill_peers ();
 
 		lampset_set_apply_delay (0);
-		lampset_apply_leff_off (LAMPSET_SORT1);
+		lampset_apply (LAMPSET_SORT1, leff_off);
 		for (i=0 ; i < 10; i++)
 		{
 			lampset_set_apply_delay (TIME_16MS);
-			lampset_apply_leff_toggle (LAMPSET_SORT1);
+			lampset_apply (LAMPSET_SORT1, leff_toggle);
 		}
 	}
 }
@@ -213,21 +214,13 @@ void amode_deff (void)
 		extern const U8 cow_anim0_prg[];
 		dmd_animate (cow_anim0_prg, TIME_66MS);
 #endif
-
+	
 		/** Display FreeWPC logo **/
 		dmd_alloc_low_high ();
 		dmd_draw_fif (fif_freewpc_logo);
 		dmd_show2 ();
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
-
-#if 0
-		extern const U8 cow_anim0_prg[];
-		dmd_alloc_low ();
-		dmd_draw_xbmprog (cow_anim0_prg);
-		dmd_show_low ();
-		task_sleep_sec (7);
-#endif
 
 		/** Display last set of player scores **/
 		dmd_alloc_low_clean ();
@@ -251,13 +244,13 @@ void amode_deff (void)
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-#ifndef CONFIG_PLATFORM_LINUX
+#ifndef CONFIG_NATIVE
 		starfield_start ();
 #endif
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed10, 64, 20, "THE ZONE");
 		deff_swap_low_high (19, TIME_100MS * 2);
-#ifndef CONFIG_PLATFORM_LINUX
+#ifndef CONFIG_NATIVE
 		starfield_stop ();
 #endif
 
@@ -270,7 +263,7 @@ void amode_deff (void)
 		/** Display PLAY PINBALL message **/
 		dmd_sched_transition (&trans_scroll_left);
 		dmd_alloc_low_high ();
-		dmd_draw_image2 (mborder0_bits);
+		dmd_draw_fif (fif_mborder);
 		font_render_string_center2 (&font_fixed10, 64, 16, 
 			"PLAY PINBALL");
 		dmd_show2 ();
@@ -301,6 +294,7 @@ void amode_deff (void)
 		}
 
 		/* Kill music if it is running */
+		/* TODO - should be a music_stop of end_game_music */
 		music_set (MUS_OFF);
 	}
 }

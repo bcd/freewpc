@@ -28,68 +28,6 @@
 
 
 /***************************************************************
- * ASIC interface
- *
- * The intent of these functions is to encapsulate all I/O
- * reads and writes, so that they can be simulated in
- * environments where a direct memory map is not present.
- ***************************************************************/
-
-extern inline void wpc_asic_write (U16 addr, U8 val)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	extern void linux_asic_write (U16 addr, U8 val);
-	linux_asic_write (addr, val);
-#else
-	*(volatile U8 *)addr = val;
-#endif
-}
-
-extern inline U8 wpc_asic_read (U16 addr)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	extern U8 linux_asic_read (U16 addr);
-	return linux_asic_read (addr);
-#else
-	return *(volatile U8 *)addr;
-#endif
-}
-
-extern inline void wpc_asic_xor (U16 addr, U8 val)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	U8 reg = wpc_asic_read (addr);
-	reg ^= val;
-	wpc_asic_write (addr, val);
-#else
-	*(volatile U8 *)addr ^= val;
-#endif
-}
-
-extern inline void wpc_asic_setbits (U16 addr, U8 val)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	U8 reg = wpc_asic_read (addr);
-	reg |= val;
-	wpc_asic_write (addr, val);
-#else
-	*(volatile U8 *)addr |= val;
-#endif
-}
-
-extern inline void wpc_asic_clearbits (U16 addr, U8 val)
-{
-#ifdef CONFIG_PLATFORM_LINUX
-	U8 reg = wpc_asic_read (addr);
-	reg &= ~val;
-	wpc_asic_write (addr, val);
-#else
-	*(volatile U8 *)addr &= ~val;
-#endif
-}
-
-
-/***************************************************************
  * Peripheral timer
  ***************************************************************/
 
@@ -101,10 +39,11 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
  * Memory usage
  ***************************************************************/
 
+#ifdef __m6809__
+
 #define ASM_DECL(name) name asm (#name)
 
 #define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
-
 #define AREA_BASE(name) (&s_ ## name)
 #define AREA_SIZE(name) ((U16)(&l_ ## name))
 
@@ -115,14 +54,16 @@ AREA_DECL(heap)
 AREA_DECL(stack)
 AREA_DECL(nvram)
 
+#else
+/* TODO */
+#endif /* __m6809__ */
+
+
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
 
 /** The usable, nonprotected area of RAM -- the first 6K */
 #define USER_RAM_SIZE	0x1800UL
-
-/** The protected RAM size -- whatever is left */
-#define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
 
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
@@ -169,6 +110,8 @@ AREA_DECL(nvram)
 #define TIME_300MS	(TIME_100MS * 3U)
 #define TIME_400MS	(TIME_100MS * 4U)
 #define TIME_500MS	(TIME_100MS * 5U)
+#define TIME_600MS	(TIME_100MS * 6U)
+#define TIME_700MS	(TIME_100MS * 7U)
 #define TIME_1S 		(TIME_100MS * 10U) /* 2 * 3 * 10 = 60 ticks */
 #define TIME_2S 		(TIME_1S * 2U)     /* 120 ticks */
 #define TIME_3S 		(TIME_1S * 3UL)
@@ -192,7 +135,7 @@ AREA_DECL(nvram)
  * ASIC / DMD memory map
  ***************************************************************/
 
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 extern U8 *linux_dmd_low_page;
 extern U8 *linux_dmd_high_page;
 #define DMD_LOW_BASE linux_dmd_low_page
@@ -295,14 +238,15 @@ extern U8 *linux_dmd_high_page;
 
 
 /********************************************/
-/* LED                                      */
+/* Diagnostic LED                           */
 /********************************************/
 
+#define WPC_LED_DIAGNOSTIC		0x80
 
 /** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
 {
-	wpc_asic_xor (WPC_LEDS, 0x80);
+	wpc_asic_xor (WPC_LEDS, WPC_LED_DIAGNOSTIC);
 }
 
 
@@ -318,14 +262,14 @@ extern inline void wpc_parport_write (U8 data)
 {
 	wpc_asic_write (WPC_PARALLEL_DATA_PORT, data);
 	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x0);
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
-	asm ("nop");
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	noop ();
 	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x1);
 }
 
@@ -366,10 +310,10 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 
 /** Acquire write access to the NVRAM */
-#define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
+#define wpc_nvram_get() wpc_set_ram_protect(RAM_UNLOCKED)
 
 /** Release write access to the NVRAM */
-#define wpc_nvram_put()		wpc_set_ram_protect(RAM_LOCKED)
+#define wpc_nvram_put() wpc_set_ram_protect(RAM_LOCKED)
 
 
 /** Atomically increment a variable in NVRAM by N. */
@@ -443,19 +387,14 @@ do { \
 
 extern inline U8 wpc_get_ram_page (void)
 {
-	return *(volatile U8 *)WPC_RAM_BANK;
+	return wpc_asic_read (WPC_RAM_BANK);
 }
 
 extern inline void wpc_set_ram_page (U8 page)
 {
-	*(volatile U8 *)WPC_RAM_BANK = page;
+	wpc_asic_write (WPC_RAM_BANK, page);
 }
 
-/********************************************/
-/* LED Register                             */
-/********************************************/
-
-#define LED_DIAGNOSTIC		0x80
 
 /********************************************/
 /* Zero Crossing/IRQ Clear Register         */
@@ -467,10 +406,31 @@ extern inline void wpc_set_ram_page (U8 page)
  * IRQ handler.  These are probably interrupt enable/status
  * lines.
  */
-extern inline void wpc_write_irq_clear (U8 val)
+
+#define WPC_CTRL_IRQ_ENABLE    0x2
+#define WPC_CTRL_FIRQ_ENABLE   0x4
+#define WPC_CTRL_BLANK_RESET   0x10
+#define WPC_CTRL_IRQ_CLEAR     0x80
+
+extern inline void wpc_write_misc_control (U8 val)
 {
 	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR, val);
 }
+
+extern inline void wpc_int_enable (void)
+{
+	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE);
+}
+
+extern inline void wpc_int_clear (void)
+{
+	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE
+		| WPC_CTRL_BLANK_RESET | WPC_CTRL_IRQ_CLEAR);
+}
+
+
+#define WPC_ZC_CLEAR 0x0
+#define WPC_ZC_SET   0x80
 
 extern inline U8 wpc_read_ac_zerocross (void)
 {
@@ -546,6 +506,11 @@ extern inline void wpc_write_flippers (U8 val)
 extern inline U8 wpc_get_jumpers (void)
 {
 	return wpc_asic_read (WPC_SW_JUMPER_INPUT);
+}
+
+extern inline U8 wpc_read_locale (void)
+{
+	return (wpc_get_jumpers () & 0x3C) >> 2;
 }
 
 

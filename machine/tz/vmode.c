@@ -59,7 +59,7 @@ void pixel_on (union dmd_coordinate coord)
 }
 
 
-CALLSET_ENTRY (vmode, sw_l_l_flipper_button)
+CALLSET_ENTRY (vmode, sw_left_button)
 {
 	if (vmode_active)
 	{
@@ -72,7 +72,7 @@ CALLSET_ENTRY (vmode, sw_l_l_flipper_button)
 }
 
 
-CALLSET_ENTRY (vmode, sw_l_r_flipper_button)
+CALLSET_ENTRY (vmode, sw_right_button)
 {
 	if (vmode_active)
 	{

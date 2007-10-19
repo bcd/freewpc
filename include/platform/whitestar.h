@@ -20,17 +20,45 @@
 
 /**
  * \file
- * \brief Definitions/macros related to the Sega Whitestar hardware
- * Note: this is not yet implemented and only a stub.
+ * \brief Definitions/macros specific to the Whitestar hardware
  */
 
 #ifndef _WHITESTAR_H
 #define _WHITESTAR_H
 
 
+
+/***************************************************************
+ * Peripheral timer
+ ***************************************************************/
+
+/** The FIRQ clear/peripheral timer register bits */
+#define FIRQ_CLEAR_BIT 0x80
+
+
 /***************************************************************
  * Memory usage
  ***************************************************************/
+
+#ifdef __m6809__
+
+#define ASM_DECL(name) name asm (#name)
+
+#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
+#define AREA_BASE(name) (&s_ ## name)
+#define AREA_SIZE(name) ((U16)(&l_ ## name))
+
+AREA_DECL(direct)
+AREA_DECL(ram)
+AREA_DECL(local)
+AREA_DECL(heap)
+AREA_DECL(stack)
+AREA_DECL(nvram)
+
+#else
+/* TODO */
+#endif /* __m6809__ */
+
 
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
@@ -38,22 +66,18 @@
 /** The usable, nonprotected area of RAM -- the first 6K */
 #define USER_RAM_SIZE	0x1800UL
 
-/** The protected RAM size -- whatever is left */
-#define NVRAM_SIZE	   (RAM_SIZE - USER_RAM_SIZE)
-
 /** The base address of the stack */
 #define STACK_BASE 		(USER_RAM_SIZE - 0x8)
 #define STACK_SIZE      0x200UL
 
-/** The layout of the player local area */
-#define LOCAL_BASE		((U8 *)0x1200)
-#define LOCAL_SIZE		0xA0U
+/** The layout of the player local area.
+ * There are 5 "copies" of the local area: the lowest address is active
+ * for the current player up, and the next 4 are save areas to hold
+ * values between players in a multi-player game. */
+#define LOCAL_BASE		AREA_BASE(local)
+#define LOCAL_SIZE		0x40U
 
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
-
-/** The layout of the malloc area */
-#define MALLOC_BASE		((U8 *)0x1400)
-#define MALLOC_SIZE		0x200UL
 
 /***************************************************************
  * System timing
@@ -87,14 +111,15 @@
 #define TIME_300MS	(TIME_100MS * 3U)
 #define TIME_400MS	(TIME_100MS * 4U)
 #define TIME_500MS	(TIME_100MS * 5U)
-#define TIME_1S 		(TIME_100MS * 10U) /* 4 * 3 * 10 = 120 ticks */
-#define TIME_2S 		(TIME_1S * 2U)     /* 240 ticks */
-
-/*
- * These time values can only be used for timer functions.
- */
+#define TIME_1S 		(TIME_100MS * 10U) /* 2 * 3 * 10 = 60 ticks */
+#define TIME_2S 		(TIME_1S * 2U)     /* 120 ticks */
 #define TIME_3S 		(TIME_1S * 3UL)
 #define TIME_4S 		(TIME_1S * 4UL)
+
+/*
+ * These time values can only be used for low-level timers,
+ * because they use a 16-bit ticks field.
+ */
 #define TIME_5S 		(TIME_1S * 5UL)
 #define TIME_6S 		(TIME_1S * 6UL)
 #define TIME_7S 		(TIME_1S * 7UL)
@@ -104,50 +129,48 @@
 #define TIME_15S 		(TIME_1S * 15UL)
 #define TIME_30S 		(TIME_1S * 30UL)
 
-/***************************************************************
- * RAM Protection Circuit
- ***************************************************************/
-
-/** When the lock register(s) contain these values, the upper
- * N bytes of the RAM are write protected. */
-#define RAM_LOCK_4K			0x0
-#define RAM_LOCK_2K			0x1
-#define RAM_LOCK_1K			0x3
-#define RAM_LOCK_512			0x7
-#define RAM_LOCK_256			0xF
-
-#define RAM_LOCKED			0x0
-
-/** When the lock register contains this value, the memory
- * protection circuit is disabled */
-#define RAM_UNLOCKED			0xB4
 
 /***************************************************************
- * CPU I/O memory map
+ * ASIC memory map
  ***************************************************************/
 
-#define WS_IO_SOLA               0x2000
-#define WS_IO_SOLB               0x2001
-#define WS_IO_SOLC               0x2002
-#define WS_IO_FLMP               0x2003
-#define WS_IO_FLIP0              0x2004
-#define WS_IO_FLIP1              0x2005
-#define WS_IO_AUX0               0x2006
-#define WS_IO_AUX1               0x2007
-#define WS_IO_LAMP_STROBE        0x2008
-#define WS_IO_LAMP_ROW_OUT       0x200A
-#define WS_IO_SW_COIN_DOOR       0x3000
-#define WS_IO_SW_DIP             0x3100
-#define WS_IO_ROM_PAGE           0x3200
-#define WS_IO_SW_COL_STROBE      0x3300
-#define WS_IO_SW_ROW_OUTPUT      0x3400
-#define WS_IO_DMD_INPUT          0x3500
-#define WS_IO_DMD_OUTPUT         0x3600
-#define WS_IO_DMD_RESET          0x3601
-#define WS_IO_DMD_STATUS_INPUT   0x3700
-#define WS_IO_1800               0x3800
+#define WS_SOLA     0x2000
+#define WS_SOLB     0x2001
+#define WS_SOLC     0x2002
+#define WS_FLASHERS 0x2003
+#define WS_FLIP0    0x2004
+#define WS_FLIP1    0x2005
+#define WS_AUX0     0x2006
+#define WS_AUX1     0x2007
+#define WS_LAMP_COLUMN_STROBE 0x2008
+#define WS_LAMP_ROW_OUTPUT 0x200A
 
+#define WS_DEDICATED 0x3000
+#define WS_DIP_SWITCHES 0x3100
+#define WS_ROM_PAGE 0x3200
+#define WS_SWITCH_COLUMN_STROBE 0x3300
+#define WS_SWITCH_ROW_INPUT 0x3400
+
+
+/********************************************/
+/* LED                                      */
+/********************************************/
+
+/** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
+{
+}
+
+
+/********************************************/
+/* Printer / Parallel Port                  */
+/********************************************/
+
+
+/** Writes a single byte to the parallel port.  The data
+ * is first latched into the data register, then the
+ * strobe line is brought low and then released. */
+extern inline void wpc_parport_write (U8 data)
 {
 }
 
@@ -155,17 +178,26 @@ extern inline void wpc_led_toggle (void)
 /* RAM Protection Circuit                   */
 /********************************************/
 
+/** Write to the WPC's RAM protect register */
 extern inline void wpc_set_ram_protect (U8 prot)
 {
 }
 
+
+/** Write to the WPC's RAM protect size register */
 extern inline void wpc_set_ram_protect_size (U8 sz)
 {
 }
 
-#define wpc_nvram_get()		wpc_set_ram_protect(RAM_UNLOCKED)
-#define wpc_nvram_put()		wpc_set_ram_protect(RAM_LOCKED)
 
+/** Acquire write access to the NVRAM */
+#define wpc_nvram_get()
+
+/** Release write access to the NVRAM */
+#define wpc_nvram_put()
+
+
+/** Atomically increment a variable in NVRAM by N. */
 #define wpc_nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -174,6 +206,8 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 		wpc_nvram_put (); \
 	} while (0)
 
+
+/** Atomically decrement a variable in NVRAM by N. */
 #define wpc_nvram_subtract(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -183,20 +217,24 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 	} while (0)
 
 /********************************************/
-/* DIP Switches                             */
-/********************************************/
-
-/********************************************/
 /* ROM Paging                               */
 /********************************************/
 
 extern inline U8 wpc_get_rom_page (void)
 {
+	return wpc_asic_read (WS_ROM_PAGE);
 }
 
 extern inline void wpc_set_rom_page (U8 page)
 {
+	wpc_asic_write (WS_ROM_PAGE, page);
 }
+
+
+/** The call_far, wpc_push_page, and wpc_pop_page
+ * macros are only safe when calling from the system
+ * page, so don't define them otherwise. */
+#if (PAGE == SYS_PAGE) || !defined(HAVE_PAGING)
 
 #define call_far(page, fncall) \
 do { \
@@ -217,32 +255,30 @@ do { \
 	wpc_set_rom_page (__saved_page); \
 }
 
+#endif /* PAGE == SYS_PAGE */
+
 /********************************************/
 /* RAM Paging                               */
 /********************************************/
-
-extern inline U8 wpc_get_ram_page (void)
-{
-}
-
-extern inline void wpc_set_ram_page (U8 page)
-{
-}
-
-/********************************************/
-/* LED Register                             */
-/********************************************/
-
-#define LED_DIAGNOSTIC		0x80
 
 
 /********************************************/
 /* Zero Crossing/IRQ Clear Register         */
 /********************************************/
 
-extern inline void wpc_write_irq_clear (U8 val)
+
+extern inline void wpc_write_misc_control (U8 val)
 {
 }
+
+extern inline void wpc_int_enable (void)
+{
+}
+
+extern inline void wpc_int_clear (void)
+{
+}
+
 
 extern inline U8 wpc_read_ac_zerocross (void)
 {
@@ -253,25 +289,17 @@ extern inline U8 wpc_read_ac_zerocross (void)
  * Flippers
  ***************************************************************/
 
-#define WPC_LR_FLIP_POWER	0x1
-#define WPC_LR_FLIP_HOLD	0x2
-#define WPC_LL_FLIP_POWER	0x4
-#define WPC_LL_FLIP_HOLD	0x8
-#define WPC_UR_FLIP_POWER	0x10
-#define WPC_UR_FLIP_HOLD	0x20
-#define WPC_UL_FLIP_POWER	0x40
-#define WPC_UL_FLIP_HOLD	0x80
-
-#define WPC_LR_FLIP_EOS		0x1
-#define WPC_LR_FLIP_SW		0x2
-#define WPC_LL_FLIP_EOS		0x4
-#define WPC_LL_FLIP_SW		0x8
-#define WPC_UR_FLIP_EOS		0x10
-#define WPC_UR_FLIP_SW		0x20
-#define WPC_UL_FLIP_EOS		0x40
-#define WPC_UL_FLIP_SW		0x80
-
 extern inline U8 wpc_read_flippers (void)
+{
+}
+
+
+extern inline U8 wpc_read_flipper_buttons (void)
+{
+}
+
+
+extern inline U8 wpc_read_flipper_eos (void)
 {
 }
 
@@ -281,7 +309,26 @@ extern inline void wpc_write_flippers (U8 val)
 }
 
 
+/********************************************/
+/* Jumpers                                  */
+/********************************************/
+
+
 extern inline U8 wpc_get_jumpers (void)
+{
+}
+
+extern inline U8 wpc_read_locale (void)
+{
+}
+
+
+extern inline U8 wpc_read_ticket (void)
+{
+}
+
+
+extern inline void wpc_write_ticket (U8 val)
 {
 }
 

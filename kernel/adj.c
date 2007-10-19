@@ -91,7 +91,7 @@ CALLSET_ENTRY (nvram, idle)
 #ifdef HAVE_NVRAM
 	U8 data = nvram_test_byte;
 	++nvram_test_byte;
-	asm ("; nop" ::: "memory");
+	barrier ();
 	if (data != nvram_test_byte)
 	{
 		fatal (ERR_NVRAM_UNLOCKED);

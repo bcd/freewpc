@@ -44,7 +44,7 @@
 __local__ U8 __unused_local__;
 
 /** In simulation, we have to declare the save areas explicitly. */
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
 
 #undef LOCAL_BASE
@@ -53,37 +53,44 @@ U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
 #define LOCAL_SAVE_BASE(p) (&local_save_area[p][0])
 #endif
 
+struct player_save_area
+{
+	U8 local_lamps[NUM_LAMP_COLS];
+	U8 local_flags[NUM_LAMP_COLS];
+	U8 local_vars[LOCAL_SIZE];
+};
+
+#define save_area ((struct player_save_area *)(LOCAL_SAVE_BASE(player_up)))
 
 void player_start_game (void)
 {
-	/* Clear all player local variables */
+	/* Clear all player local data */
 	__blockclear16 (LOCAL_BASE, LOCAL_SIZE);
 
 	/* Clear lamps/flags */
-	__blockclear16 (&bit_matrix_array, NUM_LAMP_COLS * 2);
+	memset (lamp_matrix, 0, NUM_LAMP_COLS);
+	memset (bit_matrix, 0, NUM_LAMP_COLS);
 }
 
 
 void player_save (void)
 {
 	/* Copy lamps/local flags into the save area */
-	__blockcopy16 (LOCAL_SAVE_BASE(player_up), &bit_matrix_array,
-		NUM_LAMP_COLS * 2);
+	memcpy (save_area->local_lamps, lamp_matrix, NUM_LAMP_COLS);
+	memcpy (save_area->local_flags, bit_matrix, NUM_LAMP_COLS);
 
 	/* Copy player locals into the save area */
-	__blockcopy16 (LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2, 
-		LOCAL_BASE, LOCAL_SIZE);
+	__blockcopy16 (save_area->local_vars, LOCAL_BASE, LOCAL_SIZE);
 }
 
 
 void player_restore (void)
 {
 	/* Restore lamps/bits from the save area */
-	__blockcopy16 (&bit_matrix_array, LOCAL_SAVE_BASE(player_up),
-		NUM_LAMP_COLS * 2);
+	memcpy (lamp_matrix, save_area->local_lamps, NUM_LAMP_COLS);
+	memcpy (bit_matrix, save_area->local_flags, NUM_LAMP_COLS);
 	
 	/* Restore player locals from the save area */
-	__blockcopy16 (LOCAL_BASE, LOCAL_SAVE_BASE(player_up) + NUM_LAMP_COLS * 2,
-		LOCAL_SIZE);
+	__blockcopy16 (LOCAL_BASE, save_area->local_vars, LOCAL_SIZE);
 }
 

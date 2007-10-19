@@ -3,6 +3,10 @@
 # Game specific Makefile extensions
 #
 
+MACHINE_FILE = funhouse.md
+ALPHANUMERIC := y
+CFLAGS += -DMACHINE_LACKS_ALL_INCLUDES
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.

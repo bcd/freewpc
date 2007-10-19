@@ -23,10 +23,6 @@
 
 #ifdef __m6809__
 
-#ifndef GCC4
-#define __builtin_blockage()
-#endif
-
 /** How to enable/disable the IRQ */
 #define disable_irq() m6809_orcc (CC_IRQ)
 #define enable_irq() m6809_andcc (~CC_IRQ)

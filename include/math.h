@@ -24,7 +24,7 @@
 /** Returns a random true/false value */
 #define random_bool()	(random() & 0x80)
 
-#ifdef CONFIG_PLATFORM_LINUX
+#ifdef CONFIG_NATIVE
 #undef random
 #define random freewpc_random
 #endif

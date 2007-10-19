@@ -52,6 +52,9 @@ typedef U8 lampnum_t;
  * like lamp_on, lamp_off are lamp operators. */
 typedef void (*lamp_operator_t) (lampnum_t);
 
+/** Likewise for boolean operators, like lamp_test */
+typedef bool (*lamp_boolean_operator_t) (lampnum_t);
+
 /** A lampset is a sequence of lamp numbers, some of which are
  * "immediate lamp values", others are "lamp value macros".
  */
@@ -61,39 +64,22 @@ typedef const lampnum_t lampset_t[];
 typedef U8 lampset_id_t;
 
 
-/** Lamps 00h through 3Fh correspond to the physical lamp locations */
+extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
+extern __fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+extern __fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
+extern __fastram__ U8 global_bits[NUM_LAMP_COLS];
 
-/** Lamps 40h through 7Fh are 'virtual' and don't really exist, but
- * they can be used to store boolean values.
- * These two bitsets are kept adjacent, so the same functions can
- * be used to bit-twiddle both of them.
- * Both of these bitsets are also saved from player to player.
- * Note the flash sets are NOT saved and must be recalculated from
- * ball to ball. */
 
-/** Lamps 80h through BFh are the same as the regular lamps, but
- * control the flash state */
-
-/** Lamps C0h through FFh are bits like 40h to 7Fh, but they are
- * global and not saved from player to player. */
-
-struct bit_matrix_table
+typedef enum
 {
-	U8 solid_lamps[NUM_LAMP_COLS];
-	U8 bits[NUM_VLAMP_COLS];
-	U8 flashing_lamps[NUM_LAMP_COLS];
-	U8 global_bits[NUM_LAMP_COLS];
-
-	U8 flashing_lamps_now[NUM_LAMP_COLS];
-};
-
-extern __fastram__ struct bit_matrix_table bit_matrix_array;
-
-#define lamp_matrix					bit_matrix_array.solid_lamps
-#define bit_matrix					bit_matrix_array.bits
-#define lamp_flash_matrix			bit_matrix_array.flashing_lamps
-#define lamp_flash_matrix_now		bit_matrix_array.flashing_lamps_now
-
+	LMX_DEFAULT,
+	LMX_FLASH,
+	LMX_EFFECT1_ALLOC,
+	LMX_EFFECT1_LAMPS,
+	LMX_EFFECT2_ALLOC,
+	LMX_EFFECT2_LAMPS,
+} lamp_matrix_id_t;
 
 /**
  * Lamp macros are lampset members which calculate actual
@@ -118,10 +104,13 @@ void lamp_rtt_1 (void);
 void lamp_rtt_2 (void);
 void lamp_rtt_3 (void);
 
+__attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id);
+
 void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
 void lamp_toggle (lampnum_t lamp);
 bool lamp_test (lampnum_t lamp);
+bool lamp_test_off (lampnum_t lamp);
 void lamp_flash_on (lampnum_t lamp);
 void lamp_flash_off (lampnum_t lamp);
 bool lamp_flash_test (lampnum_t lamp);
@@ -176,15 +165,10 @@ extern inline bool flag_test (const flag_t f)
 }
 
 
-#define global_flag_on(lamp)		lamp_on (lamp + GLOBAL_FLAG_OFFSET)
-#define global_flag_off(lamp)		lamp_off (lamp + GLOBAL_FLAG_OFFSET)
-#define global_flag_toggle(lamp)	lamp_toggle (lamp + GLOBAL_FLAG_OFFSET)
-#define global_flag_test(lamp)		lamp_test (lamp + GLOBAL_FLAG_OFFSET)
-
-#define long_leff_allocate(lamp)		lamp_leff_allocate(lamp + 0x80)
-#define long_leff_free(lamp)			lamp_leff_free(lamp + 0x80)
-#define long_leff_on(lamp)				leff_on(lamp + 0x80)
-#define long_leff_off(lamp)			leff_off(lamp + 0x80)
+#define global_flag_on(lamp)		bitarray_set (global_bits, lamp)
+#define global_flag_off(lamp)		bitarray_clear (global_bits, lamp)
+#define global_flag_toggle(lamp)	bitarray_toggle (global_bits, lamp)
+#define global_flag_test(lamp)	bitarray_test (global_bits, lamp)
 
 #define lamp_tristate_on(lamp) \
 	do { lamp_flash_off(lamp); lamp_on(lamp); } while (0)
@@ -192,6 +176,13 @@ extern inline bool flag_test (const flag_t f)
 	do { lamp_flash_off(lamp); lamp_off(lamp); } while (0)
 #define lamp_tristate_flash(lamp) \
 	do { lamp_flash_on(lamp); lamp_off(lamp); } while (0)
+
+void bit_on (bitset matrix, U8 bit);
+void bit_off (bitset matrix, U8 bit);
+void bit_toggle (bitset matrix, U8 bit);
+bool bit_test (bitset matrix, U8 bit);
+bool bit_test_all_on (bitset matrix);
+bool bit_test_all_off (bitset matrix);
 
 void lamp_all_on (void);
 void lamp_all_off (void);
@@ -207,21 +198,19 @@ bool lamp_leff2_test_allocated (lampnum_t lamp);
 void lamp_leff2_free (lampnum_t lamp);
 
 const U8 *lampset_lookup (lampset_id_t id);
+void lampset_apply_nomacro (lampset_id_t id, lamp_operator_t op);
 void lampset_apply (lampset_id_t id, lamp_operator_t op);
-void lampset_apply_on (lampset_id_t id);
-void lampset_apply_off (lampset_id_t id);
-void lampset_apply_toggle (lampset_id_t id);
-void lampset_apply_leff_on (lampset_id_t id);
-void lampset_apply_leff_off (lampset_id_t id);
-void lampset_apply_leff_toggle (lampset_id_t id);
+
 void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on);
 void lampset_set_apply_delay (task_ticks_t ticks);
-void lampset_step_increment (lampset_id_t id);
-void lampset_leff_step_increment (lampset_id_t id);
-void lampset_step_decrement (lampset_id_t id);
-void lampset_build_increment (lampset_id_t id);
-void lampset_build_decrement (lampset_id_t id);
-void lampset_rotate_next (lampset_id_t id);
-void lampset_rotate_previous (lampset_id_t id);
+void lampset_step_increment (lampset_id_t id, bitset matrix);
+void lampset_step_decrement (lampset_id_t id, bitset matrix);
+void lampset_build_increment (lampset_id_t id, bitset matrix);
+void lampset_build_decrement (lampset_id_t id, bitset matrix);
+void lampset_rotate_next (lampset_id_t id, bitset matrix);
+void lampset_rotate_previous (lampset_id_t id, bitset matrix);
+
+void matrix_all_on (bitset matrix);
+void matrix_all_off (bitset matrix);
 
 #endif /* _SYS_LAMP_H */

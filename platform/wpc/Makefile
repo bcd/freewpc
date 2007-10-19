@@ -30,13 +30,20 @@ CFLAGS += -mint8
 endif
 
 # Optimization flags
-CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove
+CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
 
 KERNEL_SW_OBJS +=  \
 	$(P)/div10.o  \
+	$(P)/main.o \
 	$(P)/malloc.o  \
 	$(P)/task.o  \
 	$(P)/vector.o \
 
-KERNEL_ASM_OBJS = $(P)/farcall.o $(P)/task_6809.o $(P)/start.o
+KERNEL_ASM_OBJS += \
+	$(P)/dmd.o \
+	$(P)/farcall.o \
+	$(P)/task_6809.o \
+	$(P)/start.o
+
+CALLSET_FLAGS += -D platform/wpc
 

@@ -23,6 +23,9 @@
 #include <test.h>
 
 
+extern void magnet_enable_catch (U8);
+extern void magnet_disable_catch (U8);
+
 struct magnet_test_option {
 	U8 sw;
 	const char *name;
