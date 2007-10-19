@@ -53,21 +53,6 @@ task_gid_t last_nonfatal_error_gid;
 /** Initialize the FreeWPC program. */
 void freewpc_init (void)
 {
-	fatal (ERR_LIBC_ABORT);
-}
-
-#endif
-
-/** do_reset is the beginning of the C code.
- * When building for the 6809, control transfers here from the
- * assembly bootup code in start.s.
- * Under Linux emulation, this function is called from main().
- * TODO : On the 6809 this should _be_ main().
- */
-__naked__ __noreturn__ 
-void do_reset (void)
-{
->>>>>>> .r2169
 	extern __common__ void system_reset (void);
 
 	/* Reset the sound board... the earlier the better */
