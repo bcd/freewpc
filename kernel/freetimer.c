@@ -18,6 +18,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief An implementation of short, free-running timers.
+ *
+ * Free timers are similar to the other timer API, but they do not have
+ * tasks executing and are therefore more efficient.  The timer is just
+ * a counter that is updated at IRQ level.  No action is taken upon
+ * expiration, so the only usage is to query a free timer ID to see if
+ * it is running.  Free timers are ideal for hardware debouncing such
+ * as testing whether or not two switches have been tripped sequentially;
+ * the first switch handler would start the timer, and the second will
+ * query it.  The implementation is about as simple as can be.
+ */
+
 #include <freewpc.h>
 
 #define MAX_FREE_TIMERS 32

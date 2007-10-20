@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Implement the extra ball buy-in feature.
+ */
+
 #include <freewpc.h>
 
 #define BUYIN_TIMEOUT   7  /* No. of seconds until buyin times out */

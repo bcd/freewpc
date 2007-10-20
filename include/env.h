@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Define many macros based on the machine, platform, and simulation options.
+ */
+
 #ifndef _ENV_H
 #define _ENV_H
 

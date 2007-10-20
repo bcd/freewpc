@@ -18,14 +18,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _PRIORITY_H
-#define _PRIORITY_H
-
-/*
- * Standard priorities for effects (display & lamps).
+/**
+ * \file
+ * \brief Define standard priorities for effects (display & lamps).
+ *
+ * These priority values are used for display and lamp effects to control
+ * which effect gets activated when several of them have been started.
  * Use the standard priority unless you have a good reason not to.
  * Some thought has been putting into the ordering here.
  */
+
+#ifndef _PRIORITY_H
+#define _PRIORITY_H
+
 typedef enum _priority {
 	PRI_NULL=0,
 	PRI_VOLUME_CHANGE_MUSIC,

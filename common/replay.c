@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Detect and award replays.
+ */
+
 #include <freewpc.h>
 #include <knocker.h>
 #include <coin.h>

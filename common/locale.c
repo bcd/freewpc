@@ -18,6 +18,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Handle locale-specific things, such as the formatting of dates/times
+ * and the names of the pricing modes.  This module reads the DIP switches
+ * or jumpers on the CPU board to determine how to act.
+ */
+
 #include <freewpc.h>
 
 __nvram__ U8 locale_code;

@@ -20,7 +20,17 @@
 
 /**
  * \file
- * \brief Simulation functions for use in a Linux environment
+ * \brief Routines needed to simulate the WPC hardware.
+ * 
+ * When CONFIG_NATIVE is defined at build time, access to WPC I/O registers
+ * is redirected to function calls here that simulate the behavior.  This
+ * allows FreeWPC to be tested directly on a Linux or Windows development machine,
+ * even when there is no PinMAME.
+ *
+ * If CONFIG_UI is also defined, then instead of plain console output,
+ * the state of the system is redrawn using the generic UI functions.
+ * The current UI is implemented using ncurses, but other UI backends may
+ * be added later.
  */
 
 #include <termios.h>

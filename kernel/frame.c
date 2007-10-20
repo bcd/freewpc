@@ -18,6 +18,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Render full-sized DMD frames.
+ *
+ * This module provides an API for drawing full-screen 128x32 4-color images
+ * to the dot matrix that have been compressed into the FreeWPC Image Format
+ * (FIF).  The fiftool utility can be used to generate FIFs from PGMs, which
+ * are supported by most graphics programs.  The key feature of the FIF is
+ * simple compression, since WPC provides limited space and has limited
+ * processing cycles.
+ */
+
 #include <freewpc.h>
 #include <xbmprog.h>
 
