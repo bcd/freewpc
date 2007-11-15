@@ -71,6 +71,7 @@ void replay_draw (void)
 			font_render_string_center (&font_fixed6, 64, 8, "TICKET AT");
 			break;
 		case FREE_AWARD_OFF:
+		default:
 			return;
 	}
 	sprintf_score (replay_score);

@@ -78,11 +78,6 @@ m3: .blkb 1
 ;;; report the error.  We can't rely on the DMD working
 ;;; properly to help us here.
 ;;; 
-;;; Once diags prove the system working, ALL of the remaining
-;;; code should be moved into a separate page and run from there,
-;;; as it is only run once.
-;;;
-
 
 	;;;
 	;;; start - reset entry point
@@ -205,38 +200,17 @@ ram_error:
 	;;;   ASIC POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 asic_test:
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;;;   IRQ POST DIAGNOSTIC CHECK
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-irq_test:
-	; TODO : set irq_function to a custom IRQ handler that
-	; does nothing but increment a counter.  Use hand-tuned
-	; delays, then verify that the IRQ is firing at (about)
-	; the expected rate.
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;;;   FIRQ POST DIAGNOSTIC CHECK
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-firq_test:
-	; TODO
+	/* TODO */
 
 	;;; END OF DIAGNOSTICS
+
 test_done:
 	; Initialize the stack pointer.  We can now make
-	; function calls!  Note that this stack is only used
-	; for execution that is not task-based.  Once tasks
-	; can be run, each task will use its own stack pointer
-	; separate from this one.
-	;
-	; The initial stack pointer is shifted down from the
-	; available stack size, because do_reset() may
-	; use local variables, and will assume that it already
-	; has space allocated for them; the naked attribute prevents
-	; them from being allocated explicitly.
-	lds	#STACK_BASE-8
+	; function calls!
+1$:
+	lds	#STACK_BASE
 	jmp	_main   ; Jump into C code
-
+	bra	1$
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;; diag_error

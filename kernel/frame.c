@@ -118,10 +118,13 @@ const U8 *frame_xor_rle (const U8 *framedata)
 }
 
 
+/** Internal function to draw a single full-screen frame. */
 static const U8 *dmd_draw_xbmprog (const U8 *framedata)
 {
 	U8 method;
 
+	/* TODO - remove this and force all callers of the
+	function to do the appropriate save/restore. */
 	wpc_push_page (PRG_PAGE);
 
 	/* The first byte of an xbmprog is a 'method', which
@@ -161,7 +164,8 @@ static const U8 *dmd_draw_xbmprog (const U8 *framedata)
 
 
 /** Draws a FreeWPC formatted image (FIF), which is just a
- * compressed XBMPROG. */
+ * compressed XBMPROG.  The image header says whether or not
+ * it is 1-bit or 2-bit. */
 const U8 *dmd_draw_fif1 (const U8 *fif)
 {
 	U8 depth;
@@ -181,6 +185,13 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 		dmd_flip_low_high ();
 	}
 	return fif;
+}
+
+
+/** Execute a FreeWPC animation, which is a series of
+consecutive FIFs. */
+const U8 *dmd_draw_faf1 (const U8 *faf, task_ticks_t delay)
+{
 }
 
 

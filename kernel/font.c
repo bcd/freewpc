@@ -71,6 +71,16 @@ U8 font_string_width;
  * is the maximum height of all its characters */
 U8 font_string_height;
 
+U8 top_space;
+
+/** The current x-coordinate where a character is being written */
+volatile __fastram__ U8 blit_xpos;
+
+__fastram__ U8 *blit_dmd;
+
+__fastram__ const U8 *blit_data;
+
+
 extern const font_t font_bitmap_common;
 
 
@@ -109,98 +119,78 @@ U8 *font_lookup (const font_t *font, char c)
 }
 
 
-/** The current x-coordinate where a character is being written */
-__fastram__ U8 blit_xpos;
-
-__fastram__ U8 *blit_dmd;
-
-const U8 *blit_data;
-
-
-/* Warning: experimental */
-#ifdef NEW_BLIT_MACRO
-static inline void font_blit_internal (U8 * const dst, 
-	const U8 * const src, const U8 shift)
+static inline void font_blit_internal (U8 *dst, U8 width, const U8 shift)
 {
-	*dst ^= *src << shift;
-	if (shift > 0)
-		dst[1] = (*src >> (8-shift)) ^ src[1];
+	register U8 *src = blit_data;
+
+	do {
+		if (shift == 0)
+		{
+			*dst ^= *src;
+		}
+		else
+		{
+			dst[0] ^= *src << shift;
+			dst[1] = (*src >> (8-shift)) ^ dst[1];
+		}
+	
+		src++;
+		blit_data = src;
+		dst++;
+	} while (--width);
 }
-#endif /* NEW_BLIT_MACRO */
 
 
-/** Write an 8-bit value to an arbitrary location on the DMD.  
-All inputs to this function are kept in global variables that must be 
-initialized prior to entry. */
-static void font_blit (void)
+static void font_blit0 (U8 *dst)
 {
-#ifdef NEW_BLIT_MACRO
-	switch (blit_xpos % 8)
-	{
-		case 0:
-			font_blit_internal (blit_dmd, blit_data++, 0);
-			break;
-		case 1:
-			font_blit_internal (blit_dmd, blit_data++, 1);
-			break;
-		case 2:
-			font_blit_internal (blit_dmd, blit_data++, 2);
-			break;
-		case 3:
-			font_blit_internal (blit_dmd, blit_data++, 3);
-			break;
-		case 4:
-			font_blit_internal (blit_dmd, blit_data++, 4);
-			break;
-		case 5:
-			font_blit_internal (blit_dmd, blit_data++, 5);
-			break;
-		case 6:
-			font_blit_internal (blit_dmd, blit_data++, 6);
-			break;
-		case 7:
-			font_blit_internal (blit_dmd, blit_data++, 7);
-			break;
-	}
-#else
-	switch (blit_xpos % 8)
-	{
-		default:
-		case 0:
-			blit_dmd[0] ^= *blit_data;
-			break;
-		case 1:
-			blit_dmd[0] ^= *blit_data << 1;
-			blit_dmd[1] = (*blit_data >> 7) ^ blit_dmd[1];
-			break;
-		case 2:
-			blit_dmd[0] ^= *blit_data << 2;
-			blit_dmd[1] = (*blit_data >> 6) ^ blit_dmd[1];
-			break;
-		case 3:
-			blit_dmd[0] ^= *blit_data << 3;
-			blit_dmd[1] = (*blit_data >> 5) ^ blit_dmd[1];
-			break;
-		case 4:
-			blit_dmd[0] ^= *blit_data << 4;
-			blit_dmd[1] = (*blit_data >> 4) ^ blit_dmd[1];
-			break;
-		case 5:
-			blit_dmd[0] ^= *blit_data << 5;
-			blit_dmd[1] = (*blit_data >> 3) ^ blit_dmd[1];
-			break;
-		case 6:
-			blit_dmd[0] ^= *blit_data << 6;
-			blit_dmd[1] = (*blit_data >> 2) ^ blit_dmd[1];
-			break;
-		case 7:
-			blit_dmd[0] ^= *blit_data << 7;
-			blit_dmd[1] = (*blit_data >> 1) ^ blit_dmd[1];
-			break;
-	}
-	blit_data++;
-#endif /* NEW_BLIT_MACRO */
+	font_blit_internal (dst, font_byte_width, 0);
 }
+
+static void font_blit1 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 1);
+}
+
+static void font_blit2 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 2);
+}
+
+static void font_blit3 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 3);
+}
+
+static void font_blit4 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 4);
+}
+
+static void font_blit5 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 5);
+}
+
+static void font_blit6 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 6);
+}
+
+static void font_blit7 (U8 *dst)
+{
+	font_blit_internal (dst, font_byte_width, 7);
+}
+
+void (*font_blit_table[]) (U8 *) = {
+	font_blit0,
+	font_blit1,
+	font_blit2,
+	font_blit3,
+	font_blit4,
+	font_blit5,
+	font_blit6,
+	font_blit7,
+};
 
 
 /** Renders a string whose characteristics have already been
@@ -213,6 +203,7 @@ static void fontargs_render_string (void)
 	static const char *s;
 	char c;
 	const fontargs_t *args = &font_args;
+	void (*blitter) (U8 *);
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
@@ -235,9 +226,7 @@ static void fontargs_render_string (void)
 
 	while ((c = *s++) != '\0')
 	{
-		static U8 i, j;
-		static U8 xb;
-		static U8 top_space;
+		U8 *blit_dmd;
 
 		blit_data = font_lookup (args->font, c);
 
@@ -247,7 +236,7 @@ static void fontargs_render_string (void)
 		The starting address is moved down the required number
 		of rows.  The amount of space added is saved away so that
 		it can be reclaimed later. */
-		if (font_height < args->font->height)
+		if (unlikely (font_height < args->font->height))
 		{
 			top_space = (args->font->height - font_height);
 			top_space *= DMD_BYTE_WIDTH;
@@ -256,10 +245,8 @@ static void fontargs_render_string (void)
 		else
 			top_space = 0;
 
-		xb = blit_xpos / 8;
-
 		/* Set the starting address */
-		blit_dmd = wpc_dmd_addr_verify (dmd_base + xb);
+		blit_dmd = wpc_dmd_addr_verify (dmd_base + blit_xpos / 8);
 
 		/* Write the character.
 		 * The glyph is drawn one row at a time.
@@ -279,20 +266,14 @@ static void fontargs_render_string (void)
 		 *    do better writing 16-bits at a time.  This is probably easier
 		 *    in column first mode but I think it could be done either way.
 		 */
-		for (i=0; i < font_height; i++)
+		blitter = font_blit_table[blit_xpos & 0x7];
+		do
 		{
-			for (j=0; j < font_byte_width; j++)
-			{
-				/* TODO : font_blit is applicable to more than just
-				fonts; it could be used for arbitrary-sized bitmaps. */
-				font_blit ();
-				blit_dmd = wpc_dmd_addr_verify (blit_dmd + 1);
-
-			} /* end for each byte in same row */
-
-			blit_dmd = wpc_dmd_addr_verify (blit_dmd - font_byte_width);
+			/* TODO : font_blit is applicable to more than just
+			fonts; it could be used for arbitrary-sized bitmaps. */
+			blitter (blit_dmd);
 			blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
-		} /* end for each row */
+		} while (likely (--font_height)); /* end for each row */
 
 		/* advance by 1 char ... args->font->width */
 		blit_xpos += font_width;
@@ -322,6 +303,8 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 {
 	U8 i, j;
 	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
+	void (*blitter) (U8 *);
+
   	blit_xpos = x;
 	blit_data = _blit_data;
 	wpc_push_page (FONT_PAGE);
@@ -329,16 +312,19 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 	font_byte_width = (font_width + 7) >> 3;
 	font_height = *blit_data++;
 	blit_dmd = wpc_dmd_addr_verify (dmd_base + (blit_xpos / 8));
+
+	blitter = font_blit_table[blit_xpos / 8];
 	for (i=0; i < font_height; i++)
 	{
 		for (j=0; j < font_byte_width; j++)
 		{
-			font_blit ();
+			blitter (blit_dmd);
 			blit_dmd = wpc_dmd_addr_verify (blit_dmd + 1);
 		}
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd - font_byte_width);
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 	}
+
 	wpc_pop_page ();
 }
 

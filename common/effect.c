@@ -135,7 +135,7 @@ void animation_test_deff (void)
 }
 
 
-#ifndef CONFIG_NATIVE
+#if 0
 void exit_handler_test (void)
 {
 	__label__ sighandler;
@@ -148,5 +148,5 @@ sighandler:
 	free (p);
 	task_exit ();
 }
-#endif /* !CONFIG_NATIVE */
+#endif
 

@@ -369,11 +369,11 @@ do_long_hex_integer:
 							break;
 					}
 
-					while (sprintf_width != 0)
+					do
 					{
 						endbuf = do_sprintf_hex_byte (endbuf, *bcd++);
 						sprintf_width -= 2;
-					}
+					} while (sprintf_width);
 					min_width = 2;
 					goto fixup_number;
 					break;
@@ -387,8 +387,9 @@ do_long_hex_integer:
 						while (*s)
 							*_buf++ = *s++;
 					else
-						while (sprintf_width--)
+						do {
 							*_buf++ = *s++;
+						} while (--sprintf_width);
 
 					buf = _buf;
 					break;

@@ -30,6 +30,10 @@ define require
 $(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
+ifndef Q
+Q := @
+endif
+
 #######################################################################
 ###	Configuration
 #######################################################################
@@ -42,8 +46,10 @@ $(eval $(call require,MACHINE))
 # machine-specific Makefile, based on the game you choose.
 $(eval $(call require,PLATFORM))
 
-# Set this to the name of the CPU.  This comes from the platform,
-# but now it's only 6809...
+# Set this to the name of the CPU.  In simulation this is always
+# 'native'; otherwise it depends on the platform.  However, both
+# WPC and Whitestar are 6809-based, so that's really the only other
+# possibility.
 ifdef NATIVE
 CPU := native
 else
@@ -62,13 +68,18 @@ BUILD_YEAR := $(shell date +%Y)
 #######################################################################
 ###	Set Default Target
 #######################################################################
+
+.PHONY : default_target
+default_target : clean_err check_prereqs platform_target post_build
+
+.PHONY : platform_target
 ifdef NATIVE
-default_target : clean_err check_prereqs freewpc
+platform_target : freewpc
 else
 ifdef TARGET_ROMPATH
-default_target : clean_err check_prereqs install post_build
+platform_target : install
 else
-default_target : clean_err check_prereqs build post_build
+platform_target : build
 endif
 endif
 
@@ -124,11 +135,13 @@ TMPFILES += $(BLD)/*
 # Define GCC4 if GCC_VERSION begins with 4.
 ifeq ($(CPU),m6809)
 GCC_ROOT = /usr/local/bin
-CC := $(CCACHE) $(GCC_ROOT)/m6809-gcc-$(GCC_VERSION)
-AS = $(CC) -xassembler-with-cpp
 ifneq ($(shell echo $(GCC_VERSION) | grep ^4),)
 EXTRA_CFLAGS += -DGCC4
+CC := $(CCACHE) $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
+else
+CC := $(CCACHE) $(GCC_ROOT)/m6809-gcc-$(GCC_VERSION)
 endif
+AS = $(CC) -xassembler-with-cpp
 LD = $(GCC_ROOT)/m6809-ld
 REQUIRED += $(CC:$(CCACHE)=) $(LD)
 else
@@ -460,7 +473,7 @@ GENDEFINES = include/gendefine_gid.h
 
 .PHONY : clean_err
 clean_err:
-	@rm -f $(ERR)
+	$(Q)rm -f $(ERR)
 
 .PHONY : check_prereqs
 check_prereqs : tools sched xbmgen_run xbmprotos
@@ -497,7 +510,7 @@ timedrun:
 install : $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip
 
 $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
-	@echo Installing to MAME directory '$(TARGET_ROMPATH)' ...; \
+	$(Q)echo Installing to MAME directory '$(TARGET_ROMPATH)' ...; \
 	cd $(TARGET_ROMPATH); \
 	if [ ! -f $(PINMAME_MACHINE).zip.original ]; then \
 		echo "Saving original MAME roms..."; \
@@ -508,7 +521,7 @@ $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip : $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 
 .PHONY : uninstall
 uninstall :
-	@cd $(TARGET_ROMPATH) && \
+	$(Q)cd $(TARGET_ROMPATH) && \
 	if [ -f $(PINMAME_MACHINE).zip.original ]; then \
 		if [ -f $(PINMAME_MACHINE).zip ]; then \
 			echo "Restoring original $(MACHINE) ROM in $(TARGET_ROMPATH)..."; \
@@ -529,7 +542,7 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(GAME_ROM)
 build : $(GAME_ROM)
 
 post_build :
-	@echo "Cleaning .i files..." && rm -f *.i
+	$(Q)echo "Cleaning .i files..." && rm -f *.i
 
 #
 # How to make a ROM image, which is the concatenation of each of the
@@ -537,9 +550,9 @@ post_build :
 # to that expected for the particular machine.
 #
 $(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
-	@echo Padding ... && \
+	$(Q)echo Padding ... && \
 		cat $(BLD)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
-	@echo Updating ROM checksum ... && \
+	$(Q)echo Updating ROM checksum ... && \
 		$(CSUM) -f $(GAME_ROM) -v 0x$(SYSTEM_MINOR) -u
 
 #
@@ -547,20 +560,20 @@ $(GAME_ROM) : $(BLD)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 # in multiples of 1KB.
 #
 $(BLD)/blank%.bin: $(BLD)/blankpage.bin
-	@echo "Creating $*KB blank file ..." && $(BLANKER) if=$(BLD)/blankpage.bin of=$@ bs=1k count=$* > /dev/null 2>&1
+	$(Q)echo "Creating $*KB blank file ..." && $(BLANKER) if=$(BLD)/blankpage.bin of=$@ bs=1k count=$* > /dev/null 2>&1
 
 $(BLD)/blankpage.bin: $(SR)
-	@echo "Creating blank 32KB page ..." && $(SR) -o $@.1 -l 0x8000 -f 0xFF -B
-	@( for ((a=0; a < 32; a++)); do cat $@.1; done ) > $@
-	@rm -f $@.1
+	$(Q)echo "Creating blank 32KB page ..." && $(SR) -o $@.1 -l 0x8000 -f 0xFF -B
+	$(Q)(for ((a=0; a < 32; a++)); do cat $@.1; done ) > $@
+	$(Q)rm -f $@.1
 
 
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR)
-	@echo "Checking for overflow..." && tools/mapcheck
-	@echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0xFF $<
+	$(Q)echo "Checking for overflow..." && tools/mapcheck
+	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	@echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
+	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
 
 #
 # General rule for linking a group of object files.  The linker produces
@@ -568,12 +581,12 @@ $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 #
 ifeq ($(CPU),m6809)
 $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
-	@echo "Linking $@..." && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
+	$(Q)echo "Linking $@..." && $(CC) -Wl,-T -Wl,$< >> $(ERR) 2>&1
 endif
 
 ifeq ($(CPU),native)
 freewpc : $(OBJS)
-	@echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -616,7 +629,7 @@ OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_O
 DUP_PAGE_OBJ = $1
 
 $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
-	@echo Creating linker command file $@ ... ;\
+	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
 	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $@ ;\
@@ -634,20 +647,20 @@ $(PAGED_LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefil
 
 
 $(BLD)/freewpc.s:
-	@echo ".area .text" >> $@
+	$(Q)echo ".area .text" >> $@
 
 #
 # How to build a page header source file.
 #
 $(BLD)/page%.s:
-	@echo ".area page$*" >> $@
-	@echo ".db $*" >> $@
+	$(Q)echo ".area page$*" >> $@
+	$(Q)echo ".db $*" >> $@
 
 #
 # How to make the linker command file for the system section.
 #
 $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
-	@echo Creating linker command file $@ ... ;\
+	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
 	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $(LINKCMD) ;\
@@ -668,14 +681,14 @@ $(LINKCMD) : $(MAKE_DEPS) build/Makefile.xbms platform/$(PLATFORM)/Makefile
 # available.
 #
 $(AS_OBJS) : %.o : %.s $(CC) $(MAKE_DEPS)
-	@echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
+	$(Q)echo Assembling $< ... && $(AS) $(EXTRA_ASFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to build a page header, which is a special
 # version of an assembly file.
 #
 $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(CC)
-	@echo Assembling page header $< ... && $(AS) -o $@ -c $< >> $(ERR) 2>&1
+	$(Q)echo Assembling page header $< ... && $(AS) -o $@ -c $< >> $(ERR) 2>&1
 
 #
 # General rule for how to compile any C code for the target.
@@ -701,7 +714,7 @@ $(PAGE_HEADER_OBJS) : $(BLD)/page%.o : $(BLD)/page%.s $(CC)
 
 ifeq ($(CPU),m6809)
 $(XBM_OBJS) $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
-$(BASIC_OBJS) kernel/font.o kernel/printf.o: SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
+$(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_SW_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 else
 $(XBM_OBJS) : PAGEFLAGS=-Dstatic=
 endif
@@ -725,12 +738,12 @@ $(COMMON_OBJS) : common/Makefile
 
 $(C_OBJS) $(XBM_OBJS) $(PRG_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(CPU),m6809)
-	@echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
+	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
-	@echo "Compiling $< ..." && $(HOSTCC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
+	$(Q)echo "Compiling $< ..." && $(HOSTCC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) $< >> $(ERR) 2>&1
 endif
 ifeq ($(CONFIG_PROFILING),y)
-	@mkdir -p gprof.data
+	$(Q)mkdir -p gprof.data
 	$(shell mv gmon.out gprof.data/gmon.$$RANDOM.out)
 endif
 
@@ -745,15 +758,15 @@ CONFIG_FILES = build/mach-config.h $(CONFIG_SRCS)
 config : $(CONFIG_FILES)
 
 build/mach-Makefile : $(MACH_DESC)
-	@echo "Regenerating $@ if necessary..." && \
+	$(Q)echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $< makefile > $@.tmp && tools/move-if-change $@.tmp $@
 
 build/mach-config.h : $(MACH_DESC)
-	@echo "Regenerating $@ if necessary..." && \
+	$(Q)echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $< config > $@.tmp && tools/move-if-change $@.tmp $@
 	
 $(CONFIG_SRCS) : build/mach-%.c : $(MACH_DESC) build/mach-config.h
-	@echo "Regenerating $@ if necessary..." && \
+	$(Q)echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $(MACH_DESC) $(@:build/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 
@@ -775,7 +788,7 @@ endif
 xbmprotos: $(XBM_H)
 
 $(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
-	@echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
+	$(Q)echo Generating XBM prototypes... && $(XBMPROTO) -o $(XBM_H) -D images
 
 #
 # How to automake files of #defines
@@ -783,12 +796,12 @@ $(XBM_H) : $(XBM_SRCS) $(XBMPROTO)
 gendefines: $(GENDEFINES) $(MACH_LINKS)
 
 include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS)
-	@echo Autogenerating task IDs... && \
+	$(Q)echo Autogenerating task IDs... && \
 		$(GENDEFINE) -p GID_ > $@
 
 .PHONY : clean_gendefines
 clean_gendefines:
-	@echo Deleting autogenerated files... && rm -f $(GENDEFINES)
+	$(Q)echo Deleting autogenerated files... && rm -f $(GENDEFINES)
 
 .PHONY : gendefines_again
 gendefines_again: clean_gendefines gendefines
@@ -800,7 +813,7 @@ gendefines_again: clean_gendefines gendefines
 callset: $(BLD)/callset.o
 
 $(BLD)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
-	@echo "Generating callsets ... " && rm -f $@ \
+	$(Q)echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset -D build -D kernel -D common -D mach -D test $(CALLSET_FLAGS)
 
 .PHONY : callset_again
@@ -809,7 +822,7 @@ callset_again:
 
 .PHONY : fonts clean-fonts
 fonts clean-fonts:
-	@echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
+	$(Q)echo "Making $@... " && $(MAKE) -f Makefile.fonts $@
 
 #######################################################################
 ###	Static Scheduling
@@ -855,17 +868,17 @@ HOST_XBM_OBJS = build/sysgen.o build/borders.o build/backgrounds.o
 HOST_XBM_CFLAGS = -Itools/pgmlib -Iinclude -g
 
 xbmgen_clean :
-	@echo "Cleaning host XBM files..." && \
+	$(Q)echo "Cleaning host XBM files..." && \
 	rm -f build/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
 
 .PHONY : xbmgen_run
 xbmgen_run : build/xbmgen
 ifeq ($(PLATFORM),wpc)
-	@$(MAKE) xbmgen_objs
+	$(Q)$(MAKE) xbmgen_objs
 endif
 
 build/Makefile.xbms build/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
-	@echo "Linking XBM generator..." && \
+	$(Q)echo "Linking XBM generator..." && \
 	$(HOSTCC) -o build/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS) && \
 	echo "Generating XBM files..." && build/xbmgen
 
@@ -893,11 +906,11 @@ user.make:
 # 'mach' and 'include/mach' without knowing the specific machine type.
 #
 .mach:
-	@echo Setting symbolic link for machine source code &&\
+	$(Q)echo Setting symbolic link for machine source code &&\
 		touch .mach && ln -s $(MACHINE_DIR) mach
 
 .include_mach:
-	@echo Setting symbolic link for machine include files &&\
+	$(Q)echo Setting symbolic link for machine include files &&\
 		touch .include_mach && cd include && ln -s $(MACHINE) mach
 
 #
@@ -938,31 +951,30 @@ doxygen: Doxyfile
 #
 .PHONY : info
 info:
-	@echo "MACHINE : $(MACHINE)"
-	@echo "GAME_ROM : $(GAME_ROM)"
-	@echo "GCC_VERSION = $(GCC_VERSION)"
-	@echo "CC = $(CC)"
-	-@$(CC) -v
-	@echo "CFLAGS = $(CFLAGS)"
-	@echo "TOOLS = $(TOOLS)"
-	@echo "REQUIRED = $(REQUIRED)"
-	@echo "PATH_REQUIRED = $(PATH_REQUIRED)"
-	@echo "FIF_OBJS = $(FIF_OBJS)"
-	@echo "PRG_OBJS = $(PRG_OBJS)"
-	@echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
+	$(Q)echo "MACHINE : $(MACHINE)"
+	$(Q)echo "GAME_ROM : $(GAME_ROM)"
+	$(Q)echo "GCC_VERSION = $(GCC_VERSION)"
+	$(Q)echo "CC = $(CC)"
+	$(Q)echo "CFLAGS = $(CFLAGS)"
+	$(Q)echo "TOOLS = $(TOOLS)"
+	$(Q)echo "REQUIRED = $(REQUIRED)"
+	$(Q)echo "PATH_REQUIRED = $(PATH_REQUIRED)"
+	$(Q)echo "FIF_OBJS = $(FIF_OBJS)"
+	$(Q)echo "PRG_OBJS = $(PRG_OBJS)"
+	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 
 #
 # 'make clean' does what you think.
 #
 .PHONY : clean
 clean: clean_derived clean_gendefines clean_tools
-	@for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
+	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
 		do echo Removing files in \'$$dir\' ... && \
 		cd $$dir && rm -f $(TMPFILES) && cd -; done
 
 .PHONY : clean_derived
 clean_derived:
-	@for file in `echo $(XBM_H) mach include/mach` ;\
+	$(Q)for file in `echo $(XBM_H) mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
 		rm -rf .mach .include_mach && \
@@ -974,5 +986,5 @@ clean_tools:
 
 .PHONY : show_objs
 show_objs:
-	@echo $(OBJS)
+	$(Q)echo $(OBJS)
 

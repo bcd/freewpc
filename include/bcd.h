@@ -84,8 +84,8 @@ do { \
 #else
 
 /* TODO - this isn't BCD format */
-#define bcd_add8(px, py, carry) do { *px = *px + *py + carry; } while (0)
-#define bcd_sub8(px, py, carry) do { *px = *px - *py - carry; } while (0)
+#define bcd_add8(px, py, carry) do { --px; *px = *px + *--py + carry; } while (0)
+#define bcd_sub8(px, py, carry) do { --px; *px = *px - *--py - carry; } while (0)
 
 #endif /* __m6809__ */
 
