@@ -1,0 +1,9 @@
+#!/bin/sh
+ver=$1
+if [ "$ver" = "" ]; then exit 1; fi
+for game in `echo afm tz wcs t2`; do
+	make MACHINE=$game FREEWPC_DEBUGGER=n USER_TAG="\"RELEASE\"" clean
+	make MACHINE=$game FREEWPC_DEBUGGER=n USER_TAG="\"RELEASE\""
+	zip -9 /home/bcd/oddchange/freewpc/releases/f${game}0_${ver}.zip f${game}0_${ver}.rom
+	chmod og+w /home/bcd/oddchange/freewpc/releases/f${game}0_${ver}.zip
+done
