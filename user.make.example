@@ -15,11 +15,10 @@
 # If you are primarily working with a single machine type, it is
 # easier to specify it here than saying MACHINE=xxx every time you run
 # make.
-#MACHINE := tz
-#MACHINE := afm
-#MACHINE := wcs
-#MACHINE := t2
-#MACHINE := tester
+#MACHINE = tz
+#MACHINE = afm
+#MACHINE = wcs
+#MACHINE = tester
 
 #
 # Set this to the directory in which mame roms should be installed.
@@ -29,7 +28,7 @@
 #TARGET_ROMPATH := "/cygdrive/c/Progra~1/VPinmame/roms"
 
 #
-# Set to 'y' if you wish to use the FreeWPC console debugger.
+# Set to 'y' if you wish to use the freewpc debugger.
 #
 #FREEWPC_DEBUGGER := n
 
@@ -51,21 +50,13 @@
 #USER_TAG = "MY TAG"
 
 # Set to the version of gcc6809 installed.
-# The 4.2.x releases are recommended, although 3.4.x releases
-# should still work.
+# Any of the 3.4.x series should work OK.
 #GCC_VERSION := 3.4.6
-#GCC_VERSION := 4.2.0
-#GCC_VERSION := 4.2.1
-GCC_VERSION := 4.2.2
-#GCC_VERSION := 4.3.0
 
 # Uncomment if you want to build a FREE ONLY ROM.
 #FREE_ONLY := y
 
 # If you have special flags to pass to the compiler, define them here.
 #EXTRA_CFLAGS := ...
-
-# For debugging the compiler itself.
-#DEBUG_COMPILER := y
 
 # vim: set filetype=make:
