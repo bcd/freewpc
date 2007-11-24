@@ -1,0 +1,317 @@
+# vim: set filetype=:
+
+@deftitle Frequently Asked Questions about FreeWPC
+
+Last updated November 5, 2007
+
+
+=How do I download FreeWPC?
+
+Binaries can be downloaded from the main FreeWPC page.  Source code is also
+available through Subversion.  The WebSVN interface to Subversion will also
+let you download a tarball of the code.
+
+=How can I test FreeWPC?
+
+At the moment, FreeWPC isn't ready for testing in a real pinball machine.
+Testing is done in the PinMAME emulator instead.  I use both Visual PinMAME
+on Windows and xpinmame on Unix.
+
+For a first-time user, the best way to test is to simply to play it and
+report back to me any anomalies that you find.
+
+Alternatively, you can compile and test the code in simulation mode,
+which produces a standalone executable that does the simulation inside
+the program, without the need for PinMAME, and with the ability to use
+gdb.
+
+=What can I expect to work well?
+
+Game play and test mode should work as you would expect in a regular WPC
+machine.  The basic pinball machine features are all there and working
+OK.
+
+=What can I expect NOT to work well?
+
+General illumination is not very robust.  In general, anything that
+drives an output will need more testing before attempting to put FreeWPC
+into a real game.
+
+I'm sure there are other things that belong here, once more testing has been
+done.
+
+=How stable is FreeWPC?
+
+FreeWPC is stable in the sense that release versions aren't known to
+crash under normal conditions.  FreeWPC hasn't been adequately stress
+tested to see how it behaves under constant switch closures and multiple
+game effects running.
+
+This stability is good enough for playing under the emulators like
+PinMAME.  It has not been verified in a real machine yet, so it's hard
+to say how stable it is in that sense.
+
+=What games have been tested?
+
+Twilight Zone is the main game used for development.  TZ was chosen
+based on my experience with the machine, and also, it seemed like a good
+way to test out a lot of features that I thought FreeWPC ought to have.
+TZ has a lot going on, so getting it to work should prove the system out.
+
+As proof that variations of WPC are supported, T2, World Cup Soccer,
+and Attack From Mars ROMs have also been built and run under PinMAME,
+but without any real rule set.
+
+=When can I run this thing on real hardware?
+
+I have no timetable for trying this in a real machine.  You're free to
+try it yourself, of course I am not liable for what happens to you
+if it blows up.
+
+=What kinds of safeguards are included to keep the system from blowing up?
+
+The IRQ handler has a check to make sure that task scheduling is
+going OK.  No task is allowed to run for longer than 128ms.  If that
+occurs, the system is halted.
+
+There are various sanity checks throughout the code that will throw
+a fatal error if something is up.
+
+On a fatal error, the hardware is immediately reinitialized so that
+all solenoids and flashers are left off.  A message is written to the
+DMD (hopefully, things are working enough that it can be read!), then
+the system will reset itself automatically.
+
+Real WPC hardware will reset if the IRQ stops running for some reason;
+e.g. interrupts are disabled for an extended period of time.  PinMAME
+doesn't emulate this, though.
+
+=Does FreeWPC include any patented algorithms?
+
+No, at least not that I am aware of.  If anyone sees differently,
+please let me know immediately.  I will work hard to ensure that FreeWPC
+truly remains free and steers clear of any patent-related issues.
+
+=Can FreeWPC be made to work on pinball hardware other than WPC?
+
+Maybe, although this hasn't been tried.  There is support for
+cross-compiling between the 6809 and native Linux, so some of the hooks
+for this are already there.  If the platform uses a 6809 also, then
+chances are better.  If it's a different MPU, odds are GCC doesn't support
+it.  The most likely candidate to try would be Sega Whitestar.
+
+=The 6809 is a slow CPU.  What kind of performance do you see?
+
+It is indeed slow, running at 2MHz, but it is adequate.  On average
+about 22% of the processing time is spent in the IRQ handler, which takes
+care of all the important, realtime hardware refresh.  The remaining CPU
+time is available for other tasks to run.
+
+=How do I add support for a new machine?
+
+You need to add a machine description file for the game in the machine
+subdirectory; see tz for an example of what goes in there.  Create
+a Makefile there also that has the name of the md file and any other
+C files you happen to write.  To build it, make sure MACHINE is defined
+to the machine name you chose; this is best done by editing user.make
+and rebuilding from scratch.
+
+=What kind of OS is used?  Is it multithreaded?
+
+FreeWPC is self-contained and has its own, multitasking OS.  Tasks are
+not preemptible; that is, they run until they exit via task_exit(), or
+yield control via task_sleep() or task_yield().  Then the next task starts.
+
+There is no notion of priority at present, but this is being considered
+for the future.
+
+There are also a number of 'idle' functions defined throughout the code
+that are intended to be called when no tasks are ready to run.  The
+present implementation is slightly off from that, but not too far off.
+Idle functions don't execute in a task context and therefore can't sleep.
+
+There is no memory management function like malloc(); all memory is
+statically allocated at compile time.
+
+When you build the native version that includes built-in emulation,
+these functions are generally bypassed in favor of the native versions.
+
+=What are callsets?  I see CALLSET_ENTRY scattered through the code.
+
+Callsets are an implementation of static event publish/subscribe.
+Each instance of CALLSET_ENTRY denotes a function that
+is called back when an event occurs.  The first parameter is a string
+denoting the name of the module; the second is the name of the event.
+
+Events are generated by calling callset_invoke(), with the name of the
+event as the single parameter.  This causes all corresponding CALLSET_ENTRY
+functions to be invoked.
+
+During the compile, all of the source is scanned to match invokes and
+entry points.  A file build/callset.c is automatically generated that
+implements the event catching.
+
+The script tools/gencallset does all of this.
+
+=What is a machine description file?  I see files with the .md extension.
+
+Early versions of FreeWPC required that lots of constant information about
+a machine be provided in the form of C code.  Sometimes, information had to
+be specified multiple times; also, the format varied greatly.
+
+Much of this type of information is now described in the .md file format
+instead.  As part of the build process, the contents of the md file are
+turned into the underlying C code that is needed.  The benefits are that
+a lot of the redundancy has been removed, and some syntactic sugar was added
+so that the representation is cleaner and easier to understand.  It is way
+more English-like than C code, for sure.
+
+For example, an entry that defines the properties of the Start Button would
+generate a define named SW_START_BUTTON for its switch number, an event
+named sw_start_button that represents C code to be executed when the switch
+is triggered, and a string entry "START BUTTON" into the switch name table.
+Autogenerating these ensures consistency throughout the code but also makes
+it easier on the programmer.
+
+The script tools/genmachine does all of this.
+
+=What are gendefines?
+
+Gendefines are #defines that are automatically generated by scanning the
+source code to see all uses of the #define.  They may be deprecated in
+the future; they are currently only used for task group IDs (GIDs).
+
+=Where do the DMD fonts come from?
+
+All fonts were derived automatically from freely available X11 fonts.
+The tools/fontgen script produces a .fon file, which is just C code with
+the required data structures that FreeWPC understands.  fontgen uses
+netpbm utilities to generate the font data.
+
+Actually, one of the fonts -- mono5, was the first font to be used and
+was created by hand, before the advent of fontgen.
+
+=How do I add graphics?
+
+FreeWPC needs graphics in XBM format, sized 128x32.  If it's a 3-color
+image (4 including black), you need two XBMs, one for each bit plane.
+FreeWPC defines an image format called FIF that is just an XBM or two
+with a small header.  The XBMs may be compressed to save space, using
+simple run-length encoding.  The script tools/makefif can convert
+a PGM (grayscale image) to FIF.
+
+=How is the protected area of RAM managed?
+
+FreeWPC does use the memory protection feature, which causes a special 
+area of the regular RAM to be read-only thanks to the WPC memory protection 
+circuit.  Note that using FreeWPC
+will cause any nv data you already have in PinMAME or a real machine
+to be wiped once you load FreeWPC.
+
+NVRAM functions use checksumming to detect errors, and will periodically
+reset any bogus fields back to factory defaults to ensure sanity.
+
+=I want to read through the source code.  Where should I start?
+
+The core system files are in the kernel directory.  Other common files
+are in common.  Game specific files are in machine.  The system starts
+in a platform-specific file, then branches into kernel/init.c.
+
+=In a nutshell, how are switches handled?
+
+All switches are polled every 2ms, and switches that need servicing are
+identified.  Later, a background task that runs frequently, but at no
+guaranteed rate, will throw events for servicing the switches.
+
+=In a nutshell, how are lamps handled?
+
+The lamp matrix is strobed every 2ms.  WPC hardware allows only a single
+column of 8 lamps to be enabled at any time.  FreeWPC rapidly switches
+between the 8 columns to give the illusion that all 64 lamps are being
+controlled simultaneously.  So the entire matrix is updated only
+once per 16ms.
+
+Less frequently, another realtime task will toggle the states of all
+lamps that are in 'flashing' state.
+
+Lamp effects, used for light shows and special game circumstances,
+draw onto additional, virtual lamp matrices.  These are all overlaid
+to produce the final image drawn onto the physical lamps.
+
+=In a nutshell, how are solenoids handled?
+
+Task-level code can manipulate solenoids (and other drives, like motors)
+using the functions in include/sys/sol.h.  They only modify variables
+in RAM and never touch the real hardware.  At IRQ time, the variables
+are scanned and the hardware is updated.
+
+Duty cycling, in which solenoids are pulsed at less than 100% power, is
+supported.  A task can specify the pulse strength at enable time; the
+IRQ will rapidly switch the drive on and off to produce the desired
+strength.
+
+=Do I need to know 6809 assembly language in order to understand FreeWPC?
+
+Absolutely not.  More than 98% of the code is in C.  The machine description
+files are even in a more human-readable language.  This should make it easier
+for more people to contribute.
+
+The assembly portions have to do with multitasking and bank switching.
+This code is stable and isn't likely to change anytime soon.
+
+Knowledge of the 6809 is useful, though.  The performance of the 6809 C
+compiler is not perfect, and it's good to inspect the assembly output
+occasionally to see what it's doing.  In most cases, bad code can be
+improved by rewriting it.  Occasionally, patterns are seen which can only
+be fixed in the compiler itself, but this is very rare.
+
+=What do I need to compile the code myself?
+
+FreeWPC requires a UNIX-like development system, such as Linux or Cygwin.
+It probably will work with any of the BSDs just fine, too.  Standard
+system utilities like GCC, bash, perl, and make are required.  Also, you'll
+need a copy of the 6809 GCC compiler, unless you only want to compile in
+native mode.
+
+FreeWPC comes with an S-record converter to build the final ROM images.
+
+It uses some other Unix tools that you probably have, too, like the bc
+calculator program to figure out how much padding is needed on the ROM files.
+
+=I want to contribute code changes.  What do I do?
+
+Contact brian@oddchange.com.
+
+=How do I test FreeWPC using PinMAME?
+
+=Are there any differences between running in PinMAME and on real hardware?
+
+PinMAME does a lot of things wrong, but does them well enough so that
+no one will notice.  Through the use of schematics and talking with former
+WMS employees, some of the WPC details have come out, although none of it
+seems to be getting to the PinMAME folks.  Their priorities are, probably
+justified, elsewhere.  
+
+This is why I warn about putting in a real machine.  Just because it works
+on PinMAME doesn't mean it will work elsewhere.  Only time will tell.
+Making this leap will require great care and intimate knowledge of how the
+system works.
+
+=OK.  I got a development environment set up, I made some code changes, and now it crashes.  What can I do to find the bug?
+
+First, welcome to the club :-)  Embedded programming isn't easy.  There's
+nothing like GDB to help you, but there are ways of debugging that have been
+incredibly useful to me so far.
+
+PinMAME, at least on Unix, has a debug mode that can be activated using the
+-d option.  This will let you single-step and view memory, although you'll
+be working in 6809 assembly and not C.  Use the map file at build/freewpc.map
+to correlate addresses to objects.
+
+Add debug prints to the code.  Use the dbprintf() function to write to the
+WPC debugger port.  On Unix systems, you can use the patched xpinmame and
+wpcdebug utility to view the print messages in realtime.  On Windows, you
+can define CONFIG_PARALLEL_DEBUG to force the messages out the WPC
+parallel port instead.  However, you won't be able to view the data until
+you exit PinMAME.
+
