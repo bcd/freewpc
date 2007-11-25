@@ -444,6 +444,7 @@ void trans_bitfade_old (void)
 
 	if (mask[0] != 0xFF)
 	{
+		/* TODO : unroll this to lessen loop overhead */
 		for (i=0; i < 32L * 16; i++)
 		{
 			dst[i] = src[i] & ~mask[0];
@@ -465,6 +466,7 @@ void trans_bitfade_new (void)
 	}
 	else
 	{
+		/* TODO : unroll this to lessen loop overhead */
 		for (i=0; i < 32L * 16; i ++)
 		{
 			dst[i] |= src[i] & mask[0];
