@@ -31,6 +31,7 @@ endif
 
 # Optimization flags
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
+# TODO : should -funroll-loops be given?
 
 KERNEL_HW_OBJS += $(P)/div10.o $(P)/main.o $(P)/task.o $(P)/vector.o
 
