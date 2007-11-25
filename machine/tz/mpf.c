@@ -107,6 +107,20 @@ CALLSET_ENTRY (mpf, door_start_battle_power)
 }
 
 
+CALLSET_ENTRY (mpf, powerfield_win)
+{
+	if (mpf_ball_count > 0)
+	{
+		mpf_ball_count--;
+		if (mpf_ball_count == 0)
+		{
+			callset_invoke (powerfield_end);
+			mpf_stop ();
+		}
+	}
+}
+
+
 CALLSET_ENTRY (mpf, sw_camera)
 {
 	if (event_did_follow (mpf_top, camera))
