@@ -641,10 +641,19 @@ void device_remove_live (void)
 		live_balls--;
 		if (in_game)
 		{
-			/* Notify that the ball count changed, and that a ball drained */
+			/* Notify that the ball count changed */
 			callset_invoke (ball_count_change);
-			callset_invoke (ball_drain);
 
+			/* See if this qualifies as a ball drain.  Any event receiver
+			can return FALSE here if it is not to be treated as a drain;
+			e.g., when a ballsaver is active.  In these cases, the
+			event function is also responsible for putting the ball
+			back into play. */
+			if (!callset_invoke_boolean (ball_drain))
+				return;
+
+			/* OK, at this point, it is a true ball drain event.
+			See how many balls are in play now. */
 			switch (live_balls
 #ifdef DEVNO_TROUGH
 				 + device_entry (DEVNO_TROUGH)->kicks_needed
@@ -652,16 +661,11 @@ void device_remove_live (void)
 				)
 			{
 				case 0:
-					/* With zero balls in play, this might be end of ball.
-					 * If there are pending ball serves from the trough, then
-					 * don't end the ball just yet. */
+					/* With zero balls in play, this is end of ball.
+					This function usually does not return; it will stop just about
+					every task running to reset for the next ball. */
 					end_ball ();
-
-					/* FALLTHRU : end_ball may be cancelled due to a
-					ball save, but must be treated as going back to
-					single_ball_play as well.  If the ball really ends, we will
-					come back here and invoke single ball play anyway,
-					which should be harmless. */
+					return;
 
 				case 1:
 					/* Multiball modes like to know when single ball play resumes. */

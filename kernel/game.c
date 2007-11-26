@@ -190,8 +190,9 @@ void end_game (void)
 /**
  * Handle end-of-ball.  This is called from the ball device
  * subsystem whenever it detects that the number of balls in play
- * is zero.
- * TODO - make this __noreturn__.
+ * is zero.  Some error checking is done in case this is not
+ * really end-of-ball.  Normally though, this function will
+ * not return.
  */
 void end_ball (void)
 {
@@ -200,26 +201,29 @@ void end_ball (void)
 	 * tracks ball counts always.
 	 */
 	if (!in_game)
-		goto done;
+		return;
 
 	/*
 	 * If ball_in_play never set, then either the ball drained
 	 * before touching any playfield switches, or the ball serve
 	 * failed and it fell back into the trough.  Return the
-	 * ball to the plunger lane in these cases.
+	 * ball to the plunger lane in these cases, and don't
+	 * count as end-of-ball.
 	 */
 #ifdef DEVNO_TROUGH
 	if (!ball_in_play && !in_tilt)
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
-		goto done;
+		return;
 	}
 #endif
+
+	/* Here, we are committed to ending the ball */
 
 	/* Notify everybody that wants to know about it */
 	callset_invoke (end_ball);
 
-	/* First, disable the flippers if enabled by adjustment. */
+	/* Disable the flippers if enabled by adjustment. */
 	if (system_config.no_bonus_flips)
 		flipper_disable ();
 
@@ -330,15 +334,14 @@ void end_ball (void)
 	 * end game */
 	end_game ();
 
-	/* On exit from the function, dump the game stats */
 done:
 #ifdef DEBUGGER
+	/* Dump the game state */
 	dump_game ();
 #endif
 
-	/* TODO : should this be task_exit?  device.c calls here and
-	is treating a return like end_ball was cancelled. */
-	return;
+	/* End the endball task */
+	task_exit ();
 }
 
 
