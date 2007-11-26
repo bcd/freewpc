@@ -1,3 +1,7 @@
+# This file contains macros for running the native
+# build of FreeWPC under gdb.  You can use any of
+# the 'show' commands defined below to dump game
+# information.
 #---------------------------------------------------
 break gdb_break
 #---------------------------------------------------
