@@ -285,7 +285,8 @@ task_t *task_expand_stack (task_t *tp)
 
 
 /** Free a task block for a task that no longer exists. */
-static void task_free (task_t *tp)
+static __attribute__((noinline))
+void task_free (task_t *tp)
 {
 	/* Free the auxiliary stack block first if it exists */
 	if (tp->aux_stack_block != -1)
@@ -409,6 +410,11 @@ void task_exit (void)
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
 #endif
+	/* TODO: on entry to the next function, it is expected that 'X' has
+	 * the current task pointer.  There is actually nothing that
+	 * guarantees this though.  The call to task_free() above
+	 * typically takes care of it, since X is needed for the
+	 * function argument. */
 	task_dispatcher ();
 }
 
