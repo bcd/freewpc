@@ -2,13 +2,22 @@
 # Root directory for the platform files
 P=platform/wpc
 
-# Additional CFLAGS required on the WPC platform
-CFLAGS += -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram 
+# Subplatform support
+# Eventually, this section will contain conditionals for building on the
+# different WPC variations.  For now, all of these are mandatory though.
+CONFIG_WPC=y
+CONFIG_FONT=y
+CONFIG_AC=y
+CONFIG_DMD=y
+CONFIG_ANIMATION=y
 
-# Don't check format strings, because we define those differently than ANSI C.
-CFLAGS += -Wno-format
+# The default CFLAGS required on the WPC platform
+# A few notes:
+# 1. -Wno-format is to not check format strings, because we define those
+# differently than ANSI C does.
+CFLAGS := -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -mint8
 
-# Optional CFLAGS
+# Optional CFLAGS based on configuration options
 
 # Save assembler files if needed for debugging the 6809 compiler.
 ifeq ($(SAVE_ASM),y)
@@ -20,13 +29,6 @@ endif
 # This is really only needed for debugging the 6809 compiler.
 ifeq ($(DEBUG_COMPILER),y)
 CFLAGS += -da -dA
-endif
-
-# Experimental
-ifdef CONFIG_16BIT
-CFLAGS += -fshort-enums
-else
-CFLAGS += -mint8
 endif
 
 # Optimization flags
