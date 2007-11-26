@@ -348,8 +348,8 @@ void sound_send (sound_code_t code)
 		return;
 
 #ifdef __m6809__
-	/* TODO - see if gcc is doing this better now, so we don't
-	have to hand assemble it. */
+	/* GCC still is doing this efficiently, so we are
+	hand assembling it for now. */
 	asm ("ldd\t%0" :: "m" (code));
 	asm ("sta\t%0" :: "m" (code_hi));
 	asm ("stb\t%0" :: "m" (code_lo));
