@@ -231,6 +231,35 @@ extern inline void *memmove (void *s1, const void *s2, U16 n)
 }
 
 
+extern inline bool memcmp (const void *s1, const void *s2, U16 n)
+{
+	if ((n % 2) == 0)
+	{
+		register U16 *w1 = (U16 *)s1;
+		register U16 *w2 = (U16 *)s2;
+		n /= 2;
+		do
+		{
+			if (*w1 != *w2)
+				return 1;
+			n--;
+		} while (n > 0);
+	}
+	else
+	{
+		register U8 *b1 = (U8 *)s1;
+		register U8 *b2 = (U8 *)s2;
+		do
+		{
+			if (*b1 != *b2)
+				return 1;
+			n--;
+		} while (n > 0);
+	}
+	return 0;
+}
+
+
 extern inline U16 strlen (const char *s)
 {
 	U16 len = 0;
