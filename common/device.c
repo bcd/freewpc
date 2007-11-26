@@ -107,8 +107,10 @@ void device_debug (void)
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
-	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
-		counted_balls, missing_balls, live_balls, held_balls);
+	dbprintf ("Accounted: %d   ", counted_balls);
+	dbprintf ("Missing: %d   ", missing_balls - live_balls);
+	dbprintf ("Live: %d   ", live_balls);
+	dbprintf ("Held: %d\n", held_balls);
 }
 #else
 #define device_debug()
@@ -712,9 +714,6 @@ bool device_check_start_ok (void)
  	if (task_find_gid (GID_DEVICE_PROBE)) 
 		return FALSE;
 
-	/* If a ball is on the shooter switch, then allow the
-	 * game to start anyway.  TODO : the ball count logic
-	 * gets confused if you do this. */
 	truly_missing_balls = missing_balls;
 #ifdef MACHINE_SHOOTER_SWITCH
 	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
