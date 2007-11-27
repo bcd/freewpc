@@ -49,7 +49,7 @@ include machine/$(MACHINE)/Makefile
 $(eval $(call require,PLATFORM))
 
 ifdef NATIVE
-include platform/linux/Makefile
+include platform/native/Makefile
 else
 -include platform/$(PLATFORM)/Makefile
 endif
@@ -78,7 +78,7 @@ BUILD_YEAR := $(shell date +%Y)
 #######################################################################
 
 .PHONY : default_target
-default_target : clean_err check_prereqs platform_target post_build
+default_target : clean_err check_prereqs platform_target post_compile
 
 .PHONY : platform_target
 ifdef NATIVE
@@ -87,7 +87,7 @@ else
 ifdef TARGET_ROMPATH
 platform_target : install
 else
-platform_target : build
+platform_target : compile
 endif
 endif
 
@@ -125,7 +125,6 @@ BINFILES = $(SYSTEM_BINFILE) $(PAGED_BINFILES)
 TMPFILES += $(LINKCMD)
 
 TMPFILES += *.o
-TMPFILES += *.rom
 TMPFILES += *.lst
 TMPFILES += *.i
 TMPFILES += *.c.[0-9]*.* 
@@ -458,7 +457,7 @@ clean_err:
 	$(Q)rm -f $(ERR)
 
 .PHONY : check_prereqs
-check_prereqs : tools sched xbmgen_run xbmprotos
+check_prereqs : $(BLDDIR) tools sched xbmgen_run xbmprotos
 
 .PHONY : run
 run: install
@@ -515,18 +514,18 @@ uninstall :
 #
 # PinMAME will want the ROM file to be named differently...
 #
-$(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(GAME_ROM)
-	cp -p $(GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
+$(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(BLDDIR)/$(GAME_ROM)
+	cp -p $(BLDDIR)/$(GAME_ROM) $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM)
 
 #
-# Use 'make build' to build the ROM without installing it.
+# Use 'make compile' to compile the ROM without installing it.
 #
-build : $(BLDDIR) $(GAME_ROM)
+compile: $(BLDDIR)/$(GAME_ROM)
 
 $(BLDDIR):
 	mkdir -p $(BLDDIR)
 
-post_build :
+post_compile :
 	$(Q)echo "Cleaning .i files..." && rm -f *.i
 
 #
@@ -534,11 +533,10 @@ post_build :
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
+$(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 	$(Q)echo Padding ... && \
 		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
-	$(Q)echo Updating ROM checksum ... && \
-		$(CSUM) -f $(GAME_ROM) -v 0x$(SYSTEM_MINOR) -u
+	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
@@ -864,9 +862,7 @@ ifeq ($(PLATFORM),wpc)
 	$(Q)$(MAKE) xbmgen_objs
 endif
 
-# removed $(BLDDIR)/Makefile.xbms from dst below because it is
-# getting rebuilt even on 'make clean'
-$(BLDDIR)/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
+$(BLDDIR)/Makefile.xbms $(BLDDIR)/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
 	$(Q)echo "Linking XBM generator..." && \
 	$(HOSTCC) -o $(BLDDIR)/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS) && \
 	echo "Generating XBM files..." && $(BLDDIR)/xbmgen
@@ -937,7 +933,7 @@ doxygen: Doxyfile
 .PHONY : info
 info:
 	$(Q)echo "MACHINE : $(MACHINE)"
-	$(Q)echo "GAME_ROM : $(GAME_ROM)"
+	$(Q)echo "GAME_ROM : $(BLDDIR)/$(GAME_ROM)"
 	$(Q)echo "GCC_VERSION = $(GCC_VERSION)"
 	$(Q)echo "CC = $(CC)"
 	$(Q)echo "CFLAGS = $(CFLAGS)"
@@ -954,8 +950,7 @@ info:
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
 	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
-		do echo Removing files in \'$$dir\' ... && \
-		cd $$dir && rm -f $(TMPFILES) && cd -; done
+		do echo "Removing files in '$$dir' ..." && rm -f $$dir/$(TMPFILES); done
 
 .PHONY : clean_derived
 clean_derived:
