@@ -318,9 +318,7 @@ void end_ball (void)
 	 * In timed game, this step is skipped, as the game is
 	 * automatically over at the end of the "first ball".
 	 */
-#ifdef CONFIG_TIMED_GAME
-	if (system_config.timed_game == OFF)
-#endif
+	if (config_timed_game == OFF)
 	{
 		ball_up++;
 		if (ball_up <= system_config.balls_per_game)
