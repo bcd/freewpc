@@ -237,6 +237,42 @@ void two_color_flash_deff (void)
 }
 
 
+void bg_flash_deff (void)
+{
+	const U8 flash_time = TIME_200MS;
+
+	dmd_alloc_low_high ();
+	dmd_fill_page_low ();
+	dmd_clean_page_high ();
+	for (;;)
+	{
+		dmd_show_high ();
+		task_sleep (flash_time); /* 0% */
+
+		dmd_show2 ();
+		task_sleep (flash_time); /* 33% */
+
+		dmd_flip_low_high ();
+		dmd_show2 ();
+		dmd_flip_low_high ();
+		task_sleep (flash_time); /* 66% */
+
+#if 0
+		dmd_show_low ();
+		task_sleep (flash_time); /* 100% */
+
+		dmd_flip_low_high ();
+		dmd_show2 ();
+		dmd_flip_low_high ();
+		task_sleep (flash_time); /* 66% */
+#endif
+
+		dmd_show2 ();
+		task_sleep (flash_time); /* 33% */
+	}
+}
+
+
 CALLSET_ENTRY (tz_deff, start_player)
 {
 	ball_save_count = 0;
