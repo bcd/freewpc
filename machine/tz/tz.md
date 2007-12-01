@@ -225,7 +225,7 @@ define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 [drives]
 H1: Slot
 H2: Rocket Kicker
-H3: Autofire
+H3: Autofire, nosearch
 H4: Popper
 H5: Right Ramp Div.
 H6: Gumball Div.
@@ -239,7 +239,7 @@ L4: Lower Jet
 L5: Left Jet
 L6: Right Jet
 L7: Lock Release
-L8: Shooter Div
+L8: Shooter Div, nosearch
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -365,6 +365,11 @@ Left Loop Complete:
 Left Loop Aborted:
 Right Loop Complete:
 Right Loop Aborted:
+
+
+[timers]
+Test Timer:
+
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -494,42 +499,46 @@ CHAOSMB_RUNNING:
 Amode: runner, PRI_AMODE
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 Brian Image: PRI_EGG1
-REPLAY: page(MACHINE_PAGE), PRI_REPLAY
-JACKPOT: page(MACHINE_PAGE), PRI_JACKPOT
-SPECIAL: page(MACHINE_PAGE), PRI_SPECIAL
+Replay: page(MACHINE_PAGE), PRI_REPLAY
+Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
+Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB
+# TODO : priority below?
+Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 
-Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+2
-Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+4
-MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+8
-Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE1+12
+Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
+MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7
+Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8
 
-Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK1+1
-TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
-Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
-Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
-Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK1+2
-Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK1+4
-Door Award: PRI_GAME_QUICK1+6, D_QUEUED+D_TIMEOUT
-Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK1+7
-Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
-PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1+8
-MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK1+8, D_ABORTABLE
-MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE1+8
-Ball Save: page(MACHINE_PAGE), PRI_GAME_LOW3
-PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK1+10, D_QUEUED+D_TIMEOUT
-Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1+11
-Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK1+12
-LITZ Award: PRI_GAME_QUICK1+15
+Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2
+TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK5
+Door Award: PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT
+Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK8
+Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8
+PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
+MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8
+Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE
+PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK8
+Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8
+LITZ Award: PRI_GAME_QUICK8
 
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT
-SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
-SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+6
+SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
+SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE7
 
-ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE1+5
-Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK1+13
+ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
+Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 
-Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE1+1
+Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
+
+BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 ##########################################################################
 # Lamp effects
@@ -547,7 +556,7 @@ SLOT KICKOUT: PRI_LEFF3, page(MACHINE_PAGE)
 AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 FLASH ALL: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE_PAGE)
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
-Jets Active: shared, 0, LAMPS(JETS), page(MACHINE_PAGE)
+Jets Active: shared, PRI_LEFF5, LAMPS(JETS), page(MACHINE_PAGE)
 GAME TIMEOUT: PRI_TILT, GI(ALL), page(MACHINE_PAGE)
 CLOCK START: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff), page(MACHINE_PAGE)
 MB RUNNING: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff), page(MACHINE_PAGE)
