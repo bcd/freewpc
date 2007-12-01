@@ -19,6 +19,9 @@
  */
 
 #include <freewpc.h>
+#ifdef __m6809__
+#include <m6809/math.h>
+#endif
 
 /** Filename: mach/config.c
  *
@@ -38,7 +41,9 @@ const audio_track_t bonus_music_track = {
 static inline U8 decimal_to_bcd_byte (U8 decimal)
 {
 #ifdef __m6809__
-	return __builtin_add_decimal (decimal, 0);
+	U8 quot, rem;
+	DIV10 (decimal, quot, rem);
+	return (quot << 4) + rem;
 #else
 	return ((decimal / 10) << 4) + (decimal % 10);
 #endif
