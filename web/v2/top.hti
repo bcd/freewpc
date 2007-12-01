@@ -1,0 +1,43 @@
+# vim: set filetype=html:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<base href="file:///home/bcd/src/git/freewpc/web/v2/build/freewpc/" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>FREEWPC</title>
+<style type="text/css">
+[NOCOMMENT=1]
+body { margin: 0; padding-left: 200px; padding-right: 190px; min-width: 240px; 
+	font-size: 14px; }
+#header, #footer { margin-left: -200px; margin-right: -190px; }
+.column { position: relative; float: left; }
+#center { padding: 0 20px; width: 100%; }
+#left { width: 180px; padding: 0 10px; right: 240px; margin-left: -100%; }
+#right { width: 130px; padding: 0 10px; margin-right: -100%; }
+#footer { clear: both; }
+* html #left { left: 150px; }
+body { background: #FFF; }
+#header, #footer { padding: 0.3em 0; }
+#left { background: #FF9; color: #000; }
+#center { background: #FFF; color: #000; font-size: 16px; font-family: verdana; }
+.column { padding-top: 1em; text-align: justify; }
+#left ul { margin-left: 0.5em; padding-left: 0.5em; }
+li { list-style-type: square; margin-bottom: 0.25em; }
+a, a:visited, a:active { text-decoration: none; color: #922; }
+a:hover { color: #b80828; text-decoration: underline; }
+#center p { margin-left: 20px; margin-right: 50px; }
+#center h2 { margin-top: 40px; width: 100%; background: #EEE; color: #E20; font-family: times; }
+h1 { font-size: 20px; }
+#center h3 { font-size: 15px; color: #F40; }
+#left h2 { background: #EE8; width: 100% }
+#left img { padding-left: 0px; margin-left: 0px; }
+.end { margin-top: 50px; }
+[NOCOMMENT=0]
+</style>
+</head>
+<body>
+
+<div id="header">
+</div>
+
+

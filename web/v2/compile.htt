@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+[top.hti]
+<div id="center" class="column">
+
+<h1>Building your own ROMs using FreeWPC</h1>
+
+<p>The first step to rebuilding ROMs yourself is to get the source code.
+Download using one of the links to the left then extract into a clean
+directory.</p>
+
+<p>FreeWPC is developed on Linux.  It should be possible to use other
+UNIX-like systems, including Cygwin for Windows.  To compile, you
+will need the following tools already installed and available:</p>
+
+<ul>
+<li>A recent copy of the <a href="/gcc6809">gcc6809 toolchain</a>, which includes a C compiler, assembler, and linker</li>
+<li><b>dd</b>, for generating the blank portions of the ROM file</li>
+<li><b>zip</b> and <b>unzip</b>, in order to manipulate xpinmame ROM bundles</li>
+<li>The <b>bash</b> shell</li>
+<li>The <b>make</b> program</li>
+<li><b>Perl</b>, for some helper scripts
+<li><b>doxygen</b>, if you want to be able to autogenerate documentation files
+(optional)</li>
+<li>Other basic UNIX utilities, like cat, rm, mv, mkdir, etc. which are almost
+certainly present</li>
+</ul>
+
+<h2>Configuring and making</h2>
+
+<p>Before you can just type <b>make</b>, you should create a file called
+<b>user.make</b> and define what you want to build, and options for how
+to build it.  See the file <b>user.make.example</b> in the distribution
+for guidance on what can go here.  At a minimum, you must specify the
+MACHINE and PLATFORM.</p>
+
+<p>After that, you can just run <b>make</b>.
+
+<h2>Installing</h2>
+
+<p>If you don't declare a value for <b>TARGET_ROMPATH</b>, then the
+final outcome of the build will be a ROM file in the root of the build
+tree named <b>freewpc.rom</b>.  However, if you have PinMAME installed,
+define it to be the location of your ROM directory.  Then it will
+automatically be installed there.</p>
+
+<p>The installation will overwrite any existing ROM zip there, but it
+will back it up to a file named <b>.original</b>.  See the Makefile in
+<i>machine/&lt;game&gt;</i> to see which "real" ROM will get clobbered for
+this purpose.</p>
+
+<div class="end"><i>&nbsp;Copyright &copy; 2007 by Brian Dominy.</i></div>
+
+</div>
+
+[bottom.hti]

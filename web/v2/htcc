@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+
+my %varhash;
+
+$varhash{'title'} = "";
+
+sub process_file {
+	my $fname = shift;
+
+	open (my $fh, $fname) or die "Couldn't open $fname: $!";
+	while (<$fh>)
+	{
+		# Skip over comments
+		next if (/^#/) && !$varhash{'NOCOMMENT'};
+
+		# Process htcc directives enclosed in square brackets
+		if (/\[(.*)\]/) {
+			my $directive = $1;
+			if ($directive =~ /^\!(.*)/) {
+				# Run a script
+				# print "<!-- Exec script $1 -->\n";
+				$script = $1;
+				if ($script =~ m/^\//) {
+					$lines = `$script`;
+				} else {
+					$lines = `./$script`;
+				}
+			}
+			elsif ($directive =~ /^(.*)=(.*)/) {
+				my ($var, $value) = ($1, $2);
+				if ($value =~ /^\!(.*)/) {
+					# print "<!-- Setting $var to output from ./$1 -->\n";
+					$varhash{$var} = `./$1`;
+				}
+				else {
+					# print "<!-- Setting $var to $value -->\n";
+					$varhash{$var} = $value;
+				}
+				next;
+			}
+			else {
+				# Load from a file
+				# print "<!-- Include file $directive -->\n";
+				process_file ($directive);
+				next;
+			}
+		}
+		else {
+			$lines = $_;
+		}
+
+		foreach $var (keys %varhash) {
+			$value = $varhash{$var};
+			$lines =~ s/\$\{$var\}/$value/mg;
+		}
+		print $lines;
+	}
+
+	close $fh;
+}
+
+process_file $ARGV[0];

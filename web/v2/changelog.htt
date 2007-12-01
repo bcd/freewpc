@@ -1,0 +1,70 @@
+# vim: set filetype=html:
+[top.hti]
+<div id="center" class="column">
+
+<h1>Recent Changes</h1>
+
+<p>Here is a summary of the changes in the most recent released versions of the code.
+Note these lists are not inclusive but highlight the major differences.  A detailed
+list of changes can be found using WebSVN.</p>
+
+<h3>Version 0.15</h3>
+
+<ul>
+<li>GCC 4.2 is now the default compiler.
+<li>Many test mode additions
+<li>Performance enhancements to switch scanning and solenoid update
+<li>Solenoid update is also more real-time than before
+<li>Ball save logic is now much better.
+<li>Dynamic memory allocation is stable.
+<li>TZ autofire, gumball logic deals with errors better
+<li>Core logic updated to work on non-Fliptronic games
+<li>Lampset code is more streamlined
+<li>More optimized font rendering
+<li>Stack overflows less likely, and are caught better than before
+<li>Improved ball search timing
+<li>'Native' build now using ncurses to show state
+<li>Native build can save to protected memory using a backing file
+<li>Added better graphics support, will begin migrating more code to use it
+<li>Cleaner makefile
+</ul>
+
+<h3>Version 0.14</h3>
+
+<ul>
+<li>Better support for GCC 4.x, although GCC 3.4.6 is still recommended by default.
+<li>A working malloc() function for dynamic memory needs.
+<li>Rewrite of display effect module to use dynamic memory for each effect
+<li>Deff retries and aborts
+<li>Many, many test mode improvements
+<li>Match algorithm added
+<li>Static scheduler
+<li>Improved right ramp and mini-playfield handling on TZ.
+<li>Better ball tracking, ball searching, empty balls test, etc.
+<li>DMD/Fliptronic specific codes are more isolated
+<li>Amode starts much sooner during reset
+<li>Smarter bit macros
+</ul>
+
+<h3>Version 0.13</h3>
+
+<ul>
+<li>Improved score rendering for multiplayer games
+<li>More adjustments and audits implemented
+<li>Improved font test
+<li>Misc. performance enhancements
+<li>ROM and RAM test at startup
+<li>General illumination brightness control
+<li>Better music effect control
+<li>Better compressed image drawing
+<li>Fixed some bugs with paging that caused system crashes
+<li>Deleted LOTS of old code no longer needed
+<li>Added some multiball modes to TZ
+<li>Many improvements in common code for coins, tilts, autolaunchers, etc.
+</ul>
+
+<div class="end"><i>&nbsp;Copyright &copy; 2007 by Brian Dominy.</i></div>
+
+</div>
+
+[bottom.hti]

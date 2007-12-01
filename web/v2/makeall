@@ -1,0 +1,9 @@
+#!/bin/sh
+mkdir -p build/freewpc
+for f in `ls -1 *.htt`; do
+	g=`echo $f | sed -e "s/htt$/html/"`
+	./htcc $f > build/freewpc/$g
+done
+for f in `ls -1 *.png`; do
+	cp -p $f build/freewpc/$f
+done
