@@ -405,7 +405,7 @@ void deff_restart (deffnum_t dn)
 /** Called directly from a deff when it wants to exit */
 __noreturn__ void deff_exit (void)
 {
-	dbprintf ("Exiting deff\n");
+	dbprintf ("Exiting deff %d\n", deff_runqueue->id);
 	task_setgid (GID_DEFF_EXITING);
 	deff_entry_free (deff_runqueue);
 	deff_reschedule ();
@@ -448,6 +448,17 @@ void deff_nice (enum _priority prio)
 	}
 
 	/* TODO */
+	/* Find the highest priority effect that is queued, and
+	see if its priority is greater than 'prio'.  If it is,
+	make this the new effect; otherwise, the current effect
+	stays and just lower its priority. */
+	if (0)
+	{
+	}
+	else
+	{
+		deff_runqueue->prio = prio;
+	}
 }
 
 

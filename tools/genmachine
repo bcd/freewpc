@@ -951,7 +951,7 @@ sub machine_write_makefile {
 	# Print GAME_TEST_OBJS, the objects needed for machine
 	# extensions to test mode.
 
-	# Print extra defines
+	# Print extra defines - TODO - commented out for now
 	if (defined ($extra_defs = $m->{'Extra-Defines'})) {
 		foreach $def (@$extra_defs) {
 			print "# $def\n";
