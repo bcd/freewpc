@@ -463,6 +463,8 @@ C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = include/gendefine_gid.h
 
+BG ?= &
+
 #######################################################################
 ###	Begin Makefile Targets
 ###   See 'default_target' above for which of these rules is actually
@@ -481,12 +483,12 @@ check_prereqs : tools sched xbmgen_run xbmprotos
 .PHONY : run
 run: install
 	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) $(BG)
 
 .PHONY : debug
 debug: install
 	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
+	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) $(BG)
 
 .PHONY : rund
 rund: install run $(DBCON)
