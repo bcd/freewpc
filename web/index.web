@@ -22,12 +22,17 @@ tested in simulators such as <a href="http://www.pinmame.com">Visual Pinmame</a>
 
 The FreeWPC system is being developed using Twilight Zone as the target machine.
 Periodically, the system is also verified to compile and run on
-World Cup Soccer and Attack From Mars.  Precompiled binaries for all of these
-machines are now available for download.  However, only Twilight Zone
-is currently playable.
+World Cup Soccer, Attack From Mars, and Terminator 2.
+Precompiled binaries for all of these machines are now available for download.  However, only Twilight Zone is currently playable.
 
 
 =News
+
+!November 30, 2007
+Version 0.15 posted.  This release has a huge number of changes, although
+the ROMs have not been tested extensively.  This should be considered
+a checkpoint release.
+
 
 !November 5,2007
 Updated the <a href="/freewpc/faq.html">FAQ</a>.  Still working on
@@ -48,16 +53,6 @@ edge development, otherwise stick to the trunk.
 
 !May 12, 2007
 Version 0.13 posted.  This is a major update with many new system features.
-
-
-!April 1, 2007
-Version 0.12 posted.  This is a minor release with only a few visible differences,
-mostly bug fixes.
-
-
-!January 14, 2007
-The <a href="/freewpc/faq.html">Frequently Asked Questions (FAQ)</a> about FreeWPC
-is now available online.
 
 
 =Features
@@ -115,13 +110,31 @@ For a more in-depth explanation of some of these features, read the
 
 =Version History
 
-The current version is 0.14.  Download ROMs for 
-<a href="/freewpc/releases/ftz0_14.zip">Twilight Zone</a>,
-<a href="/freewpc/releases/fwcs0_14.zip">World Cup Soccer</a>,
-and <a href="/freewpc/releases/fafm0_14.zip">Attack From Mars</a>.
+The current version is 0.15.  Download ROMs for 
+<a href="/freewpc/releases/ftz0_15.zip">Twilight Zone</a>,
+<a href="/freewpc/releases/fwcs0_15.zip">World Cup Soccer</a>,
+<a href="/freewpc/releases/fafm0_15.zip">Attack From Mars</a>,
+and <a href="/freewpc/releases/fafm0_15.zip">Terminator 2</a> (<b>NEW</b>).
 
-Version 0.15 is already well under way, and will contain a number of
-additional improvements, including support for a few more machines!
+Version 0.15 has a long list of improvements to the core system, a few
+TZ enhacements, and the beginnings of a new game: Terminator 2!
+Major features include:
+* GCC 4.2 is now the default compiler.
+* Many test mode additions
+* Performance enhancements to switch scanning and solenoid update
+* Solenoid update is also more real-time than before
+* Ball save logic is now much better.
+* Dynamic memory allocation is stable.
+* TZ autofire, gumball logic deals with errors better
+* Core logic updated to work on non-Fliptronic games
+* Lampset code is more streamlined
+* More optimized font rendering
+* Stack overflows less likely, and are caught better than before
+* Improved ball search timing
+* 'Native' build now using ncurses to show state
+* Native build can save to protected memory using a backing file
+* Added better graphics support, will begin migrating more code to use it
+* Cleaner makefile
 
 Version 0.14 contains the following changes:
 * Better support for GCC 4.x, although GCC 3.4.6 is still recommended by default.
@@ -191,7 +204,9 @@ which means basically that you can download it and use it for free.
 
 If you just want to browse the code, use the
 <a href="/websvn/">Subversion repository browser</a>.  This requires
-no additional software to be installed.
+no additional software to be installed.  <b>Note:</b> the SVN
+repository is slightly out-of-date with respect to the 0.15 release.
+This will be addressed in a future release.
 
 If you want
 to download the code directly and you already have Subversion installed,
@@ -204,14 +219,13 @@ The current Preview Releases lack a lot of things; they are intended to
 demonstrate only the most basic functionality.  Here are some of the
 areas that need addressing:
 
-* General illumination is implemented but there is no support for
-controlling the brightness.  Note that Visual Pinball does not
-show brightness levels, so this will be hard to debug outside of a
-real machine.
+* General illumination is not fully implemented, mainly because
+Visual Pinball does not show brightness levels.  Newer versions
+of pinmame do, however.
 * Only a few dot matrix transitional effects and fonts are present.
 * Many of the test mode functions are still missing.
-* Other than Twilight Zone, the games are not playable; most of the efforts 
-have been put into the test mode and very basic functionality.  Even
+* Other than Twilight Zone, the games are not very playable; most of the effort
+has been put into the test mode and system functionality.  Even
 Twilight Zone is not completely playable yet.
 
 
