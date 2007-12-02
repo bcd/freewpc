@@ -18,13 +18,10 @@ doc: all
 	mkdir -p $(HTDIR)
 	cp -p index.html faq.html $(HTDIR)
 
-all : index.html faq.html
+all : index.html faq.html build.html howto.html
 
-index.html : index.web mkweb.pl
-	perl mkweb.pl < index.web > index.html
-
-faq.html : faq.web mkweb.pl
-	perl mkweb.pl < faq.web > faq.html
+%.html : %.web mkweb.pl
+	perl mkweb.pl < $< > $@
 
 roms:
 	true $(foreach game,$(GAMES), && cd .. \
