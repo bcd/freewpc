@@ -107,8 +107,11 @@ void device_debug (void)
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
+	/* The 'missing' count printed here is the one that makes the
+	most sense... however it is not exactly the 'missing_balls'
+	variable */
 	dbprintf ("Accounted: %d   ", counted_balls);
-	dbprintf ("Missing: %d   ", missing_balls - live_balls);
+	dbprintf ("Missing: %d   ", missing_balls - live_balls + held_balls);
 	dbprintf ("Live: %d   ", live_balls);
 	dbprintf ("Held: %d\n", held_balls);
 }
@@ -441,7 +444,7 @@ void device_update_globals (void)
 	U8 held_balls_now = 0;
 
 	/* Recount the number of balls that are held, 
-	excluding those that are locked. */
+	excluding those that are locked and those in the trough. */
 	counted_balls = 0;
 	held_balls_now = 0;
 	for (devno = 0; devno < NUM_DEVICES; devno++)
@@ -459,14 +462,8 @@ void device_update_globals (void)
 	/* Update held_balls atomically */
 	held_balls = held_balls_now;
 
-	/* Count how many balls are missing */
+	/* Update count of how many balls are missing */
 	missing_balls = max_balls - counted_balls;
-
-	if (missing_balls != live_balls)
-	{
-		/* Number of balls not accounted for is NOT what we expect */
-		dbprintf ("Error: missing=%d, live=%d\n", missing_balls, live_balls);
-	}
 
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
 		counted_balls, missing_balls, live_balls, held_balls);
