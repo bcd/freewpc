@@ -1,26 +1,38 @@
 # vim: set filetype=html:
 <div id="left" class="column">
+[major=0]
+[minor=15]
+[version_suffix=${major}_${minor}]
+[version_string=Latest version is ${major}.${minor}]
 
 <img src="freewpc_logo.png" />
 
 <ul>
 
 <li><a href="index.html">Home</a></li>
-<li><a href="about.html">About</a></li>
-<li><a href="docs.html">Documentation</a></li>
+# <li><a href="about.html">About</a></li>
 <li><a href="faq.html">FAQ</a></li>
 <li><a href="changelog.html">ChangeLog</a></li>
-<li><a href="contrib.html">Contribute</a></li>
+<li><a href="mailto:freewpc@oddchange.com">Email</a></li>
 </ul>
 
 <h2>Download ROMs</h2>
 
+<p>${version_string}
 <ul>
-<li><a href="http://www.oddchange.com/freewpc/releases/fafm0_15.zip">Attack From Mars</a></li>
-<li><a href="http://www.oddchange.com/freewpc/releases/ftst0_15.zip">DMD Tester</a></li>
-<li><a href="http://www.oddchange.com/freewpc/releases/ft20_15.zip">Terminator 2</a></li>
-<li><a href="http://www.oddchange.com/freewpc/releases/ftz0_15.zip">Twilight Zone</a></li>
-<li><a href="http://www.oddchange.com/freewpc/releases/fwcs0_15.zip">World Cup Soccer</a></li>
+<li><a href="http://www.oddchange.com/freewpc/releases/fafm${version_suffix}.zip">Attack From Mars</a></li>
+<li><a href="http://www.oddchange.com/freewpc/releases/ftst${version_suffix}.zip">DMD Tester</a></li>
+<li><a href="http://www.oddchange.com/freewpc/releases/ft2${version_suffix}.zip">Terminator 2</a></li>
+<li><a href="http://www.oddchange.com/freewpc/releases/ftz${version_suffix}.zip">Twilight Zone</a></li>
+<li><a href="http://www.oddchange.com/freewpc/releases/fwcs${version_suffix}.zip">World Cup Soccer</a></li>
+</ul>
+
+<h2>Documentation</h2>
+<ul>
+# <li><a href="theory.html">Theory of Operation</a></li>
+<li><a href="compile.html">Compiling ROMs</a></li>
+# <li><a href="native.html">Compiling in Native Mode</a></li>
+<li><a href="tools.html">Bonus Tools</a></li>
 </ul>
 
 <h2>Source Code</h2>
@@ -30,6 +42,12 @@
 <li><a href="http://www.oddchange.com/freewpc/doxygen" title="Doxygen is a source code formatter and browser that is good for web viewing.">doxygen</a></li>
 <li><a href="http://www.oddchange.com/svn/public/freewpc" title="Subversion is the master file repository.">Subversion</a></li>
 <li>git ... Coming Soon!</li>
+</ul>
+
+<h2>Related Pages</h2>
+<ul>
+<li><a href="http://www.oddchange.com/">Brian's Homepage</a></li>
+<li><a href="http://www.oddchange.com/gcc6809">GCC6809</a></li>
 </ul>
 
 </div>

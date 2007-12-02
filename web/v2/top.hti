@@ -19,7 +19,7 @@ body { margin: 0; padding-left: 200px; padding-right: 190px; min-width: 240px;
 body { background: #FFF; }
 #header, #footer { padding: 0.3em 0; }
 #left { background: #FF9; color: #000; }
-#center { background: #FFF; color: #000; font-size: 16px; font-family: verdana; }
+#center { background: #FFF; color: #000; font-size: 15px; font-family: verdana; }
 .column { padding-top: 1em; text-align: justify; }
 #left ul { margin-left: 0.5em; padding-left: 0.5em; }
 li { list-style-type: square; margin-bottom: 0.25em; }
@@ -27,8 +27,8 @@ a, a:visited, a:active { text-decoration: none; color: #922; }
 a:hover { color: #b80828; text-decoration: underline; }
 #center p { margin-left: 20px; margin-right: 50px; }
 #center h2 { margin-top: 40px; width: 100%; background: #EEE; color: #E20; font-family: times; }
-h1 { font-size: 20px; }
-#center h3 { font-size: 15px; color: #F40; }
+h1 { font-size: 18px; }
+#center h3 { font-size: 16px; color: #F40; }
 #left h2 { background: #EE8; width: 100% }
 #left img { padding-left: 0px; margin-left: 0px; }
 .end { margin-top: 50px; }
@@ -40,4 +40,4 @@ h1 { font-size: 20px; }
 <div id="header">
 </div>
 
-
+[srcroot=http://www.oddchange.com/freewpc/freewpc.git]

@@ -7,7 +7,7 @@ Bally/Williams pinball machines based on the WPC (Williams Pinball Controller)
 chip.  It provides the foundation for building new game ROMs with custom 
 rules and effects.</p>
 
-<p>I have worked on this project since 2005 in my spare time.  The software
+<p>FreeWPC has evolved nicely since I started it in 2005.  The software
 is stable enough to run in emulators such as 
 <a href="http://www.pinmame.com">Visual Pinmame</a>, with the
 eventual goal being to test it in an actual machine.</p>
@@ -25,20 +25,28 @@ WPC games such as
 At the left, you can find precompiled ROMs for all of these machines, but
 note that only TZ is somewhat playable.
 
+<p>FreeWPC can also be compiled in "native mode",
+using your ordinary system C compiler.  This program runs directly without
+any emulator, as the hardware I/O is emulated internally within the program
+itself.  Although the low-level components are vastly different, this mode
+is useful for testing the higher-level features of the system, and also
+allows for more traditional debugging using tools such as gdb, etc.</p>
+<p><img src="nativecap.png" /></p>
+
 <p>FreeWPC is released under the GPL and thus source code is also freely available
 for inspection.</p>
 
 <p>Any questions?  Email me at
 <a href="mailto:brian@oddchange.com">brian@oddchange.com</a>.</p>
 
-<h2>Latest News</h2>
+<h2>Status</h2>
 
 <h3>November 30, 2007</h3>
 <p>Version 0.15 posted.  This release has a huge number of changes, although
 the ROMs have not been tested extensively.  This should be considered
 a checkpoint release.</p>
 
-<p><a href="">More News...</a></p>
+# <p><a href="">More Status...</a></p>
 
 <h2>Contribute</h2>
 
@@ -47,8 +55,9 @@ at <a href="mailto:freewpc@oddchange.com">freewpc@oddchange.com</a>.
 Developers should be familiar
 with basic embedded systems programming concepts and the C programming
 language.  Familiarity with 6809 assembler is <i>highly</i> recommended.
-Also, knowledge of WPC pinball machines is expected, but I'm assuming
-anyone interested would probably meet that requirement.</p>
+Knowledge of WPC pinball machines to some degree is also necessary.
+Also, anyone interested in just testing should just download the ROMs,
+fire up the emulator, and start sending bug reports.</p>
 
 <p>All development is currently done under the Linux operating system.
 I use <a href="subversion">Subversion</a> for source control.

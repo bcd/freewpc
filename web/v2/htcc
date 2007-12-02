@@ -49,9 +49,11 @@ sub process_file {
 			$lines = $_;
 		}
 
-		foreach $var (keys %varhash) {
-			$value = $varhash{$var};
-			$lines =~ s/\$\{$var\}/$value/mg;
+		while ($lines =~ /\$\{/) {
+			foreach $var (keys %varhash) {
+				$value = $varhash{$var};
+				$lines =~ s/\$\{$var\}/$value/mg;
+			}
 		}
 		print $lines;
 	}

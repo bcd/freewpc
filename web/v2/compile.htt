@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+# vim: set filetype=html:
 [top.hti]
 <div id="center" class="column">
 
@@ -13,7 +13,7 @@ UNIX-like systems, including Cygwin for Windows.  To compile, you
 will need the following tools already installed and available:</p>
 
 <ul>
-<li>A recent copy of the <a href="/gcc6809">gcc6809 toolchain</a>, which includes a C compiler, assembler, and linker</li>
+<li>A recent copy of the <a href="/gcc6809">gcc6809 toolchain</a>, which includes a C compiler, assembler, and linker.  If you don't have this, you can still test in native mode.</li>
 <li><b>dd</b>, for generating the blank portions of the ROM file</li>
 <li><b>zip</b> and <b>unzip</b>, in order to manipulate xpinmame ROM bundles</li>
 <li>The <b>bash</b> shell</li>

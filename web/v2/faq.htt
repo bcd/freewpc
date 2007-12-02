@@ -5,7 +5,7 @@
 
 <h1>Frequently Asked Questions about FreeWPC</h1>
 
-<p>Last updated November 5, 2007</p>
+<p>Last updated December 2, 2007</p>
 
 <h3>How do I download FreeWPC?</h3>
 
@@ -100,7 +100,10 @@ truly remains free and steers clear of any patent-related issues.
 cross-compiling between the 6809 and native Linux, so some of the hooks
 for this are already there.  If the platform uses a 6809 also, then
 chances are better.  If it's a different MPU, odds are GCC doesn't support
-it.  The most likely candidate to try would be Sega Whitestar.
+it.
+
+<p>The most likely candidate to try would be Sega Whitestar.  Some
+effort has been put into this already, but not much.
 
 <h3>The 6809 is a slow CPU.  What kind of performance do you see?</h3>
 
@@ -108,6 +111,9 @@ it.  The most likely candidate to try would be Sega Whitestar.
 about 22% of the processing time is spent in the IRQ handler, which takes
 care of all the important, realtime hardware refresh.  The remaining CPU
 time is available for other tasks to run.
+
+<p>Great care is taken to make sure that IRQ-level functions are as optimal
+as possible, otherwise it would indeed be impossible.
 
 <h3>How do I add support for a new machine?</h3>
 
@@ -136,7 +142,8 @@ Idle functions don't execute in a task context and therefore can't sleep.
 statically allocated at compile time.
 
 <p>When you build the native version that includes built-in emulation,
-these functions are generally bypassed in favor of the native versions.
+these functions are generally bypassed in favor of native versions.
+Task emulation is done using the <b>pth</b> library.
 
 <h3>What are callsets?  I see CALLSET_ENTRY scattered through the code.</h3>
 
@@ -199,8 +206,10 @@ was created by hand, before the advent of fontgen.
 image (4 including black), you need two XBMs, one for each bit plane.
 FreeWPC defines an image format called FIF that is just an XBM or two
 with a small header.  The XBMs may be compressed to save space, using
-simple run-length encoding.  The script tools/makefif can convert
-a PGM (grayscale image) to FIF.
+simple run-length encoding.
+
+<p>The script tools/makefif can convert a PGM (grayscale image) to FIF.
+You can export PGM from any decent graphics program.
 
 <h3>How is the protected area of RAM managed?</h3>
 
@@ -213,44 +222,61 @@ to be wiped once you load FreeWPC.
 <p>NVRAM functions use checksumming to detect errors, and will periodically
 reset any bogus fields back to factory defaults to ensure sanity.
 
+<p>Note that protected RAM is also emulated in native mode, by writing
+to the file 'freewpc.mem'.
+
 <h3>I want to read through the source code.  Where should I start?</h3>
 
-<p>The core system files are in the kernel directory.  Other common files
-are in common.  Game specific files are in machine.  The system starts
-in a platform-specific file, then branches into kernel/init.c.
+<p>The core system files are in the <b>kernel</b> directory.  This has all of the
+hardware-related functionality, plus a few other key functions.  This code
+is put into the fixed area of ROM that doesn't have to be bank switched to
+be accessed.
+
+<p>Other common files are in <b>common</b>.  These functions have to be bank
+switched.  This is for occasional functions that are common to all games,
+like the ball device code, match algorithm, etc.
+
+<p>Game specific files are in <b>machine/gamename</b>.
+
+<p>The system starts in a platform-specific file, then branches into kernel/init.c.
+Unless you're delving into the extreme low-level details, <b>do_reset</b> in this
+file is a good place to start.
 
 <h3>In a nutshell, how are switches handled?</h3>
 
-<p>All switches are polled every 2ms, and switches that need servicing are
+<p>All switches are polled every 2ms by the IRQ handler.
 identified.  Later, a background task that runs frequently, but at no
-guaranteed rate, will throw events for servicing the switches.
+guaranteed rate, will throw events for servicing the newly activated switches.
 
 <h3>In a nutshell, how are lamps handled?</h3>
 
 <p>The lamp matrix is strobed every 2ms.  WPC hardware allows only a single
-column of 8 lamps to be enabled at any time.  FreeWPC rapidly switches
+column of 8 lamps to be enabled at any time.  The IRQ function rapidly switches
 between the 8 columns to give the illusion that all 64 lamps are being
-controlled simultaneously.  So the entire matrix is updated only
+controlled simultaneously.  So the entire matrix is actually updated only
 once per 16ms.
 
 <p>Less frequently, another realtime task will toggle the states of all
-lamps that are in 'flashing' state.
+lamps that are in 'flashing' state.  All of these flashing lamps flash at
+the same rate.
 
-<p>Lamp effects, used for light shows and special game circumstances,
-draw onto additional, virtual lamp matrices.  These are all overlaid
-to produce the final image drawn onto the physical lamps.
+<p>Lamp effects, used for temporary light shows or effects that are more
+complicated than simple flashing, draw onto additional, virtual lamp matrices.
+These are all overlaid to produce the final image that is drawn onto the
+physical lamps.
 
 <h3>In a nutshell, how are solenoids handled?</h3>
 
 <p>Task-level code can manipulate solenoids (and other drives, like motors)
-using the functions in include/sys/sol.h.  They only modify variables
+using the functions in <b>include/sys/sol.h</b>.  They only modify variables
 in RAM and never touch the real hardware.  At IRQ time, the variables
 are scanned and the hardware is updated.
 
-<p>Duty cycling, in which solenoids are pulsed at less than 100% power, is
-supported.  A task can specify the pulse strength at enable time; the
-IRQ will rapidly switch the drive on and off to produce the desired
-strength.
+<p>The IRQ handler refreshes 1 of 4 banks of 8 solenoids every 1ms; this
+means each solenoid physically toggles every 4ms.  The state of each solenoid
+includes a duty cycle mask that allows for efficient strobing at less than
+full power; up to 8 phases per cycle can be defined, allowing down to 1/8
+power.
 
 <h3>Do I need to know 6809 assembly language in order to understand FreeWPC?</h3>
 
@@ -259,7 +285,7 @@ files are even in a more human-readable language.  This should make it easier
 for more people to contribute.
 
 <p>The assembly portions have to do with multitasking and bank switching.
-This code is stable and isn't likely to change anytime soon.
+This code is very stable and isn't likely to change much anymore.
 
 <p>Knowledge of the 6809 is useful, though.  The performance of the 6809 C
 compiler is not perfect, and it's good to inspect the assembly output
@@ -286,15 +312,23 @@ calculator program to figure out how much padding is needed on the ROM files.
 
 <h3>How do I test FreeWPC using PinMAME?</h3>
 
+<p>Copy one of the ZIP files into your mame roms directory, renaming it to
+match what pinmame will look for.  If there are sound ROMs, you'll need to
+put these into ZIP manually.
+
+<p>If you download a source code package, you can set <b>TARGET_ROMPATH</b>
+in your configuration file and this will happen automatically.
+
 <h3>Are there any differences between running in PinMAME and on real hardware?</h3>
 
 <p>PinMAME does a lot of things wrong, but does them well enough so that
 no one will notice.  Through the use of schematics and talking with former
-WMS employees, some of the WPC details have come out, although none of it
-seems to be getting to the PinMAME folks.  Their priorities are, probably
-justified, elsewhere.  
+WMS employees, some of the WPC details have come out.  PinMAME is also
+getting better and better over time.
 
-<p>This is why I warn about putting in a real machine.  Just because it works
+<p>There are many things that can go wrong on real hardware that can never
+happen in an emulator.  This is why I warn about putting in a real machine.
+Just because it works
 on PinMAME doesn't mean it will work elsewhere.  Only time will tell.
 Making this leap will require great care and intimate knowledge of how the
 system works.
