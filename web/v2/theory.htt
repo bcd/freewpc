@@ -30,142 +30,125 @@ while the sound board itself deals with the actual sound chips.
 
 <h2>Details of the ROM creation process</h2>
 
-Create Blank File
-If the ROM size is larger than the number of pages that
+<h3>Create Blank File</h3>
+
+<p>If the ROM size is larger than the number of pages that
 need to be compiled, then the final ROM image must be
 padded with blanks.  The %tool(dd) command is used
 to generate a file named '''blankxxx.bin''', where ///xxx///
 is the size of the file in kilobytes (KB).  This file
 is then concatenated with the actual game code to produce
 a final ROM of the required size.
-Create Linker Command Files
-The linker is invoked several times, once per page or
+
+<h3>Create Linker Command Files</h3>
+
+<p>The linker is invoked several times, once per page or
 bank of ROM.  Different options are passed each time
 to place the correct object file into that section, and
 to resolve references correctly; all of these options
 are written to linker command files, which have the .lnk
 extension and are placed in the ///build/// directory.
-Create XBM Prototypes
-The file ///xbmproto.h/// contains externs for XBMs
+
+<h3>Create XBM Prototypes</h3>
+<p>The file ///xbmproto.h/// contains externs for XBMs
 (simple bitmap files).
-Setting the Machine Symbolic Links
-The symbol link ///mach/// is set to point to the correct
+
+<h3>Setting the Machine Symbolic Links</h3>
+<p>The symbol link ///mach/// is set to point to the correct
 machine directory, based on the value of the MACHINE
 make variable.
-Generating Defines
-Some #defines are generally automatically by scanning the
+
+<h3>Generating Defines</h3>
+<p>Some #defines are generally automatically by scanning the
 code for uses.  These includes begin with the prefix
 ///gendefine/// and are created by a script also named
 ///gendefine/// in the ///tools/// directory.
-Generating Callsets
-Callsets are a mechanism for implementing a simple
+
+<h3>Generating Callsets</h3>
+<p>Callsets are a mechanism for implementing a simple
 event subscription/invocation mechanism that is fully
 described at compile-time.  Event handling code is
 emitted in a C file named ///callset.c///.
-<Compiling and Assembling Source Code
-Source code is compiled using the GCC6809 compiler.
-The compiler generates assembler code with the '''.s'''
-extension.  These files are then assembled using the
-asxxxx assembler tools into object files with the '''.o'''
-extension.
-<Compiling Page Headers
-Because the linker requires each section to contain at
-least one object file, a dummy file is assembly per
-section to ensure that this doesn't happen.  The page
-header is 1 byte long and contains the page number.
-<Linking Pages
-The aslink utility is used to create one S-record file,
+
+<h3>Linking Pages</h3>
+<p>The aslink utility is used to create one S-record file,
 with the '''.s19''' extension, for each page of ROM.
-<Converting Pages to Binary
-The %file(tools/srec2bin) utility included with FreeWPC
+
+<h3>Converting Pages to Binary</h3>
+
+<p>The %file(tools/srec2bin) utility included with FreeWPC
 is run to convert the S-records into raw binary files.
-<Concatenating Pages
-The binary files are concatenated, along with any blank
+
+<h3>Concatenating Pages</h3>
+
+<p>The binary files are concatenated, along with any blank
 files, to form the final ROM image.
 
 <h2>The 6809 CPU</h2>
 
-		The 6809 is a 2MHz, 8-bit Motorola processor.  This means that
-		it can execute 2 million cycles per second.  Each assembler
-		instruction takes one or more cycles to complete, depending
-		on its complexity.  A single cycle is 500ns long.
+<p>The 6809 is a 2MHz, 8-bit Motorola processor.  This means that
+it can execute 2 million cycles per second.  Each assembler
+instruction takes one or more cycles to complete, depending
+on its complexity.  A single cycle is 500ns long.
 
-		It supports two interrupts: a normal '''IRQ''', and
-		a '''fast IRQ''', or '''FIRQ'''.  The difference is that
-		when an IRQ occurs, all registers are saved to the
-		stack.  The FIRQ handler must manually save any registers
-		that need to be preserved.  On the WPC platform, the
-		IRQ is driven via a crystal to fire 1024 times per second,
-		or about once every 976 microseconds (equivalently, once
-		every 1952 cycles).
+<p>It supports two interrupts: a normal '''IRQ''', and
+a '''fast IRQ''', or '''FIRQ'''.  The difference is that
+when an IRQ occurs, all registers are saved to the
+stack.  The FIRQ handler must manually save any registers
+that need to be preserved.  On the WPC platform, the
+IRQ is driven via a crystal to fire 1024 times per second,
+or about once every 976 microseconds (equivalently, once
+every 1952 cycles).
 
-		The FIRQ is asserted by the WPC, when programmed to do so,
-		when the DMD controller has finished drawing a particular
-		scanline or when its internal timer register expires.
-
-		Interrupts can be disabled/enabled using the following
-		functions:
-
-		<%api(disable_irq), %api(enable_irq)
-		<%api(disable_firq), %api(enable_firq)
-		<%api(disable_interrupts), %api(enable_interrupts)
-		>
-
-		FreeWPC uses a port of '''GCC''', the GNU C compiler,
-		to generate the 6809 assembly language code.
+<p>The FIRQ is asserted by the WPC, when programmed to do so,
+when the DMD controller has finished drawing a particular
+scanline or when its internal timer register expires.
 
 <h2>The Memory Map</h2>
-	{Memory Map : How the processor sees memory and devices
-		All memory and I/O is mapped into a unified 64KB address
-		space.  The 6809 read and writes are initiated to the
-		WPC ASIC, which decodes the address and forwards the
-		request on to the correct device.
-			<RAM
-				Mapped from $0000 to $1FFF, for a total of 8KB.
-				The WPC allows a configurable portion of the RAM 
-				to be write-protected; trying to write this area
-				without first unlocking the memory will cause
-				the write to be ignored.
-			<Dot Matrix Controller
-				Mapped from $3800 to $3BFF, for a total of 1KB.
-				The controller provides 16 display pages, each
-				512 bytes in size, but only 2 of them are mapped
-				into memory at a time.  The ///current low page///
-				is mapped at $3800, and the ///current high page///
-				is mapped at $3A00.  There is also an
-				///active page register/// which controls which
-				of the 16 pages is actually visible; the visible
-				page may or may not be mapped.
-			<ASIC I/O
-				Mapped from	$3E00 to $3FFF.  This region contains
-				all of the WPC memory-mapped I/O registers for
-				reading switches, turning on lamps, etc.
 
-				More detailed descriptions of the ASIC registers
-				are included in %link(Hardware Functions).
-			<Paged ROM
-				Mapped from $4000 to $7FFF.  This is a 16KB window
-				in which a portion of the ROM appears.  ROM
-				varies in size and can be anywhere from 128KB to
-				1MB.  The WPC can be programmed to determine which
-				16KB section of the ROM appears here.
-			>
-			<Fixed ROM
-				Mapped from $8000 to $FFFF.  The upper 32KB of
-				the ROM image is always mapped here.
-	}
-	{WPC ASIC Summary : How the hardware is controlled
-		The WPC chip is essentially a giant address decoder that maps
-		a bunch of peripheral devices into the address space of the CPU, a
-		Motorola 6809.  By reading/writing addresses between $3F00 and $3FFF,
-		the CPU is able to access the peripherals.  This includes all of
-		the playfield switches, the solenoids, the lamps, etc.  It also
-		includes a number of other devices like the real-time clock and
-		a bit shifter.  Earlier generations of Williams pinballs implement
-		a lot of the I/O in custom TTL logic like PIAs.  The WPC is a
-		single ASIC.
-	}
-}
+<p>All memory and I/O is mapped into a unified 64KB address
+space, which is the most that the 6809 can address at a time.
+The 6809 reads and writes are first seen by the
+WPC ASIC, which decodes the address and forwards the
+request on to the correct device.
+
+<h3>RAM</h3>
+Mapped from $0000 to $1FFF, for a total of 8KB.
+The WPC allows a configurable portion of the RAM 
+to be write-protected; trying to write this area
+without first unlocking the memory will cause
+the write to be ignored.
+
+<h3>Dot Matrix Controller</h3>
+Mapped from $3800 to $3BFF, for a total of 1KB.
+The controller provides 16 display pages, each
+512 bytes in size, but only 2 of them are mapped
+into memory at a time.  The ///current low page///
+is mapped at $3800, and the ///current high page///
+is mapped at $3A00.  There is also an
+///active page register/// which controls which
+of the 16 pages is actually visible; the visible
+page may or may not be mapped.
+
+<h3>ASIC I/O</h3>
+Mapped from	$3E00 to $3FFF.  This region contains
+all of the WPC memory-mapped I/O registers for
+reading switches, turning on lamps, etc.
+
+More detailed descriptions of the ASIC registers
+are included in %link(Hardware Functions).
+
+<h3>Paged ROM</h3>
+Mapped from $4000 to $7FFF.  This is a 16KB window
+in which a portion of the ROM appears.  ROM
+varies in size and can be anywhere from 128KB to
+1MB.  The WPC can be programmed to determine which
+16KB section of the ROM appears here.
+
+<h3>Fixed ROM</h3>
+Mapped from $8000 to $FFFF.  The upper 32KB of
+the ROM image is always mapped here.
+
 
 <h2>Realtime Operation</h2>
 			{Real-Time Functions : How to perform high priority, recurring actions
@@ -178,425 +161,149 @@ files, to form the final ROM image.
 	
 <h2>Multitasking</h2>
 
-{Multitasking : How multiple things go on at once
-				FreeWPC implements a round-robin, non-preemptive task
-				scheduler.
+FreeWPC implements a round-robin, non-preemptive task
+scheduler.
 
-				The minimum task granularity is defined by IRQS_PER_TICK.
-				Currently, this is set to 16, meaning that 1 task tick
-				is equal to about 16ms.  No task can request to sleep 
-				for less than 1 tick.  Also, no task can directly sleep
-				for longer than 256 ticks, because the internal task
-				structure stores the sleep time as an 8-bit value.
-				There is a higher-layer API for sleeping a certain number
-				of seconds, which makes repeated calls to the underlying
-				API to sleep 1s at a time.
+The minimum task granularity is defined by IRQS_PER_TICK.
+Currently, this is set to 16, meaning that 1 task tick
+is equal to about 16ms.  No task can request to sleep 
+for less than 1 tick.  Also, no task can directly sleep
+for longer than 256 ticks, because the internal task
+structure stores the sleep time as an 8-bit value.
+There is a higher-layer API for sleeping a certain number
+of seconds, which makes repeated calls to the underlying
+API to sleep 1s at a time.
 
-				If a task does not give up control, either by sleeping,
-				exiting, or yielding after a certain amount of time,
-				the fatal error '''ERR_FCFS_LOCKUP''' will be asserted.
+If a task does not give up control, either by sleeping,
+exiting, or yielding after a certain amount of time,
+the fatal error '''ERR_FCFS_LOCKUP''' will be asserted.
 
 <h2>Error Handling</h2>
 
-		Functions can be broken down into a number of categories:
-		{Error Handling
-			The function fatal() is called from a number of places
-			whenever something goes really wrong.  fatal()
-			takes one parameter, an ///errno value///.  A call
-			to fatal() will lead to a reset of the machine.
+The function fatal() is called from a number of places
+whenever something goes really wrong.  fatal()
+takes one parameter, an ///errno value///.  A call
+to fatal() will lead to a reset of the machine.
 
-			The values for errno are fixed and defined in
-			%file(include/sys/errno.h).
+The values for errno are fixed and defined in
+%file(include/sys/errno.h).
 
-			A companion function, nonfatal(), is used whenever
-			the system can continue running.
+A companion function, nonfatal(), is used whenever
+the system can continue running.
 
-			The debugger can be used to determine more information
-			about what went wrong when an error is thrown.
-		}
+The debugger can be used to determine more information
+about what went wrong when an error is thrown.
 
-			{Real-Time Functions : How to perform high priority, recurring actions
-				Because tasks are not preemptive, they are not
-				guaranteed to run with any particular frequency.  For
-				high priority tasks, a guarantee is often required.
-				These types of functions are invoked from the IRQ
-				handler, which is called by the 6809 about once every
-				976 microseconds.
-			}
-			{Timers
-				Timers are implemented as tasks that execute a special
-				timer function.  All of the normal task APIs can be
-				used on timers as well, although renamed versions exist
-				for clarity.  Tasks and timers share the same group IDs
-				(GIDs).
+<h2>Switch Processing</h2>
 
-				!file timer.c
-			}
-		}
-		{Hardware Functions : Interfacing to the I/O
-			The kernel provides a common set of hardware access functions
-			that work across all of the different variations of the WPC
-			architecture.
-			{Switches
-				WPC uses a switch matrix.
+<h2>Lamp Processing</h2>
 
-				!file switches.c
-				The kernel provides the switch handlers for certain
-				switches that exist in all machines.
-				{Coin Switches
-					Up to 4 coin switches are supported.  The values
-					assigned to each of them can be configured in
-					service mode.
+WPC supports up to 64 lamps, arranged in an 8x8 matrix.
+The '''column strobe register''' identifies which of
+the 8 lamp columns is currently being driven.
+The '''row value register''' determines the states of
+those lamps, one bit per lamp.  All lamps on other
+columns remain off.
 
-					!file coin.c
-				}
-				{Tilt Switches
-					!file tilt.c
-				}
-				{Service Switches
-					!file service.c
-				}
-				{Trough Switches
-					The number and location of the trough switches
-					is given in the machine config header file.
-					This module declares a trough ball device
-					using those switches and the ball serve
-					solenoid.
+The illusion of all 64 lamps being on at once is
+done by rapidly switching the column strobe.
+The strobe is changed every 2ms.
 
-					Trough switch handling is special, because
-					trough entry is a criterion for determine the
-					end-of-ball.
+<h2>Solenoid and Motor Processing</h2>
 
-					!file trough.c
-				}
-			}
-			{Lamps
-				WPC supports up to 64 lamps, arranged in an 8x8 matrix.
-				The '''column strobe register''' identifies which of
-				the 8 lamp columns is currently being driven.
-				The '''row value register''' determines the states of
-				those lamps, one bit per lamp.  All lamps on other
-				columns remain off.
+WPC supports four standard drive output registers,
+with one bit per drive, for a total of 32 drives.
+These are not arranged in a matrix at all, so all
+solenoids can potentially be active at the same time.
 
-				The illusion of all 64 lamps being on at once is
-				done by rapidly switching the column strobe.
-				The strobe is changed every 2ms.
+The power driver board has different characteristics
+for each set of drives, providing for low-power,
+high-power, and general purpose solenoids.  From
+the CPU's perspective, all of them are equivalent.
 
-				!file lamp.c
-			}
-			{Solenoid Drives
-				WPC supports four standard drive output registers,
-				with one bit per drive, for a total of 32 drives.
-				These are not arranged in a matrix at all, so all
-				solenoids can potentially be active at the same time.
+Two flavors of solenoid APIs are provided.  The
+first lets you directly control the state of a drive.
+The second allows you to specify a duty cycle period.
+Then, the drive is rapidly cycled between a set of
+states.  This is useful with solenoids to prevent
+coil fatigue.
 
-				The power driver board has different characteristics
-				for each set of drives, providing for low-power,
-				high-power, and general purpose solenoids.  From
-				the CPU's perspective, all of them are equivalent.
+The flashlamp APIs are similar to the solenoid APIs,
+except that they are momentary.  A flashlamp is
+pulsed briefly, after which it is turned off.
 
-				Two flavors of solenoid APIs are provided.  The
-				first lets you directly control the state of a drive.
-				The second allows you to specify a duty cycle period.
-				Then, the drive is rapidly cycled between a set of
-				states.  This is useful with solenoids to prevent
-				coil fatigue.
+<h2>Dot Matrix Display Processing</h2>
 
-				<%api(sol_on)
-				<%api(sol_off)
-				<%api(sol_pulse)
-				>
+<h2>Sound Processing</h2>
 
-				!file sol.c
-			}
-			{Flashlamps
-				The flashlamp APIs are similar to the solenoid APIs,
-				except that they are momentary.  A flashlamp is
-				pulsed briefly, after which it is turned off.
+<h2>Triac Processing (Flipper Relays and General Illumination</h2>
 
-				<%api(flasher_pulse)
-				>
+<h2>Flipper Processing</h2>
 
-				!file flasher.c
-			}
-			{Dot-Matrix Display (DMD)
-				!file dmd.c
-			}
-			{Sound Board
-				Two flavors of sound board are supported: WPC, and DCS.
-				The same APIs are used in either case.
+<h2>The Real-Time Clock</h2>
 
-				!file sound.c
-			}
-			{Triacs and General Illumination
-				!file triac.c, gi.c
-			}
-			{Flippers
-				WPC supports two styles of flipper hardware.
-				FreeWPC only supports the newer, Fliptronic style.
-				The I/O registers for the Fliptronic board moved when
-				WPC95 came out, but they are functionally equivalent.
+<h2>Bank Switching</h2>
 
-				!file flip.c
-			}
-			{Real-Time Clock
-				The WPC contains an internal realtime clock.
-				The battery power keeps the RTC running even when the
-				machine is turned off.
+<h2>The WPC Bit Shifter</h2>
 
-				FreeWPC keeps the current time-of-day in NVRAM.
-				Periodically, it checks the RTC and updates the
-				copy in memory to reflect any changes.
+<h2>DMD Transitions</h2>
 
-				!file rtc.c
-			}
-			{Debug Port
-				!file db.c
-			}
-			{Paging and Locking
-				<%api(wpc_set_ram_protect)
-				<%api(wpc_set_ram_protect_size)
-				<%api(wpc_get_rom_page)
-				<%api(wpc_set_rom_page)
-				<%api(wpc_get_ram_page)
-				<%api(wpc_set_ram_page)
-				>
-				<%api(wpc_nvram_get)
-				<%api(wpc_nvram_put)
-				<%api(wpc_push_page)
-				<%api(wpc_pop_page)
-				<%api(call_far)
-			}
-			{Bit Shifting
-				The ASIC has a builtin shifter that can do some 
-				bitwise math faster than native 6809 code.
+A transition is an interim effect that runs between
+the end of one display effect and the beginning of
+another.  By default, a new effect will simply kill
+the old one and overwrite it with a new image.
 
-				'''gcc6809''' has an option '''-mwpc''' which
-				enables emitting instructions for the WPC platform.
-				In some cases, the hardware shifter will be used
-				automatically.  Note that gcc is unaware of the
-				threading/interrupt model, so access to the shifter
-				is not protected.  In the current implementation,
-				the shifter is not used from the IRQ, and since
-				tasks are nonpreemptive, that is no problem.
-
-			}
-		}
-			{DMD Transitions
-				A transition is an interim effect that runs between
-				the end of one display effect and the beginning of
-				another.  By default, a new effect will simply kill
-				the old one and overwrite it with a new image.
-
-				Transitions are scheduled -- a handler is installed
-				that runs the next time that a new image is shown.
-				Instead of showing the image right away, the transition
-				handler kicks in and displays some combination of
-				the present view and the new one.  When the transition
-				finishes, the display should consist entirely of the
-				new image.
+Transitions are scheduled -- a handler is installed
+that runs the next time that a new image is shown.
+Instead of showing the image right away, the transition
+handler kicks in and displays some combination of
+the present view and the new one.  When the transition
+finishes, the display should consist entirely of the
+new image.
 				
-				A number of different transition types are available.
+A number of different transition types are available.
 
-				<Striping
-					The new image overwrites the old one in vertical
-					sections.  Variations include ///left to right///,
-					///right to left///, ///inside out///, and
-					///outside in///.
-				<Scrolling/Pushing
-					The new image pushes the old image off the
-					display.  The new image can originate from any
-					of the 4 edges of the display.
-				<Fading
-				>
-				!file dmdtrans.c
-			}
-		}
-		{Adjustments
-			!file adj.c
-		}
-		{Audits
-			!file audit.c
-		}
-		{Scoring
-			This module provides functions for dealing with ///scores///,
-			which are kept as BCD arrays.
-			!file score.c
-		}
-	}
-	{Machine Functions
-		{Machine Configuration File
-			Each machine must provide a configuration file named
-			%file(config.h) which defines most of the machine-specific
-			configuration options.
-			{General Configuration Options
-				<MACHINE_NAME
-					%reqdef(a short name for the machine)
-				<MACHINE_PINMAME_ZIP
-				<MACHINE_PINMAME_ROM
-				<MACHINE_DMD
-					Set to 1 if the machine has a dot matrix display,
-					or 0 otherwise.  This must be defined.
-				<MACHINE_DCS
-					Set to 1 if the machine has a DCS sound board,
-					or 0 otherwise.  This must be defined.
-				<MACHINE_FLIPTRONIC
-					Set to 1 if the machine uses Fliptronic-style flippers,
-					or 0 otherwise.  This must be defined.
-				<MACHINE_WPC95
-					Set to 1 if the machine runs on the WPC95 variant of
-					the hardware, or 0 otherwise.  This must be defined.
-				>
-			}
-			{Declaring Switches
-				<MACHINE_SHOOTER_SWITCH
-					%reqdef(the shooter switch number)
-				<MACHINE_TILT_SWITCH
-					%reqdef(the tilt switch number)
-				<MACHINE_SLAM_TILT_SWITCH
-					%reqdef(the slam tilt switch number)
-				<MACHINE_START_SWITCH
-					%reqdef(the start button switch number)
-				<MACHINE_BUYIN_SWITCH
-					%optdef(the buyin switch number)
-				<MACHINE_LAUNCH_SWITCH
-					%optdef(the launch button switch number)
-					This is only required for machines which use an autoplunger.
-				<MACHINE_OUTHOLE_SWITCH
-					%optdef(the outhole switch number)
-					This is only required for machines which use an outhole mechanism to feed the ball trough.
-				<MACHINE_TROUGH_SIZE
-					%reqdef(the number of trough switches)
-				<MACHINE_TROUGHn
-					%reqdef(the switch numbers of all of the trough switches)
-					You only need to define as many of these as are necessary.
-				>
-			}
-			{Declaring Lamps
-				<MACHINE_START_LAMP
-					%optdef(the start button lamp number)
-					The start lamp is controlled by the system to
-					reflect when a game can be started.
-					The machine should avoid controlling this lamp
-					directly.
-				<MACHINE_BUYIN_LAMP
-					%optdef(the buy-in button lamp number)
-					The buyin lamp is controlled by the system to
-					reflect when an extra ball can be purchased.
-					The machine can choose to use it at other times, too.
-				<MACHINE_LAMPSETS
-					%optdef(the list of machine-defined lampsets)
-				>
-			}
-			{Declaring Solenoids
-				<MACHINE_HAS_UPPER_LEFT_FLIPPER, MACHINE_HAS_UPPER_RIGHT_FLIPPER
-					%optdef(if the machine has upper flippers or not)
-					When not present, the flipper update function will
-					avoid driving those ports.
-				<MACHINE_BALL_SERVE_SOLENOID
-					%reqdef(the ball serve solenoid number)
-					This is the coil that kicks balls from the trough to the plunger lane.
-				<MACHINE_KNOCKER_SOLENOID
-					%optdef(the knocker solenoid number)
-				<MACHINE_LAUNCH_SOLENOID
-					%optdef(the autolaunch solenoid number)
-					This is only required for machines which use an autoplunger.
-				<MACHINE_SOL_FLASHERP
-					%optdef(which drives are connected to flashers, as opposed to solenoids)
-				<MACHINE_SOL_NOSEARCHP
-					%optdef(which solenoids should not be pulsed during a ball search)
-					If not set, then no solenoids will be fired 
-					automatically during a ball search.  The machine can
-					still fire solenoids from its ball search hook.
-				>
-			}
-			{Declaring Display and Lamp Effects
-				<MACHINE_DISPLAY_EFFECTS
-					%optdef(a list of machine-defined display effects)
-					These effects are concatenated with the list of
-					effects defined by the system.
-				<MACHINE_LAMP_EFFECTS
-					%optdef(a list of machine-defined lamp effects)
-					These effects are concatenated with the list of
-					effects defined by the system.
-				>
-			}
-			{Declaring Sounds
-				<MACHINE_ADD_COIN_SOUND
-					%optdef(a sound to be played when a coin is inserted, without awarding a full credit)
-				<MACHINE_ADD_CREDIT_SOUND
-					%optdef(a sound to be played when a credit is added)
-				<MACHINE_VOLUME_CHANGE_MUSIC
-					%optdef(the music to be played when the volume is being changed)
-				>
-			}
-			{Other Machine Defines
-				<MACHINE_SCORE_DIGITS
-					%reqdef(the maximum number of digits for a variable of type ///score_t///)
-				<MACHINE_AMODE_LEFT_FLIPPER_HANDLER, MACHINE_AMODE_RIGHT_FLIPPER_HANDLER
-					%optdef(a function to be called whenever the flippers are pressed in attract mode)
-				<MACHINE_CUSTOM_AMODE
-					%optdef(the name of the machine's own attract mode function)
-					It can be omitted, and the system will install a
-					simple, default attract mode.
-				<MACHINE_TEST_MENU_ITEMS
-					%optdef(a list of extra items to be added to the Tests menu)
-				<MACHINE_HOOKS
-					%reqdef(the name of the machine hooks structure)
-				<MACHINE_xMS_RTTS
-					%optdef(the names of additional real-time functions to be run)
-				>
-			}
-		}
-		{Machine Hooks
-			Hooks are extensions to the system program that provide
-			for additional functions to be performed at various times.
-			The MACHINE_ defines change kernel behavior, while the
-			hooks augment it.
+<Striping
+The new image overwrites the old one in vertical
+sections.  Variations include ///left to right///,
+///right to left///, ///inside out///, and
+///outside in///.
+<Scrolling/Pushing
+The new image pushes the old image off the
+display.  The new image can originate from any
+of the 4 edges of the display.
+<Fading
 
-			All hooks are optional and can be left as NULL if no
-			additional processing is required by the machine.
+<h2>The Machine Description</h2>
 
-			<init
-			<start_game_attempt
-			<start_game
-			<add_player
-			<start_ball
-			<ball_in_play
-			<ball_drain
-			<end_ball
-			<bonus
-			<abort_game
-			<end_game
-			<amode_start
-			<amode_stop
-			<tilt_warning
-			<tilt
-			<slam_tilt
-			<replay
-			<high_score
-			<grand_champion
-			<coin_added
-			<credit_added
-			<start_without_credits
-			<volume_change
-			<ball_search
-			<any_pf_switch
-			<lamp_reflash
-			>
-		}
-	}
-	{Test Mode
-		!file window.c
-	}
-	{Initialization
-		{Interrupt Vectors
-			!file vector.c
-		}
-		{Reset Routine
-		}
-	}
-}
+<h2>Events</h2>
+
+init
+start_game_attempt
+start_game
+add_player
+start_ball
+ball_in_play
+ball_drain
+end_ball
+bonus
+abort_game
+end_game
+amode_start
+amode_stop
+tilt_warning
+tilt
+slam_tilt
+replay
+high_score
+grand_champion
+coin_added
+credit_added
+start_without_credits
+volume_change
+ball_search
+any_pf_switch
+lamp_reflash
 
 <div class="end"><i>&nbsp;Copyright &copy; 2007 by Brian Dominy.</i></div>
 
