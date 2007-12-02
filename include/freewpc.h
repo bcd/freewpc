@@ -25,6 +25,23 @@
  * All source files should include this one first in order to 
  * get all of the required definitions and a lot of the more 
  * commonly used features.
+ *
+ * \mainpage FreeWPC - The Source Code
+ * 
+ * These pages allow you to browse the source code for the latest released
+ * version of FreeWPC.  Use the menu on the far left to navigate through the
+ * files/data structures.
+ *
+ * If you want to browse through the initial boot sequence on real hardware,
+ * start with platform/wpc/start.s.  In native mode, see the main() function
+ * in platform/native/main.c.  Both eventually call into common bringup code
+ * in kernel/init.c.
+ *
+ * The files in the tools/ subdirectory are not part of the FreeWPC program
+ * itself, but are compiled natively and used to build the overall ROM.
+ *
+ * For more general information on FreeWPC, visit <a target="_top" href="http://www.oddchange.com/freewpc">
+ * http://www.oddchange.com/freewpc</a>.
  */
 
 #ifndef _FREEWPC_H
