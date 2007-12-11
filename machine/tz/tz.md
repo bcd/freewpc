@@ -13,10 +13,14 @@
 # Miscellaneous parameters are specified here.
 ##########################################################################
 Title: Twilight Zone
+
+# NOTE: These next 4 lines do not belong here.  They should be
+# included via the kernel md file.
 DMD: Yes
 Fliptronic: Yes
 DCS: No
 WPC95: No
+
 Pinmame-Zip: tz_92.zip
 Pinmame-ROM: tzone9_2.rom
 Lamp-Matrix-Width: 39

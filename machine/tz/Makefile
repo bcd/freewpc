@@ -3,11 +3,13 @@
 # Game specific Makefile extensions
 #
 
-MACHINE_FILE = tz.md
+PLATFORM := wpc
 
-MACHINE_SCHEDULE = $(M)/tz.sched
+MACHINE_FILE := tz.md
 
-SCHED_FLAGS += -i tz/driver.h
+MACHINE_SCHEDULE := $(M)/tz.sched
+
+MACHINE_SCHED_FLAGS := -i tz/driver.h
 
 MUX_SRCS := build/tz-mux.c
 
