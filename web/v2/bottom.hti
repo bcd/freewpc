@@ -21,7 +21,6 @@
 <p>${version_string}
 <ul>
 <li><a href="http://www.oddchange.com/freewpc/releases/fafm${version_suffix}.zip">Attack From Mars</a></li>
-<li><a href="http://www.oddchange.com/freewpc/releases/ftst${version_suffix}.zip">DMD Tester</a></li>
 <li><a href="http://www.oddchange.com/freewpc/releases/ft2${version_suffix}.zip">Terminator 2</a></li>
 <li><a href="http://www.oddchange.com/freewpc/releases/ftz${version_suffix}.zip">Twilight Zone</a></li>
 <li><a href="http://www.oddchange.com/freewpc/releases/fwcs${version_suffix}.zip">World Cup Soccer</a></li>
@@ -29,19 +28,20 @@
 
 <h2>Documentation</h2>
 <ul>
-# <li><a href="theory.html">Theory of Operation</a></li>
-<li><a href="compile.html">Compiling ROMs</a></li>
+# <li><a href="theory.html" title="Get an overview of WPC hardware and software">Theory of Operation</a></li>
+<li><a href="compile.html" title="Learn how to compile the code yourself">Compiling ROMs</a></li>
 # <li><a href="native.html">Compiling in Native Mode</a></li>
-<li><a href="tools.html">Bonus Tools</a></li>
+<li><a href="tools.html" title="Learn about other utilities included with FreeWPC">Bonus Tools</a></li>
 </ul>
 
 <h2>Source Code</h2>
 
 <ul>
-<li><a href="http://www.oddchange.com/websvn/" title="WebSVN lets you browse through the source code online without needing to install any additional software.">WebSVN</a></li>
-<li><a href="http://www.oddchange.com/freewpc/doxygen" title="Doxygen is a source code formatter and browser that is good for web viewing.">doxygen</a></li>
-<li><a href="http://www.oddchange.com/svn/public/freewpc" title="Subversion is the master file repository.">Subversion</a></li>
-<li>git ... Coming Soon!</li>
+<li><a href="http://www.oddchange.com/freewpc/doxygen" title="Browse code with comments, courtesy of Doxygen ">Browse Latest Code</a></li>
+<li><a href="http://www.oddchange.com/websvn/" title="Browse detailed version history online">Browse Subversion</a></li>
+<li><a href="http://www.oddchange.com/svn/public/freewpc" title="Use this URL if you want to access the repository using your own SVN client">Subversion Repo</a></li>
+<li>Browse Git ... Coming Soon!</li>
+<li><a href="releases/freewpc-${major}.${minor}.tar.gz">Download Tarball</a></li>
 </ul>
 
 <h2>Related Pages</h2>

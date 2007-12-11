@@ -28,68 +28,13 @@ and therefore is outside the scope of FreeWPC.  The CPU board just single
 8-bit commands to the sound board to start/stop/query sound operations,
 while the sound board itself deals with the actual sound chips.
 
-<h2>Details of the ROM creation process</h2>
-
-<h3>Create Blank File</h3>
-
-<p>If the ROM size is larger than the number of pages that
-need to be compiled, then the final ROM image must be
-padded with blanks.  The %tool(dd) command is used
-to generate a file named '''blankxxx.bin''', where ///xxx///
-is the size of the file in kilobytes (KB).  This file
-is then concatenated with the actual game code to produce
-a final ROM of the required size.
-
-<h3>Create Linker Command Files</h3>
-
-<p>The linker is invoked several times, once per page or
-bank of ROM.  Different options are passed each time
-to place the correct object file into that section, and
-to resolve references correctly; all of these options
-are written to linker command files, which have the .lnk
-extension and are placed in the ///build/// directory.
-
-<h3>Create XBM Prototypes</h3>
-<p>The file ///xbmproto.h/// contains externs for XBMs
-(simple bitmap files).
-
-<h3>Setting the Machine Symbolic Links</h3>
-<p>The symbol link ///mach/// is set to point to the correct
-machine directory, based on the value of the MACHINE
-make variable.
-
-<h3>Generating Defines</h3>
-<p>Some #defines are generally automatically by scanning the
-code for uses.  These includes begin with the prefix
-///gendefine/// and are created by a script also named
-///gendefine/// in the ///tools/// directory.
-
-<h3>Generating Callsets</h3>
-<p>Callsets are a mechanism for implementing a simple
-event subscription/invocation mechanism that is fully
-described at compile-time.  Event handling code is
-emitted in a C file named ///callset.c///.
-
-<h3>Linking Pages</h3>
-<p>The aslink utility is used to create one S-record file,
-with the '''.s19''' extension, for each page of ROM.
-
-<h3>Converting Pages to Binary</h3>
-
-<p>The %file(tools/srec2bin) utility included with FreeWPC
-is run to convert the S-records into raw binary files.
-
-<h3>Concatenating Pages</h3>
-
-<p>The binary files are concatenated, along with any blank
-files, to form the final ROM image.
-
 <h2>The 6809 CPU</h2>
 
 <p>The 6809 is a 2MHz, 8-bit Motorola processor.  This means that
 it can execute 2 million cycles per second.  Each assembler
 instruction takes one or more cycles to complete, depending
-on its complexity.  A single cycle is 500ns long.
+on its complexity.  The average instruction takes 4-6 cycles.
+A single cycle is 500ns long.
 
 <p>It supports two interrupts: a normal '''IRQ''', and
 a '''fast IRQ''', or '''FIRQ'''.  The difference is that
@@ -103,6 +48,9 @@ every 1952 cycles).
 <p>The FIRQ is asserted by the WPC, when programmed to do so,
 when the DMD controller has finished drawing a particular
 scanline or when its internal timer register expires.
+
+<p>The hardware timer is actually not used on the DMD games,
+the emulators don't support it, and so FreeWPC does not use it either.
 
 <h2>The Memory Map</h2>
 
@@ -131,33 +79,30 @@ of the 16 pages is actually visible; the visible
 page may or may not be mapped.
 
 <h3>ASIC I/O</h3>
-Mapped from	$3E00 to $3FFF.  This region contains
-all of the WPC memory-mapped I/O registers for
-reading switches, turning on lamps, etc.
+Mapped from	$3E00 to $3FFF.  This region contains all of the WPC 
+memory-mapped I/O registers for reading switches, turning on lamps, etc.
 
-More detailed descriptions of the ASIC registers
-are included in %link(Hardware Functions).
+More detailed descriptions of the ASIC registers are included in 
+%link(Hardware Functions).
 
 <h3>Paged ROM</h3>
-Mapped from $4000 to $7FFF.  This is a 16KB window
-in which a portion of the ROM appears.  ROM
-varies in size and can be anywhere from 128KB to
-1MB.  The WPC can be programmed to determine which
-16KB section of the ROM appears here.
+Mapped from $4000 to $7FFF.  This is a 16KB window in which a portion of 
+the ROM appears.  ROM varies in size and can be anywhere from 128KB to
+1MB.  The WPC can be programmed to determine which 16KB section of the 
+ROM appears here.
 
 <h3>Fixed ROM</h3>
 Mapped from $8000 to $FFFF.  The upper 32KB of
 the ROM image is always mapped here.
 
-
 <h2>Realtime Operation</h2>
-			{Real-Time Functions : How to perform high priority, recurring actions
-				Because tasks are not preemptive, they are not
-				guaranteed to run with any particular frequency.  For
-				high priority tasks, a guarantee is often required.
-				These types of functions are invoked from the IRQ
-				handler, which is called by the 6809 about once every
-				976 microseconds.
+
+Because tasks are not preemptive, they are not
+guaranteed to run with any particular frequency.  For
+high priority tasks, a guarantee is often required.
+These types of functions are invoked from the IRQ
+handler, which is called by the 6809 about once every
+976 microseconds.
 	
 <h2>Multitasking</h2>
 
@@ -304,6 +249,63 @@ volume_change
 ball_search
 any_pf_switch
 lamp_reflash
+
+<h2>Details of the ROM creation process</h2>
+
+<h3>Create Blank File</h3>
+
+<p>If the ROM size is larger than the number of pages that
+need to be compiled, then the final ROM image must be
+padded with blanks.  The <b>dd</b> command is used
+to generate a file named '''blankxxx.bin''', where <i>xxx</i>
+is the size of the file in kilobytes (KB).  This file
+is then concatenated with the actual game code to produce
+a final ROM of the required size.
+
+<h3>Create Linker Command Files</h3>
+
+<p>The linker is invoked several times, once per page or
+bank of ROM.  Different options are passed each time
+to place the correct object file into that section, and
+to resolve references correctly; all of these options
+are written to linker command files, which have the .lnk
+extension and are placed in the <i>build</i> directory.
+
+<h3>Create XBM Prototypes</h3>
+<p>The file <i>xbmproto.h</i> contains externs for XBMs
+(simple bitmap files).
+
+<h3>Setting the Machine Symbolic Links</h3>
+<p>The symbol link <i>mach</i> is set to point to the correct
+machine directory, based on the value of the MACHINE
+make variable.
+
+<h3>Generating Defines</h3>
+<p>Some #defines are generally automatically by scanning the
+code for uses.  These includes begin with the prefix
+///gendefine/// and are created by a script also named
+///gendefine/// in the ///tools/// directory.
+
+<h3>Generating Callsets</h3>
+<p>Callsets are a mechanism for implementing a simple
+event subscription/invocation mechanism that is fully
+described at compile-time.  Event handling code is
+emitted in a C file named ///callset.c///.
+
+<h3>Linking Pages</h3>
+<p>The aslink utility is used to create one S-record file,
+with the '''.s19''' extension, for each page of ROM.
+
+<h3>Converting Pages to Binary</h3>
+
+<p>The %file(tools/srec2bin) utility included with FreeWPC
+is run to convert the S-records into raw binary files.
+
+<h3>Concatenating Pages</h3>
+
+<p>The binary files are concatenated, along with any blank
+files, to form the final ROM image.
+
 
 <div class="end"><i>&nbsp;Copyright &copy; 2007 by Brian Dominy.</i></div>
 

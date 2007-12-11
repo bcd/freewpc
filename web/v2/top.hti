@@ -2,7 +2,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<base href="file:///home/bcd/src/git/freewpc/web/v2/build/freewpc/" />
+# <base href="file:///home/bcd/src/git/freewpc/web/v2/build/freewpc/" />
+<base href="http://www.oddchange.com/freewpc/" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>FREEWPC</title>
 <style type="text/css">
@@ -40,4 +41,4 @@ h1 { font-size: 18px; }
 <div id="header">
 </div>
 
-[srcroot=http://www.oddchange.com/freewpc/freewpc.git]
+[srcroot=http://www.oddchange.com/freewpc]

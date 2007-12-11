@@ -1,7 +1,7 @@
 MAJOR = 0
 MINOR = 15
 GAMES = afm tz wcs t2
-ROMDIR = /home/bcd/oddchange/freewpc/releases
+ROMDIR = /home/bcd/oddchange/freewpc/freewpc.git/web/v2/build/freewpc/releases
 HTDIR = /home/bcd/sw/freewpc/web
 
 export NOCONFIG=y
@@ -22,6 +22,12 @@ all : index.html faq.html build.html howto.html
 
 %.html : %.web mkweb.pl
 	perl mkweb.pl < $< > $@
+
+tarball:
+	@true $(foreach game,$(GAMES), && cd .. && $(MAKE) clean MACHINE=$(game) && cd -)
+	@cd .. && tar zcvf freewpc-$(MAJOR).$(MINOR).tar.gz \
+		--exclude=doxygen --exclude=web --exclude=doc * && \
+	mv freewpc-$(MAJOR).$(MINOR).tar.gz $(ROMDIR)
 
 roms:
 	true $(foreach game,$(GAMES), && cd .. \
