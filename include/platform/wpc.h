@@ -526,5 +526,37 @@ extern inline void wpc_write_ticket (U8 val)
 }
 
 
+#if (MACHINE_PIC == 1)
+/********************************************/
+/* WPC Security PIC Chip                    */
+/********************************************/
+
+/** The command to reset the PIC */
+#define WPC_PIC_RESET       0x0
+
+/** The command to update the PIC counter */
+#define WPC_PIC_COUNTER     0x0D
+
+/** The command to read the xth switch column */
+#define WPC_PIC_COLUMN(x)   (0x10 + (x))
+
+/** The command to unlock the switch matrix */
+#define WPC_PIC_UNLOCK      0x20
+
+/** The command to read the xth byte of the serial number */
+#define WPC_PIC_SERIAL(x)   (0x70 + (x))
+
+extern inline void wpc_write_pic (U8 val)
+{
+	wpc_asic_write (WPCS_PIC_WRITE, val);
+}
+
+extern inline U8 wpc_read_pic (void)
+{
+	return wpc_asic_read (WPCS_PIC_READ);
+}
+
+#endif
+
 #endif /* _WPC_H */
 
