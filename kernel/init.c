@@ -152,7 +152,12 @@ void freewpc_init (void)
 	 * in the 6809 */
 	wpc_int_enable ();
 	enable_interrupts ();
+
+	/* Enable the idle processing.  Sleep briefly so that it gets
+	 * a chance to run before continuing; this lets the debugger
+	 * interface initialize. */
 	idle_ok = 1;
+	task_sleep (TIME_16MS);
 
 	/* The system is mostly usable at this point.
 	 * Now, start the display effect that runs at powerup.
