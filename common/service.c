@@ -33,9 +33,9 @@ ought to generate a warning message */
 void coin_door_buttons_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 1, "COIN DOOR IS CLOSED");
-	font_render_string_center (&font_var5, 64, 8, "OPEN COIN DOOR TO");
-	font_render_string_center (&font_var5, 64, 14, "USE BUTTONS");
+	font_render_string_center (&font_var5, 64, 3, "COIN DOOR IS CLOSED");
+	font_render_string_center (&font_var5, 64, 10, "OPEN COIN DOOR TO");
+	font_render_string_center (&font_var5, 64, 17, "USE BUTTONS");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
