@@ -271,6 +271,7 @@ void fatal (errcode_t error_code)
 	task_dump ();
 
 #ifdef CONFIG_NATIVE
+	task_sleep_sec (2);
 	linux_shutdown ();
 #else
 	/* Go into a loop, long enough for the error message to be visible.
