@@ -309,6 +309,23 @@ fixup_number:
 					break;
 				}
 
+				case 'w':
+				{
+					do {
+						S8 n;
+						U32 w32 = va_arg (va, U32);
+						U8 *wp32 = (U8 *)&w32;
+#ifdef CONFIG_LITTLE_ENDIAN
+						for (n = 3; n >= 0; n--)
+#else /* CONFIG_BIG_ENDIAN */
+						for (n = 0; n < 4; n++)
+#endif
+							buf = do_sprintf_hex_byte (buf, wp32[n]);
+						endbuf = buf;
+					} while (0);
+					break;
+				}
+
 				case 'l':
 				{
 					++format;
