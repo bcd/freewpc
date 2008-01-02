@@ -507,8 +507,6 @@ Replay: page(MACHINE_PAGE), PRI_REPLAY
 Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
 Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB
-# TODO : priority below?
-Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 
 Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5

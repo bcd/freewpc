@@ -26,7 +26,7 @@ D5: Escape, service, intest, cabinet
 D6: Down, service, intest, cabinet
 D7: Up, service, intest, cabinet
 D8: Enter, service, intest, cabinet
-22: Coin Door Closed, cabinet, edge, opto
+22: Coin Door Closed, cabinet, edge, opto, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 
 [drives]
@@ -91,6 +91,8 @@ Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
 System Reset: PRI_RESET, page(COMMON_PAGE)
+# TODO : priority below?
+Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 
 [leffs]
 NULL: 0
