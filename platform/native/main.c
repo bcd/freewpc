@@ -55,6 +55,9 @@ extern const device_properties_t device_properties_table[];
 extern const switch_info_t switch_table[];
 
 
+#define ACCURATE_TIMING
+
+
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
 
@@ -155,9 +158,19 @@ int linux_lamp_write_flag = 1;
 /** The contents of the 16 PIC serial data registers */
 U8 pic_serial_data[16] = { 0, };
 
+/** The value for the machine number to program into the PIC.
+This defaults to the correct value as specified by MACHINE_NUMBER,
+but it can be changed to test mismatches. */
+#ifndef MACHINE_NUMBER
+#define MACHINE_NUMBER 0
+#endif
+unsigned int pic_machine_number = MACHINE_NUMBER;
+
 static void sim_switch_effects (int swno);
 
 
+
+/** A dummy function intended to be used for debugging under GDB. */
 void gdb_break (void)
 {
 	barrier ();
@@ -227,33 +240,31 @@ static int scanbit (U8 bits)
 #if (MACHINE_PIC == 1)
 void simulation_pic_init (void)
 {
-	static U8 real_serial_number[] = { 5, 3, 1, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 1, 2, 3 };
+	static U8 real_serial_number[] = { 0, 0, 0, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 0, 0, 0 };
 	U32 tmp;
 
-#ifdef MACHINE_NUMBER
-	real_serial_number[0] = MACHINE_NUMBER / 100;
-	real_serial_number[1] = (MACHINE_NUMBER / 10) % 10;
-	real_serial_number[2] = MACHINE_NUMBER % 10;
-#endif
+	/* Initialize the PIC with the desired machine number. */
+	real_serial_number[0] = pic_machine_number / 100;
+	real_serial_number[1] = (pic_machine_number / 10) % 10;
+	real_serial_number[2] = pic_machine_number % 10;
+
+	/* TODO : Initialize the three byte switch matrix unlock code */
+
+	/* Now encode the 17-byte serial number into the 16 PIC registers. */
 
 	pic_serial_data[10] = 0x0;
 	pic_serial_data[2] = 0x0;
 
-	tmp = 100 * real_serial_number[1] +
-		10 * real_serial_number[7] +
-		real_serial_number[4] +
-		5 * pic_serial_data[10];
+	tmp = 100 * real_serial_number[1] + 10 * real_serial_number[7] +
+		real_serial_number[4] + 5 * pic_serial_data[10];
 	tmp = (tmp * 0x1BCD) + 0x1F3F0UL;
 	pic_serial_data[1] = (tmp >> 16) & 0xFF;
 	pic_serial_data[11] = (tmp >> 8) & 0xFF;
 	pic_serial_data[9] = tmp  & 0xFF;
 
-	tmp = 10000 * real_serial_number[2] +
-		1000 * real_serial_number[15] +
-		100 * real_serial_number[0] +
-		10 * real_serial_number[8] +
-		real_serial_number[6] +
-		2 * pic_serial_data[10] +
+	tmp = 10000 * real_serial_number[2] + 1000 * real_serial_number[15] +
+		100 * real_serial_number[0] + 10 * real_serial_number[8] +
+		real_serial_number[6] + 2 * pic_serial_data[10] +
 		pic_serial_data[2];
 	tmp = (tmp * 0x107F) + 0x71E259UL;
 	pic_serial_data[7] = (tmp >> 24) & 0xFF;
@@ -261,20 +272,16 @@ void simulation_pic_init (void)
 	pic_serial_data[0] = (tmp >> 8) & 0xFF;
 	pic_serial_data[8] = tmp  & 0xFF;
 
-	tmp = 1000 * real_serial_number[16] +
-		100 * real_serial_number[3] +
-		10 * real_serial_number[5] +
-		real_serial_number[14] +
+	tmp = 1000 * real_serial_number[16] + 100 * real_serial_number[3] +
+		10 * real_serial_number[5] + real_serial_number[14] +
 		pic_serial_data[2];
 	tmp = (tmp * 0x245) + 0x3D74;
 	pic_serial_data[3] = (tmp >> 16) & 0xFF;
 	pic_serial_data[14] = (tmp >> 8) & 0xFF;
 	pic_serial_data[6] = tmp  & 0xFF;
 
-	tmp = 10000 * real_serial_number[13] +
-		1000 * real_serial_number[12] +
-		100 * real_serial_number[11] +
-		10 * real_serial_number[10] +
+	tmp = 10000 * real_serial_number[13] + 1000 * real_serial_number[12] +
+		100 * real_serial_number[11] + 10 * real_serial_number[10] +
 		real_serial_number[9];
 	tmp = 99999UL - tmp;
 	pic_serial_data[15] = (tmp >> 8) & 0xFF;
@@ -388,20 +395,6 @@ void linux_write_string (const char *s)
 }
 
 
-/** Print the current state of the simulated lamp matrix. */
-void linux_write_lamps (void)
-{
-	int lamp;
-	char buffer[NUM_LAMPS+8];
-
-	for (lamp=0; lamp < NUM_LAMPS; lamp++)
-		buffer[lamp] = (linux_lamp_matrix[lamp/8] & (1 << (lamp % 8))) ?
-			'+' : '-';
-	buffer[NUM_LAMPS] = '\0';
-	simlog (SLC_LAMPS, buffer);
-}
-
-
 static bool linux_switch_poll_logical (unsigned int sw)
 {
 	return (linux_switch_matrix[sw/8] & (1 << (sw%8))) ^ switch_is_opto (sw);
@@ -441,9 +434,14 @@ static void linux_switch_depress (unsigned int sw)
 }
 
 
-
 /** Write to a multiplexed output; i.e. a register in which distinct
- * outputs are multiplexed together into a single I/O location. */
+ * outputs are multiplexed together into a single I/O location.
+ * UI_UPDATE provides a function for displaying the contents of a single
+ * output; it takes the output number and a 0/1 state.
+ * INDEX gives the output number of the first bit of the byte of data.
+ * MEMP points to the data byte, containing 8 outputs.
+ * NEWVAL is the value to be written; it is assigned to *MEMP.
+ */
 static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 newval)
 {
 #ifdef CONFIG_UI
@@ -459,6 +457,7 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 }
 
 
+/** Simulate writing to a set of 8 solenoids. */
 static void sim_sol_write (int index, U8 *memp, U8 val)
 {
 	U8 newly_enabled;
@@ -489,7 +488,11 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 			else
 #endif
 	
-			/* See if it's attached to a device */
+			/* See if it's attached to a device.  Then find the first
+			switch that is active, and deactivate it, simulating the
+			removal of one ball from the device.  (This does not map
+			to reality, where lots of switch closures would occur, but
+			it does produce the intended effect.) */
 			for (devno = 0; devno < NUM_DEVICES; devno++)
 			{
 				device_properties_t *props = &device_properties_table[devno];
@@ -502,29 +505,38 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 						{
 							simlog (SLC_DEBUG, "Device %d release", devno);
 							linux_switch_toggle (props->sw[n]);
+
+							/* Where does the ball go from here?
+							Normally device kickout leads to unknown areas of
+							the playfield.
+							The shooter switch can be handled though. */
 							break;
 						}
 					}
+
+					/* If no balls are in the device, then nothing happens. */
 					break;
 				}
 			}
 		}
 
+	/* Commit the new state */
 	mux_write (ui_write_solenoid, index, memp, val);
 }
 
 
+/** Simulate the side effects of switch number SWNO becoming active.
+ */
 static void sim_switch_effects (int swno)
 {
-	/* If this is the first switch in a device, then simulate
-	the 'rolling' to the farthest possible point in the device. */
 	int devno;
 	int n;
 
+	/* If this is switch is in a device, then simulate
+	the 'rolling' to the farthest possible point in the device. */
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_properties_t *props = &device_properties_table[devno];
-
 		if (props->sw_count > 1)
 			for (n = 0; n < props->sw_count-1; n++)
 			{
@@ -547,7 +559,7 @@ static void wpc_sound_reset (void)
 }
 
 
-/** Simulated write of an I/O register */
+/** Simulate the write of a WPC I/O register */
 void linux_asic_write (U16 addr, U8 val)
 {
 	switch (addr)
@@ -574,7 +586,11 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_SHIFTBIT2:
 			fatal (ERR_CANT_GET_HERE);
 
+#if (MACHINE_WPC95 == 1)
+		case WPC95_FLIPPER_COIL_OUTPUT:
+#else
 		case WPC_FLIPTRONIC_PORT_A:
+#endif
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
 			break;
 
@@ -588,7 +604,7 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_ROM_LOCK:
 		case WPC_ZEROCROSS_IRQ_CLEAR:
 		case WPC_ROM_BANK:
-			/* nothing to do */
+			/* nothing to do, not implemented yet */
 			break;
 
 		case WPC_DMD_LOW_PAGE:
@@ -604,6 +620,7 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_DMD_FIRQ_ROW_VALUE:
+			/* Writing to this register has no effect */
 			break;
 
 		case WPC_GI_TRIAC:
@@ -649,15 +666,6 @@ void linux_asic_write (U16 addr, U8 val)
 #if (MACHINE_PIC == 1)
 		case WPCS_PIC_WRITE:
 			simulation_pic_access (1, val);
-#if 0
-			if (val == 0)
-				;
-			else if ((val >= 0x16) && (val <= 0x1F))
-				linux_switch_data_ptr = linux_switch_matrix + val - 0x16 + 1;
-			else if ((val >= 0x70) && (val <= 0x7F))
-				linux_switch_data_ptr = pic_serial_data + val - 0x70;
-#endif
-
 #else
 		case WPC_SW_COL_STROBE:
 			if (val != 0)
@@ -688,9 +696,9 @@ U8 linux_asic_read (U16 addr)
 	switch (addr)
 	{
 		case WPC_DEBUG_DATA_PORT:
-			if (simulated_orkin_control_port & 0x2)
+			if (simulated_orkin_control_port & WPC_DEBUG_READ_READY)
 			{
-				simulated_orkin_control_port ^= 0x2;
+				simulated_orkin_control_port ^= WPC_DEBUG_READ_READY;
 				return simulated_orkin_data_port;
 			}
 			else
@@ -701,7 +709,6 @@ U8 linux_asic_read (U16 addr)
 
 		case WPC_LEDS:
 			return linux_cpu_leds; /* don't think the LEDs can actually be read? */
-			break;
 
 		case WPC_CLK_HOURS_DAYS:
 		case WPC_CLK_MINS:
@@ -738,7 +745,11 @@ U8 linux_asic_read (U16 addr)
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
 			return 0;
 
+#if (MACHINE_WPC95 == 1)
+		case WPC95_FLIPPER_SWITCH_INPUT:
+#else
 		case WPC_FLIPTRONIC_PORT_A:
+#endif
 			return ~linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
@@ -751,6 +762,9 @@ U8 linux_asic_read (U16 addr)
 			return simulated_zerocross;
 
 		case WPC_EXTBOARD1:
+#ifdef MACHINE_EXTBOARD1
+			/* TODO */
+#endif
 			return 0;
 
 		default:
@@ -765,9 +779,6 @@ U8 linux_asic_read (U16 addr)
 static void linux_time_step (void)
 {
 	++linux_irq_count;
-#if 0
-	printf ("irq time #%d\n", linux_irq_count);
-#endif
 }
 
 
@@ -778,17 +789,34 @@ static void linux_time_step (void)
  */
 static void linux_realtime_thread (void)
 {
+	struct timeval prev_time, curr_time;
+
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
 	task_set_flags (TASK_PROTECTED);
+
+#ifdef ACCURATE_TIMING
+	gettimeofday (&prev_time, NULL);
+#endif
 	for (;;)
 	{
-		/** Sleep until the next iteration.
-		 * TODO - this should do more accurate timing, and wait slightly
-		 * less, based on how long it took to do the real work. */
+		/* Sleep a while; don't hog the system. */
+#ifdef ACCURATE_TIMING
+		/* Sleep for approximately 33ms */
 		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 
+		/* See how long since the last time we checked.  This
+		takes into account the actual sleep time, which is typically
+		longer on a multitasking OS, and also the length of time that
+		the previous IRQ function run took. */
+		gettimeofday (&curr_time, NULL);
+		linux_irq_pending = (curr_time.tv_usec - prev_time.tv_usec) / 1000;
+		prev_time = curr_time;
+#else
+		/* The old way that assumes task_sleep is very accurate */
+		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 		linux_irq_pending += RT_ITERATION_IRQS;
+#endif
 
 		if (linux_irq_enable)
 			while (linux_irq_pending-- > 0)
@@ -804,6 +832,7 @@ static void linux_realtime_thread (void)
 		if (linux_firq_enable)
 			while (linux_firq_pending-- > 0)
 			{
+				/* TODO - this is not being invoked in simulation */
 				do_firq ();
 			}
 	}
@@ -908,6 +937,29 @@ static void linux_interface_thread (void)
 			case '\n':
 				break;
 
+			case '\t':
+			{
+				/* Read and execute a script command */
+				char cmd[128];
+				char *p = cmd;
+
+				for (;;)
+				{
+					*p = linux_interface_readchar ();
+					if (*p == '\t')
+						break;
+					if ((*p == '\r') || (*p == '\n'))
+					{
+						*p = '\0';
+						simlog (SLC_DEBUG, "exec script: '%s'\n",  cmd);
+						break;
+					}
+					simlog (SLC_DEBUG, "script char: '%c'\n", *p);
+					p++;
+				}
+				break;
+			}
+
 			case 'C':
 				gdb_break ();
 				break;
@@ -932,10 +984,6 @@ static void linux_interface_thread (void)
 
 			case 'T':
 				task_dump ();
-				break;
-
-			case 'L':
-				linux_write_lamps ();
 				break;
 
 			case 'S':
@@ -1019,8 +1067,9 @@ void linux_trough_init (int balls)
 
 /** Initialize the Linux simulation.
  *
- * This is called during normal initialization, in place of the hardware
- * specific init.
+ * This is called during normal initialization, during the hardware
+ * bringup.  This performs final initialization before the system
+ * is ready.
  */
 void linux_init (void)
 {
@@ -1052,11 +1101,57 @@ int main (int argc, char *argv[])
 	int argn = 1;
 	switchnum_t sw;
 
+	/* Parse command-line arguments */
+	while (argn < argc)
+	{
+		const char *arg = argv[argn++];
+		if (!strcmp (arg, "-h"))
+		{
+			printf ("Syntax: freewpc [<options>]\n");
+			exit (0);
+		}
+		else if (!strcmp (arg, "-s"))
+		{
+			linux_irq_multiplier = strtoul (argv[argn++], NULL, 0);
+		}
+		else if (!strcmp (arg, "--balls"))
+		{
+			linux_installed_balls = strtoul (argv[argn++], NULL, 0);
+		}
+		else if (!strcmp (arg, "-f"))
+		{
+			linux_input_fd = open (argv[argn++], O_RDONLY);
+		}
+		else if (!strcmp (arg, "-o"))
+		{
+			linux_output_stream = fopen (argv[argn++], "w");
+			if (linux_output_stream == NULL)
+			{
+				printf ("Error: could not open log file\n");
+				exit (1);
+			}
+		}
+		else if (!strcmp (arg, "--locale"))
+		{
+			linux_jumpers = strtoul (argv[argn++], NULL, 0) << 2;
+		}
+		else if (!strcmp (arg, "--gamenum"))
+		{
+			pic_machine_number = strtoul (argv[argn++], NULL, 0);
+		}
+		else
+		{
+			printf ("invalid argument %s\n", arg);
+			exit (1);
+		}
+	}
+
 #ifdef CONFIG_UI
+	/* Initialize the user interface */
 	ui_init ();
 #endif
 
-	/** Do initialization that the hardware would normally do, before
+	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
 	linux_irq_pending = linux_firq_pending = 0;
@@ -1099,42 +1194,6 @@ int main (int argc, char *argv[])
 	linux_key_install ('h', SW_HITCHHIKER);
 	linux_key_install ('c', SW_CAMERA);
 #endif
-
-	/* Parse command-line arguments */
-	while (argn < argc)
-	{
-		const char *arg = argv[argn++];
-		if (!strcmp (arg, "-h"))
-		{
-			printf ("Syntax: freewpc [<options>]\n");
-			exit (0);
-		}
-		else if (!strcmp (arg, "-s"))
-		{
-			linux_irq_multiplier = strtoul (argv[argn++], NULL, 0);
-		}
-		else if (!strcmp (arg, "--balls"))
-		{
-			linux_installed_balls = strtoul (argv[argn++], NULL, 0);
-		}
-		else if (!strcmp (arg, "-f"))
-		{
-			linux_input_fd = open (argv[argn++], O_RDONLY);
-		}
-		else if (!strcmp (arg, "-o"))
-		{
-			linux_output_stream = fopen (argv[argn++], "w");
-			if (linux_output_stream == NULL)
-			{
-				printf ("Error: could not open log file\n");
-				exit (1);
-			}
-		}
-		else if (!strcmp (arg, "--locale"))
-		{
-			linux_jumpers = strtoul (argv[argn++], NULL, 0) << 2;
-		}
-	}
 
 	/* Jump to the reset function */
 	freewpc_init ();
