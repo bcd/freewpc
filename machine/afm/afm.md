@@ -16,6 +16,8 @@ Pinmame-ROM: afm_113b.bin
 
 include platform/wpc/wpc95.md
 
+define MACHINE_NUMBER 541
+
 [lamps]
 
 [switches]
@@ -24,19 +26,24 @@ include platform/wpc/wpc95.md
 14: Tilt, tilt
 18: Shooter, shooter
 21: Slam Tilt, slam-tilt
-31: Trough 1, trough, opto
-32: Trough 2, trough, opto
-33: Trough 3, trough, opto
-34: Trough 4, trough, opto
-35: Trough 5, trough, opto
+31: Trough Eject, opto
+32: Trough 1, trough, opto
+33: Trough 2, trough, opto
+34: Trough 3, trough, opto
+35: Trough 4, trough, opto
 36: Left Popper, opto
 37: Right Popper, opto
+85: L. Saucer Target
+86: R. Saucer Target
+87: Drop Target
+88: Center Trough
 
 [drives]
 H1: Auto Launch, launch
-H2: Trough Release, ballserve
+H2: Trough Eject, ballserve
 H3: Left Popper
 H4: Right Popper
+H7: Knocker, knocker
 
 L6: Saucer Shake
 L7: Drop Target
@@ -54,7 +61,7 @@ L7: Drop Target
 [lampsets]
 
 [containers]
-Trough: trough, Trough Release, Trough 1, Trough 2, Trough 3, Trough 4, Trough 5, init_max_count(4)
+Trough: trough, Trough Eject, Trough 1, Trough 2, Trough 3, Trough 4, init_max_count(4)
 Left Hole: Left Popper, Left Popper
 Right Hole: Right Popper, Right Popper
 
