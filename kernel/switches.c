@@ -190,11 +190,7 @@ extern inline void switch_rowpoll (const U8 col)
 #endif
 
 	else if (col == 9)
-#if (MACHINE_WPC95 == 1)
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC95_FLIPPER_SWITCH_INPUT);
-#else
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
-#endif
+		switch_raw_bits[col] = delta = wpc_read_flippers ();
 
 	/* delta/changed is TRUE when the switch has changed state from the
 	 * previous latched value */
