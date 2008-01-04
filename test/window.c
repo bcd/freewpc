@@ -1820,15 +1820,17 @@ void sched_test_init (void)
 	for (i=0 ; i < SCHED_TEST_WORKERS; i++)
 		task_create_gid (GID_SCHED_TEST_WORKER, sched_test_task);
 	task_sleep (SCHED_TEST_DURATION);
-
 	task_kill_gid (GID_SCHED_TEST_WORKER);
+	sched_test_count /= 2;
 }
 
 
 void sched_test_draw (void)
 {
-	sprintf ("SCHED COUNT %ld", sched_test_count);
-	font_render_string_left (&font_var5, 2, 3, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 1, "SCHEDULER TEST");
+	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
+	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
 	dmd_show_low ();
 }
 
@@ -2687,22 +2689,28 @@ void single_switch_init (void)
 void single_switch_draw (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
-	const char *state;
+	const char *level;
 	const char *opto;
+	const char *active;
 
 	switch_matrix_draw ();
 	font_render_string_center (&font_mono5, 80, 3, "SINGLE SWITCH");
 
+	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
-	font_render_string_center (&font_mono5, 40, 10, sprintf_buffer);
+	font_render_string_left (&font_mono5, 36, 10, sprintf_buffer);
 
 	sprintf_far_string (names_of_switches + menu_selection);
-	font_render_string_center (&font_var5, 80, 17, sprintf_buffer);
+	font_render_string_left (&font_var5, 54, 10, sprintf_buffer);
 
-	state = switch_poll (sel) ? "CLOSED" : "OPEN";
-	opto = switch_is_opto (sel) ? "OPTO " : "";
-	sprintf ("%s%s", opto, state);
-	font_render_string_center (&font_mono5, 88, 10, sprintf_buffer);
+	if (switch_is_opto (sel))
+		font_render_string_right (&font_mono5, 127, 10, " - OPTO");
+
+	/* Display the state of the switch */
+	active = switch_poll_logical (sel) ? "ACTIVE" : "INACTIVE";
+	level = switch_poll (sel) ? "CLOSED" : "OPEN";
+	sprintf ("%s - %s", active, level);
+	font_render_string_center (&font_mono5, 80, 16, sprintf_buffer);
 	
 	dmd_show_low ();
 }
