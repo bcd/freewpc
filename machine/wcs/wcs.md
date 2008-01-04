@@ -21,7 +21,7 @@ define MACHINE_NUMBER 531
 [lamps]
 
 [switches]
-13: Start Button, start-button
+13: Start Button, start-button, cabinet, intest
 14: Tilt, tilt
 21: Slam Tilt, slam-tilt
 31: Trough 1, trough, opto

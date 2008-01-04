@@ -22,7 +22,7 @@ define MACHINE_NUMBER 541
 
 [switches]
 11: Launch Button, launch-button
-13: Start Button, start-button
+13: Start Button, yellow, start-button, cabinet, intest
 14: Tilt, tilt
 18: Shooter, shooter
 21: Slam Tilt, slam-tilt
