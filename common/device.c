@@ -210,8 +210,18 @@ void device_update (void)
 	device_t *dev = &device_table[device_getgid () - DEVICE_GID_BASE];
 
 wait_and_recount:
+	/* We are really interested in the total count of the
+	 * device, not which switches contributed to it.
+	 * Since multiple switch transitions occur as a ball
+	 * "slides through", don't act on a transition right
+	 * away.  Instead, wait awhile until no further transitions
+	 * occur, so that the count is stable. */
 	task_sleep_sec (1);
+
+	/* The device is probably stable now.  Poll all of the
+	 * switches and recount */
 	device_recount (dev);
+
 	device_update_globals ();
 	device_debug ();
 
@@ -243,7 +253,7 @@ wait_and_recount:
 		{
 			/* More typical : when idle, the count should only go up.
 			 * Treat this as an enter event (or multiple events, if the
-			 * count goes down by more than 1). */
+			 * count goes up by more than 1). */
 			U8 enter_count = dev->actual_count - dev->previous_count;
 			while (enter_count > 0)
 			{
@@ -257,11 +267,11 @@ wait_and_recount:
 	{
 		/* Device is in the middle of a release cycle.
 		 * See if the count changed. */
-		if (dev->actual_count >= dev->previous_count)
+		if (unlikely (dev->actual_count >= dev->previous_count))
 		{
 			/* After attempting a release, the count did not go down ... the kick 
-			 * probably failed, and we should retry up to a point.  Since no state
-			 * is changed, the code will get reinvoked. */
+			 * probably failed, and we should retry up to a point.  Since dev->state
+			 * is unchanged below, the kick attempt will get reinvoked. */
 
 			/* Note: during multiball, it is possible for a second ball to enter
 			the device immediately after the kick.  The kick didn't
@@ -328,6 +338,8 @@ wait_and_recount:
 		else if (dev->actual_count > dev->max_count)
 		{
 			device_call_op (dev, full);
+			/* Important: when the device is completely full,
+			 * we MUST kick a ball */
 			dev->kicks_needed++;
 			dev->kick_errors = 0;
 		}
