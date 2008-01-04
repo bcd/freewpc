@@ -119,12 +119,12 @@ void system_reset_deff (void)
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
 	render_build_date ();
-	font_render_string_left (&font_mono5, 1, 7, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 
 #if (MACHINE_PIC == 1)
 	pic_init ();
 	pic_render_serial_number ();
-	font_render_string_left (&font_mono5, 1, 19, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 18, sprintf_buffer);
 #endif
 
 	font_render_string_left (&font_mono5, 1, 26, "TESTING...");
