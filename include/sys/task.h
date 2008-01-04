@@ -272,7 +272,11 @@ task_gid_t task_getgid (void);
 #define task_kill_peers()			task_kill_gid (task_getgid ())
 
 /** Yield control to another task, but do not impose a minimum sleep time. */
+#ifdef CONFIG_NATIVE
+#define task_yield()             pth_yield(0)
+#else
 #define task_yield()					task_sleep (0)
+#endif
 
 extern inline task_pid_t
 far_task_create_gid (task_gid_t gid, task_function_t fn, U8 page)
