@@ -16,6 +16,8 @@ Pinmame-ROM: wcup_lx2.bin
 
 include platform/wpc/wpc.md
 
+define MACHINE_NUMBER 531
+
 [lamps]
 
 [switches]

@@ -11,6 +11,7 @@ COMMON_BASIC_OBJS +=	common/leffs.o
 COMMON_BASIC_OBJS +=	common/locale.o 
 COMMON_BASIC_OBJS +=	common/match.o 
 COMMON_BASIC_OBJS +=	common/music.o 
+COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), common/pic.o)
 COMMON_BASIC_OBJS +=	common/plunger.o 
 COMMON_BASIC_OBJS +=	common/reset.o 
 COMMON_BASIC_OBJS +=	common/rtc.o 

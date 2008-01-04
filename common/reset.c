@@ -109,26 +109,33 @@ void system_reset_deff (void)
 {
 	dmd_alloc_low_clean ();
 
-	font_render_string_center (&font_mono5, 64, 4, MACHINE_NAME);
+	font_render_string_left (&font_mono5, 1, 1, MACHINE_NAME);
 
 #ifdef DEBUGGER
 	sprintf ("D%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
 	sprintf ("R%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #endif
-	font_render_string_left (&font_mono5, 8, 10, sprintf_buffer);
+	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
 	render_build_date ();
-	font_render_string_right (&font_mono5, 120, 10, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 7, sprintf_buffer);
 
-#ifdef USER_TAG
-	font_render_string_center (&font_mono5, 64, 20, C_STRING(USER_TAG));
+#if (MACHINE_PIC == 1)
+	pic_init ();
+	pic_render_serial_number ();
+	font_render_string_left (&font_mono5, 1, 19, sprintf_buffer);
 #endif
-	font_render_string_center (&font_mono5, 64, 28, "TESTING...");
+
+	font_render_string_left (&font_mono5, 1, 26, "TESTING...");
+#if defined(USER_TAG)
+	font_render_string_right (&font_mono5, 127, 26, C_STRING(USER_TAG));
+#endif
 
 	dmd_show_low ();
 
-	task_sleep_sec (2);
+
+	task_sleep_sec (4);
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 

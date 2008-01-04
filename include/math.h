@@ -34,4 +34,10 @@ U8 random_scaled (U8);
 void random_reseed (void);
 void random_init (void);
 
+#ifdef __m6809__
+#include <m6809/math.h>
+#else
+#include <native/math.h>
+#endif
+
 #endif /* _MATH_H */

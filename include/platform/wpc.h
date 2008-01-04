@@ -195,11 +195,12 @@ extern U8 *linux_dmd_high_page;
 #define WPC_SW_JUMPER_INPUT 			0x3FE7
 #define WPC_SW_CABINET_INPUT 			0x3FE8
 
-#define WPC_SW_ROW_INPUT 				0x3FE9
-#define WPC_SW_COL_STROBE 				0x3FEA
 #if (MACHINE_PIC == 1)
 #define WPCS_PIC_READ 					0x3FE9
 #define WPCS_PIC_WRITE 					0x3FEA
+#else
+#define WPC_SW_ROW_INPUT 				0x3FE9
+#define WPC_SW_COL_STROBE 				0x3FEA
 #endif
 
 #if (MACHINE_DMD == 0)
@@ -376,10 +377,6 @@ do { \
 
 #endif /* PAGE == SYS_PAGE */
 
-#ifndef __m6809__
-#define far_call_pointer(fn, page, arg) (fn) (arg)
-#endif
-
 
 /********************************************/
 /* RAM Paging                               */
@@ -538,7 +535,7 @@ extern inline void wpc_write_ticket (U8 val)
 #define WPC_PIC_COUNTER     0x0D
 
 /** The command to read the xth switch column */
-#define WPC_PIC_COLUMN(x)   (0x10 + (x))
+#define WPC_PIC_COLUMN(x)   (0x16 + (x))
 
 /** The command to unlock the switch matrix */
 #define WPC_PIC_UNLOCK      0x20

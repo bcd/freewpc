@@ -1,21 +1,21 @@
 
 # Root directory for the platform files
-P=platform/wpc
+P := platform/wpc
 
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
-CONFIG_WPC=y
-CONFIG_FONT=y
-CONFIG_AC=y
-CONFIG_DMD=y
-CONFIG_ANIMATION=y
+CONFIG_WPC ?= y
+CONFIG_FONT ?= $(CONFIG_DMD)
+CONFIG_AC ?= y
+CONFIG_ANIMATION ?= $(CONFIG_DMD)
 
 # The default CFLAGS required on the WPC platform
 # A few notes:
 # 1. -Wno-format is to not check format strings, because we define those
 # differently than ANSI C does.
-CFLAGS := -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -mint8
+INT_CFLAGS = -mint8
+CFLAGS = $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 
 # Optional CFLAGS based on configuration options
 
@@ -41,5 +41,8 @@ KERNEL_SW_OBJS += $(P)/malloc.o
 
 KERNEL_ASM_OBJS += $(P)/dmd.o $(P)/farcall.o $(P)/task_6809.o $(P)/start.o
 
+COMMON_BASIC_OBJS += $(P)/math.o
+
 CALLSET_FLAGS += -D platform/wpc
 
+$(P)/math.o : INT_CFLAGS=-mint16

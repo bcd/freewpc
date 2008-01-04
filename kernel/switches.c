@@ -96,8 +96,8 @@ void switch_init (void)
 
 	/* Initialize the raw state based on mach_opto_mask,
 	 * so that the optos don't all trigger at initialization. */
-	memcpy (&switch_bits[AR_RAW][0], mach_opto_mask, SWITCH_BITS_SIZE);
-	memcpy (&switch_bits[AR_LATCHED][0], mach_opto_mask, SWITCH_BITS_SIZE);
+	memcpy (switch_raw_bits, mach_opto_mask, SWITCH_BITS_SIZE);
+	memcpy (switch_latched_bits, mach_opto_mask, SWITCH_BITS_SIZE);
 }
 
 
@@ -136,6 +136,33 @@ void switch_short_detect (void)
 }
 
 
+extern inline void switch_rtt_common (void)
+{
+#if (MACHINE_PIC == 1)
+	/* Before any switch data can be accessed on a WPC-S
+	 * or WPC95 machine, we need to poll the PIC and see
+	 * if the unlock code must be sent to it. */
+	U8 unlocked;
+
+	/* Read the status to see if the matrix is still unlocked. */
+	wpc_write_pic (WPC_PIC_COUNTER);
+	noop ();
+	noop ();
+	noop ();
+	unlocked = wpc_read_pic ();
+
+	if (!unlocked)
+	{
+		/* We need to unlock it again. */
+		wpc_write_pic (WPC_PIC_UNLOCK);
+		wpc_write_pic (0);
+		wpc_write_pic (0);
+		wpc_write_pic (0);
+	}
+#endif /* MACHINE_PIC */
+}
+
+
 /** Poll a single switch column.
  * Column 0 corresponds to the cabinet switches.
  * Columns 1-8 refer to the playfield columns.
@@ -154,8 +181,14 @@ extern inline void switch_rowpoll (const U8 col)
 	 */
 	if (col == 0)
 		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_CABINET_INPUT);
+
 	else if (col <= 8)
+#if (MACHINE_PIC == 1)
+		switch_raw_bits[col] = delta = wpc_read_pic ();
+#else
 		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_ROW_INPUT);
+#endif
+
 	else if (col == 9)
 #if (MACHINE_WPC95 == 1)
 		switch_raw_bits[col] = delta = wpc_asic_read (WPC95_FLIPPER_SWITCH_INPUT);
@@ -177,7 +210,7 @@ extern inline void switch_rowpoll (const U8 col)
 	if (col < 8)
 	{
 #if (MACHINE_PIC == 1)
-		wpc_asic_write (WPC_SW_COL_STROBE, col+16);
+		wpc_write_pic (WPC_PIC_COLUMN (col));
 #else
 		wpc_asic_write (WPC_SW_COL_STROBE, 1 << col);
 #endif
@@ -227,6 +260,7 @@ bool switch_poll_logical (const switchnum_t sw)
 
 void switch_rtt_0 (void)
 {
+	switch_rtt_common ();
 	switch_rowpoll (0);
 	switch_rowpoll (1);
 	switch_rowpoll (2);
@@ -317,6 +351,7 @@ void switch_sched (void)
 	dbprintf ("Handling switch ");
 	sprintf_far_string (names_of_switches + sw);
 	dbprintf1 ();
+	dbprintf (" (%d) ", sw);
 	dbprintf ("\n");
 #endif
 

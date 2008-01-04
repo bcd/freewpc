@@ -27,6 +27,10 @@ define require
 $(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
+define md_config
+$(if $(shell grep ^$1:.*Yes $(M)/$(MACHINE_FILE)),y,)
+endef
+
 ifndef Q
 Q := @
 endif
@@ -43,10 +47,31 @@ M := machine/$(MACHINE)
 -include $(BLDDIR)/mach-Makefile
 include machine/$(MACHINE)/Makefile
 
+# MACHINE_FILE must be set by the machine Makefile.  We can
+# grep it to set additional configuration variables.
+$(eval $(call require,MACHINE_FILE))
+PLATFORM := wpc
+CONFIG_DMD := $(call md_config,DMD)
+# CONFIG_DMD := $(if $(shell grep ^DMD:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_PIC := $(if $(shell grep ^PIC:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
+
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
 # defined this.
 $(eval $(call require,PLATFORM))
+
+#######################################################################
+###	Set Default Target
+#######################################################################
+
+.PHONY : default_target
+default_target : clean_err check_prereqs platform_target post_compile
+
+KERNEL_OBJS :=
+COMMON_BASIC_OBJS :=
 
 ifdef NATIVE
 include platform/native/Makefile
@@ -72,13 +97,6 @@ BUILD_MONTH := $(shell date +%-m)
 BUILD_DAY := $(shell date +%-d)
 BUILD_YEAR := $(shell date +%Y)
 
-
-#######################################################################
-###	Set Default Target
-#######################################################################
-
-.PHONY : default_target
-default_target : clean_err check_prereqs platform_target post_compile
 
 .PHONY : platform_target
 ifdef NATIVE
@@ -460,7 +478,12 @@ clean_err:
 check_prereqs : $(BLDDIR) tools sched xbmgen_run xbmprotos
 
 .PHONY : run
-run: install
+run:
+	# Start pinmame up and let it run indefinitely.
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) -nosound &
+
+.PHONY : run-orig
+run-orig: uninstall
 	# Start pinmame up and let it run indefinitely.
 	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
@@ -533,7 +556,7 @@ post_compile :
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
-$(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
+$(BLDDIR)/$(GAME_ROM) : $(BLDDIR) $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 	$(Q)echo Padding ... && \
 		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
 	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
@@ -862,7 +885,7 @@ ifeq ($(PLATFORM),wpc)
 	$(Q)$(MAKE) xbmgen_objs
 endif
 
-$(BLDDIR)/Makefile.xbms $(BLDDIR)/xbmgen : $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
+$(BLDDIR)/Makefile.xbms $(BLDDIR)/xbmgen : $(BLDDIR) $(HOST_XBM_LIBS) $(HOST_XBM_OBJS)
 	$(Q)echo "Linking XBM generator..." && \
 	$(HOSTCC) -o $(BLDDIR)/xbmgen $(HOST_XBM_LIBS) $(HOST_XBM_OBJS) && \
 	echo "Generating XBM files..." && $(BLDDIR)/xbmgen
@@ -943,6 +966,9 @@ info:
 	$(Q)echo "FIF_OBJS = $(FIF_OBJS)"
 	$(Q)echo "PRG_OBJS = $(PRG_OBJS)"
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
+	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
+	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
+	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
 
 #
 # 'make clean' does what you think.
