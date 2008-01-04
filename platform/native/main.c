@@ -152,6 +152,9 @@ to the UI.  This is toggled, because every other write is actually just
 a failsafe to clear the lamps. */
 int linux_lamp_write_flag = 1;
 
+/** The contents of the 16 PIC serial data registers */
+U8 pic_serial_data[16] = { 0, };
+
 static void sim_switch_effects (int swno);
 
 
@@ -220,6 +223,153 @@ static int scanbit (U8 bits)
 	else return -1;
 }
 
+
+#if (MACHINE_PIC == 1)
+void simulation_pic_init (void)
+{
+	static U8 real_serial_number[] = { 5, 3, 1, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 1, 2, 3 };
+	U32 tmp;
+
+#ifdef MACHINE_NUMBER
+	real_serial_number[0] = MACHINE_NUMBER / 100;
+	real_serial_number[1] = (MACHINE_NUMBER / 10) % 10;
+	real_serial_number[2] = MACHINE_NUMBER % 10;
+#endif
+
+	pic_serial_data[10] = 0x0;
+	pic_serial_data[2] = 0x0;
+
+	tmp = 100 * real_serial_number[1] +
+		10 * real_serial_number[7] +
+		real_serial_number[4] +
+		5 * pic_serial_data[10];
+	tmp = (tmp * 0x1BCD) + 0x1F3F0UL;
+	pic_serial_data[1] = (tmp >> 16) & 0xFF;
+	pic_serial_data[11] = (tmp >> 8) & 0xFF;
+	pic_serial_data[9] = tmp  & 0xFF;
+
+	tmp = 10000 * real_serial_number[2] +
+		1000 * real_serial_number[15] +
+		100 * real_serial_number[0] +
+		10 * real_serial_number[8] +
+		real_serial_number[6] +
+		2 * pic_serial_data[10] +
+		pic_serial_data[2];
+	tmp = (tmp * 0x107F) + 0x71E259UL;
+	pic_serial_data[7] = (tmp >> 24) & 0xFF;
+	pic_serial_data[12] = (tmp >> 16) & 0xFF;
+	pic_serial_data[0] = (tmp >> 8) & 0xFF;
+	pic_serial_data[8] = tmp  & 0xFF;
+
+	tmp = 1000 * real_serial_number[16] +
+		100 * real_serial_number[3] +
+		10 * real_serial_number[5] +
+		real_serial_number[14] +
+		pic_serial_data[2];
+	tmp = (tmp * 0x245) + 0x3D74;
+	pic_serial_data[3] = (tmp >> 16) & 0xFF;
+	pic_serial_data[14] = (tmp >> 8) & 0xFF;
+	pic_serial_data[6] = tmp  & 0xFF;
+
+	tmp = 10000 * real_serial_number[13] +
+		1000 * real_serial_number[12] +
+		100 * real_serial_number[11] +
+		10 * real_serial_number[10] +
+		real_serial_number[9];
+	tmp = 99999UL - tmp;
+	pic_serial_data[15] = (tmp >> 8) & 0xFF;
+	pic_serial_data[4] = tmp & 0xFF;
+}
+
+
+/** Access the simulated PIC.
+ * writep is 1 if this is a write command, 0 on a read.
+ * For writes, WRITE_VAL specifies the value to be written.
+ *
+ * For reads, it returns the read value, otherwise it returns
+ * zero.
+ */
+U8 simulation_pic_access (int writep, U8 write_val)
+{
+	static U8 last_write = 0xFF;
+	static int writes_until_unlock_needed = 1000;
+	static U8 unlock_mode = 0;
+	static U32 unlock_code;
+	const U32 expected_unlock_code = 0;
+
+	if (writep)
+	{
+		/* Handles writes to the PIC */
+		if (last_write == 0xFF && write_val != WPC_PIC_RESET)
+		{
+			simlog (SLC_DEBUG, "PIC written before reset.");
+		}
+		else if (unlock_mode > 0)
+		{
+			unlock_code = (unlock_code << 8) | write_val;
+			if (++unlock_mode > 3)
+			{
+				if (unlock_code != expected_unlock_code)
+				{
+					simlog (SLC_DEBUG, "Invalid PIC unlock code %X (expected %X)\n",
+						unlock_code, expected_unlock_code);
+					unlock_mode = -1;
+				}
+				else
+				{
+					unlock_mode = 0;
+				}
+			}
+		}
+		else if (write_val == WPC_PIC_UNLOCK)
+		{
+			unlock_mode = 1;
+			unlock_code = 0;
+		}
+		else
+		{
+			last_write = write_val;
+			if (writes_until_unlock_needed > 0)
+				writes_until_unlock_needed--;
+		}
+		return 0;
+	}
+	else
+	{
+		/* Handles reads to the PIC */
+		switch (last_write)
+		{
+			case WPC_PIC_RESET:
+			case WPC_PIC_UNLOCK:
+				return 0;
+
+			case WPC_PIC_COUNTER:
+				return writes_until_unlock_needed;
+
+			case WPC_PIC_COLUMN(0): case WPC_PIC_COLUMN(1):
+			case WPC_PIC_COLUMN(2): case WPC_PIC_COLUMN(3):
+			case WPC_PIC_COLUMN(4): case WPC_PIC_COLUMN(5):
+			case WPC_PIC_COLUMN(6): case WPC_PIC_COLUMN(7):
+				if (unlock_mode == 0)
+					return linux_switch_matrix[last_write - WPC_PIC_COLUMN(0) + 1];
+
+			case WPC_PIC_SERIAL(0): case WPC_PIC_SERIAL(1):
+			case WPC_PIC_SERIAL(2): case WPC_PIC_SERIAL(3):
+			case WPC_PIC_SERIAL(4): case WPC_PIC_SERIAL(5):
+			case WPC_PIC_SERIAL(6): case WPC_PIC_SERIAL(7):
+			case WPC_PIC_SERIAL(8): case WPC_PIC_SERIAL(9):
+			case WPC_PIC_SERIAL(10): case WPC_PIC_SERIAL(11):
+			case WPC_PIC_SERIAL(12): case WPC_PIC_SERIAL(13):
+			case WPC_PIC_SERIAL(14): case WPC_PIC_SERIAL(15):
+				return pic_serial_data[last_write - WPC_PIC_SERIAL(0)];
+
+			default:
+				simlog (SLC_DEBUG, "Invalid PIC address read");
+				return 0;
+		}
+	}
+}
+#endif /* MACHINE_PIC */
 
 void linux_shutdown (void)
 {
@@ -496,11 +646,20 @@ void linux_asic_write (U16 addr, U8 val)
 				linux_lamp_data_ptr = NULL;
 			break;
 
-		case WPC_SW_COL_STROBE:
-#if defined (MACHINE_PIC) && (MACHINE_PIC == 1)
-			if ((val >= 0x16) && (val < 0x16 + 8))
-				linux_switch_data_ptr = linux_switch_matrix + val - 1;
+#if (MACHINE_PIC == 1)
+		case WPCS_PIC_WRITE:
+			simulation_pic_access (1, val);
+#if 0
+			if (val == 0)
+				;
+			else if ((val >= 0x16) && (val <= 0x1F))
+				linux_switch_data_ptr = linux_switch_matrix + val - 0x16 + 1;
+			else if ((val >= 0x70) && (val <= 0x7F))
+				linux_switch_data_ptr = pic_serial_data + val - 0x70;
+#endif
+
 #else
+		case WPC_SW_COL_STROBE:
 			if (val != 0)
 				linux_switch_data_ptr = linux_switch_matrix + 1 + scanbit (val);
 #endif
@@ -559,11 +718,16 @@ U8 linux_asic_read (U16 addr)
 			break;
 		}
 
+#if (MACHINE_PIC == 1)
+		case WPCS_PIC_READ:
+			return simulation_pic_access (0, 0);
+#else
 		case WPC_SW_ROW_INPUT:
-			if (col9_enabled)
+			if (col9_enabled) /* TODO : this is a TZ thing */
 				return linux_switch_matrix[9];
 			else
 				return *linux_switch_data_ptr;
+#endif
 
 		case WPC_SW_JUMPER_INPUT:
 			return linux_jumpers;
@@ -665,7 +829,7 @@ static switchnum_t keymaps[256] = {
 	['0'] = SW_ENTER,
 	[','] = SW_L_L_FLIPPER_BUTTON,
 	['.'] = SW_L_R_FLIPPER_BUTTON,
-	['`'] = SW_COIN_DOOR_CLOSED,
+	['-'] = SW_COIN_DOOR_CLOSED,
 #ifdef MACHINE_TILT_SWITCH
 	['t'] = MACHINE_TILT_SWITCH,
 #endif
@@ -812,7 +976,10 @@ static void linux_interface_thread (void)
 				if (sw)
 				{
 					if (switch_table[sw].flags & SW_EDGE)
+					{
+						simlog (SLC_DEBUG, "switch %d toggled",  sw);
 						linux_switch_toggle (sw);
+					}
 					else
 						linux_switch_depress (sw);
 				}
@@ -898,10 +1065,15 @@ int main (int argc, char *argv[])
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
 	simulated_zerocross = 0;
+#if (MACHINE_PIC == 1)
+	simulation_pic_init ();
+#endif
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
+#if !(MACHINE_PIC == 1)
 	linux_asic_write (WPC_SW_COL_STROBE, 0x1);
+#endif
 	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
@@ -911,6 +1083,9 @@ int main (int argc, char *argv[])
 	for (sw = 0; sw < NUM_SWITCHES; sw++)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
+
+	/* Close the coin door */
+	linux_switch_toggle (SW_COIN_DOOR_CLOSED);
 
 	/* Load the protected memory area */
 	protected_memory_load ();
