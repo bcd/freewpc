@@ -20,17 +20,20 @@
 
 #include <freewpc.h>
 
+
+/** For low-level debugging ; normally this is not needed */
 #define pic_debug(rest...)
 
-#ifdef CONFIG_NATIVE
+#ifdef CONFIG_LITTLE_ENDIAN
 #define POS_CONVERT(pos) (3-(pos))
 #else
 #define POS_CONVERT(pos) pos
 #endif
-
 #define PICMAP(byte, reg, pos) [byte] = (U8 *)&pic_serial_encoded.reg + POS_CONVERT (pos)
 
 
+/** The internal structure of the PIC is maintained in
+4 32-bit registers and 2 8-bit registers. */
 struct pic_serial_encoded
 {
 	U32 reg1;
@@ -42,6 +45,15 @@ struct pic_serial_encoded
 } pic_serial_encoded;
 
 
+/** A mapping between the PIC's internal structure and the
+external byte registers that are used to read it.
+The internals are "scrambled" to make it more difficult
+to reverse engineer.  Each PICMAP entry says (1) which
+external serial register is being mapped, (2) which
+internal register partially appears here, and (3) which
+part of the register it is, with 0 meaning the most significant
+byte.  NULL entries mean that the external PIC register is
+not directly associated with the internal structure at all. */
 U8 *pic_serial_map[] =
 {
 	PICMAP(3, reg3, 1),
@@ -68,14 +80,18 @@ U8 *pic_serial_map[] =
 };
 
 
+/** A table that maps the digits of the PIC's
+internal 32-bit registers to their location within
+the serial number.  Each of the 4 registers can contribute
+up to 5 digits.  The Nth row in the table says that this
+entry applies to the Nth register (reg1 through reg4).
+Within the entry are 5 offsets; if the ith offset is X[i],
+then the X[i]th digit of the serial number is described
+by the ith digit in the internal register.  A -1
+means that this digit does not contribute to the serial
+number at all. */
 struct pic_strip_info
 {
-	/* Up to 5 digits can be stored per register;
-	 * these are ordered from 10000's to 1's.
-	 * If a particular digit is to be ignored,
-	 * it is set to -1, otherwise the value here
-	 * indicates which serial number digit is
-	 * present here. */
 	S8 place[5];
 } pic_strip_info[] = {
 	{ -1, -1, 1, 7, 4 },
@@ -105,46 +121,7 @@ U8 pic_serial_number[18];
 bool pic_invalid;
 
 
-#if 0
-/** A generic division algorithm based on repeated subtraction.
- * It is not the most efficient, but it works.  The 6809 compiler
- * support for long division is sketchy at this point. */
-#ifndef CONFIG_NATIVE
-static __attribute__((noinline)) void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp)
-{
-	register U32 quotient = 0;
-	register U32 guess;
-
-	while (reg >= divisor)
-	{
-		/* Make a guess for the quotient, taking care to
-		 * err on the low side always.
-		 *
-		 * It is always safe to guess 1, although that will be the slowest.
-		 */
-		if ((divisor < 5) && (reg > 320))
-		{
-			guess = 64;
-			quotient += guess;
-			reg -= divisor * guess;
-		}
-		else
-		{
-			guess = 1;
-			quotient += guess;
-			reg -= divisor * guess;
-		}
-
-	}
-	if (*remainderp)
-		*remainderp = reg;
-	if (*quotientp)
-		*quotientp = quotient;
-}
-#endif /* !CONFIG_NATIVE */
-#endif /* 0 */
-
-
+/** Decode a 32-bit internal PIC register. */
 void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool negate)
 {
 	pic_debug ("reg.start = %w\n", *reg);
