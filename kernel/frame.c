@@ -52,7 +52,6 @@ const U8 *frame_copy_rle (const U8 *framedata)
 {
 	register U8 *dbuf = dmd_low_buffer;
 	register U8 c;
-	register U8 count;
 
 	do {
 		c = *framedata++;
@@ -197,6 +196,7 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 consecutive FIFs. */
 const U8 *dmd_draw_faf1 (const U8 *faf, task_ticks_t delay)
 {
+	return faf;
 }
 
 
