@@ -157,13 +157,6 @@ void pic_strip_digits (U32 reg, struct pic_strip_info *info)
 	U8 place;
 	U8 digit;
 
-	if (reg > 100000ULL)
-	{
-		dbprintf ("error: strip reg is too large\n");
-		while (reg > 100000ULL)
-			reg -= 100000ULL;
-	}
-
 	for (place = 0 ; place < 5 ; place++)
 	{
 		digit = 0;
