@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -311,6 +311,9 @@ fixup_number:
 
 				case 'w':
 				{
+#ifdef CONFIG_NATIVE
+do_32bit_hex_integer:
+#endif
 					do {
 						S8 n;
 						U32 w32 = va_arg (va, U32);
@@ -421,12 +424,14 @@ do_long_hex_integer:
 
 				case 'p':
 				{
-// #ifdef CONFIG_NATIVE /* TODO - handle 32-bit pointers */
-// #else
 					sprintf_leading_zeroes = TRUE;
+#ifdef CONFIG_NATIVE /* handle 32-bit pointers */
+					sprintf_width = 8;
+					goto do_32bit_hex_integer;
+#else
 					sprintf_width = 4;
 					goto do_long_hex_integer;
-// #endif
+#endif
 				}
 			}
 		}
