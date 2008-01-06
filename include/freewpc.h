@@ -215,7 +215,6 @@ extern U8 idle_ok;
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>
-#include <../images/xbmproto.h>
 
 
 /* This is ugly, but I can't figure out any other way to get 
