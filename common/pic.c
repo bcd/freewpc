@@ -94,10 +94,10 @@ struct pic_strip_info
 {
 	S8 place[5];
 } pic_strip_info[] = {
-	{ -1, -1, 1, 7, 4 },
-	{ 2, 15, 0, 8, 6 },
-	{ -1, 16, 3, 5, 14 },
-	{ 13, 12, 11, 10, 9 },
+	{{ -1, -1, 1, 7, 4 }},
+	{{ 2, 15, 0, 8, 6 }},
+	{{ -1, 16, 3, 5, 14 }},
+	{{ 13, 12, 11, 10, 9 }},
 };
 
 
@@ -215,7 +215,6 @@ void pic_init (void)
 	U8 i;
 	U8 val;
 	U8 *ereg;
-	U16 rval;
 
 	dbprintf ("Initialize the PIC...\n");
 	pic_invalid = TRUE;
@@ -273,7 +272,7 @@ void pic_init (void)
 	pic_serial_encoded.reg3 -= pic_serial_encoded.check2;
 	pic_strip_digits (pic_serial_encoded.reg3, &pic_strip_info[2]);
 	
-	pic_decode32 (&pic_serial_encoded.reg4, 99999UL, 1, TRUE);
+	pic_decode32 (&pic_serial_encoded.reg4, 99999ULL, 1, TRUE);
 	pic_strip_digits (pic_serial_encoded.reg4, &pic_strip_info[3]);
 
 	pic_verify ();
