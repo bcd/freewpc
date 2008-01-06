@@ -66,6 +66,13 @@ A6: Aux. Sol. 6
 A7: Aux. Sol. 7
 A8: Aux. Sol. 8
 
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. String 4
+4: G.I. String 5
+
 [lampsets]
 ALL: 11..88
 
