@@ -441,6 +441,7 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 }
 
 
+#if 0
 /**
  * Draw a mono image to the currently mapped (low) page.  
  * The image is stored in XBM format.
@@ -494,6 +495,7 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits,
 	}
 	wpc_pop_page ();
 }
+#endif
 
 
 /** Erase a specific region of the DMD low buffer, given its
