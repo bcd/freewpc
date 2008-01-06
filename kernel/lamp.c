@@ -24,6 +24,7 @@
  */
 
 #include <freewpc.h>
+#include <coin.h>
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 

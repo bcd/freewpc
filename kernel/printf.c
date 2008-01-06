@@ -336,7 +336,9 @@ do_32bit_hex_integer:
 					{
 						case 'x': case 'X':
 						{
+#ifndef CONFIG_NATIVE
 do_long_hex_integer:
+#endif
 							do {
 								register U8 b = va_arg (va, U8);
 								endbuf = do_sprintf_hex_byte (buf, b);

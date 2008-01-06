@@ -121,7 +121,7 @@ U8 *font_lookup (const font_t *font, char c)
 
 static inline void font_blit_internal (U8 *dst, U8 width, const U8 shift)
 {
-	register U8 *src = blit_data;
+	register const U8 *src = blit_data;
 
 	do {
 		if (shift == 0)
