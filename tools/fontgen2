@@ -1,0 +1,23 @@
+#!/bin/sh
+font="$1"
+charlist=`echo A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9`
+
+echo "#include <freewpc.h>"
+echo "#pragma section (\"page61\")"
+
+for char in ${charlist}; do
+	prefix="glyph_${font}_${char}"
+	convert -font ${font}.ttf label:$char xbm:- | sed -e "s/-/${prefix}/" | sed -e "s/{/{ ${prefix}_width, ${prefix}_height,/"
+done
+
+echo "static char *${font}_glyphs[] = {"
+for char in ${charlist}; do
+	prefix="glyph_${font}_${char}"
+	echo "	['${char}'] = ${prefix}_bits,"
+done
+echo "};"
+
+echo "const font_t font_${font} = {"
+echo "	.height = HEIGHT,"
+echo "	.glyphs = ${font}_glyphs,"
+echo "};"
