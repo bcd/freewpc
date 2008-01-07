@@ -154,10 +154,12 @@ extern inline void switch_rtt_common (void)
 	if (!unlocked)
 	{
 		/* We need to unlock it again. */
+		extern U8 pic_unlock_code[3];
+
 		wpc_write_pic (WPC_PIC_UNLOCK);
-		wpc_write_pic (0);
-		wpc_write_pic (0);
-		wpc_write_pic (0);
+		wpc_write_pic (pic_unlock_code[0]);
+		wpc_write_pic (pic_unlock_code[1]);
+		wpc_write_pic (pic_unlock_code[2]);
 	}
 #endif /* MACHINE_PIC */
 }
@@ -347,7 +349,9 @@ void switch_sched (void)
 	dbprintf ("Handling switch ");
 	sprintf_far_string (names_of_switches + sw);
 	dbprintf1 ();
+#ifdef DEBUG_SWITCH_NUMBER
 	dbprintf (" (%d) ", sw);
+#endif
 	dbprintf ("\n");
 #endif
 
@@ -455,7 +459,7 @@ CALLSET_ENTRY (switch, idle)
 		return;
 	}
 
-	for (col = 0; col <= 9; col++)
+	for (col = 0; col <= 9; col++) /* TODO : define for 9? */
 	{
 		/* Atomically get-and-clear the pending switches */
 		disable_irq ();
