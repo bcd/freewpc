@@ -53,7 +53,7 @@ this is not currently used... we always use a single pixel */
 /** A global structure that describes all of the attributes for
 the next font rendering: location, font, and string.  Using this
 avoids passing long argument lists to lots of functions. */
-fontargs_t font_args;
+__fastram__ fontargs_t font_args;
 
 /** The width of the current character being rendered in bits */
 __fastram__ U8 font_width;
