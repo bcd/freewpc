@@ -120,6 +120,8 @@ U8 pic_serial_number[18];
  * reading, so that the PIC data should not be trusted. */
 bool pic_invalid;
 
+U8 pic_unlock_code[3];
+
 
 /** Decode a 32-bit internal PIC register. */
 void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool negate)
@@ -185,6 +187,24 @@ U16 pic_read_game_number (void)
 		+ (pic_serial_number[2] - '0');
 
 	return game_number;
+}
+
+
+/** Compute the 3 byte switch matrix unlock code.
+ * This is a function of the last 3 bytes of the serial number,
+ * plus the game number (the first 3 bytes). */
+void pic_compute_unlock_code (void)
+{
+	U32 reg;
+
+	reg = pic_read_game_number ();
+
+	reg = ((reg >> 8) * (0x100 * pic_serial_number[14] + pic_serial_number[16] + 0x3030)) +
+		((reg & 0xFF) * (0x100 * pic_serial_number[15] + pic_serial_number[14] + 0x3030));
+
+	pic_unlock_code[0] = (reg >> 16) & 0xFF;
+	pic_unlock_code[1] = (reg >> 8) & 0xFF;
+	pic_unlock_code[2] = reg & 0xFF;
 }
 
 
