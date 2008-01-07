@@ -87,6 +87,12 @@ void freewpc_init (void)
 	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
 	wpc_asic_write (WPC_GI_TRIAC, 0);
 
+	/* Reset the blanking and watchdog circuitry.
+	 * Eventually, the watchdog will be tickled every 1ms
+	 * by the IRQ; until interrupts are enabled, we will
+	 * have to do this periodically ourselves. */
+	wpc_watchdog_reset ();
+
 	/* Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
 	sys_init_complete = 0;
@@ -96,7 +102,6 @@ void freewpc_init (void)
 	/* Initialize all of the other kernel subsystems,
 	 * starting with the hardware-centric ones and moving on
 	 * to software features. */
-	wpc_led_toggle ();
 
 	/* Initialize the real-time scheduler.  The periodic functions
 	are scheduled at compile-time  using the 'gensched' utility. */
@@ -105,25 +110,33 @@ void freewpc_init (void)
 	/* Initialize the hardware */
 #ifdef DEBUGGER
 	db_init ();
+	wpc_watchdog_reset ();
 #endif
 	ac_init ();
+	wpc_watchdog_reset ();
 	sol_init ();
+	wpc_watchdog_reset ();
 	triac_init ();
+	wpc_watchdog_reset ();
 #if (MACHINE_DMD == 1)
 	dmd_init ();
+	wpc_watchdog_reset ();
 #endif
 	switch_init ();
+	wpc_watchdog_reset ();
 	flipper_init ();
+	wpc_watchdog_reset ();
 	lamp_init ();
+	wpc_watchdog_reset ();
 	device_init ();
-
-	wpc_led_toggle ();
+	wpc_watchdog_reset ();
 
 	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
 	task_init ();
+	wpc_watchdog_reset ();
 
 #ifdef CONFIG_NATIVE
 	linux_init ();
@@ -134,6 +147,10 @@ void freewpc_init (void)
 	 * which may take unknown (or even infinite) time. */
 	sys_init_pending_tasks++;
 	task_create_gid (GID_SOUND_INIT, sound_init);
+
+	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
+	 * but not before all of the hardware modules are done. */
+	enable_interrupts ();
 
 	/* Initialize everything else.  Some of these are given explicitly
 	to force a particular order, since callsets do not guarantee the
@@ -147,11 +164,6 @@ void freewpc_init (void)
 	/* Check all adjustments and make sure that their checksums are valid.
 	If problems are found, those adjustments will be made sane again. */
 	csum_area_check_all ();
-
-	/* Enable interrupts (IRQs and FIRQs) at the source (WPC) and
-	 * in the 6809 */
-	wpc_int_enable ();
-	enable_interrupts ();
 
 	/* Enable the idle processing.  Sleep briefly so that it gets
 	 * a chance to run before continuing; this lets the debugger

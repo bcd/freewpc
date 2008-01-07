@@ -410,25 +410,25 @@ extern inline void wpc_set_ram_page (U8 page)
  * lines.
  */
 
-#define WPC_CTRL_IRQ_ENABLE    0x2
-#define WPC_CTRL_FIRQ_ENABLE   0x4
-#define WPC_CTRL_BLANK_RESET   0x10
-#define WPC_CTRL_IRQ_CLEAR     0x80
+#define WPC_CTRL_BLANK_RESET    0x2
+#define WPC_CTRL_WATCHDOG_RESET 0x4
+#define WPC_CTRL_IRQ_ENABLE     0x10
+#define WPC_CTRL_IRQ_CLEAR      0x80
 
 extern inline void wpc_write_misc_control (U8 val)
 {
-	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR, val);
+	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR,
+		WPC_CTRL_BLANK_RESET | WPC_CTRL_WATCHDOG_RESET | val);
 }
 
-extern inline void wpc_int_enable (void)
+extern inline void wpc_watchdog_reset (void)
 {
-	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE);
+	wpc_write_misc_control (0);
 }
 
 extern inline void wpc_int_clear (void)
 {
-	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE
-		| WPC_CTRL_BLANK_RESET | WPC_CTRL_IRQ_CLEAR);
+	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_IRQ_CLEAR);
 }
 
 
