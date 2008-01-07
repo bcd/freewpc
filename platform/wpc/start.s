@@ -100,6 +100,8 @@ _start:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; TODO - the hardware watchdog will expire if we don't
+	; reset it periodically here.
 rom_test:
 	; Initialize 16-bit checksum
 	ldd	#0
