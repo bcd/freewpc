@@ -197,6 +197,8 @@ void pic_compute_unlock_code (void)
 {
 	U32 reg;
 
+	dbprintf ("Computing unlock code...");
+
 	reg = pic_read_game_number ();
 
 	reg = ((reg >> 8) * (0x100 * pic_serial_number[14] + pic_serial_number[16] + 0x3030)) +
@@ -205,6 +207,8 @@ void pic_compute_unlock_code (void)
 	pic_unlock_code[0] = (reg >> 16) & 0xFF;
 	pic_unlock_code[1] = (reg >> 8) & 0xFF;
 	pic_unlock_code[2] = reg & 0xFF;
+
+	dbprintf ("done\n");
 }
 
 
@@ -296,6 +300,8 @@ void pic_init (void)
 	pic_strip_digits (pic_serial_encoded.reg4, &pic_strip_info[3]);
 
 	pic_verify ();
+	if (!pic_invalid)
+		pic_compute_unlock_code ();
 }
 
 
