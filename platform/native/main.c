@@ -856,8 +856,8 @@ static switchnum_t keymaps[256] = {
 	['8'] = SW_DOWN,
 	['9'] = SW_UP,
 	['0'] = SW_ENTER,
-	[','] = SW_L_L_FLIPPER_BUTTON,
-	['.'] = SW_L_R_FLIPPER_BUTTON,
+	[','] = SW_LEFT_BUTTON,
+	['.'] = SW_RIGHT_BUTTON,
 	['-'] = SW_COIN_DOOR_CLOSED,
 #ifdef MACHINE_TILT_SWITCH
 	['t'] = MACHINE_TILT_SWITCH,
@@ -902,6 +902,7 @@ static void linux_interface_thread (void)
 	switchnum_t sw;
 	struct termios tio;
 	int simulator_keys = 1;
+	int toggle_mode = 1;
 
 	/* Put stdin in raw mode so that 'enter' doesn't have to
 	be pressed after each keystroke. */
@@ -1017,16 +1018,22 @@ static void linux_interface_thread (void)
 				} while (*inbuf != '\n');
 				break;
 
+			case '"':
+				simlog (SLC_DEBUG, "next key will toggle, not press");
+				toggle_mode = 0;
+				break;
+
 			default:
 				/* For all other keystrokes, use the keymap table
 				to turn the keystroke into a switch trigger. */
 				sw = keymaps[(int)*inbuf];
 				if (sw)
 				{
-					if (switch_table[sw].flags & SW_EDGE)
+					if ((switch_table[sw].flags & SW_EDGE) || !toggle_mode)
 					{
 						simlog (SLC_DEBUG, "switch %d toggled",  sw);
 						linux_switch_toggle (sw);
+						toggle_mode = 1;
 					}
 					else
 						linux_switch_depress (sw);
