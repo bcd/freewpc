@@ -948,14 +948,19 @@ sub machine_write_makefile {
 	# TODO : the goal over time is to replace mach/Makefile with
 	# the output of this file.
 
-	# Print GAME_TEST_OBJS, the objects needed for machine
+	# TODO : Print GAME_TEST_OBJS, the objects needed for machine
 	# extensions to test mode.
 
 	# Print extra defines - TODO - commented out for now
-	if (defined ($extra_defs = $m->{'Extra-Defines'})) {
-		foreach $def (@$extra_defs) {
-			print "# $def\n";
-		}
+	#if (defined ($extra_defs = $m->{'Extra-Defines'})) {
+	#	foreach $def (@$extra_defs) {
+	#		print " $def\n";
+	#	}
+	#}
+
+	# Enable the desired fonts
+	for $font (unique ($m->{'fonts'})) {
+		print "CONFIG_" . $font->{'c_ident'} . " := y\n";
 	}
 
 	# Print rules for building the FIFs.
@@ -1092,6 +1097,18 @@ sub machine_write_score_decls {
 	print $END_SOURCE;
 }
 
+
+sub machine_write_font_decls {
+	print $START_SOURCE;
+	print "const font_t *font_table[] = {\n";
+	for $font (unique ($m->{'fonts'})) {
+		$decl = $font->{'c_decl'};
+		$decl =~ s/fon/font/;
+		print "   [" . $font->{'c_ident'} . "] = &$decl,\n";
+	}
+	print "};\n";
+	print $END_SOURCE;
+}
 
 sub machine_write_deff_decls {
 	print $START_SOURCE;
@@ -1248,6 +1265,12 @@ elsif ($command eq "deffs") {
 	machine_write_deff_decls ();
 }
 
+#######################################################
+#  generate build/mach-fonts.c
+#######################################################
+elsif ($command eq "fonts") {
+	machine_write_font_decls ();
+}
 
 elsif ($command eq "dump") {
 	machine_dump ();
