@@ -22,10 +22,17 @@ my $nested_subrs = 0;
 my $list_subr = 0;
 my $stop_after_one = 0;
 my $irq_flag = 0;
+my $named_start_address = undef;
 
 while ($_ = shift (@ARGV)) {
 	if (/-a/) {
 		$start_address = shift @ARGV;
+		if ($start_address =~ /^[a-z]/) {
+			$named_start_address = $start_address;
+			my $mapentry = `grep $start_address build/freewpc.map`;
+			my @fields = split / +/, $mapentry;
+			$start_address = $fields[1];
+		}
 	}
 	elsif (/-l/) {
 		$list_subr = 1;
@@ -61,17 +68,28 @@ sub finish_call {
 sub print_report {
 	$simulation_duration = $simulation_end_time - $system_ready_time;
 	
-	print "Number of calls: $call_count\n";
-	if ($call_count > 0) {
-		print "Average cycles/call:  " . $total_cycles / $call_count . "\n";
+	print "Function: " . ($named_start_address ? $named_start_address : $start_address) . "\n";
+
+	if ($call_count == 0) {
+		print "No calls.\n";
 	}
-	print "Min cycles/call: $min_duration\n";
-	print "Max cycles/call: $max_duration\n";
-	print "Length of simulation: $simulation_duration\n";
-	print "Percentage of runtime: " .
-		$total_cycles * 100 / $simulation_duration . "\n";
+
+	elsif ($call_count == 1) {
+		print "Cycles: " . $total_cycles / $call_count . "\n";
+	}
+
+	elsif ($call_count > 1) {
+		print "Number of calls: $call_count\n";
+		print "Average cycles/call:  " . $total_cycles / $call_count . "\n";
+		print "Min cycles/call: $min_duration\n";
+		print "Max cycles/call: $max_duration\n";
+		print "Length of simulation: $simulation_duration\n";
+		print "Percentage of runtime: " .
+			$total_cycles * 100 / $simulation_duration . "\n";
+	}
 }
 
+my $finish_flag = 0;
 while (<>) {
 	chomp;
 	my $line = $_;
@@ -86,6 +104,12 @@ while (<>) {
 	if ($line =~ /^#([0-9]+) A:.. B:.. X:.... Y:.... U:.... S:.... (....):/) {
 		my ($timestamp, $pc) = ($1, $2);
 		$simulation_end_time = $timestamp;
+
+		if ($finish_flag) {
+			$inside = finish_call ($simulation_end_time - $start_time);
+			last if ($stop_after_one && $call_count);
+			$finish_flag = 0;
+		}
 
 		if (!$inside) {
 			if ($line =~ /$start/) {
@@ -105,19 +129,13 @@ while (<>) {
 			elsif (($line =~ /PULS.*PC/) || ($line =~ /RTS/) ||
 				(($line =~ /RTI/) && $irq_flag)) {
 				if ($nested_subrs == 0) {
-					$inside = finish_call ($simulation_end_time - $start_time);
+					$finish_flag = 1;
 				} else {
-					print "POP\n";
 					$nested_subrs--;
 				}
 			}
 			elsif (($line =~ /JSR/) || ($line =~ /BSR/)) {
-				print "PUSH\n";
 				$nested_subrs++;
-			}
-
-			if ($stop_after_one && $call_count) {
-				last;
 			}
 		}
 	}
