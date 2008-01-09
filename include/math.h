@@ -40,4 +40,13 @@ void random_init (void);
 #include <native/math.h>
 #endif
 
+#define bounded_increment(var, max) do { if (var < max) var++; } while (0)
+
+#define bounded_decrement(var, min) do { if (var > min) var--; } while (0)
+
+#define value_rotate_down(var,min,max) if (var == min) { var = max; } else { var--; }
+
+#define value_rotate_up(var,min,max) if (var == max) { var = min; } else { var++; }
+		
+
 #endif /* _MATH_H */
