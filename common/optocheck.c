@@ -16,7 +16,7 @@ void opto_check (void)
 
 	for (col = 0; col < SWITCH_BITS_SIZE; col++)
 	{
-		if (bits = mach_opto_mask[col])
+		if ((bits = mach_opto_mask[col]) != 0)
 		{
 			for (row = 0; bits && row < 8; row++, bits >>= 1)
 			{
