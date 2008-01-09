@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+
+my $start = "(undefined)";
+my $end = "(undefined)";
+my $start_address = "(undefined)";
+
+#my $start = "JMP.*00E1";
+#my $end = "RTI";
+
+# my $start = " 99CC: ";
+# my $start_address = "852A";
+
+my $inside = 0;
+my $start_time;
+my $min_duration = 9999999;
+my $max_duration = 1;
+my $call_count = 0;
+my $total_cycles = 0;
+my $system_ready_time = 1;
+my $simulation_end_time;
+my $nested_subrs = 0;
+my $list_subr = 0;
+my $stop_after_one = 0;
+my $irq_flag = 0;
+
+while ($_ = shift (@ARGV)) {
+	if (/-a/) {
+		$start_address = shift @ARGV;
+	}
+	elsif (/-l/) {
+		$list_subr = 1;
+		$stop_after_one = 1;
+	}
+	elsif (/-1/) {
+		$stop_after_one = 1;
+	}
+	elsif (/-i/) {
+		$irq_flag = 1;
+	}
+}
+
+sub start_call {
+	$nested_subrs = 0;
+	$start_time = $simulation_end_time;
+	return 1;
+}
+
+sub finish_call {
+	my ($cycles) = @_;
+	# print "Duration: " . $cycles . "\n";
+
+	$call_count++;
+	$max_duration = $cycles if ($cycles > $max_duration);
+	$min_duration = $cycles if ($cycles < $min_duration);
+	$total_cycles += $cycles;
+	$list_subr = 0;
+	return 0;
+}
+
+
+sub print_report {
+	$simulation_duration = $simulation_end_time - $system_ready_time;
+	
+	print "Number of calls: $call_count\n";
+	if ($call_count > 0) {
+		print "Average cycles/call:  " . $total_cycles / $call_count . "\n";
+	}
+	print "Min cycles/call: $min_duration\n";
+	print "Max cycles/call: $max_duration\n";
+	print "Length of simulation: $simulation_duration\n";
+	print "Percentage of runtime: " .
+		$total_cycles * 100 / $simulation_duration . "\n";
+}
+
+while (<>) {
+	chomp;
+	my $line = $_;
+
+	if (!$system_ready_time)
+	{
+		next unless ($line =~ /LDS.*#/);
+		$line =~ /^#([0-9]+) /;
+		$system_ready_time = $1;
+	}
+
+	if ($line =~ /^#([0-9]+) A:.. B:.. X:.... Y:.... U:.... S:.... (....):/) {
+		my ($timestamp, $pc) = ($1, $2);
+		$simulation_end_time = $timestamp;
+
+		if (!$inside) {
+			if ($line =~ /$start/) {
+				$inside = start_call ();
+			}
+			elsif ($pc eq $start_address) {
+				$inside = start_call ();
+			}
+		}
+
+		if ($inside) {
+			print "$line ($nested_subrs)\n" if ($list_subr);
+
+			if ($line =~ /$end/) {
+				$inside = finish_call ($simulation_end_time - $start_time);
+			}
+			elsif (($line =~ /PULS.*PC/) || ($line =~ /RTS/) ||
+				(($line =~ /RTI/) && $irq_flag)) {
+				if ($nested_subrs == 0) {
+					$inside = finish_call ($simulation_end_time - $start_time);
+				} else {
+					print "POP\n";
+					$nested_subrs--;
+				}
+			}
+			elsif (($line =~ /JSR/) || ($line =~ /BSR/)) {
+				print "PUSH\n";
+				$nested_subrs++;
+			}
+
+			if ($stop_after_one && $call_count) {
+				last;
+			}
+		}
+	}
+}
+print_report ();
+
