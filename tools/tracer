@@ -27,7 +27,7 @@ my $named_start_address = undef;
 while ($_ = shift (@ARGV)) {
 	if (/-a/) {
 		$start_address = shift @ARGV;
-		if ($start_address =~ /^[a-z]/) {
+		if ($start_address =~ /^[_a-z]/) {
 			$named_start_address = $start_address;
 			my $mapentry = `grep $start_address build/freewpc.map`;
 			my @fields = split / +/, $mapentry;
@@ -99,6 +99,10 @@ while (<>) {
 		next unless ($line =~ /LDS.*#/);
 		$line =~ /^#([0-9]+) /;
 		$system_ready_time = $1;
+	}
+
+	if (($line =~ /loops/) && $inside) {
+		print "warning: loop detected during function call; may not terminate correctly\n";
 	}
 
 	if ($line =~ /^#([0-9]+) A:.. B:.. X:.... Y:.... U:.... S:.... (....):/) {
