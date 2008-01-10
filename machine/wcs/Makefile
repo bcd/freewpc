@@ -52,4 +52,4 @@ GAME_OBJS =
 
 GAME_INCLUDES =
 
-
+FIF_SRCS += $(M)/soccerball.fif
