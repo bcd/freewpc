@@ -1917,7 +1917,34 @@ struct menu score_test_item = {
 
 /**********************************************************************/
 
-extern const struct menu music_mix_menu;
+void pic_test_draw (void)
+{
+	extern U8 pic_unlock_code[];
+
+	font_render_string_center (&font_mono5, 64, 1, "SECURITY PIC INFO");
+
+	sprintf ("UNLOCK CODE %02X %02X %02X",
+		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
+	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
+
+	sprintf ("GAME NUMBER %3s", pic_serial_number);
+	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
+
+	dmd_show_low ();
+}
+
+struct window_ops pic_test_window = {
+	DEFAULT_WINDOW,
+	.draw = pic_test_draw,
+};
+
+struct menu pic_test_item = {
+	.name = "SECURITY PIC TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &pic_test_window, NULL } },
+};
+
+/**********************************************************************/
 
 struct menu *dev_menu_items[] = {
 #if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
@@ -1937,8 +1964,8 @@ struct menu *dev_menu_items[] = {
 #endif
 	&sched_test_item,
 	&score_test_item,
-#if 0
-	&music_mix_menu,
+#if (MACHINE_PIC == 1)
+	&pic_test_item,
 #endif
 	NULL,
 };
