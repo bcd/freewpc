@@ -38,11 +38,21 @@ COMMON_SW_OBJS += common/search.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/status.o)
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/special.o)
 
+# TODO : Eventually we should include generic, slow device drivers here.
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_DROP), common/drop.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SHAKER), common/shaker.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_GATED), common/gated.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SWITCHBANK), common/switchbank.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_BIDI), common/bidi.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SPINNER), common/spinner.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_KICKBACK), common/kickback.c)
+COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_CAPTIVE), common/captive.c)
+
 COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
 
 # Transition objects are separated out: in time these should be broken up
 # into multiple files, and they could take a lot of space
-TRANS_OBJS += common/dmdtrans.o
+TRANS_OBJS += $(if $(CONFIG_DMD), common/dmdtrans.o)
 
 # Effect objects contain common display and lamp effects, and are
 # separated out for the same reason.
