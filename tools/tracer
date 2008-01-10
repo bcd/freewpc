@@ -3,13 +3,6 @@
 my $start = "(undefined)";
 my $end = "(undefined)";
 my $start_address = "(undefined)";
-
-#my $start = "JMP.*00E1";
-#my $end = "RTI";
-
-# my $start = " 99CC: ";
-# my $start_address = "852A";
-
 my $inside = 0;
 my $start_time;
 my $min_duration = 9999999;
@@ -23,44 +16,72 @@ my $list_subr = 0;
 my $stop_after_one = 0;
 my $irq_flag = 0;
 my $named_start_address = undef;
+my $mapfile= "build/freewpc.map";
+my $histogram_flag = 0;
 
 while ($_ = shift (@ARGV)) {
-	if (/-a/) {
+	if (/^-h$/) {
+		print "Options:\n";
+		print "-m <file>        Use map <file> for symbolic information\n";
+		print "-a <addr>        Analyze function beginning at <addr>\n";
+		print "-l               List first instance of function then stop\n";
+		print "--list-all       List all instances found\n";
+		print "-1               Stop after first occurrence\n";
+		print "-H               Produce histogram of calls rather than summary\n";
+		print "-i               Says that function is an interrupt handler\n";
+		exit 0;
+	}
+	elsif (/^-m$/) {
+		$mapfile = shift @ARGV;
+	}
+	elsif (/^-a$/) {
 		$start_address = shift @ARGV;
 		if ($start_address =~ /^[_a-z]/) {
 			$named_start_address = $start_address;
-			my $mapentry = `grep $start_address build/freewpc.map`;
+			my $mapentry = `grep $start_address $mapfile`;
 			my @fields = split / +/, $mapentry;
 			$start_address = $fields[1];
 		}
 	}
-	elsif (/-l/) {
+	elsif (/^-l$/) {
 		$list_subr = 1;
 		$stop_after_one = 1;
 	}
-	elsif (/-1/) {
+	elsif (/^--list-all$/) {
+		$list_subr = 1;
+	}
+	elsif (/^-1$/) {
 		$stop_after_one = 1;
 	}
-	elsif (/-i/) {
+	elsif (/^-i$/) {
 		$irq_flag = 1;
 	}
+	elsif (/^-H$/) {
+		$histogram_flag = 1;
+	}
+}
+
+if (!defined $start_address) {
+	print "no start address given\n";
+	exit 1;
 }
 
 sub start_call {
 	$nested_subrs = 0;
 	$start_time = $simulation_end_time;
+	print "Start call:\n=====================================\n" if ($list_subr);
 	return 1;
 }
 
 sub finish_call {
 	my ($cycles) = @_;
-	# print "Duration: " . $cycles . "\n";
 
+	$histogram[$call_count] = $cycles;
 	$call_count++;
 	$max_duration = $cycles if ($cycles > $max_duration);
 	$min_duration = $cycles if ($cycles < $min_duration);
 	$total_cycles += $cycles;
-	$list_subr = 0;
+	# $list_subr = 0;
 	return 0;
 }
 
@@ -69,6 +90,14 @@ sub print_report {
 	$simulation_duration = $simulation_end_time - $system_ready_time;
 	
 	print "Function: " . ($named_start_address ? $named_start_address : $start_address) . "\n";
+
+
+	if ($histogram_flag) {
+		for (my $i = 0; $i < $call_count; $i++) {
+			print $histogram[$i] . "\n";
+		}
+		return;
+	}
 
 	if ($call_count == 0) {
 		print "No calls.\n";
@@ -94,6 +123,8 @@ while (<>) {
 	chomp;
 	my $line = $_;
 
+	# Skip all trace entries until the 'system ready' pattern is found.
+	# This ignores a lot of boot-time code that we don't care about.
 	if (!$system_ready_time)
 	{
 		next unless ($line =~ /LDS.*#/);
@@ -101,20 +132,31 @@ while (<>) {
 		$system_ready_time = $1;
 	}
 
+	# MAME tracing can produce shorter output when there is small loops
+	# in the code.  If an 'rts' is omitted, this can confuse the tracer.
 	if (($line =~ /loops/) && $inside) {
 		print "warning: loop detected during function call; may not terminate correctly\n";
 	}
 
+	# Only consider lines that have tracing data.
+	# The main items to parse here are the timestamp (cycle count) and the
+	# current program counter.
 	if ($line =~ /^#([0-9]+) A:.. B:.. X:.... Y:.... U:.... S:.... (....):/) {
 		my ($timestamp, $pc) = ($1, $2);
 		$simulation_end_time = $timestamp;
 
+		# If end-of-function was detected on the previous instruction, then
+		# finish the call here.  We defer this in order to account for the
+		# time it takes to execute the final instruction.
 		if ($finish_flag) {
 			$inside = finish_call ($simulation_end_time - $start_time);
-			last if ($stop_after_one && $call_count);
 			$finish_flag = 0;
+			last if ($stop_after_one && $call_count);
 		}
 
+		# If not inside the target function, see if this instruction starts it.
+		# We can match an instruction pattern or an address.
+		# Fallthrough to the next case so that the first instruction is handled.
 		if (!$inside) {
 			if ($line =~ /$start/) {
 				$inside = start_call ();
@@ -124,12 +166,22 @@ while (<>) {
 			}
 		}
 
+		# While inside the target function, print out the source code if
+		# that is enabled, and check to see if we are at the end.
 		if ($inside) {
 			print "$line ($nested_subrs)\n" if ($list_subr);
 
+			# The end-of-function can be an instruction pattern.
 			if ($line =~ /$end/) {
 				$inside = finish_call ($simulation_end_time - $start_time);
 			}
+
+			# Or it could be because of a return instruction.
+			# However, due to nesting of functions, that alone is not enough.
+			# We keep a nesting count and declare end-of-function only when the
+			# call stack is empty.
+			#
+			# Return-from-interrupt is only processed when -i is given.
 			elsif (($line =~ /PULS.*PC/) || ($line =~ /RTS/) ||
 				(($line =~ /RTI/) && $irq_flag)) {
 				if ($nested_subrs == 0) {
@@ -138,6 +190,9 @@ while (<>) {
 					$nested_subrs--;
 				}
 			}
+
+			# These instruction patterns say when a function is pushed onto
+			# the call stack.
 			elsif (($line =~ /JSR/) || ($line =~ /BSR/)) {
 				$nested_subrs++;
 			}
