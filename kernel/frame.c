@@ -117,8 +117,9 @@ const U8 *frame_xor_rle (const U8 *framedata)
 }
 
 
-/** Internal function to draw a single full-screen frame. */
-static const U8 *dmd_draw_xbmprog (const U8 *framedata)
+/** An internal function to decompress a single bitplane
+ * into the low-mapped page buffer. */
+static const U8 *dmd_decompress_bitplane (const U8 *framedata)
 {
 	U8 method;
 
@@ -126,7 +127,7 @@ static const U8 *dmd_draw_xbmprog (const U8 *framedata)
 	function to do the appropriate save/restore. */
 	wpc_push_page (PRG_PAGE);
 
-	/* The first byte of an xbmprog is a 'method', which
+	/* The first byte of a compressed bitplane is a 'method', which
 	says the overlap manner in which the image has been
 	compressed. */
 	method = *framedata++;
@@ -181,11 +182,11 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 	wpc_pop_page ();
 
 	/* Draw the frame(s) */
-	fif = dmd_draw_xbmprog (fif);
+	fif = dmd_decompress_bitplane (fif);
 	if (depth == 2)
 	{
 		dmd_flip_low_high ();
-		fif = dmd_draw_xbmprog (fif);
+		fif = dmd_decompress_bitplane (fif);
 		dmd_flip_low_high ();
 	}
 	return fif;
@@ -193,44 +194,23 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 
 
 /** Execute a FreeWPC animation, which is a series of
-consecutive FIFs. */
+consecutive FIFs.  An animation is a sequence of FIFs,
+with a leading header. */
 const U8 *dmd_draw_faf1 (const U8 *faf, task_ticks_t delay)
 {
+	U8 depth;
+	const U8 *fif;
+	const U16 **faf_as_pointer = (const U16 **)&faf;
+
+	/* TODO */
+	wpc_push_page (PRG_PAGE);
+	depth = *faf++;
+	fif = *(*faf_as_pointer)++;
+	do {
+		dmd_draw_fif1 (fif);
+		fif = *(*faf_as_pointer)++;
+	} while (fif != NULL);
+	wpc_pop_page ();
 	return faf;
 }
-
-
-/** Run a DMD animation on the display.
- * An animation is given as a set of adjacent xbmprogs.
- * The delay between frames can be specified.  The
- * special flag value XBMPROG_METHOD_END is placed at
- * the end of the sequence.
- */
-void dmd_animate (const U8 *xbmprog, task_ticks_t delay)
-{
-	while (*xbmprog != XBMPROG_METHOD_END)
-	{
-		dmd_alloc_low ();
-		/* TODO : broken because the xbmprogs are in the wrong order! */
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_show_low ();
-		task_sleep (delay);
-	}
-}
-
-
-void dmd_animate2 (const U8 *xbmprog, task_ticks_t delay)
-{
-	while (*xbmprog != XBMPROG_METHOD_END)
-	{
-		dmd_alloc_low_high ();
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_flip_low_high ();
-		xbmprog = dmd_draw_xbmprog (xbmprog);
-		dmd_flip_low_high ();
-		dmd_show2 ();
-		task_sleep (delay);
-	}
-}
-
 
