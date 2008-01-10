@@ -18,6 +18,11 @@ HOST_LIBS += -lpth
 # Additional object files to be linked into the kernel region
 KERNEL_OBJS += $(D)/main.o $(D)/task.o $(D)/section.o
 
+# Machine-specific simulation files
+#ifeq ($(MACHINE),tz)
+#KERNEL_OBJS += $(D)/tz_sim.o
+#endif
+
 # When using the curses UI (default for now)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
@@ -26,5 +31,7 @@ KERNEL_OBJS += $(D)/ui_curses.o
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)
 
+# Invoke 'make attach' to start up a GDB session that attaches itself to
+# a running instance of the native mode program.
 attach:
-	gdb -p `ps -ef | grep freewpc | head -n 1 | awk '{print $$2}'` -x gdbmacros
+	gdb -p `ps -ef | grep freewpc | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros
