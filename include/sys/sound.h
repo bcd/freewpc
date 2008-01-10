@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,7 +22,11 @@
 #define _SYS_SOUND_H
 
 /* Predefined, fixed system sound values */
+
 #if (MACHINE_DCS == 0)
+
+typedef U8 sound_cmd_t;
+
 #define SND_TEST_DOWN			0x50
 #define SND_TEST_UP				0x51
 #define SND_TEST_ABORT			0x52
@@ -42,7 +46,12 @@
 #define SND_STOP_SOUND			0x7D 
 #define SND_STOP_MUSIC			0x7E 
 #define SND_STOP_DAC          0x7F
-#else
+
+#define WPCS_READ_READY	0x01
+
+#else /* MACHINE_DCS == 1 */
+
+typedef U16 sound_cmd_t;
 
 #define MUSIC_SND(x)				((0UL << 8) + (x))
 #define SPEECH_SND(x)			((1UL << 8) + (x))
@@ -60,7 +69,11 @@
 #define SND_TEST_SCROLL			TEST_SND(0xDD)
 #define SND_GET_VERSION_CMD	TEST_SND(0xE7)
 #define SND_GET_MINOR_VERSION_CMD TEST_SND(0xE8)
-#endif
+
+#define WPCS_READ_READY	0x80
+
+#endif /* MACHINE_DCS */
+
 
 #define MUS_OFF					0
 
