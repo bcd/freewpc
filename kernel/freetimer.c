@@ -34,11 +34,24 @@
 
 #include <freewpc.h>
 
-#define MAX_FREE_TIMERS 32
+/* There are currently no free timer users, so keep this small for now */
+#define MAX_FREE_TIMERS 8
 
 typedef U8 free_timer_id_t;
 
+/* The array of free timers.  Each byte indicates time-to-expiry in 33ms
+ * units, for a max duration of about 8 seconds. */
 U8 free_timers[MAX_FREE_TIMERS];
+
+
+static inline U8 *free_timer_update (U8 *timer_ptr)
+{
+	if (*timer_ptr)
+	{
+		(*timer_ptr)--;
+	}
+	return timer_ptr+1;
+}
 
 
 /** Realtime timer update function.  Each timer value is
@@ -47,11 +60,11 @@ void free_timer_rtt (void)
 {
 	U8 *timer_ptr = free_timers;
 	do {
-		if (*timer_ptr)
-		{
-			(*timer_ptr)--;
-		}
-	} while (++timer_ptr < &free_timers[MAX_FREE_TIMERS]);
+		timer_ptr = free_timer_update (timer_ptr);
+		timer_ptr = free_timer_update (timer_ptr);
+		timer_ptr = free_timer_update (timer_ptr);
+		timer_ptr = free_timer_update (timer_ptr);
+	} while (timer_ptr < &free_timers[MAX_FREE_TIMERS]);
 }
 
 
