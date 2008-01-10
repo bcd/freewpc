@@ -43,10 +43,11 @@
 is enabled.  Each tick here corresponds to 4ms. */
 U8 sol_timers[SOL_COUNT];
 
-/** Per solenoid duty-cycle mask.  This is an 8-bit value which a '1'
-bit means to turn the solenoid on, and a '0' means to (temporarily)
+/** Per solenoid duty-cycle mask.  This is an 8-bit value where a '1'
+bit means to keep the solenoid on, and a '0' means to (temporarily)
 turn it off.  When the solenoid is enabled, this allows it to be
-duty cycled.  A value of 0xFF means 100% power, 0x55 means 50% power, etc. */
+duty cycled.  A value of 0xFF means 100% power, 0x55 means 50% power, etc.
+This value is ignored when the solenoid is disabled. */
 U8 sol_duty_state[SOL_COUNT];
 
 /** The current bit of the duty cycle masks to be examined.  After each
