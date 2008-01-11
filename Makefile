@@ -409,7 +409,6 @@ $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
 $(eval $(call PAGE_ALLOC, 59, FSM))
-## $(eval $(call PAGE_ALLOC, 60, XBM)) # not needed anymore
 $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
