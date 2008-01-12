@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -107,8 +107,11 @@ void device_debug (void)
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
+	/* The 'missing' count printed here is the one that makes the
+	most sense... however it is not exactly the 'missing_balls'
+	variable */
 	dbprintf ("Accounted: %d   ", counted_balls);
-	dbprintf ("Missing: %d   ", missing_balls - live_balls);
+	dbprintf ("Missing: %d   ", missing_balls - live_balls + held_balls);
 	dbprintf ("Live: %d   ", live_balls);
 	dbprintf ("Held: %d\n", held_balls);
 }
@@ -207,8 +210,18 @@ void device_update (void)
 	device_t *dev = &device_table[device_getgid () - DEVICE_GID_BASE];
 
 wait_and_recount:
+	/* We are really interested in the total count of the
+	 * device, not which switches contributed to it.
+	 * Since multiple switch transitions occur as a ball
+	 * "slides through", don't act on a transition right
+	 * away.  Instead, wait awhile until no further transitions
+	 * occur, so that the count is stable. */
 	task_sleep_sec (1);
+
+	/* The device is probably stable now.  Poll all of the
+	 * switches and recount */
 	device_recount (dev);
+
 	device_update_globals ();
 	device_debug ();
 
@@ -240,7 +253,7 @@ wait_and_recount:
 		{
 			/* More typical : when idle, the count should only go up.
 			 * Treat this as an enter event (or multiple events, if the
-			 * count goes down by more than 1). */
+			 * count goes up by more than 1). */
 			U8 enter_count = dev->actual_count - dev->previous_count;
 			while (enter_count > 0)
 			{
@@ -254,11 +267,11 @@ wait_and_recount:
 	{
 		/* Device is in the middle of a release cycle.
 		 * See if the count changed. */
-		if (dev->actual_count >= dev->previous_count)
+		if (unlikely (dev->actual_count >= dev->previous_count))
 		{
 			/* After attempting a release, the count did not go down ... the kick 
-			 * probably failed, and we should retry up to a point.  Since no state
-			 * is changed, the code will get reinvoked. */
+			 * probably failed, and we should retry up to a point.  Since dev->state
+			 * is unchanged below, the kick attempt will get reinvoked. */
 
 			/* Note: during multiball, it is possible for a second ball to enter
 			the device immediately after the kick.  The kick didn't
@@ -325,6 +338,8 @@ wait_and_recount:
 		else if (dev->actual_count > dev->max_count)
 		{
 			device_call_op (dev, full);
+			/* Important: when the device is completely full,
+			 * we MUST kick a ball */
 			dev->kicks_needed++;
 			dev->kick_errors = 0;
 		}
@@ -441,7 +456,7 @@ void device_update_globals (void)
 	U8 held_balls_now = 0;
 
 	/* Recount the number of balls that are held, 
-	excluding those that are locked. */
+	excluding those that are locked and those in the trough. */
 	counted_balls = 0;
 	held_balls_now = 0;
 	for (devno = 0; devno < NUM_DEVICES; devno++)
@@ -459,14 +474,8 @@ void device_update_globals (void)
 	/* Update held_balls atomically */
 	held_balls = held_balls_now;
 
-	/* Count how many balls are missing */
+	/* Update count of how many balls are missing */
 	missing_balls = max_balls - counted_balls;
-
-	if (missing_balls != live_balls)
-	{
-		/* Number of balls not accounted for is NOT what we expect */
-		dbprintf ("Error: missing=%d, live=%d\n", missing_balls, live_balls);
-	}
 
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
 		counted_balls, missing_balls, live_balls, held_balls);

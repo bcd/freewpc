@@ -1,5 +1,5 @@
 #
-# Copyright 2007 by Brian Dominy <brian@oddchange.com>
+# Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
 # 
 # This file is part of FreeWPC.
 # 
@@ -34,14 +34,14 @@ triac_rtt             2       60c
 switch_rtt/4          1       140c
 
 # Resynchronize to the AC zero cross point.
-ac_rtt                2       30c
+ac_rtt                2       23c
 
 # Update the solenoids.  Each bank of 8 is updated
 # once every 4ms (the 4 banks are alternated every 1ms).
 sol_update_rtt/4      1       60c
 
 # Update the lamps
-lamp_rtt/4            2       100c
+lamp_rtt/4            2       111c
 
 # Advance the system clock
 !clock_advance        16      4c
@@ -50,23 +50,17 @@ lamp_rtt/4            2       100c
 !wpc_led_toggle       32      14c
 
 # Read/write the sound board
-sound_rtt             2       50c
+# TODO : too frequent???
+sound_rtt             4       38c
 
 # Toggle lamps that are in 'flash' mode
-# TODO : the flash handler is really only toggling every
-# 128ms, so this can be reduced
-lamp_flash_rtt        32      0.01
+lamp_flash_rtt        32      37c
 
 # Check for task-level lockup
-# TODO : this may be more often than necessary, once all
-# critical functions are done here outside of task level.
-lockup_check_rtt      128     0.01
+lockup_check_rtt      128     23c
 
 # Free running hardware-quality timers
-free_timer_rtt        32		100c
-
-# Accumulate idle-time statistics when enabled
-#if IDLE_PROFILE idle_profile_rtt      128     0.01
+free_timer_rtt        32		94c
 
 # Common processing required at the end of every IRQ
 do_irq_end            1       0c
@@ -74,4 +68,3 @@ do_irq_end            1       0c
 
 # TODO : service the coin switches correctly to ensure proper timing
 
-# TODO : add hardtimer_rtt

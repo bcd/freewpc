@@ -98,6 +98,20 @@ typedef struct
 
 extern __nvram__ std_adj_t system_config;
 
+#ifdef CONFIG_TIMED_GAME
+#define config_timed_game (system_config.timed_game)
+#else
+#define config_timed_game OFF
+#endif
+
+#ifdef MACHINE_LAUNCH_SWITCH
+#define config_flipper_plunger (system_config.flipper_plunger)
+#define config_timed_plunger (system_config.timed_plunger)
+#else
+#define config_flipper_plunger OFF
+#define config_timed_plunger OFF
+#endif
+
 typedef struct
 {
 	adjval_t pricing_mode;

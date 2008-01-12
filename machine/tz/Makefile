@@ -3,11 +3,11 @@
 # Game specific Makefile extensions
 #
 
-MACHINE_FILE = tz.md
+MACHINE_FILE := tz.md
 
-MACHINE_SCHEDULE = $(M)/tz.sched
+MACHINE_SCHEDULE := $(M)/tz.sched
 
-SCHED_FLAGS += -i tz/driver.h
+MACHINE_SCHED_FLAGS := -i tz/driver.h
 
 MUX_SRCS := build/tz-mux.c
 
@@ -76,3 +76,6 @@ GAME_FSMS = shot.fsm
 
 FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 
+FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
+	$(M)/coinstack.fif $(M)/hitcher.fif $(M)/oldcar.fif \
+	$(M)/pyramid.fif $(M)/robot.fif

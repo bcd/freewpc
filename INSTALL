@@ -1,0 +1,27 @@
+To compile FreeWPC, follow these general guidelines.  See the
+documentation on <http://www.oddchange.com/freewpc> for more details.
+
+1. Decide if you are compiling natively (to run on your machine) or
+building a real ROM (to be used in pinmame).
+
+2. Create a file called "user.make" in the current directory.
+See user.make.example for options.
+
+	* Make sure to set "NATIVE=y" in user.make if you are compiling in
+	native mode.
+
+	* You must define 'MACHINE' to a valid game name, and 'PLATFORM'
+	must be set to 'wpc'.
+
+	* If you are going to run pinmame, set 'TARGET_ROMPATH' to point
+	to your mame ROMs directory.
+
+4. Type "make".
+
+5. For a native build, the result should be a program named "freewpc"
+in the current directory.  For a ROM build, a .rom file will be
+built.  If you defined TARGET_ROMPATH, that ROM will be copied
+there as well (replacing any zip file that was already there, which
+will get backed up to a .original file; sound ROMs from the original
+will also get copied into the new zip archive).
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -137,6 +137,8 @@ void xbmset_write (FILE *fp, XBMSET *xbmset, int plane, int write_flags);
 void xbmset_free (XBMSET *xbmset);
 XBM *xbmset_plane (XBMSET *xbmset, int plane);
 XBMPROG *xbm_make_prog (XBM *xbm);
+void xbmprog_write (FILE *fp, const char *name, int plane, XBMPROG *xbmprog);
+void xbmprog_free (XBMPROG *prog);
 
 PGM * pgm_alloc (void);
 void pgm_free (PGM *pgm);
@@ -159,6 +161,7 @@ void pgm_write_xbmset (PGM *pgm, const char *filename, const char *name);
 void pgm_write_xbm (PGM *pgm, const char *filename, const char *name, int plane);
 void pgm_change_maxval (PGM *pgm, unsigned int new_maxval);
 PGM * pgm_read (const char *filename);
+void pgm_dither (PGM *pgm, unsigned int new_maxval);
 void pgm_invert (PGM *pgm);
 
 extern void machgen (void);

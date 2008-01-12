@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,7 @@
  */
 
 #include <freewpc.h>
+#include <coin.h>
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 

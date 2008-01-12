@@ -150,7 +150,7 @@ static char glyph_times8_4_bits[] = { glyph_times8_4_width, glyph_times8_4_heigh
 #define glyph_times8_5_width 7
 #define glyph_times8_5_height 12
 static char glyph_times8_5_bits[] = { glyph_times8_5_width, glyph_times8_5_height,
- 0x7e,0x7e,0x03,0x03,0x1f,0x3f,0x73,0x60,0x60,0x73,0x3f,0x1e};
+ 0x7f,0x7f,0x03,0x03,0x1f,0x3f,0x73,0x60,0x60,0x73,0x3f,0x1e};
 #define glyph_times8_6_width 8
 #define glyph_times8_6_height 12
 static char glyph_times8_6_bits[] = { glyph_times8_6_width, glyph_times8_6_height,

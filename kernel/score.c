@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -401,20 +401,25 @@ void score_sub (score_t s1, const score_t s2)
 }
 
 
-/** Multiply a score (in place) by the given value. */
+/** Multiply a score (in place) by the given value.
+ * Zero is not supported, as it should never be called this
+ * way. */
 void score_mul (score_t s, U8 multiplier)
 {
-	/* TODO */
+	/* If multiplier is 1, nothing needs to be done. */
 	if (multiplier > 1)
 	{
+		/* Otherwise, we need to perform 'multiplier-1'
+		 * additions of the value into itself.  This is
+		 * not the most elegant way, but multiplications
+		 * are not common, and the multipliers are often
+		 * going to be small. */
 		score_t copy;
 		score_copy (copy, s);
 	
 		do {
 			score_add (s, copy);
 		} while (--multiplier > 1);
-
-		score_copy (s, copy);
 	}
 }
 
@@ -452,8 +457,6 @@ void scores_reset (void)
 
 CALLSET_ENTRY (score, start_ball)
 {
-	/* TODO : once playfield multipliers are implemented, make sure
-	to reset the multiplier at the start of the next ball */
 	global_score_multiplier = 1;
 }
 

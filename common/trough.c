@@ -46,6 +46,9 @@ static void handle_outhole (void)
 {
 	while (switch_poll (SW_OUTHOLE))
 	{
+		/* TODO : For TZ, this keeps a ball on the outhole even
+		when it could be moved to far left trough,
+		which is not part of the trough device. */
 		if (device_full_p (device_entry (DEVNO_TROUGH)))
 		{
 			task_sleep_sec (1);

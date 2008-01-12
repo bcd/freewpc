@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -84,7 +84,7 @@ typedef struct
 	const char *s;
 } fontargs_t;
 
-extern fontargs_t font_args;
+extern __fastram__ fontargs_t font_args;
 
 void font_get_string_area (const font_t *font, const char *s);
 

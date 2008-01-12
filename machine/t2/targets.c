@@ -104,7 +104,7 @@ const bank_properties_t bank_properties_table[] = {
 };
 
 
-const U8 bank_get_lampset (const U8 bankno)
+U8 bank_get_lampset (const U8 bankno)
 {
 	return bank_properties_table[bankno].lampset;
 }

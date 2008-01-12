@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -53,7 +53,7 @@ this is not currently used... we always use a single pixel */
 /** A global structure that describes all of the attributes for
 the next font rendering: location, font, and string.  Using this
 avoids passing long argument lists to lots of functions. */
-fontargs_t font_args;
+__fastram__ fontargs_t font_args;
 
 /** The width of the current character being rendered in bits */
 __fastram__ U8 font_width;
@@ -121,7 +121,7 @@ U8 *font_lookup (const font_t *font, char c)
 
 static inline void font_blit_internal (U8 *dst, U8 width, const U8 shift)
 {
-	register U8 *src = blit_data;
+	register const U8 *src = blit_data;
 
 	do {
 		if (shift == 0)

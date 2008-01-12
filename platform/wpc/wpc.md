@@ -18,7 +18,7 @@ D5: Escape, service, intest, cabinet
 D6: Down, service, intest, cabinet
 D7: Up, service, intest, cabinet
 D8: Enter, service, intest, cabinet
-22: Coin Door Closed, cabinet, edge, opto
+22: Coin Door Closed, cabinet, edge, opto, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 F1: L. R. Flipper EOS, opto, cabinet
 F2: L. R. Flipper Button, button, opto, intest, c_decl(sw_right_button)
@@ -66,6 +66,13 @@ A6: Aux. Sol. 6
 A7: Aux. Sol. 7
 A8: Aux. Sol. 8
 
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. String 4
+4: G.I. String 5
+
 [lampsets]
 ALL: 11..88
 
@@ -91,6 +98,8 @@ Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
 System Reset: PRI_RESET, page(COMMON_PAGE)
+# TODO : priority below?
+Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 
 [leffs]
 NULL: 0

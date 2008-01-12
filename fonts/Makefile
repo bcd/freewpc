@@ -4,22 +4,29 @@
 # files in source control, but can always be regenerated if necessary.
 # TODO : only link in the fonts that the machine/system require
 
-FONT_OBJS += fonts/mono5.o
-FONT_OBJS += fonts/mono9.o
-FONT_OBJS += fonts/var5.o
-FONT_OBJS += fonts/tinynum.o
-FONT_OBJS += fonts/bitmap.o
+CONFIG_FON_BITMAP := y
 
-FON_OBJS += fonts/fixed10.o
-FON_OBJS += fonts/fixed12.o
-FON_OBJS += fonts/fixed6.o
-FON_OBJS += fonts/lucida9.o
-FON_OBJS += fonts/cu17.o
-FON_OBJS += fonts/term6.o
-FON_OBJS += fonts/times10.o
-FON_OBJS += fonts/times8.o
-FON_OBJS += fonts/helv8.o
-FON_OBJS += $(if $(CONFIG_UTOPIA), fonts/utopia.o)
-FON_OBJS += $(if $(CONFIG_SCHU), fonts/schu.o)
-FON_OBJS += fonts/miscfixed.o
+FONT_OBJS += $(if $(CONFIG_FON_MONO5), fonts/mono5.o)
+FONT_OBJS += $(if $(CONFIG_FON_MONO9), fonts/mono9.o)
+FONT_OBJS += $(if $(CONFIG_FON_VAR5), fonts/var5.o)
+FONT_OBJS += $(if $(CONFIG_FON_TINYNUM), fonts/tinynum.o)
+FONT_OBJS += $(if $(CONFIG_FON_BITMAP), fonts/bitmap.o)
 
+FON_OBJS += $(if $(CONFIG_FON_FIXED10), fonts/fixed10.o)
+FON_OBJS += $(if $(CONFIG_FON_FIXED12), fonts/fixed12.o)
+FON_OBJS += $(if $(CONFIG_FON_FIXED6), fonts/fixed6.o)
+FON_OBJS += $(if $(CONFIG_FON_LUCIDA9), fonts/lucida9.o)
+FON_OBJS += $(if $(CONFIG_FON_CU17), fonts/cu17.o)
+FON_OBJS += $(if $(CONFIG_FON_TERM6), fonts/term6.o)
+FON_OBJS += $(if $(CONFIG_FON_TIMES10), fonts/times10.o)
+FON_OBJS += $(if $(CONFIG_FON_TIMES8), fonts/times8.o)
+FON_OBJS += $(if $(CONFIG_FON_HELV8), fonts/helv8.o)
+FON_OBJS += $(if $(CONFIG_FON_UTOPIA), fonts/utopia.o)
+FON_OBJS += $(if $(CONFIG_FON_SCHU), fonts/schu.o)
+FON_OBJS += $(if $(CONFIG_FON_MISCTYPE), fonts/miscfixed.o)
+
+# The fonts below were derived using fontgen2.
+
+FON_OBJS += $(if $(CONFIG_FON_V5PRC), fonts/free/v5prc.o)
+FON_OBJS += $(if $(CONFIG_FON_V5PRD), fonts/free/v5prd.o)
+FON_OBJS += $(if $(CONFIG_FON_V5PRF), fonts/free/v5prf.o)

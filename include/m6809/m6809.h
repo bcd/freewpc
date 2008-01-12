@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -46,6 +46,7 @@ U16 far_read16 (U16 *address, U8 page);
 typedef void (*void_function) (void);
 void far_indirect_call_handler (void_function address, U8 page);
 
+/* Other externals */
 
 extern void *_far_call_address;
 extern U8 _far_call_page;

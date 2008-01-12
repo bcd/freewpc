@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -96,8 +96,8 @@ void switch_init (void)
 
 	/* Initialize the raw state based on mach_opto_mask,
 	 * so that the optos don't all trigger at initialization. */
-	memcpy (&switch_bits[AR_RAW][0], mach_opto_mask, SWITCH_BITS_SIZE);
-	memcpy (&switch_bits[AR_LATCHED][0], mach_opto_mask, SWITCH_BITS_SIZE);
+	memcpy (switch_raw_bits, mach_opto_mask, SWITCH_BITS_SIZE);
+	memcpy (switch_latched_bits, mach_opto_mask, SWITCH_BITS_SIZE);
 }
 
 
@@ -136,6 +136,35 @@ void switch_short_detect (void)
 }
 
 
+extern inline void switch_rtt_common (void)
+{
+#if (MACHINE_PIC == 1)
+	/* Before any switch data can be accessed on a WPC-S
+	 * or WPC95 machine, we need to poll the PIC and see
+	 * if the unlock code must be sent to it. */
+	U8 unlocked;
+
+	/* Read the status to see if the matrix is still unlocked. */
+	wpc_write_pic (WPC_PIC_COUNTER);
+	noop ();
+	noop ();
+	noop ();
+	unlocked = wpc_read_pic ();
+
+	if (!unlocked)
+	{
+		/* We need to unlock it again. */
+		extern U8 pic_unlock_code[3];
+
+		wpc_write_pic (WPC_PIC_UNLOCK);
+		wpc_write_pic (pic_unlock_code[0]);
+		wpc_write_pic (pic_unlock_code[1]);
+		wpc_write_pic (pic_unlock_code[2]);
+	}
+#endif /* MACHINE_PIC */
+}
+
+
 /** Poll a single switch column.
  * Column 0 corresponds to the cabinet switches.
  * Columns 1-8 refer to the playfield columns.
@@ -154,14 +183,16 @@ extern inline void switch_rowpoll (const U8 col)
 	 */
 	if (col == 0)
 		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_CABINET_INPUT);
+
 	else if (col <= 8)
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_ROW_INPUT);
-	else if (col == 9)
-#if (MACHINE_WPC95 == 1)
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC95_FLIPPER_SWITCH_INPUT);
+#if (MACHINE_PIC == 1)
+		switch_raw_bits[col] = delta = wpc_read_pic ();
 #else
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
+		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_ROW_INPUT);
 #endif
+
+	else if (col == 9)
+		switch_raw_bits[col] = delta = wpc_read_flippers ();
 
 	/* delta/changed is TRUE when the switch has changed state from the
 	 * previous latched value */
@@ -177,7 +208,7 @@ extern inline void switch_rowpoll (const U8 col)
 	if (col < 8)
 	{
 #if (MACHINE_PIC == 1)
-		wpc_asic_write (WPC_SW_COL_STROBE, col+16);
+		wpc_write_pic (WPC_PIC_COLUMN (col));
 #else
 		wpc_asic_write (WPC_SW_COL_STROBE, 1 << col);
 #endif
@@ -227,6 +258,7 @@ bool switch_poll_logical (const switchnum_t sw)
 
 void switch_rtt_0 (void)
 {
+	switch_rtt_common ();
 	switch_rowpoll (0);
 	switch_rowpoll (1);
 	switch_rowpoll (2);
@@ -317,6 +349,9 @@ void switch_sched (void)
 	dbprintf ("Handling switch ");
 	sprintf_far_string (names_of_switches + sw);
 	dbprintf1 ();
+#ifdef DEBUG_SWITCH_NUMBER
+	dbprintf (" (%d) ", sw);
+#endif
 	dbprintf ("\n");
 #endif
 
@@ -412,7 +447,7 @@ CALLSET_ENTRY (switch, idle)
 #ifdef QUEUE_SWITCHES
 	U8 queued_bits;
 #endif
-	U8 col;
+	register U16 col = 0;
 	extern U8 sys_init_complete;
 
 	/* Prior to system initialization, switches are not serviced.
@@ -424,33 +459,52 @@ CALLSET_ENTRY (switch, idle)
 		return;
 	}
 
-	for (col = 0; col <= 9; col++)
+	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
-		/* Atomically get-and-clear the pending switches */
+		/* If pending bits is zero, which it will be most of the
+		 * time, then there is absolutely nothing to consider on this
+		 * column.  (The logic below would always effectively do nothing.) */
+		/* TODO - do a check before the for loop that checks all of
+		 * them quickly */
+		if (likely (switch_pending_bits[col] == 0))
+			continue;
+
+		/* Atomically get-and-clear the pending switches.
+		 * Note that we REREAD pending bits here; it may have changed
+		 * since we just checked it!  But it is guaranteed that only
+		 * additional bits could be set -- not cleared */
+		barrier ();
 		disable_irq ();
 		pendbits = switch_pending_bits[col];
 		switch_pending_bits[col] = 0;
 		enable_irq ();
 
-		/* Updated latched bits out of IRQ in new scheme, as it just toggles */
+		/* Updated latched bits.  pendbits will toggle anytime the state
+		 * of the switch changes, so we use just an XOR operation to update the
+		 * current state.  Latched just means that this is the state of the
+		 * switches that is returned when polling from task level. */
 		switch_latched_bits[col] ^= pendbits;
 
-		/* Grab the latched bits : 0=open, 1=closed */
+		/* We're going to convert the latched state, which is raw I/O level,
+		 * into something logical.  First, optos need to be inverted.
+		 * Thus rawbits=0 for any inactive switch, or 1 for an active switch. */
 		rawbits = switch_latched_bits[col];
-
-		/* Invert for optos: 0=inactive, 1=active */
 		rawbits ^= mach_opto_mask[col];
 
-		/* Convert to active level: 0=inactive, 1=active or edge */
+		/* Now consider that edge switches need to be processed on both
+		 * type of transitions, but other switches should only be handled on
+		 * inactive->active.  Convert rawbits to indicate "might need to process":
+		 * 0 == inactive == no need to process
+		 * 1 == active or edge  == might need to process */
 		rawbits |= mach_edge_switches[col];
 
 		/* Grab the current set of pending bits, masked with rawbits.
-		 * pendbits is only 1 if the switch is marked pending and it
-		 * is currently active.  For edge-triggered switches, it is
-		 * invoked active or inactive.
+		 * If nonzero, it means the switch just changed state, AND the
+		 * transition is of a type that needs to be processed.
 		 */
+		pendbits &= rawbits;
 
-		if (pendbits & rawbits) /* Anything to be done on this column? */
+		if (pendbits) /* Anything to be done on this column? */
 		{
 			/* Yes, calculate the switch number for the first row in the column */
 			U8 sw = col * 8;
@@ -459,7 +513,8 @@ CALLSET_ENTRY (switch, idle)
 			queued_bits = switch_queued_bits[col];
 #endif
 
-			/* Iterate over all rows -- all switches on this column */
+			/* Iterate over all rows -- all switches on this column that changed.
+			 * But stop as soon as pending rows are dispatched. */
 			do {
 				if (pendbits & 1)
 				{

@@ -63,7 +63,7 @@ CALLSET_ENTRY (plunger, sw_shooter)
 		prematurely */
 		VOIDCALL (plunger_sw_launch_button);
 	}
-	else if (system_config.timed_plunger == ON)
+	else if (config_timed_plunger == ON)
 	{
 		/* If timed plunger is enabled, then start a timer
 		to autoplunge the ball regardless of button press */

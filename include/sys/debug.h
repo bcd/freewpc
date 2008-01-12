@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -23,6 +23,11 @@
 
 #include <freewpc.h>
 
+#ifdef CONFIG_PLATFORM_WPC
+#define WPC_DEBUG_WRITE_READY 0x1
+#define WPC_DEBUG_READ_READY 0x2
+#endif
+
 extern inline U8 wpc_debug_get_status (void)
 {
 #ifdef CONFIG_PLATFORM_WPC
@@ -33,14 +38,14 @@ extern inline U8 wpc_debug_get_status (void)
 extern inline U8 wpc_debug_write_ready (void)
 {
 #ifdef CONFIG_PLATFORM_WPC
-	return wpc_debug_get_status () & 0x1;
+	return wpc_debug_get_status () & WPC_DEBUG_WRITE_READY;
 #endif
 }
 
 extern inline U8 wpc_debug_read_ready (void)
 {
 #ifdef CONFIG_PLATFORM_WPC
-	return wpc_debug_get_status () & 0x2;
+	return wpc_debug_get_status () & WPC_DEBUG_READ_READY;
 #endif
 }
 

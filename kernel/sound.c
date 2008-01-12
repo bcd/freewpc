@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -80,13 +80,6 @@ const audio_track_t volume_change_music_track = {
 	.code = 2,
 #endif
 };
-
-
-#if (MACHINE_DCS == 1)
-#define WPCS_READ_READY	0x80
-#else
-#define WPCS_READ_READY	0x01
-#endif
 
 
 /** Renders the sound board version into the print buffer. */
@@ -220,8 +213,9 @@ U8 sound_board_read (U8 retries)
  * If no reply is ready, a number of retries will be performed
  * before bailing and returning 0xFF.  On each retry, the
  * command is sent again. */
-U8 sound_board_command (U8 cmd, U8 retries)
+U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 {
+	/* TODO : for DCS, cmd could be 16-bit!!! */
 #ifndef CONFIG_NATIVE
 	do {
 		sound_write_queue_insert (cmd);

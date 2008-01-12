@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -44,7 +44,7 @@ int cycle_offset = 0;
  * Called when the WPC program wants to tell us
  * that it has finished executing an IRQ handler.
  */
-void
+static void
 read_cycle_stat (int fd)
 {
 	int irq_cycle_count, irq_percent;

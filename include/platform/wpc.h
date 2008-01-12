@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -136,26 +136,27 @@ AREA_DECL(nvram)
  ***************************************************************/
 
 #ifdef CONFIG_NATIVE
+
+/* In native mode, the DMD is emulated using ordinary character
+buffers. */
 extern U8 *linux_dmd_low_page;
 extern U8 *linux_dmd_high_page;
 #define DMD_LOW_BASE linux_dmd_low_page
 #define DMD_HIGH_BASE linux_dmd_high_page
+
 #else
+
 /* WPC can map up to 6 of the DMD pages into address space.
  * FreeWPC only uses page 4 (low) and page 5 (high).
  */
 #define DMD_PAGE(n)						(0x3000 + (n * 0x200))
 #define DMD_LOW_BASE 					0x3800
 #define DMD_HIGH_BASE 					0x3A00
-#endif
+
+#endif /* CONFIG_NATIVE */
 
 #define WPC_DEBUG_DATA_PORT			0x3D60
 #define WPC_DEBUG_CONTROL_PORT		0x3D61
-#define WPC_PINMAME_CYCLE_COUNT		0x3D62
-#define WPC_PINMAME_FUNC_ENTRY_HI	0x3D63
-#define WPC_PINMAME_FUNC_ENTRY_LO	0x3D64
-#define WPC_PINMAME_FUNC_EXIT_HI		0x3D65
-#define WPC_PINMAME_FUNC_EXIT_LO		0x3D66
 
 #define WPC_SERIAL_CONTROL_PORT 		0x3E66
 #define WPC_SERIAL_DATA_PORT 			0x3E67
@@ -195,11 +196,12 @@ extern U8 *linux_dmd_high_page;
 #define WPC_SW_JUMPER_INPUT 			0x3FE7
 #define WPC_SW_CABINET_INPUT 			0x3FE8
 
-#define WPC_SW_ROW_INPUT 				0x3FE9
-#define WPC_SW_COL_STROBE 				0x3FEA
 #if (MACHINE_PIC == 1)
 #define WPCS_PIC_READ 					0x3FE9
 #define WPCS_PIC_WRITE 					0x3FEA
+#else
+#define WPC_SW_ROW_INPUT 				0x3FE9
+#define WPC_SW_COL_STROBE 				0x3FEA
 #endif
 
 #if (MACHINE_DMD == 0)
@@ -376,10 +378,6 @@ do { \
 
 #endif /* PAGE == SYS_PAGE */
 
-#ifndef __m6809__
-#define far_call_pointer(fn, page, arg) (fn) (arg)
-#endif
-
 
 /********************************************/
 /* RAM Paging                               */
@@ -407,25 +405,25 @@ extern inline void wpc_set_ram_page (U8 page)
  * lines.
  */
 
-#define WPC_CTRL_IRQ_ENABLE    0x2
-#define WPC_CTRL_FIRQ_ENABLE   0x4
-#define WPC_CTRL_BLANK_RESET   0x10
-#define WPC_CTRL_IRQ_CLEAR     0x80
+#define WPC_CTRL_BLANK_RESET    0x2
+#define WPC_CTRL_WATCHDOG_RESET 0x4
+#define WPC_CTRL_IRQ_ENABLE     0x10
+#define WPC_CTRL_IRQ_CLEAR      0x80
 
 extern inline void wpc_write_misc_control (U8 val)
 {
-	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR, val);
+	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR,
+		WPC_CTRL_BLANK_RESET | WPC_CTRL_WATCHDOG_RESET | val);
 }
 
-extern inline void wpc_int_enable (void)
+extern inline void wpc_watchdog_reset (void)
 {
-	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE);
+	wpc_write_misc_control (0);
 }
 
 extern inline void wpc_int_clear (void)
 {
-	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_FIRQ_ENABLE
-		| WPC_CTRL_BLANK_RESET | WPC_CTRL_IRQ_CLEAR);
+	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_IRQ_CLEAR);
 }
 
 
@@ -454,7 +452,11 @@ extern inline U8 wpc_read_ac_zerocross (void)
 
 extern inline U8 wpc_read_flippers (void)
 {
+#if (MACHINE_WPC95 == 1)
+	return wpc_asic_read (WPC95_FLIPPER_SWITCH_INPUT);
+#else
 	return wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
+#endif
 }
 
 
@@ -481,7 +483,13 @@ extern inline U8 wpc_read_flipper_eos (void)
 
 extern inline void wpc_write_flippers (U8 val)
 {
+#ifndef CONFIG_NO_SOL
+#if (MACHINE_WPC95 == 1)
+	wpc_asic_write (WPC95_FLIPPER_COIL_OUTPUT, val);
+#else
 	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, val);
+#endif
+#endif
 }
 
 
@@ -522,9 +530,43 @@ extern inline U8 wpc_read_ticket (void)
 
 extern inline void wpc_write_ticket (U8 val)
 {
+#ifndef CONFIG_NO_SOL
 	wpc_asic_write (WPC_TICKET_DISPENSE, val);
+#endif
 }
 
+
+#if (MACHINE_PIC == 1)
+/********************************************/
+/* WPC Security PIC Chip                    */
+/********************************************/
+
+/** The command to reset the PIC */
+#define WPC_PIC_RESET       0x0
+
+/** The command to update the PIC counter */
+#define WPC_PIC_COUNTER     0x0D
+
+/** The command to read the xth switch column */
+#define WPC_PIC_COLUMN(x)   (0x16 + (x))
+
+/** The command to unlock the switch matrix */
+#define WPC_PIC_UNLOCK      0x20
+
+/** The command to read the xth byte of the serial number */
+#define WPC_PIC_SERIAL(x)   (0x70 + (x))
+
+extern inline void wpc_write_pic (U8 val)
+{
+	wpc_asic_write (WPCS_PIC_WRITE, val);
+}
+
+extern inline U8 wpc_read_pic (void)
+{
+	return wpc_asic_read (WPCS_PIC_READ);
+}
+
+#endif
 
 #endif /* _WPC_H */
 

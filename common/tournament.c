@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -36,8 +36,8 @@ void player_tournament_ready_deff (void)
 	U8 timer;
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 5, "TOURNAMENT MODE");
-	font_render_string_center (&font_fixed6, 64, 15, "ENABLED NOW");
+	font_render_string_center (&font_fixed6, 64, 5, "TOURNAMENT");
+	font_render_string_center (&font_fixed6, 64, 16, "MODE ENABLED");
 	font_render_string_center (&font_var5, 64, 28, "PRESS START NOW");
 	dmd_show_low ();
 

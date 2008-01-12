@@ -97,7 +97,17 @@ $OutputFile = "build/callset.c";
 #############################################################
 
 while (my $arg = shift @ARGV) {
-	if ($arg =~ /^-o$/) {
+	if ($arg =~ /^-h/) {
+		print "\nOptions:\n";
+		print "-o <file>         Write C code to this file (default is build/callset.c)\n";
+		print "--include <file>  Add an #include to the output file\n";
+		print "-D <dir>          Add directory to the scan list\n";
+		print "--m6809           Enable 6809 mode\n";
+		print "-d                Generate debug statements\n";
+		print "\n";
+		exit 0;
+	}
+	elsif ($arg =~ /^-o$/) {
 		$OutputFile = shift @ARGV;
 	}
 	elsif ($arg =~ /^--include$/) {
@@ -112,6 +122,9 @@ while (my $arg = shift @ARGV) {
 	}
 	elsif ($arg =~ /^-d/) {
 		$debug = 1;
+	}
+	else {
+		push @srclist, (shift @ARGV);
 	}
 }
 

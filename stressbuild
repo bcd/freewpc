@@ -13,23 +13,33 @@ for native in `echo n y`; do
 	for mach in `echo t2 tz wcs afm tester`; do
 		for debugger in `echo y n`; do
 			if [ "$native" = "n" ]; then
-				gcctargets=`echo 3.4.6 4.2.1`; # removed 4.3.0 for now
+				gcctargets=`echo 4.2.1 4.2.2 4.3.0`;
 			else
 				gcctargets=`echo nop`;
 			fi
 			for gcc in $gcctargets; do
 				if [ "$gcc" = "nop" ]; then gcc=; fi
 				for target in `echo clean default_target`; do
-					echo Execing make \
-						PLATFORM=wpc MACHINE=$mach DEBUGGER=$debugger \
-						GCC_VERSION=$gcc $target | tee -a stressbuild.log
-					make NOCONFIG=y PLATFORM=wpc MACHINE=$mach GCC_VERSION=$gcc \
-						FREEWPC_DEBUGGER=$debugger $target 2>&1 >> stressbuild.log
+
+					cfg="NATIVE=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger GCC_VERSION=$gcc target=$target"
+					echo "Begin: $cfg" | tee -a stressbuild.log
+
+					export MACHINE=$mach
+					export FREEWPC_DEBUGGER=$debugger
+					export GCC_VERSION=$gcc
+					export SOFTREG_OPTIONS="-msoft-reg-count=4 -DSOFT_REG_COUNT=4"
+					make $target 2>&1 >> stressbuild.log
 					rc="$?"
-					if [ -f err ]; then cat err | tee -a stressbuild.log; fi
-					echo rc=$rc NATIVE=$native MACHINE=$mach DEBUGGER=$debugger \
-						GCC_VERSION=$gcc $target | tee -a stressbuild.log
-	          	if [ "$rc" != "0" ]; then exit $rc; fi
+
+					if [ -f err ]; then
+						echo "Error file:" | tee -a stressbuild.log
+						cat err | tee -a stressbuild.log
+					fi
+					echo "End: $cfg" | tee -a stressbuild.log
+					echo "Exit code: $rc" | tee -a stressbuild.log
+					if [ "$rc" != "0" ]; then
+						exit $rc
+					fi
 				done
 			done
 		done

@@ -108,11 +108,11 @@ static char glyph_term6_space_bits[] = { glyph_term6_I_width, glyph_term6_I_heig
 #define glyph_term6_0_width 5
 #define glyph_term6_0_height 8
 static char glyph_term6_0_bits[] = { glyph_term6_0_width, glyph_term6_0_height,
- 0x0c,0x11,0x11,0x11,0x11,0x11,0x1b,0x0e};
+ 0x0e,0x11,0x11,0x11,0x11,0x11,0x1b,0x0e};
 #define glyph_term6_1_width 5
 #define glyph_term6_1_height 8
 static char glyph_term6_1_bits[] = { glyph_term6_1_width, glyph_term6_1_height,
- 0x03,0x04,0x04,0x04,0x04,0x04,0x04,0x1f};
+ 0x06,0x04,0x04,0x04,0x04,0x04,0x04,0x1f};
 #define glyph_term6_2_width 5
 #define glyph_term6_2_height 8
 static char glyph_term6_2_bits[] = { glyph_term6_2_width, glyph_term6_2_height,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -40,8 +40,21 @@ void locating_balls_deff (void)
 before returning to attract mode */
 void game_over_deff (void)
 {
-	generic_deff ("GAME OVER", NULL);
-	/* TODO - need to show the scores briefly here */
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "GAME OVER");
+	dmd_show_low ();
+	task_sleep_sec (2);
+
+	/* In tournament mode, need to show the scores briefly here */
+	if (tournament_mode_enabled)
+	{
+		dmd_alloc_low_clean ();
+		scores_draw ();
+		dmd_show_low ();
+		task_sleep_sec (60);
+		deff_exit ();
+	}
+	deff_exit ();
 }
 
 

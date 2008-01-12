@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
@@ -100,6 +100,8 @@ _start:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; TODO - the hardware watchdog will expire if we don't
+	; reset it periodically here.
 rom_test:
 	; Initialize 16-bit checksum
 	ldd	#0

@@ -50,7 +50,7 @@ my @dirs = (
 	"mach", 
 	"fonts", 
 	"test",
-	"platform/linux",
+	"platform/native",
 	"platform/wpc",
 	"build",
 	);

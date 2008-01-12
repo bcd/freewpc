@@ -21,7 +21,6 @@
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
 
-
 enum {
 	KICK_TROUGH,
 	KICK_LOCK,
@@ -37,15 +36,7 @@ extern U8 pb_depth;
 void pb_test_init (void)
 {
 	pb_test_command = KICK_TROUGH;
-	flipper_enable ();
 }
-
-
-void pb_test_exit (void)
-{
-	flipper_disable ();
-}
-
 
 void pb_test_draw (void)
 {
@@ -54,38 +45,35 @@ void pb_test_draw (void)
 	
 	switch (pb_location)
 	{
-		case PB_MISSING: sprintf ("MISSING"); break;
+		case PB_MISSING: sprintf ("LOST"); break;
 		case PB_IN_LOCK: sprintf ("LOCK"); break;
 		case PB_IN_TROUGH: sprintf ("TROUGH"); break;
 		case PB_IN_GUMBALL: sprintf ("GUMBALL"); break;
-		case PB_IN_PLAY: sprintf ("PLAYFIELD"); break;
-		case PB_MAYBE_IN_PLAY: sprintf ("MAYBE IN PLAY"); break;
-		default: sprintf ("???"); break;
+		case PB_IN_PLAY: sprintf ("P.F."); break;
+		case PB_MAYBE_IN_PLAY: sprintf ("NOT SURE"); break;
+		default: sprintf ("AWOL"); break;
 	}
 	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
 
 	if (pb_location & (PB_IN_LOCK | PB_IN_TROUGH))
 	{
-		if (pb_depth == 0)
-			sprintf ("NEXT");
-		else
-			sprintf ("%d TO GO");
+		sprintf ("POS. %d", pb_depth);
 		font_render_string_right (&font_mono5, 127, 6, sprintf_buffer);
 	}
 
-	sprintf ("TROUGH. PROX %s",
+	sprintf ("TROUGH SW. %s",
 		switch_poll_logical (SW_TROUGH_PROXIMITY) ? "CLOSED" : "OPEN");
 	font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
 
-	sprintf ("SLOT PROX %s",
+	sprintf ("SLOT SW. %s",
 		switch_poll_logical (SW_SLOT_PROXIMITY) ? "CLOSED" : "OPEN");
 	font_render_string_left (&font_mono5, 0, 18, sprintf_buffer);
 
 	switch (pb_test_command)
 	{
-		case KICK_TROUGH: sprintf ("RELEASE TROUGH"); break;
-		case KICK_LOCK: sprintf ("RELEASE LOCK"); break;
-		case RELEASE_GUMBALL: sprintf ("RELEASE GUMBALL"); break;
+		case KICK_TROUGH: sprintf ("REL. TROUGH"); break;
+		case KICK_LOCK: sprintf ("REL. LOCK"); break;
+		case RELEASE_GUMBALL: sprintf ("REL. GUMBALL"); break;
 		case LOAD_GUMBALL: sprintf ("LOAD GUMBALL"); break;
 	}
 	font_render_string_left (&font_mono5, 0, 24, sprintf_buffer);

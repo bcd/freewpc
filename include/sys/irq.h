@@ -29,7 +29,7 @@
 
 /** How to enable/disable the FIRQ */
 #define disable_firq() m6809_orcc (CC_FIRQ)
-#define enable_firq() m6809_andcc (CC_FIRQ)
+#define enable_firq() m6809_andcc (~CC_FIRQ)
 
 /** How to enable/disable all interrupts */
 #define disable_interrupts() m6809_orcc (CC_IRQ|CC_FIRQ)

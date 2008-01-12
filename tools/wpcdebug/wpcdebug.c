@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -90,6 +90,9 @@ typedef unsigned char UINT8;
 
 #define SOCK_READABLE	0x1
 #define SOCK_WRITEABLE	0x2
+
+
+void process_input (int fd, uint8_t val);
 
 
 /* Configuration */
