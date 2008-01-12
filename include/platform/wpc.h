@@ -157,11 +157,6 @@ extern U8 *linux_dmd_high_page;
 
 #define WPC_DEBUG_DATA_PORT			0x3D60
 #define WPC_DEBUG_CONTROL_PORT		0x3D61
-#define WPC_PINMAME_CYCLE_COUNT		0x3D62
-#define WPC_PINMAME_FUNC_ENTRY_HI	0x3D63
-#define WPC_PINMAME_FUNC_ENTRY_LO	0x3D64
-#define WPC_PINMAME_FUNC_EXIT_HI		0x3D65
-#define WPC_PINMAME_FUNC_EXIT_LO		0x3D66
 
 #define WPC_SERIAL_CONTROL_PORT 		0x3E66
 #define WPC_SERIAL_DATA_PORT 			0x3E67
@@ -488,10 +483,12 @@ extern inline U8 wpc_read_flipper_eos (void)
 
 extern inline void wpc_write_flippers (U8 val)
 {
+#ifndef CONFIG_NO_SOL
 #if (MACHINE_WPC95 == 1)
 	wpc_asic_write (WPC95_FLIPPER_COIL_OUTPUT, val);
 #else
 	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, val);
+#endif
 #endif
 }
 
@@ -533,7 +530,9 @@ extern inline U8 wpc_read_ticket (void)
 
 extern inline void wpc_write_ticket (U8 val)
 {
+#ifndef CONFIG_NO_SOL
 	wpc_asic_write (WPC_TICKET_DISPENSE, val);
+#endif
 }
 
 

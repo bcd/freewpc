@@ -204,6 +204,12 @@ void average_per_ball_audit (audit_t val)
 }
 
 
+void hex4_audit (audit_t val)
+{
+	sprintf ("0X%04lX", val);
+}
+
+
 void render_audit (audit_t val, audit_format_type_t type)
 {
 	switch (type)
@@ -231,6 +237,9 @@ void render_audit (audit_t val, audit_format_type_t type)
 			break;
 		case AUDIT_TYPE_AVG_PER_BALL:
 			average_per_ball_audit (val);
+			break;
+		case AUDIT_TYPE_HEX4:
+			hex4_audit (val);
 			break;
 		default:
 			break;

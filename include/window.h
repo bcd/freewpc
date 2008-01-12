@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,6 +28,15 @@
  */
 struct window_ops
 {
+#if 0 /* TODO */
+	/** The page of ROMs in which the window functions
+	 * reside.  The ops structure itself *must* be in the
+	 * TEST_PAGE, but the functions can reside elsewhere.
+	 * (All must be in the same page.)
+	 */
+	U8 page;
+#endif
+
 	/** A constructor function that executes right after
 	 * the window is created */
 	void (*init) (void);
@@ -144,6 +153,8 @@ struct window
 	} w_class;
 };
 
+
+extern struct window *win_top;
 
 /** menu_selection is a shorthand macro for obtaining
  * the current "selection" in a menu window. */

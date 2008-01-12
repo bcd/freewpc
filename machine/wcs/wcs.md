@@ -19,23 +19,79 @@ include platform/wpc/wpc.md
 define MACHINE_NUMBER 531
 
 [lamps]
+11: Chicago P
+12: Dallas U
+13: Buston C
+14: New York D
+15: Orlando L
+16: Washington R
+17: San Francisco O
+18: Detroit W
+21: 1 Goal
+22: 2 Goals
+23: 3 Goals
+24: 4 Goals
+25: Ball Speed
+26: Ball Strength
+27: Ball Stamina
+28: L. Ticket Half
+31: Free Kick
+32: TV Award
+33: Ultra Goalie
+34: Ultra Ramps
+35: Ball Spirit
+36: Ball Skill
+37: R. Ticket Half
+38: Tackle
+41: Kickback Lower
+42: Kickback Center
+43: Kickback Upper
+44: R. Ramp Build
+45: R. Ramp Lock
+46: Ultra Spinner
+47: Ultra Jets
+48: Striker
+51: Goal Jackpot
+52: Extra Ball
+53: Goal
+54: Upper Build Lock
+55: Light Magna Goalie
+56: R. Flipper Lane
+57: Shoot Again
+58: Special
+87: Buy-In Button
+88: Start Button
 
 [switches]
+11: Unused
+12: Magnet Button, button, cabinet
 13: Start Button, start-button, cabinet, intest
 14: Tilt, tilt
+15: Left Flipper Lane
+16: Striker 3
+17: Right Flipper Lane
+18: Right Outlane
 21: Slam Tilt, slam-tilt
+23: Buy Extra Ball, button, cabinet
+25: Free Kick Target
+26: Kickback Upper
+27: Spinner
+28: Light Kickback
 31: Trough 1, trough, opto
 32: Trough 2, trough, opto
 33: Trough 3, trough, opto
 34: Trough 4, trough, opto
 35: Trough 5, trough, opto
 36: Trough Stack, opto
+37: Light Magna Goalie
 38: Shooter, shooter
 41: Goal Trough, opto
 42: Goal Popper, opto
 43: Goalie Left, opto
 44: Goalie Right, opto
 45: TV Popper, opto
+46: Unused
+47: Travel Lane
 48: Goalie Target
 51: Skill Shot Front, opto
 52: Skill Shot Center, opto
@@ -43,13 +99,28 @@ define MACHINE_NUMBER 531
 54: Right Eject
 55: Upper Eject
 56: Left Eject
-71: Left Ramp Divert.
-72: Left Ramp Enter
-74: Left Ramp Exit
-75: Right Ramp Enter
+61: Rollover 1
+62: Rollover 2
+63: Rollover 3
+64: Rollover 4
+65: Tackle
+66: Striker 1
+67: Striker 2
+71: L. Ramp Diverted
+72: L. Ramp Enter
+74: L. Ramp Exit
+75: R. Ramp Enter
 76: Lock Low
 77: Lock High
-78: Right Ramp Exit
+78: R. Ramp Exit
+81: Left Jet
+82: Upper Jet
+83: Lower Jet
+84: Left Slingshot
+85: Right Slingshot
+86: Kickback
+87: Upper Left Lane
+88: Upper Right Lane
 
 [drives]
 H1: Goal Popper
@@ -70,7 +141,30 @@ L6: Right Eject
 L7: Left Eject
 L8: Divertor Hold
 
+G1: Goal Cage Top, flash
+G2: Goal, flash
+G3: Skill Shot, flash
+G4: Jet Bumpers, flash
+G5: Goalie Drive, motor
+G6: Soccer Ball, motor
+G7: Ball Forward, motor
+G8: Ball Reverse, motor
+
+A1: L. Ramp Enter, flash
+A2: Lock Area, flash
+A3: Flipper Lanes, flash
+A4: Ramp Rear, flash
+
+F1: Magna Goalie
+F2: Loop Gate
+F3: Lock Magnet
+
 [gi]
+0: Playfield Left
+1: Playfield Right
+2: Insert Background
+3: Insert Title
+4: Playfield Top
 
 [tests]
 
@@ -79,7 +173,7 @@ L8: Divertor Hold
 [lampsets]
 
 [containers]
-Trough: trough, Trough Release, Trough 1, Trough 2, Trough 3, Trough 4, Trough 5, init_max_count(5)
+Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
 Goal Popper: Goal Popper, Goal Popper
 TV Popper: TV Popper, TV Popper
 Left Eject: Left Eject, Left Eject

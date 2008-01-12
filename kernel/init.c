@@ -277,6 +277,7 @@ void fatal (errcode_t error_code)
 	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
 
 	dmd_show_low ();
+	dmd_rtt0 ();
 #endif
 
 	/* Dump all of the task information to the debugger port. */

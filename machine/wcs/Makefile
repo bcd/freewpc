@@ -50,6 +50,10 @@ PINMAME_OTHER_ROMS = wcup_u*.rom
 
 GAME_OBJS =
 
+GAME_TEST_OBJS =
+
 GAME_INCLUDES =
+
+GAME_PAGED_OBJS = goalie_driver.o
 
 FIF_SRCS += $(M)/soccerball.fif
