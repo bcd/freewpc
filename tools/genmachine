@@ -61,7 +61,7 @@ my %contextDefinitionRe = (
 	"" => ".*",
 	"switches" => "[1-8FD][1-8]",
 	"lamps" => "[1-8][1-8]",
-	"drives" => "[HLGAX][1-8]",
+	"drives" => "[HLGAFX][1-8]",
 	"gi" => "[0-9]+",
 	"lampsets" => "AUTO",
 	"containers" => "AUTO",
@@ -311,12 +311,16 @@ sub close_switch {
 
 sub close_drive {
 	my ($drive) = @_;
-	$drive->{'ID'} =~ m/(.)(.)/;
-	$drive->{'number'} = $2 - 1; # assume 'H'
-	$drive->{'number'} += 8 if ($1 eq "L");
-	$drive->{'number'} += 16 if ($1 eq "G");
-	$drive->{'number'} += 24 if ($1 eq "A");
-	$drive->{'number'} += 40 if ($1 eq "X");
+	if ($drive->{'ID'} =~ m/([HLGAXF])(.)/) {
+		$drive->{'number'} = $2 - 1; # assume 'H'
+		$drive->{'number'} += 8 if ($1 eq "L");
+		$drive->{'number'} += 16 if ($1 eq "G");
+		$drive->{'number'} += 24 if ($1 eq "A");
+		$drive->{'number'} += 32 if ($1 eq "F");
+		$drive->{'number'} += 40 if ($1 eq "X");
+	} else {
+		$drive->{'number'} = $drive->{'ID'};
+	}
 	$drive->{'c_ident'} =~ s/^SOL_/FLASH_/ if (defined $drive->{'flash'});
 }
 
@@ -537,7 +541,9 @@ LINE:
 				$prefix = "";
 			}
 
-			my $c_ident = $def->{'c_ident'} = $prefix . $c_ident;
+			$def->{'c_ident'} = $prefix . $c_ident;
+
+			my $c_ident = $def->{'c_ident'};
 			if (!defined ($def->{'c_decl'})) {
 				$c_ident =~ tr/A-Z/a-z/;
 				if ($prefix eq "DEFF_") {
@@ -546,6 +552,9 @@ LINE:
 				}
 				$def->{'c_decl'} = $c_ident;
 			}
+
+			$def->{'c_decl'} =~ s/unused/unused_$ID/;
+			$def->{'c_ident'} =~ s/UNUSED/UNUSED_$ID/;
 
 			# Invoke the closure if there is one
 			if (defined $ContextClosures{$contextName}) {
@@ -650,7 +659,6 @@ sub machine_write_defines {
 		print "/* Definitions of $context */\n";
 		foreach my $def (unique ($mc)) {
 			$number = $def->{'number'};
-			# next if (!defined $def->{'c_ident'});
 			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
 		}
 		my $max = $ContextMaxima{$context};
@@ -911,7 +919,9 @@ sub machine_write_switch_decls {
 		$fn = $sw->{'fn'};
 		next if (!defined $fn);
 		$swname = $sw->{'c_decl'};
-		print "extern void $fn (void); /* callset_invoke ($swname) */\n";
+		if (!($swname =~ /unused/)) {
+			print "extern void $fn (void); /* callset_invoke ($swname) */\n";
+		}
 	}
 	print "\n";
 
@@ -933,6 +943,9 @@ sub machine_write_switch_decls {
 		for $field ("fn", "flags", "lamp", "sound",
 			"active_time", "inactive_time", "devno") {
 			$val = $sw->{$field};
+			if (($c_decl =~ /unused/) && ($field eq "fn")) {
+				$val = "null_function";
+			}
 			print "      .$field = $val,\n" if defined $val;
 		}
 		print "   },\n";
