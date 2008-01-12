@@ -126,6 +126,7 @@ typedef enum
 	AUDIT_TYPE_TOTAL_EARNINGS,
 	AUDIT_TYPE_AVG_PER_GAME,
 	AUDIT_TYPE_AVG_PER_BALL,
+	AUDIT_TYPE_HEX4,
 } audit_format_type_t;
 
 
