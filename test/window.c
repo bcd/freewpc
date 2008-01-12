@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -526,6 +526,35 @@ void adj_verify (struct adjustment *adjs)
 	}
 }
 
+struct adjustment *adj_lookup;
+
+
+void adj_prepare_lookup (struct adjustment *table)
+{
+	adj_lookup = table;
+}
+
+
+void adj_name_for_preset (U8 * const nvram, const U8 value)
+{
+	if (adj_lookup == NULL)
+		return;
+
+	task_sleep (TIME_16MS);
+	while (adj_lookup->nvram != NULL)
+	{
+		if (adj_lookup->nvram == nvram)
+		{
+			task_sleep (TIME_16MS);
+			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
+			far_call_pointer (*adj_lookup->values->render, TEST2_PAGE, value);
+			font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
+			return;
+		}
+		adj_lookup++;
+	}
+}
+
 
 void adj_reset_all (void)
 {
@@ -1035,36 +1064,8 @@ U8 font_test_char_width;
 
 const font_t *font_test_lookup (void)
 {
-	switch (menu_selection)
-	{
-		case FON_MONO5: return &font_mono5;
-		case FON_FIXED10: return &font_fixed10;
-		case FON_FIXED6: return &font_fixed6;
-		case FON_LUCIDA9: return &font_lucida9;
-		case FON_TERM6: return &font_term6;
-		case FON_TIMES8: return &font_times8;
-		case FON_VAR5: return &font_var5;
-		case FON_CU17: return &font_cu17;
-		case FON_TINYNUM: return &font_tinynum;
-
-#ifdef FON_MONO9
-		case FON_MONO9: return &font_mono9;
-#endif
-#ifdef FON_TIMES10
-		case FON_TIMES10: return &font_times10; /* this and helv8 are the same? */
-#endif
-#ifdef FON_HELV8
-		case FON_HELV8: return &font_helv8;
-#endif
-#ifdef FON_MISCTYPE
-		case FON_MISCTYPE: return &font_misctype; /* broken! */
-#endif
-#ifdef FON_FIXED12
-		case FON_FIXED12: return &font_fixed12; /* broken! */
-#endif
-		default:
-			return &font_mono5;
-	}
+	extern const font_t *font_table[];
+	return font_table[menu_selection];
 }
 
 char font_test_alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -1081,7 +1082,7 @@ void font_test_init (void)
 void font_test_draw (void)
 {
 	const font_t *font = font_test_lookup ();
-	char *gl;
+	char *gl, **glp;
 	char bitwidth;
 
 	/* TODO : this won't work because the font data is in a different page!
@@ -1089,19 +1090,20 @@ void font_test_draw (void)
 	 * that returns a pointer to the glyph for a character.  Then you can
 	 * use the following code, although macros would be better:
 	 * glyph_get_width(), glyph_get_height(), etc. */
+	glp = (char **)far_read16 ((PTR_OR_U16 *)&font->glyphs, FONT_PAGE);
 
-	gl = (char *)far_read16 ((PTR_OR_U16 *)&font->glyphs['A'], FONT_PAGE);
+	gl = (char *)far_read16 ((PTR_OR_U16 *)&glp['A'], FONT_PAGE);
 	if (gl == NULL) 
 	{
 		if (font_test_offset < 26)
 			font_test_offset = 26;
 	}
 	else
-		gl = (char *)far_read16 ((PTR_OR_U16 *)&font->glyphs['0'], FONT_PAGE);
+		gl = (char *)far_read16 ((PTR_OR_U16 *)&glp['0'], FONT_PAGE);
 
 	bitwidth = (char)far_read8 ((U8 *)&gl[0], FONT_PAGE);
 	if (bitwidth <= 8)
-		font_test_char_width = 14;
+		font_test_char_width = 13;
 	else if (bitwidth <= 12)
 		font_test_char_width = 10;
 	else
@@ -1112,7 +1114,7 @@ void font_test_draw (void)
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
 	sprintf_far_string (names_of_fonts + menu_selection);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 9);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
 
 	sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
 	font_render_string_center (font, 64, 20, sprintf_buffer);
@@ -1121,15 +1123,13 @@ void font_test_draw (void)
 
 void font_test_left (void)
 {
-	if (font_test_offset > 0)
-		font_test_offset--;
+	bounded_decrement (font_test_offset, 0);
 	sound_send (SND_TEST_CHANGE);
 }
 
 void font_test_right (void)
 {
-	if (font_test_offset < sizeof (font_test_alphabet) - font_test_char_width - 1)
-		font_test_offset++;
+	bounded_increment (font_test_offset, sizeof (font_test_alphabet) - font_test_char_width - 1);
 	sound_send (SND_TEST_CHANGE);
 }
 
@@ -1762,24 +1762,45 @@ struct menu dev_force_error_item = {
 
 /**********************************************************************/
 
+extern const U8 fif_freewpc_logo[];
+const U8 *dev_frametest_ptr;
+const U8 *dev_frametest_next_ptr;
+
+void dev_frametest_init (void)
+{
+	dev_frametest_ptr = fif_freewpc_logo;
+	dev_frametest_next_ptr = NULL;
+}
+
 void dev_frametest_draw (void)
 {
-	const U8 *data = (U8 *)0x4001 + menu_selection * DMD_PAGE_SIZE;
-	if (switch_poll_logical (SW_ENTER))
+	if (dev_frametest_ptr)
 	{
-		dmd_draw_image2 (data);
+		dbprintf ("frame is at %p\n", dev_frametest_ptr);
+		dmd_alloc_low_high ();
+		dev_frametest_next_ptr = dmd_draw_fif1 (dev_frametest_ptr);
 		dmd_show2 ();
+		dev_frametest_ptr = NULL;
 	}
-	else
+}
+
+void dev_frametest_advance (void)
+{
+	dev_frametest_ptr = dev_frametest_next_ptr;
+	if (far_read8 ((U8 *)dev_frametest_ptr, FIF_PAGE) > 2)
 	{
-		dmd_draw_image (data);
-		dmd_show_low ();
+		dbprintf ("frame %p starts with %02X\n", dev_frametest_ptr, *dev_frametest_ptr);
+		dev_frametest_ptr = fif_freewpc_logo;
 	}
 }
 
 struct window_ops dev_frametest_window = {
 	INHERIT_FROM_BROWSER,
+	.init = dev_frametest_init,
 	.draw = dev_frametest_draw,
+	.up = dev_frametest_advance,
+	.down = null_function,
+	.enter = null_function,
 };
 
 struct menu dev_frametest_item = {
@@ -1827,7 +1848,7 @@ void sched_test_init (void)
 
 void sched_test_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 1, "SCHEDULER TEST");
+	font_render_string_center (&font_mono5, 64, 2, "SCHEDULER TEST");
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
@@ -1917,7 +1938,37 @@ struct menu score_test_item = {
 
 /**********************************************************************/
 
-extern const struct menu music_mix_menu;
+#if (MACHINE_PIC == 1)
+void pic_test_draw (void)
+{
+	extern U8 pic_unlock_code[];
+	extern U8 pic_serial_number[];
+
+	font_render_string_center (&font_mono5, 64, 2, "SECURITY PIC INFO");
+
+	sprintf ("UNLOCK CODE %02X %02X %02X",
+		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
+	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
+
+	sprintf ("GAME NUMBER %3s", pic_serial_number);
+	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
+
+	dmd_show_low ();
+}
+
+struct window_ops pic_test_window = {
+	DEFAULT_WINDOW,
+	.draw = pic_test_draw,
+};
+
+struct menu pic_test_item = {
+	.name = "SECURITY TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &pic_test_window, NULL } },
+};
+#endif /* MACHINE_PIC */
+
+/**********************************************************************/
 
 struct menu *dev_menu_items[] = {
 #if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
@@ -1937,8 +1988,8 @@ struct menu *dev_menu_items[] = {
 #endif
 	&sched_test_item,
 	&score_test_item,
-#if 0
-	&music_mix_menu,
+#if (MACHINE_PIC == 1)
+	&pic_test_item,
 #endif
 	NULL,
 };
@@ -2136,264 +2187,53 @@ struct menu burnin_item = {
 
 /**********************************************************************/
 
-struct preset_component
-{
-	struct adjustment *info;
-	U8 *nvram;
-	U8 value;
-};
-
-struct preset
-{
-	char *name;
-	struct preset_component *comps;
-};
-
-#define PRESET_BEGIN(name) \
-struct preset_component preset_ ## name ## _comps[] = {
-
-#define PRESET_END(N, string) \
-	{ NULL, 0 }, \
-}; \
-struct preset preset_ ## N = {  \
-	.name = string,  \
-	.comps = preset_ ## N ## _comps \
-};
-
-
-PRESET_BEGIN (3ball)
-	{ standard_adjustments, &system_config.balls_per_game, 3 },
-PRESET_END (3ball, "3-BALL")
-
-
-PRESET_BEGIN (5ball)
-	{ standard_adjustments, &system_config.balls_per_game, 5 },
-PRESET_END (5ball, "5-BALL")
-
-
-PRESET_BEGIN (tournament)
-	{ standard_adjustments, &system_config.balls_per_game, 3 },
-	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
-	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
-	{ pricing_adjustments, &price_config.free_play, YES },
-	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_NEVER },
-	{ standard_adjustments, &system_config.max_ebs, 0 },
-	{ standard_adjustments, &system_config.match_feature, OFF },
-	{ standard_adjustments, &system_config.tournament_mode, ON },
-	{ standard_adjustments, &system_config.no_bonus_flips, NO },
-	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
-	{ feature_adjustments, &system_config.buy_extra_ball, NO },
-PRESET_END (tournament, "TOURNAMENT")
-
-
-PRESET_BEGIN (show)
-	{ pricing_adjustments, &price_config.free_play, YES },
-	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
-	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
-	{ standard_adjustments, &system_config.match_feature, OFF },
-	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
-PRESET_END (show, "SHOW")
-
-
-PRESET_BEGIN (timed_game)
-	{ standard_adjustments, &system_config.max_players, 1 },
-PRESET_END (timed_game, "TIMED GAME")
-
-
-PRESET_BEGIN (american)
-	{ standard_adjustments, &system_config.euro_digit_sep, NO },
-	{ standard_adjustments, &system_config.date_style, 0 },
-PRESET_END (american, "AMERICAN")
-
-
-PRESET_BEGIN (french)
-	{ standard_adjustments, &system_config.euro_digit_sep, YES },
-	{ standard_adjustments, &system_config.date_style, 1 },
-PRESET_END (french, "FRENCH")
-
-
-PRESET_BEGIN (german)
-	{ standard_adjustments, &system_config.euro_digit_sep, YES },
-	{ standard_adjustments, &system_config.date_style, 1 },
-PRESET_END (german, "GERMAN")
-
-
-struct preset *preset_table[] = {
-	/* Easy-Hard */
-	/* Add-a-Ball */
-	/* Ticket */
-	/* Novelty */
-	/* Serial Capture */
-	/* German 1-6 */
-	/* French 1-6 */
-	&preset_3ball,
-	&preset_5ball,
-	&preset_tournament,
-	&preset_show,
-	&preset_timed_game,
-	&preset_french,
-	&preset_german,
-};
-
-
 void presets_init (void)
 {
 	browser_init ();
-	browser_max = (sizeof (preset_table) / sizeof (struct preset *)) - 1;
+	browser_max = preset_count () - 1;
+}
+
+void presets_draw_finish (void)
+{
+	task_sleep (TIME_500MS);
+	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
+	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
+	task_exit ();
 }
 
 void presets_draw (void)
 {
-	struct preset *pre = preset_table[menu_selection];
-	struct preset_component *comps = pre->comps;
-
 	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
-	sprintf ("%d. %s", menu_selection+1, pre->name);
+	sprintf ("%d.", menu_selection+1);
 	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
+	preset_render_name (menu_selection);
+	font_render_string_left (&font_mono5, 15, 9, sprintf_buffer);
 
 	/* Is it installed now? */	
-	while (comps->nvram != NULL)
-	{
-		if (*(comps->nvram) != comps->value)
-		{
-			font_render_string_right (&font_mono5, 127, 9, "NO");
-			break;
-		}
+	font_render_string_right (&font_mono5, 127, 9, 
+		preset_installed_p (menu_selection) ? "YES" : "NO");
 
-		comps++;
-		if (comps->nvram == NULL)
-			font_render_string_right (&font_mono5, 127, 9, "YES");
-	}
-
-	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
-	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
+	task_recreate_gid (GID_SLOW_DRAW_FINISH, presets_draw_finish);
 	dmd_show_low ();
-}
-
-
-void preset_install (struct preset_component *comps)
-{
-	/* Modify all of the adjustments affected by the preset */
-	wpc_nvram_get ();
-	while (comps->nvram != NULL)
-	{
-		*(comps->nvram) = comps->value;
-		comps++;
-	}
-	wpc_nvram_put ();
-
-	/* Update the checksums to match the new values */
-	adj_modified ();
-}
-
-
-/** Install the presets for a particular country.
- * The code is determined from the DIP switches. */
-void preset_install_country_code (U8 code)
-{
-	dbprintf ("Installing preset for country code %d\n", code);
-	switch (code)
-	{
-		case WPC_JUMPER_USA_CANADA:
-		case WPC_JUMPER_USA_CANADA2:
-			preset_install (preset_american_comps);
-			break;
-
-		case WPC_JUMPER_FRANCE:
-		case WPC_JUMPER_FRANCE2:
-		case WPC_JUMPER_FRANCE3:
-		case WPC_JUMPER_FRANCE4:
-			preset_install (preset_french_comps);
-			break;
-
-		case WPC_JUMPER_GERMANY:
-			preset_install (preset_german_comps);
-			break;
-
-		case WPC_JUMPER_EXPORT_ENGLISH:
-		case WPC_JUMPER_EXPORT:
-		case WPC_JUMPER_UK:
-		case WPC_JUMPER_EUROPE:
-			break;
-
-		case WPC_JUMPER_SPAIN:
-			break;
-	}
 }
 
 
 void presets_enter (void)
 {
-	struct preset *pre = preset_table[menu_selection];
-	struct preset_component *comps = pre->comps;
-
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
-	font_render_string_center (&font_mono5, 64, 16, pre->name);
+	preset_render_name (menu_selection);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
-	preset_install (comps);
+	preset_install_from_test ();
 }
-
 
 void presets_start (void)
 {
-	struct preset *pre = preset_table[menu_selection];
-	struct preset_component *comps = pre->comps;
-	struct adjustment *info;
-	union dmd_coordinate coord;
-
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_left);
-	font_render_string_center (&font_mono5, 64, 5, pre->name);
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
-	sound_send (SND_TEST_SCROLL);
-	dmd_show_low ();
-	task_sleep (TIME_1S + TIME_500MS);
-
-	while (comps->nvram != NULL)
-	{
-		info = comps->info;
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 5, pre->name);
-		dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 11);
-		if (info == NULL)
-		{
-			sprintf ("SET %p TO %02X", comps->nvram, comps->value);
-			font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-		}
-		else
-		{
-			while (info != NULL)
-			{
-				if (info->nvram == comps->nvram)
-				{
-					font_render_string_center (&font_mono5, 64, 16, info->name);
-					far_call_pointer (*info->values->render, TEST2_PAGE, comps->value);
-					font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
-					coord.x = 24;
-					coord.y = 24;
-					if (*comps->nvram == comps->value)
-					{
-						bitmap_draw (coord, BM_X5);
-					}
-					else
-					{
-						bitmap_draw (coord, BM_BOX5);
-					}
-					break;
-				}
-				info++;
-			}
-		}
-		dmd_show_low ();
-		sound_send (SND_TEST_CONFIRM);
-		task_sleep (TIME_1S + TIME_500MS);
-		comps++;
-	}
+	far_task_create_gid (GID_WINDOW_THREAD, preset_show_components, TEST2_PAGE);
 }
-
 
 struct window_ops presets_window = {
 	INHERIT_FROM_BROWSER,
@@ -2690,7 +2530,6 @@ void single_switch_draw (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	const char *level;
-	const char *opto;
 	const char *active;
 
 	switch_matrix_draw ();
@@ -2698,19 +2537,19 @@ void single_switch_draw (void)
 
 	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
-	font_render_string_left (&font_mono5, 36, 10, sprintf_buffer);
+	font_render_string_left (&font_mono5, 34, 9, sprintf_buffer);
 
 	sprintf_far_string (names_of_switches + menu_selection);
-	font_render_string_left (&font_var5, 54, 10, sprintf_buffer);
+	font_render_string_left (&font_var5, 50, 9, sprintf_buffer);
 
 	if (switch_is_opto (sel))
-		font_render_string_right (&font_mono5, 127, 10, " - OPTO");
+		font_render_string_center (&font_var5, 116, 19, "OPTO");
 
 	/* Display the state of the switch */
 	active = switch_poll_logical (sel) ? "ACTIVE" : "INACTIVE";
 	level = switch_poll (sel) ? "CLOSED" : "OPEN";
-	sprintf ("%s - %s", active, level);
-	font_render_string_center (&font_mono5, 80, 16, sprintf_buffer);
+	sprintf ("%s-%s", active, level);
+	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
 	
 	dmd_show_low ();
 }
@@ -2730,7 +2569,8 @@ void single_switch_thread (void)
 			if (*sel == selected)
 			{
 				sound_send (SND_TEST_CHANGE);
-				single_switch_draw ();
+				if (((*sel != SW_UP) && (*sel != SW_DOWN)) || !sw_poll)
+					single_switch_draw ();
 			}
 			else
 			{
@@ -3051,14 +2891,12 @@ void gi_test_draw (void)
 
 void gi_test_right (void)
 {
-	if (gi_test_brightness < 8)
-		gi_test_brightness++;
+	bounded_increment (gi_test_brightness, 8);
 }
 
 void gi_test_left (void)
 {
-	if (gi_test_brightness > 1)
-		gi_test_brightness--;
+	bounded_decrement (gi_test_brightness, 1);
 }
 
 
@@ -3286,17 +3124,41 @@ struct menu dipsw_test_item = {
 
 void empty_balls_test_init (void)
 {
-	device_t *dev;
-
-	for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
-		device_request_empty (dev);
+	if (counted_balls != 0)
+	{
+		device_t *dev;
+		for (dev = device_entry (0); dev < device_entry (NUM_DEVICES); dev++)
+		{
+			device_request_empty (dev);
+			task_sleep (TIME_500MS);
+		}
+	}
 	callset_invoke (empty_balls_test);
 }
 
+
 void empty_balls_test_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
+	extern U8 counted_balls;
+
+	if (counted_balls == 0)
+	{
+		font_render_string_center (&font_mono5, 64, 3, "ALL BALL DEVICES");
+		font_render_string_center (&font_mono5, 64, 11, "ARE EMPTY");
+	}
+	else
+		font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
 	dmd_show_low ();
+}
+
+void empty_balls_test_thread (void)
+{
+	for (;;)
+	{
+		task_sleep_sec (1);
+		dmd_alloc_low_clean ();
+		empty_balls_test_draw ();
+	}
 }
 
 struct window_ops empty_balls_test_window = {
@@ -3305,6 +3167,7 @@ struct window_ops empty_balls_test_window = {
 	.draw = empty_balls_test_draw,
 	.up = null_function,
 	.down = null_function,
+	.thread = empty_balls_test_thread,
 };
 
 struct menu empty_balls_test_item = {
@@ -3501,6 +3364,7 @@ void scroller_down (void)
 	sound_send (SND_TEST_DOWN);
 }
 
+/* TODO : this is the only use of the 'resume' hook -- can it be removed? */
 void scroller_resume (void)
 {
 	win_top->w_class.scroller.offset = 0;

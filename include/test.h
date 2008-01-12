@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -111,8 +111,8 @@ __test__ void adj_reset (struct adjustment *adjs);
 __test__ void adj_verify (struct adjustment *adjs);
 __test__ void adj_reset_all (void);
 __test__ void adj_verify_all (void);
-
-__test__ void preset_install_country_code (U8 code);
+__test__ void adj_name_for_preset (U8 * const nvram, const U8 value);
+__test__ void adj_prepare_lookup (struct adjustment *table);
 
 
 typedef enum
