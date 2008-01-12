@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -25,8 +25,8 @@ __local__ U8 hitch_count;
 
 void hitchhiker_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_draw_image (hitcher0_bits);
+	dmd_alloc_low ();
+	dmd_draw_fif (fif_hitcher);
 	psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
 	font_render_string_center (&font_var5, 80, 10, sprintf_buffer);	
 	dmd_sched_transition (&trans_scroll_left);

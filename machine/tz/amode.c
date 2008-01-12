@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -210,15 +210,10 @@ void amode_deff (void)
 
 	for (;;)
 	{
-#if 0
-		extern const U8 cow_anim0_prg[];
-		dmd_animate (cow_anim0_prg, TIME_66MS);
-#endif
-	
 		/** Display FreeWPC logo **/
-		dmd_alloc_low_high ();
-		dmd_draw_fif (fif_freewpc_logo);
-		dmd_show2 ();
+		FSTART_COLOR
+			dmd_draw_fif (fif_freewpc_logo);
+		FEND
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
@@ -261,12 +256,12 @@ void amode_deff (void)
 		}
 
 		/** Display PLAY PINBALL message **/
-		dmd_sched_transition (&trans_scroll_left);
-		dmd_alloc_low_high ();
-		dmd_draw_fif (fif_mborder);
-		font_render_string_center2 (&font_fixed10, 64, 16, 
-			"PLAY PINBALL");
-		dmd_show2 ();
+		FSTART_COLOR
+			dmd_sched_transition (&trans_scroll_left);
+			dmd_draw_fif (fif_mborder);
+			font_render_string_center2 (&font_fixed10, 64, 16, 
+				"PLAY PINBALL");
+		FEND
 		if (amode_page_delay (3) && system_config.tournament_mode)
 			continue;
 
@@ -284,6 +279,9 @@ void amode_deff (void)
 		
 			dmd_alloc_low_high ();
 			dmd_draw_fif (fif_tuxlogo);
+
+			/* note: text is displayed in 2/3 intensity by
+			 * writing to the high page */
 			dmd_flip_low_high ();
 			font_render_string_center (&font_var5, 80, 3, "DEVELOPED ON LINUX");
 			font_render_string_center (&font_mono5, 80, 18, "SUPPORT OPEN");
