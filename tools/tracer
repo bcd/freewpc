@@ -18,6 +18,10 @@ my $irq_flag = 0;
 my $named_start_address = undef;
 my $mapfile= "build/freewpc.map";
 my $histogram_flag = 0;
+my $max_calls = 1000;
+my $ignored_calls = 0;
+my $compress_flag = 0;
+my $decompress_flag = 0;
 
 while ($_ = shift (@ARGV)) {
 	if (/^-h$/) {
@@ -29,6 +33,8 @@ while ($_ = shift (@ARGV)) {
 		print "-1               Stop after first occurrence\n";
 		print "-H               Produce histogram of calls rather than summary\n";
 		print "-i               Says that function is an interrupt handler\n";
+		print "--ignore <num>   Ignore the first <num> calls to the function\n";
+		print "--max <num>      Stop after N occurrences\n";
 		exit 0;
 	}
 	elsif (/^-m$/) {
@@ -59,6 +65,18 @@ while ($_ = shift (@ARGV)) {
 	elsif (/^-H$/) {
 		$histogram_flag = 1;
 	}
+	elsif (/^--ignore$/) {
+		$ignored_calls = shift @ARGV;
+	}
+	elsif (/^--max$/) {
+		$max_calls = shift @ARGV;
+	}
+	elsif (/^--compress$/) {
+		$compress_flag = 1;
+	}
+	elsif (/^--decompress$/) {
+		$decompress_flag = 1;
+	}
 }
 
 if (!defined $start_address) {
@@ -67,6 +85,10 @@ if (!defined $start_address) {
 }
 
 sub start_call {
+	if ($ignored_calls > 0) {
+		$ignored_calls--;
+		return 0;
+	}
 	$nested_subrs = 0;
 	$start_time = $simulation_end_time;
 	print "Start call:\n=====================================\n" if ($list_subr);
@@ -77,11 +99,17 @@ sub finish_call {
 	my ($cycles) = @_;
 
 	$histogram[$call_count] = $cycles;
+	if ($histogram_flag) {
+		print $cycles . "\n";
+	}
 	$call_count++;
 	$max_duration = $cycles if ($cycles > $max_duration);
 	$min_duration = $cycles if ($cycles < $min_duration);
 	$total_cycles += $cycles;
-	# $list_subr = 0;
+	if ($call_count >= $max_calls) {
+		print_report ();
+		exit 0;
+	}
 	return 0;
 }
 
@@ -93,9 +121,6 @@ sub print_report {
 
 
 	if ($histogram_flag) {
-		for (my $i = 0; $i < $call_count; $i++) {
-			print $histogram[$i] . "\n";
-		}
 		return;
 	}
 
@@ -123,11 +148,25 @@ while (<>) {
 	chomp;
 	my $line = $_;
 
+	next if ($line =~ /^$/);
+
+	# In decompress mode, transform line.
+	if ($decompress_flag && $line =~ /([^#]*)#([0-9]+) (....) (.*)$/) {
+		my ($regs, $timestamp_delta, $pc, $insn) = ($1, $2, $3, $4);
+		$timestamp += $timestamp_delta;
+		$line = "#$timestamp A:00 B:00 X:0000 Y:0000 U:0000 S:0000 $pc: $insn";
+		if ($decompress_flag > 1) {
+			print "$line\n";
+			next;
+		}
+	}
+	
 	# Skip all trace entries until the 'system ready' pattern is found.
 	# This ignores a lot of boot-time code that we don't care about.
 	if (!$system_ready_time)
 	{
-		next unless ($line =~ /LDS.*#/);
+		next unless ($line =~ /ANDCC.*#/);
+		# next unless ($line =~ /LDS.*#/);
 		$line =~ /^#([0-9]+) /;
 		$system_ready_time = $1;
 	}
@@ -141,9 +180,34 @@ while (<>) {
 	# Only consider lines that have tracing data.
 	# The main items to parse here are the timestamp (cycle count) and the
 	# current program counter.
-	if ($line =~ /^#([0-9]+) A:.. B:.. X:.... Y:.... U:.... S:.... (....):/) {
-		my ($timestamp, $pc) = ($1, $2);
+	if ($line =~ /^#([0-9]+) A:(..) B:(..) X:(....) Y:(....) U:(....) S:(....) (....): (.*)$/) {
+		my ($timestamp, $areg, $breg, $xreg, $yreg, $ureg, $sreg, $pc, $insn) = 
+			($1,         $2,    $3,    $4,    $5,    $6,    $7,    $8,  $9);
 		$simulation_end_time = $timestamp;
+
+		# In "compress" mode, write a compressed version of the line.
+		# This will keep the file much smaller.
+		if ($compress_flag) {
+			my $timestamp_delta = $timestamp - $previous_timestamp;
+			my $dreg = $areg . $breg;
+			$insn =~ s/ +/ /;
+
+			print "D$dreg " if ($dreg ne $previous_dreg);
+			print "X$xreg " if ($xreg ne $previous_xreg);
+			print "Y$yreg " if ($yreg ne $previous_yreg);
+			print "U$ureg " if ($ureg ne $previous_ureg);
+			print "S$sreg " if ($sreg ne $previous_sreg);
+
+			print "#$timestamp_delta $pc $insn\n";
+
+			$previous_timestamp = $timestamp;
+			$previous_dreg = $dreg;
+			$previous_xreg = $xreg;
+			$previous_yreg = $yreg;
+			$previous_ureg = $ureg;
+			$previous_sreg = $sreg;
+			next;
+		}
 
 		# If end-of-function was detected on the previous instruction, then
 		# finish the call here.  We defer this in order to account for the
