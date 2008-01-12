@@ -447,7 +447,7 @@ CALLSET_ENTRY (switch, idle)
 #ifdef QUEUE_SWITCHES
 	U8 queued_bits;
 #endif
-	U8 col;
+	register U16 col = 0;
 	extern U8 sys_init_complete;
 
 	/* Prior to system initialization, switches are not serviced.
@@ -459,33 +459,52 @@ CALLSET_ENTRY (switch, idle)
 		return;
 	}
 
-	for (col = 0; col <= 9; col++) /* TODO : define for 9? */
+	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
-		/* Atomically get-and-clear the pending switches */
+		/* If pending bits is zero, which it will be most of the
+		 * time, then there is absolutely nothing to consider on this
+		 * column.  (The logic below would always effectively do nothing.) */
+		/* TODO - do a check before the for loop that checks all of
+		 * them quickly */
+		if (likely (switch_pending_bits[col] == 0))
+			continue;
+
+		/* Atomically get-and-clear the pending switches.
+		 * Note that we REREAD pending bits here; it may have changed
+		 * since we just checked it!  But it is guaranteed that only
+		 * additional bits could be set -- not cleared */
+		barrier ();
 		disable_irq ();
 		pendbits = switch_pending_bits[col];
 		switch_pending_bits[col] = 0;
 		enable_irq ();
 
-		/* Updated latched bits out of IRQ in new scheme, as it just toggles */
+		/* Updated latched bits.  pendbits will toggle anytime the state
+		 * of the switch changes, so we use just an XOR operation to update the
+		 * current state.  Latched just means that this is the state of the
+		 * switches that is returned when polling from task level. */
 		switch_latched_bits[col] ^= pendbits;
 
-		/* Grab the latched bits : 0=open, 1=closed */
+		/* We're going to convert the latched state, which is raw I/O level,
+		 * into something logical.  First, optos need to be inverted.
+		 * Thus rawbits=0 for any inactive switch, or 1 for an active switch. */
 		rawbits = switch_latched_bits[col];
-
-		/* Invert for optos: 0=inactive, 1=active */
 		rawbits ^= mach_opto_mask[col];
 
-		/* Convert to active level: 0=inactive, 1=active or edge */
+		/* Now consider that edge switches need to be processed on both
+		 * type of transitions, but other switches should only be handled on
+		 * inactive->active.  Convert rawbits to indicate "might need to process":
+		 * 0 == inactive == no need to process
+		 * 1 == active or edge  == might need to process */
 		rawbits |= mach_edge_switches[col];
 
 		/* Grab the current set of pending bits, masked with rawbits.
-		 * pendbits is only 1 if the switch is marked pending and it
-		 * is currently active.  For edge-triggered switches, it is
-		 * invoked active or inactive.
+		 * If nonzero, it means the switch just changed state, AND the
+		 * transition is of a type that needs to be processed.
 		 */
+		pendbits &= rawbits;
 
-		if (pendbits & rawbits) /* Anything to be done on this column? */
+		if (pendbits) /* Anything to be done on this column? */
 		{
 			/* Yes, calculate the switch number for the first row in the column */
 			U8 sw = col * 8;
@@ -494,7 +513,8 @@ CALLSET_ENTRY (switch, idle)
 			queued_bits = switch_queued_bits[col];
 #endif
 
-			/* Iterate over all rows -- all switches on this column */
+			/* Iterate over all rows -- all switches on this column that changed.
+			 * But stop as soon as pending rows are dispatched. */
 			do {
 				if (pendbits & 1)
 				{
