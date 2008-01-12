@@ -51,7 +51,7 @@ task_gid_t last_nonfatal_error_gid;
 
 
 /** Initialize the FreeWPC program. */
-void freewpc_init (void)
+__noreturn__ void freewpc_init (void)
 {
 	extern __common__ void system_reset (void);
 
@@ -266,6 +266,7 @@ void fatal (errcode_t error_code)
 #if (MACHINE_DMD == 1)
 	/* Try to display the error on the DMD.  This may not work,
 	you know. */
+	extern void dmd_rtt0 (void);
 	dmd_alloc_low_clean ();
 
 	dbprintf ("Fatal error: %i\n", error_code);

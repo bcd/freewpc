@@ -32,7 +32,7 @@ void abort (void)
 
 int main (void)
 {
-	extern void freewpc_init (void);
+	extern __noreturn__ void freewpc_init (void);
 	freewpc_init ();
 	return 0;
 }

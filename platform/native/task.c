@@ -45,6 +45,9 @@ extern int linux_irq_multiplier;
 
 #define MAX_TASKS (NUM_TASKS)
 
+#ifdef CURSES	
+extern void ui_write_task (int, task_gid_t);
+#endif
 
 /* Some WPC per-task data must be stored separately, outside of the pth
  * context.  The aux_task_data_t structure holds this. */
