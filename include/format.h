@@ -48,28 +48,4 @@ __test2__ void average_per_ball_audit (audit_t val);
 __test2__ void render_audit (audit_t val, audit_format_type_t);
 
 
-/* TODO - move to include/preset.h */
-
-struct preset_component
-{
-	struct adjustment *info;
-	U8 *nvram;
-	U8 value;
-};
-
-struct preset
-{
-	char *name;
-	struct preset_component *comps;
-};
-
-
-__test2__ U8 preset_count (void);
-__test2__ void preset_install (struct preset_component *comps);
-__test2__ void preset_install_from_test (void);
-__test2__ void preset_install_country_code (U8 code);
-__test2__ void preset_render_name (U8 index);
-__test2__ bool preset_installed_p (U8 index);
-__test2__ void preset_show_components (void);
-
 #endif /* __FORMAT_H */
