@@ -193,24 +193,22 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 }
 
 
+struct faf
+{
+	U8 depth;
+	U8 len;
+	U8 *fifs[0];
+};
+
 /** Execute a FreeWPC animation, which is a series of
 consecutive FIFs.  An animation is a sequence of FIFs,
 with a leading header. */
-const U8 *dmd_draw_faf1 (const U8 *faf, task_ticks_t delay)
+void dmd_draw_faf1 (struct faf *faf, task_ticks_t delay)
 {
-	U8 depth;
-	const U8 *fif;
-	const U16 **faf_as_pointer = (const U16 **)&faf;
-
-	/* TODO */
+	U8 n;
 	wpc_push_page (PRG_PAGE);
-	depth = *faf++;
-	fif = *(*faf_as_pointer)++;
-	do {
-		dmd_draw_fif1 (fif);
-		fif = *(*faf_as_pointer)++;
-	} while (fif != NULL);
+	for (n=0; n < faf->len; n++)
+		dmd_draw_fif1 (faf->fifs[n]);
 	wpc_pop_page ();
-	return faf;
 }
 
