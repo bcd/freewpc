@@ -248,7 +248,7 @@ void fatal (errcode_t error_code)
 
 	/* Reset hardware outputs */
 	wpc_asic_write (WPC_GI_TRIAC, 0);
-	wpc_write_flippers (~0);
+	wpc_write_flippers (0);
 	wpc_write_ticket (0);
 	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
 	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);

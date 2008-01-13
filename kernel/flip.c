@@ -139,7 +139,7 @@ void fliptronic_rtt (void)
 #endif
 	}
 
-	wpc_write_flippers (~outputs);
+	wpc_write_flippers (outputs);
 }
 
 #endif /* MACHINE_FLIPTRONIC */
