@@ -42,10 +42,30 @@ void coin_door_buttons_deff (void)
 }
 
 
+static bool coin_door_warning_needed (void)
+{
+#ifdef CONFIG_COIN_DOOR_WARNING
+	static bool already_warned = 0;
+
+	if (already_warned && switch_poll_logical (SW_COIN_DOOR_CLOSED))
+		return 0;
+
+	if (!already_warned)
+	{
+		deff_start (DEFF_COIN_DOOR_BUTTONS);
+		already_warned = 1;
+	}
+	return 1;
+#else
+	return 0;
+#endif
+}
+
+
 CALLSET_ENTRY (service, sw_escape)
 {
-	if (!switch_poll_logical (SW_COIN_DOOR_CLOSED))
-		deff_start (DEFF_COIN_DOOR_BUTTONS);
+	if (coin_door_warning_needed ())
+		return;
 	else if (!in_test)
 	{
 		add_credit ();
@@ -55,8 +75,8 @@ CALLSET_ENTRY (service, sw_escape)
 
 CALLSET_ENTRY (service, sw_down)
 {
-	if (!switch_poll_logical (SW_COIN_DOOR_CLOSED))
-		deff_start (DEFF_COIN_DOOR_BUTTONS);
+	if (coin_door_warning_needed ())
+		return;
 	else if (!in_test)
 		button_invoke (SW_DOWN, volume_down, TIME_500MS, TIME_100MS);
 	else	
@@ -65,8 +85,8 @@ CALLSET_ENTRY (service, sw_down)
 
 CALLSET_ENTRY (service, sw_up)
 {
-	if (!switch_poll_logical (SW_COIN_DOOR_CLOSED))
-		deff_start (DEFF_COIN_DOOR_BUTTONS);
+	if (coin_door_warning_needed ())
+		return;
 	else if (!in_test)
 		button_invoke (SW_UP, volume_up, TIME_500MS, TIME_100MS);
 	else
