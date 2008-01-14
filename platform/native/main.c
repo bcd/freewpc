@@ -54,6 +54,10 @@ extern void exit (int);
 extern const device_properties_t device_properties_table[];
 extern const switch_info_t switch_table[];
 
+extern U8 *sim_switch_matrix_get (void);
+extern void sim_switch_toggle (int sw);
+extern int sim_switch_read (int sw);
+extern void sim_switch_init (void);
 
 #define ACCURATE_TIMING
 
@@ -72,12 +76,6 @@ U8 *linux_dmd_high_page;
 
 /** A pointer to the visible DMD page */
 U8 *linux_dmd_visible_page;
-
-/** The simulated switch matrix inputs.  This acts as a buffer between the
- * simulation code and the actual product code, but it serves the same 
- * purpose.  Only one matrix is needed, however. 
- */
-U8 linux_switch_matrix[SWITCH_BITS_SIZE+1];
 
 /** The simulated lamp matrix outputs. */
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
@@ -107,7 +105,6 @@ int simulated_zerocross;
 /** The number of IRQ cycles */
 int linux_irq_count;
 
-int show_switch_levels = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -166,7 +163,7 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-static void sim_switch_effects (int swno);
+void sim_switch_effects (int swno);
 
 
 
@@ -318,8 +315,11 @@ U8 simulation_pic_access (int writep, U8 write_val)
 			{
 				if (unlock_code != expected_unlock_code)
 				{
-					simlog (SLC_DEBUG, "Invalid PIC unlock code %X (expected %X)\n",
-						unlock_code, expected_unlock_code);
+					static int already_warned = 0;
+					if (!already_warned)
+						simlog (SLC_DEBUG, "Invalid PIC unlock code %X (expected %X)\n",
+							unlock_code, expected_unlock_code);
+					already_warned = 1;
 					unlock_mode = -1;
 				}
 				else
@@ -358,7 +358,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 			case WPC_PIC_COLUMN(4): case WPC_PIC_COLUMN(5):
 			case WPC_PIC_COLUMN(6): case WPC_PIC_COLUMN(7):
 				if (unlock_mode == 0)
-					return linux_switch_matrix[last_write - WPC_PIC_COLUMN(0) + 1];
+					return sim_switch_matrix_get ()[last_write - WPC_PIC_COLUMN(0) + 1];
 
 			case WPC_PIC_SERIAL(0): case WPC_PIC_SERIAL(1):
 			case WPC_PIC_SERIAL(2): case WPC_PIC_SERIAL(3):
@@ -397,30 +397,14 @@ void linux_write_string (const char *s)
 
 static bool linux_switch_poll_logical (unsigned int sw)
 {
-	return (linux_switch_matrix[sw/8] & (1 << (sw%8))) ^ switch_is_opto (sw);
+	return sim_switch_read (sw) ^ switch_is_opto (sw);
 }
 
 
 /** Toggle the state of a switch */
 static void linux_switch_toggle (unsigned int sw)
 {
-	U8 level;
-
-	/* Update the current state of the switch */
-	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
-
-	/* Redraw the switch */
-	level = linux_switch_matrix[sw/8] & (1 << (sw%8));
-#ifdef CONFIG_UI
-	if (show_switch_levels)
-		ui_write_switch (sw, level);
-	else
-		ui_write_switch (sw, level ^ switch_is_opto (sw));
-#endif
-
-	/* Some switch closures require additional simulation... */
-	if (level ^ switch_is_opto (sw))
-		sim_switch_effects (sw);
+	sim_switch_toggle (sw);
 }
 
 
@@ -527,7 +511,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 
 /** Simulate the side effects of switch number SWNO becoming active.
  */
-static void sim_switch_effects (int swno)
+void sim_switch_effects (int swno)
 {
 	int devno;
 	int n;
@@ -588,10 +572,11 @@ void linux_asic_write (U16 addr, U8 val)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_COIL_OUTPUT:
+			sim_sol_write (32, &linux_solenoid_outputs[4], val);
 #else
 		case WPC_FLIPTRONIC_PORT_A:
-#endif
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
+#endif
 			break;
 
 		case WPC_LEDS:
@@ -669,7 +654,7 @@ void linux_asic_write (U16 addr, U8 val)
 #else
 		case WPC_SW_COL_STROBE:
 			if (val != 0)
-				linux_switch_data_ptr = linux_switch_matrix + 1 + scanbit (val);
+				linux_switch_data_ptr = sim_switch_matrix_get () + 1 + scanbit (val);
 #endif
 			break;
 
@@ -731,7 +716,7 @@ U8 linux_asic_read (U16 addr)
 #else
 		case WPC_SW_ROW_INPUT:
 			if (col9_enabled) /* TODO : this is a TZ thing */
-				return linux_switch_matrix[9];
+				return sim_switch_matrix_get ()[9];
 			else
 				return *linux_switch_data_ptr;
 #endif
@@ -740,7 +725,7 @@ U8 linux_asic_read (U16 addr)
 			return linux_jumpers;
 
 		case WPC_SW_CABINET_INPUT:
-			return linux_switch_matrix[0];
+			return sim_switch_matrix_get ()[0];
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
 			return 0;
@@ -1115,6 +1100,12 @@ int main (int argc, char *argv[])
 		if (!strcmp (arg, "-h"))
 		{
 			printf ("Syntax: freewpc [<options>]\n");
+			printf ("--balls <value>     Install N balls (default : game-specific)\n");
+			printf ("-f <file>           Read input commands from file (default : stdin)\n");
+			printf ("--gamenum <value>   Override the game number from the PIC\n");
+			printf ("--locale <value>    Set the locale jumpers\n");
+			printf ("-o <file>           Log debug messages to file (default : stdout)\n");
+			printf ("-s <value>          Set the relative speed of the simulation\n");
 			exit (0);
 		}
 		else if (!strcmp (arg, "-s"))
@@ -1181,7 +1172,7 @@ int main (int argc, char *argv[])
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
 
 	/* Initialize the state of the switches; optos are backwards */
-	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
+	sim_switch_init ();
 	for (sw = 0; sw < NUM_SWITCHES; sw++)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
