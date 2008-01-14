@@ -422,7 +422,11 @@ void device_request_kick (device_t *dev)
 			live_balls++;
 #endif
 	}
-	task_create_gid1 (gid, device_update);
+	else
+	{
+		dbprintf ("Kick request invalid\n");
+	}
+	task_recreate_gid (gid, device_update);
 }
 
 
@@ -444,7 +448,7 @@ void device_request_empty (device_t *dev)
 			live_balls += can_kick;
 #endif
 	}
-	task_create_gid1 (gid, device_update);
+	task_recreate_gid (gid, device_update);
 }
 
 
@@ -612,7 +616,7 @@ void device_sw_handler (U8 devno)
 		return;
 
 	timer_kill_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
-	task_create_gid (DEVICE_GID (devno), device_update);
+	task_recreate_gid (DEVICE_GID (devno), device_update);
 }
 
 
