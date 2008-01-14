@@ -62,10 +62,21 @@ const U8 *frame_copy_rle (const U8 *framedata)
 			is not present in the stream.  The zero case occurs 
 			frequently, and is thus given special treatment. */
 			frame_repeat_count = *framedata++;
-			/* TODO - use word copies if possible */
-			do {
+
+			while (frame_repeat_count >= 4)
+			{
 				*dbuf++ = 0;
-			} while (--frame_repeat_count != 0);
+				*dbuf++ = 0;
+				*dbuf++ = 0;
+				*dbuf++ = 0;
+				frame_repeat_count -= 4;
+			}
+
+			while (frame_repeat_count != 0)
+			{
+				*dbuf++ = 0;
+				frame_repeat_count--;
+			}
 		}
 		else if (c == XBMPROG_RLE_REPEAT)
 		{
@@ -153,7 +164,7 @@ static const U8 *dmd_decompress_bitplane (const U8 *framedata)
 			top of the existing image data, using XOR operations
 			instead of simple assignment.  This is useful for animations
 			in which a subsequent frame is quite similar to its
-			precedent. */
+			predecessor. */
 			framedata = frame_xor_rle (framedata);
 			break;
 	}
