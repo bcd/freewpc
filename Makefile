@@ -235,6 +235,7 @@ export FON_SRCS
 
 # Program include directories
 CFLAGS += -I$(BLDDIR) -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
+EXTRA_ASFLAGS += -I$(BLDDIR) -I$(INCLUDE_DIR) -I$(MACHINE_DIR)
 
 # Additional defines
 CFLAGS += -DGCC_VERSION=$(GCC_VERSION)
@@ -825,6 +826,26 @@ muxes: $(MUX_SRCS) tools/sched/sched.make
 
 $(MUX_SRCS): $(BLDDIR)/%-mux.c : $(MACHINE_DIR)/%.mux $(MAKE_DEPS)
 	tools/genvio -o $@ -h $(@:.c=.h) -c $<
+
+#######################################################################
+###	Multiplexers
+#######################################################################
+
+trace:
+	$(MAKE) debug
+	echo ""
+	echo "1. Close the debugger, by typing 'G'."
+	echo "2. After the system has nearly completed init, type a tilde to break."
+	echo "3. Enter 'IGNORE 1'."
+	echo "4. Enter 'TRACE 1 A B X Y U S'."
+	echo "5. Type 'G' to go again."
+	echo "6. Break with tilde when you are done tracing."
+	echo "7. Type 'TRACE OFF' to end tracing and close the trace file."
+	echo "8. Stop PinMAME by closing the window."
+	echo ""
+	echo "Press ENTER when you have done all of this."
+	echo ""
+	read akey
 
 #######################################################################
 ###	Host Tools
