@@ -41,7 +41,7 @@
 #include <freewpc.h>
 #include <simulation.h>
 
-extern void freewpc_init (void);
+extern __noreturn__ void freewpc_init (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);
@@ -495,7 +495,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 			it does produce the intended effect.) */
 			for (devno = 0; devno < NUM_DEVICES; devno++)
 			{
-				device_properties_t *props = &device_properties_table[devno];
+				const device_properties_t *props = &device_properties_table[devno];
 				if (props->sol == solno)
 				{
 					int n;
@@ -536,7 +536,7 @@ static void sim_switch_effects (int swno)
 	the 'rolling' to the farthest possible point in the device. */
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
-		device_properties_t *props = &device_properties_table[devno];
+		const device_properties_t *props = &device_properties_table[devno];
 		if (props->sw_count > 1)
 			for (n = 0; n < props->sw_count-1; n++)
 			{
@@ -1052,7 +1052,7 @@ void linux_trough_init (int balls)
 {
 #ifdef DEVNO_TROUGH
 	int i;
-	device_properties_t *trough_props;
+	const device_properties_t *trough_props;
 
 	if (balls >= 0)
 	{
