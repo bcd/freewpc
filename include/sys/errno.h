@@ -61,11 +61,15 @@
 #define ERR_MALLOC               37
 #define ERR_MUST_BE_LEFF         38
 #define ERR_INVALID_MATRIX       39
+#define ERR_TASK_STACK_UNDERFLOW 40
+
+#ifndef __ASSEMBLER__
 
 typedef U8 errcode_t;
 
-
 __noreturn__ void fatal (errcode_t errcode);
 void nonfatal (errcode_t errcode);
+
+#endif /* __ASSEMBLER__ */
 
 #endif /* SYS_ERRNO_H */
