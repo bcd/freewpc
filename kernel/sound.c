@@ -320,13 +320,13 @@ void sound_init (void)
 	dbprintf ("Detected L-%d sound.\n", sound_version_major);
 #endif
 
+exit_func:
 	/* Use nvram value if it's sensible */
 	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
 		volume_set (current_volume);
 	else
 		volume_set (DEFAULT_VOLUME);
 
-exit_func:
 	sys_init_pending_tasks--;
 	task_exit ();
 }
