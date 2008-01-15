@@ -59,8 +59,6 @@ extern void sim_switch_toggle (int sw);
 extern int sim_switch_read (int sw);
 extern void sim_switch_init (void);
 
-#define ACCURATE_TIMING
-
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
@@ -95,16 +93,9 @@ int linux_irq_pending;
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-/** Nonzero if an FIRQ is pending */
-int linux_firq_pending;
-
 /** When zero, at a zero cross reading; otherwise, the amount of time
  * until the next zerocross */
 int simulated_zerocross;
-
-/** The number of IRQ cycles */
-int linux_irq_count;
-
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -163,7 +154,8 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-void sim_switch_effects (int swno);
+
+unsigned long sim_jiffies = 0;
 
 
 
@@ -587,9 +579,12 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_RAM_LOCK:
 		case WPC_RAM_LOCKSIZE:
 		case WPC_ROM_LOCK:
-		case WPC_ZEROCROSS_IRQ_CLEAR:
 		case WPC_ROM_BANK:
 			/* nothing to do, not implemented yet */
+			break;
+
+		case WPC_ZEROCROSS_IRQ_CLEAR:
+			sim_watchdog_reset ();
 			break;
 
 		case WPC_DMD_LOW_PAGE:
@@ -759,14 +754,6 @@ U8 linux_asic_read (U16 addr)
 }
 
 
-/** Simulate the passage of a single 'time step', which is 1ms
- * or 1 IRQ. */
-static void linux_time_step (void)
-{
-	++linux_irq_count;
-}
-
-
 /** Permanent thread that handles realtime events.
  *
  * This thread monitors system timing and invokes the interrupt handlers
@@ -775,18 +762,17 @@ static void linux_time_step (void)
 static void linux_realtime_thread (void)
 {
 	struct timeval prev_time, curr_time;
+#define FIRQ_FREQ 16
+	static unsigned long next_firq_jiffies = FIRQ_FREQ;
 
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
 	task_set_flags (TASK_PROTECTED);
 
-#ifdef ACCURATE_TIMING
 	gettimeofday (&prev_time, NULL);
-#endif
 	for (;;)
 	{
 		/* Sleep a while; don't hog the system. */
-#ifdef ACCURATE_TIMING
 		/* Sleep for approximately 33ms */
 		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 
@@ -796,30 +782,34 @@ static void linux_realtime_thread (void)
 		the previous IRQ function run took. */
 		gettimeofday (&curr_time, NULL);
 		linux_irq_pending = (curr_time.tv_usec - prev_time.tv_usec) / 1000;
+		if (linux_irq_pending < 0)
+			linux_irq_pending += 1000;
+
+		/* Increment the total number of 1ms ticks */
+		sim_jiffies += linux_irq_pending;
 		prev_time = curr_time;
-#else
-		/* The old way that assumes task_sleep is very accurate */
-		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
-		linux_irq_pending += RT_ITERATION_IRQS;
-#endif
 
-		if (linux_irq_enable)
-			while (linux_irq_pending-- > 0)
-			{
-				/** Advance the simulator clock */
-				linux_time_step ();
-	
-				/** Invoke IRQ handler */
+		/* IRQ is a periodic interrupt driven by an oscillator.  For
+		 * each 1ms that has elapsed, simulate an IRQ (if possible) */
+		while (linux_irq_pending-- > 0)
+		{
+			/** Advance the simulator clock, regardless */
+			sim_time_step ();
+
+			/** Invoke IRQ handler, if not masked */
+			if (linux_irq_enable)
 				tick_driver ();
-			}
+		}
 
-		/** Check for external interrupts on the FIRQ line */
+		/* FIRQ is generated periodically based on the display refresh rate */
 		if (linux_firq_enable)
-			while (linux_firq_pending-- > 0)
+		{
+			while (sim_jiffies >= next_firq_jiffies)
 			{
-				/* TODO - this is not being invoked in simulation */
 				do_firq ();
+				next_firq_jiffies += FIRQ_FREQ;
 			}
+		}
 	}
 }
 
@@ -1152,8 +1142,7 @@ int main (int argc, char *argv[])
 	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
-	linux_irq_pending = linux_firq_pending = 0;
-	linux_irq_count = 0;
+	linux_irq_pending = 0;
 	linux_output_stream = stdout;
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
@@ -1161,6 +1150,7 @@ int main (int argc, char *argv[])
 #if (MACHINE_PIC == 1)
 	simulation_pic_init ();
 #endif
+	sim_watchdog_init ();
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);

@@ -16,7 +16,7 @@ HOST_LFLAGS += -pg
 HOST_LIBS += -lpth
 
 # Additional object files to be linked into the kernel region
-KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o
+KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o $(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o
 
 # When using the curses UI (default for now)
 CFLAGS += -DCONFIG_UI -DCURSES
