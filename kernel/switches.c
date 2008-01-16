@@ -451,7 +451,7 @@ CALLSET_ENTRY (switch, idle)
 	extern U8 sys_init_complete;
 
 	/* Prior to system initialization, switches are not serviced.
-	Any switch closures during this time continued to be queued up.
+	Any switch closures during this time continue to be queued up.
 	However, at the least, allow the coin door switches to be polled. */
 	if (unlikely (sys_init_complete == 0))
 	{
@@ -464,15 +464,14 @@ CALLSET_ENTRY (switch, idle)
 		/* If pending bits is zero, which it will be most of the
 		 * time, then there is absolutely nothing to consider on this
 		 * column.  (The logic below would always effectively do nothing.) */
-		/* TODO - do a check before the for loop that checks all of
-		 * them quickly */
 		if (likely (switch_pending_bits[col] == 0))
 			continue;
 
 		/* Atomically get-and-clear the pending switches.
-		 * Note that we REREAD pending bits here; it may have changed
+		 * Note that we must REREAD pending bits here; it may have changed
 		 * since we just checked it!  But it is guaranteed that only
-		 * additional bits could be set -- not cleared */
+		 * additional bits could be set -- not cleared.  The barrier is
+		 * needed to force the re-read, which can be optimized by gcc. */
 		barrier ();
 		disable_irq ();
 		pendbits = switch_pending_bits[col];
@@ -514,7 +513,7 @@ CALLSET_ENTRY (switch, idle)
 #endif
 
 			/* Iterate over all rows -- all switches on this column that changed.
-			 * But stop as soon as pending rows are dispatched. */
+			 * But stop as soon as no more pending rows are seen */
 			do {
 				if (pendbits & 1)
 				{
@@ -544,6 +543,8 @@ CALLSET_ENTRY (switch, idle)
 					task_set_arg (tp, sw);
 #endif /* QUEUE_SWITCHES */
 				}
+
+				/* Set up for next iteration */
 				pendbits >>= 1;
 #ifdef QUEUE_SWITCHES
 				queued_bits >>= 1;
