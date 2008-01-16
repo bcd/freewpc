@@ -20,7 +20,7 @@
 
 /**
  * \file
- * \brief Routines needed to simulate the WPC hardware.
+ * \brief Entry point to the builtin simulator for the WPC hardware.
  * 
  * When CONFIG_NATIVE is defined at build time, access to WPC I/O registers
  * is redirected to function calls here that simulate the behavior.  This

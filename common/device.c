@@ -107,11 +107,8 @@ void device_debug (void)
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
 	}
 
-	/* The 'missing' count printed here is the one that makes the
-	most sense... however it is not exactly the 'missing_balls'
-	variable */
-	dbprintf ("Accounted: %d   ", counted_balls);
-	dbprintf ("Missing: %d   ", missing_balls - live_balls + held_balls);
+	dbprintf ("Found: %d   ", counted_balls);
+	dbprintf ("Lost: %d   ", missing_balls - live_balls + held_balls);
 	dbprintf ("Live: %d   ", live_balls);
 	dbprintf ("Held: %d\n", held_balls);
 }
