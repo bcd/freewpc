@@ -423,7 +423,8 @@ void device_request_kick (device_t *dev)
 	{
 		dbprintf ("Kick request invalid\n");
 	}
-	task_recreate_gid (gid, device_update);
+	if (gid != task_getgid ())
+		task_recreate_gid (gid, device_update);
 }
 
 
@@ -445,7 +446,8 @@ void device_request_empty (device_t *dev)
 			live_balls += can_kick;
 #endif
 	}
-	task_recreate_gid (gid, device_update);
+	if (gid != task_getgid ())
+		task_recreate_gid (gid, device_update);
 }
 
 

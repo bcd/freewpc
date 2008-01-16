@@ -403,7 +403,7 @@ void lamp_leff2_allocate (lampnum_t lamp)
 
 bool lamp_leff2_test_allocated (lampnum_t lamp)
 {	
-	return bit_test (lamp_leff2_matrix, lamp);
+	return bit_test (lamp_leff2_allocated, lamp);
 }
 
 void lamp_leff2_free (lampnum_t lamp)

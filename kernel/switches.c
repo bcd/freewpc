@@ -303,6 +303,7 @@ typedef struct
 void switch_lamp_pulse (void)
 {
 	lamp_pulse_data_t * const cdata = task_current_class_data (lamp_pulse_data_t);	
+	bool can_pulse;
 
 	/* Although not a true leff, this fools the lamp draw to doing
 	 * the right thing. */
@@ -311,10 +312,15 @@ void switch_lamp_pulse (void)
 	/* If the lamp is already allocated by another lamp effect,
 	then don't bother trying to do the pulse. */
 	disable_interrupts ();
-	if (!lamp_leff2_test_allocated (cdata->swinfo->lamp))
-	{
+	can_pulse = lamp_leff2_test_allocated (cdata->swinfo->lamp);
+	if (can_pulse)
 		lamp_leff2_allocate (cdata->swinfo->lamp);
+	enable_interrupts ();
 
+	dbprintf ("can_pulse lamp %d = %d\n", cdata->swinfo->lamp, can_pulse);
+
+	if (can_pulse)
+	{
 		/* Change the state of the lamp */
 		if (lamp_test (cdata->swinfo->lamp))
 			leff_off (cdata->swinfo->lamp);

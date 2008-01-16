@@ -19,17 +19,27 @@
  */
 
 #include <freewpc.h>
+
+/** Normally we don't like to use 'int', but this code interfaces
+ * with the standard library, so make absolutely sure we are using
+ * the right types */
 #undef int
 
 void exit (void)
 {
 }
 
+
+/** Called by the standard library on some errors.
+ * This maps to our fatal() function. */
 void abort (void)
 {
 	fatal (ERR_LIBC_ABORT);
 }
 
+
+/** Called by the startup routine to begin the program.
+ * This maps to freewpc_init(). */
 int main (void)
 {
 	extern __noreturn__ void freewpc_init (void);

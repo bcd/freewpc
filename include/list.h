@@ -23,6 +23,9 @@
 
 /* Generic doubly linked list macros. */
 
+
+/** A doubly linked list header.  Any object that should be maintained
+ * in a linked list should embed one of these structures in it. */
 typedef struct dll_header
 {
 	struct dll_header *next;

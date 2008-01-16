@@ -1,26 +1,54 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 #include <simulation.h>
+
 
 #define RING_COUNT 32
 
 #define ring_later(ticks) ((ring_now + (ticks)) % RING_COUNT)
 
+
+/** The current time, modulo the ring count */
 unsigned int ring_now = 0;
+
 
 struct time_handler *time_handler_ring[RING_COUNT] = { NULL, };
 
+
+/** Allocate a new timer ring entry */
 static struct time_handler *ring_malloc (void)
 {
 	return malloc (sizeof (struct time_handler));
 }
 
+
+/** Free a timer ring entry */
 static void ring_free (struct time_handler *elem)
 {
 	free (elem);
 }
 
-/* Register a function to be called after N_TICKS have elapsed. */
+
+/** Register a function to be called after N_TICKS have elapsed. */
 void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *data)
 {
 	unsigned int ring = ring_later (n_ticks);
@@ -37,7 +65,7 @@ void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *da
 }
 
 
-/* Advance the simulation time by 1 tick. */
+/** Advance the simulation time by 1 tick. */
 void sim_time_step (void)
 {
 	struct time_handler *elem, *elem_next;

@@ -20,9 +20,14 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Routines for accessing the security PIC device.
+ */
 
 /** For low-level debugging ; normally this is not needed */
 #define pic_debug(rest...)
+
 
 #ifdef CONFIG_LITTLE_ENDIAN
 #define POS_CONVERT(pos) (3-(pos))
@@ -140,6 +145,9 @@ void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool neg
 		pic_debug ("reg.after_subtract = %w\n", *reg);
 	}
 
+	/* Division/modulo operations under the 6809 compiler are weakly
+	 * implemented, so bypass them and use a special hand-crafted version
+	 * that really works. */
 #ifdef CONFIG_NATIVE
 	if (*reg % divisor)
 		dbprintf ("error: there is a remainder\n");
@@ -299,7 +307,11 @@ void pic_init (void)
 	pic_decode32 (&pic_serial_encoded.reg4, 99999ULL, 1, TRUE);
 	pic_strip_digits (pic_serial_encoded.reg4, &pic_strip_info[3]);
 
+	/* Once the serial number is fully decoded, verify that
+	 * it matches the game number */
 	pic_verify ();
+
+	/* If OK, compute the switch matrix unlock code. */
 	if (!pic_invalid)
 		pic_compute_unlock_code ();
 }

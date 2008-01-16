@@ -56,6 +56,9 @@ enum chunk_type
 
 #define NUM_CHUNK_TYPES 3
 
+
+/** A per-allocation header that precedes the returned buffer pointer,
+ * that is used to free it properly. */
 typedef struct _user_header
 {
 	/* Not used.  Keep the reserved bits at the top, as GCC
@@ -78,16 +81,33 @@ typedef struct _user_header
 #define NUM_32BYTE_BLOCKS 1
 
 
-/* A view of the block structure that is being used for dynamic memory. */
+/** A view of the block structure as it is used for dynamic memory.
+ * The size of this structure should be the same as that of the
+ * task_struct.  A single chunk corresponds to one or more
+ * dynamic memory allocations. */
 typedef struct _malloc_chunk
 {
+	/** Indicates the type of block and whether it is used or not.
+	 * The task_struct has the same field in the same position.
+	 * When used for malloc(), the block always has the bit
+	 * TASK_MALLOC set. */
 	U8 state;
+
+	/** Pointer to the next block in the same list */
 	struct _malloc_chunk *next;
+
+	/** Pointer to the previous  block in the same list */
 	struct _malloc_chunk *prev;
 
-	/* A bitmask that says which userblocks in the chunk
+	/** A bitmap that says which userblocks in the chunk
 	are available */
 	U8 available;
+
+	/** A union of the actual data allocations provided to
+	 * the callers of malloc().  Allocations are rounded
+	 * up to the next 8, 16, or 32 byte boundary.
+	 * For each case, there is an element of the union
+	 * that says how those buffers are arranged and tracked. */
 	union {
 		struct {
 			struct userblock8 {

@@ -101,7 +101,7 @@ CALLSET_ENTRY (tournament, start_game)
 }
 
 
-CALLSET_ENTRY (tournament, end_game)
+CALLSET_ENTRY (tournament, amode_start)
 {
 	tournament_mode_enabled = OFF;
 }

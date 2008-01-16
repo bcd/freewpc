@@ -355,6 +355,10 @@ void task_sleep (task_ticks_t ticks)
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
+#if 1
+	/* TODO - verify that interrupts are not disabled when calling this */
+#endif
+
 	/* Mark the task as blocked, set the time at which it blocks,
 	and set how long it should wait for. 
 
