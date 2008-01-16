@@ -62,10 +62,21 @@ const U8 *frame_copy_rle (const U8 *framedata)
 			is not present in the stream.  The zero case occurs 
 			frequently, and is thus given special treatment. */
 			frame_repeat_count = *framedata++;
-			/* TODO - use word copies if possible */
-			do {
+
+			while (frame_repeat_count >= 4)
+			{
 				*dbuf++ = 0;
-			} while (--frame_repeat_count != 0);
+				*dbuf++ = 0;
+				*dbuf++ = 0;
+				*dbuf++ = 0;
+				frame_repeat_count -= 4;
+			}
+
+			while (frame_repeat_count != 0)
+			{
+				*dbuf++ = 0;
+				frame_repeat_count--;
+			}
 		}
 		else if (c == XBMPROG_RLE_REPEAT)
 		{
@@ -153,7 +164,7 @@ static const U8 *dmd_decompress_bitplane (const U8 *framedata)
 			top of the existing image data, using XOR operations
 			instead of simple assignment.  This is useful for animations
 			in which a subsequent frame is quite similar to its
-			precedent. */
+			predecessor. */
 			framedata = frame_xor_rle (framedata);
 			break;
 	}
@@ -193,24 +204,22 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 }
 
 
+struct faf
+{
+	U8 depth;
+	U8 len;
+	U8 *fifs[0];
+};
+
 /** Execute a FreeWPC animation, which is a series of
 consecutive FIFs.  An animation is a sequence of FIFs,
 with a leading header. */
-const U8 *dmd_draw_faf1 (const U8 *faf, task_ticks_t delay)
+void dmd_draw_faf1 (struct faf *faf, task_ticks_t delay)
 {
-	U8 depth;
-	const U8 *fif;
-	const U16 **faf_as_pointer = (const U16 **)&faf;
-
-	/* TODO */
+	U8 n;
 	wpc_push_page (PRG_PAGE);
-	depth = *faf++;
-	fif = *(*faf_as_pointer)++;
-	do {
-		dmd_draw_fif1 (fif);
-		fif = *(*faf_as_pointer)++;
-	} while (fif != NULL);
+	for (n=0; n < faf->len; n++)
+		dmd_draw_fif1 (faf->fifs[n]);
 	wpc_pop_page ();
-	return faf;
 }
 

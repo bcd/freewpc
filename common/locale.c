@@ -26,6 +26,7 @@
  */
 
 #include <freewpc.h>
+#include <preset.h>
 
 __nvram__ U8 locale_code;
 __nvram__ U8 locale_code_csum;

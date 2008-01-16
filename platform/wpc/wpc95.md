@@ -99,6 +99,13 @@ NULL: 0
 Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff)
 
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. Str. 4 ON
+4: G.I. Str. 5 ON
+
 [fonts]
 mono5:
 lucida9:

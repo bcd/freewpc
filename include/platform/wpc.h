@@ -487,7 +487,7 @@ extern inline void wpc_write_flippers (U8 val)
 #if (MACHINE_WPC95 == 1)
 	wpc_asic_write (WPC95_FLIPPER_COIL_OUTPUT, val);
 #else
-	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, val);
+	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, ~val);
 #endif
 #endif
 }

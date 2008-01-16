@@ -21,7 +21,7 @@ define MACHINE_NUMBER 531
 [lamps]
 11: Chicago P
 12: Dallas U
-13: Buston C
+13: Boston C
 14: New York D
 15: Orlando L
 16: Washington R
@@ -59,6 +59,28 @@ define MACHINE_NUMBER 531
 56: R. Flipper Lane
 57: Shoot Again
 58: Special
+61: L. Ramp Build
+62: L. Loop Build
+63: Travel
+64: World Cup Final
+65: L. Ramp Lock
+66: Top Lane Left
+67: Top Lane Right
+68: Skill Lower
+71: Light Jackpots
+72: Final Draw
+73: Magna Goalie
+74: Left Inlane
+75: Light Kickback
+76: L. Ramp Ticket
+77: R. Ramp Ticket
+78: Ramp Jackpots
+81: Rollover 1
+82: Rollover 2
+83: Rollover 3
+84: Rollover 4
+85: Skill Top
+86: Skill Middle
 87: Buy-In Button
 88: Start Button
 
@@ -171,6 +193,14 @@ F3: Lock Magnet
 #############################################################
 
 [lampsets]
+Goals: 1 Goal, 2 Goals, 3 Goals, 4 Goals
+Ball Panels: Ball Spirit, Ball Skill, Ball Stamina, Ball Speed, Ball Strength
+Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Upper Build Lock
+Kickbacks: Kickback Lower, Kickback Center, Kickback Upper
+Ultra Modes: Ultra Spinner, Ultra Jets, Ultra Ramps, Ultra Goalie
+Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
+Ticket Halves: L. Ticket Half, R. Ticket Half
+Cities: Chicago P, Dallas U, Boston C, New York D, Orlando L, Washington R, San Francisco O, Detroit W
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)

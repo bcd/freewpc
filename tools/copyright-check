@@ -30,3 +30,4 @@ for dir in `echo include machine kernel common test tools wpcsound platform`; do
 	done
 	cd ..
 done
+rm -f tools/copyright-timestamp

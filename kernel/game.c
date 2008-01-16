@@ -221,6 +221,10 @@ void end_ball (void)
 
 	/* Here, we are committed to ending the ball */
 
+	/* Change the running task group, so that we are no longer in
+	 * the context of the trough device update. */
+	task_setgid (GID_END_BALL);
+
 	/* Notify everybody that wants to know about it */
 	callset_invoke (end_ball);
 
@@ -435,8 +439,8 @@ void start_ball (void)
 
 	/* Since lamp effects from previous balls could have been killed,
 	ensure that no lamps for leffs are allocated, causing incorrect
-	lamp matrix draw.  Do this early, before start_ball which might
-	want to start up a leff. */
+	lamp matrix draw.  Do this early, before the start_ball hook is
+	invoked which might want to start up a leff. */
 	leff_stop_all ();
 
 	if (ball_up == 1)

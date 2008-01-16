@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 
-CALLSET_ENTRY (lefthole, enter)
+CALLSET_ENTRY (left_hole, enter)
 {
 	mark_ball_in_play ();
 	score (SC_1K);

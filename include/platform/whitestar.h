@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,14 +26,6 @@
 #ifndef _WHITESTAR_H
 #define _WHITESTAR_H
 
-
-
-/***************************************************************
- * Peripheral timer
- ***************************************************************/
-
-/** The FIRQ clear/peripheral timer register bits */
-#define FIRQ_CLEAR_BIT 0x80
 
 
 /***************************************************************

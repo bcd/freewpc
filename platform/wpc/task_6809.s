@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
@@ -18,6 +18,7 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
+#include "sys/errno.h"
 
 ;;; Defines that are in .h files which can't be included directly.
 ;;; TODO: Put only the constants in .h without the C-structs and it
@@ -126,11 +127,11 @@ _stack_too_large:
 	cmps	#STACK_BASE
 	blt	_stack_too_large
 #endif
-	ldb	#2    ; ERR_TASK_STACK_OVERFLOW
+	ldb	#ERR_TASK_STACK_OVERFLOW
 	jmp	_fatal
 
 _stack_underflow:
-	ldb	#99
+	ldb	#ERR_TASK_STACK_UNDERFLOW
 	jmp	_fatal
 
 

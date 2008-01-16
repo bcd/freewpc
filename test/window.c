@@ -69,6 +69,8 @@
 #include <format.h>
 #include <coin.h>
 #include <highscore.h>
+#include <preset.h>
+
 
 #undef CONFIG_TEST_DURING_GAME
 
