@@ -41,6 +41,17 @@ for inspection.</p>
 
 <h2>Status</h2>
 
+<h3>January 16, 2008</h3>
+<p>Version 0.16 of all ROMs posted.  This is much more stable than 0.15, with a
+few interesting new features but mostly bug fixes across all generations of
+WPC.
+
+<h3>January 12, 2008</h3>
+<p>The next release should happen within a week or two.  I'm testing all of the
+updates from the last two months.  Some new features have been added too ... stay
+tuned for details!
+
+
 <h3>November 30, 2007</h3>
 <p>Version 0.15 posted.  This release has a huge number of changes, although
 the ROMs have not been tested extensively.  This should be considered
@@ -60,7 +71,7 @@ Also, anyone interested in just testing should just download the ROMs,
 fire up the emulator, and start sending bug reports.</p>
 
 <p>All development is currently done under the Linux operating system.
-I use <a href="subversion">Subversion</a> for source control.
+I use <b>git</b> for source control.
 Developers will also need to grab my <a href="/gcc6809">GCC for 6809</a>
 compiler, an assembler, and a linker.  See the 6809 pages for information
 on how to download and install the compiler.</p>

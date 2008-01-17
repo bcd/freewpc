@@ -8,6 +8,29 @@
 Note these lists are not inclusive but highlight the major differences.  A detailed
 list of changes can be found using WebSVN.</p>
 
+<h3>Version 0.16</h3>
+<ul>
+<li>Much improved PIC support for WPC-S and WPC-95 games.
+<li>Much improved native mode emulation of the WPC hardware.
+<li>Retested AFM, WCS, and Terminator 2 more thoroughly than previous release.
+<li>Define more lamps and switches for AFM and WCS.
+<li>Fixed WPC-95 flipper output polarity.
+<li>Removed older support for compiling in XBMs directly.  Use the FIF format instead.
+<li>Retime IRQ-level functions, optimizing a few of them and feeding the profiling
+data into the scheduler to spread them evenly.  Added a "tracer" script that
+parses PinMAME trace files and presents human-readable reports from it.
+<li>Fixed a couple of problems where interrupts were disabled for a really long
+time.
+<li>Fixed bug where lamps didn't briefly flicker properly on corresponding switch
+hit.
+<li>Fixed several bugs relating to ball device kicking that could cause lockups.
+<li>Replay value displayed more reliably.
+<li>Internally rearranged a lot of code to avoid running out of ROM space.
+<li>Cleaned up the build system, removing many older constructs and making it more
+modular.
+<li>Removed support for the old user.make file; now a .config file is required.
+</ul>
+
 <h3>Version 0.15</h3>
 
 <ul>

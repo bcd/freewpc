@@ -1,7 +1,7 @@
 # vim: set filetype=html:
 <div id="left" class="column">
 [major=0]
-[minor=15]
+[minor=16]
 [version_suffix=${major}_${minor}]
 [version_string=Latest version is ${major}.${minor}]
 
@@ -38,8 +38,8 @@
 
 <ul>
 <li><a href="http://www.oddchange.com/freewpc/doxygen" title="Browse code with comments, courtesy of Doxygen ">Browse Latest Code</a></li>
-<li><a href="http://www.oddchange.com/websvn/" title="Browse detailed version history online">Browse Subversion</a></li>
-<li><a href="http://www.oddchange.com/svn/public/freewpc" title="Use this URL if you want to access the repository using your own SVN client">Subversion Repo</a></li>
+# <li><a href="http://www.oddchange.com/websvn/" title="Browse detailed version history online">Browse Subversion</a></li>
+# <li><a href="http://www.oddchange.com/svn/public/freewpc" title="Use this URL if you want to access the repository using your own SVN client">Subversion Repo</a></li>
 <li>Browse Git ... Coming Soon!</li>
 <li><a href="releases/freewpc-${major}.${minor}.tar.gz">Download Tarball</a></li>
 </ul>
