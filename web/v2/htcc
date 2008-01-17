@@ -1,5 +1,18 @@
 #!/usr/bin/perl
+#
+# htcc - HTML compiler tool
+#
+# This script converts an HTT file into HTML.
+# Special constructs permitted:
+# - Lines beginning with '#' are ignored.
+# - [!file] embeds the output of running a script named file
+# - [var=value] sets a variable
+# - [var=!file] sets a variable from the output of a script
+# - [file] includes the contents of another HTT file.
+# - $var is substituted with the value of the variable 'var'.
+# Substitution is recursive; expansions are made at output time.
 
+# A hash of all the variables defined
 my %varhash;
 
 $varhash{'title'} = "";

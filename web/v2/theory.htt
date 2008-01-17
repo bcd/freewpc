@@ -43,7 +43,7 @@ stack.  The FIRQ handler must manually save any registers
 that need to be preserved.  On the WPC platform, the
 IRQ is driven via a crystal to fire 1024 times per second,
 or about once every 976 microseconds (equivalently, once
-every 1952 cycles).
+every 1952 CPU cycles).
 
 <p>The FIRQ is asserted by the WPC, when programmed to do so,
 when the DMD controller has finished drawing a particular
@@ -65,7 +65,8 @@ Mapped from $0000 to $1FFF, for a total of 8KB.
 The WPC allows a configurable portion of the RAM 
 to be write-protected; trying to write this area
 without first unlocking the memory will cause
-the write to be ignored.
+the write to be ignored.  The entire RAM is battery-backed
+across system resets.
 
 <h3>Dot Matrix Controller</h3>
 Mapped from $3800 to $3BFF, for a total of 1KB.

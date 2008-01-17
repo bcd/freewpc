@@ -1,27 +1,19 @@
 MAJOR = 0
-MINOR = 15
+MINOR = 16
 GAMES = afm tz wcs t2
 ROMDIR = /home/bcd/oddchange/freewpc/freewpc.git/web/v2/build/freewpc/releases
-HTDIR = /home/bcd/sw/freewpc/web
 
 export NOCONFIG=y
 export FREEWPC_DEBUGGER=n
 export PLATFORM=wpc
-export GCC_VERSION=4.2.1
+export GCC_VERSION=4.3.0
 export SYSTEM_MAJOR=0
-export SYSTEM_MINOR=15
+export SYSTEM_MINOR=16
 export PINMAME=/home/bcd/src/pinmame/xpinmamed.x11
 export TARGET_ROMPATH=/home/bcd/roms/pinmame
 export BG=
 
-doc: all
-	mkdir -p $(HTDIR)
-	cp -p index.html faq.html $(HTDIR)
-
-all : index.html faq.html build.html howto.html
-
-%.html : %.web mkweb.pl
-	perl mkweb.pl < $< > $@
+all : tarball roms
 
 tarball:
 	@true $(foreach game,$(GAMES), && cd .. && $(MAKE) clean MACHINE=$(game) && cd -)
@@ -38,5 +30,3 @@ roms:
 		&& cp -p f$(game)$(MAJOR)_$(MINOR).zip $(ROMDIR) \
 		&& cd -)
 
-clean:
-	rm -f index.html faq.html

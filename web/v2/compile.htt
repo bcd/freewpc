@@ -28,10 +28,8 @@ certainly present</li>
 <h2>Configuring and making</h2>
 
 <p>Before you can just type <b>make</b>, you should create a file called
-<b>user.make</b> and define what you want to build, and options for how
-to build it.  See the file <b>user.make.example</b> in the distribution
-for guidance on what can go here.  At a minimum, you must specify the
-MACHINE and PLATFORM.</p>
+<b>.config</b> and define what you want to build, and options for how
+to build it.  TODO</p>
 
 <p>After that, you can just run <b>make</b>.
 
@@ -48,7 +46,7 @@ will back it up to a file named <b>.original</b>.  See the Makefile in
 <i>machine/&lt;game&gt;</i> to see which "real" ROM will get clobbered for
 this purpose.</p>
 
-<div class="end"><i>&nbsp;Copyright &copy; 2007 by Brian Dominy.</i></div>
+<div class="end"><i>&nbsp;Copyright &copy; 2007, 2008 by Brian Dominy.</i></div>
 
 </div>
 
