@@ -2721,6 +2721,9 @@ struct menu sound_test_item = {
 /* The browser action stores the pulse width */
 
 
+/* TODO - if no solenoids/flashers defined, solenoid_test_ok
+ * may loop indefinitely */
+
 bool solenoid_test_selection_ok (void)
 {
 	extern struct window_ops flasher_test_window;
@@ -2826,7 +2829,6 @@ struct window_ops flasher_test_window = {
 	.up = solenoid_test_up,
 	.down = solenoid_test_down,
 };
-
 
 struct menu solenoid_test_item = {
 	.name = "SOLENOID TEST",
