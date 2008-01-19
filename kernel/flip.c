@@ -34,6 +34,8 @@ U8 flippers_enabled;
 /** Software controlled flipper inputs for Fliptronic games. */
 #ifdef MACHINE_FLIPTRONIC
 __fastram__ U8 flipper_overrides;
+
+U8 fliptronic_powered_coil_outputs;
 #endif
 
 
@@ -121,7 +123,7 @@ static inline void flipper_service (
 void fliptronic_rtt (void)
 {
 	register U8 inputs __areg__ = ~wpc_read_flippers () | flipper_overrides;
-	U8 outputs = 0;
+	U8 outputs = fliptronic_powered_coil_outputs;
 
 	if (flippers_enabled)
 	{
@@ -162,6 +164,7 @@ CALLSET_ENTRY (fliptronic, ball_search)
 void flipper_init (void)
 {
 	flipper_disable ();
+	fliptronic_powered_coil_outputs = 0;
 }
 
 

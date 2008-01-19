@@ -104,6 +104,30 @@ extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
 }
 
 
+/** Update a set of 8 solenoids that share the same output register. */
+extern inline void sol_update_fliptronic_powered (void)
+{
+	extern U8 fliptronic_powered_coil_outputs;
+
+	/* For some reason, GCC 4.x crashes on this function... */
+#ifdef GCC4
+	register U8 out __areg__ = 0;
+#else
+	register U8 out = 0;
+#endif
+
+	/* Update each of the 8 solenoids in the bank, updating timers
+	and calculating whether or not each should be on or off. */
+	sol_contribute (36, out);
+	sol_contribute (37, out);
+	sol_contribute (38, out);
+	sol_contribute (39, out);
+
+	/* Write the final output to the hardware */
+	fliptronic_powered_coil_outputs = out;
+}
+
+
 /** Realtime update of the high power solenoids */
 void sol_update_rtt_0 (void)
 {
@@ -115,6 +139,9 @@ void sol_update_rtt_0 (void)
 void sol_update_rtt_1 (void)
 {
 	sol_update_set (8, WPC_SOL_LOWPOWER_OUTPUT);
+#if (MACHINE_WPC95 == 1)
+	sol_update_fliptronic_powered ();
+#endif
 }
 
 
