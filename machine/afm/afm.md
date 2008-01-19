@@ -146,19 +146,27 @@ L6: L.R. Martian
 L7: Saucer Shake
 L8: Drop Target
 
-#Motor Bank
-#Right Gate
-#Left Gate
-#Divertor Power
-#Divertor Hold
-#L.E.D. Clock
-#L.E.D. Data
-#Strobe Light
-#Coin Meter
+G1: Saucer Flash 5, flash
+G2: Saucer Flash 4, flash
+G3: Saucer Flash 6, flash
+G4: R. Martian Flash, flash
+G5: Saucer Arrow, flash
+G7: Saucer Flash, flash
 
-# TODO : Divertor Power = 34
-# TODO : Divertor Hold = 35
-# TODO : Strobe Light = 38
+A1: Saucer Flash 2, flash
+A2: Saucer Flash 3, flash
+A3: Saucer Flash 1, flash
+A4: L. Martian Flash, flash
+A5: L.E.D. Clock
+A6: L.E.D. Data
+A7: Strobe Light, flash
+
+F5: Right Gate
+F6: Left Gate
+F7: Divertor Power
+F8: Divertor Hold
+
+X1: Coin Meter
 
 [gi]
 
@@ -205,6 +213,8 @@ Right Hole: Right Popper, Right Popper
 [deffs]
 
 [leffs]
+
+Flashfest: PRI_LEFF1, page(MACHINE_PAGE)
 
 [fonts]
 
