@@ -31,7 +31,12 @@ WPC_RAM_LOCK_2K = 0x1
 
 ;;; The ROM bank value for the lowest page this ROM uses
 ;;; TODO : this has to be configurable.
-BOTTOM_BANK    = 0x20
+;;; For now, only 8 pages are ever used, so checksum the
+;;; other pages -- though present -- is not needed.
+;;; The byte sum of any blank page is zero, so the checksum
+;;; is not affected by it.
+;;; BOTTOM_BANK    = 0x20
+BOTTOM_BANK    = 0x30
 
 ;;; The ROM bank value for the highest page this ROM uses,
 ;;; excluding the fixed system pages.
@@ -100,45 +105,63 @@ _start:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;   ROM POST DIAGNOSTIC CHECK
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; TODO - the hardware watchdog will expire if we don't
-	; reset it periodically here.
 rom_test:
 	; Initialize 16-bit checksum
 	ldd	#0
 
 	; Compute checksum for fixed region (0x8000-0xFFFF).
-	ldx	#0
+	; TODO - it is possible to do these checks like just
+	; any other bank - they can be mapped to 0x4000.
+	ldx	#0x8000
 fixed_loop:
-	addb	,-x
+	addb	,x
 	adca	#0
-	addb	,-x
+	addb	1,x
 	adca	#0
-	addb	,-x
+	addb	2,x
 	adca	#0
-	addb	,-x
+	addb	3,x
 	adca	#0
-	cmpx	#0x8000
-	bhi	fixed_loop
+	leax	4,x
+	cmpx	#0x0000
+	bne	fixed_loop
 
-	; Compute checksum for each paged region
+	; Compute checksum for each paged region (0x4000-0x7FFF).
+	; Y is used to iterate over each bank of ROM.
 	ldy	#TOP_BANK
 paged_loop:
-	ldx	#0x8000
+	ldx	#0x4000
+
+	; Switch to the next bank of ROM.
 	exg	d,y
 	stb	WPC_ROM_BANK
 	exg	d,y
 
+	; TODO - the hardware watchdog will expire if we don't
+	; reset it periodically here.  Doing it once every 16KB
+	; should be enough??? That's about every 60ms.
+
+	; Sum the entire bank (16KB).
 paged_inner_loop:
-	addb	,-x
+	addb	,x
 	adca	#0
-	addb	,-x
+	addb	1,x
 	adca	#0
-	addb	,-x
+	addb	2,x
 	adca	#0
-	addb	,-x
+	addb	3,x
 	adca	#0
-	cmpx	#0x4000
-	bhi	paged_inner_loop
+	addb	4,x
+	adca	#0
+	addb	5,x
+	adca	#0
+	addb	6,x
+	adca	#0
+	addb	7,x
+	adca	#0
+	leax	8,x
+	cmpx	#0x8000
+	bne	paged_inner_loop
 	leay	-1,y
 	cmpy	#BOTTOM_BANK
 	bge	paged_loop
