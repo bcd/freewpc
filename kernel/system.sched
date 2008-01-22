@@ -50,8 +50,8 @@ lamp_rtt/4            2       111c
 !wpc_led_toggle       32      14c
 
 # Read/write the sound board
-# TODO : too frequent???
-sound_rtt             4       38c
+sound_write_rtt       2       20c
+sound_read_rtt        8       20c
 
 # Toggle lamps that are in 'flash' mode
 lamp_flash_rtt        32      37c

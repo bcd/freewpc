@@ -253,17 +253,20 @@ CALLSET_ENTRY (sound, idle)
 /** Real time task for the sound board.
  * Transmit one pending byte of data to the sound board.
  * Receive up to one pending byte of data from it. */
-void sound_rtt (void)
+void sound_read_rtt (void)
 {
 	/* Read back from sound board if bytes ready */
-	if (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY)
+	if (unlikely (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY))
 	{
 		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
 			wpc_asic_read (WPCS_DATA));
 	}
+}
 
+void sound_write_rtt (void)
+{
 	/* Write a pending byte to the sound board */
-	if (!sound_write_queue_empty_p ())
+	if (unlikely (!sound_write_queue_empty_p ()))
 	{
 		wpc_asic_write (WPCS_DATA, sound_write_queue_remove ());
 	}
