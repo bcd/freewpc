@@ -25,7 +25,12 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
-#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
+#define SOL_BASE_HIGH 0
+#define SOL_BASE_LOW 8
+#define SOL_BASE_GENERAL 16
+#define SOL_BASE_AUXILIARY 24
+#define SOL_BASE_FLIPTRONIC 32
+#define SOL_BASE_EXTENDED 40
 
 extern U8 sol_timers[];
 

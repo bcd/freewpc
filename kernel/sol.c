@@ -60,12 +60,13 @@ else return the bitmask that reflects that solenoid's
 position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
-	if (likely (sol_timers[id] != 0))
-	{
-		sol_timers[id]--;
-		if (likely (sol_duty_state[id] & sol_duty_mask))
-			return 1;
-	}
+	if (MACHINE_SOLENOID_P (id) || MACHINE_SOL_FLASHERP (id))
+		if (likely (sol_timers[id] != 0))
+		{
+			sol_timers[id]--;
+			if (likely (sol_duty_state[id] & sol_duty_mask))
+				return 1;
+		}
 	return 0;
 }
 
@@ -131,14 +132,14 @@ extern inline void sol_update_fliptronic_powered (void)
 /** Realtime update of the high power solenoids */
 void sol_update_rtt_0 (void)
 {
-	sol_update_set (0, WPC_SOL_HIGHPOWER_OUTPUT);
+	sol_update_set (SOL_BASE_HIGH, WPC_SOL_HIGHPOWER_OUTPUT);
 }
 
 
 /** Realtime update of the low power solenoids */
 void sol_update_rtt_1 (void)
 {
-	sol_update_set (8, WPC_SOL_LOWPOWER_OUTPUT);
+	sol_update_set (SOL_BASE_LOW, WPC_SOL_LOWPOWER_OUTPUT);
 #if (MACHINE_WPC95 == 1)
 	sol_update_fliptronic_powered ();
 #endif
@@ -148,16 +149,16 @@ void sol_update_rtt_1 (void)
 /** Realtime update of the first set of flasher outputs */
 void sol_update_rtt_2 (void)
 {
-	sol_update_set (16, WPC_SOL_FLASH1_OUTPUT);
+	sol_update_set (SOL_BASE_GENERAL, WPC_SOL_FLASH1_OUTPUT);
 }
 
 
 /** Realtime update of the second set of flasher outputs */
 void sol_update_rtt_3 (void)
 {
-	sol_update_set (24, WPC_SOL_FLASH2_OUTPUT);
+	sol_update_set (SOL_BASE_AUXILIARY, WPC_SOL_FLASH2_OUTPUT);
 #ifdef MACHINE_SOL_EXTBOARD1
-	sol_update_set (40, WPC_EXTBOARD1);
+	sol_update_set (SOL_BASE_EXTENDED, WPC_EXTBOARD1);
 #endif
 
 	/* Rotate the duty mask for the next iteration. */
@@ -174,10 +175,16 @@ be emulated by repeated calls to this function ; this is done
 on purpose to prevent exceeding timeouts due to the inherent
 scheduling flaws at task level.
    For the timeout level, use the SOL_TIMEOUT() macro with
-one of the TASK_xxx defines. */
+one of the TASK_xxx defines.  This ensures that it is converted
+to the proper units based on the scheduling of the solenoid
+update at IRQ time. */
 void
 sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 {
+	/* The duty cycle mask is only read by the IRQ
+	 * function, so it can be modified easily.
+	 * The timer value is read-and-decremented, so it
+	 * needs to set atomically. */
 	sol_duty_state[sol] = duty_mask;
 	disable_interrupts ();
 	sol_timers[sol] = ticks;
@@ -204,7 +211,7 @@ sol_init (void)
 
 	/* Set all of the duty cycle masks to 0xFF, or 100%.  Interrupt-level
 	 * code that wants to enable an output quickly can do so by just
-	 * writing to the timer. */
+	 * writing to the timer.  TODO : this is not particularly safe */
 	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
 	sol_duty_mask = 0x1;
 }
