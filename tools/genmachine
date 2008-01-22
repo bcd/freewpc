@@ -134,6 +134,7 @@ my %BinaryProperties = (
 		"eject" => 1,
 		"flash" => 1,
 		"nosearch" => 1,
+		"notinstalled" => 1,
 	},
 	"containers" => {
 		"trough" => $GLOBAL_OBJECT,
@@ -720,7 +721,18 @@ sub machine_write_defines {
 	my $drives = $m->{"drives"};
 	print "#define MACHINE_SOL_FLASHERP(sol) (\\\n";
 	foreach $drive (unique ($drives)) {
-		if (defined $drive->{'flash'}) {
+		if (!defined $drive->{'notinstalled'} && defined $drive->{'flash'}) {
+			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
+		}
+	}
+	print "0)\n\n";
+
+	# Print MACHINE_SOLENOID_P(sol), which returns true if SOL is
+	# a solenoid.
+	my $drives = $m->{"drives"};
+	print "#define MACHINE_SOLENOID_P(sol) (\\\n";
+	foreach $drive (unique ($drives)) {
+		if (!defined $drive->{'notinstalled'} && !defined $drive->{'flash'}) {
 			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
 		}
 	}
@@ -983,9 +995,9 @@ sub machine_write_makefile {
 
 
 sub machine_lamp_get_value {
-	my ($lamp) = @_;
-	$lamp = ($m->{'lamps'})->{$lamp};
-	die "undefined lamp $lamp" if (!defined $lamp);
+	my ($lampid) = @_;
+	$lamp = ($m->{'lamps'})->{$lampid};
+	die "undefined lamp $lampid" if (!defined $lamp);
 	return $lamp->{'number'};
 }
 
