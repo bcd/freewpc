@@ -1394,7 +1394,7 @@ void lampset_draw (void)
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 
 	sprintf ("SPEED %d", lampset_update_speed);
-	font_render_string_center (&font_var5, 50, 21, sprintf_buffer);
+	font_render_string_center (&font_var5, 46, 21, sprintf_buffer);
 
 	switch (lampset_update_mode)
 	{
@@ -1407,7 +1407,7 @@ void lampset_draw (void)
 		case 6: sprintf ("ROTATE NEXT"); break;
 		case 7: sprintf ("ROTATE PREV"); break;
 	}
-	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
+	font_render_string_center (&font_var5, 94, 21, sprintf_buffer);
 
 	/* Restart the update thread so that the old lamps are
 	cleared before the new effect is started */
