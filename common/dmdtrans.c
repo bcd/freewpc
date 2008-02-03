@@ -444,10 +444,12 @@ void trans_bitfade_old (void)
 
 	if (mask[0] != 0xFF)
 	{
-		/* TODO : unroll this to lessen loop overhead */
-		for (i=0; i < 32L * 16; i++)
+		for (i=0; i < 32L * 16; i += 4)
 		{
 			dst[i] = src[i] & ~mask[0];
+			dst[i+1] = src[i+1] & ~mask[1];
+			dst[i+2] = src[i+2] & ~mask[2];
+			dst[i+3] = src[i+3] & ~mask[3];
 		}
 	}
 }
@@ -466,10 +468,12 @@ void trans_bitfade_new (void)
 	}
 	else
 	{
-		/* TODO : unroll this to lessen loop overhead */
-		for (i=0; i < 32L * 16; i ++)
+		for (i=0; i < 32L * 16; i += 4)
 		{
 			dst[i] |= src[i] & mask[0];
+			dst[i+1] |= src[i+1] & mask[1];
+			dst[i+2] |= src[i+2] & mask[2];
+			dst[i+3] |= src[i+3] & mask[3];
 		}
 	}
 }
