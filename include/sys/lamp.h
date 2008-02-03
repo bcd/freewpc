@@ -66,9 +66,9 @@ typedef U8 lampset_id_t;
 
 extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 bit_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
-extern __fastram__ U8 global_bits[NUM_LAMP_COLS];
+extern U8 global_bits[NUM_LAMP_COLS];
 
 
 typedef enum

@@ -28,7 +28,7 @@
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
-__fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+U8 lamp_flash_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
 
@@ -40,9 +40,9 @@ __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
-__fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+U8 bit_matrix[NUM_LAMP_COLS];
 
-__fastram__ U8 global_bits[NUM_LAMP_COLS];
+U8 global_bits[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_flash_max;
 
