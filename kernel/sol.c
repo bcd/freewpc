@@ -28,31 +28,43 @@
  * The state of the solenoids is maintained in memory; the
  * actual I/O is written at IRQ time to refresh the hardware.
  *
- * Each solenoid set (of 8) is serviced during each successive 1ms;
- * thus the effective service time per solenoid is once every 4ms.
- * Each has a timer that allows it to remain active for up to 255
+ * Each solenoid set (of 8) is serviced during each successive 1ms.
+ * Real-time update cycles through 4 sets of outputs, so
+ * the effective service time per solenoid is once every 4ms.
+ * (For some machines there are more than 4 sets to be serviced;
+ * in that case it is necessary to service more than 1 set sometimes.)
+ *
+ * Each solenoid a timer that allows it to remain active for up to 255
  * iterations, or a total duration of 1.02s.  If a coil needs to
  * energize longer than that, it is up to the task level to
  * continue to kick it.  Each also has an 8-stage duty cycle,
  * allowing anywhere from full power to 1/8th power (one pulse
  * per 33ms).
+ *
+ * The algorithm has been designed to minimize hardware damage due
+ * to software failures.  A random write to any of the solenoid timers
+ * would cause that solenoid to turn on, but at most for 1.02s, since
+ * the timer countdown automatically restores it to zero.
+ * TODO : it is best to zero the mask registers as well, so that
+ * two random writes would be required to mistakenly turn on a solenoid.
  */
 
 
 /** Per solenoid on-time.  When this value is nonzero, the solenoid
 is enabled.  Each tick here corresponds to 4ms. */
-U8 sol_timers[SOL_COUNT];
+__fastram__ U8 sol_timers[SOL_COUNT];
 
-/** Per solenoid duty-cycle mask.  This is an 8-bit value which a '1'
+/** Per solenoid duty-cycle mask.  This is an 8-bit value where a '1'
 bit means to turn the solenoid on, and a '0' means to (temporarily)
 turn it off.  When the solenoid is enabled, this allows it to be
-duty cycled.  A value of 0xFF means 100% power, 0x55 means 50% power, etc. */
+duty cycled.  A value of 0xFF means 100% power, 0x55 means 50% power, etc.
+Each phase of the duty cycle is 4ms long. */
 U8 sol_duty_state[SOL_COUNT];
 
 /** The current bit of the duty cycle masks to be examined.  After each
 iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
-U8 sol_duty_mask;
+__fastram__ U8 sol_duty_mask;
 
 
 /** Return 0 if the given solenoid/flasher should be off,
@@ -79,7 +91,10 @@ a time. */
 	if (sol_update1 (id)) { bits |= (1 << ((id) & 0x7)); }
 
 
-/** Update a set of 8 solenoids that share the same output register. */
+/** Update a set of 8 solenoids that share the same output register.
+ * base_id is the solenoid number for the first solenoid in the set.
+ * asic_addr is the hardware register to be written with all 8 values
+ * at once. */
 extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
 {
 	/* For some reason, GCC 4.x crashes on this function... */
@@ -105,7 +120,8 @@ extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
 }
 
 
-/** Update a set of 8 solenoids that share the same output register. */
+/** Like sol_update_set, but updates the Fliptronic outputs.
+ * The base_id and asic_addr are implied here. */
 extern inline void sol_update_fliptronic_powered (void)
 {
 	extern U8 fliptronic_powered_coil_outputs;
@@ -198,6 +214,7 @@ sol_stop (solnum_t sol)
 {
 	disable_interrupts ();
 	sol_timers[sol] = 0;
+	sol_duty_state[sol] = 0;
 	enable_interrupts ();
 }
 
