@@ -119,7 +119,9 @@ U8 simulated_orkin_control_port = 0x1;
 
 U8 simulated_orkin_data_port = 0x0;
 
+#ifdef MACHINE_TZ
 int col9_enabled = 0;
+#endif
 
 /** The initial number of balls to 'install' as given on the command-line. */
 #ifdef DEVNO_TROUGH
@@ -710,9 +712,11 @@ U8 linux_asic_read (U16 addr)
 			return simulation_pic_access (0, 0);
 #else
 		case WPC_SW_ROW_INPUT:
-			if (col9_enabled) /* TODO : this is a TZ thing */
+#ifdef MACHINE_TZ
+			if (col9_enabled)
 				return sim_switch_matrix_get ()[9];
 			else
+#endif
 				return *linux_switch_data_ptr;
 #endif
 
