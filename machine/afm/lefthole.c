@@ -23,7 +23,6 @@
 
 CALLSET_ENTRY (left_hole, enter)
 {
-	mark_ball_in_play ();
-	score (SC_1K);
+	score (SC_100K);
 }
 
