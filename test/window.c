@@ -3409,7 +3409,7 @@ void sysinfo_system_version (void) {
 	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SY %s.%s", 
+	sprintf ("SYSTEM VER. %s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
