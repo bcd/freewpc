@@ -40,9 +40,6 @@
 /** Macro to create a lamp number from its row and column */
 #define MAKE_LAMP(col,row)	((((col)-1) * 8) + (row)-1)
 
-/** The lamp flash state is updated every 32ms, so this will
- * toggle the lamp flash state about 8 times/sec */
-#define LAMP_DEFAULT_FLASH_RATE 4
 
 /** Small integer type for a lamp number */
 typedef U8 lampnum_t;
@@ -65,7 +62,7 @@ typedef U8 lampset_id_t;
 
 
 extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+extern U8 bit_matrix[NUM_LAMP_COLS];
 extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
 extern U8 global_bits[NUM_LAMP_COLS];

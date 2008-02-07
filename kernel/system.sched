@@ -54,7 +54,7 @@ sound_write_rtt       2       20c
 sound_read_rtt        8       20c
 
 # Toggle lamps that are in 'flash' mode
-lamp_flash_rtt        32      37c
+lamp_flash_rtt        128     37c
 
 # Check for task-level lockup
 lockup_check_rtt      128     23c

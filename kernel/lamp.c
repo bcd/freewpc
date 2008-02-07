@@ -44,10 +44,6 @@ U8 bit_matrix[NUM_LAMP_COLS];
 
 U8 global_bits[NUM_LAMP_COLS];
 
-__fastram__ U8 lamp_flash_max;
-
-__fastram__ U8 lamp_flash_count;
-
 __fastram__ U8 lamp_strobe_mask;
 
 __fastram__ U8 lamp_strobe_column;
@@ -73,8 +69,6 @@ void lamp_init (void)
 	lamp_leff1_free_all ();
 	lamp_leff2_free_all ();
 
-	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
-
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
 }
@@ -83,18 +77,13 @@ void lamp_init (void)
 /** Runs periodically to invert any lamps in the flashing state */
 void lamp_flash_rtt (void)
 {
-	--lamp_flash_count;
-	if (lamp_flash_count == 0)
-	{
-		U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
-		U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
+	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
+	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
 
-		lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
-		lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
-		lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
-		lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
-		lamp_flash_count = lamp_flash_max;
-	}
+	lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
+	lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
+	lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
+	lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
 }
 
 
