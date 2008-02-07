@@ -311,14 +311,14 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 }
 
 
-/** Acquire write access to the NVRAM */
+/** Acquire write access to the protected memory */
 #define wpc_nvram_get() wpc_set_ram_protect(RAM_UNLOCKED)
 
-/** Release write access to the NVRAM */
+/** Release write access to the protected memory */
 #define wpc_nvram_put() wpc_set_ram_protect(RAM_LOCKED)
 
 
-/** Atomically increment a variable in NVRAM by N. */
+/** Atomically increment a variable in protected memory by N. */
 #define wpc_nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -328,7 +328,7 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 	} while (0)
 
 
-/** Atomically decrement a variable in NVRAM by N. */
+/** Atomically decrement a variable in protected memory by N. */
 #define wpc_nvram_subtract(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
