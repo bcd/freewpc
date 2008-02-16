@@ -152,6 +152,7 @@ extern U8 idle_ok;
 /* Core software structures */
 #include <sys/bitarray.h>
 #include <sys/errno.h>
+#include <sys/time.h>
 #include <sys/task.h>
 #if (MACHINE_DMD == 1)
 #include <sys/font.h>
