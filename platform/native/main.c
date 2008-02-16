@@ -79,7 +79,7 @@ U8 *linux_dmd_visible_page;
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
 
 /** The simulated solenoid outputs */
-U8 linux_solenoid_outputs[SOL_ARRAY_WIDTH];
+U8 linux_solenoid_outputs[SOL_COUNT / 8];
 
 /** The simulated flipper inputs */
 U8 linux_flipper_inputs;

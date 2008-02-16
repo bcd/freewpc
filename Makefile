@@ -41,21 +41,25 @@ endif
 
 BLDDIR := build
 INCLUDE_DIR = ./include
-MACHINE_DIR = machine/$(MACHINE)
-PLATFORM_DIR = platform/$(PLATFORM)
 
 
 #######################################################################
 ###	Configuration
 #######################################################################
 
+ifneq ($(PLATFORM),wpc-shell)
+
 # MACHINE says which machine you are targetting.  It must be defined.
 # This loads in per-machine rules.
 $(eval $(call require,MACHINE))
 
 M := machine/$(MACHINE)
+MMAKEFILE := $(M)/Makefile
+MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
+MACHINE_DIR = machine/$(MACHINE)
+
 include $(BLDDIR)/mach-Makefile
-include machine/$(MACHINE)/Makefile
+include $(MMAKEFILE)
 
 # MACHINE_FILE must be set by the machine Makefile.  We can
 # grep it to set additional configuration variables.
@@ -68,10 +72,16 @@ CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y
 CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
 CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
 
+else
+MACH_DESC = platform/wpc-shell/wpc-shell.md
+
+endif
+
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
 # defined this.
 $(eval $(call require,PLATFORM))
+PLATFORM_DIR = platform/$(PLATFORM)
 
 #######################################################################
 ###	Set Default Target
@@ -86,7 +96,8 @@ COMMON_BASIC_OBJS :=
 ifdef NATIVE
 include platform/native/Makefile
 else
--include platform/$(PLATFORM)/Makefile
+PMAKEFILE := platform/$(PLATFORM)/Makefile
+-include $(PMAKEFILE)
 endif
 
 # Set this to the name of the CPU.  In simulation this is always
@@ -204,6 +215,7 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 ###	Source and Binary Filenames
 #######################################################################
 
+ifneq ($(PLATFORM),wpc-shell)
 include kernel/Makefile
 include common/Makefile
 include fonts/Makefile
@@ -228,6 +240,7 @@ INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
 FON_SRCS = $(patsubst %.o,%.fon,$(FON_OBJS))
 export FON_SRCS
+endif
 
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
@@ -442,9 +455,8 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
-MAKE_DEPS = Makefile kernel/Makefile common/Makefile fonts/Makefile $(MACHINE_DIR)/Makefile $(BLDDIR)/mach-Makefile .config
+MAKE_DEPS = Makefile kernel/Makefile common/Makefile fonts/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile .config
 C_DEPS += $(BLDDIR)/mach-config.h
-MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = include/gendefine_gid.h
@@ -533,7 +545,7 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(BLDDIR)/$(GAME_ROM)
 compile: $(BLDDIR)/$(GAME_ROM)
 
 $(BLDDIR):
-	mkdir -p $(BLDDIR)
+	$(Q)echo "Making build directory..." && mkdir -p $(BLDDIR)
 
 post_compile :
 	$(Q)echo "Cleaning .i files..." && rm -f *.i
@@ -621,7 +633,7 @@ OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:
 OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(patsubst $(BLDDIR)/%,%,$1)))
 DUP_PAGE_OBJ = $1
 
-$(PAGED_LINKCMD) : $(MAKE_DEPS) platform/$(PLATFORM)/Makefile
+$(PAGED_LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
@@ -653,7 +665,7 @@ $(BLDDIR)/page%.s:
 #
 # How to make the linker command file for the system section.
 #
-$(LINKCMD) : $(MAKE_DEPS) platform/$(PLATFORM)/Makefile
+$(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
@@ -874,12 +886,16 @@ $(HOST_OBJS) : %.o : %.c
 # 'mach' and 'include/mach' without knowing the specific machine type.
 #
 .mach:
-	$(Q)echo Setting symbolic link for machine source code &&\
-		touch .mach && ln -s $(MACHINE_DIR) mach
+	$(Q)echo "Setting symbolic link for machine source code..."
+ifneq ($(PLATFORM),wpc-shell)
+	$(Q)touch .mach && ln -s $(MACHINE_DIR) mach
+endif
 
 .include_mach:
-	$(Q)echo Setting symbolic link for machine include files &&\
-		touch .include_mach && cd include && ln -s $(MACHINE) mach
+	$(Q)echo "Setting symbolic link for machine include files..."
+ifneq ($(PLATFORM),wpc-shell)
+	$(Q)touch .include_mach && cd include && ln -s $(MACHINE) mach
+endif
 
 #
 # Remake machine prototypes file
@@ -932,7 +948,16 @@ info:
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
+	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
+
+.PHONY : srcinfo
+srcinfo:
+	$(Q)echo $(OBJS:.o=.c)
+
+callset.in :
+	cat $(C_OBJS:.o=.c) | $(CC) -E $(CFLAGS) -DGENCALLSET - > callset.in
+
 
 #
 # 'make clean' does what you think.
@@ -940,7 +965,9 @@ info:
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
 	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
-		do echo "Removing files in '$$dir' ..." && pushd $$dir && rm -f $(TMPFILES) && popd; done
+		do echo "Cleaning in '$$dir' ..." && \
+		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
+		popd >/dev/null ; done
 
 .PHONY : clean_derived
 clean_derived:
@@ -952,11 +979,11 @@ clean_derived:
 
 .PHONY : clean_build
 clean_build:
-	rm -f $(BLDDIR)/* && if [ -d $(BLDDIR) ]; then rmdir $(BLDDIR); fi
+	$(Q)rm -f $(BLDDIR)/* && if [ -d $(BLDDIR) ]; then rmdir $(BLDDIR); fi
 
 .PHONY : clean_tools
 clean_tools:
-	rm -f $(HOST_OBJS) $(TOOLS)
+	$(Q)rm -f $(HOST_OBJS) $(TOOLS)
 
 .PHONY : show_objs
 show_objs:
