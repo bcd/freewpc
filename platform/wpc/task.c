@@ -623,7 +623,10 @@ void task_dispatcher (void)
 			/* If the system is fully initialized, run
 			 * the idle functions. */
 			if (idle_ok)
+			{
+				do_idle ();
 				callset_invoke (idle);
+			}
 
 			/* Reset timer and kick watchdog again */
 			tick_start_count = tick_count;

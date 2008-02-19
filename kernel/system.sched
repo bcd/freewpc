@@ -62,6 +62,9 @@ lockup_check_rtt      128     23c
 # Free running hardware-quality timers
 free_timer_rtt        32		94c
 
+# Idle timer
+idle_rtt              8       12c
+
 # Common processing required at the end of every IRQ
 do_irq_end            1       0c
 
