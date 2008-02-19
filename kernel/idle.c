@@ -32,13 +32,13 @@ void do_idle (void)
 			idle_100ms_expire_time--;
 		else
 			idle_100ms_expire_time++;
-		callset_invoke (every_100ms);
+		callset_invoke (idle_every_100ms);
 
 		idle_second_timer++;
 		if (idle_second_timer >= 10)
 		{
 			idle_second_timer -= 10;
-			callset_invoke (every_second);
+			callset_invoke (idle_every_second);
 		}
 	}
 }
@@ -51,16 +51,3 @@ CALLSET_ENTRY (idle, init)
 	idle_100ms_timer = 0;
 	idle_second_timer = 0;
 }
-
-
-CALLSET_ENTRY (idle, every_100ms)
-{
-	wpc_debug_write ('.');
-}
-
-
-CALLSET_ENTRY (idle, every_second)
-{
-	wpc_debug_write ('X');
-}
-

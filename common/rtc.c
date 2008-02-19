@@ -222,7 +222,7 @@ CALLSET_ENTRY (rtc, init)
 }
 
 
-CALLSET_ENTRY (rtc, idle)
+CALLSET_ENTRY (rtc, idle_every_second)
 {
 	/* Re-read the timer hardware registers and normalize the values. */
 	rtc_hw_read ();

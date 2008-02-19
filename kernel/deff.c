@@ -507,46 +507,34 @@ CALLSET_ENTRY (deff, any_device_enter)
 
 
 /** At idle time, stop any queued deffs that have timed out.
- * This routine is called whenever the CPU is idle, but it only
- * checks for timed out deffs about once per second. */
-CALLSET_ENTRY (deff, idle)
+ * This routine is called once per second when the CPU is idle. */
+CALLSET_ENTRY (deff, idle_every_second)
 {
 	extern U8 tick_count;
-	U8 elapsed_ticks;
 
-	/* See how many ticks went by since the last idle processing */
-	elapsed_ticks = tick_count - deff_time_last_idle;
-
-	/* Was it at least 1 second? (the minimum timeout granularity?) */
-	if (elapsed_ticks >= TIME_1S)
+	/* Yes, update all of the queued timer entries that have D_TIMEOUT set. */
+	/* But if timers are disabled, then don't do this. */
+	if (deff_timeout_disabled == 0)
 	{
-		/* Yes, update all of the queued timer entries that have D_TIMEOUT set. */
-		/* But if timers are disabled, then don't do this. */
-		if (deff_timeout_disabled == 0)
-		{
 restart:
-			if (deff_waitqueue)
-			{
-				deff_entry_t *entry = deff_waitqueue;
-				do {
-					if (entry->flags & D_TIMEOUT)
+		if (deff_waitqueue)
+		{
+			deff_entry_t *entry = deff_waitqueue;
+			do {
+				if (entry->flags & D_TIMEOUT)
+				{
+					entry->timeout--;
+					dbprintf ("Deff %d timer at %d\n", entry->id, entry->timeout);
+					if (entry->timeout == 0)
 					{
-						entry->timeout--;
-						dbprintf ("Deff %d timer at %d\n", entry->id, entry->timeout);
-						if (entry->timeout == 0)
-						{
-							/* Remove this entry from the list and restart */
-							deff_dequeue (&deff_waitqueue, entry);
-							goto restart;
-						}
+						/* Remove this entry from the list and restart */
+						deff_dequeue (&deff_waitqueue, entry);
+						goto restart;
 					}
-					entry = (deff_entry_t *)entry->dll.next;
-				} while (entry != deff_waitqueue);
-			}
+				}
+				entry = (deff_entry_t *)entry->dll.next;
+			} while (entry != deff_waitqueue);
 		}
-
-		/* Update local time count */
-		deff_time_last_idle += TIME_1S;
 	}
 }
 

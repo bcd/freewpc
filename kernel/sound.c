@@ -235,7 +235,7 @@ U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 
 
 /** At idle time, poll the sound board for asynchronous events. */
-CALLSET_ENTRY (sound, idle)
+CALLSET_ENTRY (sound, idle_every_100ms)
 {
 #if 0
 	U8 in;

@@ -86,7 +86,7 @@ void adj_init (void)
 
 /** Check the protected memory at idle time to make sure that it is locked.
  * Halt the system if found unlocked. */
-CALLSET_ENTRY (nvram, idle)
+CALLSET_ENTRY (nvram, idle_every_100ms)
 {
 #ifdef HAVE_NVRAM
 	U8 data = nvram_test_byte;

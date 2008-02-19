@@ -50,8 +50,9 @@ void ac_rtt (void)
 }
 
 
-CALLSET_ENTRY (ac, idle)
+CALLSET_ENTRY (ac, idle_every_100ms)
 {
+	/* TODO - this is not even close to right */
 	if (!ac_zc_broken)
 	{
 		if (ac_zc_poll_count < 250)

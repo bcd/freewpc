@@ -79,7 +79,7 @@ random_reseed (void)
 /**
  * Reseed the random number generator during system idle time.
  */
-CALLSET_ENTRY (random, idle)
+CALLSET_ENTRY (random, idle_every_second)
 {
 	random_reseed ();
 }
