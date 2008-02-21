@@ -308,6 +308,9 @@ sub close_switch {
 	$def->{'fnpage'} = "EVENT_PAGE";
 	$def->{'button'} = 1 if (defined $def->{'start-button'})
 		|| (defined $def->{'buyin-button'});
+
+	$def->{'active_time'} = "0" if (!defined $def->{'active_time'});
+	$def->{'inactive_time'} = "TIME_33MS" if (!defined $def->{'inactive_time'});
 }
 
 sub close_drive {
