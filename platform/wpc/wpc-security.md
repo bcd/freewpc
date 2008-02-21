@@ -17,10 +17,10 @@ D1: Left Coin, cabinet
 D2: Center Coin, cabinet
 D3: Right Coin, cabinet
 D4: Fourth Coin, cabinet
-D5: Escape, service, intest, cabinet
-D6: Down, service, intest, cabinet
-D7: Up, service, intest, cabinet
-D8: Enter, service, intest, cabinet
+D5: Escape, service, intest, cabinet, button
+D6: Down, service, intest, cabinet, button
+D7: Up, service, intest, cabinet, button
+D8: Enter, service, intest, cabinet, button
 22: Coin Door Closed, cabinet, edge, opto, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 F1: L. R. Flipper EOS, opto, cabinet
