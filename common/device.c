@@ -105,8 +105,8 @@ void device_debug (void)
 		dbprintf ("max %d, need %d kicks, %d errors, %s\n",
 			dev->max_count, dev->kicks_needed, dev->kick_errors,
 			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
+		task_sleep (TIME_16MS);
 	}
-
 	dbprintf ("Found: %d   ", counted_balls);
 	dbprintf ("Lost: %d   ", missing_balls - live_balls + held_balls);
 	dbprintf ("Live: %d   ", live_balls);
