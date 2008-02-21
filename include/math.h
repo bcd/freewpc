@@ -44,9 +44,9 @@ void random_init (void);
 
 #define bounded_decrement(var, min) do { if (var > min) var--; } while (0)
 
-#define value_rotate_down(var,min,max) if (var == min) { var = max; } else { var--; }
+#define value_rotate_down(var,min,max) do { if (var == min) { var = max; } else { var--; } } while (0)
 
-#define value_rotate_up(var,min,max) if (var == max) { var = min; } else { var++; }
+#define value_rotate_up(var,min,max) do { if (var == max) { var = min; } else { var++; } } while (0)
 		
 
 #endif /* _MATH_H */
