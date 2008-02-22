@@ -51,7 +51,7 @@ __fastram__ struct {
 } sound_read_queue;
 
 /** The last music code transmitted */
-__fastram__ music_code_t current_music;
+music_code_t current_music;
 
 /** The current master volume.  Individual sound clips may override this
  * temporarily, but this is the default. */

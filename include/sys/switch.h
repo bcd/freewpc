@@ -107,9 +107,8 @@ extern const U8 mach_edge_switches[];
 #define AR_RAW			0
 #define AR_CHANGED 	1
 #define AR_PENDING 	2
-#define AR_QUEUED 	3
-#define AR_LATCHED   4
-#define NUM_SWITCH_ARRAYS 	5
+#define AR_LATCHED   3
+#define NUM_SWITCH_ARRAYS 	4
 
 extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
@@ -184,12 +183,13 @@ when a button is first pressed and continually as it is held.
 
 void switch_init (void);
 void switch_rtt (void);
-void switch_sched (void);
+void switch_sched_task (void);
 void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
-const switch_info_t *switch_lookup (U8 sw);
-U8 switch_lookup_lamp (const switchnum_t sw);
+const switch_info_t *switch_lookup (const switchnum_t sw) __attribute__((pure));
+U8 switch_lookup_lamp (const switchnum_t sw) __attribute__((pure));
+void switch_queue_dump (void);
 
 #endif /* _SYS_SWITCH_H */
