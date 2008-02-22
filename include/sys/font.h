@@ -100,7 +100,9 @@ void fontargs_render_string_left2 (void);
 
 void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
+#ifdef NOTUSED
 void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
+#endif
 
 #define MKCOORD1(x,y) (((U16)(x)<<8)|(y))
 #define MKCOORD(x,y) { .xy = MKCOORD1(x,y), }
