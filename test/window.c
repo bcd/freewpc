@@ -1813,7 +1813,7 @@ struct menu dev_frametest_item = {
 
 /**********************************************************************/
 
-#define SCHED_TEST_DURATION TIME_2S
+#define SCHED_TEST_DURATION TIME_500MS
 #define SCHED_TEST_WORKERS  16
 #define SCHED_LOCAL_COUNT   16
 
@@ -1844,7 +1844,7 @@ void sched_test_init (void)
 		task_create_gid (GID_SCHED_TEST_WORKER, sched_test_task);
 	task_sleep (SCHED_TEST_DURATION);
 	task_kill_gid (GID_SCHED_TEST_WORKER);
-	sched_test_count /= 2;
+	sched_test_count *= 2;
 }
 
 
