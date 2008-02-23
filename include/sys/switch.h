@@ -53,13 +53,17 @@ typedef struct
 	/** If nonzero, indicates a sound to be made on any switch event */
 	sound_code_t sound;
 
-	/** Indicates how long the switch must be physically active
-	 * before an event is generated */
-	task_ticks_t active_time;
+	/** Indicates how long the switch must remain in the active
+	 * state before an event is generated.  During this time,
+	 * the switch remains queued.  If it does not change for this
+	 * time, then the event is generated.  If it does change, the
+	 * prebounce period is restarted. */
+	task_ticks_t prebounce;
 
-	/** Indicates how long the switch must be physically inactive
-	 * before the next switch event can be considered */
-	task_ticks_t inactive_time;
+	/** Indicates how long after the event is generated before
+	 * switch closures are considered again.  During this period,
+	 * any switch transitions are ignored. */
+	task_ticks_t postbounce;
 
 	/** If nonzero, indicates the device driver associated with this
 	 *switch. */

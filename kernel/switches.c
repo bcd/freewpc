@@ -306,7 +306,7 @@ typedef struct
  * lamp is not disturbed. */
 void switch_lamp_pulse (void)
 {
-	lamp_pulse_data_t * const cdata = task_current_class_data (lamp_pulse_data_t);	
+	lamp_pulse_data_t * const cdata = task_current_class_data (lamp_pulse_data_t);
 	bool can_pulse;
 
 	/* Although not a true leff, this fools the lamp draw to doing
@@ -331,11 +331,11 @@ void switch_lamp_pulse (void)
 		else
 			leff_on (cdata->swinfo->lamp);
 		task_sleep (TIME_200MS);
-	
+
 		/* Change it back */
 		leff_toggle (cdata->swinfo->lamp);
 		task_sleep (TIME_200MS);
-	
+
 		/* Free the lamp */
 		lamp_leff2_free (cdata->swinfo->lamp);
 	}
@@ -392,7 +392,7 @@ void switch_sched_task (void)
 	 * the switch triggers. */
 	if ((swinfo->lamp != 0) && in_live_game)
 	{
-		task_pid_t tp = task_create_gid (GID_SWITCH_LAMP_PULSE, 
+		task_pid_t tp = task_create_gid (GID_SWITCH_LAMP_PULSE,
 			switch_lamp_pulse);
 
 		lamp_pulse_data_t *cdata = task_init_class_data (tp, lamp_pulse_data_t);
@@ -431,10 +431,10 @@ cleanup:
 
 #ifndef QUEUE_SWITCHES
 	/* Debounce period after the switch has been handled. */
-	if (swinfo->inactive_time == 0)
-		task_sleep (TIME_100MS * 1);
+	if (swinfo->postbounce == 0)
+		task_sleep (TIME_100MS);
 	else
-		task_sleep (swinfo->inactive_time);
+		task_sleep (swinfo->postbounce);
 #endif
 
 	task_exit ();
@@ -503,11 +503,11 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 	 * If necessary, allocate a new queue entry for this purpose, or
 	 * just reuse the one on entry.  Order in the queue is not important. */
 	if ((!bit_test (mach_edge_switches, sw))
-		&& (switch_lookup (sw)->inactive_time != 0))
+		&& (switch_lookup (sw)->postbounce != 0))
 	{
 		if (!entry)
 			entry = switch_queue_add (sw);
-		entry->timer = switch_lookup(sw)->inactive_time;
+		entry->timer = switch_lookup(sw)->postbounce;
 		bit_on (switch_postbounce_bits, sw);
 	}
 #endif
@@ -518,21 +518,16 @@ void switch_service_queue (void)
 {
 	extern U8 tick_count;
 	U8 i = switch_queue_head;
-	U8 elapsed_time;
 
-	/* See how long since the last time we serviced the queue */
-	elapsed_time = tick_count - switch_last_service_time;
-	switch_last_service_time = tick_count;
-
-	/* Cap elapsed time at 32, to avoid problems with signed timer values.
-	 * This will only happen if there is excessive CPU load and the idle
-	 * doesn't get scheduled very fast. */
-	if (elapsed_time > 32)
-		elapsed_time = 32;
-
-	while (i != switch_queue_tail)
+	while (unlikely (i != switch_queue_tail))
 	{
-		pending_switch_t *entry = &switch_queue[i];
+		pending_switch_t *entry;
+		U8 elapsed_time;
+
+		/* See how long since the last time we serviced the queue */
+		elapsed_time = tick_count - switch_last_service_time;
+
+		entry = &switch_queue[i];
 		if (entry->id)
 		{
 			dbprintf ("Servicing queued SW%d: ", entry->id);
@@ -563,6 +558,8 @@ void switch_service_queue (void)
 
 		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
+
+	switch_last_service_time = tick_count;
 }
 
 void switch_queue_dump (void)
@@ -701,7 +698,7 @@ CALLSET_ENTRY (switch, idle)
 						 * to preserve the order??? */
 						pending_switch_t *entry = switch_queue_find (sw);
 						dbprintf ("Restarting prebounce for SW%d\n", sw);
-						entry->timer = switch_lookup(sw)->active_time;
+						entry->timer = switch_lookup(sw)->prebounce;
 					}
 					else
 					{
@@ -709,7 +706,7 @@ CALLSET_ENTRY (switch, idle)
 						 * If the prebounce time for the switch is zero,
 						 * then it can be serviced right away, else it
 						 * must be queued. */
-						if (switch_lookup (sw)->active_time == 0)
+						if (switch_lookup (sw)->prebounce == 0)
 						{
 							dbprintf ("Scheduling switch with no prebounce\n");
 							switch_schedule (sw, NULL);
@@ -720,7 +717,7 @@ CALLSET_ENTRY (switch, idle)
 							if (entry)
 							{
 								dbprintf ("Starting prebounce for SW %d\n", sw);
-								entry->timer = switch_lookup(sw)->active_time;
+								entry->timer = switch_lookup(sw)->prebounce;
 								bit_on (switch_prebounce_bits, sw);
 							}
 						}
