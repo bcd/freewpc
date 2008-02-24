@@ -34,6 +34,8 @@
  * center.
  */
 
+#define CONFIG_ASM_BLIT
+
 
 /* Space characters are not embedded in each font, because it would
  * just be a bunch of zero characters.  All fonts share the same
@@ -103,6 +105,7 @@ U8 *font_lookup (const font_t *font, char c)
 	}
 }
 
+#ifndef CONFIG_ASM_BLIT
 
 /** Draw one row of font data to the DMD.
  * DST is the byte-aligned pointer to where the bits should be drawn.
@@ -191,6 +194,7 @@ void (*font_blit_table[]) (U8 *) = {
 	font_blit7,
 };
 
+#endif /* !CONFIG_ASM_BLIT */
 
 /** Renders a string whose characteristics have already been
  * computed.  font_args contains the font type, starting
@@ -233,7 +237,9 @@ static void fontargs_render_string (void)
 		 * by a small amount. */
 
 		blit_data = font_lookup (args->font, c);
+#ifndef CONFIG_ASM_BLIT
 		font_byte_width = (font_width + 7) >> 3;
+#endif
 
 		/* If the height of this glyph is not the same as the
 		height of the overall string, then the character should
@@ -253,8 +259,19 @@ static void fontargs_render_string (void)
 		/* Set the starting address */
 		blit_dmd = wpc_dmd_addr_verify (dmd_base + blit_xpos / 8);
 
-		/* Write the character.
-		 * The glyph is drawn one row at a time.
+
+		/* Write the character. */
+#ifdef CONFIG_ASM_BLIT
+		{
+			extern void bitmap_blit_asm (U8 *dst, U8 shift);
+			extern U8 *bitmap_src;
+			extern U8 *bitmap_dst;
+
+			bitmap_src = blit_data;
+			bitmap_blit_asm (blit_dmd, blit_xpos & 0x7);
+		}
+#else
+		/* The glyph is drawn one row at a time.
 		 * TODO - this is pretty inefficient.  Several things could be done
 		 * better:
 		 *    When a glyph is more than 8 bits wide and unaligned, we are
@@ -274,19 +291,21 @@ static void fontargs_render_string (void)
 			blitter (blit_dmd);
 			blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 		} while (likely (--font_height)); /* end for each row */
+#endif
 
 		/* advance by 1 char ... args->font->width */
 		blit_xpos += font_width + 1;
-
 
 		/* If the height was adjusted just for this character, restore
 		back to the original starting row */
 		if (top_space != 0)
 			dmd_base -= top_space;
 
+#ifndef CONFIG_ASM_BLIT
 		/* Because this is slow, assert that everything is OK so
 		the software watchdog doesn't expire. */
 		task_dispatching_ok = TRUE;
+#endif
 
 	} /* end for each character in the string */
 	wpc_pop_page ();
@@ -310,10 +329,18 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 	blit_data = _blit_data;
 	wpc_push_page (FONT_PAGE);
 	font_width = *blit_data++;
+#ifndef CONFIG_ASM_BLIT
 	font_byte_width = (font_width + 7) >> 3;
+#endif
 	font_height = *blit_data++;
 	blit_dmd = wpc_dmd_addr_verify (dmd_base + (blit_xpos / 8));
 
+#ifdef CONFIG_ASM_BLIT
+	{
+		extern void bitmap_blit_asm (U8 *dst, U8 shift);
+		bitmap_blit_asm (blit_dmd, blit_xpos & 0x7);
+	}
+#else
 	blitter = font_blit_table[blit_xpos / 8];
 	for (i=0; i < font_height; i++)
 	{
@@ -325,6 +352,7 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd - font_byte_width);
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 	}
+#endif
 
 	wpc_pop_page ();
 }
