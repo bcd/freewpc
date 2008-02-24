@@ -73,7 +73,7 @@ A8: Aux. Sol. 8, notinstalled
 3: G.I. String 4
 4: G.I. String 5
 
-[lampsets]
+[lamplists]
 ALL: 11..88
 
 [deffs]

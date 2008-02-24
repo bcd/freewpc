@@ -313,7 +313,7 @@ endif
 # code is written to handle the paging.
 PAGED_MD_OBJS = \
 	$(BLDDIR)/mach-strings.o \
-	$(BLDDIR)/mach-lampsets.o
+	$(BLDDIR)/mach-lamplists.o
 
 SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-switchmasks.o \
@@ -754,7 +754,7 @@ endif
 #######################################################################
 ###	Machine Description Compiler
 #######################################################################
-CONFIG_CMDS = dump strings switchmasks containers switches scores lampsets deffs fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs fonts
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile
 

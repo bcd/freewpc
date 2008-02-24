@@ -1373,30 +1373,30 @@ struct menu symbol_test_item = {
 
 /*********** Lampsets **********************/
 
-U8 lampset_update_mode;
-U8 lampset_update_speed;
+U8 lamplist_update_mode;
+U8 lamplist_update_speed;
 
-void lampset_init (void)
+void lamplist_init (void)
 {
 	browser_init ();
 	browser_min = 1;
-	browser_max = MAX_LAMPSET-1;
+	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
-	lampset_update_mode = 0;
-	lampset_update_speed = TIME_16MS;
+	lamplist_update_mode = 0;
+	lamplist_update_speed = TIME_16MS;
 }
 
 
-void lampset_draw (void)
+void lamplist_draw (void)
 {
 	browser_draw ();
-	sprintf_far_string (names_of_lampsets + menu_selection);
+	sprintf_far_string (names_of_lamplists + menu_selection);
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 
-	sprintf ("SPEED %d", lampset_update_speed);
+	sprintf ("SPEED %d", lamplist_update_speed);
 	font_render_string_center (&font_var5, 46, 21, sprintf_buffer);
 
-	switch (lampset_update_mode)
+	switch (lamplist_update_mode)
 	{
 		case 0: sprintf ("ENABLE"); break;
 		case 1: sprintf ("TOGGLE"); break;
@@ -1415,72 +1415,72 @@ void lampset_draw (void)
 }
 
 
-void lampset_update (void)
+void lamplist_update (void)
 {
 	leff_data_t *cdata;
 	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
 	for (;;)
 	{
-		cdata->apply_delay = lampset_update_speed;
-		switch (lampset_update_mode)
+		cdata->apply_delay = lamplist_update_speed;
+		switch (lamplist_update_mode)
 		{
 			case 0: 
 				lamp_all_off ();
-				lampset_apply (menu_selection, lamp_on); 
+				lamplist_apply (menu_selection, lamp_on); 
 				break;
-			case 1: lampset_apply (menu_selection, lamp_toggle);
+			case 1: lamplist_apply (menu_selection, lamp_toggle);
 				break;
-			case 2: lampset_step_increment (menu_selection, lamp_matrix);
+			case 2: lamplist_step_increment (menu_selection, lamp_matrix);
 				break;
-			case 3: lampset_step_decrement (menu_selection, lamp_matrix);
+			case 3: lamplist_step_decrement (menu_selection, lamp_matrix);
 				break;
-			case 4: lampset_build_increment (menu_selection, lamp_matrix);
+			case 4: lamplist_build_increment (menu_selection, lamp_matrix);
 				break;
-			case 5: lampset_build_decrement (menu_selection, lamp_matrix);
+			case 5: lamplist_build_decrement (menu_selection, lamp_matrix);
 				break;
-			case 6: lampset_rotate_next (menu_selection, lamp_matrix);
+			case 6: lamplist_rotate_next (menu_selection, lamp_matrix);
 				break;
-			case 7: lampset_rotate_previous (menu_selection, lamp_matrix);
+			case 7: lamplist_rotate_previous (menu_selection, lamp_matrix);
 				break;
 		}
 		task_sleep (TIME_200MS);
 	}
 }
 
-void lampset_test_slower (void)
+void lamplist_test_slower (void)
 {
-	if (lampset_update_speed > 1)
-		lampset_update_speed--;
+	if (lamplist_update_speed > 1)
+		lamplist_update_speed--;
 }
 
-void lampset_test_faster (void)
+void lamplist_test_faster (void)
 {
-	lampset_update_speed++;
+	lamplist_update_speed++;
 }
 
-void lampset_test_mode_change (void)
+void lamplist_test_mode_change (void)
 {
-	lampset_update_mode++;
-	if (lampset_update_mode == 8)
-		lampset_update_mode = 0;
+	lamplist_update_mode++;
+	if (lamplist_update_mode == 8)
+		lamplist_update_mode = 0;
 }
 
-struct window_ops dev_lampset_window = {
+struct window_ops dev_lamplist_window = {
 	INHERIT_FROM_BROWSER,
-	.init = lampset_init,
+	.init = lamplist_init,
 	.exit = lamp_all_off,
-	.draw = lampset_draw,
-	.thread = lampset_update,
-	.left = lampset_test_slower,
-	.right = lampset_test_faster,
-	.enter = lampset_test_mode_change,
+	.draw = lamplist_draw,
+	.thread = lamplist_update,
+	.left = lamplist_test_slower,
+	.right = lamplist_test_faster,
+	.enter = lamplist_test_mode_change,
 };
 
-struct menu dev_lampset_test_item = {
-	.name = "LAMPSETS",
+struct menu dev_lamplist_test_item = {
+	.name = "LAMPLISTS",
 	.flags = M_ITEM,
-	.var = { .subwindow = { &dev_lampset_window, NULL } },
+	.var = { .subwindow = { &dev_lamplist_window, NULL } },
 };
 
 /*********** Ball Devices **********************/
@@ -1978,7 +1978,7 @@ struct menu *dev_menu_items[] = {
 #endif
 	&dev_deff_test_item,
 	&dev_leff_test_item,
-	&dev_lampset_test_item,
+	&dev_lamplist_test_item,
 	&dev_balldev_test_item,
 	&dev_random_test_item,
 	&dev_trans_test_item,

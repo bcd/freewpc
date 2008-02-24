@@ -178,7 +178,7 @@ X1: Coin Meter
 
 #############################################################
 
-[lampsets]
+[lamplists]
 Martians: Martian 1, Martian 2, Martian 3, Martian 4, Martian 5, Martian 6, Martian 7
 Arrows: L. Loop Arrow, L. Ramp Arrow, Lock Arrow, R. Ramp Arrow, R. Loop Arrow
 Bottom Lanes: Left Outlane, Left Inlane, Right Inlane, Right Outlane

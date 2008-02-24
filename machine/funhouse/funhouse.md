@@ -127,7 +127,7 @@ include platform/wpc/wpc.md
 # Note that a lampset may contain only one lamp.  The lampset is the
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
-[lampsets]
+[lamplists]
 
 ##########################################################################
 # Containers

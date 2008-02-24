@@ -132,7 +132,7 @@ void amode_right_flipper (void)
 
 void amode_lamp_toggle_task (void)
 {
-	lampset_apply (LAMPSET_AMODE_ALL, leff_toggle);
+	lamplist_apply (LAMPLIST_AMODE_ALL, leff_toggle);
 	task_exit ();
 }
 
@@ -140,10 +140,10 @@ U8 amode_leff_subset;
 
 void amode_leff_subset_task (void)
 {
-	register U8 lampset = amode_leff_subset;
-	lampset_set_apply_delay (TIME_100MS);
+	register U8 lamplist = amode_leff_subset;
+	lamplist_set_apply_delay (TIME_100MS);
 	for (;;)
-		lampset_apply (lampset, leff_toggle);
+		lamplist_apply (lamplist, leff_toggle);
 }
 
 void amode_leff (void)
@@ -153,12 +153,12 @@ void amode_leff (void)
 
 	for (;;)
 	{
-		amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+		amode_leff_subset = LAMPLIST_DOOR_PANELS_AND_HANDLE;
 		leff_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
 	
-		for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
-			amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
+		for (amode_leff_subset = LAMPLIST_DOOR_LOCKS_AND_GUMBALL;
+			amode_leff_subset <= LAMPLIST_SPIRAL_AWARDS;
 			amode_leff_subset++)
 		{
 			leff_create_peer (amode_leff_subset_task);
@@ -168,12 +168,12 @@ void amode_leff (void)
 		task_sleep_sec (15);
 		task_kill_peers ();
 
-		lampset_set_apply_delay (0);
-		lampset_apply (LAMPSET_SORT1, leff_off);
+		lamplist_set_apply_delay (0);
+		lamplist_apply (LAMPLIST_SORT1, leff_off);
 		for (i=0 ; i < 10; i++)
 		{
-			lampset_set_apply_delay (TIME_16MS);
-			lampset_apply (LAMPSET_SORT1, leff_toggle);
+			lamplist_set_apply_delay (TIME_16MS);
+			lamplist_apply (LAMPLIST_SORT1, leff_toggle);
 		}
 	}
 }

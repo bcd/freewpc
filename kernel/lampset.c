@@ -22,26 +22,26 @@
  * \file
  * \brief Routines for working with groups of related lamps
  *
- * A lampset is a descriptor that represents a set of lamps.
+ * A lamplist is a descriptor that represents a set of lamps.
  * Often, related lamps are modified together; these routines
  * provide the common logic.
  *
- * A lampset is the minimum allocation unit for a lamp effect
- * Lamp effects specify the lampset that they want to use.
+ * A lamplist is the minimum allocation unit for a lamp effect
+ * Lamp effects specify the lamplist that they want to use.
  *
  * Lampset themselves are declared in the machine configuration file,
- * which is compiled to produce mach-lampsets.c.  Internally, each
- * lampset is just an array of lamp IDs, terminated by the special
+ * which is compiled to produce mach-lamplists.c.  Internally, each
+ * lamplist is just an array of lamp IDs, terminated by the special
  * value LAMP_END.
  */
 
 #include <freewpc.h>
 
-/** A table of pointers to all of the defined lampsets */
-extern const lampnum_t *lampset_table[];
+/** A table of pointers to all of the defined lamplists */
+extern const lampnum_t *lamplist_table[];
 
 
-U8 lampset_alternation_state;
+U8 lamplist_alternation_state;
 
 
 /** Returns true if the current task is a lamp effect. */
@@ -53,13 +53,13 @@ static inline bool leff_caller_p (void)
 
 /** Returns true if the given lamp ID value is not an actual lamp,
 but a macro. */
-static inline bool lampset_macro_entry (lampnum_t entry)
+static inline bool lamplist_macro_entry (lampnum_t entry)
 {
 	return (entry == LAMP_MACRO_SLEEP_OP) ? TRUE : FALSE;
 }
 
 
-void lampset_set_apply_delay (task_ticks_t delay)
+void lamplist_set_apply_delay (task_ticks_t delay)
 {
 	if (!leff_caller_p ())
 		fatal (ERR_MUST_BE_LEFF);
@@ -68,121 +68,121 @@ void lampset_set_apply_delay (task_ticks_t delay)
 }
 
 
-const lampnum_t *lampset_lookup (lampset_id_t id)
+const lampnum_t *lamplist_lookup (lamplist_id_t id)
 {
 	wpc_push_page (MD_PAGE);
-	return lampset_table[id];
+	return lamplist_table[id];
 	wpc_pop_page ();
 }
 
 
-const lampnum_t *lampset_first_entry (lampset_id_t id)
+const lampnum_t *lamplist_first_entry (lamplist_id_t id)
 {
-	register const lampnum_t *entry = lampset_table[id];
-	while (lampset_macro_entry (*entry))
+	register const lampnum_t *entry = lamplist_table[id];
+	while (lamplist_macro_entry (*entry))
 		entry++;
 	return entry;
 }
 
 
-const lampnum_t *lampset_last_entry (lampset_id_t id)
+const lampnum_t *lamplist_last_entry (lamplist_id_t id)
 {
-	register const lampnum_t *entry = lampset_table[id];
+	register const lampnum_t *entry = lamplist_table[id];
 	while (entry[1] != LAMP_END)
 		entry++;
-	while (lampset_macro_entry (*entry))
+	while (lamplist_macro_entry (*entry))
 		entry--;
 	return entry;
 }
 
 
 static inline const lampnum_t *
-lampset_previous_entry (lampset_id_t id, const lampnum_t *entry)
+lamplist_previous_entry (lamplist_id_t id, const lampnum_t *entry)
 {
 	do {
 		entry--;
-	} while (lampset_macro_entry (*entry));
+	} while (lamplist_macro_entry (*entry));
 	return entry;
 }
 
 
 static inline const lampnum_t *
-lampset_next_entry (lampset_id_t id, const lampnum_t *entry)
+lamplist_next_entry (lamplist_id_t id, const lampnum_t *entry)
 {
 	do {
 		entry++;
-	} while (lampset_macro_entry (*entry));
+	} while (lamplist_macro_entry (*entry));
 	return entry;
 }
 
 
-static void lampset_leff_sleep (U8 delay)
+static void lamplist_leff_sleep (U8 delay)
 {
 	if (leff_caller_p () && (delay > 0))
 		task_sleep (delay);
 }
 
 
-/** Apply an operator to each element of a lampset, without executing
+/** Apply an operator to each element of a lamplist, without executing
 any lamp macros. */
-void lampset_apply_nomacro (lampset_id_t id, lamp_operator_t op)
+void lamplist_apply_nomacro (lamplist_id_t id, lamp_operator_t op)
 {
 	register const lampnum_t *entry;
 	wpc_push_page (MD_PAGE);
-	for (entry = lampset_table[id]; *entry != LAMP_END; entry++)
-		if (!lampset_macro_entry (*entry))
+	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
+		if (!lamplist_macro_entry (*entry))
 			(*op) (*entry);
 	wpc_pop_page ();
 }
 
 
-/** Apply an operator to each element of a lampset, one by one.
+/** Apply an operator to each element of a lamplist, one by one.
 Macros are executed as they are encountered. */
-void lampset_apply (lampset_id_t id, lamp_operator_t op)
+void lamplist_apply (lamplist_id_t id, lamp_operator_t op)
 {
 	register const lampnum_t *entry;
-	U8 lampset_apply_delay1 = 0;
+	U8 lamplist_apply_delay1 = 0;
 
 	wpc_push_page (MD_PAGE);
 
-	for (entry = lampset_table[id]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
 		switch (*entry)
 		{
 			case LAMP_MACRO_SLEEP_OP:
-				if (leff_caller_p () && (lampset_apply_delay != 0))
+				if (leff_caller_p () && (lamplist_apply_delay != 0))
 				{
-					lampset_apply_delay1 = lampset_apply_delay;
-					lampset_apply_delay = 0;
+					lamplist_apply_delay1 = lamplist_apply_delay;
+					lamplist_apply_delay = 0;
 				}
 
-				if (lampset_apply_delay1)
-					lampset_leff_sleep (lampset_apply_delay1);
+				if (lamplist_apply_delay1)
+					lamplist_leff_sleep (lamplist_apply_delay1);
 				break;
 
 			default:
 				(*op) (*entry);
-				lampset_leff_sleep (lampset_apply_delay);
+				lamplist_leff_sleep (lamplist_apply_delay);
 				break;
 		}
 	}
 
-	if (lampset_apply_delay1 != 0)
-		lampset_apply_delay = lampset_apply_delay1;
+	if (lamplist_apply_delay1 != 0)
+		lamplist_apply_delay = lamplist_apply_delay1;
 	wpc_pop_page ();
 }
 
 
-/** Returns a pointer to the first element of the lampset for which the given
+/** Returns a pointer to the first element of the lamplist for which the given
  * operator returns TRUE. */
-static const lampnum_t *lampset_find (lampset_id_t id,
+static const lampnum_t *lamplist_find (lamplist_id_t id,
 	lamp_boolean_operator_t op)
 {
 	register const lampnum_t *entry;
 
-	for (entry = lampset_table[id]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (op (*entry))
 			break;
@@ -195,16 +195,16 @@ static const lampnum_t *lampset_find (lampset_id_t id,
 /** Returns true if all of the lamps in the set return TRUE when the
 given operator is applied.  This function will short-circuit as soon
 as the result is known. */
-bool lampset_test_all (lampset_id_t id, lamp_boolean_operator_t op)
+bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op)
 {
 	register const lampnum_t *entry;
 	bool result = TRUE;
 
 	wpc_push_page (MD_PAGE);
 
-	for (entry = lampset_table[id]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (!op (*entry))
 		{
@@ -221,16 +221,16 @@ bool lampset_test_all (lampset_id_t id, lamp_boolean_operator_t op)
 /** Returns true if any of the lamps in the set return TRUE when the
 given operator is applied.  This function will short-circuit as soon
 as the result is known. */
-bool lampset_test_any (lampset_id_t id, lamp_boolean_operator_t op)
+bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 {
 	register const lampnum_t *entry;
 	bool result = FALSE;
 
 	wpc_push_page (MD_PAGE);
 
-	for (entry = lampset_table[id]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (op (*entry))
 		{
@@ -264,27 +264,27 @@ lamp_boolean_operator_t matrix_test_operator (const bitset matrix)
 
 void lamp_alternating (lampnum_t lamp)
 {
-	if (lampset_alternation_state)
+	if (lamplist_alternation_state)
 		leff_on (lamp);
 	else
 		leff_off (lamp);
-	lampset_alternation_state = ~lampset_alternation_state;
+	lamplist_alternation_state = ~lamplist_alternation_state;
 }
 
 
-void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on)
+void lamplist_apply_leff_alternating (lamplist_id_t id, U8 initially_on)
 {
-	lampset_alternation_state = initially_on;
-	lampset_apply (id, lamp_alternating);
+	lamplist_alternation_state = initially_on;
+	lamplist_apply (id, lamp_alternating);
 }
 
 
-/* Step functions.  These routines treat the lampset of length N as
+/* Step functions.  These routines treat the lamplist of length N as
  * an integer in the range of 0 to N-1.  When the 'value' is k, that
  * means the kth lamp is on, and all other lamps are off.
  * The private data field holds the number of the previous lamp.
  */
-void lampset_step_increment (lampset_id_t set, bitset matrix)
+void lamplist_step_increment (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 
@@ -293,28 +293,28 @@ void lampset_step_increment (lampset_id_t set, bitset matrix)
 	/* If all lamps are off, then turn on the first lamp.
 	 * Else, find the first lamp that is on, turn it off, then
 	 * turn on the next lamp.  If 'next' turns out to be the
-	 * end of the lampset, then wrap around and turn on the
+	 * end of the lamplist, then wrap around and turn on the
 	 * first one. */
 	if (bit_test_all_off (matrix))
 	{
-		entry = lampset_first_entry (set);
+		entry = lamplist_first_entry (set);
 		bit_on (matrix, *entry);
 	}
 	else
 	{
-		entry = lampset_find (set, matrix_test_operator (matrix));
+		entry = lamplist_find (set, matrix_test_operator (matrix));
 		bit_off (matrix, *entry);
-		entry = lampset_next_entry (set, entry);
+		entry = lamplist_next_entry (set, entry);
 		if (*entry == LAMP_END)
-			entry = lampset_first_entry (set);
+			entry = lamplist_first_entry (set);
 		bit_on (matrix, *entry);
 	}
 	wpc_pop_page ();
-	lampset_leff_sleep (lampset_apply_delay);
+	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
 
-void lampset_step_decrement (lampset_id_t set, bitset matrix)
+void lamplist_step_decrement (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 
@@ -325,37 +325,37 @@ void lampset_step_decrement (lampset_id_t set, bitset matrix)
 	wpc_push_page (MD_PAGE);
 	if (bit_test_all_off (matrix))
 	{
-		entry = lampset_last_entry (set);
+		entry = lamplist_last_entry (set);
 		lamp_on (*entry);
 	}
 	else
 	{
-		entry = lampset_find (set, matrix_test_operator (matrix));
+		entry = lamplist_find (set, matrix_test_operator (matrix));
 		lamp_off (*entry);
-		entry = lampset_previous_entry (set, entry);
-		if (entry < lampset_first_entry (set))
-			entry = lampset_last_entry (set);
+		entry = lamplist_previous_entry (set, entry);
+		if (entry < lamplist_first_entry (set))
+			entry = lamplist_last_entry (set);
 		lamp_on (*entry);
 	}
 	wpc_pop_page ();
-	lampset_leff_sleep (lampset_apply_delay);
+	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
 
 /*
  * Build functions.  These routines are similar to the step functions,
- * except that when the value of the lampset is k, all lamps from 1
+ * except that when the value of the lamplist is k, all lamps from 1
  * k are on.
  */
-void lampset_build_increment (lampset_id_t set, bitset matrix)
+void lamplist_build_increment (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 
 	/* Turn on the first lamp that is off, and then stop */
 	wpc_push_page (MD_PAGE);
-	for (entry = lampset_table[set]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (!((matrix_test_operator (matrix)) (*entry)))
 		{
@@ -366,18 +366,18 @@ void lampset_build_increment (lampset_id_t set, bitset matrix)
 	wpc_pop_page ();
 }
 
-void lampset_build_decrement (lampset_id_t set, bitset matrix)
+void lamplist_build_decrement (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 
 	/* Going in reverse, turn off the first lamp that is on, and
 	 * then stop */
 	wpc_push_page (MD_PAGE);
-	for (entry = lampset_last_entry (set);
-		entry >= lampset_first_entry (set);
+	for (entry = lamplist_last_entry (set);
+		entry >= lamplist_first_entry (set);
 		entry--)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (((matrix_test_operator (matrix)) (*entry)))
 		{
@@ -386,7 +386,7 @@ void lampset_build_decrement (lampset_id_t set, bitset matrix)
 		}
 	}
 	wpc_pop_page ();
-	lampset_leff_sleep (lampset_apply_delay);
+	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
 
@@ -397,7 +397,7 @@ void lampset_build_decrement (lampset_id_t set, bitset matrix)
  *
  * This function is implemented similar to 'memmove'.
  */
-void lampset_rotate_next (lampset_id_t set, bitset matrix)
+void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 	bool state, newstate;
@@ -410,21 +410,21 @@ void lampset_rotate_next (lampset_id_t set, bitset matrix)
 	 * Ln = old Ln-1
 	 */
 	wpc_push_page (MD_PAGE);
-	state = lamp_test (*(lampset_last_entry (set)));
-	for (entry = lampset_table[set]; *entry != LAMP_END; entry++)
+	state = lamp_test (*(lamplist_last_entry (set)));
+	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		newstate = ((matrix_test_operator (matrix)) (*entry));
 		(state ? lamp_on : lamp_off) (*entry);
 		state = newstate;
 	}
 	wpc_pop_page ();
-	lampset_leff_sleep (lampset_apply_delay);
+	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
 
-void lampset_rotate_previous (lampset_id_t set, bitset matrix)
+void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry, *prev_entry = NULL;
 	bool state;
@@ -438,9 +438,9 @@ void lampset_rotate_previous (lampset_id_t set, bitset matrix)
 	 * Ln = old L0
 	 */
 	wpc_push_page (MD_PAGE);
-	for (entry = lampset_table[set]; *entry != LAMP_END; entry++)
+	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
-		if (lampset_macro_entry (*entry))
+		if (lamplist_macro_entry (*entry))
 			continue;
 		if (prev_entry)
 		{
@@ -450,12 +450,12 @@ void lampset_rotate_previous (lampset_id_t set, bitset matrix)
 		}
 	}
 
-	entry = lampset_first_entry (set);
+	entry = lamplist_first_entry (set);
 	state = ((matrix_test_operator (matrix)) (*entry));
-	entry = lampset_last_entry (set);
+	entry = lamplist_last_entry (set);
 	(state ? lamp_on : lamp_off) (*entry);
 
 	wpc_pop_page ();
-	lampset_leff_sleep (lampset_apply_delay);
+	lamplist_leff_sleep (lamplist_apply_delay);
 }
 

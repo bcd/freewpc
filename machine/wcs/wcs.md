@@ -192,7 +192,7 @@ F3: Lock Magnet
 
 #############################################################
 
-[lampsets]
+[lamplists]
 Goals: 1 Goal, 2 Goals, 3 Goals, 4 Goals
 Ball Panels: Ball Spirit, Ball Skill, Ball Stamina, Ball Speed, Ball Strength
 Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Upper Build Lock

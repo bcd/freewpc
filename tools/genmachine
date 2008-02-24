@@ -63,7 +63,7 @@ my %contextDefinitionRe = (
 	"lamps" => "[1-8][1-8]",
 	"drives" => "[HLGAFX][1-8]",
 	"gi" => "[0-9]+",
-	"lampsets" => "AUTO",
+	"lamplists" => "AUTO",
 	"containers" => "AUTO",
 	"shots" => "AUTO",
 	"drivers" => "AUTO",
@@ -187,7 +187,7 @@ my %EnumeratedProperties = (
 my %ContextPrefixes = (
 	"switches" => "SW",
 	"lamps" => "LM",
-	"lampsets" => "LAMPSET",
+	"lamplists" => "LAMPLIST",
 	"drives" => "SOL",
 	"gi" => "GI",
 	"containers" => "DEVNO",
@@ -214,7 +214,7 @@ my %ContextMaxima = (
 	"deffs" => "MAX_DEFFS",
 	"leffs" => "MAX_LEFFS",
 	"drives" => "NUM_POWER_DRIVES",
-	"lampsets" => "MAX_LAMPSET",
+	"lamplists" => "MAX_LAMPLIST",
 	"scores" => "NUM_SCORES",
 	"fonts" => "MAX_FONTS",
 	"timers" => "MAX_TIMERS",
@@ -223,7 +223,7 @@ my %ContextMaxima = (
 
 # The contexts for which strings should be written out.
 @stringcontexts = ("switches", "drives", "lamps", "containers", 
-	"deffs", "leffs", "lampsets", "gi", "fonts");
+	"deffs", "leffs", "lamplists", "gi", "fonts");
 
 
 ###################################################################
@@ -812,9 +812,9 @@ sub machine_write_defines {
 		}
 
 		if (!defined $gi) { $gi = "0" }
-		if (!defined $lamps) { $lamps = "0" } else { $lamps = "LAMPSET_" . $lamps; }
+		if (!defined $lamps) { $lamps = "0" } else { $lamps = "LAMPLIST_" . $lamps; }
 		$gi = "L_ALL_GI" if ($gi eq "ALL");
-		$lamps = "L_ALL_LAMPS" if ($lamps eq "LAMPSET_ALL");
+		$lamps = "L_ALL_LAMPS" if ($lamps eq "LAMPLIST_ALL");
 
 		print "   DECL_LEFF (" . 
 			$leff->{'c_ident'} . ", " .
@@ -1032,81 +1032,81 @@ sub lamp_sort_circle_out {
 
 sub colored_lamps {
 	my ($color) = @_;
-	my $lampset = "";
+	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		if ($lamp->{'color'} eq $color) {
-			$lampset .= $lamp->{'c_ident'} . ",\n   ";
+			$lamplist .= $lamp->{'c_ident'} . ",\n   ";
 		}
 	}
-	return $lampset;
+	return $lamplist;
 }
 
 sub pf_lamps {
 	my ($sortfn) = @_;
 	my @lamps;
 	my $lastlamp = undef;
-	my $lampset = "";
+	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
 	}
 	@lamps = sort $sortfn @lamps;
-	$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+	$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 	foreach $lamp (@lamps) {
 		if (defined $lastlamp) {
 			$a = $lastlamp;
 			$b = $lamp;
 			if (&$sortfn() != 0) {
-				$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+				$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 			}
 		}
-		$lampset .= $lamp->{'c_ident'} . ",\n   ";
+		$lamplist .= $lamp->{'c_ident'} . ",\n   ";
 		$lastlamp = $lamp;
 	}
-	return $lampset;
+	return $lamplist;
 }
 
-sub machine_write_lampset_decls {
+sub machine_write_lamplist_decls {
 	print $START_SOURCE;
 
-	for $ls (unique ($m->{"lampsets"})) {
+	for $ls (unique ($m->{"lamplists"})) {
 		print "const lampnum_t " . $ls->{'c_decl'} . "[] = {\n   ";
 
 		my @lamps = split /,[ \t]*/, $ls->{'props'};
-		my $lampset = "";
+		my $lamplist = "";
 		foreach $lamp (@lamps) {
 			if ($lamp =~ m/COLOR:(.*)/) {
-				$lampset .= colored_lamps ("$1");
+				$lamplist .= colored_lamps ("$1");
 			}
 			elsif ($lamp =~ m/PF:(.*)/) {
-				$lampset .= pf_lamps ("$1");
+				$lamplist .= pf_lamps ("$1");
 			}
 			elsif ($lamp =~ m/(.*)\.\.(.*)/) {
 				($min, $max) = (machine_lamp_get_value ($1),
 					machine_lamp_get_value ($2));
 				if ($min < $max) {
 					for ($i = $min; $i <= $max; $i++) {
-						$lampset .= "$i, ";
+						$lamplist .= "$i, ";
 					}
 				}
 				else {
 					for ($i = $min; $i >= $max; $i--) {
-						$lampset .= "$i, ";
+						$lamplist .= "$i, ";
 					}
 				}
-			} elsif ($parent = ($m->{"lampsets"})->{$lamp}) {
-				$lampset .= $parent->{'value'};
+			} elsif ($parent = ($m->{"lamplists"})->{$lamp}) {
+				$lamplist .= $parent->{'value'};
 			} else {
 				$lamp = machine_lamp_get_value ($lamp);
-				$lampset .= "$lamp, ";
+				$lamplist .= "$lamp, ";
 			}
 		}
-		print "${lampset}LAMP_END\n";
+		print "${lamplist}LAMP_END\n";
 		print "};\n";
-		$ls->{'value'} = $lampset;
+		$ls->{'value'} = $lamplist;
 	}
 
-	print "const lampnum_t * const lampset_table[] = {\n";
-	for $ls (unique ($m->{"lampsets"})) {
+	print "const lampnum_t * const lamplist_table[] = {\n";
+	for $ls (unique ($m->{"lamplists"})) {
 		print "   " . $ls->{'c_decl'} . ",\n";
 	}
 	print "};\n";
@@ -1260,10 +1260,10 @@ elsif ($command eq "switchmasks") {
 }
 
 #######################################################
-#  generate build/mach-lampsets.c
+#  generate build/mach-lamplists.c
 #######################################################
-elsif ($command eq "lampsets") {
-	machine_write_lampset_decls ();
+elsif ($command eq "lamplists") {
+	machine_write_lamplist_decls ();
 }
 
 #######################################################

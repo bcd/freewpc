@@ -68,7 +68,7 @@ A6: Aux. Sol. 6, notinstalled
 A7: Aux. Sol. 7, notinstalled
 A8: Aux. Sol. 8, notinstalled
 
-[lampsets]
+[lamplists]
 ALL: 11..88
 
 [deffs]

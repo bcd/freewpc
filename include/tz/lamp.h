@@ -102,7 +102,7 @@
 #define LM_BUYIN_BUTTON			MAKE_LAMP(8,7)
 #define LM_START_BUTTON			MAKE_LAMP(8,8)
 
-/* Define lampsets */
+/* Define lamplists */
 
 #define LMSET_DOOR_PANEL_AWARDS \
 	LM_PANEL_TSM, LM_PANEL_EB, LM_PANEL_SUPER_SLOT, \

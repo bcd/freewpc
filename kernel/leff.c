@@ -186,7 +186,7 @@ static leffnum_t leff_get_highest_priority (void)
 /** Start the lamp effect function, but do a little
  * housekeeping before starting the task...
  *
- * If the leff has declared a lampset, then those lamps
+ * If the leff has declared a lamplist, then those lamps
  * are allocated.  Likewise, if it needs GI, then those
  * strings are allocated.  Allocation disables the normal
  * outputs and gives the effect priority.
@@ -197,12 +197,12 @@ task_pid_t leff_create_handler (const leff_t *leff)
 	leff_data_t *cdata;
 
 	/* Allocate lamps needed by the lamp effect */
-	if (leff->lampset != L_NOLAMPS)
+	if (leff->lamplist != L_NOLAMPS)
 	{
-		/* L_ALL_LAMPS is equivalent to LAMPSET_ALL and will cause
+		/* L_ALL_LAMPS is equivalent to LAMPLIST_ALL and will cause
 		 * all lamps to be allocated.  Other values will only
 		 * allocate a subset of the lamps */
-		if (leff->lampset == L_ALL_LAMPS)
+		if (leff->lamplist == L_ALL_LAMPS)
 		{
 			if (leff->flags & L_SHARED)
 				fatal (ERR_INVALID_LEFF_CONFIG);	
@@ -215,11 +215,11 @@ task_pid_t leff_create_handler (const leff_t *leff)
 		else
 		{
 			/* Allocate specific lamps. */
-			/* Apply the allocation function to each element of the lampset.
+			/* Apply the allocation function to each element of the lamplist.
 			 * Ensure the apply delay is zero first. */
 			if (leff->flags & L_SHARED)
 			{
-				lampset_apply_nomacro (leff->lampset, lamp_leff2_allocate);
+				lamplist_apply_nomacro (leff->lamplist, lamp_leff2_allocate);
 			}
 			else
 			{
@@ -227,7 +227,7 @@ task_pid_t leff_create_handler (const leff_t *leff)
 				task_kill_gid (GID_LEFF);
 				lamp_leff1_erase ();
 				lamp_leff1_free_all ();
-				lampset_apply_nomacro (leff->lampset, lamp_leff_allocate);
+				lamplist_apply_nomacro (leff->lamplist, lamp_leff_allocate);
 			}
 		}
 	}
@@ -332,7 +332,7 @@ void leff_stop (leffnum_t dn)
 		if (tp)
 		{
 			task_kill_pid (tp);
-			lampset_apply_nomacro (leff->lampset, lamp_leff2_free);
+			lamplist_apply_nomacro (leff->lamplist, lamp_leff2_free);
 		}
 		else
 		{
@@ -410,7 +410,7 @@ __noreturn__ void leff_exit (void)
 	if (leff_running_flags & L_SHARED)
 	{
 		leff = &leff_table[leff_self_id];
-		lampset_apply_nomacro (leff->lampset, lamp_leff2_free);
+		lamplist_apply_nomacro (leff->lamplist, lamp_leff2_free);
 	}
 	else
 	{

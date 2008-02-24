@@ -1,15 +1,15 @@
 
 #include <freewpc.h>
 
-static U8 lampset;
+static U8 lamplist;
 
 
 void amode_leff1 (void)
 {
-	register U8 my_lampset = lampset;
-	lampset_set_apply_delay (TIME_66MS);
+	register U8 my_lamplist = lamplist;
+	lamplist_set_apply_delay (TIME_66MS);
 	for (;;)
-		lampset_apply (my_lampset, leff_toggle);
+		lamplist_apply (my_lamplist, leff_toggle);
 }
 
 void amode_leff_eyes (void)
@@ -38,7 +38,7 @@ void amode_leff (void)
 {
 	triac_leff_enable (TRIAC_GI_MASK);
 
-	for (lampset = LAMPSET_BONUS_X; lampset <= LAMPSET_RIGHT_LOOP; lampset++)
+	for (lamplist = LAMPLIST_BONUS_X; lamplist <= LAMPLIST_RIGHT_LOOP; lamplist++)
 	{
 		leff_create_peer (amode_leff1);
 		task_sleep (TIME_33MS);
