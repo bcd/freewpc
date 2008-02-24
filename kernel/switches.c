@@ -467,7 +467,7 @@ pending_switch_t *switch_queue_find (const switchnum_t sw)
 /** Remove an entry from the switch queue */
 void switch_queue_remove (pending_switch_t *entry)
 {
-	entry->id = 0;
+	entry->id = 0xFF;
 	if (entry == &switch_queue[switch_queue_head])
 		value_rotate_up (switch_queue_head, 0, MAX_QUEUED_SWITCHES-1);
 }
@@ -526,9 +526,13 @@ void switch_service_queue (void)
 
 		/* See how long since the last time we serviced the queue */
 		elapsed_time = tick_count - switch_last_service_time;
+#ifdef CONFIG_NATIVE
+		if (elapsed_time == 0)
+			return;
+#endif
 
 		entry = &switch_queue[i];
-		if (entry->id)
+		if (entry->id != 0xFF)
 		{
 			dbprintf ("Servicing queued SW%d: ", entry->id);
 			entry->timer -= elapsed_time;
@@ -555,7 +559,6 @@ void switch_service_queue (void)
 				dbprintf ("%d down, %d to go\n", elapsed_time, entry->timer);
 			}
 		}
-
 		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
 
