@@ -63,12 +63,11 @@ U8 font_string_height;
 
 U8 top_space;
 
-/** The current x-coordinate where a character is being written */
-volatile __fastram__ U8 blit_xpos;
-
 __fastram__ U8 *blit_dmd;
 
-__fastram__ const U8 *blit_data;
+#ifndef __m6809__
+__fastram__ const U8 *bitmap_src;
+#endif
 
 
 extern const font_t font_bitmap_common;
@@ -91,7 +90,7 @@ U8 *font_lookup (const font_t *font, char c)
 		this test could be removed */
 		char *data = font->glyphs[(U8)'I'];
 		font_width = *data++;
-		font_height = *data++;
+		font_height = 1;
 		return (font_space);
 	}
 	else
@@ -121,7 +120,7 @@ U8 *font_lookup (const font_t *font, char c)
  */
 static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 {
-	register const U8 *src = blit_data;
+	register const U8 *src = bitmap_src;
 
 	do {
 		if (shift == 0)
@@ -135,7 +134,7 @@ static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 		}
 	
 		src++;
-		blit_data = src;
+		bitmap_src = src;
 		dst++;
 	} while (--byte_width);
 }
@@ -203,12 +202,13 @@ static void fontargs_render_string (void)
 	static U8 *dmd_base;
 	static const char *s;
 	char c;
-	const fontargs_t *args = &font_args;
+	fontargs_t *args = &font_args;
+#ifndef __m6809__
 	void (*blitter) (U8 *);
+#endif
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
-  	blit_xpos = args->coord.x;
 
 	/* When running in native mode, there is no DMD.  However it
 	is useful to know what text the program is trying to display,
@@ -225,6 +225,8 @@ static void fontargs_render_string (void)
 	 * there to be able to read the font data */
 	wpc_push_page (FONT_PAGE);
 
+	top_space = 0;
+
 	/* Loop over every character in the string. */
 	while ((c = *s++) != '\0')
 	{
@@ -234,7 +236,7 @@ static void fontargs_render_string (void)
 		 * bypassed and we only need to shift the output pointer
 		 * by a small amount. */
 
-		blit_data = font_lookup (args->font, c);
+		bitmap_src = font_lookup (args->font, c);
 #ifndef __m6809__
 		font_byte_width = (font_width + 7) >> 3;
 #endif
@@ -251,23 +253,13 @@ static void fontargs_render_string (void)
 			top_space *= DMD_BYTE_WIDTH;
 			dmd_base += top_space;
 		}
-		else
-			top_space = 0;
 
 		/* Set the starting address */
-		blit_dmd = wpc_dmd_addr_verify (dmd_base + blit_xpos / 8);
-
+		blit_dmd = wpc_dmd_addr_verify (dmd_base + args->coord.x / 8);
 
 		/* Write the character. */
 #ifdef __m6809__
-		{
-			extern void bitmap_blit_asm (U8 *dst, U8 shift);
-			extern U8 *bitmap_src;
-			extern U8 *bitmap_dst;
-
-			bitmap_src = blit_data;
-			bitmap_blit_asm (blit_dmd, blit_xpos & 0x7);
-		}
+		bitmap_blit_asm (blit_dmd, args->coord.x & 0x7);
 #else
 		/* The glyph is drawn one row at a time.
 		 * TODO - this is pretty inefficient.  Several things could be done
@@ -281,7 +273,7 @@ static void fontargs_render_string (void)
 		 *    We only write 1 byte at a time.  For >8 bits wide, we can
 		 *    do better writing 16-bits at a time.
 		 */
-		blitter = font_blit_table[blit_xpos & 0x7];
+		blitter = font_blit_table[args->coord.x & 0x7];
 		do
 		{
 			/* TODO : font_blit is applicable to more than just
@@ -292,15 +284,18 @@ static void fontargs_render_string (void)
 #endif
 
 		/* advance by 1 char ... args->font->width */
-		blit_xpos += font_width + 1;
+		args->coord.x += font_width + 1;
 
 		/* If the height was adjusted just for this character, restore
 		back to the original starting row */
-		if (top_space != 0)
+		if (unlikely (top_space != 0))
+		{
 			dmd_base -= top_space;
+			top_space = 0;
+		}
 
 #ifndef __m6809__
-		/* Because this is slow, assert that everything is OK so
+		/* Because the C code is slow, assert that everything is OK so
 		the software watchdog doesn't expire. */
 		task_dispatching_ok = TRUE;
 #endif
@@ -317,29 +312,25 @@ the first byte is its bit-width, the second byte is its
 bit-height, and the remaining bytes are the image data, going
 from top to bottom and then left to right.  Also, the image
 data must reside in FONT_PAGE for now. */
-void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
+void bitmap_blit (const U8 *_bitmap_src, U8 x, U8 y)
 {
 	U8 i, j;
 	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
 	void (*blitter) (U8 *);
 
-  	blit_xpos = x;
-	blit_data = _blit_data;
+	bitmap_src = _bitmap_src;
 	wpc_push_page (FONT_PAGE);
-	font_width = *blit_data++;
+	font_width = *bitmap_src++;
 #ifndef __m6809__
 	font_byte_width = (font_width + 7) >> 3;
 #endif
-	font_height = *blit_data++;
-	blit_dmd = wpc_dmd_addr_verify (dmd_base + (blit_xpos / 8));
+	font_height = *bitmap_src++;
+	blit_dmd = wpc_dmd_addr_verify (dmd_base + (x / 8));
 
 #ifdef __m6809__
-	{
-		extern void bitmap_blit_asm (U8 *dst, U8 shift);
-		bitmap_blit_asm (blit_dmd, blit_xpos & 0x7);
-	}
+	bitmap_blit_asm (blit_dmd, x & 0x7);
 #else
-	blitter = font_blit_table[blit_xpos / 8];
+	blitter = font_blit_table[x / 8];
 	for (i=0; i < font_height; i++)
 	{
 		for (j=0; j < font_byte_width; j++)
@@ -358,11 +349,11 @@ void bitmap_blit (const U8 *_blit_data, U8 x, U8 y)
 
 /** Draw a single color bitmap onto both the low and high
 mapped display pages. */
-void bitmap_blit2 (const U8 *_blit_data, U8 x, U8 y)
+void bitmap_blit2 (const U8 *_bitmap_src, U8 x, U8 y)
 {
-	bitmap_blit (_blit_data, x, y);
+	bitmap_blit (_bitmap_src, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (_blit_data, x, y);
+	bitmap_blit (_bitmap_src, x, y);
 	dmd_flip_low_high ();
 }
 
@@ -522,6 +513,7 @@ void fontargs_render_string_left2 (void)
 {
 	fontargs_prep_left ();
 	fontargs_render_string ();
+	font_args.coord.x -= font_string_width + 1;
 	dmd_flip_low_high ();
 	/* TODO - currently, to draw brightest text in 4-color
 	 * mode, we go through the entire process of rendering the
@@ -539,6 +531,7 @@ void fontargs_render_string_center2 (void)
 {
 	fontargs_prep_center ();
 	fontargs_render_string ();
+	font_args.coord.x -= font_string_width + 1;
 	dmd_flip_low_high ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
@@ -549,6 +542,7 @@ void fontargs_render_string_right2 (void)
 {
 	fontargs_prep_right ();
 	fontargs_render_string ();
+	font_args.coord.x -= font_string_width + 1;
 	dmd_flip_low_high ();
 	fontargs_render_string ();
 	dmd_flip_low_high ();
