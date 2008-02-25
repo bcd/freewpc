@@ -260,3 +260,75 @@ fastshiftword7:
 	exg	a,b
 	rts
 
+
+#if 0
+	; The erase function.
+	;
+	; On entry, X should point to the destination where the bitmap
+	; should be drawn, and B should be the shift value (0-7).  Both
+	; registers are call-clobbered.  bitmap_width and bitmap_height
+	; should contain the dimensions of the region to be erased.
+	.area .text
+	.globl	_bitmap_erase_asm
+_bitmap_erase_asm:
+	lda	_bitmap_width
+	adda	#7
+	lsra
+	lsra
+	lsra
+
+	; Essentially, there are three fragments to be written per row:
+	; the first byte, which must be ORed to preserve bits on the
+	; left edge of the bitmap; the middle bytes, which can be
+	; SET directly since they totally override what was there;
+	; and the last byte, which also must be ORed to preserve
+	; on the right edge.
+	; Ignore the byte on the left edge since it is handled
+	; separately.  So bitmap_byte_width is at least 1.
+	deca
+	sta	*_bitmap_byte_width
+	sta	_bitmap_byte_width2
+
+large_row_loop:
+	; First, deal with the left edge byte.  This looks a lot like
+	; the loop8 case above.
+	ldd	#0xffff
+	jsr	,y
+	anda	,x
+
+	; Now, deal with the remaining input bytes (at least one).
+	; On entry to the middle loop, register B holds the overflow
+	; bits from the previous iteration.
+	; Because byte width is at least 1, the condition can be
+	; checked after the first iteration.
+large_middle_loop:
+	sta	,x+
+	stb	*blit_overflow
+
+	ldd	#0xffff
+	jsr	,y
+	anda	*blit_overflow
+
+	dec	*_bitmap_byte_width
+	bne	large_middle_loop
+
+	; Finally, whatever is in overflow needs to be ORed to the
+	; display.
+	andb	1,x
+	std	,x+
+
+	; Move on to the next row.
+	; First, restore the width counter to its maximum.
+	ldb	_bitmap_byte_width2
+	stb	*_bitmap_byte_width
+	; Reset the destination pointer to the left edge of the image.
+	; The following calculation does B = 15-B, which is the amount
+	; to be added to get back to the left edge.
+	comb
+	andb	#15
+	abx
+	dec	_bitmap_height
+	bne	large_row_loop
+	stu	_bitmap_src
+	puls	u,y,pc
+#endif
