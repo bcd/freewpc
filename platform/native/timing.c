@@ -27,10 +27,13 @@
 #define ring_later(ticks) ((ring_now + (ticks)) % RING_COUNT)
 
 
-/** The current time, modulo the ring count */
+/** The current time, modulo the ring count.  This is measured
+ * in 1ms increments (more precisely, the number of IRQs). */
 unsigned int ring_now = 0;
 
-
+/** The timer ring.  Each entry contains a list of handlers to
+ * be called when the current time reaches the value indicated
+ * by the position in the array. */
 struct time_handler *time_handler_ring[RING_COUNT] = { NULL, };
 
 
@@ -48,7 +51,11 @@ static void ring_free (struct time_handler *elem)
 }
 
 
-/** Register a function to be called after N_TICKS have elapsed. */
+/** Register a function to be called after N_TICKS have elapsed.
+ * PERIOIDIC_P is nonzero if the timer function should be called indefinitely,
+ * every time that much time has elapsed.
+ * FN is the function to be called and DATA can be anything at all, passed to
+ * the handler. */
 void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *data)
 {
 	unsigned int ring = ring_later (n_ticks);
@@ -56,6 +63,9 @@ void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *da
 	struct time_handler *elem = ring_malloc ();
 	if (!elem)
 		simlog (SLC_DEBUG, "can't alloc ring");
+
+	if (n_ticks > RING_COUNT)
+		simlog (SLC_DEBUG, "can't schedule timer that far out");
 
 	elem->next = time_handler_ring[ring];
 	elem->periodicity = periodic_p ? n_ticks : 0;

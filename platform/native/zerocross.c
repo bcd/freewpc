@@ -21,7 +21,7 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 
 void sim_zc_init (void)
 {
-	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
+	//sim_time_register (1, TRUE, sim_zc_periodic, NULL);
 }
 
 
