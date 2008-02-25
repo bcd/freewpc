@@ -54,9 +54,11 @@ CKSUM_REV      = 0xFFEE
 	.module start.s
 
 
+	; Soft registers m0-m3 can be used by GCC's register allocator
+	; for functions that need lots of regs.
+	; Even when this feature is not used, these fastram variables
+	; are used by some of the assembler routines.
 	.area direct
-
-	; TODO - don't do this if soft regs not needed
 	.globl m0
 m0: .blkb 1
 	.globl m1

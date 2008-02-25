@@ -59,15 +59,10 @@ _bitmap_byte_width2:
 _bitmap_src:
 	.blkw 2
 
-	.area	direct
-	.globl blit_overflow
-blit_overflow:
-	.blkb 1
-
 #define _bitmap_width _font_width
 #define _bitmap_height _font_height
 #define _bitmap_byte_width _font_byte_width
-
+#define blit_overflow m0
 
 	; The main blit function.
 	;
