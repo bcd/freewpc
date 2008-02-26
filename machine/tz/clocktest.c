@@ -37,22 +37,22 @@ void tz_clock_test_update (void)
 		switch (clock_test_setting)
 		{
 			case -2:
-				tz_clock_set_speed (2);
+				tz_clock_set_speed (0xEE);
 				tz_clock_start_backward ();
 				break;
 			case -1:
-				tz_clock_set_speed (4);
+				tz_clock_set_speed (0xAA);
 				tz_clock_start_backward ();
 				break;
 			case 0:
 				tz_clock_stop ();
 				break;
 			case 1:
-				tz_clock_set_speed (4);
+				tz_clock_set_speed (0xAA);
 				tz_clock_start_forward ();
 				break;
 			case 2:
-				tz_clock_set_speed (2);
+				tz_clock_set_speed (0xEE);
 				tz_clock_start_forward ();
 				break;
 		}
