@@ -201,7 +201,7 @@ void tz_clock_rtt (void)
 			else if ((clock_sw & 0xF0) == (clock_find_target & 0xF0) && (clock_speed >= 0xAA))
 			{
 				/* No, but we're close.  Slow down a bit. */
-				clock_speed = 0x44;
+				clock_speed = 0x30;
 			}
 			/* Otherwise, the clock keeps running as it was */
 		}
