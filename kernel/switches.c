@@ -516,7 +516,6 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 
 void switch_service_queue (void)
 {
-	extern U8 tick_count;
 	U8 i = switch_queue_head;
 
 	while (unlikely (i != switch_queue_tail))
@@ -525,7 +524,7 @@ void switch_service_queue (void)
 		U8 elapsed_time;
 
 		/* See how long since the last time we serviced the queue */
-		elapsed_time = tick_count - switch_last_service_time;
+		elapsed_time = get_ticks () - switch_last_service_time;
 #ifdef CONFIG_NATIVE
 		if (elapsed_time == 0)
 			return;
@@ -562,7 +561,7 @@ void switch_service_queue (void)
 		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
 
-	switch_last_service_time = tick_count;
+	switch_last_service_time = get_ticks ();
 }
 
 void switch_queue_dump (void)

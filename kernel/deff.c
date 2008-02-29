@@ -510,8 +510,6 @@ CALLSET_ENTRY (deff, any_device_enter)
  * This routine is called once per second when the CPU is idle. */
 CALLSET_ENTRY (deff, idle_every_second)
 {
-	extern U8 tick_count;
-
 	/* Yes, update all of the queued timer entries that have D_TIMEOUT set. */
 	/* But if timers are disabled, then don't do this. */
 	if (deff_timeout_disabled == 0)

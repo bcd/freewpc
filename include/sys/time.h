@@ -51,4 +51,11 @@
 #define TIME_15S 		(TIME_1S * 15UL)
 #define TIME_30S 		(TIME_1S * 30UL)
 
+
+extern inline U8 get_ticks (void)
+{
+	extern U8 tick_count;
+	return tick_count;
+}
+
 #endif /* _SYS_TIME_H */
