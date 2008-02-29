@@ -314,9 +314,11 @@ from top to bottom and then left to right.  Also, the image
 data must reside in FONT_PAGE for now. */
 void bitmap_blit (const U8 *_bitmap_src, U8 x, U8 y)
 {
-	U8 i, j;
 	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
+#ifndef __m6809__
 	void (*blitter) (U8 *);
+	U8 i, j;
+#endif
 
 	bitmap_src = _bitmap_src;
 	wpc_push_page (FONT_PAGE);
