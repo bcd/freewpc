@@ -28,20 +28,11 @@
  */
 struct window_ops
 {
-#if 0 /* TODO */
-	/** The page of ROMs in which the window functions
-	 * reside.  The ops structure itself *must* be in the
-	 * TEST_PAGE, but the functions can reside elsewhere.
-	 * (All must be in the same page.)
-	 */
-	U8 page;
-#endif
-
 	/** A constructor function that executes right after
 	 * the window is created */
 	void (*init) (void);
 
-	/** A denstructor function that executes just before
+	/** A destructor function that executes just before
 	 * the window is destroyed */
 	void (*exit) (void);
 

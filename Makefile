@@ -1,7 +1,7 @@
 #
 # FreeWPC makefile
 #
-# (C) Copyright 2005-2007 by Brian Dominy.
+# (C) Copyright 2005-2008 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
@@ -9,7 +9,7 @@
 # To build the product, just type "make".
 #
 # To customize the build, create a file named .config.
-# See user.make.example for an example of how this should look.
+# See .config.example for an example of how this should look.
 # The settings in .config override any defaults given below.
 #
 # By default, make will also install your game ROM into your pinmame
@@ -423,7 +423,6 @@ $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
 $(eval $(call PAGE_ALLOC, 59, FSM))
-## $(eval $(call PAGE_ALLOC, 60, XBM)) # not needed anymore
 $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))

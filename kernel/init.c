@@ -205,13 +205,13 @@ __noreturn__ void freewpc_init (void)
 
 
 /**
- * The lockup check routine examines 'task_dispatch_ok', which
+ * The lockup check routine examines 'task_dispatching_ok', which
  * should normally be true as normal task scheduling occurs.  
  * If this value stays false, something is very wrong.
  *
  * This check occurs every 128 IRQs.  No task should run for
- * that long without giving up control.  If the count doesn't
- * change on every check, we invoke a fatal error and reset.
+ * that long without giving up control.  If the flag stays false
+ * between 2 consecutive calls, we invoke a fatal error and reset.
  *
  * NOTE: if a task _really_ does take that long to execute before
  * switching out, it should set "task_dispatching_ok = TRUE"
