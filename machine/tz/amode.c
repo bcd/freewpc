@@ -168,13 +168,10 @@ void amode_leff (void)
 		task_sleep_sec (15);
 		task_kill_peers ();
 
-		lamplist_set_apply_delay (0);
-		lamplist_apply (LAMPLIST_SORT1, leff_off);
+		lamplist_apply_nomacro (LAMPLIST_SORT1, leff_off);
+		lamplist_set_apply_delay (TIME_16MS);
 		for (i=0 ; i < 10; i++)
-		{
-			lamplist_set_apply_delay (TIME_16MS);
 			lamplist_apply (LAMPLIST_SORT1, leff_toggle);
-		}
 	}
 }
 
