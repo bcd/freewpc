@@ -177,9 +177,9 @@ extern inline bool flag_test (const flag_t f)
 void bit_on (bitset matrix, U8 bit);
 void bit_off (bitset matrix, U8 bit);
 void bit_toggle (bitset matrix, U8 bit);
-bool bit_test (bitset matrix, U8 bit);
-bool bit_test_all_on (bitset matrix);
-bool bit_test_all_off (bitset matrix);
+bool bit_test (const bitset matrix, U8 bit);
+bool bit_test_all_on (const bitset matrix);
+bool bit_test_all_off (const bitset matrix);
 
 void lamp_all_on (void);
 void lamp_all_off (void);

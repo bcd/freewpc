@@ -196,12 +196,12 @@ void bit_toggle (bitset matrix, U8 bit)
 	bitarray_toggle (matrix, bit);
 }
 
-bool bit_test (bitset matrix, U8 bit)
+bool bit_test (const bitset matrix, U8 bit)
 {
 	return bitarray_test (matrix, bit);
 }
 
-bool bit_test_all_on (bitset matrix)
+bool bit_test_all_on (const bitset matrix)
 {
 	return matrix[0] && matrix[1]
 		&& matrix[2] && matrix[3]
@@ -209,7 +209,7 @@ bool bit_test_all_on (bitset matrix)
 		&& matrix[6] && matrix[7];
 }
 
-bool bit_test_all_off (bitset matrix)
+bool bit_test_all_off (const bitset matrix)
 {
 	return !matrix[0] && !matrix[1]
 		&& !matrix[2] && !matrix[3]

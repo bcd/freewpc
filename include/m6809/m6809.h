@@ -51,7 +51,7 @@ void bitmap_blit_asm (U8 *dst, U8 shift);
 
 extern void *_far_call_address;
 extern U8 _far_call_page;
-extern U8 *bitmap_src;
+extern const U8 *bitmap_src;
 extern U8 *bitmap_dst;
 
 #define far_call_pointer(function, page, arg) \
