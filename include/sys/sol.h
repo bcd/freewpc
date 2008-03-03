@@ -33,6 +33,7 @@ typedef U8 solnum_t;
 #define SOL_BASE_EXTENDED 40
 
 extern __fastram__ U8 sol_timers[];
+extern U8 sol_duty_state[];
 
 
 /** Duty cycle values.  The first value is the on time,

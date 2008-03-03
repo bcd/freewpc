@@ -213,12 +213,12 @@ stop_clock:
 	 * put the minute hand exactly over the desired minute opto. */
 	if (clock_mode == CLOCK_RUNNING_FORWARD)
 	{
-		sol_start_real (SOL_CLOCK_FORWARD, 0xFF, 4);
+		rt_sol_start (SOL_CLOCK_FORWARD, 0xFF, 4);
 		rt_sol_disable (SOL_CLOCK_REVERSE);
 	}
 	else
 	{
-		sol_start_real (SOL_CLOCK_REVERSE, 0xFF, 4);
+		rt_sol_start (SOL_CLOCK_REVERSE, 0xFF, 4);
 		rt_sol_disable (SOL_CLOCK_FORWARD);
 	}
 	clock_mode = CLOCK_STOPPED;
