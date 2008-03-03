@@ -133,6 +133,7 @@ void window_start_thread (void)
 	if (win_top->ops->thread)
 	{
 		task_recreate_gid (GID_WINDOW_THREAD, win_top->ops->thread);
+		task_yield ();
 	}
 }
 
@@ -176,8 +177,8 @@ void window_push (struct window_ops *ops, void *priv)
 	win_top->w_class.priv = priv;
 	sound_send (SND_TEST_ENTER);
 	window_call_op (win_top, init);
-	window_redraw ();
 	window_start_thread ();
+	window_redraw ();
 }
 
 
@@ -200,9 +201,8 @@ void window_pop_quiet (void)
 	else
 	{
 		win_top--;
-		window_call_op (win_top, resume);
-		window_redraw ();
 		window_start_thread ();
+		window_redraw ();
 	}
 }
 
@@ -221,6 +221,10 @@ void window_init (void)
 	win_top = NULL;
 }
 
+void window_title (const char *title)
+{
+	font_render_string_center (&font_mono5, 64, 2, title);
+}
 
 /***************************************************/
 
@@ -267,7 +271,7 @@ void browser_draw (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 
-	font_render_string_center (&font_mono5, 64, 2, m->name);
+	window_title (m->name);
 
 	if (browser_item_number)
 	{
@@ -589,7 +593,7 @@ void adj_browser_draw (void)
 
 	if (ad->nvram == NULL)
 	{
-		font_render_string_center (&font_mono5, 32, 20, "N/A");
+		font_render_string_center (&font_mono5, 32, 21, "N/A");
 		dmd_copy_low_to_high ();
 	}
 	else
@@ -877,8 +881,7 @@ void confirm_draw (void)
 	font_render_string_left (&font_mono5, 1, 1, sprintf_buffer);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
-	sprintf ("%s", m->name);
-	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
+	window_title (m->name);
 	font_render_string_center (&font_var5, 64, 18, "PRESS ENTER TO CONFIRM");
 	font_render_string_center (&font_var5, 64, 24, "PRESS ESCAPE TO CANCEL");
 
@@ -989,7 +992,7 @@ void menu_draw (void)
 	}
 	else
 	{
-		font_render_string (&font_mono5, 8, 14, "ERROR... NO SUBMENUS");
+		/* error : no submenus defined */
 	}
 	dmd_show_low ();
 }
@@ -1494,21 +1497,14 @@ void dev_balldev_test_init (void)
 
 void dev_balldev_test_draw (void)
 {
-	extern U8 counted_balls, missing_balls;
 	device_t *dev;
 	char *s;
 
 	dev = &device_table[menu_selection];
-
-	if ((dev == NULL) || (dev->props == NULL))
-	{
-		sprintf ("DEV %d. NOT INSTALLED", menu_selection);
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
-	}
-	else
+	if (likely (dev && dev->props))
 	{
 		sprintf ("DEV %d. %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 2, sprintf_buffer);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
 		font_render_string (&font_var5, 4, 7, sprintf_buffer);
@@ -1850,7 +1846,7 @@ void sched_test_init (void)
 
 void sched_test_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 2, "SCHEDULER TEST");
+	window_title ("SCHEDULER TEST");
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
@@ -1946,7 +1942,7 @@ void pic_test_draw (void)
 	extern U8 pic_unlock_code[];
 	extern U8 pic_serial_number[];
 
-	font_render_string_center (&font_mono5, 64, 2, "SECURITY PIC INFO");
+	window_title ("SECURITY PIC TEST");
 
 	sprintf ("UNLOCK CODE %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
@@ -1964,7 +1960,7 @@ struct window_ops pic_test_window = {
 };
 
 struct menu pic_test_item = {
-	.name = "SECURITY TEST",
+	.name = "SECURITY PIC TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &pic_test_window, NULL } },
 };
@@ -2125,6 +2121,7 @@ struct menu set_time_item = {
 
 /**********************************************************************/
 
+#ifdef WMSLY_CORRECT
 struct menu custom_message_item = {
 	.name = "CUSTOM MESSAGE",
 	.flags = M_ITEM,
@@ -2134,6 +2131,7 @@ struct menu set_gameid_item = {
 	.name = "SET GAME I.D.",
 	.flags = M_ITEM,
 };
+#endif
 
 /**********************************************************************/
 
@@ -2288,8 +2286,10 @@ struct menu *util_menu_items[] = {
 	&clear_coins_item,
 	&reset_hstd_item,
 	&set_time_item,
+#ifdef WMSLY_CORRECT
 	&custom_message_item,
 	&set_gameid_item,
+#endif
 	&factory_adjust_item,
 	&factory_reset_item,
 	&presets_menu_item,
@@ -2445,10 +2445,17 @@ void switch_matrix_draw (void)
 	}
 }
 
+
+void switch_window_title (const char *title)
+{
+	font_render_string_center (&font_mono5, 80, 4, title);
+}
+
+
 void switch_edges_draw (void)
 {
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SWITCH EDGES");
+	switch_window_title ("SWITCH EDGES");
 	dmd_show_low ();
 }
 
@@ -2488,7 +2495,7 @@ struct menu switch_edges_item = {
 void switch_levels_draw (void)
 {
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SWITCH LEVELS");
+	switch_window_title ("SWITCH LEVELS");
 	dmd_show_low ();
 }
 
@@ -2535,7 +2542,7 @@ void single_switch_draw (void)
 	const char *active;
 
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 3, "SINGLE SWITCH");
+	switch_window_title ("SINGLE SWITCHES");
 
 	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
@@ -2752,12 +2759,12 @@ void solenoid_test_draw (void)
 	browser_draw ();
 	switch (browser_action)
 	{
-		default: s = "UNKNOWN PULSE"; break;
-		case TIME_16MS: s = "VERY SOFT PULSE"; break;
-		case TIME_33MS: s = "SOFT PULSE"; break;
-		case TIME_66MS: s = "NORMAL PULSE"; break;
-		case TIME_100MS: s = "HARD PULSE"; break;
-		case TIME_133MS: s = "VERY HARD PULSE"; break;
+		default: s = "ERR"; break;
+		case TIME_16MS: s = "16MS"; break;
+		case TIME_33MS: s = "33MS"; break;
+		case TIME_66MS: s = "66MS"; break;
+		case TIME_100MS: s = "100MS"; break;
+		case TIME_133MS: s = "133MS"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
 	sprintf_far_string (names_of_drives + menu_selection);
@@ -3070,7 +3077,7 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 	extern __common__ void locale_render (U8 locale);
 
-	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCH TEST");
+	window_title ("DIP SWITCH TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
@@ -3143,15 +3150,7 @@ void empty_balls_test_init (void)
 
 void empty_balls_test_draw (void)
 {
-	extern U8 counted_balls;
-
-	if (counted_balls == 0)
-	{
-		font_render_string_center (&font_mono5, 64, 3, "ALL BALL DEVICES");
-		font_render_string_center (&font_mono5, 64, 11, "ARE EMPTY");
-	}
-	else
-		font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
+	window_title (counted_balls ? "EMPTYING BALLS..." : "EMPTY BALLS DONE");
 	dmd_show_low ();
 }
 
@@ -3368,10 +3367,26 @@ void scroller_down (void)
 	sound_send (SND_TEST_DOWN);
 }
 
-/* TODO : this is the only use of the 'resume' hook -- can it be removed? */
-void scroller_resume (void)
+void scroller_thread (void)
 {
-	win_top->w_class.scroller.offset = 0;
+	struct window_scroller *ws = &win_top->w_class.scroller;
+	ws->offset = 0;
+
+	for (;;)
+	{
+		task_sleep_sec (3);
+
+		if (ws->offset < ws->size - 1)
+			ws->offset++;
+		else
+		{
+			callset_invoke (sw_enter);
+			task_exit ();
+		}
+
+		dmd_alloc_low_clean ();
+		scroller_draw ();
+	}
 }
 
 #define INHERIT_FROM_SCROLLER \
@@ -3380,7 +3395,7 @@ void scroller_resume (void)
 	.draw = scroller_draw, \
 	.up = scroller_up, \
 	.down = scroller_down, \
-	.resume = scroller_resume
+	.thread = scroller_thread
 
 struct window_ops scroller_window = {
 	INHERIT_FROM_SCROLLER,

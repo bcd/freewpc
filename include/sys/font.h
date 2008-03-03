@@ -112,6 +112,7 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height);
 	font_args.coord.xy = MKCOORD1 (_x, _y); \
 	font_args.s = _s;
 
+
 #define font_render_string_left(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
