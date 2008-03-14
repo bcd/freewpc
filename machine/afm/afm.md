@@ -80,7 +80,7 @@ define MACHINE_NUMBER 541
 85: Right Outlane
 
 [switches]
-11: Launch Button, launch-button
+11: Launch Button, launch-button, cabinet, noplay
 13: Start Button, yellow, start-button, cabinet, intest
 14: Tilt, tilt
 16: Left Outlane

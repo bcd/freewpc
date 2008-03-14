@@ -1778,7 +1778,6 @@ void dev_frametest_draw (void)
 {
 	if (dev_frametest_ptr)
 	{
-		dbprintf ("frame is at %p\n", dev_frametest_ptr);
 		dmd_alloc_low_high ();
 		dev_frametest_next_ptr = dmd_draw_fif1 (dev_frametest_ptr);
 		dmd_show2 ();
@@ -1791,7 +1790,6 @@ void dev_frametest_advance (void)
 	dev_frametest_ptr = dev_frametest_next_ptr;
 	if (far_read8 ((U8 *)dev_frametest_ptr, FIF_PAGE) > 2)
 	{
-		dbprintf ("frame %p starts with %02X\n", dev_frametest_ptr, *dev_frametest_ptr);
 		dev_frametest_ptr = fif_freewpc_logo;
 	}
 }

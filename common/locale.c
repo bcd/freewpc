@@ -69,6 +69,7 @@ void locale_render (U8 locale)
 CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;
+	__test2__ void preset_install_country_code (U8 code);
 
 	current_locale = wpc_read_locale ();
 	dbprintf ("Current locale : %d\n", current_locale);

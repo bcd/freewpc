@@ -20,7 +20,7 @@ D5: Escape, service, intest, cabinet
 D6: Down, service, intest, cabinet
 D7: Up, service, intest, cabinet
 D8: Enter, service, intest, cabinet
-22: Coin Door Closed, cabinet, edge, opto, intest
+22: Coin Door Closed, cabinet, edge, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 F1: L. R. Flipper EOS, opto, cabinet
 F2: L. R. Flipper Button, button, opto, intest, c_decl(sw_right_button)

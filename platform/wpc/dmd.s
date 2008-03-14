@@ -70,6 +70,49 @@ _dmd_memset:
 	puls	y,u,pc
 
 
+	.globl _dmd_copy_asm
+_dmd_copy_asm:
+	; X = destination
+	; stack ptr = source
+	pshs	u,y
+
+	; Convert so that U points to the end of the
+	; destination buffer, and X is the end of the
+	; source buffer.
+	leau	DMD_PAGE_WIDTH,x
+	ldx	6,s
+	leax	DMD_PAGE_WIDTH,x
+
+	lda	#(512 / 16)
+	sta	loop_count
+
+1$:
+	; Read 4 bytes into registers, then write them
+	; out at once using a push instruction.
+	; Do this 4 times, in order to transfer a total
+	; of 16 bytes.
+	ldy	,x
+	ldd	-2,x
+	pshu	d,y ; TODO - check order
+
+	ldy	-4,x
+	ldd	-6,x
+	pshu	d,y ; TODO - check order
+
+	ldy	-8,x
+	ldd	-10,x
+	pshu	d,y ; TODO - check order
+
+	ldy	-12,x
+	ldd	-14,x
+	pshu	d,y ; TODO - check order
+
+	leax	-16,x
+	dec	loop_count
+	bne	1$
+
+	puls	u,y,pc
+
 #if 0
 	; Render a single row of pixels
 	; X = destination buffer pointer
