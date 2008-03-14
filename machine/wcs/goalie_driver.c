@@ -44,14 +44,13 @@ void start_goalie (void)
 }
 
 
-CALLSET_ENTRY (goalie_driver, sw_left_button)
+CALLSET_ENTRY (goalie_driver, start_ball)
 {
-	if (!in_test)
-		start_goalie ();
+	start_goalie ();
 }
 
-CALLSET_ENTRY (goalie_driver, sw_right_button)
+CALLSET_ENTRY (goalie_driver, end_ball)
 {
-	if (!in_test)
-		stop_goalie ();
+	stop_goalie ();
 }
+

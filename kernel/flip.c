@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -34,6 +34,8 @@ U8 flippers_enabled;
 /** Software controlled flipper inputs for Fliptronic games. */
 #ifdef MACHINE_FLIPTRONIC
 __fastram__ U8 flipper_overrides;
+
+U8 fliptronic_powered_coil_outputs;
 #endif
 
 
@@ -121,7 +123,7 @@ static inline void flipper_service (
 void fliptronic_rtt (void)
 {
 	register U8 inputs __areg__ = ~wpc_read_flippers () | flipper_overrides;
-	U8 outputs = 0;
+	U8 outputs = fliptronic_powered_coil_outputs;
 
 	if (flippers_enabled)
 	{
@@ -139,7 +141,7 @@ void fliptronic_rtt (void)
 #endif
 	}
 
-	wpc_write_flippers (~outputs);
+	wpc_write_flippers (outputs);
 }
 
 #endif /* MACHINE_FLIPTRONIC */
@@ -162,6 +164,7 @@ CALLSET_ENTRY (fliptronic, ball_search)
 void flipper_init (void)
 {
 	flipper_disable ();
+	fliptronic_powered_coil_outputs = 0;
 }
 
 

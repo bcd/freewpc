@@ -4,14 +4,13 @@ documentation on <http://www.oddchange.com/freewpc> for more details.
 1. Decide if you are compiling natively (to run on your machine) or
 building a real ROM (to be used in pinmame).
 
-2. Create a file called "user.make" in the current directory.
-See user.make.example for options.
+2. Create a file called ".config" in the current directory.
+Define at least MACHINE, and optionally NATIVE:
 
-	* Make sure to set "NATIVE=y" in user.make if you are compiling in
+	* Make sure to set "NATIVE=y" if you are compiling in
 	native mode.
 
-	* You must define 'MACHINE' to a valid game name, and 'PLATFORM'
-	must be set to 'wpc'.
+	* You must define 'MACHINE' to a valid game name.
 
 	* If you are going to run pinmame, set 'TARGET_ROMPATH' to point
 	to your mame ROMs directory.

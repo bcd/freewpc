@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -95,9 +95,10 @@ doesn't define one */
 void default_amode_deff (void)
 {
 #if (MACHINE_DMD == 1)
-	dmd_alloc_low_high ();
-	dmd_draw_fif (fif_freewpc_logo);
-	dmd_show2 ();
+	FSTART_COLOR
+		dmd_draw_fif (fif_freewpc_logo);
+	FEND
+
 	for (;;)
 		task_sleep_sec (5);
 #endif
@@ -219,6 +220,10 @@ void end_ball (void)
 #endif
 
 	/* Here, we are committed to ending the ball */
+
+	/* Change the running task group, so that we are no longer in
+	 * the context of the trough device update. */
+	task_setgid (GID_END_BALL);
 
 	/* Notify everybody that wants to know about it */
 	callset_invoke (end_ball);
@@ -434,8 +439,8 @@ void start_ball (void)
 
 	/* Since lamp effects from previous balls could have been killed,
 	ensure that no lamps for leffs are allocated, causing incorrect
-	lamp matrix draw.  Do this early, before start_ball which might
-	want to start up a leff. */
+	lamp matrix draw.  Do this early, before the start_ball hook is
+	invoked which might want to start up a leff. */
 	leff_stop_all ();
 
 	if (ball_up == 1)
@@ -459,9 +464,11 @@ void start_ball (void)
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
 	if (ball_up == system_config.balls_per_game)
+	{
 		deff_start (DEFF_SCORE_GOAL);
-
-	/* TODO : chalk game played audits at the beginning of the final ball */
+		/* Chalk game played audits on the final ball */
+		audit_increment (&system_audits.total_plays);
+	}
 
 	/* Serve a ball to the plunger, by requesting a kick from the
 	 * trough device.  However, if a ball is detected in the plunger lane

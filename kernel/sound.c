@@ -51,7 +51,7 @@ __fastram__ struct {
 } sound_read_queue;
 
 /** The last music code transmitted */
-__fastram__ music_code_t current_music;
+music_code_t current_music;
 
 /** The current master volume.  Individual sound clips may override this
  * temporarily, but this is the default. */
@@ -235,7 +235,7 @@ U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 
 
 /** At idle time, poll the sound board for asynchronous events. */
-CALLSET_ENTRY (sound, idle)
+CALLSET_ENTRY (sound, idle_every_100ms)
 {
 #if 0
 	U8 in;
@@ -253,17 +253,20 @@ CALLSET_ENTRY (sound, idle)
 /** Real time task for the sound board.
  * Transmit one pending byte of data to the sound board.
  * Receive up to one pending byte of data from it. */
-void sound_rtt (void)
+void sound_read_rtt (void)
 {
 	/* Read back from sound board if bytes ready */
-	if (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY)
+	if (unlikely (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY))
 	{
 		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
 			wpc_asic_read (WPCS_DATA));
 	}
+}
 
+void sound_write_rtt (void)
+{
 	/* Write a pending byte to the sound board */
-	if (!sound_write_queue_empty_p ())
+	if (unlikely (!sound_write_queue_empty_p ()))
 	{
 		wpc_asic_write (WPCS_DATA, sound_write_queue_remove ());
 	}
@@ -320,13 +323,13 @@ void sound_init (void)
 	dbprintf ("Detected L-%d sound.\n", sound_version_major);
 #endif
 
+exit_func:
 	/* Use nvram value if it's sensible */
 	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
 		volume_set (current_volume);
 	else
 		volume_set (DEFAULT_VOLUME);
 
-exit_func:
 	sys_init_pending_tasks--;
 	task_exit ();
 }

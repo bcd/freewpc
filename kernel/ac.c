@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,22 +29,13 @@
 
 __fastram__ U8 ac_zc_count;
 
-__fastram__ U8 ac_zc_period;
+U8 ac_zc_poll_count;
 
-__fastram__ U8 ac_zc_poll_count;
-
-__fastram__ bool ac_zc_broken;
+bool ac_zc_broken;
 
 
 void ac_rtt (void)
 {
-#if 0
-	if (ac_zc_broken)
-	{
-		ac_zc_count = 7;
-	}
-	else
-#endif
 	if (wpc_read_ac_zerocross () )
 	{
 		/* At zero cross point */
@@ -59,8 +50,9 @@ void ac_rtt (void)
 }
 
 
-CALLSET_ENTRY (ac, idle)
+CALLSET_ENTRY (ac, idle_every_100ms)
 {
+	/* TODO - this is not even close to right */
 	if (!ac_zc_broken)
 	{
 		if (ac_zc_poll_count < 250)
@@ -83,7 +75,6 @@ CALLSET_ENTRY (ac, idle)
 void ac_init (void)
 {
 	ac_zc_count = 0;
-	ac_zc_period = 8;
 	ac_zc_poll_count = 0;
 	ac_zc_broken = FALSE;
 }

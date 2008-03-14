@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,12 +21,25 @@
 #include <freewpc.h>
 #include <simulation.h>
 
+/**
+ * \file
+ * \brief Implements protected memory for native mode.
+ * 
+ * Protected memory variables can be detected because they reside in a special
+ * section of the output file (in much the same way that the 6809 compile does
+ * it).  The entire block of RAM can be read from/written to a file to
+ * provide persistence.
+ */
+
 extern char *__start_nvram, *__stop_nvram;
 extern char *__start_local, *__stop_local;
 
+
+/** The name of the backing file */
 char protected_memory_file[256] = "freewpc.mem";
 
 
+/** Load the contents of the protected memory from file to RAM. */
 void protected_memory_load (void)
 {
 	int size = &__stop_nvram - &__start_nvram;
@@ -47,6 +60,7 @@ void protected_memory_load (void)
 }
 
 
+/** Save the contents of the protected memory from RAM to a file. */
 void protected_memory_save (void)
 {
 	int size = &__stop_nvram - &__start_nvram;
@@ -74,7 +88,6 @@ void protected_memory_save (void)
 void local_save (void)
 {
 }
-
 
 void local_restore (void)
 {

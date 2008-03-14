@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,20 +19,30 @@
  */
 
 #include <freewpc.h>
+
+/** Normally we don't like to use 'int', but this code interfaces
+ * with the standard library, so make absolutely sure we are using
+ * the right types */
 #undef int
 
 void exit (void)
 {
 }
 
+
+/** Called by the standard library on some errors.
+ * This maps to our fatal() function. */
 void abort (void)
 {
 	fatal (ERR_LIBC_ABORT);
 }
 
+
+/** Called by the startup routine to begin the program.
+ * This maps to freewpc_init(). */
 int main (void)
 {
-	extern void freewpc_init (void);
+	extern __noreturn__ void freewpc_init (void);
 	freewpc_init ();
 	return 0;
 }

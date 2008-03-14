@@ -306,7 +306,7 @@ tz_powerball:
 # Note that a lampset may contain only one lamp.  The lampset is the
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
-[lampsets]
+[lamplists]
 Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
 Door Panels and Handle: Door Panels, Panel LITZ
 Door Locks: Lock1, Lock2

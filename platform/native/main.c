@@ -20,7 +20,7 @@
 
 /**
  * \file
- * \brief Routines needed to simulate the WPC hardware.
+ * \brief Entry point to the builtin simulator for the WPC hardware.
  * 
  * When CONFIG_NATIVE is defined at build time, access to WPC I/O registers
  * is redirected to function calls here that simulate the behavior.  This
@@ -41,7 +41,7 @@
 #include <freewpc.h>
 #include <simulation.h>
 
-extern void freewpc_init (void);
+extern __noreturn__ void freewpc_init (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);
@@ -54,8 +54,10 @@ extern void exit (int);
 extern const device_properties_t device_properties_table[];
 extern const switch_info_t switch_table[];
 
-
-#define ACCURATE_TIMING
+extern U8 *sim_switch_matrix_get (void);
+extern void sim_switch_toggle (int sw);
+extern int sim_switch_read (int sw);
+extern void sim_switch_init (void);
 
 
 /** The rate at which the simulated clock should run */
@@ -73,17 +75,11 @@ U8 *linux_dmd_high_page;
 /** A pointer to the visible DMD page */
 U8 *linux_dmd_visible_page;
 
-/** The simulated switch matrix inputs.  This acts as a buffer between the
- * simulation code and the actual product code, but it serves the same 
- * purpose.  Only one matrix is needed, however. 
- */
-U8 linux_switch_matrix[SWITCH_BITS_SIZE+1];
-
 /** The simulated lamp matrix outputs. */
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
 
 /** The simulated solenoid outputs */
-U8 linux_solenoid_outputs[SOL_ARRAY_WIDTH];
+U8 linux_solenoid_outputs[SOL_COUNT / 8];
 
 /** The simulated flipper inputs */
 U8 linux_flipper_inputs;
@@ -97,17 +93,9 @@ int linux_irq_pending;
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-/** Nonzero if an FIRQ is pending */
-int linux_firq_pending;
-
 /** When zero, at a zero cross reading; otherwise, the amount of time
  * until the next zerocross */
 int simulated_zerocross;
-
-/** The number of IRQ cycles */
-int linux_irq_count;
-
-int show_switch_levels = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -131,7 +119,9 @@ U8 simulated_orkin_control_port = 0x1;
 
 U8 simulated_orkin_data_port = 0x0;
 
+#ifdef MACHINE_TZ
 int col9_enabled = 0;
+#endif
 
 /** The initial number of balls to 'install' as given on the command-line. */
 #ifdef DEVNO_TROUGH
@@ -166,7 +156,8 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-static void sim_switch_effects (int swno);
+
+unsigned long sim_jiffies = 0;
 
 
 
@@ -318,8 +309,11 @@ U8 simulation_pic_access (int writep, U8 write_val)
 			{
 				if (unlock_code != expected_unlock_code)
 				{
-					simlog (SLC_DEBUG, "Invalid PIC unlock code %X (expected %X)\n",
-						unlock_code, expected_unlock_code);
+					static int already_warned = 0;
+					if (!already_warned)
+						simlog (SLC_DEBUG, "Invalid PIC unlock code %X (expected %X)\n",
+							unlock_code, expected_unlock_code);
+					already_warned = 1;
 					unlock_mode = -1;
 				}
 				else
@@ -358,7 +352,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 			case WPC_PIC_COLUMN(4): case WPC_PIC_COLUMN(5):
 			case WPC_PIC_COLUMN(6): case WPC_PIC_COLUMN(7):
 				if (unlock_mode == 0)
-					return linux_switch_matrix[last_write - WPC_PIC_COLUMN(0) + 1];
+					return sim_switch_matrix_get ()[last_write - WPC_PIC_COLUMN(0) + 1];
 
 			case WPC_PIC_SERIAL(0): case WPC_PIC_SERIAL(1):
 			case WPC_PIC_SERIAL(2): case WPC_PIC_SERIAL(3):
@@ -397,30 +391,14 @@ void linux_write_string (const char *s)
 
 static bool linux_switch_poll_logical (unsigned int sw)
 {
-	return (linux_switch_matrix[sw/8] & (1 << (sw%8))) ^ switch_is_opto (sw);
+	return sim_switch_read (sw) ^ switch_is_opto (sw);
 }
 
 
 /** Toggle the state of a switch */
 static void linux_switch_toggle (unsigned int sw)
 {
-	U8 level;
-
-	/* Update the current state of the switch */
-	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
-
-	/* Redraw the switch */
-	level = linux_switch_matrix[sw/8] & (1 << (sw%8));
-#ifdef CONFIG_UI
-	if (show_switch_levels)
-		ui_write_switch (sw, level);
-	else
-		ui_write_switch (sw, level ^ switch_is_opto (sw));
-#endif
-
-	/* Some switch closures require additional simulation... */
-	if (level ^ switch_is_opto (sw))
-		sim_switch_effects (sw);
+	sim_switch_toggle (sw);
 }
 
 
@@ -495,7 +473,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 			it does produce the intended effect.) */
 			for (devno = 0; devno < NUM_DEVICES; devno++)
 			{
-				device_properties_t *props = &device_properties_table[devno];
+				const device_properties_t *props = &device_properties_table[devno];
 				if (props->sol == solno)
 				{
 					int n;
@@ -527,7 +505,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 
 /** Simulate the side effects of switch number SWNO becoming active.
  */
-static void sim_switch_effects (int swno)
+void sim_switch_effects (int swno)
 {
 	int devno;
 	int n;
@@ -536,7 +514,7 @@ static void sim_switch_effects (int swno)
 	the 'rolling' to the farthest possible point in the device. */
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
-		device_properties_t *props = &device_properties_table[devno];
+		const device_properties_t *props = &device_properties_table[devno];
 		if (props->sw_count > 1)
 			for (n = 0; n < props->sw_count-1; n++)
 			{
@@ -588,10 +566,11 @@ void linux_asic_write (U16 addr, U8 val)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_COIL_OUTPUT:
+			sim_sol_write (32, &linux_solenoid_outputs[4], val);
 #else
 		case WPC_FLIPTRONIC_PORT_A:
-#endif
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
+#endif
 			break;
 
 		case WPC_LEDS:
@@ -602,9 +581,12 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_RAM_LOCK:
 		case WPC_RAM_LOCKSIZE:
 		case WPC_ROM_LOCK:
-		case WPC_ZEROCROSS_IRQ_CLEAR:
 		case WPC_ROM_BANK:
 			/* nothing to do, not implemented yet */
+			break;
+
+		case WPC_ZEROCROSS_IRQ_CLEAR:
+			sim_watchdog_reset ();
 			break;
 
 		case WPC_DMD_LOW_PAGE:
@@ -669,7 +651,7 @@ void linux_asic_write (U16 addr, U8 val)
 #else
 		case WPC_SW_COL_STROBE:
 			if (val != 0)
-				linux_switch_data_ptr = linux_switch_matrix + 1 + scanbit (val);
+				linux_switch_data_ptr = sim_switch_matrix_get () + 1 + scanbit (val);
 #endif
 			break;
 
@@ -730,9 +712,11 @@ U8 linux_asic_read (U16 addr)
 			return simulation_pic_access (0, 0);
 #else
 		case WPC_SW_ROW_INPUT:
-			if (col9_enabled) /* TODO : this is a TZ thing */
-				return linux_switch_matrix[9];
+#ifdef MACHINE_TZ
+			if (col9_enabled)
+				return sim_switch_matrix_get ()[9];
 			else
+#endif
 				return *linux_switch_data_ptr;
 #endif
 
@@ -740,7 +724,7 @@ U8 linux_asic_read (U16 addr)
 			return linux_jumpers;
 
 		case WPC_SW_CABINET_INPUT:
-			return linux_switch_matrix[0];
+			return sim_switch_matrix_get ()[0];
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
 			return 0;
@@ -774,14 +758,6 @@ U8 linux_asic_read (U16 addr)
 }
 
 
-/** Simulate the passage of a single 'time step', which is 1ms
- * or 1 IRQ. */
-static void linux_time_step (void)
-{
-	++linux_irq_count;
-}
-
-
 /** Permanent thread that handles realtime events.
  *
  * This thread monitors system timing and invokes the interrupt handlers
@@ -790,18 +766,17 @@ static void linux_time_step (void)
 static void linux_realtime_thread (void)
 {
 	struct timeval prev_time, curr_time;
+#define FIRQ_FREQ 16
+	static unsigned long next_firq_jiffies = FIRQ_FREQ;
 
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
 	task_set_flags (TASK_PROTECTED);
 
-#ifdef ACCURATE_TIMING
 	gettimeofday (&prev_time, NULL);
-#endif
 	for (;;)
 	{
 		/* Sleep a while; don't hog the system. */
-#ifdef ACCURATE_TIMING
 		/* Sleep for approximately 33ms */
 		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
 
@@ -811,30 +786,34 @@ static void linux_realtime_thread (void)
 		the previous IRQ function run took. */
 		gettimeofday (&curr_time, NULL);
 		linux_irq_pending = (curr_time.tv_usec - prev_time.tv_usec) / 1000;
+		if (linux_irq_pending < 0)
+			linux_irq_pending += 1000;
+
+		/* Increment the total number of 1ms ticks */
+		sim_jiffies += linux_irq_pending;
 		prev_time = curr_time;
-#else
-		/* The old way that assumes task_sleep is very accurate */
-		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
-		linux_irq_pending += RT_ITERATION_IRQS;
-#endif
 
-		if (linux_irq_enable)
-			while (linux_irq_pending-- > 0)
-			{
-				/** Advance the simulator clock */
-				linux_time_step ();
-	
-				/** Invoke IRQ handler */
+		/* IRQ is a periodic interrupt driven by an oscillator.  For
+		 * each 1ms that has elapsed, simulate an IRQ (if possible) */
+		while (linux_irq_pending-- > 0)
+		{
+			/** Advance the simulator clock, regardless */
+			sim_time_step ();
+
+			/** Invoke IRQ handler, if not masked */
+			if (linux_irq_enable)
 				tick_driver ();
-			}
+		}
 
-		/** Check for external interrupts on the FIRQ line */
+		/* FIRQ is generated periodically based on the display refresh rate */
 		if (linux_firq_enable)
-			while (linux_firq_pending-- > 0)
+		{
+			while (sim_jiffies >= next_firq_jiffies)
 			{
-				/* TODO - this is not being invoked in simulation */
 				do_firq ();
+				next_firq_jiffies += FIRQ_FREQ;
 			}
+		}
 	}
 }
 
@@ -1052,7 +1031,7 @@ void linux_trough_init (int balls)
 {
 #ifdef DEVNO_TROUGH
 	int i;
-	device_properties_t *trough_props;
+	const device_properties_t *trough_props;
 
 	if (balls >= 0)
 	{
@@ -1115,6 +1094,12 @@ int main (int argc, char *argv[])
 		if (!strcmp (arg, "-h"))
 		{
 			printf ("Syntax: freewpc [<options>]\n");
+			printf ("--balls <value>     Install N balls (default : game-specific)\n");
+			printf ("-f <file>           Read input commands from file (default : stdin)\n");
+			printf ("--gamenum <value>   Override the game number from the PIC\n");
+			printf ("--locale <value>    Set the locale jumpers\n");
+			printf ("-o <file>           Log debug messages to file (default : stdout)\n");
+			printf ("-s <value>          Set the relative speed of the simulation\n");
 			exit (0);
 		}
 		else if (!strcmp (arg, "-s"))
@@ -1161,8 +1146,7 @@ int main (int argc, char *argv[])
 	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
-	linux_irq_pending = linux_firq_pending = 0;
-	linux_irq_count = 0;
+	linux_irq_pending = 0;
 	linux_output_stream = stdout;
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
@@ -1170,6 +1154,7 @@ int main (int argc, char *argv[])
 #if (MACHINE_PIC == 1)
 	simulation_pic_init ();
 #endif
+	sim_watchdog_init ();
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
@@ -1181,7 +1166,7 @@ int main (int argc, char *argv[])
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
 
 	/* Initialize the state of the switches; optos are backwards */
-	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
+	sim_switch_init ();
 	for (sw = 0; sw < NUM_SWITCHES; sw++)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);

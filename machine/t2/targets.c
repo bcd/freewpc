@@ -27,7 +27,7 @@ typedef const struct
 	U8 gid;
 	U8 sw_count;
 	U8 switches[8];
-	U8 lampset;
+	U8 lamplist;
 } bank_properties_t;
 
 #define BANK_SKILL 0
@@ -74,7 +74,7 @@ const bank_properties_t bank_properties_table[] = {
 		.name = "SKILL 5-BANK",
 		.gid = GID_BANK_SKILL,
 		.sw_count = 5,
-		.lampset = LAMPSET_SKILL,
+		.lamplist = LAMPLIST_SKILL,
 	},
 
 	[BANK_CENTER] = {
@@ -83,14 +83,14 @@ const bank_properties_t bank_properties_table[] = {
 		.gid = GID_BANK_CENTER,
 		.sw_count = 3,
 		.switches = { SW_STANDUP_MID_LEFT, SW_STANDUP_MID_CENTER, SW_STANDUP_MID_RIGHT, },
-		.lampset = LAMPSET_CENTER,
+		.lamplist = LAMPLIST_CENTER,
 	},
 
 	[BANK_RIGHT] = {
 		.name = "RIGHT 3-BANK",
 		.gid = GID_BANK_RIGHT,
 		.sw_count = 3,
-		.lampset = LAMPSET_RELIGHT_KICKBACK,
+		.lamplist = LAMPLIST_RELIGHT_KICKBACK,
 	},
 
 	[BANK_TOP] = {
@@ -99,14 +99,14 @@ const bank_properties_t bank_properties_table[] = {
 		.gid = GID_BANK_TOP,
 		.sw_count = 3,
 		.switches = { SW_TOP_LANE_LEFT, SW_TOP_LANE_CENTER, SW_TOP_LANE_RIGHT, },
-		.lampset = LAMPSET_TOP_LANES,
+		.lamplist = LAMPLIST_TOP_LANES,
 	},
 };
 
 
-U8 bank_get_lampset (const U8 bankno)
+U8 bank_get_lamplist (const U8 bankno)
 {
-	return bank_properties_table[bankno].lampset;
+	return bank_properties_table[bankno].lamplist;
 }
 
 
@@ -266,7 +266,7 @@ CALLSET_ENTRY (lanes, sw_left_flipper)
 {
 	if (in_live_game)
 	{
-		lampset_rotate_previous (LAMPSET_TOP_LANES, lamp_matrix);
+		lamplist_rotate_previous (LAMPLIST_TOP_LANES, lamp_matrix);
 	}
 }
 
@@ -274,7 +274,7 @@ CALLSET_ENTRY (lanes, sw_right_flipper)
 {
 	if (in_live_game)
 	{
-		lampset_rotate_next (LAMPSET_TOP_LANES, lamp_matrix);
+		lamplist_rotate_next (LAMPLIST_TOP_LANES, lamp_matrix);
 	}
 }
 

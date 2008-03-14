@@ -16,10 +16,10 @@ D1: Left Coin, cabinet
 D2: Center Coin, cabinet
 D3: Right Coin, cabinet
 D4: Fourth Coin, cabinet
-D5: Escape, service, intest, cabinet
-D6: Down, service, intest, cabinet
-D7: Up, service, intest, cabinet
-D8: Enter, service, intest, cabinet
+D5: Escape, service, intest, cabinet, button
+D6: Down, service, intest, cabinet, button
+D7: Up, service, intest, cabinet, button
+D8: Enter, service, intest, cabinet, button
 22: Coin Door Closed, cabinet, edge, opto, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 F1: L. R. Flipper EOS, opto, cabinet
@@ -32,43 +32,43 @@ F7: U. L. Flipper EOS, opto, cabinet
 F8: U. L. Flipper Button, button, opto
 
 [drives]
-H1: High Power Sol. 1
-H2: High Power Sol. 2
-H3: High Power Sol. 3
-H4: High Power Sol. 4
-H5: High Power Sol. 5
-H6: High Power Sol. 6
-H7: High Power Sol. 7
-H8: High Power Sol. 8
+H1: High Power Sol. 1, notinstalled
+H2: High Power Sol. 2, notinstalled
+H3: High Power Sol. 3, notinstalled
+H4: High Power Sol. 4, notinstalled
+H5: High Power Sol. 5, notinstalled
+H6: High Power Sol. 6, notinstalled
+H7: High Power Sol. 7, notinstalled
+H8: High Power Sol. 8, notinstalled
 
-L1: Low Power Sol. 1
-L2: Low Power Sol. 2
-L3: Low Power Sol. 3
-L4: Low Power Sol. 4
-L5: Low Power Sol. 5
-L6: Low Power Sol. 6
-L7: Low Power Sol. 7
-L8: Low Power Sol. 8
+L1: Low Power Sol. 1, notinstalled
+L2: Low Power Sol. 2, notinstalled
+L3: Low Power Sol. 3, notinstalled
+L4: Low Power Sol. 4, notinstalled
+L5: Low Power Sol. 5, notinstalled
+L6: Low Power Sol. 6, notinstalled
+L7: Low Power Sol. 7, notinstalled
+L8: Low Power Sol. 8, notinstalled
 
-G1: General Sol. 1
-G2: General Sol. 2
-G3: General Sol. 3
-G4: General Sol. 4
-G5: General Sol. 5
-G6: General Sol. 6
-G7: General Sol. 7
-G8: General Sol. 8
+G1: General Sol. 1, notinstalled
+G2: General Sol. 2, notinstalled
+G3: General Sol. 3, notinstalled
+G4: General Sol. 4, notinstalled
+G5: General Sol. 5, notinstalled
+G6: General Sol. 6, notinstalled
+G7: General Sol. 7, notinstalled
+G8: General Sol. 8, notinstalled
 
-A1: Aux. Sol. 1
-A2: Aux. Sol. 2
-A3: Aux. Sol. 3
-A4: Aux. Sol. 4
-A5: Aux. Sol. 5
-A6: Aux. Sol. 6
-A7: Aux. Sol. 7
-A8: Aux. Sol. 8
+A1: Aux. Sol. 1, notinstalled
+A2: Aux. Sol. 2, notinstalled
+A3: Aux. Sol. 3, notinstalled
+A4: Aux. Sol. 4, notinstalled
+A5: Aux. Sol. 5, notinstalled
+A6: Aux. Sol. 6, notinstalled
+A7: Aux. Sol. 7, notinstalled
+A8: Aux. Sol. 8, notinstalled
 
-[lampsets]
+[lamplists]
 ALL: 11..88
 
 [deffs]
@@ -98,6 +98,13 @@ System Reset: PRI_RESET, page(COMMON_PAGE)
 NULL: 0
 Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff)
+
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. Str. 4 ON
+4: G.I. Str. 5 ON
 
 [fonts]
 mono5:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -49,8 +49,8 @@ typedef struct
 	U8 prio;
 
 	/** The maximum set of lamps that it will want to control,
-	 * expressed as a lampset. */
-	U8 lampset;
+	 * expressed as a lamplist. */
+	U8 lamplist;
 
 	/** The maximum GI strings that it will want to control,
 	 * expressed as a bitmask of GI string values. */
@@ -76,8 +76,8 @@ typedef struct
 } leff_data_t;
 
 
-#define lampset_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)
-#define lampset_private_data	(task_current_class_data (leff_data_t)->data)
+#define lamplist_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)
+#define lamplist_private_data	(task_current_class_data (leff_data_t)->data)
 #define leff_running_flags		(task_current_class_data (leff_data_t)->flags)
 #define leff_self_id				(task_current_class_data (leff_data_t)->id)
 

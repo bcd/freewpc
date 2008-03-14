@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,14 +26,6 @@
 #ifndef _WHITESTAR_H
 #define _WHITESTAR_H
 
-
-
-/***************************************************************
- * Peripheral timer
- ***************************************************************/
-
-/** The FIRQ clear/peripheral timer register bits */
-#define FIRQ_CLEAR_BIT 0x80
 
 
 /***************************************************************
@@ -80,76 +72,47 @@ AREA_DECL(nvram)
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
 /***************************************************************
- * System timing
- ***************************************************************/
-
-/* A "tick" is defined as the minimum unit of time that is
- * tracked by the kernel.  A tick represents some multiple of
- * the IRQ frequency, since the IRQ happens more often than
- * we need for timing granularity.
- *
- * We define this to be 16 now, which means that every 16 IRQs,
- * we increment our "tick counter" by 1.  The tick then
- * represents about 16.66ms of actual time.
- *
- * The tick count is stored in a single byte field of the
- * task structure, so it can store up to about 4 seconds.
- * If you need to sleep longer than this, use 'task_sleep_sec'
- * instead of 'task_sleep'.
- */
-#define IRQS_PER_TICK 16
-
-/* Primitive time constants */
-#define TIME_16MS 	1U
-#define TIME_33MS 	2U
-#define TIME_50MS 	3U
-#define TIME_66MS 	(TIME_33MS * 2U)
-#define TIME_100MS 	(TIME_33MS * 3U)
-#define TIME_133MS 	(TIME_33MS * 4U)
-#define TIME_166MS 	(TIME_33MS * 5U)
-#define TIME_200MS	(TIME_100MS * 2U)
-#define TIME_300MS	(TIME_100MS * 3U)
-#define TIME_400MS	(TIME_100MS * 4U)
-#define TIME_500MS	(TIME_100MS * 5U)
-#define TIME_1S 		(TIME_100MS * 10U) /* 2 * 3 * 10 = 60 ticks */
-#define TIME_2S 		(TIME_1S * 2U)     /* 120 ticks */
-#define TIME_3S 		(TIME_1S * 3UL)
-#define TIME_4S 		(TIME_1S * 4UL)
-
-/*
- * These time values can only be used for low-level timers,
- * because they use a 16-bit ticks field.
- */
-#define TIME_5S 		(TIME_1S * 5UL)
-#define TIME_6S 		(TIME_1S * 6UL)
-#define TIME_7S 		(TIME_1S * 7UL)
-#define TIME_8S 		(TIME_1S * 8UL)
-#define TIME_9S 		(TIME_1S * 9UL)
-#define TIME_10S 		(TIME_1S * 10UL)
-#define TIME_15S 		(TIME_1S * 15UL)
-#define TIME_30S 		(TIME_1S * 30UL)
-
-
-/***************************************************************
  * ASIC memory map
  ***************************************************************/
 
-#define WS_SOLA     0x2000
-#define WS_SOLB     0x2001
-#define WS_SOLC     0x2002
-#define WS_FLASHERS 0x2003
-#define WS_FLIP0    0x2004
-#define WS_FLIP1    0x2005
-#define WS_AUX0     0x2006
-#define WS_AUX1     0x2007
-#define WS_LAMP_COLUMN_STROBE 0x2008
-#define WS_LAMP_ROW_OUTPUT 0x200A
-
-#define WS_DEDICATED 0x3000
-#define WS_DIP_SWITCHES 0x3100
-#define WS_ROM_PAGE 0x3200
-#define WS_SWITCH_COLUMN_STROBE 0x3300
-#define WS_SWITCH_ROW_INPUT 0x3400
+#define WS_SOLA                 0x2000
+#define WS_SOLB                 0x2001
+#define WS_SOLC                 0x2002
+#define WS_FLASHERS             0x2003
+#define WS_FLIP0                0x2004
+#define WS_FLIP1                0x2005
+#define WS_AUX_OUT              0x2006
+   #define WS_AUX_GI_RELAY   0x1
+	#define WS_AUX_BSTB       0x8
+	#define WS_AUX_CSTB       0x10
+	#define WS_AUX_DSTB       0x20
+	#define WS_AUX_ESTB       0x40
+	#define WS_AUX_ASTB       0x80
+#define WS_AUX_IN               0x2007
+#define WS_LAMP_COLUMN_STROBE   0x2008
+#define WS_LAMP_ROW_OUTPUT      0x200A
+#define WS_AUX_CTRL             0x200B
+#define WS_SW_DEDICATED         0x3000
+   #define WS_DED_LEFT       0x1
+	#define WS_DED_LEFT_EOS   0x2
+	#define WS_DED_RIGHT      0x4
+	#define WS_DED_RIGHT_EOS  0x8
+	#define WS_VOLUME_RED     0x20
+	#define WS_SERVICE_GREEN  0x40
+	#define WS_TEST_BLACK     0x80
+#define WS_SW_DIP               0x3100
+#define WS_PAGE_LED             0x3200
+   #define WS_PAGE_MASK      0x3F
+   #define WS_LED_MASK       0x80
+#define WS_SW_COLUMN_STROBE     0x3300
+#define WS_SW_ROW_INPUT         0x3400
+#define WS_PLASMA_IN            0x3500
+#define WS_PLASMA_OUT           0x3600
+#define WS_PLASMA_RESET         0x3601
+#define WS_PLASMA_STATUS        0x3700
+   #define WS_SOUND_BUSY     0x1
+	#define WS_DMD_BUSY       0x80
+#define WS_SOUND_OUT            0x3800
 
 
 /********************************************/
@@ -159,6 +122,7 @@ AREA_DECL(nvram)
 /** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
 {
+	wpc_asic_toggle (WS_PAGE_LED, WS_LED_MASK);
 }
 
 
@@ -190,14 +154,14 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 }
 
 
-/** Acquire write access to the NVRAM */
+/** Acquire write access to the protected memory */
 #define wpc_nvram_get()
 
-/** Release write access to the NVRAM */
+/** Release write access to the protected memory */
 #define wpc_nvram_put()
 
 
-/** Atomically increment a variable in NVRAM by N. */
+/** Atomically increment a variable in protected memory by N. */
 #define wpc_nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -207,7 +171,7 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 	} while (0)
 
 
-/** Atomically decrement a variable in NVRAM by N. */
+/** Atomically decrement a variable in protected memory by N. */
 #define wpc_nvram_subtract(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
@@ -256,10 +220,6 @@ do { \
 }
 
 #endif /* PAGE == SYS_PAGE */
-
-/********************************************/
-/* RAM Paging                               */
-/********************************************/
 
 
 /********************************************/

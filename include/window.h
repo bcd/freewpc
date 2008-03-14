@@ -28,42 +28,19 @@
  */
 struct window_ops
 {
-#if 0 /* TODO */
-	/** The page of ROMs in which the window functions
-	 * reside.  The ops structure itself *must* be in the
-	 * TEST_PAGE, but the functions can reside elsewhere.
-	 * (All must be in the same page.)
-	 */
-	U8 page;
-#endif
-
 	/** A constructor function that executes right after
 	 * the window is created */
 	void (*init) (void);
 
-	/** A denstructor function that executes just before
+	/** A destructor function that executes just before
 	 * the window is destroyed */
 	void (*exit) (void);
-
-	/** The resume function, which is called whenever the
-	 * window becomes active again after a later window
-	 * is popped off the stack. */
-	void (*resume) (void);
 
 	/** The draw function, called just about every
 	 * time something changes.  Draw functions are
 	 * always called after the key handlers below.
 	 * It must be fast, and should not sleep. */
 	void (*draw) (void);
-
-	/** Key handlers **/
-	void (*escape) (void);
-	void (*enter) (void);
-	void (*up) (void);
-	void (*down) (void);
-	void (*left) (void);
-	void (*right) (void);
-	void (*start) (void);
 
 	/** Thread function.  This should be set to NULL
 	 * if the window doesn't need a thread.   Otherwise,
@@ -74,6 +51,15 @@ struct window_ops
 	 * but its exit isn't called.)
 	 */
 	void (*thread) (void);
+
+	/** Key handlers **/
+	void (*escape) (void);
+	void (*enter) (void);
+	void (*up) (void);
+	void (*down) (void);
+	void (*left) (void);
+	void (*right) (void);
+	void (*start) (void);
 };
 
 
@@ -97,7 +83,6 @@ struct window_ops
 #define DEFAULT_WINDOW \
 	.init = null_function, \
 	.exit = null_function, \
-	.resume = null_function, \
 	.draw = null_function, \
 	.escape = window_pop, \
 	.enter = null_function, \

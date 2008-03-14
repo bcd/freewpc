@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -40,9 +40,6 @@
 /** Macro to create a lamp number from its row and column */
 #define MAKE_LAMP(col,row)	((((col)-1) * 8) + (row)-1)
 
-/** The lamp flash state is updated every 32ms, so this will
- * toggle the lamp flash state about 8 times/sec */
-#define LAMP_DEFAULT_FLASH_RATE 4
 
 /** Small integer type for a lamp number */
 typedef U8 lampnum_t;
@@ -55,20 +52,20 @@ typedef void (*lamp_operator_t) (lampnum_t);
 /** Likewise for boolean operators, like lamp_test */
 typedef bool (*lamp_boolean_operator_t) (lampnum_t);
 
-/** A lampset is a sequence of lamp numbers, some of which are
+/** A lamplist is a sequence of lamp numbers, some of which are
  * "immediate lamp values", others are "lamp value macros".
  */
-typedef const lampnum_t lampset_t[];
+typedef const lampnum_t lamplist_t[];
 
 /** Lampsets are identified by small integers */
-typedef U8 lampset_id_t;
+typedef U8 lamplist_id_t;
 
 
 extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 bit_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+extern U8 bit_matrix[NUM_LAMP_COLS];
+extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
-extern __fastram__ U8 global_bits[NUM_LAMP_COLS];
+extern U8 global_bits[NUM_LAMP_COLS];
 
 
 typedef enum
@@ -82,18 +79,18 @@ typedef enum
 } lamp_matrix_id_t;
 
 /**
- * Lamp macros are lampset members which calculate actual
+ * Lamp macros are lamplist members which calculate actual
  * lamp values at runtime.
  *
  * Macro values start above the range of acutal lamp numbers.
  * These macros will be deprecated and replaced by a compile-time
- * mechanism to construct new lampsets.
+ * mechanism to construct new lamplists.
  */
 
-/** Indicates the end of a lampset */
+/** Indicates the end of a lamplist */
 #define LAMP_END						(NUM_LAMPS + 2)
 
-/** Indicates a time delay within a lampset */
+/** Indicates a time delay within a lamplist */
 #define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
 
 
@@ -180,9 +177,9 @@ extern inline bool flag_test (const flag_t f)
 void bit_on (bitset matrix, U8 bit);
 void bit_off (bitset matrix, U8 bit);
 void bit_toggle (bitset matrix, U8 bit);
-bool bit_test (bitset matrix, U8 bit);
-bool bit_test_all_on (bitset matrix);
-bool bit_test_all_off (bitset matrix);
+bool bit_test (const bitset matrix, U8 bit);
+bool bit_test_all_on (const bitset matrix);
+bool bit_test_all_off (const bitset matrix);
 
 void lamp_all_on (void);
 void lamp_all_off (void);
@@ -197,18 +194,18 @@ void lamp_leff2_allocate (lampnum_t lamp);
 bool lamp_leff2_test_allocated (lampnum_t lamp);
 void lamp_leff2_free (lampnum_t lamp);
 
-const U8 *lampset_lookup (lampset_id_t id);
-void lampset_apply_nomacro (lampset_id_t id, lamp_operator_t op);
-void lampset_apply (lampset_id_t id, lamp_operator_t op);
+const U8 *lamplist_lookup (lamplist_id_t id);
+void lamplist_apply_nomacro (lamplist_id_t id, lamp_operator_t op);
+void lamplist_apply (lamplist_id_t id, lamp_operator_t op);
 
-void lampset_apply_leff_alternating (lampset_id_t id, U8 initially_on);
-void lampset_set_apply_delay (task_ticks_t ticks);
-void lampset_step_increment (lampset_id_t id, bitset matrix);
-void lampset_step_decrement (lampset_id_t id, bitset matrix);
-void lampset_build_increment (lampset_id_t id, bitset matrix);
-void lampset_build_decrement (lampset_id_t id, bitset matrix);
-void lampset_rotate_next (lampset_id_t id, bitset matrix);
-void lampset_rotate_previous (lampset_id_t id, bitset matrix);
+void lamplist_apply_leff_alternating (lamplist_id_t id, U8 initially_on);
+void lamplist_set_apply_delay (task_ticks_t ticks);
+void lamplist_step_increment (lamplist_id_t id, bitset matrix);
+void lamplist_step_decrement (lamplist_id_t id, bitset matrix);
+void lamplist_build_increment (lamplist_id_t id, bitset matrix);
+void lamplist_build_decrement (lamplist_id_t id, bitset matrix);
+void lamplist_rotate_next (lamplist_id_t id, bitset matrix);
+void lamplist_rotate_previous (lamplist_id_t id, bitset matrix);
 
 void matrix_all_on (bitset matrix);
 void matrix_all_off (bitset matrix);

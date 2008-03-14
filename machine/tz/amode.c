@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -132,7 +132,7 @@ void amode_right_flipper (void)
 
 void amode_lamp_toggle_task (void)
 {
-	lampset_apply (LAMPSET_AMODE_ALL, leff_toggle);
+	lamplist_apply (LAMPLIST_AMODE_ALL, leff_toggle);
 	task_exit ();
 }
 
@@ -140,10 +140,10 @@ U8 amode_leff_subset;
 
 void amode_leff_subset_task (void)
 {
-	register U8 lampset = amode_leff_subset;
-	lampset_set_apply_delay (TIME_100MS);
+	register U8 lamplist = amode_leff_subset;
+	lamplist_set_apply_delay (TIME_100MS);
 	for (;;)
-		lampset_apply (lampset, leff_toggle);
+		lamplist_apply (lamplist, leff_toggle);
 }
 
 void amode_leff (void)
@@ -153,12 +153,12 @@ void amode_leff (void)
 
 	for (;;)
 	{
-		amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+		amode_leff_subset = LAMPLIST_DOOR_PANELS_AND_HANDLE;
 		leff_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
 	
-		for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
-			amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
+		for (amode_leff_subset = LAMPLIST_DOOR_LOCKS_AND_GUMBALL;
+			amode_leff_subset <= LAMPLIST_SPIRAL_AWARDS;
 			amode_leff_subset++)
 		{
 			leff_create_peer (amode_leff_subset_task);
@@ -168,13 +168,10 @@ void amode_leff (void)
 		task_sleep_sec (15);
 		task_kill_peers ();
 
-		lampset_set_apply_delay (0);
-		lampset_apply (LAMPSET_SORT1, leff_off);
+		lamplist_apply_nomacro (LAMPLIST_SORT1, leff_off);
+		lamplist_set_apply_delay (TIME_16MS);
 		for (i=0 ; i < 10; i++)
-		{
-			lampset_set_apply_delay (TIME_16MS);
-			lampset_apply (LAMPSET_SORT1, leff_toggle);
-		}
+			lamplist_apply (LAMPLIST_SORT1, leff_toggle);
 	}
 }
 
@@ -210,15 +207,10 @@ void amode_deff (void)
 
 	for (;;)
 	{
-#if 0
-		extern const U8 cow_anim0_prg[];
-		dmd_animate (cow_anim0_prg, TIME_66MS);
-#endif
-	
 		/** Display FreeWPC logo **/
-		dmd_alloc_low_high ();
-		dmd_draw_fif (fif_freewpc_logo);
-		dmd_show2 ();
+		FSTART_COLOR
+			dmd_draw_fif (fif_freewpc_logo);
+		FEND
 		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
@@ -261,12 +253,12 @@ void amode_deff (void)
 		}
 
 		/** Display PLAY PINBALL message **/
-		dmd_sched_transition (&trans_scroll_left);
-		dmd_alloc_low_high ();
-		dmd_draw_fif (fif_mborder);
-		font_render_string_center2 (&font_fixed10, 64, 16, 
-			"PLAY PINBALL");
-		dmd_show2 ();
+		FSTART_COLOR
+			dmd_sched_transition (&trans_scroll_left);
+			dmd_draw_fif (fif_mborder);
+			font_render_string_center2 (&font_fixed10, 64, 16, 
+				"PLAY PINBALL");
+		FEND
 		if (amode_page_delay (3) && system_config.tournament_mode)
 			continue;
 
@@ -284,6 +276,9 @@ void amode_deff (void)
 		
 			dmd_alloc_low_high ();
 			dmd_draw_fif (fif_tuxlogo);
+
+			/* note: text is displayed in 2/3 intensity by
+			 * writing to the high page */
 			dmd_flip_low_high ();
 			font_render_string_center (&font_var5, 80, 3, "DEVELOPED ON LINUX");
 			font_render_string_center (&font_mono5, 80, 18, "SUPPORT OPEN");

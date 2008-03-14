@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,14 +20,28 @@
 
 #include <freewpc.h>
 
+/**
+ * \file
+ * \brief Common lamp effects
+ */
+
+
+/** The arguments to a lamp countdown effect task */
 struct countdown_leff_config
 {
+	/** The lamp that should be flickered */
 	U8 lamp;
+
+	/** A pointer to the timer */
 	U8 *timer;
+
+	/** The generic lamp effect arguments.  All
+	 * lamp effects must declare this. */
 	leff_data_t leffdata;
 };
 
 
+/** The task for running a lamp countdown */
 void lamp_countdown_task (void)
 {
 	struct countdown_leff_config *cfg;

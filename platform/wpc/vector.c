@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -27,7 +27,7 @@
  * link-time to address 0xFFF0.
  */
 
-extern void start (void);
+extern __attribute__((noreturn)) void start (void);
 #ifdef CONFIG_PLATFORM_WPC
 extern void do_swi3 (void);
 extern void do_swi2 (void);
@@ -47,7 +47,7 @@ typedef struct
 	void (*irq) (void);
 	void (*swi) (void);
 	void (*nmi) (void);
-	void (*reset) (void);
+	__attribute__((noreturn)) void (*reset) (void);
 } m6809_vector_table_t;
 
 

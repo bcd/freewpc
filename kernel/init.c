@@ -51,7 +51,7 @@ task_gid_t last_nonfatal_error_gid;
 
 
 /** Initialize the FreeWPC program. */
-void freewpc_init (void)
+__noreturn__ void freewpc_init (void)
 {
 	extern __common__ void system_reset (void);
 
@@ -196,7 +196,7 @@ void freewpc_init (void)
 	while (1)
 	{
 		/* TODO - drop priority for idle tasks */
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 		db_idle ();
 		callset_invoke (idle);
 	}
@@ -205,13 +205,13 @@ void freewpc_init (void)
 
 
 /**
- * The lockup check routine examines 'task_dispatch_ok', which
+ * The lockup check routine examines 'task_dispatching_ok', which
  * should normally be true as normal task scheduling occurs.  
  * If this value stays false, something is very wrong.
  *
  * This check occurs every 128 IRQs.  No task should run for
- * that long without giving up control.  If the count doesn't
- * change on every check, we invoke a fatal error and reset.
+ * that long without giving up control.  If the flag stays false
+ * between 2 consecutive calls, we invoke a fatal error and reset.
  *
  * NOTE: if a task _really_ does take that long to execute before
  * switching out, it should set "task_dispatching_ok = TRUE"
@@ -248,7 +248,7 @@ void fatal (errcode_t error_code)
 
 	/* Reset hardware outputs */
 	wpc_asic_write (WPC_GI_TRIAC, 0);
-	wpc_write_flippers (~0);
+	wpc_write_flippers (0);
 	wpc_write_ticket (0);
 	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
 	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
@@ -266,6 +266,7 @@ void fatal (errcode_t error_code)
 #if (MACHINE_DMD == 1)
 	/* Try to display the error on the DMD.  This may not work,
 	you know. */
+	extern void dmd_rtt0 (void);
 	dmd_alloc_low_clean ();
 
 	dbprintf ("Fatal error: %i\n", error_code);

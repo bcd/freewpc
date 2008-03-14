@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -43,7 +43,6 @@
 #define ERR_REAL_HARDWARE			19
 #define ERR_NVRAM_UNLOCKED			20
 #define ERR_SOL_CKSUM_ERROR      21
-#define ERR_NVRAM                22
 #define ERR_UNLOCK_EMPTY_DEVICE  23
 #define ERR_LOCK_FULL_DEVICE     24
 #define ERR_INVALID_LEFF_CONFIG  25
@@ -61,11 +60,15 @@
 #define ERR_MALLOC               37
 #define ERR_MUST_BE_LEFF         38
 #define ERR_INVALID_MATRIX       39
+#define ERR_TASK_STACK_UNDERFLOW 40
+
+#ifndef __ASSEMBLER__
 
 typedef U8 errcode_t;
 
-
 __noreturn__ void fatal (errcode_t errcode);
 void nonfatal (errcode_t errcode);
+
+#endif /* __ASSEMBLER__ */
 
 #endif /* SYS_ERRNO_H */

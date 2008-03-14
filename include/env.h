@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -220,6 +220,9 @@ extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 #endif
 }
 
+/* TODO - rename this so that 'wpc' is not in the name */
+#define writeb wpc_asic_write
+#define readb wpc_asic_read
 
 
 #endif /* _ENV_H */

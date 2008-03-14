@@ -28,7 +28,7 @@
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
-__fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+U8 lamp_flash_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
 
@@ -40,13 +40,9 @@ __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
-__fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+U8 bit_matrix[NUM_LAMP_COLS];
 
-__fastram__ U8 global_bits[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_flash_max;
-
-__fastram__ U8 lamp_flash_count;
+U8 global_bits[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_strobe_mask;
 
@@ -73,8 +69,6 @@ void lamp_init (void)
 	lamp_leff1_free_all ();
 	lamp_leff2_free_all ();
 
-	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
-
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
 }
@@ -83,18 +77,13 @@ void lamp_init (void)
 /** Runs periodically to invert any lamps in the flashing state */
 void lamp_flash_rtt (void)
 {
-	--lamp_flash_count;
-	if (lamp_flash_count == 0)
-	{
-		U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
-		U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
+	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
+	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
 
-		lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
-		lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
-		lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
-		lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
-		lamp_flash_count = lamp_flash_max;
-	}
+	lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
+	lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
+	lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
+	lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
 }
 
 
@@ -207,12 +196,12 @@ void bit_toggle (bitset matrix, U8 bit)
 	bitarray_toggle (matrix, bit);
 }
 
-bool bit_test (bitset matrix, U8 bit)
+bool bit_test (const bitset matrix, U8 bit)
 {
 	return bitarray_test (matrix, bit);
 }
 
-bool bit_test_all_on (bitset matrix)
+bool bit_test_all_on (const bitset matrix)
 {
 	return matrix[0] && matrix[1]
 		&& matrix[2] && matrix[3]
@@ -220,7 +209,7 @@ bool bit_test_all_on (bitset matrix)
 		&& matrix[6] && matrix[7];
 }
 
-bool bit_test_all_off (bitset matrix)
+bool bit_test_all_off (const bitset matrix)
 {
 	return !matrix[0] && !matrix[1]
 		&& !matrix[2] && !matrix[3]
@@ -403,7 +392,7 @@ void lamp_leff2_allocate (lampnum_t lamp)
 
 bool lamp_leff2_test_allocated (lampnum_t lamp)
 {	
-	return bit_test (lamp_leff2_matrix, lamp);
+	return bit_test (lamp_leff2_allocated, lamp);
 }
 
 void lamp_leff2_free (lampnum_t lamp)

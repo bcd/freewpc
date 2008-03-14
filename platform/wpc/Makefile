@@ -39,7 +39,7 @@ KERNEL_HW_OBJS += $(P)/div10.o $(P)/main.o $(P)/task.o $(P)/vector.o
 
 KERNEL_SW_OBJS += $(P)/malloc.o
 
-KERNEL_ASM_OBJS += $(P)/dmd.o $(P)/farcall.o $(P)/task_6809.o $(P)/start.o
+KERNEL_ASM_OBJS += $(P)/dmd.o $(P)/farcall.o $(P)/task_6809.o $(P)/start.o $(P)/bitmap.o
 
 COMMON_BASIC_OBJS += $(P)/math.o
 

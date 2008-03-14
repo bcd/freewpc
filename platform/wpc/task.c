@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -348,12 +348,15 @@ void task_setgid (task_gid_t gid)
 /** Suspend the current task for a period of time */
 void task_sleep (task_ticks_t ticks)
 {
-	extern U8 tick_count;
 	register task_t *tp = task_current;
 
 	/* Fail if the idle function tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
+
+#if 1
+	/* TODO - verify that interrupts are not disabled when calling this */
+#endif
 
 	/* Mark the task as blocked, set the time at which it blocks,
 	and set how long it should wait for. 
@@ -375,7 +378,7 @@ void task_sleep (task_ticks_t ticks)
 	this last approach, consider bumping all of the TIME_ defines
 	to make this a static change. */
 	tp->delay = ticks;
-	tp->asleep = tick_count;
+	tp->asleep = get_ticks ();
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
@@ -589,11 +592,10 @@ void task_alloca (task_t *tp, U8 size)
 __naked__ __noreturn__
 void task_dispatcher (void)
 {
-	extern U8 tick_count;
 	register task_t *tp asm ("x");
 	task_t *first = tp;
 
-	tick_start_count = tick_count;
+	tick_start_count = get_ticks ();
 	task_dispatching_ok = TRUE;
 
 	/* Set 'first' to the first task block to try. */
@@ -619,10 +621,13 @@ void task_dispatcher (void)
 			/* If the system is fully initialized, run
 			 * the idle functions. */
 			if (idle_ok)
+			{
+				do_idle ();
 				callset_invoke (idle);
+			}
 
 			/* Reset timer and kick watchdog again */
-			tick_start_count = tick_count;
+			tick_start_count = get_ticks ();
 			task_dispatching_ok = TRUE;
 
 			/* Wait for next task tick before continuing.
@@ -630,16 +635,15 @@ void task_dispatcher (void)
 			per 16ms.  Do this AFTER calling the idle functions, so
 			that we wait as little as possible; idle calls themselves may
 			take a long time. */
-			while (tick_start_count == *(volatile U8 *)&tick_count)
+			while (tick_start_count == get_ticks ())
 			{
+				barrier ();
 #ifdef IDLE_PROFILE
 				noop ();
 				noop ();
 				noop ();
 				noop ();
 				idle_time++;
-#else
-				barrier ();
 #endif
 			}
 			
@@ -657,7 +661,7 @@ void task_dispatcher (void)
 			 * Examine the current tick count, and see if it should
 			 * be woken up.
 			 */
-			register U8 ticks_elapsed = tick_count - tp->asleep;
+			register U8 ticks_elapsed = get_ticks () - tp->asleep;
 			if (ticks_elapsed >= tp->delay)
 			{
 				/* Yes, it is ready to run again. */

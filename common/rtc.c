@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -222,7 +222,7 @@ CALLSET_ENTRY (rtc, init)
 }
 
 
-CALLSET_ENTRY (rtc, idle)
+CALLSET_ENTRY (rtc, idle_every_second)
 {
 	/* Re-read the timer hardware registers and normalize the values. */
 	rtc_hw_read ();

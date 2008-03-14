@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -79,7 +79,7 @@ random_reseed (void)
 /**
  * Reseed the random number generator during system idle time.
  */
-CALLSET_ENTRY (random, idle)
+CALLSET_ENTRY (random, idle_every_second)
 {
 	random_reseed ();
 }

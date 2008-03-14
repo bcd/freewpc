@@ -9,7 +9,7 @@ ifeq ($(hw),)
 hw=WPC_TEST_DMD
 endif
 
-EXTRA_CFLAGS += -D$(hw) -DMACHINE_LACKS_ALL_INCLUDES
+EXTRA_CFLAGS += -D$(hw)
 
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable

@@ -69,6 +69,8 @@
 #include <format.h>
 #include <coin.h>
 #include <highscore.h>
+#include <preset.h>
+
 
 #undef CONFIG_TEST_DURING_GAME
 
@@ -131,6 +133,7 @@ void window_start_thread (void)
 	if (win_top->ops->thread)
 	{
 		task_recreate_gid (GID_WINDOW_THREAD, win_top->ops->thread);
+		task_yield ();
 	}
 }
 
@@ -174,8 +177,8 @@ void window_push (struct window_ops *ops, void *priv)
 	win_top->w_class.priv = priv;
 	sound_send (SND_TEST_ENTER);
 	window_call_op (win_top, init);
-	window_redraw ();
 	window_start_thread ();
+	window_redraw ();
 }
 
 
@@ -198,9 +201,8 @@ void window_pop_quiet (void)
 	else
 	{
 		win_top--;
-		window_call_op (win_top, resume);
-		window_redraw ();
 		window_start_thread ();
+		window_redraw ();
 	}
 }
 
@@ -219,6 +221,10 @@ void window_init (void)
 	win_top = NULL;
 }
 
+void window_title (const char *title)
+{
+	font_render_string_center (&font_mono5, 64, 2, title);
+}
 
 /***************************************************/
 
@@ -265,7 +271,7 @@ void browser_draw (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 
-	font_render_string_center (&font_mono5, 64, 2, m->name);
+	window_title (m->name);
 
 	if (browser_item_number)
 	{
@@ -587,7 +593,7 @@ void adj_browser_draw (void)
 
 	if (ad->nvram == NULL)
 	{
-		font_render_string_center (&font_mono5, 32, 20, "N/A");
+		font_render_string_center (&font_mono5, 32, 21, "N/A");
 		dmd_copy_low_to_high ();
 	}
 	else
@@ -875,8 +881,7 @@ void confirm_draw (void)
 	font_render_string_left (&font_mono5, 1, 1, sprintf_buffer);
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
-	sprintf ("%s", m->name);
-	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
+	window_title (m->name);
 	font_render_string_center (&font_var5, 64, 18, "PRESS ENTER TO CONFIRM");
 	font_render_string_center (&font_var5, 64, 24, "PRESS ESCAPE TO CANCEL");
 
@@ -987,7 +992,7 @@ void menu_draw (void)
 	}
 	else
 	{
-		font_render_string (&font_mono5, 8, 14, "ERROR... NO SUBMENUS");
+		/* error : no submenus defined */
 	}
 	dmd_show_low ();
 }
@@ -1371,30 +1376,30 @@ struct menu symbol_test_item = {
 
 /*********** Lampsets **********************/
 
-U8 lampset_update_mode;
-U8 lampset_update_speed;
+U8 lamplist_update_mode;
+U8 lamplist_update_speed;
 
-void lampset_init (void)
+void lamplist_init (void)
 {
 	browser_init ();
 	browser_min = 1;
-	browser_max = MAX_LAMPSET-1;
+	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
-	lampset_update_mode = 0;
-	lampset_update_speed = TIME_16MS;
+	lamplist_update_mode = 0;
+	lamplist_update_speed = TIME_16MS;
 }
 
 
-void lampset_draw (void)
+void lamplist_draw (void)
 {
 	browser_draw ();
-	sprintf_far_string (names_of_lampsets + menu_selection);
+	sprintf_far_string (names_of_lamplists + menu_selection);
 	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
 
-	sprintf ("SPEED %d", lampset_update_speed);
-	font_render_string_center (&font_var5, 50, 21, sprintf_buffer);
+	sprintf ("SPEED %d", lamplist_update_speed);
+	font_render_string_center (&font_var5, 46, 21, sprintf_buffer);
 
-	switch (lampset_update_mode)
+	switch (lamplist_update_mode)
 	{
 		case 0: sprintf ("ENABLE"); break;
 		case 1: sprintf ("TOGGLE"); break;
@@ -1405,7 +1410,7 @@ void lampset_draw (void)
 		case 6: sprintf ("ROTATE NEXT"); break;
 		case 7: sprintf ("ROTATE PREV"); break;
 	}
-	font_render_string_center (&font_var5, 92, 21, sprintf_buffer);
+	font_render_string_center (&font_var5, 94, 21, sprintf_buffer);
 
 	/* Restart the update thread so that the old lamps are
 	cleared before the new effect is started */
@@ -1413,72 +1418,72 @@ void lampset_draw (void)
 }
 
 
-void lampset_update (void)
+void lamplist_update (void)
 {
 	leff_data_t *cdata;
 	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
 	for (;;)
 	{
-		cdata->apply_delay = lampset_update_speed;
-		switch (lampset_update_mode)
+		cdata->apply_delay = lamplist_update_speed;
+		switch (lamplist_update_mode)
 		{
 			case 0: 
 				lamp_all_off ();
-				lampset_apply (menu_selection, lamp_on); 
+				lamplist_apply (menu_selection, lamp_on); 
 				break;
-			case 1: lampset_apply (menu_selection, lamp_toggle);
+			case 1: lamplist_apply (menu_selection, lamp_toggle);
 				break;
-			case 2: lampset_step_increment (menu_selection, lamp_matrix);
+			case 2: lamplist_step_increment (menu_selection, lamp_matrix);
 				break;
-			case 3: lampset_step_decrement (menu_selection, lamp_matrix);
+			case 3: lamplist_step_decrement (menu_selection, lamp_matrix);
 				break;
-			case 4: lampset_build_increment (menu_selection, lamp_matrix);
+			case 4: lamplist_build_increment (menu_selection, lamp_matrix);
 				break;
-			case 5: lampset_build_decrement (menu_selection, lamp_matrix);
+			case 5: lamplist_build_decrement (menu_selection, lamp_matrix);
 				break;
-			case 6: lampset_rotate_next (menu_selection, lamp_matrix);
+			case 6: lamplist_rotate_next (menu_selection, lamp_matrix);
 				break;
-			case 7: lampset_rotate_previous (menu_selection, lamp_matrix);
+			case 7: lamplist_rotate_previous (menu_selection, lamp_matrix);
 				break;
 		}
 		task_sleep (TIME_200MS);
 	}
 }
 
-void lampset_test_slower (void)
+void lamplist_test_slower (void)
 {
-	if (lampset_update_speed > 1)
-		lampset_update_speed--;
+	if (lamplist_update_speed > 1)
+		lamplist_update_speed--;
 }
 
-void lampset_test_faster (void)
+void lamplist_test_faster (void)
 {
-	lampset_update_speed++;
+	lamplist_update_speed++;
 }
 
-void lampset_test_mode_change (void)
+void lamplist_test_mode_change (void)
 {
-	lampset_update_mode++;
-	if (lampset_update_mode == 8)
-		lampset_update_mode = 0;
+	lamplist_update_mode++;
+	if (lamplist_update_mode == 8)
+		lamplist_update_mode = 0;
 }
 
-struct window_ops dev_lampset_window = {
+struct window_ops dev_lamplist_window = {
 	INHERIT_FROM_BROWSER,
-	.init = lampset_init,
+	.init = lamplist_init,
 	.exit = lamp_all_off,
-	.draw = lampset_draw,
-	.thread = lampset_update,
-	.left = lampset_test_slower,
-	.right = lampset_test_faster,
-	.enter = lampset_test_mode_change,
+	.draw = lamplist_draw,
+	.thread = lamplist_update,
+	.left = lamplist_test_slower,
+	.right = lamplist_test_faster,
+	.enter = lamplist_test_mode_change,
 };
 
-struct menu dev_lampset_test_item = {
-	.name = "LAMPSETS",
+struct menu dev_lamplist_test_item = {
+	.name = "LAMPLISTS",
 	.flags = M_ITEM,
-	.var = { .subwindow = { &dev_lampset_window, NULL } },
+	.var = { .subwindow = { &dev_lamplist_window, NULL } },
 };
 
 /*********** Ball Devices **********************/
@@ -1492,21 +1497,14 @@ void dev_balldev_test_init (void)
 
 void dev_balldev_test_draw (void)
 {
-	extern U8 counted_balls, missing_balls;
 	device_t *dev;
 	char *s;
 
 	dev = &device_table[menu_selection];
-
-	if ((dev == NULL) || (dev->props == NULL))
-	{
-		sprintf ("DEV %d. NOT INSTALLED", menu_selection);
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
-	}
-	else
+	if (likely (dev && dev->props))
 	{
 		sprintf ("DEV %d. %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 2, sprintf_buffer);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
 		font_render_string (&font_var5, 4, 7, sprintf_buffer);
@@ -1811,7 +1809,7 @@ struct menu dev_frametest_item = {
 
 /**********************************************************************/
 
-#define SCHED_TEST_DURATION TIME_2S
+#define SCHED_TEST_DURATION TIME_500MS
 #define SCHED_TEST_WORKERS  16
 #define SCHED_LOCAL_COUNT   16
 
@@ -1842,13 +1840,13 @@ void sched_test_init (void)
 		task_create_gid (GID_SCHED_TEST_WORKER, sched_test_task);
 	task_sleep (SCHED_TEST_DURATION);
 	task_kill_gid (GID_SCHED_TEST_WORKER);
-	sched_test_count /= 2;
+	sched_test_count *= 2;
 }
 
 
 void sched_test_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 2, "SCHEDULER TEST");
+	window_title ("SCHEDULER TEST");
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
@@ -1944,7 +1942,7 @@ void pic_test_draw (void)
 	extern U8 pic_unlock_code[];
 	extern U8 pic_serial_number[];
 
-	font_render_string_center (&font_mono5, 64, 2, "SECURITY PIC INFO");
+	window_title ("SECURITY PIC TEST");
 
 	sprintf ("UNLOCK CODE %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
@@ -1976,7 +1974,7 @@ struct menu *dev_menu_items[] = {
 #endif
 	&dev_deff_test_item,
 	&dev_leff_test_item,
-	&dev_lampset_test_item,
+	&dev_lamplist_test_item,
 	&dev_balldev_test_item,
 	&dev_random_test_item,
 	&dev_trans_test_item,
@@ -2123,6 +2121,7 @@ struct menu set_time_item = {
 
 /**********************************************************************/
 
+#ifdef WMSLY_CORRECT
 struct menu custom_message_item = {
 	.name = "CUSTOM MESSAGE",
 	.flags = M_ITEM,
@@ -2132,6 +2131,7 @@ struct menu set_gameid_item = {
 	.name = "SET GAME I.D.",
 	.flags = M_ITEM,
 };
+#endif
 
 /**********************************************************************/
 
@@ -2286,8 +2286,10 @@ struct menu *util_menu_items[] = {
 	&clear_coins_item,
 	&reset_hstd_item,
 	&set_time_item,
+#ifdef WMSLY_CORRECT
 	&custom_message_item,
 	&set_gameid_item,
+#endif
 	&factory_adjust_item,
 	&factory_reset_item,
 	&presets_menu_item,
@@ -2443,10 +2445,17 @@ void switch_matrix_draw (void)
 	}
 }
 
+
+void switch_window_title (const char *title)
+{
+	font_render_string_center (&font_mono5, 80, 4, title);
+}
+
+
 void switch_edges_draw (void)
 {
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SWITCH EDGES");
+	switch_window_title ("SWITCH EDGES");
 	dmd_show_low ();
 }
 
@@ -2486,7 +2495,7 @@ struct menu switch_edges_item = {
 void switch_levels_draw (void)
 {
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 4, "SWITCH LEVELS");
+	switch_window_title ("SWITCH LEVELS");
 	dmd_show_low ();
 }
 
@@ -2533,7 +2542,7 @@ void single_switch_draw (void)
 	const char *active;
 
 	switch_matrix_draw ();
-	font_render_string_center (&font_mono5, 80, 3, "SINGLE SWITCH");
+	switch_window_title ("SINGLE SWITCHES");
 
 	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
@@ -2719,6 +2728,9 @@ struct menu sound_test_item = {
 /* The browser action stores the pulse width */
 
 
+/* TODO - if no solenoids/flashers defined, solenoid_test_ok
+ * may loop indefinitely */
+
 bool solenoid_test_selection_ok (void)
 {
 	extern struct window_ops flasher_test_window;
@@ -2747,12 +2759,12 @@ void solenoid_test_draw (void)
 	browser_draw ();
 	switch (browser_action)
 	{
-		default: s = "UNKNOWN PULSE"; break;
-		case TIME_16MS: s = "VERY SOFT PULSE"; break;
-		case TIME_33MS: s = "SOFT PULSE"; break;
-		case TIME_66MS: s = "NORMAL PULSE"; break;
-		case TIME_100MS: s = "HARD PULSE"; break;
-		case TIME_133MS: s = "VERY HARD PULSE"; break;
+		default: s = "ERR"; break;
+		case TIME_16MS: s = "16MS"; break;
+		case TIME_33MS: s = "33MS"; break;
+		case TIME_66MS: s = "66MS"; break;
+		case TIME_100MS: s = "100MS"; break;
+		case TIME_133MS: s = "133MS"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
 	sprintf_far_string (names_of_drives + menu_selection);
@@ -2824,7 +2836,6 @@ struct window_ops flasher_test_window = {
 	.up = solenoid_test_up,
 	.down = solenoid_test_down,
 };
-
 
 struct menu solenoid_test_item = {
 	.name = "SOLENOID TEST",
@@ -3066,7 +3077,7 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 	extern __common__ void locale_render (U8 locale);
 
-	font_render_string_center (&font_mono5, 64, 3, "DIP SWITCH TEST");
+	window_title ("DIP SWITCH TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
@@ -3139,15 +3150,7 @@ void empty_balls_test_init (void)
 
 void empty_balls_test_draw (void)
 {
-	extern U8 counted_balls;
-
-	if (counted_balls == 0)
-	{
-		font_render_string_center (&font_mono5, 64, 3, "ALL BALL DEVICES");
-		font_render_string_center (&font_mono5, 64, 11, "ARE EMPTY");
-	}
-	else
-		font_render_string_center (&font_mono5, 64, 3, "EMPTYING BALLS...");
+	window_title (counted_balls ? "EMPTYING BALLS..." : "EMPTY BALLS DONE");
 	dmd_show_low ();
 }
 
@@ -3364,10 +3367,26 @@ void scroller_down (void)
 	sound_send (SND_TEST_DOWN);
 }
 
-/* TODO : this is the only use of the 'resume' hook -- can it be removed? */
-void scroller_resume (void)
+void scroller_thread (void)
 {
-	win_top->w_class.scroller.offset = 0;
+	struct window_scroller *ws = &win_top->w_class.scroller;
+	ws->offset = 0;
+
+	for (;;)
+	{
+		task_sleep_sec (3);
+
+		if (ws->offset < ws->size - 1)
+			ws->offset++;
+		else
+		{
+			callset_invoke (sw_enter);
+			task_exit ();
+		}
+
+		dmd_alloc_low_clean ();
+		scroller_draw ();
+	}
 }
 
 #define INHERIT_FROM_SCROLLER \
@@ -3376,7 +3395,7 @@ void scroller_resume (void)
 	.draw = scroller_draw, \
 	.up = scroller_up, \
 	.down = scroller_down, \
-	.resume = scroller_resume
+	.thread = scroller_thread
 
 struct window_ops scroller_window = {
 	INHERIT_FROM_SCROLLER,
@@ -3405,7 +3424,7 @@ void sysinfo_system_version (void) {
 	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SY %s.%s", 
+	sprintf ("SYSTEM VER. %s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }

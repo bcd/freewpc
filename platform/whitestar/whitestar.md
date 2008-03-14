@@ -65,7 +65,7 @@ A6: Aux. Sol. 6
 A7: Aux. Sol. 7
 A8: Aux. Sol. 8
 
-[lampsets]
+[lamplists]
 ALL: 11..88
 
 [deffs]
