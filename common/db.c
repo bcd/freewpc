@@ -112,10 +112,12 @@ void db_idle (void)
 					VOIDCALL (dump_deffs);
 					break;
 
+#ifdef QUEUE_SWITCHES
 				case 'q':
 					/* Dump the switch queue */
 					switch_queue_dump ();
 					break;
+#endif
 
 				case 's':
 				{
