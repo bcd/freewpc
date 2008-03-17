@@ -11,7 +11,7 @@ D := platform/native
 # Additional CFLAGS required for a native build
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
 PTH_CFLAGS := $(shell pth-config --cflags)
-CFLAGS += -O -I$(PTH_CFLAGS) -I$(D) -DCONFIG_NATIVE -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -g -DCONFIG_LITTLE_ENDIAN -pg
+CFLAGS += -O $(PTH_CFLAGS) -I$(D) -DCONFIG_NATIVE -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -g -DCONFIG_LITTLE_ENDIAN -pg
 HOST_LFLAGS += -pg
 HOST_LIBS += -lpth
 
