@@ -16,6 +16,7 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
 CFLAGS = $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+SOFTREG_OPTIONS := -msoft-reg-count=4 -DSOFT_REG_COUNT=4
 
 # Optional CFLAGS based on configuration options
 
