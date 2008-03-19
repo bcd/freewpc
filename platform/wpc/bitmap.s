@@ -189,15 +189,8 @@ large_middle_loop:
 
 	; Finally, whatever is in overflow needs to be ORed to the
 	; display.
-#if 0
-	sta	,x+
-	orb	,x
-	stb	,x
-#endif
-#if 1
 	orb	1,x
 	std	,x+
-#endif
 
 	; Move on to the next row.
 	; First, restore the width counter to its maximum.
@@ -218,10 +211,10 @@ large_middle_loop:
 	; Worst case for shifting by 7 is 14 instructions x 2 = 28 cycles.
 	; On average it will be 14 cycles exactly.  Plus the 7 cycles to
 	; call and 5 to return... average of 26 cycles.
+	; Note each section must be exactly 2 bytes long for the
+	; code above that calculates the start address to work.
 shiftword7:
-	bra	fastshiftword7
-	;asla
-	;rolb
+	bra	fastshiftword7  ; see below, this case is optimized
 shiftword6:
 	asla
 	rolb
