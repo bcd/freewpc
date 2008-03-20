@@ -44,17 +44,6 @@
 ; on the edges when we are not byte-aligned.
 ;
 
-
-; First, some variables.  'shift' is a temporary for saving the number of
-; bits that the image will need to be shifted "to the right" (which
-; actually requires an arithmetic left shift).
-	.area ram
-_bitmap_shift:
-	.blkb 1
-
-_bitmap_byte_width2:
-	.blkb 1
-
 	.globl	_bitmap_src
 _bitmap_src:
 	.blkw 2
@@ -62,7 +51,15 @@ _bitmap_src:
 #define _bitmap_width _font_width
 #define _bitmap_height _font_height
 #define _bitmap_byte_width _font_byte_width
+
+	; Local variables used by these functions are kept
+	; in these soft registers.
 #define blit_overflow m0
+#define bitmap_byte_width2 m1
+	; 'shift' is a temporary for saving the number of
+	; bits that the image will need to be shifted "to the right"
+	; (which actually requires an arithmetic left shift).
+#define bitmap_shift m2
 
 	; The main blit function.
 	;
@@ -80,7 +77,7 @@ _bitmap_blit_asm:
 	; Calculate a pointer to the shift function in Y.
 	; Note, if shift is zero, then this function is a no-op,
 	; but there is still the overhead of calling/returning.
-	stb	_bitmap_shift
+	stb	*bitmap_shift
 	comb				; B = 7-B
 	andb	#7
 	aslb				; Scale by 2 instructions per shift
@@ -95,7 +92,7 @@ _bitmap_blit_asm:
 	; These methods are called do_large, loop8, and loop16.
 	lda	_bitmap_width
 	tfr	a,b
-	addb	_bitmap_shift
+	addb	*bitmap_shift
 	cmpb	#16				; Does everything fit within 16-bits?
 	bgt	do_large			; No, can't do this very fast
 	cmpa	#8					; Is the source data 8-bits?
@@ -160,7 +157,7 @@ do_large:
 	; separately.  So bitmap_byte_width is at least 1.
 	deca
 	sta	*_bitmap_byte_width
-	sta	_bitmap_byte_width2
+	sta	*bitmap_byte_width2
 
 large_row_loop:
 	; First, deal with the left edge byte.  This looks a lot like
@@ -194,7 +191,7 @@ large_middle_loop:
 
 	; Move on to the next row.
 	; First, restore the width counter to its maximum.
-	ldb	_bitmap_byte_width2
+	ldb	*bitmap_byte_width2
 	stb	*_bitmap_byte_width
 	; Reset the destination pointer to the left edge of the image.
 	; The following calculation does B = 15-B, which is the amount
@@ -275,7 +272,7 @@ _bitmap_erase_asm:
 	; separately.  So bitmap_byte_width is at least 1.
 	deca
 	sta	*_bitmap_byte_width
-	sta	_bitmap_byte_width2
+	sta	*bitmap_byte_width2
 
 large_row_loop:
 	; First, deal with the left edge byte.  This looks a lot like
@@ -307,7 +304,7 @@ large_middle_loop:
 
 	; Move on to the next row.
 	; First, restore the width counter to its maximum.
-	ldb	_bitmap_byte_width2
+	ldb	*bitmap_byte_width2
 	stb	*_bitmap_byte_width
 	; Reset the destination pointer to the left edge of the image.
 	; The following calculation does B = 15-B, which is the amount
