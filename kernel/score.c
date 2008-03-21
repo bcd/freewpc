@@ -58,9 +58,9 @@ void scores_draw_ball (void)
 	font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 #else
 	credits_render ();
-	font_render_string_center (&font_var5, 96, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_var5, 32, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
 #endif
 }
 
@@ -69,7 +69,7 @@ void scores_draw_ball (void)
 void scores_draw_credits (void)
 {
 	credits_render ();
-	font_render_string_center (&font_mono5, 64, 27, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 }
 
 
