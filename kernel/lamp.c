@@ -248,6 +248,52 @@ void matrix_all_off (bitset matrix)
 	memset (matrix, 0, NUM_LAMP_COLS);
 }
 
+void matrix_copy (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] = src1[0];
+	dst1[1] = src1[1];
+	dst1[2] = src1[2];
+	dst1[3] = src1[3];
+}
+
+void matrix_set_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] |= src1[0];
+	dst1[1] |= src1[1];
+	dst1[2] |= src1[2];
+	dst1[3] |= src1[3];
+}
+
+
+void matrix_clear_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] &= ~src1[0];
+	dst1[1] &= ~src1[1];
+	dst1[2] &= ~src1[2];
+	dst1[3] &= ~src1[3];
+}
+
+
+void matrix_toggle_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] ^= src1[0];
+	dst1[1] ^= src1[1];
+	dst1[2] ^= src1[2];
+	dst1[3] ^= src1[3];
+}
+
 
 /*
  * Lamp manipulation routines
@@ -350,27 +396,27 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	memset (lamp_leff1_allocated, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff1_allocated);
 }
 
 void lamp_leff1_erase (void)
 {
-	memset (lamp_leff1_matrix, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff1_matrix);
 }
 
 void lamp_leff1_free_all (void)
 {	
-	memset (lamp_leff1_allocated, 0xFF, NUM_LAMP_COLS);
+	matrix_all_on (lamp_leff1_allocated);
 }
 
 void lamp_leff2_erase (void)
 {
-	memset (lamp_leff2_matrix, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff2_matrix);
 }
 
 void lamp_leff2_free_all (void)
 {
-	memset (lamp_leff2_allocated, 0xFF, NUM_LAMP_COLS);
+	matrix_all_on (lamp_leff2_allocated);
 }
 
 
