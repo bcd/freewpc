@@ -35,6 +35,7 @@ void opto_check (void)
 
 	/* All optos are open (active).  Either opto power is bad,
 	 * or there are truly balls at all opto positions.
+	 * TODO
 	 */
 }
 
