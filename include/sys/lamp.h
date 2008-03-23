@@ -207,7 +207,7 @@ void lamplist_build_decrement (lamplist_id_t id, bitset matrix);
 void lamplist_rotate_next (lamplist_id_t id, bitset matrix);
 void lamplist_rotate_previous (lamplist_id_t id, bitset matrix);
 
-void matrix_all_on (bitset matrix);
-void matrix_all_off (bitset matrix);
+__attribute__((noinline)) void matrix_all_on (bitset matrix);
+__attribute__((noinline)) void matrix_all_off (bitset matrix);
 
 #endif /* _SYS_LAMP_H */
