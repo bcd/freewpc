@@ -184,6 +184,7 @@ void amode_show_design_credits (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
+	task_sleep (TIME_16MS); /* drawing all of this text is slow; be nice */
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
 	dmd_sched_transition (&trans_scroll_up_slow);
