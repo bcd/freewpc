@@ -84,7 +84,7 @@ define MACHINE_NUMBER 541
 88: Backbox Eyes
 
 [switches]
-11: Launch Button, launch-button, noplay
+11: Launch Button, launch-button, cabinet, noplay
 13: Start Button, yellow, start-button, cabinet, intest
 14: Tilt, tilt, noplay
 16: Left Outlane
