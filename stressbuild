@@ -27,7 +27,6 @@ for native in `echo n y`; do
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
-					export SOFTREG_OPTIONS="-msoft-reg-count=4 -DSOFT_REG_COUNT=4"
 					make $target 2>&1 >> stressbuild.log
 					rc="$?"
 

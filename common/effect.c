@@ -138,9 +138,9 @@ void animation_test_deff (void)
 	U8 n;
 	animation_begin (AN_MONO+AN_CLEAN);
 	animation_set_speed (TIME_66MS);
-	animation_add (0, 0, animation_test1);
-	animation_add (0, 0, animation_test2);
-	animation_add (0, 0, animation_test3);
+	animation_add_static (animation_test1);
+	animation_add_static (animation_test2);
+	animation_add_static (animation_test3);
 	for (n=0; n < 100; n++)
 		animation_step ();
 	animation_end ();

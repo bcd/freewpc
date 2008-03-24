@@ -337,11 +337,7 @@ MUX_OBJS := $(MUX_SRCS:.c=.o)
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
-ifeq ($(ROM_PAGE_COUNT),8)
 PAGE_NUMBERS = 56 57 58 59 60 61
-else
-PAGE_NUMBERS = 55 56 57 58 59 60 61
-endif
 
 PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
 NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
@@ -399,7 +395,7 @@ endef
 # $1 = the page number
 # $2 = the object class
 # $3 = the page define (derived if $2 if not given)
-# Example : PAGE_ALLOC(55,EFFECT)
+# Example : PAGE_ALLOC(56,EFFECT)
 define PAGE_ALLOC
 page$(strip $1)_OBJS += $($(strip $2)_OBJS)
 $($(strip $2)_OBJS) : PAGE=$(strip $1)
@@ -411,8 +407,6 @@ endif
 endef
 
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
-$(eval $(call PAGE_ALLOC, 55, PAGED_MD, MD))
-$(eval $(call PAGE_ALLOC, 55, EFFECT))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 56, EVENT))
 $(eval $(call PAGE_ALLOC, 57, TRANS))
@@ -423,6 +417,8 @@ $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
 $(eval $(call PAGE_ALLOC, 59, FSM))
+$(eval $(call PAGE_ALLOC, 60, PAGED_MD, MD))
+$(eval $(call PAGE_ALLOC, 60, EFFECT))
 $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
@@ -721,7 +717,8 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 #    SOFTREG_CFLAGS says how many soft registers should be used, if any.
 #    It is unsafe to use soft registers in any file which declares
 #    interrupt-level functions, because GCC does not save/restore them
-#    as part of interrupt prologue/epilogue.
+#    as part of interrupt prologue/epilogue.  Such files will not have
+#    these options used.
 #
 #    PAGE is a macro set to the current page setting, so the code
 #    knows what page it is being compiled in.  (-mfar-code-page tells

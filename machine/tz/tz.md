@@ -500,7 +500,7 @@ CHAOSMB_RUNNING:
 # Display effects
 ##########################################################################
 [deffs]
-Amode: runner, PRI_AMODE
+Amode: page(MACHINE_PAGE), runner, PRI_AMODE
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 Brian Image: PRI_EGG1
 Replay: page(MACHINE_PAGE), PRI_REPLAY

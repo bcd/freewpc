@@ -3356,6 +3356,7 @@ void scroller_up (void)
 	if (++win_top->w_class.scroller.offset >= win_top->w_class.scroller.size)
 		win_top->w_class.scroller.offset = 0;
 	sound_send (SND_TEST_UP);
+	task_kill_gid (GID_WINDOW_THREAD);
 }
 
 void scroller_down (void)
@@ -3363,6 +3364,7 @@ void scroller_down (void)
 	if (--win_top->w_class.scroller.offset == 0xFF)
 		win_top->w_class.scroller.offset = win_top->w_class.scroller.size-1;
 	sound_send (SND_TEST_DOWN);
+	task_kill_gid (GID_WINDOW_THREAD);
 }
 
 void scroller_thread (void)
@@ -3372,7 +3374,7 @@ void scroller_thread (void)
 
 	for (;;)
 	{
-		task_sleep_sec (3);
+		task_sleep_sec (4);
 
 		if (ws->offset < ws->size - 1)
 			ws->offset++;
