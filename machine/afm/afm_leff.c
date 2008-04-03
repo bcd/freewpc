@@ -20,7 +20,7 @@ void flashleff_entry (void)
 }
 
 
-static inline flashleff_spawn (const U8 flasher)
+static inline void flashleff_spawn (const U8 flasher)
 {
 	task_pid_t tp;
 	tp = task_create_peer (flashleff_entry);
