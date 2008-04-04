@@ -196,6 +196,7 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 	fif = dmd_decompress_bitplane (fif);
 	if (depth == 2)
 	{
+		task_yield ();
 		dmd_flip_low_high ();
 		fif = dmd_decompress_bitplane (fif);
 		dmd_flip_low_high ();

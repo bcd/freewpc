@@ -3482,7 +3482,10 @@ void sysinfo_compiler_version (void) {
 void sysinfo_stats1 (void) {
 #ifdef CONFIG_DEBUG_STACK
 	extern U8 task_largest_stack;
-	sprintf ("MAX STACK %d", task_largest_stack);
+	extern U16 task_small_stacks;
+	extern U16 task_medium_stacks;
+	extern U16 task_large_stacks;
+	sprintf ("STACK %d %ld %ld %ld", task_largest_stack, task_small_stacks, task_medium_stacks, task_large_stacks);
 #else
 	sprintf ("");
 #endif
