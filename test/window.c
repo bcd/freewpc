@@ -541,17 +541,11 @@ void adj_prepare_lookup (struct adjustment *table)
 }
 
 
-/** Render the name of the adjustment that is located at the given
-protected memory address, and its current value, to the display.
-If there is no match, nothing is printed. */
 void adj_name_for_preset (U8 * const nvram, const U8 value)
 {
 	if (adj_lookup == NULL)
 		return;
 
-	/* Searching through all adjustments, and then printing was known
-	to be slow at one point, so these sleeps were added.  It may not
-	be necessary now that printing is done in assembly. */
 	task_sleep (TIME_16MS);
 	while (adj_lookup->nvram != NULL)
 	{
@@ -950,8 +944,6 @@ struct window_ops confirm_window = {
 
 /* A window class for actual menus */
 
-/** Return the number of items in a menu, by iterating
-through the array of them until a NULL pointer is seen. */
 static U8 count_submenus (struct menu *m)
 {
 	U8 count = 0;
@@ -977,24 +969,17 @@ void menu_init (void)
 }
 
 
-/** The draw function for any menu. */
 void menu_draw (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	struct menu **subm;
 	U8 *sel = &win_top->w_class.menu.selected;
 
-	/* First print the name of the menu itself */
 	font_render_string (&font_mono5, 8, 4, m->name);
 
-	/* Now try to print the current item.  *sel is the
-	index to the item that is currently selected. */
 	subm = m->var.submenus;
 	if (subm != NULL)
 	{
-		/* For compatibility with real WPC games, the top-level
-		menus are prefixed by a letter (the first letter in the
-		naem of the item) instead of a number. */
 		if (subm[*sel]->flags & M_LETTER_PREFIX)
 		{
 			sprintf ("%c. %s", subm[*sel]->name[0], subm[*sel]->name);
@@ -1021,22 +1006,17 @@ void menu_enter (void)
 	m = m->var.submenus[sel];
 	if (m->flags & M_MENU)
 	{
-		/* Enter on a menu item causes that menu to become active. */
 		window_push (&menu_window, m);
 	}
 	else
 	{
 		struct window_ops *ops = m->var.subwindow.ops;
-		/* Enter on a non-menu item pushes the window as declared by
-		the item. */
 		if (ops != NULL)
 		{
 			window_push (ops, m->var.subwindow.priv ? m->var.subwindow.priv : m);
 		}
 		else
 		{
-			/* Sound an error if a non-menu item is selected, but there is
-			no window operations structure for it. */
 			sound_send (SND_TEST_ABORT);
 		}
 	}
@@ -1206,10 +1186,6 @@ struct deff_leff_ops dev_leff_ops = {
 	.is_running = leff_test_running,
 };
 
-
-/** A thread for updating the currently running deff or leff.
-This thread polls the currently selected item and updates the
-display accordingly. */
 void deff_leff_thread (void)
 {
 	bool is_active = deff_leff_test_ops->is_running (menu_selection);
@@ -1331,8 +1307,6 @@ void deff_stress_thread (void)
 	U8 start_stop_flag;
 	U8 delay;
 
-	/* The deff stress test continuously starts and stops
-	display effects randomly. */
 	for (;;)
 	{
 		do {
@@ -1710,24 +1684,16 @@ void dev_random_test_task (void)
 	U16 i;
 	U8 *rowcount;
 
-	/* Allocate a temporary buffer to store the histogram data */
 	rowcount = malloc (32);
 	if (rowcount == NULL)
-		task_exit ();
+		return;
 
-	/* Initialize the histogram */
 	for (i=0; i < 32; i++)
 		rowcount[i] = 0;
 
-	/* Unlike normal items, all drawing is done from here, not from
-	the draw function. */
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 
-	/* Allocate 200 random numbers from 0-31.  Increment a count for
-	the number of times that number was chosen.  As long as the
-	count doesn't exceed the width of the display, grow a horizontal
-	bar for that value. */
 	for (i=0; i < 200; i++)
 	{
 		U8 r = random ();
@@ -1753,8 +1719,6 @@ void dev_random_test_task (void)
 
 void dev_random_test_enter (void)
 {
-	/* Enter while the test is running does nothing; otherwise
-	it restarts the test. */
 	task_create_gid1 (GID_WINDOW_THREAD, dev_random_test_task);
 }
 
@@ -1810,6 +1774,7 @@ void dev_frametest_draw (void)
 {
 	if (dev_frametest_ptr)
 	{
+		dbprintf ("frame is at %p\n", dev_frametest_ptr);
 		dmd_alloc_low_high ();
 		dev_frametest_next_ptr = dmd_draw_fif1 (dev_frametest_ptr);
 		dmd_show2 ();
@@ -1822,6 +1787,7 @@ void dev_frametest_advance (void)
 	dev_frametest_ptr = dev_frametest_next_ptr;
 	if (far_read8 ((U8 *)dev_frametest_ptr, FIF_PAGE) > 2)
 	{
+		dbprintf ("frame %p starts with %02X\n", dev_frametest_ptr, *dev_frametest_ptr);
 		dev_frametest_ptr = fif_freewpc_logo;
 	}
 }
@@ -2198,9 +2164,6 @@ void burnin_test_thread (void)
 {
 	extern void all_lamp_test_thread (void);
 
-	/* TODO : need a good design for how burnin test
-	should work.  Also a method for detecting errors,
-	and for counting total burnin time as an audit. */
 	task_create_peer (all_lamp_test_thread);
 	task_exit ();
 }
@@ -2506,10 +2469,9 @@ void switch_edges_thread (void)
 		a compare of the current raw switches vs. our snapshot.
 		If the same, nothing to be done.  If different, save
 		current as the new snapshot and redraw the switch matrix.
-		Even better, we could only redraw the columns that changed.
-		Also show the transition(s) that just occurred.
+		Also show the transition that just occurred.
 		(For switch levels, iterate through the active switches
-		accounting for backwards optos continuously.) */
+		accounting for backwards optos continually.) */
 		task_sleep (TIME_100MS);
 		switch_matrix_draw ();
 	}
@@ -2853,10 +2815,6 @@ void solenoid_test_left (void)
 		browser_action -= TIME_33MS;
 }
 
-/* TODO - these two window ops are identical; we are only
-using two ops to figure out which test we are in.  Better
-would be to use one ops struct and use a priv pointer to
-sort it out. */
 struct window_ops solenoid_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = solenoid_test_init,
@@ -3152,8 +3110,6 @@ void dipsw_test_thread (void)
 {
 	for (;;)
 	{
-		/* Not likely, but in case DIP switches are changed
-		on the fly, we keep redrawing. */
 		task_sleep (TIME_500MS);
 		dmd_alloc_low_clean ();
 		dipsw_test_draw ();

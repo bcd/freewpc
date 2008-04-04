@@ -122,11 +122,6 @@ extern dmd_transition_t
 	trans_bitfade_fast
 	;
 
-
-/** Verify that the destination address for writing to a DMD page is valid.
- * This is only used in native mode, to make sure that we do not write
- * outside the bounds of the emulated buffer.  No such check is done
- * in 6809 mode. */
 extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 {
 #ifdef CONFIG_NATIVE

@@ -66,9 +66,6 @@ void locale_render (U8 locale)
 }
 
 
-/* TODO - support on-the-fly DIP switch changes.  Poll them about
-once per second, during idle time. */
-
 CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;

@@ -314,12 +314,7 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 
 void dmd_fill_page_low (void)
 {
-#ifdef __m6809__
-	extern void dmd_memset (void *, U8 c);
-	dmd_memset (dmd_low_buffer, 0xFF);
-#else
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
-#endif
 }
 
 
@@ -570,8 +565,10 @@ void dmd_do_transition (void)
 {
 	dmd_trans_data_ptr = NULL;
 	U8 one_copy_flag;
-	const U8 new_dark_page = dmd_low_page;
-	const U8 new_bright_page = dmd_high_page;
+	U8 new_dark_page, new_bright_page;
+
+	new_dark_page = dmd_low_page;
+	new_bright_page = dmd_high_page;
 
 	if ((new_dark_page == new_bright_page) &&
 		 (dmd_dark_page == dmd_bright_page))

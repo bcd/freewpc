@@ -39,11 +39,7 @@ struct window_ops
 	/** The draw function, called just about every
 	 * time something changes.  Draw functions are
 	 * always called after the key handlers below.
-	 * It must be fast, and should not sleep.  It
-	 * does not need to allocate or clean a DMD page;
-	 * that is always done just before this hook is
-	 * called.  It does need to call dmd_show_low() or
-	 * the equivalent when it is done. */
+	 * It must be fast, and should not sleep. */
 	void (*draw) (void);
 
 	/** Thread function.  This should be set to NULL
@@ -56,8 +52,7 @@ struct window_ops
 	 */
 	void (*thread) (void);
 
-	/* Key handlers.  These are invoked when the corresponding
-	switch is actuated. */
+	/** Key handlers **/
 	void (*escape) (void);
 	void (*enter) (void);
 	void (*up) (void);
