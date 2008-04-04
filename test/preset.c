@@ -76,6 +76,10 @@ PRESET_BEGIN (timed_game)
 	{ standard_adjustments, &system_config.max_players, 1 },
 PRESET_END (timed_game, "TIMED GAME")
 
+#define PRESET_EUROPE \
+	{ standard_adjustments, &system_config.euro_digit_sep, YES }, \
+	{ standard_adjustments, &system_config.date_style, 1 },
+
 
 PRESET_BEGIN (american)
 	{ standard_adjustments, &system_config.euro_digit_sep, NO },
@@ -84,14 +88,12 @@ PRESET_END (american, "AMERICAN")
 
 
 PRESET_BEGIN (french)
-	{ standard_adjustments, &system_config.euro_digit_sep, YES },
-	{ standard_adjustments, &system_config.date_style, 1 },
+	PRESET_EUROPE
 PRESET_END (french, "FRENCH")
 
 
 PRESET_BEGIN (german)
-	{ standard_adjustments, &system_config.euro_digit_sep, YES },
-	{ standard_adjustments, &system_config.date_style, 1 },
+	PRESET_EUROPE
 PRESET_END (german, "GERMAN")
 
 

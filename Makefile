@@ -550,10 +550,20 @@ post_compile :
 # paged binaries, the system binary, and padding to fill out the length
 # to that expected for the particular machine.
 #
+ifndef REMOTE_PATH
 $(BLDDIR)/$(GAME_ROM) : $(BLDDIR) $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 	$(Q)echo Padding ... && \
 		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
 	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
+else
+download: prep-download $(BLDDIR)/$(GAME_ROM)
+
+prep-download:
+	rm -f $(BLDDIR)/$(GAME_ROM)
+
+$(BLDDIR)/$(GAME_ROM):
+	scp $(REMOTE_PATH)/$(BLDDIR)/$(GAME_ROM) $(BLDDIR)/$(GAME_ROM)
+endif
 
 #
 # How to make a blank file.  This creates an empty file of any desired size
