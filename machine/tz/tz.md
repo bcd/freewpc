@@ -299,7 +299,7 @@ tz_powerball:
 # form lamp1..lampN.
 #
 # The special construct PF:function indicates that a Perl subroutine
-# should be used to select and sort the lamps.  Some functions are
+# should be used to select and sort playfield lamps.  Some functions are
 # builtin to genmachine; others can be defined by you and included
 # via the 'perlinclude' directive.
 #
