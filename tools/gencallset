@@ -206,6 +206,11 @@ for $include (@IncludeFiles) {
 	print FH "\n#include <$include>\n";
 }
 
+if ($debug) {
+	print FH "void callset_debug (U16 id) { dbprintf (\"C%02X\\n\", id); }\n\n";
+	$debug_id = 0;
+}
+
 foreach $set (keys %functionhash) {
 	my $rettype = $fntypehash{$set};
 	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
@@ -250,7 +255,7 @@ foreach $set (keys %functionhash) {
 		}
 		else {
 			if ($debug) {
-				print FH "   dbprintf (\"$debug_id\\n\");\n";
+				print FH "   callset_debug ($debug_id);\n";
 				$debug_id++;
 			}
 			print FH "   ${module}_$set (); /* $modulehash{$module} */\n";
