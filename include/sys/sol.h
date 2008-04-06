@@ -62,7 +62,4 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 /* Standard solenoid pulse is full strength for 100ms */
 #define sol_pulse(id)      sol_start(id, SOL_DUTY_100, TIME_100MS)
 
-/* Ball serve pulse - TODO - this isn't right */
-#define sol_serve(id)      sol_start(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88, TIME_100MS)
-
 #endif /* _SYS_SOL_H */
