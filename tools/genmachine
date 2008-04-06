@@ -110,6 +110,7 @@ my %BinaryProperties = (
 		"drain-switch" => 1,
 		"standup" => 1,
 		"fast" => 1,
+		"noscore" => 1,
 		"outhole" => $GLOBAL_OBJECT,
 		"shooter" => $GLOBAL_OBJECT,
 		"tilt" => $GLOBAL_OBJECT,
@@ -942,14 +943,22 @@ sub machine_write_switch_decls {
 
 	print "const switch_info_t switch_table[] = {\n";
 	for $sw (unique ($m->{'switches'})) {
+		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
+			(!defined $sw->{'cabinet'}) &&
+			(!defined $sw->{'service'}));
+
+		if (defined $sw->{'noscore'}) {
+			$sw->{'playfield'} = undef;
+			$sw->{'noplay'} = 1;
+			$sw->{'intest'} = 1;
+			$sw->{'ingame'} = 1;
+		}
+
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
 		add_flag ($sw, "edge", "flags", "SW_EDGE");
 		add_flag ($sw, "noplay", "flags", "SW_NOPLAY");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
-		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
-			(!defined $sw->{'cabinet'}) &&
-			(!defined $sw->{'service'}));
 		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
 
 		my $c_decl = $sw->{'c_decl'};
