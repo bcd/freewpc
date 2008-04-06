@@ -150,15 +150,15 @@ define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
 14: Tilt, tilt, ingame, noplay
-15: Right Trough, c_decl(sw_trough), noplay
-16: Center Trough, c_decl(sw_trough), noplay
-17: Left Trough, c_decl(sw_trough), noplay
-18: Outhole, outhole, intest, noplay
+15: Right Trough, c_decl(sw_trough), noscore
+16: Center Trough, c_decl(sw_trough), noscore
+17: Left Trough, c_decl(sw_trough), noscore
+18: Outhole, outhole, noscore
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
-25: Far Left Trough, noplay
-26: Trough Proximity, edge, noplay, ingame
-27: Shooter, edge, shooter, noplay
+25: Far Left Trough, noscore
+26: Trough Proximity, edge, noscore
+27: Shooter, edge, shooter, noscore
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
 32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
@@ -180,9 +180,9 @@ define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, intest, noplay
-56: Gumball Exit, intest, noplay
-57: Slot Proximity, noplay, ingame
+55: Gumball Geneva, noscore
+56: Gumball Exit, noscore
+57: Slot Proximity, noscore
 58: Slot
 61: Skill Bottom, ingame, noplay
 62: Skill Center, ingame, noplay
