@@ -262,9 +262,12 @@ void tz_clock_reset (void)
 	}
 
 	/* Find the home position at super speed */
-	tz_clock_set_speed (0xEE);
-	clock_mode = CLOCK_FIND;
 	clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
+	if (clock_sw != clock_find_target)
+	{
+		tz_clock_set_speed (0xEE);
+		clock_mode = CLOCK_FIND;
+	}
 }
 
 
