@@ -58,10 +58,17 @@ void tilt_deff (void)
 void tilt_warning_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_mono5, 64, 13, 
-			!(tilt_warnings % 1) ? "DANGER" : "DANGER  DANGER");
+	if (tilt_warnings % 2)
+	{
+		font_render_string_center (&font_fixed10, 64, 16, "DANGER");
+	}
+	else
+	{
+		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
+		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
+	}
 	dmd_show_low ();
-	deff_swap_low_high (32, TIME_66MS);
+	deff_swap_low_high (24, TIME_66MS);
 	deff_exit ();
 }
 
