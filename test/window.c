@@ -2815,7 +2815,7 @@ void solenoid_test_enter (void)
 	task_sleep (TIME_100MS);
 	/* TODO : Use 100% duty cycle for now; this probably ought to
 	change for certain coils. */
-	sol_start (sel, 0xFF, browser_action);
+	sol_start (sel, SOL_DUTY_100, browser_action);
 	task_sleep (TIME_100MS);
 }
 
