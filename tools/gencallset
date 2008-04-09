@@ -207,7 +207,7 @@ for $include (@IncludeFiles) {
 }
 
 if ($debug) {
-	print FH "void callset_debug (U16 id) { dbprintf (\"C%02X\\n\", id); }\n\n";
+	print FH "void callset_debug (U16 id) { dbprintf (\"C%04lX\\n\", id); }\n\n";
 	$debug_id = 0;
 }
 
@@ -255,7 +255,8 @@ foreach $set (keys %functionhash) {
 		}
 		else {
 			if ($debug) {
-				print FH "   callset_debug ($debug_id);\n";
+				my $idx = sprintf "0x%04X", $debug_id;
+				print FH "   callset_debug ($idx);\n";
 				$debug_id++;
 			}
 			print FH "   ${module}_$set (); /* $modulehash{$module} */\n";
