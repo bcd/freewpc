@@ -147,7 +147,8 @@ void dump_game (void)
 
 
 /** Handles the end game condition.
- * This is called directly from the trough update function. */
+ * This is called directly from the trough update function during
+ * endball.  It is also called by test mode when it starts up. */
 void end_game (void)
 {
 	if (in_game)
