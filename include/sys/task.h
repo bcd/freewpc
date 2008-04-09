@@ -63,10 +63,6 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 /* Says that the block is used to hold a task stack */
 #define BLOCK_STACK	0x8
 
-/* Says that this block and all blocks after it are guaranteed to
-be free. */
-#define TASK_LAST_FREE 0x10
-
 /* Says that the task is in the blocked state */
 #define TASK_BLOCKED 0x20
 
@@ -108,29 +104,31 @@ typedef struct task_struct
 	 * task; or TASK_BLOCKED for a sleeping task. */
 	U8				state;
 
+	/** The index of the next block in the same chain.  Not used yet.
+	 * A NULL is indicated by a -1, hence it is signed. */
+	S8          chain;
+
 	/** The task group ID.  This is a compile-time assigned value
 	 * used to identify the task.   Multiple running tasks can also
 	 * share the same group ID; operations on a group will affect
 	 * *all* tasks with that ID, in most cases. */
 	task_gid_t	gid;
 
-	/** The saved PC for the task, while it is asleep */
+	/** The saved PC for the task, while it is blocked */
 	U16			pc;
 
-	/** The saved Y register for the task, while it is asleep */
+	/** The saved Y register for the task, while it is blocked */
 	U16			y;
 
-	/** The saved U register for the task, while it is asleep */
+	/** The saved U register for the task, while it is blocked */
 	U16			u;
 
-	/** The saved ROM page register for the task, while it is asleep */
+	/** The saved ROM page register for the task, while it is blocked */
 	U8				rom_page;
 
 	/** The amount of stack space, in bytes, that has been saved into
 	 * the task's stack area */
 	U8				stack_size;
-
-	U8          reserved;
 
 	/** The amount of time that a blocked task has requested to
 	sleep */

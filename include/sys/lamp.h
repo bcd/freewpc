@@ -24,15 +24,6 @@
 /** The maximum number of physical lamps supported */
 #define NUM_LAMPS 64
 
-/** Lamp numbers in this range refer to per-player flags */
-#define FLAG_OFFSET					0x40
-
-/** Lamp numbers in this range refer to the flash state of the lamps */
-#define LAMP_FLASH_OFFSET			0x80
-
-/** Lamp numbers in this range refer to global flags */
-#define GLOBAL_FLAG_OFFSET	      0xC0
-
 #define NUM_LAMP_COLS	8
 
 #define NUM_VLAMP_COLS	8
@@ -116,49 +107,25 @@ void leff_off (lampnum_t lamp);
 void leff_toggle (lampnum_t lamp);
 bool leff_test (lampnum_t lamp);
 
-#define old_flag_on(lamp)		lamp_on (lamp + FLAG_OFFSET)
-#define old_flag_off(lamp)		lamp_off (lamp + FLAG_OFFSET)
-#define old_flag_toggle(lamp)	lamp_toggle (lamp + FLAG_OFFSET)
-#define old_flag_test(lamp)	lamp_test (lamp + FLAG_OFFSET)
-
-
-#ifdef NEW_FLAGS
-
-#define flag_address(flagname,lampfn) \
-	asm volatile ("ldb\t#<%0" :: "X" (flagname)); \
-	asm volatile ("jsr\t%c0" :: "i"(lampfn)); \
-
-#define flag_address_output(flagname,lampfn,output) \
-	asm volatile ("ldb\t#<%0" :: "X" (flagname)); \
-	asm volatile ("jsr\t%c1" : "=q"(output) : "i"(lampfn)); \
-
-#else
-
-#define flag_address(flagname,lampfn) lampfn (flagname + FLAG_OFFSET)
-#define flag_address_output(flagname,lampfn,output) output = lampfn (flagname + FLAG_OFFSET)
-
-#endif
 
 extern inline void flag_on (const flag_t f)
 {
-	flag_address (f, lamp_on);
+	bitarray_set (bit_matrix, f);
 }
 
 extern inline void flag_off (const flag_t f)
 {
-	flag_address (f, lamp_off);
+	bitarray_clear (bit_matrix, f);
 }
 
 extern inline void flag_toggle (const flag_t f)
 {
-	flag_address (f, lamp_toggle);
+	bitarray_toggle (bit_matrix, f);
 }
 
 extern inline bool flag_test (const flag_t f)
 {
-	register U8 result;
-	flag_address_output (f, lamp_test, result);
-	return result;
+	return bitarray_test (bit_matrix, f);
 }
 
 

@@ -546,8 +546,8 @@ void start_game (void)
 		ball_up = 1;
 	
 		amode_stop ();
-		deff_start (DEFF_SCORES);
 		callset_invoke (start_game);
+		task_yield (); /* start_game can take awhile */
 
 		/* Note: explicitly call this out last, after all other events
 		for start_game have been handled */

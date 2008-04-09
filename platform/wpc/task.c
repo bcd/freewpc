@@ -47,13 +47,6 @@
  * X to be preserved across calls (e.g. task_save -> task_dispatcher).
  * Please do NOT make any ordinary function calls in these types of
  * routines, as they are likely to trash registers in unexpected ways.
- *
- * TODO:
- * The current implementation uses a static array, and a flag
- * to indicate whether or not the task is allocated.  It would be
- * faster on average if we maintained separate chains of tasks,
- * so that we only had to scan one particular chain (e.g. the
- * running chain or the free chain) at a time.
  */
 
 
@@ -74,7 +67,7 @@ task_t task_buffer[NUM_TASKS];
  * periodically from the IRQ.  If the IRQ finds it at 0, that
  * means we went a long time without a dispatch; this probably
  * means that (1) some task has been running for a very long time,
- * or (2) the task is jumped into the weeds and is never coming back.
+ * or (2) the task jumped into the weeds and is never coming back.
  * Case (1) is theoretically OK, but we consider it just as bad as
  * case (2), which could lead to all kinds of weird behavior.
  * The IRQ will reset the system when this happens. */
@@ -105,10 +98,28 @@ U16 idle_time;
 U16 last_idle_time;
 #endif
 
+#ifdef TASK_CHAINING
 
-/* Uncomment this to turn on dumping of entire task table.
- * Normally, only the running entries are displayed. */
-//#define DUMP_ALL_TASKS
+ /* The current implementation uses a static array, and a flag
+ * to indicate whether or not the task is allocated.  It would be
+ * faster on average if we maintained separate chains of tasks,
+ * so that we only had to scan one particular chain (e.g. the
+ * running chain or the free chain) at a time.
+ */
+
+/** An index used to indicate end-of-list */
+#define TASK_LIST_NULL -1
+
+/** The index of the current task */
+U8 to_current;
+
+/** The index of the first free block */
+U8 to_free;
+
+/** The index of the first and last allocated task */
+U8 to_alloc_head;
+U8 to_alloc_tail;
+#endif
 
 
 /* Private functions written in assembly used internally. */
@@ -151,7 +162,9 @@ void idle_profile_idle (void)
 
 
 /** For debugging, dump the entire contents of the task table to the
- * debug port. */
+ * debug port.  This function is called automatically whenever the
+ * system crashes.  It can also be triggered by pressing the 't'
+ * key in the debugger. */
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -164,9 +177,7 @@ void task_dump (void)
 #endif
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
-#ifndef DUMP_ALL_TASKS
 		if (tp->state != BLOCK_FREE)
-#endif
 		{
 			dbprintf ("%p: ", tp);
 			task_dispatching_ok = TRUE;
@@ -208,11 +219,17 @@ task_t *block_allocate (void)
 	register U8 t;
 	register task_t *tp;
 
+#ifdef TASK_CHAINING
+#else
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+#endif
 		if (tp->state == BLOCK_FREE)
 		{
 			tp->state = BLOCK_USED;
 			tp->aux_stack_block = t;
+#ifdef TASK_CHAINING
+			/* Remove it to the free list */
+#endif
 			return tp;
 		}
 	return NULL;
@@ -223,6 +240,9 @@ task_t *block_allocate (void)
 void block_free (task_t *tp)
 {
 	tp->state = BLOCK_FREE;
+#ifdef TASK_CHAINING
+	/* Return it to the free list */
+#endif
 }
 
 
@@ -242,6 +262,9 @@ task_t *task_allocate (void)
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
 		tp->sighandler = NULL;
+#ifdef TASK_CHAINING
+		/* Add to the task list */
+#endif
 		return tp;
 	}
 	else
@@ -292,6 +315,10 @@ void task_free (task_t *tp)
 	if (tp->aux_stack_block != -1)
 		block_free (&task_buffer[tp->aux_stack_block]);
 
+#ifdef TASK_CHAINING
+	/* Remove it from the task list */
+#endif
+
 	/* Free the task block */
 	block_free (tp);
 }
@@ -303,6 +330,10 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
+	/* This cryptic statement invokes the assembler function 'task_create',
+	 * passing it the function pointer in X, returning the task pointer
+	 * in the same register (note: 'r' may not be the safest thing to use
+	 * here).  It also declares that 'd' is destroyed by the call. */
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
@@ -354,7 +385,7 @@ void task_sleep (task_ticks_t ticks)
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
-#if 1
+#ifdef PARANOID
 	/* TODO - verify that interrupts are not disabled when calling this */
 #endif
 
@@ -448,6 +479,14 @@ task_t *task_find_gid (task_gid_t gid)
 
 /**
  * Kills the given task.
+ * Killing yourself (suicide) is illegal, so don't do it.
+ *
+ * If the target has requested a signal handler, then the task is
+ * not killed immediately, but will instead have its PC changed to
+ * run the signal handler on the next invocation.  The handler
+ * should call task_exit() when the task can finally die.
+ *
+ * If there is no signal handler, the task is killed right away.
  */
 void task_kill_pid (task_t *tp)
 {
@@ -465,6 +504,10 @@ void task_kill_pid (task_t *tp)
 	{
 		tp->u = 1;
 		tp->pc = (U16)tp->sighandler;
+
+		/* TODO - this should be a synchronous operation.
+		 * We should wait here until the task is truly gone.
+		 * If the task is asleep, it should be woken up too. */
 	}
 }
 
@@ -685,8 +728,22 @@ void task_dispatcher (void)
  */
 void task_init (void)
 {
+	U8 to;
+
 	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
+
+#ifdef TASK_CHAINING
+	/* Initialize the free list with all tasks */
+	to_free = 0;
+	for (to = 0; to < NUM_TASKS-1; to++)
+		task_buffer[to]->chain = to+1;
+	task_buffer[NUM_TASKS]->chain = TASK_LIST_NULL;
+
+	/* Initialize the ready and blocked lists to empty */
+	to_ready = TASK_LIST_NULL;
+	to_blocked = TASK_LIST_NULL;
+#endif
 
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;

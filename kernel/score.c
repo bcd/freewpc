@@ -72,7 +72,8 @@ void scores_draw_credits (void)
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 }
 
-
+/* A list of score font keys.  Each of these is an index into the
+ * table below. */
 #define SCORE_POS_CENTER_LARGE 0
 #define SCORE_POS_UL_SMALL 1
 #define SCORE_POS_UR_SMALL 2
@@ -88,7 +89,8 @@ void scores_draw_credits (void)
 #define SCORE_POS_UR_TINY 12
 
 
-/** A lookup table for mapping a 'score font key' into a font and location on the DMD. */
+/** A lookup table for mapping a 'score font key' into a font and
+ * location on the DMD. */
 const struct score_font_info 
 {
 	void (*render) (void);
@@ -115,7 +117,17 @@ const struct score_font_info
 };
 
 
-/* The lookup is [num_players-1][player_up][score_to_draw-1] */
+/* The lookup is [num_players-1][player_up][score_to_draw-1].
+ *
+ * The first index says how many players there are total.  Zero players
+ * is not an option; num_players must always be at least 1.
+ *
+ * The second index says which player is up.  If zero, it means no
+ * player is up, as during attract mode.  This will be nonzero during
+ * a game.
+ *
+ * The third index says which player's score is being drawn.
+ */
 const U8 score_font_info_key[4][5][4] = {
 	/* 1 player */  {
 		{SCORE_POS_UL_SMALL},
@@ -218,6 +230,8 @@ redraw:
 		 * First, the static elements are drawn: the opponents' scores
 		 * and the ball number.  Then the flashing element, the current
 		 * player's score is drawn. */
+		/* TODO - I'd prefer to draw all players without flashing, and
+		 * use dark/bright colors to indicate player up. */
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		scores_draw_ball ();
