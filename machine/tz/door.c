@@ -116,9 +116,9 @@ extern inline U8 door_get_flashing_lamp (void)
 void door_set_flashing (U8 id)
 {
 	const U8 *door_lamps = door_get_lamps ();
-	lamp_flash_off (door_lamps[door_index]);
+	lamp_tristate_off (door_lamps[door_index]);
 	door_index = id;
-	lamp_flash_on (door_lamps[door_index]);
+	lamp_tristate_flash (door_lamps[door_index]);
 }
 
 
@@ -208,7 +208,7 @@ static void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
-	lamp_on (door_active_lamp);
+	lamp_tristate_on (door_active_lamp);
 	door_start_event (door_index);
 	score (SC_5M);
 	timed_game_extend (10);
