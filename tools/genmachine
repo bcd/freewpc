@@ -76,6 +76,7 @@ my %contextDefinitionRe = (
 	"system_music" => "AUTO",
 	"highscores" => "GC|1|2|3|4",
 	"flags" => "AUTO",
+	"globalflags" => "AUTO",
 	"scores" => "AUTO",
 	"fonts" => "AUTO",
 	"fifs" => "AUTO",
