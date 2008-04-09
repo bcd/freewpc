@@ -29,6 +29,7 @@ extern bool task_dispatching_ok;
 
 #ifdef CONFIG_NATIVE
 
+#include "/usr/include/sys/time.h"
 #include <pth.h>
 
 typedef pth_t task_pid_t;
