@@ -81,10 +81,10 @@ PRESET_END (timed_game, "TIMED GAME")
 	{ standard_adjustments, &system_config.date_style, 1 },
 
 
-PRESET_BEGIN (american)
+PRESET_BEGIN (usa_canada)
 	{ standard_adjustments, &system_config.euro_digit_sep, NO },
 	{ standard_adjustments, &system_config.date_style, 0 },
-PRESET_END (american, "AMERICAN")
+PRESET_END (usa_canada, "USA/CANADA")
 
 
 PRESET_BEGIN (french)
@@ -112,6 +112,7 @@ struct preset *preset_table[] = {
 	&preset_timed_game,
 	&preset_french,
 	&preset_german,
+	&preset_usa_canada,
 };
 
 
@@ -152,7 +153,7 @@ void preset_install_country_code (U8 code)
 	{
 		case WPC_JUMPER_USA_CANADA:
 		case WPC_JUMPER_USA_CANADA2:
-			preset_install (preset_american_comps);
+			preset_install (preset_usa_canada_comps);
 			break;
 
 		case WPC_JUMPER_FRANCE:
