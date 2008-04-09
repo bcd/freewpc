@@ -34,8 +34,8 @@
 
 #include <freewpc.h>
 
-/* There are currently no free timer users, so keep this small for now */
-#define MAX_FREE_TIMERS 8
+/* Round to the next multiple of 4 */
+#define MAX_FREE_TIMERS (4 * ((MAX_TIMERS + 3) / 4))
 
 typedef U8 free_timer_id_t;
 
@@ -68,8 +68,10 @@ void free_timer_rtt (void)
 }
 
 
+/** Restart a timer. */
 void free_timer_restart (free_timer_id_t tid, U8 ticks)
 {
+	ticks /= 2;
 	free_timers[tid] = ticks;
 }
 
@@ -79,6 +81,7 @@ void free_timer_start (free_timer_id_t tid, U8 ticks)
 {
 	if (free_timers[tid] == 0)
 	{
+		ticks /= 2;
 		free_timers[tid] = ticks;
 	}
 }
@@ -94,6 +97,6 @@ void free_timer_stop (free_timer_id_t tid)
 /** Test the value of a timer. */
 U8 free_timer_test (free_timer_id_t tid)
 {
-	return free_timers[tid];
+	return free_timers[tid] / 2;
 }
 
