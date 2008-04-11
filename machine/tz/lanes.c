@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -31,18 +31,12 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
-	if (flag_test (FLAG_LEFT_OUTLANE_LIT))
-	{
-	}
 }
 
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
-	if (flag_test (FLAG_RIGHT_OUTLANE_LIT))
-	{
-	}
 }
 
 CALLSET_ENTRY (lanes, sw_left_inlane_1)
