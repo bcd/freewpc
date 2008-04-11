@@ -130,6 +130,8 @@ __noreturn__ void freewpc_init (void)
 	wpc_watchdog_reset ();
 	device_init ();
 	wpc_watchdog_reset ();
+	free_timer_init ();
+	wpc_watchdog_reset ();
 
 	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
