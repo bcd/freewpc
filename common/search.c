@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -140,6 +140,19 @@ void ball_search_run (void)
 		if (ball_search_timer == 0)
 			break;
 	}
+}
+
+
+void ball_search_run_task (void)
+{
+	ball_search_run ();
+	task_exit ();
+}
+
+
+void ball_search_now (void)
+{
+	task_create_gid1 (GID_BALL_SEARCH_FORCE, ball_search_run_task);
 }
 
 
