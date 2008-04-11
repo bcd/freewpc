@@ -116,9 +116,9 @@ extern inline U8 door_get_flashing_lamp (void)
 void door_set_flashing (U8 id)
 {
 	const U8 *door_lamps = door_get_lamps ();
-	lamp_tristate_off (door_lamps[door_index]);
+	lamp_flash_off (door_lamps[door_index]);
 	door_index = id;
-	lamp_tristate_flash (door_lamps[door_index]);
+	lamp_flash_on (door_lamps[door_index]);
 }
 
 
