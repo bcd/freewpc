@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 
-CALLSET_ENTRY (left_hole, enter)
+CALLSET_ENTRY (left_hole, dev_left_hole_enter)
 {
 	score (SC_100K);
 }
