@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -27,9 +27,7 @@ void ball_save_leff (void)
 {
 	for (;;)
 	{
-		leff_on (LM_SHOOT_AGAIN);
-		task_sleep (TIME_100MS);
-		leff_off (LM_SHOOT_AGAIN);
+		leff_toggle (LM_SHOOT_AGAIN);
 		task_sleep (TIME_100MS);
 	}
 }
@@ -44,15 +42,12 @@ void ballsave_timer_expire (void)
 	leff_stop (LEFF_BALL_SAVE);
 }
 
-void ballsave_timer_end (void)
-{
-}
 
 void ballsave_timer_task (void)
 {
 	U8 secs = (U8)task_get_arg ();
 	timed_mode_task (ballsave_timer_begin, 
-		ballsave_timer_expire, ballsave_timer_end,
+		ballsave_timer_expire, NULL,
 		&ball_save_timer, secs, 3);
 }
 
@@ -86,15 +81,13 @@ void ballsave_launch (void)
 {
 	autofire_add_ball ();
 	deff_start (DEFF_BALL_SAVE);
-#ifdef CONFIG_TIMED_GAME
-	timed_game_extend (2);
-#endif
+	if (config_timed_game)
+		timed_game_extend (2);
 }
 
 CALLSET_ENTRY (ballsave, sw_left_outlane)
 {
-	if (live_balls == 1
-		&& ballsave_test_active ())
+	if (live_balls == 1 && ballsave_test_active ())
 	{
 		ballsave_add_time (5);
 	}
