@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,12 +22,20 @@
 #include <rtsol.h>
 #include <tz/clock.h>
 
+
+/** The states of the clock driver state machine */
 enum mech_clock_mode
 {
+	/** The clock should not be running at all */
 	CLOCK_STOPPED = 0,
+	/** The clock should run forward */
 	CLOCK_RUNNING_FORWARD,
+	/** The clock should run backward */
 	CLOCK_RUNNING_BACKWARD,
+	/** The clock should be calibrated */
 	CLOCK_CALIBRATING,
+	/** The clock is trying to find a particular location,
+	 * and will automatically go to STOPPED when it gets there. */
 	CLOCK_FIND,
 };
 
@@ -57,9 +65,9 @@ __fastram__ U8 clock_find_target;
  * switch transitions */
 __fastram__ U8 clock_last_sw;
 
+/** How long calibration will be allowed to continue, before
+ * giving up. */
 U8 clock_calibration_time;
-
-U8 clock_is_working;
 
 
 void tz_dump_clock (void)
@@ -128,6 +136,8 @@ extern inline void wpc_ext1_disable (const U8 bits)
 /** A lower priority periodic function. */
 CALLSET_ENTRY (tz_clock, idle_every_100ms)
 {
+	/* When calibrating, once all switches have been active and inactive
+	 * at least once, claim victory and go back to the home position. */
 	if (clock_mode == CLOCK_CALIBRATING)
 	{
 		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
@@ -135,13 +145,18 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 			clock_mode = CLOCK_FIND;
 			clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
 		}
+
+		/* If calibration doesn't succeed within a certain number
+		 * of iterations, give up. */
 		else if (--clock_calibration_time == 0)
 		{
 			dbprintf ("Calibration aborted.\n");
 			clock_mode = CLOCK_STOPPED;
-			clock_calibration_time = 1;
-			clock_is_working = 0;
+			global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
 		}
+
+		/* Keep the clock moving during calibration.  Note that
+		 * we always run it forward; not sure if this is optimal. */
 		else
 		{
 			sol_stop (SOL_CLOCK_REVERSE);
@@ -156,6 +171,9 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 	}
 	else if (clock_mode == CLOCK_FIND || clock_mode == CLOCK_RUNNING_BACKWARD)
 	{
+		/* In the FIND case, it may be better to run it forward than
+		 * backward.  TODO : this depends on where we are now and where
+		 * we are trying to go. */
 		sol_stop (SOL_CLOCK_FORWARD);
 		sol_start (SOL_CLOCK_REVERSE, clock_speed, TIME_1S);
 	}
@@ -228,21 +246,21 @@ stop_clock:
 
 void tz_clock_start_forward (void)
 {
-	if (clock_is_working && feature_config.disable_clock == NO)
+	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_mode = CLOCK_RUNNING_FORWARD;
 }
 
 
 void tz_clock_start_backward (void)
 {
-	if (clock_is_working && feature_config.disable_clock == NO)
+	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_mode = CLOCK_RUNNING_BACKWARD;
 }
 
 
 void tz_clock_set_speed (U8 speed)
 {
-	if (clock_is_working && feature_config.disable_clock == NO)
+	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_speed = speed;
 }
 
@@ -277,19 +295,24 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
 	clock_sw = 0;
-	clock_is_working = 1;
+	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_speed = 0xEE;
 }
 
 CALLSET_ENTRY (tz_clock, amode_start)
 {
+	if (feature_config.disable_clock == NO)
+	{
+		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
+	}
+
 	/* If not all of the other clock switches have been seen in both
 	 * active and inactive states, start the clock. */
-	if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
+	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
 		tz_clock_set_speed (0xEE);
 		clock_calibration_time = 100;
-		clock_is_working = 1;
+		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mode = CLOCK_CALIBRATING;
 	}
 	else
@@ -313,15 +336,13 @@ CALLSET_ENTRY (tz_clock, test_start)
 	tz_clock_stop ();
 }
 
-CALLSET_ENTRY (tz_clock, start_game)
-{
-}
 
 CALLSET_ENTRY (tz_clock, start_ball)
 {
 	/* Reset the clock to 12:00 at the start of ball */
 	tz_clock_reset ();
 }
+
 
 CALLSET_ENTRY (tz_clock, end_ball)
 {
