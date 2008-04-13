@@ -76,7 +76,7 @@ loopshots {
 # Combo 3 = Left Loop/Hitchhiker
 combos {
 	* : start_ball => INIT
-	INIT : sw_left_ramp_made => 1of3
+	INIT : sw_left_ramp_exit => 1of3
 	1of3 : sw_right_ramp => 2of3
 	2of3 : sw_piano => 3of3
 }
