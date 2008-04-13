@@ -381,9 +381,7 @@ wait_and_recount:
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
 			 * can catch as well.  Deal with this like we do slowtimers. */
-#ifdef CONFIG_TIMED_GAME
 			timed_game_pause (TIME_1S);
-#endif
 			goto wait_and_recount;
 		}
 	}
@@ -478,7 +476,13 @@ void device_update_globals (void)
 	held_balls = held_balls_now;
 
 	/* Update count of how many balls are missing */
+#ifdef GCC4
 	missing_balls = max_balls - counted_balls;
+#else
+	/* The most recent GCC 3.4.6 can't compile this, so we
+	 * have to fake it */
+	missing_balls = 0;
+#endif
 
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
 		counted_balls, missing_balls, live_balls, held_balls);
@@ -488,17 +492,9 @@ void device_update_globals (void)
 	if (in_live_game)
 	{
 		if (held_balls > 0)
-		{
-#ifdef CONFIG_TIMED_GAME
 			timed_game_suspend ();
-#endif
-		}
 		else
-		{
-#ifdef CONFIG_TIMED_GAME
-		timed_game_resume ();
-#endif
-		}
+			timed_game_resume ();
 	}
 }
 
@@ -562,6 +558,11 @@ void device_probe (void)
 		}
 #endif
 	}
+
+	/* TODO - if a ball kicked out from the probe of a device
+	 * falls into _another_ device, the ball may or may not be
+	 * seen there depending on timing.  We should repeat until
+	 * all devices stay empty. */
 
 	/* If kicks are in progress, then wait for them to finish.
 	If kicks fail, eventually they will timeout so this is guaranteed
@@ -673,6 +674,8 @@ void device_remove_live (void)
 				)
 			{
 				case 0:
+					callset_invoke (single_ball_play);
+
 					/* With zero balls in play, this is end of ball.
 					This function usually does not return; it will stop just about
 					every task running to reset for the next ball. */
@@ -725,7 +728,7 @@ bool device_check_start_ok (void)
 	/* If any balls are missing, don't allow the game to start
 	 * without first trying a device probe.
 	 *
-	 * If the device probe is alread in progress, then just
+	 * If the device probe is already in progress, then just
 	 * return right away. */
  	if (task_find_gid (GID_DEVICE_PROBE)) 
 		return FALSE;
@@ -741,13 +744,12 @@ bool device_check_start_ok (void)
 	 * by displaying a message. */
 	if (truly_missing_balls > 0)
 	{
+		dbprintf ("%d balls missing.\n", truly_missing_balls);
 		if (++device_game_start_errors < 5)
 		{
 			task_recreate_gid (GID_DEVICE_PROBE, device_probe);
-			ball_search_run ();
+			ball_search_now ();
 			deff_start (DEFF_LOCATING_BALLS);
-			while (task_find_gid (GID_DEVICE_PROBE))
-				task_sleep_sec (TIME_500MS);
 			return FALSE;
 		}
 		else
