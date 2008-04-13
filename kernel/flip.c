@@ -30,6 +30,8 @@
 /** Says whether or not the flipper coils are enabled */
 U8 flippers_enabled;
 
+U8 fliptronic_powered_coil_outputs;
+
 
 /** Software controlled flipper inputs for Fliptronic games. */
 #ifdef MACHINE_FLIPTRONIC
@@ -121,7 +123,7 @@ static inline void flipper_service (
 void fliptronic_rtt (void)
 {
 	register U8 inputs __areg__;
-	U8 outputs = 0;
+	U8 outputs = fliptronic_powered_coil_outputs;
 
 	if (flippers_enabled)
 	{
@@ -164,6 +166,7 @@ CALLSET_ENTRY (fliptronic, ball_search)
 void flipper_init (void)
 {
 	flipper_disable ();
+	fliptronic_powered_coil_outputs = 0;
 }
 
 
