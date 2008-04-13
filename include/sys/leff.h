@@ -63,8 +63,6 @@ typedef struct
 	U8 page;
 } leff_t;
 
-#define MAX_QUEUED_LEFFS 8
-
 
 /** Per-leff state variables */
 typedef struct
@@ -87,11 +85,10 @@ extern inline void leff_create_peer (void (*fn)(void))
 	task_inherit_class_data (tp, leff_data_t);
 }
 
-leffnum_t leff_get_active (void);
 void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
+bool leff_running_p (leffnum_t dn);
 void leff_restart (leffnum_t dn);
-task_pid_t leff_find_shared (leffnum_t dn);
 void leff_start_highest_priority (void);
 __noreturn__ void leff_exit (void);
 void leff_init (void);

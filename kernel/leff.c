@@ -51,7 +51,7 @@
 #define L_NOGI			0
 
 /** Indicates in a leff definition that it allocates all GI */
-#define L_ALL_GI		0x1F
+#define L_ALL_GI		TRIAC_GI_MASK
 
 /* Declare externs for all of the deff functions */
 #define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
@@ -82,77 +82,23 @@ extern __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 
-/** Indicates the id of the leff currently active */
-static U8 leff_active;
-
-/** Indicates the priority of the leff currently running */
+/** Indicates the priority of the exclusive leff currently running */
 U8 leff_prio;
 
-/** Queue of all leffs that have been scheduled to run, even
- * if they are low in priority.  The actively running leff
- * is also in this queue.
- *
- * Each nonzero value in this array represents a leff number
- * for a lamp effect that is in the running state.  Zero
- * entries are ignored.  The leff that actually runs
- * depends on the priority settings of each leff, which are
- * statically configured. */
-static U8 leff_queue[MAX_QUEUED_LEFFS];
+/** A bitarray in which a '1' means that said leff is running, '0'
+ * otherwise. */
+U8 leffs_running[BITS_TO_BYTES (MAX_LEFFS)];
 
 
-/** Lamp effect function for a leff that turns all lights off.
- * Used by the system-defined tilt function. */
-void no_lights_leff (void)
+/** Test if a lamp effect is running. */
+bool leff_running_p (leffnum_t dn)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
-	for (;;)
-		task_sleep_sec (5);
+	return bitarray_test (leffs_running, dn);
 }
 
 
-/** Returns the index of the current active lamp effect. */
-leffnum_t leff_get_active (void)
-{
-	return leff_active;
-}
-
-
-/** Adds a lamp effect number into the running queue. */
-static void leff_add_queue (leffnum_t dn)
-{
-	U8 i;
-
-	/* First scan the queue and see if it's already in there; if so
-	 * then there's nothing to do */
-	for (i=0; i < MAX_QUEUED_LEFFS; i++)
-		if (leff_queue[i] == dn)
-			return;
-
-	/* Now scan the queue for the first free space. */
-	for (i=0; i < MAX_QUEUED_LEFFS; i++)
-		if (leff_queue[i] == 0)
-		{
-			leff_queue[i] = dn;
-			return;
-		}
-
-	/* Throw an error if the queue ever gets full. */
-	fatal (ERR_LEFF_QUEUE_FULL);
-}
-
-
-/** Removes a lamp effect number from the running queue. */
-static void leff_remove_queue (leffnum_t dn)
-{
-	U8 i;
-	for (i=0; i < MAX_QUEUED_LEFFS; i++)
-		if (leff_queue[i] == dn)
-			leff_queue[i] = 0;
-}
-
-
-/** Returns the lamp effect number that is the highest priority
- * in the queue right now.
+/** Returns the ID of the highest priority exclusive lamp effect
+ * still queued to run.  If none exist, LEFF_NULL is returned.
  * This function also updates the global leff_prio to the
  * selected leff's priority value.
  */
@@ -162,15 +108,15 @@ static leffnum_t leff_get_highest_priority (void)
 	U8 prio = 0;
 	U8 best = LEFF_NULL;
 
-	for (i=0; i < MAX_QUEUED_LEFFS; i++)
+	for (i=0; i < MAX_LEFFS; i++)
 	{
-		if (leff_queue[i] != 0)
+		if (leff_running_p (i))
 		{
-			const leff_t *leff = &leff_table[leff_queue[i]];
-			if (leff->prio > prio)
+			const leff_t *leff = &leff_table[i];
+			if (leff->flags & L_RUNNING && leff->prio > prio)
 			{
 				prio = leff->prio;
-				best = leff_queue[i];
+				best = i;
 			}
 		}
 	}
@@ -267,46 +213,36 @@ void leff_start (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
+	/* If the leff is already running, there is nothing to do. */
+	if (leff_running_p (dn))
+		return;
+
+	/* Mark the leff as running now.  This is done regardless of its type. */
 	dbprintf ("Leff start %d\n", dn);
 
-	if (leff->flags & L_SHARED)
+	/* If this is an exclusive leff, and it lacks priority to run,
+	 * then return.  If marked RUNNING, it can be started later
+	 * so mark it pending. */
+	if (!(leff->flags & L_SHARED) && (leff->prio < leff_prio))
 	{
-		task_pid_t tp = leff_create_handler (leff);
-		(task_class_data (tp, leff_data_t))->id = dn;
+		if (leff->flags & L_RUNNING)
+			bitarray_set (leffs_running, dn);
+		return;
 	}
-	else if (leff->flags & L_RUNNING)
-	{
-		leff_add_queue (dn);
-		if (dn == leff_get_highest_priority ())
-		{
-			/* This is the new active running leff */
-			dbprintf ("Requested leff now active\n");
-			leff_active = dn;
-			leff_create_handler (leff);
-		}
-		else
-		{
-			/* This leff cannot run now, because there is a
-			 * higher priority leff running. */
-		}
-	}
-	else
-	{
-		if (leff->prio > leff_prio)
-		{
-			dbprintf ("Restarting quick leff with high pri\n");
-			leff_active = dn;
-			leff_prio = leff->prio;
-			leff_create_handler (leff);
-		}
-	}
+
+	/* Either it is shared, or the highest priority exclusive
+	 * effect.  In either way, we can start it up now. */
+	bitarray_set (leffs_running, dn);
+	task_pid_t tp = leff_create_handler (leff);
+	(task_class_data (tp, leff_data_t))->id = dn;
 }
 
 
 /** Find the task that is running the specified lamp effect.
 Returns NULL if the task can't be found. */
-task_pid_t leff_find_shared (leffnum_t dn)
+static task_pid_t leff_find_shared (leffnum_t dn)
 {
+	/* TODO - this is slow */
 	task_pid_t tp = task_find_gid (GID_SHARED_LEFF);
 	while (tp && ((task_class_data (tp, leff_data_t))->id != dn))
 	{
@@ -321,27 +257,30 @@ void leff_stop (leffnum_t dn)
 {
 	const leff_t *leff = &leff_table[dn];
 
-	dbprintf ("Leff stop %d\n", dn);
+	/* If the leff is not already running, there is nothing to do. */
+	if (!leff_running_p (dn))
+		return;
+
+	/* Mark the leff as stopped. */
+	bitarray_clear (leffs_running, dn);
+
+	/* The leff is certainly running and needs to be stopped.
+	 * Find the task running the leff and  kill it. */
 	if (leff->flags & L_SHARED)
 	{
 		/* Search through all shared leffs that are
-		running for the one we want to stop.  No need to
-		dequeue it, but its allocations must be freed and
-		the task stopped. */
+		running for the one we want to stop.
+		Its allocations must be freed and the task stopped. */
 		task_pid_t tp = leff_find_shared (dn);
 		if (tp)
 		{
+			dbprintf ("Leff stop %d\n", dn);
 			task_kill_pid (tp);
 			lamplist_apply_nomacro (leff->lamplist, lamp_leff2_free);
 		}
-		else
-		{
-			dbprintf ("Couldn't find shared leff %d\n", dn);
-		}
 	}
-	else if ((leff->flags & L_RUNNING) || (dn == leff_active))
+	else
 	{
-		leff_remove_queue (dn);
 		lamp_leff1_erase (); /* TODO : these two functions go together */
 		lamp_leff1_free_all ();
 		if (leff->gi != L_NOGI)
@@ -351,30 +290,13 @@ void leff_stop (leffnum_t dn)
 }
 
 
-/** Restart a lamp effect. */
+/** Restart a lamp effect.  If already running, its task should
+ * be stopped and started again.  If not, then an ordinary start
+ * will do. */
 void leff_restart (leffnum_t dn)
 {
-	if (leff_table[dn].flags & L_SHARED)
-	{
-	}
-	else if (dn == leff_active)
-	{
-		const leff_t *leff = &leff_table[dn];
-		leff_create_handler (leff);
-	}
-	else
-	{
-		leff_start (dn);
-	}
-}
-
-
-/** The default (null) lamp effect function.  It never exits
- * once started and can only be stopped explicitly. */
-void leff_default (void)
-{
-	for (;;)
-		task_sleep_sec (10);
+	leff_stop (dn);
+	leff_start (dn);
 }
 
 
@@ -382,15 +304,16 @@ void leff_default (void)
  * leff that has been started. */
 void leff_start_highest_priority (void)
 {
-	leff_active = leff_get_highest_priority ();
+	U8 leff_active = leff_get_highest_priority ();
 	if (leff_active != LEFF_NULL)
 	{
 		const leff_t *leff = &leff_table[leff_active];
+		dbprintf ("leff_start_highest_priority returned %d\n", leff_active);
 		leff_create_handler (leff);
 	}
 	else
 	{
-		task_recreate_gid (GID_LEFF, leff_default);
+		task_kill_gid (GID_LEFF);
 		lamp_leff1_erase ();
 		lamp_leff1_free_all ();
 	}
@@ -406,10 +329,13 @@ __noreturn__ void leff_exit (void)
 {
 	const leff_t *leff;
 	
-	dbprintf ("Exiting leff\n");
+	dbprintf ("Exiting leff %d\n", leff_self_id);
+
+	bitarray_clear (leffs_running, leff_self_id);
+	leff = &leff_table[leff_self_id];
+
 	if (leff_running_flags & L_SHARED)
 	{
-		leff = &leff_table[leff_self_id];
 		lamplist_apply_nomacro (leff->lamplist, lamp_leff2_free);
 	}
 	else
@@ -417,11 +343,13 @@ __noreturn__ void leff_exit (void)
 		/* Note: global leffs can do leff_exit with peer
 		tasks still running ... they will eventually be
 		stopped, too */
-		leff = &leff_table[leff_active];
 		if (leff->gi != L_NOGI)
 			triac_leff_free (leff->gi);
+
+		/* Change the GID so that we are no longer
+		 * considered a leff. */
 		task_setgid (GID_LEFF_EXITING);
-		leff_remove_queue (leff_active);
+
 		leff_start_highest_priority ();
 	}
 	task_exit ();
@@ -432,8 +360,7 @@ __noreturn__ void leff_exit (void)
 void leff_init (void)
 {
 	leff_prio = 0;
-	leff_active = LEFF_NULL;
-	memset (leff_queue, 0, MAX_QUEUED_LEFFS);
+	memset (leffs_running, 0, sizeof (leffs_running));
 }
 
 
