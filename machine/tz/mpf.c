@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -48,10 +48,19 @@ void mpf_active_deff (void)
 	}
 }
 
-
-void mpf_battle_lamp_update (void)
+bool mpf_ready_p (void)
 {
-	if (mpf_enable_count > 0)
+	return (mpf_enable_count > 0)
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !flag_test (FLAG_MULTIBALL_RUNNING)
+		&& !flag_test (FLAG_QUICK_MB_RUNNING)
+		&& !flag_test (FLAG_BTTZ_RUNNING);
+}
+
+
+CALLSET_ENTRY (mpf, lamp_update)
+{
+	if (mpf_ready_p ())
 		lamp_tristate_on (LM_RAMP_BATTLE);
 	else
 		lamp_tristate_off (LM_RAMP_BATTLE);
@@ -61,7 +70,6 @@ void mpf_battle_lamp_update (void)
 void mpf_enable (void)
 {
 	mpf_enable_count++;
-	mpf_battle_lamp_update ();
 }
 
 
@@ -74,7 +82,7 @@ void mpf_active_monitor (void)
 
 void mpf_start (void)
 {
-	if (mpf_enable_count > 0)
+	if (mpf_ready_p ())
 	{
 		mpf_enable_count--;
 		mpf_ball_count++;

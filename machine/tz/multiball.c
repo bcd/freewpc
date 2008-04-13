@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -87,25 +87,46 @@ void mb_running_deff (void)
 
 CALLSET_ENTRY (mball, lamp_update)
 {
-	if (mball_locks_lit
-		&& !flag_test (FLAG_SSSMB_RUNNING))
+	/* if (flag_test (FLAG_MULTIBALL_RUNNING))
+		leff_start (LEFF_MB_RUNNING);
+	else
+		leff_stop (LEFF_MB_RUNNING); */
+
+	if (mball_locks_lit && !flag_test (FLAG_SSSMB_RUNNING))
 		lamp_tristate_flash (LM_LOCK_ARROW);
 	else
 		lamp_tristate_off (LM_LOCK_ARROW);
+
+	if (mball_locks_made == 0)
+	{
+		lamp_off (LM_LOCK1);
+		lamp_off (LM_LOCK2);
+	}
+	else if (mball_locks_made == 1)
+	{
+		lamp_on (LM_LOCK1);
+		lamp_off (LM_LOCK2);
+	}
+	else
+	{
+		lamp_on (LM_LOCK1);
+		lamp_on (LM_LOCK2);
+	}
+
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+		lamp_tristate_flash (LM_PIANO_JACKPOT);
+	else
+		lamp_tristate_off (LM_PIANO_JACKPOT);
 }
+
 
 void mball_light_lock (void)
 {
 	if (mball_locks_lit < 2)
 	{
 		mball_locks_lit++;
-		lamp_tristate_flash (LM_LOCK_ARROW);
 		sound_send (SND_GUMBALL_COMBO);
 		deff_start (DEFF_LOCK_LIT);
-	}
-	else
-	{
-		/* TODO : award gumball combo while lock at max */
 	}
 }
 
@@ -132,14 +153,8 @@ CALLSET_ENTRY (mball, mball_start)
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
 		mballs_played++;
-		lamp_tristate_off (LM_LOCK_ARROW);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
-		lamp_off (LM_LOCK1);
-		lamp_off (LM_LOCK2);
-		lamp_tristate_flash (LM_PIANO_JACKPOT);
-		lamp_tristate_off (LM_PIANO_PANEL);
-		lamp_tristate_off (LM_SLOT_MACHINE);
 		device_request_empty (device_entry (DEVNO_LOCK));
 		ballsave_add_time (10);
 	}
@@ -151,7 +166,6 @@ CALLSET_ENTRY (mball, mball_stop)
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_off (FLAG_MULTIBALL_RUNNING);
-		lamp_tristate_off (LM_PIANO_JACKPOT);
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
@@ -176,6 +190,9 @@ CALLSET_ENTRY (mball, sw_left_ramp_exit)
 		mball_check_light_lock ();
 	}
 }
+
+/* TODO - on a missed left ramp exit switch, use the
+ * autoplunger switch to start multiball instead */
 
 CALLSET_ENTRY (mball, sw_right_ramp)
 {
@@ -216,12 +233,8 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		{
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);
-			lamp_tristate_off (LM_LOCK_ARROW);
 		}
 		mball_locks_made++;
-		lamp_on (LM_LOCK1);
-		if (mball_locks_made == 2)
-			lamp_on (LM_LOCK2);
 		lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
 	}
@@ -231,11 +244,7 @@ CALLSET_ENTRY (mball, start_player)
 {
 	lamp_off (LM_GUM);
 	lamp_off (LM_BALL);
-	lamp_off (LM_LOCK1);
-	lamp_off (LM_LOCK2);
-	lamp_tristate_off (LM_LOCK_ARROW);
 	lamp_tristate_off (LM_MULTIBALL);
-	lamp_tristate_off (LM_PIANO_JACKPOT);
 	mball_locks_lit = 0;
 	mball_locks_made = 0;
 	mballs_played = 0;
