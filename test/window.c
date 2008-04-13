@@ -1189,11 +1189,6 @@ static bool deff_test_running (U8 id)
 	return (deff_get_active () == id);
 }
 
-static bool leff_test_running (U8 id)
-{
-	return (leff_get_active () == id) || leff_find_shared (id);
-}
-
 struct deff_leff_ops dev_deff_ops = {
 	.start = deff_start,
 	.stop = deff_stop,
@@ -1203,7 +1198,7 @@ struct deff_leff_ops dev_deff_ops = {
 struct deff_leff_ops dev_leff_ops = {
 	.start = leff_start,
 	.stop = leff_stop,
-	.is_running = leff_test_running,
+	.is_running = leff_running_p,
 };
 
 
