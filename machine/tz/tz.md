@@ -371,9 +371,6 @@ Right Loop Complete:
 Right Loop Aborted:
 
 
-[timers]
-Test Timer:
-
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -488,13 +485,15 @@ NO_DRAIN_PENALTY:
 STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
-
 SSSMB_RUNNING:
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
 SSSMB_YELLOW_JACKPOT:
-
 CHAOSMB_RUNNING:
+TSM_RUNNING:
+
+[globalflags]
+Clock Working:
 
 ##########################################################################
 # Display effects
