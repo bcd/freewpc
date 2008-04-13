@@ -190,7 +190,6 @@ static void increment_credit_count (void)
 
 #ifndef FREE_ONLY
 	credit_count++;
-	lamp_start_update ();
 #endif
 
 #ifdef MACHINE_ADD_CREDIT_SOUND
@@ -240,8 +239,6 @@ void remove_credit (void)
 		credit_count--;
 		csum_area_update (&coin_csum_info);
 		wpc_nvram_put ();
-
-		lamp_start_update ();
 	}
 #endif
 }

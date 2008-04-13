@@ -40,9 +40,9 @@ __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
-U8 bit_matrix[NUM_LAMP_COLS];
+U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 
-U8 global_bits[NUM_LAMP_COLS];
+U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
 
 __fastram__ U8 lamp_strobe_mask;
 
@@ -196,12 +196,12 @@ void bit_toggle (bitset matrix, U8 bit)
 	bitarray_toggle (matrix, bit);
 }
 
-bool bit_test (const bitset matrix, U8 bit)
+bool bit_test (const_bitset matrix, U8 bit)
 {
 	return bitarray_test (matrix, bit);
 }
 
-bool bit_test_all_on (const bitset matrix)
+bool bit_test_all_on (const_bitset matrix)
 {
 	return matrix[0] && matrix[1]
 		&& matrix[2] && matrix[3]
@@ -209,7 +209,7 @@ bool bit_test_all_on (const bitset matrix)
 		&& matrix[6] && matrix[7];
 }
 
-bool bit_test_all_off (const bitset matrix)
+bool bit_test_all_off (const_bitset matrix)
 {
 	return !matrix[0] && !matrix[1]
 		&& !matrix[2] && !matrix[3]
@@ -332,6 +332,9 @@ bool lamp_test_off (lampnum_t lamp)
 void lamp_flash_on (lampnum_t lamp)
 {
 	bit_on (lamp_flash_matrix, lamp);
+	/* TODO - initialize the bit in lamp_flash_matrix_now correctly,
+	 * so that the lamp stays synchronized with all other flashes.
+	 * It may need to be on or off now. */
 }
 
 void lamp_flash_off (lampnum_t lamp)
@@ -346,12 +349,28 @@ bool lamp_flash_test (lampnum_t lamp)
 }
 
 
-void lamp_global_update (void)
+void lamp_update_task (void)
+{
+	callset_invoke (lamp_update);
+	task_exit ();
+}
+
+
+void lamp_update_request (void)
 {
 	if (in_live_game)
-		callset_invoke (lamp_update);
+		task_create_gid1 (GID_LAMP_UPDATE, lamp_update_task);
 	if (!in_test)
 		lamp_start_update ();
+}
+
+
+CALLSET_ENTRY (lamp, idle_every_100ms)
+{
+	static U8 every_other_time = 0;
+	every_other_time = ~every_other_time;
+	if (every_other_time)
+		lamp_update_request ();
 }
 
 
@@ -365,10 +384,9 @@ void lamp_all_on (void)
 {
 	disable_interrupts ();
 	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
 	enable_interrupts ();
 	matrix_all_on (lamp_matrix);
-	lamp_global_update ();
+	lamp_update_request ();
 }
 
 
@@ -376,12 +394,11 @@ void lamp_all_off (void)
 {
 	disable_interrupts ();
 	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
 	matrix_all_off (lamp_leff1_matrix);
 	matrix_all_off (lamp_leff2_matrix);
 	enable_interrupts ();
 	matrix_all_off (lamp_matrix);
-	lamp_global_update ();
+	lamp_update_request ();
 }
 
 /*
@@ -436,9 +453,16 @@ void lamp_leff2_allocate (lampnum_t lamp)
 	bit_off (lamp_leff2_allocated, lamp);
 }
 
-bool lamp_leff2_test_allocated (lampnum_t lamp)
-{	
-	return bit_test (lamp_leff2_allocated, lamp);
+bool lamp_leff2_test_and_allocate (lampnum_t lamp)
+{
+	bool ok;
+
+	disable_interrupts ();
+	ok = bit_test (lamp_leff2_allocated, lamp);
+	if (ok)
+		lamp_leff2_allocate (lamp);
+	enable_interrupts ();
+	return ok;
 }
 
 void lamp_leff2_free (lampnum_t lamp)
