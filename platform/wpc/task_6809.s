@@ -33,11 +33,9 @@ UREG_SAVE_OFF      = 7
 ROMPAGE_SAVE_OFF   = 9
 SAVED_STACK_SIZE   = 10
 DELAY_OFF          = 11
-ARG_OFF            = 13
 AUX_STACK_OFF      = 15
-SIGHANDLER_OFF     = 16
 STACK_SAVE_OFF     = 18
-TASK_STACK_SIZE    = 32
+TASK_STACK_SIZE    = 40
 
 
 	.module task_6809.s

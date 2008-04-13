@@ -92,9 +92,20 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
+/* For determining the amount of idle time left on the 6809. */
 #ifdef IDLE_PROFILE
+
+/** A counter for controlling how often we update the idle time
+ * count.  Every 8 calls to the rtt, we will update the total
+ * idle time from the amount of idle time that has accumulated
+ * over the last 8ms. */
 U8 idle_rtt_calls;
+
+/** A count that represents idle time over the last 8ms.
+ * It is not in any particular units. */
 U16 idle_time;
+
+/** The total amount of idle time since boot. */
 U16 last_idle_time;
 #endif
 
@@ -261,7 +272,6 @@ task_t *task_allocate (void)
 		tp->delay = 0;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
-		tp->sighandler = NULL;
 #ifdef TASK_CHAINING
 		/* Add to the task list */
 #endif
@@ -492,23 +502,12 @@ void task_kill_pid (task_t *tp)
 {
 	if (tp == task_current)
 		fatal (ERR_TASK_KILL_CURRENT);
-	else if (tp->sighandler == NULL)
-	{
-		task_free (tp);
-		tp->gid = 0;
-#ifdef CONFIG_DEBUG_TASKCOUNT
-		task_count--;
-#endif
-	}
-	else
-	{
-		tp->u = 1;
-		tp->pc = (U16)tp->sighandler;
 
-		/* TODO - this should be a synchronous operation.
-		 * We should wait here until the task is truly gone.
-		 * If the task is asleep, it should be woken up too. */
-	}
+	task_free (tp);
+	tp->gid = 0;
+#ifdef CONFIG_DEBUG_TASKCOUNT
+	task_count--;
+#endif
 }
 
 
@@ -550,6 +549,23 @@ void task_kill_all (void)
 		if (	(tp != task_current) &&
 				(tp->state & BLOCK_TASK) && 
 				!(tp->state & TASK_PROTECTED) )
+		{
+			task_kill_pid (tp);
+		}
+}
+
+
+/** Kills all tasks that have a particular flag set. */
+void task_kill_flags (U8 flags)
+{
+	register U8 t;
+	register task_t *tp;
+
+	/* BLOCK_TASK is implied and need not be specified by the caller. */
+	flags |= BLOCK_TASK;
+
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if ((tp != task_current) && (tp->state & flags))
 		{
 			task_kill_pid (tp);
 		}
@@ -607,9 +623,10 @@ void task_set_arg (task_t *tp, U16 arg)
 /** Allocate stack size from another task.  This should only be
 called immediately after the task is created before it gets a chance
 to run. */
-void task_alloca (task_t *tp, U8 size)
+void *task_alloca (task_t *tp, U8 size)
 {
-	tp->stack_size = size;
+	tp->stack_size += size;
+	return &tp->stack[TASK_STACK_SIZE - tp->stack_size];
 }
 
 
@@ -728,7 +745,9 @@ void task_dispatcher (void)
  */
 void task_init (void)
 {
+#ifdef TASK_CHAINING
 	U8 to;
+#endif
 
 	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
