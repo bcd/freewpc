@@ -47,12 +47,10 @@ void lamp_countdown_task (void)
 	struct countdown_leff_config *cfg;
 
 	cfg = task_current_class_data (struct countdown_leff_config);
-	
 	cfg->leffdata.flags = L_SHARED;
 
-	/* Allocate the lamp.  TODO - this may fail */
-	lamp_leff2_allocate (cfg->lamp);
-	if (1)
+	/* Only run the effect if the lamp is not already in use. */
+	if (lamp_leff2_test_and_allocate (cfg->lamp))
 	{
 		/* Monitor the timer */
 		while (*cfg->timer != 0)
@@ -69,7 +67,6 @@ void lamp_countdown_task (void)
 			task_sleep (sleep_time);
 		}
 	
-		/* TODO : set sighandler here */
 		/* Ensure the lamp is turned off when done */
 		leff_off (cfg->lamp);
 		lamp_leff2_free (cfg->lamp);
