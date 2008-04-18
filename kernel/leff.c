@@ -93,7 +93,7 @@ U8 leffs_running[BITS_TO_BYTES (MAX_LEFFS)];
 /** Test if a lamp effect is running. */
 bool leff_running_p (leffnum_t dn)
 {
-	return bitarray_test (leffs_running, dn);
+	return (bitarray_test (leffs_running, dn) != 0);
 }
 
 
@@ -301,7 +301,7 @@ void leff_restart (leffnum_t dn)
 
 
 /** Restarts the lamp effect handler for the highest priority
- * leff that has been started. */
+ * exclusive leff that has been started. */
 void leff_start_highest_priority (void)
 {
 	U8 leff_active = leff_get_highest_priority ();
