@@ -351,7 +351,8 @@ bool lamp_flash_test (lampnum_t lamp)
 
 void lamp_update_task (void)
 {
-	callset_invoke (lamp_update);
+	if (in_live_game)
+		callset_invoke (lamp_update);
 	task_exit ();
 }
 
