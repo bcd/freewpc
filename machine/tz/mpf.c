@@ -42,7 +42,7 @@ static const audio_track_t powerfield_music = {
 
 void mpf_active_deff (void)
 {
-	while (mpf_active)
+	while (task_find_gid (GID_MPF_ACTIVE))
 	{
 		task_sleep (TIME_66MS);
 	}
@@ -86,7 +86,7 @@ void mpf_start (void)
 	{
 		mpf_enable_count--;
 		mpf_ball_count++;
-		if (mpf_active == 0)
+		if (!task_find_gid (GID_MPF_ACTIVE))
 		{
 			mpf_active = 1;
 			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
@@ -98,7 +98,7 @@ void mpf_start (void)
 
 void mpf_stop (void)
 {
-	if (mpf_active)
+	if (task_find_gid (GID_MPF_ACTIVE))
 	{
 		mpf_active = 0;
 		task_kill_gid (GID_MPF_ACTIVE);
@@ -133,7 +133,8 @@ CALLSET_ENTRY (mpf, sw_camera)
 {
 	if (event_did_follow (mpf_top, camera))
 	{
-		callset_invoke (powerfield_win);
+		if (task_find_gid (GID_MPF_ACTIVE))
+			callset_invoke (powerfield_win);
 	}
 }
 
@@ -181,13 +182,15 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
-	sound_send (SND_POWER_GRUNT_1);
+	if (task_find_gid (GID_MPF_ACTIVE))
+		sound_send (SND_POWER_GRUNT_1);
 }
 
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
-	sound_send (SND_POWER_GRUNT_2);
+	if (task_find_gid (GID_MPF_ACTIVE))
+		sound_send (SND_POWER_GRUNT_2);
 }
 
 
