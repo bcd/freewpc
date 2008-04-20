@@ -474,7 +474,7 @@ check_prereqs : $(BLDDIR) tools sched
 .PHONY : run
 run:
 	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) -nosound &
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
 .PHONY : run-orig
 run-orig: uninstall
