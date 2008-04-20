@@ -88,7 +88,12 @@ PLATFORM_DIR = platform/$(PLATFORM)
 #######################################################################
 
 .PHONY : default_target
-default_target : clean_err check_prereqs platform_target post_compile
+# default_target : clean_err check_prereqs platform_target post_compile
+
+default_target : post_compile
+post_compile : platform_target
+platform_target : check_prereqs
+check_prereqs : clean_err
 
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
@@ -738,6 +743,7 @@ $(FON_OBJS) : %.o : %.fon
 $(PRG_OBJS) : %.o : %.prg
 
 $(FIF_OBJS) : %.o : %.fif
+$(FIF_OBJS) : PAGEFLAGS="-D__FIF"
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 

@@ -83,6 +83,8 @@ typedef U16 PTR_OR_U16;
 #define long long_not_supported
 #endif
 
+#ifndef __FIF /* skip remainder for fast compile */
+
 /* TODO - move these elsewhere */
 extern U8 sys_init_complete;
 extern U8 sys_init_pending_tasks;
@@ -244,6 +246,8 @@ extern U8 idle_ok;
 PAGE_PRAGMA
 #endif
 #endif /* !CONFIG_NATIVE */
+
+#endif /* __FIF */
 
 #ifdef NOSTATIC
 #define static
