@@ -252,5 +252,6 @@ void preset_show_components (void)
 		task_sleep (TIME_1S + TIME_500MS);
 		comps++;
 	}
+	task_exit ();
 }
 
