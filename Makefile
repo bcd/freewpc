@@ -743,11 +743,12 @@ $(FON_OBJS) : %.o : %.fon
 $(PRG_OBJS) : %.o : %.prg
 
 $(FIF_OBJS) : %.o : %.fif
-$(FIF_OBJS) : PAGEFLAGS="-D__FIF"
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
+
+$(FIF_OBJS) : $(GENDEFINES)
 
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
