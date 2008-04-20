@@ -301,9 +301,9 @@ CALLSET_ENTRY (tz_clock, init)
 
 CALLSET_ENTRY (tz_clock, amode_start)
 {
-	if (feature_config.disable_clock == NO)
+	if (feature_config.disable_clock == YES)
 	{
-		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
+		global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
 	}
 
 	/* If not all of the other clock switches have been seen in both
