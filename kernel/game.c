@@ -115,7 +115,6 @@ void amode_start (void)
 	leff_start (LEFF_AMODE);
 #endif
 	triac_enable (TRIAC_GI_MASK);
-	lamp_start_update ();
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	callset_invoke (amode_start);
 }
@@ -239,18 +238,19 @@ void end_ball (void)
 	ball_search_monitor_stop ();
 
 	/* If the ball was not tilted, start bonus. */
+	in_bonus = TRUE;
 	if (!in_tilt)
-	{
-		in_bonus = TRUE;
 		callset_invoke (bonus);
-		in_bonus = FALSE;
-	}
 
 	/* Clear the tilt flag.  Note, this is not combined
 	with the above to handle tilt while bonus is running. */
 	if (in_tilt)
 	{
-		dbprintf ("Clearing tilt flag, deff should stop\n");
+		/* Wait for tilt bob to settle */
+		while (free_timer_test (TIM_IGNORE_TILT))
+			task_sleep (TIME_100MS);
+
+		/* Cancel the tilt effects */
 #ifdef DEFF_TILT
 		deff_stop (DEFF_TILT);
 #endif
@@ -264,6 +264,8 @@ void end_ball (void)
 	 * Any task that has protected itself is immune to this.
 	 * Normally, this is not necessary. */
 	task_kill_all ();
+	/* TODO - task_kill_flags (TASK_GAME); */
+	in_bonus = FALSE;
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
@@ -278,9 +280,6 @@ void end_ball (void)
 		start_ball ();
 		goto done;
 	}
-
-	/* TODO : a tilt here seems to end the _next_ ball
-	immediately */
 
 	/* If this is the last ball of the game for this player,
 	 * then offer to buy an extra ball if enabled.  Also,
@@ -444,7 +443,11 @@ void start_ball (void)
 	leff_stop_all ();
 
 	if (ball_up == 1)
+	{
 		callset_invoke (start_player);
+		task_yield ();
+	}
+
 	callset_invoke (start_ball);
 	callset_invoke (update_lamps);
 
