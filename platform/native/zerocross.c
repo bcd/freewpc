@@ -11,6 +11,7 @@ int zc_granularity_in_cpu_cycles;
 
 int sim_zc_read (void)
 {
+	return 0;
 }
 
 
