@@ -43,6 +43,7 @@
 __attribute__((noreturn)) void start (void);
 U8 far_read8 (U8 *address, U8 page);
 U16 far_read16 (U16 *address, U8 page);
+void *far_read_pointer (void *address, U8 page);
 typedef void (*void_function) (void);
 void far_indirect_call_handler (void_function address, U8 page);
 void bitmap_blit_asm (U8 *dst, U8 shift);

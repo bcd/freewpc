@@ -120,6 +120,8 @@ _far_read8:
 
 	;;; Read 16-bit value at a far address.  The offset is in X and the page in B.
 	;;; The return value is in X.
+	.globl _far_read_pointer
+_far_read_pointer:
 	.globl _far_read16
 _far_read16:
 	pshs	a

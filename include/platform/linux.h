@@ -26,6 +26,9 @@
 #ifndef _PLATFORM_NATIVE_H
 #define _PLATFORM_NATIVE_H
 
+void linux_init (void);
+__attribute__((noreturn)) void linux_shutdown (void);
+
 #define far_call_pointer(function, page, arg) (*function) (arg)
 
 extern inline U8 far_read8 (U8 *address, U8 page)
@@ -34,6 +37,11 @@ extern inline U8 far_read8 (U8 *address, U8 page)
 }
 
 extern inline U16 far_read16 (U16 *address, U8 page)
+{
+	return *address;
+}
+
+extern inline U16 far_read_pointer (PTR_OR_U16 *address, U8 page)
 {
 	return *address;
 }

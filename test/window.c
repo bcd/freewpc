@@ -1115,16 +1115,16 @@ void font_test_draw (void)
 	 * that returns a pointer to the glyph for a character.  Then you can
 	 * use the following code, although macros would be better:
 	 * glyph_get_width(), glyph_get_height(), etc. */
-	glp = (char **)far_read16 ((PTR_OR_U16 *)&font->glyphs, FONT_PAGE);
+	glp = (char **)far_read_pointer ((PTR_OR_U16 *)&font->glyphs, FONT_PAGE);
 
-	gl = (char *)far_read16 ((PTR_OR_U16 *)&glp['A'], FONT_PAGE);
+	gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['A'], FONT_PAGE);
 	if (gl == NULL) 
 	{
 		if (font_test_offset < 26)
 			font_test_offset = 26;
 	}
 	else
-		gl = (char *)far_read16 ((PTR_OR_U16 *)&glp['0'], FONT_PAGE);
+		gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['0'], FONT_PAGE);
 
 	bitwidth = (char)far_read8 ((U8 *)&gl[0], FONT_PAGE);
 	if (bitwidth <= 8)
