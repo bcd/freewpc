@@ -30,48 +30,48 @@ D8: Enter, service, intest, cabinet, button
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 
 [drives]
-H1: High Power Sol. 1
-H2: High Power Sol. 2
-H3: High Power Sol. 3
-H4: High Power Sol. 4
-H5: High Power Sol. 5
-H6: High Power Sol. 6
-H7: High Power Sol. 7
-H8: High Power Sol. 8
+H1: High Power Sol. 1, notinstalled
+H2: High Power Sol. 2, notinstalled
+H3: High Power Sol. 3, notinstalled
+H4: High Power Sol. 4, notinstalled
+H5: High Power Sol. 5, notinstalled
+H6: High Power Sol. 6, notinstalled
+H7: High Power Sol. 7, notinstalled
+H8: High Power Sol. 8, notinstalled
 
-L1: Low Power Sol. 1
-L2: Low Power Sol. 2
-L3: Low Power Sol. 3
-L4: Low Power Sol. 4
-L5: Low Power Sol. 5
-L6: Low Power Sol. 6
-L7: Low Power Sol. 7
-L8: Low Power Sol. 8
+L1: Low Power Sol. 1, notinstalled
+L2: Low Power Sol. 2, notinstalled
+L3: Low Power Sol. 3, notinstalled
+L4: Low Power Sol. 4, notinstalled
+L5: Low Power Sol. 5, notinstalled
+L6: Low Power Sol. 6, notinstalled
+L7: Low Power Sol. 7, notinstalled
+L8: Low Power Sol. 8, notinstalled
 
-G1: General Sol. 1
-G2: General Sol. 2
-G3: General Sol. 3
-G4: General Sol. 4
-G5: General Sol. 5
-G6: General Sol. 6
-G7: General Sol. 7
-G8: General Sol. 8
+G1: General Sol. 1, notinstalled
+G2: General Sol. 2, notinstalled
+G3: General Sol. 3, notinstalled
+G4: General Sol. 4, notinstalled
+G5: General Sol. 5, notinstalled
+G6: General Sol. 6, notinstalled
+G7: General Sol. 7, notinstalled
+G8: General Sol. 8, notinstalled
 
-A1: Aux. Sol. 1
-A2: Aux. Sol. 2
-A3: Aux. Sol. 3
-A4: Aux. Sol. 4
-A5: Aux. Sol. 5
-A6: Aux. Sol. 6
-A7: Aux. Sol. 7
-A8: Aux. Sol. 8
+A1: Aux. Sol. 1, notinstalled
+A2: Aux. Sol. 2, notinstalled
+A3: Aux. Sol. 3, notinstalled
+A4: Aux. Sol. 4, notinstalled
+A5: Aux. Sol. 5, notinstalled
+A6: Aux. Sol. 6, notinstalled
+A7: Aux. Sol. 7, notinstalled
+A8: Aux. Sol. 8, notinstalled
 
 [lamplists]
 ALL: 11..88
 
 [deffs]
 NULL: c_decl(deff_exit), 0
-Amode: page(EFFECT_PAGE), c_decl(default_amode_deff), runner, PRI_AMODE
+Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
 Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
 Scores: runner, PRI_SCORES
 Scores Important: PRI_SCORES_IMPORTANT
@@ -96,8 +96,9 @@ Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 
 [leffs]
 NULL: 0
-Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff)
-Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff)
+Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
+Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 
 [fonts]
 mono5:
@@ -109,4 +110,7 @@ cu17:
 fixed10:
 term6:
 times8:
+
+[timers]
+Ignore Tilt:
 
