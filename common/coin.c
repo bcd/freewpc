@@ -150,8 +150,6 @@ void credits_draw (void)
 		sprintf ("PRESS START");
 	}
 	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
-
-	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
 }
 
 
@@ -159,6 +157,7 @@ void credits_draw (void)
 void credits_deff (void)
 {
 	credits_draw ();
+	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
 	deff_delay_and_exit (TIME_1S);
 }
 
