@@ -19,14 +19,14 @@
  */
 
 #include <freewpc.h>
-#include <tz/clock.h>
-#include <coin.h>
-#include <highscore.h>
+//#include <coin.h>
+//#include <highscore.h>
 
 U8 egg_code_values[3];
 U8 egg_index;
 
 
+#if 0
 /* Attract mode display delay function.
  * This function waits for the specified amount of time, but
  * returns immediately if either flipper is pressed.
@@ -55,22 +55,8 @@ bool amode_page_delay (U8 secs)
 	}
 	return FALSE;
 }
+#endif
 
-void amode_flipper_sound_debounce_timer (void)
-{
-	task_sleep_sec (30);
-	task_exit ();
-}
-
-void amode_flipper_sound (void)
-{
-	if (!task_find_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE))
-	{
-		task_create_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE,
-			amode_flipper_sound_debounce_timer);
-		sound_send (SND_THUD);
-	}
-}
 
 /* TODO : use flipcode module to implement this */
 void egg_left_flipper (void)
@@ -112,23 +98,11 @@ void egg_right_flipper (void)
 			 (egg_code_values[1] == 3) &&
 			 (egg_code_values[2] == 4))
 		{
-			deff_start (DEFF_BRIAN_IMAGE);
+			//deff_start (DEFF_BRIAN_IMAGE);
 		}
 	}
 }
 
-void amode_left_flipper (void)
-{
-	amode_flipper_sound ();
-	egg_left_flipper ();
-}
-
-
-void amode_right_flipper (void)
-{
-	amode_flipper_sound ();
-	egg_right_flipper ();
-}
 
 void amode_lamp_toggle_task (void)
 {
@@ -175,7 +149,7 @@ void amode_leff (void)
 	}
 }
 
-
+#if 0
 void amode_show_design_credits (void)
 {
 	dmd_alloc_low_clean ();
@@ -208,31 +182,6 @@ void amode_deff (void)
 
 	for (;;)
 	{
-		/** Display FreeWPC logo **/
-		FSTART_COLOR
-			dmd_draw_fif (fif_freewpc_logo);
-		FEND
-		if (amode_page_delay (5) && system_config.tournament_mode)
-			continue;
-
-		/** Display last set of player scores **/
-		dmd_alloc_low_clean ();
-		scores_draw ();
-		dmd_show_low ();
-		if (amode_page_delay (5) && system_config.tournament_mode)
-			continue;
-
-		/** Display credits message **/
-		credits_draw ();
-
-		/** Display replay */
-		if (system_config.replay_award != FREE_AWARD_OFF)
-		{
-			replay_draw ();
-			if (amode_page_delay (5) && system_config.tournament_mode)
-				continue;
-		}
-
 		/** Display game title message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
@@ -247,12 +196,6 @@ void amode_deff (void)
 		starfield_stop ();
 #endif
 
-		/** Display high scores **/
-		if (hstd_config.highest_scores == ON)
-		{
-			high_score_amode_show ();
-		}
-
 		/** Display PLAY PINBALL message **/
 		FSTART_COLOR
 			dmd_sched_transition (&trans_scroll_left);
@@ -261,13 +204,6 @@ void amode_deff (void)
 				"PLAY PINBALL");
 		FEND
 		if (amode_page_delay (3) && system_config.tournament_mode)
-			continue;
-
-		/** Display 'custom message'? **/
-
-		/* Display date/time */
-		rtc_show_date_time ();
-		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
 		if (--design_credit_counter == 0)
@@ -288,10 +224,7 @@ void amode_deff (void)
 			dmd_show2 ();
 			task_sleep_sec (7);
 		}
-
-		/* Kill music if it is running */
-		/* TODO - should be a music_stop of end_game_music */
-		music_set (MUS_OFF);
 	}
 }
 
+#endif
