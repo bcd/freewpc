@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -41,7 +41,6 @@ extern inline void timed_mode_task (
 	/* Mark the task as protected, because killing it will not do all
 	of the cleanup needed for ending the mode.  The proper way to end
 	a mode is to invoke mode_stop(). */
-	/* TODO - replace with a sighandler */
 	task_set_flags (TASK_PROTECTED);
 
 	/* Initialize the timer and invoke the mode's begin hook */
@@ -95,7 +94,13 @@ extern inline void timed_mode_task (
 /** Starts a mode task */
 extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 {
-	return task_create_gid1 (gid, task_function);
+	task_pid_t tp = task_create_gid1 (gid, task_function);
+#ifdef CONFIG_NATIVE
+	/* TODO */
+#else
+	tp->state |= TASK_GAME;
+#endif
+	return tp;
 }
 
 
@@ -108,7 +113,7 @@ extern inline bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *time
 
 
 /** Returns true if a mode is running with a nonzero timer.  A mode
-in grace period is considered to be running. */
+in grace period is considered NOT to be running. */
 extern inline bool timed_mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
 {
 	return (*timer != 0);
@@ -122,13 +127,14 @@ extern inline void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 	{
 		/* TODO */
 		/* Here, the mode is technically not running but still
-		active in its grace period, and more timer is being added.
+		active in its grace period, and more time is being added.
 		Just incrementing the timer will not signal the mode task
 		to go out of grace period back into its normal loop; something
 		more is needed... */
 
 		/* Note this means that the 'expire' hook can be called
-		multiple times. */
+		multiple times.  It also means we may need some sort of
+		'restart' hook just for this case. */
 	}
 
 	/* Just increment the timer */
