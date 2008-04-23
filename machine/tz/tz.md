@@ -40,14 +40,16 @@ define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
-define MACHINE_SCORE_DIGITS 10
-define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
-define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
-define MACHINE_REPLAY_CODE_TO_SCORE replay_code_to_score
-define MACHINE_DEBUGGER_HOOK tz_debugger_hook
-define MACHINE_REPLAY_SCORE_CHOICES 10
-define MACHINE_REPLAY_START_CHOICE 5
-define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
+define MACHINE_SCORE_DIGITS               10
+define MACHINE_MUSIC_GAME                 MUS_MULTIBALL_LIT
+define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
+define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
+define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
+define MACHINE_REPLAY_SCORE_CHOICES       10
+define MACHINE_REPLAY_START_CHOICE        5
+define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
+define MACHINE_AMODE_LEFF                 tz_amode_leff
+#ifdef MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 
 ##########################################################################
 # Lamp Description
@@ -371,9 +373,6 @@ Right Loop Complete:
 Right Loop Aborted:
 
 
-[timers]
-Test Timer:
-
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -488,21 +487,22 @@ NO_DRAIN_PENALTY:
 STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
-
 SSSMB_RUNNING:
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
 SSSMB_YELLOW_JACKPOT:
-
 CHAOSMB_RUNNING:
+TSM_RUNNING:
+
+[globalflags]
+Clock Working:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
-Amode: page(MACHINE_PAGE), runner, PRI_AMODE
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
-Brian Image: PRI_EGG1
+# Brian Image: PRI_EGG1
 Replay: page(MACHINE_PAGE), PRI_REPLAY
 Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
 Special: page(MACHINE_PAGE), PRI_SPECIAL
@@ -539,6 +539,7 @@ ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
+Lookaside Test: page(EFFECT_PAGE), PRI_GAME_MODE2
 
 BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 
@@ -555,7 +556,7 @@ Left Ramp: PRI_LEFF2, page(MACHINE_PAGE)
 CLOCK TARGET: PRI_LEFF2, GI(ALL), page(MACHINE_PAGE)
 No GI: L_NORMAL, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
 SLOT KICKOUT: PRI_LEFF3, page(MACHINE_PAGE)
-AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 FLASH ALL: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE_PAGE)
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Jets Active: shared, PRI_LEFF5, LAMPS(JETS), page(MACHINE_PAGE)

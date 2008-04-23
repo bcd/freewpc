@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -115,6 +115,26 @@ void pb_loop_deff (void)
 }
 
 
+CALLSET_ENTRY (pb_detect, lamp_update)
+{
+	if (pb_location & PB_IN_PLAY)
+	{
+		lamp_tristate_flash (LM_LEFT_POWERBALL);
+		lamp_tristate_flash (LM_RIGHT_POWERBALL);
+	}
+	else if (pb_location & PB_MAYBE_IN_PLAY)
+	{
+		lamp_tristate_on (LM_LEFT_POWERBALL);
+		lamp_tristate_on (LM_RIGHT_POWERBALL);
+	}
+	else
+	{
+		lamp_tristate_off (LM_LEFT_POWERBALL);
+		lamp_tristate_off (LM_RIGHT_POWERBALL);
+	}
+}
+
+
 /** Called when the powerball is known to be in a particular location.
  * Because there is only one powerball installed in the machine, this
  * information is definitive.  The location says where the ball is;
@@ -139,16 +159,12 @@ void pb_set_location (U8 location, U8 depth)
 		}
 		else if (pb_location & PB_IN_PLAY)
 		{
-			lamp_tristate_flash (LM_LEFT_POWERBALL);
-			lamp_tristate_flash (LM_RIGHT_POWERBALL);
 			flag_on (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 1;
 			callset_invoke (powerball_present);
 		}
 		else if (pb_location & PB_MAYBE_IN_PLAY)
 		{
-			lamp_tristate_on (LM_LEFT_POWERBALL);
-			lamp_tristate_on (LM_RIGHT_POWERBALL);
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
 			callset_invoke (powerball_lost);
@@ -166,8 +182,6 @@ void pb_clear_location (U8 location)
 	if (pb_location == location)
 	{
 		pb_location = PB_MISSING;
-		lamp_tristate_off (LM_LEFT_POWERBALL);
-		lamp_tristate_off (LM_RIGHT_POWERBALL);
 		flag_off (FLAG_POWERBALL_IN_PLAY);
 		pb_announce_needed = 0;
 		callset_invoke (powerball_absent);

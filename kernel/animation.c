@@ -69,16 +69,14 @@ struct animation_object *animation_add (
 
 void animation_object_flash (struct animation_object *obj, U8 period)
 {
+#ifdef PARANOID
+	/* Ensure that this is a power of 2 */
+	if (period & (period - 1))
+	{
+	}
+#endif
 	obj->flash_period = period;
 }
-
-
-#if 0 /* what was this for? */
-void animation_add_symbol (U8 x0, U8 y0,
-	void (*update) (struct animation_object *))
-{
-}
-#endif
 
 
 /** Step through one frame of an animation.  Allocates new DMD pages
@@ -109,11 +107,10 @@ void animation_step (void)
 		/* If the flash period is nonzero, that means we only draw the object
 		 * 50% of the time.  For example, a flash period of 8 would draw the
 		 * object on iterations 0, 1, 2, and 3; but not on 4, 5, 6, or 7.
-		 * TODO : the computation is using division since flash_period is not
-		 * known to be a power of 2.  Since the iteration count is not used
+		 * IDEA : Since the iteration count is not used
 		 * elsewhere, it should be zeroed when it reaches the max below. */
 		if ((obj->flash_period == 0)
-			|| (an->iteration % obj->flash_period) < (obj->flash_period / 2))
+			|| (an->iteration & (obj->flash_period - 1)) < (obj->flash_period / 2))
 		{
 			obj->draw (obj);
 		}

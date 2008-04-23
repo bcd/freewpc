@@ -55,6 +55,14 @@ on the playfield. */
 /** Set for a deff that is abortable (by pressing both flipper buttons). */
 #define D_ABORTABLE 0x4
 
+/** Set for a deff that pauses kickouts.  While this deff is active
+ * (not just queued -- it must actually have the display), all kickouts
+ * are postponed.  When the deff finishes, is stopped, or is aborted,
+ * kickouts can resume.  It would be better if trough kickouts were
+ * not affected by this (it's OK to park a ball at the plunger while
+ * the deff runs.) */
+#define D_PAUSE 0x8
+
 
 /** A constant descriptor for a display effect. */
 typedef struct
@@ -118,9 +126,10 @@ extern inline void deff_call_components (void)
 }
 
 
-/* TODO - this function should be deprecated */
 extern inline void deff_wait_for_other (deffnum_t dn)
 {
+/* TODO - this function should be deprecated */
+#if 0
 	if (deff_is_running (dn))
 	{
 		U8 timeout = TIME_3S / TIME_100MS;
@@ -130,6 +139,7 @@ extern inline void deff_wait_for_other (deffnum_t dn)
 			task_sleep (TIME_100MS);
 		}
 	}
+#endif
 }
 
 

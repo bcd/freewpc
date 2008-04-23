@@ -150,8 +150,6 @@ void credits_draw (void)
 		sprintf ("PRESS START");
 	}
 	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
-
-	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
 }
 
 
@@ -159,6 +157,7 @@ void credits_draw (void)
 void credits_deff (void)
 {
 	credits_draw ();
+	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
 	deff_delay_and_exit (TIME_1S);
 }
 
@@ -190,7 +189,6 @@ static void increment_credit_count (void)
 
 #ifndef FREE_ONLY
 	credit_count++;
-	lamp_start_update ();
 #endif
 
 #ifdef MACHINE_ADD_CREDIT_SOUND
@@ -240,8 +238,6 @@ void remove_credit (void)
 		credit_count--;
 		csum_area_update (&coin_csum_info);
 		wpc_nvram_put ();
-
-		lamp_start_update ();
 	}
 #endif
 }

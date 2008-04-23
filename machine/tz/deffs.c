@@ -75,7 +75,7 @@ void jackpot_deff (void)
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_show_low ();
 		sound_send (SND_CLOCK_CHAOS_END_BOOM);
-		task_sleep (TIME_500MS);
+		task_sleep (TIME_300MS);
 	}
 
 	for (i=0; i < 8; i++)

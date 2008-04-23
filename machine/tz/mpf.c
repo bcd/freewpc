@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -42,16 +42,25 @@ static const audio_track_t powerfield_music = {
 
 void mpf_active_deff (void)
 {
-	while (mpf_active)
+	while (task_find_gid (GID_MPF_ACTIVE))
 	{
 		task_sleep (TIME_66MS);
 	}
 }
 
-
-void mpf_battle_lamp_update (void)
+bool mpf_ready_p (void)
 {
-	if (mpf_enable_count > 0)
+	return (mpf_enable_count > 0)
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !flag_test (FLAG_MULTIBALL_RUNNING)
+		&& !flag_test (FLAG_QUICK_MB_RUNNING)
+		&& !flag_test (FLAG_BTTZ_RUNNING);
+}
+
+
+CALLSET_ENTRY (mpf, lamp_update)
+{
+	if (mpf_ready_p ())
 		lamp_tristate_on (LM_RAMP_BATTLE);
 	else
 		lamp_tristate_off (LM_RAMP_BATTLE);
@@ -61,7 +70,6 @@ void mpf_battle_lamp_update (void)
 void mpf_enable (void)
 {
 	mpf_enable_count++;
-	mpf_battle_lamp_update ();
 }
 
 
@@ -74,11 +82,11 @@ void mpf_active_monitor (void)
 
 void mpf_start (void)
 {
-	if (mpf_enable_count > 0)
+	if (mpf_ready_p ())
 	{
 		mpf_enable_count--;
 		mpf_ball_count++;
-		if (mpf_active == 0)
+		if (!task_find_gid (GID_MPF_ACTIVE))
 		{
 			mpf_active = 1;
 			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
@@ -90,7 +98,7 @@ void mpf_start (void)
 
 void mpf_stop (void)
 {
-	if (mpf_active)
+	if (task_find_gid (GID_MPF_ACTIVE))
 	{
 		mpf_active = 0;
 		task_kill_gid (GID_MPF_ACTIVE);
@@ -125,7 +133,8 @@ CALLSET_ENTRY (mpf, sw_camera)
 {
 	if (event_did_follow (mpf_top, camera))
 	{
-		callset_invoke (powerfield_win);
+		if (task_find_gid (GID_MPF_ACTIVE))
+			callset_invoke (powerfield_win);
 	}
 }
 
@@ -173,13 +182,15 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
-	sound_send (SND_POWER_GRUNT_1);
+	if (task_find_gid (GID_MPF_ACTIVE))
+		sound_send (SND_POWER_GRUNT_1);
 }
 
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
-	sound_send (SND_POWER_GRUNT_2);
+	if (task_find_gid (GID_MPF_ACTIVE))
+		sound_send (SND_POWER_GRUNT_2);
 }
 
 

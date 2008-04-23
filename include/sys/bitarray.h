@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,6 +22,7 @@
 #define _SYS_BITARRAY_H
 
 typedef U8 *bitset;
+typedef U8 *const const_bitset;
 
 #define bitarray_const_offset(bits, bitno) (bits[(bitno) / 8])
 

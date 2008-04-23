@@ -25,6 +25,8 @@
 do_irq_begin          1       8c
 
 # Read the flipper switches and update the flipper coils
+# Note: this only takes 51 cycles when flippers are disabled.
+# Not sure if this is still accurate when enabled or not.
 fliptronic_rtt        2       250c
 
 # Update the triacs

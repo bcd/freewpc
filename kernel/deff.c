@@ -228,6 +228,10 @@ static void deff_start_task (const deff_t *deff)
 	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
 
+	/* If this deff pauses kickouts, handle that now */
+	if (deff->flags & D_PAUSE)
+		kickout_lock (KLOCK_DEFF);
+
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
 	if (deff->page != 0xFF)
@@ -288,14 +292,16 @@ static void deff_entry_start (deff_entry_t *entry)
 {
 	if (!deff_runqueue || entry->prio > deff_runqueue->prio)
 	{
-		/* This is the new active running deff */
-		/* If something else is running, it must be stopped */
+		/* This is the new active running deff.
+		 * Either nothing was running before, or it is highest
+		 * in priority. */
 		if (deff_runqueue)
 		{
+			/* If something else is running, it must be stopped */
 			deff_entry_t *oldentry = deff_runqueue;
 			deff_dequeue (&deff_runqueue, oldentry);
 
-			/* Move the running deff onto the wait list if
+			/* Move the old running deff onto the wait list if
 			it wants to be queued.  Otherwise it's a goner. */
 			if (oldentry->flags & D_QUEUED)
 			{
@@ -324,7 +330,7 @@ static void deff_entry_start (deff_entry_t *entry)
 	}
 	else
 	{
-		deff_debug ("Quick deff lacks priority\n");
+		/* This deff has no priority, and is simply ignored. */
 		deff_entry_free (entry);
 	}
 }
@@ -495,14 +501,6 @@ void deff_stop_all (void)
 	}
 
 	deff_init ();
-}
-
-
-CALLSET_ENTRY (deff, any_device_enter)
-{
-	/* TODO : If there are any pending, short-lived deffs with D_TIMEOUT set,
-	 * and there are no balls live on the playfield, wait here and give
-	 * the deffs a chance to dequeue before returning. */
 }
 
 

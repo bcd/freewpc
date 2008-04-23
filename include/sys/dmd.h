@@ -21,20 +21,24 @@
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
-/** The size of each DMD page */
-#define DMD_PAGE_SIZE 0x200UL
-
-/** The number of DMD pages */
-#define DMD_PAGE_COUNT 16
-
 /** The width of a DMD page, in pixels */
 #define DMD_PIXEL_WIDTH	128
+
+/** The height of a DMD page, in pixel */
+#define DMD_PIXEL_HEIGHT 32
 
 /** The width of a DMD page, in bytes */
 #define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / 8)
 
-/** The height of a DMD page, in pixel */
-#define DMD_PIXEL_HEIGHT 32
+/** The size of each DMD page */
+//#define DMD_PAGE_SIZE (DMD_BYTE_WIDTH * DMD_PIXEL_HEIGHT)
+#define DMD_PAGE_SIZE 512UL
+
+/** The number of DMD pages in the controller.  There are physically
+ * this number of page buffers that can be drawn to at the same time.
+ * However, not all pages are mapped into the 6809 address space
+ * simultaneously -- only 6 at a time are mapped. */
+#define DMD_PAGE_COUNT 16
 
 
 /** Coordinates that are aligned various ways */

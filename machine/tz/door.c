@@ -208,7 +208,7 @@ static void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
-	lamp_on (door_active_lamp);
+	lamp_tristate_on (door_active_lamp);
 	door_start_event (door_index);
 	score (SC_5M);
 	timed_game_extend (10);

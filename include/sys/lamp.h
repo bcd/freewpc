@@ -21,12 +21,12 @@
 #ifndef _SYS_LAMP_H
 #define _SYS_LAMP_H
 
+/** Says how many bytes are needed to hold N bits */
+#define BITS_TO_BYTES(n)  (((n) + 7) / 8)
+
 /** The maximum number of physical lamps supported */
 #define NUM_LAMPS 64
-
-#define NUM_LAMP_COLS	8
-
-#define NUM_VLAMP_COLS	8
+#define NUM_LAMP_COLS BITS_TO_BYTES(NUM_LAMPS)
 
 /** Macro to create a lamp number from its row and column */
 #define MAKE_LAMP(col,row)	((((col)-1) * 8) + (row)-1)
@@ -53,10 +53,11 @@ typedef U8 lamplist_id_t;
 
 
 extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern U8 bit_matrix[NUM_LAMP_COLS];
 extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
 extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
-extern U8 global_bits[NUM_LAMP_COLS];
+
+extern U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
+extern U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
 
 
 typedef enum
@@ -141,12 +142,14 @@ extern inline bool flag_test (const flag_t f)
 #define lamp_tristate_flash(lamp) \
 	do { lamp_flash_on(lamp); lamp_off(lamp); } while (0)
 
+void lamp_update_request (void);
+
 void bit_on (bitset matrix, U8 bit);
 void bit_off (bitset matrix, U8 bit);
 void bit_toggle (bitset matrix, U8 bit);
-bool bit_test (const bitset matrix, U8 bit);
-bool bit_test_all_on (const bitset matrix);
-bool bit_test_all_off (const bitset matrix);
+bool bit_test (const_bitset matrix, U8 bit);
+bool bit_test_all_on (const_bitset matrix);
+bool bit_test_all_off (const_bitset matrix);
 
 void lamp_all_on (void);
 void lamp_all_off (void);
@@ -158,7 +161,7 @@ void lamp_leff2_free_all (void);
 void lamp_leff_allocate (lampnum_t lamp);
 void lamp_leff_free (lampnum_t lamp);
 void lamp_leff2_allocate (lampnum_t lamp);
-bool lamp_leff2_test_allocated (lampnum_t lamp);
+bool lamp_leff2_test_and_allocate (lampnum_t lamp);
 void lamp_leff2_free (lampnum_t lamp);
 
 const U8 *lamplist_lookup (lamplist_id_t id);

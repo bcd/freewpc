@@ -88,7 +88,12 @@ PLATFORM_DIR = platform/$(PLATFORM)
 #######################################################################
 
 .PHONY : default_target
-default_target : clean_err check_prereqs platform_target post_compile
+# default_target : clean_err check_prereqs platform_target post_compile
+
+default_target : post_compile
+post_compile : platform_target
+platform_target : check_prereqs
+check_prereqs : clean_err
 
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
@@ -474,7 +479,7 @@ check_prereqs : $(BLDDIR) tools sched
 .PHONY : run
 run:
 	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) -nosound &
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
 .PHONY : run-orig
 run-orig: uninstall
@@ -742,6 +747,8 @@ $(FIF_OBJS) : %.o : %.fif
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
+
+$(FIF_OBJS) : $(GENDEFINES)
 
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile

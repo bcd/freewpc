@@ -755,29 +755,6 @@ sub machine_write_defines {
 	}
 	print "0)\n\n";
 
-	# Print MACHINE_xxMS_RTTS defines
-	my @pollcounts = (1, 8, 32, 128);
-	my $drivers = $m->{"drivers"};
-	for $poll (@pollcounts) {
-		my @calls = ();
-		for $drv (unique ($drivers)) {
-			my $drvname = $drv->{'name'};
-			if ($drv->{'poll'} == $poll) {
-				push @calls, "   VOIDCALL(${drvname}_rtt) \\";
-			}
-		}
-		if (@calls) {
-			print "#define MACHINE_${poll}MS_RTTS \\\n";
-			foreach my $call (@calls) {
-				print "$call\n";
-			}
-			print "\n";
-		} else {
-			print "#undef MACHINE_${poll}MS_RTTS\n\n";
-		}
-	}
-	print "\n";
-
 	# Print feature_adj_t and MACHINE_FEATURE_ADJUSTMENTS.  Since it's
 	# part of a structure, strip out the fad_ prefix.
 	print "typedef struct {\n";

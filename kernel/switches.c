@@ -26,7 +26,6 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
-#ifdef QUEUE_SWITCHES
 /*
  * An active switch is one which has transitioned and is eligible
  * for servicing, but is undergoing additional debounce logic.
@@ -46,7 +45,8 @@ typedef struct
 	/* The amount of time left before the transition completes. */
 	S8 timer;
 } pending_switch_t;
-#endif
+
+pending_switch_t *switch_queue_add (const switchnum_t sw);
 
 
 /* Define shorthand names for the various arrays of switch bits */
@@ -58,8 +58,8 @@ typedef struct
 /** The global array of switch bits, all in one place */
 __fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
-#ifdef QUEUE_SWITCHES
 U8 switch_prebounce_bits[SWITCH_BITS_SIZE];
+
 U8 switch_postbounce_bits[SWITCH_BITS_SIZE];
 
 #define MAX_QUEUED_SWITCHES 16
@@ -71,7 +71,6 @@ U8 switch_queue_head;
 U8 switch_queue_tail;
 
 U8 switch_last_service_time;
-#endif
 
 
 /** Return the switch table entry for a switch */
@@ -91,18 +90,6 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 	return lamp;
 }
 
-
-/** Initialize the switch subsystem */
-void switch_init (void)
-{
-	/* Clear the whole bit buffers */
-	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
-
-	/* Initialize the raw state based on mach_opto_mask,
-	 * so that the optos don't all trigger at initialization. */
-	memcpy (switch_raw_bits, mach_opto_mask, SWITCH_BITS_SIZE);
-	memcpy (switch_latched_bits, mach_opto_mask, SWITCH_BITS_SIZE);
-}
 
 
 /** Detect row / column shorts */
@@ -307,23 +294,13 @@ typedef struct
 void switch_lamp_pulse (void)
 {
 	lamp_pulse_data_t * const cdata = task_current_class_data (lamp_pulse_data_t);
-	bool can_pulse;
-
 	/* Although not a true leff, this fools the lamp draw to doing
 	 * the right thing. */
 	cdata->leffdata.flags = L_SHARED;
 
 	/* If the lamp is already allocated by another lamp effect,
 	then don't bother trying to do the pulse. */
-	disable_interrupts ();
-	can_pulse = lamp_leff2_test_allocated (cdata->swinfo->lamp);
-	if (can_pulse)
-		lamp_leff2_allocate (cdata->swinfo->lamp);
-	enable_interrupts ();
-
-	dbprintf ("can_pulse lamp %d = %d\n", cdata->swinfo->lamp, can_pulse);
-
-	if (can_pulse)
+	if (lamp_leff2_test_and_allocate (cdata->swinfo->lamp))
 	{
 		/* Change the state of the lamp */
 		if (lamp_test (cdata->swinfo->lamp))
@@ -356,6 +333,8 @@ void switch_sched_task (void)
 	const switch_info_t * const swinfo = switch_lookup (sw);
 
 #ifdef DEBUGGER
+	if (sw < 72)
+	{
 	dbprintf ("Handling switch ");
 	sprintf_far_string (names_of_switches + sw);
 	dbprintf1 ();
@@ -363,6 +342,7 @@ void switch_sched_task (void)
 	dbprintf (" (%d) ", sw);
 #endif
 	dbprintf ("\n");
+	}
 #endif
 
 #if 0 /* not working */
@@ -429,18 +409,42 @@ cleanup:
 	if (SW_HAS_DEVICE (swinfo))
 		device_sw_handler (SW_GET_DEVICE (swinfo));
 
-#ifndef QUEUE_SWITCHES
-	/* Debounce period after the switch has been handled. */
-	if (swinfo->postbounce == 0)
-		task_sleep (TIME_100MS);
-	else
-		task_sleep (swinfo->postbounce);
-#endif
-
 	task_exit ();
 }
 
-#ifdef QUEUE_SWITCHES
+
+/** Schedule a task to handle a switch event.
+ * In addition, the switch queue is updated to cancel prebounce and
+ * to start the postbounce period.
+ */
+void switch_schedule (const U8 sw, pending_switch_t *entry)
+{
+	/* Start a task to process the switch right away */
+	task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
+	task_set_arg (tp, sw);
+
+	if (entry)
+	{
+		/* The switch was queued and went through prebounce, so clear that */
+		bit_off (switch_prebounce_bits, sw);
+	}
+
+	/* Enter postbounce phase if 1) the switch is not edge (those are
+	 * processed every transition and so prebounce time is used for both
+	 * levels), AND 2) the postbounce config time is nonzero.
+	 *
+	 * If necessary, allocate a new queue entry for this purpose, or
+	 * just reuse the one on entry.  Order in the queue is not important. */
+	if ((!bit_test (mach_edge_switches, sw))
+		&& (switch_lookup (sw)->postbounce != 0))
+	{
+		if (!entry)
+			entry = switch_queue_add (sw);
+		entry->timer = switch_lookup(sw)->postbounce;
+		bit_on (switch_postbounce_bits, sw);
+	}
+}
+
 
 /** Add a new entry to the switch queue. */
 pending_switch_t *switch_queue_add (const switchnum_t sw)
@@ -476,41 +480,8 @@ void switch_queue_remove (pending_switch_t *entry)
 void switch_queue_init (void)
 {
 	switch_queue_head = switch_queue_tail = 0;
-}
-
-
-/** Schedule a task to handle a switch event.
- * In addition, the switch queue is updated to cancel prebounce and
- * to start the postbounce period.
- */
-void switch_schedule (const U8 sw, pending_switch_t *entry)
-{
-	/* Start a task to process the switch right away */
-	task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
-	task_set_arg (tp, sw);
-
-#ifdef QUEUE_SWITCHES
-	if (entry)
-	{
-		/* The switch was queued and went through prebounce, so clear that */
-		bit_off (switch_prebounce_bits, sw);
-	}
-
-	/* Enter postbounce phase if 1) the switch is not edge (those are
-	 * processed every transition and so prebounce time is used for both
-	 * levels), AND 2) the postbounce config time is nonzero.
-	 *
-	 * If necessary, allocate a new queue entry for this purpose, or
-	 * just reuse the one on entry.  Order in the queue is not important. */
-	if ((!bit_test (mach_edge_switches, sw))
-		&& (switch_lookup (sw)->postbounce != 0))
-	{
-		if (!entry)
-			entry = switch_queue_add (sw);
-		entry->timer = switch_lookup(sw)->postbounce;
-		bit_on (switch_postbounce_bits, sw);
-	}
-#endif
+	memset (switch_prebounce_bits, 0, SWITCH_BITS_SIZE);
+	memset (switch_postbounce_bits, 0, SWITCH_BITS_SIZE);
 }
 
 
@@ -583,9 +554,6 @@ void switch_queue_dump (void)
 	dbprintf ("\n");
 }
 
-#endif
-
-
 
 /** Idle time switch processing.  This function is called whenever there
  * are no round robin tasks to run, but no more frequently than once every
@@ -610,9 +578,7 @@ CALLSET_ENTRY (switch, idle)
 	}
 
 	/* Service the switch queue. */
-#ifdef QUEUE_SWITCHES
 	switch_service_queue ();
-#endif
 
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
@@ -645,7 +611,6 @@ CALLSET_ENTRY (switch, idle)
 		rawbits = switch_latched_bits[col];
 		rawbits ^= mach_opto_mask[col];
 
-#ifndef QUEUE_SWITCHES
 		/* Now consider that edge switches need to be processed on both
 		 * type of transitions, but other switches should only be handled on
 		 * inactive->active.  Convert rawbits to indicate "might need to process":
@@ -655,7 +620,6 @@ CALLSET_ENTRY (switch, idle)
 		 * When queueing switches, we need to consider transitions of
 		 * both types every time. */
 		rawbits |= mach_edge_switches[col];
-#endif
 
 		/* Grab the current set of pending bits, masked with rawbits.
 		 * If nonzero, it means the switch just changed state, AND the
@@ -663,20 +627,15 @@ CALLSET_ENTRY (switch, idle)
 		 */
 		pendbits &= rawbits;
 
-#ifdef QUEUE_SWITCHES
 		/* If the switch is in its postbounce phase, the transition
 		 * should be ignored, so mask it. */
 		pendbits &= ~switch_postbounce_bits[col];
-#endif
 
 		if (pendbits) /* Anything to be done on this column? */
 		{
 			/* Yes, calculate the switch number for the first row in the column */
 			U8 sw = col * 8;
-
-#ifdef QUEUE_SWITCHES
 			U8 prebounce_bits = switch_prebounce_bits[col];
-#endif
 
 			/* Iterate over all rows -- all switches on this column that changed.
 			 * But stop as soon as no more pending rows are seen */
@@ -685,7 +644,6 @@ CALLSET_ENTRY (switch, idle)
 				{
 					/* OK, the switch has changed state and is stable. */
 
-#ifdef QUEUE_SWITCHES
 					/* There are two possibilities: either the switch is
 					 * not queued, or it is in prebounce.  (Postbounce
 					 * is already taken care of above.)  We can
@@ -724,16 +682,11 @@ CALLSET_ENTRY (switch, idle)
 							}
 						}
 					}
-#else /* !QUEUE_SWITCHES */
-					switch_schedule (sw, NULL);
-#endif /* QUEUE_SWITCHES */
 				}
 
 				/* Set up for next iteration */
 				pendbits >>= 1;
-#ifdef QUEUE_SWITCHES
 				prebounce_bits >>= 1;
-#endif
 				sw++;
 			} while (pendbits);
 		}
@@ -743,20 +696,18 @@ CALLSET_ENTRY (switch, idle)
 }
 
 
-#if 0 /* just for testing */
-void bar (TASK_DECL_ARGS(U8 arg1, U8 arg2))
+/** Initialize the switch subsystem */
+void switch_init (void)
 {
-	dbprintf ("arg1 = %d\n", arg1);
-	dbprintf ("arg2 = %d\n", arg2);
-	task_exit ();
-}
+	/* Clear the whole bit buffers */
+	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
 
-void foo (void)
-{
-	task_pid_t tp = task_create_anon (bar);
-	task_push_arg (tp, (U8)10);
-	task_push_arg (tp, (U8)5);
-	task_push_args_done (tp);
+	/* Initialize the raw state based on mach_opto_mask,
+	 * so that the optos don't all trigger at initialization. */
+	memcpy (switch_raw_bits, mach_opto_mask, SWITCH_BITS_SIZE);
+	memcpy (switch_latched_bits, mach_opto_mask, SWITCH_BITS_SIZE);
+
+	/* Initialize the switch queue */
+	switch_queue_init ();
 }
-#endif
 

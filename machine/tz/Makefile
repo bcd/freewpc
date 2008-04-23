@@ -9,8 +9,6 @@ MACHINE_SCHEDULE := $(M)/tz.sched
 
 MACHINE_SCHED_FLAGS := -i tz/driver.h
 
-MUX_SRCS := build/tz-mux.c
-
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.

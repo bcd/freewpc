@@ -147,19 +147,3 @@ void animation_test_deff (void)
 	deff_exit ();
 }
 
-
-#if 0
-void exit_handler_test (void)
-{
-	__label__ sighandler;
-	void *p;
-
-	task_set_sighandler (&&sighandler);
-	p = malloc (10);
-	task_sleep_sec (3);
-sighandler:
-	free (p);
-	task_exit ();
-}
-#endif
-
