@@ -25,7 +25,6 @@ enum sim_log_class
 	SLC_TEXT,
 	/** Debug information written by the game ROM to the debugger */
 	SLC_DEBUG_PORT,
-	SLC_LAMPS,
 	SLC_SOUNDCALL,
 };
 

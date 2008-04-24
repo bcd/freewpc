@@ -197,7 +197,6 @@ void simlog (enum sim_log_class class, const char *format, ...)
 			case SLC_DEBUG: class_code = 'd'; break;
 			case SLC_TEXT: class_code = 't'; break;
 			case SLC_DEBUG_PORT: class_code = '>'; break;
-			case SLC_LAMPS: class_code = 'L'; break;
 			case SLC_SOUNDCALL: class_code = 'S'; break;
 			default: return;
 		}
@@ -372,7 +371,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 }
 #endif /* MACHINE_PIC */
 
-void linux_shutdown (void)
+__noreturn__ void linux_shutdown (void)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
 	protected_memory_save ();
