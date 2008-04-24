@@ -6,7 +6,7 @@
 # a section than it can hold, because only a base address is given --
 # there is no specified size.  Here, we scan the map file and compare
 # the final length of each section to its predetermined maximum size,
-# using a series of shell commands.  
+# using a series of shell commands.
 #
 # If any section overflows, it returns nonzero and the build will halt.
 #
@@ -15,6 +15,8 @@
 # things before it becomes critical.
 #
 
+rc=0
+
 checkpage ()
 {
 	sz=`grep " l_$1" build/freewpc.map | awk '{print $1}'`
@@ -22,25 +24,45 @@ checkpage ()
 	used=$((0x$sz));
 	avail=$(($max - 0x$sz));
 	percent_used=$(( $used * 100 / $max ));
+	dots=$(( $percent_used / 4 ));
+
+	printf "%-10.10s" $1
+
+	for (( i=0 ; $i < $dots ; i++ )); do
+		echo -n "X"
+	done
+	for (( i=$dots+1 ; $i < 25 ; i++ )); do
+		echo -n "."
+	done
+
 	if [ "$percent_used" -ge 100 ]; then
-		echo "error: section '$1' overflow" 
-		exit 1
+		echo "   error: overflow"
+		rc=1
 	fi
 	if [ "$percent_used" -gt 95 ]; then
-		echo "warning: section '$1' is $percent_used% full" 
+		echo "   warning: $percent_used% full"
+	fi
+	if [ "$percent_used" -le 95 ]; then
+		echo ""
 	fi
 	return 0
 }
 
-checkpage "direct" "0x100";
-checkpage "ram"    "0x1300";
-checkpage "local"  "0xA0";
-checkpage "nvram"  "0x800";
-checkpage "page56" "0x4000";
-checkpage "page57" "0x4000";
-checkpage "page58" "0x4000";
-checkpage "page59" "0x4000";
-checkpage "page60" "0x4000";
-checkpage "page61" "0x4000";
-checkpage "sysrom" "0x8000";
-exit 0
+make -j1 areainfo | grep 0x | while read x; do
+	checkpage $x
+done
+checkpage ".text" "0x8000";
+exit $rc
+
+#checkpage "direct" "0x100";
+#checkpage "ram"    "0x1300";
+#checkpage "local"  "0xA0";
+#checkpage "nvram"  "0x800";
+#checkpage "page56" "0x4000";
+#checkpage "page57" "0x4000";
+#checkpage "page58" "0x4000";
+#checkpage "page59" "0x4000";
+#checkpage "page60" "0x4000";
+#checkpage "page61" "0x4000";
+#checkpage ".text" "0x8000";
+exit $rc

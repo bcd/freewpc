@@ -37,16 +37,45 @@ typedef U8 sound_cmd_t;
 #define SND_TEST_ENTER			0x57
 #define SND_TEST_ESCAPE			0x58
 #define SND_TEST_SCROLL			0x59
+
+#define SND_MUSIC_FASTER		0x5A
+#define SND_MUSIC_SLOWER		0x5B
 #define SND_GET_VERSION_CMD	0x5F
+#define SND_DROP_VOLUME(x)		(0x60 + (x))
+
+/* The following sound codes don't actually play sounds, but
+ * rather issue commands to the sound board. */
+
+/** Enables an event notification from the sound board
+ * when the next sound call finishes. */
 #define SND_EVENT_ENABLE		0x76
+
+/** Requests volume change.  The next 2 bytes written
+ * will be interpreted as a volume level and a checksum. */
 #define SND_SET_VOLUME_CMD    0x79
+
+/** Says that an extended sound call is being made.  Normally,
+ * a single byte can be used to make a sound call, but that
+ * limits to 256 (theoretically).  After the EXTENDED code,
+ * the next byte specifies one of a second set of 256 calls. */
 #define SND_START_EXTENDED		0x7A
+
 #define SND_GET_VERSION_CMD2	0x7B
+
+/** Disables event notifications */
 #define SND_EVENT_DISABLE		0x7C
-#define SND_STOP_SOUND			0x7D 
+
+/** Requests all sounds to stop playing */
+#define SND_STOP_SOUND			0x7D
+
+/** Requests that music stop */
 #define SND_STOP_MUSIC			0x7E 
+
+/** Requests that the DAC stop */
 #define SND_STOP_DAC          0x7F
 
+/** This bit is set in the sound status register when
+ * there is a byte to be read by the CPU. */
 #define WPCS_READ_READY	0x01
 
 #else /* MACHINE_DCS == 1 */
@@ -78,9 +107,7 @@ typedef U16 sound_cmd_t;
 #define MUS_OFF					0
 
 #define MIN_VOLUME				0
-
 #define MAX_VOLUME				31
-
 #define DEFAULT_VOLUME			8
 
 /** Returned by the sound board when the last sound clip finishes. */

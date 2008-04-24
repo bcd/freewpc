@@ -44,6 +44,7 @@
 ; on the edges when we are not byte-aligned.
 ;
 
+	.area		ram
 	.globl	_bitmap_src
 _bitmap_src:
 	.blkw 2
@@ -60,6 +61,8 @@ _bitmap_src:
 	; bits that the image will need to be shifted "to the right"
 	; (which actually requires an arithmetic left shift).
 #define bitmap_shift m2
+
+#define erase_pattern *m2
 
 	; The main blit function.
 	;
@@ -246,7 +249,6 @@ fastshiftword7:
 	rts
 
 
-#if 0
 	; The erase function.
 	;
 	; On entry, X should point to the destination where the bitmap
@@ -256,6 +258,18 @@ fastshiftword7:
 	.area .text
 	.globl	_bitmap_erase_asm
 _bitmap_erase_asm:
+	pshs	y
+
+	; Calculate a pointer to the shift function in Y.
+	; Note, if shift is zero, then this function is a no-op,
+	; but there is still the overhead of calling/returning.
+	comb				; B = 7-B
+	andb	#7
+	aslb				; Scale by 2 instructions per shift
+	ldy	#shiftword7
+	leay	b,y
+
+	; Figure out how many bytes of zeroes there are per row.
 	lda	_bitmap_width
 	adda	#7
 	lsra
@@ -274,11 +288,17 @@ _bitmap_erase_asm:
 	sta	*_bitmap_byte_width
 	sta	*bitmap_byte_width2
 
-large_row_loop:
-	; First, deal with the left edge byte.  This looks a lot like
-	; the loop8 case above.
+	; Compute the erase pattern
 	ldd	#0xffff
 	jsr	,y
+	coma
+	comb
+	std	erase_pattern
+
+erase_large_row_loop:
+	ldd	erase_pattern
+	; First, deal with the left edge byte.  This looks a lot like
+	; the loop8 case above.
 	anda	,x
 
 	; Now, deal with the remaining input bytes (at least one).
@@ -286,19 +306,15 @@ large_row_loop:
 	; bits from the previous iteration.
 	; Because byte width is at least 1, the condition can be
 	; checked after the first iteration.
-large_middle_loop:
+erase_large_middle_loop:
 	sta	,x+
 	stb	*blit_overflow
-
-	ldd	#0xffff
-	jsr	,y
+	ldd	erase_pattern
 	anda	*blit_overflow
-
 	dec	*_bitmap_byte_width
-	bne	large_middle_loop
+	bne	erase_large_middle_loop
 
-	; Finally, whatever is in overflow needs to be ORed to the
-	; display.
+	; Finally, whatever is in overflow needs to be ANDed as well.
 	andb	1,x
 	std	,x+
 
@@ -313,7 +329,5 @@ large_middle_loop:
 	andb	#15
 	abx
 	dec	_bitmap_height
-	bne	large_row_loop
-	stu	_bitmap_src
-	puls	u,y,pc
-#endif
+	bne	erase_large_row_loop
+	puls	y,pc
