@@ -278,8 +278,8 @@ static void fontargs_render_string (void)
 		{
 			/* TODO : font_blit is applicable to more than just
 			fonts; it could be used for arbitrary-sized bitmaps. */
-			blitter (blit_dmd);
-			blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
+			blitter (wpc_dmd_addr_verify (blit_dmd));
+			blit_dmd += DMD_BYTE_WIDTH;
 		} while (likely (--font_height)); /* end for each row */
 #endif
 
