@@ -351,11 +351,14 @@ BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
 
 #
 # Memory Map
-# The first 16-bytes of the nonvolatile area are reserved.
-# PinMAME has a hack that overwrites this area.
 #
 # AREA_SETUP (name, address, length):
 # Define a new linker area.
+#
+# The first 16-bytes of the nonvolatile area are reserved.
+# PinMAME has a hack that overwrites this area.
+#
+# The size of the local area given here is the per-player value.
 #
 AREA_LIST :=
 define AREA_SETUP
@@ -368,7 +371,7 @@ endef
 
 $(eval $(call AREA_SETUP, direct,    0x0004,   0x00FC))
 $(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
-$(eval $(call AREA_SETUP, local,     0x1400,   0x00A0))
+$(eval $(call AREA_SETUP, local,     0x1400,   0x0040))
 $(eval $(call AREA_SETUP, stack,     0x1600,   0x0200,  virtual))
 $(eval $(call AREA_SETUP, nvram,     0x1810,   0x07F0))
 $(eval $(call AREA_SETUP, paged,     0x4000,   0x4000,  virtual))
@@ -963,6 +966,11 @@ info:
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
+
+.PHONY : areainfo
+areainfo:
+	@true $(foreach area,$(AREA_LIST),&& echo $(area) $(AREASIZE_$(area)))
+	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000)
 
 .PHONY : srcinfo
 srcinfo:
