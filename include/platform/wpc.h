@@ -41,12 +41,23 @@
 
 #ifdef __m6809__
 
+/** AREA_DECL is used to expose a linker area name within the C
+ * variable namespace.  It appears an external name.  The asm syntax
+ * is needed so that the normal appending of an underscore does not
+ * occur. */
 #define ASM_DECL(name) name asm (#name)
-
 #define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
+
+/** Return the base address of a linker area.  This has type (U8 *). */
 #define AREA_BASE(name) (&s_ ## name)
+
+/** Return the runtime size of a linker area.  This has type U16.
+ * This is not the maximum allowable space for the area, but rather
+ * reflects how many actual variables have been mapped there. */
 #define AREA_SIZE(name) ((U16)(&l_ ## name))
 
+/* Define externs for all of these areas.  AREA_BASE and AREA_SIZE can
+ * only be called on these. */
 AREA_DECL(direct)
 AREA_DECL(ram)
 AREA_DECL(local)
@@ -73,9 +84,16 @@ AREA_DECL(nvram)
  * There are 5 "copies" of the local area: the lowest address is active
  * for the current player up, and the next 4 are save areas to hold
  * values between players in a multi-player game. */
+
+/** The address of the current player's local variables. */
 #define LOCAL_BASE		AREA_BASE(local)
+
+/** The maximum alloted size of each player's local variables.
+ * 5x this amount is allocated, one for the "live" variables and
+ * 4 for the player save buffers. */
 #define LOCAL_SIZE		0x40U
 
+/** Returns the address of player P's save buffer. */
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
 /***************************************************************
@@ -96,9 +114,9 @@ extern U8 *linux_dmd_high_page;
 /* WPC can map up to 6 of the DMD pages into address space.
  * FreeWPC only uses page 4 (low) and page 5 (high).
  */
-#define DMD_PAGE(n)						(0x3000 + (n * 0x200))
-#define DMD_LOW_BASE 					0x3800
-#define DMD_HIGH_BASE 					0x3A00
+#define DMD_MAPPED(n)					((U8 *)0x3000 + (n * 0x200))
+#define DMD_LOW_BASE 					DMD_MAPPED(4)
+#define DMD_HIGH_BASE 					DMD_MAPPED(5)
 
 #endif /* CONFIG_NATIVE */
 
