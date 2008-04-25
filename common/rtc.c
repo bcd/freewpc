@@ -177,9 +177,9 @@ static void rtc_hw_read (void)
  * year, month, and day as determined from the simulator's
  * operating system.  On real hardware, this value would need
  * to be configured in the utilities menu. */
+#ifdef CONFIG_PINMAME
 static void rtc_pinmame_read (void)
 {
-#ifdef CONFIG_PINMAME
 	struct wpc_pinmame_clock_data *clock_data;
 
 	clock_data = (struct wpc_pinmame_clock_data *)0x1800;
@@ -194,8 +194,8 @@ static void rtc_pinmame_read (void)
 		csum_area_update (&rtc_csum_info);
 		wpc_nvram_put ();
 	}
-#endif
 }
+#endif
 
 
 void rtc_factory_reset (void)
@@ -213,12 +213,24 @@ void rtc_factory_reset (void)
 
 CALLSET_ENTRY (rtc, init)
 {
+#ifdef CONFIG_PINMAME
 	/* Once, during initialization, read the values of year, month, and
 	day from memory locations that PinMAME writes.  It gets these
 	from the system on which it is running.  Afterwards, FreeWPC will
 	increment these correctly.  (And therefore, clock changes on the
 	host system are ignored.) */
 	rtc_pinmame_read ();
+#elif defined (CONFIG_NATIVE)
+	/* TODO - should read this from the native system */
+	wpc_nvram_get ();
+	year = 2008;
+	month = 4;
+	day = 1;
+	rtc_calc_day_of_week ();
+	rtc_normalize ();
+	csum_area_update (&rtc_csum_info);
+	wpc_nvram_put ();
+#endif
 }
 
 
