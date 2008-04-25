@@ -288,10 +288,24 @@ void dmd_show2 (void)
 		dmd_do_transition ();
 	else
 	{
-		disable_firq ();
+		/* Changing both the active dark and bright page
+		must be atomic in order to prevent visual artifacts
+		from occurring.  Without such, portions of the
+		old image and new image would be displayed simultaneously,
+		but not in any meaningful way, due to the way images are
+		divided into planes.
+		   Earlier, this was done solely by disabling the FIRQ,
+		which masks the DMD interrupt.  However, this did not
+		keep IRQ disabled.  It was possible for IRQ to occur
+		in between the two writes, which could take some time
+		and would therefore keep the display from refreshing
+		for much longer.  The effect is that only part of the image
+		appears during that window.  So, we must disable IRQ as well
+		here. */
+		disable_interrupts ();
 		dmd_dark_page = dmd_low_page;
 		dmd_bright_page = dmd_high_page;
-		enable_firq ();
+		enable_interrupts ();
 	}
 }
 
