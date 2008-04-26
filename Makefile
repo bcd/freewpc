@@ -88,7 +88,6 @@ PLATFORM_DIR = platform/$(PLATFORM)
 #######################################################################
 
 .PHONY : default_target
-# default_target : clean_err check_prereqs platform_target post_compile
 
 default_target : post_compile
 post_compile : platform_target
