@@ -19,7 +19,7 @@ _dmd_shadow:
 	sta	words_per_row
 shadow_copy_top_row:
 	ldd	,x++
-	stu	,u++
+	std	,u++
 	dec	words_per_row
 	bne	shadow_copy_top_row
 
@@ -37,6 +37,7 @@ shadow_copy_top_row:
 shadow_copy_rows:
 	lda	#8
 	sta	words_per_row
+	inc	_task_dispatching_ok
 shadow_copy_row:
 	ldd	,x
 	std	16,u
@@ -57,7 +58,7 @@ shadow_copy_row:
 	sta	words_per_row
 shadow_copy_bottom_row:
 	ldd	,x++
-	stu	,u++
+	std	,u++
 	dec	words_per_row
 	bne	shadow_copy_bottom_row
 
@@ -84,6 +85,7 @@ shadow_copy_cols1:
 	ora	temp
 	orb	temp+1
 	std	,x++
+	inc	_task_dispatching_ok
 	dec	loop_count
 	bne	shadow_copy_cols1
 
@@ -95,6 +97,7 @@ shadow_copy_cols1:
 shadow_copy_cols2_rows:
 	lda	#15
 	sta	words_per_row
+	inc	_task_dispatching_ok
 shadow_copy_cols2_row:
 	ldd	,u
 	; All that need happen is that if either the LSB of A or the
@@ -121,5 +124,4 @@ next_row:
 	leau	2,u
 	dec	row_count
 	bne	shadow_copy_cols2_rows
-
 	puls	u,pc
