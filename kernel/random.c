@@ -50,7 +50,6 @@ random (void)
 
 	r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
-	//r ^= ac_zc_count;
 	r ^= firq_count;
 	return (r >> 8);
 }
