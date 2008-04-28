@@ -46,7 +46,7 @@ shadow_copy_row:
 	std	-16,u
 	ldd	,x++
 	ora	,u
-	orb	,u
+	orb	1,u
 	std	,u++
 	dec	words_per_row
 	bne	shadow_copy_row
@@ -74,18 +74,17 @@ shadow_copy_bottom_row:
 	clr	loop_count
 shadow_copy_cols1:
 	ldd	,x
-	lslb
-	rola
+	lsla
+	rolb
 	ora	,x
 	orb	1,x
 	std	temp
 	ldd	,x
-	lsra
-	rorb
+	lsrb
+	rora
 	ora	temp
 	orb	temp+1
 	std	,x++
-	inc	_task_dispatching_ok
 	dec	loop_count
 	bne	shadow_copy_cols1
 
@@ -102,14 +101,14 @@ shadow_copy_cols2_row:
 	ldd	,u
 	; All that need happen is that if either the LSB of A or the
 	; MSB of B is a 1, then both need to be a 1.
-	bita	#0x01
+	bita	#0x80
 	bne	modify
-	bitb	#0x80
+	bitb	#0x01
 	beq	no_modify
 
 modify:
-	ora	#0x01
-	orb	#0x80
+	ora	#0x80
+	orb	#0x01
 	std	,u++
 	dec	words_per_row
 	bne	shadow_copy_cols2_row
@@ -124,4 +123,7 @@ next_row:
 	leau	2,u
 	dec	row_count
 	bne	shadow_copy_cols2_rows
+#if 0
+#endif
+
 	puls	u,pc
