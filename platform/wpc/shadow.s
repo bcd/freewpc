@@ -2,10 +2,9 @@
 DMD_LOW_BUFFER = 0x3800
 DMD_HIGH_BUFFER = 0x3A00
 
-#define loop_count *m0
-#define row_count *m1
-#define words_per_row *m2
-#define temp *m2
+#define temp *m0
+#define row_count *m2
+#define words_per_row *m3
 
 	.area		.text
 	.globl	_dmd_shadow
@@ -32,6 +31,14 @@ shadow_copy_top_row:
 	; It is relatively fast because we only use 16-bit loads/stores.
 	; This gets the shadowing right in the vertical dimension.
 	; X and U are already correct set from above.
+	;
+	; In the first iteration, we get columns right except for the
+	; boundary between adjacent 16-bit values.
+	; Note also that the source image is not used at all here;
+	; we are completely operating on the final image.  We can
+	; use X as it already advanced from low to high from the
+	; previous instructions.
+
 	lda	#30
 	sta	row_count
 shadow_copy_rows:
@@ -44,7 +51,17 @@ shadow_copy_row:
 	ora	-16,u
 	orb	-15,u
 	std	-16,u
+	ldd	,x
+	lsla
+	rolb
+	ora	,x
+	orb	1,x
+	std	temp
 	ldd	,x++
+	lsrb
+	rora
+	ora	temp
+	orb	temp+1
 	ora	,u
 	orb	1,u
 	std	,u++
@@ -61,32 +78,6 @@ shadow_copy_bottom_row:
 	std	,u++
 	dec	words_per_row
 	bne	shadow_copy_bottom_row
-
-	; Shadow copy the columns.
-	; In the first iteration, we get it right except for the
-	; boundary between adjacent 16-bit values.
-	; Note also that the source image is not used at all here;
-	; we are completely operating on the final image.  We can
-	; use X as it already advanced from low to high from the
-	; previous instructions.
-	; There are 256 words to be manipulated.  loop_count rolls
-	; around completely.
-	clr	loop_count
-shadow_copy_cols1:
-	ldd	,x
-	lsla
-	rolb
-	ora	,x
-	orb	1,x
-	std	temp
-	ldd	,x
-	lsrb
-	rora
-	ora	temp
-	orb	temp+1
-	std	,x++
-	dec	loop_count
-	bne	shadow_copy_cols1
 
 	; A second pass is needed to fix up the boundary cases.
 	; There are only 15 per row, and we don't wraparound.
