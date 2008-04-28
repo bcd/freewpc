@@ -78,13 +78,11 @@ U8 player_up;
 /** The number of the current ball in play */
 U8 ball_up;
 
-#ifdef CONFIG_TIMED_GAME /* TODO - remove this define, it is adjustable */
 /** Nonzero if the current ball will automatically end after a certain
 period of time.  The value indicates the number of seconds. */
 U8 timed_game_timer;
 
 U8 timed_game_suspend_count;
-#endif
 
 void start_ball (void);
 
@@ -467,6 +465,7 @@ void start_ball (void)
 	 */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
+	/* TODO : start a timer to a reminder to plunge the ball */
 	if (ball_up == system_config.balls_per_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
