@@ -39,10 +39,6 @@
 
 #include <freewpc.h>
 
-/** aslink gets angry if there are no local variables declared, so always
- * declare at least one here */
-__local__ U8 __unused_local__;
-
 /** In simulation, we have to declare the save areas explicitly. */
 #ifdef CONFIG_NATIVE
 U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
