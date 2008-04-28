@@ -35,8 +35,11 @@ SAVED_STACK_SIZE   = 10
 DELAY_OFF          = 11
 AUX_STACK_OFF      = 15
 STACK_SAVE_OFF     = 18
-TASK_STACK_SIZE    = 40
 
+; Because we save in multiples of 8 bytes at a time,
+; this should always be a multiple of 8 also.
+TASK_SMALL_SIZE    = 40
+TASK_LARGE_SIZE    = 64
 
 	.module task_6809.s
 
@@ -69,9 +72,9 @@ _task_save:
 	bgt	_stack_underflow
 #endif
 
-	;;; The total number of bytes saved can be precomputed -- it
+	;;; The total number of bytes to be saved can be precomputed -- it
 	;;; is STACK_BASE - s.  If this number is greater than
-	;;; TASK_STACK_SIZE, then more work needs to be done here.
+	;;; TASK_SMALL_SIZE, then more work needs to be done here.
 	tfr	s,d                    ; 6 cycles
 	subb	#<STACK_BASE           ; 4 cycles
 	negb                         ; 2 cycles
@@ -116,7 +119,7 @@ stack_debug_done:
 	beq	save_empty_stack
 
 	; Check for stack too large.  This is currently a hard stop.
-	cmpb  #TASK_STACK_SIZE       ; 2 cycles
+	cmpb  #TASK_SMALL_SIZE       ; 2 cycles
 	bgt   _stack_too_large       ; 2 cycles
 
 	; Round number of bytes up to the next multiple of 8.
@@ -125,19 +128,20 @@ stack_debug_done:
 	addb	#7                     ; 4 cycles
 	andb	#~7                    ; 4 cycles
 
-	; Set the destination address to the top (high address).
-	leau	STACK_SAVE_OFF+TASK_STACK_SIZE,x ; 5 cycles
+	; Set the destination address to the top (high address) of
+	; the task block.
+	leau	STACK_SAVE_OFF+TASK_SMALL_SIZE,x ; 5 cycles
 
 	;;; Copy b blocks of 8-bytes at a time.
 	;;; This takes 42 cycles per 8 bytes (about twice as
 	;;; fast as before!)
-1$:
+save_loop:
 	puls	x,y                    ; 9 cycles
 	pshu	x,y                    ; 9 cycles
 	puls	x,y                    ; 9 cycles
 	pshu	x,y                    ; 9 cycles
 	subb	#8	                    ; 4 cycles
-	bne	1$                     ; 2 cycles
+	bne	save_loop              ; 2 cycles
 
 	; x was killed in the core copy loop, need to restore it
 	ldx	*_task_current         ; 5 cycles
@@ -150,6 +154,17 @@ save_empty_stack:
 	jmp   _task_dispatcher
 
 _stack_too_large:
+#if 0
+	cmpb	#TASK_LARGE_SIZE
+	bgt	_stack_large_error
+
+	; Allocate a new block for the task's stack.
+	jsr	_stack_expand_stack
+	tfr	x,u
+	bra	save_loop
+#endif
+
+_stack_large_error:
 	; When debug support is builtin, dump the contents of
 	; the large stack so we can see what is going on,
 	; before halting the system.
@@ -201,7 +216,7 @@ _task_restore:
 	nega
 
 	; Set the destination address
-	leau	STACK_SAVE_OFF+TASK_STACK_SIZE,x ; 5 cycles
+	leau	STACK_SAVE_OFF+TASK_SMALL_SIZE,x ; 5 cycles
 	negb                         ; 2 cycles
 	leau	b,u                    ; 5 cycles
 
