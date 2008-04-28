@@ -246,11 +246,21 @@ extern inline void wpc_parport_write (U8 data)
 
 /** When the lock register(s) contain these values, the upper
  * N bytes of the RAM are write protected. */
-#define RAM_LOCK_4K			0x0
-#define RAM_LOCK_2K			0x1
-#define RAM_LOCK_1K			0x3
-#define RAM_LOCK_512			0x7
-#define RAM_LOCK_256			0xF
+#define RAM_LOCK_4K        0x0 /* up to 0x1000 is unprotected */
+#define RAM_LOCK_2K        0x1 /* up to 0x1800 is unprotected */
+#define RAM_LOCK_1K        0x3 /* up to 0x1C00 is unprotected */
+#define RAM_LOCK_512       0x7 /* up to 0x1E00 is unprotected */
+#define RAM_LOCK_256       0xF /* up to 0x1F00 is unprotected */
+#define RAM_LOCK_NONE      0x10 /* up to 0x2000 is unprotected */
+
+/** Another set of defines for the same purpose, but expressed
+in terms of the base address of the protected memory area. */
+#define PROT_BASE_0x1000   RAM_LOCK_4K
+#define PROT_BASE_0x1800   RAM_LOCK_2K
+#define PROT_BASE_0x1C00   RAM_LOCK_1K
+#define PROT_BASE_0x1E00   RAM_LOCK_512
+#define PROT_BASE_0x1F00   RAM_LOCK_256
+#define PROT_BASE_NONE     RAM_LOCK_NONE
 
 /** When the lock register contains this value, the memory
  * protection circuit is enabled, and the protected

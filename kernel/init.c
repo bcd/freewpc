@@ -70,7 +70,7 @@ __noreturn__ void freewpc_init (void)
 
 	/* Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
-	wpc_set_ram_protect_size (RAM_LOCK_2K);
+	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
 
 	/* Initialize the ROM page register 
@@ -214,6 +214,7 @@ __noreturn__ void freewpc_init (void)
  * This check occurs every 128 IRQs.  No task should run for
  * that long without giving up control.  If the flag stays false
  * between 2 consecutive calls, we invoke a fatal error and reset.
+ * This implies the same task was running for between 125 and 250ms.
  *
  * NOTE: if a task _really_ does take that long to execute before
  * switching out, it should set "task_dispatching_ok = TRUE"
