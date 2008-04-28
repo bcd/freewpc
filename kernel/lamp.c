@@ -74,7 +74,9 @@ void lamp_init (void)
 }
 
 
-/** Runs periodically to invert any lamps in the flashing state */
+/** Runs periodically to invert any lamps in the flashing state.
+ * (This is hard realtime now; it could probably be dropped in
+ * priority, though.) */
 void lamp_flash_rtt (void)
 {
 	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
@@ -203,6 +205,7 @@ bool bit_test (const_bitset matrix, U8 bit)
 
 bool bit_test_all_on (const_bitset matrix)
 {
+	/* TODO : is this right? */
 	return matrix[0] && matrix[1]
 		&& matrix[2] && matrix[3]
 		&& matrix[4] && matrix[5]
@@ -324,7 +327,17 @@ bool lamp_test (lampnum_t lamp)
 }
 
 bool lamp_test_off (lampnum_t lamp)
-{ 
+{
+	/* Note: gcc6809 generates inefficient code for this.
+	This would be better:
+	   if (rc) return (0) else return (rc);
+	gcc is insisting on returning 0/1, when zero/nonzero is
+	sufficient.
+    */
+#if 0
+	bool t = bit_test (lamp_matrix, lamp);
+	return t ? 0 : t;
+#endif
 	return !bit_test (lamp_matrix, lamp);
 }
 
@@ -349,6 +362,7 @@ bool lamp_flash_test (lampnum_t lamp)
 }
 
 
+/** The task that calls all of the 'lamp_update' callset entries. */
 void lamp_update_task (void)
 {
 	if (in_live_game)
@@ -357,15 +371,33 @@ void lamp_update_task (void)
 }
 
 
+/** Request that the lamps be updated.
+ * Lamp update runs in a separate task context, and it
+ * only works during a game. */
 void lamp_update_request (void)
 {
 	if (in_live_game)
-		task_create_gid1 (GID_LAMP_UPDATE, lamp_update_task);
+		task_recreate_gid (GID_LAMP_UPDATE, lamp_update_task);
+
+	/* Handle 'system lamps' here.  Right now that's just
+	the start button. */
 	if (!in_test)
 		lamp_start_update ();
 }
 
 
+/** Periodically update the lamps.  Currently this is done
+ * every 200ms (every other call to the 100ms callback).
+ *
+ * This is intended to be used during a game for recomputing
+ * the states of lamps with multiple conditions that feed into
+ * the state.  Rather than do this everytime something changes,
+ * it is done periodically on all lamps instead.
+ *
+ * There is a performance penalty for doing this too frequently,
+ * but it simplifies the game logic considerably and also
+ * makes bugs less likely.  Also, 200ms is not too often and it
+ * is still frequent enough for it not to be noticeable. */
 CALLSET_ENTRY (lamp, idle_every_100ms)
 {
 	static U8 every_other_time = 0;
