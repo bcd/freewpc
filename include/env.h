@@ -91,7 +91,6 @@ typedef U8 flag_t;
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 #define __xbmprog__     __far__(C_STRING(PRG_PAGE))
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
-#define __mux__         __far__(C_STRING(MUX_PAGE))
 #else
 #define __far__(x)
 #define __system__
@@ -103,7 +102,6 @@ typedef U8 flag_t;
 #define __machine__
 #define __xbmprog__
 #define __effect__
-#define __mux__
 #endif
 
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
