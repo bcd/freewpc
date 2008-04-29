@@ -1,8 +1,6 @@
 
 DMD_PAGE_WIDTH=512
 
-LOOP_COUNT=5
-
 	; Keep loop_count in a fast direct memory slot.
 #define loop_count *m0
 
@@ -10,12 +8,12 @@ LOOP_COUNT=5
 
 	;--------------------------------------------------------
 	;
-	; void dmd_zero (void *dst);
+	; void dmd_clean_page (void *dst);
 	;
 	; X = pointer to display page
 	;--------------------------------------------------------
-	.globl _dmd_zero
-_dmd_zero:
+	.globl _dmd_clean_page
+_dmd_clean_page:
 	clrb
 
 	;--------------------------------------------------------
@@ -31,7 +29,7 @@ _dmd_memset:
 
 	leau	DMD_PAGE_WIDTH,x
 
-	lda	#LOOP_COUNT
+	lda	#5
 	sta	loop_count
 
 	tfr	b,a

@@ -40,6 +40,12 @@
  * simultaneously -- only 6 at a time are mapped. */
 #define DMD_PAGE_COUNT 16
 
+/** The number of lookaside frames */
+#define DMD_LOOKASIDE_FRAME_COUNT 2
+
+#define DMD_LOOKASIDE_PAGE_COUNT (DMD_LOOKASIDE_FRAME_COUNT * 2)
+
+#define DMD_ALLOC_PAGE_COUNT (DMD_PAGE_COUNT - DMD_LOOKASIDE_PAGE_COUNT)
 
 /** Coordinates that are aligned various ways */
 #define DMD_CENTER_X (DMD_PIXEL_WIDTH / 2)
@@ -176,18 +182,25 @@ extern inline U8 wpc_dmd_get_high_page (void)
 	return dmd_high_page;
 }
 
+extern inline dmd_pagenum_t dmd_get_lookaside (const U8 num)
+{
+	return DMD_ALLOC_PAGE_COUNT + num * 2;
+}
+
 
 void dmd_init (void);
 extern __fastram__ void (*dmd_rtt) (void);
 void dmd_alloc_low (void);
 void dmd_alloc_high (void);
 void dmd_alloc_low_high (void);
+void dmd_map_low_high (dmd_pagenum_t page);
 void dmd_show_low (void);
 void dmd_show_high (void);
 void dmd_show_other (void);
 void dmd_flip_low_high (void);
 void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t dbuf);
+void dmd_memset (dmd_buffer_t dbuf, U8 val);
 void dmd_clean_page_low (void);
 void dmd_clean_page_high (void);
 void dmd_fill_page_low (void);
@@ -210,6 +223,24 @@ void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
 const U8 *dmd_draw_fif1 (const U8 *fif);
+#ifdef __m6809__
+void dmd_and_page (void);
+void dmd_or_page (void);
+void dmd_xor_page (void);
+void dmd_shadow_copy (void);
+#else
+#define dmd_and_page null_function
+#define dmd_or_page null_function
+#define dmd_xor_page null_function
+#define dmd_shadow_copy null_function
+#endif
+void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
+
+extern inline void dmd_map_lookaside (const U8 num)
+{
+	dmd_map_low_high ( dmd_get_lookaside (num) );
+}
+
 
 #define dmd_draw_fif(fif) \
 do { \
