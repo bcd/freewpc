@@ -415,7 +415,7 @@ void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
 			dmd_base[hoff] &= mask;
 	}
 }
-#endif /* NOTUSED */
+#endif
 
 
 /** Calculate font_string_width and font_string_height

@@ -177,6 +177,7 @@ void dmd_rtt1 (void)
 
 void dmd_rtt2 (void)
 {
+	wpc_dmd_set_visible_page (dmd_bright_page);
 	wpc_dmd_set_firq_row (30);
 	dmd_rtt = dmd_rtt0;
 }
@@ -192,11 +193,12 @@ void dmd_rtt2 (void)
  *
  * This function does not map the new pages into memory.
  */
-static dmd_pagenum_t dmd_alloc (void)
+static __attribute__((noinline)) dmd_pagenum_t dmd_alloc (void)
 {
 	dmd_pagenum_t page = dmd_free_page;
 	dmd_free_page += 2;
-	dmd_free_page %= DMD_PAGE_COUNT;
+	if (dmd_free_page >= DMD_ALLOC_PAGE_COUNT)
+		dmd_free_page = 0;
 	return page;
 }
 
@@ -218,6 +220,13 @@ void dmd_alloc_low (void)
 void dmd_alloc_high (void)
 {
 	wpc_dmd_set_high_page (dmd_alloc ());	
+}
+
+
+void dmd_map_low_high (dmd_pagenum_t page)
+{
+	wpc_dmd_set_low_page (page);
+	wpc_dmd_set_high_page (page + 1);
 }
 
 
@@ -310,26 +319,26 @@ void dmd_show2 (void)
 }
 
 
+/**
+ * Clean an entire DMD page.  This is the C portable version
+ * of the function; there is a special assembler version of this
+ * for the 6809. */
+#ifndef __m6809__
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
-#ifdef __m6809__
-	extern void dmd_zero (void *);
-	dmd_zero (dbuf);
-#else
 	__blockclear16 (dbuf, DMD_PAGE_SIZE);
-#endif
 
 #ifdef CONFIG_UI
 	extern void ui_clear_dmd_text (int);
 	ui_clear_dmd_text ((dbuf == dmd_low_buffer) ? dmd_low_page : dmd_high_page);
 #endif
 }
+#endif /* __m6809__ */
 
 
 void dmd_fill_page_low (void)
 {
 #ifdef __m6809__
-	extern void dmd_memset (void *, U8 c);
 	dmd_memset (dmd_low_buffer, 0xFF);
 #else
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
@@ -674,6 +683,26 @@ void dmd_do_transition (void)
 	}
 	wpc_pop_page ();
 	dmd_transition = NULL;
+}
+
+
+void dmd_apply_lookaside2 (U8 num, void (*apply)(void))
+{
+	const U8 low = wpc_dmd_get_low_page ();
+	const U8 high = wpc_dmd_get_high_page ();
+	const U8 apply_low = dmd_get_lookaside (0);
+	const U8 apply_high = apply_low+1;
+
+	/* Note: this currently takes about 18000 cycles, or 9ms.  Each
+	 * page AND/OR operation is the majority of the time, each about
+	 * 9000 cycles or 4.5ms */
+	wpc_dmd_set_high_page (apply_low);
+	apply ();
+	wpc_dmd_set_low_page (high);
+	wpc_dmd_set_high_page (apply_high);
+	apply ();
+	wpc_dmd_set_low_page (low);
+	wpc_dmd_set_high_page (high);
 }
 
 
