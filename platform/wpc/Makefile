@@ -16,7 +16,9 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
 CFLAGS = $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+ifneq ($(GCC_VERSION),3.4.6)
 SOFTREG_OPTIONS := -msoft-reg-count=4 -DSOFT_REG_COUNT=4
+endif
 
 # Optional CFLAGS based on configuration options
 
@@ -40,9 +42,14 @@ KERNEL_HW_OBJS += $(P)/div10.o $(P)/main.o $(P)/task.o $(P)/vector.o
 
 KERNEL_SW_OBJS += $(P)/malloc.o
 
-KERNEL_ASM_OBJS += $(P)/dmd.o $(P)/farcall.o $(P)/task_6809.o $(P)/start.o $(P)/bitmap.o
+KERNEL_ASM_OBJS += $(P)/dmd.o
+KERNEL_ASM_OBJS += $(P)/farcall.o
+KERNEL_ASM_OBJS += $(P)/task_6809.o
+KERNEL_ASM_OBJS += $(P)/start.o
+KERNEL_ASM_OBJS += $(P)/bitmap.o
+KERNEL_ASM_OBJS += $(P)/dot.o
 
-COMMON_BASIC_OBJS += $(P)/math.o
+COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
 CALLSET_FLAGS += -D platform/wpc
 
