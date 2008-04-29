@@ -25,7 +25,7 @@
 ; - Bits are shifted at most once.  Before, for each byte, we did two shifts.
 ; The second shift was even worse because we negated the shift count too.
 ; Now, every input byte is shifted exactly one time.  If it is not needed
-; right away, the bits are saved in an 'overflow' register that are used on
+; right away, the bits are saved in an 'overflow' register that is used on
 ; the next iteration.
 ;
 ; - Optimal code is added for some common cases, where the byte width of the
@@ -142,6 +142,13 @@ loop16:
 
 	; do large handles larger bitmaps.  On entry, a is the
 	; bitmap width.
+	;
+	; TODO: for a large bitmap, the "jsr"s throughout are the
+	; most inefficient part of the algorithm.  There could be
+	; dozens of these calls.
+	; Consider creating a variant of do_large per possible shift
+	; value, thereby eliminating that overhead at the expense
+	; of code bloat.
 do_large:
 	; Figure out how many bytes of input data there are per row.
 	; There must be at least 2 ... maybe more.
@@ -213,6 +220,7 @@ large_middle_loop:
 	; call and 5 to return... average of 26 cycles.
 	; Note each section must be exactly 2 bytes long for the
 	; code above that calculates the start address to work.
+	; (Cycle counts: 12, 16, 20, 24, 28, 32, 36, 29)
 shiftword7:
 	bra	fastshiftword7  ; see below, this case is optimized
 shiftword6:
@@ -255,6 +263,8 @@ fastshiftword7:
 	; should be drawn, and B should be the shift value (0-7).  Both
 	; registers are call-clobbered.  bitmap_width and bitmap_height
 	; should contain the dimensions of the region to be erased.
+	; This routine is basically a copy of the 'large loop' blit
+	; function above, but with source data assumed to be all zeroes.
 	.area .text
 	.globl	_bitmap_erase_asm
 _bitmap_erase_asm:
