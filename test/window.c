@@ -1069,6 +1069,35 @@ void menu_down (void)
 }
 
 
+void menu_left_flipper_task (void)
+{
+	task_sleep (TIME_66MS);
+	if (!switch_poll_logical (SW_RIGHT_BUTTON))
+		menu_down ();
+	else
+		window_pop ();
+}
+
+void menu_right_flipper_task (void)
+{
+	task_sleep (TIME_66MS);
+	if (!switch_poll_logical (SW_RIGHT_BUTTON))
+		menu_up ();
+	else
+		window_pop ();
+}
+
+
+void menu_left_flipper (void)
+{
+	task_create_gid1 (GID_MENU_FLIPPER, menu_left_flipper_task);
+}
+
+void menu_right_flipper (void)
+{
+	task_create_gid1 (GID_MENU_FLIPPER, menu_right_flipper_task);
+}
+
 struct window_ops menu_window = {
 	DEFAULT_WINDOW,
 	.init = menu_init,
@@ -1076,6 +1105,9 @@ struct window_ops menu_window = {
 	.enter = menu_enter,
 	.up = menu_up,
 	.down = menu_down,
+	.left = menu_left_flipper,
+	.right = menu_right_flipper,
+	.start = menu_enter,
 };
 
 /**********************************************************/
