@@ -53,16 +53,3 @@ make -j1 areainfo | grep 0x | while read x; do
 done
 checkpage ".text" "0x8000";
 exit $rc
-
-#checkpage "direct" "0x100";
-#checkpage "ram"    "0x1300";
-#checkpage "local"  "0xA0";
-#checkpage "nvram"  "0x800";
-#checkpage "page56" "0x4000";
-#checkpage "page57" "0x4000";
-#checkpage "page58" "0x4000";
-#checkpage "page59" "0x4000";
-#checkpage "page60" "0x4000";
-#checkpage "page61" "0x4000";
-#checkpage ".text" "0x8000";
-exit $rc
