@@ -64,6 +64,19 @@
 /** The type of a page number */
 typedef U8 dmd_pagenum_t;
 
+/** The type of a page pair, which tracks the two pages
+needed to display a 4-color image.  Normally, the
+dark and bright page numbers are consecutive, but for
+mono images, they could be the same value. */
+typedef union
+{
+	struct {
+		dmd_pagenum_t first;
+		dmd_pagenum_t second;
+	} u;
+	U16 pair;
+} dmd_pagepair_t;
+
 /** The type of a page buffer pointer */
 typedef U8 *dmd_buffer_t;
 
@@ -116,6 +129,13 @@ typedef struct
 extern U8 *dmd_trans_data_ptr;
 extern bool dmd_in_transition;
 extern dmd_transition_t *dmd_transition;
+extern dmd_pagepair_t dmd_mapped_pages;
+extern dmd_pagepair_t dmd_visible_pages;
+
+#define dmd_low_page dmd_mapped_pages.u.first
+#define dmd_high_page dmd_mapped_pages.u.second
+#define dmd_dark_page dmd_visible_pages.u.first
+#define dmd_bright_page dmd_visible_pages.u.second
 
 extern dmd_transition_t 
 	trans_scroll_up,
@@ -158,27 +178,33 @@ extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
  * variables.  Then reads can be done using the cached values.
  */
 
+extern inline dmd_pagepair_t wpc_dmd_get_mapped (void)
+{
+	return dmd_mapped_pages;
+}
+
+extern inline void wpc_dmd_set_mapped (dmd_pagepair_t mapping)
+{
+	dmd_mapped_pages = mapping;
+}
+
 extern inline void wpc_dmd_set_low_page (U8 val)
 {
-	extern U8 dmd_low_page;
 	wpc_asic_write (WPC_DMD_LOW_PAGE, dmd_low_page = val);
 }
 
 extern inline U8 wpc_dmd_get_low_page (void)
 {
-	extern U8 dmd_low_page;
 	return dmd_low_page;
 }
 
 extern inline void wpc_dmd_set_high_page (U8 val)
 {
-	extern U8 dmd_high_page;
 	wpc_asic_write (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
 }
 
 extern inline U8 wpc_dmd_get_high_page (void)
 {
-	extern U8 dmd_high_page;
 	return dmd_high_page;
 }
 
@@ -205,7 +231,6 @@ void dmd_clean_page_low (void);
 void dmd_clean_page_high (void);
 void dmd_fill_page_low (void);
 void dmd_invert_page (dmd_buffer_t dbuf);
-void dmd_mask_page (dmd_buffer_t dbuf, U16 mask);
 void dmd_copy_page (dmd_buffer_t dst, const dmd_buffer_t src);
 void dmd_copy_low_to_high (void);
 void dmd_alloc_low_clean (void);
@@ -227,7 +252,7 @@ const U8 *dmd_draw_fif1 (const U8 *fif);
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
-void dmd_shadow_copy (void);
+__transition__ void dmd_shadow_copy (void);
 #else
 #define dmd_and_page null_function
 #define dmd_or_page null_function

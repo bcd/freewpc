@@ -69,8 +69,7 @@ dmd_pagenum_t dmd_free_page;
 /** Low/High cache the current pages that are mapped into
  * visible memory.  Note that you can't read the I/O
  * register directly; they are write-only. */
-dmd_pagenum_t dmd_low_page;
-dmd_pagenum_t dmd_high_page;
+dmd_pagepair_t dmd_mapped_pages;
 
 /** Dark/Bright store the 2 pages that are used to actually
  * draw on the display.  These values are programmed into
@@ -80,9 +79,7 @@ dmd_pagenum_t dmd_high_page;
  * is shown 2/3 of the time.  (The brightest pixels are
  * those that are set in both of the pages at the same time.)
  */
-__fastram__ dmd_pagenum_t dmd_dark_page;
-__fastram__ dmd_pagenum_t dmd_bright_page;
-
+__fastram__ dmd_pagepair_t dmd_visible_pages;
 
 /** dmd_show_hook is normally set to a nop function.
  * However, whenever a deff is started/stopped that defines
@@ -247,7 +244,7 @@ void dmd_alloc_low_high (void)
  */
 void dmd_show_low (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 		dmd_dark_page = dmd_bright_page = dmd_low_page;
@@ -255,7 +252,7 @@ void dmd_show_low (void)
 
 void dmd_show_high (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 		dmd_dark_page = dmd_bright_page = dmd_high_page;
@@ -293,7 +290,7 @@ void dmd_show_other (void)
  */
 void dmd_show2 (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 	{
@@ -312,8 +309,12 @@ void dmd_show2 (void)
 		appears during that window.  So, we must disable IRQ as well
 		here. */
 		disable_interrupts ();
+#if 0
 		dmd_dark_page = dmd_low_page;
 		dmd_bright_page = dmd_high_page;
+#else
+		dmd_visible_pages = dmd_mapped_pages;
+#endif
 		enable_interrupts ();
 	}
 }
@@ -374,33 +375,6 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 		dbuf16++;
 		*dbuf16 = ~*dbuf16;
 		dbuf16++;
-	}
-}
-
-
-void dmd_mask_page (dmd_buffer_t dbuf, U16 mask)
-{
-	register int16_t count = DMD_PAGE_SIZE / (2 * 8);
-	register U16 *dbuf16 = (U16 *)dbuf;
-	while (--count >= 0)
-	{
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		mask = ~mask;
 	}
 }
 
@@ -690,7 +664,7 @@ void dmd_apply_lookaside2 (U8 num, void (*apply)(void))
 {
 	const U8 low = wpc_dmd_get_low_page ();
 	const U8 high = wpc_dmd_get_high_page ();
-	const U8 apply_low = dmd_get_lookaside (0);
+	const U8 apply_low = dmd_get_lookaside (num);
 	const U8 apply_high = apply_low+1;
 
 	/* Note: this currently takes about 18000 cycles, or 9ms.  Each
