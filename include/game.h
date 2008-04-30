@@ -31,9 +31,7 @@ extern U8 ball_in_play;
 extern __nvram__ U8 num_players;
 extern U8 player_up;
 extern U8 ball_up;
-#ifdef CONFIG_TIMED_GAME
 extern U8 timed_game_timer;
-#endif
 extern U8 tournament_mode_enabled;
 
 #define in_live_game		(in_game && !in_tilt)
