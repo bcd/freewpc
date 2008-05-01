@@ -156,7 +156,53 @@ void amode_kill_music (void)
 }
 
 
+void dmd_apply_text_lookaside (dmd_pagepair_t dst, U8 src)
+{
+	wpc_dmd_set_low_page (dst.u.first);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
+	dmd_and_page ();
+	wpc_dmd_set_low_page (dst.u.second);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
+	dmd_and_page ();
+
+	wpc_dmd_set_low_page (dst.u.first);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src));
+	dmd_or_page ();
+	wpc_dmd_set_low_page (dst.u.second);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src));
+	dmd_or_page ();
+
+	wpc_dmd_set_mapped (dst);
+}
+
+const U8 test_bitmap[] = {
+	3, 3, 0, 2, 0,
+	3, 3, 2, 7, 2,
+};
+
+void amode_test_page (void)
+{
+	dmd_alloc_low_high ();
+	dmd_fill_page_low ();
+	dmd_clean_page_high ();
+
+	dmd_pagepair_t final = wpc_dmd_get_mapped ();
+
+	dmd_map_lookaside (0);
+	dmd_clean_page_low ();
+	font_render_string_center (&font_var5, 64, 8, "SPIDER-MAN MULTIBALL");
+	font_render_string_center (&font_var5, 64, 20, "SHOOT EITHER RAMP");
+	dmd_shadow_copy ();
+
+	dmd_apply_text_lookaside (final, 0);
+	bitmap_blit2 (test_bitmap, 10, 5);
+	dmd_show2 ();
+	amode_page_end (30);
+}
+
+
 void (*amode_page_table[]) (void) = {
+	amode_test_page,
 	amode_score_page,
 	amode_logo_page,
 	amode_credits_page,
