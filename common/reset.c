@@ -134,8 +134,7 @@ void system_reset_deff (void)
 
 	dmd_show_low ();
 
-
-	task_sleep_sec (4);
+	task_sleep_sec (3);
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
@@ -149,7 +148,11 @@ void system_reset_deff (void)
 void system_reset (void)
 {
 	system_accept_freewpc ();
+#ifdef FASTBOOT
+	sys_init_complete++;
+#else
 	deff_start (DEFF_SYSTEM_RESET);
+#endif
 	amode_start ();
 }
 
