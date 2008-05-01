@@ -65,9 +65,15 @@ __fastram__ U8 clock_find_target;
  * switch transitions */
 __fastram__ U8 clock_last_sw;
 
+
 /** How long calibration will be allowed to continue, before
  * giving up. */
 U8 clock_calibration_time;
+
+
+U8 clock_decode;
+
+U8 clock_minute_sw;
 
 
 void tz_dump_clock (void)
@@ -133,6 +139,29 @@ extern inline void wpc_ext1_disable (const U8 bits)
 }
 
 
+/** Decodes the current clock switches to determine what time
+ * it is. */
+void tz_clock_decode (void)
+{
+	/* Determine the 'rough' hour from the hour optos. */
+	clock_decode = tz_clock_opto_to_hour[clock_sw >> 4] * 4;
+
+	/* Adjust according to the last minute opto seen. */
+	if (clock_minute_sw & CLK_SW_MIN00)
+		clock_decode += 4;
+	else if (clock_minute_sw & CLK_SW_MIN15)
+		clock_decode += 5;
+	else if (clock_minute_sw & CLK_SW_MIN30)
+		clock_decode += 2;
+	else if (clock_minute_sw & CLK_SW_MIN45)
+		clock_decode += 3;
+
+	while (clock_decode >= 48)
+		clock_decode -= 48;
+	return clock_decode;
+}
+
+
 /** A lower priority periodic function. */
 CALLSET_ENTRY (tz_clock, idle_every_100ms)
 {
@@ -163,17 +192,27 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 			sol_start (SOL_CLOCK_FORWARD, clock_speed, TIME_1S);
 		}
 	}
-	/* Refresh clock outputs when active */
-	else if (clock_mode == CLOCK_RUNNING_FORWARD)
-	{
-		sol_stop (SOL_CLOCK_REVERSE);
-		sol_start (SOL_CLOCK_FORWARD, clock_speed, TIME_1S);
-	}
-	else if (clock_mode == CLOCK_FIND || clock_mode == CLOCK_RUNNING_BACKWARD)
+	else if (unlikely (clock_mode == CLOCK_FIND))
 	{
 		/* In the FIND case, it may be better to run it forward than
 		 * backward.  TODO : this depends on where we are now and where
 		 * we are trying to go. */
+#if 0
+		S8 delta = tz_clock_opto_to_hour[clock_sw >> 4] -
+			tz_clock_opto_to_hour[clock_find_target >> 4];
+#endif
+		goto run_backwards;
+	}
+	/* Refresh clock outputs when active */
+	else if (clock_mode == CLOCK_RUNNING_FORWARD)
+	{
+run_forwards:
+		sol_stop (SOL_CLOCK_REVERSE);
+		sol_start (SOL_CLOCK_FORWARD, clock_speed, TIME_1S);
+	}
+	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
+	{
+run_backwards:
 		sol_stop (SOL_CLOCK_FORWARD);
 		sol_start (SOL_CLOCK_REVERSE, clock_speed, TIME_1S);
 	}
@@ -207,6 +246,10 @@ void tz_clock_rtt (void)
 		/* Update the active/inactive switch list for calibration */
 		clock_sw_seen_active |= clock_sw;
 		clock_sw_seen_inactive |= ~clock_sw;
+
+		/* Always remember the last minute opto seen. */
+		if (clock_sw & 0x0F)
+			clock_minute_sw = clock_sw & 0x0F;
 
 		/* If searching for a specific target, see if we're there */
 		if (unlikely (clock_mode == CLOCK_FIND))
@@ -268,6 +311,8 @@ void tz_clock_set_speed (U8 speed)
 void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
+	sol_stop (SOL_CLOCK_FORWARD);
+	sol_stop (SOL_CLOCK_REVERSE);
 }
 
 
@@ -295,6 +340,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_active = 0;
 	clock_sw_seen_inactive = 0;
 	clock_sw = 0;
+	clock_minute_sw = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_speed = 0xEE;
 }
