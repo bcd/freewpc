@@ -31,7 +31,8 @@
  * Coordinate values are given in pixels.
  *
  * Three variants exist, one for each justification: left, right, or
- * center.
+ * center.  For right/center printing, the width is calculated in
+ * advance and the starting position adjusted accordingly.
  */
 
 
@@ -261,23 +262,10 @@ static void fontargs_render_string (void)
 #ifdef __m6809__
 		bitmap_blit_asm (blit_dmd, args->coord.x & 0x7);
 #else
-		/* The glyph is drawn one row at a time.
-		 * TODO - this is pretty inefficient.  Several things could be done
-		 * better:
-		 *    When a glyph is more than 8 bits wide and unaligned, we are
-		 *    performing way more reads and writes than necessary.  We
-		 *    have to read a byte, set only the affected bits, write it back.
-		 *    Some sort of pipelined approach where we only write to the
-		 *    DMD memory when we are done with a byte would be better.
-		 *
-		 *    We only write 1 byte at a time.  For >8 bits wide, we can
-		 *    do better writing 16-bits at a time.
-		 */
+		/* The glyph is drawn one row at a time. */
 		blitter = font_blit_table[args->coord.x & 0x7];
 		do
 		{
-			/* TODO : font_blit is applicable to more than just
-			fonts; it could be used for arbitrary-sized bitmaps. */
 			blitter (wpc_dmd_addr_verify (blit_dmd));
 			blit_dmd += DMD_BYTE_WIDTH;
 		} while (likely (--font_height)); /* end for each row */
@@ -310,9 +298,8 @@ a single color and drawn into the low-mapped display page.
 The format of the image data is the same as for a font glyph:
 the first byte is its bit-width, the second byte is its
 bit-height, and the remaining bytes are the image data, going
-from top to bottom and then left to right.  Also, the image
-data must reside in FONT_PAGE for now. */
-void bitmap_blit (const U8 *_bitmap_src, U8 x, U8 y)
+from top to bottom and then left to right. */
+void bitmap_blit (const U8 *src, U8 x, U8 y)
 {
 	U8 *dmd_base = ((U8 *)dmd_low_buffer) + y * DMD_BYTE_WIDTH;
 #ifndef __m6809__
@@ -320,14 +307,13 @@ void bitmap_blit (const U8 *_bitmap_src, U8 x, U8 y)
 	U8 i, j;
 #endif
 
-	bitmap_src = _bitmap_src;
-	wpc_push_page (FONT_PAGE);
-	font_width = *bitmap_src++;
+	font_width = *src++;
 #ifndef __m6809__
 	font_byte_width = (font_width + 7) >> 3;
 #endif
-	font_height = *bitmap_src++;
+	font_height = *src++;
 	blit_dmd = wpc_dmd_addr_verify (dmd_base + (x / 8));
+	bitmap_src = src;
 
 #ifdef __m6809__
 	bitmap_blit_asm (blit_dmd, x & 0x7);
@@ -344,78 +330,16 @@ void bitmap_blit (const U8 *_bitmap_src, U8 x, U8 y)
 		blit_dmd = wpc_dmd_addr_verify (blit_dmd + DMD_BYTE_WIDTH);
 	}
 #endif
-
-	wpc_pop_page ();
 }
 
 
-/** Draw a single color bitmap onto both the low and high
-mapped display pages. */
-void bitmap_blit2 (const U8 *_bitmap_src, U8 x, U8 y)
+void bitmap_blit2 (const U8 *src, U8 x, U8 y)
 {
-	bitmap_blit (_bitmap_src, x, y);
+	bitmap_blit (src, x, y);
 	dmd_flip_low_high ();
-	bitmap_blit (_bitmap_src, x, y);
+	bitmap_blit (bitmap_src, x, y);
 	dmd_flip_low_high ();
 }
-
-
-#ifdef NOTUSED
-/** Erase an arbitrary region of the DMD.  coord gives the
-upper-left corner of the region.  width and height specify the size. */
-void blit_erase (union dmd_coordinate coord, U8 width, U8 height)
-{
-	U8 *dmd_base;
-	static U8 xr;
-	static U8 partial_left[] = { 
-		0x0, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1 };
-	static U8 partial_right[] = { 
-		0x0, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80 };
-	static U16 hoffset;
-	S16 hoff;
-
-	dmd_base = ((U8 *)dmd_low_buffer) + coord.y * DMD_BYTE_WIDTH +
-		coord.x / 8;
-	xr = coord.x % 8;
-	hoffset = height * DMD_BYTE_WIDTH;
-	
-	if (xr)
-	{
-		/* Erase partial left region */
-		U8 mask = partial_left[(8 - xr)];
-		width -= xr;
-		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
-			dmd_base[hoff] &= mask;
-		dmd_base++;
-	}
-
-	while (width >= 16)
-	{
-		/* Erase middle region */
-		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
-			((U16 *)dmd_base)[hoff] = 0;
-		dmd_base += 2;
-		width -= 16;
-	}
-
-	while (width >= 8)
-	{
-		/* Erase middle region */
-		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
-			dmd_base[hoff] = 0;
-		dmd_base++;
-		width -= 8;
-	}
-
-	if (width)
-	{
-		/* Erase partial right region */
-		U8 mask = partial_right[width];
-		for (hoff=hoffset; hoff >= 0; hoff -= DMD_BYTE_WIDTH)
-			dmd_base[hoff] &= mask;
-	}
-}
-#endif
 
 
 /** Calculate font_string_width and font_string_height
@@ -508,46 +432,6 @@ void fontargs_render_string_right (void)
 {
 	fontargs_prep_right ();
 	fontargs_render_string ();
-}
-
-
-void fontargs_render_string_left2 (void)
-{
-	fontargs_prep_left ();
-	fontargs_render_string ();
-	font_args.coord.x -= font_string_width + 1;
-	dmd_flip_low_high ();
-	/* TODO - currently, to draw brightest text in 4-color
-	 * mode, we go through the entire process of rendering the
-	 * text twice, once per page, since the underlying routine
-	 * only knows how to draw on the low mapped page.  Better
-	 * to modify the underlying routines to support 4-color mode,
-	 * or to do a quicker bitmap copy without decoding the font
-	 * again. */
-	fontargs_render_string ();
-	dmd_flip_low_high ();
-}
-
-
-void fontargs_render_string_center2 (void)
-{
-	fontargs_prep_center ();
-	fontargs_render_string ();
-	font_args.coord.x -= font_string_width + 1;
-	dmd_flip_low_high ();
-	fontargs_render_string ();
-	dmd_flip_low_high ();
-}
-
-
-void fontargs_render_string_right2 (void)
-{
-	fontargs_prep_right ();
-	fontargs_render_string ();
-	font_args.coord.x -= font_string_width + 1;
-	dmd_flip_low_high ();
-	fontargs_render_string ();
-	dmd_flip_low_high ();
 }
 
 

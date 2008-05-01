@@ -99,6 +99,7 @@ void fontargs_render_string_right2 (void);
 void fontargs_render_string_left2 (void);
 
 void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
+void bitmap_blit2 (const U8 *blit_data, U8 x, U8 y);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
 
 #define MKCOORD1(x,y) (((U16)(x)<<8)|(y))
