@@ -44,7 +44,6 @@ shadow_copy_top_row:
 shadow_copy_rows:
 	lda	#8
 	sta	words_per_row
-	inc	_task_dispatching_ok
 shadow_copy_row:
 	ldd	,x
 	std	16,u
@@ -79,6 +78,8 @@ shadow_copy_bottom_row:
 	dec	words_per_row
 	bne	shadow_copy_bottom_row
 
+	inc	_task_dispatching_ok
+
 	; A second pass is needed to fix up the boundary cases.
 	; There are only 15 per row, and we don't wraparound.
 	ldu	#DMD_HIGH_BUFFER + 1
@@ -87,7 +88,6 @@ shadow_copy_bottom_row:
 shadow_copy_cols2_rows:
 	lda	#15
 	sta	words_per_row
-	inc	_task_dispatching_ok
 shadow_copy_cols2_row:
 	ldd	,u
 	; All that need happen is that if either the LSB of A or the
