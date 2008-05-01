@@ -1076,15 +1076,17 @@ void menu_left_flipper_task (void)
 		menu_down ();
 	else
 		window_pop ();
+	task_exit ();
 }
 
 void menu_right_flipper_task (void)
 {
 	task_sleep (TIME_66MS);
-	if (!switch_poll_logical (SW_RIGHT_BUTTON))
+	if (!switch_poll_logical (SW_LEFT_BUTTON))
 		menu_up ();
 	else
 		window_pop ();
+	task_exit ();
 }
 
 
