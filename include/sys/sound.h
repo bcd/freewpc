@@ -38,13 +38,23 @@ typedef U8 sound_cmd_t;
 #define SND_TEST_ESCAPE			0x58
 #define SND_TEST_SCROLL			0x59
 
-#define SND_MUSIC_FASTER		0x5A
-#define SND_MUSIC_SLOWER		0x5B
-#define SND_GET_VERSION_CMD	0x5F
-#define SND_DROP_VOLUME(x)		(0x60 + (x))
-
 /* The following sound codes don't actually play sounds, but
  * rather issue commands to the sound board. */
+
+/** Drops the volume of the D/A converter */
+#define SND_DROP_DAC_VOLUME(x)		(0x20 + (x))
+
+/** Causes the running music to go faster */
+#define SND_MUSIC_FASTER		0x5A
+
+/** Causes the running music to go slower */
+#define SND_MUSIC_SLOWER		0x5B
+
+/** Requests the version number of the sound code */
+#define SND_GET_VERSION_CMD	0x5F
+
+/** Drops the volume of the running music */
+#define SND_DROP_DSP_VOLUME(x)		(0x60 + (x))
 
 /** Enables an event notification from the sound board
  * when the next sound call finishes. */
