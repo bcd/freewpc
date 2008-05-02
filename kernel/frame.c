@@ -136,7 +136,7 @@ static const U8 *dmd_decompress_bitplane (const U8 *framedata)
 
 	/* TODO - remove this and force all callers of the
 	function to do the appropriate save/restore. */
-	wpc_push_page (PRG_PAGE);
+	wpc_push_page (FIF_PAGE);
 
 	/* The first byte of a compressed bitplane is a 'method', which
 	says the overlap manner in which the image has been
@@ -188,7 +188,7 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 
 	/* The first byte of the FIF format is the depth, which
 	 * indicates if the frame has 2 or 4 colors. */
-	wpc_push_page (PRG_PAGE);
+	wpc_push_page (FIF_PAGE);
 	depth = *fif++;
 	wpc_pop_page ();
 
@@ -218,7 +218,7 @@ with a leading header. */
 void dmd_draw_faf1 (struct faf *faf, task_ticks_t delay)
 {
 	U8 n;
-	wpc_push_page (PRG_PAGE);
+	wpc_push_page (FIF_PAGE);
 	for (n=0; n < faf->len; n++)
 		dmd_draw_fif1 (faf->fifs[n]);
 	wpc_pop_page ();
