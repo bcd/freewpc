@@ -19,14 +19,16 @@ rc=0
 
 checkpage ()
 {
-	sz=`grep " l_$1" build/freewpc.map | awk '{print $1}'`
-	max=$(($2));
+	section=$1; shift
+	addr=$1; shift
+	sz=`grep " l_${section}" build/freewpc.map | awk '{print $1}'`
+	max=$(($addr));
 	used=$((0x$sz));
 	avail=$(($max - 0x$sz));
 	percent_used=$(( $used * 100 / $max ));
 	dots=$(( $percent_used / 4 ));
 
-	printf "%-10.10s" $1
+	printf "%-10.10s" ${section}
 
 	for (( i=0 ; $i < $dots ; i++ )); do
 		echo -n "X"
@@ -36,15 +38,19 @@ checkpage ()
 	done
 
 	if [ "$percent_used" -ge 100 ]; then
-		echo "   error: overflow"
+		echo -n "   error: overflow"
 		rc=1
 	fi
 	if [ "$percent_used" -gt 95 ]; then
-		echo "   warning: $percent_used% full"
+		echo -n "   warning: $percent_used% full"
 	fi
-	if [ "$percent_used" -le 95 ]; then
+
+	if [ $1 ]; then
+	   echo "   ($*)"
+	else
 		echo ""
 	fi
+
 	return 0
 }
 
