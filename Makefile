@@ -405,6 +405,7 @@ endef
 # Example : PAGE_ALLOC(56,EFFECT)
 define PAGE_ALLOC
 page$(strip $1)_OBJS += $($(strip $2)_OBJS)
+page$(strip $1)_SECTIONS += $(strip $2)
 $($(strip $2)_OBJS) : PAGE=$(strip $1)
 ifneq ($(strip $3),)
 CFLAGS += -D$(strip $3)_PAGE=$(strip $1)
@@ -417,7 +418,6 @@ $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 56, EVENT))
 $(eval $(call PAGE_ALLOC, 57, TRANS))
-$(eval $(call PAGE_ALLOC, 57, PRG))
 $(eval $(call PAGE_ALLOC, 57, FIF))
 $(eval $(call PAGE_ALLOC, 57, MUX))
 $(eval $(call PAGE_ALLOC, 58, TEST))
@@ -446,12 +446,12 @@ C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 
 
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(FIF_OBJS) $(FON_OBJS) $(PRG_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(FIF_OBJS) $(FON_OBJS)
 else
 ifeq ($(PLATFORM),whitestar)
 OBJS = $(C_OBJS) $(AS_OBJS)
 else
-OBJS = $(C_OBJS) $(PRG_OBJS) $(FIF_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(FIF_OBJS) $(FON_OBJS)
 endif
 endif
 
@@ -742,8 +742,6 @@ $(C_OBJS) : %.o : %.c
 
 $(FON_OBJS) : %.o : %.fon
 
-$(PRG_OBJS) : %.o : %.prg
-
 $(FIF_OBJS) : %.o : %.fif
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
@@ -755,7 +753,7 @@ $(FIF_OBJS) : $(GENDEFINES)
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
 
-$(C_OBJS) $(PRG_OBJS) $(FON_OBJS) $(FIF_OBJS):
+$(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
@@ -959,7 +957,6 @@ info:
 	$(Q)echo "REQUIRED = $(REQUIRED)"
 	$(Q)echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 	$(Q)echo "FIF_OBJS = $(FIF_OBJS)"
-	$(Q)echo "PRG_OBJS = $(PRG_OBJS)"
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
@@ -969,7 +966,7 @@ info:
 .PHONY : areainfo
 areainfo:
 	@true $(foreach area,$(AREA_LIST),&& echo $(area) $(AREASIZE_$(area)))
-	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000)
+	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000 $($(page)_SECTIONS))
 
 .PHONY : srcinfo
 srcinfo:
