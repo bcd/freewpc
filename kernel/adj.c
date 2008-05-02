@@ -43,6 +43,9 @@ __nvram__ feature_adj_t feature_config;
 #endif
 
 
+/* The reset function is declared here because the real
+reason function is in a different ROM page, and we can't
+yet store far pointers. */
 void adj_csum_failure (void)
 {
 	adj_reset_all ();
