@@ -26,8 +26,8 @@
  * \brief Entry point to the game program.
  */
 
-/** The number of task ticks executed.  A tick equals 16 IRQs. */
-__fastram__ U8 tick_count;
+/** The current system time as the number of IRQs/960 microsecond intervals */
+__fastram__ U16 sys_time;
 
 /** The number of FIRQs asserted */
 __fastram__ U8 firq_count;

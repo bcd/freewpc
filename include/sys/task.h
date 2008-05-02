@@ -133,15 +133,8 @@ typedef struct task_struct
 	 * the task's stack area */
 	U8				stack_size;
 
-	/** The amount of time that a blocked task has requested to
-	sleep */
-	U8				delay;
-
-	/** The time at which the task went to sleep.  To see if a task
-	needs to be awakened, compute current time - asleep, and if
-	see if that is greater than or equal to the intended delay.
-	This method handles the 8-bit overflow properly. */
-	U8				asleep;
+	/** The time at which the task should be awakened, when it is blocked. */
+	U16			wakeup;
 
 	/** The task argument pointer.  This is a primitive way of passing
 	 * initialization data to a new task.  The creator of the task can

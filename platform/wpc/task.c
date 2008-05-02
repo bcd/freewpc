@@ -73,7 +73,7 @@ task_t task_buffer[NUM_TASKS];
  * The IRQ will reset the system when this happens. */
 __fastram__ bool task_dispatching_ok;
 
-__fastram__ U8 tick_start_count;
+__fastram__ U16 last_dispatch_time;
 
 #ifdef CONFIG_DEBUG_STACK
 /** For debug, this tells us the largest stack size that we've had
@@ -269,7 +269,6 @@ task_t *task_allocate (void)
 	if (tp)
 	{
 		tp->state |= BLOCK_TASK;
-		tp->delay = 0;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
 #ifdef TASK_CHAINING
@@ -400,26 +399,8 @@ void task_sleep (task_ticks_t ticks)
 #endif
 
 	/* Mark the task as blocked, set the time at which it blocks,
-	and set how long it should wait for. 
-
-	TODO : the accuracy here is a bit wonky.  For example, a task could
-	want to sleep 16ms (1 tick), and then almost right away, the 16th
-	IRQ could fire and decrement the tick count, causing the task to
-	wake up having slept nearly 0ms.  Essentially, accuracy is only
-	good to within 16ms. 
-	
-	One solution is to keep these counters in terms of raw IRQs, but
-	enforce a minimum sleep time of 16ms still.  Also, we could
-	examine 'irq_count' here and adjust ticks accordingly, if we are
-	close to the 16 IRQ cycle boundary.  (If 'irq_count' > 8, then
-	increment ticks; this improves the resolution.)  Third, we could
-	always bump ticks by 1, so that tasks always guarantee to sleep
-	for *at least* the quantity asked for, but more frequently, they
-	will always sleep a little longer (as much as 16ms longer).  For
-	this last approach, consider bumping all of the TIME_ defines
-	to make this a static change. */
-	tp->delay = ticks;
-	tp->asleep = get_ticks ();
+	and set how long it should wait for. */
+	tp->wakeup = get_sys_time () + ((U16)ticks) * 16;
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
@@ -655,7 +636,7 @@ void task_dispatcher (void)
 	register task_t *tp asm ("x");
 	task_t *first = tp;
 
-	tick_start_count = get_ticks ();
+	last_dispatch_time = get_sys_time ();
 	task_dispatching_ok = TRUE;
 
 	/* Set 'first' to the first task block to try. */
@@ -683,21 +664,18 @@ void task_dispatcher (void)
 			if (idle_ok)
 			{
 				do_idle ();
-				callset_invoke (idle);
+				switch_idle ();
 			}
 
-			/* Reset timer and kick watchdog again */
-			tick_start_count = get_ticks ();
-			task_dispatching_ok = TRUE;
-
-			/* Wait for next task tick before continuing.
-			This ensures that the idle function is not invoked more than once
-			per 16ms.  Do this AFTER calling the idle functions, so
-			that we wait as little as possible; idle calls themselves may
-			take a long time. */
-			while (tick_start_count == get_ticks ())
+			/* Wait for time to change before continuing.
+			Do this AFTER calling the idle functions, so
+			that we wait as little as possible; idle calls
+			themselves may take a long time. */
+			last_dispatch_time = get_sys_time ();
+			while (last_dispatch_time == get_sys_time ())
 			{
 				barrier ();
+				task_dispatching_ok = TRUE;
 #ifdef IDLE_PROFILE
 				noop ();
 				noop ();
@@ -715,18 +693,22 @@ void task_dispatcher (void)
 
 		if (tp->state & (BLOCK_TASK | TASK_BLOCKED))
 		{
-			/* The task exists, but is sleeping.
-			 * tp->asleep holds the time at which it went to sleep,
-			 * and tp->delay is the time for which it should sleep.
-			 * Examine the current tick count, and see if it should
-			 * be woken up.
-			 */
-			register U8 ticks_elapsed = get_ticks () - tp->asleep;
-			if (ticks_elapsed >= tp->delay)
+			/* The task exists, but is sleeping.  See if it should be woken up now.
+			Compare the time at which it wants to wake up with the current time.
+			The subtraction should yield a non-positive value when it is OK to wake
+			up.  We use a check of the sign bit since these are stored as positive
+			values.  This is a valid method as long as the task doesn't sleep
+			more than 0x8000 ticks. */
+			if ((tp->wakeup - get_sys_time ()) & 0x8000UL)
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
 				task_restore (tp);
+			}
+			else
+			{
+				dbprintf ("can't wake %p, wants %ld, now %ld\n",
+					tp, tp->wakeup, get_sys_time ());
 			}
 		}
 		else if (tp->state & BLOCK_TASK)

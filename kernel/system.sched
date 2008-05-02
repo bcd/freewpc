@@ -22,7 +22,7 @@
 # Schedule for FreeWPC's core real-time tasks
 
 # Common processing required at the beginning of every IRQ.
-do_irq_begin          1       8c
+do_irq_begin          1       16c
 
 # Read the flipper switches and update the flipper coils
 # Note: this only takes 51 cycles when flippers are disabled.
@@ -45,9 +45,6 @@ sol_update_rtt/4      1       60c
 # Update the lamps
 lamp_rtt/4            2       111c
 
-# Advance the system clock
-!clock_advance        16      4c
-
 # Toggle the CPU board LED
 !wpc_led_toggle       32      14c
 
@@ -63,9 +60,6 @@ lockup_check_rtt      128     23c
 
 # Free running hardware-quality timers
 free_timer_rtt        32		94c
-
-# Idle timer
-idle_rtt              8       12c
 
 # Common processing required at the end of every IRQ
 do_irq_end            1       0c

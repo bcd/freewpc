@@ -70,7 +70,7 @@ U8 switch_queue_head;
 
 U8 switch_queue_tail;
 
-U8 switch_last_service_time;
+U16 switch_last_service_time;
 
 
 /** Return the switch table entry for a switch */
@@ -440,7 +440,7 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 	{
 		if (!entry)
 			entry = switch_queue_add (sw);
-		entry->timer = switch_lookup(sw)->postbounce;
+		entry->timer = switch_lookup(sw)->postbounce * 16;
 		bit_on (switch_postbounce_bits, sw);
 	}
 }
@@ -450,6 +450,7 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 pending_switch_t *switch_queue_add (const switchnum_t sw)
 {
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
+	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
 	return entry;
@@ -495,11 +496,9 @@ void switch_service_queue (void)
 		U8 elapsed_time;
 
 		/* See how long since the last time we serviced the queue */
-		elapsed_time = get_ticks () - switch_last_service_time;
-#ifdef CONFIG_NATIVE
-		if (elapsed_time == 0)
+		elapsed_time = get_sys_time () - switch_last_service_time;
+		if (elapsed_time < 5)
 			return;
-#endif
 
 		entry = &switch_queue[i];
 		if (entry->id != 0xFF)
@@ -532,7 +531,7 @@ void switch_service_queue (void)
 		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
 
-	switch_last_service_time = get_ticks ();
+	switch_last_service_time = get_sys_time ();
 }
 
 void switch_queue_dump (void)
@@ -658,7 +657,7 @@ CALLSET_ENTRY (switch, idle)
 						 * to preserve the order??? */
 						pending_switch_t *entry = switch_queue_find (sw);
 						dbprintf ("Restarting prebounce for SW%d\n", sw);
-						entry->timer = switch_lookup(sw)->prebounce;
+						entry->timer = switch_lookup(sw)->prebounce * 16;
 					}
 					else
 					{
@@ -677,7 +676,7 @@ CALLSET_ENTRY (switch, idle)
 							if (entry)
 							{
 								dbprintf ("Starting prebounce for SW %d\n", sw);
-								entry->timer = switch_lookup(sw)->prebounce;
+								entry->timer = switch_lookup(sw)->prebounce * 16;
 								bit_on (switch_prebounce_bits, sw);
 							}
 						}
