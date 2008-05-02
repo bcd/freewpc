@@ -14,6 +14,15 @@ static char font_tinynum_digit[][7] = {
 	{ 3, 5, 7, 5, 7, 4, 4 },
 };
 
+static char font_tinynum_hexdigit[][7] = {
+	{ 3, 5, 2, 5, 7, 5, 5 },
+	{ 3, 5, 3, 5, 3, 5, 3 },
+	{ 3, 5, 6, 1, 1, 1, 6 },
+	{ 3, 5, 3, 5, 5, 5, 3 },
+	{ 3, 5, 7, 1, 3, 1, 7 },
+	{ 3, 5, 7, 1, 3, 1, 1 },
+};
+
 static char font_tinynum_sep[][7] = {
 	/* period */ { 1, 5, 0, 0, 0, 0, 1 },
 	/* comma */ { 1, 5, 0, 0, 0, 1, 1 },
@@ -37,7 +46,7 @@ static char *tinynum_glyphs[] = {
 
 const font_t font_tinynum = {
 	.spacing = 1,
-	.height = 5, 
+	.height = 5,
 	.glyphs = tinynum_glyphs,
 };
 
