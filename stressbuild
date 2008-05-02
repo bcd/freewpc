@@ -3,8 +3,16 @@
 # stressbuild - test many different build configurations at once
 #
 
+native_options="n y"
+
+case $1 in
+	--native)
+		native_options="y"
+		;;
+esac
+
 rm -f stressbuild.log
-for native in `echo n y`; do
+for native in $native_options; do
 	if [ "$native" = "y" ]; then
 		NATIVE=y; export NATIVE
 	else
