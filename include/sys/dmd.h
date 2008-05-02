@@ -186,6 +186,8 @@ extern inline dmd_pagepair_t wpc_dmd_get_mapped (void)
 extern inline void wpc_dmd_set_mapped (dmd_pagepair_t mapping)
 {
 	dmd_mapped_pages = mapping;
+	wpc_asic_write (WPC_DMD_LOW_PAGE, mapping.u.first);
+	wpc_asic_write (WPC_DMD_HIGH_PAGE, mapping.u.second);
 }
 
 extern inline void wpc_dmd_set_low_page (U8 val)
@@ -248,16 +250,16 @@ void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
 const U8 *dmd_draw_fif1 (const U8 *fif);
+__transition__ void dmd_shadow_copy (void);
+__transition__ void dmd_text_raise (void);
 #ifdef __m6809__
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
-__transition__ void dmd_shadow_copy (void);
 #else
-#define dmd_and_page null_function
-#define dmd_or_page null_function
-#define dmd_xor_page null_function
-#define dmd_shadow_copy null_function
+#define dmd_and_page()
+#define dmd_or_page()
+#define dmd_xor_page()
 #endif
 void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
 

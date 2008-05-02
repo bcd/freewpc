@@ -156,7 +156,7 @@ void amode_kill_music (void)
 }
 
 
-void dmd_apply_text_lookaside (dmd_pagepair_t dst, U8 src)
+void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_low_page (dst.u.first);
 	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
@@ -175,31 +175,94 @@ void dmd_apply_text_lookaside (dmd_pagepair_t dst, U8 src)
 	wpc_dmd_set_mapped (dst);
 }
 
-const U8 test_bitmap[] = {
-	3, 3, 0, 2, 0,
-	3, 3, 2, 7, 2,
-};
+
+void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
+{
+	wpc_dmd_set_low_page (dst.u.second);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
+	dmd_or_page ();
+
+	wpc_dmd_set_low_page (dst.u.first);
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
+	dmd_or_page ();
+
+	wpc_dmd_set_high_page (dst.u.second);
+}
+
+void dmd_overlay (dmd_pagepair_t dst, U8 src)
+{
+	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
+
+	wpc_dmd_set_low_page (dst.u.second);
+	dmd_or_page ();
+
+	wpc_dmd_set_low_page (dst.u.first);
+	dmd_or_page ();
+
+	wpc_dmd_set_high_page (dst.u.second);
+}
+
+
+void dmd_dup_mapped (void)
+{
+	dmd_pagepair_t old, new;
+
+	old = wpc_dmd_get_mapped ();
+	dmd_alloc_low_high ();
+	new = wpc_dmd_get_mapped ();
+
+	wpc_dmd_set_low_page (old.u.second);
+	dmd_copy_low_to_high ();
+
+	wpc_dmd_set_low_page (old.u.first);
+	wpc_dmd_set_high_page (new.u.first);
+	dmd_copy_low_to_high ();
+
+	wpc_dmd_set_mapped (new);
+}
+
 
 void amode_test_page (void)
 {
+	U8 n;
+
+#if 0
 	dmd_alloc_low_high ();
 	dmd_fill_page_low ();
 	dmd_clean_page_high ();
-
-	dmd_pagepair_t final = wpc_dmd_get_mapped ();
+#endif
 
 	dmd_map_lookaside (0);
 	dmd_clean_page_low ();
-	font_render_string_center (&font_var5, 64, 8, "SPIDER-MAN MULTIBALL");
-	font_render_string_center (&font_var5, 64, 20, "SHOOT EITHER RAMP");
-	dmd_shadow_copy ();
+	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
+	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
+	//dmd_text_raise ();
 
-	dmd_apply_text_lookaside (final, 0);
-	bitmap_blit2 (test_bitmap, 10, 5);
-	dmd_show2 ();
-	amode_page_end (30);
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay (wpc_dmd_get_mapped (), 0);
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_200MS);
+		dmd_map_lookaside (0);
+	}
+	amode_page_end (0);
 }
 
+void amode_star_page (void)
+{
+	U8 n;
+	star_reset ();
+	for (n=0; n < 50; n++)
+	{
+		dmd_alloc_pair_clean ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_200MS);
+	}
+	//amode_page_end (0);
+}
 
 void (*amode_page_table[]) (void) = {
 	amode_test_page,
