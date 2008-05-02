@@ -87,11 +87,6 @@ void mb_running_deff (void)
 
 CALLSET_ENTRY (mball, lamp_update)
 {
-	/* if (flag_test (FLAG_MULTIBALL_RUNNING))
-		leff_start (LEFF_MB_RUNNING);
-	else
-		leff_stop (LEFF_MB_RUNNING); */
-
 	if (mball_locks_lit && !flag_test (FLAG_SSSMB_RUNNING))
 		lamp_tristate_flash (LM_LOCK_ARROW);
 	else
@@ -113,7 +108,7 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_on (LM_LOCK2);
 	}
 
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (flag_test (FLAG_MB_JACKPOT_LIT))
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 	else
 		lamp_tristate_off (LM_PIANO_JACKPOT);
@@ -146,6 +141,7 @@ CALLSET_ENTRY (mball, mball_start)
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_on (FLAG_MULTIBALL_RUNNING);
+		flag_on (FLAG_MB_JACKPOT_LIT);
 		music_start (multiball_track);
 		deff_start (DEFF_MB_START);
 		deff_start (DEFF_MB_RUNNING);
@@ -166,6 +162,7 @@ CALLSET_ENTRY (mball, mball_stop)
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_off (FLAG_MULTIBALL_RUNNING);
+		flag_off (FLAG_MB_JACKPOT_LIT);
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
@@ -201,6 +198,17 @@ CALLSET_ENTRY (mball, sw_right_ramp)
 	{
 		lamp_on (LM_BALL);
 		mball_check_light_lock ();
+	}
+}
+
+
+CALLSET_ENTRY (mball, sw_piano)
+{
+	if (flag_test (FLAG_MB_JACKPOT_LIT))
+	{
+		flag_off (FLAG_MB_JACKPOT_LIT);
+		deff_start (DEFF_JACKPOT);
+		score (SC_20M);
 	}
 }
 
@@ -249,6 +257,7 @@ CALLSET_ENTRY (mball, start_player)
 	mball_locks_made = 0;
 	mballs_played = 0;
 	flag_off (FLAG_MULTIBALL_RUNNING);
+	flag_off (FLAG_MB_JACKPOT_LIT);
 }
 
 
