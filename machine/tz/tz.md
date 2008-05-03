@@ -540,7 +540,6 @@ ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
-Lookaside Test: page(EFFECT_PAGE), PRI_GAME_MODE2
 
 BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 
