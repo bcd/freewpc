@@ -12,7 +12,7 @@ U16 idle_ready_time;
 void do_idle (void)
 {
 	/* See if 100ms has elapsed */
-	if ((idle_ready_time - get_sys_time ()) & 0x8000)
+	if (time_reached_p (idle_ready_time))
 	{
 		idle_ready_time += IRQS_PER_100MS;
 	}

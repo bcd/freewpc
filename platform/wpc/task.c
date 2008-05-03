@@ -345,6 +345,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	 * here).  It also declares that 'd' is destroyed by the call. */
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
+	tp->wakeup = 0;
 	tp->arg = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count++;
@@ -644,11 +645,11 @@ void task_dispatcher (void)
 	{
 		/* Reset task pointer to top of list after reaching the
 		 * bottom of the table. */
-		if (tp == &task_buffer[NUM_TASKS])
+		if (unlikely (tp == &task_buffer[NUM_TASKS]))
 			tp = &task_buffer[0];
 
 		/* All task blocks were scanned, and no free task was found. */
-		if (first == tp)
+		if (unlikely (first == tp))
 		{
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
@@ -661,7 +662,7 @@ void task_dispatcher (void)
 
 			/* If the system is fully initialized, run
 			 * the idle functions. */
-			if (idle_ok)
+			if (likely (idle_ok))
 			{
 				do_idle ();
 				switch_idle ();
@@ -672,7 +673,7 @@ void task_dispatcher (void)
 			that we wait as little as possible; idle calls
 			themselves may take a long time. */
 			last_dispatch_time = get_sys_time ();
-			while (last_dispatch_time == get_sys_time ())
+			while (likely (last_dispatch_time == get_sys_time ()))
 			{
 				barrier ();
 				task_dispatching_ok = TRUE;
@@ -691,7 +692,7 @@ void task_dispatcher (void)
 			tp = first;
 		}
 
-		if (tp->state & (BLOCK_TASK | TASK_BLOCKED))
+		if (tp->state == BLOCK_USED+BLOCK_TASK+TASK_BLOCKED)
 		{
 			/* The task exists, but is sleeping.  See if it should be woken up now.
 			Compare the time at which it wants to wake up with the current time.
@@ -699,19 +700,19 @@ void task_dispatcher (void)
 			up.  We use a check of the sign bit since these are stored as positive
 			values.  This is a valid method as long as the task doesn't sleep
 			more than 0x8000 ticks. */
-			if ((tp->wakeup - get_sys_time ()) & 0x8000UL)
+			if (tp->wakeup == 0)
+			{
+				dbprintf ("wakeup=0 for gid %d flags %02Xh\n", tp->gid, tp->state);
+				fatal (0xff);
+			}
+			else if (time_reached_p (tp->wakeup))
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
 				task_restore (tp);
 			}
-			else
-			{
-				dbprintf ("can't wake %p, wants %ld, now %ld\n",
-					tp, tp->wakeup, get_sys_time ());
-			}
 		}
-		else if (tp->state & BLOCK_TASK)
+		else if (likely (tp->state == BLOCK_USED+BLOCK_TASK))
 		{
 			/* The task exists, and is not sleeping.  It can be
 			started immediately. */

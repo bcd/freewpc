@@ -59,4 +59,7 @@ extern inline U16 get_sys_time (void)
 	return sys_time;
 }
 
+#define time_reached_p(t) \
+({ volatile U16 diff = t - get_sys_time (); diff & 0x8000; })
+
 #endif /* _SYS_TIME_H */

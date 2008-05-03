@@ -32,7 +32,6 @@ YREG_SAVE_OFF      = 5
 UREG_SAVE_OFF      = 7
 ROMPAGE_SAVE_OFF   = 9
 SAVED_STACK_SIZE   = 10
-DELAY_OFF          = 11
 AUX_STACK_OFF      = 15
 STACK_SAVE_OFF     = 18
 
@@ -255,7 +254,6 @@ restore_stack_done:
 	pshs	u
 	ldy	YREG_SAVE_OFF,x
 	ldu	UREG_SAVE_OFF,x
-	clr	DELAY_OFF,x
 
 	; Return to the task again.  PC was pushed onto the
 	; stack so RTS works normally

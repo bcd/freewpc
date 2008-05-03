@@ -497,7 +497,7 @@ void switch_service_queue (void)
 
 		/* See how long since the last time we serviced the queue */
 		elapsed_time = get_sys_time () - switch_last_service_time;
-		if (elapsed_time < 5)
+		if (elapsed_time == 0)
 			return;
 
 		entry = &switch_queue[i];
