@@ -32,19 +32,25 @@ U8 shooter_div_delay_time;
 U8 shooter_div_open_time;
 
 
-CALLSET_ENTRY (autofire, sw_autofire1)
+void sw_autofire (void)
 {
 	/* TODO : balls landing here when not expected
 	still need to be ejected.  See amode_start below.  This
 	would also need to happen if the autofire monitor
 	failed to kick properly; some retry logic is needed. */
+	sol_stop (SOL_RAMP_DIVERTOR);
 	score (SC_100);
+}
+
+CALLSET_ENTRY (autofire, sw_autofire1)
+{
+	sw_autofire ();
 }
 
 
 CALLSET_ENTRY (autofire, sw_autofire2)
 {
-	score (SC_100);
+	sw_autofire ();
 }
 
 

@@ -250,8 +250,14 @@ void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
 const U8 *dmd_draw_fif1 (const U8 *fif);
+
 __transition__ void dmd_shadow_copy (void);
 __transition__ void dmd_text_raise (void);
+__transition__ void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src);
+__transition__ void dmd_overlay2 (dmd_pagepair_t dst, U8 src);
+__transition__ void dmd_overlay (dmd_pagepair_t dst, U8 src);
+__transition__ void dmd_dup_mapped (void);
+
 #ifdef __m6809__
 void dmd_and_page (void);
 void dmd_or_page (void);

@@ -58,14 +58,34 @@ void game_over_deff (void)
 }
 
 
-/** The display effect for a volume change */
+void draw_volume_bar (U8 n)
+{
+	U8 *base = dmd_low_buffer + 22 * DMD_BYTE_WIDTH + 4;
+	U8 val = 0x55;
+	static const U8 volume_bar_data[] = { 0x0, 0x1, 0x5, 0x15, 0x55 };
+	while (n >= 4)
+	{
+		base[0] = base[1 * DMD_BYTE_WIDTH] = base[2 * DMD_BYTE_WIDTH] = val;
+		base++;
+		n -= 4;
+	}
+	val = volume_bar_data[n];
+	base[0] = base[1 * DMD_BYTE_WIDTH] = base[2 * DMD_BYTE_WIDTH] = val;
+}
+
+
+/**uThe display effect for a volume change */
 void volume_change_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
-	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	draw_volume_bar (current_volume);
 	dmd_show_low ();
-	task_sleep_sec (5);
+	if (in_live_game)
+		task_sleep_sec (3);
+	else
+		task_sleep_sec (5);
 	music_stop (volume_change_music_track);
 	deff_exit ();
 }

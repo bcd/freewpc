@@ -93,10 +93,14 @@ void tz_clock_test_draw (void)
 		clock_can_run ? "RUNNING" : "STOPPED");
 
 	/* TODO : this should be common logic */
-	hour = tz_clock_opto_to_hour[clock_sw >> 4];
-	if (hour == 0)
-		hour = 12;
-	minute = 0;
+	{
+		extern void tz_clock_decode (void);
+		extern U8 clock_decode;
+
+	tz_clock_decode ();
+	hour = clock_decode / 4;
+	minute = (clock_decode % 4 * 15);
+	}
 
 	sprintf ("%02d:%02d", hour, minute);
 	font_render_string_center (&font_mono5, 32, 18, sprintf_buffer);
