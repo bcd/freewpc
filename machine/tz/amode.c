@@ -186,15 +186,9 @@ void amode_deff (void)
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-#ifndef CONFIG_NATIVE
-		starfield_start ();
-#endif
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed10, 64, 20, "THE ZONE");
 		deff_swap_low_high (19, TIME_100MS * 2);
-#ifndef CONFIG_NATIVE
-		starfield_stop ();
-#endif
 
 		/** Display PLAY PINBALL message **/
 		FSTART_COLOR
