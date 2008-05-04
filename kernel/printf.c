@@ -447,6 +447,7 @@ output_char:
 	va_end (va);
 
 	*buf = '\0';
+	/* TODO - detect buffer overflow here and signal an error */
 }
 
 

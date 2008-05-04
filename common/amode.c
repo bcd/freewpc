@@ -156,87 +156,16 @@ void amode_kill_music (void)
 }
 
 
-void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src)
-{
-	wpc_dmd_set_low_page (dst.u.first);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
-	dmd_and_page ();
-	wpc_dmd_set_low_page (dst.u.second);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
-	dmd_and_page ();
-
-	wpc_dmd_set_low_page (dst.u.first);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src));
-	dmd_or_page ();
-	wpc_dmd_set_low_page (dst.u.second);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src));
-	dmd_or_page ();
-
-	wpc_dmd_set_mapped (dst);
-}
-
-
-void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
-{
-	wpc_dmd_set_low_page (dst.u.second);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
-	dmd_or_page ();
-
-	wpc_dmd_set_low_page (dst.u.first);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
-	dmd_or_page ();
-
-	wpc_dmd_set_high_page (dst.u.second);
-}
-
-void dmd_overlay (dmd_pagepair_t dst, U8 src)
-{
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
-
-	wpc_dmd_set_low_page (dst.u.second);
-	dmd_or_page ();
-
-	wpc_dmd_set_low_page (dst.u.first);
-	dmd_or_page ();
-
-	wpc_dmd_set_high_page (dst.u.second);
-}
-
-
-void dmd_dup_mapped (void)
-{
-	dmd_pagepair_t old, new;
-
-	old = wpc_dmd_get_mapped ();
-	dmd_alloc_low_high ();
-	new = wpc_dmd_get_mapped ();
-
-	wpc_dmd_set_low_page (old.u.second);
-	dmd_copy_low_to_high ();
-
-	wpc_dmd_set_low_page (old.u.first);
-	wpc_dmd_set_high_page (new.u.first);
-	dmd_copy_low_to_high ();
-
-	wpc_dmd_set_mapped (new);
-}
-
-
-void amode_test_page (void)
+#ifdef MACHINE_TZ
+void amode_tz_page (void)
 {
 	U8 n;
 
-#if 0
-	dmd_alloc_low_high ();
-	dmd_fill_page_low ();
-	dmd_clean_page_high ();
-#endif
-
 	dmd_map_lookaside (0);
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
-	//dmd_text_raise ();
+	dmd_text_raise ();
+	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
 
 	for (n = 0; n < 40; n++)
 	{
@@ -249,25 +178,15 @@ void amode_test_page (void)
 	}
 	amode_page_end (0);
 }
+#endif
 
-void amode_star_page (void)
-{
-	U8 n;
-	star_reset ();
-	for (n=0; n < 50; n++)
-	{
-		dmd_alloc_pair_clean ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_200MS);
-	}
-	//amode_page_end (0);
-}
 
 void (*amode_page_table[]) (void) = {
-	amode_test_page,
 	amode_score_page,
 	amode_logo_page,
+#ifdef MACHINE_TZ
+	amode_tz_page,
+#endif
 	amode_credits_page,
 	amode_freeplay_page,
 	amode_high_score_page,

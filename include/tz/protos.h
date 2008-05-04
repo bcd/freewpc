@@ -103,7 +103,4 @@ __machine__ void sssmb_stop (void);
 __machine__ void star_reset(void);
 __machine__ void star_draw(void);
 __machine__ void star_task(void);
-__machine__ void starfield_task(void);
-__machine__ void starfield_start(void);
-__machine__ void starfield_stop(void);
 

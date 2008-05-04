@@ -222,10 +222,10 @@ void two_color_flash_deff (void)
 	U8 n;
 
 	dmd_alloc_pair_clean ();
-	dmd_flip_low_high ();
+	font_render_string_center (&font_fixed6, 64, 21, "BRIGHT");
+	dmd_copy_low_to_high ();
 	font_render_string_center (&font_fixed6, 64, 9, "DARK");
-	dmd_flip_low_high ();
-	font_render_string_center2 (&font_fixed6, 64, 21, "BRIGHT");
+
 	for (n = 0; n < 5; n++)
 	{
 		dmd_show2 ();
@@ -239,7 +239,7 @@ void two_color_flash_deff (void)
 
 void bg_flash_deff (void)
 {
-	const U8 flash_time = TIME_200MS;
+	const U8 flash_time = TIME_50MS;
 
 	dmd_alloc_low_high ();
 	dmd_fill_page_low ();
@@ -255,17 +255,7 @@ void bg_flash_deff (void)
 		dmd_flip_low_high ();
 		dmd_show2 ();
 		dmd_flip_low_high ();
-		task_sleep (flash_time); /* 66% */
-
-#if 0
-		dmd_show_low ();
-		task_sleep (flash_time); /* 100% */
-
-		dmd_flip_low_high ();
-		dmd_show2 ();
-		dmd_flip_low_high ();
-		task_sleep (flash_time); /* 66% */
-#endif
+		task_sleep (flash_time * 2); /* 66% */
 
 		dmd_show2 ();
 		task_sleep (flash_time); /* 33% */
