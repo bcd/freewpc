@@ -111,10 +111,30 @@ extern U8 *linux_dmd_high_page;
 
 #else
 
-/* WPC can map up to 6 of the DMD pages into address space.
- * FreeWPC only uses page 4 (low) and page 5 (high).
+/* WPC can map up to 2 of the DMD pages into address space at
+ * 0x3800 and 0x3A00.  Additionally, on WPC-95, 4 more pages
+ * can be mapped at 0x3000, 0x3200, 0x3400, and 0x3600.
+ * We refer to these areas as map 0 through map 5.
+ *
+ * FreeWPC only uses maps 4 and 5, as they work on all platforms.
+ * We call these "low" and "high".
  */
-#define DMD_MAPPED(n)					((U8 *)0x3000 + (n * 0x200))
+
+
+extern inline U8 wpc_dmd_map_ok (const U8 map)
+{
+#if (MACHINE_WPC95 == 0)
+	if (map < 4)
+		halt_compile_due_to_bad_dmd_map ();
+#endif
+	return map;
+}
+
+#define DMD_MAPPED(n)					((U8 *)0x3000 + (wpc_dmd_map_ok (n) * 0x200))
+
+/* Define addresses for the two page buffer locations we
+ * call low and high. */
+
 #define DMD_LOW_BASE 					DMD_MAPPED(4)
 #define DMD_HIGH_BASE 					DMD_MAPPED(5)
 
