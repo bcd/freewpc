@@ -493,11 +493,11 @@ void switch_service_queue (void)
 	while (unlikely (i != switch_queue_tail))
 	{
 		pending_switch_t *entry;
-		U8 elapsed_time;
+		S8 elapsed_time;
 
 		/* See how long since the last time we serviced the queue */
-		elapsed_time = get_sys_time () - switch_last_service_time;
-		if (elapsed_time == 0)
+		elapsed_time = get_elapsed_time (switch_last_service_time);
+		if (elapsed_time < 5)
 			return;
 
 		entry = &switch_queue[i];

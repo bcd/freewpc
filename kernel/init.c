@@ -337,6 +337,12 @@ void nonfatal (errcode_t error_code)
 }
 
 
+U8 get_elapsed_time (U16 then)
+{
+	return get_sys_time () - then;
+}
+
+
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
  * is generated from the WPC ASIC on two different occasions: (1)
