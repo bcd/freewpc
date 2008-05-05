@@ -234,6 +234,11 @@ static void deff_start_task (const deff_t *deff)
 
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
+	if (tp == NULL)
+	{
+		dbprintf ("could not spawn deff task!\n");
+	}
+
 	if (deff->page != 0xFF)
 		task_set_rom_page (tp, deff->page);
 }
@@ -525,6 +530,7 @@ restart:
 					{
 						/* Remove this entry from the list and restart */
 						deff_dequeue (&deff_waitqueue, entry);
+						deff_entry_free (entry);
 						goto restart;
 					}
 				}
