@@ -536,19 +536,31 @@ extern inline void wpc_write_ticket (U8 val)
 /* WPC Security PIC Chip                    */
 /********************************************/
 
+/* The PIC Security Chip can be read/written one byte at a time.
+ * It works much like the sound board, in that the first byte
+ * sent indicates a 'command', with optional data bytes to
+ * follow.  After a command that is intended to return a value,
+ * the result can be obtained by doing a PIC read. */
+
 /** The command to reset the PIC */
 #define WPC_PIC_RESET       0x0
 
-/** The command to update the PIC counter */
+/** The command to update the PIC counter.  When this counter
+ * reaches zero, the switch matrix cannot be accessed until
+ * an unlock sequence is successfully issued.   The counter
+ * resets automatically after unlocking. */
 #define WPC_PIC_COUNTER     0x0D
 
 /** The command to read the xth switch column */
 #define WPC_PIC_COLUMN(x)   (0x16 + (x))
 
-/** The command to unlock the switch matrix */
+/** The command to unlock the switch matrix.  A three-byte
+ * sequence follows. */
 #define WPC_PIC_UNLOCK      0x20
 
-/** The command to read the xth byte of the serial number */
+/** The command to read the xth byte of the serial number.
+ * See pic.c for a full description of how this value is
+ * encoded/decoded. */
 #define WPC_PIC_SERIAL(x)   (0x70 + (x))
 
 extern inline void wpc_write_pic (U8 val)
