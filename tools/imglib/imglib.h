@@ -1,3 +1,23 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef _IMGLIB_H
 #define _IMGLIB_H
 
@@ -45,7 +65,9 @@ struct coord
 };
 
 typedef U8 binary_operator (U8, U8);
+
 typedef U8 unary_operator (U8);
+
 typedef struct coord translate_operator (struct coord);
 
 struct buffer *buffer_alloc(unsigned int maxlen);
@@ -69,8 +91,8 @@ struct buffer *buffer_splitbits(struct buffer *buf);
 int buffer_compare(struct buffer *a, struct buffer *b);
 struct buffer *buffer_replace(struct buffer *old, struct buffer *new);
 struct histogram *histogram_update(struct buffer *buf);
-struct buffer *buffer_rle_encode(struct buffer *buf);
-struct buffer *buffer_rle_decode(struct buffer *buf);
+struct buffer *buffer_compress(struct buffer *buf);
+struct buffer *buffer_decompress(struct buffer *buf);
 struct buffer *bitmap_crop(struct buffer *buf);
 void bitmap_draw_pixel(struct buffer *buf, unsigned int x, unsigned int y);
 void bitmap_draw_line(struct buffer *buf, int x1, int y1, int x2, int y2);

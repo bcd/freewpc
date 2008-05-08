@@ -73,13 +73,16 @@ void buffer_write_c (struct buffer *buf, FILE *fp)
 
 	if (buf->hist)
 	{
-		fprintf (fp, "/* Histogram (%d unique values):\n", buf->hist->unique);
-		for (off = 0; off < buf->hist->unique; off++)
+		fprintf (fp, "/* Histogram (%d unique values)\n", buf->hist->unique);
+		if (buf->hist->unique < 16)
 		{
-			U8 val = buf->hist->most_frequent[off];
-			unsigned int count = buf->hist->count[val];
-			fprintf (fp, " * %d occurrences of %02X\n",
-				count, val);
+			for (off = 0; off < buf->hist->unique; off++)
+			{
+				U8 val = buf->hist->most_frequent[off];
+				unsigned int count = buf->hist->count[val];
+				fprintf (fp, " * %d occurrences of %02X\n",
+					count, val);
+			}
 		}
 		fprintf (fp, " */\n");
 	}
@@ -200,7 +203,13 @@ int buffer_compare (struct buffer *a, struct buffer *b)
 		return 1;
 	for (off = 0; off < a->len; off++)
 		if (a->data[off] != b->data[off])
+		{
+#if 1
+			printf ("difference at offset %d (%02X vs. %02X)\n",
+				off, a->data[off], b->data[off]);
+#endif
 			return 1;
+		}
 	return 0;
 }
 
@@ -261,18 +270,218 @@ struct histogram *histogram_update (struct buffer *buf)
 }
 
 
-struct buffer *buffer_rle_encode (struct buffer *buf)
+/********************************************************************/
+
+/* Compression scheme:
+
+   Byte 0 of the compressed buffer contains flags:
+		7:6	Init method
+			Says how to initialize the page buffer before
+			decompressing:
+				00 = No initialization.
+				01 = Copy previous image.
+				10 = Clean page with all zeroes.
+				11 = Reserved.
+		5:4	Encryption method
+			Says how to decrypt the following bytes:
+				00 = No decryption.  Bytes are copied as-is.
+						512 bytes must follow.
+            01 = Run-Length Encoding.  512 bytes are
+						described, but runs of consecutive bytes
+						are compressed into a value/count pair.
+				10 = Palette Encoding.  This is used when the
+				      number of unique bytes in the image is small.
+						The palette format is shown below.
+				11 = Reserved.
+		3		Patch flag
+			When this bit is set, after decryption one or more
+			'patches' are to be applied.  These are offset/value
+			pairs which are used to fixup certain locations.
+			This is intended for cases where RLE could be improved
+			by damaging the input data in certain ways; and these
+			patches are corrections to fix the damage.
+
+	Beginning at byte 1, the encryption method as specified
+	in [5:4] is run.  This area is variable-sized.  There is no
+	explicit length given here.
+
+	Following the encoded area, if bit 3 is set, are one or more
+	patches.  Each patch is 3-bytes in length:
+		Byte 0 = offset from previous patch, in bytes.  Up to
+			255 positions can be advanced this way.  If more is
+			needed, a 'fake patch' that patches identical data as
+			before is required.  An offset of zero means no
+			more patches, and the following bytes do not occur.
+		Byte 1/2 = the 16-bit value to be placed in the image.
+
+	When the init method is 'copy from previous', this affects
+	how data and patches are applied.  In this case, we use XOR
+	operations rather than plain stores.
+
+   When using the palette method, the data layout is as follows:
+	   Byte 1:	Number of palette entries (at most 16)
+		Byte 2:  Palette - depending on the length above, each
+		         byte here maps to a 2-bit (if 4 or less) or 4-bit
+					encoded value.
+	   Byte 2+N: The encoded data, either 2 or 4 bytes/encoded byte.
+ */
+
+#define CH_INIT_NONE 0x00
+#define CH_INIT_COPY 0x40
+#define CH_INIT_CLEAN 0x80
+#define CH_INIT_MASK 0xC0
+
+#define CH_ENCODE_NONE 0x00
+#define CH_ENCODE_RLE 0x10
+#define CH_ENCODE_PALETTE 0x20
+#define CH_ENCODE_MASK 0x30
+
+#define CH_PATCH 0x08
+
+static U8 *buffer_write_run (U8 *ptr, U8 sentinel, U8 data, unsigned int count)
 {
-	struct buffer *res = buffer_alloc (buf->len);
+	if (count == 0);
+	else if (count < 4)
+	{
+		do {
+			*ptr++ = data;
+		} while (--count > 0);
+	}
+	else
+	{
+		*ptr++ = sentinel;
+		*ptr++ = data;
+		*ptr++ = count;
+	}
+
+	return ptr;
+}
+
+static unsigned int palette_compression_length (struct histogram *hist)
+{
+	if (hist->unique > 16)
+		return 10000;
+
+	else if (hist->unique <= 4)
+		return (512 / 4) + hist->unique + 1 + 1;
+
+	else
+		return (512 / 2) + hist->unique + 1 + 1;
+}
+
+struct buffer *buffer_compress (struct buffer *buf)
+{
+	struct buffer *rle;
+	U8 *rleptr;
+	unsigned int last, last_count;
+	int n;
+	U8 sentinel;
+
+	/* Update the image histogram */
+	histogram_update (buf);
+
+	/* Find a byte value that does not occur in the image */
+	for (n = 0; n <= 0xFF; n++)
+	{
+		if (buf->hist->count[n] == 0)
+		{
+			sentinel = n;
+			break;
+		}
+	}
+
+	/* Compute the run length encoded version of the buffer.
+	We'll assume for now that just RLE is good enough.
+	We will check that assumption later and see how good it really was. */
+	rle = buffer_alloc (buf->len);
+	rleptr = rle->data;
+	last = 1000;
+	last_count = 0;
+
+	*rleptr++ = CH_ENCODE_RLE;
+	*rleptr++ = sentinel;
+
+	for (n = 0; n < buf->len ; n++)
+	{
+		if ((buf->data[n] == last) && (last_count < 255))
+		{
+			last_count++;
+		}
+		else
+		{
+			rleptr = buffer_write_run (rleptr, sentinel, last, last_count);
+			last = buf->data[n];
+			last_count = 1;
+		}
+	}
+	rleptr = buffer_write_run (rleptr, sentinel, last, last_count);
+	rle->len = rleptr - rle->data;
+
+#if 0
+	printf ("Unique values in original = %d\n", buf->hist->unique);
+	printf ("RLE encoded version = %d bytes\n", rle->len);
+	printf ("Palette compression = %d bytes\n",
+		palette_compression_length (buf->hist));
+#endif
+	return rle;
+}
+
+
+struct buffer *buffer_decompress (struct buffer *buf)
+{
+	struct buffer *res;
+	U8 flags;
+	U8 sentinel;
+	U8 *inptr = buf->data;
+	U8 *outptr;
+	U8 val, count;
+
+	res = buffer_alloc (MAX_BUFFER_SIZE);
+	outptr = res->data;
+
+	flags = *inptr++;
+
+	switch (flags & CH_INIT_MASK)
+	{
+		case CH_INIT_NONE:
+		case CH_INIT_COPY:
+			break;
+
+		case CH_INIT_CLEAN:
+			break;
+	}
+
+	if ((flags & CH_ENCODE_MASK) == CH_ENCODE_RLE)
+	{
+		sentinel = *inptr++;
+		while (outptr - res->data < 512)
+		{
+			val = *inptr++;
+			if (val == sentinel)
+			{
+				val = *inptr++;
+				count = *inptr++;
+				do {
+					*outptr++ = val;
+				} while (--count > 0);
+			}
+			else
+			{
+				*outptr++ = val;
+			}
+		}
+	}
+
+	if (flags & CH_PATCH)
+	{
+	}
+
+	res->len = outptr - res->data;
 	return res;
 }
 
 
-struct buffer *buffer_rle_decode (struct buffer *buf)
-{
-	struct buffer *res = buffer_alloc (MAX_BUFFER_SIZE);
-	return res;
-}
+/********************************************************************/
 
 
 struct buffer *bitmap_crop (struct buffer *buf)
