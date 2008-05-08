@@ -1,46 +1,5 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#define MAX_BUFFER_SIZE (128 * 32)
-
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-
-#define abs(n) (((n) >= 0) ? (n) : -(n))
-
-#define square(n) ((n) * (n))
-
-
-typedef unsigned char U8;
-
-struct histogram
-{
-	unsigned int count[256];
-	unsigned int most_frequent[256];
-	unsigned int unique;
-};
-
-struct buffer
-{
-	unsigned int len;
-	unsigned int width, height;
-	U8 *data;
-	U8 _data[MAX_BUFFER_SIZE];
-	struct histogram *hist;
-	U8 color;
-};
-
-struct coord
-{
-	int x;
-	int y;
-};
-
-typedef U8 binary_operator (U8, U8);
-typedef U8 unary_operator (U8);
-typedef struct coord translate_operator (struct coord);
+#include "imglib.h"
 
 struct buffer *buffer_alloc (unsigned int maxlen)
 {
@@ -66,7 +25,7 @@ struct buffer *bitmap_alloc (unsigned int width, unsigned int height)
 
 struct buffer *frame_alloc (void)
 {
-	return bitmap_alloc (128, 32);
+	return bitmap_alloc (FRAME_WIDTH, FRAME_HEIGHT);
 }
 
 
@@ -393,10 +352,12 @@ struct buffer *bitmap_translate (struct buffer *buf, translate_operator op)
 		{
 			struct coord c = { .x = x, .y = y };
 			c = op (c);
-			res->data[bitmap_pos (res, c.x, c.y)] = 
-				buf->data[bitmap_pos (buf, x, y)];
+
+			res->color = buf->data[bitmap_pos (buf, x, y)];
+
+			bitmap_draw_pixel (res, c.x, c.y);
 		}
-	return res;	
+	return res;
 }
 
 
@@ -504,7 +465,7 @@ void bitmap_finish (struct buffer *buf)
 }
 
 
-void bitmap_zoom_out (void)
+void bitmap_zoom_out (struct buffer *buf)
 {
 	for (;;)
 	{
