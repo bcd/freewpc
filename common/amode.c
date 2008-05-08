@@ -116,6 +116,7 @@ void amode_logo_page (void)
 void amode_credits_page (void)
 {
 	credits_draw ();
+	dmd_show_low ();
 	amode_page_end (3);
 }
 
@@ -173,7 +174,7 @@ void amode_tz_page (void)
 		dmd_overlay (wpc_dmd_get_mapped (), 0);
 		star_draw ();
 		dmd_show2 ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 		dmd_map_lookaside (0);
 	}
 	amode_page_end (0);

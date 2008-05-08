@@ -120,17 +120,7 @@ extern U8 *linux_dmd_high_page;
  * We call these "low" and "high".
  */
 
-
-extern inline U8 wpc_dmd_map_ok (const U8 map)
-{
-#if (MACHINE_WPC95 == 0)
-	if (map < 4)
-		halt_compile_due_to_bad_dmd_map ();
-#endif
-	return map;
-}
-
-#define DMD_MAPPED(n)					((U8 *)0x3000 + (wpc_dmd_map_ok (n) * 0x200))
+#define DMD_MAPPED(n) ((U8 *)0x3000 + ((n) * 0x200))
 
 /* Define addresses for the two page buffer locations we
  * call low and high. */
