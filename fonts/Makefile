@@ -30,3 +30,8 @@ FON_OBJS += $(if $(CONFIG_FON_MISCTYPE), fonts/miscfixed.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRC), fonts/free/v5prc.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRD), fonts/free/v5prd.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRF), fonts/free/v5prf.o)
+FON_OBJS += $(if $(CONFIG_FON_STEEL), fonts/free/steel.o)
+FON_OBJS += $(if $(CONFIG_FON_LITHOGRAPH), fonts/free/lithograph.o)
+FON_OBJS += $(if $(CONFIG_FON_TWIZONE), fonts/free/twizone.o)
+
+
