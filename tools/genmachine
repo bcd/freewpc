@@ -63,7 +63,7 @@ my %contextDefinitionRe = (
 	"lamps" => "[1-8][1-8]",
 	"drives" => "[HLGAFX][1-8]",
 	"gi" => "[0-9]+",
-	"lampsets" => "AUTO",
+	"lamplists" => "AUTO",
 	"containers" => "AUTO",
 	"shots" => "AUTO",
 	"drivers" => "AUTO",
@@ -76,6 +76,7 @@ my %contextDefinitionRe = (
 	"system_music" => "AUTO",
 	"highscores" => "GC|1|2|3|4",
 	"flags" => "AUTO",
+	"globalflags" => "AUTO",
 	"scores" => "AUTO",
 	"fonts" => "AUTO",
 	"fifs" => "AUTO",
@@ -110,6 +111,7 @@ my %BinaryProperties = (
 		"drain-switch" => 1,
 		"standup" => 1,
 		"fast" => 1,
+		"noscore" => 1,
 		"outhole" => $GLOBAL_OBJECT,
 		"shooter" => $GLOBAL_OBJECT,
 		"tilt" => $GLOBAL_OBJECT,
@@ -134,6 +136,7 @@ my %BinaryProperties = (
 		"eject" => 1,
 		"flash" => 1,
 		"nosearch" => 1,
+		"notinstalled" => 1,
 	},
 	"containers" => {
 		"trough" => $GLOBAL_OBJECT,
@@ -186,12 +189,13 @@ my %EnumeratedProperties = (
 my %ContextPrefixes = (
 	"switches" => "SW",
 	"lamps" => "LM",
-	"lampsets" => "LAMPSET",
+	"lamplists" => "LAMPLIST",
 	"drives" => "SOL",
 	"gi" => "GI",
 	"containers" => "DEVNO",
 	"shots" => "SHOT",
 	"flags" => "FLAG",
+	"globalflags" => "GLOBAL_FLAG",
 	"scores" => "SC",
 	"adjustments" => "FAD",
 	"audits" => "FAU",
@@ -208,12 +212,13 @@ my %ContextMaxima = (
 	"containers" => "NUM_DEVICES",
 	"shots" => "NUM_SHOTS",
 	"flags" => "MAX_FLAGS",
+	"globalflags" => "MAX_GLOBAL_FLAGS",
 	"adjustments" => "NUM_FEATURE_ADJUSTMENTS",
 	"audits" => "NUM_FEATURE_AUDITS",
 	"deffs" => "MAX_DEFFS",
 	"leffs" => "MAX_LEFFS",
 	"drives" => "NUM_POWER_DRIVES",
-	"lampsets" => "MAX_LAMPSET",
+	"lamplists" => "MAX_LAMPLIST",
 	"scores" => "NUM_SCORES",
 	"fonts" => "MAX_FONTS",
 	"timers" => "MAX_TIMERS",
@@ -222,7 +227,7 @@ my %ContextMaxima = (
 
 # The contexts for which strings should be written out.
 @stringcontexts = ("switches", "drives", "lamps", "containers", 
-	"deffs", "leffs", "lampsets", "gi", "fonts");
+	"deffs", "leffs", "lamplists", "gi", "fonts");
 
 
 ###################################################################
@@ -307,6 +312,9 @@ sub close_switch {
 	$def->{'fnpage'} = "EVENT_PAGE";
 	$def->{'button'} = 1 if (defined $def->{'start-button'})
 		|| (defined $def->{'buyin-button'});
+
+	$def->{'prebounce'} = "0" if (!defined $def->{'prebounce'});
+	$def->{'postbounce'} = "TIME_33MS" if (!defined $def->{'postbounce'});
 }
 
 sub close_drive {
@@ -720,7 +728,18 @@ sub machine_write_defines {
 	my $drives = $m->{"drives"};
 	print "#define MACHINE_SOL_FLASHERP(sol) (\\\n";
 	foreach $drive (unique ($drives)) {
-		if (defined $drive->{'flash'}) {
+		if (!defined $drive->{'notinstalled'} && defined $drive->{'flash'}) {
+			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
+		}
+	}
+	print "0)\n\n";
+
+	# Print MACHINE_SOLENOID_P(sol), which returns true if SOL is
+	# a solenoid.
+	my $drives = $m->{"drives"};
+	print "#define MACHINE_SOLENOID_P(sol) (\\\n";
+	foreach $drive (unique ($drives)) {
+		if (!defined $drive->{'notinstalled'} && !defined $drive->{'flash'}) {
 			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
 		}
 	}
@@ -735,29 +754,6 @@ sub machine_write_defines {
 		}
 	}
 	print "0)\n\n";
-
-	# Print MACHINE_xxMS_RTTS defines
-	my @pollcounts = (1, 8, 32, 128);
-	my $drivers = $m->{"drivers"};
-	for $poll (@pollcounts) {
-		my @calls = ();
-		for $drv (unique ($drivers)) {
-			my $drvname = $drv->{'name'};
-			if ($drv->{'poll'} == $poll) {
-				push @calls, "   VOIDCALL(${drvname}_rtt) \\";
-			}
-		}
-		if (@calls) {
-			print "#define MACHINE_${poll}MS_RTTS \\\n";
-			foreach my $call (@calls) {
-				print "$call\n";
-			}
-			print "\n";
-		} else {
-			print "#undef MACHINE_${poll}MS_RTTS\n\n";
-		}
-	}
-	print "\n";
 
 	# Print feature_adj_t and MACHINE_FEATURE_ADJUSTMENTS.  Since it's
 	# part of a structure, strip out the fad_ prefix.
@@ -797,9 +793,9 @@ sub machine_write_defines {
 		}
 
 		if (!defined $gi) { $gi = "0" }
-		if (!defined $lamps) { $lamps = "0" } else { $lamps = "LAMPSET_" . $lamps; }
+		if (!defined $lamps) { $lamps = "0" } else { $lamps = "LAMPLIST_" . $lamps; }
 		$gi = "L_ALL_GI" if ($gi eq "ALL");
-		$lamps = "L_ALL_LAMPS" if ($lamps eq "LAMPSET_ALL");
+		$lamps = "L_ALL_LAMPS" if ($lamps eq "LAMPLIST_ALL");
 
 		print "   DECL_LEFF (" . 
 			$leff->{'c_ident'} . ", " .
@@ -927,21 +923,29 @@ sub machine_write_switch_decls {
 
 	print "const switch_info_t switch_table[] = {\n";
 	for $sw (unique ($m->{'switches'})) {
+		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
+			(!defined $sw->{'cabinet'}) &&
+			(!defined $sw->{'service'}));
+
+		if (defined $sw->{'noscore'}) {
+			$sw->{'playfield'} = undef;
+			$sw->{'noplay'} = 1;
+			$sw->{'intest'} = 1;
+			$sw->{'ingame'} = 1;
+		}
+
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
 		add_flag ($sw, "edge", "flags", "SW_EDGE");
 		add_flag ($sw, "noplay", "flags", "SW_NOPLAY");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
-		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
-			(!defined $sw->{'cabinet'}) &&
-			(!defined $sw->{'service'}));
 		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
 
 		my $c_decl = $sw->{'c_decl'};
 		my $c_ident = $sw->{'c_ident'};
 		print "   [" . $c_ident . "] = {\n";
 		for $field ("fn", "flags", "lamp", "sound",
-			"active_time", "inactive_time", "devno") {
+			"prebounce", "postbounce", "devno") {
 			$val = $sw->{$field};
 			if (($c_decl =~ /unused/) && ($field eq "fn")) {
 				$val = "null_function";
@@ -983,9 +987,9 @@ sub machine_write_makefile {
 
 
 sub machine_lamp_get_value {
-	my ($lamp) = @_;
-	$lamp = ($m->{'lamps'})->{$lamp};
-	die "undefined lamp $lamp" if (!defined $lamp);
+	my ($lampid) = @_;
+	$lamp = ($m->{'lamps'})->{$lampid};
+	die "undefined lamp $lampid" if (!defined $lamp);
 	return $lamp->{'number'};
 }
 
@@ -1017,81 +1021,81 @@ sub lamp_sort_circle_out {
 
 sub colored_lamps {
 	my ($color) = @_;
-	my $lampset = "";
+	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		if ($lamp->{'color'} eq $color) {
-			$lampset .= $lamp->{'c_ident'} . ",\n   ";
+			$lamplist .= $lamp->{'c_ident'} . ",\n   ";
 		}
 	}
-	return $lampset;
+	return $lamplist;
 }
 
 sub pf_lamps {
 	my ($sortfn) = @_;
 	my @lamps;
 	my $lastlamp = undef;
-	my $lampset = "";
+	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
 	}
 	@lamps = sort $sortfn @lamps;
-	$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+	$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 	foreach $lamp (@lamps) {
 		if (defined $lastlamp) {
 			$a = $lastlamp;
 			$b = $lamp;
 			if (&$sortfn() != 0) {
-				$lampset .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
+				$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 			}
 		}
-		$lampset .= $lamp->{'c_ident'} . ",\n   ";
+		$lamplist .= $lamp->{'c_ident'} . ",\n   ";
 		$lastlamp = $lamp;
 	}
-	return $lampset;
+	return $lamplist;
 }
 
-sub machine_write_lampset_decls {
+sub machine_write_lamplist_decls {
 	print $START_SOURCE;
 
-	for $ls (unique ($m->{"lampsets"})) {
+	for $ls (unique ($m->{"lamplists"})) {
 		print "const lampnum_t " . $ls->{'c_decl'} . "[] = {\n   ";
 
 		my @lamps = split /,[ \t]*/, $ls->{'props'};
-		my $lampset = "";
+		my $lamplist = "";
 		foreach $lamp (@lamps) {
 			if ($lamp =~ m/COLOR:(.*)/) {
-				$lampset .= colored_lamps ("$1");
+				$lamplist .= colored_lamps ("$1");
 			}
 			elsif ($lamp =~ m/PF:(.*)/) {
-				$lampset .= pf_lamps ("$1");
+				$lamplist .= pf_lamps ("$1");
 			}
 			elsif ($lamp =~ m/(.*)\.\.(.*)/) {
 				($min, $max) = (machine_lamp_get_value ($1),
 					machine_lamp_get_value ($2));
 				if ($min < $max) {
 					for ($i = $min; $i <= $max; $i++) {
-						$lampset .= "$i, ";
+						$lamplist .= "$i, ";
 					}
 				}
 				else {
 					for ($i = $min; $i >= $max; $i--) {
-						$lampset .= "$i, ";
+						$lamplist .= "$i, ";
 					}
 				}
-			} elsif ($parent = ($m->{"lampsets"})->{$lamp}) {
-				$lampset .= $parent->{'value'};
+			} elsif ($parent = ($m->{"lamplists"})->{$lamp}) {
+				$lamplist .= $parent->{'value'};
 			} else {
 				$lamp = machine_lamp_get_value ($lamp);
-				$lampset .= "$lamp, ";
+				$lamplist .= "$lamp, ";
 			}
 		}
-		print "${lampset}LAMP_END\n";
+		print "${lamplist}LAMP_END\n";
 		print "};\n";
-		$ls->{'value'} = $lampset;
+		$ls->{'value'} = $lamplist;
 	}
 
-	print "const lampnum_t * const lampset_table[] = {\n";
-	for $ls (unique ($m->{"lampsets"})) {
+	print "const lampnum_t * const lamplist_table[] = {\n";
+	for $ls (unique ($m->{"lamplists"})) {
 		print "   " . $ls->{'c_decl'} . ",\n";
 	}
 	print "};\n";
@@ -1245,10 +1249,10 @@ elsif ($command eq "switchmasks") {
 }
 
 #######################################################
-#  generate build/mach-lampsets.c
+#  generate build/mach-lamplists.c
 #######################################################
-elsif ($command eq "lampsets") {
-	machine_write_lampset_decls ();
+elsif ($command eq "lamplists") {
+	machine_write_lamplist_decls ();
 }
 
 #######################################################

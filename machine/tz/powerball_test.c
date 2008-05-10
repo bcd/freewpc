@@ -9,7 +9,7 @@
 #include <window.h>
 #include <test.h>
 
-/* copied from powerball.c */
+/* TODO : copied from powerball.c */
 #define PB_MISSING       0x0
 #define PB_IN_LOCK       0x1
 #define PB_IN_TROUGH     0x2
@@ -42,17 +42,21 @@ void pb_test_draw (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 0, "POWERBALL TEST");
-	
-	switch (pb_location)
-	{
-		case PB_MISSING: sprintf ("LOST"); break;
-		case PB_IN_LOCK: sprintf ("LOCK"); break;
-		case PB_IN_TROUGH: sprintf ("TROUGH"); break;
-		case PB_IN_GUMBALL: sprintf ("GUMBALL"); break;
-		case PB_IN_PLAY: sprintf ("P.F."); break;
-		case PB_MAYBE_IN_PLAY: sprintf ("NOT SURE"); break;
-		default: sprintf ("AWOL"); break;
-	}
+
+	if (pb_location == PB_MISSING)
+		sprintf ("LOST");
+	else if (pb_location & PB_IN_LOCK)
+		sprintf ("LOCK");
+	else if (pb_location & PB_IN_TROUGH)
+		sprintf ("TROUGH");
+	else if (pb_location & PB_IN_GUMBALL)
+		sprintf ("GUMBALL");
+	else if (pb_location & PB_IN_PLAY)
+		sprintf ("P.F.");
+	else if (pb_location & PB_MAYBE_IN_PLAY)
+		sprintf ("NOT SURE");
+	else
+		sprintf ("ERROR");
 	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
 
 	if (pb_location & (PB_IN_LOCK | PB_IN_TROUGH))

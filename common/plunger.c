@@ -51,6 +51,9 @@ CALLSET_ENTRY (plunger, ball_in_play)
 
 CALLSET_ENTRY (plunger, sw_shooter)
 {
+	/* TODO - none of this logic works if the shooter switch is broken.
+	 * Need to invoke this on a timer after any trough kick.
+	 */
 #ifdef INCLUDE_AUTOPLUNGER
 	if (ball_in_play
 		&& !tournament_mode_enabled 
@@ -60,7 +63,9 @@ CALLSET_ENTRY (plunger, sw_shooter)
 		in the autoplunger lane. */
 		/* TODO - after locking a ball, adding a new ball to the
 		plunger while ball_in_play is TRUE: this will launch
-		prematurely */
+		prematurely.  We need a permanent, system-defined global
+		flag that says whether a trough serve should be autoplunged
+		or not.  TZ is already doing this privately... */
 		VOIDCALL (plunger_sw_launch_button);
 	}
 	else if (config_timed_plunger == ON)

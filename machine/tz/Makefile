@@ -9,8 +9,6 @@ MACHINE_SCHEDULE := $(M)/tz.sched
 
 MACHINE_SCHED_FLAGS := -i tz/driver.h
 
-MUX_SRCS := build/tz-mux.c
-
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
@@ -61,7 +59,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 #
 
 GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
-	rampdiv.o amode.o lock.o door.o ballsave.o
+	rampdiv.o lock.o door.o ballsave.o
 
 GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o powerball_test.o
 
@@ -70,7 +68,7 @@ GAME_INCLUDES =
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	config.o rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
 	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
-	multiball.o loop.o sssmb.o chaosmb.o leffs.o
+	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
 
 GAME_FSMS = shot.fsm
 

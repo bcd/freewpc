@@ -11,6 +11,7 @@ int zc_granularity_in_cpu_cycles;
 
 int sim_zc_read (void)
 {
+	return 0;
 }
 
 
@@ -21,7 +22,7 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 
 void sim_zc_init (void)
 {
-	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
+	//sim_time_register (1, TRUE, sim_zc_periodic, NULL);
 }
 
 

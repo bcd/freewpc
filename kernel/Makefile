@@ -7,6 +7,7 @@ SCHED_OBJ := $(SCHED_SRC:.c=.o)
 # the machine type at all.
 KERNEL_BASIC_OBJS += $(if $(CONFIG_ANIMATION), kernel/animation.o)
 KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
+KERNEL_BASIC_OBJS += kernel/idle.o
 KERNEL_BASIC_OBJS += kernel/list.o
 KERNEL_BASIC_OBJS += kernel/misc.o
 KERNEL_BASIC_OBJS += kernel/puts.o
@@ -19,7 +20,7 @@ KERNEL_BASIC_OBJS += kernel/sysinfo.o
 KERNEL_SW_OBJS += kernel/deff.o
 KERNEL_SW_OBJS += $(if $(CONFIG_FONT), kernel/font.o)
 KERNEL_SW_OBJS += kernel/game.o
-KERNEL_SW_OBJS += kernel/lampset.o
+KERNEL_SW_OBJS += kernel/lamplist.o
 KERNEL_SW_OBJS += kernel/player.o
 KERNEL_SW_OBJS += kernel/printf.o
 KERNEL_SW_OBJS += kernel/score.o

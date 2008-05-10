@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -69,13 +69,13 @@ struct animation_object *animation_add (
 
 void animation_object_flash (struct animation_object *obj, U8 period)
 {
+#ifdef PARANOID
+	/* Ensure that this is a power of 2 */
+	if (period & (period - 1))
+	{
+	}
+#endif
 	obj->flash_period = period;
-}
-
-
-void animation_add_symbol (U8 x0, U8 y0,
-	void (*update) (struct animation_object *))
-{
 }
 
 
@@ -85,8 +85,6 @@ elements to draw itself and finally displays the page(s). */
 void animation_step (void)
 {
 	U8 n;
-
-	dbprintf ("animation_step\n");
 
 	if (an->flags & AN_DOUBLE)
 	{
@@ -106,8 +104,13 @@ void animation_step (void)
 	{
 		struct animation_object *obj = an->object[n];
 
+		/* If the flash period is nonzero, that means we only draw the object
+		 * 50% of the time.  For example, a flash period of 8 would draw the
+		 * object on iterations 0, 1, 2, and 3; but not on 4, 5, 6, or 7.
+		 * IDEA : Since the iteration count is not used
+		 * elsewhere, it should be zeroed when it reaches the max below. */
 		if ((obj->flash_period == 0)
-			|| (an->iteration % obj->flash_period) < (obj->flash_period / 2))
+			|| (an->iteration & (obj->flash_period - 1)) < (obj->flash_period / 2))
 		{
 			obj->draw (obj);
 		}
@@ -118,6 +121,9 @@ void animation_step (void)
 	else
 		dmd_show_low ();
 
+	/* TODO : for video modes there should be a callback here for
+	 * updating 'global state', like collision detection. */
+
 	an->iteration++;
 	task_sleep (an->interframe_delay);
 }
@@ -125,7 +131,7 @@ void animation_step (void)
 
 void animation_run (void)
 {
-	for (;;)
+	while (!(an->flags & AN_STOP))
 		animation_step ();
 }
 

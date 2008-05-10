@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,7 +29,7 @@
 #include <test.h>
 
 
-/** An area of NVRAM used to test that it is kept locked. */
+/** An area of protected memory used to test that it is kept locked. */
 __nvram__ U8 nvram_test_byte;
 
 __nvram__ std_adj_t system_config;
@@ -84,9 +84,9 @@ void adj_init (void)
 }
 
 
-/** Check the NVRAM at idle time to make sure that it is locked.
+/** Check the protected memory at idle time to make sure that it is locked.
  * Halt the system if found unlocked. */
-CALLSET_ENTRY (nvram, idle)
+CALLSET_ENTRY (nvram, idle_every_100ms)
 {
 #ifdef HAVE_NVRAM
 	U8 data = nvram_test_byte;

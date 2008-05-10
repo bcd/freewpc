@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -38,10 +38,6 @@
  */
 
 #include <freewpc.h>
-
-/** aslink gets angry if there are no local variables declared, so always
- * declare at least one here */
-__local__ U8 __unused_local__;
 
 /** In simulation, we have to declare the save areas explicitly. */
 #ifdef CONFIG_NATIVE

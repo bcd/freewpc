@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -112,6 +112,11 @@ void db_idle (void)
 					VOIDCALL (dump_deffs);
 					break;
 
+				case 'q':
+					/* Dump the switch queue */
+					switch_queue_dump ();
+					break;
+
 				case 's':
 				{
 					/* Simulate a switch closure.  The switch column/row must be given
@@ -124,7 +129,7 @@ void db_idle (void)
 					col = db_read_sync ();
 					sw = MAKE_SWITCH (col - '0', row - '0');
 
-					tp = task_create_gid (GID_SW_HANDLER, switch_sched);
+					tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
 					task_set_arg (tp, sw);
 				}
 

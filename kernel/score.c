@@ -58,9 +58,9 @@ void scores_draw_ball (void)
 	font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 #else
 	credits_render ();
-	font_render_string_center (&font_var5, 96, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_var5, 32, 27, sprintf_buffer);
+	font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
 #endif
 }
 
@@ -69,10 +69,11 @@ void scores_draw_ball (void)
 void scores_draw_credits (void)
 {
 	credits_render ();
-	font_render_string_center (&font_mono5, 64, 27, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 }
 
-
+/* A list of score font keys.  Each of these is an index into the
+ * table below. */
 #define SCORE_POS_CENTER_LARGE 0
 #define SCORE_POS_UL_SMALL 1
 #define SCORE_POS_UR_SMALL 2
@@ -88,7 +89,8 @@ void scores_draw_credits (void)
 #define SCORE_POS_UR_TINY 12
 
 
-/** A lookup table for mapping a 'score font key' into a font and location on the DMD. */
+/** A lookup table for mapping a 'score font key' into a font and
+ * location on the DMD. */
 const struct score_font_info 
 {
 	void (*render) (void);
@@ -115,7 +117,17 @@ const struct score_font_info
 };
 
 
-/* The lookup is [num_players-1][player_up][score_to_draw-1] */
+/* The lookup is [num_players-1][player_up][score_to_draw-1].
+ *
+ * The first index says how many players there are total.  Zero players
+ * is not an option; num_players must always be at least 1.
+ *
+ * The second index says which player is up.  If zero, it means no
+ * player is up, as during attract mode.  This will be nonzero during
+ * a game.
+ *
+ * The third index says which player's score is being drawn.
+ */
 const U8 score_font_info_key[4][5][4] = {
 	/* 1 player */  {
 		{SCORE_POS_UL_SMALL},
@@ -140,7 +152,7 @@ const U8 score_font_info_key[4][5][4] = {
 
 
 /** Render the default score screen. */
-void scores_draw_current (U8 skip_player)
+void scores_draw_current (U8 single_player)
 {
 	U8 p;
 	const struct score_font_info *info;
@@ -151,7 +163,7 @@ void scores_draw_current (U8 skip_player)
 	implement a single flashing score. */
 	for (p=0; p < num_players; p++)
 	{
-		if (p+1 == skip_player)
+		if (single_player && p+1 != single_player)
 			continue;
 
 		/* Render the score into the print buffer */
@@ -198,60 +210,58 @@ void scores_important_deff (void)
 
 /** The score screen display effect.  This function redraws the scores
  * in the default manner when there are no other high priority effects
- * running.  In ths mode, the current player's score will flash. */
+ * running. */
 void scores_deff (void)
 {
-	U8 delay;
+#ifdef MACHINE_TZ
+	star_reset ();
+#endif
 
 	/* This effect always runs, until it is preempted. */
 	for (;;)
 	{
-redraw:
 		/* Clear score change flag */
 		score_update_start ();
 
-		/* Stop any score effects (i.e. flashing) */
-
-		/* Redraw the scores.  player_up signals which score
-		 * should be drawn larger and will flash.
-		 *
-		 * First, the static elements are drawn: the opponents' scores
+		/* First, the static elements are drawn: the opponents' scores
 		 * and the ball number.  Then the flashing element, the current
 		 * player's score is drawn. */
-		dmd_alloc_low_high ();
+		/* TODO - I'd prefer to draw all players without flashing, and
+		 * use dark/bright colors to indicate player up. */
+		dmd_map_lookaside (0);
 		dmd_clean_page_low ();
 		scores_draw_ball ();
-		scores_draw_current (player_up);
+		scores_draw_current (0);
 		dmd_copy_low_to_high ();
-		scores_draw_current (0); /* TODO - this is redrawing other players ! */
-		dmd_show_low ();
+		scores_draw_current (player_up);
 		
-		/* Restart score effects */
-
-		/* Wait for a score change. */
+		/* Display the score with effects, until a score change. */
 		for (;;)
 		{
+			if (ball_in_play)
+			{
+				dmd_map_lookaside (0);
+				dmd_dup_mapped ();
+				dmd_overlay2 (wpc_dmd_get_mapped (), 0);
+#ifdef MACHINE_TZ
+				star_draw ();
+#endif
+				dmd_show2 ();
+			}
+			else
+			{
+				dmd_alloc_low_clean ();
+				wpc_dmd_set_high_page (dmd_get_lookaside (0) + 1);
+				dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
+				dmd_show_low ();
+			}
+
+			task_sleep (TIME_166MS);
+
 			/* TODO - use a sweeping effect rather than the flashing
 			when ball is in play. */
-			delay = ball_in_play ? TIME_500MS : TIME_100MS;
-			while (delay != 0)
-			{
-				task_sleep (TIME_33MS);
-				delay -= TIME_33MS;
-				if (score_update_required ())
-					goto redraw;
-			}
-			dmd_show_other ();
-
-			delay = ball_in_play ? TIME_200MS : TIME_100MS;
-			while (delay != 0)
-			{
-				task_sleep (TIME_33MS);
-				delay -= TIME_33MS;
-				if (score_update_required ())
-					goto redraw;
-			}
-			dmd_show_other ();
+			if (score_update_required ())
+				break;
 		}
 	}
 }

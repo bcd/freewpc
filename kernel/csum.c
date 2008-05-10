@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,7 +21,7 @@
 /**
  * \file
  * \brief Generic checksum calculation/verification routines.
- * Each module that uses the NVRAM should declare a structure of
+ * Each module that uses protected memory should declare a structure of
  * type "struct area_csum" that says how that memory should be
  * managed.
  */
@@ -40,7 +40,7 @@ extern const struct area_csum audit_csum_info;
 
 /** A table of all csum info structures.  All of these
 will be scanned during initialization to ensure that the
-NVRAM is valid. */
+protected memory is valid. */
 const struct area_csum *csum_info_table[] = {
 	&coin_csum_info,
 	&replay_csum_info,
@@ -66,8 +66,8 @@ const U8 csum_paging_info_table[] = {
 
 /**
  * Updates a checksummed region after an update.
- * This should be invoked immediately after any changes to NVRAM
- * data.
+ * This should be invoked immediately after any changes to protected
+ * memory.
  */
 void
 csum_area_update (const struct area_csum *csi)

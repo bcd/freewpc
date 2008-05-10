@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -54,7 +54,7 @@ match_deff (void)
 	U8 value;
 	U8 n;
 	U8 last_value = 0xFF;
-	
+
 	for (n=0; n < 20; n++)
 	{
 		if (n == 19)
@@ -87,28 +87,41 @@ match_deff (void)
 }
 
 
+/**
+ * Return a score that says how good a particular two-digit number
+ * meets our expectation.  The higher the score, the better it is.
+ * WANT_MATCH is nonzero if we want at least one player to match.
+ * VAL is the two-digit number we are testing.
+ */
 U8
 match_value_score (U8 want_match, U8 val)
 {
 	U8 score = 0;
 	U8 p;
+
+	/* Count how many players would match if the value
+	was chosen */
 	for (p = 0; p < num_players; p++)
 	{
 		if (scores[p][BYTES_PER_SCORE-1] == match_value)
-		{
-			if (want_match)
-				score++;
-		}
-		else
-		{
-			if (!want_match)
-				score++;
-		}
+			score++;
 	}
 
-	if (want_match && score > 0)
+	/* If we want to match and this would do that, return 1.
+	Otherwise, return zero.  (For now, number of matches
+	is not considered.)
+	   Likewise, if we don't want to match, return 1 iff
+	no matches happened. */
+	if (want_match == 2)
 	{
-		score = 4 - score;
+	}
+	else if (want_match == 1)
+	{
+		score = (score > 0);
+	}
+	else
+	{
+		score = !(score > 0);
 	}
 
 	dbprintf ("%s, %02X = %d\n", want_match ? "match" : "no match", val, score);
@@ -118,10 +131,9 @@ match_value_score (U8 want_match, U8 val)
 
 /** Runs the match sequence if necessary */
 void
-match_start (void) 
+match_start (void)
 {
 	U8 match_flag;
-	U8 starting_match_value;
 	U8 score;
 	U8 best_score = 0;
 	U8 best_match_value = 0;
@@ -148,23 +160,24 @@ match_start (void)
 		match_flag = 0;
 	}
 
-	/* Find a value for the match that works best. */
-	starting_match_value = match_value = random_scaled (10) * 0x10;
-	do {
+	/* Find a value for the match that meets our goal.
+	Start with a random two-digit value. */
+	for (match_value = 0x00; match_value <= 0x90; match_value += 0x10)
+	{
 		score = match_value_score (match_flag, match_value);
-		if (score > best_score)
+		if ((score > best_score)
+			|| ((score == best_score) && random () > 128))
 		{
 			best_score = score;
 			best_match_value = match_value;
 		}
+	}
 
-		match_value += 0x10;
-		if (match_value > 0x90)
-			match_value = 0x00;
-	} while (match_value != starting_match_value);
-
-	dbprintf ("Chose match value %02X\n", match_value);
 	match_value = best_match_value;
+	dbprintf ("Chose match value %02X\n", best_match_value);
+
+	/* See how many matches we are about to award. */
+	match_count = match_value_score (2, match_value);
 
 	/* Start the match effect, then wait until it finishes. */
 	deff_start (DEFF_MATCH);

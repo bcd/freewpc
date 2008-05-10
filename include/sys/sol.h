@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -25,9 +25,15 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
-#define SOL_ARRAY_WIDTH	((SOL_COUNT + 8) / 8)
+#define SOL_BASE_HIGH 0
+#define SOL_BASE_LOW 8
+#define SOL_BASE_GENERAL 16
+#define SOL_BASE_AUXILIARY 24
+#define SOL_BASE_FLIPTRONIC 32
+#define SOL_BASE_EXTENDED 40
 
-extern U8 sol_timers[];
+extern __fastram__ U8 sol_timers[];
+extern U8 sol_duty_state[];
 
 
 /** Duty cycle values.  The first value is the on time,
@@ -55,8 +61,5 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 
 /* Standard solenoid pulse is full strength for 100ms */
 #define sol_pulse(id)      sol_start(id, SOL_DUTY_100, TIME_100MS)
-
-/* Ball serve pulse - TODO - this isn't right */
-#define sol_serve(id)      sol_start(MACHINE_BALL_SERVE_SOLENOID, SOL_DUTY_12_88, TIME_100MS)
 
 #endif /* _SYS_SOL_H */

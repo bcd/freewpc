@@ -45,6 +45,8 @@ define MACHINE_NUMBER 541
 38: Stroke of Luck
 41: R. Loop Arrow
 42: Lock Arrow
+43: L. Top Lane
+44: R. Top Lane
 45: Motor Bank 1
 46: Motor Bank 2
 47: Motor Bank 3
@@ -78,48 +80,50 @@ define MACHINE_NUMBER 541
 83: Left Inlane
 84: Right Inlane
 85: Right Outlane
+86: Backbox Saucer
+88: Backbox Eyes
 
 [switches]
 11: Launch Button, launch-button, cabinet, noplay
 13: Start Button, yellow, start-button, cabinet, intest
-14: Tilt, tilt
+14: Tilt, tilt, noplay
 16: Left Outlane
 17: Right Inlane
-18: Shooter, shooter
-21: Slam Tilt, slam-tilt
+18: Shooter, edge, shooter, noplay
+21: Slam Tilt, slam-tilt, noplay
 26: Left Inlane
 27: Right Outlane
-31: Trough Eject, opto
-32: Trough 1, trough, opto
-33: Trough 2, trough, opto
-34: Trough 3, trough, opto
-35: Trough 4, trough, opto
+31: Trough Eject, opto, noplay
+32: Trough 1, trough, opto, noplay
+33: Trough 2, trough, opto, noplay
+34: Trough 3, trough, opto, noplay
+35: Trough 4, trough, opto, noplay
 36: Left Popper, opto
 37: Right Popper, opto
 38: Left Top Lane
-41: Martian 6
-42: Martian 7
-43: Martian 4
-44: Martian 5
-45: Left Motor Bank
-46: Center Motor Bank
-47: Right Motor Bank
+41: Martian 6, lamp(LM_MARTIAN_6)
+42: Martian 7, lamp(LM_MARTIAN_7)
+43: Martian 4, lamp(LM_MARTIAN_4)
+44: Martian 5, lamp(LM_MARTIAN_5)
+45: Motor Bank 1
+46: Motor Bank 2
+47: Motor Bank 3
 48: Right Top Lane
-51: Left Slingshot
-52: Right Slingshot
-53: Left Jet
-54: Bottom Jet
-55: Right Jet
-56: Martian 1
-57: Martian 2
-58: Martian 3
+51: Left Slingshot, noplay
+52: Right Slingshot, noplay
+53: Left Jet, noplay
+54: Bottom Jet, noplay
+55: Right Jet, noplay
+56: Martian 1, lamp(LM_MARTIAN_1)
+57: Martian 2, lamp(LM_MARTIAN_2)
+58: Martian 3, lamp(LM_MARTIAN_3)
 61: Left Ramp Enter
 62: Center Ramp Enter
 63: Right Ramp Enter
 64: Left Ramp Exit
 65: Right Ramp Exit
-66: Motor Bank Down
-67: Motor Bank Up
+66: Motor Bank Down, noplay
+67: Motor Bank Up, noplay
 71: Right Loop High
 72: Right Loop Low
 73: Left Loop High
@@ -146,19 +150,27 @@ L6: L.R. Martian
 L7: Saucer Shake
 L8: Drop Target
 
-#Motor Bank
-#Right Gate
-#Left Gate
-#Divertor Power
-#Divertor Hold
-#L.E.D. Clock
-#L.E.D. Data
-#Strobe Light
-#Coin Meter
+G1: Saucer Flash 5, flash
+G2: Saucer Flash 4, flash
+G3: Saucer Flash 6, flash
+G4: R. Martian Flash, flash
+G5: Saucer Arrow, flash
+G7: Saucer Flash, flash
 
-# TODO : Divertor Power = 34
-# TODO : Divertor Hold = 35
-# TODO : Strobe Light = 38
+A1: Saucer Flash 2, flash
+A2: Saucer Flash 3, flash
+A3: Saucer Flash 1, flash
+A4: L. Martian Flash, flash
+A5: L.E.D. Clock
+A6: L.E.D. Data
+A7: Strobe Light, flash
+
+F5: Right Gate
+F6: Left Gate
+F7: Divertor Power
+F8: Divertor Hold
+
+X1: Coin Meter
 
 [gi]
 
@@ -166,7 +178,7 @@ L8: Drop Target
 
 #############################################################
 
-[lampsets]
+[lamplists]
 Martians: Martian 1, Martian 2, Martian 3, Martian 4, Martian 5, Martian 6, Martian 7
 Arrows: L. Loop Arrow, L. Ramp Arrow, Lock Arrow, R. Ramp Arrow, R. Loop Arrow
 Bottom Lanes: Left Outlane, Left Inlane, Right Inlane, Right Outlane
@@ -175,6 +187,15 @@ Motor Bank: Motor Bank 1, Motor Bank 2, Motor Bank 3
 Jackpots: L. Loop Jackpot, L. Ramp Jackpot, Lock Jackpot, R. Ramp Jackpot, R. Loop Jackpot
 Countries: Country 1, Country 2, Country 3, Country 4, Country 5
 Locks: Lock 1, Lock 2, Lock 3
+Top Lanes: L. Top Lane, R. Top Lane
+L. Loop Count: L. Loop 1, L. Loop 2, L. Loop 3
+L. Ramp Count: L. Ramp 1, L. Ramp 2, L. Ramp 3
+R. Ramp Count: R. Ramp 1, R. Ramp 2, R. Ramp 3
+R. Loop Count: R. Loop 1, R. Loop 2, R. Loop 3
+L. Loop All: L. Loop Count, L. Loop Jackpot, L. Loop Arrow
+Lock Lane: Light Lock, Locks, Lock Jackpot, Lock Arrow
+Right Hole: Rule the Universe, Martian Attack, Stroke of Luck, Extra Ball
+Countries and Attack: Attack Mars, Countries
 
 [containers]
 Trough: trough, Trough Eject, Trough 1, Trough 2, Trough 3, Trough 4, init_max_count(4)
@@ -196,7 +217,12 @@ Right Hole: Right Popper, Right Popper
 [system_music]
 
 [scores]
-1K:
+12370:
+25K:
+100K:
+500K:
+1M:
+5M:
 
 [highscores]
 
@@ -205,6 +231,8 @@ Right Hole: Right Popper, Right Popper
 [deffs]
 
 [leffs]
+
+Flashfest: PRI_LEFF1, page(MACHINE_PAGE)
 
 [fonts]
 

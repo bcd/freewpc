@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -47,13 +47,6 @@
  * X to be preserved across calls (e.g. task_save -> task_dispatcher).
  * Please do NOT make any ordinary function calls in these types of
  * routines, as they are likely to trash registers in unexpected ways.
- *
- * TODO:
- * The current implementation uses a static array, and a flag
- * to indicate whether or not the task is allocated.  It would be
- * faster on average if we maintained separate chains of tasks,
- * so that we only had to scan one particular chain (e.g. the
- * running chain or the free chain) at a time.
  */
 
 
@@ -74,7 +67,7 @@ task_t task_buffer[NUM_TASKS];
  * periodically from the IRQ.  If the IRQ finds it at 0, that
  * means we went a long time without a dispatch; this probably
  * means that (1) some task has been running for a very long time,
- * or (2) the task is jumped into the weeds and is never coming back.
+ * or (2) the task jumped into the weeds and is never coming back.
  * Case (1) is theoretically OK, but we consider it just as bad as
  * case (2), which could lead to all kinds of weird behavior.
  * The IRQ will reset the system when this happens. */
@@ -99,16 +92,45 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
+/* For determining the amount of idle time left on the 6809. */
 #ifdef IDLE_PROFILE
+
+/** A counter for controlling how often we update the idle time
+ * count.  Every 8 calls to the rtt, we will update the total
+ * idle time from the amount of idle time that has accumulated
+ * over the last 8ms. */
 U8 idle_rtt_calls;
+
+/** A count that represents idle time over the last 8ms.
+ * It is not in any particular units. */
 U16 idle_time;
+
+/** The total amount of idle time since boot. */
 U16 last_idle_time;
 #endif
 
+#ifdef TASK_CHAINING
 
-/* Uncomment this to turn on dumping of entire task table.
- * Normally, only the running entries are displayed. */
-//#define DUMP_ALL_TASKS
+ /* The current implementation uses a static array, and a flag
+ * to indicate whether or not the task is allocated.  It would be
+ * faster on average if we maintained separate chains of tasks,
+ * so that we only had to scan one particular chain (e.g. the
+ * running chain or the free chain) at a time.
+ */
+
+/** An index used to indicate end-of-list */
+#define TASK_LIST_NULL -1
+
+/** The index of the current task */
+U8 to_current;
+
+/** The index of the first free block */
+U8 to_free;
+
+/** The index of the first and last allocated task */
+U8 to_alloc_head;
+U8 to_alloc_tail;
+#endif
 
 
 /* Private functions written in assembly used internally. */
@@ -151,7 +173,9 @@ void idle_profile_idle (void)
 
 
 /** For debugging, dump the entire contents of the task table to the
- * debug port. */
+ * debug port.  This function is called automatically whenever the
+ * system crashes.  It can also be triggered by pressing the 't'
+ * key in the debugger. */
 void task_dump (void)
 {
 #ifdef DEBUGGER
@@ -164,9 +188,7 @@ void task_dump (void)
 #endif
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
-#ifndef DUMP_ALL_TASKS
 		if (tp->state != BLOCK_FREE)
-#endif
 		{
 			dbprintf ("%p: ", tp);
 			task_dispatching_ok = TRUE;
@@ -208,11 +230,17 @@ task_t *block_allocate (void)
 	register U8 t;
 	register task_t *tp;
 
+#ifdef TASK_CHAINING
+#else
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+#endif
 		if (tp->state == BLOCK_FREE)
 		{
 			tp->state = BLOCK_USED;
 			tp->aux_stack_block = t;
+#ifdef TASK_CHAINING
+			/* Remove it to the free list */
+#endif
 			return tp;
 		}
 	return NULL;
@@ -223,6 +251,9 @@ task_t *block_allocate (void)
 void block_free (task_t *tp)
 {
 	tp->state = BLOCK_FREE;
+#ifdef TASK_CHAINING
+	/* Return it to the free list */
+#endif
 }
 
 
@@ -241,7 +272,9 @@ task_t *task_allocate (void)
 		tp->delay = 0;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
-		tp->sighandler = NULL;
+#ifdef TASK_CHAINING
+		/* Add to the task list */
+#endif
 		return tp;
 	}
 	else
@@ -292,6 +325,10 @@ void task_free (task_t *tp)
 	if (tp->aux_stack_block != -1)
 		block_free (&task_buffer[tp->aux_stack_block]);
 
+#ifdef TASK_CHAINING
+	/* Remove it from the task list */
+#endif
+
 	/* Free the task block */
 	block_free (tp);
 }
@@ -303,6 +340,10 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	register task_function_t fn_x asm ("x") = fn;
 	register task_t *tp asm ("x");
 
+	/* This cryptic statement invokes the assembler function 'task_create',
+	 * passing it the function pointer in X, returning the task pointer
+	 * in the same register (note: 'r' may not be the safest thing to use
+	 * here).  It also declares that 'd' is destroyed by the call. */
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->arg = 0;
@@ -348,14 +389,13 @@ void task_setgid (task_gid_t gid)
 /** Suspend the current task for a period of time */
 void task_sleep (task_ticks_t ticks)
 {
-	extern U8 tick_count;
 	register task_t *tp = task_current;
 
 	/* Fail if the idle function tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
-#if 1
+#ifdef PARANOID
 	/* TODO - verify that interrupts are not disabled when calling this */
 #endif
 
@@ -379,7 +419,7 @@ void task_sleep (task_ticks_t ticks)
 	this last approach, consider bumping all of the TIME_ defines
 	to make this a static change. */
 	tp->delay = ticks;
-	tp->asleep = tick_count;
+	tp->asleep = get_ticks ();
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
@@ -449,24 +489,25 @@ task_t *task_find_gid (task_gid_t gid)
 
 /**
  * Kills the given task.
+ * Killing yourself (suicide) is illegal, so don't do it.
+ *
+ * If the target has requested a signal handler, then the task is
+ * not killed immediately, but will instead have its PC changed to
+ * run the signal handler on the next invocation.  The handler
+ * should call task_exit() when the task can finally die.
+ *
+ * If there is no signal handler, the task is killed right away.
  */
 void task_kill_pid (task_t *tp)
 {
 	if (tp == task_current)
 		fatal (ERR_TASK_KILL_CURRENT);
-	else if (tp->sighandler == NULL)
-	{
-		task_free (tp);
-		tp->gid = 0;
+
+	task_free (tp);
+	tp->gid = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
-		task_count--;
+	task_count--;
 #endif
-	}
-	else
-	{
-		tp->u = 1;
-		tp->pc = (U16)tp->sighandler;
-	}
 }
 
 
@@ -508,6 +549,23 @@ void task_kill_all (void)
 		if (	(tp != task_current) &&
 				(tp->state & BLOCK_TASK) && 
 				!(tp->state & TASK_PROTECTED) )
+		{
+			task_kill_pid (tp);
+		}
+}
+
+
+/** Kills all tasks that have a particular flag set. */
+void task_kill_flags (U8 flags)
+{
+	register U8 t;
+	register task_t *tp;
+
+	/* BLOCK_TASK is implied and need not be specified by the caller. */
+	flags |= BLOCK_TASK;
+
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+		if ((tp != task_current) && (tp->state & flags))
 		{
 			task_kill_pid (tp);
 		}
@@ -565,9 +623,10 @@ void task_set_arg (task_t *tp, U16 arg)
 /** Allocate stack size from another task.  This should only be
 called immediately after the task is created before it gets a chance
 to run. */
-void task_alloca (task_t *tp, U8 size)
+void *task_alloca (task_t *tp, U8 size)
 {
-	tp->stack_size = size;
+	tp->stack_size += size;
+	return &tp->stack[TASK_STACK_SIZE - tp->stack_size];
 }
 
 
@@ -593,11 +652,10 @@ void task_alloca (task_t *tp, U8 size)
 __naked__ __noreturn__
 void task_dispatcher (void)
 {
-	extern U8 tick_count;
 	register task_t *tp asm ("x");
 	task_t *first = tp;
 
-	tick_start_count = tick_count;
+	tick_start_count = get_ticks ();
 	task_dispatching_ok = TRUE;
 
 	/* Set 'first' to the first task block to try. */
@@ -623,10 +681,13 @@ void task_dispatcher (void)
 			/* If the system is fully initialized, run
 			 * the idle functions. */
 			if (idle_ok)
+			{
+				do_idle ();
 				callset_invoke (idle);
+			}
 
 			/* Reset timer and kick watchdog again */
-			tick_start_count = tick_count;
+			tick_start_count = get_ticks ();
 			task_dispatching_ok = TRUE;
 
 			/* Wait for next task tick before continuing.
@@ -634,16 +695,15 @@ void task_dispatcher (void)
 			per 16ms.  Do this AFTER calling the idle functions, so
 			that we wait as little as possible; idle calls themselves may
 			take a long time. */
-			while (tick_start_count == *(volatile U8 *)&tick_count)
+			while (tick_start_count == get_ticks ())
 			{
+				barrier ();
 #ifdef IDLE_PROFILE
 				noop ();
 				noop ();
 				noop ();
 				noop ();
 				idle_time++;
-#else
-				barrier ();
 #endif
 			}
 			
@@ -661,7 +721,7 @@ void task_dispatcher (void)
 			 * Examine the current tick count, and see if it should
 			 * be woken up.
 			 */
-			register U8 ticks_elapsed = tick_count - tp->asleep;
+			register U8 ticks_elapsed = get_ticks () - tp->asleep;
 			if (ticks_elapsed >= tp->delay)
 			{
 				/* Yes, it is ready to run again. */
@@ -685,8 +745,24 @@ void task_dispatcher (void)
  */
 void task_init (void)
 {
+#ifdef TASK_CHAINING
+	U8 to;
+#endif
+
 	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
+
+#ifdef TASK_CHAINING
+	/* Initialize the free list with all tasks */
+	to_free = 0;
+	for (to = 0; to < NUM_TASKS-1; to++)
+		task_buffer[to]->chain = to+1;
+	task_buffer[NUM_TASKS]->chain = TASK_LIST_NULL;
+
+	/* Initialize the ready and blocked lists to empty */
+	to_ready = TASK_LIST_NULL;
+	to_blocked = TASK_LIST_NULL;
+#endif
 
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;

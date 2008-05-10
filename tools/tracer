@@ -25,6 +25,7 @@ my $decompress_flag = 0;
 
 while ($_ = shift (@ARGV)) {
 	if (/^-h$/) {
+		print "Syntax: tracer [options] < tracefile\n";
 		print "Options:\n";
 		print "-m <file>        Use map <file> for symbolic information\n";
 		print "-a <addr>        Analyze function beginning at <addr>\n";
@@ -143,14 +144,19 @@ sub print_report {
 	}
 }
 
+#
+# Begin main loop.
+#
+# Read each line from the trace file, parse it, and process it.
+#
 my $finish_flag = 0;
 while (<>) {
 	chomp;
 	my $line = $_;
-
 	next if ($line =~ /^$/);
 
-	# In decompress mode, transform line.
+	# With the decompress option, we first decode the compressed format
+	# and make it look like the uncompressed format.
 	if ($decompress_flag && $line =~ /([^#]*)#([0-9]+) (....) (.*)$/) {
 		my ($regs, $timestamp_delta, $pc, $insn) = ($1, $2, $3, $4);
 		$timestamp += $timestamp_delta;
@@ -162,16 +168,16 @@ while (<>) {
 	}
 	
 	# Skip all trace entries until the 'system ready' pattern is found.
+	# This is done by looking for when interrupts are turned on.
 	# This ignores a lot of boot-time code that we don't care about.
 	if (!$system_ready_time)
 	{
 		next unless ($line =~ /ANDCC.*#/);
-		# next unless ($line =~ /LDS.*#/);
 		$line =~ /^#([0-9]+) /;
 		$system_ready_time = $1;
 	}
 
-	# MAME tracing can produce shorter output when there is small loops
+	# MAME tracing can produce shorter output when there are small loops
 	# in the code.  If an 'rts' is omitted, this can confuse the tracer.
 	if (($line =~ /loops/) && $inside) {
 		print "warning: loop detected during function call; may not terminate correctly\n";
@@ -179,13 +185,14 @@ while (<>) {
 
 	# Only consider lines that have tracing data.
 	# The main items to parse here are the timestamp (cycle count) and the
-	# current program counter.
+	# current program counter.  The other registers are decoded but aren't
+	# being used.
 	if ($line =~ /^#([0-9]+) A:(..) B:(..) X:(....) Y:(....) U:(....) S:(....) (....): (.*)$/) {
 		my ($timestamp, $areg, $breg, $xreg, $yreg, $ureg, $sreg, $pc, $insn) = 
 			($1,         $2,    $3,    $4,    $5,    $6,    $7,    $8,  $9);
 		$simulation_end_time = $timestamp;
 
-		# In "compress" mode, write a compressed version of the line.
+		# In "compress" mode, just write a compressed version of the line.
 		# This will keep the file much smaller.
 		if ($compress_flag) {
 			my $timestamp_delta = $timestamp - $previous_timestamp;

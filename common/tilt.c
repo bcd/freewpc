@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -35,33 +35,42 @@
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
 
+
+/** Lamp effect function for a leff that turns all lights off.
+ * Used by the system-defined tilt function. */
+void no_lights_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	for (;;)
+		task_sleep_sec (5);
+}
+
+
+/** The tilt display effect runs until explicitly cancelled. */
 void tilt_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_cu17, 64, 13, "TILT");
 	dmd_show_low ();
-	leff_start (LEFF_TILT);
-
-	/* Run the tilt deff for a minimum amount of time */
-	task_sleep_sec (5);
-
-	/* Now wait for the tilt condition to clear */
-	while (in_tilt)
-		task_sleep_sec (1);
-
-	/* Cleanup and exit */
-	leff_stop (LEFF_TILT);
-	deff_exit ();
+	for (;;)
+		task_sleep_sec (10);
 }
 
 
 void tilt_warning_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_mono5, 64, 13, 
-			!(tilt_warnings % 1) ? "DANGER" : "DANGER  DANGER");
+	if (tilt_warnings % 2)
+	{
+		font_render_string_center (&font_fixed10, 64, 16, "DANGER");
+	}
+	else
+	{
+		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
+		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
+	}
 	dmd_show_low ();
-	deff_swap_low_high (32, TIME_66MS);
+	deff_swap_low_high (24, TIME_66MS);
 	deff_exit ();
 }
 
@@ -80,9 +89,14 @@ CALLSET_ENTRY (tilt, sw_tilt)
 {
 	extern U8 in_tilt;
 
-	/* Ignore tilt switch activity while already in tilt state */
+	/* Ignore tilt switch activity while already in tilt state.
+	 * But restart the timer that tells us that the tilt is still
+	 * moving, so we can delay endball. */
 	if (in_tilt)
+	{
+		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
 		return;
+	}
 
 	else if (++tilt_warnings == system_config.tilt_warnings)
 	{
@@ -90,6 +104,8 @@ CALLSET_ENTRY (tilt, sw_tilt)
 		sound_reset ();
 		triac_disable (TRIAC_GI_MASK);
 		deff_start (DEFF_TILT);
+		leff_start (LEFF_TILT);
+		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
 		in_tilt = TRUE;
 		flipper_disable ();
 		mark_ball_in_play ();

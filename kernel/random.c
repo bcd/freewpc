@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -50,7 +50,6 @@ random (void)
 
 	r = random_cong_seed * 33 + 1;
 	random_cong_seed = r;
-	//r ^= ac_zc_count;
 	r ^= firq_count;
 	return (r >> 8);
 }
@@ -79,7 +78,7 @@ random_reseed (void)
 /**
  * Reseed the random number generator during system idle time.
  */
-CALLSET_ENTRY (random, idle)
+CALLSET_ENTRY (random, idle_every_second)
 {
 	random_reseed ();
 }

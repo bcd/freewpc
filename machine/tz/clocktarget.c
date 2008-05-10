@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,8 @@ __local__ U8 clock_round_hits;
 
 __local__ U8 clock_default_hits;
 
+U8 clock_millions_timer;
+
 
 void clock_millions_hit_deff (void)
 {
@@ -40,6 +42,30 @@ void clock_default_hit_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
+}
+
+
+void clock_millions_begin (void)
+{
+	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+}
+
+
+void clock_millions_expire (void)
+{
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
+}
+
+
+void clock_millions_end (void)
+{
+}
+
+
+void clock_millions_task (void)
+{
+	timed_mode_task (clock_millions_begin, clock_millions_expire, clock_millions_end,
+		&clock_millions_timer, 20, 3);
 }
 
 
@@ -65,6 +91,17 @@ CALLSET_ENTRY (clocktarget, sw_clock_target)
 }
 
 
+CALLSET_ENTRY (clocktarget, lamp_update)
+{
+	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	{
+	}
+	else
+	{
+	}
+}
+
+
 CALLSET_ENTRY(clocktarget, start_player)
 {
 	clock_default_hits = 0;
@@ -72,15 +109,14 @@ CALLSET_ENTRY(clocktarget, start_player)
 }
 
 
-CALLSET_ENTRY (clocktarget, start_ball)
+CALLSET_ENTRY (clocktarget, end_ball)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	timed_mode_stop (&clock_millions_timer);
 }
 
 
 CALLSET_ENTRY (clocktarget, door_start_clock_millions)
 {
-	/* TODO : need to start a round timer here */
-	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	timed_mode_start (GID_CLOCK_MILLIONS_RUNNING, clock_millions_task);
 }
 

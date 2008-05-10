@@ -93,13 +93,6 @@ struct {
 	{ "DEAD END", 50 },
 };
 
-void chaosmb_lamp_update (void)
-{
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
-	{
-	}
-}
-
 
 void chaos_jackpot_deff (void)
 {

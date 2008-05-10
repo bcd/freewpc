@@ -21,9 +21,8 @@
 #include <freewpc.h>
 
 
-CALLSET_ENTRY (right_hole, enter)
+CALLSET_ENTRY (right_hole, dev_right_hole_enter)
 {
-	mark_ball_in_play ();
-	score (SC_1K);
+	score (SC_100K);
 }
 

@@ -27,8 +27,20 @@ extern bool task_dispatching_ok;
  * Space for this many task structures is statically allocated. */
 #define NUM_TASKS 48
 
+/** TASK_BALL means that a task's lifetime is limited to the
+ * current ball-in-play.  During endball, all tasks with this
+ * bit set will be stopped. */
+#define TASK_GAME 0x40
+
+/** TASK_PROTECTED means that a task is immune to task_kill_gid.
+ * It can only exit by means of dying, i.e. task_exit.
+ * A task should set this upon entry before it begins anything
+ * urgent.  TODO - deprecate this bit, use TASK_GAME instead. */
+#define TASK_PROTECTED 0x80
+
 #ifdef CONFIG_NATIVE
 
+#include "/usr/include/sys/time.h"
 #include <pth.h>
 
 typedef pth_t task_pid_t;
@@ -36,8 +48,6 @@ typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
 extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
-
-#define TASK_PROTECTED 0x40
 
 #else /* !CONFIG_NATIVE */
 
@@ -62,22 +72,12 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 /* Says that the block is used to hold a task stack */
 #define BLOCK_STACK	0x8
 
-/* Says that this block and all blocks after it are guaranteed to
-be free. */
-#define TASK_LAST_FREE 0x10
-
 /* Says that the task is in the blocked state */
-#define TASK_BLOCKED 0x20
-
-/* TASK_PROTECTED means that a task is immune to task_kill_gid.
- * It can only exit by means of dying, i.e. task_exit.
- * A task should set this upon entry before it begins anything
- * urgent. */
-#define TASK_PROTECTED 0x40
+#define TASK_BLOCKED 0x10
 
 
 /** Define the size of the saved process stack. */
-#define TASK_STACK_SIZE 32
+#define TASK_STACK_SIZE 40
 
 
 /** Type for the group ID (gid) */
@@ -107,29 +107,31 @@ typedef struct task_struct
 	 * task; or TASK_BLOCKED for a sleeping task. */
 	U8				state;
 
+	/** The index of the next block in the same chain.  Not used yet.
+	 * A NULL is indicated by a -1, hence it is signed. */
+	S8          chain;
+
 	/** The task group ID.  This is a compile-time assigned value
 	 * used to identify the task.   Multiple running tasks can also
 	 * share the same group ID; operations on a group will affect
 	 * *all* tasks with that ID, in most cases. */
 	task_gid_t	gid;
 
-	/** The saved PC for the task, while it is asleep */
+	/** The saved PC for the task, while it is blocked */
 	U16			pc;
 
-	/** The saved Y register for the task, while it is asleep */
+	/** The saved Y register for the task, while it is blocked */
 	U16			y;
 
-	/** The saved U register for the task, while it is asleep */
+	/** The saved U register for the task, while it is blocked */
 	U16			u;
 
-	/** The saved ROM page register for the task, while it is asleep */
+	/** The saved ROM page register for the task, while it is blocked */
 	U8				rom_page;
 
 	/** The amount of stack space, in bytes, that has been saved into
 	 * the task's stack area */
 	U8				stack_size;
-
-	U8          reserved;
 
 	/** The amount of time that a blocked task has requested to
 	sleep */
@@ -157,12 +159,8 @@ typedef struct task_struct
 	 * to -1, it means there is no auxiliary storage. */
 	U8				aux_stack_block;
 
-   /** If non-NULL, the address to switch to when the task is
-	killed.  When NULL, killing a task frees it immediately.  When
-	non-NULL, the task will be rescheduled at this address.  The
-	function runs in the context of the task so has access to all
-	task local data. */
-   void      (*sighandler) (void);
+	/** Not currently used */
+	U16			reserved;
 
 	/** The task stack save area.  This is NOT used as the live stack
 	 * area; the live stack is copied here when the task blocks.
@@ -194,26 +192,6 @@ extern inline task_gid_t task_getgid (void)
 extern inline void task_set_rom_page (task_t *pid, U8 rom_page)
 {
 	pid->rom_page = rom_page;
-}
-
-extern inline void task_set_sighandler (task_function_t sighandler)
-{
-	task_current->sighandler = sighandler;
-}
-
-
-/*******************************/
-/*     Debug Timing            */
-/*******************************/
-
-#define debug_time_start() \
-{ \
-	U8 __debug_timer = irq_count; \
-
-
-#define debug_time_stop() \
-	dbprintf ("debug time: %02X %02X\n", \
-		__debug_timer, irq_count); \
 }
 
 /** A process ID, or PID, is just a pointer to the task block.
@@ -252,8 +230,8 @@ bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
 void task_set_flags (U8 flags);
 void task_clear_flags (U8 flags);
-PTR_OR_U16 task_get_arg (void);
-void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
+__attribute__((deprecated)) PTR_OR_U16 task_get_arg (void);
+__attribute__((deprecated)) void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
 __noreturn__ void task_dispatcher (void);
 #ifdef CONFIG_NATIVE
 task_pid_t task_getpid (void);

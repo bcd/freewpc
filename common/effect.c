@@ -58,14 +58,37 @@ void game_over_deff (void)
 }
 
 
-/** The display effect for a volume change */
+void draw_volume_bar (U8 n)
+{
+	U8 *base = dmd_low_buffer + 22 * DMD_BYTE_WIDTH + 4;
+	U8 val = 0x55;
+	U8 h;
+	static const U8 volume_bar_data[] = { 0x0, 0x1, 0x5, 0x15, 0x55 };
+	while (n >= 4)
+	{
+		for (h=0; h < 8; h++)
+			base[h * DMD_BYTE_WIDTH] = val;
+		base++;
+		n -= 4;
+	}
+	val = volume_bar_data[n];
+	for (h=0; h < 8; h++)
+		base[h * DMD_BYTE_WIDTH] = val;
+}
+
+
+/**uThe display effect for a volume change */
 void volume_change_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("VOLUME %d", current_volume);
-	font_render_string_center (&font_fixed6, 64, 13, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	draw_volume_bar (current_volume);
 	dmd_show_low ();
-	task_sleep_sec (5);
+	if (in_live_game)
+		task_sleep_sec (3);
+	else
+		task_sleep_sec (5);
 	music_stop (volume_change_music_track);
 	deff_exit ();
 }
@@ -138,28 +161,12 @@ void animation_test_deff (void)
 	U8 n;
 	animation_begin (AN_MONO+AN_CLEAN);
 	animation_set_speed (TIME_66MS);
-	animation_add (0, 0, animation_test1);
-	animation_add (0, 0, animation_test2);
-	animation_add (0, 0, animation_test3);
+	animation_add_static (animation_test1);
+	animation_add_static (animation_test2);
+	animation_add_static (animation_test3);
 	for (n=0; n < 100; n++)
 		animation_step ();
 	animation_end ();
 	deff_exit ();
 }
-
-
-#if 0
-void exit_handler_test (void)
-{
-	__label__ sighandler;
-	void *p;
-
-	task_set_sighandler (&&sighandler);
-	p = malloc (10);
-	task_sleep_sec (3);
-sighandler:
-	free (p);
-	task_exit ();
-}
-#endif
 

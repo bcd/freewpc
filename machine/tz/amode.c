@@ -19,14 +19,14 @@
  */
 
 #include <freewpc.h>
-#include <tz/clock.h>
-#include <coin.h>
-#include <highscore.h>
+//#include <coin.h>
+//#include <highscore.h>
 
 U8 egg_code_values[3];
 U8 egg_index;
 
 
+#if 0
 /* Attract mode display delay function.
  * This function waits for the specified amount of time, but
  * returns immediately if either flipper is pressed.
@@ -55,22 +55,8 @@ bool amode_page_delay (U8 secs)
 	}
 	return FALSE;
 }
+#endif
 
-void amode_flipper_sound_debounce_timer (void)
-{
-	task_sleep_sec (30);
-	task_exit ();
-}
-
-void amode_flipper_sound (void)
-{
-	if (!task_find_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE))
-	{
-		task_create_gid (GID_AMODE_FLIPPER_SOUND_DEBOUNCE,
-			amode_flipper_sound_debounce_timer);
-		sound_send (SND_THUD);
-	}
-}
 
 /* TODO : use flipcode module to implement this */
 void egg_left_flipper (void)
@@ -112,27 +98,15 @@ void egg_right_flipper (void)
 			 (egg_code_values[1] == 3) &&
 			 (egg_code_values[2] == 4))
 		{
-			deff_start (DEFF_BRIAN_IMAGE);
+			//deff_start (DEFF_BRIAN_IMAGE);
 		}
 	}
 }
 
-void amode_left_flipper (void)
-{
-	amode_flipper_sound ();
-	egg_left_flipper ();
-}
-
-
-void amode_right_flipper (void)
-{
-	amode_flipper_sound ();
-	egg_right_flipper ();
-}
 
 void amode_lamp_toggle_task (void)
 {
-	lampset_apply (LAMPSET_AMODE_ALL, leff_toggle);
+	lamplist_apply (LAMPLIST_AMODE_ALL, leff_toggle);
 	task_exit ();
 }
 
@@ -140,10 +114,10 @@ U8 amode_leff_subset;
 
 void amode_leff_subset_task (void)
 {
-	register U8 lampset = amode_leff_subset;
-	lampset_set_apply_delay (TIME_100MS);
+	register U8 lamplist = amode_leff_subset;
+	lamplist_set_apply_delay (TIME_100MS);
 	for (;;)
-		lampset_apply (lampset, leff_toggle);
+		lamplist_apply (lamplist, leff_toggle);
 }
 
 void amode_leff (void)
@@ -153,12 +127,12 @@ void amode_leff (void)
 
 	for (;;)
 	{
-		amode_leff_subset = LAMPSET_DOOR_PANELS_AND_HANDLE;
+		amode_leff_subset = LAMPLIST_DOOR_PANELS_AND_HANDLE;
 		leff_create_peer (amode_leff_subset_task);
 		task_sleep (TIME_33MS);
 	
-		for (amode_leff_subset = LAMPSET_DOOR_LOCKS_AND_GUMBALL;
-			amode_leff_subset <= LAMPSET_SPIRAL_AWARDS;
+		for (amode_leff_subset = LAMPLIST_DOOR_LOCKS_AND_GUMBALL;
+			amode_leff_subset <= LAMPLIST_SPIRAL_AWARDS;
 			amode_leff_subset++)
 		{
 			leff_create_peer (amode_leff_subset_task);
@@ -168,17 +142,14 @@ void amode_leff (void)
 		task_sleep_sec (15);
 		task_kill_peers ();
 
-		lampset_set_apply_delay (0);
-		lampset_apply (LAMPSET_SORT1, leff_off);
+		lamplist_apply_nomacro (LAMPLIST_SORT1, leff_off);
+		lamplist_set_apply_delay (TIME_16MS);
 		for (i=0 ; i < 10; i++)
-		{
-			lampset_set_apply_delay (TIME_16MS);
-			lampset_apply (LAMPSET_SORT1, leff_toggle);
-		}
+			lamplist_apply (LAMPLIST_SORT1, leff_toggle);
 	}
 }
 
-
+#if 0
 void amode_show_design_credits (void)
 {
 	dmd_alloc_low_clean ();
@@ -187,6 +158,7 @@ void amode_show_design_credits (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
+	task_sleep (TIME_16MS); /* drawing all of this text is slow; be nice */
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
 	dmd_sched_transition (&trans_scroll_up_slow);
@@ -210,50 +182,13 @@ void amode_deff (void)
 
 	for (;;)
 	{
-		/** Display FreeWPC logo **/
-		FSTART_COLOR
-			dmd_draw_fif (fif_freewpc_logo);
-		FEND
-		if (amode_page_delay (5) && system_config.tournament_mode)
-			continue;
-
-		/** Display last set of player scores **/
-		dmd_alloc_low_clean ();
-		scores_draw ();
-		dmd_show_low ();
-		if (amode_page_delay (5) && system_config.tournament_mode)
-			continue;
-
-		/** Display credits message **/
-		credits_draw ();
-
-		/** Display replay */
-		if (system_config.replay_award != FREE_AWARD_OFF)
-		{
-			replay_draw ();
-			if (amode_page_delay (5) && system_config.tournament_mode)
-				continue;
-		}
-
 		/** Display game title message **/
 		dmd_alloc_low_high ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-#ifndef CONFIG_NATIVE
-		starfield_start ();
-#endif
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed10, 64, 20, "THE ZONE");
 		deff_swap_low_high (19, TIME_100MS * 2);
-#ifndef CONFIG_NATIVE
-		starfield_stop ();
-#endif
-
-		/** Display high scores **/
-		if (hstd_config.highest_scores == ON)
-		{
-			high_score_amode_show ();
-		}
 
 		/** Display PLAY PINBALL message **/
 		FSTART_COLOR
@@ -263,13 +198,6 @@ void amode_deff (void)
 				"PLAY PINBALL");
 		FEND
 		if (amode_page_delay (3) && system_config.tournament_mode)
-			continue;
-
-		/** Display 'custom message'? **/
-
-		/* Display date/time */
-		rtc_show_date_time ();
-		if (amode_page_delay (5) && system_config.tournament_mode)
 			continue;
 
 		if (--design_credit_counter == 0)
@@ -290,10 +218,7 @@ void amode_deff (void)
 			dmd_show2 ();
 			task_sleep_sec (7);
 		}
-
-		/* Kill music if it is running */
-		/* TODO - should be a music_stop of end_game_music */
-		music_set (MUS_OFF);
 	}
 }
 
+#endif

@@ -28,7 +28,7 @@
 
 __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
 
-__fastram__ U8 lamp_flash_matrix[NUM_LAMP_COLS];
+U8 lamp_flash_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
 
@@ -40,13 +40,9 @@ __fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
 
 __fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
 
-__fastram__ U8 bit_matrix[NUM_LAMP_COLS];
+U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 
-__fastram__ U8 global_bits[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_flash_max;
-
-__fastram__ U8 lamp_flash_count;
+U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
 
 __fastram__ U8 lamp_strobe_mask;
 
@@ -73,28 +69,23 @@ void lamp_init (void)
 	lamp_leff1_free_all ();
 	lamp_leff2_free_all ();
 
-	lamp_flash_max = lamp_flash_count = LAMP_DEFAULT_FLASH_RATE;
-
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
 }
 
 
-/** Runs periodically to invert any lamps in the flashing state */
+/** Runs periodically to invert any lamps in the flashing state.
+ * (This is hard realtime now; it could probably be dropped in
+ * priority, though.) */
 void lamp_flash_rtt (void)
 {
-	--lamp_flash_count;
-	if (lamp_flash_count == 0)
-	{
-		U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
-		U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
+	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
+	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
 
-		lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
-		lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
-		lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
-		lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
-		lamp_flash_count = lamp_flash_max;
-	}
+	lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
+	lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
+	lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
+	lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
 }
 
 
@@ -207,20 +198,21 @@ void bit_toggle (bitset matrix, U8 bit)
 	bitarray_toggle (matrix, bit);
 }
 
-bool bit_test (bitset matrix, U8 bit)
+bool bit_test (const_bitset matrix, U8 bit)
 {
 	return bitarray_test (matrix, bit);
 }
 
-bool bit_test_all_on (bitset matrix)
+bool bit_test_all_on (const_bitset matrix)
 {
+	/* TODO : is this right? */
 	return matrix[0] && matrix[1]
 		&& matrix[2] && matrix[3]
 		&& matrix[4] && matrix[5]
 		&& matrix[6] && matrix[7];
 }
 
-bool bit_test_all_off (bitset matrix)
+bool bit_test_all_off (const_bitset matrix)
 {
 	return !matrix[0] && !matrix[1]
 		&& !matrix[2] && !matrix[3]
@@ -259,6 +251,52 @@ void matrix_all_off (bitset matrix)
 	memset (matrix, 0, NUM_LAMP_COLS);
 }
 
+void matrix_copy (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] = src1[0];
+	dst1[1] = src1[1];
+	dst1[2] = src1[2];
+	dst1[3] = src1[3];
+}
+
+void matrix_set_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] |= src1[0];
+	dst1[1] |= src1[1];
+	dst1[2] |= src1[2];
+	dst1[3] |= src1[3];
+}
+
+
+void matrix_clear_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] &= ~src1[0];
+	dst1[1] &= ~src1[1];
+	dst1[2] &= ~src1[2];
+	dst1[3] &= ~src1[3];
+}
+
+
+void matrix_toggle_bits (bitset dst, const bitset src)
+{
+	register U16 *dst1 = (U16 *)dst;
+	register U16 *src1 = (U16 *)src;
+
+	dst1[0] ^= src1[0];
+	dst1[1] ^= src1[1];
+	dst1[2] ^= src1[2];
+	dst1[3] ^= src1[3];
+}
+
 
 /*
  * Lamp manipulation routines
@@ -289,7 +327,17 @@ bool lamp_test (lampnum_t lamp)
 }
 
 bool lamp_test_off (lampnum_t lamp)
-{ 
+{
+	/* Note: gcc6809 generates inefficient code for this.
+	This would be better:
+	   if (rc) return (0) else return (rc);
+	gcc is insisting on returning 0/1, when zero/nonzero is
+	sufficient.
+    */
+#if 0
+	bool t = bit_test (lamp_matrix, lamp);
+	return t ? 0 : t;
+#endif
 	return !bit_test (lamp_matrix, lamp);
 }
 
@@ -297,6 +345,9 @@ bool lamp_test_off (lampnum_t lamp)
 void lamp_flash_on (lampnum_t lamp)
 {
 	bit_on (lamp_flash_matrix, lamp);
+	/* TODO - initialize the bit in lamp_flash_matrix_now correctly,
+	 * so that the lamp stays synchronized with all other flashes.
+	 * It may need to be on or off now. */
 }
 
 void lamp_flash_off (lampnum_t lamp)
@@ -311,12 +362,48 @@ bool lamp_flash_test (lampnum_t lamp)
 }
 
 
-void lamp_global_update (void)
+/** The task that calls all of the 'lamp_update' callset entries. */
+void lamp_update_task (void)
 {
 	if (in_live_game)
 		callset_invoke (lamp_update);
+	task_exit ();
+}
+
+
+/** Request that the lamps be updated.
+ * Lamp update runs in a separate task context, and it
+ * only works during a game. */
+void lamp_update_request (void)
+{
+	if (in_live_game)
+		task_recreate_gid (GID_LAMP_UPDATE, lamp_update_task);
+
+	/* Handle 'system lamps' here.  Right now that's just
+	the start button. */
 	if (!in_test)
 		lamp_start_update ();
+}
+
+
+/** Periodically update the lamps.  Currently this is done
+ * every 200ms (every other call to the 100ms callback).
+ *
+ * This is intended to be used during a game for recomputing
+ * the states of lamps with multiple conditions that feed into
+ * the state.  Rather than do this everytime something changes,
+ * it is done periodically on all lamps instead.
+ *
+ * There is a performance penalty for doing this too frequently,
+ * but it simplifies the game logic considerably and also
+ * makes bugs less likely.  Also, 200ms is not too often and it
+ * is still frequent enough for it not to be noticeable. */
+CALLSET_ENTRY (lamp, idle_every_100ms)
+{
+	static U8 every_other_time = 0;
+	every_other_time = ~every_other_time;
+	if (every_other_time)
+		lamp_update_request ();
 }
 
 
@@ -330,10 +417,9 @@ void lamp_all_on (void)
 {
 	disable_interrupts ();
 	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
 	enable_interrupts ();
 	matrix_all_on (lamp_matrix);
-	lamp_global_update ();
+	lamp_update_request ();
 }
 
 
@@ -341,12 +427,11 @@ void lamp_all_off (void)
 {
 	disable_interrupts ();
 	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
 	matrix_all_off (lamp_leff1_matrix);
 	matrix_all_off (lamp_leff2_matrix);
 	enable_interrupts ();
 	matrix_all_off (lamp_matrix);
-	lamp_global_update ();
+	lamp_update_request ();
 }
 
 /*
@@ -361,27 +446,27 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	memset (lamp_leff1_allocated, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff1_allocated);
 }
 
 void lamp_leff1_erase (void)
 {
-	memset (lamp_leff1_matrix, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff1_matrix);
 }
 
 void lamp_leff1_free_all (void)
 {	
-	memset (lamp_leff1_allocated, 0xFF, NUM_LAMP_COLS);
+	matrix_all_on (lamp_leff1_allocated);
 }
 
 void lamp_leff2_erase (void)
 {
-	memset (lamp_leff2_matrix, 0, NUM_LAMP_COLS);
+	matrix_all_off (lamp_leff2_matrix);
 }
 
 void lamp_leff2_free_all (void)
 {
-	memset (lamp_leff2_allocated, 0xFF, NUM_LAMP_COLS);
+	matrix_all_on (lamp_leff2_allocated);
 }
 
 
@@ -401,9 +486,16 @@ void lamp_leff2_allocate (lampnum_t lamp)
 	bit_off (lamp_leff2_allocated, lamp);
 }
 
-bool lamp_leff2_test_allocated (lampnum_t lamp)
-{	
-	return bit_test (lamp_leff2_allocated, lamp);
+bool lamp_leff2_test_and_allocate (lampnum_t lamp)
+{
+	bool ok;
+
+	disable_interrupts ();
+	ok = bit_test (lamp_leff2_allocated, lamp);
+	if (ok)
+		lamp_leff2_allocate (lamp);
+	enable_interrupts ();
+	return ok;
 }
 
 void lamp_leff2_free (lampnum_t lamp)

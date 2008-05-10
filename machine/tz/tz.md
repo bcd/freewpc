@@ -40,14 +40,16 @@ define MACHINE_TZ
 define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
-define MACHINE_SCORE_DIGITS 10
-define MACHINE_MUSIC_GAME MUS_MULTIBALL_LIT
-define MACHINE_MUSIC_PLUNGER MUS_MULTIBALL_LIT_PLUNGER
-define MACHINE_REPLAY_CODE_TO_SCORE replay_code_to_score
-define MACHINE_DEBUGGER_HOOK tz_debugger_hook
-define MACHINE_REPLAY_SCORE_CHOICES 10
-define MACHINE_REPLAY_START_CHOICE 5
-define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
+define MACHINE_SCORE_DIGITS               10
+define MACHINE_MUSIC_GAME                 MUS_MULTIBALL_LIT
+define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
+define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
+define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
+define MACHINE_REPLAY_SCORE_CHOICES       10
+define MACHINE_REPLAY_START_CHOICE        5
+define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
+define MACHINE_AMODE_LEFF                 tz_amode_leff
+#ifdef MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 
 ##########################################################################
 # Lamp Description
@@ -150,15 +152,15 @@ define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
 14: Tilt, tilt, ingame, noplay
-15: Right Trough, c_decl(sw_trough), noplay
-16: Center Trough, c_decl(sw_trough), noplay
-17: Left Trough, c_decl(sw_trough), noplay
-18: Outhole, outhole, intest, noplay
+15: Right Trough, c_decl(sw_trough), noscore
+16: Center Trough, c_decl(sw_trough), noscore
+17: Left Trough, c_decl(sw_trough), noscore
+18: Outhole, outhole, noscore
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
-25: Far Left Trough, noplay
-26: Trough Proximity, edge, noplay, ingame
-27: Shooter, edge, shooter, noplay
+25: Far Left Trough, noscore
+26: Trough Proximity, edge, noscore
+27: Shooter, edge, shooter, noscore
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
 32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
@@ -180,9 +182,9 @@ define MACHINE_OUTHOLE_KICK_HOOK tz_outhole_kick_hook
 52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, intest, noplay
-56: Gumball Exit, intest, noplay
-57: Slot Proximity, noplay, ingame
+55: Gumball Geneva, noscore
+56: Gumball Exit, noscore
+57: Slot Proximity, noscore
 58: Slot
 61: Skill Bottom, ingame, noplay
 62: Skill Center, ingame, noplay
@@ -299,14 +301,14 @@ tz_powerball:
 # form lamp1..lampN.
 #
 # The special construct PF:function indicates that a Perl subroutine
-# should be used to select and sort the lamps.  Some functions are
+# should be used to select and sort playfield lamps.  Some functions are
 # builtin to genmachine; others can be defined by you and included
 # via the 'perlinclude' directive.
 #
 # Note that a lampset may contain only one lamp.  The lampset is the
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
-[lampsets]
+[lamplists]
 Door Panels: Panel TSM..Panel EB, Panel Super Slot..Panel Greed, Panel Camera..Panel Gumball
 Door Panels and Handle: Door Panels, Panel LITZ
 Door Locks: Lock1, Lock2
@@ -370,9 +372,6 @@ Left Loop Aborted:
 Right Loop Complete:
 Right Loop Aborted:
 
-
-[timers]
-Test Timer:
 
 
 #------------------------------------------------------------------------
@@ -488,21 +487,23 @@ NO_DRAIN_PENALTY:
 STEEL_IN_TROUGH:
 STEEL_IN_TUNNEL:
 PB_ALONE_IN_PLAY:
-
 SSSMB_RUNNING:
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
 SSSMB_YELLOW_JACKPOT:
-
 CHAOSMB_RUNNING:
+TSM_RUNNING:
+MB_JACKPOT_LIT:
+
+[globalflags]
+Clock Working:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
-Amode: runner, PRI_AMODE
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
-Brian Image: PRI_EGG1
+# Brian Image: PRI_EGG1
 Replay: page(MACHINE_PAGE), PRI_REPLAY
 Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
 Special: page(MACHINE_PAGE), PRI_SPECIAL
@@ -555,7 +556,7 @@ Left Ramp: PRI_LEFF2, page(MACHINE_PAGE)
 CLOCK TARGET: PRI_LEFF2, GI(ALL), page(MACHINE_PAGE)
 No GI: L_NORMAL, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
 SLOT KICKOUT: PRI_LEFF3, page(MACHINE_PAGE)
-AMODE: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 FLASH ALL: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE_PAGE)
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Jets Active: shared, PRI_LEFF5, LAMPS(JETS), page(MACHINE_PAGE)

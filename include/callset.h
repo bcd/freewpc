@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,6 +21,8 @@
 #ifndef _CALLSET_H
 #define _CALLSET_H
 
+#ifndef GENCALLSET
+
 #define CALLSET_ENTRY(module,set) \
 	void module ## _ ## set (void)
 
@@ -38,5 +40,7 @@
 /* WARNING : this function won't work if the caller is in a different page
 from EVENT_PAGE. */
 #define callset_pointer_invoke(callset_ptr)	call_far (EVENT_PAGE, (*callset_ptr) ())
+
+#endif /* GENCALLSET */
 
 #endif /* _CALLSET_H */

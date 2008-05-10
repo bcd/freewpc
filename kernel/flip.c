@@ -30,6 +30,8 @@
 /** Says whether or not the flipper coils are enabled */
 U8 flippers_enabled;
 
+U8 fliptronic_powered_coil_outputs;
+
 
 /** Software controlled flipper inputs for Fliptronic games. */
 #ifdef MACHINE_FLIPTRONIC
@@ -76,7 +78,7 @@ void flipper_override_pulse (U8 switches)
 
 /** Perform real-time processing for a single flipper. */
 static inline void flipper_service (
-	U8 inputs,
+	const U8 inputs,
 	U8 *outputs,
 	const U8 sw_button,
 	const U8 sw_eos,
@@ -86,7 +88,7 @@ static inline void flipper_service (
 	/* The logic is as follows:
 	 * If the button is held and the EOS is active, enable holding power.
 	 * If the button is held and no EOS is seen, enable full power.
-	 * If the button is not held, then the coil is off.
+	 * If the button is not held, then the coil is off by default.
 	 *
 	 * Future enhancements:
 	 * - Duty cycling: pulsing the coil at less than 100%
@@ -120,16 +122,18 @@ static inline void flipper_service (
  * this isn't necessary. */
 void fliptronic_rtt (void)
 {
-	register U8 inputs __areg__ = ~wpc_read_flippers () | flipper_overrides;
-	U8 outputs = 0;
+	register U8 inputs __areg__;
+	U8 outputs = fliptronic_powered_coil_outputs;
 
 	if (flippers_enabled)
 	{
+		inputs = ~wpc_read_flippers () | flipper_overrides;
+
 		flipper_service (inputs, &outputs, WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
 		flipper_service (inputs, &outputs, WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
 
 		/* Some machines use the upper flipper coils for other uses.
-		 * Those can already be handled by the sol.c */
+		 * Those can already be handled by the regular solenoid module. */
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
 		flipper_service (inputs, &outputs, WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
 #endif
@@ -162,6 +166,7 @@ CALLSET_ENTRY (fliptronic, ball_search)
 void flipper_init (void)
 {
 	flipper_disable ();
+	fliptronic_powered_coil_outputs = 0;
 }
 
 

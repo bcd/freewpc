@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -25,7 +25,9 @@
 #define HIGH_SCORE_NAMESZ	3
 #define NUM_HIGH_SCORES		4
 
-__common__ void high_score_amode_show (void);
+__common__ void high_score_draw_gc (void);
+__common__ void high_score_draw_12 (void);
+__common__ void high_score_draw_34 (void);
 __common__ void high_score_reset (void);
 __common__ void high_score_reset_check (void);
 __common__ void high_score_check (void);

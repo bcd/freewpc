@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,6 +28,8 @@ typedef enum {
 	CAMERA_AWARD_250K,
 	MAX_CAMERA_AWARDS,
 } camera_award_t;
+
+__local__ U8 cameras_lit;
 
 __local__ camera_award_t camera_award_count;
 
@@ -107,6 +109,7 @@ static void do_camera_award (void)
 
 CALLSET_ENTRY (camera, sw_camera)
 {
+	device_switch_can_follow (camera, slot, TIME_5S);
 	if (event_did_follow (mpf_top, camera))
 	{
 		callset_invoke (mpf_top_exit);
@@ -119,8 +122,9 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
-		if (lamp_flash_test (LM_CAMERA))
+		if (cameras_lit)
 		{
+			cameras_lit--;
 			score (SC_10M);
 			sound_send (SND_CAMERA_AWARD_SHOWN);
 			task_create_anon (do_camera_award);
@@ -131,19 +135,21 @@ CALLSET_ENTRY (camera, sw_camera)
 			sound_send (SND_JET_BUMPER_ADDED);
 		}
 	}
-	device_switch_can_follow (camera, slot, TIME_5S);
 }
 
 
-CALLSET_ENTRY (camera, start_ball)
+CALLSET_ENTRY (camera, lamp_update)
 {
-	lamp_tristate_off (LM_CAMERA);
+	if (cameras_lit > 0)
+		lamp_tristate_flash (LM_CAMERA);
+	else
+		lamp_tristate_off (LM_CAMERA);
 }
 
 
 CALLSET_ENTRY (camera, start_player)
 {
-	lamp_tristate_off (LM_CAMERA);
+	cameras_lit = 0;
 	camera_award_count = 0;
 	camera_default_count = 0;
 }
@@ -151,7 +157,7 @@ CALLSET_ENTRY (camera, start_player)
 
 CALLSET_ENTRY (camera, door_start_camera)
 {
-	lamp_tristate_flash (LM_CAMERA);
+	cameras_lit++;
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,10 +21,21 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 
+/* Round to the next multiple of 4 */
+#define MAX_FREE_TIMERS (4 * ((MAX_TIMERS + 3) / 4))
+
+typedef U8 free_timer_id_t;
+
 task_pid_t timer_restart (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
 void timer_init (void);
+
+void free_timer_restart (free_timer_id_t tid, U8 ticks);
+void free_timer_start (free_timer_id_t tid, U8 ticks);
+void free_timer_stop (free_timer_id_t tid);
+U8 free_timer_test (free_timer_id_t tid);
+void free_timer_init (void);
 
 #define timer_kill_gid 	task_kill_gid
 #define timer_kill_pid 	task_kill_pid

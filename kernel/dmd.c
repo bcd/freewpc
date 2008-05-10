@@ -69,8 +69,7 @@ dmd_pagenum_t dmd_free_page;
 /** Low/High cache the current pages that are mapped into
  * visible memory.  Note that you can't read the I/O
  * register directly; they are write-only. */
-dmd_pagenum_t dmd_low_page;
-dmd_pagenum_t dmd_high_page;
+dmd_pagepair_t dmd_mapped_pages;
 
 /** Dark/Bright store the 2 pages that are used to actually
  * draw on the display.  These values are programmed into
@@ -80,9 +79,7 @@ dmd_pagenum_t dmd_high_page;
  * is shown 2/3 of the time.  (The brightest pixels are
  * those that are set in both of the pages at the same time.)
  */
-__fastram__ dmd_pagenum_t dmd_dark_page;
-__fastram__ dmd_pagenum_t dmd_bright_page;
-
+__fastram__ dmd_pagepair_t dmd_visible_pages;
 
 /** dmd_show_hook is normally set to a nop function.
  * However, whenever a deff is started/stopped that defines
@@ -177,6 +174,7 @@ void dmd_rtt1 (void)
 
 void dmd_rtt2 (void)
 {
+	wpc_dmd_set_visible_page (dmd_bright_page);
 	wpc_dmd_set_firq_row (30);
 	dmd_rtt = dmd_rtt0;
 }
@@ -192,11 +190,12 @@ void dmd_rtt2 (void)
  *
  * This function does not map the new pages into memory.
  */
-static dmd_pagenum_t dmd_alloc (void)
+static __attribute__((noinline)) dmd_pagenum_t dmd_alloc (void)
 {
 	dmd_pagenum_t page = dmd_free_page;
 	dmd_free_page += 2;
-	dmd_free_page %= DMD_PAGE_COUNT;
+	if (dmd_free_page >= DMD_ALLOC_PAGE_COUNT)
+		dmd_free_page = 0;
 	return page;
 }
 
@@ -221,6 +220,13 @@ void dmd_alloc_high (void)
 }
 
 
+void dmd_map_low_high (dmd_pagenum_t page)
+{
+	wpc_dmd_set_low_page (page);
+	wpc_dmd_set_high_page (page + 1);
+}
+
+
 /**
  * Allocate and map two different pages.
  */
@@ -238,7 +244,7 @@ void dmd_alloc_low_high (void)
  */
 void dmd_show_low (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 		dmd_dark_page = dmd_bright_page = dmd_low_page;
@@ -246,7 +252,7 @@ void dmd_show_low (void)
 
 void dmd_show_high (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 		dmd_dark_page = dmd_bright_page = dmd_high_page;
@@ -284,37 +290,53 @@ void dmd_show_other (void)
  */
 void dmd_show2 (void)
 {
-	if (dmd_transition)
+	if (unlikely (dmd_transition))
 		dmd_do_transition ();
 	else
 	{
-		disable_firq ();
-		dmd_dark_page = dmd_low_page;
-		dmd_bright_page = dmd_high_page;
-		enable_firq ();
+		/* Changing both the active dark and bright page
+		must be atomic in order to prevent visual artifacts
+		from occurring.  Without such, portions of the
+		old image and new image would be displayed simultaneously,
+		but not in any meaningful way, due to the way images are
+		divided into planes.
+		   Earlier, this was done solely by disabling the FIRQ,
+		which masks the DMD interrupt.  However, this did not
+		keep IRQ disabled.  It was possible for IRQ to occur
+		in between the two writes, which could take some time
+		and would therefore keep the display from refreshing
+		for much longer.  The effect is that only part of the image
+		appears during that window.  So, we must disable IRQ as well
+		here. */
+		dmd_visible_pages = dmd_mapped_pages;
 	}
 }
 
 
+/**
+ * Clean an entire DMD page.  This is the C portable version
+ * of the function; there is a special assembler version of this
+ * for the 6809. */
+#ifndef __m6809__
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
-#ifdef __m6809__
-	extern void dmd_zero (void *);
-	dmd_zero (dbuf);
-#else
 	__blockclear16 (dbuf, DMD_PAGE_SIZE);
-#endif
 
 #ifdef CONFIG_UI
 	extern void ui_clear_dmd_text (int);
 	ui_clear_dmd_text ((dbuf == dmd_low_buffer) ? dmd_low_page : dmd_high_page);
 #endif
 }
+#endif /* __m6809__ */
 
 
 void dmd_fill_page_low (void)
 {
+#ifdef __m6809__
+	dmd_memset (dmd_low_buffer, 0xFF);
+#else
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
+#endif
 }
 
 
@@ -346,33 +368,6 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 		dbuf16++;
 		*dbuf16 = ~*dbuf16;
 		dbuf16++;
-	}
-}
-
-
-void dmd_mask_page (dmd_buffer_t dbuf, U16 mask)
-{
-	register int16_t count = DMD_PAGE_SIZE / (2 * 8);
-	register U16 *dbuf16 = (U16 *)dbuf;
-	while (--count >= 0)
-	{
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		*dbuf16 &= mask;
-		dbuf16++;
-		mask = ~mask;
 	}
 }
 
@@ -565,10 +560,8 @@ void dmd_do_transition (void)
 {
 	dmd_trans_data_ptr = NULL;
 	U8 one_copy_flag;
-	U8 new_dark_page, new_bright_page;
-
-	new_dark_page = dmd_low_page;
-	new_bright_page = dmd_high_page;
+	const U8 new_dark_page = dmd_low_page;
+	const U8 new_bright_page = dmd_high_page;
 
 	if ((new_dark_page == new_bright_page) &&
 		 (dmd_dark_page == dmd_bright_page))
@@ -657,6 +650,26 @@ void dmd_do_transition (void)
 	}
 	wpc_pop_page ();
 	dmd_transition = NULL;
+}
+
+
+void dmd_apply_lookaside2 (U8 num, void (*apply)(void))
+{
+	const U8 low = wpc_dmd_get_low_page ();
+	const U8 high = wpc_dmd_get_high_page ();
+	const U8 apply_low = dmd_get_lookaside (num);
+	const U8 apply_high = apply_low+1;
+
+	/* Note: this currently takes about 18000 cycles, or 9ms.  Each
+	 * page AND/OR operation is the majority of the time, each about
+	 * 9000 cycles or 4.5ms */
+	wpc_dmd_set_high_page (apply_low);
+	apply ();
+	wpc_dmd_set_low_page (high);
+	wpc_dmd_set_high_page (apply_high);
+	apply ();
+	wpc_dmd_set_low_page (low);
+	wpc_dmd_set_high_page (high);
 }
 
 

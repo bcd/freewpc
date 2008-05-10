@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,22 +22,22 @@
 #define __CSUM_H
 
 
-/** Describes an area of NVRAM that should be checksummed.
+/** Describes an area of protected memory that should be checksummed.
 The data area and the checksum itself need not be contiguous.
 A reset function is provided which says what to do to the block
 if checksum validation fails. */
 struct area_csum
 {
-	/** A pointer to the beginning of the NVRAM block */
+	/** A pointer to the beginning of the block */
 	/* __nvram__ */ U8 *area;
 
-	/** The length of the NVRAM block, in bytes */
+	/** The length of the protected block, in bytes */
 	U8 length;
 
 	/** A pointer to the variable that actually holds the checksum */
 	/* __nvram__ */ U8 *csum;
 
-	/** A function that will reset the NVRAM block to factory defaults */
+	/** A function that will reset the block to factory defaults */
 	void (*reset) (void);
 
 	/** The ROM page in which the reset function resides */

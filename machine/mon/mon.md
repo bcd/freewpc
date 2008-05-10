@@ -102,7 +102,7 @@ define MACHINE_LACKS_ALL_INCLUDES
 # Note that a lampset may contain only one lamp.  The lampset is the
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
-[lampsets]
+[lamplists]
 
 ##########################################################################
 # Containers

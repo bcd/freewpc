@@ -70,7 +70,7 @@ __noreturn__ void freewpc_init (void)
 
 	/* Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
-	wpc_set_ram_protect_size (RAM_LOCK_2K);
+	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
 
 	/* Initialize the ROM page register 
@@ -129,6 +129,8 @@ __noreturn__ void freewpc_init (void)
 	lamp_init ();
 	wpc_watchdog_reset ();
 	device_init ();
+	wpc_watchdog_reset ();
+	free_timer_init ();
 	wpc_watchdog_reset ();
 
 	/* task_init is somewhat special in that it transforms the system
@@ -196,7 +198,7 @@ __noreturn__ void freewpc_init (void)
 	while (1)
 	{
 		/* TODO - drop priority for idle tasks */
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 		db_idle ();
 		callset_invoke (idle);
 	}
@@ -205,13 +207,14 @@ __noreturn__ void freewpc_init (void)
 
 
 /**
- * The lockup check routine examines 'task_dispatch_ok', which
+ * The lockup check routine examines 'task_dispatching_ok', which
  * should normally be true as normal task scheduling occurs.  
  * If this value stays false, something is very wrong.
  *
  * This check occurs every 128 IRQs.  No task should run for
- * that long without giving up control.  If the count doesn't
- * change on every check, we invoke a fatal error and reset.
+ * that long without giving up control.  If the flag stays false
+ * between 2 consecutive calls, we invoke a fatal error and reset.
+ * This implies the same task was running for between 125 and 250ms.
  *
  * NOTE: if a task _really_ does take that long to execute before
  * switching out, it should set "task_dispatching_ok = TRUE"

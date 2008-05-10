@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -70,7 +70,7 @@ void sw_jet_sound (void)
 	if (jet_sound_index >= 3)
 		jet_sound_index = 0;
 
-	if (lamp_test (LM_PANEL_TSM))
+	if (flag_test (FLAG_TSM_RUNNING))
 		sound_send (super_jet_sounds[jet_sound_index]);
 	else
 		sound_send (jet_sounds[jet_sound_index]);
@@ -82,7 +82,7 @@ void sw_jet_sound (void)
 
 CALLSET_ENTRY (jet, sw_jet)
 {
-	if (lamp_test (LM_PANEL_TSM))
+	if (flag_test (FLAG_TSM_RUNNING))
 		score (SC_500K);
 	else
 		score (SC_250K);
@@ -90,11 +90,25 @@ CALLSET_ENTRY (jet, sw_jet)
 }
 
 
+CALLSET_ENTRY (jet, lamp_update)
+{
+	/* if (flag_test (FLAG_TSM_RUNNING))
+		leff_start (LEFF_JETS_ACTIVE);
+	else
+		leff_stop (LEFF_JETS_ACTIVE); */
+}
+
+
+CALLSET_ENTRY (jet, start_ball)
+{
+	flag_off (FLAG_TSM_RUNNING);
+	leff_stop (LEFF_JETS_ACTIVE);
+}
+
+
 CALLSET_ENTRY (jet, door_start_tsm)
 {
-	if (lamp_test (LM_PANEL_TSM))
-	{
-		leff_start (LEFF_JETS_ACTIVE);
-	}
+	flag_on (FLAG_TSM_RUNNING);
+	leff_start (LEFF_JETS_ACTIVE);
 }
 

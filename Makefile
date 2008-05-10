@@ -1,7 +1,7 @@
 #
 # FreeWPC makefile
 #
-# (C) Copyright 2005-2007 by Brian Dominy.
+# (C) Copyright 2005-2008 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.
@@ -9,7 +9,7 @@
 # To build the product, just type "make".
 #
 # To customize the build, create a file named .config.
-# See user.make.example for an example of how this should look.
+# See .config.example for an example of how this should look.
 # The settings in .config override any defaults given below.
 #
 # By default, make will also install your game ROM into your pinmame
@@ -41,21 +41,25 @@ endif
 
 BLDDIR := build
 INCLUDE_DIR = ./include
-MACHINE_DIR = machine/$(MACHINE)
-PLATFORM_DIR = platform/$(PLATFORM)
 
 
 #######################################################################
 ###	Configuration
 #######################################################################
 
+ifneq ($(PLATFORM),wpc-shell)
+
 # MACHINE says which machine you are targetting.  It must be defined.
 # This loads in per-machine rules.
 $(eval $(call require,MACHINE))
 
 M := machine/$(MACHINE)
+MMAKEFILE := $(M)/Makefile
+MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
+MACHINE_DIR = machine/$(MACHINE)
+
 include $(BLDDIR)/mach-Makefile
-include machine/$(MACHINE)/Makefile
+include $(MMAKEFILE)
 
 # MACHINE_FILE must be set by the machine Makefile.  We can
 # grep it to set additional configuration variables.
@@ -68,17 +72,27 @@ CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y
 CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
 CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
 
+else
+MACH_DESC = platform/wpc-shell/wpc-shell.md
+
+endif
+
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
 # defined this.
 $(eval $(call require,PLATFORM))
+PLATFORM_DIR = platform/$(PLATFORM)
 
 #######################################################################
 ###	Set Default Target
 #######################################################################
 
 .PHONY : default_target
-default_target : clean_err check_prereqs platform_target post_compile
+
+default_target : post_compile
+post_compile : platform_target
+platform_target : check_prereqs
+check_prereqs : clean_err
 
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
@@ -86,7 +100,8 @@ COMMON_BASIC_OBJS :=
 ifdef NATIVE
 include platform/native/Makefile
 else
--include platform/$(PLATFORM)/Makefile
+PMAKEFILE := platform/$(PLATFORM)/Makefile
+-include $(PMAKEFILE)
 endif
 
 # Set this to the name of the CPU.  In simulation this is always
@@ -204,6 +219,7 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 ###	Source and Binary Filenames
 #######################################################################
 
+ifneq ($(PLATFORM),wpc-shell)
 include kernel/Makefile
 include common/Makefile
 include fonts/Makefile
@@ -228,6 +244,7 @@ INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
 FON_SRCS = $(patsubst %.o,%.fon,$(FON_OBJS))
 export FON_SRCS
+endif
 
 #######################################################################
 ###	Compiler / Assembler / Linker Flags
@@ -300,7 +317,7 @@ endif
 # code is written to handle the paging.
 PAGED_MD_OBJS = \
 	$(BLDDIR)/mach-strings.o \
-	$(BLDDIR)/mach-lampsets.o
+	$(BLDDIR)/mach-lamplists.o
 
 SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-switchmasks.o \
@@ -324,11 +341,7 @@ MUX_OBJS := $(MUX_SRCS:.c=.o)
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
-ifeq ($(ROM_PAGE_COUNT),8)
 PAGE_NUMBERS = 56 57 58 59 60 61
-else
-PAGE_NUMBERS = 55 56 57 58 59 60 61
-endif
 
 PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
 NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
@@ -337,11 +350,14 @@ BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
 
 #
 # Memory Map
-# The first 16-bytes of the nonvolatile area are reserved.
-# PinMAME has a hack that overwrites this area.
 #
 # AREA_SETUP (name, address, length):
 # Define a new linker area.
+#
+# The first 16-bytes of the nonvolatile area are reserved.
+# PinMAME has a hack that overwrites this area.
+#
+# The size of the local area given here is the per-player value.
 #
 AREA_LIST :=
 define AREA_SETUP
@@ -354,7 +370,7 @@ endef
 
 $(eval $(call AREA_SETUP, direct,    0x0004,   0x00FC))
 $(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
-$(eval $(call AREA_SETUP, local,     0x1400,   0x00A0))
+$(eval $(call AREA_SETUP, local,     0x1400,   0x0040))
 $(eval $(call AREA_SETUP, stack,     0x1600,   0x0200,  virtual))
 $(eval $(call AREA_SETUP, nvram,     0x1810,   0x07F0))
 $(eval $(call AREA_SETUP, paged,     0x4000,   0x4000,  virtual))
@@ -386,9 +402,10 @@ endef
 # $1 = the page number
 # $2 = the object class
 # $3 = the page define (derived if $2 if not given)
-# Example : PAGE_ALLOC(55,EFFECT)
+# Example : PAGE_ALLOC(56,EFFECT)
 define PAGE_ALLOC
 page$(strip $1)_OBJS += $($(strip $2)_OBJS)
+page$(strip $1)_SECTIONS += $(strip $2)
 $($(strip $2)_OBJS) : PAGE=$(strip $1)
 ifneq ($(strip $3),)
 CFLAGS += -D$(strip $3)_PAGE=$(strip $1)
@@ -398,19 +415,17 @@ endif
 endef
 
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
-$(eval $(call PAGE_ALLOC, 55, PAGED_MD, MD))
-$(eval $(call PAGE_ALLOC, 55, EFFECT))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 56, EVENT))
 $(eval $(call PAGE_ALLOC, 57, TRANS))
-$(eval $(call PAGE_ALLOC, 57, PRG))
 $(eval $(call PAGE_ALLOC, 57, FIF))
 $(eval $(call PAGE_ALLOC, 57, MUX))
 $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
 $(eval $(call PAGE_ALLOC, 59, FSM))
-## $(eval $(call PAGE_ALLOC, 60, XBM)) # not needed anymore
+$(eval $(call PAGE_ALLOC, 60, PAGED_MD, MD))
+$(eval $(call PAGE_ALLOC, 60, EFFECT))
 $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
@@ -431,20 +446,19 @@ C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 
 
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(FIF_OBJS) $(FON_OBJS) $(PRG_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(FIF_OBJS) $(FON_OBJS)
 else
 ifeq ($(PLATFORM),whitestar)
 OBJS = $(C_OBJS) $(AS_OBJS)
 else
-OBJS = $(C_OBJS) $(PRG_OBJS) $(FIF_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(FIF_OBJS) $(FON_OBJS)
 endif
 endif
 
 MACH_LINKS = .mach .include_mach
 
-MAKE_DEPS = Makefile kernel/Makefile common/Makefile fonts/Makefile $(MACHINE_DIR)/Makefile $(BLDDIR)/mach-Makefile .config
+MAKE_DEPS = Makefile kernel/Makefile common/Makefile fonts/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile .config
 C_DEPS += $(BLDDIR)/mach-config.h
-MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
 GENDEFINES = include/gendefine_gid.h
@@ -469,7 +483,7 @@ check_prereqs : $(BLDDIR) tools sched
 .PHONY : run
 run:
 	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) -nosound &
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
 .PHONY : run-orig
 run-orig: uninstall
@@ -535,7 +549,7 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(BLDDIR)/$(GAME_ROM)
 compile: $(BLDDIR)/$(GAME_ROM)
 
 $(BLDDIR):
-	mkdir -p $(BLDDIR)
+	$(Q)echo "Making build directory..." && mkdir -p $(BLDDIR)
 
 post_compile :
 	$(Q)echo "Cleaning .i files..." && rm -f *.i
@@ -633,7 +647,7 @@ OBJ_PAGE_LINKOPT = $(subst -v $(1) $(1),-o $(1),-v $(1) $(findstring $(1),$($(2:
 OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_OBJS)),$(call OBJ_PAGE_LINKOPT,$(obj),$(patsubst $(BLDDIR)/%,%,$1)))
 DUP_PAGE_OBJ = $1
 
-$(PAGED_LINKCMD) : $(MAKE_DEPS) platform/$(PLATFORM)/Makefile
+$(PAGED_LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
@@ -665,7 +679,7 @@ $(BLDDIR)/page%.s:
 #
 # How to make the linker command file for the system section.
 #
-$(LINKCMD) : $(MAKE_DEPS) platform/$(PLATFORM)/Makefile
+$(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	$(Q)echo Creating linker command file $@ ... ;\
 	rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
@@ -712,7 +726,8 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 #    SOFTREG_CFLAGS says how many soft registers should be used, if any.
 #    It is unsafe to use soft registers in any file which declares
 #    interrupt-level functions, because GCC does not save/restore them
-#    as part of interrupt prologue/epilogue.
+#    as part of interrupt prologue/epilogue.  Such files will not have
+#    these options used.
 #
 #    PAGE is a macro set to the current page setting, so the code
 #    knows what page it is being compiled in.  (-mfar-code-page tells
@@ -729,18 +744,18 @@ $(C_OBJS) : %.o : %.c
 
 $(FON_OBJS) : %.o : %.fon
 
-$(PRG_OBJS) : %.o : %.prg
-
 $(FIF_OBJS) : %.o : %.fif
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
+$(FIF_OBJS) : $(GENDEFINES)
+
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
 
-$(C_OBJS) $(PRG_OBJS) $(FON_OBJS) $(FIF_OBJS):
+$(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
@@ -754,7 +769,7 @@ endif
 #######################################################################
 ###	Machine Description Compiler
 #######################################################################
-CONFIG_CMDS = dump strings switchmasks containers switches scores lampsets deffs fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs fonts
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile
 
@@ -886,12 +901,16 @@ $(HOST_OBJS) : %.o : %.c
 # 'mach' and 'include/mach' without knowing the specific machine type.
 #
 .mach:
-	$(Q)echo Setting symbolic link for machine source code &&\
-		touch .mach && ln -s $(MACHINE_DIR) mach
+	$(Q)echo "Setting symbolic link for machine source code..."
+ifneq ($(PLATFORM),wpc-shell)
+	$(Q)touch .mach && ln -s $(MACHINE_DIR) mach
+endif
 
 .include_mach:
-	$(Q)echo Setting symbolic link for machine include files &&\
-		touch .include_mach && cd include && ln -s $(MACHINE) mach
+	$(Q)echo "Setting symbolic link for machine include files..."
+ifneq ($(PLATFORM),wpc-shell)
+	$(Q)touch .include_mach && cd include && ln -s $(MACHINE) mach
+endif
 
 #
 # Remake machine prototypes file
@@ -940,11 +959,24 @@ info:
 	$(Q)echo "REQUIRED = $(REQUIRED)"
 	$(Q)echo "PATH_REQUIRED = $(PATH_REQUIRED)"
 	$(Q)echo "FIF_OBJS = $(FIF_OBJS)"
-	$(Q)echo "PRG_OBJS = $(PRG_OBJS)"
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
+	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
+
+.PHONY : areainfo
+areainfo:
+	@true $(foreach area,$(AREA_LIST),&& echo $(area) $(AREASIZE_$(area)))
+	@true $(foreach page,$(PAGED_SECTIONS),&& echo $(page) 0x4000 $($(page)_SECTIONS))
+
+.PHONY : srcinfo
+srcinfo:
+	$(Q)echo $(OBJS:.o=.c)
+
+callset.in :
+	cat $(C_OBJS:.o=.c) | $(CC) -E $(CFLAGS) -DGENCALLSET - > callset.in
+
 
 #
 # 'make clean' does what you think.
@@ -952,7 +984,9 @@ info:
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
 	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
-		do echo "Removing files in '$$dir' ..." && pushd $$dir && rm -f $(TMPFILES) && popd; done
+		do echo "Cleaning in '$$dir' ..." && \
+		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
+		popd >/dev/null ; done
 
 .PHONY : clean_derived
 clean_derived:
@@ -964,11 +998,11 @@ clean_derived:
 
 .PHONY : clean_build
 clean_build:
-	rm -f $(BLDDIR)/* && if [ -d $(BLDDIR) ]; then rmdir $(BLDDIR); fi
+	$(Q)rm -f $(BLDDIR)/* && if [ -d $(BLDDIR) ]; then rmdir $(BLDDIR); fi
 
 .PHONY : clean_tools
 clean_tools:
-	rm -f $(HOST_OBJS) $(TOOLS)
+	$(Q)rm -f $(HOST_OBJS) $(TOOLS)
 
 .PHONY : show_objs
 show_objs:

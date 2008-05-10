@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,6 +22,7 @@
 #define _SYS_BITARRAY_H
 
 typedef U8 *bitset;
+typedef U8 *const const_bitset;
 
 #define bitarray_const_offset(bits, bitno) (bits[(bitno) / 8])
 
@@ -101,16 +102,16 @@ typedef U8 *bitset;
  * will be made. */
 
 #define bitarray_set(bits, bitno) \
-	(__bitarray_constant_p (bitno) ? \
-	   bitarray_const_set (bits, bitno) : wpc_setbit(bits, bitno))
+	((void)(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_set (bits, bitno) : wpc_setbit(bits, bitno)))
 
 #define bitarray_clear(bits, bitno) \
-	(__bitarray_constant_p (bitno) ? \
-	   bitarray_const_clear (bits, bitno) : wpc_clearbit(bits, bitno))
+	((void)(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_clear (bits, bitno) : wpc_clearbit(bits, bitno)))
 
 #define bitarray_toggle(bits, bitno) \
-	(__bitarray_constant_p (bitno) ? \
-	   bitarray_const_toggle (bits, bitno) : wpc_togglebit(bits, bitno))
+	((void)(__bitarray_constant_p (bitno) ? \
+	   bitarray_const_toggle (bits, bitno) : wpc_togglebit(bits, bitno)))
 
 #define bitarray_test(bits, bitno) \
 	(__bitarray_constant_p (bitno) ? \

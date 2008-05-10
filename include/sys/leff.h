@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -49,8 +49,8 @@ typedef struct
 	U8 prio;
 
 	/** The maximum set of lamps that it will want to control,
-	 * expressed as a lampset. */
-	U8 lampset;
+	 * expressed as a lamplist. */
+	U8 lamplist;
 
 	/** The maximum GI strings that it will want to control,
 	 * expressed as a bitmask of GI string values. */
@@ -63,8 +63,6 @@ typedef struct
 	U8 page;
 } leff_t;
 
-#define MAX_QUEUED_LEFFS 8
-
 
 /** Per-leff state variables */
 typedef struct
@@ -76,8 +74,8 @@ typedef struct
 } leff_data_t;
 
 
-#define lampset_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)
-#define lampset_private_data	(task_current_class_data (leff_data_t)->data)
+#define lamplist_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)
+#define lamplist_private_data	(task_current_class_data (leff_data_t)->data)
 #define leff_running_flags		(task_current_class_data (leff_data_t)->flags)
 #define leff_self_id				(task_current_class_data (leff_data_t)->id)
 
@@ -87,11 +85,10 @@ extern inline void leff_create_peer (void (*fn)(void))
 	task_inherit_class_data (tp, leff_data_t);
 }
 
-leffnum_t leff_get_active (void);
 void leff_start (leffnum_t dn);
 void leff_stop (leffnum_t dn);
+bool leff_running_p (leffnum_t dn);
 void leff_restart (leffnum_t dn);
-task_pid_t leff_find_shared (leffnum_t dn);
 void leff_start_highest_priority (void);
 __noreturn__ void leff_exit (void);
 void leff_init (void);

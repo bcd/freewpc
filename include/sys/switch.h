@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -53,13 +53,17 @@ typedef struct
 	/** If nonzero, indicates a sound to be made on any switch event */
 	sound_code_t sound;
 
-	/** Indicates how long the switch must be physically active
-	 * before an event is generated */
-	task_ticks_t active_time;
+	/** Indicates how long the switch must remain in the active
+	 * state before an event is generated.  During this time,
+	 * the switch remains queued.  If it does not change for this
+	 * time, then the event is generated.  If it does change, the
+	 * prebounce period is restarted. */
+	task_ticks_t prebounce;
 
-	/** Indicates how long the switch must be physically inactive
-	 * before the next switch event can be considered */
-	task_ticks_t inactive_time;
+	/** Indicates how long after the event is generated before
+	 * switch closures are considered again.  During this period,
+	 * any switch transitions are ignored. */
+	task_ticks_t postbounce;
 
 	/** If nonzero, indicates the device driver associated with this
 	 *switch. */
@@ -83,6 +87,11 @@ extern const U8 mach_edge_switches[];
 
 #define NUM_DEDICATED_SWITCHES 8
 
+/** On a pre-Fliptronic game, the flipper button switches are in
+the ordinary 8x8 switch matrix.  On Fliptronic games, these are
+accessed separately and tracked in a "9th" switch column internally.
+Define SW_LEFT_BUTTON and SW_RIGHT_BUTTON to the correct values
+depending on the system type. */
 #if (MACHINE_FLIPTRONIC == 1)
 #define NUM_FLIPTRONIC_SWITCHES 8
 #define SW_LEFT_BUTTON SW_L_L_FLIPPER_BUTTON
@@ -107,9 +116,8 @@ extern const U8 mach_edge_switches[];
 #define AR_RAW			0
 #define AR_CHANGED 	1
 #define AR_PENDING 	2
-#define AR_QUEUED 	3
-#define AR_LATCHED   4
-#define NUM_SWITCH_ARRAYS 	5
+#define AR_LATCHED   3
+#define NUM_SWITCH_ARRAYS 	4
 
 extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
 
@@ -184,12 +192,13 @@ when a button is first pressed and continually as it is held.
 
 void switch_init (void);
 void switch_rtt (void);
-void switch_sched (void);
+void switch_sched_task (void);
 void switch_idle_task (void);
 bool switch_poll (const switchnum_t sw);
 bool switch_is_opto (const switchnum_t sw);
 bool switch_poll_logical (const switchnum_t sw);
-const switch_info_t *switch_lookup (U8 sw);
-U8 switch_lookup_lamp (const switchnum_t sw);
+const switch_info_t *switch_lookup (const switchnum_t sw) __attribute__((pure));
+U8 switch_lookup_lamp (const switchnum_t sw) __attribute__((pure));
+void switch_queue_dump (void);
 
 #endif /* _SYS_SWITCH_H */

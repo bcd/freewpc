@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,6 +29,13 @@
 extern inline void rt_sol_enable (const U8 sol)
 {
 	sol_timers[sol] = 0xFF;
+}
+
+
+extern inline void rt_sol_start (solnum_t sol, U8 duty_mask, U8 ticks)
+{
+	sol_duty_state[sol] = duty_mask;
+	sol_timers[sol] = ticks;
 }
 
 
