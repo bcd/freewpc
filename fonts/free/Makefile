@@ -7,5 +7,8 @@ all : $(FONS)
 
 $(FONS) : %.fon : %.ttf $(DEPS)
 	$(TTF2FON) $* > $@ ;\
-	height=`grep "height [0-9]" v5prc.fon | awk '{print $$3}' | sort | tail -n 1` ;\
+	height=`grep "height [0-9]" $@ | awk '{print $$3}' | sort | tail -n 1` ;\
 	sed -i -e "s/HEIGHT/$${height}/" $@
+
+clean:
+	rm -f $(FONS)
