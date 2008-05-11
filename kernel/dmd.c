@@ -308,14 +308,7 @@ void dmd_show2 (void)
 		for much longer.  The effect is that only part of the image
 		appears during that window.  So, we must disable IRQ as well
 		here. */
-		disable_interrupts ();
-#if 0
-		dmd_dark_page = dmd_low_page;
-		dmd_bright_page = dmd_high_page;
-#else
 		dmd_visible_pages = dmd_mapped_pages;
-#endif
-		enable_interrupts ();
 	}
 }
 
