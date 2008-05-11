@@ -436,63 +436,6 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 }
 
 
-#if 0
-/**
- * Draw a mono image to the currently mapped (low) page.  
- * The image is stored in XBM format.
- */
-void dmd_draw_image (const U8 *image_bits)
-{
-	wpc_push_page (XBM_PAGE);
-	dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits);
-	wpc_pop_page ();
-}
-
-
-/**
- * Draw a 4-color image.  The image is stored as two adjacent XBM files.
- */
-void dmd_draw_image2 (const U8 *image_bits)
-{
-	wpc_push_page (XBM_PAGE);
-#ifdef HAVE_BRIGHT_BITS_FIRST
-	dmd_copy_page (dmd_high_buffer, (dmd_buffer_t)image_bits);
-	dmd_copy_page (dmd_low_buffer, ((dmd_buffer_t)image_bits + DMD_PAGE_SIZE));
-#else
-	dmd_copy_page (dmd_low_buffer, (dmd_buffer_t)image_bits);
-	dmd_copy_page (dmd_high_buffer, ((dmd_buffer_t)image_bits + DMD_PAGE_SIZE));
-#endif
-	wpc_pop_page ();
-}
-
-
-/** Draw the bitmap described by image_bits, with given width & height,
- * at the given location on the DMD.
- *
- * For now, it is assumed that x, y, width, and height are all multiples
- * of 8.
- */
-void dmd_draw_bitmap (dmd_buffer_t image_bits, 
-	U8 x, U8 y, U8 width, U8 height)
-{
-	U8 i, j;
-	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
-	U16 *image_data = (U16 *)image_bits;
-
-	wpc_push_page (XBM_PAGE);
-	for (j=0; j < height; j++)
-	{
-		for (i=0; i < ((width / 8) / 2); i++)
-		{
-			dbuf[x + i] = *image_data++;
-		}
-		dbuf += (16 / 2);
-	}
-	wpc_pop_page ();
-}
-#endif
-
-
 /** Erase a specific region of the DMD low buffer, given its
  * location and size.
  *

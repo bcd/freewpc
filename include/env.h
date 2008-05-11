@@ -31,7 +31,6 @@
 #ifdef __m6809__
 #define HAVE_PAGING
 #define HAVE_INTERRUPT_ATTRIBUTE
-#define HAVE_FLAG_SECTION
 #endif
 
 /* All CPUs support sections for now */
@@ -65,12 +64,6 @@
 #define __local__
 #endif
 
-typedef U8 flag_t;
-#ifdef HAVE_FLAG_SECTION
-#define __flagdef__ __attribute__((section ("flags"))) volatile flag_t
-#else
-#define __flagdef__
-#endif
 
 /** Section declaration modifiers.  These attributes are used
  * on function prototypes and data externs to denote which
@@ -89,7 +82,6 @@ typedef U8 flag_t;
 #define __test__			__far__(C_STRING(TEST_PAGE))
 #define __test2__			__far__(C_STRING(TEST2_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
-#define __xbmprog__     __far__(C_STRING(PRG_PAGE))
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
 #else
 #define __far__(x)
@@ -100,7 +92,6 @@ typedef U8 flag_t;
 #define __test__
 #define __test2__
 #define __machine__
-#define __xbmprog__
 #define __effect__
 #endif
 
