@@ -103,6 +103,17 @@ U8 *font_lookup (const font_t *font, char c)
 	}
 }
 
+
+void font_lookup_char (const font_t *font, char c)
+{
+	wpc_push_page (FONT_PAGE);
+	if (font->glyphs[(U8)c] == NULL)
+		font_width = font_height = 0;
+	else
+		(void)font_lookup (font, c);
+	wpc_pop_page ();
+}
+
 #ifndef __m6809__
 
 /** Draw one row of font data to the DMD.

@@ -86,6 +86,8 @@ typedef struct
 
 extern __fastram__ fontargs_t font_args;
 
+void font_lookup_char (const font_t *font, char c);
+
 void font_get_string_area (const font_t *font, const char *s);
 
 void fontargs_render_string_center (void);
