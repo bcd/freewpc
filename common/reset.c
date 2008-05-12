@@ -122,7 +122,6 @@ void system_reset_deff (void)
 	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 
 #if (MACHINE_PIC == 1)
-	pic_init ();
 	pic_render_serial_number ();
 	font_render_string_left (&font_mono5, 1, 18, sprintf_buffer);
 #endif
@@ -148,6 +147,11 @@ void system_reset_deff (void)
 void system_reset (void)
 {
 	system_accept_freewpc ();
+
+#if (MACHINE_PIC == 1)
+	pic_init ();
+#endif
+
 #ifdef FASTBOOT
 	sys_init_complete++;
 #else

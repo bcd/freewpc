@@ -111,10 +111,20 @@ extern U8 *linux_dmd_high_page;
 
 #else
 
-/* WPC can map up to 6 of the DMD pages into address space.
- * FreeWPC only uses page 4 (low) and page 5 (high).
+/* WPC can map up to 2 of the DMD pages into address space at
+ * 0x3800 and 0x3A00.  Additionally, on WPC-95, 4 more pages
+ * can be mapped at 0x3000, 0x3200, 0x3400, and 0x3600.
+ * We refer to these areas as map 0 through map 5.
+ *
+ * FreeWPC only uses maps 4 and 5, as they work on all platforms.
+ * We call these "low" and "high".
  */
-#define DMD_MAPPED(n)					((U8 *)0x3000 + (n * 0x200))
+
+#define DMD_MAPPED(n) ((U8 *)0x3000 + ((n) * 0x200))
+
+/* Define addresses for the two page buffer locations we
+ * call low and high. */
+
 #define DMD_LOW_BASE 					DMD_MAPPED(4)
 #define DMD_HIGH_BASE 					DMD_MAPPED(5)
 
@@ -516,19 +526,31 @@ extern inline void wpc_write_ticket (U8 val)
 /* WPC Security PIC Chip                    */
 /********************************************/
 
+/* The PIC Security Chip can be read/written one byte at a time.
+ * It works much like the sound board, in that the first byte
+ * sent indicates a 'command', with optional data bytes to
+ * follow.  After a command that is intended to return a value,
+ * the result can be obtained by doing a PIC read. */
+
 /** The command to reset the PIC */
 #define WPC_PIC_RESET       0x0
 
-/** The command to update the PIC counter */
+/** The command to update the PIC counter.  When this counter
+ * reaches zero, the switch matrix cannot be accessed until
+ * an unlock sequence is successfully issued.   The counter
+ * resets automatically after unlocking. */
 #define WPC_PIC_COUNTER     0x0D
 
 /** The command to read the xth switch column */
 #define WPC_PIC_COLUMN(x)   (0x16 + (x))
 
-/** The command to unlock the switch matrix */
+/** The command to unlock the switch matrix.  A three-byte
+ * sequence follows. */
 #define WPC_PIC_UNLOCK      0x20
 
-/** The command to read the xth byte of the serial number */
+/** The command to read the xth byte of the serial number.
+ * See pic.c for a full description of how this value is
+ * encoded/decoded. */
 #define WPC_PIC_SERIAL(x)   (0x70 + (x))
 
 extern inline void wpc_write_pic (U8 val)

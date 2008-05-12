@@ -2005,7 +2005,7 @@ void pic_test_draw (void)
 	extern U8 pic_unlock_code[];
 	extern U8 pic_serial_number[];
 
-	window_title ("SECURITY PIC TEST");
+	window_title ("SECURITY TEST");
 
 	sprintf ("UNLOCK CODE %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
@@ -2023,7 +2023,7 @@ struct window_ops pic_test_window = {
 };
 
 struct menu pic_test_item = {
-	.name = "SECURITY PIC TEST",
+	.name = "SECURITY TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &pic_test_window, NULL } },
 };

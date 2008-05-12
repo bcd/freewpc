@@ -109,22 +109,22 @@ void leff_toggle (lampnum_t lamp);
 bool leff_test (lampnum_t lamp);
 
 
-extern inline void flag_on (const flag_t f)
+extern inline void flag_on (const U8 f)
 {
 	bitarray_set (bit_matrix, f);
 }
 
-extern inline void flag_off (const flag_t f)
+extern inline void flag_off (const U8 f)
 {
 	bitarray_clear (bit_matrix, f);
 }
 
-extern inline void flag_toggle (const flag_t f)
+extern inline void flag_toggle (const U8 f)
 {
 	bitarray_toggle (bit_matrix, f);
 }
 
-extern inline bool flag_test (const flag_t f)
+extern inline bool flag_test (const U8 f)
 {
 	return bitarray_test (bit_matrix, f);
 }
