@@ -35,6 +35,13 @@ typedef struct font
 
 	/** A pointer to the table of glyphs */
 	char **glyphs;
+
+	/** The first character that has a glyph.  Earlier characters
+	 * are not represented at all, thus saving space.  Typically,
+	 * there is nothing before a space, which saves 64 bytes.
+	 * Old fonts that have not been converted to use this feature
+	 * will have a value of zero here. */
+	U8 basechar;
 } font_t;
 
 

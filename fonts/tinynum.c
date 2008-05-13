@@ -19,26 +19,28 @@ static char font_tinynum_sep[][7] = {
 	/* comma */ { 1, 5, 0, 0, 0, 1, 1 },
 };
 
+#define BASECHAR ','
+
 static char *tinynum_glyphs[] = {
-   ['0'] = font_tinynum_digit[0],
-   ['1'] = font_tinynum_digit[1],
-   ['2'] = font_tinynum_digit[2],
-   ['3'] = font_tinynum_digit[3],
-   ['4'] = font_tinynum_digit[4],
-   ['5'] = font_tinynum_digit[5],
-   ['6'] = font_tinynum_digit[6],
-   ['7'] = font_tinynum_digit[7],
-   ['8'] = font_tinynum_digit[8],
-   ['9'] = font_tinynum_digit[9],
-   ['.'] = font_tinynum_sep[0],
-   [','] = font_tinynum_sep[1],
-	['A'] = NULL,
+   ['0' - BASECHAR] = font_tinynum_digit[0],
+   ['1' - BASECHAR] = font_tinynum_digit[1],
+   ['2' - BASECHAR] = font_tinynum_digit[2],
+   ['3' - BASECHAR] = font_tinynum_digit[3],
+   ['4' - BASECHAR] = font_tinynum_digit[4],
+   ['5' - BASECHAR] = font_tinynum_digit[5],
+   ['6' - BASECHAR] = font_tinynum_digit[6],
+   ['7' - BASECHAR] = font_tinynum_digit[7],
+   ['8' - BASECHAR] = font_tinynum_digit[8],
+   ['9' - BASECHAR] = font_tinynum_digit[9],
+   ['.' - BASECHAR] = font_tinynum_sep[0],
+   [',' - BASECHAR] = font_tinynum_sep[1],
 };
 
 const font_t font_tinynum = {
 	.spacing = 1,
 	.height = 5, 
 	.glyphs = tinynum_glyphs,
+	.basechar = BASECHAR,
 };
 
 
