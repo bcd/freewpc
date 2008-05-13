@@ -1,6 +1,7 @@
 
 # Root directory for the platform files
 P := platform/wpc-shell
+CONFIG_BARE := y
 
 # A few notes:
 # 1. -Wno-format is to not check format strings, because we define those

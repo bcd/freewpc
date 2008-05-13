@@ -1,4 +1,6 @@
 
+CONFIG_GAME_ROM := y
+
 # Root directory for the platform files
 P := platform/wpc
 
@@ -20,6 +22,7 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
 CFLAGS += $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPC
 
 KERNEL_HW_OBJS += $(P)/main.o
 
@@ -32,6 +35,11 @@ KERNEL_ASM_OBJS += $(P)/start.o
 COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
 CALLSET_FLAGS += -D platform/wpc
+
+ifeq ($(FREEWPC_DEBUGGER),y)
+CFLAGS += -DDEBUGGER
+EXTRA_ASFLAGS += -DDEBUGGER
+endif
 
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
