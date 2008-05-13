@@ -54,7 +54,7 @@ define MACHINE_NUMBER 531
 51: Goal Jackpot
 52: Extra Ball
 53: Goal
-54: Upper Build Lock
+54: Striker Build
 55: Light Magna Goalie
 56: R. Flipper Lane
 57: Shoot Again
@@ -141,7 +141,7 @@ define MACHINE_NUMBER 531
 84: Left Slingshot
 85: Right Slingshot
 86: Kickback
-87: Upper Left Lane
+87: uPPER Left Lane
 88: Upper Right Lane
 
 [drives]
@@ -193,14 +193,18 @@ F3: Lock Magnet
 #############################################################
 
 [lamplists]
-Goals: 1 Goal, 2 Goals, 3 Goals, 4 Goals
+Goal Counts: 1 Goal, 2 Goals, 3 Goals, 4 Goals
 Ball Panels: Ball Spirit, Ball Skill, Ball Stamina, Ball Speed, Ball Strength
-Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Upper Build Lock
+Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Striker Build
 Kickbacks: Kickback Lower, Kickback Center, Kickback Upper
 Ultra Modes: Ultra Spinner, Ultra Jets, Ultra Ramps, Ultra Goalie
 Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
 Ticket Halves: L. Ticket Half, R. Ticket Half
 Cities: Chicago P, Dallas U, Boston C, New York D, Orlando L, Washington R, San Francisco O, Detroit W
+Skill Shots: Skill Top, Skill Middle, Skill Lower
+Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
+Top Lanes: Top Lane Left, Top Lane Right
+Ramp Tickets: L. Ramp Ticket, R. Ramp Ticket
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
