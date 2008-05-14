@@ -47,6 +47,7 @@ void volume_off (void)
  * hardware. */
 U8 translate_volume (U8 cpu_volume)
 {
+	return cpu_volume;
 }
 
 
@@ -54,6 +55,11 @@ U8 translate_volume (U8 cpu_volume)
 given in terms of CPU units. */
 void volume_set (U8 new_volume)
 {
+	new_volume = translate_volume (new_volume);
+	while (new_volume > current_hw_volume)
+		increase_volume ();
+	while (new_volume < current_hw_volume)
+		decrease_volume ();
 }
 
 

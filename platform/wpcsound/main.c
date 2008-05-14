@@ -58,7 +58,10 @@ int main (void)
 	wpcs_hardware_init ();
 	VOIDCALL (host_init);
 	VOIDCALL (volume_init);
-	for (;;);
+	for (;;)
+	{
+		writeb (WPCS_DAC, 0x55);
+	}
 	return 0;
 }
 

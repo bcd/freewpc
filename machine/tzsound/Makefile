@@ -41,7 +41,9 @@ ROM_PAGE_COUNT = 32
 
 PINMAME_MACHINE = tz_92
 
-PINMAME_SOUND_ROMS = tzu*.rom
+PINMAME_GAME_ROM = tzu18_l2.rom
+
+PINMAME_OTHER_ROMS = tzone9_2.rom tzu14_l2.rom tzu15_l2.rom
 
 #
 # Object files exported by this game

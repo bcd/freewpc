@@ -17,5 +17,5 @@ EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPCSOUND
 
 KERNEL_OBJS += $(P)/main.o $(P)/interrupt.o $(P)/volume.o $(P)/host.o \
 	$(P)/dac.o $(P)/cvsd.o
-KERNEL_ASM_OBJS += platform/wpc/start.o
+KERNEL_ASM_OBJS += $(P)/start.o
 
