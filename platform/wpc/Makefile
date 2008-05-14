@@ -21,7 +21,7 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 # 1. -Wno-format is to not check format strings, because we define those
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
-CFLAGS += $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPC
 
 KERNEL_HW_OBJS += $(P)/main.o

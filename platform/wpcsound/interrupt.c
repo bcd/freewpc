@@ -28,6 +28,7 @@ extern __fastram__ U8 tick_count;
  */
 __interrupt__ void wpcs_invalid_interrupt (void)
 {
+	fatal (1);
 }
 
 
@@ -36,7 +37,13 @@ __interrupt__ void wpcs_invalid_interrupt (void)
  */
 __interrupt__ void wpcs_periodic_interrupt (void)
 {
+	m6809_firq_save_regs ();
+
 	tick_count++;
+	host_send ();
+	host_write (0xF0);
+
+	m6809_firq_restore_regs ();
 }
 
 

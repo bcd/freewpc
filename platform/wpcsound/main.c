@@ -28,6 +28,9 @@
 __fastram__ U8 tick_count;
 
 
+static const char copyright[] = "FreeWPC - WPC Sound System";
+
+
 void fatal (U8 error_code)
 {
 	while (1);
@@ -53,15 +56,19 @@ void wpcs_hardware_init (void)
 }
 
 
-int main (void)
+__noreturn__ void main (void)
 {
 	wpcs_hardware_init ();
 	VOIDCALL (host_init);
+	host_write (0x00);
 	VOIDCALL (volume_init);
+	host_write (0x10);
+	VOIDCALL (fm_init);
+	host_write (0x20);
+
 	for (;;)
 	{
 		writeb (WPCS_DAC, 0x55);
 	}
-	return 0;
 }
 
