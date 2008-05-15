@@ -32,6 +32,8 @@
 
 #define MAX_BUFFER_SIZE (FRAME_WIDTH * FRAME_HEIGHT)
 
+#define FRAME_BYTE_SIZE (FRAME_WIDTH * FRAME_HEIGHT / 8)
+
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 
 #define abs(n) (((n) >= 0) ? (n) : -(n))
@@ -64,6 +66,15 @@ struct coord
 	int y;
 };
 
+
+struct layer
+{
+	struct buffer *bitmap;
+	struct buffer *buf;
+	struct coord coord;
+};
+
+
 typedef U8 binary_operator (U8, U8);
 
 typedef U8 unary_operator (U8);
@@ -71,6 +82,7 @@ typedef U8 unary_operator (U8);
 typedef struct coord translate_operator (struct coord);
 
 struct buffer *buffer_alloc(unsigned int maxlen);
+struct buffer *buffer_copy (struct buffer *buf);
 struct buffer *bitmap_alloc(unsigned int width, unsigned int height);
 struct buffer *frame_alloc(void);
 unsigned int bitmap_pos(struct buffer *buf, unsigned int x, unsigned int y);
@@ -91,7 +103,7 @@ struct buffer *buffer_splitbits(struct buffer *buf);
 int buffer_compare(struct buffer *a, struct buffer *b);
 struct buffer *buffer_replace(struct buffer *old, struct buffer *new);
 struct histogram *histogram_update(struct buffer *buf);
-struct buffer *buffer_compress(struct buffer *buf);
+struct buffer *buffer_compress(struct buffer *buf, struct buffer *prev);
 struct buffer *buffer_decompress(struct buffer *buf);
 struct buffer *bitmap_crop(struct buffer *buf);
 void bitmap_draw_pixel(struct buffer *buf, unsigned int x, unsigned int y);
