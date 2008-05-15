@@ -8,6 +8,7 @@
  */
 static void fm_wait (void)
 {
+	while (readb (WPCS_FM_DATA) & 0x80);
 }
 
 
@@ -38,7 +39,7 @@ U8 fm_read (U8 addr)
 }
 
 
-void fm_init (void)
+void fm_restart_timer (void)
 {
 	/* Program the FM timer register to generate a periodic
 	interrupt on the FIRQ */
@@ -46,5 +47,11 @@ void fm_init (void)
 	fm_write (FM_ADDR_CLOCK_A2, 0x02);
 	fm_write (FM_ADDR_CLOCK_CTRL,
 		FM_TIMER_FRESETA + FM_TIMER_IRQENA + FM_TIMER_LOADA);
+}
+
+
+void fm_init (void)
+{
+	fm_restart_timer ();
 }
 

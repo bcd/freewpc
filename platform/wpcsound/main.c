@@ -58,6 +58,8 @@ void wpcs_hardware_init (void)
 
 __noreturn__ void main (void)
 {
+	U8 val;
+
 	wpcs_hardware_init ();
 	VOIDCALL (host_init);
 	host_write (0x00);
@@ -68,7 +70,22 @@ __noreturn__ void main (void)
 
 	for (;;)
 	{
-		writeb (WPCS_DAC, 0x55);
+		for (val=0; val<0xff; val++)
+		{
+			writeb (WPCS_DAC, val);
+			noop ();
+			noop ();
+			noop ();
+			noop ();
+		}
+		for (val=0xff; val != 0; val--)
+		{
+			writeb (WPCS_DAC, val);
+			noop ();
+			noop ();
+			noop ();
+			noop ();
+		}
 	}
 }
 

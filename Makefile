@@ -331,11 +331,16 @@ MUX_OBJS := $(MUX_SRCS:.c=.o)
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
 PAGE_NUMBERS = 56 57 58 59 60 61
-
-PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
+ifeq ($(PLATFORM),wpcsound)
+BLANK_SIZE := 304
+else
+PAGE_SIZE = 16
+FIXED_PAGE_COUNT = 2
 NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
-NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS))))
-BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
+NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - $(FIXED_PAGE_COUNT) - $(NUM_PAGED_SECTIONS))))
+BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * $(PAGE_SIZE))))
+endif
+PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
 
 #
 # Memory Map
@@ -359,16 +364,21 @@ endef
 
 $(eval $(call AREA_SETUP, direct,    0x0004,   0x00FC))
 $(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
-ifdef CONFIG_GAME_ROM
+ifneq ($(PLATFORM),wpcsound)
 $(eval $(call AREA_SETUP, local,     0x1400,   0x0040))
 endif
 $(eval $(call AREA_SETUP, stack,     0x1600,   0x0200,  virtual))
-ifdef CONFIG_GAME_ROM
+ifeq ($(PLATFORM),wpcsound)
+$(eval $(call AREA_SETUP, paged,     0x4000,   0x8000,  virtual))
+$(eval $(call AREA_SETUP, sysrom,    0xC000,   0x3FF0,  virtual))
+else
 $(eval $(call AREA_SETUP, nvram,     0x1810,   0x07F0))
-endif
 $(eval $(call AREA_SETUP, paged,     0x4000,   0x4000,  virtual))
 $(eval $(call AREA_SETUP, sysrom,    0x8000,   0x7FF0,  virtual))
+endif
 $(eval $(call AREA_SETUP, vector,    0xFFF0,   0x0010,  virtual))
+
+SYSROM_SIZE := $(shell echo $$(($(AREASIZE_sysrom) + $(AREASIZE_vector))))
 
 MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
@@ -581,7 +591,7 @@ $(BLDDIR)/blankpage.bin: $(SR)
 
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR)
 	$(Q)echo "Checking for overflow..." && tools/mapcheck
-	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l 0x8000 -f 0xFF $<
+	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l $(SYSROM_SIZE) -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
@@ -679,14 +689,12 @@ $(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
 	for f in `echo $(PAGED_SECTIONS)`; \
 		do echo "-b $$f = $(AREA_paged)" >> $(LINKCMD); done ;\
 	echo "-b .text = $(AREA_sysrom)" >> $(LINKCMD) ;\
-	echo "-b vector = $(AREA_vector)" >> $(LINKCMD) ;\
 	echo "$(BLDDIR)/freewpc.o" >> $(LINKCMD) ;\
 	for f in `echo $(SYSTEM_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-v" >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_OBJS)`; do echo $$f >> $(LINKCMD); done ;\
 	echo "-o" >> $(LINKCMD) ;\
 	echo "-e" >> $(LINKCMD)
-
 
 #
 # General rule for how to build any assembler file.  This uses GCC
