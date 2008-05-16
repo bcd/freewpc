@@ -52,7 +52,6 @@ void exit (void)
 void wpcs_hardware_init (void)
 {
 	writeb (WPCS_ROM_BANK, 0x7D);
-	writeb (WPCS_HOST_OUTPUT, 0);
 }
 
 
@@ -62,12 +61,10 @@ __noreturn__ void main (void)
 
 	wpcs_hardware_init ();
 	VOIDCALL (host_init);
-	host_write (0x00);
 	VOIDCALL (volume_init);
-	host_write (0x10);
 	VOIDCALL (fm_init);
-	host_write (0x20);
 
+	enable_interrupts ();
 	for (;;)
 	{
 		for (val=0; val<0xff; val++)
