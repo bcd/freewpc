@@ -33,7 +33,6 @@ COMMON_SW_OBJS += common/eb.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/highscore.o)
 COMMON_SW_OBJS += common/inspector.o
 COMMON_SW_OBJS += common/knocker.o
-COMMON_SW_OBJS += common/onecoin.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/replay.o)
 COMMON_SW_OBJS += common/search.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/status.o)
