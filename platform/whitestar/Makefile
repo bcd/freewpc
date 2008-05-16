@@ -3,6 +3,7 @@
 P=platform/wpc
 
 CPU := m6809
+CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
 
 # Additional CFLAGS required on the WPC platform

@@ -29,9 +29,9 @@ CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
 # Which version of the 6809 compiler to use.
 GCC_VERSION ?= 4.2.1
 
-KERNEL_OBJS += $(C)/div10.o
-KERNEL_OBJS += $(C)/task.o
-KERNEL_OBJS += $(C)/vector.o
-KERNEL_OBJS += $(C)/malloc.o
+KERNEL_OBJS     += $(C)/vector.o
+KERNEL_OBJS     += $(C)/div10.o
 KERNEL_ASM_OBJS += $(C)/farcall.o
-KERNEL_ASM_OBJS += $(C)/task_6809.o
+KERNEL_OBJS     += $(if $(CONFIG_TASK), $(C)/task.o)
+KERNEL_ASM_OBJS += $(if $(CONFIG_TASK), $(C)/task_6809.o)
+KERNEL_OBJS     += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
