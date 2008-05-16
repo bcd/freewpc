@@ -144,4 +144,69 @@ hardware supported volume is. */
 
 #define FM_ADDR_RELEASE(dev,ch)  (0xE0 + 8 * (dev) + (ch))
 
+
+/* Inline Functions */
+
+
+/**
+ * Waits until the FM chip is ready to receive a new
+ * read/write operation.
+ */
+extern inline void fm_wait (void)
+{
+	while (readb (WPCS_FM_DATA) & 0x80);
+}
+
+
+extern inline void fm_write_inline (const U8 addr,
+	const U8 val, const U8 in_interrupt)
+{
+	if (!in_interrupt)
+		disable_interrupts ();
+
+	fm_wait ();
+	writeb (WPCS_FM_ADDR_STATUS, addr);
+	fm_wait ();
+	writeb (WPCS_FM_DATA, val);
+
+	if (!in_interrupt)
+		enable_interrupts ();
+}
+
+
+extern inline U8 fm_read_inline (const U8 addr, const U8 in_interrupt)
+{
+	U8 val;
+
+	if (!in_interrupt)
+		disable_interrupts ();
+
+	fm_wait ();
+	writeb (WPCS_FM_ADDR_STATUS, addr);
+	fm_wait ();
+	val = readb (WPCS_FM_DATA);
+
+	if (!in_interrupt)
+		enable_interrupts ();
+
+	return val;
+}
+
+
+/**
+ * Program the FM timer register to generate a periodic
+ * interrupt on the FIRQ.
+ *	This writes a value of 1014 to the TIMER_A1 register,
+ * which causes about 5500 FIRQs/sec (5.5Khz).  This
+ * means that FIRQ is asserted about 6 times per
+ * millisecond, or once every 350 CPU clock cycles.
+ */
+extern inline void fm_timer_restart (const U8 in_interrupt)
+{
+	fm_write_inline (FM_ADDR_CLOCK_CTRL,
+		FM_TIMER_FRESETA + FM_TIMER_IRQENA + FM_TIMER_LOADA,
+		in_interrupt);
+}
+
+
 #endif /* _WPCSOUND_H */

@@ -52,7 +52,7 @@ __interrupt__ void wpcs_periodic_interrupt (void)
 	tick_count++;
 	host_send ();
 	host_write (0xF0);
-	fm_restart_timer ();
+	fm_timer_restart (1);
 
 	m6809_firq_restore_regs ();
 }
