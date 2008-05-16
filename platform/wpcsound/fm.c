@@ -42,7 +42,11 @@ U8 fm_read (U8 addr)
 void fm_restart_timer (void)
 {
 	/* Program the FM timer register to generate a periodic
-	interrupt on the FIRQ */
+	   interrupt on the FIRQ.
+		This writes a value of 1014 to the TIMER_A1 register,
+		which causes about 5500 FIRQs/sec (5.5Khz).  This
+		means that FIRQ is asserted about 6 times per
+		millisecond, or once every 350 CPU clock cycles. */
 	fm_write (FM_ADDR_CLOCK_A1, 0xFD);
 	fm_write (FM_ADDR_CLOCK_A2, 0x02);
 	fm_write (FM_ADDR_CLOCK_CTRL,

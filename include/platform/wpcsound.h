@@ -29,10 +29,23 @@
 #define WPCS_FM_ADDR_STATUS    (WPCS_IOBASE + 0x400)
 #define WPCS_FM_DATA           (WPCS_IOBASE + 0x401)
 #define WPCS_DAC               (WPCS_IOBASE + 0x800)
+
+/* Writing to this register sends 1 data bit to the CVSD.
+It is the LSB of the byte written.  The input latch
+must be enabled by writing to WPCS_CVSD_CLK first. */
 #define WPCS_CVSD_DATA         (WPCS_IOBASE + 0xC00)
+
+/* Read this register to get the last byte written by the host. */
 #define WPCS_HOST_INPUT        (WPCS_IOBASE + 0x1000)
+
+/* Opens the CVSD input latch, so that a new bit can be
+clocked in.  This must be written before writing WPCS_CVSD_DATA. */
 #define WPCS_CVSD_CLK          (WPCS_IOBASE + 0x1400)
+
+/* Write this register to adjust the volume after mixing. */
 #define WPCS_EPOT              (WPCS_IOBASE + 0x1800)
+
+/* Write this register to send a data byte back to the host. */
 #define WPCS_HOST_OUTPUT       (WPCS_IOBASE + 0x1C00)
 
 /* When writing to the e-pot, bit 1 must be set in order for
