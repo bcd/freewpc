@@ -32,6 +32,21 @@ __interrupt__ void wpcs_invalid_interrupt (void)
 }
 
 
+extern U8 bell_data[0x2800];
+
+U8 *dac_data;
+
+
+extern inline void dac_refresh (const U8 n)
+{
+	if (dac_data < bell_data + sizeof (bell_data))
+	{
+		writeb (WPCS_DAC, *dac_data);
+		dac_data++;
+	}
+}
+
+
 /**
  * Handles the periodic interrupt on the FIRQ.
  * This interrupt occurs at 5.5khz.
@@ -49,10 +64,14 @@ __interrupt__ void wpcs_periodic_interrupt (void)
 {
 	m6809_firq_save_regs ();
 
+	dac_refresh (0);
 	tick_count++;
 	host_send ();
+	dac_refresh (1);
 	host_write (0xF0);
+	dac_refresh (2);
 	fm_timer_restart (1);
+	dac_refresh (3);
 
 	m6809_firq_restore_regs ();
 }

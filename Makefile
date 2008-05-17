@@ -193,6 +193,7 @@ $(eval $(call include-tool,sched))
 $(eval $(call include-tool,fiftool))
 $(eval $(call include-tool,softscope))
 $(eval $(call include-tool,scope))
+$(eval $(call include-tool,bin2c))
 
 
 # Name of the blanker to use
@@ -550,6 +551,7 @@ $(TARGET_ROMPATH)/$(PINMAME_GAME_ROM) : $(BLDDIR)/$(GAME_ROM)
 #
 compile: $(BLDDIR)/$(GAME_ROM)
 
+.PHONY : $(BLDDIR)
 $(BLDDIR):
 	$(Q)echo "Making build directory..." && mkdir -p $(BLDDIR)
 
@@ -562,7 +564,7 @@ post_compile :
 # to that expected for the particular machine.
 #
 ifndef REMOTE_PATH
-$(BLDDIR)/$(GAME_ROM) : $(BLDDIR) $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
+$(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
 	$(Q)echo Padding ... && \
 		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
 	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u

@@ -24,5 +24,6 @@ EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPCSOUND
 
 KERNEL_OBJS += $(P)/main.o $(P)/interrupt.o $(P)/volume.o $(P)/host.o \
 	$(P)/dac.o $(P)/cvsd.o $(P)/fm.o # kernel/printf.o
+KERNEL_OBJS += $(P)/bell.o
 KERNEL_ASM_OBJS += $(P)/start.o
 

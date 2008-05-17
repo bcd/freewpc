@@ -154,7 +154,10 @@ hardware supported volume is. */
  */
 extern inline void fm_wait (void)
 {
-	while (readb (WPCS_FM_DATA) & 0x80);
+	__asm__ volatile (
+		"lda\t" C_STRING(WPCS_FM_DATA) "\n"
+		"\tbmi\t.-3"
+	);
 }
 
 

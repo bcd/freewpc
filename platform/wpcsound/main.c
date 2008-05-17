@@ -55,6 +55,10 @@ void wpcs_hardware_init (void)
 }
 
 
+extern U8 bell_data[];
+extern U8 *dac_data;
+
+
 __noreturn__ void main (void)
 {
 	U8 val;
@@ -64,9 +68,13 @@ __noreturn__ void main (void)
 	VOIDCALL (volume_init);
 	VOIDCALL (fm_init);
 
+	dac_data = bell_data;
+
 	enable_interrupts ();
+
 	for (;;)
 	{
+#if 0
 		for (val=0; val<0xff; val++)
 		{
 			writeb (WPCS_DAC, val);
@@ -83,6 +91,7 @@ __noreturn__ void main (void)
 			noop ();
 			noop ();
 		}
+#endif
 	}
 }
 
