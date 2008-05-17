@@ -579,6 +579,5 @@ Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)
 [fonts]
 mono9:
 times10:
-helv8:
 misctype:
 fixed12:
