@@ -34,6 +34,16 @@ __interrupt__ void wpcs_invalid_interrupt (void)
 
 /**
  * Handles the periodic interrupt on the FIRQ.
+ * This interrupt occurs at 5.5khz.
+ *
+ * 8-bit DAC samples are encoded at 11khz and thus 2 must be
+ * sent.
+ *
+ * 1-bit CVSD samples are encoded at 22khz and thus 4 must be
+ * sent.
+ *
+ * This routine only has about 350 cycles to get the job done
+ * before another interrupt will occur.  Yikes!
  */
 __interrupt__ void wpcs_periodic_interrupt (void)
 {
@@ -42,7 +52,7 @@ __interrupt__ void wpcs_periodic_interrupt (void)
 	tick_count++;
 	host_send ();
 	host_write (0xF0);
-	fm_restart_timer ();
+	fm_timer_restart (1);
 
 	m6809_firq_restore_regs ();
 }

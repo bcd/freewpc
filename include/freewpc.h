@@ -141,6 +141,9 @@ extern U8 idle_ok;
 #include <env.h>
 #include <version.h>
 
+/* CPU specifics */
+#include <sys/irq.h>
+
 /* Platform specifics */
 #ifdef CONFIG_PLATFORM_WHITESTAR
 #include <platform/whitestar.h>
@@ -177,7 +180,6 @@ extern U8 idle_ok;
 #include <sys/dmd.h>
 #endif
 #include <sys/triac.h>
-#include <sys/irq.h>
 #include <sys/rtc.h>
 
 /* Common software structures */

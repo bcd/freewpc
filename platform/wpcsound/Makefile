@@ -15,6 +15,13 @@ INT_CFLAGS = -mint8
 CFLAGS += $(INT_CFLAGS) -mdirect -DCONFIG_PLATFORM_WPCSOUND -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPCSOUND
 
+# Rules for converting sound files into ROM
+%.dac : %.wav
+	sox $< -r 11050 -b $@
+
+%.cvs : %.wav
+	sox $< -r 11050 -b $@
+
 KERNEL_OBJS += $(P)/main.o $(P)/interrupt.o $(P)/volume.o $(P)/host.o \
 	$(P)/dac.o $(P)/cvsd.o $(P)/fm.o # kernel/printf.o
 KERNEL_ASM_OBJS += $(P)/start.o
