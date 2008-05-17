@@ -108,7 +108,10 @@ static void rtc_calc_day_of_week (void)
 	day_of_week	+= ((year % 4) ? 0 : 1);
 	day_of_week --;
 
-	/* The mod 7 is the hard part to do on the 6809.  */
+	/* The mod 7 is the hard part to do on the 6809.
+	 * The technique used here is to do repeated subtraction.
+	 * For values larger than 64, subtract 63 at a time to speed up
+	 * the computation. */
 #ifndef __m6809__
 	day_of_week %= 7;
 #else
