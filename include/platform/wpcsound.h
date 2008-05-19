@@ -58,6 +58,19 @@ hardware supported volume is. */
 #define EPOT_CLOCK 0x1
 #define EPOT_MAX 128
 
+/* FM chip frequency */
+
+/** The number of cycles/sec that the FM operates at */
+#define FM_HZ 3579545UL
+
+/** Generate the correct value to be written into a YM2151
+ * timer register in order to produce an interrupt N times
+ * per second.  M is the maximum allowed value of the
+ * timer: 1024 for timer A and 256 for timer B.
+ */
+#define FM_TIMER_FOR_HZ(M,n) ((M) - (FM_HZ / 64 / (n)))
+
+
 /* FM chip (Yamaha 2151) registers */
 
 #define DEV_MOD1 0
@@ -193,6 +206,13 @@ extern inline U8 fm_read_inline (const U8 addr, const U8 in_interrupt)
 		enable_interrupts ();
 
 	return val;
+}
+
+
+extern inline void fm_timera_config (const U16 hz)
+{
+	fm_write_inline (FM_ADDR_CLOCK_A1, FM_TIMER_FOR_HZ(1024,hz) >> 2, 0);
+	fm_write_inline (FM_ADDR_CLOCK_A2, FM_TIMER_FOR_HZ(1024,hz) & 0x03, 0);
 }
 
 
