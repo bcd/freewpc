@@ -37,3 +37,13 @@ void fm_init (void)
 	fm_timer_restart (1);
 }
 
+void fm_test5500 (void)
+{
+	fm_timera_config (5500);
+}
+
+void fm_test11000 (void)
+{
+	fm_timera_config (11000);
+}
+

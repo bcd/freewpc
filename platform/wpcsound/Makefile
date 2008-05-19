@@ -16,14 +16,27 @@ CFLAGS += $(INT_CFLAGS) -mdirect -DCONFIG_PLATFORM_WPCSOUND -fno-builtin -DCONFI
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPCSOUND
 
 # Rules for converting sound files into ROM
-%.dac : %.wav
-	sox $< -r 11050 -b $@
+# Output options
+SOX_DACOPTS := -b -c 1 -u -r 11025
+SOX_CVSDOPTS := -b -c 1 -u -r 22050
 
-%.cvs : %.wav
-	sox $< -r 11050 -b $@
+DAC_CLIPS = $(DAC_OBJS:.o=.dac)
+DAC_SRCS = $(DAC_OBJS:.o=.c)
+
+$(DAC_SRCS) : %.c : %.dac
+	$(BIN2C) $< $@
+
+$(DAC_CLIPS) : %.dac : %.wav
+	sox $< $(SOX_DACOPTS) $@
+
+$(CVSD_CLIPS) : %.cvs : %.wav
+	sox $< $(SOX_CVSDOPTS) $@
 
 KERNEL_OBJS += $(P)/main.o $(P)/interrupt.o $(P)/volume.o $(P)/host.o \
 	$(P)/dac.o $(P)/cvsd.o $(P)/fm.o # kernel/printf.o
-KERNEL_OBJS += $(P)/bell.o
+
+DAC_OBJS += $(P)/bell.o
+KERNEL_OBJS += $(DAC_OBJS)
+
 KERNEL_ASM_OBJS += $(P)/start.o
 
