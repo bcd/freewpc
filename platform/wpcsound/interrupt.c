@@ -32,17 +32,21 @@ __interrupt__ void wpcs_invalid_interrupt (void)
 }
 
 
-extern U8 bell_data[0x2800];
+extern U8 bell_data[0x2000];
 
 U8 *dac_data;
 
+U8 dac_flag;
+
+U8 count;
 
 extern inline void dac_refresh (const U8 n)
 {
-	if (dac_data < bell_data + sizeof (bell_data))
+	if (dac_flag)
 	{
-		writeb (WPCS_DAC, *dac_data);
-		dac_data++;
+		writeb (WPCS_DAC, *dac_data++);
+		if (n == 1 && dac_data == bell_data + sizeof (bell_data))
+			dac_flag = 0;
 	}
 }
 
@@ -64,14 +68,18 @@ __interrupt__ void wpcs_periodic_interrupt (void)
 {
 	m6809_firq_save_regs ();
 
-	dac_refresh (0);
+	fm_timer_restart (1);
+	//dac_refresh (0);
 	tick_count++;
 	host_send ();
-	dac_refresh (1);
-	host_write (0xF0);
-	dac_refresh (2);
-	fm_timer_restart (1);
-	dac_refresh (3);
+
+	if (count == 0)
+	{
+		dac_refresh (1);
+		count = 8;
+	}
+	else
+		count--;
 
 	m6809_firq_restore_regs ();
 }

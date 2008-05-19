@@ -57,11 +57,13 @@ void wpcs_hardware_init (void)
 
 extern U8 bell_data[];
 extern U8 *dac_data;
+extern U8 dac_flag;
 
 
 __noreturn__ void main (void)
 {
 	U8 val;
+	U16 count;
 
 	wpcs_hardware_init ();
 	VOIDCALL (host_init);
@@ -69,6 +71,22 @@ __noreturn__ void main (void)
 	VOIDCALL (fm_init);
 
 	dac_data = bell_data;
+	dac_flag = 1;
+
+	/* Wait for the host to be ready. */
+	for (count = 0; count < 0xFFF0; count++)
+	{
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+		noop ();
+	}
 
 	enable_interrupts ();
 

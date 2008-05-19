@@ -82,9 +82,9 @@ hardware supported volume is. */
 	#define FM_NOISE_ENABLE 0x80
 	#define FM_NOISE_FREQ_MASK 0x1F
 
-#define FM_ADDR_CLOCK_A1 0x11
-#define FM_ADDR_CLOCK_A2 0x12
-#define FM_ADDR_CLOCK_B 0x13
+#define FM_ADDR_CLOCK_A1 0x10
+#define FM_ADDR_CLOCK_A2 0x11
+#define FM_ADDR_CLOCK_B 0x12
 #define FM_ADDR_CLOCK_CTRL 0x14
 
 	/* Values for writing to the clock control register */

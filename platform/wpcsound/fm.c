@@ -22,8 +22,18 @@ __attribute__((noinline)) U8 fm_read (U8 addr)
 
 void fm_init (void)
 {
-	fm_write (FM_ADDR_CLOCK_A1, 0xFD);
-	fm_write (FM_ADDR_CLOCK_A2, 0x02);
-	fm_timer_restart (0);
+	U8 reg;
+
+	/* Initialize the FM chip.
+	 * Use the 'in_interrupt' version, since interrupts are now
+	 * disabled. */
+	for (reg=0; reg <= 0xFE; reg++)
+		fm_write_inline (reg, 0, 1);
+	fm_write_inline (0xFF, 0, 1);
+
+	fm_write_inline (FM_ADDR_CLOCK_CTRL, FM_TIMER_FRESETA + FM_TIMER_FRESETB, 1);
+	fm_write_inline (FM_ADDR_CLOCK_A1, 0xFD, 1);
+	fm_write_inline (FM_ADDR_CLOCK_A2, 0x02, 1);
+	fm_timer_restart (1);
 }
 

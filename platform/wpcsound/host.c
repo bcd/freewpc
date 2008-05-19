@@ -61,9 +61,7 @@ bool host_read_ready (void)
 
 void host_init (void)
 {
-	disable_firq ();
 	queue_init ((queue_t *)&host_write_queue);
 	queue_init ((queue_t *)&host_read_queue);
-	enable_firq ();
 }
 
