@@ -18,6 +18,7 @@ COMMON_BASIC_OBJS +=	common/music.o
 COMMON_BASIC_OBJS +=	common/optocheck.o
 COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), common/pic.o)
 COMMON_BASIC_OBJS +=	common/plunger.o
+COMMON_BASIC_OBJS += common/printer.o
 COMMON_BASIC_OBJS +=	common/reset.o
 COMMON_BASIC_OBJS +=	common/rtc.o
 COMMON_BASIC_OBJS +=	common/service.o

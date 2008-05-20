@@ -2428,6 +2428,35 @@ struct menu bookkeeping_menu = {
 
 /**********************************************************************/
 
+
+struct menu print_main_audits_item = {
+	.name = "MAIN AUDITS",
+	.flags = M_ITEM,
+};
+
+struct menu print_earnings_data_item = {
+	.name = "EARNINGS DATA",
+	.flags = M_ITEM,
+};
+
+
+
+struct menu *printouts_menu_items[] = {
+	&print_main_audits_item,
+	&print_earnings_data_item,
+	NULL,
+};
+
+
+struct menu printouts_menu = {
+	.name = "PRINTOUTS",
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = printouts_menu_items },
+};
+
+
+/**********************************************************************/
+
 struct menu standard_adjustments_menu = {
 	.name = "STANDARD ADJ.",
 	.flags = M_ITEM,
@@ -3382,6 +3411,7 @@ struct menu *main_menu_items[] = {
 	&adjustments_menu,
 	&test_menu,
 	&utilities_menu,
+	&printouts_menu,
 	&development_menu,
 	NULL,
 };
