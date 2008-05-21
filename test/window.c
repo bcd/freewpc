@@ -480,13 +480,13 @@ struct adjustment hstd_adjustments[] = {
 
 
 struct adjustment printer_adjustments[] = {
-	{ "COLUMN WIDTH", &integer_value, 72, NULL },
-	{ "LINES PER PAGE", &integer_value, 60, NULL },
-	{ "PAUSE EVERY PAGE", &yes_no_value, NO, NULL },
-	{ "PRINTER TYPE", &integer_value, 0, NULL },
-	{ "SERIAL BAUD RATE", &integer_value, 0, NULL },
-	{ "SERIAL D.T.R.", &integer_value, 0, NULL },
-	{ "AUTO PRINTOUT", &on_off_value, OFF, NULL },
+	{ "COLUMN WIDTH", &integer_value, 72, &printer_config.column_width },
+	{ "LINES PER PAGE", &integer_value, 60, &printer_config.lines_per_page },
+	{ "PAUSE EVERY PAGE", &yes_no_value, NO, &printer_config.pause_every_page },
+	{ "PRINTER TYPE", &integer_value, 0, &printer_config.printer_type },
+	{ "SERIAL BAUD RATE", &integer_value, 0, &printer_config.serial_baud_rate },
+	{ "SERIAL D.T.R.", &integer_value, 0, &printer_config.serial_dtr },
+	{ "AUTO PRINTOUT", &on_off_value, OFF, &printer_config.auto_printout },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -2428,22 +2428,42 @@ struct menu bookkeeping_menu = {
 
 /**********************************************************************/
 
+void printout_thread (void)
+{
+	extern __common__ void print_all_audits (void);
+	print_all_audits ();
 
-struct menu print_main_audits_item = {
-	.name = "MAIN AUDITS",
-	.flags = M_ITEM,
+#if 0
+	task_setgid (0);
+	window_pop ();
+#endif
+	task_exit ();
+}
+
+
+void printout_draw (void)
+{
+	font_render_string_center (&font_mono5, 64, 16, "PRINTING...");
+	dmd_show_low ();
+}
+
+
+struct window_ops printout_window = {
+	DEFAULT_WINDOW,
+	.thread = printout_thread,
+	.draw = printout_draw,
 };
 
-struct menu print_earnings_data_item = {
-	.name = "EARNINGS DATA",
-	.flags = M_ITEM,
-};
 
+struct menu print_all_data_item = {
+	.name = "ALL DATA",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &printout_window, NULL } },
+};
 
 
 struct menu *printouts_menu_items[] = {
-	&print_main_audits_item,
-	&print_earnings_data_item,
+	&print_all_data_item,
 	NULL,
 };
 

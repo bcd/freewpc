@@ -151,6 +151,19 @@ typedef struct
 
 extern __nvram__ hstd_adj_t hstd_config;
 
+typedef struct
+{
+	adjval_t column_width;
+	adjval_t lines_per_page;
+	adjval_t pause_every_page;
+	adjval_t printer_type;
+	adjval_t serial_baud_rate;
+	adjval_t serial_dtr;
+	adjval_t auto_printout;
+} printer_adj_t;
+
+extern __nvram__ printer_adj_t printer_config;
+
 #ifdef MACHINE_FEATURE_ADJUSTMENTS
 extern __nvram__ feature_adj_t feature_config;
 #endif
