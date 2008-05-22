@@ -141,6 +141,30 @@ void buffer_write_c (struct buffer *buf, FILE *fp)
 	fprintf (fp, "\n");
 }
 
+
+/* Writes a 'joined bitmap' to an XBM. */
+void buffer_write_xbm (struct buffer *buf, const char *ident, FILE *fp)
+{
+	fprintf (fp, "#define %s_width %d\n", ident, buf->width);
+	fprintf (fp, "#define %s_height %d\n", ident, buf->height);
+	fprintf (fp, "const unsigned char %s[] = {\n", ident);
+	buffer_write_c (buf, fp);
+	fprintf (fp, "}\n");
+}
+
+
+void buffer_write_pgm (struct buffer *buf, const char *ident, FILE *fp)
+{
+	unsigned int row, col;
+	fprintf (fp, "P2\n");
+	fprintf (fp, "#\n");
+	fprintf (fp, "%d %d\n", buf->width, buf->height);
+	for (row=0; row < buf->height; row++)
+		for (col=0; col < buf->width; col++)
+			fprintf (fp, "%d\n", buf->data[bitmap_pos (buf, col, row)]);
+}
+
+
 void cdecl_begin (const char ident[], FILE *fp)
 {
 	fprintf (fp, "unsigned char %s[] = {", ident);
@@ -596,6 +620,20 @@ struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
 		{
 			U8 pixel = src->data[bitmap_pos(src, sx, sy)];
 			bitmap_draw_pixel (dst, sx + xoff, sy + yoff);
+		}
+	}
+}
+
+
+struct buffer *bitmap_tile (struct buffer *dst, struct buffer *src)
+{
+	unsigned int dx, dy;
+	for (dx = 0; dx < dst->width; dx++)
+	{
+		for (dy = 0; dy < dst->height; dy++)
+		{
+			U8 pixel = src->data[bitmap_pos(src, dx % src->width, dy % src->height)];
+			bitmap_draw_pixel (dst, dx, dy);
 		}
 	}
 }
