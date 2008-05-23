@@ -769,7 +769,7 @@ U8 linux_asic_read (U16 addr)
 static void linux_realtime_thread (void)
 {
 	struct timeval prev_time, curr_time;
-#define FIRQ_FREQ 16
+#define FIRQ_FREQ 8
 	static unsigned long next_firq_jiffies = FIRQ_FREQ;
 
 	/* TODO - boost priority of this process, so that it always
