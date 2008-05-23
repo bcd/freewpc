@@ -380,12 +380,13 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
-	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
+	{ "TICKET EXP. BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
+	{ "ALLOW CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -429,9 +430,12 @@ struct adjustment pricing_adjustments[] = {
 	{ "CENTER COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
 	{ "RIGHT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
 	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
-	{ "UNITS PER CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
-	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
+	{ "UNITS/CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
+	{ "UNITS/BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
+	{ "MINIMUM UNITS", &integer_value, 1, &price_config.min_units },
+	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
+	{ "COLLECTION TEXT", &integer_value, 1, &price_config.collection_text },
 	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
 	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
 	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
@@ -486,7 +490,9 @@ struct adjustment printer_adjustments[] = {
 	{ "PRINTER TYPE", &integer_value, 0, &printer_config.printer_type },
 	{ "SERIAL BAUD RATE", &integer_value, 0, &printer_config.serial_baud_rate },
 	{ "SERIAL D.T.R.", &integer_value, 0, &printer_config.serial_dtr },
+	{ "NSM STUB ONLY", &on_off_value, OFF, &printer_config.nsm_stub_only },
 	{ "AUTO PRINTOUT", &on_off_value, OFF, &printer_config.auto_printout },
+	{ "AUTO LINE FILL", &on_off_value, OFF, &printer_config.auto_line_fill },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -811,6 +817,8 @@ struct audit standard_audits[] = {
 	{ "NON-FATAL ERRORS", AUDIT_TYPE_INT, &system_audits.non_fatal_errors },
 	{ "LEFT FLIPPER", AUDIT_TYPE_INT, &system_audits.left_flippers },
 	{ "RIGHT FLIPPER", AUDIT_TYPE_INT, &system_audits.right_flippers },
+	{ "TROUGH RESCUE", AUDIT_TYPE_INT, &system_audits.trough_rescues },
+	{ "CHASE BALLS", AUDIT_TYPE_INT, &system_audits.chase_balls },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 

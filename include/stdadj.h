@@ -83,6 +83,7 @@ typedef struct
 	adjval_t ticket_board;
 	adjval_t no_bonus_flips;
 	adjval_t game_restart;
+	adjval_t allow_chase_ball;
 
 	adjval_t family_mode;
 #ifdef MACHINE_LAUNCH_SWITCH
@@ -159,7 +160,9 @@ typedef struct
 	adjval_t printer_type;
 	adjval_t serial_baud_rate;
 	adjval_t serial_dtr;
+	adjval_t nsm_stub_only;
 	adjval_t auto_printout;
+	adjval_t auto_line_fill;
 } printer_adj_t;
 
 extern __nvram__ printer_adj_t printer_config;
