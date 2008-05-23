@@ -141,7 +141,7 @@ define MACHINE_NUMBER 531
 84: Left Slingshot
 85: Right Slingshot
 86: Kickback
-87: uPPER Left Lane
+87: Upper Left Lane
 88: Upper Right Lane
 
 [drives]
