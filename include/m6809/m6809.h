@@ -228,14 +228,6 @@ extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 }
 
 
-
-extern inline void *memmove (void *s1, const void *s2, U16 n)
-{
-	/* TODO - memcpy isn't always going to work */
-	return memcpy (s1, s2, n);
-}
-
-
 extern inline bool memcmp (const void *s1, const void *s2, U16 n)
 {
 	if ((n % 2) == 0)
