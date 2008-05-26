@@ -116,7 +116,8 @@ static void rtc_calc_day_of_week (void)
 	day_of_week += (year / 4);
 	day_of_week += day_of_week_month_code[month-1];
 	day_of_week += day;
-	day_of_week	+= ((year % 4) ? 0 : 1);
+	if (!(year % 4) && month <= 2)
+		day_of_week--;
 	day_of_week --;
 
 	/* The mod 7 is the hard part to do on the 6809.
