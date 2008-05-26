@@ -22,6 +22,7 @@ STACK_BASE     = 6133
 
 ;;; Hardware registers needed
 WPC_DEBUG_PORT = 0x3D60
+WPCS_CONTROL_STATUS = 0x3FDD
 WPC_LEDS       = 0x3FF2
 WPC_ROM_BANK   = 0x3FFC
 WPC_RAM_LOCK   = 0x3FFD
@@ -29,7 +30,16 @@ WPC_RAM_LOCKSIZE = 0x3FFE
 WPC_WATCHDOG_REG = 0x3FFF
 WPC_RAM_UNLOCKED = 0xB4
 WPC_RAM_LOCK_2K = 0x1
-WPC_WATCHDOG_RESET = 6
+; Writing a 6 here does not turn off blanking.
+WPC_WATCHDOG_RESET = 0x06
+
+; Writing 0x16 here caused the sound board to bong almost immediately.
+; But the blanking LED did not go off.  The diag LED did not flicker,
+; so this apparently did not enable the IRQ.
+;WPC_WATCHDOG_RESET = 0x16
+
+; This had similar effect???
+;WPC_WATCHDOG_RESET = 0x86
 
 ;;; The ROM bank value for the lowest page this ROM uses
 ;;; TODO : this has to be configurable.
@@ -263,7 +273,7 @@ flash_loop:
 	eorb	#-128
 	stb	WPC_LEDS
 
-	ldy	#20000
+	ldy	#15000
 outer_flash_loop:        ; Hold the LED state
 	mul
 	mul
@@ -280,7 +290,7 @@ outer_flash_loop:        ; Hold the LED state
 	cmpu	#0
 	bne	flash_loop
 
-	ldy	#50000
+	ldy	#55000
 delay_loop:
 	; Use 'mul' instructions here because they are the
 	; shortest instructions that give the longest delay.
