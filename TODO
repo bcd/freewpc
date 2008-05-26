@@ -40,7 +40,6 @@ tunable.
 * Briefly ignore switch row/column on ground/short.
 * Sound board commands are all 8-bits, not 16-bit, on DCS.
 * Flashing lamps do not all flash in sync.
-* Time-of-day does not always print the right value/day of week.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
 * When changing adjustments, 'confirmation' screen does not work.
