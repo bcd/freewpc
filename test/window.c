@@ -2004,6 +2004,7 @@ void pic_test_draw (void)
 {
 	extern U8 pic_unlock_code[];
 	extern U8 pic_serial_number[];
+	extern __common__ void pic_render_serial_number (void);
 
 	window_title ("SECURITY TEST");
 
@@ -2011,7 +2012,7 @@ void pic_test_draw (void)
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
 	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
 
-	sprintf ("GAME NUMBER %3s", pic_serial_number);
+	pic_render_serial_number ();
 	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
 
 	dmd_show_low ();
@@ -2159,9 +2160,23 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
-void set_time_window_confirm (void)
+void set_time_init (void)
 {
-	confirm_enter ();
+	rtc_begin_modify ();
+}
+
+void set_time_exit (void)
+{
+	rtc_end_modify (0);
+}
+
+void set_time_thread (void)
+{
+	for (;;)
+	{
+		task_sleep_sec (5);
+		rtc_show_date_time ();
+	}
 }
 
 void set_time_window_draw (void)
@@ -2169,11 +2184,30 @@ void set_time_window_draw (void)
 	rtc_show_date_time ();
 }
 
+void set_time_up (void)
+{
+	rtc_modify_field (1);
+}
+
+void set_time_down (void)
+{
+	rtc_modify_field (0);
+}
+
+void set_time_enter (void)
+{
+	rtc_next_field ();
+}
 
 struct window_ops set_time_window = {
 	DEFAULT_WINDOW,
+	.init = set_time_init,
+	.exit = set_time_exit,
 	.draw = set_time_window_draw,
-	.enter = set_time_window_confirm,
+	.up = set_time_up,
+	.down = set_time_down,
+	.enter = set_time_enter,
+	.thread = set_time_thread,
 };
 
 struct menu set_time_item = {

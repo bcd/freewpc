@@ -25,6 +25,9 @@ __common__ void rtc_factory_reset (void);
 __common__ void rtc_render_date (void);
 __common__ void rtc_render_time (void);
 __common__ void rtc_show_date_time (void);
-__common__ void rtc_advance_day (void);
+__common__ void rtc_begin_modify (void);
+__common__ void rtc_end_modify (U8 cancel_flag);
+__common__ void rtc_next_field (void);
+__common__ void rtc_modify_field (U8 up_flag);
 
 #endif /* _RTC_H */
