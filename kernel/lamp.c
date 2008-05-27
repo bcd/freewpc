@@ -387,7 +387,9 @@ void lamp_update_task (void)
 
 /** Request that the lamps be updated.
  * Lamp update runs in a separate task context, and it
- * only works during a game. */
+ * only happens during a game.
+ * TODO : lamp update should not happen more than once
+ * per 500ms. */
 void lamp_update_request (void)
 {
 	if (in_live_game)
