@@ -22,12 +22,24 @@ STACK_BASE     = 6133
 
 ;;; Hardware registers needed
 WPC_DEBUG_PORT = 0x3D60
+WPCS_CONTROL_STATUS = 0x3FDD
 WPC_LEDS       = 0x3FF2
 WPC_ROM_BANK   = 0x3FFC
 WPC_RAM_LOCK   = 0x3FFD
 WPC_RAM_LOCKSIZE = 0x3FFE
+WPC_WATCHDOG_REG = 0x3FFF
 WPC_RAM_UNLOCKED = 0xB4
 WPC_RAM_LOCK_2K = 0x1
+; Writing a 6 here does not turn off blanking.
+WPC_WATCHDOG_RESET = 0x06
+
+; Writing 0x16 here caused the sound board to bong almost immediately.
+; But the blanking LED did not go off.  The diag LED did not flicker,
+; so this apparently did not enable the IRQ.
+;WPC_WATCHDOG_RESET = 0x16
+
+; This had similar effect???
+;WPC_WATCHDOG_RESET = 0x86
 
 ;;; The ROM bank value for the lowest page this ROM uses
 ;;; TODO : this has to be configurable.
@@ -111,6 +123,9 @@ rom_test:
 	; Initialize 16-bit checksum
 	ldd	#0
 
+	; Value to be periodically written to reset the watchdog
+	ldu	#WPC_WATCHDOG_RESET
+
 	; Compute checksum for fixed region (0x8000-0xFFFF).
 	; TODO - it is possible to do these checks like just
 	; any other bank - they can be mapped to 0x4000.
@@ -124,6 +139,11 @@ fixed_loop:
 	adca	#0
 	addb	3,x
 	adca	#0
+
+	exg	d,u
+	stb	WPC_WATCHDOG_REG
+	exg	d,u
+
 	leax	4,x
 	cmpx	#0x0000
 	bne	fixed_loop
@@ -138,10 +158,6 @@ paged_loop:
 	exg	d,y
 	stb	WPC_ROM_BANK
 	exg	d,y
-
-	; TODO - the hardware watchdog will expire if we don't
-	; reset it periodically here.  Doing it once every 16KB
-	; should be enough??? That's about every 60ms.
 
 	; Sum the entire bank (16KB).
 paged_inner_loop:
@@ -161,6 +177,11 @@ paged_inner_loop:
 	adca	#0
 	addb	7,x
 	adca	#0
+
+	exg	d,u
+	stb	WPC_WATCHDOG_REG
+	exg	d,u
+
 	leax	8,x
 	cmpx	#0x8000
 	bne	paged_inner_loop
@@ -188,34 +209,30 @@ ram_test:
 	clr	WPC_RAM_LOCK
 
 	ldx	#0
-	ldu	#0x55AA
-ram_loop1:
-	stu	,x
-	ldu	,x++
-	cmpu	#0x55AA
+ram_loop:
+	ldd	#0x55AA
+	std	,x
+	cmpd	,x
 	bne	ram_error
-	cmpx	#0x1700
-	blo	ram_loop1
 
-	ldx	#0
-	ldu	#0xAA55
-ram_loop2:
-	stu	,x
-	ldu	,x++
-	cmpu	#0xAA55
+	coma
+	comb
+	std	,x
+	cmpd	,x
 	bne	ram_error
-	cmpx	#0x1700
-	blo	ram_loop2
 
-	ldx	#0
-	ldu	#0
-ram_loop3:
-	stu	,x
-	ldu	,x++
-	cmpu	#0
+	clra
+	clrb
+	std	,x
+	cmpd	,x++
 	bne	ram_error
+
+	ldb	#WPC_WATCHDOG_RESET
+	stb	WPC_WATCHDOG_REG
+
+	/* TODO - upper limit hardcoded */
 	cmpx	#0x1700
-	blo	ram_loop3
+	blo	ram_loop
 	bra	asic_test
 
 ram_error:
@@ -256,9 +273,13 @@ flash_loop:
 	eorb	#-128
 	stb	WPC_LEDS
 
-	ldy	#0x6000
+	ldy	#15000
 outer_flash_loop:        ; Hold the LED state
 	mul
+	mul
+	mul
+	ldb	#WPC_WATCHDOG_RESET
+	stb	WPC_WATCHDOG_REG
 	ldb	WPC_LEDS
 	stb	WPC_LEDS
 	leay	-1,y
@@ -269,7 +290,7 @@ outer_flash_loop:        ; Hold the LED state
 	cmpu	#0
 	bne	flash_loop
 
-	ldy	#0xFFFF
+	ldy	#55000
 delay_loop:
 	; Use 'mul' instructions here because they are the
 	; shortest instructions that give the longest delay.
@@ -278,6 +299,8 @@ delay_loop:
 	mul
 	mul
 	mul
+	ldb	#WPC_WATCHDOG_RESET
+	stb	WPC_WATCHDOG_REG
 	leay	-1,y
 	cmpy	#0
 	bne	delay_loop

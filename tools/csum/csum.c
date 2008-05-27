@@ -92,7 +92,7 @@ main (int argc, char *argv[])
 				printf ("-v <version>      Sets desired version number\n");
 				printf ("-u                Update mode (default: read-only)\n");
 				printf ("-d                Disable existing checksum verification\n");
-				printf ("-s                Screw up the ROM so checksum will fail\n");
+				printf ("-s <delta>        Screw up the ROM so checksum will fail\n");
             exit (0);
             break;
             

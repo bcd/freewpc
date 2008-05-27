@@ -269,8 +269,14 @@ void pic_init (void)
 	for (i=0; i < 16; i++)
 	{
 		/* Read a single PIC register, and store it in the
-		 * correct slot. */
+		 * correct slot.  Note that some delay is required
+		 * before the result can be obtained. */
 		wpc_write_pic (WPC_PIC_SERIAL (i));
+		null_function ();
+		null_function ();
+		null_function ();
+		null_function ();
+		null_function ();
 		val = wpc_read_pic ();
 		ereg = pic_serial_map[i];
 		if (ereg)

@@ -64,7 +64,8 @@ typedef struct
 	audit_t lockup1_pid_lef; /* done */
 	audit_t nplayer_games[4];
 	audit_t exec_lockups;
-	audit_t trough_rescue;
+	audit_t trough_rescues;
+	audit_t chase_balls;
 } std_audits_t;
 
 extern __nvram__ std_audits_t system_audits;

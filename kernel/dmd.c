@@ -131,6 +131,7 @@ void dmd_init (void)
 	dmd_transition = NULL;
 	wpc_dmd_set_low_page (0);
 	wpc_dmd_set_high_page (0);
+	dmd_clean_page_low ();
 	wpc_dmd_set_visible_page (dmd_dark_page = dmd_bright_page = 0);
 	dmd_free_page = 2;
 

@@ -26,6 +26,10 @@ INT_CFLAGS = -mint8
 CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPC
 
+ifneq ($(REAL_HARDWARE),y)
+CFLAGS += -DCONFIG_PINMAME
+endif
+
 KERNEL_HW_OBJS += $(P)/main.o
 
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/bitmap.o)
