@@ -287,7 +287,7 @@ void browser_up (void)
 	sound_send (SND_TEST_UP);
 	menu_selection++;
 	if (menu_selection > browser_max)
-		menu_selection = 0;
+		menu_selection = browser_min;
 }
 
 void browser_down (void)
@@ -380,12 +380,13 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
-	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
+	{ "TICKET EXP. BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
+	{ "ALLOW CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -429,9 +430,12 @@ struct adjustment pricing_adjustments[] = {
 	{ "CENTER COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
 	{ "RIGHT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
 	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
-	{ "UNITS PER CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
-	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
+	{ "UNITS/CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
+	{ "UNITS/BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
+	{ "MINIMUM UNITS", &integer_value, 1, &price_config.min_units },
+	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
+	{ "COLLECTION TEXT", &integer_value, 1, &price_config.collection_text },
 	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
 	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
 	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
@@ -480,13 +484,15 @@ struct adjustment hstd_adjustments[] = {
 
 
 struct adjustment printer_adjustments[] = {
-	{ "COLUMN WIDTH", &integer_value, 72, NULL },
-	{ "LINES PER PAGE", &integer_value, 60, NULL },
-	{ "PAUSE EVERY PAGE", &yes_no_value, NO, NULL },
-	{ "PRINTER TYPE", &integer_value, 0, NULL },
-	{ "SERIAL BAUD RATE", &integer_value, 0, NULL },
-	{ "SERIAL D.T.R.", &integer_value, 0, NULL },
-	{ "AUTO PRINTOUT", &on_off_value, OFF, NULL },
+	{ "COLUMN WIDTH", &integer_value, 72, &printer_config.column_width },
+	{ "LINES PER PAGE", &integer_value, 60, &printer_config.lines_per_page },
+	{ "PAUSE EVERY PAGE", &yes_no_value, NO, &printer_config.pause_every_page },
+	{ "PRINTER TYPE", &integer_value, 0, &printer_config.printer_type },
+	{ "SERIAL BAUD RATE", &integer_value, 0, &printer_config.serial_baud_rate },
+	{ "SERIAL D.T.R.", &integer_value, 0, &printer_config.serial_dtr },
+	{ "NSM STUB ONLY", &on_off_value, OFF, &printer_config.nsm_stub_only },
+	{ "AUTO PRINTOUT", &on_off_value, OFF, &printer_config.auto_printout },
+	{ "AUTO LINE FILL", &on_off_value, OFF, &printer_config.auto_line_fill },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -782,7 +788,7 @@ struct audit earnings_audits[] = {
 	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
 	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
 	{ "RECENT PAID CREDITS", AUDIT_TYPE_INT, &system_audits.paid_credits },
-	{ "RECENT SERV. CREDITS", AUDIT_TYPE_INT, &system_audits.service_credits },
+	{ "RECENT SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -811,6 +817,8 @@ struct audit standard_audits[] = {
 	{ "NON-FATAL ERRORS", AUDIT_TYPE_INT, &system_audits.non_fatal_errors },
 	{ "LEFT FLIPPER", AUDIT_TYPE_INT, &system_audits.left_flippers },
 	{ "RIGHT FLIPPER", AUDIT_TYPE_INT, &system_audits.right_flippers },
+	{ "TROUGH RESCUE", AUDIT_TYPE_INT, &system_audits.trough_rescues },
+	{ "CHASE BALLS", AUDIT_TYPE_INT, &system_audits.chase_balls },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -1435,6 +1443,7 @@ struct menu dev_deff_stress_test_item = {
 void symbol_test_init (void)
 {
 	browser_init ();
+	browser_min = 1;
 	browser_max = BM_LAST-1;
 }
 
@@ -1445,7 +1454,7 @@ void symbol_test_draw (void)
 	browser_draw ();
 	coord.x = 96;
 	coord.y = 20;
-	bitmap_draw (coord, menu_selection+1);
+	bitmap_draw (coord, menu_selection);
 }
 
 struct window_ops symbol_test_window = {
@@ -2037,15 +2046,17 @@ void pic_test_draw (void)
 {
 	extern U8 pic_unlock_code[];
 	extern U8 pic_serial_number[];
+	extern __common__ void pic_render_serial_number (void);
 
 	window_title ("SECURITY TEST");
 
-	sprintf ("UNLOCK CODE %02X %02X %02X",
+	sprintf ("UNLOCK CODE: %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
 	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
 
-	sprintf ("GAME NUMBER %3s", pic_serial_number);
-	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 16, "SER. NO.:");
+	pic_render_serial_number ();
+	font_render_string_left (&font_var5, 40, 16, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -2192,9 +2203,23 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
-void set_time_window_confirm (void)
+void set_time_init (void)
 {
-	confirm_enter ();
+	rtc_begin_modify ();
+}
+
+void set_time_exit (void)
+{
+	rtc_end_modify (0);
+}
+
+void set_time_thread (void)
+{
+	for (;;)
+	{
+		task_sleep_sec (5);
+		rtc_show_date_time ();
+	}
 }
 
 void set_time_window_draw (void)
@@ -2202,11 +2227,30 @@ void set_time_window_draw (void)
 	rtc_show_date_time ();
 }
 
+void set_time_up (void)
+{
+	rtc_modify_field (1);
+}
+
+void set_time_down (void)
+{
+	rtc_modify_field (0);
+}
+
+void set_time_enter (void)
+{
+	rtc_next_field ();
+}
 
 struct window_ops set_time_window = {
 	DEFAULT_WINDOW,
+	.init = set_time_init,
+	.exit = set_time_exit,
 	.draw = set_time_window_draw,
-	.enter = set_time_window_confirm,
+	.up = set_time_up,
+	.down = set_time_down,
+	.enter = set_time_enter,
+	.thread = set_time_thread,
 };
 
 struct menu set_time_item = {
@@ -2458,6 +2502,55 @@ struct menu bookkeeping_menu = {
 	.flags = M_MENU | M_LETTER_PREFIX,
 	.var = { .submenus = audit_menu_items },
 };
+
+/**********************************************************************/
+
+void printout_thread (void)
+{
+	extern __common__ void print_all_audits (void);
+	print_all_audits ();
+
+#if 0
+	task_setgid (0);
+	window_pop ();
+#endif
+	task_exit ();
+}
+
+
+void printout_draw (void)
+{
+	font_render_string_center (&font_mono5, 64, 16, "PRINTING...");
+	dmd_show_low ();
+}
+
+
+struct window_ops printout_window = {
+	DEFAULT_WINDOW,
+	.thread = printout_thread,
+	.draw = printout_draw,
+};
+
+
+struct menu print_all_data_item = {
+	.name = "ALL DATA",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &printout_window, NULL } },
+};
+
+
+struct menu *printouts_menu_items[] = {
+	&print_all_data_item,
+	NULL,
+};
+
+
+struct menu printouts_menu = {
+	.name = "PRINTOUTS",
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = printouts_menu_items },
+};
+
 
 /**********************************************************************/
 
@@ -3415,6 +3508,7 @@ struct menu *main_menu_items[] = {
 	&adjustments_menu,
 	&test_menu,
 	&utilities_menu,
+	&printouts_menu,
 	&development_menu,
 	NULL,
 };
@@ -3532,13 +3626,14 @@ void sysinfo_system_version (void) {
 	sprintf ("%s %s.%s", C_STRING(USER_TAG),
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SYSTEM VER. %s.%s",
+	sprintf ("SYSTEM V%s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
 
-void sysinfo_compiler_version (void) {
-	sprintf ("GCC %s", C_STRING(GCC_VERSION));
+
+void sysinfo_compiler_version (void) { 
+	sprintf ("GCC6809 V%s", C_STRING(GCC_VERSION));
 }
 
 void sysinfo_stats1 (void) {

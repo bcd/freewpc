@@ -222,10 +222,10 @@ void two_color_flash_deff (void)
 	U8 n;
 
 	dmd_alloc_pair_clean ();
-	dmd_flip_low_high ();
+	font_render_string_center (&font_fixed6, 64, 21, "BRIGHT");
+	dmd_copy_low_to_high ();
 	font_render_string_center (&font_fixed6, 64, 9, "DARK");
-	dmd_flip_low_high ();
-	//font_render_string_center2 (&font_fixed6, 64, 21, "BRIGHT");
+
 	for (n = 0; n < 5; n++)
 	{
 		dmd_show2 ();

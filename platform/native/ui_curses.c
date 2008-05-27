@@ -21,6 +21,7 @@
 #include <ncurses.h>
 #include <string.h>
 #include <stdarg.h>
+#include <simulation.h>
 
 /* \file ui_curses.c
  * \brief A curses-based UI for the built-in WPC simulator.
@@ -75,8 +76,10 @@ static WINDOW * ui_window_create (int width, int height, int x, int y, const cha
 }
 
 
-void ui_write_debug (const char *format, va_list ap)
+void ui_write_debug (enum sim_log_class c, const char *format, va_list ap)
 {
+	if (c != SLC_DEBUG_PORT)
+		wprintw (debug_win, "[SIM] ");
 	vw_printw (debug_win, format, ap);
 	waddch (debug_win, '\n');
 	wrefresh (debug_win);
@@ -134,8 +137,15 @@ void ui_write_switch (int switchno, int on_flag)
 
 void ui_write_sound_call (unsigned int x)
 {
+	wprintw (sound_win, "%02X\n", x);
+	wrefresh (sound_win);
+}
+
+
+void ui_write_sound_reset (void)
+{
 	wmove (sound_win, 2, 3);
-	wprintw (sound_win, "%02X", x);
+	wprintw (sound_win, "  ");
 	wrefresh (sound_win);
 }
 
@@ -196,6 +206,7 @@ void ui_init (void)
 
 	triac_win = ui_window_create (12, 3, x, y, " Triacs ");
 	sound_win = ui_window_create (12, 6, x, y+4, " Sound ");
+	scrollok (sound_win, 1);
 	y += 10 + 1;
 	x = 0;
 

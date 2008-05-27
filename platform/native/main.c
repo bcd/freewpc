@@ -34,11 +34,11 @@
  */
 
 #include <termios.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <freewpc.h>
+#include "/usr/include/sys/time.h"
 #include <simulation.h>
 
 extern __noreturn__ void freewpc_init (void);
@@ -179,7 +179,7 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	va_start (ap, format);
 
 #ifdef CONFIG_UI
-	ui_write_debug (format, ap);
+	ui_write_debug (class, format, ap);
 
 	if (linux_output_stream == stdout)
 		ofp = NULL;
@@ -486,7 +486,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 							/* Where does the ball go from here?
 							Normally device kickout leads to unknown areas of
 							the playfield.
-							The shooter switch can be handled though. */
+							The shooter switch could be handled though. */
 							break;
 						}
 					}
@@ -533,6 +533,9 @@ void sim_switch_effects (int swno)
 
 static void wpc_sound_reset (void)
 {
+#ifdef CONFIG_UI
+	ui_write_sound_reset ();
+#endif
 }
 
 
@@ -657,8 +660,9 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPCS_DATA:
 #ifdef CONFIG_UI
 			ui_write_sound_call (val);
-#endif
+#else
 			simlog (SLC_SOUNDCALL, "%02X", val);
+#endif
 			break;
 
 		case WPCS_CONTROL_STATUS:
@@ -765,7 +769,7 @@ U8 linux_asic_read (U16 addr)
 static void linux_realtime_thread (void)
 {
 	struct timeval prev_time, curr_time;
-#define FIRQ_FREQ 16
+#define FIRQ_FREQ 8
 	static unsigned long next_firq_jiffies = FIRQ_FREQ;
 
 	/* TODO - boost priority of this process, so that it always
@@ -898,13 +902,16 @@ static void linux_interface_thread (void)
 	{
 		*inbuf = linux_interface_readchar ();
 
+		/* If switch simulation is turned off, then keystrokes
+		are fed directly into the runtime debugger. */
 		if (simulator_keys == 0)
 		{
+			/* Except tilde turns it off as usual. */
 			if (*inbuf == '`')
 				simulator_keys ^= 1;
-			else if ((simulated_orkin_control_port & 0x2) == 0)
+			else if ((simulated_orkin_control_port & WPC_DEBUG_READ_READY) == 0)
 			{
-				simulated_orkin_control_port |= 0x2;
+				simulated_orkin_control_port |= WPC_DEBUG_READ_READY;
 				simulated_orkin_data_port = *inbuf;
 			}
 			continue;
@@ -916,24 +923,29 @@ static void linux_interface_thread (void)
 			case '\n':
 				break;
 
-			case '\t':
+			case ':':
 			{
 				/* Read and execute a script command */
 				char cmd[128];
 				char *p = cmd;
 
+				simlog (SLC_DEBUG, "Script mode enabled.");
 				for (;;)
 				{
 					*p = linux_interface_readchar ();
-					if (*p == '\t')
-						break;
-					if ((*p == '\r') || (*p == '\n'))
+					if (*p == '\x1B')
 					{
-						*p = '\0';
-						simlog (SLC_DEBUG, "exec script: '%s'\n",  cmd);
+						simlog (SLC_DEBUG, "Script mode aborted.");
 						break;
 					}
-					simlog (SLC_DEBUG, "script char: '%c'\n", *p);
+					else if ((*p == '\r') || (*p == '\n'))
+					{
+						*p = '\0';
+						simlog (SLC_DEBUG, "Exec script '%s'",  cmd);
+						/* TODO */
+						break;
+					}
+					simlog (SLC_DEBUG, "'%c'", *p);
 					p++;
 				}
 				break;
@@ -954,6 +966,10 @@ static void linux_interface_thread (void)
 				break;
 
 			case '`':
+				/* The tilde toggles between keystrokes being treated as switches,
+				and as input into the runtime debugger. */
+				simlog (SLC_DEBUG, "Simulator switches are %s\n",
+					simulator_keys ? "enabled" : "disabled");
 				simulator_keys ^= 1;
 				break;
 				

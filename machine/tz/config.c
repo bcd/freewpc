@@ -28,9 +28,7 @@
  * Machine-specific miscellaneous functions.
  */
 
-#ifdef CONFIG_TIMED_GAME
 U8 faster_quote_given;
-#endif
 
 const audio_track_t bonus_music_track = {
 	.prio = PRI_BONUS,
@@ -58,9 +56,7 @@ void replay_code_to_score (score_t s, U8 val)
 
 CALLSET_ENTRY (tz, start_ball)
 {
-#ifdef CONFIG_TIMED_GAME
 	faster_quote_given = 0;
-#endif
 }
 
 
@@ -106,7 +102,6 @@ CALLSET_ENTRY (tz, start_without_credits)
 
 CALLSET_ENTRY (tz, timed_game_tick)
 {
-#ifdef CONFIG_TIMED_GAME
 	if (!in_live_game || in_bonus)
 		return;
 	switch (timed_game_timer)
@@ -123,6 +118,5 @@ CALLSET_ENTRY (tz, timed_game_tick)
 		case 1: sound_send (SND_ONE); break;
 		default: break;
 	}
-#endif
 }
 

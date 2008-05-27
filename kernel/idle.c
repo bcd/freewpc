@@ -20,6 +20,8 @@ U8 idle_100ms_expire_time;
 
 U8 idle_second_timer;
 
+U8 idle_10second_timer;
+
 
 /** Increment the number of idle ticks, every 8ms. */
 void idle_rtt (void)
@@ -56,6 +58,14 @@ void do_idle (void)
 		{
 			idle_second_timer -= 10;
 			callset_invoke (idle_every_second);
+
+			/* Throw the 10 second event if that has elapsed */
+			idle_10second_timer++;
+			if (idle_10second_timer >= 10)
+			{
+				idle_10second_timer -= 10;
+				callset_invoke (idle_every_ten_seconds);
+			}
 		}
 	}
 }
@@ -67,4 +77,5 @@ CALLSET_ENTRY (idle, init)
 	idle_100ms_expire_time = 12;
 	idle_100ms_timer = 0;
 	idle_second_timer = 0;
+	idle_10second_timer = 0;
 }
