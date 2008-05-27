@@ -46,7 +46,6 @@ tunable.
 * Factory defaults should be different per country code.
 * Switch levels/edges tests do not work.
 * Eliminate deff_wait_for_other().
-* Remove memmove() completely as it does not work as expected.
 * Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
 * bit_test_all_on() isn't right
@@ -73,7 +72,6 @@ Nice to Have
 
 
 Real Hardware Issues
-* Time of day is not set and cannot be changed.
 * Colors are different from emulation.
 * PIC serial number decoding does not seem to be correct.
 
