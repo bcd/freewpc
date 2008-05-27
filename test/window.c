@@ -287,7 +287,7 @@ void browser_up (void)
 	sound_send (SND_TEST_UP);
 	menu_selection++;
 	if (menu_selection > browser_max)
-		menu_selection = 0;
+		menu_selection = browser_min;
 }
 
 void browser_down (void)
@@ -782,7 +782,7 @@ struct audit earnings_audits[] = {
 	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
 	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
 	{ "RECENT PAID CREDITS", AUDIT_TYPE_INT, &system_audits.paid_credits },
-	{ "RECENT SERV. CREDITS", AUDIT_TYPE_INT, &system_audits.service_credits },
+	{ "RECENT SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -1402,6 +1402,7 @@ struct menu dev_deff_stress_test_item = {
 void symbol_test_init (void)
 {
 	browser_init ();
+	browser_min = 1;
 	browser_max = BM_LAST-1;
 }
 
@@ -1412,7 +1413,7 @@ void symbol_test_draw (void)
 	browser_draw ();
 	coord.x = 96;
 	coord.y = 20;
-	bitmap_draw (coord, menu_selection+1);
+	bitmap_draw (coord, menu_selection);
 }
 
 struct window_ops symbol_test_window = {
@@ -2008,12 +2009,13 @@ void pic_test_draw (void)
 
 	window_title ("SECURITY TEST");
 
-	sprintf ("UNLOCK CODE %02X %02X %02X",
+	sprintf ("UNLOCK CODE: %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
 	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
 
+	font_render_string_left (&font_var5, 1, 16, "SER. NO.:");
 	pic_render_serial_number ();
-	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
+	font_render_string_left (&font_var5, 40, 16, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -3533,13 +3535,14 @@ void sysinfo_system_version (void) {
 	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SYSTEM VER. %s.%s",
+	sprintf ("SYSTEM V%s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
 
+
 void sysinfo_compiler_version (void) { 
-	sprintf ("GCC %s", C_STRING(GCC_VERSION));
+	sprintf ("GCC6809 V%s", C_STRING(GCC_VERSION));
 }
 
 void sysinfo_stats1 (void) {
