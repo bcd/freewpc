@@ -319,7 +319,7 @@ static void deff_entry_start (deff_entry_t *entry)
 				deff_entry_free (oldentry);
 			}
 		}
-		deff_debug ("Adding deff %d to runqueue now\n", dn);
+		deff_debug ("Adding deff %d to runqueue now\n", entry->id);
 		deff_enqueue (&deff_runqueue, entry);
 		deff_start_task (&deff_table[entry->id]);
 	}
