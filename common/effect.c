@@ -62,15 +62,18 @@ void draw_volume_bar (U8 n)
 {
 	U8 *base = dmd_low_buffer + 22 * DMD_BYTE_WIDTH + 4;
 	U8 val = 0x55;
+	U8 h;
 	static const U8 volume_bar_data[] = { 0x0, 0x1, 0x5, 0x15, 0x55 };
 	while (n >= 4)
 	{
-		base[0] = base[1 * DMD_BYTE_WIDTH] = base[2 * DMD_BYTE_WIDTH] = val;
+		for (h=0; h < 8; h++)
+			base[h * DMD_BYTE_WIDTH] = val;
 		base++;
 		n -= 4;
 	}
 	val = volume_bar_data[n];
-	base[0] = base[1 * DMD_BYTE_WIDTH] = base[2 * DMD_BYTE_WIDTH] = val;
+	for (h=0; h < 8; h++)
+		base[h * DMD_BYTE_WIDTH] = val;
 }
 
 

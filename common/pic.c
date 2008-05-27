@@ -29,6 +29,7 @@
 #define pic_debug(rest...)
 
 
+/** For running this natively on an Intel x86 */
 #ifdef CONFIG_LITTLE_ENDIAN
 #define POS_CONVERT(pos) (3-(pos))
 #else
@@ -185,7 +186,7 @@ void pic_strip_digits (U32 reg, struct pic_strip_info *info)
 }
 
 
-/** Return the game number as stored in the PIC. */
+/** Return the game number as stored in the PIC as a decimal value. */
 U16 pic_read_game_number (void)
 {
 	U16 game_number;
@@ -209,8 +210,8 @@ void pic_compute_unlock_code (void)
 
 	reg = pic_read_game_number ();
 
-	reg = ((reg >> 8) * (0x100 * pic_serial_number[14] + pic_serial_number[16] + 0x3030)) +
-		((reg & 0xFF) * (0x100 * pic_serial_number[15] + pic_serial_number[14] + 0x3030));
+	reg = ((reg >> 8) * (0x100UL * pic_serial_number[14] + pic_serial_number[16])) +
+		((reg & 0xFF) * (0x100UL * pic_serial_number[15] + pic_serial_number[14]));
 
 	pic_unlock_code[0] = (reg >> 16) & 0xFF;
 	pic_unlock_code[1] = (reg >> 8) & 0xFF;
@@ -268,8 +269,14 @@ void pic_init (void)
 	for (i=0; i < 16; i++)
 	{
 		/* Read a single PIC register, and store it in the
-		 * correct slot. */
+		 * correct slot.  Note that some delay is required
+		 * before the result can be obtained. */
 		wpc_write_pic (WPC_PIC_SERIAL (i));
+		null_function ();
+		null_function ();
+		null_function ();
+		null_function ();
+		null_function ();
 		val = wpc_read_pic ();
 		ereg = pic_serial_map[i];
 		if (ereg)
@@ -317,9 +324,13 @@ void pic_init (void)
 }
 
 
-/** Render the serial number read from the PIC for display. */
+/** Render the serial number read from the PIC for display.
+ * Note that the last 3 digits of the serial number are
+ * never displayed normally, as this breaks the security
+ * feature. */
 void pic_render_serial_number (void)
 {
-	sprintf ("%3s %6s %5s", pic_serial_number, pic_serial_number+3, pic_serial_number+9);
+	sprintf ("%3s %6s %5s", pic_serial_number, pic_serial_number+3,
+		pic_serial_number+9);
 }
 

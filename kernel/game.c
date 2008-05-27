@@ -289,11 +289,6 @@ void end_ball (void)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
 		}
-
-		if (price_config.one_coin_buyin == YES)
-		{
-			SECTION_VOIDCALL (__common__, onecoin_buyin_offer);
-		}
 	}
 
 	/* Advance to the next player in a multiplayer game.

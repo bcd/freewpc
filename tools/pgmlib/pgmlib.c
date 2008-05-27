@@ -868,37 +868,6 @@ pgm_write_xbm (PGM *pgm, const char *filename, const char *name, int plane)
 }
 
 
-/** Main function for PGM library programs. */
 #ifndef NO_MAIN
-int
-main (int argc, char *argv[])
-{
-	if (argv[1])
-	{
-		char *arg = argv[1];
-		while (*arg != '\0')
-		{
-			switch (*arg++)
-			{
-				case 'd':
-					opt_debug = 1;
-					break;
-
-				case 'q':
-					opt_verbose = 0;
-					break;
-
-				case 'c':
-					opt_compress = 1;
-					break;
-			}
-		}
-	}
-
-	/* Call the user's machgen() routine. */
-	machgen ();
-
-	pgm_finish_output_file ();
-	exit (0);
-}
+#error "standalone binary for pgmlib no longer supported"
 #endif /* NO_MAIN */

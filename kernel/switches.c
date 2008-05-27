@@ -127,12 +127,13 @@ void switch_short_detect (void)
 }
 
 
-extern inline void switch_rtt_common (void)
+/* Before any switch data can be accessed on a WPC-S
+ * or WPC95 machine, we need to poll the PIC and see
+ * if the unlock code must be sent to it.   On pre-
+ * security games, this function is a no-op. */
+static __attribute__((noinline)) void switch_refresh_pic (void)
 {
 #if (MACHINE_PIC == 1)
-	/* Before any switch data can be accessed on a WPC-S
-	 * or WPC95 machine, we need to poll the PIC and see
-	 * if the unlock code must be sent to it. */
 	U8 unlocked;
 
 	/* Read the status to see if the matrix is still unlocked. */
@@ -249,7 +250,8 @@ bool switch_poll_logical (const switchnum_t sw)
 
 void switch_rtt_0 (void)
 {
-	switch_rtt_common ();
+	/* We check/refresh the PIC once per 4ms. */
+	switch_refresh_pic ();
 	switch_rowpoll (0);
 	switch_rowpoll (1);
 	switch_rowpoll (2);
