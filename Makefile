@@ -228,7 +228,7 @@ EVENT_OBJS = $(BLDDIR)/callset.o
 
 TEST_OBJS = test/window.o
 
-TEST2_OBJS = test/format.o test/preset.o
+TEST2_OBJS = test/format.o test/preset.o test/swtest.o
 
 FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
 
