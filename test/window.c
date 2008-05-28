@@ -226,6 +226,11 @@ void window_title (const char *title)
 	font_render_string_center (&font_mono5, 64, 2, title);
 }
 
+void print_row_center (font_t *f, U8 row)
+{
+	font_render_string_center (f, 64, row, sprintf_buffer);
+}
+
 /***************************************************/
 
 extern struct menu main_menu;
@@ -566,7 +571,7 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 			task_sleep (TIME_16MS);
 			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
 			far_call_pointer (*adj_lookup->values->render, TEST2_PAGE, value);
-			font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
+			print_row_center (&font_mono5, 24);
 			return;
 		}
 		adj_lookup++;
@@ -601,7 +606,7 @@ void adj_browser_draw (void)
 	window_stop_thread ();
 
 	sprintf ("%d. %s", menu_selection+1, ad->name);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	if (ad->nvram == NULL)
 	{
@@ -847,7 +852,7 @@ void audit_browser_draw (void)
 	struct audit *aud = browser_audits + menu_selection;
 
 	sprintf ("%d. %s", menu_selection+1, aud->name);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	if (aud->nvram)
 	{
@@ -1184,7 +1189,7 @@ void font_test_draw (void)
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
 
 	sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
-	font_render_string_center (font, 64, 20, sprintf_buffer);
+	print_row_center (font, 20);
 	dmd_show_low ();
 }
 
@@ -1263,7 +1268,7 @@ void deff_leff_thread (void)
 				{
 					window_redraw ();
 					sprintf_far_string (names_of_deffs + menu_selection);
-					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+					print_row_center (&font_var5, 12);
 					browser_print_operation ("STOPPED");
 				}
 			}
@@ -1271,7 +1276,7 @@ void deff_leff_thread (void)
 			{
 				window_redraw ();
 				sprintf_far_string (names_of_leffs + menu_selection);
-				font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+				print_row_center (&font_var5, 12);
 				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
@@ -1458,10 +1463,10 @@ void lamplist_draw (void)
 {
 	browser_draw ();
 	sprintf_far_string (names_of_lamplists + menu_selection);
-	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+	print_row_center (&font_var5, 12);
 
 	sprintf ("SPEED %d", lamplist_update_speed);
-	font_render_string_center (&font_var5, 46, 21, sprintf_buffer);
+	print_row_center (&font_var5, 21);
 
 	switch (lamplist_update_mode)
 	{
@@ -1568,7 +1573,7 @@ void dev_balldev_test_draw (void)
 	if (likely (dev && dev->props))
 	{
 		sprintf ("DEV %d. %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_var5, 64, 2, sprintf_buffer);
+		print_row_center (&font_var5, 2);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
 		font_render_string (&font_var5, 4, 7, sprintf_buffer);
@@ -1920,7 +1925,7 @@ void sched_test_draw (void)
 {
 	window_title ("SCHEDULER TEST");
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
-	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
+	print_row_center (&font_var5, 10);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
 	dmd_show_low ();
 }
@@ -2012,7 +2017,6 @@ struct menu score_test_item = {
 void pic_test_draw (void)
 {
 	extern U8 pic_unlock_code[];
-	extern U8 pic_serial_number[];
 	extern __common__ void pic_render_serial_number (void);
 
 	window_title ("SECURITY TEST");
@@ -2042,6 +2046,42 @@ struct menu pic_test_item = {
 
 /**********************************************************************/
 
+void asic_3fff_thread (void)
+{
+	U8 writeval = 0x96;
+	U8 last_readval = 0;
+
+	for (;;)
+	{
+		U8 readval = readb (WPC_ZEROCROSS_IRQ_CLEAR);
+		U8 readval2 = readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR);
+
+		dmd_alloc_low_clean ();
+		sprintf ("READ IRQ %02X", readval);
+		font_render_string_left (&font_mono5, 32, 7, sprintf_buffer);
+		sprintf ("READ FIRQ %02X", readval2);
+		font_render_string_left (&font_mono5, 32, 15, sprintf_buffer);
+		sprintf ("WRITE IRQ %02X", writeval);
+		font_render_string_left (&font_mono5, 32, 23, sprintf_buffer);
+		dmd_show_low ();
+		last_readval = readval;
+		task_sleep (TIME_100MS);
+	}
+}
+
+struct window_ops asic_3fff_window = {
+	DEFAULT_WINDOW,
+	.thread = asic_3fff_thread,
+};
+
+struct menu asic_3fff_item = {
+	.name = "ASIC 3FFF TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &asic_3fff_window, NULL } },
+};
+
+/**********************************************************************/
+
 struct menu *dev_menu_items[] = {
 #if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
 	&dev_font_test_item,
@@ -2063,6 +2103,7 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
+	&asic_3fff_item,
 	NULL,
 };
 
@@ -2333,7 +2374,7 @@ void presets_enter (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
 	preset_render_name (menu_selection);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	print_row_center (&font_mono5, 16);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
@@ -2570,44 +2611,13 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
-void switch_matrix_draw (void)
-{
-	U8 row, col;
-
-	for (row=0; row < 8; row++)
-	{
-		for (col=0; col < 8; col++)
-		{
-			U8 sw = MAKE_SWITCH (col+1,row+1);
-#if 0 /* whether or not it is an opto isn't important now */
-			bool opto_p = switch_is_opto (sw);
-#endif
-			bool state_p = switch_poll (sw);
-			register U8 *dmd = dmd_low_buffer +
-				((U16)row << 6) + (col >> 1);
-			U8 mask = (col & 1) ? 0x0E : 0xE0;
-
-			/* TODO : use bitmap_draw for these */
-			if (state_p)
-			{
-				dmd[0 * DMD_BYTE_WIDTH] |= mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
-				dmd[2 * DMD_BYTE_WIDTH] |= mask;
-			}
-			else
-			{
-				dmd[0 * DMD_BYTE_WIDTH] &= ~mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
-				dmd[2 * DMD_BYTE_WIDTH] &= ~mask;
-			}
-		}
-	}
-}
-
+extern __test2__ void switch_matrix_draw (void);
+extern __test2__ void switch_edges_update (void);
+extern __test2__ void switch_levels_update (void);
 
 void switch_window_title (const char *title)
 {
-	font_render_string_center (&font_mono5, 80, 4, title);
+	font_render_string_center (&font_mono5, 80, 3, title);
 }
 
 
@@ -2622,18 +2632,8 @@ void switch_edges_thread (void)
 {
 	for (;;)
 	{
-		/* TODO : here's what needs to happen.
-		We begin by drawing the switch matrix normally, then we
-		take a snapshot of raw switches.  Every 16ms, we do
-		a compare of the current raw switches vs. our snapshot.
-		If the same, nothing to be done.  If different, save
-		current as the new snapshot and redraw the switch matrix.
-		Even better, we could only redraw the columns that changed.
-		Also show the transition(s) that just occurred.
-		(For switch levels, iterate through the active switches
-		accounting for backwards optos continuously.) */
+		switch_edges_update ();
 		task_sleep (TIME_100MS);
-		switch_matrix_draw ();
 	}
 }
 
@@ -2659,10 +2659,20 @@ void switch_levels_draw (void)
 	dmd_show_low ();
 }
 
+void switch_levels_thread (void)
+{
+	for (;;)
+	{
+		switch_levels_update ();
+		task_sleep (TIME_100MS);
+	}
+}
+
+
 struct window_ops switch_levels_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = switch_levels_draw,
-	.thread = switch_edges_thread,
+	.thread = switch_levels_thread,
 	.up = null_function,
 	.down = null_function,
 };
@@ -3058,7 +3068,7 @@ void gi_test_draw (void)
 	}
 
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
-	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
+	print_row_center (&font_mono5, 29);
 
 	triac_leff_disable (TRIAC_GI_MASK);
 	triac_set_brightness (gi_test_values[menu_selection], gi_test_brightness);
@@ -3244,7 +3254,7 @@ void dipsw_test_draw (void)
 	window_title ("DIP SWITCH TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	for (sw = 0; sw < 8; sw++)
 	{
@@ -3408,7 +3418,7 @@ void display_test_draw (void)
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
 		sprintf ("PAGE %d", n);
-		font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+		print_row_center (&font_mono5, 16);
 		dmd_show_low ();
 		return;
 	}
@@ -3514,9 +3524,9 @@ void scroller_draw (void)
 	U8 offset = win_top->w_class.scroller.offset;
 
 	s[offset * 2] ();
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 	s[offset * 2 + 1] ();
-	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	print_row_center (&font_mono5, 22);
 	dmd_show_low ();
 }
 

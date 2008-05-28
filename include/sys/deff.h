@@ -126,23 +126,6 @@ extern inline void deff_call_components (void)
 }
 
 
-extern inline void deff_wait_for_other (deffnum_t dn)
-{
-/* TODO - this function should be deprecated */
-#if 0
-	if (deff_is_running (dn))
-	{
-		U8 timeout = TIME_3S / TIME_100MS;
-		while (timeout && deff_is_running (dn))
-		{
-			timeout--;
-			task_sleep (TIME_100MS);
-		}
-	}
-#endif
-}
-
-
 extern inline __noreturn__ void generic_deff (
 	const char *line1, const char *line2)
 {
