@@ -2012,7 +2012,6 @@ struct menu score_test_item = {
 void pic_test_draw (void)
 {
 	extern U8 pic_unlock_code[];
-	extern U8 pic_serial_number[];
 	extern __common__ void pic_render_serial_number (void);
 
 	window_title ("SECURITY TEST");
@@ -2042,6 +2041,42 @@ struct menu pic_test_item = {
 
 /**********************************************************************/
 
+void asic_3fff_thread (void)
+{
+	U8 writeval = 0x96;
+	U8 last_readval = 0;
+
+	for (;;)
+	{
+		U8 readval = readb (WPC_ZEROCROSS_IRQ_CLEAR);
+		U8 readval2 = readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR);
+
+		dmd_alloc_low_clean ();
+		sprintf ("READ IRQ %02X", readval);
+		font_render_string_left (&font_mono5, 32, 7, sprintf_buffer);
+		sprintf ("READ FIRQ %02X", readval2);
+		font_render_string_left (&font_mono5, 32, 15, sprintf_buffer);
+		sprintf ("WRITE IRQ %02X", writeval);
+		font_render_string_left (&font_mono5, 32, 23, sprintf_buffer);
+		dmd_show_low ();
+		last_readval = readval;
+		task_sleep (TIME_100MS);
+	}
+}
+
+struct window_ops asic_3fff_window = {
+	DEFAULT_WINDOW,
+	.thread = asic_3fff_thread,
+};
+
+struct menu asic_3fff_item = {
+	.name = "ASIC 3FFF TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &asic_3fff_window, NULL } },
+};
+
+/**********************************************************************/
+
 struct menu *dev_menu_items[] = {
 #if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
 	&dev_font_test_item,
@@ -2063,6 +2098,7 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
+	&asic_3fff_item,
 	NULL,
 };
 
