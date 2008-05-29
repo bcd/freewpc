@@ -225,7 +225,8 @@ static void rtc_pinmame_read (void)
 
 void rtc_factory_reset (void)
 {
-	/* Reset the date to Jan. 1, 2006 */
+	/* Reset the date to Jan. 1, 2006.
+	 * TODO : this should trigger a CLOCK NOT SET message */
 	year = 6;
 	month = 1;
 	day = 1;
