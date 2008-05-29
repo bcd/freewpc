@@ -18,7 +18,7 @@ void switch_matrix_draw (void)
 			bool state_p = switch_poll (sw);
 			register U8 *dmd = dmd_low_buffer +
 				((U16)row << 6) + (col >> 1);
-			U8 mask = (col & 1) ? 0x0E : 0xE0;
+			U8 mask = (col & 1) ? 0xE0 : 0x0E;
 
 			/* TODO : use bitmap_draw for these */
 			if (state_p)
@@ -39,6 +39,7 @@ void switch_matrix_draw (void)
 
 void switch_edges_update (void)
 {
+	extern __test__ void switch_edges_draw (void);
 	/* TODO : here's what needs to happen.
 	We begin by drawing the switch matrix normally, then we
 	take a snapshot of raw switches.  Every 16ms, we do
@@ -49,11 +50,14 @@ void switch_edges_update (void)
 	Also show the transition(s) that just occurred.
 	(For switch levels, iterate through the active switches
 	accounting for backwards optos continuously.) */
-	switch_matrix_draw ();
+	dmd_alloc_low_clean ();
+	switch_edges_draw ();
 }
 
 void switch_levels_update (void)
 {
-	switch_matrix_draw ();
+	extern __test__ void switch_levels_draw (void);
+	dmd_alloc_low_clean ();
+	switch_levels_draw ();
 }
 
