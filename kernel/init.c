@@ -244,10 +244,19 @@ void lockup_check_rtt (void)
 __noreturn__ 
 void fatal (errcode_t error_code)
 {
+	/* Audit the error. */
+	audit_increment (&system_audits.fatal_errors);
+	audit_assign (&system_audits.lockup1_addr, error_code);
+	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
+
 	/* Don't allow any more interrupts, since they might be the
 	source of the error.  Since FIRQ is disabled, we can only
 	do mono display at this point. */
 	disable_interrupts ();
+
+	/* Note: on a real game, leaving interrupts disabled for even
+	 * a short while will cause the blanking circuit to kick in,
+	 * causing little of this to happen. */
 
 	/* Reset hardware outputs */
 	wpc_asic_write (WPC_GI_TRIAC, 0);
@@ -260,11 +269,6 @@ void fatal (errcode_t error_code)
 #ifdef MACHINE_SOL_EXTBOARD1
 	wpc_asic_write (WPC_EXTBOARD1, 0);
 #endif
-
-	/* Audit the error. */
-	audit_increment (&system_audits.fatal_errors);
-	audit_assign (&system_audits.lockup1_addr, error_code);
-	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 
 #if (MACHINE_DMD == 1)
 	/* Try to display the error on the DMD.  This may not work,
