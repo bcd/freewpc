@@ -3692,7 +3692,7 @@ void test_up_button (void)
 	{
 		window_call_op (win_top, up);
 		window_redraw ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	}
 }
 
@@ -3714,7 +3714,7 @@ void test_down_button (void)
 	{
 		window_call_op (win_top, down);
 		window_redraw ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	}
 }
 
