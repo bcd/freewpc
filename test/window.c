@@ -824,6 +824,8 @@ struct audit standard_audits[] = {
 	{ "RIGHT FLIPPER", AUDIT_TYPE_INT, &system_audits.right_flippers },
 	{ "TROUGH RESCUE", AUDIT_TYPE_INT, &system_audits.trough_rescues },
 	{ "CHASE BALLS", AUDIT_TYPE_INT, &system_audits.chase_balls },
+	{ "LOCKUP 1 ADDR", AUDIT_TYPE_INT, &system_audits.lockup1_addr },
+	{ "LOCKUP 1 PID/LEF", AUDIT_TYPE_INT, &system_audits.lockup1_pid_lef },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
