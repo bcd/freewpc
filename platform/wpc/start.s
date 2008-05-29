@@ -41,19 +41,6 @@ WPC_WATCHDOG_RESET = 0x06
 ; This had similar effect???
 ;WPC_WATCHDOG_RESET = 0x86
 
-;;; The ROM bank value for the lowest page this ROM uses
-;;; TODO : this has to be configurable.
-;;; For now, only 8 pages are ever used, so checksum the
-;;; other pages -- though present -- is not needed.
-;;; The byte sum of any blank page is zero, so the checksum
-;;; is not affected by it.
-;;; BOTTOM_BANK    = 0x20
-BOTTOM_BANK    = 0x30
-
-;;; The ROM bank value for the highest page this ROM uses,
-;;; excluding the fixed system pages.
-TOP_BANK       = 0x3D
-
 FLASH_DELAY    = 100
 
 PAGED_REGION   = 0x4000

@@ -344,7 +344,7 @@ MUX_OBJS := $(MUX_SRCS:.c=.o)
 PAGE_NUMBERS = 56 57 58 59 60 61
 
 PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
-NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
+NUM_PAGED_SECTIONS = $(words $(PAGE_NUMBERS))
 NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS))))
 BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
 
