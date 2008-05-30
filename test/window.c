@@ -226,7 +226,7 @@ void window_title (const char *title)
 	font_render_string_center (&font_mono5, 64, 2, title);
 }
 
-void print_row_center (font_t *f, U8 row)
+void print_row_center (const font_t *f, U8 row)
 {
 	font_render_string_center (f, 64, row, sprintf_buffer);
 }
