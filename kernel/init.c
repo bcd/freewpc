@@ -56,7 +56,7 @@ __noreturn__ void freewpc_init (void)
 	extern __common__ void system_reset (void);
 
 	/* Reset the sound board... the earlier the better */
-	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
+	writeb (WPCS_CONTROL_STATUS, 0);
 
 	/* Initializing the RAM page */
 	wpc_set_ram_page (0);
@@ -80,12 +80,12 @@ __noreturn__ void freewpc_init (void)
 
 	/* Initialize other critical WPC output registers relating
 	 * to hardware */
-	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
-	wpc_asic_write (WPC_GI_TRIAC, 0);
+	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
+	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
+	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_GI_TRIAC, 0);
 
 	/* Reset the blanking and watchdog circuitry.
 	 * Eventually, the watchdog will be tickled every 1ms
@@ -132,11 +132,15 @@ __noreturn__ void freewpc_init (void)
 	wpc_watchdog_reset ();
 	free_timer_init ();
 	wpc_watchdog_reset ();
+	sound_init ();
+	wpc_watchdog_reset ();
 
 	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
+	/* Note that because interrupts are disabled, system timing is
+	 * not yet operational. */
 	task_init ();
 	wpc_watchdog_reset ();
 
@@ -144,15 +148,15 @@ __noreturn__ void freewpc_init (void)
 	linux_init ();
 #endif
 
+	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
+	 * but not before all of the hardware modules are done. */
+	enable_interrupts ();
+
 	/* Initialize the sound board early in a background
 	 * thread, since it involves polling for data back from it,
 	 * which may take unknown (or even infinite) time. */
 	sys_init_pending_tasks++;
-	task_create_gid (GID_SOUND_INIT, sound_init);
-
-	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
-	 * but not before all of the hardware modules are done. */
-	enable_interrupts ();
+	task_create_gid (GID_SOUND_INIT, sound_board_init);
 
 	/* Initialize everything else.  Some of these are given explicitly
 	to force a particular order, since callsets do not guarantee the
@@ -259,15 +263,15 @@ void fatal (errcode_t error_code)
 	 * causing little of this to happen. */
 
 	/* Reset hardware outputs */
-	wpc_asic_write (WPC_GI_TRIAC, 0);
+	writeb (WPC_GI_TRIAC, 0);
 	wpc_write_flippers (0);
 	wpc_write_ticket (0);
-	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
+	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
+	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
 #ifdef MACHINE_SOL_EXTBOARD1
-	wpc_asic_write (WPC_EXTBOARD1, 0);
+	writeb (WPC_EXTBOARD1, 0);
 #endif
 
 #if (MACHINE_DMD == 1)
@@ -371,11 +375,11 @@ void do_firq (void)
 	/* Read the peripheral timer register.
 	 * If bit 7 is set, it is a timer interrupt.  Otherwise,
 	 * it is a DMD interrupt. */
-	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
+	if (readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
 		/* It is a timer interrupt.
 		 * Clear the interrupt by writing back to the same register. */
-		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
+		writeb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
 
 		/* If we were using the timer, we would process the interrupt
 		here... */

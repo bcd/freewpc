@@ -100,9 +100,14 @@ void window_push_first (void)
 #endif
 	{
 		end_game ();
-		sound_reset ();
 		/* Kill any other tasks still running */
 		task_kill_all ();
+
+		/* Reset sound, but delay a little to allow the reset
+		 * to finish before we attempt to play the 'enter' sound
+		 * later. */
+		sound_reset ();
+		task_sleep (TIME_100MS);
 	}
 	callset_invoke (test_start);
 }
@@ -2751,7 +2756,11 @@ void single_switch_thread (void)
 			{
 				sound_send (SND_TEST_CHANGE);
 				if (((*sel != SW_UP) && (*sel != SW_DOWN)) || !sw_poll)
+				{
+					dmd_alloc_low_clean ();
 					single_switch_draw ();
+					task_sleep (TIME_66MS);
+				}
 			}
 			else
 			{

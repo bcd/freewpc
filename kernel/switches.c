@@ -26,6 +26,11 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
+/* TODO : on real hardware, occasionally an entry seems to get
+ * stuck in the switch queue, and that switch can no longer be
+ * processed. */
+
+
 /*
  * An active switch is one which has transitioned and is eligible
  * for servicing, but is undergoing additional debounce logic.
@@ -131,27 +136,38 @@ void switch_short_detect (void)
  * or WPC95 machine, we need to poll the PIC and see
  * if the unlock code must be sent to it.   On pre-
  * security games, this function is a no-op. */
-static __attribute__((noinline)) void switch_refresh_pic (void)
+void pic_rtt (void)
 {
 #if (MACHINE_PIC == 1)
 	U8 unlocked;
 
 	/* Read the status to see if the matrix is still unlocked. */
 	wpc_write_pic (WPC_PIC_COUNTER);
-	noop ();
-	noop ();
-	noop ();
+	null_function ();
+	null_function ();
+	null_function ();
 	unlocked = wpc_read_pic ();
-
 	if (!unlocked)
 	{
 		/* We need to unlock it again. */
 		extern U8 pic_unlock_code[3];
+		extern bool pic_unlock_ready;
+
+		if (!pic_unlock_ready)
+			return;
 
 		wpc_write_pic (WPC_PIC_UNLOCK);
+		null_function ();
+		null_function ();
 		wpc_write_pic (pic_unlock_code[0]);
+		null_function ();
+		null_function ();
 		wpc_write_pic (pic_unlock_code[1]);
+		null_function ();
+		null_function ();
 		wpc_write_pic (pic_unlock_code[2]);
+		null_function ();
+		null_function ();
 	}
 #endif /* MACHINE_PIC */
 }
@@ -174,17 +190,28 @@ extern inline void switch_rowpoll (const U8 col)
 	 * computing delta below.)
 	 */
 	if (col == 0)
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_CABINET_INPUT);
+		switch_raw_bits[col] = delta = readb (WPC_SW_CABINET_INPUT);
 
 	else if (col <= 8)
 #if (MACHINE_PIC == 1)
 		switch_raw_bits[col] = delta = wpc_read_pic ();
 #else
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_ROW_INPUT);
+		switch_raw_bits[col] = delta = readb (WPC_SW_ROW_INPUT);
 #endif
 
 	else if (col == 9)
 		switch_raw_bits[col] = delta = wpc_read_flippers ();
+
+	/* Set up the column strobe for the next read (on the next
+	 * iteration) */
+	if (col < 8)
+	{
+#if (MACHINE_PIC == 1)
+		wpc_write_pic (WPC_PIC_COLUMN (col));
+#else
+		writeb (WPC_SW_COL_STROBE, 1 << col);
+#endif
+	}
 
 	/* delta/changed is TRUE when the switch has changed state from the
 	 * previous latched value */
@@ -194,17 +221,6 @@ extern inline void switch_rowpoll (const U8 col)
 	 * for 2 cycles ; this is a quick and dirty debouncing */
 	switch_pending_bits[col] = delta & switch_changed_bits[col];
 	switch_changed_bits[col] = delta;
-
-	/* Set up the column strobe for the next read (on the next
-	 * iteration) */
-	if (col < 8)
-	{
-#if (MACHINE_PIC == 1)
-		wpc_write_pic (WPC_PIC_COLUMN (col));
-#else
-		wpc_asic_write (WPC_SW_COL_STROBE, 1 << col);
-#endif
-	}
 }
 
 
@@ -250,8 +266,6 @@ bool switch_poll_logical (const switchnum_t sw)
 
 void switch_rtt_0 (void)
 {
-	/* We check/refresh the PIC once per 4ms. */
-	switch_refresh_pic ();
 	switch_rowpoll (0);
 	switch_rowpoll (1);
 	switch_rowpoll (2);

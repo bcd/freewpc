@@ -60,6 +60,7 @@
 #define DMD_ALIGN_TOP_CENTER     DMD_CENTER_X, DMD_TOP_CENTER_Y
 #define DMD_ALIGN_BOTTOM_CENTER  DMD_CENTER_X, DMD_BOTTOM_CENTER_Y
 
+#define DMD_REFRESH_ROW 30
 
 /** The type of a page number */
 typedef U8 dmd_pagenum_t;
@@ -120,8 +121,8 @@ typedef struct
 } dmd_transition_t;
 
 
-#define wpc_dmd_set_firq_row(v)		wpc_asic_write (WPC_DMD_FIRQ_ROW_VALUE, v)
-#define wpc_dmd_set_visible_page(v)	wpc_asic_write (WPC_DMD_ACTIVE_PAGE, v)
+#define wpc_dmd_set_firq_row(v)		writeb (WPC_DMD_FIRQ_ROW_VALUE, v)
+#define wpc_dmd_set_visible_page(v)	writeb (WPC_DMD_ACTIVE_PAGE, v)
 
 #define dmd_low_buffer			((dmd_buffer_t)DMD_LOW_BASE)
 #define dmd_high_buffer			((dmd_buffer_t)DMD_HIGH_BASE)
@@ -186,13 +187,13 @@ extern inline dmd_pagepair_t wpc_dmd_get_mapped (void)
 extern inline void wpc_dmd_set_mapped (dmd_pagepair_t mapping)
 {
 	dmd_mapped_pages = mapping;
-	wpc_asic_write (WPC_DMD_LOW_PAGE, mapping.u.first);
-	wpc_asic_write (WPC_DMD_HIGH_PAGE, mapping.u.second);
+	writeb (WPC_DMD_LOW_PAGE, mapping.u.first);
+	writeb (WPC_DMD_HIGH_PAGE, mapping.u.second);
 }
 
 extern inline void wpc_dmd_set_low_page (U8 val)
 {
-	wpc_asic_write (WPC_DMD_LOW_PAGE, dmd_low_page = val);
+	writeb (WPC_DMD_LOW_PAGE, dmd_low_page = val);
 }
 
 extern inline U8 wpc_dmd_get_low_page (void)
@@ -202,7 +203,7 @@ extern inline U8 wpc_dmd_get_low_page (void)
 
 extern inline void wpc_dmd_set_high_page (U8 val)
 {
-	wpc_asic_write (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
+	writeb (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
 }
 
 extern inline U8 wpc_dmd_get_high_page (void)
