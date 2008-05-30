@@ -136,7 +136,7 @@ void dmd_init (void)
 	dmd_free_page = 2;
 
 	/* Program the DMD controller to generate interrupts */
-	wpc_dmd_set_firq_row (30);
+	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
 }
 
 
@@ -158,7 +158,7 @@ void dmd_init (void)
 void dmd_rtt0 (void)
 {
 	wpc_dmd_set_visible_page (dmd_dark_page);
-	wpc_dmd_set_firq_row (30);
+	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
 	/* IDEA: only the last byte of 'dmd_rtt' needs to be
 	 * updated, as long as all three functions reside within
 	 * the same 256-byte region, which could be verified at
@@ -169,14 +169,14 @@ void dmd_rtt0 (void)
 void dmd_rtt1 (void)
 {
 	wpc_dmd_set_visible_page (dmd_bright_page);
-	wpc_dmd_set_firq_row (30);
+	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
 	dmd_rtt = dmd_rtt2;
 }
 
 void dmd_rtt2 (void)
 {
 	wpc_dmd_set_visible_page (dmd_bright_page);
-	wpc_dmd_set_firq_row (30);
+	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
 	dmd_rtt = dmd_rtt0;
 }
 

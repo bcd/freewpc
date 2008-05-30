@@ -60,6 +60,7 @@
 #define DMD_ALIGN_TOP_CENTER     DMD_CENTER_X, DMD_TOP_CENTER_Y
 #define DMD_ALIGN_BOTTOM_CENTER  DMD_CENTER_X, DMD_BOTTOM_CENTER_Y
 
+#define DMD_REFRESH_ROW 30
 
 /** The type of a page number */
 typedef U8 dmd_pagenum_t;
