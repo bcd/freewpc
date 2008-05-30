@@ -71,6 +71,9 @@ U8 sound_version_major;
 U8 sound_version_minor;
 #endif
 
+U8 sound_board_type;
+
+
 /** The default audio track to be played when setting volume. */
 const audio_track_t volume_change_music_track = {
 	.prio = PRI_VOLUME_CHANGE_MUSIC,
@@ -85,8 +88,10 @@ const audio_track_t volume_change_music_track = {
 /** Renders the sound board version into the print buffer. */
 bool sound_version_render (void)
 {
-	if (sound_error_code == 0xFF)
+	if (sound_error_code != 0xFF)
 	{
+		sprintf ("SOUND TYPE %02X ERR %02X",
+			sound_board_type, sound_error_code);
 		return FALSE;
 	}
 	else
@@ -218,7 +223,12 @@ U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 	/* TODO : for DCS, cmd could be 16-bit!!! */
 #ifndef CONFIG_NATIVE
 	do {
+#if (MACHINE_DCS == 1)
+		sound_write_queue_insert (cmd >> 8);
+		sound_write_queue_insert (cmd & 0xFF);
+#else
 		sound_write_queue_insert (cmd);
+#endif
 		task_sleep (TIME_33MS);
 
 		if (queue_empty_p ((queue_t *)&sound_read_queue))
@@ -283,15 +293,22 @@ void sound_reset (void)
 device, this function is run in the background in a separate task. */
 void sound_init (void)
 {
-	U8 sound_board_type;
-
+	/* Initialize the input/output queues to the sound board. */
 	sound_read_queue_init ();
+	sound_write_queue_init ();
+}
+
+
+void sound_board_init (void)
+{
+	task_sleep_sec (2);
 
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
 	if ((sound_board_type = sound_board_read (100)) == 0xFF)
 	{
 		dbprintf ("Error: sound board not detected\n");
+		task_sleep_sec (1);
 		goto exit_func;
 	}
 	dbprintf ("Sound board detected: type %02X\n", sound_board_type);
@@ -303,11 +320,10 @@ void sound_init (void)
 	if ((sound_error_code = sound_board_read (20)) != 0xFF)
 	{
 		dbprintf ("Sound board boot code: %02X\n", sound_error_code);
+		task_sleep_sec (1);
 		goto exit_func;
 	}
 
-	/* Initialize the write queue.  We cannot transmit anything before here. */
-	sound_write_queue_init ();
 	task_sleep (TIME_200MS); /* TODO : needed? */
 
 	/* Read the sound board version. */
@@ -379,6 +395,8 @@ void volume_set (U8 vol)
 	/* Adhere to the minimum volume override */
 	if (vol < system_config.min_volume_control)
 		vol = system_config.min_volume_control;
+	if (vol > MAX_VOLUME)
+		vol = MAX_VOLUME;
 
 	/* Save the volume level in nvram. */
 	wpc_nvram_get ();
