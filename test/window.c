@@ -2751,7 +2751,11 @@ void single_switch_thread (void)
 			{
 				sound_send (SND_TEST_CHANGE);
 				if (((*sel != SW_UP) && (*sel != SW_DOWN)) || !sw_poll)
+				{
+					dmd_alloc_low_clean ();
 					single_switch_draw ();
+					task_sleep (TIME_66MS);
+				}
 			}
 			else
 			{

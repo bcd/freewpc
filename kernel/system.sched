@@ -35,6 +35,9 @@ triac_rtt             2       60c
 # Read the regular switch matrix and coin door
 switch_rtt/4          1       140c
 
+# Update the PIC on security games
+pic_rtt               32      200c  # guess?
+
 # Resynchronize to the AC zero cross point.
 ac_rtt                2       23c
 
