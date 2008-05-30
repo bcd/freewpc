@@ -174,13 +174,13 @@ extern inline void switch_rowpoll (const U8 col)
 	 * computing delta below.)
 	 */
 	if (col == 0)
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_CABINET_INPUT);
+		switch_raw_bits[col] = delta = readb (WPC_SW_CABINET_INPUT);
 
 	else if (col <= 8)
 #if (MACHINE_PIC == 1)
 		switch_raw_bits[col] = delta = wpc_read_pic ();
 #else
-		switch_raw_bits[col] = delta = wpc_asic_read (WPC_SW_ROW_INPUT);
+		switch_raw_bits[col] = delta = readb (WPC_SW_ROW_INPUT);
 #endif
 
 	else if (col == 9)
@@ -202,7 +202,7 @@ extern inline void switch_rowpoll (const U8 col)
 #if (MACHINE_PIC == 1)
 		wpc_write_pic (WPC_PIC_COLUMN (col));
 #else
-		wpc_asic_write (WPC_SW_COL_STROBE, 1 << col);
+		writeb (WPC_SW_COL_STROBE, 1 << col);
 #endif
 	}
 }

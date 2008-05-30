@@ -62,7 +62,7 @@ cached in memory so that the current state can be read back. */
 #define triac_write(v) \
 do { \
 	triac_io_cache = v; \
-	wpc_asic_write (WPC_GI_TRIAC, v); \
+	writeb (WPC_GI_TRIAC, v); \
 } while (0)
 
 #define ac_zerocross_set()			(*(U8 *)WPC_ZEROCROSS & 0x80)

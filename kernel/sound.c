@@ -176,12 +176,12 @@ void music_off (void)
  * If no data is ready, returns 0xFF. */
 U8 sound_board_poll (void)
 {
-	U8 status = wpc_asic_read (WPCS_CONTROL_STATUS);
+	U8 status = readb (WPCS_CONTROL_STATUS);
 	U8 in_data;
 
 	if (status & WPCS_READ_READY)
 	{
-		in_data = wpc_asic_read (WPCS_DATA);
+		in_data = readb (WPCS_DATA);
 		return (in_data);
 	}
 	else
@@ -256,10 +256,10 @@ CALLSET_ENTRY (sound, idle_every_100ms)
 void sound_read_rtt (void)
 {
 	/* Read back from sound board if bytes ready */
-	if (unlikely (wpc_asic_read (WPCS_CONTROL_STATUS) & WPCS_READ_READY))
+	if (unlikely (readb (WPCS_CONTROL_STATUS) & WPCS_READ_READY))
 	{
 		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
-			wpc_asic_read (WPCS_DATA));
+			readb (WPCS_DATA));
 	}
 }
 
@@ -268,7 +268,7 @@ void sound_write_rtt (void)
 	/* Write a pending byte to the sound board */
 	if (unlikely (!sound_write_queue_empty_p ()))
 	{
-		wpc_asic_write (WPCS_DATA, sound_write_queue_remove ());
+		writeb (WPCS_DATA, sound_write_queue_remove ());
 	}
 }
 

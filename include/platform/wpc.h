@@ -237,8 +237,8 @@ extern inline void wpc_led_toggle (void)
  * strobe line is brought low and then released. */
 extern inline void wpc_parport_write (U8 data)
 {
-	wpc_asic_write (WPC_PARALLEL_DATA_PORT, data);
-	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x0);
+	writeb (WPC_PARALLEL_DATA_PORT, data);
+	writeb (WPC_PARALLEL_STROBE_PORT, 0x0);
 	noop ();
 	noop ();
 	noop ();
@@ -247,7 +247,7 @@ extern inline void wpc_parport_write (U8 data)
 	noop ();
 	noop ();
 	noop ();
-	wpc_asic_write (WPC_PARALLEL_STROBE_PORT, 0x1);
+	writeb (WPC_PARALLEL_STROBE_PORT, 0x1);
 }
 
 /********************************************/
@@ -285,14 +285,14 @@ in terms of the base address of the protected memory area. */
 /** Write to the WPC's RAM protect register */
 extern inline void wpc_set_ram_protect (U8 prot)
 {
-	wpc_asic_write (WPC_RAM_LOCK, prot);
+	writeb (WPC_RAM_LOCK, prot);
 }
 
 
 /** Write to the WPC's RAM protect size register */
 extern inline void wpc_set_ram_protect_size (U8 sz)
 {
-	wpc_asic_write (WPC_RAM_LOCKSIZE, sz);
+	writeb (WPC_RAM_LOCKSIZE, sz);
 }
 
 
@@ -328,12 +328,12 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 extern inline U8 wpc_get_rom_page (void)
 {
-	return wpc_asic_read (WPC_ROM_BANK);
+	return readb (WPC_ROM_BANK);
 }
 
 extern inline void wpc_set_rom_page (U8 page)
 {
-	wpc_asic_write (WPC_ROM_BANK, page);
+	writeb (WPC_ROM_BANK, page);
 }
 
 
@@ -370,12 +370,12 @@ do { \
 
 extern inline U8 wpc_get_ram_page (void)
 {
-	return wpc_asic_read (WPC_RAM_BANK);
+	return readb (WPC_RAM_BANK);
 }
 
 extern inline void wpc_set_ram_page (U8 page)
 {
-	wpc_asic_write (WPC_RAM_BANK, page);
+	writeb (WPC_RAM_BANK, page);
 }
 
 
@@ -397,7 +397,7 @@ extern inline void wpc_set_ram_page (U8 page)
 
 extern inline void wpc_write_misc_control (U8 val)
 {
-	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR,
+	writeb (WPC_ZEROCROSS_IRQ_CLEAR,
 		WPC_CTRL_BLANK_RESET | WPC_CTRL_WATCHDOG_RESET | val);
 }
 
@@ -417,7 +417,7 @@ extern inline void wpc_int_clear (void)
 
 extern inline U8 wpc_read_ac_zerocross (void)
 {
-	U8 val = wpc_asic_read (WPC_ZEROCROSS_IRQ_CLEAR);
+	U8 val = readb (WPC_ZEROCROSS_IRQ_CLEAR);
 	return (val & 0x80);
 }
 
@@ -438,9 +438,9 @@ extern inline U8 wpc_read_ac_zerocross (void)
 extern inline U8 wpc_read_flippers (void)
 {
 #if (MACHINE_WPC95 == 1)
-	return wpc_asic_read (WPC95_FLIPPER_SWITCH_INPUT);
+	return readb (WPC95_FLIPPER_SWITCH_INPUT);
 #else
-	return wpc_asic_read (WPC_FLIPTRONIC_PORT_A);
+	return readb (WPC_FLIPTRONIC_PORT_A);
 #endif
 }
 
@@ -470,9 +470,9 @@ extern inline void wpc_write_flippers (U8 val)
 {
 #ifndef CONFIG_NO_SOL
 #if (MACHINE_WPC95 == 1)
-	wpc_asic_write (WPC95_FLIPPER_COIL_OUTPUT, val);
+	writeb (WPC95_FLIPPER_COIL_OUTPUT, val);
 #else
-	wpc_asic_write (WPC_FLIPTRONIC_PORT_A, ~val);
+	writeb (WPC_FLIPTRONIC_PORT_A, ~val);
 #endif
 #endif
 }
@@ -498,7 +498,7 @@ extern inline void wpc_write_flippers (U8 val)
 
 extern inline U8 wpc_get_jumpers (void)
 {
-	return wpc_asic_read (WPC_SW_JUMPER_INPUT);
+	return readb (WPC_SW_JUMPER_INPUT);
 }
 
 extern inline U8 wpc_read_locale (void)
@@ -509,14 +509,14 @@ extern inline U8 wpc_read_locale (void)
 
 extern inline U8 wpc_read_ticket (void)
 {
-	return wpc_asic_read (WPC_TICKET_DISPENSE);
+	return readb (WPC_TICKET_DISPENSE);
 }
 
 
 extern inline void wpc_write_ticket (U8 val)
 {
 #ifndef CONFIG_NO_SOL
-	wpc_asic_write (WPC_TICKET_DISPENSE, val);
+	writeb (WPC_TICKET_DISPENSE, val);
 #endif
 }
 
@@ -555,12 +555,12 @@ extern inline void wpc_write_ticket (U8 val)
 
 extern inline void wpc_write_pic (U8 val)
 {
-	wpc_asic_write (WPCS_PIC_WRITE, val);
+	writeb (WPCS_PIC_WRITE, val);
 }
 
 extern inline U8 wpc_read_pic (void)
 {
-	return wpc_asic_read (WPCS_PIC_READ);
+	return readb (WPCS_PIC_READ);
 }
 
 #endif
