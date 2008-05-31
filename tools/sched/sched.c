@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -66,6 +66,7 @@
 #define MAX_SLOTS_PER_TICK 32
 #define MAX_TASKS 64
 #define MAX_INCLUDE_FILES 16
+#define MAX_CONDITIONALS 32
 
 /* The following defines are system-dependent, and could be
 changed to support non-FreeWPC compilations. */
@@ -160,6 +161,8 @@ const unsigned int cycles_per_interrupt = CYCLES_PER_TICK;
 
 double warn_utilization_high = 0.80;
 
+int n_conditionals = 0;
+const char *conditionals[MAX_CONDITIONALS];
 
 #if 0
 static unsigned long gcd (unsigned long a, unsigned long b)
@@ -424,9 +427,31 @@ void add_task (char *name, unsigned int period, double len)
 	struct slot *slot;
 	struct task *task;
 	unsigned int divider = 1;
-	char *end = name + strlen (name) - 2;
+	char *end;
 	unsigned int already_unrolled_count = 0;
+	char *c;
 
+	/* Is this entry dependent on a conditional? */
+	if ((c = strchr (name, '?')) != NULL)
+	{
+		int cond;
+		for (cond = 0; cond < n_conditionals; cond++)
+		{
+			if (!strcmp (conditionals[cond], c+1))
+			{
+				/* The conditional exists.  Proceed, and strip off
+				the conditional part of the expression. */
+				*c = '\0';
+				goto conditional_defined;
+			}
+		}
+		/* The conditional is not defined.  Do not define this task. */
+		fprintf (stderr, "warning: skipping entry for '%s'\n", name);
+		return;
+	}
+conditional_defined:;
+
+	end = name + strlen (name) - 2;
 	if (*end == '/')
 	{
 		already_unrolled_count = end[1] - '0';
@@ -579,6 +604,14 @@ int main (int argc, char *argv[])
 				command-line, without requiring a file; this would make it
 				easier to generate the task list on-the-fly, for making
 				certain things optional */
+
+				/* TODO - add conditionals (like -DMACRO) and be
+				able to tag certain entries with the conditional.
+				For example, the PIC rtt isn't needed on non-security
+				games. */
+				case 'D':
+					conditionals[n_conditionals++] = argv[argn];
+					break;
 			}
 		}
 		else

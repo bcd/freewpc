@@ -260,6 +260,10 @@ void pic_init (void)
 	pic_invalid = TRUE;
 	pic_unlock_ready = FALSE;
 
+#ifdef CONFIG_NO_PIC
+	return;
+#endif
+
 	/* Reset the PIC. */
 	wpc_write_pic (WPC_PIC_RESET);
 

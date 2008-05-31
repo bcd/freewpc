@@ -224,6 +224,10 @@ struct buffer *buffer_binop (struct buffer *a, struct buffer *b,
 }
 
 
+/** Performs a unary operation on a buffer.  Returns the result in a new
+ * buffer.  Byte-by-byte, the operation is applied to the source to
+ * determine the corresponding byte of the result.
+ */
 struct buffer *buffer_unop (struct buffer *buf, unary_operator op)
 {
 	unsigned int off = 0;
@@ -238,12 +242,16 @@ struct buffer *buffer_unop (struct buffer *buf, unary_operator op)
 }
 
 
+/** Compute the delta (exclusive-OR) between two buffers. */
 struct buffer *buffer_compute_delta (struct buffer *dst, struct buffer *src)
 {
 	return buffer_binop (dst, src, xor_operator);
 }
 
 
+/** Created a joined buffer.  The input image must use 8 bits per pixel and
+ * have a single color (0 or 1) per pixel.  The output image has 1 bit per pixel;
+ * 8 consecutive pixels are joined together into a single byte. */
 struct buffer *buffer_joinbits (struct buffer *buf)
 {
 	unsigned int off, bit;
@@ -260,6 +268,9 @@ struct buffer *buffer_joinbits (struct buffer *buf)
 	return res;
 }
 
+
+/** Create a split buffer from a joined one.  This is the reverse process of
+ * buffer_joinbits(); see above. */
 struct buffer *buffer_splitbits (struct buffer *buf)
 {
 	unsigned int off, bit;
