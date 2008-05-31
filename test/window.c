@@ -2053,38 +2053,114 @@ struct menu pic_test_item = {
 
 /**********************************************************************/
 
-void asic_3fff_thread (void)
+U8 *memory_editor_addr;
+
+U8 memory_editor_step;
+
+U8 memory_editor_modify_flag;
+
+U8 memory_editor_new_value;
+
+void memory_editor_init (void)
 {
-	U8 writeval = 0x96;
-	U8 last_readval = 0;
+	memory_editor_addr = 0x0;
+	memory_editor_step = 8;
+	memory_editor_modify_flag = 0;
+}
 
-	for (;;)
+void memory_editor_up (void)
+{
+	if (memory_editor_modify_flag == 0)
+		memory_editor_addr += memory_editor_step;
+	else
+		memory_editor_new_value++;
+}
+
+void memory_editor_down (void)
+{
+	if (memory_editor_modify_flag == 0)
+		memory_editor_addr -= memory_editor_step;
+	else
+		memory_editor_new_value--;
+}
+
+void memory_editor_start (void)
+{
+	if (memory_editor_modify_flag == 0)
 	{
-		U8 readval = readb (WPC_ZEROCROSS_IRQ_CLEAR);
-		U8 readval2 = readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR);
+		if (memory_editor_step == 8)
+			memory_editor_step = 1;
+		else
+			memory_editor_step = 8;
+	}
+	else
+		memory_editor_modify_flag = 0;
+}
 
-		dmd_alloc_low_clean ();
-		sprintf ("READ IRQ %02X", readval);
-		font_render_string_left (&font_mono5, 32, 7, sprintf_buffer);
-		sprintf ("READ FIRQ %02X", readval2);
-		font_render_string_left (&font_mono5, 32, 15, sprintf_buffer);
-		sprintf ("WRITE IRQ %02X", writeval);
-		font_render_string_left (&font_mono5, 32, 23, sprintf_buffer);
-		dmd_show_low ();
-		last_readval = readval;
-		task_sleep (TIME_100MS);
+void memory_editor_enter (void)
+{
+	if (memory_editor_modify_flag == 0)
+	{
+		memory_editor_modify_flag = 1;
+		memory_editor_new_value = readb (memory_editor_addr);
+	}
+	else if (memory_editor_modify_flag == 1)
+	{
+		writeb (memory_editor_addr, memory_editor_new_value);
+		memory_editor_modify_flag = 0;
 	}
 }
 
-struct window_ops asic_3fff_window = {
+void memory_editor_thread (void)
+{
+	U8 n;
+	U8 flash = 0;
+	for (;;)
+	{
+		dmd_alloc_low_clean ();
+
+		sprintf ("MEMORY EDITOR : %p", memory_editor_addr);
+		font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
+
+		for (n=0; n < 8; n++)
+		{
+			sprintf ("%02X", readb (memory_editor_addr+n));
+			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
+		}
+
+		sprintf ("STEP : %d", memory_editor_step);
+		font_render_string_left (&font_var5, 1, 26, sprintf_buffer);
+
+		if (memory_editor_modify_flag)
+		{
+			dmd_show_low ();
+			task_sleep (TIME_33MS);
+			sprintf ("EDIT : %02X", memory_editor_new_value);
+			font_render_string_right (&font_var5, 127, 26, sprintf_buffer);
+			task_sleep (TIME_66MS);
+		}
+		else
+		{
+			dmd_show_low ();
+			task_sleep (TIME_100MS);
+		}
+	}
+}
+
+struct window_ops memory_editor_window = {
 	DEFAULT_WINDOW,
-	.thread = asic_3fff_thread,
+	.init = memory_editor_init,
+	.up = memory_editor_up,
+	.down = memory_editor_down,
+	.enter = memory_editor_enter,
+	.start = memory_editor_start,
+	.thread = memory_editor_thread,
 };
 
-struct menu asic_3fff_item = {
-	.name = "ASIC 3FFF TEST",
+struct menu memory_editor_item = {
+	.name = "MEMORY EDITOR",
 	.flags = M_ITEM,
-	.var = { .subwindow = { &asic_3fff_window, NULL } },
+	.var = { .subwindow = { &memory_editor_window, NULL } },
 };
 
 /**********************************************************************/
@@ -2110,7 +2186,7 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
-	&asic_3fff_item,
+	&memory_editor_item,
 	NULL,
 };
 
