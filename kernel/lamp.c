@@ -360,8 +360,11 @@ bool lamp_test_off (lampnum_t lamp)
 
 void lamp_flash_on (lampnum_t lamp)
 {
-	bit_on (lamp_flash_matrix, lamp);
-	lamp_flash_sync ();
+	if (!bit_test (lamp_flash_matrix, lamp))
+	{
+		bit_on (lamp_flash_matrix, lamp);
+		lamp_flash_sync ();
+	}
 }
 
 void lamp_flash_off (lampnum_t lamp)
