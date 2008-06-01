@@ -1473,7 +1473,7 @@ void lamplist_draw (void)
 	print_row_center (&font_var5, 12);
 
 	sprintf ("SPEED %d", lamplist_update_speed);
-	print_row_center (&font_var5, 21);
+	font_render_string_center (&font_var5, 48, 21, sprintf_buffer);
 
 	switch (lamplist_update_mode)
 	{
