@@ -8,7 +8,7 @@ void goalie_running (void)
 	while (goalie_mode == RUNNING)
 	{
 		dbprintf ("Restarting goalie drive\n");
-		sol_start (SOL_GOALIE_DRIVE, SOL_DUTY_100, TIME_1S);
+		sol_start (SOL_GOALIE_DRIVE, SOL_DUTY_25, TIME_1S);
 		task_sleep (TIME_500MS);
 	}
 
@@ -50,6 +50,11 @@ CALLSET_ENTRY (goalie_driver, start_ball)
 }
 
 CALLSET_ENTRY (goalie_driver, end_ball)
+{
+	stop_goalie ();
+}
+
+CALLSET_ENTRY (goalie_driver, end_game)
 {
 	stop_goalie ();
 }
