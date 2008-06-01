@@ -1462,7 +1462,8 @@ void lamplist_init (void)
 	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
 	lamplist_update_mode = 0;
-	lamplist_update_speed = TIME_16MS;
+	lamplist_update_speed = TIME_100MS;
+	lamp_all_off ();
 }
 
 
@@ -1496,19 +1497,26 @@ void lamplist_draw (void)
 
 void lamplist_update (void)
 {
-	leff_data_t *cdata;
-	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
+#if 0
+	if (lamplist_update_mode >= 6)
+	{
+		U8 *lamp = lamplist_first_entry (menu_selection);
+		lamp_on (*lamp);
+		lamp = lamplist_next_entry (menu_selection, lamp);
+		lamp_on (*lamp);
+	}
+#endif
 	for (;;)
 	{
-		cdata->apply_delay = lamplist_update_speed;
 		switch (lamplist_update_mode)
 		{
 			case 0: 
-				lamp_all_off ();
 				lamplist_apply (menu_selection, lamp_on); 
+				task_sleep (TIME_166MS);
 				break;
 			case 1: lamplist_apply (menu_selection, lamp_toggle);
+				task_sleep (TIME_166MS);
 				break;
 			case 2: lamplist_step_increment (menu_selection, lamp_matrix);
 				break;
@@ -1523,7 +1531,7 @@ void lamplist_update (void)
 			case 7: lamplist_rotate_previous (menu_selection, lamp_matrix);
 				break;
 		}
-		task_sleep (TIME_200MS);
+		task_sleep (lamplist_update_speed);
 	}
 }
 
