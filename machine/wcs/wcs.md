@@ -169,7 +169,7 @@ G2: Goal, flash
 G3: Skill Shot, flash
 G4: Jet Bumpers, flash
 G5: Goalie Drive, motor
-G6: Soccer Ball, motor
+G6: Soccer Ball, flash
 G7: Ball Forward, motor
 G8: Ball Reverse, motor
 
@@ -196,7 +196,7 @@ F3: Lock Magnet
 [lamplists]
 Goal Counts: 1 Goal, 2 Goals, 3 Goals, 4 Goals
 Ball Panels: Ball Stamina, Ball Skill, Ball Spirit, Ball Speed, Ball Strength
-Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Striker Build
+Build Shots: L. Loop Build, L. Ramp Build, Striker Build, R. Ramp Build
 Kickbacks: Kickback Lower, Kickback Center, Kickback Upper
 Ultra Modes: Ultra Spinner, Ultra Jets, Ultra Ramps, Ultra Goalie
 Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
@@ -224,6 +224,12 @@ Lock: Lock Release, Lock High, Lock Low
 #############################################################
 
 [adjustments]
+Ball Saver: yes_no, YES
+Evil Goalie: yes_no, NO
+Max Lock Count: integer, 2
+Reverse Spin: yes_no, NO
+Disable Ball: yes_no, NO
+Disable Goalie: yes_no, NO
 
 [audits]
 
@@ -236,6 +242,19 @@ Lock: Lock Release, Lock High, Lock Low
 [highscores]
 
 [flags]
+L. Ramp Light Mode:
+R. Ramp Light Mode:
+5 Man MB Lit:
+Final Draw MB Running:
+5 Man MB Running:
+L. Loop Build:
+L. Ramp Build:
+Striker Build:
+R. Ramp Build:
+Divert Ramp:
+
+[globalflags]
+Goalie Moving:
 
 [deffs]
 
