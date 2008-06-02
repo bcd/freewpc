@@ -38,9 +38,6 @@ fonts/times10.fon :
 fonts/times8.fon :
 	tools/fontgen -o $@ -fn "-adobe-times-bold-r-*-*-8-*-75" -id times8
 
-fonts/helv8.fon :
-	tools/fontgen -o $@ -fn "-adobe-helvetica-bold-r-*-*-8-*-75" -id helv8
-
 ###################################################
 # Experimental
 ###################################################

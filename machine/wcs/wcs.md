@@ -19,6 +19,7 @@ Lamp-Matrix-Height: 25
 include platform/wpc/wpc.md
 
 define MACHINE_NUMBER 531
+define MACHINE_CUSTOM_AMODE
 
 [lamps]
 11: noname, x(39), y(12)
@@ -149,68 +150,68 @@ define MACHINE_NUMBER 531
 84: Rollover 4, red
 85: Skill Top, yellow
 86: Skill Middle, yellow
-87: Buy-In Button, green
-88: Start Button, yellow
+87: Buy-In Button, green, buyin, cabinet
+88: Start Button, yellow, start, cabinet
 
 [switches]
 11: Unused
-12: Magnet Button, button, cabinet
+12: Magnet Button, button, noscore, cabinet
 13: Start Button, start-button, cabinet, intest
 14: Tilt, tilt
-15: Left Flipper Lane
-16: Striker 3
-17: Right Flipper Lane
-18: Right Outlane
+15: Left Flipper Lane, ingame
+16: Striker 3, ingame
+17: Right Flipper Lane, ingame
+18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
 23: Buy Extra Ball, button, cabinet
-25: Free Kick Target
-26: Kickback Upper
-27: Spinner
-28: Light Kickback
-31: Trough 1, trough, opto
-32: Trough 2, trough, opto
-33: Trough 3, trough, opto
-34: Trough 4, trough, opto
-35: Trough 5, trough, opto
-36: Trough Stack, opto
-37: Light Magna Goalie
-38: Shooter, shooter
-41: Goal Trough, opto
-42: Goal Popper, opto
-43: Goalie Left, opto
-44: Goalie Right, opto
-45: TV Popper, opto
+25: Free Kick Target, ingame
+26: Kickback Upper, ingame
+27: Spinner, ingame
+28: Light Kickback, ingame
+31: Trough 1, trough, noscore, opto
+32: Trough 2, trough, noscore, opto
+33: Trough 3, trough, noscore, opto
+34: Trough 4, trough, noscore, opto
+35: Trough 5, trough, noscore, opto
+36: Trough Stack, noscore, opto
+37: Light Magna Goalie, ingame
+38: Shooter, noscore, shooter
+41: Goal Trough, opto, ingame
+42: Goal Popper, opto, ingame
+43: Goalie Left, noscore, opto
+44: Goalie Right, noscore, opto
+45: TV Popper, opto, ingame
 46: Unused
-47: Travel Lane
-48: Goalie Target
-51: Skill Shot Front, opto
-52: Skill Shot Center, opto
-53: Skill Shot Rear, opto
-54: Right Eject
-55: Upper Eject
-56: Left Eject
-61: Rollover 1
-62: Rollover 2
-63: Rollover 3
-64: Rollover 4
-65: Tackle
-66: Striker 1
-67: Striker 2
-71: L. Ramp Diverted
-72: L. Ramp Enter
-74: L. Ramp Exit
-75: R. Ramp Enter
-76: Lock Low
-77: Lock High
-78: R. Ramp Exit
+47: Travel Lane, ingame
+48: Goalie Target, ingame
+51: Skill Shot Front, opto, ingame
+52: Skill Shot Center, opto, ingame
+53: Skill Shot Rear, opto, ingame
+54: Right Eject, ingame
+55: Upper Eject, ingame
+56: Left Eject, ingame
+61: Rollover 1, ingame
+62: Rollover 2, ingame
+63: Rollover 3, ingame
+64: Rollover 4, ingame
+65: Tackle, ingame
+66: Striker 1, ingame
+67: Striker 2, ingame
+71: L. Ramp Diverted, ingame
+72: L. Ramp Enter, ingame
+74: L. Ramp Exit, ingame
+75: R. Ramp Enter, ingame
+76: Lock Low, ingame
+77: Lock High, ingame
+78: R. Ramp Exit, ingame
 81: Left Jet
 82: Upper Jet
 83: Lower Jet
 84: Left Slingshot
 85: Right Slingshot
-86: Kickback
-87: Upper Left Lane
-88: Upper Right Lane
+86: Kickback, ingame
+87: Upper Left Lane, ingame
+88: Upper Right Lane, ingame
 
 [drives]
 H1: Goal Popper
@@ -236,7 +237,7 @@ G2: Goal, flash
 G3: Skill Shot, flash
 G4: Jet Bumpers, flash
 G5: Goalie Drive, motor
-G6: Soccer Ball, motor
+G6: Soccer Ball, flash
 G7: Ball Forward, motor
 G8: Ball Reverse, motor
 
@@ -262,8 +263,8 @@ F3: Lock Magnet
 
 [lamplists]
 Goal Counts: 1 Goal, 2 Goals, 3 Goals, 4 Goals
-Ball Panels: Ball Spirit, Ball Skill, Ball Stamina, Ball Speed, Ball Strength
-Build Shots: L. Loop Build, L. Ramp Build, R. Ramp Build, Striker Build
+Ball Panels: Ball Stamina, Ball Skill, Ball Spirit, Ball Speed, Ball Strength
+Build Shots: L. Loop Build, L. Ramp Build, Striker Build, R. Ramp Build
 Kickbacks: Kickback Lower, Kickback Center, Kickback Upper
 Ultra Modes: Ultra Spinner, Ultra Jets, Ultra Ramps, Ultra Goalie
 Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
@@ -272,6 +273,7 @@ Cities: Chicago P, Dallas U, Boston C, New York D, Orlando L, Washington R, San 
 Skill Shots: Skill Top, Skill Middle, Skill Lower
 Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
 Top Lanes: Top Lane Left, Top Lane Right
+Locks: L. Ramp Lock, R. Ramp Lock
 Ramp Tickets: L. Ramp Ticket, R. Ramp Ticket
 Red Lamps: COLOR:red
 White Lamps: COLOR:white
@@ -297,6 +299,12 @@ Lock: Lock Release, Lock High, Lock Low
 #############################################################
 
 [adjustments]
+Ball Saver: yes_no, YES
+Evil Goalie: yes_no, NO
+Max Lock Count: integer, 2
+Reverse Spin: yes_no, NO
+Disable Ball: yes_no, NO
+Disable Goalie: yes_no, NO
 
 [audits]
 
@@ -309,10 +317,24 @@ Lock: Lock Release, Lock High, Lock Low
 [highscores]
 
 [flags]
+L. Ramp Light Mode:
+R. Ramp Light Mode:
+5 Man MB Lit:
+Final Draw MB Running:
+5 Man MB Running:
+L. Loop Build:
+L. Ramp Build:
+Striker Build:
+R. Ramp Build:
+Divert Ramp:
+
+[globalflags]
+Goalie Moving:
 
 [deffs]
 
 [leffs]
+Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
 

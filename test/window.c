@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
  * of a "window class", which is defined by the window_ops structure.
  * The window class declares callbacks for various events, including
  * inputs (key presses) and focus change (new window created, etc.)
- * The module maintains a window stack, so that new windows can be 
+ * The module maintains a window stack, so that new windows can be
  * created temporarily and then popped off to return to the originating
  * point.
  *
@@ -120,7 +120,7 @@ void window_pop_first (void)
 	dmd_show_low ();
 
 	/* Delay before starting amode and actually
-	 * exiting test mode; this keeps extra presses 
+	 * exiting test mode; this keeps extra presses
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
 #ifdef CONFIG_TEST_DURING_GAME
@@ -266,9 +266,9 @@ void browser_decimal_item_number (U8 val)
 void browser_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
-	
+
 	win_top->w_class.menu.self = m;
-	menu_selection = 0;	
+	menu_selection = 0;
 
 	browser_action = 0;
 	browser_last_selection_update = 0;
@@ -353,7 +353,7 @@ struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 #ifndef MACHINE_REPLAY_START_CHOICE
 #define MACHINE_REPLAY_START_CHOICE 0
 #endif
-struct adjustment_value replay_score_value = { 
+struct adjustment_value replay_score_value = {
 	0, MACHINE_REPLAY_SCORE_CHOICES-1, 1, replay_score_render
 };
 
@@ -842,7 +842,7 @@ void audit_browser_init (void)
 	browser_init ();
 
 	aud = browser_audits = win_top->w_class.priv;
-	
+
 	/* Count the number of adjustments manually by stepping through
 	 * the array of entries */
 	browser_min = 0;
@@ -990,7 +990,7 @@ static U8 count_submenus (struct menu *m)
 void menu_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
-	
+
 	win_top->w_class.menu.self = m;
 	win_top->w_class.menu.parent = NULL;
 	menu_selection = 0;
@@ -1066,7 +1066,7 @@ void menu_up (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
-	
+
 	sound_send (SND_TEST_UP);
 	(*sel)++;
 	if ((*sel) >= count_submenus (m))
@@ -1077,10 +1077,10 @@ void menu_down (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
-	
+
 	sound_send (SND_TEST_DOWN);
 	(*sel)--;
-	if ((*sel) == 0xFF) 
+	if ((*sel) == 0xFF)
 	{
 		*sel = count_submenus (m);
 		if (*sel > 0)
@@ -1139,7 +1139,10 @@ struct window_ops menu_window = {
 /*******************  Font Test  ************************/
 
 U8 font_test_offset;
+
 U8 font_test_char_width;
+
+extern __fastram__ U8 font_height;
 
 const font_t *font_test_lookup (void)
 {
@@ -1158,36 +1161,48 @@ void font_test_init (void)
 	font_test_char_width = 8;
 }
 
-void font_test_draw (void)
+
+void font_test_change (void)
 {
 	const font_t *font = font_test_lookup ();
-	char *gl, **glp;
-	char bitwidth;
+	extern U8 font_width;
 
-	/* TODO : this won't work because the font data is in a different page!
-	 * Need to add a function in FONT_PAGE : char *font_get_glyph(font, char)
-	 * that returns a pointer to the glyph for a character.  Then you can
-	 * use the following code, although macros would be better:
-	 * glyph_get_width(), glyph_get_height(), etc. */
-	glp = (char **)far_read_pointer ((PTR_OR_U16 *)&font->glyphs, FONT_PAGE);
-
-	gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['A'], FONT_PAGE);
-	if (gl == NULL) 
+	font_lookup_char (font, 'A');
+	if (font_width == 0)
 	{
 		if (font_test_offset < 26)
 			font_test_offset = 26;
+		font_lookup_char (font, '0');
 	}
-	else
-		gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['0'], FONT_PAGE);
+	font_width++;
 
-	bitwidth = (char)far_read8 ((U8 *)&gl[0], FONT_PAGE);
-	if (bitwidth <= 8)
-		font_test_char_width = 13;
-	else if (bitwidth <= 12)
-		font_test_char_width = 10;
-	else
-		font_test_char_width = 8;
+	switch (font_width)
+	{
+		case 4: case 5: case 6:
+			font_test_char_width = 20;
+			break;
+		case 7: case 8:
+			font_test_char_width = 15;
+			break;
+		case 9: case 10:
+			font_test_char_width = 12;
+			break;
+		case 11: case 12:
+			font_test_char_width = 10;
+			break;
+		case 13: case 14:
+			font_test_char_width = 8;
+			break;
+		default:
+			font_test_char_width = 7;
+			break;
+	}
+}
 
+
+void font_test_draw (void)
+{
+	const font_t *font;
 
 	sprintf ("FONT %d", menu_selection+1);
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
@@ -1195,20 +1210,38 @@ void font_test_draw (void)
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
 
-	sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
-	print_row_center (font, 20);
+	font = font_test_lookup ();
+	font_test_change ();
+	if (font_height < 8)
+	{
+		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
+		font_render_string_center (font, 64, 16, sprintf_buffer);
+		task_dispatching_ok = TRUE;
+		if (font_test_offset < 20)
+		{
+			sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset + font_test_char_width);
+			font_render_string_center (font, 64, 26, sprintf_buffer);
+		}
+	}
+	else
+	{
+		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
+		font_render_string_center (font, 64, 21, sprintf_buffer);
+	}
 	dmd_show_low ();
 }
 
 void font_test_left (void)
 {
 	bounded_decrement (font_test_offset, 0);
+	font_test_change ();
 	sound_send (SND_TEST_CHANGE);
 }
 
 void font_test_right (void)
 {
 	bounded_increment (font_test_offset, sizeof (font_test_alphabet) - font_test_char_width - 1);
+	font_test_change ();
 	sound_send (SND_TEST_CHANGE);
 }
 
@@ -1269,7 +1302,7 @@ void deff_leff_thread (void)
 	{
 		if (is_active != deff_leff_last_active)
 		{
-			if (deff_leff_test_ops == &dev_deff_ops) 
+			if (deff_leff_test_ops == &dev_deff_ops)
 			{
 				if (is_active == FALSE)
 				{
@@ -1429,7 +1462,7 @@ void symbol_test_init (void)
 void symbol_test_draw (void)
 {
 	union dmd_coordinate coord;
-	
+
 	browser_draw ();
 	coord.x = 96;
 	coord.y = 20;
@@ -1462,7 +1495,8 @@ void lamplist_init (void)
 	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
 	lamplist_update_mode = 0;
-	lamplist_update_speed = TIME_16MS;
+	lamplist_update_speed = TIME_100MS;
+	lamp_all_off ();
 }
 
 
@@ -1473,7 +1507,7 @@ void lamplist_draw (void)
 	print_row_center (&font_var5, 12);
 
 	sprintf ("SPEED %d", lamplist_update_speed);
-	print_row_center (&font_var5, 21);
+	font_render_string_center (&font_var5, 48, 21, sprintf_buffer);
 
 	switch (lamplist_update_mode)
 	{
@@ -1496,19 +1530,26 @@ void lamplist_draw (void)
 
 void lamplist_update (void)
 {
-	leff_data_t *cdata;
-	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
+#if 0
+	if (lamplist_update_mode >= 6)
+	{
+		U8 *lamp = lamplist_first_entry (menu_selection);
+		lamp_on (*lamp);
+		lamp = lamplist_next_entry (menu_selection, lamp);
+		lamp_on (*lamp);
+	}
+#endif
 	for (;;)
 	{
-		cdata->apply_delay = lamplist_update_speed;
 		switch (lamplist_update_mode)
 		{
 			case 0: 
-				lamp_all_off ();
 				lamplist_apply (menu_selection, lamp_on); 
+				task_sleep (TIME_166MS);
 				break;
 			case 1: lamplist_apply (menu_selection, lamp_toggle);
+				task_sleep (TIME_166MS);
 				break;
 			case 2: lamplist_step_increment (menu_selection, lamp_matrix);
 				break;
@@ -1523,7 +1564,7 @@ void lamplist_update (void)
 			case 7: lamplist_rotate_previous (menu_selection, lamp_matrix);
 				break;
 		}
-		task_sleep (TIME_200MS);
+		task_sleep (lamplist_update_speed);
 	}
 }
 
@@ -2443,8 +2484,8 @@ void presets_draw (void)
 	preset_render_name (menu_selection);
 	font_render_string_left (&font_mono5, 15, 9, sprintf_buffer);
 
-	/* Is it installed now? */	
-	font_render_string_right (&font_mono5, 127, 9, 
+	/* Is it installed now? */
+	font_render_string_right (&font_mono5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
 	task_recreate_gid (GID_SLOW_DRAW_FINISH, presets_draw_finish);
@@ -2812,7 +2853,7 @@ void single_switch_draw (void)
 	level = switch_poll (sel) ? "CLOSED" : "OPEN";
 	sprintf ("%s-%s", active, level);
 	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
-	
+
 	dmd_show_low ();
 }
 
@@ -2958,7 +2999,7 @@ void sound_test_enter (void)
 }
 
 void sound_test_init (void)
-{	
+{
 	browser_init ();
 	sound_test_set = 0;
 }
@@ -3116,11 +3157,11 @@ U8 gi_test_brightness;
 
 U8 gi_test_values[] = {
 	0,
-	TRIAC_GI_STRING(0),	
-	TRIAC_GI_STRING(1),	
-	TRIAC_GI_STRING(2),	
-	TRIAC_GI_STRING(3),	
-	TRIAC_GI_STRING(4),	
+	TRIAC_GI_STRING(0),
+	TRIAC_GI_STRING(1),
+	TRIAC_GI_STRING(2),
+	TRIAC_GI_STRING(3),
+	TRIAC_GI_STRING(4),
 	TRIAC_GI_MASK,
 };
 
@@ -3677,7 +3718,7 @@ void sysinfo_machine_version (void) {
 	extern __common__ void render_build_date (void);
 	render_build_date ();
 #ifdef DEBUGGER
-	sprintf ("%E   D%s.%s", 
+	sprintf ("%E   D%s.%s",
 		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
 	sprintf ("%E   R%s.%s",
@@ -3685,9 +3726,9 @@ void sysinfo_machine_version (void) {
 #endif
 }
 
-void sysinfo_system_version (void) { 
+void sysinfo_system_version (void) {
 #ifdef USER_TAG
-	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
+	sprintf ("%s %s.%s", C_STRING(USER_TAG),
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
 	sprintf ("SYSTEM V%s.%s",
