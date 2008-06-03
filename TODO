@@ -45,7 +45,6 @@ tunable.
 * Switch levels/edges tests do not work.  In Progress.
 * Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
-* bit_test_all_on() isn't right
 
 
 Compiler Changes
@@ -55,6 +54,7 @@ Compiler Changes
 the register replaced was dead.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
+* Too many BRA to RTS instructions; just return already.
 
 
 Nice to Have
