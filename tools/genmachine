@@ -169,6 +169,7 @@ my %EnumeratedProperties = (
 			"yellow" => 1,
 			"green" => 1,
 			"blue" => 1,
+			"purple" => 1,
 		},
 	},
 	"adjustments" => {
