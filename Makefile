@@ -270,6 +270,10 @@ CFLAGS += -DDEBUGGER
 EXTRA_ASFLAGS += -DDEBUGGER 
 endif
 
+ifeq ($(REAL_HARDWARE),y)
+CFLAGS += -DCONFIG_NO_SOL -DCONFIG_NO_TRIAC
+endif
+
 ifndef SYSTEM_MAJOR
 SYSTEM_MAJOR = 0
 endif
@@ -324,6 +328,7 @@ SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-scores.o \
 	$(BLDDIR)/mach-switches.o \
 	$(BLDDIR)/mach-containers.o \
+	$(BLDDIR)/mach-drives.o \
 	$(BLDDIR)/mach-deffs.o \
 	$(BLDDIR)/mach-fonts.o
 
@@ -767,7 +772,7 @@ endif
 #######################################################################
 ###	Machine Description Compiler
 #######################################################################
-CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives fonts
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile
 
