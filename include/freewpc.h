@@ -196,6 +196,7 @@ extern U8 idle_ok;
 #include <csum.h>
 #include <audio.h>
 #include <mode.h>
+#include <log.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #include <sys/debug.h>
