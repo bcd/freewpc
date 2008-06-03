@@ -223,20 +223,22 @@ bool bit_test (const_bitset matrix, U8 bit)
 /** Return nonzero if all bits in a matrix are set. */
 bool bit_test_all_on (const_bitset matrix)
 {
-	return !~(matrix[0] & matrix[1]
+	U8 product = (matrix[0] & matrix[1]
 		& matrix[2] & matrix[3]
 		& matrix[4] & matrix[5]
 		& matrix[6] & matrix[7]);
+	return (product == 0xFF);
 }
 
 
 /** Return nonzero if all bits in a matrix are clear. */
 bool bit_test_all_off (const_bitset matrix)
 {
-	return !!~(matrix[0] & matrix[1]
-		& matrix[2] & matrix[3]
-		& matrix[4] & matrix[5]
-		& matrix[6] & matrix[7]);
+	U8 sum = (matrix[0] | matrix[1]
+		| matrix[2] | matrix[3]
+		| matrix[4] | matrix[5]
+		| matrix[6] | matrix[7]);
+	return (sum == 0);
 }
 
 
