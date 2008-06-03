@@ -136,7 +136,7 @@ define MACHINE_CUSTOM_AMODE
 66: Top Lane Left, purple
 67: Top Lane Right, purple
 68: Skill Lower, yellow
-71: Light Jackpots, yellow
+71: Ultra Ramp Collect, yellow
 72: Final Draw, white
 73: Magna Goalie, orange
 74: Left Inlane
@@ -338,3 +338,5 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
 
+[images]
+Soccer Ball:

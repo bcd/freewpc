@@ -39,7 +39,7 @@ void amode_leff (void)
 		leff_toggle (LM_FREE_KICK);
 		leff_toggle (LM_FINAL_DRAW);
 		leff_toggle (LM_LIGHT_KICKBACK);
-		leff_toggle (LM_LIGHT_JACKPOTS);
+		leff_toggle (LM_ULTRA_RAMP_COLLECT);
 
 		task_sleep (TIME_100MS);
 
