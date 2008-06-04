@@ -37,7 +37,6 @@ Bugs
 * Solenoid pulse for device kick is hardcoded to 100%, may need to be
 tunable.
 * Briefly ignore switch row/column on ground/short.
-* Sound board commands are all 8-bits, not 16-bit, on DCS.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
 * When changing adjustments, 'confirmation' screen does not work.
@@ -51,7 +50,7 @@ Compiler Changes
 * Multiply by 16 should not be unrolled to shift; mul works best.
 * sprintf() jump table per character is way too large.
 * Increment 16-bit word optimization in GCC 4.4 does not account that
-the register replaced was dead.
+the register replaced was dead.  In Progress.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
 * Too many BRA to RTS instructions; just return already.
