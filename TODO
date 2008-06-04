@@ -5,7 +5,7 @@ Poor Design
 * Rewrite display effect module not to use malloc(), like leffs.
 * task_set_arg() still used in some places, inefficient.
 * Remove gendefines???
-* "Idle" functions aren't really idle...
+* "Idle" functions aren't really idle... see 'timing' branch
 * Sound/music management is extremely poor.
 * Teach gencallset to ignore code that isn't being compiled in.
 * sol_duty_state should default to off, for safety.  Could also:
