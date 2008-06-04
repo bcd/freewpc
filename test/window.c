@@ -308,10 +308,6 @@ void browser_down (void)
 		menu_selection = browser_max;
 }
 
-struct window_ops browser_window = {
-	INHERIT_FROM_BROWSER,
-};
-
 void browser_print_operation (const char *s)
 {
 	font_render_string_right (&font_mono5, 127, 20, s);
@@ -2143,19 +2139,29 @@ void memory_editor_enter (void)
 	if (memory_editor_modify_flag == 0)
 	{
 		memory_editor_modify_flag = 1;
-		memory_editor_new_value = readb (memory_editor_addr);
+		memory_editor_new_value = *memory_editor_addr;
 	}
 	else if (memory_editor_modify_flag == 1)
 	{
-		writeb (memory_editor_addr, memory_editor_new_value);
+		*memory_editor_addr = memory_editor_new_value;
 		memory_editor_modify_flag = 0;
 	}
 }
 
+		/* Reading both of these registers produces the same results! */
+		/* Reading just zerocross/IRQ clear produces 38, 78 most of the time;
+		 * 40, 3A, 01, 7A occasionally.
+		 * Reading just FIRQ clear produces the same results, except 02
+		 * instead of 01, and 00 occasionally.
+		 * This is with the zerocross circuit unconnected, so bit 7 of
+		 * the first should indeed always be the same. */
+		/* With the power driver board connected, both of these read a
+		 * solid 3A, occasionally BA for the first because of zerocross.
+		 * Very rarely 38 was seen on both. */
+
 void memory_editor_thread (void)
 {
 	U8 n;
-	U8 flash = 0;
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
