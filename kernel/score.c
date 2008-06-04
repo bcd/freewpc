@@ -289,6 +289,9 @@ void score_add (score_t s1, const score_t s2)
 	s2 += BYTES_PER_SCORE;
 
 	/* Add one byte at a time, however many times it takes */
+#if (BYTES_PER_SCORE >= 6)
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
+#endif
 #if (BYTES_PER_SCORE >= 5)
 	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif
@@ -393,6 +396,9 @@ void score_sub (score_t s1, const score_t s2)
 	s2 += BYTES_PER_SCORE;
 
 	/* Subtract one byte at a time, however many times it takes */
+#if (BYTES_PER_SCORE >= 6)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
+#endif
 #if (BYTES_PER_SCORE >= 5)
 	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif
