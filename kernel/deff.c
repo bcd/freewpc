@@ -347,6 +347,7 @@ void deff_start (deffnum_t dn)
 	deff_entry_t *entry;
 
 	dbprintf ("Deff %d start\n", dn);
+	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_START, dn);
 
 	/* See if an entry is already tracking this deff.
 	 * If so, just return.  To truly restart the deff,
@@ -376,6 +377,8 @@ void deff_stop (deffnum_t dn)
 	deff_entry_t *entry;
 
 	dbprintf ("Stopping deff #%d\n", dn);
+	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_STOP, dn);
+
 	if (deff_runqueue && deff_runqueue->id == dn)
 	{
 		deff_debug ("Dequeueing running deff %d\n", dn);
@@ -400,6 +403,8 @@ and then restarted.  If it is queued but not active, nothing happens.
 If it isn't even in the queue, then it is treated just like deff_start(). */
 void deff_restart (deffnum_t dn)
 {
+	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_RESTART, dn);
+
 	if (deff_runqueue && deff_runqueue->id == dn)
 	{
 		deff_start_task (&deff_table[dn]);
@@ -417,6 +422,8 @@ void deff_restart (deffnum_t dn)
 __noreturn__ void deff_exit (void)
 {
 	dbprintf ("Exiting deff %d\n", deff_runqueue->id);
+	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_EXIT, deff_runqueue->id);
+
 	task_setgid (GID_DEFF_EXITING);
 	deff_entry_free (deff_runqueue);
 	deff_reschedule ();
@@ -529,6 +536,8 @@ restart:
 					if (entry->timeout == 0)
 					{
 						/* Remove this entry from the list and restart */
+						log_event (SEV_INFO, MOD_DEFF, EV_DEFF_TIMEOUT,
+							entry->id);
 						deff_dequeue (&deff_waitqueue, entry);
 						deff_entry_free (entry);
 						goto restart;

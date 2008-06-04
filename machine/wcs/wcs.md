@@ -338,5 +338,5 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
 
-[images]
-Soccer Ball:
+# [images]
+# Soccer Ball:

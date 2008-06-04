@@ -252,6 +252,7 @@ void fatal (errcode_t error_code)
 	audit_increment (&system_audits.fatal_errors);
 	audit_assign (&system_audits.lockup1_addr, error_code);
 	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
+	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
 
 	/* Don't allow any more interrupts, since they might be the
 	source of the error.  Since FIRQ is disabled, we can only
@@ -342,6 +343,7 @@ void nonfatal (errcode_t error_code)
 	last_nonfatal_error_gid = task_getgid ();
 	deff_start (DEFF_NONFATAL_ERROR);
 #endif
+	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
 }
 
 

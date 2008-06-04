@@ -32,7 +32,7 @@ struct log_event
 #define MIN_SEVERITY SEV_DEBUG
 
 
-#define MOD_DEFF 0
+#define MOD_DEFF 0 /* done */
 	#define EV_DEFF_START 0
 	#define EV_DEFF_STOP 1
 	#define EV_DEFF_RESTART 2
@@ -66,7 +66,7 @@ struct log_event
 	#define EV_TASK_100MS 5
 
 #define MOD_SWITCH 4
-	#define EV_SW_SCHEDULE 0
+	#define EV_SW_SCHEDULE 0 /* done */
 	#define EV_SW_BLIP 1
 	#define EV_SW_SHORT 2
 
@@ -87,8 +87,8 @@ struct log_event
 
 #define MOD_SYSTEM 7
 	#define EV_SYSTEM_INIT 0
-	#define EV_SYSTEM_NONFATAL 1
-	#define EV_SYSTEM_FATAL 2
+	#define EV_SYSTEM_NONFATAL 1 /* done */
+	#define EV_SYSTEM_FATAL 2 /* done */
 
 #define MOD_PRICING 8
 	#define EV_PRICING_ADD_CREDIT 0

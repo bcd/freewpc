@@ -368,6 +368,8 @@ void switch_sched_task (void)
 		switch_test_add_queue (sw);
 #endif
 
+	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
+
 	/* Don't service switches marked SW_IN_GAME at all, if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
