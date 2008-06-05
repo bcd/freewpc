@@ -383,7 +383,7 @@ struct adjustment standard_adjustments[] = {
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
 	{ "SHOW DATE/TIME", &yes_no_value, YES, &system_config.show_date_and_time },
-	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
+	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
 	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
