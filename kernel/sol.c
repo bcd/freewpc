@@ -203,6 +203,7 @@ sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 	 * function, so it can be modified easily.
 	 * The timer value is read-and-decremented, so it
 	 * needs to set atomically. */
+	log_event (SEV_INFO, MOD_SOL, EV_SOL_START, sol);
 	sol_duty_state[sol] = duty_mask;
 	disable_interrupts ();
 	sol_timers[sol] = ticks;
@@ -214,6 +215,7 @@ sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 void
 sol_stop (solnum_t sol)
 {
+	log_event (SEV_INFO, MOD_SOL, EV_SOL_STOP, sol);
 	disable_interrupts ();
 	sol_timers[sol] = 0;
 	sol_duty_state[sol] = 0;

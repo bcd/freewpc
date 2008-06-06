@@ -165,6 +165,7 @@ __noreturn__ void freewpc_init (void)
 	leff_init ();
 	test_init ();
 	adj_init ();
+	log_init ();
 	callset_invoke (init);
 
 	/* Check all adjustments and make sure that their checksums are valid.
@@ -189,6 +190,7 @@ __noreturn__ void freewpc_init (void)
 
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
+	log_event (SEV_INFO, MOD_SYSTEM, EV_SYSTEM_INIT, 0);
 #endif
 
 	/* The system can run itself now, this task is done!
@@ -343,7 +345,7 @@ void nonfatal (errcode_t error_code)
 	last_nonfatal_error_gid = task_getgid ();
 	deff_start (DEFF_NONFATAL_ERROR);
 #endif
-	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
+	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_NONFATAL, error_code);
 }
 
 

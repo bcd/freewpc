@@ -201,16 +201,19 @@ optimal.  The bitarray macros are preferred. */
 
 void bit_on (bitset matrix, U8 bit)
 {
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_ON, bit);
 	bitarray_set (matrix, bit);
 }
 
 void bit_off (bitset matrix, U8 bit)
 {
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_OFF, bit);
 	bitarray_clear (matrix, bit);
 }
 
 void bit_toggle (bitset matrix, U8 bit)
 {
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_TOGGLE, bit);
 	bitarray_toggle (matrix, bit);
 }
 

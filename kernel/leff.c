@@ -219,6 +219,7 @@ void leff_start (leffnum_t dn)
 
 	/* Mark the leff as running now.  This is done regardless of its type. */
 	dbprintf ("Leff start %d\n", dn);
+	log_event (SEV_INFO, MOD_LAMP, EV_LEFF_START, dn);
 
 	/* If this is an exclusive leff, and it lacks priority to run,
 	 * then return.  If marked RUNNING, it can be started later
@@ -275,6 +276,7 @@ void leff_stop (leffnum_t dn)
 		if (tp)
 		{
 			dbprintf ("Leff stop %d\n", dn);
+			log_event (SEV_INFO, MOD_LAMP, EV_LEFF_STOP, dn);
 			task_kill_pid (tp);
 			lamplist_apply_nomacro (leff->lamplist, lamp_leff2_free);
 		}
@@ -330,6 +332,7 @@ __noreturn__ void leff_exit (void)
 	const leff_t *leff;
 	
 	dbprintf ("Exiting leff %d\n", leff_self_id);
+	log_event (SEV_INFO, MOD_LAMP, EV_LEFF_EXIT, leff_self_id);
 
 	bitarray_clear (leffs_running, leff_self_id);
 	leff = &leff_table[leff_self_id];

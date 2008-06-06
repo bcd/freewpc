@@ -85,6 +85,7 @@ void triac_rtt (void)
 /** Turns on one or more triacs */
 void triac_enable (U8 triac)
 {
+	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_ON, triac);
 	triac_enables |= triac;
 }
 
@@ -92,6 +93,7 @@ void triac_enable (U8 triac)
 /** Turns off one or more triacs */
 void triac_disable (U8 triac)
 {
+	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_OFF, triac);
 	triac_enables &= ~triac;
 }
 
