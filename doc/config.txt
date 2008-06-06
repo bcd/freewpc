@@ -198,14 +198,17 @@ Here is a list of the C defines that genmachine can currently generate.
 	MACHINE_BALL_IN_PLAY_MUSIC
 	MACHINE_BALL_SERVE_SOLENOID
 	MACHINE_BUYIN_LAMP
+		Says which lamp is attached to the extra ball buyin button.
 	MACHINE_BUYIN_SWITCH
 	MACHINE_CUSTOM_AMODE
 	MACHINE_DCS
 		Says the machine uses the DCS sound board.
 	MACHINE_DEBUGGER_HOOK
 	MACHINE_END_GAME_MUSIC
+		The music clip to be played at end of game.
 	MACHINE_EXTBOARD1
 	MACHINE_EXTRA_BALL_LAMP
+		Says which lamp is lit when extra balls have been collected.
 	MACHINE_FEATURE_ADJUSTMENTS
 	MACHINE_FEATURE_AUDITS
 	MACHINE_FLIPTRONIC
@@ -225,14 +228,18 @@ Here is a list of the C defines that genmachine can currently generate.
 		The maximum number of balls that can be installed.
 		This is equal to or less than the trough size.
 	MACHINE_OUTHOLE_SWITCH
+		The ID for the outhole switch, if there is one.
 	MACHINE_REPLAY_CODE_TO_SCORE
 	MACHINE_SHOOTER_SWITCH
+		The ID for the shooter switch.
 	MACHINE_SLAM_TILT_SWITCH
+		The ID for the slam tilt switch.
 	MACHINE_SOL_EXTBOARD1 (duplicate!!!)
 	MACHINE_SOL_NOSEARCHP
 	MACHINE_START_BALL_MUSIC
 	MACHINE_START_GAME_SOUND
 	MACHINE_START_LAMP
+		Says which lamp is attached to the start button.
 	MACHINE_START_SWITCH
 	MACHINE_TEST_MENU_ITEMS
 	MACHINE_TEST_ONLY
@@ -242,7 +249,6 @@ Here is a list of the C defines that genmachine can currently generate.
 
 
 Other defines not categorized yet:
-
 
 CONFIG_COIN_DOOR_WARNING
 CONFIG_PAGED_RAM
