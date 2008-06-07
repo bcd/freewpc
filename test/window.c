@@ -263,7 +263,7 @@ void browser_decimal_item_number (U8 val)
 	sprintf ("%d", val);
 }
 
-void browser_init (void)
+__attribute__((noinline)) void browser_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
 
