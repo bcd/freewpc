@@ -29,44 +29,72 @@
 
 __fastram__ U8 ac_zc_count;
 
-U8 ac_zc_poll_count;
+__fastram__ U8 ac_cycle_complete;
 
-bool ac_zc_broken;
+U8 ac_zerocross_errors;
 
+U8 ac_zerocross_count;
 
+U8 ac_zerocross_histogram[5];
+
+/**
+ * Real-time function that checks to see if we are currently at a
+ * zero crossing point.  In the US, zerocrossing occurs 60 times
+ * per second, or once every 17.07 IRQs.
+ */
 void ac_rtt (void)
 {
-	if (wpc_read_ac_zerocross () )
+	if (unlikely (wpc_read_ac_zerocross ()))
 	{
-		/* At zero cross point */
-		ac_zc_count = 0;
-	}
-	else
-	{
-		/* Not at zero cross point */
-		ac_zc_count++;
-		ac_zc_count %= 8; /* limit to 0-7 */
-	}
-}
+		/* We are currently at a zero crossing. */
+handle_zero_crossing:;
 
+		/* Bump total number of zerocrossings seen */
+		ac_zerocross_count++;
 
-CALLSET_ENTRY (ac, idle_every_100ms)
-{
-	/* TODO - this is not even close to right */
-	if (!ac_zc_broken)
-	{
-		if (ac_zc_poll_count < 250)
+		/* Audit the time since the last zerocrossing. */
+		if (ac_zc_count < 7)
 		{
-			++ac_zc_poll_count;
-			if (ac_zc_count != 0)
-			{
-				ac_zc_poll_count = 0;
-			}
+			ac_zerocross_histogram[0]++;
+		}
+		else if (ac_zc_count > 9)
+		{
+			ac_zerocross_histogram[4]++;
 		}
 		else
 		{
-			ac_zc_broken = TRUE;
-			dbprintf ("Zerocross circuit not working.\n");
+			ac_zerocross_histogram[ac_zc_count-6]++;
+		}
+
+		/* Clear the counter which indicates the number
+		of IRQs since the last crossing. */
+		ac_zc_count = 0;
+
+		/* Two crossings = 1 AC cycle, so do this every
+		other time */
+		if (ac_cycle_complete)
+		{
+			/* Update outputs */
+
+			/* Update duty cycle mask */
+		}
+		ac_cycle_complete = ~ac_cycle_complete;
+	}
+	else
+	{
+		/* We are not at a zero crossing. */
+
+		/* Don't refresh any outputs here */
+
+		/* Increment the crossing counter. */
+		ac_zc_count++;
+		if (unlikely (ac_zc_count > 9))
+		{
+			/* We should have gotten a zero crossing by now, but
+			we didn't.  We'll just pretend we got one anyway,
+			to allow the coils to be refreshed. */
+			ac_zerocross_errors++;
+			goto handle_zero_crossing;
 		}
 	}
 }
@@ -75,7 +103,7 @@ CALLSET_ENTRY (ac, idle_every_100ms)
 void ac_init (void)
 {
 	ac_zc_count = 0;
-	ac_zc_poll_count = 0;
-	ac_zc_broken = FALSE;
+	ac_cycle_complete = 0;
+	ac_zerocross_errors = 0;
 }
 

@@ -87,20 +87,32 @@ U8 *font_lookup (const font_t *font, char c)
 {
 	if (unlikely (c == ' '))
 	{
-		/* TODO : if every font had an entry for the 'space' character,
-		this test could be removed */
-		char *data = font->glyphs[(U8)'I'];
+		/* Fonts are not required to provide their own 'space' character,
+		 * since it is trivial to draw.  The width of the space is taken
+		 * from the width of the letter 'I'. */
+		char *data = font->glyphs[(U8)'I' - font->basechar];
 		font_width = *data++;
 		font_height = 1;
 		return (font_space);
 	}
 	else
 	{
-		char *data = font->glyphs[(U8)c];
+		char *data = font->glyphs[(U8)c - font->basechar];
 		font_width = *data++;
 		font_height = *data++;
 		return ((U8 *)data);
 	}
+}
+
+
+void font_lookup_char (const font_t *font, char c)
+{
+	wpc_push_page (FONT_PAGE);
+	if (font->glyphs[(U8)c - font->basechar] == NULL)
+		font_width = font_height = 0;
+	else
+		(void)font_lookup (font, c);
+	wpc_pop_page ();
 }
 
 #ifndef __m6809__

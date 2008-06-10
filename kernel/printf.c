@@ -483,8 +483,10 @@ sprintf_score (const U8 *score)
 	sprintf ("%8b", score);
 #elif (MACHINE_SCORE_DIGITS == 10)
 	sprintf ("%10b", score);
+#elif (MACHINE_SCORE_DIGITS == 12)
+	sprintf ("%12b", score);
 #else
-#error
+#error "invalid number of score digits"
 #endif
 }
 

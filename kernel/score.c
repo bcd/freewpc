@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -91,10 +91,17 @@ void scores_draw_credits (void)
 
 /** A lookup table for mapping a 'score font key' into a font and
  * location on the DMD. */
-const struct score_font_info 
+const struct score_font_info
 {
+	/* The function to call to draw the string.  This determines
+	the justification */
 	void (*render) (void);
+
+	/* The font to be used */
 	const font_t *font;
+
+	/* The location where the score should be drawn, subject to
+	justification */
 	U8 x;
 	U8 y;
 } score_font_info_table[] = {
@@ -134,19 +141,23 @@ const U8 score_font_info_key[4][5][4] = {
 		{SCORE_POS_CENTER_LARGE},
 	},
 	/* 2 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL }, 
-		{SCORE_POS_UL_LARGE, SCORE_POS_LR_SMALL }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL },
+		{SCORE_POS_UL_LARGE, SCORE_POS_LR_SMALL },
 		{SCORE_POS_UL_SMALL, SCORE_POS_LR_LARGE }
 	},
 	/* 3 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY }, 
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL }, 
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_LARGE }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL },
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_LARGE },
 	},
 	/* 4 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL, 
-			SCORE_POS_LR_SMALL }, 
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL,
+			SCORE_POS_LR_SMALL },
+		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY, },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY, },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_SMALL, SCORE_POS_LR_TINY, },
+		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_SMALL, },
 	},
 };
 
@@ -289,6 +300,9 @@ void score_add (score_t s1, const score_t s2)
 	s2 += BYTES_PER_SCORE;
 
 	/* Add one byte at a time, however many times it takes */
+#if (BYTES_PER_SCORE >= 6)
+	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
+#endif
 #if (BYTES_PER_SCORE >= 5)
 	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif
@@ -393,6 +407,9 @@ void score_sub (score_t s1, const score_t s2)
 	s2 += BYTES_PER_SCORE;
 
 	/* Subtract one byte at a time, however many times it takes */
+#if (BYTES_PER_SCORE >= 6)
+	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
+#endif
 #if (BYTES_PER_SCORE >= 5)
 	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
 #endif

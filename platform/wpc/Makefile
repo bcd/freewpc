@@ -64,3 +64,7 @@ CALLSET_FLAGS += -D platform/wpc
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
 $(P)/math.o : INT_CFLAGS=-mint16
+
+# The startup code needs to know the number of paged regions in the ROM
+# to checksum.
+$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=61 -DBOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))

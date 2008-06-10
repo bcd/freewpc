@@ -31,7 +31,7 @@
 extern inline U8 wpc_debug_get_status (void)
 {
 #ifdef CONFIG_PLATFORM_WPC
-	return wpc_asic_read (WPC_DEBUG_CONTROL_PORT);
+	return readb (WPC_DEBUG_CONTROL_PORT);
 #endif
 }
 
@@ -52,14 +52,14 @@ extern inline U8 wpc_debug_read_ready (void)
 extern inline void wpc_debug_write (U8 data)
 {
 #ifdef CONFIG_PLATFORM_WPC
-	wpc_asic_write (WPC_DEBUG_DATA_PORT, data);
+	writeb (WPC_DEBUG_DATA_PORT, data);
 #endif
 }
 
 extern inline U8 wpc_debug_read (void)
 {
 #ifdef CONFIG_PLATFORM_WPC
-	return wpc_asic_read (WPC_DEBUG_DATA_PORT);
+	return readb (WPC_DEBUG_DATA_PORT);
 #endif
 }
 

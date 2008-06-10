@@ -50,6 +50,7 @@ per AC cycle */
 #define flipper_triac_disable()	triac_disable (TRIAC_FLIPPER_ENABLE)
 
 /* Macros for enabling/disabling the coindoor interlock */
+/* TODO - these are not being used now */
 #define coindoor_triac_enable()	triac_enable (TRIAC_COINDOOR_INTERLOCK)
 #define coindoor_triac_disable()	triac_disable (TRIAC_COINDOOR_INTERLOCK)
 
@@ -59,11 +60,15 @@ cached in memory so that the current state can be read back. */
 
 #define triac_read()					triac_io_cache
 
+#ifdef CONFIG_NO_TRIAC
+#define triac_write(v)
+#else
 #define triac_write(v) \
 do { \
 	triac_io_cache = v; \
-	wpc_asic_write (WPC_GI_TRIAC, v); \
+	writeb (WPC_GI_TRIAC, v); \
 } while (0)
+#endif
 
 #define ac_zerocross_set()			(*(U8 *)WPC_ZEROCROSS & 0x80)
 

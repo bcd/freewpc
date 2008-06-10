@@ -228,7 +228,7 @@ EVENT_OBJS = $(BLDDIR)/callset.o
 
 TEST_OBJS = test/window.o
 
-TEST2_OBJS = test/format.o test/preset.o
+TEST2_OBJS = test/format.o test/preset.o test/swtest.o
 
 FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
 
@@ -268,6 +268,10 @@ CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(B
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER 
 EXTRA_ASFLAGS += -DDEBUGGER 
+endif
+
+ifeq ($(REAL_HARDWARE),y)
+CFLAGS += -DCONFIG_NO_SOL -DCONFIG_NO_TRIAC
 endif
 
 ifndef SYSTEM_MAJOR
@@ -324,6 +328,7 @@ SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-scores.o \
 	$(BLDDIR)/mach-switches.o \
 	$(BLDDIR)/mach-containers.o \
+	$(BLDDIR)/mach-drives.o \
 	$(BLDDIR)/mach-deffs.o \
 	$(BLDDIR)/mach-fonts.o
 
@@ -344,7 +349,7 @@ MUX_OBJS := $(MUX_SRCS:.c=.o)
 PAGE_NUMBERS = 56 57 58 59 60 61
 
 PAGED_SECTIONS = $(foreach pg,$(PAGE_NUMBERS),page$(pg))
-NUM_PAGED_SECTIONS := $(words $(PAGE_NUMBERS))
+NUM_PAGED_SECTIONS = $(words $(PAGE_NUMBERS))
 NUM_BLANK_PAGES := $(shell echo $$(($(ROM_PAGE_COUNT) - 2 - $(NUM_PAGED_SECTIONS))))
 BLANK_SIZE := $(shell echo $$(( $(NUM_BLANK_PAGES) * 16)))
 
@@ -603,7 +608,7 @@ endif
 
 ifeq ($(CPU),native)
 freewpc : $(OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -767,7 +772,7 @@ endif
 #######################################################################
 ###	Machine Description Compiler
 #######################################################################
-CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives fonts
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile
 

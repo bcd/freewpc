@@ -54,6 +54,6 @@ GAME_TEST_OBJS =
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS = goalie_driver.o
+GAME_PAGED_OBJS = goalie_driver.o amode.o
 
 FIF_SRCS += $(M)/soccerball.fif
