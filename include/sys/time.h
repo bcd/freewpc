@@ -59,7 +59,13 @@ extern inline U16 get_sys_time (void)
 	return sys_time;
 }
 
+#define HAVE_BMI
+
+#ifdef HAVE_BMI
+#define time_reached_p(t) (((t) - get_sys_time ()) & 0x8000UL)
+#else
 #define time_reached_p(t) \
 ({ volatile U16 diff = t - get_sys_time (); diff & 0x8000; })
+#endif
 
 #endif /* _SYS_TIME_H */
