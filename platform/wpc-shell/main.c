@@ -55,7 +55,7 @@ void exec (void)
 	{
 		for (exec_off = 0; exec_off <= 0x7f; exec_off++)
 			verify (exec_off);
-		if (wpc_asic_read (WPC_SW_CABINET_INPUT) != 0)
+		if (readb (WPC_SW_CABINET_INPUT) != 0)
 			fault ();
 		if (++exec_count == 0)
 			dmd_low_buffer[64] = ~dmd_low_buffer[64];
@@ -64,9 +64,9 @@ void exec (void)
 
 void init (void)
 {
-	wpc_asic_write (WPC_DMD_LOW_PAGE, 0);
-	wpc_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
-	wpc_asic_write (WPC_ZEROCROSS_IRQ_CLEAR, 0x96);
+	writeb (WPC_DMD_LOW_PAGE, 0);
+	writeb (WPC_DMD_ACTIVE_PAGE, 0);
+	writeb (WPC_ZEROCROSS_IRQ_CLEAR, 0x96);
 	wpc_dmd_set_firq_row (30);
 	for (exec_off = 0; exec_off <= 0x7f; exec_off++)
 		testbuf[exec_off] = ~exec_off;

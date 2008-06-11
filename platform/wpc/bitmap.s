@@ -341,3 +341,17 @@ erase_large_middle_loop:
 	dec	_bitmap_height
 	bne	erase_large_row_loop
 	puls	y,pc
+
+
+	.globl _bitmap_rough_erase
+_bitmap_rough_erase:
+	ldb	_bitmap_height
+rough_row_loop:
+	lda	*_bitmap_byte_width
+rough_col_loop:
+	deca
+	clr	a,x
+	bne	rough_col_loop
+	leax	16,x
+	decb
+	bne	rough_row_loop

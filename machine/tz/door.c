@@ -158,7 +158,6 @@ void door_award_deff (void)
 {
 	U8 index = door_index;
 
-	deff_wait_for_other (DEFF_SKILL_SHOT_MADE);
 	kickout_lock (KLOCK_DEFF);
 	dmd_alloc_low_clean ();
 

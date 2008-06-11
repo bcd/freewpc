@@ -146,8 +146,7 @@ static void rtc_normalize (void)
 	while (hour >= 24)
 	{
 		hour -= 24;
-		wpc_asic_write (WPC_CLK_HOURS_DAYS,
-			wpc_asic_read (WPC_CLK_HOURS_DAYS) - 24);
+		writeb (WPC_CLK_HOURS_DAYS, readb (WPC_CLK_HOURS_DAYS) - 24);
 		day++;
 	}
 
@@ -184,8 +183,8 @@ static void rtc_normalize (void)
 static void rtc_hw_read (void)
 {
 	wpc_nvram_get ();
-	hour = wpc_asic_read (WPC_CLK_HOURS_DAYS);
-	minute = wpc_asic_read (WPC_CLK_MINS);
+	hour = readb (WPC_CLK_HOURS_DAYS);
+	minute = readb (WPC_CLK_MINS);
 	csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
 }
@@ -225,10 +224,12 @@ static void rtc_pinmame_read (void)
 
 void rtc_factory_reset (void)
 {
-	/* Reset the date to Jan. 1, 2006 */
-	year = 6;
-	month = 1;
-	day = 1;
+	/* Reset the date to the time at which the software
+	 * was built.
+	 * TODO : this should trigger a CLOCK NOT SET message */
+	year = BUILD_YEAR - 2000;
+	month = BUILD_MONTH;
+	day = BUILD_DAY;
 	hour = 0;
 	minute = 0;
 	last_minute = 0;

@@ -94,7 +94,7 @@ void print_string (const char *text)
 	if (printer_string_page)
 	{
 		U8 c;
-		while (c = far_read8 (text, printer_string_page))
+		while ((c = far_read8 (text, printer_string_page)))
 		{
 			print_char (c);
 			text++;

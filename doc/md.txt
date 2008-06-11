@@ -56,9 +56,11 @@ creates the number based on the order of the declarations.
 
 Directives
 
-
 The include directive
 
 The define directive
+
+
+Global Configuration
 
 

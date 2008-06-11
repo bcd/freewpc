@@ -221,7 +221,7 @@ EVENT_OBJS = $(BLDDIR)/callset.o
 
 TEST_OBJS = test/window.o
 
-TEST2_OBJS = test/format.o test/preset.o
+TEST2_OBJS = test/format.o test/preset.o test/swtest.o
 
 FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
 
@@ -257,6 +257,10 @@ CFLAGS += -Wall -Wstrict-prototypes
 # Define lots of other things based on make parameters
 #
 CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(BUILD_YEAR)
+
+ifeq ($(REAL_HARDWARE),y)
+CFLAGS += -DCONFIG_NO_SOL -DCONFIG_NO_TRIAC
+endif
 
 ifndef SYSTEM_MAJOR
 SYSTEM_MAJOR = 0
@@ -313,6 +317,7 @@ SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-scores.o \
 	$(BLDDIR)/mach-switches.o \
 	$(BLDDIR)/mach-containers.o \
+	$(BLDDIR)/mach-drives.o \
 	$(BLDDIR)/mach-deffs.o \
 	$(BLDDIR)/mach-fonts.o
 
@@ -609,7 +614,7 @@ endif
 
 ifeq ($(CPU),native)
 freewpc : $(OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -772,7 +777,7 @@ endif
 ###	Machine Description Compiler
 #######################################################################
 ifneq ($(CONFIG_BARE),y)
-CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives fonts
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 endif
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile

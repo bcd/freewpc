@@ -118,8 +118,8 @@ extern inline void lamp_rtt_common (const U8 mode)
 	 * But only do this outside of a game. */
 
 	/* Setup the strobe */
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
-	wpc_asic_write (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
+	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
 
 	/* Advance the strobe value for the next iteration.
 	Keep this together with the above so that lamp_strobe_mask
@@ -162,7 +162,7 @@ extern inline void lamp_rtt_common (const U8 mode)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, bits);
+	writeb (WPC_LAMP_ROW_OUTPUT, bits);
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
@@ -219,21 +219,26 @@ bool bit_test (const_bitset matrix, U8 bit)
 	return bitarray_test (matrix, bit);
 }
 
+
+/** Return nonzero if all bits in a matrix are set. */
 bool bit_test_all_on (const_bitset matrix)
 {
-	/* TODO : is this right? */
-	return matrix[0] && matrix[1]
-		&& matrix[2] && matrix[3]
-		&& matrix[4] && matrix[5]
-		&& matrix[6] && matrix[7];
+	U8 product = (matrix[0] & matrix[1]
+		& matrix[2] & matrix[3]
+		& matrix[4] & matrix[5]
+		& matrix[6] & matrix[7]);
+	return (product == 0xFF);
 }
 
+
+/** Return nonzero if all bits in a matrix are clear. */
 bool bit_test_all_off (const_bitset matrix)
 {
-	return !matrix[0] && !matrix[1]
-		&& !matrix[2] && !matrix[3]
-		&& !matrix[4] && !matrix[5]
-		&& !matrix[6] && !matrix[7];
+	U8 sum = (matrix[0] | matrix[1]
+		| matrix[2] | matrix[3]
+		| matrix[4] | matrix[5]
+		| matrix[6] | matrix[7]);
+	return (sum == 0);
 }
 
 
@@ -360,8 +365,11 @@ bool lamp_test_off (lampnum_t lamp)
 
 void lamp_flash_on (lampnum_t lamp)
 {
-	bit_on (lamp_flash_matrix, lamp);
-	lamp_flash_sync ();
+	if (!bit_test (lamp_flash_matrix, lamp))
+	{
+		bit_on (lamp_flash_matrix, lamp);
+		lamp_flash_sync ();
+	}
 }
 
 void lamp_flash_off (lampnum_t lamp)

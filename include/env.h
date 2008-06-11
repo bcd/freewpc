@@ -133,6 +133,22 @@ to perform certain optimizations across both sides of the barrier. */
 #define barrier() asm ("; nop" ::: "memory")
 
 
+/* Some versions of the 6809 C compiler have issues.
+ * Use __GCC6809_AT_LEAST__ to test for a minimum version. */
+#define VERSION_CODE(major, minor, patchlevel) \
+	((major * 10000UL) + (minor * 100UL) + patchlevel)
+
+#define __GCC_VERSION_CODE__ \
+	VERSION_CODE(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
+
+#ifdef __m6809__
+#define __GCC6809_AT_LEAST__(major, minor, patchlevel) \
+	(__GCC_VERSION_CODE__ >= VERSION_CODE(major, minor, patchlevel))
+#else
+#define __GCC6809_AT_LEAST__(major, minor, patchlevel) 1
+#endif
+
+
 /* The VOIDCALL macros let you call a function without declaring
 a prototype. */
 

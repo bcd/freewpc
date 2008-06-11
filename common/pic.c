@@ -126,6 +126,12 @@ U8 pic_serial_number[18];
  * reading, so that the PIC data should not be trusted. */
 bool pic_invalid;
 
+/** True if the PIC unlock code has been calculated.  Until this is
+ * true, the periodic refresh is disabled. */
+bool pic_unlock_ready;
+
+/** The unlock code that is periodically sent to the PIC to enable
+ * switch scanning */
 U8 pic_unlock_code[3];
 
 
@@ -216,6 +222,7 @@ void pic_compute_unlock_code (void)
 	pic_unlock_code[0] = (reg >> 16) & 0xFF;
 	pic_unlock_code[1] = (reg >> 8) & 0xFF;
 	pic_unlock_code[2] = reg & 0xFF;
+	pic_unlock_ready = TRUE;
 
 	dbprintf ("done\n");
 }
@@ -251,6 +258,11 @@ void pic_init (void)
 
 	dbprintf ("Initialize the PIC...\n");
 	pic_invalid = TRUE;
+	pic_unlock_ready = FALSE;
+
+#ifdef CONFIG_NO_PIC
+	return;
+#endif
 
 	/* Reset the PIC. */
 	wpc_write_pic (WPC_PIC_RESET);
@@ -270,7 +282,10 @@ void pic_init (void)
 	{
 		/* Read a single PIC register, and store it in the
 		 * correct slot.  Note that some delay is required
-		 * before the result can be obtained. */
+		 * before the result can be obtained.  Also interrupts
+		 * must be disabled to prevent other accesses to the
+		 * PIC device during this time (i.e. switch polling). */
+		disable_irq ();
 		wpc_write_pic (WPC_PIC_SERIAL (i));
 		null_function ();
 		null_function ();
@@ -278,6 +293,7 @@ void pic_init (void)
 		null_function ();
 		null_function ();
 		val = wpc_read_pic ();
+		enable_irq ();
 		ereg = pic_serial_map[i];
 		if (ereg)
 			*ereg = val;

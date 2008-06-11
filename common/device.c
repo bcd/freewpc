@@ -484,6 +484,13 @@ void device_update_globals (void)
 	missing_balls = 0;
 #endif
 
+	/* If 'missing' went negative, this means there are more
+	balls detected than expected. */
+	if (missing_balls > 0xF0)
+	{
+		missing_balls = 0;
+	}
+
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
 		counted_balls, missing_balls, live_balls, held_balls);
 

@@ -4,8 +4,9 @@ through the code, then sorted according to feature and priority.
 Poor Design
 * Rewrite display effect module not to use malloc(), like leffs.
 * task_set_arg() still used in some places, inefficient.
-* Move printf and game state machine code out of the system page.
 * Remove gendefines???
+* "Idle" functions aren't really idle... see 'timing' branch
+* Sound/music management is extremely poor.
 * Teach gencallset to ignore code that isn't being compiled in.
 * sol_duty_state should default to off, for safety.  Could also:
  - invert/encode it so identical ff/ff from runaway code doesn't
@@ -13,9 +14,8 @@ Poor Design
  - Take the timer mod some upper limit, to prevent exercising a coil
    more than should ever be needed (i.e. slingshots).
 * Use the new bitmap functions to draw the switch matrix in test.
-* "Idle" functions aren't really idle...
 * Replace FIF with something more intelligent.
-* Sound/music management is extremely poor.
+* Move printf and game state machine code out of the system page.
 
 
 Missing Feature
@@ -34,34 +34,29 @@ Missing Feature
 
 
 Bugs
-* ROM checksum calculation does not account for the size of the ROM.
 * Solenoid pulse for device kick is hardcoded to 100%, may need to be
 tunable.
 * Briefly ignore switch row/column on ground/short.
-* Sound board commands are all 8-bits, not 16-bit, on DCS.
-* Flashing lamps do not all flash in sync.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
 * When changing adjustments, 'confirmation' screen does not work.
 * Factory defaults should be different per country code.
-* Switch levels/edges tests do not work.
-* Eliminate deff_wait_for_other().
+* Switch levels/edges tests do not work.  In Progress.
 * Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
-* bit_test_all_on() isn't right
 
 
 Compiler Changes
 * Multiply by 16 should not be unrolled to shift; mul works best.
 * sprintf() jump table per character is way too large.
 * Increment 16-bit word optimization in GCC 4.4 does not account that
-the register replaced was dead.
+the register replaced was dead.  In Progress.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
+* Too many BRA to RTS instructions; just return already.
 
 
 Nice to Have
-* Rename wpc_asic_write to just writeb.
 * ./include/freewpc.h:/* TODO - move these elsewhere */
 * ./include/freewpc.h:#include <platform/linux.h> /* TODO : rename this file */
 * ./include/freewpc.h:/* Uncommon software modules - TODO : shouldn't automatically include */
@@ -73,11 +68,9 @@ Nice to Have
 
 Real Hardware Issues
 * Colors are different from emulation.
-* PIC serial number decoding does not seem to be correct.
 
 
 Uncategorized
-
 
 ./common/device.c:/* TODO : is this needed?  Can use sys_init_complete instead? */
 ./common/device.c:			 * TODO - how to do this is also device-specific. */

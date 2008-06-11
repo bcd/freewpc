@@ -126,7 +126,16 @@ extern inline void m6809_firq_restore_regs (void)
  */
 extern inline void *memset (void *s, U8 c, U16 n)
 {
-	if ((n % 8) == 0)
+	if (n <= 5)
+	{
+		register U8 *s1 = (U8 *)s;
+		if (n >= 4) *s1++ = c;
+		if (n >= 3) *s1++ = c;
+		if (n >= 2) *s1++ = c;
+		if (n >= 1) *s1++ = c;
+		*s1 = c;
+	}
+	else if ((n % 8) == 0)
 	{
 		register U16 *s1 = (U16 *)s;
 		n /= 8;
@@ -149,14 +158,6 @@ extern inline void *memset (void *s, U8 c, U16 n)
 			n--;
 		}
 	}
-#if 0
-	else if (n <= 7)
-	{
-		register U8 *s1 = (U8 *)s;
-		*s1++ = c;
-		(void) memset (s1, c, n-1);
-	}
-#endif
 	else
 	{
 		register char *s1 = (char *)s;
@@ -194,12 +195,36 @@ extern inline void __blockclear16 (void *s1, U16 n)
 
 extern inline void *memcpy (void *s1, const void *s2, U16 n)
 {
-	register char *_s1 = (char *)s1;
-	register char *_s2 = (char *)s2;
-	while (n > 0)
+	if ((n == 3) || (n == 5))
 	{
-		*_s1++ = *_s2++;
+		register U8 *_s1 = (U8 *)s1;
+		register const U8 *_s2 = (U8 *)s2;
+		*_s1 = *_s2;
+		s1++;
+		s2++;
 		n--;
+	}
+
+	if ((n % 2) == 0)
+	{
+		register U16 *_s1 = (U16 *)s1;
+		register const U16 *_s2 = (U16 *)s2;
+		n /= 2;
+		while (n > 0)
+		{
+			*_s1++ = *_s2++;
+			n--;
+		}
+	}
+	else
+	{
+		register U8 *_s1 = (U8 *)s1;
+		register const U8 *_s2 = (U8 *)s2;
+		while (n > 0)
+		{
+			*_s1++ = *_s2++;
+			n--;
+		}
 	}
 	return (s1);
 }

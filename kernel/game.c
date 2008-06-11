@@ -595,13 +595,15 @@ CALLSET_ENTRY (game, sw_start_button)
 		return;
 
 #ifdef MACHINE_START_SWITCH
-	/* If not enough credits, inform the player.
-	 * Also call machine hook, e.g. to make a sound.
-	 * But don't do this during a game. */
-	if (!in_game && !has_credits_p ())
+	/* If not enough credits to start game/add player,
+	 * return.  Alert the player of this outside of a game. */
+	if (!has_credits_p ())
 	{
-		deff_start (DEFF_CREDITS);
-		callset_invoke (start_without_credits);
+		if (!in_game)
+		{
+			deff_start (DEFF_CREDITS);
+			callset_invoke (start_without_credits);
+		}
 		return;
 	}
 

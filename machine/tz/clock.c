@@ -237,7 +237,7 @@ void tz_clock_rtt (void)
 	 * switches. */
 	wpc_ext1_enable (CLK_DRV_SWITCH_STROBE);
 	clock_last_sw = clock_sw;
-	clock_sw = ~ wpc_asic_read (WPC_SW_ROW_INPUT);
+	clock_sw = ~ readb (WPC_SW_ROW_INPUT);
 	wpc_ext1_disable (CLK_DRV_SWITCH_STROBE);
 
 	/* Unless any switches change, there's nothing else to do */

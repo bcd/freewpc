@@ -116,7 +116,9 @@ extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
 	sol_contribute (base_id + 7, out);
 
 	/* Write the final output to the hardware */
-	wpc_asic_write (asic_addr, out);
+#ifndef CONFIG_NO_SOL
+	writeb (asic_addr, out);
+#endif
 }
 
 

@@ -129,6 +129,7 @@ void music_off (void);
 void music_set (music_code_t code);
 void sound_rtt (void);
 void sound_init (void);
+void sound_board_init (void);
 void sound_send (sound_code_t code);
 void sound_reset (void);
 void volume_set (U8);

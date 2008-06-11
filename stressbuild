@@ -21,7 +21,7 @@ for native in $native_options; do
 	for mach in `echo t2 tz wcs afm tester`; do
 		for debugger in `echo y n`; do
 			if [ "$native" = "n" ]; then
-				gcctargets=`echo 4.2.1 4.2.2 4.3.0`;
+				gcctargets=`echo 4.2.2 4.3.0 4.4.0`;
 			else
 				gcctargets=`echo nop`;
 			fi

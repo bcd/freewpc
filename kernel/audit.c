@@ -30,14 +30,14 @@
 
 __nvram__ std_audits_t system_audits;
 
-__nvram__ U8 audit_csum;
-
 #ifdef MACHINE_FEATURE_AUDITS
 __nvram__ feature_audits_t feature_audits;
 #define MACHINE_FEATURE_AUDIT_SIZE sizeof (feature_audits)
 #else
 #define MACHINE_FEATURE_AUDIT_SIZE 0
 #endif
+
+__nvram__ U8 audit_csum;
 
 const struct area_csum audit_csum_info = {
 	.area = (U8 *)&system_audits,
@@ -64,10 +64,13 @@ void audit_reset (void)
 /** Increment an audit by 1 */
 void audit_increment (audit_t *aud)
 {
-	wpc_nvram_get ();
-	(*aud)++;
-	csum_area_update (&audit_csum_info);
-	wpc_nvram_put ();
+	if (*aud < 0xFFFF)
+	{
+		wpc_nvram_get ();
+		(*aud)++;
+		csum_area_update (&audit_csum_info);
+		wpc_nvram_put ();
+	}
 }
 
 
@@ -76,6 +79,7 @@ void audit_add (audit_t *aud, U8 val)
 {
 	wpc_nvram_get ();
 	(*aud) += val;
+	/* TODO - check for overflow */
 	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();
 }
