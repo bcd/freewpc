@@ -66,7 +66,7 @@ cached in memory so that the current state can be read back. */
 #define triac_write(v) \
 do { \
 	triac_io_cache = v; \
-	writeb (WPC_GI_TRIAC, v); \
+	pinio_write_triac (v); \
 } while (0)
 #endif
 

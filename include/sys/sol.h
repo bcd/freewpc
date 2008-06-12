@@ -25,6 +25,7 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
+/* TODO - these are WPC specific */
 #define SOL_BASE_HIGH 0
 #define SOL_BASE_LOW 8
 #define SOL_BASE_GENERAL 16

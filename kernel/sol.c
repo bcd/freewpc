@@ -95,7 +95,7 @@ a time. */
  * base_id is the solenoid number for the first solenoid in the set.
  * asic_addr is the hardware register to be written with all 8 values
  * at once. */
-extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
+extern inline void sol_update_set (const U8 set)
 {
 	/* For some reason, GCC 4.x crashes on this function... */
 #ifdef GCC4
@@ -106,18 +106,18 @@ extern inline void sol_update_set (const U8 base_id, const U16 asic_addr)
 
 	/* Update each of the 8 solenoids in the bank, updating timers
 	and calculating whether or not each should be on or off. */
-	sol_contribute (base_id + 0, out);
-	sol_contribute (base_id + 1, out);
-	sol_contribute (base_id + 2, out);
-	sol_contribute (base_id + 3, out);
-	sol_contribute (base_id + 4, out);
-	sol_contribute (base_id + 5, out);
-	sol_contribute (base_id + 6, out);
-	sol_contribute (base_id + 7, out);
+	sol_contribute (set * 8 + 0, out);
+	sol_contribute (set * 8 + 1, out);
+	sol_contribute (set * 8 + 2, out);
+	sol_contribute (set * 8 + 3, out);
+	sol_contribute (set * 8 + 4, out);
+	sol_contribute (set * 8 + 5, out);
+	sol_contribute (set * 8 + 6, out);
+	sol_contribute (set * 8 + 7, out);
 
 	/* Write the final output to the hardware */
 #ifndef CONFIG_NO_SOL
-	writeb (asic_addr, out);
+	pinio_write_solenoid_set (set, out);
 #endif
 }
 
@@ -150,14 +150,14 @@ extern inline void sol_update_fliptronic_powered (void)
 /** Realtime update of the high power solenoids */
 void sol_update_rtt_0 (void)
 {
-	sol_update_set (SOL_BASE_HIGH, WPC_SOL_HIGHPOWER_OUTPUT);
+	sol_update_set (0);
 }
 
 
 /** Realtime update of the low power solenoids */
 void sol_update_rtt_1 (void)
 {
-	sol_update_set (SOL_BASE_LOW, WPC_SOL_LOWPOWER_OUTPUT);
+	sol_update_set (1);
 #if (MACHINE_WPC95 == 1)
 	sol_update_fliptronic_powered ();
 #endif
@@ -167,16 +167,16 @@ void sol_update_rtt_1 (void)
 /** Realtime update of the first set of flasher outputs */
 void sol_update_rtt_2 (void)
 {
-	sol_update_set (SOL_BASE_GENERAL, WPC_SOL_FLASH1_OUTPUT);
+	sol_update_set (2);
 }
 
 
 /** Realtime update of the second set of flasher outputs */
 void sol_update_rtt_3 (void)
 {
-	sol_update_set (SOL_BASE_AUXILIARY, WPC_SOL_FLASH2_OUTPUT);
+	sol_update_set (3);
 #ifdef MACHINE_SOL_EXTBOARD1
-	sol_update_set (SOL_BASE_EXTENDED, WPC_EXTBOARD1);
+	sol_update_set (5);
 #endif
 
 	/* Rotate the duty mask for the next iteration. */

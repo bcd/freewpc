@@ -6,6 +6,12 @@ CPU := m6809
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
 
+# Subplatform support
+CONFIG_WHITESTAR ?= y
+CONFIG_FONT ?= $(CONFIG_DMD)
+CONFIG_AC ?= n
+CONFIG_ANIMATION ?= $(CONFIG_DMD)
+
 # Additional CFLAGS required on the WPC platform
 CFLAGS += -mdirect -DCONFIG_PLATFORM_WHITESTAR -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram
 

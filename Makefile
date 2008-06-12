@@ -215,7 +215,9 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 ifneq ($(CONFIG_BARE),y)
 include kernel/Makefile
 include common/Makefile
+ifeq ($(CONFIG_FONT),y)
 include fonts/Makefile
+endif
 
 EVENT_OBJS = $(BLDDIR)/callset.o
 
@@ -318,8 +320,11 @@ SYSTEM_MD_OBJS = \
 	$(BLDDIR)/mach-switches.o \
 	$(BLDDIR)/mach-containers.o \
 	$(BLDDIR)/mach-drives.o \
-	$(BLDDIR)/mach-deffs.o \
-	$(BLDDIR)/mach-fonts.o
+	$(BLDDIR)/mach-deffs.o
+
+ifeq ($(CONFIG_FONT),y)
+SYSTEM_MD_OBJS += $(BLDDIR)/mach-fonts.o
+endif
 
 MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 endif
@@ -466,7 +471,10 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
-MAKE_DEPS = Makefile kernel/Makefile common/Makefile fonts/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile .config
+MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile .config
+ifeq ($(CONFIG_FONT),y)
+MAKE_DEPS += fonts/Makefile
+endif
 C_DEPS += $(BLDDIR)/mach-config.h
 C_DEPS += $(MAKE_DEPS) $(INCLUDES) $(MACH_LINKS)
 
@@ -777,7 +785,10 @@ endif
 ###	Machine Description Compiler
 #######################################################################
 ifneq ($(CONFIG_BARE),y)
-CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives fonts
+CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives
+ifeq ($(CONFIG_FONT),y)
+CONFIG_CMDS += fonts
+endif
 CONFIG_SRCS = $(CONFIG_CMDS:%=$(BLDDIR)/mach-%.c)
 endif
 CONFIG_FILES = $(BLDDIR)/mach-config.h $(CONFIG_SRCS) $(BLDDIR)/mach-Makefile

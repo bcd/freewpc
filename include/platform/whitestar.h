@@ -186,12 +186,12 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 extern inline U8 wpc_get_rom_page (void)
 {
-	return readb (WS_ROM_PAGE);
+	return readb (WS_PAGE_LED) & WS_PAGE_MASK;
 }
 
 extern inline void wpc_set_rom_page (U8 page)
 {
-	writeb (WS_ROM_PAGE, page);
+	writeb (WS_PAGE_LED, page & WS_PAGE_MASK);
 }
 
 
@@ -292,6 +292,84 @@ extern inline void wpc_write_ticket (U8 val)
 {
 }
 
+/********************************************/
+/* Lamps                                    */
+/********************************************/
+
+extern inline void pinio_write_lamp_strobe (U8 val)
+{
+	writeb (WS_LAMP_COLUMN_STROBE, val);
+}
+
+extern inline void pinio_write_lamp_data (U8 val)
+{
+	writeb (WS_LAMP_ROW_OUTPUT, val);
+}
+
+/********************************************/
+/* Solenoids                                */
+/********************************************/
+
+extern inline void pinio_write_solenoid_set (U8 set, U8 val)
+{
+	switch (set)
+	{
+	case 0:
+		writeb (WS_SOLA, val);
+		break;
+	case 1:
+		writeb (WS_SOLB, val);
+		break;
+	case 2:
+		writeb (WS_SOLC, val);
+		break;
+	case 3:
+		writeb (WS_FLASHERS, val);
+		break;
+	}
+}
+
+
+/********************************************/
+/* Sound                                    */
+/********************************************/
+
+extern inline void pinio_write_sound (U8 val)
+{
+}
+
+extern inline bool pinio_sound_ready_p (void)
+{
+}
+
+extern inline U8 pinio_read_sound (void)
+{
+}
+
+/********************************************/
+/* Switches                                 */
+/********************************************/
+
+extern inline void pinio_write_switch_column (U8 val)
+{
+}
+
+extern inline U8 pinio_read_switch_rows (void)
+{
+}
+
+extern inline U8 pinio_read_dedicated_switches (void)
+{
+}
+
+
+/********************************************/
+/* Triacs                                   */
+/********************************************/
+
+extern inline void pinio_write_triac (U8 val)
+{
+}
 
 #endif /* _WHITESTAR_H */
 

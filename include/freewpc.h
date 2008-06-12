@@ -205,8 +205,8 @@ extern U8 idle_ok;
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #ifdef CONFIG_PLATFORM_WPC
 #include <sys/debug.h>
-#include <test.h> /* this one HAS to be here for now, for callset.c */
 #endif
+#include <test.h> /* this one HAS to be here for now, for callset.c */
 
 /* Game-specific defines.  'mach' should point to the machine-specific 
  * directory.  These files are optional; if a machine does not need
