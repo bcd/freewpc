@@ -23,7 +23,7 @@ Missing Feature
 * Lamp power saver level
 * If all optos are not working, warn about the 12V supply.
 * Abort after so many ball searches, or try another method (chase ball?)
-* Zerocross circuitry is not being used.
+* Zerocross circuitry is not being used.  In Progress.
 * Print message when high power coils are disabled by open coin door.
 * Coin Door Ballsave
 * Burnin
@@ -35,7 +35,7 @@ Missing Feature
 
 Bugs
 * Solenoid pulse for device kick is hardcoded to 100%, may need to be
-tunable.
+tunable.  In Progress.
 * Briefly ignore switch row/column on ground/short.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
@@ -44,16 +44,14 @@ tunable.
 * Switch levels/edges tests do not work.  In Progress.
 * Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
+* DCS sound bringup does not work well
 
 
 Compiler Changes
 * Multiply by 16 should not be unrolled to shift; mul works best.
 * sprintf() jump table per character is way too large.
-* Increment 16-bit word optimization in GCC 4.4 does not account that
-the register replaced was dead.  In Progress.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
-* Too many BRA to RTS instructions; just return already.
 
 
 Nice to Have
