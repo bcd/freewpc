@@ -186,12 +186,12 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 extern inline U8 wpc_get_rom_page (void)
 {
-	return wpc_asic_read (WS_ROM_PAGE);
+	return readb (WS_ROM_PAGE);
 }
 
 extern inline void wpc_set_rom_page (U8 page)
 {
-	wpc_asic_write (WS_ROM_PAGE, page);
+	writeb (WS_ROM_PAGE, page);
 }
 
 

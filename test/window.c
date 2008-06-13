@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,7 +30,7 @@
  * of a "window class", which is defined by the window_ops structure.
  * The window class declares callbacks for various events, including
  * inputs (key presses) and focus change (new window created, etc.)
- * The module maintains a window stack, so that new windows can be 
+ * The module maintains a window stack, so that new windows can be
  * created temporarily and then popped off to return to the originating
  * point.
  *
@@ -100,9 +100,14 @@ void window_push_first (void)
 #endif
 	{
 		end_game ();
-		sound_reset ();
 		/* Kill any other tasks still running */
 		task_kill_all ();
+
+		/* Reset sound, but delay a little to allow the reset
+		 * to finish before we attempt to play the 'enter' sound
+		 * later. */
+		sound_reset ();
+		task_sleep (TIME_100MS);
 	}
 	callset_invoke (test_start);
 }
@@ -115,7 +120,7 @@ void window_pop_first (void)
 	dmd_show_low ();
 
 	/* Delay before starting amode and actually
-	 * exiting test mode; this keeps extra presses 
+	 * exiting test mode; this keeps extra presses
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
 #ifdef CONFIG_TEST_DURING_GAME
@@ -226,6 +231,11 @@ void window_title (const char *title)
 	font_render_string_center (&font_mono5, 64, 2, title);
 }
 
+void print_row_center (const font_t *f, U8 row)
+{
+	font_render_string_center (f, 64, row, sprintf_buffer);
+}
+
 /***************************************************/
 
 extern struct menu main_menu;
@@ -253,12 +263,12 @@ void browser_decimal_item_number (U8 val)
 	sprintf ("%d", val);
 }
 
-void browser_init (void)
+__attribute__((noinline)) void browser_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
-	
+
 	win_top->w_class.menu.self = m;
-	menu_selection = 0;	
+	menu_selection = 0;
 
 	browser_action = 0;
 	browser_last_selection_update = 0;
@@ -287,7 +297,7 @@ void browser_up (void)
 	sound_send (SND_TEST_UP);
 	menu_selection++;
 	if (menu_selection > browser_max)
-		menu_selection = 0;
+		menu_selection = browser_min;
 }
 
 void browser_down (void)
@@ -297,10 +307,6 @@ void browser_down (void)
 	if (menu_selection == 0xFF)
 		menu_selection = browser_max;
 }
-
-struct window_ops browser_window = {
-	INHERIT_FROM_BROWSER,
-};
 
 void browser_print_operation (const char *s)
 {
@@ -343,7 +349,7 @@ struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 #ifndef MACHINE_REPLAY_START_CHOICE
 #define MACHINE_REPLAY_START_CHOICE 0
 #endif
-struct adjustment_value replay_score_value = { 
+struct adjustment_value replay_score_value = {
 	0, MACHINE_REPLAY_SCORE_CHOICES-1, 1, replay_score_render
 };
 
@@ -377,15 +383,16 @@ struct adjustment standard_adjustments[] = {
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
 	{ "SHOW DATE/TIME", &yes_no_value, YES, &system_config.show_date_and_time },
-	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
+	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOL. CONTROL", &integer_value, 8, &system_config.min_volume_control },
+	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
-	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
+	{ "TICKET EXP. BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
+	{ "ALLOW CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -429,9 +436,12 @@ struct adjustment pricing_adjustments[] = {
 	{ "CENTER COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
 	{ "RIGHT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
 	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
-	{ "UNITS PER CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
-	{ "UNITS PER BONUS", &integer_value, 0, &price_config.units_per_bonus },
+	{ "UNITS/CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
+	{ "UNITS/BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
+	{ "MINIMUM UNITS", &integer_value, 1, &price_config.min_units },
+	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
+	{ "COLLECTION TEXT", &integer_value, 1, &price_config.collection_text },
 	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
 	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
 	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
@@ -480,13 +490,15 @@ struct adjustment hstd_adjustments[] = {
 
 
 struct adjustment printer_adjustments[] = {
-	{ "COLUMN WIDTH", &integer_value, 72, NULL },
-	{ "LINES PER PAGE", &integer_value, 60, NULL },
-	{ "PAUSE EVERY PAGE", &yes_no_value, NO, NULL },
-	{ "PRINTER TYPE", &integer_value, 0, NULL },
-	{ "SERIAL BAUD RATE", &integer_value, 0, NULL },
-	{ "SERIAL D.T.R.", &integer_value, 0, NULL },
-	{ "AUTO PRINTOUT", &on_off_value, OFF, NULL },
+	{ "COLUMN WIDTH", &integer_value, 72, &printer_config.column_width },
+	{ "LINES PER PAGE", &integer_value, 60, &printer_config.lines_per_page },
+	{ "PAUSE EVERY PAGE", &yes_no_value, NO, &printer_config.pause_every_page },
+	{ "PRINTER TYPE", &integer_value, 0, &printer_config.printer_type },
+	{ "SERIAL BAUD RATE", &integer_value, 0, &printer_config.serial_baud_rate },
+	{ "SERIAL D.T.R.", &integer_value, 0, &printer_config.serial_dtr },
+	{ "NSM STUB ONLY", &on_off_value, OFF, &printer_config.nsm_stub_only },
+	{ "AUTO PRINTOUT", &on_off_value, OFF, &printer_config.auto_printout },
+	{ "AUTO LINE FILL", &on_off_value, OFF, &printer_config.auto_line_fill },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -560,7 +572,7 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 			task_sleep (TIME_16MS);
 			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
 			far_call_pointer (*adj_lookup->values->render, TEST2_PAGE, value);
-			font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
+			print_row_center (&font_mono5, 24);
 			return;
 		}
 		adj_lookup++;
@@ -595,7 +607,7 @@ void adj_browser_draw (void)
 	window_stop_thread ();
 
 	sprintf ("%d. %s", menu_selection+1, ad->name);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	if (ad->nvram == NULL)
 	{
@@ -782,7 +794,7 @@ struct audit earnings_audits[] = {
 	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
 	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
 	{ "RECENT PAID CREDITS", AUDIT_TYPE_INT, &system_audits.paid_credits },
-	{ "RECENT SERV. CREDITS", AUDIT_TYPE_INT, &system_audits.service_credits },
+	{ "RECENT SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -811,6 +823,10 @@ struct audit standard_audits[] = {
 	{ "NON-FATAL ERRORS", AUDIT_TYPE_INT, &system_audits.non_fatal_errors },
 	{ "LEFT FLIPPER", AUDIT_TYPE_INT, &system_audits.left_flippers },
 	{ "RIGHT FLIPPER", AUDIT_TYPE_INT, &system_audits.right_flippers },
+	{ "TROUGH RESCUE", AUDIT_TYPE_INT, &system_audits.trough_rescues },
+	{ "CHASE BALLS", AUDIT_TYPE_INT, &system_audits.chase_balls },
+	{ "LOCKUP 1 ADDR", AUDIT_TYPE_INT, &system_audits.lockup1_addr },
+	{ "LOCKUP 1 PID/LEF", AUDIT_TYPE_INT, &system_audits.lockup1_pid_lef },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -822,7 +838,7 @@ void audit_browser_init (void)
 	browser_init ();
 
 	aud = browser_audits = win_top->w_class.priv;
-	
+
 	/* Count the number of adjustments manually by stepping through
 	 * the array of entries */
 	browser_min = 0;
@@ -839,7 +855,7 @@ void audit_browser_draw (void)
 	struct audit *aud = browser_audits + menu_selection;
 
 	sprintf ("%d. %s", menu_selection+1, aud->name);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	if (aud->nvram)
 	{
@@ -970,7 +986,7 @@ static U8 count_submenus (struct menu *m)
 void menu_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
-	
+
 	win_top->w_class.menu.self = m;
 	win_top->w_class.menu.parent = NULL;
 	menu_selection = 0;
@@ -1046,7 +1062,7 @@ void menu_up (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
-	
+
 	sound_send (SND_TEST_UP);
 	(*sel)++;
 	if ((*sel) >= count_submenus (m))
@@ -1057,10 +1073,10 @@ void menu_down (void)
 {
 	struct menu *m = win_top->w_class.menu.self;
 	U8 *sel = &win_top->w_class.menu.selected;
-	
+
 	sound_send (SND_TEST_DOWN);
 	(*sel)--;
-	if ((*sel) == 0xFF) 
+	if ((*sel) == 0xFF)
 	{
 		*sel = count_submenus (m);
 		if (*sel > 0)
@@ -1119,7 +1135,10 @@ struct window_ops menu_window = {
 /*******************  Font Test  ************************/
 
 U8 font_test_offset;
+
 U8 font_test_char_width;
+
+extern __fastram__ U8 font_height;
 
 const font_t *font_test_lookup (void)
 {
@@ -1138,36 +1157,48 @@ void font_test_init (void)
 	font_test_char_width = 8;
 }
 
-void font_test_draw (void)
+
+void font_test_change (void)
 {
 	const font_t *font = font_test_lookup ();
-	char *gl, **glp;
-	char bitwidth;
+	extern U8 font_width;
 
-	/* TODO : this won't work because the font data is in a different page!
-	 * Need to add a function in FONT_PAGE : char *font_get_glyph(font, char)
-	 * that returns a pointer to the glyph for a character.  Then you can
-	 * use the following code, although macros would be better:
-	 * glyph_get_width(), glyph_get_height(), etc. */
-	glp = (char **)far_read_pointer ((PTR_OR_U16 *)&font->glyphs, FONT_PAGE);
-
-	gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['A'], FONT_PAGE);
-	if (gl == NULL) 
+	font_lookup_char (font, 'A');
+	if (font_width == 0)
 	{
 		if (font_test_offset < 26)
 			font_test_offset = 26;
+		font_lookup_char (font, '0');
 	}
-	else
-		gl = (char *)far_read_pointer ((PTR_OR_U16 *)&glp['0'], FONT_PAGE);
+	font_width++;
 
-	bitwidth = (char)far_read8 ((U8 *)&gl[0], FONT_PAGE);
-	if (bitwidth <= 8)
-		font_test_char_width = 13;
-	else if (bitwidth <= 12)
-		font_test_char_width = 10;
-	else
-		font_test_char_width = 8;
+	switch (font_width)
+	{
+		case 4: case 5: case 6:
+			font_test_char_width = 20;
+			break;
+		case 7: case 8:
+			font_test_char_width = 15;
+			break;
+		case 9: case 10:
+			font_test_char_width = 12;
+			break;
+		case 11: case 12:
+			font_test_char_width = 10;
+			break;
+		case 13: case 14:
+			font_test_char_width = 8;
+			break;
+		default:
+			font_test_char_width = 7;
+			break;
+	}
+}
 
+
+void font_test_draw (void)
+{
+	const font_t *font;
 
 	sprintf ("FONT %d", menu_selection+1);
 	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
@@ -1175,20 +1206,38 @@ void font_test_draw (void)
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 8);
 
-	sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
-	font_render_string_center (font, 64, 20, sprintf_buffer);
+	font = font_test_lookup ();
+	font_test_change ();
+	if (font_height < 8)
+	{
+		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
+		font_render_string_center (font, 64, 16, sprintf_buffer);
+		task_dispatching_ok = TRUE;
+		if (font_test_offset < 20)
+		{
+			sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset + font_test_char_width);
+			font_render_string_center (font, 64, 26, sprintf_buffer);
+		}
+	}
+	else
+	{
+		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
+		font_render_string_center (font, 64, 21, sprintf_buffer);
+	}
 	dmd_show_low ();
 }
 
 void font_test_left (void)
 {
 	bounded_decrement (font_test_offset, 0);
+	font_test_change ();
 	sound_send (SND_TEST_CHANGE);
 }
 
 void font_test_right (void)
 {
 	bounded_increment (font_test_offset, sizeof (font_test_alphabet) - font_test_char_width - 1);
+	font_test_change ();
 	sound_send (SND_TEST_CHANGE);
 }
 
@@ -1249,13 +1298,13 @@ void deff_leff_thread (void)
 	{
 		if (is_active != deff_leff_last_active)
 		{
-			if (deff_leff_test_ops == &dev_deff_ops) 
+			if (deff_leff_test_ops == &dev_deff_ops)
 			{
 				if (is_active == FALSE)
 				{
 					window_redraw ();
 					sprintf_far_string (names_of_deffs + menu_selection);
-					font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+					print_row_center (&font_var5, 12);
 					browser_print_operation ("STOPPED");
 				}
 			}
@@ -1263,7 +1312,7 @@ void deff_leff_thread (void)
 			{
 				window_redraw ();
 				sprintf_far_string (names_of_leffs + menu_selection);
-				font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+				print_row_center (&font_var5, 12);
 				if (is_active == TRUE)
 					browser_print_operation ("RUNNING");
 				else
@@ -1402,17 +1451,18 @@ struct menu dev_deff_stress_test_item = {
 void symbol_test_init (void)
 {
 	browser_init ();
+	browser_min = 1;
 	browser_max = BM_LAST-1;
 }
 
 void symbol_test_draw (void)
 {
 	union dmd_coordinate coord;
-	
+
 	browser_draw ();
 	coord.x = 96;
 	coord.y = 20;
-	bitmap_draw (coord, menu_selection+1);
+	bitmap_draw (coord, menu_selection);
 }
 
 struct window_ops symbol_test_window = {
@@ -1441,7 +1491,8 @@ void lamplist_init (void)
 	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
 	lamplist_update_mode = 0;
-	lamplist_update_speed = TIME_16MS;
+	lamplist_update_speed = TIME_100MS;
+	lamp_all_off ();
 }
 
 
@@ -1449,10 +1500,10 @@ void lamplist_draw (void)
 {
 	browser_draw ();
 	sprintf_far_string (names_of_lamplists + menu_selection);
-	font_render_string_center (&font_var5, 64, 12, sprintf_buffer);
+	print_row_center (&font_var5, 12);
 
 	sprintf ("SPEED %d", lamplist_update_speed);
-	font_render_string_center (&font_var5, 46, 21, sprintf_buffer);
+	font_render_string_center (&font_var5, 48, 21, sprintf_buffer);
 
 	switch (lamplist_update_mode)
 	{
@@ -1475,19 +1526,26 @@ void lamplist_draw (void)
 
 void lamplist_update (void)
 {
-	leff_data_t *cdata;
-	cdata = task_init_class_data (task_getpid (), leff_data_t);
 	lamp_all_off ();
+#if 0
+	if (lamplist_update_mode >= 6)
+	{
+		U8 *lamp = lamplist_first_entry (menu_selection);
+		lamp_on (*lamp);
+		lamp = lamplist_next_entry (menu_selection, lamp);
+		lamp_on (*lamp);
+	}
+#endif
 	for (;;)
 	{
-		cdata->apply_delay = lamplist_update_speed;
 		switch (lamplist_update_mode)
 		{
 			case 0: 
-				lamp_all_off ();
 				lamplist_apply (menu_selection, lamp_on); 
+				task_sleep (TIME_166MS);
 				break;
 			case 1: lamplist_apply (menu_selection, lamp_toggle);
+				task_sleep (TIME_166MS);
 				break;
 			case 2: lamplist_step_increment (menu_selection, lamp_matrix);
 				break;
@@ -1502,7 +1560,7 @@ void lamplist_update (void)
 			case 7: lamplist_rotate_previous (menu_selection, lamp_matrix);
 				break;
 		}
-		task_sleep (TIME_200MS);
+		task_sleep (lamplist_update_speed);
 	}
 }
 
@@ -1559,7 +1617,7 @@ void dev_balldev_test_draw (void)
 	if (likely (dev && dev->props))
 	{
 		sprintf ("DEV %d. %s", menu_selection, dev->props->name);
-		font_render_string_center (&font_var5, 64, 2, sprintf_buffer);
+		print_row_center (&font_var5, 2);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
 		font_render_string (&font_var5, 4, 7, sprintf_buffer);
@@ -1911,7 +1969,7 @@ void sched_test_draw (void)
 {
 	window_title ("SCHEDULER TEST");
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
-	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
+	print_row_center (&font_var5, 10);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
 	dmd_show_low ();
 }
@@ -2003,16 +2061,17 @@ struct menu score_test_item = {
 void pic_test_draw (void)
 {
 	extern U8 pic_unlock_code[];
-	extern U8 pic_serial_number[];
+	extern __common__ void pic_render_serial_number (void);
 
 	window_title ("SECURITY TEST");
 
-	sprintf ("UNLOCK CODE %02X %02X %02X",
+	sprintf ("UNLOCK CODE: %02X %02X %02X",
 		pic_unlock_code[0], pic_unlock_code[1], pic_unlock_code[2]);
 	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
 
-	sprintf ("GAME NUMBER %3s", pic_serial_number);
-	font_render_string_left (&font_var5, 1, 16, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 16, "SER. NO.:");
+	pic_render_serial_number ();
+	font_render_string_left (&font_var5, 40, 16, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -2028,6 +2087,128 @@ struct menu pic_test_item = {
 	.var = { .subwindow = { &pic_test_window, NULL } },
 };
 #endif /* MACHINE_PIC */
+
+/**********************************************************************/
+
+U8 *memory_editor_addr;
+
+U8 memory_editor_step;
+
+U8 memory_editor_modify_flag;
+
+U8 memory_editor_new_value;
+
+void memory_editor_init (void)
+{
+	memory_editor_addr = 0x0;
+	memory_editor_step = 8;
+	memory_editor_modify_flag = 0;
+}
+
+void memory_editor_up (void)
+{
+	if (memory_editor_modify_flag == 0)
+		memory_editor_addr += memory_editor_step;
+	else
+		memory_editor_new_value++;
+}
+
+void memory_editor_down (void)
+{
+	if (memory_editor_modify_flag == 0)
+		memory_editor_addr -= memory_editor_step;
+	else
+		memory_editor_new_value--;
+}
+
+void memory_editor_start (void)
+{
+	if (memory_editor_modify_flag == 0)
+	{
+		if (memory_editor_step == 8)
+			memory_editor_step = 1;
+		else
+			memory_editor_step = 8;
+	}
+	else
+		memory_editor_modify_flag = 0;
+}
+
+void memory_editor_enter (void)
+{
+	if (memory_editor_modify_flag == 0)
+	{
+		memory_editor_modify_flag = 1;
+		memory_editor_new_value = *memory_editor_addr;
+	}
+	else if (memory_editor_modify_flag == 1)
+	{
+		*memory_editor_addr = memory_editor_new_value;
+		memory_editor_modify_flag = 0;
+	}
+}
+
+		/* Reading both of these registers produces the same results! */
+		/* Reading just zerocross/IRQ clear produces 38, 78 most of the time;
+		 * 40, 3A, 01, 7A occasionally.
+		 * Reading just FIRQ clear produces the same results, except 02
+		 * instead of 01, and 00 occasionally.
+		 * This is with the zerocross circuit unconnected, so bit 7 of
+		 * the first should indeed always be the same. */
+		/* With the power driver board connected, both of these read a
+		 * solid 3A, occasionally BA for the first because of zerocross.
+		 * Very rarely 38 was seen on both. */
+
+void memory_editor_thread (void)
+{
+	U8 n;
+	for (;;)
+	{
+		dmd_alloc_low_clean ();
+
+		sprintf ("MEMORY EDITOR : %p", memory_editor_addr);
+		font_render_string_center (&font_var5, 64, 3, sprintf_buffer);
+
+		for (n=0; n < 8; n++)
+		{
+			sprintf ("%02X", readb (memory_editor_addr+n));
+			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
+		}
+
+		sprintf ("STEP : %d", memory_editor_step);
+		font_render_string_left (&font_var5, 1, 26, sprintf_buffer);
+
+		if (memory_editor_modify_flag)
+		{
+			dmd_show_low ();
+			task_sleep (TIME_33MS);
+			sprintf ("EDIT : %02X", memory_editor_new_value);
+			font_render_string_right (&font_var5, 127, 26, sprintf_buffer);
+			task_sleep (TIME_66MS);
+		}
+		else
+		{
+			dmd_show_low ();
+			task_sleep (TIME_100MS);
+		}
+	}
+}
+
+struct window_ops memory_editor_window = {
+	DEFAULT_WINDOW,
+	.init = memory_editor_init,
+	.up = memory_editor_up,
+	.down = memory_editor_down,
+	.enter = memory_editor_enter,
+	.start = memory_editor_start,
+	.thread = memory_editor_thread,
+};
+
+struct menu memory_editor_item = {
+	.name = "MEMORY EDITOR",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &memory_editor_window, NULL } },
+};
 
 /**********************************************************************/
 
@@ -2052,6 +2233,7 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
+	&memory_editor_item,
 	NULL,
 };
 
@@ -2159,9 +2341,23 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
-void set_time_window_confirm (void)
+void set_time_init (void)
 {
-	confirm_enter ();
+	rtc_begin_modify ();
+}
+
+void set_time_exit (void)
+{
+	rtc_end_modify (0);
+}
+
+void set_time_thread (void)
+{
+	for (;;)
+	{
+		task_sleep_sec (5);
+		rtc_show_date_time ();
+	}
 }
 
 void set_time_window_draw (void)
@@ -2169,11 +2365,30 @@ void set_time_window_draw (void)
 	rtc_show_date_time ();
 }
 
+void set_time_up (void)
+{
+	rtc_modify_field (1);
+}
+
+void set_time_down (void)
+{
+	rtc_modify_field (0);
+}
+
+void set_time_enter (void)
+{
+	rtc_next_field ();
+}
 
 struct window_ops set_time_window = {
 	DEFAULT_WINDOW,
+	.init = set_time_init,
+	.exit = set_time_exit,
 	.draw = set_time_window_draw,
-	.enter = set_time_window_confirm,
+	.up = set_time_up,
+	.down = set_time_down,
+	.enter = set_time_enter,
+	.thread = set_time_thread,
 };
 
 struct menu set_time_item = {
@@ -2275,8 +2490,8 @@ void presets_draw (void)
 	preset_render_name (menu_selection);
 	font_render_string_left (&font_mono5, 15, 9, sprintf_buffer);
 
-	/* Is it installed now? */	
-	font_render_string_right (&font_mono5, 127, 9, 
+	/* Is it installed now? */
+	font_render_string_right (&font_mono5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
 	task_recreate_gid (GID_SLOW_DRAW_FINISH, presets_draw_finish);
@@ -2289,7 +2504,7 @@ void presets_enter (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
 	preset_render_name (menu_selection);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	print_row_center (&font_mono5, 16);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
@@ -2428,6 +2643,55 @@ struct menu bookkeeping_menu = {
 
 /**********************************************************************/
 
+void printout_thread (void)
+{
+	extern __common__ void print_all_audits (void);
+	print_all_audits ();
+
+#if 0
+	task_setgid (0);
+	window_pop ();
+#endif
+	task_exit ();
+}
+
+
+void printout_draw (void)
+{
+	font_render_string_center (&font_mono5, 64, 16, "PRINTING...");
+	dmd_show_low ();
+}
+
+
+struct window_ops printout_window = {
+	DEFAULT_WINDOW,
+	.thread = printout_thread,
+	.draw = printout_draw,
+};
+
+
+struct menu print_all_data_item = {
+	.name = "ALL DATA",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &printout_window, NULL } },
+};
+
+
+struct menu *printouts_menu_items[] = {
+	&print_all_data_item,
+	NULL,
+};
+
+
+struct menu printouts_menu = {
+	.name = "PRINTOUTS",
+	.flags = M_MENU | M_LETTER_PREFIX,
+	.var = { .submenus = printouts_menu_items },
+};
+
+
+/**********************************************************************/
+
 struct menu standard_adjustments_menu = {
 	.name = "STANDARD ADJ.",
 	.flags = M_ITEM,
@@ -2477,44 +2741,13 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
-void switch_matrix_draw (void)
-{
-	U8 row, col;
-
-	for (row=0; row < 8; row++)
-	{
-		for (col=0; col < 8; col++)
-		{
-			U8 sw = MAKE_SWITCH (col+1,row+1);
-#if 0 /* whether or not it is an opto isn't important now */
-			bool opto_p = switch_is_opto (sw);
-#endif
-			bool state_p = switch_poll (sw);
-			register U8 *dmd = dmd_low_buffer +
-				((U16)row << 6) + (col >> 1);
-			U8 mask = (col & 1) ? 0x0E : 0xE0;
-
-			/* TODO : use bitmap_draw for these */
-			if (state_p)
-			{
-				dmd[0 * DMD_BYTE_WIDTH] |= mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & ~0x44;
-				dmd[2 * DMD_BYTE_WIDTH] |= mask;
-			}
-			else
-			{
-				dmd[0 * DMD_BYTE_WIDTH] &= ~mask;
-				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
-				dmd[2 * DMD_BYTE_WIDTH] &= ~mask;
-			}
-		}
-	}
-}
-
+extern __test2__ void switch_matrix_draw (void);
+extern __test2__ void switch_edges_update (void);
+extern __test2__ void switch_levels_update (void);
 
 void switch_window_title (const char *title)
 {
-	font_render_string_center (&font_mono5, 80, 4, title);
+	font_render_string_center (&font_mono5, 80, 3, title);
 }
 
 
@@ -2529,18 +2762,8 @@ void switch_edges_thread (void)
 {
 	for (;;)
 	{
-		/* TODO : here's what needs to happen.
-		We begin by drawing the switch matrix normally, then we
-		take a snapshot of raw switches.  Every 16ms, we do
-		a compare of the current raw switches vs. our snapshot.
-		If the same, nothing to be done.  If different, save
-		current as the new snapshot and redraw the switch matrix.
-		Even better, we could only redraw the columns that changed.
-		Also show the transition(s) that just occurred.
-		(For switch levels, iterate through the active switches
-		accounting for backwards optos continuously.) */
+		switch_edges_update ();
 		task_sleep (TIME_100MS);
-		switch_matrix_draw ();
 	}
 }
 
@@ -2566,10 +2789,20 @@ void switch_levels_draw (void)
 	dmd_show_low ();
 }
 
+void switch_levels_thread (void)
+{
+	for (;;)
+	{
+		switch_levels_update ();
+		task_sleep (TIME_100MS);
+	}
+}
+
+
 struct window_ops switch_levels_window = {
 	INHERIT_FROM_BROWSER,
 	.draw = switch_levels_draw,
-	.thread = switch_edges_thread,
+	.thread = switch_levels_thread,
 	.up = null_function,
 	.down = null_function,
 };
@@ -2626,7 +2859,7 @@ void single_switch_draw (void)
 	level = switch_poll (sel) ? "CLOSED" : "OPEN";
 	sprintf ("%s-%s", active, level);
 	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
-	
+
 	dmd_show_low ();
 }
 
@@ -2646,7 +2879,11 @@ void single_switch_thread (void)
 			{
 				sound_send (SND_TEST_CHANGE);
 				if (((*sel != SW_UP) && (*sel != SW_DOWN)) || !sw_poll)
+				{
+					dmd_alloc_low_clean ();
 					single_switch_draw ();
+					task_sleep (TIME_66MS);
+				}
 			}
 			else
 			{
@@ -2768,7 +3005,7 @@ void sound_test_enter (void)
 }
 
 void sound_test_init (void)
-{	
+{
 	browser_init ();
 	sound_test_set = 0;
 }
@@ -2926,11 +3163,11 @@ U8 gi_test_brightness;
 
 U8 gi_test_values[] = {
 	0,
-	TRIAC_GI_STRING(0),	
-	TRIAC_GI_STRING(1),	
-	TRIAC_GI_STRING(2),	
-	TRIAC_GI_STRING(3),	
-	TRIAC_GI_STRING(4),	
+	TRIAC_GI_STRING(0),
+	TRIAC_GI_STRING(1),
+	TRIAC_GI_STRING(2),
+	TRIAC_GI_STRING(3),
+	TRIAC_GI_STRING(4),
 	TRIAC_GI_MASK,
 };
 
@@ -2965,7 +3202,7 @@ void gi_test_draw (void)
 	}
 
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
-	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
+	print_row_center (&font_mono5, 29);
 
 	triac_leff_disable (TRIAC_GI_MASK);
 	triac_set_brightness (gi_test_values[menu_selection], gi_test_brightness);
@@ -3151,7 +3388,7 @@ void dipsw_test_draw (void)
 	window_title ("DIP SWITCH TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 
 	for (sw = 0; sw < 8; sw++)
 	{
@@ -3315,7 +3552,7 @@ void display_test_draw (void)
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
 		sprintf ("PAGE %d", n);
-		font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+		print_row_center (&font_mono5, 16);
 		dmd_show_low ();
 		return;
 	}
@@ -3382,6 +3619,7 @@ struct menu *main_menu_items[] = {
 	&adjustments_menu,
 	&test_menu,
 	&utilities_menu,
+	&printouts_menu,
 	&development_menu,
 	NULL,
 };
@@ -3420,9 +3658,9 @@ void scroller_draw (void)
 	U8 offset = win_top->w_class.scroller.offset;
 
 	s[offset * 2] ();
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	print_row_center (&font_mono5, 10);
 	s[offset * 2 + 1] ();
-	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	print_row_center (&font_mono5, 22);
 	dmd_show_low ();
 }
 
@@ -3486,7 +3724,7 @@ void sysinfo_machine_version (void) {
 	extern __common__ void render_build_date (void);
 	render_build_date ();
 #ifdef DEBUGGER
-	sprintf ("%E   D%s.%s", 
+	sprintf ("%E   D%s.%s",
 		C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
 	sprintf ("%E   R%s.%s",
@@ -3494,18 +3732,19 @@ void sysinfo_machine_version (void) {
 #endif
 }
 
-void sysinfo_system_version (void) { 
+void sysinfo_system_version (void) {
 #ifdef USER_TAG
-	sprintf ("%s %s.%s", C_STRING(USER_TAG), 
+	sprintf ("%s %s.%s", C_STRING(USER_TAG),
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #else
-	sprintf ("SYSTEM VER. %s.%s",
+	sprintf ("SYSTEM V%s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
 #endif
 }
 
+
 void sysinfo_compiler_version (void) { 
-	sprintf ("GCC %s", C_STRING(GCC_VERSION));
+	sprintf ("GCC6809 V%s", C_STRING(GCC_VERSION));
 }
 
 void sysinfo_stats1 (void) {
@@ -3585,7 +3824,7 @@ void test_up_button (void)
 	{
 		window_call_op (win_top, up);
 		window_redraw ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	}
 }
 
@@ -3607,7 +3846,7 @@ void test_down_button (void)
 	{
 		window_call_op (win_top, down);
 		window_redraw ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	}
 }
 

@@ -72,18 +72,6 @@ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp)
 {
 	U32 quotient = 0;
 
-#ifdef SLOWEST_DIVISION
-	while (reg >= divisor)
-	{
-		/* Make a guess for the quotient, taking care to
-		 * err on the low side always.
-		 *
-		 * It is always safe to guess 1, although that will be the slowest.
-		 */
-		quotient++;
-		reg -= divisor;
-	}
-#else
 	S16 y0 = 16 - __builtin_clz (divisor);
 	while (reg >= divisor)
 	{
@@ -99,7 +87,6 @@ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp)
 			reg -= divisor;
 		}
 	}
-#endif
 
 	if (*remainderp)
 		*remainderp = reg;

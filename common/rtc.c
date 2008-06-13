@@ -47,6 +47,17 @@ static __nvram__ U8 day;
 static __nvram__ U8 hour;
 static __nvram__ U8 day_of_week;
 
+U8 rtc_edit_field;
+
+static struct date_time_backup
+{
+	U8 year;
+	U8 month;
+	U8 day;
+	U8 hour;
+	U8 min;
+} backup;
+
 
 /** Checksum descriptor for the RTC info */
 static __nvram__ U8 rtc_csum;
@@ -105,10 +116,14 @@ static void rtc_calc_day_of_week (void)
 	day_of_week += (year / 4);
 	day_of_week += day_of_week_month_code[month-1];
 	day_of_week += day;
-	day_of_week	+= ((year % 4) ? 0 : 1);
+	if (!(year % 4) && month <= 2)
+		day_of_week--;
 	day_of_week --;
 
-	/* The mod 7 is the hard part to do on the 6809.  */
+	/* The mod 7 is the hard part to do on the 6809.
+	 * The technique used here is to do repeated subtraction.
+	 * For values larger than 64, subtract 63 at a time to speed up
+	 * the computation. */
 #ifndef __m6809__
 	day_of_week %= 7;
 #else
@@ -127,28 +142,30 @@ static void rtc_calc_day_of_week (void)
 static void rtc_normalize (void)
 {
 	wpc_nvram_get ();
+
 	while (hour >= 24)
 	{
 		hour -= 24;
-		wpc_asic_write (WPC_CLK_HOURS_DAYS,
-			wpc_asic_read (WPC_CLK_HOURS_DAYS) - 24);
-
+		writeb (WPC_CLK_HOURS_DAYS, readb (WPC_CLK_HOURS_DAYS) - 24);
 		day++;
-		if (day > rtc_days_in_current_month ())
-		{
-			day = 1;
-			month++;
-			if (month > 12)
-			{
-				month = 1;
-				year++;
-				/* FreeWPC stores the year in nvram as the offset from
-				the year 2000; therefore, this won't overflow until
-				the year 2256. */
-			}
-		}
-		rtc_calc_day_of_week ();
 	}
+
+	if (day > rtc_days_in_current_month ())
+	{
+		day = 1;
+		month++;
+	}
+
+	if (month > 12)
+	{
+		month = 1;
+		year++;
+		/* FreeWPC stores the year in nvram as the offset from
+		the year 2000; therefore, this won't overflow until
+		the year 2256. */
+	}
+
+	rtc_calc_day_of_week ();
 
 	/* Perform sanity checks, just in case. */
 	if ((month < 1) || (month > 12))
@@ -166,10 +183,17 @@ static void rtc_normalize (void)
 static void rtc_hw_read (void)
 {
 	wpc_nvram_get ();
-	hour = wpc_asic_read (WPC_CLK_HOURS_DAYS);
-	minute = wpc_asic_read (WPC_CLK_MINS);
+	hour = readb (WPC_CLK_HOURS_DAYS);
+	minute = readb (WPC_CLK_MINS);
 	csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
+}
+
+
+static void rtc_hw_write (void)
+{
+	writeb (WPC_CLK_HOURS_DAYS, hour);
+	writeb (WPC_CLK_MINS, minute);
 }
 
 
@@ -200,10 +224,12 @@ static void rtc_pinmame_read (void)
 
 void rtc_factory_reset (void)
 {
-	/* Reset the date to Jan. 1, 2006 */
-	year = 6;
-	month = 1;
-	day = 1;
+	/* Reset the date to the time at which the software
+	 * was built.
+	 * TODO : this should trigger a CLOCK NOT SET message */
+	year = BUILD_YEAR - 2000;
+	month = BUILD_MONTH;
+	day = BUILD_DAY;
 	hour = 0;
 	minute = 0;
 	last_minute = 0;
@@ -231,10 +257,11 @@ CALLSET_ENTRY (rtc, init)
 	csum_area_update (&rtc_csum_info);
 	wpc_nvram_put ();
 #endif
+	rtc_edit_field = 0xFF;
 }
 
 
-CALLSET_ENTRY (rtc, idle_every_second)
+CALLSET_ENTRY (rtc, idle_every_ten_seconds)
 {
 	/* Re-read the timer hardware registers and normalize the values. */
 	rtc_hw_read ();
@@ -282,6 +309,11 @@ void rtc_render_time (void)
 }
 
 
+const char *rtc_edit_field_name[] = {
+	"MONTH", "DAY", "YEAR", "HOUR", "MINUTE"
+};
+
+
 /** Show the current date/time on the DMD */
 void rtc_show_date_time (void)
 {
@@ -294,14 +326,74 @@ void rtc_show_date_time (void)
 	rtc_render_time ();
 	font_render_string_center (&font_mono5, 64, 25, sprintf_buffer);
 
+	if (rtc_edit_field != 0xFF)
+	{
+		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
+		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
+	}
+
 	dmd_show_low ();
 }
 
 
-void rtc_advance_day (void)
+void rtc_begin_modify (void)
+{
+	rtc_edit_field = 0;
+}
+
+void rtc_end_modify (U8 cancel_flag)
+{
+	rtc_edit_field = 0xFF;
+}
+
+void rtc_next_field (void)
+{
+	rtc_edit_field++;
+	if (rtc_edit_field >= 5)
+		rtc_edit_field = 0;
+}
+
+
+void rtc_modify_field (U8 up_flag)
 {
 	wpc_nvram_get ();
-	hour += 24;
+
+	switch (rtc_edit_field)
+	{
+		case 0: /* month */
+			if (up_flag)
+				month++;
+			else if (month > 1)
+				month--;
+			break;
+		case 1: /* day */
+			if (up_flag)
+				day++;
+			else if (day > 1)
+				day--;
+			break;
+		case 2: /* year */
+			if (up_flag)
+				year++;
+			else if (year > 0)
+				year--;
+			break;
+		case 3: /* hour */
+			if (up_flag && hour < 23)
+				hour++;
+			else if (hour > 0)
+				hour--;
+			rtc_hw_write ();
+			break;
+		case 4: /* minute */
+			if (up_flag && minute < 59)
+				minute++;
+			else if (minute > 0)
+				minute--;
+			rtc_hw_write ();
+			break;
+	}
+
 	wpc_nvram_put ();
 	rtc_normalize ();
 }

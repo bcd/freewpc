@@ -15,7 +15,7 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 # 1. -Wno-format is to not check format strings, because we define those
 # differently than ANSI C does (e.g. look at sprintf()).
 INT_CFLAGS = -mint8
-CFLAGS = $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_PINMAME -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+CFLAGS = $(INT_CFLAGS) -DHAVE_FASTRAM_ATTRIBUTE -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -DCONFIG_BIG_ENDIAN -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
 ifneq ($(GCC_VERSION),3.4.6)
 SOFTREG_OPTIONS := -msoft-reg-count=4 -DSOFT_REG_COUNT=4
 endif
@@ -25,6 +25,10 @@ endif
 # Save assembler files if needed for debugging the 6809 compiler.
 ifeq ($(SAVE_ASM),y)
 CFLAGS += -save-temps
+endif
+
+ifneq ($(REAL_HARDWARE),y)
+CFLAGS += -DCONFIG_PINMAME
 endif
 
 # Turn on compiler debug.  This will cause a bunch of compiler
@@ -60,3 +64,7 @@ CALLSET_FLAGS += -D platform/wpc
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
 $(P)/math.o : INT_CFLAGS=-mint16
+
+# The startup code needs to know the number of paged regions in the ROM
+# to checksum.
+$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=61 -DBOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))

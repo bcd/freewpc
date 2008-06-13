@@ -35,8 +35,11 @@ triac_rtt             2       60c
 # Read the regular switch matrix and coin door
 switch_rtt/4          1       140c
 
+# Update the PIC on security games
+pic_rtt               32      200c  # guess?
+
 # Resynchronize to the AC zero cross point.
-ac_rtt                2       23c
+ac_rtt                1       23c
 
 # Update the solenoids.  Each bank of 8 is updated
 # once every 4ms (the 4 banks are alternated every 1ms).
@@ -46,7 +49,7 @@ sol_update_rtt/4      1       60c
 lamp_rtt/4            2       111c
 
 # Toggle the CPU board LED
-!wpc_led_toggle       32      14c
+!wpc_led_toggle       64      14c
 
 # Read/write the sound board
 sound_write_rtt       2       20c

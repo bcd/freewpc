@@ -1,6 +1,28 @@
 
 #include "imglib.h"
 
+/*
+ * The buffer_xxx functions operate on arbitrary buffers.  You can put
+ * anything you want in there.  It's simply a convenient way of tracking
+ * data plus a length.  There are a few other things in there for
+ * convenience.
+ *
+ * The bitmap_xxx functions work on buffers, too, but assume that each
+ * byte corresponds to a single pixel.  Thus, you can have up to 256
+ * colors in a bitmap.  Bitmaps are laid out from row 1 to row N,
+ * with the columns in each row given left to right.  Bitmaps require
+ * that the 'width' and 'height' fields be set in the buffer so that
+ * correlation between (x,y) locations are byte offsets is possible.
+ *
+ * A frame is just a bitmap of size 128x32, the size of the entire
+ * WPC dot matrix display.
+ *
+ * A joined bitmap is one in which each group of 8 adjacent pixels within
+ * one row are combined into a single byte.  Joining requires a bitmap
+ * of a single color only (each pixel is either 00h or 01h).  This is the
+ * format that can actually be copied directly to the DMD memory.
+ */
+
 struct buffer *buffer_alloc (unsigned int maxlen)
 {
 	struct buffer *buf = malloc (sizeof (struct buffer));
@@ -11,6 +33,19 @@ struct buffer *buffer_alloc (unsigned int maxlen)
 	buf->color = 1;
 	memset (buf->_data, 0, maxlen);
 	return buf;
+}
+
+
+struct buffer *buffer_copy (struct buffer *buf)
+{
+	struct buffer *copy = buffer_alloc (buf->len);
+	copy->width = buf->width;
+	copy->height = buf->height;
+	copy->color = buf->color;
+	memcpy (copy->_data, buf->_data, buf->len);
+	if (buf->hist)
+		histogram_update (copy);
+	return copy;
 }
 
 
@@ -28,6 +63,14 @@ struct buffer *frame_alloc (void)
 	return bitmap_alloc (FRAME_WIDTH, FRAME_HEIGHT);
 }
 
+struct layer *layer_alloc (struct buffer *bitmap)
+{
+	struct layer *layer = malloc (sizeof (struct layer));
+	layer->bitmap = bitmap;
+	layer->buf = frame_alloc ();
+	layer->coord.x = layer->coord.y = 0;
+	return layer;
+}
 
 unsigned int bitmap_pos (struct buffer *buf, unsigned int x, unsigned int y)
 {
@@ -73,13 +116,16 @@ void buffer_write_c (struct buffer *buf, FILE *fp)
 
 	if (buf->hist)
 	{
-		fprintf (fp, "/* Histogram (%d unique values):\n", buf->hist->unique);
-		for (off = 0; off < buf->hist->unique; off++)
+		fprintf (fp, "/* Histogram (%d unique values)\n", buf->hist->unique);
+		if (buf->hist->unique < 16)
 		{
-			U8 val = buf->hist->most_frequent[off];
-			unsigned int count = buf->hist->count[val];
-			fprintf (fp, " * %d occurrences of %02X\n",
-				count, val);
+			for (off = 0; off < buf->hist->unique; off++)
+			{
+				U8 val = buf->hist->most_frequent[off];
+				unsigned int count = buf->hist->count[val];
+				fprintf (fp, " * %d occurrences of %02X\n",
+					count, val);
+			}
 		}
 		fprintf (fp, " */\n");
 	}
@@ -94,6 +140,30 @@ void buffer_write_c (struct buffer *buf, FILE *fp)
 	}
 	fprintf (fp, "\n");
 }
+
+
+/* Writes a 'joined bitmap' to an XBM. */
+void buffer_write_xbm (struct buffer *buf, const char *ident, FILE *fp)
+{
+	fprintf (fp, "#define %s_width %d\n", ident, buf->width);
+	fprintf (fp, "#define %s_height %d\n", ident, buf->height);
+	fprintf (fp, "const unsigned char %s[] = {\n", ident);
+	buffer_write_c (buf, fp);
+	fprintf (fp, "}\n");
+}
+
+
+void buffer_write_pgm (struct buffer *buf, const char *ident, FILE *fp)
+{
+	unsigned int row, col;
+	fprintf (fp, "P2\n");
+	fprintf (fp, "#\n");
+	fprintf (fp, "%d %d\n", buf->width, buf->height);
+	for (row=0; row < buf->height; row++)
+		for (col=0; col < buf->width; col++)
+			fprintf (fp, "%d\n", buf->data[bitmap_pos (buf, col, row)]);
+}
+
 
 void cdecl_begin (const char ident[], FILE *fp)
 {
@@ -113,6 +183,14 @@ void buffer_free (struct buffer *buf)
 	free (buf);
 }
 
+void layer_free (struct layer *layer)
+{
+	/* note: layer->bitmap is not freed */
+	free (layer->buf);
+	free (layer);
+}
+
+
 U8 xor_operator (U8 a, U8 b)
 {
 	return a ^ b;
@@ -128,6 +206,9 @@ U8 com_operator (U8 a)
 	return ~a;
 }
 
+/** Performs a binary operation on two buffers.
+ * Byte-by-byte, the operation is applied to each pair of corresponding
+ * bytes. */
 struct buffer *buffer_binop (struct buffer *a, struct buffer *b,
 	binary_operator op)
 {
@@ -143,6 +224,10 @@ struct buffer *buffer_binop (struct buffer *a, struct buffer *b,
 }
 
 
+/** Performs a unary operation on a buffer.  Returns the result in a new
+ * buffer.  Byte-by-byte, the operation is applied to the source to
+ * determine the corresponding byte of the result.
+ */
 struct buffer *buffer_unop (struct buffer *buf, unary_operator op)
 {
 	unsigned int off = 0;
@@ -157,6 +242,16 @@ struct buffer *buffer_unop (struct buffer *buf, unary_operator op)
 }
 
 
+/** Compute the delta (exclusive-OR) between two buffers. */
+struct buffer *buffer_compute_delta (struct buffer *dst, struct buffer *src)
+{
+	return buffer_binop (dst, src, xor_operator);
+}
+
+
+/** Created a joined buffer.  The input image must use 8 bits per pixel and
+ * have a single color (0 or 1) per pixel.  The output image has 1 bit per pixel;
+ * 8 consecutive pixels are joined together into a single byte. */
 struct buffer *buffer_joinbits (struct buffer *buf)
 {
 	unsigned int off, bit;
@@ -173,6 +268,9 @@ struct buffer *buffer_joinbits (struct buffer *buf)
 	return res;
 }
 
+
+/** Create a split buffer from a joined one.  This is the reverse process of
+ * buffer_joinbits(); see above. */
 struct buffer *buffer_splitbits (struct buffer *buf)
 {
 	unsigned int off, bit;
@@ -200,7 +298,13 @@ int buffer_compare (struct buffer *a, struct buffer *b)
 		return 1;
 	for (off = 0; off < a->len; off++)
 		if (a->data[off] != b->data[off])
+		{
+#ifdef DEBUG
+			printf ("difference at offset %d (%02X vs. %02X)\n",
+				off, a->data[off], b->data[off]);
+#endif
 			return 1;
+		}
 	return 0;
 }
 
@@ -261,18 +365,246 @@ struct histogram *histogram_update (struct buffer *buf)
 }
 
 
-struct buffer *buffer_rle_encode (struct buffer *buf)
+/********************************************************************/
+
+/* Compression scheme:
+
+   Byte 0 of the compressed buffer contains flags:
+		7:6	Init method
+			Says how to initialize the page buffer before
+			decompressing:
+				00 = No initialization.
+				01 = Copy previous image.
+				10 = Clean page with all zeroes.
+				11 = Reserved.
+		5:4	Encryption method
+			Says how to decrypt the following bytes:
+				00 = No decryption.  Bytes are copied as-is.
+						512 bytes must follow.
+            01 = Run-Length Encoding.  512 bytes are
+						described, but runs of consecutive bytes
+						are compressed into a value/count pair.
+				10 = Palette Encoding.  This is used when the
+				      number of unique bytes in the image is small.
+						The palette format is shown below.
+				11 = Reserved.
+		3		Patch flag
+			When this bit is set, after decryption one or more
+			'patches' are to be applied.  These are offset/value
+			pairs which are used to fixup certain locations.
+			This is intended for cases where RLE could be improved
+			by damaging the input data in certain ways; and these
+			patches are corrections to fix the damage.
+
+	Beginning at byte 1, the encryption method as specified
+	in [5:4] is run.  This area is variable-sized.  There is no
+	explicit length given here.
+
+	Following the encoded area, if bit 3 is set, are one or more
+	patches.  Each patch is 3-bytes in length:
+		Byte 0 = offset from previous patch, in bytes.  Up to
+			255 positions can be advanced this way.  If more is
+			needed, a 'fake patch' that patches identical data as
+			before is required.  An offset of zero means no
+			more patches, and the following bytes do not occur.
+		Byte 1/2 = the 16-bit value to be placed in the image.
+
+	When the init method is 'copy from previous', this affects
+	how data and patches are applied.  In this case, we use XOR
+	operations rather than plain stores.
+
+   When using the palette method, the data layout is as follows:
+	   Byte 1:	Number of palette entries (at most 16)
+		Byte 2:  Palette - depending on the length above, each
+		         byte here maps to a 2-bit (if 4 or less) or 4-bit
+					encoded value.
+	   Byte 2+N: The encoded data, either 2 or 4 bytes/encoded byte.
+ */
+
+#define CH_INIT_NONE 0x00
+#define CH_INIT_COPY 0x40
+#define CH_INIT_CLEAN 0x80
+#define CH_INIT_MASK 0xC0
+
+#define CH_ENCODE_NONE 0x00
+#define CH_ENCODE_RLE 0x10
+#define CH_ENCODE_PALETTE 0x20
+#define CH_ENCODE_MASK 0x30
+
+#define CH_PATCH 0x08
+
+static U8 *buffer_write_run (U8 *ptr, U8 sentinel, U8 data, unsigned int count)
 {
-	struct buffer *res = buffer_alloc (buf->len);
+	if (count == 0);
+	else if (count < 4)
+	{
+		do {
+			*ptr++ = data;
+		} while (--count > 0);
+	}
+	else
+	{
+		*ptr++ = sentinel;
+		*ptr++ = data;
+		*ptr++ = count;
+	}
+
+	return ptr;
+}
+
+
+/**
+ * Return the estimated size of the image if it were compressed using
+ * the palette method.
+ */
+static unsigned int palette_compression_length (struct histogram *hist)
+{
+	if (hist->unique > 16)
+		return 10000;
+
+	else if (hist->unique <= 4)
+		return (FRAME_BYTE_SIZE / 4) + hist->unique + 1 + 1;
+
+	else
+		return (FRAME_BYTE_SIZE / 2) + hist->unique + 1 + 1;
+}
+
+
+/**
+ * Given a joined bitmap, return a compressed version.
+ * 'buf' is the buffer to be compressed.
+ *
+ * If 'prev' is non-NULL, it represents the previous image in the
+ * animation.  The compressor will see if the new image can be
+ * represented better as a delta from the previous.
+ */
+struct buffer *buffer_compress (struct buffer *buf, struct buffer *prev)
+{
+	struct buffer *rle;
+	U8 *rleptr;
+	unsigned int last, last_count;
+	int n;
+	U8 sentinel;
+
+	/* Update the image histogram */
+	histogram_update (buf);
+
+	/* Find a byte value that does not occur in the image */
+	for (n = 0; n <= 0xFF; n++)
+	{
+		if (buf->hist->count[n] == 0)
+		{
+			sentinel = n;
+			break;
+		}
+	}
+
+	/* Compute the run length encoded version of the buffer.
+	We'll assume for now that just RLE is good enough.
+	We will check that assumption later and see how good it really was. */
+	rle = buffer_alloc (buf->len);
+	rleptr = rle->data;
+	last = 1000;
+	last_count = 0;
+
+	*rleptr++ = CH_ENCODE_RLE;
+	*rleptr++ = sentinel;
+
+	for (n = 0; n < buf->len ; n++)
+	{
+		if ((buf->data[n] == last) && (last_count < 255))
+		{
+			last_count++;
+		}
+		else
+		{
+			rleptr = buffer_write_run (rleptr, sentinel, last, last_count);
+			last = buf->data[n];
+			last_count = 1;
+		}
+	}
+	rleptr = buffer_write_run (rleptr, sentinel, last, last_count);
+	rle->len = rleptr - rle->data;
+
+	/* See if delta encoding is better */
+	if (prev != NULL)
+	{
+		struct buffer *delta = buffer_compress (prev, NULL);
+		if (delta->len < rle->len)
+		{
+			/* TODO : it's possible that it needs to be _significantly_
+			smaller for this to be worthwhile... */
+		}
+	}
+
+#ifdef DEBUG
+	printf ("Unique values in original = %d\n", buf->hist->unique);
+	printf ("RLE encoded version = %d bytes\n", rle->len);
+	printf ("Palette compression = %d bytes\n",
+		palette_compression_length (buf->hist));
+#endif
+	return rle;
+}
+
+
+/**
+ * Given a compressed bitmap, return the uncompressed, joined buffer.
+ */
+struct buffer *buffer_decompress (struct buffer *buf)
+{
+	struct buffer *res;
+	U8 flags;
+	U8 sentinel;
+	U8 *inptr = buf->data;
+	U8 *outptr;
+	U8 val, count;
+
+	res = buffer_alloc (MAX_BUFFER_SIZE);
+	outptr = res->data;
+
+	flags = *inptr++;
+
+	switch (flags & CH_INIT_MASK)
+	{
+		case CH_INIT_NONE:
+		case CH_INIT_COPY:
+			break;
+
+		case CH_INIT_CLEAN:
+			break;
+	}
+
+	if ((flags & CH_ENCODE_MASK) == CH_ENCODE_RLE)
+	{
+		sentinel = *inptr++;
+		while (outptr - res->data < FRAME_BYTE_SIZE)
+		{
+			val = *inptr++;
+			if (val == sentinel)
+			{
+				val = *inptr++;
+				count = *inptr++;
+				do {
+					*outptr++ = val;
+				} while (--count > 0);
+			}
+			else
+			{
+				*outptr++ = val;
+			}
+		}
+	}
+
+	if (flags & CH_PATCH)
+	{
+	}
+
+	res->len = outptr - res->data;
 	return res;
 }
 
 
-struct buffer *buffer_rle_decode (struct buffer *buf)
-{
-	struct buffer *res = buffer_alloc (MAX_BUFFER_SIZE);
-	return res;
-}
+/********************************************************************/
 
 
 struct buffer *bitmap_crop (struct buffer *buf)
@@ -281,10 +613,40 @@ struct buffer *bitmap_crop (struct buffer *buf)
 	return res;
 }
 
-
 void bitmap_draw_pixel (struct buffer *buf, unsigned int x, unsigned int y)
 {
-	buf->data[bitmap_pos (buf, x, y)] = buf->color;
+	unsigned int pos = bitmap_pos (buf, x, y);
+	if (pos < buf->len)
+		buf->data[pos] = buf->color;
+}
+
+
+struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
+	unsigned int xoff, unsigned int yoff)
+{
+	unsigned int sx, sy;
+	for (sx = 0; sx < src->width; sx++)
+	{
+		for (sy = 0; sy < src->height; sy++)
+		{
+			U8 pixel = src->data[bitmap_pos(src, sx, sy)];
+			bitmap_draw_pixel (dst, sx + xoff, sy + yoff);
+		}
+	}
+}
+
+
+struct buffer *bitmap_tile (struct buffer *dst, struct buffer *src)
+{
+	unsigned int dx, dy;
+	for (dx = 0; dx < dst->width; dx++)
+	{
+		for (dy = 0; dy < dst->height; dy++)
+		{
+			U8 pixel = src->data[bitmap_pos(src, dx % src->width, dy % src->height)];
+			bitmap_draw_pixel (dst, dx, dy);
+		}
+	}
 }
 
 
@@ -293,6 +655,14 @@ void bitmap_draw_line (struct buffer *buf,
 	int x2, int y2)
 {
 	float xm, ym;
+
+	/* The approach used here is recursive divide-and-conquer:
+	1) Calculate the midpoint of the line to be drawn.
+	2) Draw a line from one end to the midpoint.
+	3) Draw a line from the other end to the midpoint.
+
+	The recursion is terminated by looking for cases where
+	the line is to be drawn is only 1 or 2 pixels in width. */
 
 	if (abs (x2-x1) <= 1 && abs (y2-y1) <= 1)
 	{
@@ -316,6 +686,7 @@ void bitmap_draw_box (struct buffer *buf,
 	int x1, int y1,
 	int x2, int y2)
 {
+	/* A box is just a series of four lines. */
 	bitmap_draw_line (buf, x1, y1, x2, y1);
 	bitmap_draw_line (buf, x1, y1, x1, y2);
 	bitmap_draw_line (buf, x2, y1, x2, y2);
@@ -326,6 +697,8 @@ void bitmap_draw_box (struct buffer *buf,
 void bitmap_draw_border (struct buffer *buf, unsigned int width)
 {
 	unsigned int i;
+
+	/* For each pixel-width, draw one box. */
 	for (i = 0; i < width; i++)
 		bitmap_draw_box (buf, i, i, buf->width - i - 1, buf->height - i - 1);
 }
@@ -371,9 +744,14 @@ void bitmap_fill (struct buffer *buf, U8 val)
 }
 
 
+/**
+ * A legacy function that decodes the older FIF format into
+ * an uncompressed, joined bitmap.  This allows the imglib
+ * functions to be used on existing images.
+ */
 struct buffer *fif_decode (struct buffer *buf, unsigned int plane)
 {
-	struct buffer *res = buffer_alloc (512);
+	struct buffer *res = buffer_alloc (FRAME_BYTE_SIZE);
 	U8 *in = buf->data;
 	U8 *out = res->data;
 	U8 planes, method;
@@ -389,7 +767,7 @@ struct buffer *fif_decode (struct buffer *buf, unsigned int plane)
 		switch (method)
 		{
 			case 1: /* RLE */
-				while (bytes < 512)
+				while (bytes < FRAME_BYTE_SIZE)
 				{
 					val = *in++;
 					if (val == 0xEE) /* skip */
@@ -475,4 +853,11 @@ void bitmap_zoom_out (struct buffer *buf)
 		getchar ();
 	}
 }
+
+
+void layer_update (struct layer *layer)
+{
+	bitmap_fill (layer->buf, 0);
+}
+
 

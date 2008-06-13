@@ -89,6 +89,22 @@ void lamp_flash_rtt (void)
 }
 
 
+/** Synchronize all flashing lamps.  There may be a slight glitch
+ * if the lamps were already on.  */
+void lamp_flash_sync (void)
+{
+	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
+	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
+
+	disable_irq ();
+	lamp_matrix_words[0] = lamp_flash_matrix_words[0];
+	lamp_matrix_words[1] = lamp_flash_matrix_words[1];
+	lamp_matrix_words[2] = lamp_flash_matrix_words[2];
+	lamp_matrix_words[3] = lamp_flash_matrix_words[3];
+	enable_irq ();
+}
+
+
 /** Runs periodically to update the physical lamp state.
  * MODE ranges from 0 .. NUM_LAMP_RTTS-1, and says which version
  * of the routine is needed, because of loop unrolling.
@@ -102,8 +118,8 @@ extern inline void lamp_rtt_common (const U8 mode)
 	 * But only do this outside of a game. */
 
 	/* Setup the strobe */
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
-	wpc_asic_write (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
+	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
 
 	/* Advance the strobe value for the next iteration.
 	Keep this together with the above so that lamp_strobe_mask
@@ -146,7 +162,7 @@ extern inline void lamp_rtt_common (const U8 mode)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, bits);
+	writeb (WPC_LAMP_ROW_OUTPUT, bits);
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
@@ -203,21 +219,26 @@ bool bit_test (const_bitset matrix, U8 bit)
 	return bitarray_test (matrix, bit);
 }
 
+
+/** Return nonzero if all bits in a matrix are set. */
 bool bit_test_all_on (const_bitset matrix)
 {
-	/* TODO : is this right? */
-	return matrix[0] && matrix[1]
-		&& matrix[2] && matrix[3]
-		&& matrix[4] && matrix[5]
-		&& matrix[6] && matrix[7];
+	U8 product = (matrix[0] & matrix[1]
+		& matrix[2] & matrix[3]
+		& matrix[4] & matrix[5]
+		& matrix[6] & matrix[7]);
+	return (product == 0xFF);
 }
 
+
+/** Return nonzero if all bits in a matrix are clear. */
 bool bit_test_all_off (const_bitset matrix)
 {
-	return !matrix[0] && !matrix[1]
-		&& !matrix[2] && !matrix[3]
-		&& !matrix[4] && !matrix[5]
-		&& !matrix[6] && !matrix[7];
+	U8 sum = (matrix[0] | matrix[1]
+		| matrix[2] | matrix[3]
+		| matrix[4] | matrix[5]
+		| matrix[6] | matrix[7]);
+	return (sum == 0);
 }
 
 
@@ -344,10 +365,11 @@ bool lamp_test_off (lampnum_t lamp)
 
 void lamp_flash_on (lampnum_t lamp)
 {
-	bit_on (lamp_flash_matrix, lamp);
-	/* TODO - initialize the bit in lamp_flash_matrix_now correctly,
-	 * so that the lamp stays synchronized with all other flashes.
-	 * It may need to be on or off now. */
+	if (!bit_test (lamp_flash_matrix, lamp))
+	{
+		bit_on (lamp_flash_matrix, lamp);
+		lamp_flash_sync ();
+	}
 }
 
 void lamp_flash_off (lampnum_t lamp)
@@ -373,7 +395,9 @@ void lamp_update_task (void)
 
 /** Request that the lamps be updated.
  * Lamp update runs in a separate task context, and it
- * only works during a game. */
+ * only happens during a game.
+ * TODO : lamp update should not happen more than once
+ * per 500ms. */
 void lamp_update_request (void)
 {
 	if (in_live_game)
@@ -426,6 +450,7 @@ void lamp_all_on (void)
 void lamp_all_off (void)
 {
 	disable_interrupts ();
+	matrix_all_off (lamp_flash_matrix_now);
 	matrix_all_off (lamp_flash_matrix);
 	matrix_all_off (lamp_leff1_matrix);
 	matrix_all_off (lamp_leff2_matrix);

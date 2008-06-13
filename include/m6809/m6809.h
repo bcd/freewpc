@@ -41,9 +41,9 @@
 
 /* Defines for various assembler routines that can be called from C */
 __attribute__((noreturn)) void start (void);
-U8 far_read8 (U8 *address, U8 page);
-U16 far_read16 (U16 *address, U8 page);
-void *far_read_pointer (void *address, U8 page);
+U8 far_read8 (const void *address, U8 page);
+U16 far_read16 (const void *address, U8 page);
+void *far_read_pointer (const void *address, U8 page);
 typedef void (*void_function) (void);
 void far_indirect_call_handler (void_function address, U8 page);
 void bitmap_blit_asm (U8 *dst, U8 shift);
@@ -126,7 +126,16 @@ extern inline void m6809_firq_restore_regs (void)
  */
 extern inline void *memset (void *s, U8 c, U16 n)
 {
-	if ((n % 8) == 0)
+	if (n <= 5)
+	{
+		register U8 *s1 = (U8 *)s;
+		if (n >= 4) *s1++ = c;
+		if (n >= 3) *s1++ = c;
+		if (n >= 2) *s1++ = c;
+		if (n >= 1) *s1++ = c;
+		*s1 = c;
+	}
+	else if ((n % 8) == 0)
 	{
 		register U16 *s1 = (U16 *)s;
 		n /= 8;
@@ -149,14 +158,6 @@ extern inline void *memset (void *s, U8 c, U16 n)
 			n--;
 		}
 	}
-#if 0
-	else if (n <= 7)
-	{
-		register U8 *s1 = (U8 *)s;
-		*s1++ = c;
-		(void) memset (s1, c, n-1);
-	}
-#endif
 	else
 	{
 		register char *s1 = (char *)s;
@@ -194,12 +195,36 @@ extern inline void __blockclear16 (void *s1, U16 n)
 
 extern inline void *memcpy (void *s1, const void *s2, U16 n)
 {
-	register char *_s1 = (char *)s1;
-	register char *_s2 = (char *)s2;
-	while (n > 0)
+	if ((n == 3) || (n == 5))
 	{
-		*_s1++ = *_s2++;
+		register U8 *_s1 = (U8 *)s1;
+		register const U8 *_s2 = (U8 *)s2;
+		*_s1 = *_s2;
+		s1++;
+		s2++;
 		n--;
+	}
+
+	if ((n % 2) == 0)
+	{
+		register U16 *_s1 = (U16 *)s1;
+		register const U16 *_s2 = (U16 *)s2;
+		n /= 2;
+		while (n > 0)
+		{
+			*_s1++ = *_s2++;
+			n--;
+		}
+	}
+	else
+	{
+		register U8 *_s1 = (U8 *)s1;
+		register const U8 *_s2 = (U8 *)s2;
+		while (n > 0)
+		{
+			*_s1++ = *_s2++;
+			n--;
+		}
 	}
 	return (s1);
 }
@@ -225,14 +250,6 @@ extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 		*_s1++ = *_s2++;
 		n -= 16;
 	} while (n > 0);
-}
-
-
-
-extern inline void *memmove (void *s1, const void *s2, U16 n)
-{
-	/* TODO - memcpy isn't always going to work */
-	return memcpy (s1, s2, n);
 }
 
 

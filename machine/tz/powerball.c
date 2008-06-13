@@ -246,11 +246,6 @@ void pb_announce (void)
 {
 	if (pb_announce_needed)
 	{
-		/* At ball start, the important score screen may pre-empt us.
-		TODO : better deff management would eliminate the need for
-		this. */
-		deff_wait_for_other (DEFF_SCORES_IMPORTANT);
-
 #ifdef PB_DEBUG
 		deff_restart (DEFF_PB_DETECT);
 #else
