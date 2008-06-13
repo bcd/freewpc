@@ -334,6 +334,10 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 /* Sound                                    */
 /********************************************/
 
+extern inline void pinio_reset_sound (void)
+{
+}
+
 extern inline void pinio_write_sound (U8 val)
 {
 }
@@ -345,6 +349,9 @@ extern inline bool pinio_sound_ready_p (void)
 extern inline U8 pinio_read_sound (void)
 {
 }
+
+#define SW_VOLUME_UP SW_GREEN_BUTTON
+#define SW_VOLUME_DOWN SW_RED_BUTTON
 
 /********************************************/
 /* Switches                                 */

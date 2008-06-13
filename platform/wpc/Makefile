@@ -40,8 +40,6 @@ KERNEL_ASM_OBJS += $(P)/start.o
 
 COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
-CALLSET_FLAGS += -D platform/wpc
-
 ifeq ($(FREEWPC_DEBUGGER),y)
 CFLAGS += -DDEBUGGER
 EXTRA_ASFLAGS += -DDEBUGGER

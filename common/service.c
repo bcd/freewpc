@@ -78,7 +78,7 @@ CALLSET_ENTRY (service, sw_down)
 	if (coin_door_warning_needed ())
 		return;
 	else if (!in_test)
-		button_invoke (SW_DOWN, volume_down, TIME_500MS, TIME_100MS);
+		button_invoke (SW_VOLUME_DOWN, volume_down, TIME_500MS, TIME_100MS);
 	else	
 		test_down_button ();
 }
@@ -88,7 +88,7 @@ CALLSET_ENTRY (service, sw_up)
 	if (coin_door_warning_needed ())
 		return;
 	else if (!in_test)
-		button_invoke (SW_UP, volume_up, TIME_500MS, TIME_100MS);
+		button_invoke (SW_VOLUME_UP, volume_up, TIME_500MS, TIME_100MS);
 	else
 		test_up_button ();
 }

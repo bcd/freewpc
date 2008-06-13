@@ -85,7 +85,7 @@ typedef U8 *const const_bitset;
 #define wpc_testbit(bs, index) \
 	WPC_BITOP (bs, index, "\tand%1\t,%0")
 
-#elif defined (CONFIG_PLATFORM_WHITESTAR) /* TODO */
+#elif defined (CONFIG_PLATFORM_WHITESTAR) && defined (SHIFTER_FAILS)
 
 #define __bitarray_constant_p(bitno) 0
 #define wpc_setbit(bits,bitno) 0

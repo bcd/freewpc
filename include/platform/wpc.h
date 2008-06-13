@@ -620,6 +620,11 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 #define WPCS_READ_READY	0x80
 #endif
 
+extern inline void pinio_reset_sound (void)
+{
+	writeb (WPCS_CONTROL_STATUS, 0);
+}
+
 extern inline void pinio_write_sound (U8 val)
 {
 	writeb (WPCS_DATA, val);
@@ -634,6 +639,9 @@ extern inline U8 pinio_read_sound (void)
 {
 	return readb (WPCS_DATA);
 }
+
+#define SW_VOLUME_UP SW_UP
+#define SW_VOLUME_DOWN SW_DOWN
 
 /********************************************/
 /* Switches                                 */

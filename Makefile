@@ -221,15 +221,18 @@ endif
 
 EVENT_OBJS = $(BLDDIR)/callset.o
 
+ifdef CONFIG_WPC
 TEST_OBJS = test/window.o
-
 TEST2_OBJS = test/format.o test/preset.o test/swtest.o
+endif
 
+ifeq ($(CONFIG_DMD),y)
 FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
 
 FIF_SRCS += $(patsubst %.pgm,%.fif,$(PGM_SRCS))
 
 FIF_OBJS = $(patsubst %.fif,%.o,$(FIF_SRCS))
+endif
 
 BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
 

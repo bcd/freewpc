@@ -27,6 +27,8 @@ RETADDR=3
 WPC_ROM_PAGE_REG=0x3FFC
 #elif defined (CONFIG_PLATFORM_WPCSOUND)
 WPC_ROM_PAGE_REG=0x2000
+#elif defined (CONFIG_PLATFORM_WHITESTAR)
+WPC_ROM_PAGE_REG=0x3200
 #else
 #error "unknown bank switching register"
 #endif
