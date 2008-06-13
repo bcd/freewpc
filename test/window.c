@@ -2171,7 +2171,7 @@ void memory_editor_thread (void)
 
 		for (n=0; n < 8; n++)
 		{
-			sprintf ("%02X", readb (memory_editor_addr+n));
+			sprintf ("%02X", memory_editor_addr[n]);
 			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
 		}
 
@@ -2535,7 +2535,7 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern void freewpc_init (void);
+	extern __noreturn__ void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
