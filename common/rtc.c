@@ -249,7 +249,7 @@ CALLSET_ENTRY (rtc, init)
 #elif defined (CONFIG_NATIVE)
 	/* TODO - should read this from the native system */
 	wpc_nvram_get ();
-	year = 2008;
+	year = 8;
 	month = 4;
 	day = 1;
 	rtc_calc_day_of_week ();
