@@ -136,14 +136,14 @@ define MACHINE_CUSTOM_AMODE
 66: Top Lane Left, purple
 67: Top Lane Right, purple
 68: Skill Lower, yellow
-71: Ultra Ramp Collect, yellow
+71: Light Jackpots, red
 72: Final Draw, white
 73: Magna Goalie, orange
 74: Left Inlane
 75: Light Kickback, green
 76: L. Ramp Ticket, purple
 77: R. Ramp Ticket, purple
-78: Ramp Jackpots, red
+78: Ultra Ramp Collect, yellow
 81: Rollover 1, red
 82: Rollover 2, red
 83: Rollover 3, red

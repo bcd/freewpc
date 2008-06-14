@@ -20,7 +20,7 @@
 ;;; Offset from the stack pointer to the farcall parameters.
 ;;; This should equal the total size of all saved registers at the
 ;;; point that the parameters are read.
-RETADDR=5
+RETADDR=3
 
 ;;; I/O address of the bank switching register.
 WPC_ROM_PAGE_REG=0x3FFC
@@ -58,15 +58,15 @@ __far_call_page: .blkb 1
 	.area .text
 	.globl __far_call_handler
 __far_call_handler:
-	pshs	b,u,x                 ; Save all registers used for parameters
+	pshs	b,u                   ; Save all registers used for parameters
 	ldu	RETADDR,s             ; Get pointer to the parameters
-	ldx	,u++                  ; Get the called function offset
+	ldd	,u++                  ; Get the called function offset
+	std   *__far_call_address   ; Move function offset to memory
 	ldb	,u+                   ; Get the called function page
 	stu	RETADDR,s			    ; Update return address
-	stx   *__far_call_address   ; Move function offset to memory
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
-	puls	b,u,x                 ; Restore parameters
+	puls	b,u                   ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A
@@ -80,11 +80,9 @@ __far_call_handler:
 	;;; takes parameters, this gets tricky...
 	.globl _far_indirect_call_handler
 _far_indirect_call_handler:
-	pshs	b,u,x                 ; Save all registers used for parameters
-	stx   *__far_call_address   ; Move function offset to memory
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	stx   *__far_call_address   ; Move function offset to memory
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
-	puls	b,u,x                 ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A
@@ -94,11 +92,11 @@ _far_indirect_call_handler:
 
 	.globl _far_call_pointer_handler
 _far_call_pointer_handler:
-	pshs	b,x                   ; Save all registers used for parameters
+	pshs	b                     ; Save all registers used for parameters
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
 	ldb	__far_call_page
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
-	puls	b,x                   ; Restore parameters
+	puls	b                     ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A

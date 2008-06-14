@@ -54,7 +54,6 @@ void status_page_complete (void)
 
 void status_report_deff (void)
 {
-
 	status_page_init ();
 	font_render_string_center (&font_fixed6, 64, 16, "STATUS REPORT");
 	status_page_complete ();
