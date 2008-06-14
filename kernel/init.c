@@ -132,6 +132,8 @@ __noreturn__ void freewpc_init (void)
 	wpc_watchdog_reset ();
 	free_timer_init ();
 	wpc_watchdog_reset ();
+	sound_init ();
+	wpc_watchdog_reset ();
 
 	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks
@@ -148,7 +150,7 @@ __noreturn__ void freewpc_init (void)
 	 * thread, since it involves polling for data back from it,
 	 * which may take unknown (or even infinite) time. */
 	sys_init_pending_tasks++;
-	task_create_gid (GID_SOUND_INIT, sound_init);
+	task_create_gid (GID_SOUND_INIT, sound_board_init);
 
 	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
 	 * but not before all of the hardware modules are done. */
