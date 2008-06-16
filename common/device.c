@@ -374,9 +374,8 @@ wait_and_recount:
 			callset_invoke (any_kick_attempt);
 			device_call_op (dev, kick_attempt);
 
-			/* Pulse the solenoid.
-			 * TODO - how to do this is also device-specific. */
-			sol_start (dev->props->sol, SOL_DUTY_100, TIME_66MS);
+			/* Pulse the solenoid. */
+			sol_pulse (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
