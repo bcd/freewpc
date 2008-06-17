@@ -63,6 +63,12 @@ on the playfield. */
  * the deff runs.) */
 #define D_PAUSE 0x8
 
+/** Set for a deff that wants to display the last score that was
+ * earned by the player.  This requires that the score value be
+ * copied to a safe location where it remain available throughout
+ * the deff, even if other score switches are tripped in the
+ * meantime. */
+#define D_SCORE 0x10
 
 /** A constant descriptor for a display effect. */
 typedef struct
