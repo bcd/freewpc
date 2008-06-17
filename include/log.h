@@ -21,7 +21,7 @@ struct log_event
 extern void log_event1(U16 module_event, U8 arg);
 
 #define log_event(severity, module, event, arg) \
-	log_event1((((module) << 8UL) | event), arg)
+	log_event1((((U16)(module) << 8UL) | event), arg)
 
 #define log_set_min_severity(severity)
 
