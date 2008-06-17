@@ -10,7 +10,7 @@ struct log_event
 	U8 timestamp;
 
 	/* The module ID (upper 4-bits) and event ID (lower 4-bits) */
-	U8 module_event;
+	U16 module_event;
 
 	/* An event-specific 8-bit argument */
 	U8 arg;
