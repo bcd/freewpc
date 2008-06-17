@@ -40,6 +40,29 @@ struct wpc_pinmame_clock_data
 #endif
 
 
+/** The memory state of the realtime clock.  These variables
+hold the 'base time' that is not counted in the ASIC, plus
+a snapshot of the last value that was read from the ASIC. */
+struct rtc_state
+{
+	U8 year;
+	U8 month;
+	U8 day;
+	U8 hour;
+	U8 min;
+	U8 day_of_week;
+};
+
+
+/** The editable fields of the date/time. */
+#define RTC_FIELD_MONTH 0
+#define RTC_FIELD_DAY 1
+#define RTC_FIELD_YEAR 2
+#define RTC_FIELD_HOUR 3
+#define RTC_FIELD_MINUTE 4
+#define NUM_RTC_FIELDS 5
+
+
 /* Year is stored as an offset from 2000 */
 static __nvram__ U8 year;
 static __nvram__ U8 month;
@@ -314,11 +337,8 @@ const char *rtc_edit_field_name[] = {
 };
 
 
-/** Show the current date/time on the DMD */
-void rtc_show_date_time (void)
+void rtc_render (void)
 {
-	dmd_alloc_low_clean ();
-
 	sprintf ("%s", day_names[day_of_week]);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	rtc_render_date ();
@@ -331,7 +351,14 @@ void rtc_show_date_time (void)
 		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
 		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
 	}
+}
 
+
+/** Show the current date/time on the DMD */
+void rtc_show_date_time (void)
+{
+	dmd_alloc_low_clean ();
+	rtc_render ();
 	dmd_show_low ();
 }
 
@@ -360,32 +387,32 @@ void rtc_modify_field (U8 up_flag)
 
 	switch (rtc_edit_field)
 	{
-		case 0: /* month */
+		case RTC_FIELD_MONTH:
 			if (up_flag)
 				month++;
 			else if (month > 1)
 				month--;
 			break;
-		case 1: /* day */
+		case RTC_FIELD_DAY:
 			if (up_flag)
 				day++;
 			else if (day > 1)
 				day--;
 			break;
-		case 2: /* year */
+		case RTC_FIELD_YEAR:
 			if (up_flag)
 				year++;
 			else if (year > 0)
 				year--;
 			break;
-		case 3: /* hour */
+		case RTC_FIELD_HOUR:
 			if (up_flag && hour < 23)
 				hour++;
 			else if (hour > 0)
 				hour--;
 			rtc_hw_write ();
 			break;
-		case 4: /* minute */
+		case RTC_FIELD_MINUTE:
 			if (up_flag && minute < 59)
 				minute++;
 			else if (minute > 0)
