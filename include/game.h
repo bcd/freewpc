@@ -41,6 +41,7 @@ void end_game (void);
 void end_ball (void);
 void start_ball (void);
 void mark_ball_in_play (void);
+void try_validate_playfield (U8 swno);
 void add_player (void);
 void start_game (void);
 void stop_game (void);

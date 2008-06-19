@@ -29,7 +29,7 @@ typedef U8 switchnum_t;
 #define SW_EDGE		0x02 /* Switch is handled on any edge */
 #define SW_IN_GAME	0x08 /* Only service switch during a game */
 #define SW_PLAYFIELD	0x10 /* Declares that switch is 'on the playfield' */
-#define SW_NOPLAY		0x20 /* Switch does not mark a ball as 'in play' */
+#define SW_NOVALID   0x20 /* Switch does not mark playfield valid */
 #define SW_IN_TEST	0x40 /* Service switch in test mode; default is no */
 
 /** Switch handler prototype form */

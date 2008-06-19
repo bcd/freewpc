@@ -69,6 +69,9 @@ __fastram__ U8 in_tilt;
  * delivered to the plunger lane. */
 U8 ball_in_play;
 
+/** The number of switch closures before playfield valid */
+U8 pending_valid_count;
+
 /** The number of players in the current game */
 __nvram__ U8 num_players;
 
@@ -429,6 +432,7 @@ void start_ball (void)
 {
 	in_tilt = FALSE;
 	ball_in_play = FALSE;
+	pending_valid_count = 0;
 
 	/* Since lamp effects from previous balls could have been killed,
 	ensure that no lamps for leffs are allocated, causing incorrect
@@ -504,6 +508,16 @@ void mark_ball_in_play (void)
 	{
 		ball_in_play = TRUE;		
 		callset_invoke (ball_in_play);
+	}
+}
+
+
+void try_validate_playfield (U8 swno)
+{
+	pending_valid_count++;
+	if (pending_valid_count == 3)
+	{
+		mark_ball_in_play ();
 	}
 }
 
