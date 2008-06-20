@@ -165,6 +165,7 @@ void end_game (void)
 		{
 			high_score_check ();
 			match_start ();
+			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
 		}
 
@@ -557,6 +558,7 @@ void start_game (void)
 		ball_up = 1;
 	
 		amode_stop ();
+		log_event (SEV_INFO, MOD_GAME, EV_START, 0);
 		callset_invoke (start_game);
 		task_yield (); /* start_game can take awhile */
 

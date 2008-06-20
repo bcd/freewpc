@@ -43,6 +43,48 @@ char *log_module_names[] = {
 	[MOD_PRICING] = "Pricing",
 	[MOD_SOL] = "Sol",
 };
+
+char *log_get_format (U16 module_event)
+{
+	switch (module_event & 0xF)
+	{
+		case EV_START:
+			return "start";
+		case EV_STOP:
+			return "stop";
+		case EV_EXIT:
+			return "exit";
+	}
+
+	switch (module_event)
+	{
+		case make_module_event(MOD_LAMP, EV_BIT_ON):
+			return "flag on";
+		case make_module_event(MOD_LAMP, EV_BIT_OFF):
+			return "flag off";
+		case make_module_event(MOD_LAMP, EV_BIT_TOGGLE):
+			return "flag toggle";
+
+		case make_module_event(MOD_TASK, EV_TASK_RESTART):
+			return "restart";
+		case make_module_event(MOD_TASK, EV_TASK_START1):
+			return "start1";
+
+		case make_module_event(MOD_SYSTEM, EV_SYSTEM_NONFATAL):
+			return "nonfatal";
+
+		case make_module_event(MOD_SYSTEM, EV_SYSTEM_FATAL):
+			return "fatal";
+
+		case make_module_event(MOD_SOL, EV_DEV_ENTER):
+			return "deventer";
+		case make_module_event(MOD_SOL, EV_DEV_KICK):
+			return "devkick";
+	}
+
+	return "?";
+}
+
 #endif
 
 /** Add an entry to the event log. */
@@ -58,7 +100,8 @@ void log_event1 (U16 module_event, U8 arg)
 	ev->module_event = module_event;
 	ev->arg = arg;
 
-	/* Advance the log forward */
+	/* Advance the log forward.  When it reaches the end, we always
+	 * wrap around, overwriting previous entries. */
 	log_tail++;
 	if (log_tail >= MAX_LOG_EVENTS)
 	{
@@ -73,10 +116,13 @@ void log_event1 (U16 module_event, U8 arg)
 	write a message as well.  This replaces the older printfs
 	that were scattered through the code. */
 #ifdef DEBUGGER
+	dbprintf ("%s %s %02X\n", log_module_names[module_part(module_event)],
+		log_get_format (module_event), arg);
 #endif
 }
 
 
+/** Initialize the event log. */
 void log_init (void)
 {
 	log_head = log_tail = 0;
