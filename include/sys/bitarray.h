@@ -22,7 +22,7 @@
 #define _SYS_BITARRAY_H
 
 typedef U8 *bitset;
-typedef U8 *const const_bitset;
+typedef const U8 *const_bitset;
 
 #define bitarray_const_offset(bits, bitno) (bits[(bitno) / 8])
 

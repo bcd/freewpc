@@ -263,7 +263,7 @@ void browser_decimal_item_number (U8 val)
 	sprintf ("%d", val);
 }
 
-void browser_init (void)
+__attribute__((noinline)) void browser_init (void)
 {
 	struct menu *m = win_top->w_class.priv;
 
@@ -307,10 +307,6 @@ void browser_down (void)
 	if (menu_selection == 0xFF)
 		menu_selection = browser_max;
 }
-
-struct window_ops browser_window = {
-	INHERIT_FROM_BROWSER,
-};
 
 void browser_print_operation (const char *s)
 {
@@ -387,7 +383,7 @@ struct adjustment standard_adjustments[] = {
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
 	{ "SHOW DATE/TIME", &yes_no_value, YES, &system_config.show_date_and_time },
-	{ "ALLOW DIM ALLUM.", &yes_no_value, NO, &system_config.allow_dim_illum },
+	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
 	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
@@ -2143,19 +2139,29 @@ void memory_editor_enter (void)
 	if (memory_editor_modify_flag == 0)
 	{
 		memory_editor_modify_flag = 1;
-		memory_editor_new_value = readb (memory_editor_addr);
+		memory_editor_new_value = *memory_editor_addr;
 	}
 	else if (memory_editor_modify_flag == 1)
 	{
-		writeb (memory_editor_addr, memory_editor_new_value);
+		*memory_editor_addr = memory_editor_new_value;
 		memory_editor_modify_flag = 0;
 	}
 }
 
+		/* Reading both of these registers produces the same results! */
+		/* Reading just zerocross/IRQ clear produces 38, 78 most of the time;
+		 * 40, 3A, 01, 7A occasionally.
+		 * Reading just FIRQ clear produces the same results, except 02
+		 * instead of 01, and 00 occasionally.
+		 * This is with the zerocross circuit unconnected, so bit 7 of
+		 * the first should indeed always be the same. */
+		/* With the power driver board connected, both of these read a
+		 * solid 3A, occasionally BA for the first because of zerocross.
+		 * Very rarely 38 was seen on both. */
+
 void memory_editor_thread (void)
 {
 	U8 n;
-	U8 flash = 0;
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
@@ -2165,7 +2171,7 @@ void memory_editor_thread (void)
 
 		for (n=0; n < 8; n++)
 		{
-			sprintf ("%02X", readb (memory_editor_addr+n));
+			sprintf ("%02X", memory_editor_addr[n]);
 			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
 		}
 
@@ -2529,7 +2535,7 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern void freewpc_init (void);
+	extern __noreturn__ void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
@@ -3065,6 +3071,10 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "133MS"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
+	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
+	{
+		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+	}
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
@@ -3073,9 +3083,7 @@ void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
-	/* TODO : Use 100% duty cycle for now; this probably ought to
-	change for certain coils. */
-	sol_start (sel, SOL_DUTY_100, browser_action);
+	sol_start (sel, sol_get_duty (sel), browser_action);
 	task_sleep (TIME_100MS);
 }
 

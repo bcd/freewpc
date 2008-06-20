@@ -196,7 +196,7 @@ scheduling flaws at task level.
 one of the TASK_xxx defines.  This ensures that it is converted
 to the proper units based on the scheduling of the solenoid
 update at IRQ time. */
-void
+__attribute__((noinline)) void
 sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 {
 	/* The duty cycle mask is only read by the IRQ
@@ -220,6 +220,14 @@ sol_stop (solnum_t sol)
 	sol_timers[sol] = 0;
 	sol_duty_state[sol] = 0;
 	enable_interrupts ();
+}
+
+
+/** Pulse a solenoid for its normal duration. */
+void
+sol_pulse (solnum_t sol)
+{
+	sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
 }
 
 

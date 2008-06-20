@@ -190,7 +190,7 @@ void print_audit_list (const char *title, struct audit *aud)
 
 		printer_moveto (5);
 		print_from_page (TEST_PAGE);
-		print_string (far_read_pointer (&aud->name, TEST_PAGE));
+		print_string ((char *)far_read_pointer (&aud->name, TEST_PAGE));
 		print_from_this_page ();
 
 		aptr = far_read_pointer (&aud->nvram, TEST_PAGE);

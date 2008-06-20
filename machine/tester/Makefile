@@ -11,6 +11,8 @@ endif
 
 EXTRA_CFLAGS += -D$(hw)
 
+CONFIG_PLAYABLE := n
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.

@@ -71,7 +71,7 @@ typedef struct
 	U8 data;
 	U8 flags;
 	U8 id;
-} leff_data_t;
+} __attribute__((may_alias)) leff_data_t;
 
 
 #define lamplist_apply_delay	(task_current_class_data (leff_data_t)->apply_delay)

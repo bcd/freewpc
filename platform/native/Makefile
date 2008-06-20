@@ -18,15 +18,12 @@ HOST_LIBS += -lpth
 # Additional object files to be linked into the kernel region
 KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o $(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o
 
-# Machine-specific simulation files
-#ifeq ($(MACHINE),tz)
-#KERNEL_OBJS += $(D)/tz_sim.o
-#endif
-
 # When using the curses UI (default for now)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 KERNEL_OBJS += $(D)/ui_curses.o
+
+CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)

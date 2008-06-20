@@ -299,7 +299,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 		/* Handles writes to the PIC */
 		if (last_write == 0xFF && write_val != WPC_PIC_RESET)
 		{
-			simlog (SLC_DEBUG, "PIC written before reset.");
+			simlog (SLC_DEBUG, "PIC write %02X before reset.", write_val);
 		}
 		else if (unlock_mode > 0)
 		{

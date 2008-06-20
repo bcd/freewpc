@@ -608,7 +608,7 @@ endif
 
 ifeq ($(CPU),native)
 freewpc : $(OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc -Wl,-Map -Wl,freewpc.map $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #

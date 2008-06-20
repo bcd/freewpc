@@ -374,9 +374,8 @@ wait_and_recount:
 			callset_invoke (any_kick_attempt);
 			device_call_op (dev, kick_attempt);
 
-			/* Pulse the solenoid.
-			 * TODO - how to do this is also device-specific. */
-			sol_start (dev->props->sol, SOL_DUTY_100, TIME_66MS);
+			/* Pulse the solenoid. */
+			sol_pulse (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
@@ -483,6 +482,13 @@ void device_update_globals (void)
 	 * have to fake it */
 	missing_balls = 0;
 #endif
+
+	/* If 'missing' went negative, this means there are more
+	balls detected than expected. */
+	if (missing_balls > 0xF0)
+	{
+		missing_balls = 0;
+	}
 
 	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
 		counted_balls, missing_balls, live_balls, held_balls);

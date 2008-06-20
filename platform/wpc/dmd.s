@@ -42,6 +42,11 @@ _dmd_memset:
 	; initialized 510 of the 512 DMD display bytes.
 	; At the end one more pshu is needed to assign
 	; the final 2 bytes.
+	; TODO - when doing zero operation, we can push
+	; DP=0 to get one extra byte moved per instruction.
+	; If interrupts are disabled, we can set S=0 before
+	; this loop and get 2 more bytes out of it.  There
+	; would be a penalty for the setup/restore though.
 	; (102 bytes in 17x12=204 cycles, means this takes
 	; about 0.5ms to execute.)
 1$:

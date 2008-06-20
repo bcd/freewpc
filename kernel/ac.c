@@ -31,6 +31,11 @@ __fastram__ U8 ac_zc_count;
 
 __fastram__ U8 ac_cycle_complete;
 
+U8 ac_zerocross_errors;
+
+U8 ac_zerocross_count;
+
+U8 ac_zerocross_histogram[5];
 
 /**
  * Real-time function that checks to see if we are currently at a
@@ -43,6 +48,23 @@ void ac_rtt (void)
 	{
 		/* We are currently at a zero crossing. */
 handle_zero_crossing:;
+
+		/* Bump total number of zerocrossings seen */
+		ac_zerocross_count++;
+
+		/* Audit the time since the last zerocrossing. */
+		if (ac_zc_count < 7)
+		{
+			ac_zerocross_histogram[0]++;
+		}
+		else if (ac_zc_count > 9)
+		{
+			ac_zerocross_histogram[4]++;
+		}
+		else
+		{
+			ac_zerocross_histogram[ac_zc_count-6]++;
+		}
 
 		/* Clear the counter which indicates the number
 		of IRQs since the last crossing. */
@@ -71,6 +93,7 @@ handle_zero_crossing:;
 			/* We should have gotten a zero crossing by now, but
 			we didn't.  We'll just pretend we got one anyway,
 			to allow the coils to be refreshed. */
+			ac_zerocross_errors++;
 			goto handle_zero_crossing;
 		}
 	}
@@ -81,5 +104,6 @@ void ac_init (void)
 {
 	ac_zc_count = 0;
 	ac_cycle_complete = 0;
+	ac_zerocross_errors = 0;
 }
 

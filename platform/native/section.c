@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+#undef sprintf
 
 /**
  * \file
@@ -36,7 +37,7 @@ extern char *__start_local, *__stop_local;
 
 
 /** The name of the backing file */
-char protected_memory_file[256] = "freewpc.mem";
+char protected_memory_file[256] = "nvram/default.nv";
 
 
 /** Load the contents of the protected memory from file to RAM. */
@@ -44,6 +45,9 @@ void protected_memory_load (void)
 {
 	int size = &__stop_nvram - &__start_nvram;
 	FILE *fp;
+
+	/* Use a different file for each machine */
+	sprintf (protected_memory_file, "nvram/%s.nv", MACHINE_SHORTNAME);
 
 	simlog (SLC_DEBUG, "Loading protected memory from '%s'", protected_memory_file);
 	fp = fopen (protected_memory_file, "r");

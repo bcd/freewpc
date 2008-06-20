@@ -119,7 +119,7 @@ extern U8 idle_ok;
 
 #include <m6809/m6809.h>
 #ifndef NULL
-#define NULL 0UL
+#define NULL 0
 #endif
 
 #else

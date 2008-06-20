@@ -45,9 +45,13 @@ the second value is the off time */
 #define SOL_DUTY_75		0x77
 #define SOL_DUTY_100		0xFF
 
+#define SOL_DUTY_DEFAULT   SOL_DUTY_25
+#define SOL_TIME_DEFAULT   TIME_133MS
+
 /* Function prototypes */
 void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
 void sol_stop (solnum_t sol);
+void sol_pulse (solnum_t sol);
 void sol_init (void);
 
 /* sol_start is a macro because the 'time' value must be scaled
@@ -56,10 +60,18 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 #define sol_start(sol,mask,time) \
 	sol_start_real (sol, mask, (4 * time))
 
-/* Standard flasher pulse is full strength, for 33ms */
-#define flasher_pulse(id) sol_start (id, SOL_DUTY_100, TIME_33MS)
+#define flasher_pulse(id) sol_pulse(id)
 
-/* Standard solenoid pulse is full strength for 100ms */
-#define sol_pulse(id)      sol_start(id, SOL_DUTY_100, TIME_100MS)
+extern inline U8 sol_get_time (solnum_t sol)
+{
+	extern const U8 sol_time_table[];
+	return sol_time_table[sol];
+}
+
+extern inline U8 sol_get_duty (solnum_t sol)
+{
+	extern const U8 sol_duty_table[];
+	return sol_duty_table[sol];
+}
 
 #endif /* _SYS_SOL_H */

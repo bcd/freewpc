@@ -5,7 +5,7 @@ Poor Design
 * Rewrite display effect module not to use malloc(), like leffs.
 * task_set_arg() still used in some places, inefficient.
 * Remove gendefines???
-* "Idle" functions aren't really idle...
+* "Idle" functions aren't really idle... see 'timing' branch
 * Sound/music management is extremely poor.
 * Teach gencallset to ignore code that isn't being compiled in.
 * sol_duty_state should default to off, for safety.  Could also:
@@ -23,7 +23,7 @@ Missing Feature
 * Lamp power saver level
 * If all optos are not working, warn about the 12V supply.
 * Abort after so many ball searches, or try another method (chase ball?)
-* Zerocross circuitry is not being used.
+* Zerocross circuitry is not being used.  In Progress.
 * Print message when high power coils are disabled by open coin door.
 * Coin Door Ballsave
 * Burnin
@@ -34,10 +34,7 @@ Missing Feature
 
 
 Bugs
-* Solenoid pulse for device kick is hardcoded to 100%, may need to be
-tunable.
 * Briefly ignore switch row/column on ground/short.
-* Sound board commands are all 8-bits, not 16-bit, on DCS.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
 * When changing adjustments, 'confirmation' screen does not work.
@@ -45,16 +42,14 @@ tunable.
 * Switch levels/edges tests do not work.  In Progress.
 * Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
+* DCS sound bringup does not work well
 
 
 Compiler Changes
 * Multiply by 16 should not be unrolled to shift; mul works best.
 * sprintf() jump table per character is way too large.
-* Increment 16-bit word optimization in GCC 4.4 does not account that
-the register replaced was dead.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
-* Too many BRA to RTS instructions; just return already.
 
 
 Nice to Have
