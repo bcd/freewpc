@@ -73,8 +73,8 @@ ALL: 11..88
 NULL: c_decl(deff_exit), 0
 Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
 Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
-Scores: runner, PRI_SCORES
-Scores Important: PRI_SCORES_IMPORTANT
+Scores: runner, page(COMMON_PAGE), PRI_SCORES
+Scores Important: page(COMMON_PAGE), PRI_SCORES_IMPORTANT
 Score Goal: page(EFFECT_PAGE), runner, PRI_SCORE_GOAL
 Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING

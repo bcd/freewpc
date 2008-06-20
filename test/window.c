@@ -2171,7 +2171,7 @@ void memory_editor_thread (void)
 
 		for (n=0; n < 8; n++)
 		{
-			sprintf ("%02X", readb (memory_editor_addr+n));
+			sprintf ("%02X", memory_editor_addr[n]);
 			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
 		}
 
@@ -2535,7 +2535,7 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern void freewpc_init (void);
+	extern __noreturn__ void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
@@ -3071,6 +3071,10 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "133MS"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
+	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
+	{
+		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+	}
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
@@ -3079,9 +3083,7 @@ void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
-	/* TODO : Use 100% duty cycle for now; this probably ought to
-	change for certain coils. */
-	sol_start (sel, SOL_DUTY_100, browser_action);
+	sol_start (sel, sol_get_duty (sel), browser_action);
 	task_sleep (TIME_100MS);
 }
 

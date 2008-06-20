@@ -937,7 +937,7 @@ sub machine_write_switch_decls {
 
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
 		add_flag ($sw, "edge", "flags", "SW_EDGE");
-		add_flag ($sw, "noplay", "flags", "SW_NOPLAY");
+		add_flag ($sw, "noplay", "flags", "SW_NOVALID");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
 		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
