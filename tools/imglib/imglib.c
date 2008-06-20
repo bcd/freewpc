@@ -745,6 +745,25 @@ void bitmap_fill (struct buffer *buf, U8 val)
 
 
 /**
+ * Given a bitmap, return a new bitmap in which each pixel is 1 if the
+ * PLANEth bit of the source is 1.
+ */
+struct buffer *bitmap_extract_plane (struct buffer *buf, unsigned int plane)
+{
+	return NULL;
+}
+
+
+/**
+ * Merge a set of PLANES bitmaps.
+ */
+struct buffer *bitmap_combine_planes (struct buffer *buf[], unsigned int planes)
+{
+	return NULL;
+}
+
+
+/**
  * A legacy function that decodes the older FIF format into
  * an uncompressed, joined bitmap.  This allows the imglib
  * functions to be used on existing images.
