@@ -34,8 +34,6 @@ Missing Feature
 
 
 Bugs
-* Solenoid pulse for device kick is hardcoded to 100%, may need to be
-tunable.  In Progress.
 * Briefly ignore switch row/column on ground/short.
 * Scores do not persist across a reset.
 * TZ clock decoding is not perfect.

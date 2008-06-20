@@ -3071,6 +3071,10 @@ void solenoid_test_draw (void)
 		case TIME_133MS: s = "133MS"; break;
 	}
 	font_render_string_center (&font_mono5, 64, 12, s);
+	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
+	{
+		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+	}
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
