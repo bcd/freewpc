@@ -484,12 +484,7 @@ clean_err:
 check_prereqs : $(BLDDIR) tools sched
 
 .PHONY : run
-run:
-	# Start pinmame up and let it run indefinitely.
-	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
-
-.PHONY : run-orig
-run-orig: uninstall
+run: install
 	# Start pinmame up and let it run indefinitely.
 	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
@@ -499,11 +494,11 @@ debug: install
 	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
 
 .PHONY : rund
-rund: install run $(DBCON)
+rund: run $(DBCON)
 	xterm -e "$(DBCON) -1" &
 
 .PHONY : rund-file
-rund-file: install run $(DBCON)
+rund-file: run $(DBCON)
 	xterm -e "$(DBCON) -1 > $(DBCON_FILE) 2>&1" &
 
 .PHONY : endrun
