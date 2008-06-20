@@ -1,12 +1,8 @@
 #
-# This is an example user.make file.
-# If you don't already have a user.make, you can rename this one
+# This is an example FreeWPC config file.
+# If you don't already have a .config, you can rename this one
 # and change anything you don't like.
 #
-
-# Set the platform you are trying to build.
-#PLATFORM := wpc
-#PLATFORM := whitestar
 
 # If you want to simulate, enable NATIVE.
 #NATIVE := y
@@ -20,6 +16,8 @@
 #MACHINE := wcs
 #MACHINE := t2
 #MACHINE := tester
+#MACHINE := tzsound
+#MACHINE := tspp
 
 #
 # Set this to the directory in which mame roms should be installed.
@@ -43,27 +41,22 @@
 #MACHINE_MAJOR=
 #MACHINE_MINOR=
 
-#
-# Set to an arbitrary string to be included in the final binary
-# for identification purposes.  It will show up in the initial
-# splash screen.
-#
-#USER_TAG = "MY TAG"
-
 # Set to the version of gcc6809 installed.
-# The 4.2.x releases are recommended, although 3.4.x releases
+# The 4.3.x releases are recommended, although 4.2.x releases
 # should still work.
 #GCC_VERSION := 3.4.6
-#GCC_VERSION := 4.2.0
-#GCC_VERSION := 4.2.1
-GCC_VERSION := 4.2.2
-#GCC_VERSION := 4.3.0
+#GCC_VERSION := 4.2.3
+GCC_VERSION := 4.3.1
+#GCC_VERSION := 4.4.0
 
 # Uncomment if you want to build a FREE ONLY ROM.
 #FREE_ONLY := y
 
 # If you have special flags to pass to the compiler, define them here.
-#EXTRA_CFLAGS := ...
+#EXTRA_CFLAGS += -save-temps
+#EXTRA_CFLAGS += -DFASTBOOT
+#EXTRA_CFLAGS += -DCONFIG_DEBUG_STACK
+#EXTRA_CFLAGS += -DCONFIG_PARALLEL_DEBUG
 
 # For debugging the compiler itself.
 #DEBUG_COMPILER := y
