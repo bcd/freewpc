@@ -82,7 +82,7 @@ void jackpot_deff (void)
 	{
 		dmd_sched_transition (&trans_scroll_up);
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
 		dmd_show_low ();
 	}
 
@@ -90,18 +90,19 @@ void jackpot_deff (void)
 	{
 		dmd_sched_transition (&trans_scroll_up);
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 8, sprintf_buffer);
-		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_fixed10, 64, 8, "JACKPOT");
+		font_render_string_center (&font_fixed10, 64, 24, "JACKPOT");
 		dmd_show_low ();
 	}
 
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
 	dmd_copy_low_to_high ();
 	dmd_show_low ();
 	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (30, TIME_100MS);
-	task_sleep_sec (1);
+	deff_swap_low_high (25, TIME_100MS);
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 
