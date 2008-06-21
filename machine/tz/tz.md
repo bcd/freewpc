@@ -580,4 +580,6 @@ Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)
 mono9:
 times10:
 misctype:
-fixed12:
+v5prc:
+steel:
+lithograph:
