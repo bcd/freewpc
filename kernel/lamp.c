@@ -91,7 +91,7 @@ void lamp_flash_rtt (void)
 
 /** Synchronize all flashing lamps.  There may be a slight glitch
  * if the lamps were already on.  */
-void lamp_flash_sync (void)
+static void lamp_flash_sync (void)
 {
 	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
 	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
