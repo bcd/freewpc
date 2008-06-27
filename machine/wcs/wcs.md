@@ -20,6 +20,8 @@ include platform/wpc/wpc.md
 
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
+define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }
+define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 'E', 'S' }, { 'R', 'J', 'S' }
 
 [lamps]
 11: noname, x(39), y(12)

@@ -124,7 +124,10 @@ static void high_score_draw_single (U8 pos, const U8 *initials,
 	font_render_string_left (&font_fixed6, 1, row, sprintf_buffer);
 
 	sprintf_score (score);
-	font_render_string_right (&font_fixed6, 128, row, sprintf_buffer);
+#ifndef MACHINE_HIGH_SCORE_FONT
+#define MACHINE_HIGH_SCORE_FONT font_fixed6
+#endif
+	font_render_string_right (&MACHINE_HIGH_SCORE_FONT, 128, row, sprintf_buffer);
 }
 
 

@@ -77,3 +77,4 @@ FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
 	$(M)/coinstack.fif $(M)/hitcher.fif $(M)/oldcar.fif \
 	$(M)/pyramid.fif $(M)/robot.fif
+
