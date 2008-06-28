@@ -200,8 +200,8 @@ extern inline void *memcpy (void *s1, const void *s2, U16 n)
 		register U8 *_s1 = (U8 *)s1;
 		register const U8 *_s2 = (U8 *)s2;
 		*_s1 = *_s2;
-		s1++;
-		s2++;
+		s1 = (char *)s1 + 1;
+		s2 = (char *)s2 + 1;
 		n--;
 	}
 
