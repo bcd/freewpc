@@ -1,71 +1,53 @@
 
 #include <freewpc.h>
 
-/** The number of 8ms ticks that have elapsed since the last
- * idle check */
-U8 idle_8ms_ticks;
+/** The frequency to run the idle checks */
+#define IDLE_PERIOD (TIME_100MS * IRQS_PER_TICK)
 
-/** The current 100ms timer.  This value counts up, basically
- * tracking idle_8ms_ticks above.  However, this may contain
- * residual ticks from previous calls that need to be remembered,
- * so that even if a particular idle call runs a bit late, overall
- * it will continue to track the desired 100ms interval. */
-volatile U8 idle_100ms_timer;
+/** The next time at which we should run the idle event.
+This is calculated as 100ms from the last timeout. */
+U16 idle_ready_time;
 
-/** The time at which the next 100ms event should be thrown.
- * Because the underlying tick is 8ms, we should do this every
- * 12.5 ticks... the approach is to alternate between calling
- * at 12 then 13 ticks. */
-U8 idle_100ms_expire_time;
-
+/** The number of 100ms events generated.  When this
+reaches 10, we clear it and consider that one second
+has passed. */
 U8 idle_second_timer;
 
+/** The number of 1sec events generated.  When this
+reaches 10, we clear it and consider that 10 seconds
+have passed. */
 U8 idle_10second_timer;
 
 
-/** Increment the number of idle ticks, every 8ms. */
-void idle_rtt (void)
-{
-	idle_8ms_ticks++;
-}
-
-
-/** Runs the idle function */
+/** Runs the idle functions. */
 void do_idle (void)
 {
-	/* See how much time has elapsed since the last idle call.
-	 * Beware of overflow here.  These are all 8-bit counters.
-	 * Idle state should happen at least once every two seconds
-	 * to avoid the IRQ tick overflow. */
-	disable_irq ();
-	idle_100ms_timer += idle_8ms_ticks;
-	idle_8ms_ticks = 0;
-	enable_irq ();
+	/* See if at least 100ms has elapsed.
+	If so, we advance the timeout for the next check.
+	If more than 200ms elapsed, we will only process
+	1 'tick' on the current call, and do it again
+	on the next run. */
+	if (time_reached_p (idle_ready_time))
+		idle_ready_time += IDLE_PERIOD;
+	else
+		return;
 
-	/* Throw the 100ms event if that much time has elapsed */
-	if (idle_100ms_timer >= idle_100ms_expire_time)
+	/* Throw the 100ms event */
+	callset_invoke (idle_every_100ms);
+
+	/* Throw the 1 second event every 10 calls */
+	idle_second_timer++;
+	if (idle_second_timer >= 10)
 	{
-		idle_100ms_timer -= idle_100ms_expire_time;
-		if (idle_100ms_expire_time >= 13)
-			idle_100ms_expire_time--;
-		else
-			idle_100ms_expire_time++;
-		callset_invoke (idle_every_100ms);
+		idle_second_timer -= 10;
+		callset_invoke (idle_every_second);
 
-		/* Throw the 1 second event if that has elapsed */
-		idle_second_timer++;
-		if (idle_second_timer >= 10)
+		/* Throw the 10 second event if that has elapsed */
+		idle_10second_timer++;
+		if (idle_10second_timer >= 10)
 		{
-			idle_second_timer -= 10;
-			callset_invoke (idle_every_second);
-
-			/* Throw the 10 second event if that has elapsed */
-			idle_10second_timer++;
-			if (idle_10second_timer >= 10)
-			{
-				idle_10second_timer -= 10;
-				callset_invoke (idle_every_ten_seconds);
-			}
+			idle_10second_timer -= 10;
+			callset_invoke (idle_every_ten_seconds);
 		}
 	}
 }
@@ -73,9 +55,7 @@ void do_idle (void)
 
 CALLSET_ENTRY (idle, init)
 {
-	idle_8ms_ticks = 0;
-	idle_100ms_expire_time = 12;
-	idle_100ms_timer = 0;
+	idle_ready_time = get_sys_time () + IDLE_PERIOD;
 	idle_second_timer = 0;
 	idle_10second_timer = 0;
 }
