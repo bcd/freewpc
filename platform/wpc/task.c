@@ -352,6 +352,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	if (task_count > task_max_count)
 		task_max_count = task_count;
 #endif
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_START, gid);
 	return (tp);
 }
 
@@ -446,6 +447,7 @@ void task_sleep_sec (int8_t secs)
 __naked__ __noreturn__ 
 void task_exit (void)
 {
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_EXIT, task_current->gid);
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
@@ -522,6 +524,7 @@ bool task_kill_gid (task_gid_t gid)
 	register task_t *tp;
 	bool rc = FALSE;
 
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_KILL, gid);
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
 				(tp->state & BLOCK_TASK) && 

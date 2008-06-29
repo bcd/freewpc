@@ -162,6 +162,7 @@ extern U8 idle_ok;
 
 #include <misc.h>
 #include <list.h>
+#include <log.h>
 
 /* Hardware modules */
 #include <sys/ac.h>

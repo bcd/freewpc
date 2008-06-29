@@ -112,16 +112,19 @@ bool leff_test (lampnum_t lamp);
 extern inline void flag_on (const U8 f)
 {
 	bitarray_set (bit_matrix, f);
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_ON, f);
 }
 
 extern inline void flag_off (const U8 f)
 {
 	bitarray_clear (bit_matrix, f);
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_OFF, f);
 }
 
 extern inline void flag_toggle (const U8 f)
 {
 	bitarray_toggle (bit_matrix, f);
+	log_event (SEV_INFO, MOD_LAMP, EV_BIT_TOGGLE, f);
 }
 
 extern inline bool flag_test (const U8 f)
