@@ -573,7 +573,7 @@ void malloc_test_thread (void)
 	U8 *p;
 	U8 n, sz;
 
-	task_set_flags (TASK_PROTECTED);
+	task_set_duration (task_getpid (), TASK_DURATION_INF);
 	dbprintf ("malloc() test running.\n");
 
 	for (n = 0; n < MAX_POINTERS; n++)

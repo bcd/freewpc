@@ -27,16 +27,11 @@ extern bool task_dispatching_ok;
  * Space for this many task structures is statically allocated. */
 #define NUM_TASKS 48
 
-/** TASK_BALL means that a task's lifetime is limited to the
- * current ball-in-play.  During endball, all tasks with this
- * bit set will be stopped. */
-#define TASK_GAME 0x40
-
-/** TASK_PROTECTED means that a task is immune to task_kill_gid.
- * It can only exit by means of dying, i.e. task_exit.
- * A task should set this upon entry before it begins anything
- * urgent.  TODO - deprecate this bit, use TASK_GAME instead. */
-#define TASK_PROTECTED 0x80
+#define TASK_DURATION_INF 0x0
+#define TASK_DURATION_LIVE 0x1
+#define TASK_DURATION_BALL 0x3
+#define TASK_DURATION_GAME 0x7
+#define TASK_DURATION_TEST 0x8
 
 #ifdef CONFIG_NATIVE
 
@@ -78,6 +73,7 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 
 /** Define the size of the saved process stack. */
 #define TASK_STACK_SIZE 40
+
 
 
 /** Type for the group ID (gid) */
@@ -159,8 +155,12 @@ typedef struct task_struct
 	 * to -1, it means there is no auxiliary storage. */
 	U8				aux_stack_block;
 
+	/** Says how long the task is allowed to exist, before being
+	 * stopped automatically due to some external event. */
+	U8				duration;
+
 	/** Not currently used */
-	U16			reserved;
+	U8				reserved;
 
 	/** The task stack save area.  This is NOT used as the live stack
 	 * area; the live stack is copied here when the task blocks.
@@ -228,8 +228,10 @@ task_pid_t task_find_gid_next (task_pid_t first, task_gid_t gid);
 void task_kill_pid (task_pid_t tp);
 bool task_kill_gid (task_gid_t);
 void task_kill_all (void);
-void task_set_flags (U8 flags);
-void task_clear_flags (U8 flags);
+void task_duration_expire (U8);
+void task_set_duration (task_pid_t pid, U8 cond);
+void task_add_duration (U8 cond);
+void task_remove_duration (U8 cond);
 __attribute__((deprecated)) PTR_OR_U16 task_get_arg (void);
 __attribute__((deprecated)) void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
 __noreturn__ void task_dispatcher (void);
@@ -255,6 +257,23 @@ void do_idle (void);
 #else
 #define task_yield()					task_sleep (0)
 #endif
+
+
+#define task_create_gid_while(gid, fn, cond) \
+	({ task_pid_t pid = task_create_gid (gid, fn); \
+		task_set_duration (pid, cond); \
+		pid; })
+
+#define task_recreate_gid_while(gid, fn, cond) \
+	({ task_pid_t pid = task_recreate_gid (gid, fn); \
+		task_set_duration (pid, cond); \
+		pid; })
+
+#define task_create_gid1_while(gid, fn, cond) \
+	({ task_pid_t pid = task_create_gid1 (gid, fn); \
+		task_set_duration (pid, cond); \
+		pid; })
+
 
 extern inline task_pid_t
 far_task_create_gid (task_gid_t gid, task_function_t fn, U8 page)

@@ -56,7 +56,7 @@ typedef struct
 	pth_t pid;
 	task_gid_t gid;
 	PTR_OR_U16 arg;
-	U8 flags;
+	U8 duration;
 	void *class_data;
 } aux_task_data_t;
 
@@ -77,7 +77,7 @@ void task_dump (void)
 			printf ("%p%c   %d    %08X   %02X\n",
 				td->pid, 
 				(td->pid == task_getpid ()) ? '*' : ' ', 
-				td->gid, td->arg, td->flags);
+				td->gid, td->arg, td->duration);
 		}
 	}
 }
@@ -104,9 +104,10 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 		{
 			task_data_table[i].pid = pid;
 			task_data_table[i].gid = gid;
-			task_data_table[i].flags = 0;
+			task_data_table[i].duration = TASK_DURATION_INF;
 			task_data_table[i].arg = 0;
 			task_data_table[i].class_data = NULL;
+			task_data_table[i].duration = TASK_DURATION_BALL;
 #ifdef CURSES	
 			ui_write_task (i, gid);
 #endif
@@ -242,42 +243,54 @@ bool task_kill_gid (task_gid_t gid)
 }
 
 
-void task_kill_all (void)
+void task_duration_expire (U8 cond)
 {
 	int i;
 
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		if ((task_data_table[i].pid != 0) &&
-			 (task_data_table[i].pid != task_getpid ()) &&
-			 !(task_data_table[i].flags & TASK_PROTECTED))
+			 (task_data_table[i].duration & cond))
 			task_kill_pid (task_data_table[i].pid);
 	}
 }
 
-
-void task_set_flags (U8 flags)
+void task_set_duration (task_pid_t tp, U8 cond)
 {
 	int i;
 	for (i=0; i < MAX_TASKS; i++)
 	{
-		if (task_data_table[i].pid == task_getpid ())
+		if (task_data_table[i].pid == tp)
 		{
-			task_data_table[i].flags |= flags;
+			task_data_table[i].duration = cond;
 			break;
 		}
 	}
 }
 
 
-void task_clear_flags (U8 flags)
+void task_add_duration (U8 flags)
 {
 	int i;
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 		{
-			task_data_table[i].flags &= ~flags;
+			task_data_table[i].duration |= flags;
+			break;
+		}
+	}
+}
+
+
+void task_remove_duration (U8 flags)
+{
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+		{
+			task_data_table[i].duration &= ~flags;
 			break;
 		}
 	}
@@ -371,6 +384,6 @@ void task_init (void)
 
 	task_data_table[0].pid = task_getpid ();
 	task_data_table[0].gid = GID_FIRST_TASK;
-	task_data_table[0].flags = TASK_PROTECTED;
+	task_data_table[0].duration = TASK_DURATION_INF;
 }
 

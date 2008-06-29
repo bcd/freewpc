@@ -100,8 +100,9 @@ void window_push_first (void)
 #endif
 	{
 		end_game ();
-		/* Kill any other tasks still running */
-		task_kill_all ();
+		/* Stop tasks that should run only until end-of-game. */
+		task_remove_duration (TASK_DURATION_GAME);
+		task_duration_expire (TASK_DURATION_GAME);
 
 		/* Reset sound, but delay a little to allow the reset
 		 * to finish before we attempt to play the 'enter' sound
