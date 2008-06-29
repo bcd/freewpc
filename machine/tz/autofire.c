@@ -86,8 +86,6 @@ Upon entry, the autofire divertor solenoid is already pulsing
 and a ball is being kicked from the trough. */
 void autofire_monitor (void)
 {
-	task_set_flags (TASK_PROTECTED);
-
 	/* Open the divertor to catch the ball.  Because it may be
 	coming from either the trough or a ramp divert, the
 	timings are variable. */
@@ -142,7 +140,7 @@ void autofire_open_for_trough (void)
 	dbprintf ("Shooter divertor open to catch\n");
 	shooter_div_delay_time = 0;
 	shooter_div_open_time = 2;
-	task_create_gid (GID_AUTOFIRE_HANDLER, autofire_monitor);
+	task_create_gid_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
 }
 
 
@@ -180,7 +178,7 @@ void autofire_catch (void)
 	a start multiball animation */
 	shooter_div_delay_time = 1;
 	shooter_div_open_time = 4;
-	task_create_gid1 (GID_AUTOFIRE_HANDLER, autofire_monitor);
+	task_create_gid1_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
 }
 
 

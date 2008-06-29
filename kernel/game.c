@@ -263,11 +263,9 @@ void end_ball (void)
 		in_tilt = FALSE;
 	}
 
-	/* Stop everything running except for this task.
-	 * Any task that has protected itself is immune to this.
-	 * Normally, this is not necessary. */
-	task_kill_all ();
-	/* TODO - task_kill_flags (TASK_GAME); */
+	/* Stop tasks that should run only until end-of-ball. */
+	task_remove_duration (TASK_DURATION_BALL);
+	task_duration_expire (TASK_DURATION_BALL);
 	in_bonus = FALSE;
 
 	/* If the player has extra balls stacked, then start the

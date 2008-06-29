@@ -195,6 +195,7 @@ void task_dump (void)
 
 			if (tp->state & BLOCK_TASK)
 			{
+				dbprintf ("DUR %02X  ", tp->duration);
 				dbprintf ("GID %02d  PC %p", tp->gid, tp->pc);
 				dbprintf ("  ST %02X", tp->stack_size);
 				dbprintf ("  ARG %04X\n", tp->arg);
@@ -271,6 +272,7 @@ task_t *task_allocate (void)
 		tp->state |= BLOCK_TASK;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
+		tp->duration = TASK_DURATION_BALL;
 #ifdef TASK_CHAINING
 		/* Add to the task list */
 #endif
@@ -519,64 +521,40 @@ bool task_kill_gid (task_gid_t gid)
 }
 
 
-/**
- * Kills all tasks that are not protected.
- *
- * Protected tasks are marked with the flag TASK_PROTECTED and are
- * immune to this call.
- */
-void task_kill_all (void)
+void task_duration_expire (U8 cond)
 {
 	register U8 t;
 	register task_t *tp;
 
+	task_dump ();
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (	(tp != task_current) &&
-				(tp->state & BLOCK_TASK) && 
-				!(tp->state & TASK_PROTECTED) )
+		if ((tp->state & BLOCK_TASK) && (tp->duration & cond))
 		{
 			task_kill_pid (tp);
 		}
 }
 
-
-/** Kills all tasks that have a particular flag set. */
-void task_kill_flags (U8 flags)
+void task_set_duration (task_t *tp, U8 cond)
 {
-	register U8 t;
-	register task_t *tp;
-
-	/* BLOCK_TASK is implied and need not be specified by the caller. */
-	flags |= BLOCK_TASK;
-
-	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if ((tp != task_current) && (tp->state & flags))
-		{
-			task_kill_pid (tp);
-		}
+	tp->duration = cond;
 }
 
 
 /**
- * Sets task flags.
- *
- * TODO : there is a race condition here with regard to TASK_PROTECTED;
- * the task might be killed after it has been created, but before it
- * gets a chance to set TASK_PROTECTED.  The caller is probably aware
- * of the special status and should be able to set it at creation time.
+ * Add/remove duration flags.
  */
-void task_set_flags (U8 flags)
+void task_add_duration (U8 cond)
 {
-	task_current->state |= flags;
+	task_current->duration |= cond;
 }
 
 
 /**
  * Clears task flags.
  */
-void task_clear_flags (U8 flags)
+void task_remove_duration (U8 cond)
 {
-	task_current->state &= ~flags;
+	task_current->duration &= ~cond;
 }
 
 

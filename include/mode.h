@@ -38,11 +38,6 @@ extern inline void timed_mode_task (
 	U8 grace_time
 	)
 {
-	/* Mark the task as protected, because killing it will not do all
-	of the cleanup needed for ending the mode.  The proper way to end
-	a mode is to invoke mode_stop(). */
-	task_set_flags (TASK_PROTECTED);
-
 	/* Initialize the timer and invoke the mode's begin hook */
 	*timer = mode_time;
 	if (begin)
@@ -98,7 +93,7 @@ extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 #ifdef CONFIG_NATIVE
 	/* TODO */
 #else
-	tp->state |= TASK_GAME;
+	task_set_duration (tp, TASK_DURATION_GAME);
 #endif
 	return tp;
 }

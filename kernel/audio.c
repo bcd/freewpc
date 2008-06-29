@@ -102,10 +102,9 @@ void audio_start (
 			continue;
 
 		/* OK, use this channel. */
-		ch->pid = task_create_gid (GID_AUDIO_TASK, fn);
+		ch->pid = task_create_gid_while (GID_AUDIO_TASK, fn, TASK_DURATION_INF);
 #ifdef __m6809__
 		ch->pid->rom_page = fnpage;
-		ch->pid->state |= TASK_PROTECTED;
 #endif
 		task_set_arg (ch->pid, data);
 		return;
