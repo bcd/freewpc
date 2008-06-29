@@ -565,5 +565,120 @@ extern inline U8 wpc_read_pic (void)
 
 #endif
 
+/********************************************/
+/* Lamps                                    */
+/********************************************/
+
+extern inline void pinio_write_lamp_strobe (U8 val)
+{
+	writeb (WPC_LAMP_COL_STROBE, val);
+}
+
+extern inline void pinio_write_lamp_data (U8 val)
+{
+	writeb (WPC_LAMP_ROW_OUTPUT, val);
+}
+
+/********************************************/
+/* Solenoids                                */
+/********************************************/
+
+extern inline void pinio_write_solenoid_set (U8 set, U8 val)
+{
+	switch (set)
+	{
+	case 0:
+		writeb (WPC_SOL_HIGHPOWER_OUTPUT, val);
+		break;
+	case 1:
+		writeb (WPC_SOL_LOWPOWER_OUTPUT, val);
+		break;
+	case 2:
+		writeb (WPC_SOL_FLASH1_OUTPUT, val);
+		break;
+	case 3:
+		writeb (WPC_SOL_FLASH2_OUTPUT, val);
+		break;
+	case 4:
+		wpc_write_flippers (val);
+		break;
+	case 5:
+		writeb (WPC_EXTBOARD1, val);
+		break;
+	}
+}
+
+/********************************************/
+/* Sound                                    */
+/********************************************/
+
+/** This bit is set in the sound status register when
+ * there is a byte to be read by the CPU. */
+#if (MACHINE_DCS == 0)
+#define WPCS_READ_READY	0x01
+#else
+#define WPCS_READ_READY	0x80
+#endif
+
+extern inline void pinio_reset_sound (void)
+{
+	writeb (WPCS_CONTROL_STATUS, 0);
+}
+
+extern inline void pinio_write_sound (U8 val)
+{
+	writeb (WPCS_DATA, val);
+}
+
+extern inline bool pinio_sound_ready_p (void)
+{
+	return readb (WPCS_CONTROL_STATUS) & WPCS_READ_READY;
+}
+
+extern inline U8 pinio_read_sound (void)
+{
+	return readb (WPCS_DATA);
+}
+
+#define SW_VOLUME_UP SW_UP
+#define SW_VOLUME_DOWN SW_DOWN
+
+/********************************************/
+/* Switches                                 */
+/********************************************/
+
+extern inline void pinio_write_switch_column (U8 val)
+{
+#if (MACHINE_PIC == 1)
+		wpc_write_pic (WPC_PIC_COLUMN (val));
+#else
+		writeb (WPC_SW_COL_STROBE, 1 << val);
+#endif
+}
+
+extern inline U8 pinio_read_switch_rows (void)
+{
+#if (MACHINE_PIC == 1)
+	return wpc_read_pic ();
+#else
+	return readb (WPC_SW_ROW_INPUT);
+#endif
+}
+
+extern inline U8 pinio_read_dedicated_switches (void)
+{
+	return readb (WPC_SW_CABINET_INPUT);
+}
+
+/********************************************/
+/* Triacs                                   */
+/********************************************/
+
+extern inline void pinio_write_triac (U8 val)
+{
+	writeb (WPC_GI_TRIAC, val);
+}
+
+
 #endif /* _WPC_H */
 

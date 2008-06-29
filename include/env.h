@@ -33,10 +33,11 @@
 #define HAVE_INTERRUPT_ATTRIBUTE
 #endif
 
-/* All CPUs support sections for now */
+/* Only CPU game ROMs have nvram and locals */
+#ifdef CONFIG_PLATFORM_WPC
 #define HAVE_NVRAM_SECTION
 #define HAVE_LOCAL_SECTION
-
+#endif
 
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */

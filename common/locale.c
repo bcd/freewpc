@@ -73,7 +73,11 @@ CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;
 
+#ifdef CONFIG_PLATFORM_WPC
 	current_locale = wpc_read_locale ();
+#else
+	current_locale = 0;
+#endif
 	dbprintf ("Current locale : %d\n", current_locale);
 
 	/* If the DIP switch setting changed, or the previous

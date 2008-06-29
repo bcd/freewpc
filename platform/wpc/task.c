@@ -658,6 +658,7 @@ void task_dispatcher (void)
 			'idle' event below because it should _always_ be called,
 			even when 'sys_init_complete' is not true.  This lets us
 			debug very early initialization. */
+#ifdef CONFIG_PLATFORM_WPC
 			db_idle ();
 #ifdef IDLE_PROFILE
 			idle_profile_idle ();
@@ -670,6 +671,7 @@ void task_dispatcher (void)
 				do_idle ();
 				switch_idle ();
 			}
+#endif /* CONFIG_PLATFORM_WPC */
 
 			/* Wait for time to change before continuing.
 			Do this AFTER calling the idle functions, so

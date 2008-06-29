@@ -190,28 +190,16 @@ extern inline void switch_rowpoll (const U8 col)
 	 * computing delta below.)
 	 */
 	if (col == 0)
-		switch_raw_bits[col] = delta = readb (WPC_SW_CABINET_INPUT);
-
+		switch_raw_bits[col] = delta = pinio_read_dedicated_switches ();
 	else if (col <= 8)
-#if (MACHINE_PIC == 1)
-		switch_raw_bits[col] = delta = wpc_read_pic ();
-#else
-		switch_raw_bits[col] = delta = readb (WPC_SW_ROW_INPUT);
-#endif
-
+		switch_raw_bits[col] = delta = pinio_read_switch_rows ();
 	else if (col == 9)
 		switch_raw_bits[col] = delta = wpc_read_flippers ();
 
 	/* Set up the column strobe for the next read (on the next
 	 * iteration) */
 	if (col < 8)
-	{
-#if (MACHINE_PIC == 1)
-		wpc_write_pic (WPC_PIC_COLUMN (col));
-#else
-		writeb (WPC_SW_COL_STROBE, 1 << col);
-#endif
-	}
+		pinio_write_switch_column (col);
 
 	/* delta/changed is TRUE when the switch has changed state from the
 	 * previous latched value */

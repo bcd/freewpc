@@ -56,7 +56,7 @@ __noreturn__ void freewpc_init (void)
 	extern __common__ void system_reset (void);
 
 	/* Reset the sound board... the earlier the better */
-	wpc_asic_write (WPCS_CONTROL_STATUS, 0);
+	pinio_reset_sound ();
 
 	/* Initializing the RAM page */
 	wpc_set_ram_page (0);
@@ -68,10 +68,12 @@ __noreturn__ void freewpc_init (void)
 	*(U8 *)1 = 0x3F;
 #endif /* __m6809__ */
 
+#ifdef CONFIG_PLATFORM_WPC
 	/* Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
+#endif
 
 	/* Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped.
@@ -254,15 +256,15 @@ void fatal (errcode_t error_code)
 	disable_interrupts ();
 
 	/* Reset hardware outputs */
-	wpc_asic_write (WPC_GI_TRIAC, 0);
+	pinio_write_triac (0);
 	wpc_write_flippers (0);
 	wpc_write_ticket (0);
-	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
+	pinio_write_solenoid_set (0, 0);
+	pinio_write_solenoid_set (1, 0);
+	pinio_write_solenoid_set (2, 0);
+	pinio_write_solenoid_set (3, 0);
 #ifdef MACHINE_SOL_EXTBOARD1
-	wpc_asic_write (WPC_EXTBOARD1, 0);
+	pinio_write_solenoid_set (5, 0);
 #endif
 
 	/* Audit the error. */
@@ -349,6 +351,7 @@ U8 get_elapsed_time (U16 then)
 }
 
 
+#ifdef CONFIG_PLATFORM_WPC
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
  * is generated from the WPC ASIC on two different occasions: (1)
@@ -401,6 +404,7 @@ void do_firq (void)
 	m6809_firq_restore_regs ();
 #endif
 }
+#endif /* CONFIG_PLATFORM_WPC */
 
 
 __interrupt__

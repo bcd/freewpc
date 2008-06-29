@@ -22,8 +22,16 @@
 ;;; point that the parameters are read.
 RETADDR=3
 
-;;; I/O address of the bank switching register.
+;;; The I/O address of the bank switching register.
+#if defined (CONFIG_PLATFORM_WPC)
 WPC_ROM_PAGE_REG=0x3FFC
+#elif defined (CONFIG_PLATFORM_WPCSOUND)
+WPC_ROM_PAGE_REG=0x2000
+#elif defined (CONFIG_PLATFORM_WHITESTAR)
+WPC_ROM_PAGE_REG=0x3200
+#else
+#error "unknown bank switching register"
+#endif
 
 	.module farcall.s
 

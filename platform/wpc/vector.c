@@ -28,6 +28,7 @@
  */
 
 extern __attribute__((noreturn)) void start (void);
+
 #ifdef CONFIG_PLATFORM_WPC
 extern void do_swi3 (void);
 extern void do_swi2 (void);
@@ -35,6 +36,12 @@ extern void do_firq (void);
 extern void tick_driver (void);
 extern void do_swi (void);
 extern void do_nmi (void);
+#endif
+
+#ifdef CONFIG_PLATFORM_WPCSOUND
+extern void wpcs_invalid_interrupt (void);
+extern void wpcs_host_interrupt (void);
+extern void wpcs_periodic_interrupt (void);
 #endif
 
 /** The 6809 vector table structure */
@@ -55,14 +62,23 @@ typedef struct
  * callbacks differently, except for the reset vector which
  * always map to the start function. */
 __attribute__((section("vector"))) m6809_vector_table_t vectors = {
-	.unused = start,
 #ifdef CONFIG_PLATFORM_WPC
+	.unused = start,
 	.swi3 = do_swi3,
 	.swi2 = do_swi2,
 	.firq = do_firq,
 	.irq = tick_driver,
 	.swi = do_swi,
 	.nmi = do_nmi,
+#endif
+#ifdef CONFIG_PLATFORM_WPCSOUND
+	.unused = wpcs_invalid_interrupt,
+	.swi3 = wpcs_invalid_interrupt,
+	.swi2 = wpcs_invalid_interrupt,
+	.irq = wpcs_host_interrupt,
+	.firq = wpcs_periodic_interrupt,
+	.swi = wpcs_invalid_interrupt,
+	.nmi = wpcs_invalid_interrupt,
 #endif
 	.reset = start,
 };

@@ -181,14 +181,8 @@ void music_off (void)
  * If no data is ready, returns 0xFF. */
 U8 sound_board_poll (void)
 {
-	U8 status = readb (WPCS_CONTROL_STATUS);
-	U8 in_data;
-
-	if (status & WPCS_READ_READY)
-	{
-		in_data = readb (WPCS_DATA);
-		return (in_data);
-	}
+	if (pinio_sound_ready_p ())
+		return (pinio_read_sound ());
 	else
 		return (0xFF);
 }
@@ -247,7 +241,7 @@ U8 sound_board_command (sound_cmd_t cmd, U8 retries)
 /** At idle time, poll the sound board for asynchronous events. */
 CALLSET_ENTRY (sound, idle_every_100ms)
 {
-#if 0
+#if 1
 	U8 in;
 	/* TODO : do something like this elsewhere for sound syncing */
 	if (sys_init_complete
@@ -266,10 +260,10 @@ CALLSET_ENTRY (sound, idle_every_100ms)
 void sound_read_rtt (void)
 {
 	/* Read back from sound board if bytes ready */
-	if (unlikely (readb (WPCS_CONTROL_STATUS) & WPCS_READ_READY))
+	if (unlikely (pinio_sound_ready_p ()))
 	{
 		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
-			readb (WPCS_DATA));
+			pinio_read_sound ());
 	}
 }
 
@@ -278,7 +272,7 @@ void sound_write_rtt (void)
 	/* Write a pending byte to the sound board */
 	if (unlikely (!sound_write_queue_empty_p ()))
 	{
-		writeb (WPCS_DATA, sound_write_queue_remove ());
+		pinio_write_sound (sound_write_queue_remove ());
 	}
 }
 

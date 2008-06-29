@@ -141,13 +141,19 @@ extern U8 idle_ok;
 #include <env.h>
 #include <version.h>
 
+/* CPU specifics */
+#include <sys/irq.h>
+
 /* Platform specifics */
-#ifdef MACHINE_PLATFORM_WHITESTAR
+#ifdef CONFIG_PLATFORM_WHITESTAR
 #include <platform/whitestar.h>
-#else
+#endif
+#ifdef CONFIG_PLATFORM_WPC
 #include <platform/wpc.h>
 #endif
-
+#ifdef CONFIG_PLATFORM_WPCSOUND
+#include <platform/wpcsound.h>
+#endif
 
 /* Core software structures */
 #include <sys/bitarray.h>
@@ -175,7 +181,6 @@ extern U8 idle_ok;
 #include <sys/dmd.h>
 #endif
 #include <sys/triac.h>
-#include <sys/irq.h>
 #include <sys/rtc.h>
 
 /* Common software structures */
@@ -199,7 +204,9 @@ extern U8 idle_ok;
 #include <mode.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
+#ifdef CONFIG_PLATFORM_WPC
 #include <sys/debug.h>
+#endif
 #include <test.h> /* this one HAS to be here for now, for callset.c */
 
 /* Game-specific defines.  'mach' should point to the machine-specific 

@@ -1,4 +1,9 @@
 
+	.area .ctors
+__ctors::
+	.area .dtors
+__dtors::
+
 ; MDELAY_COUNT = 290   ; works for 1s delays
 MDELAY_COUNT = 315   ; works for 1s delays
 

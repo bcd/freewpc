@@ -118,8 +118,8 @@ extern inline void lamp_rtt_common (const U8 mode)
 	 * But only do this outside of a game. */
 
 	/* Setup the strobe */
-	writeb (WPC_LAMP_ROW_OUTPUT, 0);
-	writeb (WPC_LAMP_COL_STROBE, lamp_strobe_mask);
+	pinio_write_lamp_data (0);
+	pinio_write_lamp_strobe (lamp_strobe_mask);
 
 	/* Advance the strobe value for the next iteration.
 	Keep this together with the above so that lamp_strobe_mask
@@ -162,7 +162,7 @@ extern inline void lamp_rtt_common (const U8 mode)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
-	writeb (WPC_LAMP_ROW_OUTPUT, bits);
+	pinio_write_lamp_data (bits);
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
