@@ -334,8 +334,6 @@ SYSTEM_MD_OBJS = \
 
 MD_OBJS = $(PAGED_MD_OBJS) $(SYSTEM_MD_OBJS)
 
-MUX_OBJS := $(MUX_SRCS:.c=.o)
-
 #######################################################################
 ###	Object File Distribution
 #######################################################################
@@ -424,7 +422,6 @@ $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 56, EVENT))
 $(eval $(call PAGE_ALLOC, 57, TRANS))
 $(eval $(call PAGE_ALLOC, 57, FIF))
-$(eval $(call PAGE_ALLOC, 57, MUX))
 $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
@@ -447,7 +444,7 @@ AS_OBJS = $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 C_OBJS = $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) $(FSM_OBJS) \
 	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
-	$(FONT_OBJS) $(EFFECT_OBJS) $(SCHED_OBJ) $(MUX_OBJS)
+	$(FONT_OBJS) $(EFFECT_OBJS) $(SCHED_OBJ)
 
 
 ifeq ($(PLATFORM),wpc)
@@ -848,17 +845,7 @@ $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(MAKE_DEPS)
 	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
 
 #######################################################################
-###	Multiplexers
-#######################################################################
-
-.PHONY : muxes
-muxes: $(MUX_SRCS) tools/sched/sched.make
-
-$(MUX_SRCS): $(BLDDIR)/%-mux.c : $(MACHINE_DIR)/%.mux $(MAKE_DEPS)
-	tools/genvio -o $@ -h $(@:.c=.h) -c $<
-
-#######################################################################
-###	Multiplexers
+###	Tracing
 #######################################################################
 
 trace:
