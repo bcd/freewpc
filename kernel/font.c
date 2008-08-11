@@ -330,7 +330,7 @@ void bitmap_blit (const U8 *src, U8 x, U8 y)
 #ifdef __m6809__
 	bitmap_blit_asm (blit_dmd, x & 0x7);
 #else
-	blitter = font_blit_table[x / 8];
+	blitter = font_blit_table[x & 0x7];
 	for (i=0; i < font_height; i++)
 	{
 		for (j=0; j < font_byte_width; j++)
