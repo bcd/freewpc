@@ -314,7 +314,11 @@ void write_tick_driver (FILE *f)
 	 * instruction.  We cannot guarantee that the C compiler will do
 	 * this, so we hand-code it ourselves. */
 	cfprintf (indent, f, " void %s_driver (void)\n{\n", prefix);
+	cfprintf (indent, f, "#ifdef __m6809__\n");
 	cfprintf (indent, f, "   asm (\"jmp\t[_%s_function]\");\n", prefix);
+	cfprintf (indent, f, "#else\n");
+	cfprintf (indent, f, "   (*%s_function) ();\n", prefix);
+	cfprintf (indent, f, "#endif\n");
 	cfprintf (indent, f, "}\n\n");
 
 	cfprintf (indent, f, "void %s_init (void)\n{\n", prefix);
