@@ -521,12 +521,15 @@ bool task_kill_gid (task_gid_t gid)
 }
 
 
+/**
+ * Asserts that a task-ending condition has just occurred,
+ * and kills all of the tasks that needs to be.
+ */
 void task_duration_expire (U8 cond)
 {
 	register U8 t;
 	register task_t *tp;
 
-	task_dump ();
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if ((tp->state & BLOCK_TASK) && (tp->duration & cond))
 		{
@@ -534,6 +537,10 @@ void task_duration_expire (U8 cond)
 		}
 }
 
+
+/**
+ * Sets the duration for a given task.
+ */
 void task_set_duration (task_t *tp, U8 cond)
 {
 	tp->duration = cond;
@@ -683,12 +690,7 @@ void task_dispatcher (void)
 			up.  We use a check of the sign bit since these are stored as positive
 			values.  This is a valid method as long as the task doesn't sleep
 			more than 0x8000 ticks. */
-			if (tp->wakeup == 0)
-			{
-				dbprintf ("wakeup=0 for gid %d flags %02Xh\n", tp->gid, tp->state);
-				fatal (0xff);
-			}
-			else if (time_reached_p (tp->wakeup))
+			if (time_reached_p (tp->wakeup))
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
