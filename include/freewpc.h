@@ -105,7 +105,7 @@ extern U8 idle_ok;
 #define C_STR(x)		#x
 
 #ifdef CONFIG_NATIVE
-#include <platform/linux.h> /* TODO : rename this file */
+#include <platform/native.h>
 #endif
 
 /* Include the standard header files that are needed
