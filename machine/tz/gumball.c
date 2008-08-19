@@ -221,7 +221,7 @@ void sw_far_left_trough_monitor (void)
 
 	/* If a ball is known to be in play, then delay the
 	load */
-	while (ball_in_play)
+	while (valid_playfield)
 	{
 		dbprintf ("Far left trough : waiting to load\n");
 		task_sleep_sec (1);

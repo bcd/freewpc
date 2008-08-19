@@ -232,7 +232,7 @@ void scores_deff (void)
 		/* Display the score with effects, until a score change. */
 		for (;;)
 		{
-			if (ball_in_play)
+			if (valid_playfield)
 			{
 				dmd_map_lookaside (0);
 				dmd_dup_mapped ();

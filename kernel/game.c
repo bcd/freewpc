@@ -63,11 +63,11 @@ __fastram__ U8 in_bonus;
 /** Nonzero if the current game is currently in tilt mode */
 __fastram__ U8 in_tilt;
 
-/** Nonzero if the current ball is considered 'in play', which
- * means that ball loss is allowed to end the ball.  When zero,
+/** Nonzero if the current ball has reached valid playfield; i.e.
+ * ball loss is allowed to end the ball.  When zero,
  * ball loss is not allowed and will result in a new ball being
  * delivered to the plunger lane. */
-U8 ball_in_play;
+U8 valid_playfield;
 
 /** The number of switch closures before playfield valid */
 U8 pending_valid_count;
@@ -139,7 +139,7 @@ void dump_game (void)
 
 	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
 		in_game, in_bonus, in_tilt);
-	dbprintf ("In Play : %d\n", ball_in_play);
+	dbprintf ("Valid : %d\n", valid_playfield);
 	dbprintf ("Player Up : %d of %d\n", player_up, num_players);
 	dbprintf ("Ball : %d    EBs : %d\n", ball_up, extra_balls);
 }
@@ -174,7 +174,7 @@ void end_game (void)
 		player_up = 0;
 		ball_up = 0;
 		in_tilt = FALSE;
-		ball_in_play = FALSE;
+		valid_playfield = FALSE;
 	}
 
 	leff_stop_all ();
@@ -207,14 +207,14 @@ void end_ball (void)
 		return;
 
 	/*
-	 * If ball_in_play never set, then either the ball drained
+	 * If valid_playfield never set, then either the ball drained
 	 * before touching any playfield switches, or the ball serve
 	 * failed and it fell back into the trough.  Return the
 	 * ball to the plunger lane in these cases, and don't
 	 * count as end-of-ball.
 	 */
 #ifdef DEVNO_TROUGH
-	if (!ball_in_play && !in_tilt)
+	if (!valid_playfield && !in_tilt)
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
 		return;
@@ -349,7 +349,7 @@ void timed_game_monitor (void)
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
 		/* Look for conditions in which the game timer should not run. */
-		if (!ball_in_play
+		if (!valid_playfield
 				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
 				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
 						(live_balls <= 1))
@@ -430,7 +430,7 @@ void timed_game_pause (task_ticks_t delay)
 void start_ball (void)
 {
 	in_tilt = FALSE;
-	ball_in_play = FALSE;
+	valid_playfield = FALSE;
 	pending_valid_count = 0;
 
 	/* Since lamp effects from previous balls could have been killed,
@@ -501,12 +501,12 @@ void start_ball (void)
 
 /** Called when the ball is marked as 'in play'.  This happens on
 most, but not all, playfield switch closures. */
-void mark_ball_in_play (void)
+void set_valid_playfield (void)
 {
-	if (in_game && !ball_in_play)
+	if (in_game && !valid_playfield)
 	{
-		ball_in_play = TRUE;		
-		callset_invoke (ball_in_play);
+		valid_playfield = TRUE;		
+		callset_invoke (valid_playfield);
 	}
 }
 
@@ -516,7 +516,7 @@ void try_validate_playfield (U8 swno)
 	pending_valid_count++;
 	if (pending_valid_count == 3)
 	{
-		mark_ball_in_play ();
+		set_valid_playfield ();
 	}
 }
 
@@ -695,7 +695,7 @@ CALLSET_ENTRY (game, init)
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
-	ball_in_play = FALSE;
+	valid_playfield = FALSE;
 	player_up = 0;
 }
 

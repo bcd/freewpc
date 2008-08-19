@@ -33,7 +33,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	extern void door_award_flashing (void);
 
 	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
-	mark_ball_in_play ();
+	set_valid_playfield ();
 	score (SC_1K);
 
 	if (switch_did_follow (dead_end, slot))

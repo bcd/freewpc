@@ -110,7 +110,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 		task_remove_duration (TASK_DURATION_LIVE);
 		task_duration_expire (TASK_DURATION_LIVE);
 		flipper_disable ();
-		mark_ball_in_play ();
+		set_valid_playfield ();
 		audit_increment (&system_audits.tilts);
 		audit_increment (&system_audits.plumb_bob_tilts);
 		callset_invoke (tilt);

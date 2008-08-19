@@ -405,7 +405,7 @@ void switch_sched_task (void)
 	{
 		callset_invoke (any_pf_switch);
 
-		if (!ball_in_play)
+		if (!valid_playfield)
 		{
 			if (swinfo->flags & SW_NOVALID)
 			{
@@ -415,7 +415,7 @@ void switch_sched_task (void)
 			{
 				/* Normally, mark valid playfield right away
 				 * for most switches */
-				mark_ball_in_play ();
+				set_valid_playfield ();
 			}
 		}
 		ball_search_timer_reset ();

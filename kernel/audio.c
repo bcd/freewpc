@@ -181,7 +181,7 @@ CALLSET_ENTRY(audio, start_ball)
 }
 
 
-CALLSET_ENTRY (audio, ball_in_play)
+CALLSET_ENTRY (audio, valid_playfield)
 {
 	/* TODO : optimize to a single call */
 	music_stop (start_ball_music_track);

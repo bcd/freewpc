@@ -103,7 +103,7 @@ CALLSET_ENTRY (ballsave, sw_outhole)
 	ballsave_sw_left_outlane ();
 }
 
-CALLSET_ENTRY (ballsave, ball_in_play)
+CALLSET_ENTRY (ballsave, valid_playfield)
 {
 	/* Start default ballsaver */
 	ballsave_add_time (10);

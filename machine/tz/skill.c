@@ -118,7 +118,7 @@ void skill_shot_made_deff (void)
 
 static void award_skill_shot (void)
 {
-	mark_ball_in_play ();
+	set_valid_playfield ();
 	deff_start (DEFF_SKILL_SHOT_MADE);
 	task_sleep (TIME_66MS);
 	leff_restart (LEFF_FLASHER_HAPPY);
@@ -209,7 +209,7 @@ CALLSET_ENTRY (skill, start_ball)
 }
 
 
-CALLSET_ENTRY (skill, ball_in_play)
+CALLSET_ENTRY (skill, valid_playfield)
 {
 	disable_skill_shot ();
 }

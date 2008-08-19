@@ -27,7 +27,6 @@ void unused_start_ball(void);
 void wcs_start_game(void);
 void wcs_end_game(void);
 void wcs_start_ball(void);
-void wcs_ball_in_play(void);
 bool wcs_end_ball(void);
 void wcs_add_player(void);
 void wcs_any_pf_switch(void);
