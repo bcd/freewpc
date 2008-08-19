@@ -233,7 +233,7 @@ void end_ball (void)
 	if (system_config.no_bonus_flips)
 		flipper_disable ();
 
-	/* Incrmeent audit for total number of balls played */
+	/* Increment audit for total number of balls played */
 	audit_increment (&system_audits.balls_played);
 
 	/* Stop the ball search monitor */
@@ -284,8 +284,7 @@ void end_ball (void)
 	}
 
 	/* If this is the last ball of the game for this player,
-	 * then offer to buy an extra ball if enabled.  Also,
-	 * if 1-coin buyin is enabled, offer this too. */
+	 * then offer to buy an extra ball if enabled. */
 	if (ball_up == system_config.balls_per_game)
 	{
 		if (system_config.buy_extra_ball == YES)
