@@ -18,6 +18,7 @@ struct log_event
 
 #define MAX_LOG_EVENTS 128
 
+extern void log_init (void);
 extern void log_event1(U16 module_event, U8 arg);
 
 #define log_event(severity, module, event, arg) \
