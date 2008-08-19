@@ -82,12 +82,12 @@ __noreturn__ void freewpc_init (void)
 
 	/* Initialize other critical WPC output registers relating
 	 * to hardware */
-	wpc_asic_write (WPC_SOL_FLASH2_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_FLASH1_OUTPUT, 0);
-	wpc_asic_write (WPC_SOL_LOWPOWER_OUTPUT, 0);
-	wpc_asic_write (WPC_LAMP_ROW_OUTPUT, 0);
-	wpc_asic_write (WPC_GI_TRIAC, 0);
+	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
+	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
+	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_GI_TRIAC, 0);
 
 	/* Reset the blanking and watchdog circuitry.
 	 * Eventually, the watchdog will be tickled every 1ms
@@ -382,11 +382,11 @@ void do_firq (void)
 	/* Read the peripheral timer register.
 	 * If bit 7 is set, it is a timer interrupt.  Otherwise,
 	 * it is a DMD interrupt. */
-	if (wpc_asic_read (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
+	if (readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
 	{
 		/* It is a timer interrupt.
 		 * Clear the interrupt by writing back to the same register. */
-		wpc_asic_write (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
+		writeb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, 0);
 
 		/* If we were using the timer, we would process the interrupt
 		here... */
