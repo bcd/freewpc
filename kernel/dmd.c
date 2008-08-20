@@ -119,6 +119,12 @@ void dmd_rtt0 (void);
 void dmd_rtt1 (void);
 void dmd_rtt2 (void);
 
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+U8 firq_row_value;
+#define dmd_request_firq() wpc_dmd_set_firq_row (firq_row_value)
+#else
+#define dmd_request_firq() wpc_dmd_set_firq_row (DMD_REFRESH_ROW)
+#endif
 
 
 /**
@@ -136,7 +142,10 @@ void dmd_init (void)
 	dmd_free_page = 2;
 
 	/* Program the DMD controller to generate interrupts */
-	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+	firq_row_value = DMD_REFRESH_ROW;
+#endif
+	dmd_request_firq ();
 }
 
 
@@ -158,7 +167,7 @@ void dmd_init (void)
 void dmd_rtt0 (void)
 {
 	wpc_dmd_set_visible_page (dmd_dark_page);
-	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
+	dmd_request_firq ();
 	/* IDEA: only the last byte of 'dmd_rtt' needs to be
 	 * updated, as long as all three functions reside within
 	 * the same 256-byte region, which could be verified at
@@ -169,14 +178,14 @@ void dmd_rtt0 (void)
 void dmd_rtt1 (void)
 {
 	wpc_dmd_set_visible_page (dmd_bright_page);
-	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
+	dmd_request_firq ();
 	dmd_rtt = dmd_rtt2;
 }
 
 void dmd_rtt2 (void)
 {
 	wpc_dmd_set_visible_page (dmd_bright_page);
-	wpc_dmd_set_firq_row (DMD_REFRESH_ROW);
+	dmd_request_firq ();
 	dmd_rtt = dmd_rtt0;
 }
 

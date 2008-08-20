@@ -172,6 +172,11 @@ void idle_profile_idle (void)
 #endif
 
 
+__attribute__((noinline)) void cpu_idle (void)
+{
+}
+
+
 /** For debugging, dump the entire contents of the task table to the
  * debug port.  This function is called automatically whenever the
  * system crashes.  It can also be triggered by pressing the 't'
@@ -674,6 +679,7 @@ void task_dispatcher (void)
 				noop ();
 				idle_time++;
 #endif
+				cpu_idle ();
 			}
 			
 			/* Ensure that 'tp', which is in register X, is reloaded

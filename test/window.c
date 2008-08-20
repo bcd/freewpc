@@ -504,6 +504,14 @@ struct adjustment printer_adjustments[] = {
 };
 
 
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+extern U8 firq_row_value;
+struct adjustment debug_adjustments[] = {
+	{ "FIRQ ROW VALUE", &integer_value, DMD_REFRESH_ROW, &firq_row_value },
+	{ NULL, NULL, 0, NULL },
+};
+#endif
+
 struct adjustment empty_adjustments[] = {
 	{ "EMPTY ADJ. SET", &integer_value, 0, NULL },
 	{ NULL, NULL, 0, NULL },
@@ -2725,12 +2733,23 @@ struct menu printer_adjustments_menu = {
 	.var = { .subwindow = { &adj_browser_window, printer_adjustments } },
 };
 
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+struct menu debug_adjustments_menu = {
+	.name = "DEBUG ADJ.",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &adj_browser_window, debug_adjustments } },
+};
+#endif
+
 struct menu *adj_menu_items[] = {
 	&standard_adjustments_menu,
 	&feature_adjustments_menu,
 	&pricing_adjustments_menu,
 	&hstd_adjustments_menu,
 	&printer_adjustments_menu,
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+	&debug_adjustments_menu,
+#endif
 	NULL,
 };
 
