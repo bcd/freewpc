@@ -3068,7 +3068,12 @@ void solenoid_test_init (void)
 {
 	browser_init ();
 	while (!solenoid_test_selection_ok ())
+	{
 		menu_selection++;
+#if __GCC6809_AT_LEAST__(4, 4, 0) /* Workaround a compiler bug */
+		barrier ();
+#endif
+	}
 	browser_item_number = browser_decimal_item_number;
 	browser_action = TIME_66MS;
 #ifdef NUM_POWER_DRIVES
