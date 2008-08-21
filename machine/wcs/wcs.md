@@ -118,7 +118,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 42: Kickback Center, green
 43: Kickback Upper, green
 44: R. Ramp Build, white
-45: R. Ramp Lock, white
+45: R. Ramp Lock, yellow
 46: Ultra Spinner, white
 47: Ultra Jets, white
 48: Striker, red
@@ -133,7 +133,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 61: L. Ramp Build, white
 62: L. Loop Build, white
 63: Travel, yellow
-64: World Cup Final, white
+64: World Cup Final, red
 65: L. Ramp Lock
 66: Top Lane Left, purple
 67: Top Lane Right, purple
