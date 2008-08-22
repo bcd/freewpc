@@ -92,6 +92,7 @@ Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
 System Reset: PRI_RESET, page(COMMON_PAGE)
 # TODO : priority below?
 Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
+Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
 
 [leffs]
 NULL: 0
