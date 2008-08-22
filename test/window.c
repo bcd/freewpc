@@ -600,9 +600,15 @@ void adj_verify_all (void)
 }
 
 
+struct adjustment *adj_get (U8 num)
+{
+	return browser_adjs + num;
+}
+
+
 void adj_browser_draw (void)
 {
-	struct adjustment *ad = browser_adjs + menu_selection;
+	struct adjustment *ad = adj_get (menu_selection);
 
 	window_stop_thread ();
 
@@ -634,12 +640,11 @@ void adj_browser_draw (void)
 
 void adj_browser_thread (void)
 {
+	dmd_show_low ();
 	for (;;)
 	{
 		if (browser_action == ADJ_EDITING)
 			dmd_show_other ();
-		else
-			dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
 }
@@ -661,7 +666,7 @@ void adj_browser_init (void)
 	while (ad->name != NULL)
 	{
 		browser_max++;
-		ad++;
+		ad++; /* TODO - adj_get() won't work here */
 	}
 	if (browser_max == 0xFF)
 	{
@@ -674,21 +679,23 @@ void adj_browser_init (void)
 
 void adj_browser_enter (void)
 {
+	struct adjustment *ad = adj_get (menu_selection);
+
 	if ((browser_action == ADJ_BROWSING) &&
-		 (browser_adjs[menu_selection].nvram != NULL))
+		 (ad->nvram != NULL))
 	{
-		adj_edit_value = *(browser_adjs[menu_selection].nvram);
+		adj_edit_value = *(ad->nvram);
 		browser_action = ADJ_EDITING;
 		sound_send (SND_TEST_ENTER);
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		/* TODO - confirmation of changes not done yet */
-		if (*(browser_adjs[menu_selection].nvram) != adj_edit_value)
+		if (*(ad->nvram) != adj_edit_value)
 		{
 			/* Modify the adjustment */
 			wpc_nvram_get ();
-			*(browser_adjs[menu_selection].nvram) = adj_edit_value;
+			*(ad->nvram) = adj_edit_value;
 			wpc_nvram_put ();
 			adj_modified ();
 			sound_send (SND_TEST_CONFIRM);
@@ -703,7 +710,8 @@ void adj_browser_escape (void)
 	if (browser_action == ADJ_EDITING)
 	{
 		/* abort */
-		if (adj_edit_value != *(browser_adjs[menu_selection].nvram))
+		struct adjustment *ad = adj_get (menu_selection);
+		if (adj_edit_value != *(ad->nvram))
 			sound_send (SND_TEST_ABORT);
 		browser_action = ADJ_BROWSING;
 	}
@@ -716,38 +724,42 @@ void adj_browser_escape (void)
 
 void adj_browser_up (void)
 {
+	struct adjustment *ad = adj_get (menu_selection);
 	if (browser_action == ADJ_BROWSING)
 	{
 		do {
 			browser_up ();
-		} while (!*browser_adjs[menu_selection].name);
+			ad = adj_get (menu_selection);
+		} while (!*(ad->name));
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		sound_send (SND_TEST_UP);
-		if (adj_edit_value < browser_adjs[menu_selection].values->max)
-			adj_edit_value += browser_adjs[menu_selection].values->step;
+		if (adj_edit_value < ad->values->max)
+			adj_edit_value += ad->values->step;
 		else
-			adj_edit_value = browser_adjs[menu_selection].values->min;
+			adj_edit_value = ad->values->min;
 	}
 }
 
 
 void adj_browser_down (void)
 {
+	struct adjustment *ad = adj_get (menu_selection);
 	if (browser_action == ADJ_BROWSING)
 	{
 		do {
 			browser_down ();
-		} while (!*browser_adjs[menu_selection].name);
+			ad = adj_get (menu_selection);
+		} while (!*(ad->name));
 	}
 	else if (browser_action == ADJ_EDITING)
 	{
 		sound_send (SND_TEST_DOWN);
-		if (adj_edit_value > browser_adjs[menu_selection].values->min)
-			adj_edit_value -= browser_adjs[menu_selection].values->step;
+		if (adj_edit_value > ad->values->min)
+			adj_edit_value -= ad->values->step;
 		else
-			adj_edit_value = browser_adjs[menu_selection].values->max;
+			adj_edit_value = ad->values->max;
 	}
 }
 
