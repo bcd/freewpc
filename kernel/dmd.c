@@ -126,15 +126,38 @@ U8 firq_row_value;
 #define dmd_request_firq() wpc_dmd_set_firq_row (DMD_REFRESH_ROW)
 #endif
 
+U8 *dmd_phase_ptr;
+
+U8 dmd_phase_table[] = {
+	0, 1, 1, 0, 1, 1
+};
+
+
+void dmd_new_rtt (void)
+{
+	wpc_dmd_set_visible_page ( ((U8 *)&dmd_visible_pages) [*dmd_phase_ptr++]);
+	if (dmd_phase_ptr >= dmd_phase_table + sizeof (dmd_phase_table))
+		dmd_phase_ptr = dmd_phase_table;
+	dmd_request_firq ();
+}
+
 
 /**
  * Initialize the DMD subsystem.
  */
 void dmd_init (void)
 {
-	dmd_rtt = dmd_rtt0;
+	//dmd_rtt = dmd_rtt0;
+	dmd_rtt = dmd_new_rtt;
+	dmd_phase_ptr = dmd_phase_table;
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
+
+#ifdef DMD_BLANK_PAGE_COUNT
+	wpc_dmd_set_low_page (dmd_get_blank (0));
+	dmd_clean_page_low ();
+#endif
+
 	wpc_dmd_set_low_page (0);
 	wpc_dmd_set_high_page (0);
 	dmd_clean_page_low ();
@@ -255,17 +278,30 @@ void dmd_alloc_low_high (void)
 void dmd_show_low (void)
 {
 	if (unlikely (dmd_transition))
+	{
+		dmd_high_page = dmd_low_page;
+		dmd_low_page = dmd_get_blank (0);
 		dmd_do_transition ();
+	}
 	else
-		dmd_dark_page = dmd_bright_page = dmd_low_page;
+	{
+		dmd_dark_page = dmd_get_blank (0);
+		dmd_bright_page = dmd_low_page;
+	}
 }
 
 void dmd_show_high (void)
 {
 	if (unlikely (dmd_transition))
+	{
+		dmd_low_page = dmd_get_blank (0);
 		dmd_do_transition ();
+	}
 	else
-		dmd_dark_page = dmd_bright_page = dmd_high_page;
+	{
+		dmd_dark_page = dmd_get_blank (0);
+		dmd_bright_page = dmd_high_page;
+	}
 }
 
 
@@ -288,10 +324,13 @@ void dmd_flip_low_high (void)
 currently mapped */
 void dmd_show_other (void)
 {
+	dmd_visible_pages.pair ^= 0x0101;
+#if 0
 	if (dmd_dark_page == dmd_low_page)
 		dmd_show_high ();
 	else
 		dmd_show_low ();
+#endif
 }
 
 
@@ -511,41 +550,12 @@ static inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
  */
 void dmd_do_transition (void)
 {
-	dmd_trans_data_ptr = NULL;
-	U8 one_copy_flag;
+	U8 one_copy_flag = FALSE;
 	const U8 new_dark_page = dmd_low_page;
 	const U8 new_bright_page = dmd_high_page;
 
-	if ((new_dark_page == new_bright_page) &&
-		 (dmd_dark_page == dmd_bright_page))
-	{
-		one_copy_flag = TRUE;
-	}
-	else
-	{
-		one_copy_flag = FALSE;
-		dmd_trans_data_ptr2 = NULL;
-		if (new_dark_page != new_bright_page)
-		{
-			/* New image is 4-color but old image
-			 * is mono.
-			 * Need to turn old image into 4-color format
-			 * by copying it.
-			 */
-			wpc_dmd_set_low_page (dmd_dark_page);
-			wpc_dmd_set_high_page (dmd_dark_page+1);
-			dmd_copy_low_to_high ();
-			dmd_bright_page = dmd_high_page;
-			wpc_dmd_set_low_page (new_dark_page);
-		}
-		else
-		{
-			/* Old image is 4-color but new image is mono. */
-			/* Copy it to make it 4-color also */
-			wpc_dmd_set_high_page (dmd_low_page+1);
-			dmd_copy_low_to_high ();
-		}
-	}
+	dmd_trans_data_ptr = NULL;
+	dmd_trans_data_ptr2 = NULL;
 
 	wpc_push_page (TRANS_PAGE);
 	
@@ -569,17 +579,16 @@ void dmd_do_transition (void)
 
 		do {
 			dmd_composite_page = dmd_alloc ();
-		} while (dmd_composite_page == new_dark_page);
+		} while ((dmd_composite_page == (new_dark_page & ~1)) ||
+			(dmd_composite_page == (new_bright_page & ~1)));
 
 		/* Handle the transition of the dark page first.
 		 * Use the lower composite pair page. */
 		wpc_dmd_set_high_page (dmd_composite_page);
 		dmd_do_transition_cycle (dmd_dark_page, new_dark_page);
 
-		/* Handle the transition of the bright page, if either
-		 * the old or new images is 4-color.
+		/* Handle the transition of the bright page.
 		 * Use the upper composite pair page (+1). */
-		if (!one_copy_flag)
 		{
 			U8 *tmp_trans_data_ptr;
 
@@ -591,16 +600,13 @@ void dmd_do_transition (void)
 
 			dmd_trans_data_ptr2 = dmd_trans_data_ptr;
 			dmd_trans_data_ptr = tmp_trans_data_ptr;
-
-			dmd_dark_page = dmd_composite_page;
-			dmd_bright_page = dmd_composite_page+1;
-
 		}
-		else
-		{
-			dmd_dark_page = dmd_bright_page = dmd_composite_page;
-		}
+
+		/* Make the composite pages visible */
+		dmd_dark_page = dmd_composite_page;
+		dmd_bright_page = dmd_composite_page+1;
 	}
+
 	wpc_pop_page ();
 	dmd_transition = NULL;
 }
