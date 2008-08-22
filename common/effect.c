@@ -132,6 +132,22 @@ void score_goal_deff (void)
 }
 
 
+void plunge_ball_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+
+	sprintf ("PLAYER %d", player_up);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	dmd_draw_border (dmd_low_buffer);
+	dmd_copy_low_to_high ();
+	font_render_string_center (&font_fixed6, 64, 22, "PLUNGE THE BALL");
+	dmd_show_low ();
+	deff_swap_low_high (12, TIME_300MS);
+	deff_exit ();
+}
+
+
 void animation_test1 (struct animation_object *obj)
 {
 	U8 *x = &obj->data.u8;

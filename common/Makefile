@@ -24,6 +24,7 @@ COMMON_BASIC_OBJS +=	common/reset.o
 COMMON_BASIC_OBJS +=	common/rtc.o
 COMMON_BASIC_OBJS += $(if $(CONFIG_PLAYABLE), common/score_deff.o)
 COMMON_BASIC_OBJS +=	common/service.o
+COMMON_BASIC_OBJS += common/shootalert.o
 COMMON_BASIC_OBJS +=	common/tilt.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/tournament.o)
 COMMON_BASIC_OBJS +=	common/trough.o
