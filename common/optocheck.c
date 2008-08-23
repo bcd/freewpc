@@ -22,10 +22,12 @@ void opto_check (void)
 			{
 				if (bits & 1)
 				{
-					if (switch_poll (col * 8 + row))
+					dbprintf ("Checking SW %d\n", col * 8 + row);
+					if (!switch_poll (col * 8 + row))
 					{
-						/* The switch is closed (inactive); opto power must
+						/* The switch is open (active); opto power must
 						 * be good */
+						dbprintf ("Switch is open\n");
 						return;
 					}
 				}
@@ -33,9 +35,10 @@ void opto_check (void)
 		}
 	}
 
-	/* All optos are open (active).  Either opto power is bad,
-	 * or there are truly balls at all opto positions.
-	 * TODO
+	/* All optos are closed (inactive).  Either opto power is bad,
+	 * or there are truly balls at all opto positions, which is
+	 * highly unlikely.
 	 */
+	dbprintf ("Bad 12V?\n");
 }
 
