@@ -511,7 +511,7 @@ void switch_service_queue (void)
 	while (unlikely (i != switch_queue_tail))
 	{
 		pending_switch_t *entry;
-		S8 elapsed_time;
+		U8 elapsed_time;
 
 		/* See how long since the last time we serviced the queue */
 		elapsed_time = get_elapsed_time (switch_last_service_time);
@@ -685,7 +685,7 @@ CALLSET_ENTRY (switch, idle)
 						 * must be queued. */
 						if (switch_lookup (sw)->prebounce == 0)
 						{
-							dbprintf ("Scheduling switch with no prebounce\n");
+							dbprintf ("Scheduling SW%d with no prebounce\n", sw);
 							switch_schedule (sw, NULL);
 						}
 						else
