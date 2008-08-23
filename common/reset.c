@@ -41,6 +41,8 @@ volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
 __nvram__ U8 freewpc_accepted[3];
 
+extern __common__ void opto_check ();
+
 
 void render_build_date (void)
 {
@@ -158,6 +160,9 @@ void system_reset (void)
 #if (MACHINE_PIC == 1)
 	pic_init ();
 #endif
+
+	/* Check the 12V supply to make sure optos are working */
+	opto_check ();
 
 #ifdef FASTBOOT
 	sys_init_complete++;
