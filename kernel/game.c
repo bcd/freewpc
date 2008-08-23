@@ -321,6 +321,7 @@ void end_ball (void)
 	if (config_timed_game == OFF)
 	{
 		ball_up++;
+		/* TODO - real WPC games will clear the 1/2 credits here */
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
@@ -677,17 +678,25 @@ CALLSET_ENTRY (game, sw_start_button)
 #endif /* MACHINE_START_SWITCH */
 }
 
-
-/** Initialize the game subsystem.  */
-CALLSET_ENTRY (game, init)
+void validate_num_players (void)
 {
 	/* Make sure this value is sane */
 	if ((num_players == 0) || (num_players > MAX_PLAYERS))
 	{
-		wpc_nvram_get ();
 		num_players = 1;
-		wpc_nvram_put ();
 	}
+}
+
+
+CALLSET_ENTRY (game, factory_reset)
+{
+	num_players = 1;
+}
+
+/** Initialize the game subsystem.  */
+CALLSET_ENTRY (game, init)
+{
+	validate_num_players ();
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
