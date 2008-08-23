@@ -463,7 +463,6 @@ void start_ball (void)
 	 */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
-	/* TODO : start a timer to a reminder to plunge the ball */
 	if (ball_up == system_config.balls_per_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
