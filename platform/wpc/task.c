@@ -174,6 +174,15 @@ void idle_profile_idle (void)
 
 __attribute__((noinline)) void cpu_idle (void)
 {
+	task_dispatching_ok = TRUE;
+	barrier ();
+#ifdef IDLE_PROFILE
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	idle_time++;
+#endif
 }
 
 
@@ -669,18 +678,7 @@ void task_dispatcher (void)
 			themselves may take a long time. */
 			last_dispatch_time = get_sys_time ();
 			while (likely (last_dispatch_time == get_sys_time ()))
-			{
-				barrier ();
-				task_dispatching_ok = TRUE;
-#ifdef IDLE_PROFILE
-				noop ();
-				noop ();
-				noop ();
-				noop ();
-				idle_time++;
-#endif
 				cpu_idle ();
-			}
 			
 			/* Ensure that 'tp', which is in register X, is reloaded
 			with the correct task pointer.  The above functions may
