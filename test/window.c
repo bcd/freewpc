@@ -2728,9 +2728,7 @@ struct menu feature_adjustments_menu = {
 struct menu pricing_adjustments_menu = {
 	.name = "PRICING ADJ.",
 	.flags = M_ITEM,
-#ifndef FREE_ONLY
 	.var = { .subwindow = { &adj_browser_window, pricing_adjustments } },
-#endif
 };
 
 struct menu hstd_adjustments_menu = {
