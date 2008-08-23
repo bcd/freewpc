@@ -37,6 +37,7 @@
 #ifdef CONFIG_PLATFORM_WPC
 #define HAVE_NVRAM_SECTION
 #define HAVE_LOCAL_SECTION
+#define HAVE_PERMANENT_SECTION
 #endif
 
 /** noreturn is a standard GCC attribute and is always
@@ -63,6 +64,12 @@
 #define __local__ __attribute__((section ("local")))
 #else
 #define __local__
+#endif
+
+#ifdef HAVE_PERMANENT_SECTION
+#define __permanent__ __attribute__((section ("permanent")))
+#else
+#define __permanent__
 #endif
 
 

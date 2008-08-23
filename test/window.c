@@ -2287,9 +2287,8 @@ struct menu factory_adjust_item = {
 
 void factory_reset_confirm (void)
 {
-	adj_reset_all ();
-	/* TODO : this should also clear audits, reset the high scores,
-	 * and reset the custom message/game ID */
+	extern __common__ void factory_reset (void);
+	factory_reset ();
 	confirm_enter ();
 }
 
@@ -2728,9 +2727,7 @@ struct menu feature_adjustments_menu = {
 struct menu pricing_adjustments_menu = {
 	.name = "PRICING ADJ.",
 	.flags = M_ITEM,
-#ifndef FREE_ONLY
 	.var = { .subwindow = { &adj_browser_window, pricing_adjustments } },
-#endif
 };
 
 struct menu hstd_adjustments_menu = {

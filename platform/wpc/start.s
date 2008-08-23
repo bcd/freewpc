@@ -218,7 +218,7 @@ ram_loop:
 	stb	WPC_WATCHDOG_REG
 
 	/* TODO - upper limit hardcoded */
-	cmpx	#0x1700
+	cmpx	#0x1600
 	blo	ram_loop
 	bra	asic_test
 

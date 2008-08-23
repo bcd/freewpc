@@ -342,7 +342,7 @@ endif
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
-PAGE_NUMBERS = 56 57 58 59 60 61
+PAGE_NUMBERS = 52 53 54 55 56 57 58 59 60 61
 ifeq ($(PLATFORM),wpcsound)
 BLANK_SIZE := 304
 else
@@ -379,7 +379,8 @@ $(eval $(call AREA_SETUP, ram,       0x0100,   0x1300))
 ifneq ($(PLATFORM),wpcsound)
 $(eval $(call AREA_SETUP, local,     0x1400,   0x0040))
 endif
-$(eval $(call AREA_SETUP, stack,     0x1600,   0x0200,  virtual))
+$(eval $(call AREA_SETUP, permanent, 0x1600,   0x0080))
+$(eval $(call AREA_SETUP, stack,     0x1680,   0x0180,  virtual))
 ifeq ($(PLATFORM),wpcsound)
 $(eval $(call AREA_SETUP, paged,     0x4000,   0x8000,  virtual))
 $(eval $(call AREA_SETUP, sysrom,    0xC000,   0x3FF0,  virtual))
@@ -430,10 +431,10 @@ endif
 endef
 
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
+$(eval $(call PAGE_ALLOC, 55, TRANS))
+$(eval $(call PAGE_ALLOC, 55, FIF))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
-$(eval $(call PAGE_ALLOC, 56, EVENT))
-$(eval $(call PAGE_ALLOC, 57, TRANS))
-$(eval $(call PAGE_ALLOC, 57, FIF))
+$(eval $(call PAGE_ALLOC, 57, EVENT))
 $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
