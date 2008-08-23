@@ -42,6 +42,35 @@ volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 __nvram__ U8 freewpc_accepted[3];
 
 
+/**
+ * Perform a full factory reset.
+ * This can be triggered automatically at boot time if
+ * certain sanity checks fail, or via a test mode option.
+ */
+void factory_reset (void)
+{
+	adj_reset_all ();
+	rtc_factory_reset ();
+	/* TODO : this should also clear audits, reset the high scores,
+	 * reset the custom message/game ID, and clear the persistent
+	 * area. */
+#ifdef __m6809__
+	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
+#endif
+	callset_invoke (factory_reset);
+}
+
+
+void factory_reset_if_required (void)
+{
+	if (0)
+	{
+		factory_reset ();
+		/* TODO - display message to this effect */
+	}
+}
+
+
 void render_build_date (void)
 {
 	locale_render_date (BUILD_MONTH, BUILD_DAY, BUILD_YEAR);
@@ -106,8 +135,7 @@ void system_accept_freewpc (void)
 	freewpc_accepted[2] = ACCEPT_3;
 	wpc_nvram_put ();
 
-	adj_reset_all ();
-	rtc_factory_reset ();
+	factory_reset ();
 }
 
 
@@ -158,6 +186,8 @@ void system_reset (void)
 #if (MACHINE_PIC == 1)
 	pic_init ();
 #endif
+
+	factory_reset_if_required ();
 
 #ifdef FASTBOOT
 	sys_init_complete++;

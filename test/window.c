@@ -2287,9 +2287,8 @@ struct menu factory_adjust_item = {
 
 void factory_reset_confirm (void)
 {
-	adj_reset_all ();
-	/* TODO : this should also clear audits, reset the high scores,
-	 * and reset the custom message/game ID */
+	extern __common__ void factory_reset (void);
+	factory_reset ();
 	confirm_enter ();
 }
 
