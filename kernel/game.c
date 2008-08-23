@@ -73,7 +73,7 @@ U8 valid_playfield;
 U8 pending_valid_count;
 
 /** The number of players in the current game */
-__nvram__ U8 num_players;
+__permanent__ U8 num_players;
 
 /** The number of the player that is currently up. */
 U8 player_up;
@@ -525,9 +525,7 @@ void try_validate_playfield (U8 swno)
 void add_player (void)
 {
 	remove_credit ();
-	wpc_nvram_get ();
 	num_players++;
-	wpc_nvram_put ();
 	callset_invoke (add_player);
 
 	/* Acknowledge the new player by showing the scores briefly */
@@ -545,9 +543,7 @@ void start_game (void)
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
-		wpc_nvram_get ();
 		num_players = 0;
-		wpc_nvram_put ();
 		scores_reset ();
 		high_score_reset_check ();
 	

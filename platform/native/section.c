@@ -32,6 +32,7 @@
  * provide persistence.
  */
 
+extern char *__start_protected, *__stop_protected;
 extern char *__start_nvram, *__stop_nvram;
 extern char *__start_local, *__stop_local;
 
