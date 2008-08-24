@@ -343,6 +343,10 @@ struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
+struct adjustment_value collection_text_value = { CUR_DOLLAR, CUR_DM, 1,
+	collection_text_render };
+struct adjustment_value printer_type_value = { 0, 4, 1, printer_type_render };
+struct adjustment_value baud_rate_value = { 0, 5, 1, baud_rate_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -442,7 +446,8 @@ struct adjustment pricing_adjustments[] = {
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
 	{ "MINIMUM UNITS", &integer_value, 1, &price_config.min_units },
 	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
-	{ "COLLECTION TEXT", &integer_value, 1, &price_config.collection_text },
+	{ "COLLECTION TEXT", &collection_text_value, CUR_DOLLAR,
+		&price_config.collection_text },
 	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
 	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
 	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
@@ -494,8 +499,8 @@ struct adjustment printer_adjustments[] = {
 	{ "COLUMN WIDTH", &integer_value, 72, &printer_config.column_width },
 	{ "LINES PER PAGE", &integer_value, 60, &printer_config.lines_per_page },
 	{ "PAUSE EVERY PAGE", &yes_no_value, NO, &printer_config.pause_every_page },
-	{ "PRINTER TYPE", &integer_value, 0, &printer_config.printer_type },
-	{ "SERIAL BAUD RATE", &integer_value, 0, &printer_config.serial_baud_rate },
+	{ "PRINTER TYPE", &printer_type_value, 0, &printer_config.printer_type },
+	{ "SERIAL BAUD RATE", &baud_rate_value, 0, &printer_config.serial_baud_rate },
 	{ "SERIAL D.T.R.", &integer_value, 0, &printer_config.serial_dtr },
 	{ "NSM STUB ONLY", &on_off_value, OFF, &printer_config.nsm_stub_only },
 	{ "AUTO PRINTOUT", &on_off_value, OFF, &printer_config.auto_printout },
@@ -1561,8 +1566,8 @@ void lamplist_update (void)
 	{
 		switch (lamplist_update_mode)
 		{
-			case 0: 
-				lamplist_apply (menu_selection, lamp_on); 
+			case 0:
+				lamplist_apply (menu_selection, lamp_on);
 				task_sleep (TIME_166MS);
 				break;
 			case 1: lamplist_apply (menu_selection, lamp_toggle);
@@ -3774,7 +3779,7 @@ void sysinfo_system_version (void) {
 }
 
 
-void sysinfo_compiler_version (void) { 
+void sysinfo_compiler_version (void) {
 	sprintf ("GCC6809 V%s", C_STRING(GCC_VERSION));
 }
 
