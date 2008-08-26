@@ -517,6 +517,8 @@ void switch_service_queue (void)
 		elapsed_time = get_elapsed_time (switch_last_service_time);
 		if (elapsed_time < 5)
 			return;
+		if (elapsed_time > 100)
+			elapsed_time = 100;
 
 		entry = &switch_queue[i];
 		if (entry->id != 0xFF)
@@ -660,6 +662,8 @@ CALLSET_ENTRY (switch, idle)
 				if (pendbits & 1)
 				{
 					/* OK, the switch has changed state and is stable. */
+
+					task_dispatching_ok = TRUE;
 
 					/* There are two possibilities: either the switch is
 					 * not queued, or it is in prebounce.  (Postbounce
