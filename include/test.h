@@ -107,12 +107,26 @@ struct adjustment
 	U8 *nvram;
 };
 
-__test__ void adj_reset (struct adjustment *adjs);
-__test__ void adj_verify (struct adjustment *adjs);
-__test__ void adj_reset_all (void);
-__test__ void adj_verify_all (void);
-__test__ void adj_name_for_preset (U8 * const nvram, const U8 value);
-__test__ void adj_prepare_lookup (struct adjustment *table);
+extern struct adjustment standard_adjustments[];
+extern struct adjustment feature_adjustments[];
+extern struct adjustment pricing_adjustments[];
+extern struct adjustment hstd_adjustments[];
+extern struct adjustment printer_adjustments[];
+extern struct adjustment debug_adjustments[];
+extern struct adjustment empty_adjustments[];
+
+__test2__ const struct adjustment *adj_get (U8 num);
+__test2__ void adj_set_current (struct adjustment *adjs);
+__test2__ U8 adj_count_current (void);
+__test2__ void adj_render_current_value (U8 val);
+__test2__ void adj_render_current_name (U8 id);
+__test2__ bool adj_current_hidden_p (void);
+__test2__ void adj_reset (struct adjustment *adjs);
+__test2__ void adj_verify (struct adjustment *adjs);
+__test2__ void adj_reset_all (void);
+__test2__ void adj_verify_all (void);
+__test2__ void adj_name_for_preset (U8 * const nvram, const U8 value);
+__test2__ void adj_prepare_lookup (struct adjustment *table);
 
 
 typedef enum

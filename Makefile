@@ -223,7 +223,7 @@ EVENT_OBJS = $(BLDDIR)/callset.o
 
 ifdef CONFIG_WPC
 TEST_OBJS = test/window.o
-TEST2_OBJS = test/format.o test/preset.o test/swtest.o
+TEST2_OBJS = test/format.o test/preset.o test/swtest.o test/adjust.o
 endif
 
 ifeq ($(CONFIG_DMD),y)
