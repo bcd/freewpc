@@ -1,7 +1,7 @@
 To compile FreeWPC, follow these general guidelines.  See the
 documentation on <http://www.oddchange.com/freewpc> for more details.
 
-1. Decide if you are compiling natively (to run on your machine) or
+1. Decide if you are compiling natively (to run on your workstation) or
 building a real ROM (to be used in pinmame).
 
 2. Create a file called ".config" in the current directory.
@@ -11,6 +11,7 @@ Define at least MACHINE, and optionally NATIVE:
 	native mode.
 
 	* You must define 'MACHINE' to a valid game name.
+	For example, "MACHINE=tz".
 
 	* If you are going to run pinmame, set 'TARGET_ROMPATH' to point
 	to your mame ROMs directory.

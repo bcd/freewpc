@@ -73,7 +73,7 @@ U8 valid_playfield;
 U8 pending_valid_count;
 
 /** The number of players in the current game */
-__nvram__ U8 num_players;
+__permanent__ U8 num_players;
 
 /** The number of the player that is currently up. */
 U8 player_up;
@@ -321,6 +321,7 @@ void end_ball (void)
 	if (config_timed_game == OFF)
 	{
 		ball_up++;
+		/* TODO - real WPC games will clear the 1/2 credits here */
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
@@ -463,7 +464,6 @@ void start_ball (void)
 	 */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
-	/* TODO : start a timer to a reminder to plunge the ball */
 	if (ball_up == system_config.balls_per_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
@@ -525,9 +525,7 @@ void try_validate_playfield (U8 swno)
 void add_player (void)
 {
 	remove_credit ();
-	wpc_nvram_get ();
 	num_players++;
-	wpc_nvram_put ();
 	callset_invoke (add_player);
 
 	/* Acknowledge the new player by showing the scores briefly */
@@ -545,9 +543,7 @@ void start_game (void)
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
-		wpc_nvram_get ();
 		num_players = 0;
-		wpc_nvram_put ();
 		scores_reset ();
 		high_score_reset_check ();
 	
@@ -681,17 +677,25 @@ CALLSET_ENTRY (game, sw_start_button)
 #endif /* MACHINE_START_SWITCH */
 }
 
-
-/** Initialize the game subsystem.  */
-CALLSET_ENTRY (game, init)
+void validate_num_players (void)
 {
 	/* Make sure this value is sane */
 	if ((num_players == 0) || (num_players > MAX_PLAYERS))
 	{
-		wpc_nvram_get ();
 		num_players = 1;
-		wpc_nvram_put ();
 	}
+}
+
+
+CALLSET_ENTRY (game, factory_reset)
+{
+	num_players = 1;
+}
+
+/** Initialize the game subsystem.  */
+CALLSET_ENTRY (game, init)
+{
+	validate_num_players ();
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;

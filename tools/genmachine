@@ -538,6 +538,7 @@ LINE:
 			# Derive C strings from the human readable name
 			my $c_string = $def->{'name'};
 			$c_string =~ tr/a-z/A-Z/;
+			$c_string =~ s/_/-/g;
 			$def->{'c_string'} = "\"$c_string\"";
 
 			my $c_ident = $c_string;

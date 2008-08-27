@@ -84,6 +84,11 @@ void percent_render (U8 val)
 
 void replay_score_render (U8 val)
 {
+	if (val == 0)
+	{
+		sprintf ("OFF");
+		return;
+	}
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
 	score_t score;
 	score_zero (score);
@@ -112,6 +117,33 @@ void brightness_render (U8 val)
 		case 5: sprintf ("5.DIM"); break;
 		case 6: sprintf ("6.BRIGHT"); break;
 		case 7: sprintf ("7.BRIGHTEST"); break;
+	}
+}
+
+
+void printer_type_render (U8 val)
+{
+	switch (val)
+	{
+		case 0: sprintf ("PARALLEL"); break;
+		case 1: sprintf ("SERIAL"); break;
+		case 2: sprintf ("ADP"); break;
+		case 3: sprintf ("M.DRUCK."); break;
+		case 4: sprintf ("NSM"); break;
+	}
+}
+
+
+void baud_rate_render (U8 val)
+{
+	switch (val)
+	{
+		case 0: sprintf ("300"); break;
+		case 1: sprintf ("600"); break;
+		case 2: sprintf ("1200"); break;
+		case 3: sprintf ("2400"); break;
+		case 4: sprintf ("4800"); break;
+		case 5: sprintf ("9600"); break;
 	}
 }
 
@@ -156,15 +188,53 @@ void us_dollar_audit (audit_t val)
 	sprintf ("$%ld.%02d", val / 4, (val % 4) * 25);
 }
 
+const struct currency_info
+{
+	char sep;
+	const char *sign;
+	U8 base_unit;
+	U8 units_for_larger;
+	bool prefix_sign;
+} currency_info_table[] = {
+	[CUR_DOLLAR] = { '.', "$", 25, 4, TRUE },
+	[CUR_FRANC] = { ',', " FR.", 25, 4, FALSE },
+	[CUR_LIRA] = { ',', "L", 25, 4, FALSE },
+	[CUR_PESETA] = { ',', "P", 25, 4, FALSE },
+	[CUR_YEN] = { '.', "Y", 25, 4, FALSE },
+	[CUR_DM] = { ',', "DM", 25, 4, FALSE },
+};
+
+void specific_currency_audit (audit_t val, U8 type)
+{
+	const struct currency_info *info;
+	U16 large;
+	U16 small;
+
+	if (type > CUR_DM)
+	{
+		sprintf ("???");
+		return;
+	}
+
+	info = &currency_info_table[type];
+	large = val / info->units_for_larger;
+	small = (val % info->units_for_larger) * info->base_unit;
+
+	if (info->prefix_sign)
+		sprintf ("%s%ld.%02ld", info->sign, large, small);
+	else
+		sprintf ("%ld.%02ld%s", large, small, info->sign);
+}
 
 void currency_audit (audit_t val)
 {
-	switch (0)
-	{
-		default:
-			us_dollar_audit (val);
-			break;
-	}
+	specific_currency_audit (val, price_config.collection_text);
+}
+
+
+void collection_text_render (U8 val)
+{
+	specific_currency_audit (0, val);
 }
 
 
@@ -222,9 +292,6 @@ void render_audit (audit_t val, audit_format_type_t type)
 			break;
 		case AUDIT_TYPE_SECS:
 			secs_audit (val);
-			break;
-		case AUDIT_TYPE_US_DOLLAR:
-			us_dollar_audit (val);
 			break;
 		case AUDIT_TYPE_CURRENCY:
 			currency_audit (val);

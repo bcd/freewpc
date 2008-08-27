@@ -299,7 +299,7 @@ void sound_board_init (void)
 
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	if ((sound_board_type = sound_board_read (50)) == 0xFF)
+	if ((sound_board_type = sound_board_read (100)) == 0xFF)
 	{
 		dbprintf ("Error: sound board not detected\n");
 		task_sleep_sec (1);

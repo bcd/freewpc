@@ -63,6 +63,7 @@ AREA_DECL(ram)
 AREA_DECL(local)
 AREA_DECL(heap)
 AREA_DECL(stack)
+AREA_DECL(permanent)
 AREA_DECL(nvram)
 
 #else

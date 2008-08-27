@@ -174,7 +174,7 @@ U8 device_recount (device_t *dev)
 static inline U8 device_getgid (void)
 {
 	U8 gid = task_getgid ();
-#if 0
+#ifdef PARANOID
 	if ((gid < DEVICE_GID_BASE) || (gid >= DEVICE_GID_BASE + NUM_DEVICES))
 	{
 		dbprintf ("Bad GID %02X for device\n", gid);

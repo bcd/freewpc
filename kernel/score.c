@@ -29,7 +29,7 @@
 extern const score_t score_table[];
 
 /** The array of player scores */
-score_t scores[MAX_PLAYERS];
+__permanent__ score_t scores[MAX_PLAYERS];
 
 /** A pointer to the score for the current player up */
 U8 *current_score;
@@ -245,12 +245,5 @@ void scores_reset (void)
 CALLSET_ENTRY (score, start_ball)
 {
 	global_score_multiplier = 1;
-}
-
-
-CALLSET_ENTRY (score, init)
-{
-	/* TODO : scores should persist across a reset */
-	scores_reset ();
 }
 

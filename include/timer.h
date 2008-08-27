@@ -42,18 +42,7 @@ void free_timer_init (void);
 #define timer_find_gid	task_find_gid
 #define timer_test_and_kill_gid	task_kill_gid
 
-#define timer_pause() \
-do { \
-	extern U8 pausable_timer_locks; pausable_timer_locks++; \
-} while (0);
-
-#define timer_resume() \
-do { \
-	extern U8 pausable_timer_locks; pausable_timer_locks--; \
-} while (0);
-
 void freerunning_timer_function (void);
-void pausable_timer_function (void);
 
 #define timer_restart_free(g,t)	timer_restart(g,t,freerunning_timer_function)
 #define timer_start1_free(g,t)	timer_start1(g,t,freerunning_timer_function)

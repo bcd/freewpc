@@ -47,8 +47,21 @@ typedef U8 adjval_t;
 #define FREE_AWARD_TICKET 3
 #define FREE_AWARD_POINTS 4
 
+/* Coin door types */
+#define COINDOOR_CUSTOM 0
+#define COINDOOR_USA_QUARTERS 1
+#define COINDOOR_USA_25_100_25 2
+#define COINDOOR_CANADA 3
+#define COINDOOR_FRANCE 4
+#define COINDOOR_ITALY 5
+
 /* Currency types */
-#define CUR_US_DOLLAR 0
+#define CUR_DOLLAR 0
+#define CUR_FRANC 1
+#define CUR_LIRA 2
+#define CUR_PESETA 3
+#define CUR_YEN 4
+#define CUR_DM 5
 
 typedef struct
 {
