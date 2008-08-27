@@ -39,12 +39,14 @@ extern U8 sol_duty_state[];
 
 /** Duty cycle values.  The first value is the on time,
 the second value is the off time */
-#define SOL_DUTY_0		0x0
-#define SOL_DUTY_12		0x40
-#define SOL_DUTY_25		0x22
-#define SOL_DUTY_50		0x55
-#define SOL_DUTY_75		0x77
-#define SOL_DUTY_100		0xFF
+#define SOL_DUTY_0      0x0
+#define SOL_DUTY_12     0x40
+#define SOL_DUTY_25     0x22
+#define SOL_DUTY_37     0x92
+#define SOL_DUTY_50     0x55
+#define SOL_DUTY_62     0xB5
+#define SOL_DUTY_75     0x77
+#define SOL_DUTY_100    0xFF
 
 #define SOL_DUTY_DEFAULT   SOL_DUTY_25
 #define SOL_TIME_DEFAULT   TIME_133MS
