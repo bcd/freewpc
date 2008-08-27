@@ -156,6 +156,8 @@ void dmd_init (void)
 #ifdef DMD_BLANK_PAGE_COUNT
 	wpc_dmd_set_low_page (dmd_get_blank (0));
 	dmd_clean_page_low ();
+	wpc_dmd_set_high_page (dmd_get_blank (1));
+	dmd_clean_page_high ();
 #endif
 
 	wpc_dmd_set_low_page (0);
