@@ -43,6 +43,7 @@ static char *tinynum_glyphs[] = {
    ['9' - BASECHAR] = font_tinynum_digit[9],
    ['.' - BASECHAR] = font_tinynum_sep[0],
    [',' - BASECHAR] = font_tinynum_sep[1],
+   ['A' - BASECHAR] = NULL,
 };
 
 const font_t font_tinynum = {

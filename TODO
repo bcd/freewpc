@@ -21,7 +21,6 @@ Poor Design
 Missing Feature
 * Generic slingshot/jet bumper drivers that work in every game.
 * Lamp power saver level
-* If all optos are not working, warn about the 12V supply.
 * Abort after so many ball searches, or try another method (chase ball?)
 * Zerocross circuitry is not being used.  In Progress.
 * Print message when high power coils are disabled by open coin door.
@@ -29,18 +28,15 @@ Missing Feature
 * Burnin
 * Printer pause after every page
 * Lamp strobing, like newer Sterns
-* "Plunge the Ball" reminder
 * deff_nice
 
 
 Bugs
 * Briefly ignore switch row/column on ground/short.
-* Scores do not persist across a reset.
 * TZ clock decoding is not perfect.
-* When changing adjustments, 'confirmation' screen does not work.
+* When changing adjustments, 'confirmation' screen does not work. (True??)
 * Factory defaults should be different per country code.
 * Switch levels/edges tests do not work.  In Progress.
-* Factory reset does not clear audits, high scores, etc.
 * Audits are only 16-bits, and can overflow rather easily.
 * DCS sound bringup does not work well
 
@@ -50,20 +46,16 @@ Compiler Changes
 * sprintf() jump table per character is way too large.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
+* GCC 4.4 generated sol.s is inefficient.
 
 
 Nice to Have
 * ./include/freewpc.h:/* TODO - move these elsewhere */
-* ./include/freewpc.h:#include <platform/linux.h> /* TODO : rename this file */
 * ./include/freewpc.h:/* Uncommon software modules - TODO : shouldn't automatically include */
 * ./include/printf.h:/* TODO : much of this is implementing a 'varargs' type facility.
 * Score sweeping for player up
 * ./kernel/font.c:		/* TODO - use a real strcpy() here that is more efficient */
 * ./kernel/frame.c:			/* TODO - use word copies if possible */
-
-
-Real Hardware Issues
-* Colors are different from emulation.
 
 
 Uncategorized
@@ -123,6 +115,7 @@ Uncategorized Machine Code
 ./machine/tz/powerball_test.c:/* TODO : copied from powerball.c */
 ./machine/tz/skill.c:	TODO : genmachine can be made to generate two events here,
 ./machine/tz/sssmb.c:		/* TODO: handle case where red jackpot switch is tripped but
+
 ./platform/wpc/task.c:		/* TODO : if there are no free blocks, it might be possible
 ./platform/wpc/task.c:	/* TODO - verify that interrupts are not disabled when calling this */
 ./platform/wpc/task.c:	TODO : the accuracy here is a bit wonky.  For example, a task could

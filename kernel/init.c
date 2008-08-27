@@ -26,8 +26,8 @@
  * \brief Entry point to the game program.
  */
 
-/** The number of task ticks executed.  A tick equals 16 IRQs. */
-__fastram__ U8 tick_count;
+/** The current system time as the number of IRQs/960 microsecond intervals */
+__fastram__ U16 sys_time;
 
 /** The number of FIRQs asserted */
 __fastram__ U8 firq_count;
@@ -56,7 +56,7 @@ __noreturn__ void freewpc_init (void)
 	extern __common__ void system_reset (void);
 
 	/* Reset the sound board... the earlier the better */
-	writeb (WPCS_CONTROL_STATUS, 0);
+	pinio_reset_sound ();
 
 	/* Initializing the RAM page */
 	wpc_set_ram_page (0);
@@ -68,10 +68,12 @@ __noreturn__ void freewpc_init (void)
 	*(U8 *)1 = 0x3F;
 #endif /* __m6809__ */
 
+#ifdef CONFIG_PLATFORM_WPC
 	/* Set up protected RAM */
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
+#endif
 
 	/* Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped.
@@ -139,8 +141,6 @@ __noreturn__ void freewpc_init (void)
 	 * from a single task into a multitasking one.  After this, tasks
 	 * can be spawned if need be.  A task is created for the current
 	 * thread of execution, too. */
-	/* Note that because interrupts are disabled, system timing is
-	 * not yet operational. */
 	task_init ();
 	wpc_watchdog_reset ();
 
@@ -148,15 +148,15 @@ __noreturn__ void freewpc_init (void)
 	linux_init ();
 #endif
 
-	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
-	 * but not before all of the hardware modules are done. */
-	enable_interrupts ();
-
 	/* Initialize the sound board early in a background
 	 * thread, since it involves polling for data back from it,
 	 * which may take unknown (or even infinite) time. */
 	sys_init_pending_tasks++;
 	task_create_gid (GID_SOUND_INIT, sound_board_init);
+
+	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
+	 * but not before all of the hardware modules are done. */
+	enable_interrupts ();
 
 	/* Initialize everything else.  Some of these are given explicitly
 	to force a particular order, since callsets do not guarantee the
@@ -165,6 +165,7 @@ __noreturn__ void freewpc_init (void)
 	leff_init ();
 	test_init ();
 	adj_init ();
+	log_init ();
 	callset_invoke (init);
 
 	/* Check all adjustments and make sure that their checksums are valid.
@@ -189,6 +190,7 @@ __noreturn__ void freewpc_init (void)
 
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
+	log_event (SEV_INFO, MOD_SYSTEM, EV_SYSTEM_INIT, 0);
 #endif
 
 	/* The system can run itself now, this task is done!
@@ -248,31 +250,28 @@ void lockup_check_rtt (void)
 __noreturn__ 
 void fatal (errcode_t error_code)
 {
-	/* Audit the error. */
-	audit_increment (&system_audits.fatal_errors);
-	audit_assign (&system_audits.lockup1_addr, error_code);
-	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
-
 	/* Don't allow any more interrupts, since they might be the
 	source of the error.  Since FIRQ is disabled, we can only
 	do mono display at this point. */
 	disable_interrupts ();
 
-	/* Note: on a real game, leaving interrupts disabled for even
-	 * a short while will cause the blanking circuit to kick in,
-	 * causing little of this to happen. */
-
 	/* Reset hardware outputs */
-	writeb (WPC_GI_TRIAC, 0);
+	pinio_write_triac (0);
 	wpc_write_flippers (0);
 	wpc_write_ticket (0);
-	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
-	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
-	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
+	pinio_write_solenoid_set (0, 0);
+	pinio_write_solenoid_set (1, 0);
+	pinio_write_solenoid_set (2, 0);
+	pinio_write_solenoid_set (3, 0);
 #ifdef MACHINE_SOL_EXTBOARD1
-	writeb (WPC_EXTBOARD1, 0);
+	pinio_write_solenoid_set (5, 0);
 #endif
+
+	/* Audit the error. */
+	audit_increment (&system_audits.fatal_errors);
+	audit_assign (&system_audits.lockup1_addr, error_code);
+	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
+	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
 
 #if (MACHINE_DMD == 1)
 	/* Try to display the error on the DMD.  This may not work,
@@ -342,9 +341,17 @@ void nonfatal (errcode_t error_code)
 	last_nonfatal_error_gid = task_getgid ();
 	deff_start (DEFF_NONFATAL_ERROR);
 #endif
+	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_NONFATAL, error_code);
 }
 
 
+U8 get_elapsed_time (U16 then)
+{
+	return get_sys_time () - then;
+}
+
+
+#ifdef CONFIG_PLATFORM_WPC
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
  * is generated from the WPC ASIC on two different occasions: (1)
@@ -397,6 +404,7 @@ void do_firq (void)
 	m6809_firq_restore_regs ();
 #endif
 }
+#endif /* CONFIG_PLATFORM_WPC */
 
 
 __interrupt__

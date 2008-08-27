@@ -774,7 +774,6 @@ static void linux_realtime_thread (void)
 
 	/* TODO - boost priority of this process, so that it always
 	 * takes precedence over higher priority stuff. */
-	task_set_flags (TASK_PROTECTED);
 
 	gettimeofday (&prev_time, NULL);
 	for (;;)
@@ -891,9 +890,6 @@ static void linux_interface_thread (void)
 	tcgetattr (0, &tio);
 	tio.c_lflag &= ~ICANON;
 	tcsetattr (0, TCSANOW, &tio);
-
-	/* Don't ever let this task be killed */
-	task_set_flags (TASK_PROTECTED);
 
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
@@ -1076,8 +1072,8 @@ void linux_init (void)
 {
 	/* This is done here, because the task subsystem isn't ready
 	inside main () */
-	task_create_gid (GID_LINUX_REALTIME, linux_realtime_thread);
-	task_create_gid (GID_LINUX_INTERFACE, linux_interface_thread);
+	task_create_gid_while (GID_LINUX_REALTIME, linux_realtime_thread, TASK_DURATION_INF);
+	task_create_gid_while (GID_LINUX_INTERFACE, linux_interface_thread, TASK_DURATION_INF);
 
 	/* Initial the trough to contain all the balls.  By default,
 	 * it will fill the trough, based on its actual size.  You

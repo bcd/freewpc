@@ -199,7 +199,7 @@ void ball_search_monitor_task (void)
 					ball_search_run ();
 
 					/* TODO - after so many ball searches, try other
-					things. */
+					things, like chase ball if it's enabled. */
 					task_sleep_sec (15);
 				}
 				ball_search_count = 0;

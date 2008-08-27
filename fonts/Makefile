@@ -26,6 +26,18 @@ FON_OBJS += $(if $(CONFIG_FON_MISCTYPE), fonts/miscfixed.o)
 
 # The fonts below were derived using fontgen2.
 
+FON_OBJS += $(if $(CONFIG_FON_ADORE64), fonts/free/Adore64.o)
+FON_OBJS += $(if $(CONFIG_FON_ADDLG), fonts/free/addlg.o)
+FON_OBJS += $(if $(CONFIG_FON_AMBITSEK), fonts/free/ambitsek.o)
+FON_OBJS += $(if $(CONFIG_FON_ARCADEPI), fonts/free/arcadepi.o)
+FON_OBJS += $(if $(CONFIG_FON_MICRON55), fonts/free/micron55.o)
+FON_OBJS += $(if $(CONFIG_FON_PIXCHICAGO), fonts/free/pixchicago.o)
+FON_OBJS += $(if $(CONFIG_FON_PX_SANS_NOUVEAUX), fonts/free/px_sans_nouveaux.o)
+FON_OBJS += $(if $(CONFIG_FON_UNI05_53), fonts/free/uni05_53.o)
+FON_OBJS += $(if $(CONFIG_FON_UNI05_54), fonts/free/uni05_54.o)
+FON_OBJS += $(if $(CONFIG_FON_UNI05_63), fonts/free/uni05_63.o)
+FON_OBJS += $(if $(CONFIG_FON_UNI05_64), fonts/free/uni05_64.o)
+FON_OBJS += $(if $(CONFIG_FON_XPAIDERP), fonts/free/xpaiderp.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRC), fonts/free/v5prc.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRD), fonts/free/v5prd.o)
 FON_OBJS += $(if $(CONFIG_FON_V5PRF), fonts/free/v5prf.o)

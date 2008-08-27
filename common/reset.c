@@ -30,9 +30,47 @@
 #define ACCEPT_2	0x75
 #define ACCEPT_3	0xB9
 
+#ifdef CONFIG_PLATFORM_WPC
+#define ACCEPT_BUTTON SW_ENTER
+#endif
+#ifdef CONFIG_PLATFORM_WHITESTAR
+#define ACCEPT_BUTTON SW_BLACK_BUTTON
+#endif
+
 volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
 __nvram__ U8 freewpc_accepted[3];
+
+extern __common__ void opto_check ();
+
+
+/**
+ * Perform a full factory reset.
+ * This can be triggered automatically at boot time if
+ * certain sanity checks fail, or via a test mode option.
+ */
+void factory_reset (void)
+{
+	adj_reset_all ();
+	rtc_factory_reset ();
+	/* TODO : this should also clear audits, reset the high scores,
+	 * reset the custom message/game ID, and clear the persistent
+	 * area. */
+#ifdef __m6809__
+	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
+#endif
+	callset_invoke (factory_reset);
+}
+
+
+void factory_reset_if_required (void)
+{
+	if (0)
+	{
+		factory_reset ();
+		/* TODO - display message to this effect */
+	}
+}
 
 
 void render_build_date (void)
@@ -69,7 +107,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "THIS SOFTWARE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	wait_for_button (SW_ENTER);
+	wait_for_button (ACCEPT_BUTTON);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -78,7 +116,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "TO REAL MACHINE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	wait_for_button (SW_ENTER);
+	wait_for_button (ACCEPT_BUTTON);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -86,8 +124,8 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 15, "WANT TO CONTINUE");
 	font_render_string_center (&font_mono5, 64, 21, "PRESS ENTER TWICE");
 	dmd_show_low ();
-	wait_for_button (SW_ENTER);
-	wait_for_button (SW_ENTER);
+	wait_for_button (ACCEPT_BUTTON);
+	wait_for_button (ACCEPT_BUTTON);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
@@ -99,8 +137,7 @@ void system_accept_freewpc (void)
 	freewpc_accepted[2] = ACCEPT_3;
 	wpc_nvram_put ();
 
-	adj_reset_all ();
-	rtc_factory_reset ();
+	factory_reset ();
 }
 
 
@@ -151,6 +188,11 @@ void system_reset (void)
 #if (MACHINE_PIC == 1)
 	pic_init ();
 #endif
+
+	/* Check the 12V supply to make sure optos are working */
+	opto_check ();
+
+	factory_reset_if_required ();
 
 #ifdef FASTBOOT
 	sys_init_complete++;

@@ -84,10 +84,6 @@ typedef U8 sound_cmd_t;
 /** Requests that the DAC stop */
 #define SND_STOP_DAC          0x7F
 
-/** This bit is set in the sound status register when
- * there is a byte to be read by the CPU. */
-#define WPCS_READ_READY	0x01
-
 #else /* MACHINE_DCS == 1 */
 
 typedef U16 sound_cmd_t;
@@ -108,8 +104,6 @@ typedef U16 sound_cmd_t;
 #define SND_TEST_SCROLL			TEST_SND(0xDD)
 #define SND_GET_VERSION_CMD	TEST_SND(0xE7)
 #define SND_GET_MINOR_VERSION_CMD TEST_SND(0xE8)
-
-#define WPCS_READ_READY	0x80
 
 #endif /* MACHINE_DCS */
 

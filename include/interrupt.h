@@ -22,6 +22,8 @@
 /** Called at the beginning of every IRQ */
 extern inline void do_irq_begin (void)
 {
+	extern U16 sys_time;
+
 	/* If using the RAM paging facility, ensure that page 0
 	 * is visible for the IRQ */
 #ifdef CONFIG_PAGED_RAM
@@ -30,18 +32,14 @@ extern inline void do_irq_begin (void)
 
 	/* Clear the source of the interrupt */
 	wpc_int_clear ();
+
+	/* Advance the system time by ~1ms */
+	sys_time++;
 }
 
 
 /** Called at the end of every IRQ */
 extern inline void do_irq_end (void)
 {
-}
-
-
-extern inline void clock_advance (void)
-{
-	extern U8 tick_count;
-	tick_count++;
 }
 

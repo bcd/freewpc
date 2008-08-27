@@ -35,6 +35,9 @@ __test2__ void percent_render (U8 val);
 __test2__ void replay_score_render (U8 val);
 __test2__ void minutes_render (U8 val);
 __test2__ void brightness_render (U8 val);
+__test2__ void collection_text_render (U8 val);
+__test2__ void printer_type_render (U8 val);
+__test2__ void baud_rate_render (U8 val);
 
 __test2__ void integer_audit (audit_t val) ;
 __test2__ void percentage_of_games_audit (audit_t val);

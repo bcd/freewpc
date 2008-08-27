@@ -304,7 +304,7 @@ dmd_transition_t trans_sequential_boxfade = {
 	.composite_init = trans_fade_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
-	.delay = TIME_33MS,
+	.delay = TIME_16MS,
 	.arg = { .ptr = sequential_boxfade_offset_table },
 	.count = 64,
 };
@@ -313,7 +313,7 @@ dmd_transition_t trans_random_boxfade = {
 	.composite_init = trans_fade_init,
 	.composite_old = dmd_copy_low_to_high,
 	.composite_new = trans_fade_new,
-	.delay = TIME_33MS,
+	.delay = TIME_16MS,
 	.arg = { .ptr = random_boxfade_offset_table },
 	.count = 64,
 };

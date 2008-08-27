@@ -73,7 +73,7 @@ task_t task_buffer[NUM_TASKS];
  * The IRQ will reset the system when this happens. */
 __fastram__ bool task_dispatching_ok;
 
-__fastram__ U8 tick_start_count;
+__fastram__ U16 last_dispatch_time;
 
 #ifdef CONFIG_DEBUG_STACK
 /** For debug, this tells us the largest stack size that we've had
@@ -172,6 +172,20 @@ void idle_profile_idle (void)
 #endif
 
 
+__attribute__((noinline)) void cpu_idle (void)
+{
+	task_dispatching_ok = TRUE;
+	barrier ();
+#ifdef IDLE_PROFILE
+	noop ();
+	noop ();
+	noop ();
+	noop ();
+	idle_time++;
+#endif
+}
+
+
 /** For debugging, dump the entire contents of the task table to the
  * debug port.  This function is called automatically whenever the
  * system crashes.  It can also be triggered by pressing the 't'
@@ -195,6 +209,7 @@ void task_dump (void)
 
 			if (tp->state & BLOCK_TASK)
 			{
+				dbprintf ("DUR %02X  ", tp->duration);
 				dbprintf ("GID %02d  PC %p", tp->gid, tp->pc);
 				dbprintf ("  ST %02X", tp->stack_size);
 				dbprintf ("  ARG %04X\n", tp->arg);
@@ -269,9 +284,9 @@ task_t *task_allocate (void)
 	if (tp)
 	{
 		tp->state |= BLOCK_TASK;
-		tp->delay = 0;
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
+		tp->duration = TASK_DURATION_BALL;
 #ifdef TASK_CHAINING
 		/* Add to the task list */
 #endif
@@ -346,12 +361,14 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	 * here).  It also declares that 'd' is destroyed by the call. */
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
+	tp->wakeup = 0;
 	tp->arg = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count++;
 	if (task_count > task_max_count)
 		task_max_count = task_count;
 #endif
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_START, gid);
 	return (tp);
 }
 
@@ -400,26 +417,8 @@ void task_sleep (task_ticks_t ticks)
 #endif
 
 	/* Mark the task as blocked, set the time at which it blocks,
-	and set how long it should wait for. 
-
-	TODO : the accuracy here is a bit wonky.  For example, a task could
-	want to sleep 16ms (1 tick), and then almost right away, the 16th
-	IRQ could fire and decrement the tick count, causing the task to
-	wake up having slept nearly 0ms.  Essentially, accuracy is only
-	good to within 16ms. 
-	
-	One solution is to keep these counters in terms of raw IRQs, but
-	enforce a minimum sleep time of 16ms still.  Also, we could
-	examine 'irq_count' here and adjust ticks accordingly, if we are
-	close to the 16 IRQ cycle boundary.  (If 'irq_count' > 8, then
-	increment ticks; this improves the resolution.)  Third, we could
-	always bump ticks by 1, so that tasks always guarantee to sleep
-	for *at least* the quantity asked for, but more frequently, they
-	will always sleep a little longer (as much as 16ms longer).  For
-	this last approach, consider bumping all of the TIME_ defines
-	to make this a static change. */
-	tp->delay = ticks;
-	tp->asleep = get_ticks ();
+	and set how long it should wait for. */
+	tp->wakeup = get_sys_time () + ((U16)ticks) * 16;
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
@@ -446,6 +445,7 @@ void task_sleep_sec (int8_t secs)
 __naked__ __noreturn__ 
 void task_exit (void)
 {
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_EXIT, task_current->gid);
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
@@ -522,6 +522,7 @@ bool task_kill_gid (task_gid_t gid)
 	register task_t *tp;
 	bool rc = FALSE;
 
+	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_KILL, gid);
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
 				(tp->state & BLOCK_TASK) && 
@@ -535,37 +536,16 @@ bool task_kill_gid (task_gid_t gid)
 
 
 /**
- * Kills all tasks that are not protected.
- *
- * Protected tasks are marked with the flag TASK_PROTECTED and are
- * immune to this call.
+ * Asserts that a task-ending condition has just occurred,
+ * and kills all of the tasks that needs to be.
  */
-void task_kill_all (void)
+void task_duration_expire (U8 cond)
 {
 	register U8 t;
 	register task_t *tp;
 
 	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if (	(tp != task_current) &&
-				(tp->state & BLOCK_TASK) && 
-				!(tp->state & TASK_PROTECTED) )
-		{
-			task_kill_pid (tp);
-		}
-}
-
-
-/** Kills all tasks that have a particular flag set. */
-void task_kill_flags (U8 flags)
-{
-	register U8 t;
-	register task_t *tp;
-
-	/* BLOCK_TASK is implied and need not be specified by the caller. */
-	flags |= BLOCK_TASK;
-
-	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
-		if ((tp != task_current) && (tp->state & flags))
+		if ((tp->state & BLOCK_TASK) && (tp->duration & cond))
 		{
 			task_kill_pid (tp);
 		}
@@ -573,25 +553,29 @@ void task_kill_flags (U8 flags)
 
 
 /**
- * Sets task flags.
- *
- * TODO : there is a race condition here with regard to TASK_PROTECTED;
- * the task might be killed after it has been created, but before it
- * gets a chance to set TASK_PROTECTED.  The caller is probably aware
- * of the special status and should be able to set it at creation time.
+ * Sets the duration for a given task.
  */
-void task_set_flags (U8 flags)
+void task_set_duration (task_t *tp, U8 cond)
 {
-	task_current->state |= flags;
+	tp->duration = cond;
+}
+
+
+/**
+ * Add/remove duration flags.
+ */
+void task_add_duration (U8 cond)
+{
+	task_current->duration |= cond;
 }
 
 
 /**
  * Clears task flags.
  */
-void task_clear_flags (U8 flags)
+void task_remove_duration (U8 cond)
 {
-	task_current->state &= ~flags;
+	task_current->duration &= ~cond;
 }
 
 
@@ -655,7 +639,7 @@ void task_dispatcher (void)
 	register task_t *tp asm ("x");
 	task_t *first = tp;
 
-	tick_start_count = get_ticks ();
+	last_dispatch_time = get_sys_time ();
 	task_dispatching_ok = TRUE;
 
 	/* Set 'first' to the first task block to try. */
@@ -663,16 +647,17 @@ void task_dispatcher (void)
 	{
 		/* Reset task pointer to top of list after reaching the
 		 * bottom of the table. */
-		if (tp == &task_buffer[NUM_TASKS])
+		if (unlikely (tp == &task_buffer[NUM_TASKS]))
 			tp = &task_buffer[0];
 
 		/* All task blocks were scanned, and no free task was found. */
-		if (first == tp)
+		if (unlikely (first == tp))
 		{
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
 			even when 'sys_init_complete' is not true.  This lets us
 			debug very early initialization. */
+#ifdef CONFIG_PLATFORM_WPC
 			db_idle ();
 #ifdef IDLE_PROFILE
 			idle_profile_idle ();
@@ -680,32 +665,20 @@ void task_dispatcher (void)
 
 			/* If the system is fully initialized, run
 			 * the idle functions. */
-			if (idle_ok)
+			if (likely (idle_ok))
 			{
 				do_idle ();
-				callset_invoke (idle);
+				switch_idle ();
 			}
+#endif /* CONFIG_PLATFORM_WPC */
 
-			/* Reset timer and kick watchdog again */
-			tick_start_count = get_ticks ();
-			task_dispatching_ok = TRUE;
-
-			/* Wait for next task tick before continuing.
-			This ensures that the idle function is not invoked more than once
-			per 16ms.  Do this AFTER calling the idle functions, so
-			that we wait as little as possible; idle calls themselves may
-			take a long time. */
-			while (tick_start_count == get_ticks ())
-			{
-				barrier ();
-#ifdef IDLE_PROFILE
-				noop ();
-				noop ();
-				noop ();
-				noop ();
-				idle_time++;
-#endif
-			}
+			/* Wait for time to change before continuing.
+			Do this AFTER calling the idle functions, so
+			that we wait as little as possible; idle calls
+			themselves may take a long time. */
+			last_dispatch_time = get_sys_time ();
+			while (likely (last_dispatch_time == get_sys_time ()))
+				cpu_idle ();
 			
 			/* Ensure that 'tp', which is in register X, is reloaded
 			with the correct task pointer.  The above functions may
@@ -713,23 +686,22 @@ void task_dispatcher (void)
 			tp = first;
 		}
 
-		if (tp->state & (BLOCK_TASK | TASK_BLOCKED))
+		if (tp->state == BLOCK_USED+BLOCK_TASK+TASK_BLOCKED)
 		{
-			/* The task exists, but is sleeping.
-			 * tp->asleep holds the time at which it went to sleep,
-			 * and tp->delay is the time for which it should sleep.
-			 * Examine the current tick count, and see if it should
-			 * be woken up.
-			 */
-			register U8 ticks_elapsed = get_ticks () - tp->asleep;
-			if (ticks_elapsed >= tp->delay)
+			/* The task exists, but is sleeping.  See if it should be woken up now.
+			Compare the time at which it wants to wake up with the current time.
+			The subtraction should yield a non-positive value when it is OK to wake
+			up.  We use a check of the sign bit since these are stored as positive
+			values.  This is a valid method as long as the task doesn't sleep
+			more than 0x8000 ticks. */
+			if (time_reached_p (tp->wakeup))
 			{
 				/* Yes, it is ready to run again. */
 				tp->state &= ~TASK_BLOCKED;
 				task_restore (tp);
 			}
 		}
-		else if (tp->state & BLOCK_TASK)
+		else if (likely (tp->state == BLOCK_USED+BLOCK_TASK))
 		{
 			/* The task exists, and is not sleeping.  It can be
 			started immediately. */

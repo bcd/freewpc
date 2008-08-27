@@ -35,7 +35,7 @@
 
 
 /** The seed for the linear congruential component of the random numbers. */
-U16 random_cong_seed;
+__permanent__ U16 random_cong_seed;
 
 
 

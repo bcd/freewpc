@@ -53,20 +53,6 @@ void freerunning_timer_function (void)
 }
 
 
-void pausable_timer_function (void)
-{
-	U16 ticks = task_get_arg ();
-	while (ticks > 0)
-	{
-		task_sleep (TIMER_PAUSABLE_GRAN);
-		if (pausable_timer_locks != 0)
-			continue;
-		ticks -= TIMER_PAUSABLE_GRAN;
-	}
-	task_exit ();
-}
-
-
 void live_ball_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
@@ -102,11 +88,6 @@ task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 	task_pid_t tp = task_create_gid (gid, fn);
 	task_set_arg (tp, ticks);
 	return (tp);
-}
-
-
-void timer_pause_for_secs (U8 secs)
-{
 }
 
 

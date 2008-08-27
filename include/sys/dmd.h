@@ -37,15 +37,19 @@
 /** The number of DMD pages in the controller.  There are physically
  * this number of page buffers that can be drawn to at the same time.
  * However, not all pages are mapped into the 6809 address space
- * simultaneously -- only 6 at a time are mapped. */
+ * simultaneously -- only 2 at a time are mapped.  WPC-95 supports
+ * 6 mapped at a time, but FreeWPC doesn't take advantage of that now. */
 #define DMD_PAGE_COUNT 16
 
 /** The number of lookaside frames */
 #define DMD_LOOKASIDE_FRAME_COUNT 2
-
 #define DMD_LOOKASIDE_PAGE_COUNT (DMD_LOOKASIDE_FRAME_COUNT * 2)
 
-#define DMD_ALLOC_PAGE_COUNT (DMD_PAGE_COUNT - DMD_LOOKASIDE_PAGE_COUNT)
+/** The number of blank pages kept */
+#define DMD_BLANK_PAGE_COUNT 2
+
+#define DMD_ALLOC_PAGE_COUNT \
+	(DMD_PAGE_COUNT - DMD_LOOKASIDE_PAGE_COUNT - DMD_BLANK_PAGE_COUNT)
 
 /** Coordinates that are aligned various ways */
 #define DMD_CENTER_X (DMD_PIXEL_WIDTH / 2)
@@ -214,6 +218,11 @@ extern inline U8 wpc_dmd_get_high_page (void)
 extern inline dmd_pagenum_t dmd_get_lookaside (const U8 num)
 {
 	return DMD_ALLOC_PAGE_COUNT + num * 2;
+}
+
+extern inline dmd_pagenum_t dmd_get_blank (const U8 num)
+{
+	return DMD_ALLOC_PAGE_COUNT + DMD_LOOKASIDE_PAGE_COUNT + num;
 }
 
 

@@ -33,10 +33,12 @@
 #define HAVE_INTERRUPT_ATTRIBUTE
 #endif
 
-/* All CPUs support sections for now */
+/* Only CPU game ROMs have nvram and locals */
+#ifdef CONFIG_PLATFORM_WPC
 #define HAVE_NVRAM_SECTION
 #define HAVE_LOCAL_SECTION
-
+#define HAVE_PERMANENT_SECTION
+#endif
 
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */
@@ -62,6 +64,12 @@
 #define __local__ __attribute__((section ("local")))
 #else
 #define __local__
+#endif
+
+#ifdef HAVE_PERMANENT_SECTION
+#define __permanent__ __attribute__((section ("permanent")))
+#else
+#define __permanent__
 #endif
 
 
@@ -172,7 +180,7 @@ a prototype. */
  * environments where a direct memory map is not present.
  ***************************************************************/
 
-extern inline void wpc_asic_write (U16 addr, U8 val)
+extern inline void writeb (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
 	extern void linux_asic_write (U16 addr, U8 val);
@@ -182,7 +190,7 @@ extern inline void wpc_asic_write (U16 addr, U8 val)
 #endif
 }
 
-extern inline U8 wpc_asic_read (U16 addr)
+extern inline U8 readb (U16 addr)
 {
 #ifdef CONFIG_NATIVE
 	extern U8 linux_asic_read (U16 addr);
@@ -195,9 +203,9 @@ extern inline U8 wpc_asic_read (U16 addr)
 extern inline void wpc_asic_xor (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
-	U8 reg = wpc_asic_read (addr);
+	U8 reg = readb (addr);
 	reg ^= val;
-	wpc_asic_write (addr, val);
+	writeb (addr, val);
 #else
 	*(volatile U8 *)addr ^= val;
 #endif
@@ -206,9 +214,9 @@ extern inline void wpc_asic_xor (U16 addr, U8 val)
 extern inline void wpc_asic_setbits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
-	U8 reg = wpc_asic_read (addr);
+	U8 reg = readb (addr);
 	reg |= val;
-	wpc_asic_write (addr, val);
+	writeb (addr, val);
 #else
 	*(volatile U8 *)addr |= val;
 #endif
@@ -217,17 +225,12 @@ extern inline void wpc_asic_setbits (U16 addr, U8 val)
 extern inline void wpc_asic_clearbits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
-	U8 reg = wpc_asic_read (addr);
+	U8 reg = readb (addr);
 	reg &= ~val;
-	wpc_asic_write (addr, val);
+	writeb (addr, val);
 #else
 	*(volatile U8 *)addr &= ~val;
 #endif
 }
-
-/* TODO - rename this so that 'wpc' is not in the name */
-#define writeb wpc_asic_write
-#define readb wpc_asic_read
-
 
 #endif /* _ENV_H */

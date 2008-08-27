@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -36,7 +36,6 @@ void right_ramp_default_deff (void)
 
 void sw_right_ramp_enter_task (void)
 {
-	task_set_flags (TASK_PROTECTED);
 	/* Decide whether to let the ball onto the mini-playfield,
 	or dump it.  Do this once for each balls that enters the
 	ramp. */
@@ -69,7 +68,8 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 	/* Handle all balls entering the ramp unconditionally, so that
 	they are disposed of properly. */
 	right_ramps_entered++;
-	task_recreate_gid (GID_RIGHT_RAMP_ENTERED, sw_right_ramp_enter_task);
+	task_recreate_gid_while (GID_RIGHT_RAMP_ENTERED,
+		sw_right_ramp_enter_task, TASK_DURATION_INF);
 
 	/* Scoring functions only happen during a game */
 	if (!in_live_game)

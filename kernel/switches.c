@@ -75,7 +75,7 @@ U8 switch_queue_head;
 
 U8 switch_queue_tail;
 
-U8 switch_last_service_time;
+U16 switch_last_service_time;
 
 
 /** Return the switch table entry for a switch */
@@ -190,28 +190,16 @@ extern inline void switch_rowpoll (const U8 col)
 	 * computing delta below.)
 	 */
 	if (col == 0)
-		switch_raw_bits[col] = delta = readb (WPC_SW_CABINET_INPUT);
-
+		switch_raw_bits[col] = delta = pinio_read_dedicated_switches ();
 	else if (col <= 8)
-#if (MACHINE_PIC == 1)
-		switch_raw_bits[col] = delta = wpc_read_pic ();
-#else
-		switch_raw_bits[col] = delta = readb (WPC_SW_ROW_INPUT);
-#endif
-
+		switch_raw_bits[col] = delta = pinio_read_switch_rows ();
 	else if (col == 9)
 		switch_raw_bits[col] = delta = wpc_read_flippers ();
 
 	/* Set up the column strobe for the next read (on the next
 	 * iteration) */
 	if (col < 8)
-	{
-#if (MACHINE_PIC == 1)
-		wpc_write_pic (WPC_PIC_COLUMN (col));
-#else
-		writeb (WPC_SW_COL_STROBE, 1 << col);
-#endif
-	}
+		pinio_write_switch_column (col);
 
 	/* delta/changed is TRUE when the switch has changed state from the
 	 * previous latched value */
@@ -368,6 +356,8 @@ void switch_sched_task (void)
 		switch_test_add_queue (sw);
 #endif
 
+	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
+
 	/* Don't service switches marked SW_IN_GAME at all, if we're
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
@@ -415,7 +405,7 @@ void switch_sched_task (void)
 	{
 		callset_invoke (any_pf_switch);
 
-		if (!ball_in_play)
+		if (!valid_playfield)
 		{
 			if (swinfo->flags & SW_NOVALID)
 			{
@@ -425,7 +415,7 @@ void switch_sched_task (void)
 			{
 				/* Normally, mark valid playfield right away
 				 * for most switches */
-				mark_ball_in_play ();
+				set_valid_playfield ();
 			}
 		}
 		ball_search_timer_reset ();
@@ -468,7 +458,7 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 	{
 		if (!entry)
 			entry = switch_queue_add (sw);
-		entry->timer = switch_lookup(sw)->postbounce;
+		entry->timer = switch_lookup(sw)->postbounce * 16;
 		bit_on (switch_postbounce_bits, sw);
 	}
 }
@@ -478,6 +468,7 @@ void switch_schedule (const U8 sw, pending_switch_t *entry)
 pending_switch_t *switch_queue_add (const switchnum_t sw)
 {
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
+	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
 	return entry;
@@ -523,11 +514,11 @@ void switch_service_queue (void)
 		U8 elapsed_time;
 
 		/* See how long since the last time we serviced the queue */
-		elapsed_time = get_ticks () - switch_last_service_time;
-#ifdef CONFIG_NATIVE
-		if (elapsed_time == 0)
+		elapsed_time = get_elapsed_time (switch_last_service_time);
+		if (elapsed_time < 5)
 			return;
-#endif
+		if (elapsed_time > 100)
+			elapsed_time = 100;
 
 		entry = &switch_queue[i];
 		if (entry->id != 0xFF)
@@ -560,7 +551,7 @@ void switch_service_queue (void)
 		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
 
-	switch_last_service_time = get_ticks ();
+	switch_last_service_time = get_sys_time ();
 }
 
 void switch_queue_dump (void)
@@ -672,6 +663,8 @@ CALLSET_ENTRY (switch, idle)
 				{
 					/* OK, the switch has changed state and is stable. */
 
+					task_dispatching_ok = TRUE;
+
 					/* There are two possibilities: either the switch is
 					 * not queued, or it is in prebounce.  (Postbounce
 					 * is already taken care of above.)  We can
@@ -686,7 +679,7 @@ CALLSET_ENTRY (switch, idle)
 						 * to preserve the order??? */
 						pending_switch_t *entry = switch_queue_find (sw);
 						dbprintf ("Restarting prebounce for SW%d\n", sw);
-						entry->timer = switch_lookup(sw)->prebounce;
+						entry->timer = switch_lookup(sw)->prebounce * 16;
 					}
 					else
 					{
@@ -696,7 +689,7 @@ CALLSET_ENTRY (switch, idle)
 						 * must be queued. */
 						if (switch_lookup (sw)->prebounce == 0)
 						{
-							dbprintf ("Scheduling switch with no prebounce\n");
+							dbprintf ("Scheduling SW%d with no prebounce\n", sw);
 							switch_schedule (sw, NULL);
 						}
 						else
@@ -705,7 +698,7 @@ CALLSET_ENTRY (switch, idle)
 							if (entry)
 							{
 								dbprintf ("Starting prebounce for SW %d\n", sw);
-								entry->timer = switch_lookup(sw)->prebounce;
+								entry->timer = switch_lookup(sw)->prebounce * 16;
 								bit_on (switch_prebounce_bits, sw);
 							}
 						}

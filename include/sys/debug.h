@@ -64,17 +64,6 @@ extern inline U8 wpc_debug_read (void)
 }
 
 
-enum wpc_debugger_request {
-	WPC_DBREQ_TASK_DUMP=0x80,
-};
-
-enum wpc_debugger_response {
-	WPC_DBRSP_CYCLECOUNT=0x80,
-	WPC_DBRSP_STACK_POINTER,
-	WPC_DBRSP_TASK_CREATE,
-	WPC_DBRSP_IDLE_RUN,
-};
-
 __common__ void db_init (void);
 __common__ void db_idle (void);
 void db_puts (const char *s); /* moved to kernel for efficiency */

@@ -41,7 +41,7 @@ void timed_plunger_monitor (void)
 #endif
 
 
-CALLSET_ENTRY (plunger, ball_in_play)
+CALLSET_ENTRY (plunger, valid_playfield)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	task_kill_gid (GID_TIMED_PLUNGER_MONITOR);
@@ -55,14 +55,14 @@ CALLSET_ENTRY (plunger, sw_shooter)
 	 * Need to invoke this on a timer after any trough kick.
 	 */
 #ifdef INCLUDE_AUTOPLUNGER
-	if (ball_in_play
+	if (valid_playfield
 		&& !tournament_mode_enabled 
 		&& switch_poll_logical (SW_COIN_DOOR_CLOSED))
 	{
 		/* Autolaunch balls right away during a game if they land
 		in the autoplunger lane. */
 		/* TODO - after locking a ball, adding a new ball to the
-		plunger while ball_in_play is TRUE: this will launch
+		plunger while valid_playfield is TRUE: this will launch
 		prematurely.  We need a permanent, system-defined global
 		flag that says whether a trough serve should be autoplunged
 		or not.  TZ is already doing this privately... */

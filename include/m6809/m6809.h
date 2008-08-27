@@ -129,10 +129,10 @@ extern inline void *memset (void *s, U8 c, U16 n)
 	if (n <= 5)
 	{
 		register U8 *s1 = (U8 *)s;
-		if (n >= 4) *s1++ = c;
-		if (n >= 3) *s1++ = c;
-		if (n >= 2) *s1++ = c;
-		if (n >= 1) *s1++ = c;
+		if (n > 4) *s1++ = c;
+		if (n > 3) *s1++ = c;
+		if (n > 2) *s1++ = c;
+		if (n > 1) *s1++ = c;
 		*s1 = c;
 	}
 	else if ((n % 8) == 0)

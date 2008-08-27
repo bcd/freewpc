@@ -53,10 +53,21 @@
 #define TIME_30S 		(TIME_1S * 30UL)
 
 
-extern inline U8 get_ticks (void)
+extern inline U16 get_sys_time (void)
 {
-	extern U8 tick_count;
-	return tick_count;
+	extern U16 sys_time;
+	return sys_time;
 }
+
+U8 get_elapsed_time (U16 then);
+
+#define HAVE_BMI
+
+#ifdef HAVE_BMI
+#define time_reached_p(t) (((t) - get_sys_time ()) & 0x8000UL)
+#else
+#define time_reached_p(t) \
+({ volatile U16 diff = t - get_sys_time (); diff & 0x8000; })
+#endif
 
 #endif /* _SYS_TIME_H */

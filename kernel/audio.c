@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -102,10 +102,9 @@ void audio_start (
 			continue;
 
 		/* OK, use this channel. */
-		ch->pid = task_create_gid (GID_AUDIO_TASK, fn);
+		ch->pid = task_create_gid_while (GID_AUDIO_TASK, fn, TASK_DURATION_INF);
 #ifdef __m6809__
 		ch->pid->rom_page = fnpage;
-		ch->pid->state |= TASK_PROTECTED;
 #endif
 		task_set_arg (ch->pid, data);
 		return;
@@ -182,7 +181,7 @@ CALLSET_ENTRY(audio, start_ball)
 }
 
 
-CALLSET_ENTRY (audio, ball_in_play)
+CALLSET_ENTRY (audio, valid_playfield)
 {
 	/* TODO : optimize to a single call */
 	music_stop (start_ball_music_track);

@@ -9,6 +9,7 @@ KERNEL_BASIC_OBJS += $(if $(CONFIG_ANIMATION), kernel/animation.o)
 KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
 KERNEL_BASIC_OBJS += kernel/idle.o
 KERNEL_BASIC_OBJS += kernel/list.o
+KERNEL_BASIC_OBJS += kernel/log.o
 KERNEL_BASIC_OBJS += kernel/misc.o
 KERNEL_BASIC_OBJS += kernel/puts.o
 KERNEL_BASIC_OBJS += kernel/random.o
@@ -23,7 +24,7 @@ KERNEL_SW_OBJS += kernel/game.o
 KERNEL_SW_OBJS += kernel/lamplist.o
 KERNEL_SW_OBJS += kernel/player.o
 KERNEL_SW_OBJS += kernel/printf.o
-KERNEL_SW_OBJS += kernel/score.o
+KERNEL_SW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/score.o)
 
 
 # Hardware kernel modules are incredibly hardware dependent,
@@ -32,11 +33,11 @@ KERNEL_SW_OBJS += kernel/score.o
 # (e.g. supporting System 11, or Whitestar, etc.)
 KERNEL_HW_OBJS += $(if $(CONFIG_AC), kernel/ac.o)
 KERNEL_HW_OBJS += kernel/adj.o
-KERNEL_HW_OBJS += kernel/audio.o
+KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/audio.o)
 KERNEL_HW_OBJS += kernel/audit.o
 KERNEL_HW_OBJS += kernel/csum.o
 KERNEL_HW_OBJS += $(if $(CONFIG_DMD), kernel/dmd.o)
-KERNEL_HW_OBJS += kernel/flip.o
+KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/flip.o)
 KERNEL_HW_OBJS += kernel/freetimer.o
 KERNEL_HW_OBJS += kernel/init.o
 KERNEL_HW_OBJS += kernel/lamp.o

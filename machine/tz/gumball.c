@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -148,8 +148,6 @@ void gumball_divertor_hold_task (void)
 {
 	U8 n;
 
-	task_set_flags (TASK_PROTECTED);
-
 	for (n=0 ; n < 12; n++)
 	{
 		sol_start (SOL_GUMBALL_DIV, SOL_DUTY_25, TIME_1S);
@@ -162,7 +160,7 @@ void gumball_divertor_hold_task (void)
 void gumball_divertor_open (void)
 {
 	sol_start (SOL_GUMBALL_DIV, SOL_DUTY_100, TIME_100MS);
-	task_recreate_gid (GID_GUMBALL_DIVERTOR_HOLD, gumball_divertor_hold_task);
+	task_recreate_gid_while (GID_GUMBALL_DIVERTOR_HOLD, gumball_divertor_hold_task, TASK_DURATION_INF);
 }
 
 
@@ -223,7 +221,7 @@ void sw_far_left_trough_monitor (void)
 
 	/* If a ball is known to be in play, then delay the
 	load */
-	while (ball_in_play)
+	while (valid_playfield)
 	{
 		dbprintf ("Far left trough : waiting to load\n");
 		task_sleep_sec (1);

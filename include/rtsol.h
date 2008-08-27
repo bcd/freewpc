@@ -106,6 +106,60 @@ extern inline void rt_solenoid_update (
  * given (in case the switch is an opto, or the drive goes from on to off?)
  */
 
+
+/*
+ * This routine should be scheduled every 8 ms.
+ */
+extern inline void fast_solenoid_update (
+	const U8 solno,
+	const U8 swno,
+	const U8 on_cycles,
+	const U8 off_cycles)
+{
+	extern U8 sol_set_cache[];
+
+	const U8 sol_set = (solno / 8);
+	const U8 sol_mask = 1 << (solno % 8);
+
+	/* If not in a game, we never turn on the solenoid.
+	 * NOTE: throughout this routine, we never explicitly
+	 * turn off the solenoid. */
+	if (!in_live_game)
+		return;
+
+	/* If the timer is off, and its switch is
+	 * active, then start the timer.  Otherwise,
+	 * decrement the timer. */
+	if (sol_timers[solno] == 0 &&
+		rt_switch_poll (swno))
+	{
+		sol_timers[solno] = on_cycles + off_cycles;
+	}
+	else
+	{
+		--sol_timers[solno];
+	}
+
+	/* The timer counts both the on and off phase.
+	 * During the on phase, turn on the coil. */
+	if (sol_timers[solno] >= off_cycles)
+	{
+		sol_set_cache[sol_set] |= sol_mask;
+	}
+}
+
+
+extern inline void sling_update (const U8 solno, const U8 swno)
+{
+	fast_solenoid_update (solno, swno, 8, 32);
+}
+
+
+extern inline void bumper_update (const U8 solno, const U8 swno)
+{
+	fast_solenoid_update (solno, swno, 2, 8);
+}
+
 #endif /* _RTSOL_H */
 
 /* vim: set ts=3: */

@@ -63,17 +63,17 @@ __fastram__ U8 in_bonus;
 /** Nonzero if the current game is currently in tilt mode */
 __fastram__ U8 in_tilt;
 
-/** Nonzero if the current ball is considered 'in play', which
- * means that ball loss is allowed to end the ball.  When zero,
+/** Nonzero if the current ball has reached valid playfield; i.e.
+ * ball loss is allowed to end the ball.  When zero,
  * ball loss is not allowed and will result in a new ball being
  * delivered to the plunger lane. */
-U8 ball_in_play;
+U8 valid_playfield;
 
 /** The number of switch closures before playfield valid */
 U8 pending_valid_count;
 
 /** The number of players in the current game */
-__nvram__ U8 num_players;
+__permanent__ U8 num_players;
 
 /** The number of the player that is currently up. */
 U8 player_up;
@@ -139,7 +139,7 @@ void dump_game (void)
 
 	dbprintf ("Game : %d    Bonus: %d    Tilt: %d\n",
 		in_game, in_bonus, in_tilt);
-	dbprintf ("In Play : %d\n", ball_in_play);
+	dbprintf ("Valid : %d\n", valid_playfield);
 	dbprintf ("Player Up : %d of %d\n", player_up, num_players);
 	dbprintf ("Ball : %d    EBs : %d\n", ball_up, extra_balls);
 }
@@ -165,6 +165,7 @@ void end_game (void)
 		{
 			high_score_check ();
 			match_start ();
+			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
 		}
 
@@ -173,7 +174,7 @@ void end_game (void)
 		player_up = 0;
 		ball_up = 0;
 		in_tilt = FALSE;
-		ball_in_play = FALSE;
+		valid_playfield = FALSE;
 	}
 
 	leff_stop_all ();
@@ -206,14 +207,14 @@ void end_ball (void)
 		return;
 
 	/*
-	 * If ball_in_play never set, then either the ball drained
+	 * If valid_playfield never set, then either the ball drained
 	 * before touching any playfield switches, or the ball serve
 	 * failed and it fell back into the trough.  Return the
 	 * ball to the plunger lane in these cases, and don't
 	 * count as end-of-ball.
 	 */
 #ifdef DEVNO_TROUGH
-	if (!ball_in_play && !in_tilt)
+	if (!valid_playfield && !in_tilt)
 	{
 		device_request_kick (device_entry (DEVNO_TROUGH));
 		return;
@@ -262,11 +263,9 @@ void end_ball (void)
 		in_tilt = FALSE;
 	}
 
-	/* Stop everything running except for this task.
-	 * Any task that has protected itself is immune to this.
-	 * Normally, this is not necessary. */
-	task_kill_all ();
-	/* TODO - task_kill_flags (TASK_GAME); */
+	/* Stop tasks that should run only until end-of-ball. */
+	task_remove_duration (TASK_DURATION_BALL);
+	task_duration_expire (TASK_DURATION_BALL);
 	in_bonus = FALSE;
 
 	/* If the player has extra balls stacked, then start the
@@ -321,6 +320,7 @@ void end_ball (void)
 	if (config_timed_game == OFF)
 	{
 		ball_up++;
+		/* TODO - real WPC games will clear the 1/2 credits here */
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
@@ -349,7 +349,7 @@ void timed_game_monitor (void)
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
 		/* Look for conditions in which the game timer should not run. */
-		if (!ball_in_play
+		if (!valid_playfield
 				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
 				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
 						(live_balls <= 1))
@@ -430,7 +430,7 @@ void timed_game_pause (task_ticks_t delay)
 void start_ball (void)
 {
 	in_tilt = FALSE;
-	ball_in_play = FALSE;
+	valid_playfield = FALSE;
 	pending_valid_count = 0;
 
 	/* Since lamp effects from previous balls could have been killed,
@@ -463,7 +463,6 @@ void start_ball (void)
 	 */
 	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
-	/* TODO : start a timer to a reminder to plunge the ball */
 	if (ball_up == system_config.balls_per_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
@@ -501,12 +500,12 @@ void start_ball (void)
 
 /** Called when the ball is marked as 'in play'.  This happens on
 most, but not all, playfield switch closures. */
-void mark_ball_in_play (void)
+void set_valid_playfield (void)
 {
-	if (in_game && !ball_in_play)
+	if (in_game && !valid_playfield)
 	{
-		ball_in_play = TRUE;		
-		callset_invoke (ball_in_play);
+		valid_playfield = TRUE;		
+		callset_invoke (valid_playfield);
 	}
 }
 
@@ -516,7 +515,7 @@ void try_validate_playfield (U8 swno)
 	pending_valid_count++;
 	if (pending_valid_count == 3)
 	{
-		mark_ball_in_play ();
+		set_valid_playfield ();
 	}
 }
 
@@ -525,9 +524,7 @@ void try_validate_playfield (U8 swno)
 void add_player (void)
 {
 	remove_credit ();
-	wpc_nvram_get ();
 	num_players++;
-	wpc_nvram_put ();
 	callset_invoke (add_player);
 
 	/* Acknowledge the new player by showing the scores briefly */
@@ -545,9 +542,7 @@ void start_game (void)
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
-		wpc_nvram_get ();
 		num_players = 0;
-		wpc_nvram_put ();
 		scores_reset ();
 		high_score_reset_check ();
 	
@@ -556,6 +551,7 @@ void start_game (void)
 		ball_up = 1;
 	
 		amode_stop ();
+		log_event (SEV_INFO, MOD_GAME, EV_START, 0);
 		callset_invoke (start_game);
 		task_yield (); /* start_game can take awhile */
 
@@ -680,21 +676,29 @@ CALLSET_ENTRY (game, sw_start_button)
 #endif /* MACHINE_START_SWITCH */
 }
 
-
-/** Initialize the game subsystem.  */
-CALLSET_ENTRY (game, init)
+void validate_num_players (void)
 {
 	/* Make sure this value is sane */
 	if ((num_players == 0) || (num_players > MAX_PLAYERS))
 	{
-		wpc_nvram_get ();
 		num_players = 1;
-		wpc_nvram_put ();
 	}
+}
+
+
+CALLSET_ENTRY (game, factory_reset)
+{
+	num_players = 1;
+}
+
+/** Initialize the game subsystem.  */
+CALLSET_ENTRY (game, init)
+{
+	validate_num_players ();
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
-	ball_in_play = FALSE;
+	valid_playfield = FALSE;
 	player_up = 0;
 }
 
