@@ -7,6 +7,7 @@ endif
 # .h files, but are not important enough to do into the system region.
 COMMON_BASIC_OBJS +=	common/abort.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_DMD),common/amode.o)
+COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/ballsave.o)
 COMMON_BASIC_OBJS +=	common/coin.o
 COMMON_BASIC_OBJS +=	common/db.o
 COMMON_BASIC_OBJS +=	common/event-audit.o
