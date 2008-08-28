@@ -326,7 +326,7 @@ U8 adj_edit_value;
 
 void adj_browser_draw (void)
 {
-	struct adjustment *ad = adj_get (menu_selection);
+	const struct adjustment *ad = adj_get (menu_selection);
 
 	window_stop_thread ();
 
@@ -388,7 +388,7 @@ void adj_browser_init (void)
 
 void adj_browser_enter (void)
 {
-	struct adjustment *ad = adj_get (menu_selection);
+	const struct adjustment *ad = adj_get (menu_selection);
 
 	if ((browser_action == ADJ_BROWSING) &&
 		 (ad->nvram != NULL))
@@ -419,7 +419,7 @@ void adj_browser_escape (void)
 	if (browser_action == ADJ_EDITING)
 	{
 		/* abort */
-		struct adjustment *ad = adj_get (menu_selection);
+		const struct adjustment *ad = adj_get (menu_selection);
 		if (adj_edit_value != *(ad->nvram))
 			sound_send (SND_TEST_ABORT);
 		browser_action = ADJ_BROWSING;
@@ -433,7 +433,7 @@ void adj_browser_escape (void)
 
 void adj_browser_up (void)
 {
-	struct adjustment *ad = adj_get (menu_selection);
+	const struct adjustment *ad = adj_get (menu_selection);
 	if (browser_action == ADJ_BROWSING)
 	{
 		do {
@@ -454,7 +454,7 @@ void adj_browser_up (void)
 
 void adj_browser_down (void)
 {
-	struct adjustment *ad = adj_get (menu_selection);
+	const struct adjustment *ad = adj_get (menu_selection);
 	if (browser_action == ADJ_BROWSING)
 	{
 		do {
