@@ -22,6 +22,8 @@
 #include <test.h>
 #include <format.h>
 
+extern __test__ void print_row_center (const font_t *f, U8 row);
+
 struct adjustment current_adjustment;
 
 struct adjustment_value current_adjustment_value;
@@ -287,7 +289,7 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 		{
 			task_sleep (TIME_16MS);
 			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
-			far_call_pointer (*adj_lookup->values->render, TEST2_PAGE, value);
+			adj_lookup->values->render (value);
 			print_row_center (&font_mono5, 24);
 			return;
 		}
