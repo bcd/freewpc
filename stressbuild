@@ -3,11 +3,17 @@
 # stressbuild - test many different build configurations at once
 #
 
+machines="t2 tz wcs afm tester"
 native_options="n y"
+gcc_options="4.2.2 4.3.0 4.4.0"
 
 case $1 in
 	--native)
 		native_options="y"
+		;;
+	--fast)
+		native_options="n"
+		gcc_options="4.4.0"
 		;;
 esac
 
@@ -18,10 +24,10 @@ for native in $native_options; do
 	else
 		unset NATIVE
 	fi
-	for mach in `echo t2 tz wcs afm tester`; do
+	for mach in ${machines}; do
 		for debugger in `echo y n`; do
 			if [ "$native" = "n" ]; then
-				gcctargets=`echo 4.2.2 4.3.0 4.4.0`;
+				gcctargets=${gcc_options}
 			else
 				gcctargets=`echo nop`;
 			fi
