@@ -346,7 +346,6 @@ void deff_start (deffnum_t dn)
 {
 	deff_entry_t *entry;
 
-	dbprintf ("Deff %d start\n", dn);
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_START, dn);
 
 	/* See if an entry is already tracking this deff.
@@ -376,7 +375,6 @@ void deff_stop (deffnum_t dn)
 {
 	deff_entry_t *entry;
 
-	dbprintf ("Stopping deff #%d\n", dn);
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_STOP, dn);
 
 	if (deff_runqueue && deff_runqueue->id == dn)
@@ -421,7 +419,6 @@ void deff_restart (deffnum_t dn)
 /** Called directly from a deff when it wants to exit */
 __noreturn__ void deff_exit (void)
 {
-	dbprintf ("Exiting deff %d\n", deff_runqueue->id);
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_EXIT, deff_runqueue->id);
 
 	task_setgid (GID_DEFF_EXITING);
