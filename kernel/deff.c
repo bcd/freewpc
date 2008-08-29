@@ -442,6 +442,7 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
  * DELAY is how long to wait between each change. */
 void deff_swap_low_high (S8 count, task_ticks_t delay)
 {
+	dmd_show_low ();
 	while (--count >= 0)
 	{
 		dmd_show_other ();

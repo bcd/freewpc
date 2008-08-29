@@ -157,7 +157,7 @@ void credits_draw (void)
 void credits_deff (void)
 {
 	credits_draw ();
-	deff_swap_low_high (in_live_game ? 13 : 21, 2 * TIME_100MS);
+	deff_swap_low_high (in_live_game ? 12 : 20, 2 * TIME_100MS);
 	deff_delay_and_exit (TIME_1S);
 }
 
