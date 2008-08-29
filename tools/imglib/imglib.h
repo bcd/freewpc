@@ -18,16 +18,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief A library of image generation and manipulation functions.
+ */
+
 #ifndef _IMGLIB_H
 #define _IMGLIB_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <freewpc.h>
 
 #define FRAME_WIDTH 128
-
 #define FRAME_HEIGHT 32
 
 #define MAX_BUFFER_SIZE (FRAME_WIDTH * FRAME_HEIGHT)
@@ -40,8 +41,6 @@
 
 #define square(n) ((n) * (n))
 
-
-typedef unsigned char U8;
 
 struct histogram
 {
@@ -75,10 +74,19 @@ struct layer
 };
 
 
+/**
+ * A unary operator maps two pixel values to another.
+ */
 typedef U8 binary_operator (U8, U8);
 
+/**
+ * A unary operator maps one pixel value to another.
+ */
 typedef U8 unary_operator (U8);
 
+/**
+ * A translation operator maps one coordinate to another.
+ */
 typedef struct coord translate_operator (struct coord);
 
 struct buffer *buffer_alloc(unsigned int maxlen);
@@ -113,10 +121,29 @@ void bitmap_draw_border(struct buffer *buf, unsigned int width);
 struct coord zoom_out_translation(struct coord c);
 struct buffer *bitmap_translate(struct buffer *buf, translate_operator op);
 void bitmap_fill(struct buffer *buf, U8 val);
+void bitmap_fill_region (struct buffer *buf, int x1, int y1, int x2, int y2, U8 val);
+struct buffer *bitmap_extract_plane (struct buffer *buf, unsigned int plane);
+struct buffer *bitmap_combine_planes (struct buffer *buf[], unsigned int planes);
 struct buffer *fif_decode(struct buffer *buf, unsigned int plane);
 struct buffer *binary_fif_read(const char *filename);
 void bitmap_finish(struct buffer *buf);
 void bitmap_zoom_out(struct buffer *buf);
+
+#define buffer_invert(buf) buffer_unop(buf, com_operator)
+
+extern const font_t mono5;
+extern const font_t mono9;
+extern const font_t fixed10;
+
+struct glyph
+{
+	U8 width;
+	U8 height;
+	U8 bits[0];
+};
+
+void bitmap_write_glyph (struct buffer *bmp, const struct glyph *g, unsigned int x, unsigned int y);
+void bitmap_write_text (struct buffer *bmp, const font_t *font, unsigned int x, unsigned int y, const char *text);
 
 #endif /* _IMGLIB_H */
 

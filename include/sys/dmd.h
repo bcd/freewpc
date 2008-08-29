@@ -164,6 +164,7 @@ extern dmd_transition_t
  * in 6809 mode. */
 extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 {
+#ifdef DMD_LOW_BASE
 #ifdef CONFIG_NATIVE
 	if ((addr >= DMD_LOW_BASE) && (addr <= DMD_LOW_BASE + DMD_PAGE_SIZE))
 		return addr;
@@ -171,6 +172,7 @@ extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 		return addr;
 	else
 		fatal (ERR_INVALID_IO_ADDR);
+#endif
 #endif
 	return addr;
 }

@@ -2,6 +2,8 @@
 #include "imglib.h"
 
 /*
+ * \file
+ * \brief A library of image manipulation functions.
  * The buffer_xxx functions operate on arbitrary buffers.  You can put
  * anything you want in there.  It's simply a convenient way of tracking
  * data plus a length.  There are a few other things in there for
@@ -36,12 +38,27 @@ struct buffer *buffer_alloc (unsigned int maxlen)
 }
 
 
-struct buffer *buffer_copy (struct buffer *buf)
+/**
+ * Like buffer_alloc(), but uses the attribute of another
+ * buffer to determine the initial size of the new buffer.
+ * This is also a simplified version of buffer_copy(),
+ * in which no pixel data is actually copied.  The intent
+ * would be for functions that will redraw the entire
+ * buffer contents anyway.
+ */
+struct buffer *buffer_clone (struct buffer *buf)
 {
 	struct buffer *copy = buffer_alloc (buf->len);
 	copy->width = buf->width;
 	copy->height = buf->height;
 	copy->color = buf->color;
+	return copy;
+}
+
+
+struct buffer *buffer_copy (struct buffer *buf)
+{
+	struct buffer *copy = buffer_clone (buf);
 	memcpy (copy->_data, buf->_data, buf->len);
 	if (buf->hist)
 		histogram_update (copy);
@@ -80,7 +97,8 @@ unsigned int bitmap_pos (struct buffer *buf, unsigned int x, unsigned int y)
 
 void buffer_read (struct buffer *buf, FILE *fp)
 {
-	buf->len = fread (buf->data, sizeof (U8), MAX_BUFFER_SIZE, fp);
+	buf->len = fread (buf->data, sizeof (U8), buf->len, fp);
+	/* TODO - not handling errors very well */
 }
 
 void buffer_write (struct buffer *buf, FILE *fp)
@@ -91,6 +109,7 @@ void buffer_write (struct buffer *buf, FILE *fp)
 void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 {
 	unsigned int x, y;
+	unsigned int color;
 
 	if (buf->height * buf->width < buf->len)
 	{
@@ -102,8 +121,8 @@ void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 	for (y = 0; y < buf->height; y++)
 	{
 		for (x = 0; x < buf->width; x++)
-			if (buf->data[bitmap_pos (buf, x, y)] != 0)
-				fputc ('X', fp);
+			if ((color = buf->data[bitmap_pos (buf, x, y)]) != 0)
+				fputc (color + 'A' - 1, fp);
 			else
 				fputc ('.', fp);
 		fputc ('\n', fp);
@@ -203,7 +222,7 @@ U8 and_operator (U8 a, U8 b)
 
 U8 com_operator (U8 a)
 {
-	return ~a;
+	return a ? 0 : 1;
 }
 
 /** Performs a binary operation on two buffers.
@@ -214,6 +233,9 @@ struct buffer *buffer_binop (struct buffer *a, struct buffer *b,
 {
 	unsigned int off = 0;
 	struct buffer *res = buffer_alloc (max (a->len, b->len));
+
+	res->width = a->width;
+	res->height = b->height;
 
 	while (off < a->len && off < b->len)
 	{
@@ -232,6 +254,9 @@ struct buffer *buffer_unop (struct buffer *buf, unary_operator op)
 {
 	unsigned int off = 0;
 	struct buffer *res = buffer_alloc (buf->len);
+
+	res->width = buf->width;
+	res->height = buf->height;
 
 	while (off < buf->len)
 	{
@@ -311,7 +336,8 @@ int buffer_compare (struct buffer *a, struct buffer *b)
 
 struct buffer *buffer_replace (struct buffer *old, struct buffer *new)
 {
-	free (old);
+	if (old != new)
+		free (old);
 	return new;
 }
 
@@ -474,7 +500,7 @@ static unsigned int palette_compression_length (struct histogram *hist)
  * Given a joined bitmap, return a compressed version.
  * 'buf' is the buffer to be compressed.
  *
- * If 'prev' is non-NULL, it represents the previous image in the
+ * A non-NULL represents the previous image in an
  * animation.  The compressor will see if the new image can be
  * represented better as a delta from the previous.
  */
@@ -610,17 +636,42 @@ struct buffer *buffer_decompress (struct buffer *buf)
 struct buffer *bitmap_crop (struct buffer *buf)
 {
 	struct buffer *res = buffer_alloc (buf->len);
+	/* TODO */
 	return res;
 }
 
+void bitmap_set_color (struct buffer *buf, unsigned int color)
+{
+	buf->color = color;
+}
+
+
+/**
+ * Draw a single pixel at (x,y) in a bitmap.
+ * The color of the pixel is determined by the last call
+ * to bitmap_set_color().
+ * All attempts to draw to an invalid location will be ignored.
+ */
 void bitmap_draw_pixel (struct buffer *buf, unsigned int x, unsigned int y)
 {
-	unsigned int pos = bitmap_pos (buf, x, y);
+	unsigned int pos;
+
+	if (x >= buf->width || y >= buf->height)
+		return;
+
+	pos = bitmap_pos (buf, x, y);
 	if (pos < buf->len)
 		buf->data[pos] = buf->color;
 }
 
 
+/**
+ * Paste one bitmap into another.
+ * SRC is the source bitmap.
+ * DST is the destination bitmap.
+ * XOFF and YOFF state the location, relative to the destination,
+ * where the source should begin.
+ */
 struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
 	unsigned int xoff, unsigned int yoff)
 {
@@ -636,6 +687,10 @@ struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
 }
 
 
+/**
+ * Fill a bitmap with SRC, replicating it as many times as
+ * necessary to fill the destination.
+ */
 struct buffer *bitmap_tile (struct buffer *dst, struct buffer *src)
 {
 	unsigned int dx, dy;
@@ -644,12 +699,16 @@ struct buffer *bitmap_tile (struct buffer *dst, struct buffer *src)
 		for (dy = 0; dy < dst->height; dy++)
 		{
 			U8 pixel = src->data[bitmap_pos(src, dx % src->width, dy % src->height)];
+			bitmap_set_color (dst, pixel);
 			bitmap_draw_pixel (dst, dx, dy);
 		}
 	}
 }
 
 
+/**
+ * Draw a line segment from (x1,y1) to (x2,y2).
+ */
 void bitmap_draw_line (struct buffer *buf,
 	int x1, int y1,
 	int x2, int y2)
@@ -679,6 +738,19 @@ void bitmap_draw_line (struct buffer *buf,
 
 	bitmap_draw_line (buf, x1, y1, xm, ym);
 	bitmap_draw_line (buf, x2, y2, xm, ym);
+}
+
+
+void bitmap_draw_ellipse (struct buffer *buf,
+	int x, int y, int rx, int ry)
+{
+	int px, py;
+
+	/* Check each coordinate in the bounding box */
+	for (px = x - rx; px <= x + rx; px++)
+		for (py = y - ry; py <= y + ry; py++)
+			if ((square (abs (px - x)) + square (abs (py - y))) < square (rx))
+				bitmap_draw_pixel (buf, px, py);
 }
 
 
@@ -713,13 +785,18 @@ struct coord zoom_out_translation (struct coord c)
 }
 
 
+/**
+ * Translate one buffer to another.
+ *
+ * This function applies a transformation function to the
+ * coordinates of all pixels in the source image.  The pixel
+ * is then written to the output image at the new location.
+ */
 struct buffer *bitmap_translate (struct buffer *buf, translate_operator op)
 {
-	struct buffer *res = buffer_alloc (buf->len);
+	struct buffer *res = buffer_clone (buf);
 	unsigned int x, y;
 
-	res->width = buf->width;
-	res->height = buf->height;
 	for (x = 0; x < buf->width; x++)
 		for (y = 0 ; y < buf->height; y++)
 		{
@@ -734,6 +811,9 @@ struct buffer *bitmap_translate (struct buffer *buf, translate_operator op)
 }
 
 
+/**
+ * Fill an entire bitmap with a specific color.
+ */
 void bitmap_fill (struct buffer *buf, U8 val)
 {
 	unsigned int x, y;
@@ -745,12 +825,39 @@ void bitmap_fill (struct buffer *buf, U8 val)
 
 
 /**
+ * Fill a rectangular region of a bitmap with a specific color.
+ */
+void bitmap_fill_region (struct buffer *buf,
+	int x1, int y1,
+	int x2, int y2, U8 val)
+{
+	unsigned int x, y;
+	buf->color = val;
+	for (x = x1; x < x2; x++)
+		for (y = y1; y < y2; y++)
+			bitmap_draw_pixel (buf, x, y);
+}
+
+
+/**
  * Given a bitmap, return a new bitmap in which each pixel is 1 if the
- * PLANEth bit of the source is 1.
+ * PLANEth bit of the source is 1, else it is 0.
  */
 struct buffer *bitmap_extract_plane (struct buffer *buf, unsigned int plane)
 {
-	return NULL;
+	unsigned int x, y;
+	struct buffer *res = buffer_alloc (buf->len);
+	res->height = buf->height;
+	res->width = buf->width;
+
+	for (x = 0; x < buf->width; x++)
+		for (y = 0; y < buf->height; y++)
+		{
+			unsigned int color = buf->data[bitmap_pos (buf, x, y)];
+			res->color = (color & (1 << plane)) ? 1 : 0;
+			bitmap_draw_pixel (res, x, y);
+		}
+	return res;
 }
 
 
@@ -830,26 +937,53 @@ struct buffer *fif_decode (struct buffer *buf, unsigned int plane)
 	return res;
 }
 
+/**
+ * Read a binary FIF file into bitmap format.
+ * Returns the frame object.
+ */
 struct buffer *binary_fif_read (const char *filename)
 {
 	FILE *fp;
 	struct buffer *buf;
 
+	/*
+	 * Allocate a raw buffer large enough to hold the
+	 * entire FIF data.  Fill it with the file contents.
+	 */
 	buf = buffer_alloc (540);
 	fp = fopen (filename, "rb");
+	if (!fp)
+		goto error;
+
 	buffer_read (buf, fp);
+	fclose (fp);
+#if 0
 	printf ("FIF:\n");
 	buffer_write_c (buf, stdout);
+#endif
 
-	printf ("Decoded:\n");
+	/*
+	 * Decode the compressed FIF format into an
+	 * uncompressed, joined image.
+	 */
 	buf = buffer_replace (buf, fif_decode (buf, 1));
+#if 0
+	printf ("Decoded:\n");
 	buffer_write_c (buf, stdout);
+#endif
 
+	/*
+	 * Finally split the buffer, producing a bitmap.
+	 */
 	buf = buffer_replace (buf, buffer_splitbits (buf));
-	buf->width = 128;
-	buf->height = 32;
-	fclose (fp);
+	buf->width = FRAME_WIDTH;
+	buf->height = FRAME_HEIGHT;
+
 	return buf;
+
+error:
+	buffer_free (buf);
+	return NULL;
 }
 
 
