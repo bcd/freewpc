@@ -69,7 +69,6 @@ void tilt_warning_deff (void)
 		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
 		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
 	}
-	dmd_show_low ();
 	deff_swap_low_high (24, TIME_66MS);
 	deff_exit ();
 }

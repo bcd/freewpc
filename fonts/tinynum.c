@@ -14,7 +14,7 @@ static char font_tinynum_digit[][7] = {
 	{ 3, 5, 7, 5, 7, 4, 4 },
 };
 
-static char font_tinynum_hexdigit[][7] = {
+static volatile char font_tinynum_hexdigit[][7] = {
 	{ 3, 5, 2, 5, 7, 5, 5 },
 	{ 3, 5, 3, 5, 3, 5, 3 },
 	{ 3, 5, 6, 1, 1, 1, 6 },

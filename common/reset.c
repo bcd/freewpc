@@ -41,7 +41,7 @@ volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
 __nvram__ U8 freewpc_accepted[3];
 
-extern __common__ void opto_check ();
+extern __common__ void opto_check (void);
 
 
 /**

@@ -142,8 +142,7 @@ void plunge_ball_deff (void)
 	dmd_draw_border (dmd_low_buffer);
 	dmd_copy_low_to_high ();
 	font_render_string_center (&font_fixed6, 64, 22, "PLUNGE THE BALL");
-	dmd_show_low ();
-	deff_swap_low_high (12, TIME_300MS);
+	deff_swap_low_high (13, TIME_300MS);
 	deff_exit ();
 }
 

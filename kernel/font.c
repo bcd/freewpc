@@ -294,12 +294,6 @@ static void fontargs_render_string (void)
 			top_space = 0;
 		}
 
-#ifndef __m6809__
-		/* Because the C code is slow, assert that everything is OK so
-		the software watchdog doesn't expire. */
-		task_dispatching_ok = TRUE;
-#endif
-
 	} /* end for each character in the string */
 	wpc_pop_page ();
 }

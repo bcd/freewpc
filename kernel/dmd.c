@@ -552,7 +552,6 @@ static inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
  */
 void dmd_do_transition (void)
 {
-	U8 one_copy_flag = FALSE;
 	const U8 new_dark_page = dmd_low_page;
 	const U8 new_bright_page = dmd_high_page;
 
