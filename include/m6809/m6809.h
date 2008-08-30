@@ -55,6 +55,9 @@ extern U8 _far_call_page;
 extern const U8 *bitmap_src;
 extern U8 *bitmap_dst;
 
+void slow_memset (U8 *dst, U8 val, U16 len);
+void slow_memcpy (U8 *dst, const U8 *src, U16 len);
+
 #define far_call_pointer(function, page, arg) \
 do { \
 	_far_call_address = (void *)function; \

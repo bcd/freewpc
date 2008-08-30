@@ -25,6 +25,7 @@
 The generic versions are portable, but optimal 6809 versions are also provided
 that are a little faster on real WPC hardware. */
 
+#if 0
 
 /** Adjust a byte to make sure it is in valid BCD format. */
 extern inline bcd_t bcd_adjust (bcd_t x)
@@ -65,6 +66,7 @@ extern inline void longbcd_add (bcd_t *s0, bcd_t *s1, U8 len)
 	}
 }
 
+#endif
 
 #ifdef __m6809__
 
