@@ -47,7 +47,8 @@ NATIVE
 FREEWPC_DEBUGGER
 	If set to 'y', enables the builtin debugger support.
 	This requires a patched PinMAME and the 'wpcdebug'
-	utility.  It does not work on real hardware.
+	utility.  It does not work on real hardware, although
+	it does not hurt to have it compiled in.
 
 	Code can use the 'dbprintf' function to print
 	debug messages.
