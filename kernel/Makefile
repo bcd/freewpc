@@ -6,6 +6,7 @@ SCHED_OBJ := $(SCHED_SRC:.c=.o)
 # Basic kernel modules are generic and do not depend on
 # the machine type at all.
 KERNEL_BASIC_OBJS += $(if $(CONFIG_ANIMATION), kernel/animation.o)
+KERNEL_BASIC_OBJS += kernel/bcd.o
 KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
 KERNEL_BASIC_OBJS += kernel/idle.o
 KERNEL_BASIC_OBJS += kernel/list.o

@@ -1,9 +1,9 @@
 
 This text describes the machine description file format.
 
-Machines may optionally provide configuration in the form of an "md" file.
+Machines define most of their hardware configuration in the form of an "md" file.
 In the past this was done by directly writing a .h file with the required
-information.  The .h file approach is more cumbersome and somewhat error-
+information.  The .h file approach was more cumbersome and somewhat error-
 prone.
 
 In the new approach, the md file is "compiled" by the script "genmachine".
