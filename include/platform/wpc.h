@@ -604,7 +604,9 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 		wpc_write_flippers (val);
 		break;
 	case 5:
+#ifdef WPC_EXTBOARD1
 		writeb (WPC_EXTBOARD1, val);
+#endif
 		break;
 	}
 }
