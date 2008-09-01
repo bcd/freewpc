@@ -106,6 +106,14 @@ void buffer_write (struct buffer *buf, FILE *fp)
 	fwrite (buf->data, sizeof (U8), buf->len, fp);
 }
 
+char default_pixel_ascii (unsigned int pixel)
+{
+	if (pixel != 0)
+		return pixel + 'X' - 1;
+	else
+		return ' ';
+}
+
 void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 {
 	unsigned int x, y;
@@ -121,10 +129,7 @@ void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 	for (y = 0; y < buf->height; y++)
 	{
 		for (x = 0; x < buf->width; x++)
-			if ((color = buf->data[bitmap_pos (buf, x, y)]) != 0)
-				fputc (color + 'A' - 1, fp);
-			else
-				fputc ('.', fp);
+			fputc (default_pixel_ascii (buf->data[bitmap_pos (buf, x, y)]), fp);
 		fputc ('\n', fp);
 	}
 }
@@ -295,7 +300,9 @@ struct buffer *buffer_joinbits (struct buffer *buf)
 
 
 /** Create a split buffer from a joined one.  This is the reverse process of
- * buffer_joinbits(); see above. */
+ * buffer_joinbits(); see above.
+ * The output image contains only 0s and 1s as pixel values.
+ */
 struct buffer *buffer_splitbits (struct buffer *buf)
 {
 	unsigned int off, bit;
