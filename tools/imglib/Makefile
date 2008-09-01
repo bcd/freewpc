@@ -7,7 +7,7 @@ FONT_OBJS = mono5.o mono9.o
 FON_OBJS = fixed10.o
 OBJS = $(IMG_OBJS) $(FONT_OBJS) $(FON_OBJS)
 
-PROGS = test_compression genmask
+PROGS = test_compression genmask dmdsim
 
 all : $(PROGS)
 
