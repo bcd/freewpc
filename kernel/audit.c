@@ -94,3 +94,9 @@ void audit_assign (audit_t *aud, audit_t val)
 	wpc_nvram_put ();
 }
 
+
+CALLSET_ENTRY (sys_audit, factory_reset)
+{
+       audit_reset ();
+}
+
