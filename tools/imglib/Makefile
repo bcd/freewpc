@@ -1,11 +1,13 @@
 CC=gcc
-CFLAGS = -g -I../../include -I../../build -DCONFIG_NATIVE -DWPC_DMD_LOW_PAGE=0 -DWPC_DMD_HIGH_PAGE=0
+CFLAGS = -g -I../../include -I../../build -I../wpclib -DCONFIG_NATIVE -DWPC_DMD_LOW_PAGE=0 -DWPC_DMD_HIGH_PAGE=0
 
 FONT_DIR = ../../fonts
-IMG_OBJS = imglib.o font.o
+WPCLIB_DIR = ../../../wpclib
+IMG_OBJS = imglib.o font.o wpclib.o
 FONT_OBJS = mono5.o mono9.o
 FON_OBJS = fixed10.o
 OBJS = $(IMG_OBJS) $(FONT_OBJS) $(FON_OBJS)
+VPATH += ../wpclib
 
 PROGS = test_compression genmask dmdsim
 
