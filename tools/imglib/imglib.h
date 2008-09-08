@@ -56,7 +56,15 @@ struct buffer
 	U8 *data;
 	U8 _data[MAX_BUFFER_SIZE];
 	struct histogram *hist;
+
+	/** The current color used by all drawing functions. */
 	U8 color;
+
+	/**
+	 * The color which indicates transparency.
+	 * This is only used by layering functions.
+	 */
+	U8 alpha;
 };
 
 struct coord

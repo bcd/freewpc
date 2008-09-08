@@ -115,6 +115,21 @@ void gen_test_animation (void)
 }
 
 
+void gen_test_alpha (void)
+{
+	struct buffer *buf = frame_alloc ();
+	buf->alpha = 0xFF;
+	bitmap_fill (buf, 0xFF);
+
+	bitmap_set_color (buf, 0);
+	bitmap_draw_box (buf, 0, 0, 9, 9);
+
+	bitmap_set_color (buf, 1);
+	bitmap_draw_box (buf, 1, 1, 8, 8);
+	gen_finish (buf);
+}
+
+
 int main (int argc, char *argv[])
 {
 	int argn = 1;
@@ -145,6 +160,7 @@ int main (int argc, char *argv[])
 	//gen_test_pattern ();
 	//gen_tile_example ();
 	//gen_test_font ();
-	gen_test_animation ();
+	//gen_test_animation ();
+	gen_test_alpha ();
 	exit (0);
 }
