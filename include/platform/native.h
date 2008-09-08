@@ -30,6 +30,8 @@ void linux_init (void);
 __attribute__((noreturn)) void linux_shutdown (void);
 
 #define far_call_pointer(function, page, arg) (*function) (arg)
+#define slow_memcpy memcpy
+#define slow_memset memset
 
 extern inline U8 far_read8 (U8 *address, U8 page)
 {

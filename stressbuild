@@ -3,7 +3,7 @@
 # stressbuild - test many different build configurations at once
 #
 
-machines="t2 tz wcs afm tester"
+machines="t2 tz wcs afm tester tzsound"
 native_options="n y"
 gcc_options="4.2.2 4.3.0 4.4.0"
 
