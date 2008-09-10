@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -44,6 +44,16 @@ __nvram__ U8 freewpc_accepted[3];
 extern __common__ void opto_check (void);
 
 
+extern inline void wait_for_button (const U8 swno)
+{
+	while (!switch_poll (swno))
+		task_sleep (TIME_66MS);
+
+	while (switch_poll (swno))
+		task_sleep (TIME_66MS);
+}
+
+
 /**
  * Perform a full factory reset.
  * This can be triggered automatically at boot time if
@@ -54,8 +64,7 @@ void factory_reset (void)
 	adj_reset_all ();
 	rtc_factory_reset ();
 	/* TODO : this should also clear audits, reset the high scores,
-	 * reset the custom message/game ID, and clear the persistent
-	 * area. */
+	 * and reset the custom message. */
 #ifdef __m6809__
 	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
 #endif
@@ -65,10 +74,16 @@ void factory_reset (void)
 
 void factory_reset_if_required (void)
 {
-	if (0)
+	if (!callset_invoke_boolean (init_ok))
 	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_mono5, 64, 10, "FACTORY SETTINGS");
+		font_render_string_center (&font_mono5, 64, 20, "RESTORED");
+		dmd_show_low ();
+
 		factory_reset ();
-		/* TODO - display message to this effect */
+
+		wait_for_button (ACCEPT_BUTTON);
 	}
 }
 
@@ -76,16 +91,6 @@ void factory_reset_if_required (void)
 void render_build_date (void)
 {
 	locale_render_date (BUILD_MONTH, BUILD_DAY, BUILD_YEAR);
-}
-
-
-extern inline void wait_for_button (const U8 swno)
-{
-	while (!switch_poll (swno))
-		task_sleep (TIME_66MS);
-
-	while (switch_poll (swno))
-		task_sleep (TIME_66MS);
 }
 
 
@@ -189,9 +194,6 @@ void system_reset (void)
 	pic_init ();
 #endif
 
-	/* Check the 12V supply to make sure optos are working */
-	opto_check ();
-
 	factory_reset_if_required ();
 
 #ifdef FASTBOOT
@@ -200,5 +202,9 @@ void system_reset (void)
 	deff_start (DEFF_SYSTEM_RESET);
 #endif
 	amode_start ();
+
+	/* Check the 12V supply to make sure optos are working */
+	opto_check ();
+
 }
 
