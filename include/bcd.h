@@ -68,6 +68,15 @@ extern inline void longbcd_add (bcd_t *s0, bcd_t *s1, U8 len)
 
 #endif
 
+
+void bcd_zero (bcd_t *val, U8 len);
+void bcd_copy (bcd_t *dst, const bcd_t *src, U8 len);
+void bcd_add (bcd_t *s1, const bcd_t *s2, U8 len);
+void bcd_add_int (bcd_t * s1, U8 val, U8 len);
+void bcd_sub (bcd_t *s1, const bcd_t *s2, U8 len);
+void bcd_mul (bcd_t * s, U8 multiplier, U8 len);
+I8 bcd_compare (const bcd_t * s1, const bcd_t * s2, U8 len);
+
 #ifdef __m6809__
 
 /* Calculate the sum of two BCD-encoded bytes, possibly with carry
