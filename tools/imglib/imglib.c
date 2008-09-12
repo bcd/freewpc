@@ -71,6 +71,7 @@ struct buffer *bitmap_alloc (unsigned int width, unsigned int height)
 	struct buffer *buf = buffer_alloc (width * height);
 	buf->width = width;
 	buf->height = height;
+	buf->alpha = 0;
 	return buf;
 }
 
@@ -106,10 +107,14 @@ void buffer_write (struct buffer *buf, FILE *fp)
 	fwrite (buf->data, sizeof (U8), buf->len, fp);
 }
 
-char default_pixel_ascii (unsigned int pixel)
+char default_pixel_ascii (struct buffer *buf, unsigned int pixel)
 {
 	if (pixel != 0)
+	{
+		if (pixel == buf->alpha)
+			return '?';
 		return pixel + 'X' - 1;
+	}
 	else
 		return ' ';
 }
@@ -686,8 +691,9 @@ void bitmap_draw_pixel (struct buffer *buf, unsigned int x, unsigned int y)
 
 
 /**
- * Paste one bitmap into another.
- * SRC is the source bitmap.
+ * Paste one bitmap onto another.
+ * SRC is the source bitmap.  The alpha channel of the source is
+ *    obeyed, and can be used to see through to the destination.
  * DST is the destination bitmap.
  * XOFF and YOFF state the location, relative to the destination,
  * where the source should begin.
@@ -701,7 +707,8 @@ struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
 		for (sy = 0; sy < src->height; sy++)
 		{
 			U8 pixel = src->data[bitmap_pos(src, sx, sy)];
-			bitmap_draw_pixel (dst, sx + xoff, sy + yoff);
+			if (pixel != src->alpha)
+				bitmap_draw_pixel (dst, sx + xoff, sy + yoff);
 		}
 	}
 }

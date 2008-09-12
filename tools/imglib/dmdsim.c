@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <termios.h>
 #include "imglib.h"
 #include "wpclib.h"
 
@@ -27,6 +28,13 @@ int cpu_sock;
 
 /** The frame cache */
 struct buffer *page_buffer[16] = { NULL, };
+
+/** The current time on the CPU */
+unsigned long cpu_time;
+
+unsigned int cpu_port = 9000;
+
+unsigned int system_port = 9001;
 
 
 /**
@@ -88,16 +96,17 @@ void process_visible_pages (struct wpc_message *msg)
  * This call is nonblocking, so if there is nothing to do,
  * it returns immediately.
  */
-int try_receive (void)
+int try_receive_from_cpu (void)
 {
 	struct wpc_message aMsg;
 	struct wpc_message *msg = &aMsg;
 	int rc;
 
-	rc = udp_socket_receive (cpu_sock, 9000, msg, sizeof (aMsg));
+	rc = udp_socket_receive (cpu_sock, cpu_port, msg, sizeof (aMsg));
 	if (rc < 0)
 		return rc;
 
+	cpu_time = msg->timestamp;
 #ifdef DEBUG
 		printf ("Code: %02X   Time: %09d   Len: %03d\n",
 			msg->code, msg->timestamp, msg->len);
@@ -117,17 +126,76 @@ int try_receive (void)
 }
 
 
+void process_key (unsigned char c)
+{
+}
+
+
+int try_receive_from_stdin (void)
+{
+	fd_set fds;
+	struct timeval timeout;
+	unsigned char c;
+	int rc;
+
+	FD_ZERO (&fds);
+	FD_SET (0, &fds);
+	timeout.tv_sec = timeout.tv_usec = 0;
+
+	if (rc = select (1, &fds, NULL, NULL, &timeout))
+	{
+		rc = read (0, &c, 1);
+		process_key (c);
+	}
+
+	return rc;
+}
+
+void
+keybuffering (int flag)
+{
+   struct termios tio;
+
+   tcgetattr (0, &tio);
+   if (!flag) /* 0 = no buffering = not default */
+	{
+      tio.c_lflag &= ~(ICANON | ECHO);
+	}
+   else /* 1 = buffering = default */
+	{
+      tio.c_lflag |= (ICANON | ECHO);
+	}
+   tcsetattr (0, TCSANOW, &tio);
+}
+
+
+void exit_handler (void)
+{
+	keybuffering (1);
+}
+
+
 int main (int argc, char *argv[])
 {
 	struct buffer *buf;
 
-	cpu_sock = udp_socket_create (9001);
+	/* Open a socket connection for sending/receiving messages
+	with the CPU. */
+	cpu_sock = udp_socket_create (system_port);
+	if (cpu_sock < 0)
+	{
+		fprintf (stderr, "error: could not connect to CPU\n");
+		exit (1);
+	}
+
+	keybuffering (0);
 
 	/* The main loop */
 	for (;;)
 	{
 		usleep (10 * 1000UL);
-		try_receive ();
+		try_receive_from_cpu ();
+		try_receive_from_stdin ();
 	}
 }
 
