@@ -34,6 +34,9 @@ bool print_header_needed;
 
 const char *printout_name;
 
+extern struct audit main_audits[];
+extern struct audit earnings_audits[];
+extern struct audit standard_audits[];
 
 #define print_nl() print_char ('\n')
 #define print_ff() print_char ('\f')
@@ -155,19 +158,33 @@ void print_bar (void)
 
 void print_header (void)
 {
+	if (print_header_needed == FALSE)
+		return;
+
 	print_header_needed = FALSE;
 	printer_pageno++;
 
-	/* TODO */
 	if (printer_config.pause_every_page == YES)
 	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_mono5, 64, 11, "PRESS ENTER");
+		font_render_string_center (&font_mono5, 64, 21, "FOR NEXT PAGE");
+		dmd_show_low ();
+
+		while (!switch_poll (SW_ENTER))
+			task_sleep (TIME_66MS);
+		while (switch_poll (SW_ENTER))
+			task_sleep (TIME_66MS);
 	}
 
 	/* Print the actual page header.
 	 * Note that we do not use sprintf() here, as that has been
 	 * seen to cause stack overflows.  We opt for a much simpler
 	 * approach whereby the tilde character is substituted with
-	 * the real page number.  This limits reports to 9 pages. */
+	 * the real page number.  This limits reports to 9 pages.
+	 * The proper solution would be to use fork a separate
+	 * task to work around the stack size limitation.
+	 */
 	print_string (printout_name);
 	print_line_right ("PAGE ~");
 }
@@ -213,10 +230,6 @@ void print_audit_list (const char *title, struct audit *aud)
 because it may sleep. */
 void print_all_audits (void)
 {
-	extern struct audit main_audits[];
-	extern struct audit earnings_audits[];
-	extern struct audit standard_audits[];
-
 	printer_reconfig ();
 
 	printout_name = "AUDIT REPORT";

@@ -2366,12 +2366,12 @@ struct menu bookkeeping_menu = {
 void printout_thread (void)
 {
 	extern __common__ void print_all_audits (void);
+
+	task_sleep_sec (2);
 	print_all_audits ();
 
-#if 0
 	task_setgid (0);
 	window_pop ();
-#endif
 	task_exit ();
 }
 
