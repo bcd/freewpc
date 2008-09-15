@@ -221,9 +221,9 @@ void specific_currency_audit (audit_t val, U8 type)
 	small = (val % info->units_for_larger) * info->base_unit;
 
 	if (info->prefix_sign)
-		sprintf ("%s%ld.%02ld", info->sign, large, small);
+		sprintf ("%s%ld.%02d", info->sign, large, small);
 	else
-		sprintf ("%ld.%02ld%s", large, small, info->sign);
+		sprintf ("%ld.%02d%s", large, small, info->sign);
 }
 
 void currency_audit (audit_t val)
