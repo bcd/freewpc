@@ -42,8 +42,6 @@
 #include <native/math.h>
 #endif
 
-extern U8 db_attached;
-
 
 /** Writes a constant string to the debugger port */
 void db_puts (const char *s)
@@ -51,16 +49,13 @@ void db_puts (const char *s)
 #ifdef DEBUGGER
 	register U8 c;
 
-	if (db_attached)
+	while ((c = *s++) != '\0')
 	{
-		while ((c = *s++) != '\0')
-		{
 #ifdef CONFIG_PARALLEL_DEBUG
-			wpc_parport_write (c);
+		wpc_parport_write (c);
 #else
-			wpc_debug_write (c);
+		wpc_debug_write (c);
 #endif
-		}
 	}
 #endif /* DEBUGGER */
 }
