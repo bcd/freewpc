@@ -134,7 +134,7 @@ U8 to_alloc_tail;
 
 
 /* Private functions written in assembly used internally. */
-__noreturn__ void task_save (task_t *tp);
+__attribute__((returns_twice)) void task_save (task_t *tp);
 __noreturn__ void task_restore (task_t *tp);
 
 
