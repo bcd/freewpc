@@ -273,9 +273,12 @@ void fatal (errcode_t error_code)
 	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
 
-#if (MACHINE_DMD == 1)
-	/* Try to display the error on the DMD.  This may not work,
-	you know. */
+#if (MACHINE_DMD == 1) && DEBUG_FATAL_DMD
+	/* Display the error on the DMD.
+	 * This may not work, if the fatal was caused by any of the
+	 * font/DMD functions.  So this is known turned off by default;
+	 * you can recompile it in if need be.
+	 */
 	extern void dmd_rtt0 (void);
 	dmd_alloc_low_clean ();
 
