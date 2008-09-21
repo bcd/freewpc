@@ -56,4 +56,4 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = goalie_driver.o amode.o
 
-FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif
+FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif

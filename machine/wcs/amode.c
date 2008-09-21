@@ -8,6 +8,23 @@ CALLSET_ENTRY (wcs_amode, start_without_credits)
 	sound_send (SND_WHISTLE);
 }
 
+
+void amode_pgj_logo (void)
+{
+	dmd_map_lookaside (0);
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 44, 25, "10");
+	font_render_string_center (&font_var5, 64, 27, "YEARS");
+	dmd_shadow_copy ();
+
+	dmd_alloc_low_high ();
+	dmd_draw_fif (fif_pgj);
+	dmd_overlay_alpha (wpc_dmd_get_mapped (), 0);
+	dmd_show2 ();
+	task_sleep_sec (15);
+	deff_exit ();
+}
+
 void amode_leff1 (void)
 {
 	register U8 my_lamplist = lamplist;

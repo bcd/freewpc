@@ -334,6 +334,7 @@ Divert Ramp:
 Goalie Moving:
 
 [deffs]
+PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
