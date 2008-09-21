@@ -74,6 +74,15 @@ _bitmap_src:
 _bitmap_blit_asm:
 	pshs	u,y
 
+#ifdef PARANOID
+	; Ensure that the destination is a valid DMD page pointer.
+	cmpx	#0x3800
+	bge	ok
+	ldb	#99
+	jmp	_fatal
+ok:
+#endif
+
 	; Load the source/destination pointers
 	ldu	_bitmap_src
 
