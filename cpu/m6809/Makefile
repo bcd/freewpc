@@ -26,7 +26,9 @@ CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-
 CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
 # TODO : should -funroll-loops be given?
 
-# Which version of the 6809 compiler to use.
+# Which version of the 6809 compiler to use by default.
+# This is the minimum available version.  More often than not,
+# testing/releases are done with later builds than this.
 GCC_VERSION ?= 4.2.1
 
 KERNEL_OBJS     += $(C)/vector.o
@@ -35,3 +37,4 @@ KERNEL_ASM_OBJS += $(C)/farcall.o
 KERNEL_OBJS     += $(if $(CONFIG_TASK), $(C)/task.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_TASK), $(C)/task_6809.o)
 KERNEL_OBJS     += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
+KERNEL_OBJS     += cpu/m6809/string.o
