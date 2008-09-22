@@ -81,7 +81,6 @@ Uncategorized
 ./kernel/animation.c:	/* TODO : for video modes there should be a callback here for
 ./kernel/deff.c:	/* TODO */
 ./kernel/frame.c:	/* TODO - remove this and force all callers of the
-./kernel/game.c:	/* TODO - task_kill_flags (TASK_GAME); */
 ./kernel/leff.c: * (TODO : as long as they do not use the same lamps!.)   There are
 ./kernel/leff.c:	/* TODO - this is slow */
 ./kernel/leff.c:		lamp_leff1_erase (); /* TODO : these two functions go together */
@@ -120,11 +119,9 @@ Uncategorized Machine Code
 ./platform/wpc/task.c:	/* TODO - verify that interrupts are not disabled when calling this */
 ./platform/wpc/task.c:	TODO : the accuracy here is a bit wonky.  For example, a task could
 ./platform/wpc/task.c:	/* TODO: on entry to the next function, it is expected that 'X' has
-./platform/wpc/task.c: * TODO : there is a race condition here with regard to TASK_PROTECTED;
 ./platform/wpc/task.c: * TODO : why not just set the B/X register directly here and then
 ./test/window.c:/* TODO - these really belong in feature_config.  They are not being
 ./test/window.c:/* TODO - if no solenoids/flashers defined, solenoid_test_ok
-./test/window.c:	/* TODO : Use 100% duty cycle for now; this probably ought to
 ./test/window.c:/* TODO - these two window ops are identical; we are only
 ./test/window.c:	/* TODO : lamp_flasher_test_item */
 ./test/window.c:	/* TODO : ordered_lamp_test_item */

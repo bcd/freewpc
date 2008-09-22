@@ -1,15 +1,39 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 
+/* dmd_shadow() is the low-level routine to generate shadows. */
 #ifdef __m6809__
 extern void dmd_shadow (void);
 #else
 #define dmd_shadow()
 #endif
 
-/* On input: a mono image in the low buffer.
-On output: a shadowed image in both buffers
-suitable for dmd_show2 (). */
+
+/**
+ * Generate a shadowed image.
+ *
+ * On input, provide a mono image in the low-mapped buffer.
+ * On output, the high mapped buffer will contain an alpha mask.
+ */
 void dmd_shadow_copy (void)
 {
 	/* Create the shadow plane in the high page */
@@ -22,6 +46,7 @@ void dmd_shadow_copy (void)
 	dmd_flip_low_high ();
 }
 
+
 void dmd_text_raise (void)
 {
 	dmd_shadow ();
@@ -29,6 +54,19 @@ void dmd_text_raise (void)
 }
 
 
+/**
+ * Overlay a 1-color image plus alphamask onto a page pair.
+ *
+ * DST describes the destination pages, which do not have
+ * to be consecutive.
+ *
+ * SRC is the lookaside ID of a page pair which contains
+ * the 1-color image and alphamask, respectively.
+ *
+ * The alpha mask is applied first to reset some bits of
+ * the image to black.  Then the 1-color image is ORed
+ * into both destination pages, for 100% intensity.
+ */
 void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_low_page (dst.u.first);
@@ -49,6 +87,13 @@ void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src)
 }
 
 
+/**
+ * Overlay the contents of two DMD pages (SRC and SRC+1)
+ * onto two other DMD pages, described by DST.
+ * The destination pages do not have to be consecutive.
+ *
+ * On output, the destination pages are also mapped.
+ */
 void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_low_page (dst.u.second);
@@ -62,6 +107,14 @@ void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
 	wpc_dmd_set_high_page (dst.u.second);
 }
 
+
+/**
+ * Overlay the contents of a single DMD page, in SRC,
+ * onto two other DMD pages, described by DST.
+ * The destination pages do not have to be consecutive.
+ *
+ * On output, the destination pages are also mapped.
+ */
 void dmd_overlay (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
@@ -76,6 +129,10 @@ void dmd_overlay (dmd_pagepair_t dst, U8 src)
 }
 
 
+/**
+ * Allocate a new pair of DMD pages that are initialized
+ * with the current visible contents.
+ */
 void dmd_dup_mapped (void)
 {
 	dmd_pagepair_t old, new;

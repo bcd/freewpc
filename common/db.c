@@ -42,10 +42,6 @@
 #include <native/math.h>
 #endif
 
-/** Initially zero, this is set to 1 when a remote debugger is
- * detected */
-U8 db_attached;
-
 
 /** Nonzero when the system (all tasks except for interrupts)
 is paused */
@@ -69,23 +65,6 @@ U8 db_read_sync (void)
 void db_idle (void)
 {
 #ifdef DEBUGGER
-	if (!db_attached)
-	{
-		if (wpc_debug_read_ready ())
-		{
-			wpc_debug_write (0);
-			db_attached = 1;
-#ifdef CONFIG_SHORT_STRINGS_ONLY
-			db_puts ("FREEWPC\n");
-#else
-			db_puts ("\n\n"
-				"----------------------------------------------------------\n"
-				"FREEWPC DEBUGGER\n"
-				"----------------------------------------------------------\n\n");
-#endif
-		}
-	}
-	else
 	{
 		if (wpc_debug_read_ready ())
 		{
@@ -175,14 +154,14 @@ void db_idle (void)
 /** Initialize the debugger */
 void db_init (void)
 {
-#ifdef CONFIG_NATIVE
-	db_attached = 1;
+	wpc_debug_write (0);
+#ifdef CONFIG_SHORT_STRINGS_ONLY
+	db_puts ("FREEWPC\n");
 #else
-#ifdef CONFIG_PARALLEL_DEBUG
-	db_attached = 1;
-#else
-	db_attached = 0;
-#endif
+	db_puts ("\n\n"
+		"----------------------------------------------------------\n"
+		"FREEWPC DEBUGGER\n"
+		"----------------------------------------------------------\n\n");
 #endif
 	db_paused = 0;
 }

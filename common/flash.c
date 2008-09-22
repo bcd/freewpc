@@ -66,14 +66,10 @@ void flasher_repeat_act (U8 id, struct flasher_action *action, U16 repeat_count)
 }
 
 
+#if 0
 void flash_test_task (void)
 {
 	flasher_act (FLASH_GOAL, flasher_pulsating_action);
 	task_exit ();
 }
-
-CALLSET_ENTRY (flash_test, sw_escape)
-{
-	task_recreate_gid (GID_FLASHER_TEST, flash_test_task);
-}
-
+#endif

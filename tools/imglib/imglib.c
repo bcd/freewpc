@@ -120,6 +120,18 @@ char default_pixel_ascii (struct buffer *buf, unsigned int pixel)
 }
 
 
+char enhanced_pixel_ascii (unsigned int pixel)
+{
+	switch (pixel)
+	{
+		default: case 0: return ' ';
+		case 1: return ':';
+		case 2: return '*';
+		case 3: return '#';
+	}
+}
+
+
 void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 {
 	unsigned int x, y;
@@ -135,7 +147,7 @@ void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 	for (y = 0; y < buf->height; y++)
 	{
 		for (x = 0; x < buf->width; x++)
-			fputc (default_pixel_ascii (buf, buf->data[bitmap_pos (buf, x, y)]), fp);
+			fputc (enhanced_pixel_ascii (buf->data[bitmap_pos (buf, x, y)]), fp);
 		fputc ('\n', fp);
 	}
 }
