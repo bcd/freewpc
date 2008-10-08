@@ -119,14 +119,14 @@ depending on the system type. */
 #define AR_LATCHED   3
 #define NUM_SWITCH_ARRAYS 	4
 
-extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+extern __fastram__ U8 sw_raw[SWITCH_BITS_SIZE];
 
 
 /** Poll the raw state of a switch.  Returns zero if open, nonzero
 if closed. */
 extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 {
-	return switch_bits[AR_RAW][SW_COL(sw_num)] & SW_ROWMASK(sw_num);
+	return sw_raw[SW_COL(sw_num)] & SW_ROWMASK(sw_num);
 }
 
 

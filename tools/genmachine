@@ -315,7 +315,7 @@ sub close_switch {
 		|| (defined $def->{'buyin-button'});
 
 	$def->{'prebounce'} = "0" if (!defined $def->{'prebounce'});
-	$def->{'postbounce'} = "TIME_33MS" if (!defined $def->{'postbounce'});
+	$def->{'postbounce'} = "0" if (!defined $def->{'postbounce'});
 }
 
 sub close_drive {
