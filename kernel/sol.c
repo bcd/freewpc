@@ -180,6 +180,9 @@ void sol_update_rtt_3 (void)
 #endif
 
 	/* Rotate the duty mask for the next iteration. */
+	/* TODO - the assembly code generated here is not ideal.
+	It could be done in two instructions, by shifting and then
+	adding the carry.  Need a way from gcc to request this. */
 	sol_duty_mask <<= 1;
 	if (sol_duty_mask == 0)
 		sol_duty_mask = 1;
