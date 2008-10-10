@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,11 +18,26 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* This file implements a simple S-record to binary converter. */
+/* This file implements a simple S-record to binary converter.
+ * It does not implement all S-record types, only those that
+ * are used in FreeWPC. */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+/* S-Record types */
+/* For the header file, it is claimed that address is always 0x0000
+and the data consists of: 20-byte module name, 2-byte version, 2-byte
+revision, and 0-36 byte description/comment. */
+#define SREC_HEADER    0
+#define SREC_DATA16    1
+#define SREC_DATA24    2
+#define SREC_DATA32    3
+#define SREC_COUNT     5 /* count of S1, S2, S3 records prev. sent */
+#define SREC_END32     7
+#define SREC_END24     8
+#define SREC_END16     9
 
 typedef unsigned char U8;
 
@@ -51,7 +66,7 @@ int main (int argc, char *argv[])
 {
 	FILE *ifp;
 	FILE *ofp;
-	char line[256];
+	char line[515];
 	char *s;
 	int len;
 	int addr;
@@ -120,7 +135,7 @@ int main (int argc, char *argv[])
 	for (;;)
 	{
 		/* Read the next line of input */
-		fgets (line, 255, ifp);
+		fgets (line, 514, ifp);
 		if (feof (ifp))
 			break;
 
@@ -129,8 +144,9 @@ int main (int argc, char *argv[])
 		/* Skip over S */
 		s++;
 
-		/* Check S-record type */
-		if (*s == '9')
+		/* Check S-record type.
+		Stop as soon as we get an END line. */
+		if (*s >= '0' + SREC_END32)
 			break;
 		s++;
 

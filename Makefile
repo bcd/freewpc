@@ -604,9 +604,13 @@ $(BLDDIR)/blankpage.bin: $(SR)
 	$(Q)rm -f $@.1
 
 
+#
+# Convert each S-record file, one per page, into binary.
+#
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR)
 	$(Q)echo "Checking for overflow..." && tools/mapcheck
 	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l $(SYSROM_SIZE) -f 0xFF $<
+	$(Q)echo "Renaming map file..." && mv $(BLDDIR)/freewpc.map $(BLDDIR)/$(GAME_ROM:.rom=.map)
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
 	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
