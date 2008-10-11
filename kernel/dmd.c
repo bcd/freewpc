@@ -44,6 +44,11 @@
  * registers named dark_page and bright_page, track which pages
  * have been allocated for 4-color imaging.
  *
+ * The DMD controller contains the logic for refreshing the
+ * display from the current visible page contents.  It clocks
+ * 1 byte into the display every 32 CPU cycles, which equates to
+ * one full page in roughly 8ms, or 122Hz.
+ *
  * This module also implements the generic transition algorithm.
  * All transitions share some common logic that is done here.  The
  * specifics of a particular transition are implemented in callback
