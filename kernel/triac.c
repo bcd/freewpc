@@ -26,9 +26,9 @@
  *
  * Theory of operation.
  *
- * The CPU generates an IRQ once every 960 msec.
+ * The CPU generates an IRQ once every 960 microseconds.
  *
- * The GI is driven off 48VAC at a frequency of 60 Hz.
+ * The GI is driven off 48VAC at a frequency of 60 Hz (US).
  * This means that 60 times a second, the AC voltage goes through
  * a complete cycle.  AC will cross zero twice during each cycle.
  * In between each of the zero points is a peak (one negative,
@@ -46,7 +46,7 @@
 #include <freewpc.h>
 
 
-extern __fastram__ U8 ac_zc_count;
+extern __fastram__ U8 zc_timer;
 
 
 /** The last value written to the triacs */
@@ -75,7 +75,7 @@ void triac_rtt (void)
 	This can vary according to the position of the AC wave from the
 	zerocross point. */
 	triac_bits &= ~triac_leff_alloc;
-	triac_bits |= triac_leff_bits[ac_zc_count];
+	triac_bits |= triac_leff_bits[zc_timer];
 
 	/* Update the triac hardware */
 	triac_write (triac_bits);
@@ -151,7 +151,7 @@ void triac_set_brightness (U8 triac, U8 brightness)
 	for (i=0; i< NUM_BRIGHTNESS_LEVELS; i++)
 		dbprintf ("%02X ", triac_leff_bits[i]);
 	db_puts ("\n");
-	dbprintf ("ac_zc_count = %d\n", ac_zc_count);
+	dbprintf ("zc_timer = %d\n", zc_timer);
 	dbprintf ("triac_enables = %02X\n", triac_enables);
 	dbprintf ("triac_io_cache = %02X\n", triac_io_cache);
 #endif
