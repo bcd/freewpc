@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief DMD-related definitions.
+ */
+
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
@@ -64,6 +69,12 @@
 #define DMD_ALIGN_TOP_CENTER     DMD_CENTER_X, DMD_TOP_CENTER_Y
 #define DMD_ALIGN_BOTTOM_CENTER  DMD_CENTER_X, DMD_BOTTOM_CENTER_Y
 
+/**
+ * The row value at which an FIRQ should normally be generated in order to do
+ * page flipping.  By requesting the FIRQ just before the complete page is
+ * refreshed, software has time to reprogram the VISIBLE page register
+ * just before the hardware will latch it.
+ */
 #define DMD_REFRESH_ROW 30
 
 /** The type of a page number */
@@ -125,7 +136,21 @@ typedef struct
 } dmd_transition_t;
 
 
+/**
+ * Request an FIRQ to be generated after row 'v' has been displayed.
+ */
 #define wpc_dmd_set_firq_row(v)		writeb (WPC_DMD_FIRQ_ROW_VALUE, v)
+
+
+/**
+ * Return the last row that was refreshed.
+ */
+#define wpc_dmd_get_firq_row()      readb(WPC_DMD_FIRQ_ROW_VALUE)
+
+
+/**
+ * Set the visible page.
+ */
 #define wpc_dmd_set_visible_page(v)	writeb (WPC_DMD_ACTIVE_PAGE, v)
 
 #define dmd_low_buffer			((dmd_buffer_t)DMD_LOW_BASE)
