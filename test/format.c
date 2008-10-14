@@ -148,6 +148,31 @@ void baud_rate_render (U8 val)
 }
 
 
+void time_interval_render (U8 val)
+{
+	U8 ms;
+
+	if (val > TIME_200MS)
+	{
+		sprintf ("???");
+		return;
+	}
+
+	switch (val)
+	{
+		case 0: ms = 0; break;
+		case TIME_33MS: ms = 33; break;
+		case TIME_66MS: ms = 66; break;
+		case TIME_100MS: ms = 100; break;
+		case TIME_133MS: ms = 133; break;
+		case TIME_166MS: ms = 166; break;
+		case TIME_200MS: ms = 200; break;
+	}
+
+	sprintf ("%dMS", ms);
+}
+
+
 void percentage_of_games_audit (audit_t val)
 {
 	/* Avoid divide-by-zero error */
