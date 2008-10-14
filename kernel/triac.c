@@ -28,57 +28,116 @@
  *
  * The CPU generates an IRQ once every 960 microseconds.
  *
- * The GI is driven off 48VAC at a frequency of 60 Hz (US).
+ * The GI is driven off 6.3VAC at a frequency of 60 Hz (US).
  * This means that 60 times a second, the AC voltage goes through
  * a complete cycle.  AC will cross zero twice during each cycle.
  * In between each of the zero points is a peak (one negative,
  * one positive per cycle).
  *
- * We need to poll the zero cross flag periodically (at interrupt
- * time) to reconstruct the waveform of the original AC voltage.
- * The timing of zerocross may skew over time from the CPU's clock
- * so this must be constantly updated.  Then, the interrupt level
- * routine must enable the triacs at just the right time based on
- * the most recent estimate of the zero cross point, to enable
- * the desired brightness on the lamps.
+ * The AC module (ac.c) monitors the zerocross and tracks how
+ * long it has been since the last crossing.
+ *
+ * The state of each triac is maintained by a latch (LS374) on the
+ * power driver board.  When '1', the triac is enabled and allows
+ * current to flow until the next zerocrossing point.  During this
+ * time, the state of the latch is irrelevant; the triac is on.
+ * When set to '0', the triac will be turned off at the next
+ * zerocross point, if it isn't already off.
+ *
+ * GI lamps can either be undimmed or dimmed.  In undimmed mode,
+ * we just turn on/off the latched value and leave it there.
+ * 'On' strings are permanently receiving power and thus run at
+ * full intensity.  In dimmed mode, the latch is enabled and then
+ * immediately disabled, at a particular point in the AC phase.
+ * The triac is enabled from the point of the first write to the
+ * next zerocross point.  The closer the writes are to the next
+ * zerocrossing, the dimmer the lamps will be.  Maintaining the
+ * lamps at this intensity requires rewriting the latch continuously
+ * at the exact point in the AC cycle.
  */
 
 #include <freewpc.h>
 
-
+/** The amount of time since the last zero crossing, as calculated
+ * by the AC module. */
 extern __fastram__ U8 zc_timer;
 
 
-/** The last value written to the triacs */
-__fastram__ U8 triac_io_cache;
+/** The normal state of the triacs, not accounting for lamp effects. */
+U8 triac_output;
 
-/** Which triac outputs should be enabled normally */
-__fastram__ U8 triac_enables;
+/** The last value written to the triac latch */
+U8 triac_io_cache;
 
-/** Which triac outputs are allocated to the current running lamp effect */
-__fastram__ U8 triac_leff_alloc;
+/** Says which triacs need to be turned on at specific times
+ * during the AC phase.  Each entry is a triac bitset.
+ * If entry X is enabled, then X ms after the last zerocross,
+ * those triacs are turned on, and remain on until the next ZC.
+ */
+U8 gi_dimming[NUM_BRIGHTNESS_LEVELS];
 
-/** Which triac outputs should be enabled for the current lamp effect.
- * This overrides the normal triac enables. */
-__fastram__ U8 triac_leff_bits[NUM_BRIGHTNESS_LEVELS];
+/** Which triac outputs are allocated by lamp effects */
+U8 gi_leff_alloc;
+
+/** The states of the GI strings currently allocated */
+U8 gi_leff_output;
+
+U8 gi_leff_dimming[NUM_BRIGHTNESS_LEVELS];
+
+
+void triac_dump (void)
+{
+	dbprintf ("Normal:    %02X\n", triac_output);
+	dbprintf ("Dim:       %02X %02X %02X\n", gi_dimming[0], gi_dimming[1], gi_dimming[2]);
+	dbprintf ("Alloc:     %02X\n", gi_leff_alloc);
+	dbprintf ("Leff GI:   %02X\n", gi_leff_output);
+	dbprintf ("Leff dim:  %02X %02X %02X\n", gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2]);
+}
 
 
 /** Update the triacs at interrupt time */
 void triac_rtt (void)
 {
-	U8 triac_bits;
+	/* We only need to update the triacs if dimming
+	 * needs to be done during this phase of the AC cycle. */
+	if (unlikely (gi_dimming[zc_timer]))
+	{
+		U8 triac_bits;
 
-	/* Get the default triac states */
-	triac_bits = triac_enables;
+		/* Get the current triac states */
+		triac_bits = triac_read ();
 
-	/* Override with the lamp effect states.
-	This can vary according to the position of the AC wave from the
-	zerocross point. */
-	triac_bits &= ~triac_leff_alloc;
-	triac_bits |= triac_leff_bits[zc_timer];
+		/* Turn on the lamps that need to be dimmed at this level. */
+		triac_write (triac_bits | gi_dimming[zc_timer]);
 
-	/* Update the triac hardware */
-	triac_write (triac_bits);
+		/* Now disable the dimmed lamps for the next phase */
+		triac_write (triac_bits);
+	}
+}
+
+
+/** Clear the dimming feature on a set of triacs. */
+void gi_clear_dimming (U8 triac, U8 *dimming)
+{
+	U8 i;
+	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
+		dimming[i] &= ~triac;
+}
+
+void triac_update (void)
+{
+	U8 i;
+	U8 latch;
+
+	/* Refresh the triac latch by turning on all 'normal'
+	 * outputs, masked by anything allocated by a lamp effect. */
+	latch = triac_output;
+	latch &= ~gi_leff_alloc;
+	latch |= gi_leff_output;
+	triac_write (latch);
+
+	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
+		gi_dimming[i] |= gi_leff_dimming[i];
 }
 
 
@@ -86,7 +145,9 @@ void triac_rtt (void)
 void triac_enable (U8 triac)
 {
 	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_ON, triac);
-	triac_enables |= triac;
+	gi_clear_dimming (triac, gi_dimming);
+	triac_output |= triac;
+	triac_update ();
 }
 
 
@@ -94,76 +155,98 @@ void triac_enable (U8 triac)
 void triac_disable (U8 triac)
 {
 	log_event (SEV_INFO, MOD_TRIAC, EV_TRIAC_OFF, triac);
-	triac_enables &= ~triac;
+	gi_clear_dimming (triac, gi_dimming);
+	triac_output &= ~triac;
+	triac_update ();
 }
 
 
+/** Enable dimming for a GI string. */
+void gi_dim (U8 triac, U8 intensity)
+{
+	gi_clear_dimming (triac, gi_dimming);
+	triac_output &= ~triac;
+	gi_dimming[intensity] |= triac;
+	triac_update ();
+}
+
+
+
 /** Allocates one or more triacs for a lamp effect.
-The leff can override the default value for the triac. */
+The leff can override the default value for the strings. */
 void triac_leff_allocate (U8 triac)
 {
-	U8 i;
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
-		triac_leff_bits[i] &= ~triac;
-	triac_leff_alloc |= triac;
+	/* Only allow unallocated strings to be manipulated
+	 * by this effect. */
+	triac &= ~gi_leff_alloc;
+
+	/* Mark the strings as allocated */
+	gi_leff_alloc |= triac;
+
+	gi_leff_output = 0;
+
+	/* TODO - return actually allocated strings to the caller */
 }
 
 
 /** Frees a set of triacs at the end of a lamp effect */
 void triac_leff_free (U8 triac)
 {
-	triac_leff_alloc &= ~triac;
+	U8 i;
+	U8 latch;
+
+	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
+		gi_dimming[i] &= ~gi_leff_dimming[i];
+	gi_leff_alloc &= ~triac;
 }
+
 
 
 /** Enables a triac from a lamp effect at full brightness */
 void triac_leff_enable (U8 triac)
 {
-	U8 i;
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
-		triac_leff_bits[i] |= triac;
+	gi_clear_dimming (triac, gi_leff_dimming);
+	gi_leff_output |= triac;
+	triac_update ();
 }
 
 
 /** Disables a triac from a lamp effect */
 void triac_leff_disable (U8 triac)
 {
-	U8 i;
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
-		triac_leff_bits[i] &= ~triac;
+	gi_clear_dimming (triac, gi_leff_dimming);
+	gi_leff_output &= ~triac;
+	triac_update ();
 }
 
 
 /** Sets the intensity (brightness) of a single GI triac */
-void triac_set_brightness (U8 triac, U8 brightness)
+void triac_leff_dim (U8 triac, U8 brightness)
 {
 	U8 i;
-	brightness = 8 - brightness;
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
+
+	gi_clear_dimming (triac, gi_leff_dimming);
+	if (brightness == 0)
 	{
-		if (i >= brightness)
-			triac_leff_bits[i] |= triac;
-		else	
-			triac_leff_bits[i] &= ~triac;
+		triac_leff_disable (triac);
 	}
-#ifdef TRIAC_DEBUG
-	dbprintf ("triac bits:");
-	for (i=0; i< NUM_BRIGHTNESS_LEVELS; i++)
-		dbprintf ("%02X ", triac_leff_bits[i]);
-	db_puts ("\n");
-	dbprintf ("zc_timer = %d\n", zc_timer);
-	dbprintf ("triac_enables = %02X\n", triac_enables);
-	dbprintf ("triac_io_cache = %02X\n", triac_io_cache);
-#endif
+	else if (brightness < 6)
+	{
+		gi_dimming[6-brightness] |= triac;
+		triac_update ();
+	}
+	else
+	{
+		triac_leff_enable (triac);
+	}
 }
 
 
 /** Initialize the triac module */
 void triac_init (void)
 {
-	triac_enables = 0;
-	triac_leff_alloc = 0;
-	memset (triac_leff_bits, 0, NUM_BRIGHTNESS_LEVELS);
+	gi_leff_alloc = 0;
+	memset (gi_dimming, 0, NUM_BRIGHTNESS_LEVELS);
 	triac_write (0);
 }
 

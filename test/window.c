@@ -2913,14 +2913,12 @@ void gi_test_init (void)
 	browser_init ();
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
-	triac_disable (TRIAC_GI_MASK);
 	triac_leff_allocate (TRIAC_GI_MASK);
 }
 
 void gi_test_exit (void)
 {
 	triac_leff_free (TRIAC_GI_MASK);
-	triac_enable (TRIAC_GI_MASK);
 }
 
 void gi_test_draw (void)
@@ -2941,7 +2939,7 @@ void gi_test_draw (void)
 	print_row_center (&font_mono5, 29);
 
 	triac_leff_disable (TRIAC_GI_MASK);
-	triac_set_brightness (gi_test_values[menu_selection], gi_test_brightness);
+	triac_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
 }
 
 void gi_test_right (void)

@@ -96,6 +96,11 @@ void db_idle (void)
 					switch_queue_dump ();
 					break;
 
+				case 'T':
+					/* Dump the triac states */
+					VOIDCALL (triac_dump);
+					break;
+
 				case 's':
 				{
 					/* Simulate a switch closure.  The switch column/row must be given
