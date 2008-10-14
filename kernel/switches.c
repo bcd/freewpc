@@ -26,7 +26,6 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
-#undef RTT_ONLY
 
 /* TODO : on real hardware, occasionally an entry seems to get
  * stuck in the switch queue, and that switch can no longer be
@@ -82,7 +81,6 @@ U8 switch_queue_tail;
 
 U16 switch_last_service_time;
 
-#ifndef RTT_ONLY
 
 /** Return the switch table entry for a switch */
 const switch_info_t *switch_lookup (const switchnum_t sw)
@@ -175,8 +173,6 @@ void pic_rtt (void)
 	}
 #endif /* MACHINE_PIC */
 }
-
-#endif /* !RTT_ONLY */
 
 
 #if defined(CONFIG_PLATFORM_WPC) && defined(__m6809__)
@@ -286,16 +282,6 @@ extern inline void switch_rowpoll (const U8 col)
 
 #endif
 
-
-#ifdef RTT_ONLY
-
-void rowpoll1 (void)
-{
-	switch_rowpoll_6809 (1);
-}
-
-
-#else
 
 /** Return TRUE if the given switch is CLOSED.
  * This scans the logical values calculated at periodic service time. */
@@ -764,9 +750,7 @@ CALLSET_ENTRY (switch, idle)
 void switch_init (void)
 {
 	/* Initialize the switch state buffers */
-	/* TODO - initialize sw_logical based on current levels? */
-	memset (sw_raw, 0, sizeof (switch_bits_t));
-	memset (sw_logical, 0, sizeof (switch_bits_t));
+	memcpy (sw_logical, mach_opto_mask, SWITCH_BITS_SIZE);
 	memset (sw_edge, 0, sizeof (switch_bits_t));
 	memset (sw_stable, 0, sizeof (switch_bits_t));
 	memset (sw_unstable, 0, sizeof (switch_bits_t));
@@ -775,4 +759,3 @@ void switch_init (void)
 	switch_queue_init ();
 }
 
-#endif /* !RTT_ONLY */
