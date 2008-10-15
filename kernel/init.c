@@ -77,6 +77,10 @@ __noreturn__ void freewpc_init (void)
 	wpc_set_ram_protect (RAM_LOCKED);
 #endif
 
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+	irq_ack_value = 0x96;
+#endif
+
 	/* Initialize the ROM page register 
 	 * page of ROM adjacent to the system area is mapped.
 	 * This is the default location for machine-specific files. */
@@ -158,9 +162,6 @@ __noreturn__ void freewpc_init (void)
 
 	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
 	 * but not before all of the hardware modules are done. */
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-	irq_ack_value = 0x96;
-#endif
 	enable_interrupts ();
 
 	/* Initialize everything else.  Some of these are given explicitly
