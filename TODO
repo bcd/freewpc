@@ -22,11 +22,8 @@ Missing Feature
 * Generic slingshot/jet bumper drivers that work in every game.
 * Lamp power saver level
 * Abort after so many ball searches, or try another method (chase ball?)
-* Zerocross circuitry is not being used.  In Progress.
-* Print message when high power coils are disabled by open coin door.
 * Coin Door Ballsave
 * Burnin
-* Printer pause after every page
 * Lamp strobing, like newer Sterns
 * deff_nice
 
@@ -77,7 +74,6 @@ Uncategorized
 ./include/mode.h:	/* TODO */
 ./include/mode.h:		/* TODO */
 ./include/sys/switch.h: * the same ball.  TODO : the check for live balls should not apply in
-./include/sys/task.h: * urgent.  TODO - deprecate this bit, use TASK_GAME instead. */
 ./kernel/animation.c:	/* TODO : for video modes there should be a callback here for
 ./kernel/deff.c:	/* TODO */
 ./kernel/frame.c:	/* TODO - remove this and force all callers of the
@@ -120,7 +116,7 @@ Uncategorized Machine Code
 ./platform/wpc/task.c:	TODO : the accuracy here is a bit wonky.  For example, a task could
 ./platform/wpc/task.c:	/* TODO: on entry to the next function, it is expected that 'X' has
 ./platform/wpc/task.c: * TODO : why not just set the B/X register directly here and then
-./test/window.c:/* TODO - these really belong in feature_config.  They are not being
+./test/adjust.c:/* TODO - these really belong in feature_config.  They are not being
 ./test/window.c:/* TODO - if no solenoids/flashers defined, solenoid_test_ok
 ./test/window.c:/* TODO - these two window ops are identical; we are only
 ./test/window.c:	/* TODO : lamp_flasher_test_item */
