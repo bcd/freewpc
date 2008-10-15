@@ -411,7 +411,7 @@ extern inline void wpc_int_clear (void)
 {
 #ifdef CONFIG_DEBUG_ADJUSTMENTS
 	extern U8 irq_ack_value;
-	wpc_write_misc_control (irq_ack_value);
+	writeb (WPC_ZEROCROSS_IRQ_CLEAR, irq_ack_value);
 #else
 	wpc_write_misc_control (WPC_CTRL_IRQ_ENABLE | WPC_CTRL_IRQ_CLEAR);
 #endif
