@@ -159,7 +159,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 11: Unused
 12: Magnet Button, button, noscore, cabinet
 13: Start Button, start-button, cabinet, intest
-14: Tilt, tilt
+14: Tilt, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
 16: Striker 3, ingame
 17: Right Flipper Lane, ingame
