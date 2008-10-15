@@ -42,6 +42,28 @@ void coin_door_buttons_deff (void)
 }
 
 
+void coin_door_power_deff (void)
+{
+	U8 n;
+	for (n=0; n < 5; n++)
+	{
+		dmd_alloc_low_clean ();
+		dmd_show_low ();
+		task_sleep (TIME_200MS);
+
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed6, 64, 6, "COIN DOOR IS OPEN");
+		font_render_string_center (&font_fixed6, 64, 16, "HIGH POWER");
+		font_render_string_center (&font_fixed6, 64, 26, "IS DISABLED");
+		dmd_show_low ();
+		sound_send (SND_TEST_ALERT);
+		task_sleep (TIME_300MS);
+	}
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
 static bool coin_door_warning_needed (void)
 {
 #ifdef CONFIG_COIN_DOOR_WARNING
@@ -97,8 +119,13 @@ CALLSET_ENTRY (service, sw_up)
 void coin_door_opened (void)
 {
 	dbprintf ("Coin door is open\n");
-	/* TODO : Print a message that high power coils are disabled */
 	/* TODO : Enable Stern's "coindoor ballsave" feature */
+
+	/* Print a message that high power coils are disabled */
+	if (!in_test)
+	{
+		deff_start (DEFF_COIN_DOOR_POWER);
+	}
 }
 
 
