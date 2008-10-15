@@ -31,6 +31,7 @@
 #include <test.h>
 
 void decimal_render (U8 val) { sprintf ("%d", val); }
+void hexadecimal_render (U8 val) { sprintf ("%02X", val); }
 void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
 void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
 void clock_style_render (U8 val) { sprintf (val ? "24 HOUR" : "AM/PM"); }

@@ -22,6 +22,7 @@
 #define __FORMAT_H
 
 __test2__ void decimal_render (U8 val);
+__test2__ void hexadecimal_render (U8 val);
 __test2__ void on_off_render (U8 val);
 __test2__ void yes_no_render (U8 val);
 __test2__ void clock_style_render (U8 val);
