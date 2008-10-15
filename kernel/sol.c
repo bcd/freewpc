@@ -66,6 +66,10 @@ iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
+#define MAX_QUEUED_SOLENOIDS 4
+
+U8 sol_queue[MAX_QUEUED_SOLENOIDS];
+
 
 /** Return 0 if the given solenoid/flasher should be off,
 else return the bitmask that reflects that solenoid's
@@ -234,6 +238,50 @@ sol_pulse (solnum_t sol)
 }
 
 
+/** Queue a solenoid pulse.  This will wait if another pulse
+is currently in progress and should be used when the pulse
+is not time critical. */
+void
+sol_queue_pulse (solnum_t sol)
+{
+	U8 n;
+
+	/* Find a free slot and queue it. */
+	for (n = 0; n < MAX_QUEUED_SOLENOIDS; n++)
+	{
+		if (sol_queue[n] == 0xFF)
+		{
+			sol_queue[n] = sol;
+			return;
+		}
+	}
+
+	/* If the queue is full, pulse it now. */
+	sol_pulse (sol);
+}
+
+
+/** Service the solenoid queue once per second, doing
+one pulse at a time.  The order of the pulses is not
+guaranteed. */
+CALLSET_ENTRY (sol, idle_every_second)
+{
+	U8 n;
+	U8 sol;
+
+	/* Search the queue, and pulse at most one entry. */
+	for (n = 0; n < MAX_QUEUED_SOLENOIDS; n++)
+	{
+		if ((sol = sol_queue[n]) != 0xFF)
+		{
+			sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
+			sol_queue[n] = 0xFF;
+			return;
+		}
+	}
+}
+
+
 /** Initialize the solenoid subsystem. */
 void
 sol_init (void)
@@ -246,6 +294,8 @@ sol_init (void)
 	 * writing to the timer.  TODO : this is not particularly safe */
 	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
 	sol_duty_mask = 0x1;
-}
 
+	/* Empty the solenoid queue. */
+	memset (sol_queue, 0xFF, MAX_QUEUED_SOLENOIDS);
+}
 
