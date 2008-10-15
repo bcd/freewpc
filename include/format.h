@@ -22,6 +22,7 @@
 #define __FORMAT_H
 
 __test2__ void decimal_render (U8 val);
+__test2__ void hexadecimal_render (U8 val);
 __test2__ void on_off_render (U8 val);
 __test2__ void yes_no_render (U8 val);
 __test2__ void clock_style_render (U8 val);
@@ -38,6 +39,7 @@ __test2__ void brightness_render (U8 val);
 __test2__ void collection_text_render (U8 val);
 __test2__ void printer_type_render (U8 val);
 __test2__ void baud_rate_render (U8 val);
+__test2__ void time_interval_render (U8 val);
 
 __test2__ void integer_audit (audit_t val) ;
 __test2__ void percentage_of_games_audit (audit_t val);

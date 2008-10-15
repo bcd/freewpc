@@ -48,7 +48,9 @@ U8 last_nonfatal_error_code;
 /** Indicate the task that was running when the last nonfatal happened */
 task_gid_t last_nonfatal_error_gid;
 
-
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+U8 irq_ack_value;
+#endif
 
 /** Initialize the FreeWPC program. */
 __noreturn__ void freewpc_init (void)
@@ -156,6 +158,9 @@ __noreturn__ void freewpc_init (void)
 
 	/* Enable interrupts (IRQs and FIRQs).  Do this as soon as possible,
 	 * but not before all of the hardware modules are done. */
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+	irq_ack_value = 0x96;
+#endif
 	enable_interrupts ();
 
 	/* Initialize everything else.  Some of these are given explicitly

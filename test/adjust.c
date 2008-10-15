@@ -31,6 +31,7 @@ struct adjustment_value current_adjustment_value;
 struct adjustment *current_adjustment_set;
 
 struct adjustment_value integer_value = { 0, 0xFF, 1, decimal_render };
+struct adjustment_value hex_integer_value = { 0, 0xFF, 1, hexadecimal_render };
 struct adjustment_value credit_count_value = { 0, 4, 1, decimal_render };
 struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
@@ -216,8 +217,10 @@ struct adjustment printer_adjustments[] = {
 
 #ifdef CONFIG_DEBUG_ADJUSTMENTS
 extern U8 firq_row_value;
+extern U8 irq_ack_value;
 struct adjustment debug_adjustments[] = {
 	{ "FIRQ ROW VALUE", &integer_value, DMD_REFRESH_ROW, &firq_row_value },
+	{ "IRQ ACK VALUE", &hex_integer_value, 0x96, &irq_ack_value },
 	{ NULL, NULL, 0, NULL },
 };
 #endif

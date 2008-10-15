@@ -2784,7 +2784,7 @@ void solenoid_test_init (void)
 #endif
 	}
 	browser_item_number = browser_decimal_item_number;
-	browser_action = TIME_66MS;
+	browser_action = SOL_TIME_DEFAULT;
 #ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES-1;
 #endif
@@ -2795,16 +2795,10 @@ void solenoid_test_draw (void)
 	char *s;
 
 	browser_draw ();
-	switch (browser_action)
-	{
-		default: s = "ERR"; break;
-		case TIME_16MS: s = "16MS"; break;
-		case TIME_33MS: s = "33MS"; break;
-		case TIME_66MS: s = "66MS"; break;
-		case TIME_100MS: s = "100MS"; break;
-		case TIME_133MS: s = "133MS"; break;
-	}
-	font_render_string_center (&font_mono5, 64, 12, s);
+
+	time_interval_render (browser_action);
+	font_render_string_center (&font_mono5, 64, 12, sprintf_buffer);
+
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
 		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
@@ -2837,21 +2831,13 @@ void solenoid_test_down (void)
 
 void solenoid_test_right (void)
 {
-	if (browser_action == TIME_133MS)
-		sound_send (SND_TEST_ABORT);
-	else if (browser_action == TIME_16MS)
-		browser_action = TIME_33MS;
-	else
+	if (browser_action < TIME_200MS)
 		browser_action += TIME_33MS;
 }
 
 void solenoid_test_left (void)
 {
-	if (browser_action == TIME_16MS)
-		sound_send (SND_TEST_ABORT);
-	else if (browser_action == TIME_33MS)
-		browser_action = TIME_16MS;
-	else
+	if (browser_action > TIME_33MS)
 		browser_action -= TIME_33MS;
 }
 
