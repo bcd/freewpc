@@ -48,7 +48,9 @@ U8 last_nonfatal_error_code;
 /** Indicate the task that was running when the last nonfatal happened */
 task_gid_t last_nonfatal_error_gid;
 
-
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+U8 irq_ack_value;
+#endif
 
 /** Initialize the FreeWPC program. */
 __noreturn__ void freewpc_init (void)
@@ -73,6 +75,10 @@ __noreturn__ void freewpc_init (void)
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
+#endif
+
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+	irq_ack_value = 0x96;
 #endif
 
 	/* Initialize the ROM page register 

@@ -32,6 +32,8 @@ KERNEL_SW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/score.o)
 # and are subject to change on different hardware platforms.
 # This isn't really supported yet but it might be in the future
 # (e.g. supporting System 11, or Whitestar, etc.)
+# This group also includes any file that has a function called
+# from interrupt context.
 KERNEL_HW_OBJS += $(if $(CONFIG_AC), kernel/ac.o)
 KERNEL_HW_OBJS += kernel/adj.o
 KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/audio.o)
@@ -39,14 +41,15 @@ KERNEL_HW_OBJS += kernel/audit.o
 KERNEL_HW_OBJS += kernel/csum.o
 KERNEL_HW_OBJS += $(if $(CONFIG_DMD), kernel/dmd.o)
 KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/flip.o)
-KERNEL_HW_OBJS += kernel/freetimer.o
+KERNEL_HW_OBJS += kernel/freetimer.o   # could be KERNEL_SW_OBJS
+                                       # except for RTT.
 KERNEL_HW_OBJS += kernel/init.o
 KERNEL_HW_OBJS += kernel/lamp.o
-KERNEL_HW_OBJS += kernel/leff.o
+KERNEL_HW_OBJS += kernel/leff.o   # why not KERNEL_SW_OBJS?
 KERNEL_HW_OBJS += kernel/sol.o
 KERNEL_HW_OBJS += kernel/sound.o
 KERNEL_HW_OBJS += kernel/switches.o
-KERNEL_HW_OBJS += kernel/timer.o
+KERNEL_HW_OBJS += kernel/timer.o   # why not KERNEL_SW_OBJS?
 KERNEL_HW_OBJS += kernel/triac.o
 
 KERNEL_OBJS += $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) $(KERNEL_HW_OBJS)

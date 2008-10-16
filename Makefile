@@ -746,12 +746,13 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 #    It is unsafe to use soft registers in any file which declares
 #    interrupt-level functions, because GCC does not save/restore them
 #    as part of interrupt prologue/epilogue.  Such files will not have
-#    these options used.
+#    these options used.  TODO: what would it take to get
+#    KERNEL_HW_OBJS to benefit from soft regs?
 #
 #    PAGE is a macro set to the current page setting, so the code
 #    knows what page it is being compiled in.  (-mfar-code-page tells
 #    only GCC; this tells the code itself.  Ideally, GCC would define
-#    something for us.)
+#    something for us (another TODO))
 # 
 
 ifeq ($(CPU),m6809)

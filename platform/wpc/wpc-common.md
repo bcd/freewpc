@@ -26,7 +26,7 @@ D5: Escape, service, intest, cabinet, button
 D6: Down, service, intest, cabinet, button
 D7: Up, service, intest, cabinet, button
 D8: Enter, service, intest, cabinet, button
-22: Coin Door Closed, cabinet, edge, opto, intest
+22: Coin Door Closed, cabinet, edge, intest
 24: Always Closed, virtual, opto, c_decl(sw_unused)
 
 [drives]
@@ -93,6 +93,7 @@ System Reset: PRI_RESET, page(COMMON_PAGE)
 # TODO : priority below?
 Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
+Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
 
 [leffs]
 NULL: 0

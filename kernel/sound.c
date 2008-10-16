@@ -354,7 +354,7 @@ void sound_send (sound_code_t code)
 	if (current_volume == 0)
 		return;
 
-#ifdef __m6809__
+#if 0 // #ifdef __m6809__
 	/* GCC still is doing this inefficiently, so we are
 	hand assembling it for now. */
 	asm ("ldd\t%0" :: "m" (code));

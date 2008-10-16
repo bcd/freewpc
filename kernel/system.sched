@@ -30,7 +30,7 @@ do_irq_begin          1       16c
 fliptronic_rtt        2       250c
 
 # Update the triacs
-triac_rtt             2       60c
+triac_rtt             1       60c
 
 # Read the regular switch matrix and coin door
 switch_rtt/2          1       280c
