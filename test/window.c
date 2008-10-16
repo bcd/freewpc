@@ -2792,8 +2792,6 @@ void solenoid_test_init (void)
 
 void solenoid_test_draw (void)
 {
-	char *s;
-
 	browser_draw ();
 
 	time_interval_render (browser_action);
@@ -3264,20 +3262,22 @@ void display_test_init (void)
 
 void display_test_draw (void)
 {
-	U8 n = menu_selection;
-
-	if (n < 16)
+	if (menu_selection < 16)
 	{
 		wpc_dmd_set_low_page (menu_selection);
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
-		sprintf ("PAGE %d", n);
+		sprintf ("PAGE %d", menu_selection);
 		print_row_center (&font_mono5, 16);
 		dmd_show_low ();
 		return;
 	}
 	else
-		n -= 16;
+	{
+		extern __test2__ void dmd_show_color_pattern (void);
+		menu_selection--;
+		dmd_show_color_pattern ();
+	}
 }
 
 
