@@ -22,7 +22,7 @@
 # Schedule for FreeWPC's core real-time tasks
 
 # Common processing required at the beginning of every IRQ.
-do_irq_begin          1       16c
+!do_irq_begin         1       16c
 
 # Read the flipper switches and update the flipper coils
 # Note: this only takes 51 cycles when flippers are disabled.
@@ -65,7 +65,7 @@ lockup_check_rtt      128     23c
 free_timer_rtt        32		94c
 
 # Common processing required at the end of every IRQ
-do_irq_end            1       0c
+!do_irq_end           1       0c
 
 
 # TODO : service the coin switches correctly to ensure proper timing

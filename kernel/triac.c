@@ -128,7 +128,6 @@ void gi_clear_dimming (U8 triac, U8 *dimming)
 
 void triac_update (void)
 {
-	U8 i;
 	U8 latch;
 
 	/* Refresh the triac latch by turning on all 'normal'
@@ -220,20 +219,28 @@ void triac_leff_disable (U8 triac)
 /** Sets the intensity (brightness) of a single GI triac */
 void triac_leff_dim (U8 triac, U8 brightness)
 {
-	U8 i;
-
+	/* Disable the GI string first. */
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_output &= ~triac;
 
 	if (brightness == 0)
 	{
+		/* Nothing to do if brightness = off */
 	}
-	else if (brightness < 8)
+	else if (brightness < 7)
 	{
-		gi_leff_dimming[8-brightness] |= triac;
+		/* We want to dim the lamps at levels 1-6.
+		Level 7 doesn't work because the GI string
+		would have to be turned on and off very shortly
+		because the next zerocross point, which can't be
+		guaranteed to work. */
+		gi_leff_dimming[7-brightness] |= triac;
 	}
 	else
 	{
+		/* If the brightness is greater than the threshold,
+		then just it turn on all the way, no need to do any
+		dimming at IRQ time. */
 		gi_leff_output |= triac;
 	}
 

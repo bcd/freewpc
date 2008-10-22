@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,6 +33,13 @@ diag_error_code_t diag_error_list[MAX_DIAG_ERRORS];
 U8 diag_error_count;
 
 
+U8
+diag_get_error_count (void)
+{
+	return diag_error_count;
+}
+
+#ifdef NOT_IMPL
 void
 diag_post_error (diag_error_code_t errcode)
 {
@@ -43,12 +50,6 @@ diag_post_error (diag_error_code_t errcode)
 void
 diag_post_fatal_error (diag_error_code_t errcode)
 {
-}
-
-U8
-diag_get_error_count (void)
-{
-	return diag_error_count;
 }
 
 
@@ -78,12 +79,14 @@ diag_report_errors (void)
 {
 }
 
+#endif
 
 void
 diag_run (void)
 {
 	diag_error_count = 0;
 
+#ifdef NOT_IMPL
 #if 0
 	diag_post_error (DIAG_NOT_IMPLEMENTED);
 #endif
@@ -91,8 +94,8 @@ diag_run (void)
 	diag_test_ram ();
 	diag_test_rom ();
 	diag_test_wpc ();
+#endif
 }
-
 
 
 CALLSET_ENTRY (diag, init)
