@@ -128,7 +128,6 @@ void gi_clear_dimming (U8 triac, U8 *dimming)
 
 void triac_update (void)
 {
-	U8 i;
 	U8 latch;
 
 	/* Refresh the triac latch by turning on all 'normal'
@@ -220,8 +219,6 @@ void triac_leff_disable (U8 triac)
 /** Sets the intensity (brightness) of a single GI triac */
 void triac_leff_dim (U8 triac, U8 brightness)
 {
-	U8 i;
-
 	/* Disable the GI string first. */
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_output &= ~triac;
