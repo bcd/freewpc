@@ -2768,6 +2768,8 @@ bool solenoid_test_selection_ok (void)
 {
 	extern struct window_ops flasher_test_window;
 
+	browser_action = sol_get_time (menu_selection);
+
 	return (win_top->ops == &flasher_test_window)
 		== (MACHINE_SOL_FLASHERP (menu_selection));
 }
@@ -2795,12 +2797,15 @@ void solenoid_test_draw (void)
 	browser_draw ();
 
 	time_interval_render (browser_action);
-	font_render_string_center (&font_mono5, 64, 12, sprintf_buffer);
-
+	font_render_string_left (&font_mono5, 1, 10, sprintf_buffer);
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
-		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
+
+	sprintf ("S%02X", sol_get_duty (menu_selection));
+	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
