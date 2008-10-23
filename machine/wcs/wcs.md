@@ -216,20 +216,20 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 88: Upper Right Lane, ingame
 
 [drives]
-H1: Goal Popper
-H2: TV Popper
-H3: Kickback
+H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H2: TV Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
 H4: Lock Release
 H5: Upper Eject
-H6: Trough Release, ballserve
+H6: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
 H7: Knocker, knocker
 H8: Ramp Divertor
 
 L1: Left Jet
 L2: Upper Jet
 L3: Lower Jet
-L4: Left Sling
-L5: Right Sling
+L4: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
+L5: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Eject
 L7: Left Eject
 L8: Divertor Hold
