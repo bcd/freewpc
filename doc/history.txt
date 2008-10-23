@@ -1,0 +1,136 @@
+
+------------------------------------------------------------------------
+
+The story behind FreeWPC
+	* Create summary story for PGJ?
+	* Create more detailed stories for the website
+
+- Interest in pinball programming since college
+	- Interest in the algorithms
+- Earlier projects
+- Focus on low-level details, not necessarily creativity
+- Focus on CPU board, not sound board
+
+- First attempts
+	- Assembly language
+	- Macros
+- Switch to a C compiler
+	- Long separate discussion about how that has gone...
+
+- Emulation
+	- pinmame
+	- 6809 simulator
+
+- Benefits of the C compiler
+	- Portability to other platforms (native, ???)
+	- Catches many errors at compile time
+	- Easier to develop in
+	- Compiler problems had to be debugged, taking lots of time
+
+- History of the development
+	- Core operating system, 6809 specific
+	- I/O handling, using pinmame to figure it all out
+	- Initial focus on the test mode system
+	- Poor performance initially
+	- Version control (svn, then git)
+	- Targetting to TZ initially ... then moving to other hardware
+	variations (AFM for WPC-95, WCS for WPC-S, T2 for pre-Fliptronic).
+
+- Features that would be needed for real hardware
+	- Watchdog
+	- Switch debouncing
+	- Output duty cycling
+	- Robust error handling
+		- Solenoid pulse strategy
+		- What happens if something goes wrong?
+		- Assertions
+		- Sabotage
+	- Timing issues
+
+- Debugging features added
+	- The debug console
+	- pinmame tracing
+	- Cycle count tracking
+	- Development menu (deff stress, etc.)
+
+- Side track projects
+	- DMD effects
+	- Sound board emulation?
+	- Modularity --- Whitestar emulation
+	- Native mode
+
+- Further improvements
+	- Extensive analysis done on cycle time
+	- Rewrote many core pieces in assembly
+		- Task scheduling
+		- DMD handling
+	- Adding more fonts
+	- Deal with bank switching
+
+
+- Testing on real hardware
+	- Timing differences
+
+- Eventual plan
+	- Write a complete game
+	- Port to a brand new hardware platform
+
+
+------------------------------------------------------------------------
+
+
+FreeWPC is a project I started back in 2005 to create an open-source
+software platform that could be loaded onto WPC-era pinball machines.
+This would allow the original game software to be replaced with
+something brand new, from scratch.
+
+Over the years, there have been "hacked ROMs" that have had minor
+changes to games... changed text messages and the like.  The
+legality of these techniques is pretty clearly on the side of the
+manufacturers.  My approach is very different.  There is no pre-existing
+source code in FreeWPC.  Everything is written from scratch.
+
+Since I was in college, I have had a lot of interest in what
+it takes to write software for a pinball machine.  I had written
+a pinball "simulator" under DOS, and an emulator (pre MAME days!)
+for the System 11 platform.  Emulation was interesting, but my
+primary interest was in the algorithms and the logic that actually
+makes a pinball machine work correctly.  The thought of one program
+controlling all of those I/O devices, reading switches, and synchronizing
+display, lamp, and sound effects all at the same time seemed like
+quite a challenge.
+
+I had previously played around with 6809 assemblers a bit, but it was around
+the middle of 2005 when I decided to get seriously started on this.
+I wrote some very, very basic code just to prove that I could actually
+write something that would run under PinMAME.  It did little more than
+blink a few dots on the dot matrix.  But it was enough to prove that I
+had the necessary tools to pull it off.
+
+Within months, I became frustrated writing everything in 6809
+assembly language.  It was too tedious and error-prone to get
+much done productively.  I needed a better alternative.  I actually
+went through several styles of "macro processors", which basically
+let me abstract away some of the details and use more meaningful names
+for things.  These turned out to have their own issues.  What I really
+needed, and what I eventually got working, was a C compiler.
+
+The story of getting the C compiler to work is a long story in itself.
+Some code to let you compile C programs for the 6809 had been floating
+around for a while, but it wasn't perfect.  I needed something that
+produce high performance code, otherwise it would never work in a real
+game.  I needed something reliable, too -- I had to trust that the
+compiler was working 100% of the time.  So I spent a LOT of time improving
+and fixing the compiler itself.  I have probably spent as much time on
+the compiler as the pinball code, but it was well worth it.
+
+With the C compiler in place, I eventually rewrote most of the code
+(except for a few bits that needed to stay in assembly language, and
+which rarely changes at all these days), and it became a much more
+pleasant experience to develop in.  It also opened up some
+interesting possibilities.  Since most of the code was no longer
+in 6809 assembler, it was possible to run the software on other
+processors, like my desktop.  This has made testing some of the
+features easier, outside of the normal "target" environment.
+Another possibility is that the codebase can be ported to run
+on some custom pinball hardware yet-to-be-created.

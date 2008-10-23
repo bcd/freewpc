@@ -88,10 +88,12 @@ U8 gi_leff_dimming[NUM_BRIGHTNESS_LEVELS];
 void triac_dump (void)
 {
 	dbprintf ("Normal:    %02X\n", triac_output);
-	dbprintf ("Dim:       %02X %02X %02X\n", gi_dimming[0], gi_dimming[1], gi_dimming[2]);
+	dbprintf ("Dim:       %02X %02X %02X %02X %02X\n",
+		gi_dimming[0], gi_dimming[1], gi_dimming[2], gi_dimming[3], gi_dimming[4]);
 	dbprintf ("Alloc:     %02X\n", gi_leff_alloc);
 	dbprintf ("Leff GI:   %02X\n", gi_leff_output);
-	dbprintf ("Leff dim:  %02X %02X %02X\n", gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2]);
+	dbprintf ("Leff dim:  %02X %02X %02X %02X %02X\n",
+		gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2], gi_leff_dimming[3], gi_leff_dimming[4]);
 }
 
 
@@ -100,7 +102,7 @@ void triac_rtt (void)
 {
 	/* We only need to update the triacs if dimming
 	 * needs to be done during this phase of the AC cycle. */
-	if (unlikely (gi_dimming[zc_timer]))
+	if (unlikely (gi_dimming[zc_timer] | gi_leff_dimming[zc_timer]))
 	{
 		U8 triac_bits;
 
@@ -108,7 +110,7 @@ void triac_rtt (void)
 		triac_bits = triac_read ();
 
 		/* Turn on the lamps that need to be dimmed at this level. */
-		triac_write (triac_bits | gi_dimming[zc_timer]);
+		triac_write (triac_bits | gi_dimming[zc_timer] | gi_leff_dimming[zc_timer]);
 
 		/* Now disable the dimmed lamps for the next phase */
 		triac_write (triac_bits);
@@ -126,7 +128,6 @@ void gi_clear_dimming (U8 triac, U8 *dimming)
 
 void triac_update (void)
 {
-	U8 i;
 	U8 latch;
 
 	/* Refresh the triac latch by turning on all 'normal'
@@ -135,9 +136,6 @@ void triac_update (void)
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
 	triac_write (latch);
-
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
-		gi_dimming[i] |= gi_leff_dimming[i];
 }
 
 
@@ -183,20 +181,18 @@ void triac_leff_allocate (U8 triac)
 	/* Mark the strings as allocated */
 	gi_leff_alloc |= triac;
 
+	/* By default, allocated strings are off. */
 	gi_leff_output = 0;
 
-	/* TODO - return actually allocated strings to the caller */
+	/* TODO - return actually allocated strings to the caller
+	 * so that only those will be freed up on leff exit. */
 }
 
 
 /** Frees a set of triacs at the end of a lamp effect */
 void triac_leff_free (U8 triac)
 {
-	U8 i;
-	U8 latch;
-
-	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
-		gi_dimming[i] &= ~gi_leff_dimming[i];
+	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_alloc &= ~triac;
 }
 
@@ -223,22 +219,32 @@ void triac_leff_disable (U8 triac)
 /** Sets the intensity (brightness) of a single GI triac */
 void triac_leff_dim (U8 triac, U8 brightness)
 {
-	U8 i;
-
+	/* Disable the GI string first. */
 	gi_clear_dimming (triac, gi_leff_dimming);
+	gi_leff_output &= ~triac;
+
 	if (brightness == 0)
 	{
-		triac_leff_disable (triac);
+		/* Nothing to do if brightness = off */
 	}
-	else if (brightness < 6)
+	else if (brightness < 7)
 	{
-		gi_dimming[6-brightness] |= triac;
-		triac_update ();
+		/* We want to dim the lamps at levels 1-6.
+		Level 7 doesn't work because the GI string
+		would have to be turned on and off very shortly
+		because the next zerocross point, which can't be
+		guaranteed to work. */
+		gi_leff_dimming[7-brightness] |= triac;
 	}
 	else
 	{
-		triac_leff_enable (triac);
+		/* If the brightness is greater than the threshold,
+		then just it turn on all the way, no need to do any
+		dimming at IRQ time. */
+		gi_leff_output |= triac;
 	}
+
+	triac_update ();
 }
 
 
@@ -246,8 +252,11 @@ void triac_leff_dim (U8 triac, U8 brightness)
 void triac_init (void)
 {
 	gi_leff_alloc = 0;
+	triac_output = 0;
+	gi_leff_output = 0;
 	memset (gi_dimming, 0, NUM_BRIGHTNESS_LEVELS);
-	triac_write (0);
+	memset (gi_leff_dimming, 0, NUM_BRIGHTNESS_LEVELS);
+	triac_update ();
 }
 
 

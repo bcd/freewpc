@@ -15,8 +15,6 @@
 # things before it becomes critical.
 #
 
-rc=0
-
 checkpage ()
 {
 	section=$1; shift
@@ -38,11 +36,11 @@ checkpage ()
 	done
 
 	if [ "$percent_used" -ge 100 ]; then
-		echo -n "   error: overflow"
-		rc=1
+		echo "  error: overflow ($*)"
+		return 1
 	fi
 	if [ "$percent_used" -gt 95 ]; then
-		echo -n "   warning: $percent_used% full"
+		echo -n "  warning: $percent_used% full"
 	fi
 
 	if [ $1 ]; then
@@ -50,12 +48,10 @@ checkpage ()
 	else
 		echo ""
 	fi
-
 	return 0
 }
 
 make -j1 areainfo | grep 0x | while read x; do
-	checkpage $x
-done
-checkpage ".text" "0x8000";
-exit $rc
+	checkpage $x || exit 1
+done || exit 1
+checkpage ".text" "0x8000" || exit 1;

@@ -1,0 +1,67 @@
+
+Ideas on supporting alphanumeric displays:
+------------------------------------------
+
+* Create a new module named seg.c/seg.h which defines
+the hardware interface to segmented displays.
+	- This would mostly clone the functions already present
+	in dmd.c where possible, but deviating as necessary.
+	- Display memory is replaced by a number of regular RAM buffers.
+	- FIRQ is not required anymore.
+	- Font rendering is replaced by char-to-segment conversion
+	functions.
+	- Active/visible concept can be retained, replaced by software
+	emulation.
+	- Separate transitions need to be rewritten.
+	- New types of effects where individual segments are manipulated
+	(instead of pixels) can be written.
+
+* Create a generic display interface in display.h that
+can be used by portable code.  It maps calls to either DMD
+or seg depending on the system type.
+	- dmd_invert_page() is not supported.
+	- dmd_draw_border() , dmd_draw_horiz_line() etc. are not supported.
+	Anything involving bitmaps or images obviously can't be done.
+
+	- Create a new primitive for writing a justified block of text.
+	The font argument is included in the call, but is ignored for
+	segmented displays.
+
+	- The way that segmented calls depends on the orientation of the
+	segments, which differed in some older games but on WPC is
+	always 16x2.  Consider porting back to older systems if possible.
+
+	- A call needs to specify the block region that it wants to overlay,
+	then use coordinates relative to that region.  Internally, a region
+	is maintained as an array of four numbers: the coordinates of the
+	upper-left and lower-right corners.  Individual pixel/segment
+	offsets need not be mentioned in calls, instead use justification
+	arguments.
+
+
+#define display_print(region, justification, string)
+
+The region parameter is again four numbers and can be obtained
+via macros such as:
+
+region_all
+region_top_half
+region_bottom_half
+region_left_half
+region_right_half
+region_top_left_quadrant
+region_top_right_quadrant
+etc.
+
+The justification parameter is either:
+left_justified
+centered
+right_justified
+
+The font_render_args_* functions can be mapped into this style.
+
+In some cases, a large string can be rendered on a DMD whereas it would
+not fit on a segmented display.
+
+
+

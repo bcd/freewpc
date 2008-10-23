@@ -2768,6 +2768,8 @@ bool solenoid_test_selection_ok (void)
 {
 	extern struct window_ops flasher_test_window;
 
+	browser_action = sol_get_time (menu_selection);
+
 	return (win_top->ops == &flasher_test_window)
 		== (MACHINE_SOL_FLASHERP (menu_selection));
 }
@@ -2792,17 +2794,18 @@ void solenoid_test_init (void)
 
 void solenoid_test_draw (void)
 {
-	char *s;
-
 	browser_draw ();
 
 	time_interval_render (browser_action);
-	font_render_string_center (&font_mono5, 64, 12, sprintf_buffer);
-
+	font_render_string_left (&font_mono5, 1, 10, sprintf_buffer);
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
-		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
+
+	sprintf ("S%02X", sol_get_duty (menu_selection));
+	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
@@ -3264,20 +3267,22 @@ void display_test_init (void)
 
 void display_test_draw (void)
 {
-	U8 n = menu_selection;
-
-	if (n < 16)
+	if (menu_selection < 16)
 	{
 		wpc_dmd_set_low_page (menu_selection);
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
-		sprintf ("PAGE %d", n);
+		sprintf ("PAGE %d", menu_selection);
 		print_row_center (&font_mono5, 16);
 		dmd_show_low ();
 		return;
 	}
 	else
-		n -= 16;
+	{
+		extern __test2__ void dmd_show_color_pattern (void);
+		menu_selection--;
+		dmd_show_color_pattern ();
+	}
 }
 
 
