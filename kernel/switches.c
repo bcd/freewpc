@@ -527,10 +527,8 @@ void switch_queue_remove (pending_switch_t *entry)
 void switch_queue_init (void)
 {
 	switch_queue_head = switch_queue_tail = 0;
-	disable_irq ();
 	memset (sw_stable, 0, sizeof (sw_stable));
 	memset (sw_unstable, 0, sizeof (sw_unstable));
-	enable_irq ();
 }
 
 
@@ -752,8 +750,6 @@ void switch_init (void)
 	/* Initialize the switch state buffers */
 	memcpy (sw_logical, mach_opto_mask, SWITCH_BITS_SIZE);
 	memset (sw_edge, 0, sizeof (switch_bits_t));
-	memset (sw_stable, 0, sizeof (switch_bits_t));
-	memset (sw_unstable, 0, sizeof (switch_bits_t));
 
 	/* Initialize the switch queue */
 	switch_queue_init ();
