@@ -71,6 +71,132 @@ __fastram__ U8 sol_duty_mask;
 U8 sol_queue[MAX_QUEUED_SOLENOIDS];
 
 
+enum sol_request_state {
+	/* No solenoid request is pending */
+	REQ_IDLE,
+
+	/* A request is pending but has not been started.
+	 * For maximum power, the start should be deferred
+	 * until just after the next zerocross. */
+	REQ_PENDING,
+
+	/* The solenoid is running at 100% power.
+	 * When the timer expires, it switches to the duty
+	 * phase. */
+	REQ_ON,
+
+	/* The solenoid is running at less than 100%.
+	 * The duty mask controls during which phases of the AC
+	 * cycle it is on, and when it is off.  When the timer
+	 * expires, the coil is turned off and we go back to
+	 * idle state. */
+	REQ_DUTY,
+};
+
+__fastram__ volatile enum sol_request_state sol_req_state;
+__fastram__ volatile U8 sol_req_timer;
+
+volatile U8 req_lock;
+U8 *req_reg;
+U8 *req_reg_cache;
+U8 req_bit;
+U8 req_on_time;
+U8 req_duty_time;
+U8 req_duty_mask;
+
+
+/**
+ * Start a solenoid request.
+ */
+void sol_req_start (U8 sol)
+{
+	/* Fill out the request parameters. */
+
+	/* Mark the request pending, so the update procedure will see it. */
+	sol_req_state = REQ_PENDING;
+}
+
+
+void sol_request_async (U8 sol)
+{
+	/*
+	 * If the state machine is IDLE, go ahead and start the request.
+	 * Otherwise, it will need to be queued.
+	 */
+	sol_req_start (sol);
+}
+
+
+void sol_request (U8 sol)
+{
+	while (req_lock)
+		task_sleep (TIME_33MS);
+	req_lock = sol;
+	sol_request_async (sol);
+	while (sol_req_state != REQ_IDLE)
+		task_sleep (TIME_33MS);
+	req_lock = 0;
+}
+
+
+/**
+ * Handle solenoid requests every 1ms.
+ */
+void sol_req_rtt (void)
+{
+	/* If nothing to do, get out quickly. */
+	if (likely (sol_req_state == REQ_IDLE))
+		return;
+
+	else if (sol_req_state == REQ_PENDING)
+	{
+		/* In the pending state, start the solenoid
+		 * at 100% power but only if at a zerocrossing
+		 * point.  If the ZC circuit is broken, this
+		 * state is bypassed and task level will always
+		 * program the request in ON mode. */
+		if (1) /* TODO : just past zerocross */
+		{
+			sol_req_timer = req_on_time;
+			*req_reg = *req_reg_cache |= req_bit;
+			sol_req_state = REQ_ON;
+		}
+	}
+
+	else
+	{
+		/* In either the ON or DUTY states, we must decrement the timer. */
+		--sol_req_timer;
+		if (sol_req_timer == 0)
+		{
+			/* On expiry, switch to the next state. */
+			if (sol_req_state == REQ_ON)
+			{
+				/* Switch to DUTY. */
+				sol_req_state = REQ_DUTY;
+			}
+			else
+			{
+				/* Switch to IDLE, and ensure the coil is off. */
+				*req_reg = *req_reg_cache &= ~req_bit;
+				sol_req_state = REQ_IDLE;
+			}
+		}
+		else if (sol_req_state == REQ_DUTY)
+		{
+			/* If the timer has not expired, and we are in DUTY state,
+			 * see if the coil state needs to be toggled.  This is not
+			 * synchronized with zerocrossing exactly, but it is good
+			 * enough. */
+			if ((sol_req_timer & sol_duty_mask) == 0)
+			{
+				*req_reg = *req_reg_cache ^= req_bit;
+			}
+		}
+	}
+}
+
+
 /** Return 0 if the given solenoid/flasher should be off,
 else return the bitmask that reflects that solenoid's
 position in the output register. */
@@ -264,7 +390,7 @@ sol_queue_pulse (solnum_t sol)
 /** Service the solenoid queue once per second, doing
 one pulse at a time.  The order of the pulses is not
 guaranteed. */
-CALLSET_ENTRY (sol, idle_every_second)
+CALLSET_ENTRY (sol, idle_every_100ms)
 {
 	U8 n;
 	U8 sol;
