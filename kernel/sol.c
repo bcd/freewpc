@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 #include <rtsol.h>
-
+#include <queue.h>
 
 /**
  * \file
@@ -66,10 +66,6 @@ iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
-#define MAX_QUEUED_SOLENOIDS 4
-
-U8 sol_queue[MAX_QUEUED_SOLENOIDS];
-
 
 enum sol_request_state {
 	/* No solenoid request is pending */
@@ -104,29 +100,79 @@ U8 req_on_time;
 U8 req_duty_time;
 U8 req_duty_mask;
 
+#define SOL_REQ_QUEUE_LEN 8
+
+struct {
+	U8 head;
+	U8 tail;
+	U8 sols[SOL_REQ_QUEUE_LEN];
+} sol_req_queue;
+
 
 /**
- * Start a solenoid request.
+ * Start a solenoid request now.
+ * The state machine must be in IDLE.  This call puts it
+ * into PENDING state.
  */
 void sol_req_start (U8 sol)
 {
+	dbprintf ("Starting solenoid %d now.\n", sol);
+
 	/* Fill out the request parameters. */
+	req_reg = 0;
+	req_reg_cache = 0;
+	req_bit = 0;
+	req_on_time = 40;
+	req_duty_time = 120;
+	req_duty_mask = 0x3;
 
 	/* Mark the request pending, so the update procedure will see it. */
 	sol_req_state = REQ_PENDING;
 }
 
 
+
+static inline void sol_req_enqueue (U8 sol)
+{
+	queue_insert ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN, sol);
+}
+
+
+CALLSET_ENTRY (sol, idle_every_100ms)
+{
+	if (sol_req_state == REQ_IDLE
+		&& !queue_empty_p ((queue_t *)&sol_req_queue))
+	{
+		U8 sol = queue_remove ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN);
+		sol_req_start (sol);
+	}
+}
+
+
+/**
+ * Make a solenoid request, and return immediately, even if it
+ * is not started.
+ */
 void sol_request_async (U8 sol)
 {
 	/*
 	 * If the state machine is IDLE, go ahead and start the request.
 	 * Otherwise, it will need to be queued.
 	 */
-	sol_req_start (sol);
+	if (sol_req_state == REQ_IDLE)
+	{
+		sol_req_start (sol);
+	}
+	else
+	{
+		sol_req_enqueue (sol);
+	}
 }
 
 
+/**
+ * Make a solenoid request, and wait it to finish before returning.
+ */
 void sol_request (U8 sol)
 {
 	while (req_lock)
@@ -155,7 +201,7 @@ void sol_req_rtt (void)
 		 * point.  If the ZC circuit is broken, this
 		 * state is bypassed and task level will always
 		 * program the request in ON mode. */
-		if (1) /* TODO : just past zerocross */
+		if (zc_get_timer () == 2)
 		{
 			sol_req_timer = req_on_time;
 			*req_reg = *req_reg_cache |= req_bit;
@@ -370,41 +416,8 @@ is not time critical. */
 void
 sol_queue_pulse (solnum_t sol)
 {
-	U8 n;
-
-	/* Find a free slot and queue it. */
-	for (n = 0; n < MAX_QUEUED_SOLENOIDS; n++)
-	{
-		if (sol_queue[n] == 0xFF)
-		{
-			sol_queue[n] = sol;
-			return;
-		}
-	}
-
-	/* If the queue is full, pulse it now. */
+	//sol_request_async (sol);
 	sol_pulse (sol);
-}
-
-
-/** Service the solenoid queue once per second, doing
-one pulse at a time.  The order of the pulses is not
-guaranteed. */
-CALLSET_ENTRY (sol, idle_every_100ms)
-{
-	U8 n;
-	U8 sol;
-
-	/* Search the queue, and pulse at most one entry. */
-	for (n = 0; n < MAX_QUEUED_SOLENOIDS; n++)
-	{
-		if ((sol = sol_queue[n]) != 0xFF)
-		{
-			sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
-			sol_queue[n] = 0xFF;
-			return;
-		}
-	}
 }
 
 
@@ -421,7 +434,7 @@ sol_init (void)
 	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
 	sol_duty_mask = 0x1;
 
-	/* Empty the solenoid queue. */
-	memset (sol_queue, 0xFF, MAX_QUEUED_SOLENOIDS);
+	/* Initialize the solenoid queue. */
+	queue_init ((queue_t *)&sol_req_queue);
 }
 
