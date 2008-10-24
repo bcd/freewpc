@@ -248,9 +248,9 @@ A2: Lock Area, flash
 A3: Flipper Lanes, flash
 A4: Ramp Rear, flash
 
-F1: Magna Goalie
-F2: Loop Gate
-F3: Lock Magnet
+F5: Magna Goalie, duty(SOL_DUTY_50), time(TIME_66MS)
+F6: Loop Gate, duty(SOL_DUTY_75), time(TIME_200MS)
+F7: Lock Magnet, duty(SOL_DUTY_50), time(TIME_66MS)
 
 [gi]
 0: Playfield Left
