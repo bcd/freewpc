@@ -218,13 +218,11 @@ include common/Makefile
 ifeq ($(CONFIG_FONT),y)
 include fonts/Makefile
 endif
+ifdef CONFIG_WPC
+include test/Makefile
+endif
 
 EVENT_OBJS = $(BLDDIR)/callset.o
-
-ifdef CONFIG_WPC
-TEST_OBJS = test/window.o
-TEST2_OBJS = test/format.o test/preset.o test/swtest.o test/dmdtest.o test/adjust.o
-endif
 
 ifeq ($(CONFIG_DMD),y)
 FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
