@@ -596,6 +596,10 @@ CALLSET_ENTRY (switch, idle)
 		return;
 	}
 
+	/* TODO - before doing anything else, make sure the ALWAYS CLOSED
+	 * switch is really closed.  If not, there's a serious problem
+	 * and we can't do any switch processing. */
+
 	/* Service the switch queue. */
 	switch_service_queue ();
 
