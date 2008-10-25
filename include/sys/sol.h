@@ -51,6 +51,9 @@ the second value is the off time */
 #define SOL_DUTY_DEFAULT   SOL_DUTY_25
 #define SOL_TIME_DEFAULT   TIME_133MS
 
+#define FLASHER_DUTY_DEFAULT SOL_DUTY_50
+#define FLASHER_TIME_DEFAULT TIME_66MS
+
 /* Function prototypes */
 void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
 void sol_stop (solnum_t sol);

@@ -2760,20 +2760,23 @@ struct menu sound_test_item = {
 
 /* The browser action stores the pulse width */
 
+U8 flasher_test_mode;
+
 
 /* TODO - if no solenoids/flashers defined, solenoid_test_ok
  * may loop indefinitely */
 
 bool solenoid_test_selection_ok (void)
 {
-	extern struct window_ops flasher_test_window;
-
-	return (win_top->ops == &flasher_test_window)
-		== (MACHINE_SOL_FLASHERP (menu_selection));
+	browser_action = sol_get_time (menu_selection);
+	U8 is_flasher = MACHINE_SOL_FLASHERP (menu_selection);
+	if (is_flasher == flasher_test_mode)
+		return 1;
+	return 0;
 }
 
 
-void solenoid_test_init (void)
+void driver_test_init (void)
 {
 	browser_init ();
 	while (!solenoid_test_selection_ok ())
@@ -2790,17 +2793,32 @@ void solenoid_test_init (void)
 #endif
 }
 
+void solenoid_test_init (void)
+{
+	flasher_test_mode = 0;
+	driver_test_init ();
+}
+
+void flasher_test_init (void)
+{
+	flasher_test_mode = 1;
+	driver_test_init ();
+}
+
 void solenoid_test_draw (void)
 {
 	browser_draw ();
 
 	time_interval_render (browser_action);
-	font_render_string_center (&font_mono5, 64, 12, sprintf_buffer);
-
+	font_render_string_left (&font_mono5, 1, 10, sprintf_buffer);
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
-		font_render_string_center (&font_var5, 108, 12, "(DEFAULT)");
+		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
+
+	sprintf ("S%02X", sol_get_duty (menu_selection));
+	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
 }
@@ -2856,7 +2874,7 @@ struct window_ops solenoid_test_window = {
 
 struct window_ops flasher_test_window = {
 	INHERIT_FROM_BROWSER,
-	.init = solenoid_test_init,
+	.init = flasher_test_init,
 	.draw = solenoid_test_draw,
 	.enter = solenoid_test_enter,
 	.left = solenoid_test_left,

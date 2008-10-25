@@ -216,20 +216,20 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 88: Upper Right Lane, ingame
 
 [drives]
-H1: Goal Popper
-H2: TV Popper
-H3: Kickback
+H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H2: TV Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
 H4: Lock Release
 H5: Upper Eject
-H6: Trough Release, ballserve
+H6: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
 H7: Knocker, knocker
 H8: Ramp Divertor
 
 L1: Left Jet
 L2: Upper Jet
 L3: Lower Jet
-L4: Left Sling
-L5: Right Sling
+L4: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
+L5: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Eject
 L7: Left Eject
 L8: Divertor Hold
@@ -248,9 +248,9 @@ A2: Lock Area, flash
 A3: Flipper Lanes, flash
 A4: Ramp Rear, flash
 
-F1: Magna Goalie
-F2: Loop Gate
-F3: Lock Magnet
+F5: Magna Goalie, duty(SOL_DUTY_50), time(TIME_66MS)
+F6: Loop Gate, duty(SOL_DUTY_75), time(TIME_200MS)
+F7: Lock Magnet, duty(SOL_DUTY_50), time(TIME_66MS)
 
 [gi]
 0: Playfield Left
@@ -315,6 +315,7 @@ Disable Goalie: yes_no, NO
 [system_music]
 
 [scores]
+2500:
 
 [highscores]
 
@@ -340,3 +341,8 @@ PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
+
+[timers]
+Goal Trough Made:
+Ignore R. Ramp Exit:
+Ramp Gate Debounce:
