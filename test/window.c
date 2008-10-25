@@ -2760,22 +2760,23 @@ struct menu sound_test_item = {
 
 /* The browser action stores the pulse width */
 
+U8 flasher_test_mode;
+
 
 /* TODO - if no solenoids/flashers defined, solenoid_test_ok
  * may loop indefinitely */
 
 bool solenoid_test_selection_ok (void)
 {
-	extern struct window_ops flasher_test_window;
-
 	browser_action = sol_get_time (menu_selection);
-
-	return (win_top->ops == &flasher_test_window)
-		== (MACHINE_SOL_FLASHERP (menu_selection));
+	U8 is_flasher = MACHINE_SOL_FLASHERP (menu_selection);
+	if (is_flasher == flasher_test_mode)
+		return 1;
+	return 0;
 }
 
 
-void solenoid_test_init (void)
+void driver_test_init (void)
 {
 	browser_init ();
 	while (!solenoid_test_selection_ok ())
@@ -2790,6 +2791,18 @@ void solenoid_test_init (void)
 #ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES-1;
 #endif
+}
+
+void solenoid_test_init (void)
+{
+	flasher_test_mode = 0;
+	driver_test_init ();
+}
+
+void flasher_test_init (void)
+{
+	flasher_test_mode = 1;
+	driver_test_init ();
 }
 
 void solenoid_test_draw (void)
@@ -2861,7 +2874,7 @@ struct window_ops solenoid_test_window = {
 
 struct window_ops flasher_test_window = {
 	INHERIT_FROM_BROWSER,
-	.init = solenoid_test_init,
+	.init = flasher_test_init,
 	.draw = solenoid_test_draw,
 	.enter = solenoid_test_enter,
 	.left = solenoid_test_left,
