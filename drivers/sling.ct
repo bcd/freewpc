@@ -1,0 +1,59 @@
+/**
+ * Slingshot driver
+ */
+
+@@class sling
+@@parameter sw
+@@parameter sol
+
+@@file @class.h
+
+typedef enum { ON_PHASE, OFF_PHASE } mode_t;
+
+@@file @self.h
+
+#include <@class.h>
+
+extern mode_t @self_mode;
+
+extern U8 @self_timer;
+
+
+extern inline void @self_init (void)
+{
+	@self_timer = 0;
+	@self_mode = ON_PHASE;
+}
+
+extern inline void @self_service (void)
+{
+	if (@self_timer)
+	{
+		@self_timer--;
+		if (@self_mode == ON_PHASE)
+		{
+			/* turn on @sol here */
+			if (@self_timer == 0)
+			{
+				@self_mode = OFF_PHASE;
+			}
+		}
+		else
+		{
+			/* turn off @sol here */
+			if (@self_timer == 0)
+			{
+				@self_mode = ON_PHASE;
+			}
+		}
+	}
+}
+
+@@file @self.c
+
+#include <freewpc.h>
+#include <@self.h>
+
+mode_t @self_mode;
+
+U8 @self_timer;

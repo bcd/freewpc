@@ -215,6 +215,7 @@ PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_F
 ifneq ($(CONFIG_BARE),y)
 include kernel/Makefile
 include common/Makefile
+include drivers/Makefile
 ifeq ($(CONFIG_FONT),y)
 include fonts/Makefile
 endif
