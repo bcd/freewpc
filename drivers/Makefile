@@ -10,8 +10,8 @@ DRIVER_OBJS :=
 #
 define driver-load
 D_CLASS := $(strip $(1))
-$(D_CLASS)_TEMPLATE := drivers/$(D_CLASS).ct
-$(D_CLASS)_HEADER := $(BLDDIR)/$(D_CLASS).h
+$$(D_CLASS)_TEMPLATE := drivers/$$(D_CLASS).ct
+$$(D_CLASS)_HEADER := $(BLDDIR)/$$(D_CLASS).h
 endef
 
 
@@ -25,21 +25,23 @@ define driver-open
 D_CLASS := $(strip $(1))
 D_INST := $(strip $(2))
 D_ARGS := $(strip $(3))
-D_SRC := $(BLDDIR)/$(D_CLASS)$(D_INST).c
-D_OBJ := $(D_SRC:.c=.o)
-D_HEADER := $(BLDDIR)/$(D_CLASS)$(D_INST).h
+D_CLASS_TEMPLATE := $($(D_CLASS)_TEMPLATE)
+D_CLASS_HEADER := $($(D_CLASS)_HEADER)
+D_SRC := $(BLDDIR)/$$(D_CLASS)$$(D_INST).c
+D_OBJ := $$(D_SRC:.c=.o)
+D_HEADER := $(BLDDIR)/$$(D_CLASS)$$(D_INST).h
 
-DRIVER_OBJS += $(D_CLASS), $(D_INST), $(D_ARGS) ;
+DRIVER_OBJS += $$(D_OBJ)
 
-$(D_OBJ) : $(D_SRC) $(D_HEADER) $($(D_CLASS)_HEADER)
+$$(D_OBJ) : $$(D_SRC) $$(D_HEADER) $$(D_CLASS_HEADER)
 
-$(D_SRC) $(D_HEADER) $($(D_CLASS)_HEADER) : $($(D_CLASS)_TEMPLATE)
+$$(D_SRC) $$(D_HEADER) $$(D_CLASS_HEADER) : $$(D_CLASS_TEMPLATE)
+	$(CTEMP) $$(D_ARGS) -i $$(D_INST) $$(D_CLASS_TEMPLATE)
 endef
 
-$(eval $(call driver-load,sling))
-$(eval $(call driver-open,sling,1,bar))
-$(eval $(call driver-open,sling,2,baz))
-$(eval $(call driver-open,sling,0,foo))
+$(eval $(call driver-load, sling))
+$(eval $(call driver-open, sling, 0, -D sw=SW_LEFT_SLING -D sol=SOL_LEFT_SLING))
+$(eval $(call driver-open, sling, 1, -D sw=SW_RIGHT_SLING -D sol=SOL_RIGHT_SLING))
 
 
 #SLING_DRIVER=drivers/sling.ct
@@ -72,4 +74,5 @@ dump-drivers :
 #build/sling1.c build/sling1.h : drivers/sling.ct
 #	$(CTEMP) $(CONFIG_SLING_INSTANCE1) -i 1 drivers/sling.ct
 
-KERNEL_HW_OBJS += $(DRIVER_OBJS)
+# once working:
+# KERNEL_HW_OBJS += $(DRIVER_OBJS)
