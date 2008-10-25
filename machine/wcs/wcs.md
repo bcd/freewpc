@@ -315,6 +315,7 @@ Disable Goalie: yes_no, NO
 [system_music]
 
 [scores]
+2500:
 
 [highscores]
 
@@ -340,3 +341,8 @@ PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
+
+[timers]
+Goal Trough Made:
+Ignore R. Ramp Exit:
+Ramp Gate Debounce:
