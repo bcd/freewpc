@@ -2768,6 +2768,8 @@ U8 flasher_test_mode;
 
 bool solenoid_test_selection_ok (void)
 {
+	if ((menu_selection >= 28) && (menu_selection <= 31))
+		return 0;
 	browser_action = sol_get_time (menu_selection);
 	U8 is_flasher = MACHINE_SOL_FLASHERP (menu_selection);
 	if (is_flasher == flasher_test_mode)
@@ -2816,7 +2818,27 @@ void solenoid_test_draw (void)
 		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
 
-	sprintf ("S%02X", sol_get_duty (menu_selection));
+	switch (sol_get_duty (menu_selection))
+	{
+		case SOL_DUTY_12:
+			sprintf ("1/8");
+			break;
+		case SOL_DUTY_25:
+			sprintf ("1/4");
+			break;
+		case SOL_DUTY_50:
+			sprintf ("1/2");
+			break;
+		case SOL_DUTY_75:
+			sprintf ("3/4");
+			break;
+		case SOL_DUTY_100:
+			sprintf ("ON");
+			break;
+		default:
+			sprintf ("S%02X", sol_get_duty (menu_selection));
+			break;
+	}
 	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
 
 	sprintf_far_string (names_of_drives + menu_selection);
