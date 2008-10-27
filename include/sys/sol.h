@@ -37,8 +37,9 @@ extern __fastram__ U8 sol_timers[];
 extern U8 sol_duty_state[];
 
 
-/** Duty cycle values.  The first value is the on time,
-the second value is the off time */
+/** Duty cycle values.  Each '1' bit represents a
+time quantum during which the coil on.  The more '1's,
+the more powerful the pulse. */
 #define SOL_DUTY_0      0x0
 #define SOL_DUTY_12     0x40
 #define SOL_DUTY_25     0x22
@@ -48,7 +49,12 @@ the second value is the off time */
 #define SOL_DUTY_75     0x77
 #define SOL_DUTY_100    0xFF
 
+/** The default duty cycle is kept small.  This
+can be overwritten in the machine config file. */
 #define SOL_DUTY_DEFAULT   SOL_DUTY_25
+
+/** The default pulse time is reasonable for most
+coils. */
 #define SOL_TIME_DEFAULT   TIME_133MS
 
 /* Function prototypes */
@@ -65,12 +71,15 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 
 #define flasher_pulse(id) sol_pulse(id)
 
+
+/** Retrieve the default pulse duration for a coil. */
 extern inline U8 sol_get_time (solnum_t sol)
 {
 	extern const U8 sol_time_table[];
 	return sol_time_table[sol];
 }
 
+/** Retrieve the default duty strength for a coil. */
 extern inline U8 sol_get_duty (solnum_t sol)
 {
 	extern const U8 sol_duty_table[];
