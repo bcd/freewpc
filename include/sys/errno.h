@@ -60,6 +60,7 @@
 #define ERR_MUST_BE_LEFF         38
 #define ERR_INVALID_MATRIX       39
 #define ERR_TASK_STACK_UNDERFLOW 40
+#define ERR_SWITCH_SLOW_SERVICE  41
 
 #ifndef __ASSEMBLER__
 
