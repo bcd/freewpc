@@ -480,11 +480,10 @@ cleanup:
 }
 
 
-/** Schedule a task to handle a switch event.
- * In addition, the switch queue is updated to cancel prebounce and
- * to start the postbounce period.
+/**
+ * Schedule a task to handle a switch event.
  */
-void switch_schedule (const U8 sw, pending_switch_t *entry)
+void switch_schedule (const U8 sw)
 {
 	/* Start a task to process the switch right away */
 	task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
@@ -562,7 +561,7 @@ void switch_service_queue (void)
 			{
 				/* Debounce is complete.  Schedule the switch handler. */
 				dbprintf ("debounce complete\n");
-				switch_schedule (entry->id, entry);
+				switch_schedule (entry->id);
 				switch_queue_remove (entry);
 			}
 			else
@@ -626,7 +625,7 @@ void switch_update_stable (const U8 sw)
 		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
 		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
 	{
-		switch_schedule (sw, NULL);
+		switch_schedule (sw);
 	}
 }
 
