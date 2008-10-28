@@ -112,12 +112,9 @@ depending on the system type. */
 
 #define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
 
-/* Switch array indices */
-#define AR_RAW			0
-#define AR_CHANGED 	1
-#define AR_PENDING 	2
-#define AR_LATCHED   3
-#define NUM_SWITCH_ARRAYS 	4
+
+/** The form for a matrix of bits, one per switch */
+typedef U8 switch_bits_t[SWITCH_BITS_SIZE];
 
 extern __fastram__ U8 sw_raw[SWITCH_BITS_SIZE];
 

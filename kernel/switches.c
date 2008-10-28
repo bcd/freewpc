@@ -53,8 +53,6 @@ typedef struct
 } pending_switch_t;
 
 
-typedef U8 switch_bits_t[SWITCH_BITS_SIZE];
-
 /** 0/1 = the raw input value of the switch */
 __fastram__ switch_bits_t sw_raw;
 
