@@ -612,14 +612,10 @@ void switch_update_stable (const U8 sw)
 	dbprintf ("Switch stable: %d\n", sw);
 
 	disable_irq ();
+	bit_toggle (sw_logical, sw);
 	bit_off (sw_stable, sw);
 	bit_off (sw_unstable, sw);
 	enable_irq ();
-
-	/* Latch the transition.  This is still an open/closed level. */
-	bit_toggle (sw_logical, sw);
-
-	/* TODO - queue the switch if it requires further debouncing */
 
 	/* See if the transition requires scheduling.  It does if:
 	 a) the switch is bidirectional, or
