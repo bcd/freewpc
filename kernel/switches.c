@@ -748,6 +748,15 @@ CALLSET_ENTRY (switch, idle)
 					}
 #endif
 
+
+CALLSET_ENTRY (switch, init_complete)
+{
+	/* Initialize the service timer.  This needs to happen
+	 * just before interrupts are enabled */
+	switch_last_service_time = get_sys_time ();
+}
+
+
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
