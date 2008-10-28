@@ -66,6 +66,8 @@ iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
+U8 sol_reg_readable[6];
+
 
 enum sol_request_state {
 	/* No solenoid request is pending */
@@ -93,8 +95,8 @@ __fastram__ volatile enum sol_request_state sol_req_state;
 __fastram__ volatile U8 sol_req_timer;
 
 volatile U8 req_lock;
-U8 *req_reg;
-U8 *req_reg_cache;
+U8 *req_reg_write;
+U8 *req_reg_read;
 U8 req_bit;
 U8 req_on_time;
 U8 req_duty_time;
@@ -109,6 +111,15 @@ struct {
 } sol_req_queue;
 
 
+void sol_req_dump (void)
+{
+	dbprintf ("State = %d\n", sol_req_state);
+	dbprintf ("Timer = %d\n", sol_req_timer);
+	dbprintf ("Write = %p, Read = %p\n", req_reg_write, req_reg_read);
+	dbprintf ("Bit = %02X\n", req_bit);
+}
+
+
 /**
  * Start a solenoid request now.
  * The state machine must be in IDLE.  This call puts it
@@ -116,14 +127,35 @@ struct {
  */
 void sol_req_start (U8 sol)
 {
-	dbprintf ("Starting solenoid %d now.\n", sol);
+	dbprintf ("Starting pulse %d now.\n", sol);
 
 	/* Fill out the request parameters. */
-	req_reg = 0;
-	req_reg_cache = 0;
-	req_bit = 0;
-	req_on_time = 40;
-	req_duty_time = 120;
+	switch (sol / 8)
+	{
+		case 0:
+			req_reg_write = WPC_SOL_HIGHPOWER_OUTPUT;
+			break;
+		case 1:
+			req_reg_write = WPC_SOL_LOWPOWER_OUTPUT;
+			break;
+		case 2:
+			req_reg_write = WPC_SOL_FLASH1_OUTPUT;
+			break;
+		case 3:
+			req_reg_write = WPC_SOL_FLASH2_OUTPUT;
+			break;
+		case 4:
+			req_reg_write = WPC_SOL_HIGHPOWER_OUTPUT;
+			break;
+		case 5:
+			req_reg_write = WPC_EXTBOARD1;
+			break;
+	}
+	req_reg_read = &sol_reg_readable[sol / 8];
+	req_bit = 1 << (sol % 8);
+
+	req_on_time = 16;
+	req_duty_time = 100;
 	req_duty_mask = 0x3;
 
 	/* Mark the request pending, so the update procedure will see it. */
@@ -155,6 +187,8 @@ CALLSET_ENTRY (sol, idle_every_100ms)
  */
 void sol_request_async (U8 sol)
 {
+	dbprintf ("Request pulse %d\n", sol);
+
 	/*
 	 * If the state machine is IDLE, go ahead and start the request.
 	 * Otherwise, it will need to be queued.
@@ -165,6 +199,7 @@ void sol_request_async (U8 sol)
 	}
 	else
 	{
+		dbprintf ("Queueing pulse %d\n", sol);
 		sol_req_enqueue (sol);
 	}
 }
@@ -175,10 +210,17 @@ void sol_request_async (U8 sol)
  */
 void sol_request (U8 sol)
 {
+	/* Wait until any existing sync requests are finished. */
 	while (req_lock)
 		task_sleep (TIME_33MS);
+
+	/* Acquire the lock for this solenoid. */
 	req_lock = sol;
+
+	/* Issue the request */
 	sol_request_async (sol);
+
+	/* Wait for the request to finish - TODO not quite right */
 	while (sol_req_state != REQ_IDLE)
 		task_sleep (TIME_33MS);
 	req_lock = 0;
@@ -204,7 +246,7 @@ void sol_req_rtt (void)
 		if (zc_get_timer () == 2)
 		{
 			sol_req_timer = req_on_time;
-			*req_reg = *req_reg_cache |= req_bit;
+			*req_reg_write = *req_reg_read |= req_bit;
 			sol_req_state = REQ_ON;
 		}
 	}
@@ -224,7 +266,7 @@ void sol_req_rtt (void)
 			else
 			{
 				/* Switch to IDLE, and ensure the coil is off. */
-				*req_reg = *req_reg_cache &= ~req_bit;
+				*req_reg_write = *req_reg_read &= ~req_bit;
 				sol_req_state = REQ_IDLE;
 			}
 		}
@@ -236,7 +278,7 @@ void sol_req_rtt (void)
 			 * enough. */
 			if ((sol_req_timer & sol_duty_mask) == 0)
 			{
-				*req_reg = *req_reg_cache ^= req_bit;
+				*req_reg_write = *req_reg_read ^= req_bit;
 			}
 		}
 	}
