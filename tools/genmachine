@@ -81,6 +81,7 @@ my %contextDefinitionRe = (
 	"fonts" => "AUTO",
 	"fifs" => "AUTO",
 	"timers" => "AUTO",
+	"templates" => "AUTO",
 );
 
 # A table of binary properties per context.  During any object declaration,
@@ -1002,6 +1003,38 @@ sub machine_write_makefile {
 	for $font (unique ($m->{'fonts'})) {
 		print "CONFIG_" . $font->{'c_ident'} . " := y\n";
 	}
+
+	# Generate rules for compiling templates.
+	for $inst (unique ($m->{'templates'})) {
+		my $driver = $inst->{'driver'};
+		my $id = $inst->{'ID'};
+
+		my $args = "";
+		my @arglist = split /,/, $inst->{'props'};
+		for my $arg (@arglist) {
+			$args .= "-D $arg ";
+		}
+
+		my $c_file = "build/$driver$id.c";
+		my $h_file = "build/$driver$id.h";
+		my $o_file = "\$(BLDDIR)/$driver$id.o";
+		my $class_file = "build/$driver.h";
+		my $template_file = "drivers/$driver.ct";
+
+		print "# Template ID : $id\n";
+		print "# Driver: $driver\n";
+		print "# Arguments: $args\n";
+		print <<END;
+
+TEMPLATE_OBJS += $o_file
+
+$o_file : $c_file $h_file build/mach-Makefile
+
+$c_file $h_file : $template_file
+	\$(CTEMP) -i $id $args $template_file
+END
+	}
+	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";
 
 	# Print rules for building the FIFs.
 	print "\n";

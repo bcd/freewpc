@@ -66,6 +66,7 @@ print "(ctemp): reading template '$infile'\n";
 open FH, "$infile" or die "$!";
 while (<FH>) {
 	chomp;
+	next if (/^\@\@$/);
 	if (/^\@\@class ([^ ]*)/) {
 		$class = $1;
 		print "(ctemp): class '$class'\n";

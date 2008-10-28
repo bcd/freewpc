@@ -38,6 +38,8 @@ ROM_PAGE_COUNT = 32
 
 MACHINE_FILE = wcs.md
 
+MACHINE_SCHEDULE := $(M)/wcs.sched
+
 PINMAME_MACHINE = wcs_l2
 
 PINMAME_GAME_ROM = wcup_lx2.rom
@@ -57,3 +59,5 @@ GAME_INCLUDES =
 GAME_PAGED_OBJS = goalie_driver.o amode.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
+
+MACHINE_SCHED_FLAGS += -i sling0.h -i sling1.h

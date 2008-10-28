@@ -340,3 +340,7 @@ PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
+
+[templates]
+Left Slingshot: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=8
+Right Slingshot: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=8
