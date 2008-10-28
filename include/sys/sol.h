@@ -61,6 +61,8 @@ coils. */
 #define FLASHER_TIME_DEFAULT TIME_66MS
 
 /* Function prototypes */
+void sol_request_async (U8 sol);
+void sol_request (U8 sol);
 void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
 void sol_stop (solnum_t sol);
 void sol_pulse (solnum_t sol);

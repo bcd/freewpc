@@ -69,6 +69,9 @@ __fastram__ U8 sol_duty_mask;
 U8 sol_reg_readable[6];
 
 
+/**
+ * The state of the solenoid request driver.
+ */
 enum sol_request_state {
 	/* No solenoid request is pending */
 	REQ_IDLE,
@@ -111,6 +114,10 @@ struct {
 } sol_req_queue;
 
 
+/**
+ * Dump the state of the solenoid request driver.
+ */
+#ifdef DEBUGGER
 void sol_req_dump (void)
 {
 	dbprintf ("State = %d\n", sol_req_state);
@@ -118,6 +125,7 @@ void sol_req_dump (void)
 	dbprintf ("Write = %p, Read = %p\n", req_reg_write, req_reg_read);
 	dbprintf ("Bit = %02X\n", req_bit);
 }
+#endif
 
 
 /**
@@ -128,6 +136,9 @@ void sol_req_dump (void)
 void sol_req_start (U8 sol)
 {
 	dbprintf ("Starting pulse %d now.\n", sol);
+
+	if (sol_req_state != REQ_IDLE)
+		fatal (ERR_SOL_REQUEST);
 
 	/* Fill out the request parameters. */
 	switch (sol / 8)
@@ -220,15 +231,20 @@ void sol_request (U8 sol)
 	/* Issue the request */
 	sol_request_async (sol);
 
-	/* Wait for the request to finish - TODO not quite right */
-	while (sol_req_state != REQ_IDLE)
+	/* Wait for the request to finish */
+	while (req_lock)
 		task_sleep (TIME_33MS);
-	req_lock = 0;
 }
 
 
 /**
  * Handle solenoid requests every 1ms.
+ *
+ * The lifecycle of the request manager is as follows:
+ *
+ * IDLE   --->  PENDING   --->  ON   ---> DUTY
+ *
+ * See the declaration of these states for details.
  */
 void sol_req_rtt (void)
 {
@@ -265,8 +281,11 @@ void sol_req_rtt (void)
 			}
 			else
 			{
-				/* Switch to IDLE, and ensure the coil is off. */
+				/* Switch to IDLE.  Ensure the coil is off.
+				Release any process waiting on this solenoid to
+				finish. */
 				*req_reg_write = *req_reg_read &= ~req_bit;
+				req_lock = 0;
 				sol_req_state = REQ_IDLE;
 			}
 		}
@@ -453,17 +472,6 @@ void
 sol_pulse (solnum_t sol)
 {
 	sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
-}
-
-
-/** Queue a solenoid pulse.  This will wait if another pulse
-is currently in progress and should be used when the pulse
-is not time critical. */
-void
-sol_queue_pulse (solnum_t sol)
-{
-	//sol_request_async (sol);
-	sol_pulse (sol);
 }
 
 

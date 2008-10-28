@@ -135,6 +135,7 @@ my %BinaryProperties = (
 		"upkick" => 1,
 		"eject" => 1,
 		"flash" => 1,
+		"flipper" => 1,
 		"nosearch" => 1,
 		"notinstalled" => 1,
 	},
