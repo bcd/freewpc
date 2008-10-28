@@ -52,8 +52,6 @@ typedef struct
 	S8 timer;
 } pending_switch_t;
 
-pending_switch_t *switch_queue_add (const switchnum_t sw);
-
 
 typedef U8 switch_bits_t[SWITCH_BITS_SIZE];
 
@@ -70,6 +68,8 @@ __fastram__ switch_bits_t sw_unstable;
 
 __fastram__ switch_bits_t sw_logical;
 
+/** Nonzero for each switch that is in the switch queue. */
+switch_bits_t sw_queued;
 
 #define MAX_QUEUED_SWITCHES 16
 
@@ -497,7 +497,9 @@ pending_switch_t *switch_queue_add (const switchnum_t sw)
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
 	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
+	entry->timer = switch_lookup(sw)->prebounce * 16;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
+	bit_on (sw_queued, sw);
 	return entry;
 }
 
@@ -517,6 +519,7 @@ pending_switch_t *switch_queue_find (const switchnum_t sw)
 /** Remove an entry from the switch queue */
 void switch_queue_remove (pending_switch_t *entry)
 {
+	bit_off (sw_queued, entry->id);
 	entry->id = 0xFF;
 	if (entry == &switch_queue[switch_queue_head])
 		value_rotate_up (switch_queue_head, 0, MAX_QUEUED_SWITCHES-1);
@@ -528,6 +531,7 @@ void switch_queue_init (void)
 	switch_queue_head = switch_queue_tail = 0;
 	memset (sw_stable, 0, sizeof (sw_stable));
 	memset (sw_unstable, 0, sizeof (sw_unstable));
+	memset (sw_queued, 0, sizeof (sw_queued));
 }
 
 
@@ -561,8 +565,9 @@ void switch_service_queue (void)
 			{
 				/* Debounce is complete.  Schedule the switch handler. */
 				dbprintf ("debounce complete\n");
-				switch_schedule (entry->id);
 				switch_queue_remove (entry);
+				switch_schedule (entry->id);
+				/* TODO - reset stable/unstable here */
 			}
 			else
 			{
@@ -601,8 +606,10 @@ void switch_queue_dump (void)
 	switch_matrix_dump ("Raw     ", sw_raw);
 	switch_matrix_dump ("Logical ", sw_logical);
 	switch_matrix_dump ("Edge    ", sw_edge);
+	task_sleep (TIME_16MS);
 	switch_matrix_dump ("Stable  ", sw_stable);
 	switch_matrix_dump ("Unstable", sw_unstable);
+	switch_matrix_dump ("Queued  ", sw_queued);
 }
 
 
@@ -610,6 +617,20 @@ void switch_update_stable (const U8 sw)
 {
 	dbprintf ("Switch stable: %d\n", sw);
 
+	/* TODO - if the queue is already in the queue, then it is
+	 * not stable and should be removed */
+
+	/* Queue the switch if it requires further debouncing
+	 * and skip everything below */
+	if (switch_lookup (sw)->prebounce != 0)
+	{
+		switch_queue_add (sw);
+		return;
+	}
+
+	/* Latch the transition.  sw_logical is still an open/closed level.
+	 * By clearing the stable/unstable bits, IRQ will begin scanning
+	 * for new transitions at this point. */
 	disable_irq ();
 	bit_toggle (sw_logical, sw);
 	bit_off (sw_stable, sw);
@@ -634,8 +655,14 @@ void switch_update_unstable (const U8 sw)
 {
 	dbprintf ("Switch unstable: %d\n", sw);
 
-	/* TODO - see if heavy debounce should be cancelled */
+	if (bit_test (sw_queued, sw))
+	{
+		/* The switch was already seen and queued, but it did not
+		 * complete its full debounce.  TODO - remove the queue
+		 * entry here */
+	}
 
+	/* Restart IRQ-level scanning. */
 	disable_irq ();
 	bit_off (sw_stable, sw);
 	bit_off (sw_unstable, sw);
@@ -669,6 +696,8 @@ CALLSET_ENTRY (switch, idle)
 	 * switch is really closed.  If not, there's a serious problem
 	 * and we can't do any switch processing. */
 
+	/* Check for shorted switch rows/columns.  TODO : this should return a
+	 * value, and we skip rest of processing if there are problems. */
 	switch_short_detect ();
 
 	/* Iterate over each switch column to see what needs to be done. */
@@ -691,6 +720,7 @@ CALLSET_ENTRY (switch, idle)
 
 		/* Each bit in sw_stable, but not in sw_unstable, indicates a switch
 		that just transitioned and needs to be put into the debounce queue. */
+		/* TODO - also verify that not already queued? */
 		if (unlikely (rows = (sw_stable[col] & ~sw_unstable[col])))
 		{
 			U8 sw = col * 8;
@@ -712,42 +742,21 @@ CALLSET_ENTRY (switch, idle)
 }
 
 #if 0 /* merge above */
-					if (prebounce_bits & 1)
-					{
-						/* The switch is already in prebounce state, and a change
-						 * occurred.  The switch is not stable, so the
-						 * queue entry needs to be reset: restart the
-						 * prebounce timer.  The entry is not removed/added
-						 * to preserve the order??? */
-						pending_switch_t *entry = switch_queue_find (sw);
-						dbprintf ("Restarting prebounce for SW%d\n", sw);
-						entry->timer = switch_lookup(sw)->prebounce * 16;
-					}
-					else
-					{
-						/* This is a new switch closure.
-						 * If the prebounce time for the switch is zero,
-						 * then it can be serviced right away, else it
-						 * must be queued. */
-						if (switch_lookup (sw)->prebounce == 0)
-						{
-							dbprintf ("Scheduling SW%d with no prebounce\n", sw);
-							switch_schedule (sw, NULL);
-						}
-						else
-						{
-							pending_switch_t *entry = switch_queue_add (sw);
-							if (entry)
-							{
-								dbprintf ("Starting prebounce for SW %d\n", sw);
-								entry->timer = switch_lookup(sw)->prebounce * 16;
-								bit_on (switch_prebounce_bits, sw);
-							}
-						}
-					}
+		if (prebounce_bits & 1)
+		{
+			/* The switch is already in prebounce state, and a change
+			 * occurred.  The switch is not stable, so the
+			 * queue entry needs to be reset: restart the
+			 * prebounce timer.  The entry is not removed/added
+			 * to preserve the order??? */
+			pending_switch_t *entry = switch_queue_find (sw);
+			dbprintf ("Restarting prebounce for SW%d\n", sw);
+			entry->timer = switch_lookup(sw)->prebounce * 16;
+		}
 #endif
 
 
+/** Do final initializing once system init is complete. */
 CALLSET_ENTRY (switch, init_complete)
 {
 	/* Initialize the service timer.  This needs to happen
