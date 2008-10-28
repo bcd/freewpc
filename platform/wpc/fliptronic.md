@@ -7,3 +7,9 @@ F5: U. R. Flipper EOS, opto, cabinet
 F6: U. R. Flipper Button, button, opto
 F7: U. L. Flipper EOS, opto, cabinet
 F8: U. L. Flipper Button, button, opto
+
+[drives]
+F1: L.R. Flip Power, duty(SOL_DUTY_75), time(TIME_33MS)
+F2: L.R. Flip Hold, duty(SOL_DUTY_75), time(TIME_100MS)
+F3: L.L. Flip Power, duty(SOL_DUTY_75), time(TIME_33MS)
+F4: L.L. Flip Hold, duty(SOL_DUTY_75), time(TIME_100MS)
