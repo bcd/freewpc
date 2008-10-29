@@ -611,15 +611,17 @@ void switch_queue_dump (void)
 }
 
 
+/**
+ * Handle a switch that has just become stable; i.e. it changed
+ * and held steady for at least 2 consecutive readings.  It is
+ * also known not to be in the heavy debounce queue already.
+ */
 void switch_update_stable (const U8 sw)
 {
 	dbprintf ("Switch stable: %d\n", sw);
 
-	/* TODO - if the queue is already in the queue, then it is
-	 * not stable and should be removed */
-
-	/* Queue the switch if it requires further debouncing
-	 * and skip everything below */
+	/* Queue the switch if it requires further debouncing.
+	 * Otherwise, it is eligible for scheduling. */
 	if (switch_lookup (sw)->prebounce != 0)
 	{
 		switch_queue_add (sw);
@@ -649,6 +651,11 @@ void switch_update_stable (const U8 sw)
 }
 
 
+/**
+ * Handle a switch that is changing faster than its debounce period.
+ * Ignore the recent transitions and restart IRQ-level switch
+ * scanning again.
+ */
 void switch_update_unstable (const U8 sw)
 {
 	dbprintf ("Switch unstable: %d\n", sw);
