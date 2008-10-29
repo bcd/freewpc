@@ -61,10 +61,10 @@ A1: Aux. Sol. 1, notinstalled
 A2: Aux. Sol. 2, notinstalled
 A3: Aux. Sol. 3, notinstalled
 A4: Aux. Sol. 4, notinstalled
-A5: Aux. Sol. 5, notinstalled
-A6: Aux. Sol. 6, notinstalled
-A7: Aux. Sol. 7, notinstalled
-A8: Aux. Sol. 8, notinstalled
+#A5: Aux. Sol. 5, notinstalled
+#A6: Aux. Sol. 6, notinstalled
+#A7: Aux. Sol. 7, notinstalled
+#A8: Aux. Sol. 8, notinstalled
 
 [lamplists]
 ALL: 11..88
