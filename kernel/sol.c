@@ -45,8 +45,6 @@
  * to software failures.  A random write to any of the solenoid timers
  * would cause that solenoid to turn on, but at most for 1.02s, since
  * the timer countdown automatically restores it to zero.
- * TODO : it is best to zero the mask registers as well, so that
- * two random writes would be required to mistakenly turn on a solenoid.
  */
 
 
@@ -66,7 +64,7 @@ iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
-U8 sol_reg_readable[6];
+U8 sol_reg_readable[SOL_REG_COUNT];
 
 
 /**
@@ -140,31 +138,9 @@ void sol_req_start (U8 sol)
 	if (sol_req_state != REQ_IDLE)
 		fatal (ERR_SOL_REQUEST);
 
-	/* Fill out the request parameters. */
-	switch (sol / 8)
-	{
-		case 0:
-			req_reg_write = WPC_SOL_HIGHPOWER_OUTPUT;
-			break;
-		case 1:
-			req_reg_write = WPC_SOL_LOWPOWER_OUTPUT;
-			break;
-		case 2:
-			req_reg_write = WPC_SOL_FLASH1_OUTPUT;
-			break;
-		case 3:
-			req_reg_write = WPC_SOL_FLASH2_OUTPUT;
-			break;
-		case 4:
-			req_reg_write = WPC_SOL_HIGHPOWER_OUTPUT;
-			break;
-		case 5:
-			req_reg_write = WPC_EXTBOARD1;
-			break;
-	}
-	req_reg_read = &sol_reg_readable[sol / 8];
-	req_bit = 1 << (sol % 8);
-
+	req_reg_write = sol_get_write_reg (sol);
+	req_reg_read = sol_get_read_reg (sol);
+	req_bit = sol_get_bit (sol);
 	req_on_time = 16;
 	req_duty_time = 100;
 	req_duty_mask = 0x3;
@@ -175,12 +151,11 @@ void sol_req_start (U8 sol)
 
 
 
-static inline void sol_req_enqueue (U8 sol)
-{
-	queue_insert ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN, sol);
-}
 
-
+/**
+ * Periodically inspect the solenoid queue and dispatch
+ * the pending request.
+ */
 CALLSET_ENTRY (sol, idle_every_100ms)
 {
 	if (sol_req_state == REQ_IDLE
@@ -211,7 +186,7 @@ void sol_request_async (U8 sol)
 	else
 	{
 		dbprintf ("Queueing pulse %d\n", sol);
-		sol_req_enqueue (sol);
+		queue_insert ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN, sol);
 	}
 }
 
@@ -270,6 +245,9 @@ void sol_req_rtt (void)
 	else
 	{
 		/* In either the ON or DUTY states, we must decrement the timer. */
+		/* TODO - in either of these states, precise timing is not
+		as critical so we may be able to do this less frequently; i.e.
+		every 8ms instead of every 1ms. */
 		--sol_req_timer;
 		if (sol_req_timer == 0)
 		{

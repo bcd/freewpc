@@ -25,6 +25,8 @@ typedef U8 solnum_t;
 
 #define SOL_COUNT 48
 
+#define SOL_REG_COUNT (SOL_COUNT / 8)
+
 /* TODO - these are WPC specific */
 #define SOL_BASE_HIGH 0
 #define SOL_BASE_LOW 8
@@ -89,6 +91,61 @@ extern inline U8 sol_get_duty (solnum_t sol)
 {
 	extern const U8 sol_duty_table[];
 	return sol_duty_table[sol];
+}
+
+
+/** Return the hardware register that can be written
+to enable/disable a coil driver. */
+extern inline U8 *sol_get_write_reg (solnum_t sol)
+{
+	switch (sol / 8)
+	{
+		case 0:
+			return (U8 *)WPC_SOL_HIGHPOWER_OUTPUT;
+		case 1:
+			return (U8 *)WPC_SOL_LOWPOWER_OUTPUT;
+		case 2:
+			return (U8 *)WPC_SOL_FLASH1_OUTPUT;
+		case 3:
+			return (U8 *)WPC_SOL_FLASH2_OUTPUT;
+		case 4:
+			return (U8 *)WPC_SOL_HIGHPOWER_OUTPUT;
+		case 5:
+			return (U8 *)WPC_EXTBOARD1;
+	}
+}
+
+
+/** Return the memory variable that tracks the state
+of a coil driver. */
+extern inline U8 *sol_get_read_reg (const solnum_t sol)
+{
+	extern U8 sol_reg_readable[SOL_REG_COUNT];
+	return &sol_reg_readable[sol / 8];
+}
+
+
+/** Return the bit position in a hardware register
+or memory variable that corresponds to a particular
+coil driver. */
+extern inline U8 sol_get_bit (const solnum_t sol)
+{
+	return 1 << (sol % 8);
+}
+
+
+extern inline void sol_enable (const solnum_t sol)
+{
+	U8 *r = sol_get_read_reg (sol);
+	U8 *w = sol_get_write_reg (sol);
+	*w = *r |= sol_get_bit (sol);
+}
+
+extern inline void sol_disable (const solnum_t sol)
+{
+	U8 *r = sol_get_read_reg (sol);
+	U8 *w = sol_get_write_reg (sol);
+	*w = *r &= ~sol_get_bit (sol);
 }
 
 #endif /* _SYS_SOL_H */
