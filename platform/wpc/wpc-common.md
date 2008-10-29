@@ -27,7 +27,7 @@ D6: Down, service, intest, cabinet, button
 D7: Up, service, intest, cabinet, button
 D8: Enter, service, intest, cabinet, button
 22: Coin Door Closed, cabinet, edge, intest
-24: Always Closed, virtual, opto, c_decl(sw_unused)
+24: Always Closed, virtual, c_decl(sw_unused)
 
 [drives]
 H1: High Power Sol. 1, notinstalled
