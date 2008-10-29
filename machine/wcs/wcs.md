@@ -315,6 +315,7 @@ Disable Goalie: yes_no, NO
 [system_music]
 
 [scores]
+2500:
 
 [highscores]
 
@@ -341,6 +342,12 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 [fonts]
 
+[timers]
+Goal Trough Made:
+Ignore R. Ramp Exit:
+Ramp Gate Debounce:
+
 [templates]
 Left Slingshot: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=8
 Right Slingshot: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=8
+

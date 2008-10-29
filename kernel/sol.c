@@ -137,6 +137,10 @@ extern inline void sol_update_fliptronic_powered (void)
 
 	/* Update each of the 8 solenoids in the bank, updating timers
 	and calculating whether or not each should be on or off. */
+	sol_contribute (32, out);
+	sol_contribute (33, out);
+	sol_contribute (34, out);
+	sol_contribute (35, out);
 	sol_contribute (36, out);
 	sol_contribute (37, out);
 	sol_contribute (38, out);
@@ -158,7 +162,7 @@ void sol_update_rtt_0 (void)
 void sol_update_rtt_1 (void)
 {
 	sol_update_set (1);
-#if (MACHINE_WPC95 == 1)
+#if (MACHINE_FLIPTRONIC == 1)
 	sol_update_fliptronic_powered ();
 #endif
 }
