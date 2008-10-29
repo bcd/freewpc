@@ -665,6 +665,8 @@ void switch_update_unstable (const U8 sw)
 		/* The switch was already seen and queued, but it did not
 		 * complete its full debounce.  TODO - remove the queue
 		 * entry here */
+		pending_switch_t *entry = switch_queue_find (sw);
+		switch_queue_remove (entry);
 	}
 
 	/* Restart IRQ-level scanning. */
@@ -697,9 +699,11 @@ CALLSET_ENTRY (switch, idle)
 		return;
 	}
 
-	/* TODO - before doing anything else, make sure the ALWAYS CLOSED
+	/* Before doing anything else, make sure the ALWAYS CLOSED
 	 * switch is really closed.  If not, there's a serious problem
 	 * and we can't do any switch processing. */
+	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
+		return;
 
 	/* Check for shorted switch rows/columns.  TODO : this should return a
 	 * value, and we skip rest of processing if there are problems. */
@@ -745,20 +749,6 @@ CALLSET_ENTRY (switch, idle)
 	/* Service the switch queue. */
 	switch_service_queue ();
 }
-
-#if 0 /* merge above */
-		if (prebounce_bits & 1)
-		{
-			/* The switch is already in prebounce state, and a change
-			 * occurred.  The switch is not stable, so the
-			 * queue entry needs to be reset: restart the
-			 * prebounce timer.  The entry is not removed/added
-			 * to preserve the order??? */
-			pending_switch_t *entry = switch_queue_find (sw);
-			dbprintf ("Restarting prebounce for SW%d\n", sw);
-			entry->timer = switch_lookup(sw)->prebounce * 16;
-		}
-#endif
 
 
 /** Do final initializing once system init is complete. */
