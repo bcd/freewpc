@@ -542,11 +542,11 @@ void switch_service_queue (void)
 	elapsed_time = get_elapsed_time (switch_last_service_time);
 	if (elapsed_time < 5)
 		return;
-	if (elapsed_time > 100)
+	if (elapsed_time > 150)
 	{
-		dbprintf ("Switch queue did not reschedule for a while.\n");
+		dbprintf ("Switch queue slow: %d ms\n", elapsed_time);
 		nonfatal (ERR_SWITCH_SLOW_SERVICE);
-		elapsed_time = 100;
+		elapsed_time = 150;
 	}
 
 	i = switch_queue_head;
