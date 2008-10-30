@@ -60,4 +60,4 @@ GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o shot.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 
-MACHINE_SCHED_FLAGS += -i sling0.h -i sling1.h -i sling2.h -i sling3.h -i sling4.h
+SCHED_HEADERS += build/sling0.h build/sling1.h build/sling2.h build/sling3.h build/sling4.h

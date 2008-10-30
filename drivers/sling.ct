@@ -71,7 +71,7 @@ extern inline void @self_service (void)
 	/* If the timer is nonzero, then either the solenoid
 	is ON, or it is in its forced OFF phase.  It is
 	not necessary to poll the switch here. */
-	if (@self_timer)
+	if (unlikely (@self_timer))
 	{
 		/* Decrement the timer. */
 		@self_timer--;
@@ -81,7 +81,7 @@ extern inline void @self_service (void)
 			/* If the timer expires in the ON phase, then
 			switch to the OFF phase.  Also, turn off the
 			solenoid now. */
-			/* TODO : turn off @sol here */
+			sol_disable (@sol);
 			if (@self_timer == 0)
 			{
 				@self_timer = @offtime;
@@ -93,7 +93,7 @@ extern inline void @self_service (void)
 	{
 		/* When the solenoid is not running, poll its switch
 		and see if it should be started. */
-		/* TODO : turn on @sol here */
+		sol_enable (@sol);
 		@self_mode = ON_PHASE;
 		@self_timer = @ontime;
 	}

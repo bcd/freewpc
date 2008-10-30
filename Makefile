@@ -291,8 +291,8 @@ endif
 
 CFLAGS += $(EXTRA_CFLAGS)
 
-SCHED_FLAGS := -i freewpc.h -i interrupt.h $(MACHINE_SCHED_FLAGS)
-
+SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
+SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
 
 
 # Fix up names based on machine definitions
@@ -868,7 +868,7 @@ fonts clean-fonts:
 .PHONY : sched
 sched: $(SCHED_SRC) tools/sched/sched.make
 
-$(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(MAKE_DEPS)
+$(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
 	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
 
 #######################################################################
@@ -980,6 +980,7 @@ info:
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
 	$(Q)echo "CONFIG_BARE = $(CONFIG_BARE)"
+	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
 
 .PHONY : areainfo
 areainfo:
