@@ -244,6 +244,8 @@ INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
 FON_SRCS = $(patsubst %.o,%.fon,$(FON_OBJS))
 export FON_SRCS
+
+TEMPLATE_SRCS = $(patsubst %.o,%.c,$(TEMPLATE_OBJS))
 endif
 
 #######################################################################
@@ -832,7 +834,7 @@ endif
 #
 gendefines: $(GENDEFINES) $(MACH_LINKS)
 
-include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS)
+include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
 	$(Q)echo Autogenerating task IDs... && \
 		$(GENDEFINE) -p GID_ > $@
 
@@ -849,7 +851,7 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLDDIR)/callset.o
 
-$(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
+$(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) # $(CALLSET_FLAGS)
 
