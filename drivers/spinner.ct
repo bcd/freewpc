@@ -20,10 +20,48 @@
 
 /*
  * Generic spinner driver
+ *
+ * Spinner handling requires polling the switch faster than software
+ * can normally dispatch transitions.  The strategy is to monitor
+ * the switch here for a little while after the first transition,
+ * and keep throwing "spin events" until a timeout occurs.  While
+ * this is happening, switch scanning should not look at the switch.
+ *
+ * Unfortunately, process level can only sleep in 16ms units.
+ *
+ * Note that it is possible for a spinner to keep flipping even after
+ * the last ball has drained.
  */
 
 @@class spinner
-@@parameter sw
+@@parameter sw_number
+@@parameter sw_event
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+extern U8 @self_counter;
+extern U8 @self_prev_state;
+
+/* Fast handler for a spinner switch.
+ * This function runs at IRQ time and is only responsible
+ * for counting the number of spins that occur, as this
+ * can happen _very_ fast.  The slow handler will then
+ * process all of the spins in one dispatch.
+ */
+extern inline void @self_service (void)
+{
+	U8 state = rt_switch_poll (@sw_number);
+	if (state != @self_prev_state)
+	{
+		@self_counter++;
+	}
+	@self_prev_state = state;
+}
+
 
 @@
 @@file @self.c
@@ -31,9 +69,51 @@
 
 #include <freewpc.h>
 
-/* Handler for a spinner switch */
-CALLSET_ENTRY (@self, @sw)
+U8 @self_prev_state;
+U8 @self_counter;
+U8 @self_timer;
+
+
+/* Slow handler for a spinner switch. */
+CALLSET_ENTRY (@self, @sw_event)
 {
+	/* Don't do anything if another instance of the switch
+	handler is running. */
+	if (!task_find_gid (GID_@self_MONITOR))
+	{
+		task_setgid (GID_@self_MONITOR);
+
+		/* Throw as many spins as the fast handler has counted.
+		When the counter is zero, decrement the timer that says
+		how long we continue to poll before getting out. */
+		for (;;)
+		{
+work_to_do:
+			while (@self_counter)
+			{
+				dbprintf ("Handle 1 spin\n");
+
+				/* It is important that the following generate only
+				one instruction, so that no locking is required! */
+				@self_counter--;
+			}
+
+			@self_timer = TIME_1S;
+			while (@self_timer)
+			{
+				task_sleep (TIME_16MS);
+				@self_timer -= TIME_16MS;
+				if (@self_counter)
+					goto work_to_do;
+			}
+		}
+	}
+}
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_counter = 0;
+	@self_prev_state = 0;
 }
 
 /* vim: set filetype=c: */
