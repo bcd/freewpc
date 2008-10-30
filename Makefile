@@ -58,6 +58,8 @@ MMAKEFILE := $(M)/Makefile
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 MACHINE_DIR = machine/$(MACHINE)
 
+top_target : default_target
+
 include $(BLDDIR)/mach-Makefile
 include $(MMAKEFILE)
 
@@ -207,6 +209,8 @@ GENDEFINE = tools/gendefine
 PINMAME ?= xpinmamed.x11
 PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_FLAGS)
 
+# The template compiler
+CTEMP=tools/ctemp -o $(BLDDIR)
 
 #######################################################################
 ###	Source and Binary Filenames

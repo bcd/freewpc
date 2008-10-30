@@ -1,0 +1,114 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Generic switch-activated coil driver
+ * (can be used for slingshot and jet bumpers)
+ */
+
+@@class sling
+@@parameter sw
+@@parameter sol
+@@parameter ontime
+@@parameter offtime
+
+@@
+@@file @class.h
+@@
+
+#ifndef __@class_DRIVER_H
+#define __@class_DRIVER_H
+
+/**
+ * The state of the driver is kept in a MODE variable.
+ */
+typedef enum {
+	ON_PHASE,
+	OFF_PHASE
+} @class_mode_t;
+
+#endif /* __@class_DRIVER_H */
+
+
+@@
+@@file @self.h
+@@
+
+#include <@class.h>
+
+/** The mode that the driver is currently in. */
+extern @class_mode_t @self_mode;
+
+/** The driver timer */
+extern U8 @self_timer;
+
+
+extern inline void @self_init (void)
+{
+	@self_timer = 0;
+}
+
+
+extern inline void @self_service (void)
+{
+	/* If the timer is nonzero, then either the solenoid
+	is ON, or it is in its forced OFF phase.  It is
+	not necessary to poll the switch here. */
+	if (@self_timer)
+	{
+		/* Decrement the timer. */
+		@self_timer--;
+
+		if (@self_mode == ON_PHASE)
+		{
+			/* If the timer expires in the ON phase, then
+			switch to the OFF phase.  Also, turn off the
+			solenoid now. */
+			/* TODO : turn off @sol here */
+			if (@self_timer == 0)
+			{
+				@self_timer = @offtime;
+				@self_mode = OFF_PHASE;
+			}
+		}
+	}
+	else if (rt_switch_poll (@sw))
+	{
+		/* When the solenoid is not running, poll its switch
+		and see if it should be started. */
+		/* TODO : turn on @sol here */
+		@self_mode = ON_PHASE;
+		@self_timer = @ontime;
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include <@self.h>
+
+@class_mode_t @self_mode;
+
+U8 @self_timer;
+
+/* vim: set filetype=c: */

@@ -346,3 +346,11 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Goal Trough Made:
 Ignore R. Ramp Exit:
 Ramp Gate Debounce:
+
+[templates]
+Left Slingshot: driver(sling), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=4, offtime=8
+Right Slingshot: driver(sling), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=4, offtime=8
+Left Jet: driver(sling), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=8
+Upper Jet: driver(sling), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=4, offtime=8
+Lower Jet: driver(sling), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=8
+
