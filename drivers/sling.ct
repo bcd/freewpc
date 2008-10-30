@@ -89,7 +89,7 @@ extern inline void @self_service (void)
 			}
 		}
 	}
-	else if (0) /* poll @sw */
+	else if (rt_switch_poll (@sw))
 	{
 		/* When the solenoid is not running, poll its switch
 		and see if it should be started. */
