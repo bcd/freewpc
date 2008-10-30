@@ -1008,7 +1008,12 @@ sub machine_write_makefile {
 	# Generate rules for compiling templates.
 	for $inst (unique ($m->{'templates'})) {
 		my $driver = $inst->{'driver'};
-		my $id = $inst->{'ID'};
+		my $id;
+
+		if (!defined ($tempid{$driver})) {
+			$tempid{$driver} = 0;
+		}
+		$id = $tempid{$driver}++;
 
 		my $args = "";
 		my @arglist = split /,/, $inst->{'props'};
