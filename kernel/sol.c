@@ -142,8 +142,8 @@ void sol_req_start (U8 sol)
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
 	req_on_time = 16;
-	req_duty_time = 100;
-	req_duty_mask = 0x3;
+	req_duty_time = sol_get_time (sol) * 16;
+	req_duty_mask = 0x3; /* 25% */
 
 	/* Mark the request pending, so the update procedure will see it. */
 	sol_req_state = REQ_PENDING;
