@@ -65,9 +65,8 @@ coils. */
 /* Function prototypes */
 void sol_request_async (U8 sol);
 void sol_request (U8 sol);
-void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
+__attribute__((deprecated)) void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);
 void sol_stop (solnum_t sol);
-void sol_pulse (solnum_t sol);
 void sol_init (void);
 
 /* sol_start is a macro because the 'time' value must be scaled
@@ -78,6 +77,7 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 
 #define flasher_pulse(id) sol_pulse(id)
 
+#define sol_pulse sol_request_async
 
 /** Retrieve the default pulse duration for a coil. */
 extern inline U8 sol_get_time (solnum_t sol)

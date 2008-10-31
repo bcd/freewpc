@@ -445,14 +445,6 @@ sol_stop (solnum_t sol)
 }
 
 
-/** Pulse a solenoid for its normal duration. */
-void
-sol_pulse (solnum_t sol)
-{
-	sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
-}
-
-
 /** Initialize the solenoid subsystem. */
 void
 sol_init (void)
