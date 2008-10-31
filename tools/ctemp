@@ -20,6 +20,12 @@
 #
 # ctemp - program for compiling a C template (".ct") file into
 #   multiple C/H files.
+#
+# TODO:
+# - method to declare maximum number of instantiations
+# - provide default values for template parameters
+# - print boilerplate comment in output files
+
 
 use Getopt::Long;
 
@@ -84,6 +90,16 @@ open FH, "$infile" or die "$!";
 while (<FH>) {
 	chomp;
 	next if (/^\@\@$/);
+
+	if (/^\@\@classvar (.*)$/) {
+		if ($macrotab{'instance'} == 0) {
+			$_ = $1;
+		}
+		else {
+			next;
+		}
+	}
+
 	if (/^\@\@class ([^ ]*)/) {
 		$class = $1;
 		define ("class", $class);
