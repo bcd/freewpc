@@ -314,9 +314,9 @@ extern inline void sol_update_set (const U8 set)
 {
 	/* For some reason, GCC 4.x crashes on this function... */
 #ifdef GCC4
-	register U8 out __areg__ = 0;
+	register U8 out __areg__ = *sol_get_read_reg (set * 8);
 #else
-	register U8 out = 0;
+	register U8 out = *sol_get_read_reg (set * 8);
 #endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers
