@@ -36,13 +36,8 @@
 #ifndef __@class_DRIVER_H
 #define __@class_DRIVER_H
 
-/**
- * The state of the driver is kept in a MODE variable.
- */
-typedef enum {
-	ON_PHASE,
-	OFF_PHASE
-} @class_mode_t;
+extern __fastram__ U8 @class_enables;
+extern __fastram__ U8 @class_running;
 
 #endif /* __@class_DRIVER_H */
 
@@ -53,16 +48,20 @@ typedef enum {
 
 #include <@class.h>
 
-/** The mode that the driver is currently in. */
-extern @class_mode_t @self_mode;
+#undef INST_MASK
+#define INST_MASK (1 << @instance)
 
-/** The driver timer */
-extern U8 @self_timer;
+extern __fastram__ U8 @self_timer;
 
-
-extern inline void @self_init (void)
+extern inline U8 @self_enabled_p (void)
 {
-	@self_timer = 0;
+	return @class_enables & INST_MASK;
+}
+
+
+extern inline U8 @self_running_p (void)
+{
+	return @class_running & INST_MASK;
 }
 
 
@@ -76,7 +75,7 @@ extern inline void @self_service (void)
 		/* Decrement the timer. */
 		@self_timer--;
 
-		if (@self_mode == ON_PHASE)
+		if (@self_running_p ())
 		{
 			/* If the timer expires in the ON phase, then
 			switch to the OFF phase.  Also, turn off the
@@ -85,16 +84,16 @@ extern inline void @self_service (void)
 			if (@self_timer == 0)
 			{
 				@self_timer = @offtime;
-				@self_mode = OFF_PHASE;
+				@class_running &= ~INST_MASK;
 			}
 		}
 	}
-	else if (rt_switch_poll (@sw))
+	else if (@self_enabled_p () && rt_switch_poll (@sw))
 	{
 		/* When the solenoid is not running, poll its switch
 		and see if it should be started. */
 		sol_enable (@sol);
-		@self_mode = ON_PHASE;
+		@class_running |= INST_MASK;
 		@self_timer = @ontime;
 	}
 }
@@ -107,8 +106,27 @@ extern inline void @self_service (void)
 #include <freewpc.h>
 #include <@self.h>
 
-@class_mode_t @self_mode;
+@@classvar __fastram__ U8 @class_enables;
+@@classvar __fastram__ U8 @class_running;
+__fastram__ U8 @self_timer;
 
-U8 @self_timer;
+/* Initialize the device */
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = 0;
+	@class_enables &= ~(1 << @instance);
+}
+
+/* Enable the device */
+CALLSET_ENTRY (@self, sw_sol_enable)
+{
+	@class_enables |= (1 << @instance);
+}
+
+/* Disable the device */
+CALLSET_ENTRY (@self, sw_sol_disable)
+{
+	@class_enables &= ~(1 << @instance);
+}
 
 /* vim: set filetype=c: */
