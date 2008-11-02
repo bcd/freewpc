@@ -91,8 +91,7 @@ CALLSET_ENTRY (@self, @sw_event)
 work_to_do:
 			while (@self_counter)
 			{
-				dbprintf ("Handle 1 spin\n");
-
+				callset_invoke (@sw_event_slow);
 				/* It is important that the following generate only
 				one instruction, so that no locking is required! */
 				@self_counter--;
