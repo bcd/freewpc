@@ -2859,7 +2859,11 @@ void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
+#if 1
+	sol_request_async (sel);
+#else
 	sol_start (sel, sol_get_duty (sel), browser_action);
+#endif
 	task_sleep (TIME_100MS);
 }
 

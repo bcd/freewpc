@@ -42,8 +42,6 @@ per AC cycle */
 	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
 	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
 
-#define TRIAC_CONTROL_MASK		(TRIAC_COINDOOR_INTERLOCK | TRIAC_FLIPPER_ENABLE)
-
 
 /* Macros for enabling/disabling the flippers */
 #define flipper_triac_enable()	triac_enable (TRIAC_FLIPPER_ENABLE)
@@ -69,14 +67,6 @@ do { \
 	pinio_write_triac (v); \
 } while (0)
 #endif
-
-#define ac_zerocross_set()			(*(U8 *)WPC_ZEROCROSS & 0x80)
-
-#define TRIAC_GI0					0x01
-#define TRIAC_GI1					0x02
-#define TRIAC_GI2					0x04
-#define TRIAC_GI3					0x08
-#define TRIAC_GI4					0x10
 
 typedef U8 triacbits_t;
 

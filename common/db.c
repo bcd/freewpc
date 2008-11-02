@@ -96,6 +96,11 @@ void db_idle (void)
 					switch_queue_dump ();
 					break;
 
+				case 'S':
+					/* Dump the solenoid request queue */
+					VOIDCALL (sol_req_dump);
+					break;
+
 				case 'T':
 					/* Dump the triac states */
 					VOIDCALL (triac_dump);

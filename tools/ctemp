@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+#
+# Copyright 2008 by Brian Dominy <brian@oddchange.com>
+#
+# This file is part of FreeWPC.
+#
+# FreeWPC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# FreeWPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FreeWPC; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# ctemp - program for compiling a C template (".ct") file into
+#   multiple C/H files.
+#
+# TODO:
+# - method to declare maximum number of instantiations
+# - provide default values for template parameters
+# - print boilerplate comment in output files
+
+
+use Getopt::Long;
+
+my $class = "noclass";
+my $ofile = undef;
+my $infile = undef;
+my $outdir = ".";
+
+sub define {
+	my ($var, $value) = @_;
+	if (defined ($macrotab{$var}) && $macrotab{$var} ne $value) {
+		print "Warning: redefining '$var'\n";
+	}
+	$macrotab{$var} = $value;
+}
+
+sub need {
+	my $var = shift;
+	die "Undefined variable '$var'" if not $macrotab{$var};
+}
+
+sub expand {
+	my $string = shift;
+	for my $var (keys %macrotab) {
+		my $value = $macrotab{$var};
+		$string =~ s/\@$var/$value/g;
+	}
+	return $string;
+}
+
+sub chfile {
+	my ($file) = @_;
+	if ($file ne $ofile) {
+		if ($ofile) {
+			print "(ctemp): Closed '$ofile'\n";
+			close OFH;
+		}
+		if ($file) {
+			open OFH, ">$outdir/$file" or die "$!";
+			print "(ctemp): Opened '$file'\n";
+		}
+	}
+	$ofile = $file;
+}
+
+sub output {
+	my $line = shift;
+	print OFH "$line\n" if ($ofile);
+}
+
+GetOptions ("D=s" => sub {
+								my ($var, $value) = split /=/, $_[1];
+								define ($var, $value);
+							},
+				"i=s" => sub { define ("instance", $_[1]); },
+				"o=s" => \$outdir
+				) or die "Invalid options";
+$infile = $ARGV[0];
+
+print "(ctemp): reading template '$infile'\n";
+open FH, "$infile" or die "$!";
+while (<FH>) {
+	chomp;
+	next if (/^\@\@$/);
+
+	if (/^\@\@classvar (.*)$/) {
+		if ($macrotab{'instance'} == 0) {
+			$_ = $1;
+		}
+		else {
+			next;
+		}
+	}
+
+	if (/^\@\@class ([^ ]*)/) {
+		$class = $1;
+		define ("class", $class);
+		define ("self", expand ("$class\@instance"));
+	}
+	elsif (/^\@\@parameter ([^ ]*)/) {
+		need $1;
+	}
+	elsif (/^\@\@file ([^ ]*)/) {
+		chfile (expand ($1));
+	}
+	else {
+		output (expand ($_));
+	}
+}
+
+close FH;
+chfile (undef);

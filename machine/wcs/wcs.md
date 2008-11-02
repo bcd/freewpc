@@ -225,9 +225,9 @@ H6: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
 H7: Knocker, knocker
 H8: Ramp Divertor
 
-L1: Left Jet
-L2: Upper Jet
-L3: Lower Jet
+L1: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L2: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L3: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L5: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Eject
@@ -316,6 +316,7 @@ Disable Goalie: yes_no, NO
 
 [scores]
 2500:
+10K:
 
 [highscores]
 
@@ -346,3 +347,11 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Goal Trough Made:
 Ignore R. Ramp Exit:
 Ramp Gate Debounce:
+
+[templates]
+Left Slingshot: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=4, offtime=20
+Right Slingshot: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
+Upper Jet: driver(spsol), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=4, offtime=20
+Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER

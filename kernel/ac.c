@@ -27,32 +27,6 @@
  * This module is not yet complete.
  */
 
-#define AC_DOMESTIC_CYCLE 17
-#define AC_EXPORT_CYCLE 20
-
-/**
- * The different states of the zerocross circuit.
- */
-typedef enum {
-	/** At initialization, it is unknown if the zerocross circuit is
-	 * functional or not, or whether we are running on 50Hz or 60Hz
-	 * AC.  In this state, do not allow any solenoids/GI to be
-	 * controlled.
-	 */
-	ZC_INITIALIZING,
-
-	/** Set when the zerocross circuit is known to be working OK.
-	 * It can be used to perform lamp dimming and precise solenoid
-	 * timing.
-	 */
-	ZC_WORKING,
-
-	/** Set when the zerocross circuit is known to be broken.
-	 * It will not be used anymore.
-	 */
-	ZC_BROKEN,
-} zc_status_t;
-
 
 /**
  * The time since the last zerocross point, in IRQs/milliseconds.
@@ -83,10 +57,6 @@ U8 ac_expected_cycle_len;
 
 U8 ac_zerocross_errors;
 
-#ifdef DEBUG
-U8 ac_zerocross_histogram[5];
-#endif
-
 
 /**
  * Real-time function that checks to see if we are currently at a
@@ -105,22 +75,6 @@ void ac_rtt (void)
 	else if (unlikely (wpc_read_ac_zerocross ()))
 	{
 		/* We are currently at a zero crossing. */
-#ifdef DEBUG
-		/* Audit the time since the last zerocrossing. */
-		if (zc_timer < 7)
-		{
-			ac_zerocross_histogram[0]++;
-		}
-		else if (zc_timer > 9)
-		{
-			ac_zerocross_histogram[4]++;
-		}
-		else
-		{
-			ac_zerocross_histogram[zc_timer-6]++;
-		}
-#endif
-
 handle_zero_crossing:;
 		/* Reset the timer */
 		zc_timer = 0;

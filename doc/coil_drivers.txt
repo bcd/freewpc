@@ -1,0 +1,119 @@
+
+The current coil logic supports <b>independent software control</b> of all
+coils.  Software can start a coil by writing to two 8-bit variables:
+a <b>timer</b> and a <b>duty mask</b>.  The timer says for how many
+milliseconds the coil is to be turned on.  The duty mask allows for the
+coil to be pulsed on & off rapidly while enabled, anywhere from 1/8 of the
+time to a full 100% on.
+
+This scheme is very flexible, but it has a few fundamental problems:
+
+<li>It is inherently dangerous, in that it is possible for software to turn
+on everything at once.
+<li>It is inefficient, because there is no need to turn on lots of coils
+at once.  Generally, one coil at a time is enough, with the possible exception
+of flashers.  Dedicating valuable IRQ cycles to this is wasteful.
+
+There is also a third, more subtle problem that only became evident after
+running on real hardware:
+
+<li>Low-strength duty-cycled pulses kick inconsistently.
+
+
+Software controllable coil pulses are used for:
+
+<li>Ball kickouts
+<li>Flashlamp control
+<li>Ball searches
+
+There are other uses of coils that don't fall into this category.
+For example, there are <i>switch-activated solenoids</i>, such as slingshots
+and jet bumpers, that are normally pulsed whenver a corresponding
+switch is activated.  The system has special drivers installed for these
+that enable the coil as soon as the switch transition is seen, without
+going through the much longer debounce and task schedule that is normally
+done.  This is necessary in order to get a good, fast response time.
+
+There are also motors and divertors, which are software initiated but
+they don't fall into the category of <i>pulses</i>, as the drivers
+normally need to be kept on for an extended period of time.  These
+are treated similarly to the switch-activated coils, with special
+software drivers that keep them on/off according to an enable/disable
+bit, which takes the place of the controlling hardware switch.
+
+So a majority of the coil drivers don't require independent software pulsing.
+The exception is ball searching, which needs to be able to pulse
+slingshots, divertors, etc. without regards to the usual controlling
+switch/enable mechanism.  However, ball search doesn't need to pulse them
+all simultaneously: it can step through them one by one.  It's better
+for the hardware anyway.
+
+The end result of all this is that many of the independent timers can
+be replaced <b>by a single timer/duty mask</b> and adding a third variable,
+<b>the coil to be controlled</b>.  It is fairly easy to modify the
+existing code to do this, but there are a few challenges:
+
+<li>Calling code cannot just blindly write to these variables as before,
+since they are now shared among many uses.  In particular, there has to
+be a queueing mechanism, so that if one coil is being pulsed and another
+pulse request is made, the second one has to wait.  The assumption is
+that it is always OK to wait for coils that use this method; anything
+that requires fast, immediate response has to be driven some other way.
+<li>The coil number can't directly be used by the IRQ-level routine;
+what it really needs a pointer to the I/O register that drives the
+coil and the specific bit to be turned on.  The way that WPC coil numbers
+translate to I/O registers is not completely obvious.
+
+The last known problem to be solved has to do with duty cycling.
+The core of the issue involves the power variation at different points
+of the A/C waveform, which can be discerned from reading the zerocross
+circuit, and that the power variations aren't in sync with the CPU's
+periodic interrupt.
+
+The period of the AC waveform depends on the local line voltage, which
+is typically 60Hz in the United States and 50Hz elsewhere.  That
+number specifies the number of times per second that the voltage
+oscillates between peak positive voltage and negative voltage and
+back again.  Since only the magnitude determines the strength of a coil
+pulse, twice the period (120 in the US) says how many times per
+second that the voltage reaches a peak, and likewise, how many times
+it crosses zero.
+
+The WPC power driver board has a zero-crossing detection circuit that
+allows the CPU to know if a zero crossing occurred since the last
+reading.  By polling this from its periodic interrupt, software can
+know approximately where the AC voltage lies.
+
+For example, if zerocrossing is active, then voltage is at or approximately
+0V.  At the next interrupt, 1ms later, zerocrossing should not be present,
+and voltage would be slightly higher.  Around 4ms later, voltage would
+be at its peak (in the US; on 50Hz, it would occur around 5ms.) and then
+begin to decrease.
+
+Now consider what happens if software does not look at the zerocross logic.
+If a coil is turned on at full power and kept on for a long period of time,
+then it really doesn't matter.  But if a coil is duty cycled, by pulsing
+it on and off rapidly, then the true power delivered depending on which
+times it is on, and when it is off.  It is possible, for example, that
+on one such pulse, the on-time always corresponds to low voltage, and
+another time, it always correspond to higher voltage.  Then you would
+get two very different results, even though software did the same thing.
+
+A very short duty cycled pulse suffers from this effect the most.  Longer
+pulses tend to be OK in the long run, since the AC waveform "shifts"
+over time with respect to the periodic interrupt.  You would get an even
+distribution of low and high pulses.  However, the problem then is that
+which one comes first is not predictable.
+
+Remember that solenoids are mechnical devices.
+
+
+
+
+
+
+
+
+
+
+

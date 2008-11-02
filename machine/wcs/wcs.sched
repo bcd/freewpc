@@ -20,3 +20,10 @@
 
 
 # Handle fast solenoids: slings and jets
+!spsol0_service      8     40c
+!spsol1_service      8     40c
+!spsol2_service      8     40c
+!spsol3_service      8     40c
+!spsol4_service      8     40c
+
+!spinner0_service    8     40c

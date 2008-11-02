@@ -19,24 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
-
-__fastram__ S8 rtsol_left_sling;
-__fastram__ S8 rtsol_right_sling;
-
-
-void slingshot_rtt (void)
-{
-	if (in_live_game)
-	{
-		rt_solenoid_update (&rtsol_left_sling,
-			SOL_LEFT_SLING, SW_LEFT_SLING, 8, 8);
-	
-		rt_solenoid_update (&rtsol_right_sling,
-			SOL_RIGHT_SLING, SW_RIGHT_SLING, 8, 8);
-	}
-}
-
 
 CALLSET_ENTRY (sling, sw_sling)
 {
