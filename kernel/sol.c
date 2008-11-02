@@ -139,10 +139,13 @@ void sol_req_start (U8 sol)
 		fatal (ERR_SOL_REQUEST);
 
 	req_reg_write = sol_get_write_reg (sol);
+	if (req_reg_write == NULL)
+		return;
+
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
 	req_on_time = 16;
-	req_duty_time = sol_get_time (sol) * 16;
+	req_duty_time = (sol_get_time (sol) - 1) * 16;
 	req_duty_mask = 0x3; /* 25% */
 
 	/* Mark the request pending, so the update procedure will see it. */
@@ -255,6 +258,7 @@ void sol_req_rtt (void)
 			if (sol_req_state == REQ_ON)
 			{
 				/* Switch to DUTY. */
+				sol_req_timer = req_duty_time;
 				sol_req_state = REQ_DUTY;
 			}
 			else
@@ -269,13 +273,15 @@ void sol_req_rtt (void)
 		}
 		else if (sol_req_state == REQ_DUTY)
 		{
-			/* If the timer has not expired, and we are in DUTY state,
-			 * see if the coil state needs to be toggled.  This is not
-			 * synchronized with zerocrossing exactly, but it is good
-			 * enough. */
 			if ((sol_req_timer & sol_duty_mask) == 0)
 			{
-				*req_reg_write = *req_reg_read ^= req_bit;
+				/* Occasionally turn on the coil */
+				*req_reg_write = *req_reg_read |= req_bit;
+			}
+			else
+			{
+				/* Most of the time, keep it off */
+				*req_reg_write = *req_reg_read &= ~req_bit;
 			}
 		}
 	}
@@ -457,6 +463,9 @@ sol_init (void)
 	 * writing to the timer.  TODO : this is not particularly safe */
 	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
 	sol_duty_mask = 0x1;
+
+	sol_req_state = REQ_IDLE;
+	memset (sol_reg_readable, 0, SOL_REG_COUNT);
 
 	/* Initialize the solenoid queue. */
 	queue_init ((queue_t *)&sol_req_queue);
