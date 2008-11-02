@@ -316,6 +316,7 @@ Disable Goalie: yes_no, NO
 
 [scores]
 2500:
+10K:
 
 [highscores]
 
