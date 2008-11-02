@@ -53,32 +53,48 @@ typedef struct
 } pending_switch_t;
 
 
-/** 0/1 = the raw input value of the switch */
+/** The raw input values of the switch.  These values are
+ * updated every 2ms, and are only used as inputs into the
+ * debounce procedure.  Higher layer software never looks at
+ * these values. */
 __fastram__ switch_bits_t sw_raw;
 
 /** Nonzero for each switch whose last reading differs from the
 most recent logical (debounced) reading */
 __fastram__ switch_bits_t sw_edge;
 
+/** Nonzero for each switch that has been stable at the IRQ level.
+ * This means two consecutive readings, 2ms apart, returned the
+ * same value, which differed from the last stable reading. */
 __fastram__ switch_bits_t sw_stable;
 
+/** Nonzero for each stable switch (according to sw_stable)
+ * that transitioned back to its previous reading.  This means
+ * the switch did not remain stable long enough for periodic
+ * switch scanning to recognize it. */
 __fastram__ switch_bits_t sw_unstable;
 
+/** The current logical (i.e. debounced) readings for each
+ * switch.  These are still based on voltage levels and do not
+ * consider inverting necessary for processing optos. */
 __fastram__ switch_bits_t sw_logical;
 
-/** Nonzero for each switch that is in the switch queue. */
+/** Nonzero for each switch that is in the switch queue.
+ * This is not strictly needed, but it provides a fast way to
+ * see if a switch is already in the debounce queue. */
 switch_bits_t sw_queued;
 
-#define MAX_QUEUED_SWITCHES 16
+/* TODO - the following could use the queue.h functions */
 
 pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
-
 U8 switch_queue_head;
-
 U8 switch_queue_tail;
 
+/** The last time that switch scanning occurred.  It is used
+ * to determine by how much to decrement debounce timers. */
 U16 switch_last_service_time;
 
+/** The switch number of the last switch to be scheduled. */
 U8 sw_last_scheduled;
 
 
@@ -100,13 +116,11 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 }
 
 
-
 /** Detect row / column shorts */
 void switch_short_detect (void)
 {
 	U8 n;
 	U8 row = 0;
-
 
 	n = sw_raw[0] & sw_raw[1] & sw_raw[2] & sw_raw[3] &
 		sw_raw[4] & sw_raw[5] & sw_raw[6] & sw_raw[7];
@@ -398,7 +412,8 @@ void switch_sched_task (void)
 	}
 #endif
 
-	/* For test mode */
+	/* For test mode : this lets it see what was the last switch
+	 * to be scheduled.  Used by the Switch Edges test. */
 	sw_last_scheduled = sw;
 
 	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
@@ -477,13 +492,42 @@ cleanup:
 
 
 /**
- * Schedule a task to handle a switch event.
+ * Process a switch that has transitioned states.  All debouncing
+ * is fully completed prior to this call.
+ *
+ * The transition is first latched, so that polling the switch level
+ * will return the new state.
+ *
+ * Second, if the transition requires scheduling, a task is started
+ * to handle it.  Eligibility depends on whether or not the switch
+ * is declared as an edge switch (meaning it is scheduled on both
+ * types of transitions) and whether or not it is an opto (i.e.
+ * do we schedule open-to-closed or closed-to-open?)
  */
-void switch_schedule (const U8 sw)
+void switch_transitioned (const U8 sw)
 {
-	/* Start a task to process the switch right away */
-	task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
-	task_set_arg (tp, sw);
+	/* Latch the transition.  sw_logical is still an open/closed level.
+	 * By clearing the stable/unstable bits, IRQ will begin scanning
+	 * for new transitions at this point. */
+	disable_irq ();
+	bit_toggle (sw_logical, sw);
+	bit_off (sw_stable, sw);
+	bit_off (sw_unstable, sw);
+	enable_irq ();
+
+	/* See if the transition requires scheduling.  It does if:
+	 a) the switch is bidirectional, or
+	 b) the switch is an opto and it is now open, or
+	 c) the switch is not an opto and it is now closed.
+	*/
+	if (bit_test (mach_edge_switches, sw)
+		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
+		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
+	{
+		/* Start a task to process the switch right away */
+		task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
+		task_set_arg (tp, sw);
+	}
 }
 
 
@@ -531,12 +575,20 @@ void switch_queue_init (void)
 }
 
 
+/** Service the switch queue.  This function is called
+ * periodically to see if any pending switch transitions have
+ * completed their debounce time.  If any switch becomes
+ * unstable before the period expires, it will be removed
+ * from the queue prior to this function being called.  So
+ * all that is needed here is to decrement the timers, and if
+ * one reaches zero, consider that switch transitioned.
+ */
 void switch_service_queue (void)
 {
 	U8 i;
 	U8 elapsed_time;
 
-	/* See how long since the last time we serviced the queue */
+	/* See how long since the last time we serviced the queue. */
 	elapsed_time = get_elapsed_time (switch_last_service_time);
 	if (elapsed_time < 5)
 		return;
@@ -559,11 +611,10 @@ void switch_service_queue (void)
 			entry->timer -= elapsed_time;
 			if (entry->timer <= 0)
 			{
-				/* Debounce is complete.  Schedule the switch handler. */
+				/* Debounce is fully complete. */
 				dbprintf ("debounce complete\n");
 				switch_queue_remove (entry);
-				switch_schedule (entry->id);
-				/* TODO - reset stable/unstable here */
+				switch_transitioned (entry->id);
 			}
 			else
 			{
@@ -577,6 +628,7 @@ void switch_service_queue (void)
 }
 
 
+#ifdef DEBUGGER
 static inline void switch_matrix_dump (const char *name, U8 *matrix)
 {
 	U8 i;
@@ -607,45 +659,26 @@ void switch_queue_dump (void)
 	switch_matrix_dump ("Unstable", sw_unstable);
 	switch_matrix_dump ("Queued  ", sw_queued);
 }
+#endif /* DEBUGGER */
 
 
 /**
  * Handle a switch that has just become stable; i.e. it changed
  * and held steady for at least 2 consecutive readings.  It is
  * also known not to be in the heavy debounce queue already.
+ * 
+ * If the switch requires a longer debounce period, then it is
+ * put into a queue and we wait a little while to see if it
+ * remains stable, then it will be scheduled.
  */
-void switch_update_stable (const U8 sw)
+static void switch_update_stable (const U8 sw)
 {
-	dbprintf ("Switch stable: %d\n", sw);
-
 	/* Queue the switch if it requires further debouncing.
 	 * Otherwise, it is eligible for scheduling. */
 	if (switch_lookup (sw)->prebounce != 0)
-	{
 		switch_queue_add (sw);
-		return;
-	}
-
-	/* Latch the transition.  sw_logical is still an open/closed level.
-	 * By clearing the stable/unstable bits, IRQ will begin scanning
-	 * for new transitions at this point. */
-	disable_irq ();
-	bit_toggle (sw_logical, sw);
-	bit_off (sw_stable, sw);
-	bit_off (sw_unstable, sw);
-	enable_irq ();
-
-	/* See if the transition requires scheduling.  It does if:
-	 a) the switch is bidirectional, or
-	 b) the switch is an opto and it is now open, or
-	 c) the switch is not an opto and it is now closed.
-	*/
-	if (bit_test (mach_edge_switches, sw)
-		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
-		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
-	{
-		switch_schedule (sw);
-	}
+	else
+		switch_transitioned (sw);
 }
 
 
@@ -654,16 +687,15 @@ void switch_update_stable (const U8 sw)
  * Ignore the recent transitions and restart IRQ-level switch
  * scanning again.
  */
-void switch_update_unstable (const U8 sw)
+static void switch_update_unstable (const U8 sw)
 {
-	dbprintf ("Switch unstable: %d\n", sw);
-
 	if (bit_test (sw_queued, sw))
 	{
 		/* The switch was already seen and queued, but it did not
-		 * complete its full debounce.  TODO - remove the queue
-		 * entry here */
+		 * complete its full debounce.  Cancel that entry. */
 		pending_switch_t *entry = switch_queue_find (sw);
+		if (!entry)
+			fatal (ERR_SWITCH_QUEUE_CORRUPT);
 		switch_queue_remove (entry);
 	}
 
@@ -696,6 +728,17 @@ CALLSET_ENTRY (switch, idle)
 		sw_logical[0] = sw_raw[0];
 		return;
 	}
+
+	/* Service the switch queue.  Note that this is done BEFORE
+	 * polling switches; please do not change this!  In case
+	 * idle is not invoked fast enough, it is possible that a
+	 * switch might have legitimately completed its debounce period,
+	 * but we just didn't see it in time before it transitioned
+	 * back.  In that case, to be fair, consider the transition
+	 * anyway.  The service function does not actually poll the
+	 * current switch readings at all, so it is safe to do this
+	 * even if there are hardware errors. */
+	switch_service_queue ();
 
 	/* Before doing anything else, make sure the ALWAYS CLOSED
 	 * switch is really closed.  If not, there's a serious problem
@@ -743,9 +786,6 @@ CALLSET_ENTRY (switch, idle)
 		the software watchdog from expiring. */
 		task_dispatching_ok = TRUE;
 	}
-
-	/* Service the switch queue. */
-	switch_service_queue ();
 }
 
 

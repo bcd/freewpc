@@ -74,6 +74,11 @@ typedef struct
 extern const U8 mach_opto_mask[];
 extern const U8 mach_edge_switches[];
 
+/** The maximum number of switches that can be queued at
+ * a time.  Queueing is necessary only for switches that
+ * require a long (more than 4ms) debounce interval.
+ * Keeping this as a power of 2 generates more efficient code. */
+#define MAX_QUEUED_SWITCHES 16
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
