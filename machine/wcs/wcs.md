@@ -225,9 +225,9 @@ H6: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
 H7: Knocker, knocker
 H8: Ramp Divertor
 
-L1: Left Jet
-L2: Upper Jet
-L3: Lower Jet
+L1: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L2: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L3: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L5: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Eject
