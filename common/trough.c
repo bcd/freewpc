@@ -71,6 +71,8 @@ CALLSET_ENTRY (trough, sw_outhole)
 #endif /* MACHINE_OUTHOLE_SWITCH */
 }
 
+/* TODO - handle trough stack/jam switch on newer games */
+
 
 CALLSET_ENTRY (trough, dev_trough_enter)
 {
