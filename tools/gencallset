@@ -177,8 +177,8 @@ foreach $src (@srclist) {
 		elsif (/callset_invoke_boolean \(([^)]*)\)/) {
 			if (!defined $functionhash{$1}) {
 				$functionhash{$1} = "";
-				$fntypehash{$1} = $bool_type;
 			}
+			$fntypehash{$1} = $bool_type;
 			$invocation{$1} .= "$src:$lineno ";
 		}
 		elsif (/callset_invoke[_a-z]* \(([^)]*)\)/) {
@@ -213,7 +213,7 @@ if ($debug) {
 
 foreach $set (keys %functionhash) {
 	my $rettype = $fntypehash{$set};
-	$rettype = "void" if (($rettype eq "") or !defined ($rettype));
+	$rettype = "void" if (($rettype eq "") || !defined ($rettype));
 	print FH "$rettype\ncallset_$set (void)\n{\n";
 
 	my @callers = split " ", $invocation{$set};
