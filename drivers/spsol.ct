@@ -23,7 +23,7 @@
  * (can be used for slingshot and jet bumpers)
  */
 
-@@class sling
+@@class spsol
 @@parameter sw
 @@parameter sol
 @@parameter ontime

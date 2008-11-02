@@ -349,9 +349,9 @@ Ignore R. Ramp Exit:
 Ramp Gate Debounce:
 
 [templates]
-Left Slingshot: driver(sling), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=4, offtime=20
-Right Slingshot: driver(sling), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
-Left Jet: driver(sling), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
-Upper Jet: driver(sling), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=4, offtime=20
-Lower Jet: driver(sling), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+Left Slingshot: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=4, offtime=20
+Right Slingshot: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
+Upper Jet: driver(spsol), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=4, offtime=20
+Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
 Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
