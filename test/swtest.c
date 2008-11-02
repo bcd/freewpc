@@ -56,6 +56,7 @@ void switch_matrix_draw (void)
 				dmd[1 * DMD_BYTE_WIDTH] |= mask & 0x44;
 				dmd[2 * DMD_BYTE_WIDTH] &= ~mask;
 			}
+			dmd[3 * DMD_BYTE_WIDTH] = 0;
 		}
 	}
 }
@@ -90,7 +91,7 @@ void switch_edges_update (void)
 		if (sw_last_scheduled)
 		{
 			switch_test_display (sw_last_scheduled);
-			switch_display_timer = 10;
+			switch_display_timer = 8;
 		}
 	}
 	else

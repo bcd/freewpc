@@ -2483,7 +2483,9 @@ void switch_window_title (const char *title)
 
 void switch_edges_init (void)
 {
+	extern U8 sw_last_scheduled;
 	browser_init ();
+	sw_last_scheduled = 0;
 	switch_display_timer = 0;
 }
 
@@ -2578,7 +2580,6 @@ void single_switch_draw (void)
 	const char *level;
 	const char *active;
 
-	switch_matrix_draw ();
 	switch_window_title ("SINGLE SWITCHES");
 
 	/* Display a description of the switch */
@@ -2597,6 +2598,7 @@ void single_switch_draw (void)
 	sprintf ("%s-%s", active, level);
 	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
 
+	switch_matrix_draw ();
 	dmd_show_low ();
 }
 
