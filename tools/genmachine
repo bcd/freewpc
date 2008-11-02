@@ -314,8 +314,7 @@ sub close_switch {
 	$def->{'button'} = 1 if (defined $def->{'start-button'})
 		|| (defined $def->{'buyin-button'});
 
-	$def->{'prebounce'} = "0" if (!defined $def->{'prebounce'});
-	$def->{'postbounce'} = "0" if (!defined $def->{'postbounce'});
+	$def->{'debounce'} = "0" if (!defined $def->{'debounce'});
 }
 
 sub close_drive {
@@ -947,7 +946,7 @@ sub machine_write_switch_decls {
 		my $c_ident = $sw->{'c_ident'};
 		print "   [" . $c_ident . "] = {\n";
 		for $field ("fn", "flags", "lamp", "sound",
-			"prebounce", "postbounce", "devno") {
+			"debounce", "devno") {
 			$val = $sw->{$field};
 			if (($c_decl =~ /unused/) && ($field eq "fn")) {
 				$val = "null_function";

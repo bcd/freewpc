@@ -537,7 +537,7 @@ pending_switch_t *switch_queue_add (const switchnum_t sw)
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
 	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
-	entry->timer = switch_lookup(sw)->prebounce * 16;
+	entry->timer = switch_lookup(sw)->debounce * 16;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
 	bit_on (sw_queued, sw);
 	return entry;
@@ -675,7 +675,7 @@ static void switch_update_stable (const U8 sw)
 {
 	/* Queue the switch if it requires further debouncing.
 	 * Otherwise, it is eligible for scheduling. */
-	if (switch_lookup (sw)->prebounce != 0)
+	if (switch_lookup (sw)->debounce != 0)
 		switch_queue_add (sw);
 	else
 		switch_transitioned (sw);
