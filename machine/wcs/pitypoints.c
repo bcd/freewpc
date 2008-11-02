@@ -1,9 +1,30 @@
 
 #include <freewpc.h>
 
+
+CALLSET_ENTRY (pity, end_ball)
+{
+	sound_send (SND_CROWD_AWW);
+}
+
+CALLSET_ENTRY (pity, bonus)
+{
+	sound_send (MUS_BONUS1);
+	task_sleep_sec (1);
+	sound_send (MUS_BONUS2);
+	task_sleep_sec (1);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep_sec (1);
+}
+
 CALLSET_ENTRY (pity, any_pf_switch)
 {
 	score (SC_2500);
+}
+
+CALLSET_ENTRY (pity, sw_spinner_slow)
+{
+	score (SC_10K);
 }
 
 void pity_skill_lane (void)
