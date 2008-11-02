@@ -293,7 +293,11 @@ else return the bitmask that reflects that solenoid's
 position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
+#ifdef CONFIG_OLD_SOL
 	if (MACHINE_SOLENOID_P (id) || MACHINE_SOL_FLASHERP (id))
+#else
+	if (MACHINE_SOL_FLASHERP (id))
+#endif
 		if (likely (sol_timers[id] != 0))
 		{
 			sol_timers[id]--;
