@@ -22,6 +22,10 @@
 #include <window.h>
 #include <test.h>
 
+extern U8 sw_last_scheduled;
+extern U8 switch_display_timer;
+
+
 void switch_matrix_draw (void)
 {
 	U8 row, col;
@@ -56,9 +60,18 @@ void switch_matrix_draw (void)
 	}
 }
 
+void switch_test_display (U8 sw)
+{
+	sprintf_far_string (names_of_switches + sw_last_scheduled);
+	font_render_string_left (&font_var5, 50, 9, sprintf_buffer);
+}
+
+
+
 void switch_edges_update (void)
 {
 	extern __test__ void switch_edges_draw (void);
+
 	/* TODO : here's what needs to happen.
 	We begin by drawing the switch matrix normally, then we
 	take a snapshot of raw switches.  Every 16ms, we do
@@ -69,7 +82,27 @@ void switch_edges_update (void)
 	Also show the transition(s) that just occurred.
 	(For switch levels, iterate through the active switches
 	accounting for backwards optos continuously.) */
+
 	dmd_alloc_low_clean ();
+
+	if (switch_display_timer == 0)
+	{
+		if (sw_last_scheduled)
+		{
+			switch_test_display (sw_last_scheduled);
+			switch_display_timer = 10;
+		}
+	}
+	else
+	{
+		switch_display_timer--;
+		switch_test_display (sw_last_scheduled);
+		if (switch_display_timer == 0)
+		{
+			sw_last_scheduled = 0;
+		}
+	}
+
 	switch_edges_draw ();
 }
 

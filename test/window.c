@@ -2474,11 +2474,18 @@ extern __test2__ void switch_matrix_draw (void);
 extern __test2__ void switch_edges_update (void);
 extern __test2__ void switch_levels_update (void);
 
+U8 switch_display_timer;
+
 void switch_window_title (const char *title)
 {
 	font_render_string_center (&font_mono5, 80, 3, title);
 }
 
+void switch_edges_init (void)
+{
+	browser_init ();
+	switch_display_timer = 0;
+}
 
 void switch_edges_draw (void)
 {
@@ -2498,6 +2505,7 @@ void switch_edges_thread (void)
 
 struct window_ops switch_edges_window = {
 	INHERIT_FROM_BROWSER,
+	.init = switch_edges_init,
 	.draw = switch_edges_draw,
 	.thread = switch_edges_thread,
 	.up = null_function,

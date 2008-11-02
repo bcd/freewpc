@@ -79,6 +79,8 @@ U8 switch_queue_tail;
 
 U16 switch_last_service_time;
 
+U8 sw_last_scheduled;
+
 
 /** Return the switch table entry for a switch */
 const switch_info_t *switch_lookup (const switchnum_t sw)
@@ -396,12 +398,8 @@ void switch_sched_task (void)
 	}
 #endif
 
-#if 0 /* not working */
-	/* In test mode, always queue switch closures into the
-	 * special switch test queue. */
-	if (in_test)
-		switch_test_add_queue (sw);
-#endif
+	/* For test mode */
+	sw_last_scheduled = sw;
 
 	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
 
