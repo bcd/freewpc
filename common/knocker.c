@@ -35,7 +35,7 @@ U8 knock_count;
 /** Fires the knocker */
 static void knocker_fire_task (void)
 {
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	do
 	{
 #ifdef MACHINE_KNOCKER_SOLENOID
