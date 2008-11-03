@@ -112,8 +112,7 @@ extern inline U8 *sol_get_write_reg (solnum_t sol)
 #if (MACHINE_WPC95 == 1)
 			return (U8 *)WPC95_FLIPPER_COIL_OUTPUT;
 #else
-			return NULL;
-			//return (U8 *)WPC_FLIPTRONIC_PORT_A;
+			return (U8 *)WPC_FLIPTRONIC_PORT_A;
 #endif
 		case 5:
 			return (U8 *)WPC_EXTBOARD1;
