@@ -90,9 +90,7 @@ void ballsave_launch (void)
 #else
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
-#ifdef DEFF_BALL_SAVE /* TODO - always have one of these ! */
 	deff_start (DEFF_BALL_SAVE);
-#endif
 	if (config_timed_game)
 		timed_game_extend (2);
 }

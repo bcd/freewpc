@@ -29,6 +29,20 @@ extern __nvram__ U8 current_volume;
 extern const audio_track_t volume_change_music_track;
 
 
+void ball_save_deff (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+	sprintf ("PLAYER %d", player_up);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
+	dmd_show_low ();
+	deff_swap_low_high (24, TIME_100MS);
+	deff_exit ();
+}
+
+
 /** Display effect when locating missing balls prior to game start */
 void locating_balls_deff (void)
 {

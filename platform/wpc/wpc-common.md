@@ -94,6 +94,7 @@ System Reset: PRI_RESET, page(COMMON_PAGE)
 Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
 Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
 Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
+Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 
 [leffs]
 NULL: 0
