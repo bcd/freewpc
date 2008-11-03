@@ -112,8 +112,7 @@ extern inline U8 *sol_get_write_reg (solnum_t sol)
 #if (MACHINE_WPC95 == 1)
 			return (U8 *)WPC95_FLIPPER_COIL_OUTPUT;
 #else
-			return NULL;
-			//return (U8 *)WPC_FLIPTRONIC_PORT_A;
+			return (U8 *)WPC_FLIPTRONIC_PORT_A;
 #endif
 		case 5:
 			return (U8 *)WPC_EXTBOARD1;
@@ -139,18 +138,37 @@ extern inline U8 sol_get_bit (const solnum_t sol)
 }
 
 
+/** Return nonzero if a solenoid's enable line is
+ * inverted; i.e. writing a 0 turns it on and
+ * writing a 1 turns it off.
+ */
+extern inline U8 sol_inverted (const solnum_t sol)
+{
+	return (sol >= 32) && (sol < 40);
+}
+
+
+/** Turn on a solenoid immediately. */
 extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
 	U8 *w = sol_get_write_reg (sol);
-	*w = *r |= sol_get_bit (sol);
+	if (sol_inverted (sol))
+		*w = *r &= ~sol_get_bit (sol);
+	else
+		*w = *r |= sol_get_bit (sol);
 }
 
+
+/** Turn off a solenoid immediately. */
 extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
 	U8 *w = sol_get_write_reg (sol);
-	*w = *r &= ~sol_get_bit (sol);
+	if (sol_inverted (sol))
+		*w = *r |= sol_get_bit (sol);
+	else
+		*w = *r &= ~sol_get_bit (sol);
 }
 
 #endif /* _SYS_SOL_H */

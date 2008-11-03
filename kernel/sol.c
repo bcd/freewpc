@@ -102,6 +102,7 @@ U8 req_bit;
 U8 req_on_time;
 U8 req_duty_time;
 U8 req_duty_mask;
+U8 req_inverted;
 
 #define SOL_REQ_QUEUE_LEN 8
 
@@ -147,6 +148,7 @@ void sol_req_start (U8 sol)
 	req_on_time = 16;
 	req_duty_time = (sol_get_time (sol) - 1) * 16;
 	req_duty_mask = 0x3; /* 25% */
+	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
 
 	/* Mark the request pending, so the update procedure will see it. */
 	sol_req_state = REQ_PENDING;
@@ -240,7 +242,7 @@ void sol_req_rtt (void)
 		if (zc_get_timer () == 2)
 		{
 			sol_req_timer = req_on_time;
-			*req_reg_write = *req_reg_read |= req_bit;
+			*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
 			sol_req_state = REQ_ON;
 		}
 	}
@@ -266,7 +268,7 @@ void sol_req_rtt (void)
 				/* Switch to IDLE.  Ensure the coil is off.
 				Release any process waiting on this solenoid to
 				finish. */
-				*req_reg_write = *req_reg_read &= ~req_bit;
+				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
 				req_lock = 0;
 				sol_req_state = REQ_IDLE;
 			}
@@ -276,12 +278,12 @@ void sol_req_rtt (void)
 			if ((sol_req_timer & sol_duty_mask) == 0)
 			{
 				/* Occasionally turn on the coil */
-				*req_reg_write = *req_reg_read |= req_bit;
+				*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
 			}
 			else
 			{
 				/* Most of the time, keep it off */
-				*req_reg_write = *req_reg_read &= ~req_bit;
+				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
 			}
 		}
 	}
@@ -293,7 +295,11 @@ else return the bitmask that reflects that solenoid's
 position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
+#ifdef CONFIG_OLD_SOL
 	if (MACHINE_SOLENOID_P (id) || MACHINE_SOL_FLASHERP (id))
+#else
+	if (MACHINE_SOL_FLASHERP (id))
+#endif
 		if (likely (sol_timers[id] != 0))
 		{
 			sol_timers[id]--;
@@ -351,9 +357,9 @@ extern inline void sol_update_fliptronic_powered (void)
 
 	/* For some reason, GCC 4.x crashes on this function... */
 #ifdef GCC4
-	register U8 out __areg__ = 0;
+	register U8 out __areg__ = fliptronic_powered_coil_outputs;
 #else
-	register U8 out = 0;
+	register U8 out = fliptronic_powered_coil_outputs;
 #endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers

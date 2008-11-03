@@ -9,12 +9,13 @@ CALLSET_ENTRY (pity, end_ball)
 
 CALLSET_ENTRY (pity, bonus)
 {
-	sound_send (MUS_BONUS1);
-	task_sleep_sec (1);
-	sound_send (MUS_BONUS2);
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	sound_send (MUS_BONUS_BONG);
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_500MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_500MS);
 }
 
 CALLSET_ENTRY (pity, any_pf_switch)
