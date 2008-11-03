@@ -30,11 +30,10 @@
  * These are termed "local variables" throughout the code.  To declare
  * a local, simply prefix its declaration with "__local__".  The
  * linker will put all locals into a special section of RAM, where
- * this functions expect them.
+ * these functions expect them.
  *
- * There are also "local flags", which are implemented as special
- * lamp numbers above the range of the physical lamps.  The number
- * of these is limited.
+ * There are also "local flags", which are implemented as a
+ * separate bit matrix.
  */
 
 #include <freewpc.h>
@@ -49,6 +48,9 @@ U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
 #define LOCAL_SAVE_BASE(p) (&local_save_area[p][0])
 #endif
 
+/**
+ * The save area for each player is arranged as follows:
+ */
 struct player_save_area
 {
 	U8 local_lamps[NUM_LAMP_COLS];
@@ -58,6 +60,10 @@ struct player_save_area
 
 #define save_area ((struct player_save_area *)(LOCAL_SAVE_BASE(player_up)))
 
+/**
+ * Initialize the player save areas at the beginning of a game.
+ * All flags/lamps are turned off, and all local vars are zeroed.
+ */
 void player_start_game (void)
 {
 	/* Clear all player local data */
@@ -69,6 +75,9 @@ void player_start_game (void)
 }
 
 
+/**
+ * Save player-local data just after a player's turn ends.
+ */
 void player_save (void)
 {
 	/* Copy lamps/local flags into the save area */
@@ -80,6 +89,9 @@ void player_save (void)
 }
 
 
+/**
+ * Restore player-local data just before a new player's turn.
+ */
 void player_restore (void)
 {
 	/* Restore lamps/bits from the save area */
