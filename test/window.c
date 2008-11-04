@@ -3341,7 +3341,12 @@ struct menu *test_menu_items[] = {
 	&switch_levels_item,
 	&single_switches_item,
 	&solenoid_test_item,
+#ifndef MACHINE_LACKS_ALL_INCLUDES
+	/* Flasher test is excluded for the DMD-tester
+	 * because nothing is defined as a flasher.
+	 * Everything can be accessed in solenoid test. */
 	&flasher_test_item,
+#endif
 	&gi_test_item,
 	&sound_test_item,
 	&lamp_test_item,
