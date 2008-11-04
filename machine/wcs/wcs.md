@@ -216,8 +216,8 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 88: Upper Right Lane, ingame
 
 [drives]
-H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_66MS)
-H2: TV Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_100MS)
+H2: TV Popper, duty(SOL_DUTY_75), time(TIME_100MS)
 H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
 H4: Lock Release
 H5: Upper Eject
@@ -330,6 +330,7 @@ L. Ramp Build:
 Striker Build:
 R. Ramp Build:
 Divert Ramp:
+Lock Magnet Enable:
 
 [globalflags]
 Goalie Moving:
@@ -346,3 +347,5 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Goal Trough Made:
 Ignore R. Ramp Exit:
 Ramp Gate Debounce:
+Kickback Made:
+
