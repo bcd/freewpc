@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-__local__ U8 ball_save_count;
-
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
@@ -106,32 +104,6 @@ void jackpot_deff (void)
 	deff_exit ();
 }
 
-void ball_save_deff (void)
-{
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	sprintf ("PLAYER %d", player_up);
-	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
-	dmd_copy_low_to_high ();
-	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
-	dmd_show_low ();
-
-	switch (ball_save_count)
-	{
-		case 0:
-			sound_send (SND_POWER_HUH_3);
-			break;
-		case 1:
-			sound_send (SND_POWER_HUH_4);
-			break;
-		default:
-			break;
-	}
-	ball_save_count++;
-
-	deff_swap_low_high (24, TIME_100MS);
-	deff_exit ();
-}
 
 U16 tv_static_data[] = {
 	0x4964UL, 0x3561UL, 0x2957UL, 0x1865UL, 
@@ -261,11 +233,5 @@ void bg_flash_deff (void)
 		dmd_show2 ();
 		task_sleep (flash_time); /* 33% */
 	}
-}
-
-
-CALLSET_ENTRY (tz_deff, start_player)
-{
-	ball_save_count = 0;
 }
 

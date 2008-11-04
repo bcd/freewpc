@@ -81,9 +81,31 @@ CALLSET_ENTRY (shot, sw_r_ramp_exit)
 }
 
 /*
- * Throw kickback events.
+ * Throw kickback events.  Kickback upper throws
+ * two different sub-events depending on direction:
+ * 'enter' by default; 'exit' right after the lower
+ * kickback.
+ *
+ * TODO - this does not work completely in multiball.
  */
 
+CALLSET_ENTRY (shot, sw_kickback_upper)
+{
+	if (free_timer_test (TIM_KICKBACK_MADE))
+	{
+		free_timer_stop (TIM_KICKBACK_MADE);
+		callset_invoke (sw_kickback_upper_exit);
+	}
+	else
+	{
+		callset_invoke (sw_kickback_upper_enter);
+	}
+}
+
+CALLSET_ENTRY (shot, sw_kickback)
+{
+	free_timer_restart (TIM_KICKBACK_MADE, TIME_2S);
+}
 
 /*
  * Throw the left_loop event.  It is not counted

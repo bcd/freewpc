@@ -474,12 +474,10 @@ extern inline U8 wpc_read_flipper_eos (void)
 
 extern inline void wpc_write_flippers (U8 val)
 {
-#ifndef CONFIG_NO_SOL
 #if (MACHINE_WPC95 == 1)
 	writeb (WPC95_FLIPPER_COIL_OUTPUT, val);
 #else
 	writeb (WPC_FLIPTRONIC_PORT_A, ~val);
-#endif
 #endif
 }
 
@@ -521,9 +519,7 @@ extern inline U8 wpc_read_ticket (void)
 
 extern inline void wpc_write_ticket (U8 val)
 {
-#ifndef CONFIG_NO_SOL
 	writeb (WPC_TICKET_DISPENSE, val);
-#endif
 }
 
 
