@@ -50,7 +50,7 @@ static inline U8 *free_timer_update (U8 *timer_ptr)
 
 
 /** Realtime timer update function.  Each timer value is
-simply decremented by 1 if it is nonzero. */
+simply decremented by 1 tick (33ms) if it is nonzero. */
 void free_timer_rtt (void)
 {
 	U8 *timer_ptr = free_timers;

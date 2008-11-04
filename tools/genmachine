@@ -119,6 +119,7 @@ my %BinaryProperties = (
 		"buyin-button" => $GLOBAL_OBJECT,
 		"launch-button" => $GLOBAL_OBJECT,
 		"start-button" => $GLOBAL_OBJECT,
+		"trough-stack" => $GLOBAL_OBJECT,
 	},
 	"lamps" => {
 		"start" => $GLOBAL_OBJECT,

@@ -21,7 +21,8 @@
 #ifndef _TIMER_H
 #define _TIMER_H
 
-/* Round to the next multiple of 4 */
+/* Round to the next multiple of 4, because the IRQ-level function
+ * has an unrolled loop that requires this. */
 #define MAX_FREE_TIMERS (4 * ((MAX_TIMERS + 3) / 4))
 
 typedef U8 free_timer_id_t;

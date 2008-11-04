@@ -24,7 +24,7 @@
  * \file
  * \brief AC/zerocross circuit handling
  *
- * This module is not yet complete.
+ * This module is mostly working but not incredibly robust.
  */
 
 #define AC_DOMESTIC_CYCLE 17
@@ -95,6 +95,10 @@ void ac_rtt (void)
 {
 	if (unlikely (zc_status == ZC_INITIALIZING))
 	{
+		/* TODO - here, verify that zerocross is OK by
+		 * counting the frequency of occurrences and make sure
+		 * they are within range.  When good, switch to
+		 * ZC_WORKING; if bad, switch to ZC_BROKEN. */
 	}
 
 	else if (unlikely (zc_status == ZC_BROKEN))
@@ -146,22 +150,11 @@ handle_zero_crossing:;
 				zc_status = ZC_BROKEN;
 			}
 		}
-
-		/* When zerocross is not active, there is AC power
-		 * and GI dimming can be done.  It makes no sense to do
-		 * this at the instant the zerocross is detected.
-		 *
-		 * As the GI lamps only need to be pulsed roughly
-		 * 1/8 of the time anyway, like the controlled lamps,
-		 * we just use the zc_timer to determine at what point
-		 * since zerocross to turn on the circuit.  During that
-		 * 1ms interval only, enable the string; during all
-		 * others, disable the string.
-		 */
 	}
 }
 
 
+/** Initialize the AC detection module. */
 void ac_init (void)
 {
 	zc_timer = 0;
