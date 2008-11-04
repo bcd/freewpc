@@ -165,7 +165,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
-23: Buy Extra Ball, button, cabinet
+23: Buyin Button, buyin-button, cabinet
 25: Free Kick Target, ingame
 26: Kickback Upper, ingame
 27: Spinner, ingame
