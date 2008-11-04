@@ -116,9 +116,7 @@ extern inline void sol_update_set (const U8 set)
 	sol_contribute (set * 8 + 7, out);
 
 	/* Write the final output to the hardware */
-#ifndef CONFIG_NO_SOL
 	pinio_write_solenoid_set (set, out);
-#endif
 }
 
 
