@@ -59,7 +59,8 @@ CALLSET_ENTRY (shot, sw_r_ramp_enter)
 
 CALLSET_ENTRY (shot, sw_l_ramp_diverted)
 {
-	free_timer_restart (TIM_IGNORE_R_RAMP_EXIT, TIME_5S);
+	/* TODO - be careful, cannot ask for more than 4s of this API */
+	free_timer_restart (TIM_IGNORE_R_RAMP_EXIT, TIME_4S);
 	callset_invoke (left_ramp_shot);
 }
 
