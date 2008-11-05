@@ -50,7 +50,7 @@ extern inline void @self_start (void)
 {
 	disable_interrupts ();
 	@self_timer = @ontime;
-	@self_timeout = @timeout;
+	@self_cycles = @timeout;
 	@self_state = 1;
 	sol_enable (@sol);
 	@class_enables |= (1 << @instance);
@@ -65,28 +65,38 @@ extern inline void @self_stop (void)
 	enable_interrupts ();
 }
 
+/**
+ * Realtime update of a duty-cycled device.
+ */
 extern inline void @self_service (void)
 {
+	/* Only act if device is enabled */
 	if (@class_enables & (1 << @instance))
 	{
+		/* Alternate between on and off */
 		if (--@self_timer == 0)
 		{
-			if (@self_state) /* device is on */
+			if (@self_state)
 			{
+				/* Device is presently on, turn it off */
 				sol_disable (@sol);
-				@self_state = 0;
-				@self_timer = @duty_ontime;
-			}
-			else /* device is presently off */
-			{
-				if (@timeout)
+
+				/* If a timeout was declared, then see if
+				 * it should be auto-disabled. */
+				if (@timeout && --@self_cycles == 0)
 				{
-					if (--@self_cycles == 0)
-						return;
+					@class_enables &= ~(1 << @instance);
+					return;
 				}
+				@self_state = 0;
+				@self_timer = @duty_offtime;
+			}
+			else
+			{
+				/* Device is presently off, turn it on */
 				sol_enable (@sol);
 				@self_state++;
-				@self_timer = @duty_offtime;
+				@self_timer = @duty_ontime;
 			}
 		}
 	}
@@ -102,6 +112,7 @@ extern inline void @self_service (void)
 @@classvar __fastram__ U8 @class_enables;
 U8 @self_state;
 U8 @self_timer;
+U8 @self_cycles;
 
 CALLSET_ENTRY (@self, init)
 {
