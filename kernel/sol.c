@@ -470,6 +470,7 @@ sol_init (void)
 
 	sol_req_state = REQ_IDLE;
 	memset (sol_reg_readable, 0, SOL_REG_COUNT);
+	sol_reg_readable[4] = 0xFF;
 
 	/* Initialize the solenoid queue. */
 	queue_init ((queue_t *)&sol_req_queue);
