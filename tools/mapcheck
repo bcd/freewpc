@@ -15,11 +15,17 @@
 # things before it becomes critical.
 #
 
+if [ "$1" = "" ]; then
+	mapfile="build/freewpc.map"
+else
+	mapfile=$1
+fi
+
 checkpage ()
 {
 	section=$1; shift
 	addr=$1; shift
-	sz=`grep " l_${section}" build/freewpc.map | awk '{print $1}'`
+	sz=`grep " l_${section}" ${mapfile} | awk '{print $1}'`
 	max=$(($addr));
 	used=$((0x$sz));
 	avail=$(($max - 0x$sz));

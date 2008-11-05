@@ -30,11 +30,10 @@
  * These are termed "local variables" throughout the code.  To declare
  * a local, simply prefix its declaration with "__local__".  The
  * linker will put all locals into a special section of RAM, where
- * this functions expect them.
+ * these functions expect them.
  *
- * There are also "local flags", which are implemented as special
- * lamp numbers above the range of the physical lamps.  The number
- * of these is limited.
+ * There are also "local flags", which are implemented as a
+ * separate bit matrix.
  */
 
 #include <freewpc.h>
@@ -49,15 +48,22 @@ U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
 #define LOCAL_SAVE_BASE(p) (&local_save_area[p][0])
 #endif
 
+/**
+ * The save area for each player is arranged as follows:
+ */
 struct player_save_area
 {
 	U8 local_lamps[NUM_LAMP_COLS];
-	U8 local_flags[NUM_LAMP_COLS];
+	U8 local_flags[MAX_FLAGS];
 	U8 local_vars[LOCAL_SIZE];
 };
 
 #define save_area ((struct player_save_area *)(LOCAL_SAVE_BASE(player_up)))
 
+/**
+ * Initialize the player save areas at the beginning of a game.
+ * All flags/lamps are turned off, and all local vars are zeroed.
+ */
 void player_start_game (void)
 {
 	/* Clear all player local data */
@@ -65,26 +71,32 @@ void player_start_game (void)
 
 	/* Clear lamps/flags */
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
-	memset (bit_matrix, 0, NUM_LAMP_COLS);
+	memset (bit_matrix, 0, MAX_FLAGS);
 }
 
 
+/**
+ * Save player-local data just after a player's turn ends.
+ */
 void player_save (void)
 {
 	/* Copy lamps/local flags into the save area */
 	memcpy (save_area->local_lamps, lamp_matrix, NUM_LAMP_COLS);
-	memcpy (save_area->local_flags, bit_matrix, NUM_LAMP_COLS);
+	memcpy (save_area->local_flags, bit_matrix, MAX_FLAGS);
 
 	/* Copy player locals into the save area */
 	__blockcopy16 (save_area->local_vars, LOCAL_BASE, LOCAL_SIZE);
 }
 
 
+/**
+ * Restore player-local data just before a new player's turn.
+ */
 void player_restore (void)
 {
 	/* Restore lamps/bits from the save area */
 	memcpy (lamp_matrix, save_area->local_lamps, NUM_LAMP_COLS);
-	memcpy (bit_matrix, save_area->local_flags, NUM_LAMP_COLS);
+	memcpy (bit_matrix, save_area->local_flags, MAX_FLAGS);
 	
 	/* Restore player locals from the save area */
 	__blockcopy16 (LOCAL_BASE, save_area->local_vars, LOCAL_SIZE);

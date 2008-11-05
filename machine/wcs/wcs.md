@@ -128,7 +128,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 54: Striker Build, white
 55: Light Magna Goalie
 56: R. Flipper Lane
-57: Shoot Again, red
+57: Shoot Again, red, extra-ball
 58: Special, red
 61: L. Ramp Build, white
 62: L. Loop Build, white

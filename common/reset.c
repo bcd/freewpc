@@ -30,6 +30,12 @@
 #define ACCEPT_2	0x75
 #define ACCEPT_3	0xB9
 
+
+/**
+ * The acceptance screen requires pressing a coindoor button
+ * to continue.  Define which button does this generically,
+ * for working on WPC or Whitestar platforms.
+ */
 #ifdef CONFIG_PLATFORM_WPC
 #define ACCEPT_BUTTON SW_ENTER
 #endif
@@ -44,6 +50,9 @@ __nvram__ U8 freewpc_accepted[3];
 extern __common__ void opto_check (void);
 
 
+/**
+ * Wait for a button to be pressed and released.
+ */
 extern inline void wait_for_button (const U8 swno)
 {
 	while (!switch_poll (swno))
@@ -67,11 +76,19 @@ void factory_reset (void)
 	 * and reset the custom message. */
 #ifdef __m6809__
 	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
+#else
+	/* TODO */
 #endif
 	callset_invoke (factory_reset);
 }
 
 
+/**
+ * See if a factory reset is needed.  The 'init_ok' event is
+ * thrown and any catchers can return FALSE if a factory reset
+ * should occur.  The accept button must be pressed afterwards
+ * to confirm.
+ */
 void factory_reset_if_required (void)
 {
 	if (!callset_invoke_boolean (init_ok))
@@ -205,6 +222,5 @@ void system_reset (void)
 
 	/* Check the 12V supply to make sure optos are working */
 	opto_check ();
-
 }
 
