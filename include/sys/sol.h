@@ -116,6 +116,9 @@ extern inline U8 *sol_get_write_reg (solnum_t sol)
 #endif
 		case 5:
 			return (U8 *)WPC_EXTBOARD1;
+		default:
+			fatal (ERR_SOL_REQUEST);
+			return NULL;
 	}
 }
 
