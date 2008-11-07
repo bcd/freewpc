@@ -358,3 +358,4 @@ Upper Jet: driver(spsol), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=3, offtime=
 Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
 Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
 Gate Open: driver(duty), sol=SOL_LOOP_GATE, ontime=4, duty_ontime=1, duty_offtime=1, timeout=96
+Kickback: driver(spsol), sw=SW_KICKBACK, sol=SOL_KICKBACK, ontime=5, offtime=30
