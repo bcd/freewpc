@@ -1,5 +1,5 @@
 #
-# Copyright 2007 by Brian Dominy <brian@oddchange.com>
+# Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
 # 
 # This file is part of FreeWPC.
 # 
@@ -19,12 +19,13 @@
 # 
 
 
-# Handle fast solenoids: slings and jets
+# Handle fast solenoids: slings, jets, and kickback
 !spsol0_service      8     40c
 !spsol1_service      8     40c
 !spsol2_service      8     40c
 !spsol3_service      8     40c
 !spsol4_service      8     40c
+!spsol5_service      8     40c
 
 !spinner0_service    8     40c
 !duty0_service       16    40c

@@ -57,8 +57,8 @@ GAME_TEST_OBJS =
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
-	shot.o lock.o driver.o match.o
+	shot.o lock.o driver.o match.o kickback.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 
-SCHED_HEADERS += build/spsol0.h build/spsol1.h build/spsol2.h build/spsol3.h build/spsol4.h build/spinner0.h build/duty0.h
+SCHED_HEADERS += build/spsol0.h build/spsol1.h build/spsol2.h build/spsol3.h build/spsol4.h build/spsol5.h build/spinner0.h build/duty0.h

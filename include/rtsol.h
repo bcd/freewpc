@@ -26,22 +26,10 @@
  * then driving the appropriate solenoids.
  */
 
-extern inline void rt_sol_enable (const U8 sol)
-{
-	sol_timers[sol] = 0xFF;
-}
-
-
 extern inline void rt_sol_start (solnum_t sol, U8 duty_mask, U8 ticks)
 {
 	sol_duty_state[sol] = duty_mask;
 	sol_timers[sol] = ticks;
-}
-
-
-extern inline void rt_sol_disable (const U8 sol)
-{
-	sol_timers[sol] = 0;
 }
 
 
@@ -61,7 +49,7 @@ extern inline void rt_solenoid_update (
 	if (!in_live_game)
 	{
 		/* Solenoid is never pulsed except during a game */
-		rt_sol_disable (solno);
+		sol_disable (solno);
 	}
 	else if (*state == 0)
 	{
@@ -77,13 +65,13 @@ extern inline void rt_solenoid_update (
 	else if (*state < 0)
 	{
 		/* Solenoid is in its off-phase */
-		rt_sol_disable (solno);
+		sol_disable (solno);
 		(*state)++;
 	}
 	else if (*state > 0)
 	{
 		/* Solenoid is in its on-phase */
-		rt_sol_enable (solno);
+		sol_enable (solno);
 		(*state)--;
 		if (*state == 0)
 		{
