@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -54,16 +54,10 @@ typedef struct
 	sound_code_t sound;
 
 	/** Indicates how long the switch must remain in the active
-	 * state before an event is generated.  During this time,
-	 * the switch remains queued.  If it does not change for this
-	 * time, then the event is generated.  If it does change, the
-	 * prebounce period is restarted. */
-	task_ticks_t prebounce;
-
-	/** Indicates how long after the event is generated before
-	 * switch closures are considered again.  During this period,
-	 * any switch transitions are ignored. */
-	task_ticks_t postbounce;
+	 * state before an event is generated.   If zero, then only
+	 * a quick 4ms debounce is done.  The value is given
+	 * in 16ms ticks. */
+	task_ticks_t debounce;
 
 	/** If nonzero, indicates the device driver associated with this
 	 *switch. */
