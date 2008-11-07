@@ -49,6 +49,25 @@ extern U8 @self_state;
 extern U8 @self_timer;
 extern U8 @self_cycles;
 
+
+extern inline void @self_enable (void)
+{
+	@class_enables |= (1 << @instance);
+}
+
+
+extern inline void @self_disable (void)
+{
+	@class_enables &= ~(1 << @instance);
+}
+
+
+extern inline bool @self_enabled_p (void)
+{
+	return @class_enables & (1 << @instance);
+}
+
+
 void @self_start (void);
 void @self_stop (void);
 
@@ -58,7 +77,7 @@ void @self_stop (void);
 extern inline void @self_service (void)
 {
 	/* Only act if device is enabled */
-	if (@class_enables & (1 << @instance))
+	if (@self_enabled_p ())
 	{
 		/* Alternate between on and off */
 		if (--@self_timer == 0)
@@ -72,7 +91,7 @@ extern inline void @self_service (void)
 				 * it should be auto-disabled. */
 				if (@timeout && --@self_cycles == 0)
 				{
-					@class_enables &= ~(1 << @instance);
+					@self_disable ();
 					return;
 				}
 				@self_state = 0;
@@ -110,7 +129,7 @@ void @self_start (void)
 	@self_state = 1;
 	disable_interrupts ();
 	sol_enable (@sol);
-	@class_enables |= (1 << @instance);
+	@self_enable ();
 	enable_interrupts ();
 }
 
@@ -118,7 +137,7 @@ void @self_start (void)
 void @self_stop (void)
 {
 	disable_interrupts ();
-	@class_enables &= ~(1 << @instance);
+	@self_disable ();
 	sol_disable (@sol);
 	enable_interrupts ();
 }
