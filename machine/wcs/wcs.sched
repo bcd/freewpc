@@ -19,17 +19,19 @@
 # 
 
 
-# Handle fast solenoids: slings, jets, and kickback
-!spsol0_service      8     40c
-!spsol1_service      8     40c
-!spsol2_service      8     40c
-!spsol3_service      8     40c
-!spsol4_service      8     40c
-!spsol5_service      8     40c
+# Special solenoid drivers
+!left_sling_service       8     40c
+!right_sling_service      8     40c
+!left_jet_service         8     40c
+!upper_jet_service        8     40c
+!lower_jet_service        8     40c
+!kickback_driver_service  8     40c
 
-!spinner0_service    8     40c
+# Spinner drivers
+!spinner_service          8     40c
 
-!duty0_service       16    40c
-!duty1_service       16    40c
-!duty2_service       16    40c
+# Duty drivers
+!gate_service             16    40c
+!spinning_ball_service    16    40c
+!goalie_service           16    40c
 

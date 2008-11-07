@@ -4,7 +4,7 @@
 
 void stop_goalie (void)
 {
-	duty2_stop ();
+	goalie_stop ();
 }
 
 void stop_goalie_left (void)
@@ -23,7 +23,7 @@ void start_goalie (void)
 {
 	if (feature_config.disable_goalie == NO)
 	{
-		duty2_start ();
+		goalie_start ();
 	}
 }
 

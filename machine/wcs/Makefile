@@ -61,4 +61,4 @@ GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 
-SCHED_HEADERS += build/spsol0.h build/spsol1.h build/spsol2.h build/spsol3.h build/spsol4.h build/spsol5.h build/spinner0.h build/duty0.h build/duty1.h build/duty2.h
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/lower_jet.h build/upper_jet.h build/kickback_driver.h build/spinner.h build/gate.h build/spinning_ball.h build/goalie.h

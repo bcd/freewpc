@@ -1,6 +1,6 @@
 
 #include <freewpc.h>
-#include "spsol5.h"
+#include "kickback_driver.h"
 
 void kickback_enable (void)
 {
