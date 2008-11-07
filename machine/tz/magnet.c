@@ -78,7 +78,7 @@ static inline void magnet_rtt_duty_handler (
 	{
 		case MAG_DISABLED:
 		case MAG_ENABLED:
-			rt_sol_disable (sol_magnet);
+			sol_disable (sol_magnet);
 			break;
 
 		case MAG_ON_POWER:
@@ -94,7 +94,7 @@ static inline void magnet_rtt_duty_handler (
 			else
 			{
 				/* magnet is on 100% */
-				rt_sol_enable (sol_magnet);
+				sol_enable (sol_magnet);
 			}
 			break;
 
@@ -103,7 +103,7 @@ static inline void magnet_rtt_duty_handler (
 			/* switch should remain closed in this state */
 			if (--*timer == 0)
 			{
-				rt_sol_disable (sol_magnet);
+				sol_disable (sol_magnet);
 				/* switch to DISABLED */
 				*state = MAG_DISABLED;
 			}
@@ -112,11 +112,11 @@ static inline void magnet_rtt_duty_handler (
 				/* magnet is on 25% */
 				if ((*timer % 4) == 0)
 				{
-					rt_sol_enable (sol_magnet);
+					sol_enable (sol_magnet);
 				}
 				else
 				{
-					rt_sol_disable (sol_magnet);
+					sol_disable (sol_magnet);
 				}
 			}
 			break;
