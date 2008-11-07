@@ -145,7 +145,13 @@ void @self_stop (void)
 
 CALLSET_ENTRY (@self, init)
 {
-	@class_enables &= ~(1 << @instance);
+	@self_disable ();
+}
+
+
+CALLSET_ENTRY (@self, stop_game)
+{
+	@self_stop ();
 }
 
 /* vim: set filetype=c: */
