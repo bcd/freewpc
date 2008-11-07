@@ -340,6 +340,13 @@ Goalie Moving:
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
 
+Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
+Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Lit: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
+Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
+
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
@@ -353,11 +360,14 @@ Ramp Gate Debounce:
 Kickback Made:
 
 [templates]
-Left Slingshot: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=3, offtime=16
-Right Slingshot: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Upper Jet: driver(spsol), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=3, offtime=16
 Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
 Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
-Gate Open: driver(duty), sol=SOL_LOOP_GATE, ontime=4, duty_ontime=1, duty_offtime=1, timeout=96
-Kickback: driver(spsol), sw=SW_KICKBACK, sol=SOL_KICKBACK, ontime=5, offtime=30
+Gate: driver(duty), sol=SOL_LOOP_GATE, ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+Kickback Driver: driver(spsol), sw=SW_KICKBACK, sol=SOL_KICKBACK, ontime=5, offtime=30
+Spinning Ball: driver(duty), sol=SOL_BALL_FORWARD, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=0
+Goalie: driver(duty), sol=SOL_GOALIE_DRIVE, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=0
+

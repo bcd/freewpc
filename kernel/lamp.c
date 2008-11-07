@@ -173,7 +173,11 @@ extern inline void lamp_rtt_common (const U8 mode)
 
 void lamp_rtt_0 (void)
 {
+#ifdef BCD_WCS
+	pinio_write_lamp_data (0);
+#else
 	lamp_rtt_common (0);
+#endif
 }
 
 
@@ -185,7 +189,11 @@ void lamp_rtt_1 (void)
 
 void lamp_rtt_2 (void)
 {
+#ifdef BCD_WCS
+	pinio_write_lamp_data (0);
+#else
 	lamp_rtt_common (2);
+#endif
 }
 
 

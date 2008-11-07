@@ -10,6 +10,6 @@ F8: U. L. Flipper Button, button, opto
 
 [drives]
 F1: L.R. Flip Power, duty(SOL_DUTY_75), time(TIME_33MS)
-F2: L.R. Flip Hold, duty(SOL_DUTY_75), time(TIME_100MS)
+F2: L.R. Flip Hold, duty(SOL_DUTY_75), time(TIME_200MS)
 F3: L.L. Flip Power, duty(SOL_DUTY_75), time(TIME_33MS)
-F4: L.L. Flip Hold, duty(SOL_DUTY_75), time(TIME_100MS)
+F4: L.L. Flip Hold, duty(SOL_DUTY_75), time(TIME_200MS)
