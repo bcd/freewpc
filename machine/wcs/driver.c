@@ -5,5 +5,5 @@
 /* Temporary! */
 CALLSET_ENTRY (driver_test, sw_buyin_button)
 {
-	duty0_start ();
+	duty2_start ();
 }

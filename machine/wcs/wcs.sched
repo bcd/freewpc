@@ -30,3 +30,6 @@
 !spinner0_service    8     40c
 
 !duty0_service       16    40c
+!duty1_service       16    40c
+!duty2_service       16    40c
+

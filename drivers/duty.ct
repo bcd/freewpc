@@ -95,6 +95,7 @@ extern inline void @self_service (void)
 @@
 
 #include <freewpc.h>
+#include "@self.h"
 
 @@classvar __fastram__ U8 @class_enables;
 U8 @self_state;
