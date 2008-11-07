@@ -25,6 +25,10 @@
  * and must be constantly on for long periods of time.  It
  * supports duty cycling to avoid smoke :) and a fixed "on"
  * time at enable.
+ *
+ * For space efficiency, all enables are 1-bit and packed into
+ * a single byte variable.  A maximum of 8 drivers can be
+ * supported.
  */
 
 @@class duty
@@ -45,25 +49,8 @@ extern U8 @self_state;
 extern U8 @self_timer;
 extern U8 @self_cycles;
 
-
-extern inline void @self_start (void)
-{
-	disable_interrupts ();
-	@self_timer = @ontime;
-	@self_cycles = @timeout;
-	@self_state = 1;
-	sol_enable (@sol);
-	@class_enables |= (1 << @instance);
-	enable_interrupts ();
-}
-
-extern inline void @self_stop (void)
-{
-	disable_interrupts ();
-	@class_enables &= ~(1 << @instance);
-	sol_disable (@sol);
-	enable_interrupts ();
-}
+void @self_start (void);
+void @self_stop (void);
 
 /**
  * Realtime update of a duty-cycled device.
@@ -113,6 +100,28 @@ extern inline void @self_service (void)
 U8 @self_state;
 U8 @self_timer;
 U8 @self_cycles;
+
+
+void @self_start (void)
+{
+	@self_timer = @ontime;
+	@self_cycles = @timeout;
+	@self_state = 1;
+	disable_interrupts ();
+	sol_enable (@sol);
+	@class_enables |= (1 << @instance);
+	enable_interrupts ();
+}
+
+
+void @self_stop (void)
+{
+	disable_interrupts ();
+	@class_enables &= ~(1 << @instance);
+	sol_disable (@sol);
+	enable_interrupts ();
+}
+
 
 CALLSET_ENTRY (@self, init)
 {
