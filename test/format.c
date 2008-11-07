@@ -161,7 +161,7 @@ void time_interval_render (U8 val)
 
 	switch (val)
 	{
-		case 0: ms = 0; break;
+		default: case 0: ms = 0; break;
 		case TIME_33MS: ms = 33; break;
 		case TIME_66MS: ms = 66; break;
 		case TIME_100MS: ms = 100; break;

@@ -614,8 +614,8 @@ sub machine_finish {
 	}
 
 	# Does the machine have upper flippers that need to be serviced?
-	$m->{'*switches:has-ul'} = 1;
-	$m->{'*switches:has-ur'} = 1;
+	$m->{'*switches:has-ul'} = undef;
+	$m->{'*switches:has-ur'} = undef;
 
 	# TODO : Are there any GLOBAL_OBJECTS that aren't defined?
 }

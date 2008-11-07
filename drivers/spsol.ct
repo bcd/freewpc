@@ -80,9 +80,9 @@ extern inline void @self_service (void)
 			/* If the timer expires in the ON phase, then
 			switch to the OFF phase.  Also, turn off the
 			solenoid now. */
-			sol_disable (@sol);
 			if (@self_timer == 0)
 			{
+				sol_disable (@sol);
 				@self_timer = @offtime;
 				@class_running &= ~INST_MASK;
 			}

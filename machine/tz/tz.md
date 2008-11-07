@@ -49,7 +49,9 @@ define MACHINE_REPLAY_SCORE_CHOICES       10
 define MACHINE_REPLAY_START_CHOICE        5
 define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
 define MACHINE_AMODE_LEFF                 tz_amode_leff
-#ifdef MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
+define MACHINE_HAS_UPPER_LEFT_FLIPPER
+define MACHINE_HAS_UPPER_RIGHT_FLIPPER
+define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 
 ##########################################################################
 # Lamp Description

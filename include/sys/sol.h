@@ -93,6 +93,14 @@ extern inline U8 sol_get_duty (solnum_t sol)
 	return sol_duty_table[sol];
 }
 
+/** Return the memory variable that tracks the state
+of a coil driver. */
+extern inline U8 *sol_get_read_reg (const solnum_t sol)
+{
+	extern U8 sol_reg_readable[SOL_REG_COUNT];
+	return &sol_reg_readable[sol / 8];
+}
+
 
 /** Return the hardware register that can be written
 to enable/disable a coil driver. */
@@ -112,21 +120,14 @@ extern inline U8 *sol_get_write_reg (solnum_t sol)
 #if (MACHINE_WPC95 == 1)
 			return (U8 *)WPC95_FLIPPER_COIL_OUTPUT;
 #else
-			return NULL;
-			//return (U8 *)WPC_FLIPTRONIC_PORT_A;
+			return (U8 *)WPC_FLIPTRONIC_PORT_A;
 #endif
 		case 5:
 			return (U8 *)WPC_EXTBOARD1;
+		default:
+			fatal (ERR_SOL_REQUEST);
+			return NULL;
 	}
-}
-
-
-/** Return the memory variable that tracks the state
-of a coil driver. */
-extern inline U8 *sol_get_read_reg (const solnum_t sol)
-{
-	extern U8 sol_reg_readable[SOL_REG_COUNT];
-	return &sol_reg_readable[sol / 8];
 }
 
 
@@ -154,10 +155,7 @@ extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
 	U8 *w = sol_get_write_reg (sol);
-	if (sol_inverted (sol))
-		*w = *r &= ~sol_get_bit (sol);
-	else
-		*w = *r |= sol_get_bit (sol);
+	*w = (*r |= sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00);
 }
 
 
@@ -166,10 +164,7 @@ extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
 	U8 *w = sol_get_write_reg (sol);
-	if (sol_inverted (sol))
-		*w = *r |= sol_get_bit (sol);
-	else
-		*w = *r &= ~sol_get_bit (sol);
+	*w = (*r &= ~sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00);
 }
 
 #endif /* _SYS_SOL_H */

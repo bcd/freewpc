@@ -2,19 +2,14 @@
 #include <freewpc.h>
 
 
-CALLSET_ENTRY (pity, end_ball)
-{
-	sound_send (SND_CROWD_AWW);
-}
-
 CALLSET_ENTRY (pity, bonus)
 {
-	sound_send (MUS_BONUS1);
-	task_sleep_sec (1);
-	sound_send (MUS_BONUS2);
-	task_sleep_sec (1);
 	sound_send (MUS_BONUS_BONG);
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_300MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_300MS);
 }
 
 CALLSET_ENTRY (pity, any_pf_switch)
@@ -52,3 +47,7 @@ CALLSET_ENTRY (pity, sw_rollover_4)
 	sound_send (SND_DING4);
 }
 
+CALLSET_ENTRY (pity, sw_shooter)
+{
+	sound_send (SND_PLUNGE);
+}
