@@ -122,7 +122,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 46: Ultra Spinner, white
 47: Ultra Jets, white
 48: Striker, red
-51: Goal Jackpot
+51: Goal Jackpot, red
 52: Extra Ball, red
 53: Goal, yellow
 54: Striker Build, white
@@ -134,7 +134,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 62: L. Loop Build, white
 63: Travel, yellow
 64: World Cup Final, red
-65: L. Ramp Lock
+65: L. Ramp Lock, yellow
 66: Top Lane Left, purple
 67: Top Lane Right, purple
 68: Skill Lower, yellow
@@ -338,6 +338,7 @@ Goalie Moving:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
+Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
 
 Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
 Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
@@ -348,6 +349,7 @@ Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 
 [fonts]
 
