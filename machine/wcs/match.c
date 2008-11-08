@@ -102,6 +102,7 @@ void match_running_deff (void)
 		while (!score_update_required ())
 			task_sleep (TIME_133MS);
 	}
+}
 
 /* FINAL_MATCH_START
 MATCH_LOST
