@@ -58,7 +58,7 @@ PINMAME_OTHER_ROMS = tzu*.rom
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-SCHED_HEADERS += build/spsol0.h build/spsol1.h build/spsol2.h build/spsol3.h build/spsol4.h
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/right_jet.h build/lower_jet.h
 
 GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
 	rampdiv.o lock.o door.o

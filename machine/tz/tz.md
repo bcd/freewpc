@@ -586,8 +586,8 @@ steel:
 lithograph:
 
 [templates]
-Left Slingshot: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
-Right Slingshot: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
+Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
+Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
