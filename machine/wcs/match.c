@@ -38,6 +38,70 @@ __local__ U8 spinners_needed;
 __local__ U8 spinners_needed_next;
 
 
+void goal_flash_multiple (void)
+{
+	for (;;)
+	{
+		sol_request_async (FLASH_GOAL);
+		task_sleep (TIME_200MS);
+	}
+}
+
+
+void goal_scored_leff (void)
+{
+	leff_create_peer (goal_flash_multiple);
+	sol_request_async (FLASH_GOAL_CAGE_TOP);
+	task_sleep (TIME_500MS);
+	sol_request_async (FLASH_GOAL_CAGE_TOP);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+
+void flash_many (void)
+{
+	for (;;)
+	{
+		task_sleep (TIME_200MS);
+	}
+}
+
+
+void match_won_leff (void)
+{
+	leff_create_peer (flash_many);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+
+void match_running_deff (void)
+{
+	for (;;)
+	{
+		score_update_start ();
+
+		dmd_alloc_low_clean ();
+
+		font_render_string_left (&font_var5, 1, 9, "YARDS");
+		sprintf ("%d", yards_to_go);
+		font_render_string_left (&font_fixed10, 1, 16, sprintf_buffer);
+
+		font_render_string_right (&font_var5, 1, 9, "GOALS");
+		sprintf ("%d", match_goals_scored);
+		font_render_string_right (&font_fixed10, 127, 16, sprintf_buffer);
+
+		sprintf_current_score ();
+		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+
+		dmd_show_low ();
+
+		while (!score_update_required ())
+			task_sleep (TIME_133MS);
+	}
 
 /* FINAL_MATCH_START
 MATCH_LOST
@@ -142,6 +206,7 @@ void wcs_match_lost (void)
 	{
 		spinners_needed_next += 5;
 	}
+	deff_stop (DEFF_MATCH_RUNNING);
 	/* deff_start (DEFF_MATCH_LOST); */
 }
 
@@ -175,6 +240,7 @@ void wcs_start_match (void)
 	wcs_restart_timer ();
 	spinners_needed = 0;
 	spinners_needed_next = 20;
+	deff_restart (DEFF_MATCH_RUNNING);
 	deff_start (DEFF_MATCH_STARTED);
 }
 
@@ -182,6 +248,7 @@ void wcs_restart_match (void)
 {
 	spinners_needed = 0;
 	wcs_restart_timer ();
+	deff_restart (DEFF_MATCH_RUNNING);
 	/* deff_start (DEFF_MATCH_RESTART); */
 }
 
