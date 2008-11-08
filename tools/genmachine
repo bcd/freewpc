@@ -1010,6 +1010,7 @@ sub machine_write_makefile {
 	# Generate rules for compiling templates.
 	for $inst (unique ($m->{'templates'})) {
 		my $driver = $inst->{'driver'};
+		my $ident = $inst->{'c_decl'};
 		my $id;
 
 		if (!defined ($tempid{$driver})) {
@@ -1023,13 +1024,14 @@ sub machine_write_makefile {
 			$args .= "-D $arg ";
 		}
 
-		my $c_file = "build/$driver$id.c";
-		my $h_file = "build/$driver$id.h";
-		my $o_file = "\$(BLDDIR)/$driver$id.o";
-		my $class_file = "build/$driver.h";
+		my $c_file = "build/$ident.c";
+		my $h_file = "build/$ident.h";
+		my $o_file = "\$(BLDDIR)/$ident.o";
+		my $class_file = "build/$ident.h";
 		my $template_file = "drivers/$driver.ct";
 
 		print "\n# Template ID : $id\n";
+		print "# Identifier: $ident\n";
 		print "# Driver: $driver\n";
 		print "# Arguments: $args\n";
 		print <<END;
@@ -1039,7 +1041,7 @@ TEMPLATE_OBJS += $o_file
 $o_file : $c_file $h_file build/mach-Makefile
 
 $c_file $h_file : $template_file \$(CTEMP)
-	\$(CTEMP) -i $id $args $template_file
+	\$(CTEMP) -s $ident -i $id $args $template_file
 END
 	}
 	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";

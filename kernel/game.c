@@ -175,6 +175,7 @@ void end_game (void)
 		ball_up = 0;
 		in_tilt = FALSE;
 		valid_playfield = FALSE;
+		callset_invoke (stop_game);
 	}
 
 	leff_stop_all ();
@@ -575,6 +576,7 @@ void stop_game (void)
 	in_tilt = FALSE;
 	deff_stop_all ();
 	leff_stop_all ();
+	callset_invoke (stop_game);
 }
 
 

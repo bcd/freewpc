@@ -8,7 +8,6 @@ Poor Design
 * "Idle" functions aren't really idle... see 'timing' branch
 * Sound/music management is extremely poor.
 * Teach gencallset to ignore code that isn't being compiled in.
-* Implement more specific coil drivers
 * Use the new bitmap functions to draw the switch matrix in test.
 * Replace FIF with something more intelligent.
 * Move printf and game state machine code out of the system page.
@@ -21,6 +20,7 @@ Missing Feature
 * Burnin
 * Lamp strobing, like newer Sterns
 * deff_nice
+* Flasher allocation for lamp effects
 
 
 Bugs
