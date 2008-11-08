@@ -24,8 +24,13 @@
 # TODO:
 # - method to declare maximum number of instantiations
 # - provide default values for template parameters
-# - print boilerplate comment in output files
 
+# @@class sling
+# @@define ontime 3
+# @@define offtime 20
+# @@inherit spsol
+#
+# md [templates] needs a schedule() option fed into sched file.
 
 use Getopt::Long;
 
