@@ -1,7 +1,7 @@
 #!/bin/sh
 
-dir1=asm-goodpage
-dir2=asm-badpage
+dir1=asm-4.3.2
+dir2=asm-4.4.0
 
 #make clean
 #make GCC_VERSION=3.4.6 MACHINE=tz SAVE_ASM=y FREE_ONLY=y FREEWPC_DEBUGGER=y FREEWPC_IRQPROFILE=n SYSTEM_MAJOR=0 SYSTEM_MINOR=10
