@@ -223,6 +223,7 @@ void wcs_finish_match (void)
 	{
 		sound_send (MUS_TEA_PARTY_WON);
 		deff_start (DEFF_MATCH_WON);
+		task_yield ();
 	}
 }
 
@@ -362,11 +363,10 @@ CALLSET_ENTRY (wcs_match, goal_shot)
 
 CALLSET_ENTRY (wcs_match, sw_goalie_target)
 {
+	sound_send (SND_POW);
 	if (match_in_progress_p ())
 	{
-		// speech call here
 	}
-	// hit goalie sound here
 }
 
 CALLSET_ENTRY (wcs_match, striker_shot)

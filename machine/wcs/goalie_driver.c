@@ -27,10 +27,9 @@ void start_goalie (void)
 	}
 }
 
-
 CALLSET_ENTRY (goalie_driver, start_ball)
 {
-	start_goalie ();
+	stop_goalie ();
 }
 
 CALLSET_ENTRY (goalie_driver, end_ball)

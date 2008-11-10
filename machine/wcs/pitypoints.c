@@ -49,5 +49,10 @@ CALLSET_ENTRY (pity, sw_rollover_4)
 
 CALLSET_ENTRY (pity, sw_shooter)
 {
-	sound_send (SND_PLUNGE);
+	/* Sound only on the closed->open transition */
+	if (!switch_poll_logical (SW_SHOOTER))
+	{
+		sound_send (SND_PLUNGE);
+	}
 }
+
