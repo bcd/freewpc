@@ -27,7 +27,6 @@
  * This module is mostly working but not incredibly robust.
  */
 
-
 /**
  * The time since the last zerocross point, in IRQs/milliseconds.
  * This value is cleared whenever zerocross occurs and increments
@@ -38,7 +37,13 @@ __fastram__ U8 zc_timer;
 /**
  * The current status of the zerocross circuit.
  */
+#ifdef CONFIG_NO_ZEROCROSS
+#define zc_status ZC_BROKEN
+#define zc_set_status(x)
+#else
 zc_status_t zc_status;
+#define zc_set_status(x) zc_status = x
+#endif
 
 
 /**
@@ -71,21 +76,20 @@ void ac_rtt (void)
 		 * ZC_WORKING; if bad, switch to ZC_BROKEN. */
 	}
 
-	else if (unlikely (zc_status == ZC_BROKEN))
+	else if (likely (zc_status != ZC_BROKEN)
+		&& unlikely (wpc_read_ac_zerocross ()))
 	{
-	}
-
-	/* Otherwise, we must be in the WORKING state */
-	else if (unlikely (wpc_read_ac_zerocross ()))
-	{
-		/* We are currently at a zero crossing. */
+		/* Read the zerocross register, unless broken.
+		 * If we are currently at a zero crossing,
+		 * reset the timer. */
 handle_zero_crossing:;
 		/* Reset the timer */
 		zc_timer = 0;
 	}
 	else
 	{
-		/* We are not at a zero crossing. */
+		/* We are not at a zero crossing, or the hardware
+		 * is busted. */
 
 		/* Increment the crossing counter. */
 		zc_timer++;
@@ -93,6 +97,9 @@ handle_zero_crossing:;
 		{
 			/* We should have gotten a zero crossing by now, but
 			we didn't.  We'll just pretend we got one anyway. */
+			zc_timer = 0;
+
+#if 0
 			ac_zerocross_errors++;
 			if (ac_zerocross_errors < 5)
 			{
@@ -101,8 +108,9 @@ handle_zero_crossing:;
 			else
 			{
 				/* Nope, it's really broken.  Forget about it. */
-				zc_status = ZC_BROKEN;
+				zc_set_status (ZC_BROKEN);
 			}
+#endif
 		}
 	}
 }
@@ -115,7 +123,7 @@ void ac_init (void)
 	ac_zerocross_errors = 0;
 
 	/* Assume working AC/zerocross for now - TODO */
-	zc_status = ZC_WORKING;
+	zc_set_status (ZC_WORKING);
 	ac_expected_cycle_len = AC_DOMESTIC_CYCLE;
 }
 
