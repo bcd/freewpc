@@ -20,11 +20,20 @@ static inline bool kickback_enabled (void)
 }
 
 
+void kickback_finish (void)
+{
+	task_sleep_sec (3);
+	kickback_disable ();
+	task_exit ();
+}
+
+
 CALLSET_ENTRY (kickback, sw_kickback)
 {
 	if (kickback_enabled ())
 	{
 		sound_send (SND_WHISTLE);
+		task_create1 (GID_KICKBACK_FINISH, kickback_finish);
 	}
 	else
 	{

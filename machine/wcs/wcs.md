@@ -177,7 +177,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 35: Trough 5, trough, noscore, opto
 36: Trough Stack, noscore, opto
 37: Light Magna Goalie, ingame
-38: Shooter, noscore, shooter
+38: Shooter, edge, noscore, shooter
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
 43: Goalie Left, noscore, opto
