@@ -33,7 +33,7 @@ CALLSET_ENTRY (kickback, sw_kickback)
 	if (kickback_enabled ())
 	{
 		sound_send (SND_WHISTLE);
-		task_create1 (GID_KICKBACK_FINISH, kickback_finish);
+		task_create_gid1 (GID_KICKBACK_FINISH, kickback_finish);
 	}
 	else
 	{
