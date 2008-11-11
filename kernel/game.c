@@ -461,7 +461,6 @@ void start_ball (void)
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */
-	deff_restart (DEFF_SCORES);
 	deff_start (DEFF_SCORES_IMPORTANT);
 	if (ball_up == system_config.balls_per_game)
 	{
@@ -683,6 +682,12 @@ void validate_num_players (void)
 	{
 		num_players = 1;
 	}
+}
+
+
+CALLSET_ENTRY (game, display_update)
+{
+	deff_start_bg (DEFF_SCORES, 0);
 }
 
 
