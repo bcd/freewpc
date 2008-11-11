@@ -158,6 +158,12 @@ typedef struct device
 	/** The size of the device, same as the number of counting switches */
 	U8 size;
 
+	/** The number of 'virtual balls' in the device.  These are not seen
+	 * by any switches and so are not seen by the normal recount
+	 * mechanism.  However, they are 'known' to be in the device due to
+	 * other methods.  APIs are available for modifying this. */
+	U8 virtual_count;
+
 	/** The current count of balls in the device, as determined by
 	the most recent recount. */
 	U8 actual_count;
@@ -220,6 +226,8 @@ __common__ void device_request_empty (device_t *dev);
 __common__ void device_sw_handler (U8 devno);
 __common__ void device_add_live (void);
 __common__ void device_remove_live (void);
+__common__ void device_add_virtual (device_t *dev);
+__common__ void device_remove_virtual (device_t *dev);
 __common__ void device_multiball_set (U8 count);
 __common__ bool device_check_start_ok (void);
 __common__ void device_unlock_ball (device_t *dev);

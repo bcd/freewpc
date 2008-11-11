@@ -358,6 +358,7 @@ Goal Trough Made:
 Ignore R. Ramp Exit:
 Ramp Gate Debounce:
 Kickback Made:
+Lock Kicking:
 
 [templates]
 Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=3, offtime=16
