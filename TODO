@@ -11,7 +11,7 @@ Poor Design
 * Use the new bitmap functions to draw the switch matrix in test.
 * Replace FIF with something more intelligent.
 * Move printf and game state machine code out of the system page.
-
+* Deal with common page getting full.
 
 Missing Feature
 * Lamp power saver level

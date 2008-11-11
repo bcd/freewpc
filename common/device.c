@@ -706,17 +706,24 @@ void device_remove_live (void)
 #ifdef DEVNO_TROUGH
 void device_multiball_set (U8 count)
 {
-	device_t *dev = device_entry (DEVNO_TROUGH);
+	device_t *dev;
+	U8 current_count;
+
+	/* See how many balls are in play now */
+	dev = device_entry (DEVNO_TROUGH);
+	current_count = live_balls + dev->kicks_needed;
 
 	/* Calculate the number of balls that need to be added to play,
-	to reach the desired total count. */
-	U8 kicks = count - (live_balls + dev->kicks_needed);
-
-	/* Add that balls into play */
-	while (kicks > 0)
+	to reach the desired total count.  If more balls are already
+	in play, don't do anything. */
+	if (current_count < count)
 	{
-		device_request_kick (dev);
-		kicks--;
+		U8 kicks = count - current_count;
+		while (kicks > 0)
+		{
+			device_request_kick (dev);
+			kicks--;
+		}
 	}
 }
 #endif

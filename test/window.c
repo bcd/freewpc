@@ -163,6 +163,11 @@ void window_redraw (void)
 /** Push a new window onto the stack */
 void window_push (struct window_ops *ops, void *priv)
 {
+	/* Delay a bit since this is called directly from
+	 * a switch context which may have already taken some
+	 * time.  The redraw below can be especially taxing. */
+	task_sleep (TIME_16MS);
+
 	window_stop_thread ();
 	if (win_top == NULL)
 	{
