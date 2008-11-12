@@ -687,7 +687,14 @@ void validate_num_players (void)
 
 CALLSET_ENTRY (game, display_update)
 {
-	deff_start_bg (DEFF_SCORES, 0);
+	if (in_game)
+	{
+		deff_start_bg (DEFF_SCORES, 0);
+	}
+	else
+	{
+		deff_start_bg (DEFF_AMODE, 0);
+	}
 }
 
 
