@@ -44,6 +44,8 @@
  * and subject to get it later if priorities change.
  */
 
+#define DEFF_DEBUG
+
 #ifdef DEFF_DEBUG
 #define deff_debug(fmt, rest...) dbprintf(fmt, ## rest)
 #else
@@ -95,6 +97,7 @@ U8 deff_get_active (void)
  */
 static void deff_stop_task (void)
 {
+	deff_debug ("deff_stop_task\n");
 	/* if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
 		dmd_reset_transition ();
 	kickout_unlock (KLOCK_DEFF);
@@ -105,6 +108,8 @@ static void deff_stop_task (void)
 static void deff_start_task (const deff_t *deff)
 {
 	task_pid_t tp;
+
+	deff_debug ("deff_start_task\n");
 
 	/* Stop whatever deff is running now */
 	task_kill_gid (GID_DEFF);
@@ -118,7 +123,7 @@ static void deff_start_task (const deff_t *deff)
 	tp = task_create_gid (GID_DEFF, deff->fn);
 	if (tp == NULL)
 	{
-		dbprintf ("could not spawn deff task!\n");
+		deff_debug ("could not spawn deff task!\n");
 	}
 
 	if (deff->page != 0xFF)
@@ -175,6 +180,7 @@ void deff_start (deffnum_t id)
 {
 	const deff_t *deff = &deff_table[id];
 
+	deff_debug ("deff_start\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_START, id);
 
 	/* Nothing to do if it's already running */
@@ -202,6 +208,7 @@ void deff_start (deffnum_t id)
  */
 void deff_stop (deffnum_t dn)
 {
+	deff_debug ("deff_stop\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_STOP, dn);
 	if (dn == deff_running)
 		deff_update ();
@@ -213,6 +220,7 @@ and then restarted.  If it is queued but not active, nothing happens.
 If it isn't even in the queue, then it is treated just like deff_start(). */
 void deff_restart (deffnum_t dn)
 {
+	deff_debug ("deff_restart\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_RESTART, dn);
 
 	if (deff_running == dn)
@@ -230,6 +238,7 @@ void deff_restart (deffnum_t dn)
 /** Called directly from a deff when it wants to exit */
 __noreturn__ void deff_exit (void)
 {
+	deff_debug ("deff_exit\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_EXIT, deff_running);
 
 	/* Change the task group ID so that a new task can be started
@@ -303,6 +312,7 @@ void deff_init (void)
 /** Stop all running deffs, and cancel any waiting deffs. */
 void deff_stop_all (void)
 {
+	deff_debug ("deff_stop_all\n");
 	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
 	deff_running = deff_prio = 0;
@@ -324,6 +334,7 @@ void deff_stop_all (void)
  */
 void deff_start_bg (deffnum_t dn, enum _priority prio)
 {
+	deff_debug ("deff_start_bg %d, %d\n", dn, prio);
 	if (prio == 0)
 	{
 		const deff_t *deff = &deff_table[dn];
@@ -344,6 +355,8 @@ void deff_start_bg (deffnum_t dn, enum _priority prio)
 void deff_update (void)
 {
 	U8 previous;
+
+	deff_debug ("deff_update\n");
 
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
