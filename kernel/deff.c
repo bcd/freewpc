@@ -185,18 +185,28 @@ void deff_start (deffnum_t id)
 
 	/* Nothing to do if it's already running */
 	if (id == deff_running)
+	{
+		deff_debug ("deff already running\n");
 		return;
+	}
 
 	/* This effect can take the display now if it has priority.
 	Otherwise, if it wants to wait, a background retry task is
 	started. */
 	if (deff_prio < deff->prio)
 	{
+		deff_prio = deff->prio;
+		deff_running = id;
 		deff_start_task (deff);
 	}
 	else if (deff->flags & D_TIMEOUT)
 	{
+		deff_debug ("no priority\n");
 		deff_start_retry (id, 5);
+	}
+	else
+	{
+		deff_debug ("prio requested = %d, now = %d\n", deff->prio, deff_prio);
 	}
 }
 
@@ -245,6 +255,7 @@ __noreturn__ void deff_exit (void)
 	with GID_DEFF in the same context. */
 	task_setgid (GID_DEFF_EXITING);
 
+	deff_running = 0;
 	deff_update ();
 	task_exit ();
 }
@@ -376,9 +387,15 @@ void deff_update (void)
 		return;
 
 	/* Switch to the new effect */
-	deff_stop (previous);
+	deff_debug ("deff_update: %d-%d\n", previous, deff_background);
+	if (previous != DEFF_NULL)
+		deff_stop (previous);
 	if (deff_background != DEFF_NULL)
-		deff_start (deff_background);
+	{
+		const deff_t *bgdeff = &deff_table[deff_background];
+		deff_running = deff_background;
+		deff_start_task (bgdeff);
+	}
 }
 
 
