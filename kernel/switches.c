@@ -141,6 +141,9 @@ void pic_rtt (void)
 #if (MACHINE_PIC == 1)
 	U8 unlocked;
 
+	if (sys_init_complete == 0)
+		return;
+
 	/* Read the status to see if the matrix is still unlocked. */
 	wpc_write_pic (WPC_PIC_COUNTER);
 	null_function ();
