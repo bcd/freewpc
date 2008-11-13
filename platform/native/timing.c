@@ -22,6 +22,15 @@
 #include <simulation.h>
 
 
+/**
+ * \file timing.c
+ *
+ * In simulation, it would be nice to model the actual timing
+ * of the real hardware as much as possible.  However, the fact is,
+ * we are running on an operating system sharing the CPU with
+ * other things, so there are no guarantees.
+ */
+
 #define RING_COUNT 32
 
 #define ring_later(ticks) ((ring_now + (ticks)) % RING_COUNT)
@@ -52,7 +61,7 @@ static void ring_free (struct time_handler *elem)
 
 
 /** Register a function to be called after N_TICKS have elapsed.
- * PERIOIDIC_P is nonzero if the timer function should be called indefinitely,
+ * PERIOIDIC_P is nonzero if the timer function should be called repeatedly,
  * every time that much time has elapsed.
  * FN is the function to be called and DATA can be anything at all, passed to
  * the handler. */
@@ -75,7 +84,11 @@ void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *da
 }
 
 
-/** Advance the simulation time by 1 tick. */
+/** Advance the simulation time by 1 tick.
+ * This is called by the core simulator every simulated 1ms.
+ * The purpose is to invoke functions that would normally be done
+ * by hardware on a periodic basis.
+ */
 void sim_time_step (void)
 {
 	struct time_handler *elem, *elem_next;

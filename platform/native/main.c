@@ -97,6 +97,8 @@ bool linux_firq_enable;
  * until the next zerocross */
 int simulated_zerocross;
 
+volatile int sim_debug_init = 0;
+
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
 
@@ -115,7 +117,7 @@ time_t linux_boot_time;
 /** The status of the CPU board LEDs */
 U8 linux_cpu_leds;
 
-U8 simulated_orkin_control_port = 0x1;
+volatile U8 simulated_orkin_control_port = WPC_DEBUG_WRITE_READY;
 
 U8 simulated_orkin_data_port = 0x0;
 
@@ -904,7 +906,10 @@ static void linux_interface_thread (void)
 		{
 			/* Except tilde turns it off as usual. */
 			if (*inbuf == '`')
+			{
+				simlog (SLC_DEBUG, "Input directed to switch matrix.");
 				simulator_keys ^= 1;
+			}
 			else if ((simulated_orkin_control_port & WPC_DEBUG_READ_READY) == 0)
 			{
 				simulated_orkin_control_port |= WPC_DEBUG_READ_READY;
@@ -964,9 +969,8 @@ static void linux_interface_thread (void)
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
 				and as input into the runtime debugger. */
-				simlog (SLC_DEBUG, "Simulator switches are %s\n",
-					simulator_keys ? "enabled" : "disabled");
 				simulator_keys ^= 1;
+				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
 				break;
 				
 			case '\x1b':
@@ -1144,6 +1148,10 @@ int main (int argc, char *argv[])
 		{
 			pic_machine_number = strtoul (argv[argn++], NULL, 0);
 		}
+		else if (!strcmp (arg, "--debuginit"))
+		{
+			sim_debug_init = 1;
+		}
 		else
 		{
 			printf ("invalid argument %s\n", arg);
@@ -1200,6 +1208,9 @@ int main (int argc, char *argv[])
 #endif
 
 	/* Jump to the reset function */
+	while (sim_debug_init)
+		usleep (10000);
+
 	freewpc_init ();
 	return 0;
 }
