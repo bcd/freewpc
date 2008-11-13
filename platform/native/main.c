@@ -1099,6 +1099,8 @@ int main (int argc, char *argv[])
 	switchnum_t sw;
 
 	/* Parse command-line arguments */
+	linux_output_stream = stdout;
+
 	while (argn < argc)
 	{
 		const char *arg = argv[argn++];
@@ -1158,7 +1160,6 @@ int main (int argc, char *argv[])
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
 	linux_irq_pending = 0;
-	linux_output_stream = stdout;
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
 	simulated_zerocross = 0;
