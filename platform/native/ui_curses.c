@@ -232,7 +232,7 @@ void ui_init (void)
 	y += 10 + 1;
 	x = 0;
 
-	debug_win = ui_window_create (64, 25, x, y, NULL);
+	debug_win = ui_window_create (64, 40, x, y, NULL);
 	scrollok (debug_win, 1);
 	x += 64 + 2;
 	y += 6;
