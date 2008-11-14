@@ -39,3 +39,7 @@ document show-effects
 	Displays which effects are currently running
 end
 #---------------------------------------------------
+define resume-init
+	set var sim_debug_init=0
+	c
+end

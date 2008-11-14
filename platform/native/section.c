@@ -44,7 +44,7 @@ char protected_memory_file[256] = "nvram/default.nv";
 /** Load the contents of the protected memory from file to RAM. */
 void protected_memory_load (void)
 {
-	int size = &__stop_nvram - &__start_nvram;
+	int size = (int)&__stop_nvram - (int)&__start_nvram;
 	FILE *fp;
 
 	/* Use a different file for each machine */
@@ -68,10 +68,10 @@ void protected_memory_load (void)
 /** Save the contents of the protected memory from RAM to a file. */
 void protected_memory_save (void)
 {
-	int size = &__stop_nvram - &__start_nvram;
+	int size = (int)&__stop_nvram - (int)&__start_nvram;
 	FILE *fp;
 
-	simlog (SLC_DEBUG, "Saving protected memory to %s", protected_memory_file);
+	simlog (SLC_DEBUG, "Saving 0x%X bytes of protected memory to %s", size, protected_memory_file);
 	fp = fopen (protected_memory_file, "w");
 	if (fp)
 	{

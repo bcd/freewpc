@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,6 +35,7 @@ WINDOW *dmd_win;
 WINDOW *switch_win;
 WINDOW *task_win;
 WINDOW *sound_win;
+WINDOW *asciidmd_win;
 
 
 #define TEXTDMD_WIDTH 32
@@ -151,7 +152,7 @@ void ui_write_sound_reset (void)
 
 
 void ui_write_task (int taskno, int gid)
-{	
+{
 	int x = (taskno / 12) * 8 + 2;
 	int y = (taskno % 12) + 1;
 	wmove (task_win, y, x);
@@ -186,6 +187,21 @@ void ui_clear_dmd_text (int n)
 }
 
 
+void ui_refresh_asciidmd (unsigned char *data)
+{
+	unsigned int x, y;
+	unsigned int color;
+
+	for (y = 0; y < 32; y++)
+	{
+		wmove (asciidmd_win, y+1, 1);
+		for (x = 0; x < 128; x++)
+			wprintw (asciidmd_win, "%c", enhanced_pixel_ascii (*data++));
+	}
+	wrefresh (asciidmd_win);
+}
+
+
 void ui_init (void)
 {
 	initscr ();
@@ -207,17 +223,21 @@ void ui_init (void)
 	triac_win = ui_window_create (12, 3, x, y, " Triacs ");
 	sound_win = ui_window_create (12, 6, x, y+4, " Sound ");
 	scrollok (sound_win, 1);
+	x += 16 + 2;
+
+	task_win = ui_window_create (40, 15, x, y, " Tasks ");
+	x += 40 + 2;
+
+	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
 	y += 10 + 1;
 	x = 0;
 
-	debug_win = ui_window_create (64, 25, x, y, NULL);
+	debug_win = ui_window_create (64, 40, x, y, NULL);
 	scrollok (debug_win, 1);
 	x += 64 + 2;
+	y += 6;
 
-	task_win = ui_window_create (40, 15, x, y, " Tasks ");
-	y += 15 + 2;
-
-	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
+	asciidmd_win = ui_window_create (130, 34, x, y, " ASCII-DMD ");
 }
 
 
