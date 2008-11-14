@@ -63,17 +63,11 @@ extern void sim_switch_init (void);
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
 
-/** An array of DMD page buffers */
-U8 linux_dmd_pages[DMD_PAGE_COUNT][DMD_PAGE_SIZE];
-
 /** A pointer to the low DMD page */
 U8 *linux_dmd_low_page;
 
 /** A pointer to the high DMD page */
 U8 *linux_dmd_high_page;
-
-/** A pointer to the visible DMD page */
-U8 *linux_dmd_visible_page;
 
 /** The simulated lamp matrix outputs. */
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
@@ -594,15 +588,15 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_DMD_LOW_PAGE:
-			linux_dmd_low_page = linux_dmd_pages[val];
+			asciidmd_map_page (0, val);
 			break;
 
 		case WPC_DMD_HIGH_PAGE:
-			linux_dmd_high_page = linux_dmd_pages[val];
+			asciidmd_map_page (1, val);
 			break;
 
 		case WPC_DMD_ACTIVE_PAGE:
-			linux_dmd_visible_page = linux_dmd_pages[val];
+			asciidmd_set_visible (val);
 			break;
 
 		case WPC_DMD_FIRQ_ROW_VALUE:
@@ -1175,6 +1169,7 @@ int main (int argc, char *argv[])
 	simulation_pic_init ();
 #endif
 	sim_watchdog_init ();
+	asciidmd_init ();
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
