@@ -43,7 +43,7 @@ static __attribute__((noinline))
 const U8 *frame_copy_raw (const U8 *framedata)
 {
 	dmd_copy_page (dmd_low_buffer, (const dmd_buffer_t)framedata);
-	return framedata + (dmd_high_buffer - dmd_low_buffer);
+	return framedata + DMD_PAGE_SIZE;
 }
 
 
@@ -95,7 +95,7 @@ const U8 *frame_copy_rle (const U8 *framedata)
 			above will need to be encoded as an RLE sequence of
 			1, since no escape character is defined. */
 			*dbuf++ = c;
-	} while (unlikely (dbuf < dmd_high_buffer));
+	} while (unlikely (dbuf < dmd_low_buffer + DMD_PAGE_SIZE));
 	return framedata;
 }
 
@@ -123,7 +123,7 @@ const U8 *frame_xor_rle (const U8 *framedata)
 		}
 		else
 			*dbuf++ ^= c;
-	} while (unlikely (dbuf < dmd_high_buffer));
+	} while (unlikely (dbuf < dmd_low_buffer + DMD_PAGE_SIZE));
 	return framedata;
 }
 
