@@ -55,11 +55,13 @@ extern __common__ void opto_check (void);
  */
 extern inline void wait_for_button (const U8 swno)
 {
+#ifndef CONFIG_NATIVE
 	while (!switch_poll (swno))
 		task_sleep (TIME_66MS);
 
 	while (switch_poll (swno))
 		task_sleep (TIME_66MS);
+#endif
 }
 
 
@@ -113,10 +115,6 @@ void render_build_date (void)
 
 void system_accept_freewpc (void)
 {
-#ifdef CONFIG_NATIVE
-	return;
-#endif
-
 	if ((freewpc_accepted[0] == ACCEPT_1) &&
 		 (freewpc_accepted[1] == ACCEPT_2) &&
 		 (freewpc_accepted[2] == ACCEPT_3))
