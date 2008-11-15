@@ -1959,7 +1959,9 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
+#ifndef CONFIG_NATIVE
 	&memory_editor_item,
+#endif
 	NULL,
 };
 
