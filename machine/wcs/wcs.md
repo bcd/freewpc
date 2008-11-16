@@ -315,7 +315,7 @@ Disable Goalie: yes_no, NO
 [system_music]
 
 [scores]
-2500:
+730:
 10K:
 
 [highscores]

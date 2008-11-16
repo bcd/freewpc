@@ -14,7 +14,7 @@ CALLSET_ENTRY (pity, bonus)
 
 CALLSET_ENTRY (pity, any_pf_switch)
 {
-	score (SC_2500);
+	score (SC_730);
 }
 
 CALLSET_ENTRY (pity, sw_spinner_slow)
@@ -30,21 +30,25 @@ void pity_skill_lane (void)
 CALLSET_ENTRY (pity, sw_rollover_1)
 {
 	sound_send (SND_DING1);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_2)
 {
 	sound_send (SND_DING2);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_3)
 {
 	sound_send (SND_DING3);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_4)
 {
 	sound_send (SND_DING4);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_shooter)

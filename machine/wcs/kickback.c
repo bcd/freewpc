@@ -50,6 +50,19 @@ CALLSET_ENTRY (kickback, sw_kickback_upper_enter)
 	kickback_enable ();
 }
 
+CALLSET_ENTRY (kickback, sw_light_kickback)
+{
+	if (!lamp_flash_test (LM_LIGHT_KICKBACK))
+	{
+		lamp_flash_off (LM_LIGHT_KICKBACK);
+		kickback_enable ();
+	}
+}
+
+CALLSET_ENTRY (kickback, sw_right_inlane)
+{
+}
+
 CALLSET_ENTRY (kickback, start_player)
 {
 	kickback_enable ();
