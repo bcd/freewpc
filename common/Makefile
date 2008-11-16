@@ -62,3 +62,4 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # Effect objects contain common display and lamp effects, and are
 # separated out for the same reason.
 EFFECT_OBJS += $(if $(CONFIG_DMD), common/effect.o)
+EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)
