@@ -75,9 +75,6 @@ U8 linux_lamp_matrix[NUM_LAMP_COLS];
 /** The simulated solenoid outputs */
 U8 linux_solenoid_outputs[SOL_COUNT / 8];
 
-/** The simulated flipper inputs */
-U8 linux_flipper_inputs;
-
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
 
@@ -713,7 +710,7 @@ U8 linux_asic_read (U16 addr)
 		case WPC_SW_ROW_INPUT:
 #ifdef MACHINE_TZ
 			if (col9_enabled)
-				return sim_switch_matrix_get ()[9];
+				return sim_switch_matrix_get ()[9]; /* TODO - not right */
 			else
 #endif
 				return *linux_switch_data_ptr;
@@ -730,10 +727,11 @@ U8 linux_asic_read (U16 addr)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
+				return sim_switch_matrix_get ()[9];
 #else
 		case WPC_FLIPTRONIC_PORT_A:
+				return ~sim_switch_matrix_get ()[9];
 #endif
-			return ~linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
 			return 0;
