@@ -1186,6 +1186,9 @@ int main (int argc, char *argv[])
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
 
+	/* Force always closed */
+	linux_switch_toggle (SW_ALWAYS_CLOSED);
+
 	/* Close the coin door */
 	linux_switch_toggle (SW_COIN_DOOR_CLOSED);
 
