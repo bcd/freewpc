@@ -1939,7 +1939,7 @@ struct menu memory_editor_item = {
 /**********************************************************************/
 
 struct menu *dev_menu_items[] = {
-#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
+#if defined(MACHINE_DMD)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
