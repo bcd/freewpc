@@ -296,6 +296,8 @@ void write_tick_driver (FILE *f)
 		for (div = 1; div <= max_divider; div *= 2)
 		{
 			unsigned int used = 0;
+			unsigned int inline_p;
+
 			for (slotno = 0; slotno < tick->n_slots; slotno++)
 			{
 				struct slot *slot = &tick->slots[slotno];
@@ -315,8 +317,8 @@ void write_tick_driver (FILE *f)
 					the function is implemented as an inline macro.
 					This is optional, but knowing this allows for some
 					optimization suggestions. */
-					strcpy (task_name, 
-						slot->task->name + (*slot->task->name == '!'));
+					inline_p = (*slot->task->name == '!');
+					strcpy (task_name, slot->task->name + inline_p);
 
 					if (slot->task->already_unrolled_count)
 					{
@@ -327,7 +329,8 @@ void write_tick_driver (FILE *f)
 						sprintf (task_name + strlen (task_name), "_%d", suffix);
 					}
 
-					cfprintf (indent, f, "extern void %s (void);\n", task_name);
+					if (!inline_p)
+						cfprintf (indent, f, "extern void %s (void);\n", task_name);
 
 					cfprintf (indent, f, "%s (); ", task_name);
 					write_time_comment (f, slot->task->len);
