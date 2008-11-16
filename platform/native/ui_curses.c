@@ -166,24 +166,30 @@ void ui_write_task (int taskno, int gid)
 
 static void dmd_refresh (WINDOW *w)
 {
+#ifdef TEXTDMD
 	wrefresh (dmd_win);
+#endif
 }
 
 
 void ui_write_dmd_text (int x, int y, const char *text)
 {
+#ifdef TEXTDMD
 	wmove (dmd_win, 1+y/4, 6+x/4);
 	wprintw (dmd_win, text);
 	dmd_refresh (dmd_win);
+#endif
 }
 
 
 void ui_clear_dmd_text (int n)
 {
+#ifdef TEXTDMD
 	wclear (dmd_win);
 	box (dmd_win, 0, 0);
 	print_center (dmd_win, 20, 0, " DMD Text ");
 	dmd_refresh (dmd_win);
+#endif
 }
 
 
@@ -211,27 +217,29 @@ void ui_init (void)
 	ui_window_create (COLS, 2, x, y, " FreeWPC - Linux Simulator ");
 	y += 2;
 
-	switch_win = ui_window_create (40, 10, x, y, " Switches ");
-	x += 40 + 2;
+	switch_win = ui_window_create (34, 10, x, y, " Switches ");
+	x += 34 + 2;
 
 	lamp_win = ui_window_create (28, 10, x, y, " Lamps ");
 	x += 28 + 2;
 
 	sol_win = ui_window_create (20, 10, x, y, " Solenoids ");
+	triac_win = ui_window_create (12, 3, x, y+11, " Triacs ");
 	x += 20 + 2;
 
-	triac_win = ui_window_create (12, 3, x, y, " Triacs ");
-	sound_win = ui_window_create (12, 6, x, y+4, " Sound ");
+	sound_win = ui_window_create (8, 6, x, y, " Sound ");
 	scrollok (sound_win, 1);
-	x += 16 + 2;
+	x += 8 + 2;
 
 	task_win = ui_window_create (40, 15, x, y, " Tasks ");
 	x += 40 + 2;
 
+#ifdef TEXTDMD
 	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
+#endif
+
 	y += 10 + 1;
 	x = 0;
-
 	debug_win = ui_window_create (64, 40, x, y, NULL);
 	scrollok (debug_win, 1);
 	x += 64 + 2;
