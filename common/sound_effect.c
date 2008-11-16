@@ -1,6 +1,8 @@
 
 #include <freewpc.h>
 
+/* CALLSET_SECTION (sound_effect, __effect__) */
+
 U8 speech_prio;
 
 
@@ -10,7 +12,6 @@ U8 speech_prio;
 CALLSET_ENTRY (sound_effect, music_update)
 {
 }
-
 
 void speech_running (void)
 {
@@ -43,4 +44,3 @@ CALLSET_ENTRY (sound_effect, init)
 {
 	speech_prio = 0;
 }
-
