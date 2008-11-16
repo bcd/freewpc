@@ -50,18 +50,6 @@ COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SHAKER), common/shaker.c)
 COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_GATED), common/gated.c)
 COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SWITCHBANK), common/switchbank.c)
 COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_BIDI), common/bidi.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SPINNER), common/spinner.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_KICKBACK), common/kickback.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_CAPTIVE), common/captive.c)
-
-# TODO : Eventually we should include generic, slow device drivers here.
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_DROP), common/drop.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SHAKER), common/shaker.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_GATED), common/gated.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SWITCHBANK), common/switchbank.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_BIDI), common/bidi.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SPINNER), common/spinner.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_KICKBACK), common/kickback.c)
 COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_CAPTIVE), common/captive.c)
 
 COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
