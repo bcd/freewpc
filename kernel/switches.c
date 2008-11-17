@@ -26,6 +26,7 @@
 #include <freewpc.h>
 #include <sys/irq.h>
 
+
 /* TODO : on real hardware, occasionally an entry seems to get
  * stuck in the switch queue, and that switch can no longer be
  * processed. */
@@ -51,31 +52,50 @@ typedef struct
 	S8 timer;
 } pending_switch_t;
 
-pending_switch_t *switch_queue_add (const switchnum_t sw);
 
+/** The raw input values of the switch.  These values are
+ * updated every 2ms, and are only used as inputs into the
+ * debounce procedure.  Higher layer software never looks at
+ * these values. */
+__fastram__ switch_bits_t sw_raw;
 
-/* Define shorthand names for the various arrays of switch bits */
-#define switch_raw_bits			switch_bits[AR_RAW]
-#define switch_changed_bits	switch_bits[AR_CHANGED]
-#define switch_pending_bits	switch_bits[AR_PENDING]
-#define switch_latched_bits	switch_bits[AR_LATCHED]
+/** Nonzero for each switch whose last reading differs from the
+most recent logical (debounced) reading */
+__fastram__ switch_bits_t sw_edge;
 
-/** The global array of switch bits, all in one place */
-__fastram__ U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+/** Nonzero for each switch that has been stable at the IRQ level.
+ * This means two consecutive readings, 2ms apart, returned the
+ * same value, which differed from the last stable reading. */
+__fastram__ switch_bits_t sw_stable;
 
-U8 switch_prebounce_bits[SWITCH_BITS_SIZE];
+/** Nonzero for each stable switch (according to sw_stable)
+ * that transitioned back to its previous reading.  This means
+ * the switch did not remain stable long enough for periodic
+ * switch scanning to recognize it. */
+__fastram__ switch_bits_t sw_unstable;
 
-U8 switch_postbounce_bits[SWITCH_BITS_SIZE];
+/** The current logical (i.e. debounced) readings for each
+ * switch.  These are still based on voltage levels and do not
+ * consider inverting necessary for processing optos. */
+__fastram__ switch_bits_t sw_logical;
 
-#define MAX_QUEUED_SWITCHES 16
+/** Nonzero for each switch that is in the switch queue.
+ * This is not strictly needed, but it provides a fast way to
+ * see if a switch is already in the debounce queue. */
+switch_bits_t sw_queued;
+
+/* TODO - the following could use the queue.h functions */
 
 pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
-
 U8 switch_queue_head;
-
 U8 switch_queue_tail;
 
+/** The last time that switch scanning occurred.  It is used
+ * to determine by how much to decrement debounce timers. */
 U16 switch_last_service_time;
+
+/** The switch number of the last switch to be scheduled. */
+U8 sw_last_scheduled;
 
 
 /** Return the switch table entry for a switch */
@@ -96,18 +116,14 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 }
 
 
-
 /** Detect row / column shorts */
 void switch_short_detect (void)
 {
 	U8 n;
 	U8 row = 0;
 
-
-	n = switch_bits[AR_RAW][0] & switch_bits[AR_RAW][1] &
-		switch_bits[AR_RAW][2] & switch_bits[AR_RAW][3] &
-		switch_bits[AR_RAW][4] & switch_bits[AR_RAW][5] &
-		switch_bits[AR_RAW][6] & switch_bits[AR_RAW][7];
+	n = sw_raw[0] & sw_raw[1] & sw_raw[2] & sw_raw[3] &
+		sw_raw[4] & sw_raw[5] & sw_raw[6] & sw_raw[7];
 	/* Each bit in 'n' represents a row that is shorted. */
 	while (n != 0)
 	{
@@ -122,7 +138,7 @@ void switch_short_detect (void)
 
 	for (n = 0; n < 8; n++)
 	{
-		if (switch_bits[AR_RAW][n] == ~mach_opto_mask[n])
+		if (sw_raw[n] == ~mach_opto_mask[n])
 		{
 			/* The nth column is shorted. */
 			dbprintf ("Column %d short detected\n", row);
@@ -176,6 +192,78 @@ void pic_rtt (void)
 }
 
 
+#if defined(CONFIG_PLATFORM_WPC) && defined(__m6809__)
+extern inline void switch_rowpoll (const U8 col)
+{
+	/* Load the raw switch value from the hardware. */
+	if (col == 0)
+	{
+		/* Column 0 = Dedicated Switches */
+		__asm__ volatile ("ldb\t" C_STRING (WPC_SW_CABINET_INPUT));
+	}
+	else if (col <= 8)
+	{
+		/* Columns 1-8 = Switch Matrix
+		Load method is different on PIC vs. non-PIC games. */
+#if (MACHINE_PIC == 1)
+		__asm__ volatile ("ldb\t" C_STRING (WPCS_PIC_READ));
+#else
+		__asm__ volatile ("ldb\t" C_STRING (WPC_SW_ROW_INPUT));
+#endif
+	}
+	else if (col == 9)
+	{
+		/* Column 9 = Flipper Inputs
+		Load method is different on WPC-95 vs. older Fliptronic games */
+#if (MACHINE_WPC95 == 1)
+		__asm__ volatile ("ldb\t" C_STRING (WPC95_FLIPPER_SWITCH_INPUT));
+#else
+		__asm__ volatile ("ldb\t" C_STRING (WPC_FLIPTRONIC_PORT_A));
+#endif
+	}
+
+	/* Save the raw switch */
+	__asm__ volatile ("stb\t%0" :: "m" (sw_raw[col]) );
+
+	/* Set up the column strobe for the next read (on the next
+	 * iteration).  Don't do this if the next read will be the dedicated
+	 * switches.
+	 *
+	 * PIC vs. non-PIC games set up the column strobe differently. */
+	if (col < 8)
+	{
+#if (MACHINE_PIC == 1)
+		__asm__ volatile (
+			"lda\t%0\n"
+			"\tsta\t" C_STRING (WPCS_PIC_WRITE) :: "n" (WPC_PIC_COLUMN (col)) );
+#else
+		__asm__ volatile (
+			"lda\t%0\n"
+			"\tsta\t" C_STRING (WPC_SW_COL_STROBE) :: "n" (1 << col) );
+#endif
+	}
+
+	/* Update stable/unstable states.  This is an optimized
+	version of the C code below, which works around some GCC
+	problems that are unlikely to ever be fixed.  I took the
+	gcc output and optimized it by hand. */
+	__asm__ volatile (
+			"eorb	%0\n"
+			"\ttfr	b,a\n"
+			"\tandb	%1\n"
+			"\tsta	%1\n"
+			"\torb	%2\n"
+			"\tstb	%2\n"
+			"\tcoma\n"
+			"\tanda	%2\n"
+			"\tora	%3\n"
+			"\tsta	%3" ::
+				"m" (sw_logical[col]), "m" (sw_edge[col]),
+				"m" (sw_stable[col]), "m" (sw_unstable[col]) );
+}
+
+#else /* !__m6809__ */
+
 /** Poll a single switch column.
  * Column 0 corresponds to the cabinet switches.
  * Columns 1-8 refer to the playfield columns.
@@ -185,42 +273,38 @@ void pic_rtt (void)
  */
 extern inline void switch_rowpoll (const U8 col)
 {
-	register U8 delta __areg__;
+	U8 edge;
 
 	/*
-	 * (Optimization: by loading the value into 'delta' first,
-	 * it will already be in the correct register needed when
-	 * computing delta below.)
+	 * Read the raw switch.
 	 */
 	if (col == 0)
-		switch_raw_bits[col] = delta = pinio_read_dedicated_switches ();
+		sw_raw[col] = pinio_read_dedicated_switches ();
 	else if (col <= 8)
-		switch_raw_bits[col] = delta = pinio_read_switch_rows ();
+		sw_raw[col] = pinio_read_switch_rows ();
 	else if (col == 9)
-		switch_raw_bits[col] = delta = wpc_read_flippers ();
+		sw_raw[col] = wpc_read_flippers ();
 
 	/* Set up the column strobe for the next read (on the next
 	 * iteration) */
 	if (col < 8)
 		pinio_write_switch_column (col);
 
-	/* delta/changed is TRUE when the switch has changed state from the
-	 * previous latched value */
-	delta = (switch_raw_bits[col] ^ switch_latched_bits[col]);
-
-	/* pending is TRUE when a switch changes state and remains in the new state
-	 * for 2 cycles ; this is a quick and dirty debouncing */
-	switch_pending_bits[col] = delta & switch_changed_bits[col];
-	switch_changed_bits[col] = delta;
+	/* Update stable/unstable states. */
+	edge = sw_raw[col] ^ sw_logical[col];
+	sw_stable[col] |= edge & sw_edge[col];
+	sw_unstable[col] |= ~edge & sw_stable[col];
+	sw_edge[col] = edge;
 }
+
+#endif
 
 
 /** Return TRUE if the given switch is CLOSED.
- * This now scans the latched values and not the raw bits,
- * so that quick debouncing is considered. */
+ * This scans the logical values calculated at periodic service time. */
 bool switch_poll (const switchnum_t sw)
 {
-	return bitarray_test (switch_latched_bits, sw);
+	return bitarray_test (sw_logical, sw);
 }
 
 
@@ -241,41 +325,20 @@ bool switch_poll_logical (const switchnum_t sw)
 }
 
 
-/** The realtime switch processing.
- * All that is done is to poll all of the switches and store the
- * updated values in memory.  The idle function will come along
- * later, scan them, and do further, more intensive processing.
- *
- * The polling is broken up to do different switch columns on
- * different iterations.  2 columns are polled every 1ms, for
- * an effective full scan every 4ms.  This is the minimum time
- * that a switch must remain steady in order for the software to
- * sense it.  Sometimes in PinMAME, a switch will toggle so
- * rapidly that this isn't seen.  My guess is this is OK for
- * real hardware.
- */
-
 void switch_rtt_0 (void)
 {
 	switch_rowpoll (0);
 	switch_rowpoll (1);
 	switch_rowpoll (2);
-}
-
-void switch_rtt_1 (void)
-{
 	switch_rowpoll (3);
 	switch_rowpoll (4);
 }
 
-void switch_rtt_2 (void)
+
+void switch_rtt_1 (void)
 {
 	switch_rowpoll (5);
 	switch_rowpoll (6);
-}
-
-void switch_rtt_3 (void)
-{
 	switch_rowpoll (7);
 	switch_rowpoll (8);
 
@@ -352,12 +415,9 @@ void switch_sched_task (void)
 	}
 #endif
 
-#if 0 /* not working */
-	/* In test mode, always queue switch closures into the
-	 * special switch test queue. */
-	if (in_test)
-		switch_test_add_queue (sw);
-#endif
+	/* For test mode : this lets it see what was the last switch
+	 * to be scheduled.  Used by the Switch Edges test. */
+	sw_last_scheduled = sw;
 
 	log_event (SEV_INFO, MOD_SWITCH, EV_SW_SCHEDULE, sw);
 
@@ -434,35 +494,42 @@ cleanup:
 }
 
 
-/** Schedule a task to handle a switch event.
- * In addition, the switch queue is updated to cancel prebounce and
- * to start the postbounce period.
+/**
+ * Process a switch that has transitioned states.  All debouncing
+ * is fully completed prior to this call.
+ *
+ * The transition is first latched, so that polling the switch level
+ * will return the new state.
+ *
+ * Second, if the transition requires scheduling, a task is started
+ * to handle it.  Eligibility depends on whether or not the switch
+ * is declared as an edge switch (meaning it is scheduled on both
+ * types of transitions) and whether or not it is an opto (i.e.
+ * do we schedule open-to-closed or closed-to-open?)
  */
-void switch_schedule (const U8 sw, pending_switch_t *entry)
+void switch_transitioned (const U8 sw)
 {
-	/* Start a task to process the switch right away */
-	task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
-	task_set_arg (tp, sw);
+	/* Latch the transition.  sw_logical is still an open/closed level.
+	 * By clearing the stable/unstable bits, IRQ will begin scanning
+	 * for new transitions at this point. */
+	disable_irq ();
+	bit_toggle (sw_logical, sw);
+	bit_off (sw_stable, sw);
+	bit_off (sw_unstable, sw);
+	enable_irq ();
 
-	if (entry)
+	/* See if the transition requires scheduling.  It does if:
+	 a) the switch is bidirectional, or
+	 b) the switch is an opto and it is now open, or
+	 c) the switch is not an opto and it is now closed.
+	*/
+	if (bit_test (mach_edge_switches, sw)
+		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
+		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
 	{
-		/* The switch was queued and went through prebounce, so clear that */
-		bit_off (switch_prebounce_bits, sw);
-	}
-
-	/* Enter postbounce phase if 1) the switch is not edge (those are
-	 * processed every transition and so prebounce time is used for both
-	 * levels), AND 2) the postbounce config time is nonzero.
-	 *
-	 * If necessary, allocate a new queue entry for this purpose, or
-	 * just reuse the one on entry.  Order in the queue is not important. */
-	if ((!bit_test (mach_edge_switches, sw))
-		&& (switch_lookup (sw)->postbounce != 0))
-	{
-		if (!entry)
-			entry = switch_queue_add (sw);
-		entry->timer = switch_lookup(sw)->postbounce * 16;
-		bit_on (switch_postbounce_bits, sw);
+		/* Start a task to process the switch right away */
+		task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
+		task_set_arg (tp, sw);
 	}
 }
 
@@ -473,7 +540,9 @@ pending_switch_t *switch_queue_add (const switchnum_t sw)
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
 	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
+	entry->timer = switch_lookup(sw)->debounce * 16;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
+	bit_on (sw_queued, sw);
 	return entry;
 }
 
@@ -493,6 +562,7 @@ pending_switch_t *switch_queue_find (const switchnum_t sw)
 /** Remove an entry from the switch queue */
 void switch_queue_remove (pending_switch_t *entry)
 {
+	bit_off (sw_queued, entry->id);
 	entry->id = 0xFF;
 	if (entry == &switch_queue[switch_queue_head])
 		value_rotate_up (switch_queue_head, 0, MAX_QUEUED_SWITCHES-1);
@@ -502,49 +572,52 @@ void switch_queue_remove (pending_switch_t *entry)
 void switch_queue_init (void)
 {
 	switch_queue_head = switch_queue_tail = 0;
-	memset (switch_prebounce_bits, 0, SWITCH_BITS_SIZE);
-	memset (switch_postbounce_bits, 0, SWITCH_BITS_SIZE);
+	memset (sw_stable, 0, sizeof (sw_stable));
+	memset (sw_unstable, 0, sizeof (sw_unstable));
+	memset (sw_queued, 0, sizeof (sw_queued));
 }
 
 
+/** Service the switch queue.  This function is called
+ * periodically to see if any pending switch transitions have
+ * completed their debounce time.  If any switch becomes
+ * unstable before the period expires, it will be removed
+ * from the queue prior to this function being called.  So
+ * all that is needed here is to decrement the timers, and if
+ * one reaches zero, consider that switch transitioned.
+ */
 void switch_service_queue (void)
 {
-	U8 i = switch_queue_head;
+	U8 i;
+	U8 elapsed_time;
 
+	/* See how long since the last time we serviced the queue. */
+	elapsed_time = get_elapsed_time (switch_last_service_time);
+	if (elapsed_time < 5)
+		return;
+	if (elapsed_time > 150)
+	{
+		dbprintf ("Switch queue slow: %d ms\n", elapsed_time);
+		nonfatal (ERR_SWITCH_SLOW_SERVICE);
+		elapsed_time = 150;
+	}
+
+	i = switch_queue_head;
 	while (unlikely (i != switch_queue_tail))
 	{
 		pending_switch_t *entry;
-		U8 elapsed_time;
-
-		/* See how long since the last time we serviced the queue */
-		elapsed_time = get_elapsed_time (switch_last_service_time);
-		if (elapsed_time < 5)
-			return;
-		if (elapsed_time > 100)
-			elapsed_time = 100;
 
 		entry = &switch_queue[i];
-		if (entry->id != 0xFF)
+		if (likely (entry->id != 0xFF))
 		{
 			dbprintf ("Servicing queued SW%d: ", entry->id);
 			entry->timer -= elapsed_time;
 			if (entry->timer <= 0)
 			{
-				/* Why was this switch queued -- is it in prebounce or postbounce? */
-				if (bit_test (switch_prebounce_bits, entry->id))
-				{
-					/* Prebounce is over.  Schedule the switch handler. */
-					dbprintf ("prebounce done\n");
-					switch_schedule (entry->id, entry);
-				}
-				else
-				{
-					/* Postbounce is over.  There is nothing more to do,
-					 * just remove the queue entry */
-					dbprintf ("postbounce done\n");
-					bit_off (switch_postbounce_bits, entry->id);
-					switch_queue_remove (entry);
-				}
+				/* Debounce is fully complete. */
+				dbprintf ("debounce complete\n");
+				switch_queue_remove (entry);
+				switch_transitioned (entry->id);
 			}
 			else
 			{
@@ -557,183 +630,183 @@ void switch_service_queue (void)
 	switch_last_service_time = get_sys_time ();
 }
 
-void switch_queue_dump (void)
+
+#ifdef DEBUGGER
+static inline void switch_matrix_dump (const char *name, U8 *matrix)
 {
 	U8 i;
-
-	dbprintf ("Head: %d   Tail: %d\n", switch_queue_head, switch_queue_tail);
-	for (i=0; i < MAX_QUEUED_SWITCHES; i++)
-		dbprintf ("Entry %d:  SW %d  %d\n", i, switch_queue[i].id, switch_queue[i].timer);
-
-	dbprintf ("Prebounce: ");
+	dbprintf ("%s:", name);
 	for (i=0; i < SWITCH_BITS_SIZE; i++)
-		dbprintf ("%02X ", switch_prebounce_bits[i]);
-	dbprintf ("\n");
-
-	dbprintf ("Postbounce: ");
-	for (i=0; i < SWITCH_BITS_SIZE; i++)
-		dbprintf ("%02X ", switch_postbounce_bits[i]);
+		dbprintf ("%02X ", matrix[i]);
 	dbprintf ("\n");
 }
 
 
+void switch_queue_dump (void)
+{
+	U8 i;
+
+	dbprintf ("Queue: [%d, %d]\n", switch_queue_head, switch_queue_tail);
+	for (i=0; i < MAX_QUEUED_SWITCHES; i++)
+	{
+		pending_switch_t *entry = switch_queue + i;
+		if (entry->id != 0)
+			dbprintf ("Entry %d:  SW %d  %d\n", i, entry->id, entry->timer);
+	}
+
+	switch_matrix_dump ("Raw     ", sw_raw);
+	switch_matrix_dump ("Logical ", sw_logical);
+	switch_matrix_dump ("Edge    ", sw_edge);
+	task_sleep (TIME_16MS);
+	switch_matrix_dump ("Stable  ", sw_stable);
+	switch_matrix_dump ("Unstable", sw_unstable);
+	switch_matrix_dump ("Queued  ", sw_queued);
+}
+#endif /* DEBUGGER */
+
+
+/**
+ * Handle a switch that has just become stable; i.e. it changed
+ * and held steady for at least 2 consecutive readings.  It is
+ * also known not to be in the heavy debounce queue already.
+ * 
+ * If the switch requires a longer debounce period, then it is
+ * put into a queue and we wait a little while to see if it
+ * remains stable, then it will be scheduled.
+ */
+static void switch_update_stable (const U8 sw)
+{
+	/* Queue the switch if it requires further debouncing.
+	 * Otherwise, it is eligible for scheduling. */
+	if (switch_lookup (sw)->debounce != 0)
+		switch_queue_add (sw);
+	else
+		switch_transitioned (sw);
+}
+
+
+/**
+ * Handle a switch that is changing faster than its debounce period.
+ * Ignore the recent transitions and restart IRQ-level switch
+ * scanning again.
+ */
+static void switch_update_unstable (const U8 sw)
+{
+	if (bit_test (sw_queued, sw))
+	{
+		/* The switch was already seen and queued, but it did not
+		 * complete its full debounce.  Cancel that entry. */
+		pending_switch_t *entry = switch_queue_find (sw);
+		if (!entry)
+			fatal (ERR_SWITCH_QUEUE_CORRUPT);
+		switch_queue_remove (entry);
+	}
+
+	/* Restart IRQ-level scanning. */
+	disable_irq ();
+	bit_off (sw_stable, sw);
+	bit_off (sw_unstable, sw);
+	enable_irq ();
+}
+
+
+
 /** Idle time switch processing.  This function is called whenever there
- * are no round robin tasks to run, but no more frequently than once every
- * 16ms.
+ * are no round robin tasks to run.
  *
  * 'Pending switches' are scanned and handlers are spawned for each
  * of them (each is a separate task).
  */
 CALLSET_ENTRY (switch, idle)
 {
-	U8 rawbits, pendbits;
 	register U16 col = 0;
 	extern U8 sys_init_complete;
+	U8 rows;
 
 	/* Prior to system initialization, switches are not serviced.
 	Any switch closures during this time continue to be queued up.
 	However, at the least, allow the coin door switches to be polled. */
 	if (unlikely (sys_init_complete == 0))
 	{
-		switch_latched_bits[0] = switch_raw_bits[0];
+		sw_logical[0] = sw_raw[0];
 		return;
 	}
 
-	/* TODO - before doing anything else, make sure the ALWAYS CLOSED
-	 * switch is really closed.  If not, there's a serious problem
-	 * and we can't do any switch processing. */
-
-	/* Service the switch queue. */
+	/* Service the switch queue.  Note that this is done BEFORE
+	 * polling switches; please do not change this!  In case
+	 * idle is not invoked fast enough, it is possible that a
+	 * switch might have legitimately completed its debounce period,
+	 * but we just didn't see it in time before it transitioned
+	 * back.  In that case, to be fair, consider the transition
+	 * anyway.  The service function does not actually poll the
+	 * current switch readings at all, so it is safe to do this
+	 * even if there are hardware errors. */
 	switch_service_queue ();
 
+	/* Before doing anything else, make sure the ALWAYS CLOSED
+	 * switch is really closed.  If not, there's a serious problem
+	 * and we can't do any switch processing. */
+	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
+		return;
+
+	/* Check for shorted switch rows/columns.  TODO : this should return a
+	 * value, and we skip rest of processing if there are problems. */
+	switch_short_detect ();
+
+	/* Iterate over each switch column to see what needs to be done. */
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
-		/* If pending bits is zero, which it will be most of the
-		 * time, then there is absolutely nothing to consider on this
-		 * column.  (The logic below would always effectively do nothing.) */
-		if (likely (switch_pending_bits[col] == 0))
-			continue;
-
-		/* Atomically get-and-clear the pending switches.
-		 * Note that we must REREAD pending bits here; it may have changed
-		 * since we just checked it!  But it is guaranteed that only
-		 * additional bits could be set -- not cleared.  The barrier is
-		 * needed to force the re-read, which can be optimized by gcc. */
-		barrier ();
-		disable_irq ();
-		pendbits = switch_pending_bits[col];
-		switch_pending_bits[col] = 0;
-		enable_irq ();
-
-		/* Updated latched bits.  pendbits will toggle anytime the state
-		 * of the switch changes, so we use just an XOR operation to update the
-		 * current state.  Latched just means that this is the state of the
-		 * switches that is returned when polling from task level. */
-		switch_latched_bits[col] ^= pendbits;
-
-		/* We're going to convert the latched state, which is raw I/O level,
-		 * into something logical.  First, optos need to be inverted.
-		 * Thus rawbits=0 for any inactive switch, or 1 for an active switch. */
-		rawbits = switch_latched_bits[col];
-		rawbits ^= mach_opto_mask[col];
-
-		/* Now consider that edge switches need to be processed on both
-		 * type of transitions, but other switches should only be handled on
-		 * inactive->active.  Convert rawbits to indicate "might need to process":
-		 * 0 == inactive == no need to process
-		 * 1 == active or edge  == might need to process.
-		 *
-		 * When queueing switches, we need to consider transitions of
-		 * both types every time. */
-		rawbits |= mach_edge_switches[col];
-
-		/* Grab the current set of pending bits, masked with rawbits.
-		 * If nonzero, it means the switch just changed state, AND the
-		 * transition is of a type that needs to be processed.
-		 */
-		pendbits &= rawbits;
-
-		/* If the switch is in its postbounce phase, the transition
-		 * should be ignored, so mask it. */
-		pendbits &= ~switch_postbounce_bits[col];
-
-		if (pendbits) /* Anything to be done on this column? */
+		/* Each bit set in sw_unstable indicates a switch that had transitioned
+		briefly, but not before the full debounce period expired.  These
+		switches might be in the switch queue, or might not.  We need
+		to check anyway. */
+		if (unlikely (rows = sw_unstable[col]))
 		{
-			/* Yes, calculate the switch number for the first row in the column */
 			U8 sw = col * 8;
-			U8 prebounce_bits = switch_prebounce_bits[col];
-
-			/* Iterate over all rows -- all switches on this column that changed.
-			 * But stop as soon as no more pending rows are seen */
 			do {
-				if (pendbits & 1)
-				{
-					/* OK, the switch has changed state and is stable. */
-
-					task_dispatching_ok = TRUE;
-
-					/* There are two possibilities: either the switch is
-					 * not queued, or it is in prebounce.  (Postbounce
-					 * is already taken care of above.)  We can
-					 * distinguish between the two cases just by checking
-					 * one bit. */
-					if (prebounce_bits & 1)
-					{
-						/* The switch is already in prebounce state, and a change
-						 * occurred.  The switch is not stable, so the
-						 * queue entry needs to be reset: restart the
-						 * prebounce timer.  The entry is not removed/added
-						 * to preserve the order??? */
-						pending_switch_t *entry = switch_queue_find (sw);
-						dbprintf ("Restarting prebounce for SW%d\n", sw);
-						entry->timer = switch_lookup(sw)->prebounce * 16;
-					}
-					else
-					{
-						/* This is a new switch closure.
-						 * If the prebounce time for the switch is zero,
-						 * then it can be serviced right away, else it
-						 * must be queued. */
-						if (switch_lookup (sw)->prebounce == 0)
-						{
-							dbprintf ("Scheduling SW%d with no prebounce\n", sw);
-							switch_schedule (sw, NULL);
-						}
-						else
-						{
-							pending_switch_t *entry = switch_queue_add (sw);
-							if (entry)
-							{
-								dbprintf ("Starting prebounce for SW %d\n", sw);
-								entry->timer = switch_lookup(sw)->prebounce * 16;
-								bit_on (switch_prebounce_bits, sw);
-							}
-						}
-					}
-				}
-
-				/* Set up for next iteration */
-				pendbits >>= 1;
-				prebounce_bits >>= 1;
+				if (rows & 1)
+					switch_update_unstable (sw);
+				rows >>= 1;
 				sw++;
-			} while (pendbits);
+			} while (rows);
 		}
-	}
 
-	switch_short_detect ();
+		/* Each bit in sw_stable, but not in sw_unstable, indicates a switch
+		that just transitioned and needs to be put into the debounce queue. */
+		/* TODO - also verify that not already queued? */
+		if (unlikely (rows = (sw_stable[col] & ~sw_unstable[col])))
+		{
+			U8 sw = col * 8;
+			do {
+				if (rows & 1)
+					switch_update_stable (sw);
+				rows >>= 1;
+				sw++;
+			} while (rows);
+		}
+
+		/* Because it can take awhile to scan the entire matrix, keep
+		the software watchdog from expiring. */
+		task_dispatching_ok = TRUE;
+	}
+}
+
+
+/** Do final initializing once system init is complete. */
+CALLSET_ENTRY (switch, init_complete)
+{
+	/* Initialize the service timer.  This needs to happen
+	 * just before interrupts are enabled */
+	switch_last_service_time = get_sys_time ();
 }
 
 
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
-	/* Clear the whole bit buffers */
-	memset ((U8 *)&switch_bits[0][0], 0, sizeof (switch_bits));
-
-	/* Initialize the raw state based on mach_opto_mask,
-	 * so that the optos don't all trigger at initialization. */
-	memcpy (switch_raw_bits, mach_opto_mask, SWITCH_BITS_SIZE);
-	memcpy (switch_latched_bits, mach_opto_mask, SWITCH_BITS_SIZE);
+	/* Initialize the switch state buffers */
+	memcpy (sw_logical, mach_opto_mask, SWITCH_BITS_SIZE);
+	memset (sw_edge, 0, sizeof (switch_bits_t));
 
 	/* Initialize the switch queue */
 	switch_queue_init ();

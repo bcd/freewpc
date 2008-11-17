@@ -75,9 +75,6 @@ U8 linux_lamp_matrix[NUM_LAMP_COLS];
 /** The simulated solenoid outputs */
 U8 linux_solenoid_outputs[SOL_COUNT / 8];
 
-/** The simulated flipper inputs */
-U8 linux_flipper_inputs;
-
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
 
@@ -567,7 +564,7 @@ void linux_asic_write (U16 addr, U8 val)
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_COIL_OUTPUT:
 			sim_sol_write (32, &linux_solenoid_outputs[4], val);
-#else
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
 #endif
@@ -720,7 +717,7 @@ U8 linux_asic_read (U16 addr)
 		case WPC_SW_ROW_INPUT:
 #ifdef MACHINE_TZ
 			if (col9_enabled)
-				return sim_switch_matrix_get ()[9];
+				return sim_switch_matrix_get ()[9]; /* TODO - not right */
 			else
 #endif
 				return *linux_switch_data_ptr;
@@ -739,10 +736,11 @@ U8 linux_asic_read (U16 addr)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
-#else
+				return sim_switch_matrix_get ()[9];
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
+				return ~sim_switch_matrix_get ()[9];
 #endif
-			return ~linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
 			return 0;
@@ -1195,6 +1193,9 @@ int main (int argc, char *argv[])
 		for (sw = 0; sw < NUM_SWITCHES; sw++)
 			if (switch_is_opto (sw))
 				linux_switch_toggle (sw);
+
+	/* Force always closed */
+	linux_switch_toggle (SW_ALWAYS_CLOSED);
 
 	/* Close the coin door */
 	linux_switch_toggle (SW_COIN_DOOR_CLOSED);

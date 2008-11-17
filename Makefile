@@ -58,6 +58,8 @@ MMAKEFILE := $(M)/Makefile
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 MACHINE_DIR = machine/$(MACHINE)
 
+top_target : default_target
+
 include $(BLDDIR)/mach-Makefile
 include $(MMAKEFILE)
 
@@ -207,6 +209,8 @@ GENDEFINE = tools/gendefine
 PINMAME ?= xpinmamed.x11
 PINMAME_FLAGS = -skip_gameinfo -skip_disclaimer -si -s 2 -fs 8 $(EXTRA_PINMAME_FLAGS)
 
+# The template compiler
+CTEMP=tools/ctemp -o $(BLDDIR)
 
 #######################################################################
 ###	Source and Binary Filenames
@@ -240,6 +244,8 @@ INCLUDES = $(OS_INCLUDES) $(GAME_INCLUDES)
 
 FON_SRCS = $(patsubst %.o,%.fon,$(FON_OBJS))
 export FON_SRCS
+
+TEMPLATE_SRCS = $(patsubst %.o,%.c,$(TEMPLATE_OBJS))
 endif
 
 #######################################################################
@@ -287,8 +293,8 @@ endif
 
 CFLAGS += $(EXTRA_CFLAGS)
 
-SCHED_FLAGS := -i freewpc.h -i interrupt.h $(MACHINE_SCHED_FLAGS)
-
+SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
+SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
 
 
 # Fix up names based on machine definitions
@@ -837,7 +843,7 @@ endif
 #
 gendefines: $(GENDEFINES) $(MACH_LINKS)
 
-include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS)
+include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
 	$(Q)echo Autogenerating task IDs... && \
 		$(GENDEFINE) -p GID_ > $@
 
@@ -854,7 +860,7 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLDDIR)/callset.o
 
-$(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) tools/gencallset
+$(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) # $(CALLSET_FLAGS)
 
@@ -873,7 +879,7 @@ fonts clean-fonts:
 .PHONY : sched
 sched: $(SCHED_SRC) tools/sched/sched.make
 
-$(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(MAKE_DEPS)
+$(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
 	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
 
 #######################################################################
@@ -985,6 +991,7 @@ info:
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
 	$(Q)echo "CONFIG_BARE = $(CONFIG_BARE)"
+	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
 
 .PHONY : areainfo
 areainfo:

@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 #include <rtsol.h>
-
+#include <queue.h>
 
 /**
  * \file
@@ -45,8 +45,6 @@
  * to software failures.  A random write to any of the solenoid timers
  * would cause that solenoid to turn on, but at most for 1.02s, since
  * the timer countdown automatically restores it to zero.
- * TODO : it is best to zero the mask registers as well, so that
- * two random writes would be required to mistakenly turn on a solenoid.
  */
 
 
@@ -66,13 +64,242 @@ iteration through all solenoids, this mask is shifted.  At most one bit
 is set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
+U8 sol_reg_readable[SOL_REG_COUNT];
+
+
+/**
+ * The state of the solenoid request driver.
+ */
+enum sol_request_state {
+	/* No solenoid request is pending */
+	REQ_IDLE,
+
+	/* A request is pending but has not been started.
+	 * For maximum power, the start should be deferred
+	 * until just after the next zerocross. */
+	REQ_PENDING,
+
+	/* The solenoid is running at 100% power.
+	 * When the timer expires, it switches to the duty
+	 * phase. */
+	REQ_ON,
+
+	/* The solenoid is running at less than 100%.
+	 * The duty mask controls during which phases of the AC
+	 * cycle it is on, and when it is off.  When the timer
+	 * expires, the coil is turned off and we go back to
+	 * idle state. */
+	REQ_DUTY,
+};
+
+__fastram__ volatile enum sol_request_state sol_req_state;
+__fastram__ volatile U8 sol_req_timer;
+
+volatile U8 req_lock;
+U8 *req_reg_write;
+U8 *req_reg_read;
+U8 req_bit;
+U8 req_on_time;
+U8 req_duty_time;
+U8 req_duty_mask;
+U8 req_inverted;
+
+#define SOL_REQ_QUEUE_LEN 8
+
+struct {
+	U8 head;
+	U8 tail;
+	U8 sols[SOL_REQ_QUEUE_LEN];
+} sol_req_queue;
+
+
+/**
+ * Dump the state of the solenoid request driver.
+ */
+#ifdef DEBUGGER
+void sol_req_dump (void)
+{
+	dbprintf ("State = %d\n", sol_req_state);
+	dbprintf ("Timer = %d\n", sol_req_timer);
+	dbprintf ("Write = %p, Read = %p\n", req_reg_write, req_reg_read);
+	dbprintf ("Bit = %02X\n", req_bit);
+}
+#endif
+
+
+/**
+ * Start a solenoid request now.
+ * The state machine must be in IDLE.  This call puts it
+ * into PENDING state.
+ */
+void sol_req_start (U8 sol)
+{
+	dbprintf ("Starting pulse %d now.\n", sol);
+
+	if (sol_req_state != REQ_IDLE)
+		fatal (ERR_SOL_REQUEST);
+
+	req_reg_write = sol_get_write_reg (sol);
+	if (req_reg_write == NULL)
+		return;
+
+	req_reg_read = sol_get_read_reg (sol);
+	req_bit = sol_get_bit (sol);
+	req_on_time = 16;
+	req_duty_time = (sol_get_time (sol) - 1) * 16;
+	req_duty_mask = 0x3; /* 25% */
+	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
+
+	/* Mark the request pending, so the update procedure will see it. */
+	sol_req_state = REQ_PENDING;
+}
+
+
+
+
+/**
+ * Periodically inspect the solenoid queue and dispatch
+ * the pending request.
+ */
+CALLSET_ENTRY (sol, idle_every_100ms)
+{
+	if (sol_req_state == REQ_IDLE
+		&& !queue_empty_p ((queue_t *)&sol_req_queue))
+	{
+		U8 sol = queue_remove ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN);
+		sol_req_start (sol);
+	}
+}
+
+
+/**
+ * Make a solenoid request, and return immediately, even if it
+ * is not started.
+ */
+void sol_request_async (U8 sol)
+{
+	dbprintf ("Request pulse %d\n", sol);
+
+	/*
+	 * If the state machine is IDLE, go ahead and start the request.
+	 * Otherwise, it will need to be queued.
+	 */
+	if (sol_req_state == REQ_IDLE)
+	{
+		sol_req_start (sol);
+	}
+	else
+	{
+		dbprintf ("Queueing pulse %d\n", sol);
+		queue_insert ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN, sol);
+	}
+}
+
+
+/**
+ * Make a solenoid request, and wait it to finish before returning.
+ */
+void sol_request (U8 sol)
+{
+	/* Wait until any existing sync requests are finished. */
+	while (req_lock)
+		task_sleep (TIME_33MS);
+
+	/* Acquire the lock for this solenoid. */
+	req_lock = sol;
+
+	/* Issue the request */
+	sol_request_async (sol);
+
+	/* Wait for the request to finish */
+	while (req_lock)
+		task_sleep (TIME_33MS);
+}
+
+
+/**
+ * Handle solenoid requests every 1ms.
+ *
+ * The lifecycle of the request manager is as follows:
+ *
+ * IDLE   --->  PENDING   --->  ON   ---> DUTY
+ *
+ * See the declaration of these states for details.
+ */
+void sol_req_rtt (void)
+{
+	/* If nothing to do, get out quickly. */
+	if (likely (sol_req_state == REQ_IDLE))
+		return;
+
+	else if (sol_req_state == REQ_PENDING)
+	{
+		/* In the pending state, start the solenoid
+		 * at 100% power but only if at a zerocrossing
+		 * point.  If the ZC circuit is broken, this
+		 * state is bypassed and task level will always
+		 * program the request in ON mode. */
+		if (zc_get_timer () == 2)
+		{
+			sol_req_timer = req_on_time;
+			*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
+			sol_req_state = REQ_ON;
+		}
+	}
+
+	else
+	{
+		/* In either the ON or DUTY states, we must decrement the timer. */
+		/* TODO - in either of these states, precise timing is not
+		as critical so we may be able to do this less frequently; i.e.
+		every 8ms instead of every 1ms. */
+		--sol_req_timer;
+		if (sol_req_timer == 0)
+		{
+			/* On expiry, switch to the next state. */
+			if (sol_req_state == REQ_ON)
+			{
+				/* Switch to DUTY. */
+				sol_req_timer = req_duty_time;
+				sol_req_state = REQ_DUTY;
+			}
+			else
+			{
+				/* Switch to IDLE.  Ensure the coil is off.
+				Release any process waiting on this solenoid to
+				finish. */
+				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
+				req_lock = 0;
+				sol_req_state = REQ_IDLE;
+			}
+		}
+		else if (sol_req_state == REQ_DUTY)
+		{
+			if ((sol_req_timer & sol_duty_mask) == 0)
+			{
+				/* Occasionally turn on the coil */
+				*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
+			}
+			else
+			{
+				/* Most of the time, keep it off */
+				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
+			}
+		}
+	}
+}
+
 
 /** Return 0 if the given solenoid/flasher should be off,
 else return the bitmask that reflects that solenoid's
 position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
+#ifdef CONFIG_OLD_SOL
 	if (MACHINE_SOLENOID_P (id) || MACHINE_SOL_FLASHERP (id))
+#else
+	if (MACHINE_SOL_FLASHERP (id))
+#endif
 		if (likely (sol_timers[id] != 0))
 		{
 			sol_timers[id]--;
@@ -99,9 +326,9 @@ extern inline void sol_update_set (const U8 set)
 {
 	/* For some reason, GCC 4.x crashes on this function... */
 #ifdef GCC4
-	register U8 out __areg__ = 0;
+	register U8 out __areg__ = *sol_get_read_reg (set * 8);
 #else
-	register U8 out = 0;
+	register U8 out = *sol_get_read_reg (set * 8);
 #endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers
@@ -128,9 +355,9 @@ extern inline void sol_update_fliptronic_powered (void)
 
 	/* For some reason, GCC 4.x crashes on this function... */
 #ifdef GCC4
-	register U8 out __areg__ = 0;
+	register U8 out __areg__ = fliptronic_powered_coil_outputs;
 #else
-	register U8 out = 0;
+	register U8 out = fliptronic_powered_coil_outputs;
 #endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers
@@ -228,14 +455,6 @@ sol_stop (solnum_t sol)
 }
 
 
-/** Pulse a solenoid for its normal duration. */
-void
-sol_pulse (solnum_t sol)
-{
-	sol_start (sol, sol_get_duty(sol), sol_get_time(sol));
-}
-
-
 /** Initialize the solenoid subsystem. */
 void
 sol_init (void)
@@ -248,6 +467,11 @@ sol_init (void)
 	 * writing to the timer.  TODO : this is not particularly safe */
 	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
 	sol_duty_mask = 0x1;
-}
 
+	sol_req_state = REQ_IDLE;
+	memset (sol_reg_readable, 0, SOL_REG_COUNT);
+
+	/* Initialize the solenoid queue. */
+	queue_init ((queue_t *)&sol_req_queue);
+}
 

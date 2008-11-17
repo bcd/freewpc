@@ -274,12 +274,12 @@ stop_clock:
 	if (clock_mode == CLOCK_RUNNING_FORWARD)
 	{
 		rt_sol_start (SOL_CLOCK_FORWARD, 0xFF, 4);
-		rt_sol_disable (SOL_CLOCK_REVERSE);
+		sol_disable (SOL_CLOCK_REVERSE);
 	}
 	else
 	{
 		rt_sol_start (SOL_CLOCK_REVERSE, 0xFF, 4);
-		rt_sol_disable (SOL_CLOCK_FORWARD);
+		sol_disable (SOL_CLOCK_FORWARD);
 	}
 	clock_mode = CLOCK_STOPPED;
 	return;

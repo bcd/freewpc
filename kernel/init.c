@@ -190,6 +190,7 @@ __noreturn__ void freewpc_init (void)
 	 */
 #ifdef MACHINE_TEST_ONLY
 	sys_init_complete++;
+	callset_invoke (init_complete);
 	callset_invoke (sw_enter);
 #else
 	system_reset ();

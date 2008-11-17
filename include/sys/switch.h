@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -54,16 +54,10 @@ typedef struct
 	sound_code_t sound;
 
 	/** Indicates how long the switch must remain in the active
-	 * state before an event is generated.  During this time,
-	 * the switch remains queued.  If it does not change for this
-	 * time, then the event is generated.  If it does change, the
-	 * prebounce period is restarted. */
-	task_ticks_t prebounce;
-
-	/** Indicates how long after the event is generated before
-	 * switch closures are considered again.  During this period,
-	 * any switch transitions are ignored. */
-	task_ticks_t postbounce;
+	 * state before an event is generated.   If zero, then only
+	 * a quick 4ms debounce is done.  The value is given
+	 * in 16ms ticks. */
+	task_ticks_t debounce;
 
 	/** If nonzero, indicates the device driver associated with this
 	 *switch. */
@@ -74,6 +68,11 @@ typedef struct
 extern const U8 mach_opto_mask[];
 extern const U8 mach_edge_switches[];
 
+/** The maximum number of switches that can be queued at
+ * a time.  Queueing is necessary only for switches that
+ * require a long (more than 4ms) debounce interval.
+ * Keeping this as a power of 2 generates more efficient code. */
+#define MAX_QUEUED_SWITCHES 16
 
 #define SW_DEVICE_DECL(real_devno)	((real_devno) + 1)
 
@@ -112,21 +111,18 @@ depending on the system type. */
 
 #define MAKE_SWITCH(col,row)	(((col) * 8) + (row) - 1)
 
-/* Switch array indices */
-#define AR_RAW			0
-#define AR_CHANGED 	1
-#define AR_PENDING 	2
-#define AR_LATCHED   3
-#define NUM_SWITCH_ARRAYS 	4
 
-extern U8 switch_bits[NUM_SWITCH_ARRAYS][SWITCH_BITS_SIZE];
+/** The form for a matrix of bits, one per switch */
+typedef U8 switch_bits_t[SWITCH_BITS_SIZE];
+
+extern __fastram__ U8 sw_raw[SWITCH_BITS_SIZE];
 
 
 /** Poll the raw state of a switch.  Returns zero if open, nonzero
 if closed. */
 extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 {
-	return switch_bits[AR_RAW][SW_COL(sw_num)] & SW_ROWMASK(sw_num);
+	return sw_raw[SW_COL(sw_num)] & SW_ROWMASK(sw_num);
 }
 
 

@@ -1939,7 +1939,7 @@ struct menu memory_editor_item = {
 /**********************************************************************/
 
 struct menu *dev_menu_items[] = {
-#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
+#if defined(MACHINE_DMD)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
@@ -2481,11 +2481,20 @@ extern __test2__ void switch_matrix_draw (void);
 extern __test2__ void switch_edges_update (void);
 extern __test2__ void switch_levels_update (void);
 
+U8 switch_display_timer;
+
 void switch_window_title (const char *title)
 {
 	font_render_string_center (&font_mono5, 80, 3, title);
 }
 
+void switch_edges_init (void)
+{
+	extern U8 sw_last_scheduled;
+	browser_init ();
+	sw_last_scheduled = 0;
+	switch_display_timer = 0;
+}
 
 void switch_edges_draw (void)
 {
@@ -2505,6 +2514,7 @@ void switch_edges_thread (void)
 
 struct window_ops switch_edges_window = {
 	INHERIT_FROM_BROWSER,
+	.init = switch_edges_init,
 	.draw = switch_edges_draw,
 	.thread = switch_edges_thread,
 	.up = null_function,
@@ -2577,7 +2587,6 @@ void single_switch_draw (void)
 	const char *level;
 	const char *active;
 
-	switch_matrix_draw ();
 	switch_window_title ("SINGLE SWITCHES");
 
 	/* Display a description of the switch */
@@ -2596,6 +2605,7 @@ void single_switch_draw (void)
 	sprintf ("%s-%s", active, level);
 	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
 
+	switch_matrix_draw ();
 	dmd_show_low ();
 }
 
@@ -2856,7 +2866,11 @@ void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
+#if 1
+	sol_request_async (sel);
+#else
 	sol_start (sel, sol_get_duty (sel), browser_action);
+#endif
 	task_sleep (TIME_100MS);
 }
 

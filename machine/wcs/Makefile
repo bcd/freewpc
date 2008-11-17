@@ -38,6 +38,8 @@ ROM_PAGE_COUNT = 32
 
 MACHINE_FILE = wcs.md
 
+MACHINE_SCHEDULE := $(M)/wcs.sched
+
 PINMAME_MACHINE = wcs_l2
 
 PINMAME_GAME_ROM = wcup_lx2.rom
@@ -55,6 +57,8 @@ GAME_TEST_OBJS =
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
-	shot.o lock.o match.o
+	shot.o lock.o driver.o match.o kickback.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
+
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/lower_jet.h build/upper_jet.h build/kickback_driver.h build/spinner.h build/gate.h build/spinning_ball.h build/goalie.h

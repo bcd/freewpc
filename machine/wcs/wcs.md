@@ -122,7 +122,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 46: Ultra Spinner, white
 47: Ultra Jets, white
 48: Striker, red
-51: Goal Jackpot
+51: Goal Jackpot, red
 52: Extra Ball, red
 53: Goal, yellow
 54: Striker Build, white
@@ -134,7 +134,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 62: L. Loop Build, white
 63: Travel, yellow
 64: World Cup Final, red
-65: L. Ramp Lock
+65: L. Ramp Lock, yellow
 66: Top Lane Left, purple
 67: Top Lane Right, purple
 68: Skill Lower, yellow
@@ -165,7 +165,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
-23: Buy Extra Ball, button, cabinet
+23: Buyin Button, buyin-button, cabinet
 25: Free Kick Target, ingame
 26: Kickback Upper, ingame
 27: Spinner, ingame
@@ -177,7 +177,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 35: Trough 5, trough, noscore, opto
 36: Trough Stack, noscore, opto
 37: Light Magna Goalie, ingame
-38: Shooter, noscore, shooter
+38: Shooter, edge, noscore, shooter
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
 43: Goalie Left, noscore, opto
@@ -225,9 +225,9 @@ H6: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
 H7: Knocker, knocker
 H8: Ramp Divertor
 
-L1: Left Jet
-L2: Upper Jet
-L3: Lower Jet
+L1: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L2: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS)
+L3: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L5: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Eject
@@ -315,7 +315,8 @@ Disable Goalie: yes_no, NO
 [system_music]
 
 [scores]
-2500:
+730:
+10K:
 
 [highscores]
 
@@ -337,9 +338,18 @@ Goalie Moving:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
+Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
+
+Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
+Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Lit: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
+Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
+Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 
 [fonts]
 
@@ -348,4 +358,16 @@ Goal Trough Made:
 Ignore R. Ramp Exit:
 Ramp Gate Debounce:
 Kickback Made:
+
+[templates]
+Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Upper Jet: driver(spsol), sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=3, offtime=16
+Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
+Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
+Gate: driver(duty), sol=SOL_LOOP_GATE, ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+Kickback Driver: driver(spsol), sw=SW_KICKBACK, sol=SOL_KICKBACK, ontime=5, offtime=30
+Spinning Ball: driver(duty), sol=SOL_BALL_FORWARD, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=0
+Goalie: driver(duty), sol=SOL_GOALIE_DRIVE, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=0
 

@@ -375,7 +375,9 @@ wait_and_recount:
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid. */
-			sol_pulse (dev->props->sol);
+			/* TODO - in this task context, we can wait for the queue to
+			be serviced. */
+			sol_request (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules

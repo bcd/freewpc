@@ -49,7 +49,9 @@ define MACHINE_REPLAY_SCORE_CHOICES       10
 define MACHINE_REPLAY_START_CHOICE        5
 define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
 define MACHINE_AMODE_LEFF                 tz_amode_leff
-#ifdef MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
+define MACHINE_HAS_UPPER_LEFT_FLIPPER
+define MACHINE_HAS_UPPER_RIGHT_FLIPPER
+define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 
 ##########################################################################
 # Lamp Description
@@ -582,3 +584,10 @@ misctype:
 v5prc:
 steel:
 lithograph:
+
+[templates]
+Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
+Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
+Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
+Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20

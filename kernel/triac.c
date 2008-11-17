@@ -58,10 +58,6 @@
 
 #include <freewpc.h>
 
-/** The amount of time since the last zero crossing, as calculated
- * by the AC module. */
-extern __fastram__ U8 zc_timer;
-
 
 /** The normal state of the triacs, not accounting for lamp effects. */
 U8 triac_output;
@@ -102,7 +98,7 @@ void triac_rtt (void)
 {
 	/* We only need to update the triacs if dimming
 	 * needs to be done during this phase of the AC cycle. */
-	if (unlikely (gi_dimming[zc_timer] | gi_leff_dimming[zc_timer]))
+	if (unlikely (gi_dimming[zc_get_timer ()] | gi_leff_dimming[zc_get_timer ()]))
 	{
 		U8 triac_bits;
 
@@ -110,7 +106,9 @@ void triac_rtt (void)
 		triac_bits = triac_read ();
 
 		/* Turn on the lamps that need to be dimmed at this level. */
-		triac_write (triac_bits | gi_dimming[zc_timer] | gi_leff_dimming[zc_timer]);
+		triac_write (triac_bits
+			| gi_dimming[zc_get_timer ()]
+			| gi_leff_dimming[zc_get_timer ()]);
 
 		/* Now disable the dimmed lamps for the next phase */
 		triac_write (triac_bits);

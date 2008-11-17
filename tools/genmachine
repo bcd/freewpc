@@ -81,6 +81,7 @@ my %contextDefinitionRe = (
 	"fonts" => "AUTO",
 	"fifs" => "AUTO",
 	"timers" => "AUTO",
+	"templates" => "AUTO",
 );
 
 # A table of binary properties per context.  During any object declaration,
@@ -137,6 +138,7 @@ my %BinaryProperties = (
 		"upkick" => 1,
 		"eject" => 1,
 		"flash" => 1,
+		"flipper" => 1,
 		"nosearch" => 1,
 		"notinstalled" => 1,
 	},
@@ -316,8 +318,7 @@ sub close_switch {
 	$def->{'button'} = 1 if (defined $def->{'start-button'})
 		|| (defined $def->{'buyin-button'});
 
-	$def->{'prebounce'} = "0" if (!defined $def->{'prebounce'});
-	$def->{'postbounce'} = "TIME_33MS" if (!defined $def->{'postbounce'});
+	$def->{'debounce'} = "0" if (!defined $def->{'debounce'});
 }
 
 sub close_drive {
@@ -612,8 +613,8 @@ sub machine_finish {
 	}
 
 	# Does the machine have upper flippers that need to be serviced?
-	$m->{'*switches:has-ul'} = 1;
-	$m->{'*switches:has-ur'} = 1;
+	$m->{'*switches:has-ul'} = undef;
+	$m->{'*switches:has-ur'} = undef;
 
 	# TODO : Are there any GLOBAL_OBJECTS that aren't defined?
 }
@@ -950,7 +951,7 @@ sub machine_write_switch_decls {
 		my $c_ident = $sw->{'c_ident'};
 		print "   [" . $c_ident . "] = {\n";
 		for $field ("fn", "flags", "lamp", "sound",
-			"prebounce", "postbounce", "devno") {
+			"debounce", "devno") {
 			$val = $sw->{$field};
 			if (($c_decl =~ /unused/) && ($field eq "fn")) {
 				$val = "null_function";
@@ -1005,6 +1006,45 @@ sub machine_write_makefile {
 	for $font (unique ($m->{'fonts'})) {
 		print "CONFIG_" . $font->{'c_ident'} . " := y\n";
 	}
+
+	# Generate rules for compiling templates.
+	for $inst (unique ($m->{'templates'})) {
+		my $driver = $inst->{'driver'};
+		my $ident = $inst->{'c_decl'};
+		my $id;
+
+		if (!defined ($tempid{$driver})) {
+			$tempid{$driver} = 0;
+		}
+		$id = $tempid{$driver}++;
+
+		my $args = "";
+		my @arglist = split /,/, $inst->{'props'};
+		for my $arg (@arglist) {
+			$args .= "-D $arg ";
+		}
+
+		my $c_file = "build/$ident.c";
+		my $h_file = "build/$ident.h";
+		my $o_file = "\$(BLDDIR)/$ident.o";
+		my $class_file = "build/$ident.h";
+		my $template_file = "drivers/$driver.ct";
+
+		print "\n# Template ID : $id\n";
+		print "# Identifier: $ident\n";
+		print "# Driver: $driver\n";
+		print "# Arguments: $args\n";
+		print <<END;
+
+TEMPLATE_OBJS += $o_file
+
+$o_file : $c_file $h_file build/mach-Makefile
+
+$c_file $h_file : $template_file \$(CTEMP)
+	\$(CTEMP) -s $ident -i $id $args $template_file
+END
+	}
+	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";
 
 	# Print rules for building the FIFs.
 	print "\n";

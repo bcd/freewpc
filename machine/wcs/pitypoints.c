@@ -1,52 +1,62 @@
 
 #include <freewpc.h>
 
-void pity_rollover (void)
+
+CALLSET_ENTRY (pity, bonus)
 {
-	score (SC_2500);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_500MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_300MS);
+	sound_send (MUS_BONUS_BONG);
+	task_sleep (TIME_300MS);
+}
+
+CALLSET_ENTRY (pity, any_pf_switch)
+{
+	score (SC_730);
+}
+
+CALLSET_ENTRY (pity, sw_spinner_slow)
+{
+	score (SC_10K);
 }
 
 void pity_skill_lane (void)
 {
-	score (SC_2500);
 	sound_send (SND_WAIT_BELL);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_1)
 {
-	pity_rollover ();
 	sound_send (SND_DING1);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_2)
 {
-	pity_rollover ();
 	sound_send (SND_DING2);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_3)
 {
-	pity_rollover ();
 	sound_send (SND_DING3);
+	callset_invoke (any_rollover);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_4)
 {
-	pity_rollover ();
 	sound_send (SND_DING4);
+	callset_invoke (any_rollover);
 }
 
-CALLSET_ENTRY (pity, sw_skill_shot_front)
+CALLSET_ENTRY (pity, sw_shooter)
 {
-	pity_skill_lane ();
+	/* Sound only on the closed->open transition */
+	if (!switch_poll_logical (SW_SHOOTER))
+	{
+		sound_send (SND_PLUNGE);
+	}
 }
 
-CALLSET_ENTRY (pity, sw_skill_shot_center)
-{
-	pity_skill_lane ();
-}
-
-CALLSET_ENTRY (pity, sw_skill_shot_rear)
-{
-	pity_skill_lane ();
-}

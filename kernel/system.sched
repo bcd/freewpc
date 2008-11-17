@@ -33,7 +33,7 @@ fliptronic_rtt        2       250c
 triac_rtt             1       60c
 
 # Read the regular switch matrix and coin door
-switch_rtt/4          1       140c
+switch_rtt/2          1       280c
 
 # Update the PIC on security games
 pic_rtt               32      200c  # guess?
@@ -44,6 +44,7 @@ ac_rtt                1       23c
 # Update the solenoids.  Each bank of 8 is updated
 # once every 4ms (the 4 banks are alternated every 1ms).
 sol_update_rtt/4      1       60c
+sol_req_rtt           1       25c
 
 # Update the lamps
 lamp_rtt/4            2       111c

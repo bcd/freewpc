@@ -1,5 +1,5 @@
 #
-# Copyright 2007 by Brian Dominy <brian@oddchange.com>
+# Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
 # 
 # This file is part of FreeWPC.
 # 
@@ -19,4 +19,19 @@
 # 
 
 
-# Handle fast solenoids: slings and jets
+# Special solenoid drivers
+!left_sling_service       8     40c
+!right_sling_service      8     40c
+!left_jet_service         8     40c
+!upper_jet_service        8     40c
+!lower_jet_service        8     40c
+!kickback_driver_service  8     40c
+
+# Spinner drivers
+!spinner_service          8     40c
+
+# Duty drivers
+!gate_service             16    40c
+!spinning_ball_service    16    40c
+!goalie_service           16    40c
+

@@ -27,33 +27,6 @@
  * This module is mostly working but not incredibly robust.
  */
 
-#define AC_DOMESTIC_CYCLE 17
-#define AC_EXPORT_CYCLE 20
-
-/**
- * The different states of the zerocross circuit.
- */
-typedef enum {
-	/** At initialization, it is unknown if the zerocross circuit is
-	 * functional or not, or whether we are running on 50Hz or 60Hz
-	 * AC.  In this state, do not allow any solenoids/GI to be
-	 * controlled.
-	 */
-	ZC_INITIALIZING,
-
-	/** Set when the zerocross circuit is known to be working OK.
-	 * It can be used to perform lamp dimming and precise solenoid
-	 * timing.
-	 */
-	ZC_WORKING,
-
-	/** Set when the zerocross circuit is known to be broken.
-	 * It will not be used anymore.
-	 */
-	ZC_BROKEN,
-} zc_status_t;
-
-
 /**
  * The time since the last zerocross point, in IRQs/milliseconds.
  * This value is cleared whenever zerocross occurs and increments
@@ -64,7 +37,13 @@ __fastram__ U8 zc_timer;
 /**
  * The current status of the zerocross circuit.
  */
+#ifdef CONFIG_NO_ZEROCROSS
+#define zc_status ZC_BROKEN
+#define zc_set_status(x)
+#else
 zc_status_t zc_status;
+#define zc_set_status(x) zc_status = x
+#endif
 
 
 /**
@@ -83,10 +62,6 @@ U8 ac_expected_cycle_len;
 
 U8 ac_zerocross_errors;
 
-#ifdef DEBUG
-U8 ac_zerocross_histogram[5];
-#endif
-
 
 /**
  * Real-time function that checks to see if we are currently at a
@@ -101,37 +76,20 @@ void ac_rtt (void)
 		 * ZC_WORKING; if bad, switch to ZC_BROKEN. */
 	}
 
-	else if (unlikely (zc_status == ZC_BROKEN))
+	else if (likely (zc_status != ZC_BROKEN)
+		&& unlikely (wpc_read_ac_zerocross ()))
 	{
-	}
-
-	/* Otherwise, we must be in the WORKING state */
-	else if (unlikely (wpc_read_ac_zerocross ()))
-	{
-		/* We are currently at a zero crossing. */
-#ifdef DEBUG
-		/* Audit the time since the last zerocrossing. */
-		if (zc_timer < 7)
-		{
-			ac_zerocross_histogram[0]++;
-		}
-		else if (zc_timer > 9)
-		{
-			ac_zerocross_histogram[4]++;
-		}
-		else
-		{
-			ac_zerocross_histogram[zc_timer-6]++;
-		}
-#endif
-
+		/* Read the zerocross register, unless broken.
+		 * If we are currently at a zero crossing,
+		 * reset the timer. */
 handle_zero_crossing:;
 		/* Reset the timer */
 		zc_timer = 0;
 	}
 	else
 	{
-		/* We are not at a zero crossing. */
+		/* We are not at a zero crossing, or the hardware
+		 * is busted. */
 
 		/* Increment the crossing counter. */
 		zc_timer++;
@@ -139,6 +97,9 @@ handle_zero_crossing:;
 		{
 			/* We should have gotten a zero crossing by now, but
 			we didn't.  We'll just pretend we got one anyway. */
+			zc_timer = 0;
+
+#if 0
 			ac_zerocross_errors++;
 			if (ac_zerocross_errors < 5)
 			{
@@ -147,8 +108,9 @@ handle_zero_crossing:;
 			else
 			{
 				/* Nope, it's really broken.  Forget about it. */
-				zc_status = ZC_BROKEN;
+				zc_set_status (ZC_BROKEN);
 			}
+#endif
 		}
 	}
 }
@@ -161,7 +123,7 @@ void ac_init (void)
 	ac_zerocross_errors = 0;
 
 	/* Assume working AC/zerocross for now - TODO */
-	zc_status = ZC_WORKING;
+	zc_set_status (ZC_WORKING);
 	ac_expected_cycle_len = AC_DOMESTIC_CYCLE;
 }
 

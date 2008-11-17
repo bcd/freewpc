@@ -196,6 +196,7 @@ void system_reset_deff (void)
 
 	dbprintf ("System initialized.\n");
 	sys_init_complete++;
+	callset_invoke (init_complete);
 	deff_exit ();
 }
 
@@ -213,6 +214,7 @@ void system_reset (void)
 
 #ifdef FASTBOOT
 	sys_init_complete++;
+	callset_invoke (init_complete);
 #else
 	deff_start (DEFF_SYSTEM_RESET);
 #endif

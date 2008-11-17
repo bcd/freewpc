@@ -193,7 +193,8 @@ match_start (void)
 }
 
 
-CALLSET_ENTRY (match, sw_buyin_button)
+#if 0 /* for testing match */
+CALLSETX_ENTRY (match, sw_buyin_button)
 {
 	U8 p;
 	if (!in_game && !in_test)
@@ -210,4 +211,4 @@ CALLSET_ENTRY (match, sw_buyin_button)
 		match_start ();
 	}
 }
-
+#endif

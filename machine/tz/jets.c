@@ -26,26 +26,6 @@ U8 jet_sound_index;
 __local__ U8 jets_scored;
 __local__ U8 jets_for_bonus;
 
-__fastram__ S8 rtsol_left_jet;
-__fastram__ S8 rtsol_right_jet;
-__fastram__ S8 rtsol_bottom_jet;
-
-
-void jets_rtt (void)
-{
-	if (in_live_game)
-	{
-		rt_solenoid_update (&rtsol_left_jet,
-			SOL_LEFT_JET, SW_LEFT_JET, 8, 8);
-	
-		rt_solenoid_update (&rtsol_right_jet,
-			SOL_RIGHT_JET, SW_RIGHT_JET, 8, 8);
-	
-		rt_solenoid_update (&rtsol_bottom_jet,
-			SOL_LOWER_JET, SW_BOTTOM_JET, 8, 8);
-	}
-}
-
 
 CALLSET_ENTRY(jet, start_player)
 {

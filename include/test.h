@@ -170,6 +170,4 @@ __test__ void test_enter_button (void);
 __test__ void test_escape_button (void);
 __test__ void test_start_button (void);
 
-__test__ void switch_test_add_queue (U8 sw);
-
 #endif /* _TEST_H */

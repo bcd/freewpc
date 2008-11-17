@@ -52,5 +52,6 @@ int sim_switch_read (int sw)
 void sim_switch_init (void)
 {
 	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
+	linux_switch_matrix[9] = 0xFF;
 }
 

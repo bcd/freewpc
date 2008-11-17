@@ -1,0 +1,157 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Generic duty cycle driver
+ *
+ * This driver implements a device which is software-enabled
+ * and must be constantly on for long periods of time.  It
+ * supports duty cycling to avoid smoke :) and a fixed "on"
+ * time at enable.
+ *
+ * For space efficiency, all enables are 1-bit and packed into
+ * a single byte variable.  A maximum of 8 drivers can be
+ * supported.
+ */
+
+@@class duty
+@@parameter sol
+@@parameter ontime
+@@parameter duty_ontime
+@@parameter duty_offtime
+@@parameter timeout
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+extern __fastram__ U8 @class_enables;
+extern U8 @self_state;
+extern U8 @self_timer;
+extern U8 @self_cycles;
+
+
+extern inline void @self_enable (void)
+{
+	@class_enables |= (1 << @instance);
+}
+
+
+extern inline void @self_disable (void)
+{
+	@class_enables &= ~(1 << @instance);
+}
+
+
+extern inline bool @self_enabled_p (void)
+{
+	return @class_enables & (1 << @instance);
+}
+
+
+void @self_start (void);
+void @self_stop (void);
+
+/**
+ * Realtime update of a duty-cycled device.
+ */
+extern inline void @self_service (void)
+{
+	/* Only act if device is enabled */
+	if (@self_enabled_p ())
+	{
+		/* Alternate between on and off */
+		if (--@self_timer == 0)
+		{
+			if (@self_state)
+			{
+				/* Device is presently on, turn it off */
+				sol_disable (@sol);
+
+				/* If a timeout was declared, then see if
+				 * it should be auto-disabled. */
+				if (@timeout && --@self_cycles == 0)
+				{
+					@self_disable ();
+					return;
+				}
+				@self_state = 0;
+				@self_timer = @duty_offtime;
+			}
+			else
+			{
+				/* Device is presently off, turn it on */
+				sol_enable (@sol);
+				@self_state++;
+				@self_timer = @duty_ontime;
+			}
+		}
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+@@classvar __fastram__ U8 @class_enables;
+U8 @self_state;
+U8 @self_timer;
+U8 @self_cycles;
+
+
+void @self_start (void)
+{
+	@self_timer = @ontime;
+	@self_cycles = @timeout;
+	@self_state = 1;
+	disable_interrupts ();
+	sol_enable (@sol);
+	@self_enable ();
+	enable_interrupts ();
+}
+
+
+void @self_stop (void)
+{
+	disable_interrupts ();
+	@self_disable ();
+	sol_disable (@sol);
+	enable_interrupts ();
+}
+
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_disable ();
+}
+
+
+CALLSET_ENTRY (@self, stop_game)
+{
+	@self_stop ();
+}
+
+/* vim: set filetype=c: */
