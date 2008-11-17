@@ -562,7 +562,7 @@ void linux_asic_write (U16 addr, U8 val)
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_COIL_OUTPUT:
 			sim_sol_write (32, &linux_solenoid_outputs[4], val);
-#else
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
 #endif
@@ -728,7 +728,7 @@ U8 linux_asic_read (U16 addr)
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
 				return sim_switch_matrix_get ()[9];
-#else
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
 				return ~sim_switch_matrix_get ()[9];
 #endif
