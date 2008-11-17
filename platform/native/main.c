@@ -152,9 +152,11 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-
+/** The current simulated system time, in IRQs */
 unsigned long sim_jiffies = 0;
 
+/** Nonzero if simulating some bad hardware */
+unsigned long sim_badness = 0;
 
 
 /** A dummy function intended to be used for debugging under GDB. */
@@ -600,7 +602,9 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_DMD_FIRQ_ROW_VALUE:
-			/* Writing to this register has no effect */
+			/* Writing to this register has no effect in
+			simulation, because FIRQ is automatically asserted
+			to update the DMD occasionally. */
 			break;
 
 		case WPC_GI_TRIAC:
@@ -665,6 +669,9 @@ void linux_asic_write (U16 addr, U8 val)
 			wpc_sound_reset ();
 			break;
 
+		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
+			break;
+
 		default:
 			printf ("Error: unhandled I/O write to 0x%04X, val=0x%02X\n", addr, val);
 	}
@@ -726,6 +733,8 @@ U8 linux_asic_read (U16 addr)
 			return sim_switch_matrix_get ()[0];
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
+			/* The ASIC timer is not implemented, so this
+			always returns zero. */
 			return 0;
 
 #if (MACHINE_WPC95 == 1)
@@ -1172,9 +1181,9 @@ int main (int argc, char *argv[])
 	asciidmd_init ();
 
 	/* Set the hardware registers to their initial values. */
-	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
+	linux_asic_write (WPC_LAMP_COL_STROBE, 0);
 #if !(MACHINE_PIC == 1)
-	linux_asic_write (WPC_SW_COL_STROBE, 0x1);
+	linux_asic_write (WPC_SW_COL_STROBE, 0);
 #endif
 	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
@@ -1182,9 +1191,10 @@ int main (int argc, char *argv[])
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
-	for (sw = 0; sw < NUM_SWITCHES; sw++)
-		if (switch_is_opto (sw))
-			linux_switch_toggle (sw);
+	if (!sim_test_badness (SIM_BAD_NOOPTOPOWER))
+		for (sw = 0; sw < NUM_SWITCHES; sw++)
+			if (switch_is_opto (sw))
+				linux_switch_toggle (sw);
 
 	/* Close the coin door */
 	linux_switch_toggle (SW_COIN_DOOR_CLOSED);
@@ -1193,6 +1203,9 @@ int main (int argc, char *argv[])
 	protected_memory_load ();
 
 	/* Invoke the machine-specific simulation function */
+#ifdef CONFIG_MACHINE_SIMULATOR
+	(*CONFIG_MACHINE_SIMULATOR) ();
+#endif
 #ifdef MACHINE_TZ
 	linux_key_install ('s', SW_SLOT);
 	linux_key_install ('z', SW_PIANO);

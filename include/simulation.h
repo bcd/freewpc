@@ -89,5 +89,31 @@ void sim_time_step (void);
 void sim_watchdog_reset (void);
 void sim_watchdog_init (void);
 
+/* For simulation of broken hardware.  Each of these bit indicates an
+induced error condition that is created by the simulator, to see how
+the software handles it. */
+#define SIM_BAD_NOZEROCROSS   0x2
+#define SIM_BAD_NOOPTOPOWER   0x4
+#define SIM_BAD_NOSWITCHPOWER 0x8
+
+
+extern inline bool sim_test_badness (unsigned int err)
+{
+	extern unsigned long sim_badness;
+	return sim_badness & err;
+}
+
+extern inline bool sim_set_badness (unsigned long err)
+{
+	extern unsigned long sim_badness;
+	sim_badness |= err;
+}
+
+extern inline bool sim_clear_badness (unsigned long err)
+{
+	extern unsigned long sim_badness;
+	sim_badness &= ~err;
+}
+
 
 #endif /* _SIMULATION_H */

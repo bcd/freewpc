@@ -1,5 +1,6 @@
 
 #include <freewpc.h>
+#include <simulation.h>
 
 int show_switch_levels = 0;
 
@@ -20,6 +21,9 @@ U8 *sim_switch_matrix_get (void)
 void sim_switch_toggle (int sw)
 {
 	U8 level;
+
+	if (sim_test_badness (SIM_BAD_NOSWITCHPOWER))
+		return;
 
 	/* Update the current state of the switch */
 	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
