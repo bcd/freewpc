@@ -47,7 +47,7 @@ typedef const U8 *const_bitset;
 	(bitarray_const_offset (bits, bitno) &= ~bitarray_const_mask (bits, bitno))
 
 #define bitarray_const_toggle(bits, bitno) \
-	(bitarray_const_offset (bits, bitno) ^= ~bitarray_const_mask (bits, bitno))
+	(bitarray_const_offset (bits, bitno) ^= bitarray_const_mask (bits, bitno))
 
 #define bitarray_const_test(bits, bitno) \
 	(bitarray_const_offset (bits, bitno) & bitarray_const_mask (bits, bitno))

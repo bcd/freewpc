@@ -43,9 +43,9 @@ extern inline U16 far_read16 (U16 *address, U8 page)
 	return *address;
 }
 
-extern inline U16 far_read_pointer (PTR_OR_U16 *address, U8 page)
+extern inline void *far_read_pointer (PTR_OR_U16 *address, U8 page)
 {
-	return *address;
+	return *(void **)address;
 }
 
 typedef void (*void_function) (void);

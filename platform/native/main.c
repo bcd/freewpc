@@ -63,26 +63,17 @@ extern void sim_switch_init (void);
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
 
-/** An array of DMD page buffers */
-U8 linux_dmd_pages[DMD_PAGE_COUNT][DMD_PAGE_SIZE];
-
 /** A pointer to the low DMD page */
 U8 *linux_dmd_low_page;
 
 /** A pointer to the high DMD page */
 U8 *linux_dmd_high_page;
 
-/** A pointer to the visible DMD page */
-U8 *linux_dmd_visible_page;
-
 /** The simulated lamp matrix outputs. */
 U8 linux_lamp_matrix[NUM_LAMP_COLS];
 
 /** The simulated solenoid outputs */
 U8 linux_solenoid_outputs[SOL_COUNT / 8];
-
-/** The simulated flipper inputs */
-U8 linux_flipper_inputs;
 
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
@@ -96,6 +87,8 @@ bool linux_firq_enable;
 /** When zero, at a zero cross reading; otherwise, the amount of time
  * until the next zerocross */
 int simulated_zerocross;
+
+volatile int sim_debug_init = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -115,7 +108,7 @@ time_t linux_boot_time;
 /** The status of the CPU board LEDs */
 U8 linux_cpu_leds;
 
-U8 simulated_orkin_control_port = 0x1;
+volatile U8 simulated_orkin_control_port = WPC_DEBUG_WRITE_READY;
 
 U8 simulated_orkin_data_port = 0x0;
 
@@ -569,7 +562,7 @@ void linux_asic_write (U16 addr, U8 val)
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_COIL_OUTPUT:
 			sim_sol_write (32, &linux_solenoid_outputs[4], val);
-#else
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
 			sim_sol_write (32, &linux_solenoid_outputs[4], ~val);
 #endif
@@ -592,15 +585,15 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_DMD_LOW_PAGE:
-			linux_dmd_low_page = linux_dmd_pages[val];
+			asciidmd_map_page (0, val);
 			break;
 
 		case WPC_DMD_HIGH_PAGE:
-			linux_dmd_high_page = linux_dmd_pages[val];
+			asciidmd_map_page (1, val);
 			break;
 
 		case WPC_DMD_ACTIVE_PAGE:
-			linux_dmd_visible_page = linux_dmd_pages[val];
+			asciidmd_set_visible (val);
 			break;
 
 		case WPC_DMD_FIRQ_ROW_VALUE:
@@ -717,7 +710,7 @@ U8 linux_asic_read (U16 addr)
 		case WPC_SW_ROW_INPUT:
 #ifdef MACHINE_TZ
 			if (col9_enabled)
-				return sim_switch_matrix_get ()[9];
+				return sim_switch_matrix_get ()[9]; /* TODO - not right */
 			else
 #endif
 				return *linux_switch_data_ptr;
@@ -734,10 +727,11 @@ U8 linux_asic_read (U16 addr)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
-#else
+				return sim_switch_matrix_get ()[9];
+#elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
+				return ~sim_switch_matrix_get ()[9];
 #endif
-			return ~linux_flipper_inputs;
 
 		case WPC_ROM_BANK:
 			return 0;
@@ -904,7 +898,10 @@ static void linux_interface_thread (void)
 		{
 			/* Except tilde turns it off as usual. */
 			if (*inbuf == '`')
+			{
+				simlog (SLC_DEBUG, "Input directed to switch matrix.");
 				simulator_keys ^= 1;
+			}
 			else if ((simulated_orkin_control_port & WPC_DEBUG_READ_READY) == 0)
 			{
 				simulated_orkin_control_port |= WPC_DEBUG_READ_READY;
@@ -964,9 +961,8 @@ static void linux_interface_thread (void)
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
 				and as input into the runtime debugger. */
-				simlog (SLC_DEBUG, "Simulator switches are %s\n",
-					simulator_keys ? "enabled" : "disabled");
 				simulator_keys ^= 1;
+				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
 				break;
 				
 			case '\x1b':
@@ -1099,6 +1095,8 @@ int main (int argc, char *argv[])
 	switchnum_t sw;
 
 	/* Parse command-line arguments */
+	linux_output_stream = stdout;
+
 	while (argn < argc)
 	{
 		const char *arg = argv[argn++];
@@ -1142,6 +1140,10 @@ int main (int argc, char *argv[])
 		{
 			pic_machine_number = strtoul (argv[argn++], NULL, 0);
 		}
+		else if (!strcmp (arg, "--debuginit"))
+		{
+			sim_debug_init = 1;
+		}
 		else
 		{
 			printf ("invalid argument %s\n", arg);
@@ -1158,7 +1160,6 @@ int main (int argc, char *argv[])
 	 * the reset vector is invoked. */
 	linux_irq_enable = linux_firq_enable = TRUE;
 	linux_irq_pending = 0;
-	linux_output_stream = stdout;
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
 	simulated_zerocross = 0;
@@ -1166,6 +1167,7 @@ int main (int argc, char *argv[])
 	simulation_pic_init ();
 #endif
 	sim_watchdog_init ();
+	asciidmd_init ();
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0x1);
@@ -1181,6 +1183,9 @@ int main (int argc, char *argv[])
 	for (sw = 0; sw < NUM_SWITCHES; sw++)
 		if (switch_is_opto (sw))
 			linux_switch_toggle (sw);
+
+	/* Force always closed */
+	linux_switch_toggle (SW_ALWAYS_CLOSED);
 
 	/* Close the coin door */
 	linux_switch_toggle (SW_COIN_DOOR_CLOSED);
@@ -1199,6 +1204,9 @@ int main (int argc, char *argv[])
 #endif
 
 	/* Jump to the reset function */
+	while (sim_debug_init)
+		usleep (10000);
+
 	freewpc_init ();
 	return 0;
 }

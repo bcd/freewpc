@@ -28,81 +28,103 @@
 #include <diag.h>
 
 
-diag_error_code_t diag_error_list[MAX_DIAG_ERRORS];
-
 U8 diag_error_count;
 
+/** Nonzero if diagnostic errors should be announced
+ * as they are found */
+U8 diag_announce_flag;
 
+
+/**
+ * Return the number of diagnostic errors.
+ */
 U8
 diag_get_error_count (void)
 {
 	return diag_error_count;
 }
 
-#ifdef NOT_IMPL
-void
-diag_post_error (diag_error_code_t errcode)
-{
-	if (diag_error_count < MAX_DIAG_ERRORS)
-		diag_error_list[diag_error_count++] = errcode;
-}
 
+/**
+ * Called by a diagnostic to report an error.
+ * messenger is a callback function for rendering
+ * the text of the error message.
+ */
 void
-diag_post_fatal_error (diag_error_code_t errcode)
+diag_post_error (void_function messenger)
 {
-}
-
-
-void
-diag_test_cpu (void)
-{
-}
-
-void
-diag_test_ram (void)
-{
-}
-
-void
-diag_test_rom (void)
-{
-}
-
-void
-diag_test_wpc (void)
-{
+	diag_error_count++;
+	if (diag_announce_flag && messenger)
+	{
+		if (diag_error_count == 1)
+		{
+		}
+		dmd_alloc_low_clean ();
+		messenger ();
+		dmd_show_low ();
+		task_sleep_sec (3);
+	}
 }
 
 
-void
-diag_report_errors (void)
-{
-}
-
-#endif
-
+/**
+ * Rerun all of the diagnostic tests.
+ */
 void
 diag_run (void)
 {
+	/* Reset the error count */
 	diag_error_count = 0;
 
-#ifdef NOT_IMPL
-#if 0
-	diag_post_error (DIAG_NOT_IMPLEMENTED);
-#endif
-	diag_test_cpu ();
-	diag_test_ram ();
-	diag_test_rom ();
-	diag_test_wpc ();
-#endif
+	/* Invoke each of the diagnostics */
+	callset_invoke (diagnostic_check);
 }
 
 
-CALLSET_ENTRY (diag, init)
+CALLSET_ENTRY (diag, init_complete)
 {
+	diag_announce_flag = 0;
 	diag_run ();
-	if (diag_get_error_count () > 0)
+	if (diag_error_count > 0)
 	{
+		U8 n;
+		dmd_alloc_low_high ();
+		dmd_clean_page_low ();
+		dmd_clean_page_high ();
+		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
+		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
+		for (n = 0; n < 5; n++)
+		{
+			task_sleep (TIME_200MS);
+			dmd_show_high ();
+			task_sleep (TIME_200MS);
+			dmd_show_low ();
+			sound_send (SND_TEST_ALERT);
+		}
+		task_sleep_sec (1);
 	}
 }
+
+
+CALLSET_ENTRY (diag, test_start)
+{
+	diag_announce_flag = 1;
+	diag_run ();
+}
+
+
+#if 0
+
+void diag_test_error (void)
+{
+	sprintf ("SAMPLE ERROR");
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+}
+
+CALLSETX_ENTRY (diag, diagnostic_check)
+{
+	diag_post_error (diag_test_error);
+}
+
+#endif
 

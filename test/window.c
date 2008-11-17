@@ -163,6 +163,11 @@ void window_redraw (void)
 /** Push a new window onto the stack */
 void window_push (struct window_ops *ops, void *priv)
 {
+	/* Delay a bit since this is called directly from
+	 * a switch context which may have already taken some
+	 * time.  The redraw below can be especially taxing. */
+	task_sleep (TIME_16MS);
+
 	window_stop_thread ();
 	if (win_top == NULL)
 	{
@@ -1934,7 +1939,7 @@ struct menu memory_editor_item = {
 /**********************************************************************/
 
 struct menu *dev_menu_items[] = {
-#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
+#if defined(MACHINE_DMD)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
@@ -1954,7 +1959,9 @@ struct menu *dev_menu_items[] = {
 #if (MACHINE_PIC == 1)
 	&pic_test_item,
 #endif
+#ifndef CONFIG_NATIVE
 	&memory_editor_item,
+#endif
 	NULL,
 };
 

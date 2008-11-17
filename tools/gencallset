@@ -192,6 +192,11 @@ foreach $src (@srclist) {
 				print "warning: $src:$lineno: ignoring invocation of '$1'\n";
 			}
 		}
+		elsif (/CALLSET_SECTION[ \t]*\((.*)\)/) {
+			my $callset_section_args = $1;
+			my ($module, $section) = split /, */, $callset_section_args;
+			$modulesection{$module} = $section;
+		}
 	}
 	close FH;
 }
@@ -234,10 +239,14 @@ foreach $set (keys %functionhash) {
 	}
 
 	foreach $module (@modules) {
-		if ($modulehash{$module} =~ /^test/) {
+		if (defined $modulesection{$module}) {
+			$modifier = " " . $modulesection{$module};
+		}
+		elsif ($modulehash{$module} =~ /^test/) {
 			$modifier = " __test__";
 		}
 		elsif ($modulehash{$module} =~ /^common/) {
+			print FH "   /* warning: $module does not declare its section */\n";
 			$modifier = " __common__";
 		}
 		elsif ($modulehash{$module} =~ /^mach/) {

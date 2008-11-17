@@ -422,6 +422,12 @@ void volume_set (U8 vol)
 }
 
 
+CALLSET_ENTRY (sound, factory_reset)
+{
+	volume_set (DEFAULT_VOLUME);
+}
+
+
 /** Decrease the master volume */
 CALLSET_ENTRY (sound, volume_down)
 {

@@ -125,7 +125,7 @@ extern U8 idle_ok;
 #else
 
 #define __blockcopy16(s1,s2,n) memcpy(s1,s2,n)
-#define __blockclear16(s,n) memset(s,'0',n)
+#define __blockclear16(s,n) memset(s,0,n)
 
 #include <stdio.h>
 #include <string.h>

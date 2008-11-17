@@ -53,6 +53,7 @@ struct adjustment_value collection_text_value = { CUR_DOLLAR, CUR_DM, 1,
 	collection_text_render };
 struct adjustment_value printer_type_value = { 0, 4, 1, printer_type_render };
 struct adjustment_value baud_rate_value = { 0, 5, 1, baud_rate_render };
+struct adjustment_value lines_per_page_value = { 22, 80, 1, decimal_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -201,9 +202,17 @@ struct adjustment hstd_adjustments[] = {
 };
 
 
+#ifdef CONFIG_NATIVE
+#define DEFAULT_COL_WIDTH 50
+#define DEFAULT_LINES_PER_PAGE 40
+#else
+#define DEFAULT_COL_WIDTH 72
+#define DEFAULT_LINES_PER_PAGE 60
+#endif
 struct adjustment printer_adjustments[] = {
-	{ "COLUMN WIDTH", &integer_value, 72, &printer_config.column_width },
-	{ "LINES PER PAGE", &integer_value, 60, &printer_config.lines_per_page },
+	{ "COLUMN WIDTH", &integer_value, DEFAULT_COL_WIDTH, &printer_config.column_width },
+	{ "LINES PER PAGE", &lines_per_page_value, DEFAULT_LINES_PER_PAGE,
+		&printer_config.lines_per_page },
 	{ "PAUSE EVERY PAGE", &yes_no_value, NO, &printer_config.pause_every_page },
 	{ "PRINTER TYPE", &printer_type_value, 0, &printer_config.printer_type },
 	{ "SERIAL BAUD RATE", &baud_rate_value, 0, &printer_config.serial_baud_rate },
