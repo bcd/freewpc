@@ -103,13 +103,13 @@ extern inline bool sim_test_badness (unsigned int err)
 	return sim_badness & err;
 }
 
-extern inline bool sim_set_badness (unsigned long err)
+extern inline void sim_set_badness (unsigned long err)
 {
 	extern unsigned long sim_badness;
 	sim_badness |= err;
 }
 
-extern inline bool sim_clear_badness (unsigned long err)
+extern inline void sim_clear_badness (unsigned long err)
 {
 	extern unsigned long sim_badness;
 	sim_badness &= ~err;
