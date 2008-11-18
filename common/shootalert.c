@@ -51,7 +51,7 @@ CALLSET_ENTRY (shootalert, start_ball)
 }
 
 
-CALLSET_ENTRY (shootalert, ball_in_play)
+CALLSET_ENTRY (shootalert, valid_playfield)
 {
 	task_kill_gid (GID_SHOOT_ALERT);
 	deff_stop (DEFF_PLUNGE_BALL);
