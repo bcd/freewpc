@@ -35,6 +35,42 @@ U8 diag_error_count;
 U8 diag_announce_flag;
 
 
+void
+diag_message_start (void)
+{
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
+}
+
+
+void
+diag_message_flash (void)
+{
+	U8 n;
+	dmd_clean_page_high ();
+	for (n = 0; n < 5; n++)
+	{
+		task_sleep (TIME_200MS);
+		dmd_show_high ();
+		task_sleep (TIME_100MS);
+		dmd_show_low ();
+		sound_send (SND_TEST_ALERT);
+	}
+	task_sleep_sec (1);
+	barrier ();
+}
+
+
+void
+diag_message_scroll (void)
+{
+	dmd_sched_transition (&trans_scroll_left);
+	dmd_show_low ();
+	task_sleep_sec (3);
+	barrier ();
+}
+
+
 /**
  * Return the number of diagnostic errors.
  */
@@ -51,80 +87,88 @@ diag_get_error_count (void)
  * the text of the error message.
  */
 void
-diag_post_error (void_function messenger)
+diag_post_error (const char *message1, const char *message2)
 {
 	diag_error_count++;
-	if (diag_announce_flag && messenger)
+	if (diag_announce_flag)
 	{
 		if (diag_error_count == 1)
 		{
+			diag_message_start ();
+			font_render_string_center (&font_mono5, 64, 6, "TEST REPORT...");
+			diag_message_flash ();
 		}
-		dmd_alloc_low_clean ();
-		messenger ();
-		dmd_show_low ();
-		task_sleep_sec (3);
+		diag_message_start ();
+		if (message2)
+		{
+			font_render_string_center (&font_mono5, 64, 10, message1);
+			font_render_string_center (&font_mono5, 64, 20, message2);
+		}
+		else
+		{
+			font_render_string_center (&font_mono5, 64, 16, message1);
+		}
+		diag_message_scroll ();
 	}
+}
+
+
+/**
+ * Go through all of the diags.
+ */
+void
+diag_run_task (void)
+{
+	dbprintf ("Running diags...");
+	diag_error_count = 0;
+	callset_invoke (diagnostic_check);
+	dbprintf ("%d errors.\n", diag_error_count);
+
+	if ((diag_announce_flag == 0) && (diag_error_count > 0))
+	{
+		diag_message_start ();
+		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
+		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
+		diag_message_flash ();
+	}
+
+	task_exit ();
 }
 
 
 /**
  * Rerun all of the diagnostic tests.
  */
-void
+static void
 diag_run (void)
 {
-	/* Reset the error count */
-	diag_error_count = 0;
-
-	/* Invoke each of the diagnostics */
-	callset_invoke (diagnostic_check);
+	/* Create in a separate task context, to avoid
+	 * stack overflow problems. */
+	task_pid_t tp = task_recreate_gid (GID_DIAG_RUNNING, diag_run_task);
+	while (task_find_gid (GID_DIAG_RUNNING))
+		task_sleep (TIME_100MS);
+	barrier ();
 }
 
 
+/**
+ * At the end of initialization, run the diagnostics
+ * and announce on one screen if there are any errors.
+ */
 CALLSET_ENTRY (diag, init_complete)
 {
 	diag_announce_flag = 0;
 	diag_run ();
-	if (diag_error_count > 0)
-	{
-		U8 n;
-		dmd_alloc_low_high ();
-		dmd_clean_page_low ();
-		dmd_clean_page_high ();
-		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
-		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
-		for (n = 0; n < 5; n++)
-		{
-			task_sleep (TIME_200MS);
-			dmd_show_high ();
-			task_sleep (TIME_200MS);
-			dmd_show_low ();
-			sound_send (SND_TEST_ALERT);
-		}
-		task_sleep_sec (1);
-	}
 }
 
 
+/**
+ * On entry to test mode, run the diagnostics and
+ * read the errors one-by-one.
+ */
 CALLSET_ENTRY (diag, test_start)
 {
 	diag_announce_flag = 1;
 	diag_run ();
 }
-
-
-#if 0
-
-void diag_test_error (void)
-{
-	sprintf ("SAMPLE ERROR");
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-}
-
-CALLSETX_ENTRY (diag, diagnostic_check)
-{
-	diag_post_error (diag_test_error);
-}
-
-#endif
 
