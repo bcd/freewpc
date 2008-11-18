@@ -93,4 +93,15 @@ do { \
 #define dbprintf(format, rest...)
 #endif /* DEBUGGER */
 
+/**
+ * interrupt_dbprintf() can be used in IRQ handlers.
+ * This is never safe to do on real hardware, but it can be useful
+ * for debugging in simuation.
+ */
+#ifdef CONFIG_NATIVE
+#define interrupt_dbprintf dbprintf
+#else
+#define interrupt_dbprintf(format, rest...)
+#endif
+
 #endif /* _PRINTF_H */

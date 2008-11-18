@@ -400,6 +400,7 @@ void do_firq (void)
 
 		/* If we were using the timer, we would process the interrupt
 		here... */
+		interrupt_dbprintf ("Timer interrupt.\n");
 	}
 	else
 	{

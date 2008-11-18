@@ -95,6 +95,7 @@ void ac_rtt (void)
 		{
 			/* We should have gotten a zero crossing by now, but
 			we didn't.  We'll just pretend we got one anyway. */
+			interrupt_dbprintf ("ZC failure?\n");
 			zc_timer = 0;
 
 #if 0
