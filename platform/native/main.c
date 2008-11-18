@@ -1063,8 +1063,7 @@ void linux_trough_init (int balls)
 		for (i=trough_props->sw_count-1; i >= 0 && balls; i--, balls--)
 		{
 			U8 sw = trough_props->sw[i];
-			simlog (SLC_DEBUG, "Loading trough switch %d", sw);
-			linux_switch_toggle (sw);
+			sim_ball_move (i, sw);
 		}
 	}
 #endif
@@ -1207,6 +1206,10 @@ int main (int argc, char *argv[])
 
 	/* Load the protected memory area */
 	protected_memory_load ();
+
+	/* Initialize the simulated ball tracker */
+	sim_ball_init ();
+	signal_init ();
 
 	/* Invoke the machine-specific simulation function */
 #ifdef CONFIG_MACHINE_SIMULATOR

@@ -36,6 +36,7 @@ WINDOW *switch_win;
 WINDOW *task_win;
 WINDOW *sound_win;
 WINDOW *asciidmd_win;
+WINDOW *ball_tracker_win;
 
 
 #define TEXTDMD_WIDTH 32
@@ -208,6 +209,16 @@ void ui_refresh_asciidmd (unsigned char *data)
 }
 
 
+void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
+{
+	extern const char *sim_ball_location_name (unsigned int location);
+	wmove (ball_tracker_win, ballno+1, 1);
+	wprintw (ball_tracker_win, "%d: %s", ballno,
+		sim_ball_location_name (location));
+	wrefresh (ball_tracker_win);
+}
+
+
 void ui_init (void)
 {
 	initscr ();
@@ -237,6 +248,9 @@ void ui_init (void)
 #ifdef TEXTDMD
 	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
 #endif
+
+	ball_tracker_win = ui_window_create (16, 8, x, y, " Ball Tracker ");
+	x += 16 + 2;
 
 	y += 10 + 1;
 	x = 0;

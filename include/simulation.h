@@ -80,6 +80,7 @@ void ui_write_switch (int, int);
 void ui_write_sound_call (unsigned int x);
 void ui_write_dmd_text (int x, int y, const char *text);
 void ui_clear_dmd_text (int n);
+void ui_update_ball_tracker (unsigned int ballno, unsigned int location);
 void ui_exit (void);
 
 
