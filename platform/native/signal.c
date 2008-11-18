@@ -25,7 +25,7 @@ typedef struct signal_readings
  * An array of readings, indexed by signal number.
  * Each entry is a linked list of 256-reading chunks;
  */
-signal_readings_t *signal_readings[MAX_READINGS] = { NULL, };
+signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
 
 
 signal_readings_t *signal_chunk_alloc (void)
