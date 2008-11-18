@@ -135,7 +135,6 @@ char enhanced_pixel_ascii (unsigned int pixel)
 void bitmap_write_ascii (struct buffer *buf, FILE *fp)
 {
 	unsigned int x, y;
-	unsigned int color;
 
 	if (buf->height * buf->width < buf->len)
 	{
@@ -711,6 +710,7 @@ struct buffer *bitmap_paste (struct buffer *dst, struct buffer *src,
 				bitmap_draw_pixel (dst, sx + xoff, sy + yoff);
 		}
 	}
+	return dst;
 }
 
 
@@ -730,6 +730,7 @@ struct buffer *bitmap_tile (struct buffer *dst, struct buffer *src)
 			bitmap_draw_pixel (dst, dx, dy);
 		}
 	}
+	return dst;
 }
 
 

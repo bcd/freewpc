@@ -82,8 +82,6 @@ void ac_rtt (void)
 		/* Read the zerocross register, unless broken.
 		 * If we are currently at a zero crossing,
 		 * reset the timer. */
-handle_zero_crossing:;
-		/* Reset the timer */
 		zc_timer = 0;
 	}
 	else
