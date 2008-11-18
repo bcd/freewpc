@@ -63,9 +63,10 @@ extern inline void score_update_request (void)
 }
 
 
-__common__ void scores_draw (void);
-__common__ void scores_draw_ball (void);
-__common__ void scores_draw_current (U8 skip_player);
+__effect__ void scores_draw (void);
+__effect__ void scores_draw_ball (void);
+__effect__ void scores_draw_current (U8 skip_player);
+
 void score_zero (score_t s);
 void score_add (score_t s1, const score_t s2);
 void score_add_byte (score_t s1, U8 offset, bcd_t val);

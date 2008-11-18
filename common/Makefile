@@ -11,7 +11,6 @@ COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/ballsave.o)
 COMMON_BASIC_OBJS +=	common/coin.o
 COMMON_BASIC_OBJS +=	common/db.o
 COMMON_BASIC_OBJS +=	common/event-audit.o
-COMMON_BASIC_OBJS +=	common/flash.o
 COMMON_BASIC_OBJS +=	common/flipcode.o
 COMMON_BASIC_OBJS +=	common/initials.o
 COMMON_BASIC_OBJS +=	common/leffs.o
@@ -25,7 +24,6 @@ COMMON_BASIC_OBJS +=	common/printer.o
 COMMON_BASIC_OBJS +=	common/reset.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/rtc.o)
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/service.o)
-COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/score_deff.o)
 COMMON_BASIC_OBJS +=	common/shootalert.o
 COMMON_BASIC_OBJS +=	common/tilt.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WHITESTAR),,common/tournament.o)
@@ -62,4 +60,6 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # Effect objects contain common display and lamp effects, and are
 # separated out for the same reason.
 EFFECT_OBJS += $(if $(CONFIG_DMD), common/effect.o)
+EFFECT_OBJS +=	common/flash.o
+EFFECT_OBJS +=	$(if $(CONFIG_PLAYABLE), common/score_deff.o)
 EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)
