@@ -614,10 +614,10 @@ $(BLDDIR)/blankpage.bin: $(SR)
 #
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR) $(BLDDIR)/$(MAP_FILE)
 	$(Q)echo "Checking for overflow..." && tools/mapcheck $(BLDDIR)/$(MAP_FILE)
-	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_sysrom) -l $(SYSROM_SIZE) -f 0xFF $<
+	$(Q)$(SR) -o $@ -s $(AREA_sysrom) -l $(SYSROM_SIZE) -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)
-	$(Q)echo "Converting $< to binary ..." && $(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
+	$(Q)$(SR) -o $@ -s $(AREA_paged) -l $(AREASIZE_paged) -f 0xFF $<
 
 
 #
@@ -682,8 +682,7 @@ OBJ_PAGE_LIST = $(foreach obj,$(filter-out $(1:.lnk=.o),$(SYSTEM_OBJS) $(PAGED_O
 DUP_PAGE_OBJ = $1
 
 $(PAGED_LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
-	$(Q)echo Creating linker command file $@ ... ;\
-	rm -f $@ ;\
+	$(Q)rm -f $@ ;\
 	echo "-xswz" >> $@ ;\
 	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $@ ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
@@ -714,8 +713,7 @@ $(BLDDIR)/page%.s:
 # How to make the linker command file for the system section.
 #
 $(LINKCMD) : $(MAKE_DEPS) $(PMAKEFILE)
-	$(Q)echo Creating linker command file $@ ... ;\
-	rm -f $(LINKCMD) ;\
+	$(Q)rm -f $(LINKCMD) ;\
 	echo "-mxswz" >> $(LINKCMD) ;\
 	( $(foreach area,$(AREA_LIST),echo -b $(area) = $(AREA_$(area));) ) >> $(LINKCMD) ;\
 	for f in `echo $(PAGED_SECTIONS)`; \
