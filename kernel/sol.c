@@ -376,32 +376,18 @@ extern inline void sol_update_fliptronic_powered (void)
 }
 
 
-/** Realtime update of the high power solenoids */
+/** Realtime update of the first set of flasher outputs */
 void sol_update_rtt_0 (void)
 {
-	sol_update_set (0);
-}
-
-
-/** Realtime update of the low power solenoids */
-void sol_update_rtt_1 (void)
-{
-	sol_update_set (1);
+	sol_update_set (2);
 #if (MACHINE_FLIPTRONIC == 1)
 	sol_update_fliptronic_powered ();
 #endif
 }
 
 
-/** Realtime update of the first set of flasher outputs */
-void sol_update_rtt_2 (void)
-{
-	sol_update_set (2);
-}
-
-
 /** Realtime update of the second set of flasher outputs */
-void sol_update_rtt_3 (void)
+void sol_update_rtt_1 (void)
 {
 	sol_update_set (3);
 #ifdef MACHINE_SOL_EXTBOARD1
