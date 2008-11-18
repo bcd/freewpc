@@ -86,13 +86,13 @@ void match_running_deff (void)
 
 		dmd_alloc_low_clean ();
 
-		font_render_string_left (&font_var5, 1, 9, "YARDS");
+		font_render_string_left (&font_var5, 1, 11, "YARDS");
 		sprintf ("%d", yards_to_go);
-		font_render_string_left (&font_fixed10, 1, 16, sprintf_buffer);
+		font_render_string_left (&font_fixed10, 4, 18, sprintf_buffer);
 
-		font_render_string_right (&font_var5, 1, 9, "GOALS");
+		font_render_string_right (&font_var5, 127, 11, "GOALS");
 		sprintf ("%d", match_goals_scored);
-		font_render_string_right (&font_fixed10, 127, 16, sprintf_buffer);
+		font_render_string_right (&font_fixed10, 122, 18, sprintf_buffer);
 
 		sprintf_current_score ();
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
