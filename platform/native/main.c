@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -21,7 +21,7 @@
 /**
  * \file
  * \brief Entry point to the builtin simulator for the WPC hardware.
- * 
+ *
  * When CONFIG_NATIVE is defined at build time, access to WPC I/O registers
  * is redirected to function calls here that simulate the behavior.  This
  * allows FreeWPC to be tested directly on a Linux or Windows development machine,
@@ -191,7 +191,7 @@ void simlog (enum sim_log_class class, const char *format, ...)
 			case SLC_SOUNDCALL: class_code = 'S'; break;
 			default: return;
 		}
-	
+
 		fputc (class_code, ofp);
 		(void)vfprintf (ofp, format, ap);
 		fputc ('\n', ofp);
@@ -448,7 +448,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 
 			/* See if it's the outhole kicker */
 #if defined(MACHINE_OUTHOLE_SWITCH) && defined(DEVNO_TROUGH)
-			if (solno == SOL_OUTHOLE && 
+			if (solno == SOL_OUTHOLE &&
 				linux_switch_poll_logical (MACHINE_OUTHOLE_SWITCH))
 			{
 				/* Simulate kicking the ball off the outhole into the trough */
@@ -458,7 +458,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 			}
 			else
 #endif
-	
+
 			/* See if it's attached to a device.  Then find the first
 			switch that is active, and deactivate it, simulating the
 			removal of one ball from the device.  (This does not map
@@ -700,7 +700,7 @@ U8 linux_asic_read (U16 addr)
 			/* The time-of-day registers return the system time of the
 			simulator itself. */
 			time_t now = time (NULL);
-			int minutes_on = 
+			int minutes_on =
 				(now - linux_boot_time) * linux_irq_multiplier / 60;
 			if (addr == WPC_CLK_HOURS_DAYS)
 				return minutes_on / 60;
@@ -969,7 +969,7 @@ static void linux_interface_thread (void)
 #else
 				linux_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
 #endif /* MACHINE_OUTHOLE_SWITCH */
-#endif	
+#endif
 				break;
 
 			case '`':
@@ -978,7 +978,7 @@ static void linux_interface_thread (void)
 				simulator_keys ^= 1;
 				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
 				break;
-				
+
 			case '\x1b':
 				linux_shutdown ();
 				break;
@@ -999,7 +999,7 @@ static void linux_interface_thread (void)
 				if (inbuf[0] == 'D')
 					sw = inbuf[1] - '1';
 				else if (inbuf[0] == 'F')
-					sw = (inbuf[1] - '1') 
+					sw = (inbuf[1] - '1')
 						+ NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES;
 				else
 					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
@@ -1039,7 +1039,7 @@ static void linux_interface_thread (void)
 						linux_switch_depress (sw);
 				}
 				else
-					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)", 
+					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
 						*inbuf, *inbuf);
 			}
 	}
