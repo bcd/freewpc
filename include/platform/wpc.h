@@ -690,6 +690,20 @@ extern inline void pinio_write_triac (U8 val)
 	writeb (WPC_GI_TRIAC, val);
 }
 
+/********************************************/
+/* Precision Timer                          */
+/********************************************/
+
+extern inline U8 pinio_read_timer (unsigned int timerno)
+{
+	return readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR);
+}
+
+extern inline void pinio_write_timer (unsigned int timerno, U8 val)
+{
+	writeb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, val);
+}
+
 
 #endif /* _WPC_H */
 
