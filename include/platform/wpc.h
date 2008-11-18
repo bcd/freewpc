@@ -694,12 +694,12 @@ extern inline void pinio_write_triac (U8 val)
 /* Precision Timer                          */
 /********************************************/
 
-extern inline U8 pinio_read_timer (unsigned int timerno)
+extern inline U8 pinio_read_timer (U8 timerno)
 {
 	return readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR);
 }
 
-extern inline void pinio_write_timer (unsigned int timerno, U8 val)
+extern inline void pinio_write_timer (U8 timerno, U8 val)
 {
 	writeb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, val);
 }
