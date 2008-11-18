@@ -425,7 +425,7 @@ void switch_sched_task (void)
 	 * not presently in a game */
 	if ((swinfo->flags & SW_IN_GAME) && !in_game)
 	{
-		dbprintf ("Not handling switch because not in game\n");
+		dbprintf ("Ignore: no game\n");
 		goto cleanup;
 	}
 
@@ -433,7 +433,7 @@ void switch_sched_task (void)
 	 * actually in test mode */
 	if (!(swinfo->flags & SW_IN_TEST) && in_test)
 	{
-		dbprintf ("Not handling switch because in test mode\n");
+		dbprintf ("Ignore: not in test\n");
 		goto cleanup;
 	}
 
@@ -610,12 +610,12 @@ void switch_service_queue (void)
 		entry = &switch_queue[i];
 		if (likely (entry->id != 0xFF))
 		{
-			dbprintf ("Servicing queued SW%d: ", entry->id);
+			dbprintf ("Service SW%d: ", entry->id);
 			entry->timer -= elapsed_time;
 			if (entry->timer <= 0)
 			{
 				/* Debounce is fully complete. */
-				dbprintf ("debounce complete\n");
+				dbprintf ("debounced\n");
 				switch_queue_remove (entry);
 				switch_transitioned (entry->id);
 			}
