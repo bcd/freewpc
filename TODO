@@ -11,7 +11,9 @@ Poor Design
 * Use the new bitmap functions to draw the switch matrix in test.
 * Replace FIF with something more intelligent.
 * Move printf and game state machine code out of the system page.
-* Deal with common page getting full.
+* Deal with common page getting full. (Started)
+* Get rid of RTTs for high/low solenoid banks that are all pulsed now,
+and reclaim sol_timers[] direct spots.
 
 Missing Feature
 * Lamp power saver level
@@ -47,7 +49,6 @@ Nice to Have
 * Score sweeping for player up
 * ./kernel/font.c:		/* TODO - use a real strcpy() here that is more efficient */
 * ./kernel/frame.c:			/* TODO - use word copies if possible */
-* Integrate ASCII DMD into the native build
 
 Uncategorized
 
