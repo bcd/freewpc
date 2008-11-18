@@ -84,10 +84,6 @@ int linux_irq_pending;
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-/** When zero, at a zero cross reading; otherwise, the amount of time
- * until the next zerocross */
-int simulated_zerocross;
-
 volatile int sim_debug_init = 0;
 
 /** Pointer to the current switch matrix element */
@@ -749,7 +745,7 @@ U8 linux_asic_read (U16 addr)
 			return 0;
 
 		case WPC_ZEROCROSS_IRQ_CLEAR:
-			return simulated_zerocross;
+			return sim_zc_read () ? 0x80 : 0x0;
 
 		case WPC_EXTBOARD1:
 #ifdef MACHINE_EXTBOARD1
@@ -1169,7 +1165,7 @@ int main (int argc, char *argv[])
 	linux_irq_pending = 0;
 	linux_debug_output_ptr = linux_debug_output_buffer;
 	simulated_orkin_control_port = 0;
-	simulated_zerocross = 0;
+	sim_zc_init ();
 #if (MACHINE_PIC == 1)
 	simulation_pic_init ();
 #endif
