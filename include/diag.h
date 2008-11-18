@@ -22,7 +22,6 @@
 #define __DIAG_H
 
 __common__ U8 diag_get_error_count (void);
-__common__ void diag_post_error (void_function messenger);
-__common__ void diag_run (void);
+__common__ void diag_post_error (const char *, const char *);
 
 #endif /* __DIAG_H */
