@@ -53,6 +53,8 @@ that is invoked after a certain amount of real time has expired, in the
 context of the simulation and not the running system. */
 typedef void (*time_handler_t) (void *);
 
+typedef unsigned long simulated_time_interval_t;
+
 /** An instance of a time handler */
 struct time_handler
 {
@@ -88,6 +90,18 @@ void sim_time_step (void);
 
 void sim_watchdog_reset (void);
 void sim_watchdog_init (void);
+
+
+typedef enum
+{
+	SIGNO_SOL=0,
+	SIGNO_TRIAC=100,
+	SIGNO_LAMP=200,
+	SIGNO_ZEROCROSS=300
+} signal_number_t;
+
+void signal_update (signal_number_t signo, unsigned int state);
+void signal_init (void);
 
 /* For simulation of broken hardware.  Each of these bit indicates an
 induced error condition that is created by the simulator, to see how

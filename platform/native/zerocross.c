@@ -32,6 +32,11 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 	{
 		sim_zc_active = 1;
 		sim_zc_timer = sim_zc_timer_start;
+		signal_update (SIGNO_ZEROCROSS, 1);
+	}
+	else
+	{
+		signal_update (SIGNO_ZEROCROSS, 0);
 	}
 }
 

@@ -410,17 +410,20 @@ static void linux_switch_depress (unsigned int sw)
  * MEMP points to the data byte, containing 8 outputs.
  * NEWVAL is the value to be written; it is assigned to *MEMP.
  */
-static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 newval)
+static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 newval, unsigned int sigbase)
 {
-#ifdef CONFIG_UI
 	U8 oldval = *memp;
 	int n;
 	for (n = 0; n < 8; n++)
 	{
 		if ((newval & (1 << n)) != (oldval & (1 << n)))
+		{
+#ifdef CONFIG_UI
 			ui_update (index + n, newval & (1 << n));
-	}
 #endif
+			signal_update (sigbase+index+n, newval & (1 << n));
+		}
+	}
 	*memp = newval;
 }
 
@@ -489,7 +492,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 		}
 
 	/* Commit the new state */
-	mux_write (ui_write_solenoid, index, memp, val);
+	mux_write (ui_write_solenoid, index, memp, val, SIGNO_SOL);
 }
 
 
@@ -601,7 +604,7 @@ void linux_asic_write (U16 addr, U8 val)
 			break;
 
 		case WPC_GI_TRIAC:
-			mux_write (ui_write_triac, 0, &linux_triac_outputs, val);
+			mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
 			break;
 
 		case WPC_SOL_FLASH2_OUTPUT:
@@ -629,7 +632,7 @@ void linux_asic_write (U16 addr, U8 val)
 		case WPC_LAMP_ROW_OUTPUT:
 			if ((linux_lamp_data_ptr != NULL) && linux_lamp_write_flag)
 				mux_write (ui_write_lamp, 8 * (linux_lamp_data_ptr - linux_lamp_matrix),
-					linux_lamp_data_ptr, val);
+					linux_lamp_data_ptr, val, SIGNO_LAMP);
 			linux_lamp_write_flag ^= 1;
 			break;
 
@@ -949,6 +952,14 @@ static void linux_interface_thread (void)
 
 			case 'C':
 				gdb_break ();
+				break;
+
+			case '{':
+				signal_trace_start (SIGNO_ZEROCROSS);
+				break;
+
+			case '}':
+				signal_trace_stop (SIGNO_ZEROCROSS);
 				break;
 
 			case 'q':
