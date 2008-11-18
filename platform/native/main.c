@@ -793,9 +793,6 @@ static void linux_realtime_thread (void)
 		linux_irq_pending = (curr_time.tv_usec - prev_time.tv_usec) / 1000;
 		if (linux_irq_pending < 0)
 			linux_irq_pending += 1000;
-
-		/* Increment the total number of 1ms ticks */
-		sim_jiffies += linux_irq_pending;
 		prev_time = curr_time;
 
 		/* IRQ is a periodic interrupt driven by an oscillator.  For
@@ -803,6 +800,7 @@ static void linux_realtime_thread (void)
 		while (linux_irq_pending-- > 0)
 		{
 			/** Advance the simulator clock, regardless */
+			sim_jiffies++;
 			sim_time_step ();
 
 			/** Invoke IRQ handler, if not masked */
