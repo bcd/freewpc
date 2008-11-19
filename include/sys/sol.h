@@ -104,29 +104,29 @@ extern inline U8 *sol_get_read_reg (const solnum_t sol)
 
 /** Return the hardware register that can be written
 to enable/disable a coil driver. */
-extern inline U8 *sol_get_write_reg (solnum_t sol)
+extern inline IOPTR sol_get_write_reg (solnum_t sol)
 {
 	switch (sol / 8)
 	{
 		case 0:
-			return (U8 *)WPC_SOL_HIGHPOWER_OUTPUT;
+			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
 		case 1:
-			return (U8 *)WPC_SOL_LOWPOWER_OUTPUT;
+			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
 		case 2:
-			return (U8 *)WPC_SOL_FLASH1_OUTPUT;
+			return (IOPTR)WPC_SOL_FLASH1_OUTPUT;
 		case 3:
-			return (U8 *)WPC_SOL_FLASH2_OUTPUT;
+			return (IOPTR)WPC_SOL_FLASH2_OUTPUT;
 		case 4:
 #if (MACHINE_WPC95 == 1)
-			return (U8 *)WPC95_FLIPPER_COIL_OUTPUT;
+			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
 #else
-			return (U8 *)WPC_FLIPTRONIC_PORT_A;
+			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
 #endif
 		case 5:
-			return (U8 *)WPC_EXTBOARD1;
+			return (IOPTR)WPC_EXTBOARD1;
 		default:
 			fatal (ERR_SOL_REQUEST);
-			return NULL;
+			return (IOPTR)0;
 	}
 }
 
@@ -154,8 +154,8 @@ extern inline U8 sol_inverted (const solnum_t sol)
 extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
-	U8 *w = sol_get_write_reg (sol);
-	*w = (*r |= sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00);
+	IOPTR w = sol_get_write_reg (sol);
+	writeb (w, (*r |= sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00));
 }
 
 
@@ -163,8 +163,8 @@ extern inline void sol_enable (const solnum_t sol)
 extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
-	U8 *w = sol_get_write_reg (sol);
-	*w = (*r &= ~sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00);
+	IOPTR w = sol_get_write_reg (sol);
+	writeb (w, (*r &= ~sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00));
 }
 
 #endif /* _SYS_SOL_H */

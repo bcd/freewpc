@@ -96,7 +96,7 @@ __fastram__ volatile enum sol_request_state sol_req_state;
 __fastram__ volatile U8 sol_req_timer;
 
 volatile U8 req_lock;
-U8 *req_reg_write;
+IOPTR req_reg_write;
 U8 *req_reg_read;
 U8 req_bit;
 U8 req_on_time;
@@ -242,7 +242,7 @@ void sol_req_rtt (void)
 		if (zc_get_timer () == 2)
 		{
 			sol_req_timer = req_on_time;
-			*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
+			writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
 			sol_req_state = REQ_ON;
 		}
 	}
@@ -268,7 +268,7 @@ void sol_req_rtt (void)
 				/* Switch to IDLE.  Ensure the coil is off.
 				Release any process waiting on this solenoid to
 				finish. */
-				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
+				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
 				req_lock = 0;
 				sol_req_state = REQ_IDLE;
 			}
@@ -278,12 +278,12 @@ void sol_req_rtt (void)
 			if ((sol_req_timer & sol_duty_mask) == 0)
 			{
 				/* Occasionally turn on the coil */
-				*req_reg_write = (*req_reg_read |= req_bit) ^ req_inverted;
+				writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
 			}
 			else
 			{
 				/* Most of the time, keep it off */
-				*req_reg_write = (*req_reg_read &= ~req_bit) ^ req_inverted;
+				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
 			}
 		}
 	}

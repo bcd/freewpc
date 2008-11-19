@@ -527,7 +527,7 @@ static void wpc_sound_reset (void)
 
 
 /** Simulate the write of a WPC I/O register */
-void linux_asic_write (U16 addr, U8 val)
+void linux_asic_write (IOPTR addr, U8 val)
 {
 	switch (addr)
 	{
@@ -669,7 +669,7 @@ void linux_asic_write (U16 addr, U8 val)
 
 
 /** Simulated read of an I/O register */
-U8 linux_asic_read (U16 addr)
+U8 linux_asic_read (IOPTR addr)
 {
 	switch (addr)
 	{

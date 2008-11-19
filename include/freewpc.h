@@ -73,6 +73,7 @@ typedef unsigned long long U32;
 typedef unsigned int INTPTR;
 typedef U16 PTR_OR_U16;
 #endif
+typedef U16 IOPTR;
 
 /* After this point, do not permit native types like
  * short, int, long to be used; use one of the types
