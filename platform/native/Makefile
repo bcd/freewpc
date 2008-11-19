@@ -18,7 +18,7 @@ HOST_LIBS += -lpth
 # Additional object files to be linked into the kernel region
 KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o $(D)/asciidmd.o \
-	$(D)/ball.o $(D)/signal.o
+	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o
 
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 

@@ -662,6 +662,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
+			hwtimer_write (val);
 			break;
 
 		default:
@@ -725,9 +726,7 @@ U8 linux_asic_read (IOPTR addr)
 			return sim_switch_matrix_get ()[0];
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
-			/* The ASIC timer is not implemented, so this
-			always returns zero. */
-			return 0;
+			return hwtimer_read ();
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
