@@ -576,7 +576,8 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 
 		case WPC_ZEROCROSS_IRQ_CLEAR:
-			sim_watchdog_reset ();
+			if ((val & 0x0F) == 6)
+				sim_watchdog_reset ();
 			break;
 
 		case WPC_DMD_LOW_PAGE:
