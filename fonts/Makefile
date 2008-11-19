@@ -8,6 +8,7 @@ CONFIG_FON_BITMAP := y
 
 FONT_OBJS += $(if $(CONFIG_FON_MONO5), fonts/mono5.o)
 FONT_OBJS += $(if $(CONFIG_FON_MONO9), fonts/mono9.o)
+FONT_OBJS += $(if $(CONFIG_FON_NUM5X7), fonts/num5x7.o)
 FONT_OBJS += $(if $(CONFIG_FON_VAR5), fonts/var5.o)
 FONT_OBJS += $(if $(CONFIG_FON_TINYNUM), fonts/tinynum.o)
 FONT_OBJS += $(if $(CONFIG_FON_BITMAP), fonts/bitmap.o)

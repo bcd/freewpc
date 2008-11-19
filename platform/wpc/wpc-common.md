@@ -104,6 +104,7 @@ Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON
 
 [fonts]
 mono5:
+num5x7:
 lucida9:
 tinynum:
 var5:
