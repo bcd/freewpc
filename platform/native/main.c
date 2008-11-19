@@ -280,7 +280,7 @@ U8 simulation_pic_access (int writep, U8 write_val)
 {
 	static U8 last_write = 0xFF;
 	static int writes_until_unlock_needed = 1000;
-	static U8 unlock_mode = 0;
+	static int unlock_mode = 0;
 	static U32 unlock_code;
 	const U32 expected_unlock_code = 0;
 
