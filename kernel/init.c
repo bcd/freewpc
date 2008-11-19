@@ -213,7 +213,11 @@ __noreturn__ void freewpc_init (void)
 		/* TODO - drop priority for idle tasks */
 		task_sleep (TIME_33MS);
 		db_idle ();
-		callset_invoke (idle);
+		if (likely (idle_ok))
+		{
+			do_idle ();
+			switch_idle ();
+		}
 	}
 #endif
 }
