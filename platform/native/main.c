@@ -571,6 +571,24 @@ void linux_asic_write (IOPTR addr, U8 val)
 			asciidmd_map_page (1, val);
 			break;
 
+#if (MACHINE_WPC95 == 1)
+		case WPC_DMD_3200_PAGE:
+			asciidmd_map_page (3, val);
+			break;
+
+		case WPC_DMD_3000_PAGE:
+			asciidmd_map_page (2, val);
+			break;
+
+		case WPC_DMD_3600_PAGE:
+			asciidmd_map_page (5, val);
+			break;
+
+		case WPC_DMD_3400_PAGE:
+			asciidmd_map_page (4, val);
+			break;
+#endif
+
 		case WPC_DMD_ACTIVE_PAGE:
 			asciidmd_set_visible (val);
 			break;
