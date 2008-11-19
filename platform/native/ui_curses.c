@@ -249,8 +249,8 @@ void ui_init (void)
 	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
 #endif
 
-	ball_tracker_win = ui_window_create (16, 8, x, y, " Ball Tracker ");
-	x += 16 + 2;
+	ball_tracker_win = ui_window_create (20, 8, x, y, " Ball Tracker ");
+	x += 20 + 2;
 
 	y += 10 + 1;
 	x = 0;
