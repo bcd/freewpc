@@ -26,6 +26,7 @@ int lowest_cycles = WDOG_EXPIRY;
 void watchdog_expired (void)	
 {
 	simlog (SLC_DEBUG, "Watchdog expired\n");
+	signal_update (SIGNO_BLANKING, 0);
 	linux_shutdown ();
 }
 
@@ -50,6 +51,7 @@ void sim_watchdog_reset (void)
 		lowest_cycles = cycles_until_reset;
 	}
 
+	signal_update (SIGNO_BLANKING, 1);
 	cycles_until_reset = WDOG_EXPIRY;
 }
 
@@ -58,6 +60,7 @@ void sim_watchdog_reset (void)
  * We install a timer that runs every simulated 8ms. */
 void sim_watchdog_init (void)
 {
+	signal_update (SIGNO_BLANKING, 0);
 	sim_time_register (8, TRUE, sim_watchdog_periodic, NULL);
 }
 

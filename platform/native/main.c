@@ -564,6 +564,7 @@ void linux_asic_write (U16 addr, U8 val)
 
 		case WPC_LEDS:
 			linux_cpu_leds = val;
+			signal_update (SIGNO_DIAG_LED, (val & 0x80) ? 1 : 0);
 			break;
 
 		case WPC_RAM_BANK:
@@ -1164,6 +1165,7 @@ int main (int argc, char *argv[])
 
 	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
+	signal_update (SIGNO_RESET, 1);
 	linux_irq_enable = linux_firq_enable = TRUE;
 	linux_irq_pending = 0;
 	linux_debug_output_ptr = linux_debug_output_buffer;
@@ -1221,6 +1223,7 @@ int main (int argc, char *argv[])
 	while (sim_debug_init)
 		usleep (10000);
 
+	signal_update (SIGNO_RESET, 0);
 	freewpc_init ();
 	return 0;
 }
