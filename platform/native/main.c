@@ -186,7 +186,6 @@ void simlog (enum sim_log_class class, const char *format, ...)
 		switch (class)
 		{
 			case SLC_DEBUG: class_code = 'd'; break;
-			case SLC_TEXT: class_code = 't'; break;
 			case SLC_DEBUG_PORT: class_code = '>'; break;
 			case SLC_SOUNDCALL: class_code = 'S'; break;
 			default: return;
@@ -370,12 +369,6 @@ __noreturn__ void linux_shutdown (void)
 	ui_exit ();
 #endif
 	exit (0);
-}
-
-
-void linux_write_string (const char *s)
-{
-	simlog (SLC_TEXT, "%s", s);
 }
 
 
