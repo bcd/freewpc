@@ -79,13 +79,17 @@ void signal_update (signal_number_t signo, unsigned int state)
 
 void signal_trace_start (signal_number_t signo)
 {
-	signal_readings[signo] = signal_chunk_alloc ();
+	if (!signal_readings[signo])
+		signal_readings[signo] = signal_chunk_alloc ();
 }
 
 
 void signal_trace_stop (signal_number_t signo)
 {
 	signal_readings_t *sigrd = signal_readings[signo];
+	if (!sigrd)
+		return;
+
 	simlog (SLC_DEBUG, "Trace for signal %d:", signo);
 	simlog (SLC_DEBUG, "  Start at %d", sigrd->init_state);
 	unsigned int last_time = sigrd->t[0];
