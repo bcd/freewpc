@@ -353,7 +353,8 @@ void nonfatal (errcode_t error_code)
 #ifdef DEBUGGER
 	last_nonfatal_error_code = error_code;
 	last_nonfatal_error_gid = task_getgid ();
-	deff_start (DEFF_NONFATAL_ERROR);
+	if (!in_test)
+		deff_start (DEFF_NONFATAL_ERROR);
 #endif
 	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_NONFATAL, error_code);
 }

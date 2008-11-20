@@ -235,7 +235,7 @@ void ui_init (void)
 	x += 28 + 2;
 
 	sol_win = ui_window_create (20, 10, x, y, " Solenoids ");
-	triac_win = ui_window_create (12, 3, x, y+11, " Triacs ");
+	triac_win = ui_window_create (12, 3, x, y+10, " Triacs ");
 	x += 20 + 2;
 
 	sound_win = ui_window_create (8, 6, x, y, " Sound ");
@@ -252,14 +252,14 @@ void ui_init (void)
 	ball_tracker_win = ui_window_create (20, 8, x, y, " Ball Tracker ");
 	x += 20 + 2;
 
-	y += 10 + 1;
+	y += 9 + 1;
 	x = 0;
 	debug_win = ui_window_create (64, 40, x, y, NULL);
 	scrollok (debug_win, 1);
 	x += 64 + 2;
 	y += 6;
 
-	asciidmd_win = ui_window_create (130, 34, x, y, " ASCII-DMD ");
+	asciidmd_win = ui_window_create (130, 34, x, y, " ASCII-Matrix ");
 }
 
 

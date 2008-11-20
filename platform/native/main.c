@@ -340,8 +340,26 @@ U8 simulation_pic_access (int writep, U8 write_val)
 			case WPC_PIC_COLUMN(2): case WPC_PIC_COLUMN(3):
 			case WPC_PIC_COLUMN(4): case WPC_PIC_COLUMN(5):
 			case WPC_PIC_COLUMN(6): case WPC_PIC_COLUMN(7):
-				if (unlock_mode == 0)
-					return sim_switch_matrix_get ()[last_write - WPC_PIC_COLUMN(0) + 1];
+			{
+				unsigned int col;
+				U8 val;
+
+				if (unlock_mode > 0)
+				{
+					simlog (SLC_DEBUG, "Column read in unlock mode");
+					return 0;
+				}
+
+				col = last_write - WPC_PIC_COLUMN(0);
+				if (col >= 8)
+				{
+					simlog (SLC_DEBUG, "Invalid column %d", col);
+					return 0;
+				}
+
+				val = sim_switch_matrix_get ()[col + 1];
+				return val;
+			}
 
 			case WPC_PIC_SERIAL(0): case WPC_PIC_SERIAL(1):
 			case WPC_PIC_SERIAL(2): case WPC_PIC_SERIAL(3):
@@ -698,7 +716,7 @@ U8 linux_asic_read (IOPTR addr)
 			simulator itself. */
 			time_t now = time (NULL);
 			int minutes_on =
-				(now - linux_boot_time) * linux_irq_multiplier / 60;
+				((now - linux_boot_time) * linux_irq_multiplier) / 60;
 			if (addr == WPC_CLK_HOURS_DAYS)
 				return minutes_on / 60;
 			else

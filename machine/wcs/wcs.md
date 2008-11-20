@@ -206,11 +206,11 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 76: Lock Low, ingame
 77: Lock High, ingame
 78: R. Ramp Exit, ingame
-81: Left Jet
-82: Upper Jet
-83: Lower Jet
-84: Left Slingshot
-85: Right Slingshot
+81: Left Jet, ingame, noplay
+82: Upper Jet, ingame, noplay
+83: Lower Jet, ingame, noplay
+84: Left Slingshot, ingame, noplay
+85: Right Slingshot, ingame, noplay
 86: Kickback, ingame
 87: Upper Left Lane, ingame
 88: Upper Right Lane, ingame
