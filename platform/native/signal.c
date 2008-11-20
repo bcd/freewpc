@@ -27,6 +27,12 @@ typedef struct signal_readings
  */
 signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
 
+/**
+ * The last known value of each signal.  This does not
+ * provide any history.
+ */
+uint32_t signal_states[MAX_SIGNALS / 32] = { 0, };
+
 
 signal_readings_t *signal_chunk_alloc (void)
 {
@@ -45,7 +51,13 @@ void signal_update (signal_number_t signo, unsigned int state)
 	signal_readings_t *sigrd;
 	extern unsigned long sim_jiffies;
 
-	/* Don't do anything if we're not tracing this signal. */
+	/* Update last state */
+	if (state)
+		signal_states[signo / 32] &= ~(1 << (signo % 32));
+	else
+		signal_states[signo / 32] |= (1 << (signo % 32));
+
+	/* Don't do anything else if we're not tracing this signal. */
 	sigrd = signal_readings[signo];
 	if (!sigrd)
 		return;
