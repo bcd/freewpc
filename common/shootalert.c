@@ -22,7 +22,7 @@
 #include <freewpc.h>
 
 /**
- * Monitor if a ball is stuck in the plunger lane and ball
+ * Monitor if a ball is stuck in the plunger lane at ball
  * start, and periodically remind the player to plunge it...
  * This task begins at ball start, and is cancelled on
  * valid playfield.

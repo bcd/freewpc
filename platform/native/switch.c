@@ -18,6 +18,9 @@ U8 *sim_switch_matrix_get (void)
 }
 
 
+/**
+ * Toggle the physical state of a switch.
+ */
 void sim_switch_toggle (int sw)
 {
 	U8 level;
@@ -46,6 +49,15 @@ void sim_switch_toggle (int sw)
 int sim_switch_read (int sw)
 {
 	return linux_switch_matrix[sw/8] & (1 << (sw%8));
+}
+
+
+void sim_switch_depress (int sw)
+{
+	sim_switch_toggle (sw);
+	task_sleep (TIME_100MS);
+	sim_switch_toggle (sw);
+	task_sleep (TIME_100MS);
 }
 
 

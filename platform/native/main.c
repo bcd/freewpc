@@ -396,23 +396,6 @@ static bool linux_switch_poll_logical (unsigned int sw)
 }
 
 
-/** Toggle the state of a switch */
-static void linux_switch_toggle (unsigned int sw)
-{
-	sim_switch_toggle (sw);
-}
-
-
-/** Simulate a switch trigger */
-static void linux_switch_depress (unsigned int sw)
-{
-	linux_switch_toggle (sw);
-	task_sleep (TIME_100MS);
-	linux_switch_toggle (sw);
-	task_sleep (TIME_100MS);
-}
-
-
 /** Write to a multiplexed output; i.e. a register in which distinct
  * outputs are multiplexed together into a single I/O location.
  * UI_UPDATE provides a function for displaying the contents of a single
@@ -464,8 +447,8 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 			{
 				/* Simulate kicking the ball off the outhole into the trough */
 				simlog (SLC_DEBUG, "Outhole kick");
-				linux_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-				linux_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
+				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
+				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
 			}
 			else
 #endif
@@ -486,7 +469,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 						if (linux_switch_poll_logical (props->sw[n]))
 						{
 							simlog (SLC_DEBUG, "Device %d release", devno);
-							linux_switch_toggle (props->sw[n]);
+							sim_switch_toggle (props->sw[n]);
 
 							/* Where does the ball go from here?
 							Normally device kickout leads to unknown areas of
@@ -527,8 +510,8 @@ void sim_switch_effects (int swno)
 					/* Turn off these switch, and turn on the next one */
 					simlog (SLC_DEBUG, "Move from switch %d to %d",
 						swno, props->sw[n+1]);
-					linux_switch_toggle (swno);
-					linux_switch_toggle (props->sw[n+1]);
+					sim_switch_toggle (swno);
+					sim_switch_toggle (props->sw[n+1]);
 					break;
 				}
 			}
@@ -594,7 +577,8 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 
 		case WPC_ZEROCROSS_IRQ_CLEAR:
-			sim_watchdog_reset ();
+			if ((val & 0x0F) == 6)
+				sim_watchdog_reset ();
 			break;
 
 		case WPC_DMD_LOW_PAGE:
@@ -604,6 +588,24 @@ void linux_asic_write (IOPTR addr, U8 val)
 		case WPC_DMD_HIGH_PAGE:
 			asciidmd_map_page (1, val);
 			break;
+
+#if (MACHINE_WPC95 == 1)
+		case WPC_DMD_3200_PAGE:
+			asciidmd_map_page (3, val);
+			break;
+
+		case WPC_DMD_3000_PAGE:
+			asciidmd_map_page (2, val);
+			break;
+
+		case WPC_DMD_3600_PAGE:
+			asciidmd_map_page (5, val);
+			break;
+
+		case WPC_DMD_3400_PAGE:
+			asciidmd_map_page (4, val);
+			break;
+#endif
 
 		case WPC_DMD_ACTIVE_PAGE:
 			asciidmd_set_visible (val);
@@ -678,6 +680,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
+			hwtimer_write (val);
 			break;
 
 		default:
@@ -741,9 +744,7 @@ U8 linux_asic_read (IOPTR addr)
 			return sim_switch_matrix_get ()[0];
 
 		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
-			/* The ASIC timer is not implemented, so this
-			always returns zero. */
-			return 0;
+			return hwtimer_read ();
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
@@ -977,9 +978,9 @@ static void linux_interface_thread (void)
 			case 'q':
 #ifdef DEVNO_TROUGH
 #ifdef MACHINE_OUTHOLE_SWITCH
-				linux_switch_toggle (MACHINE_OUTHOLE_SWITCH);
+				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
 #else
-				linux_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
+				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
 #endif /* MACHINE_OUTHOLE_SWITCH */
 #endif
 				break;
@@ -1015,11 +1016,11 @@ static void linux_interface_thread (void)
 						+ NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES;
 				else
 					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
-				linux_switch_depress (sw);
+				sim_switch_depress (sw);
 				break;
 
 			case '3':
-				linux_switch_depress (SW_LEFT_COIN);
+				sim_switch_depress (SW_LEFT_COIN);
 				break;
 
 			case '#':
@@ -1044,11 +1045,11 @@ static void linux_interface_thread (void)
 					if ((switch_table[sw].flags & SW_EDGE) || !toggle_mode)
 					{
 						simlog (SLC_DEBUG, "switch %d toggled",  sw);
-						linux_switch_toggle (sw);
+						sim_switch_toggle (sw);
 						toggle_mode = 1;
 					}
 					else
-						linux_switch_depress (sw);
+						sim_switch_depress (sw);
 				}
 				else
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
@@ -1209,13 +1210,13 @@ int main (int argc, char *argv[])
 	if (!sim_test_badness (SIM_BAD_NOOPTOPOWER))
 		for (sw = 0; sw < NUM_SWITCHES; sw++)
 			if (switch_is_opto (sw))
-				linux_switch_toggle (sw);
+				sim_switch_toggle (sw);
 
 	/* Force always closed */
-	linux_switch_toggle (SW_ALWAYS_CLOSED);
+	sim_switch_toggle (SW_ALWAYS_CLOSED);
 
 	/* Close the coin door */
-	linux_switch_toggle (SW_COIN_DOOR_CLOSED);
+	sim_switch_toggle (SW_COIN_DOOR_CLOSED);
 
 	/* Load the protected memory area */
 	protected_memory_load ();
