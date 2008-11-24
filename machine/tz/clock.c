@@ -130,12 +130,12 @@ U8 tz_clock_opto_to_hour[] =
 
 extern inline void wpc_ext1_enable (const U8 bits)
 {
-	wpc_asic_setbits (WPC_EXTBOARD1, bits);
+	io_set_bits (WPC_EXTBOARD1, bits);
 }
 
 extern inline void wpc_ext1_disable (const U8 bits)
 {
-	wpc_asic_clearbits (WPC_EXTBOARD1, bits);
+	io_clear_bits (WPC_EXTBOARD1, bits);
 }
 
 

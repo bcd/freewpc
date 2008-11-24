@@ -122,7 +122,7 @@ AREA_DECL(nvram)
 /** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
 {
-	wpc_asic_xor (WS_PAGE_LED, WS_LED_MASK);
+	io_toggle_bits (WS_PAGE_LED, WS_LED_MASK);
 }
 
 

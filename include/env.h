@@ -200,7 +200,7 @@ extern inline U8 readb (U16 addr)
 #endif
 }
 
-extern inline void wpc_asic_xor (U16 addr, U8 val)
+extern inline void io_toggle_bits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
 	U8 reg = readb (addr);
@@ -211,7 +211,7 @@ extern inline void wpc_asic_xor (U16 addr, U8 val)
 #endif
 }
 
-extern inline void wpc_asic_setbits (U16 addr, U8 val)
+extern inline void io_set_bits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
 	U8 reg = readb (addr);
@@ -222,7 +222,7 @@ extern inline void wpc_asic_setbits (U16 addr, U8 val)
 #endif
 }
 
-extern inline void wpc_asic_clearbits (U16 addr, U8 val)
+extern inline void io_clear_bits (U16 addr, U8 val)
 {
 #ifdef CONFIG_NATIVE
 	U8 reg = readb (addr);

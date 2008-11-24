@@ -231,7 +231,7 @@ extern U8 *linux_dmd_high_page;
 /** Toggle the diagnostic LED. */
 extern inline void wpc_led_toggle (void)
 {
-	wpc_asic_xor (WPC_LEDS, WPC_LED_DIAGNOSTIC);
+	io_toggle_bits (WPC_LEDS, WPC_LED_DIAGNOSTIC);
 }
 
 
