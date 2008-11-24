@@ -128,6 +128,7 @@ void device_clear (device_t *dev)
 	dev->kick_errors = 0;
 	dev->state = DEV_STATE_IDLE;
 	dev->props = NULL;
+	dev->virtual_count = 0;
 }
 
 
@@ -163,6 +164,8 @@ U8 device_recount (device_t *dev)
 		if (level)
 			count++;
 	}
+
+	count += dev->virtual_count;
 
 	dev->actual_count = count;
 	return (count);
@@ -699,6 +702,22 @@ void device_remove_live (void)
 			}
 		}
 	}
+}
+
+
+/** Add a virtual ball to the device, not seen by any switches. */
+void device_add_virtual (device_t *dev)
+{
+	dev->virtual_count++;
+	device_sw_handler (dev->devno);
+}
+
+
+/** Remove a virtual ball from the device, not seen by any switches. */
+void device_remove_virtual (device_t *dev)
+{
+	dev->virtual_count--;
+	device_sw_handler (dev->devno);
 }
 
 
