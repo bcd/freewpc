@@ -166,7 +166,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
 23: Buyin Button, buyin-button, cabinet
-25: Free Kick Target, ingame
+25: Free Kick Target, ingame, debounce(TIME_100MS)
 26: Kickback Upper, ingame
 27: Spinner, ingame
 28: Light Kickback, ingame

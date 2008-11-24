@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+#include <stdint.h>
 
 /**
  * The signal module allows 'scoping' of binary I/O signals
