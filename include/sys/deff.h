@@ -86,12 +86,12 @@ typedef struct
 	U8 page;
 } deff_t;
 
+enum _priority;
 
 extern const deff_t deff_table[];
 
 extern void (*deff_component_table[4]) (void);
 
-bool deff_is_running (deffnum_t dn);
 deffnum_t deff_get_active (void);
 void deff_start (deffnum_t dn);
 void deff_stop (deffnum_t dn);
@@ -100,6 +100,9 @@ void deff_start_highest_priority (void);
 __noreturn__ void deff_exit (void);
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (S8 count, task_ticks_t delay);
+void deff_start_bg (deffnum_t dn, enum _priority prio);
+void deff_start_retry (deffnum_t id, U8 timeout);
+void deff_update (void);
 void deff_init (void);
 void deff_stop_all (void);
 
