@@ -24,7 +24,7 @@
 #ifdef __m6809__
 extern void dmd_shadow (void);
 #else
-#define dmd_shadow()
+#define dmd_shadow() /* TODO - no C version of shadowing */
 #endif
 
 

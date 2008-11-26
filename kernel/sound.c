@@ -193,6 +193,7 @@ U8 sound_board_poll (void)
  * before bailing and returning 0xFF. */
 U8 sound_board_read (U8 retries)
 {
+	/* TODO - the sound board is not emulated in native mode */
 #ifndef CONFIG_NATIVE
 	do {
 		if (queue_empty_p ((queue_t *)&sound_read_queue))

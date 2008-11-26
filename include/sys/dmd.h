@@ -300,6 +300,7 @@ void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
 #else
+/* TODO - no C versions of dmd_and/or/xor */
 #define dmd_and_page()
 #define dmd_or_page()
 #define dmd_xor_page()

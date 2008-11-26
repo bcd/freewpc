@@ -160,6 +160,8 @@ void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool neg
 		dbprintf ("error: there is a remainder\n");
 	*reg /= divisor;
 #else
+	/* TODO : this is done differently only because native
+	32-bit division on the 6809 does not work. */
 	udiv32 (*reg, divisor, reg, NULL);
 #endif
 	pic_debug ("reg.after_divide = %w\n", *reg);

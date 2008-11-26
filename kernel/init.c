@@ -210,7 +210,8 @@ __noreturn__ void freewpc_init (void)
 #else
 	while (1)
 	{
-		/* TODO - drop priority for idle tasks */
+		/* TODO - drop priority for idle tasks.  Also consider
+		moving this logic elsewhere... */
 		task_sleep (TIME_33MS);
 		db_idle ();
 		if (likely (idle_ok))

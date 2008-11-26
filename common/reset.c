@@ -55,6 +55,7 @@ extern __common__ void opto_check (void);
  */
 extern inline void wait_for_button (const U8 swno)
 {
+	/* TODO - why is this not done in native mode? */
 #ifndef CONFIG_NATIVE
 	while (!switch_poll (swno))
 		task_sleep (TIME_66MS);
@@ -79,7 +80,7 @@ void factory_reset (void)
 #ifdef __m6809__
 	memset (AREA_BASE (permanent), 0, AREA_SIZE (permanent));
 #else
-	/* TODO */
+	/* TODO - how to clean the permanent area in native mode? */
 #endif
 	callset_invoke (factory_reset);
 }
