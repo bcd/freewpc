@@ -1951,7 +1951,7 @@ struct menu *dev_menu_items[] = {
 	&dev_force_error_item,
 	&dev_frametest_item,
 	&dev_deff_stress_test_item,
-#if defined(MACHINE_DMD) && !defined(CONFIG_NATIVE)
+#if defined(MACHINE_DMD)
 	&symbol_test_item,
 #endif
 	&sched_test_item,
