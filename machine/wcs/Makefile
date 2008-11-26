@@ -52,7 +52,7 @@ PINMAME_OTHER_ROMS = wcup_u*.rom
 
 GAME_OBJS =
 
-GAME_TEST_OBJS =
+GAME_TEST_OBJS = goalie_test.o
 
 GAME_INCLUDES =
 

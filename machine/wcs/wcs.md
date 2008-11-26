@@ -260,6 +260,7 @@ F7: Lock Magnet, duty(SOL_DUTY_50), time(TIME_66MS)
 4: Playfield Top
 
 [tests]
+wcs_goalie:
 
 #############################################################
 
