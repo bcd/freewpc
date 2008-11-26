@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -262,7 +262,7 @@ void sound_read_rtt (void)
 	/* Read back from sound board if bytes ready */
 	if (unlikely (pinio_sound_ready_p ()))
 	{
-		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN, 
+		queue_insert ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN,
 			pinio_read_sound ());
 	}
 }

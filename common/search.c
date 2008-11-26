@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -123,7 +123,7 @@ void ball_search_run (void)
 
 	ball_search_count++;
 
-	/* Fire all solenoids.  Skip over solenoids known not to be 
+	/* Fire all solenoids.  Skip over solenoids known not to be
 	pertinent to ball search.  Before starting, throw an event
 	so machines can do special handling on their own. */
 	callset_invoke (ball_search);
@@ -183,7 +183,7 @@ void ball_search_monitor_task (void)
 		 * - ball is on the shooter switch
 		 * - either flipper button is held
 		 */
-		if (in_live_game && !in_bonus && live_balls 
+		if (in_live_game && !in_bonus && live_balls
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif

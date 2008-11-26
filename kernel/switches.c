@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -669,7 +669,7 @@ void switch_queue_dump (void)
  * Handle a switch that has just become stable; i.e. it changed
  * and held steady for at least 2 consecutive readings.  It is
  * also known not to be in the heavy debounce queue already.
- * 
+ *
  * If the switch requires a longer debounce period, then it is
  * put into a queue and we wait a little while to see if it
  * remains stable, then it will be scheduled.

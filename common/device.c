@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -97,8 +97,8 @@ void device_debug (void)
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_t *dev = &device_table[devno];
-		
-		dbprintf ("%d) %s: %d -> %d, ", 
+
+		dbprintf ("%d) %s: %d -> %d, ",
 			devno, dev->props->name,
 			dev->previous_count, dev->actual_count);
 
@@ -137,7 +137,7 @@ device state with information from the device properties structure. */
 void device_register (devicenum_t devno, device_properties_t *props)
 {
 	device_t *dev;
-	
+
 	dev = &device_table[devno];
 	if (dev->props != NULL)
 		return;
@@ -242,7 +242,7 @@ wait_and_recount:
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
-			/* Also unusual in that a ball came out of the device without 
+			/* Also unusual in that a ball came out of the device without
 			 * explicitly kicking it.  (Although this can happen in test mode.)
 			 * Throw a nonfatal if it happens during a game.
 			 */
@@ -269,7 +269,7 @@ wait_and_recount:
 		 * See if the count changed. */
 		if (unlikely (dev->actual_count >= dev->previous_count))
 		{
-			/* After attempting a release, the count did not go down ... the kick 
+			/* After attempting a release, the count did not go down ... the kick
 			 * probably failed, and we should retry up to a point.  Since dev->state
 			 * is unchanged below, the kick attempt will get reinvoked. */
 
@@ -364,7 +364,7 @@ wait_and_recount:
 			 * locks are held so we must wait. */
 			goto wait_and_recount;
 		}
-		else 
+		else
 		{
 			/* Container has balls ready to kick */
 			dbprintf ("About to call kick_attempt\n");
@@ -460,7 +460,7 @@ void device_update_globals (void)
 	devicenum_t devno;
 	U8 held_balls_now = 0;
 
-	/* Recount the number of balls that are held, 
+	/* Recount the number of balls that are held,
 	excluding those that are locked and those in the trough. */
 	counted_balls = 0;
 	held_balls_now = 0;
@@ -495,7 +495,7 @@ void device_update_globals (void)
 		missing_balls = 0;
 	}
 
-	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n", 
+	dbprintf ("Counted %d Missing %d Live %d Heldup %d\n",
 		counted_balls, missing_balls, live_balls, held_balls);
 
 	/* If any balls are held up temporarily (more than "max" are
@@ -513,7 +513,7 @@ void device_update_globals (void)
 /** Returns the number of balls held up temporarily. */
 U8 device_holdup_count (void)
 {
-	return held_balls + 
+	return held_balls +
 		(timer_find_gid (GID_DEVICE_SWITCH_WILL_FOLLOW) ? 1 : 0);
 }
 
@@ -584,7 +584,7 @@ void device_probe (void)
 	/* At this point, all kicks have been made, but balls may be
 	on the playfield heading for the trough.  We still should wait
 	until 'missing_balls' goes (hopefully) to zero.
-   We'll give it three tries. */ 
+   We'll give it three tries. */
 	if (missing_balls != 0)
 	{
 		task_sleep_sec (2);
@@ -610,7 +610,7 @@ void device_probe (void)
 
 
 /** Called from a switch handler to do the common processing.
- * The input is the device number.  The actual switch that 
+ * The input is the device number.  The actual switch that
  * transitioned is unknown, as we don't really care. */
 void device_sw_handler (U8 devno)
 {
@@ -764,7 +764,7 @@ bool device_check_start_ok (void)
 	 *
 	 * If the device probe is already in progress, then just
 	 * return right away. */
- 	if (task_find_gid (GID_DEVICE_PROBE)) 
+	if (task_find_gid (GID_DEVICE_PROBE))
 		return FALSE;
 
 	truly_missing_balls = missing_balls;

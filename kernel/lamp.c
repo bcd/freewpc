@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -382,7 +382,7 @@ void lamp_flash_on (lampnum_t lamp)
 
 void lamp_flash_off (lampnum_t lamp)
 {
-	bit_off (lamp_flash_matrix, lamp); 
+	bit_off (lamp_flash_matrix, lamp);
 	bit_off (lamp_flash_matrix_now, lamp);
 }
 
@@ -504,17 +504,17 @@ void lamp_leff2_free_all (void)
 
 
 void lamp_leff_allocate (lampnum_t lamp)
-{ 
+{
 	bit_off (lamp_leff1_allocated, lamp);
 }
 
 void lamp_leff_free (lampnum_t lamp)
-{ 
+{
 	bit_on (lamp_leff1_allocated, lamp);
 }
 
 void lamp_leff2_allocate (lampnum_t lamp)
-{ 
+{
 	bit_off (lamp_leff2_matrix, lamp);
 	bit_off (lamp_leff2_allocated, lamp);
 }
@@ -549,7 +549,7 @@ void lamp_leff2_free (lampnum_t lamp)
  */
 void leff_on (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ? 
+	register bitset p = (leff_running_flags & L_SHARED) ?
 		lamp_leff2_matrix : lamp_leff1_matrix;
 	bit_on (p, lamp);
 }
@@ -557,7 +557,7 @@ void leff_on (lampnum_t lamp)
 
 void leff_off (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ? 
+	register bitset p = (leff_running_flags & L_SHARED) ?
 		lamp_leff2_matrix : lamp_leff1_matrix;
 	bit_off (p, lamp);
 }
@@ -565,7 +565,7 @@ void leff_off (lampnum_t lamp)
 
 void leff_toggle (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ? 
+	register bitset p = (leff_running_flags & L_SHARED) ?
 		lamp_leff2_matrix : lamp_leff1_matrix;
 	bit_toggle (p, lamp);
 }
@@ -573,7 +573,7 @@ void leff_toggle (lampnum_t lamp)
 
 bool leff_test (lampnum_t lamp)
 {
-	register bitset p = (leff_running_flags & L_SHARED) ? 
+	register bitset p = (leff_running_flags & L_SHARED) ?
 		lamp_leff2_matrix : lamp_leff1_matrix;
 	return bit_test (p, lamp);
 }

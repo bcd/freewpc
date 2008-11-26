@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -81,7 +81,7 @@ __noreturn__ void freewpc_init (void)
 	irq_ack_value = 0x96;
 #endif
 
-	/* Initialize the ROM page register 
+	/* Initialize the ROM page register
 	 * page of ROM adjacent to the system area is mapped.
 	 * This is the default location for machine-specific files. */
 	wpc_set_rom_page (MACHINE_PAGE);
@@ -225,7 +225,7 @@ __noreturn__ void freewpc_init (void)
 
 /**
  * The lockup check routine examines 'task_dispatching_ok', which
- * should normally be true as normal task scheduling occurs.  
+ * should normally be true as normal task scheduling occurs.
  * If this value stays false, something is very wrong.
  *
  * This check occurs every 128 IRQs.  No task should run for
@@ -258,7 +258,7 @@ void lockup_check_rtt (void)
  * Entry point for errors that are nonrecoverable.
  * error_code is one of the values in include/sys/errno.h.
  */
-__noreturn__ 
+__noreturn__
 void fatal (errcode_t error_code)
 {
 	/* Don't allow any more interrupts, since they might be the
@@ -370,7 +370,7 @@ U8 get_elapsed_time (U16 then)
 /**
  * do_firq is the entry point from the FIRQ vector.  This interrupt
  * is generated from the WPC ASIC on two different occasions: (1)
- * when the DMD controller has been programmed to generate an 
+ * when the DMD controller has been programmed to generate an
  * interrupt after drawing a particular scan line, and (2) when the
  * WPC's peripheral timer register reaches zero.  The type of interrupt
  * can be determined by reading the peripheral timer register.

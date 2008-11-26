@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -78,7 +78,7 @@ void lamp_countdown_task (void)
 /** Start a lamp countdown effect.  LAMP says which lamp should
 flash to reflect the state of a timer.  TIMER is a pointer to the
 byte variable that contains the current time (counting towards
-zero) in seconds.  The lamp is flashed at an increasing rate as 
+zero) in seconds.  The lamp is flashed at an increasing rate as
 the timer approaches expiration. */
 void lamp_countdown (const U8 lamp, U8 * const timer)
 {

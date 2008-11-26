@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,7 +28,7 @@
  * "old" page that is currently visible; the "new" page that will eventually
  * be drawn completely, and a temporary buffer to hold the intermediate
  * frames.  At the time the transition starts, the old and new pages
- * are already rendered; the transition's only job is to render the 
+ * are already rendered; the transition's only job is to render the
  * intermediate frames.
  *
  * During each "step" of the transition, the intermediate frame is
@@ -91,7 +91,7 @@ void trans_scroll_up_old (void)
 	
 	/* Use __blockcopy16 to do a fast memcpy when size is
 	 * guaranteed to be a multiple of 16 bytes and nonzero. */
-	__blockcopy16 (dmd_high_buffer, 
+	__blockcopy16 (dmd_high_buffer,
 		dmd_low_buffer + arg, DMD_PAGE_SIZE - arg);
 }
 
@@ -148,7 +148,7 @@ void trans_scroll_down_init (void)
 void trans_scroll_down_old (void)
 {
 	register U16 arg = dmd_transition->arg.u16;
-	__blockcopy16 (dmd_high_buffer + arg, 
+	__blockcopy16 (dmd_high_buffer + arg,
 		dmd_low_buffer, DMD_PAGE_SIZE - arg);
 }
 
@@ -295,7 +295,7 @@ void trans_fade_new (void)
 	dmd_high_buffer[112 + offset] = dmd_low_buffer[112 + offset];
 
 	dmd_trans_data_ptr += sizeof (U16);
-	if (dmd_trans_data_ptr == 
+	if (dmd_trans_data_ptr ==
 		((U8 *)dmd_transition->arg.ptr) + 64 * sizeof (U16))
 		dmd_in_transition = FALSE;
 }
