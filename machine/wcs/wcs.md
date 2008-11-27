@@ -250,7 +250,7 @@ A4: Ramp Rear, flash
 
 F5: Magna Goalie, duty(SOL_DUTY_50), time(TIME_66MS)
 F6: Loop Gate, duty(SOL_DUTY_75), time(TIME_200MS)
-F7: Lock Magnet, duty(SOL_DUTY_50), time(TIME_66MS)
+F7: Lock Magnet, duty(SOL_DUTY_12), time(TIME_500MS)
 
 [gi]
 0: Playfield Left

@@ -95,7 +95,7 @@ void match_running_deff (void)
 		font_render_string_right (&font_fixed10, 122, 18, sprintf_buffer);
 
 		sprintf_current_score ();
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_num5x7, 64, 3, sprintf_buffer);
 
 		dmd_show_low ();
 
@@ -207,7 +207,7 @@ void wcs_match_lost (void)
 	{
 		spinners_needed_next += 5;
 	}
-	deff_stop (DEFF_MATCH_RUNNING);
+	deff_update ();
 	/* deff_start (DEFF_MATCH_LOST); */
 }
 
@@ -242,7 +242,7 @@ void wcs_start_match (void)
 	wcs_restart_timer ();
 	spinners_needed = 0;
 	spinners_needed_next = 20;
-	deff_restart (DEFF_MATCH_RUNNING);
+	deff_update ();
 	deff_start (DEFF_MATCH_STARTED);
 }
 
@@ -250,14 +250,14 @@ void wcs_restart_match (void)
 {
 	spinners_needed = 0;
 	wcs_restart_timer ();
-	deff_restart (DEFF_MATCH_RUNNING);
+	deff_update ();
 	/* deff_start (DEFF_MATCH_RESTART); */
 }
 
 
 static inline bool match_in_progress_p (void)
 {
-	return (yards_to_go == 0) && (spinners_needed == 0);
+	return (in_live_game && yards_to_go && !spinners_needed);
 }
 
 void award_match_goal (void)
@@ -315,6 +315,13 @@ static inline void lamp_update_goals (U8 count, U8 lamp)
 	else
 		lamp_tristate_off (lamp);
 }
+
+CALLSET_ENTRY (wcs_match, display_update)
+{
+	if (match_in_progress_p ())
+		deff_start_bg (DEFF_MATCH_RUNNING, 0);
+}
+
 
 CALLSET_ENTRY (wcs_match, lamp_update)
 {

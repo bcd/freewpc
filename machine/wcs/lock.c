@@ -35,6 +35,7 @@ CALLSET_ENTRY (lock_magnet, sw_r_ramp_exit)
 	if (in_live_game && flag_test (FLAG_LOCK_MAGNET_ENABLE))
 	{
 		/* start the magnet catch for X ms */
+		sol_req_state (SOL_LOCK_MAGNET);
 
 #ifdef BCD_WCS
 		/* If the tail switch -- the next one that would
