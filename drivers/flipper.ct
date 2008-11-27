@@ -1,0 +1,147 @@
+/*
+ * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Fliptronic Flipper driver
+ *
+ * It is a more specific version of the special solenoid driver.
+ *
+ * id is the flipper number (0-3).
+ */
+
+@@class flipper
+@@parameter id
+
+@@
+@@file @class.h
+@@
+
+#ifndef __@class_DRIVER_H
+#define __@class_DRIVER_H
+
+extern __fastram__ U8 @class_enables;
+extern __fastram__ U8 @class_running;
+
+#endif /* __@class_DRIVER_H */
+
+
+@@
+@@file @self.h
+@@
+
+#include <@class.h>
+
+#undef INST_MASK
+#define INST_MASK (1 << @instance)
+
+#undef SOL_POWER
+#define SOL_POWER (32 + @instance * 2)
+#undef SOL_HOLD
+#define SOL_HOLD (32 + @instance * 2 + 1)
+
+#undef SW_EOS
+#define SW_EOS (72 + @instance * 2)
+#undef SW_BUTTON
+#define SW_BUTTON (72 + @instance * 2 + 1)
+
+extern __fastram__ U8 @self_timer;
+
+extern inline U8 @self_enabled_p (void)
+{
+	return @class_enables & INST_MASK;
+}
+
+
+extern inline U8 @self_running_p (void)
+{
+	return @class_running & INST_MASK;
+}
+
+
+extern inline void @self_service (void)
+{
+	/* If the timer is nonzero, then either the solenoid
+	is ON, or it is in its forced OFF phase.  It is
+	not necessary to poll the switch here. */
+	if (unlikely (@self_timer))
+	{
+		/* Decrement the timer. */
+		@self_timer--;
+
+		if (@self_running_p ())
+		{
+			/* If the timer expires in the ON phase, then
+			switch to the OFF phase.  Also, turn off the
+			solenoid now. */
+			sol_disable (@sol);
+			if (@self_timer == 0)
+			{
+				@self_timer = @offtime;
+				@class_running &= ~INST_MASK;
+			}
+		}
+	}
+	else if (@self_enabled_p () && rt_switch_poll (@sw))
+	{
+		/* When the solenoid is not running, poll its switch
+		and see if it should be started. */
+		sol_enable (@sol);
+		@class_running |= INST_MASK;
+		@self_timer = @ontime;
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include <@self.h>
+
+@@classvar __fastram__ U8 flippers_enabled;
+@@classvar __fastram__ U8 @class_running;
+__fastram__ U8 @self_timer;
+
+/* Initialize the device */
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = 0;
+	flippers_enabled = 0;
+}
+
+/* Enable the device at start ball */
+CALLSET_ENTRY (@self, start_ball)
+{
+	flippers_enabled = 1;
+}
+
+/* Disable the device at end ball/tilt */
+CALLSET_ENTRY (@self, end_ball)
+{
+	flippers_enabled = 0;
+}
+
+CALLSET_ENTRY (@self, tilt)
+{
+	flippers_enabled = 0;
+}
+
+/* vim: set filetype=c: */
