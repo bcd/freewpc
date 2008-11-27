@@ -22,38 +22,53 @@
 #include <window.h>
 #include <test.h>
 
-
-void wcs_goalie_test_init (void)
-{
-}
+extern U8 goalie_status;
+extern U8 goalie_distance;
+extern __machine__ void goalie_status_display (void);
+extern __machine__ void goalie_test_toggle (void);
+extern __machine__ void goalie_command (U8 command);
 
 void wcs_goalie_test_draw (void)
 {
-	extern __machine__ void goalie_status_display (void);
 	goalie_status_display ();
 }
 
 void wcs_goalie_test_enter (void)
 {
-	extern __machine__ void goalie_test_toggle (void);
 	goalie_test_toggle ();
 }
 
 void wcs_goalie_test_up (void)
 {
+	if (!(goalie_status & 0x10))
+		if (goalie_distance < 20)
+			goalie_command ((goalie_distance + 1) | 0x30);
 }
 
 void wcs_goalie_test_down (void)
 {
+	if (!(goalie_status & 0x10))
+		if (goalie_distance > 0)
+			goalie_command ((goalie_distance - 1) | 0x30);
+}
+
+void wcs_goalie_test_thread (void)
+{
+	for (;;)
+	{
+		dmd_alloc_low_clean ();
+		wcs_goalie_test_draw ();
+		dmd_show_low ();
+		task_sleep (TIME_100MS);
+	}
 }
 
 struct window_ops wcs_goalie_test_window = {
 	DEFAULT_WINDOW,
-	.init = wcs_goalie_test_init,
-	.draw = wcs_goalie_test_draw,
 	.enter = wcs_goalie_test_enter,
 	.up = wcs_goalie_test_up,
 	.down = wcs_goalie_test_down,
+	.thread = wcs_goalie_test_thread,
 };
 
 

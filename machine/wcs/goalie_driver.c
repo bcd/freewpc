@@ -80,6 +80,7 @@ void goalie_test_toggle (void)
 CALLSET_ENTRY (goalie_driver, sw_goalie_left)
 {
 	goal_edges_seen |= GOAL_EDGE_LEFT_SEEN;
+	goalie_errors &= ~GOAL_EDGE_LEFT_SEEN;
 	if (goalie_position == GOALIE_LEFT_TO_RIGHT)
 	{
 		/* TODO - right opto not seen.
@@ -93,13 +94,15 @@ CALLSET_ENTRY (goalie_driver, sw_goalie_left)
 CALLSET_ENTRY (goalie_driver, sw_goalie_right)
 {
 	goal_edges_seen |= GOAL_EDGE_RIGHT_SEEN;
+	goalie_errors &= ~GOAL_EDGE_RIGHT_SEEN;
 	if (goalie_position == GOALIE_RIGHT_TO_LEFT)
 	{
 		/* TODO - left opto not seen. */
 	}
 	else
 	{
-		goal_width = goalie_distance;
+		if (goalie_distance > goal_width)
+			goal_width = goalie_distance;
 	}
 	goalie_position = GOALIE_RIGHT_TO_LEFT;
 }
@@ -159,7 +162,7 @@ CALLSET_ENTRY (goalie_driver, idle_every_second)
 
 void goalie_recalibrate (void)
 {
-	goal_width = 0;
+	goal_width = 7;
 	goal_edges_seen = 0;
 	goalie_errors = 0;
 	goalie_position = GOALIE_LOST;
@@ -209,12 +212,14 @@ CALLSET_ENTRY (goalie_driver, diagnostic_check)
 {
 	while (goalie_status & GOALIE_CALIBRATING)
 		task_sleep (TIME_100MS);
+#if 0
 	if (goalie_errors)
 		diag_post_error ("GOALIE IS", "NOT WORKING");
+#endif
 }
 
 
-CALLSET_ENTRY (goalie_driver, init)
+CALLSET_ENTRY (goalie_driver, init_complete)
 {
 	goalie_recalibrate ();
 }

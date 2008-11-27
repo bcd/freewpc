@@ -180,8 +180,8 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 38: Shooter, edge, noscore, shooter
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
-43: Goalie Left, noscore, opto
-44: Goalie Right, noscore, opto
+43: Goalie Left, noplay, intest, opto
+44: Goalie Right, noplay, intest, opto
 45: TV Popper, opto, ingame
 46: Unused
 47: Travel Lane, ingame
