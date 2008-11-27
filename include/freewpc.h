@@ -178,9 +178,7 @@ extern U8 idle_ok;
 #include <sys/sound.h>
 #include <sys/switch.h>
 #include <sys/flip.h>
-#if (MACHINE_DMD == 1)
-#include <sys/dmd.h>
-#endif
+#include <sys/display.h>
 #include <sys/triac.h>
 #include <sys/rtc.h>
 
