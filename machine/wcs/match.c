@@ -95,7 +95,7 @@ void match_running_deff (void)
 		font_render_string_right (&font_fixed10, 122, 18, sprintf_buffer);
 
 		sprintf_current_score ();
-		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
+		font_render_string_center (&font_num5x7, 64, 3, sprintf_buffer);
 
 		dmd_show_low ();
 
