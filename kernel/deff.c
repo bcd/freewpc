@@ -372,12 +372,16 @@ void deff_update (void)
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
-	if (deff_running != deff_background)
+	if (deff_running && (deff_running != deff_background))
+	{
+		deff_debug ("no update: running=%d, bg=%d\n",
+			deff_running, deff_background);
 		return;
+	}
 
 	/* Recalculate which display effect should run in the
 	background */
-	previous = deff_background;
+	previous = deff_running;
 	deff_prio = 0;
 	deff_background = DEFF_NULL;
 	callset_invoke (display_update);
