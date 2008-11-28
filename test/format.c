@@ -155,7 +155,7 @@ void time_interval_render (U8 val)
 
 	if (val > TIME_200MS)
 	{
-		sprintf ("???");
+		sprintf ("BIG");
 		return;
 	}
 
