@@ -430,8 +430,12 @@ extern inline void wpc_int_clear (void)
 
 extern inline U8 wpc_read_ac_zerocross (void)
 {
+#ifdef CONFIG_NO_ZEROCROSS
+	return 0;
+#else
 	U8 val = readb (WPC_ZEROCROSS_IRQ_CLEAR);
 	return (val & 0x80);
+#endif
 }
 
 

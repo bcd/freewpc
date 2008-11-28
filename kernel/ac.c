@@ -40,9 +40,11 @@ __fastram__ U8 zc_timer;
 #ifdef CONFIG_NO_ZEROCROSS
 #define zc_status ZC_BROKEN
 #define zc_set_status(x)
+#define ZC_MAX_PERIOD 8
 #else
 zc_status_t zc_status;
 #define zc_set_status(x) zc_status = x
+#define ZC_MAX_PERIOD 11
 #endif
 
 
@@ -91,7 +93,7 @@ void ac_rtt (void)
 
 		/* Increment the crossing counter. */
 		zc_timer++;
-		if (unlikely (zc_timer > 11))
+		if (unlikely (zc_timer > ZC_MAX_PERIOD))
 		{
 			/* We should have gotten a zero crossing by now, but
 			we didn't.  We'll just pretend we got one anyway. */
