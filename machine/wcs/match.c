@@ -171,8 +171,8 @@ void match_won_deff (void)
 void match_lost_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 10, "SHOOT SPINNER");
-	font_render_string_center (&font_mono5, 64, 22, "TO RESTART MATCH");
+	font_render_string_center (&font_fixed10, 64, 10, "SPINNER");
+	font_render_string_center (&font_mono5, 64, 22, "RESTARTS MATCH");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -181,8 +181,8 @@ void match_lost_deff (void)
 void goal_unlit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 10, "SHOOT RAMPS TO");
-	font_render_string_center (&font_mono5, 64, 22, "RELIGHT GOAL");
+	font_render_string_center (&font_fixed10, 64, 10, "SHOOT RAMPS");
+	font_render_string_center (&font_mono5, 64, 22, "TO RELIGHT GOAL");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
