@@ -404,8 +404,7 @@ void lamp_update_task (void)
 /** Request that the lamps be updated.
  * Lamp update runs in a separate task context, and it
  * only happens during a game.
- * TODO : lamp update should not happen more than once
- * per 500ms. */
+ */
 void lamp_update_request (void)
 {
 	if (in_live_game)
@@ -419,7 +418,7 @@ void lamp_update_request (void)
 
 
 /** Periodically update the lamps.  Currently this is done
- * every 200ms (every other call to the 100ms callback).
+ * every 500ms.
  *
  * This is intended to be used during a game for recomputing
  * the states of lamps with multiple conditions that feed into
@@ -428,14 +427,16 @@ void lamp_update_request (void)
  *
  * There is a performance penalty for doing this too frequently,
  * but it simplifies the game logic considerably and also
- * makes bugs less likely.  Also, 200ms is not too often and it
- * is still frequent enough for it not to be noticeable. */
+ * makes bugs less likely.  Also, 500ms is not too often but it
+ * is frequent enough for it not to be noticeable. */
 CALLSET_ENTRY (lamp, idle_every_100ms)
 {
-	static U8 every_other_time = 0;
-	every_other_time = ~every_other_time;
-	if (every_other_time)
+	static U8 counter = 0;
+	if (++counter == 5)
+	{
+		counter = 0;
 		lamp_update_request ();
+	}
 }
 
 
