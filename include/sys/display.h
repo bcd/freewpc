@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef CONFIG_DMD
+#if (MACHINE_DMD == 1)
 
 #include <sys/dmd.h>
 
@@ -44,10 +44,7 @@
 #define display_alloc_low_clean dmd_alloc_low_clean
 #define display_alloc_pair_clean dmd_alloc_pair_clean
 
-#endif /* CONFIG_DMD */
-
-
-#ifdef CONFIG_SEGMENT
+#else /* not DMD, using alphanumeric segment displays */
 
 #include <sys/segment.h>
 
@@ -73,7 +70,7 @@
 #define display_alloc_low_clean seg_alloc_low_clean
 #define display_alloc_pair_clean seg_alloc_pair_clean
 
-#endif /* CONFIG_SEGMENT */
+#endif
 
 /* Derived definitions.  These are truly in common for all
 display types. */
