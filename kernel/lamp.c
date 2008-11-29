@@ -120,8 +120,10 @@ extern inline void lamp_rtt_common (const U8 mode)
 	/* Setup the strobe */
 	pinio_write_lamp_data (0);
 
+#ifdef BCD_WCS
 	if (lamp_strobe_mask != 0x80)
-		pinio_write_lamp_strobe (lamp_strobe_mask);
+#endif
+	pinio_write_lamp_strobe (lamp_strobe_mask);
 
 	/* Advance the strobe value for the next iteration.
 	Keep this together with the above so that lamp_strobe_mask
@@ -164,8 +166,12 @@ extern inline void lamp_rtt_common (const U8 mode)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
+#ifdef BCD_WCS
 	if (lamp_strobe_mask != 0x80)
 		pinio_write_lamp_data (bits & 0x7F);
+#else
+	pinio_write_lamp_data (bits);
+#endif
 
 	/* Advance strobe to next position for next iteration */
 	lamp_strobe_column++;
