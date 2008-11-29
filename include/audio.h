@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,47 +22,9 @@
 #define __AUDIO_H
 
 
-/** A bitmask that says an audio clip should try to use a particular
-channel. */
-#define AUDIO_CH(n)	(1 << (n))
-
-/* The 8 channels are allocated for different purposes.
- * The order of these bits is in order from most frequent to least. */
-#define AUDIO_SAMPLE1           0x1
-#define AUDIO_SAMPLE2           0x2
-#define AUDIO_SAMPLE3           0x4
-#define AUDIO_BACKGROUND_MUSIC  0x8
-#define AUDIO_SPEECH1           0x10
-#define AUDIO_SPEECH2           0x20
-#define AUDIO_FOREGROUND_MUSIC  0x40
-#define AUDIO_RESERVED          0x80
-
-#define AUDIO_CH_SAMPLE1        0
-#define AUDIO_CH_SAMPLE2        1
-#define AUDIO_CH_SAMPLE3        2
-#define AUDIO_CH_BACKGROUND     3
-#define AUDIO_CH_SPEECH1        4
-#define AUDIO_CH_SPEECH2        5
-#define AUDIO_CH_FOREGROUND     6
-
 /** The total number of audio channels supported.  At most 8 can
  * be supported due to the way channel bitmasks are used. */
 #define NUM_AUDIO_CHANNELS 8
-
-
-/** The total number of stacked background tracks */
-#define NUM_STACKED_TRACKS 8
-
-/** The audio channel structure. */
-typedef struct {
-	/** The task that currently owns the channel.
-	 * If this is zero, the channel is free and may be allocated
-	 * for a new clip. */
-	task_pid_t pid;
-
-	/** The priority of the clip that currently owns the channel. */
-	priority_t prio;
-} audio_channel_t;
 
 
 /** A background track */
@@ -75,20 +37,68 @@ typedef struct {
 	U8 code;
 } audio_track_t;
 
-void audio_dump (void);
-void audio_start (U8 channel_mask, task_function_t fn, U8 fnpage, U16 data);
-void audio_stop (U8 channel_id);
-void audio_exit (void);
-void bg_music_start (const audio_track_t *track);
-void bg_music_stop (const audio_track_t *track);
-void bg_music_stop_all (void);
 
 /* New style */
-
 
 #define MAX_TRACKS 8
 __common__ void music_start (const audio_track_t track);
 __common__ void music_stop (const audio_track_t track);
 __common__ void music_stop_all (void);
+
+/* Really new sound system */
+
+#define MAX_SOUND_CHANNELS 4
+
+#define MUSIC_CHANNEL 0
+
+#define ST_MUSIC   0x1
+#define ST_SPEECH  0x2
+#define ST_SAMPLE  0x4
+#define ST_EFFECT  0x8
+#define ST_ANY     (ST_SAMPLE | ST_EFFECT)
+
+#define SP_NORMAL  PRI_NULL
+
+#define SL_100MS   1
+#define SL_500MS   5
+#define SL_1S      10
+#define SL_2S      20
+#define SL_3S      30
+#define SL_4S      40
+
+typedef struct
+{
+	/** The time, in 100ms units, until this channel becomes
+	 * free. */
+	U8 timer;
+
+	/** The current priority of the sound that is using
+	 * this channel right now. */
+	U8 prio;
+} sound_channel_t;
+
+__effect__ void music_refresh (void);
+__effect__ void music_request (sound_code_t music, U8 prio);
+__effect__ void sound_start1 (U8 channels, sound_code_t code);
+
+extern inline void sound_start (U8 channels, sound_code_t code, U8 duration, U8 prio)
+{
+	extern U8 sound_start_duration;
+	extern U8 sound_start_prio;
+
+	sound_start_duration = duration;
+	sound_start_prio = prio;
+	sound_start1 (channels, code);
+}
+
+extern inline void speech_start (sound_code_t code, U8 duration)
+{
+	sound_start (ST_SPEECH, code, duration, SP_NORMAL);
+}
+
+extern inline void music_effect_start (sound_code_t code, U8 duration)
+{
+	sound_start (ST_MUSIC, code, duration, SP_NORMAL);
+}
 
 #endif /* __AUDIO_H */

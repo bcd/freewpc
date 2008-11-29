@@ -74,7 +74,7 @@
 #define SND_ULTRA_SPINNER        MUSIC_SND(0x98)
 #define SND_MOO                  MUSIC_SND(0x9A)
 #define SND_CROWD_NOISE          MUSIC_SND(0x9D)
-#define SND_CROWD_CHEER          MUSIC_SND(0xA0
+#define SND_CROWD_CHEER          MUSIC_SND(0xA0)
 #define SND_CROWD_HAPPY          MUSIC_SND(0xA1)
 #define SND_CROWD_AWW            MUSIC_SND(0xA2)
 #define SND_CROWD_BOO            MUSIC_SND(0xA3)

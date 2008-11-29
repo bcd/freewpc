@@ -71,11 +71,6 @@ void db_idle (void)
 			char c = wpc_debug_read ();
 			switch (c)
 			{
-				case 'a':
-					/* Dump the audio table */
-					SECTION_VOIDCALL (__common__, audio_dump);
-					break;
-
 				case 't':
 					/* Dump the task table */
 					VOIDCALL (task_dump);

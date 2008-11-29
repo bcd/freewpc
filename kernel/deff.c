@@ -240,6 +240,9 @@ void deff_restart (deffnum_t dn)
 	else if (0) /* deff_pending_p (dn) */
 	{
 		/* TODO : See if the request is pending and cancel it. */
+	}
+	else
+	{
 		deff_start (dn);
 	}
 }
@@ -257,6 +260,7 @@ __noreturn__ void deff_exit (void)
 
 	deff_running = 0;
 	deff_update ();
+	music_refresh ();
 	task_exit ();
 }
 

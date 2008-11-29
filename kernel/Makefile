@@ -19,6 +19,7 @@ KERNEL_BASIC_OBJS += kernel/sysinfo.o
 # Software kernel modules are hardware-agnostic, but may depend
 # on machine flags and so need to be recompiled when the machine
 # flags change.
+KERNEL_HW_OBJS += kernel/audio.o
 KERNEL_SW_OBJS += kernel/deff.o
 KERNEL_SW_OBJS += $(if $(CONFIG_FONT), kernel/font.o)
 KERNEL_SW_OBJS += kernel/game.o
@@ -36,7 +37,6 @@ KERNEL_SW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/score.o)
 # from interrupt context.
 KERNEL_HW_OBJS += $(if $(CONFIG_AC), kernel/ac.o)
 KERNEL_HW_OBJS += kernel/adj.o
-KERNEL_HW_OBJS += $(if $(CONFIG_WHITESTAR),,kernel/audio.o)
 KERNEL_HW_OBJS += kernel/audit.o
 KERNEL_HW_OBJS += kernel/csum.o
 KERNEL_HW_OBJS += $(if $(CONFIG_DMD), kernel/dmd.o)

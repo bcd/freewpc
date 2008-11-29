@@ -102,6 +102,10 @@ typedef U16 sound_cmd_t;
 #define SND_TEST_ENTER			TEST_SND(0xDB)
 #define SND_TEST_ESCAPE			TEST_SND(0xDC)
 #define SND_TEST_SCROLL			TEST_SND(0xDD)
+#define SND_INIT_CH0          TEST_SND(0xE3)
+#define SND_INIT_CH1          TEST_SND(0xE4)
+#define SND_INIT_CH2          TEST_SND(0xE5)
+#define SND_INIT_CH3          TEST_SND(0xE6)
 #define SND_GET_VERSION_CMD	TEST_SND(0xE7)
 #define SND_GET_MINOR_VERSION_CMD TEST_SND(0xE8)
 

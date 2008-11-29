@@ -75,15 +75,9 @@ U8 sound_board_type;
 
 
 /** The default audio track to be played when setting volume. */
-const audio_track_t volume_change_music_track = {
-	.prio = PRI_VOLUME_CHANGE_MUSIC,
-#ifdef MACHINE_VOLUME_CHANGE_MUSIC
-	.code = MACHINE_VOLUME_CHANGE_MUSIC
-#else
-	.code = 2,
+#ifndef MACHINE_VOLUME_CHANGE_MUSIC
+#define MACHINE_VOLUME_CHANGE_MUSIC 2
 #endif
-};
-
 
 /** Renders the sound board version into the print buffer. */
 bool sound_version_render (void)
@@ -124,7 +118,7 @@ static void sound_read_queue_init (void)
 
 
 /** Queues a byte for transmit to the sound board */
-static void sound_write_queue_insert (U8 val)
+static __attribute__((noinline)) void sound_write_queue_insert (U8 val)
 {
 	queue_insert ((queue_t *)&sound_write_queue, SOUND_QUEUE_LEN, val);
 }
@@ -346,14 +340,10 @@ exit_func:
 }
 
 
-/** Send a command to the sound board. */
-void sound_send (sound_code_t code)
+__attribute__((noinline)) void sound_write (sound_code_t code)
 {
 	U8 code_lo;
 	U8 code_hi;
-
-	if (current_volume == 0)
-		return;
 
 #if 0 // #ifdef __m6809__
 	/* GCC still is doing this inefficiently, so we are
@@ -381,6 +371,22 @@ void sound_send (sound_code_t code)
 #endif
 		sound_write_queue_insert (code_lo);
 	}
+}
+
+
+/** Send a command to the sound board. */
+void sound_send (sound_code_t code)
+{
+	if (current_volume == 0)
+		return;
+
+	sound_start (ST_ANY, code, SL_500MS, 1);
+#if 0
+#if (MACHINE_DCS == 1)
+	sound_write (SND_INIT_CH3);
+#endif
+	sound_write (code);
+#endif
 }
 
 
@@ -429,16 +435,20 @@ CALLSET_ENTRY (sound, factory_reset)
 }
 
 
+CALLSET_ENTRY (sound, music_refresh)
+{
+	if (deff_get_active () == DEFF_VOLUME_CHANGE)
+		music_request (MACHINE_VOLUME_CHANGE_MUSIC, PRI_VOLUME_CHANGE_MUSIC);
+}
+
+
 /** Decrease the master volume */
 CALLSET_ENTRY (sound, volume_down)
 {
 	if (current_volume > MIN_VOLUME)
-	{
 		volume_set (current_volume-1);
-		task_sleep (TIME_100MS);
-	}
-	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
+	music_refresh ();
 }
 
 
@@ -446,11 +456,8 @@ CALLSET_ENTRY (sound, volume_down)
 CALLSET_ENTRY (sound, volume_up)
 {
 	if (current_volume < MAX_VOLUME)
-	{
 		volume_set (current_volume+1);
-		task_sleep (TIME_100MS);
-	}
-	music_start (volume_change_music_track);
 	deff_restart (DEFF_VOLUME_CHANGE);
+	music_refresh ();
 }
 

@@ -22,12 +22,16 @@
 
 /* CALLSET_SECTION (sound_effect, __effect__) */
 
-U8 speech_prio;
+/** Tracks the status of each audio channel */
+sound_channel_t chtab[MAX_SOUND_CHANNELS];
 
+/** The highest priority music requested during the current refresh */
 U8 music_prio;
 
+/** The best music code requested so far during the current refresh */
 sound_code_t music_requested;
 
+/** The music that is currently playing, or zero if none */
 sound_code_t music_active;
 
 
@@ -39,7 +43,10 @@ sound_code_t music_active;
 void music_request (sound_code_t music, U8 prio)
 {
 	if (prio > music_prio)
+	{
+		dbprintf ("New music 0x%04lX at prio %d\n", music, prio);
 		music_requested = music;
+	}
 }
 
 
@@ -48,12 +55,27 @@ void music_request (sound_code_t music, U8 prio)
  */
 void music_refresh_task (void)
 {
+	dbprintf ("Refreshing music\n");
+
 	music_prio = 0;
 	music_requested = 0;
+
 	callset_invoke (music_refresh);
+
 	if (music_requested != music_active)
-		sound_send (music_requested);
-	music_active = music_requested;
+	{
+		if (music_requested != 0)
+		{
+			dbprintf ("Music now %04lX\n", music_requested);
+			sound_write (music_requested);
+		}
+		else
+		{
+			dbprintf ("Music now off\n");
+			music_off ();
+		}
+		music_active = music_requested;
+	}
 	task_exit ();
 }
 
@@ -63,48 +85,101 @@ void music_refresh_task (void)
  */
 void music_refresh (void)
 {
-	if (in_live_game)
+	task_recreate_gid (GID_MUSIC_REFRESH, music_refresh_task);
+}
+
+
+/**
+ * Invoked periodically to see if any running sound effects
+ * have stopped.
+ */
+CALLSET_ENTRY (sound_effect, idle_every_100ms)
+{
+	U8 chid;
+
+	for (chid = 0; chid < MAX_SOUND_CHANNELS; chid++)
 	{
-		task_create_gid1 (GID_MUSIC_REFRESH, music_refresh_task);
-	}
-	else
-	{
-		music_off ();
+		sound_channel_t *ch = ch = chtab + chid;
+		if (ch->timer)
+		{
+			if (--ch->timer == 0)
+			{
+				dbprintf ("Sound on channel %d done.\n", chid);
+				ch->prio = 0;
+				if (chid == MUSIC_CHANNEL)
+				{
+					music_refresh ();
+				}
+			}
+		}
 	}
 }
 
 
 /**
- * Invoke a sound board command for speech.
- * DURATION says how long the speech will take to complete.
+ * Start a sound effect.
+ * CHANNELS is one or more channels that it may be allocated to,
+ *    provided as a bitmask.
+ *
+ * CODE says which sound to play.
+ *
+ * DURATION says how long the sound will take to complete.
+ *    If zero, the sound could be preempted at any time and is
+ *    not tracked.
+ *
  * PRIORITY controls whether or not the call will be made,
  * if another speech call is in progress.
  */
-void speak (sound_code_t code,
-				task_ticks_t duration,
-				U8 prio)
+
+U8 sound_start_duration;
+U8 sound_start_prio;
+
+void sound_start1 (U8 channels, sound_code_t code)
 {
-	if (prio > speech_prio)
+	U8 chid;
+	U8 chbit;
+
+	for (chid = 0, chbit = 0x1; chid < MAX_SOUND_CHANNELS; chid++, chbit <<= 1)
 	{
+		sound_channel_t *ch;
+
+		/* Skip this channel if it is not in the list that the caller
+		 * suggested. */
+		if (!(chbit & channels))
+			continue;
+
+		/* Is this channel free?   If not, can we take it due to priority? */
+		ch = chtab + chid;
+		if (ch->timer == 0 || sound_start_prio >= ch->prio)
+		{
+			/* Yes, we can use it */
+
+			/* If a duration was given, then don't allow another request
+			 * to use the channel until it is done. */
+			if (sound_start_duration != 0)
+			{
+				ch->timer = sound_start_duration;
+				ch->prio = sound_start_prio;
+			}
+
+			if (chid == MUSIC_CHANNEL)
+				music_active = 0;
+
+			/* Cancel any sound running on the channel now */
+			//sound_write (SND_INIT_CH0 + chid);
+
+			/* Write to the sound board and return */
+			dbprintf ("Start sound %04lX on channel %d\n", code, chid);
+			sound_write (code);
+			return;
+		}
 	}
-}
-
-
-/**
- * Make a sound call then refresh the background music
- * when it has completed.
- */
-void sound_play_with_refresh (sound_code_t code,
-										task_ticks_t duration)
-{
-	sound_send (code);
-	task_sleep (duration);
-	music_refresh ();
 }
 
 
 CALLSET_ENTRY (sound_effect, init)
 {
-	speech_prio = 0;
+	memset (chtab, 0, sizeof (chtab));
+	music_active = 0;
 	music_refresh ();
 }

@@ -26,7 +26,6 @@
 extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
 extern __nvram__ U8 current_volume;
-extern const audio_track_t volume_change_music_track;
 
 
 void ball_save_deff (void)
@@ -103,7 +102,6 @@ void volume_change_deff (void)
 		task_sleep_sec (3);
 	else
 		task_sleep_sec (5);
-	music_stop (volume_change_music_track);
 	deff_exit ();
 }
 

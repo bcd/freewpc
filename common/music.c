@@ -32,7 +32,6 @@
 
 
 /** The array of all queued music tracks */
-/* TODO : these should be dynamically allocated */
 audio_track_t music_tracks[MAX_TRACKS];
 
 /** The index into 'music_tracks' denoting the entry which is currently
