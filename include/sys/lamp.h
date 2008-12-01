@@ -180,6 +180,7 @@ void lamplist_build_decrement (lamplist_id_t id, bitset matrix);
 void lamplist_rotate_next (lamplist_id_t id, bitset matrix);
 void lamplist_rotate_previous (lamplist_id_t id, bitset matrix);
 void lamplist_set_count (lamplist_id_t set, U8 count);
+bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op);
 
 __attribute__((noinline)) void matrix_all_on (bitset matrix);
 __attribute__((noinline)) void matrix_all_off (bitset matrix);
