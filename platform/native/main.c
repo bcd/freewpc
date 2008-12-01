@@ -519,14 +519,6 @@ void sim_switch_effects (int swno)
 }
 
 
-static void wpc_sound_reset (void)
-{
-#ifdef CONFIG_UI
-	ui_write_sound_reset ();
-#endif
-}
-
-
 /** Simulate the write of a WPC I/O register */
 void linux_asic_write (IOPTR addr, U8 val)
 {
@@ -668,11 +660,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 
 		case WPCS_DATA:
-#ifdef CONFIG_UI
-			ui_write_sound_call (val);
-#else
-			simlog (SLC_SOUNDCALL, "%02X", val);
-#endif
+			wpc_sound_write (val);
 			break;
 
 		case WPCS_CONTROL_STATUS:

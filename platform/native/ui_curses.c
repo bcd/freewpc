@@ -137,17 +137,18 @@ void ui_write_switch (int switchno, int on_flag)
 }
 
 
-void ui_write_sound_call (unsigned int x)
+void ui_write_sound_command (unsigned int x)
 {
-	wprintw (sound_win, "%02X\n", x);
+	wmove (sound_win, 2, 2);
+	wprintw (sound_win, "%04X\n", x);
 	wrefresh (sound_win);
 }
 
 
 void ui_write_sound_reset (void)
 {
-	wmove (sound_win, 2, 3);
-	wprintw (sound_win, "  ");
+	wmove (sound_win, 2, 2);
+	wprintw (sound_win, "    ");
 	wrefresh (sound_win);
 }
 
