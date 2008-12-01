@@ -43,11 +43,6 @@ U8 greed_sounds[] = {
 U8 greed_round_timer;
 
 
-static const audio_track_t greed_round_music = {
-	.prio = PRI_GAME_MODE1,
-	.code = MUS_GREED_ROUND,
-};
-
 void greed_round_deff (void)
 {
 	for (;;)
@@ -140,14 +135,12 @@ void greed_round_begin (void)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
-	music_start (greed_round_music);
 	deff_start (DEFF_GREED_ROUND);
 }
 
 void greed_round_expire (void)
 {
 	deff_stop (DEFF_GREED_ROUND);
-	music_stop (greed_round_music);
 }
 
 void greed_round_end (void)
@@ -160,6 +153,12 @@ void greed_round_task (void)
 {
 	timed_mode_task (greed_round_begin, greed_round_expire, greed_round_end,
 		&greed_round_timer, 20, 3);
+}
+
+CALLSET_ENTRY (greed, music_refresh)
+{
+	if (deff_get_active () == DEFF_GREED_ROUND)
+		music_request (MUS_GREED_ROUND, PRI_GAME_MODE1);
 }
 
 CALLSET_ENTRY (greed, door_start_greed)
