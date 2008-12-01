@@ -183,11 +183,14 @@ void deff_start (deffnum_t id)
 	deff_debug ("deff_start\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_START, id);
 
-	/* Nothing to do if it's already running */
+	/* Nothing to do if it's already running, unless it's
+	 * marked RESTARTABLE. */
 	if (id == deff_running)
 	{
-		deff_debug ("deff already running\n");
-		return;
+		if (deff->flags & D_RESTARTABLE)
+			deff_start_task (deff);
+		else
+			return;
 	}
 
 	/* This effect can take the display now if it has priority.
@@ -349,7 +352,7 @@ void deff_stop_all (void)
  */
 void deff_start_bg (deffnum_t dn, enum _priority prio)
 {
-	deff_debug ("deff_start_bg %d, %d\n", dn, prio);
+	deff_debug ("deff_start_bg %d, prio %d\n", dn, prio);
 	if (prio == 0)
 	{
 		const deff_t *deff = &deff_table[dn];

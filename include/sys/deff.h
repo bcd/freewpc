@@ -70,6 +70,9 @@ on the playfield. */
  * meantime. */
 #define D_SCORE 0x10
 
+/** Set for a deff that is allowed to preempt itself */
+#define D_RESTARTABLE 0x20
+
 /** A constant descriptor for a display effect. */
 typedef struct
 {
