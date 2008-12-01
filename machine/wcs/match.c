@@ -129,10 +129,11 @@ void yards_awarded_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("%d MORE YARDS", yards_to_go);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 20, "TO LIGHT GOAL");
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 21, "TO LIGHT GOAL");
+	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -153,7 +154,7 @@ void goal_scored_deff (void)
 	sprintf ("WIN MATCH AT %d", match_params[match_number].goals_needed);
 	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -221,7 +222,7 @@ void wcs_finish_match (void)
 	}
 	else
 	{
-		sound_send (MUS_TEA_PARTY_WON);
+		music_effect_start (MUS_TEA_PARTY_WON, SL_3S);
 		deff_start (DEFF_MATCH_WON);
 		task_yield ();
 	}
@@ -260,9 +261,16 @@ static inline bool match_in_progress_p (void)
 	return (in_live_game && yards_to_go && !spinners_needed);
 }
 
+
+static inline bool goal_ready_p (void)
+{
+	return (in_live_game && !yards_to_go);
+}
+
+
 void award_match_goal (void)
 {
-	if (match_in_progress_p ())
+	if (goal_ready_p ())
 	{
 		++match_goals_scored;
 		sound_send (SPCH_GOALLL);
@@ -301,7 +309,7 @@ void advance_yards (U8 yards)
 	}
 	else
 	{
-		deff_start (DEFF_YARDS_AWARDED);
+		deff_restart (DEFF_YARDS_AWARDED);
 		yards_to_go -= yards;
 	}
 }
@@ -318,7 +326,7 @@ static inline void lamp_update_goals (U8 count, U8 lamp)
 
 CALLSET_ENTRY (wcs_match, display_update)
 {
-	if (match_in_progress_p ())
+	if (valid_playfield && match_in_progress_p ())
 		deff_start_bg (DEFF_MATCH_RUNNING, 0);
 }
 
@@ -389,11 +397,6 @@ CALLSET_ENTRY (wcs_match, left_ramp_shot)
 CALLSET_ENTRY (wcs_match, right_ramp_shot)
 {
 	advance_yards (30);
-}
-
-CALLSET_ENTRY (wcs_match, any_rollover)
-{
-	advance_yards (5);
 }
 
 CALLSET_ENTRY (wcs_match, sw_spinner_slow)
