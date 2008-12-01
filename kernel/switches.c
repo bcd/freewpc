@@ -616,8 +616,8 @@ void switch_service_queue (void)
 			{
 				/* Debounce is fully complete. */
 				dbprintf ("debounced\n");
-				switch_queue_remove (entry);
 				switch_transitioned (entry->id);
+				switch_queue_remove (entry);
 			}
 			else
 			{
@@ -779,7 +779,8 @@ CALLSET_ENTRY (switch, idle)
 			U8 sw = col * 8;
 			do {
 				if (rows & 1)
-					switch_update_stable (sw);
+					if (!bit_test (sw_queued, sw))
+						switch_update_stable (sw);
 				rows >>= 1;
 				sw++;
 			} while (rows);
