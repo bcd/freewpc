@@ -508,6 +508,7 @@ void set_valid_playfield (void)
 		valid_playfield = TRUE;		
 		callset_invoke (valid_playfield);
 		music_refresh ();
+		deff_update ();
 	}
 }
 
@@ -554,8 +555,12 @@ void start_game (void)
 	
 		amode_stop ();
 		log_event (SEV_INFO, MOD_GAME, EV_START, 0);
+
+		/* Going through all of the start game hooks can take a while,
+		 * so sleep before/after to keep the system scheduling OK. */
+		task_sleep (TIME_33MS);
 		callset_invoke (start_game);
-		task_yield (); /* start_game can take awhile */
+		task_sleep (TIME_33MS);
 
 		/* Note: explicitly call this out last, after all other events
 		for start_game have been handled */
