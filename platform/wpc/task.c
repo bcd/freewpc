@@ -92,21 +92,9 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
-/* For determining the amount of idle time left on the 6809. */
+/** A count that represents idle time over the last 100ms. */
 #ifdef IDLE_PROFILE
-
-/** A counter for controlling how often we update the idle time
- * count.  Every 8 calls to the rtt, we will update the total
- * idle time from the amount of idle time that has accumulated
- * over the last 8ms. */
-U8 idle_rtt_calls;
-
-/** A count that represents idle time over the last 8ms.
- * It is not in any particular units. */
 U16 idle_time;
-
-/** The total amount of idle time since boot. */
-U16 last_idle_time;
 #endif
 
 #ifdef TASK_CHAINING
@@ -138,49 +126,51 @@ __attribute__((returns_twice)) void task_save (task_t *tp);
 __noreturn__ void task_restore (task_t *tp);
 
 
+/**
+ * Called every 100ms to report the idle time.
+ */
+CALLSET_ENTRY (idle_profile, idle_every_100ms)
+{
 #ifdef IDLE_PROFILE
-void idle_profile_rtt (void)
-{
-	wpc_debug_write ('.');
-	if (--idle_rtt_calls == 0)
+	/* Take a snapshot of the number of idle points within the
+	last 100ms.  Divide this number for 64 to smooth out the
+	readings.
+		Each tick is now roughly 25x64 = 1600 CPU cycles, or
+	about 0.83ms.
+		Thus, in a 100ms period, this number times 1.2 is a good
+	approximation of the percentage of idle time.
+	*/
+	static U8 last_idle_time = 0;
+
+	/* Round down */
+	idle_time /= 64;
+
+	/* Print it if it's different than last reading */
+	if (idle_time != last_idle_time)
 	{
-		last_idle_time += idle_time;
-		idle_time = 0;
-		idle_rtt_calls = 8;
+		last_idle_time = idle_time;
+		dbprintf ("I: %02X\n", last_idle_time);
 	}
-}
 
-void idle_profile_idle (void)
-{
-	/* last_idle_time represents the number of idle loops done
-	 * within the last 1 second (approximate).  Each loop is
-	 * about 24 cycles now. */
-	U16 printed_idle_time;
-
-	/* Read and clear the idle loop count */
-	disable_irq ();
-	printed_idle_time = last_idle_time;
-	last_idle_time = 0;
-	enable_irq ();
-
-	/* If nonzero, then print it */
-	if (printed_idle_time != 0)
-		dbprintf ("Idle %ld\n", printed_idle_time);
-	else
-		wpc_debug_write ('*');
-}
+	/* Clear the idle loop count */
+	idle_time = 0;
 #endif
+}
 
 
-__attribute__((noinline)) void cpu_idle (void)
+/**
+ * Called whenever the CPU is truly idle; there are no tasks to be
+ * scheduled and all idle callbacks have returned.
+ */
+static inline void cpu_idle (void)
 {
-	task_dispatching_ok = TRUE;
 	barrier ();
 #ifdef IDLE_PROFILE
-	noop ();
-	noop ();
-	noop ();
-	noop ();
+	/* When profiling, keep a count of the number of times
+	we have nothing to do. */
+	/* TODO - need to measure exactly, but 1 tick of this counter is
+	about 30 CPU cycles.   That equates to 65 ticks per 1ms; therefore
+	it can't overflow faster than about once per second. */
 	idle_time++;
 #endif
 }
@@ -659,9 +649,6 @@ void task_dispatcher (void)
 			debug very early initialization. */
 #ifdef CONFIG_PLATFORM_WPC
 			db_idle ();
-#ifdef IDLE_PROFILE
-			idle_profile_idle ();
-#endif	
 
 			/* If the system is fully initialized, run
 			 * the idle functions. */
@@ -679,6 +666,7 @@ void task_dispatcher (void)
 			last_dispatch_time = get_sys_time ();
 			while (likely (last_dispatch_time == get_sys_time ()))
 				cpu_idle ();
+			task_dispatching_ok = TRUE;
 			
 			/* Ensure that 'tp', which is in register X, is reloaded
 			with the correct task pointer.  The above functions may
@@ -753,8 +741,6 @@ void task_init (void)
 
 #ifdef IDLE_PROFILE
 	idle_time = 0;
-	last_idle_time = 0;
-	idle_rtt_calls = 8;
 #endif
 
 	/* Allocate a task for the first (current) thread of execution.
