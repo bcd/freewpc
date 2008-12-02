@@ -200,7 +200,8 @@ extern U8 idle_ok;
 #include <replay.h>
 #include <csum.h>
 #include <audio.h>
-#include <mode.h>
+#include <mode.h> /* deprecated */
+#include <timedmode.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #ifdef CONFIG_PLATFORM_WPC
