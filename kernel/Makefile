@@ -15,6 +15,7 @@ KERNEL_BASIC_OBJS += kernel/misc.o
 KERNEL_BASIC_OBJS += kernel/puts.o
 KERNEL_BASIC_OBJS += kernel/random.o
 KERNEL_BASIC_OBJS += kernel/sysinfo.o
+KERNEL_BASIC_OBJS += kernel/timedmode.o
 
 # Software kernel modules are hardware-agnostic, but may depend
 # on machine flags and so need to be recompiled when the machine
