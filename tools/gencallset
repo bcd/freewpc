@@ -154,12 +154,16 @@ foreach $src (@srclist) {
 		if ((/CALLSET_ENTRY[ \t]*\((.*)\)/) 
 			|| (/CALLSET_BOOL_ENTRY[ \t]*\((.*)\)/)) {
 			my $callset_entry_args = $1;
-			my ($module, $set) = split /, */, $callset_entry_args;
-			next if (!defined $module or !defined $set);
-			if (!defined $functionhash{$set}) {
-				$functionhash{$set} = "";
+			my ($module, @sets) = split /, */, $callset_entry_args;
+			next if (!defined $module or !defined $sets[0]);
+
+			my $primary = $sets[0];
+			foreach my $set (@sets) {
+				if (!defined $functionhash{$set}) {
+					$functionhash{$set} = "";
+				}
+				$functionhash{$set} .= "$module/$primary ";
 			}
-			$functionhash{$set} .= "$module ";
 
 			# Save the filename that declared this entry.
 			# Emit an error if later, a different filename
@@ -239,6 +243,9 @@ foreach $set (keys %functionhash) {
 	}
 
 	foreach $module (@modules) {
+		$module =~ s/\/(.*)$//;
+		my $primary = $1;
+
 		if (defined $modulesection{$module}) {
 			$modifier = " " . $modulesection{$module};
 		}
@@ -258,7 +265,7 @@ foreach $set (keys %functionhash) {
 		else {
 			$modifier = "";
 		}
-		print FH "   extern$modifier $rettype ${module}_$set (void);\n";
+		print FH "   extern$modifier $rettype ${module}_$primary (void);\n";
 		if ($rettype eq $bool_type) {
 			print FH "   if (!${module}_$set ()) return FALSE;\n";
 		}
@@ -268,7 +275,7 @@ foreach $set (keys %functionhash) {
 				print FH "   callset_debug ($idx);\n";
 				$debug_id++;
 			}
-			print FH "   ${module}_$set (); /* $modulehash{$module} */\n";
+			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
 		}
 	}
 	if ($rettype eq $bool_type) {
