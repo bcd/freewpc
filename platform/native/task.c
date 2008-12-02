@@ -361,7 +361,6 @@ void *task_get_class_data (task_pid_t pid)
 
 	printf ("task_get_class_data for pid %d failed\n", pid);
 	return &zero_class_data;
-	//return NULL;
 }
 
 void task_set_class_data (task_pid_t pid, size_t size)
