@@ -62,6 +62,14 @@ extern inline void score_update_request (void)
 	score_update_needed = TRUE;
 }
 
+extern inline void score_update_wait (void)
+{
+	while (!score_update_required ())
+		task_sleep (TIME_133MS);
+	score_update_start ();
+}
+
+#define when_score_changes for (score_update_start ();; score_update_wait ())
 
 __effect__ void scores_draw (void);
 __effect__ void scores_draw_ball (void);

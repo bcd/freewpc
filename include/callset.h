@@ -23,7 +23,7 @@
 
 #ifndef GENCALLSET
 
-#define CALLSET_ENTRY(module,set) \
+#define CALLSET_ENTRY(module,set,...) \
 	void module ## _ ## set (void)
 
 #define CALLSET_BOOL_ENTRY(module,set) \
