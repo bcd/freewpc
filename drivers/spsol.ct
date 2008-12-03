@@ -124,12 +124,7 @@ CALLSET_ENTRY (@self, start_ball)
 }
 
 /* Disable the device at end ball/tilt */
-CALLSET_ENTRY (@self, end_ball)
-{
-	@class_enables &= ~(1 << @instance);
-}
-
-CALLSET_ENTRY (@self, tilt)
+CALLSET_ENTRY (@self, end_ball, tilt)
 {
 	@class_enables &= ~(1 << @instance);
 }
