@@ -72,7 +72,7 @@ static __nvram__ U8 day_of_week;
 
 U8 rtc_edit_field;
 
-static struct date_time_backup
+struct date_time_backup
 {
 	U8 year;
 	U8 month;
