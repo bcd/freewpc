@@ -41,7 +41,6 @@ typedef enum _priority {
 	PRI_EGG4,
 	PRI_SCORES,
 	PRI_CREDITS,
-	PRI_BALLSAVE,
 	PRI_GAME_LOW1,
 	PRI_GAME_LOW2,
 	PRI_GAME_LOW3,
@@ -67,6 +66,7 @@ typedef enum _priority {
 	PRI_GAME_QUICK6,
 	PRI_GAME_QUICK7,
 	PRI_GAME_QUICK8,
+	PRI_BALLSAVE,
 	PRI_EB,
 	PRI_JACKPOT,
 	PRI_SUPER_JACKPOT,
@@ -80,11 +80,6 @@ typedef enum _priority {
 	PRI_BALL_SEARCH,
 	PRI_VOLUME_CHANGE_DISPLAY,
 	PRI_TILT_WARNING,
-
-	/* Every priority greater than PRI_SOLO indicates
-	an effect that not only preempts, but also *kills*
-	anything with lower priority. */
-	PRI_SOLO,
 	PRI_BONUS,
 	PRI_TILT,
 	PRI_GAME_OVER,
