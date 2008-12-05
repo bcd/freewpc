@@ -20,23 +20,21 @@
 
 #include <freewpc.h>
 
-#ifndef MACHINE_BALL_IN_PLAY_MUSIC
-#define MACHINE_BALL_IN_PLAY_MUSIC 2
-#endif
-
-#ifndef MACHINE_START_BALL_MUSIC
-#define MACHINE_START_BALL_MUSIC 3
-#endif
-
 
 CALLSET_ENTRY (audio, music_refresh)
 {
 	if (!in_live_game || in_bonus)
 		return;
+
+#ifdef MACHINE_BALL_IN_PLAY_MUSIC
 	else if (valid_playfield)
 		music_request (MACHINE_BALL_IN_PLAY_MUSIC, PRI_SCORES);
+#endif
+
+#ifdef MACHINE_START_BALL_MUSIC
 	else
 		music_request (MACHINE_START_BALL_MUSIC, PRI_SCORES);
+#endif
 }
 
 
