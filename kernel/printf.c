@@ -443,11 +443,13 @@ output_char:
 			*buf++ = *format;
 		}
 		format++;
+
+		/* Detect when close to buffer overflow here and break out */
+		if (buf > sprintf_buffer + PRINTF_BUFFER_SIZE - 2)
+			break;
 	}
 	va_end (va);
-
 	*buf = '\0';
-	/* TODO - detect buffer overflow here and signal an error */
 }
 
 
