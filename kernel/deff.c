@@ -334,11 +334,10 @@ void deff_stop_all (void)
 	task_kill_gid (GID_DEFF);
 	deff_stop_task ();
 	deff_running = deff_prio = 0;
+	task_kill_gid (GID_DEFF_WAITING);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
-
-	/* TODO - cancel waiting deffs */
 
 	deff_init ();
 }
