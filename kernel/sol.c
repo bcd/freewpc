@@ -140,7 +140,7 @@ void sol_req_start (U8 sol)
 		fatal (ERR_SOL_REQUEST);
 
 	req_reg_write = sol_get_write_reg (sol);
-	if (req_reg_write == NULL)
+	if (req_reg_write == (IOPTR)0)
 		return;
 
 	req_reg_read = sol_get_read_reg (sol);

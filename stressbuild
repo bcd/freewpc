@@ -5,7 +5,7 @@
 
 machines="t2 tz wcs afm tester"
 native_options="n y"
-gcc_options="4.2.2 4.3.0 4.4.0"
+gcc_options="4.2.3 4.3.2 4.3.3 4.4.0"
 
 case $1 in
 	--native)

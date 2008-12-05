@@ -21,12 +21,6 @@
 #ifndef __AUDIO_H
 #define __AUDIO_H
 
-
-/** The total number of audio channels supported.  At most 8 can
- * be supported due to the way channel bitmasks are used. */
-#define NUM_AUDIO_CHANNELS 8
-
-
 /** A background track */
 typedef struct {
 	/** The priority of the track.  Only the highest priority track queued
@@ -39,10 +33,9 @@ typedef struct {
 
 
 /* New style */
-
-#define MAX_TRACKS 8
-__common__ void music_start (const audio_track_t track);
-__common__ void music_stop (const audio_track_t track);
+#define MAX_TRACKS 2
+__common__ __attribute__((deprecated)) void music_start (const audio_track_t track);
+__common__ __attribute__((deprecated)) void music_stop (const audio_track_t track);
 __common__ void music_stop_all (void);
 
 /* Really new sound system */
@@ -89,6 +82,11 @@ extern inline void sound_start (U8 channels, sound_code_t code, U8 duration, U8 
 	sound_start_duration = duration;
 	sound_start_prio = prio;
 	sound_start1 (channels, code);
+}
+
+extern inline void sample_start (sound_code_t code, U8 duration)
+{
+	sound_start (ST_ANY, code, duration, SP_NORMAL);
 }
 
 extern inline void speech_start (sound_code_t code, U8 duration)
