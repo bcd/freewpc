@@ -320,15 +320,13 @@ do { \
 } while (0)
 
 
-#define FSTART { U8 __frame_depth = 1; U8 __frame_intensity = 100; __frame_start (__frame_depth);
+#define FSTART { U8 __frame_depth = 1; __frame_start (__frame_depth);
 
-#define FSTART_COLOR { U8 __frame_depth = 2; U8 __frame_intensity = 100; __frame_start (__frame_depth);
+#define FSTART_COLOR { U8 __frame_depth = 2; __frame_start (__frame_depth);
 
 #define FCLEAR __frame_clear (__frame_depth);
 
-#define FINTENSITY(n) __frame_set_intensity (__frame_depth, n, &__frame_intensity);
-
-#define FEND FINTENSITY(100) __frame_end (__frame_depth); }
+#define FEND __frame_end (__frame_depth); }
 
 
 extern inline void __frame_start (const U8 depth)
@@ -344,26 +342,6 @@ extern inline void __frame_clear (const U8 depth)
 	dmd_clean_page_low ();
 	if (depth == 2)
 		dmd_clean_page_high ();
-}
-
-extern inline void __frame_set_intensity (const U8 depth, const U8 new_intensity, U8 *intensityp)
-{
-	//U8 intensity_requires_color_frame [ __builtin_choose_expr ((depth == 0), -1, 1) ];
-
-	if (new_intensity == *intensityp)
-		return;
-
-	switch (new_intensity)
-	{
-		case 33:
-		case 66:
-		case 100:
-		default:
-		{
-			// U8 illegal_intensity_value[-1];
-			break;
-		}
-	}
 }
 
 extern inline void __frame_end (const U8 depth)
