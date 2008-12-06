@@ -27,26 +27,26 @@
 #include <bcd.h>
 
 
-/** Clears a score */
+/** Zeroes a BCD value */
 void bcd_zero (bcd_t *val, U8 len)
 {
 	slow_memset (val, 0, len);
 }
 
 
-/** Copy from one score to another */
+/** Copy from one BCD to another */
 void bcd_copy (bcd_t *dst, const bcd_t *src, U8 len)
 {
 	slow_memcpy (dst, src, len);
 }
 
 
-/** Adds one binary-coded decimal score to another. */
+/** Adds one BCD number to another. */
 void bcd_add (bcd_t *s1, const bcd_t *s2, U8 len)
 {
 	const bcd_t *s1_init = s1;
 
-	/* Advance to just past the end of each score */
+	/* Advance to just past the end */
 	s1 += len-1;
 	s2 += len-1;
 
@@ -60,7 +60,7 @@ void bcd_add (bcd_t *s1, const bcd_t *s2, U8 len)
 }
 
 
-/** Increments a binary-coded decimal score by another value
+/** Increments a BCD number by another value
  * in which only one byte is nonzero (e.g. 40K = 04 00 00).
  * 'offset' identifies the position of the nonzero byte, with
  * zero always meaning the 'ones' byte, and higher values
@@ -80,7 +80,7 @@ void bcd_sub (bcd_t *s1, const bcd_t *s2, U8 len)
 {
 	const bcd_t *s1_init = s1;
 
-	/* Advance to just past the end of each score */
+	/* Advance to just past the end */
 	s1 += len-1;
 	s2 += len-1;
 
@@ -94,7 +94,7 @@ void bcd_sub (bcd_t *s1, const bcd_t *s2, U8 len)
 }
 
 
-/** Multiply a score (in place) by the given value.
+/** Multiply a BCD (in place) by the given integer.
  * Zero is not supported, as it should never be called this
  * way. */
 void bcd_mul (bcd_t * s, U8 multiplier, U8 len)
@@ -117,7 +117,7 @@ void bcd_mul (bcd_t * s, U8 multiplier, U8 len)
 }
 
 
-/** Compares two scores.  Returns -1, 0, or 1 accordingly, like memcmp. */
+/** Compares two BCD numbers.  Returns -1, 0, or 1 accordingly, like memcmp. */
 I8 bcd_compare (const bcd_t * s1, const bcd_t * s2, U8 len)
 {
 	while (len > 0)
