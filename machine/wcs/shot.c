@@ -69,6 +69,12 @@ void ramp_enter (void)
 CALLSET_ENTRY (shot, sw_l_ramp_enter)
 {
 	ramp_enter ();
+	/* TODO - start a timer for awarding the
+	shot on a jet bumper hit */
+}
+
+CALLSET_ENTRY (shot, any_jet)
+{
 }
 
 CALLSET_ENTRY (shot, sw_r_ramp_enter)
@@ -127,11 +133,26 @@ CALLSET_ENTRY (shot, sw_kickback)
 	free_timer_restart (TIM_KICKBACK_MADE, TIME_2S);
 }
 
+
+CALLSET_ENTRY (shot, sw_left_jet, sw_upper_jet, sw_lower_jet)
+{
+	sound_start (ST_SAMPLE, SND_JET_BUMPER, SL_500MS, PRI_GAME_QUICK4);
+}
+
+CALLSET_ENTRY (shot, sw_left_slingshot, sw_right_slingshot)
+{
+	sound_start (ST_SAMPLE, SND_SLINGSHOT, SL_500MS, PRI_GAME_QUICK2);
+}
+
+CALLSET_ENTRY (shot, sw_left_flipper_lane, sw_right_flipper_lane)
+{
+	sound_start (ST_SAMPLE, SND_INLANE, SL_500MS, PRI_GAME_QUICK2);
+}
+
 /*
  * Throw the left_loop event.  It is not counted
  * if certain switch closures occurred just prior to
  * the travel lane switch: bounceback off loop gate
  * back onto switch, etc.
  */
-
 

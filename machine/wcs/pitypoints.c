@@ -20,51 +20,6 @@
 
 #include <freewpc.h>
 
-static void common_jet_handler (void)
-{
-	sound_start (ST_SAMPLE, SND_JET_BUMPER, SL_500MS, PRI_GAME_QUICK4);
-}
-
-static void common_sling_handler (void)
-{
-	sound_start (ST_SAMPLE, SND_SLINGSHOT, SL_500MS, PRI_GAME_QUICK2);
-}
-
-
-CALLSET_ENTRY (pity, sw_left_jet)
-{
-	common_jet_handler ();
-}
-
-CALLSET_ENTRY (pity, sw_upper_jet)
-{
-	common_jet_handler ();
-}
-
-CALLSET_ENTRY (pity, sw_lower_jet)
-{
-	common_jet_handler ();
-}
-
-CALLSET_ENTRY (pity, sw_left_slingshot)
-{
-	common_sling_handler ();
-}
-
-CALLSET_ENTRY (pity, sw_right_slingshot)
-{
-	common_sling_handler ();
-}
-
-CALLSET_ENTRY (pity, sw_left_flipper_lane)
-{
-	sound_start (ST_SAMPLE, SND_INLANE, SL_500MS, PRI_GAME_QUICK2);
-}
-
-CALLSET_ENTRY (pity, sw_right_flipper_lane)
-{
-	sound_start (ST_SAMPLE, SND_INLANE, SL_500MS, PRI_GAME_QUICK2);
-}
 
 CALLSET_ENTRY (pity, bonus)
 {
@@ -88,20 +43,11 @@ CALLSET_ENTRY (pity, sw_spinner_slow)
 }
 
 
-CALLSET_ENTRY (pity, dev_left_eject_kick_attempt)
+CALLSET_ENTRY (pity, dev_left_eject_kick_attempt, dev_right_eject_kick_attempt, dev_upper_eject_kick_attempt)
 {
 	sound_start (ST_SAMPLE, SND_FREE_KICK_LIT, SL_1S, PRI_GAME_QUICK3);
 }
 
-CALLSET_ENTRY (pity, dev_right_eject_kick_attempt)
-{
-	sound_start (ST_SAMPLE, SND_FREE_KICK_LIT, SL_1S, PRI_GAME_QUICK3);
-}
-
-CALLSET_ENTRY (pity, dev_upper_eject_kick_attempt)
-{
-	sound_start (ST_SAMPLE, SND_FREE_KICK_LIT, SL_1S, PRI_GAME_QUICK3);
-}
 
 CALLSET_ENTRY (pity, dev_tv_popper_kick_attempt)
 {

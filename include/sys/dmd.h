@@ -321,6 +321,8 @@ do { \
 
 #define FSTART_COLOR { U8 __frame_depth = 2; __frame_start (__frame_depth);
 
+#define FCLEAR __frame_clear (__frame_depth);
+
 #define FEND __frame_end (__frame_depth); }
 
 

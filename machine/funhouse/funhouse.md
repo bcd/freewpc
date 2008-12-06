@@ -32,6 +32,7 @@ include platform/wpc/wpc.md
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
+define MACHINE_LACKS_ALL_INCLUDES
 #define MACHINE_INCLUDE_FLAGS
 #define MACHINE_SOL_EXTBOARD1
 #define MACHINE_CUSTOM_AMODE
@@ -76,6 +77,12 @@ include platform/wpc/wpc.md
 #
 ##########################################################################
 [switches]
+11: Right Flipper, button, intest, c_decl(sw_right_button)
+12: Left Flipper, button, intest, c_decl(sw_left_button)
+13: Start Button, start-button, intest
+14: Plumb Bob Tilt, c_decl(sw_tilt), tilt, ingame, noplay
+21: Slam Tilt, slam-tilt, ingame, cabinet
+23: Ticket Opto, opto
 
 ##########################################################################
 # Drives
