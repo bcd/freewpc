@@ -128,8 +128,10 @@ __noreturn__ void freewpc_init (void)
 	wpc_watchdog_reset ();
 #if (MACHINE_DMD == 1)
 	dmd_init ();
-	wpc_watchdog_reset ();
+#else
+	seg_init ();
 #endif
+	wpc_watchdog_reset ();
 	switch_init ();
 	wpc_watchdog_reset ();
 	flipper_init ();

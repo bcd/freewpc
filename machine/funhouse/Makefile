@@ -26,7 +26,7 @@ GAME_ROM_PREFIX = ffh
 # 512KB.....32 pages
 # 1MB...... 64 pages
 #
-ROM_PAGE_COUNT = 8
+ROM_PAGE_COUNT = 16  # L9 uses a larger ROM
 
 #################################################
 #

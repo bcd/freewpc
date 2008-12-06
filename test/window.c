@@ -237,10 +237,14 @@ void window_title (const char *title)
 	font_render_string_center (&font_mono5, 64, 2, title);
 }
 
+#if (MACHINE_DMD == 1)
 void print_row_center (const font_t *f, U8 row)
 {
 	font_render_string_center (f, 64, row, sprintf_buffer);
 }
+#else
+#define print_row_center(font, row) /* TODO */
+#endif
 
 /***************************************************/
 
@@ -860,6 +864,8 @@ struct window_ops menu_window = {
 
 /*******************  Font Test  ************************/
 
+#if (MACHINE_DMD == 1)
+
 U8 font_test_offset;
 
 U8 font_test_char_width;
@@ -981,6 +987,8 @@ struct menu dev_font_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &font_test_window, NULL } },
 };
+
+#endif /* MACHINE_DMD == 1 */
 
 /**********************************************************/
 
@@ -1174,6 +1182,8 @@ struct menu dev_deff_stress_test_item = {
 
 /************ Symbol Test *****************/
 
+#if (MACHINE_DMD == 1)
+
 void symbol_test_init (void)
 {
 	browser_init ();
@@ -1203,6 +1213,7 @@ struct menu symbol_test_item = {
 	.var = { .subwindow = { &symbol_test_window, NULL } },
 };
 
+#endif /* MACHINE_DMD == 1 */
 
 
 /*********** Lampsets **********************/
@@ -1467,6 +1478,7 @@ struct menu dev_balldev_test_item = {
 
 /************* Transition Test ******************/
 
+#if (MACHINE_DMD == 1)
 
 dmd_transition_t *transition_table[] = {
 	&trans_scroll_up,
@@ -1515,6 +1527,7 @@ struct menu dev_trans_test_item = {
 	.var = { .subwindow = { &dev_trans_test_window, NULL } },
 };
 
+#endif
 
 /**********************************************************************/
 
@@ -1547,9 +1560,11 @@ void dev_random_test_task (void)
 		r &= 31;
 		if (rowcount[r] < 16)
 		{
+#if (MACHINE_DMD == 1)
 			U16 offset = ((U16)r << 4) + rowcount[r];
 			dmd_low_buffer[offset] = 0xFF;
 			rowcount[r]++;
+#endif
 		}
 		task_sleep (TIME_33MS);
 	}
@@ -1609,6 +1624,8 @@ struct menu dev_force_error_item = {
 
 /**********************************************************************/
 
+#if (MACHINE_DMD == 1)
+
 extern const U8 fif_freewpc_logo[];
 const U8 *dev_frametest_ptr;
 const U8 *dev_frametest_next_ptr;
@@ -1653,6 +1670,8 @@ struct menu dev_frametest_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &dev_frametest_window, NULL } },
 };
+
+#endif /* MACHINE_DMD == 1 */
 
 /**********************************************************************/
 
@@ -1939,7 +1958,7 @@ struct menu memory_editor_item = {
 /**********************************************************************/
 
 struct menu *dev_menu_items[] = {
-#if defined(MACHINE_DMD)
+#if (MACHINE_DMD == 1)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
@@ -1947,11 +1966,13 @@ struct menu *dev_menu_items[] = {
 	&dev_lamplist_test_item,
 	&dev_balldev_test_item,
 	&dev_random_test_item,
+#if (MACHINE_DMD == 1)
 	&dev_trans_test_item,
-	&dev_force_error_item,
 	&dev_frametest_item,
+#endif
+	&dev_force_error_item,
 	&dev_deff_stress_test_item,
-#if defined(MACHINE_DMD)
+#if (MACHINE_DMD == 1)
 	&symbol_test_item,
 #endif
 	&sched_test_item,
@@ -2477,9 +2498,15 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
+#if (MACHINE_DMD == 1)
 extern __test2__ void switch_matrix_draw (void);
 extern __test2__ void switch_edges_update (void);
 extern __test2__ void switch_levels_update (void);
+#else
+#define switch_matrix_draw()
+#define switch_edges_update()
+#define switch_levels_update()
+#endif
 
 U8 switch_display_timer;
 
@@ -3313,6 +3340,7 @@ struct menu flipper_test_item = {
 
 /************   Display Test   **************************/
 
+#if (MACHINE_DMD == 1)
 
 void display_test_init (void)
 {
@@ -3354,6 +3382,7 @@ struct menu display_test_item = {
 	.var = { .subwindow = { &display_test_window, NULL } },
 };
 
+#endif
 
 /****************** TEST MENU **************************/
 
@@ -3373,7 +3402,9 @@ struct menu *test_menu_items[] = {
 	&lamp_test_item,
 	&all_lamp_test_item,
 	/* TODO : lamp_flasher_test_item */
+#if (MACHINE_DMD == 1)
 	&display_test_item,
+#endif
 #if MACHINE_FLIPTRONIC
 	&flipper_test_item,
 #endif

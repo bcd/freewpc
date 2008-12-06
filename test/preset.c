@@ -225,6 +225,7 @@ void preset_show_components (void)
 			sprintf ("SET %p TO %02X", comps->nvram, comps->value);
 			font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 		}
+#ifdef CONFIG_DMD /* TODO */
 		else
 		{
 			union dmd_coordinate coord;
@@ -246,6 +247,7 @@ void preset_show_components (void)
 				bitmap_draw (coord, BM_BOX5);
 			}
 		}
+#endif
 
 		dmd_show_low ();
 		sound_send (SND_TEST_CONFIRM);

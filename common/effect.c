@@ -73,6 +73,7 @@ void game_over_deff (void)
 
 void draw_volume_bar (U8 n)
 {
+#if (MACHINE_DMD == 1)
 	U8 *base = dmd_low_buffer + 22 * DMD_BYTE_WIDTH + 4;
 	U8 val = 0x55;
 	U8 h;
@@ -87,6 +88,7 @@ void draw_volume_bar (U8 n)
 	val = volume_bar_data[n];
 	for (h=0; h < 8; h++)
 		base[h * DMD_BYTE_WIDTH] = val;
+#endif
 }
 
 
@@ -158,6 +160,7 @@ void plunge_ball_deff (void)
 	deff_exit ();
 }
 
+#if (MACHINE_DMD == 1)
 
 void animation_test1 (struct animation_object *obj)
 {
@@ -197,3 +200,4 @@ void animation_test_deff (void)
 	deff_exit ();
 }
 
+#endif /* MACHINE_DMD */
