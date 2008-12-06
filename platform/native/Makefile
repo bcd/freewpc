@@ -2,9 +2,9 @@
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
 CONFIG_WPC=y
-CONFIG_FONT=y
+CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC=y
-CONFIG_ANIMATION=y
+CONFIG_ANIMATION ?= $(CONFIG_DMD)
 
 D := platform/native
 
