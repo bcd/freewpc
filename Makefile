@@ -347,7 +347,10 @@ endif
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
-PAGE_NUMBERS = 52 53 54 55 56 57 58 59 60 61
+ifeq ($(CONFIG_DMD),y)
+PAGE_NUMBERS += 52 53 54 55
+endif
+PAGE_NUMBERS += 56 57 58 59 60 61
 ifeq ($(PLATFORM),wpcsound)
 BLANK_SIZE := 304
 else
