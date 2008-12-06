@@ -2,18 +2,22 @@
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
 CONFIG_WPC=y
-CONFIG_FONT=y
+CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC=y
-CONFIG_ANIMATION=y
+CONFIG_ANIMATION ?= $(CONFIG_DMD)
 
 D := platform/native
 
 # Additional CFLAGS required for a native build
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
 PTH_CFLAGS := $(shell pth-config --cflags)
-CFLAGS += -O $(PTH_CFLAGS) -I$(D) -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -g -DCONFIG_LITTLE_ENDIAN -pg
-HOST_LFLAGS += -pg
+CFLAGS += -O $(PTH_CFLAGS) -I$(D) -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -g -DCONFIG_LITTLE_ENDIAN
 HOST_LIBS += -lpth
+
+ifeq ($(CONFIG_NATIVE_PROFILE),y)
+CFLAGS += -pg
+HOST_LFLAGS += -pg
+endif
 
 # Additional object files to be linked into the kernel region
 KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
