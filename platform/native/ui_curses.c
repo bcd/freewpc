@@ -198,7 +198,6 @@ void ui_clear_dmd_text (int n)
 void ui_refresh_asciidmd (unsigned char *data)
 {
 	unsigned int x, y;
-	unsigned int color;
 
 	for (y = 0; y < 32; y++)
 	{
@@ -214,7 +213,7 @@ void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
 {
 	extern const char *sim_ball_location_name (unsigned int location);
 	wmove (ball_tracker_win, ballno+1, 1);
-	wprintw (ball_tracker_win, "%d: %s", ballno,
+	wprintw (ball_tracker_win, "%d: %-12.12s", ballno,
 		sim_ball_location_name (location));
 	wrefresh (ball_tracker_win);
 }
