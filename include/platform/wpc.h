@@ -131,11 +131,20 @@ extern U8 *linux_dmd_high_page;
 
 #endif /* CONFIG_NATIVE */
 
+#define WPC_DEBUG_BASE              0x3D60
+#define WPC_DMD_BASE                0x3FB0
+#define WPC_PRN_TICKET_BASE         0x3FC0
+#define WPC_IO_BASE                 0x3FD0
+#define WPC_DRIVER_BASE             0x3FE0
+#define WPC_ASIC_BASE               0x3FF0
+
+#ifdef CONFIG_OLD_DEBUGGER
+#define WPC_DEBUG_CONTROL_PORT      0x3E66
+#define WPC_DEBUG_DATA_PORT         0x3E67
+#else
 #define WPC_DEBUG_DATA_PORT			0x3D60
 #define WPC_DEBUG_CONTROL_PORT		0x3D61
-
-#define WPC_SERIAL_CONTROL_PORT 		0x3E66
-#define WPC_SERIAL_DATA_PORT 			0x3E67
+#endif
 
 #define WPC_DMD_3200_PAGE				0x3FB8
 #define WPC_DMD_3000_PAGE				0x3FB9
