@@ -22,10 +22,11 @@
 #include <test.h>
 #include <format.h>
 
-#ifdef CONFIG_DMD
+#if (MACHINE_DMD == 1)
 extern __test__ void print_row_center (const font_t *f, U8 row);
 #else
-#define print_row_center(font, row) /* TODO */
+extern __test__ void print_row_center1 (U8 row);
+#define print_row_center(f, row) print_row_center1 (row)
 #endif
 
 struct adjustment current_adjustment;

@@ -239,12 +239,13 @@ void window_title (const char *title)
 
 #if (MACHINE_DMD == 1)
 void print_row_center (const font_t *f, U8 row)
+#else
+#define print_row_center(f, row) print_row_center1 (row)
+void print_row_center1 (U8 row)
+#endif
 {
 	font_render_string_center (f, 64, row, sprintf_buffer);
 }
-#else
-#define print_row_center(font, row) /* TODO */
-#endif
 
 /***************************************************/
 
@@ -296,7 +297,7 @@ void browser_draw (void)
 	if (browser_item_number)
 	{
 		(*browser_item_number) (menu_selection);
-		font_render_string (&font_mono5, 4, 20, sprintf_buffer);
+		font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -696,6 +697,16 @@ struct window_ops confirm_window = {
 
 /* A window class for actual menus */
 
+#if (MACHINE_DMD == 1)
+#define MENU_DRAW_X         8
+#define MENU_DRAW_NAME_Y    4
+#define MENU_DRAW_ITEM_Y    14
+#else
+#define MENU_DRAW_X         0
+#define MENU_DRAW_NAME_Y    0
+#define MENU_DRAW_ITEM_Y    16
+#endif
+
 /** Return the number of items in a menu, by iterating
 through the array of them until a NULL pointer is seen. */
 static U8 count_submenus (struct menu *m)
@@ -731,7 +742,8 @@ void menu_draw (void)
 	U8 *sel = &win_top->w_class.menu.selected;
 
 	/* First print the name of the menu itself */
-	font_render_string (&font_mono5, 8, 4, m->name);
+	font_render_string_left (&font_mono5,
+		MENU_DRAW_X, MENU_DRAW_NAME_Y, m->name);
 
 	/* Now try to print the current item.  *sel is the
 	index to the item that is currently selected. */
@@ -749,7 +761,8 @@ void menu_draw (void)
 		{
 			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
 		}
-		font_render_string (&font_mono5, 8, 14, sprintf_buffer);
+		font_render_string_left (&font_mono5,
+			MENU_DRAW_X, MENU_DRAW_ITEM_Y, sprintf_buffer);
 	}
 	else
 	{
@@ -1357,22 +1370,22 @@ void dev_balldev_test_draw (void)
 		print_row_center (&font_var5, 2);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
-		font_render_string (&font_var5, 4, 7, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 7, sprintf_buffer);
 
 		sprintf ("HOLD %d", dev->max_count);
-		font_render_string (&font_var5, 4, 13, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_var5, 4, 19, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_var5, 64, 7, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_var5, 64, 13, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 13, sprintf_buffer);
 
 		sprintf ("LIVE/LOCKS %d/%d", live_balls, kickout_locks);
-		font_render_string (&font_var5, 64, 19, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 19, sprintf_buffer);
 
 		switch (browser_action)
 		{
@@ -1713,9 +1726,14 @@ void sched_test_init (void)
 void sched_test_draw (void)
 {
 	window_title ("SCHEDULER TEST");
+#if (MACHINE_DMD == 1)
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
 	print_row_center (&font_var5, 10);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
+#else
+	sprintf ("%ld SCHED./SEC.", sched_test_count);
+	print_row_center (&font_var5, 16);
+#endif
 	dmd_show_low ();
 }
 
@@ -2614,7 +2632,7 @@ void single_switch_draw (void)
 	const char *level;
 	const char *active;
 
-	switch_window_title ("SINGLE SWITCHES");
+	switch_window_title ("SINGLE SWITCH");
 
 	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
@@ -2676,7 +2694,7 @@ struct window_ops single_switch_window = {
 
 
 struct menu single_switches_item = {
-	.name = "SINGLE SWITCHES",
+	.name = "SINGLE SWITCH",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &single_switch_window, NULL } },
 };
@@ -3191,7 +3209,7 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 	extern __common__ void locale_render (U8 locale);
 
-	window_title ("DIP SWITCH TEST");
+	window_title ("DIP SW. TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
 	print_row_center (&font_mono5, 10);
@@ -3242,7 +3260,7 @@ struct window_ops dipsw_test_window = {
 };
 
 struct menu dipsw_test_item = {
-	.name = "DIP SWITCH TEST",
+	.name = "DIP SW. TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &dipsw_test_window, NULL } },
 };
