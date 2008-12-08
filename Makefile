@@ -295,7 +295,9 @@ CFLAGS += $(EXTRA_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
 SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
-
+ifneq ($(CONFIG_DMD),y)
+SCHED_FLAGS += -D CONFIG_SEG
+endif
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX

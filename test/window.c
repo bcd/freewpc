@@ -237,7 +237,12 @@ void window_title (const char *title)
 	font_render_string_center (&font_mono5, 64, 2, title);
 }
 
+#if (MACHINE_DMD == 1)
 void print_row_center (const font_t *f, U8 row)
+#else
+#define print_row_center(f, row) print_row_center1 (row)
+void print_row_center1 (U8 row)
+#endif
 {
 	font_render_string_center (f, 64, row, sprintf_buffer);
 }
@@ -292,7 +297,7 @@ void browser_draw (void)
 	if (browser_item_number)
 	{
 		(*browser_item_number) (menu_selection);
-		font_render_string (&font_mono5, 4, 20, sprintf_buffer);
+		font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -692,6 +697,16 @@ struct window_ops confirm_window = {
 
 /* A window class for actual menus */
 
+#if (MACHINE_DMD == 1)
+#define MENU_DRAW_X         8
+#define MENU_DRAW_NAME_Y    4
+#define MENU_DRAW_ITEM_Y    14
+#else
+#define MENU_DRAW_X         0
+#define MENU_DRAW_NAME_Y    0
+#define MENU_DRAW_ITEM_Y    16
+#endif
+
 /** Return the number of items in a menu, by iterating
 through the array of them until a NULL pointer is seen. */
 static U8 count_submenus (struct menu *m)
@@ -727,7 +742,8 @@ void menu_draw (void)
 	U8 *sel = &win_top->w_class.menu.selected;
 
 	/* First print the name of the menu itself */
-	font_render_string (&font_mono5, 8, 4, m->name);
+	font_render_string_left (&font_mono5,
+		MENU_DRAW_X, MENU_DRAW_NAME_Y, m->name);
 
 	/* Now try to print the current item.  *sel is the
 	index to the item that is currently selected. */
@@ -745,7 +761,8 @@ void menu_draw (void)
 		{
 			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
 		}
-		font_render_string (&font_mono5, 8, 14, sprintf_buffer);
+		font_render_string_left (&font_mono5,
+			MENU_DRAW_X, MENU_DRAW_ITEM_Y, sprintf_buffer);
 	}
 	else
 	{
@@ -859,6 +876,8 @@ struct window_ops menu_window = {
 /* The test mode menus */
 
 /*******************  Font Test  ************************/
+
+#if (MACHINE_DMD == 1)
 
 U8 font_test_offset;
 
@@ -981,6 +1000,8 @@ struct menu dev_font_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &font_test_window, NULL } },
 };
+
+#endif /* MACHINE_DMD == 1 */
 
 /**********************************************************/
 
@@ -1174,6 +1195,8 @@ struct menu dev_deff_stress_test_item = {
 
 /************ Symbol Test *****************/
 
+#if (MACHINE_DMD == 1)
+
 void symbol_test_init (void)
 {
 	browser_init ();
@@ -1203,6 +1226,7 @@ struct menu symbol_test_item = {
 	.var = { .subwindow = { &symbol_test_window, NULL } },
 };
 
+#endif /* MACHINE_DMD == 1 */
 
 
 /*********** Lampsets **********************/
@@ -1346,22 +1370,22 @@ void dev_balldev_test_draw (void)
 		print_row_center (&font_var5, 2);
 	
 		sprintf ("COUNT %d/%d", dev->actual_count, dev->size);
-		font_render_string (&font_var5, 4, 7, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 7, sprintf_buffer);
 
 		sprintf ("HOLD %d", dev->max_count);
-		font_render_string (&font_var5, 4, 13, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 13, sprintf_buffer);
 
 		sprintf ("SOL %d", dev->props->sol+1);
-		font_render_string (&font_var5, 4, 19, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 19, sprintf_buffer);
 
 		sprintf ("COUNTED %d", counted_balls);
-		font_render_string (&font_var5, 64, 7, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 7, sprintf_buffer);
 
 		sprintf ("MISSING %d", missing_balls);
-		font_render_string (&font_var5, 64, 13, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 13, sprintf_buffer);
 
 		sprintf ("LIVE/LOCKS %d/%d", live_balls, kickout_locks);
-		font_render_string (&font_var5, 64, 19, sprintf_buffer);
+		font_render_string_left (&font_var5, 64, 19, sprintf_buffer);
 
 		switch (browser_action)
 		{
@@ -1467,6 +1491,7 @@ struct menu dev_balldev_test_item = {
 
 /************* Transition Test ******************/
 
+#if (MACHINE_DMD == 1)
 
 dmd_transition_t *transition_table[] = {
 	&trans_scroll_up,
@@ -1515,6 +1540,7 @@ struct menu dev_trans_test_item = {
 	.var = { .subwindow = { &dev_trans_test_window, NULL } },
 };
 
+#endif
 
 /**********************************************************************/
 
@@ -1547,9 +1573,11 @@ void dev_random_test_task (void)
 		r &= 31;
 		if (rowcount[r] < 16)
 		{
+#if (MACHINE_DMD == 1)
 			U16 offset = ((U16)r << 4) + rowcount[r];
 			dmd_low_buffer[offset] = 0xFF;
 			rowcount[r]++;
+#endif
 		}
 		task_sleep (TIME_33MS);
 	}
@@ -1609,6 +1637,8 @@ struct menu dev_force_error_item = {
 
 /**********************************************************************/
 
+#if (MACHINE_DMD == 1)
+
 extern const U8 fif_freewpc_logo[];
 const U8 *dev_frametest_ptr;
 const U8 *dev_frametest_next_ptr;
@@ -1654,6 +1684,8 @@ struct menu dev_frametest_item = {
 	.var = { .subwindow = { &dev_frametest_window, NULL } },
 };
 
+#endif /* MACHINE_DMD == 1 */
+
 /**********************************************************************/
 
 #define SCHED_TEST_DURATION TIME_500MS
@@ -1694,9 +1726,14 @@ void sched_test_init (void)
 void sched_test_draw (void)
 {
 	window_title ("SCHEDULER TEST");
+#if (MACHINE_DMD == 1)
 	sprintf ("SCHEDULES PER SEC. = %ld", sched_test_count);
 	print_row_center (&font_var5, 10);
 	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO REPEAT");
+#else
+	sprintf ("%ld SCHED./SEC.", sched_test_count);
+	print_row_center (&font_var5, 16);
+#endif
 	dmd_show_low ();
 }
 
@@ -1939,7 +1976,7 @@ struct menu memory_editor_item = {
 /**********************************************************************/
 
 struct menu *dev_menu_items[] = {
-#if defined(MACHINE_DMD)
+#if (MACHINE_DMD == 1)
 	&dev_font_test_item,
 #endif
 	&dev_deff_test_item,
@@ -1947,11 +1984,13 @@ struct menu *dev_menu_items[] = {
 	&dev_lamplist_test_item,
 	&dev_balldev_test_item,
 	&dev_random_test_item,
+#if (MACHINE_DMD == 1)
 	&dev_trans_test_item,
-	&dev_force_error_item,
 	&dev_frametest_item,
+#endif
+	&dev_force_error_item,
 	&dev_deff_stress_test_item,
-#if defined(MACHINE_DMD)
+#if (MACHINE_DMD == 1)
 	&symbol_test_item,
 #endif
 	&sched_test_item,
@@ -2477,9 +2516,15 @@ struct menu adjustments_menu = {
 
 /**********************************************************************/
 
+#if (MACHINE_DMD == 1)
 extern __test2__ void switch_matrix_draw (void);
 extern __test2__ void switch_edges_update (void);
 extern __test2__ void switch_levels_update (void);
+#else
+#define switch_matrix_draw()
+#define switch_edges_update()
+#define switch_levels_update()
+#endif
 
 U8 switch_display_timer;
 
@@ -2587,7 +2632,7 @@ void single_switch_draw (void)
 	const char *level;
 	const char *active;
 
-	switch_window_title ("SINGLE SWITCHES");
+	switch_window_title ("SINGLE SWITCH");
 
 	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
@@ -2649,7 +2694,7 @@ struct window_ops single_switch_window = {
 
 
 struct menu single_switches_item = {
-	.name = "SINGLE SWITCHES",
+	.name = "SINGLE SWITCH",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &single_switch_window, NULL } },
 };
@@ -3164,7 +3209,7 @@ void dipsw_test_draw (void)
 	U8 dipsw = wpc_get_jumpers ();
 	extern __common__ void locale_render (U8 locale);
 
-	window_title ("DIP SWITCH TEST");
+	window_title ("DIP SW. TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
 	print_row_center (&font_mono5, 10);
@@ -3215,7 +3260,7 @@ struct window_ops dipsw_test_window = {
 };
 
 struct menu dipsw_test_item = {
-	.name = "DIP SWITCH TEST",
+	.name = "DIP SW. TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &dipsw_test_window, NULL } },
 };
@@ -3313,6 +3358,7 @@ struct menu flipper_test_item = {
 
 /************   Display Test   **************************/
 
+#if (MACHINE_DMD == 1)
 
 void display_test_init (void)
 {
@@ -3354,6 +3400,7 @@ struct menu display_test_item = {
 	.var = { .subwindow = { &display_test_window, NULL } },
 };
 
+#endif
 
 /****************** TEST MENU **************************/
 
@@ -3373,7 +3420,9 @@ struct menu *test_menu_items[] = {
 	&lamp_test_item,
 	&all_lamp_test_item,
 	/* TODO : lamp_flasher_test_item */
+#if (MACHINE_DMD == 1)
 	&display_test_item,
+#endif
 #if MACHINE_FLIPTRONIC
 	&flipper_test_item,
 #endif

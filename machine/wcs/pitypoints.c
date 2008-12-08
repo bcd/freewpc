@@ -38,6 +38,7 @@ CALLSET_ENTRY (pity, any_pf_switch)
 
 CALLSET_ENTRY (pity, sw_spinner_slow)
 {
+	sound_send (SND_SPINNER);
 	score (SC_10K);
 }
 

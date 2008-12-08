@@ -104,6 +104,7 @@ void amode_score_page (void)
 }
 
 
+#if (MACHINE_DMD == 1)
 void amode_logo_page (void)
 {
 	dmd_alloc_low_high ();
@@ -111,7 +112,7 @@ void amode_logo_page (void)
 	dmd_show2 ();
 	amode_page_end (3);
 }
-
+#endif
 
 void amode_credits_page (void)
 {
@@ -184,7 +185,9 @@ void amode_tz_page (void)
 
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
+#if (MACHINE_DMD == 1)
 	amode_logo_page,
+#endif
 #ifdef MACHINE_TZ
 	amode_tz_page,
 #endif

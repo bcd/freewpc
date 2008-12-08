@@ -119,7 +119,7 @@ extern inline IOPTR sol_get_write_reg (solnum_t sol)
 		case 4:
 #if (MACHINE_WPC95 == 1)
 			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
-#else
+#elif (MACHINE_FLIPTRONIC == 1)
 			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
 #endif
 #ifdef EXTBOARD1

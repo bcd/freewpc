@@ -452,6 +452,8 @@ extern inline U8 wpc_read_ac_zerocross (void)
  * Flippers
  ***************************************************************/
 
+#if (MACHINE_FLIPTRONIC == 1)
+
 #define WPC_LR_FLIP_EOS		0x1
 #define WPC_LR_FLIP_SW		0x2
 #define WPC_LL_FLIP_EOS		0x4
@@ -469,7 +471,6 @@ extern inline U8 wpc_read_flippers (void)
 	return readb (WPC_FLIPTRONIC_PORT_A);
 #endif
 }
-
 
 extern inline U8 wpc_read_flipper_buttons (void)
 {
@@ -500,6 +501,8 @@ extern inline void wpc_write_flippers (U8 val)
 	writeb (WPC_FLIPTRONIC_PORT_A, ~val);
 #endif
 }
+
+#endif /* MACHINE_FLIPTRONIC */
 
 
 /********************************************/
@@ -621,11 +624,13 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	case 3:
 		writeb (WPC_SOL_FLASH2_OUTPUT, val);
 		break;
+#if (MACHINE_FLIPTRONIC == 1)
 	case 4:
 		wpc_write_flippers (val);
 		break;
-	case 5:
+#endif
 #ifdef WPC_EXTBOARD1
+	case 5:
 		writeb (WPC_EXTBOARD1, val);
 #endif
 		break;

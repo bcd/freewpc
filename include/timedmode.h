@@ -47,6 +47,19 @@ struct timed_mode_ops
 };
 
 
+#define DEFAULT_MODE \
+	.init = null_function, \
+	.exit = null_function, \
+	.pause = null_false_function, \
+	.finish = null_function, \
+	.timeout = null_function, \
+	.deff_starting = 0, \
+	.deff_running = 0, \
+	.deff_ending = 0, \
+	.music = 0, \
+	.grace_timer = 2
+
+
 struct timed_mode_task_config
 {
 	struct timed_mode_ops *ops;

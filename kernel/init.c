@@ -126,10 +126,8 @@ __noreturn__ void freewpc_init (void)
 	wpc_watchdog_reset ();
 	triac_init ();
 	wpc_watchdog_reset ();
-#if (MACHINE_DMD == 1)
-	dmd_init ();
+	display_init ();
 	wpc_watchdog_reset ();
-#endif
 	switch_init ();
 	wpc_watchdog_reset ();
 	flipper_init ();
@@ -269,7 +267,9 @@ void fatal (errcode_t error_code)
 
 	/* Reset hardware outputs */
 	pinio_write_triac (0);
+#if (MACHINE_FLIPTRONIC == 1)
 	wpc_write_flippers (0);
+#endif
 	wpc_write_ticket (0);
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);

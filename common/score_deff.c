@@ -57,6 +57,8 @@ void scores_draw_credits (void)
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 }
 
+#if (MACHINE_DMD == 1)
+
 /* A list of score font keys.  Each of these is an index into the
  * table below. */
 #define SCORE_POS_CENTER_LARGE 0
@@ -146,6 +148,8 @@ const U8 score_font_info_key[4][5][4] = {
 	},
 };
 
+#endif
+
 
 /** Render the default score screen. */
 void scores_draw_current (U8 single_player)
@@ -166,6 +170,7 @@ void scores_draw_current (U8 single_player)
 		sprintf_score (scores[p]);
 
 		/* Figure out what font to use and where to print it */
+#if (MACHINE_DMD == 1)
 		info = &score_font_info_table[
 			score_font_info_key[num_players-1][player_up][p] ];
 
@@ -174,6 +179,8 @@ void scores_draw_current (U8 single_player)
 
 		/* Start printing to the display */
 		info->render ();
+#else /* TODO */
+#endif
 	}
 }
 
@@ -219,6 +226,7 @@ void scores_deff (void)
 		/* Clear score change flag */
 		score_update_start ();
 
+#if (MACHINE_DMD == 1)
 		/* First, the static elements are drawn: the opponents' scores
 		 * and the ball number.  Then the flashing element, the current
 		 * player's score is drawn. */
@@ -259,6 +267,7 @@ void scores_deff (void)
 			if (score_update_required ())
 				break;
 		}
+#endif
 	}
 }
 
