@@ -33,6 +33,8 @@ include platform/wpc/wpc.md
 # some other means.
 ##########################################################################
 define MACHINE_LACKS_ALL_INCLUDES
+# define MACHINE_SYS11_SOUND
+
 #define MACHINE_INCLUDE_FLAGS
 #define MACHINE_SOL_EXTBOARD1
 #define MACHINE_CUSTOM_AMODE
@@ -53,6 +55,22 @@ define MACHINE_LACKS_ALL_INCLUDES
 # given in terms of the Lamp-Matrix-Width and Lamp-Matrix-Height.
 ##########################################################################
 [lamps]
+11: Gangway 75K
+12: Gangway 100K
+13: Gangway 150K
+14: Gangway 200K
+15: Gangway 250K
+16: Gangway Ex. Ball
+17: Mirror Quick MB
+18: Mirror Open Gate
+21: Mirror Super Dog
+22: Mirror Bumpers
+23: Mirror Million
+24: Mirror Ex. Ball
+25: Extra Ball
+26: Super Dog
+27: Step S
+28: Step P
 
 ##########################################################################
 # Switch Description
@@ -82,7 +100,27 @@ define MACHINE_LACKS_ALL_INCLUDES
 13: Start Button, start-button, intest
 14: Plumb Bob Tilt, c_decl(sw_tilt), tilt, ingame, noplay
 21: Slam Tilt, slam-tilt, ingame, cabinet
-23: Ticket Opto, opto
+23: Ticket Opto, opto, noplay
+25: Lock Right
+27: Lock Center
+28: Lock Left
+41: Left Slingshot
+44: Wind Tunnel Hole
+45: Trap Door
+46: Rudys Hideout
+51: Dummy Jaw, opto
+53: Right Slingshot
+58: Tunnel Kickout
+62: Right Plunger, shooter
+63: Right Trough
+65: Dummy Eject Hole
+67: Lower Right Hole
+68: Lower Jet
+72: Left Trough
+73: Outhole, outhole, noscore
+74: Center Trough
+76: Trap Door Closed, noplay
+77: Upper Right Jet
 
 ##########################################################################
 # Drives
@@ -102,13 +140,47 @@ define MACHINE_LACKS_ALL_INCLUDES
 #
 ##########################################################################
 [drives]
+H1: Outhole
+H2: Ramp Diverter
+H3: Rudys Hideout
+H4: Tunnel Kickout
+H5: Trap Door Open
+H6: Trap Door Close
+H7: Knocker
+H8: Lock Release
+L1: Upper Left Jet
+L2: Upper Right Jet
+L3: Lower Jet
+L4: Left Slingshot
+L5: Right Slingshot
+L6: Steps Gate
+L7: Ball Release
+L8: Dummy Eject Hole
 
+G1: Blue Flashers
+G2: Dummy Flasher
+G3: Clock Flashers
+G4: Super Dog Flash.
+G5: Mouth Motor
+G6: Motor Direction
+G7: Red Flashers
+G8: Clear Flashers
+
+A1: Eyes Right
+A2: Eyelids Open
+A3: Eyelids Closed
+A4: Eyes Left
 
 ##########################################################################
 # General Illumination
 ##########################################################################
 [gi]
-
+0: Backglass Upper
+1: Rudy Backglass
+2: Rear Playfield
+3: Backglass Center
+4: Front Playfield
+5: All Illumination
 
 ##########################################################################
 # Tests
@@ -147,6 +219,11 @@ define MACHINE_LACKS_ALL_INCLUDES
 # that count pinball, in front from entry to exit.
 ##########################################################################
 [containers]
+Trough: Ball Release, trough, init_max_count(3), \
+	Left Trough, Center Trough, Right Trough
+Lock: Lock Release, init_max_count(0), \
+	Lock Right, Lock Center, Lock Left
+Tunnel: Tunnel Kickout, init_max_count(0), Tunnel Kickout
 
 [targetbanks]
 
@@ -190,6 +267,11 @@ define MACHINE_LACKS_ALL_INCLUDES
 # Commas _cannot_ be used for this purpose since they separate parameters.
 ##########################################################################
 [highscores]
+GC: LED, 15.000.000
+1: BCD, 10.000.000
+2: QQQ, 9.000.000
+3: DEH, 8.000.000
+4: JND, 7.000.000
 
 ##########################################################################
 # Bit flags.
