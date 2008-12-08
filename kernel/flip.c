@@ -34,7 +34,7 @@ U8 fliptronic_powered_coil_outputs;
 
 
 /** Software controlled flipper inputs for Fliptronic games. */
-#ifdef MACHINE_FLIPTRONIC
+#if (MACHINE_FLIPTRONIC == 1)
 __fastram__ U8 flipper_overrides;
 #endif
 
@@ -53,7 +53,7 @@ void flipper_disable (void)
 }
 
 
-#ifdef MACHINE_FLIPTRONIC
+#if (MACHINE_FLIPTRONIC == 1)
 
 void flipper_override_on (U8 switches)
 {
@@ -148,12 +148,18 @@ void fliptronic_rtt (void)
 	wpc_write_flippers (outputs);
 }
 
+#else
+
+void fliptronic_rtt (void)
+{
+}
+
 #endif /* MACHINE_FLIPTRONIC */
 
 
 CALLSET_ENTRY (fliptronic, ball_search)
 {
-#ifdef MACHINE_FLIPTRONIC
+#if (MACHINE_FLIPTRONIC == 1)
 	flipper_override_pulse (WPC_LL_FLIP_SW);
 	flipper_override_pulse (WPC_LR_FLIP_SW);
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER

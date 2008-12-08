@@ -267,7 +267,9 @@ void fatal (errcode_t error_code)
 
 	/* Reset hardware outputs */
 	pinio_write_triac (0);
+#if (MACHINE_FLIPTRONIC == 1)
 	wpc_write_flippers (0);
+#endif
 	wpc_write_ticket (0);
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);
