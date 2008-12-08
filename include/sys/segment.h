@@ -1,6 +1,27 @@
+/*
+ * Copyright 2005-2008 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef _SYS_SEGMENT_H
 #define _SYS_SEGMENT_H
+
+typedef U16 segbits_t;
 
 #define SEG_UL_DIAG    0x0001
 #define SEG_VERT_TOP   0x0002
@@ -24,17 +45,20 @@
 #define SEG_MID        (SEG_MID_LEFT+SEG_MID_RIGHT)
 #define SEG_VERT       (SEG_VERT_TOP+SEG_VERT_BOT)
 
-typedef U16 segbits_t;
+#define SEG_SECTIONS       2
+#define SEG_SECTION_SIZE   16
+#define SEG_PAGES          4
 
-typedef segbits_t *segaddr_t;
+typedef segbits_t seg_section_t[SEG_SECTION_SIZE];
+typedef seg_section_t seg_page_t[SEG_SECTIONS];
 
-void seg_set_new (segaddr_t sa, segbits_t bits);
 segbits_t seg_translate_char (char c);
-void seg_write_char (segaddr_t sa, char c);
-void seg_write_digit (segaddr_t sa, U8 digit);
-void seg_write_bcd (segaddr_t sa, bcd_t bcd);
-void seg_write_uint8 (segaddr_t sa, U8 u8);
-void seg_write_string (segaddr_t sa, const char *s);
-void seg_erase (segaddr_t sa, S8 len);
+segbits_t *seg_write_char (segbits_t *sa, char c);
+void seg_write_string (U8 row, U8 col, const char *s);
+U8 seg_strlen (const char *s);
+void seg_erase (void);
+void seg_init (void);
+void seg_alloc (void);
+void seg_show (void);
 
 #endif /* _SYS_SEGMENT_H */
