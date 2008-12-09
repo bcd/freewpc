@@ -183,6 +183,7 @@ extern U8 idle_ok;
 #include <sys/rtc.h>
 
 /* Common software structures */
+#include <priority.h>
 #include <sys/deff.h>
 #include <sys/leff.h>
 #include <sys/device.h>
@@ -194,7 +195,6 @@ extern U8 idle_ok;
 #include <audit.h>
 #include <printf.h>
 #include <callset.h>
-#include <priority.h>
 #include <eb.h>
 #include <search.h>
 #include <replay.h>
