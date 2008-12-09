@@ -642,22 +642,38 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 
 extern inline void pinio_reset_sound (void)
 {
+#ifdef MACHINE_SYS11_SOUND
+	writeb (WPCS11_RESET, 0);
+#else
 	writeb (WPCS_CONTROL_STATUS, 0);
+#endif
 }
 
 extern inline void pinio_write_sound (U8 val)
 {
+#ifdef MACHINE_SYS11_SOUND
+	writeb (WPCS11_DATA_OUT, val);
+#else
 	writeb (WPCS_DATA, val);
+#endif
 }
 
 extern inline bool pinio_sound_ready_p (void)
 {
+#ifdef MACHINE_SYS11_SOUND
+	return readb (WPCS11_READY_IN);
+#else
 	return readb (WPCS_CONTROL_STATUS) & WPCS_READ_READY;
+#endif
 }
 
 extern inline U8 pinio_read_sound (void)
 {
+#ifdef MACHINE_SYS11_SOUND
+	return readb (WPCS11_DATA_IN);
+#else
 	return readb (WPCS_DATA);
+#endif
 }
 
 #define SW_VOLUME_UP SW_UP
