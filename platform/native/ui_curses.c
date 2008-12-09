@@ -35,7 +35,7 @@ WINDOW *dmd_win;
 WINDOW *switch_win;
 WINDOW *task_win;
 WINDOW *sound_win;
-WINDOW *asciidmd_win;
+WINDOW *display_win;
 WINDOW *ball_tracker_win;
 
 
@@ -195,18 +195,41 @@ void ui_clear_dmd_text (int n)
 }
 
 
+#if (MACHINE_DMD == 1)
 void ui_refresh_asciidmd (unsigned char *data)
 {
 	unsigned int x, y;
 
 	for (y = 0; y < 32; y++)
 	{
-		wmove (asciidmd_win, y+1, 1);
+		wmove (display_win, y+1, 1);
 		for (x = 0; x < 128; x++)
-			wprintw (asciidmd_win, "%c", enhanced_pixel_ascii (*data++));
+			wprintw (display_win, "%c", enhanced_pixel_ascii (*data++));
 	}
-	wrefresh (asciidmd_win);
+	wrefresh (display_win);
 }
+#else
+void ui_refresh_display (unsigned int x, unsigned int y, unsigned int data)
+{
+	unsigned char c;
+
+	wmove (display_win, y+1, x+1);
+
+	switch (data)
+	{
+		case 0:
+			c = ' ';
+			break;
+
+		default:
+			c = '*';
+			break;
+	}
+
+	wprintw (display_win, "%c", c);
+	wrefresh (display_win);
+}
+#endif
 
 
 void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
@@ -259,7 +282,11 @@ void ui_init (void)
 	x += 64 + 2;
 	y += 6;
 
-	asciidmd_win = ui_window_create (130, 34, x, y, " ASCII-Matrix ");
+#if (MACHINE_DMD == 1)
+	display_win = ui_window_create (130, 34, x, y, " ASCII-Matrix ");
+#else
+	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
+#endif
 }
 
 
