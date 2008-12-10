@@ -425,34 +425,19 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 /** Simulate writing to a set of 8 solenoids. */
 static void sim_sol_write (int index, U8 *memp, U8 val)
 {
-	U8 newly_enabled;
 	int devno;
 	int n;
 
-	/* Find which solenoids transitioned from off to on */
-	newly_enabled = (*memp ^ val) & val;
+	/* Update the state of each solenoid from the signal coming
+	into it. */
 	for (n = 0; n < 8; n++)
-		if (newly_enabled & (1 << n))
-		{
-			int solno = index+n;
-			/* Solenoid index+n just turned on */
+	{
+		unsigned int solno = index+n;
 
-			if (solno >= NUM_POWER_DRIVES)
-				return;
-
-			/* See if it's the outhole kicker */
-#if defined(MACHINE_OUTHOLE_SWITCH) && defined(DEVNO_TROUGH)
-			if (solno == SOL_OUTHOLE &&
-				linux_switch_poll_logical (MACHINE_OUTHOLE_SWITCH))
-			{
-				/* Simulate kicking the ball off the outhole into the trough */
-				simlog (SLC_DEBUG, "Outhole kick");
-				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
-			}
-			else
-#endif
-
+		if (solno >= NUM_POWER_DRIVES)
+			return;
+		sim_coil_change (solno, val & (1 << n));
+#if 0
 			/* See if it's attached to a device.  Then find the first
 			switch that is active, and deactivate it, simulating the
 			removal of one ball from the device.  (This does not map
@@ -483,7 +468,8 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 					break;
 				}
 			}
-		}
+#endif
+	}
 
 	/* Commit the new state */
 	mux_write (ui_write_solenoid, index, memp, val, SIGNO_SOL);
@@ -1235,6 +1221,7 @@ int main (int argc, char *argv[])
 
 	/* Initialize the simulated ball tracker */
 	sim_ball_init ();
+	sim_coil_init ();
 	signal_init ();
 
 	/* Invoke the machine-specific simulation function */

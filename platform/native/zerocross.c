@@ -21,17 +21,19 @@
 #include <freewpc.h>
 #include <simulation.h>
 
-#define SIM_ZC_NONE
-//#define SIM_ZC_DOMESTIC
-//#define SIM_ZC_EXPORT
-
-
 /* Simulation of the zerocross circuit */
 
+#define AC_HZ 60   /* AC cycle has 60 cycles per second */
+#define ZC_HZ (AC_HZ * 2)  /* There are twice as many zero crossings */
+#define ZC_TIMER_MAX  (1000.0 / ZC_HZ)
+
+/** Nonzero when voltage has crossed zero.  This value is latched
+for software to read. */
 unsigned int sim_zc_active;
 
-unsigned int sim_zc_timer_start;
-unsigned int sim_zc_timer;
+/** The number of 1ms units between zerocrossing points. */
+double sim_zc_timer;
+
 
 /** Called by the software when reading the zerocross register.
  * Returns nonzero if currently at a zerocrossing.
@@ -45,12 +47,15 @@ int sim_zc_read (void)
 }
 
 
+/**
+ * Update the state of the zerocross circuit every 1ms.
+ */
 void sim_zc_periodic (void *data __attribute__((unused)))
 {
-	if (--sim_zc_timer == 0)
+	if (--sim_zc_timer <= 0)
 	{
 		sim_zc_active = 1;
-		sim_zc_timer = sim_zc_timer_start;
+		sim_zc_timer += ZC_TIMER_MAX;
 		signal_update (SIGNO_ZEROCROSS, 1);
 	}
 	else
@@ -63,9 +68,7 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 void sim_zc_init (void)
 {
 	sim_zc_active = 0;
-
-	/* Generate zerocross every 8ms -- close enough */
-	sim_zc_timer = sim_zc_timer_start = 8;
+	sim_zc_timer = ZC_TIMER_MAX;
 
 	/* Register a callback every 1ms */
 	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
