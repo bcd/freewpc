@@ -425,34 +425,19 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 /** Simulate writing to a set of 8 solenoids. */
 static void sim_sol_write (int index, U8 *memp, U8 val)
 {
-	U8 newly_enabled;
 	int devno;
 	int n;
 
-	/* Find which solenoids transitioned from off to on */
-	newly_enabled = (*memp ^ val) & val;
+	/* Update the state of each solenoid from the signal coming
+	into it. */
 	for (n = 0; n < 8; n++)
-		if (newly_enabled & (1 << n))
-		{
-			int solno = index+n;
-			/* Solenoid index+n just turned on */
+	{
+		unsigned int solno = index+n;
 
-			if (solno >= NUM_POWER_DRIVES)
-				return;
-
-			/* See if it's the outhole kicker */
-#if defined(MACHINE_OUTHOLE_SWITCH) && defined(DEVNO_TROUGH)
-			if (solno == SOL_OUTHOLE &&
-				linux_switch_poll_logical (MACHINE_OUTHOLE_SWITCH))
-			{
-				/* Simulate kicking the ball off the outhole into the trough */
-				simlog (SLC_DEBUG, "Outhole kick");
-				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
-			}
-			else
-#endif
-
+		if (solno >= NUM_POWER_DRIVES)
+			return;
+		sim_coil_change (solno, val & (1 << n));
+#if 0
 			/* See if it's attached to a device.  Then find the first
 			switch that is active, and deactivate it, simulating the
 			removal of one ball from the device.  (This does not map
@@ -483,7 +468,8 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 					break;
 				}
 			}
-		}
+#endif
+	}
 
 	/* Commit the new state */
 	mux_write (ui_write_solenoid, index, memp, val, SIGNO_SOL);
@@ -573,6 +559,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 				sim_watchdog_reset ();
 			break;
 
+#if (MACHINE_DMD == 1)
 		case WPC_DMD_LOW_PAGE:
 			asciidmd_map_page (0, val);
 			break;
@@ -608,6 +595,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			simulation, because FIRQ is automatically asserted
 			to update the DMD occasionally. */
 			break;
+#endif /* MACHINE_DMD */
 
 		case WPC_GI_TRIAC:
 			mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
@@ -629,11 +617,29 @@ void linux_asic_write (IOPTR addr, U8 val)
 			sim_sol_write (8, &linux_solenoid_outputs[1], val);
 			break;
 
-		case WPC_EXTBOARD1:
 #ifdef MACHINE_SOL_EXTBOARD1
+		case WPC_EXTBOARD1:
 			sim_sol_write (40, &linux_solenoid_outputs[5], val);
 #endif
 			break;
+
+#if (MACHINE_DMD == 0)
+		case WPC_ALPHA_POS:
+			sim_seg_set_column (val);
+			break;
+		case WPC_ALPHA_ROW1:
+			sim_seg_write (0, 0, val);
+			break;
+		case WPC_ALPHA_ROW1+1:
+			sim_seg_write (0, 1, val);
+			break;
+		case WPC_ALPHA_ROW2:
+			sim_seg_write (1, 0, val);
+			break;
+		case WPC_ALPHA_ROW2+1:
+			sim_seg_write (1, 1, val);
+			break;
+#endif
 
 		case WPC_LAMP_ROW_OUTPUT:
 			if ((linux_lamp_data_ptr != NULL) && linux_lamp_write_flag)
@@ -751,8 +757,8 @@ U8 linux_asic_read (IOPTR addr)
 		case WPC_ZEROCROSS_IRQ_CLEAR:
 			return sim_zc_read () ? 0x80 : 0x0;
 
-		case WPC_EXTBOARD1:
 #ifdef MACHINE_EXTBOARD1
+		case WPC_EXTBOARD1:
 			/* TODO */
 #endif
 			return 0;
@@ -1182,16 +1188,20 @@ int main (int argc, char *argv[])
 	simulation_pic_init ();
 #endif
 	sim_watchdog_init ();
+#if (MACHINE_DMD == 1)
 	asciidmd_init ();
+#endif
 
 	/* Set the hardware registers to their initial values. */
 	linux_asic_write (WPC_LAMP_COL_STROBE, 0);
 #if !(MACHINE_PIC == 1)
 	linux_asic_write (WPC_SW_COL_STROBE, 0);
 #endif
+#if (MACHINE_DMD == 1)
 	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
 	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
 	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
+#endif
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
@@ -1211,6 +1221,7 @@ int main (int argc, char *argv[])
 
 	/* Initialize the simulated ball tracker */
 	sim_ball_init ();
+	sim_coil_init ();
 	signal_init ();
 
 	/* Invoke the machine-specific simulation function */

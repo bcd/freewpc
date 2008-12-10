@@ -21,9 +21,13 @@ endif
 
 # Additional object files to be linked into the kernel region
 KERNEL_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
-	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o $(D)/asciidmd.o \
-	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o $(D)/sound.o
+	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
+	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
+	$(D)/coil.o
 
+# For ASCII DMD
+KERNEL_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
+KERNEL_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 
 # When using the curses UI (default for now)
@@ -31,8 +35,8 @@ CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 KERNEL_OBJS += $(D)/ui_curses.o
 
-# For ASCII DMD
-KERNEL_OBJS += tools/imglib/imglib.o
+# Add machine type flags
+CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
 
 CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 

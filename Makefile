@@ -119,7 +119,7 @@ BUILD_YEAR := $(shell date +%Y)
 
 .PHONY : platform_target
 ifdef NATIVE
-platform_target : freewpc
+platform_target : native
 else
 ifdef TARGET_ROMPATH
 platform_target : install
@@ -306,6 +306,7 @@ else
 GAME_ROM = freewpc.rom
 endif
 MAP_FILE = $(GAME_ROM:.rom=.map)
+NATIVE_PROG = freewpc_$(MACHINE_MAJOR)_$(MACHINE_MINOR)_$(MACHINE)
 
 ifndef MACHINE_FILE
 MACHINE_FILE = $(MACHINE).md
@@ -643,8 +644,9 @@ $(BINFILES:.bin=.s19) : %.s19 : %.lnk $(OBJS) $(AS_OBJS) $(PAGE_HEADER_OBJS)
 endif
 
 ifeq ($(CPU),native)
-freewpc : $(OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o freewpc $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+native : $(NATIVE_PROG)
+$(NATIVE_PROG) : $(OBJS)
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -991,10 +993,12 @@ info:
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
+	$(Q)echo "CONFIG_FONT = $(CONFIG_FONT)"
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
 	$(Q)echo "CONFIG_BARE = $(CONFIG_BARE)"
 	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
+	$(Q)echo "NATIVE_PROG = $(NATIVE_PROG)"
 
 .PHONY : areainfo
 areainfo:
