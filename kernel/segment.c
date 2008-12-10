@@ -45,7 +45,7 @@ const segbits_t seg_table[] = {
 	['<'] = SEG_UR_DIAG+SEG_LR_DIAG,
 	['>'] = SEG_UL_DIAG+SEG_LL_DIAG,
    ['A'] = SEG_LEFT+SEG_TOP+SEG_MID+SEG_RIGHT,
-   ['B'] = SEG_TOP+SEG_LEFT+SEG_BOT+SEG_MID+SEG_UR_DIAG+SEG_LWR_RIGHT,
+   ['B'] = SEG_TOP+SEG_BOT+SEG_MID_RIGHT+SEG_VERT+SEG_RIGHT,
    ['C'] = SEG_LEFT+SEG_TOP+SEG_BOT,
    ['D'] = SEG_TOP+SEG_BOT+SEG_VERT+SEG_RIGHT,
    ['E'] = SEG_LEFT+SEG_TOP+SEG_MID+SEG_BOT,
@@ -135,7 +135,7 @@ segbits_t seg_translate_char (char c)
 segbits_t *seg_write_char (segbits_t *sa, char c)
 {
 	if (c == '\0')
-		return;
+		return sa;
 	else if ((c == '.' || c == ':') && (!(sa[-1] & SEG_PERIOD)))
 		*--sa |= SEG_PERIOD;
 	else if (c == ',')
