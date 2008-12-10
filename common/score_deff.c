@@ -160,7 +160,9 @@ const U8 score_font_info_key[4][5][4] = {
 void scores_draw_current (U8 single_player)
 {
 	U8 p;
+#if (MACHINE_DMD == 1)
 	const struct score_font_info *info;
+#endif
 
 	/* Each player's score is drawn in turn.
 	If skip_player is not 0, then it will cause a particular
