@@ -2,14 +2,15 @@
 #include <stdio.h>
 
 #define MAX_SIGNALS 16
-#define MAX_WAVE_LEN 60
+#define MAX_WAVE_LEN 80
 
 enum value_range {
 	INACTIVE,
 	ACTIVE,
 	RISING_EDGE,
 	FALLING_EDGE,
-	INDETERMINATE,
+	FUZZY_INACTIVE,
+	FUZZY_ACTIVE,
 };
 
 struct signal_info
@@ -18,6 +19,7 @@ struct signal_info
 	enum value_range val;
 	unsigned long last_clock;
 	char wave[MAX_WAVE_LEN];
+	unsigned int maxval;
 };
 
 struct signal_info signal_table[MAX_SIGNALS];
@@ -25,12 +27,19 @@ unsigned int signal_longest_name;
 unsigned long clock_min;
 unsigned long clock_max;
 unsigned int clock_width;
+unsigned int display_width;
 
 void set_window (unsigned int min, unsigned int max)
 {
+	display_width = MAX_WAVE_LEN;
 	clock_min = min;
 	clock_max = max;
-	clock_width = (max - min) / MAX_WAVE_LEN;
+	clock_width = (max - min) / display_width;
+	if (clock_width == 0)
+	{
+		clock_width = 1;
+		display_width = max - min;
+	}
 }
 
 static enum value_range update_val (enum value_range old, enum value_range new)
@@ -42,7 +51,7 @@ static enum value_range update_val (enum value_range old, enum value_range new)
 	else if ((old == ACTIVE || old == FALLING_EDGE) && new == INACTIVE)
 		return FALLING_EDGE;
 	else
-		return INDETERMINATE;
+		return (new == ACTIVE) ? FUZZY_ACTIVE : FUZZY_INACTIVE;
 }
 
 char wave_char (enum value_range val)
@@ -57,8 +66,8 @@ char wave_char (enum value_range val)
 			return '/';
 		case FALLING_EDGE:
 			return '\\';
-		default:
-		case INDETERMINATE:
+		case FUZZY_ACTIVE:
+		case FUZZY_INACTIVE:
 			return '*';
 	}
 }
@@ -87,6 +96,7 @@ void update_signal (const char *name, unsigned long clock, unsigned int val)
 	int i;
 	struct signal_info *sig;
 
+	//printf ("%s : %ld %d\n", name, clock, val);
 	for (i=0, sig = signal_table ; i < MAX_SIGNALS; i++, sig++)
 	{
 		if (!strcmp (sig->name, name))
@@ -106,12 +116,15 @@ void update_signal (const char *name, unsigned long clock, unsigned int val)
 				if (clk / clock_width > sig->last_clock / clock_width)
 				{
 					unsigned int offset = (clk - clock_min) / clock_width;
+					if (offset >= MAX_WAVE_LEN)
+						continue;
+
 					//printf ("signal %d clk %d array %d  :  %d\n", i, clk, offset, sig->val);
 					sig->wave[offset] = wave_char (sig->val);
 
-					if (sig->val == RISING_EDGE)
+					if (sig->val == RISING_EDGE || sig->val == FUZZY_ACTIVE)
 						sig->val = ACTIVE;
-					else if (sig->val == FALLING_EDGE)
+					else if (sig->val == FALLING_EDGE || sig->val == FUZZY_INACTIVE)
 						sig->val = INACTIVE;
 
 					sig->last_clock = clk;
@@ -123,7 +136,7 @@ void update_signal (const char *name, unsigned long clock, unsigned int val)
 	}
 }
 
-void add_clock_signal (const char *name, unsigned long f)
+void add_clock_signal (const char *name, unsigned long f, unsigned int width)
 {
 	unsigned long clock;
 
@@ -134,9 +147,10 @@ void add_clock_signal (const char *name, unsigned long f)
 
 	for (clock = (clock_min / clock_width) * clock_width;
 		clock < clock_max;
-		clock++)
+		clock += f)
 	{
-		update_signal (name, clock, (clock % f) < f/2);
+		update_signal (name, clock, 1);
+		update_signal (name, clock + width, 0);
 	}
 }
 
@@ -153,7 +167,7 @@ void dump_signals (void)
 			continue;
 		c = 'X';
 		printf ("%-8.8s ", sig->name);
-		for (j = 0; j < MAX_WAVE_LEN; j++)
+		for (j = 0; j < display_width; j++)
 		{
 			if (sig->wave[j] != 'X')
 				c = sig->wave[j];
@@ -200,15 +214,17 @@ int main (int argc, char *argv[])
 	{
 	}
 
-	set_window (0, 20000);
-	add_signal ("ZC");
+	/* Set a 1 second window by default */
+	set_window (0, 300);
+
+	add_clock_signal ("ZC", 8, 1);
 	add_signal ("COIL");
-	//add_clock_signal ("IRQ", 10);
-	update_signal ("ZC", 100, 1);
-	update_signal ("COIL", 200, 1);
-	update_signal ("ZC", 300, 0);
-	update_signal ("COIL", 600, 0);
-	update_signal ("ZC", 900, 1);
+	//add_clock_signal ("CLK", 1, 1);
+	update_signal ("COIL", 20, 1);
+	update_signal ("COIL", 60, 0);
+	update_signal ("COIL", 65, 1);
+	update_signal ("COIL", 70, 1);
+	update_signal ("COIL", 75, 0);
 	dump_signals ();
 	exit (0);
 }
