@@ -26,7 +26,7 @@ WPC95: No
 # Include standard definitions that apply to all WPC games.
 # This will set some defaults for things you leave out here.
 ##########################################################################
-include platform/wpc/wpc.md
+include platform/wpc/wpc89.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
@@ -34,9 +34,10 @@ include platform/wpc/wpc.md
 ##########################################################################
 define MACHINE_LACKS_ALL_INCLUDES
 # define MACHINE_SYS11_SOUND
+define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
+define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
 
 #define MACHINE_INCLUDE_FLAGS
-#define MACHINE_SOL_EXTBOARD1
 #define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
