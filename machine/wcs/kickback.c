@@ -78,7 +78,7 @@ CALLSET_ENTRY (kickback, sw_light_kickback)
 	}
 }
 
-CALLSET_ENTRY (kickback, sw_right_inlane)
+CALLSET_ENTRY (kickback, sw_right_flipper_lane)
 {
 }
 

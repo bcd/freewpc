@@ -22,6 +22,8 @@ define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 'E', 'S' }, { 'R', 'J', 'S' }
+define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
+define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 
 [lamps]
 11: noname, x(39), y(12)
@@ -166,7 +168,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 
 18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
 23: Buyin Button, buyin-button, cabinet
-25: Free Kick Target, ingame, debounce(TIME_100MS)
+25: Free Kick Target, ingame, debounce(TIME_50MS)
 26: Kickback Upper, ingame
 27: Spinner, ingame
 28: Light Kickback, ingame
@@ -250,7 +252,7 @@ A4: Ramp Rear, flash
 
 F5: Magna Goalie, duty(SOL_DUTY_50), time(TIME_66MS)
 F6: Loop Gate, duty(SOL_DUTY_75), time(TIME_200MS)
-F7: Lock Magnet, duty(SOL_DUTY_12), time(TIME_500MS)
+F7: Lock Magnet, duty(SOL_DUTY_12), time(TIME_100MS)
 
 [gi]
 0: Playfield Left
@@ -285,6 +287,7 @@ Yellow Lamps: COLOR:yellow
 Green Lamps: COLOR:green
 Blue Lamps: COLOR:blue
 Purple Lamps: COLOR:purple
+Circle Out: PF:lamp_sort_circle_out
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
@@ -318,6 +321,7 @@ Disable Goalie: yes_no, NO
 [scores]
 730:
 10K:
+1M:
 
 [highscores]
 
@@ -339,18 +343,26 @@ Goalie Moving:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
-Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
+Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1
 
-Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
-Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
-Goal Lit: page(MACHINE_PAGE), PRI_GAME_MODE1
-Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
-Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
-Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
+NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
+NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
+
+#MyMode Starting: page(MACHINE_PAGE), PRI_GAME_QUICK6
+#MyMode Running: page(MACHINE_PAGE), PRI_GAME_MODE2
+#MyMode Ending: page(MACHINE_PAGE), PRI_GAME_QUICK6
+
+#Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
+#Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
+#Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
+#Goal Lit: page(MACHINE_PAGE), PRI_GAME_MODE1
+#Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
+#Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
+#Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
-Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
+# Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 
 [fonts]
 
