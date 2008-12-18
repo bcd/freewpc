@@ -59,6 +59,7 @@ U8 seg_strlen (const char *s);
 void seg_erase (void);
 void seg_init (void);
 void seg_alloc (void);
+void seg_alloc_clean (void);
 void seg_show (void);
 
 #endif /* _SYS_SEGMENT_H */

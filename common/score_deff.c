@@ -30,6 +30,7 @@ bool score_update_needed;
 /** Draw the current ball number at the bottom of the display. */
 void scores_draw_ball (void)
 {
+#if (MACHINE_DMD == 1)
 #if defined (CONFIG_TIMED_GAME)
 	U8 time_minutes, time_seconds;
 	time_minutes = 0;
@@ -46,6 +47,10 @@ void scores_draw_ball (void)
 	font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
 	sprintf ("BALL %1i", ball_up);
 	font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
+#endif
+#else
+	sprintf ("BALL %1i", ball_up);
+	seg_write_string (1, 11, sprintf_buffer);
 #endif
 }
 
@@ -155,7 +160,9 @@ const U8 score_font_info_key[4][5][4] = {
 void scores_draw_current (U8 single_player)
 {
 	U8 p;
+#if (MACHINE_DMD == 1)
 	const struct score_font_info *info;
+#endif
 
 	/* Each player's score is drawn in turn.
 	If skip_player is not 0, then it will cause a particular
@@ -180,6 +187,7 @@ void scores_draw_current (U8 single_player)
 		/* Start printing to the display */
 		info->render ();
 #else /* TODO */
+		seg_write_string (0, 0, sprintf_buffer);
 #endif
 	}
 }
@@ -191,7 +199,7 @@ void scores_draw (void)
 {
 	if (in_game)
 		scores_draw_ball ();
-	else
+	else if (MACHINE_DMD)
 		scores_draw_credits ();
 	scores_draw_current (0);
 }
@@ -238,10 +246,18 @@ void scores_deff (void)
 		scores_draw_current (0);
 		dmd_copy_low_to_high ();
 		scores_draw_current (player_up);
+#else
+		seg_alloc ();
+		seg_erase ();
+		scores_draw_ball ();
+		scores_draw_current (0);
+		seg_show ();
+#endif
 
 		/* Display the score with effects, until a score change. */
 		for (;;)
 		{
+#if (MACHINE_DMD == 1)
 			if (valid_playfield)
 			{
 				dmd_map_lookaside (0);
@@ -259,6 +275,9 @@ void scores_deff (void)
 				dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
 				dmd_show_low ();
 			}
+#else
+/* TODO */
+#endif
 
 			task_sleep (TIME_166MS);
 
@@ -267,7 +286,6 @@ void scores_deff (void)
 			if (score_update_required ())
 				break;
 		}
-#endif
 	}
 }
 

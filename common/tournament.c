@@ -57,7 +57,7 @@ void tournament_player_detect (void)
 
 	while (hold > 0)
 	{
-		if (!switch_poll_logical (SW_L_L_FLIPPER_BUTTON))
+		if (!switch_poll_logical (SW_LEFT_BUTTON))
 		{
 			task_exit ();
 		}

@@ -24,6 +24,17 @@ __local__ U8 free_kicks;
 
 U8 free_kick_multiplier;
 
+void free_kick_deff (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("%d KICKS", free_kicks);
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	sprintf ("NEXT SHOT = %dX", free_kick_multiplier);
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
 
 void freekick_lamp_update (void)
 {
@@ -58,12 +69,15 @@ void free_kick_timeout_multiplier (void)
 void free_kick_award (void)
 {
 	free_kicks += free_kick_multiplier;
+	score_multiple (SC_1M, free_kick_multiplier);
 	if (free_kick_multiplier < 5)
 	{
 		free_kick_multiplier++;
 		freekick_lamp_update ();
 	}
 	task_recreate_gid (GID_FREEKICK_TIMEOUT, free_kick_timeout_multiplier);
+	sound_send (SND_KICK);
+	deff_restart (DEFF_FREE_KICK);
 }
 
 
@@ -76,5 +90,10 @@ CALLSET_ENTRY (freekick, sw_free_kick_target)
 CALLSET_ENTRY (freekick, start_player)
 {
 	free_kicks = 0;
+}
+
+CALLSET_ENTRY (freekick, start_ball)
+{
 	free_kick_reset_multiplier ();
 }
+

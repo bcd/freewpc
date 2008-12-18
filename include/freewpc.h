@@ -147,12 +147,15 @@ extern U8 idle_ok;
 
 /* Platform specifics */
 #ifdef CONFIG_PLATFORM_WHITESTAR
+#define CPU_BOARD
 #include <platform/whitestar.h>
 #endif
 #ifdef CONFIG_PLATFORM_WPC
+#define CPU_BOARD
 #include <platform/wpc.h>
 #endif
 #ifdef CONFIG_PLATFORM_WPCSOUND
+#define SOUND_BOARD
 #include <platform/wpcsound.h>
 #endif
 
@@ -171,6 +174,7 @@ extern U8 idle_ok;
 #include <list.h>
 #include <log.h>
 
+#ifdef CPU_BOARD
 /* Hardware modules */
 #include <sys/ac.h>
 #include <sys/sol.h>
@@ -224,6 +228,8 @@ extern U8 idle_ok;
 
 /* Automatically generated header files */
 #include <gendefine_gid.h>
+
+#endif /* CPU_BOARD */
 
 
 /* This is ugly, but I can't figure out any other way to get 
