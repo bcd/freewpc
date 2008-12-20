@@ -21,15 +21,6 @@
 #include <freewpc.h>
 #include <simulation.h>
 
-/** The maximum number of balls that can be tracked in simulation */
-#define SIM_MAX_BALLS 8
-
-#define MAX_BALL_LOCATIONS 128
-
-#define SIM_LOCATION_NONE 0
-#define SIM_NO_BALL_HERE -1
-
-
 void_function sim_location_handler[MAX_BALL_LOCATIONS] = { NULL, };
 
 /**
@@ -58,6 +49,12 @@ void sim_location_toggle (unsigned int location)
 		sim_switch_toggle (location);
 }
 
+
+unsigned int sim_ball_get_number (unsigned int location)
+{
+	return sim_location_ball[location];
+}
+
 const char *
 sim_ball_location_name (unsigned int location)
 {
@@ -74,8 +71,13 @@ sim_ball_location_name (unsigned int location)
  */
 void sim_ball_move (unsigned int ballno, unsigned int location)
 {
+	unsigned int prev_location;
+
+	if (ballno == -1)
+		return;
+
 	/* Remove the ball from its previous location */
-	unsigned int prev_location = sim_ball_location[ballno];
+	prev_location = sim_ball_location[ballno];
 	if (prev_location != SIM_LOCATION_NONE)
 	{
 		sim_location_toggle (prev_location);
@@ -91,7 +93,6 @@ void sim_ball_move (unsigned int ballno, unsigned int location)
 #endif
 	simlog (SLC_DEBUG, "Ball %d @ %s", ballno, sim_ball_location_name (location));
 }
-
 
 void sim_register_location_handler (unsigned int location,
                                     void_function handler)

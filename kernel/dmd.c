@@ -430,7 +430,11 @@ void dmd_invert_page (dmd_buffer_t dbuf)
 
 void dmd_copy_page (dmd_buffer_t dst, const dmd_buffer_t src)
 {
+#ifdef __m6809__
+	dmd_copy_asm (dst, src);
+#else
 	__blockcopy16 (dst, src, DMD_PAGE_SIZE);
+#endif
 }
 
 
