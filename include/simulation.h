@@ -141,5 +141,13 @@ extern inline void sim_clear_badness (unsigned long err)
 	sim_badness &= ~err;
 }
 
+/** The maximum number of balls that can be tracked in simulation */
+#define SIM_MAX_BALLS 8
+
+#define MAX_BALL_LOCATIONS 128
+
+#define SIM_LOCATION_NONE 0
+#define SIM_NO_BALL_HERE -1
+
 
 #endif /* _SIMULATION_H */
