@@ -3055,7 +3055,11 @@ struct window_ops gi_test_window = {
 };
 
 struct menu gi_test_item = {
+#if (MACHINE_DMD == 1)
 	.name = "GEN. ILLUMINATION",
+#else
+	.name = "GEN. ILLUM.",
+#endif
 	.flags = M_ITEM,
 	.var = { .subwindow = { &gi_test_window, NULL } },
 };
