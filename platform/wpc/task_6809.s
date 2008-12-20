@@ -298,3 +298,27 @@ _task_create:
 	;;; don't consider that anymore.
 	rts
 
+
+
+	.area .text
+	.globl _task_fork
+_task_fork:
+	pshs	u
+	jsr	_task_allocate
+	ldu	2,s
+	stu	UREG_SAVE_OFF,x
+	ldu	#_task_fork_entry
+	stu	PCREG_SAVE_OFF,x
+	puls	u
+	ldb	WPC_ROM_BANK
+	stb	ROMPAGE_SAVE_OFF,x
+	ldb	#1
+	rts
+
+	.area .text
+	.globl _task_fork_entry
+_task_fork_entry:
+	ldx	UREG_SAVE_OFF,x
+	clrb
+	jmp	,x
+
