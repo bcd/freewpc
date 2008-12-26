@@ -42,7 +42,10 @@ unsigned int coil_pulse_count;
  */
 void sim_coil_kick (struct sim_coil_state *c)
 {
-	simlog (SLC_DEBUG, "Kick device %02X", c - coil_states);
+	extern device_properties_t device_properties_table[];
+	unsigned int solno = c - coil_states;
+
+	simlog (SLC_DEBUG, "Kick device %02X", c);
 
 	/* If it's the outhole kicker, simulate the ball being
 	moved off the outhole into the trough */

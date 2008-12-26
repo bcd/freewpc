@@ -390,7 +390,7 @@ __noreturn__ void linux_shutdown (void)
 }
 
 
-static bool linux_switch_poll_logical (unsigned int sw)
+bool linux_switch_poll_logical (unsigned int sw)
 {
 	return sim_switch_read (sw) ^ switch_is_opto (sw);
 }
@@ -620,8 +620,8 @@ void linux_asic_write (IOPTR addr, U8 val)
 #ifdef MACHINE_SOL_EXTBOARD1
 		case WPC_EXTBOARD1:
 			sim_sol_write (40, &linux_solenoid_outputs[5], val);
-#endif
 			break;
+#endif
 
 #if (MACHINE_DMD == 0)
 		case WPC_ALPHA_POS:
@@ -757,7 +757,7 @@ U8 linux_asic_read (IOPTR addr)
 		case WPC_ZEROCROSS_IRQ_CLEAR:
 			return sim_zc_read () ? 0x80 : 0x0;
 
-#ifdef MACHINE_EXTBOARD1
+#ifdef MACHINE_SOL_EXTBOARD1
 		case WPC_EXTBOARD1:
 			/* TODO */
 #endif
