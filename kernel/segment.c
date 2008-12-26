@@ -18,14 +18,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Manage the alphanumeric segment displays.
+ *
+ */
+
 #include <freewpc.h>
 #include <m6809/math.h>
 
+#define SEGCHAR_ALL       0  /* Light up all segments of the display */
+#define SEGCHAR_HORIZ     1  /* Light up all horizontal segments */
+#define SEGCHAR_VERT      2  /* Light up all vertical segments */
+
 const segbits_t seg_table[] = {
+	[SEGCHAR_ALL] = 0xFFFF & SEG_COMMA & SEG_PERIOD,
+	[SEGCHAR_HORIZ] = SEG_TOP+SEG_MID+SEG_BOT,
+	[SEGCHAR_VERT] = SEG_LEFT+SEG_VERT+SEG_RIGHT,
 	[' '] = 0,
 	['%'] = SEG_UPR_LEFT+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LWR_RIGHT,
 	['('] = SEG_UR_DIAG+SEG_LR_DIAG,
 	[')'] = SEG_UL_DIAG+SEG_LL_DIAG,
+	['*'] = SEG_UL_DIAG+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LR_DIAG+SEG_MID+SEG_VERT,
 	['+'] = SEG_VERT+SEG_MID,
 	['-'] = SEG_MID,
 	['/'] = SEG_UR_DIAG+SEG_LL_DIAG,
@@ -74,15 +88,21 @@ const segbits_t seg_table[] = {
 };
 
 
-seg_page_t seg_pages[SEG_PAGES];
+seg_page_t seg_pages[SEG_ALLOC_PAGES+SEG_FIXED_PAGES];
 
-seg_page_t *seg_visible_page;
+__fastram__ seg_page_t *seg_visible_page;
 
-seg_page_t *seg_writable_page;
+__fastram__ seg_page_t *seg_writable_page;
 
-U8 seg_writable_pageid;
+U8 seg_alloc_pageid;
 
 
+/**
+ * Handle the realtime update of the segment displays.
+ *
+ * This function is invoked every 1ms to latch a value
+ * for one column -- 2 characters, one on top, one on bottom.
+ */
 void seg_rtt (void)
 {
 	U8 col;
@@ -99,9 +119,15 @@ void seg_rtt (void)
 
 void seg_alloc (void)
 {
-	seg_writable_page = seg_pages + seg_writable_pageid;
-	seg_writable_pageid++;
-	seg_writable_pageid &= (SEG_PAGES-1);
+	seg_writable_page = seg_pages + seg_alloc_pageid;
+	seg_alloc_pageid++;
+	seg_alloc_pageid &= (SEG_ALLOC_PAGES-1);
+}
+
+
+void seg_map (U8 page)
+{
+	seg_writable_page = seg_pages + page;
 }
 
 
@@ -146,19 +172,39 @@ segbits_t *seg_write_char (segbits_t *sa, char c)
 }
 
 
+bool seg_addr_valid (void *sa)
+{
+	return ((sa >= seg_pages) && (sa < seg_pages + sizeof (seg_pages)));
+}
+
+
+void seg_write (segbits_t *addr, U16 *data, U8 len)
+{
+	while (len-- > 0)
+		*addr++ = *data++;
+}
+
+
 void seg_write_string (U8 row, U8 col, const char *s)
 {
 	segbits_t *addr;
 
-	db_puts (s);
-	wpc_debug_write ('\n');
+	if (row >= SEG_SECTIONS)
+		return;
+	if (col >= SEG_SECTION_SIZE)
+		return;
 
 	addr = &(*seg_writable_page)[row][col];
-	while (*s != '\0')
+	while ((*s != '\0') && seg_addr_valid (addr))
 		addr = seg_write_char (addr, *s++);
 }
 
 
+/**
+ * Calculate the length of a string to be written to the
+ * display.  This is used to determine positioning for
+ * centering and right justification.
+ */
 U8 seg_strlen (const char *s)
 {
 	U8 n = 0;
@@ -168,6 +214,9 @@ U8 seg_strlen (const char *s)
 }
 
 
+/**
+ * Erase the current page.
+ */
 void seg_erase (void)
 {
 	segbits_t *addr = &(*seg_writable_page)[0][0];
@@ -175,6 +224,9 @@ void seg_erase (void)
 }
 
 
+/**
+ * Allocate a clean page for drawing.
+ */
 void seg_alloc_clean (void)
 {
 	seg_alloc ();
@@ -182,9 +234,13 @@ void seg_alloc_clean (void)
 }
 
 
+/**
+ * Initialize the segment displays.
+ */
 void seg_init (void)
 {
 	memset (seg_pages, 0, sizeof (seg_pages));
 	seg_show_page (0);
+	seg_alloc_pageid = 0;
 }
 

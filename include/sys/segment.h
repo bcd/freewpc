@@ -47,7 +47,8 @@ typedef U16 segbits_t;
 
 #define SEG_SECTIONS       2
 #define SEG_SECTION_SIZE   16
-#define SEG_PAGES          4
+#define SEG_ALLOC_PAGES    4
+#define SEG_FIXED_PAGES    3
 
 typedef segbits_t seg_section_t[SEG_SECTION_SIZE];
 typedef seg_section_t seg_page_t[SEG_SECTIONS];
