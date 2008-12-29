@@ -209,7 +209,8 @@ U8 seg_strlen (const char *s)
 {
 	U8 n = 0;
 	while (*s++ != '\0')
-		n++;
+		if ((*s != '.') && (*s != ','))
+			n++;
 	return n;
 }
 

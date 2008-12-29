@@ -50,7 +50,7 @@ void scores_draw_ball (void)
 #endif
 #else
 	sprintf ("BALL %1i", ball_up);
-	seg_write_string (1, 11, sprintf_buffer);
+	seg_write_string (1, 10, sprintf_buffer);
 #endif
 }
 
