@@ -103,7 +103,7 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIGIT SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOL. OVERRIDE", &integer_value, 8, &system_config.min_volume_control },
+	{ "MIN. VOL. OVERRIDE", &integer_value, 0, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
 	{ "TICKET EXP. BOARD", &yes_no_value, NO, &system_config.ticket_board },
