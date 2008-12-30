@@ -20,7 +20,8 @@
 #MACHINE := tspp
 
 #
-# Set this to the directory in which mame roms should be installed.
+# Set this to the directory in which MAME roms should be installed.
+# If you don't have MAME, then you can leave this undefined.
 #
 # Under Cygwin use something like the following.  make has trouble
 # with filenames that have spaces or colons in them.
