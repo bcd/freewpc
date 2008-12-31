@@ -427,7 +427,7 @@ LINE:
 		# Ignore comments and blank lines
 		next if /^#/; next if /^$/;
 		# Join with following line if necessary
-		while (/\\$/) {
+		while (/[\\,]$/) {
 			my $line = <FH>;
 			s/\\$//;
 			$_ .= $line;
