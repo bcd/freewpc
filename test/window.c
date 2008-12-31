@@ -70,7 +70,7 @@
 #include <coin.h>
 #include <highscore.h>
 #include <preset.h>
-
+#include <imagemap.h>
 
 #undef CONFIG_TEST_DURING_GAME
 
@@ -1641,44 +1641,47 @@ struct menu dev_force_error_item = {
 
 #if (MACHINE_DMD == 1)
 
-extern const U8 fif_freewpc_logo[];
-const U8 *dev_frametest_ptr;
-const U8 *dev_frametest_next_ptr;
+U8 test_frameno;
 
 void dev_frametest_init (void)
 {
-	dev_frametest_ptr = fif_freewpc_logo;
-	dev_frametest_next_ptr = NULL;
+	test_frameno = 0;
 }
+
 
 void dev_frametest_draw (void)
 {
-	if (dev_frametest_ptr)
-	{
-		dmd_alloc_low_high ();
-		dev_frametest_next_ptr = dmd_draw_fif1 (dev_frametest_ptr);
-		dmd_show2 ();
-		dev_frametest_ptr = NULL;
-	}
+	dmd_alloc_low_high ();
+	frame_draw (test_frameno);
+	dmd_show2 ();
 }
 
-void dev_frametest_advance (void)
+
+void dev_frametest_up (void)
 {
-	dev_frametest_ptr = dev_frametest_next_ptr;
-	if (far_read8 ((U8 *)dev_frametest_ptr, FIF_PAGE) > 2)
-	{
-		dev_frametest_ptr = fif_freewpc_logo;
-	}
+	test_frameno += 2;
+	if (test_frameno >= MAX_IMAGE_NUMBER)
+		test_frameno = 0;
+}
+
+
+void dev_frametest_down (void)
+{
+	if (test_frameno > 0)
+		test_frameno -= 2;
+	else
+		test_frameno = MAX_IMAGE_NUMBER - 2;
 }
 
 struct window_ops dev_frametest_window = {
 	INHERIT_FROM_BROWSER,
 	.init = dev_frametest_init,
 	.draw = dev_frametest_draw,
-	.up = dev_frametest_advance,
-	.down = null_function,
+	.up = dev_frametest_up,
+	.down = dev_frametest_down,
 	.enter = null_function,
 };
+
 
 struct menu dev_frametest_item = {
 	.name = "DMD FRAME TEST",

@@ -193,11 +193,11 @@ struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 	planebuf = buffer_clone (buf);
 	for (off = 0; off < planebuf->len; off++)
 	{
-		if (buf->data[off] <= 50 * 0xFF / 100)
+		if (buf->data[off] <= 25 * 0xFF / 100)
 			level = 0;
-		else if (buf->data[off] <= 70 * 0xFF / 100)
+		else if (buf->data[off] <= 50 * 0xFF / 100)
 			level = 1;
-		else if (buf->data[off] <= 90 * 0xFF / 100)
+		else if (buf->data[off] <= 75 * 0xFF / 100)
 			level = 2;
 		else
 			level = 3;
@@ -209,7 +209,7 @@ struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 }
 
 
-void add_image (const char *label, const char *filename)
+void add_image (const char *label, const char *filename, unsigned int options)
 {
 	FILE *imgfile;
 	struct buffer *buf;
@@ -221,15 +221,25 @@ void add_image (const char *label, const char *filename)
 	/* Read the PGM into a bitmap */
 	imgfile = fopen (filename, "r");
 	if (!imgfile)
-		return;
+		error ("can't open image file '%s'\n", filename);
+
 	buf = buffer_alloc (128 * 32);
 	buffer_read_pgm (buf, imgfile);
 	fclose (imgfile);
+
+	/* Apply any transformations */
+	if (options & OPT_NEGATE)
+	{
+		int off;
+		for (off = 0; off < buf->len; off++)
+			buf->data[off] = 0xFF - buf->data[off];
+	}
 
 	/* Convert into two bitplanes and process each */
 	for (plane = 0; plane < 2; plane++)
 	{
 		struct buffer *planebuf = pgm_get_plane (buf, plane);
+		planebuf->type = (!plane ? 0x1 : 0x0);
 		add_frame (!plane ? label : NULL, planebuf);
 	}
 
@@ -246,11 +256,13 @@ void write_output (const char *filename)
 	unsigned char padding = 0xFF;
 
 	outfile = fopen (filename, "w");
+	if (!outfile)
+		error ("can't open output file '%s'\n", filename);
 
 	/* Write the frame table header. */
 	for (frame = 0, offset = (frame_count + 1) * 3, buf = frame_table[0];
 		frame < frame_count; 
-		frame++, offset += buf->len, buf = frame_table[frame])
+		frame++, offset += buf->len + 1, buf = frame_table[frame])
 	{
 		/* Round up to the next page boundary if the image doesn't
 		 * completely fit in the current page. */
@@ -284,7 +296,7 @@ void write_output (const char *filename)
 	/* Write the frame table data */
 	for (frame = 0, offset = frame_count * 3, buf = frame_table[0];
 		frame < frame_count; 
-		frame++, offset += buf->len, buf = frame_table[frame])
+		frame++, offset += buf->len + 1, buf = frame_table[frame])
 	{
 		if ((offset / 0x4000) != ((offset + buf->len) / 0x4000))
 		{
@@ -295,6 +307,7 @@ void write_output (const char *filename)
 			offset = new_offset;
 		}
 
+		fputc (buf->type, outfile);
 		buffer_write (buf, outfile);
 	}
 	fclose (outfile);
@@ -303,12 +316,16 @@ void write_output (const char *filename)
 void parse_config (const char *filename)
 {
 	FILE *cfgfile = fopen (filename, "r");
+	if (!cfgfile)
+		error ("can't open config file '%s'\n", filename);
+
 	for (;;)
 	{
 		char line[256];
 		char *word;
 		char *label;
 		char *filename;
+		unsigned int options = 0;
 
 		fgets (line, 255, cfgfile);
 		if (feof (cfgfile))
@@ -322,13 +339,18 @@ void parse_config (const char *filename)
 				break;
 			else if (strchr (word, ':'))
 				label = word;
+			else if (*word == '!')
+			{
+				filename = word+1;
+				options |= OPT_NEGATE;
+			}
 			else if (*word)
 				filename = word;
 			word = strtok (NULL, " \t\n");
 		}
 
 		if (filename)
-			add_image (label, filename);
+			add_image (label, filename, options);
 	}
 	fclose (cfgfile);
 }
@@ -367,6 +389,7 @@ int main (int argc, char *argv[])
 
 	write_output (outfilename);
 
+	fprintf (lblfile, "\n#define MAX_IMAGE_NUMBER %d\n", frame_count);
 	fprintf (lblfile, "\n#endif /* _IMGLD_IMAGEMAP_H */\n");
 	fclose (lblfile);
 

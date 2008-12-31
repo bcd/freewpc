@@ -315,6 +315,8 @@ endif
 
 ifdef IMAGE_MAP
 IMAGE_ROM = build/image.rom
+IMAGE_HEADER = build/imagemap.h
+C_DEPS += $(IMAGE_HEADER)
 endif
 
 ifdef GAME_FSMS
@@ -852,8 +854,11 @@ endif
 #######################################################################
 
 ifdef IMAGE_MAP
-$(IMAGE_ROM) : $(IMAGE_MAP) $(IMGLD)
-	$(IMGLD) -o $@ -i build/imagemap.h $<
+$(IMAGE_ROM) $(IMAGE_HEADER): $(IMAGE_MAP) $(IMGLD)
+	$(IMGLD) -o $(IMAGE_ROM) -i $(IMAGE_HEADER) $(IMAGE_MAP)
+else
+$(IMAGE_HEADER):
+	touch $(IMAGE_HEADER)
 endif
 
 #######################################################################

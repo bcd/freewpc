@@ -65,6 +65,11 @@ struct buffer
 	 * This is only used by layering functions.
 	 */
 	U8 alpha;
+
+	/**
+	 * The type of the buffer.
+	 */
+	U8 type;
 };
 
 struct coord

@@ -1,0 +1,10 @@
+IMG_OLDCAR: machine/tz/oldcar.pgm
+IMG_ROBOT: !machine/tz/robot.pgm
+IMG_COINSTACK: machine/tz/coinstack.pgm
+IMG_HITCHER: machine/tz/hitcher.pgm
+IMG_PYRAMID: !machine/tz/pyramid.pgm
+IMG_CITY: machine/tz/city.pgm
+IMG_BRIANHEAD: !machine/tz/brianhead.pgm
+IMG_SPIRAL: !machine/tz/spiral.pgm
+IMG_COW: machine/tz/cow.pgm
+IMG_MBORDER: machine/tz/mborder.pgm

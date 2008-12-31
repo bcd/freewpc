@@ -52,6 +52,7 @@ struct buffer *buffer_alloc (unsigned int maxlen)
 	buf->hist = NULL;
 	buf->width = buf->height = 0;
 	buf->color = 1;
+	buf->type = 0;
 	memset (buf->_data, 0, maxlen);
 	return buf;
 }
