@@ -105,6 +105,8 @@ unsigned int bitmap_pos(struct buffer *buf, unsigned int x, unsigned int y);
 void buffer_read(struct buffer *buf, FILE *fp);
 void buffer_write(struct buffer *buf, FILE *fp);
 void bitmap_write_ascii(struct buffer *buf, FILE *fp);
+void buffer_read_pgm(struct buffer *buf, FILE *fp);
+void buffer_write_pgm(struct buffer *buf, FILE *fp);
 void buffer_write_c(struct buffer *buf, FILE *fp);
 void cdecl_begin(const char ident[], FILE *fp);
 void cdecl_end(FILE *fp);

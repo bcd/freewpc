@@ -9,7 +9,7 @@ FON_OBJS = fixed10.o
 OBJS = $(IMG_OBJS) $(FONT_OBJS) $(FON_OBJS)
 VPATH += ../wpclib
 
-PROGS = test_compression genmask dmdsim
+PROGS = test_compression genmask dmdsim testpgm
 
 all : $(PROGS)
 
