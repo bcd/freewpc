@@ -1,11 +1,21 @@
 
 #include <freewpc.h>
 
-register segbits_t *src asm ("u");
+#ifdef __m6809__
+#define __register__ register
+#define __ureg__ asm ("u")
+#define __yreg__ asm ("u")
+#else
+#define __register__
+#define __ureg__
+#define __yreg__
+#endif
+
+__register__ segbits_t *src __ureg__;
 
 segbits_t *src2;
 
-register segbits_t *dst asm ("y");
+__register__ segbits_t *dst __yreg__;
 
 segbits_t seg_overlay_mask;
 
