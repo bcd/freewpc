@@ -220,6 +220,9 @@ extern U8 *linux_dmd_high_page;
 #define WPC_RAM_BANK 					0x3FF3
 #define WPC_SHIFTADDR 					0x3FF4
 #define WPC_SHIFTBIT 					0x3FF6
+
+/* After writing a value from 0-7 to this register, reading it
+back will return a single bit set (0x1, 0x2, etc. up to 0x80). */
 #define WPC_SHIFTBIT2 					0x3FF7
 #define WPC_PERIPHERAL_TIMER_FIRQ_CLEAR 0x3FF8
 #define WPC_ROM_LOCK 					0x3FF9
