@@ -32,7 +32,7 @@
 
 #include <freewpc.h>
 #include <xbmprog.h>
-
+#include <imagemap.h>
 
 U8 frame_repeat_count;
 
@@ -204,6 +204,53 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 	return fif;
 }
 
+
+#ifdef IMAGEMAP_PAGE
+
+
+void frame_decode (U8 *data, U8 type)
+{
+	dmd_copy_page (dmd_low_buffer, (const dmd_buffer_t)data);
+}
+
+
+void frame_draw_plane (U16 id)
+{
+	U8 type;
+
+	struct frame_pointer
+	{
+		unsigned char *ptr;
+		U8 page;
+	} *p;
+
+	/* Lookup the image number in the global table. */
+	wpc_push_page (IMAGEMAP_PAGE);
+	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
+
+	/* Switch to the page containing the image data.
+	 * Pull the type byte out, then decode the remaining bytes
+	 * to the display buffer. */
+	wpc_push_page (p->page);
+	type = p->ptr[0];
+	dbprintf ("Frame %ld type %02X\n", id, type);
+	frame_decode (p->ptr + 1, type & ~0x1);
+	wpc_pop_page ();
+
+	wpc_pop_page ();
+}
+
+
+void frame_draw (U16 id)
+{
+	frame_draw_plane (id++);
+	dmd_flip_low_high ();
+	frame_draw_plane (id);
+	dmd_flip_low_high ();
+}
+
+
+#endif /* IMAGEMAP_PAGE */
 
 struct faf
 {

@@ -36,6 +36,8 @@ KERNEL_ASM_OBJS += $(P)/start.o
 
 COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
+IMAGE_MAP += $(P)/wpc.ild
+
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
 $(P)/math.o : INT_CFLAGS=-mint16

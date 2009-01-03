@@ -284,6 +284,8 @@ void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
 const U8 *dmd_draw_fif1 (const U8 *fif);
+void frame_draw (U16 id);
+void frame_draw2 (U16 id);
 
 __transition__ void dmd_shadow_copy (void);
 __transition__ void dmd_text_raise (void);

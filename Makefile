@@ -196,6 +196,7 @@ $(eval $(call include-tool,fiftool))
 $(eval $(call include-tool,softscope))
 $(eval $(call include-tool,scope))
 $(eval $(call include-tool,bin2c))
+$(eval $(call include-tool,imgld))
 
 
 # Name of the blanker to use
@@ -310,6 +311,12 @@ NATIVE_PROG = freewpc_$(MACHINE_MAJOR)_$(MACHINE_MINOR)_$(MACHINE)
 
 ifndef MACHINE_FILE
 MACHINE_FILE = $(MACHINE).md
+endif
+
+ifdef IMAGE_MAP
+IMAGE_ROM = build/image.rom
+IMAGE_HEADER = build/imagemap.h
+C_DEPS += $(IMAGE_HEADER)
 endif
 
 ifdef GAME_FSMS
@@ -588,10 +595,13 @@ post_compile :
 # to that expected for the particular machine.
 #
 ifndef REMOTE_PATH
-$(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(CSUM)
+$(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(IMAGE_ROM) $(CSUM)
 	$(Q)echo Padding ... && \
 		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
 	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
+ifdef IMAGE_MAP
+	$(Q)echo "Importing image ROM ..." && dd if=$(IMAGE_ROM) of=$(BLDDIR)/$(GAME_ROM) conv=notrunc
+endif
 else
 download: prep-download $(BLDDIR)/$(GAME_ROM)
 
@@ -840,6 +850,18 @@ $(FSM_SRCS) : $(BLDDIR)/%.c : $(MACHINE_DIR)/%.fsm tools/fsmgen
 endif
 
 #######################################################################
+###	Image Linking
+#######################################################################
+
+ifdef IMAGE_MAP
+$(IMAGE_ROM) $(IMAGE_HEADER): $(IMAGE_MAP) $(IMGLD)
+	$(IMGLD) -o $(IMAGE_ROM) -i $(IMAGE_HEADER) $(IMAGE_MAP)
+else
+$(IMAGE_HEADER):
+	touch $(IMAGE_HEADER)
+endif
+
+#######################################################################
 ###	Header File Targets
 #######################################################################
 
@@ -917,7 +939,7 @@ $(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC)
 
 $(HOST_OBJS) : CFLAGS=-Wall -I. -g
 
-$(HOST_OBJS) : %.o : %.c
+$(sort $(HOST_OBJS)) : %.o : %.c
 	$(CC) $(CFLAGS) $(TOOL_CFLAGS) -o $@ -c $< >> $(ERR) 2>&1
 
 #######################################################################

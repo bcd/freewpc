@@ -52,6 +52,7 @@ struct buffer *buffer_alloc (unsigned int maxlen)
 	buf->hist = NULL;
 	buf->width = buf->height = 0;
 	buf->color = 1;
+	buf->type = 0;
 	memset (buf->_data, 0, maxlen);
 	return buf;
 }
@@ -213,12 +214,43 @@ void buffer_write_xbm (struct buffer *buf, const char *ident, FILE *fp)
 }
 
 
-void buffer_write_pgm (struct buffer *buf, const char *ident, FILE *fp)
+/* Read a bitmap from a file in PGM file format. */
+void buffer_read_pgm (struct buffer *buf, FILE *fp)
+{
+	char line[80];
+	unsigned int x, y;
+	unsigned int c;
+
+	fgets (line, 79, fp); /* magic */
+	fgets (line, 79, fp); /* comment */
+
+	fgets (line, 79, fp);
+	sscanf (line, "%d %d", &buf->width, &buf->height);
+
+	fgets (line, 79, fp);
+	/* sscanf (line, "%d", &pgm->maxval); */
+
+	for (y=0; y < buf->height; y++)
+		for (x=0; x < buf->width; x++)
+		{
+			fgets (line, 79, fp);
+			if (feof (fp))
+				break;
+			sscanf (line, "%u\n", &c);
+			//printf ("x,y = %d, %d\n", x, y);
+			buf->data[bitmap_pos (buf, x, y)] = c;
+		}
+}
+
+
+/* Write a bitmap to a file in PGM file format. */
+void buffer_write_pgm (struct buffer *buf, FILE *fp)
 {
 	unsigned int row, col;
 	fprintf (fp, "P2\n");
 	fprintf (fp, "#\n");
 	fprintf (fp, "%d %d\n", buf->width, buf->height);
+	fprintf (fp, "255\n");
 	for (row=0; row < buf->height; row++)
 		for (col=0; col < buf->width; col++)
 			fprintf (fp, "%d\n", buf->data[bitmap_pos (buf, col, row)]);

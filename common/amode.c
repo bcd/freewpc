@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <coin.h>
 #include <highscore.h>
+#include <imagemap.h>
 
 /**
  * \file
@@ -108,7 +109,7 @@ void amode_score_page (void)
 void amode_logo_page (void)
 {
 	dmd_alloc_low_high ();
-	dmd_draw_fif (fif_freewpc_logo);
+	frame_draw (IMG_FREEWPC);
 	dmd_show2 ();
 	amode_page_end (3);
 }
