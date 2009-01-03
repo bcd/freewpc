@@ -295,6 +295,9 @@ void deff_swap_low_high (S8 count, task_ticks_t delay)
 This may cause it to be preempted by something more important. */
 void deff_nice (enum _priority prio)
 {
+	/* TODO - verify that this is only being called from
+	a display effect */
+
 	/* If increasing the priority, then accept the change but
 	nothing else really happens at the moment. */
 	if (prio >= deff_prio)
@@ -306,8 +309,8 @@ void deff_nice (enum _priority prio)
 	/* TODO */
 	/* Find the highest priority effect that is queued, and
 	see if its priority is greater than 'prio'.  If it is,
-	make this the new effect; otherwise, the current effect
-	stays and just lower its priority. */
+	make it the new effect (the current one is cancelled).
+	Otherwise, the current effect stays but with a lower priority. */
 	if (0)
 	{
 	}
