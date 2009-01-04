@@ -558,7 +558,7 @@ static U8 *buffer_write_run (U8 *ptr, U8 sentinel, U8 data, unsigned int count)
  * Return the estimated size of the image if it were compressed using
  * the palette method.
  */
-static unsigned int palette_compression_length (struct histogram *hist)
+unsigned int palette_compression_length (struct histogram *hist)
 {
 	if (hist->unique > 16)
 		return 10000;

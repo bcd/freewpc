@@ -132,8 +132,10 @@ void add_image (const char *label, const char *filename, unsigned int options)
 	struct buffer *buf;
 	int plane;
 
+#if 0
 	/* TODO - assume PGM format for now */
 	enum image_format format = get_file_format (filename);
+#endif
 
 	/* Read the PGM into a bitmap */
 	imgfile = fopen (filename, "r");
@@ -198,7 +200,7 @@ void write_output (const char *filename)
 
 		if (frame == 0)
 		{
-			fprintf (lblfile, "\n#define IMAGEMAP_BASE 0x4000\n", target_offset);
+			fprintf (lblfile, "\n#define IMAGEMAP_BASE 0x4000\n");
 			fprintf (lblfile, "#define IMAGEMAP_PAGE 0x%02X\n", target_page);
 		}
 

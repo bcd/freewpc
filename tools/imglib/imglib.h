@@ -103,6 +103,7 @@ typedef U8 unary_operator (U8);
 typedef struct coord translate_operator (struct coord);
 
 struct buffer *buffer_alloc(unsigned int maxlen);
+struct buffer *buffer_clone (struct buffer *buf);
 struct buffer *buffer_copy (struct buffer *buf);
 struct buffer *bitmap_alloc(unsigned int width, unsigned int height);
 struct buffer *frame_alloc(void);

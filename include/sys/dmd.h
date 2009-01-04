@@ -298,6 +298,8 @@ __transition__ void dmd_dup_mapped (void);
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
+void frame_decode_rle_asm (U8 *);
+void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_rle frame_decode_rle_asm
 #else
 /* TODO - no C versions of dmd_and/or/xor */

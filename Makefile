@@ -152,8 +152,8 @@ TMPFILES += $(LINKCMD)
 TMPFILES += *.o
 TMPFILES += *.lst
 TMPFILES += *.i
-TMPFILES += *.c.[0-9]*.* 
-TMPFILES += *.fon.[0-9]*.* 
+TMPFILES += *.c.[0-9]*.*
+TMPFILES += *.fon.[0-9]*.*
 TMPFILES += *.out
 TMPFILES += $(ERR)
 
@@ -314,7 +314,7 @@ MACHINE_FILE = $(MACHINE).md
 endif
 
 ifdef IMAGE_MAP
-IMAGE_ROM = build/image.rom
+IMAGE_ROM = build/$(MACHINE)_images.rom
 IMAGE_HEADER = build/imagemap.h
 C_DEPS += $(IMAGE_HEADER)
 endif
@@ -655,8 +655,8 @@ endif
 
 ifeq ($(CPU),native)
 native : $(NATIVE_PROG)
-$(NATIVE_PROG) : $(OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+$(NATIVE_PROG) : $(IMAGE_ROM) $(OBJS) $(NATIVE_OBJS)
+	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(NATIVE_OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
@@ -781,20 +781,24 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 #    knows what page it is being compiled in.  (-mfar-code-page tells
 #    only GCC; this tells the code itself.  Ideally, GCC would define
 #    something for us (another TODO))
-# 
+#
 
 ifeq ($(CPU),m6809)
 $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
 $(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 endif
 
-$(C_OBJS) : %.o : %.c 
+$(NATIVE_OBJS) $(C_OBJS) : %.o : %.c
 
 $(FON_OBJS) : %.o : %.fon
 
 $(FIF_OBJS) : %.o : %.fif
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
+
+$(C_OBJS) : $(IMAGE_HEADER)
+
+$(NATIVE_OBJS) : $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
@@ -803,7 +807,7 @@ $(FIF_OBJS) : $(GENDEFINES)
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
 
-$(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
+$(NATIVE_OBJS) $(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
@@ -836,7 +840,7 @@ $(BLDDIR)/mach-Makefile : $(MACH_DESC) $(BLDDIR)
 $(BLDDIR)/mach-config.h : $(MACH_DESC)
 	$(Q)echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $< config > $@.tmp && tools/move-if-change $@.tmp $@
-	
+
 $(CONFIG_SRCS) : $(BLDDIR)/mach-%.c : $(MACH_DESC) $(BLDDIR)/mach-config.h
 	$(Q)echo "Regenerating $@ if necessary..." && \
 	tools/genmachine $(MACH_DESC) $(@:$(BLDDIR)/mach-%.c=%) > $@.tmp && \
@@ -935,7 +939,7 @@ trace:
 
 tools : $(TOOLS)
 
-$(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC) 
+$(TOOLS) $(HOST_OBJS) : CC=$(HOSTCC)
 
 $(HOST_OBJS) : CFLAGS=-Wall -I. -g
 
@@ -1011,7 +1015,6 @@ info:
 	$(Q)echo "TOOLS = $(TOOLS)"
 	$(Q)echo "REQUIRED = $(REQUIRED)"
 	$(Q)echo "PATH_REQUIRED = $(PATH_REQUIRED)"
-	$(Q)echo "FIF_OBJS = $(FIF_OBJS)"
 	$(Q)echo "NUM_BLANK_PAGES = $(NUM_BLANK_PAGES)"
 	$(Q)echo "CONFIG_DMD = $(CONFIG_DMD)"
 	$(Q)echo "CONFIG_PIC = $(CONFIG_PIC)"
@@ -1021,6 +1024,8 @@ info:
 	$(Q)echo "CONFIG_BARE = $(CONFIG_BARE)"
 	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
 	$(Q)echo "NATIVE_PROG = $(NATIVE_PROG)"
+	$(Q)echo "NATIVE_OBJS = $(NATIVE_OBJS)"
+	$(Q)echo "C_OBJS = $(C_OBJS)"
 
 .PHONY : areainfo
 areainfo:
@@ -1036,7 +1041,7 @@ callset.in :
 #
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
-	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR)`;\
+	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) platform/native`;\
 		do echo "Cleaning in '$$dir' ..." && \
 		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
 		popd >/dev/null ; done

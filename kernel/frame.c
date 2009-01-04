@@ -213,7 +213,7 @@ void frame_decode_rle_c (U8 *data)
 	U16 *src = (U16 *)data;
 	U16 *dst = (U16 *)dmd_low_buffer;
 
-	while (dst < dmd_low_buffer + 512)
+	while ((U8 *)dst < dmd_low_buffer + 512)
 	{
 		U16 val = *src++;
 		if ((val & 0xFF00) == 0xA800)
@@ -262,15 +262,20 @@ void frame_decode (U8 *data, U8 type)
  */
 void frame_draw_plane (U16 id)
 {
+	/* Lookup the image number in the global table.
+	 * For real ROMs, this is located at a fixed address.
+	 * In native mode, the images are kept in a separate file.
+	 */
+#ifdef CONFIG_NATIVE
+	/* TODO */
+#else
 	U8 type;
-
 	struct frame_pointer
 	{
 		unsigned char *ptr;
 		U8 page;
 	} *p;
 
-	/* Lookup the image number in the global table. */
 	wpc_push_page (IMAGEMAP_PAGE);
 	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
 
@@ -283,6 +288,7 @@ void frame_draw_plane (U16 id)
 	wpc_pop_page ();
 
 	wpc_pop_page ();
+#endif
 }
 
 

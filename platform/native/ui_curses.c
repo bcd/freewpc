@@ -166,20 +166,12 @@ void ui_write_task (int taskno, int gid)
 }
 
 
-static void dmd_refresh (WINDOW *w)
-{
-#ifdef TEXTDMD
-	wrefresh (dmd_win);
-#endif
-}
-
-
 void ui_write_dmd_text (int x, int y, const char *text)
 {
 #ifdef TEXTDMD
 	wmove (dmd_win, 1+y/4, 6+x/4);
 	wprintw (dmd_win, text);
-	dmd_refresh (dmd_win);
+	wrefresh (dmd_win);
 #endif
 }
 
@@ -190,7 +182,7 @@ void ui_clear_dmd_text (int n)
 	wclear (dmd_win);
 	box (dmd_win, 0, 0);
 	print_center (dmd_win, 20, 0, " DMD Text ");
-	dmd_refresh (dmd_win);
+	wrefresh (dmd_win);
 #endif
 }
 

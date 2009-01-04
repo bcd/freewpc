@@ -26,6 +26,10 @@
 #define WPCS_IOBASE 0x2000
 
 #define WPCS_ROM_BANK          (WPCS_IOBASE + 0)
+#if 1
+#define WPCS_DEBUG_CONTROL     (WPCS_IOBASE + 0x200)
+#define WPCS_DEBUG_DATA        (WPCS_IOBASE + 0x201)
+#endif
 #define WPCS_FM_ADDR_STATUS    (WPCS_IOBASE + 0x400)
 #define WPCS_FM_DATA           (WPCS_IOBASE + 0x401)
 #define WPCS_DAC               (WPCS_IOBASE + 0x800)
@@ -61,7 +65,7 @@ hardware supported volume is. */
 /* FM chip frequency */
 
 /** The number of cycles/sec that the FM operates at */
-#define FM_HZ 3579545UL
+#define FM_HZ 3579545ULL
 
 /** Generate the correct value to be written into a YM2151
  * timer register in order to produce an interrupt N times
@@ -159,6 +163,11 @@ hardware supported volume is. */
 
 
 /* Inline Functions */
+
+extern inline void putchar (U8 c)
+{
+	writeb (WPCS_DEBUG_DATA, c);
+}
 
 
 /**
