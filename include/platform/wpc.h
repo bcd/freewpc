@@ -534,16 +534,23 @@ extern inline U8 wpc_read_locale (void)
 }
 
 
+/* Read the current ticket switches. */
 extern inline U8 wpc_read_ticket (void)
 {
+	/* Reading back a value of 0xFF indicates that
+	 * the ticket board is not present.  Otherwise,
+	 * it reads back a set of switch readings from
+	 * the board. */
 	return readb (WPC_TICKET_DISPENSE);
 }
 
 
+/* Write the ticket output drivers. */
 extern inline void wpc_write_ticket (U8 val)
 {
 	writeb (WPC_TICKET_DISPENSE, val);
 }
+
 
 
 #if (MACHINE_PIC == 1)
