@@ -1,7 +1,7 @@
 #
 # FreeWPC makefile
 #
-# (C) Copyright 2005-2008 by Brian Dominy.
+# (C) Copyright 2005-2009 by Brian Dominy.
 #
 # This Makefile can be used to build an entire, FreeWPC game ROM
 # from source code.

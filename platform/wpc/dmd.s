@@ -1,4 +1,4 @@
-;;; Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
