@@ -29,6 +29,9 @@
  * For space efficiency, all enables are 1-bit and packed into
  * a single byte variable.  A maximum of 8 drivers can be
  * supported.
+ *
+ * TODO - add support for a software adjust to categorically
+ * disable the device.
  */
 
 @@class duty

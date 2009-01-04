@@ -72,6 +72,54 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 26: Super Dog
 27: Step S
 28: Step P
+31: Step E
+32: Step T
+33: Million
+34: Trap Door Bonus
+35: Million Plus
+36: Ramp Entrance
+37: Ramp Steps
+38: Upper Left Jet
+41: Upper Right Jet
+42: Lower Jet
+43: Shoot Again
+44: Steps Gate Open
+45: Flipper Lanes
+46: Specials
+47: Lock
+48: Mirror Value
+51: Left Gangway
+52: Right Gangway
+53: Steps Frenzy
+54: Steps 500K
+55: Steps E.B.
+56: Ramp 250K
+57: Frenzy
+58: Start Button, start
+61: Clock 0 Min.
+62: Clock 5 Min.
+63: Clock 10 Min.
+64: Clock 15 Min.
+65: Clock 20 Min.
+66: Clock 25 Min.
+67: Clock 30 Min.
+68: Clock 35 Min.
+71: Clock 40 Min.
+72: Clock 45 Min.
+73: Clock 50 Min.
+74: Clock 55 Min.
+75: Clock Hour 1
+76: Clock Hour 2
+77: Clock Hour 3
+78: Clock Hour 4
+81: Clock Hour 5
+82: Clock Hour 6
+83: Clock Hour 7
+84: Clock Hour 8
+85: Clock Hour 9
+86: Clock Hour 10
+87: Clock Hour 11
+88: Clock Hour 12
 
 ##########################################################################
 # Switch Description
@@ -100,26 +148,52 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 12: Left Flipper, button, intest, c_decl(sw_left_button)
 13: Start Button, start-button, intest
 14: Plumb Bob Tilt, c_decl(sw_tilt), tilt, ingame, noplay
+15: Steps Frenzy
+16: Upper Ramp
+17: Step S
+18: U.L. Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, opto, noplay
 25: Lock Right
 27: Lock Center
 28: Lock Left
+31: Step P
+32: Superdog High
+33: Left Gangway
+34: Superdog Low
+35: Step Track Lower
+36: Step 500K
+37: Superdog Center
+38: Step Track Upper
 41: Left Slingshot
+42: Left Inlane
+43: Left Outlane
 44: Wind Tunnel Hole
 45: Trap Door
 46: Rudys Hideout
+47: Left Plunger
+48: Ramp Exit
 51: Dummy Jaw, opto
+52: Right Outlane
 53: Right Slingshot
+54: Step T
+55: Step Exit, opto
+56: Ramp Enter
+57: Jet Lane
 58: Tunnel Kickout
+61: Inner Right Inlane
 62: Right Plunger, shooter
 63: Right Trough
+64: Step E
 65: Dummy Eject Hole
+66: Right Gangway
 67: Lower Right Hole
 68: Lower Jet
+71: Outer Right Inlane
 72: Left Trough
 73: Outhole, outhole, noscore
 74: Center Trough
+75: Upper Loop
 76: Trap Door Closed, noplay
 77: Upper Right Jet
 
@@ -147,7 +221,7 @@ H3: Rudys Hideout
 H4: Tunnel Kickout
 H5: Trap Door Open
 H6: Trap Door Close
-H7: Knocker
+H7: Knocker, knocker
 H8: Lock Release
 L1: Upper Left Jet
 L2: Upper Right Jet
@@ -155,17 +229,17 @@ L3: Lower Jet
 L4: Left Slingshot
 L5: Right Slingshot
 L6: Steps Gate
-L7: Ball Release
+L7: Ball Release, ballserve
 L8: Dummy Eject Hole
 
-G1: Blue Flashers
-G2: Dummy Flasher
-G3: Clock Flashers
-G4: Super Dog Flash.
+G1: Blue Flashers, flash
+G2: Dummy Flasher, flash
+G3: Clock Flashers, flash
+G4: Super Dog Flash., flash
 G5: Mouth Motor
 G6: Motor Direction
-G7: Red Flashers
-G8: Clear Flashers
+G7: Red Flashers, flash
+G8: Clear Flashers, flash
 
 A1: Eyes Right
 A2: Eyelids Open

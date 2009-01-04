@@ -57,6 +57,7 @@ COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
 # Transition objects are separated out: in time these should be broken up
 # into multiple files, and they could take a lot of space
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmdtrans.o)
+TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_rough.o)
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 
 # Effect objects contain common display and lamp effects, and are
