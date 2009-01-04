@@ -390,7 +390,8 @@ void deff_update (void)
 	previous = deff_running;
 	deff_prio = 0;
 	deff_background = DEFF_NULL;
-	callset_invoke (display_update);
+	if (!in_test)
+		callset_invoke (display_update);
 
 	/* Nothing to do if it's already running */
 	if (deff_background == previous)
