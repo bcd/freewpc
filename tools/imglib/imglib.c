@@ -355,7 +355,7 @@ struct buffer *buffer_joinbits (struct buffer *buf)
 	unsigned int off, bit;
 	struct buffer *res = buffer_alloc (buf->len / 8);
 
-	for (off = 0; off < buf->len; off++)
+	for (off = 0; off < buf->len / 8; off++)
 	{
 		U8 val = 0;
 		for (bit = 0; bit < 8; bit++)
@@ -704,6 +704,66 @@ struct buffer *buffer_decompress (struct buffer *buf)
 	return res;
 }
 
+
+struct buffer *buffer_rle_encode (struct buffer *buf)
+{
+	U8 *dstp, *srcp;
+	struct buffer *res;
+	U8 b;
+
+	res = buffer_clone (buf);
+	srcp = buf->data;
+	dstp = res->data;
+
+	while (srcp < buf->data + 512)
+	{
+		b = *srcp++;
+		if (b == 0xA8)
+		{
+			*dstp++ = 0xA8;
+			*dstp++ = 0x00;
+			*dstp++ = *srcp++;
+		}
+		else
+		{
+			/* See how many following bytes are the same */
+			int run = 0;
+			while ((srcp + run < buf->data + 512) && (srcp[run] == b))
+				run++;
+			/* Include the current byte in the count, too */
+			run++;
+			if (run >= 4)
+			{
+				run &= ~1; /* round down to multiple of 2 */
+				*dstp++ = 0xA8;
+				*dstp++ = run / 2;
+				*dstp++ = b;
+				srcp += run-1;
+			}
+			else
+			{
+				/* None or not enough to do RLE, just copy literal */
+				*dstp++ = b;
+				*dstp++ = *srcp++;
+			}
+		}
+	}
+
+	res->len = dstp - res->data;
+	res->type |= 0x2;
+	return res;
+}
+
+
+struct buffer *buffer_rle_decode (struct buffer *buf)
+{
+	struct buffer *res;
+
+	res = buffer_alloc (512);
+	res->width = buf->width;
+	res->height = buf->height;
+	return res;
+}
 
 /********************************************************************/
 

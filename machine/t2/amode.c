@@ -1,5 +1,6 @@
 
 #include <freewpc.h>
+#include <imagemap.h>
 
 static U8 lamplist;
 
@@ -51,7 +52,7 @@ void amode_leff (void)
 void amode_deff (void)
 {
 	dmd_alloc_low_high ();
-	dmd_draw_fif (fif_freewpc_logo);
+	frame_draw (IMG_FREEWPC);
 	dmd_show2 ();
 	for (;;)
 		task_sleep_sec (5);

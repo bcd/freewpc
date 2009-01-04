@@ -17,6 +17,7 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
+DMD_LOW_BASE=0x3800
 DMD_PAGE_WIDTH=512
 
 	; Keep loop_count in a fast direct memory slot.
@@ -127,4 +128,40 @@ _dmd_copy_asm:
 	dec	loop_count
 	bne	1$
 	puls	u,y,pc
+
+
+	.globl _frame_decode_rle_asm
+_frame_decode_rle_asm:
+	; X = source buffer
+	pshs	u
+	ldu	#DMD_LOW_BASE
+
+rle_loop:
+	ldd	,x++
+	cmpa	#0xA8
+	beq	rle_run
+	std	,u++
+
+rle_next:
+	cmpu	#DMD_LOW_BASE + 512
+	blt	rle_loop
+	puls	u,pc
+
+rle_run:
+	tstb
+	beq	rle_escape
+	stb	*m0
+	lda	,x+
+	tfr	a,b
+
+rle_run_loop:
+	std	,u++
+	dec	*m0
+	bne	rle_run_loop
+	bra	rle_next
+
+rle_escape:
+	ldb	,x+
+	std	,u++
+	bra	rle_next
 

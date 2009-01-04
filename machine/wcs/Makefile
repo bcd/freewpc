@@ -38,6 +38,8 @@ ROM_PAGE_COUNT = 32
 
 MACHINE_FILE = wcs.md
 
+IMAGE_MAP += $(M)/wcs.ild
+
 MACHINE_SCHEDULE := $(M)/wcs.sched
 
 PINMAME_MACHINE = wcs_l2
@@ -58,7 +60,7 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
 	shot.o lock.o driver.o kickback.o freekick.o \
-	toplane.o newmatch.o
+	toplane.o newmatch.o deffs.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 

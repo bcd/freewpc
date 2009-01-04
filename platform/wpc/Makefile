@@ -38,10 +38,14 @@ COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
 IMAGE_MAP += $(P)/wpc.ild
 
+BOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))
+
+FIRST_BANK=$(shell echo $$((64 - $(ROM_PAGE_COUNT) )))
+
 # The math code must be compiled in 16-bit mode, since it interfaces
 # to the system libraries which expect this.
 $(P)/math.o : INT_CFLAGS=-mint16
 
 # The startup code needs to know the number of paged regions in the ROM
 # to checksum.
-$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=61 -DBOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))
+$(P)/start.o : EXTRA_ASFLAGS += -DTOP_BANK=61 -DBOTTOM_BANK=$(BOTTOM_BANK)

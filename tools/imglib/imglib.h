@@ -128,6 +128,7 @@ struct buffer *buffer_replace(struct buffer *old, struct buffer *new);
 struct histogram *histogram_update(struct buffer *buf);
 struct buffer *buffer_compress(struct buffer *buf, struct buffer *prev);
 struct buffer *buffer_decompress(struct buffer *buf);
+struct buffer *buffer_rle_encode (struct buffer *buf);
 struct buffer *bitmap_crop(struct buffer *buf);
 void bitmap_draw_pixel(struct buffer *buf, unsigned int x, unsigned int y);
 void bitmap_draw_line(struct buffer *buf, int x1, int y1, int x2, int y2);

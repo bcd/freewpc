@@ -298,11 +298,13 @@ __transition__ void dmd_dup_mapped (void);
 void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
+#define frame_decode_rle frame_decode_rle_asm
 #else
 /* TODO - no C versions of dmd_and/or/xor */
 #define dmd_and_page()
 #define dmd_or_page()
 #define dmd_xor_page()
+#define frame_decode_rle frame_decode_rle_c
 #endif
 void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
 

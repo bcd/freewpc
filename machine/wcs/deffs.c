@@ -7,18 +7,19 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <freewpc.h>
+#include <imagemap.h>
 
 __local__ U8 ball_save_count;
 
@@ -105,33 +106,8 @@ void jackpot_deff (void)
 	deff_exit ();
 }
 
-void ball_save_deff (void)
-{
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	sprintf ("PLAYER %d", player_up);
-	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
-	dmd_copy_low_to_high ();
-	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
-	dmd_show_low ();
-
-	switch (ball_save_count)
-	{
-		case 0:
-			break;
-		case 1:
-			break;
-		default:
-			break;
-	}
-	ball_save_count++;
-
-	deff_swap_low_high (24, TIME_100MS);
-	deff_exit ();
-}
-
 U16 tv_static_data[] = {
-	0x4964UL, 0x3561UL, 0x2957UL, 0x1865UL, 
+	0x4964UL, 0x3561UL, 0x2957UL, 0x1865UL,
 	0x8643UL, 0x8583UL, 0x18C9UL, 0x9438UL,
 	0x2391UL, 0x1684UL, 0x6593UL,
 };
@@ -194,7 +170,7 @@ void text_color_flash_deff (void)
 		dmd_flip_low_high ();
 	}
 
-	deff_exit ();	
+	deff_exit ();
 }
 
 
@@ -211,7 +187,7 @@ void spell_test_deff (void)
 	dmd_flip_low_high ();
 	dmd_show2 ();
 	task_sleep_sec (3);
-	deff_exit ();	
+	deff_exit ();
 }
 
 
@@ -260,9 +236,39 @@ void bg_flash_deff (void)
 	}
 }
 
-
-CALLSET_ENTRY (tz_deff, start_player)
+void dmd_flash (task_ticks_t delay)
 {
-	ball_save_count = 0;
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	task_sleep (delay);
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	task_sleep (delay);
 }
+
+
+void lightning_test_deff (void)
+{
+#if 0
+	dmd_map_lookaside (0);
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 16, "LIGHTNING TEST");
+	dmd_show_low ();
+	task_sleep (TIME_100MS);
+#endif
+
+	dmd_alloc_low_high ();
+	frame_draw (IMG_LIGHTNING1);
+	dmd_show2 ();
+	task_sleep (TIME_50MS);
+	dmd_flash (TIME_66MS);
+
+	dmd_alloc_low_high ();
+	frame_draw (IMG_LIGHTNING2);
+	dmd_show2 ();
+	task_sleep (TIME_50MS);
+	dmd_flash (TIME_66MS);
+	deff_exit ();
+}
+
 

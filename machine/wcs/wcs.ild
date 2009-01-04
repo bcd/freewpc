@@ -1,3 +1,16 @@
-IMG_FREEWPC: machine/tz/freewpc_logo.pgm
 IMG_STRIKER: machine/wcs/striker.pgm
 IMG_PGJ: machine/wcs/pgj.pgm
+IMG_SCRATCHY: !images/scratchy.pgm
+IMG_PYRAMID: images/newpyramid.pgm
+IMG_SPLIT1: images/split1.pgm
+IMG_SPLIT2: images/split2.pgm
+IMG_LIGHTNING1: images/lightning1.pgm
+IMG_LIGHTNING2: images/lightning2.pgm
+
+#IMG_MIDCIRCLE_START:
+#	images/midcircle1.xbm
+#	images/midcircle2.xbm
+#	images/midcircle3.xbm
+#	images/midcircle4.xbm
+#	images/midcircle5.xbm
+#IMG_MIDCIRCLE_END:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -207,13 +207,59 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 
 #ifdef IMAGEMAP_PAGE
 
+#ifndef __m6809__
+void frame_decode_rle_c (U8 *data)
+{
+	U16 *src = (U16 *)data;
+	U16 *dst = (U16 *)dmd_low_buffer;
 
+	while (dst < dmd_low_buffer + 512)
+	{
+		U16 val = *src++;
+		if ((val & 0xFF00) == 0xA800)
+		{
+			U8 words = val & 0xFF;
+			U8 repeater = *((U8 *)src);
+			U16 repeated_word = repeater | ((U16)repeater << 8);
+			src = (U16 *)((U8 *)src + 1);
+			while (words > 0)
+			{
+				*dst++ = repeated_word;
+				words--;
+			}
+		}
+		else
+		{
+			*dst++ = val;
+		}
+	}
+}
+#endif
+
+
+/**
+ * Decode the source of a DMD frame.  DATA points to the
+ * source data; the ROM page is already mapped.  TYPE
+ * says how it was encoded.
+ */
 void frame_decode (U8 *data, U8 type)
 {
-	dmd_copy_page (dmd_low_buffer, (const dmd_buffer_t)data);
+	if (type == 0)
+	{
+		dmd_copy_page (dmd_low_buffer, (const dmd_buffer_t)data);
+	}
+	else
+	{
+		frame_decode_rle (data);
+	}
 }
 
 
+/**
+ * Draw one plane of a DMD frame.
+ * ID identifies the source of the frame data.
+ * The output is always drawn to the low-mapped buffer.
+ */
 void frame_draw_plane (U16 id)
 {
 	U8 type;
@@ -233,7 +279,6 @@ void frame_draw_plane (U16 id)
 	 * to the display buffer. */
 	wpc_push_page (p->page);
 	type = p->ptr[0];
-	dbprintf ("Frame %ld type %02X\n", id, type);
 	frame_decode (p->ptr + 1, type & ~0x1);
 	wpc_pop_page ();
 
@@ -241,6 +286,11 @@ void frame_draw_plane (U16 id)
 }
 
 
+/**
+ * Draw a 2-plane, 4-color DMD frame.
+ * ID identifies the first plane of the frame.  The two
+ * frames have consecutive IDs.
+ */
 void frame_draw (U16 id)
 {
 	frame_draw_plane (id++);
@@ -251,23 +301,4 @@ void frame_draw (U16 id)
 
 
 #endif /* IMAGEMAP_PAGE */
-
-struct faf
-{
-	U8 depth;
-	U8 len;
-	U8 *fifs[0];
-};
-
-/** Execute a FreeWPC animation, which is a series of
-consecutive FIFs.  An animation is a sequence of FIFs,
-with a leading header. */
-void dmd_draw_faf1 (struct faf *faf, task_ticks_t delay)
-{
-	U8 n;
-	wpc_push_page (FIF_PAGE);
-	for (n=0; n < faf->len; n++)
-		dmd_draw_fif1 (faf->fifs[n]);
-	wpc_pop_page ();
-}
 

@@ -31,9 +31,6 @@ You want to convert it to FIF.  Use fiftool -o image.fif -c image.pgm.
 - Or maybe it's in XBM format.  That works too: 
 fiftool -o image.fif -c image.xbm
 
-- If you have a sequence of FIF frames... you want a FAF, 
-FreeWPC Animation Format.  Do: fiftool -o anim.faf -c image1.fif image2.fif...
-
 - Before writing a frame out, maybe you want to apply some transformation on
 it.  Use fiftool's command-line options to accept common pgmlib.c functions
 without having to write a full-fledged program.
@@ -64,7 +61,7 @@ do { \
 
 
 enum image_format { 
-	FORMAT_BAD, FORMAT_XBM, FORMAT_PGM, FORMAT_FIF, FORMAT_FAF
+	FORMAT_BAD, FORMAT_XBM, FORMAT_PGM, FORMAT_FIF
 }; 
 
 
@@ -95,8 +92,6 @@ enum image_format get_file_format (const char *filename)
 		return FORMAT_PGM;
 	else if (!strcmp (sep, "fif"))
 		return FORMAT_FIF;
-	else if (!strcmp (sep, "faf"))
-		return FORMAT_FAF;
 	else
 		return FORMAT_BAD;
 }
@@ -222,14 +217,6 @@ void write_fif (void)
 }
 
 
-/** Write a FAF formatted file */
-void write_faf (void)
-{
-	FILE *ofp = output_file_open ();
-	output_file_close (ofp);
-}
-
-
 int main (int argc, char *argv[])
 {
 	int argn;
@@ -275,9 +262,6 @@ int main (int argc, char *argv[])
 	{
 		case FORMAT_FIF:
 			write_fif ();
-			break;
-		case FORMAT_FAF:
-			write_faf ();
 			break;
 		default:
 			error ("invalid output file format (%d) for %s", format, outfile);
