@@ -21,6 +21,46 @@
 /**
  * \file
  * \brief Lamp management functions
+ *
+ * Theory of operation:
+ *
+ * The WPC lamp circuit is setup as an 8x8 matrix.  A column strobe output
+ * selects which group of 8 lamps can be on at any time.  A separate row
+ * output register contains the on/off values for each of the 8 lamps in
+ * that column.
+ *
+ * At IRQ time, the column strobe is repeatedly switched among the 8
+ * columns, at a rate of every 2ms.  Thus, the effective time to redraw
+ * the entire lamp matrix is 16ms.
+ *
+ * The lowest level function calculates the row output by overlaying several
+ * different values.  There are 3 different states for each lamp: the
+ * default state, the secondary state, and the lightshow state -- in that
+ * order.  It is possible that there is no secondary/lightshow associated
+ * with a lamp, in which case those values are not applied to the output.
+ * So for each those, a lamp must be allocated/freed.
+ *
+ * In mathematical form, the row output is defined as:
+ *
+ * 	(((default & secondary_mask) | secondary) & lightshow_mask) | lightshow
+ *
+ * A mask bit of 0 discards the previous state of the lamp, and allows the
+ * new state, either 0 or 1 to come through.
+ *
+ * On top of this, the default state of a lamp can be set to 'flashing'.
+ * A separate bit matrix tracks all lamps that are in flashing mode.
+ * A separate realtime function, which runs much more slowly, toggles the
+ * default lamp states to create the flashing.
+ *
+ * There are many boolean functions defined for testing lamp states as well
+ * as setting them.  In simple cases, the default lamps can be used as
+ * boolean variables for indicating game state.
+ *
+ * Default lamp values are also tracked per-player.  They are guaranteed to be
+ * all off at the start of a player's game, and they are saved/restored in
+ * multiplayer games.  The secondary/lightshow values are transient and are not
+ * saved this way.
+ *
  */
 
 #include <freewpc.h>

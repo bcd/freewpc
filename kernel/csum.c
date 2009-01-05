@@ -21,9 +21,14 @@
 /**
  * \file
  * \brief Generic checksum calculation/verification routines.
+ *
  * Each module that uses protected memory should declare a structure of
  * type "struct area_csum" that says how that memory should be
- * managed.
+ * managed.  Two APIs are exposed per region: one to update the
+ * checksum (after the data is changed through proper means), and one
+ * to verify the area.  If the checksum does not match, the
+ * structure provides a callback function that says how to reset the
+ * data to sane values.
  */
 
 #include <freewpc.h>

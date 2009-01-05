@@ -26,6 +26,17 @@
  * \brief Sound and music control
  * This file implements the interface to the sound board hardware, both the WPC
  * and DCS versions.
+ *
+ * Because the sound board runs asynchronously to the CPU board, all input/output
+ * is buffered.  A fast running realtime function pulls data from a "write queue"
+ * and transmits it to the sound board, at the required rate.  Another
+ * realtime function reads from the sound board and places it into a "read queue",
+ * where it can be processed by higher-layer logic at a slower pace (but hopefully
+ * not so slow that the queue overflows).
+ *
+ * The WPC sound board uses 8-bit commands for most things; one of the command
+ * values acts as an escape, though, and causes the next 8-bit value to be
+ * interpreted (differently) instead.
  */
 
 

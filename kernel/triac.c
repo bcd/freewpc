@@ -24,13 +24,13 @@
  *
  * This controls the general illumination strings and some additional I/O.
  *
- * Theory of operation.
+ * Theory of operation:
  *
  * The CPU generates an IRQ once every 960 microseconds.
  *
  * The GI is driven off 6.3VAC at a frequency of 60 Hz (US).
- * This means that 60 times a second, the AC voltage goes through
- * a complete cycle.  AC will cross zero twice during each cycle.
+ * This means that 60 times a second, the sinusoidal AC voltage goes
+ * through a complete cycle.  AC will cross zero twice during each cycle.
  * In between each of the zero points is a peak (one negative,
  * one positive per cycle).
  *
@@ -40,14 +40,19 @@
  * The state of each triac is maintained by a latch (LS374) on the
  * power driver board.  When '1', the triac is enabled and allows
  * current to flow until the next zerocrossing point.  During this
- * time, the state of the latch is irrelevant; the triac is on.
+ * time, the state of the latch is irrelevant; the triac is kept on.
  * When set to '0', the triac will be turned off at the next
- * zerocross point, if it isn't already off.
+ * zerocross point, if it isn't already off.  Note that the time that
+ * a triac can be turned on varies, but the time it is turned off
+ * is fixed.
  *
  * GI lamps can either be undimmed or dimmed.  In undimmed mode,
  * we just turn on/off the latched value and leave it there.
  * 'On' strings are permanently receiving power and thus run at
- * full intensity.  In dimmed mode, the latch is enabled and then
+ * full intensity.  At the end of each half-cycle, the latch still
+ * has a '1' for that string, and so the triac stays on.
+ *
+ * In dimmed mode, the latch is enabled and then
  * immediately disabled, at a particular point in the AC phase.
  * The triac is enabled from the point of the first write to the
  * next zerocross point.  The closer the writes are to the next

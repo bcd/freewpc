@@ -47,7 +47,11 @@
  * The DMD controller contains the logic for refreshing the
  * display from the current visible page contents.  It clocks
  * 1 byte into the display every 32 CPU cycles, which equates to
- * one full page in roughly 8ms, or 122Hz.
+ * one full page in roughly 8ms, or 122Hz.  In 4-color mode, two
+ * pages are drawn in 3 phases (see above) for an actual refresh
+ * rate of about 40Hz.  Trying to use more pages for more color
+ * fails to work as the refresh rate becomes so low that the
+ * page flipping becomes detectable by the human eye.
  *
  * This module also implements the generic transition algorithm.
  * All transitions share some common logic that is done here.  The
@@ -158,6 +162,11 @@ void dmd_init (void)
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
 
+	/* If DMD_BLANK_PAGE_COUNT is defined, this says how
+	 * many DMD pages should not be allocatable, but should be
+	 * reserved and kept blank.  This is handy for some effects.
+	 * Initialize those pages now.
+	 */
 #ifdef DMD_BLANK_PAGE_COUNT
 	wpc_dmd_set_low_page (dmd_get_blank (0));
 	dmd_clean_page_low ();

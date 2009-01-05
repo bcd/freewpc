@@ -694,6 +694,11 @@ void validate_num_players (void)
 }
 
 
+/**
+ * Provide a default background effect when nothing else
+ * is happening.  In a game, this would be the default
+ * score screen; otherwise, it is the attract mode effect.
+ */
 CALLSET_ENTRY (game, display_update)
 {
 	if (in_game)
@@ -707,10 +712,15 @@ CALLSET_ENTRY (game, display_update)
 }
 
 
+/** Because num_players is tracked across resets in
+ * protected memory, it needs an initializer at factory
+ * reset time.
+ */
 CALLSET_ENTRY (game, factory_reset)
 {
 	num_players = 1;
 }
+
 
 /** Initialize the game subsystem.  */
 CALLSET_ENTRY (game, init)
