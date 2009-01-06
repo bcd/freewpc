@@ -229,6 +229,9 @@ extern U8 idle_ok;
 /* Automatically generated header files */
 #include <gendefine_gid.h>
 
+/* Automatically include image IDs */
+#include <imagemap.h>
+
 #endif /* CPU_BOARD */
 
 
