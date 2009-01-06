@@ -97,6 +97,69 @@ AREA_DECL(nvram)
 /** Returns the address of player P's save buffer. */
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
+
+/**
+ * New machine type flags
+ *
+ * The WPC_CAP_xxx flags indicate specific capabilities of the hardware.
+ * The WPC_GEN_xxx values give the sets of capabilities that each
+ * generation of the hardware supported.
+ *
+ * WPC_TYPE is set to the correct WPC_GEN_xxx value, when building for
+ * a fixed system.  The MACHINE_WPC_GENERIC flag will build code
+ * (theoretically!) for all generations of hardware, using runtime
+ * checks to determine the actual system type.
+ */
+#define WPC_CAP_FLIPTRONIC      0x1
+#define WPC_CAP_DMD             0x2
+#define WPC_CAP_DCS             0x4
+#define WPC_CAP_PIC             0x8
+#define WPC_CAP_95              0x10
+#define WPC_CAP_KNOWN           0x80
+
+#define WPC_GEN_ALPHA           (WPC_CAP_KNOWN)
+#define WPC_GEN_DMD             (WPC_GEN_ALPHA | WPC_CAP_DMD)
+#define WPC_GEN_FLIPTRONIC      (WPC_CAP_DMD | WPC_CAP_FLIPTRONIC)
+#define WPC_GEN_DCS             (WPC_GEN_DMD | WPC_CAP_DMD)
+#define WPC_GEN_PIC             (WPC_GEN_DCS | WPC_CAP_PIC)
+#define WPC_GEN_95              (WPC_GEN_PIC | WPC_CAP_95)
+
+#if (MACHINE_WPC_GENERIC == 1)
+#define WPC_TYPE 0
+#elif (MACHINE_WPC95 == 1)
+#define WPC_TYPE WPC_GEN_95
+#elif (MACHINE_PIC == 1)
+#define WPC_TYPE WPC_GEN_PIC
+#elif (MACHINE_DCS == 0)
+#define WPC_TYPE WPC_GEN_DCS
+#elif (MACHINE_FLIPTRONIC == 1)
+#define WPC_TYPE WPC_GEN_FLIPTRONIC
+#elif (MACHINE_DMD == 1)
+#define WPC_TYPE WPC_GEN_DMD
+#else
+#define WPC_TYPE WPC_GEN_ALPHA
+#endif
+
+/** Test whether a certain capability exists on the target
+ * hardware. */
+#define WPC_HAS_CAP(cap)  (WPC_TYPE & (WPC_CAP_KNOWN | (cap)))
+
+
+/* For sanity testing */
+#if (MACHINE_WPC95 == 1) && !WPC_HAS_CAP(WPC_CAP_95)
+#error "WPC95 capability broken"
+#endif
+#if (MACHINE_PIC == 1) && !WPC_HAS_CAP(WPC_CAP_PIC)
+#error "PIC capability broken"
+#endif
+#if (MACHINE_DCS == 1) && !WPC_HAS_CAP(WPC_CAP_DCS)
+#error "DCS capability broken"
+#endif
+#if (MACHINE_FLIPTRONIC == 1) && !WPC_HAS_CAP(WPC_CAP_FLIPTRONIC)
+#error "Fliptronic capability broken"
+#endif
+
+
 /***************************************************************
  * ASIC / DMD memory map
  ***************************************************************/
