@@ -1,33 +1,28 @@
 #!/bin/sh
-#
-# copyright-check
-#
-# This script should be invoked from the top-level directory; e.g.
-# run "tools/copyright-check".
-#
+# Find files that have committed in 2009.  Then see if their copyright
+# headers are up-to-date, and if not, add 2009 to them.
 
-touch -t `date +%Y`01010000 tools/copyright-timestamp
-for dir in `echo include machine kernel common test tools wpcsound platform`; do
-	cd $dir
-	# Find all files that have been touched in 2008
-	for f in `find . -name "*.[chs]" -newer ../tools/copyright-timestamp`; do
-		echo -n "Checking $dir/$f ... "
-		# Is the 2008 in the copyright header?
-		grep "Copyright.*2008" $f > /dev/null 2>&1
+for f in `git ls-files`; do
+	when=`git log $f | head -n 5 | grep "^Date:"`
+	echo $when | grep "2009" > /dev/null
+	if [ "$?" = "0" ]; then
+		echo -n "Checking $f ... "
+		# Is the 2009 in the copyright header?
+		grep "Copyright.*2009" $f > /dev/null 2>&1
 		if [ "$?" != "0" ]; then
 			# No... how about some copyright statement at least?
-			grep "Copyright.*200[567]" $f > /dev/null 2>&1
+			grep "Copyright.*200[5678]" $f > /dev/null 2>&1
 			if [ "$?" != "0" ]; then
 				echo "No copyright at all!";
 			else
 				echo "Copyright needs updating";
-				sed -i -e "s/Copyright 200[ ,0-9]*[0-9]/&, 2008/" $f
-				# sed -i -e "s/Copyright 200/&, 2008/" $f
+				sed -i -e "s/\(Copyright 200[5-8]\)-200[5-8]/\1-2009/" \
+					-e "s/Copyright 200[ ,0-8]*[0-8]/&, 2009/" $f
+				# sed -e "s/\(Copyright 200[5-8]\)-200[5-8]/\1-2009/" \
+				#		-e "s/Copyright 200[ ,0-8]*[0-8]/&, 2009/" $f | head -n 10
 			fi
 		else
 			echo "OK";
 		fi
-	done
-	cd ..
+	fi
 done
-rm -f tools/copyright-timestamp
