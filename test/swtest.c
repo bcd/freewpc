@@ -43,7 +43,6 @@ void switch_matrix_draw (void)
 				((U16)row << 6) + (col >> 1);
 			U8 mask = (col & 1) ? 0xE0 : 0x0E;
 
-			/* TODO : use bitmap_draw for these */
 			if (state_p)
 			{
 				dmd[0 * DMD_BYTE_WIDTH] |= mask;
