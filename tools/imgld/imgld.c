@@ -18,6 +18,51 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* \file imgld.c
+ * \description The FreeWPC image linker
+ *
+ * The image linker reads in one or more image linker command files (.ild)
+ * which gives a list of images to be included in the ROM image, and
+ * optionally, C-style labels that can be used to reference the images
+ * from code.
+ *
+ * The objective is to load in all of the image files, optimize them, and
+ * create an index table with pointers to the beginning of each image.
+ * The C defines are simple 16-bit incremental values which are used to
+ * index the table and get a pointer to the image data.  These pointers
+ * are all 3-bytes long, stored as pointer/ROM page pairs.
+ *
+ * Optimization is not yet implemented completely, but here's what should
+ * happen:  The basic input image format is PGM, which is a simple
+ * bitmap format with 256 colors per pixel.  Frames are expected to be
+ * in 128x32 size already.  When not optimizing, at a minimum, the
+ * image needs to be converted into two, 128x32 joined buffers.  This
+ * is the format that can be sent directly to the dot matrix board.
+ * Two buffers are needed for 4-color output; the original 256 buffers
+ * will be downscaled to 4 colors as necessary.
+ *
+ * The pinball game ROM may implement a number of decoders; at present,
+ * only one decoder is support, which does simple run-length encoding of
+ * 16-bit words.  It is written for very easy decoding with little
+ * runtime overhead, and so does not compress very well.  However,
+ * CPU cycles are considered more precious than ROM space.  Different
+ * codecs may be added in the future with different properties; e.g.
+ * a long-running animation when the CPU is mostly idle may need to tuned
+ * for better compression at the cost of a longer decompression time.
+ *
+ * Command-line parameters specify the total amount of space that is
+ * allocated for images.  The linker will only decompress as is
+ * necessary; as long as there is ample space, it does not make sense
+ * to compress.  If multiple codecs are available, then all should be
+ * attempted and the one that matches the performance requirements the
+ * best should be selected.  Images can also be tagged to denote those
+ * where runtime performance is especially critical -- those would be
+ * compressed *last*.  The linker would continue to compress until
+ * everything fits.  Then it builds the table and outputs the final image.
+ *
+ * The output is placed in a file dedicated for images.  A separate part
+ * of the build process copies that file into the actual game ROM.
+ */
 
 #include <stdio.h>
 #include <string.h>
