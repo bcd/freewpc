@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <imagemap.h>
 
 __local__ U8 ball_save_count;
 

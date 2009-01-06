@@ -32,7 +32,6 @@
 
 #include <freewpc.h>
 #include <xbmprog.h>
-#include <imagemap.h>
 
 U8 frame_repeat_count;
 

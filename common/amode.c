@@ -21,7 +21,6 @@
 #include <freewpc.h>
 #include <coin.h>
 #include <highscore.h>
-#include <imagemap.h>
 
 /**
  * \file

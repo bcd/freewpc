@@ -1,6 +1,5 @@
 
 #include <freewpc.h>
-#include <imagemap.h>
 
 static U8 lamplist;
 

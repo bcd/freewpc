@@ -70,7 +70,6 @@
 #include <coin.h>
 #include <highscore.h>
 #include <preset.h>
-#include <imagemap.h>
 
 #undef CONFIG_TEST_DURING_GAME
 
