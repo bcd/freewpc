@@ -796,7 +796,7 @@ $(FIF_OBJS) : %.o : %.fif
 
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
-$(C_OBJS) : $(IMAGE_HEADER)
+$(C_OBJS) $(FIF_OBJS) $(FON_OBJS) : $(IMAGE_HEADER)
 
 $(NATIVE_OBJS) : $(GENDEFINES) $(REQUIRED)
 

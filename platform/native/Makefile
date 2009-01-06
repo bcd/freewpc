@@ -35,6 +35,8 @@ CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 NATIVE_OBJS += $(D)/ui_curses.o
 
+$(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM
+
 # Add machine type flags
 CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
 

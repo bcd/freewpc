@@ -230,7 +230,11 @@ extern U8 idle_ok;
 #include <gendefine_gid.h>
 
 /* Automatically include image IDs */
+#ifndef NO_MAIN
+#ifndef NATIVE_SYSTEM
 #include <imagemap.h>
+#endif
+#endif
 
 #endif /* CPU_BOARD */
 
