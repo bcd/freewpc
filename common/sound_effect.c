@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -123,12 +123,21 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
  *
  * CODE says which sound to play.
  *
+ * Two additional arguments, DURATION and PRIORITY, are
+ * global variables rather than actual parameters, to workaround
+ * 6809 compiler limitations.  Use the macros rather than this
+ * function directly to make sure these are set OK.
+ *
  * DURATION says how long the sound will take to complete.
  *    If zero, the sound could be preempted at any time and is
- *    not tracked.
+ *    not tracked.  Otherwise, the channel is used for the
+ *    sound cannot be used by any other sound effects in the
+ *    meantime.
  *
  * PRIORITY controls whether or not the call will be made,
- * if another speech call is in progress.
+ * if another sound call is in progress.  When a higher
+ * priority sound call is made, it can stop other calls,
+ * if no channels are free.
  */
 
 U8 sound_start_duration;
@@ -153,15 +162,20 @@ void sound_start1 (U8 channels, sound_code_t code)
 		if (ch->timer == 0 || sound_start_prio >= ch->prio)
 		{
 			/* Yes, we can use it */
+			/* TODO - preemption should try to use a free channel
+			first, before overriding */
 
-			/* If a duration was given, then don't allow another request
-			 * to use the channel until it is done. */
+			/* If a duration was given, then reserve the channel until
+			 * it is done. */
 			if (sound_start_duration != 0)
 			{
 				ch->timer = sound_start_duration;
 				ch->prio = sound_start_prio;
 			}
 
+			/* If a sound call uses the music channel, this will
+			kill the background music.  Note this so that the music
+			can be restarted later. */
 			if (chid == MUSIC_CHANNEL)
 				music_active = 0;
 
