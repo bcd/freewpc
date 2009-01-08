@@ -21,6 +21,9 @@
 /*
  * Generic switch-activated coil driver
  * (can be used for slingshot and jet bumpers)
+ * TODO - Gottlieb System 3 games will disable slingshots that
+ * are firing too rapidly as a safety feature; perhaps this should
+ * be added here?
  */
 
 @@class spsol

@@ -258,12 +258,14 @@ void add_units (U8 n)
 			add_credit ();
 			audit_increment (&system_audits.paid_credits);
 		}
+		callset_invoke (add_credits);
 	}
 	else
 	{
 #ifdef MACHINE_ADD_COIN_SOUND
 		sound_send (MACHINE_ADD_COIN_SOUND);
 #endif
+		callset_invoke (add_partial_credits);
 		deff_restart (DEFF_CREDITS);
 	}
 	csum_area_update (&coin_csum_info);

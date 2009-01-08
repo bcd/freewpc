@@ -279,6 +279,7 @@ void end_ball (void)
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);
 #endif
+		callset_invoke (shoot_again);
 		start_ball ();
 		goto done;
 	}
@@ -448,7 +449,7 @@ void start_ball (void)
 	}
 
 	callset_invoke (start_ball);
-	callset_invoke (update_lamps);
+	lamp_update_request ();
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
@@ -500,7 +501,9 @@ void start_ball (void)
 
 
 /** Called when the ball is marked as 'in play'.  This happens on
-most, but not all, playfield switch closures. */
+most, but not all, playfield switch closures.  After valid
+playfield is set, end-of-ball is allowed to happen.  Prior to
+that, end-of-ball just causes a re-serve from the trough. */
 void set_valid_playfield (void)
 {
 	if (in_game && !valid_playfield)
@@ -513,8 +516,14 @@ void set_valid_playfield (void)
 }
 
 
+/** Called prior to valid playfield, when a switch closure
+occurs that does not automatically set valid playfield. */
 void try_validate_playfield (U8 swno)
 {
+	/* TODO : The current logic goes ahead and sets
+	valid playfield after any 3 such closures.  A better
+	implementation would ensure that they are 3 *different*
+	switches, to handle a chatty sling/jet. */
 	pending_valid_count++;
 	if (pending_valid_count == 3)
 	{

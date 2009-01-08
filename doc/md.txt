@@ -15,9 +15,9 @@ machine.
 
 It will enforce naming consistency between identifiers, declarations,
 and strings.  For example, the start button gets a define for its switch
-number (SW_START_BUTTON), an identifier for its properties (sw_start_button)
-and its handler (sw_start_button_handler), and a string in the menus
-("START BUTTON").  gendefine can produce all of these automatically from
+number (SW_START_BUTTON), an identifier for callback events
+(sw_start_button), and a string in the menus ("START BUTTON").
+gendefine can produce all of these automatically from
 a single "Start Button:" declaration in the .md file.
 
 
@@ -27,10 +27,13 @@ File Format
 Blank lines and lines beginning with a '#' are ignored, like in a shell script.
 
 Long lines can be broken up like in C, with a backslash at the end of each line.
+A comma also acts as a line continuation character.
 
 The file is divided into sections, which begin with a section header in
-square brackets.  (It's a throwback to the old .ini file days.)  Only
-section names that are known to genmachine are permitted.
+square brackets.  (It's a throwback to the old Windows .ini file days.)  Only
+section names that are known to genmachine are permitted.  The list of
+permitted sections is listed near the top of the 'genmachine' script, and
+includes: switches, lamp, drives, gi, lamplists, containers, etc.
 
 There's also a default section that is in effect at the top of a file,
 before you declare any sections yourself.  Some global data goes in the
@@ -41,26 +44,79 @@ declarations begin with a "key", followed by a colon, followed by a comma-
 separated list of properties.  The key and/or properties can contain any
 characters, including spaces, but not commas or colons.
 
-There are two types of declarations.  In one style, the key refers to the
-object's physical identification, such as the switch, lamp, or solenoid
+There are two types of declarations.  In one style, used mostly for
+hardware layout, the key refers to the object's physical identification,
+such as the switch, lamp, or solenoid
 number.  Here the key is generally numeric, although for solenoids the
 syntax is slightly different to specify the solenoid bank.  The first
 property of these declarations should always be the human readable name
 of the object.  Depending on the type of declaration, genmachine can
 validate that the key name is valid.
 
-In the other style, there is no physical identifier, and so the name before
-the colon is the human readable name.  For these genmachine automatically
-creates the number based on the order of the declarations.
+An example:
+
+[switches]
+14: Tilt, tilt, ingame, noplay
+
+The key, 14, identifies which switch is being described.  The first item,
+Tilt, gives it a name.  Everything else identifies properties of the switch.
+Different types of objects will have different properties.  Here, we say that
+the tilt switch should only be serviced during a game and a closure does not
+mark valid playfield.
+
+In the second style, there is no physical identifier, and so the name before
+the colon is the human readable name.  These are generally used for
+software constructs.  For these genmachine automatically
+assign a number based on the order of the declarations.
+
+For example:
+
+[deffs]
+Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+
+defines a display effect for multiball start.  A #define is generated,
+DEFF_MULTIBALL_START, which is a numeric ID used to refer to the effect.
+The IDs for all deffs are assigned sequentially, and do not need to be
+specified as with the switches above.  Everything following the colon is
+treat as a property just as above.
+
+Though the syntax is fairly strict, there is a bit of magic in how different
+categories need to be written.  The easiest way to write a config is to copy
+from another one.  The Twilight Zone and World Cup Soccer configs are the most
+complete.
 
 
 Directives
 
-The include directive
+The 'include' directive can be used to include config syntax from another file,
+much like a C '#include'.  This is used to bring in common definitions for the
+platform, that can be shared across games.
 
-The define directive
+For example, no game defines a switch entry for the "ALWAYS CLOSED" switch,
+which is the same in every WPC game.  By including platform/wpc/wpc.md, that
+and many other definitions are automatically provided.
+
+All files are read and parsed before any output is generated.  It is possible
+to override previous definitions.
+
+
+The 'define' directive is used for miscellaneous settings.  It gets translated
+to a C '#define' in the output file mach-config.h.  For example,
+
+define MACHINE_NUMBER 531
+
+is converted to:
+
+#define MACHINE_NUMBER 531
+
+Note that the pound sign is not included, as it would be treated as a comment.
 
 
 Global Configuration
+
+Certain things need to be defined in the global sections, using Key: Value syntax.
+The human readable name of the machine, the system type, and a few other things can be
+given here.  These do not appear directly in the mach-config.h, but are used by
+genmachine to guide the compilation.  Again, see any existing config file for an example.
 
 

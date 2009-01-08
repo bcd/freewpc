@@ -279,14 +279,14 @@ the scope to the simplest of algorithms.  Really good compressors work at
 the bit-level, but because of the 6809's inability to do bit-level manipulation
 fast, FreeWPC has only considered techniques that work a byte or a word at a time.
 
-One scheme is to use run length encoding, where a long string of consecutive
-byte values is compressed into a value+count pair.  Not all images will have
-the priority of long consecutive bytes (they probably do for bits, though).
-It works well for sparse bits with lots of zeroes.
+There are a number of basic approaches to compression.  The first is to use
+a form of run length encoding (RLE), where a long string of consecutive
+byte or word values is compressed into a value+count pair.  Not all images will have
+long strings like this, but many do, especially runs of 0x00 and 0xFF.
 
-Another scheme is to examine the number of different byte (or word) values in
-the image, and if it is small (say less than 16), we can remap each value so
-that it takes fewer bits.  For 16 unique values, each could be coded 4-bits,
-and two of these would efficiently pack into a single byte, which reduces the
-amount of bitshifting that has to be done.
+The second is to use a form of delta encoding, where an image is encoded as the
+set of differences from a previous image.  This is useful when doing animations,
+in which consecutive images don't differ too much.
+
+More complicated techniques than these are likely to be a burden for the 6809.
 
