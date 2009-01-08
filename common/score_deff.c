@@ -266,6 +266,7 @@ void scores_deff (void)
 #ifdef MACHINE_TZ
 				star_draw ();
 #endif
+				callset_invoke (score_overlay);
 				dmd_show2 ();
 			}
 			else

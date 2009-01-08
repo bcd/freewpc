@@ -83,6 +83,7 @@ void replay_draw (void)
 /** Award a single replay to the player up */
 void replay_award (void)
 {
+	callset_invoke (replay);
 	switch (system_config.replay_award)
 	{
 		case FREE_AWARD_CREDIT:

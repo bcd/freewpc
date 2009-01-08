@@ -279,6 +279,7 @@ void end_ball (void)
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);
 #endif
+		callset_invoke (shoot_again);
 		start_ball ();
 		goto done;
 	}
@@ -448,7 +449,7 @@ void start_ball (void)
 	}
 
 	callset_invoke (start_ball);
-	callset_invoke (update_lamps);
+	lamp_update_request ();
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
