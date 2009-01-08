@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,8 +26,8 @@ __local__ U8 hitch_count;
 void hitchhiker_deff (void)
 {
 	dmd_alloc_low ();
+	frame_draw (IMG_HITCHER);
 	dmd_draw_fif (fif_hitcher);
-	dmd_invert_page (dmd_low_buffer);
 	psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
 	font_render_string_center (&font_fixed6, 76, 10, sprintf_buffer);
 	dmd_sched_transition (&trans_scroll_left);
@@ -39,7 +39,7 @@ void hitchhiker_deff (void)
 
 CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
-	event_did_follow (rocket, hitchhiker);
+	(void)event_did_follow (rocket, hitchhiker);
 	if (lamp_test (LM_PANEL_HH))
 	{
 		score (SC_10M);
