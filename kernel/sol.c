@@ -235,7 +235,7 @@ void sol_req_rtt (void)
 	else if (sol_req_state == REQ_PENDING)
 	{
 		/* In the pending state, start the solenoid
-		 * at 100% power but only if at a zerocrossing
+		 * at 100% power but only if just past a zerocrossing
 		 * point.  If the ZC circuit is broken, this
 		 * state is bypassed and task level will always
 		 * program the request in ON mode. */
@@ -268,6 +268,7 @@ void sol_req_rtt (void)
 				/* Switch to IDLE.  Ensure the coil is off.
 				Release any process waiting on this solenoid to
 				finish. */
+				/* TODO - this form of call appears frequently : macro? */
 				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
 				req_lock = 0;
 				sol_req_state = REQ_IDLE;
@@ -377,6 +378,10 @@ extern inline void sol_update_fliptronic_powered (void)
 
 
 /** Realtime update of the first set of flasher outputs */
+/* TODO - as these functions are only used for flashers now,
+ * they do not need to run at the same frequency (4ms).
+ * We could get by with every 16ms probably, except maybe
+ * for dimming effects. */
 void sol_update_rtt_0 (void)
 {
 	sol_update_set (2);

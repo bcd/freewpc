@@ -20,6 +20,16 @@
 
 
 # Schedule for FreeWPC's core real-time tasks
+# This file is processed by the 'sched' program in tools/sched.
+# Each line specifies a realtime function that needs to be called periodically.
+# It also says how often it should be called (in IRQs, roughly 1ms per IRQ)
+# and approximately how long the function takes to run on average (usually
+# given in terms of CPU cycles).
+#
+# The scheduler generates a top-level function which invokes everything
+# properly.  It also attempts to balance the load, so that the average
+# time per IRQ is as stable as possible.
+
 
 # Common processing required at the beginning of every IRQ.
 !do_irq_begin         1       16c
@@ -65,6 +75,7 @@ lockup_check_rtt      128     23c
 # Free running hardware-quality timers
 free_timer_rtt        32		94c
 
+# Update the segmented displays, if CONFIG_SEG is defined.
 seg_rtt?CONFIG_SEG    1       100c
 
 # Common processing required at the end of every IRQ
