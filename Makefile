@@ -544,7 +544,7 @@ timedrun:
 
 .PHONY : runcon
 runcon: $(BLDDIR)/$(GAME_ROM)
-	m6809-run -s wpc -I 1952 -b -C -d -m -1 $(BLDDIR)/$(GAME_ROM)
+	wpc-run $(BLDDIR)/$(GAME_ROM)
 
 .PHONY : install
 install : $(TARGET_ROMPATH)/$(PINMAME_MACHINE).zip
