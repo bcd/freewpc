@@ -229,6 +229,8 @@ void buffer_read_pgm (struct buffer *buf, FILE *fp)
 
 	fgets (line, 79, fp);
 	/* sscanf (line, "%d", &pgm->maxval); */
+	/* TODO - the max val is not being communicated back, so
+	 * it is impossible to do proper scaling. */
 
 	for (y=0; y < buf->height; y++)
 		for (x=0; x < buf->width; x++)
@@ -749,6 +751,9 @@ struct buffer *buffer_rle_encode (struct buffer *buf)
 		}
 	}
 
+	/* Add final 0xA880 to mark end of frame */
+	*dstp++ = 0xA8;
+	*dstp++ = 0x80;
 	res->len = dstp - res->data;
 	res->type |= 0x2;
 	return res;
@@ -760,8 +765,76 @@ struct buffer *buffer_rle_decode (struct buffer *buf)
 	struct buffer *res;
 
 	res = buffer_alloc (512);
+	/* TODO */
 	res->width = buf->width;
 	res->height = buf->height;
+	return res;
+}
+
+
+struct buffer *buffer_sparse_encode (struct buffer *buf)
+{
+	U8 *dstp, *srcp;
+	struct buffer *res;
+	U8 b;
+	int zeroes, count;
+
+	res = buffer_clone (buf);
+	srcp = buf->data;
+	dstp = res->data;
+
+	/* Encode the buffer as a series of <skip, count, data...> tuples.
+	 * SKIP indicates the number of zero bytes that are omitted from
+	 * the image.  COUNT says how many literal 16-bit words follow.
+	 */
+	while (srcp < buf->data + 512)
+	{
+
+		/* See how many following bytes are zero.
+		 * Strip them from the input. */
+		zeroes = 0;
+		while (*srcp == 0 && srcp < buf->data + 512)
+		{
+			zeroes++;
+			srcp++;
+		}
+
+		/* See how many following bytes are zero.
+		 * Don't strip them from the input yet. */
+		count = 0;
+		while (srcp[count] != 0 && srcp + count < buf->data + 512)
+		{
+			count++;
+		}
+
+		/* The size of each literal block needs to be word aligned.
+		 * If not, add a zero back in, preferably from the amount
+		 * just skipped, otherwise from the following data. */
+		if (count & 1)
+		{
+			if (zeroes != 0)
+			{
+				zeroes--;
+				srcp--;
+			}
+			count++;
+		}
+
+		/* Write the block */
+		*dstp++ = count / 2;
+		if (count > 0)
+		{
+			*dstp++ = zeroes;
+			memcpy (dstp, srcp, count);
+			dstp += count;
+			srcp += count;
+		}
+	}
+
+	/* Add final 0x00 to mark end of frame */
+	*dstp++ = 0;
+	res->len = dstp - res->data;
+	res->type |= 0x4;
 	return res;
 }
 
