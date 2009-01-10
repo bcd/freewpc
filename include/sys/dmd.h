@@ -308,7 +308,7 @@ void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define dmd_or_page()
 #define dmd_xor_page()
 #define frame_decode_rle frame_decode_rle_c
-#define frame_decode_sparse()
+#define frame_decode_sparse(p)
 #endif
 void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
 
