@@ -41,8 +41,8 @@ pic_rtt               32      200c  # guess?
 # Resynchronize to the AC zero cross point.
 ac_rtt                1       23c
 
-# Update the solenoids.  Each bank of 8 is updated
-# once every 4ms (the 4 banks are alternated every 1ms).
+# Update flashers.  Each bank of 8 is updated
+# once every 4ms (the 2 banks are alternated every 2ms).
 sol_update_rtt/2      2       60c
 sol_req_rtt           1       25c
 
