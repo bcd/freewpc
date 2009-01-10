@@ -20,6 +20,8 @@
 DMD_LOW_BASE=0x3800
 DMD_PAGE_WIDTH=512
 
+	.module dmd_6809.s
+
 	; Keep loop_count in a fast direct memory slot.
 #define loop_count *m0
 
