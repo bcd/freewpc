@@ -60,7 +60,8 @@ void music_refresh_task (void)
 	music_prio = 0;
 	music_requested = 0;
 
-	callset_invoke (music_refresh);
+	if (!in_test)
+		callset_invoke (music_refresh);
 
 	if (music_requested != music_active)
 	{
