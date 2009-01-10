@@ -83,6 +83,11 @@ void task_dump (void)
 }
 
 
+void idle_profile_rtt (void)
+{
+}
+
+
 task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	pth_t pid;

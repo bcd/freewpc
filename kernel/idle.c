@@ -38,7 +38,10 @@ have passed. */
 U8 idle_10second_timer;
 
 
-/** Runs the idle functions. */
+/** Runs the idle functions.   This function is called
+ * whenever there are no tasks ready to run, at a
+ * rate of once per 1ms.
+ */
 void do_idle (void)
 {
 	/* See if at least 100ms has elapsed.
