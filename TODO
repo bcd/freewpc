@@ -12,7 +12,7 @@ Poor Design
 * Deal with common page getting full. (Started)
 * Get rid of RTTs for high/low solenoid banks that are all pulsed now,
 and reclaim sol_timers[] direct spots.  In the same vein, flashlamps
-need a different method.
+need a different method.  In Progress.
 
 
 Missing Feature
@@ -42,6 +42,7 @@ Compiler Changes
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
 * GCC 4.4 generated sol.s is inefficient.
+* GCC 4.4 no longer works as of late December 2008.
 
 
 Nice to Have

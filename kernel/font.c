@@ -223,12 +223,9 @@ static void fontargs_render_string (void)
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
 
-	/* When running in native mode, there is no DMD.  However it
-	is useful to know what text the program is trying to display,
-	so output the text string to the console instead.  Note that
-	there is no return here, so the remaining code is still executed,
-	and the 'virtual' DMD buffer is indeed written to, although it
-	can't actually be seen. */
+	/* When running in native mode, and there is no DMD viewer,
+	TEXTDMD can be defined so that at least text messages can be
+	shown. */
 #ifdef CONFIG_UI
 	if (args->font != &font_bitmap_common)
 		ui_write_dmd_text (args->coord.x, args->coord.y, s);
@@ -339,6 +336,9 @@ void bitmap_blit (const U8 *src, U8 x, U8 y)
 }
 
 
+/** Like bitmap_blit, but for drawing a monochrome bitmap
+onto a 4-color frame.  The bitmap is rendered twice, once
+onto each plane of the display. */
 void bitmap_blit2 (const U8 *src, U8 x, U8 y)
 {
 	bitmap_blit (src, x, y);

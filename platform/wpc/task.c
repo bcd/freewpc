@@ -142,7 +142,11 @@ CALLSET_ENTRY (idle_profile, idle_every_100ms)
 	*/
 	static U8 last_idle_time = 0;
 
-	/* Round down */
+	/* Round down.  This has the effect of keeping the
+	printed value in 8-bits, as well as discarding the
+	least significant bits which makes the comparison
+	below less likely ... slight fluctuations in timing are
+	not worth considering. */
 	idle_time /= 64;
 
 	/* Print it if it's different than last reading */

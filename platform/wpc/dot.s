@@ -20,6 +20,8 @@
 DMD_LOW_BUFFER=0x3800
 DMD_HIGH_BUFFER=0x3A00
 
+	.module dot_6809.s
+
 ; Keep loop_count in a fast direct memory slot.
 #define loop_count *m0
 

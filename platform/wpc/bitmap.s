@@ -44,6 +44,8 @@
 ; on the edges when we are not byte-aligned.
 ;
 
+	.module bitmap_6809.s
+
 	.area		ram
 	.globl	_bitmap_src
 _bitmap_src:

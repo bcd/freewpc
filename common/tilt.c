@@ -136,6 +136,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	event_can_follow (sw_slam_tilt, sw_coin, TIME_5S);
 
 	/* Start the slam tilt effect */
+	callset_invoke (slam_tilt);
 	deff_start (DEFF_SLAM_TILT);
 	lamp_all_off ();
 
