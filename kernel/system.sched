@@ -81,6 +81,8 @@ seg_rtt?CONFIG_SEG    1       100c
 # Common processing required at the end of every IRQ
 !do_irq_end           1       0c
 
+# Profile idle time
+idle_profile_rtt      1024    100c # guess?
 
 # TODO : service the coin switches correctly to ensure proper timing
 

@@ -126,39 +126,35 @@ __attribute__((returns_twice)) void task_save (task_t *tp);
 __noreturn__ void task_restore (task_t *tp);
 
 
-/**
- * Called every 100ms to report the idle time.
- */
+U8 idle_chunks;
+
+void idle_profile_rtt (void)
+{
+	/* Take a snapshot of the number of idle ticks within the
+	last second.  Divide this number by 256 to smooth out the
+	readings, ignore small fluctuations.
+		Each of these "idle chunks" is now roughly 23x256 = 5888 CPU cycles, or
+	about 3ms.
+		If the system is completely busy, the value will be 0.
+		If the system were completely idle (impossible though), it would be
+	333 (at 3ms each, that would fill the entire second).  We store the
+	chunk count in 8-bits, so in practice this can only reach 255
+	(77.7% idle)
+		So, in a 1 second period, idle chunks divided by 3.3 is an
+	approximation to the percentage of idle time.
+	*/
+	idle_chunks = idle_time >> 8UL;
+	idle_time = 0;
+}
+
+
 CALLSET_ENTRY (idle_profile, idle_every_100ms)
 {
-#ifdef IDLE_PROFILE
-	/* Take a snapshot of the number of idle points within the
-	last 100ms.  Divide this number for 64 to smooth out the
-	readings.
-		Each tick is now roughly 25x64 = 1600 CPU cycles, or
-	about 0.83ms.
-		Thus, in a 100ms period, this number times 1.2 is a good
-	approximation of the percentage of idle time.
-	*/
-	static U8 last_idle_time = 0;
-
-	/* Round down.  This has the effect of keeping the
-	printed value in 8-bits, as well as discarding the
-	least significant bits which makes the comparison
-	below less likely ... slight fluctuations in timing are
-	not worth considering. */
-	idle_time /= 64;
-
-	/* Print it if it's different than last reading */
-	if (idle_time != last_idle_time)
+	if (idle_chunks != 0xFF)
 	{
-		last_idle_time = idle_time;
-		dbprintf ("I: %02X\n", last_idle_time);
+		dbprintf ("I: 0x%02X\n", idle_chunks);
+		idle_chunks = 0xFF;
 	}
-
-	/* Clear the idle loop count */
-	idle_time = 0;
-#endif
 }
 
 
@@ -169,14 +165,13 @@ CALLSET_ENTRY (idle_profile, idle_every_100ms)
 static inline void cpu_idle (void)
 {
 	barrier ();
-#ifdef IDLE_PROFILE
-	/* When profiling, keep a count of the number of times
-	we have nothing to do. */
-	/* TODO - need to measure exactly, but 1 tick of this counter is
-	about 30 CPU cycles.   That equates to 65 ticks per 1ms; therefore
-	it can't overflow faster than about once per second. */
+
+	/* For profiling, keep a count of the number of times
+	we have nothing to do.
+		Each tick of this counter is approximately 23 CPU cycles.
+	That equates to 87 ticks per 1ms; therefore it will overflow
+	after about 750ms. */
 	idle_time++;
-#endif
 }
 
 
@@ -668,6 +663,7 @@ void task_dispatcher (void)
 			that we wait as little as possible; idle calls
 			themselves may take a long time. */
 			last_dispatch_time = get_sys_time ();
+			barrier ();
 			while (likely (last_dispatch_time == get_sys_time ()))
 				cpu_idle ();
 			task_dispatching_ok = TRUE;
