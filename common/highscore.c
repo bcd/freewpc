@@ -237,7 +237,7 @@ void high_score_check (void)
 	U8 hs;
 
 	if (hstd_config.hstd_award == OFF)
-		return;
+		return; /* TODO - is this the right condition? */
 
 	high_score_player = 1;
 	if ((score_compare (current_score, gc_score)) > 0)
