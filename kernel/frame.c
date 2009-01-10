@@ -247,9 +247,13 @@ void frame_decode (U8 *data, U8 type)
 	{
 		dmd_copy_page (dmd_low_buffer, (const dmd_buffer_t)data);
 	}
-	else
+	else if (type == 2)
 	{
 		frame_decode_rle (data);
+	}
+	else
+	{
+		frame_decode_sparse (data);
 	}
 }
 
