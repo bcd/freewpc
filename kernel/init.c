@@ -215,7 +215,6 @@ __noreturn__ void freewpc_init (void)
 		if (likely (idle_ok))
 		{
 			do_idle ();
-			switch_idle ();
 		}
 	}
 #endif

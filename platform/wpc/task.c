@@ -667,7 +667,6 @@ void task_dispatcher (void)
 			if (likely (idle_ok))
 			{
 				do_idle ();
-				switch_idle ();
 			}
 #endif /* CONFIG_PLATFORM_WPC */
 

@@ -44,6 +44,8 @@ U8 idle_10second_timer;
  */
 void do_idle (void)
 {
+	callset_invoke (idle);
+
 	/* See if at least 100ms has elapsed.
 	If so, we advance the timeout for the next check.
 	If more than 200ms elapsed, we will only process
