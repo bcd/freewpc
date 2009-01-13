@@ -341,7 +341,7 @@ to be generated when the current scanline reaches a certain value.
 -Interrupts
 --Reset
 --IRQ
-IRQ can be generated every 976 microseconds, or 1024 times per second.
+IRQ can be generated 976 times per second, about once every 1.02ms.
 This can be enabled by writing to the WPC_ZEROCROSS_IRQ_CLEAR register.
 --FIRQ
 FIRQ can be generated in two ways: from the dot matrix display after a
