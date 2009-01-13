@@ -92,10 +92,17 @@ U8 task_count;
 U8 task_max_count;
 #endif
 
-/** A count that represents idle time over the last 100ms. */
-#ifdef IDLE_PROFILE
+/** A count that represents accumulated idle time.
+ * Whenever there are no tasks to be scheduled, this counter
+ * is incremented.
+ */
 U16 idle_time;
-#endif
+
+/**
+ * A conversion and snapshot of the above idle_time measurement.
+ */
+U8 idle_chunks;
+
 
 #ifdef TASK_CHAINING
 
@@ -126,12 +133,12 @@ __attribute__((returns_twice)) void task_save (task_t *tp);
 __noreturn__ void task_restore (task_t *tp);
 
 
-U8 idle_chunks;
-
+/**
+ * Take a snapshot of the number of idle cycles.
+ */
 void idle_profile_rtt (void)
 {
-	/* Take a snapshot of the number of idle ticks within the
-	last second.  Divide this number by 256 to smooth out the
+	/* Divide the idle tick count by 256 to smooth out the
 	readings, ignore small fluctuations.
 		Each of these "idle chunks" is now roughly 23x256 = 5888 CPU cycles, or
 	about 3ms.
@@ -148,13 +155,19 @@ void idle_profile_rtt (void)
 }
 
 
+/**
+ * When IDLE_PROFILE is defined, print out the
+ * idle profiling data periodically.
+ */
 CALLSET_ENTRY (idle_profile, idle_every_100ms)
 {
+#ifdef IDLE_PROFILE
 	if (idle_chunks != 0xFF)
 	{
 		dbprintf ("I: 0x%02X\n", idle_chunks);
 		idle_chunks = 0xFF;
 	}
+#endif
 }
 
 
@@ -739,9 +752,7 @@ void task_init (void)
 	task_count = task_max_count = 1;
 #endif
 
-#ifdef IDLE_PROFILE
 	idle_time = 0;
-#endif
 
 	/* Allocate a task for the first (current) thread of execution.
 	 * The calling routine can then sleep and/or create new tasks
