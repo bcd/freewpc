@@ -283,7 +283,7 @@ void dmd_erase_region (U8 x, U8 y, U8 width, U8 height);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
-const U8 *dmd_draw_fif1 (const U8 *fif);
+__attribute__((deprecated)) const U8 *dmd_draw_fif1 (const U8 *fif);
 void frame_draw (U16 id);
 void frame_draw2 (U16 id);
 
@@ -327,8 +327,6 @@ do { \
 
 #define FSTART_COLOR { U8 __frame_depth = 2; __frame_start (__frame_depth);
 
-#define FCLEAR __frame_clear (__frame_depth);
-
 #define FEND __frame_end (__frame_depth); }
 
 
@@ -338,13 +336,6 @@ extern inline void __frame_start (const U8 depth)
 		dmd_alloc_low ();
 	else
 		dmd_alloc_low_high ();
-}
-
-extern inline void __frame_clear (const U8 depth)
-{
-	dmd_clean_page_low ();
-	if (depth == 2)
-		dmd_clean_page_high ();
 }
 
 extern inline void __frame_end (const U8 depth)
