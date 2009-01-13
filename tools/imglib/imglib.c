@@ -776,7 +776,6 @@ struct buffer *buffer_sparse_encode (struct buffer *buf)
 {
 	U8 *dstp, *srcp;
 	struct buffer *res;
-	U8 b;
 	int zeroes, count;
 
 	res = buffer_clone (buf);

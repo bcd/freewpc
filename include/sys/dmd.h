@@ -299,6 +299,7 @@ void dmd_and_page (void);
 void dmd_or_page (void);
 void dmd_xor_page (void);
 void frame_decode_rle_asm (U8 *);
+void frame_decode_sparse_asm (U8 *);
 void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_rle frame_decode_rle_asm
 #define frame_decode_sparse frame_decode_sparse_asm
