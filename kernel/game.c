@@ -117,6 +117,7 @@ void amode_start (void)
 #endif
 	triac_enable (TRIAC_GI_MASK);
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
+	task_yield ();
 	callset_invoke (amode_start);
 }
 

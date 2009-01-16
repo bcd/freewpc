@@ -27,11 +27,6 @@
 #include <sys/irq.h>
 
 
-/* TODO : on real hardware, occasionally an entry seems to get
- * stuck in the switch queue, and that switch can no longer be
- * processed. */
-
-
 /*
  * An active switch is one which has transitioned and is eligible
  * for servicing, but is undergoing additional debounce logic.
@@ -602,6 +597,12 @@ void switch_service_queue (void)
 		elapsed_time = 150;
 	}
 
+	/* Check for shorted switch rows/columns.  TODO : this should return a
+	 * value, and we skip rest of processing if there are problems.
+	 * Note this check used to be done every call to switch_idle, by
+	 * moving it here, it is only done every few ms instead. */
+	switch_short_detect ();
+
 	i = switch_queue_head;
 	while (unlikely (i != switch_queue_tail))
 	{
@@ -716,6 +717,8 @@ static void switch_update_unstable (const U8 sw)
  *
  * 'Pending switches' are scanned and handlers are spawned for each
  * of them (each is a separate task).
+ *
+ * TODO : Calling this every 1ms seems a bit much.
  */
 CALLSET_ENTRY (switch, idle)
 {
@@ -745,13 +748,11 @@ CALLSET_ENTRY (switch, idle)
 
 	/* Before doing anything else, make sure the ALWAYS CLOSED
 	 * switch is really closed.  If not, there's a serious problem
-	 * and we can't do any switch processing. */
+	 * and we can't do any switch processing.
+	 * TODO - do this check during initialization and then forget
+	 * about it... */
 	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
 		return;
-
-	/* Check for shorted switch rows/columns.  TODO : this should return a
-	 * value, and we skip rest of processing if there are problems. */
-	switch_short_detect ();
 
 	/* Iterate over each switch column to see what needs to be done. */
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
