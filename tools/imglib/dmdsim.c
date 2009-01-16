@@ -101,6 +101,16 @@ int try_receive_from_cpu (void)
 	struct wpc_message aMsg;
 	struct wpc_message *msg = &aMsg;
 	int rc;
+	fd_set fds;
+	struct timeval timeout;
+
+#if 0
+	FD_ZERO (&fds);
+	FD_SET (cpu_sock, &fds);
+	timeout.tv_sec = 5;
+	timeout.tv_usec = 0;
+	select (1, &fds, NULL, NULL, &timeout);
+#endif
 
 	rc = udp_socket_receive (cpu_sock, cpu_port, msg, sizeof (aMsg));
 	if (rc < 0)
@@ -126,55 +136,6 @@ int try_receive_from_cpu (void)
 }
 
 
-void process_key (unsigned char c)
-{
-}
-
-
-int try_receive_from_stdin (void)
-{
-	fd_set fds;
-	struct timeval timeout;
-	unsigned char c;
-	int rc;
-
-	FD_ZERO (&fds);
-	FD_SET (0, &fds);
-	timeout.tv_sec = timeout.tv_usec = 0;
-
-	if (rc = select (1, &fds, NULL, NULL, &timeout))
-	{
-		rc = read (0, &c, 1);
-		process_key (c);
-	}
-
-	return rc;
-}
-
-void
-keybuffering (int flag)
-{
-   struct termios tio;
-
-   tcgetattr (0, &tio);
-   if (!flag) /* 0 = no buffering = not default */
-	{
-      tio.c_lflag &= ~(ICANON | ECHO);
-	}
-   else /* 1 = buffering = default */
-	{
-      tio.c_lflag |= (ICANON | ECHO);
-	}
-   tcsetattr (0, TCSANOW, &tio);
-}
-
-
-void exit_handler (void)
-{
-	keybuffering (1);
-}
-
-
 int main (int argc, char *argv[])
 {
 	struct buffer *buf;
@@ -188,14 +149,11 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	keybuffering (0);
-
 	/* The main loop */
 	for (;;)
 	{
 		usleep (10 * 1000UL);
 		try_receive_from_cpu ();
-		try_receive_from_stdin ();
 	}
 }
 
