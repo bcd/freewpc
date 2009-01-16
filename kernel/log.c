@@ -90,7 +90,12 @@ char *log_get_format (U16 module_event)
 /** Add an entry to the event log. */
 void log_event1 (U16 module_event, U8 arg)
 {
-	struct log_event *ev = &log_entry[log_tail];
+	struct log_event *ev;
+
+	/* TODO : If logging has been disabled for this type of event,
+	 * stop now. */
+
+	ev = &log_entry[log_tail];
 
 	/* The timestamp is stored as the number of ticks since
 	the last event. */
@@ -108,7 +113,7 @@ void log_event1 (U16 module_event, U8 arg)
 		log_tail = 0;
 	}
 
-	/* See if a breakpoint has been set on the module_event.  This halts
+	/* TODO : See if a breakpoint has been set on the module_event.  This halts
 	all user task scheduling and enters the builtin debugger until
 	it is exited. */
 
