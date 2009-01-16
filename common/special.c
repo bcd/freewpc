@@ -32,6 +32,7 @@
 
 void special_award (void)
 {
+	callset_invoke (special_award);
 	switch (system_config.special_award)
 	{
 		case FREE_AWARD_CREDIT:
