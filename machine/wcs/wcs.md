@@ -360,6 +360,8 @@ NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
 #Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
 #Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
+Lightning Test: page(MACHINE_PAGE), PRI_GAME_QUICK1
+
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 # Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
