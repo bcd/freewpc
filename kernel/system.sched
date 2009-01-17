@@ -46,7 +46,7 @@ triac_rtt             1       60c
 switch_rtt/2          1       280c
 
 # Update the PIC on security games
-pic_rtt               32      200c  # guess?
+pic_rtt?CONFIG_PIC    32      200c  # guess?
 
 # Resynchronize to the AC zero cross point.
 ac_rtt                1       23c

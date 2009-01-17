@@ -299,6 +299,9 @@ SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_F
 ifneq ($(CONFIG_DMD),y)
 SCHED_FLAGS += -D CONFIG_SEG
 endif
+ifeq ($(CONFIG_PIC),y)
+SCHED_FLAGS += -D CONFIG_PIC
+endif
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
