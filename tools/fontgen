@@ -89,6 +89,7 @@ while [ "$1" != "" ]; do
 	esac
 done
 
+# TODO : page61 is hardcoded for fonts now
 echo "#include <freewpc.h>" > $fonfile
 echo "#pragma section (\"page61\")" >> $fonfile
 
