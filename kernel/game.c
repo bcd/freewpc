@@ -90,24 +90,6 @@ U8 timed_game_suspend_count;
 void start_ball (void);
 
 
-#ifndef MACHINE_CUSTOM_AMODE
-/** A default attract mode display effect to be used when the machine
-doesn't define one */
-void default_amode_deff (void)
-{
-#if (MACHINE_DMD == 1)
-	FSTART_COLOR
-		dmd_draw_fif (fif_freewpc_logo);
-	FEND
-
-	for (;;)
-		task_sleep_sec (5);
-#endif
-}
-#endif
-
-
-
 /** Starts the attract mode */
 void amode_start (void)
 {
