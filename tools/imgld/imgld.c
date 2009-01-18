@@ -102,6 +102,30 @@ unsigned int base_page = 0x20;
 
 unsigned int max_rom_size = 65536;
 
+/**
+ * Target properties are used to describe things specific
+ * to the CPU or platform.  The target image can be divided
+ * into _pages_ of a particular length, and linear addresses
+ * are translated into a <logical_addr,page number> pair.
+ * If a target doesn't require paging, then use a really
+ * large page size.  The page number must range from 0-255.
+ */
+
+struct target_properties
+{
+	unsigned int page_base;
+	unsigned int page_size;
+};
+
+struct target_properties target_m6809 =
+{
+	.page_base = 0x4000,
+	.page_size = 0x4000,
+};
+
+struct target_properties *target_props = &target_m6809;
+
+
 /** Return the format of a file, based on its extension. */
 enum image_format get_file_format (const char *filename)
 {
@@ -212,6 +236,33 @@ void add_image (const char *label, const char *filename, unsigned int options)
 }
 
 
+/**
+ * Returns offset if an object is of SIZE can be placed there without
+ * crossing a page boundary.  Otherwise, returns the address of to the
+ * next page.
+ */
+unsigned long round_up_to_page (unsigned long offset, unsigned int size)
+{
+	if ((offset / target_props->page_size) == ((offset + size) / target_props->page_size))
+		return offset;
+	else
+		return ((offset / target_props->page_size) + 1) * target_props->page_size;
+}
+
+
+void convert_to_target_pointer (unsigned long offset, unsigned char pointer[])
+{
+	/* Compute the offset and page components */
+	unsigned int target_offset = (offset % target_props->page_size) + target_props->page_base;
+	unsigned int target_page = (offset / target_props->page_size) + base_page;
+
+	/* Store these into the target pointer */
+	pointer[0] = target_offset >> 8;
+	pointer[1] = target_offset & 0xFF;
+	pointer[2] = target_page;
+}
+
+
 void write_output (const char *filename)
 {
 	unsigned int frame;
@@ -231,51 +282,47 @@ void write_output (const char *filename)
 	{
 		/* Round up to the next page boundary if the image doesn't
 		 * completely fit in the current page. */
-		if ((offset / 0x4000) != ((offset + buf->len) / 0x4000))
-			offset = ((offset / 0x4000) + 1) * 0x4000;
+		offset = round_up_to_page (offset, buf->len+1);
 
 		/* Convert the absolute offset from the beginning of image data into
-		 * a target pointer. */
-		unsigned int target_offset = (offset % 0x4000) + 0x4000;
-		unsigned int target_page = (offset / 0x4000) + base_page;
-
-		target_pointer[0] = target_offset >> 8;
-		target_pointer[1] = target_offset & 0xFF;
-		target_pointer[2] = target_page;
+		 * a target pointer, and write it to the table header. */
+		convert_to_target_pointer (offset, target_pointer);
 		fwrite (target_pointer, sizeof (target_pointer), 1, outfile);
 
 		if (frame == 0)
 		{
-			fprintf (lblfile, "\n#define IMAGEMAP_BASE 0x4000\n");
-			fprintf (lblfile, "#define IMAGEMAP_PAGE 0x%02X\n", target_page);
+			fprintf (lblfile, "\n#define IMAGEMAP_BASE 0x%04X\n", target_props->page_base);
+			fprintf (lblfile, "#define IMAGEMAP_PAGE 0x%02X\n", base_page);
 		}
 
-		fprintf (lblfile, "/* %d: %02X/%04X, type %02X, len %d */\n",
-			frame, target_page, target_offset, buf->type, buf->len);
-		fprintf (lblfile, "   /* RLE encoded version has len %d */\n", rle_frame_table[frame]->len);
+		fprintf (lblfile, "/* %d: %02X/%02X%02X, type %02X, len %d */\n",
+			frame, target_pointer[2], target_pointer[0], target_pointer[1],
+			buf->type, buf->len);
+		fprintf (lblfile, "   /* RLE encoded version has len %d */\n",
+			rle_frame_table[frame]->len);
 	}
 
-	/* Write a NULL pointer at the end of the table */
-	target_pointer[0] = 0;
-	target_pointer[1] = 0;
-	target_pointer[2] = 0;
+	/* Write a NULL pointer at the end of the table.  Not strictly needed anymore,
+	since the number of table entries is available as a #define. */
+	convert_to_target_pointer (0, target_pointer);
 	fwrite (target_pointer, sizeof (target_pointer), 1, outfile);
 
 
 	/* Write the frame table data */
-	for (frame = 0, offset = frame_count * 3, buf = frame_table[0];
+	for (frame = 0, offset = frame_count * sizeof (target_pointer), buf = frame_table[0];
 		frame < frame_count;
 		frame++, offset += buf->len + 1, buf = frame_table[frame])
 	{
-		if ((offset / 0x4000) != ((offset + buf->len) / 0x4000))
+		/* If the object address needed to be pushed to the next
+		page boundary, then output padding bytes first. */
+		padding = round_up_to_page (offset, buf->len+1) - offset;
+		while (padding-- > 0)
 		{
-			unsigned long new_offset = ((offset / 0x4000) + 1) * 0x4000;
-			unsigned int diff = new_offset - offset;
-			while (diff-- > 0)
-				fwrite (&padding, sizeof (padding), 1, outfile);
-			offset = new_offset;
+			fwrite (&padding, sizeof (padding), 1, outfile);
+			offset++;
 		}
 
+		/* Output the image data itself */
 		fputc (buf->type, outfile);
 		buffer_write (buf, outfile);
 	}
