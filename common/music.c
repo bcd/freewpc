@@ -158,11 +158,3 @@ CALLSET_ENTRY (music, init)
 	music_track_current = 0xFF;
 }
 
-
-/** Stops all music tracks running and/or queued. */
-void music_stop_all (void)
-{
-	music_init ();
-	music_update ();
-}
-

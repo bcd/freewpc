@@ -35,11 +35,6 @@ __fastram__ S8 rtsol_mpf_right;
 U8 mpf_ball_count;
 
 
-static const audio_track_t powerfield_music = {
-	.prio = PRI_GAME_MODE2,
-	.code = MUS_POWERFIELD,
-};
-
 void mpf_active_deff (void)
 {
 	while (task_find_gid (GID_MPF_ACTIVE))
@@ -90,7 +85,7 @@ void mpf_start (void)
 		{
 			mpf_active = 1;
 			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
-			music_start (powerfield_music);
+			music_refresh ();
 		}
 	}
 }
@@ -103,9 +98,16 @@ void mpf_stop (void)
 		mpf_active = 0;
 		task_kill_gid (GID_MPF_ACTIVE);
 		sound_send (SND_POWER_HUH_3);
-		music_stop (powerfield_music);
+		music_refresh ();
 	}
 }
+
+
+CALLSET_ENTRY (mpf, music_refresh)
+{
+	if (task_find_gid (GID_MPF_ACTIVE))
+		music_request (MUS_POWERFIELD, PRI_GAME_MODE2);
+};
 
 
 CALLSET_ENTRY (mpf, door_start_battle_power)

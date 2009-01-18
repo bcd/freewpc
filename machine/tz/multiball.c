@@ -25,11 +25,6 @@ __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 
-static const audio_track_t multiball_track = {
-	.prio = PRI_GAME_MODE1 + 12,
-	.code = MUS_MULTIBALL,
-};
-
 void lock_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -136,13 +131,20 @@ void mball_check_light_lock (void)
 }
 
 
+CALLSET_ENTRY (mball, music_refresh)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
+};
+
+
 CALLSET_ENTRY (mball, mball_start)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		flag_on (FLAG_MB_JACKPOT_LIT);
-		music_start (multiball_track);
+		music_refresh ();
 		deff_start (DEFF_MB_START);
 		deff_start (DEFF_MB_RUNNING);
 		leff_start (LEFF_MB_RUNNING);
@@ -166,7 +168,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		leff_stop (LEFF_MB_RUNNING);
-		music_stop (multiball_track);
+		music_refresh ();
 	}
 }
 

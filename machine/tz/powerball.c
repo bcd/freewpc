@@ -41,11 +41,6 @@
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
 
-static const audio_track_t pb_in_play_music = {
-	.prio = PRI_GAME_MODE3,
-	.code = MUS_POWERBALL_IN_PLAY,
-};
-
 
 typedef enum {
 	PF_STEEL_DETECTED = 1,
@@ -187,7 +182,7 @@ void pb_clear_location (U8 location)
 		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
 		drains during multiball and game doesn't know where it is. */
-		music_stop (pb_in_play_music);
+		music_refresh ();
 #ifdef PB_DEBUG
 		deff_restart (DEFF_PB_DETECT);
 #else
@@ -251,7 +246,7 @@ void pb_announce (void)
 #else
 		deff_start (DEFF_PB_DETECT);
 #endif
-		music_start (pb_in_play_music);
+		music_refresh ();
 		pb_announce_needed = 0;
 	}
 }
@@ -346,6 +341,12 @@ void pb_container_exit (U8 location)
 		}
 	}
 
+}
+
+CALLSET_ENTRY (pb_detect, music_refresh)
+{
+	if (pb_location == PB_IN_PLAY)
+		music_request (MUS_POWERBALL_IN_PLAY, PRI_GAME_MODE3);
 }
 
 CALLSET_ENTRY (pb_detect, sw_camera)

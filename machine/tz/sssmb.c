@@ -1,11 +1,6 @@
 
 #include <freewpc.h>
 
-static const audio_track_t sssmb_track = {
-	.prio = PRI_GAME_MODE1 + 9,
-	.code = MUS_SPIRAL_ROUND,
-};
-
 /* Super Skill Shot multiball rules */
 
 U8 sssmb_initial_ramps_to_divert;
@@ -144,7 +139,7 @@ void sssmb_start (void)
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
 		deff_start (DEFF_SSSMB_RUNNING);
-		music_start (sssmb_track);
+		music_refresh ();
 		flag_on (FLAG_SSSMB_RUNNING);
 		flag_on (FLAG_SSSMB_RED_JACKPOT);
 		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
@@ -169,9 +164,16 @@ void sssmb_stop (void)
 		timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
 		task_kill_gid (GID_SSSMB_JACKPOT_READY);
 		deff_stop (DEFF_SSSMB_RUNNING);
-		music_stop (sssmb_track);
+		music_refresh ();
 	}
 }
+
+
+CALLSET_ENTRY (sssmb, music_refresh)
+{
+	if (flag_test (FLAG_SSSMB_RUNNING))
+		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
+};
 
 
 CALLSET_ENTRY (sssmb, door_start_super_skill)

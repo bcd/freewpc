@@ -21,6 +21,8 @@
 #ifndef __AUDIO_H
 #define __AUDIO_H
 
+#define MAX_TRACKS 2
+
 /** A background track */
 typedef struct {
 	/** The priority of the track.  Only the highest priority track queued
@@ -32,11 +34,8 @@ typedef struct {
 } audio_track_t;
 
 
-/* New style */
-#define MAX_TRACKS 2
 __common__ __attribute__((deprecated)) void music_start (const audio_track_t track);
 __common__ __attribute__((deprecated)) void music_stop (const audio_track_t track);
-__common__ void music_stop_all (void);
 
 /* Really new sound system */
 
