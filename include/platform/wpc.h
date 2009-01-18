@@ -115,6 +115,7 @@ AREA_DECL(nvram)
 #define WPC_CAP_DCS             0x4
 #define WPC_CAP_PIC             0x8
 #define WPC_CAP_95              0x10
+#define WPC_CAP_EXTIO           0x20
 #define WPC_CAP_KNOWN           0x80
 
 #define WPC_GEN_ALPHA           (WPC_CAP_KNOWN)
@@ -140,9 +141,14 @@ AREA_DECL(nvram)
 #define WPC_TYPE WPC_GEN_ALPHA
 #endif
 
+/* The extra capabilities defined by the machine itself */
+#ifndef WPC_CAP_MACHINE
+#define WPC_CAP_MACHINE 0
+#endif
+
 /** Test whether a certain capability exists on the target
  * hardware. */
-#define WPC_HAS_CAP(cap)  (WPC_TYPE & (WPC_CAP_KNOWN | (cap)))
+#define WPC_HAS_CAP(cap)  ((WPC_TYPE | WPC_CAP_MACHINE) & (WPC_CAP_KNOWN | (cap)))
 
 
 /* For sanity testing */
@@ -251,13 +257,10 @@ extern U8 *linux_dmd_high_page;
 #define WPC_SW_JUMPER_INPUT 			0x3FE7
 #define WPC_SW_CABINET_INPUT 			0x3FE8
 
-#if (MACHINE_PIC == 1)
-#define WPCS_PIC_READ 					0x3FE9
-#define WPCS_PIC_WRITE 					0x3FEA
-#else
 #define WPC_SW_ROW_INPUT 				0x3FE9
+#define WPCS_PIC_READ 					0x3FE9
 #define WPC_SW_COL_STROBE 				0x3FEA
-#endif
+#define WPCS_PIC_WRITE 					0x3FEA
 
 #if (MACHINE_DMD == 0)
 #define WPC_ALPHA_POS 					0x3FEB
@@ -697,11 +700,10 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	case 3:
 		writeb (WPC_SOL_FLASH2_OUTPUT, val);
 		break;
-#if (MACHINE_FLIPTRONIC == 1)
 	case 4:
-		wpc_write_flippers (val);
+		if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
+			wpc_write_flippers (val);
 		break;
-#endif
 #ifdef WPC_EXTBOARD1
 	case 5:
 		writeb (WPC_EXTBOARD1, val);
@@ -767,20 +769,18 @@ extern inline U8 pinio_read_sound (void)
 
 extern inline void pinio_write_switch_column (U8 val)
 {
-#if (MACHINE_PIC == 1)
+	if (WPC_HAS_CAP (WPC_CAP_PIC))
 		wpc_write_pic (WPC_PIC_COLUMN (val));
-#else
+	else
 		writeb (WPC_SW_COL_STROBE, 1 << val);
-#endif
 }
 
 extern inline U8 pinio_read_switch_rows (void)
 {
-#if (MACHINE_PIC == 1)
-	return wpc_read_pic ();
-#else
-	return readb (WPC_SW_ROW_INPUT);
-#endif
+	if (WPC_HAS_CAP (WPC_CAP_PIC))
+		return wpc_read_pic ();
+	else
+		return readb (WPC_SW_ROW_INPUT);
 }
 
 extern inline U8 pinio_read_dedicated_switches (void)

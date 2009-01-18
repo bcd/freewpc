@@ -376,13 +376,29 @@ extern inline void sol_update_fliptronic_powered (void)
 }
 
 
+/**
+ * The 2 RTT functions below are only used for
+ * flashers, since pulsed coils are handled through
+ * the request module.
+ *
+ * Several improvements can be made here:
+ * 1) Merge these back to a single function.
+ * 2) Change the frequency from 4ms to something larger.
+ * Flashers don't need that much granularity, unless
+ * individually controlled dimming is required.  I'm not
+ * worried about that now.
+ * 3) It's unlikely that *all* flashers would be pulsed
+ * at once -- could we maybe get by with fewer slots
+ * than actual flashers?
+ */
+
+
 /** Realtime update of the first set of flasher outputs */
 void sol_update_rtt_0 (void)
 {
 	sol_update_set (2);
-#if (MACHINE_FLIPTRONIC == 1)
-	sol_update_fliptronic_powered ();
-#endif
+	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
+		sol_update_fliptronic_powered ();
 }
 
 

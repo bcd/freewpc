@@ -267,9 +267,8 @@ void fatal (errcode_t error_code)
 
 	/* Reset hardware outputs */
 	pinio_write_triac (0);
-#if (MACHINE_FLIPTRONIC == 1)
-	wpc_write_flippers (0);
-#endif
+	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
+		wpc_write_flippers (0);
 	wpc_write_ticket (0);
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);
@@ -408,12 +407,10 @@ void do_firq (void)
 		here... */
 		interrupt_dbprintf ("Timer interrupt.\n");
 	}
-	else
+	else if (WPC_HAS_CAP (WPC_CAP_DMD))
 	{
 		/* It is a DMD interrupt. */
-#if (MACHINE_DMD == 1)
 		dmd_rtt ();
-#endif
 	}
 	firq_count++;
 
