@@ -71,6 +71,7 @@ void increment_extra_balls (void)
 	if (can_award_extra_ball ())
 	{
 		extra_balls++;
+		callset_invoke (extra_ball_award);
 		update_extra_ball_lamp ();
 
 		audit_increment (&system_audits.extra_balls_awarded);
