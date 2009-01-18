@@ -116,12 +116,12 @@ AREA_DECL(nvram)
 #define WPC_CAP_PIC             0x8
 #define WPC_CAP_95              0x10
 #define WPC_CAP_EXTIO           0x20
-#define WPC_CAP_KNOWN           0x80
+#define WPC_CAP_KNOWN           0
 
 #define WPC_GEN_ALPHA           (WPC_CAP_KNOWN)
 #define WPC_GEN_DMD             (WPC_GEN_ALPHA | WPC_CAP_DMD)
-#define WPC_GEN_FLIPTRONIC      (WPC_CAP_DMD | WPC_CAP_FLIPTRONIC)
-#define WPC_GEN_DCS             (WPC_GEN_DMD | WPC_CAP_DMD)
+#define WPC_GEN_FLIPTRONIC      (WPC_GEN_DMD | WPC_CAP_FLIPTRONIC)
+#define WPC_GEN_DCS             (WPC_GEN_FLIPTRONIC | WPC_CAP_DCS)
 #define WPC_GEN_PIC             (WPC_GEN_DCS | WPC_CAP_PIC)
 #define WPC_GEN_95              (WPC_GEN_PIC | WPC_CAP_95)
 
@@ -131,7 +131,7 @@ AREA_DECL(nvram)
 #define WPC_TYPE WPC_GEN_95
 #elif (MACHINE_PIC == 1)
 #define WPC_TYPE WPC_GEN_PIC
-#elif (MACHINE_DCS == 0)
+#elif (MACHINE_DCS == 1)
 #define WPC_TYPE WPC_GEN_DCS
 #elif (MACHINE_FLIPTRONIC == 1)
 #define WPC_TYPE WPC_GEN_FLIPTRONIC
@@ -164,6 +164,10 @@ AREA_DECL(nvram)
 #if (MACHINE_FLIPTRONIC == 1) && !WPC_HAS_CAP(WPC_CAP_FLIPTRONIC)
 #error "Fliptronic capability broken"
 #endif
+#if (MACHINE_DMD == 1) && !WPC_HAS_CAP(WPC_CAP_DMD)
+#error "DMD capability broken"
+#endif
+
 
 
 /***************************************************************
@@ -622,7 +626,6 @@ extern inline void wpc_write_ticket (U8 val)
 
 
 
-#if (MACHINE_PIC == 1)
 /********************************************/
 /* WPC Security PIC Chip                    */
 /********************************************/
@@ -664,7 +667,6 @@ extern inline U8 wpc_read_pic (void)
 	return readb (WPCS_PIC_READ);
 }
 
-#endif
 
 /********************************************/
 /* Lamps                                    */

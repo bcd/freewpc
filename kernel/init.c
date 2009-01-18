@@ -52,6 +52,8 @@ task_gid_t last_nonfatal_error_gid;
 U8 irq_ack_value;
 #endif
 
+const U8 wpc_machine_type = WPC_TYPE;
+
 /** Initialize the FreeWPC program. */
 __noreturn__ void freewpc_init (void)
 {
