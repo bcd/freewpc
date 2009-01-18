@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -77,11 +77,13 @@ void audit_increment (audit_t *aud)
 /** Increment an audit by an arbitrary value */
 void audit_add (audit_t *aud, U8 val)
 {
-	wpc_nvram_get ();
-	(*aud) += val;
-	/* TODO - check for overflow */
-	csum_area_update (&audit_csum_info);
-	wpc_nvram_put ();
+	if (*aud < 0xFFFF - (val - 1))
+	{
+		wpc_nvram_get ();
+		(*aud) += val;
+		csum_area_update (&audit_csum_info);
+		wpc_nvram_put ();
+	}
 }
 
 

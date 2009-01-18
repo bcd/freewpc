@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # WCS machine description for FreeWPC
-# (C) Copyright 2006-2008 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2009-2009 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -359,6 +359,8 @@ NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
 #Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
 #Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
 #Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
+
+Lightning Test: page(MACHINE_PAGE), PRI_GAME_QUICK1
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)

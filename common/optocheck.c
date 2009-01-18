@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -42,7 +42,7 @@ void opto_check (void)
 				if (bits & 1)
 				{
 					dbprintf ("Checking SW %d\n", col * 8 + row);
-					if (!switch_poll (col * 8 + row))
+					if (!rt_switch_poll (col * 8 + row))
 					{
 						/* The switch is open (active); opto power must
 						 * be good */
@@ -59,5 +59,6 @@ void opto_check (void)
 	 * highly unlikely.
 	 */
 	dbprintf ("Bad 12V?\n");
+	task_sleep (TIME_33MS);
 }
 

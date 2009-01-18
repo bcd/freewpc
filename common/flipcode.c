@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -63,10 +63,13 @@ void flipcode_default_2 (void)
 //#define DEBUG_FLIPCODE
 
 
+/** The sequence of characters entered at the flippers */
 U8 flipcode_chars[MAX_FLIPCODE_CHARS];
 
+/** The next position of characters to be set */
 U8 flipcode_pos;
 
+/** The current value being programmed for the next character */
 U8 flipcode_value;
 
 static void (*flipcode_handler[]) (void) = FLIPCODE_HANDLERS;
@@ -99,6 +102,7 @@ void flipcode_test (void)
 	U8 code;
 	U8 i;
 
+	callset_invoke (flipper_code_entered);
 	for (code=0; code < sizeof (flipcodes) / (MAX_FLIPCODE_CHARS+1); code++)
 	{
 #ifdef DEBUG_FLIPCODE
@@ -146,6 +150,12 @@ void flipcode_lock_char (void)
 		++flipcode_pos;
 		task_recreate_gid (GID_FLIPCODE_ACTIVE, flipcode_active_task);
 	}
+}
+
+
+bool flipper_code_check (const U8 *string)
+{
+	return FALSE;
 }
 
 

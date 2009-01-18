@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -525,7 +525,7 @@ struct audit earnings_audits[] = {
 	{ "RECENT CENTER SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
 	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
 	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
-	{ "RECENT PAID CREDITS", AUDIT_TYPE_INT, &system_audits.paid_credits },
+	{ "RECENT PAID CRED.", AUDIT_TYPE_INT, &system_audits.paid_credits },
 	{ "RECENT SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };

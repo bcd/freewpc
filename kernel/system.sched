@@ -1,5 +1,5 @@
 #
-# Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+# Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
 # 
 # This file is part of FreeWPC.
 # 
@@ -20,6 +20,16 @@
 
 
 # Schedule for FreeWPC's core real-time tasks
+# This file is processed by the 'sched' program in tools/sched.
+# Each line specifies a realtime function that needs to be called periodically.
+# It also says how often it should be called (in IRQs, roughly 1ms per IRQ)
+# and approximately how long the function takes to run on average (usually
+# given in terms of CPU cycles).
+#
+# The scheduler generates a top-level function which invokes everything
+# properly.  It also attempts to balance the load, so that the average
+# time per IRQ is as stable as possible.
+
 
 # Common processing required at the beginning of every IRQ.
 !do_irq_begin         1       16c
@@ -36,7 +46,7 @@ triac_rtt             1       60c
 switch_rtt/2          1       280c
 
 # Update the PIC on security games
-pic_rtt               32      200c  # guess?
+pic_rtt?CONFIG_PIC    32      200c  # guess?
 
 # Resynchronize to the AC zero cross point.
 ac_rtt                1       23c
@@ -65,11 +75,14 @@ lockup_check_rtt      128     23c
 # Free running hardware-quality timers
 free_timer_rtt        32		94c
 
+# Update the segmented displays, if CONFIG_SEG is defined.
 seg_rtt?CONFIG_SEG    1       100c
 
 # Common processing required at the end of every IRQ
 !do_irq_end           1       0c
 
+# Profile idle time
+idle_profile_rtt      1024    100c # guess?
 
 # TODO : service the coin switches correctly to ensure proper timing
 

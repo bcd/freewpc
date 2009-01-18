@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -56,12 +56,14 @@ extern __common__ void opto_check (void);
 extern inline void wait_for_button (const U8 swno)
 {
 	/* TODO - why is this not done in native mode? */
+#ifndef CONFIG_NO_ACCEPT
 #ifndef CONFIG_NATIVE
 	while (!switch_poll (swno))
 		task_sleep (TIME_66MS);
 
 	while (switch_poll (swno))
 		task_sleep (TIME_66MS);
+#endif
 #endif
 }
 
@@ -191,37 +193,75 @@ void system_reset_deff (void)
 
 	dmd_show_low ();
 
+#if 0 && (MACHINE_DMD == 0) /* TODO */
+	extern __common__ void seg_effect_demo (void);
+	task_pid_t tp = far_task_create_gid (task_getgid (), seg_effect_demo, COMMON_PAGE);
+	task_sleep_sec (5);
+	task_kill_pid (tp);
+#endif
+
+	/* Keep the reset display for at least 3 seconds (so
+	 * it is readable), keep it longer if any of the
+	 * asynchronous initializations are still running. */
 	task_sleep_sec (3);
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
 	dbprintf ("System initialized.\n");
-	sys_init_complete++;
-	callset_invoke (init_complete);
 	deff_exit ();
 }
 
 
-
+/**
+ * Called when the system hardware is fully initialized.
+ * This function performs final initialization.
+ */
 void system_reset (void)
 {
 	system_accept_freewpc ();
 
+	/* Start the reset display effect, which shows
+	 * the machine name, version, etc. */
+	deff_start (DEFF_SYSTEM_RESET);
+
+	/* Perform final checks on the switch matrix to make sure
+	 * it is working properly. */
+	/* TODO - poll certain switches that must be operational
+	 * before allowing the system to complete init. */
 #if (MACHINE_PIC == 1)
+	/* The PIC needs to be initialized before switches
+	 * can be polled. */
 	pic_init ();
 #endif
+	opto_check ();
 
+	/* Mark hardware initialization complete.  This will
+	 * allow switch scanning to start, so sleep briefly
+	 * to allow that to happen once. */
+	sys_init_complete++;
+	task_sleep (TIME_66MS);
+
+	/* Check various persistent variables for sane values.
+	 * If there are any incompatibilities, perform a factory
+	 * reset to be safe. */
 	factory_reset_if_required ();
 
-#ifdef FASTBOOT
-	sys_init_complete++;
-	callset_invoke (init_complete);
-#else
-	deff_start (DEFF_SYSTEM_RESET);
-#endif
+	/* Start the attract mode effects */
 	amode_start ();
 
-	/* Check the 12V supply to make sure optos are working */
-	opto_check ();
+	/* Invoke other final initializations. */
+	callset_invoke (init_complete);
+
+	/* Bump the power-up audit */
+	audit_increment (&system_audits.power_ups);
+	log_event (SEV_INFO, MOD_SYSTEM, EV_SYSTEM_INIT, 0);
+
+	/* In test-only mode, pretend ENTER was pressed
+	 * and go straight to test mode. */
+#ifdef MACHINE_TEST_ONLY
+	while (sys_init_pending_tasks != 0)
+		task_sleep (TIME_66MS);
+	callset_invoke (sw_enter);
+#endif
 }
 

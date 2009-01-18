@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -67,7 +67,8 @@
  * Allocation is done very simply by iteration.  Pages are always
  * allocated in pairs in case 4-colors are desired.  No more than
  * two pairs are ever needed at once, so there is no concern for
- * overflow.
+ * overflow.  A few pages are reserved for special use and are
+ * always skipped by the allocator.
  */
 
 #include <freewpc.h>
@@ -333,6 +334,8 @@ void dmd_flip_low_high (void)
 	register dmd_pagenum_t tmp __areg__ = wpc_dmd_get_low_page ();
 	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
 	wpc_dmd_set_high_page (tmp);
+	/* TODO - for the 6809, this can be optimized by using
+	 * the EXG instruction to swap the values. */
 }
 
 
@@ -341,12 +344,6 @@ currently mapped */
 void dmd_show_other (void)
 {
 	dmd_visible_pages.pair ^= 0x0101;
-#if 0
-	if (dmd_dark_page == dmd_low_page)
-		dmd_show_high ();
-	else
-		dmd_show_low ();
-#endif
 }
 
 
@@ -371,8 +368,11 @@ void dmd_show2 (void)
 		in between the two writes, which could take some time
 		and would therefore keep the display from refreshing
 		for much longer.  The effect is that only part of the image
-		appears during that window.  So, we must disable IRQ as well
-		here. */
+		appears during that window.  So, we disabled IRQ as well
+		here.
+			However, now the operation can be performed atomically
+		without any locking is at all, because the following
+		results in a single store of 16-bits operation. */
 		dmd_visible_pages = dmd_mapped_pages;
 	}
 }
@@ -631,6 +631,15 @@ void dmd_do_transition (void)
 }
 
 
+/**
+ * Apply the contents of a lookaside frame (2 planes)
+ * onto the current frame mapped in low/high buffers.
+ * The apply operation is performed twice, once per bitplane.
+ *
+ * An apply function could be an AND or OR operation.
+ * Prior to the call, the low page points to the destination
+ * buffer and the high page to the source/lookaside buffer.
+ */
 void dmd_apply_lookaside2 (U8 num, void (*apply)(void))
 {
 	const U8 low = wpc_dmd_get_low_page ();

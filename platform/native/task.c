@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -80,6 +80,11 @@ void task_dump (void)
 				td->gid, td->arg, td->duration);
 		}
 	}
+}
+
+
+void idle_profile_rtt (void)
+{
 }
 
 

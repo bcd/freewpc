@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -176,27 +176,15 @@ __noreturn__ void freewpc_init (void)
 	If problems are found, those adjustments will be made sane again. */
 	csum_area_check_all ();
 
-	/* Enable the idle processing.  Sleep briefly so that it gets
+	/* Enable the idle processing.  Sleep briefly so that idle gets
 	 * a chance to run before continuing; this lets the debugger
 	 * interface initialize. */
 	idle_ok = 1;
 	task_sleep (TIME_16MS);
 
-	/* The system is mostly usable at this point.
-	 * Now, start the display effect that runs at powerup.
-	 * But in a test-only build, go directly to test mode.
-	 */
-#ifdef MACHINE_TEST_ONLY
-	sys_init_complete++;
-	callset_invoke (init_complete);
-	callset_invoke (sw_enter);
-#else
+	/* The system is initialized from a hardware perspective.
+	 * Now, perform additional final initializations. */
 	system_reset ();
-
-	/* Bump the power-up audit */
-	audit_increment (&system_audits.power_ups);
-	log_event (SEV_INFO, MOD_SYSTEM, EV_SYSTEM_INIT, 0);
-#endif
 
 	/* The system can run itself now, this task is done!
 	 *
@@ -215,7 +203,6 @@ __noreturn__ void freewpc_init (void)
 		if (likely (idle_ok))
 		{
 			do_idle ();
-			switch_idle ();
 		}
 	}
 #endif

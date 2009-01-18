@@ -88,9 +88,28 @@ enum image_format {
 	FORMAT_BAD, FORMAT_XBM, FORMAT_PGM, FORMAT_FIF
 };
 
-struct buffer *frame_table[MAX_FRAMES];
 
+
+/**
+ * Stores everything you need to know about an image.
+ */
+struct image
+{
+	/* The raw, uncompressed format of the image.
+	 * This is a type 0, joined buffer that is suitable for
+	 * direct dumping to the display. */
+	struct buffer *raw;
+
+	struct buffer *compressed;
+
+	/* The preferred representation */
+	struct buffer *buf;
+};
+
+
+struct buffer *frame_table[MAX_FRAMES];
 struct buffer *rle_frame_table[MAX_FRAMES];
+struct buffer *sparse_frame_table[MAX_FRAMES];
 
 unsigned int frame_count = 0;
 
@@ -159,13 +178,15 @@ void emit_label (const char *label, unsigned int no)
 
 void add_frame (const char *label, struct buffer *buf)
 {
-	struct buffer *rlebuf;
+	rle_frame_table[frame_count] = buffer_rle_encode (buf);
+	sparse_frame_table[frame_count] = buffer_sparse_encode (buf);
 
-	rlebuf = buffer_rle_encode (buf);
-	rle_frame_table[frame_count] = rlebuf;
-
-	//frame_table[frame_count] = buf;
-	frame_table[frame_count] = rlebuf;
+//#define COMPRESS_IT
+#ifdef COMPRESS_IT
+	frame_table[frame_count] = sparse_frame_table[frame_count];
+#else
+	frame_table[frame_count] = buf;
+#endif
 
 	if (label)
 		emit_label (label, frame_count);
@@ -298,8 +319,8 @@ void write_output (const char *filename)
 		fprintf (lblfile, "/* %d: %02X/%02X%02X, type %02X, len %d */\n",
 			frame, target_pointer[2], target_pointer[0], target_pointer[1],
 			buf->type, buf->len);
-		fprintf (lblfile, "   /* RLE encoded version has len %d */\n",
-			rle_frame_table[frame]->len);
+		fprintf (lblfile, "   /* RLE encoded version has len %d */\n", rle_frame_table[frame]->len);
+		fprintf (lblfile, "   /* Sparse encoded version has len %d */\n", sparse_frame_table[frame]->len);
 	}
 
 	/* Write a NULL pointer at the end of the table.  Not strictly needed anymore,

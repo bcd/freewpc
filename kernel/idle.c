@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -38,9 +38,14 @@ have passed. */
 U8 idle_10second_timer;
 
 
-/** Runs the idle functions. */
+/** Runs the idle functions.   This function is called
+ * whenever there are no tasks ready to run, at a
+ * rate of once per 1ms.
+ */
 void do_idle (void)
 {
+	callset_invoke (idle);
+
 	/* See if at least 100ms has elapsed.
 	If so, we advance the timeout for the next check.
 	If more than 200ms elapsed, we will only process

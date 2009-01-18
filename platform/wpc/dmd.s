@@ -132,9 +132,15 @@ _dmd_copy_asm:
 	puls	u,y,pc
 
 
+	;--------------------------------------------------------
+	;
+	; void frame_decode_rle_asm (void *src);
+	;
+	; X = pointer to source image data
+	;
+	;--------------------------------------------------------
 	.globl _frame_decode_rle_asm
 _frame_decode_rle_asm:
-	; X = source buffer
 	pshs	u
 	ldu	#DMD_LOW_BASE
 
@@ -143,15 +149,15 @@ rle_loop:
 	cmpa	#0xA8
 	beq	rle_run
 	std	,u++
+	bra	rle_loop
 
-rle_next:
-	cmpu	#DMD_LOW_BASE + 512
-	blt	rle_loop
+rle_done:
 	puls	u,pc
 
 rle_run:
 	tstb
 	beq	rle_escape
+	bmi	rle_done
 	stb	*m0
 	lda	,x+
 	tfr	a,b
@@ -160,10 +166,54 @@ rle_run_loop:
 	std	,u++
 	dec	*m0
 	bne	rle_run_loop
-	bra	rle_next
+	bra	rle_loop
 
 rle_escape:
 	ldb	,x+
 	std	,u++
-	bra	rle_next
+	bra	rle_loop
+
+
+	;--------------------------------------------------------
+	;
+	; void frame_decode_sparse_asm (void *src);
+	;
+	; X = pointer to source image data
+	;
+	;--------------------------------------------------------
+	.globl _frame_decode_sparse_asm
+_frame_decode_sparse_asm:
+	pshs	u
+	tfr	x,u
+	ldx	#DMD_LOW_BASE
+	jsr	_dmd_clean_page
+	tfr	u,x
+	ldu	#DMD_LOW_BASE
+
+sparse_loop:
+	; First byte is literal data count, in 16-bit words.
+	; If zero, this means no more blocks
+	lda	,x+
+	beq	sparse_done
+	sta	*m0
+
+	; Second byte of block is skip count.
+	; The cursor is moved forward this many BYTES
+	; before copying the literals to memory.
+	ldb	,x+
+	leau	b,u
+
+	; Remaining bytes of block are the data
+sparse_block_loop:
+	ldd	,x++
+	std	,u++
+	dec	*m0
+	bne	sparse_block_loop
+
+	; On to the next block
+	bra	sparse_loop
+
+sparse_done:
+	puls	u,pc
+
 

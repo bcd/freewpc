@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -99,6 +99,7 @@ void amode_start (void)
 #endif
 	triac_enable (TRIAC_GI_MASK);
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
+	task_yield ();
 	callset_invoke (amode_start);
 }
 
