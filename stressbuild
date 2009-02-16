@@ -5,7 +5,7 @@
 
 machines="funhouse t2 tz wcs afm tester tzsound"
 native_options="n y"
-gcc_options="4.3.2 4.3.3" #4.4.0 is broken now
+gcc_options="4.3.2 4.3.3 4.4.0"
 
 case $1 in
 	--native)
@@ -51,15 +51,17 @@ for native in $native_options; do
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
-					make -j3 $target 2>&1 >> stressbuild.log
+					make -j3 $target 2>&1 > /dev/null
 					rc="$?"
 
 					if [ -f err ]; then
 						echo "Error file:" | tee -a stressbuild.log
 						cat err | tee -a stressbuild.log
 					fi
+
 					echo "End: $cfg" | tee -a stressbuild.log
 					echo "Exit code: $rc" | tee -a stressbuild.log
+					echo "" | tee -a stressbuild.log
 					if [ "$rc" != "0" ]; then
 						exit $rc
 					fi
