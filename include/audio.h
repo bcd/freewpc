@@ -36,7 +36,6 @@ typedef struct {
 #define MAX_TRACKS 2
 __common__ __attribute__((deprecated)) void music_start (const audio_track_t track);
 __common__ __attribute__((deprecated)) void music_stop (const audio_track_t track);
-__common__ void music_stop_all (void);
 
 /* Really new sound system */
 

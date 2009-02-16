@@ -25,9 +25,7 @@ void bonus_deff (void)
 {
 	extern U8 door_panels_started;
 
-	music_stop_all ();
-	music_set (MUS_FADE_BONUS);
-
+	music_effect_start (MUS_FADE_BONUS, 0);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 8, "BONUS");
 

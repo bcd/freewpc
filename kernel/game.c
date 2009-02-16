@@ -128,7 +128,6 @@ void amode_stop (void)
 	deff_stop_all ();
 	leff_stop_all ();
 	lamp_all_off ();
-	music_stop_all ();
 	callset_invoke (amode_stop);
 }
 
