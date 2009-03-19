@@ -270,8 +270,8 @@ void sol_req_rtt (void)
 				finish. */
 				/* TODO - this form of call appears frequently : macro? */
 				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
-				req_lock = 0;
 				sol_req_state = REQ_IDLE;
+				req_lock = 0;
 			}
 		}
 		else if (sol_req_state == REQ_DUTY)
