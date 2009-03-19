@@ -197,16 +197,18 @@ void sol_request_async (U8 sol)
 
 
 /**
- * Make a solenoid request, and wait it to finish before returning.
+ * Make a solenoid request, and wait for it to finish before returning.
  */
 void sol_request (U8 sol)
 {
+	/* TODO : If coils are disabled, then just return. */
+
 	/* Wait until any existing sync requests are finished. */
 	while (req_lock)
 		task_sleep (TIME_33MS);
 
 	/* Acquire the lock for this solenoid. */
-	req_lock = sol;
+	req_lock = sol; /* TODO - what if sol == 0 ? */
 
 	/* Issue the request */
 	sol_request_async (sol);
@@ -217,8 +219,20 @@ void sol_request (U8 sol)
 }
 
 
+extern inline void sol_req_on (void)
+{
+	writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
+}
+
+
+extern inline void sol_req_off (void)
+{
+	writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
+}
+
+
 /**
- * Handle solenoid requests every 1ms.
+ * Handle solenoid requests in realtime, every 1ms.
  *
  * The lifecycle of the request manager is as follows:
  *
@@ -242,7 +256,7 @@ void sol_req_rtt (void)
 		if (zc_get_timer () == 2)
 		{
 			sol_req_timer = req_on_time;
-			writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
+			sol_req_on ();
 			sol_req_state = REQ_ON;
 		}
 	}
@@ -268,8 +282,7 @@ void sol_req_rtt (void)
 				/* Switch to IDLE.  Ensure the coil is off.
 				Release any process waiting on this solenoid to
 				finish. */
-				/* TODO - this form of call appears frequently : macro? */
-				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
+				sol_req_off ();
 				req_lock = 0;
 				sol_req_state = REQ_IDLE;
 			}
@@ -279,12 +292,12 @@ void sol_req_rtt (void)
 			if ((sol_req_timer & sol_duty_mask) == 0)
 			{
 				/* Occasionally turn on the coil */
-				writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
+				sol_req_on ();
 			}
 			else
 			{
 				/* Most of the time, keep it off */
-				writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
+				sol_req_off ();
 			}
 		}
 	}
