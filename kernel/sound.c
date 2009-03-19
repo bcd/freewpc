@@ -448,7 +448,7 @@ CALLSET_ENTRY (sound, factory_reset)
 
 CALLSET_ENTRY (sound, music_refresh)
 {
-	if (deff_get_active () == DEFF_VOLUME_CHANGE)
+	if (!in_game && (deff_get_active () == DEFF_VOLUME_CHANGE))
 		music_request (MACHINE_VOLUME_CHANGE_MUSIC, PRI_VOLUME_CHANGE_MUSIC);
 }
 
