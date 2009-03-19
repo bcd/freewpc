@@ -111,6 +111,8 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
 				{
 					music_refresh ();
 				}
+				/* TODO - when supporting sound strings, this would cue
+				 * the next sample */
 			}
 		}
 	}
@@ -131,7 +133,7 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
  *
  * DURATION says how long the sound will take to complete.
  *    If zero, the sound could be preempted at any time and is
- *    not tracked.  Otherwise, the channel is used for the
+ *    not tracked.  Otherwise, the channel used for the
  *    sound cannot be used by any other sound effects in the
  *    meantime.
  *
