@@ -250,7 +250,7 @@ CALLSET_ENTRY (sound, idle_every_100ms)
 #if 1
 	U8 in;
 	/* TODO : do something like this elsewhere for sound syncing */
-	if (sys_init_complete
+	if (!sys_init_pending_tasks
 		&& !queue_empty_p ((queue_t *)&sound_read_queue))
 	{
 		in = queue_remove ((queue_t *)&sound_read_queue, SOUND_QUEUE_LEN);
