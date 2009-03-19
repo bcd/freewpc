@@ -8,20 +8,35 @@
 
 while (<>) {
 	chomp;
+	# Remove comments to the end of line
 	s/;.*$//;
+
+	# Canonicalize local labels so they all look alike.
 	s/L[0-9]+/Lxx/;
 	s/LC[0-9]+/LCxx/;
 
+	# If this is a .globl directive, it tells us the name of the
+	# function being defined.
 	if (/[ \t]*\.globl[ \t]+(.*)$/) {
 		$symbol = $1;
 	}
+
+	# If it has a data directive in it, then ignore it; we only
+	# care about code.
 	elsif (/[ \t]*\.(byte|word|blkb|module|area|ascii)/) {}
+
+	# Skip blank lines
 	elsif (/^[ \t]*$/) {}
+
+	# Anything else is considered valid code.  Add a function to
+	# the function definition.
 	else {
 		$def{$symbol} .= "$_\n";
 	}
 }
 
+
+# Now iterate through all functions seen
 for $symbol (sort (keys %def)) {
 	next if $symbol =~ /^[^_]/;
 	my @lines = split /\n+/, $def{$symbol};
