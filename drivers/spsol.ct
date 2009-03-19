@@ -24,6 +24,13 @@
  * TODO - Gottlieb System 3 games will disable slingshots that
  * are firing too rapidly as a safety feature; perhaps this should
  * be added here?
+ *
+ * The parameters are:
+ * sw - the switch number that triggers it
+ * sol - the solenoid/coil that gets fired automatically
+ * ontime - how long the coil is kept on
+ * offtime - how long the coil is kept off after it was fired, before
+ * 	polling the switch again.  This prevents constant lock-on.
  */
 
 @@class spsol
@@ -109,8 +116,16 @@ extern inline void @self_service (void)
 #include <freewpc.h>
 #include <@self.h>
 
+/** We keep two bitarrays to track all special solenoids.
+ * The 'enables' are software controlled and allow the
+ * solenoids to be disabled.  The 'running' entries say
+ * for each coil whether it is in its on or off phase. */
+
 @@classvar __fastram__ U8 @class_enables;
 @@classvar __fastram__ U8 @class_running;
+
+/* The time until the current phase expires */
+
 __fastram__ U8 @self_timer;
 
 /* Initialize the device */
