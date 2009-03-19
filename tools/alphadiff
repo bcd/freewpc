@@ -1,19 +1,33 @@
 #!/bin/sh
 
-dir1=asm-4.3.2
-dir2=asm-4.4.0
+ver1=4.3.3
+ver2=4.4.0
 
-#make clean
-#make GCC_VERSION=3.4.6 MACHINE=tz SAVE_ASM=y FREE_ONLY=y FREEWPC_DEBUGGER=y FREEWPC_IRQPROFILE=n SYSTEM_MAJOR=0 SYSTEM_MINOR=10
-#cp -p *.s $dir1
+recompile ()
+{
+	make clean
+	mkdir -p asm-$1
+	rm -f asm-$1/*.s
+	make GCC_VERSION=$1 SAVE_ASM=y
+	mv *.s asm-$1
+}
 
-#make clean
-#make GCC_VERSION=trunk MACHINE=tz SAVE_ASM=y OPT=-O2 EXTRA_CFLAGS=-DGCC4 FREE_ONLY=y FREEWPC_DEBUGGER=y FREEWPC_IRQPROFILE=n SYSTEM_MAJOR=0 SYSTEM_MINOR=10
-#cp -p *.s $dir2
-
-for dir in `echo $dir1 $dir2`; do
-	cd $dir
-	../tools/alphaglob *.s > ag
-	cd - >/dev/null 2>&1
+while [ "$1" != "" ]; do
+	arg=$1; shift
+	case $arg in
+		*)
+			ver1=$arg
+			ver2=$1; shift
+			;;
+	esac
 done
-diff -w $dir1/ag $dir2/ag > DIFFS.ag
+
+#recompile $ver1
+#recompile $ver2
+
+cd asm-$ver1 && ../tools/alphaglob *.s > tmp-$ver1
+cd ..
+cd asm-$ver2 && ../tools/alphaglob *.s > tmp-$ver2
+cd ..
+# vimdiff asm-$ver1/tmp-$ver1 asm-$ver2/tmp-$ver2
+diff -w asm-$ver1/tmp-$ver1 asm-$ver2/tmp-$ver2 > DIFFS.$ver1-$ver2
