@@ -94,10 +94,17 @@ _dmd_memset:
 
 	puls	y,u,pc
 
+
+	;--------------------------------------------------------
+	;
+	; void dmd_copy_asm (void *dst, const void *src);
+	;
+	; X = pointer to destination buffer
+	; top of stack = pointer to source buffer
+	;
+	;--------------------------------------------------------
 	.globl _dmd_copy_asm
 _dmd_copy_asm:
-	; X = destination
-	; stack ptr = source
 	pshs	u,y
 
    ; Get the source pointer off the stack
@@ -113,7 +120,6 @@ _dmd_copy_asm:
 	; Do all of this 4 times to transfer a total of 16 bytes.
 	; U moves automatically throughout; X is adjusted
 	; forward once at the end of each block.
-	; TODO - verify order of stores is correct
 	pulu	d,y
 	std	,x
 	sty	2,x
@@ -136,15 +142,21 @@ _dmd_copy_asm:
 	;
 	; void frame_decode_rle_asm (void *src);
 	;
-	; X = pointer to source image data
+	; X = pointer to compressed source image data
 	;
 	;--------------------------------------------------------
 	.globl _frame_decode_rle_asm
 _frame_decode_rle_asm:
 	pshs	u
+
+	; Decoding is always done to the low mapped buffer.
 	ldu	#DMD_LOW_BASE
 
 rle_loop:
+	; The main loop reads 16-bit at a time.  If the upper 8-bits
+	; is 0xA8, that indicates a special macro sequence follows.
+	; This value was chosen because it is unlikely to appear in
+	; actual image data.  Otherwise the data is just copied.
 	ldd	,x++
 	cmpa	#0xA8
 	beq	rle_run
@@ -155,9 +167,16 @@ rle_done:
 	puls	u,pc
 
 rle_run:
+	; Here, a macro sequence has been started (0xA8).  The second
+	; byte tells us what to do.
 	tstb
-	beq	rle_escape
-	bmi	rle_done
+	beq	rle_escape        ; Zero = escape character
+	bmi	rle_done          ; Any negative value = end-of-image
+
+	; Positive values indicate the run-length count.  The actual
+	; byte count must be EVEN.  The value here is that divided by 2;
+	; i.e. the number of 16-bit words which follow.  One more byte
+	; must be read, which says what the data value is.
 	stb	*m0
 	lda	,x+
 	tfr	a,b
@@ -169,6 +188,10 @@ rle_run_loop:
 	bra	rle_loop
 
 rle_escape:
+	; A negative count means that 0xA8 really was the image data.
+	; Read a third byte to see what should follow it.
+	; (For example, a word of 0xA8BF in the image data would be
+	; encoded as 0xA8 0x80 0xBF.)
 	ldb	,x+
 	std	,u++
 	bra	rle_loop
