@@ -320,8 +320,20 @@ Disable Goalie: yes_no, NO
 
 [scores]
 730:
+5:
 10K:
+25K:
+50K:
+100K:
+200K:
+250K:
+500K:
+750K:
 1M:
+1500K:
+2M:
+2500K:
+3M:
 
 [highscores]
 
@@ -343,7 +355,7 @@ Goalie Moving:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
-Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1
+Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE
 
 NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
 NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
