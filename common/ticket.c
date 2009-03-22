@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* TODO - I have no idea how this ticket I/O really works */
+
 #include <freewpc.h>
 
 U8 ticket_out_count;

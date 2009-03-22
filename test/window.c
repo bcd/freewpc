@@ -73,6 +73,8 @@
 
 #undef CONFIG_TEST_DURING_GAME
 
+#define MAX_WIN_STACK 6
+
 /** win_top always points to the current window, or NULL if
  * no window is open. */
 struct window *win_top;
@@ -86,7 +88,7 @@ __fastram__ U8 in_test;
 /* The window stack keeps track of where you came from, so when you
  * exit a menu/window/whatever, you can go back to where you started.
  * There is a maximum depth here, which should be sufficient. */
-struct window win_stack[8];
+struct window win_stack[MAX_WIN_STACK];
 
 
 /** Push the first window onto the stack.  This ends any game in progress
@@ -173,7 +175,7 @@ void window_push (struct window_ops *ops, void *priv)
 		window_push_first ();
 		win_top = &win_stack[0];
 	}
-	else if (win_top < &win_stack[8])
+	else if (win_top < &win_stack[MAX_WIN_STACK])
 	{
 		win_top++;
 	}
