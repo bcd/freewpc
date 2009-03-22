@@ -92,6 +92,11 @@ U16 switch_last_service_time;
 /** The switch number of the last switch to be scheduled. */
 U8 sw_last_scheduled;
 
+/** Nonzero if a switch short was detected and switches need to be
+ * ignored for some time.  The value indicates the number of
+ * seconds to ignore switches. */
+U8 sw_short_timer;
+
 
 /** Return the switch table entry for a switch */
 const switch_info_t *switch_lookup (const switchnum_t sw)
@@ -115,20 +120,13 @@ U8 switch_lookup_lamp (const switchnum_t sw)
 void switch_short_detect (void)
 {
 	U8 n;
-	U8 row = 0;
 
 	n = sw_raw[0] & sw_raw[1] & sw_raw[2] & sw_raw[3] &
 		sw_raw[4] & sw_raw[5] & sw_raw[6] & sw_raw[7];
-	/* Each bit in 'n' represents a row that is shorted. */
-	while (n != 0)
+	if (n != 0)
 	{
-		if (n & 1)
-		{
-			dbprintf ("Row %d short detected\n", row);
-			/* TODO - ignore this row briefly */
-		}
-		n >>= 1;
-		row++;
+		dbprintf ("Row short\n", n);
+		sw_short_timer = 3;
 	}
 
 	for (n = 0; n < 8; n++)
@@ -136,8 +134,8 @@ void switch_short_detect (void)
 		if (sw_raw[n] == ~mach_opto_mask[n])
 		{
 			/* The nth column is shorted. */
-			dbprintf ("Column %d short detected\n", row);
-			/* TODO - ignore this column briefly */
+			dbprintf ("Column short\n");
+			sw_short_timer = 3;
 		}
 	}
 }
@@ -463,18 +461,17 @@ void switch_sched_task (void)
 	{
 		callset_invoke (any_pf_switch);
 
+		/* If valid playfield not asserted yet, then see if this
+		 * switch validates it.  Most switches do this right
+		 * away; for other switches, like special solenoids,
+		 * queue the transition and maybe validate if some number
+		 * of different switches have triggered. */
 		if (!valid_playfield)
 		{
 			if (swinfo->flags & SW_NOVALID)
-			{
 				try_validate_playfield (sw);
-			}
 			else
-			{
-				/* Normally, mark valid playfield right away
-				 * for most switches */
 				set_valid_playfield ();
-			}
 		}
 		ball_search_timer_reset ();
 	}
@@ -597,8 +594,7 @@ void switch_service_queue (void)
 		elapsed_time = 150;
 	}
 
-	/* Check for shorted switch rows/columns.  TODO : this should return a
-	 * value, and we skip rest of processing if there are problems.
+	/* Check for shorted switch rows/columns.
 	 * Note this check used to be done every call to switch_idle, by
 	 * moving it here, it is only done every few ms instead. */
 	switch_short_detect ();
@@ -726,6 +722,10 @@ CALLSET_ENTRY (switch, idle)
 	extern U8 sys_init_complete;
 	U8 rows;
 
+	/* If there are row/column shorts, ignore the switch matrix. */
+	if (sw_short_timer)
+		return;
+
 	/* Prior to system initialization, switches are not serviced.
 	Any switch closures during this time continue to be queued up.
 	However, at the least, allow the coin door switches to be polled. */
@@ -803,9 +803,25 @@ CALLSET_ENTRY (switch, init_complete)
 }
 
 
+/** Once per second, see if we had disabled switch scanning
+ * due to a short, and it should be reenabled now.  This
+ * is not accurately timed: it may range from 2.1 to 3s of
+ * disabled time. */
+CALLSET_ENTRY (switch, idle_every_second)
+{
+	if (sw_short_timer > 0)
+	{
+		sw_short_timer--;
+	}
+}
+
+
 /** Initialize the switch subsystem */
 void switch_init (void)
 {
+	/* Initialize the short timer so switch scanning is enabled */
+	sw_short_timer = 0;
+
 	/* Initialize the switch state buffers */
 	memcpy (sw_logical, mach_opto_mask, SWITCH_BITS_SIZE);
 	memset (sw_edge, 0, sizeof (switch_bits_t));
