@@ -62,6 +62,9 @@ struct area_csum highscore_csum_info = {
 };
 
 
+__permanent__ U8 hs_reset_counter1, hs_reset_counter2;
+
+
 /* During high score entry, indicates the table position to insert at */
 U8 high_score_position;
 
@@ -176,6 +179,15 @@ void high_score_draw_34 (void)
 }
 
 
+void high_score_check_reset (void)
+{
+	/* Initialize the counters that will force a reset
+	 * automatically after some time */
+	hs_reset_counter1 = hstd_config.hs_reset_every;
+	hs_reset_counter2 = 250;
+}
+
+
 /** Reset all of the high scores, including the grand champion,
  * to default values */
 void high_score_reset (void)
@@ -192,6 +204,9 @@ void high_score_reset (void)
 	memcpy (high_score_initials, default_high_score_initials,
 		HIGH_SCORE_NAMESZ * NUM_HIGH_SCORES);
 	wpc_nvram_put ();
+
+	/* Reset when the next auto-reset will occur */
+	high_score_check_reset ();
 }
 
 
@@ -225,8 +240,29 @@ void hsentry_deff (void)
 }
 
 
+/** Check if the high scores need to be reset automatically.
+ * Called during game start. */
 void high_score_reset_check (void)
 {
+	dbprintf ("High score reset check: %02X %02X\n",
+		hs_reset_counter1, hs_reset_counter2);
+
+	/* If the counters are invalid, factory reset them */
+	if (hs_reset_counter1 == 0 || hs_reset_counter2 == 0)
+		high_score_check_reset ();
+
+	/* Decrement the counters.  If we hit zero,
+	 * restore to maximum and actually reset the high
+	 * scores */
+	if (--hs_reset_counter2 == 0)
+	{
+		hs_reset_counter2 = 250;
+		if (--hs_reset_counter1 == 0)
+		{
+			hs_reset_counter1 = hstd_config.hs_reset_every;
+			high_score_reset ();
+		}
+	}
 }
 
 
