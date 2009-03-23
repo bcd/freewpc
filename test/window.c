@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -104,13 +104,13 @@ void window_push_first (void)
 		/* Stop tasks that should run only until end-of-game. */
 		task_remove_duration (TASK_DURATION_GAME);
 		task_duration_expire (TASK_DURATION_GAME);
-
-		/* Reset sound, but delay a little to allow the reset
-		 * to finish before we attempt to play the 'enter' sound
-		 * later. */
-		sound_reset ();
-		task_sleep (TIME_100MS);
 	}
+
+	/* Reset sound, but delay a little to allow the reset
+	 * to finish before we attempt to play the 'enter' sound
+	 * later. */
+	sound_reset ();
+	task_sleep (TIME_100MS);
 	callset_invoke (test_start);
 }
 
