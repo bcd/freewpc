@@ -31,23 +31,26 @@ bool score_update_needed;
 void scores_draw_ball (void)
 {
 #if (MACHINE_DMD == 1)
-#if defined (CONFIG_TIMED_GAME)
-	U8 time_minutes, time_seconds;
-	time_minutes = 0;
-	time_seconds = timed_game_timer;
-	while (time_seconds >= 60)
+	if (config_timed_game)
 	{
-		time_minutes++;
-		time_seconds -= 60;
+		U8 time_minutes, time_seconds;
+		time_minutes = 0;
+		time_seconds = timed_game_timer;
+		while (time_seconds >= 60)
+		{
+			time_minutes++;
+			time_seconds -= 60;
+		}
+		sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
+		font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 	}
-	sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
-	font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-#else
-	credits_render ();
-	font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
-	sprintf ("BALL %1i", ball_up);
-	font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
-#endif
+	else
+	{
+		credits_render ();
+		font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
+		sprintf ("BALL %1i", ball_up);
+		font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
+	}
 #else
 	sprintf ("BALL %1i", ball_up);
 	seg_write_string (1, 10, sprintf_buffer);
