@@ -91,6 +91,7 @@ void ballsave_launch (void)
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
 	deff_start (DEFF_BALL_SAVE);
+
 	if (config_timed_game)
 		timed_game_extend (2);
 }
@@ -143,7 +144,12 @@ CALLSET_ENTRY (ballsave, single_ball_play)
  */
 CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 {
-	if (ballsave_test_active ())
+	if (config_timed_game && timed_game_timer > 0)
+	{
+		ballsave_launch ();
+		return FALSE;
+	}
+	else if (ballsave_test_active ())
 	{
 		ballsave_launch ();
 		return FALSE;
