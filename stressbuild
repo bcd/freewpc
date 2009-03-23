@@ -27,7 +27,7 @@ esac
 rm -f stressbuild.log
 for native in $native_options; do
 	if [ "$native" = "y" ]; then
-		NATIVE=y; export NATIVE
+		NATIVE=y
 	else
 		unset NATIVE
 	fi
@@ -51,6 +51,7 @@ for native in $native_options; do
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
+					export NATIVE
 					make -j3 $target 2>&1 > /dev/null
 					rc="$?"
 
