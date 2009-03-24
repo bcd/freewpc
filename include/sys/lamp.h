@@ -145,6 +145,14 @@ extern inline bool flag_test (const U8 f)
 #define lamp_tristate_flash(lamp) \
 	do { lamp_flash_on(lamp); lamp_off(lamp); } while (0)
 
+#define lamp_on_if(lamp, pred) \
+	if (pred) { lamp_tristate_on (lamp); } \
+	else { lamp_tristate_off (lamp); }
+
+#define lamp_flash_if(lamp, pred) \
+	if (pred) { lamp_tristate_flash (lamp); } \
+	else { lamp_tristate_off (lamp); }
+
 void lamp_update_request (void);
 
 void bit_on (bitset matrix, U8 bit);
