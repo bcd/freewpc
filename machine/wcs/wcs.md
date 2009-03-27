@@ -26,136 +26,70 @@ define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 
 [lamps]
-11: noname, x(39), y(12)
-12: noname, x(37), y(11)
-13: noname, x(35), y(10)
-14: noname, x(33), y( 9)
-15: noname, x(31), y( 8)
-16: noname, x(29), y( 7)
-17: noname, x(27), y( 6)
-18: noname, x(25), y( 5)
-21: noname, x(36), y(13)
-22: noname, x(34), y(13)
-23: noname, x(32), y(13)
-24: noname, x(30), y(13)
-25: noname, x(27), y(12)
-26: noname, x(25), y(11)
-27: noname, x(23), y(12)
-28: noname, x(21), y(11)
-31: noname, x(16), y(16)
-32: noname, x(17), y(18)
-33: noname, x(31), y(16)
-34: noname, x(29), y(17)
-35: noname, x(26), y(14)
-36: noname, x(24), y(14)
-37: noname, x(21), y(13)
-38: noname, x(14), y( 9)
-41: noname, x(38), y( 1)
-42: noname, x(36), y( 1)
-43: noname, x(34), y( 1)
-44: noname, x(19), y(20)
-45: noname, x(21), y(19)
-46: noname, x(25), y(18)
-47: noname, x(27), y(18)
-48: noname, x(3), y(15)
-51: noname, x(8), y(12)
-52: noname, x(7), y(14)
-53: noname, x(6), y(11)
-54: noname, x(5), y(15)
-55: noname, x(29), y(21)
-56: noname, x(35), y(22)
-57: noname, x(43), y(17)
-58: noname, x(38), y(24)
-61: noname, x(19), y( 6)
-62: noname, x(19), y( 2)
-63: noname, x(21), y( 3)
-64: noname, x(23), y( 4)
-65: noname, x(21), y( 7)
-66: noname, x(1), y(17)
-67: noname, x(1), y(19)
-68: noname, x(30), y(25)
-71: noname, x(16), y( 4)
-72: noname, x(19), y(17)
-73: noname, x(43), y( 7)
-74: noname, x(35), y( 3)
-75: noname, x(30), y( 4)
-76: noname, x(16), y( 6)
-77: noname, x(16), y(20)
-78: noname, x(16), y( 5)
-81: noname, x(10), y(13)
-82: noname, x(13), y(12)
-83: noname, x(16), y(13)
-84: noname, x(19), y(14)
-85: noname, x(26), y(25)
-86: noname, x(28), y(25)
-87: noname, x(45), y(21)
-88: noname, x(45), y( 3)
-
-[lamps]
-11: Chicago P, purple
-12: Dallas U, purple
-13: Boston C, purple
-14: New York D, purple
-15: Orlando L, purple
-16: Washington R, purple
-17: San Francisco O, purple
-18: Detroit W, purple
-21: 1 Goal, yellow
-22: 2 Goals, yellow
-23: 3 Goals, yellow
-24: 4 Goals, yellow
-25: Ball Speed, white
-26: Ball Strength, white
-27: Ball Stamina, white
-28: L. Ticket Half
-31: Free Kick, yellow
-32: TV Award, white
-33: Ultra Goalie, white
-34: Ultra Ramps, white
-35: Ball Spirit, white
-36: Ball Skill, white
-37: R. Ticket Half
-38: Tackle, blue
-41: Kickback Lower, green
-42: Kickback Center, green
-43: Kickback Upper, green
-44: R. Ramp Build, white
-45: R. Ramp Lock, yellow
-46: Ultra Spinner, white
-47: Ultra Jets, white
-48: Striker, red
-51: Goal Jackpot, red
-52: Extra Ball, red
-53: Goal, yellow
-54: Striker Build, white
-55: Light Magna Goalie
-56: R. Flipper Lane
-57: Shoot Again, red, extra-ball
-58: Special, red
-61: L. Ramp Build, white
-62: L. Loop Build, white
-63: Travel, yellow
-64: World Cup Final, red
-65: L. Ramp Lock, yellow
-66: Top Lane Left, purple
-67: Top Lane Right, purple
-68: Skill Lower, yellow
-71: Light Jackpots, red
-72: Final Draw, white
-73: Magna Goalie, orange
-74: Left Inlane
-75: Light Kickback, green
-76: L. Ramp Ticket, purple
-77: R. Ramp Ticket, purple
-78: Ultra Ramp Collect, yellow
-81: Rollover 1, red
-82: Rollover 2, red
-83: Rollover 3, red
-84: Rollover 4, red
-85: Skill Top, yellow
-86: Skill Middle, yellow
-87: Buy-In Button, green, buyin, cabinet
-88: Start Button, yellow, start, cabinet
+11: Chicago P, purple, x(39), y(12)
+12: Dallas U, purple, x(37), y(11)
+13: Boston C, purple, x(35), y(10)
+14: New York D, purple, x(33), y( 9)
+15: Orlando L, purple, x(31), y( 8)
+16: Washington R, purple, x(29), y( 7)
+17: San Francisco O, purple, x(27), y( 6)
+18: Detroit W, purple, x(25), y( 5)
+21: 1 Goal, yellow, x(36), y(13)
+22: 2 Goals, yellow, x(34), y(13)
+23: 3 Goals, yellow, x(32), y(13)
+24: 4 Goals, yellow, x(30), y(13)
+25: Ball Speed, white, x(27), y(12)
+26: Ball Strength, white, x(25), y(11)
+27: Ball Stamina, white, x(23), y(12)
+28: L. Ticket Half, x(21), y(11)
+31: Free Kick, yellow ,x(16), y(16)
+32: TV Award, white , x(17), y(18)
+33: Ultra Goalie, white , x(31), y(16)
+34: Ultra Ramps, white , x(29), y(17)
+35: Ball Spirit, white , x(26), y(14)
+36: Ball Skill, white , x(24), y(14)
+37: R. Ticket Half , x(21), y(13)
+38: Tackle, blue , x(14), y( 9)
+41: Kickback Lower, green , x(38), y( 1)
+42: Kickback Center, green , x(36), y( 1)
+43: Kickback Upper, green , x(34), y( 1)
+44: R. Ramp Build, white , x(19), y(20)
+45: R. Ramp Lock, yellow , x(21), y(19)
+46: Ultra Spinner, white , x(25), y(18)
+47: Ultra Jets, white , x(27), y(18)
+48: Striker, red , x(3), y(15)
+51: Goal Jackpot, red , x(8), y(12)
+52: Extra Ball, red , x(7), y(14)
+53: Goal, yellow , x(6), y(11)
+54: Striker Build, white , x(5), y(15)
+55: Light Magna Goalie , x(29), y(21)
+56: R. Flipper Lane , x(35), y(22)
+57: Shoot Again, red, extra-ball , x(43), y(17)
+58: Special, red , x(38), y(24)
+61: L. Ramp Build, white , x(19), y( 6)
+62: L. Loop Build, white , x(19), y( 2)
+63: Travel, yellow , x(21), y( 3)
+64: World Cup Final, red , x(23), y( 4)
+65: L. Ramp Lock, yellow , x(21), y( 7)
+66: Top Lane Left, purple , x(1), y(17)
+67: Top Lane Right, purple , x(1), y(19)
+68: Skill Lower, yellow , x(30), y(25)
+71: Light Jackpots, red , x(16), y( 4)
+72: Final Draw, white , x(19), y(17)
+73: Magna Goalie, orange , x(43), y( 7)
+74: Left Inlane , x(35), y( 3)
+75: Light Kickback, green, x(30), y( 4)
+76: L. Ramp Ticket, purple, x(16), y( 6)
+77: R. Ramp Ticket, purple, x(16), y(20)
+78: Ultra Ramp Collect, yellow, x(16), y( 5)
+81: Rollover 1, red, x(10), y(13)
+82: Rollover 2, red, x(13), y(12)
+83: Rollover 3, red, x(16), y(13)
+84: Rollover 4, red, x(19), y(14)
+85: Skill Top, yellow, x(26), y(25)
+86: Skill Middle, yellow, x(28), y(25)
+87: Buy-In Button, green, buyin, cabinet, x(45), y(21)
+88: Start Button, yellow, start, cabinet, x(45), y( 3)
 
 [switches]
 11: Unused
@@ -320,13 +254,15 @@ Disable Goalie: yes_no, NO
 
 [scores]
 730:
-5:
+5K:
 10K:
 25K:
 50K:
 100K:
 200K:
 250K:
+300K:
+400K:
 500K:
 750K:
 1M:
