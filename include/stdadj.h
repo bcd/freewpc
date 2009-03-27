@@ -112,6 +112,16 @@ typedef struct
 
 extern __nvram__ std_adj_t system_config;
 
+/**
+ * Use CONFIG_TIMED_GAME for a compile-time conditional
+ * for things that need to be included in a timed game.
+ *
+ * Use config_timed_game for a runtime check to see if
+ * a timed game is in progress.  The difference is, it is
+ * possible to build a program with no timed game support
+ * at all; it is also possible to turn it off even if
+ * compiled in via adjustment.
+ */
 #ifdef CONFIG_TIMED_GAME
 #define config_timed_game (system_config.timed_game)
 #else
