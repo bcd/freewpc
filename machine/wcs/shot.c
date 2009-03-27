@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -63,7 +63,7 @@ CALLSET_ENTRY (shot, dev_goal_popper_kick_attempt)
 
 void ramp_enter (void)
 {
-	sound_send (SND_ASTHMA_ATTACK);
+	sound_start (ST_SAMPLE, SND_ASTHMA_ATTACK, SL_2S, PRI_GAME_QUICK1);
 }
 
 CALLSET_ENTRY (shot, sw_l_ramp_enter)
@@ -86,11 +86,13 @@ CALLSET_ENTRY (shot, sw_l_ramp_diverted)
 {
 	/* TODO - be careful, cannot ask for more than 4s of this API */
 	free_timer_restart (TIM_IGNORE_R_RAMP_EXIT, TIME_4S);
+	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
 	callset_invoke (left_ramp_shot);
 }
 
 CALLSET_ENTRY (shot, sw_l_ramp_exit)
 {
+	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
 	callset_invoke (left_ramp_shot);
 }
 
@@ -98,6 +100,7 @@ CALLSET_ENTRY (shot, sw_r_ramp_exit)
 {
 	if (!free_timer_test (TIM_IGNORE_R_RAMP_EXIT))
 	{
+		sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
 		callset_invoke (right_ramp_shot);
 	}
 	else
@@ -134,10 +137,9 @@ CALLSET_ENTRY (shot, sw_kickback)
 }
 
 
-CALLSET_ENTRY (shot, sw_left_jet, sw_upper_jet, sw_lower_jet)
-{
-	sound_start (ST_SAMPLE, SND_JET_BUMPER, SL_500MS, PRI_GAME_QUICK4);
-}
+/*
+ * Start sound effects for the simple switches
+ */
 
 CALLSET_ENTRY (shot, sw_left_slingshot, sw_right_slingshot)
 {
@@ -155,4 +157,9 @@ CALLSET_ENTRY (shot, sw_left_flipper_lane, sw_right_flipper_lane)
  * the travel lane switch: bounceback off loop gate
  * back onto switch, etc.
  */
+
+CALLSET_ENTRY (shot, sw_travel_lane)
+{
+	callset_invoke (left_loop_shot);
+}
 

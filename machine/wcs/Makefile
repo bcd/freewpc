@@ -60,7 +60,8 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
 	shot.o lock.o driver.o kickback.o freekick.o \
-	toplane.o newmatch.o deffs.o
+	toplane.o deffs.o jets.o goal_round.o \
+	combo.o multiball.o tv.o leffs.o mode.o ultra.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 

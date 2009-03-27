@@ -38,8 +38,15 @@ CALLSET_ENTRY (pity, any_pf_switch)
 
 CALLSET_ENTRY (pity, sw_spinner_slow)
 {
-	sound_send (SND_SPINNER);
-	score (SC_10K);
+	if (lamp_flash_test (LM_ULTRA_SPINNER))
+	{
+		score (SC_50K);
+	}
+	else
+	{
+		score (SC_10K);
+		sound_send (SND_SPINNER);
+	}
 }
 
 
@@ -51,7 +58,7 @@ CALLSET_ENTRY (pity, dev_left_eject_kick_attempt, dev_right_eject_kick_attempt, 
 
 CALLSET_ENTRY (pity, dev_tv_popper_kick_attempt)
 {
-	sound_start (ST_SAMPLE, SND_DRIBBLE, SL_1S, PRI_GAME_QUICK3);
+	sound_start (ST_SAMPLE, SND_TV_KICKOUT, SL_1S, PRI_GAME_QUICK3);
 }
 
 CALLSET_ENTRY (pity, dev_goal_popper_kick_attempt)
@@ -60,18 +67,16 @@ CALLSET_ENTRY (pity, dev_goal_popper_kick_attempt)
 }
 
 
-CALLSET_ENTRY (pity, sw_skill_front)
+CALLSET_ENTRY (pity, sw_skill_shot_front, sw_skill_shot_rear)
 {
+	sound_start (ST_SAMPLE, SND_DING1, SL_500MS, PRI_GAME_QUICK6);
+	sound_start (ST_SPEECH, SND_CROWD_AWW, SL_2S, PRI_GAME_QUICK4);
 }
 
-CALLSET_ENTRY (pity, sw_skill_center)
+CALLSET_ENTRY (pity, sw_skill_shot_center)
 {
 	sound_start (ST_MUSIC, MUS_SKILL_SHOT_CITY, SL_1S, PRI_GAME_QUICK6);
-	sound_start (ST_SPEECH, SND_CROWD_CHEER, SL_2S, PRI_GAME_QUICK6);
-}
-
-CALLSET_ENTRY (pity, sw_skill_rear)
-{
+	sound_start (ST_SPEECH, SND_CROWD_CHEER, SL_2S, PRI_GAME_QUICK4);
 }
 
 CALLSET_ENTRY (pity, sw_rollover_1)

@@ -28,9 +28,11 @@ void free_kick_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("%d KICKS", free_kicks);
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 5, sprintf_buffer);
+	sprintf_score (score_deff_get ());
+	font_render_string_center (&font_fixed6, 64, 15, sprintf_buffer);
 	sprintf ("NEXT SHOT = %dX", free_kick_multiplier);
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 25, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

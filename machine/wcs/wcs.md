@@ -222,6 +222,7 @@ Green Lamps: COLOR:green
 Blue Lamps: COLOR:blue
 Purple Lamps: COLOR:purple
 Circle Out: PF:lamp_sort_circle_out
+Build Up: PF:lamp_sort_bottom_to_top
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
@@ -274,17 +275,21 @@ Disable Goalie: yes_no, NO
 [highscores]
 
 [flags]
-L. Ramp Light Mode:
-R. Ramp Light Mode:
-5 Man MB Lit:
-Final Draw MB Running:
 5 Man MB Running:
-L. Loop Build:
-L. Ramp Build:
-Striker Build:
-R. Ramp Build:
 Divert Ramp:
 Lock Magnet Enable:
+
+Goal Lit:
+
+Multiball Lit:
+Multiball Running:
+Left Eject Lock:
+Right Eject Lock:
+Jackpot Lit:
+Super Jackpot Lit:
+
+TV Lit:
+Mode Lit:
 
 [globalflags]
 Goalie Moving:
@@ -293,13 +298,11 @@ Goalie Moving:
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE
 
-NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
-NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
-
+#NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
+#NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
 #MyMode Starting: page(MACHINE_PAGE), PRI_GAME_QUICK6
 #MyMode Running: page(MACHINE_PAGE), PRI_GAME_MODE2
 #MyMode Ending: page(MACHINE_PAGE), PRI_GAME_QUICK6
-
 #Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
 #Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
 #Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
@@ -308,11 +311,32 @@ NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
 #Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
 #Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
+Combo: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_SCORE+D_RESTARTABLE
+
+Jet: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
 Lightning Test: page(MACHINE_PAGE), PRI_GAME_QUICK1
+
+Goal Lit: page(MACHINE_PAGE), PRI_GAME_QUICK2
+Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE4
+
+Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
+Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Multiball Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5
+Multiball Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
+Multiball Super Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK8
+Multiball Spinner: page(MACHINE_PAGE), PRI_GAME_QUICK6
+
+Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2
+Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 # Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
+Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
+Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 
 [fonts]
 

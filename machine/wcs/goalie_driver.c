@@ -53,6 +53,9 @@ U8 goalie_calibration_timer;
 
 U8 goalie_errors;
 
+U8 goalie_alloc_prio;
+
+
 void goalie_command (U8 command)
 {
 	goalie_status = command;
@@ -66,6 +69,16 @@ void goalie_command (U8 command)
 		goalie_stop ();
 	}
 }
+
+void goalie_alloc (U8 prio)
+{
+}
+
+
+void goalie_free (U8 prio)
+{
+}
+
 
 void goalie_test_toggle (void)
 {
@@ -167,6 +180,7 @@ void goalie_recalibrate (void)
 	goalie_errors = 0;
 	goalie_position = GOALIE_LOST;
 	goalie_calibration_timer = 5;
+	goalie_alloc_prio = 0;
 	goalie_command (GOALIE_MOVING | GOALIE_CALIBRATING);
 }
 

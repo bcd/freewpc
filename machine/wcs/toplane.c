@@ -3,6 +3,8 @@
 
 void toplane_complete (void)
 {
+	score (SC_100K);
+
 	task_sleep (TIME_500MS);
 	sound_start (ST_MUSIC, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK7);
 	lamplist_apply (LAMPLIST_TOP_LANES, lamp_off);
@@ -14,10 +16,12 @@ void toplane_award (U8 lamp)
 	if (lamp_test (lamp))
 	{
 		sound_start (ST_SAMPLE, SND_TOP_LANE_LIT, SL_500MS, PRI_GAME_QUICK3);
+		score (SC_5K);
 	}
 	else
 	{
 		sound_start (ST_SAMPLE, SND_TOP_LANE_UNLIT, SL_500MS, PRI_GAME_QUICK5);
+		score (SC_25K);
 		lamp_on (lamp);
 
 		if (lamp_test (LM_TOP_LANE_LEFT)
@@ -36,5 +40,17 @@ CALLSET_ENTRY (toplane, sw_upper_left_lane)
 CALLSET_ENTRY (toplane, sw_upper_right_lane)
 {
 	toplane_award (LM_TOP_LANE_RIGHT);
+}
+
+CALLSET_ENTRY (toplane, sw_left_button, sw_right_button)
+{
+	/* 2-lane change.  If either lamp is on (and both can't be, because
+	 * they just never are!), then toggle both lamps, effectively
+	 * causing the lane to move. */
+	if (lamp_test (LM_TOP_LANE_LEFT) || lamp_test (LM_TOP_LANE_RIGHT))
+	{
+		lamp_toggle (LM_TOP_LANE_LEFT);
+		lamp_toggle (LM_TOP_LANE_RIGHT);
+	}
 }
 

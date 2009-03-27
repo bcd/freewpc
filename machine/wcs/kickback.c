@@ -51,11 +51,12 @@ CALLSET_ENTRY (kickback, sw_kickback)
 {
 	if (kickback_enabled ())
 	{
-		sound_send (SND_WHISTLE);
-		task_create_gid1 (GID_KICKBACK_FINISH, kickback_finish);
+		sound_start (ST_SAMPLE, SND_WHISTLE, SL_2S, PRI_GAME_QUICK3);
+		task_recreate_gid (GID_KICKBACK_FINISH, kickback_finish);
 	}
 	else
 	{
+		callset_invoke (sw_left_outlane);
 	}
 }
 

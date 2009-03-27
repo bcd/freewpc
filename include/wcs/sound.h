@@ -66,8 +66,8 @@
 #define SND_AIRPLANE_FLYOVER     MUSIC_SND(0x6C)
 #define SND_WHISTLE              MUSIC_SND(0x6E)
 #define SND_JET_BUMPER           MUSIC_SND(0x6F)
-#define SND_FIREWORK1            MUSIC_SND(0x71)
-#define SND_FIREWORK2            MUSIC_SND(0x72)
+#define SND_FIREWORK_EXPLODE     MUSIC_SND(0x71)
+#define SND_FIREWORK_LAUNCH1     MUSIC_SND(0x72)
 #define SND_MAGNA_GOALIE         MUSIC_SND(0x73)
 #define SND_UHHH                 MUSIC_SND(0x77)
 #define SND_FREE_KICK_LIT        MUSIC_SND(0x78)
@@ -87,7 +87,9 @@
 #define SND_ULTRA_RAMP           MUSIC_SND(0x95)
 #define SND_DING                 MUSIC_SND(0x96)
 #define SND_FIREWORK_LAUNCH2     MUSIC_SND(0x97)
-#define SND_ULTRA_SPINNER        MUSIC_SND(0x98)
+/* In the real game, TV kickout sound is a sequence of
+ * SND_PLUNGE twice followed by SND_TV_KICKOUT. */
+#define SND_TV_KICKOUT           MUSIC_SND(0x98)
 #define SND_MOO                  MUSIC_SND(0x9A)
 #define SND_EB_LANDING           MUSIC_SND(0x9B)
 #define SND_CROWD_LOOP           MUSIC_SND(0x9C)
@@ -103,8 +105,8 @@
 #define SND_ASTHMA_ATTACK        MUSIC_SND(0xA8)
 #define SND_GULP                 MUSIC_SND(0xAB)
 #define SND_RETURN_TO_PLAY       MUSIC_SND(0xAC)
-#define SND_FIREWORK_LIGHT       MUSIC_SND(0xAD)
-#define SND_FIREWORK_LAUNCH      MUSIC_SND(0xAE)
+#define SND_ROCKET_LIGHT         MUSIC_SND(0xAD)
+#define SND_ROCKET_LAUNCH        MUSIC_SND(0xAE)
 #define SND_CHALKBOARD           MUSIC_SND(0xAF)
 #define SND_UNLIT_GOAL           MUSIC_SND(0xB0)
 #define SND_POW                  MUSIC_SND(0xB1)
@@ -156,6 +158,23 @@
 #define SPCH_STAY_COOL_DADDY_O           SPEECH_SND(0x70)
 #define SPCH_ADMIRAL_BIAGI_OUT           SPEECH_SND(0x71)
 #define SPCH_SCREAM                      SPEECH_SND(0x72)
+
+#define SPCH_SHOOT_THE_GOAL       0x07DCUL
+#define SPCH_ANOTHER_GOAL         (0x07E7UL + (n))
+
+#define SPCH_YELLOW_CARD          0x07FEUL
+#define SPCH_RED_CARD             0x07FFUL
+
+#define SPCH_OUT_OF_BOUNDS        0x0802UL
+#define SPCH_CORNER_KICK(n)       (0x0803UL + (n)) /* 3 choices */
+#define SPCH_INSTANT_REPLAY(n)    (0x0807UL + (n)) /* 2 choices */
+#define SPCH_IN_OVERTIME          0x0819UL
+#define SPCH_FEW_SECONDS_REMAIN   0x081BUL
+#define SPCH_VICTORY_LAP(n)       (0x081CUL + (n)) /* 2 choices */
+#define SPCH_REPLAY               0x08A3UL
+#define SPCH_SHOOT_AGAIN          0x08A5UL
+
+
 
 
 #endif /* _MACH_SOUND_H */
