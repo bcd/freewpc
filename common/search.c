@@ -83,12 +83,10 @@ static bool ball_search_solenoid_ok (U8 sol)
 		 )
 		return (FALSE);
 
-	/* Also check for all ball device kick coils.
-	 * Skip devices, except those that can only hold a single ball.
-	 * Balls should never be trapped here anyway. */
+	/* Also check for all ball device kick coils; skip them */
 	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
 	{
-		if ((sol == dev->props->sol) && (dev->size > 1))
+		if (sol == dev->props->sol)
 			return (FALSE);
 	}
 #endif
@@ -110,7 +108,7 @@ void ball_search_timer_reset (void)
 }
 
 
-static bool ball_search_timed_out (void)
+bool ball_search_timed_out (void)
 {
 	return (ball_search_timer >= ball_search_timeout);
 }
