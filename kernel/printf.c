@@ -246,8 +246,8 @@ do_format_chars:
 				case '1': case '2': case '3':
 				case '4': case '5': case '6':
 				case '7': case '8': case '9':
-					sprintf_width *= 10;
-					sprintf_width += *format - '0';
+					sprintf_width = (sprintf_width * 10) +
+						*format - '0';
 					goto do_format_chars;
 
 				case 'd':
