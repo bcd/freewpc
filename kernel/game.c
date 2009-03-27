@@ -336,8 +336,10 @@ void timed_game_monitor (void)
 		/* Look for conditions in which the game timer should not run. */
 		if (!valid_playfield
 				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
+#ifdef MACHINE_SHOOTER_SWITCH
 				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
 						(live_balls <= 1))
+#endif
 				|| timed_game_suspend_count
 				|| kickout_locks
 				|| ball_search_timed_out ())
@@ -475,11 +477,13 @@ void start_ball (void)
 	triac_enable (TRIAC_GI_MASK);
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
-#ifdef CONFIG_TIMED_GAME
-	timed_game_timer = CONFIG_TIMED_GAME;
-	timed_game_suspend_count = 0;
-	task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
-#endif
+
+	if (config_timed_game)
+	{
+		timed_game_timer = CONFIG_TIMED_GAME;
+		timed_game_suspend_count = 0;
+		task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
+	}
 }
 
 
