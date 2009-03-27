@@ -37,6 +37,13 @@ U8 *current_score;
 /** The all-inclusive score multiplier */
 U8 global_score_multiplier;
 
+/** The last score award, with multipliers applied */
+score_t last_score;
+
+/** The score award that is being displayed.  This is a latched
+ * version of last_score. */
+score_t deff_score;
+
 
 /** Clears a score */
 void score_zero (score_t s)
@@ -55,29 +62,7 @@ void score_copy (score_t dst, const score_t src)
 /** Adds one binary-coded decimal score to another. */
 void score_add (score_t s1, const score_t s2)
 {
-	/* Advance to just past the end of each score */
-	s1 += BYTES_PER_SCORE;
-	s2 += BYTES_PER_SCORE;
-
-	/* Add one byte at a time, however many times it takes */
-#if (BYTES_PER_SCORE >= 6)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 5)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 4)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 3)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 2)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 1)
-	bcd_add8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
-#endif
+	bcd_string_add (s1, s2, BYTES_PER_SCORE);
 }
 
 
@@ -97,98 +82,15 @@ void score_add_byte (score_t s1, U8 offset, bcd_t val)
 }
 
 
-/** Adds to the current score.  The input score is given as a BCD-string. */
-void score_add_current (const bcd_t *s)
-{
-	if (!in_live_game)
-	{
-		nonfatal (ERR_SCORE_NOT_IN_GAME);
-		return;
-	}
 
-	score_add (current_score, s);
-	score_update_request ();
-	replay_check_current ();
-}
-
-
-/** Like score_add_byte, but modifies the current player's score */
-void score_add_byte_current (U8 offset, bcd_t val)
-{
-	if (!in_live_game)
-	{
-		nonfatal (ERR_SCORE_NOT_IN_GAME);
-		return;
-	}
-
-	score_add_byte (current_score, offset, val);
-	score_update_request ();
-	replay_check_current ();
-}
-
-
-/** Adds to the current score, multiplied by some amount.
- * The multiplier is subject to further multiplication by the
- * global score multiplier. */
-void score_multiple (score_id_t id, U8 multiplier)
-{
-	if (!in_live_game)
-		return;
-
-	multiplier *= global_score_multiplier;
-
-	/* Some things to consider:
-	 * 1. Multiplication is expensive on BCD values.
-	 * 2. Multiplied scores will not be common.
-	 * 3. Even if the multiplier > 1, it will often be small.
-	 *
-	 * Considering all of that, it makes sense to ignore
-	 * multiplication entirely and just do repeated additions. */
-	while (multiplier > 0)
-	{
-		score_add_current (score_table[id]);
-		multiplier--;
-	}
-	score_update_request ();
-}
-
-
-/** Adds to the current score.  The input score is given as a score ID. */
-void score (score_id_t id)
-{
-	score_multiple (id, 1);
-}
-
-
+/** Subtracts one binary-coded decimal score from another. */
 void score_sub (score_t s1, const score_t s2)
 {
-	/* Advance to just past the end of each score */
-	s1 += BYTES_PER_SCORE;
-	s2 += BYTES_PER_SCORE;
-
-	/* Subtract one byte at a time, however many times it takes */
-#if (BYTES_PER_SCORE >= 6)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 6) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 5)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 5) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 4)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 4) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 3)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 3) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 2)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 2) ? 0 : 1);
-#endif
-#if (BYTES_PER_SCORE >= 1)
-	bcd_sub8 (s1, s2, (BYTES_PER_SCORE == 1) ? 0 : 1);
-#endif
+	bcd_string_sub (s1, s2, BYTES_PER_SCORE);
 }
 
 
-/** Multiply a score (in place) by the given value.
+/** Multiply a score (in place) by the given integer.
  * Zero is not supported, as it should never be called this
  * way. */
 void score_mul (score_t s, U8 multiplier)
@@ -203,7 +105,7 @@ void score_mul (score_t s, U8 multiplier)
 		 * going to be small. */
 		score_t copy;
 		score_copy (copy, s);
-	
+
 		do {
 			score_add (s, copy);
 		} while (--multiplier > 1);
@@ -233,6 +135,87 @@ I8 score_compare (const score_t s1, const score_t s2)
 }
 
 
+/** Adds to the current score.  The input score is given as a BCD-string. */
+static void score_award (const bcd_t *s)
+{
+	if (!in_live_game)
+	{
+		nonfatal (ERR_SCORE_NOT_IN_GAME);
+		return;
+	}
+
+	score_add (current_score, s);
+	score_update_request ();
+	replay_check_current ();
+}
+
+
+/** Like score_add_byte, but modifies the current player's score */
+void score_award_compact (U8 offset, bcd_t val)
+{
+	/* TODO - this function does not obey the global multiplier */
+	if (!in_live_game)
+	{
+		nonfatal (ERR_SCORE_NOT_IN_GAME);
+		return;
+	}
+
+	score_add_byte (current_score, offset, val);
+	score_update_request ();
+	replay_check_current ();
+}
+
+
+void score_long_unmultiplied (const score_t score)
+{
+	score_copy (last_score, score);
+	score_award (last_score);
+}
+
+
+void score_long_multiple (const score_t score, U8 multiplier)
+{
+	score_copy (last_score, score);
+	score_mul (last_score, multiplier);
+	score_mul (last_score, global_score_multiplier);
+	score_award (last_score);
+}
+
+
+void score_long (const score_t score)
+{
+	score_long_multiple (score, 1);
+}
+
+
+/** Adds to the current score, multiplied by some amount.
+ * The multiplier is subject to further multiplication by the
+ * global score multiplier. */
+void score_multiple (score_id_t id, U8 multiplier)
+{
+	score_long_multiple (score_table[id], multiplier);
+}
+
+
+/** Adds to the current score.  The input score is given as a score ID. */
+void score (score_id_t id)
+{
+	score_long_multiple (score_table[id], 1);
+}
+
+
+void score_deff_set (void)
+{
+	score_copy (deff_score, last_score);
+}
+
+
+bcd_t *score_deff_get (void)
+{
+	return deff_score;
+}
+
+
 /** Reset all scores to zero */
 void scores_reset (void)
 {
@@ -246,4 +229,5 @@ CALLSET_ENTRY (score, start_ball)
 {
 	global_score_multiplier = 1;
 }
+
 

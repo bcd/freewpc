@@ -119,6 +119,11 @@ static void deff_start_task (const deff_t *deff)
 	if (deff->flags & D_PAUSE)
 		kickout_lock (KLOCK_DEFF);
 
+	/* If this deff wants to show the last score, hold
+	 * on to that value */
+	if (deff->flags & D_SCORE)
+		score_deff_set ();
+
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
 	if (tp == NULL)

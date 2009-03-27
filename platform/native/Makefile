@@ -21,6 +21,7 @@ endif
 
 # Additional object files to be linked into the kernel region
 NATIVE_OBJS := $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
+	$(D)/bcd_string.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
 	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
 	$(D)/coil.o

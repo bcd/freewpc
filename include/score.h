@@ -76,32 +76,44 @@ __effect__ void scores_draw_ball (void);
 __effect__ void scores_draw_current (U8 skip_player);
 
 void score_zero (score_t s);
+void score_copy (score_t dst, const score_t src);
 void score_add (score_t s1, const score_t s2);
 void score_add_byte (score_t s1, U8 offset, bcd_t val);
-void score_add_current (const bcd_t *s);
-void score_add_byte_current (U8 offset, bcd_t val);
-void score (score_id_t id);
-void score_multiple (score_id_t id, U8 multiplier);
 void score_sub (score_t s1, const score_t s2);
 void score_mul (score_t s1, U8 multiplier);
 I8 score_compare (const score_t s1, const score_t s2);
+
+//void score_award (const bcd_t *s);
+void score_award_compact (U8 offset, bcd_t val);
+
+void score (score_id_t id);
+void score_multiple (score_id_t id, U8 multiplier);
+
+void score_long_unmultiplied (const score_t score);
+void score_long_multiple (const score_t score, U8 multiplier);
+void score_long (const score_t score);
+
+void score_deff_set (void);
+bcd_t *score_deff_get (void);
+
 void scores_reset (void);
 void score_init (void);
 
+#define score_add_current score_award
 
 extern inline void score_10K (U8 count)
 {
-	score_add_byte_current (3, count);
+	score_award_compact (3, count);
 }
 
 extern inline void score_1M (U8 count)
 {
-	score_add_byte_current (4, count);
+	score_award_compact (4, count);
 }
 
 extern inline void score_100M (U8 count)
 {
-	score_add_byte_current (5, count);
+	score_award_compact (5, count);
 }
 
 

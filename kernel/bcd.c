@@ -44,19 +44,19 @@ void bcd_copy (bcd_t *dst, const bcd_t *src, U8 len)
 /** Adds one BCD number to another. */
 void bcd_add (bcd_t *s1, const bcd_t *s2, U8 len)
 {
-	const bcd_t *s1_init = s1;
+	register U8 _len asm ("m1") = len;
 
 	/* Advance to just past the end */
-	s1 += len-1;
-	s2 += len-1;
+	s1 += _len;
+	s2 += _len;
 
 	bcd_add8 (s1, s2, 0);
-	while (s1_init <= s1)
+	--_len;
+
+	do
 	{
-		s1--;
-		s2--;
 		bcd_add8 (s1, s2, 1);
-	}
+	} while (--_len);
 }
 
 
