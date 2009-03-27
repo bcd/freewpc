@@ -231,6 +231,7 @@ foreach $set (keys %functionhash) {
 		print FH "   /* Invoked by $caller */\n";
 		++$num_callers;
 	}
+
 	if ($num_callers == 0) {
 		print STDERR "warning: event $set is never thrown\n";
 		print FH "   /* warning: event $set is never thrown */\n";
@@ -240,6 +241,9 @@ foreach $set (keys %functionhash) {
 
 	if (@modules == 0) {
 		print FH "   /* warning: nobody cares about $set */\n";
+	}
+	elsif (@modules >= 10) {
+		print FH "   /* warning: $set is caught many times and may take a while */\n";
 	}
 
 	foreach $module (@modules) {
