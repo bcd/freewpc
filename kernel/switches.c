@@ -723,7 +723,7 @@ CALLSET_ENTRY (switch, idle)
 	U8 rows;
 
 	/* If there are row/column shorts, ignore the switch matrix. */
-	if (sw_short_timer)
+	if (unlikely (sw_short_timer))
 		return;
 
 	/* Prior to system initialization, switches are not serviced.
