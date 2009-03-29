@@ -525,8 +525,6 @@ extern inline U8 wpc_read_ac_zerocross (void)
  * Flippers
  ***************************************************************/
 
-#if (MACHINE_FLIPTRONIC == 1)
-
 #define WPC_LR_FLIP_EOS		0x1
 #define WPC_LR_FLIP_SW		0x2
 #define WPC_LL_FLIP_EOS		0x4
@@ -574,8 +572,6 @@ extern inline void wpc_write_flippers (U8 val)
 	writeb (WPC_FLIPTRONIC_PORT_A, ~val);
 #endif
 }
-
-#endif /* MACHINE_FLIPTRONIC */
 
 
 /********************************************/
