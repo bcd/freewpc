@@ -41,6 +41,43 @@
 U8 pausable_timer_locks;
 
 
+/*
+ * Check if timers should be paused.
+ *
+ * Returns TRUE if timers should not run for some reason.
+ * Returns FALSE if timers should continue to run.
+ */
+bool system_timer_pause (void)
+{
+	if (!in_game || in_bonus || !valid_playfield)
+		return TRUE;
+
+#ifdef MACHINE_SHOOTER_SWITCH
+	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH) && (live_balls <= 1))
+		return TRUE;
+#endif
+
+	if (config_timed_game)
+	{
+		extern U8 timed_game_suspend_count;
+
+		if (timer_find_gid (GID_TIMED_GAME_PAUSED))
+			return TRUE;
+
+		if (timed_game_suspend_count)
+			return TRUE;
+	}
+
+	if (kickout_locks)
+		return TRUE;
+
+	if (ball_search_timed_out ())
+		return TRUE;
+
+	return FALSE;
+}
+
+
 void freerunning_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
@@ -52,19 +89,6 @@ void freerunning_timer_function (void)
 	task_exit ();
 }
 
-
-void live_ball_timer_function (void)
-{
-	U16 ticks = task_get_arg ();
-	while (ticks > 0)
-	{
-		task_sleep (TIMER_PAUSABLE_GRAN);
-		if (0) /* TODO : add condition that ball is live */
-			continue;
-		ticks -= TIMER_PAUSABLE_GRAN;
-	}
-	task_exit ();
-}
 
 
 task_pid_t timer_restart (task_gid_t gid, U16 ticks, task_function_t fn)
