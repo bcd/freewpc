@@ -102,6 +102,9 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
 	pth_attr_set (attr, PTH_ATTR_CANCEL_STATE, PTH_CANCEL_ENABLE);
 
+	/* TODO - inside of calling the function directly, call a global
+	 * function and pass it a pointer to the task_data_table entry
+	 * as an argument. */
 	pid = pth_spawn (attr, fn, 0);
 
 	for (i=0; i < MAX_TASKS; i++)

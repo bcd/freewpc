@@ -18,6 +18,32 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Idle processing
+ *
+ * This module runs at idle time -- when there are no tasks that need
+ * to be scheduled.  It is the third tier of priorities, behind
+ * interrupt-level and task-level.  The task scheduler will not call
+ * these functions more frequently than once per 1ms though.
+ *
+ * Functions that need to run as often as possible should register for
+ * the 'idle' event.  Most function can get by running less often, though:
+ * those should register one of the time-based idle events.  For example,
+ * 'idle_every_100ms' would only run once every 100ms.
+ *
+ * Time-based idle functions are not guaranteed to run as soon as the
+ * time has elapsed, if there are lots of tasks still runnable.  So you
+ * cannot use idle to do any realtime processing.  However, this module
+ * does track when it is falling behind, and will try to compensate.
+ * For example, if the 100ms handlers don't get invoked until after 110ms,
+ * next time it will run that after only 90ms more has elapsed.
+ *
+ * Time events are implemented for 100ms, 1 second, and 10 seconds.
+ * Any other intervals need to be implemented by hooking one of these
+ * and counting the time units yourself.
+ */
+
 #include <freewpc.h>
 
 /** The frequency to run the idle checks */

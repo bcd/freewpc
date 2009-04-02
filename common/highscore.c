@@ -183,6 +183,7 @@ void high_score_check_reset (void)
 {
 	/* Initialize the counters that will force a reset
 	 * automatically after some time */
+	/* TODO - what if adjustment is OFF ? */
 	hs_reset_counter1 = hstd_config.hs_reset_every;
 	hs_reset_counter2 = 250;
 }

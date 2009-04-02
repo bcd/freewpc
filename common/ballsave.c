@@ -160,3 +160,5 @@ CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 	}
 }
 
+/* TODO - handle early ball save due to an outlane drain */
+

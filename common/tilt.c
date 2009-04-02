@@ -148,6 +148,10 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 
 	while (deff_get_active () == DEFF_SLAM_TILT)
 		task_sleep (TIME_66MS);
+
+	/* TODO: wait for slam switch to become stable, to avoid
+	 * endless restarts */
+	/* TODO : change to a warm reboot here */
 	amode_start ();
 }
 

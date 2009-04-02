@@ -70,6 +70,8 @@ void increment_extra_balls (void)
 {
 	if (can_award_extra_ball ())
 	{
+		/* TODO - handle adjustment to award points instead of
+		 * extra ball */
 		extra_balls++;
 		callset_invoke (extra_ball_award);
 		update_extra_ball_lamp ();

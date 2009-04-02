@@ -24,7 +24,14 @@
  * \file
  * \brief AC/zerocross circuit handling
  *
- * This module is mostly working but not incredibly robust.
+ * The zerocross circuit allows software to synchronize with the
+ * AC cycle.  Alternate current produces a constantly changing
+ * instantaneous voltage.  For long bursts of power, this is
+ * negligible, but for short bursts, adjusting the pulse near the
+ * peak of the AC cycle can produce a stronger pulse.
+ *
+ * This module exports a value, 'zc_timer', which is zero right
+ * at the zerocross point, and increments every millisecond after.
  */
 
 /**

@@ -18,6 +18,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief A generic timed mode driver
+ *
+ * This module implements a driver for timed modes.  Callers create
+ * a structure 'timed_mode_ops' which describes the mode.
+ */
+
+
 #include <freewpc.h>
 
 static void effect_update (void)

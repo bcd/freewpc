@@ -453,6 +453,10 @@ void lamp_update_task (void)
 /** Request that the lamps be updated.
  * Lamp update runs in a separate task context, and it
  * only happens during a game.
+ *
+ * This function is called every 500ms automatically, but it
+ * may be called any other time, to force an update more
+ * frequently.
  */
 void lamp_update_request (void)
 {

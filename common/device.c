@@ -442,6 +442,7 @@ void device_request_empty (device_t *dev)
 		dev->kicks_needed += can_kick;
 		dev->kick_errors = 0;
 		dev->max_count -= can_kick;
+		/* TODO - lock count should be decremented here or not? */
 #ifdef DEVNO_TROUGH
 		/* TODO - this logic probably belongs somewhere else */
 		if (device_devno (dev) != DEVNO_TROUGH)
