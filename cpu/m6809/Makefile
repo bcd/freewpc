@@ -29,7 +29,7 @@ CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
 # Which version of the 6809 compiler to use by default.
 # This is the minimum available version.  More often than not,
 # testing/releases are done with later builds than this.
-GCC_VERSION ?= 4.2.1
+GCC_VERSION ?= 4.3.2
 
 KERNEL_OBJS     += $(C)/vector.o
 KERNEL_OBJS     += $(C)/div10.o
