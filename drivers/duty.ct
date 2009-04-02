@@ -104,7 +104,7 @@ extern inline void @self_service (void)
 			{
 				/* Device is presently off, turn it on */
 				sol_enable (@sol);
-				@self_state++;
+				@self_state++; /* sneaky */
 				@self_timer = @duty_ontime;
 			}
 		}
@@ -125,18 +125,26 @@ U8 @self_timer;
 U8 @self_cycles;
 
 
+/**
+ * The user API to start a duty-cycled solenoid.
+ */
 void @self_start (void)
 {
+	/* The entire operation must be done with interrupts disabled,
+	 * in case the solenoid is always running. */
+	disable_interrupts ();
 	@self_timer = @ontime;
 	@self_cycles = @timeout;
 	@self_state = 1;
-	disable_interrupts ();
 	sol_enable (@sol);
 	@self_enable ();
 	enable_interrupts ();
 }
 
 
+/**
+ * The user API to stop a duty-cycled solenoid.
+ */
 void @self_stop (void)
 {
 	disable_interrupts ();
