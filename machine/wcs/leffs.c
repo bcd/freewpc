@@ -25,9 +25,9 @@ void build_up_leff (void)
 {
 	lamplist_set_apply_delay (TIME_16MS);
 	leff_create_peer (build_up_task);
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	leff_create_peer (build_up_task);
-	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	task_kill_peers ();
 	leff_exit ();
 }
