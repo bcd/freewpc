@@ -157,6 +157,9 @@ my %BinaryProperties = (
 		"runner" => 1,
 		"shared" => 1,
 	},
+	"lamplists" => {
+		"set" => 1,
+	},
 );
 
 # A table of enumerated properties per context.  Similar to binary
@@ -1059,6 +1062,17 @@ sub machine_lamp_get_value {
 	return $lamp->{'number'};
 }
 
+sub machine_lamp_get_name {
+	my ($lampnum) = @_;
+	for $lamp (unique ($m->{"lamps"})) {
+		if ($lamp->{'number'} eq $lampnum) {
+			return $lamp->{'c_ident'};
+		}
+	}
+	return $lampnum;
+}
+
+
 sub lamp_sort_bottom_to_top {
 	return -($a->{'x'} <=> $b->{'x'});
 }
@@ -1140,24 +1154,34 @@ sub machine_write_lamplist_decls {
 					machine_lamp_get_value ($2));
 				if ($min < $max) {
 					for ($i = $min; $i <= $max; $i++) {
-						$lamplist .= "$i, ";
+						$lamp = machine_lamp_get_name ($i);
+						$lamplist .= "$lamp,\n   ";
 					}
 				}
 				else {
 					for ($i = $min; $i >= $max; $i--) {
-						$lamplist .= "$i, ";
+						$lamp = machine_lamp_get_name ($i);
+						$lamplist .= "$lamp,\n   ";
 					}
 				}
 			} elsif ($parent = ($m->{"lamplists"})->{$lamp}) {
 				$lamplist .= $parent->{'value'};
 			} else {
 				$lamp = machine_lamp_get_value ($lamp);
-				$lamplist .= "$lamp, ";
+				$lamp = machine_lamp_get_name ($lamp);
+				$lamplist .= "$lamp,\n   ";
 			}
 		}
 		print "${lamplist}LAMP_END\n";
-		print "};\n";
+		print "};\n\n";
 		$ls->{'value'} = $lamplist;
+
+		if ($ls->{'set'} == 1) {
+			$c_decl = $ls->{'c_decl'};
+			$c_decl =~ s/lamplist/lampset/g;
+			print "const U8 " . $c_decl . "[] = { ";
+			print " };\n\n";
+		}
 	}
 
 	print "const lampnum_t * const lamplist_table[] = {\n";
