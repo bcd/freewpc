@@ -746,14 +746,6 @@ CALLSET_ENTRY (switch, idle)
 	 * even if there are hardware errors. */
 	switch_service_queue ();
 
-	/* Before doing anything else, make sure the ALWAYS CLOSED
-	 * switch is really closed.  If not, there's a serious problem
-	 * and we can't do any switch processing.
-	 * TODO - do this check during initialization and then forget
-	 * about it... */
-	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
-		return;
-
 	/* Iterate over each switch column to see what needs to be done. */
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
@@ -791,6 +783,17 @@ CALLSET_ENTRY (switch, idle)
 		the software watchdog from expiring. */
 		task_dispatching_ok = TRUE;
 	}
+}
+
+/** As part of startup diagnostics, check that the 12V
+ * switch matrix power is present. */
+CALLSET_ENTRY (switch, diagnostic_check)
+{
+	/* Make sure the ALWAYS CLOSED switch is really closed.
+	 * If not, there's a serious problem
+	 * and we can't do any switch processing. */
+	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
+		diag_post_error ("12V SWITCH POWER", "IS NOT PRESENT");
 }
 
 
