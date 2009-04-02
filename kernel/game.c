@@ -603,8 +603,11 @@ bool verify_start_ok (void)
 
 CALLSET_ENTRY (game, sw_start_button)
 {
-	/* If in test mode, let test handle it completely. */
-	if (in_test)
+	extern U8 initials_enter_timer;
+
+	/* If in test mode, let test handle it completely.
+	 * Likewise for enter initials. */
+	if (in_test || initials_enter_timer)
 		return;
 
 #ifdef MACHINE_START_SWITCH
