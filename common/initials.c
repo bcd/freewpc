@@ -65,8 +65,10 @@ void enter_initials_deff (void)
 		sprintf ("%12s", initial_chars + initials_selection);
 		font_render_string_left (&font_mono5, 2, 26, sprintf_buffer);
 
+#if (MACHINE_DMD == 1)
 		for (n = 25; n <= 31; n++)
 			dmd_low_buffer[16UL * n] ^= 0xFE;
+#endif
 
 		sprintf ("%d", initials_enter_timer);
 		font_render_string_right (&font_mono5, 126, 3, sprintf_buffer);
