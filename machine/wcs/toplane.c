@@ -44,10 +44,7 @@ CALLSET_ENTRY (toplane, sw_upper_right_lane)
 
 CALLSET_ENTRY (toplane, sw_left_button, sw_right_button)
 {
-	/* 2-lane change.  If either lamp is on (and both can't be, because
-	 * they just never are!), then toggle both lamps, effectively
-	 * causing the lane to move. */
-	if (lamp_test (LM_TOP_LANE_LEFT) || lamp_test (LM_TOP_LANE_RIGHT))
+	if (lamp_test (LM_TOP_LANE_LEFT) ^ lamp_test (LM_TOP_LANE_RIGHT)) /* TODO */
 	{
 		lamp_toggle (LM_TOP_LANE_LEFT);
 		lamp_toggle (LM_TOP_LANE_RIGHT);

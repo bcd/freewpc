@@ -108,10 +108,11 @@ CALLSET_ENTRY (goalround, goal_shot)
 	if (flag_test (FLAG_GOAL_LIT))
 	{
 		flag_off (FLAG_GOAL_LIT);
+		score (SC_1M);
 		deff_start (DEFF_GOAL_SCORED);
 		speech_start (SPCH_GOALLL, SL_3S);
-		score (SC_1M);
 		bounded_increment (goal_count, MAX_GOALS);
+		VOIDCALL (ultra_add_shot);
 		goal_count_lamp_update ();
 		if (lit_build_shots == 0)
 		{
@@ -129,6 +130,7 @@ CALLSET_ENTRY (goalround, lamp_update)
 	{
 		lamp_tristate_flash (LM_GOAL);
 		lamplist_apply (LAMPLIST_BUILD_SHOTS, lamp_flash_off);
+		/* strobe the rollovers */
 	}
 	else
 	{

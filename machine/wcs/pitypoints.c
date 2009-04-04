@@ -23,6 +23,13 @@
 
 CALLSET_ENTRY (pity, bonus)
 {
+	/* TODO - the first sound goes missing, because the request
+	 * to refresh music, also called in a bonus CALLSET_ENTRY, is
+	 * backgrounded and we don't wait for it to finish.
+	 * These calls should change to sound_start() calls on the DSP
+	 * channel.  And the background should ensure that if no music
+	 * is needed, but a sound is running on the DSP, that it is not
+	 * killed. */
 	sound_send (MUS_BONUS_BONG);
 	task_sleep (TIME_500MS);
 	sound_send (MUS_BONUS_BONG);

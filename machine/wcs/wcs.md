@@ -41,14 +41,14 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 25: Ball Speed, white, x(27), y(12)
 26: Ball Strength, white, x(25), y(11)
 27: Ball Stamina, white, x(23), y(12)
-28: L. Ticket Half, x(21), y(11)
+28: L. Ticket Half, purple, x(21), y(11)
 31: Free Kick, yellow ,x(16), y(16)
 32: TV Award, white , x(17), y(18)
 33: Ultra Goalie, white , x(31), y(16)
 34: Ultra Ramps, white , x(29), y(17)
 35: Ball Spirit, white , x(26), y(14)
 36: Ball Skill, white , x(24), y(14)
-37: R. Ticket Half , x(21), y(13)
+37: R. Ticket Half, purple, x(21), y(13)
 38: Tackle, blue , x(14), y( 9)
 41: Kickback Lower, green , x(38), y( 1)
 42: Kickback Center, green , x(36), y( 1)
@@ -79,8 +79,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 73: Magna Goalie, orange , x(43), y( 7)
 74: Left Inlane , x(35), y( 3)
 75: Light Kickback, green, x(30), y( 4)
-76: L. Ramp Ticket, purple, x(16), y( 6)
-77: R. Ramp Ticket, purple, x(16), y(20)
+76: L. Ramp Ticket, yellow, x(16), y( 6)
+77: R. Ramp Ticket, yellow, x(16), y(20)
 78: Ultra Ramp Collect, yellow, x(16), y( 5)
 81: Rollover 1, red, x(10), y(13)
 82: Rollover 2, red, x(13), y(12)
@@ -97,7 +97,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 13: Start Button, start-button, cabinet, intest
 14: Tilt, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
-16: Striker 3, ingame
+16: Striker 3, ingame, debounce(TIME_50MS)
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt
@@ -133,8 +133,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 63: Rollover 3, ingame
 64: Rollover 4, ingame
 65: Tackle, ingame
-66: Striker 1, ingame
-67: Striker 2, ingame
+66: Striker 1, ingame, debounce(TIME_50MS)
+67: Striker 2, ingame, debounce(TIME_50MS)
 71: L. Ramp Diverted, ingame
 72: L. Ramp Enter, ingame
 74: L. Ramp Exit, ingame
@@ -214,13 +214,13 @@ Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
 Top Lanes: Top Lane Left, Top Lane Right
 Locks: L. Ramp Lock, R. Ramp Lock
 Ramp Tickets: L. Ramp Ticket, R. Ramp Ticket
-Red Lamps: COLOR:red
-White Lamps: COLOR:white
-Orange Lamps: COLOR:orange
-Yellow Lamps: COLOR:yellow
-Green Lamps: COLOR:green
-Blue Lamps: COLOR:blue
-Purple Lamps: COLOR:purple
+Red Lamps: set, COLOR:red
+White Lamps: set, COLOR:white
+Orange Lamps: set, COLOR:orange
+Yellow Lamps: set, COLOR:yellow
+Green Lamps: set, COLOR:green
+Blue Lamps: set, COLOR:blue
+Purple Lamps: set, COLOR:purple
 Circle Out: PF:lamp_sort_circle_out
 Build Up: PF:lamp_sort_bottom_to_top
 
@@ -258,6 +258,7 @@ Disable Goalie: yes_no, NO
 5K:
 10K:
 25K:
+30K:
 50K:
 100K:
 200K:
@@ -290,13 +291,15 @@ Super Jackpot Lit:
 
 TV Lit:
 Mode Lit:
+Ultra Mania Lit:
 
 [globalflags]
 Goalie Moving:
+Goalie Active:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
-Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE
+Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 #NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
 #NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
@@ -318,7 +321,7 @@ Jet: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Lightning Test: page(MACHINE_PAGE), PRI_GAME_QUICK1
 
 Goal Lit: page(MACHINE_PAGE), PRI_GAME_QUICK2
-Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE4
+Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE4, D_SCORE
 
 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
@@ -339,6 +342,9 @@ Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 
 [fonts]
+pcsenior:
+misctype:
+lithograph:
 
 [timers]
 Goal Trough Made:

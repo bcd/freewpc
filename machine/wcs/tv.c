@@ -1,7 +1,7 @@
 
 #include <freewpc.h>
 
-__local__ tv_count;
+__local__ U8 tv_count;
 
 struct tv_award
 {
@@ -9,6 +9,35 @@ struct tv_award
 	void (*dynamic_prob) (void);
 	void (*award) (void);
 };
+
+void tv_award_points (void)
+{
+}
+
+void tv_award_start_mode (void)
+{
+}
+
+void tv_award_start_quickmb (void)
+{
+}
+
+void tv_award_hurryup (void)
+{
+}
+
+void tv_award_add_ultra (void)
+{
+}
+
+void tv_award_light_extra_ball (void)
+{
+}
+
+void tv_award_add_time (void)
+{
+}
+
 
 void tv_award_deff (void)
 {

@@ -23,12 +23,28 @@ void multiball_start_deff (void)
 
 void multiball_running_deff (void)
 {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 16, "MULTIBALL RUNNING");
-	dmd_show_low ();
-	while (1)
-		task_sleep_sec (5);
+	for (;;)
+	{
+		score_update_start ();
+		dmd_alloc_low_high ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_mono5, 64, 5, "MULTIBALL");
+		sprintf_current_score ();
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		dmd_copy_low_to_high ();
+
+		font_render_string_center (&font_var5, 64, 27, "ALL SHOTS = 2X");
+
+		dmd_show_low ();
+		do {
+			task_sleep (TIME_100MS);
+			dmd_show_other ();
+			task_sleep (TIME_100MS);
+			dmd_show_other ();
+		} while (!score_update_required ());
+	}
 }
+
 
 void multiball_jackpot_deff (void)
 {
