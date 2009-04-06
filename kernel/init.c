@@ -232,6 +232,7 @@ void lockup_check_rtt (void)
 #ifndef CONFIG_NATIVE
 	if (sys_init_complete && !task_dispatching_ok)
 	{
+		audit_increment (&system_audits.exec_lockups);
 		fatal (ERR_TASK_LOCKUP);
 	}
 	else
