@@ -478,12 +478,16 @@ void start_ball (void)
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
 
+	/* If timed game support is built-in and enabled, then
+	start a task to monitor the game time. */
+#ifdef CONFIG_TIMED_GAME
 	if (config_timed_game)
 	{
 		timed_game_timer = CONFIG_TIMED_GAME;
 		timed_game_suspend_count = 0;
 		task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 	}
+#endif
 }
 
 
