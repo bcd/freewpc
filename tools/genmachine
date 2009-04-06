@@ -1180,6 +1180,25 @@ sub machine_write_lamplist_decls {
 			$c_decl = $ls->{'c_decl'};
 			$c_decl =~ s/lamplist/lampset/g;
 			print "const U8 " . $c_decl . "[] = { ";
+			my $bits = {};
+			for $lamp (unique ($m->{"lamps"})) {
+				my $name =$lamp->{'c_ident'};
+				if ($lamplist =~ /$name/m) {
+					my $id = $lamp->{'ID'};
+					$bits->{$id} = 1;
+					# print "/* adding $id */\n";
+				}
+			}
+			for (my $col = 0; $col < 8; $col++) {
+				my $val = 0;
+				for (my $row = 0; $row < 8; $row++) {
+					my $id = ($col+1) . ($row+1);
+					if ($bits->{"$id"}) {
+						$val |= (1 << $row);
+					}
+				}
+				printf "0x%02X, ", $val;
+			}
 			print " };\n\n";
 		}
 	}
@@ -1188,7 +1207,21 @@ sub machine_write_lamplist_decls {
 	for $ls (unique ($m->{"lamplists"})) {
 		print "   " . $ls->{'c_decl'} . ",\n";
 	}
+	print "};\n\n";
+
+	print "const U8 * lampset_table[] = {\n";
+	for $ls (unique ($m->{"lamplists"})) {
+		if ($ls->{'set'} == 1) {
+			$name = $ls->{'c_decl'};
+			$name =~ s/lamplist/lampset/g;
+		}
+		else {
+			$name = "NULL";
+		}
+		print "   " . $name . ",\n";
+	}
 	print "};\n";
+
 	print $END_SOURCE;
 }
 
