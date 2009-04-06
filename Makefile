@@ -47,8 +47,6 @@ INCLUDE_DIR = ./include
 ###	Configuration
 #######################################################################
 
-#ifneq ($(PLATFORM),wpc-shell)
-
 # MACHINE says which machine you are targetting.  It must be defined.
 # This loads in per-machine rules.
 $(eval $(call require,MACHINE))
@@ -74,9 +72,6 @@ CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y
 CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
 CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
 
-#else
-#MACH_DESC = platform/wpc-shell/wpc-shell.md
-#endif
 
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
