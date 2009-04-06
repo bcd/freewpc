@@ -44,10 +44,6 @@ CALLSET_ENTRY (toplane, sw_upper_right_lane)
 
 CALLSET_ENTRY (toplane, sw_left_button, sw_right_button)
 {
-	if (lamp_test (LM_TOP_LANE_LEFT) ^ lamp_test (LM_TOP_LANE_RIGHT)) /* TODO */
-	{
-		lamp_toggle (LM_TOP_LANE_LEFT);
-		lamp_toggle (LM_TOP_LANE_RIGHT);
-	}
+	lamplist_rotate_next (LAMPLIST_TOP_LANES, lamp_matrix);
 }
 
