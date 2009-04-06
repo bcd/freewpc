@@ -299,26 +299,73 @@ _task_create:
 	rts
 
 
+	;-----------------------------------------------------
+	; task_fork - an implementation of the UNIX fork()
+	; system call.  It is similar to task_create,
+	; but with an implied starting address and the
+	; fork() return code semantics.
+	;
+	; Input: None
+	; Output: None
+	;-----------------------------------------------------
 
 	.area .text
 	.globl _task_fork
 _task_fork:
+	; Need a temporary in U.
 	pshs	u
+
+	; Allocate a new task block for the child,
+	; returned in X.
 	jsr	_task_allocate
+
+	; Set the child's 'U' register to the
+	; starting point, which is the PC on the stack.
 	ldu	2,s
 	stu	UREG_SAVE_OFF,x
+
+	; Start the child at a thunk, which will
+	; make sure the child returns with a different
+	; return code (zero).
 	ldu	#_task_fork_entry
 	stu	PCREG_SAVE_OFF,x
+
+	; Done with U.
 	puls	u
+
+	; Ensure the child runs in the same page as
+	; the parent.
 	ldb	WPC_ROM_BANK
 	stb	ROMPAGE_SAVE_OFF,x
+
+	; Return from the parent with nonzero.
 	ldb	#1
 	rts
 
 	.area .text
 	.globl _task_fork_entry
 _task_fork_entry:
+	; Get the actual start address in the 'U' save
+	; area and jump there.  Set the return code to zero
+	; so the caller can distinguish between parent and child.
 	ldx	UREG_SAVE_OFF,x
 	clrb
+	jmp	,x
+
+
+	;-----------------------------------------------------
+	; task_stack_reset - truncate the stack.
+	; This can be called by a function that does not
+	; return.
+	;
+	; Input: None
+	; Output: None
+	;-----------------------------------------------------
+
+	.area .text
+	.globl _task_stack_reset
+_task_stack_reset:
+	puls	x
+	lds	#STACK_BASE
 	jmp	,x
 
