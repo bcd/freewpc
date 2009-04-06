@@ -194,9 +194,65 @@ void sound_start1 (U8 channels, sound_code_t code)
 }
 
 
+/**
+ * A default music refresh handler.
+ * This function gets involved anytime a music refresh is required,
+ * in addition to any machine-specific handlers.  It ensures that
+ * the MACHINE_xxx_MUSIC defines for default music get started,
+ * if there is nothing else to play.
+ */
+CALLSET_ENTRY (sound_effect, music_refresh)
+{
+	if (!in_live_game || in_bonus)
+		return;
+
+#ifdef MACHINE_BALL_IN_PLAY_MUSIC
+	else if (valid_playfield)
+		music_request (MACHINE_BALL_IN_PLAY_MUSIC, PRI_SCORES);
+#endif
+
+#ifdef MACHINE_START_BALL_MUSIC
+	else
+		music_request (MACHINE_START_BALL_MUSIC, PRI_SCORES);
+#endif
+}
+
+
+/**
+ * Always cause a music refresh at certain well-known points in the
+ * game.
+ */
+CALLSET_ENTRY (sound_effect, bonus, end_ball)
+{
+	music_refresh ();
+}
+
+
+CALLSET_ENTRY (sound_effect, end_game)
+{
+	music_refresh ();
+	if (!in_test)
+	{
+		/* TODO - start timed with fade out */
+#ifdef MACHINE_END_GAME_MUSIC
+		music_set (MACHINE_END_GAME_MUSIC);
+#endif
+	}
+}
+
+
+CALLSET_ENTRY (sound_effect, start_game)
+{
+#ifdef MACHINE_START_GAME_SOUND
+	sound_send (MACHINE_START_GAME_SOUND);
+#endif
+}
+
+
 CALLSET_ENTRY (sound_effect, init)
 {
 	memset (chtab, 0, sizeof (chtab));
 	music_active = 0;
 	music_refresh ();
 }
+

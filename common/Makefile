@@ -61,7 +61,8 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_rough.o)
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 
 # Effect objects contain common display and lamp effects, and are
-# separated out for the same reason.
+# separated out for the same reason.  These may be placed into a
+# different ROM page.
 EFFECT_OBJS += common/effect.o
 EFFECT_OBJS +=	common/flash.o
 EFFECT_OBJS +=	common/score_deff.o
