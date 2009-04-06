@@ -229,7 +229,10 @@ void deff_stop (deffnum_t dn)
 	deff_debug ("deff_stop\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_STOP, dn);
 	if (dn == deff_running)
+	{
+		deff_stop_task ();
 		deff_update ();
+	}
 }
 
 
