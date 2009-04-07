@@ -5,6 +5,7 @@ documentation on <http://www.oddchange.com/freewpc> for more details.
 building a real ROM (to be used in pinmame).
 
 2. Create a file called ".config" in the current directory.
+See config.example for some examples of options.
 Define at least MACHINE, and optionally NATIVE:
 
 	* Make sure to set "NATIVE=y" if you are compiling in
