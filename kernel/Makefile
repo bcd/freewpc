@@ -20,7 +20,6 @@ KERNEL_BASIC_OBJS += kernel/timedmode.o
 # Software kernel modules are hardware-agnostic, but may depend
 # on machine flags and so need to be recompiled when the machine
 # flags change.
-KERNEL_HW_OBJS += kernel/audio.o
 KERNEL_SW_OBJS += kernel/deff.o
 KERNEL_SW_OBJS += $(if $(CONFIG_FONT), kernel/font.o)
 KERNEL_SW_OBJS += kernel/game.o

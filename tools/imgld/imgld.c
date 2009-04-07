@@ -38,11 +38,11 @@
  * in 128x32 size already.  When not optimizing, at a minimum, the
  * image needs to be converted into two, 128x32 joined buffers.  This
  * is the format that can be sent directly to the dot matrix board.
- * Two buffers are needed for 4-color output; the original 256 buffers
+ * Two buffers are needed for 4-color output; the original 256 colors
  * will be downscaled to 4 colors as necessary.
  *
  * The pinball game ROM may implement a number of decoders; at present,
- * only one decoder is support, which does simple run-length encoding of
+ * only one decoder is supported, which does simple run-length encoding of
  * 16-bit words.  It is written for very easy decoding with little
  * runtime overhead, and so does not compress very well.  However,
  * CPU cycles are considered more precious than ROM space.  Different
