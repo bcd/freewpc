@@ -73,7 +73,7 @@ void music_refresh_task (void)
 		else
 		{
 			dbprintf ("Music now off\n");
-			music_off ();
+			music_off (); /* TODO - careful here, may have a sound running */
 		}
 		music_active = music_requested;
 	}
