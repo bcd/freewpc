@@ -107,8 +107,7 @@ U8 req_inverted;
 #define SOL_REQ_QUEUE_LEN 8
 
 struct {
-	U8 head;
-	U8 tail;
+	queue_t header;
 	U8 sols[SOL_REQ_QUEUE_LEN];
 } sol_req_queue;
 
@@ -164,9 +163,9 @@ void sol_req_start (U8 sol)
 CALLSET_ENTRY (sol, idle_every_100ms)
 {
 	if (sol_req_state == REQ_IDLE
-		&& !queue_empty_p ((queue_t *)&sol_req_queue))
+		&& !queue_empty_p (&sol_req_queue.header))
 	{
-		U8 sol = queue_remove ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN);
+		U8 sol = queue_remove (&sol_req_queue.header, SOL_REQ_QUEUE_LEN);
 		sol_req_start (sol);
 	}
 }
@@ -191,7 +190,8 @@ void sol_request_async (U8 sol)
 	else
 	{
 		dbprintf ("Queueing pulse %d\n", sol);
-		queue_insert ((queue_t *)&sol_req_queue, SOL_REQ_QUEUE_LEN, sol);
+		queue_insert (&sol_req_queue.header, SOL_REQ_QUEUE_LEN, sol);
+		/* TODO - what if the queue is full? */
 	}
 }
 
@@ -492,6 +492,6 @@ sol_init (void)
 	memset (sol_reg_readable, 0, SOL_REG_COUNT);
 
 	/* Initialize the solenoid queue. */
-	queue_init ((queue_t *)&sol_req_queue);
+	queue_init (&sol_req_queue.header);
 }
 

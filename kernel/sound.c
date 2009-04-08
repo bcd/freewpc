@@ -48,16 +48,14 @@
 /** The sound write queue.  head and tail are offsets; elems hold the actual
  * data bytes to be transmitted. */
 __fastram__ struct {
-	U8 head;
-	U8 tail;
+	queue_t header;
 	U8 elems[SOUND_QUEUE_LEN];
 } sound_write_queue;
 
 /** The sound read queue, which works just like the write queue but takes
 back data from the sound board. */
 __fastram__ struct {
-	U8 head;
-	U8 tail;
+	queue_t header;
 	U8 elems[SOUND_QUEUE_LEN];
 } sound_read_queue;
 
@@ -115,7 +113,7 @@ bool sound_version_render (void)
 static void sound_write_queue_init (void)
 {
 	disable_irq ();
-	queue_init ((queue_t *)&sound_write_queue);
+	queue_init (&sound_write_queue.header);
 	enable_irq ();
 }
 
@@ -123,7 +121,7 @@ static void sound_write_queue_init (void)
 static void sound_read_queue_init (void)
 {
 	disable_irq ();
-	queue_init ((queue_t *)&sound_read_queue);
+	queue_init (&sound_read_queue.header);
 	enable_irq ();
 }
 
@@ -131,21 +129,21 @@ static void sound_read_queue_init (void)
 /** Queues a byte for transmit to the sound board */
 static __attribute__((noinline)) void sound_write_queue_insert (U8 val)
 {
-	queue_insert ((queue_t *)&sound_write_queue, SOUND_QUEUE_LEN, val);
+	queue_insert (&sound_write_queue.header, SOUND_QUEUE_LEN, val);
 }
 
 
 /** Dequeues a byte for transmit to the sound board */
 static U8 sound_write_queue_remove (void)
 {
-	return queue_remove ((queue_t *)&sound_write_queue, SOUND_QUEUE_LEN);
+	return queue_remove (&sound_write_queue.header, SOUND_QUEUE_LEN);
 }
 
 
 /** Checks whether the write queue is empty or not */
 inline bool sound_write_queue_empty_p (void)
 {
-	return queue_empty_p ((queue_t *)&sound_write_queue);
+	return queue_empty_p (&sound_write_queue.header);
 }
 
 
@@ -305,7 +303,7 @@ void sound_board_init (void)
 
 	/* Wait for the sound board to report its presence/type code */
 	dbprintf ("Waiting for sound board...\n");
-	if ((sound_board_type = sound_board_read (100)) == 0xFF)
+	if ((sound_board_type = sound_board_read (60)) == 0xFF)
 	{
 		dbprintf ("Error: sound board not detected\n");
 		task_sleep_sec (1);
