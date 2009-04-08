@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_test_bang_width 2
 #define glyph_test_bang_height 18
 static char glyph_test_bang_bits[] = { glyph_test_bang_width, glyph_test_bang_height,

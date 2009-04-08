@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_xpaiderp_A_width 13
 #define glyph_xpaiderp_A_height 17
 static char glyph_xpaiderp_A_bits[] = { glyph_xpaiderp_A_width, glyph_xpaiderp_A_height,

@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_steel_A_width 11
 #define glyph_steel_A_height 13
 static char glyph_steel_A_bits[] = { glyph_steel_A_width, glyph_steel_A_height,

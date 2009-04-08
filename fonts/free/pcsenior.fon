@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_pcsenior_A_width 14
 #define glyph_pcsenior_A_height 13
 static char glyph_pcsenior_A_bits[] = { glyph_pcsenior_A_width, glyph_pcsenior_A_height,

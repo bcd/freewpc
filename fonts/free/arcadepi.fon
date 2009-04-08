@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_arcadepi_A_width 10
 #define glyph_arcadepi_A_height 14
 static char glyph_arcadepi_A_bits[] = { glyph_arcadepi_A_width, glyph_arcadepi_A_height,

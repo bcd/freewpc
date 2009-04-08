@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_pixChicago_A_width 12
 #define glyph_pixChicago_A_height 24
 static char glyph_pixChicago_A_bits[] = { glyph_pixChicago_A_width, glyph_pixChicago_A_height,
