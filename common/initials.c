@@ -47,7 +47,7 @@ U8 initials_index;
 U8 initials_selection;
 
 /* The array of initials */
-U8 initials_data[NUM_INITIALS_ALLOWED+1];
+char initials_data[NUM_INITIALS_ALLOWED+1];
 
 /* The callback function to invoke when initials are entered OK */
 void (*initials_enter_complete) (void);
@@ -55,7 +55,9 @@ void (*initials_enter_complete) (void);
 
 void enter_initials_deff (void)
 {
+#if (MACHINE_DMD == 1)
 	U8 n;
+#endif
 
 	while (task_find_gid (GID_ENTER_INITIALS))
 	{
