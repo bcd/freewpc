@@ -146,6 +146,10 @@ struct waiting_deff
 /**
  * A background task that repeatedly tries to start a display
  * effect for some time.
+ *
+ * TODO - if there are multiple waiters, it is best effort as to
+ * which one gets the display first.  A better scheme is for a
+ * separate task to run through the waitqueue in priority order.
  */
 static void deff_retry_task (void)
 {
