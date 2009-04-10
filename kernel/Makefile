@@ -9,7 +9,6 @@ KERNEL_BASIC_OBJS += $(if $(CONFIG_ANIMATION), kernel/animation.o)
 KERNEL_BASIC_OBJS += kernel/bcd.o
 KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
 KERNEL_BASIC_OBJS += kernel/idle.o
-KERNEL_BASIC_OBJS += kernel/list.o
 KERNEL_BASIC_OBJS += kernel/log.o
 KERNEL_BASIC_OBJS += kernel/misc.o
 KERNEL_BASIC_OBJS += kernel/puts.o
