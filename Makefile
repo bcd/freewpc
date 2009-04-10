@@ -9,7 +9,7 @@
 # To build the product, just type "make".
 #
 # To customize the build, create a file named .config.
-# See .config.example for an example of how this should look.
+# See config.example for an example of how this should look.
 # The settings in .config override any defaults given below.
 #
 # By default, make will also install your game ROM into your pinmame
@@ -268,7 +268,7 @@ SYSTEM_MAJOR = 0
 endif
 CFLAGS += -DFREEWPC_MAJOR_VERSION=$(SYSTEM_MAJOR)
 ifndef SYSTEM_MINOR
-SYSTEM_MINOR = 20
+SYSTEM_MINOR = 90
 endif
 CFLAGS += -DFREEWPC_MINOR_VERSION=$(SYSTEM_MINOR)
 ifndef MACHINE_MAJOR
@@ -355,6 +355,9 @@ endif
 
 # A list of the paged sections that we will use.  Not all pages
 # are currently needed.
+#
+# Alphanumeric games like Funhouse are restricted to 128KB total,
+# so only 6 non-system pages.  DMD games are allowed to use more.
 ifeq ($(CONFIG_DMD),y)
 PAGE_NUMBERS += 52 53 54 55
 endif
@@ -670,8 +673,8 @@ endif
 # which page we are trying to build.
 #
 # It is _extremely_ important that the order in which object files are
-# named here is the same for every page, otherwise references won't match
-# up with definitions.
+# named here is the same for every page, otherwise the address of
+# references won't match up with their actual definitions.
 #
 # Two helper functions are defined.  OBJ_PAGE_LINKOPT returns the
 # right linker option followed by the name of the object file, given
@@ -966,7 +969,7 @@ $(sort $(HOST_OBJS)) : %.o : %.c
 	$(Q)touch .include_mach && cd include && ln -s $(MACHINE) mach
 
 #
-# Remake machine prototypes file
+# Remake machine prototypes file.  This never happens by default.
 #
 protos : include/$(MACHINE)/protos.h
 

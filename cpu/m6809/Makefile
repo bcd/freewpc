@@ -6,6 +6,8 @@ C := platform/wpc
 
 CFLAGS =
 
+# Soft register support is not available in versions of
+# GCC-6809 prior to 4.0.
 ifneq ($(GCC_VERSION),3.4.6)
 SOFTREG_OPTIONS := -msoft-reg-count=4 -DSOFT_REG_COUNT=4
 endif

@@ -31,7 +31,7 @@
  *
  * The machine description file declares the containers and their
  * properties.  This module contains all of the common code
- * for servicing requests from the rest of the kernel.  This module
+ * for servicing requests from the rest of the system.  This module
  * exposes several per-device events that can be caught by the game
  * code, for example, when a ball enters a device or a kickout is
  * successful.
@@ -81,11 +81,13 @@ U8 held_balls;
  * Normally this is zero, and kickouts occur as soon as possible.
  * When nonzero, kickouts are delayed, e.g. to allow an effect to
  * run.  The lock is then released and things continue. */
+/* TODO - no way to lock only a particular device, which could be
+useful */
 U8 kickout_locks;
 
 /** The number of times in a row that game start was tried,
 but failed due to missing balls.  After so many errors, the
-game is started anyway. */
+game is allowed to start anyway. */
 U8 device_game_start_errors;
 
 
@@ -155,6 +157,9 @@ U8 device_recount (device_t *dev)
 	U8 i;
 	U8 count = 0;
 
+	/* Everytime a recount occurs, we remember the previous
+	value that was counted.  By comparing these two, we can
+	tell if something changed. */
 	dev->previous_count = dev->actual_count;
 
 	for (i=0; i < dev->size; i++)
@@ -165,6 +170,11 @@ U8 device_recount (device_t *dev)
 			count++;
 	}
 
+	/* Each device keeps a 'virtual count' of balls that it knows
+	are in the device but which are not seen by any switches.
+	The core system cannot determine what this count should be, but
+	just includes it in the overall count.  See APIs for below for
+	game code to update the virtual count. */
 	count += dev->virtual_count;
 
 	dev->actual_count = count;
@@ -380,6 +390,8 @@ wait_and_recount:
 			/* Pulse the solenoid. */
 			/* TODO - in this task context, we can wait for the queue to
 			be serviced. */
+			/* TODO - the pulse strength is implied.  Would be nice to
+			have differing pulses for retries */
 			sol_request (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
@@ -706,10 +718,20 @@ void device_remove_live (void)
 }
 
 
-/** Add a virtual ball to the device, not seen by any switches. */
+/** Add a virtual ball to the device, not seen by any switches.
+ * For example, TZ's gumball machine does not have individual switches
+ * counting how many balls are inside it.  The machine code has other
+ * means of knowing when a ball enters the device.
+ */
 void device_add_virtual (device_t *dev)
 {
 	dev->virtual_count++;
+
+	/* After updating the virtual count, always invoke the
+	device switch handler, as if some counting switch changed.
+	This will take care of throwing the 'enter' event and updating
+	the number of live balls, serving another ball if it is locked
+	here, etc. */
 	device_sw_handler (dev->devno);
 }
 
@@ -741,6 +763,8 @@ void device_multiball_set (U8 count)
 		U8 kicks = count - current_count;
 		while (kicks > 0)
 		{
+			/* TODO - what if not all of them can come from the
+			trough?  Need to release them from somewhere else maybe. */
 			device_request_kick (dev);
 			kicks--;
 		}
@@ -777,6 +801,9 @@ bool device_check_start_ok (void)
 	/* If some balls are unaccounted for, and not on the shooter,
 	 * then start a device probe and a ball search.  Alert the user
 	 * by displaying a message. */
+	/* TODO - e.g. what if a ball is sitting in the left plunger
+	lane on Road Show?  Ball search won't free it but the game
+	sees it... maybe a message to clear the shooter? */
 	if (truly_missing_balls > 0)
 	{
 		dbprintf ("%d balls missing.\n", truly_missing_balls);
@@ -818,12 +845,25 @@ void device_lock_ball (device_t *dev)
 	device_t *trough = device_entry (DEVNO_TROUGH);
 #endif
 
+	/* If the device is already locking as many balls
+	as it can hold, then trying to lock another ball here
+	is an error. */
 	if (dev->max_count >= dev->size)
 		fatal (ERR_LOCK_FULL_DEVICE);
 
 	dbprintf ("Lock ball in devno %d\n", dev->devno);
+
+	/* Update count of balls that will be held here. */
 	device_enable_lock (dev);
+
+	/* Say that there is one less active ball on the
+	playfield now. */
 	live_balls--;
+
+	/* If the trough is not empty, we can serve another ball from the
+	trough to continue play.  Otherwise, it will have to come from
+	somewhere else.  The default is to serve it from the same device,
+	but this can be overriden by the 'empty_trough_kick' event. */
 #ifdef DEVNO_TROUGH
 	if (trough->actual_count > 0)
 	{
