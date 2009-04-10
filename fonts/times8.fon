@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_times8_A_width 11
 #define glyph_times8_A_height 12
 static char glyph_times8_A_bits[] = { glyph_times8_A_width, glyph_times8_A_height,

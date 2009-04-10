@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_addlg_A_width 14
 #define glyph_addlg_A_height 14
 static char glyph_addlg_A_bits[] = { glyph_addlg_A_width, glyph_addlg_A_height,

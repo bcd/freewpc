@@ -28,7 +28,7 @@
 struct generic_ladder
 {
 	U8 *scores;
-	U8 size;
+	const U8 size;
 	U8 *level;
 };
 
@@ -39,21 +39,21 @@ struct generic_ladder
  */
 struct fixed_ladder
 {
-	score_t base;
-	score_t increment;
-	score_t max;
-	score_t *current;
+	const score_t base;
+	const score_t increment;
+	const score_t max;
+	score_pointer_t current;
 };
 
 
 
-void generic_ladder_reset (struct generic_ladder *ladder)
+void generic_ladder_reset (const struct generic_ladder *ladder)
 {
 	*(ladder->level) = 0;
 }
 
 
-void generic_ladder_score (struct generic_ladder *ladder)
+void generic_ladder_score (const struct generic_ladder *ladder)
 {
 	score (ladder->scores[*(ladder->level)]);
 	(*(ladder->level))++;
@@ -61,19 +61,19 @@ void generic_ladder_score (struct generic_ladder *ladder)
 
 
 
-void fixed_ladder_reset (struct fixed_ladder *ladder)
+void fixed_ladder_reset (const struct fixed_ladder *ladder)
 {
 	score_copy (ladder->current, ladder->base);
 }
 
-void fixed_ladder_score_multiple (struct fixed_ladder *ladder, U8 multiplier)
+void fixed_ladder_score_multiple (const struct fixed_ladder *ladder, U8 multiplier)
 {
 	score_long_multiple (ladder->current, multiplier);
 	if (score_compare (ladder->current, ladder->max) == -1)
 		score_add (ladder->current, ladder->increment);
 }
 
-void fixed_ladder_score (struct fixed_ladder *ladder)
+void fixed_ladder_score (const struct fixed_ladder *ladder)
 {
 	fixed_ladder_score_multiple (ladder, 1);
 }

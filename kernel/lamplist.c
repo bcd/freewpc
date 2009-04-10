@@ -22,14 +22,15 @@
  * \file
  * \brief Routines for working with groups of related lamps
  *
- * A lamplist is a descriptor that represents a set of lamps.
+ * A lamplist is an ordered set of lamps.
  * Often, related lamps are modified together; these routines
  * provide the common logic.
  *
  * A lamplist is the minimum allocation unit for a lamp effect
- * Lamp effects specify the lamplist that they want to use.
+ * Lamp effects specify the lamplist that they want to use, and
+ * only those lamps are modifiable.
  *
- * Lampset themselves are declared in the machine configuration file,
+ * Lamplists themselves are declared in the machine configuration file,
  * which is compiled to produce mach-lamplists.c.  Internally, each
  * lamplist is just an array of lamp IDs, terminated by the special
  * value LAMP_END.

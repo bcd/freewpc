@@ -511,8 +511,8 @@ struct audit main_audits[] = {
 	{ "TOTAL EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
 	{ "RECENT EARNINGS", AUDIT_TYPE_NONE, NULL },
 	{ "FREEPLAY PERCENT", AUDIT_TYPE_NONE, NULL },
-	{ "AVG. BALL TIME", AUDIT_TYPE_NONE, NULL },
-	{ "TIME PER CREDIT", AUDIT_TYPE_SECS, &default_audit_value },
+	{ "AVG. BALL TIME", AUDIT_TYPE_TIME_PER_BALL, &system_audits.total_game_time },
+	{ "TIME PER CREDIT", AUDIT_TYPE_TIME_PER_CREDIT, &system_audits.total_game_time },
 	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
 	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
 	{ "PERCENT REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
@@ -593,7 +593,10 @@ void audit_browser_draw (void)
 
 	if (aud->nvram)
 	{
-		render_audit (*(aud->nvram), aud->format);
+		if (aud->format >= AUDIT_TYPE_TIMESTAMP)
+			render_audit ((U16)aud->nvram, aud->format);
+		else
+			render_audit (*(aud->nvram), aud->format);
 		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
 	}
 

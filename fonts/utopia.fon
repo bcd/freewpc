@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_utopia_0_width 6
 #define glyph_utopia_0_height 10
 static char glyph_utopia_0_bits[] = { glyph_utopia_0_width, glyph_utopia_0_height,

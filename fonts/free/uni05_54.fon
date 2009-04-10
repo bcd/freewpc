@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_uni05_54_A_width 12
 #define glyph_uni05_54_A_height 15
 static char glyph_uni05_54_A_bits[] = { glyph_uni05_54_A_width, glyph_uni05_54_A_height,

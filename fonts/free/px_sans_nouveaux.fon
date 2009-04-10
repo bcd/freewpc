@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_px_sans_nouveaux_A_width 13
 #define glyph_px_sans_nouveaux_A_height 24
 static char glyph_px_sans_nouveaux_A_bits[] = { glyph_px_sans_nouveaux_A_width, glyph_px_sans_nouveaux_A_height,

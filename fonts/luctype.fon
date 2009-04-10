@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_luctype_0_width 6
 #define glyph_luctype_0_height 10
 static char glyph_luctype_0_bits[] = { glyph_luctype_0_width, glyph_luctype_0_height,

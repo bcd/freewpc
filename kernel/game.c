@@ -139,9 +139,6 @@ void end_game (void)
 		/* Kill the flippers in case still enabled */
 		flipper_disable ();
 
-		/* Stop the long-running score screen */
-		deff_stop (DEFF_SCORES);
-
 		/* If in test mode now (i.e. the game was aborted
 		by pressing Enter), then skip over the end game effects. */
 		if (!in_test)
@@ -268,13 +265,15 @@ void end_ball (void)
 	}
 
 	/* If this is the last ball of the game for this player,
-	 * then offer to buy an extra ball if enabled. */
+	 * then offer to buy an extra ball if enabled.  Also
+	 * save away the per-player audits. */
 	if (ball_up == system_config.balls_per_game)
 	{
 		if (system_config.buy_extra_ball == YES)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
 		}
+		callset_invoke (end_player);
 	}
 
 	/* Advance to the next player in a multiplayer game.
@@ -583,6 +582,9 @@ void stop_game (void)
 	deff_stop_all ();
 	leff_stop_all ();
 	callset_invoke (stop_game);
+
+	/* TODO : Per-player audits should also be chalked, but only if
+	 * the final ball of the game was started */
 }
 
 
@@ -706,11 +708,11 @@ CALLSET_ENTRY (game, display_update)
 {
 	if (in_game)
 	{
-		deff_start_bg (DEFF_SCORES, 0);
+		deff_start_bg (DEFF_SCORES, PRI_SCORES);
 	}
 	else
 	{
-		deff_start_bg (DEFF_AMODE, 0);
+		deff_start_bg (DEFF_AMODE, PRI_AMODE);
 	}
 }
 

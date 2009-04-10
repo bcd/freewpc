@@ -31,7 +31,7 @@
 #define BYTES_PER_SCORE ((MACHINE_SCORE_DIGITS+1)/2)
 
 /** The standard score type, kept in packed BCD, 2 digits per byte */
-typedef bcd_t score_t[BYTES_PER_SCORE];
+typedef bcd_t score_t[BYTES_PER_SCORE], *score_pointer_t;
 
 typedef U8 score_id_t;
 
@@ -83,7 +83,6 @@ void score_sub (score_t s1, const score_t s2);
 void score_mul (score_t s1, U8 multiplier);
 I8 score_compare (const score_t s1, const score_t s2);
 
-//void score_award (const bcd_t *s);
 void score_award_compact (U8 offset, bcd_t val);
 
 void score (score_id_t id);
@@ -94,7 +93,7 @@ void score_long_multiple (const score_t score, U8 multiplier);
 void score_long (const score_t score);
 
 void score_deff_set (void);
-bcd_t *score_deff_get (void);
+score_pointer_t score_deff_get (void);
 
 void scores_reset (void);
 void score_init (void);

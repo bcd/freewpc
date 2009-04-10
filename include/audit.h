@@ -22,11 +22,25 @@
 #define _AUDIT_H
 
 /**
- * An audit variable.  Audits are 16-bit integers stored in
- * non-volatile memory.  TODO - this isn't large enough.
- * We really need multibyte BCD vars here.
+ * An audit variable.  Most audits are 16-bit integers stored in
+ * non-volatile memory.
  */
 typedef U16 audit_t;
+
+/**
+ * Some audits need more than 16-bits.  These are called
+ * long audits and are stored as 3-byte binary-coded decimal.
+ */
+typedef U8 long_audit_t[3];
+
+
+typedef struct
+{
+	U16 hr;
+	U8 min;
+	U8 sec;
+} timestamp_t;
+
 
 /**
  * The table of standard WPC system audits.
@@ -46,13 +60,13 @@ typedef struct
 	audit_t hstd_credits; /* done */
 	audit_t tickets_awarded;
 	audit_t extra_balls_awarded; /* done */
-	audit_t total_game_time;
+	audit_t __unused_total_game_time; /* TODO */
 	audit_t minutes_on; /* done */
 	audit_t balls_played; /* done */
 	audit_t tilts; /* done */
 	audit_t left_drains; /* done */
 	audit_t right_drains; /* done */
-	audit_t center_drains;
+	audit_t center_drains; /* done */
 	audit_t power_ups; /* done */
 	audit_t slam_tilts; /* done */
 	audit_t plumb_bob_tilts; /* done */
@@ -63,9 +77,10 @@ typedef struct
 	audit_t lockup1_addr; /* done */
 	audit_t lockup1_pid_lef; /* done */
 	audit_t nplayer_games[4];
-	audit_t exec_lockups;
+	audit_t exec_lockups; /* done */
 	audit_t trough_rescues;
 	audit_t chase_balls;
+	timestamp_t total_game_time;
 } std_audits_t;
 
 extern __nvram__ std_audits_t system_audits;
@@ -74,5 +89,16 @@ void audit_reset (void);
 void audit_increment (audit_t *aud);
 void audit_add (audit_t *aud, U8 val);
 void audit_assign (audit_t *aud, audit_t val);
+
+__test2__ void timestamp_format (timestamp_t *t);
+__test2__ void timestamp_clear (timestamp_t *t);
+__test2__ void timestamp_validate (timestamp_t *t);
+//__test2__ void timestamp_normalize (timestamp_t *t);
+__test2__ void timestamp_add (timestamp_t *dst, timestamp_t *src);
+__test2__ void timestamp_add_sec (timestamp_t *t, U16 seconds);
+__test2__ void timestamp_copy (timestamp_t *dst, timestamp_t *src);
+__test2__ void timestamp_divide (timestamp_t *t, U16 n);
+__test2__ void timestamp_format_per_ball (timestamp_t *t);
+__test2__ void timestamp_format_per_credit (timestamp_t *t);
 
 #endif /* _STDADJ_H */

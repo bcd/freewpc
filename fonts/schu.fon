@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_schu_0_width 6
 #define glyph_schu_0_height 10
 static char glyph_schu_0_bits[] = { glyph_schu_0_width, glyph_schu_0_height,

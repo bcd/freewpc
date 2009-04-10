@@ -1,5 +1,4 @@
 #include <freewpc.h>
-#pragma section ("page61")
 #define glyph_fixed6_A_width 9
 #define glyph_fixed6_A_height 9
 static char glyph_fixed6_A_bits[] = { glyph_fixed6_A_width, glyph_fixed6_A_height,

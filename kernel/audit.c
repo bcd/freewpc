@@ -99,6 +99,6 @@ void audit_assign (audit_t *aud, audit_t val)
 
 CALLSET_ENTRY (sys_audit, factory_reset)
 {
-       audit_reset ();
+	audit_reset ();
 }
 
