@@ -196,6 +196,9 @@ void integer_audit (audit_t val)
 	sprintf ("%ld", val);
 }
 
+void long_integer_audit (long_audit_t *val)
+{
+}
 
 void secs_audit (audit_t val)
 {
@@ -333,6 +336,15 @@ void render_audit (audit_t val, audit_format_type_t type)
 			break;
 		case AUDIT_TYPE_HEX4:
 			hex4_audit (val);
+			break;
+		case AUDIT_TYPE_LONGINT:
+			/* TODO long_integer_audit (val); */
+			break;
+		case AUDIT_TYPE_TIME_PER_BALL:
+			timestamp_format_per_ball ((timestamp_t *)val);
+			break;
+		case AUDIT_TYPE_TIME_PER_CREDIT:
+			timestamp_format_per_credit ((timestamp_t *)val);
 			break;
 		default:
 			break;

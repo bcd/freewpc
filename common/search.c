@@ -51,6 +51,12 @@ U8 ball_search_timeout;
 
 U8 ball_search_count;
 
+/** The amount of time in seconds that this ball has lasted */
+U16 ball_time;
+
+/** The amount of time in seconds that this ball has lasted */
+__local__ U16 game_time;
+
 /** Returns true if the given solenoid is OK to fire during
  * a ball search.  The following should be avoided:
  * - kickout coils from ball devices
@@ -188,6 +194,7 @@ void ball_search_monitor_task (void)
 				&& !switch_poll_logical (SW_LEFT_BUTTON)
 				&& !switch_poll_logical (SW_RIGHT_BUTTON))
 		{
+			ball_time++;
 			ball_search_timer_step ();
 			if (ball_search_timed_out ())
 			{
@@ -225,4 +232,24 @@ CALLSET_ENTRY (ball_search, init)
 {
 	ball_search_timeout_set (BS_TIMEOUT_DEFAULT);
 }
+
+CALLSET_ENTRY (ball_search, start_player)
+{
+	game_time = 0;
+}
+
+CALLSET_ENTRY (ball_search, start_ball)
+{
+	ball_time = 0;
+}
+
+CALLSET_ENTRY (ball_search, end_ball)
+{
+	game_time += ball_time;
+	if (game_time < ball_time)
+	{
+		game_time = 0xFFFFUL;
+	}
+}
+
 

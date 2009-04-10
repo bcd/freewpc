@@ -6,4 +6,4 @@ TEST2_OBJS += test/preset.o
 TEST2_OBJS += $(if $(CONFIG_DMD),test/swtest.o)
 TEST2_OBJS += $(if $(CONFIG_DMD),test/dmdtest.o)
 TEST2_OBJS += test/adjust.o
-
+TEST2_OBJS += test/timestamp.o
