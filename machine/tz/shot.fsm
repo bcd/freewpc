@@ -19,6 +19,8 @@
 #
 # The script tools/fsmgen translates this description into C code.
 #
+# TODO - this mechanism is obsolete and should be replaced by
+# simpler code.
 
 #################################################################
 # Recognize loop shots.
@@ -107,51 +109,4 @@ skillshot {
 		throw skill_shot_red;
 	}
 }
-
-
-# A template declaration (not supported yet -- this is theoretical :-).
-# This provides the common framework for FSM, but which is
-# parameterized.  Substitutions are entirely textual and
-# similar to a #define.
-#
-#template gatedramp<gate_switch, made_switch, timeout, enter_event, \
-#   made_event, abort_event> {
-#	* : init => INIT
-#	INIT : gate_switch => entered
-#	{
-#		throw enter_event;
-#	}
-#	INIT, entered : made_switch => INIT
-#	{
-#		throw made_event;
-#	}
-#	entered : timeout, gate_switch => INIT
-#	{
-#		throw abort_event;
-#	}
-#}
-#
-# An example of a template instantiation:
-#
-# left_ramp_shot : gatedramp<sw_left_ramp_enter, sw_left_ramp_made, \
-#   timeout, left_ramp_enter, left_ramp_made, left_ramp_abort> {
-# }
-#
-# Note that this is a sufficient definition.  We could also
-# include additional rules here that would extend or override the
-# rules in the template.
-#
-
-# Another template example:
-#
-# template always_precedes<s1, s2, timeout> {
-# 	* : init => INIT
-# 	INIT, started : s1 => started
-# 	started : s2 => INIT
-# 	started : timeout => INIT
-# 	INIT : s2 => INIT
-# 	{
-# 		throw s1;
-# 	}
-# }
 
