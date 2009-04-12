@@ -93,29 +93,55 @@ void timestamp_copy (timestamp_t *dst, timestamp_t *src)
  * This is going to be ugly.
  *
  */
-void timestamp_divide (timestamp_t *t, U16 n)
+void timestamp_divide (timestamp_t *t, volatile U16 n)
 {
+	U16 dividend;
+
+	dividend = t->hr;
+	t->hr = 0;
+	while (dividend >= n)
+	{
+		dividend -= n;
+		t->hr++;
+	}
+
+	dividend = (dividend * 60) + t->min;
+	t->min = 0;
+	while (dividend >= n)
+	{
+		dividend -= n;
+		t->min++;
+	}
+
+	dividend = (dividend * 60) + t->sec;
+	t->sec = 0;
+	while (dividend >= n)
+	{
+		dividend -= n;
+		t->sec++;
+	}
 }
 
 void timestamp_format_per_ball (timestamp_t *t)
 {
-	timestamp_format (t);
+	timestamp_t per_ball;
+	timestamp_copy (&per_ball, t);
+	timestamp_divide (&per_ball, 1); /* TODO - total balls??? */
+	timestamp_format (&per_ball);
 }
 
 void timestamp_format_per_credit (timestamp_t *t)
 {
-	timestamp_format (t);
+	timestamp_t per_credit;
+	timestamp_copy (&per_credit, t);
+	timestamp_divide (&per_credit, system_audits.total_plays);
+	timestamp_format (&per_credit);
 }
 
 CALLSET_ENTRY (timestamp, init)
 {
 	/* TODO - validate instead */
 	wpc_nvram_get ();
-#if 0
-	system_audits.total_game_time.hr = 1;
-	system_audits.total_game_time.min = 2;
-	system_audits.total_game_time.sec = 3;
-#endif
 	timestamp_clear (&system_audits.total_game_time);
 	csum_area_update (&audit_csum_info);
 	wpc_nvram_put ();
@@ -125,8 +151,9 @@ CALLSET_ENTRY (timestamp, init)
 CALLSET_ENTRY (timestamp, end_player)
 {
 	extern U16 game_time;
-	dbprintf ("%lds for this player.\n", game_time);
 
+	/* TODO - don't do this if the player's game was
+	 * aborted early */
 	wpc_nvram_get ();
 	timestamp_add_sec (&system_audits.total_game_time, game_time);
 	csum_area_update (&audit_csum_info);
