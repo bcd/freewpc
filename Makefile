@@ -516,12 +516,12 @@ clean_err:
 check_prereqs : $(BLDDIR) tools sched
 
 .PHONY : run
-run: install
+run:
 	# Start pinmame up and let it run indefinitely.
 	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
 
 .PHONY : debug
-debug: install
+debug:
 	# Start pinmame up and let it run indefinitely.
 	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
 
@@ -786,7 +786,7 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 
 ifeq ($(CPU),m6809)
 $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
-$(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
+$(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS) $(TEST2_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 endif
 
 $(NATIVE_OBJS) $(C_OBJS) : %.o : %.c
@@ -823,7 +823,7 @@ endif
 ###	Machine Description Compiler
 #######################################################################
 ifneq ($(CONFIG_BARE),y)
-CONFIG_CMDS = dump strings switchmasks containers switches scores lamplists deffs drives
+CONFIG_CMDS = strings switchmasks containers switches scores lamplists deffs drives
 ifeq ($(CONFIG_FONT),y)
 CONFIG_CMDS += fonts
 endif
