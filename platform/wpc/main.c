@@ -27,6 +27,7 @@
 
 void exit (void)
 {
+	fatal (ERR_LIBC_ABORT);
 }
 
 
