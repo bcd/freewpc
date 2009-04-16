@@ -105,12 +105,12 @@ CALLSET_ENTRY (ultra, left_ramp_shot, right_ramp_shot)
 	ultra_collect (&ultra_award_table[0]);
 }
 
-CALLSET_ENTRY (ultra, sw_goalie)
+CALLSET_ENTRY (ultra, sw_goalie_target)
 {
 	ultra_collect (&ultra_award_table[1]);
 }
 
-CALLSET_ENTRY (ultra, sw_left_jet, sw_right_jet, sw_bottom_jet)
+CALLSET_ENTRY (ultra, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
 	ultra_collect (&ultra_award_table[2]);
 }
