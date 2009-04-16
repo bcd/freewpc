@@ -60,7 +60,7 @@ sol_req_rtt           1       25c
 lamp_rtt/4            2       111c
 
 # Toggle the CPU board LED
-!wpc_led_toggle       64      14c
+!pinio_active_led_toggle 64   14c
 
 # Read/write the sound board
 sound_write_rtt       2       20c
@@ -83,6 +83,9 @@ seg_rtt?CONFIG_SEG    1       100c
 
 # Profile idle time
 idle_profile_rtt      1024    100c # guess?
+
+# Profile debugger
+db_write_rtt          32      25c # guess?
 
 # TODO : service the coin switches correctly to ensure proper timing
 
