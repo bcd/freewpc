@@ -514,9 +514,11 @@ CALLSET_ENTRY (printf, amode_start)
 }
 
 
+/** At initialization, don't trust the adjustments and default
+ * to US style. */
 CALLSET_ENTRY (printf, init)
 {
-	printf_amode_start ();
+	separator_char = '.';
 }
 
 
