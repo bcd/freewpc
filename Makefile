@@ -764,9 +764,7 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 # Many options are passed to gcc, and these differ depending on the type
 # of file being compiled:
 #
-#    PAGEFLAGS sets a macro 'DECLARED_PAGED' to be used on function
-#    and variable definitions for asserting what page they are in.
-#    Only the XBM image files need this defined.
+#    PAGEFLAGS is only used by font files, and may be removed later...
 #
 #    SOFTREG_CFLAGS says how many soft registers should be used, if any.
 #    It is unsafe to use soft registers in any file which declares
@@ -973,23 +971,6 @@ protos : include/$(MACHINE)/protos.h
 include/$(MACHINE)/protos.h :
 	cproto -o $@ -I include -I include/sys $(MACHINE)/*.c
 
-#
-# Install to the web server
-# Set the location of the web documents in WEBDIR in your .config.
-#
-web : webdocs
-
-webdocs : webdir
-	cp -p doc/* $(WEBDIR)
-	cd $(WEBDIR) && chmod -R og+w *
-
-ifdef WEBDIR
-webdir : $(WEBDIR)
-
-$(WEBDIR):
-	mkdir -p $(WEBDIR)
-	mkdir -p $(WEBDIR)/releases
-endif
 
 #
 # Documentation (doxygen)
@@ -1019,7 +1000,6 @@ info:
 	$(Q)echo "CONFIG_FONT = $(CONFIG_FONT)"
 	$(Q)echo "MACH_DESC = $(MACH_DESC)"
 	$(Q)echo "HOST_OBJS = $(HOST_OBJS)"
-	$(Q)echo "CONFIG_BARE = $(CONFIG_BARE)"
 	$(Q)echo "SCHED_FLAGS = $(SCHED_FLAGS)"
 	$(Q)echo "NATIVE_PROG = $(NATIVE_PROG)"
 	$(Q)echo "NATIVE_OBJS = $(NATIVE_OBJS)"
@@ -1046,10 +1026,10 @@ clean: clean_derived clean_build clean_gendefines clean_tools
 
 .PHONY : clean_derived
 clean_derived:
-	$(Q)for file in `echo $(XBM_H) mach include/mach` ;\
+	$(Q)for file in `echo mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
-		rm -rf .mach .include_mach && \
+		rm -rf mach .include_mach && \
 		rm -f *.s *.i
 
 .PHONY : clean_build
