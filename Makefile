@@ -1029,7 +1029,7 @@ clean_derived:
 	$(Q)for file in `echo mach include/mach` ;\
 		do echo "Removing derived file $$file..." && \
 		rm -f $$file; done && \
-		rm -rf mach .include_mach && \
+		rm -rf .mach .include_mach && \
 		rm -f *.s *.i
 
 .PHONY : clean_build
