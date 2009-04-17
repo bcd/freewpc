@@ -63,7 +63,7 @@ void tv_collect (void)
 }
 
 
-CALLSET_ENTRY (tv, tv_popper_enter)
+CALLSET_ENTRY (tv, dev_tv_popper_enter)
 {
 	if (flag_test (FLAG_TV_LIT))
 	{

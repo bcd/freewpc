@@ -311,7 +311,7 @@ back will return a single bit set (0x1, 0x2, etc. up to 0x80). */
 #define WPC_LED_DIAGNOSTIC		0x80
 
 /** Toggle the diagnostic LED. */
-extern inline void wpc_led_toggle (void)
+extern inline void pinio_active_led_toggle (void)
 {
 	io_toggle_bits (WPC_LEDS, WPC_LED_DIAGNOSTIC);
 }

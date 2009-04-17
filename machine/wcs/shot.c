@@ -73,7 +73,7 @@ CALLSET_ENTRY (shot, sw_l_ramp_enter)
 	shot on a jet bumper hit */
 }
 
-CALLSET_ENTRY (shot, any_jet)
+CALLSET_ENTRY (ramp_shot, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
 }
 
