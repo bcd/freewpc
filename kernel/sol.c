@@ -309,14 +309,11 @@ else return the bitmask that reflects that solenoid's
 position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
-#ifdef CONFIG_OLD_SOL
-	if (MACHINE_SOLENOID_P (id) || MACHINE_SOL_FLASHERP (id))
-#else
 	if (MACHINE_SOL_FLASHERP (id))
-#endif
 		if (likely (sol_timers[id] != 0))
 		{
 			sol_timers[id]--;
+
 			if (likely (sol_duty_state[id] & sol_duty_mask))
 				return 1;
 		}
@@ -479,13 +476,19 @@ sol_stop (solnum_t sol)
 void
 sol_init (void)
 {
+	U8 sol;
+
 	/* Clear all of the solenoid timers. */
 	memset (sol_timers, 0, sizeof (sol_timers));
 
-	/* Set all of the duty cycle masks to 0xFF, or 100%.  Interrupt-level
-	 * code that wants to enable an output quickly can do so by just
-	 * writing to the timer.  TODO : this is not particularly safe */
-	memset (sol_duty_state, 0xFF, sizeof (sol_duty_state));
+	/* Initialize the duty state of all solenoids to their nominal
+	 * values. */
+	for (sol = 0; sol < SOL_COUNT; sol++)
+	{
+		sol_duty_state[sol] = sol_get_duty (sol);
+	}
+
+	/* Initialize the rotating duty strobe mask */
 	sol_duty_mask = 0x1;
 
 	sol_req_state = REQ_IDLE;
