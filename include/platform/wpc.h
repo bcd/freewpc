@@ -604,7 +604,7 @@ extern inline U8 wpc_read_locale (void)
 
 
 /* Read the current ticket switches. */
-extern inline U8 wpc_read_ticket (void)
+extern inline U8 pinio_read_ticket (void)
 {
 	/* Reading back a value of 0xFF indicates that
 	 * the ticket board is not present.  Otherwise,
@@ -615,7 +615,7 @@ extern inline U8 wpc_read_ticket (void)
 
 
 /* Write the ticket output drivers. */
-extern inline void wpc_write_ticket (U8 val)
+extern inline void pinio_write_ticket (U8 val)
 {
 	writeb (WPC_TICKET_DISPENSE, val);
 }

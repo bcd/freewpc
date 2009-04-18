@@ -47,13 +47,13 @@ CALLSET_ENTRY (ticket, idle_every_100ms)
 {
 	if (ticket_connected)
 	{
-		ticket_switches = wpc_read_ticket ();
+		ticket_switches = pinio_read_ticket ();
 
 		if (ticket_out_count > 0)
 		{
 		}
 
-		wpc_write_ticket (ticket_pulses);
+		pinio_write_ticket (ticket_pulses);
 	}
 }
 
@@ -67,7 +67,7 @@ CALLSET_ENTRY (ticket, init)
 	if (system_config.ticket_board == NO)
 		return;
 
-	ticket_switches = wpc_read_ticket ();
+	ticket_switches = pinio_read_ticket ();
 	if (ticket_switches != 0xFF)
 	{
 		ticket_connected++;
