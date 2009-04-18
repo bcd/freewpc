@@ -164,11 +164,11 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 26: Trough Proximity, edge, noscore
 27: Shooter, edge, shooter, noscore
 28: Rocket Kicker
-31: Left Jet, ingame, c_decl(sw_jet), fast, Left Jet, noplay
-32: Right Jet, ingame, c_decl(sw_jet), fast, Right Jet, noplay
-33: Bottom Jet, ingame, c_decl(sw_jet), fast, Bottom Jet, noplay
-34: Left Sling, ingame, c_decl(sw_sling), fast, Left Slingshot, noplay
-35: Right Sling, ingame, c_decl(sw_sling), fast, Right Slingshot, noplay
+31: Left Jet, ingame, c_decl(sw_jet), Left Jet, noplay
+32: Right Jet, ingame, c_decl(sw_jet), Right Jet, noplay
+33: Bottom Jet, ingame, c_decl(sw_jet), Bottom Jet, noplay
+34: Left Sling, ingame, c_decl(sw_sling), Left Slingshot, noplay
+35: Right Sling, ingame, c_decl(sw_sling), Right Slingshot, noplay
 36: Left Outlane, ingame, sound(SND_DRAIN)
 37: Left Inlane 1, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE1)
 38: Left Inlane 2, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_LEFT_INLANE2)
