@@ -84,8 +84,5 @@ seg_rtt?CONFIG_SEG    1       100c
 # Profile idle time
 idle_profile_rtt      1024    100c # guess?
 
-# Profile debugger
-db_write_rtt          32      25c # guess?
-
 # TODO : service the coin switches correctly to ensure proper timing
 
