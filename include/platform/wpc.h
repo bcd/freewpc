@@ -622,6 +622,7 @@ extern inline void pinio_write_solenoid (U8 solno, U8 val)
 
 extern inline U8 pinio_read_solenoid (U8 solno)
 {
+	return 0;
 }
 
 
