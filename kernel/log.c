@@ -120,7 +120,7 @@ void log_event1 (U16 module_event, U8 arg)
 	/* If the builtin debugger is present (in simulation),
 	write a message as well.  This replaces the older printfs
 	that were scattered through the code. */
-#ifdef DEBUGGER
+#ifdef DEBUG_LOG
 	dbprintf ("%s %s %02X\n", log_module_names[module_part(module_event)],
 		log_get_format (module_event), arg);
 #endif
