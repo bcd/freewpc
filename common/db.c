@@ -36,11 +36,6 @@
  * debug output to go out the parallel port instead.
  */
 #include <freewpc.h>
-#ifdef __m6809__
-#include <m6809/math.h>
-#else
-#include <native/math.h>
-#endif
 
 
 /** Nonzero when the system (all tasks except for interrupts)
@@ -159,15 +154,17 @@ void db_idle (void)
 /** Initialize the debugger */
 void db_init (void)
 {
-	wpc_debug_write (0);
-#ifdef CONFIG_SHORT_STRINGS_ONLY
-	db_puts ("FREEWPC\n");
-#else
-	db_puts ("\n\n"
-		"----------------------------------------------------------\n"
-		"FREEWPC DEBUGGER\n"
-		"----------------------------------------------------------\n\n");
-#endif
 	db_paused = 0;
+
+#ifdef DEBUGGER
+	/* Signal the debugger that the system has just reset. */
+	wpc_debug_write (0);
+
+	/* Announce myself to the world. */
+	dbprintf ("FreeWPC\n");
+	dbprintf ("System Version %s.%s\n",
+		C_STRING (MACHINE_MAJOR_VERSION), C_STRING (MACHINE_MINOR_VERSION));
+	dbprintf ("%s\n\n", MACHINE_NAME);
+#endif /* DEBUGGER */
 }
 
