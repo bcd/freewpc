@@ -259,7 +259,7 @@ void fatal (errcode_t error_code)
 	pinio_write_triac (0);
 	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 		wpc_write_flippers (0);
-	wpc_write_ticket (0);
+	pinio_write_ticket (0);
 	pinio_write_solenoid_set (0, 0);
 	pinio_write_solenoid_set (1, 0);
 	pinio_write_solenoid_set (2, 0);
