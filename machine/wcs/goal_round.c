@@ -125,7 +125,6 @@ CALLSET_ENTRY (goalround, goal_shot)
 
 CALLSET_ENTRY (goalround, lamp_update)
 {
-	dbprintf ("build_shots = %02X\n", lit_build_shots);
 	if (flag_test (FLAG_GOAL_LIT))
 	{
 		lamp_tristate_flash (LM_GOAL);
