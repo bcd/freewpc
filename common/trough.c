@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -71,7 +71,13 @@ CALLSET_ENTRY (trough, sw_outhole, init_complete)
 #endif /* MACHINE_OUTHOLE_SWITCH */
 }
 
+
 /* TODO - handle trough stack/jam switch on newer games */
+CALLSET_ENTRY (trough, sw_trough_jam)
+{
+#ifdef MACHINE_TROUGH_JAM_SWITCH
+#endif /* MACHINE_TROUGH_JAM_SWITCH */
+}
 
 
 CALLSET_ENTRY (trough, dev_trough_enter)

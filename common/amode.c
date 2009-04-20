@@ -254,6 +254,8 @@ __attribute__((noreturn)) void system_amode_deff (void)
 	amode_page = 0;
 	for (;;)
 	{
+		if (amode_page == 1)
+			callset_invoke (amode_page);
 		amode_page_table[amode_page] ();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -146,7 +146,7 @@ the common information. */
 unsigned int n_tasks = 0;
 struct task tasks[MAX_TASKS];
 
-/* The configured maximum of number of ticks to use.  Unrolling 
+/* The configured maximum of number of ticks to use.  Unrolling
 will not happen more than this. */
 unsigned int max_ticks = 8;
 
@@ -322,7 +322,7 @@ void write_tick_driver (FILE *f)
 
 					if (slot->task->already_unrolled_count)
 					{
-						unsigned int n1 = n % 
+						unsigned int n1 = n %
 							(slot->task->already_unrolled_count * slot->task->period);
 						unsigned int suffix = n1 / slot->task->period;
 
@@ -644,16 +644,55 @@ double parse_time (const char *string)
 
 
 /**
- * Parse an input schedule file.
+ * Parse one line of an input schedule file.
  */
-void parse_schedule (FILE *f)
+void parse_sched_entry (char *line)
 {
 	char *name;
 	unsigned int period;
 	float len;
+	const char *delims = " \t\n";
+
+	name = strtok (line, delims);
+	if (!name || *name == '#')
+		return;
+
+	period = (unsigned int)parse_time (strtok (NULL, delims));
+	if (period & (period - 1))
+	{
+		fprintf (stderr,
+			"error: invalid period '%d' for '%s' (must be power of 2)\n",
+			period, name);
+		exit (1);
+	}
+
+	len = parse_time (strtok (NULL, delims));
+	if (len >= period)
+	{
+		fprintf (stderr,
+			"error: '%s' has length greater than its period\n", name);
+		exit (1);
+	}
+
+	add_task (name, period, len);
+}
+
+
+void add_cmdline_entry (const char *arg)
+{
+	char line[512];
+	strcpy (line, arg);
+	parse_sched_entry (line);
+}
+
+
+/**
+ * Parse an input schedule file.
+ */
+void parse_schedule (FILE *f)
+{
 	char line[512];
 	int lineno = 0;
-	const char *delims = " \t\n";
 
 	for (;;)
 	{
@@ -664,29 +703,7 @@ void parse_schedule (FILE *f)
 #if 0
 		fprintf (stderr, "<<%03d>>  %s", lineno, line);
 #endif
-
-		name = strtok (line, delims);
-		if (!name || *name == '#')
-			continue;
-
-		period = (unsigned int)parse_time (strtok (NULL, delims));
-		if (period & (period - 1))
-		{
-			fprintf (stderr, 
-				"error: invalid period '%d' for '%s' (must be power of 2)\n", 
-				period, name);
-			exit (1);
-		}
-
-		len = parse_time (strtok (NULL, delims));
-		if (len >= period)
-		{
-			fprintf (stderr, 
-				"error: '%s' has length greater than its period\n", name);
-			exit (1);
-		}
-
-		add_task (name, period, len);
+		parse_sched_entry (line);
 	}
 }
 
@@ -721,10 +738,9 @@ int main (int argc, char *argv[])
 					prefix = argv[argn];
 					break;
 
-				/* TODO - add option to add a task directly from the
-				command-line, without requiring a file; this would make it
-				easier to generate the task list on-the-fly, for making
-				certain things optional */
+				case 'e':
+					add_cmdline_entry (argv[argn]);
+					break;
 
 				case 'D':
 					conditionals[n_conditionals++] = argv[argn];
@@ -734,6 +750,11 @@ int main (int argc, char *argv[])
 		else
 		{
 			FILE *infile = fopen (argv[argn], "r");
+			if (!infile)
+			{
+				fprintf (stderr, "error: cannot open schedule '%s'\n", argv[argn]);
+				exit (1);
+			}
 			parse_schedule (infile);
 			fclose (infile);
 		}

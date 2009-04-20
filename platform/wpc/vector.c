@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -60,15 +60,31 @@ typedef struct
 
 /** The interrupt vector table.  Each platform may define the
  * callbacks differently, except for the reset vector which
- * always map to the start function. */
+ * always maps to the start function. */
 __attribute__((section("vector"))) m6809_vector_table_t vectors = {
 #ifdef CONFIG_PLATFORM_WPC
+	/* The unused vector should never occur.  It is treated like hard reset. */
 	.unused = start,
+
+	/* The SWI, SWI2, and SWI3 interrupts occur when instructions generate
+	 * them.  FreeWPC doesn't use them, but an invalid branch into data could
+	 * possibly generate one.  So catch them, log the error, and then reset
+	 * the CPU again. */
 	.swi3 = do_swi3,
 	.swi2 = do_swi2,
+
+	/* The FIRQ vector is connected to the ASIC timer and to the DMD controller. */
 	.firq = do_firq,
+
+	/* The IRQ vector is connected to the periodic (~1ms) interrupt.
+	 * This interrupt is the basis for system timing and realtime processing.
+	 * The function 'tick_driver' is automatically generated from a schedule
+	 * of functions to call.  See build/sched-irq.c for the results and
+	 * kernel/system.sched for the tasks common to all machines. */
 	.irq = tick_driver,
 	.swi = do_swi,
+
+	/* NMI also shouldn't happen, but log it if it does. */
 	.nmi = do_nmi,
 #endif
 #ifdef CONFIG_PLATFORM_WPCSOUND
