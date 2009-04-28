@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # WCS machine description for FreeWPC
-# (C) Copyright 2006, 2009-2009 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -354,21 +354,29 @@ Kickback Made:
 Lock Kicking:
 
 [templates]
+# This section contains template definitions for device drivers.
+# For each device requiring a driver, it specifies the file that
+# contains the template code, and any parameters for the specific
+# device.
 Left Sling: driver(spsol),
-	sw=SW_LEFT_SLINGSHOT,
-	sol=SOL_LEFT_SLING,
+	sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLING,
 	ontime=3, offtime=16
+
 Right Sling: driver(spsol),
-	sw=SW_RIGHT_SLINGSHOT,
-	sol=SOL_RIGHT_SLING,
+	sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLING,
 	ontime=3, offtime=16
 
 Left Jet: driver(spsol),
-	sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+	sw=SW_LEFT_JET, sol=SOL_LEFT_JET,
+	ontime=3, offtime=16
+
 Upper Jet: driver(spsol),
-	sw=SW_UPPER_JET, sol=SOL_UPPER_JET, ontime=3, offtime=16
+	sw=SW_UPPER_JET, sol=SOL_UPPER_JET,
+	ontime=3, offtime=16
+
 Lower Jet: driver(spsol),
-	sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
+	sw=SW_LOWER_JET, sol=SOL_LOWER_JET,
+	ontime=3, offtime=16
 
 Spinner: driver(spinner),
 	sw_event=sw_spinner, sw_number=SW_SPINNER
@@ -378,7 +386,8 @@ Gate: driver(duty),
 	ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
 
 Kickback Driver: driver(spsol),
-	sw=SW_KICKBACK, sol=SOL_KICKBACK, ontime=5, offtime=30
+	sw=SW_KICKBACK, sol=SOL_KICKBACK,
+	ontime=5, offtime=30
 
 Spinning Ball: driver(duty),
 	sol=SOL_BALL_FORWARD,
