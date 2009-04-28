@@ -77,7 +77,7 @@ void task_dump (void)
 			printf ("%p%c   %d    %08X   %02X\n",
 				td->pid, 
 				(td->pid == task_getpid ()) ? '*' : ' ', 
-				td->gid, td->arg, td->duration);
+				td->gid, (unsigned int)td->arg, td->duration);
 		}
 	}
 }
@@ -367,7 +367,7 @@ void *task_get_class_data (task_pid_t pid)
 				return task_data_table[i].class_data;
 		}
 
-	printf ("task_get_class_data for pid %d failed\n", pid);
+	printf ("task_get_class_data for pid %p failed\n", pid);
 	return &zero_class_data;
 }
 

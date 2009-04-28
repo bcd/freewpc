@@ -197,4 +197,9 @@ const switch_info_t *switch_lookup (const switchnum_t sw) __attribute__((pure));
 U8 switch_lookup_lamp (const switchnum_t sw) __attribute__((pure));
 void switch_queue_dump (void);
 
+#if (MACHINE_PIC == 1)
+__common__ void pic_init (void);
+__common__ void pic_render_serial_number (void);
+#endif
+
 #endif /* _SYS_SWITCH_H */

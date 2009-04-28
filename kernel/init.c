@@ -117,7 +117,13 @@ __noreturn__ void freewpc_init (void)
 	are scheduled at compile-time  using the 'gensched' utility. */
 	VOIDCALL (tick_init);
 
-	/* Initialize the hardware */
+	/* Initialize the hardware.
+	 * After each init call, tickle the watchdog (IRQ isn't enabled yet)
+	 * to prevent it from expiring and resetting the CPU.
+	 * We don't use a callset here because there are some ordering
+	 * dependencies -- some modules must be initialized before others --
+	 * and gencallset doesn't allow us to express those conditions.
+	 */
 #ifdef DEBUGGER
 	db_init ();
 	wpc_watchdog_reset ();

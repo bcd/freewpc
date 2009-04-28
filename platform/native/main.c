@@ -864,7 +864,7 @@ static switchnum_t keymaps[256] = {
 
 void linux_key_install (char key, unsigned int swno)
 {
-	keymaps[key] = swno;
+	keymaps[(int)key] = swno;
 }
 
 
