@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,6 +22,7 @@
 #define __DIAG_H
 
 __common__ U8 diag_get_error_count (void);
-__common__ void diag_post_error (const char *, const char *);
+__common__ void diag_post_error (char *, U8);
+__common__ void diag_announce_if_errors (void);
 
 #endif /* __DIAG_H */

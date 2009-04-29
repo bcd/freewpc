@@ -45,6 +45,7 @@ KERNEL_HW_OBJS += kernel/freetimer.o   # could be KERNEL_SW_OBJS
 KERNEL_HW_OBJS += kernel/init.o
 KERNEL_HW_OBJS += kernel/lamp.o
 KERNEL_HW_OBJS += kernel/leff.o   # why not KERNEL_SW_OBJS?
+KERNEL_HW_OBJS += kernel/message.o
 KERNEL_HW_OBJS += kernel/sol.o
 KERNEL_HW_OBJS += kernel/sound.o
 KERNEL_HW_OBJS += kernel/switches.o
