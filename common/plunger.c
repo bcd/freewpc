@@ -83,7 +83,7 @@ CALLSET_ENTRY (plunger, sw_launch_button)
 #ifdef INCLUDE_AUTOPLUNGER
 	if (switch_poll (MACHINE_SHOOTER_SWITCH))
 	{
-		sol_start (MACHINE_LAUNCH_SOLENOID, SOL_DUTY_100, TIME_66MS);
+		sol_request_async (MACHINE_LAUNCH_SOLENOID);
 	}
 #endif
 }
