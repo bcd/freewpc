@@ -39,7 +39,7 @@ void award_loop (void)
 		at certain levels */
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		sound_send (SND_POWERBALL_QUOTE);
-		score (SC_5M);
+		score (SC_10M);
 	}
 
 	if (lamp_test (LM_PANEL_SPIRAL))
