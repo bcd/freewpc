@@ -33,7 +33,6 @@ void combo_award (void)
 {	
 	U8 value;
 
-	bounded_increment (combo_count, 99);
 	if (combo_count > 5)
 		value = SC_500K;
 	else
@@ -57,6 +56,7 @@ void combo_running (void)
 
 void combo_shot (void)
 {
+	bounded_increment (combo_count, 99);
 	if (task_find_gid (GID_COMBO))
 		combo_award ();
 	task_recreate_gid (GID_COMBO, combo_running);

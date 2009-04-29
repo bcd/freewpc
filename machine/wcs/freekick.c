@@ -70,6 +70,9 @@ void free_kick_timeout_multiplier (void)
 
 void free_kick_award (void)
 {
+	if (free_kicks >= 250)
+		return;
+
 	free_kicks += free_kick_multiplier;
 	score_multiple (SC_1M, free_kick_multiplier);
 	if (free_kick_multiplier < 5)

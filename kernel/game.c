@@ -375,19 +375,25 @@ void timed_game_monitor (void)
 
 	/* OK, the game is going to end soon... Disable the flippers. */
 	flipper_disable ();
+
+	/* Just in case something goes wrong, force endball after
+	 * some time */
+	task_sleep_sec (20);
+	end_ball ();
 	task_exit ();
 }
 
+#ifndef CONFIG_TIMED_GAME_MAX
+#define CONFIG_TIMED_GAME_MAX 240
+#endif
 
 void timed_game_extend (U8 secs)
 {
 	if (timed_game_timer > 0)
 	{
 		timed_game_timer += secs;
-#ifdef CONFIG_TIMED_GAME_MAX
-		if (timed_game_timer > CONFIG_TIMED_GAME_MAX)
+		if ((timed_game_timer > CONFIG_TIMED_GAME_MAX) || (timed_game_timer < secs))
 			timed_game_timer = CONFIG_TIMED_GAME_MAX;
-#endif
 	}
 }
 
