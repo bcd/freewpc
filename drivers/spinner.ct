@@ -85,12 +85,12 @@ CALLSET_ENTRY (@self, @sw_event)
 
 		/* Throw as many spins as the fast handler has counted.
 		When the counter is zero, decrement the timer that says
-		how long we continue to poll before getting out. */
+		how long we continue to poll before getting out.
+		Note that counter=0 should never happen, but it is detected
+		anyway. */
 
 work_to_do:
-		/* Assume the counter is at least 1, since this
-		 * function was scheduled... */
-		do
+		while (@self_counter)
 		{
 			dbprintf ("counter = %d\n", spinner_counter);
 			callset_invoke (@sw_event_slow);
@@ -98,7 +98,7 @@ work_to_do:
 			one instruction, so that no locking is required!
 			TODO - use an explicit atomic primitive */
 			@self_counter--;
-		} while (@self_counter);
+		}
 
 		/* Monitor the counter for some time after it goes to
 		 * zero, in case it flips again, to try to avoid the
