@@ -133,6 +133,7 @@ void gumball_popper_task (void)
 			break;
 		}
 	}
+	task_exit ();
 }
 
 
