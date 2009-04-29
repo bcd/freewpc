@@ -207,6 +207,10 @@ void system_reset_deff (void)
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
 
+	/* If there were any diagnostic errors discovered, announce
+	this fact. */
+	diag_announce_if_errors ();
+
 	dbprintf ("System initialized.\n");
 	deff_exit ();
 }

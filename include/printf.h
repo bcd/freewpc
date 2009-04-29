@@ -67,6 +67,7 @@ void sprintf (const char *format, ...);
 void sprintf_far_string (const char **srcp);
 void sprintf_score (const U8 *score);
 void dbprintf1 (void);
+void message_write (const char *msg, U8 page);
 
 #define sprintf_current_score() sprintf_score (current_score)
 
