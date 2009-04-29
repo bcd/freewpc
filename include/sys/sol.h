@@ -75,7 +75,8 @@ we need 1 per 4ms for solenoids, so scale accordingly. */
 #define sol_start(sol,mask,time) \
 	sol_start_real (sol, mask, (4 * time))
 
-#define flasher_pulse(id) sol_pulse(id)
+#define flasher_pulse(id) \
+	sol_start(id, FLASHER_DUTY_DEFAULT, FLASHER_TIME_DEFAULT)
 
 #define sol_pulse sol_request_async
 
