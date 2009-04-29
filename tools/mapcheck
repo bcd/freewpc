@@ -16,7 +16,7 @@
 #
 
 if [ "$1" = "" ]; then
-	mapfile="build/freewpc.map"
+	mapfile=`find build -name "*.map"`
 else
 	mapfile=$1
 fi
