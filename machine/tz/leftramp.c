@@ -77,7 +77,7 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
 CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
 	maybe_ramp_divert ();
-	left_ramps++;
+	bounded_increment (left_ramps, 250);
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	score (SC_250K);
