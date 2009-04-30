@@ -619,7 +619,7 @@ CALLSET_ENTRY (game, sw_start_button)
 
 	/* If in test mode, let test handle it completely.
 	 * Likewise for enter initials. */
-	if (in_test || initials_enter_timer)
+	if (in_test || initials_enter_timer || (deff_get_active () == DEFF_SYSTEM_RESET))
 		return;
 
 #ifdef MACHINE_START_SWITCH
