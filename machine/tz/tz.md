@@ -153,7 +153,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE), lamp(LM_RIGHT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
-14: Tilt, tilt, ingame, noplay
+14: Tilt, tilt, ingame, noplay, cabinet
 15: Right Trough, c_decl(sw_trough), noscore
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
@@ -181,7 +181,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 47: Clock Target, standup, ingame, lamp(LM_CLOCK_MILLIONS)
 48: Standup 1, standup, ingame, lamp(LM_LL_5M)
 51: Gumball Lane, intest
-52: Hitchhiker, ingame, sound(SND_HITCHHIKER_DRIVE_BY)
+52: Hitchhiker, ingame
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
 55: Gumball Geneva, noscore

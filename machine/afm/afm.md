@@ -86,7 +86,7 @@ define MACHINE_NUMBER 541
 [switches]
 11: Launch Button, launch-button, cabinet, noplay
 13: Start Button, yellow, start-button, cabinet, intest
-14: Tilt, tilt, noplay
+14: Tilt, tilt, noplay, cabinet
 16: Left Outlane
 17: Right Inlane
 18: Shooter, edge, shooter, noplay

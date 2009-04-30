@@ -147,13 +147,13 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 11: Right Flipper, button, intest, c_decl(sw_right_button)
 12: Left Flipper, button, intest, c_decl(sw_left_button)
 13: Start Button, start-button, intest
-14: Plumb Bob Tilt, c_decl(sw_tilt), tilt, ingame, noplay
+14: Plumb Bob Tilt, c_decl(sw_tilt), cabinet, tilt, ingame, noplay
 15: Steps Frenzy
 16: Upper Ramp
 17: Step S
 18: U.L. Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
-23: Ticket Opto, opto, noplay
+23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
 27: Lock Center
 28: Lock Left
@@ -171,7 +171,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 44: Wind Tunnel Hole
 45: Trap Door
 46: Rudys Hideout
-47: Left Plunger
+47: Left Plunger, edge
 48: Ramp Exit
 51: Dummy Jaw, opto
 52: Right Outlane
@@ -182,17 +182,17 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 57: Jet Lane
 58: Tunnel Kickout
 61: Inner Right Inlane
-62: Right Plunger, shooter
-63: Right Trough
+62: Right Plunger, shooter, edge, noplay
+63: Right Trough, trough, noscore, noplay
 64: Step E
 65: Dummy Eject Hole
 66: Right Gangway
 67: Lower Right Hole
 68: Lower Jet
 71: Outer Right Inlane
-72: Left Trough
+72: Left Trough, trough, noscore, noplay
 73: Outhole, outhole, noscore
-74: Center Trough
+74: Center Trough, trough, noscore, noplay
 75: Upper Loop
 76: Trap Door Closed, noplay
 77: Upper Right Jet
@@ -299,6 +299,7 @@ Trough: Ball Release, trough, init_max_count(3), \
 Lock: Lock Release, init_max_count(0), \
 	Lock Right, Lock Center, Lock Left
 Tunnel: Tunnel Kickout, init_max_count(0), Tunnel Kickout
+Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
 
 [targetbanks]
 
