@@ -1,3 +1,8 @@
+# This Makefile is used to control a native build, where the code
+# runs on the same machine as the build.  It is slightly different
+# because of toolchain differences, and also simulation files need
+# to be linked in.
+
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.

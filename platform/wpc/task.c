@@ -135,6 +135,8 @@ __noreturn__ void task_restore (task_t *tp);
 
 /**
  * Take a snapshot of the number of idle cycles.
+ *
+ * This function MUST be done in interrupt context to be effective.
  */
 void idle_profile_rtt (void)
 {
@@ -157,11 +159,16 @@ void idle_profile_rtt (void)
 
 /**
  * When IDLE_PROFILE is defined, print out the
- * idle profiling data periodically.
+ * idle profiling data periodically.  (If not defined, the value
+ * is still available in memory.)
  */
 CALLSET_ENTRY (idle_profile, idle_every_100ms)
 {
 #ifdef IDLE_PROFILE
+	/* Note that idle_chunks is unlikely to ever be 0xFF (a very idle
+	system).  So we use that value to mark that we have printed the
+	last computed value.  This function runs much more frequently than
+	chunks is computed, but only prints once per computation. */
 	if (idle_chunks != 0xFF)
 	{
 		dbprintf ("I: 0x%02X\n", idle_chunks);
@@ -181,7 +188,7 @@ static inline void cpu_idle (void)
 
 	/* For profiling, keep a count of the number of times
 	we have nothing to do.
-		Each tick of this counter is approximately 23 CPU cycles.
+		Each tick of this 16-bit counter is approximately 23 CPU cycles.
 	That equates to 87 ticks per 1ms; therefore it will overflow
 	after about 750ms. */
 	idle_time++;
@@ -418,13 +425,13 @@ void task_sleep (task_ticks_t ticks)
 	/* TODO - verify that interrupts are not disabled when calling this */
 #endif
 
-	/* Mark the task as blocked, set the time at which it blocks,
-	and set how long it should wait for. */
+	/* Mark the task as blocked, and set the time at which it
+	should be awakened. */
 	tp->wakeup = get_sys_time () + ((U16)ticks) * 16;
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
-	whenever the task is eventually unblocked. */
+	whenever the sleeping task is eventually unblocked. */
 	task_save (tp);
 }
 
@@ -492,13 +499,6 @@ task_t *task_find_gid (task_gid_t gid)
 /**
  * Kills the given task.
  * Killing yourself (suicide) is illegal, so don't do it.
- *
- * If the target has requested a signal handler, then the task is
- * not killed immediately, but will instead have its PC changed to
- * run the signal handler on the next invocation.  The handler
- * should call task_exit() when the task can finally die.
- *
- * If there is no signal handler, the task is killed right away.
  */
 void task_kill_pid (task_t *tp)
 {
@@ -662,8 +662,7 @@ void task_dispatcher (void)
 #ifdef CONFIG_PLATFORM_WPC
 			db_idle ();
 
-			/* If the system is fully initialized, run
-			 * the idle functions. */
+			/* If the system is fully initialized, run the idle functions. */
 			if (likely (idle_ok))
 			{
 				do_idle ();

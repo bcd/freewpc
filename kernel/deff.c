@@ -146,6 +146,10 @@ struct waiting_deff
 /**
  * A background task that repeatedly tries to start a display
  * effect for some time.
+ *
+ * TODO - if there are multiple waiters, it is best effort as to
+ * which one gets the display first.  A better scheme is for a
+ * separate task to run through the waitqueue in priority order.
  */
 static void deff_retry_task (void)
 {
@@ -304,28 +308,10 @@ This may cause it to be preempted by something more important. */
 void deff_nice (enum _priority prio)
 {
 	/* TODO - verify that this is only being called from
-	a display effect */
+	a transient display effect */
 
-	/* If increasing the priority, then accept the change but
-	nothing else really happens at the moment. */
-	if (prio >= deff_prio)
-	{
-		deff_prio = prio;
-		return;
-	}
-
-	/* TODO */
-	/* Find the highest priority effect that is queued, and
-	see if its priority is greater than 'prio'.  If it is,
-	make it the new effect (the current one is cancelled).
-	Otherwise, the current effect stays but with a lower priority. */
-	if (0)
-	{
-	}
-	else
-	{
-		deff_prio = prio;
-	}
+	/* Change the current priority */
+	deff_prio = prio;
 }
 
 

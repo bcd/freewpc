@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -66,7 +66,7 @@ diag_message_scroll (void)
 {
 	dmd_sched_transition (&trans_scroll_left);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (5);
 	barrier ();
 }
 
@@ -83,13 +83,18 @@ diag_get_error_count (void)
 
 /**
  * Called by a diagnostic to report an error.
- * messenger is a callback function for rendering
- * the text of the error message.
+ * message is a string to be reported when announcements
+ * are enabled.
  */
 void
-diag_post_error (const char *message1, const char *message2)
+diag_post_error (char *message, U8 page)
 {
+	/* Increment total error count */
 	diag_error_count++;
+
+	/* If announcements are on, then write a message.
+	If it is the first such error detected, then print the
+	initial "TEST REPORT" message too. */
 	if (diag_announce_flag)
 	{
 		if (diag_error_count == 1)
@@ -98,23 +103,16 @@ diag_post_error (const char *message1, const char *message2)
 			font_render_string_center (&font_mono5, 64, 6, "TEST REPORT...");
 			diag_message_flash ();
 		}
-		diag_message_start ();
-		if (message2)
-		{
-			font_render_string_center (&font_mono5, 64, 10, message1);
-			font_render_string_center (&font_mono5, 64, 20, message2);
-		}
-		else
-		{
-			font_render_string_center (&font_mono5, 64, 16, message1);
-		}
+
+		message_write (message, page);
 		diag_message_scroll ();
 	}
 }
 
 
 /**
- * Go through all of the diags.
+ * Run each of the diagnostic checks, tallying up the number
+ * of errors that are found.
  */
 void
 diag_run_task (void)
@@ -123,16 +121,25 @@ diag_run_task (void)
 	diag_error_count = 0;
 	callset_invoke (diagnostic_check);
 	dbprintf ("%d errors.\n", diag_error_count);
+	task_exit ();
+}
 
-	if ((diag_announce_flag == 0) && (diag_error_count > 0))
+
+/**
+ * Announce if there are diagnostic errors.  This is called at the
+ * end of the system reset message, just before entering
+ * attract mode.
+ */
+void
+diag_announce_if_errors (void)
+{
+	if (diag_error_count > 0)
 	{
 		diag_message_start ();
 		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
 		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
 		diag_message_flash ();
 	}
-
-	task_exit ();
 }
 
 
@@ -152,8 +159,9 @@ diag_run (void)
 
 
 /**
- * At the end of initialization, run the diagnostics
- * and announce on one screen if there are any errors.
+ * At the end of initialization, run the diagnostics and
+ * determine if there are errors, but don't announce
+ * anything.
  */
 CALLSET_ENTRY (diag, init_complete)
 {
@@ -164,7 +172,7 @@ CALLSET_ENTRY (diag, init_complete)
 
 /**
  * On entry to test mode, run the diagnostics and
- * read the errors one-by-one.
+ * announce each error one-by-one as it is detected.
  */
 CALLSET_ENTRY (diag, test_start)
 {

@@ -58,7 +58,7 @@ __far_call_page: .blkb 1
 	;;; but the task might sleep many times over its lifetime.)
 	;;;
 	;;; Overhead is about 70 cycles as compared to a normal function
-	;;; call.
+	;;; call, plus 3 extra bytes on the stack.
 	;;;
 	;;; TODO? - put the saved bank into a global so that the callee can
 	;;; get to it, for accessing caller data?
