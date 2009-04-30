@@ -24,16 +24,25 @@
 #define SND_GONG             0x88
 #define SND_RAMP_ENTER       0x89
 #define SND_JET(x)           (0x8A + (x))
+#define SND_LEFT_PLUNGER     0x8E
 #define SND_TILT             0x90
 #define SND_STEP_SPELLED     0x91
 #define SND_TILT_WARNING     0x93
 #define SND_COIN             0x94
 #define SND_SKILL_SHOT       0x9C
+#define SND_STEPS_AWARD      0x9D
 #define SND_MILLION_AWARD    0xA9
 #define SND_3WAY_COMBO       0xAA
+#define SND_RAMP_MADE        0xAC
 #define SND_4WAY_COMBO       0xAD
+#define SND_RAMP_ENTER2      0xB6
+#define SND_STEPS_TOP_AWARD  0xBC
 #define SND_KICKOUT          0xBF
+#define SND_GONG2            0xC0
+#define SND_JACKPOT          0xC8
+#define SND_MULTIBALL_START  0xC9
 #define SND_RESTART_RING     0xCB
+#define SND_QUICK_MB_AWARD   0xCC
 #define SND_REPLAY           0xCE
 #define SND_CHOMP            0xDF
 
@@ -41,5 +50,9 @@
 #define SPCH_YOU_CANT_HIDE   0x103
 #define SPCH_I_SEE_YOU_NOW   0x104
 #define SPCH_COME_BACK_HERE  0x105
+#define SPCH_GETTING_LATE    0x107
+#define SPCH_BIG_DEAL        0x108
+#define SPCH_YOU_BIG         0x109
+#define SPCH_BLEH            0x10E
 
 #endif /* _MACH_SOUND_H */
