@@ -1873,14 +1873,17 @@ U8 memory_editor_new_value;
 void memory_editor_init (void)
 {
 	memory_editor_addr = 0x0;
-	memory_editor_step = 8;
+	memory_editor_step = 1;
 	memory_editor_modify_flag = 0;
 }
 
 void memory_editor_up (void)
 {
 	if (memory_editor_modify_flag == 0)
+	{
 		memory_editor_addr += memory_editor_step;
+		memory_editor_addr = (U8 *)((U16)memory_editor_addr & 0x1FFF);
+	}
 	else
 		memory_editor_new_value++;
 }
@@ -1888,7 +1891,10 @@ void memory_editor_up (void)
 void memory_editor_down (void)
 {
 	if (memory_editor_modify_flag == 0)
+	{
 		memory_editor_addr -= memory_editor_step;
+		memory_editor_addr = (U8 *)((U16)memory_editor_addr & 0x1FFF);
+	}
 	else
 		memory_editor_new_value--;
 }
@@ -1897,10 +1903,10 @@ void memory_editor_start (void)
 {
 	if (memory_editor_modify_flag == 0)
 	{
-		if (memory_editor_step == 8)
+		if (memory_editor_step == 64)
 			memory_editor_step = 1;
 		else
-			memory_editor_step = 8;
+			memory_editor_step <<= 2;
 	}
 	else
 		memory_editor_modify_flag = 0;
@@ -1947,7 +1953,7 @@ void memory_editor_thread (void)
 			font_render_string_left (&font_var5, n * 13, 8, sprintf_buffer);
 		}
 
-		sprintf ("STEP : %d", memory_editor_step);
+		sprintf ("STEP : 0X%X", memory_editor_step);
 		font_render_string_left (&font_var5, 1, 26, sprintf_buffer);
 
 		if (memory_editor_modify_flag)
@@ -1984,6 +1990,59 @@ struct menu memory_editor_item = {
 
 /**********************************************************************/
 
+void expansion_test_enter (void)
+{
+}
+
+void expansion_test_write (U8 val)
+{
+	writeb (WPC_EXTBOARD1, val);
+	sound_send (SND_TEST_CHANGE);
+	dmd_alloc_low_clean ();
+	sprintf ("WRITE 0X%02X", val);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+}
+
+void expansion_test_read (void)
+{
+	U8 val = readb (WPC_EXTBOARD1);
+	sound_send (SND_TEST_CHANGE);
+	dmd_alloc_low_clean ();
+	sprintf ("READ 0X%02X", val);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+}
+
+
+void expansion_test_thread (void)
+{
+	for (;;)
+	{
+		expansion_test_write (0);
+		expansion_test_write (0x80);
+		expansion_test_write (0xFF);
+		expansion_test_read ();
+	}
+}
+
+struct window_ops expansion_test_window = {
+	DEFAULT_WINDOW,
+	.enter = expansion_test_enter,
+	.thread = expansion_test_thread,
+};
+
+struct menu expansion_test_item = {
+	.name = "EXPANSION TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &expansion_test_window, NULL } },
+};
+
+
+/**********************************************************************/
+
 struct menu *dev_menu_items[] = {
 #if (MACHINE_DMD == 1)
 	&dev_font_test_item,
@@ -2010,6 +2069,7 @@ struct menu *dev_menu_items[] = {
 #ifndef CONFIG_NATIVE
 	&memory_editor_item,
 #endif
+	&expansion_test_item,
 	NULL,
 };
 
