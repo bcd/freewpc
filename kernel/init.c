@@ -302,6 +302,7 @@ void fatal (errcode_t error_code)
 #endif
 
 	/* Dump all of the task information to the debugger port. */
+	dbprintf ("Fatal error %d\n", error_code);
 	task_dump ();
 
 #ifdef CONFIG_NATIVE
