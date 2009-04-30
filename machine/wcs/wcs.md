@@ -95,12 +95,12 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 11: Unused
 12: Magnet Button, button, noscore, cabinet
 13: Start Button, start-button, cabinet, intest
-14: Tilt, tilt, ingame, noplay
+14: Tilt, cabinet, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
 16: Striker 3, ingame, debounce(TIME_50MS)
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
-21: Slam Tilt, slam-tilt
+21: Slam Tilt, cabinet, slam-tilt
 23: Buyin Button, buyin-button, cabinet
 25: Free Kick Target, ingame, debounce(TIME_50MS)
 26: Kickback Upper, ingame
