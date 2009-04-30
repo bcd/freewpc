@@ -27,7 +27,6 @@ void hitchhiker_deff (void)
 {
 	dmd_alloc_low ();
 	frame_draw (IMG_HITCHER);
-	dmd_draw_fif (fif_hitcher);
 	psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
 	font_render_string_center (&font_fixed6, 76, 10, sprintf_buffer);
 	dmd_sched_transition (&trans_scroll_left);
@@ -50,7 +49,7 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 		score (SC_250K);
 		sound_send (SND_HITCHHIKER_DRIVE_BY);
 	}
-	hitch_count++;
+	bounded_increment (hitch_count, 99);
 	deff_start (DEFF_HITCHHIKER);
 }
 
