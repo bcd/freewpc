@@ -717,8 +717,15 @@ void device_add_virtual (device_t *dev)
 /** Remove a virtual ball from the device, not seen by any switches. */
 void device_remove_virtual (device_t *dev)
 {
-	dev->virtual_count--;
-	device_sw_handler (dev->devno);
+	if (dev->virtual_count > 0)
+	{
+		dev->virtual_count--;
+		device_sw_handler (dev->devno);
+	}
+	else
+	{
+		nonfatal (ERR_VIRTUAL_DEVICE_COUNT);
+	}
 }
 
 
