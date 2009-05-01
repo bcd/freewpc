@@ -1990,6 +1990,8 @@ struct menu memory_editor_item = {
 
 /**********************************************************************/
 
+#if (MACHINE_DMD == 1)
+
 void expansion_test_enter (void)
 {
 }
@@ -2040,6 +2042,7 @@ struct menu expansion_test_item = {
 	.var = { .subwindow = { &expansion_test_window, NULL } },
 };
 
+#endif
 
 /**********************************************************************/
 
@@ -2069,7 +2072,9 @@ struct menu *dev_menu_items[] = {
 #ifndef CONFIG_NATIVE
 	&memory_editor_item,
 #endif
+#if (MACHINE_DMD == 1)
 	&expansion_test_item,
+#endif
 	NULL,
 };
 
