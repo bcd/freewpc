@@ -97,6 +97,13 @@ void timestamp_divide (timestamp_t *t, volatile U16 n)
 {
 	U16 dividend;
 
+	/* Catch divide by zero errors, and just make the result zero. */
+	if (n == 0)
+	{
+		timestamp_clear (t);
+		return;
+	}
+
 	dividend = t->hr;
 	t->hr = 0;
 	while (dividend >= n)
