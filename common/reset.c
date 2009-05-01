@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <amode.h>
+#include <diag.h>
 
 /**
  * \file
