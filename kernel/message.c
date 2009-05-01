@@ -30,6 +30,9 @@ static void line_printer (U8 index, const char *line)
 		else
 			row = 20;
 	}
+	else
+		return;
+
 	dbprintf ("Msg: index %d, row=%d\n", index, row);
 	font_render_string_center (&font_mono5, 64, row, line);
 }
