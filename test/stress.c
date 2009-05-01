@@ -63,13 +63,18 @@ void switch_stress_task (void)
 	}
 }
 
+
+/**
+ * Ensure that no simulation is the default.
+ */
 CALLSET_ENTRY (stress, init)
 {
 	switch_stress_enable = NO;
 }
 
 /**
- * Start the simulation as soon as valid playfield is declared.
+ * Start the simulation as soon as valid playfield is declared,
+ * if it has been enabled.
  */
 CALLSET_ENTRY (stress, valid_playfield)
 {
