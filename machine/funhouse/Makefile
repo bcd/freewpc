@@ -51,6 +51,8 @@ PINMAME_OTHER_ROMS = fh_u*
 
 GAME_OBJS =
 
+GAME_PAGED_OBJS = shot.o
+
 GAME_INCLUDES =
 
 
