@@ -62,64 +62,64 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 14: Gangway 200K
 15: Gangway 250K
 16: Gangway Ex. Ball
-17: Mirror Quick MB
-18: Mirror Open Gate
-21: Mirror Super Dog
-22: Mirror Bumpers
-23: Mirror Million
-24: Mirror Ex. Ball
-25: Extra Ball
-26: Super Dog
-27: Step S
-28: Step P
-31: Step E
-32: Step T
-33: Million
-34: Trap Door Bonus
-35: Million Plus
-36: Ramp Entrance
-37: Ramp Steps
-38: Upper Left Jet
-41: Upper Right Jet
-42: Lower Jet
-43: Shoot Again
-44: Steps Gate Open
-45: Flipper Lanes
-46: Specials
-47: Lock
-48: Mirror Value
-51: Left Gangway
-52: Right Gangway
-53: Steps Frenzy
-54: Steps 500K
+17: Shoot Again, extra-ball
+18: Steps Gate Open
+21: Clock 45 Min.
+22: Clock Hour 8
+23: Clock Hour 6
+24: Clock 25 Min.
+25: Clock 15 Min.
+26: Clock 10 Min.
+27: Clock Hour 12
+28: Clock 0 Min.
+31: Clock 40 Min.
+32: Clock 35 Min.
+33: Clock 30 Min.
+34: Clock 20 Min.
+35: Clock Hour 3
+36: Clock Hour 1
+37: Clock Hour 11
+38: Clock 50 Min.
+41: Clock Hour 9
+42: Clock Hour 7
+43: Clock Hour 5
+44: Clock Hour 4
+45: Clock Hour 2
+46: Clock 5 Min.
+47: Clock 55 Min.
+48: Clock Hour 10
+51: Lower Jet
+52: Upper Left Jet
+53: Super Dog
+54: Steps Frenzy
 55: Steps E.B.
-56: Ramp 250K
-57: Frenzy
-58: Start Button, start
-61: Clock 0 Min.
-62: Clock 5 Min.
-63: Clock 10 Min.
-64: Clock 15 Min.
-65: Clock 20 Min.
-66: Clock 25 Min.
-67: Clock 30 Min.
-68: Clock 35 Min.
-71: Clock 40 Min.
-72: Clock 45 Min.
-73: Clock 50 Min.
-74: Clock 55 Min.
-75: Clock Hour 1
-76: Clock Hour 2
-77: Clock Hour 3
-78: Clock Hour 4
-81: Clock Hour 5
-82: Clock Hour 6
-83: Clock Hour 7
-84: Clock Hour 8
-85: Clock Hour 9
-86: Clock Hour 10
-87: Clock Hour 11
-88: Clock Hour 12
+56: Steps 500K
+57: Ramp Entrance
+58: Right Gangway
+61: Flipper Lanes
+62: Step S
+63: Trap Door Bonus
+64: Ramp 250K
+65: Step T
+66: Left Gangway
+67: Extra Ball
+68: Lock
+71: Mirror Ex. Ball
+72: Upper Right Jet
+73: Step P
+74: Mirror Million
+75: Mirror Bumpers
+76: Mirror Super Dog
+77: Mirror Open Gate
+78: Mirror Quick MB
+81: Million Plus
+82: Specials
+83: Frenzy
+84: Ramp Steps
+85: Mirror Value
+86: Step E
+87: Million
+88: Start Button, start
 
 ##########################################################################
 # Switch Description
@@ -282,6 +282,15 @@ A4: Eyes Left
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
 [lamplists]
+Gangways: Gangway 75K, Gangway 100K, Gangway 150K, Gangway 200K, Gangway 250K, Gangway Ex. Ball
+Clock Minutes: Clock 0 Min., Clock 5 Min., Clock 10 Min., Clock 15 Min., Clock 20 Min., Clock 25 Min., Clock 30 Min., Clock 35 Min., Clock 40 Min., Clock 45 Min., Clock 50 Min., Clock 55 Min.
+Clock Hours: Clock Hour 1, Clock Hour 2, Clock Hour 3, Clock Hour 4, Clock Hour 5, Clock Hour 6, Clock Hour 7, Clock Hour 8, Clock Hour 9, Clock Hour 10, Clock Hour 11, Clock Hour 12
+Mirror Awards: Mirror Ex. Ball, Mirror Million, Mirror Bumpers, Mirror Super Dog, Mirror Open Gate, Mirror Quick MB
+Jets: Upper Left Jet, Upper Right Jet, Lower Jet
+Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
+Top Loop: Lock, Extra Ball
+Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
+Step Target: Step S, Step T, Step E, Step P
 
 ##########################################################################
 # Containers
@@ -368,3 +377,7 @@ GC: LED, 15.000.000
 # Fonts used in this game.
 ##########################################################################
 [fonts]
+
+[timers]
+Tunnel Entered:
+Ignore Jaw:
