@@ -66,13 +66,11 @@ void print_char (U8 c)
 
 	if (c == '~')
 	{
-		wpc_parport_write (printer_pageno + '0');
-	}
-	else
-	{
-		wpc_parport_write (c);
+		print_char (printer_pageno + '0');
+		return;
 	}
 
+	wpc_parport_write (c);
 	if (c == '\n')
 	{
 		printer_colno = 0;
