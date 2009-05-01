@@ -64,7 +64,7 @@ static void handle_outhole (void)
 #endif
 
 
-CALLSET_ENTRY (trough, sw_outhole, init_complete)
+CALLSET_ENTRY (trough, sw_outhole, amode_start, init_complete)
 {
 #ifdef MACHINE_OUTHOLE_SWITCH
 	task_create_gid1 (GID_OUTHOLE_HANDLER, handle_outhole);
