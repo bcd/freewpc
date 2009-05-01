@@ -92,7 +92,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 44: Spiral 5M, yellow ,x(30), y(14)
 45: Spiral 10M, yellow ,x(31), y(16)
 46: Spiral EB, red ,x(32), y(18)
-47: Shoot Again, red ,x(36), y(13)
+47: Shoot Again, red , extra-ball, x(36), y(13)
 48: Right Inlane, white ,x(26), y(21)
 51: Bonus X, white ,x( 5), y(11)
 52: Multiball, white ,x( 7), y(12)

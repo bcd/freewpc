@@ -75,7 +75,7 @@ define MACHINE_NUMBER 541
 76: Martian 1
 77: Martian 2
 78: Martian 3
-81: Shoot Again
+81: Shoot Again, extra-ball
 82: Left Outlane
 83: Left Inlane
 84: Right Inlane
