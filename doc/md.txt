@@ -58,16 +58,21 @@ An example:
 [switches]
 14: Tilt, tilt, ingame, noplay
 
-The key, 14, identifies which switch is being described.  The first item,
+The key, 14, identifies which switch is being described.  For switches and
+lamps, the key is given as a pair of column/row digits.  The first property,
 Tilt, gives it a name.  Everything else identifies properties of the switch.
-Different types of objects will have different properties.  Here, we say that
-the tilt switch should only be serviced during a game and a closure does not
-mark valid playfield.
+Different types of objects will have different properties.  Here, we say three
+things: (1) it is an instance of a well-known switch class, called 'tilt';
+this ties it directly to system code for processing tilts automatically.
+(2) The tilt switch should only be serviced during a game.  (3) A closure does
+not mark valid playfield.
 
 In the second style, there is no physical identifier, and so the name before
 the colon is the human readable name.  These are generally used for
 software constructs.  For these genmachine automatically
-assign a number based on the order of the declarations.
+assigns a number based on the order of the declarations.  There can be an
+unlimited number of objects of these types, unlike those tied to hardware
+where there is a physical limit.
 
 For example:
 
@@ -80,10 +85,20 @@ The IDs for all deffs are assigned sequentially, and do not need to be
 specified as with the switches above.  Everything following the colon is
 treat as a property just as above.
 
+This example also shows a variation in the property syntax.  Above,
+we saw properties 'ingame' and 'noplay', which are _binary properties_.
+Just stating them causes them to be turned on.  Binary properties can
+be listed in any order; genmachine knows what all of the allowable binary
+properties are and will handle them correctly.  In the deff declaration
+above, there is a 'page' property, which is not binary -- it has a value,
+MACHINE_PAGE.  For these types of properties, the syntax is always
+variable(value).
+
 Though the syntax is fairly strict, there is a bit of magic in how different
 categories need to be written.  The easiest way to write a config is to copy
 from another one.  The Twilight Zone and World Cup Soccer configs are the most
-complete.
+complete.  There is more documentation in those files on how things should
+be set up.
 
 
 Directives
@@ -97,7 +112,9 @@ which is the same in every WPC game.  By including platform/wpc/wpc.md, that
 and many other definitions are automatically provided.
 
 All files are read and parsed before any output is generated.  It is possible
-to override previous definitions.
+to override previous definitions.  The default WPC md file provides names
+for all of the switches and lamps, so if you omit one from the machine file,
+you get a default definition.  The tester ROM uses this facility.
 
 
 The 'define' directive is used for miscellaneous settings.  It gets translated
@@ -109,7 +126,7 @@ is converted to:
 
 #define MACHINE_NUMBER 531
 
-Note that the pound sign is not included, as it would be treated as a comment.
+Note that the pound sign is not included in the mdfile, as it would be treated as a comment.
 
 
 Global Configuration
@@ -119,4 +136,19 @@ The human readable name of the machine, the system type, and a few other things 
 given here.  These do not appear directly in the mach-config.h, but are used by
 genmachine to guide the compilation.  Again, see any existing config file for an example.
 
+
+How genmachine works
+
+genmachine is a Perl script.  It parses all of the md commands and builds a giant
+hash with all of the data.  genmachine is invoked multiple times with different options,
+requesting that different output files be generated.  All of the output files are C or H
+files put into the 'build' subdirectory, which are then compiled normally.
+
+For the Perl programmer, each object declaration is itself a Perl anonymous hash, where
+each property of the object is one of the hash entries.  Using the variable(value) syntax,
+it is possible to put anything into the object definition.  However, only certain keys are
+recognized by the output functions.  Adding new properties generally doesn't require
+a parser change, but only a change to the output routines.  Binary properties and well-known
+object classes do need to be stated -- there are constant tables at the top of the script
+that declare these.
 
