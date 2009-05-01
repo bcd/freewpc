@@ -8,3 +8,4 @@ TEST2_OBJS += $(if $(CONFIG_DMD),test/dmdtest.o)
 TEST2_OBJS += test/adjust.o
 TEST2_OBJS += test/timestamp.o
 TEST2_OBJS += test/stress.o
+TEST2_OBJS += test/wire.o
