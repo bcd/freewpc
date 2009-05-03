@@ -254,10 +254,12 @@ wait_and_recount:
 		{
 			/* Also unusual in that a ball came out of the device without
 			 * explicitly kicking it.  (Although this can happen in test mode.)
-			 * Throw a nonfatal if it happens during a game.
-			 */
-			if (!in_test)
-				nonfatal (ERR_IDLE_BALL_LOST);
+			 * Note that the number of balls in play went up */
+			if (in_game)
+			{
+				device_call_op (dev, surprise_release);
+				device_add_live ();
+			}
 		}
 		else if (dev->actual_count > dev->previous_count)
 		{

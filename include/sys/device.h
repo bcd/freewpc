@@ -79,6 +79,9 @@ typedef struct device_ops
 
 	/** Called when the device becomes empty */
 	void (*empty) (void);
+
+	/** Called when a ball disappears from the device without a kick */
+	void (*surprise_release) (void);
 } device_ops_t;
 
 
