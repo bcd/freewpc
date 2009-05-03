@@ -280,7 +280,7 @@ void end_ball (void)
 	/* If this is the last ball of the game for this player,
 	 * then offer to buy an extra ball if enabled.  Also
 	 * save away the per-player audits. */
-	if (ball_up == system_config.balls_per_game)
+	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
 		if (system_config.buy_extra_ball == YES)
 		{
@@ -468,10 +468,10 @@ void start_ball (void)
 	 * or the next high score level.
 	 */
 	deff_start (DEFF_SCORES_IMPORTANT);
-	if (ball_up == system_config.balls_per_game)
+	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
-		/* Chalk game played audits on the final ball */
+		/* Chalk game played audits at the start of the final ball */
 		audit_increment (&system_audits.total_plays);
 	}
 
