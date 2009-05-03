@@ -279,6 +279,7 @@ Disable Goalie: yes_no, NO
 5 Man MB Running:
 Divert Ramp:
 Lock Magnet Enable:
+Skill Lit:
 
 Goal Lit:
 
@@ -387,7 +388,7 @@ Gate: driver(duty),
 
 Kickback Driver: driver(spsol),
 	sw=SW_KICKBACK, sol=SOL_KICKBACK,
-	ontime=5, offtime=30
+	ontime=6, offtime=20
 
 Spinning Ball: driver(duty),
 	sol=SOL_BALL_FORWARD,

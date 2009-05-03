@@ -73,19 +73,6 @@ CALLSET_ENTRY (pity, dev_goal_popper_kick_attempt)
 	sound_start (ST_SAMPLE, SND_KICK, SL_1S, PRI_GAME_QUICK3);
 }
 
-
-CALLSET_ENTRY (pity, sw_skill_shot_front, sw_skill_shot_rear)
-{
-	sound_start (ST_SAMPLE, SND_DING1, SL_500MS, PRI_GAME_QUICK6);
-	sound_start (ST_SPEECH, SND_CROWD_AWW, SL_2S, PRI_GAME_QUICK4);
-}
-
-CALLSET_ENTRY (pity, sw_skill_shot_center)
-{
-	sound_start (ST_MUSIC, MUS_SKILL_SHOT_CITY, SL_1S, PRI_GAME_QUICK6);
-	sound_start (ST_SPEECH, SND_CROWD_CHEER, SL_2S, PRI_GAME_QUICK4);
-}
-
 CALLSET_ENTRY (pity, sw_rollover_1)
 {
 	sound_send (SND_DING1);
