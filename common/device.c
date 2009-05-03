@@ -876,7 +876,7 @@ void device_lock_ball (device_t *dev)
 #ifdef DEVNO_TROUGH
 	if (trough->actual_count > 0)
 	{
-		device_request_kick (trough);
+		serve_ball ();
 	}
 	else
 #endif
