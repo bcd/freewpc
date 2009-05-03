@@ -38,6 +38,9 @@ ROM_PAGE_COUNT = 32
 
 MACHINE_FILE = wcs.md
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 50
+
 IMAGE_MAP += $(M)/wcs.ild
 
 MACHINE_SCHEDULE := $(M)/wcs.sched
