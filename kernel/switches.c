@@ -25,7 +25,7 @@
 
 #include <freewpc.h>
 #include <sys/irq.h>
-
+#include <diag.h>
 
 /*
  * An active switch is one which has transitioned and is eligible

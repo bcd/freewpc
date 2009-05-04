@@ -873,7 +873,7 @@ sub machine_write_container_decls {
 		my $name = $def->{'c_decl'};
 		$name =~ s/^devno/dev/;
 		for $event ("enter", "kick_attempt",
-			"kick_success", "kick_failure", "full", "empty") {
+			"kick_success", "kick_failure", "full", "empty", "surprise_release") {
 			print "extern void callset_${name}_${event} (void);" .
 				"  /* callset_invoke (${name}_${event}) */\n";
 		}

@@ -117,6 +117,7 @@ diag_post_error (char *message, U8 page)
 void
 diag_run_task (void)
 {
+	task_sleep (TIME_100MS);
 	dbprintf ("Running diags...");
 	diag_error_count = 0;
 	callset_invoke (diagnostic_check);

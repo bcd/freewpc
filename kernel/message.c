@@ -11,7 +11,6 @@ U8 message_line_count;
 static void line_counter (U8 index, const char *line)
 {
 	message_line_count++;
-	dbprintf ("Msg: row %d\n", message_line_count);
 }
 
 
@@ -33,7 +32,6 @@ static void line_printer (U8 index, const char *line)
 	else
 		return;
 
-	dbprintf ("Msg: index %d, row=%d\n", index, row);
 	font_render_string_center (&font_mono5, 64, row, line);
 }
 
@@ -77,15 +75,12 @@ void message_write (const char *msg, U8 page)
 	if (msg != sprintf_buffer)
 		sprintf ("%s", msg);
 
-	dbprintf ("msg: counting rows\n");
 	message_line_handler = line_counter;
 	message_line_count = 0;
 	message_iterate (sprintf_buffer);
 
-	dbprintf ("msg: printing rows\n");
 	message_line_handler = line_printer;
 	message_iterate (sprintf_buffer);
-	dbprintf ("msg: done\n");
 
 	wpc_pop_page ();
 }

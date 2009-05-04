@@ -176,8 +176,8 @@ G3: Skill Shot, flash
 G4: Jet Bumpers, flash
 G5: Goalie Drive, motor
 G6: Soccer Ball, flash
-G7: Ball Forward, motor
-G8: Ball Reverse, motor
+G7: Ball Forward, motor, nosearch
+G8: Ball Reverse, motor, nosearch
 
 A1: L. Ramp Enter, flash
 A2: Lock Area, flash
@@ -279,6 +279,7 @@ Disable Goalie: yes_no, NO
 5 Man MB Running:
 Divert Ramp:
 Lock Magnet Enable:
+Skill Lit:
 
 Goal Lit:
 
@@ -387,7 +388,7 @@ Gate: driver(duty),
 
 Kickback Driver: driver(spsol),
 	sw=SW_KICKBACK, sol=SOL_KICKBACK,
-	ontime=5, offtime=30
+	ontime=6, offtime=20
 
 Spinning Ball: driver(duty),
 	sol=SOL_BALL_FORWARD,

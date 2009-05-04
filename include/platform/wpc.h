@@ -608,7 +608,7 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 		if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 			wpc_write_flippers (val);
 		break;
-#ifdef WPC_EXTBOARD1
+#ifdef MACHINE_SOL_EXTBOARD1
 	case 5:
 		writeb (WPC_EXTBOARD1, val);
 #endif

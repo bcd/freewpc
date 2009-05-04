@@ -207,8 +207,10 @@ extern inline void lamp_rtt_common (const U8 mode)
 
 	/* Write the result to the hardware */
 #ifdef BCD_WCS
-	if (lamp_strobe_mask != 0x80)
+	if (lamp_strobe_mask != 0x1)
 		pinio_write_lamp_data (bits & 0x7F);
+	else
+		pinio_write_lamp_data (0);
 #else
 	pinio_write_lamp_data (bits);
 #endif

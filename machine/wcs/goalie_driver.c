@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <diag.h>
 
 typedef enum
 {
@@ -222,8 +223,14 @@ void goalie_status_display (void)
 }
 
 
+CALLSET_ENTRY (goalie_driver, init)
+{
+	goalie_status = GOALIE_NOT_MOVING;
+}
+
 CALLSET_ENTRY (goalie_driver, diagnostic_check)
 {
+	/* this should timeout */
 	while (goalie_status & GOALIE_CALIBRATING)
 		task_sleep (TIME_100MS);
 	if (goalie_errors)
@@ -233,6 +240,7 @@ CALLSET_ENTRY (goalie_driver, diagnostic_check)
 
 CALLSET_ENTRY (goalie_driver, init_complete)
 {
+	/* TODO - this should also be done after exiting test mode! */
 	goalie_recalibrate ();
 }
 

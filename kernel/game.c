@@ -129,6 +129,19 @@ void dump_game (void)
 #endif
 
 
+/**
+ * Serve a new ball to the shooter lane.
+ * This function is the preferred method to serve a ball to a manual
+ * plunger at the beginning of a ball and after a ball lock.
+ * It is not used for autoplunges or ball saves.
+ */
+void serve_ball (void)
+{
+	device_request_kick (device_entry (DEVNO_TROUGH));
+	callset_invoke (serve_ball);
+}
+
+
 /** Handles the end game condition.
  * This is called directly from the trough update function during
  * endball.  It is also called by test mode when it starts up. */
@@ -197,7 +210,7 @@ void end_ball (void)
 #ifdef DEVNO_TROUGH
 	if (!valid_playfield && !in_tilt)
 	{
-		device_request_kick (device_entry (DEVNO_TROUGH));
+		serve_ball ();
 		return;
 	}
 #endif
@@ -267,7 +280,7 @@ void end_ball (void)
 	/* If this is the last ball of the game for this player,
 	 * then offer to buy an extra ball if enabled.  Also
 	 * save away the per-player audits. */
-	if (ball_up == system_config.balls_per_game)
+	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
 		if (system_config.buy_extra_ball == YES)
 		{
@@ -455,10 +468,10 @@ void start_ball (void)
 	 * or the next high score level.
 	 */
 	deff_start (DEFF_SCORES_IMPORTANT);
-	if (ball_up == system_config.balls_per_game)
+	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
-		/* Chalk game played audits on the final ball */
+		/* Chalk game played audits at the start of the final ball */
 		audit_increment (&system_audits.total_plays);
 	}
 
@@ -470,7 +483,7 @@ void start_ball (void)
 #if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
-		device_request_kick (device_entry (DEVNO_TROUGH));
+		serve_ball ();
 	}
 	else
 	{

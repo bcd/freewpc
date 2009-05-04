@@ -35,11 +35,12 @@ static struct ultra_info {
 	U8 shot_value;
 	U8 spot;
 	U8 *enable;
+	sound_code_t enable_sound;
 } ultra_award_table[] = {
-	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0] },
-	{ LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1] },
-	{ LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2] },
-	{ LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3]  }
+	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0], SPCH_ULTRA_RAMPS },
+	{ LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1], SPCH_ULTRA_GOALIE },
+	{ LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2], SPCH_ULTRA_JETS },
+	{ LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3], SPCH_ULTRA_SPINNER  }
 };
 
 
@@ -67,6 +68,7 @@ void ultra_score (struct ultra_info *u)
 {
 	ultra_collect (u);
 	score (u->shot_value);
+	music_effect_start (MUS_ULTRA_AWARD, TIME_2S);
 }
 
 
@@ -94,6 +96,7 @@ void ultra_add_shot (void)
 	{
 		*(u->enable) = u->shot_count;
 		lamp_tristate_flash (u->lamp);
+		speech_start (u->enable_sound, SL_3S);
 	}
 
 	ultra_award_next = (ultra_award_next + 1) % NUM_ULTRA_AWARDS;

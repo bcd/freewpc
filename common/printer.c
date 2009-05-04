@@ -22,10 +22,13 @@
 #include <test.h>
 #include <format.h>
 
+/** The line number within the current page */
 U8 printer_lineno;
 
+/** The column number on the current line */
 U8 printer_colno;
 
+/** The page number from the beginning of the current report */
 U8 printer_pageno;
 
 U8 printer_string_page;
@@ -46,6 +49,9 @@ extern struct audit standard_audits[];
 void print_header (void);
 
 
+/**
+ * Reset all state information about a print job.
+ */
 void printer_reconfig (void)
 {
 	printer_lineno = 0;
@@ -57,6 +63,10 @@ void printer_reconfig (void)
 }
 
 
+/**
+ * Write a single character to the printer, plus perform other
+ * necessary tasks, like page headers, form feeds, etc.
+ */
 void print_char (U8 c)
 {
 	if (print_header_needed)
@@ -90,6 +100,12 @@ void print_char (U8 c)
 	}
 }
 
+
+/**
+ * Write a string to the printer.
+ * This uses print_char() repeatedly.  It also handles strings
+ * that are not in the current page, using bank switching fetches.
+ */
 void print_string (const char *text)
 {
 	if (printer_string_page)
@@ -112,6 +128,10 @@ void print_string (const char *text)
 }
 
 
+/**
+ * Print a single character multiple times.  Useful for printing
+ * a horizontal bar.
+ */
 void print_repeated_char (U8 c, U8 count)
 {
 	while (count)
@@ -121,7 +141,11 @@ void print_repeated_char (U8 c, U8 count)
 	}
 }
 
-
+/**
+ * Move the print head to the specified column.  This can be used
+ * to implement tabs.  Physical spaces are output as needed to get
+ * to the correct location.
+ */
 void printer_moveto (U8 colno)
 {
 	if (colno < printer_colno)
@@ -132,6 +156,9 @@ void printer_moveto (U8 colno)
 }
 
 
+/**
+ * Print a string centered on the current line.
+ */
 void print_line_center (const char *text)
 {
 	printer_moveto ((printer_config.column_width - strlen (text)) / 2);
@@ -140,6 +167,9 @@ void print_line_center (const char *text)
 }
 
 
+/**
+ * Print a string right justified to the edge of the page.
+ */
 void print_line_right (const char *text)
 {
 	printer_moveto (printer_config.column_width - strlen (text));
@@ -162,6 +192,12 @@ void print_header (void)
 	print_header_needed = FALSE;
 	printer_pageno++;
 
+	/**
+	 * Just before printing the page header, see if the PAUSE EVERY PAGE
+	 * setting is on.  If so, the user must press Enter before the page
+	 * is written.  This would be for printers that need paper manually fed
+	 * into them.
+	 */
 	if (printer_config.pause_every_page == YES)
 	{
 		dmd_alloc_low_clean ();
@@ -188,6 +224,10 @@ void print_header (void)
 }
 
 
+/**
+ * Print a list of audits, with their names, numbers, and current
+ * counters.
+ */
 void print_audit_list (const char *title, struct audit *aud)
 {
 	U8 auditno = 1;

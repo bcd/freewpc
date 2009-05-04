@@ -38,6 +38,9 @@ ROM_PAGE_COUNT = 32
 
 MACHINE_FILE = wcs.md
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 50
+
 IMAGE_MAP += $(M)/wcs.ild
 
 MACHINE_SCHEDULE := $(M)/wcs.sched
@@ -61,7 +64,8 @@ GAME_INCLUDES =
 GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
 	shot.o lock.o driver.o kickback.o freekick.o \
 	toplane.o deffs.o jets.o goal_round.o \
-	combo.o multiball.o tv.o leffs.o mode.o ultra.o
+	combo.o multiball.o tv.o leffs.o mode.o ultra.o \
+	effect.o skill.o
 
 FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 
