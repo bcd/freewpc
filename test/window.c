@@ -834,22 +834,10 @@ void menu_down (void)
 }
 
 
-void menu_left_flipper_task (void)
+void menu_flipper_escape_task (void)
 {
-	task_sleep (TIME_66MS);
-	if (!switch_poll_logical (SW_RIGHT_BUTTON))
-		menu_down ();
-	else
-		window_pop ();
-	task_exit ();
-}
-
-void menu_right_flipper_task (void)
-{
-	task_sleep (TIME_66MS);
-	if (!switch_poll_logical (SW_LEFT_BUTTON))
-		menu_up ();
-	else
+	task_sleep (TIME_166MS);
+	if (switch_poll_logical (SW_RIGHT_BUTTON) && switch_poll_logical (SW_LEFT_BUTTON))
 		window_pop ();
 	task_exit ();
 }
@@ -857,12 +845,20 @@ void menu_right_flipper_task (void)
 
 void menu_left_flipper (void)
 {
-	task_create_gid1 (GID_MENU_FLIPPER, menu_left_flipper_task);
+	if (!task_find_gid (GID_MENU_FLIPPER))
+	{
+		menu_down ();
+		task_create_gid (GID_MENU_FLIPPER, menu_flipper_escape_task);
+	}
 }
 
 void menu_right_flipper (void)
 {
-	task_create_gid1 (GID_MENU_FLIPPER, menu_right_flipper_task);
+	if (!task_find_gid (GID_MENU_FLIPPER))
+	{
+		menu_up ();
+		task_create_gid (GID_MENU_FLIPPER, menu_flipper_escape_task);
+	}
 }
 
 struct window_ops menu_window = {
