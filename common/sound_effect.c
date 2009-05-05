@@ -245,6 +245,11 @@ void sound_proc_set_volume (U8 vol)
 }
 
 
+void sound_proc_set_prio (U8 prio)
+{
+}
+
+
 /**
  * Exit from a sound process.
  */
