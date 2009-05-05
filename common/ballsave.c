@@ -144,9 +144,10 @@ CALLSET_ENTRY (ballsave, single_ball_play)
  */
 CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 {
-	if (config_timed_game && timed_game_timer > 0 && (live_balls == 1))
+	if (config_timed_game && !in_tilt && (timed_game_timer > 0) && (live_balls == 1))
 	{
 		ballsave_launch ();
+		callset_invoke (timed_drain_penalty);
 		return FALSE;
 	}
 	else if (ballsave_test_active ())
