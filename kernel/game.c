@@ -137,7 +137,10 @@ void dump_game (void)
  */
 void serve_ball (void)
 {
+#ifdef DEVNO_TROUGH
 	device_request_kick (device_entry (DEVNO_TROUGH));
+#endif
+	valid_playfield = FALSE;
 	callset_invoke (serve_ball);
 }
 
@@ -207,13 +210,11 @@ void end_ball (void)
 	 * ball to the plunger lane in these cases, and don't
 	 * count as end-of-ball.
 	 */
-#ifdef DEVNO_TROUGH
 	if (!valid_playfield && !in_tilt)
 	{
 		serve_ball ();
 		return;
 	}
-#endif
 
 	/* Here, we are committed to ending the ball */
 
