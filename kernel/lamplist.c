@@ -79,7 +79,7 @@ const lampnum_t *lamplist_lookup (lamplist_id_t id)
 }
 
 
-const lampnum_t lamplist_index (lamplist_id_t id, U8 n)
+lampnum_t lamplist_index (lamplist_id_t id, U8 n)
 {
 	lampnum_t lamp;
 	wpc_push_page (MD_PAGE);
