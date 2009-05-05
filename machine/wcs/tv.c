@@ -3,15 +3,19 @@
 
 __local__ U8 tv_count;
 
+U8 tv_award_selected;
+
 struct tv_award
 {
+	const char *name;
+	void (*award) (void);
 	U8 static_prob;
 	void (*dynamic_prob) (void);
-	void (*award) (void);
 };
 
 void tv_award_points (void)
 {
+	score (SC_250K);
 }
 
 void tv_award_start_mode (void)
@@ -28,6 +32,7 @@ void tv_award_hurryup (void)
 
 void tv_award_add_ultra (void)
 {
+	VOIDCALL (ultra_add_shot);
 }
 
 void tv_award_light_extra_ball (void)
@@ -38,11 +43,31 @@ void tv_award_add_time (void)
 {
 }
 
+struct tv_award tv_award_table[] = {
+	{ "250,000", tv_award_points },
+	{ "START MODE", tv_award_start_mode },
+	{ "QUICK MULTIBALL", tv_award_start_quickmb },
+	{ "HURRY-UP", tv_award_hurryup },
+	{ "LIGHT ULTRA MODE", tv_award_add_ultra },
+	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball },
+	{ "ADD 30 SECONDS", tv_award_add_time },
+};
+
 
 void tv_award_deff (void)
 {
+	dmd_alloc_low_clean ();
+	sprintf ("TV AWARD %d", tv_count);
+	font_render_string_center (&font_fixed10, 64, 9, sprintf_buffer);
+	sprintf ("%s", tv_award_table[tv_award_selected].name);
+	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
+	dmd_draw_border (dmd_low_buffer);
+	dmd_show_low ();
+	sample_start (SND_TV_STATIC, SL_3S);
+	task_sleep_sec (3);
 	deff_exit ();
 }
+
 
 static bool tv_can_be_collected (void)
 {
@@ -58,8 +83,11 @@ void tv_light (void)
 
 void tv_collect (void)
 {
+	tv_award_selected = tv_count;
 	bounded_increment (tv_count, 250);
-	score (SC_250K);
+	score (SC_100K);
+	tv_award_table[tv_award_selected].award ();
+	deff_start (DEFF_TV_AWARD);
 }
 
 
