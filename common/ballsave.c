@@ -27,8 +27,8 @@ void ball_save_leff (void)
 {
 	for (;;)
 	{
-#ifdef MACHINE_EXTRA_BALL_LAMP
-		leff_toggle (MACHINE_EXTRA_BALL_LAMP);
+#ifdef MACHINE_SHOOT_AGAIN_LAMP
+		leff_toggle (MACHINE_SHOOT_AGAIN_LAMP);
 #endif
 		task_sleep (TIME_100MS);
 	}

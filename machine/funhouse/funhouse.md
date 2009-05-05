@@ -62,7 +62,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 14: Gangway 200K
 15: Gangway 250K
 16: Gangway Ex. Ball
-17: Shoot Again, extra-ball
+17: Shoot Again, shoot-again
 18: Steps Gate Open
 21: Clock 45 Min.
 22: Clock Hour 8

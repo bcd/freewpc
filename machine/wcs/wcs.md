@@ -64,7 +64,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 54: Striker Build, white , x(5), y(15)
 55: Light Magna Goalie , x(29), y(21)
 56: R. Flipper Lane , x(35), y(22)
-57: Shoot Again, red, extra-ball , x(43), y(17)
+57: Shoot Again, red, shoot-again , x(43), y(17)
 58: Special, red , x(38), y(24)
 61: L. Ramp Build, white , x(19), y( 6)
 62: L. Loop Build, white , x(19), y( 2)

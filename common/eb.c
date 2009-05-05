@@ -41,16 +41,16 @@ U8 extra_balls_earned_this_bip;
 collected extra balls by the current player up. */
 static void update_extra_ball_lamp (void)
 {
-#ifdef MACHINE_EXTRA_BALL_LAMP
+#ifdef MACHINE_SHOOT_AGAIN_LAMP
 	if (extra_balls > 0)
 	{
-		lamp_tristate_on (MACHINE_EXTRA_BALL_LAMP);
+		lamp_tristate_on (MACHINE_SHOOT_AGAIN_LAMP);
 	}
 	else
 	{
-		lamp_tristate_off (MACHINE_EXTRA_BALL_LAMP);
+		lamp_tristate_off (MACHINE_SHOOT_AGAIN_LAMP);
 	}
-#endif /* MACHINE_EXTRA_BALL_LAMP */
+#endif /* MACHINE_SHOOT_AGAIN_LAMP */
 }
 
 

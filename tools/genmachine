@@ -715,6 +715,7 @@ sub machine_write_defines {
 	
 	print_c_ident ($m->{'*lamps:start'}, "MACHINE_START_LAMP");
 	print_c_ident ($m->{'*lamps:buyin'}, "MACHINE_BUYIN_LAMP");
+	print_c_ident ($m->{'*lamps:shoot-again'}, "MACHINE_SHOOT_AGAIN_LAMP");
 	print_c_ident ($m->{'*lamps:extra-ball'}, "MACHINE_EXTRA_BALL_LAMP");
 
 	print_c_ident ($m->{'*drives:launch'}, "MACHINE_LAUNCH_SOLENOID");
