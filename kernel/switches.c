@@ -426,7 +426,7 @@ void switch_sched_task (void)
 	 * actually in test mode */
 	if (!(swinfo->flags & SW_IN_TEST) && in_test)
 	{
-		dbprintf ("Ignore: not in test\n");
+		dbprintf ("Ignore: in test\n");
 		goto cleanup;
 	}
 
