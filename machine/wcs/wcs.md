@@ -402,3 +402,11 @@ Goalie: driver(duty),
 	sol=SOL_GOALIE_DRIVE,
 	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=0
 
+Magna Goalie: driver(duty),
+	sol=SOL_MAGNA_GOALIE,
+	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=TIME_2S
+
+Lock Magnet: driver(duty),
+	sol=SOL_LOCK_MAGNET,
+	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_100MS, timeout=TIME_2S
+

@@ -30,7 +30,7 @@ void lock_magnet_disable (void)
 	flag_off (FLAG_LOCK_MAGNET_ENABLE);
 }
 
-CALLSET_ENTRY (lock_magnet, sw_r_ramp_exit)
+CALLSET_ENTRY (lock_lane, sw_r_ramp_exit)
 {
 	if (in_live_game && flag_test (FLAG_LOCK_MAGNET_ENABLE))
 	{
@@ -51,19 +51,19 @@ CALLSET_ENTRY (lock_magnet, sw_r_ramp_exit)
 	}
 }
 
-CALLSET_ENTRY (lock_magnet, dev_lock_enter)
+CALLSET_ENTRY (lock_lane, dev_lock_enter)
 {
 	lock_magnet_disable ();
 }
 
 
-CALLSET_ENTRY (lock_magnet, dev_lock_kick_attempt)
+CALLSET_ENTRY (lock_lane, dev_lock_kick_attempt)
 {
 	free_timer_start (TIM_LOCK_KICKING, TIME_3S);
 }
 
 
-CALLSET_ENTRY (lock_magnet, sw_left_flipper_lane)
+CALLSET_ENTRY (lock_lane, sw_left_flipper_lane)
 {
 #ifdef BCD_WCS
 	/* If the head switch -- the one that would open
@@ -82,12 +82,12 @@ CALLSET_ENTRY (lock_magnet, sw_left_flipper_lane)
 }
 
 
-CALLSET_ENTRY (lock_magnet, start_game)
+CALLSET_ENTRY (lock_lane, start_game)
 {
 	lock_magnet_disable ();
 }
 
-CALLSET_ENTRY (lock_magnet, end_game)
+CALLSET_ENTRY (lock_lane, end_game)
 {
 	lock_magnet_disable ();
 }

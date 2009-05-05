@@ -34,4 +34,6 @@
 !gate_service             16    40c
 !spinning_ball_service    16    40c
 !goalie_service           16    40c
+!magna_goalie_service     16    40c
+!lock_magnet_service      16    40c
 
