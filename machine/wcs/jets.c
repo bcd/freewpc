@@ -48,7 +48,7 @@ CALLSET_ENTRY (jets, sw_left_jet, sw_upper_jet, sw_lower_jet)
 	if (lamp_flash_test (LM_ULTRA_JETS))
 	{
 		score (SC_25K);
-		sound_start (ST_SAMPLE, SND_WHISTLE, SL_500MS, PRI_GAME_QUICK5);
+		sound_start (ST_SAMPLE, SND_FIREWORK_EXPLODE, SL_500MS, PRI_GAME_QUICK5);
 		if (++ultra_jet_count == 80)
 		{
 			lamp_tristate_on (LM_ULTRA_JETS);

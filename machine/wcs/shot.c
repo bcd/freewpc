@@ -163,3 +163,9 @@ CALLSET_ENTRY (shot, sw_travel_lane)
 	callset_invoke (left_loop_shot);
 }
 
+
+CALLSET_ENTRY (shot, sw_left_outlane, sw_right_outlane)
+{
+	sample_start (SND_OUTLANE, SL_3S);
+}
+
