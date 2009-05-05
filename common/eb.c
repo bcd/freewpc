@@ -68,7 +68,10 @@ bool can_award_extra_ball (void)
 cannot be awarded, then it is skipped. */
 void increment_extra_balls (void)
 {
-	if (can_award_extra_ball ())
+	if (config_timed_game)
+	{
+	}
+	else if (can_award_extra_ball ())
 	{
 		/* TODO - handle adjustment to award points instead of
 		 * extra ball */
