@@ -29,6 +29,7 @@
 @@class flipper
 @@parameter id
 
+
 @@
 @@file @class.h
 @@
@@ -38,60 +39,20 @@
 
 extern __fastram__ U8 @class_enabled;
 extern __fastram__ U8 @class_running;
-extern __fastram__ U8 @class_duty;
 
 
 /**
- * Every millisecond, rewrite the flipper output.
+ * Every millisecond, refresh the flipper outputs.
  */
-extern inline void @self_1ms_service (void)
+extern inline void @class_refresh (void)
 {
-	wpc_write_flippers ((@class_duty & @class_duty_mask[0]) | @class_enabled);
+	wpc_write_flippers (@class_running & @class_enabled);
 }
 
 #endif /* __@class_DRIVER_H */
 
-
 @@
-@@file @self.h
-@@
-
-#include <@class.h>
-
-#undef INST_MASK
-#define INST_MASK (1 << @instance)
-
-#undef SOL_POWER
-#define SOL_POWER (32 + @instance * 2)
-#undef SOL_HOLD
-#define SOL_HOLD (32 + @instance * 2 + 1)
-
-#undef SW_EOS
-#define SW_EOS (72 + @instance * 2)
-#undef SW_BUTTON
-#define SW_BUTTON (72 + @instance * 2 + 1)
-
-extern __fastram__ U8 @self_timer;
-
-extern inline U8 @self_enabled_p (void)
-{
-	return @class_enables & INST_MASK;
-}
-
-
-extern inline U8 @self_running_p (void)
-{
-	return @class_running & INST_MASK;
-}
-
-
-extern inline void @self_8ms_service (void)
-{
-}
-
-
-@@
-@@file @self.c
+@@file @class.c
 @@
 
 #include <freewpc.h>
@@ -99,7 +60,6 @@ extern inline void @self_8ms_service (void)
 
 @@classvar __fastram__ U8 @class_enabled;
 @@classvar __fastram__ U8 @class_running;
-@@classvar __fastram__ U8 @class_duty;
 
 __fastram__ U8 @self_timer;
 
@@ -107,24 +67,98 @@ __fastram__ U8 @self_timer;
 CALLSET_ENTRY (@self, init)
 {
 	@self_timer = 0;
-	flippers_enabled = 0;
+	@class_enabled = NO_FLIPPERS;
 }
 
 /* Enable the device at start ball */
 CALLSET_ENTRY (@self, start_ball)
 {
-	flippers_enabled = 1;
+	@class_enabled = ALL_FLIPPERS;
 }
 
 /* Disable the device at end ball/tilt */
-CALLSET_ENTRY (@self, end_ball)
+CALLSET_ENTRY (@self, end_ball, tilt)
 {
-	flippers_enabled = 0;
+	@class_enabled = NO_FLIPPERS;
 }
 
-CALLSET_ENTRY (@self, tilt)
+
+@@
+@@file @self.h
+@@
+
+/* Schedule this driver every 8ms */
+#define RTT_SCHED 8
+#define POWER_PULSE 40
+#define POWER_TICKS (POWER_PULSE / RTT_SCHED)
+
+#include <@class.h>
+
+extern __fastram__ U8 @self_timer;
+
+/**
+ * The driver for a single flipper.
+ */
+extern inline void @self_driver (void)
 {
-	flippers_enabled = 0;
+	if (flippers_enabled && BUTTON_PRESSED (@button))
+	{
+		/* Flipper button is pressed.  See what phase we are in. */
+		if (@self_timer == 0)
+		{
+			/* Start a high power 40ms pulse */
+			sol_enable (@power_sol);
+			@self_timer = POWER_TICKS;
+		}
+		else if (@self_timer > 0)
+		{
+			/* Allow the 40ms pulse to run */
+			if (--@self_timer == 0)
+			{
+				/* The 40ms pulse has expired.  Switch to hold power */
+				sol_disable (@power_sol);
+				sol_enable (@hold_sol);
+			}
+		}
+		else if (@self_timer < 0)
+		{
+			/* The flipper is in hold mode.  Check for foldback */
+			if (EOS_INACTIVE (@eos))
+			{
+				/* Start another high power pulse */
+				sol_disable (@hold_sol);
+				sol_enable (@power_sol);
+				@self_timer = POWER_TICKS;
+			}
+		}
+	}
+	else
+	{
+		/* Flipper button is not pressed: the coil should be off */
+		@self_timer = 0;
+		sol_disable (@power_sol);
+		sol_disable (@hold_sol);
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+/** Each flipper has its own timer instance variable.
+ * When zero, it means the flipper is not running at all.
+ *
+ * When positive, it means the flipper is in high power mode, and will
+ * stay this way for 40ms.
+ *
+ * When negative, it measn the flipper is in low power mode.
+ */
+__fastram__ U8 @self_timer;
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = 0;
 }
 
 /* vim: set filetype=c: */
