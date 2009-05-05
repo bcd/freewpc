@@ -35,6 +35,7 @@ goalie_position_t goalie_position;
 #define GOALIE_MOVING        0x10
 #define GOALIE_TARGETING     0x20
 #define GOALIE_CALIBRATING   0x40
+#define GOALIE_EVIL          0x80
 
 U8 goalie_status;
 
@@ -258,4 +259,21 @@ CALLSET_ENTRY (goalie_driver, end_game)
 {
 	goalie_command (GOALIE_NOT_MOVING);
 }
+
+CALLSET_ENTRY (goalie_logic, idle_every_second)
+{
+	if (in_live_game)
+	{
+		if (flag_test (FLAG_GOAL_LIT) || flag_test (FLAG_MULTIBALL_RUNNING))
+		{
+			goalie_command (GOALIE_MOVING);
+			return;
+		}
+		else
+		{
+			goalie_command (GOALIE_NOT_MOVING);
+		}
+	}
+}
+
 
