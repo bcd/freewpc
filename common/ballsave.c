@@ -131,7 +131,7 @@ CALLSET_ENTRY (ballsave, valid_playfield)
 }
 
 /*
- * Ball save is turned on when any multiball ends.
+ * Ball save is turned off when any multiball ends.
  */
 CALLSET_ENTRY (ballsave, single_ball_play)
 {
@@ -139,12 +139,12 @@ CALLSET_ENTRY (ballsave, single_ball_play)
 }
 
 /*
- * Ball save is activated at ball drain if
- * it is active.
+ * Ball save is activated at ball drain if it is active, or in timed
+ * game.
  */
 CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 {
-	if (config_timed_game && timed_game_timer > 0)
+	if (config_timed_game && timed_game_timer > 0 && (live_balls == 1))
 	{
 		ballsave_launch ();
 		return FALSE;
