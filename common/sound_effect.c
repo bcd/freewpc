@@ -195,6 +195,67 @@ void sound_start1 (U8 channels, sound_code_t code)
 
 
 /**
+ * Start a sound process.  This is used for more complex sound effects
+ * that require more than just a single write to the sound board.
+ * Instead of providing a sound code, the caller provides a function.
+ * This function then runs in a separate task context to write the
+ * required sound calls.
+ *
+ * Sound procs can sleep, do other checks, and change volume.
+ *
+ * A sound proc can be preempted by higher priority effects (either
+ * simple or complex).  When preempted the task is killed.
+ */
+void sound_proc_start1 (U8 channels, task_function_t fn)
+{
+}
+
+
+/**
+ * Return the channel number for the currently running
+ * sound process.
+ */
+static inline U8 sound_proc_channel_id (void)
+{
+	U8 gid = task_getgid ();
+	if ((gid < GID_SOUND_PROC0) || (gid >= GID_SOUND_PROC0 + MAX_SOUND_CHANNELS))
+	{
+		dbprintf ("Bad GID %02X for sound proc\n", gid);
+		abort ();
+	}
+	return gid - GID_SOUND_PROC0;
+}
+
+
+/**
+ * Send a sound code to the sound board from a sound process.
+ */
+void sound_proc_send (sound_code_t code)
+{
+	U8 chid = sound_proc_channel_id ();
+}
+
+
+/**
+ * Adjust the volume from a sound process.
+ */
+void sound_proc_set_volume (U8 vol)
+{
+	U8 chid = sound_proc_channel_id ();
+}
+
+
+/**
+ * Exit from a sound process.
+ */
+void sound_proc_exit (void)
+{
+	U8 chid = sound_proc_channel_id ();
+	task_exit ();
+}
+
+
+/**
  * A default music refresh handler.
  * This function gets involved anytime a music refresh is required,
  * in addition to any machine-specific handlers.  It ensures that
