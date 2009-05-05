@@ -176,6 +176,7 @@ bool lamp_leff2_test_and_allocate (lampnum_t lamp);
 void lamp_leff2_free (lampnum_t lamp);
 
 const U8 *lamplist_lookup (lamplist_id_t id);
+const lampnum_t lamplist_index (lamplist_id_t id, U8 n);
 void lamplist_apply_nomacro (lamplist_id_t id, lamp_operator_t op);
 void lamplist_apply (lamplist_id_t id, lamp_operator_t op);
 

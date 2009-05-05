@@ -71,9 +71,21 @@ void lamplist_set_apply_delay (task_ticks_t delay)
 
 const lampnum_t *lamplist_lookup (lamplist_id_t id)
 {
+	lampnum_t *lptr;
 	wpc_push_page (MD_PAGE);
-	return lamplist_table[id];
+	lptr = lamplist_table[id];
 	wpc_pop_page ();
+	return lptr;
+}
+
+
+const lampnum_t lamplist_index (lamplist_id_t id, U8 n)
+{
+	lampnum_t lamp;
+	wpc_push_page (MD_PAGE);
+	lamp = lamplist_table[id][n];
+	wpc_pop_page ();
+	return lamp;
 }
 
 
