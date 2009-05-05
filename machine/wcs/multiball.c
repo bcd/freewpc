@@ -8,18 +8,32 @@ __local__ U8 mb_spinner_count;
 
 void ball_locked_deff (void)
 {
+	dmd_alloc_low_clean ();
+	dmd_draw_border (dmd_low_buffer);
+	sprintf ("BALL %d LOCKED", lock_count);
+	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
 void multiball_lit_deff (void)
 {
+	dmd_alloc_low_clean ();
+	dmd_draw_border (dmd_low_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, "SHOOT FINAL DRAW");
+	font_render_string_center (&font_fixed6, 64, 21, "FOR MULTIBALL");
+	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
 void multiball_start_deff (void)
 {
-	deff_exit ();
+	sprintf ("MULTIBALL");
+	flash_and_exit_deff (30, TIME_100MS);
 }
+
 
 void multiball_running_deff (void)
 {
@@ -48,12 +62,14 @@ void multiball_running_deff (void)
 
 void multiball_jackpot_deff (void)
 {
-	deff_exit ();
+	sprintf ("JACKPOT");
+	flash_and_exit_deff (20, TIME_100MS);
 }
 
 void multiball_super_jackpot_deff (void)
 {
-	deff_exit ();
+	sprintf ("SUPER JACKPOT");
+	flash_and_exit_deff (30, TIME_100MS);
 }
 
 void multiball_spinner_deff (void)
@@ -70,11 +86,13 @@ void mb_reset (void)
 	flag_off (FLAG_MULTIBALL_RUNNING);
 	flag_off (FLAG_JACKPOT_LIT);
 	flag_off (FLAG_SUPER_JACKPOT_LIT);
+	global_score_multiplier = 1;
 }
 
 void mb_light (void)
 {
 	flag_on (FLAG_MULTIBALL_LIT);
+	deff_start (DEFF_MULTIBALL_LIT);
 }
 
 void mb_light_jackpot (void)
@@ -93,11 +111,18 @@ void mb_start (void)
 	mb_light_jackpot ();
 	flag_off (FLAG_SUPER_JACKPOT_LIT);
 	mb_spinner_count = 0;
+	global_score_multiplier = 2;
 	VOIDCALL (goal_count_lamp_update);
+	deff_start (DEFF_MULTIBALL_START);
 	if (flag_test (FLAG_LEFT_EJECT_LOCK))
 		device_unlock_ball (device_entry (DEVNO_LEFT_EJECT));
 	if (flag_test (FLAG_RIGHT_EJECT_LOCK))
 		device_unlock_ball (device_entry (DEVNO_RIGHT_EJECT));
+}
+
+void mb_start_surprise (void)
+{
+	mb_start ();
 }
 
 static void mb_advance_spinner (void)
@@ -131,6 +156,7 @@ static void mb_award_lock (U8 flag, U8 devno)
 		flag_on (flag);
 		device_lock_ball (device_entry (devno));
 		sound_start (ST_SAMPLE, SND_LOCK_MAGNET, SL_4S, PRI_GAME_QUICK5);
+		deff_start (DEFF_BALL_LOCKED);
 		lock_count++;
 	}
 }
@@ -146,6 +172,26 @@ CALLSET_ENTRY (mb, dev_right_eject_enter)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 		mb_award_lock (FLAG_RIGHT_EJECT_LOCK, DEVNO_RIGHT_EJECT);
+}
+
+CALLSET_ENTRY (mb, dev_left_eject_surprise_release)
+{
+	if (!flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_LEFT_EJECT_LOCK))
+	{
+		flag_off (FLAG_LEFT_EJECT_LOCK);
+		device_disable_lock (device_entry (DEVNO_LEFT_EJECT));
+		mb_start_surprise ();
+	}
+}
+
+CALLSET_ENTRY (mb, dev_right_eject_surprise_release)
+{
+	if (!flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_RIGHT_EJECT_LOCK))
+	{
+		flag_off (FLAG_RIGHT_EJECT_LOCK);
+		device_disable_lock (device_entry (DEVNO_RIGHT_EJECT));
+		mb_start_surprise ();
+	}
 }
 
 CALLSET_ENTRY (mb, dev_tv_popper_enter)
@@ -203,13 +249,7 @@ CALLSET_ENTRY (mb, display_update)
 		deff_start_bg (DEFF_MULTIBALL_RUNNING, PRI_GAME_MODE3);
 }
 
-CALLSET_ENTRY (mb, single_ball_play, end_ball)
-{
-	mb_reset ();
-}
-
-
-CALLSET_ENTRY (mb, start_player)
+CALLSET_ENTRY (mb, start_player, single_ball_play, end_ball)
 {
 	mb_reset ();
 }

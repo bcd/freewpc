@@ -1,9 +1,94 @@
+/*
+ * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 
+#define MODE_STAMINA 0
+#define MODE_SKILL 1
+#define MODE_SPIRIT 2
+#define MODE_SPEED 3
+#define MODE_STRENGTH 4
+#define NUM_MODES 5
+
+#define ALL_MODES_RUNNING 0x1F
+
 __local__ U8 dog_targets;
 
+/** The number of modes that have been started */
 __local__ U8 modes_started;
+
+__local__ U8 mode_ready;
+
+U8 modes_running;
+
+U8 modes_won;
+
+void mode_stamina_start (void)
+{
+}
+
+void mode_skill_start (void)
+{
+	/* Hold onto ball at mode start.  Serve new ball to plunger.
+	Disable flippers.  Shoot for the flashing skill lane.
+	If made, ball drains and is re-served for another shot.
+	If missed, flippers are re-enabled and either ramp shot
+	will requalify (ball will drain again).  Timed game pauses
+	while skill shots are active. */
+}
+
+void mode_spirit_start (void)
+{
+	/* Frenzy mode - all switches score */
+}
+
+void mode_speed_start (void)
+{
+	/* Hurry-Up mode */
+}
+
+void mode_strength_start (void)
+{
+	/* Shoot goal over and over, with Evil Goalie active */
+}
+
+bool mode_running_p (const U8 mode)
+{
+	return modes_running & (1 << mode);
+}
+
+typedef struct
+{
+	const char *name;
+	void (*start) (void);
+} mode_t;
+
+
+mode_t mode_table[] = {
+	{ "STAMINA", },
+	{ "SKILL", },
+	{ "SPIRIT", },
+	{ "SPEED", },
+	{ "STRENGTH", },
+};
+
 
 void mode_draw_target_status (U8 targets)
 {
@@ -53,7 +138,10 @@ void mode_lit_deff (void)
 void mode_started_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "MODE START");
+	sprintf ("MODE %d", modes_started);
+	font_render_string_center (&font_fixed10, 64, 7, sprintf_buffer);
+	sprintf ("%s", mode_table[mode_ready].name);
+	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -84,7 +172,7 @@ void mode_collect_dog_target (U8 target)
 		{
 			flag_on (FLAG_MODE_LIT);
 			deff_start (DEFF_MODE_LIT);
-			score (SC_50K);
+			score (SC_100K);
 		}
 		else
 		{
@@ -94,7 +182,7 @@ void mode_collect_dog_target (U8 target)
 	}
 	else
 	{
-		score (SC_5K);
+		score (SC_10K);
 	}
 }
 
@@ -105,14 +193,59 @@ bool mode_can_be_started (void)
 
 void mode_start (void)
 {
-	if (flag_test (FLAG_MODE_LIT))
+	modes_running |= (1 << mode_ready);
+	lamp_tristate_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
+	mode_table[mode_ready].start ();
+	if (modes_started < NUM_MODES)
+		mode_rotate_next ();
+}
+
+void maybe_mode_start (void)
+{
+	if (mode_can_be_started () && flag_test (FLAG_MODE_LIT))
 	{
-		mode_reset_dog_targets ();
-		score (SC_100K);
-		/* start mode */
-		deff_start (DEFF_MODE_STARTED);
-		modes_started++;
+		if (modes_started < NUM_MODES)
+		{
+			mode_reset_dog_targets ();
+			score (SC_100K);
+			modes_started++;
+			mode_start ();
+			deff_start (DEFF_MODE_STARTED);
+		}
+		else
+		{
+		}
 	}
+	else
+	{
+		score (SC_50K);
+	}
+}
+
+static void mode_flash_next (void)
+{
+	lamp_flash_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
+}
+
+void mode_flash_first (void)
+{
+	mode_ready = 0;
+	mode_flash_next ();
+}
+
+void mode_rotate_next (void)
+{
+	U8 lamp;
+
+	lamp_flash_off (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
+	mode_ready++;
+	lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
+	if (lamp == LAMP_END)
+	{
+		mode_ready = 0;
+		lamp = lamplist_index (LAMPLIST_BALL_PANELS, 0);
+	}
+	lamp_flash_on (lamp);
 }
 
 CALLSET_ENTRY (mode, sw_striker_1)
@@ -132,13 +265,16 @@ CALLSET_ENTRY (mode, sw_striker_3)
 
 CALLSET_ENTRY (mode, striker_shot)
 {
-	mode_start ();
+	maybe_mode_start ();
 }
 
 CALLSET_ENTRY (mode, start_player)
 {
 	modes_started = 0;
+	modes_won = 0;
 	mode_reset_dog_targets ();
+	lamplist_apply (LAMPLIST_BALL_PANELS, lamp_off);
+	mode_flash_first ();
 }
 
 CALLSET_ENTRY (mode, lamp_update)
@@ -147,7 +283,13 @@ CALLSET_ENTRY (mode, lamp_update)
 		mode_can_be_started () && flag_test (FLAG_MODE_LIT));
 }
 
+CALLSET_ENTRY (mode, sw_right_button)
+{
+	mode_rotate_next ();
+}
+
 CALLSET_ENTRY (mode, start_ball)
 {
+	modes_running = 0;
 }
 

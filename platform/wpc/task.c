@@ -244,7 +244,8 @@ void task_dump (void)
 
 /** Allocate a dynamic block of memory, by searching the block
  * array (linearly) for the first entry that is in the BLOCK_FREE
- * state.  Returns a pointer to the newly allocated block.
+ * state.  Returns a pointer to the newly allocated block, or
+ * NULL if none can be found.
  *
  * The 'aux_stack_block' field of a new block is initialized to
  * that block's index.
@@ -312,6 +313,9 @@ task_t *task_allocate (void)
 		(GID_SWITCH_LAMP_PULSE); pending switch handlers that have been
 		started but not yet begun (GID_SW_HANDLER) -- this would be as if
 		the switch never triggered. */
+
+		/* At present, just halt the system when this happens.
+		No callers are checking return codes at this point. */
 		fatal (ERR_NO_FREE_TASKS);
 		return 0;
 	}

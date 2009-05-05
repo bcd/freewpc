@@ -68,6 +68,10 @@ void tv_award_deff (void)
 	deff_exit ();
 }
 
+void tv_lit_deff (void)
+{
+	deff_exit ();
+}
 
 static bool tv_can_be_collected (void)
 {
@@ -105,6 +109,7 @@ CALLSET_ENTRY (tv, sw_free_kick_target)
 	if (!flag_test (FLAG_TV_LIT))
 	{
 		tv_light ();
+		deff_start (DEFF_TV_LIT);
 	}
 }
 
@@ -116,10 +121,6 @@ CALLSET_ENTRY (tv, lamp_update)
 CALLSET_ENTRY (tv, start_player)
 {
 	tv_count = 0;
-}
-
-CALLSET_ENTRY (tv, start_ball)
-{
 	tv_light ();
 }
 

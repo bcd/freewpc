@@ -97,6 +97,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 13: Start Button, start-button, cabinet, intest
 14: Tilt, cabinet, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
+# TODO : everything marked debounce does not register on real hardware!!!
 16: Striker 3, ingame, debounce(TIME_50MS)
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
@@ -326,15 +327,18 @@ Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE4, D_SCORE
 
 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
-Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 Multiball Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5
 Multiball Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
 Multiball Super Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK8
 Multiball Spinner: page(MACHINE_PAGE), PRI_GAME_QUICK6
 
-Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2
+TV Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
+TV Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+
+Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
-Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)

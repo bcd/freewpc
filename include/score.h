@@ -45,6 +45,8 @@ extern score_t scores[];
 /** A pointer to the current score in the scores[] array */
 extern U8 *current_score;
 
+/** The all-inclusive score multiplier */
+extern U8 global_score_multiplier;
 
 
 extern inline void score_update_start (void)
