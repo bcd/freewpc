@@ -346,16 +346,8 @@ void timed_game_monitor (void)
 {
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
-		/* Look for conditions in which the game timer should not run. */
-		if (!valid_playfield
-				|| timer_find_gid (GID_TIMED_GAME_PAUSED)
-#ifdef MACHINE_SHOOTER_SWITCH
-				|| (switch_poll_logical (MACHINE_SHOOTER_SWITCH) &&
-						(live_balls <= 1))
-#endif
-				|| timed_game_suspend_count
-				|| kickout_locks
-				|| ball_search_timed_out ())
+		/* Don't run the timer under certain conditions */
+		if (system_timer_pause ())
 		{
 			task_sleep (TIME_500MS);
 			continue;
@@ -481,7 +473,7 @@ void start_ball (void)
 	 * for whatever reason, then don't kick a new ball, just use the
 	 * one that is there.  In that case, need to increment live ball count
 	 * manually. */
-#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
+#if defined(MACHINE_SHOOTER_SWITCH)
 	if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 	{
 		serve_ball ();
