@@ -161,6 +161,12 @@ rle_loop:
 	cmpa	#0xA8
 	beq	rle_run
 	std	,u++
+
+	ldd	,x++
+	cmpa	#0xA8
+	beq	rle_run
+	std	,u++
+
 	bra	rle_loop
 
 rle_done:
