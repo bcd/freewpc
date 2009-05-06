@@ -98,12 +98,12 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 14: Tilt, cabinet, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
 # TODO : everything marked debounce does not register on real hardware!!!
-16: Striker 3, ingame, debounce(TIME_50MS)
+16: Striker 3, ingame
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
 21: Slam Tilt, cabinet, slam-tilt
 23: Buyin Button, buyin-button, cabinet
-25: Free Kick Target, ingame, debounce(TIME_50MS)
+25: Free Kick Target, ingame
 26: Kickback Upper, ingame
 27: Spinner, ingame
 28: Light Kickback, ingame
@@ -134,8 +134,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 63: Rollover 3, ingame
 64: Rollover 4, ingame
 65: Tackle, ingame
-66: Striker 1, ingame, debounce(TIME_50MS)
-67: Striker 2, ingame, debounce(TIME_50MS)
+66: Striker 1, ingame
+67: Striker 2, ingame
 71: L. Ramp Diverted, ingame
 72: L. Ramp Enter, ingame
 74: L. Ramp Exit, ingame
