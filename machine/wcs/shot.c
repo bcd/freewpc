@@ -66,20 +66,39 @@ void ramp_enter (void)
 	sound_start (ST_SAMPLE, SND_ASTHMA_ATTACK, SL_2S, PRI_GAME_QUICK1);
 }
 
+void left_ramp_jet_task (void)
+{
+	task_sleep_sec (5);
+	task_exit ();
+}
+
+void right_ramp_jet_task (void)
+{
+	task_sleep_sec (5);
+	task_exit ();
+}
+
+
 CALLSET_ENTRY (shot, sw_l_ramp_enter)
 {
 	ramp_enter ();
-	/* TODO - start a timer for awarding the
-	shot on a jet bumper hit */
+	if (single_ball_play ())
+		task_create_gid1 (GID_LEFT_RAMP_MADE_ON_JET, left_ramp_jet_task);
 }
 
 CALLSET_ENTRY (ramp_shot, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
+	if (task_kill_gid (GID_LEFT_RAMP_MADE_ON_JET))
+		callset_invoke (left_ramp_shot);
+	else if (task_kill_gid (GID_RIGHT_RAMP_MADE_ON_JET))
+		callset_invoke (right_ramp_shot);
 }
 
 CALLSET_ENTRY (shot, sw_r_ramp_enter)
 {
 	ramp_enter ();
+	if (single_ball_play ())
+		task_create_gid1 (GID_RIGHT_RAMP_MADE_ON_JET, right_ramp_jet_task);
 }
 
 CALLSET_ENTRY (shot, sw_l_ramp_diverted)
@@ -87,12 +106,14 @@ CALLSET_ENTRY (shot, sw_l_ramp_diverted)
 	/* TODO - be careful, cannot ask for more than 4s of this API */
 	free_timer_restart (TIM_IGNORE_R_RAMP_EXIT, TIME_4S);
 	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
+	task_kill_gid (GID_LEFT_RAMP_MADE_ON_JET);
 	callset_invoke (left_ramp_shot);
 }
 
 CALLSET_ENTRY (shot, sw_l_ramp_exit)
 {
 	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
+	task_kill_gid (GID_LEFT_RAMP_MADE_ON_JET);
 	callset_invoke (left_ramp_shot);
 }
 
@@ -101,6 +122,7 @@ CALLSET_ENTRY (shot, sw_r_ramp_exit)
 	if (!free_timer_test (TIM_IGNORE_R_RAMP_EXIT))
 	{
 		sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK2);
+		task_kill_gid (GID_RIGHT_RAMP_MADE_ON_JET);
 		callset_invoke (right_ramp_shot);
 	}
 	else
