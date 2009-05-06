@@ -102,22 +102,12 @@ void ballsave_launch (void)
  * ball save doesn't timeout before endball is called.
  */
 
-CALLSET_ENTRY (ballsave, sw_left_outlane)
+CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
 {
-	if (live_balls == 1 && ballsave_test_active ())
+	if (single_ball_play () && ballsave_test_active ())
 	{
 		ballsave_add_time (5);
 	}
-}
-
-CALLSET_ENTRY (ballsave, sw_right_outlane)
-{
-	ballsave_sw_left_outlane ();
-}
-
-CALLSET_ENTRY (ballsave, sw_outhole)
-{
-	ballsave_sw_left_outlane ();
 }
 
 

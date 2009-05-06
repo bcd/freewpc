@@ -232,7 +232,7 @@ static void door_award_litz (void)
 bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
-	if (live_balls > 1)
+	if (multi_ball_play ())
 		return FALSE;
 
 	/* No more panels can be awarded after BTTZ */

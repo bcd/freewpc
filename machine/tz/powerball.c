@@ -204,7 +204,7 @@ void pb_detect_event (pb_event_t event)
 	{
 		/* Steel ball detected on playfield, via Slot Proximity */
 		case PF_STEEL_DETECTED:
-			if (live_balls == 1)
+			if (single_ball_play ())
 				pb_clear_location (PB_IN_PLAY);
 #ifdef PB_DEBUG
 			else
@@ -286,7 +286,7 @@ void pb_container_enter (U8 location, U8 devno)
 	of a ball entering a device is significant. */
 	if (pb_location == PB_IN_PLAY)
 	{
-		if (live_balls <= 1) /* ball count before entering the device */
+		if (single_ball_play ())
 		{
 			/* In single ball play, things are fairly deterministic.
 			 * We know the powerball is no longer in play, and it is in

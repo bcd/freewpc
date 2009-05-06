@@ -147,8 +147,7 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * the same ball.  TODO : the check for live balls should not apply in
  * some cases, e.g. non-playfield switches */
 #define switch_did_follow(first,second) \
-	((live_balls == 1) \
-		&& timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))
+	(single_ball_play () && timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))
 
 /* The above macros are generic enough to apply to any event, not
  * just switch events */

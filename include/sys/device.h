@@ -252,4 +252,7 @@ __common__ void device_init (void);
 #define KLOCK_DEBUGGER 0x2
 
 
+#define single_ball_play() (live_balls <= 1)
+#define multi_ball_play() (live_balls > 1)
+
 #endif /* _SYS_DEVICE_H */

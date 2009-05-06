@@ -53,7 +53,7 @@ bool system_timer_pause (void)
 		return TRUE;
 
 #ifdef MACHINE_SHOOTER_SWITCH
-	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH) && (live_balls <= 1))
+	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH) && single_ball_play ())
 		return TRUE;
 #endif
 
