@@ -173,8 +173,6 @@ counter reaches a threshold, and ball search is allowed to run,
 then it is initiated. */
 void ball_search_monitor_task (void)
 {
-	extern U8 live_balls;
-
 	ball_search_timer_reset ();
 	while (in_game)
 	{
