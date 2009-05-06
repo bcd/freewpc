@@ -36,21 +36,24 @@ __local__ U8 extra_balls_earned;
 /** Number of extra balls collected on this ball in play */
 U8 extra_balls_earned_this_bip;
 
+/** Number of EBs lit that carryover from ball to ball */
+__local__ U8 easy_extra_balls_lit;
 
-/** Update the extra ball lamp to reflect the number of
-collected extra balls by the current player up. */
-static void update_extra_ball_lamp (void)
+/** Number of EBs lit that don't carryover */
+U8 hard_extra_balls_lit;
+
+
+/** Update the extra ball/shoot again lamps */
+static void update_extra_ball_lamps (void)
 {
 #ifdef MACHINE_SHOOT_AGAIN_LAMP
-	if (extra_balls > 0)
-	{
-		lamp_tristate_on (MACHINE_SHOOT_AGAIN_LAMP);
-	}
-	else
-	{
-		lamp_tristate_off (MACHINE_SHOOT_AGAIN_LAMP);
-	}
+	lamp_on_if (MACHINE_SHOOT_AGAIN_LAMP, extra_balls > 0);
 #endif /* MACHINE_SHOOT_AGAIN_LAMP */
+
+#ifdef MACHINE_EXTRA_BALL_LAMP
+	lamp_on_if (MACHINE_EXTRA_BALL_LAMP,
+		easy_extra_balls_lit || hard_extra_balls_lit)
+#endif /* MACHINE_EXTRA_BALL_LAMP */
 }
 
 
@@ -77,7 +80,7 @@ void increment_extra_balls (void)
 		 * extra ball */
 		extra_balls++;
 		callset_invoke (extra_ball_award);
-		update_extra_ball_lamp ();
+		update_extra_ball_lamps ();
 
 		audit_increment (&system_audits.extra_balls_awarded);
 
@@ -102,7 +105,7 @@ bool decrement_extra_balls (void)
 	if (extra_balls > 0)
 	{
 		extra_balls--;
-		update_extra_ball_lamp ();
+		update_extra_ball_lamps ();
 		return (TRUE);
 	}
 	else
@@ -113,9 +116,36 @@ bool decrement_extra_balls (void)
 }
 
 
+void light_easy_extra_ball (void)
+{
+	easy_extra_balls_lit++;
+	update_extra_ball_lamps ();
+}
+
+void light_hard_extra_ball (void)
+{
+	hard_extra_balls_lit++;
+	update_extra_ball_lamps ();
+}
+
+void collect_extra_ball (void)
+{
+	if (hard_extra_balls_lit)
+	{
+		hard_extra_balls_lit--;
+		increment_extra_balls ();
+	}
+	else if (easy_extra_balls_lit)
+	{
+		easy_extra_balls_lit--;
+		increment_extra_balls ();
+	}
+}
+
 CALLSET_ENTRY (extra_ball, start_player)
 {
 	extra_balls_earned = 0;
+	easy_extra_balls_lit = 0;
 }
 
 
@@ -124,3 +154,8 @@ CALLSET_ENTRY (extra_ball, start_game)
 	extra_balls = 0;
 }
 
+CALLSET_ENTRY (extra_ball, start_ball)
+{
+	hard_extra_balls_lit = 0;
+	update_extra_ball_lamps ();
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,6 +26,10 @@ extern U8 extra_balls;
 __common__ void increment_extra_balls (void);
 __common__ bool decrement_extra_balls (void);
 __common__ void clear_extra_balls (void);
+
+__common__ void light_easy_extra_ball (void);
+__common__ void light_hard_extra_ball (void);
+__common__ void collect_extra_ball (void);
 
 #endif /* GAME_H */
 
