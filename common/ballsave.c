@@ -140,11 +140,11 @@ CALLSET_ENTRY (ballsave, single_ball_play)
 
 /*
  * Ball save is activated at ball drain if it is active, or in timed
- * game.
+ * game when there are no balls in play.
  */
 CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 {
-	if (config_timed_game && !in_tilt && (timed_game_timer > 0) && (live_balls == 1))
+	if (config_timed_game && !in_tilt && (timed_game_timer > 0) && (live_balls == 0))
 	{
 		ballsave_launch ();
 		callset_invoke (timed_drain_penalty);
