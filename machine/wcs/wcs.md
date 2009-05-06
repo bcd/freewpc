@@ -293,11 +293,16 @@ Super Jackpot Lit:
 
 TV Lit:
 Mode Lit:
+
 Ultra Mania Lit:
+Ultra Mania Running:
+
+Magna Goalie Lit:
 
 [globalflags]
 Goalie Moving:
 Goalie Active:
+Ramp Diverting:
 
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE

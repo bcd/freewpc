@@ -43,9 +43,14 @@ void goal_scored_deff (void)
 
 void goal_round_build_shot (U8 shot)
 {
-	if ((lit_build_shots & shot) && !flag_test (FLAG_GOAL_LIT))
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
-		lit_build_shots &= ~shot;
+	}
+	else if ((lit_build_shots & shot) && !flag_test (FLAG_GOAL_LIT))
+	{
+		/* When Multiball is lit, don't expire the build lamps. */
+		if (!flag_test (FLAG_MULTIBALL_LIT))
+			lit_build_shots &= ~shot;
 		flag_on (FLAG_GOAL_LIT);
 		deff_start (DEFF_GOAL_LIT);
 		sound_start (ST_MUSIC, MUS_GOAL_IS_LIT, SL_2S, PRI_GAME_QUICK4);
@@ -55,8 +60,13 @@ void goal_round_build_shot (U8 shot)
 	{
 		score (SC_25K);
 	}
-
 }
+
+void goal_round_build_relight (void)
+{
+	lit_build_shots = 0xF;
+}
+
 
 void goal_count_lamp_update (void)
 {
@@ -114,9 +124,15 @@ CALLSET_ENTRY (goalround, goal_shot)
 		bounded_increment (goal_count, MAX_GOALS);
 		VOIDCALL (ultra_add_shot);
 		goal_count_lamp_update ();
+
 		if (lit_build_shots == 0)
 		{
 			VOIDCALL (mb_light);
+
+			/* Note that once 5 goals have been scored and
+			Multiball is lit, all 4 Build Shots are relit so that
+			Ultra Modes can still be enabled. */
+			goal_round_build_relight ();
 		}
 	}
 	else
@@ -149,7 +165,7 @@ CALLSET_ENTRY (goalround, lamp_update)
 
 CALLSET_ENTRY (goalround, start_player)
 {
-	lit_build_shots = 0xF;
+	goal_round_build_relight ();
 	flag_on (FLAG_GOAL_LIT);
 }
 

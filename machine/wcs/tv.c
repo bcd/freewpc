@@ -10,7 +10,7 @@ struct tv_award
 	const char *name;
 	void (*award) (void);
 	U8 static_prob;
-	void (*dynamic_prob) (void);
+	U8 (*dynamic_prob) (struct tv_award *);
 };
 
 void tv_award_points (void)
@@ -20,6 +20,7 @@ void tv_award_points (void)
 
 void tv_award_start_mode (void)
 {
+	VOIDCALL (mode_start);
 }
 
 void tv_award_start_quickmb (void)
@@ -37,20 +38,22 @@ void tv_award_add_ultra (void)
 
 void tv_award_light_extra_ball (void)
 {
+	light_easy_extra_ball ();
 }
 
 void tv_award_add_time (void)
 {
+	timed_game_extend (30);
 }
 
 struct tv_award tv_award_table[] = {
-	{ "250,000", tv_award_points },
 	{ "START MODE", tv_award_start_mode },
 	{ "QUICK MULTIBALL", tv_award_start_quickmb },
 	{ "HURRY-UP", tv_award_hurryup },
 	{ "LIGHT ULTRA MODE", tv_award_add_ultra },
 	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball },
 	{ "ADD 30 SECONDS", tv_award_add_time },
+	{ "250,000", tv_award_points },
 };
 
 
@@ -58,9 +61,9 @@ void tv_award_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("TV AWARD %d", tv_count);
-	font_render_string_center (&font_fixed10, 64, 9, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	sprintf ("%s", tv_award_table[tv_award_selected].name);
-	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
 	dmd_draw_border (dmd_low_buffer);
 	dmd_show_low ();
 	sample_start (SND_TV_STATIC, SL_3S);
@@ -70,6 +73,10 @@ void tv_award_deff (void)
 
 void tv_lit_deff (void)
 {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "TV IS LIT");
+	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -87,7 +94,28 @@ void tv_light (void)
 
 void tv_collect (void)
 {
+#if 1
+	/* Until the logic below is implemented, just go through them in order. */
 	tv_award_selected = tv_count;
+#else
+	/* The TV Awards are pseudorandom, like AFM's Stroke of Luck.
+	The algorithm works as follows:
+		Scan the table of TV awards in order from top to bottom.
+	The awards should be ordered so that the higher priority awards
+	are at the top.
+		If the current award can be given out, then stop and do so.
+	Else move to the next award, and so on.
+		To decide whether or not the current award should be selected,
+	two things happen.  First, there is a static priority, in the range of
+	0 to 100.  This determines the likelihood of giving out that award,
+	when it is truly random.  Before doing this, though, if a
+	dynamic_prob function is defined, then call that.  It returns a new
+	probability.  It can use any criteria for increasing/decreasing the
+	probability.  0 and 100 are allowable results, meaning that the
+	award is definitely/never given out.  If not needed, this function
+	should be NULL.
+		The last entry in the table must always succeed, as a last resort. */
+#endif
 	bounded_increment (tv_count, 250);
 	score (SC_100K);
 	tv_award_table[tv_award_selected].award ();

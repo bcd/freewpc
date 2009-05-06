@@ -91,8 +91,11 @@ void mb_reset (void)
 
 void mb_light (void)
 {
-	flag_on (FLAG_MULTIBALL_LIT);
-	deff_start (DEFF_MULTIBALL_LIT);
+	if (!flag_test (FLAG_MULTIBALL_LIT))
+	{
+		flag_on (FLAG_MULTIBALL_LIT);
+		deff_start (DEFF_MULTIBALL_LIT);
+	}
 }
 
 void mb_light_jackpot (void)

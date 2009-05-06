@@ -29,12 +29,27 @@ U8 ultra_award_next;
 U8 ultra_awards_finished;
 
 
+/**
+ * The table of ultra modes
+ */
 static struct ultra_info {
+	/* Which lamp indicates the state of the mode */
 	U8 lamp;
+
+	/* The number of "shots" required to finish the mode */
 	U8 shot_count;
+
+	/* The value of each shot */
 	U8 shot_value;
+
+	/* The number of shots that are spotted if the mode is restarted */
 	U8 spot;
+
+	/* A pointer to the variable that tracks the number of shots that
+	can still be scored.  When zero, the mode is not running */
 	U8 *enable;
+
+	/* The speech effect when the mode is started */
 	sound_code_t enable_sound;
 } ultra_award_table[] = {
 	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0], SPCH_ULTRA_RAMPS },
@@ -44,11 +59,25 @@ static struct ultra_info {
 };
 
 
-
-void ultra_collect (struct ultra_info *u)
+/**
+ * Collect an Ultra Mode.  Returns FALSE if the mode is not running and
+ * nothing was collected.
+ */
+bool ultra_collect (struct ultra_info *u)
 {
 	U8 *enable = u->enable;
-	if (*enable)
+
+	/* Score only when enabled, or when Ultra Mania running */
+	if (*enable || flag_test (FLAG_ULTRA_MANIA_RUNNING))
+	{
+		score (u->shot_value);
+	}
+
+	/* Decrement shot counts during normal play */
+	if (flag_test (FLAG_ULTRA_MANIA_RUNNING))
+	{
+	}
+	else if (*enable)
 	{
 		(*enable)--;
 		if (*enable == 0)
@@ -58,17 +87,25 @@ void ultra_collect (struct ultra_info *u)
 			if (ultra_awards_finished == NUM_ULTRA_AWARDS)
 			{
 				flag_on (FLAG_ULTRA_MANIA_LIT);
+				/* TODO - add effects */
 			}
 		}
+		return TRUE;
 	}
+	else
+		return FALSE;
 }
 
 
+/**
+ * Score an Ultra Mode.
+ */
 void ultra_score (struct ultra_info *u)
 {
-	ultra_collect (u);
-	score (u->shot_value);
-	music_effect_start (MUS_ULTRA_AWARD, TIME_2S);
+	if (ultra_collect (u))
+	{
+		music_effect_start (MUS_ULTRA_AWARD, TIME_2S); /* TODO - different sound for spinner/jet */
+	}
 }
 
 void ultra_add_sound (void)
@@ -79,12 +116,27 @@ void ultra_add_sound (void)
 	task_exit ();
 }
 
+/**
+ * Start another Ultra Mode.
+ *
+ * Scan through the list of ultra modes to find a mode that has not been
+ * finished yet.  The scan starts from where it left off before, so that
+ * all ultra modes will be considered because going back to the beginning
+ * again.
+ * - If all modes have been completed, ULTRA MANIA is lit and modes cannot
+ *   be advanced at all.
+ * - If the lamp is SOLID, it has been completed and cannot be awarded
+ *   further.
+ * - If the lamp is FLASHING, then it is already running.  In this case,
+ *   some of the shots are spotted and scored.
+ * - Otherwise, if the lamp is OFF, then the mode is started.
+ */
 void ultra_add_shot (void)
 {
 	struct ultra_info *u;
 	task_pid_t tp;
 
-	if (flag_test (FLAG_ULTRA_MANIA_LIT))
+	if (flag_test (FLAG_ULTRA_MANIA_LIT) || flag_test (FLAG_ULTRA_MANIA_RUNNING))
 		return;
 
 	u = ultra_award_table + ultra_award_next;
@@ -97,11 +149,13 @@ void ultra_add_shot (void)
 	if (lamp_flash_test (u->lamp))
 	{
 		U8 n;
+		/* Award a running mode by spotting shots */
 		for (n=0; n < u->spot; n++)
 			ultra_collect (u);
 	}
 	else
 	{
+		/* Award an unlit mode */
 		*(u->enable) = u->shot_count;
 		lamp_tristate_flash (u->lamp);
 
@@ -113,37 +167,56 @@ void ultra_add_shot (void)
 }
 
 
+void ultra_mania_start (void)
+{
+	flag_off (FLAG_ULTRA_MANIA_LIT);
+	ultra_awards_finished = 0;
+	flag_on (FLAG_ULTRA_MANIA_RUNNING);
+	/* effects */
+}
+
+
 CALLSET_ENTRY (ultra, left_ramp_shot, right_ramp_shot)
 {
-	ultra_collect (&ultra_award_table[0]);
+	ultra_score (&ultra_award_table[0]);
 }
 
 CALLSET_ENTRY (ultra, sw_goalie_target)
 {
-	ultra_collect (&ultra_award_table[1]);
+	ultra_score (&ultra_award_table[1]);
 }
 
 CALLSET_ENTRY (ultra, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
-	ultra_collect (&ultra_award_table[2]);
+	ultra_score (&ultra_award_table[2]);
 }
 
 CALLSET_ENTRY (ultra, sw_spinner_slow)
 {
-	ultra_collect (&ultra_award_table[3]);
+	ultra_score (&ultra_award_table[3]);
+}
+
+CALLSET_ENTRY (ultra, left_loop_shot)
+{
+	if (flag_test (FLAG_ULTRA_MANIA_LIT))
+		ultra_mania_start ();
 }
 
 CALLSET_ENTRY (ultra, lamp_update)
 {
 	lamp_on_if (LM_ULTRA_RAMP_COLLECT, lamp_flash_test (LM_ULTRA_RAMPS));
+	/* strobe left loop when Ultra Mania lit */
 }
 
 CALLSET_ENTRY (ultra, start_player)
 {
+	ultra_awards_finished = 0;
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_off);
 }
 
 CALLSET_ENTRY (ultra, start_ball)
 {
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_flash_off);
+	flag_off (FLAG_ULTRA_MANIA_RUNNING);
 }
+
