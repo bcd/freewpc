@@ -4,9 +4,8 @@
 void toplane_complete (void)
 {
 	score (SC_100K);
-
-	task_sleep (TIME_500MS);
-	sound_start (ST_MUSIC, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK7);
+	task_sleep (TIME_200MS);
+	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK7);
 	lamplist_apply (LAMPLIST_TOP_LANES, lamp_off);
 	task_exit ();
 }

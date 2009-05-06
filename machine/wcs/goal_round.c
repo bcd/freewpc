@@ -110,7 +110,7 @@ CALLSET_ENTRY (goalround, goal_shot)
 		flag_off (FLAG_GOAL_LIT);
 		score (SC_1M);
 		deff_start (DEFF_GOAL_SCORED);
-		speech_start (SPCH_GOALLL, SL_3S);
+		speech_start (SPCH_GOALLL, SL_2S);
 		bounded_increment (goal_count, MAX_GOALS);
 		VOIDCALL (ultra_add_shot);
 		goal_count_lamp_update ();
@@ -118,6 +118,10 @@ CALLSET_ENTRY (goalround, goal_shot)
 		{
 			VOIDCALL (mb_light);
 		}
+	}
+	else
+	{
+		sample_start (SND_UNLIT_GOAL, SL_2S);
 	}
 }
 

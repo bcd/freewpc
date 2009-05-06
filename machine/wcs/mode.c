@@ -78,15 +78,16 @@ typedef struct
 {
 	const char *name;
 	void (*start) (void);
-} mode_t;
+	sound_code_t say_name;
+} mode_info_t;
 
 
-mode_t mode_table[] = {
-	{ "STAMINA", },
-	{ "SKILL", },
-	{ "SPIRIT", },
-	{ "SPEED", },
-	{ "STRENGTH", },
+mode_info_t mode_table[] = {
+	{ "STAMINA", mode_stamina_start, SPCH_STAMINA },
+	{ "SKILL", mode_skill_start, SPCH_SKILL },
+	{ "SPIRIT", mode_spirit_start, SPCH_SPIRIT },
+	{ "SPEED", mode_speed_start, SPCH_SPEED },
+	{ "STRENGTH", mode_strength_start, SPCH_STRENGTH },
 };
 
 
@@ -186,6 +187,31 @@ void mode_collect_dog_target (U8 target)
 	}
 }
 
+static void mode_flash_next (void)
+{
+	dbprintf ("mode_ready = %d\n", mode_ready);
+	lamp_flash_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
+}
+
+void mode_flash_first (void)
+{
+	mode_ready = 0;
+	mode_flash_next ();
+}
+
+void mode_rotate_next (void)
+{
+	U8 lamp;
+
+	lamp_flash_off (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
+	mode_ready++;
+	lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
+	if (lamp == LAMP_END)
+		mode_ready = 0;
+	mode_flash_next ();
+}
+
+
 bool mode_can_be_started (void)
 {
 	return TRUE;
@@ -208,9 +234,10 @@ void maybe_mode_start (void)
 		{
 			mode_reset_dog_targets ();
 			score (SC_100K);
+			deff_start (DEFF_MODE_STARTED);
+			task_sleep (TIME_16MS);
 			modes_started++;
 			mode_start ();
-			deff_start (DEFF_MODE_STARTED);
 		}
 		else
 		{
@@ -220,32 +247,6 @@ void maybe_mode_start (void)
 	{
 		score (SC_50K);
 	}
-}
-
-static void mode_flash_next (void)
-{
-	lamp_flash_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
-}
-
-void mode_flash_first (void)
-{
-	mode_ready = 0;
-	mode_flash_next ();
-}
-
-void mode_rotate_next (void)
-{
-	U8 lamp;
-
-	lamp_flash_off (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
-	mode_ready++;
-	lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
-	if (lamp == LAMP_END)
-	{
-		mode_ready = 0;
-		lamp = lamplist_index (LAMPLIST_BALL_PANELS, 0);
-	}
-	lamp_flash_on (lamp);
 }
 
 CALLSET_ENTRY (mode, sw_striker_1)
