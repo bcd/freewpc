@@ -77,7 +77,7 @@ void ballsave_disable (void)
 }
 
 
-static bool ballsave_test_active (void)
+bool ballsave_test_active (void)
 {
 	return timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
 }
