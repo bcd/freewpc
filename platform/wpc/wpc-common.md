@@ -114,3 +114,5 @@ times8:
 [timers]
 Ignore Tilt:
 
+[globalflags]
+Ball At Plunger:

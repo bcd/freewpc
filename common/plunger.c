@@ -41,11 +41,49 @@ void timed_plunger_monitor (void)
 #endif
 
 
+void shooter_clear_monitor (void)
+{
+	task_add_duration (TASK_DURATION_INF);
+	task_sleep_sec (4); /* this could be machine-specific */
+	global_flag_off (GLOBAL_FLAG_BALL_AT_PLUNGER);
+	task_exit ();
+}
+
+
+void shooter_update (void)
+{
+#ifdef MACHINE_SHOOTER_SWITCH
+	/* A ball seen on the shooter switch means it is definitely there.
+	 * If not seen, it might be out of the plunger lane, or it may just be
+	 * "on its way up".  During that interval, still consider the ball
+	 * at the plunger, so delay clearing the flag.
+	 */
+	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+	{
+		task_kill_gid (GID_SHOOTER_CLEAR);
+		global_flag_on (GLOBAL_FLAG_BALL_AT_PLUNGER);
+	}
+	else
+	{
+		task_create_gid1 (GID_SHOOTER_CLEAR, shooter_clear_monitor);
+	}
+#endif
+}
+
+
+CALLSET_ENTRY (plunger, amode_start)
+{
+	shooter_update ();
+}
+
 CALLSET_ENTRY (plunger, valid_playfield)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	task_kill_gid (GID_TIMED_PLUNGER_MONITOR);
 #endif
+	task_kill_gid (GID_SHOOTER_CLEAR);
+	global_flag_off (GLOBAL_FLAG_BALL_AT_PLUNGER);
+
 }
 
 
@@ -75,6 +113,7 @@ CALLSET_ENTRY (plunger, sw_shooter)
 		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
 	}
 #endif
+	shooter_update ();
 }
 
 
