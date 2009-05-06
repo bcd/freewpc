@@ -71,10 +71,18 @@ void ultra_score (struct ultra_info *u)
 	music_effect_start (MUS_ULTRA_AWARD, TIME_2S);
 }
 
+void ultra_add_sound (void)
+{
+	U16 code = task_get_arg ();
+	task_sleep_sec (1);
+	speech_start (code, SL_3S);
+	task_exit ();
+}
 
 void ultra_add_shot (void)
 {
 	struct ultra_info *u;
+	task_pid_t tp;
 
 	if (flag_test (FLAG_ULTRA_MANIA_LIT))
 		return;
@@ -96,7 +104,9 @@ void ultra_add_shot (void)
 	{
 		*(u->enable) = u->shot_count;
 		lamp_tristate_flash (u->lamp);
-		speech_start (u->enable_sound, SL_3S);
+
+		tp = task_create_anon (ultra_add_sound);
+		task_set_arg (tp, u->enable_sound);
 	}
 
 	ultra_award_next = (ultra_award_next + 1) % NUM_ULTRA_AWARDS;
