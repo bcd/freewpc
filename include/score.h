@@ -35,6 +35,36 @@ typedef bcd_t score_t[BYTES_PER_SCORE], *score_pointer_t;
 
 typedef U8 score_id_t;
 
+/**
+ * The generic ladder tracks an award whose values increase in
+ * an irregular way.
+ */
+struct generic_ladder
+{
+	/* The number of scores in the ladder */
+	const U8 size;
+
+	/* An array of score values */
+	score_id_t *scores;
+
+	/* A pointer to the level tracker.  The level is an index
+	into the above array which gives the next score to be awarded */
+	U8 *level;
+};
+
+
+/**
+ * The fixed ladder tracks an award whose values increase by
+ * fixed size steps.
+ */
+struct fixed_ladder
+{
+	const score_t base;
+	const score_t increment;
+	const score_t max;
+	score_pointer_t current;
+};
+
 
 /** A flag that is nonzero when the score screen needs to be updated */
 extern bool score_update_needed;
@@ -117,5 +147,13 @@ extern inline void score_100M (U8 count)
 	score_award_compact (5, count);
 }
 
+void generic_ladder_reset (const struct generic_ladder *ladder);
+void generic_ladder_advance (const struct generic_ladder *ladder);
+void generic_ladder_score (const struct generic_ladder *ladder);
+void generic_ladder_score_and_advance (const struct generic_ladder *ladder);
+
+void fixed_ladder_reset (const struct fixed_ladder *ladder);
+void fixed_ladder_score_multiple (const struct fixed_ladder *ladder, U8 multiplier);
+void fixed_ladder_score (const struct fixed_ladder *ladder);
 
 #endif /* _SCORE_H */

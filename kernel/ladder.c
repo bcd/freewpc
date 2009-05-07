@@ -21,44 +21,30 @@
 #include <freewpc.h>
 
 
-/**
- * The generic ladder tracks an award whose values increase in
- * an irregular way.
- */
-struct generic_ladder
-{
-	U8 *scores;
-	const U8 size;
-	U8 *level;
-};
-
-
-/**
- * The fixed ladder tracks an award whose values increase by
- * fixed size steps.
- */
-struct fixed_ladder
-{
-	const score_t base;
-	const score_t increment;
-	const score_t max;
-	score_pointer_t current;
-};
-
-
-
 void generic_ladder_reset (const struct generic_ladder *ladder)
 {
 	*(ladder->level) = 0;
 }
 
 
+void generic_ladder_advance (const struct generic_ladder *ladder)
+{
+	if (*(ladder->level) < ladder->size)
+		(*(ladder->level))++;
+}
+
+
 void generic_ladder_score (const struct generic_ladder *ladder)
 {
 	score (ladder->scores[*(ladder->level)]);
-	(*(ladder->level))++;
 }
 
+
+void generic_ladder_score_and_advance (const struct generic_ladder *ladder)
+{
+	generic_ladder_score (ladder);
+	generic_ladder_advance (ladder);
+}
 
 
 void fixed_ladder_reset (const struct fixed_ladder *ladder)
