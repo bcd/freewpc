@@ -51,11 +51,14 @@ static struct ultra_info {
 
 	/* The speech effect when the mode is started */
 	sound_code_t enable_sound;
+
+	/* The sound code to play when a shot is made */
+	sound_code_t score_sound;
 } ultra_award_table[] = {
-	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0], SPCH_ULTRA_RAMPS },
-	{ LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1], SPCH_ULTRA_GOALIE },
-	{ LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2], SPCH_ULTRA_JETS },
-	{ LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3], SPCH_ULTRA_SPINNER  }
+	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0], SPCH_ULTRA_RAMPS, MUS_ULTRA_AWARD },
+	{ LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1], SPCH_ULTRA_GOALIE, MUS_ULTRA_AWARD },
+	{ LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2], SPCH_ULTRA_JETS, SND_FIREWORK_EXPLODE },
+	{ LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3], SPCH_ULTRA_SPINNER, SND_GULP  }
 };
 
 
@@ -104,10 +107,13 @@ void ultra_score (struct ultra_info *u)
 {
 	if (ultra_collect (u))
 	{
-		music_effect_start (MUS_ULTRA_AWARD, TIME_2S); /* TODO - different sound for spinner/jet */
+		sample_start (u->score_sound, TIME_2S);
 	}
 }
 
+/**
+ * Announce that an Ultra shot has been lit/extended.
+ */
 void ultra_add_sound (void)
 {
 	U16 code = task_get_arg ();
