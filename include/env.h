@@ -187,6 +187,7 @@ extern inline void writeb (U16 addr, U8 val)
 	linux_asic_write (addr, val);
 #else
 	*(volatile U8 *)addr = val;
+	barrier ();
 #endif
 }
 
@@ -197,6 +198,7 @@ extern inline void writew (U16 addr, U16 val)
 	writeb (addr+1, val & 0xFF);
 #else
 	*(volatile U16 *)addr = val;
+	barrier ();
 #endif
 }
 
