@@ -160,16 +160,16 @@ to perform certain optimizations across both sides of the barrier. */
 a prototype. */
 
 #define SECTION_VOIDCALL(section,fn) \
-{ \
+do { \
 	extern section void fn (void); \
 	fn (); \
-}
+} while (0)
 
 #define VOIDCALL(fn) \
-{ \
+do { \
 	extern void fn (void); \
 	fn (); \
-}
+} while (0)
 
 
 /***************************************************************
