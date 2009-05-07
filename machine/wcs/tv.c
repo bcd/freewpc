@@ -47,13 +47,14 @@ void tv_award_add_time (void)
 }
 
 struct tv_award tv_award_table[] = {
-	{ "START MODE", tv_award_start_mode },
-	{ "QUICK MULTIBALL", tv_award_start_quickmb },
-	{ "HURRY-UP", tv_award_hurryup },
-	{ "LIGHT ULTRA MODE", tv_award_add_ultra },
-	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball },
-	{ "ADD 30 SECONDS", tv_award_add_time },
-	{ "250,000", tv_award_points },
+	{ "QUICK MULTIBALL", tv_award_start_quickmb, 5, NULL },
+	{ "HURRY-UP", tv_award_hurryup, 40, NULL },
+	/* next one should not apply unless in timed game */
+	{ "ADD 30 SECONDS", tv_award_add_time, 20, NULL },
+	{ "START MODE", tv_award_start_mode, 60, NULL },
+	{ "LIGHT ULTRA SHOT", tv_award_add_ultra, 60, NULL },
+	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball, 5, NULL },
+	{ "250,000", tv_award_points, 100, NULL },
 };
 
 
