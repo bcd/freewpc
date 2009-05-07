@@ -66,6 +66,16 @@ void db_idle (void)
 			char c = wpc_debug_read ();
 			switch (c)
 			{
+				case 'a':
+					/* Dump everything */
+					VOIDCALL (task_dump);
+					VOIDCALL (dump_game);
+					VOIDCALL (dump_deffs);
+					switch_queue_dump ();
+					VOIDCALL (sol_req_dump);
+					VOIDCALL (triac_dump);
+					break;
+
 				case 't':
 					/* Dump the task table */
 					VOIDCALL (task_dump);
