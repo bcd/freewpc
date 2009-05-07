@@ -344,7 +344,7 @@ done:
 #ifdef CONFIG_TIMED_GAME
 void timed_game_monitor (void)
 {
-	extern bool ballsave_test_active (void);
+	extern __common__ bool ballsave_test_active (void);
 
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
