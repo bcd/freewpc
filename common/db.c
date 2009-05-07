@@ -42,6 +42,9 @@
 is paused */
 U8 db_paused;
 
+#ifndef CONFIG_INSPECTOR
+void inspector_deff (void) {}
+#endif
 
 
 /** Read a character from the debug port, and wait for it if

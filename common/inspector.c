@@ -48,7 +48,6 @@ U8 *inspector_addr;
  * anything else. */
 void inspector_deff (void)
 {
-#ifdef CONFIG_INSPECTOR
 	U8 *addr, *p;
 	U8 y;
 
@@ -66,7 +65,6 @@ void inspector_deff (void)
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}
-#endif
 	deff_exit ();
 }
 
@@ -74,7 +72,6 @@ void inspector_deff (void)
 /** Handles the buyin button for starting/stopping the inspector */
 CALLSET_ENTRY (inspector, sw_buyin_button)
 {
-#ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
 		deff_stop (DEFF_INSPECTOR);
@@ -85,7 +82,6 @@ CALLSET_ENTRY (inspector, sw_buyin_button)
 		deff_start (DEFF_INSPECTOR);
 		kickout_lock (KLOCK_DEBUGGER);
 	}
-#endif
 }
 
 
@@ -106,14 +102,12 @@ void inspector_fast_page_down (void)
 
 CALLSET_ENTRY (inspector, sw_left_button)
 {
-#ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
 		if (inspector_addr > 0)
 			inspector_addr -= INSPECTOR_PAGE_SIZE;
 		task_recreate_gid (GID_INSPECTOR_FAST_PAGE, inspector_fast_page_down);
 	}
-#endif
 }
 
 void inspector_fast_page_up (void)
@@ -131,7 +125,6 @@ void inspector_fast_page_up (void)
 
 CALLSET_ENTRY (inspector, sw_right_button)
 {
-#ifdef CONFIG_INSPECTOR
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
 		if (inspector_addr < (U8 *)(RAM_SIZE-INSPECTOR_PAGE_SIZE))
@@ -143,7 +136,5 @@ CALLSET_ENTRY (inspector, sw_right_button)
 
 CALLSET_ENTRY (inspector, init)
 {
-#ifdef CONFIG_INSPECTOR
 	inspector_addr = 0;
-#endif
 }
