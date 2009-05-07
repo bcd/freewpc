@@ -133,7 +133,7 @@ void timestamp_format_per_ball (timestamp_t *t)
 {
 	timestamp_t per_ball;
 	timestamp_copy (&per_ball, t);
-	timestamp_divide (&per_ball, 1); /* TODO - total balls??? */
+	timestamp_divide (&per_ball, system_audits.balls_played);
 	timestamp_format (&per_ball);
 }
 
