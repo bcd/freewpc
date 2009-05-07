@@ -230,4 +230,8 @@ CALLSET_ENTRY (score, start_ball)
 	global_score_multiplier = 1;
 }
 
+CALLSET_ENTRY (score, factory_reset)
+{
+	scores_reset ();
+}
 
