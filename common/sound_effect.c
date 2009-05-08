@@ -186,7 +186,6 @@ void sound_start1 (U8 channels, sound_code_t code)
 			//sound_write (SND_INIT_CH0 + chid);
 
 			/* Write to the sound board and return */
-			dbprintf ("Start sound %04lX on channel %d\n", code, chid);
 			sound_write (code);
 			return;
 		}
