@@ -549,12 +549,23 @@ U8 device_holdup_count (void)
 void device_probe (void)
 {
 	devicenum_t devno;
+	U8 kicks;
 
 	while (unlikely (sys_init_complete == 0))
 		task_sleep (TIME_100MS);
 	task_sleep_sec (2);
 
 	dbprintf ("Probing devices\n");
+
+	/* Keep track of the number of times we actually had to kick
+	a device; equivalently, this is the number of times we sleep
+	waiting for the kick to have an effect.  After so long, if
+	things aren't right, just give up. */
+	kicks = 0;
+
+probe_from_beginning:
+	if (kicks >= 10)
+		goto probe_exit;
 
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
@@ -569,14 +580,15 @@ void device_probe (void)
 		task_kill_gid (DEVICE_GID(devno));
 
 		/* If there are more balls in the device than ought to be,
-		 * schedule the extras to be emptied. */
+		 * schedule the extras to be emptied.   Then rescan from
+		 * the beginning again. */
 		dev->max_count = dev->props->init_max_count;
 		if (dev->actual_count > dev->max_count)
 		{
-			U8 kick_count = dev->actual_count - dev->max_count;
-			do {
-				device_request_kick (dev);
-			} while (--kick_count != 0);
+			kicks++;
+			device_request_kick (dev);
+			task_sleep_sec (2);
+			goto probe_from_beginning;
 		}
 #if 0 /* TODO */
 		else if (dev->actual_count < dev->max_count)
@@ -588,17 +600,7 @@ void device_probe (void)
 #endif
 	}
 
-	/* TODO - if a ball kicked out from the probe of a device
-	 * falls into _another_ device, the ball may or may not be
-	 * seen there depending on timing.  We should repeat until
-	 * all devices stay empty. */
-
-	/* If kicks are in progress, then wait for them to finish.
-	If kicks fail, eventually they will timeout so this is guaranteed
-	to finish. */
-	while (device_kicks_pending ())
-		task_sleep_sec (1);
-
+probe_exit:
 	/* At this point, all kicks have been made, but balls may be
 	on the playfield heading for the trough.  We still should wait
 	until 'missing_balls' goes (hopefully) to zero.
