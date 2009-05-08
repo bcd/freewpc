@@ -339,6 +339,7 @@ sub close_drive {
 		$drive->{'number'} = $drive->{'ID'};
 	}
 	$drive->{'c_ident'} =~ s/^SOL_/FLASH_/ if (defined $drive->{'flash'});
+	$drive->{'nosearch'} = 1 if (defined $drive->{'motor'});
 }
 
 sub close_container {
