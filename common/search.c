@@ -137,7 +137,7 @@ void ball_search_run (void)
 		if (ball_search_solenoid_ok (sol))
 		{
 			sol_pulse (sol);
-			task_sleep (TIME_200MS);
+			task_sleep (TIME_250MS);
 		}
 
 		/* If a switch triggered, stop the ball search immediately */
