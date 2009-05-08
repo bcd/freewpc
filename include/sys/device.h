@@ -74,9 +74,6 @@ typedef struct device_ops
 	/** Called when a kick is not successful */
 	void (*kick_failure) (void);
 
-	/** Called when the device becomes full */
-	void (*full) (void);
-
 	/** Called when the device becomes empty */
 	void (*empty) (void);
 

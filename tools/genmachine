@@ -96,6 +96,8 @@ my %contextDefinitionRe = (
 # ($m) is set as a shortcut to the object based on the property name.
 # For example, $m->{"*switches:outhole"} is a quick way of getting to the
 # (single) outhole switch object.
+# TODO : Global objects should be named consistently in the code, even if the
+# textual description is different.
 my %BinaryProperties = (
 	"switches" => { 
 		"opto" => 1, 
@@ -874,7 +876,7 @@ sub machine_write_container_decls {
 		my $name = $def->{'c_decl'};
 		$name =~ s/^devno/dev/;
 		for $event ("enter", "kick_attempt",
-			"kick_success", "kick_failure", "full", "empty", "surprise_release") {
+			"kick_success", "kick_failure", "empty", "surprise_release") {
 			print "extern void callset_${name}_${event} (void);" .
 				"  /* callset_invoke (${name}_${event}) */\n";
 		}
@@ -886,7 +888,7 @@ sub machine_write_container_decls {
 		$name =~ s/^devno/dev/;
 		print "device_ops_t ${name}_ops = {\n";
 		for $event ("enter", "kick_attempt",
-			"kick_success", "kick_failure", "full", "empty") {
+			"kick_success", "kick_failure", "empty") {
 			print "   .$event = callset_${name}_${event},\n";
 		}
 		print "};\n\n";

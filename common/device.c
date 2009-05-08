@@ -214,6 +214,8 @@ bool device_kicks_pending (void)
  * This function is invoked (within its own task context) whenever
  * a switch closure occurs on a device, or when a request is made to
  * kick a ball from a device.
+ * The update task will get killed and restarted anytime a switch
+ * closure occurs on the device, so it may be interrupted at any time.
  */
 void device_update (void)
 {
@@ -349,11 +351,10 @@ wait_and_recount:
 			device_call_op (dev, empty);
 		else if (dev->actual_count > dev->max_count)
 		{
-			device_call_op (dev, full);
-			/* Important: when the device is completely full,
-			 * we MUST kick a ball */
-			dev->kicks_needed++;
-			dev->kick_errors = 0;
+			/* When there are more balls in the device than we normally want
+			to keep here, we must kick one of them out.  If multiple kicks
+			are needed, this check will occur again in the future. */
+			device_request_kick (dev);
 		}
 	}
 
@@ -385,13 +386,15 @@ wait_and_recount:
 			if (dev->state == DEV_STATE_IDLE)
 				dev->state = DEV_STATE_RELEASING;
 
+			/* TODO - keep track of all pending kick attempts.  Use a
+			bit variable per device.  If other devices are in the
+			process of kicking, wait */
+
 			/* Generate events that a kick attempt is coming */
 			callset_invoke (any_kick_attempt);
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid. */
-			/* TODO - in this task context, we can wait for the queue to
-			be serviced. */
 			/* TODO - the pulse strength is implied.  Would be nice to
 			have differing pulses for retries */
 			sol_request (dev->props->sol);
