@@ -299,6 +299,8 @@ Mode Lit:
 Ultra Mania Lit:
 Ultra Mania Running:
 
+QuickMB Running:
+
 Magna Goalie Lit:
 
 [globalflags]
@@ -346,6 +348,10 @@ TV Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+
+Ultra Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)

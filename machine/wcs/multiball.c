@@ -11,7 +11,7 @@ void ball_locked_deff (void)
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	sprintf ("BALL %d LOCKED", lock_count);
-	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -21,8 +21,8 @@ void multiball_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	font_render_string_center (&font_fixed6, 64, 9, "SHOOT FINAL DRAW");
-	font_render_string_center (&font_fixed6, 64, 21, "FOR MULTIBALL");
+	font_render_string_center (&font_term6, 64, 9, "SHOOT FINAL DRAW");
+	font_render_string_center (&font_term6, 64, 21, "FOR MULTIBALL");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
