@@ -177,8 +177,8 @@ G3: Skill Shot, flash
 G4: Jet Bumpers, flash
 G5: Goalie Drive, motor
 G6: Soccer Ball, flash
-G7: Ball Forward, motor, nosearch
-G8: Ball Reverse, motor, nosearch
+G7: Ball Forward, motor
+G8: Ball Reverse, motor
 
 A1: L. Ramp Enter, flash
 A2: Lock Area, flash
