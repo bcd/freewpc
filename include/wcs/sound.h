@@ -159,16 +159,39 @@
 #define SPCH_ADMIRAL_BIAGI_OUT           SPEECH_SND(0x71)
 #define SPCH_SCREAM                      SPEECH_SND(0x72)
 
+#define SPCH_HIT_THE_GOALIE       0x07D0UL
+#define SPCH_GO_FOR_GOALIE        0x07D1UL
+#define SPCH_ITS_BOSTON_TEA_PARTY 0x07D2UL
+#define SPCH_ITS_TEA_TIME         0x07D3UL
+#define SPCH_SUPER_FREE_KICK      0x07D4UL
+#define SPCH_GO_FOR_EXTRA_BALL    0x07D5UL
 #define SPCH_SHOOT_THE_GOAL       0x07DCUL
-#define SPCH_ANOTHER_GOAL         (0x07E7UL + (n))
+#define SPCH_ON_THE_MOVE          0x07DEUL
+#define SPCH_WHAT_A_SAVE          0x07DFUL
+#define SPCH_GREAT_SAVE           0x07E0UL
+#define SPCH_CANT_BELIEVE_STOP    0x07E1UL
+#define SPCH_GOALIE_UNBEATABLE    0x07E2UL
+#define SPCH_GREAT_HANDS          0x07E3UL
+#define SPCH_GUY_IS_A_WALL        0x07E4UL
+#define SPCH_INCREDIBLE_SAVE      0x07E5UL
+#define SPCH_HOW_DID_HE_SAVE      0x07E6UL
+
+#define SPCH_ANOTHER_GOAL         (0x07E8UL + (n))
+#define SPCH_ITS_GOING_IN         0x07F1UL
+
+#define SPCH_JACKPOT(n)           (0x07F3UL + (n)) /* 2 of these */
 
 #define SPCH_YELLOW_CARD          0x07FEUL
 #define SPCH_RED_CARD             0x07FFUL
 
+#define SPCH_PASSES_DOWNFIELD     0x0801UL
 #define SPCH_OUT_OF_BOUNDS        0x0802UL
 #define SPCH_CORNER_KICK(n)       (0x0803UL + (n)) /* 3 choices */
 #define SPCH_INSTANT_REPLAY(n)    (0x0807UL + (n)) /* 2 choices */
+#define SPCH_GAME_START(n)        (0x080DUL + (n)) /* 4 choices */
+#define SPCH_FINAL_DRAW(n)        (0x0811UL + (n)) /* 3 choices */
 #define SPCH_IN_OVERTIME          0x0819UL
+#define SPCH_WON_WORLD_CUP        0x081AUL
 #define SPCH_FEW_SECONDS_REMAIN   0x081BUL
 #define SPCH_VICTORY_LAP(n)       (0x081CUL + (n)) /* 2 choices */
 #define SPCH_REPLAY               0x08A3UL
