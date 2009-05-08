@@ -26,6 +26,13 @@ void jet_deff (void)
 	deff_exit ();
 }
 
+void jet_flasher (void)
+{
+	flasher_pulse (FLASH_JET_BUMPERS);
+	task_sleep (TIME_500MS);
+	task_exit ();
+}
+
 void jet_goal_reset (void)
 {
 	jet_count = 0;
@@ -45,22 +52,9 @@ void jet_goal_award (void)
 CALLSET_ENTRY (jets, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
 	++jet_count;
-	if (lamp_flash_test (LM_ULTRA_JETS))
-	{
-		score (SC_25K);
-		sound_start (ST_SAMPLE, SND_FIREWORK_EXPLODE, SL_500MS, PRI_GAME_QUICK5);
-		if (++ultra_jet_count == 80)
-		{
-			lamp_tristate_on (LM_ULTRA_JETS);
-		}
-	}
-	else
-	{
-		score (SC_5K);
-		deff_start (DEFF_JET);
-		task_sleep (TIME_16MS);
-	}
-
+	score (SC_5K);
+	deff_start (DEFF_JET);
+	task_sleep (TIME_16MS);
 
 	if (jet_count == jet_goal)
 	{

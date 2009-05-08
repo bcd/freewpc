@@ -21,7 +21,9 @@ include platform/wpc/wpc.md
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }
+define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 'E', 'S' }, { 'R', 'J', 'S' }
+define MACHINE_HIGH_SCORES { 0x00, 0x17, 0x50, 0x00, 0x00 }, { 0x00, 0x15, 0x00, 0x00, 0x00 }, { 0x00, 0x12, 0x50, 0x00, 0x00 }, { 0x00, 0x10, 0x00, 0x00, 0x00 }
 define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 
@@ -177,8 +179,8 @@ G3: Skill Shot, flash
 G4: Jet Bumpers, flash
 G5: Goalie Drive, motor
 G6: Soccer Ball, flash
-G7: Ball Forward, motor, nosearch
-G8: Ball Reverse, motor, nosearch
+G7: Ball Forward, motor
+G8: Ball Reverse, motor
 
 A1: L. Ramp Enter, flash
 A2: Lock Area, flash
@@ -297,6 +299,8 @@ Mode Lit:
 Ultra Mania Lit:
 Ultra Mania Running:
 
+QuickMB Running:
+
 Magna Goalie Lit:
 
 [globalflags]
@@ -344,6 +348,10 @@ TV Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+
+Ultra Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)

@@ -22,17 +22,21 @@
 
 #define NUM_ULTRA_AWARDS 4
 
-U8 ultra_awards_enabled[4];
+__local__ U8 ultra_awards_enabled[4];
 
-U8 ultra_award_next;
+__local__ U8 ultra_award_next;
 
-U8 ultra_awards_finished;
-
+__local__ U8 ultra_awards_finished;
 
 /**
  * The table of ultra modes
  */
-static struct ultra_info {
+static const struct ultra_info {
+	/* The names of the shot */
+	const char *pf_name;
+	const char *singular_name;
+	const char *plural_name;
+
 	/* Which lamp indicates the state of the mode */
 	U8 lamp;
 
@@ -55,11 +59,78 @@ static struct ultra_info {
 	/* The sound code to play when a shot is made */
 	sound_code_t score_sound;
 } ultra_award_table[] = {
-	{ LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0], SPCH_ULTRA_RAMPS, MUS_ULTRA_AWARD },
-	{ LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1], SPCH_ULTRA_GOALIE, MUS_ULTRA_AWARD },
-	{ LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2], SPCH_ULTRA_JETS, SND_FIREWORK_EXPLODE },
-	{ LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3], SPCH_ULTRA_SPINNER, SND_GULP  }
+	{ "RAMPS", "RAMP", "RAMPS",
+		LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0],
+		SPCH_ULTRA_RAMPS, MUS_ULTRA_AWARD },
+	{ "GOALIE", "HIT", "HITS",
+		LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1],
+		SPCH_ULTRA_GOALIE, MUS_ULTRA_AWARD },
+	{ "JETS", "JET", "JETS",
+		LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2],
+		SPCH_ULTRA_JETS, SND_FIREWORK_EXPLODE },
+	{ "SPINNER", "SPIN", "SPINS",
+		LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3],
+		SPCH_ULTRA_SPINNER, SND_GULP  }
 };
+
+
+const struct ultra_info *ultra_deff_info;
+
+
+void ultra_render_name (void)
+{
+	sprintf ("ULTRA %s", ultra_deff_info->pf_name);
+}
+
+void ultra_collect_deff (void)
+{
+	U8 count;
+
+	dmd_alloc_low_clean ();
+	ultra_render_name ();
+	font_render_string_center (&font_var5, 64, 5, sprintf_buffer);
+
+	if (!flag_test (FLAG_ULTRA_MANIA_RUNNING))
+	{
+		count = *(ultra_deff_info->enable);
+		sprintf ("%d %s TO GO", count,
+			(count > 1) ? ultra_deff_info->plural_name : ultra_deff_info->singular_name);
+		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
+	}
+
+	dmd_show_low ();
+	task_sleep (TIME_1500MS);
+	deff_exit ();
+}
+
+void ultra_start_deff (void)
+{
+	dmd_alloc_low_clean ();
+	ultra_render_name ();
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 22, "STARTED");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+void ultra_mania_start_deff (void)
+{
+	deff_exit ();
+}
+
+void ultra_spot_deff (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("COLLECT %d", ultra_deff_info->spot);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 21,
+		(ultra_deff_info->spot > 1) ? ultra_deff_info->plural_name
+			: ultra_deff_info->singular_name);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
 
 
 /**
@@ -74,6 +145,8 @@ bool ultra_collect (struct ultra_info *u)
 	if (*enable || flag_test (FLAG_ULTRA_MANIA_RUNNING))
 	{
 		score (u->shot_value);
+		ultra_deff_info = u;
+		deff_start (DEFF_ULTRA_COLLECT);
 	}
 
 	/* Decrement shot counts during normal play */
@@ -122,6 +195,18 @@ void ultra_add_sound (void)
 	task_exit ();
 }
 
+void ultra_deff_start (struct ultra_info *u, deffnum_t deff)
+{
+	task_pid_t tp;
+
+	ultra_deff_info = u;
+	deff_start (deff);
+
+	tp = task_create_anon (ultra_add_sound);
+	task_set_arg (tp, u->enable_sound);
+}
+
+
 /**
  * Start another Ultra Mode.
  *
@@ -140,7 +225,6 @@ void ultra_add_sound (void)
 void ultra_add_shot (void)
 {
 	struct ultra_info *u;
-	task_pid_t tp;
 
 	if (flag_test (FLAG_ULTRA_MANIA_LIT) || flag_test (FLAG_ULTRA_MANIA_RUNNING))
 		return;
@@ -156,17 +240,16 @@ void ultra_add_shot (void)
 	{
 		U8 n;
 		/* Award a running mode by spotting shots */
+		ultra_deff_start (u, DEFF_ULTRA_SPOT);
 		for (n=0; n < u->spot; n++)
 			ultra_collect (u);
 	}
 	else
 	{
 		/* Award an unlit mode */
+		ultra_deff_start (u, DEFF_ULTRA_COLLECT);
 		*(u->enable) = u->shot_count;
 		lamp_tristate_flash (u->lamp);
-
-		tp = task_create_anon (ultra_add_sound);
-		task_set_arg (tp, u->enable_sound);
 	}
 
 	ultra_award_next = (ultra_award_next + 1) % NUM_ULTRA_AWARDS;
@@ -179,8 +262,14 @@ void ultra_mania_start (void)
 	ultra_awards_finished = 0;
 	flag_on (FLAG_ULTRA_MANIA_RUNNING);
 	/* effects */
+	speech_start (SPCH_ULTRA_EVERYTHING, SL_3S);
 }
 
+
+CALLSET_ENTRY (ultra, init_complete)
+{
+	ultra_deff_info = &ultra_award_table[0];
+}
 
 CALLSET_ENTRY (ultra, left_ramp_shot, right_ramp_shot)
 {
@@ -217,6 +306,8 @@ CALLSET_ENTRY (ultra, lamp_update)
 CALLSET_ENTRY (ultra, start_player)
 {
 	ultra_awards_finished = 0;
+	ultra_award_next = 0;
+	memset (ultra_awards_enabled, 0, sizeof (ultra_awards_enabled));
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_off);
 }
 

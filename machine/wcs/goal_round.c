@@ -40,6 +40,36 @@ void goal_scored_deff (void)
 	deff_exit ();
 }
 
+void goal_scored_leff (void)
+{
+	flasher_pulse (FLASH_GOAL);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_GOAL);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_GOAL);
+	leff_exit ();
+}
+
+void goal_ball_update (void)
+{
+	if (flag_test (FLAG_GOAL_LIT))
+		spinning_ball_start ();
+	else
+		spinning_ball_stop ();
+}
+
+
+void goal_light (void)
+{
+	flag_on (FLAG_GOAL_LIT);
+	goal_ball_update ();
+}
+
+void goal_unlight (void)
+{
+	flag_off (FLAG_GOAL_LIT);
+	goal_ball_update ();
+}
 
 void goal_round_build_shot (U8 shot)
 {
@@ -51,7 +81,7 @@ void goal_round_build_shot (U8 shot)
 		/* When Multiball is lit, don't expire the build lamps. */
 		if (!flag_test (FLAG_MULTIBALL_LIT))
 			lit_build_shots &= ~shot;
-		flag_on (FLAG_GOAL_LIT);
+		goal_light ();
 		deff_start (DEFF_GOAL_LIT);
 		sound_start (ST_MUSIC, MUS_GOAL_IS_LIT, SL_2S, PRI_GAME_QUICK4);
 		score (SC_100K);
@@ -66,7 +96,6 @@ void goal_round_build_relight (void)
 {
 	lit_build_shots = 0xF;
 }
-
 
 void goal_count_lamp_update (void)
 {
@@ -117,7 +146,7 @@ CALLSET_ENTRY (goalround, goal_shot)
 {
 	if (flag_test (FLAG_GOAL_LIT))
 	{
-		flag_off (FLAG_GOAL_LIT);
+		goal_unlight ();
 		score (SC_1M);
 		deff_start (DEFF_GOAL_SCORED);
 		speech_start (SPCH_GOALLL, SL_2S);
@@ -140,7 +169,6 @@ CALLSET_ENTRY (goalround, goal_shot)
 		sample_start (SND_UNLIT_GOAL, SL_2S);
 	}
 }
-
 
 
 CALLSET_ENTRY (goalround, lamp_update)
@@ -166,10 +194,11 @@ CALLSET_ENTRY (goalround, lamp_update)
 CALLSET_ENTRY (goalround, start_player)
 {
 	goal_round_build_relight ();
-	flag_on (FLAG_GOAL_LIT);
+	goal_light ();
 }
 
-CALLSET_ENTRY (goalround, start_ball)
+CALLSET_ENTRY (goalround, end_ball)
 {
+	goal_ball_update ();
 }
 
