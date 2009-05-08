@@ -273,7 +273,7 @@ __noreturn__ void deff_exit (void)
 	with GID_DEFF in the same context. */
 	task_setgid (GID_DEFF_EXITING);
 
-	deff_running = 0;
+	deff_running = DEFF_NULL;
 	deff_update ();
 	music_refresh ();
 	task_exit ();
@@ -318,8 +318,8 @@ void deff_nice (enum _priority prio)
 /** Initialize the display effect subsystem. */
 void deff_init (void)
 {
-	deff_background = 0;
-	deff_running = 0;
+	deff_background = DEFF_NULL;
+	deff_running = DEFF_NULL;
 	deff_prio = 0;
 }
 
