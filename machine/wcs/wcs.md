@@ -21,7 +21,9 @@ include platform/wpc/wpc.md
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }
+define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'E', 'K' }, { 'K', 'M', 'E' }, { 'N', 'E', 'S' }, { 'R', 'J', 'S' }
+define MACHINE_HIGH_SCORES { 0x00, 0x17, 0x50, 0x00, 0x00 }, { 0x00, 0x15, 0x00, 0x00, 0x00 }, { 0x00, 0x12, 0x50, 0x00, 0x00 }, { 0x00, 0x10, 0x00, 0x00, 0x00 }
 define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 
