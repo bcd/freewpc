@@ -2776,9 +2776,9 @@ U8 sound_test_set;
 void sound_test_set_draw (void)
 {
 	char *s;
+#if (MACHINE_DCS == 0)
 	switch (sound_test_set)
 	{
-#if (MACHINE_DCS == 0)
 		case 0:
 		default:
 			s = "SET 1";
@@ -2787,21 +2787,11 @@ void sound_test_set_draw (void)
 		case 1:
 			s = "SET 2";
 			break;
-#else
-		case 0:
-		default:
-			s = "MUSIC";
-			break;
-
-		case 1:
-			s = "SPEECH";
-			break;
-
-		case 3:
-			s = "MISC/TEST MODE";
-			break;
-#endif
 	}
+#else
+	sprintf ("SET %d", sound_test_set);
+	s = sprintf_buffer;
+#endif
 	font_render_string_center (&font_mono5, 64, 9, s);
 }
 
@@ -2811,11 +2801,9 @@ void sound_test_set_change (void)
 #if (MACHINE_DCS == 0)
 	if (sound_test_set > 1)
 #else
-	if (sound_test_set == 2)
-		sound_test_set = 3;
-	if (sound_test_set > 3)
+	if (sound_test_set > 8)
 #endif
-		sound_test_set = 0;
+	sound_test_set = 0;
 	win_top->w_class.menu.selected = 0;
 }
 
