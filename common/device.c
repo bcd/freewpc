@@ -354,7 +354,11 @@ wait_and_recount:
 			/* When there are more balls in the device than we normally want
 			to keep here, we must kick one of them out.  If multiple kicks
 			are needed, this check will occur again in the future. */
-			device_request_kick (dev);
+			dev->kicks_needed++;
+			dev->kick_errors = 0;
+			/* TODO - device_request_kick (dev); would be more appropriate,
+			 * but that doesn't work when called from device context due
+			 * to live balls getting bumped */
 		}
 	}
 
