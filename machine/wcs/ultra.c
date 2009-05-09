@@ -60,16 +60,16 @@ static const struct ultra_info {
 	sound_code_t score_sound;
 } ultra_award_table[] = {
 	{ "RAMPS", "RAMP", "RAMPS",
-		LM_ULTRA_RAMPS, 6, SC_250K, 1, &ultra_awards_enabled[0],
+		LM_ULTRA_RAMPS, 5, SC_250K, 1, &ultra_awards_enabled[0],
 		SPCH_ULTRA_RAMPS, MUS_ULTRA_AWARD },
-	{ "GOALIE", "HIT", "HITS",
-		LM_ULTRA_GOALIE, 6, SC_250K, 1, &ultra_awards_enabled[1],
+	{ "GOALIE", "GOALIE HIT", "GOALIE HITS",
+		LM_ULTRA_GOALIE, 5, SC_250K, 1, &ultra_awards_enabled[1],
 		SPCH_ULTRA_GOALIE, MUS_ULTRA_AWARD },
 	{ "JETS", "JET", "JETS",
-		LM_ULTRA_JETS, 50, SC_30K, 10, &ultra_awards_enabled[2],
+		LM_ULTRA_JETS, 25, SC_50K, 10, &ultra_awards_enabled[2],
 		SPCH_ULTRA_JETS, SND_FIREWORK_EXPLODE },
 	{ "SPINNER", "SPIN", "SPINS",
-		LM_ULTRA_SPINNER, 30, SC_50K, 5, &ultra_awards_enabled[3],
+		LM_ULTRA_SPINNER, 25, SC_50K, 5, &ultra_awards_enabled[3],
 		SPCH_ULTRA_SPINNER, SND_GULP  }
 };
 
@@ -93,8 +93,19 @@ void ultra_collect_deff (void)
 	if (!flag_test (FLAG_ULTRA_MANIA_RUNNING))
 	{
 		count = *(ultra_deff_info->enable);
-		sprintf ("%d %s TO GO", count,
-			(count > 1) ? ultra_deff_info->plural_name : ultra_deff_info->singular_name);
+		if (count == 0)
+		{
+			sprintf ("%d/4 ULTRAS COMPLETED", ultra_awards_finished);
+		}
+		else
+		{
+			/* Older GCCs will fail here due to an improper merging of the
+			 * two operands to sprintf into a single pshs instruction. */
+#ifndef GCCBUG_PUSHMERGE
+			sprintf ("%d %s TO GO", count,
+				(count > 1) ? ultra_deff_info->plural_name : ultra_deff_info->singular_name);
+#endif
+		}
 		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
 	}
 
@@ -122,7 +133,7 @@ void ultra_mania_start_deff (void)
 void ultra_spot_deff (void)
 {
 	dmd_alloc_low_clean ();
-	sprintf ("COLLECT %d", ultra_deff_info->spot);
+	sprintf ("AWARD %d ULTRA", ultra_deff_info->spot);
 	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
 	font_render_string_center (&font_fixed6, 64, 21,
 		(ultra_deff_info->spot > 1) ? ultra_deff_info->plural_name
@@ -160,10 +171,11 @@ bool ultra_collect (struct ultra_info *u)
 		{
 			lamp_tristate_on (u->lamp);
 			ultra_awards_finished++;
+			score (SC_500K);
 			if (ultra_awards_finished == NUM_ULTRA_AWARDS)
 			{
 				flag_on (FLAG_ULTRA_MANIA_LIT);
-				/* TODO - add effects */
+				/* TODO - add effects, strobe left loop */
 			}
 		}
 		return TRUE;
@@ -247,7 +259,7 @@ void ultra_add_shot (void)
 	else
 	{
 		/* Award an unlit mode */
-		ultra_deff_start (u, DEFF_ULTRA_COLLECT);
+		ultra_deff_start (u, DEFF_ULTRA_START);
 		*(u->enable) = u->shot_count;
 		lamp_tristate_flash (u->lamp);
 	}
@@ -288,6 +300,8 @@ CALLSET_ENTRY (ultra, sw_left_jet, sw_upper_jet, sw_lower_jet)
 
 CALLSET_ENTRY (ultra, sw_spinner_slow)
 {
+	/* TODO - this is getting called much faster than we can
+	 * process it on a hard shot */
 	ultra_score (&ultra_award_table[3]);
 }
 
