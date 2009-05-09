@@ -55,6 +55,7 @@ CALLSET_ENTRY (jets, sw_left_jet, sw_upper_jet, sw_lower_jet)
 	score (SC_5K);
 	deff_start (DEFF_JET);
 	task_sleep (TIME_16MS);
+	task_create_gid1 (GID_JET_FLASHER, jet_flasher);
 
 	if (jet_count == jet_goal)
 	{
