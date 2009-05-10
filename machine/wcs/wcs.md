@@ -226,6 +226,7 @@ Blue Lamps: set, COLOR:blue
 Purple Lamps: set, COLOR:purple
 Circle Out: PF:lamp_sort_circle_out
 Build Up: PF:lamp_sort_bottom_to_top
+Ball Save: Shoot Again
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
@@ -355,6 +356,7 @@ Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 # Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
