@@ -105,7 +105,6 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
 		{
 			if (--ch->timer == 0)
 			{
-				dbprintf ("Sound on channel %d done.\n", chid);
 				ch->prio = 0;
 				if (chid == MUSIC_CHANNEL)
 				{
