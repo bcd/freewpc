@@ -1,0 +1,20 @@
+
+U8 @self_target_position;
+
+
+void @self_park_rtt (void)
+{
+	if (@self_target_position && switches can be polled)
+	{
+		if (rt_switch_poll (...) == @self_target_position)
+		{
+			stop now;
+		}
+	}
+}
+
+
+void @self_park (U8 position)
+{
+}
+

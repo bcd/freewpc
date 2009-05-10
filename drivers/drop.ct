@@ -1,0 +1,191 @@
+/*
+ * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/** Device driver for a single, standalone drop target */
+
+@@class drop
+@@parameter sol_up
+@@parameter sol_down
+@@parameter sw
+@@parameter sw_event
+
+
+@@
+@@file @self.h
+@@
+
+/* The design of the drop target driver:
+No special realtime function is needed, as it uses the
+existing coil pulsing mechanism.
+ */
+
+enum @self_state
+{
+	DROP_INIT,
+	DROP_UP,
+	DROP_DOWN,
+	DROP_GOING_UP,
+	DROP_GOING_DOWN,
+	DROP_RESET_ERROR,
+};
+
+extern inline bool @self_down_p (void)
+{
+	return switch_poll_logical (sw);
+}
+
+
+@@
+@@file @self.c
+@@
+
+
+__fastram__ enum @self_state @self_state;
+
+U8 @self_timer;
+
+U8 @self_down_errors;
+
+U8 @self_up_errors;
+
+
+/**
+ * Initialize the driver.  Determine what state the drop target is
+ * in, either up or down.
+ */
+void @self_init (void)
+{
+	@self_state = DROP_INIT;
+	@self_down_errors = @self_up_errors = 0;
+	if (@self_down_p ())
+	{
+		@self_state = DROP_DOWN;
+	}
+	else
+	{
+		@self_state = DROP_UP;
+	}
+}
+
+
+/**
+ * Force the drop target up.
+ */
+void @self_reset (void)
+{
+	if ((@self_state != DROP_UP) && (@self_up_errors < 5))
+	{
+		sol_req_start (@sol_up);
+		@self_state = DROP_GOING_UP;
+		@self_timer = 10;
+	}
+}
+
+
+/**
+ * Force the drop target down.
+ */
+void @self_down (void)
+{
+	if ((@self_state != DROP_DOWN) && (@self_down_errors < 5))
+	{
+		@self_state = DROP_GOING_DOWN;
+		@self_timer = 8;
+		sol_req_start (@sol_down);
+	}
+}
+
+
+/**
+ * Handle the switch event.  When the target is up, throw a secondary
+ * event for the game code to process.  Otherwise, ignore the switch.
+ */
+CALLSET_ENTRY (@self, @sw_event)
+{
+	if (@self_state == DROP_UP)
+	{
+		@self_state = DROP_DOWN;
+		callset_invoke (@self_down);
+	}
+}
+
+
+/**
+ * Periodic driver entry point.  Check to see if anything needs to be done.
+ */
+CALLSET_ENTRY (@self, idle_every_100ms)
+{
+	/* We only have work to do if the timer is nonzero. */
+	if (@self_timer)
+	{
+		/* Decrement the timer.  If it expired, then we have
+		more to do. */
+		--@self_timer;
+		if (@self_timer == 0)
+		{
+			/* If we just tried to reset the drop, see if that
+			worked. */
+			if (@self_state == DROP_GOING_UP)
+			{
+				if (@self_down_p ())
+				{
+					/* Reset failed. */
+					@self_up_errors++;
+					@self_reset ();
+				}
+				else
+				{
+					/* Reset good. */
+					@self_up_errors = 0;
+					@self_state = DROP_UP;
+				}
+			}
+			/* If we just tried to knockdown the drop, see if that
+			worked. */
+			else if (@self_state == DROP_GOING_DOWN)
+			{
+				if (@self_down_p ())
+				{
+					/* Knockdown good. */
+					@self_down_errors = 0;
+					@self_state = DROP_DOWN;
+				}
+				else
+				{
+					/* Knockdown failed. */
+					@self_down_errors++;
+					@self_down ();
+				}
+			}
+		}
+	}
+}
+
+
+/**
+ * Reinitialize the driver at system poweron and when entering attract mode.
+ */
+CALLSET_ENTRY (@self, amode_start, init_complete)
+{
+	@self_init ();
+}
+
+
+/* vim: set filetype=c: */
