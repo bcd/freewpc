@@ -99,3 +99,13 @@ CALLSET_ENTRY (trough, dev_trough_kick_success)
 	/* Note that there is one more ball in play now */
 	device_add_live ();
 }
+
+CALLSET_ENTRY (trough, dev_trough_kick_failure)
+{
+	/* Normally, when a device fails to kick after so many tries, we stop
+	trying.  But if it is the trough device, we really can't give up so
+	easily...
+	Since we are running in a task context, wait a bit and then retry the
+	kick again. */
+}
+
