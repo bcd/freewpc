@@ -155,8 +155,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 88: Upper Right Lane, ingame
 
 [drives]
-H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_100MS)
-H2: TV Popper, duty(SOL_DUTY_75), time(TIME_100MS)
+H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_133MS)
+H2: TV Popper, duty(SOL_DUTY_75), time(TIME_166MS)
 H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
 H4: Lock Release
 H5: Upper Eject
@@ -405,11 +405,11 @@ Gate: driver(duty),
 
 Kickback Driver: driver(spsol),
 	sw=SW_KICKBACK, sol=SOL_KICKBACK,
-	ontime=6, offtime=20
+	ontime=12, offtime=18
 
 Spinning Ball: driver(duty),
 	sol=SOL_BALL_FORWARD,
-	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=0
+	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_200MS, timeout=0
 
 Goalie: driver(duty),
 	sol=SOL_GOALIE_DRIVE,
