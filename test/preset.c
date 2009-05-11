@@ -74,6 +74,9 @@ PRESET_END (show, "SHOW")
 
 PRESET_BEGIN (timed_game)
 	{ standard_adjustments, &system_config.max_players, 1 },
+#ifdef CONFIG_TIMED_GAME
+	{ feature_adjustments, &system_config.timed_game, YES },
+#endif
 PRESET_END (timed_game, "TIMED GAME")
 
 #define PRESET_EUROPE \
@@ -97,6 +100,10 @@ PRESET_BEGIN (german)
 PRESET_END (german, "GERMAN")
 
 
+PRESET_BEGIN (dev)
+	{ pricing_adjustments, &price_config.free_play, YES },
+PRESET_END (dev, "DEVELOPER")
+
 struct preset *preset_table[] = {
 	/* Easy-Hard */
 	/* Add-a-Ball */
@@ -113,6 +120,7 @@ struct preset *preset_table[] = {
 	&preset_french,
 	&preset_german,
 	&preset_usa_canada,
+	&preset_dev,
 };
 
 
@@ -185,6 +193,11 @@ void preset_render_name (U8 index)
 }
 
 
+/**
+ * Returns true if a given preset is already installed.
+ * This means that ALL of the items within the preset
+ * are equal to their present values.
+ */
 bool preset_installed_p (U8 index)
 {
 	struct preset *pre = preset_table[index];
