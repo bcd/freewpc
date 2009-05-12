@@ -576,7 +576,7 @@ void dmd_do_transition (void)
 	dmd_trans_data_ptr = NULL;
 	dmd_trans_data_ptr2 = NULL;
 
-	wpc_push_page (TRANS_PAGE);
+	page_push (TRANS_PAGE);
 	
 	if (dmd_transition->composite_init)
 	{
@@ -626,7 +626,7 @@ void dmd_do_transition (void)
 		dmd_bright_page = dmd_composite_page+1;
 	}
 
-	wpc_pop_page ();
+	page_pop ();
 	dmd_transition = NULL;
 }
 

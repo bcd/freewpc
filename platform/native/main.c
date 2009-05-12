@@ -93,7 +93,7 @@ U8 *linux_switch_data_ptr;
 U8 *linux_lamp_data_ptr;
 
 /** The jumper settings */
-U8 linux_jumpers = WPC_JUMPER_USA_CANADA;
+U8 linux_jumpers = LC_USA_CANADA << 2;
 
 /** The triac outputs */
 U8 linux_triac_outputs;

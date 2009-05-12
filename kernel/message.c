@@ -70,7 +70,7 @@ static void message_iterate (char *msg)
 void message_write (const char *msg, U8 page)
 {
 	dmd_alloc_low_clean ();
-	wpc_push_page (page);
+	page_push (page);
 
 	if (msg != sprintf_buffer)
 		sprintf ("%s", msg);
@@ -82,6 +82,6 @@ void message_write (const char *msg, U8 page)
 	message_line_handler = line_printer;
 	message_iterate (sprintf_buffer);
 
-	wpc_pop_page ();
+	page_pop ();
 }
 

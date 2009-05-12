@@ -21,6 +21,22 @@
 #ifndef _GENERIC_H
 #define _GENERIC_H
 
+/* Locales.  The values here are taken directly from the WPC jumper codes,
+but they are otherwise generic. */
+#define LC_USA_CANADA 0
+#define LC_FRANCE 1
+#define LC_GERMANY 2
+#define LC_FRANCE2 3
+#define LC_EXPORT_ENGLISH 8
+#define LC_FRANCE3 9
+#define LC_EXPORT 10
+#define LC_FRANCE4 11
+#define LC_UK 12
+#define LC_EUROPE 13
+#define LC_SPAIN 14
+#define LC_USA_CANADA2 15
+
+
 /** Atomically increment a variable in protected memory by N. */
 #define wpc_nvram_add(var,n) \
 	do { \
@@ -55,13 +71,13 @@ do { \
 } while (0)
 
 
-#define wpc_push_page(page) \
+#define page_push(page) \
 { \
 	U8 __saved_page = wpc_get_rom_page (); \
 	wpc_set_rom_page (page);
 
 
-#define wpc_pop_page() \
+#define page_pop() \
 	wpc_set_rom_page (__saved_page); \
 }
 

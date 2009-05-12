@@ -159,29 +159,29 @@ void preset_install_country_code (U8 code)
 	dbprintf ("Installing preset for country code %d\n", code);
 	switch (code)
 	{
-		case WPC_JUMPER_USA_CANADA:
-		case WPC_JUMPER_USA_CANADA2:
+		case LC_USA_CANADA:
+		case LC_USA_CANADA2:
 			preset_install (preset_usa_canada_comps);
 			break;
 
-		case WPC_JUMPER_FRANCE:
-		case WPC_JUMPER_FRANCE2:
-		case WPC_JUMPER_FRANCE3:
-		case WPC_JUMPER_FRANCE4:
+		case LC_FRANCE:
+		case LC_FRANCE2:
+		case LC_FRANCE3:
+		case LC_FRANCE4:
 			preset_install (preset_french_comps);
 			break;
 
-		case WPC_JUMPER_GERMANY:
+		case LC_GERMANY:
 			preset_install (preset_german_comps);
 			break;
 
-		case WPC_JUMPER_EXPORT_ENGLISH:
-		case WPC_JUMPER_EXPORT:
-		case WPC_JUMPER_UK:
-		case WPC_JUMPER_EUROPE:
+		case LC_EXPORT_ENGLISH:
+		case LC_EXPORT:
+		case LC_UK:
+		case LC_EUROPE:
 			break;
 
-		case WPC_JUMPER_SPAIN:
+		case LC_SPAIN:
 			break;
 	}
 }

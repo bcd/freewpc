@@ -461,7 +461,7 @@ sprintf_far_string (const char **srcp)
 	char *dst = sprintf_buffer;
 	const char *src;
 	
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	
 	src = *srcp;
 	if (src != NULL)
@@ -473,7 +473,7 @@ sprintf_far_string (const char **srcp)
 	}
 
 	*dst++ = '\0';
-	wpc_pop_page ();
+	page_pop ();
 }
 
 

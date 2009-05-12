@@ -72,9 +72,9 @@ void lamplist_set_apply_delay (task_ticks_t delay)
 const lampnum_t *lamplist_lookup (lamplist_id_t id)
 {
 	lampnum_t *lptr;
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	lptr = lamplist_table[id];
-	wpc_pop_page ();
+	page_pop ();
 	return lptr;
 }
 
@@ -82,9 +82,9 @@ const lampnum_t *lamplist_lookup (lamplist_id_t id)
 lampnum_t lamplist_index (lamplist_id_t id, U8 n)
 {
 	lampnum_t lamp;
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	lamp = lamplist_table[id][n];
-	wpc_pop_page ();
+	page_pop ();
 	return lamp;
 }
 
@@ -141,11 +141,11 @@ any lamp macros. */
 void lamplist_apply_nomacro (lamplist_id_t id, lamp_operator_t op)
 {
 	register const lampnum_t *entry;
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 		if (!lamplist_macro_entry (*entry))
 			(*op) (*entry);
-	wpc_pop_page ();
+	page_pop ();
 }
 
 
@@ -156,7 +156,7 @@ void lamplist_apply (lamplist_id_t id, lamp_operator_t op)
 	register const lampnum_t *entry;
 	U8 lamplist_apply_delay1 = 0;
 
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
@@ -182,7 +182,7 @@ void lamplist_apply (lamplist_id_t id, lamp_operator_t op)
 
 	if (lamplist_apply_delay1 != 0)
 		lamplist_apply_delay = lamplist_apply_delay1;
-	wpc_pop_page ();
+	page_pop ();
 }
 
 
@@ -213,7 +213,7 @@ bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op)
 	register const lampnum_t *entry;
 	bool result = TRUE;
 
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
@@ -226,7 +226,7 @@ bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op)
 		}
 	}
 
-	wpc_pop_page ();
+	page_pop ();
 	return result;
 }
 
@@ -239,7 +239,7 @@ bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 	register const lampnum_t *entry;
 	bool result = FALSE;
 
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 
 	for (entry = lamplist_table[id]; *entry != LAMP_END; entry++)
 	{
@@ -252,7 +252,7 @@ bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 		}
 	}
 
-	wpc_pop_page ();
+	page_pop ();
 	return result;
 }
 
@@ -301,7 +301,7 @@ void lamplist_step_increment (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	
 	/* If all lamps are off, then turn on the first lamp.
 	 * Else, find the first lamp that is on, turn it off, then
@@ -322,7 +322,7 @@ void lamplist_step_increment (lamplist_id_t set, bitset matrix)
 			entry = lamplist_first_entry (set);
 		bit_on (matrix, *entry);
 	}
-	wpc_pop_page ();
+	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
@@ -335,7 +335,7 @@ void lamplist_step_decrement (lamplist_id_t set, bitset matrix)
 	 * Else, find the first lamp that is on, turn it off,
 	 * then turn on the _previous_ lamp. */
 
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	if (bit_test_all_off (matrix))
 	{
 		entry = lamplist_last_entry (set);
@@ -350,7 +350,7 @@ void lamplist_step_decrement (lamplist_id_t set, bitset matrix)
 			entry = lamplist_last_entry (set);
 		lamp_on (*entry);
 	}
-	wpc_pop_page ();
+	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
@@ -365,7 +365,7 @@ void lamplist_build_increment (lamplist_id_t set, bitset matrix)
 	const lampnum_t *entry;
 
 	/* Turn on the first lamp that is off, and then stop */
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
 		if (lamplist_macro_entry (*entry))
@@ -376,7 +376,7 @@ void lamplist_build_increment (lamplist_id_t set, bitset matrix)
 			break;
 		}
 	}
-	wpc_pop_page ();
+	page_pop ();
 }
 
 void lamplist_build_decrement (lamplist_id_t set, bitset matrix)
@@ -385,7 +385,7 @@ void lamplist_build_decrement (lamplist_id_t set, bitset matrix)
 
 	/* Going in reverse, turn off the first lamp that is on, and
 	 * then stop */
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	for (entry = lamplist_last_entry (set);
 		entry >= lamplist_first_entry (set);
 		entry--)
@@ -398,7 +398,7 @@ void lamplist_build_decrement (lamplist_id_t set, bitset matrix)
 			break;
 		}
 	}
-	wpc_pop_page ();
+	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
@@ -422,7 +422,7 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 	 * etc.
 	 * Ln = old Ln-1
 	 */
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	state = lamp_test (*(lamplist_last_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
@@ -432,7 +432,7 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 		(state ? lamp_on : lamp_off) (*entry);
 		state = newstate;
 	}
-	wpc_pop_page ();
+	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);
 }
 
@@ -450,7 +450,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 	 * Ln-1 = old Ln
 	 * Ln = old L0
 	 */
-	wpc_push_page (MD_PAGE);
+	page_push (MD_PAGE);
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
 		if (lamplist_macro_entry (*entry))
@@ -468,7 +468,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 	entry = lamplist_last_entry (set);
 	(state ? lamp_on : lamp_off) (*entry);
 
-	wpc_pop_page ();
+	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);
 }
 

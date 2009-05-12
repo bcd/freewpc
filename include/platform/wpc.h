@@ -440,20 +440,6 @@ extern inline void wpc_write_flippers (U8 val)
 /* Jumpers                                  */
 /********************************************/
 
-#define WPC_JUMPER_USA_CANADA 0
-#define WPC_JUMPER_FRANCE 1
-#define WPC_JUMPER_GERMANY 2
-#define WPC_JUMPER_FRANCE2 3
-#define WPC_JUMPER_EXPORT_ENGLISH 8
-#define WPC_JUMPER_FRANCE3 9
-#define WPC_JUMPER_EXPORT 10
-#define WPC_JUMPER_FRANCE4 11
-#define WPC_JUMPER_UK 12
-#define WPC_JUMPER_EUROPE 13
-#define WPC_JUMPER_SPAIN 14
-#define WPC_JUMPER_USA_CANADA2 15
-
-
 extern inline U8 wpc_get_jumpers (void)
 {
 	return readb (WPC_SW_JUMPER_INPUT);

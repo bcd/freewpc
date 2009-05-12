@@ -135,9 +135,9 @@ csum_area_check_all (void)
 		n < sizeof (csum_info_table) / sizeof (struct area_csum *);
 		n++)
 	{
-		wpc_push_page (csum_paging_info_table[n]);
+		page_push (csum_paging_info_table[n]);
 		csum_area_check (csum_info_table[n]);
-		wpc_pop_page ();
+		page_pop ();
 	}
 }
 

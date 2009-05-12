@@ -107,12 +107,12 @@ U8 *font_lookup (const font_t *font, char c)
 
 void font_lookup_char (const font_t *font, char c)
 {
-	wpc_push_page (FONT_PAGE);
+	page_push (FONT_PAGE);
 	if (font->glyphs[(U8)c - font->basechar] == NULL)
 		font_width = font_height = 0;
 	else
 		(void)font_lookup (font, c);
-	wpc_pop_page ();
+	page_pop ();
 }
 
 #ifndef __m6809__
@@ -233,7 +233,7 @@ static void fontargs_render_string (void)
 
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */
-	wpc_push_page (FONT_PAGE);
+	page_push (FONT_PAGE);
 
 	top_space = 0;
 
@@ -292,7 +292,7 @@ static void fontargs_render_string (void)
 		}
 
 	} /* end for each character in the string */
-	wpc_pop_page ();
+	page_pop ();
 }
 
 
@@ -372,7 +372,7 @@ void font_get_string_area (const font_t *font, const char *s)
 		s = sprintf_buffer;
 	}
 
-	wpc_push_page (FONT_PAGE);
+	page_push (FONT_PAGE);
 
 	font_string_width = 0;
 	font_string_height = 0;
@@ -393,7 +393,7 @@ void font_get_string_area (const font_t *font, const char *s)
 	/* Don't count the space at the end of the string */
 	font_string_width--;
 
-	wpc_pop_page ();
+	page_pop ();
 
 	/* This can take a while for long strings; don't let the
 	software watchdog expire */
