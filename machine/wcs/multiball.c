@@ -110,6 +110,7 @@ void mb_light_super_jackpot (void)
 
 void mb_start (void)
 {
+	flag_off (FLAG_MULTIBALL_LIT);
 	flag_on (FLAG_MULTIBALL_RUNNING);
 	mb_light_jackpot ();
 	flag_off (FLAG_SUPER_JACKPOT_LIT);

@@ -354,7 +354,11 @@ wait_and_recount:
 			/* When there are more balls in the device than we normally want
 			to keep here, we must kick one of them out.  If multiple kicks
 			are needed, this check will occur again in the future. */
-			device_request_kick (dev);
+			dev->kicks_needed++;
+			dev->kick_errors = 0;
+			/* TODO - device_request_kick (dev); would be more appropriate,
+			 * but that doesn't work when called from device context due
+			 * to live balls getting bumped */
 		}
 	}
 
@@ -395,6 +399,10 @@ wait_and_recount:
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid. */
+			/* TODO - in this task context, we can wait for the queue to
+			be serviced. */
+			/* TODO - if multiple devices want to kick at the same time,
+			 * they should be staggered a bit */
 			/* TODO - the pulse strength is implied.  Would be nice to
 			have differing pulses for retries */
 			sol_request (dev->props->sol);
@@ -848,7 +856,7 @@ void device_unlock_ball (device_t *dev)
 		device_request_kick (dev);
 	}
 	else
-		fatal (ERR_UNLOCK_EMPTY_DEVICE);
+		nonfatal (ERR_UNLOCK_EMPTY_DEVICE);
 }
 
 

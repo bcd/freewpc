@@ -59,7 +59,7 @@ can be overwritten in the machine config file. */
 coils. */
 #define SOL_TIME_DEFAULT   TIME_133MS
 
-#define FLASHER_DUTY_DEFAULT SOL_DUTY_50
+#define FLASHER_DUTY_DEFAULT SOL_DUTY_25
 #define FLASHER_TIME_DEFAULT TIME_66MS
 
 /* Function prototypes */

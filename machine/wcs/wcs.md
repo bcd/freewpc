@@ -155,8 +155,8 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 88: Upper Right Lane, ingame
 
 [drives]
-H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_100MS)
-H2: TV Popper, duty(SOL_DUTY_75), time(TIME_100MS)
+H1: Goal Popper, duty(SOL_DUTY_75), time(TIME_133MS)
+H2: TV Popper, duty(SOL_DUTY_75), time(TIME_166MS)
 H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
 H4: Lock Release
 H5: Upper Eject
@@ -226,6 +226,7 @@ Blue Lamps: set, COLOR:blue
 Purple Lamps: set, COLOR:purple
 Circle Out: PF:lamp_sort_circle_out
 Build Up: PF:lamp_sort_bottom_to_top
+Ball Save: Shoot Again
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
@@ -349,12 +350,13 @@ Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
-Ultra Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
-Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Ultra Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE
+Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 # Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
@@ -405,11 +407,11 @@ Gate: driver(duty),
 
 Kickback Driver: driver(spsol),
 	sw=SW_KICKBACK, sol=SOL_KICKBACK,
-	ontime=6, offtime=20
+	ontime=12, offtime=18
 
 Spinning Ball: driver(duty),
 	sol=SOL_BALL_FORWARD,
-	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=0
+	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_200MS, timeout=0
 
 Goalie: driver(duty),
 	sol=SOL_GOALIE_DRIVE,

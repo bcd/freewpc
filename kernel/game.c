@@ -496,9 +496,11 @@ void start_ball (void)
 #ifdef CONFIG_TIMED_GAME
 	if (config_timed_game)
 	{
+		extern U8 switch_stress_enable;
 		timed_game_timer = CONFIG_TIMED_GAME;
 		timed_game_suspend_count = 0;
-		task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
+		if (switch_stress_enable == NO)
+			task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 	}
 #endif
 }

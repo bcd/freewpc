@@ -117,7 +117,8 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
  */
 CALLSET_ENTRY (ballsave, valid_playfield)
 {
-	ballsave_add_time (10);
+	if (!config_timed_game)
+		ballsave_add_time (7); /* TODO - make configurable per game */
 }
 
 /*
