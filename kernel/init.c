@@ -394,7 +394,7 @@ void do_firq (void)
 	/* Read the peripheral timer register.
 	 * If bit 7 is set, it is a timer interrupt.  Otherwise,
 	 * it is a DMD interrupt. */
-	if (readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & 0x80)
+	if (readb (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR) & WPC_FIRQ_CLEAR_BIT)
 	{
 		/* It is a timer interrupt.
 		 * Clear the interrupt by writing back to the same register. */

@@ -206,6 +206,7 @@ extern U8 idle_ok;
 #include <audio.h>
 #include <mode.h> /* deprecated */
 #include <timedmode.h>
+#include <generic.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #ifdef CONFIG_PLATFORM_WPC

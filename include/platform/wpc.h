@@ -32,7 +32,7 @@
  ***************************************************************/
 
 /** The FIRQ clear/peripheral timer register bits */
-#define FIRQ_CLEAR_BIT 0x80
+#define WPC_FIRQ_CLEAR_BIT 0x80
 
 
 /***************************************************************
@@ -298,25 +298,6 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 #define wpc_nvram_put() wpc_set_ram_protect(RAM_LOCKED)
 
 
-/** Atomically increment a variable in protected memory by N. */
-#define wpc_nvram_add(var,n) \
-	do { \
-		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
-		*pvar += n; \
-		wpc_nvram_put (); \
-	} while (0)
-
-
-/** Atomically decrement a variable in protected memory by N. */
-#define wpc_nvram_subtract(var,n) \
-	do { \
-		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
-		*pvar -= n; \
-		wpc_nvram_put (); \
-	} while (0)
-
 /********************************************/
 /* ROM Paging                               */
 /********************************************/
@@ -330,34 +311,6 @@ extern inline void wpc_set_rom_page (U8 page)
 {
 	writeb (WPC_ROM_BANK, page);
 }
-
-
-/** The call_far, wpc_push_page, and wpc_pop_page
- * macros are only safe when calling from the system
- * page, so don't define them otherwise. */
-#if (PAGE == SYS_PAGE) || !defined(HAVE_PAGING)
-
-#define call_far(page, fncall) \
-do { \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page); \
-	fncall; \
-	wpc_set_rom_page (__saved_page); \
-} while (0)
-
-
-#define wpc_push_page(page) \
-{ \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page);
-
-
-#define wpc_pop_page() \
-	wpc_set_rom_page (__saved_page); \
-}
-
-#endif /* PAGE == SYS_PAGE */
-
 
 /********************************************/
 /* RAM Paging                               */
@@ -418,10 +371,10 @@ extern inline void wpc_int_clear (void)
 extern inline U8 wpc_read_ac_zerocross (void)
 {
 #ifdef CONFIG_NO_ZEROCROSS
-	return 0;
+	return WPC_ZC_CLEAR;
 #else
 	U8 val = readb (WPC_ZEROCROSS_IRQ_CLEAR);
-	return (val & 0x80);
+	return (val & WPC_ZC_SET);
 #endif
 }
 
@@ -438,6 +391,10 @@ extern inline U8 wpc_read_ac_zerocross (void)
 #define WPC_UR_FLIP_SW		0x20
 #define WPC_UL_FLIP_EOS		0x40
 #define WPC_UL_FLIP_SW		0x80
+#define WPC_FLIP_EOS \
+	(WPC_LR_FLIP_EOS+WPC_LL_FLIP_EOS+WPC_UR_FLIP_EOS+WPC_UL_FLIP_EOS)
+#define WPC_FLIP_SW \
+	(WPC_LR_FLIP_SW+WPC_LL_FLIP_SW+WPC_UR_FLIP_SW+WPC_UL_FLIP_SW)
 
 extern inline U8 wpc_read_flippers (void)
 {
@@ -450,13 +407,13 @@ extern inline U8 wpc_read_flippers (void)
 
 extern inline U8 wpc_read_flipper_buttons (void)
 {
-	return wpc_read_flippers () & 0xAA;
+	return wpc_read_flippers () & WPC_FLIP_SW;
 }
 
 
 extern inline U8 wpc_read_flipper_eos (void)
 {
-	return wpc_read_flippers () & 0x55;
+	return wpc_read_flippers () & WPC_FLIP_EOS;
 }
 
 
