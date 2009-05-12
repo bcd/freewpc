@@ -36,6 +36,8 @@ EXTRA_ASFLAGS += -DCONFIG_PLATFORM_WPC
 # Say which source files need to be compiled in for the WPC platform only.
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.
 KERNEL_HW_OBJS += $(P)/main.o
+KERNEL_HW_OBJS += $(P)/interrupt.o
+KERNEL_HW_OBJS += $(P)/init-wpc.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/bitmap.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/dmd.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_DMD), $(P)/dot.o)

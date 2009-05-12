@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -30,8 +30,9 @@ extern inline void do_irq_begin (void)
 	wpc_set_ram_page (0);
 #endif
 
-	/* Clear the source of the interrupt */
-	wpc_int_clear ();
+	/* Clear the source of the periodic interrupt, and reset
+	the hardware watchdog */
+	pinio_clear_periodic ();
 
 	/* Advance the system time by ~1ms */
 	sys_time++;

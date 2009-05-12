@@ -86,7 +86,7 @@ void ac_rtt (void)
 	}
 
 	else if (likely (zc_status != ZC_BROKEN)
-		&& unlikely (wpc_read_ac_zerocross ()))
+		&& unlikely (pinio_read_ac_zerocross ()))
 	{
 		/* Read the zerocross register, unless broken.
 		 * If we are currently at a zero crossing,

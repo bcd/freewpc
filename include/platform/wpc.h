@@ -349,12 +349,12 @@ extern inline void wpc_write_misc_control (U8 val)
 		WPC_CTRL_BLANK_RESET | WPC_CTRL_WATCHDOG_RESET | val);
 }
 
-extern inline void wpc_watchdog_reset (void)
+extern inline void pinio_watchdog_reset (void)
 {
 	wpc_write_misc_control (0);
 }
 
-extern inline void wpc_int_clear (void)
+extern inline void pinio_clear_periodic (void)
 {
 #ifdef CONFIG_DEBUG_ADJUSTMENTS
 	extern U8 irq_ack_value;
@@ -368,7 +368,7 @@ extern inline void wpc_int_clear (void)
 #define WPC_ZC_CLEAR 0x0
 #define WPC_ZC_SET   0x80
 
-extern inline U8 wpc_read_ac_zerocross (void)
+extern inline U8 pinio_read_ac_zerocross (void)
 {
 #ifdef CONFIG_NO_ZEROCROSS
 	return WPC_ZC_CLEAR;
