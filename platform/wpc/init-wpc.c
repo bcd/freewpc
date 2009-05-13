@@ -2,6 +2,11 @@
 #include <freewpc.h>
 
 
+#ifdef CONFIG_DEBUG_ADJUSTMENTS
+U8 irq_ack_value;
+#endif
+
+
 /**
  * Initialize the WPC platform.
  */

@@ -39,10 +39,6 @@ U8 idle_ok;
 running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-U8 irq_ack_value;
-#endif
-
 const U8 wpc_machine_type = WPC_TYPE;
 
 /** Initialize the FreeWPC program. */
