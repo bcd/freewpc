@@ -25,8 +25,8 @@ CONFIG_ANIMATION ?= $(CONFIG_DMD)
 KERNEL_HW_OBJS += $(P)/interrupt.o
 KERNEL_HW_OBJS += $(P)/init-wpc.o
 
-# Additional header files
-CFLAGS += -I$(D)
+# Additional defines
+CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC
 
 # Additional object files to be linked into the kernel region
 NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \

@@ -8,7 +8,7 @@ CFLAGS =
 # TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
 
 # Additional CFLAGS required for a native build
-CFLAGS += -O -g -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -DCONFIG_LITTLE_ENDIAN
+CFLAGS += -O -g -DCONFIG_NATIVE -DCONFIG_LITTLE_ENDIAN
 
 ifeq ($(CONFIG_PTH),y)
 PTH_CFLAGS := $(shell pth-config --cflags)
