@@ -92,7 +92,7 @@ void fatal (errcode_t error_code)
 #if (MACHINE_DMD == 1) && DEBUG_FATAL_DMD
 	/* Display the error on the DMD.
 	 * This may not work, if the fatal was caused by any of the
-	 * font/DMD functions.  So this is known turned off by default;
+	 * font/DMD functions.  So this is now turned off by default;
 	 * you can recompile it in if need be.
 	 */
 	extern void dmd_rtt0 (void);
