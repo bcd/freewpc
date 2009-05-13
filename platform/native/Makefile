@@ -3,6 +3,16 @@
 # because of toolchain differences, and also simulation files need
 # to be linked in.
 
+D := platform/native
+P := platform/wpc
+NATIVE_OBJS :=
+
+# Common native mode CPU configuration
+CPU := native
+CONFIG_PTH := y
+CONFIG_CURSES := y
+include cpu/$(CPU)/Makefile
+
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
@@ -11,21 +21,15 @@ CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC=y
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
 
-D := platform/native
+# Platform dependent files
+KERNEL_HW_OBJS += $(P)/interrupt.o
+KERNEL_HW_OBJS += $(P)/init-wpc.o
 
-# Additional CFLAGS required for a native build
-# TODO : don't define CONFIG_LITTLE_ENDIAN on sparc, etc.
-PTH_CFLAGS := $(shell pth-config --cflags)
-CFLAGS += -O $(PTH_CFLAGS) -I$(D) -DCONFIG_NATIVE -DCONFIG_PLATFORM_WPC -g -DCONFIG_LITTLE_ENDIAN
-HOST_LIBS += -lpth
-
-ifeq ($(CONFIG_NATIVE_PROFILE),y)
-CFLAGS += -pg
-HOST_LFLAGS += -pg
-endif
+# Additional header files
+CFLAGS += -I$(D)
 
 # Additional object files to be linked into the kernel region
-NATIVE_OBJS := $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
+NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
 	$(D)/bcd_string.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
 	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
@@ -35,11 +39,6 @@ NATIVE_OBJS := $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
 NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
-
-# When using the curses UI (default for now)
-CFLAGS += -DCONFIG_UI -DCURSES
-HOST_LIBS += -lncurses
-NATIVE_OBJS += $(D)/ui_curses.o
 
 $(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM
 

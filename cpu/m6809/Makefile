@@ -1,6 +1,5 @@
 
-# Root directory for the CPU files.  TODO: move
-# the code to cpu/m6809 and change $(C) accordingly.
+# Root directory for the CPU files.
 CPU := m6809
 C := cpu/$(CPU)
 
