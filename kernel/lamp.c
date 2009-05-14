@@ -129,22 +129,6 @@ void lamp_flash_rtt (void)
 }
 
 
-/** Synchronize all flashing lamps.  There may be a slight glitch
- * if the lamps were already on.  */
-static void lamp_flash_sync (void)
-{
-	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
-	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
-
-	disable_irq ();
-	lamp_matrix_words[0] = lamp_flash_matrix_words[0];
-	lamp_matrix_words[1] = lamp_flash_matrix_words[1];
-	lamp_matrix_words[2] = lamp_flash_matrix_words[2];
-	lamp_matrix_words[3] = lamp_flash_matrix_words[3];
-	enable_irq ();
-}
-
-
 /** Runs periodically to update the physical lamp state.
  * MODE ranges from 0 .. NUM_LAMP_RTTS-1, and says which version
  * of the routine is needed, because of loop unrolling.
@@ -426,8 +410,19 @@ void lamp_flash_on (lampnum_t lamp)
 {
 	if (!bit_test (lamp_flash_matrix, lamp))
 	{
+		/* Enable flashing on this lamp */
 		bit_on (lamp_flash_matrix, lamp);
-		lamp_flash_sync ();
+
+		/* Set the initial flash state of the lamp to match that of all
+		other lamps that are flashing.  If any of the flashing lamps
+		are on now, then this one should be on, too.  Otherwise, leave
+		it off. */
+		disable_interrupts ();
+		if (!bit_test_all_off (lamp_flash_matrix_now))
+			bit_on (lamp_flash_matrix_now, lamp);
+		else
+			bit_off (lamp_flash_matrix_now, lamp);
+		enable_interrupts ();
 	}
 }
 
