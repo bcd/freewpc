@@ -150,6 +150,8 @@ void pic_rtt (void)
 #if (MACHINE_PIC == 1)
 	U8 unlocked;
 
+	/* Until initialization is complete, the PIC is not ready
+	to receive unlock commands. */
 	if (sys_init_complete == 0)
 		return;
 
@@ -168,6 +170,10 @@ void pic_rtt (void)
 		if (!pic_unlock_ready)
 			return;
 
+		/* The unlock sequence is four bytes long, but we can't
+		write everything without some delay between bytes.
+		The 'null_function' calls are there just to delay for
+		a few tens of cycles. */
 		wpc_write_pic (WPC_PIC_UNLOCK);
 		null_function ();
 		null_function ();
