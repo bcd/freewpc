@@ -451,6 +451,25 @@ void task_sleep_sec (int8_t secs)
 }
 
 
+/** Set the time at which the task should be awakened, AFTER
+the next call to task_sleep_periodic().  Together, these two
+functions allow a task to specify its timeout in advance of
+doing work, which allows it to be regularly scheduled. */
+void task_set_periodic (task_ticks_t ticks)
+{
+	task_current->wakeup = get_sys_time () + ((U16)ticks) * 16;
+}
+
+
+/** Sleep, using the wakeup time already calculated. */
+void task_sleep_periodic (void)
+{
+	register task_t *tp = task_current;
+	tp->state |= TASK_BLOCKED;
+	task_save (tp);
+}
+
+
 /**
  * Exit the current task, and return to the dispatcher to select
  * another task to start running now.

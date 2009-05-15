@@ -92,7 +92,7 @@ void draw_volume_bar (U8 n)
 }
 
 
-/**uThe display effect for a volume change */
+/** The display effect for a volume change */
 void volume_change_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -201,3 +201,12 @@ void animation_test_deff (void)
 }
 
 #endif /* MACHINE_DMD */
+
+void periodic_test (void)
+{
+	task_do_periodic (TIME_100MS)
+	{
+		dbprintf ("ping\n");
+	}
+}
+

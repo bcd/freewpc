@@ -292,7 +292,13 @@ far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
 	return pid;
 }
 
-
+/** A macro for defining a block of code that runs periodically.
+ * The timing is better than if you just called task_sleep() in the loop,
+ * because it accounts for the time it takes the code block itself
+ * to finish.
+ */
+#define task_do_periodic(time) \
+	for (task_set_periodic (time);; task_sleep_periodic (time), task_set_periodic (time))
 
 #ifdef CONFIG_NATIVE
 
