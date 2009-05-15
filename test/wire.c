@@ -37,8 +37,8 @@ enum wire_color {
 	SOLID,
 };
 
-#define DEF_WIRE(main, stripe) ((main << 4) | stripe)
-#define WIRE_MAIN(wire)  (wire >> 4)
+#define DEF_WIRE(solid, stripe) ((solid << 4) | stripe)
+#define WIRE_SOLID(wire)  (wire >> 4)
 #define WIRE_STRIPE(wire) (wire & 0x0F)
 #define SOLID_WIRE(color)   DEF_WIRE(color, SOLID)
 #define Q(n) n
@@ -210,15 +210,15 @@ wire_config_t wire_fliptronic_drives[] = {
 
 void render_wire_color (wire_config_t *wire)
 {
-	U8 main = WIRE_MAIN (wire->color);
+	U8 solid = WIRE_SOLID (wire->color);
 	U8 stripe = WIRE_STRIPE (wire->color);
-	if (main == stripe)
+	if (solid == stripe)
 	{
-		sprintf (wire_colors[main]);
+		sprintf (wire_colors[solid]);
 	}
 	else
 	{
-		sprintf ("%s-%s", wire_colors[main], wire_colors[stripe]);
+		sprintf ("%s-%s", wire_colors[solid], wire_colors[stripe]);
 	}
 }
 
