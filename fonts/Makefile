@@ -11,6 +11,7 @@ FONT_OBJS += $(if $(CONFIG_FON_NUM5X7), fonts/num5x7.o)
 FONT_OBJS += $(if $(CONFIG_FON_VAR5), fonts/var5.o)
 FONT_OBJS += $(if $(CONFIG_FON_TINYNUM), fonts/tinynum.o)
 FONT_OBJS += $(if $(CONFIG_FON_BITMAP), fonts/bitmap.o)
+FONT_OBJS += $(if $(CONFIG_FON_BITMAP8), fonts/bitmap8.o)
 
 FON_OBJS += $(if $(CONFIG_FON_FIXED10), fonts/fixed10.o)
 FON_OBJS += $(if $(CONFIG_FON_FIXED12), fonts/fixed12.o)
