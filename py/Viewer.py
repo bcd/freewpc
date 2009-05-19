@@ -71,4 +71,5 @@ def view (cfg):
 		#else:
 		#	view_list (cat)
 
-view (Config ("machine/wcs/wcs.md"))
+# view (Config ("machine/wcs/wcs.md"))
+view (Config ("machine/tz/tz.md"))

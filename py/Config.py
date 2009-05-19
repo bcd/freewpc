@@ -2,7 +2,7 @@
 
 import re
 
-Root = '/home/bdominy/src/git/freewpc'
+Root = '/home/bcd/src/git/freewpc'
 
 def tagged (tag, text):
 	return "<" + tag + ">" + text + "</" + tag + ">"
@@ -10,10 +10,9 @@ def tagged (tag, text):
 class Item:
 	def __init__ (self, category, name, level=0):
 		self.category = category
-		self.name = name
 		self.attrs = {}
-		self.attrs['name'] = name
 		self.level = level
+		self.setName (name)
 
 	def setAttr (self, attr, value):
 		if self.category.testBooleanAttr (attr):
@@ -26,6 +25,10 @@ class Item:
 		if not value:
 			value = self.attrs[attr]
 		return value
+
+	def setName (self, name):
+		self.name = name
+		self.attrs['name'] = name
 
 	def __str__ (self):
 		return "(" + self.name + ":" + self.attrs.__str__ () + ")"
@@ -60,20 +63,40 @@ class Category:
 
 	def print_all (self):
 		print '<table border=1 cellpadding=3 cellspacing=4>'
+
+		all_attrs = []
+		for itemname in self.items:
+			item = self.items[itemname]
+			for attrname in item.attrs:
+				if attrname == 'name':
+					pass
+				elif not attrname in all_attrs:
+					all_attrs.append (attrname)
+		all_attrs.sort ()
+
+		print '<tr>'
+		print tagged ('th', 'Name')
+		for attrname in all_attrs:
+			print tagged ('th', attrname)
+		print '</tr>'
+
 		for itemname in self.items:
 			print '<tr>'
 			print tagged ('td', itemname)
 			item = self.items[itemname]
 			#if (item.level != 1):
 			#	print '(Level ' + str(item.level) + ')'
-			for attrname in item.attrs:
-				attrvalue = item.attrs[attrname]
-				if attrname == 'name' and attrvalue == itemname:
-					pass
+
+			for attrname in all_attrs:
+			#for attrname in item.attrs:
+				if not attrname in item.attrs:
+					print tagged ('td', '')
 				else:
-					print tagged ('td', attrname + "=" + str(attrvalue))
+					attrvalue = item.attrs[attrname]
+					print tagged ('td', str(attrvalue))
 			print '</tr>'
 		print '</table>'
+
 
 class MatrixCategory(Category):
 	def print_matrix (self, cols, rows):
@@ -87,11 +110,13 @@ class MatrixCategory(Category):
 					item = self.items[key]
 					itemname = item.attrs['name']
 					print key
+					self.print_item (item)
 					print '<br>' + itemname
 					#if (item.level != 1):
 					#	print '(Level ' + str(item.level) + ')'
 					for attrname in item.attrs:
-						attrvalue = item.attrs[attrname]
+						# attrvalue = item.attrs[attrname]
+						attrvalue = item.getAttr (attrname)
 						if attrname == 'name' and attrvalue == itemname:
 							pass
 						else:
@@ -100,8 +125,16 @@ class MatrixCategory(Category):
 			print '</tr>'
 		print '</table>'
 
+	def print_item (self, item):
+		pass
 
 class SwitchCategory(MatrixCategory):
+	def testBooleanAttr (self, attr):
+		return (attr == 'ingame' or
+			attr == 'noplay' or
+			attr == 'cabinet' or
+			attr == 'opto')
+
 	def print_all (self):
 		cols = [ 'D', '1', '2', '3', '4', '5', '6', '7', '8', 'F' ]
 		rows = [ '1', '2', '3', '4', '5', '6', '7', '8' ]
@@ -132,7 +165,7 @@ class DeffLeffCategory(Category):
 			item.setAttr ('priority', attr)
 			return True
 
-		r = re.match ("D_*", attr)
+		r = re.match ("[DL]_*", attr)
 		if r:
 			item.setAttr ('flags', attr)
 			return True
@@ -171,6 +204,8 @@ class ContainerCategory(ListCategory):
 		if not 'sol' in item.attrs:
 			item.attrs['sol'] = attr;
 			return True
+		if attr == 'init_max_count':
+			return False
 		return ListCategory.setAttr (self, item, attr, value, 'switches')
 
 class AdjustmentCategory(Category):
@@ -183,6 +218,15 @@ class AdjustmentCategory(Category):
 			return True
 		return False
 
+class HighScoresCategory(Category):
+	def setAttr (self, item, attr, value):
+		if not 'initials' in item.attrs:
+			item.attrs['initials'] = attr;
+			return True
+		if not 'score' in item.attrs:
+			item.attrs['score'] = attr;
+			return True
+		return False
 
 CategoryTable = {
 	'switches' : SwitchCategory,
@@ -196,6 +240,9 @@ CategoryTable = {
 	'lamplists' : LamplistCategory,
 	'containers' : ContainerCategory,
 	'adjustments' : AdjustmentCategory,
+	'highscores' : HighScoresCategory,
+	'system_music' : GlobalCategory,
+	'system_sounds' : GlobalCategory,
 }
 
 #---------------------------------------------------------------------
@@ -225,8 +272,10 @@ class Config:
 
 		# Create/edit the item
 		if not key in category.items:
-			category.items[key] = Item (category, name, level)
-		item = category.items[key]
+			item = category.items[key] = Item (category, name, level)
+		else:
+			item = category.items[key]
+			item.setName (name)
 
 		# Add/override each attribute to the item
 		for attr in attributes:
@@ -234,8 +283,12 @@ class Config:
 			if r:
 				(attrname, attrvalue) = r.group (1, 2)
 			else:
-				attrname = attr
-				attrvalue = True
+				r = re.match ("(.*)=(.*)", attr)
+				if r:
+					(attrname, attrvalue) = r.group (1, 2)
+				else:
+					attrname = attr
+					attrvalue = True
 			item.setAttr (attrname, attrvalue)
 
 	def parse (self, filename):
@@ -261,11 +314,13 @@ class Config:
 			r = re.match (r"(.*)[,\\]$", line)
 			if r:
 				prev_lines = prev_lines + r.group (1)
+				if re.match (",$", r.group (1)):
+					prev_lines = prev_lines + ", "
 				continue
 			else:
+				line = prev_lines + line
 				prev_lines = ""
-
-			line = prev_lines + line
+				#print "<p>" + line
 
 			# Handle special directives
 			r = re.match ("^include (.*)$", line)
@@ -282,7 +337,7 @@ class Config:
 			# Handle definitions given before a category name; these
 			# are termed globals.
 			if current_category == 'global':
-				r = re.match ("^define ([^ ]*) (.*)$", line)
+				r = re.match ("^define ([^ ]*)(.*)$", line)
 				if r:
 					self.add ('defines', r.group (1), [ r.group (2) ], self.parselevel)
 					# print "#define " + r.group (1)
@@ -305,7 +360,7 @@ class Config:
 					attrlist = []
 				self.add (current_category, name, attrlist, self.parselevel)
 			else:
-				print "No match: " + line
+				print "<p>No match: " + line
 		self.parselevel = self.parselevel - 1
 
 	def __init__ (self, filename):
