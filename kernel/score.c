@@ -26,8 +26,6 @@
 #include <freewpc.h>
 #include <bcd.h>
 
-extern const score_t score_table[];
-
 /** The array of player scores */
 __permanent__ score_t scores[MAX_PLAYERS];
 

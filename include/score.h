@@ -78,6 +78,9 @@ extern U8 *current_score;
 /** The all-inclusive score multiplier */
 extern U8 global_score_multiplier;
 
+/** A pointer to the fixed score table */
+extern const score_t score_table[];
+
 
 extern inline void score_update_start (void)
 {
