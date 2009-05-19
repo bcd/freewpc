@@ -1,0 +1,22 @@
+
+This directory contains scripts written in the Python programming language.
+Python must already be installed on your system in order to use them.
+Free downloads are available for all platforms from http://www.python.org.
+
+The long-term plan is to migrate most of the Perl-based tools, especially those
+of interest to a larger community than just programmers.
+
+Config.py implements the FreeWPC machine parser.  Each machine is described
+by a machine description file (.md).  Config can parse these files and generate
+a database in Python format.  The benefit is that a wide variety of processing
+can be done on the definition by just writing more Python scripts.
+
+Possible uses:
+- Remove the need for Perl when building ROMs.
+- Write graphical-user interface tools for working with the machine description.
+- Easier to maintain and extend.
+- Make it easier to generate a machine description from scratch, based on other
+machines
+- Simulation tools
+- User manual generation
+- Migrate other parts of the build system for better performance

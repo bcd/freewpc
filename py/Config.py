@@ -1,69 +1,147 @@
 #!/usr/bin/env python
 
 import re
+import cPickle as pickle
 
-Root = '/home/bcd/src/git/freewpc'
+Root = os.environ["HOME"] + 'src/git/freewpc'
 
 def tagged (tag, text):
 	return "<" + tag + ">" + text + "</" + tag + ">"
 
+def smaller (text):
+	return "<font size=-1>" + text + "</font>"
+
+#---------------------------------------------------------------------
+#
+# Item - the parent class for an object instance
+#
+#---------------------------------------------------------------------
 class Item:
 	def __init__ (self, category, name, level=0):
 		self.category = category
 		self.attrs = {}
+		# TODO - level should be per-attribute
 		self.level = level
 		self.setName (name)
 
+	def __cmp__ (self, other):
+		return cmp (self.name, other.name)
+
+	def setAttrValue (self, attr, value):
+		"""A low-level set of an item attribute.
+		This should not be overriden by subclasses."""
+		self.attrs[attr] = value
+
+		globalID = self.category.getGlobalID (attr)
+		if globalID:
+			id = self.category.getID (self.name)
+			self.category.config.add ('implicit-defines', globalID, [ id ], 0)
+
+		if self.category.testBooleanAttr (attr) and value is True:
+			inherits = self.category.getInheritedBooleanAttrs (attr)
+			if inherits:
+				for parent in inherits:
+					self.setAttrValue (parent, inherits[parent])
+
 	def setAttr (self, attr, value):
+		"""Set an item's attribute value.  The category may provide an override."""
+
+		attr = re.sub ('^ *', '', attr)
+		attr = re.sub (' *$', '', attr)
 		if self.category.testBooleanAttr (attr):
-			self.attrs[attr] = True
+			self.setAttrValue (attr, True)
 		elif not self.category.setAttr (self, attr, value):
-			self.attrs[attr] = value
+			self.setAttrValue (attr, value)
 
 	def getAttr (self, attr):
-		value = self.category.getAttr (self, attr)
-		if not value:
-			value = self.attrs[attr]
-		return value
+		"""Return the value of an attribute, or None if it is not set"""
+		return self.attrs[attr]
 
-	def setName (self, name):
+	def getAttrDefault (self, attr):
+		if self.category.testBooleanAttr (attr):
+			return False
+		return self.category.getAttrDefault (self, attr)
+
+	def setName (self, name, level=0):
 		self.name = name
 		self.attrs['name'] = name
+		if 'notinstalled' in self.attrs:
+			del self.attrs['notinstalled']
 
 	def __str__ (self):
 		return "(" + self.name + ":" + self.attrs.__str__ () + ")"
 
+#---------------------------------------------------------------------
+#
+# Category - the parent class of all object categories
+#
+#---------------------------------------------------------------------
 class Category:
-	static = {
-		'switches' : True,
-		'lamps' : True,
-		'drives' : True,
-		'gi' : True,
-	}
+	static_flag = True
+	prefix = None
+	suffix = None
 
-	def __init__ (self, name):
+	def __init__ (self, name, config):
 		self.name = name
 		self.items = {}
-		self.static = name in Category.static
+		self.config = config
 
 	def setAttr (self, item, attr, value):
+		return False
+
+	def setAttrOnce (self, item, attr, value):
+		"""Set an attribute value only if it is undefined.
+		Returns True if the attribute was changed.
+		This should not be overwritten, and should only be called from
+		category-specific setAttr() hooks."""
+		if not attr in item.attrs:
+			item.attrs[attr] = value;
+			return True
+		return False
+
+	def getGlobalID (self, attr):
 		return None
 
-	def getAttr (self, item, attr):
+	def getLongName (self, name):
+		if self.suffix:
+			name = name + "_" + self.suffix
+		return re.sub (' ', '_', name)
+
+	def getCDecl (self, name):
+		return self.getLongName (name).lower ()
+
+	def getID (self, name):
+		if self.prefix:
+			name = self.prefix + "_" + name
+		return self.getLongName (name).upper ()
+
+	def getAttrDefault (self, item, attr):
+		if attr == 'c_decl':
+			return self.getCDecl (item.name)
+		elif attr == 'id':
+			return self.getID (item.name)
+		return None
+
+	def getInheritedBooleanAttrs (self, attr):
+		"""Returns a list of inherited boolean attributes.
+		When the given attribute is True, it says that additional attributes
+		are well-defined, and may be automatically set to True or False.
+		When attr is False, nothing is assumed."""
 		return None
 
 	def testBooleanAttr (self, attr):
 		return False
 
 	def isStatic (self):
-		return self.static
+		return self.static_flag
 
 	def isDynamic (self):
-		return not self.isDynamic ()
+		return not self.isStatic ()
 
-	def print_all (self):
-		print '<table border=1 cellpadding=3 cellspacing=4>'
-
+	def getAllAttrs (self):
+		"""Return a list of all attributes that are valid for this category.
+		Not all objects may actually have the attribute set."""
+		# TODO - cached the result of this calculation so it is not done every time.
 		all_attrs = []
 		for itemname in self.items:
 			item = self.items[itemname]
@@ -73,6 +151,24 @@ class Category:
 				elif not attrname in all_attrs:
 					all_attrs.append (attrname)
 		all_attrs.sort ()
+		return all_attrs
+
+	def getDefaultAttrHTML (self, item, attr, printAttr = False):
+		if printAttr:
+			s = attr + "="
+		else:
+			s = ""
+
+		value = item.getAttrDefault (attr)
+		if value is None:
+			s = '<font color=#b0b0c0>' + s + 'N/A' + '</font>'
+		else:
+			s = '<font color=#b0b0c0>' + s + str(value) + '</font>'
+		return s
+
+	def print_all (self):
+		print '<table border=1 cellpadding=3 cellspacing=4>'
+		all_attrs = self.getAllAttrs ()
 
 		print '<tr>'
 		print tagged ('th', 'Name')
@@ -80,19 +176,18 @@ class Category:
 			print tagged ('th', attrname)
 		print '</tr>'
 
-		for itemname in self.items:
+		items = self.items.keys ()
+		items.sort ()
+		for itemname in items:
 			print '<tr>'
 			print tagged ('td', itemname)
 			item = self.items[itemname]
-			#if (item.level != 1):
-			#	print '(Level ' + str(item.level) + ')'
 
 			for attrname in all_attrs:
-			#for attrname in item.attrs:
 				if not attrname in item.attrs:
-					print tagged ('td', '')
+					print tagged ('td', self.getDefaultAttrHTML (item, attrname))
 				else:
-					attrvalue = item.attrs[attrname]
+					attrvalue = item.getAttr (attrname)
 					print tagged ('td', str(attrvalue))
 			print '</tr>'
 		print '</table>'
@@ -101,6 +196,7 @@ class Category:
 class MatrixCategory(Category):
 	def print_matrix (self, cols, rows):
 		print '<table border=1 cellpadding=3 cellspacing=4>'
+		all_attrs = self.getAllAttrs ()
 		for row in rows:
 			print '<tr>'
 			for col in cols:
@@ -112,15 +208,17 @@ class MatrixCategory(Category):
 					print key
 					self.print_item (item)
 					print '<br>' + itemname
-					#if (item.level != 1):
-					#	print '(Level ' + str(item.level) + ')'
-					for attrname in item.attrs:
-						# attrvalue = item.attrs[attrname]
-						attrvalue = item.getAttr (attrname)
-						if attrname == 'name' and attrvalue == itemname:
-							pass
+
+					for attrname in all_attrs:
+						if not attrname in item.attrs:
+							if not self.getGlobalID (attrname):
+								print "<br>" + smaller (self.getDefaultAttrHTML (item, attrname, True))
 						else:
-							print "<br>" + attrname + "=" + str(attrvalue)
+							attrvalue = item.getAttr (attrname)
+							if attrname == 'name' and attrvalue == itemname:
+								pass
+							else:
+								print "<br>" + smaller (attrname + "=" + str(attrvalue))
 				print '</td>'
 			print '</tr>'
 		print '</table>'
@@ -129,54 +227,142 @@ class MatrixCategory(Category):
 		pass
 
 class SwitchCategory(MatrixCategory):
+	prefix = "SW"
+
 	def testBooleanAttr (self, attr):
-		return (attr == 'ingame' or
-			attr == 'noplay' or
-			attr == 'cabinet' or
-			attr == 'opto')
+		return (attr == 'ingame' or attr == 'noplay' or attr == 'intest' or
+			attr == 'cabinet' or attr == 'opto' or attr == 'standup' or
+			attr == 'edge' or attr == 'service' or attr == 'virtual')
 
 	def print_all (self):
 		cols = [ 'D', '1', '2', '3', '4', '5', '6', '7', '8', 'F' ]
 		rows = [ '1', '2', '3', '4', '5', '6', '7', '8' ]
 		self.print_matrix (cols, rows)
+
+	def getGlobalID (self, attr):
+		if attr == 'shooter': return 'MACHINE_SHOOTER_SWITCH'
+		elif attr == 'tilt': return 'MACHINE_TILT_SWITCH'
+		elif attr == 'slam-tilt': return 'MACHINE_SLAM_TILT_SWITCH'
+		elif attr == 'start-button': return 'MACHINE_START_SWITCH'
+		elif attr == 'buyin-button': return 'MACHINE_BUYIN_SWITCH'
+		elif attr == 'launch-button': return 'MACHINE_LAUNCH_SWITCH'
+		elif attr == 'outhole': return 'MACHINE_OUTHOLE_SWITCH'
+		return None
 
 class LampCategory(MatrixCategory):
+	prefix = "LM"
+
 	def print_all (self):
 		cols = [ 'D', '1', '2', '3', '4', '5', '6', '7', '8', 'F' ]
 		rows = [ '1', '2', '3', '4', '5', '6', '7', '8' ]
 		self.print_matrix (cols, rows)
 
+	def getGlobalID (self, attr):
+		if attr == 'start': return 'MACHINE_START_LAMP'
+		elif attr == 'buyin': return 'MACHINE_BUYIN_LAMP'
+		elif attr == 'shoot-again': return 'MACHINE_SHOOT_AGAIN_LAMP'
+		elif attr == 'extra-ball': return 'MACHINE_EXTRA_BALL_LAMP'
+		return None
+
+
 class TriacCategory(MatrixCategory):
+	prefix = "TRIAC"
+
 	def print_all (self):
 		cols = [ '' ]
 		rows = [ '0', '1', '2', '3', '4' ]
 		self.print_matrix (cols, rows)
 
+	def setAttr (self, item, attr, value):
+		if attr == 'GI' and value == 'ALL':
+			item.setAttrValue (attr, 'L_ALL_GI')
+			return True
+		return False
+
 class DriverCategory(MatrixCategory):
+	prefix = "SOL"
+
+	def testBooleanAttr (self, attr):
+		return (attr == 'motor' or attr == 'nosearch' or attr == 'flash')
+
 	def print_all (self):
 		cols = [ 'H', 'L', 'G', 'A', 'F', 'X' ]
 		rows = [ '1', '2', '3', '4', '5', '6', '7', '8' ]
 		self.print_matrix (cols, rows)
 
+	def getGlobalID (self, attr):
+		if attr == 'launch': return 'MACHINE_LAUNCH_SOLENOID'
+		elif attr == 'knocker': return 'MACHINE_KNOCKER_SOLENOID'
+		elif attr == 'ballserve': return 'MACHINE_BALL_SERVE_SOLENOID'
+		return None
+
+	def getAttrDefault (self, item, attr):
+		if attr == 'duty': return 'SOL_DUTY_DEFAULT'
+		elif attr == 'time': return 'SOL_TIME_DEFAULT'
+		else: return Category.getAttrDefault (self, item, attr)
+
+
 class DeffLeffCategory(Category):
+	static_flag = False
+
 	def setAttr (self, item, attr, value):
 		r = re.match ("PRI.*", attr)
-		if r:
+		if r or attr == '0':
 			item.setAttr ('priority', attr)
 			return True
 
-		r = re.match ("[DL]_*", attr)
+		r = re.match (r"([^+]*)\+(.*)", attr)
 		if r:
-			item.setAttr ('flags', attr)
+			item.setAttr (r.group (1), value)
+			self.setAttr (item, r.group (2), value)
 			return True
+
+		if attr == 'D_QUEUED':
+			item.setAttr ('queued', True)
+			return True
+
+		if attr == 'D_ABORTABLE':
+			item.setAttr ('abortable', True)
+			return True
+
+		if attr == 'L_NORMAL' or attr == 'D_NORMAL':
+			return True
+
 		return False
 
+	def testBooleanAttr (self, attr):
+		return (attr == 'runner' or attr == 'shared' or
+			attr == 'queued' or attr == 'abortable')
+
+	def getAttrDefault (self, item, attr):
+		if attr == 'page':
+			return -1
+		return Category.getAttrDefault (self, item, attr)
+
+
+class DeffCategory(DeffLeffCategory):
+	suffix = "deff"
+	prefix = "DEFF"
+
+class LeffCategory(DeffLeffCategory):
+	suffix = "leff"
+	prefix = "LEFF"
+
+	def getAttrDefault (self, item, attr):
+		if attr == 'GI':
+			return 'L_NOGI'
+		if attr == 'LAMPS':
+			return 'L_NOLAMPS'
+		return DeffLeffCategory.getAttrDefault (self, item, attr)
+
 class GlobalCategory(Category):
+	static_flag = False
 	def setAttr (self, item, attr, value):
 		item.attrs['value'] = attr
 		return True
 
 class ListCategory(Category):
+	static_flag = False
 	def setAttr (self, item, attr, value, listattr = 'entries'):
 		if not listattr in item.attrs:
 			item.attrs[listattr] = []
@@ -194,11 +380,19 @@ class ListCategory(Category):
 		return True
 
 class LamplistCategory(ListCategory):
-	pass
+	prefix = "LAMPLIST"
 
 class ContainerCategory(ListCategory):
+	static_flag = False
+	prefix = "DEV"
+
 	def testBooleanAttr (self, attr):
 		return attr == 'trough'
+
+	def getAttrDefault (self, item, attr):
+		if attr == 'init_max_count':
+			return 0
+		return Category.getAttrDefault (self, item, attr)
 
 	def setAttr (self, item, attr, value):
 		if not 'sol' in item.attrs:
@@ -209,40 +403,47 @@ class ContainerCategory(ListCategory):
 		return ListCategory.setAttr (self, item, attr, value, 'switches')
 
 class AdjustmentCategory(Category):
+	static_flag = False
 	def setAttr (self, item, attr, value):
-		if not 'type' in item.attrs:
-			item.attrs['type'] = attr;
+		if self.setAttrOnce (item, 'type', attr):
 			return True
-		if not 'default' in item.attrs:
-			item.attrs['default'] = attr;
+		if self.setAttrOnce (item, 'default', attr):
 			return True
 		return False
 
 class HighScoresCategory(Category):
+	static_flag = False
 	def setAttr (self, item, attr, value):
-		if not 'initials' in item.attrs:
-			item.attrs['initials'] = attr;
+		if self.setAttrOnce (item, 'initials', attr):
 			return True
-		if not 'score' in item.attrs:
-			item.attrs['score'] = attr;
+		if self.setAttrOnce (item, 'score', attr):
 			return True
 		return False
+
+class TemplateCategory(Category):
+	static_flag = False
+	#def setAttr (self, item, attr, value):
+	#	if self.setAttrOnce (item, 'driver', attr):
+	#		return True
+	#	return False
 
 CategoryTable = {
 	'switches' : SwitchCategory,
 	'lamps' : LampCategory,
 	'drives' : DriverCategory,
 	'gi' : TriacCategory,
-	'deffs' : DeffLeffCategory,
-	'leffs' : DeffLeffCategory,
+	'deffs' : DeffCategory,
+	'leffs' : LeffCategory,
 	'global' : GlobalCategory,
 	'defines' : GlobalCategory,
+	'implicit-defines' : GlobalCategory,
 	'lamplists' : LamplistCategory,
 	'containers' : ContainerCategory,
 	'adjustments' : AdjustmentCategory,
 	'highscores' : HighScoresCategory,
 	'system_music' : GlobalCategory,
 	'system_sounds' : GlobalCategory,
+	'templates' : TemplateCategory,
 }
 
 #---------------------------------------------------------------------
@@ -259,7 +460,7 @@ class Config:
 				cat_class = CategoryTable[category_name]
 			else:
 				cat_class = Category
-			self.categories[category_name] = cat_class (category_name)
+			self.categories[category_name] = cat_class (category_name, self)
 		category = self.categories[category_name]
 
 		# For static categories, the name is taken as the first
@@ -320,12 +521,15 @@ class Config:
 			else:
 				line = prev_lines + line
 				prev_lines = ""
-				#print "<p>" + line
 
 			# Handle special directives
 			r = re.match ("^include (.*)$", line)
 			if r:
 				self.parse (r.group (1))
+				continue
+
+			r = re.match ("^perlinclude (.*)$", line)
+			if r:
 				continue
 
 			# Handle a category change, e.g. [switches]
@@ -340,13 +544,11 @@ class Config:
 				r = re.match ("^define ([^ ]*)(.*)$", line)
 				if r:
 					self.add ('defines', r.group (1), [ r.group (2) ], self.parselevel)
-					# print "#define " + r.group (1)
 					continue
 
 				r = re_global.match (line)
 				if r:
 					self.add (current_category, r.group (1), [ r.group (2) ], self.parselevel)
-					# print r.group (1, 2)
 					continue
 
 			# Handle ordinary definitions inside a category.
@@ -363,13 +565,23 @@ class Config:
 				print "<p>No match: " + line
 		self.parselevel = self.parselevel - 1
 
-	def __init__ (self, filename):
+	def __init__ (self):
 		self.categories = {}
-		self.filename = filename
 		self.parselevel = 0
+
+	def loadMD (self, filename):
+		self.filename = filename
 		self.parse (filename)
 
-	def save (self):
+	def saveMD (self, filename):
 		pass
 
+	def load (filename):
+		f = file (filename, 'r')
+		return pickle.load (f)
+	load = staticmethod (load)
+
+	def save (self, filename):
+		f = file (filename, 'w')
+		pickle.dump (self, f)
 
