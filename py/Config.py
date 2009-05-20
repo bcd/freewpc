@@ -2,8 +2,9 @@
 
 import re
 import cPickle as pickle
+import os
 
-Root = os.environ["HOME"] + 'src/git/freewpc'
+Root = os.environ["HOME"] + '/src/git/freewpc'
 
 def tagged (tag, text):
 	return "<" + tag + ">" + text + "</" + tag + ">"
@@ -105,7 +106,8 @@ class Category:
 	def getLongName (self, name):
 		if self.suffix:
 			name = name + "_" + self.suffix
-		return re.sub (' ', '_', name)
+		name = re.sub ('[\. ]+', '_', name)
+		return name
 
 	def getCDecl (self, name):
 		return self.getLongName (name).lower ()
@@ -232,7 +234,8 @@ class SwitchCategory(MatrixCategory):
 	def testBooleanAttr (self, attr):
 		return (attr == 'ingame' or attr == 'noplay' or attr == 'intest' or
 			attr == 'cabinet' or attr == 'opto' or attr == 'standup' or
-			attr == 'edge' or attr == 'service' or attr == 'virtual')
+			attr == 'edge' or attr == 'service' or attr == 'virtual' or
+			attr == 'button' or attr == 'noscore')
 
 	def print_all (self):
 		cols = [ 'D', '1', '2', '3', '4', '5', '6', '7', '8', 'F' ]
@@ -252,6 +255,9 @@ class SwitchCategory(MatrixCategory):
 class LampCategory(MatrixCategory):
 	prefix = "LM"
 
+	def testBooleanAttr (self, attr):
+		return (attr == 'cabinet')
+
 	def print_all (self):
 		cols = [ 'D', '1', '2', '3', '4', '5', '6', '7', '8', 'F' ]
 		rows = [ '1', '2', '3', '4', '5', '6', '7', '8' ]
@@ -264,6 +270,12 @@ class LampCategory(MatrixCategory):
 		elif attr == 'extra-ball': return 'MACHINE_EXTRA_BALL_LAMP'
 		return None
 
+	def setAttr (self, item, attr, value):
+		if attr in [ 'blue', 'red', 'green', 'orange', 'purple',
+			'white', 'yellow' ]:
+			item.setAttrValue ('color', attr)
+			return True
+		return False
 
 class TriacCategory(MatrixCategory):
 	prefix = "TRIAC"
@@ -272,12 +284,6 @@ class TriacCategory(MatrixCategory):
 		cols = [ '' ]
 		rows = [ '0', '1', '2', '3', '4' ]
 		self.print_matrix (cols, rows)
-
-	def setAttr (self, item, attr, value):
-		if attr == 'GI' and value == 'ALL':
-			item.setAttrValue (attr, 'L_ALL_GI')
-			return True
-		return False
 
 class DriverCategory(MatrixCategory):
 	prefix = "SOL"
@@ -325,6 +331,18 @@ class DeffLeffCategory(Category):
 			item.setAttr ('abortable', True)
 			return True
 
+		if attr == 'D_RESTARTABLE':
+			item.setAttr ('restartable', True)
+			return True
+
+		if attr == 'D_PAUSE':
+			item.setAttr ('pause', True)
+			return True
+
+		if attr == 'D_SCORE':
+			item.setAttr ('score', True)
+			return True
+
 		if attr == 'L_NORMAL' or attr == 'D_NORMAL':
 			return True
 
@@ -332,7 +350,9 @@ class DeffLeffCategory(Category):
 
 	def testBooleanAttr (self, attr):
 		return (attr == 'runner' or attr == 'shared' or
-			attr == 'queued' or attr == 'abortable')
+			attr == 'queued' or attr == 'abortable' or
+			attr == 'pause' or attr == 'restartable' or
+			attr == 'score')
 
 	def getAttrDefault (self, item, attr):
 		if attr == 'page':
@@ -354,6 +374,12 @@ class LeffCategory(DeffLeffCategory):
 		if attr == 'LAMPS':
 			return 'L_NOLAMPS'
 		return DeffLeffCategory.getAttrDefault (self, item, attr)
+
+	def setAttr (self, item, attr, value):
+		if attr == 'GI' and value == 'ALL':
+			item.setAttrValue (attr, 'L_ALL_GI')
+			return True
+		return DeffLeffCategory.setAttr (self, item, attr, value)
 
 class GlobalCategory(Category):
 	static_flag = False
@@ -381,6 +407,10 @@ class ListCategory(Category):
 
 class LamplistCategory(ListCategory):
 	prefix = "LAMPLIST"
+
+	def testBooleanAttr (self, attr):
+		return (attr == 'set')
+
 
 class ContainerCategory(ListCategory):
 	static_flag = False
@@ -422,10 +452,6 @@ class HighScoresCategory(Category):
 
 class TemplateCategory(Category):
 	static_flag = False
-	#def setAttr (self, item, attr, value):
-	#	if self.setAttrOnce (item, 'driver', attr):
-	#		return True
-	#	return False
 
 CategoryTable = {
 	'switches' : SwitchCategory,
@@ -444,6 +470,12 @@ CategoryTable = {
 	'system_music' : GlobalCategory,
 	'system_sounds' : GlobalCategory,
 	'templates' : TemplateCategory,
+	'fonts' : Category,
+	'flags' : Category,
+	'globalflags' : Category,
+	'timers' : Category,
+	'tests' : Category,
+	'scores' : Category,
 }
 
 #---------------------------------------------------------------------
@@ -459,7 +491,7 @@ class Config:
 			if category_name in CategoryTable:
 				cat_class = CategoryTable[category_name]
 			else:
-				cat_class = Category
+				raise RuntimeError ("undefined category " + category_name)
 			self.categories[category_name] = cat_class (category_name, self)
 		category = self.categories[category_name]
 
@@ -515,7 +547,7 @@ class Config:
 			r = re.match (r"(.*)[,\\]$", line)
 			if r:
 				prev_lines = prev_lines + r.group (1)
-				if re.match (",$", r.group (1)):
+				if not re.match (",$", r.group (1)):
 					prev_lines = prev_lines + ", "
 				continue
 			else:
@@ -562,7 +594,7 @@ class Config:
 					attrlist = []
 				self.add (current_category, name, attrlist, self.parselevel)
 			else:
-				print "<p>No match: " + line
+				raise Error ("No match: " + line)
 		self.parselevel = self.parselevel - 1
 
 	def __init__ (self):

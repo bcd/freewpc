@@ -14,8 +14,7 @@ def view (cfg):
 		cat.print_all ()
 
 config = Config ()
-config.loadMD ("machine/tz/tz.md")
-config.save ("tz.db")
+config.loadMD ("machine/wcs/wcs.md")
 
 #config = Config.load ("tz.db")
 
