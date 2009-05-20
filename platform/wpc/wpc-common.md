@@ -66,7 +66,7 @@ A4: Aux. Sol. 4, notinstalled
 ALL: 11..88
 
 [deffs]
-NULL: c_decl(deff_exit), 0
+NULL: c_decl(deff_exit), PRI_NULL
 Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
 Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
 Scores: runner, page(EFFECT_PAGE), PRI_SCORES
@@ -94,7 +94,7 @@ Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 
 [leffs]
-NULL: 0
+NULL: PRI_NULL
 Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
 Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)

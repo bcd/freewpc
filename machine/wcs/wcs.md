@@ -99,7 +99,6 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 13: Start Button, start-button, cabinet, intest
 14: Tilt, cabinet, tilt, ingame, noplay
 15: Left Flipper Lane, ingame
-# TODO : everything marked debounce does not register on real hardware!!!
 16: Striker 3, ingame
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
@@ -109,11 +108,11 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 26: Kickback Upper, ingame
 27: Spinner, ingame
 28: Light Kickback, ingame
-31: Trough 1, trough, noscore, opto
-32: Trough 2, trough, noscore, opto
-33: Trough 3, trough, noscore, opto
-34: Trough 4, trough, noscore, opto
-35: Trough 5, trough, noscore, opto
+31: Trough 1, noscore, opto
+32: Trough 2, noscore, opto
+33: Trough 3, noscore, opto
+34: Trough 4, noscore, opto
+35: Trough 5, noscore, opto
 36: Trough Stack, noscore, opto
 37: Light Magna Goalie, ingame
 38: Shooter, edge, noscore, shooter
@@ -312,19 +311,6 @@ Ramp Diverting:
 [deffs]
 PGJ Logo: page(MACHINE_PAGE), c_decl(amode_pgj_logo), PRI_AMODE
 Free Kick: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-#NewMatch Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW3
-#NewMatch Win: page(MACHINE_PAGE), PRI_GAME_QUICK6
-#MyMode Starting: page(MACHINE_PAGE), PRI_GAME_QUICK6
-#MyMode Running: page(MACHINE_PAGE), PRI_GAME_MODE2
-#MyMode Ending: page(MACHINE_PAGE), PRI_GAME_QUICK6
-#Match Running: page(MACHINE_PAGE), runner, PRI_GAME_LOW2
-#Match Started: page(MACHINE_PAGE), PRI_GAME_LOW1
-#Yards Awarded: page(MACHINE_PAGE), PRI_GAME_MODE1
-#Goal Lit: page(MACHINE_PAGE), PRI_GAME_MODE1
-#Goal Unlit: page(MACHINE_PAGE), PRI_GAME_MODE1
-#Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE2
-#Match Won: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 Combo: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_SCORE+D_RESTARTABLE
 
