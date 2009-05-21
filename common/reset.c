@@ -86,6 +86,7 @@ void factory_reset (void)
 	/* TODO - how to clean the permanent area in native mode? */
 #endif
 	callset_invoke (factory_reset);
+	/* TODO - should do warm reboot here */
 }
 
 

@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Implement the standard ballsaver.
+ */
+
 #include <freewpc.h>
 
 U8 ball_save_timer;

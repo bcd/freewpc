@@ -19,6 +19,11 @@
  */
 
 
+/**
+ * \file
+ * \brief Warn the player if a ball is left on to the shooter too long.
+ */
+
 #include <freewpc.h>
 
 /**
