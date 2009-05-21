@@ -453,6 +453,18 @@ class HighScoresCategory(Category):
 class TemplateCategory(Category):
 	static_flag = False
 
+class FontCategory(Category):
+	static_flag = False
+	prefix = 'FON'
+
+class FlagCategory(Category):
+	static_flag = False
+	prefix = 'FLAG'
+
+class GlobalFlagCategory(Category):
+	static_flag = False
+	prefix = 'GLOBAL_FLAG'
+
 CategoryTable = {
 	'switches' : SwitchCategory,
 	'lamps' : LampCategory,
@@ -470,9 +482,9 @@ CategoryTable = {
 	'system_music' : GlobalCategory,
 	'system_sounds' : GlobalCategory,
 	'templates' : TemplateCategory,
-	'fonts' : Category,
-	'flags' : Category,
-	'globalflags' : Category,
+	'fonts' : FontCategory,
+	'flags' : FlagCategory,
+	'globalflags' : GlobalFlagCategory,
 	'timers' : Category,
 	'tests' : Category,
 	'scores' : Category,
