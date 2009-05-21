@@ -1,0 +1,337 @@
+add_credits
+One or more full credits have just been added, via coins or the service
+switch.
+
+add_partial_credits
+One or more partial credits have just been added.
+
+add_player
+A new player has been added to the game in progress.  This event is
+thrown for all players, including the first one.  For the first player,
+it is thrown after the start_game event.
+
+amode_page
+Thrown by the attract mode pager to allow machines to add their own
+pages into the attract mode display sequence.
+
+amode_start
+Attract mode has just started.
+
+amode_stop
+Attract mode has just stopped.
+
+any_device_enter
+A ball has entered any of the ball devices.
+
+any_kick_attempt
+An attempt is about to be made to kick from one of the ball devices.
+
+any_pf_switch
+A playfield switch closure occurred.
+
+wcs any_rollover
+
+wcs any_skill_switch
+
+ball_count_change
+The number of balls in play has decreased.
+
+boolean ball_drain
+A ball has entered the trough; should it be treated as a drain?
+This event should be received by ballsaver logic.  It should return
+FALSE if this is not to be considered a drain, in which case the
+handler should also put a ball back into play somehow.  Otherwise, it
+should return TRUE.
+
+ball_search
+A ball search attempt is in progress.  This event is thrown each time
+all of the solenoids are pulsed to try to find the ball.  It should be
+received by modules which need to do some special processing, such as
+raising/lowering a motor bank -- anything more complicated than just
+firing a solenoid.
+
+bonus
+End of ball bonus has started.
+
+dev_foo_empty
+The device "foo" just became empty.
+
+dev_foo_enter
+The device "foo" was just entered (its count went up by 1).
+
+dev_foo_kick_attempt
+The system is about to try to kick a ball from device "foo".
+
+dev_foo_kick_failure
+A kick from device "foo" succeeded (its count went down by 1).
+
+dev_foo_kick_success
+A kick from device "foo" succeeded (its count did not change).
+
+diagnostic_check
+Called after init_complete to perform further diagnostic checks.  Note
+that unlike init_ok, a diagnostic_check failure does not cause factory
+reset and reboot, but only flags a problem.  These errors are reported
+in test report.
+
+display_update
+The running display effect needs to be updated.  This is called whenever
+a display effect exits; it may also be called periodically.  Modules which
+want to display a long-running effect (e.g. for a running mode) should
+receive this event, see if the condition to start the effect is valid
+(i.e. the mode is running), and call deff_start_bg() to request a
+particular background effect be started.  That call itself doesn't guarantee
+that the effect will run; if multiple requests are made, only the one with the
+highest priority will run.
+
+tz door_panel_awarded
+
+tz door_start_10M
+
+tz door_start_battle_power
+
+tz door_start_camera
+
+tz door_start_clock_chaos
+
+tz door_start_clock_millions
+
+tz door_start_eb
+
+tz door_start_fast_lock
+
+tz door_start_greed
+
+tz door_start_hitchhiker
+
+tz door_start_light_gumball
+
+tz door_start_litz
+
+tz door_start_spiral
+
+tz door_start_super_skill
+
+tz door_start_super_slot
+
+tz door_start_tsm
+
+t2 drop_hit
+
+empty_balls_test
+The empty balls test has been initiated.  The system will take care of
+emptying ordinary ball devices; this event is for modules which store
+balls in some other way (e.g. virtual devices like TZ's gumball machine).
+
+boolean empty_trough_kick
+
+end_ball
+End-of-ball has been asserted.
+
+end_game
+End-of-game has been asserted (for all players).
+
+end_player
+End-player has been asserted.  This is called after end_ball, and
+before end_game.
+
+extra_ball_award
+An extra ball has just been awarded.
+
+factory_reset
+A factory reset has been initiated.  This event should be received by
+any module with a __permanent__ variable, so that it can be reinitialized.
+Audits and adjustments are handled automatically.
+
+flipper_abort
+Both flipper buttons were pressed simultaneously.
+
+flipper_code_entered
+TBD.
+
+wcs goal_shot
+
+idle
+No tasks are ready to run.  This event will be thrown only once per
+system tick (1 millisecond on WPC), but it will be thrown repeatedly
+until a task can be restarted.  The idle event is not thrown during
+early system initialization.  As this event may be generated many times,
+it is usually not the right event for non-system modules to receive.
+
+idle_every_100ms
+Like idle, but only called once per 100 milliseconds.  This is the
+preferred event for modules to use for periodic processing.
+
+idle_every_second
+Like idle, but only called once per second.  This can be used instead
+of the 100ms event for less frequent processing.
+
+idle_every_ten_seconds
+Like idle, but only called once per 10 seconds.  This can be used
+for extremely infrequent processing.
+
+init
+Called during phase 1 of system initialization.  An init receiver
+cannot assume anything about any other modules than itself.
+
+init_complete
+Called during phase 2 of system initialization.  This is intended for
+modules which require interaction with each other.
+
+boolean init_ok
+Called after init to determine if initialization failed for any module.
+Handlers should return FALSE on failure, TRUE on success.  If any
+handler returns FALSE, an automatic factory reset will occur, and the
+init_complete event will not be generated.
+
+fh jaw_shot
+
+lamp_update
+Called periodically to update the lamp matrix.  This should be received
+to update a lamp whose state depends on a variety of conditions which
+may be constantly changing (e.g. a generic "mode arrow" which could
+be off, flash, or solid and is used by multiple modes.)  In these cases,
+the state of the mode is stored in multiple, separate variables, and the
+lamp_update routine recalculates the state of the lamp.
+
+wcs left_loop_shot
+
+wcs left_ramp_shot
+
+match_awarded
+A match was just awarded to one or more players.
+
+tz mball_start
+
+tz mball_stop
+
+minute_elapsed
+One minute of real time has elapsed, as detected by the real-time clock.
+
+missing_ball_found
+
+tz mpf_top_exit
+
+music_refresh
+
+tz powerball_absent
+
+tz powerball_lost
+
+tz powerball_present
+
+tz powerfield_begin
+
+tz powerfield_end
+
+tz powerfield_enter
+
+tz powerfield_exit
+
+tz powerfield_win
+
+tz ramp_divertor_update
+
+replay
+A replay was just awarded.
+
+wcs right_ramp_shot
+
+score_overlay
+
+serve_ball
+A new ball was just served to the shooter lane.  This event is thrown
+during start_ball, and after locking a ball, but it is not thrown during
+a ball save.  It is intended to be used for relighting a skill shot, or
+for enabling a ball saver.  This event also signals that valid_playfield
+has been reset; i.e. draining this ball without scoring will cause it
+to be re-served.
+
+shoot_again
+Called during start_ball if an extra ball is being played.
+
+tz shot_slot_machine
+
+single_ball_play
+The game was in multiball, but is now back into 1-ball play.  This should
+be handled by multiball modes to shutdown.
+
+tz skill_missed
+
+tz skill_orange
+
+tz skill_red
+
+tz skill_yellow
+
+slam_tilt
+The machine has been slam-tilted.
+
+special_award
+A special was just awarded.
+
+start_ball
+Start-of-ball has been asserted.
+
+start_game
+A new game has been started.
+
+start_player
+Called during the first ball of each player.  For player 1, it is called
+after start_game.  This should be received by any module with a __local__
+variable declaration, which is per-player, to initialize it correctly.
+
+start_without_credits
+The start button has been pressed in attract mode without credits.
+
+status_report
+
+stop_game
+The game in progress has been cancelled, due to game restart or exiting
+to test mode.
+
+wcs striker_shot
+
+sw_foo
+The switch "foo" has transitioned.  Normally switch events are only
+generated on a transition from inactive to active.  Switches marked
+"edge" in the machine configuration will also generate events when
+going back to inactive: for those switches, handlers must use
+switch_poll_logical() to determine the current state of the switch to
+do the right thing.
+
+wcs sw_kickback_upper_enter
+
+wcs sw_kickback_upper_exit
+
+test_start
+Test mode has been started.
+
+tilt
+The player has just tilted his ball.
+
+tilt_warning
+The player has just received a tilt warning.
+
+timed_drain_penalty
+In a timed game, the player has drained the ball.  This should be
+received by any modes that want to penalize the player for draining,
+by changing game features or further decreasing the game timer.
+
+timed_game_tick
+In a timed game, the game timer has decreased.
+
+fh tunnel_kickout_shot
+
+fh upper_loop_or_trap_door_shot
+
+valid_playfield
+Called after start_ball when the ball has been put into play; a
+ball drain at this point will now signal end_ball.  This is normally
+asserted on any scoring switch, and is what enables a zero-point ball
+to be re-served.  Certain switches like jets and slingshots, which can
+fire if misaligned, can be marked "noplay" to disable this.  The machine
+may use other methods to assure that it is eventually asserted, based on
+number of switch closures or timing.
+
+
