@@ -212,7 +212,6 @@ Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
 Ticket Halves: L. Ticket Half, R. Ticket Half
 Cities: Chicago P, Dallas U, Boston C, New York D, Orlando L, Washington R, San Francisco O, Detroit W
 Skill Shots: Skill Top, Skill Middle, Skill Lower
-Rollovers: Rollover 1, Rollover 2, Rollover 3, Rollover 4
 Top Lanes: Top Lane Left, Top Lane Right
 Locks: L. Ramp Lock, R. Ramp Lock
 Ramp Tickets: L. Ramp Ticket, R. Ramp Ticket
@@ -318,8 +317,10 @@ Jet: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Lightning Test: page(MACHINE_PAGE), PRI_GAME_QUICK1
 
+Unlit Goal: page(MACHINE_PAGE), PRI_GAME_QUICK1
 Goal Lit: page(MACHINE_PAGE), PRI_GAME_QUICK2
-Goal Scored: page(MACHINE_PAGE), PRI_GAME_MODE4, D_SCORE
+Goal Increase: page(MACHINE_PAGE), PRI_GAME_QUICK4
+Goal Scored: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_SCORE
 
 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
@@ -332,18 +333,25 @@ Multiball Spinner: page(MACHINE_PAGE), PRI_GAME_QUICK6
 TV Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
 TV Award: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 
+Unlit Striker: page(MACHINE_PAGE), PRI_GAME_QUICK1
 Mode Target Status: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Mode Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Mode Started: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+#Mode Running: page(MACHINE_PAGE)
 
 Ultra Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE
 Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+#Ultra Mania Running: page(MACHINE_PAGE)
+
+#Skill Shot Ready:
+#Skill Shot Scored:
+
+Kickback Relit: page(MACHINE_PAGE), PRI_GAME_QUICK2
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
-# Goal Scored: PRI_LEFF1, page(MACHINE_PAGE)
 Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 
@@ -351,6 +359,7 @@ Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 pcsenior:
 misctype:
 lithograph:
+bitmap8:
 
 [timers]
 Goal Trough Made:

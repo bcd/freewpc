@@ -129,6 +129,16 @@ void mode_target_status_deff (void)
 	deff_exit ();
 }
 
+void unlit_striker_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_var5, 64, 10, "SHOOT 3 DOG TARGETS");
+	font_render_string_center (&font_var5, 64, 22, "TO LIGHT MODE START");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
 void mode_lit_deff (void)
 {
 	mode_draw_target_status (0x7);

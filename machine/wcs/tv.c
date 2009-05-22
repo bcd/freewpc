@@ -48,7 +48,7 @@ void tv_award_add_time (void)
 
 struct tv_award tv_award_table[] = {
 	{ "QUICK MULTIBALL", tv_award_start_quickmb, 5, NULL },
-	{ "HURRY-UP", tv_award_hurryup, 40, NULL },
+	{ "HURRY UP", tv_award_hurryup, 40, NULL },
 	/* next one should not apply unless in timed game */
 	{ "ADD 30 SECONDS", tv_award_add_time, 20, NULL },
 	{ "START MODE", tv_award_start_mode, 60, NULL },
@@ -77,7 +77,7 @@ void tv_lit_deff (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 16, "TV IS LIT");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep (TIME_1500MS);
 	deff_exit ();
 }
 

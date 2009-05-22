@@ -21,6 +21,15 @@
 #include <freewpc.h>
 #include "kickback_driver.h"
 
+void kickback_relit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 16, "KICKBACK IS LIT");
+	dmd_show_low ();
+	task_sleep (TIME_1500MS);
+	deff_exit ();
+}
+
 void kickback_enable (void)
 {
 	lamplist_apply (LAMPLIST_KICKBACKS, lamp_on);

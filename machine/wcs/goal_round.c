@@ -12,6 +12,16 @@ __local__ U8 lit_build_shots;
 
 __local__ U8 goal_count;
 
+void unlit_goal_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 10, "CHALK SHOTS");
+	font_render_string_center (&font_fixed6, 64, 21, "RELIGHT GOAL");
+	dmd_show_low ();
+	task_sleep (TIME_2S);
+	deff_exit ();
+}
+
 
 void goal_lit_deff (void)
 {
@@ -49,6 +59,17 @@ void goal_scored_leff (void)
 	flasher_pulse (FLASH_GOAL);
 	leff_exit ();
 }
+
+void goal_increase_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 64, 8, "GOALIE HIT");
+	font_render_string_center (&font_var5, 64, 25, "GOAL VALUE INCREASED");
+	dmd_show_low ();
+	task_sleep (TIME_2S);
+	deff_exit ();
+}
+
 
 void goal_ball_update (void)
 {
