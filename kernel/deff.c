@@ -98,7 +98,7 @@ U8 deff_get_active (void)
 static void deff_stop_task (void)
 {
 	deff_debug ("deff_stop_task\n");
-	/* if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
+	/* TODO : if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
 		dmd_reset_transition ();
 	kickout_unlock (KLOCK_DEFF);
 }
