@@ -52,10 +52,8 @@ bool system_timer_pause (void)
 	if (!in_game || in_bonus || !valid_playfield)
 		return TRUE;
 
-#ifdef MACHINE_SHOOTER_SWITCH
-	if (switch_poll_logical (MACHINE_SHOOTER_SWITCH) && single_ball_play ())
+	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
 		return TRUE;
-#endif
 
 	if (config_timed_game)
 	{
