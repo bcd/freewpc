@@ -83,6 +83,8 @@ do { \
 
 #define OPT_NEGATE 0x1
 
+#define TYPE_BITMAP 0x80
+
 
 enum image_format {
 	FORMAT_BAD, FORMAT_XBM, FORMAT_PGM, FORMAT_FIF
@@ -178,8 +180,11 @@ void emit_label (const char *label, unsigned int no)
 
 void add_frame (const char *label, struct buffer *buf)
 {
-	rle_frame_table[frame_count] = buffer_rle_encode (buf);
-	sparse_frame_table[frame_count] = buffer_sparse_encode (buf);
+	if (buf->len == 512)
+	{
+		rle_frame_table[frame_count] = buffer_rle_encode (buf);
+		sparse_frame_table[frame_count] = buffer_sparse_encode (buf);
+	}
 
 //#define COMPRESS_IT
 #ifdef COMPRESS_IT
@@ -222,19 +227,26 @@ void add_image (const char *label, const char *filename, unsigned int options)
 	FILE *imgfile;
 	struct buffer *buf;
 	int plane;
+	enum image_format format;
 
-#if 0
-	/* TODO - assume PGM format for now */
-	enum image_format format = get_file_format (filename);
-#endif
 
 	/* Read the PGM into a bitmap */
 	imgfile = fopen (filename, "r");
 	if (!imgfile)
 		error ("can't open image file '%s'\n", filename);
 
-	buf = buffer_alloc (128 * 32);
-	buffer_read_pgm (buf, imgfile);
+	format = get_file_format (filename);
+
+	if (format == FORMAT_PGM)
+	{
+		buf = buffer_alloc (128 * 32);
+		buffer_read_pgm (buf, imgfile);
+	}
+	else if (format == FORMAT_FIF)
+		buf = binary_fif_read (filename);
+	else
+		error ("invalid image format\n");
+
 	fclose (imgfile);
 
 	/* Apply any transformations */
@@ -250,6 +262,8 @@ void add_image (const char *label, const char *filename, unsigned int options)
 	{
 		struct buffer *planebuf = pgm_get_plane (buf, plane);
 		planebuf->type = (!plane ? 0x1 : 0x0);
+		if ((buf->width < 128) || (buf->height < 32))
+			planebuf->type |= TYPE_BITMAP;
 		add_frame (!plane ? label : NULL, planebuf);
 	}
 
@@ -284,6 +298,15 @@ void convert_to_target_pointer (unsigned long offset, unsigned char pointer[])
 }
 
 
+unsigned int frame_length_with_header (struct buffer *buf)
+{
+	unsigned int len = buf->len + 1;
+	if (buf->type & TYPE_BITMAP)
+		len += 2;
+	return len;
+}
+
+
 void write_output (const char *filename)
 {
 	unsigned int frame;
@@ -299,7 +322,7 @@ void write_output (const char *filename)
 	/* Write the frame table header. */
 	for (frame = 0, offset = (frame_count + 1) * 3, buf = frame_table[0];
 		frame < frame_count;
-		frame++, offset += buf->len + 1, buf = frame_table[frame])
+		frame++, offset += frame_length_with_header (buf), buf = frame_table[frame])
 	{
 		/* Round up to the next page boundary if the image doesn't
 		 * completely fit in the current page. */
@@ -316,11 +339,17 @@ void write_output (const char *filename)
 			fprintf (lblfile, "#define IMAGEMAP_PAGE 0x%02X\n", base_page);
 		}
 
-		fprintf (lblfile, "/* %d: %02X/%02X%02X, type %02X, len %d */\n",
+		fprintf (lblfile, "/* %d: %02X/%02X%02X, type %02X, len %d (%d x %d) */\n",
 			frame, target_pointer[2], target_pointer[0], target_pointer[1],
-			buf->type, buf->len);
-		fprintf (lblfile, "   /* RLE encoded version has len %d */\n", rle_frame_table[frame]->len);
-		fprintf (lblfile, "   /* Sparse encoded version has len %d */\n", sparse_frame_table[frame]->len);
+			buf->type, buf->len, buf->width, buf->height);
+
+		if (rle_frame_table[frame])
+			fprintf (lblfile, "   /* RLE encoded version has len %d */\n",
+				rle_frame_table[frame]->len);
+
+		if (sparse_frame_table[frame])
+			fprintf (lblfile, "   /* Sparse encoded version has len %d */\n",
+				sparse_frame_table[frame]->len);
 	}
 
 	/* Write a NULL pointer at the end of the table.  Not strictly needed anymore,
@@ -332,7 +361,7 @@ void write_output (const char *filename)
 	/* Write the frame table data */
 	for (frame = 0, offset = frame_count * sizeof (target_pointer), buf = frame_table[0];
 		frame < frame_count;
-		frame++, offset += buf->len + 1, buf = frame_table[frame])
+		frame++, offset += frame_length_with_header (buf), buf = frame_table[frame])
 	{
 		/* If the object address needed to be pushed to the next
 		page boundary, then output padding bytes first. */
@@ -345,6 +374,11 @@ void write_output (const char *filename)
 
 		/* Output the image data itself */
 		fputc (buf->type, outfile);
+		if (buf->type & TYPE_BITMAP)
+		{
+			fputc (buf->width, outfile);
+			fputc (buf->height, outfile);
+		}
 		buffer_write (buf, outfile);
 	}
 	fclose (outfile);
