@@ -326,27 +326,4 @@ do { \
 } while (0)
 
 
-#define FSTART { U8 __frame_depth = 1; __frame_start (__frame_depth);
-
-#define FSTART_COLOR { U8 __frame_depth = 2; __frame_start (__frame_depth);
-
-#define FEND __frame_end (__frame_depth); }
-
-
-extern inline void __frame_start (const U8 depth)
-{
-	if (depth == 1)
-		dmd_alloc_low ();
-	else
-		dmd_alloc_low_high ();
-}
-
-extern inline void __frame_end (const U8 depth)
-{
-	if (depth == 1)
-		dmd_show_low ();
-	else
-		dmd_show2 ();
-}
-
 #endif /* _SYS_DMD_H */
