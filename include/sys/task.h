@@ -215,6 +215,8 @@ task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
 void task_sleep_sec (int8_t secs);
+void task_set_periodic (task_ticks_t ticks);
+void task_sleep_periodic (void);
 __noreturn__ void task_exit (void);
 task_pid_t task_find_gid (task_gid_t);
 task_pid_t task_find_gid_next (task_pid_t first, task_gid_t gid);
@@ -298,7 +300,7 @@ far_task_recreate_gid (task_gid_t gid, task_function_t fn, U8 page)
  * to finish.
  */
 #define task_do_periodic(time) \
-	for (task_set_periodic (time);; task_sleep_periodic (time), task_set_periodic (time))
+	for (task_set_periodic (time);; task_sleep_periodic (), task_set_periodic (time))
 
 #ifdef CONFIG_NATIVE
 
