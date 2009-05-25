@@ -124,9 +124,15 @@ emptying ordinary ball devices; this event is for modules which store
 balls in some other way (e.g. virtual devices like TZ's gumball machine).
 
 boolean empty_trough_kick
+This is thrown prior to serving a new ball from the trough after a ball
+lock.  It allows machines to override this behavior and serve the ball
+from somewhere else if desired.  When this is wanted, the handler should
+return FALSE.  The system automatically handles the case where the trough
+is empty and the ball must be served from somewhere else anyway.
 
 end_ball
-End-of-ball has been asserted.
+End-of-ball has been asserted.  This is thrown just before end of ball
+bonus starts.
 
 end_game
 End-of-game has been asserted (for all players).
@@ -209,6 +215,7 @@ minute_elapsed
 One minute of real time has elapsed, as detected by the real-time clock.
 
 missing_ball_found
+Don't use this... it will probably be deleted.
 
 tz mpf_top_exit
 
@@ -238,6 +245,10 @@ A replay was just awarded.
 wcs right_ramp_shot
 
 score_overlay
+Thrown just after the default score screen is drawn, but before it is
+displayed.  It allows machines to add an auxiliary effect into the score
+screen, e.g. the starfield on Twilight Zone or the swimming fish on
+Fish Tales.
 
 serve_ball
 A new ball was just served to the shooter lane.  This event is thrown
@@ -285,6 +296,8 @@ start_without_credits
 The start button has been pressed in attract mode without credits.
 
 status_report
+Thrown after all of the default status report pages have been displayed,
+to allow machines to define their own pages.
 
 stop_game
 The game in progress has been cancelled, due to game restart or exiting
