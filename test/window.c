@@ -1068,8 +1068,8 @@ void deff_leff_thread (void)
 					browser_print_operation ("STOPPED");
 			}
 		}
+		task_sleep (TIME_133MS);
 		deff_leff_last_active = is_active;
-		task_sleep (TIME_200MS);
 		is_active = deff_leff_test_ops->is_running (menu_selection);
 	}
 }
