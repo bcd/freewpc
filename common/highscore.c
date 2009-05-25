@@ -273,6 +273,8 @@ void high_score_check (void)
 {
 	U8 hs;
 
+	/* TODO - this only checks the last player, not all of them */
+
 	if (hstd_config.hstd_award == OFF)
 		return; /* TODO - is this the right condition? */
 
