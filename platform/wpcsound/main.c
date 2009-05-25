@@ -62,7 +62,6 @@ extern U8 dac_flag;
 
 __noreturn__ void main (void)
 {
-	U8 val;
 	U16 count;
 
 	wpcs_hardware_init ();
@@ -93,6 +92,7 @@ __noreturn__ void main (void)
 	for (;;)
 	{
 #if 0
+		U8 val;
 		for (val=0; val<0xff; val++)
 		{
 			writeb (WPCS_DAC, val);

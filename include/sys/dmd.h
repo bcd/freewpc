@@ -286,6 +286,7 @@ void dmd_reset_transition (void);
 __attribute__((deprecated)) const U8 *dmd_draw_fif1 (const U8 *fif);
 void frame_draw (U16 id);
 void frame_draw2 (U16 id);
+void bmp_draw (U8 x, U8 y, U16 id);
 
 __transition__ void dmd_shadow_copy (void);
 __transition__ void dmd_text_raise (void);

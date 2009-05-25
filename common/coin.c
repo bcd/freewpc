@@ -277,7 +277,7 @@ void add_units (U8 n)
 static void do_coin (U8 slot)
 {
 	/* Ignore coins after slam tilt */
-	if (event_did_follow (sw_slam_tilt, sw_coin))
+	if (nonball_event_did_follow (sw_slam_tilt, sw_coin))
 		return;
 
 	add_units (price_config.slot_values[slot]);

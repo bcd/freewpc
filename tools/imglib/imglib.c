@@ -220,6 +220,7 @@ void buffer_read_pgm (struct buffer *buf, FILE *fp)
 	char line[80];
 	unsigned int x, y;
 	unsigned int c;
+	unsigned int newlen = 0;
 
 	fgets (line, 79, fp); /* magic */
 	fgets (line, 79, fp); /* comment */
@@ -241,7 +242,10 @@ void buffer_read_pgm (struct buffer *buf, FILE *fp)
 			sscanf (line, "%u\n", &c);
 			//printf ("x,y = %d, %d\n", x, y);
 			buf->data[bitmap_pos (buf, x, y)] = c;
+			newlen++;
 		}
+
+	buf->len = newlen;
 }
 
 
@@ -365,6 +369,9 @@ struct buffer *buffer_joinbits (struct buffer *buf)
 				val |= 1 << bit;
 		res->data[off] = val;
 	}
+
+	res->width = buf->width;
+	res->height = buf->height;
 	return res;
 }
 

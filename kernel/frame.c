@@ -33,6 +33,13 @@
 #include <freewpc.h>
 #include <xbmprog.h>
 
+
+struct frame_pointer
+{
+	unsigned char *ptr;
+	U8 page;
+};
+
 U8 frame_repeat_count;
 
 U8 frame_repeat_value;
@@ -273,11 +280,7 @@ void frame_draw_plane (U16 id)
 	/* TODO */
 #else
 	U8 type;
-	struct frame_pointer
-	{
-		unsigned char *ptr;
-		U8 page;
-	} *p;
+	struct frame_pointer *p;
 
 	page_push (IMAGEMAP_PAGE);
 	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
@@ -306,6 +309,30 @@ void frame_draw (U16 id)
 	dmd_flip_low_high ();
 	frame_draw_plane (id);
 	dmd_flip_low_high ();
+}
+
+
+/**
+ * Draw an arbitrary sized bitmap at a particular region
+ * of the display.
+ */
+void bmp_draw (U8 x, U8 y, U16 id)
+{
+	struct frame_pointer *p;
+
+	page_push (IMAGEMAP_PAGE);
+	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
+	page_push (p->page);
+	bitmap_blit (p->ptr + 1, x, y);
+	if (p->ptr[0] & 0x1)
+	{
+		dmd_flip_low_high ();
+		p++;
+		bitmap_blit (p->ptr + 1, x, y);
+		dmd_flip_low_high ();
+	}
+	page_pop ();
+	page_pop ();
 }
 
 

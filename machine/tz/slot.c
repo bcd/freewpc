@@ -36,19 +36,19 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	set_valid_playfield ();
 	score (SC_1K);
 
-	if (switch_did_follow (dead_end, slot))
+	if (event_did_follow (dead_end, slot))
 	{
 		/* dead end was recently hit, so ignore slot */
 	}
-	else if (switch_did_follow (piano, slot))
+	else if (event_did_follow (piano, slot))
 	{
 		/* piano was recently hit, so ignore slot */
 	}
-	else if (switch_did_follow (camera, slot))
+	else if (event_did_follow (camera, slot))
 	{
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (switch_did_follow (any_skill_switch, slot))
+	else if (event_did_follow (any_skill_switch, slot))
 	{
 		/* skill switch was recently hit, so ignore slot */
 		callset_invoke (skill_missed);

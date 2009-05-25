@@ -42,6 +42,6 @@ CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 	}
 
 	sound_send (SND_LOCK_KICKOUT);
-	switch_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
+	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
 }
 

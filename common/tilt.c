@@ -126,7 +126,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
 	/* Ignore right after a coin door open/close */
-	if (event_did_follow (sw_coin_door_closed, sw_slam_tilt))
+	if (nonball_event_did_follow (sw_coin_door_closed, sw_slam_tilt))
 		return;
 
 	/* Kill the current game */

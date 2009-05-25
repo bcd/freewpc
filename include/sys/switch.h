@@ -127,8 +127,10 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 
 
 /** Declare that another switch can follow the one that just closed. */
-#define switch_can_follow(first,second,timeout) \
+#define event_can_follow(first,second,timeout) \
 	timer_restart_free (GID_ ## first ## _FOLLOWED_BY_ ## second, timeout)
+
+#define event_should_follow(f,s,t) event_can_follow(f,s,t)
 
 /** Declare that a 'device switch' can follow the one that just closed.
  * This is equivalent to 'switch_can_follow', but it also freezes all
@@ -136,7 +138,7 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * is eventually to a device, where timers will stop anyway. */
 #define device_switch_can_follow(first, second, timeout) \
 	do { \
-		switch_can_follow (first, second, timeout); \
+		event_can_follow (first, second, timeout); \
 		timer_restart_free (GID_DEVICE_SWITCH_WILL_FOLLOW, timeout); \
 	} while (0)
 
@@ -144,17 +146,17 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
  * If this returns TRUE, it means it happened within the timeout after the
  * first switch closure.  This will always return FALSE during a
  * multiball, since multiple closures cannot assume that they are from
- * the same ball.  TODO : the check for live balls should not apply in
- * some cases, e.g. non-playfield switches */
-#define switch_did_follow(first,second) \
-	(single_ball_play () && timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second))
+ * the same ball.
+ */
+#define nonball_event_did_follow(first,second) \
+	timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second)
 
-/* The above macros are generic enough to apply to any event, not
- * just switch events */
+#define ball_event_did_follow(first,second) \
+	(single_ball_play () && nonball_event_did_follow(first, second))
 
-#define event_should_follow(f,s,t) switch_can_follow(f,s,t)
-#define event_can_follow(f,s,t)	switch_can_follow(f,s,t)
-#define event_did_follow(f,s)		switch_did_follow(f,s)
+/* The default is to assume a playfield ball event */
+#define event_did_follow(f,s)		ball_event_did_follow(f,s)
+
 
 /** A macro for implementing button event handlers, which need to be called
 when a button is first pressed and continually as it is held.
