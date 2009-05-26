@@ -79,6 +79,7 @@ free_timer_rtt        32		94c
 seg_rtt?CONFIG_SEG    1       100c
 
 # Common processing required at the end of every IRQ
+### process_check_rtt     1       50c
 !do_irq_end           1       0c
 
 # Profile idle time
