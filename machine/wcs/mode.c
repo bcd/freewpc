@@ -42,6 +42,7 @@ U8 modes_won;
 
 void mode_stamina_start (void)
 {
+	/* Requires looping either left/right ramp over and over */
 }
 
 void mode_skill_start (void)
@@ -61,12 +62,15 @@ void mode_spirit_start (void)
 
 void mode_speed_start (void)
 {
-	/* Hurry-Up mode */
+	/* Hurry-Up mode: a countdown value is initialized
+	 * and begins dropping.  Each shot made scores the value
+	 * and adds to it for the next shot. */
 }
 
 void mode_strength_start (void)
 {
-	/* Shoot goal over and over, with Evil Goalie active */
+	/* Shoot goal over and over, with Evil Goalie active if
+	 * enabled */
 }
 
 bool mode_running_p (const U8 mode)
@@ -150,7 +154,7 @@ void mode_started_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("MODE %d", modes_started);
-	font_render_string_center (&font_fixed10, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	sprintf ("%s", mode_table[mode_ready].name);
 	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();

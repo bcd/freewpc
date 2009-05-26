@@ -20,7 +20,12 @@
 
 #include <freewpc.h>
 
-/* Penalties for ball drain during a timed game */
+/* Penalties for ball drain during a timed game.
+ * The first two drains are free.
+ * The third drain incurs a 10 second penalty.
+ * The fourth drain incurs a 15 second penalty.
+ * Every subsequent drain incurs a 20 second penalty.
+ */
 
 __local__ U8 single_ball_drains;
 

@@ -73,10 +73,12 @@ void goal_increase_deff (void)
 
 void goal_ball_update (void)
 {
+#if 0
 	if (flag_test (FLAG_GOAL_LIT))
 		spinning_ball_start ();
 	else
 		spinning_ball_stop ();
+#endif
 }
 
 
