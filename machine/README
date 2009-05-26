@@ -1,6 +1,17 @@
 
-There are 6 different generations of WPC games.  
-Taken from http://www.pinrepair.com/wpc/index1.htm:
+This directory contains machine-specific files.  Each supported
+game should put its files into its own subdirectory.
+
+At a minimum, each machine must provide:
+
+- A Makefile
+- A machine description file (.md)
+
+For WPC, the top of the .md should define the generation of
+machine used.  Here are the values to use and the games that they
+apply to (taken from information at http://www.pinrepair.com/wpc/index1.htm):
+
+1. WPC Alphanumeric
 
 DMD: No
 Fliptronic: No
@@ -14,6 +25,7 @@ Harley Davidson
 The Machine: Bride of Pinbot
 
 
+2. WPC Dot Matrix
 
 DMD: Yes
 --------------------------------------------
@@ -25,6 +37,7 @@ Party Zone
 Hot Shots (Basketball game) 
 
 
+3. Fliptronics
 
 Fliptronics: Yes
 --------------------------------------------
@@ -41,6 +54,7 @@ Dracula
 Addams Family Gold
 
 
+4. DCS Sound
 
 DCS: Yes
 --------------------------------------------
@@ -52,6 +66,7 @@ Demolition Man#
 Addams Family Values (redemption)*** 
 
 
+5. Security CPU
 
 PIC: Yes
 --------------------------------------------
@@ -69,6 +84,7 @@ Jackbot (some of these were WPC-95)
 Who Dunnit
 
 
+6. WPC-95
 
 WPC95: Yes
 --------------------------------------------
