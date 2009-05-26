@@ -1,0 +1,310 @@
+
+***NEW*** WORLD CUP SOCCER RULES
+
+Author: Brian Dominy <brian@oddchange.com>
+Last Revised May 26, 2009
+
+
+Goals
+=====
+One of the main objectives of the game -- as in the past, is to score GOALS.
+At game start, the Goal is lit.  Whenever Goal is lit, the spinning ball
+will spin and the Goalie Target will move.  Shooting the lit Goal awards
+several things:
+
+	- 1,000,000 points are awarded.
+
+	- The GOAL counters near the flippers are advanced to keep track
+	of how many Goals you have scored in this particular run.  When
+	you have scored 5 Goals, all of the lights will strobe... see
+	"Multiball" below for more details.
+
+	- An Ultra Mode (see below) is advanced.
+
+After scoring the first Goal in a run, you need to relight it.
+Unlike in the original game,
+which just requires making some rollovers, you need to actually make one
+of the 4 "chalk shots" (labelled "Build") to relight it: Left Loop,
+Left Ramp, Striker Popper, or Right Ramp.  Whenever one of these is flashing,
+it can be shot to relight the goal.
+
+Whichever shot you use to relight Goal, that shot cannot be used again for
+the same run.  So to score 5 goals, eventually you'll have to shoot all
+4 chalk shots.
+
+Shooting the unlit goal will remind you that you need to make a Build Shot
+first.
+
+After the 1st multiball, it becomes harder to complete the 5 goals
+in several ways (TBD):
+- Evil Goalie becomes active
+- Fewer chalk shots are lit at a time
+- Lit goal timeout?
+
+
+
+Multiball
+=========
+
+After 5 Goals have been scored, Final Draw becomes lit to start Multiball.
+Shoot Final Draw to start.  One additional ball is added to play, for a
+minimum of 2 balls, plus any balls that have been locked will be released.
+
+How, you ask, do you lock balls?  The left and right Free Kick saucers can
+now be used as ball locks.  Under normal difficulty settings (which may be
+altered in later runs), shooting the saucers at any time will lock a ball.
+After 2 locks are made, Final Draw will light automatically, without requiring
+5 goals.
+
+After plunging a new ball, the balls are kicked out in this order:
+Final Draw, Left saucer, Right saucer.
+
+During multiball, the Goal scores a Jackpot, whose base value depends on (1)
+how many balls you had locked, and (2) whether or not you reached the 5 Goal
+mark.  In addition, the base value is multiplied by the number of balls
+in play, encouraging you not to drain.  The Jackpot Value increases each
+time the Goal is scored.  Relight Jackpot via the left/right ramps.
+
+
+
+Surprise Multiball
+==================
+
+It is possible to knock a ball out of the Free Kick saucers when a ball
+is held there.  When this happens, Surprise Multiball starts.  A jackpot
+is enabled at the same saucer, begging you to put one of the balls back.
+The value counts down to some minimum value.
+
+If you drain one of the 2 balls during Surprise Multiball, play resumes
+as normal.  If you had originally locked the ball there, you are
+penalized by losing that ball lock.  If, in a multi-player game, your
+opponent had locked the ball, there is no penalty for you. Your
+opponent is still credited with having locked the ball for the purposes
+of multiball scoring, although there may be one less ball in play.
+If your opponent relocks the ball you stole, he will receive a bonus
+score for doing so.
+
+
+Ultra Modes
+===========
+The Ultra Modes work slightly differently than in the original game.
+As before, Ultra Scoring is awarded after making a lit goal.  When a shot
+is lit for Ultra Scoring, bonus points are awarded immediately (not
+during bonus).
+
+	- Ultra Ramps are worth 250K each.
+	- Ultra Goalie is worth 250K each.
+	- Ultra Spinner is worth 50K each.
+	- Ultra Jets are worth 50K each.
+
+In addition, there is a target number of shots to be made once Ultra Scoring
+is started:
+
+	- 5 Ramps or Goalies
+	- 25 Spinners or Jets
+
+Thus, the total scoring for any Ultra Mode is 1.25M once completed.
+
+If an Ultra Mode is earned while all 4 modes are already active or complete,
+then instead of starting a new mode, it will spot some # of shots on an
+existing active mode -- 1 goalie hit or ramp, or 5 spinners/jets.
+
+At end ball, all active Ultra Modes are stopped, but any modes that have
+previously been completed are remembered.
+
+When all 4 Ultra Modes have been completed, "Ultra Mania" is lit ...
+see below.
+
+
+
+Ultra Mania
+===========
+When Ultra Mania is qualified, the Left Ramp becomes lit for Lock, then Final
+Draw lights to start Ultra Mania.  
+This multiball can be started immediately, or you can shoot the Lock
+to try to add additional balls into play.
+
+TODO : what if both multiballs are qualified.
+
+During Ultra Mania, all Ultra shots are active one more time, but you
+are allowed to score 2X as many total points.
+
+Progress in Ultra Mania is carried over after the multiball ends, if
+you start it again you pick up where you left off.
+
+Each Ultra Shot can score up to 2.5M points.  Completing all 4 shots
+lights Final Draw for a 10M Super Jackpot.
+
+
+
+TV Awards
+=========
+
+TV Awards are "Mystery" awards are collected at the TV, whenever it is not
+already lit for a Multiball.  The TV is lit at ball start, and relit by hitting
+the Free Kick Target.
+
+Possible awards are:
+
+	- Quick Multiball
+	- Hurry Up (like the Mode below)
+	- Add Time (in timed game)
+	- Ball Save
+	- Start Mode
+	- Advance Ultra
+	- Light Extra Ball (in non-timed game)
+	- Points
+	- Light Multiball
+	- Multiball
+	- You're There (Collect Next City)
+
+There will be some rules to govern how these are given out, so that it is not
+entirely random.
+
+
+Modes
+=====
+
+There are 5 timed modes corresponding to the 5 panels on the soccer ball.
+The next mode to be started can be selected via the Right Flipper button.
+
+Shoot the 3 Striker Dog targets (2 orange, 1 red) to spell D-O-G and
+light mode start at the Striker popper.
+
+Mode rules TBD, however:
+
+	- Modes each run on their own timer, starting at 20 seconds,
+	and may overlap.
+	- Mode timers reset each time the appropriate shot is made, and thus
+	may run indefinitely.
+	- Mode starts cannot be stacked; while mode start is lit,
+	the value of the Dog targets depends on the number of modes
+	actually running, and will not advance towards lighting another
+	Mode Start.
+
+
+Mode : Stamina
+===============
+Points are scored for Left or Right Ramp loop combos.
+Shoot either ramp to begin the sequence, then continue shooting that
+ramp for a repeated score.  The 20 second timer resets on every combo.
+Double points for the right ramp over the left.
+
+
+Mode : Speed
+===============
+This is a Hurry-Up mode, like Corvette's "Catch Me", that progresses
+across multiple playfield shots.  Each made shot increases the shot
+value again and resets the timer to 20 seconds.  Each successive shot,
+the value of the shot will count down a little faster to its minimum.
+
+
+Mode : Skill
+===============
+A new ball is served to the plunger, with flippers disabled.  The
+objective is to make skill shots for points.  Once missed, the
+original ball is kicked from the Striker scoop -- shoot Striker
+again to repeat the process.  The 20 second timer does not run while
+skill shots are attempted, and is reset by making a Skill Shot.
+
+This mode cannot run concurrently with any multiball.
+
+
+
+Mode : Spirit
+===============
+This is a frenzy mode where all switches score, but the Jet Bumpers
+reset the Spirit timer to 20 seconds.
+
+
+Mode : Strength
+===============
+Shoot the Goal repeatedly for increasing points.  Hitting the Goalie
+drops the goal value.  The timer is reset each time the Goal is made.
+
+
+Super Dog
+=========
+
+Once all 5 modes have been started, the next completion of
+the dog targets will light Super Dog at the Striker scoop.
+Super Dog cannot be started during any other multiball.  A jackpot value
+is established based on the total number of seconds that modes were running
+prior to starting Super Dog.  (You can leave it lit while the 5th mode
+is running to boost the value!)
+
+If multiple modes are running concurrently, this is taken into account, and
+multiplies the total time increment.  If a ball drains ending one or
+more modes, the amount of time left is not counted.
+This counter also pauses during ball search and other times when normal
+timers would pause.
+
+Shoot the Dog targets as often as you like to score the Jackpot Value.
+Super Dog runs on a 30 second timer, with a short ballsaver.
+The timer is reset to 30 seconds once *all three* targets are hit.
+
+
+Cities
+======
+Cities are advanced by repeated shots to the spinner.
+A certain number of spins is required in order to collect the next city.
+When a city is collected, the top gate opens allowing the ball to whiz out
+the right side of the playfield.
+
+The current City affects general scoring in some way.
+Note that only *one* can be in effect at a time, so you may choose
+to avoid shooting for the next city if the current feature is lucrative --
+advancing the city will cancel the previous benefit.
+
+Each city reached also scores 500,000.
+
+The first city, Chicago, requires 10 spins to reach.  Each city thereafter
+takes an additional 5 spins.  The Left Orbit switch will always spot 3
+spins.
+
+	- Chicago - 2X Combos
+	- Dallas
+	- Boston - 2X Mode
+	- New York
+	- Orlando - 2X Ultra
+	- Washington D.C. - Extra Ball Lit
+	- San Francisco - 2X Jackpots
+	- Detroit
+	- Los Angeles - 2X Scoring
+
+The final award, 2X Scoring, can run until end-of-ball, but it will
+time out in 30 seconds.  Shooting the Left Loop/Spinner adds 10 seconds
+to the clock, up to a max of 30 seconds.
+
+
+World Cup Final
+===============
+
+To qualify World Cup Final, you must start all of the following:
+- Regular Multiball
+- Ultra Mania
+- Super Dog
+- 2X Scoring
+
+Once these 4 tasks have been achieved, and no multiball is in
+progress, the Left and Right Ramp locks will become lit.
+Shoot either to start World Cup Final.
+
+During Final, unlimited balls are served from the trough for 45 seconds
+as before.  The Goal collects an increasing Jackpot value.
+The ramps increase the jackpot even further...
+
+
+
+Feature Adjustments
+===================
+
+Ball Saver
+Evil Goalie : Defaults to NO.  When set to YES, Goalie movement
+will be altered to make the game more difficult.
+
+Max Lock Count
+Reverse Spin
+Disable Ball
+Disable Goalie
+
