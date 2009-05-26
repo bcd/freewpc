@@ -251,6 +251,12 @@ static void fontargs_render_string (void)
 		font_byte_width = (font_width + 7) >> 3;
 #endif
 
+		/////////////////////////////////////////////////
+		//  GCC 4.4.0 alert - the following block of   //
+		//  code does not compile correctly, and       //
+		//  will cause lockups!!!                      //
+		/////////////////////////////////////////////////
+
 		/* If the height of this glyph is not the same as the
 		height of the overall string, then the character should
 		be bottom aligned.  This is needed for commas and periods.

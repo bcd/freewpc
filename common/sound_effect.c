@@ -230,7 +230,7 @@ static inline U8 sound_proc_channel_id (void)
  */
 void sound_proc_send (sound_code_t code)
 {
-	U8 chid = sound_proc_channel_id ();
+	//U8 chid = sound_proc_channel_id ();
 }
 
 
@@ -239,7 +239,7 @@ void sound_proc_send (sound_code_t code)
  */
 void sound_proc_set_volume (U8 vol)
 {
-	U8 chid = sound_proc_channel_id ();
+	//U8 chid = sound_proc_channel_id ();
 }
 
 
@@ -253,7 +253,7 @@ void sound_proc_set_prio (U8 prio)
  */
 void sound_proc_exit (void)
 {
-	U8 chid = sound_proc_channel_id ();
+	//U8 chid = sound_proc_channel_id ();
 	task_exit ();
 }
 

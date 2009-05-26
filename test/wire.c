@@ -231,17 +231,21 @@ void render_wire_pin (wire_config_t *wire)
 
 wire_config_t *wire_get_sw_column (const switchnum_t sw)
 {
+	return NULL;
 }
 
 wire_config_t *wire_get_sw_row (const switchnum_t sw)
 {
+	return NULL;
 }
 
 wire_config_t *wire_get_lamp_column (const lampnum_t lamp)
 {
+	return NULL;
 }
 
 wire_config_t *wire_get_lamp_row (const lampnum_t lamp)
 {
+	return NULL;
 }
 

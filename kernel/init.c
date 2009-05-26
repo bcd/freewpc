@@ -47,7 +47,7 @@ __noreturn__ void freewpc_init (void)
 	extern __common__ void system_reset (void);
 
 	/* Initialize the platform specifics first */
-	platform_init ();
+	VOIDCALL (platform_init);
 
 	/* Reset the blanking and watchdog circuitry.
 	 * Eventually, the watchdog will be tickled every 1ms
