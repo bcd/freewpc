@@ -27,6 +27,8 @@
 #define MODE_STRENGTH 4
 #define NUM_MODES 5
 
+#define MODE_TIMER 20
+
 #define ALL_MODES_RUNNING 0x1F
 
 __local__ U8 dog_targets;
@@ -39,6 +41,16 @@ __local__ U8 mode_ready;
 U8 modes_running;
 
 U8 modes_won;
+
+U8 mode_timers[NUM_MODES];
+
+U8 mode_multiplier;
+
+
+void mode_score (const score_t score)
+{
+	score_long_multiple (score, mode_multiplier);
+}
 
 void mode_stamina_start (void)
 {
@@ -236,9 +248,20 @@ void mode_start (void)
 	modes_running |= (1 << mode_ready);
 	lamp_tristate_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
 	mode_table[mode_ready].start ();
+	mode_timers[mode_ready] = MODE_TIMER;
 	if (modes_started < NUM_MODES)
 		mode_rotate_next ();
 }
+
+
+void mode_reset (U8 mode)
+{
+	if (mode_timers[mode] > 0)
+	{
+		mode_timers[mode] = MODE_TIMER;
+	}
+}
+
 
 void maybe_mode_start (void)
 {
@@ -285,6 +308,7 @@ CALLSET_ENTRY (mode, striker_shot)
 
 CALLSET_ENTRY (mode, start_player)
 {
+	flag_off (FLAG_SUPER_DOG_LIT);
 	modes_started = 0;
 	modes_won = 0;
 	mode_reset_dog_targets ();
@@ -306,5 +330,6 @@ CALLSET_ENTRY (mode, sw_right_button)
 CALLSET_ENTRY (mode, start_ball)
 {
 	modes_running = 0;
+	mode_multiplier = 1;
 }
 

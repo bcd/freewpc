@@ -257,6 +257,7 @@ Disable Goalie: yes_no, NO
 
 [scores]
 730:
+2500:
 5K:
 10K:
 25K:
@@ -294,6 +295,7 @@ Super Jackpot Lit:
 
 TV Lit:
 Mode Lit:
+Super Dog Lit:
 
 Ultra Mania Lit:
 Ultra Mania Running:
@@ -301,6 +303,8 @@ Ultra Mania Running:
 QuickMB Running:
 
 Magna Goalie Lit:
+
+Final Match Lit:
 
 [globalflags]
 Goalie Moving:

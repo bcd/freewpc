@@ -1,3 +1,31 @@
+# This is the image load config file, which lists the graphics
+# images that are imported into the final ROM image.
+#
+# Each entry in this file is of the form:
+#
+# <id>: <filename>
+#
+# and causes one image file to be imported, which can be
+# referenced from the code using the C #define named by <id>.
+# Identifiers are integers that index a table of all images.
+# An image ID can be passed to the frame_draw() function for
+# fullscreen (128x32) images or to bmp_draw() for arbitrary-sized
+# images.
+#
+# This file contains only the machine-specific images.
+# The platform can define its own common images, in
+# platform/<name>/<name>.ild.
+#
+# If a filename is prefixed with '!', the image data is
+# inverted.
+#
+# Identifiers are optional; if not given, an ID is assigned
+# internally but no C #define is written out for it.  As
+# IDs are sequential, an animation can have IDs for the first
+# and last frame only, and just use a for loop to render each
+# frame.
+
+
 IMG_STRIKER: machine/wcs/striker.pgm
 IMG_PGJ: machine/wcs/pgj.pgm
 IMG_SCRATCHY: !images/scratchy.pgm
