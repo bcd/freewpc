@@ -24,6 +24,7 @@
  */
 
 #include <freewpc.h>
+#include <replay.h>
 #include <knocker.h>
 #include <coin.h>
 

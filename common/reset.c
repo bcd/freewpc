@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <amode.h>
 #include <diag.h>
+#include <replay.h>
 
 /**
  * \file

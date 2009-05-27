@@ -25,6 +25,7 @@
 
 #include <freewpc.h>
 #include <bcd.h>
+#include <replay.h>
 
 /** The array of player scores */
 __permanent__ score_t scores[MAX_PLAYERS];

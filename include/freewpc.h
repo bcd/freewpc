@@ -171,7 +171,7 @@ extern U8 idle_ok;
 /* Basic data structures */
 
 #include <misc.h>
-#include <list.h>
+//#include <list.h>
 #include <log.h>
 
 #ifdef CPU_BOARD
@@ -199,9 +199,6 @@ extern U8 idle_ok;
 #include <audit.h>
 #include <printf.h>
 #include <callset.h>
-#include <eb.h>
-#include <search.h>
-#include <replay.h>
 #include <csum.h>
 #include <audio.h>
 #include <mode.h> /* deprecated */
