@@ -39,7 +39,8 @@ Compiler Changes
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
 * GCC 4.4 generated sol.s is inefficient.
-* GCC 4.4 no longer works as of late December 2008.  Working again???
+* GCC 4.4 stopped working late December 2008, then worked again, now is broken
+again in May 2009?
 
 
 Nice to Have
@@ -58,7 +59,6 @@ Uncategorized
 ./common/device.c:		/* TODO - this logic probably belongs somewhere else.
 ./common/device.c:		/* TODO - this logic probably belongs somewhere else */
 ./common/device.c:#if 0 /* TODO */
-./common/device.c:	/* TODO - if a ball kicked out from the probe of a device
 ./common/locale.c:/* TODO - support on-the-fly DIP switch changes.  Poll them about
 ./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
 ./common/plunger.c:		/* TODO - after locking a ball, adding a new ball to the
@@ -68,7 +68,6 @@ Uncategorized
 ./include/m6809/m6809.h:	/* TODO - memcpy isn't always going to work */
 ./include/mode.h:	/* TODO */
 ./include/mode.h:		/* TODO */
-./include/sys/switch.h: * the same ball.  TODO : the check for live balls should not apply in
 ./kernel/animation.c:	/* TODO : for video modes there should be a callback here for
 ./kernel/deff.c:	/* TODO */
 ./kernel/frame.c:	/* TODO - remove this and force all callers of the
