@@ -235,6 +235,7 @@ void deff_stop (deffnum_t dn)
 	if (dn == deff_running)
 	{
 		deff_stop_task ();
+		deff_running = 0;
 		deff_update ();
 	}
 }
