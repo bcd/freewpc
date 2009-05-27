@@ -38,19 +38,22 @@ __local__ U8 modes_started;
 
 __local__ U8 mode_ready;
 
+/** A bitmask of the modes that are currently running */
 U8 modes_running;
 
-U8 modes_won;
-
+/** The timer for each of the modes */
 U8 mode_timers[NUM_MODES];
 
+/** The mode scoring multiplier */
 U8 mode_multiplier;
 
 
+/** Awards mode points, possibly multiplied. */
 void mode_score (const score_t score)
 {
 	score_long_multiple (score, mode_multiplier);
 }
+
 
 void mode_stamina_start (void)
 {
@@ -310,7 +313,6 @@ CALLSET_ENTRY (mode, start_player)
 {
 	flag_off (FLAG_SUPER_DOG_LIT);
 	modes_started = 0;
-	modes_won = 0;
 	mode_reset_dog_targets ();
 	lamplist_apply (LAMPLIST_BALL_PANELS, lamp_off);
 	mode_flash_first ();
@@ -324,7 +326,8 @@ CALLSET_ENTRY (mode, lamp_update)
 
 CALLSET_ENTRY (mode, sw_right_button)
 {
-	mode_rotate_next ();
+	if (in_live_game)
+		mode_rotate_next ();
 }
 
 CALLSET_ENTRY (mode, start_ball)
