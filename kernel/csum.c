@@ -36,8 +36,7 @@
 
 extern const struct area_csum coin_csum_info;
 extern const struct area_csum replay_csum_info;
-extern const struct area_csum champion_csum_info;
-extern const struct area_csum highscore_csum_info;
+extern const struct area_csum high_csum_info;
 extern const struct area_csum rtc_csum_info;
 extern const struct area_csum adj_csum_info;
 extern const struct area_csum audit_csum_info;
@@ -49,8 +48,7 @@ protected memory is valid. */
 const struct area_csum *csum_info_table[] = {
 	&coin_csum_info,
 	&replay_csum_info,
-	&champion_csum_info,
-	&highscore_csum_info,
+	&high_csum_info,
 	&rtc_csum_info,
 	&adj_csum_info,
 	&audit_csum_info,

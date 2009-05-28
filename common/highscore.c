@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -27,43 +27,30 @@
  *
  */
 
+struct high_score
+{
+	score_t score;
+	U8 initials[HIGH_SCORE_NAMESZ];
+};
 
-/** The grand champion score */
-__nvram__ U8 gc_score[HIGH_SCORE_WIDTH];
-/** The initials of the grand champion */
-__nvram__ U8 gc_initials[HIGH_SCORE_NAMESZ];
+/** The high score table */
+__nvram__ struct high_score high_score_table[NUM_HIGH_SCORES+1];
 
-__nvram__ U8 gc_csum;
-struct area_csum champion_csum_info = {
-	.area = (U8 *)gc_score,
-	.length = HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ,
-	.csum = &gc_csum,
+
+/** A checksum descriptor for the high scores/initials */
+__nvram__ U8 high_csum;
+struct area_csum high_csum_info = {
+	.area = (U8 *)high_score_table,
+	.length = sizeof (high_score_table),
+	.csum = &high_csum,
 	.reset = high_score_reset,
 #ifdef HAVE_PAGING
 	.reset_page = PAGE,
 #endif
 };
 
-
-/** The highest scores */
-__nvram__ U8 highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH];
-/** The initials of the highest scores */
-__nvram__ U8 high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ];
-
-__nvram__ U8 high_score_csum;
-struct area_csum highscore_csum_info = {
-	.area = (U8 *)highest_scores,
-	.length = (HIGH_SCORE_WIDTH + HIGH_SCORE_NAMESZ) * NUM_HIGH_SCORES,
-	.csum = &high_score_csum,
-	.reset = high_score_reset,
-#ifdef HAVE_PAGING
-	.reset_page = PAGE,
-#endif
-};
-
-
+/** The high score auto-reset counters */
 __permanent__ U8 hs_reset_counter1, hs_reset_counter2;
-
 
 /* During high score entry, indicates the table position to insert at */
 U8 high_score_position;
@@ -117,16 +104,16 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 
 /** Renders a single high score table entry.
  * If pos is zero, then no position is drawn. */
-static void high_score_draw_single (U8 pos, const U8 *initials,
-	const U8 *score, U8 row)
+static void high_score_draw_single (U8 pos, U8 row)
 {
+	struct high_score *hsp = &high_score_table[pos];
 	if (pos != 0)
-		sprintf ("%d. %c%c%c", pos, initials[0], initials[1], initials[2]);
+		sprintf ("%d. %c%c%c", pos, hsp->initials[0], hsp->initials[1], hsp->initials[2]);
 	else
-		sprintf ("%c%c%c", initials[0], initials[1], initials[2]);
+		sprintf ("%c%c%c", hsp->initials[0], hsp->initials[1], hsp->initials[2]);
 	font_render_string_left (&font_fixed6, 1, row, sprintf_buffer);
 
-	sprintf_score (score);
+	sprintf_score (hsp->score);
 #ifndef MACHINE_HIGH_SCORE_FONT
 #define MACHINE_HIGH_SCORE_FONT font_fixed6
 #endif
@@ -139,7 +126,7 @@ void grand_champion_draw (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "HIGHEST SCORE AT");
-	sprintf_score (gc_score);
+	sprintf_score (high_score_table[0].score);
 	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
@@ -150,7 +137,7 @@ void high_score_draw_gc (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "GRAND CHAMPION");
-	high_score_draw_single (0, gc_initials, gc_score, 20);
+	high_score_draw_single (0, 20);
 	dmd_show_low ();
 }
 
@@ -160,8 +147,8 @@ void high_score_draw_12 (void)
 #if (MACHINE_DMD == 1)
 	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 #endif
-	high_score_draw_single (1, high_score_initials[0], highest_scores[0], 8);
-	high_score_draw_single (2, high_score_initials[1], highest_scores[1], 20);
+	high_score_draw_single (1, 8);
+	high_score_draw_single (2, 20);
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_show_low ();
 }
@@ -172,8 +159,8 @@ void high_score_draw_34 (void)
 #if (MACHINE_DMD == 1)
 	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 #endif
-	high_score_draw_single (3, high_score_initials[2], highest_scores[2], 8);
-	high_score_draw_single (4, high_score_initials[3], highest_scores[3], 20);
+	high_score_draw_single (3, 8);
+	high_score_draw_single (4, 20);
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_show_low ();
 }
@@ -193,17 +180,25 @@ void high_score_check_reset (void)
  * to default values */
 void high_score_reset (void)
 {
+	U8 place;
+
+	dbprintf ("Resetting high score table\n");
+
 	wpc_nvram_get ();
 
 	/* Reset the grand champion */
-	memcpy (gc_score, default_gc_score, HIGH_SCORE_WIDTH);
-	memcpy (gc_initials, default_gc_initials, HIGH_SCORE_NAMESZ);
+	memcpy (high_score_table[0].score, default_gc_score, HIGH_SCORE_WIDTH);
+	memcpy (high_score_table[0].initials, default_gc_initials, HIGH_SCORE_NAMESZ);
 
 	/* Reset the other high scores */
-	memcpy (highest_scores, default_highest_scores,
-		HIGH_SCORE_WIDTH * NUM_HIGH_SCORES);
-	memcpy (high_score_initials, default_high_score_initials,
-		HIGH_SCORE_NAMESZ * NUM_HIGH_SCORES);
+	for (place=0; place < 4; place++)
+	{
+		memcpy (high_score_table[place+1].score, default_highest_scores[place],
+			HIGH_SCORE_WIDTH);
+		memcpy (high_score_table[place+1].initials, default_high_score_initials[place],
+			HIGH_SCORE_NAMESZ);
+	}
+
 	wpc_nvram_put ();
 
 	/* Reset when the next auto-reset will occur */
@@ -267,34 +262,89 @@ void high_score_reset_check (void)
 }
 
 
-/* Check to see if the current player score qualifies for the
-high score board. */
-void high_score_check (void)
+void high_score_check_player (U8 player)
 {
 	U8 hs;
 
-	/* TODO - this only checks the last player, not all of them */
-
-	if (hstd_config.hstd_award == OFF)
-		return; /* TODO - is this the right condition? */
-
-	high_score_player = 1;
-	if ((score_compare (current_score, gc_score)) > 0)
-	{
-		/* This is a grand champion score */
-		high_score_position = 0;
-		deff_start (DEFF_HSENTRY);
-		return;
-	}
-
 	for (hs = 0; hs < NUM_HIGH_SCORES; hs++)
-		if ((score_compare (current_score, highest_scores[hs])) > 0)
+	{
+		struct high_score *hsp = &high_score_table[hs];
+		if ((score_compare (scores[player], hsp->score)) > 0)
 		{
-			/* This is a regular high score */
-			high_score_position = hs+1;
-			deff_start (DEFF_HSENTRY);
+			/* The score qualifies for this position.  Push all
+			 * scores down and then insert the player score here.
+			 * Set the initials to the player number */
+			/* TODO */
 			return;
 		}
+	}
+}
+
+
+/** Award COUNT credits for achieving a high score */
+void high_score_award_credits (U8 count)
+{
+}
+
+
+/** See if the given position in the high score table was modified and
+ * needs initials entered.  POSITION is 1-4 for the regular spots
+ * and 0 for the grand champion. */
+void high_score_enter_initials (U8 position)
+{
+	struct high_score *hsp = &high_score_table[position];
+	if (hsp->initials[0] < ' ')
+	{
+		/* Get the initials for this player */
+		high_score_player = hsp->initials[0];
+		memset (hsp->initials, 0, 3);
+		deff_start (DEFF_HSENTRY);
+		while (deff_get_active () == DEFF_HSENTRY)
+			task_sleep (TIME_133MS);
+
+		/* Award credits */
+		if (position == 0)
+		{
+			high_score_award_credits (&hstd_config.champion_credits);
+		}
+		else
+		{
+			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
+		}
+#if 0
+		deff_start (DEFF_HSCREDITS);
+		while (deff_get_active () == DEFF_HSCREDITS)
+			task_sleep (TIME_133MS);
+#endif
+	}
+}
+
+
+
+/** Check to see if the current player score qualifies for the
+high score board. */
+void high_score_check (void)
+{
+	U8 player;
+
+	/* Don't record high scores if disabled by adjustment */
+	if (hstd_config.highest_scores == OFF)
+		return;
+
+	/* Scan all players, in order from first to last, and see if they
+	 * qualify for the high score board.  For each player that
+	 * qualifies, insert the score and set the first initial to
+	 * the player number, which is a nonprintable character. */
+	for (player = 0; player < num_players; player++)
+		high_score_check_player (player);
+
+	/* Now that all high scores have been entered, scan the table
+	 * one more table to see which initials need to be entered */
+	high_score_enter_initials (4);
+	high_score_enter_initials (3);
+	high_score_enter_initials (2);
+	high_score_enter_initials (1);
+	high_score_enter_initials (0);
 }
 
 
