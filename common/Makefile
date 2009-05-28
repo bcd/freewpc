@@ -26,6 +26,7 @@ COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/rtc.o)
 COMMON_BASIC_OBJS += $(if $(CONFIG_DMD),, common/segtrans.o)
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/service.o)
 COMMON_BASIC_OBJS +=	common/shootalert.o
+COMMON_BASIC_OBJS +=	common/start_button.o
 COMMON_BASIC_OBJS +=	common/ticket.o
 COMMON_BASIC_OBJS +=	common/tilt.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WHITESTAR),,common/tournament.o)
