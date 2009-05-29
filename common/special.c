@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <knocker.h>
 #include <coin.h>
+#include <eb.h>
 
 /**
  * \file

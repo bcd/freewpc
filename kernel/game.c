@@ -24,6 +24,8 @@
 #include <player.h>
 #include <highscore.h>
 #include <amode.h>
+#include <search.h>
+#include <eb.h>
 
 /**
  * \file

@@ -42,6 +42,7 @@
  */
 
 #include <freewpc.h>
+#include <search.h>
 
 /** Pointer to the device properties table generated from the md */
 extern device_properties_t device_properties_table[];

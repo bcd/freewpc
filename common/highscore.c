@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 #include <highscore.h>
+#include <knocker.h>
+#include <coin.h>
 
 /**
  * \file

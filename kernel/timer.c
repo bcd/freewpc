@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <search.h>
 
 /**
  * \file

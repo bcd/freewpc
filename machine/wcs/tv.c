@@ -1,5 +1,6 @@
 
 #include <freewpc.h>
+#include <eb.h>
 
 __local__ U8 tv_count;
 

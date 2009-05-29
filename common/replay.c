@@ -27,6 +27,7 @@
 #include <replay.h>
 #include <knocker.h>
 #include <coin.h>
+#include <eb.h>
 
 /** The current replay score */
 __nvram__ U8 replay_score[BYTES_PER_SCORE];

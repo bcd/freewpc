@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <coin.h>
+#include <replay.h>
 
 /**
  * \file
