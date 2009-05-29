@@ -225,7 +225,7 @@ endif
 EVENT_OBJS = $(BLDDIR)/callset.o
 
 ifeq ($(CONFIG_DMD),y)
-FIF_SRCS := images/freewpc_logo.fif images/tuxlogo.fif $(FIF_SRCS)
+FIF_SRCS := images/tuxlogo.fif $(FIF_SRCS)
 
 FIF_SRCS += $(patsubst %.pgm,%.fif,$(PGM_SRCS))
 
