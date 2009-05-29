@@ -42,16 +42,17 @@
  * will be downscaled to 4 colors as necessary.
  *
  * The pinball game ROM may implement a number of decoders; at present,
- * only one decoder is supported, which does simple run-length encoding of
- * 16-bit words.  It is written for very easy decoding with little
+ * there are two supported decoders.  One does simple run-length encoding
+ * of 16-bit words.  It is written for very easy decoding with little
  * runtime overhead, and so does not compress very well.  However,
- * CPU cycles are considered more precious than ROM space.  Different
- * codecs may be added in the future with different properties; e.g.
- * a long-running animation when the CPU is mostly idle may need to tuned
+ * CPU cycles are considered more precious than ROM space.  The second
+ * is for sparse images with lots of zeroes.  Different codecs may be
+ * added in the future with different properties; e.g. for a long-
+ * running animation when the CPU is mostly idle may need to tuned
  * for better compression at the cost of a longer decompression time.
  *
  * Command-line parameters specify the total amount of space that is
- * allocated for images.  The linker will only decompress as is
+ * allocated for images.  The linker will only compress as is
  * necessary; as long as there is ample space, it does not make sense
  * to compress.  If multiple codecs are available, then all should be
  * attempted and the one that matches the performance requirements the
@@ -82,6 +83,7 @@ do { \
 
 
 #define OPT_NEGATE 0x1
+#define OPT_FAST   0x2
 
 #define TYPE_BITMAP 0x80
 
@@ -93,7 +95,7 @@ enum image_format {
 
 
 /**
- * Stores everything you need to know about an image.
+ * Stores everything you need to know about an image.  TODO
  */
 struct image
 {
@@ -121,6 +123,8 @@ FILE *outfile;
 
 unsigned int base_page = 0x20;
 
+/* By default, images may use up to 64KB.  This can be increased
+with the -s option. */
 unsigned int max_rom_size = 65536;
 
 /**
@@ -180,18 +184,18 @@ void emit_label (const char *label, unsigned int no)
 
 void add_frame (const char *label, struct buffer *buf)
 {
-	if (buf->len == 512)
+	if (buf->len == FRAME_BYTE_SIZE)
 	{
 		rle_frame_table[frame_count] = buffer_rle_encode (buf);
 		sparse_frame_table[frame_count] = buffer_sparse_encode (buf);
-	}
 
 //#define COMPRESS_IT
 #ifdef COMPRESS_IT
-	frame_table[frame_count] = sparse_frame_table[frame_count];
+		frame_table[frame_count] = sparse_frame_table[frame_count];
 #else
-	frame_table[frame_count] = buf;
+		frame_table[frame_count] = buf;
 #endif
+	}
 
 	if (label)
 		emit_label (label, frame_count);
@@ -239,7 +243,7 @@ void add_image (const char *label, const char *filename, unsigned int options)
 
 	if (format == FORMAT_PGM)
 	{
-		buf = buffer_alloc (128 * 32);
+		buf = buffer_alloc (FRAME_BYTE_SIZE);
 		buffer_read_pgm (buf, imgfile);
 	}
 	else if (format == FORMAT_FIF)
