@@ -21,7 +21,7 @@
 #include <freewpc.h>
 #include <animation.h>
 #include <highscore.h>
-
+#include <replay.h>
 
 extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
