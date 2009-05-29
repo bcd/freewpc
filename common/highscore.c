@@ -35,8 +35,10 @@ struct high_score
 	U8 initials[HIGH_SCORE_NAMESZ];
 };
 
+#define HS_COUNT (NUM_HIGH_SCORES + 1)
+
 /** The high score table */
-__nvram__ struct high_score high_score_table[NUM_HIGH_SCORES+1];
+__nvram__ struct high_score high_score_table[HS_COUNT];
 
 
 /** A checksum descriptor for the high scores/initials */
@@ -208,13 +210,6 @@ void high_score_reset (void)
 }
 
 
-/** Awards for a high score */
-void high_score_award (void)
-{
-	audit_increment (&system_audits.hstd_credits);
-}
-
-
 void hsentry_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -264,11 +259,31 @@ void high_score_reset_check (void)
 }
 
 
+/**
+ * Free a high score entry.
+ *
+ * If this is not the last entry in the table, it is pushed
+ * down recursively.
+ */
+void high_score_free (U8 position)
+{
+	if (position < HS_COUNT-1)
+		high_score_free (position+1);
+
+	memcpy (&high_score_table[position+1], &high_score_table[position],
+		sizeof (struct high_score));
+}
+
+
+/**
+ * Check if player PLAYER has qualified for the high score board
+ * and add his score to the table if so.
+ */
 void high_score_check_player (U8 player)
 {
 	U8 hs;
 
-	for (hs = 0; hs < NUM_HIGH_SCORES; hs++)
+	for (hs = 0; hs < HS_COUNT; hs++)
 	{
 		struct high_score *hsp = &high_score_table[hs];
 		if ((score_compare (scores[player], hsp->score)) > 0)
@@ -276,7 +291,13 @@ void high_score_check_player (U8 player)
 			/* The score qualifies for this position.  Push all
 			 * scores down and then insert the player score here.
 			 * Set the initials to the player number */
-			/* TODO */
+			dbprintf ("High score %d achieved by player %d\n",
+				hs, player+1);
+			wpc_nvram_get ();
+			high_score_free (hs);
+			memcpy (hsp->score, scores[player], sizeof (score_t));
+			hsp->initials[0] = player;
+			wpc_nvram_put ();
 			return;
 		}
 	}
@@ -284,8 +305,18 @@ void high_score_check_player (U8 player)
 
 
 /** Award COUNT credits for achieving a high score */
-void high_score_award_credits (U8 count)
+void high_score_award_credits (U8 *adjptr)
 {
+	U8 count = *adjptr;
+	dbprintf ("Award %d highscore credits\n", count);
+	while (count > 0)
+	{
+		audit_increment (&system_audits.hstd_credits);
+		add_credit ();
+		knocker_fire ();
+		task_sleep_sec (1);
+		count--;
+	}
 }
 
 
@@ -297,12 +328,26 @@ void high_score_enter_initials (U8 position)
 	struct high_score *hsp = &high_score_table[position];
 	if (hsp->initials[0] < ' ')
 	{
-		/* Get the initials for this player */
+		dbprintf ("High score %d needs initials\n", position);
+		/* Announce that player # has qualified */
 		high_score_player = hsp->initials[0];
-		memset (hsp->initials, 0, 3);
+
+		wpc_nvram_get ();
+		memset (hsp->initials, ' ', HIGH_SCORE_NAMESZ);
+		wpc_nvram_put ();
+
+		high_score_position = position;
 		deff_start (DEFF_HSENTRY);
-		while (deff_get_active () == DEFF_HSENTRY)
+		while (deff_get_active () == DEFF_HSENTRY) /* TODO - not working? */
 			task_sleep (TIME_133MS);
+
+		/* Get the initials for this player */
+		SECTION_VOIDCALL (__common__, initials_enter);
+#if 0
+		wpc_nvram_get ();
+		/* save initials to table */
+		wpc_nvram_put ();
+#endif
 
 		/* Award credits */
 		if (position == 0)
@@ -332,6 +377,8 @@ void high_score_check (void)
 	/* Don't record high scores if disabled by adjustment */
 	if (hstd_config.highest_scores == OFF)
 		return;
+
+	dbprintf ("Checking for high scores\n");
 
 	/* Scan all players, in order from first to last, and see if they
 	 * qualify for the high score board.  For each player that
