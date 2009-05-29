@@ -110,6 +110,7 @@ cu17:
 fixed10:
 term6:
 times8:
+bitmap8:
 
 [timers]
 Ignore Tilt:
