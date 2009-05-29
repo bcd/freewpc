@@ -152,6 +152,9 @@ void serve_ball (void)
  * endball.  It is also called by test mode when it starts up. */
 void end_game (void)
 {
+	/* Common stop/end game logic */
+	stop_game ();
+
 	if (in_game)
 	{
 		/* Kill the flippers in case still enabled */
@@ -162,24 +165,15 @@ void end_game (void)
 		if (!in_test)
 		{
 			high_score_check ();
+			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
 		}
-
-		/* Mark the game as complete */
-		in_game = FALSE;
-		player_up = 0;
-		ball_up = 0;
-		in_tilt = FALSE;
-		valid_playfield = FALSE;
-		callset_invoke (stop_game);
 	}
 
-	leff_stop_all ();
 	task_sleep (TIME_33MS); /* not needed? */
 	lamp_all_off ();
-	deff_stop_all ();
 
 	if (!in_test)
 	{
@@ -597,6 +591,9 @@ void stop_game (void)
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
+	player_up = 0;
+	ball_up = 0;
+	valid_playfield = FALSE;
 	deff_stop_all ();
 	leff_stop_all ();
 	callset_invoke (stop_game);
