@@ -205,7 +205,7 @@ void scores_draw_current (U8 single_player)
 no scores are flashing; everything is fixed. */
 void scores_draw (void)
 {
-	if (in_game)
+	if (in_game && ball_up)
 		scores_draw_ball ();
 	else if (MACHINE_DMD)
 		scores_draw_credits ();
@@ -219,8 +219,7 @@ at ball start. */
 void scores_important_deff (void)
 {
 	dmd_alloc_low_clean ();
-	scores_draw_ball ();
-	scores_draw_current (0);
+	scores_draw ();
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
