@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -61,27 +61,32 @@ void enter_initials_deff (void)
 
 	while (task_find_gid (GID_ENTER_INITIALS))
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_left (&font_var5, 2, 3, "ENTER INITIALS");
-		font_render_string_left (&font_fixed6, 2, 15, initials_data);
-		sprintf ("%12s", initial_chars + initials_selection);
-		font_render_string_left (&font_mono5, 2, 26, sprintf_buffer);
+		if (score_update_required ())
+		{
+			dmd_alloc_low_clean ();
+			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
+			font_render_string_left (&font_fixed10, 0, 9, initials_data);
+			sprintf ("%12s", initial_chars + initials_selection);
+			font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
 
 #if (MACHINE_DMD == 1)
-		for (n = 25; n <= 31; n++)
-			dmd_low_buffer[16UL * n] ^= 0xFE;
+			for (n = 23; n <= 31; n++)
+				dmd_low_buffer[16UL * n] ^= 0xFF;
 #endif
 
-		sprintf ("%d", initials_enter_timer);
-		font_render_string_right (&font_mono5, 126, 3, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_300MS);
+			sprintf ("%d", initials_enter_timer);
+			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
+			dmd_show_low ();
+		}
+		task_sleep (TIME_66MS);
 	}
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 
 void initials_stop (void)
 {
+	task_sleep_sec (1);
 	task_kill_gid (GID_ENTER_INITIALS);
 	initials_enter_timer = 0;
 }
@@ -104,6 +109,7 @@ void initials_running (void)
 	{
 		task_sleep (TIME_1S + TIME_66MS);
 		initials_enter_timer--;
+		score_update_request ();
 	}
 	task_exit ();
 }
@@ -112,20 +118,29 @@ void initials_running (void)
 void initials_enter (void)
 {
 	task_create_gid1 (GID_ENTER_INITIALS, initials_running);
+	while (task_find_gid (GID_ENTER_INITIALS))
+		task_sleep (TIME_133MS);
 }
 
 
 CALLSET_ENTRY (initials, sw_left_button)
 {
 	if (initials_enter_timer)
+	{
+		/* TODO - bounds checking and wraparound */
 		--initials_selection;
+		score_update_request ();
+	}
 }
 
 
 CALLSET_ENTRY (initials, sw_right_button)
 {
 	if (initials_enter_timer)
+	{
 		++initials_selection;
+		score_update_request ();
+	}
 }
 
 
@@ -134,6 +149,7 @@ CALLSET_ENTRY (initials, start_button_handler)
 	if (initials_enter_timer)
 	{
 		initials_data[initials_index] = initial_chars[initials_selection];
+		score_update_request ();
 		if (++initials_index == NUM_INITIALS_ALLOWED)
 		{
 			(*initials_enter_complete) ();

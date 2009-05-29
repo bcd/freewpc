@@ -204,6 +204,7 @@ void high_score_reset (void)
 	}
 
 	wpc_nvram_put ();
+	csum_area_update (&high_csum_info);
 
 	/* Reset when the next auto-reset will occur */
 	high_score_check_reset ();
@@ -214,12 +215,13 @@ void hsentry_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("PLAYER %d", high_score_player);
-	font_render_string_center (&font_fixed6, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	font_render_string_center (&font_fixed6, 64, 22, "ENTER INITIALS");
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
 	task_sleep_sec (2);
 
+#if 0
 	dmd_alloc_low_clean ();
 	if (high_score_position == 0)
 		sprintf ("GRAND CHAMPION");
@@ -229,6 +231,7 @@ void hsentry_deff (void)
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_show_low ();
 	task_sleep_sec (3);
+#endif
 	deff_exit ();
 }
 
@@ -298,6 +301,7 @@ void high_score_check_player (U8 player)
 			memcpy (hsp->score, scores[player], sizeof (score_t));
 			hsp->initials[0] = player;
 			wpc_nvram_put ();
+			csum_area_update (&high_csum_info);
 			return;
 		}
 	}
@@ -330,23 +334,22 @@ void high_score_enter_initials (U8 position)
 	{
 		dbprintf ("High score %d needs initials\n", position);
 		/* Announce that player # has qualified */
-		high_score_player = hsp->initials[0];
+		high_score_player = hsp->initials[0]+1;
 
 		wpc_nvram_get ();
 		memset (hsp->initials, ' ', HIGH_SCORE_NAMESZ);
 		wpc_nvram_put ();
+		csum_area_update (&high_csum_info);
 
 		high_score_position = position;
-		deff_start (DEFF_HSENTRY);
-		while (deff_get_active () == DEFF_HSENTRY) /* TODO - not working? */
-			task_sleep (TIME_133MS);
-
-		/* Get the initials for this player */
+		deff_start_sync (DEFF_HSENTRY);
 		SECTION_VOIDCALL (__common__, initials_enter);
+
 #if 0
 		wpc_nvram_get ();
 		/* save initials to table */
 		wpc_nvram_put ();
+		csum_area_update (&high_csum_info);
 #endif
 
 		/* Award credits */
@@ -359,9 +362,7 @@ void high_score_enter_initials (U8 position)
 			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
 		}
 #if 0
-		deff_start (DEFF_HSCREDITS);
-		while (deff_get_active () == DEFF_HSCREDITS)
-			task_sleep (TIME_133MS);
+		deff_start_sync (DEFF_HSCREDITS);
 #endif
 	}
 }
