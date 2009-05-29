@@ -129,7 +129,7 @@ CALLSET_ENTRY (initials, sw_right_button)
 }
 
 
-CALLSET_ENTRY (initials, sw_start_button)
+CALLSET_ENTRY (initials, start_button_handler)
 {
 	if (initials_enter_timer)
 	{

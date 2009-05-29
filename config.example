@@ -15,6 +15,7 @@
 #MACHINE := afm
 #MACHINE := wcs
 #MACHINE := t2
+#MACHINE := fh
 #MACHINE := tester
 #MACHINE := tzsound
 #MACHINE := tspp

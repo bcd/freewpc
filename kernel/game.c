@@ -625,15 +625,8 @@ bool verify_start_ok (void)
 }
 
 
-CALLSET_ENTRY (game, sw_start_button)
+CALLSET_ENTRY (game, start_button_handler)
 {
-	extern U8 initials_enter_timer;
-
-	/* If in test mode, let test handle it completely.
-	 * Likewise for enter initials. */
-	if (in_test || initials_enter_timer || (deff_get_active () == DEFF_SYSTEM_RESET))
-		return;
-
 #ifdef MACHINE_START_SWITCH
 	/* If not enough credits to start game/add player,
 	 * return.  Alert the player of this outside of a game. */

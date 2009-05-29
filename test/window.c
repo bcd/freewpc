@@ -3796,7 +3796,7 @@ CALLSET_ENTRY (test_mode, sw_escape)
 	}
 }
 
-CALLSET_ENTRY (test_mode, sw_start_button)
+CALLSET_ENTRY (test_mode, start_button_handler)
 {
 	if (win_top)
 	{
