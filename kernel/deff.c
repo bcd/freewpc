@@ -396,7 +396,7 @@ void deff_update (void)
 		return;
 
 	/* Switch to the new effect */
-	deff_debug ("deff_update: %d-%d\n", previous, deff_background);
+	deff_debug ("deff_update: %d -> %d\n", previous, deff_background);
 	if (previous != DEFF_NULL)
 		deff_stop (previous);
 	if (deff_background != DEFF_NULL)
@@ -405,6 +405,17 @@ void deff_update (void)
 		deff_running = deff_background;
 		deff_start_task (bgdeff);
 	}
+}
+
+
+/** Start a display effect and wait for it to finish before returning. */
+void deff_start_sync (deffnum_t dn)
+{
+	deff_start (dn);
+	if (deff_get_active () != dn)
+		abort ();
+	while (deff_get_active () == dn)
+		task_sleep (TIME_100MS);
 }
 
 
