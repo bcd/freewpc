@@ -313,6 +313,9 @@ void deff_nice (enum _priority prio)
 
 	/* Change the current priority */
 	deff_prio = prio;
+
+	/* Force an update: this task may not be the best anymore */
+	deff_update ();
 }
 
 
