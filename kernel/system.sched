@@ -49,12 +49,12 @@ switch_rtt/2          1       280c
 pic_rtt?CONFIG_PIC    32      200c  # guess?
 
 # Resynchronize to the AC zero cross point.
-ac_rtt                1       23c
+ac_rtt                1       36c
 
 # Update flashers.  Each bank of 8 is updated
 # once every 4ms (the 2 banks are alternated every 2ms).
 sol_update_rtt/2      2       60c
-sol_req_rtt           1       25c
+sol_req_rtt           1       12c
 
 # Update the lamps
 lamp_rtt/4            2       111c
