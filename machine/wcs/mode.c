@@ -47,6 +47,9 @@ U8 mode_timers[NUM_MODES];
 /** The mode scoring multiplier */
 U8 mode_multiplier;
 
+/** The Super Dog mode timer; when nonzero, the mode is active */
+U8 superdog_timer;
+
 
 /** Awards mode points, possibly multiplied. */
 void mode_score (const score_t score)
@@ -194,6 +197,11 @@ void mode_reset_dog_targets (void)
 
 void mode_collect_dog_target (U8 target)
 {
+	if (superdog_timer)
+	{
+		return;
+	}
+
 	sound_start (ST_SAMPLE, SND_DRIBBLE, SL_500MS, PRI_GAME_QUICK1);
 	if (!flag_test (FLAG_MODE_LIT))
 	{
@@ -212,6 +220,8 @@ void mode_collect_dog_target (U8 target)
 	}
 	else
 	{
+		/* Mode start is already lit; the value of the Dog targets
+		depends on the number of modes actually running right now */
 		score (SC_10K);
 	}
 }
@@ -266,13 +276,19 @@ void mode_reset (U8 mode)
 }
 
 
+void superdog_start (void)
+{
+	superdog_timer = 30;
+}
+
+
 void maybe_mode_start (void)
 {
 	if (mode_can_be_started () && flag_test (FLAG_MODE_LIT))
 	{
+		mode_reset_dog_targets ();
 		if (modes_started < NUM_MODES)
 		{
-			mode_reset_dog_targets ();
 			score (SC_100K);
 			deff_start (DEFF_MODE_STARTED);
 			task_sleep (TIME_16MS);
@@ -281,6 +297,7 @@ void maybe_mode_start (void)
 		}
 		else
 		{
+			superdog_start ();
 		}
 	}
 	else
@@ -334,5 +351,6 @@ CALLSET_ENTRY (mode, start_ball)
 {
 	modes_running = 0;
 	mode_multiplier = 1;
+	superdog_timer = 0;
 }
 

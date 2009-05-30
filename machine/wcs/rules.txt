@@ -256,10 +256,10 @@ Note that only *one* can be in effect at a time, so you may choose
 to avoid shooting for the next city if the current feature is lucrative --
 advancing the city will cancel the previous benefit.
 
-Each city reached also scores 500,000.
+Per-ball, each city reached scores 500K + 100K.
 
-The first city, Chicago, requires 10 spins to reach.  Each city thereafter
-takes an additional 5 spins.  The Left Orbit switch will always spot 3
+The first city, Chicago, requires 12 spins to reach.  Each city thereafter
+takes an additional 4 spins.  The Left Orbit switch will always spot 4
 spins.
 
 	- Chicago - 2X Combos
@@ -274,7 +274,8 @@ spins.
 
 The final award, 2X Scoring, can run until end-of-ball, but it will
 time out in 30 seconds.  Shooting the Left Loop/Spinner adds 10 seconds
-to the clock, up to a max of 30 seconds.
+to the clock, up to a max of 30 seconds.  When 2X Scoring times out, the
+cities reset to the beginning again.
 
 
 World Cup Final

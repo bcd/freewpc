@@ -5,6 +5,10 @@ __local__ U8 lock_count;
 
 __local__ U8 mb_spinner_count;
 
+score_t mb_jackpot_value;
+
+#define SPINNERS_FOR_SUPER 20
+
 
 void ball_locked_deff (void)
 {
@@ -86,7 +90,6 @@ void mb_reset (void)
 	flag_off (FLAG_MULTIBALL_RUNNING);
 	flag_off (FLAG_JACKPOT_LIT);
 	flag_off (FLAG_SUPER_JACKPOT_LIT);
-	global_score_multiplier = 1;
 }
 
 void mb_light (void)
@@ -112,10 +115,10 @@ void mb_start (void)
 {
 	flag_off (FLAG_MULTIBALL_LIT);
 	flag_on (FLAG_MULTIBALL_RUNNING);
+	/* TODO - init base jackpot value */
 	mb_light_jackpot ();
 	flag_off (FLAG_SUPER_JACKPOT_LIT);
 	mb_spinner_count = 0;
-	global_score_multiplier = 2;
 	VOIDCALL (goal_count_lamp_update);
 	deff_start (DEFF_MULTIBALL_START);
 	if (flag_test (FLAG_LEFT_EJECT_LOCK))
@@ -131,7 +134,7 @@ void mb_start_surprise (void)
 
 static void mb_advance_spinner (void)
 {
-	if (++mb_spinner_count == 16)
+	if (++mb_spinner_count == SPINNERS_FOR_SUPER)
 	{
 		mb_light_super_jackpot ();
 	}
@@ -142,6 +145,8 @@ static void mb_award_jackpot (void)
 	if (!flag_test (FLAG_JACKPOT_LIT))
 	{
 		flag_off (FLAG_JACKPOT_LIT);
+		/* score jackpot value */
+		/* increase jackpot value */
 	}
 }
 
