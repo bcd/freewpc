@@ -348,8 +348,9 @@ Ultra Collect: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 Ultra Spot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 #Ultra Mania Running: page(MACHINE_PAGE)
 
-#Skill Shot Ready:
-#Skill Shot Scored:
+Skill Shot Ready: page(MACHINE_PAGE), PRI_GAME_MODE6
+Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_MODE6
+Skill Shot Missed: page(MACHINE_PAGE), PRI_GAME_MODE6
 
 Kickback Relit: page(MACHINE_PAGE), PRI_GAME_QUICK2
 
@@ -363,7 +364,6 @@ Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 pcsenior:
 misctype:
 lithograph:
-bitmap8:
 
 [timers]
 Goal Trough Made:

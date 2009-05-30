@@ -130,6 +130,8 @@ void score_long (const score_t score);
 void score_deff_set (void);
 score_pointer_t score_deff_get (void);
 
+void score_multiplier_set (U8 m);
+
 void scores_reset (void);
 void score_init (void);
 
