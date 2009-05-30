@@ -223,10 +223,14 @@ void scores_reset (void)
 	current_score = &scores[0][0];
 }
 
+void score_multiplier_set (U8 m)
+{
+	global_score_multiplier = m;
+}
 
 CALLSET_ENTRY (score, start_ball)
 {
-	global_score_multiplier = 1;
+	score_multiplier_set (1);
 }
 
 CALLSET_ENTRY (score, factory_reset)
