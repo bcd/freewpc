@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <diag.h>
+#include <goalie.h>
 
 typedef enum
 {

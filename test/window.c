@@ -1858,6 +1858,8 @@ struct menu pic_test_item = {
 
 /**********************************************************************/
 
+#ifndef CONFIG_NATIVE
+
 U8 *memory_editor_addr;
 
 U8 memory_editor_step;
@@ -1983,6 +1985,8 @@ struct menu memory_editor_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &memory_editor_window, NULL } },
 };
+
+#endif /* !CONFIG_NATIVE */
 
 /**********************************************************************/
 

@@ -62,5 +62,6 @@ void seg_init (void);
 void seg_alloc (void);
 void seg_alloc_clean (void);
 void seg_show (void);
+void dmd_rtt (void);
 
 #endif /* _SYS_SEGMENT_H */

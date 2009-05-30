@@ -148,7 +148,7 @@ void ultra_spot_deff (void)
  * Collect an Ultra Mode.  Returns FALSE if the mode is not running and
  * nothing was collected.
  */
-bool ultra_collect (struct ultra_info *u)
+bool ultra_collect (const struct ultra_info *u)
 {
 	U8 *enable = u->enable;
 
@@ -163,6 +163,7 @@ bool ultra_collect (struct ultra_info *u)
 	/* Decrement shot counts during normal play */
 	if (flag_test (FLAG_ULTRA_MANIA_RUNNING))
 	{
+		return FALSE;
 	}
 	else if (*enable)
 	{
@@ -188,7 +189,7 @@ bool ultra_collect (struct ultra_info *u)
 /**
  * Score an Ultra Mode.
  */
-void ultra_score (struct ultra_info *u)
+void ultra_score (const struct ultra_info *u)
 {
 	if (ultra_collect (u))
 	{
@@ -207,7 +208,7 @@ void ultra_add_sound (void)
 	task_exit ();
 }
 
-void ultra_deff_start (struct ultra_info *u, deffnum_t deff)
+void ultra_deff_start (const struct ultra_info *u, deffnum_t deff)
 {
 	task_pid_t tp;
 
@@ -236,7 +237,7 @@ void ultra_deff_start (struct ultra_info *u, deffnum_t deff)
  */
 void ultra_add_shot (void)
 {
-	struct ultra_info *u;
+	const struct ultra_info *u;
 
 	if (flag_test (FLAG_ULTRA_MANIA_LIT) || flag_test (FLAG_ULTRA_MANIA_RUNNING))
 		return;

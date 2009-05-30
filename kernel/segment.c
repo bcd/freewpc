@@ -186,7 +186,7 @@ segbits_t *seg_write_char (segbits_t *sa, char c)
 
 bool seg_addr_valid (void *sa)
 {
-	return ((sa >= seg_pages) && (sa < seg_pages + sizeof (seg_pages)));
+	return ((sa >= (void *)seg_pages) && (sa < (void *)seg_pages + sizeof (seg_pages)));
 }
 
 
