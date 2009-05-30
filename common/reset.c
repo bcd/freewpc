@@ -113,12 +113,6 @@ void factory_reset_if_required (void)
 }
 
 
-void render_build_date (void)
-{
-	locale_render_date (BUILD_MONTH, BUILD_DAY, BUILD_YEAR);
-}
-
-
 void system_accept_freewpc (void)
 {
 	if ((freewpc_accepted[0] == ACCEPT_1) &&
@@ -181,7 +175,7 @@ void system_reset_deff (void)
 #endif
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
-	render_build_date ();
+	SECTION_VOIDCALL (__common__, render_build_date);
 	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 
 #if (MACHINE_PIC == 1)

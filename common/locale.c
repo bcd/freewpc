@@ -60,6 +60,13 @@ void locale_render_date (U8 month, U8 day, U16 year)
 	}
 }
 
+
+void render_build_date (void)
+{
+	locale_render_date (BUILD_MONTH, BUILD_DAY, BUILD_YEAR);
+}
+
+
 void locale_render (U8 locale)
 {
 	sprintf (locale_names[locale]);
