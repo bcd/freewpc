@@ -221,6 +221,8 @@ endif
 ifdef CONFIG_WPC
 include test/Makefile
 endif
+include effect/Makefile
+
 
 EVENT_OBJS = $(BLDDIR)/callset.o
 
