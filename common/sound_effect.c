@@ -219,7 +219,7 @@ static inline U8 sound_proc_channel_id (void)
 	if ((gid < GID_SOUND_PROC0) || (gid >= GID_SOUND_PROC0 + MAX_SOUND_CHANNELS))
 	{
 		dbprintf ("Bad GID %02X for sound proc\n", gid);
-		abort ();
+		fatal (ERR_NOT_SOUND_PROC);
 	}
 	return gid - GID_SOUND_PROC0;
 }

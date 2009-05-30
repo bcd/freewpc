@@ -416,7 +416,7 @@ void deff_start_sync (deffnum_t dn)
 {
 	deff_start (dn);
 	if (deff_get_active () != dn)
-		abort ();
+		nonfatal (ERR_FAILED_DEFF);
 	while (deff_get_active () == dn)
 		task_sleep (TIME_100MS);
 }

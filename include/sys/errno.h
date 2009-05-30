@@ -64,6 +64,8 @@
 #define ERR_SWITCH_QUEUE_CORRUPT 42
 #define ERR_SOL_REQUEST          43
 #define ERR_VIRTUAL_DEVICE_COUNT 44
+#define ERR_FAILED_DEFF          45
+#define ERR_NOT_SOUND_PROC       46
 
 #ifndef __ASSEMBLER__
 
