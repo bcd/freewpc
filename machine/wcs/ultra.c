@@ -24,6 +24,8 @@
 
 __local__ U8 ultra_awards_enabled[4];
 
+__local__ U8 ultra_mania_awards_enabled[4];
+
 __local__ U8 ultra_award_next;
 
 __local__ U8 ultra_awards_finished;
@@ -323,6 +325,7 @@ CALLSET_ENTRY (ultra, start_player)
 	ultra_award_next = 0;
 	memset (ultra_awards_enabled, 0, sizeof (ultra_awards_enabled));
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_off);
+	/* init ultra_mania_awards_enabled to 2X max */
 }
 
 CALLSET_ENTRY (ultra, start_ball)

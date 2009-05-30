@@ -52,8 +52,15 @@ struct tv_award tv_award_table[] = {
 	{ "HURRY UP", tv_award_hurryup, 40, NULL },
 	/* next one should not apply unless in timed game */
 	{ "ADD 30 SECONDS", tv_award_add_time, 20, NULL },
+#if 0
+	{ "20 SEC. BALLSAVE", tv_award_ball_save, 20, NULL },
+	{ "LIGHT MULTIBALL", tv_award_light_mb, 20, NULL },
+	{ "MULTIBALL", tv_award_start_mb, 20, NULL },
+	{ "ADVANCE CITY", tv_award_advance_city, 20, NULL },
+#endif
 	{ "START MODE", tv_award_start_mode, 60, NULL },
 	{ "LIGHT ULTRA SHOT", tv_award_add_ultra, 60, NULL },
+	/* next one should not apply in timed game */
 	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball, 5, NULL },
 	{ "250,000", tv_award_points, 100, NULL },
 };
