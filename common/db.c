@@ -77,6 +77,12 @@ void db_idle (void)
 					switch_queue_dump ();
 					VOIDCALL (sol_req_dump);
 					VOIDCALL (triac_dump);
+					SECTION_VOIDCALL (__common__, device_debug);
+					break;
+
+				case 'm':
+					/* Dump the multiball devices */
+					SECTION_VOIDCALL (__common__, device_debug);
 					break;
 
 				case 't':
