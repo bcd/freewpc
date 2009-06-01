@@ -86,7 +86,7 @@ void le_example (void)
 	le_alloc_single (MACHINE_SHOOT_AGAIN_LAMP);
 	le_flicker (MACHINE_SHOOT_AGAIN_LAMP, TIME_4S);
 	le_free_single (MACHINE_SHOOT_AGAIN_LAMP);
-#endif MACHINE_SHOOT_AGAIN_LAMP
+#endif /* MACHINE_SHOOT_AGAIN_LAMP */
 	task_exit ();
 }
 
