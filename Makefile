@@ -167,7 +167,7 @@ else
 CC := $(CCACHE) $(GCC_ROOT)/m6809-gcc-$(GCC_VERSION)
 endif
 AS = $(CC) -xassembler-with-cpp
-LD = $(GCC_ROOT)/m6809-ld
+LD = $(GCC_ROOT)/m6809-unknown-none-ld
 REQUIRED += $(CC:$(CCACHE)=) $(LD)
 else
 GCC_VERSION = NATIVE
