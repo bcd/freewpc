@@ -1,10 +1,24 @@
+/*
+ * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
-
-
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-U8 irq_ack_value;
-#endif
 
 
 /**
@@ -29,10 +43,6 @@ void platform_init (void)
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
-
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-	irq_ack_value = 0x96;
-#endif
 
 	/* Initialize the ROM page register
 	 * page of ROM adjacent to the system area is mapped.

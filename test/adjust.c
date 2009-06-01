@@ -231,13 +231,11 @@ struct adjustment printer_adjustments[] = {
 
 #ifdef CONFIG_DEBUG_ADJUSTMENTS
 extern U8 firq_row_value;
-extern U8 irq_ack_value;
 extern U8 switch_stress_enable;
 struct adjustment debug_adjustments[] = {
 #if (MACHINE_DMD == 1)
 	{ "FIRQ ROW VALUE", &integer_value, DMD_REFRESH_ROW, &firq_row_value },
 #endif
-	{ "IRQ ACK VALUE", &hex_integer_value, 0x96, &irq_ack_value },
 	{ "SWITCH STRESS", &yes_no_value, NO, &switch_stress_enable },
 	{ NULL, NULL, 0, NULL },
 };
