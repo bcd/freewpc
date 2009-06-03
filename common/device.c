@@ -426,7 +426,12 @@ wait_and_recount:
  * minus any pending kicks. */
 static inline U8 device_kickable_count (device_t *dev)
 {
-	return (dev->actual_count - dev->kicks_needed);
+	extern U8 switch_stress_enable;
+
+	if (switch_stress_enable == YES)
+		return 0;
+	else
+		return (dev->actual_count - dev->kicks_needed);
 }
 
 
