@@ -47,6 +47,8 @@ void tv_award_add_time (void)
 	timed_game_extend (30);
 }
 
+#define TV_AWARD_COUNT (sizeof (tv_award_table) / sizeof (struct tv_award))
+
 struct tv_award tv_award_table[] = {
 	{ "QUICK MULTIBALL", tv_award_start_quickmb, 5, NULL },
 	{ "HURRY UP", tv_award_hurryup, 40, NULL },
@@ -106,6 +108,8 @@ void tv_collect (void)
 #if 1
 	/* Until the logic below is implemented, just go through them in order. */
 	tv_award_selected = tv_count;
+	while (tv_award_selected > TV_AWARD_COUNT)
+		tv_award_selected -= TV_AWARD_COUNT;
 #else
 	/* The TV Awards are pseudorandom, like AFM's Stroke of Luck.
 	The algorithm works as follows:
