@@ -3,6 +3,9 @@
 
 extern U8 initials_enter_timer;
 
+extern U8 switch_stress_enable;
+
+__test2__ void switch_stress_endball (void);
 
 /**
  * Handle the start button.  There should be only one callset entry for
@@ -17,6 +20,10 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	}
 	else */ if (deff_get_active () == DEFF_SYSTEM_RESET)
 	{
+	}
+	else if (switch_stress_enable && in_live_game)
+	{
+		switch_stress_endball ();
 	}
 	else if (in_test)
 	{

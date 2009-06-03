@@ -36,6 +36,7 @@ void switch_stress_task (void)
 	const switch_info_t *swinfo;
 	task_pid_t tp;
 
+	device_add_live ();
 	for (;;)
 	{
 		task_sleep (TIME_100MS);
@@ -55,12 +56,30 @@ void switch_stress_task (void)
 			continue;
 
 		if (SW_HAS_DEVICE (swinfo))
+		{
+			device_t *dev = device_entry (SW_GET_DEVICE (swinfo));
+#ifdef DEVNO_TROUGH
+			if (dev->devno == DEVNO_TROUGH)
+				continue;
+#endif
+			dbprintf ("Simulating enter %s\n", dev->props->name);
+			device_call_op (dev, enter);
 			continue;
+		}
 
 		/* Simulate the switch */
 		tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
 		task_set_arg (tp, sw);
 	}
+}
+
+
+void switch_stress_endball (void)
+{
+#ifdef DEVNO_TROUGH
+	device_t *dev = device_entry (DEVNO_TROUGH);
+	device_call_op (dev, enter);
+#endif
 }
 
 
@@ -76,7 +95,7 @@ CALLSET_ENTRY (stress, init)
  * Start the simulation as soon as valid playfield is declared,
  * if it has been enabled.
  */
-CALLSET_ENTRY (stress, valid_playfield)
+CALLSET_ENTRY (stress, start_ball)
 {
 	if (switch_stress_enable == YES)
 		task_create_gid1 (GID_SWITCH_STRESS, switch_stress_task);
