@@ -829,9 +829,6 @@ bool device_check_start_ok (void)
 	/* If some balls are unaccounted for, and not on the shooter,
 	 * then start a device probe and a ball search.  Alert the user
 	 * by displaying a message. */
-	/* TODO - e.g. what if a ball is sitting in the left plunger
-	lane on Road Show?  Ball search won't free it but the game
-	sees it... maybe a message to clear the shooter? */
 	if (truly_missing_balls > 0)
 	{
 		dbprintf ("%d balls missing.\n", truly_missing_balls);

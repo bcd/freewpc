@@ -45,7 +45,15 @@ void ball_save_deff (void)
 /** Display effect when locating missing balls prior to game start */
 void locating_balls_deff (void)
 {
+	/* For Funhouse/Road Show, if a ball is sitting in the left plunger
+	lane, announce that, as ball search isn't going to fix it. */
+#ifdef MACHINE_LEFT_SHOOTER_SWITCH
+	if (switch_poll_logical (MACHINE_LEFT_SHOOTER_SWITCH))
+		generic_deff ("CLEAR BALL FROM", "LEFT SHOOTER");
+	else
+#else
 	generic_deff ("LOCATING BALLS", "PLEASE WAIT...");
+#endif
 }
 
 
