@@ -65,37 +65,37 @@ typedef U8 adjval_t;
 
 typedef struct
 {
-	adjval_t balls_per_game;
+	adjval_t balls_per_game; /* done */
 	adjval_t max_players;
-	adjval_t tilt_warnings;
-	adjval_t max_ebs;
-	adjval_t max_ebs_per_bip;
+	adjval_t tilt_warnings; /* done */
+	adjval_t max_ebs; /* done */
+	adjval_t max_ebs_per_bip; /* done */
 	adjval_t replay_system;
 	adjval_t replay_percent;
 	adjval_t replay_start;
 	adjval_t replay_levels;
 	adjval_t replay_level[4];
 	adjval_t replay_boost;
-	adjval_t replay_award;
-	adjval_t special_award;
+	adjval_t replay_award; /* done */
+	adjval_t special_award; /* done */
 	adjval_t match_award;
 	adjval_t extra_ball_ticket;
 	adjval_t max_tickets_per_player;
-	adjval_t match_feature;
+	adjval_t match_feature; /* done */
 	adjval_t custom_message;
 	adjval_t language;
 	adjval_t clock_style;
-	adjval_t date_style;
+	adjval_t date_style; /* done */
 	adjval_t show_date_and_time;
 	adjval_t allow_dim_illum;
-	adjval_t tournament_mode;
-	adjval_t euro_digit_sep;
-	adjval_t min_volume_control;
+	adjval_t tournament_mode; /* done */
+	adjval_t euro_digit_sep; /* done */
+	adjval_t min_volume_control; /* done */
 	adjval_t gi_power_saver;
 	adjval_t power_saver_level;
 	adjval_t ticket_board;
-	adjval_t no_bonus_flips;
-	adjval_t game_restart;
+	adjval_t no_bonus_flips; /* done */
+	adjval_t game_restart; /* done */
 	adjval_t allow_chase_ball;
 
 	adjval_t family_mode;
