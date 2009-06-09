@@ -74,6 +74,7 @@ void free_kick_award (void)
 		return;
 
 	free_kicks += free_kick_multiplier;
+	/* TODO - adjust scoring here big time */
 	score_multiple (SC_1M, free_kick_multiplier);
 	if (free_kick_multiplier < 5)
 	{
