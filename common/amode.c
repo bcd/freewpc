@@ -148,8 +148,11 @@ void amode_high_score_page (void)
 
 void amode_date_time_page (void)
 {
-	rtc_show_date_time ();
-	amode_page_end (3);
+	if (system_config.show_date_and_time == YES)
+	{
+		rtc_show_date_time ();
+		amode_page_end (3);
+	}
 }
 
 void amode_kill_music (void)
