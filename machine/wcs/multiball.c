@@ -116,6 +116,7 @@ void mb_start (void)
 	flag_off (FLAG_MULTIBALL_LIT);
 	flag_on (FLAG_MULTIBALL_RUNNING);
 	/* TODO - init base jackpot value */
+	/* TODO - add one more ball to play */
 	mb_light_jackpot ();
 	flag_off (FLAG_SUPER_JACKPOT_LIT);
 	mb_spinner_count = 0;

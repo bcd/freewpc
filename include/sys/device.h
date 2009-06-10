@@ -100,11 +100,11 @@ do { \
  * contains various compile-time attributes. */
 typedef struct device_properties
 {
-	/** Pointer to the operations structure */
-	device_ops_t *ops;
-
 	/** Name of the device */
 	const char *name;
+
+	/** Pointer to the operations structure */
+	device_ops_t *ops;
 
 	/** The solenoid used to kick balls from it */
 	solnum_t sol;

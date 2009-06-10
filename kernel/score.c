@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -165,13 +165,17 @@ void score_award_compact (U8 offset, bcd_t val)
 }
 
 
+/** The first of three general scoring APIs.  score_long_multiplied
+adds to the current player's score without applying *any*
+multipliers. */
 void score_long_unmultiplied (const score_t score)
 {
 	score_copy (last_score, score);
 	score_award (last_score);
 }
 
-
+/** Like above, but the global score multiplier is in effect and
+an additional multiplier can be specified too. */
 void score_long_multiple (const score_t score, U8 multiplier)
 {
 	score_copy (last_score, score);
@@ -180,7 +184,8 @@ void score_long_multiple (const score_t score, U8 multiplier)
 	score_award (last_score);
 }
 
-
+/** Like score_long_multiple, without an additional multiplier.
+The global multiplier still applies. */
 void score_long (const score_t score)
 {
 	score_long_multiple (score, 1);
@@ -196,19 +201,22 @@ void score_multiple (score_id_t id, U8 multiplier)
 }
 
 
-/** Adds to the current score.  The input score is given as a score ID. */
+/** Like score_long, except the input score is given as a score ID
+instead of a long BCD string. */
 void score (score_id_t id)
 {
 	score_long_multiple (score_table[id], 1);
 }
 
-
+/** Called by the display effect module when starting an effect which
+wants to display the last score (it has the D_SCORE flag).  The score
+is saved to separate storage so that future scores do not clobber it. */
 void score_deff_set (void)
 {
 	score_copy (deff_score, last_score);
 }
 
-
+/** Called by a display effect to get the last score */
 bcd_t *score_deff_get (void)
 {
 	return deff_score;

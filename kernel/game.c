@@ -314,7 +314,6 @@ void end_ball (void)
 	if (config_timed_game == OFF)
 	{
 		ball_up++;
-		/* TODO - real WPC games will clear the 1/2 credits here */
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
