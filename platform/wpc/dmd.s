@@ -63,13 +63,14 @@ _dmd_memset:
 	; initialized 510 of the 512 DMD display bytes.
 	; At the end one more pshu is needed to assign
 	; the final 2 bytes.
-	; TODO - when doing zero operation, we can push
-	; DP=0 to get one extra byte moved per instruction.
-	; If interrupts are disabled, we can set S=0 before
-	; this loop and get 2 more bytes out of it.  There
-	; would be a penalty for the setup/restore though.
 	; (102 bytes in 17x12=204 cycles, means this takes
 	; about 0.5ms to execute.)
+	;
+	; TODO - when doing zero operation, we can push
+	; DP=0 to get one extra byte moved per instruction.
+	; If interrupts are disabled, we can also set S=0 before
+	; this loop and get 2 more bytes out of it.  There
+	; would be a penalty for the setup/restore though.
 1$:
 	pshu	a,b,x,y
 	pshu	a,b,x,y
@@ -176,16 +177,18 @@ rle_run:
 	; Here, a macro sequence has been started (0xA8).  The second
 	; byte tells us what to do.
 	tstb
-	beq	rle_escape        ; Zero = escape character
 	bmi	rle_done          ; Any negative value = end-of-image
+	beq	rle_escape        ; Zero = escape character
 
 	; Positive values indicate the run-length count.  The actual
 	; byte count must be EVEN.  The value here is that divided by 2;
 	; i.e. the number of 16-bit words which follow.  One more byte
 	; must be read, which says what the data value is.
-	stb	*m0
-	lda	,x+
-	tfr	a,b
+	; For example, a string of 16 zeroes could be encoded as:
+	; 0xA8 0x08 0x00.
+	stb	*m0               ; Save word count
+	lda	,x+               ; Read data byte
+	tfr	a,b               ; Copy it (it appears twice)
 
 rle_run_loop:
 	std	,u++
@@ -194,10 +197,11 @@ rle_run_loop:
 	bra	rle_loop
 
 rle_escape:
-	; A negative count means that 0xA8 really was the image data.
-	; Read a third byte to see what should follow it.
+	; 0xA800 means that 0xA8 actually occurred in the image data.
+	; Read a third byte to see what should follow it, to keep
+	; everything in 16-bit chunks.
 	; (For example, a word of 0xA8BF in the image data would be
-	; encoded as 0xA8 0x80 0xBF.)
+	; encoded as 0xA8 0x00 0xBF.)
 	ldb	,x+
 	std	,u++
 	bra	rle_loop
@@ -210,13 +214,23 @@ rle_escape:
 	; X = pointer to source image data
 	;
 	;--------------------------------------------------------
+	; A sparse image is used when the image data consists of many
+	; strides of zero bytes.  The image is encoded as a set of
+	; <len, data[], move> triples.  len says how long the data
+	; array is.  move says how to adjust the output pointer
+	; to set up for the next triple.  The zero bytes are implied,
+	; and are written by a bulk zero of the entire page prior to
+	; copying.
 	.globl _frame_decode_sparse_asm
 _frame_decode_sparse_asm:
 	pshs	u
+
+	; First, clear the output page.
 	tfr	x,u
 	ldx	#DMD_LOW_BASE
 	jsr	_dmd_clean_page
 	tfr	u,x
+
 	ldu	#DMD_LOW_BASE
 
 sparse_loop:
@@ -228,7 +242,9 @@ sparse_loop:
 
 	; Second byte of block is skip count.
 	; The cursor is moved forward this many BYTES
-	; before copying the literals to memory.
+	; before copying the literals to memory.  Note that this
+	; count should not exceed 127, because leau treats the
+	; offset as SIGNED.
 	ldb	,x+
 	leau	b,u
 

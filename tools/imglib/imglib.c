@@ -826,6 +826,10 @@ struct buffer *buffer_sparse_encode (struct buffer *buf)
 			count++;
 		}
 
+		/* TODO - The skip value (zeroes) cannot exceed 126 for the 6809,
+		due to the way the algorithm is written in assembler.  Detect this,
+		and emit a 'dummy block' which skips as much as possible. */
+
 		/* Write the block */
 		*dstp++ = count / 2;
 		if (count > 0)
