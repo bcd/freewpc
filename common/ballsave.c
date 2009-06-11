@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,6 +24,11 @@
  */
 
 #include <freewpc.h>
+
+/* The default ball save time is 7 seconds.  Machines can override this. */
+#ifndef MACHINE_BALL_SAVE_TIME
+#define MACHINE_BALL_SAVE_TIME 7
+#endif
 
 U8 ball_save_timer;
 
@@ -97,6 +102,7 @@ void ballsave_launch (void)
 #endif
 	deff_start (DEFF_BALL_SAVE);
 
+	/* TODO : This is a hack! */
 	if (config_timed_game)
 		timed_game_extend (2);
 }
@@ -111,6 +117,11 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
 {
 	if (single_ball_play () && ballsave_test_active ())
 	{
+		/* TODO - not clean.  We should start a separate timer to
+		indicate that ballsave should occur once the ball reaches the
+		trough.  It should have a long expiry time just in case
+		something goes wrong.  But the ballsave lamp should not
+		light during this period. */
 		ballsave_add_time (5);
 	}
 }
@@ -122,8 +133,10 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
  */
 CALLSET_ENTRY (ballsave, valid_playfield)
 {
+#if MACHINE_BALL_SAVE_TIME > 0
 	if (!config_timed_game)
-		ballsave_add_time (7); /* TODO - make configurable per game */
+		ballsave_add_time (MACHINE_BALL_SAVE_TIME);
+#endif
 }
 
 /*
