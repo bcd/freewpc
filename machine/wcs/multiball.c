@@ -135,7 +135,8 @@ void mb_start_surprise (void)
 
 static void mb_advance_spinner (void)
 {
-	if (++mb_spinner_count == SPINNERS_FOR_SUPER)
+	if (!flag_test (FLAG_SUPER_JACKPOT_LIT) &&
+		(++mb_spinner_count == SPINNERS_FOR_SUPER))
 	{
 		mb_light_super_jackpot ();
 	}
