@@ -227,8 +227,10 @@ void task_duration_expire (U8);
 void task_set_duration (task_pid_t pid, U8 cond);
 void task_add_duration (U8 cond);
 void task_remove_duration (U8 cond);
-PTR_OR_U16 task_get_arg (void);
-void task_set_arg (task_pid_t tp, PTR_OR_U16 arg);
+U16 task_get_arg (void);
+void task_set_arg (task_pid_t tp, U16 arg);
+void *task_get_pointer_arg (void);
+void task_set_pointer_arg (task_pid_t tp, void *arg);
 __noreturn__ void task_dispatcher (void);
 #ifdef CONFIG_NATIVE
 task_pid_t task_getpid (void);

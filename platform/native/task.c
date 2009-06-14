@@ -77,7 +77,7 @@ void task_dump (void)
 			printf ("%p%c   %d    %08X   %02X\n",
 				td->pid, 
 				(td->pid == task_getpid ()) ? '*' : ' ', 
-				td->gid, (unsigned int)td->arg, td->duration);
+				td->gid, td->arg.u16, td->duration);
 		}
 	}
 }
@@ -113,7 +113,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 			task_data_table[i].pid = pid;
 			task_data_table[i].gid = gid;
 			task_data_table[i].duration = TASK_DURATION_INF;
-			task_data_table[i].arg = 0;
+			task_data_table[i].arg.u16 = 0;
 			task_data_table[i].class_data = NULL;
 			task_data_table[i].duration = TASK_DURATION_BALL;
 #ifdef CURSES	
@@ -305,26 +305,51 @@ void task_remove_duration (U8 flags)
 }
 
 
-PTR_OR_U16 task_get_arg (void)
+U16 task_get_arg (void)
 {
 	int i;
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
-			return task_data_table[i].arg;
+			return task_data_table[i].arg.u16;
 	}
 	fatal (ERR_CANT_GET_HERE);
 }
 
 
-void task_set_arg (task_pid_t tp, PTR_OR_U16 arg)
+void *task_get_pointer_arg (void)
+{
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == task_getpid ())
+			return task_data_table[i].arg.ptr;
+	}
+	fatal (ERR_CANT_GET_HERE);
+}
+
+
+void task_set_arg (task_pid_t tp, U16 arg)
 {
 	int i;
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		if (task_data_table[i].pid == tp)
 		{
-			task_data_table[i].arg = arg;
+			task_data_table[i].arg.u16 = arg;
+		}
+	}
+}
+
+
+void task_set_pointer_arg (task_pid_t tp, void *arg)
+{
+	int i;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if (task_data_table[i].pid == tp)
+		{
+			task_data_table[i].arg.ptr = arg;
 		}
 	}
 }

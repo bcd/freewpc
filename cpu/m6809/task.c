@@ -375,7 +375,7 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 	__asm__ volatile ("jsr\t_task_create" : "=r" (tp) : "0" (fn_x) : "d");
 	tp->gid = gid;
 	tp->wakeup = 0;
-	tp->arg = 0;
+	tp->arg.u16 = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count++;
 	if (task_count > task_max_count)
@@ -616,7 +616,13 @@ void task_remove_duration (U8 cond)
  */
 U16 task_get_arg (void)
 {
-	return task_current->arg;
+	return task_current->arg.u16;
+}
+
+
+void *task_get_pointer_arg (void)
+{
+	return task_current->arg.ptr;
 }
 
 
@@ -625,7 +631,13 @@ U16 task_get_arg (void)
  */
 void task_set_arg (task_t *tp, U16 arg)
 {
-	tp->arg = arg;
+	tp->arg.u16 = arg;
+}
+
+
+void task_set_pointer_arg (task_t *tp, void *arg)
+{
+	tp->arg.ptr = arg;
 }
 
 
@@ -780,6 +792,6 @@ void task_init (void)
 	 * after this point. */
 	task_current = task_allocate ();
 	task_current->gid = GID_FIRST_TASK;
-	task_current->arg = 0;
+	task_current->arg.u16 = 0;
 }
 

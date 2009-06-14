@@ -33,17 +33,17 @@ __attribute__((noreturn)) void linux_shutdown (void);
 #define slow_memcpy memcpy
 #define slow_memset memset
 
-extern inline U8 far_read8 (U8 *address, U8 page)
+extern inline U8 far_read8 (const void *address, U8 page)
 {
-	return *address;
+	return *(U8 *)address;
 }
 
-extern inline U16 far_read16 (U16 *address, U8 page)
+extern inline U16 far_read16 (const void *address, U8 page)
 {
-	return *address;
+	return *(U16 *)address;
 }
 
-extern inline void *far_read_pointer (PTR_OR_U16 *address, U8 page)
+extern inline void *far_read_pointer (const void *address, U8 page)
 {
 	return *(void **)address;
 }

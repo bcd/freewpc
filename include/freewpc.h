@@ -59,21 +59,25 @@ typedef unsigned char U8;
 typedef int int16_t, I16, S16;
 typedef unsigned int U16;
 typedef U16 INTPTR;
-typedef U16 PTR_OR_U16;
 typedef unsigned long U32;
 #elif defined(CONFIG_NATIVE)
 typedef short int16_t, I16, S16;
 typedef unsigned short U16;
-typedef unsigned long PTR_OR_U16;
 typedef unsigned long U32;
 #else /* default assumes -mint8 on wpc */
 typedef long int16_t, I16, S16;
 typedef unsigned long U16;
 typedef unsigned long long U32;
 typedef unsigned int INTPTR;
-typedef U16 PTR_OR_U16;
 #endif
+
 typedef U16 IOPTR;
+
+typedef union
+{
+	void *ptr;
+	U16 u16;
+} PTR_OR_U16;
 
 /* After this point, do not permit native types like
  * short, int, long to be used; use one of the types
