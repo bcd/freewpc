@@ -257,6 +257,9 @@ static void fontargs_render_string (void)
 		//  will cause lockups!!!                      //
 		/////////////////////////////////////////////////
 
+#if __GCC6809_AT_LEAST__(4, 4, 0)
+#warning "skipping GCC 4.4.0 broken font code"
+#else
 		/* If the height of this glyph is not the same as the
 		height of the overall string, then the character should
 		be bottom aligned.  This is needed for commas and periods.
@@ -269,6 +272,7 @@ static void fontargs_render_string (void)
 			top_space *= DMD_BYTE_WIDTH;
 			dmd_base += top_space;
 		}
+#endif
 
 		/* Set the starting address */
 		blit_dmd = wpc_dmd_addr_verify (dmd_base + args->coord.x / 8);
