@@ -8,7 +8,6 @@ P := platform/wpc
 # Common 6809 configuration
 CPU := m6809
 CONFIG_TASK := y
-CONFIG_MALLOC := y
 include cpu/$(CPU)/Makefile
 
 # Subplatform support

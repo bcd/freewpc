@@ -223,10 +223,12 @@ void task_dump (void)
 				dbprintf ("  ST %02X", tp->stack_size);
 				dbprintf ("  ARG %04X\n", tp->arg);
 			}
+#ifdef CONFIG_MALLOC
 			else if (tp->state & BLOCK_MALLOC)
 			{
 				malloc_chunk_dump (tp);
 			}
+#endif
 			else if (tp->state & BLOCK_STACK)
 			{
 				dbprintf ("aux stack\n");

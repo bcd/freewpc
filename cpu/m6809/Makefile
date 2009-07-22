@@ -26,6 +26,7 @@ endif
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
 CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
 # TODO : should -funroll-loops be given?
+CFLAGS += $(if $(CONFIG_MALLOC), -DCONFIG_MALLOC)
 
 # Which version of the 6809 compiler to use by default.
 # This is the minimum available version.  More often than not,
