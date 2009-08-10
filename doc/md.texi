@@ -1,5 +1,7 @@
 
-This text describes the machine description file format.
+@node Machine Description Format
+
+This section describes the machine description file format.
 
 Machines define most of their hardware configuration in the form of an "md" file.
 In the past this was done by directly writing a .h file with the required
@@ -20,9 +22,7 @@ number (SW_START_BUTTON), an identifier for callback events
 gendefine can produce all of these automatically from
 a single "Start Button:" declaration in the .md file.
 
-
-File Format
-
+@section Syntax
 
 Blank lines and lines beginning with a '#' are ignored, like in a shell script.
 
@@ -101,7 +101,7 @@ complete.  There is more documentation in those files on how things should
 be set up.
 
 
-Directives
+@section Directive
 
 The 'include' directive can be used to include config syntax from another file,
 much like a C '#include'.  This is used to bring in common definitions for the
@@ -129,15 +129,14 @@ is converted to:
 Note that the pound sign is not included in the mdfile, as it would be treated as a comment.
 
 
-Global Configuration
+@section Global Configuration
 
 Certain things need to be defined in the global sections, using Key: Value syntax.
 The human readable name of the machine, the system type, and a few other things can be
 given here.  These do not appear directly in the mach-config.h, but are used by
 genmachine to guide the compilation.  Again, see any existing config file for an example.
 
-
-How genmachine works
+@section How genmachine works
 
 genmachine is a Perl script.  It parses all of the md commands and builds a giant
 hash with all of the data.  genmachine is invoked multiple times with different options,

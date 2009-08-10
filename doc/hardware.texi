@@ -1,20 +1,31 @@
 
-The Williams Pinball Controller (WPC) Hardware Platform
+This chapter documents the WPC hardware.
 
--Hardware Overview
---WPC Generations
-* WPC Alphanumeric
-* WPC DMD
-* WPC Fliptronic
-* WPC DCS
-* WPC Security
-* WPC-95
---CPU Board
----CPU
-A Motorola 68B09E, running at 2Mhz.  It is an 8-bit/16-bit CPU with
+@section Overview
+
+WPC pinball machines contain a number of circuit boards, some that are intelligent
+with microprocessors, and others that are passive.
+
+From 1990-1999, six different generations of machines were produced, which differed
+only slightly.
+
+@itemize @bullet
+@item WPC Alphanumeric
+@item WPC DMD
+@item WPC Fliptronic
+@item WPC DCS
+@item WPC Security
+@item WPC-95
+@end itemize
+
+@section CPU Board
+
+The CPU board contains the main processor: a Motorola 68B09E, running at 2Mhz.
+It is an 8-bit/16-bit CPU with
 a 64KB address space.  Bank switching is required to address more than
 64KB.  On reset, location 0xFFFE is read to determine the address of
 the first instruction.
+
 ---RAM
 A 2KB device.  When power is turned on, three batteries on the CPU board
 maintains the state of the RAM.
@@ -25,26 +36,78 @@ to accommodate more and more graphics.  The uppermost 32KB is
 permanently mapped into the 64KB address space and contains
 the core operating system functions.  The remaining parts of EPROM
 must be bank switched in, 16KB at a time.
----ASIC
+
+@subsection ASIC
+
 The WPC ASIC is the heart of the system and is essentially a
 giant address decoder.  It combines a lot of the functionality that
 was performed by PIAs and TTL logic in earlier solid state games.
 The ASIC implements a lot of functions, described in detail below.
----The Switch Matrix
+
+@subsubsection Blanking
+
+The system blanking circuit is provided to protect against software
+crashes.  The ASIC generates the BLANKING signal to nearly all
+system components.  When asserted, BLANKING disables all output
+circuits.
+
+Software disables blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
+register.
+
+@subsubsection Diagnostics LED
+
+LED ?? is software-controllable by writing to bit 7 of the WPC_LEDS
+register; it can also be read.  The OS toggles this bit periodically
+to indicate that the system is alive.
+
+@subsubsection Watchdog
+@subsubsection Bit Shifter
+@subsubsection Memory Protection
+As an address decoder, the WPC ASIC is capable of restricting access
+to any part of the address space.  The memory protection circuit
+provides this capability for locking a portion of the system RAM as
+read-only.
+
+The feature can be enabled/disabled and the size of the protected
+region can also be specified.  It must reside in the uppermost
+part of RAM and must be a power of 2 in size.
+
+@subsubsection Time of Day Clock
+@subsubsection High Resolution Timer
+@subsubsection Bank Switching
+
+@subsection The Switch Matrix
+
 All of the switch inputs terminate directly on the CPU board.
 This includes up to 64 playfield switches, arranged in an 8x8 matrix;
 8 direct inputs used for service buttons and coin switches; and
 several jumpers/DIP switches used for configuring some factory defaults.
----External I/O
+
+@subsection External I/O
 All of the other I/O is located on other boards, which are connected
 to the CPU board via flex cables.  Generally on these cables, one side
 of the pins are connected to ground, while the others contain actual
 inputs/outputs.  All generations of WPC use the same connector to
 the power driver board, which controls lamps and general solenoids.
 Display, sound, and flipper interfaces differ somewhat between generations.
---Dot Matrix Controller Board
---Power Driver Board
----Lamp Circuits
+
+@subsubsection Ticket Dispenser
+@subsubsection Parallel Port
+@subsubsection Serial Port
+
+@subsection Interrupts
+@subsubsection Reset
+@subsubsection IRQ
+IRQ can be generated 976 times per second, about once every 1.02ms.
+This can be enabled by writing to the WPC_ZEROCROSS_IRQ_CLEAR register.
+@subsubsection FIRQ
+FIRQ can be generated in two ways: from the dot matrix display after a
+certain scanline is redrawn, or from the high-performance timer.
+@subsubsection NMI
+
+@section Power Driver Board
+
+@subsection Lamp Circuits
 WPC supports up to 64 individually controllable lamps.  The lamps are
 arranged in an 8x8 matrix.  At any given instant, only 8 of the lamps
 can receive power.  A column strobe is written to determine which set
@@ -56,7 +119,9 @@ The filaments in incandescent lamps operate at around 6V.  The lamp
 circuitry switches a much higher 18V, but strobing only enables that
 voltage for 1/8 of the time, and filaments do not instantly turn off
 when power is removed, so no flicker is perceived.
----Solenoid Circuits
+
+@subsection Solenoid Circuits
+
 The power driver board supports up to 28 controlled outputs for
 solenoids, motors, etc.  These are divided into four groups:
 8 high power drivers, 8 low power drivers, 8 flashlamp drivers, and
@@ -64,15 +129,20 @@ solenoids, motors, etc.  These are divided into four groups:
 The CPU board enables/disable a driver by writing a command to the
 power driver board.  All values are latched and thus retain their
 states until the CPU changes them.
----General Illumination Circuits
+
+@subsection General Illumination Circuits
 The GI circuitry allows for 5 strings of up to 18 lamps each.
 Each string can independently be turned on and off by a triac.
 The lamps all run off 6.3V AC.
----Zero Cross Circuit
+
+@subsection Zero Cross Circuit
+
 Alternating current (AC) rapidly changes between a positive and
 negative voltage many times per second.  In the US, the frequency is
 60Hz.
---Sound Board
+
+@section Sound Board
+
 Both the WPC and DCS sound boards are connected via ribbon cable
 to the CPU board, which issues both read and write commands.  The
 actual values vary greatly depending on the board type.
@@ -81,7 +151,9 @@ actual values vary greatly depending on the board type.
 to be played.  The sound board stores all of the sound data on
 additional EPROMs, and has its own CPU that decodes the data and
 writes it to various audio devices.
---Fliptronic Board
+
+@section Fliptronic Board
+
 On all but the earliest games, flipper control is located on a
 separate board, called the Fliptronic Board.  It has 8 drivers
 for up to 4 flippers.  Half of the drivers switch high power 50V,
@@ -96,7 +168,42 @@ when the flippers are in the 'up' position, indicating that the
 lower power voltage can be used.  It is up to software to use
 all of this wisely.
 
--Memory Map
+@section Dot Matrix Controller Board
+
+The dot matrix display is 128 columns x 32 rows.  The display itself is
+very dumb and expects a serial bitstream of pixels to be clocked in.
+The controller board has the display RAM and the serialization logic.
+
+The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds).
+At this rate, it takes 256 microseconds per row and a little more than 8
+milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
+--Display Memory
+The RAM has a total of 8KB.  A full DMD image requires 128x32 pixels,
+that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
+a total of 16 frames.
+
+The SRAM is designed to allow both the 6809 and the serial decoder
+to access it simultaneously, at nonoverlapping phases of the system
+clock.
+
+Bits are encoded within a byte such that the leftmost pixel is in the
+least significant bit.  This is backwards from how binary numbers are
+normally visualized.
+--Display Bank Switching
+--Visible Page Register
+The visible page register, WPC_DMD_ACTIVE_PAGE, holds the page number
+of the frame that should be clocked to the display.  Writing to this
+register does not take effect immediately but instead at the beginning
+of the next vertical retrace.
+--Scanline Register
+The controller keeps track of which row is currently being refreshed,
+and makes this accessible to the CPU by reading the WPC_DMD_SCANLINE register.
+Values range from 0 to 31.
+
+The CPU can also write to WPC_DMD_SCANLINE to request an FIRQ interrupt
+to be generated when the current scanline reaches a certain value.
+
+@section Memory Map
 This section describes the WPC memory map in detail.  In particular,
 it gives the function of each of the WPC ASIC registers.  A more
 readable theory of operation is described later.
@@ -264,96 +371,4 @@ are effectively ignored.
 2: W: Writing a 1 here resets the watchdog.
 
 
--ASIC Functions
---Blanking
-The system blanking circuit is provided to protect against software
-crashes.  The ASIC generates the BLANKING signal to nearly all
-system components.  When asserted, BLANKING disables all output
-circuits.
 
-Software disables blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
-register.
-
---Diagnostics LED
-LED ?? is software-controllable by writing to bit 7 of the WPC_LEDS
-register; it can also be read.  The OS toggles this bit periodically
-to indicate that the system is alive.
-
---Watchdog
---Bit Shifter
---Memory Protection
-As an address decoder, the WPC ASIC is capable of restricting access
-to any part of the address space.  The memory protection circuit
-provides this capability for locking a portion of the system RAM as
-read-only.
-
-The feature can be enabled/disabled and the size of the protected
-region can also be specified.  It must reside in the uppermost
-part of RAM and must be a power of 2 in size.
---Time of Day Clock
---High Resolution Timer
---Switch Interfaces
---Lamp Interfaces
---Zerocross Circuit
---Solenoid Interfaces
---Triac Interface
---ROM Bank Switching
---RAM Bank Switching
---Sound Board Interface
---Ticket Dispenser
---Parallel Port
---Serial Port
-
--Dot Matrix Functions
-The dot matrix display is 128 columns x 32 rows.  The display itself is
-very dumb and expects a serial bitstream of pixels to be clocked in.
-The controller board has the display RAM and the serialization logic.
-
-The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds).
-At this rate, it takes 256 microseconds per row and a little more than 8
-milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
---Display Memory
-The RAM has a total of 8KB.  A full DMD image requires 128x32 pixels,
-that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
-a total of 16 frames.
-
-The SRAM is designed to allow both the 6809 and the serial decoder
-to access it simultaneously, at nonoverlapping phases of the system
-clock.
-
-Bits are encoded within a byte such that the leftmost pixel is in the
-least significant bit.  This is backwards from how binary numbers are
-normally visualized.
---Display Bank Switching
---Visible Page Register
-The visible page register, WPC_DMD_ACTIVE_PAGE, holds the page number
-of the frame that should be clocked to the display.  Writing to this
-register does not take effect immediately but instead at the beginning
-of the next vertical retrace.
---Scanline Register
-The controller keeps track of which row is currently being refreshed,
-and makes this accessible to the CPU by reading the WPC_DMD_SCANLINE register.
-Values range from 0 to 31.
-
-The CPU can also write to WPC_DMD_SCANLINE to request an FIRQ interrupt
-to be generated when the current scanline reaches a certain value.
-
--Interrupts
---Reset
---IRQ
-IRQ can be generated 976 times per second, about once every 1.02ms.
-This can be enabled by writing to the WPC_ZEROCROSS_IRQ_CLEAR register.
---FIRQ
-FIRQ can be generated in two ways: from the dot matrix display after a
-certain scanline is redrawn, or from the high-performance timer.
-
--Connectors
-J133	Lamp Rows (1 of 3)
-J134	Lamp Rows (2 of 3)
-J135	Lamp Rows (3 of 3)
-J136	Lamp Columns (small 3 pin plug)
-J137	Lamp Columns
-J138	Lamp Columns
-
--Fuses
-F114	Lamp +18V	LED6	TP8

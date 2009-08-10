@@ -976,6 +976,10 @@ include/$(MACHINE)/protos.h :
 doxygen: Doxyfile
 	doxygen
 
+tex:
+	cd doc && makeinfo --no-split --no-headers --html -o freewpc.html freewpc.texi
+	cp -p doc/freewpc.html /home/bcd/oddchange/freewpc/freewpc.git/web/v2/build/freewpc/manual.html
+
 #
 # For debugging the makefile settings
 #

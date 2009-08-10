@@ -1,31 +1,38 @@
 Here is a list of all of the configuration options for FreeWPC.
 
-As a user of the FreeWPC toolkit, the primary way to configure the code
-to build a particular image is to create a file named '.config' in the
+The preferred way to configure the code
+to build a particular image is to create a file named @file{.config} in the
 top-level directory, and specify Makefile variables there.  Some
 values are required, others are optional.
 
-.config is written in normal Makefile syntax, so you can declare
+@file{.config} is written in normal Makefile syntax, so you can declare
 these values in any way that GNU make understands.  In the most
 basic form,
 
+@example
 	VAR=value
+@end example
 
 will set a variable to some value.  Or,
 
+@example
 	VAR += value
+@end example
 
 will append to an existing value.
 
 Make variables are translated by the build system into:
-	- other Make variables,
-	- flags to the C compiler, or
-	- flags to the linker, or
-	- flags to other programs used during the build process.
 
-In the .config, you can set the following options:
+@itemize @bullet
+@item other Make variables,
+@item flags to the C compiler, or
+@item flags to the linker, or
+@item flags to other programs used during the build process.
+@end itemize
 
-MACHINE
+@table @code
+
+@item MACHINE
 	Identifies the machine you want to build.  This is the
 	same name as the subdirectory named under 'machine' that
 	has all of the machine-specific configuration.
@@ -33,7 +40,7 @@ MACHINE
 	This MUST be set, otherwise the build has no idea what
 	you want to do.
 
-NATIVE
+@item NATIVE
 	If set (to any value), says to compile the code to run
 	on the build machine, rather than the target hardware.
 	This is currently only supported for WPC machines.
@@ -44,7 +51,7 @@ NATIVE
 	The output of a native build will be an executable
 	named 'freewpc', instead of a ROM image.
 
-FREEWPC_DEBUGGER
+@item FREEWPC_DEBUGGER
 	If set to 'y', enables the builtin debugger support.
 	This requires a patched PinMAME and the 'wpcdebug'
 	utility.  It does not work on real hardware, although
@@ -53,7 +60,7 @@ FREEWPC_DEBUGGER
 	Code can use the 'dbprintf' function to print
 	debug messages.
 
-TARGET_ROMPATH
+@item TARGET_ROMPATH
 	Optionally sets the name of the directory in which
 	PinMAME ROM files are kept.  When it is set, each
 	time a ROM is compiled, and if the machine supports it,
@@ -67,14 +74,14 @@ TARGET_ROMPATH
 	overwritten (e.g., tz_92 for Twilight Zone) and how
 	sound ROM files are treated.
 
-SYSTEM_MAJOR
-SYSTEM_MINOR
+@item SYSTEM_MAJOR
+@item SYSTEM_MINOR
 	Sets the major/minor version numbers to be used.
 	If not set, the build will be labeled version 0.0.
 
-GCC_VERSION
+@item GCC_VERSION
 
-EXTRA_CFLAGS
+@item EXTRA_CFLAGS
 	Used to pass in any additional flags to the C compiler.
 	This is the most generic way of controlling the build process for
 	C files.
@@ -94,48 +101,52 @@ EXTRA_CFLAGS
 	Note that these will never be automatically set by the build system,
 	so this is the only way to add them:
 
-	CONFIG_DEBUG_STACK
-	CONFIG_DEBUG_TASKCOUNT
-	CONFIG_INSPECTOR
+@table @code
 
-	CONFIG_PARALLEL_DEBUG
+@item	CONFIG_DEBUG_STACK
+@item	CONFIG_DEBUG_TASKCOUNT
+@item	CONFIG_INSPECTOR
+
+@item	CONFIG_PARALLEL_DEBUG
 		When FREEWPC_DEBUGGER is set, this value changes debug
 		output to be written to the parallel port, rather than to the
 		debug console.  This allows for debugging when using an
 		unpatched PinMAME.
 
-	CONFIG_PINMAME
-	DEBUG_SWITCH_NUMBER
-	DEBUGGER
+@item	CONFIG_PINMAME
+@item	DEBUG_SWITCH_NUMBER
+@item	DEBUGGER
 
-	FASTBOOT
+@item	FASTBOOT
 		Disables the ROM checksum calculation.
 
-	FREE_ONLY
+@item	FREE_ONLY
 		Enables Free Play all the time.
 
-	IDLE_PROFILE
-	MALLOC_TEST
-	NOSTATIC
+@item	IDLE_PROFILE
+@item	MALLOC_TEST
+@item	NOSTATIC
 
-	PARANOID
+@item	PARANOID
 		Enables lots of runtime checks that aren't likely to
 		ever fail.
 
-	STANDALONE
+@item	STANDALONE
 
-	STOP_ON_ERROR
+@item	STOP_ON_ERROR
 		When defined, causes the system to halt on a fatal
 		error.  Normally, the system is restarted.  This can make
 		debugging easier sometimes.
 
-	USER_TAG
-	WMSLY_CORRECT
+@item	USER_TAG
+@item	WMSLY_CORRECT
 
+@end table
+
+@end table
 
 In the machine description (.md file) or in the machine-specific Makefile,
 you can set the following defines:
-
 
 In the C code, you can use the following defines that are set for you
 correctly by the build system.  Note that not all such defines are given here;
@@ -143,48 +154,51 @@ some are used internally at the 'lowest layers' and should never need to
 be changed or known to application developers.
 
 
-	__cplusplus
+@table @code
+
+@item	__cplusplus
 		Defined by any C++ compiler.
 
-	__m6809__
+@item	__m6809__
 		Defined only by the 6809 C compiler.  Use this when writing
 		6809 CPU only code.
 
-	__mint16__
+@item	__mint16__
 		Defined by the 6809 C compiler when the -mint16 option is in
 		effect.
 
-	CONFIG_BIG_ENDIAN
-	CONFIG_LITTLE_ENDIAN
+@item	CONFIG_BIG_ENDIAN
+@item	CONFIG_LITTLE_ENDIAN
 		Says that the CPU is big-endian or little-endian.  (Automatically set.)
 
-	CONFIG_NATIVE
+@item	CONFIG_NATIVE
 		Says that a native build is being performed.  Here, the hardware
 		platform is being emulated by compiling to run on the same machine,
 		with I/O calls being emulated by special code.
 
 		Currently, the only platform that can be emulated is WPC.
 
-	CONFIG_PLATFORM_<platform>
+@item	CONFIG_PLATFORM_<platform>
 		Use to distinguish between the different platforms.
 		Possible values are 'wpc', 'whitestar', and 'wpcsound'.
 
-	CONFIG_UI
+@item	CONFIG_UI
 		Build a user-interface (UI) into the native build.
 		(This is the default.)
 
-	GCC4
+@item	GCC4
 		Says that version 4.0 or higher of the GCC 6809 toolchain is being
 		used.  This is used to work around some limitations of the 3.x toolchain.
 
-	HAVE_LIBC
-	HAVE_LOCAL_SECTION
-	HAVE_NVRAM
-	HAVE_NVRAM_SECTION
+@item	HAVE_LIBC
+@item	HAVE_LOCAL_SECTION
+@item	HAVE_NVRAM
+@item	HAVE_NVRAM_SECTION
 
-	HAVE_PAGING
+@item	HAVE_PAGING
 		Says that paging hardware is present.
 
+@end table
 
 Each machine specifies many of its properties using a machine configuration
 file, given in 'md syntax'.  The 'genmachine' script converts this
@@ -192,90 +206,90 @@ configuration to C code.
 
 Here is a list of the C defines that genmachine can currently generate.
 
-	MACHINE_ADD_COIN_SOUND
-	MACHINE_ADD_CREDIT_SOUND
-	MACHINE_AMODE_EFFECTS
-	MACHINE_AMODE_FLIPPER_SOUND_CODE
-	MACHINE_BALL_IN_PLAY_MUSIC
-	MACHINE_BALL_SERVE_SOLENOID
-	MACHINE_BUYIN_LAMP
+@table @code
+
+@item	MACHINE_ADD_COIN_SOUND
+@item	MACHINE_ADD_CREDIT_SOUND
+@item	MACHINE_AMODE_EFFECTS
+@item	MACHINE_AMODE_FLIPPER_SOUND_CODE
+@item	MACHINE_BALL_IN_PLAY_MUSIC
+@item	MACHINE_BALL_SERVE_SOLENOID
+@item	MACHINE_BUYIN_LAMP
 		Says which lamp is attached to the extra ball buyin button.
-	MACHINE_BUYIN_SWITCH
-	MACHINE_CUSTOM_AMODE
-	MACHINE_DCS
+@item	MACHINE_BUYIN_SWITCH
+@item	MACHINE_CUSTOM_AMODE
+@item	MACHINE_DCS
 		Says the machine uses the DCS sound board.
-	MACHINE_DEBUGGER_HOOK
-	MACHINE_END_GAME_MUSIC
+@item	MACHINE_DEBUGGER_HOOK
+@item	MACHINE_END_GAME_MUSIC
 		The music clip to be played at end of game.
-	MACHINE_EXTBOARD1
-	MACHINE_EXTRA_BALL_LAMP
+@item	MACHINE_EXTBOARD1
+@item	MACHINE_EXTRA_BALL_LAMP
 		Says which lamp is lit when extra balls have been collected.
-	MACHINE_FEATURE_ADJUSTMENTS
-	MACHINE_FEATURE_AUDITS
-	MACHINE_FLIPTRONIC
+@item	MACHINE_FEATURE_ADJUSTMENTS
+@item	MACHINE_FEATURE_AUDITS
+@item	MACHINE_FLIPTRONIC
 		Says the machine uses the Fliptronic (I or II) flipper board.
-	MACHINE_HAS_NOVICE_MODE
-	MACHINE_HAS_UPPER_LEFT_FLIPPER
+@item	MACHINE_HAS_NOVICE_MODE
+@item	MACHINE_HAS_UPPER_LEFT_FLIPPER
 		Defined when a machine has an upper left flipper.
-	MACHINE_HAS_UPPER_RIGHT_FLIPPER
+@item	MACHINE_HAS_UPPER_RIGHT_FLIPPER
 		Defined when a machine has an upper right flipper.
-	MACHINE_KNOCKER_SOLENOID
+@item	MACHINE_KNOCKER_SOLENOID
 		The ID for the knocker coil.
-	MACHINE_KNOCKER_SOUND
-	MACHINE_LAMP_EFFECTS
-	MACHINE_LAUNCH_SOLENOID
-	MACHINE_LAUNCH_SWITCH
-	MACHINE_MAX_BALLS
+@item	MACHINE_KNOCKER_SOUND
+@item	MACHINE_LAMP_EFFECTS
+@item	MACHINE_LAUNCH_SOLENOID
+@item	MACHINE_LAUNCH_SWITCH
+@item	MACHINE_MAX_BALLS
 		The maximum number of balls that can be installed.
 		This is equal to or less than the trough size.
-	MACHINE_OUTHOLE_SWITCH
+@item	MACHINE_OUTHOLE_SWITCH
 		The ID for the outhole switch, if there is one.
-	MACHINE_REPLAY_CODE_TO_SCORE
-	MACHINE_SHOOTER_SWITCH
+@item	MACHINE_REPLAY_CODE_TO_SCORE
+@item	MACHINE_SHOOTER_SWITCH
 		The ID for the shooter switch.
-	MACHINE_SLAM_TILT_SWITCH
+@item	MACHINE_SLAM_TILT_SWITCH
 		The ID for the slam tilt switch.
-	MACHINE_SOL_EXTBOARD1 (duplicate!!!)
-	MACHINE_SOL_NOSEARCHP
-	MACHINE_START_BALL_MUSIC
-	MACHINE_START_GAME_SOUND
-	MACHINE_START_LAMP
+@item	MACHINE_SOL_EXTBOARD1 (duplicate!!!)
+@item	MACHINE_SOL_NOSEARCHP
+@item	MACHINE_START_BALL_MUSIC
+@item	MACHINE_START_GAME_SOUND
+@item	MACHINE_START_LAMP
 		Says which lamp is attached to the start button.
-	MACHINE_START_SWITCH
-	MACHINE_TEST_MENU_ITEMS
-	MACHINE_TEST_ONLY
-	MACHINE_TILT_SWITCH
-	MACHINE_TZ
-	MACHINE_VOLUME_CHANGE_MUSIC
+@item	MACHINE_START_SWITCH
+@item	MACHINE_TEST_MENU_ITEMS
+@item	MACHINE_TEST_ONLY
+@item	MACHINE_TILT_SWITCH
+@item	MACHINE_TZ
+@item	MACHINE_VOLUME_CHANGE_MUSIC
 
+@end table
 
 Other defines not categorized yet:
 
-CONFIG_COIN_DOOR_WARNING
-CONFIG_PAGED_RAM
-CONFIG_SHORT_STRINGS_ONLY
-CONFIG_TEST_DURING_GAME
-CONFIG_TIMED_GAME
-CONFIG_TIMED_GAME_MAX
-CONFIG_TIMED_GAME_OVER_DEFF
-CONFIG_TIMED_GAME_OVER_LEFF
-CONFIG_TIMED_GAME_OVER_SOUND
-CURSES
-DEBUG_FLIPCODE
-DEFF_DEBUG
-FUTURE
-INCLUDE_AUTOPLUNGER
-PTHDEBUG
-PTHDEBUG2
-TASKCOUNT
-TASK_CHAINING
-TRIAC_DEBUG
-WPC_ORKIN_DEBUG
+@table @code
 
+@item CONFIG_COIN_DOOR_WARNING
+@item CONFIG_PAGED_RAM
+@item CONFIG_SHORT_STRINGS_ONLY
+@item CONFIG_TEST_DURING_GAME
+@item CONFIG_TIMED_GAME
+@item CONFIG_TIMED_GAME_MAX
+@item CONFIG_TIMED_GAME_OVER_DEFF
+@item CONFIG_TIMED_GAME_OVER_LEFF
+@item CONFIG_TIMED_GAME_OVER_SOUND
+@item CURSES
+@item DEBUG_FLIPCODE
+@item DEFF_DEBUG
+@item FUTURE
+@item INCLUDE_AUTOPLUNGER
+@item PTHDEBUG
+@item PTHDEBUG2
+@item TASKCOUNT
+@item TASK_CHAINING
+@item TRIAC_DEBUG
+@item WPC_ORKIN_DEBUG
 
-Machine-specific defines:
+@end table
 
-Twilight Zone:
-GREED_ONLY
-PB_DEBUG
-CONFIG_TZONE_IP

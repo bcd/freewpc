@@ -1,0 +1,459 @@
+\input texinfo
+@c %**start of header
+@setfilename freewpc.info
+@settitle The FreeWPC Manual
+@setchapternewpage odd
+@c %**end of header
+
+@titlepage
+@title The FreeWPC Manual
+@author Brian Dominy
+
+@sp 10
+@center @titlefont{}
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2006-2009 by Brian Dominy.
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Introduction to FreeWPC
+
+This is the manual for @dfn{FreeWPC}, a free platform for developing replacement
+game ROMs for Bally/Williams pinball machines based on the WPC
+(Williams Pinball Controller) chip.  FreeWPC provides the foundation for building
+new ROMs with custom game rules.
+
+WPC is the system that was used in all games from 1990-1999, starting with
+@samp{Funhouse} and ending with @samp{Cactus Canyon}.
+
+FreeWPC only replaces your game ROM (the U6 chip), which contains all
+of the game code and dot matrix text/graphics.  In particular, sounds and
+music are NOT included in this part, so FreeWPC games use the
+same sounds as the real machines.
+
+Eventually, code should be able to run on an actual pinball machine; 
+however, for now, FreeWPC ROMs should only be used in emulators such as 
+pinmame.  @emph{Do not attempt to put a FreeWPC ROM in a real machine!}
+It likely won't work and you may cause irreparable damage to your game, 
+yourself, your house, etc.  You have been warned.
+
+This document provides an overview of the FreeWPC architecture for
+developers who wish to understand how the system works.
+
+The details provided here reflect the status of the latest development
+branch.  FreeWPC is constantly evolving and the information here is
+subject to change.
+
+FreeWPC is developed by Brian Dominy @email{brian@@oddchange.com} and is licensed
+under the GNU General Public License version 2 or later.  The latest version of
+the software can be obtained at @url{http://www.oddchange.com/freewpc}.
+Developers should be familiar
+with basic embedded systems programming concepts and the C programming
+language.  Familiarity with 6809 assembler is highly recommended.
+Also, knowledge of WPC pinball machines is very helpful.
+
+@end ifnottex
+
+@chapter Introduction
+
+FreeWPC is a toolkit for building new software for Williams WPC pinball machines.
+
+FreeWPC is 100% Williams-free code, written from scratch.  It is not a hack on existing
+ROMs and does not contain any software extracted from real games.
+
+Most of the code is written mostly in the C programming language.  Actual WPC games
+were programmed in assembly language.  FreeWPC uses the freely available GCC6809 C
+compiler.  There are some assembly language routines for really low-level, or high
+performance parts of the program.
+
+Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
+users.  Many common UNIX tools like @command{bc} and @command{perl} are required.
+
+The system is designed to be flexible and extensive.  All generations of WPC are supported.
+
+In addition to building WPC ROMs, the toolkit supports @dfn{native mode compilation}, which
+builds an executable that can be run directly on your development machine.  This lets you
+test and debug the software without requiring a real machine or even an emulator.  Basically,
+native mode replaces the lowest level of hardware access with builtin emulation.  Native
+mode currently uses the @command{ncurses} terminal library for visualizing the state of the game.
+
+
+@chapter Installing FreeWPC
+
+You will need to copy the ROM file into your PinMAME <b>roms</b>
+directory so that PinMAME can find it.  The location of this directory
+depends on how you installed PinMAME.  These directories typically contain
+ZIP files of the game ROM and sound ROMs; you'll need to unzip the file,
+replace the game ROM, then zip it back.  Make sure to save your original
+version of the ROM file for when you want to revert back to the real deal.
+
+@section Directory Layout
+
+The FreeWPC source code tree is organized into the following directories:
+
+@table @file
+
+@item kernel/
+
+The core pinball APIs.  All of these functions are kept in the fixed region of ROM and
+can be called at any time.
+
+@item common/
+
+Secondary pinball APIs, also called the @dfn{Common Pinball Library}.  These functions are
+not in fixed ROM and require bank switching to call.
+
+@item machine/@var{machine}/
+
+The machine-specific files.
+
+@item platform/@var{platform}/
+
+The platform-specific files.  These are mostly used during initialization.
+
+@item cpu/@var{cpu}/
+
+The CPU-specific files.  These are mostly assembly language files.
+
+@item fonts/
+
+The standard font files.
+
+@item include/
+
+All of the include files are kept in here or one of its subdirectories.
+
+@end table
+
+@chapter Configuring FreeWPC
+
+FreeWPC can be compiled in many different ways with lots of optional features.
+You cannot just type @command{make} at the top of the directory tree without
+first specifying what you want to build.  This is done by creating a file
+named @file{.config}.  The file @file{config.example} is providing as an
+example of the kinds of things that can be done.
+
+@file{.config} is written in standard Makefile syntax.  You set various
+options by writing variable assignments, such as:
+
+@example
+MACHINE := wcs
+@end example
+
+A list of all of the options is given later in an appendix.
+
+You must specify at least a @var{MACHINE}.  All other configuration
+variables are optional.
+
+@chapter Building FreeWPC
+
+To compile, just run @command{make}.  This will build a ROM and optionally
+install it into your PinMAME ROM directory if you have said where that is.
+The build procedure is complicated, but it can be broken down into the
+following steps:
+
+@enumerate
+
+@item Create Blank File
+
+If the ROM size is larger than the number of pages that
+need to be compiled, then the final ROM image must be
+padded with blanks.  The @command{dd} command is used
+to generate a file named @file{blankxxx.bin}, where @var{xxx}
+is the size of the file in kilobytes (KB).  This file
+is then concatenated with the actual game code to produce
+a final ROM of the required size.
+
+@item Create Linker Command Files
+
+The linker is invoked several times, once per page or
+bank of ROM.  Different options are passed each time
+to place the correct object file into that section, and
+to resolve references correctly; all of these options
+are written to linker command files, which have the .lnk
+extension and are placed in the @file{build} directory.
+
+@item Setting the Machine Symbolic Links
+
+The symbol link @file{mach} is set to point to the correct
+machine directory, based on the value of the MACHINE
+make variable.
+
+@item Generating Defines
+
+Some #defines are generally automatically by scanning the
+code for uses.  These includes begin with the prefix
+@command{gendefine} and are created by a script also named
+@command{gendefine} in the @file{tools} directory.
+
+@item Generating Callsets
+
+Callsets are a mechanism for implementing a simple
+event subscription/invocation mechanism that is fully
+described at compile-time.  Event handling code is
+emitted in a C file named @file{callset.c}.
+
+@item Compiling and Assembling Source Code
+Source code is compiled using the GCC6809 compiler.
+The compiler generates assembler code with the @file{.s}
+extension.  These files are then assembled using the
+asxxxx assembler tools into object files with the @file{.o}
+extension.
+
+@item Compiling Page Headers
+Because the linker requires each section to contain at
+least one object file, a dummy file is assembly per
+section to ensure that this doesn't happen.  The page
+header is 1 byte long and contains the page number.
+
+@item Linking Pages
+
+The aslink utility is used to create one S-record file,
+with the @file{.s19} extension, for each page of ROM.
+
+@item Converting Pages to Binary
+
+The @file{tools/srec2bin} utility included with FreeWPC
+is run to convert the S-records into raw binary files.
+
+@item Concatenating Pages
+
+The binary files are concatenated, along with any blank
+files, to form the final ROM image.
+
+@end enumerate
+
+@chapter The WPC Hardware
+
+This chapter provides an overview of the WPC hardware, in terms of its
+capabilities and how software is able to control everything in the machine.
+
+@include hardware.texi
+
+@c ======================================================
+
+@chapter Software Environment
+
+FreeWPC is a standalone operating system environment.  It does not use any
+existing OS and has its own multitasker, memory manager, etc.  This chapter
+describes the key features of the OS.
+
+Note: If you are compiling in native mode, all of these functions are replaced by
+functions in the host operating system.
+
+@section Multitasking
+
+FreeWPC implements a runtime, round-robin, non-preemptive task scheduler.
+The system manages multiple tasks, each of which has its own call stack.  You
+can create a new task when you want to run some code in parallel with the current
+thread of execution.  The current task has complete control of the CPU and will
+continue to run until it explicit exits or sleeps (waiting for a certain amount
+of time).  The minimum sleep time is defined by IRQS_PER_TICK and is currently 16ms.
+
+If a task does not give up control, either by sleeping, exiting, or yielding
+after a certain amount of time, the fatal error @code{ERR_FCFS_LOCKUP} will be asserted.
+
+@section Real-Time Processing
+
+The multitasking APIs are flexible but do not guarantee realtime response, since
+any task may run for a long time.  Processing that needs to occur at a strict interval
+is done by @dfn{real time tasks}, sometimes abbreviated in the code as @dfn{RTTs}.
+
+@section Memory Allocation
+
+FreeWPC does not use dynamic (heap) memory allocation at all.  All variables are either
+global or on the stack.
+
+Global variables cannot be statically initialized.  Variables should be initialized
+explicitly inside a C function.
+
+Global variables can be divided into a number of categories, depending on their
+usage.  Normal globals are always in scope and behave as you would expect.  Additionally,
+you can tag a global with one of the following attributes:
+
+@table @code
+
+@item __fastram__
+
+@item __permanent__
+
+@item __nvram__
+
+@item __local__
+
+@end table
+
+
+@section Event Handling
+
+@section Error Handling
+
+@c ======================================================
+@chapter Hardware APIs
+
+The kernel provides a common set of hardware access functions
+that work across all of the different variations of the WPC
+architecture.
+
+@section Switches
+@section Lamps
+@section Power Drivers
+
+@c include coil-drivers.txt
+
+@section Flashlamps
+
+The flashlamp APIs are similar to the solenoid APIs,
+except that they are momentary.  A flashlamp is
+pulsed briefly, after which it is turned off.
+
+@section Dot-Matrix Display (DMD)
+
+@c include dmd.txt
+
+@section Sound Board
+
+Two flavors of sound board are supported: WPC, and DCS.
+The same APIs are used in either case.
+
+@section Triacs and General Illumination
+
+@section Flippers
+
+WPC supports two styles of flipper hardware.
+FreeWPC only supports the newer, Fliptronic style.
+The I/O registers for the Fliptronic board moved when
+WPC95 came out, but they are functionally equivalent.
+
+@section Real-Time Clock
+
+The WPC contains an internal realtime clock.
+The battery power keeps the RTC running even when the
+machine is turned off.
+
+FreeWPC keeps the current time-of-day in NVRAM.
+Periodically, it checks the RTC and updates the
+copy in memory to reflect any changes.
+
+@section Debug Port
+
+@section Paging and Locking
+
+@section Bit Shifting
+
+The ASIC has a builtin shifter that can do some 
+bitwise math faster than native 6809 code.
+
+@command{gcc6809} has an option @option{-mwpc} which
+enables emitting instructions for the WPC platform.
+In some cases, the hardware shifter will be used
+automatically.  Note that gcc is unaware of the
+threading/interrupt model, so access to the shifter
+is not protected.  In the current implementation,
+the shifter is not used from the IRQ, and since
+tasks are nonpreemptive, that is no problem.
+
+@c ======================================================
+@chapter Effects
+
+Effect processing is a layer above the hardware which provides
+controlled access to the lamps, display, flashers, and general
+illumination.  It resolves contention when multiple tasks try to
+access the same object at the same time through the use of
+priorities.
+
+@section Display Effects
+
+@section Lamp Effects
+
+@section Lamplists
+
+Typically, groups of lamps are often used for a
+similar purpose.  A lampset is a just of set of
+lamps that are often controlled together.  Each
+lampset has a unique ID, and is internally
+represented by an array of lamp values, terminated
+by a special lamp code named @code{LAMP_END}.
+
+The lampset APIs provide convenience whenever
+many lamps need to be updated at once.
+
+@section Text and Fonts
+
+@section DMD Transitions
+
+A transition is an interim effect that runs between
+the end of one display effect and the beginning of
+another.  By default, a new effect will simply kill
+the old one and overwrite it with a new image.
+
+Transitions are scheduled -- a handler is installed
+that runs the next time that a new image is shown.
+Instead of showing the image right away, the transition
+handler kicks in and displays some combination of
+the present view and the new one.  When the transition
+finishes, the display should consist entirely of the
+new image.
+
+@c ======================================================
+@chapter Common Pinball Library
+
+The files in the @file{common} directory provide a library of generic
+pinball functions that can be reused from game to game.  Some of the more
+important ones are described in detail in this chapter.
+
+@section Coins and Pricing
+
+@section Ball Devices
+
+@section Extra Balls
+
+@section High Scores
+
+@section Enter Initials
+
+@section Tournament Mode
+
+@section Ball Search
+			
+@section Knocker Driver
+
+@section PIC Driver
+
+@section Player Local Data
+
+@section Adjustments
+
+@section Audits
+
+@section Scoring
+
+@c ======================================================
+@chapter The Machine Definition
+
+Each machine must provide a configuration file named
+@file{config.h} which defines most of the machine-specific
+configuration options.
+
+@include config.texi
+
+@c ======================================================
+@chapter Native Mode
+
+@c ======================================================
+@chapter Debugging
+
+
+@c ======================================================
+@c ======================================================
+@appendix Event Handling
+
+Here is a list of all of the standard events that the system generates.
+
+@include events.texi
+
