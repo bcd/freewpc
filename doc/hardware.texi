@@ -21,37 +21,41 @@ only slightly.
 @section CPU Board
 
 The CPU board contains the main processor: a Motorola 68B09E, running at 2Mhz.
-It is an 8-bit/16-bit CPU with
-a 64KB address space.  Bank switching is required to address more than
-64KB.  On reset, location 0xFFFE is read to determine the address of
-the first instruction.
+It is an 8-bit/16-bit CPU with a 64KB address space.  Bank switching is
+required to address more than 64KB.  On reset, location 0xFFFE is
+read to determine the address of the first instruction.
 
----RAM
-A 2KB device.  When power is turned on, three batteries on the CPU board
-maintains the state of the RAM.
----EPROM
-Size varies from 128KB to 1MB, depending on the game.  The hardware
-supports a maximum of 1MB; this was used in all of the later game
-to accommodate more and more graphics.  The uppermost 32KB is
-permanently mapped into the 64KB address space and contains
-the core operating system functions.  The remaining parts of EPROM
-must be bank switched in, 16KB at a time.
+2KB of RAM is located at physical address 0x0000.  When power is turned off,
+three batteries on the CPU board maintains the state of the RAM.
+
+The game ROM size varies from 128KB to 1MB, depending on the game.
+The hardware supports a maximum of 1MB; this upper limit was used in all of
+the later models to accommodate more and more graphics.  The uppermost 32KB is
+permanently mapped into the 64KB address space at address 0x8000 and contains
+the core operating system functions.  The remaining parts of the ROM
+must be bank switched in, 16KB at a time; only one 16KB bank at a time
+is visible at address 0x4000.
 
 @subsection ASIC
 
 The WPC ASIC is the heart of the system and is essentially a
 giant address decoder.  It combines a lot of the functionality that
 was performed by PIAs and TTL logic in earlier solid state games.
-The ASIC implements a lot of functions, described in detail below.
+
+All addresses from the CPU are first seen by the ASIC, which can
+then either respond to the read/write request directly if it is an
+internal function, or forward the request to another device.
 
 @subsubsection Blanking
 
-The system blanking circuit is provided to protect against software
-crashes.  The ASIC generates the BLANKING signal to nearly all
-system components.  When asserted, BLANKING disables all output
-circuits.
+The system blanking circuit helps to protect against software
+crashes.  The ASIC drives the BLANKING signal which is carried to
+all of the other circuit boards.
+When asserted, BLANKING means to disable all output circuits.
+Blanking is initially asserted by the ASIC at powerup, and is then
+controllable from the CPU.
 
-Software disables blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
+Software can disable blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
 register.
 
 @subsubsection Diagnostics LED
@@ -61,20 +65,46 @@ register; it can also be read.  The OS toggles this bit periodically
 to indicate that the system is alive.
 
 @subsubsection Watchdog
+
+The ASIC has a builtin watchdog timer which will reset the CPU board if
+software does not restart it periodically.  The expiration seems to be
+on the order of 1 or 2ms.
+
+FreeWPC restarts the watchdog on every periodic interrupt, every 1ms.
+During initialization, when interrupts are disabled, it also restarts it
+occasionally.
+
 @subsubsection Bit Shifter
+
 @subsubsection Memory Protection
+
 As an address decoder, the WPC ASIC is capable of restricting access
 to any part of the address space.  The memory protection circuit
-provides this capability for locking a portion of the system RAM as
-read-only.
+lets you lock a portion of the system RAM as read-only, so that writes
+to those addresses are effectively no-ops.
 
-The feature can be enabled/disabled and the size of the protected
-region can also be specified.  It must reside in the uppermost
+The feature can be enabled/disabled, and the size of the protected
+region can also be specified.  The region must reside in the uppermost
 part of RAM and must be a power of 2 in size.
 
+FreeWPC uses memory protection to guard adjustments, audits, and some
+other vital data.
+
 @subsubsection Time of Day Clock
+
 @subsubsection High Resolution Timer
+
+The high resolution timer is not currently used by FreeWPC.
+It allows for sub-millisecond accuracy, and was only used in
+alphanumeric games to do display dimming.
+
 @subsubsection Bank Switching
+
+The bank switch register allows you to select which portion of the
+ROM is mapped to the banked region of the physical address space,
+at 0x4000.  Only the lower 6-bits of the register are used, allowing
+for up to 64 pages.  These bits become the uppermost address lines
+sent to the ROM device.
 
 @subsection The Switch Matrix
 
@@ -84,6 +114,7 @@ This includes up to 64 playfield switches, arranged in an 8x8 matrix;
 several jumpers/DIP switches used for configuring some factory defaults.
 
 @subsection External I/O
+
 All of the other I/O is located on other boards, which are connected
 to the CPU board via flex cables.  Generally on these cables, one side
 of the pins are connected to ground, while the others contain actual
@@ -96,18 +127,26 @@ Display, sound, and flipper interfaces differ somewhat between generations.
 @subsubsection Serial Port
 
 @subsection Interrupts
+
+The ASIC generates the reset, IRQ, and FIRQ signals which are sent to the CPU.
+
 @subsubsection Reset
+
 @subsubsection IRQ
+
 IRQ can be generated 976 times per second, about once every 1.02ms.
 This can be enabled by writing to the WPC_ZEROCROSS_IRQ_CLEAR register.
+
 @subsubsection FIRQ
 FIRQ can be generated in two ways: from the dot matrix display after a
 certain scanline is redrawn, or from the high-performance timer.
+
 @subsubsection NMI
 
 @section Power Driver Board
 
 @subsection Lamp Circuits
+
 WPC supports up to 64 individually controllable lamps.  The lamps are
 arranged in an 8x8 matrix.  At any given instant, only 8 of the lamps
 can receive power.  A column strobe is written to determine which set
@@ -208,47 +247,48 @@ This section describes the WPC memory map in detail.  In particular,
 it gives the function of each of the WPC ASIC registers.  A more
 readable theory of operation is described later.
 
-#define WPC_RAM_BASE                0x0000
+@table @asis
+@item #define WPC_RAM_BASE                0x0000
 System RAM (2K)
 
-#define WPC_DMD_RAM_BASE            0x3800
+@item #define WPC_DMD_RAM_BASE            0x3800
 Display RAM (1K).  Which 1K portion of the 16K SRAM
 appears here is controlled by writing to two display
 paging registers, WPC_DMD_HIGH_PAGE and WPC_DMD_LOW_PAGE.
 On WPC-95 only, up to 3K can be mapped, starting at 0x3000.
-#define WPC_DEBUG_DATA_PORT			0x3D60
-#define WPC_DEBUG_CONTROL_PORT		0x3D61
-#define WPC_SERIAL_CONTROL_PORT 		0x3E66
-#define WPC_SERIAL_DATA_PORT 			0x3E67
+@item #define WPC_DEBUG_DATA_PORT			0x3D60
+@item #define WPC_DEBUG_CONTROL_PORT		0x3D61
+@item #define WPC_SERIAL_CONTROL_PORT 		0x3E66
+@item #define WPC_SERIAL_DATA_PORT 			0x3E67
 
-#define WPC_DMD_3200_PAGE				0x3FB8 *WPC-95
+@item #define WPC_DMD_3200_PAGE				0x3FB8 *WPC-95
 3-0: W: The page of display RAM mapped into the 2nd region,
 from 0x3200-0x33FF.
-#define WPC_DMD_3000_PAGE				0x3FB9 *WPC-95
+@item #define WPC_DMD_3000_PAGE				0x3FB9 *WPC-95
 3-0: W: The page of display RAM mapped into the 1st region,
 from 0x3000-0x31FF.
-#define WPC_DMD_3600_PAGE				0x3FBA *WPC-95
-#define WPC_DMD_3400_PAGE				0x3FBB *WPC-95
-#define WPC_DMD_HIGH_PAGE 				0x3FBC
+@item #define WPC_DMD_3600_PAGE				0x3FBA *WPC-95
+@item #define WPC_DMD_3400_PAGE				0x3FBB *WPC-95
+@item #define WPC_DMD_HIGH_PAGE 				0x3FBC
 3-0: W: The page of display RAM mapped into the 2nd (6th on WPC95) region,
 from 0x3A00-0x3BFF.
-#define WPC_DMD_SCANLINE      		0x3FBD
+@item #define WPC_DMD_SCANLINE      		0x3FBD
 7-0: W: Request an FIRQ after a particular scanline is drawn
 5-0: R: The last scanline that was drawn
-#define WPC_DMD_LOW_PAGE 				0x3FBE
+@item #define WPC_DMD_LOW_PAGE 				0x3FBE
 3-0: W: The page of display RAM mapped into the 1st (5th on WPC95) region,
 from 0x3800-0x39FF.
-#define WPC_DMD_ACTIVE_PAGE 			0x3FBF
+@item #define WPC_DMD_ACTIVE_PAGE 			0x3FBF
 3-0: W: The page of display RAM to be used for refreshing the display.
 Writes to this register take effect just prior to drawing scanline 0.
-#define WPC_PARALLEL_STATUS_PORT 	0x3FC0
-#define WPC_PARALLEL_DATA_PORT 		0x3FC1
-#define WPC_PARALLEL_STROBE_PORT 	0x3FC2
-#define WPC_SERIAL_DATA_OUTPUT 		0x3FC3
-#define WPC_SERIAL_CONTROL_OUTPUT	0x3FC4
-#define WPC_SERIAL_BAUD_SELECT 		0x3FC5
-#define WPC_TICKET_DISPENSE 			0x3FC6
-#define WPC_FLIPTRONIC_PORT_A 		0x3FD4
+@item #define WPC_PARALLEL_STATUS_PORT 	0x3FC0
+@item #define WPC_PARALLEL_DATA_PORT 		0x3FC1
+@item #define WPC_PARALLEL_STROBE_PORT 	0x3FC2
+@item #define WPC_SERIAL_DATA_OUTPUT 		0x3FC3
+@item #define WPC_SERIAL_CONTROL_OUTPUT	0x3FC4
+@item #define WPC_SERIAL_BAUD_SELECT 		0x3FC5
+@item #define WPC_TICKET_DISPENSE 			0x3FC6
+@item #define WPC_FLIPTRONIC_PORT_A 		0x3FD4
 7: W: Enable upper-left flipper hold
 6: W: Enable upper-left flipper power
 5: W: Enable upper-right flipper hold
@@ -266,35 +306,35 @@ Writes to this register take effect just prior to drawing scanline 0.
 1: R: Lower-right flipper EOS input
 0: R: Lower-right flipper cabinet input
 
-#define WPC_FLIPTRONIC_PORT_B 		0x3FD5
+@item #define WPC_FLIPTRONIC_PORT_B 		0x3FD5
 Not used.
-#define WPCS_DATA 						0x3FDC
+@item #define WPCS_DATA 						0x3FDC
 7-0: R/W: Send/receive a byte of data to/from the sound board.
-#define WPCS_CONTROL_STATUS 			0x3FDD
+@item #define WPCS_CONTROL_STATUS 			0x3FDD
 7: R: WPC sound board read ready
 0: R: DCS sound board read ready
-#define WPC_SOL_GEN_OUTPUT 		   0x3FE0
+@item #define WPC_SOL_GEN_OUTPUT 		   0x3FE0
 7-0: W: Enables for solenoids 25-29
-#define WPC_SOL_HIGHPOWER_OUTPUT 	0x3FE1
+@item #define WPC_SOL_HIGHPOWER_OUTPUT 	0x3FE1
 7-0: W: Enables for solenoids 1-8
-#define WPC_SOL_FLASH1_OUTPUT 		0x3FE2
+@item #define WPC_SOL_FLASH1_OUTPUT 		0x3FE2
 7-0: W: Enables for solenoids 17-24
-#define WPC_SOL_LOWPOWER_OUTPUT 		0x3FE3
+@item #define WPC_SOL_LOWPOWER_OUTPUT 		0x3FE3
 7-0: W: Enables for solenoids 9-16
-#define WPC_LAMP_ROW_OUTPUT 			0x3FE4
+@item #define WPC_LAMP_ROW_OUTPUT 			0x3FE4
 7-0: W: Lamp matrix row output
-#define WPC_LAMP_COL_STROBE 			0x3FE5
+@item #define WPC_LAMP_COL_STROBE 			0x3FE5
 7-0: W: Lamp matrix column strobe
 At most one bit in this register should be set.
 If all are clear, then no controlled lamps are
 enabled.
-#define WPC_GI_TRIAC 					0x3FE6
+@item #define WPC_GI_TRIAC 					0x3FE6
 7: W: Flipper enable relay
 5: W: Coin door enable relay
 4-0: W: General illumination enables
-#define WPC_SW_JUMPER_INPUT 			0x3FE7
+@item #define WPC_SW_JUMPER_INPUT 			0x3FE7
 7-0: R: Jumper/DIP switch inputs
-#define WPC_SW_CABINET_INPUT 			0x3FE8
+@item #define WPC_SW_CABINET_INPUT 			0x3FE8
 7: R: Fourth coin switch
 6: R: Right coin switch
 5: R: Center coin switch
@@ -303,66 +343,66 @@ enabled.
 2: R: Up button
 1: R: Down button
 0: R: Escape (Service Credit) button
-#define WPC_SW_ROW_INPUT 				0x3FE9 *Pre-security
+@item #define WPC_SW_ROW_INPUT 				0x3FE9 *Pre-security
 7-0: R: Readings for the currently selected switch column.
 Bit 0 corresponds to row 1, bit 1 to row 2, and so on.
 A '1' indicates active voltage level.  For a mechanical switch,
 this means the switch is closed.  For an optical switch, this
 means the switch is open.
-#define WPCS_PIC_READ 					0x3FE9 *WPC-S
-#define WPC_SW_COL_STROBE 				0x3FEA *Pre-security
-#define WPCS_PIC_WRITE 					0x3FEA *WPC-S
+@item #define WPCS_PIC_READ 					0x3FE9 *WPC-S
+@item #define WPC_SW_COL_STROBE 				0x3FEA *Pre-security
+@item #define WPCS_PIC_WRITE 					0x3FEA *WPC-S
 7-0: W: Switch column strobe.
 For pre-Security games, exactly one bit must be set.
 For Security games, writing to this register sends a command
 to the PIC chip and does not directly control the strobe line.
-#define WPC_ALPHA_POS 					0x3FEB *Alphanumeric
-#define WPC_EXTBOARD1 					0x3FEB *DMD
+@item #define WPC_ALPHA_POS 					0x3FEB *Alphanumeric
+@item #define WPC_EXTBOARD1 					0x3FEB *DMD
 On DMD games, this is a general I/O that is used for machine-specific
 purposes.
-#define WPC_ALPHA_ROW1 					0x3FEC *Alphanumeric
-#define WPC_EXTBOARD2 					0x3FEC *DMD
+@item #define WPC_ALPHA_ROW1 					0x3FEC *Alphanumeric
+@item #define WPC_EXTBOARD2 					0x3FEC *DMD
 On DMD games, this is a general I/O that is used for machine-specific
 purposes.
-#define WPC_EXTBOARD3 					0x3FED *DMD
+@item #define WPC_EXTBOARD3 					0x3FED *DMD
 On DMD games, this is a general I/O that is used for machine-specific
 purposes.
-#define WPC_ALPHA_ROW2 					0x3FEE *Alphanumeric
-#define WPC95_FLIPPER_COIL_OUTPUT 	0x3FEE *WPC-95
-#define WPC95_FLIPPER_SWITCH_INPUT 	0x3FEF *WPC-95
-#define WPC_LEDS 							0x3FF2
+@item #define WPC_ALPHA_ROW2 					0x3FEE *Alphanumeric
+@item #define WPC95_FLIPPER_COIL_OUTPUT 	0x3FEE *WPC-95
+@item #define WPC95_FLIPPER_SWITCH_INPUT 	0x3FEF *WPC-95
+@item #define WPC_LEDS 							0x3FF2
 7: R/W : The state of the diagnostic LED.
 >0=Off
 >1=On
-#define WPC_RAM_BANK 					0x3FF3 *WPC-95
+@item #define WPC_RAM_BANK 					0x3FF3 *WPC-95
 3-0: W: The page of RAM currently mapped into the banked region.
-#define WPC_SHIFTADDR 					0x3FF4
+@item #define WPC_SHIFTADDR 					0x3FF4
 15-0: R/W: The base address for the bit shifter.
 Writing to this address initializes the shifter.
 Reading from this address after a shift command returns the
 shifted address.
-#define WPC_SHIFTBIT 					0x3FF6
+@item #define WPC_SHIFTBIT 					0x3FF6
 7-0: W: Sets the bit position for a shift command.
 7-0: R: Returns the output of the last shift command as a bitmask.
-#define WPC_SHIFTBIT2 					0x3FF7
+@item #define WPC_SHIFTBIT2 					0x3FF7
 7-0: R/W:
-#define WPC_PERIPHERAL_TIMER_FIRQ_CLEAR 0x3FF8
-#define WPC_ROM_LOCK 					0x3FF9
+@item #define WPC_PERIPHERAL_TIMER_FIRQ_CLEAR 0x3FF8
+@item #define WPC_ROM_LOCK 					0x3FF9
 Not used
-#define WPC_CLK_HOURS_DAYS 			0x3FFA
+@item #define WPC_CLK_HOURS_DAYS 			0x3FFA
 7-0: R/W : The time-of-day hour counter.
-#define WPC_CLK_MINS 					0x3FFB
+@item #define WPC_CLK_MINS 					0x3FFB
 7-0: R/W : The time-of-day minute counter.
-#define WPC_ROM_BANK 					0x3FFC
+@item #define WPC_ROM_BANK 					0x3FFC
 5-0: R/W: The page of ROM currently mapped into the banked region (0x4000-0x7FFF).
 Pages 62 and 63 correspond to the uppermost 32KB, and are not normally mapped
 because those pages are accessible in the fixed region (0x8000-0xFFFF).
 Page numbers are consecutive.  Page 0 corresponds to the lowest address in a
 1MB device.  If a smaller ROM is installed, the uppermost bits of this register
 are effectively ignored.
-#define WPC_RAM_LOCK 					0x3FFD
-#define WPC_RAM_LOCKSIZE 				0x3FFE
-#define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
+@item #define WPC_RAM_LOCK 					0x3FFD
+@item #define WPC_RAM_LOCKSIZE 				0x3FFE
+@item #define WPC_ZEROCROSS_IRQ_CLEAR 		0x3FFF
 7: R: Set to 1 when AC is currently at a zero crossing, or 0 otherwise.
 7: W: Writing a 1 here clears the source of the periodic timer interrupt.
 4: R/W: Periodic timer interrupt enable
@@ -370,5 +410,5 @@ are effectively ignored.
 >1=Periodic IRQ enabled
 2: W: Writing a 1 here resets the watchdog.
 
-
+@end table
 

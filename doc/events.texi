@@ -51,19 +51,19 @@ firing a solenoid.
 @item bonus
 End of ball bonus has started.
 
-@item dev_foo_empty
+@item dev_@var{foo}_empty
 The device "foo" just became empty.
 
-@item dev_foo_enter
+@item dev_@var{foo}_enter
 The device "foo" was just entered (its count went up by 1).
 
-@item dev_foo_kick_attempt
+@item dev_@var{foo}_kick_attempt
 The system is about to try to kick a ball from device "foo".
 
-@item dev_foo_kick_failure
+@item dev_@var{foo}_kick_failure
 A kick from device "foo" succeeded (its count went down by 1).
 
-@item dev_foo_kick_success
+@item dev_@var{foo}_kick_success
 A kick from device "foo" succeeded (its count did not change).
 
 @item diagnostic_check
@@ -146,7 +146,7 @@ cannot assume anything about any other modules than itself.
 Called during phase 2 of system initialization.  This is intended for
 modules which require interaction with each other.
 
-@item boolean init_ok
+@item init_ok @asis{(boolean)}
 Called after init to determine if initialization failed for any module.
 Handlers should return FALSE on failure, TRUE on success.  If any
 handler returns FALSE, an automatic factory reset will occur, and the
@@ -223,8 +223,8 @@ to allow machines to define their own pages.
 The game in progress has been cancelled, due to game restart or exiting
 to test mode.
 
-@item sw_foo
-The switch "foo" has transitioned.  Normally switch events are only
+@item sw_@var{foo}
+The switch @var{foo} has transitioned.  Normally switch events are only
 generated on a transition from inactive to active.  Switches marked
 "edge" in the machine configuration will also generate events when
 going back to inactive: for those switches, handlers must use

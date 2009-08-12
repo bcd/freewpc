@@ -1,19 +1,15 @@
 
-@node Machine Description Format
-
-This section describes the machine description file format.
+@node Overview of the Machine Description
 
 Machines define most of their hardware configuration in the form of an "md" file.
-In the past this was done by directly writing a .h file with the required
+Long ago, this was done by directly writing a .h file with the required
 information.  The .h file approach was more cumbersome and somewhat error-
 prone.
 
-In the new approach, the md file is "compiled" by the script "genmachine".
-which writes out the .h file and also some .c files that get linked in.
+The md file is "compiled" by the script "genmachine",
+which writes out a .h file and also some .c files that get linked in.
 genmachine will do some consistency checking on the input to make sure it
-is sane.  It will derive some of the required #defines that can be inferred
-from other definitions, so you have less to write up when starting a new
-machine.  
+is sane.
 
 It will enforce naming consistency between identifiers, declarations,
 and strings.  For example, the start button gets a define for its switch
@@ -24,10 +20,12 @@ a single "Start Button:" declaration in the .md file.
 
 @section Syntax
 
-Blank lines and lines beginning with a '#' are ignored, like in a shell script.
+The "md" file is just a text file.  Blank lines and lines beginning with a '#' are
+ignored, like in a shell script.
 
 Long lines can be broken up like in C, with a backslash at the end of each line.
-A comma also acts as a line continuation character.
+A comma also acts as a line continuation character, which is useful when
+defining long lists.
 
 The file is divided into sections, which begin with a section header in
 square brackets.  (It's a throwback to the old Windows .ini file days.)  Only
@@ -55,8 +53,10 @@ validate that the key name is valid.
 
 An example:
 
+@example
 [switches]
 14: Tilt, tilt, ingame, noplay
+@end example
 
 The key, 14, identifies which switch is being described.  For switches and
 lamps, the key is given as a pair of column/row digits.  The first property,
@@ -67,41 +67,42 @@ this ties it directly to system code for processing tilts automatically.
 (2) The tilt switch should only be serviced during a game.  (3) A closure does
 not mark valid playfield.
 
-In the second style, there is no physical identifier, and so the name before
-the colon is the human readable name.  These are generally used for
-software constructs.  For these genmachine automatically
+In the second type of object definition, there is no physical identifier,
+and so the name before the colon is the human readable name.  These are generally used for
+software constructs.  For these, genmachine automatically
 assigns a number based on the order of the declarations.  There can be an
 unlimited number of objects of these types, unlike those tied to hardware
 where there is a physical limit.
 
 For example:
 
+@example
 [deffs]
 Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6
+@end example
 
-defines a display effect for multiball start.  A #define is generated,
+This defines a display effect for multiball start.  A #define is generated,
 DEFF_MULTIBALL_START, which is a numeric ID used to refer to the effect.
 The IDs for all deffs are assigned sequentially, and do not need to be
 specified as with the switches above.  Everything following the colon is
 treat as a property just as above.
 
 This example also shows a variation in the property syntax.  Above,
-we saw properties 'ingame' and 'noplay', which are _binary properties_.
-Just stating them causes them to be turned on.  Binary properties can
+we saw properties 'ingame' and 'noplay', which are @dfn{binary properties}:
+just stating them causes them to be turned on.  Binary properties can
 be listed in any order; genmachine knows what all of the allowable binary
 properties are and will handle them correctly.  In the deff declaration
 above, there is a 'page' property, which is not binary -- it has a value,
-MACHINE_PAGE.  For these types of properties, the syntax is always
-variable(value).
+MACHINE_PAGE.  For these @dfn{valued properties}, the syntax is always
+@samp{@var{variable}(@var{value})}.
 
 Though the syntax is fairly strict, there is a bit of magic in how different
-categories need to be written.  The easiest way to write a config is to copy
-from another one.  The Twilight Zone and World Cup Soccer configs are the most
-complete.  There is more documentation in those files on how things should
-be set up.
+categories need to be written.  The easiest way to write a config for a new
+game is to copy from another one.  The Twilight Zone and World Cup Soccer
+configs are the most complete.  There is more documentation in those files
+on how things should be set up.
 
-
-@section Directive
+@section Directives
 
 The 'include' directive can be used to include config syntax from another file,
 much like a C '#include'.  This is used to bring in common definitions for the

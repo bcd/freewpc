@@ -33,112 +33,147 @@ Make variables are translated by the build system into:
 @table @code
 
 @item MACHINE
-	Identifies the machine you want to build.  This is the
-	same name as the subdirectory named under 'machine' that
-	has all of the machine-specific configuration.
 
-	This MUST be set, otherwise the build has no idea what
-	you want to do.
+Identifies the machine you want to build.  This is the
+same name as the subdirectory named under 'machine' that
+has all of the machine-specific configuration.
+
+This MUST be set, otherwise the build has no idea what
+you want to do.
 
 @item NATIVE
-	If set (to any value), says to compile the code to run
-	on the build machine, rather than the target hardware.
-	This is currently only supported for WPC machines.
-	It replaces certain platform-specific calls with
-	built-in emulation.  Native builds do not require an
-	emulator to run.
 
-	The output of a native build will be an executable
-	named 'freewpc', instead of a ROM image.
+If set (to any value), says to compile the code to run
+on the build machine, rather than the target hardware.
+This is currently only supported for WPC machines.
+It replaces certain platform-specific calls with
+built-in emulation.  Native builds do not require an
+emulator to run.
+
+The output of a native build will be an executable
+named 'freewpc', instead of a ROM image.
 
 @item FREEWPC_DEBUGGER
-	If set to 'y', enables the builtin debugger support.
-	This requires a patched PinMAME and the 'wpcdebug'
-	utility.  It does not work on real hardware, although
-	it does not hurt to have it compiled in.
 
-	Code can use the 'dbprintf' function to print
-	debug messages.
+If set to 'y', enables the builtin debugger support.
+This requires a patched PinMAME and the 'wpcdebug'
+utility.  It does not work on real hardware, although
+it does not hurt to have it compiled in.
+
+Code can use the 'dbprintf' function to print
+debug messages.
 
 @item TARGET_ROMPATH
-	Optionally sets the name of the directory in which
-	PinMAME ROM files are kept.  When it is set, each
-	time a ROM is compiled, and if the machine supports it,
-	the ROM is copied into the PinMAME directory, overwriting
-	an existing game ROM.  This makes it easy to test.
 
-	The original game ROM is always saved, and can be restored
-	by running 'make uninstall' at any time.
+Optionally sets the name of the directory in which
+PinMAME ROM files are kept.  When it is set, each
+time a ROM is compiled, and if the machine supports it,
+the ROM is copied into the PinMAME directory, overwriting
+an existing game ROM.  This makes it easy to test.
 
-	The machine's Makefile will say which version gets
-	overwritten (e.g., tz_92 for Twilight Zone) and how
-	sound ROM files are treated.
+The original game ROM is always saved, and can be restored
+by running 'make uninstall' at any time.
+
+The machine's Makefile will say which version gets
+overwritten (e.g., tz_92 for Twilight Zone) and how
+sound ROM files are treated.
 
 @item SYSTEM_MAJOR
 @item SYSTEM_MINOR
-	Sets the major/minor version numbers to be used.
-	If not set, the build will be labeled version 0.0.
+
+Sets the major/minor version numbers to be used.
+If not set, the build will be labeled version 0.0.
 
 @item GCC_VERSION
 
 @item EXTRA_CFLAGS
-	Used to pass in any additional flags to the C compiler.
-	This is the most generic way of controlling the build process for
-	C files.
 
-	In some cases, there are Make variables that will have the
-	same effect, or at least appear to have the same effect, as
-	defining a value in EXTRA_CFLAGS.  Use the Make variable when
-	possible.  In many cases, setting one Make variable has
-	many effects, allowing all tools and the entire build system
-	to be aware of something.  Setting EXTRA_CFLAGS only makes
-	something known to the C compiler.
+Used to pass in any additional flags to the C compiler.
+This is the most generic way of controlling the build process for
+C files.
 
-	These defines are not visible to assembly language files.
-	EXTRA_ASFLAGS can be used to similar effect.
+In some cases, there are Make variables that will have the
+same effect, or at least appear to have the same effect, as
+defining a value in EXTRA_CFLAGS.  Use the Make variable when
+possible.  In many cases, setting one Make variable has
+many effects, allowing all tools and the entire build system
+to be aware of something.  Setting EXTRA_CFLAGS only makes
+something known to the C compiler.
 
-	The flags that you might want to add here are listed below.
-	Note that these will never be automatically set by the build system,
-	so this is the only way to add them:
+These defines are not visible to assembly language files.
+EXTRA_ASFLAGS can be used to similar effect.
+
+The flags that you might want to add here are listed below.
+Note that these will never be automatically set by the build system,
+so this is the only way to add them:
 
 @table @code
 
 @item	CONFIG_DEBUG_STACK
+
 @item	CONFIG_DEBUG_TASKCOUNT
+
 @item	CONFIG_INSPECTOR
 
+Enables the inspector module, which allows memory to be dumped
+to the DMD via special button commands.  This works even when
+there is no other debug support.
+
 @item	CONFIG_PARALLEL_DEBUG
-		When FREEWPC_DEBUGGER is set, this value changes debug
-		output to be written to the parallel port, rather than to the
-		debug console.  This allows for debugging when using an
-		unpatched PinMAME.
+
+When FREEWPC_DEBUGGER is set, this value changes debug
+output to be written to the parallel port, rather than to the
+debug console.  This allows for debugging when using an
+unpatched PinMAME.
 
 @item	CONFIG_PINMAME
+
+Says that this ROM can be run under PinMAME, as well as on
+real hardware.  This is necessary to enable some code which
+is not needed for real machines, but which PinMAME expects.
+
+Currently this is only being used in the real-time clock module.
+
 @item	DEBUG_SWITCH_NUMBER
+
+Causes the switch number to be printed to the debugger every time
+a switch closure occurs.
+
 @item	DEBUGGER
 
+Enables builtin debug messages throughout the code.  These are only
+printed in native mode, or under PinMAME when using the debugger add-on.
+
 @item	FASTBOOT
-		Disables the ROM checksum calculation.
+
+Disables the ROM checksum calculation.
 
 @item	FREE_ONLY
-		Enables Free Play all the time.
+
+Enables Free Play all the time.
 
 @item	IDLE_PROFILE
+
+Enables idle-time profiling, to see how much CPU is free.
+
 @item	MALLOC_TEST
+
 @item	NOSTATIC
 
 @item	PARANOID
-		Enables lots of runtime checks that aren't likely to
-		ever fail.
+
+Enables lots of runtime checks that aren't likely to ever fail.
 
 @item	STANDALONE
 
 @item	STOP_ON_ERROR
-		When defined, causes the system to halt on a fatal
-		error.  Normally, the system is restarted.  This can make
-		debugging easier sometimes.
+
+When defined, causes the system to halt on a fatal
+error.  Normally, the system is restarted.  This can make
+debugging easier sometimes.
 
 @item	USER_TAG
+
 @item	WMSLY_CORRECT
 
 @end table
@@ -157,38 +192,47 @@ be changed or known to application developers.
 @table @code
 
 @item	__cplusplus
-		Defined by any C++ compiler.
+
+Defined by any C++ compiler.
 
 @item	__m6809__
-		Defined only by the 6809 C compiler.  Use this when writing
-		6809 CPU only code.
+
+Defined only by the 6809 C compiler.  Use this when writing
+6809 CPU only code.
 
 @item	__mint16__
-		Defined by the 6809 C compiler when the -mint16 option is in
-		effect.
+
+Defined by the 6809 C compiler when the -mint16 option is in
+effect.
 
 @item	CONFIG_BIG_ENDIAN
 @item	CONFIG_LITTLE_ENDIAN
-		Says that the CPU is big-endian or little-endian.  (Automatically set.)
+
+Says that the CPU is big-endian or little-endian.  (Automatically set.)
 
 @item	CONFIG_NATIVE
-		Says that a native build is being performed.  Here, the hardware
-		platform is being emulated by compiling to run on the same machine,
-		with I/O calls being emulated by special code.
 
-		Currently, the only platform that can be emulated is WPC.
+Says that a native build is being performed.  Here, the hardware
+platform is being emulated by compiling to run on the same machine,
+with I/O calls being emulated by special code.
+
+Currently, the only platform that can be emulated is WPC.
 
 @item	CONFIG_PLATFORM_<platform>
-		Use to distinguish between the different platforms.
-		Possible values are 'wpc', 'whitestar', and 'wpcsound'.
+
+Use to distinguish between the different platforms.
+Possible values are 'wpc', 'whitestar', and 'wpcsound'.
 
 @item	CONFIG_UI
-		Build a user-interface (UI) into the native build.
-		(This is the default.)
+
+Build a user-interface (UI) into the native build.
+(This is the default.  Previously it was possible to build a native
+mode program that did not use ncurses.)
 
 @item	GCC4
-		Says that version 4.0 or higher of the GCC 6809 toolchain is being
-		used.  This is used to work around some limitations of the 3.x toolchain.
+
+Says that version 4.0 or higher of the GCC 6809 toolchain is being
+used.  This is used to work around some limitations of the 3.x toolchain.
 
 @item	HAVE_LIBC
 @item	HAVE_LOCAL_SECTION
@@ -196,7 +240,8 @@ be changed or known to application developers.
 @item	HAVE_NVRAM_SECTION
 
 @item	HAVE_PAGING
-		Says that paging hardware is present.
+
+Says that paging hardware is present.
 
 @end table
 
@@ -209,54 +254,133 @@ Here is a list of the C defines that genmachine can currently generate.
 @table @code
 
 @item	MACHINE_ADD_COIN_SOUND
+
+The sound call to make when a coin is inserted, that does not
+award a full credit.
+
 @item	MACHINE_ADD_CREDIT_SOUND
+
+The sound call to make when a coin is inserted and a credit is added.
+
 @item	MACHINE_AMODE_EFFECTS
 @item	MACHINE_AMODE_FLIPPER_SOUND_CODE
 @item	MACHINE_BALL_IN_PLAY_MUSIC
+
 @item	MACHINE_BALL_SERVE_SOLENOID
+
+The ID of the solenoid that serves a ball from the trough.
+
 @item	MACHINE_BUYIN_LAMP
-		Says which lamp is attached to the extra ball buyin button.
+
+Says which lamp is attached to the extra ball buyin button.
+
 @item	MACHINE_BUYIN_SWITCH
+
+The ID of the extra-ball buyin switch, if any.
+
 @item	MACHINE_CUSTOM_AMODE
+
 @item	MACHINE_DCS
-		Says the machine uses the DCS sound board.
+
+Says the machine uses the DCS sound board.
+
 @item	MACHINE_DEBUGGER_HOOK
+
 @item	MACHINE_END_GAME_MUSIC
-		The music clip to be played at end of game.
-@item	MACHINE_EXTBOARD1
+
+The music clip to be played at end of game.
+
 @item	MACHINE_EXTRA_BALL_LAMP
-		Says which lamp is lit when extra balls have been collected.
+
+Says which lamp is lit when extra balls have been collected.
+
 @item	MACHINE_FEATURE_ADJUSTMENTS
+
+A list of the feature adjustments
+
 @item	MACHINE_FEATURE_AUDITS
+A list of the feature audits
+
 @item	MACHINE_FLIPTRONIC
-		Says the machine uses the Fliptronic (I or II) flipper board.
+
+Says the machine uses the Fliptronic (I or II) flipper board.
+
 @item	MACHINE_HAS_NOVICE_MODE
+
+Defined when the novice mode feature should be installed.
+
 @item	MACHINE_HAS_UPPER_LEFT_FLIPPER
-		Defined when a machine has an upper left flipper.
+
+Defined when a machine has an upper left flipper.
+
 @item	MACHINE_HAS_UPPER_RIGHT_FLIPPER
-		Defined when a machine has an upper right flipper.
+
+Defined when a machine has an upper right flipper.
+
 @item	MACHINE_KNOCKER_SOLENOID
-		The ID for the knocker coil.
+
+The ID for the knocker coil.
+
 @item	MACHINE_KNOCKER_SOUND
+
+A sound code to invoke instead of firing the knocker coil.
+
 @item	MACHINE_LAMP_EFFECTS
+
 @item	MACHINE_LAUNCH_SOLENOID
+
+The ID of the autoplunger coil, if any.
+
 @item	MACHINE_LAUNCH_SWITCH
+
+The ID of the autoplunger cabinet button, if any.
+
 @item	MACHINE_MAX_BALLS
-		The maximum number of balls that can be installed.
-		This is equal to or less than the trough size.
+
+The maximum number of balls that can be installed.
+This is equal to or less than the trough size.
+
 @item	MACHINE_OUTHOLE_SWITCH
-		The ID for the outhole switch, if there is one.
+
+The ID for the outhole switch, if there is one.
+
 @item	MACHINE_REPLAY_CODE_TO_SCORE
+
+Defines how to translate a replay code into an actual score.
+The adjustment system can only store 256 different values for
+a single adjustment.  This macro says how to translate those
+codes into score values, which will depend on the nature of the
+scoring for that machine.
+
 @item	MACHINE_SHOOTER_SWITCH
-		The ID for the shooter switch.
+
+The ID for the shooter switch.
+
 @item	MACHINE_SLAM_TILT_SWITCH
-		The ID for the slam tilt switch.
-@item	MACHINE_SOL_EXTBOARD1 (duplicate!!!)
+
+The ID for the slam tilt switch.
+
+@item	MACHINE_SOL_EXTBOARD1
+
+Defined when the machine uses the optional 8-driver board.
+
 @item	MACHINE_SOL_NOSEARCHP
+
+A macro which takes one argument, a solenoid number, and returns true
+if that solenoid should not be pulsed in ball search.
+
 @item	MACHINE_START_BALL_MUSIC
+
+The music code to invoke when a ball is started.
+
 @item	MACHINE_START_GAME_SOUND
+
+The sound code to call when a new game is started.
+
 @item	MACHINE_START_LAMP
-		Says which lamp is attached to the start button.
+
+Says which lamp is attached to the start button.
+
 @item	MACHINE_START_SWITCH
 @item	MACHINE_TEST_MENU_ITEMS
 @item	MACHINE_TEST_ONLY

@@ -1,4 +1,6 @@
-\input texinfo
+will occur 
+will occur 
+637=1B5B313B3246input texinfo
 @c %**start of header
 @setfilename freewpc.info
 @settitle The FreeWPC Manual
@@ -21,33 +23,12 @@ Copyright @copyright{} 2006-2009 by Brian Dominy.
 
 @ifnottex
 @node Top
-@top Introduction to FreeWPC
+@top Introduction
 
 This is the manual for @dfn{FreeWPC}, a free platform for developing replacement
 game ROMs for Bally/Williams pinball machines based on the WPC
 (Williams Pinball Controller) chip.  FreeWPC provides the foundation for building
 new ROMs with custom game rules.
-
-WPC is the system that was used in all games from 1990-1999, starting with
-@samp{Funhouse} and ending with @samp{Cactus Canyon}.
-
-FreeWPC only replaces your game ROM (the U6 chip), which contains all
-of the game code and dot matrix text/graphics.  In particular, sounds and
-music are NOT included in this part, so FreeWPC games use the
-same sounds as the real machines.
-
-Eventually, code should be able to run on an actual pinball machine; 
-however, for now, FreeWPC ROMs should only be used in emulators such as 
-pinmame.  @emph{Do not attempt to put a FreeWPC ROM in a real machine!}
-It likely won't work and you may cause irreparable damage to your game, 
-yourself, your house, etc.  You have been warned.
-
-This document provides an overview of the FreeWPC architecture for
-developers who wish to understand how the system works.
-
-The details provided here reflect the status of the latest development
-branch.  FreeWPC is constantly evolving and the information here is
-subject to change.
 
 FreeWPC is developed by Brian Dominy @email{brian@@oddchange.com} and is licensed
 under the GNU General Public License version 2 or later.  The latest version of
@@ -62,73 +43,51 @@ Also, knowledge of WPC pinball machines is very helpful.
 @chapter Introduction
 
 FreeWPC is a toolkit for building new software for Williams WPC pinball machines.
+WPC is the hardware platform that was used in all games from 1990-1999, starting with
+@samp{Funhouse} and ending with @samp{Cactus Canyon}.
+
+This document provides an overview of the FreeWPC architecture for
+developers who wish to understand how the system works.
+The details provided here reflect the status of the latest development
+branch.  FreeWPC is constantly evolving and the information here is
+subject to change.
+
+FreeWPC only replaces your game ROM (the U6 chip on the CPU board), which contains all
+of the game code and dot matrix text/graphics.  In particular, sounds and
+music are NOT included in this device, so FreeWPC games use the
+same sounds as the real machines.
 
 FreeWPC is 100% Williams-free code, written from scratch.  It is not a hack on existing
 ROMs and does not contain any software extracted from real games.
-
-Most of the code is written mostly in the C programming language.  Actual WPC games
-were programmed in assembly language.  FreeWPC uses the freely available GCC6809 C
+Most of the code is written mostly in the C programming language.  (Actual WPC games
+were programmed in assembly language).  FreeWPC uses the freely available GCC6809 C
 compiler.  There are some assembly language routines for really low-level, or high
 performance parts of the program.
+
+All generations of WPC are supported.  FreeWPC is architected into a number of
+distinct layers.  This makes it possible that, in the future, FreeWPC may be used
+to control other types of pinball machines than just WPC games, including new custom
+hardware.
 
 Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
 users.  Many common UNIX tools like @command{bc} and @command{perl} are required.
 
-The system is designed to be flexible and extensive.  All generations of WPC are supported.
-
-In addition to building WPC ROMs, the toolkit supports @dfn{native mode compilation}, which
+In addition to building ROMs, the toolkit supports @dfn{native mode compilation}, which
 builds an executable that can be run directly on your development machine.  This lets you
 test and debug the software without requiring a real machine or even an emulator.  Basically,
 native mode replaces the lowest level of hardware access with builtin emulation.  Native
 mode currently uses the @command{ncurses} terminal library for visualizing the state of the game.
 
+@chapter Installing Binaries
 
-@chapter Installing FreeWPC
+This chapter explains how to install precompiled binaries.
 
-You will need to copy the ROM file into your PinMAME <b>roms</b>
+You will need to copy the ROM file into your PinMAME @file{roms}
 directory so that PinMAME can find it.  The location of this directory
 depends on how you installed PinMAME.  These directories typically contain
 ZIP files of the game ROM and sound ROMs; you'll need to unzip the file,
 replace the game ROM, then zip it back.  Make sure to save your original
 version of the ROM file for when you want to revert back to the real deal.
-
-@section Directory Layout
-
-The FreeWPC source code tree is organized into the following directories:
-
-@table @file
-
-@item kernel/
-
-The core pinball APIs.  All of these functions are kept in the fixed region of ROM and
-can be called at any time.
-
-@item common/
-
-Secondary pinball APIs, also called the @dfn{Common Pinball Library}.  These functions are
-not in fixed ROM and require bank switching to call.
-
-@item machine/@var{machine}/
-
-The machine-specific files.
-
-@item platform/@var{platform}/
-
-The platform-specific files.  These are mostly used during initialization.
-
-@item cpu/@var{cpu}/
-
-The CPU-specific files.  These are mostly assembly language files.
-
-@item fonts/
-
-The standard font files.
-
-@item include/
-
-All of the include files are kept in here or one of its subdirectories.
-
-@end table
 
 @chapter Configuring FreeWPC
 
@@ -236,6 +195,49 @@ capabilities and how software is able to control everything in the machine.
 @include hardware.texi
 
 @c ======================================================
+@chapter The Source Tree
+
+The FreeWPC source code tree is organized into the following directories:
+
+@table @file
+
+@item kernel/
+
+The core pinball APIs.  All of these functions are kept in the fixed region of ROM and
+can be called at any time.
+
+@item common/
+
+Secondary pinball APIs, also called the @dfn{Common Pinball Library}.  These functions are
+not in fixed ROM and require bank switching to call.
+
+@item machine/@var{machine}/
+
+The machine-specific files.
+
+@item platform/@var{platform}/
+
+The platform-specific files.  These are mostly used during initialization.
+
+@item cpu/@var{cpu}/
+
+The CPU-specific files.  These are mostly assembly language files.
+
+@item fonts/
+
+The standard font files.
+
+@item drivers/
+
+Driver templates for things like jets, slings, kickbacks, etc.
+
+@item include/
+
+All of the include files are kept in here or one of its subdirectories.
+
+@end table
+
+@c ======================================================
 
 @chapter Software Environment
 
@@ -258,11 +260,38 @@ of time).  The minimum sleep time is defined by IRQS_PER_TICK and is currently 1
 If a task does not give up control, either by sleeping, exiting, or yielding
 after a certain amount of time, the fatal error @code{ERR_FCFS_LOCKUP} will be asserted.
 
+Each task is identified by a @dfn{process ID}, or @dfn{pid}.  The PID for a task
+is assigned by the system when it is created.  A task also has a @dfn{group ID},
+or @dfn{gid}.  The GID is assigned by the programmer, and multiple tasks can share
+the same GID.  GIDs allow you to control a group of related tasks, or to
+refer to a task using a compile-time ID as opposed to a run-time ID.
+
+In native mode, the multitasking APIs are emulated using the GNU
+Pth library.
+
 @section Real-Time Processing
 
 The multitasking APIs are flexible but do not guarantee realtime response, since
 any task may run for a long time.  Processing that needs to occur at a strict interval
 is done by @dfn{real time tasks}, sometimes abbreviated in the code as @dfn{RTTs}.
+
+Real-time tasks are scheduled at @emph{compile-time}.  When you write an RTT, you
+must also add an entry to the @dfn{schedule file}, either @file{kernel/system.sched}
+for the core parts of the system, or @file{machine/@var{machine}/@var{machine}.sched}
+for the game-specific RTTs.  Each entry in the schedule file gives the rate at which
+you want your function to be run, for example, once every 8ms.  You can schedule
+to run as frequently as once every 1ms, but you should only schedule as often as
+you really need it, otherwise the CPU will have little time to do anything else!
+
+Real-time functions run at interrupt (IRQ) level.  They will interrupt anything
+else that is running at non-real-time priority.
+
+A schedule, @command{gensched}, processes these files at compile-time and generates
+the IRQ handler which calls all of the RTTs at the correct frequency.  The output
+can be seen in @file{build/sched_irq.c}.
+
+In native mode, realtime functions are run inside an ordinary task.  They
+cannot run exactly at the desired rate, but the emulation does its best.
 
 @section Memory Allocation
 
@@ -280,18 +309,205 @@ you can tag a global with one of the following attributes:
 
 @item __fastram__
 
+Used for variables that are used frequently.  GCC6809 will generate faster
+code when accessing these.  However, you are limited to about 250 bytes of
+fastram variables total.
+
 @item __permanent__
+
+Used for variables that should be persistent across reboots.  These variables
+should be initialized inside of a @code{factory_reset} event, because factory
+reset should restore everything to a sane state.
 
 @item __nvram__
 
+Like __permanent__, but for variables that are also write-protected by default.
+To modify such a variable, you must first issue an @code{unlock()} call, and
+also issue a @code{lock()} call when you are done.  This helps to ensure that
+certain critical variables are not accidentally corrupted.
+
+Adjustments and audits kept in NVRAM are managed via special APIs which
+do the locking/unlocking for you.
+
 @item __local__
+
+Used for variables that are maintained separately for different players
+in a multiplayer game.  The system software will transparently reload
+these variables with the correct values whenever the player up changes.
+These variables should be initialized inside of an @code{add_player} event.
 
 @end table
 
-
 @section Event Handling
 
-@section Error Handling
+FreeWPC is mostly an @dfn{event-driven} system, which only acts when there are new
+inputs to the system.  This section describes the basic interface to the
+application layer software, and then explains how that is implemented internally.
+
+When any module wants to be notified when a particular event occurs, it declares
+an event catcher function, using the CALLSET_ENTRY macro.  Here is an example:
+
+@example
+CALLSET_ENTRY (strobe_multiball, sw_forcefield_target)
+@{
+	...
+@}
+@end example
+
+This declares a new catcher for the module named @code{strobe_multiball},
+which is to be called whenever the event @code{sw_forcefield_target} occurs.
+
+The name of the module is arbitrary, but the convention is to use the name
+of the source code file or something similar.  The event name must be an
+exact match.  There is a list of predefined event names which can be used.
+Also, any switch closure can be used as an event name; the names of these
+events are declared in the machine configuration file.
+
+If there are multiple catchers for the same event, then all of them
+will be invoked, in some random order.  For example, another mode might
+also make use of the same targets:
+
+@example
+CALLSET_ENTRY (mode_start, sw_forcefield_target)
+@{
+	...
+@}
+@end example
+
+Then both of them would be called when the switch is closed.
+
+To generate an event, use the @code{callset_invoke()} API, passing
+it the name of the event.  You can create your own events for any
+purpose; event names do not need to be declared.  Such events are
+as full-featured as system-defined events.  When defining events
+in a game, it is customary to prefix the event name with the short
+name of the game (e.g. @samp{tz}).
+
+Event catchers are allowed to throw new events.  This will result
+in nested function calls.
+
+@subsection Boolean Events
+
+Most event handlers do not return a value.  However, in some cases
+it is desirable to stop calling event handlers once the event has
+been @emph{claimed}.  You can do this with boolean events.
+
+To throw a boolean event, use @code{callset_invoke_boolean()}.  This
+returns TRUE if all of the event handlers return TRUE; else it
+returns FALSE.
+
+The event handlers are declared using @code{CALLSET_BOOL_ENTRY} instead
+of @code{CALLSET_ENTRY}, and they must return either TRUE or FALSE.
+
+The invocation of boolean handlers will immediately stop if one of them
+returns FALSE (so-called @dfn{short-circuit evaluation}).
+
+@subsection Handlers in Banked Pages
+
+Because handlers are invoked via function calls, if the handlers are
+in a banked section of ROM, care must be taken to ensure that the
+proper far call is made to it.  In most cases, this is autodetected
+based on the directory in which the source file is located:
+
+@itemize @bullet
+@end itemize
+
+You can explicitly declare the section in the source file by
+adding a comment like this:
+
+@example
+/* CALLSET_SECTION (@var{module-name}, @var{section-name}) */
+@end example
+
+This is only needed if the module uses event handlers.  @var{section-name}
+would be something like @code{__common__} or @code{__machine__}.  The
+@var{module-name} must match all of the module names used in the
+@code{CALLSET_ENTRY} definitions within it.
+
+@subsection Debugging Event Handlers
+
+@section Template Drivers
+
+A @dfn{template} is a crude implementation of a reusable code block, similar in
+purpose to C++ templates but much more limited.  Were FreeWPC written in C++,
+regular templates would have been used here.
+
+Templates end in @file{.ct} (for C template) and are always kept in the
+@file{drivers/} directory.  A template file is @dfn{instantiated} via
+commands in the machine description.  The script @command{ctemp} converts
+a template to one or more .c or .h files, which are then compiled normally.
+Thus, templates can contain RTTs or event handlers just like any other file.
+
+@subsection Template Syntax
+
+A template contains ordinary C code, plus special @dfn{template directives}.  These
+always begin with two at-signs (@@@@).  The list of valid directives, in the order
+that they are normally used, is listed below:
+
+@table @code
+
+@item @@@@class
+
+Gives the name of the template; usually this is related to the filename.
+
+@item @@@@parameter @var{name}
+
+Declares a template parameter.  The value is substituted during instantiation.
+
+@item @@@@file
+
+Sets the current output filename.  A template can generate any number of output files.
+You can switch between the different output files with this directive.
+
+@item @@@@
+
+A template comment.  Used to insert a comment line that is not placed into the current
+output file.
+
+@end table
+
+Within the C code, you use single-at (@@) references to substitute the values of
+template variables into the text.  For example,
+
+@example
+@@@@class xyz
+int @@class_variable
+@end example
+
+would be translated into the following plain C code:
+
+@example
+int xyz_variable
+@end example
+
+Notice that template variables cannot contain underscores.
+
+Anything template parameter defined with @@@@parameter can be substituted this way.
+Also, the following variables are predefined by the code generator:
+
+@table @code
+
+@item @@class
+
+The name of the template, as given in a @@@@class directive.
+
+@item @@self
+
+The name of the instance.  If a template is instantiated multiple times, each should have
+a different name.  For example, the @samp{sling} class might have instances named
+@samp{left_sling} and @samp{right_sling}.
+
+@item @@instance
+
+Like @@self, but a zero-based ID.  These are assigned by the code generator during
+instantiation.
+
+@end table
+
+@section Fault Detection
+
+Fatal errors when detected will cause the system to reboot.  The system
+API @code{fatal()} can be used to cause a fatal error at any time.
 
 @c ======================================================
 @chapter Hardware APIs
@@ -301,8 +517,45 @@ that work across all of the different variations of the WPC
 architecture.
 
 @section Switches
+
+@table @code
+@item switch_poll
+
+Read the stable, physical state of a switch.  Returns 1 if it has
+a high level, or 0 for a low level.
+
+@item switch_poll_logical
+
+Read the stable, logical state of a switch.  Returns 1 if it is
+active, or 0 for inactive.  This is the same as @code{switch_poll}
+but it inverts its result for optos.
+
+@end table
+
 @section Lamps
+
+@table @code
+@item lamp_on
+Turns on a lamp.
+@item lamp_off
+Turns off a lamp.
+@item lamp_test
+Tests whether a lamp is on/off.
+@item lamp_toggle
+Toggles a lamp's on/off state.
+@item lamp_flash_on
+@item lamp_flash_off
+@item lamp_flash_toggle
+@item lamp_tristate_on
+@item lamp_tristate_off
+@item lamp_tristate_flash
+@end table
+
 @section Power Drivers
+
+@table @code
+@item sol_request
+@end table
 
 @c include coil-drivers.txt
 
@@ -312,33 +565,62 @@ The flashlamp APIs are similar to the solenoid APIs,
 except that they are momentary.  A flashlamp is
 pulsed briefly, after which it is turned off.
 
+@table @code
+@item flasher_pulse
+@end table
+
 @section Dot-Matrix Display (DMD)
 
 @c include dmd.txt
+
+@table @code
+@item dmd_alloc_low
+@item dmd_alloc_low_high
+@item dmd_clean_page
+@item dmd_copy_page
+@item dmd_flip_low_high
+@item dmd_show_low
+@item dmd_show_high
+@item dmd_show_other
+@item dmd_show2
+@end table
+
+There are many more APIs for drawing text and graphics.
 
 @section Sound Board
 
 Two flavors of sound board are supported: WPC, and DCS.
 The same APIs are used in either case.
 
+@table @code
+@item sound_send
+@end table
+
 @section Triacs and General Illumination
 
-@section Flippers
-
-WPC supports two styles of flipper hardware.
-FreeWPC only supports the newer, Fliptronic style.
-The I/O registers for the Fliptronic board moved when
-WPC95 came out, but they are functionally equivalent.
+@table @code
+@item triac_on
+Turns on one or more triacs.
+@item gi_dim
+Enables a dim general illumination string.
+@item triac_off
+Turns off one or more triacs.
+@end table
 
 @section Real-Time Clock
 
-The WPC contains an internal realtime clock.
-The battery power keeps the RTC running even when the
-machine is turned off.
+The WPC ASIC contains an internal realtime clock.
+The battery power keeps the RTC running even when the machine is turned off.
 
-FreeWPC keeps the current time-of-day in NVRAM.
-Periodically, it checks the RTC and updates the
-copy in memory to reflect any changes.
+The chip provides three registers for counting minutes, hours, and days.
+FreeWPC keeps the calendar time in persistent memory.
+About once per minute, it polls the RTC and updates the calendar time to reflect
+any changes.
+
+@table @code
+@item rtc_read
+@item rtc_write
+@end table
 
 @section Debug Port
 
@@ -346,8 +628,7 @@ copy in memory to reflect any changes.
 
 @section Bit Shifting
 
-The ASIC has a builtin shifter that can do some 
-bitwise math faster than native 6809 code.
+The ASIC has a builtin shifter that can do some bitwise math faster than native 6809 code.
 
 @command{gcc6809} has an option @option{-mwpc} which
 enables emitting instructions for the WPC platform.
@@ -367,9 +648,62 @@ illumination.  It resolves contention when multiple tasks try to
 access the same object at the same time through the use of
 priorities.
 
+The system manages two distinct types of effects: display and
+lamp effects.  They always run independently; thus it is not possible
+to guarantee allocation of both at the same time.  Lamp effects
+manage both the regular lamps, plus the GI and flashers.
+
+@section Basic Effect Principles
+
+These principles apply to both display and lamp effects.
+
+At any time, there is at most 1 effect that is @emph{running}.  The
+running effect is the one which has been @emph{started} with the
+highest priority.  Priorities are simple integer values:
+the higher the number, the more important the effect is.
+
+It is possible for no effect to be running if none has been started.
+In that case, the current priority is considered to be zero.  Actual
+effects always have a priority that is non-zero.
+
+The running effect is executed in a separate task context.  The
+currently running display effect always has the group ID
+@code{GID_DEFF}; likewise @code{GID_LEFF} for the lamps.
+
+These tasks can be preempted, if a higher priority effect is started.
+In that case, the old task is killed, and a new task is started.
+
+Effects must be declared in the machine configuration file.  Each
+entry gives the entry point to the effect, along with its priority
+and other optional properties.
+
+The APIs and implementation for display/lamp effects are mostly the
+same, but there are differences due to the following:
+
+@itemize @bullet
+@item The lamp matrix can be suballocated; the display can only be
+allocated as a whole.
+@item Some display effects are long-lived, while others are only
+temporary.
+@item Some display effects do not have high priority, but we should
+retry to start it later if possible.
+@end itemize
+
 @section Display Effects
 
+@table @code
+@item deff_start
+@item deff_stop
+@item deff_exit
+@end table
+
 @section Lamp Effects
+
+@table @code
+@item leff_start
+@item leff_stop
+@item leff_exit
+@end table
 
 @section Lamplists
 
@@ -382,8 +716,6 @@ by a special lamp code named @code{LAMP_END}.
 
 The lampset APIs provide convenience whenever
 many lamps need to be updated at once.
-
-@section Text and Fonts
 
 @section DMD Transitions
 
@@ -433,21 +765,107 @@ important ones are described in detail in this chapter.
 
 @section Scoring
 
+
 @c ======================================================
-@chapter The Machine Definition
+@chapter Fonts and Graphics
 
-Each machine must provide a configuration file named
-@file{config.h} which defines most of the machine-specific
-configuration options.
+This chapter explains how FreeWPC fonts and graphics work.
 
-@include config.texi
+FreeWPC uses simple bitmaps to represent fonts, icons, and full-screen
+graphics.  A @dfn{bitmap} is an array of rectangular pixel data.
+The data bits are prefixed by a short header which contains the width
+and height information.  The image is stored one row at a time, starting
+from the top.  Within a row, the bits are stored in little-endian format,
+with the least significant bit representing the leftmost pixel.
+
+A @dfn{font} is a set of bitmaps mapped to a contiguous sequence of
+characters.  The font header identifies the ASCII code for the first
+bitmap that is represented; this saves space by not needing to encode
+the low-valued ASCII control characters.  The nominal height of the
+characters is also defined, which allows for descenders.
+
+A @dfn{frame} is a full-screen bitmap, 128x32.  Since these are fairly
+common, special APIs are used to draw them that are more optimal, and
+the width/height is implied and not actually stored in the bitmap.
+A frame can have 4 colors per pixel (3 shades plus back) so
+the frame is actually stored as two consecutive @dfn{bit planes}.
+Each bit plane also can optionally be compressed using run-length
+encoding (RLE) or zero suppression to save space.
+
+@section Compression
+
+@section Using TrueType Fonts
+
+The script @command{fontgen2} converts TrueType font files (.ttf files)
+into WPC font files (.fon).
+
+@section Frame List
+
+The list of all frames compiled in the ROM is defined in an
+@dfn{image map}.
 
 @c ======================================================
 @chapter Native Mode
 
+Native mode lets you run the code directly on your host machine.
+It is a form of emulation, like PinMAME, except the emulator is
+"built-in" to the game ROM itself.
+
+The main difference in native mode is that all I/O accesses
+are emulated.  Calls to @code{readb} and @code{writeb} are
+converted to call @code{linux_asic_read} or @code{linux_asic_write},
+which does the emulation.
+
+Other features of native mode:
+
+@itemize @bullet
+
+@item You can use GDB to debug the program.
+
+@item printf statements can be used in interrupt handlers.
+
+@end itemize
+
 @c ======================================================
 @chapter Debugging
 
+You can use the @code{dbprintf()} function to print debug
+messages.  What happens to these messages depends on how
+you compile the code and what emulator you use.
+
+For now, there is no debug support when you are running on
+real hardware.
+
+@section @command{wpcdebug} and @command{PinMAME}
+
+PinMAME has been modified to support a new register, the
+@dfn{debugger port}.  It acts like a serial port and can
+be used to communicate between the running program and a
+separate debug console.  The program @command{wpcdebug} is
+the console.  Run this at the same time as PinMame and you
+will see the debug messages printed out.
+
+You need to be running a patched version of PinMAME under
+Linux for this to work.  Under PinMAME for Windows, you
+should compile the ROM with the @code{CONFIG_PARALLEL_DEBUG}
+option.  This will use the WPC parallel port for all debug
+messages.  Standard versions of PinMAME support this, and
+will write the output to a file in the @file{nvram} directory.
+
+This virtual port is unlikely any real serial port, in that writes can
+be done infinitely fast.  It is an oversimplification but it suffices
+for its purpose.
+
+@section @command{gdb}
+
+@section @command{exec09}
+
+exec09 is the 6809 emulator that is provided with GCC6809.
+exec09 supports a subset of the WPC architecture and can be used
+as a replacement for PinMAME.  It is mostly good for debugging
+straight CPU code that does not access hardware.  It provides
+a command-line monitor with breakpoints, single-step, and symbolic
+debugging which is sometimes more useful than PinMAME or gdb.
 
 @c ======================================================
 @c ======================================================
@@ -457,3 +875,7 @@ Here is a list of all of the standard events that the system generates.
 
 @include events.texi
 
+@c ======================================================
+@appendix The Machine Definition
+
+@include config.texi
