@@ -36,7 +36,7 @@ Make variables are translated by the build system into:
 
 Identifies the machine you want to build.  This is the
 same name as the subdirectory named under 'machine' that
-has all of the machine-specific configuration.
+.has all of the machine-specific configuration.
 
 This MUST be set, otherwise the build has no idea what
 you want to do.
@@ -382,10 +382,19 @@ The sound code to call when a new game is started.
 Says which lamp is attached to the start button.
 
 @item	MACHINE_START_SWITCH
+
+The ID for the start button switch.
+
 @item	MACHINE_TEST_MENU_ITEMS
+
 @item	MACHINE_TEST_ONLY
+
 @item	MACHINE_TILT_SWITCH
+
+The ID for the plumb tilt switch.
+
 @item	MACHINE_TZ
+
 @item	MACHINE_VOLUME_CHANGE_MUSIC
 
 @end table

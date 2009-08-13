@@ -1,21 +1,50 @@
 
-This chapter documents the WPC hardware.
+This chapter documents the WPC hardware.  A much more thorough
+guide to the WPC can be found at @url{http://marvin3m.com}.
 
 @section Overview
 
-WPC pinball machines contain a number of circuit boards, some that are intelligent
-with microprocessors, and others that are passive.
+WPC pinball machines contain a number of circuit boards, some that are
+intelligent with microprocessors, and others that are passive.
 
-From 1990-1999, six different generations of machines were produced, which differed
-only slightly.
+From 1990-1999, six different generations of machines were produced, which
+differed only slightly.
 
 @itemize @bullet
 @item WPC Alphanumeric
+
+The initial generation, which used 2 16-character alphanumeric displays.
+
 @item WPC DMD
+
+The alphanumerics are replaced by the dot matrix controller/display.
+
 @item WPC Fliptronic
+
+The flipper switches/drive transistors are moved from the regular
+switch matrix/power driver board onto a separate board.
+
 @item WPC DCS
+
+The sound board is radically improved, replacing the synthesizer chip
+and low-quality analog circuits with a DSP supporting high fidelity, stereo,
+multi-channel sound.
+
 @item WPC Security
+
+A security PIC chip is added between the ASIC and the switch matrix
+inputs.  The CPU no longer reads the switch data directly; it sends
+commands to the PIC which then reads the data.  The PIC requires some
+special cryptic codes to be sent otherwise it will not return valid
+switch data.
+
 @item WPC-95
+
+The functions of the circuit boards are combined into fewer boards,
+using FPGAs to replace many of the discrete TTL components.  Functionally
+it is not much different, although the CPU addresses for many of the
+functions changes.
+
 @end itemize
 
 @section CPU Board
@@ -36,8 +65,6 @@ the core operating system functions.  The remaining parts of the ROM
 must be bank switched in, 16KB at a time; only one 16KB bank at a time
 is visible at address 0x4000.
 
-@subsection ASIC
-
 The WPC ASIC is the heart of the system and is essentially a
 giant address decoder.  It combines a lot of the functionality that
 was performed by PIAs and TTL logic in earlier solid state games.
@@ -46,7 +73,7 @@ All addresses from the CPU are first seen by the ASIC, which can
 then either respond to the read/write request directly if it is an
 internal function, or forward the request to another device.
 
-@subsubsection Blanking
+@subsection Blanking
 
 The system blanking circuit helps to protect against software
 crashes.  The ASIC drives the BLANKING signal which is carried to
@@ -58,13 +85,13 @@ controllable from the CPU.
 Software can disable blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
 register.
 
-@subsubsection Diagnostics LED
+@subsection Diagnostics LED
 
 LED ?? is software-controllable by writing to bit 7 of the WPC_LEDS
 register; it can also be read.  The OS toggles this bit periodically
 to indicate that the system is alive.
 
-@subsubsection Watchdog
+@subsection Watchdog
 
 The ASIC has a builtin watchdog timer which will reset the CPU board if
 software does not restart it periodically.  The expiration seems to be
@@ -74,9 +101,16 @@ FreeWPC restarts the watchdog on every periodic interrupt, every 1ms.
 During initialization, when interrupts are disabled, it also restarts it
 occasionally.
 
-@subsubsection Bit Shifter
+@subsection Bit Shifter
 
-@subsubsection Memory Protection
+The ASIC has a bit shifter which offloads the CPU from having to
+calculate shifts using multiple CPU instructions.  The 6809 does not
+have a native shift instruction for more than 1 bit at a time.
+
+The bit shifter is used to optimize setting and clearing particular
+elements of a bitmap.
+
+@subsection Memory Protection
 
 As an address decoder, the WPC ASIC is capable of restricting access
 to any part of the address space.  The memory protection circuit
@@ -90,15 +124,17 @@ part of RAM and must be a power of 2 in size.
 FreeWPC uses memory protection to guard adjustments, audits, and some
 other vital data.
 
-@subsubsection Time of Day Clock
+@subsection Time of Day Clock
 
-@subsubsection High Resolution Timer
+The time-of-day device maintains the current calendar time.
+
+@subsection High Resolution Timer
 
 The high resolution timer is not currently used by FreeWPC.
 It allows for sub-millisecond accuracy, and was only used in
 alphanumeric games to do display dimming.
 
-@subsubsection Bank Switching
+@subsection Bank Switching
 
 The bank switch register allows you to select which portion of the
 ROM is mapped to the banked region of the physical address space,
@@ -122,28 +158,46 @@ inputs/outputs.  All generations of WPC use the same connector to
 the power driver board, which controls lamps and general solenoids.
 Display, sound, and flipper interfaces differ somewhat between generations.
 
-@subsubsection Ticket Dispenser
-@subsubsection Parallel Port
-@subsubsection Serial Port
+Special I/O boards exist to drive other miscellaneous devices like
+ticket dispensers or a printer.
 
 @subsection Interrupts
 
 The ASIC generates the reset, IRQ, and FIRQ signals which are sent to the CPU.
 
+The 6809 instructions to generate @emph{soft interrupts} --- swi, swi2,
+and swi3, are not used.  The handlers for those vectors all throw fatal
+errors.
+
 @subsubsection Reset
+
+The ASIC drives the CPU reset signal.  This signal is active low; normally
+the reset line is high.  The ASIC will pull reset low when the watchdog
+timer expires.
 
 @subsubsection IRQ
 
-IRQ can be generated 976 times per second, about once every 1.02ms.
-This can be enabled by writing to the WPC_ZEROCROSS_IRQ_CLEAR register.
+IRQ is generated 976 times per second, about once every 1.02ms.  An
+oscillator on the CPU board generates the frequency.
+The periodic interrupt
+can be disabled/enabled by writing to the ASIC's WPC_ZEROCROSS_IRQ_CLEAR
+register.  Separately, IRQ can be masked/unmasked by writing to the
+6809's condition-code (CC) register.
 
 @subsubsection FIRQ
+
 FIRQ can be generated in two ways: from the dot matrix display after a
 certain scanline is redrawn, or from the high-performance timer.
 
 @subsubsection NMI
 
+The CPU's NMI input is not used and is connected to Vcc.
+
 @section Power Driver Board
+
+The power driver board contains all of the high power circuitry.
+It has no intelligent parts and is controlled completely by the CPU board
+over a short ribbon cable.
 
 @subsection Lamp Circuits
 
@@ -170,15 +224,39 @@ power driver board.  All values are latched and thus retain their
 states until the CPU changes them.
 
 @subsection General Illumination Circuits
+
 The GI circuitry allows for 5 strings of up to 18 lamps each.
 Each string can independently be turned on and off by a triac.
 The lamps all run off 6.3V AC.
 
+Starting with WPC-95, two of the GI strings are always on and not
+under software control, saving the cost of the triacs, but
+eliminating the ability to flash/dim them.
+
 @subsection Zero Cross Circuit
+
+The zero-cross circuit tells the CPU when the AC voltage is near zero.
 
 Alternating current (AC) rapidly changes between a positive and
 negative voltage many times per second.  In the US, the frequency is
-60Hz.
+60Hz, which means that the voltage is near zero about once every 8.33ms.
+Outside the USe, line voltage is 50Hz and so zero crossing occurs every
+10ms.
+
+The CPU can use this information to time the pulses to the solenoids
+so that they are most effective.  Consider if a solenoid were turned on
+at the zero crossing and only kept on for 4ms.  That would be a much
+weaker pulse than if it were turned on at the peak of the AC cycle,
+which is halfway between two zero crossings, even if the duration were
+still 4ms.
+
+Most solenoid pulses last considerably longer than the length of the
+AC cycle, and so it is not required for operation (note that the Sega/Stern
+Whitestar hardware does not have it).
+
+The zero cross data can also be used to dim the flashers.
+
+Effective use of zero cross data can conserve power.
 
 @section Sound Board
 
@@ -207,6 +285,16 @@ when the flippers are in the 'up' position, indicating that the
 lower power voltage can be used.  It is up to software to use
 all of this wisely.
 
+@section Auxiliary Driver Board
+
+Some games use an auxiliary driver board which allows up to 8
+additional flashlamps/low power devices to be controlled.  These
+machines must have the following line in the machine config:
+
+@example
+define MACHINE_SOL_EXTBOARD1
+@end example
+
 @section Dot Matrix Controller Board
 
 The dot matrix display is 128 columns x 32 rows.  The display itself is
@@ -216,7 +304,7 @@ The controller board has the display RAM and the serialization logic.
 The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds).
 At this rate, it takes 256 microseconds per row and a little more than 8
 milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
---Display Memory
+
 The RAM has a total of 8KB.  A full DMD image requires 128x32 pixels,
 that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
 a total of 16 frames.
@@ -228,13 +316,20 @@ clock.
 Bits are encoded within a byte such that the leftmost pixel is in the
 least significant bit.  This is backwards from how binary numbers are
 normally visualized.
---Display Bank Switching
---Visible Page Register
+
+The DMD controller exposes the following registers:
+
+@itemize @bullet
+
+@item Visible Page Register
+
 The visible page register, WPC_DMD_ACTIVE_PAGE, holds the page number
 of the frame that should be clocked to the display.  Writing to this
 register does not take effect immediately but instead at the beginning
 of the next vertical retrace.
---Scanline Register
+
+@item Scanline Register
+
 The controller keeps track of which row is currently being refreshed,
 and makes this accessible to the CPU by reading the WPC_DMD_SCANLINE register.
 Values range from 0 to 31.
@@ -242,7 +337,10 @@ Values range from 0 to 31.
 The CPU can also write to WPC_DMD_SCANLINE to request an FIRQ interrupt
 to be generated when the current scanline reaches a certain value.
 
+@end itemize
+
 @section Memory Map
+
 This section describes the WPC memory map in detail.  In particular,
 it gives the function of each of the WPC ASIC registers.  A more
 readable theory of operation is described later.

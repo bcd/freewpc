@@ -1,6 +1,4 @@
-will occur 
-will occur 
-637=1B5B313B3246input texinfo
+\input texinfo
 @c %**start of header
 @setfilename freewpc.info
 @settitle The FreeWPC Manual
@@ -40,7 +38,7 @@ Also, knowledge of WPC pinball machines is very helpful.
 
 @end ifnottex
 
-@chapter Introduction
+@chapter Overview
 
 FreeWPC is a toolkit for building new software for Williams WPC pinball machines.
 WPC is the hardware platform that was used in all games from 1990-1999, starting with
@@ -64,10 +62,12 @@ were programmed in assembly language).  FreeWPC uses the freely available GCC680
 compiler.  There are some assembly language routines for really low-level, or high
 performance parts of the program.
 
-All generations of WPC are supported.  FreeWPC is architected into a number of
-distinct layers.  This makes it possible that, in the future, FreeWPC may be used
-to control other types of pinball machines than just WPC games, including new custom
-hardware.
+All generations of WPC are supported.  FreeWPC is also architected into a number of
+distinct layers which makes it highly portable to other
+types of pinball machines than just WPC games, including new custom hardware.  The
+@emph{platform} files describe the circuit boards.  The @emph{CPU} files are specific to
+the microprocessor, and can be shared between platforms (WPC and WhiteStar both use
+a 6809).  The @emph{machine} files are unique to a particular game.
 
 Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
 users.  Many common UNIX tools like @command{bc} and @command{perl} are required.
@@ -78,124 +78,44 @@ test and debug the software without requiring a real machine or even an emulator
 native mode replaces the lowest level of hardware access with builtin emulation.  Native
 mode currently uses the @command{ncurses} terminal library for visualizing the state of the game.
 
-@chapter Installing Binaries
+@chapter Installation
 
-This chapter explains how to install precompiled binaries.
+This chapter explains how to install the software.
 
-You will need to copy the ROM file into your PinMAME @file{roms}
-directory so that PinMAME can find it.  The location of this directory
+FreeWPC is mainly a toolkit, and thus is provided in source code format.
+However, periodically binary ROMs are compiled and published as well.
+If you are not a developer, but would like to experiment with FreeWPC,
+you can just download the binary packages and install them in your
+machine or in your emulator.
+
+If you are a developer and want to write your own game code, for one
+of the existing games that FreeWPC has been ported to or for a brand
+new game, you need a source code package.
+
+If you just want to browse the source code, you can view it online
+at the GitHub repository.
+
+@section Binary Packages
+
+Binary packages are available as @file{.zip} files, which contain
+@file{.rom} files.  These ROMs replace the game ROM only (the U6 chip
+on the CPU board).  If you want to test in a real machine, you need
+to burn a real EPROM from this file.
+
+If you want to test under PinMAME, you need to copy the ROM file into
+your PinMAME @file{roms} directory; where this is
 depends on how you installed PinMAME.  These directories typically contain
-ZIP files of the game ROM and sound ROMs; you'll need to unzip the file,
-replace the game ROM, then zip it back.  Make sure to save your original
-version of the ROM file for when you want to revert back to the real deal.
+@file{.zip} files of both the game ROM and sound ROMs together.
+You'll need to unzip the original file, replace the game ROM, then zip it back.
+Make sure to save your original
+game ROM file for when you want to revert back to the Williams code.
 
-@chapter Configuring FreeWPC
+@section Source Code Packages
 
-FreeWPC can be compiled in many different ways with lots of optional features.
-You cannot just type @command{make} at the top of the directory tree without
-first specifying what you want to build.  This is done by creating a file
-named @file{.config}.  The file @file{config.example} is providing as an
-example of the kinds of things that can be done.
+The following is a partial list of other programs which are used during the
+build process: gcc6809, dd, bc, zip, unzip, bash, Perl.
 
-@file{.config} is written in standard Makefile syntax.  You set various
-options by writing variable assignments, such as:
-
-@example
-MACHINE := wcs
-@end example
-
-A list of all of the options is given later in an appendix.
-
-You must specify at least a @var{MACHINE}.  All other configuration
-variables are optional.
-
-@chapter Building FreeWPC
-
-To compile, just run @command{make}.  This will build a ROM and optionally
-install it into your PinMAME ROM directory if you have said where that is.
-The build procedure is complicated, but it can be broken down into the
-following steps:
-
-@enumerate
-
-@item Create Blank File
-
-If the ROM size is larger than the number of pages that
-need to be compiled, then the final ROM image must be
-padded with blanks.  The @command{dd} command is used
-to generate a file named @file{blankxxx.bin}, where @var{xxx}
-is the size of the file in kilobytes (KB).  This file
-is then concatenated with the actual game code to produce
-a final ROM of the required size.
-
-@item Create Linker Command Files
-
-The linker is invoked several times, once per page or
-bank of ROM.  Different options are passed each time
-to place the correct object file into that section, and
-to resolve references correctly; all of these options
-are written to linker command files, which have the .lnk
-extension and are placed in the @file{build} directory.
-
-@item Setting the Machine Symbolic Links
-
-The symbol link @file{mach} is set to point to the correct
-machine directory, based on the value of the MACHINE
-make variable.
-
-@item Generating Defines
-
-Some #defines are generally automatically by scanning the
-code for uses.  These includes begin with the prefix
-@command{gendefine} and are created by a script also named
-@command{gendefine} in the @file{tools} directory.
-
-@item Generating Callsets
-
-Callsets are a mechanism for implementing a simple
-event subscription/invocation mechanism that is fully
-described at compile-time.  Event handling code is
-emitted in a C file named @file{callset.c}.
-
-@item Compiling and Assembling Source Code
-Source code is compiled using the GCC6809 compiler.
-The compiler generates assembler code with the @file{.s}
-extension.  These files are then assembled using the
-asxxxx assembler tools into object files with the @file{.o}
-extension.
-
-@item Compiling Page Headers
-Because the linker requires each section to contain at
-least one object file, a dummy file is assembly per
-section to ensure that this doesn't happen.  The page
-header is 1 byte long and contains the page number.
-
-@item Linking Pages
-
-The aslink utility is used to create one S-record file,
-with the @file{.s19} extension, for each page of ROM.
-
-@item Converting Pages to Binary
-
-The @file{tools/srec2bin} utility included with FreeWPC
-is run to convert the S-records into raw binary files.
-
-@item Concatenating Pages
-
-The binary files are concatenated, along with any blank
-files, to form the final ROM image.
-
-@end enumerate
-
-@chapter The WPC Hardware
-
-This chapter provides an overview of the WPC hardware, in terms of its
-capabilities and how software is able to control everything in the machine.
-
-@include hardware.texi
-
-@c ======================================================
-@chapter The Source Tree
+@section Directory Layout
 
 The FreeWPC source code tree is organized into the following directories:
 
@@ -203,13 +123,13 @@ The FreeWPC source code tree is organized into the following directories:
 
 @item kernel/
 
-The core pinball APIs.  All of these functions are kept in the fixed region of ROM and
-can be called at any time.
+The core pinball APIs.  All of these functions are kept in the fixed
+region of ROM and can be called at any time.
 
 @item common/
 
-Secondary pinball APIs, also called the @dfn{Common Pinball Library}.  These functions are
-not in fixed ROM and require bank switching to call.
+Secondary pinball APIs, also called the @dfn{Common Pinball Library}.
+These functions are not in fixed ROM and require bank switching to call.
 
 @item machine/@var{machine}/
 
@@ -237,8 +157,123 @@ All of the include files are kept in here or one of its subdirectories.
 
 @end table
 
-@c ======================================================
+@chapter Compiling
 
+@section Configuration
+
+FreeWPC can be compiled in many different ways with lots of optional features.
+You cannot just type @command{make} at the top of the directory tree without
+first specifying what you want to build.  This is done by creating a file
+named @file{.config}.  The file @file{config.example} is provided as an
+example of the kinds of things that can be tuned.
+
+@file{.config} is written in standard Makefile syntax.  (The top-level
+Makefile includes this file.)  You set various options by writing
+variable assignments, such as:
+
+@example
+MACHINE := wcs
+@end example
+
+A list of all of the options is given later in an appendix.
+TBD - move the appendix information here.
+
+You must specify at least a @var{MACHINE}.  All other configuration
+variables are optional; suitable defaults will be used.
+
+@section Making the ROM
+
+To compile, just run @command{make}.  This will build a ROM and optionally
+install it into your PinMAME ROM directory if you have said where that is.
+The build procedure is complicated, but it can be broken down into the
+following steps:
+
+@enumerate
+
+@item Create Blank File
+
+If the size of the ROM is larger than the number of pages that
+the compiler generates, then the final ROM image must be
+padded with blank sections.  The @command{dd} command is used
+to generate a file named @file{blank@var{xxx}.bin}, where @var{xxx}
+is the size of the file in kilobytes (KB).  This file
+is later concatenated with the linker output to produce
+a final ROM of the required size.
+
+@item Create Linker Command Files
+
+The linker is invoked several times, once per page or
+bank of ROM.  Different options are passed each time
+to place the correct object files into that section, and
+to resolve references correctly.  All of these options
+are written to linker command files, which have the .lnk
+extension and are placed in the @file{build} directory.
+They are an essentially a list of command-line options to the linker,
+but placed into a file because of the huge number of them.
+
+@item Setting the Machine Symbolic Links
+
+The symbol link @file{mach} is set to point to the correct
+machine code directory, based on the value of the MACHINE
+make variable.  Likewise, @file{include/mach} is pointed to the
+machine includes.
+
+@item Generating Defines
+
+Some #defines are generated automatically by scanning the
+code for their uses.  These include files begin with the prefix
+@command{gendefine} and are created by a script also named
+@command{gendefine} in the @file{tools} directory.
+
+At present this is only used to autogenerate the task group IDs.
+
+@item Generating Callsets
+
+Callsets are a mechanism for implementing a simple
+event subscription/invocation mechanism that is fully
+described at compile-time.  Event handling code is
+emitted in a C file named @file{callset.c}.
+
+@item Compiling and Assembling Source Code
+
+Source code is compiled using the GCC6809 compiler.
+The compiler generates assembler code with the @file{.s}
+extension.  These files are then assembled using the
+asxxxx asembler tools into object files with the @file{.o}
+extension.
+
+@item Compiling Page Headers
+Because the linker requires each section to contain at
+least one object file, a dummy file is assembly per
+section to ensure that this doesn't happen.  The page
+header is 1 byte long and contains the page number.
+
+@item Linking Pages
+
+The aslink utility is used to create one S-record file,
+with the @file{.s19} extension, for each page of ROM.
+
+@item Converting Pages to Binary
+
+The @file{tools/srec2bin} utility included with FreeWPC
+is run to convert the S-records into raw binary files.
+
+@item Concatenating Pages
+
+The binary files are concatenated, along with any blank
+files, to form the final ROM image.
+
+@end enumerate
+
+@c ======================================================
+@chapter The WPC Hardware
+
+This chapter provides an overview of the WPC hardware, in terms of its
+capabilities and how software is able to control everything in the machine.
+
+@include hardware.texi
+
+@c ======================================================
 @chapter Software Environment
 
 FreeWPC is a standalone operating system environment.  It does not use any
@@ -426,6 +461,12 @@ would be something like @code{__common__} or @code{__machine__}.  The
 
 @subsection Debugging Event Handlers
 
+@command{gencallset} has a @option{-d} option which emits @code{dbprintf()} statements
+as each event handler is called.  It is extremely verbose, but it can be used to
+debug when you don't know where to start when something isn't working.
+
+You can enable it by setting @command{CALLSET_FLAGS := -d} in @file{.config}.
+
 @section Template Drivers
 
 A @dfn{template} is a crude implementation of a reusable code block, similar in
@@ -516,9 +557,50 @@ The kernel provides a common set of hardware access functions
 that work across all of the different variations of the WPC
 architecture.
 
+There are basically two types of APIs.  The low-level APIs
+access the hardware directly.  These APIs all begin with @code{pinio}.
+They could be ported to any new pinball platform.  These are
+normally called only from realtime tasks (driver space, if you will).
+Every supported platform (WPC, Whitestar) needs to define these functions.
+See @file{include/platform/wpc.h}.
+
+The high-level APIs are invoked from the application layer (user space).  They
+are typically more user friendly, and don't actually talk directly to the
+hardware, but rather interface with the low-level device driver.
+
 @section Switches
 
+The switch matrix driver polls the hardware every 2ms and constantly updates
+its view of all of the switches in memory.  The user APIs can then query this
+data.
+
+Less frequently, the driver will also detect when switches have @emph{changed state}
+and invoke event handlers for these.
+
+It also performs debouncing so that rapid open and close are not considered.
+
 @table @code
+
+@item pinio_write_switch_column
+
+Set the current switch matrix column.
+
+@item pinio_read_switch_rows
+
+Read all of the switches on the currently selected column.
+
+@item pinio_read_dedicated_switches
+
+Read all of the dedicated switches.
+
+@item pinio_read_flippers
+@item pinio_read_flipper_buttons
+@item pinio_read_flipper_eos
+
+Read all or some of the flipper switches.
+
+@item pinio_read_locale
+
 @item switch_poll
 
 Read the stable, physical state of a switch.  Returns 1 if it has
@@ -534,6 +616,25 @@ but it inverts its result for optos.
 
 @section Lamps
 
+Each physical lamp is controlled by several flags.  The lamp driver
+combines the values of all these flags to decide at any time whether
+a lamp should be on or off.
+
+@table @asis
+@item On/Off
+Controls the steady on/off state of the lamp.
+@item Flashing
+When set, overrides the steady state and causes the lamp to flash.
+@item Effect 1 Allocated/Value
+When the allocated flag is set, overrides the steady/flashing state
+by the value of value flag.
+@item Effect 2 Allocated/Value
+Same, except overrides the Effect 1 flags as well.
+@end table
+
+The steady and flashing flags are per-player, and are automatically
+switched out in a multiplayer game.
+
 @table @code
 @item lamp_on
 Turns on a lamp.
@@ -544,22 +645,59 @@ Tests whether a lamp is on/off.
 @item lamp_toggle
 Toggles a lamp's on/off state.
 @item lamp_flash_on
+Enable lamp flashing.
 @item lamp_flash_off
+Disable lamp flashing.
 @item lamp_flash_toggle
+Toggle lamp flashing.
 @item lamp_tristate_on
+Ensure the lamp is steady.
 @item lamp_tristate_off
+Ensure the lamp is off.
 @item lamp_tristate_flash
+Ensure the lamp is flashing.
+@item pinio_write_lamp_strobe
+Set the current lamp matrix strobe.
+@item pinio_write_lamp_data
+Write lamp row data for the currently selected column.
 @end table
 
 @section Power Drivers
+
+Solenoid outputs are not matrixed; they are individually writable at all times.
+A '1' value means to turn it on, and '0' to turn it off.
+
+@table @code
+@item pinio_write_solenoid_set (@var{bank}, @var{value})
+Refresh a set of 8 solenoids.
+@item pinio_read_ac_zerocross
+Return nonzero if currently at a zerocross point.
+@end table
+
+@subsection Pulse Drivers
+
+@dfn{Pulse drivers} are operated infrequently, and only for short
+durations at a time.  The system prevents multiple pulses from
+occurring simultaneously and will queue and stage them.  These
+are normally used for kickers, poppers, etc.
 
 @table @code
 @item sol_request
 @end table
 
+@subsection Continuous Drivers
+
+@dfn{Continuous drivers} can run for longer periods of times.
+They are allowed to run in parallel with anything else.  They
+will frequently use @dfn{duty cycling} to avoid keeping the
+coil 100% active for too long, and thus they often require
+realtime processing to switch reliably.
+
+These types of drivers are all implemented using templates.
+
 @c include coil-drivers.txt
 
-@section Flashlamps
+@subsection Flashers
 
 The flashlamp APIs are similar to the solenoid APIs,
 except that they are momentary.  A flashlamp is
@@ -574,15 +712,28 @@ pulsed briefly, after which it is turned off.
 @c include dmd.txt
 
 @table @code
-@item dmd_alloc_low
+@item bmp_draw
+@item dmd_alloc_@var{map}
 @item dmd_alloc_low_high
-@item dmd_clean_page
+@item dmd_and_page
+@item dmd_clean_page_@var{map}
 @item dmd_copy_page
 @item dmd_flip_low_high
-@item dmd_show_low
-@item dmd_show_high
+@item dmd_or_page
+@item dmd_shadow_copy
+@item dmd_text_raise
+@item dmd_show_@var{map}
 @item dmd_show_other
 @item dmd_show2
+@item dmd_xor_page
+@item font_render_string
+@item font_render_string_center
+@item font_render_string_right
+@item frame_draw
+@item wpc_dmd_set_high_page
+@item wpc_dmd_get_high_page
+@item wpc_dmd_set_low_page
+@item wpc_dmd_get_low_page
 @end table
 
 There are many more APIs for drawing text and graphics.
@@ -593,12 +744,19 @@ Two flavors of sound board are supported: WPC, and DCS.
 The same APIs are used in either case.
 
 @table @code
+@item pinio_reset_sound
+@item pinio_write_sound
+@item pinio_sound_ready_p
+@item pinio_read_sound
 @item sound_send
+Sends any command to the sound board.
+@item sound_start
 @end table
 
 @section Triacs and General Illumination
 
 @table @code
+@item pinio_write_triac
 @item triac_on
 Turns on one or more triacs.
 @item gi_dim
@@ -620,6 +778,20 @@ any changes.
 @table @code
 @item rtc_read
 @item rtc_write
+@end table
+
+@section High Precision Timer
+
+@table @code
+@item pinio_read_timer
+@item pinio_write_timer
+@end table
+
+@section Miscellaneous
+
+@table @code
+@item pinio_watchdog_reset
+@item pinio_active_led_toggle
 @end table
 
 @section Debug Port
@@ -689,6 +861,8 @@ temporary.
 retry to start it later if possible.
 @end itemize
 
+@section Background Effects
+
 @section Display Effects
 
 @table @code
@@ -733,6 +907,209 @@ finishes, the display should consist entirely of the
 new image.
 
 @c ======================================================
+@chapter Ball Tracking
+
+The ball tracking module keeps track of where all of the pinballs are in
+the machine.  It is implemented in @file{common/device.c} and uses
+container declarations in the machine description.
+
+A @dfn{device} is defined to be something which can hold and release pinballs.
+(Earlier versions of the software used the term @emph{container}.)
+A device is comprised of one or more switches which count the number of balls
+in the device, plus a release solenoid that can be pulsed to force one
+ball to be removed.
+
+Ball troughs, kickouts, poppers, saucers, and locks are all just different
+shapes that a device can take.  Some containers only hold one ball, while
+others can hold many.
+
+@section Device Status
+
+For each device, the ball tracker maintains the following state information:
+
+@itemize @bullet
+@item The maximum number of balls it can hold (constant)
+@item The current number of balls it has
+@item The desired number of balls
+@item Whether or not it is in the process of trying to release a ball
+@end itemize
+
+The @dfn{desired count} is crucial to understanding the module's behavior.
+Whenever it has more balls than desired, it will initiate one or more releases
+to try to bring the count down to the desired number.  Otherwise, any balls
+that enter the device are kept there; this is used to implement ball locks.
+
+Software requests to kick a ball are @emph{always} done by manipulating the
+desired count.  The device module has complete control over the actual
+release solenoid.
+
+The trough device is the only device which normally desires to keep any balls.
+Playfield devices generally want zero balls unless a lock has been enabled.
+
+Device switches msut be declared as @emph{edge} switches, which invoke the
+event handler on both open and close transitions.  The tracker simply updates
+the current count on either type of transition.
+
+@section Global Status
+
+@section Events
+
+The ball tracker also generates new per-device events.  The name of
+the event includes the name of the device: for example,
+@code{dev_trough_enter}.
+
+The @dfn{enter} event is generated when the current count goes up by 1.
+Game code should normally always register handlers for the enter events
+rather than individual switches.  Note that a switch closure does not
+always indicate enter: consider an eject that is trying to kick out
+but the kicker is weak, so that the ball falls back in immediately.
+Also, when a ball trough releases a ball, a whole series of switch
+closures occur rapidly.
+
+The @dfn{exit} event is generated when a release is deemed successful.
+It happens after a release cycle, when the count goes down by 1.
+
+There are also some useful global events.  @code{single_ball_play}
+is generated when the total number of balls in play is reduced to 1,
+as at the end of multiball.  Multiball modes use this to exit.
+There is also @code{ball_count_change} invoked on every change of
+the number of balls in play.
+
+@section The Trough Device
+
+The trough device is special; every game must have one.  The system
+completely handles the device events generated for the ball trough.
+The function @code{device_add_live} is called whenever a new ball
+is added to play.
+
+Likewise, @code{device_remove_live} is called whenever a ball drains.
+It ultimately is the one that generates the @code{end_ball} event
+when all balls have drained.
+
+@c ======================================================
+@chapter Test Mode
+
+The FreeWPC test mode works similarly to the original menu system.
+However, there are extra options and a few important differences.
+For testing core changes to FreeWPC, it is often more convenient to use
+test mode than to play a game.
+
+When compiling with the @code{MACHINE_TEST_ONLY} option, the game
+will boot directly into test mode, and there is no provision to start a game.
+
+@section Adjustments
+
+All of the @emph{standard adjustments} are supported.  There are also a few
+new adjustments.
+
+@subsection Timed Game
+
+This adjustment allows you to switch between normal game play and a timed
+game.  Machines can implement different rules for timed play or not.
+They can also disable it entirely.
+
+@subsection Switch Stress Test
+
+The switch stress test is used to test switch handling over a long
+period of time.  When enabled, this adjustment causes the game to
+pretend that switch closures are occurring randomly after the ball
+has been plunged into play.  You can force end-of-ball by putting
+the ball into the drain.  You can also park the ball somewhere and
+the machine will continue to simulate closures indefinitely.
+
+Closures are simulated randomly at a rate of about 10 per second.
+This test has been used to uncover some hard to find bugs in the game
+logic after extended play.
+
+Naturally, this feature is disabled by default.
+
+@section Audits
+
+All of the @emph{standard audits} are supported.
+
+Presently, audits are kept as 16-bit integers, so they max out at 65535.
+
+@section Tests
+
+@section Utilities
+
+@section Development
+
+The development menu contains a series of additional tests that are
+probably only relevant to developers and not to end users.
+
+@subsection Font Test
+
+Cycles through all of the available fonts.  Use the flipper buttons
+to scroll through the alphabet.  The machine will try to display
+as much as possible at once, depending on the font size.
+
+@subsection Display Effect Test
+
+Cycles through all display effects.  Press ENTER to activate a deff,
+as if @code{deff_start} were called.  For long-running effects, press
+ENTER again to stop it via @code{deff_stop}.
+
+@subsection Lamp Effect Test
+
+Cycles through all lamp effects.  Press ENTER to activate a leff,
+as if @code{leff_start} were called.  Press ENTER again to stop it.
+
+Remember that multiple lamp effects can be active simultaneously if
+they are declared as shared and they do not overlap in the lamps that
+they use.
+
+@subsection Lamplist Test
+
+Cycles through the lamplists.  The flipper buttons cycle through the
+different ways that the lamplist can be controlled.  The default is
+to turn on all of the lamps.  You can also strobe them, flash them, etc.
+
+@subsection Ball Device Test
+
+Cycles through each of the ball devices, telling you its current status
+(how many balls it sees, kickouts pending, errors).  The flipper buttons
+will scroll through a set of actions (empty, kick 1, etc.); press ENTER
+to perform the action displayed.
+
+This test also continuously shows the global device status, such as
+how many total balls are detected and whether any balls are missing.
+
+@subsection Random Test
+
+Tests the random number generator.
+
+@subsection Transition Test
+
+Cycles through all of the dot-matrix transition effects.
+
+@subsection Frame Test
+
+Cycles through all of the display frames.
+
+@subsection Force Error Test
+
+Entering this test forces a fatal error, which should restart the system.
+
+@subsection Display Stress Test
+
+Starts randomly starting and stopping display effects until exiting the test.
+
+@subsection Symbol Test
+
+Cycles through the symbol bitmap, a collection of arrows, boxes, etc.
+
+@subsection Score Test
+
+@subsection PIC Test
+
+Displays vital data about the PIC.
+
+@subsection Memory Editor
+
+Lets you interactively scroll through the CPU's memory and alter values.
+
+@c ======================================================
 @chapter Common Pinball Library
 
 The files in the @file{common} directory provide a library of generic
@@ -740,29 +1117,17 @@ pinball functions that can be reused from game to game.  Some of the more
 important ones are described in detail in this chapter.
 
 @section Coins and Pricing
-
 @section Ball Devices
-
 @section Extra Balls
-
 @section High Scores
-
 @section Enter Initials
-
 @section Tournament Mode
-
 @section Ball Search
-			
 @section Knocker Driver
-
 @section PIC Driver
-
 @section Player Local Data
-
 @section Adjustments
-
 @section Audits
-
 @section Scoring
 
 
@@ -794,6 +1159,14 @@ encoding (RLE) or zero suppression to save space.
 
 @section Compression
 
+Frames can optionally be compressed.  The frame header includes
+a flag which indicates the compression method.
+
+@itemize @bullet
+@item Run-Length Encoding
+@item Zero Suppression
+@end itemize
+
 @section Using TrueType Fonts
 
 The script @command{fontgen2} converts TrueType font files (.ttf files)
@@ -823,6 +1196,10 @@ Other features of native mode:
 @item You can use GDB to debug the program.
 
 @item printf statements can be used in interrupt handlers.
+
+@item Permanent and NVRAM variables are supported; their values are
+saved in files across program runs.  NVRAM variables are not
+actually write-protected while the program is running, though.
 
 @end itemize
 
@@ -868,6 +1245,12 @@ a command-line monitor with breakpoints, single-step, and symbolic
 debugging which is sometimes more useful than PinMAME or gdb.
 
 @c ======================================================
+
+@c ======================================================
+@appendix The Machine Definition
+
+@include md.texi
+
 @c ======================================================
 @appendix Event Handling
 
@@ -876,6 +1259,10 @@ Here is a list of all of the standard events that the system generates.
 @include events.texi
 
 @c ======================================================
-@appendix The Machine Definition
+@appendix Build Tools
 
-@include config.texi
+@section csum : ROM Checksum Tool
+@section srec2bin : S-Record Converter
+@section sched : Static Scheduler
+@section fontgen2 : TrueType Font Generator
+

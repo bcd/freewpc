@@ -1,15 +1,13 @@
-
-@node Overview of the Machine Description
-
-Machines define most of their hardware configuration in the form of an "md" file.
+Machines define most of their hardware configuration in the form of
+an "md" file.
 Long ago, this was done by directly writing a .h file with the required
 information.  The .h file approach was more cumbersome and somewhat error-
 prone.
 
-The md file is "compiled" by the script "genmachine",
-which writes out a .h file and also some .c files that get linked in.
-genmachine will do some consistency checking on the input to make sure it
-is sane.
+The md file is "compiled" by the script @command{genmachine},
+which writes out a .h file and also some .c files that get linked in
+to the final program.  @command{genmachine} will do some consistency
+checking on the input to make sure it is sane.
 
 It will enforce naming consistency between identifiers, declarations,
 and strings.  For example, the start button gets a define for its switch
@@ -18,31 +16,58 @@ number (SW_START_BUTTON), an identifier for callback events
 gendefine can produce all of these automatically from
 a single "Start Button:" declaration in the .md file.
 
+Though the syntax is fairly strict, there is a bit of magic in how different
+categories need to be written.  The easiest way to write a config for a new
+game is to copy from another one.  The Twilight Zone and World Cup Soccer
+configs are the most complete.  There is more documentation in those files
+on how things should be set up.
+
 @section Syntax
 
-The "md" file is just a text file.  Blank lines and lines beginning with a '#' are
-ignored, like in a shell script.
+The "md" file is just a text file.  Blank lines and lines beginning
+with a '#' are ignored, like in a shell script.
 
 Long lines can be broken up like in C, with a backslash at the end of each line.
 A comma also acts as a line continuation character, which is useful when
 defining long lists.
 
 The file is divided into sections, which begin with a section header in
-square brackets.  (It's a throwback to the old Windows .ini file days.)  Only
-section names that are known to genmachine are permitted.  The list of
-permitted sections is listed near the top of the 'genmachine' script, and
+square brackets.  For example:
+
+@example
+@var{global-statements}
+
+[section1]
+@var{section1-statements}
+
+[section2]
+@var{section2-statements}
+@end example
+
+Only section names that are known to genmachine are permitted.  The list of
+permitted sections is listed near the top of the @code{genmachine} script, and
 includes: switches, lamp, drives, gi, lamplists, containers, etc.
 
-There's also a default section that is in effect at the top of a file,
-before you declare any sections yourself.  Some global data goes in the
-default section.
+Notice that there is a global section that is in effect at the top of a file,
+before you declare any sections.
 
 Within a section, you declare items that fit that category.  All
-declarations begin with a "key", followed by a colon, followed by a comma-
+declarations take this form:
+
+@example
+@var{key}: @var{property1}, [@var{property2}...]
+@end example
+
+A declaration begins with a key, followed by a colon, followed by a comma-
 separated list of properties.  The key and/or properties can contain any
 characters, including spaces, but not commas or colons.
 
-There are two types of declarations.  In one style, used mostly for
+There are two types of declarations: fixed objects and dynamic objects.
+They are written similarly but not exactly the same.
+
+@section Fixed Objects
+
+In one style, used mostly for
 hardware layout, the key refers to the object's physical identification,
 such as the switch, lamp, or solenoid
 number.  Here the key is generally numeric, although for solenoids the
@@ -66,6 +91,8 @@ things: (1) it is an instance of a well-known switch class, called 'tilt';
 this ties it directly to system code for processing tilts automatically.
 (2) The tilt switch should only be serviced during a game.  (3) A closure does
 not mark valid playfield.
+
+@section Variable Objects
 
 In the second type of object definition, there is no physical identifier,
 and so the name before the colon is the human readable name.  These are generally used for
@@ -96,12 +123,6 @@ above, there is a 'page' property, which is not binary -- it has a value,
 MACHINE_PAGE.  For these @dfn{valued properties}, the syntax is always
 @samp{@var{variable}(@var{value})}.
 
-Though the syntax is fairly strict, there is a bit of magic in how different
-categories need to be written.  The easiest way to write a config for a new
-game is to copy from another one.  The Twilight Zone and World Cup Soccer
-configs are the most complete.  There is more documentation in those files
-on how things should be set up.
-
 @section Directives
 
 The 'include' directive can be used to include config syntax from another file,
@@ -117,9 +138,8 @@ to override previous definitions.  The default WPC md file provides names
 for all of the switches and lamps, so if you omit one from the machine file,
 you get a default definition.  The tester ROM uses this facility.
 
-
 The 'define' directive is used for miscellaneous settings.  It gets translated
-to a C '#define' in the output file mach-config.h.  For example,
+to a C '#define' in the output file @file{mach-config.h}.  For example,
 
 define MACHINE_NUMBER 531
 
@@ -127,8 +147,8 @@ is converted to:
 
 #define MACHINE_NUMBER 531
 
-Note that the pound sign is not included in the mdfile, as it would be treated as a comment.
-
+Note that the pound sign is not included in the mdfile,
+as it would be treated as a comment.
 
 @section Global Configuration
 
@@ -136,6 +156,54 @@ Certain things need to be defined in the global sections, using Key: Value synta
 The human readable name of the machine, the system type, and a few other things can be
 given here.  These do not appear directly in the mach-config.h, but are used by
 genmachine to guide the compilation.  Again, see any existing config file for an example.
+
+@section Section Summary
+
+Here is a list of the sections that can appear.
+
+@table @code
+@item switches
+@table @code
+@item opto
+@item edge
+@item noplay
+@item ingame
+@item intest
+@item button
+@item noscore
+@end table
+@table @code
+@item outhole
+@item shooter
+@item tilt
+@item slam-tilt
+@item buyin-button
+@item launch-button
+@item start-button
+@item trough-stack
+@end table
+@item lamps
+@item drives
+@item gi
+@item lamplists
+@item containers
+@item drivers
+@item tests
+@item deffs
+@item leffs
+@item adjustments
+@item audits
+@item system_sounds
+@item system_music
+@item highscores
+@item flags
+@item globalflags
+@item scores
+@item fonts
+@item fifs
+@item timers
+@item templates
+@end table
 
 @section How genmachine works
 
