@@ -1,6 +1,13 @@
 
-This chapter documents the WPC hardware.  A much more thorough
-guide to the WPC can be found at @url{http://marvin3m.com}.
+This chapter provides an overview of the WPC hardware, in terms of its
+capabilities and how software is able to control everything in the machine.
+
+A much more thorough guide to the WPC and other pinball architectures
+can be found at @url{http://marvin3m.com}.
+
+Note that FreeWPC is intended to be portable, and not all pinball machines
+will be architected in exactly the same way.  However, the basic software
+architecture is FreeWPC is based heavily on the way that WPC games work.
 
 @section Overview
 
@@ -13,11 +20,13 @@ differed only slightly.
 @itemize @bullet
 @item WPC Alphanumeric
 
-The initial generation, which used 2 16-character alphanumeric displays.
+The initial generation, which used 2 16-character alphanumeric displays,
+Each character is comprised of 14 line segments, a comma, and a period.
 
 @item WPC DMD
 
-The alphanumerics are replaced by the dot matrix controller/display.
+The alphanumerics are replaced by the dot matrix controller/display,
+which has 128x32 pixels.
 
 @item WPC Fliptronic
 
@@ -54,7 +63,7 @@ It is an 8-bit/16-bit CPU with a 64KB address space.  Bank switching is
 required to address more than 64KB.  On reset, location 0xFFFE is
 read to determine the address of the first instruction.
 
-2KB of RAM is located at physical address 0x0000.  When power is turned off,
+8KB of RAM is located at physical address 0x0000.  When power is turned off,
 three batteries on the CPU board maintains the state of the RAM.
 
 The game ROM size varies from 128KB to 1MB, depending on the game.
@@ -254,7 +263,8 @@ Most solenoid pulses last considerably longer than the length of the
 AC cycle, and so it is not required for operation (note that the Sega/Stern
 Whitestar hardware does not have it).
 
-The zero cross data can also be used to dim the flashers.
+The zero cross data can also be used to dim the general illumination
+and the flashers.
 
 Effective use of zero cross data can conserve power.
 
@@ -305,13 +315,14 @@ The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds).
 At this rate, it takes 256 microseconds per row and a little more than 8
 milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
 
-The RAM has a total of 8KB.  A full DMD image requires 128x32 pixels,
+The RAM has a total of 8KB.  A full DMD bit plane requires 128x32 pixels,
 that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
-a total of 16 frames.
+a total of 16 planes.  At any time, at most two planes can be addressed by the
+CPU (changed to six in WPC-95).
 
 The SRAM is designed to allow both the 6809 and the serial decoder
 to access it simultaneously, at nonoverlapping phases of the system
-clock.
+clocks.
 
 Bits are encoded within a byte such that the leftmost pixel is in the
 least significant bit.  This is backwards from how binary numbers are
@@ -320,6 +331,14 @@ normally visualized.
 The DMD controller exposes the following registers:
 
 @itemize @bullet
+
+@item Low Mapped Page Register
+
+Says which of the 16 pages is currently accessible at CPU address 0x3800.
+
+@item High Mapped Page Register
+
+Says which of the 16 pages is currently accessible at CPU address 0x3A00.
 
 @item Visible Page Register
 

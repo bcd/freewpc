@@ -125,18 +125,28 @@ MACHINE_PAGE.  For these @dfn{valued properties}, the syntax is always
 
 @section Directives
 
+@subsection include
+
 The 'include' directive can be used to include config syntax from another file,
 much like a C '#include'.  This is used to bring in common definitions for the
 platform, that can be shared across games.
 
 For example, no game defines a switch entry for the "ALWAYS CLOSED" switch,
-which is the same in every WPC game.  By including platform/wpc/wpc.md, that
-and many other definitions are automatically provided.
+which is the same in every WPC game.  This can be put into a file shared by
+all machines.
 
-All files are read and parsed before any output is generated.  It is possible
-to override previous definitions.  The default WPC md file provides names
+By convention, the @emph{machine-specific} file includes the
+@emph{platform-specific} file, which may itself include other files.
+The WPC platform provides different files for the different hardware
+generations, one per variation and one that is common for all.
+
+All includes files are read and parsed before any of the output is generated.
+It is thus possible to override definitions that were seen in an earlier
+include.  The default WPC md file provides names
 for all of the switches and lamps, so if you omit one from the machine file,
 you get a default definition.  The tester ROM uses this facility.
+
+@subsection define
 
 The 'define' directive is used for miscellaneous settings.  It gets translated
 to a C '#define' in the output file @file{mach-config.h}.  For example,
@@ -162,7 +172,12 @@ genmachine to guide the compilation.  Again, see any existing config file for an
 Here is a list of the sections that can appear.
 
 @table @code
+
 @item switches
+
+Defines the physical switches.
+
+The possible attributes for switches are:
 @table @code
 @item opto
 @item edge
@@ -172,6 +187,9 @@ Here is a list of the sections that can appear.
 @item button
 @item noscore
 @end table
+
+Additionally, these attribute are used to tag special switches:
+
 @table @code
 @item outhole
 @item shooter
@@ -182,27 +200,75 @@ Here is a list of the sections that can appear.
 @item start-button
 @item trough-stack
 @end table
+
 @item lamps
+
+Defines the physical lamps.
+
 @item drives
+
+Defines the solenoids and flashers.  Use the @code{flash} attribute on flashers only.
+
 @item gi
+
+Defines the G.I. strings.
+
 @item lamplists
+
+Defines the lamplists.
+The attribute list is just a list of physical lamp names.
+
 @item containers
+
+Defines the containers/ball devices.
+The attribute list begins with the name of the release solenoid,
+followed by the names of the counting switches, following by any of the
+following flags:
+
 @item drivers
 @item tests
 @item deffs
+
+Define the display effects.
+
 @item leffs
+
+Define the lamp effects.
+
 @item adjustments
 @item audits
 @item system_sounds
 @item system_music
 @item highscores
 @item flags
+
+Declares bit flags.  These are handled similarly to lamps; they are
+per-player.  All flags are zero at the start of game.
+
 @item globalflags
+
+Like @samp{flags}, except these are global and not per-player.
+
 @item scores
+
+Declares the score table, which associate a short 8-bit ID to a binary-coded
+decimal score value.  Some of the scoring APIs use IDs instead of the
+expanded values for space efficiency.
+
 @item fonts
+
+Declares which fonts should be included in this game.
+
 @item fifs
+
+Obsolete.
+
 @item timers
+
+Declares the freerunning timers that are needed.
+
 @item templates
+
 @end table
 
 @section How genmachine works

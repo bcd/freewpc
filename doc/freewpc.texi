@@ -5,6 +5,9 @@
 @setchapternewpage odd
 @c %**end of header
 
+@set VERSION 0.90
+@set COPYRIGHT 2006-2009
+
 @titlepage
 @title The FreeWPC Manual
 @author Brian Dominy
@@ -14,7 +17,7 @@
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2006-2009 by Brian Dominy.
+Copyright @copyright{} @value{COPYRIGHT} by Brian Dominy.
 @end titlepage
 
 @contents
@@ -26,7 +29,8 @@ Copyright @copyright{} 2006-2009 by Brian Dominy.
 This is the manual for @dfn{FreeWPC}, a free platform for developing replacement
 game ROMs for Bally/Williams pinball machines based on the WPC
 (Williams Pinball Controller) chip.  FreeWPC provides the foundation for building
-new ROMs with custom game rules.
+new ROMs with custom game rules.  This document describes version
+@value{VERSION} of the software.
 
 FreeWPC is developed by Brian Dominy @email{brian@@oddchange.com} and is licensed
 under the GNU General Public License version 2 or later.  The latest version of
@@ -38,6 +42,125 @@ Also, knowledge of WPC pinball machines is very helpful.
 
 @end ifnottex
 
+@menu
+* Overview::
+* Installation::
+* Compiling::
+* The WPC Hardware::
+* Software Environment::
+* Hardware APIs::
+* Effects::
+* Ball Tracking::
+* Test Mode::
+* Common Pinball Library::
+* Fonts and Graphics::
+* Native Mode::
+* Debugging::
+* The Machine Definition::
+* Event Handling::
+* Build Tools::
+* Dot-Matrix Performance::
+* Historical Notes::
+@end menu
+
+@ignore
+* Frame Rate::
+* Simulating Color::
+* 6809 Instruction Set::
+* The Fastest Copy in Town::
+* Bit Alignment::
+* Compression Techniques::
+* Binary Packages::
+* Source Code Packages::
+* Directory Layout::
+* Configuration::
+* Making the ROM::
+
+@menu
+* Multitasking::
+* Real-Time Processing::
+* Memory Allocation::
+* Event Handling::
+* Template Drivers::
+* Fault Detection::
+@end menu
+
+* Switches::
+* Lamps::
+* Power Drivers::
+* Zerocross Detector::
+* Dot-Matrix Display (DMD)::
+* Sound Board::
+* Triacs and General Illumination::
+* Real-Time Clock::
+* High Precision Timer::
+* Miscellaneous::
+* Debug Port::
+* Paging and Locking::
+* Bit Shifting::
+
+* Basic Effect Principles::
+* Background Effects::
+* Display Effects::
+* Lamp Effects::
+* Lamplists::
+* DMD Transitions::
+
+* Device Status::
+* Global Status::
+* Events::
+* The Trough Device::
+
+* Adjustments::
+* Audits::
+* Tests::
+* Development::
+
+* Coins and Pricing::
+* Ball Devices::
+* Extra Balls::
+* High Scores::
+* Enter Initials::
+* Tournament Mode::
+* Ball Search::
+* Knocker Driver::
+* PIC Driver::
+* Player Local Data::
+* Adjustments::
+* Audits::
+* Scoring::
+
+* Compression::
+* Using TrueType Fonts::
+* Frame List::
+
+* @command{wpcdebug} and @command{PinMAME}::
+* @command{gdb}::
+* @command{exec09}::
+* csum : ROM Checksum Tool::
+* srec2bin : S-Record Converter::
+* sched : Static Scheduler::
+* fontgen2 : TrueType Font Generator::
+
+* Overview::
+* CPU Board::
+* Power Driver Board::
+* Sound Board::
+* Fliptronic Board::
+* Auxiliary Driver Board::
+* Dot Matrix Controller Board::
+* Memory Map::
+
+* Syntax::
+* Fixed Objects::
+* Variable Objects::
+* Directives::
+* Global Configuration::
+* Section Summary::
+* How genmachine works::
+@end ignore
+
+@node Overview
 @chapter Overview
 
 FreeWPC is a toolkit for building new software for Williams WPC pinball machines.
@@ -78,6 +201,7 @@ test and debug the software without requiring a real machine or even an emulator
 native mode replaces the lowest level of hardware access with builtin emulation.  Native
 mode currently uses the @command{ncurses} terminal library for visualizing the state of the game.
 
+@node Installation
 @chapter Installation
 
 This chapter explains how to install the software.
@@ -157,6 +281,7 @@ All of the include files are kept in here or one of its subdirectories.
 
 @end table
 
+@node Compiling
 @chapter Compiling
 
 @section Configuration
@@ -185,6 +310,15 @@ variables are optional; suitable defaults will be used.
 
 To compile, just run @command{make}.  This will build a ROM and optionally
 install it into your PinMAME ROM directory if you have said where that is.
+
+The exact commands are not printed, but you can force the details to be
+shown by setting the environment variable @var{Q} to the empty string, like
+this:
+
+@example
+make Q=""
+@end example
+
 The build procedure is complicated, but it can be broken down into the
 following steps:
 
@@ -265,23 +399,33 @@ files, to form the final ROM image.
 
 @end enumerate
 
-@c ======================================================
-@chapter The WPC Hardware
+@section Build Results
 
-This chapter provides an overview of the WPC hardware, in terms of its
-capabilities and how software is able to control everything in the machine.
+If successful, @file{build/@var{var}.rom} will contain the ready-to-burn ROM image.  @var{var} is
+a string composed of the machine's short name and the version number.
+
+Warnings and errors during the build are display on the console as they
+occur; they are also log to a file named @file{err}.
+
+In native mode, instead of a ROM, a file named @file{freewpc_@var{var}} is placed at the root
+of the tree.
+
+@c ======================================================
+@node The WPC Hardware
+@chapter The WPC Hardware
 
 @include hardware.texi
 
 @c ======================================================
+@node Software Environment
 @chapter Software Environment
 
 FreeWPC is a standalone operating system environment.  It does not use any
 existing OS and has its own multitasker, memory manager, etc.  This chapter
 describes the key features of the OS.
 
-Note: If you are compiling in native mode, all of these functions are replaced by
-functions in the host operating system.
+Note: If you are compiling in native mode, most of these functions are
+replaced by functions in the host operating system.
 
 @section Multitasking
 
@@ -302,7 +446,9 @@ the same GID.  GIDs allow you to control a group of related tasks, or to
 refer to a task using a compile-time ID as opposed to a run-time ID.
 
 In native mode, the multitasking APIs are emulated using the GNU
-Pth library.
+Pth library.  A good description of this library can be found at:
+@url{http://www.gnu.org/pth/}.
+
 
 @section Real-Time Processing
 
@@ -548,9 +694,15 @@ instantiation.
 @section Fault Detection
 
 Fatal errors when detected will cause the system to reboot.  The system
-API @code{fatal()} can be used to cause a fatal error at any time.
+API @code{fatal()} can be used to cause a fatal error at any time.  A list of the
+error codes is kept in @file{include/sys/errno.h}.
+
+There is also the @code{nonfatal()} API
+for logging errors which will not cause a reset.  These are audited and when @code{DEBUGGER}
+is defined, it will display a brief message on the DMD.
 
 @c ======================================================
+@node Hardware APIs
 @chapter Hardware APIs
 
 The kernel provides a common set of hardware access functions
@@ -707,9 +859,19 @@ pulsed briefly, after which it is turned off.
 @item flasher_pulse
 @end table
 
-@section Dot-Matrix Display (DMD)
+@section Zerocross Detector
 
-@c include dmd.txt
+The zero cross driver increments a counter every 1ms, and clears it
+whenever zero cross is asserted.  With knowledge of the AC cycle
+length, this allows a relatively good reconstruction of the waveform.
+For example, in the US zero cross should occur about once every 8ms.
+When the counter is at 4, the AC should be at its peak voltage.
+Outside the US, this would occur when the counter is at 5.
+
+Note that the AC waveform is not synchronized to the oscillator that
+generates IRQ, so a perfect reconstruction is not possible.
+
+@section Dot-Matrix Display (DMD)
 
 @table @code
 @item bmp_draw
@@ -812,6 +974,7 @@ the shifter is not used from the IRQ, and since
 tasks are nonpreemptive, that is no problem.
 
 @c ======================================================
+@node Effects
 @chapter Effects
 
 Effect processing is a layer above the hardware which provides
@@ -863,6 +1026,34 @@ retry to start it later if possible.
 
 @section Background Effects
 
+The display and music should always be doing something, even when
+nothing really important is happening.  Thus, these effect modules
+implement @dfn{background effects}, a way to determine what to do
+in these circumstances.  Lamp effects do not support a background mode,
+because in that case the lamp matrix is best left alone.
+
+The strategy for handling background effects is as follows:  When
+no effect has been explicitly started, an event is generated:
+@code{display_update} or @code{music_refresh}.  Any module that can
+provide a background effect should implement these handlers.
+
+The function can decide which effect, if any, it wants to run by
+calling either @code{deff_start_bg} or @code{music_request}.  It passes
+the code for the deff or music plus a priority value.  After all of the
+event handlers have been invoked, the one with the highest priority
+will be started.
+
+The common code provides many of the implementations to deal with the
+usual cases.  For example, while a game is running, the default effect
+is to show the game scores.  Default music codes can be defined for
+different circumstances: normal game play, ball at plunger, during bonus.
+
+Because handlers can use the values of other variables in the
+determination (are we in game, for example?), the calculations need to
+be redone periodically.  APIs exist to force a refresh: @code{deff_update}
+and @code{music_update}.  The system will also invoke them occasionally,
+on the order of a few times per second.
+
 @section Display Effects
 
 @table @code
@@ -906,7 +1097,10 @@ the present view and the new one.  When the transition
 finishes, the display should consist entirely of the
 new image.
 
+Currently all transitions are contained in @file{common/dmdtrans.c}.
+
 @c ======================================================
+@node Ball Tracking
 @chapter Ball Tracking
 
 The ball tracking module keeps track of where all of the pinballs are in
@@ -952,6 +1146,12 @@ the current count on either type of transition.
 
 @section Global Status
 
+The ball tracker also maintains a count of the number of balls in play,
+which is the total number of balls installed, minus the number of balls
+that are seen in devices, minus the number of balls declared "missing".
+Missing balls are flagged when a game is started but the balls are not
+all seen.
+
 @section Events
 
 The ball tracker also generates new per-device events.  The name of
@@ -987,6 +1187,7 @@ It ultimately is the one that generates the @code{end_ball} event
 when all balls have drained.
 
 @c ======================================================
+@node Test Mode
 @chapter Test Mode
 
 The FreeWPC test mode works similarly to the original menu system.
@@ -1031,7 +1232,10 @@ Presently, audits are kept as 16-bit integers, so they max out at 65535.
 
 @section Tests
 
-@section Utilities
+The test menu contains roughly the same tests as in the actual WPC
+games, with some differences.
+
+@subsection Solenoid Test
 
 @section Development
 
@@ -1110,6 +1314,7 @@ Displays vital data about the PIC.
 Lets you interactively scroll through the CPU's memory and alter values.
 
 @c ======================================================
+@node Common Pinball Library
 @chapter Common Pinball Library
 
 The files in the @file{common} directory provide a library of generic
@@ -1132,6 +1337,7 @@ important ones are described in detail in this chapter.
 
 
 @c ======================================================
+@node Fonts and Graphics
 @chapter Fonts and Graphics
 
 This chapter explains how FreeWPC fonts and graphics work.
@@ -1178,6 +1384,7 @@ The list of all frames compiled in the ROM is defined in an
 @dfn{image map}.
 
 @c ======================================================
+@node Native Mode
 @chapter Native Mode
 
 Native mode lets you run the code directly on your host machine.
@@ -1204,6 +1411,7 @@ actually write-protected while the program is running, though.
 @end itemize
 
 @c ======================================================
+@node Debugging
 @chapter Debugging
 
 You can use the @code{dbprintf()} function to print debug
@@ -1247,11 +1455,13 @@ debugging which is sometimes more useful than PinMAME or gdb.
 @c ======================================================
 
 @c ======================================================
+@node The Machine Definition
 @appendix The Machine Definition
 
 @include md.texi
 
 @c ======================================================
+@node Event Handling
 @appendix Event Handling
 
 Here is a list of all of the standard events that the system generates.
@@ -1259,10 +1469,45 @@ Here is a list of all of the standard events that the system generates.
 @include events.texi
 
 @c ======================================================
+@node Build Tools
 @appendix Build Tools
 
 @section csum : ROM Checksum Tool
+
+The checksum tool works on FreeWPC ROMs as well as the original
+Williams factory ROMs.  It can verify and update the checksum
+field located just above the interrupt vector table.
+
 @section srec2bin : S-Record Converter
+
+The gcc6809 linker produces S-record files by default.  This
+tool converts S-records to raw binary format.
+
 @section sched : Static Scheduler
+
+The scheduler reads in a list of schedule files, which by
+convention end with the extension @file{.sched}.
+
 @section fontgen2 : TrueType Font Generator
+
+@c ======================================================
+
+@include dmd-theory.texi
+
+@node Historical Notes
+@appendix Historical Notes
+
+FreeWPC was started in 2005 and was written entirely in assembly language,
+before the availability of the gcc6809 C compiler.  An initial attempt
+to ease programming involved the use of some complicated macros, written
+in the @command{m4} programming language.  Work was halted during the
+development of gcc6809, then the system was gradually rewritten in C.
+The early source code repository actually contained the compiler changes
+as well.
+
+The first time that a FreeWPC ROM was placed into a game was in
+May, 2008.  It did not run OK due to some problems with the watchdog
+circuit and with the PIC initialization.  Those problems were
+resolved within only a few hours.
+
 
