@@ -433,7 +433,7 @@ void task_sleep (task_ticks_t ticks)
 
 	/* Mark the task as blocked, and set the time at which it
 	should be awakened. */
-	tp->wakeup = get_sys_time () + ((U16)ticks) * 16;
+	tp->wakeup = get_sys_time () + ((U16)ticks) * IRQS_PER_TICK;
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
