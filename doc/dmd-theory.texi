@@ -85,11 +85,13 @@ of the copy.  Let's look at some approaches.
 A simple way is to copy byte-by-byte.  Assume that the source and destination
 addresses are already in registers, then we can do something like this:
 
+@example
 loop:
 	ldb	,x+
 	stb	,u+
 	dec	count
 	bne	loop
+@end example
 
 We use the X and U registers, because instructions using Y are one byte longer,
 and also take one cycle longer.
@@ -98,6 +100,7 @@ This actually doesn't work, because count is a byte variable, and we need to
 copy 512 bytes.  Also, it is inefficient because many cycles are spent in the
 'dec' and 'bne'.  Loop unrolling can help us eliminate overhead:
 
+@example
 	lda	#64
 	sta	count
 loop:
@@ -111,6 +114,7 @@ loop:
 	stb	,u+
 	dec	count
 	bne	loop
+@end example
 
 As each iteration now copies 4 bytes at a time, we can do this in 64 loop iterations.
 
@@ -122,6 +126,7 @@ The above example can be improved further by realizing that the 6809 can operate
 on 16-bit words.  Loading/storing a word at a time helps a lot.  The number of
 iterations can be cut in half, too, which reduces loop overhead more.
 
+@example
 	lda	#32
 	sta	count
 loop:
@@ -135,6 +140,7 @@ loop:
 	std	,u++
 	dec	count
 	bne	loop
+@end example
 
 The 'ldd' and 'std' instructions, in the indexed modes used above, take 7 cycles
 each.  dec takes 5 cycles -- or 4 if we ensure that it is in the direct page.
@@ -144,23 +150,29 @@ a little more than 1ms, just to do a straightforward page copy.
 
 Now consider the following:
 
-* Keeping all images uncompressed is not practical on the WPC platform, because
+@table @bullet
+@item
+Keeping all images uncompressed is not practical on the WPC platform, because
 of the ROM space limitation.  In the earliest dot matrix games, 256KB ROMs were
 used.  With no room for anything but graphics, these could only hold 512 pages
 of data.  If 4-color images are desired, then cut that number in half.
 
+@item
 Compression is necessary, and takes CPU power to decode.  So the 1ms copy is
 mostly unrealistic.
 
-* In many cases, copying a single page of graphics is not what is needed.
+@item
+In many cases, copying a single page of graphics is not what is needed.
 We may need to composite several layers of images together, including text.
 It may take 4 or 5 page-level operations (meaning, where an entire page is modified)
 to compose the final image.  Some of these operations are a little more costly
 than a single copy, too.
 
-* Remember that we wanted a display frame every 50ms.  As we add all of this
+@item
+Remember that we wanted a display frame every 50ms.  As we add all of this
 extra complexity, this is starting to take a significant percentage of the
 total CPU available.
+@end table
 
 @section The Fastest Copy in Town
 

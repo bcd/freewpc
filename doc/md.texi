@@ -188,7 +188,7 @@ The possible attributes for switches are:
 @item noscore
 @end table
 
-Additionally, these attribute are used to tag special switches:
+Additionally, these attributes are used to tag special switches:
 
 @table @code
 @item outhole
@@ -203,15 +203,18 @@ Additionally, these attribute are used to tag special switches:
 
 @item lamps
 
-Defines the physical lamps.
+Defines the controlled lamps.  You can also give each lamp a color
+and a playfield position; there are ways of using this data to
+auto-generate lamp effects.
 
 @item drives
 
-Defines the solenoids and flashers.  Use the @code{flash} attribute on flashers only.
+Defines the solenoids and flashers.  Use the @code{flash} attribute to say
+which ones are flashers.
 
 @item gi
 
-Defines the G.I. strings.
+Defines the G.I. string names, for display in test mode.
 
 @item lamplists
 
@@ -222,11 +225,13 @@ The attribute list is just a list of physical lamp names.
 
 Defines the containers/ball devices.
 The attribute list begins with the name of the release solenoid,
-followed by the names of the counting switches, following by any of the
-following flags:
+followed by the names of the counting switches (in order from entry
+to exit).
 
-@item drivers
+@item templates
+
 @item tests
+
 @item deffs
 
 Define the display effects.
@@ -236,6 +241,11 @@ Define the display effects.
 Define the lamp effects.
 
 @item adjustments
+
+Define the machine's feature adjustments.  For each adjustment,
+you give a @emph{type}, which is an object that defines its
+allowable values, and a @emph{default}.
+
 @item audits
 @item system_sounds
 @item system_music

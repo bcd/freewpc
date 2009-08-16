@@ -10,7 +10,8 @@ One or more partial credits have just been added.
 @item add_player
 A new player has been added to the game in progress.  This event is
 thrown for all players, including the first one.  For the first player,
-it is thrown after the start_game event.
+it is thrown after the start_game event.  When called, all player-local
+variables are in scope.
 
 @item amode_page
 Thrown by the attract mode pager to allow machines to add their own
@@ -32,7 +33,7 @@ An attempt is about to be made to kick from one of the ball devices.
 A playfield switch closure occurred.
 
 @item ball_count_change
-The number of balls in play has decreased.
+The number of balls in play has changed.
 
 @item boolean ball_drain
 A ball has entered the trough; should it be treated as a drain?
@@ -61,10 +62,10 @@ The device "foo" was just entered (its count went up by 1).
 The system is about to try to kick a ball from device "foo".
 
 @item dev_@var{foo}_kick_failure
-A kick from device "foo" succeeded (its count went down by 1).
+A kick from device "foo" failed (its count did not change).
 
 @item dev_@var{foo}_kick_success
-A kick from device "foo" succeeded (its count did not change).
+A kick from device "foo" succeeded (its count went down by 1).
 
 @item diagnostic_check
 Called after init_complete to perform further diagnostic checks.  Note
@@ -157,7 +158,7 @@ Called periodically to update the lamp matrix.  This should be received
 to update a lamp whose state depends on a variety of conditions which
 may be constantly changing (e.g. a generic "mode arrow" which could
 be off, flash, or solid and is used by multiple modes.)  In these cases,
-the state of the mode is stored in multiple, separate variables, and the
+the state of the lamp is dependent on several variables, and the
 lamp_update routine recalculates the state of the lamp.
 
 @item match_awarded
@@ -246,7 +247,7 @@ received by any modes that want to penalize the player for draining,
 by changing game features or further decreasing the game timer.
 
 @item timed_game_tick
-In a timed game, the game timer has decreased.
+In a timed game, the game timer has decreased by 1 second.
 
 @item valid_playfield
 Called after start_ball when the ball has been put into play; a

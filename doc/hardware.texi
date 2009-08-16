@@ -3,7 +3,7 @@ This chapter provides an overview of the WPC hardware, in terms of its
 capabilities and how software is able to control everything in the machine.
 
 A much more thorough guide to the WPC and other pinball architectures
-can be found at @url{http://marvin3m.com}.
+can be found at @url{http://www.pinrepair.com/wpc/index.htm}.
 
 Note that FreeWPC is intended to be portable, and not all pinball machines
 will be architected in exactly the same way.  However, the basic software
@@ -26,7 +26,9 @@ Each character is comprised of 14 line segments, a comma, and a period.
 @item WPC DMD
 
 The alphanumerics are replaced by the dot matrix controller/display,
-which has 128x32 pixels.
+which has 128x32 pixels.  The DMD controller board can store up to 16
+frames in memory separate from the regular CPU memory, and can quickly
+switch between them.  The display refreshes at 122Mhz.
 
 @item WPC Fliptronic
 
@@ -52,7 +54,7 @@ switch data.
 The functions of the circuit boards are combined into fewer boards,
 using FPGAs to replace many of the discrete TTL components.  Functionally
 it is not much different, although the CPU addresses for many of the
-functions changes.
+functions changed.
 
 @end itemize
 
@@ -195,8 +197,18 @@ register.  Separately, IRQ can be masked/unmasked by writing to the
 
 @subsubsection FIRQ
 
-FIRQ can be generated in two ways: from the dot matrix display after a
-certain scanline is redrawn, or from the high-performance timer.
+FIRQ can be generated in two ways: from the dot matrix controller after a
+certain scanline is redrawn, or from the high-performance timer.  When
+an FIRQ is received, the CPU has to determine which of these occurred
+to determine how to process it.
+
+The DMD controller can interrupt via FIRQ when a particular scanline of
+the display has just been sent to the display.  This can be used to
+tell the CPU when to display a new frame.
+
+The high precision timer can interrupt when its value reaches zero.
+
+Either of these can be enabled/disabled.
 
 @subsubsection NMI
 
@@ -206,7 +218,9 @@ The CPU's NMI input is not used and is connected to Vcc.
 
 The power driver board contains all of the high power circuitry.
 It has no intelligent parts and is controlled completely by the CPU board
-over a short ribbon cable.
+over a short ribbon cable.  It houses the drive transistors which switch
+current to the high power devices, along with fuses and other power-related
+circuitry.
 
 @subsection Lamp Circuits
 
@@ -220,27 +234,37 @@ strobe each of the lamp columns in order to update all 64 lamps.
 The filaments in incandescent lamps operate at around 6V.  The lamp
 circuitry switches a much higher 18V, but strobing only enables that
 voltage for 1/8 of the time, and filaments do not instantly turn off
-when power is removed, so no flicker is perceived.
+when power is removed, so no flicker is perceived.  LEDs do not have
+this property and this explains the flicker that is often seen when
+people replace normal bulbs with LEDs.
 
 @subsection Solenoid Circuits
 
 The power driver board supports up to 28 controlled outputs for
 solenoids, motors, etc.  These are divided into four groups:
 8 high power drivers, 8 low power drivers, 8 flashlamp drivers, and
-4 general purpose drivers.
+4 general purpose drivers.  Each bank operates at a different voltage,
+somewhere between 20V and 50V.
+
 The CPU board enables/disable a driver by writing a command to the
-power driver board.  All values are latched and thus retain their
-states until the CPU changes them.
+power driver board.  All values are latched on the driver board and thus
+retain their states until the CPU changes them.  The latches are not
+readable, so software must maintain the last value written in RAM.
 
 @subsection General Illumination Circuits
 
 The GI circuitry allows for 5 strings of up to 18 lamps each.
+These are separate from the @dfn{controlled lamps} described previously;
+individual lamps are not controllable, only entire strings of lamps.
 Each string can independently be turned on and off by a triac.
 The lamps all run off 6.3V AC.
 
 Starting with WPC-95, two of the GI strings are always on and not
 under software control, saving the cost of the triacs, but
 eliminating the ability to flash/dim them.
+
+When enabled, the triacs illuminate the lamps until the AC voltage
+crosses zero.  They must be constantly re-enabled to keep the lamps on.
 
 @subsection Zero Cross Circuit
 
@@ -264,20 +288,22 @@ AC cycle, and so it is not required for operation (note that the Sega/Stern
 Whitestar hardware does not have it).
 
 The zero cross data can also be used to dim the general illumination
-and the flashers.
-
-Effective use of zero cross data can conserve power.
+and the flashers, and to conserve power.
 
 @section Sound Board
 
-Both the WPC and DCS sound boards are connected via ribbon cable
-to the CPU board, which issues both read and write commands.  The
+Both the WPC and DCS sound boards are connected via a ribbon cable
+to the CPU board, which sends it both read and write commands.  The
 actual values vary greatly depending on the board type.
 
 1-byte or 2-byte commands are written to request particular sounds
 to be played.  The sound board stores all of the sound data on
 additional EPROMs, and has its own CPU that decodes the data and
 writes it to various audio devices.
+
+The sound board can also send data back to the CPU, notably to tell
+it when a sound has finished playing, allowing the CPU to synchronize
+its actions to the sounds and music.
 
 @section Fliptronic Board
 
@@ -292,8 +318,7 @@ for the flipper buttons and 4 end-of-stroke (EOS) switches.
 The button switches are wired to the cabinet buttons.  The
 EOS switches are mounted on the flipper and used to determine
 when the flippers are in the 'up' position, indicating that the
-lower power voltage can be used.  It is up to software to use
-all of this wisely.
+lower power voltage can be used.
 
 @section Auxiliary Driver Board
 
@@ -361,8 +386,7 @@ to be generated when the current scanline reaches a certain value.
 @section Memory Map
 
 This section describes the WPC memory map in detail.  In particular,
-it gives the function of each of the WPC ASIC registers.  A more
-readable theory of operation is described later.
+it gives the function of each of the WPC ASIC registers.
 
 @table @asis
 @item #define WPC_RAM_BASE                0x0000
