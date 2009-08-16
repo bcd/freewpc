@@ -438,7 +438,7 @@ extern inline void wpc_write_flippers (U8 val)
 
 
 /********************************************/
-/* Jumpers                                  */
+/* Locale                                   */
 /********************************************/
 
 extern inline U8 wpc_get_jumpers (void)
@@ -446,7 +446,7 @@ extern inline U8 wpc_get_jumpers (void)
 	return readb (WPC_SW_JUMPER_INPUT);
 }
 
-extern inline U8 wpc_read_locale (void)
+extern inline U8 pinio_read_locale (void)
 {
 	/* TODO - make a getbits macro */
 	return (wpc_get_jumpers () & 0x3C) >> 2;

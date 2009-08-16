@@ -238,7 +238,7 @@ extern inline void wpc_write_flippers (U8 val)
 
 
 /********************************************/
-/* Jumpers                                  */
+/* Locale                                   */
 /********************************************/
 
 
@@ -246,7 +246,7 @@ extern inline U8 wpc_get_jumpers (void)
 {
 }
 
-extern inline U8 wpc_read_locale (void)
+extern inline U8 pinio_read_locale (void)
 {
 }
 

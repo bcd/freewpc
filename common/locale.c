@@ -73,18 +73,11 @@ void locale_render (U8 locale)
 }
 
 
-/* TODO - support on-the-fly DIP switch changes.  Poll them about
-once per second, during idle time. */
-
 CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;
 
-#ifdef CONFIG_PLATFORM_WPC
-	current_locale = wpc_read_locale ();
-#else
-	current_locale = 0;
-#endif
+	current_locale = pinio_read_locale ();
 	dbprintf ("Current locale : %d\n", current_locale);
 
 	/* If the DIP switch setting changed, or the previous
