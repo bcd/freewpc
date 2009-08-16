@@ -299,33 +299,39 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 
 /********************************************/
-/* ROM Paging                               */
+/* Bank Switching                           */
 /********************************************/
 
-extern inline U8 wpc_get_rom_page (void)
+#define PINIO_BANK_ROM 0
+#define PINIO_BANK_RAM 1
+
+extern inline void pinio_set_bank (U8 bankno, U8 val)
 {
-	return readb (WPC_ROM_BANK);
+	switch (bankno)
+	{
+		case PINIO_BANK_ROM:
+			writeb (WPC_ROM_BANK, val);
+			break;
+		case PINIO_BANK_RAM:
+			writeb (WPC_RAM_BANK, val);
+			break;
+		default:
+			break;
+	}
 }
 
-extern inline void wpc_set_rom_page (U8 page)
+extern inline U8 pinio_get_bank (U8 bankno)
 {
-	writeb (WPC_ROM_BANK, page);
+	switch (bankno)
+	{
+		case PINIO_BANK_ROM:
+			return readb (WPC_ROM_BANK);
+		case PINIO_BANK_RAM:
+			return readb (WPC_RAM_BANK);
+		default:
+			break;
+	}
 }
-
-/********************************************/
-/* RAM Paging                               */
-/********************************************/
-
-extern inline U8 wpc_get_ram_page (void)
-{
-	return readb (WPC_RAM_BANK);
-}
-
-extern inline void wpc_set_ram_page (U8 page)
-{
-	writeb (WPC_RAM_BANK, page);
-}
-
 
 /********************************************/
 /* Zero Crossing/IRQ Clear Register         */

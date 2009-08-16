@@ -1170,8 +1170,10 @@ any changes.
 @section Paging and Locking
 
 @table @code
-@item wpc_get_rom_page
-@item wpc_set_rom_page
+@item pinio_set_bank
+Writes a bank-switching register.
+@item pinio_get_bank
+Reads a bank-switching register.
 @end table
 
 @section Bit Shifting

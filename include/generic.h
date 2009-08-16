@@ -64,21 +64,21 @@ but they are otherwise generic. */
 
 #define call_far(page, fncall) \
 do { \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page); \
+	U8 __saved_page = pinio_get_bank (PINIO_BANK_ROM); \
+	pinio_set_bank (PINIO_BANK_ROM, page); \
 	fncall; \
-	wpc_set_rom_page (__saved_page); \
+	pinio_set_bank (PINIO_BANK_ROM, __saved_page); \
 } while (0)
 
 
 #define page_push(page) \
 { \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page);
+	U8 __saved_page = pinio_get_bank (PINIO_BANK_ROM); \
+	pinio_set_bank (PINIO_BANK_ROM, page);
 
 
 #define page_pop() \
-	wpc_set_rom_page (__saved_page); \
+	pinio_set_bank (PINIO_BANK_ROM, __saved_page); \
 }
 
 #endif /* PAGE == SYS_PAGE */

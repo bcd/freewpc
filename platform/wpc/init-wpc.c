@@ -30,7 +30,7 @@ void platform_init (void)
 	pinio_reset_sound ();
 
 	/* Initializing the RAM page */
-	wpc_set_ram_page (0);
+	pinio_set_bank (PINIO_BANK_RAM, 0);
 
 #ifdef __m6809__
 	/* Install the null pointer catcher, by programming
@@ -47,7 +47,7 @@ void platform_init (void)
 	/* Initialize the ROM page register
 	 * page of ROM adjacent to the system area is mapped.
 	 * This is the default location for machine-specific files. */
-	wpc_set_rom_page (MACHINE_PAGE);
+	pinio_set_bank (PINIO_BANK_ROM, MACHINE_PAGE);
 
 	/* Initialize other critical WPC output registers relating
 	 * to hardware */

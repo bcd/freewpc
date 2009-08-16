@@ -160,66 +160,34 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 /** Release write access to the protected memory */
 #define wpc_nvram_put()
 
-
-/** Atomically increment a variable in protected memory by N. */
-#define wpc_nvram_add(var,n) \
-	do { \
-		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
-		*pvar += n; \
-		wpc_nvram_put (); \
-	} while (0)
-
-
-/** Atomically decrement a variable in protected memory by N. */
-#define wpc_nvram_subtract(var,n) \
-	do { \
-		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
-		*pvar -= n; \
-		wpc_nvram_put (); \
-	} while (0)
-
 /********************************************/
-/* ROM Paging                               */
+/* Bank Switching                           */
 /********************************************/
 
-extern inline U8 wpc_get_rom_page (void)
+#define PINIO_BANK_ROM 0
+
+extern inline void pinio_set_bank (U8 bankno, U8 val)
 {
-	return readb (WS_PAGE_LED) & WS_PAGE_MASK;
+	switch (bankno)
+	{
+		case PINIO_BANK_ROM:
+			writeb (WS_PAGE_LED, page & WS_PAGE_MASK);
+			break;
+		default:
+			break;
+	}
 }
 
-extern inline void wpc_set_rom_page (U8 page)
+extern inline U8 pinio_get_bank (U8 bankno)
 {
-	writeb (WS_PAGE_LED, page & WS_PAGE_MASK);
+	switch (bankno)
+	{
+		case PINIO_BANK_ROM:
+			return readb (WS_PAGE_LED) & WS_PAGE_MASK;
+		default:
+			break;
+	}
 }
-
-
-/** The call_far, wpc_push_page, and wpc_pop_page
- * macros are only safe when calling from the system
- * page, so don't define them otherwise. */
-#if (PAGE == SYS_PAGE) || !defined(HAVE_PAGING)
-
-#define call_far(page, fncall) \
-do { \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page); \
-	fncall; \
-	wpc_set_rom_page (__saved_page); \
-} while (0)
-
-
-#define wpc_push_page(page) \
-{ \
-	U8 __saved_page = wpc_get_rom_page (); \
-	wpc_set_rom_page (page);
-
-
-#define wpc_pop_page() \
-	wpc_set_rom_page (__saved_page); \
-}
-
-#endif /* PAGE == SYS_PAGE */
 
 
 /********************************************/

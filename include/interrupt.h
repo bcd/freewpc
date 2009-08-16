@@ -27,7 +27,7 @@ extern inline void do_irq_begin (void)
 	/* If using the RAM paging facility, ensure that page 0
 	 * is visible for the IRQ */
 #ifdef CONFIG_PAGED_RAM
-	wpc_set_ram_page (0);
+	pinio_set_bank (PINIO_BANK_RAM, 0);
 #endif
 
 	/* Clear the source of the periodic interrupt, and reset
