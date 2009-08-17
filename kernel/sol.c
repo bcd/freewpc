@@ -412,8 +412,10 @@ extern inline void sol_update_fliptronic_powered (void)
 void sol_update_rtt_0 (void)
 {
 	sol_update_set (2);
+#ifdef CONFIG_PLATFORM_WPC
 	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 		sol_update_fliptronic_powered ();
+#endif
 }
 
 

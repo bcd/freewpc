@@ -90,6 +90,11 @@ Onecoin Buyin: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
 Player Tournament Ready: page(COMMON_PAGE), PRI_STATUS
 System Reset: PRI_RESET, page(COMMON_PAGE)
+Coin Door Buttons: page(COMMON_PAGE), PRI_JACKPOT
+Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
+Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
+Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
+Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 
 [leffs]
 NULL: 0
@@ -110,3 +115,5 @@ times8:
 [timers]
 Ignore Tilt:
 
+[globalflags]
+Ball At Plunger:

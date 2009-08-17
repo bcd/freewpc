@@ -33,18 +33,6 @@
 #define ACCEPT_3	0xB9
 
 
-/**
- * The acceptance screen requires pressing a coindoor button
- * to continue.  Define which button does this generically,
- * for working on WPC or Whitestar platforms.
- */
-#ifdef CONFIG_PLATFORM_WPC
-#define ACCEPT_BUTTON SW_ENTER
-#endif
-#ifdef CONFIG_PLATFORM_WHITESTAR
-#define ACCEPT_BUTTON SW_BLACK_BUTTON
-#endif
-
 volatile static const char gcc_version[] = C_STRING(GCC_VERSION);
 
 __nvram__ U8 freewpc_accepted[3];
@@ -108,7 +96,7 @@ void factory_reset_if_required (void)
 
 		factory_reset ();
 
-		wait_for_button (ACCEPT_BUTTON);
+		wait_for_button (SW_ENTER);
 	}
 }
 
@@ -127,7 +115,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "THIS SOFTWARE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	wait_for_button (ACCEPT_BUTTON);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -136,7 +124,7 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 21, "TO REAL MACHINE");
 	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
-	wait_for_button (ACCEPT_BUTTON);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
@@ -144,8 +132,8 @@ void system_accept_freewpc (void)
 	font_render_string_center (&font_mono5, 64, 15, "WANT TO CONTINUE");
 	font_render_string_center (&font_mono5, 64, 21, "PRESS ENTER TWICE");
 	dmd_show_low ();
-	wait_for_button (ACCEPT_BUTTON);
-	wait_for_button (ACCEPT_BUTTON);
+	wait_for_button (SW_ENTER);
+	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low ();

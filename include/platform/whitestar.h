@@ -45,6 +45,7 @@ AREA_DECL(ram)
 AREA_DECL(local)
 AREA_DECL(heap)
 AREA_DECL(stack)
+AREA_DECL(permanent)
 AREA_DECL(nvram)
 
 #else
@@ -156,7 +157,7 @@ extern inline void pinio_set_bank (U8 bankno, U8 val)
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
-			writeb (WS_PAGE_LED, page & WS_PAGE_MASK);
+			writeb (WS_PAGE_LED, val & WS_PAGE_MASK);
 			break;
 		default:
 			break;
@@ -309,6 +310,10 @@ extern inline U8 pinio_read_sound (void)
 /********************************************/
 /* Switches                                 */
 /********************************************/
+
+#define SW_ENTER SW_BLACK_BUTTON
+#define SW_UP SW_GREEN_BUTTON
+#define SW_DOWN SW_RED_BUTTON
 
 extern inline void pinio_write_switch_column (U8 val)
 {

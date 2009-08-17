@@ -115,6 +115,7 @@ extern inline IOPTR sol_get_write_reg (solnum_t sol)
 {
 	switch (sol / 8)
 	{
+#ifdef CONFIG_PLATFORM_WPC
 		case 0:
 			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
 		case 1:
@@ -133,6 +134,7 @@ extern inline IOPTR sol_get_write_reg (solnum_t sol)
 		case 5:
 			return (IOPTR)WPC_EXTBOARD1;
 #endif
+#endif /* CONFIG_PLATFORM_WPC */
 		default:
 			fatal (ERR_SOL_REQUEST);
 			return (IOPTR)0;

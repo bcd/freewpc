@@ -232,9 +232,11 @@ extern U8 idle_ok;
 #include <gendefine_gid.h>
 
 /* Automatically include image IDs */
+#ifdef CONFIG_PLATFORM_WPC
 #ifndef NO_MAIN
 #ifndef NATIVE_SYSTEM
 #include <imagemap.h>
+#endif
 #endif
 #endif
 
