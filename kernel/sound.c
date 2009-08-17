@@ -409,10 +409,10 @@ void volume_set (U8 vol)
 		vol = MAX_VOLUME;
 
 	/* Save the volume level in nvram. */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	current_volume = vol;
 	current_volume_checksum = ~vol;
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 
 	if (current_volume == 0)
 	{

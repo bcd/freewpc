@@ -148,10 +148,10 @@ void timestamp_format_per_credit (timestamp_t *t)
 CALLSET_ENTRY (timestamp, init)
 {
 	/* TODO - validate instead */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	timestamp_clear (&system_audits.total_game_time);
 	csum_area_update (&audit_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -161,10 +161,10 @@ CALLSET_ENTRY (timestamp, end_player)
 
 	/* TODO - don't do this if the player's game was
 	 * aborted early */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	timestamp_add_sec (&system_audits.total_game_time, game_time);
 	csum_area_update (&audit_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 
 	game_time = 0;
 }

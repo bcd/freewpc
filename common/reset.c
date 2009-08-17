@@ -151,11 +151,11 @@ void system_accept_freewpc (void)
 	dmd_show_low ();
 	task_sleep_sec (1);
 
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	freewpc_accepted[0] = ACCEPT_1;
 	freewpc_accepted[1] = ACCEPT_2;
 	freewpc_accepted[2] = ACCEPT_3;
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 
 	factory_reset ();
 }

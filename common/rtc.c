@@ -164,7 +164,7 @@ static void rtc_calc_day_of_week (void)
 /** Normalizes the current date and time. */
 static void rtc_normalize (void)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 
 	while (hour >= 24)
 	{
@@ -198,18 +198,18 @@ static void rtc_normalize (void)
 
 	/* Update checksums and save */
 	csum_area_update (&rtc_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
 /** Re-read the current date/time from the hardware */
 static void rtc_hw_read (void)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	hour = readb (WPC_CLK_HOURS_DAYS);
 	minute = readb (WPC_CLK_MINS);
 	csum_area_update (&rtc_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -232,14 +232,14 @@ static void rtc_pinmame_read (void)
 	clock_data = (struct wpc_pinmame_clock_data *)0x1800;
 	if (clock_data->year >= 2000)
 	{
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		year = clock_data->year - 2000;
 		month = clock_data->month;
 		day = clock_data->day;
 		rtc_calc_day_of_week ();
 		rtc_normalize ();
 		csum_area_update (&rtc_csum_info);
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 	}
 }
 #endif
@@ -271,14 +271,14 @@ CALLSET_ENTRY (rtc, init)
 	rtc_pinmame_read ();
 #elif defined (CONFIG_NATIVE)
 	/* TODO - should read this from the native system */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	year = 8;
 	month = 4;
 	day = 1;
 	rtc_calc_day_of_week ();
 	rtc_normalize ();
 	csum_area_update (&rtc_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 #endif
 	rtc_edit_field = 0xFF;
 }
@@ -383,7 +383,7 @@ void rtc_next_field (void)
 
 void rtc_modify_field (U8 up_flag)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 
 	switch (rtc_edit_field)
 	{
@@ -421,7 +421,7 @@ void rtc_modify_field (U8 up_flag)
 			break;
 	}
 
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 	rtc_normalize ();
 }
 

@@ -416,9 +416,9 @@ void adj_browser_enter (void)
 		if (*(ad->nvram) != adj_edit_value)
 		{
 			/* Modify the adjustment */
-			wpc_nvram_get ();
+			pinio_nvram_unlock ();
 			*(ad->nvram) = adj_edit_value;
-			wpc_nvram_put ();
+			pinio_nvram_lock ();
 			adj_modified ();
 			sound_send (SND_TEST_CONFIRM);
 		}
@@ -2381,11 +2381,11 @@ void revoke_init (void)
 	dmd_show_low();
 	task_sleep_sec (1);
 
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	freewpc_accepted[0] = 0;
 	freewpc_accepted[1] = 0;
 	freewpc_accepted[2] = 0;
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 
 	freewpc_init ();
 }

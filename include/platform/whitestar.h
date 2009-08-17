@@ -139,26 +139,11 @@ extern inline void wpc_parport_write (U8 data)
 }
 
 /********************************************/
-/* RAM Protection Circuit                   */
+/* NVRAM Protection Circuit                 */
 /********************************************/
 
-/** Write to the WPC's RAM protect register */
-extern inline void wpc_set_ram_protect (U8 prot)
-{
-}
-
-
-/** Write to the WPC's RAM protect size register */
-extern inline void wpc_set_ram_protect_size (U8 sz)
-{
-}
-
-
-/** Acquire write access to the protected memory */
-#define wpc_nvram_get()
-
-/** Release write access to the protected memory */
-#define wpc_nvram_put()
+#define pinio_nvram_unlock()
+#define pinio_nvram_lock()
 
 /********************************************/
 /* Bank Switching                           */

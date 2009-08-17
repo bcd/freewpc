@@ -84,9 +84,9 @@ csum_area_update (const struct area_csum *csi)
 		csum += *ptr;
 
 	/* Store this as the new checksum */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	*(csi->csum) = csum;
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -110,9 +110,9 @@ csum_area_check (const struct area_csum *csi)
 	{
 		/* If different, reset area to default values.
 		 * Enable write access prior to calling this. */
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		csi->reset ();
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 
 		/* Automatically invoke update to save the correct
 		 * checksum for the default values. */

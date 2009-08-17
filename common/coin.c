@@ -206,10 +206,10 @@ static void increment_credit_count (void)
 /** Add a credit. */
 void add_credit (void)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	increment_credit_count ();
 	csum_area_update (&coin_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -234,10 +234,10 @@ void remove_credit (void)
 #ifndef FREE_ONLY
 	if (credit_count > 0)
 	{
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		credit_count--;
 		csum_area_update (&coin_csum_info);
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 	}
 #endif
 }
@@ -249,12 +249,12 @@ void add_units (U8 n)
 	if (credit_count >= price_config.max_credits)
 		return;
 
-	wpc_nvram_add (unit_count, n);
+	nvram_add (unit_count, n);
 	if (unit_count >= price_config.units_per_credit)
 	{
 		while (unit_count >= price_config.units_per_credit)
 		{
-			wpc_nvram_subtract (unit_count, price_config.units_per_credit);
+			nvram_subtract (unit_count, price_config.units_per_credit);
 			add_credit ();
 			audit_increment (&system_audits.paid_credits);
 		}
@@ -269,7 +269,7 @@ void add_units (U8 n)
 		deff_restart (DEFF_CREDITS);
 	}
 	csum_area_update (&coin_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -309,10 +309,10 @@ CALLSET_ENTRY (coin, sw_fourth_coin)
 /** Clear the units and credits counters. */
 void credits_clear (void)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	credit_count = 0;
 	unit_count = 0;
 	csum_area_update (&coin_csum_info);
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 

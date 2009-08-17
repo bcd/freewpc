@@ -292,10 +292,10 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 
 
 /** Acquire write access to the protected memory */
-#define wpc_nvram_get() wpc_set_ram_protect(RAM_UNLOCKED)
+#define pinio_nvram_unlock() wpc_set_ram_protect(RAM_UNLOCKED)
 
 /** Release write access to the protected memory */
-#define wpc_nvram_put() wpc_set_ram_protect(RAM_LOCKED)
+#define pinio_nvram_lock() wpc_set_ram_protect(RAM_LOCKED)
 
 
 /********************************************/

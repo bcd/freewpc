@@ -140,14 +140,14 @@ void replay_reset (void)
 	U8 replay_code;
 
 	replay_code = system_config.replay_start;
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
 	score_zero (replay_score);
 	MACHINE_REPLAY_CODE_TO_SCORE (replay_score, replay_code);
 #else
 	memcpy (replay_score, default_replay_score, sizeof (score_t));
 #endif
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 	csum_area_update (&replay_csum_info);
 }
 

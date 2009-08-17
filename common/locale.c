@@ -92,10 +92,10 @@ CALLSET_ENTRY (locale, init)
 		/* Save the current locale so that install does not
 		need to be performed on the next reboot, unless
 		the DIP switches are changed. */
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		locale_code = current_locale;
 		locale_code_csum = ~current_locale;
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 	}
 }
 

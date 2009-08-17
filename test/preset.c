@@ -132,13 +132,13 @@ U8 preset_count (void)
 void preset_install (struct preset_component *comps)
 {
 	/* Modify all of the adjustments affected by the preset */
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	while (comps->nvram != NULL)
 	{
 		*(comps->nvram) = comps->value;
 		comps++;
 	}
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 
 	/* Update the checksums to match the new values */
 	adj_modified ();

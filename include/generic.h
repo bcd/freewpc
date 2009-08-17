@@ -38,22 +38,22 @@ but they are otherwise generic. */
 
 
 /** Atomically increment a variable in protected memory by N. */
-#define wpc_nvram_add(var,n) \
+#define nvram_add(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
+		pinio_nvram_unlock (); \
 		*pvar += n; \
-		wpc_nvram_put (); \
+		pinio_nvram_lock (); \
 	} while (0)
 
 
 /** Atomically decrement a variable in protected memory by N. */
-#define wpc_nvram_subtract(var,n) \
+#define nvram_subtract(var,n) \
 	do { \
 		volatile typeof(var) *pvar = &var; \
-		wpc_nvram_get (); \
+		pinio_nvram_unlock (); \
 		*pvar -= n; \
-		wpc_nvram_put (); \
+		pinio_nvram_lock (); \
 	} while (0)
 
 

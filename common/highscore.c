@@ -188,7 +188,7 @@ void high_score_reset (void)
 
 	dbprintf ("Resetting high score table\n");
 
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 
 	/* Reset the grand champion */
 	memcpy (high_score_table[0].score, default_gc_score, HIGH_SCORE_WIDTH);
@@ -203,7 +203,7 @@ void high_score_reset (void)
 			HIGH_SCORE_NAMESZ);
 	}
 
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 	csum_area_update (&high_csum_info);
 
 	/* Reset when the next auto-reset will occur */
@@ -296,11 +296,11 @@ void high_score_check_player (U8 player)
 			 * Set the initials to the player number */
 			dbprintf ("High score %d achieved by player %d\n",
 				hs, player+1);
-			wpc_nvram_get ();
+			pinio_nvram_unlock ();
 			high_score_free (hs);
 			memcpy (hsp->score, scores[player], sizeof (score_t));
 			hsp->initials[0] = player;
-			wpc_nvram_put ();
+			pinio_nvram_lock ();
 			csum_area_update (&high_csum_info);
 			return;
 		}
@@ -336,9 +336,9 @@ void high_score_enter_initials (U8 position)
 		/* Announce that player # has qualified */
 		high_score_player = hsp->initials[0]+1;
 
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		memset (hsp->initials, ' ', HIGH_SCORE_NAMESZ);
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
 
 		high_score_position = position;
@@ -346,9 +346,9 @@ void high_score_enter_initials (U8 position)
 		SECTION_VOIDCALL (__common__, initials_enter);
 
 #if 0
-		wpc_nvram_get ();
+		pinio_nvram_unlock ();
 		/* save initials to table */
-		wpc_nvram_put ();
+		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
 #endif
 

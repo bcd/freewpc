@@ -248,7 +248,7 @@ struct adjustment empty_adjustments[] = {
 
 void adj_reset (struct adjustment *adjs)
 {
-	wpc_nvram_get ();
+	pinio_nvram_unlock ();
 	while (adjs->name != NULL)
 	{
 		if (adjs->nvram)
@@ -257,7 +257,7 @@ void adj_reset (struct adjustment *adjs)
 		}
 		adjs++;
 	}
-	wpc_nvram_put ();
+	pinio_nvram_lock ();
 }
 
 
@@ -272,9 +272,9 @@ void adj_verify (struct adjustment *adjs)
 			val = *(adjs->nvram);
 			if ((val < adjs->values->min) || (val > adjs->values->max))
 			{
-				wpc_nvram_get ();
+				pinio_nvram_unlock ();
 				*(adjs->nvram) = adjs->factory_default;
-				wpc_nvram_put ();
+				pinio_nvram_lock ();
 			}
 		}
 		adjs++;
