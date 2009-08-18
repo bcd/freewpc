@@ -697,6 +697,7 @@ sub machine_write_defines {
 	# Print machine configuration
 	print "/* Global configuration */\n";
 	print_value ($m->{'Title'}, "MACHINE_NAME");
+	print_boolean ($m->{'Alphanumeric'}, "MACHINE_ALPHANUMERIC");
 	print_boolean ($m->{'DMD'}, "MACHINE_DMD");
 	print_boolean ($m->{'Fliptronic'}, "MACHINE_FLIPTRONIC");
 	print_boolean ($m->{'DCS'}, "MACHINE_DCS");

@@ -45,7 +45,7 @@
 #define display_alloc_pair_clean dmd_alloc_pair_clean
 #define display_sched_transition dmd_sched_transition
 
-#else /* not DMD, using alphanumeric segment displays */
+#elif (MACHINE_ALPHANUMERIC == 1)
 
 #include <sys/segment.h>
 
@@ -104,6 +104,57 @@
 
 #define font_render_string_right(f,x,y,s) \
 	seg_write_string (y/16, x/8 + 1 - seg_strlen (s), s)
+
+#else
+
+/* Not DMD or alphanumeric */
+
+/* Portable display functions */
+#define display_init            remote_dmd_init
+#define display_alloc_low       remote_dmd_alloc_low
+#define display_alloc_high      remote_dmd_alloc_high
+#define display_alloc_low_high  remote_dmd_alloc_low_high
+#define display_map_low_high    remote_dmd_map_low_high
+#define display_show_low        remote_dmd_show_low
+#define display_show_high       remote_dmd_show_high
+#define display_show_other      remote_dmd_show_other
+#define display_flip_low_high   remote_dmd_flip_low_high
+#define display_clean_page      remote_dmd_clean_page
+#define display_memset          remote_dmd_memset
+#define display_clean_page_low  remote_dmd_clean_page_low
+#define display_clean_page_high remote_dmd_clean_page_high
+#define display_copy_page       remote_dmd_copy_page
+#define display_copy_low_to_high remote_dmd_copy_low_to_high
+#define display_alloc_low_clean remote_dmd_alloc_low_clean
+#define display_alloc_pair_clean remote_dmd_alloc_pair_clean
+#define display_sched_transition(x)
+
+#define dmd_init()
+#define dmd_alloc_low(args...)
+#define dmd_alloc_high(args...)
+#define dmd_alloc_low_high(args...)
+#define dmd_map_low_high(args...)
+#define dmd_show_low()
+#define dmd_show_high()
+#define dmd_show_other(args...)
+#define dmd_flip_low_high(args...)
+#define dmd_clean_page(args...)
+#define dmd_memset(args...)
+#define dmd_clean_page_low()
+#define dmd_clean_page_high()
+#define dmd_copy_page(args...)
+#define dmd_copy_low_to_high(args...)
+#define dmd_alloc_low_clean()
+#define dmd_alloc_pair_clean(args...)
+#define dmd_sched_transition(args...)
+#define dmd_reset_transition(args...)
+#define dmd_draw_border(args...)
+#define dmd_draw_horiz_line(args...)
+#define dmd_invert_page(args...)
+#define dmd_show2(args...)
+#define font_render_string_left(f,x,y,s)
+#define font_render_string_center(f,x,y,s)
+#define font_render_string_right(f,x,y,s)
 
 #endif
 

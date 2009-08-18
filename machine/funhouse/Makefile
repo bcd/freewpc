@@ -4,7 +4,6 @@
 #
 
 MACHINE_FILE = funhouse.md
-ALPHANUMERIC := y
 
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable

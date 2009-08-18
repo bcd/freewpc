@@ -66,7 +66,7 @@ include $(MMAKEFILE)
 $(eval $(call require,MACHINE_FILE))
 PLATFORM ?= wpc
 CONFIG_DMD := $(call md_config,DMD)
-# CONFIG_DMD := $(if $(shell grep ^DMD:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_ALPHA := $(call md_config,Alphanumeric)
 CONFIG_PIC := $(if $(shell grep ^PIC:.*Yes $(M)/$(MACHINE_FILE)),y,)
 CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y,)
 CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
@@ -285,7 +285,10 @@ CFLAGS += $(EXTRA_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
 SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
-ifneq ($(CONFIG_DMD),y)
+ifeq ($(CONFIG_DMD),y)
+SCHED_FLAGS += -D CONFIG_DMD
+endif
+ifeq ($(CONFIG_ALPHA),y)
 SCHED_FLAGS += -D CONFIG_SEG
 endif
 ifeq ($(CONFIG_PIC),y)

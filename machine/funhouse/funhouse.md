@@ -14,6 +14,7 @@
 ##########################################################################
 Title: Fun House
 DMD: No
+Alphanumeric: Yes
 Fliptronic: No
 DCS: No
 WPC95: No
