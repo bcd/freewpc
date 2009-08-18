@@ -329,7 +329,7 @@ extern inline U8 pinio_get_bank (U8 bankno)
 		case PINIO_BANK_RAM:
 			return readb (WPC_RAM_BANK);
 		default:
-			break;
+			return 0;
 	}
 }
 

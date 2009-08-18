@@ -73,7 +73,7 @@ AREA_DECL(nvram)
 #define LOCAL_SAVE_BASE(p)	(LOCAL_BASE + (LOCAL_SIZE * (p)))
 
 /***************************************************************
- * ASIC memory map
+ * Whitestar memory map
  ***************************************************************/
 
 #define WS_SOLA                 0x2000
@@ -131,10 +131,6 @@ extern inline void pinio_active_led_toggle (void)
 /* Printer / Parallel Port                  */
 /********************************************/
 
-
-/** Writes a single byte to the parallel port.  The data
- * is first latched into the data register, then the
- * strobe line is brought low and then released. */
 extern inline void wpc_parport_write (U8 data)
 {
 }
@@ -171,31 +167,8 @@ extern inline U8 pinio_get_bank (U8 bankno)
 		case PINIO_BANK_ROM:
 			return readb (WS_PAGE_LED) & WS_PAGE_MASK;
 		default:
-			break;
+			return 0;
 	}
-}
-
-
-/********************************************/
-/* Zero Crossing/IRQ Clear Register         */
-/********************************************/
-
-
-extern inline void wpc_write_misc_control (U8 val)
-{
-}
-
-extern inline void wpc_int_enable (void)
-{
-}
-
-extern inline void wpc_int_clear (void)
-{
-}
-
-
-extern inline U8 wpc_read_ac_zerocross (void)
-{
 }
 
 
@@ -205,16 +178,19 @@ extern inline U8 wpc_read_ac_zerocross (void)
 
 extern inline U8 wpc_read_flippers (void)
 {
+	return 0;
 }
 
 
 extern inline U8 wpc_read_flipper_buttons (void)
 {
+	return 0;
 }
 
 
 extern inline U8 wpc_read_flipper_eos (void)
 {
+	return 0;
 }
 
 
@@ -230,15 +206,18 @@ extern inline void wpc_write_flippers (U8 val)
 
 extern inline U8 wpc_get_jumpers (void)
 {
+	return 0;
 }
 
 extern inline U8 pinio_read_locale (void)
 {
+	return 0;
 }
 
 
 extern inline U8 wpc_read_ticket (void)
 {
+	return 0;
 }
 
 
@@ -298,10 +277,12 @@ extern inline void pinio_write_sound (U8 val)
 
 extern inline bool pinio_sound_ready_p (void)
 {
+	return FALSE;
 }
 
 extern inline U8 pinio_read_sound (void)
 {
+	return 0;
 }
 
 #define SW_VOLUME_UP SW_GREEN_BUTTON
@@ -321,10 +302,12 @@ extern inline void pinio_write_switch_column (U8 val)
 
 extern inline U8 pinio_read_switch_rows (void)
 {
+	return 0;
 }
 
 extern inline U8 pinio_read_dedicated_switches (void)
 {
+	return 0;
 }
 
 
