@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -25,8 +25,6 @@ typedef U8 leffnum_t;
 
 typedef void (*leff_function_t) (void);
 
-#define L_NORMAL	0x0
-
 /** A running leff is long-lived and continues to be active
  * until it is explicitly stopped. */
 #define L_RUNNING 0x1
@@ -43,7 +41,7 @@ typedef void (*leff_function_t) (void);
 typedef struct
 {
 	/** Miscellaneous flags */
-	U8 flags;
+	U8 flags; /* TODO : rename to lamp effect ID (leid) */
 
 	/** Its priority (higher value means more important) */
 	U8 prio;
