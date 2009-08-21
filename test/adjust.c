@@ -126,7 +126,7 @@ struct adjustment standard_adjustments[] = {
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
-	{ "CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
+	{ "CHASE BALL", &yes_no_value, NO, &system_config.allow_chase_ball },
 	{ NULL, NULL, 0, NULL },
 };
 

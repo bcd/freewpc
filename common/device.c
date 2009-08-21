@@ -911,7 +911,7 @@ void device_lock_ball (device_t *dev)
 	}
 }
 
-CALLSET_ENTRY (device, start_game)
+CALLSET_ENTRY (device, start_ball)
 {
 	live_balls = 0;
 	kickout_unlock_all ();

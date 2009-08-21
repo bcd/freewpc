@@ -60,12 +60,13 @@ This is a per-player variable */
 __local__ U16 game_time;
 
 
-/** Returns true if the chase ball feature is enabled. */
+/** Returns true if the chase ball feature is enabled.
+ * When true, after 5 unsuccessful ball searches, all balls in play
+ * are marked as missing, and endball is called.
+ */
 static bool chase_ball_enabled (void)
 {
-	return FALSE;
-	// uncomment once chase ball support has been coded
-	//return system_config.allow_chase_ball == YES;
+	return system_config.allow_chase_ball == YES;
 }
 
 
@@ -239,25 +240,21 @@ void ball_search_monitor_task (void)
 					if (ball_search_count == 3)
 						leff_stop (LEFF_TILT);
 
-					/* Wait a bit before searching again.  How long to wait?
-					A little while at first, then a little longer.  */
-					if (ball_search_count <= 5)
+					if ((ball_search_count == 5) && chase_ball_enabled ())
 					{
-						task_sleep_sec (10);
+						/* If chase ball is enabled, after the 5th ball search
+						we will force endball. */
+						audit_increment (&system_audits.chase_balls);
+						end_ball ();
 					}
-					else if (ball_search_count <= 10)
+					else if (ball_search_count < 10)
 					{
-						if (chase_ball_enabled ())
-						{
-							/* TODO : When chase ball is turned on, do not wait for
-							more than 5 ball searches.  Instead, end the current player's
-							ball, mark all outstanding balls as missing, and continue the
-							game.  Only do this if there is at least one ball in the trough. */
-						}
-						task_sleep_sec (15);
+						/* Delay a small amount for the first few ball searches */
+						task_sleep_sec (12);
 					}
 					else
 					{
+						/* Delay longer after many ball searches */
 						task_sleep_sec (20);
 					}
 
