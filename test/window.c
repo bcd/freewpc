@@ -3645,7 +3645,11 @@ void sysinfo_system_version (void) {
 
 
 void sysinfo_compiler_version (void) {
+#ifdef CONFIG_NATIVE
+	sprintf ("NATIVE MODE");
+#else
 	sprintf ("GCC6809 V%s", C_STRING(GCC_VERSION));
+#endif
 }
 
 void sysinfo_stats1 (void) {
