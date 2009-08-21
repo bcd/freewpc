@@ -48,8 +48,8 @@ void switch_stress_task (void)
 			continue;
 
 		/* Lookup the switch properties.  Skip switches which aren't normally
-		 * activated on the playfield, or which are part of ball containers that
-		 * need to see a real pinball there */
+		 * activated on the playfield.  For switches in a ball container,
+		 * simulate device entry there, otherwise simulate a switch event. */
 		swinfo = switch_lookup (sw);
 
 		if (!(swinfo->flags & SW_PLAYFIELD))
