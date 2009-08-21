@@ -257,7 +257,7 @@ static void fontargs_render_string (void)
 		//  will cause lockups!!!                      //
 		/////////////////////////////////////////////////
 
-#if __GCC6809_AT_LEAST__(4, 4, 0)
+#if defined(__m6809__) && __GCC6809_AT_LEAST__(4, 4, 0)
 #warning "skipping GCC 4.4.0 broken font code"
 #else
 		/* If the height of this glyph is not the same as the
