@@ -982,8 +982,8 @@ doxygen: Doxyfile
 tex:
 	cd doc && makeinfo --no-split --no-headers --html -o freewpc.html freewpc.texi
 	cd doc && makeinfo --html freewpc.texi
-	cp -p doc/freewpc.html /home/bcd/oddchange/freewpc/build/freewpc/manual.html
-	cp -a doc/freewpc/* /home/bcd/oddchange/freewpc/build/freewpc/manual
+	cp -p doc/freewpc.html $(WEBROOT)/manual.html
+	cp -a doc/freewpc/* $(WEBROOT)/manual
 
 #
 # For debugging the makefile settings
