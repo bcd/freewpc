@@ -28,6 +28,7 @@
 #include <diag.h>
 
 
+/** The number of diagnostic errors that have been detected */
 U8 diag_error_count;
 
 /** Nonzero if diagnostic errors should be announced
@@ -35,7 +36,7 @@ U8 diag_error_count;
 U8 diag_announce_flag;
 
 
-void
+static void
 diag_message_start (void)
 {
 	dmd_alloc_low_high ();
@@ -43,7 +44,7 @@ diag_message_start (void)
 }
 
 
-void
+static void
 diag_message_flash (void)
 {
 	U8 n;
@@ -61,7 +62,7 @@ diag_message_flash (void)
 }
 
 
-void
+static void
 diag_message_scroll (void)
 {
 	dmd_sched_transition (&trans_scroll_left);
