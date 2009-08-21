@@ -40,6 +40,12 @@ NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
 NATIVE_OBJS += $(if $(CONFIG_DMD), tools/imglib/imglib.o)
 $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 
+# For Ubuntu 8.10 and higher: The default compiler flags will try to
+# detect buffer overflows, but we are doing ugly things to read/write
+# persistent memory.  We need to disable this 'feature' for this file
+# only.
+$(D)/section.o : CFLAGS += -U_FORTIFY_SOURCE
+
 $(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM
 
 # Add machine type flags
