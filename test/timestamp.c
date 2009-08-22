@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
+/*
+ * This module provides generic functions for dealing with timestamp
+ * variables.
+ */
+
 #include <freewpc.h>
 #include <test.h>
 
@@ -26,6 +32,9 @@
 extern const struct area_csum audit_csum_info;
 
 
+/**
+ * Format a timestamp as text in the common buffer.
+ */
 void timestamp_format (timestamp_t *t)
 {
 	sprintf ("%ld:%02d:%02d", t->hr, t->min, t->sec);
@@ -62,6 +71,10 @@ void timestamp_add (timestamp_t *dst, timestamp_t *src)
 	timestamp_normalize (dst);
 }
 
+
+/**
+ * Increment a timestamp audit by the given number of seconds.
+ */
 void timestamp_add_sec (timestamp_t *t, volatile U16 seconds)
 {
 	while (seconds >= 3600)
@@ -145,9 +158,11 @@ void timestamp_format_per_credit (timestamp_t *t)
 	timestamp_format (&per_credit);
 }
 
+
+/* TODO - this should not be removed eventually.  It is clearing
+the total game time audit, totally not necessary */
 CALLSET_ENTRY (timestamp, init)
 {
-	/* TODO - validate instead */
 	pinio_nvram_unlock ();
 	timestamp_clear (&system_audits.total_game_time);
 	csum_area_update (&audit_csum_info);

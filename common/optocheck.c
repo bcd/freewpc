@@ -59,7 +59,7 @@ void opto_check (void)
 		}
 	}
 
-	/* All optos are closed (inactive).  Either opto power is bad,
+	/* All optos are closed (active).  Either opto power is bad,
 	 * or there are truly balls at all opto positions, which is
 	 * highly unlikely.
 	 */

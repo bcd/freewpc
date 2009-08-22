@@ -147,7 +147,7 @@ void fatal (errcode_t error_code)
 	while (1);
 #endif
 
-	/* Restart the system automatically (only on the 6809) */
+	/* Restart the system by jumping to the reset vector again. */
 #ifdef __m6809__
 	start ();
 #else
@@ -157,6 +157,11 @@ void fatal (errcode_t error_code)
 }
 
 
+/**
+ * Entry point for errors that are recoverable.
+ * error_code is one of the values in include/sys/errno.h.
+ * This function simply logs the error, but the system continues on.
+ */
 void nonfatal (errcode_t error_code)
 {
 	audit_increment (&system_audits.non_fatal_errors);

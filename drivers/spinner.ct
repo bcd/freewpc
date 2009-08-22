@@ -43,14 +43,21 @@
 
 #include <freewpc.h>
 
+/** The number of times the fast handler has seen the spinner
+toggle.  This is 2X the number of activations. */
 extern U8 @self_counter;
+
+
+/** The previous reading of the spinner switch at IRQ time */
 extern U8 @self_prev_state;
+
 
 /* Fast handler for a spinner switch.
  * This function runs at IRQ time and is only responsible
  * for counting the number of transitions that occur, as this
  * can happen _very_ fast.  The slow handler will then
- * process all of the spins in one dispatch.
+ * process all of the spins in one dispatch.  This cuts down
+ * the overhead in switch scanning and task creation.
  */
 extern inline void @self_service (void)
 {

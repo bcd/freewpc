@@ -55,7 +55,7 @@ U8 ball_search_count;
 /** The amount of time in seconds that this ball has lasted */
 U16 ball_time;
 
-/** The amount of time in seconds that this ball has lasted */
+/** The amount of time in seconds that this game has lasted */
 __local__ U16 game_time;
 
 /** Returns true if the given solenoid is OK to fire during
@@ -171,7 +171,9 @@ void ball_search_timeout_set (U8 secs)
 necessary.  This task periodically bumps a counter, which is
 normally reset as scoring switches are triggered.  If the
 counter reaches a threshold, and ball search is allowed to run,
-then it is initiated. */
+then it is initiated.
+	This task is also responsible for incrementing the ball time
+statistic, when ball search is not necessary. */
 void ball_search_monitor_task (void)
 {
 	ball_search_timer_reset ();
@@ -232,16 +234,28 @@ CALLSET_ENTRY (ball_search, init)
 	ball_search_timeout_set (BS_TIMEOUT_DEFAULT);
 }
 
+/*
+ * Initialize the total game time statistic per player.
+ */
 CALLSET_ENTRY (ball_search, start_player)
 {
 	game_time = 0;
 }
 
+/*
+ * At the beginning of a ball, initialize the ball time
+ * statistic.
+ */
 CALLSET_ENTRY (ball_search, start_ball)
 {
 	ball_time = 0;
 }
 
+/*
+ * At the end of a ball, add the ball time to the
+ * total time for the player.  Take care that it doesn't
+ * overflow (unlikely, but still).
+ */
 CALLSET_ENTRY (ball_search, end_ball)
 {
 	game_time += ball_time;
@@ -250,5 +264,4 @@ CALLSET_ENTRY (ball_search, end_ball)
 		game_time = 0xFFFFUL;
 	}
 }
-
 
