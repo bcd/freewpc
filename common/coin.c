@@ -53,9 +53,7 @@ const struct area_csum coin_csum_info = {
 	.length = sizeof (credit_count) + sizeof (unit_count),
 	.csum = &coin_csum,
 	.reset = coin_reset,
-#ifdef HAVE_PAGING
-	.reset_page = COMMON_PAGE,
-#endif
+	.reset_page = PAGE,
 };
 
 

@@ -89,9 +89,7 @@ const struct area_csum rtc_csum_info = {
 	.length = 5,
 	.csum = &rtc_csum,
 	.reset = rtc_factory_reset,
-#ifdef HAVE_PAGING
 	.reset_page = PAGE,
-#endif
 };
 
 static U8 minute;

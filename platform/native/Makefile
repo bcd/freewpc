@@ -26,7 +26,7 @@ KERNEL_HW_OBJS += $(P)/interrupt.o
 KERNEL_HW_OBJS += $(P)/init-wpc.o
 
 # Additional defines
-CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC
+CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
 
 # Additional object files to be linked into the kernel region
 NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \

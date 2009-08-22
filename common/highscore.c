@@ -48,9 +48,7 @@ struct area_csum high_csum_info = {
 	.length = sizeof (high_score_table),
 	.csum = &high_csum,
 	.reset = high_score_reset,
-#ifdef HAVE_PAGING
 	.reset_page = PAGE,
-#endif
 };
 
 /** The high score auto-reset counters */
