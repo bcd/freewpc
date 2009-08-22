@@ -100,7 +100,5 @@ __machine__ void disable_skill_shot (void);
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
 /* star.c */
-__machine__ void star_reset(void);
 __machine__ void star_draw(void);
-__machine__ void star_task(void);
 

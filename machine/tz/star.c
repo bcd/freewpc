@@ -80,10 +80,15 @@ void star_draw (void)
 }
 
 
-void star_reset (void)
+CALLSET_ENTRY (tz_star, score_deff_start)
 {
 	U8 n;
 	for (n=0; n < 8; n++)
 		star_states[n].time = 0;
+}
+
+CALLSET_ENTRY (tz_star, score_overlay)
+{
+	star_draw ();
 }
 

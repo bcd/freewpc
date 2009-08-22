@@ -231,9 +231,7 @@ void scores_important_deff (void)
  * running. */
 void scores_deff (void)
 {
-#ifdef MACHINE_TZ
-	star_reset ();
-#endif
+	callset_invoke (score_deff_start);
 
 	/* This effect always runs, until it is preempted. */
 	for (;;)
@@ -270,9 +268,6 @@ void scores_deff (void)
 				dmd_map_lookaside (0);
 				dmd_dup_mapped ();
 				dmd_overlay2 (wpc_dmd_get_mapped (), 0);
-#ifdef MACHINE_TZ
-				star_draw ();
-#endif
 				callset_invoke (score_overlay);
 				dmd_show2 ();
 			}
