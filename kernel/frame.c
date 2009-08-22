@@ -278,6 +278,8 @@ void frame_draw_plane (U16 id)
 	 */
 #ifdef CONFIG_NATIVE
 	/* TODO */
+	dmd_clean_page_low ();
+	dbprintf ("frame_draw (%ld)\n", id);
 #else
 	U8 type;
 	struct frame_pointer *p;
