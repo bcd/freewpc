@@ -444,13 +444,11 @@ void device_request_kick (device_t *dev)
 	{
 		dev->kicks_needed++;
 		dev->kick_errors = 0;
-#ifdef DEVNO_TROUGH
 		/* TODO - this logic probably belongs somewhere else.
 		We're increment live balls very early here, before the
 		balls are actually added to play. */
-		if (device_devno (dev) != DEVNO_TROUGH)
+		if (!trough_dev_p (dev))
 			live_balls++;
-#endif
 	}
 	else
 	{
@@ -474,11 +472,9 @@ void device_request_empty (device_t *dev)
 		dev->kick_errors = 0;
 		dev->max_count -= can_kick;
 		/* TODO - lock count should be decremented here or not? */
-#ifdef DEVNO_TROUGH
 		/* TODO - this logic probably belongs somewhere else */
-		if (device_devno (dev) != DEVNO_TROUGH)
+		if (!trough_dev_p (dev))
 			live_balls += can_kick;
-#endif
 	}
 	if (gid != task_getgid ())
 		task_recreate_gid (gid, device_update);
@@ -501,9 +497,7 @@ void device_update_globals (void)
 		device_t *dev = device_entry (devno);
 		counted_balls += dev->actual_count;
 
-#ifdef DEVNO_TROUGH
-		if (devno != DEVNO_TROUGH)
-#endif
+		if (!trough_dev_p (dev))
 			if (dev->actual_count >= dev->max_count)
 				held_balls_now += dev->actual_count - dev->max_count;
 	}

@@ -209,6 +209,14 @@ typedef U8 devicenum_t;
 /** Enable an automatic ball lock on this device */
 #define device_enable_lock(dev)	(dev->max_count++)
 
+/** Test if a device is the trough.  For the test fixture ROM, no
+ball devices are defined, and this always returns FALSE. */
+#ifdef DEVNO_TROUGH
+#define trough_dev_p(dev) (device_devno(dev) == DEVNO_TROUGH)
+#else
+#define trough_dev_p(dev) FALSE
+#endif
+
 extern device_t device_table[];
 extern U8 counted_balls;
 extern U8 missing_balls;
