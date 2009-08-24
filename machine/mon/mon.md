@@ -116,10 +116,6 @@ define MACHINE_LACKS_ALL_INCLUDES
 ##########################################################################
 [containers]
 
-[targetbanks]
-
-[shots]
-
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.

@@ -235,10 +235,6 @@ Right Eject: Right Eject, Right Eject
 Upper Eject: Upper Eject, Upper Eject
 Lock: Lock Release, Lock High, Lock Low
 
-[targetbanks]
-
-[shots]
-
 #############################################################
 
 [adjustments]

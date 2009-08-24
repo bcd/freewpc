@@ -202,10 +202,6 @@ Trough: trough, Trough Eject, Trough 1, Trough 2, Trough 3, Trough 4, init_max_c
 Left Hole: Left Popper, Left Popper
 Right Hole: Right Popper, Right Popper
 
-[targetbanks]
-
-[shots]
-
 #############################################################
 
 [adjustments]

@@ -141,10 +141,6 @@ include platform/wpc/wpc.md
 ##########################################################################
 [containers]
 
-[targetbanks]
-
-[shots]
-
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.

@@ -311,10 +311,6 @@ Lock: Lock Release, init_max_count(0), \
 Tunnel: Tunnel Kickout, init_max_count(0), Tunnel Kickout
 Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
 
-[targetbanks]
-
-[shots]
-
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
