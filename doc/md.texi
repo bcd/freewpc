@@ -188,7 +188,8 @@ The possible attributes for switches are:
 @item noscore
 @end table
 
-Additionally, these attributes are used to tag special switches:
+Additionally, these attributes are used to tag special switches.
+There should only be one switch of each type.
 
 @table @code
 @item outhole
