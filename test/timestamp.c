@@ -180,7 +180,5 @@ CALLSET_ENTRY (timestamp, end_player)
 	timestamp_add_sec (&system_audits.total_game_time, game_time);
 	csum_area_update (&audit_csum_info);
 	pinio_nvram_lock ();
-
-	game_time = 0;
 }
 
