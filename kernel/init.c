@@ -102,6 +102,10 @@ __noreturn__ void freewpc_init (void)
 	pinio_watchdog_reset ();
 	sound_init ();
 	pinio_watchdog_reset ();
+#if (MACHINE_PIC == 1)
+	pic_init ();
+	pinio_watchdog_reset ();
+#endif
 
 	/* task_init is somewhat special in that it transforms the system
 	 * from a single task into a multitasking one.  After this, tasks

@@ -162,6 +162,7 @@ void pic_decode32 (U32 *reg, const U32 offset, const U16 divisor, const bool neg
 #else
 	/* TODO : this is done differently only because native
 	32-bit division on the 6809 does not work. */
+	pinio_watchdog_reset ();
 	udiv32 (*reg, divisor, reg, NULL);
 #endif
 	pic_debug ("reg.after_divide = %w\n", *reg);
@@ -287,7 +288,6 @@ void pic_init (void)
 		 * before the result can be obtained.  Also interrupts
 		 * must be disabled to prevent other accesses to the
 		 * PIC device during this time (i.e. switch polling). */
-		disable_irq ();
 		wpc_write_pic (WPC_PIC_SERIAL (i));
 		null_function ();
 		null_function ();
@@ -295,7 +295,6 @@ void pic_init (void)
 		null_function ();
 		null_function ();
 		val = wpc_read_pic ();
-		enable_irq ();
 		ereg = pic_serial_map[i];
 		if (ereg)
 			*ereg = val;

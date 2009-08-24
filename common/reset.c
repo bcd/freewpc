@@ -217,11 +217,6 @@ void system_reset (void)
 	 * it is working properly. */
 	/* TODO - poll certain switches that must be operational
 	 * before allowing the system to complete init. */
-#if (MACHINE_PIC == 1)
-	/* The PIC needs to be initialized before switches
-	 * can be polled. */
-	pic_init ();
-#endif
 	opto_check ();
 
 	/* Mark hardware initialization complete.  This will
