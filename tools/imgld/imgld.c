@@ -52,11 +52,12 @@
  * for better compression at the cost of a longer decompression time.
  *
  * Command-line parameters specify the total amount of space that is
- * allocated for images.  The linker will only compress as is
- * necessary; as long as there is ample space, it does not make sense
+ * allocated for images.  The linker should only compress as is
+ * necessary: as long as there is ample space, it does not make sense
  * to compress.  If multiple codecs are available, then all should be
  * attempted and the one that matches the performance requirements the
- * best should be selected.  Images can also be tagged to denote those
+ * best should be selected.  Images should also allowed to be tagged
+ * to denote those
  * where runtime performance is especially critical -- those would be
  * compressed *last*.  The linker would continue to compress until
  * everything fits.  Then it builds the table and outputs the final image.
