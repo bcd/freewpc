@@ -71,7 +71,7 @@
 #include <imglib.h>
 #include <pgmlib.h>
 
-#define MAX_FRAMES 256
+#define MAX_FRAMES 2048
 
 #define error(format, rest...) \
 do { \
@@ -386,6 +386,10 @@ void write_output (const char *filename)
 		buffer_write (buf, outfile);
 	}
 	fclose (outfile);
+
+	/* Check that the offset has not advanced past the file size limit */
+	if (offset > max_rom_size)
+		error ("output is too large: %d > %d\n", offset, max_rom_size);
 }
 
 
@@ -453,7 +457,7 @@ int main (int argc, char *argv[])
 					printf ("-i <include-file>            Writes #defines to this include file\n");
 					printf ("-o <output-file>             Writes final image data to this file\n");
 					printf ("-p <page>                    Set the base page number\n");
-					printf ("-s <size>                    Set the maximum amount of space available\n");
+					printf ("-s <1k-blocks>               Set the maximum output file size\n");
 					exit (0);
 
 				case 'i':
@@ -472,7 +476,7 @@ int main (int argc, char *argv[])
 					break;
 
 				case 's':
-					max_rom_size = strtoul (argv[++argn], NULL, 0);
+					max_rom_size = 1024 * strtoul (argv[++argn], NULL, 0);
 					break;
 			}
 		}
