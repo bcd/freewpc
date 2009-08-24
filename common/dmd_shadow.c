@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Dot-matrix text shadowing
+ *
+ */
+
 #include <freewpc.h>
 
 /* dmd_shadow() is the low-level routine to generate shadows. */

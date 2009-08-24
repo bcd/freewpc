@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Manage the printer device
+ *
+ */
+
 #include <freewpc.h>
 #include <test.h>
 #include <format.h>

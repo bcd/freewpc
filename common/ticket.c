@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Manage an optional ticket dispenser
+ *
+ */
+
 /* TODO - I have no idea how this ticket I/O really works */
 
 #include <freewpc.h>

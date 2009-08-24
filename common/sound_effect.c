@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Sound effect management
+ *
+ */
+
 #include <freewpc.h>
 
 /* CALLSET_SECTION (sound_effect, __effect__) */

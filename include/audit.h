@@ -34,6 +34,12 @@ typedef U16 audit_t;
 typedef U8 long_audit_t[3];
 
 
+/*
+ * A timestamp audit.  The 16-bit variable is not large enough to
+ * hold some time durations, so we expand to an hr/min/sec format.
+ * Storing them in this way also makes it easier to display them,
+ * without requiring more complicated division operations.
+ */
 typedef struct
 {
 	U16 hr;
