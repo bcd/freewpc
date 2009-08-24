@@ -70,9 +70,9 @@ void flipper_override_off (U8 switches)
 void flipper_override_pulse (U8 switches)
 {
 	flipper_override_on (switches);
-	task_sleep (TIME_133MS);
+	task_sleep (TIME_166MS);
 	flipper_override_off (switches);
-	task_sleep (TIME_33MS);
+	task_sleep (TIME_66MS);
 }
 
 
