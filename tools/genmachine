@@ -1180,7 +1180,7 @@ sub machine_write_lamplist_decls {
 		if ($ls->{'set'} == 1) {
 			$c_decl = $ls->{'c_decl'};
 			$c_decl =~ s/lamplist/lampset/g;
-			print "const U8 " . $c_decl . "[] = { ";
+			print "const U8 " . $c_decl . "[] = {\n   ";
 			my $bits = {};
 			for $lamp (unique ($m->{"lamps"})) {
 				my $name =$lamp->{'c_ident'};
