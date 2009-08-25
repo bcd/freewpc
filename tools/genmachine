@@ -810,7 +810,8 @@ sub machine_write_defines {
 
 		print "   DECL_LEFF (" . 
 			$leff->{'c_ident'} . ", " .
-			($leff->{'shared'} ? "L_SHARED" : "L_RUNNING") .
+			($leff->{'runner'} ? "L_RUNNING" :
+				$leff->{'shared'} ? "L_SHARED" : "L_NORMAL") .
 			", " . $prio .  ", " .
 			"$lamps, " .
 			"$gi, " .
