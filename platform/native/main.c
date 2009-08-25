@@ -623,7 +623,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			break;
 #endif
 
-#if (MACHINE_DMD == 0)
+#if (MACHINE_ALPHANUMERIC == 1)
 		case WPC_ALPHA_POS:
 			sim_seg_set_column (val);
 			break;
