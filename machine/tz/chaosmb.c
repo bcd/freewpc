@@ -30,19 +30,6 @@ extern inline bool multiball_mode_start (U8 flag, U8 deff, U8 leff, U8 music)
 	if (!flag_test (flag))
 	{
 		flag_on (flag);
-		if (deff != DEFF_NULL)
-		{
-			deff_start (deff);
-			if (music != 0)
-			{
-				audio_track_t track;
-				track.code = music;
-				track.prio = deff_table[deff].prio;
-				music_start (track);
-			}
-		}
-		if (leff != LEFF_NULL)
-			leff_start (leff);
 		return TRUE;
 	}
 	else
@@ -55,20 +42,6 @@ extern inline bool multiball_mode_stop (U8 flag, U8 deff, U8 leff, U8 music)
 	if (flag_test (flag))
 	{
 		flag_off (flag);
-		if (deff != DEFF_NULL)
-		{
-			deff_stop (deff);
-			if (music != 0)
-			{
-				audio_track_t track;
-				track.code = music;
-				track.prio = deff_table[deff].prio;
-				music_stop (track);
-			}
-		}
-		if (leff != LEFF_NULL)
-			leff_stop (leff);
-		return TRUE;
 	}
 	else
 		return FALSE;
@@ -141,8 +114,6 @@ void chaosmb_score_jackpot (void)
 	sound_send (SND_EXPLOSION_1);
 }
 
-
-
 void chaosmb_start (void)
 {
 	if (multiball_mode_start (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
@@ -171,6 +142,20 @@ void chaosmb_check_level (U8 level)
 		chaosmb_score_jackpot ();
 	}
 }
+
+
+CALLSET_ENTRY (chaosmb, display_update)
+{
+	if (flag_test (FLAG_CHAOSMB_RUNNING))
+		deff_start_bg (DEFF_CHAOSMB_RUNNING, PRI_GAME_MODE6);
+}
+
+CALLSET_ENTRY (chaosmb, music_refresh)
+{
+	if (flag_test (FLAG_CHAOSMB_RUNNING))
+		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE6);
+}
+
 
 CALLSET_ENTRY (chaosmb, door_start_clock_chaos)
 {
