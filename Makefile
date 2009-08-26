@@ -21,7 +21,10 @@
 
 
 # Include the .config file, which must exist
-include .config
+DOTCONFIG ?= .config
+ifneq ($(DOTCONFIG),)
+include $(DOTCONFIG)
+endif
 
 define require
 $(if $($1),,$(error $1 is not defined : $($1)))
@@ -488,7 +491,7 @@ endif
 
 MACH_LINKS = .mach .include_mach
 
-MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile .config
+MAKE_DEPS = Makefile kernel/Makefile common/Makefile $(MMAKEFILE) $(BLDDIR)/mach-Makefile $(DOTCONFIG)
 ifeq ($(CONFIG_FONT),y)
 MAKE_DEPS += fonts/Makefile
 endif
@@ -670,7 +673,7 @@ endif
 # which page we are trying to build.
 #
 # It is _extremely_ important that the order in which object files are
-# named here is the same for every page, otherwise the address of
+# named here is the same for every page, otherwise the addresses of
 # references won't match up with their actual definitions.
 #
 # Two helper functions are defined.  OBJ_PAGE_LINKOPT returns the
@@ -947,10 +950,12 @@ $(sort $(HOST_OBJS)) : %.o : %.c
 ###	Standard Dependencies
 #######################################################################
 
-# Provide a target for .config that will run 'configure' if it does
-# not exist.
-.config:
-	echo "No .config" && exit 1
+# Provide a target for .config that will run 'configure' or abort if it
+# does not exist.
+ifneq ($(DOTCONFIG),)
+$(DOTCONFIG):
+	echo "No $(DOTCONFIG)" && exit 1
+endif
 
 #
 # Symbolic links to the machine code.  Once set, code can reference
