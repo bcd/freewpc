@@ -88,17 +88,17 @@ void pb_detect_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (3);
 #else
-	dmd_alloc_low_clean ();
+	dmd_alloc_low_high ();
+	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");
 	dmd_sched_transition (&trans_vstripe_right2left);
 	sound_send (SND_POWERBALL_QUOTE);
 	dmd_show_low ();
 	task_sleep (TIME_500MS);
-	dmd_alloc_high ();
+	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (32, TIME_100MS);
-	dmd_sched_transition (&trans_scroll_up);
 #endif
 	deff_exit ();
 }
