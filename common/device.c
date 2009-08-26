@@ -479,6 +479,15 @@ void device_request_empty (device_t *dev)
 		if (!trough_dev_p (dev))
 			live_balls += can_kick;
 	}
+	else
+	{
+		/* We tried to empty a device that had no balls in it.
+		Originally seen in switch stress simulation, we need to
+		reset max_count at the least. */
+		dev->kicks_needed = 0;
+		dev->kick_errors = 0;
+		dev->max_count = dev->props->init_max_count;
+	}
 	if (gid != task_getgid ())
 		task_recreate_gid (gid, device_update);
 }
