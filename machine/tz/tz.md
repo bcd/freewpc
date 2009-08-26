@@ -531,8 +531,9 @@ LITZ Award: PRI_GAME_QUICK8
 
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT
 SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
-SSSMB Jackpot Lit: page(MACHINE_PAGE), runner, PRI_GAME_MODE7
+SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE7
 
+# TODO - this mode does not update its deff by the new rules
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 

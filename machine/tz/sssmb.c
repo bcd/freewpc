@@ -138,7 +138,7 @@ void sssmb_start (void)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
-		deff_start (DEFF_SSSMB_RUNNING);
+		deff_update ();
 		music_refresh ();
 		flag_on (FLAG_SSSMB_RUNNING);
 		flag_on (FLAG_SSSMB_RED_JACKPOT);
@@ -168,6 +168,11 @@ void sssmb_stop (void)
 	}
 }
 
+CALLSET_ENTRY (sssmb, display_update)
+{
+	if (flag_test (FLAG_SSSMB_RUNNING))
+		deff_start_bg (DEFF_SSSMB_RUNNING, 0);
+}
 
 CALLSET_ENTRY (sssmb, music_refresh)
 {

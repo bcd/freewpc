@@ -110,6 +110,13 @@ CALLSET_ENTRY (mball, lamp_update)
 }
 
 
+CALLSET_ENTRY (mball, display_update)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+		deff_start_bg (DEFF_MB_RUNNING, 0);
+}
+
+
 void mball_light_lock (void)
 {
 	if (mball_locks_lit < 2)
@@ -146,7 +153,6 @@ CALLSET_ENTRY (mball, mball_start)
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		music_refresh ();
 		deff_start (DEFF_MB_START);
-		deff_start (DEFF_MB_RUNNING);
 		leff_start (LEFF_MB_RUNNING);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
@@ -211,6 +217,7 @@ CALLSET_ENTRY (mball, sw_piano)
 		flag_off (FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT);
 		score (SC_20M);
+		/* TODO : there is no relight jackpot rule */
 	}
 }
 

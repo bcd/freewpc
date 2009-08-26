@@ -155,9 +155,17 @@ void greed_round_task (void)
 		&greed_round_timer, 20, 3);
 }
 
+CALLSET_ENTRY (greed, display_update)
+{
+	if (timed_mode_timer_running_p (GID_GREED_ROUND_RUNNING,
+		&greed_round_timer))
+		deff_start_bg (DEFF_GREED_ROUND, 0);
+}
+
 CALLSET_ENTRY (greed, music_refresh)
 {
-	if (deff_get_active () == DEFF_GREED_ROUND)
+	if (timed_mode_timer_running_p (GID_GREED_ROUND_RUNNING,
+		&greed_round_timer))
 		music_request (MUS_GREED_ROUND, PRI_GAME_MODE1);
 }
 
