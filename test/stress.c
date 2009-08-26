@@ -52,24 +52,30 @@ void switch_stress_task (void)
 		 * simulate device entry there, otherwise simulate a switch event. */
 		swinfo = switch_lookup (sw);
 
-		if (!(swinfo->flags & SW_PLAYFIELD))
-			continue;
-
 		if (SW_HAS_DEVICE (swinfo))
 		{
 			device_t *dev = device_entry (SW_GET_DEVICE (swinfo));
-#ifdef DEVNO_TROUGH
-			if (dev->devno == DEVNO_TROUGH)
-				continue;
-#endif
-			dbprintf ("Simulating enter %s\n", dev->props->name);
-			device_call_op (dev, enter);
-			continue;
+			if (trough_dev_p (dev))
+			{
+				/* Don't trigger the trough device, because that will lead
+				to endball and we want to keep the simulation going.
+				Occasionally, though, throw single_ball_play so that any
+				multiball running will stop */
+				if (random () < 30)
+					callset_invoke (single_ball_play);
+			}
+			else
+			{
+				device_call_op (dev, enter);
+				task_sleep (TIME_1S);
+			}
 		}
-
-		/* Simulate the switch */
-		tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
-		task_set_arg (tp, sw);
+		else if (swinfo->flags & SW_PLAYFIELD)
+		{
+			/* Simulate the switch */
+			tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
+			task_set_arg (tp, sw);
+		}
 	}
 }
 
