@@ -1328,6 +1328,7 @@ score is made available to the effect via the @code{score_get()} API.
 @item D_RESTARTABLE
 Says that if the effect is started when it is already running, that
 it will be restarted (normally, the second call would do nothing).
+This should generally be set on D_SCORE effects at least.
 @end itemize
 
 @table @code
@@ -1685,13 +1686,34 @@ The common code knows how to pulse all of the regular solenoids.
 It also knows which solenoids @emph{not} to fire.
 Machines that need to handle a particular power driver in a non-standard
 way should implement a @code{ball_search} event handler, and mark the
-solenoid as @code{nosearch}.
+associated solenoid as @code{nosearch} to prevent the common code from
+touching it.
 
 @section Knocker Driver
+
 @section PIC Driver
+
 @section Player Local Data
+
+To support multiplayer games, FreeWPC maintains 5 separate copies of the
+variables that are marked @code{__local__}.  One of these is the "live" copy and
+is where the linker places the variables.  The other four are holding buffers that are
+used when the player is not up.  When switching between players, the current local
+variables are swapped out to that player's holding area, and the new player's
+variables are then swapped in.
+
+In single-player games, none of this happens and the variables stay in the live
+area all the time.
+
 @section Adjustments
+
 @section Audits
+
+Audits are 16-bit variables kept in the non-volatile area of memory.  They
+are generally incremented via the @code{audit_increment} API, which adds 1.
+They can also be incremented by an arbitrary value, via @code{audit_add}; or
+they can be assigned via @code{audit_assign}.
+
 @section Scoring
 
 @c ======================================================
@@ -1762,7 +1784,64 @@ strings, however, it is not quite the same.
 The @code{sprintf()} function formats a string into a unique,
 @emph{global} buffer named @code{sprintf_buffer}.  It is like the
 actual C function of the same name, but the first argument is implied.
-Also, the format string does not support all of the standard specifiers.
+
+The format specifiers are also slightly different.  Here is a list of
+the valid ones:
+
+@table @code
+
+@item %b
+
+Print a binary-coded decimal value.  The format length gives the total
+number of digits; for example, @code{%8b} would print a 4-byte BCD
+string containing 8 digits.  Also, this format will insert commas
+(or periods) between digits as necessary.
+
+@item %c
+
+Print a single 8-bit ASCII character.
+
+@item %d
+
+Print an 8-bit decimal integer (declared @code{U8}).
+
+@item %E
+
+@item %ld
+
+Print a 16-bit decimal integer (declared @code{U16}).
+
+@item %lx
+
+Print a 16-bit hexadecimal integer (declared @code{U16}).
+
+@item %p
+
+Print a pointer.
+
+@item %s
+
+Print a string.
+
+@item %w
+
+Print a 32-bit hexadecimal integer (declared @code{U32}).
+
+@item %x
+
+Print an 8-bit hexadecimal integer (declared @code{U8}).
+
+@end table
+
+Like in C, you can insert a number in front of the format letter to
+limit the output to a particular width.  If the length begins with
+'0', then it will be padded with leading zeroes if necessary.
+
+The formatter does not support signed numbers, and will print them as
+if they were declared unsigned.
+
+The formatter is not particularly efficient for printing large decimal
+values, as the 6809 is not very good at long division.
 
 @section Frame List
 
