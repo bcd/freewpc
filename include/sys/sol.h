@@ -77,10 +77,18 @@ __attribute__((deprecated)) extern inline void sol_start (U8 sol, U8 mask, U8 ti
 	sol_start_real (sol, mask, (4 * time));
 }
 
+/* flasher_start is identical, but it is not marked deprecated.  This
+is the blessed way to control a flashlamp. */
+extern inline void flasher_start (U8 sol, U8 mask, U8 time)
+{
+	sol_start_real (sol, mask, (4 * time));
+}
 
+/* The older API for controlling a flasher, which uses default
+timing and duty cycle */
 extern inline void flasher_pulse (U8 sol)
 {
-	sol_start_real (sol, FLASHER_DUTY_DEFAULT, (4 * FLASHER_TIME_DEFAULT));
+	flasher_start (sol, FLASHER_DUTY_DEFAULT, FLASHER_TIME_DEFAULT);
 }
 
 

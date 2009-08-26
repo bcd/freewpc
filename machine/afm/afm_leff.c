@@ -7,13 +7,13 @@ void flashleff_entry (void)
 	U8 *flasherp = task_current_class_data (U8);
 	for (;;)
 	{
-		sol_start (*flasherp, 0x1, TIME_500MS);
+		flasher_start (*flasherp, 0x1, TIME_500MS);
 		task_sleep (TIME_300MS);
-		sol_start (*flasherp, 0x11, TIME_400MS);
+		flasher_start (*flasherp, 0x11, TIME_400MS);
 		task_sleep (TIME_200MS);
-		sol_start (*flasherp, 0x55, TIME_200MS);
+		flasher_start (*flasherp, 0x55, TIME_200MS);
 		task_sleep (TIME_100MS);
-		sol_start (*flasherp, 0x11, TIME_400MS);
+		flasher_start (*flasherp, 0x11, TIME_400MS);
 		task_sleep (TIME_200MS);
 	}
 	task_exit ();
