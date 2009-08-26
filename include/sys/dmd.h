@@ -280,7 +280,6 @@ void dmd_draw_bitmap (dmd_buffer_t image_bits, U8 x, U8 y, U8 width, U8 height);
 void dmd_do_transition (void);
 void dmd_sched_transition (dmd_transition_t *trans);
 void dmd_reset_transition (void);
-__attribute__((deprecated)) const U8 *dmd_draw_fif1 (const U8 *fif);
 void frame_draw (U16 id);
 void frame_draw2 (U16 id);
 void bmp_draw (U8 x, U8 y, U16 id);
@@ -316,12 +315,15 @@ extern inline void dmd_map_overlay (void)
 	dmd_map_low_high (DMD_OVERLAY_PAGE);
 }
 
+#ifdef CONFIG_FIF
+__attribute__((deprecated)) const U8 *dmd_draw_fif1 (const U8 *fif);
+
 #define dmd_draw_fif(fif) \
 do { \
 	extern const U8 fif[]; \
 	dmd_draw_fif1 (fif); \
 } while (0)
-
+#endif
 
 /*
  * The parameters to a rough copy or erase operation.

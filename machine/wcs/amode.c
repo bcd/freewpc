@@ -53,7 +53,9 @@ void amode_pgj_logo (void)
 	dmd_text_outline ();
 
 	dmd_alloc_pair ();
+#ifdef CONFIG_FIF
 	dmd_draw_fif (fif_pgj);
+#endif
 	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (15);

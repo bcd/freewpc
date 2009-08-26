@@ -62,10 +62,11 @@ struct frame_pointer
 
 #endif
 
+#ifdef CONFIG_FIF
+
 U8 frame_repeat_count;
 
 U8 frame_repeat_value;
-
 
 static __attribute__((noinline))
 const U8 *frame_copy_raw (const U8 *framedata)
@@ -226,6 +227,7 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 	}
 	return fif;
 }
+#endif /* CONFIG_FIF */
 
 
 #ifdef IMAGEMAP_PAGE
