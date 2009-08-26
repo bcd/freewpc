@@ -261,6 +261,13 @@ CALLSET_ENTRY (goalie_driver, end_game)
 	goalie_command (GOALIE_NOT_MOVING);
 }
 
+CALLSET_ENTRY (goalie_driver, ball_search)
+{
+	if (!(goalie_status & GOALIE_MOVING))
+	{
+	}
+}
+
 CALLSET_ENTRY (goalie_logic, idle_every_second)
 {
 	if (in_live_game)
