@@ -58,7 +58,7 @@ typedef struct
 	audit_t paid_credits; /* done */
 	audit_t service_credits; /* done */
 	audit_t games_started; /* done */
-	audit_t total_plays;
+	audit_t total_plays; /* done */
 	audit_t total_free_plays;
 	audit_t replays; /* done */
 	audit_t specials; /* done */
@@ -86,7 +86,7 @@ typedef struct
 	audit_t exec_lockups; /* done */
 	audit_t trough_rescues;
 	audit_t chase_balls;
-	timestamp_t total_game_time;
+	timestamp_t total_game_time; /* done */
 } std_audits_t;
 
 extern __nvram__ std_audits_t system_audits;
