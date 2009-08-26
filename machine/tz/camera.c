@@ -89,8 +89,16 @@ static void do_camera_award (void)
 			break;
 		case CAMERA_AWARD_20_SECS:
 			/* Extra Time: 20 seconds */
-			timed_game_extend (20);
-			break;
+			if (config_timed_game)
+			{
+				camera_award_count++;
+				/* FALLTHRU */
+			}
+			else
+			{
+				timed_game_extend (20);
+				break;
+			}
 		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
 			break;
