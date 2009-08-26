@@ -126,7 +126,7 @@ unsigned int base_page = 0x20;
 
 /* By default, images may use up to 64KB.  This can be increased
 with the -s option. */
-unsigned int max_rom_size = 65536;
+unsigned long max_rom_size = 65536;
 
 /**
  * Target properties are used to describe things specific
@@ -390,7 +390,7 @@ void write_output (const char *filename)
 
 	/* Check that the offset has not advanced past the file size limit */
 	if (offset > max_rom_size)
-		error ("output is too large: %d > %d\n", offset, max_rom_size);
+		error ("output is too large: %lu > %lu\n", offset, max_rom_size);
 }
 
 
