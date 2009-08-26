@@ -30,11 +30,7 @@
 
 U8 faster_quote_given;
 
-const audio_track_t bonus_music_track = {
-	.prio = PRI_BONUS,
-	.code = MUS_BONUS_START,
-};
-
+/* TODO - bonus music hook was deleted, needs re-doing */
 
 static inline U8 decimal_to_bcd_byte (U8 decimal)
 {

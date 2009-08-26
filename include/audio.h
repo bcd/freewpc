@@ -21,22 +21,6 @@
 #ifndef __AUDIO_H
 #define __AUDIO_H
 
-#define MAX_TRACKS 2
-
-/** A background track */
-typedef struct {
-	/** The priority of the track.  Only the highest priority track queued
-	 * will be audible */
-	priority_t prio;
-
-	/** The sound board code for the track */
-	U8 code;
-} audio_track_t;
-
-
-__common__ __attribute__((deprecated)) void music_start (const audio_track_t track);
-__common__ __attribute__((deprecated)) void music_stop (const audio_track_t track);
-
 /* Really new sound system */
 
 #define MAX_SOUND_CHANNELS 4
