@@ -201,8 +201,6 @@ void sol_request_async (U8 sol)
  */
 void sol_request (U8 sol)
 {
-	/* TODO : If coils are disabled, then just return. */
-
 	/* Wait until any existing sync requests are finished. */
 	while (req_lock)
 		task_sleep (TIME_33MS);
