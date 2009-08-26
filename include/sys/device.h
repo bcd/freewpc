@@ -250,7 +250,8 @@ __common__ void device_init (void);
 /** Release a kickout lock */
 #define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)
 
-/** Kickout is being locked by a display effect */
+/** All kickouts are locked by a display effect.  This flag
+is set by deffs with the D_PAUSE property. */
 #define KLOCK_DEFF 0x1
 
 /** Kickout is being locked by the debugger */

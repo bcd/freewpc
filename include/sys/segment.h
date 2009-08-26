@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2009-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2005-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,6 +21,8 @@
 #ifndef _SYS_SEGMENT_H
 #define _SYS_SEGMENT_H
 
+/* Names for each part of a 16-bit segmented character */
+
 typedef U16 segbits_t;
 
 #define SEG_UL_DIAG    0x0001
@@ -40,13 +42,22 @@ typedef U16 segbits_t;
 #define SEG_MID_LEFT   0x4000
 #define SEG_PERIOD     0x8000
 
+/* Shorthand notation for some common combinations */
+
 #define SEG_RIGHT      (SEG_UPR_RIGHT+SEG_LWR_RIGHT)
 #define SEG_LEFT       (SEG_UPR_LEFT+SEG_LWR_LEFT)
 #define SEG_MID        (SEG_MID_LEFT+SEG_MID_RIGHT)
 #define SEG_VERT       (SEG_VERT_TOP+SEG_VERT_BOT)
 
+/* The dimensions of the entire display */
+
 #define SEG_SECTIONS       2
 #define SEG_SECTION_SIZE   16
+
+/* The number of frames of display data kept in memory.
+Alloc pages are handed out at request; fixed pages can
+be used whenever */
+
 #define SEG_ALLOC_PAGES    4
 #define SEG_FIXED_PAGES    3
 

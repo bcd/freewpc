@@ -22,11 +22,15 @@
  * \file
  * \brief Routines for working with groups of related lamps
  *
- * A lamplist is an ordered set of lamps.
+ * A lamplist is an ordered group of lamps.
  * Often, related lamps are modified together; these routines
  * provide the common logic.
  *
- * A lamplist is the minimum allocation unit for a lamp effect
+ * Some lamplists are also encoded without ordering; these are
+ * called lampsets.  A lampset is stored as a bitmap as opposed
+ * to a list.
+ *
+ * A lamplist is the minimum allocation unit for a lamp effect.
  * Lamp effects specify the lamplist that they want to use, and
  * only those lamps are modifiable.
  *

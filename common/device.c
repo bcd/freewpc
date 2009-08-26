@@ -228,7 +228,10 @@ wait_and_recount:
 	 * Since multiple switch transitions occur as a ball
 	 * "slides through", don't act on a transition right
 	 * away.  Instead, wait awhile until no further transitions
-	 * occur, so that the count is stable. */
+	 * occur, so that the count is stable.  If another closure on
+	 * this device happens while we sleep here, this task will
+	 * be killed and restarted.
+	 */
 	task_sleep_sec (1);
 
 	/* The device is probably stable now.  Poll all of the
