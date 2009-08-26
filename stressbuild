@@ -6,6 +6,7 @@
 machines="funhouse t2 tz wcs afm tester tzsound"
 native_options="n y"
 gcc_options="4.3.4 4.4.1"
+debugger_options="n y"
 
 case $1 in
 	--native)
@@ -17,7 +18,8 @@ case $1 in
 	--fast)
 		machines="funhouse t2 tz wcs afm"
 		native_options="n"
-		gcc_options="4.3.3 4.4.0"
+		debugger_options="y"
+		gcc_options="4.3.4"
 		;;
 	4*)
 		gcc_options="$1"
@@ -35,7 +37,7 @@ for native in $native_options; do
 		if [ "$native:$mach" = "y:tzsound" ]; then
 			continue
 		fi
-		for debugger in `echo y n`; do
+		for debugger in $debugger_options; do
 			if [ "$native" = "n" ]; then
 				gcctargets=${gcc_options}
 			else
