@@ -68,7 +68,7 @@ ALL: 11..88
 [deffs]
 NULL: c_decl(deff_exit), PRI_NULL
 Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
-Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER
+Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER, D_PAUSE
 Scores: runner, page(EFFECT_PAGE), PRI_SCORES
 Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT
 Score Goal: page(EFFECT_PAGE), runner, PRI_SCORE_GOAL

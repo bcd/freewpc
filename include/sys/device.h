@@ -254,10 +254,6 @@ __common__ void device_init (void);
 is set by deffs with the D_PAUSE property. */
 #define KLOCK_DEFF 0x1
 
-/** Kickout is being locked by the debugger */
-#define KLOCK_DEBUGGER 0x2
-
-
 #define single_ball_play() (live_balls <= 1)
 #define multi_ball_play() (live_balls > 1)
 

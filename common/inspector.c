@@ -75,12 +75,10 @@ CALLSET_ENTRY (inspector, sw_buyin_button)
 	if (deff_get_active () == DEFF_INSPECTOR)
 	{
 		deff_stop (DEFF_INSPECTOR);
-		kickout_unlock (KLOCK_DEBUGGER);
 	}
 	else
 	{
 		deff_start (DEFF_INSPECTOR);
-		kickout_lock (KLOCK_DEBUGGER);
 	}
 }
 
