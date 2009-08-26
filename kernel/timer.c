@@ -56,6 +56,9 @@ bool system_timer_pause (void)
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
 		return TRUE;
 
+	if (!switch_poll_logical (SW_COIN_DOOR_CLOSED))
+		return TRUE;
+
 	if (config_timed_game)
 	{
 		extern U8 timed_game_suspend_count;
