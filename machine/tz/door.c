@@ -101,30 +101,28 @@ void door_start_event (U8 id)
 }
 
 
-extern inline const U8 *door_get_lamps (void)
+extern inline lampnum_t door_get_lamp (U8 id)
 {
-	return lamplist_lookup (LAMPLIST_DOOR_PANELS_AND_HANDLE);
+	return lamplist_index (LAMPLIST_DOOR_PANELS_AND_HANDLE, id);
 }
 
 
 extern inline U8 door_get_flashing_lamp (void)
 {
-	return ((door_get_lamps ())[door_index]);
+	return door_get_lamp (door_index);
 }
 
 
 void door_set_flashing (U8 id)
 {
-	const U8 *door_lamps = door_get_lamps ();
-	lamp_flash_off (door_lamps[door_index]);
+	lamp_flash_off (door_get_flashing_lamp ());
 	door_index = id;
-	lamp_flash_on (door_lamps[door_index]);
+	lamp_flash_on (door_get_flashing_lamp ());
 }
 
 
 void door_advance_flashing (void)
 {
-	const U8 *door_lamps = door_get_lamps ();
 	U8 new_door_index;
 
 	if (door_panels_started < NUM_DOOR_PANELS)
@@ -134,7 +132,7 @@ void door_advance_flashing (void)
 			new_door_index++;
 			if (new_door_index >= NUM_DOOR_PANELS)
 				new_door_index = 0;
-		} while (lamp_test (door_lamps[new_door_index]));
+		} while (lamp_test (door_get_lamp (new_door_index)));
 	}
 	else
 		/* Light the door handle */
