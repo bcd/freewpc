@@ -110,6 +110,11 @@ void ultra_collect_deff (void)
 		}
 		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
 	}
+	else
+	{
+		sprintf_score (score_deff_get ());
+		font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+	}
 
 	dmd_show_low ();
 	task_sleep (TIME_1500MS);
