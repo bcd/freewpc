@@ -151,20 +151,20 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 14: Plumb Bob Tilt, c_decl(sw_tilt), cabinet, tilt, ingame, noplay
 15: Steps Frenzy
 16: Upper Ramp
-17: Step S
+17: Step S, lamp(LM_STEP_S)
 18: U.L. Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
 27: Lock Center
 28: Lock Left
-31: Step P
-32: Superdog High
+31: Step P, lamp(LM_STEP_P)
+32: Superdog High, lamp(LM_SUPER_DOG)
 33: Left Gangway
-34: Superdog Low
+34: Superdog Low, lamp(LM_SUPER_DOG)
 35: Step Track Lower
 36: Step 500K
-37: Superdog Center
+37: Superdog Center, lamp(LM_SUPER_DOG)
 38: Step Track Upper
 41: Left Slingshot
 42: Left Inlane
@@ -177,7 +177,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 51: Dummy Jaw, opto
 52: Right Outlane
 53: Right Slingshot
-54: Step T
+54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
 56: Ramp Enter
 57: Jet Lane
@@ -185,7 +185,7 @@ define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 
 61: Inner Right Inlane
 62: Right Plunger, shooter, edge, noplay
 63: Right Trough, trough, noscore, noplay
-64: Step E
+64: Step E, lamp(LM_STEP_E)
 65: Dummy Eject Hole
 66: Right Gangway
 67: Lower Right Hole
