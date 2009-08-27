@@ -90,7 +90,7 @@ define MACHINE_NUMBER 541
 16: Left Outlane
 17: Right Inlane
 18: Shooter, edge, shooter, noplay
-21: Slam Tilt, slam-tilt, noplay
+21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane
 31: Trough Eject, opto, noplay
@@ -122,8 +122,8 @@ define MACHINE_NUMBER 541
 63: Right Ramp Enter
 64: Left Ramp Exit
 65: Right Ramp Exit
-66: Motor Bank Down, noplay
-67: Motor Bank Up, noplay
+66: Motor Bank Down, noplay, intest, service
+67: Motor Bank Up, noplay, intest, service
 71: Right Loop High
 72: Right Loop Low
 73: Left Loop High

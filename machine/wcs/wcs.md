@@ -102,7 +102,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 16: Striker 3, ingame
 17: Right Flipper Lane, ingame
 18: Right Outlane, ingame
-21: Slam Tilt, cabinet, slam-tilt
+21: Slam Tilt, cabinet, ingame, slam-tilt
 23: Buyin Button, buyin-button, cabinet
 25: Free Kick Target, ingame
 26: Kickback Upper, ingame
