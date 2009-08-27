@@ -235,7 +235,9 @@ extern U8 idle_ok;
 #ifdef CONFIG_PLATFORM_WPC
 #ifndef NO_MAIN
 #ifndef NATIVE_SYSTEM
+#if (MACHINE_DMD == 1)
 #include <imagemap.h>
+#endif
 #endif
 #endif
 #endif

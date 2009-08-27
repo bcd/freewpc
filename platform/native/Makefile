@@ -53,7 +53,9 @@ CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
 
 CFLAGS += -DMACHINE_SHORTNAME=\"$(MACHINE)\"
 
+ifeq ($(CONFIG_DMD),y)
 IMAGE_MAP += platform/wpc/wpc.ild
+endif
 
 # CALLSET_ENTRYs in the simulator directory work too!
 CALLSET_FLAGS += -D $(D)

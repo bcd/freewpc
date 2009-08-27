@@ -51,7 +51,9 @@ KERNEL_ASM_OBJS += $(P)/start.o
 COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
 # Import images that are common to all games.
+ifeq ($(CONFIG_DMD),y)
 IMAGE_MAP += $(P)/wpc.ild
+endif
 
 BOTTOM_BANK=$(shell echo $$((62 - $(NUM_PAGED_SECTIONS) )))
 
