@@ -46,6 +46,10 @@ void switch_stress_task (void)
 		sw = random_scaled (NUM_SWITCHES);
 		if (sw == SW_ALWAYS_CLOSED)
 			continue;
+#ifdef MACHINE_OUTHOLE_SWITCH
+		if (sw == MACHINE_OUTHOLE_SWITCH)
+			continue;
+#endif
 
 		/* Lookup the switch properties.  Skip switches which aren't normally
 		 * activated on the playfield.  For switches in a ball container,
@@ -64,8 +68,14 @@ void switch_stress_task (void)
 				if (random () < 30)
 					callset_invoke (single_ball_play);
 			}
-			else
+			else if (dev->max_count < dev->size)
 			{
+				/* Don't throw an enter event if the device thinks
+				it is full: it has "locked" as many balls as it
+				can hold.  The device code will throw a fatal if
+				it sees this, which should never happen with real
+				balls. */
+				dbprintf ("Sim. enter dev %d\n", dev->devno);
 				device_call_op (dev, enter);
 				task_sleep (TIME_1S);
 			}
@@ -94,7 +104,11 @@ void switch_stress_endball (void)
  */
 CALLSET_ENTRY (stress, init)
 {
+#ifdef CONFIG_SWITCH_STRESS
+	switch_stress_enable = YES;
+#else
 	switch_stress_enable = NO;
+#endif
 }
 
 /**
@@ -112,7 +126,7 @@ CALLSET_ENTRY (stress, start_ball)
  * Stop the simulation as soon as a ball enters the trough.
  * Also force it to stop on endball and endgame.
  */
-CALLSET_ENTRY (stress, dev_trough_enter, end_ball, end_game)
+CALLSET_ENTRY (stress, dev_trough_enter, end_ball, stop_game)
 {
 	task_kill_gid (GID_SWITCH_STRESS);
 }
