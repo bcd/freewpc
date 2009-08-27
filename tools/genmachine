@@ -933,6 +933,7 @@ sub machine_write_switch_decls {
 	print "\n";
 
 	print "const switch_info_t switch_table[] = {\n";
+	print "   [NUM_SWITCHES-1] = { 0, },\n";
 	for $sw (unique ($m->{'switches'})) {
 		$sw->{'playfield'} = 1 if ((!defined $sw->{'button'}) &&
 			(!defined $sw->{'cabinet'}) &&
