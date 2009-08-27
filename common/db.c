@@ -58,6 +58,19 @@ U8 db_read_sync (void)
 	return wpc_debug_read ();
 }
 
+#ifdef DEBUGGER
+void db_dump_all (void)
+{
+	VOIDCALL (task_dump);
+	VOIDCALL (dump_game);
+	VOIDCALL (dump_deffs);
+	switch_queue_dump ();
+	VOIDCALL (sol_req_dump);
+	VOIDCALL (triac_dump);
+	SECTION_VOIDCALL (__common__, device_debug);
+}
+#endif
+
 
 /** Check for debug input at idle time */
 void db_idle (void)
@@ -71,13 +84,7 @@ void db_idle (void)
 			{
 				case 'a':
 					/* Dump everything */
-					VOIDCALL (task_dump);
-					VOIDCALL (dump_game);
-					VOIDCALL (dump_deffs);
-					switch_queue_dump ();
-					VOIDCALL (sol_req_dump);
-					VOIDCALL (triac_dump);
-					SECTION_VOIDCALL (__common__, device_debug);
+					db_dump_all ();
 					break;
 
 				case 'm':

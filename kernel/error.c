@@ -115,8 +115,10 @@ void fatal (errcode_t error_code)
 #endif
 
 	/* Dump all of the task information to the debugger port. */
+#ifdef DEBUGGER
 	dbprintf ("Fatal error %d\n", error_code);
-	task_dump ();
+	db_dump_all ();
+#endif
 
 #ifdef CONFIG_NATIVE
 	task_sleep_sec (2);
