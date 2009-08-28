@@ -565,6 +565,12 @@ struct audit standard_audits[] = {
 };
 
 
+struct audit feature_audit_info[] = {
+	MACHINE_FEATURE_AUDITS
+	{ NULL, AUDIT_TYPE_NONE, NULL },
+};
+
+
 void audit_browser_init (void)
 {
 	struct audit *aud;
@@ -2449,8 +2455,8 @@ struct menu standard_audits_item = {
 struct menu feature_audits_item = {
 	.name = "FEATURE AUDITS",
 	.flags = M_ITEM,
-#ifdef MACHINE_FEATURE_AUDITS
-	.var = { .subwindow = { &audit_browser_window, MACHINE_FEATURE_AUDITS } },
+#if (NUM_FEATURE_AUDITS > 0)
+	.var = { .subwindow = { &audit_browser_window, feature_audit_info } },
 #endif
 };
 

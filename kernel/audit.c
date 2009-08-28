@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -30,18 +30,13 @@
 
 __nvram__ std_audits_t system_audits;
 
-#ifdef MACHINE_FEATURE_AUDITS
 __nvram__ feature_audits_t feature_audits;
-#define MACHINE_FEATURE_AUDIT_SIZE sizeof (feature_audits)
-#else
-#define MACHINE_FEATURE_AUDIT_SIZE 0
-#endif
 
 __nvram__ U8 audit_csum;
 
 const struct area_csum audit_csum_info = {
 	.area = (U8 *)&system_audits,
-	.length = sizeof (system_audits) + MACHINE_FEATURE_AUDIT_SIZE,
+	.length = sizeof (system_audits) + sizeof (feature_audits),
 	.csum = &audit_csum,
 	.reset = audit_reset,
 };
@@ -53,9 +48,7 @@ void audit_reset (void)
 {
 	pinio_nvram_unlock ();
 	memset (&system_audits, 0, sizeof (system_audits));
-#ifdef MACHINE_FEATURE_AUDITS
 	memset (&feature_audits, 0, sizeof (feature_audits));
-#endif
 	csum_area_update (&audit_csum_info);
 	pinio_nvram_lock ();
 }

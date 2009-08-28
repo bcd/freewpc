@@ -188,6 +188,11 @@ my %EnumeratedProperties = (
 			"credit_count" => 1,
 		},
 	},
+	"audits" => {
+		"type" => {
+			"integer" => 1,
+		},
+	},
 );
 
 # When outputting defines for object IDs, specifies the prefix to use per
@@ -787,6 +792,26 @@ sub machine_write_defines {
 	}
 	print "\n\n";
 
+	# Print feature_audit_t and MACHINE_FEATURE_AUDITS.
+	print "typedef struct {\n";
+	foreach $feature (unique ($m->{"audits"})) {
+		my $ident = $feature->{'c_decl'};
+		$ident =~ s/^fau_//;
+		$ident =~ s/^([0-9])/_$1/;
+		print "   U16 $ident;\n";
+	}
+	print "} feature_audits_t;\n\n";
+
+	print "#define MACHINE_FEATURE_AUDITS \\\n";
+	foreach $feature (unique ($m->{"audits"})) {
+		my $ident = $feature->{'c_decl'};
+		$ident =~ s/^fau_//;
+		$ident =~ s/^([0-9])/_$1/;
+		my $type = $feature->{'type'};
+		my $string = $feature->{'c_string'};
+		print "  { $string, AUDIT_TYPE_INT, \&feature_audits.$ident }, \\\n";
+	}
+	print "\n\n";
 
 	# Print lamp effects
 	print "#define MACHINE_LAMP_EFFECTS \\\n";
