@@ -708,8 +708,6 @@ sub machine_write_defines {
 	print_boolean ($m->{'DCS'}, "MACHINE_DCS");
 	print_boolean ($m->{'WPC95'}, "MACHINE_WPC95");
 	print_boolean ($m->{'PIC'}, "MACHINE_PIC");
-	print_define ($m->{'*switches:has-ul'}, "MACHINE_HAS_UPPER_LEFT_FLIPPER");
-	print_define ($m->{'*switches:has-ur'}, "MACHINE_HAS_UPPER_RIGHT_FLIPPER");
 
 	print_c_ident ($m->{'*switches:shooter'}, "MACHINE_SHOOTER_SWITCH");
 	print_c_ident ($m->{'*switches:tilt'}, "MACHINE_TILT_SWITCH");
