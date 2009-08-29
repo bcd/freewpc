@@ -39,7 +39,7 @@ define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
 
 #define MACHINE_INCLUDE_FLAGS
-#define MACHINE_CUSTOM_AMODE
+define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
 #define MACHINE_MUSIC_PLUNGER
@@ -291,7 +291,7 @@ Jets: Upper Left Jet, Upper Right Jet, Lower Jet
 Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
 Top Loop: Lock, Extra Ball
 Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
-Step Target: Step S, Step T, Step E, Step P
+Step Targets: Step S, Step T, Step E, Step P
 
 ##########################################################################
 # Containers
@@ -326,6 +326,7 @@ Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
 # Items for the Feature Audits menu.
 ##########################################################################
 [audits]
+Rudy Hits: INT
 
 ##########################################################################
 # Sound calls for well-known events
@@ -369,6 +370,7 @@ GC: LED, 15.000.000
 # Lamp effects
 ##########################################################################
 [leffs]
+Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 
 ##########################################################################
 # Fonts used in this game.
