@@ -138,7 +138,7 @@ extern inline IOPTR sol_get_write_reg (solnum_t sol)
 #elif (MACHINE_FLIPTRONIC == 1)
 			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
 #endif
-#ifdef EXTBOARD1
+#ifdef MACHINE_SOL_EXTBOARD1
 		case 5:
 			return (IOPTR)WPC_EXTBOARD1;
 #endif
