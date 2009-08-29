@@ -123,9 +123,7 @@ U8 tz_clock_opto_to_hour[] =
 #define CLK_SW_MIN30		0x8
 #define CLK_SW_MIN45		0x4
 
-/* Drives for the clock and the switch strobe on the aux board */
-#define CLK_DRV_REVERSE				0x20
-#define CLK_DRV_FORWARD				0x40
+/* Switch strobe enable on the aux board */
 #define CLK_DRV_SWITCH_STROBE		0x80
 
 extern inline void wpc_ext1_enable (const U8 bits)
@@ -179,16 +177,19 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 		else if (--clock_calibration_time == 0)
 		{
 			dbprintf ("Calibration aborted.\n");
+			audit_increment (&feature_audits.clock_errors);
 			clock_mode = CLOCK_STOPPED;
 			global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
+			clock_reverse_stop ();
+			clock_forward_stop ();
 		}
 
 		/* Keep the clock moving during calibration.  Note that
 		 * we always run it forward; not sure if this is optimal. */
 		else
 		{
-			sol_stop (SOL_CLOCK_REVERSE);
-			sol_start (SOL_CLOCK_FORWARD, clock_speed, TIME_1S);
+			clock_reverse_stop ();
+			clock_forward_start ();
 		}
 	}
 	else if (unlikely (clock_mode == CLOCK_FIND))
@@ -206,14 +207,14 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 	else if (clock_mode == CLOCK_RUNNING_FORWARD)
 	{
 run_forwards:
-		sol_stop (SOL_CLOCK_REVERSE);
-		sol_start (SOL_CLOCK_FORWARD, clock_speed, TIME_1S);
+		clock_reverse_stop ();
+		clock_forward_start ();
 	}
 	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
 	{
 run_backwards:
-		sol_stop (SOL_CLOCK_FORWARD);
-		sol_start (SOL_CLOCK_REVERSE, clock_speed, TIME_1S);
+		clock_forward_stop ();
+		clock_reverse_start ();
 	}
 }
 
@@ -271,15 +272,12 @@ void tz_clock_rtt (void)
 stop_clock:
 	/* Before stopping the clock, give one last 16ms pulse to try to
 	 * put the minute hand exactly over the desired minute opto. */
+	 /* TODO */
 	if (clock_mode == CLOCK_RUNNING_FORWARD)
 	{
-		rt_sol_start (SOL_CLOCK_FORWARD, 0xFF, 4);
-		sol_disable (SOL_CLOCK_REVERSE);
 	}
 	else
 	{
-		rt_sol_start (SOL_CLOCK_REVERSE, 0xFF, 4);
-		sol_disable (SOL_CLOCK_FORWARD);
 	}
 	clock_mode = CLOCK_STOPPED;
 	return;
@@ -288,21 +286,21 @@ stop_clock:
 
 void tz_clock_start_forward (void)
 {
-	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_mode = CLOCK_RUNNING_FORWARD;
 }
 
 
 void tz_clock_start_backward (void)
 {
-	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_mode = CLOCK_RUNNING_BACKWARD;
 }
 
 
 void tz_clock_set_speed (U8 speed)
 {
-	if (global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
 		clock_speed = speed;
 }
 
@@ -310,8 +308,8 @@ void tz_clock_set_speed (U8 speed)
 void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
-	sol_stop (SOL_CLOCK_FORWARD);
-	sol_stop (SOL_CLOCK_REVERSE);
+	clock_reverse_stop ();
+	clock_forward_stop ();
 }
 
 
