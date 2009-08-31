@@ -591,9 +591,15 @@ Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, of
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
-Clock Forward: driver(duty),
-	sol=SOL_CLOCK_FORWARD,
-	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=TIME_2S
-Clock Reverse: driver(duty),
-	sol=SOL_CLOCK_REVERSE,
-	ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_66MS, timeout=TIME_2S
+
+#Clock Forward: driver(duty),
+#	sol=SOL_CLOCK_FORWARD,
+#	ontime=0, duty_ontime=TIME_16MS, duty_offtime=clock_speed, timeout=TIME_2S
+#Clock Reverse: driver(duty),
+#	sol=SOL_CLOCK_REVERSE,
+#	ontime=0, duty_ontime=TIME_16MS, duty_offtime=clock_speed, timeout=TIME_2S
+
+Clock Mech: driver(bivar),
+	forward_sol=SOL_CLOCK_FORWARD,
+	reverse_sol=SOL_CLOCK_REVERSE
+

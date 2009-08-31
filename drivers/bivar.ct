@@ -1,0 +1,166 @@
+/*
+ * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Driver for a bidirectional, variable-speed motor
+ *
+ * This driver is based on the simpler 'duty' driver, but it
+ * supports a forward and reverse direction, and also variable
+ * pulse width.
+ */
+
+@@class duty
+@@parameter forward_sol
+@@parameter reverse_sol
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+typedef enum {
+	BIVAR_IDLE,
+	BIVAR_FORWARD,
+	BIVAR_REVERSE,
+} @self_state_t;
+
+#define BIVAR_DUTY_100 0
+#define BIVAR_DUTY_50  TIME_16MS
+#define BIVAR_DUTY_25  TIME_50MS
+#define BIVAR_DUTY_10  TIME_166MS
+
+extern __fastram__ @self_state_t @self_state;
+extern __fastram__ U8 @self_timer;
+extern U8 @self_speed;
+
+/* User APIs */
+
+void @self_start_forward (void);
+void @self_start_reverse (void);
+void @self_set_speed (U8 speed);
+void @self_stop (void);
+
+extern inline void @self_stop_from_interrupt (void)
+{
+	@self_state = BIVAR_IDLE;
+	sol_disable (@forward_sol);
+	sol_disable (@reverse_sol);
+}
+
+
+extern inline void @self_set_speed (U8 speed)
+{
+	@self_speed = speed;
+}
+
+extern inline U8 @self_get_speed (void)
+{
+	return @self_speed;
+}
+
+extern inline @self_state_t @self_get_state (void)
+{
+	return @self_state;
+}
+
+/**
+ * Realtime update of a duty-cycled device.
+ */
+extern inline void @self_service (void)
+{
+	/* Only act if device is enabled */
+	if (@self_state != BIVAR_IDLE)
+	{
+		if (@self_timer == 0)
+		{
+			/* Motor was enabled for 1 tick.  We need to
+			turn it off, and restart the off delay. */
+			if (@self_speed == 0)
+				;
+			else if (@self_state == BIVAR_FORWARD)
+				sol_disable (@forward_sol);
+			else
+				sol_disable (@reverse_sol);
+			@self_timer = @self_speed;
+		}
+		else if (--@self_timer == 0)
+		{
+			/* We are in off delay, if timer reaches zero,
+			then turn it back on. */
+			if (@self_state == BIVAR_FORWARD)
+				sol_enable (@forward_sol);
+			else
+				sol_enable (@reverse_sol);
+		}
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+__fastram__ @self_state_t @self_state;
+__fastram__ U8 @self_timer;
+U8 @self_speed;
+
+
+void @self_start_forward (void)
+{
+	disable_interrupts ();
+	@self_timer = 1;
+	@self_state = BIVAR_FORWARD;
+	sol_disable (@reverse_sol);
+	enable_interrupts ();
+}
+
+void @self_start_reverse (void)
+{
+	disable_interrupts ();
+	@self_timer = 1;
+	@self_state = BIVAR_REVERSE;
+	sol_disable (@forward_sol);
+	enable_interrupts ();
+}
+
+void @self_stop (void)
+{
+	disable_interrupts ();
+	@self_stop_from_interrupt ();
+	enable_interrupts ();
+}
+
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_state = BIVAR_IDLE;
+}
+
+
+CALLSET_ENTRY (@self, end_game, tilt, stop_game)
+{
+	@self_stop ();
+}
+
+/* vim: set filetype=c: */
