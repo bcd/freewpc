@@ -54,6 +54,8 @@ extern inline void wait_for_button (const U8 swno)
 	while (switch_poll (swno))
 		task_sleep (TIME_66MS);
 #endif
+#else
+	task_sleep (TIME_500MS);
 #endif
 }
 
