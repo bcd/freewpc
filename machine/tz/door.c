@@ -207,7 +207,25 @@ static void door_award_flashing (void)
 	door_start_event (door_index);
 	score (SC_5M);
 	timed_game_extend (10);
+
 	door_panels_started++;
+	audit_increment (&feature_audits.door_panels);
+	switch (door_panels_started)
+	{
+		case 3:
+			audit_increment (&feature_audits._3_panel_games);
+			break;
+		case 6:
+			audit_increment (&feature_audits._6_panel_games);
+			break;
+		case 9:
+			audit_increment (&feature_audits._9_panel_games);
+			break;
+		case 12:
+			audit_increment (&feature_audits._12_panel_games);
+			break;
+	}
+
 	deff_start (DEFF_DOOR_AWARD);
 	leff_start (LEFF_DOOR_STROBE);
 	task_sleep (TIME_100MS);
@@ -222,6 +240,7 @@ static void door_award_flashing (void)
 static void door_award_litz (void)
 {
 	door_start_event (14);
+	audit_increment (&feature_audits.litz_started);
 	deff_start (DEFF_LITZ_AWARD);
 }
 
