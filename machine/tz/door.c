@@ -29,8 +29,6 @@ __local__ U8 door_panels_started;
 
 U8 door_active_lamp;
 
-U8 door_start_with_bttz;
-
 
 /* For testing -- only enables GREED mode */
 //#define GREED_ONLY
@@ -326,11 +324,5 @@ CALLSET_ENTRY(door, start_ball)
 {
 	door_set_flashing (door_index);
 	door_award_enable ();
-}
-
-
-CALLSET_ENTRY (door, init)
-{
-	door_start_with_bttz = 0;
 }
 
