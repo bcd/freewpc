@@ -152,10 +152,14 @@ void serve_ball (void)
  * endball.  It is also called by test mode when it starts up. */
 void end_game (void)
 {
+	U8 was_in_game = in_game;
+
 	/* Common stop/end game logic */
 	stop_game ();
 
-	if (in_game)
+	/* TODO - should be able to restart a game at this point??? */
+
+	if (was_in_game)
 	{
 		/* Kill the flippers in case still enabled */
 		flipper_disable ();
