@@ -79,6 +79,9 @@ void @self_stop (void);
  */
 extern inline void @self_service (void)
 {
+#ifndef @duty_offtime
+extern U8 @duty_offtime;
+#endif
 	/* Only act if device is enabled */
 	if (@self_enabled_p ())
 	{

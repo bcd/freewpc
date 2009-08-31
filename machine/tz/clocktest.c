@@ -21,7 +21,7 @@
 #include <freewpc.h>
 #include <window.h>
 #include <test.h>
-#include <tz/clock.h>
+#include <clock_mech.h>
 
 S8 clock_test_setting;
 
@@ -37,22 +37,22 @@ void tz_clock_test_update (void)
 		switch (clock_test_setting)
 		{
 			case -2:
-				tz_clock_set_speed (0xEE);
+				clock_mech_set_speed (BIVAR_DUTY_100);
 				tz_clock_start_backward ();
 				break;
 			case -1:
-				tz_clock_set_speed (0xAA);
+				clock_mech_set_speed (BIVAR_DUTY_25);
 				tz_clock_start_backward ();
 				break;
 			case 0:
 				tz_clock_stop ();
 				break;
 			case 1:
-				tz_clock_set_speed (0xAA);
+				clock_mech_set_speed (BIVAR_DUTY_25);
 				tz_clock_start_forward ();
 				break;
 			case 2:
-				tz_clock_set_speed (0xEE);
+				clock_mech_set_speed (BIVAR_DUTY_100);
 				tz_clock_start_forward ();
 				break;
 		}
@@ -74,6 +74,8 @@ extern U8 tz_clock_opto_to_hour[];
 
 void tz_clock_test_draw (void)
 {
+	extern __machine__ U8 tz_clock_gettime (void);
+	U8 intervals;
 	U8 hour;
 	U8 minute;
 
@@ -92,15 +94,9 @@ void tz_clock_test_draw (void)
 	font_render_string_center (&font_mono5, 96, 11,
 		clock_can_run ? "RUNNING" : "STOPPED");
 
-	/* TODO : this should be common logic */
-	{
-		extern void tz_clock_decode (void);
-		extern U8 clock_decode;
-
-	tz_clock_decode ();
-	hour = clock_decode / 4;
-	minute = (clock_decode % 4 * 15);
-	}
+	intervals = tz_clock_gettime ();
+	hour = intervals / 4;
+	minute = (intervals % 4 * 15);
 
 	sprintf ("%02d:%02d", hour, minute);
 	font_render_string_center (&font_mono5, 32, 18, sprintf_buffer);

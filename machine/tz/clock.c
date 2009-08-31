@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,10 +20,9 @@
 
 #include <freewpc.h>
 #include <rtsol.h>
-#include <tz/clock.h>
+#include <clock_mech.h>
 
-
-/** The states of the clock driver state machine */
+/** The logical states of the clock driver state machine */
 enum mech_clock_mode
 {
 	/** The clock should not be running at all */
@@ -40,16 +39,19 @@ enum mech_clock_mode
 };
 
 
-/* Current state of the clock switches, as read during the last rtt */
+/* Current state of the clock switches, as read during the last rtt.
+The upper 4-bits gives the state of the hour optos.  The lower 4-bits
+gives the state of the minutes optos */
 __fastram__ U8 clock_sw;
+
+#define CLK_SW_HOUR(sw)   ((sw) & 0xF0)
+#define CLK_SW_MIN(sw)    ((sw) & 0x0F)
+
+#define CLK_SW_HOUR_EQUAL_P(sw1,sw2) \
+	CLK_SW_HOUR(sw1) == CLK_SW_HOUR(sw2)
 
 /* Mode that drives the rtt state machine */
 __fastram__ enum mech_clock_mode clock_mode;
-
-/** Configured speed of the clock.  When set to higher values, the
- * clock will run more slowly.  This represents the number of idle
- * rtt cycles between pulses to the clock motor drives. */
-__fastram__ U8 clock_speed;
 
 /** Clock switches which have been seen to be active */
 __fastram__ U8 clock_sw_seen_active;
@@ -70,7 +72,8 @@ __fastram__ U8 clock_last_sw;
  * giving up. */
 U8 clock_calibration_time;
 
-
+/** The clock time "decoded" as the number of 15-minute intervals
+past 12:00, ranging from 0 to 47. */
 U8 clock_decode;
 
 U8 clock_minute_sw;
@@ -83,7 +86,6 @@ void tz_dump_clock (void)
 	dbprintf ("Seen inactive: %02x\n", clock_sw_seen_inactive);
 	dbprintf ("State machine: %02x\n", clock_mode);
 	dbprintf ("Target switches: %02x\n", clock_find_target);
-	dbprintf ("Clock speed: %02x\n", clock_speed);
 }
 
 
@@ -99,10 +101,6 @@ void tz_debugger_hook (char c)
 	}
 }
 
-
-/*
- * Twilight Zone Clock Driver
- */
 
 /* Given an hour value (0-11), return the value of the hour
  * optos that matches it.  The reading is valid from
@@ -139,7 +137,7 @@ extern inline void wpc_ext1_disable (const U8 bits)
 
 /** Decodes the current clock switches to determine what time
  * it is. */
-void tz_clock_decode (void)
+U8 tz_clock_gettime (void)
 {
 	/* Determine the 'rough' hour from the hour optos. */
 	clock_decode = tz_clock_opto_to_hour[clock_sw >> 4] * 4;
@@ -159,78 +157,11 @@ void tz_clock_decode (void)
 }
 
 
-/** A lower priority periodic function. */
-CALLSET_ENTRY (tz_clock, idle_every_100ms)
-{
-	/* When calibrating, once all switches have been active and inactive
-	 * at least once, claim victory and go back to the home position. */
-	if (clock_mode == CLOCK_CALIBRATING)
-	{
-		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
-		{
-			clock_mode = CLOCK_FIND;
-			clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
-		}
-
-		/* If calibration doesn't succeed within a certain number
-		 * of iterations, give up. */
-		else if (--clock_calibration_time == 0)
-		{
-			dbprintf ("Calibration aborted.\n");
-			audit_increment (&feature_audits.clock_errors);
-			clock_mode = CLOCK_STOPPED;
-			global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
-			clock_reverse_stop ();
-			clock_forward_stop ();
-		}
-
-		/* Keep the clock moving during calibration.  Note that
-		 * we always run it forward; not sure if this is optimal. */
-		else
-		{
-			clock_reverse_stop ();
-			clock_forward_start ();
-		}
-	}
-	else if (unlikely (clock_mode == CLOCK_FIND))
-	{
-		/* In the FIND case, it may be better to run it forward than
-		 * backward.  TODO : this depends on where we are now and where
-		 * we are trying to go. */
-#if 0
-		S8 delta = tz_clock_opto_to_hour[clock_sw >> 4] -
-			tz_clock_opto_to_hour[clock_find_target >> 4];
-#endif
-		goto run_backwards;
-	}
-	/* Refresh clock outputs when active */
-	else if (clock_mode == CLOCK_RUNNING_FORWARD)
-	{
-run_forwards:
-		clock_reverse_stop ();
-		clock_forward_start ();
-	}
-	else if (clock_mode == CLOCK_RUNNING_BACKWARD)
-	{
-run_backwards:
-		clock_forward_stop ();
-		clock_reverse_start ();
-	}
-}
-
 
 /** The real-time task driver for the clock.
- * This function is called once every 33ms. */
-void tz_clock_rtt (void)
+ * This function is called once every 8ms. */
+void tz_clock_switch_rtt (void)
 {
-	/* When the clock is stopped, there is nothing to do.
-	 * This is the common case.  Even if by chance the
-	 * clock outputs happen to be driving it, they will
-	 * stop eventually due to the design of the solenoid
-	 * refresh. */
-	if (likely (clock_mode == CLOCK_STOPPED))
-		return;
-
 	/* Read latest switch state.  Enabling the output at
 	 * bit 7 on the I/O extender switches the row input
 	 * from the switch matrix to the 9th column of clock
@@ -243,13 +174,11 @@ void tz_clock_rtt (void)
 	/* Unless any switches change, there's nothing else to do */
 	if (unlikely (clock_sw != clock_last_sw))
 	{
-		/* Update the active/inactive switch list for calibration */
-		clock_sw_seen_active |= clock_sw;
-		clock_sw_seen_inactive |= ~clock_sw;
-
-		/* Always remember the last minute opto seen. */
-		if (clock_sw & 0x0F)
-			clock_minute_sw = clock_sw & 0x0F;
+		/* Always remember the last minute opto seen.  The hour optos
+		can be read at any time, but the minute optos are only active
+		when the arm actually crosses one of the 15 minute marks. */
+		if (CLK_SW_MIN (clock_sw))
+			clock_minute_sw = CLK_SW_MIN (clock_sw);
 
 		/* If searching for a specific target, see if we're there */
 		if (unlikely (clock_mode == CLOCK_FIND))
@@ -257,80 +186,115 @@ void tz_clock_rtt (void)
 			if (clock_sw == clock_find_target)
 			{
 				/* Yep, stop NOW! */
-				goto stop_clock;
+				clock_mech_stop_from_interrupt ();
 			}
-			else if ((clock_sw & 0xF0) == (clock_find_target & 0xF0) && (clock_speed >= 0xAA))
+			else if (CLK_SW_HOUR_EQUAL_P (clock_sw, clock_find_target)
+				&& (clock_mech_get_speed () < BIVAR_DUTY_25))
 			{
 				/* No, but we're close.  Slow down a bit. */
-				clock_speed = 0x30;
+				clock_mech_set_speed (BIVAR_DUTY_25);
 			}
 			/* Otherwise, the clock keeps running as it was */
 		}
+		else if (unlikely (clock_mode == CLOCK_CALIBRATING))
+		{
+			/* Update the active/inactive switch list for calibration */
+			clock_sw_seen_active |= clock_sw;
+			clock_sw_seen_inactive |= ~clock_sw;
+		}
 	}
-	return;
-
-stop_clock:
-	/* Before stopping the clock, give one last 16ms pulse to try to
-	 * put the minute hand exactly over the desired minute opto. */
-	 /* TODO */
-	if (clock_mode == CLOCK_RUNNING_FORWARD)
-	{
-	}
-	else
-	{
-	}
-	clock_mode = CLOCK_STOPPED;
-	return;
 }
 
 
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+	{
+		clock_mech_start_forward ();
 		clock_mode = CLOCK_RUNNING_FORWARD;
+	}
 }
 
 
 void tz_clock_start_backward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+	{
+		clock_mech_start_reverse ();
 		clock_mode = CLOCK_RUNNING_BACKWARD;
+	}
 }
-
-
-void tz_clock_set_speed (U8 speed)
-{
-	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
-		clock_speed = speed;
-}
-
 
 void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
-	clock_reverse_stop ();
-	clock_forward_stop ();
+	clock_mech_stop ();
+}
+
+void tz_clock_error (void)
+{
+	audit_increment (&feature_audits.clock_errors);
+	tz_clock_stop ();
+	global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
 }
 
 
+/**
+ * Reset the mechanical clock to the home position.
+ */
 void tz_clock_reset (void)
 {
 	if (feature_config.disable_clock == YES)
 	{
+		/* Don't do anything if the clock is disabled */
 		tz_clock_stop ();
-		return;
 	}
-
-	/* Find the home position at super speed */
-	clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
-	if (clock_sw != clock_find_target)
+	else
 	{
-		tz_clock_set_speed (0xEE);
-		clock_mode = CLOCK_FIND;
+		/* See where the clock is and start it if it's not already home. */
+		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
+		if (clock_sw != clock_find_target)
+		{
+			clock_mech_set_speed (BIVAR_DUTY_100);
+			if (tz_clock_opto_to_hour[clock_sw >> 4] <= 6)
+				clock_mech_start_reverse ();
+			else
+				clock_mech_start_forward ();
+			clock_mode = CLOCK_FIND;
+		}
 	}
 }
 
 
+/**
+ * A periodic, lower priority function that updates the
+ * state machine depending on what has been seen recently.
+ */
+CALLSET_ENTRY (tz_clock, idle_every_100ms)
+{
+	/* When calibrating, once all switches have been active and inactive
+	 * at least once, claim victory and go back to the home position. */
+	if (unlikely (clock_mode == CLOCK_CALIBRATING))
+	{
+		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+		{
+			/* CALIBRATING -> FIND */
+			tz_clock_reset ();
+		}
+		/* If calibration doesn't succeed within a certain number
+		 * of iterations, give up. */
+		else if (--clock_calibration_time == 0)
+		{
+			dbprintf ("Calibration aborted.\n");
+			tz_clock_error ();
+		}
+	}
+}
+
+
+/**
+ * Reinitialize the mechanical clock driver.
+ */
 CALLSET_ENTRY (tz_clock, init)
 {
 	clock_mode = CLOCK_STOPPED;
@@ -339,7 +303,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw = 0;
 	clock_minute_sw = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
-	clock_speed = 0xEE;
+	clock_mech_set_speed (BIVAR_DUTY_100);
 }
 
 CALLSET_ENTRY (tz_clock, amode_start)
@@ -353,9 +317,10 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	 * active and inactive states, start the clock. */
 	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
-		tz_clock_set_speed (0xEE);
-		clock_calibration_time = 100;
+		clock_calibration_time = 80; /* 8 seconds */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
+		clock_mech_set_speed (BIVAR_DUTY_100);
+		tz_clock_start_forward ();
 		clock_mode = CLOCK_CALIBRATING;
 	}
 	else
@@ -364,32 +329,21 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	}
 }
 
-
-CALLSET_ENTRY (tz_clock, amode_stop)
+/**
+ * Stop the clock when entering test mode
+ */
+CALLSET_ENTRY (tz_clock, amode_stop, test_start)
 {
-	/* Stop the calibration or real-time clock display that
-	 * runs in the attract mode. */
 	tz_clock_stop ();
 }
 
 
-CALLSET_ENTRY (tz_clock, test_start)
+/**
+ * Reset the clock to the home position at the start of
+ * each ball.
+ */
+CALLSET_ENTRY (tz_clock, start_ball, end_ball)
 {
-	/* Stop the clock unconditionally when entering test mode. */
-	tz_clock_stop ();
-}
-
-
-CALLSET_ENTRY (tz_clock, start_ball)
-{
-	/* Reset the clock to 12:00 at the start of ball */
-	tz_clock_reset ();
-}
-
-
-CALLSET_ENTRY (tz_clock, end_ball)
-{
-	/* Reset the clock to 12:00 at the end of ball */
 	tz_clock_reset ();
 }
 
