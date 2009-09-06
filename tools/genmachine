@@ -125,6 +125,7 @@ my %BinaryProperties = (
 		"start" => $GLOBAL_OBJECT,
 		"buyin" => $GLOBAL_OBJECT,
 		"extra-ball" => $GLOBAL_OBJECT,
+		"shoot-again" => $GLOBAL_OBJECT,
 		"cabinet" => 1,
 	},
 	"drives" => {
