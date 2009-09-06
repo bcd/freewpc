@@ -158,7 +158,7 @@ CALLSET_ENTRY (@self, init)
 }
 
 
-CALLSET_ENTRY (@self, end_game, tilt, stop_game)
+CALLSET_ENTRY (@self, tilt, stop_game, test_start)
 {
 	@self_stop ();
 }
