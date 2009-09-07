@@ -42,6 +42,7 @@ extern inline bool multiball_mode_stop (U8 flag, U8 deff, U8 leff, U8 music)
 	if (flag_test (flag))
 	{
 		flag_off (flag);
+		return TRUE;
 	}
 	else
 		return FALSE;
@@ -211,12 +212,5 @@ CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;
 	chaosmb_hits_to_relight = 0;
-}
-
-
-CALLSET_ENTRY (chaosmb, sw_buyin_button)
-{
-	if (in_live_game)
-		chaosmb_start ();
 }
 
