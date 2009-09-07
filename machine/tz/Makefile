@@ -82,6 +82,7 @@ FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
 
 IMAGE_MAP += $(M)/tz.ild
 
-#SCHED_HEADERS += build/clock_forward.h build/clock_reverse.h
-SCHED_HEADERS += build/clock_mech.h
+SCHED_HEADERS += build/clock_mech.h build/bridge_open.h build/shooter_div.h \
+	build/ramp_div.h build/gumball_div.h
+
 

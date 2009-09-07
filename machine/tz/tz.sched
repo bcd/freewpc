@@ -41,6 +41,8 @@ magnet_duty_rtt    32    0.1
 # Update mini-playfield magnets
 mpf_driver         8     0.1
 
-# TODO: duty cycle bridge divertor
-# TODO : duty cycle ramp divertor
-# TODO : duty cycle gumball divertor
+!bridge_open_service    16    40c
+!shooter_div_service    16    40c
+!ramp_div_service       16    40c
+!gumball_div_service    16    40c
+

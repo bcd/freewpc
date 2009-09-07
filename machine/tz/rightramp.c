@@ -19,7 +19,7 @@
  */
 
 #include <freewpc.h>
-
+#include <bridge_open.h>
 
 extern __local__ U8 mpf_enable_count;
 
@@ -42,21 +42,14 @@ void sw_right_ramp_enter_task (void)
 	do {
 		if (mpf_enable_count)
 		{
-			U8 n;
-			for (n = 0; n < 6; n++)
-			{
-				sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_1S);
-				task_sleep (TIME_500MS);
-			}
+			bridge_open_start ();
+			task_sleep_sec (1);
 		}
 		else
 		{
 			task_sleep_sec (2);
 			sound_send (SND_RIGHT_RAMP_EXIT);
-
-			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_500MS);
-			task_sleep (TIME_200MS);
-			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_25, TIME_1S);
+			sol_request_async (SOL_RIGHT_RAMP_DIV);
 		}
 	} while (--right_ramps_entered > 0);
 	task_exit ();

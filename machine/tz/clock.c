@@ -154,6 +154,8 @@ U8 tz_clock_gettime (void)
 
 	while (clock_decode >= 48)
 		clock_decode -= 48;
+
+	return clock_decode;
 }
 
 
