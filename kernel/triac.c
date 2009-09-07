@@ -92,9 +92,13 @@ void triac_dump (void)
 	dbprintf ("Dim:       %02X %02X %02X %02X %02X\n",
 		gi_dimming[0], gi_dimming[1], gi_dimming[2], gi_dimming[3], gi_dimming[4]);
 	dbprintf ("Alloc:     %02X\n", gi_leff_alloc);
-	dbprintf ("Leff GI:   %02X\n", gi_leff_output);
-	dbprintf ("Leff dim:  %02X %02X %02X %02X %02X\n",
-		gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2], gi_leff_dimming[3], gi_leff_dimming[4]);
+	if (gi_leff_alloc)
+	{
+		dbprintf ("Leff GI:   %02X\n", gi_leff_output);
+		dbprintf ("Leff dim:  %02X %02X %02X %02X %02X\n",
+			gi_leff_dimming[0], gi_leff_dimming[1], gi_leff_dimming[2],
+			gi_leff_dimming[3], gi_leff_dimming[4]);
+	}
 }
 
 
@@ -189,6 +193,7 @@ void triac_leff_allocate (U8 triac)
 
 	/* TODO - return actually allocated strings to the caller
 	 * so that only those will be freed up on leff exit. */
+	 triac_update ();
 }
 
 
@@ -197,6 +202,7 @@ void triac_leff_free (U8 triac)
 {
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_alloc &= ~triac;
+	triac_update ();
 }
 
 
