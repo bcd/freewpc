@@ -40,9 +40,15 @@ U8 tilt_warnings;
  * Used by the system-defined tilt function. */
 void no_lights_leff (void)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
 	for (;;)
 		task_sleep_sec (5);
+}
+
+
+void tilt_warning_leff (void)
+{
+	task_sleep (TIME_500MS);
+	leff_exit ();
 }
 
 
@@ -118,6 +124,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	{
 		/* Give a warning this time */
 		deff_start (DEFF_TILT_WARNING);
+		leff_start (LEFF_TILT_WARNING);
 		callset_invoke (tilt_warning);
 	}
 }
