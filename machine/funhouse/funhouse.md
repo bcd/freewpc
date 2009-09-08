@@ -103,7 +103,7 @@ define MACHINE_CUSTOM_AMODE
 64: Ramp 250K
 65: Step T
 66: Left Gangway
-67: Extra Ball
+67: Extra Ball, extra-ball
 68: Lock
 71: Mirror Ex. Ball
 72: Upper Right Jet
@@ -229,7 +229,7 @@ L2: Upper Right Jet
 L3: Lower Jet
 L4: Left Slingshot
 L5: Right Slingshot
-L6: Steps Gate
+L6: Steps Gate, nosearch
 L7: Ball Release, ballserve
 L8: Dummy Eject Hole
 
@@ -237,15 +237,15 @@ G1: Blue Flashers, flash
 G2: Dummy Flasher, flash
 G3: Clock Flashers, flash
 G4: Super Dog Flash., flash
-G5: Mouth Motor
-G6: Motor Direction
+G5: Mouth Motor, motor
+G6: Motor Direction, motor
 G7: Red Flashers, flash
 G8: Clear Flashers, flash
 
-A1: Eyes Right
-A2: Eyelids Open
-A3: Eyelids Closed
-A4: Eyes Left
+A1: Eyes Right, nosearch
+A2: Eyelids Open, nosearch
+A3: Eyelids Closed, nosearch
+A4: Eyes Left, nosearch
 
 ##########################################################################
 # General Illumination
@@ -292,6 +292,8 @@ Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
 Top Loop: Lock, Extra Ball
 Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
 Step Targets: Step S, Step T, Step E, Step P
+Ramp Awards: Ramp Steps, Ramp 250K
+Lower Lanes: Specials, Flipper Lanes
 
 ##########################################################################
 # Containers
