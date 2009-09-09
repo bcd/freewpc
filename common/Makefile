@@ -65,5 +65,6 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # different ROM page.
 EFFECT_OBJS += common/effect.o
 EFFECT_OBJS +=	common/flash.o
+EFFECT_OBJS += common/lamptimer.o
 EFFECT_OBJS +=	common/score_deff.o
 EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)
