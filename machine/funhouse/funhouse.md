@@ -33,7 +33,7 @@ include platform/wpc/wpc89.md
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-define MACHINE_LACKS_ALL_INCLUDES
+define MACHINE_LACKS_PROTOS_H
 # define MACHINE_SYS11_SOUND
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
@@ -120,7 +120,7 @@ define MACHINE_CUSTOM_AMODE
 85: Mirror Value
 86: Step E
 87: Million
-88: Start Button, start
+88: Start Button, start, cabinet
 
 ##########################################################################
 # Switch Description
@@ -152,7 +152,7 @@ define MACHINE_CUSTOM_AMODE
 15: Steps Frenzy
 16: Upper Ramp
 17: Step S, lamp(LM_STEP_S)
-18: U.L. Jet
+18: Upper Left Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
@@ -285,7 +285,7 @@ A4: Eyes Left, nosearch
 [lamplists]
 Gangways: Gangway 75K, Gangway 100K, Gangway 150K, Gangway 200K, Gangway 250K, Gangway Ex. Ball
 Clock Minutes: Clock 0 Min., Clock 5 Min., Clock 10 Min., Clock 15 Min., Clock 20 Min., Clock 25 Min., Clock 30 Min., Clock 35 Min., Clock 40 Min., Clock 45 Min., Clock 50 Min., Clock 55 Min.
-Clock Hours: Clock Hour 1, Clock Hour 2, Clock Hour 3, Clock Hour 4, Clock Hour 5, Clock Hour 6, Clock Hour 7, Clock Hour 8, Clock Hour 9, Clock Hour 10, Clock Hour 11, Clock Hour 12
+Clock Hours: Clock Hour 12, Clock Hour 1, Clock Hour 2, Clock Hour 3, Clock Hour 4, Clock Hour 5, Clock Hour 6, Clock Hour 7, Clock Hour 8, Clock Hour 9, Clock Hour 10, Clock Hour 11
 Mirror Awards: Mirror Ex. Ball, Mirror Million, Mirror Bumpers, Mirror Super Dog, Mirror Open Gate, Mirror Quick MB
 Jets: Upper Left Jet, Upper Right Jet, Lower Jet
 Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
@@ -294,6 +294,11 @@ Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
 Step Targets: Step S, Step T, Step E, Step P
 Ramp Awards: Ramp Steps, Ramp 250K
 Lower Lanes: Specials, Flipper Lanes
+Circle Out: PF:lamp_sort_circle_out
+Strobe Up: PF:lamp_sort_bottom_to_top
+Strobe Down: PF:lamp_sort_top_to_bottom
+Strobe Left: PF:lamp_sort_right_to_left
+Strobe Right: PF:lamp_sort_left_to_right
 
 ##########################################################################
 # Containers
@@ -312,6 +317,7 @@ Lock: Lock Release, init_max_count(0), \
 	Lock Right, Lock Center, Lock Left
 Tunnel: Tunnel Kickout, init_max_count(0), Tunnel Kickout
 Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
+Hideout: Rudys Hideout, init_max_count(0), Rudys Hideout
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -339,11 +345,26 @@ Rudy Hits: INT
 # Music calls for well-known events
 ##########################################################################
 [system_music]
+Start Ball: MUS_MAIN_PLUNGER
+Ball In Play: MUS_MAIN
+End Game: MUS_MAIN
+Volume Change: MUS_RESTART_RUNNING
 
 ##########################################################################
 # A list of all scores needed by the game rules.
 ##########################################################################
 [scores]
+110:
+1K:
+5K:
+10K:
+25K:
+50K:
+100K:
+250K:
+500K:
+750K:
+1M:
 
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.
@@ -373,12 +394,10 @@ GC: LED, 15.000.000
 ##########################################################################
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
-
-##########################################################################
-# Fonts used in this game.
-##########################################################################
-[fonts]
+Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:
 Ignore Jaw:
+Ramp Just Entered:
+
