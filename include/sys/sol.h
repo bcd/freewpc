@@ -165,7 +165,11 @@ extern inline U8 sol_get_bit (const solnum_t sol)
  */
 extern inline U8 sol_inverted (const solnum_t sol)
 {
+#if (MACHINE_WPC95 == 1)
+	return 0;
+#else
 	return (sol >= 32) && (sol < 40);
+#endif
 }
 
 
