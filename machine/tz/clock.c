@@ -238,6 +238,7 @@ void tz_clock_error (void)
 	audit_increment (&feature_audits.clock_errors);
 	tz_clock_stop ();
 	global_flag_off (GLOBAL_FLAG_CLOCK_WORKING);
+	tz_dump_clock ();
 }
 
 
@@ -322,8 +323,8 @@ CALLSET_ENTRY (tz_clock, amode_start)
 		clock_calibration_time = 80; /* 8 seconds */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
-		tz_clock_start_forward ();
 		clock_mode = CLOCK_CALIBRATING;
+		tz_clock_start_forward ();
 	}
 	else
 	{
