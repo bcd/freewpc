@@ -5,6 +5,8 @@
 
 MACHINE_FILE = funhouse.md
 
+MACHINE_SCHEDULE := $(M)/funhouse.sched
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
@@ -50,8 +52,11 @@ PINMAME_OTHER_ROMS = fh_u*
 
 GAME_OBJS =
 
-GAME_PAGED_OBJS = shot.o leffs.o
+GAME_PAGED_OBJS = shot.o leffs.o rudy.o
 
 GAME_INCLUDES =
 
+SCHED_HEADERS += build/left_sling.h build/right_sling.h \
+	build/left_jet.h build/right_jet.h build/lower_jet.h \
+	build/ramp_div.h build/steps_gate.h build/eye_direction.h
 

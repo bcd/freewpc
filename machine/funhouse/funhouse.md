@@ -152,7 +152,7 @@ define MACHINE_CUSTOM_AMODE
 15: Steps Frenzy
 16: Upper Ramp
 17: Step S, lamp(LM_STEP_S)
-18: U.L. Jet
+18: Upper Left Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
@@ -380,3 +380,21 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 [timers]
 Tunnel Entered:
 Ignore Jaw:
+
+[templates]
+
+Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLINGSHOT, ontime=4, offtime=20
+Right Sling: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT, ontime=4, offtime=20
+Left Jet: driver(spsol), sw=SW_UPPER_LEFT_JET, sol=SOL_UPPER_LEFT_JET, ontime=4, offtime=20
+Right Jet: driver(spsol), sw=SW_UPPER_RIGHT_JET, sol=SOL_UPPER_RIGHT_JET, ontime=4, offtime=20
+Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+
+Ramp Div: driver(duty),
+	sol=SOL_RAMP_DIVERTER,
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=TIME_4S
+
+Steps Gate: driver(duty),
+	sol=SOL_STEPS_GATE,
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_100MS, timeout=0
+
+Eye Direction: driver(bivar), forward_sol=SOL_EYES_RIGHT, reverse_sol=SOL_EYES_LEFT
