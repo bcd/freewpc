@@ -15,12 +15,19 @@ void amode_leff (void)
 {
 	triac_leff_enable (TRIAC_GI_MASK);
 
-	for (lamplist = LAMPLIST_GANGWAYS; lamplist <= LAMPLIST_STEP_TARGETS; lamplist++)
+	for (lamplist = LAMPLIST_GANGWAYS; lamplist <= LAMPLIST_LOWER_LANES; lamplist++)
 	{
 		leff_create_peer (amode_leff1);
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_166MS);
 	}
 	task_exit ();
 }
 
+void circle_out_leff (void)
+{
+	lamplist_set_apply_delay (TIME_16MS);
+	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_on);
+	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_off);
+	leff_exit ();
+}
 
