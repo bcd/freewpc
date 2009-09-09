@@ -337,6 +337,7 @@ const char *rtc_edit_field_name[] = {
 
 void rtc_render (void)
 {
+#if (MACHINE_DMD == 1)
 	sprintf ("%s", day_names[day_of_week]);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	rtc_render_date ();
@@ -349,6 +350,12 @@ void rtc_render (void)
 		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
 		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
 	}
+#else
+	rtc_render_date ();
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	rtc_render_time ();
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+#endif
 }
 
 

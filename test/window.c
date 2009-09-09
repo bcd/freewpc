@@ -235,7 +235,9 @@ void window_init (void)
 
 void window_title (const char *title)
 {
+#if (MACHINE_DMD == 1)
 	font_render_string_center (&font_mono5, 64, 2, title);
+#endif
 }
 
 #if (MACHINE_DMD == 1)
@@ -1260,8 +1262,13 @@ void lamplist_draw (void)
 	sprintf_far_string (names_of_lamplists + menu_selection);
 	print_row_center (&font_var5, 12);
 
+#if (MACHINE_DMD == 1)
 	sprintf ("SPEED %d", lamplist_update_speed);
 	font_render_string_center (&font_var5, 48, 21, sprintf_buffer);
+#else
+	sprintf ("SP.%d", lamplist_update_speed);
+	font_render_string_center (&font_var5, 32, 21, sprintf_buffer);
+#endif
 
 	switch (lamplist_update_mode)
 	{
@@ -1271,8 +1278,13 @@ void lamplist_draw (void)
 		case 3: sprintf ("STEP DOWN"); break;
 		case 4: sprintf ("BUILD UP"); break;
 		case 5: sprintf ("BUILD DOWN"); break;
+#if (MACHINE_DMD == 1)
 		case 6: sprintf ("ROTATE NEXT"); break;
-		case 7: sprintf ("ROTATE PREV"); break;
+		case 7: sprintf ("ROTATE PREV."); break;
+#else
+		case 6: sprintf ("ROT. NEXT"); break;
+		case 7: sprintf ("ROT. PREV."); break;
+#endif
 	}
 	font_render_string_center (&font_var5, 94, 21, sprintf_buffer);
 
