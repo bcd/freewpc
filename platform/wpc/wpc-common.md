@@ -96,7 +96,7 @@ Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 [leffs]
 NULL: PRI_NULL
 Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
-Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Tilt Warning: PRI_TILT_WARNING, GI(ALL), c_decl(tilt_warning_leff), page(COMMON_PAGE)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 
 [fonts]

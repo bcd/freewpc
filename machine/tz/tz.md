@@ -369,12 +369,6 @@ Slot: Slot, \
 Popper: Popper, \
 	Gumball Popper
 
-[shots]
-Left Loop Complete:
-Left Loop Aborted:
-Right Loop Complete:
-Right Loop Aborted:
-
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.

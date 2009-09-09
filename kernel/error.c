@@ -65,6 +65,10 @@ void lockup_check_rtt (void)
 __noreturn__
 void fatal (errcode_t error_code)
 {
+#ifdef __m6809__
+	set_stack_pointer (6133);
+#endif
+
 	/* Don't allow any more interrupts, since they might be the
 	source of the error.  Since FIRQ is disabled, we can only
 	do mono display at this point. */
@@ -101,8 +105,6 @@ void fatal (errcode_t error_code)
 	 */
 	extern void dmd_rtt0 (void);
 	dmd_alloc_low_clean ();
-
-	dbprintf ("Fatal error: %i\n", error_code);
 
 	sprintf ("ERRNO %i", error_code);
 	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
@@ -172,6 +174,7 @@ void nonfatal (errcode_t error_code)
 	last_nonfatal_error_gid = task_getgid ();
 	if (!in_test)
 		deff_start (DEFF_NONFATAL_ERROR);
+	dbprintf ("Nonfatal error %d\n", error_code);
 #endif
 	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_NONFATAL, error_code);
 }

@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
 #include <clock_mech.h>
 
 /** The logical states of the clock driver state machine */

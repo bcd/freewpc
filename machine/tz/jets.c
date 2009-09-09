@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
 
 U8 jet_sound_index;
 
