@@ -121,6 +121,8 @@ __fastram__ seg_page_t *seg_visible_page;
 
 __fastram__ seg_page_t *seg_writable_page;
 
+seg_page_t *seg_secondary;
+
 U8 seg_alloc_pageid;
 
 
@@ -148,6 +150,7 @@ void seg_rtt (void)
 void seg_alloc (void)
 {
 	seg_writable_page = seg_pages + seg_alloc_pageid;
+	seg_secondary = seg_writable_page + 1;
 	seg_alloc_pageid += 2;
 	seg_alloc_pageid &= (SEG_ALLOC_PAGES-1);
 }
@@ -158,6 +161,12 @@ void seg_map (U8 page)
 	seg_writable_page = seg_pages + page;
 }
 
+void seg_flip_low_high (void)
+{
+	seg_page_t *tmp = seg_writable_page;
+	seg_writable_page = seg_secondary;
+	seg_secondary = tmp;
+}
 
 static void seg_show_from (seg_page_t *page_ptr)
 {
