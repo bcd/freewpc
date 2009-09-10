@@ -1,5 +1,6 @@
 
 #include <freewpc.h>
+#include <eye_direction.h>
 
 #define EYE_DIRECTION(x)   (x & 3)
 #define EYES_STRAIGHT 0
