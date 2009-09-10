@@ -53,7 +53,7 @@ static void lamp_timer_effect_task (void)
 	struct lamp_timer_effect_data *edata;
 	struct lamp_timer_data *tdata;
 
-	edata = task_current_class_data (struct lamp_timer_effect_task);
+	edata = task_current_class_data (struct lamp_timer_effect_data);
 	tdata = edata->tdata;
 	do {
 		lamp_toggle (tdata->lamp);
@@ -78,7 +78,7 @@ static void lamp_timer_task (void)
 {
 	struct lamp_timer_data *tdata;
 
-	tdata = task_current_class_data (struct lamp_timer_task);
+	tdata = task_current_class_data (struct lamp_timer_data);
 	while (tdata->timer >= TIME_166MS)
 	{
 		do {
@@ -151,9 +151,9 @@ lamp_timer_stop (lampnum_t lamp)
 	if (tp)
 	{
 		tdata = task_class_data (tp, struct lamp_timer_data);
-		task_kill_gid (tdata->effect);
+		task_kill_pid (tdata->effect);
 		lamp_off (tdata->lamp);
-		task_kill_gid (tp);
+		task_kill_pid (tp);
 	}
 }
 
