@@ -472,11 +472,16 @@ void switch_sched_task (void)
 		 * switch validates it.  Most switches do this right
 		 * away; for other switches, like special solenoids,
 		 * queue the transition and maybe validate if some number
-		 * of different switches have triggered. */
+		 * of different switches have triggered.  Device counting
+		 * switches are ignored here, but an 'enter' event will
+		 * set it. */
 		if (!valid_playfield)
 		{
 			if (swinfo->flags & SW_NOVALID)
-				try_validate_playfield (sw);
+			{
+				if (!SW_HAS_DEVICE (swinfo))
+					try_validate_playfield (sw);
+			}
 			else
 				set_valid_playfield ();
 		}

@@ -275,6 +275,7 @@ wait_and_recount:
 			U8 enter_count = dev->actual_count - dev->previous_count;
 			while (enter_count > 0)
 			{
+				set_valid_playfield ();
 				callset_invoke (any_device_enter);
 				device_call_op (dev, enter);
 				enter_count--;
