@@ -356,10 +356,14 @@ void adj_browser_draw (void)
 		if (ad->nvram && (browser_action != ADJ_EDITING))
 			adj_edit_value = *(ad->nvram);
 
-#if (MACHINE_DMD == 1)
 		if (adj_edit_value == ad->factory_default)
+		{
+#if (MACHINE_DMD == 1)
 			font_render_string_center (&font_var5, 96, 21, "(FAC. DEFAULT)");
+#else
+			seg_write_string (1, 15, "*");
 #endif
+		}
 		dmd_copy_low_to_high ();
 
 		if (ad->nvram)

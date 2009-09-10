@@ -33,9 +33,11 @@ ought to generate a warning message */
 void coin_door_buttons_deff (void)
 {
 	dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
 	font_render_string_center (&font_var5, 64, 3, "COIN DOOR IS CLOSED");
-	font_render_string_center (&font_var5, 64, 10, "OPEN COIN DOOR TO");
-	font_render_string_center (&font_var5, 64, 17, "USE BUTTONS");
+#endif
+	font_render_string_center (&font_var5, 64, 10, "OPEN COIN DOOR");
+	font_render_string_center (&font_var5, 64, 17, "TO USE BUTTONS");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -52,9 +54,14 @@ void coin_door_power_deff (void)
 		task_sleep (TIME_200MS);
 
 		dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
 		font_render_string_center (&font_fixed6, 64, 6, "COIN DOOR IS OPEN");
 		font_render_string_center (&font_fixed6, 64, 16, "HIGH POWER");
 		font_render_string_center (&font_fixed6, 64, 26, "IS DISABLED");
+#else
+		font_render_string_center (&font_fixed6, 64, 10, "HIGH POWER");
+		font_render_string_center (&font_fixed6, 64, 21, "IS DISABLED");
+#endif
 		dmd_show_low ();
 		sound_send (SND_TEST_ALERT);
 		task_sleep (TIME_300MS);
