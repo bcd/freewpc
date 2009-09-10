@@ -37,7 +37,21 @@
 	#define SEG_STROBE2       (SEG_STROBE1 + SEG_MID)
 	#define SEG_STROBE3       (SEG_STROBE2 + SEG_LWR_LEFT+SEG_LL_DIAG+SEG_VERT_BOT+SEG_LR_DIAG+SEG_LWR_RIGHT)
 
+
+bool seg_in_transition;
+
+seg_transition_t *seg_transition;
+
+U8 *seg_trans_data_ptr;
+
+/**
+ * The segment lookup table.
+ * Each entry here gives the segments that should be lit to form a specific
+ * character.
+ */
 const segbits_t seg_table[] = {
+	/* Characters in the low end, which are normally not displayable,
+	have entries here for miscellaneous graphics characters. */
 	[SEGCHAR_ALL] = 0xFFFF & SEG_COMMA & SEG_PERIOD,
 	[SEGCHAR_HORIZ] = SEG_TOP+SEG_MID+SEG_BOT,
 	[SEGCHAR_VERT] = SEG_LEFT+SEG_VERT+SEG_RIGHT,
@@ -47,6 +61,7 @@ const segbits_t seg_table[] = {
 		SEG_STROBE2,
 		SEG_STROBE3,
 
+	/* The beginning of the ASCII printable characters */
 	[' '] = 0,
 	['%'] = SEG_UPR_LEFT+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LWR_RIGHT,
 	['('] = SEG_UR_DIAG+SEG_LR_DIAG,
@@ -114,6 +129,7 @@ U8 seg_alloc_pageid;
  *
  * This function is invoked every 1ms to latch a value
  * for one column -- 2 characters, one on top, one on bottom.
+ * It thus takes 16ms to strobe the entire display.
  */
 void seg_rtt (void)
 {
@@ -132,7 +148,7 @@ void seg_rtt (void)
 void seg_alloc (void)
 {
 	seg_writable_page = seg_pages + seg_alloc_pageid;
-	seg_alloc_pageid++;
+	seg_alloc_pageid += 2;
 	seg_alloc_pageid &= (SEG_ALLOC_PAGES-1);
 }
 
@@ -143,15 +159,38 @@ void seg_map (U8 page)
 }
 
 
+static void seg_show_from (seg_page_t *page_ptr)
+{
+	if (unlikely (seg_transition))
+		seg_do_transition ();
+	seg_visible_page = page_ptr;
+}
+
+
 void seg_show (void)
 {
-	seg_visible_page = seg_writable_page;
+	seg_show_from (seg_writable_page);
 }
 
 
 void seg_show_page (U8 page)
 {
-	seg_visible_page = seg_pages + page;
+	seg_show_from (seg_pages + page);
+}
+
+
+void seg_show_other (void)
+{
+	if (seg_visible_page == seg_writable_page)
+		seg_show_from (seg_writable_page + 1);
+	else
+		seg_show_from (seg_writable_page);
+}
+
+
+void seg_copy_low_to_high (void)
+{
+	memcpy (seg_writable_page+1, seg_writable_page, sizeof (seg_page_t));
 }
 
 
@@ -161,15 +200,27 @@ seg_page_t *seg_get_page_pointer (U8 page)
 }
 
 
-segbits_t seg_translate_char (char c)
+/**
+ * Translate an ASCII character into segments.
+ *
+ * If an invalid, high-end character is given, display it as a
+ * dash to avoid table lookup.
+ */
+static segbits_t seg_translate_char (char c)
 {
-	if (c <= '_')
+	if (likely (c <= '_'))
 		return seg_table[(U8)c];
 	else
 		return SEG_MID;
 }
 
 
+/**
+ * Write a single character to one alphanumeric display slot.
+ *
+ * SA points to the display memory.
+ * C is the character to be displayed there.
+ */
 segbits_t *seg_write_char (segbits_t *sa, char c)
 {
 	if (c == '\0')
@@ -184,29 +235,41 @@ segbits_t *seg_write_char (segbits_t *sa, char c)
 }
 
 
-bool seg_addr_valid (void *sa)
+static bool seg_addr_valid (void *sa)
 {
-	return ((sa >= (void *)seg_pages) && (sa < (void *)seg_pages + sizeof (seg_pages)));
+	return ((sa >= (void *)seg_pages) &&
+		(sa < (void *)seg_pages + sizeof (seg_pages)));
 }
 
 
+#if 0
 void seg_write (segbits_t *addr, U16 *data, U8 len)
 {
 	while (len-- > 0)
 		*addr++ = *data++;
 }
+#endif
 
 
+/**
+ * Write a string to the alphanumeric display, starting at the
+ * given row and column.
+ */
 void seg_write_string (U8 row, U8 col, const char *s)
 {
 	segbits_t *addr;
 
+	/* Sanity checking */
 	if (row >= SEG_SECTIONS)
 		return;
 	if (col >= SEG_SECTION_SIZE)
 		return;
 
+	/* Get a pointer to the display memory */
 	addr = &(*seg_writable_page)[row][col];
+
+	/* For each character in the string, write it and advance the
+	cursor. */
 	while ((*s != '\0') && seg_addr_valid (addr))
 		addr = seg_write_char (addr, *s++);
 }
@@ -248,6 +311,67 @@ void seg_alloc_clean (void)
 
 
 /**
+ * Execute a segment-style transition effect.
+ */
+void seg_do_transition (void)
+{
+	seg_page_t *seg_final_page;
+	seg_page_t *tmp;
+	U8 iteration;
+
+	dbprintf ("seg_do_transition\n");
+
+	/* Save pointer to the final page -- that which will ultimately
+	be displayed.  This is the source page for all updates during
+	the transition. */
+	seg_final_page = seg_writable_page;
+
+	/* Allocate a new page, kept in seg_writable_page, and initialize
+	it with the current visible page.  This is the destination page
+	for all updates. */
+	seg_alloc ();
+	memcpy (seg_writable_page, seg_visible_page, sizeof (seg_page_t));
+
+	/* Invoke the constructor */
+	if (seg_transition->init)
+		seg_transition->init ();
+
+	iteration = 0;
+	while (seg_in_transition && iteration < 64)
+	{
+		dbprintf ("seg_trans: iteration %d\n", iteration);
+		/* Delay */
+		task_sleep (seg_transition->delay);
+
+		/* Do a partial update */
+		seg_in_transition = seg_transition->update (seg_final_page, iteration);
+		iteration++;
+
+		/* Make the current destination page visible, and allocate a
+		new one for the next iteration.  This can be done by a swap
+		of the old page and new page pointers */
+		tmp = seg_visible_page;
+		seg_visible_page = seg_writable_page;
+		seg_writable_page = tmp;
+	}
+	seg_transition = NULL;
+}
+
+
+void seg_sched_transition (seg_transition_t *trans)
+{
+	seg_transition = trans;
+	seg_in_transition = TRUE;
+}
+
+void seg_reset_transition (void)
+{
+	seg_transition = NULL;
+	seg_in_transition = FALSE;
+}
+
+
+/**
  * Initialize the segment displays.
  */
 void seg_init (void)
@@ -255,5 +379,6 @@ void seg_init (void)
 	memset (seg_pages, 0, sizeof (seg_pages));
 	seg_show_page (0);
 	seg_alloc_pageid = 0;
+	seg_transition = NULL;
 }
 

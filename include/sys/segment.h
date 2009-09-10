@@ -64,7 +64,13 @@ be used whenever */
 typedef segbits_t seg_section_t[SEG_SECTION_SIZE];
 typedef seg_section_t seg_page_t[SEG_SECTIONS];
 
-segbits_t seg_translate_char (char c);
+typedef struct
+{
+	void (*init) (void);
+	bool (*update) (seg_page_t *src, U8 iteration);
+	U8 delay;
+} seg_transition_t;
+
 segbits_t *seg_write_char (segbits_t *sa, char c);
 void seg_write_string (U8 row, U8 col, const char *s);
 U8 seg_strlen (const char *s);
@@ -74,5 +80,9 @@ void seg_alloc (void);
 void seg_alloc_clean (void);
 void seg_show (void);
 void dmd_rtt (void);
+void seg_sched_transition (seg_transition_t *trans);
+void seg_reset_transition (void);
+
+extern seg_transition_t seg_trans_test;
 
 #endif /* _SYS_SEGMENT_H */

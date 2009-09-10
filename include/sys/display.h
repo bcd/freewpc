@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -72,29 +72,40 @@
 #define display_alloc_pair_clean seg_alloc_pair_clean
 #define display_sched_transition(x)
 
+/* For compatibility with code that has already been written to
+use the DMD, redefine all of these functions to their alphanumeric
+equivalents. */
 #define dmd_init()                     seg_init ()
-#define dmd_alloc_low(args...)         seg_alloc ()
-#define dmd_alloc_high(args...)
-#define dmd_alloc_low_high(args...)
-#define dmd_map_low_high(args...)
+#define dmd_alloc_low()                seg_alloc ()
+#define dmd_alloc_high()               seg_alloc ()
+#define dmd_alloc_low_high()           seg_alloc ()
+#define dmd_map_low_high()
 #define dmd_show_low()                 seg_show ()
 #define dmd_show_high()
-#define dmd_show_other(args...)
-#define dmd_flip_low_high(args...)
+#define dmd_show_other()               seg_show_other()
+#define dmd_flip_low_high()
 #define dmd_clean_page(args...)
 #define dmd_memset(args...)
 #define dmd_clean_page_low()           seg_erase ()
 #define dmd_clean_page_high()
 #define dmd_copy_page(args...)
-#define dmd_copy_low_to_high(args...)
+#define dmd_copy_low_to_high()         seg_copy_low_to_high ()
 #define dmd_alloc_low_clean()          seg_alloc_clean ()
 #define dmd_alloc_pair_clean(args...)
-#define dmd_sched_transition(args...)
-#define dmd_reset_transition(args...)
+#define dmd_sched_transition(trans)    //seg_sched_transition (trans)
+#define dmd_reset_transition()         seg_reset_transition ()
 #define dmd_draw_border(args...)
 #define dmd_draw_horiz_line(args...)
 #define dmd_invert_page(args...)
 #define dmd_show2(args...)             seg_show () /* ??? */
+
+/* These functions are a bit magical.  They convert DMD text printing
+to the alphanumeric display, translating from the pixel-oriented
+DMD coordinate system to the block-oriented alphanumeric one.
+They generally work if the original code only used 1 or 2 lines of
+text and centered it well. */
+
+/* TODO - get rid of magic numbers here */
 
 #define font_render_string_left(f,x,y,s) \
 	seg_write_string (y/16, x/8, s)
