@@ -299,6 +299,7 @@ Strobe Up: PF:lamp_sort_bottom_to_top
 Strobe Down: PF:lamp_sort_top_to_bottom
 Strobe Left: PF:lamp_sort_right_to_left
 Strobe Right: PF:lamp_sort_left_to_right
+Clock Hours Minutes: Clock Hours, Clock Minutes
 
 ##########################################################################
 # Containers
@@ -395,6 +396,8 @@ GC: LED, 15.000.000
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Clock Vibrate: PRI_LEFF4, LAMPS(CLOCK_HOURS_MINUTES), page(MACHINE_PAGE)
+Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:

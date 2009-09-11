@@ -31,3 +31,40 @@ void circle_out_leff (void)
 	leff_exit ();
 }
 
+void clock_vibrate_leff1 (void)
+{
+	for (;;)
+	{
+		lamplist_apply (LAMPLIST_CLOCK_HOURS_MINUTES, leff_toggle);
+		task_sleep (TIME_100MS);
+	}
+}
+
+void clock_vibrate_leff (void)
+{
+	lamplist_apply_leff_alternating (LAMPLIST_CLOCK_HOURS, 0);
+	lamplist_apply_leff_alternating (LAMPLIST_CLOCK_MINUTES, 0xFF);
+	leff_create_peer (clock_vibrate_leff1);
+	task_sleep_sec (3);
+	leff_exit ();
+}
+
+
+void gangway_strobe_leff1 (void)
+{
+	for (;;)
+	{
+		lamplist_step_increment (LAMPLIST_GANGWAYS,
+			matrix_lookup (LMX_EFFECT1_LAMPS));
+		task_sleep (TIME_66MS);
+	}
+}
+
+void gangway_strobe_leff (void)
+{
+	leff_on (lamplist_index (LAMPLIST_GANGWAYS, 0));
+	leff_create_peer (gangway_strobe_leff1);
+	task_sleep_sec (3);
+	leff_exit ();
+}
+
