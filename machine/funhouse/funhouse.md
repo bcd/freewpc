@@ -180,7 +180,7 @@ define MACHINE_CUSTOM_AMODE
 54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
 56: Ramp Enter
-57: Jet Lane
+57: Jet Lane, noplay
 58: Tunnel Kickout
 61: Inner Right Inlane
 62: Right Plunger, shooter, edge, noplay
@@ -195,7 +195,7 @@ define MACHINE_CUSTOM_AMODE
 73: Outhole, outhole, noscore
 74: Center Trough, trough, noscore, noplay
 75: Upper Loop
-76: Trap Door Closed, noplay
+76: Trap Door Closed, noplay, service
 77: Upper Right Jet
 
 ##########################################################################
