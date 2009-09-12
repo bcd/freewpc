@@ -52,7 +52,8 @@ PINMAME_OTHER_ROMS = fh_u*
 
 GAME_OBJS =
 
-GAME_PAGED_OBJS = shot.o leffs.o rudy.o
+GAME_PAGED_OBJS = shot.o leffs.o rudy.o trivial.o mirror.o \
+	mb.o clock.o
 
 GAME_INCLUDES =
 

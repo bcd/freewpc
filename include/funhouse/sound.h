@@ -40,10 +40,13 @@
 #define SND_4WAY_COMBO       0xAD
 #define SND_LOCK_MB_KICK     0xB0
 #define SND_RAMP_ENTER2      0xB6
+#define SND_KICKOUT          0xBA
 #define SND_STEPS_TOP_AWARD  0xBC
-#define SND_KICKOUT          0xBF
+#define SND_KICKOUT_COMING   0xBF
 #define SND_GONG2            0xC0
 //#define SND_RAMP_MADE        0xC2
+#define SND_BOOM1            0xC6
+#define SND_BOOM2            0xC7
 #define SND_JACKPOT          0xC8
 #define SND_MULTIBALL_START  0xC9
 #define SND_RESTART_RING     0xCB

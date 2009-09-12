@@ -330,12 +330,19 @@ Hideout: Rudys Hideout, init_max_count(0), Rudys Hideout
 # type of adjustment and the default value.
 ##########################################################################
 [adjustments]
+Disable Dummy: yes_no, NO
+Disable Trapdoor: yes_no, NO
 
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
 [audits]
 Rudy Hits: INT
+Rudy Gulps: INT
+Mirror Awards: INT
+Millions: INT
+Multiball Starts: INT
+Million Plus: INT
 
 ##########################################################################
 # Sound calls for well-known events
@@ -384,11 +391,22 @@ GC: LED, 15.000.000
 # Bit flags.
 ##########################################################################
 [flags]
+Mirror Lit:
+Million Lit:
+Multiball Lit:
+Multiball Running:
+Quick MB Running:
+Jackpot Lit:
+Super Frenzy Lit:
+Steps Lit:
+Jackpot This Ball:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
+Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED
+Bonus: page(MACHINE_PAGE), PRI_BONUS
 
 ##########################################################################
 # Lamp effects
