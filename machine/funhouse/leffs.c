@@ -25,10 +25,23 @@ void amode_leff (void)
 
 void circle_out_leff (void)
 {
-	lamplist_set_apply_delay (TIME_16MS);
+	lamplist_set_apply_delay (TIME_33MS);
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_on);
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_off);
 	leff_exit ();
+}
+
+void jackpot_subleff (void)
+{
+	lamplist_apply_nomacro (LAMPLIST_CIRCLE_OUT, leff_off);
+	lamplist_set_apply_delay (TIME_33MS);
+	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_on);
+	leff_exit ();
+}
+
+void jackpot_leff (void)
+{
+	//task_recreate_gid (GID_JACKPOT_SUBLEFF, jackpot_subleff);
 }
 
 void clock_vibrate_leff1 (void)
@@ -45,7 +58,7 @@ void clock_vibrate_leff (void)
 	lamplist_apply_leff_alternating (LAMPLIST_CLOCK_HOURS, 0);
 	lamplist_apply_leff_alternating (LAMPLIST_CLOCK_MINUTES, 0xFF);
 	leff_create_peer (clock_vibrate_leff1);
-	task_sleep_sec (3);
+	task_sleep_sec (1);
 	leff_exit ();
 }
 
