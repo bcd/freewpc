@@ -17,6 +17,15 @@
 U8 rudy_eyes;
 
 
+static void rudy_eyedir_timeout (void)
+{
+	task_sleep_sec (4);
+	eye_direction_stop ();
+	rudy_eyes &= (EYES_LEFT | EYES_RIGHT);
+	task_exit ();
+}
+
+
 void rudy_eye_update (void)
 {
 	switch (EYE_DIRECTION (rudy_eyes))
@@ -26,9 +35,13 @@ void rudy_eye_update (void)
 			break;
 		case EYES_LEFT:
 			eye_direction_start_reverse ();
+			task_recreate_gid_while (GID_RUDY_EYE_TIMEOUT, rudy_eyedir_timeout,
+				TASK_DURATION_INF);
 			break;
 		case EYES_RIGHT:
 			eye_direction_start_forward ();
+			task_recreate_gid_while (GID_RUDY_EYE_TIMEOUT, rudy_eyedir_timeout,
+				TASK_DURATION_INF);
 			break;
 	}
 
@@ -52,6 +65,35 @@ void rudy_eye_change (U8 flags)
 		rudy_eyes = flags;
 		rudy_eye_update ();
 	}
+}
+
+void rudy_look_left (void)
+{
+	rudy_eye_change (EYELID_OPEN+EYES_LEFT);
+}
+
+void rudy_look_straight (void)
+{
+	rudy_eye_change (EYELID_OPEN+EYES_STRAIGHT);
+}
+
+void rudy_look_right (void)
+{
+	rudy_eye_change (EYELID_OPEN+EYES_RIGHT);
+}
+
+static void rudy_blink_task (void)
+{
+	rudy_eye_change (EYELID_CLOSED);
+	task_sleep_sec (1);
+	rudy_eye_change (EYELID_OPEN);
+	task_exit ();
+}
+
+void rudy_blink (void)
+{
+	task_recreate_gid_while (GID_RUDY_BLINK, rudy_blink_task,
+		TASK_DURATION_INF);
 }
 
 CALLSET_ENTRY (rudy, init)

@@ -50,8 +50,9 @@ void music_request (sound_code_t music, U8 prio)
 {
 	if (prio > music_prio)
 	{
-		dbprintf ("New music 0x%04lX at prio %d\n", music, prio);
+		dbprintf ("Want music 0x%04lX at prio %d\n", music, prio);
 		music_requested = music;
+		music_prio = prio;
 	}
 }
 
@@ -61,8 +62,6 @@ void music_request (sound_code_t music, U8 prio)
  */
 void music_refresh_task (void)
 {
-	dbprintf ("Refreshing music\n");
-
 	music_prio = 0;
 	music_requested = 0;
 
@@ -290,9 +289,9 @@ CALLSET_ENTRY (sound_effect, music_refresh)
 
 /**
  * Always cause a music refresh at certain well-known points in the
- * game.
+ * game; also periodically.
  */
-CALLSET_ENTRY (sound_effect, bonus, end_ball)
+CALLSET_ENTRY (sound_effect, start_ball, end_ball, idle_every_second)
 {
 	music_refresh ();
 }

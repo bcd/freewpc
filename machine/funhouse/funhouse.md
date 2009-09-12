@@ -180,7 +180,7 @@ define MACHINE_CUSTOM_AMODE
 54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
 56: Ramp Enter
-57: Jet Lane
+57: Jet Lane, noplay
 58: Tunnel Kickout
 61: Inner Right Inlane
 62: Right Plunger, shooter, edge, noplay
@@ -195,7 +195,7 @@ define MACHINE_CUSTOM_AMODE
 73: Outhole, outhole, noscore
 74: Center Trough, trough, noscore, noplay
 75: Upper Loop
-76: Trap Door Closed, noplay
+76: Trap Door Closed, noplay, service
 77: Upper Right Jet
 
 ##########################################################################
@@ -299,6 +299,7 @@ Strobe Up: PF:lamp_sort_bottom_to_top
 Strobe Down: PF:lamp_sort_top_to_bottom
 Strobe Left: PF:lamp_sort_right_to_left
 Strobe Right: PF:lamp_sort_left_to_right
+Clock Hours Minutes: Clock Hours, Clock Minutes
 
 ##########################################################################
 # Containers
@@ -329,12 +330,19 @@ Hideout: Rudys Hideout, init_max_count(0), Rudys Hideout
 # type of adjustment and the default value.
 ##########################################################################
 [adjustments]
+Disable Dummy: yes_no, NO
+Disable Trapdoor: yes_no, NO
 
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
 [audits]
 Rudy Hits: INT
+Rudy Gulps: INT
+Mirror Awards: INT
+Millions: INT
+Multiball Starts: INT
+Million Plus: INT
 
 ##########################################################################
 # Sound calls for well-known events
@@ -383,11 +391,22 @@ GC: LED, 15.000.000
 # Bit flags.
 ##########################################################################
 [flags]
+Mirror Lit:
+Million Lit:
+Multiball Lit:
+Multiball Running:
+Quick MB Running:
+Jackpot Lit:
+Super Frenzy Lit:
+Steps Lit:
+Jackpot This Ball:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
+Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED
+Bonus: page(MACHINE_PAGE), PRI_BONUS
 
 ##########################################################################
 # Lamp effects
@@ -395,6 +414,8 @@ GC: LED, 15.000.000
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Clock Vibrate: PRI_LEFF4, LAMPS(CLOCK_HOURS_MINUTES), page(MACHINE_PAGE)
+Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:
