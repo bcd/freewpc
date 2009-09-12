@@ -7,7 +7,7 @@ can be found at @url{http://www.pinrepair.com/wpc/index.htm}.
 
 Note that FreeWPC is intended to be portable, and not all pinball machines
 will be architected in exactly the same way.  However, the basic software
-architecture is FreeWPC is based heavily on the way that WPC games work.
+architecture of FreeWPC is based heavily on the way that WPC games work.
 
 @section Overview
 
@@ -66,7 +66,7 @@ required to address more than 64KB.  On reset, location 0xFFFE is
 read to determine the address of the first instruction.
 
 8KB of RAM is located at physical address 0x0000.  When power is turned off,
-three batteries on the CPU board maintains the state of the RAM.
+three batteries on the CPU board maintain the state of the RAM.
 
 The game ROM size varies from 128KB to 1MB, depending on the game.
 The hardware supports a maximum of 1MB; this upper limit was used in all of
@@ -165,7 +165,8 @@ several jumpers/DIP switches used for configuring some factory defaults.
 All of the other I/O is located on other boards, which are connected
 to the CPU board via flex cables.  Generally on these cables, one side
 of the pins are connected to ground, while the others contain actual
-inputs/outputs.  All generations of WPC use the same connector to
+inputs/outputs.  All logic values measure 0V for a '0', and +5V for a '1'.
+All generations of WPC use the same connector to
 the power driver board, which controls lamps and general solenoids.
 Display, sound, and flipper interfaces differ somewhat between generations.
 
@@ -273,7 +274,7 @@ The zero-cross circuit tells the CPU when the AC voltage is near zero.
 Alternating current (AC) rapidly changes between a positive and
 negative voltage many times per second.  In the US, the frequency is
 60Hz, which means that the voltage is near zero about once every 8.33ms.
-Outside the USe, line voltage is 50Hz and so zero crossing occurs every
+Outside the US, line voltage is 50Hz and so zero crossing occurs every
 10ms.
 
 The CPU can use this information to time the pulses to the solenoids
@@ -340,7 +341,7 @@ The controller fetches 1 byte (8 pixels) every 32 CPU cycles (16 microseconds).
 At this rate, it takes 256 microseconds per row and a little more than 8
 milliseconds per complete frame.  Thus, the refresh rate is about 122MHz.
 
-The RAM has a total of 8KB.  A full DMD bit plane requires 128x32 pixels,
+The display RAM holds 8KB.  A full DMD bit plane requires 128x32 pixels,
 that is, 4096 bits, or 512 bytes.  Thus, there is enough RAM to hold
 a total of 16 planes.  At any time, at most two planes can be addressed by the
 CPU (changed to six in WPC-95).
