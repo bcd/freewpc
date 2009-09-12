@@ -95,11 +95,11 @@ define MACHINE_CUSTOM_AMODE
 21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane
-31: Trough Eject, opto, noplay
-32: Trough 1, trough, opto, noplay
-33: Trough 2, trough, opto, noplay
-34: Trough 3, trough, opto, noplay
-35: Trough 4, trough, opto, noplay
+31: Trough Eject, opto, noscore, noplay
+32: Trough 1, trough, opto, noscore, noplay
+33: Trough 2, trough, opto, noscore, noplay
+34: Trough 3, trough, opto, noscore, noplay
+35: Trough 4, trough, opto, noscore, noplay
 36: Left Popper, opto
 37: Right Popper, opto
 38: Left Top Lane
