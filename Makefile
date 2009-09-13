@@ -893,7 +893,7 @@ callset: $(BLDDIR)/callset.o
 
 $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
-		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) # $(CALLSET_FLAGS)
+		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) $(CALLSET_FLAGS)
 
 .PHONY : callset_again
 callset_again:
