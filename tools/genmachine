@@ -1137,6 +1137,10 @@ sub pf_lamps {
 	my $lamplist = "";
 	for $lamp (unique ($m->{"lamps"})) {
 		push @lamps, $lamp if (!defined $lamp->{'cabinet'});
+		if (!defined $lamp->{'x'}) {
+			$lamp->{'x'} = rand (40);
+			$lamp->{'y'} = rand (30);
+		}
 	}
 	@lamps = sort $sortfn @lamps;
 	$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
