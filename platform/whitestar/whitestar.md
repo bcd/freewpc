@@ -67,6 +67,7 @@ A8: Aux. Sol. 8
 
 [lamplists]
 ALL: 11..88
+Ball Save: MACHINE_BALL_SAVE_LAMP
 
 [deffs]
 NULL: c_decl(deff_exit), 0
@@ -100,6 +101,7 @@ Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 NULL: 0
 Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
 
 [fonts]
 mono5:

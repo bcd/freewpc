@@ -30,13 +30,6 @@
 #define MACHINE_BALL_SAVE_TIME 7
 #endif
 
-/* The default ball save lamp is the same as the shoot again lamp. */
-#ifndef MACHINE_BALL_SAVE_LAMP
-#ifdef MACHINE_SHOOT_AGAIN_LAMP
-#define MACHINE_BALL_SAVE_LAMP MACHINE_SHOOT_AGAIN_LAMP
-#endif
-#endif
-
 U8 ball_save_timer;
 
 

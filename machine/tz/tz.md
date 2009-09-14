@@ -334,7 +334,6 @@ Sort3: PF:lamp_sort_left_to_right
 Sort4: PF:lamp_sort_right_to_left
 Circle Out: PF:lamp_sort_circle_out
 Lock Test: PF:build_lampset_from_lock
-Ball Save: Shoot Again
 Red Lamps: COLOR:red
 White Lamps: COLOR:white
 Orange Lamps: COLOR:orange
@@ -566,7 +565,6 @@ Multi Strobe: PRI_LEFF2, LAMPS(ALL), page(MACHINE_PAGE)
 Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL), page(MACHINE_PAGE)
 Left Loop: PRI_LEFF1, LAMPS(SORT3), page(MACHINE_PAGE)
 Right Loop: PRI_LEFF1, LAMPS(SORT4), page(MACHINE_PAGE)
-Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)

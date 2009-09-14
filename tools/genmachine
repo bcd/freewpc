@@ -1077,6 +1077,7 @@ END
 
 sub machine_lamp_get_value {
 	my ($lampid) = @_;
+	return $lampid if ($lampid =~ /^MACHINE_/);
 	$lamp = ($m->{'lamps'})->{$lampid};
 	die "undefined lamp $lampid" if (!defined $lamp);
 	return $lamp->{'number'};
