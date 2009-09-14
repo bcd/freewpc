@@ -93,21 +93,26 @@ U8 device_game_start_errors;
 
 
 #ifdef DEBUGGER
-void device_debug (void)
+
+void device_debug (device_t *dev)
+{
+	dbprintf ("%d) %s: %d -> %d, ",
+		dev->devno, dev->props->name,
+		dev->previous_count, dev->actual_count);
+
+	dbprintf ("max %d, need %d kicks, %d errors, %s\n",
+		dev->max_count, dev->kicks_needed, dev->kick_errors,
+		(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
+}
+
+void device_debug_all (void)
 {
 	devicenum_t devno;
 
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		device_t *dev = &device_table[devno];
-
-		dbprintf ("%d) %s: %d -> %d, ",
-			devno, dev->props->name,
-			dev->previous_count, dev->actual_count);
-
-		dbprintf ("max %d, need %d kicks, %d errors, %s\n",
-			dev->max_count, dev->kicks_needed, dev->kick_errors,
-			(dev->state == DEV_STATE_IDLE) ? "idle" : "releasing");
+		device_debug (dev);
 		task_sleep (TIME_16MS);
 	}
 	dbprintf ("Found: %d   ", counted_balls);
@@ -117,6 +122,7 @@ void device_debug (void)
 }
 #else
 #define device_debug()
+#define device_debug_all()
 #endif
 
 
@@ -239,7 +245,7 @@ wait_and_recount:
 	device_recount (dev);
 
 	device_update_globals ();
-	device_debug ();
+	device_debug (dev);
 
 	dbprintf ("Updating device %s\n", dev->props->name);
 
@@ -254,6 +260,9 @@ wait_and_recount:
 			/* Switch closures were detected but in the end, after becoming
 			 * stable, the count did not change.  This is OK, perhaps
 			 * there is some vibration...
+			 * Also, when transitioning back to idle after a device kick,
+			 * we repoll the switches one extra time and if all is well,
+			 * we'll end up here.
 			 */
 		}
 		else if (dev->actual_count < dev->previous_count)
@@ -420,7 +429,14 @@ wait_and_recount:
 		}
 	}
 
-	device_debug ();
+	/* Just before exiting this task, poll the switches one more time,
+	and see if something has changed during the update.  It is important
+	that no task context switches take place here, otherwise there would
+	be a race condition where a switch closure gets missed. */
+	device_recount (dev);
+	if (dev->actual_count != dev->previous_count)
+		goto wait_and_recount;
+
 	task_exit ();
 }
 
@@ -643,7 +659,7 @@ probe_exit:
 	device_update_globals ();
 
 	dbprintf ("\nDevices initialized.\n");
-	device_debug ();
+	device_debug_all ();
 
 	device_ss_state = 1;
 	task_exit ();
