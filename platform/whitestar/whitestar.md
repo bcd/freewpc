@@ -98,8 +98,8 @@ Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 
 [leffs]
 NULL: 0
-Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff)
-Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff)
+Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
 
 [fonts]
 mono5:
