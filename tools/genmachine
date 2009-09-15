@@ -444,6 +444,10 @@ LINE:
 		# Check for the include directive
 		if (/^include[ \t]+(.*)/) {
 			machine_load ($1);
+			$mc->{'autoid'} = $autoid if ($contextName ne "");
+			$contextName = "";
+			$mc = $m;
+			$autoid = $mc->{'autoid'};
 			next;
 		}
 

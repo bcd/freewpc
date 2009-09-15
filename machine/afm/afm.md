@@ -6,15 +6,10 @@
 #--------------------------------------------------------------------------
 
 Title: Attack From Mars
-DMD: Yes
-Fliptronic: Yes
-DCS: Yes
-PIC: Yes
-WPC95: Yes
+include platform/wpc/wpc95.md
+
 Pinmame-Zip: afm_113b.zip
 Pinmame-ROM: afm_113b.bin
-
-include platform/wpc/wpc95.md
 
 define MACHINE_NUMBER 541
 define MACHINE_SOL_EXTBOARD1

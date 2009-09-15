@@ -6,17 +6,13 @@
 #--------------------------------------------------------------------------
 
 Title: World Cup
-DMD: Yes
-Fliptronic: Yes
-DCS: Yes
-PIC: Yes
-WPC95: No
+
+include platform/wpc/wpc-security.md
+
 Pinmame-Zip: wcs_l2.zip
 Pinmame-ROM: wcup_lx2.bin
 Lamp-Matrix-Width: 45
 Lamp-Matrix-Height: 25
-
-include platform/wpc/wpc.md
 
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE

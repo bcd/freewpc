@@ -31,7 +31,7 @@ $(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
 define md_config
-$(if $(shell grep ^$1:.*Yes $(M)/$(MACHINE_FILE)),y,)
+$(if $(shell grep ^$1:.*Yes $(PLATFORM_DESC)),y,)
 endef
 
 ifndef Q
@@ -58,6 +58,7 @@ M := machine/$(MACHINE)
 MMAKEFILE := $(M)/Makefile
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 MACHINE_DIR = machine/$(MACHINE)
+PLATFORM_DESC = $(shell grep include $(MACH_DESC) | head -n 1)
 
 top_target : default_target
 
@@ -70,10 +71,10 @@ $(eval $(call require,MACHINE_FILE))
 PLATFORM ?= wpc
 CONFIG_DMD := $(call md_config,DMD)
 CONFIG_ALPHA := $(call md_config,Alphanumeric)
-CONFIG_PIC := $(if $(shell grep ^PIC:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_PIC := $(call md_config,PIC)
+CONFIG_FLIPTRONIC := $(call md_config,Fliptronic)
+CONFIG_DCS := $(call md_config,DCS)
+CONFIG_WPC95 := $(call md_config,WPC95)
 
 
 # PLATFORM says which hardware platform is targeted.  Valid values
@@ -845,7 +846,7 @@ $(CONFIG_SRCS) : $(BLDDIR)/mach-%.c : $(MACH_DESC) $(BLDDIR)/mach-config.h
 	tools/genmachine $(MACH_DESC) $(@:$(BLDDIR)/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 
-$(CONFIG_FILES) : tools/genmachine platform/$(PLATFORM)/$(PLATFORM).md
+$(CONFIG_FILES) : tools/genmachine $(PLATFORM_DESC)
 
 ifdef GAME_FSMS
 $(FSM_SRCS) : $(BLDDIR)/%.c : $(MACHINE_DIR)/%.fsm tools/fsmgen

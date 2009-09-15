@@ -62,6 +62,14 @@ A2: Aux. Sol. 2, notinstalled
 A3: Aux. Sol. 3, notinstalled
 A4: Aux. Sol. 4, notinstalled
 
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. String 4
+4: G.I. String 5
+
+
 [lamplists]
 ALL: 11..88
 
