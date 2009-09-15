@@ -58,7 +58,6 @@ PRESET_BEGIN (tournament)
 	{ standard_adjustments, &system_config.match_feature, OFF },
 	{ standard_adjustments, &system_config.tournament_mode, ON },
 	{ standard_adjustments, &system_config.no_bonus_flips, NO },
-	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
 	{ feature_adjustments, &system_config.buy_extra_ball, NO },
 PRESET_END (tournament, "TOURNAMENT")
 
@@ -68,7 +67,6 @@ PRESET_BEGIN (show)
 	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.match_feature, OFF },
-	{ pricing_adjustments, &price_config.one_coin_buyin, OFF },
 PRESET_END (show, "SHOW")
 
 
