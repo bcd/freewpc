@@ -234,6 +234,13 @@ my %ContextMaxima = (
 	"timers" => "MAX_TIMERS",
 );
 
+# Likewise for predefined objects where the define does not need to
+# be emitted, but is already defined by the common header files.
+my %FixedMaxima = (
+	"switches" => "NUM_SWITCHES",
+	"lamps", "NUM_LAMPS",
+	"drives" => "SOL_COUNT",
+);
 
 # The contexts for which strings should be written out.
 @stringcontexts = ("switches", "drives", "lamps", "containers", 
@@ -876,7 +883,11 @@ sub machine_write_defines {
 
 sub machine_write_decl_names {
 	my ($categoryname) = @_;
-	print "const char *names_of_${categoryname} [] = {\n";
+	my $max = $ContextMaxima{$categoryname};
+	if (!defined $max) {
+		$max = $FixedMaxima{$categoryname};
+	}
+	print "const char *names_of_${categoryname} [$max] = {\n";
 	foreach $def (unique ($m->{$categoryname})) {
 		my $ident = $def->{'c_ident'};
 		my $string = $def->{'c_string'};
