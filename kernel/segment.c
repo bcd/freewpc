@@ -70,6 +70,7 @@ const segbits_t seg_table[] = {
 	['+'] = SEG_VERT+SEG_MID,
 	['-'] = SEG_MID,
 	['/'] = SEG_UR_DIAG+SEG_LL_DIAG,
+   ['$'] = SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT+SEG_VERT,
    ['0'] = SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT,
    ['1'] = SEG_RIGHT,
    ['2'] = SEG_TOP+SEG_UPR_RIGHT+SEG_MID+SEG_LWR_LEFT+SEG_BOT,
