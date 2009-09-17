@@ -119,6 +119,7 @@ CALLSET_ENTRY (ramp, sw_ramp_enter)
 	{
 		sample_start (SND_RAMP_ENTER, SL_1S);
 		free_timer_start (TIM_RAMP_JUST_ENTERED, TIME_3S);
+		callset_invoke (ramp_entered);
 	}
 }
 

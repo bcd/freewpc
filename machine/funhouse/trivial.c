@@ -42,14 +42,18 @@ __local__ U8 rudy_hits;
 
 void bonus_deff (void)
 {
-	music_off ();
+	music_disable ();
 	seg_alloc ();
 	seg_erase ();
 	task_sleep (TIME_100MS);
 	seg_write_row_center (0, "BONUS");
-	seg_show ();
+	sprintf ("%d RUDY HITS", rudy_hits);
+	seg_write_row_center (1, sprintf_buffer);
+	seg_sched_transition (&seg_trans_ltr);
 	sample_start (SND_BONUS_BLIP1, SL_1S);
+	seg_show ();
 	task_sleep_sec (2);
+	music_enable ();
 	deff_exit ();
 }
 
@@ -71,16 +75,30 @@ CALLSET_ENTRY (trivial, lamp_update)
 	million_lamp_update ();
 }
 
+
+CALLSET_ENTRY (trivial, valid_playfield)
+{
+	fh_clock_advance (CLK_30_MIN);
+}
+
+CALLSET_ENTRY (trivial, sw_ramp_enter)
+{
+	score (SC_2570);
+}
+
 CALLSET_ENTRY (trivial, sw_ramp_exit)
 {
 	sample_start (SND_RAMP_MADE, SL_2S);
 	score (SC_100K);
+	fh_clock_advance (CLK_15_MIN);
 }
 
 CALLSET_ENTRY (trivial, sw_left_slingshot, sw_right_slingshot)
 {
-	score (SC_110);
 	rudy_look_straight ();
+	score (SC_110);
+	if (flag_test (FLAG_OUTLANES_LIT))
+		lamp_toggle (LM_SPECIALS);
 }
 
 CALLSET_ENTRY (trivial, any_jet)
@@ -110,6 +128,7 @@ CALLSET_ENTRY (trivial, sw_lower_jet)
 
 CALLSET_ENTRY (trivial, sw_left_inlane, sw_inner_right_inlane, sw_outer_right_inlane)
 {
+	fh_clock_advance (CLK_5_MIN);
 	score (SC_10K);
 	rudy_look_straight ();
 }
@@ -123,6 +142,7 @@ CALLSET_ENTRY (trivial, sw_left_outlane, sw_right_outlane)
 
 CALLSET_ENTRY (trivial, sw_wind_tunnel_hole)
 {
+	fh_clock_advance (CLK_15_MIN);
 	score (SC_50K);
 }
 
@@ -151,7 +171,7 @@ CALLSET_ENTRY (trivial, sw_upper_loop)
 
 CALLSET_ENTRY (trivial, dev_hideout_enter)
 {
-	score (SC_50K);
+	score (SC_75K);
 	rudy_look_left ();
 }
 
@@ -166,7 +186,8 @@ CALLSET_ENTRY (trivial, rudy_shot)
 {
 	score (SC_50K);
 	fh_clock_advance (CLK_15_MIN);
-	rudy_blink ();
+	if (rudy_hits < 99)
+		rudy_hits++;
 }
 
 CALLSET_ENTRY (trivial, sw_jet_lane)
@@ -177,13 +198,12 @@ CALLSET_ENTRY (trivial, sw_jet_lane)
 
 CALLSET_ENTRY (trivial, rudy_jaw)
 {
-	fh_clock_advance (CLK_15_MIN);
 	speech_start (SPCH_OWW, SL_2S);
 }
 
 CALLSET_ENTRY (trivial, dev_rudy_enter)
 {
-	fh_clock_advance (CLK_15_MIN);
+	score (SC_250K);
 }
 
 CALLSET_ENTRY (trivial, tunnel_kickout_shot)
