@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <test.h>
 #include <format.h>
+#include <text.h>
 
 #if (MACHINE_DMD == 1)
 extern __test__ void print_row_center (const font_t *f, U8 row);
@@ -79,7 +80,7 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX PLAYERS", &players_per_game_value, MAX_PLAYERS, &system_config.max_players },
 	{ "TILT WARNINGS", &balls_per_game_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
-	{ "MAX EB PER BIP", &max_eb_value, 4, &system_config.max_ebs_per_bip },
+	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
 	{ "REPLAY PERCENT", &percent_value, 7, &system_config.replay_percent },
 	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
@@ -149,9 +150,9 @@ struct adjustment feature_adjustments[] = {
 
 
 struct adjustment pricing_adjustments[] = {
-	{ "LEFT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[0] },
-	{ "CENTER COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
-	{ "RIGHT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
+	{ STR_LEFT "LEFT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[0] },
+	{ STR_CENTER "COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
+	{ STR_RIGHT "COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
 	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
 	{ "UNITS/CREDIT", &nonzero_integer_value, 2, &price_config.units_per_credit },
 	{ "UNITS/BONUS", &integer_value, 0, &price_config.units_per_bonus },
@@ -160,9 +161,9 @@ struct adjustment pricing_adjustments[] = {
 	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
 	{ "COLLECTION TEXT", &collection_text_value, CUR_DOLLAR,
 		&price_config.collection_text },
-	{ "LEFT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
-	{ "CENTER SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
-	{ "RIGHT SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
+	{ STR_LEFT "SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
+	{ STR_CENTER "SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
+	{ STR_RIGHT "SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
 	{ "4TH SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[3] },
 	{ "MAXIMUM CREDITS", &nonzero_integer_value, 10, &price_config.max_credits },
 
@@ -183,7 +184,7 @@ struct adjustment pricing_adjustments[] = {
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
-	{ "CREDIT FRACTION", &on_off_value, ON, &price_config.credit_fraction },
+	{ STR_CREDIT "FRACTION", &on_off_value, ON, &price_config.credit_fraction },
 	{ NULL, NULL, 0, NULL },
 };
 
