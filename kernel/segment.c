@@ -27,17 +27,6 @@
 #include <freewpc.h>
 #include <m6809/math.h>
 
-#define SEGCHAR_ALL       0  /* Light up all segments of the display */
-#define SEGCHAR_HORIZ     1  /* Light up all horizontal segments */
-#define SEGCHAR_VERT      2  /* Light up all vertical segments */
-#define SEGCHAR_STROBE    3  /* Light up horizontal segments gradually */
-	#define SEGCHAR_STROBE_COUNT 4
-   #define SEG_STROBE0       SEG_TOP
-	#define SEG_STROBE1       (SEG_STROBE0 + SEG_UPR_LEFT+SEG_UL_DIAG+SEG_VERT_TOP+SEG_UR_DIAG+SEG_UPR_RIGHT)
-	#define SEG_STROBE2       (SEG_STROBE1 + SEG_MID)
-	#define SEG_STROBE3       (SEG_STROBE2 + SEG_LWR_LEFT+SEG_LL_DIAG+SEG_VERT_BOT+SEG_LR_DIAG+SEG_LWR_RIGHT)
-
-
 bool seg_in_transition;
 
 seg_transition_t *seg_transition;
@@ -70,6 +59,7 @@ const segbits_t seg_table[] = {
 	['+'] = SEG_VERT+SEG_MID,
 	['-'] = SEG_MID,
 	['/'] = SEG_UR_DIAG+SEG_LL_DIAG,
+	['\\'] = SEG_UL_DIAG+SEG_LR_DIAG,
    ['$'] = SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT+SEG_VERT,
    ['0'] = SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT,
    ['1'] = SEG_RIGHT,
@@ -113,17 +103,23 @@ const segbits_t seg_table[] = {
 	['Y'] = SEG_UL_DIAG+SEG_UR_DIAG+SEG_VERT_BOT,
    ['Z'] = SEG_TOP+SEG_UR_DIAG+SEG_LL_DIAG+SEG_BOT,
 	['_'] = SEG_BOT,
+	['h'] = SEG_LEFT+SEG_MID+SEG_LWR_RIGHT,
+	['m'] = SEG_LWR_LEFT+SEG_VERT_BOT+SEG_LWR_RIGHT+SEG_MID,
+	[127] = SEG_MID,
 };
 
-
+/** An array of display page memory */
 seg_page_t seg_pages[SEG_ALLOC_PAGES+SEG_FIXED_PAGES];
 
+/** The pointer to the current visible display page */
 __fastram__ seg_page_t *seg_visible_page;
 
+/** The pointer to the current writable display page */
 __fastram__ seg_page_t *seg_writable_page;
 
 seg_page_t *seg_secondary;
 
+/** The page number for the next page that will be given out */
 U8 seg_alloc_pageid;
 
 
@@ -139,15 +135,18 @@ void seg_rtt (void)
 	U8 col;
 	segbits_t *valp;
 	
-	col = get_sys_time () & 0x0F;
+	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
 	writeb (WPC_ALPHA_POS, col);
 
 	valp = &(*seg_visible_page)[0][col];
 	writew (WPC_ALPHA_ROW1, *valp);
-	writew (WPC_ALPHA_ROW2, *(valp + 16));
+	writew (WPC_ALPHA_ROW2, *(valp + SEG_SECTION_SIZE));
 }
 
 
+/**
+ * Allocate a new display page.
+ */
 void seg_alloc (void)
 {
 	seg_writable_page = seg_pages + seg_alloc_pageid;
@@ -157,17 +156,26 @@ void seg_alloc (void)
 }
 
 
+/**
+ * Map a specific display page so that all write commands
+ * apply to it.
+ */
 void seg_map (U8 page)
 {
 	seg_writable_page = seg_pages + page;
 }
 
+
+/**
+ * Flip the current and secondary display pages.
+ */
 void seg_flip_low_high (void)
 {
 	seg_page_t *tmp = seg_writable_page;
 	seg_writable_page = seg_secondary;
 	seg_secondary = tmp;
 }
+
 
 static void seg_show_from (seg_page_t *page_ptr)
 {
@@ -177,18 +185,27 @@ static void seg_show_from (seg_page_t *page_ptr)
 }
 
 
+/**
+ * Show the current writable page.
+ */
 void seg_show (void)
 {
 	seg_show_from (seg_writable_page);
 }
 
 
+/**
+ * Show a specific page number.
+ */
 void seg_show_page (U8 page)
 {
 	seg_show_from (seg_pages + page);
 }
 
 
+/**
+ * Swap the current visible page with the secondary page.
+ */
 void seg_show_other (void)
 {
 	if (seg_visible_page == seg_writable_page)
@@ -198,6 +215,10 @@ void seg_show_other (void)
 }
 
 
+/**
+ * Copy the contents of the current writable page to the
+ * secondary one.
+ */
 void seg_copy_low_to_high (void)
 {
 	memcpy (seg_writable_page+1, seg_writable_page, sizeof (seg_page_t));
@@ -218,10 +239,31 @@ seg_page_t *seg_get_page_pointer (U8 page)
  */
 static segbits_t seg_translate_char (char c)
 {
-	if (likely (c <= '_'))
+	if (likely (c <= 127))
 		return seg_table[(U8)c];
 	else
 		return SEG_MID;
+}
+
+
+/**
+ * Return true if the display slot pointer is valid and can be
+ * written.
+ */
+static bool seg_addr_valid (void *sa)
+{
+	return ((sa >= (void *)seg_pages) &&
+		(sa < (void *)seg_pages + sizeof (seg_pages)));
+}
+
+
+/**
+ * Enable one or more segments on a particular display slot.
+ */
+static void seg_enable_segment (segbits_t *sa, segbits_t seg)
+{
+	if (seg_addr_valid (sa))
+		*sa |= seg;
 }
 
 
@@ -234,31 +276,29 @@ static segbits_t seg_translate_char (char c)
 segbits_t *seg_write_char (segbits_t *sa, char c)
 {
 	if (c == '\0')
+	{
 		return sa;
+	}
 	else if ((c == '.' || c == ':') && (!(sa[-1] & SEG_PERIOD)))
-		*--sa |= SEG_PERIOD;
+	{
+		seg_enable_segment (sa-1, SEG_PERIOD);
+		return sa;
+	}
 	else if (c == ',')
-		*--sa |= SEG_COMMA;
-	else
+	{
+		seg_enable_segment (sa-1, SEG_COMMA);
+		return sa;
+	}
+	else if (seg_addr_valid (sa))
+	{
 		*sa = seg_translate_char (c);
-	return sa+1;
+		return sa+1;
+	}
+	else
+	{
+		return sa;
+	}
 }
-
-
-static bool seg_addr_valid (void *sa)
-{
-	return ((sa >= (void *)seg_pages) &&
-		(sa < (void *)seg_pages + sizeof (seg_pages)));
-}
-
-
-#if 0
-void seg_write (segbits_t *addr, U16 *data, U8 len)
-{
-	while (len-- > 0)
-		*addr++ = *data++;
-}
-#endif
 
 
 /**
@@ -280,7 +320,7 @@ void seg_write_string (U8 row, U8 col, const char *s)
 
 	/* For each character in the string, write it and advance the
 	cursor. */
-	while ((*s != '\0') && seg_addr_valid (addr))
+	while (*s != '\0')
 		addr = seg_write_char (addr, *s++);
 }
 
@@ -311,6 +351,16 @@ void seg_erase (void)
 
 
 /**
+ * Fill the current page with the same character.
+ */
+void seg_fill (segbits_t segs)
+{
+	segbits_t *addr = &(*seg_writable_page)[0][0];
+	memset (addr, segs, sizeof(segbits_t) * SEG_SECTIONS * SEG_SECTION_SIZE);
+}
+
+
+/**
  * Allocate a clean page for drawing.
  */
 void seg_alloc_clean (void)
@@ -329,8 +379,6 @@ void seg_do_transition (void)
 	seg_page_t *tmp;
 	U8 iteration;
 
-	dbprintf ("seg_do_transition\n");
-
 	/* Save pointer to the final page -- that which will ultimately
 	be displayed.  This is the source page for all updates during
 	the transition. */
@@ -347,9 +395,8 @@ void seg_do_transition (void)
 		seg_transition->init ();
 
 	iteration = 0;
-	while (seg_in_transition && iteration < 64)
+	while (seg_in_transition && iteration < 255)
 	{
-		dbprintf ("seg_trans: iteration %d\n", iteration);
 		/* Delay */
 		task_sleep (seg_transition->delay);
 
@@ -368,12 +415,20 @@ void seg_do_transition (void)
 }
 
 
+/**
+ * Schedule a segment display transition.
+ */
 void seg_sched_transition (seg_transition_t *trans)
 {
 	seg_transition = trans;
 	seg_in_transition = TRUE;
 }
 
+
+/**
+ * Clear any segment display transition that has been scheduled,
+ * but not executed yet.
+ */
 void seg_reset_transition (void)
 {
 	seg_transition = NULL;
@@ -391,4 +446,150 @@ void seg_init (void)
 	seg_alloc_pageid = 0;
 	seg_transition = NULL;
 }
+
+
+/************************************************************/
+
+/* Begin examples of transition effects.  TODO : move these
+out of the system bank of ROM. */
+
+
+/**
+ * Copy one character from the new display page onto the
+ * existing page.
+ */
+static void seg_fade_in (seg_page_t *src, U8 row, U8 col)
+{
+	(*seg_writable_page)[row][col] = (*src)[row][col];
+}
+
+
+/**
+ * Copy one column of characters
+ */
+static void seg_fade_in_col (seg_page_t *src, U8 col)
+{
+	seg_fade_in (src, 0, col);
+	seg_fade_in (src, 1, col);
+}
+
+
+
+bool seg_trans_center_out_update (seg_page_t *src, U8 iteration)
+{
+	if (iteration < (SEG_SECTION_SIZE/2))
+	{
+		/* Copy from center to outside edges */
+		seg_fade_in_col (src, (SEG_SECTION_SIZE/2)-iteration);
+		seg_fade_in_col (src, (1+SEG_SECTION_SIZE/2)+iteration);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+bool seg_trans_ltr_update (seg_page_t *src, U8 iteration)
+{
+	if (iteration < SEG_SECTION_SIZE)
+	{
+		seg_fade_in_col (src, iteration);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+bool seg_trans_rtl_update (seg_page_t *src, U8 iteration)
+{
+	if (iteration < SEG_SECTION_SIZE)
+	{
+		seg_fade_in_col (src, (SEG_SECTION_SIZE-1)-iteration);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+bool seg_trans_push_left_update (seg_page_t *src, U8 iteration)
+{
+	return FALSE;
+}
+
+bool seg_trans_push_right_update (seg_page_t *src, U8 iteration)
+{
+	return FALSE;
+}
+
+segbits_t seg_fade_table[] = {
+	SEG_UPR_LEFT,
+	SEG_UL_DIAG,
+	SEG_TOP,
+	SEG_VERT_TOP,
+	SEG_UR_DIAG,
+	SEG_UPR_RIGHT,
+	SEG_MID_RIGHT,
+	SEG_LWR_RIGHT,
+	SEG_LR_DIAG,
+	SEG_VERT_BOT,
+	SEG_BOT,
+	SEG_LL_DIAG,
+	SEG_LWR_LEFT,
+	SEG_MID_LEFT,
+	SEG_COMMA+SEG_PERIOD,
+};
+
+bool seg_trans_fade_update (seg_page_t *src, U8 iteration)
+{
+	if (iteration < sizeof (seg_fade_table) / sizeof (segbits_t))
+	{
+		segbits_t mask = seg_fade_table[iteration];
+		segbits_t *dst1 = &(*seg_writable_page)[0][0];
+		segbits_t *src1 = &(*src)[0][0];
+		U8 count;
+		for (count = 0;
+			count < SEG_SECTIONS*SEG_SECTION_SIZE;
+			count++, src1++, dst1++)
+		{
+			*dst1 = (*dst1 & ~mask) | (*src1 & mask);
+		}
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+seg_transition_t seg_trans_center_out =
+{
+	.init = NULL,
+	.update = seg_trans_center_out_update,
+	.delay = TIME_100MS,
+};
+
+seg_transition_t seg_trans_ltr =
+{
+	.init = NULL,
+	.update = seg_trans_ltr_update,
+	.delay = TIME_50MS,
+};
+
+seg_transition_t seg_trans_rtl =
+{
+	.init = NULL,
+	.update = seg_trans_rtl_update,
+	.delay = TIME_50MS,
+};
+
+seg_transition_t seg_trans_fast_center_out =
+{
+	.init = NULL,
+	.update = seg_trans_center_out_update,
+	.delay = TIME_50MS,
+};
+
+seg_transition_t seg_trans_fade =
+{
+	.init = NULL,
+	.update = seg_trans_fade_update,
+	.delay = TIME_33MS,
+};
 
