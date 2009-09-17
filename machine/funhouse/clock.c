@@ -9,6 +9,13 @@ __local__ min5_t clock_minute;
 
 __local__ U8 clock_base_hour;
 
+#define TIME_0_MIN  0
+#define TIME_15_MIN 3
+#define TIME_30_MIN 6
+#define TIME_45_MIN 9
+
+__machine__ void light_lock (void);
+
 
 void fh_clock_update (void)
 {
@@ -48,25 +55,54 @@ S8 fh_clock_compare (U8 hour, min5_t minute)
 		return 0;
 }
 
+void fh_clock_advance_step (void)
+{
+	if ((clock_hour == 11) && (clock_minute >= TIME_30_MIN))
+		return;
+	if (clock_hour == 12)
+		return;
+
+	clock_minute++;
+	if (clock_minute == 12)
+	{
+		clock_minute = 0;
+		clock_hour++;
+	}
+}
+
 void fh_clock_advance (min5_t minutes)
 {
-	if (flag_test (FLAG_MULTIBALL_LIT))
-		return;
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (lock_lit_p () ||
+		flag_test (FLAG_MULTIBALL_LIT) ||
+		flag_test (FLAG_MULTIBALL_RUNNING))
 		return;
 
-	clock_minute += minutes;
-	while (clock_minute >= 12)
+	while (minutes > 0)
 	{
-		clock_minute -= 12;
-		clock_hour++;
-		if (clock_hour >= 12)
-			clock_hour -= 12;
+		minutes--;
+		fh_clock_advance_step ();
+		if (clock_hour == 11 && clock_minute == TIME_30_MIN)
+		{
+			light_lock ();
+			break;
+		}
 	}
-
 	fh_clock_update ();
 }
 
+void fh_clock_advance_to_1145 (void)
+{
+	clock_hour = 11;
+	clock_minute = TIME_45_MIN;
+	fh_clock_update ();
+}
+
+void fh_clock_advance_to_1200 (void)
+{
+	clock_hour = 0;
+	clock_minute = TIME_0_MIN;
+	fh_clock_update ();
+}
 
 void fh_clock_reset (void)
 {

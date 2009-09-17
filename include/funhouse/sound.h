@@ -10,6 +10,7 @@
 #define MUS_MIDNIGHT         0x07
 #define MUS_MULTIBALL        0x08
 #define MUS_JACKPOT          0x09
+#define MUS_1130_PLUNGER     0x0A
 #define MUS_RESTART_PLUNGER  0x0C
 #define MUS_RESTART_RUNNING  0x0D
 #define MUS_FRENZY           0x0E
@@ -20,9 +21,10 @@
 #define SND_EXTRA_BALL       0x80
 #define SND_LOCK_LIT         0x81
 #define SND_WIND             0x83
+#define SND_DRAIN            0x84
 #define SND_WIND_TUNNEL      0x86
 #define SND_GONG             0x88
-#define SND_RAMP_ENTER       0x89
+#define SND_PLUNGE           0x89
 #define SND_JET(x)           (0x8A + (x))
 #define SND_LEFT_PLUNGER     0x8E
 #define SND_TILT             0x90
@@ -44,6 +46,7 @@
 #define SND_STEPS_TOP_AWARD  0xBC
 #define SND_KICKOUT_COMING   0xBF
 #define SND_GONG2            0xC0
+#define SND_RAMP_ENTER       0xC1
 //#define SND_RAMP_MADE        0xC2
 #define SND_BOOM1            0xC6
 #define SND_BOOM2            0xC7

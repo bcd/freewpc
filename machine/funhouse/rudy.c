@@ -82,6 +82,18 @@ void rudy_look_right (void)
 	rudy_eye_change (EYELID_OPEN+EYES_RIGHT);
 }
 
+void rudy_sleep (void)
+{
+}
+
+void rudy_wakeup (void)
+{
+}
+
+void rudy_wide_eyes (void)
+{
+}
+
 static void rudy_blink_task (void)
 {
 	rudy_eye_change (EYELID_CLOSED);
