@@ -27,9 +27,9 @@ U8 superdog_level;
 const score_id_t superdog_scores[] = {
 	SC_200K, SC_225K, SC_250K, SC_275K, SC_300K,
 };
-const struct generic_ladder superdog_score_rule[] = {
+const struct generic_ladder superdog_score_rule = {
 	5,
-	&superdog_scores,
+	superdog_scores,
 	&superdog_level
 };
 

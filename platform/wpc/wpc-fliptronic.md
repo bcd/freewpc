@@ -5,5 +5,9 @@
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
 
+DMD: Yes
+Fliptronic: Yes
+DCS: No
+WPC95: No
 include platform/wpc/wpc-common.md
 include platform/wpc/fliptronic.md

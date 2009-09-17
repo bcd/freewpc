@@ -81,13 +81,12 @@ bool multiball_mode_running_p (void)
 		flag_test (FLAG_QUICK_MB_RUNNING);
 }
 
-
 void trap_door_update (void)
 {
 	if (in_live_game)
 	{
 		if (flag_test (FLAG_JACKPOT_LIT) ||
-			flag_test (FLAG_FRENZY_LIT) && !multiball_mode_running_p ())
+			(flag_test (FLAG_FRENZY_LIT) && !multiball_mode_running_p ()))
 		{
 			sol_request (SOL_TRAP_DOOR_OPEN);
 		}

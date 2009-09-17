@@ -122,6 +122,8 @@ extern __fastram__ U8 sw_raw[SWITCH_BITS_SIZE];
 if closed. */
 extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 {
+	/* TODO - for PIC games, this value is valid only when the PIC
+	is known to be initialized properly. */
 	return sw_raw[SW_COL(sw_num)] & SW_ROWMASK(sw_num);
 }
 

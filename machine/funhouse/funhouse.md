@@ -13,21 +13,12 @@
 # Miscellaneous parameters are specified here.
 ##########################################################################
 Title: Fun House
-DMD: No
-Alphanumeric: Yes
-Fliptronic: No
-DCS: No
-WPC95: No
+include platform/wpc/wpc89.md
+
 #Pinmame-Zip:
 #Pinmame-ROM:
 #Lamp-Matrix-Width:
 #Lamp-Matrix-Height:
-
-##########################################################################
-# Include standard definitions that apply to all WPC games.
-# This will set some defaults for things you leave out here.
-##########################################################################
-include platform/wpc/wpc89.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by

@@ -121,7 +121,7 @@ void device_debug_all (void)
 	dbprintf ("Held: %d\n", held_balls);
 }
 #else
-#define device_debug()
+#define device_debug(dev)
 #define device_debug_all()
 #endif
 

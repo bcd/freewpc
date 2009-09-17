@@ -45,7 +45,7 @@ struct generic_ladder
 	const U8 size;
 
 	/* An array of score values */
-	score_id_t *scores;
+	const score_id_t *scores;
 
 	/* A pointer to the level tracker.  The level is an index
 	into the above array which gives the next score to be awarded */

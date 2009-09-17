@@ -14,23 +14,13 @@
 ##########################################################################
 Title: Twilight Zone
 
-# NOTE: These next 4 lines do not belong here.  They should be
-# included via the kernel md file.
-DMD: Yes
-Fliptronic: Yes
-DCS: No
-WPC95: No
+include platform/wpc/wpc-fliptronic.md
 
 Pinmame-Zip: tz_92.zip
 Pinmame-ROM: tzone9_2.rom
 Lamp-Matrix-Width: 39
 Lamp-Matrix-Height: 29
 
-##########################################################################
-# Include standard definitions that apply to all WPC games.
-# This will set some defaults for things you leave out here.
-##########################################################################
-include platform/wpc/wpc.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by

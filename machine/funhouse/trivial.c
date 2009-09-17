@@ -31,7 +31,7 @@
 #define CLK_25_MIN 5
 #define CLK_30_MIN 6
 
-__machine__ void fh_clock_advance ();
+__machine__ void fh_clock_advance (U8);
 __machine__ void rudy_look_left (void);
 __machine__ void rudy_look_straight (void);
 __machine__ void rudy_look_right (void);
