@@ -55,6 +55,9 @@ typedef struct
 
 __effect__ void music_refresh (void);
 __effect__ void music_request (sound_code_t music, U8 prio);
+__effect__ void music_disable (void);
+__effect__ void music_enable (void);
+__effect__ void music_timed_disable (task_ticks_t delay);
 __effect__ void sound_start1 (U8 channels, sound_code_t code);
 
 extern inline void sound_start (U8 channels, sound_code_t code, U8 duration, U8 prio)
