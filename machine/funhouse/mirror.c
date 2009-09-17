@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <eb.h>
+#include <steps_gate.h>
 
 __local__ U8 mirror_award;
 

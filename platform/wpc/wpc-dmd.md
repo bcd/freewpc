@@ -10,5 +10,4 @@ Fliptronic: No
 DCS: No
 WPC95: No
 include platform/wpc/wpc-common.md
-include platform/wpc/fliptronic.md
 

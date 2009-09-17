@@ -74,13 +74,20 @@ __machine__ void fh_clock_reset (void);
 __machine__ void fh_clock_advance_to_1145 (void);
 __machine__ void fh_clock_advance_to_1200 (void);
 
+bool multiball_mode_running_p (void)
+{
+	return flag_test (FLAG_MULTIBALL_RUNNING) ||
+		flag_test (FLAG_QUICK_MB_RUNNING);
+}
+
+
 
 void trap_door_update (void)
 {
 	if (in_live_game)
 	{
 		if (flag_test (FLAG_JACKPOT_LIT) ||
-			flag_test (FLAG_FRENZY_LIT) && !multiball_mode_running_p ())
+			(flag_test (FLAG_FRENZY_LIT) && !multiball_mode_running_p ()))
 		{
 			sol_request (SOL_TRAP_DOOR_OPEN);
 		}
@@ -98,12 +105,6 @@ CALLSET_ENTRY (trapdoor, sw_trap_door, sw_upper_loop)
 	trap_door_update ();
 }
 
-
-bool multiball_mode_running_p (void)
-{
-	return flag_test (FLAG_MULTIBALL_RUNNING) ||
-		flag_test (FLAG_QUICK_MB_RUNNING);
-}
 
 void light_jackpot (void)
 {

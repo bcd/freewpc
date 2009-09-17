@@ -19,6 +19,8 @@
  */
 
 #include <freewpc.h>
+#include <steps_gate.h>
+#include <ramp_div.h>
 
 __machine__ bool multiball_mode_running_p (void);
 

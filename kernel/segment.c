@@ -33,6 +33,8 @@ seg_transition_t *seg_transition;
 
 U8 *seg_trans_data_ptr;
 
+static void seg_do_transition (void);
+
 /**
  * The segment lookup table.
  * Each entry here gives the segments that should be lit to form a specific
@@ -373,7 +375,7 @@ void seg_alloc_clean (void)
 /**
  * Execute a segment-style transition effect.
  */
-void seg_do_transition (void)
+static void seg_do_transition (void)
 {
 	seg_page_t *seg_final_page;
 	seg_page_t *tmp;

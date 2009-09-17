@@ -120,7 +120,7 @@ text and centered it well. */
 	seg_write_string (y/16, x/8 - (seg_strlen (s) / 2), s)
 
 #define font_render_string_right(f,x,y,s) \
-	seg_write_string (y/16, ((x + 7) / 8) - seg_strlen (s), s)
+	seg_write_string (y/16, ((x + 7UL) / 8) - seg_strlen (s), s)
 
 #else
 
