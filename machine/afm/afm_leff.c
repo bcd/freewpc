@@ -42,6 +42,12 @@ void flashfest_leff (void)
 	leff_exit ();
 }
 
+void flash_random_leff (void)
+{
+	flasher_randomize (TIME_166MS, 3);
+	leff_exit ();
+}
+
 static void amode_leff1 (void)
 {
 	register U8 my_lamplist = lamplist;
@@ -57,7 +63,7 @@ void amode_leff (void)
 	for (lamplist = LAMPLIST_MARTIANS; lamplist <= LAMPLIST_R_LOOP_ALL; lamplist++)
 	{
 		leff_create_peer (amode_leff1);
-		task_sleep (TIME_166MS);
+		task_sleep (TIME_66MS);
 	}
 	task_exit ();
 }

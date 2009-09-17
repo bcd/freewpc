@@ -331,7 +331,11 @@ void rtc_render_time (void)
 
 
 const char *rtc_edit_field_name[] = {
+#if (MACHINE_DMD == 1)
 	"MONTH", "DAY", "YEAR", "HOUR", "MINUTE"
+#else
+	"M", "D", "Y", "h", "m"
+#endif
 };
 
 
@@ -344,18 +348,17 @@ void rtc_render (void)
 	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	rtc_render_time ();
 	font_render_string_center (&font_mono5, 64, 25, sprintf_buffer);
-
-	if (rtc_edit_field != 0xFF)
-	{
-		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
-		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
-	}
 #else
 	rtc_render_date ();
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	rtc_render_time ();
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 #endif
+	if (rtc_edit_field != 0xFF)
+	{
+		sprintf ("%s", rtc_edit_field_name[rtc_edit_field]);
+		font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
+	}
 }
 
 

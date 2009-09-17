@@ -35,15 +35,24 @@ U8 buyin_offer_timer;
 /** Display effect that runs during the extra ball buyin */
 void buyin_offer_deff (void)
 {
+#if (MACHINE_DMD == 1)
 	dmd_sched_transition (&trans_bitfade_slow);
+#else
+	seg_sched_transition (&seg_trans_fast_center_out);
+#endif
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
 		dmd_draw_border (dmd_low_buffer);
 		font_render_string_center (&font_term6, 64, 5, "CONTINUE GAME");
+#if (MACHINE_DMD == 1)
 		sprintf ("%d", buyin_offer_timer);
 		font_render_string_left (&font_mono5, 4, 3, sprintf_buffer);
 		font_render_string_right (&font_mono5, 123, 3, sprintf_buffer);
+#else
+		sprintf ("%d SECS", buyin_offer_timer);
+		seg_write_row_center (1, sprintf_buffer);
+#endif
 		dmd_show_low ();
 		task_sleep (TIME_500MS);
 	}

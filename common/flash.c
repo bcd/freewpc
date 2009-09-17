@@ -57,6 +57,9 @@ struct flasher_action flasher_pulsating_action[] =
 };
 
 
+/**
+ * Execute a single flasher action.
+ */
 void flasher_act (U8 id, struct flasher_action *action)
 {
 	while (action->pulse_time != 0)
@@ -68,6 +71,9 @@ void flasher_act (U8 id, struct flasher_action *action)
 }
 
 
+/**
+ * Execute an action on a set of flashers.
+ */
 void flasher_set_act (U8 *idlist, struct flasher_action *action)
 {
 	while (action->pulse_time != 0)
@@ -82,11 +88,34 @@ void flasher_set_act (U8 *idlist, struct flasher_action *action)
 }
 
 
+/**
+ * Execute a single flasher action multiple times.
+ */
 void flasher_repeat_act (U8 id, struct flasher_action *action, U16 repeat_count)
 {
 	do {
 		flasher_act (id, action);
 	} while (--repeat_count > 0);
+}
+
+
+/**
+ * Randomly pulse all flashers for the given duration, with the given delay
+ * in between each pulse.
+ */
+void flasher_randomize (task_ticks_t delay, U16 duration)
+{
+	U8 id;
+	duration *= TIME_1S;
+	while (duration > 0)
+	{
+		do {
+			id = random_scaled (SOL_COUNT);
+		} while (!MACHINE_SOL_FLASHERP (id));
+		flasher_pulse (id);
+		task_sleep (delay);
+		duration -= delay;
+	}
 }
 
 

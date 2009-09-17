@@ -6,7 +6,10 @@ static U8 lamplist;
 void amode_leff1 (void)
 {
 	register U8 my_lamplist = lamplist;
-	lamplist_set_apply_delay (TIME_66MS);
+	if (lamplist == LAMPLIST_CLOCK_HOURS)
+		lamplist_set_apply_delay (TIME_50MS);
+	else
+		lamplist_set_apply_delay (TIME_66MS);
 	for (;;)
 		lamplist_apply (my_lamplist, leff_toggle);
 }

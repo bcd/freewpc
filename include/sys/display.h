@@ -102,6 +102,9 @@ equivalents. */
 #define seg_write_row_center(n, s) \
 	seg_write_string (n, 8 - (seg_strlen (s) / 2), s)
 
+#define seg_write_row_right(n, s) \
+	seg_write_string (n, 16 - seg_strlen (s), s)
+
 /* These functions are a bit magical.  They convert DMD text printing
 to the alphanumeric display, translating from the pixel-oriented
 DMD coordinate system to the block-oriented alphanumeric one.
@@ -117,7 +120,7 @@ text and centered it well. */
 	seg_write_string (y/16, x/8 - (seg_strlen (s) / 2), s)
 
 #define font_render_string_right(f,x,y,s) \
-	seg_write_string (y/16, x/8 + 1 - seg_strlen (s), s)
+	seg_write_string (y/16, ((x + 7) / 8) - seg_strlen (s), s)
 
 #else
 

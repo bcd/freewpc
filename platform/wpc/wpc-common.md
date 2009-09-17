@@ -72,6 +72,7 @@ A4: Aux. Sol. 4, notinstalled
 
 [lamplists]
 ALL: 11..88
+Ball Save: MACHINE_BALL_SAVE_LAMP
 
 [deffs]
 NULL: c_decl(deff_exit), PRI_NULL
@@ -106,6 +107,7 @@ NULL: PRI_NULL
 Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
 Tilt Warning: PRI_TILT_WARNING, GI(ALL), c_decl(tilt_warning_leff), page(COMMON_PAGE)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
 
 [fonts]
 mono5:

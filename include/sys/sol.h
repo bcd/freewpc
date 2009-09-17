@@ -190,4 +190,7 @@ extern inline void sol_disable (const solnum_t sol)
 	writeb (w, (*r &= ~sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00));
 }
 
+
+__effect__ void flasher_randomize (task_ticks_t delay, U16 secs);
+
 #endif /* _SYS_SOL_H */

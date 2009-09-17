@@ -28,6 +28,9 @@
 
 /* CALLSET_SECTION (sound_effect, __effect__) */
 
+#define MUS_DISABLED_BY_SOUND  0x1
+#define MUS_DISABLED_BY_CALL   0x2
+
 /** Tracks the status of each audio channel */
 sound_channel_t chtab[MAX_SOUND_CHANNELS];
 
@@ -40,6 +43,8 @@ sound_code_t music_requested;
 /** The music that is currently playing, or zero if none */
 sound_code_t music_active;
 
+U8 music_flags;
+
 
 /**
  * Called by a music_refresh handler to say that
@@ -50,7 +55,6 @@ void music_request (sound_code_t music, U8 prio)
 {
 	if (prio > music_prio)
 	{
-		dbprintf ("Want music 0x%04lX at prio %d\n", music, prio);
 		music_requested = music;
 		music_prio = prio;
 	}
@@ -62,12 +66,20 @@ void music_request (sound_code_t music, U8 prio)
  */
 void music_refresh_task (void)
 {
+	/* Sleep for a bit before actually doing anything, because
+	there may be multiple refreshes in a row, and only the last
+	one is needed.  This cures an audio glitch. */
+	/* TODO - this sleep sometimes causes the system to crash?
+	I believe this is related to a task sleeping that has not
+	allocated any stack space yet???? */
+#if 0
+	task_sleep (TIME_166MS);
+#endif
+
 	music_prio = 0;
 	music_requested = 0;
 
-	if (!in_test)
-		callset_invoke (music_refresh);
-
+	callset_invoke (music_refresh);
 	if (music_requested != music_active)
 	{
 		if (music_requested != 0)
@@ -91,7 +103,42 @@ void music_refresh_task (void)
  */
 void music_refresh (void)
 {
-	task_recreate_gid (GID_MUSIC_REFRESH, music_refresh_task);
+	if (in_live_game && music_flags == 0)
+		task_recreate_gid (GID_MUSIC_REFRESH, music_refresh_task);
+}
+
+
+void music_disable (void)
+{
+	task_kill_gid (GID_MUSIC_REFRESH);
+	music_off ();
+	music_flags |= MUS_DISABLED_BY_CALL;
+	music_active = MUS_OFF;
+}
+
+
+void music_enable (void)
+{
+	music_flags &= ~MUS_DISABLED_BY_CALL;
+	music_refresh ();
+}
+
+
+static void music_timed_disable_task (void)
+{
+	task_ticks_t *tdata = task_current_class_data (task_ticks_t);
+	music_disable ();
+	task_sleep (*tdata);
+	music_enable ();
+	task_exit ();
+}
+
+
+void music_timed_disable (task_ticks_t delay)
+{
+	task_pid_t tp = task_recreate_gid (GID_TIMED_MUSIC_DISABLE, music_timed_disable_task);
+	task_ticks_t *tdata = task_init_class_data (tp, task_ticks_t);
+	*tdata = delay;
 }
 
 
@@ -113,6 +160,7 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
 				ch->prio = 0;
 				if (chid == MUSIC_CHANNEL)
 				{
+					music_flags &= ~MUS_DISABLED_BY_SOUND;
 					music_refresh ();
 				}
 				/* TODO - when supporting sound strings, this would cue
@@ -184,7 +232,10 @@ void sound_start1 (U8 channels, sound_code_t code)
 			kill the background music.  Note this so that the music
 			can be restarted later. */
 			if (chid == MUSIC_CHANNEL)
-				music_active = 0;
+			{
+				music_active = MUS_OFF;
+				music_flags |= MUS_DISABLED_BY_SOUND;
+			}
 
 			/* Cancel any sound running on the channel now */
 			//sound_write (SND_INIT_CH0 + chid);
@@ -322,6 +373,7 @@ CALLSET_ENTRY (sound_effect, init)
 {
 	memset (chtab, 0, sizeof (chtab));
 	music_active = 0;
+	music_flags = 0;
 	music_refresh ();
 }
 

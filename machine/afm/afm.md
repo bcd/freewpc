@@ -14,6 +14,7 @@ Pinmame-ROM: afm_113b.bin
 define MACHINE_NUMBER 541
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
+define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 
 [lamps]
 11: RTU Super Jets
@@ -90,11 +91,11 @@ define MACHINE_CUSTOM_AMODE
 21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane
-31: Trough Eject, opto, noplay
-32: Trough 1, trough, opto, noplay
-33: Trough 2, trough, opto, noplay
-34: Trough 3, trough, opto, noplay
-35: Trough 4, trough, opto, noplay
+31: Trough Eject, opto, noscore, noplay
+32: Trough 1, trough, opto, noscore, noplay
+33: Trough 2, trough, opto, noscore, noplay
+34: Trough 3, trough, opto, noscore, noplay
+35: Trough 4, trough, opto, noscore, noplay
 36: Left Popper, opto
 37: Right Popper, opto
 38: Left Top Lane
@@ -158,8 +159,8 @@ A1: Saucer Flash 2, flash
 A2: Saucer Flash 3, flash
 A3: Saucer Flash 1, flash
 A4: L. Martian Flash, flash
-A5: L.E.D. Clock
-A6: L.E.D. Data
+A5: L.E.D. Clock, nosearch
+A6: L.E.D. Data, nosearch
 A7: Strobe Light, flash
 
 F5: Right Gate
@@ -186,11 +187,11 @@ L. Ramp Count: L. Ramp 1, L. Ramp 2, L. Ramp 3
 R. Ramp Count: R. Ramp 1, R. Ramp 2, R. Ramp 3
 R. Loop Count: R. Loop 1, R. Loop 2, R. Loop 3
 Arrows: L. Loop Arrow, L. Ramp Arrow, Lock Arrow, R. Ramp Arrow, R. Loop Arrow
+Jackpots: L. Loop Jackpot, L. Ramp Jackpot, Lock Jackpot, R. Ramp Jackpot, R. Loop Jackpot
 Martians: Martian 1, Martian 2, Martian 3, Martian 4, Martian 5, Martian 6, Martian 7
 Bottom Lanes: Left Outlane, Left Inlane, Right Inlane, Right Outlane
 RTU Progress: RTU Super Jets, RTU Super Jackpot, RTU Total Ann., RTU Martian MB, RTU Conquer Mars, RTU 5 Way
 Motor Bank: Motor Bank 1, Motor Bank 2, Motor Bank 3
-Jackpots: L. Loop Jackpot, L. Ramp Jackpot, Lock Jackpot, R. Ramp Jackpot, R. Loop Jackpot
 Countries and Attack: Countries, Attack Mars
 Lock Lane: Light Lock, Locks, Lock Jackpot, Lock Arrow
 Top Lanes: L. Top Lane, R. Top Lane
@@ -232,6 +233,7 @@ Right Hole: Right Popper, Right Popper
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Flashfest: PRI_LEFF2, page(MACHINE_PAGE)
+Flash Random: PRI_LEFF3, page(MACHINE_PAGE)
 
 [fonts]
 

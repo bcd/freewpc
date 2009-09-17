@@ -237,6 +237,7 @@ void end_ball (void)
 
 	/* If the ball was not tilted, start bonus. */
 	in_bonus = TRUE;
+	music_disable ();
 	if (!in_tilt)
 		callset_invoke (bonus);
 
@@ -430,7 +431,7 @@ void start_ball (void)
 {
 	in_tilt = FALSE;
 	valid_playfield = FALSE;
-	music_refresh ();
+	music_enable ();
 	pending_valid_count = 0;
 
 	/* Since lamp effects from previous balls could have been killed,

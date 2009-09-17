@@ -166,7 +166,7 @@ define MACHINE_CUSTOM_AMODE
 47: Left Plunger, edge
 48: Ramp Exit
 51: Dummy Jaw, opto
-52: Right Outlane
+52: Right Outlane, noplay
 53: Right Slingshot
 54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
@@ -321,8 +321,11 @@ Hideout: Rudys Hideout, init_max_count(0), Rudys Hideout
 # type of adjustment and the default value.
 ##########################################################################
 [adjustments]
+Clock 1st Start: integer, 8
+Clock 2nd Start: integer, 5
 Disable Dummy: yes_no, NO
 Disable Trapdoor: yes_no, NO
+Disable Gate: yes_no, NO
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -331,9 +334,18 @@ Disable Trapdoor: yes_no, NO
 Rudy Hits: INT
 Rudy Gulps: INT
 Mirror Awards: INT
-Millions: INT
-Multiball Starts: INT
+Multiball: INT
 Million Plus: INT
+Million Shots: INT
+Ramp Shots: INT
+Skill Shots: INT
+Frenzy: INT
+Super Frenzy: INT
+Trap Door Opened: INT
+Trap Door Made: INT
+3 Way Combo: INT
+4 Way Combo: INT
+Special Lit: INT
 
 ##########################################################################
 # Sound calls for well-known events
@@ -355,12 +367,18 @@ Volume Change: MUS_RESTART_RUNNING
 [scores]
 110:
 1K:
+2570:
 5K:
 10K:
 25K:
 50K:
+75K:
 100K:
+200K:
+225K:
 250K:
+275K:
+300K:
 500K:
 750K:
 1M:
@@ -388,9 +406,15 @@ Multiball Lit:
 Multiball Running:
 Quick MB Running:
 Jackpot Lit:
+Frenzy Lit:
 Super Frenzy Lit:
-Steps Lit:
+Super Frenzy Running:
+Left Plunger Open:
 Jackpot This Ball:
+Ball At Steps:
+Mirror Complete:
+Steps Lit:
+Outlanes Lit:
 
 ##########################################################################
 # Display effects
@@ -398,6 +422,11 @@ Jackpot This Ball:
 [deffs]
 Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED
 Bonus: page(MACHINE_PAGE), PRI_BONUS
+QuickMB Started: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED
+QuickMB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE3
+QuickMB Score: page(MACHINE_PAGE), PRI_GAME_QUICK6
+MB 1130: page(MACHINE_PAGE), PRI_GAME_QUICK4
+MB 1145: page(MACHINE_PAGE), PRI_GAME_QUICK4
 
 ##########################################################################
 # Lamp effects
@@ -423,12 +452,12 @@ Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTER,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, \
-	timeout=TIME_4S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
+	timeout=TIME_3S
 
 Steps Gate: driver(duty),
 	sol=SOL_STEPS_GATE,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_100MS, \
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
 	timeout=0
 
 Eye Direction: driver(bivar),

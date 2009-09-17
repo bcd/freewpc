@@ -408,6 +408,7 @@ extern inline void sol_update_fliptronic_powered (void)
  * for dimming effects. */
 void sol_update_rtt_0 (void)
 {
+	pinio_write_solenoid_set (0, *sol_get_read_reg (0));
 	sol_update_set (2);
 #ifdef CONFIG_PLATFORM_WPC
 	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
@@ -419,6 +420,7 @@ void sol_update_rtt_0 (void)
 /** Realtime update of the second set of flasher outputs */
 void sol_update_rtt_1 (void)
 {
+	pinio_write_solenoid_set (1, *sol_get_read_reg (8));
 	sol_update_set (3);
 #ifdef MACHINE_SOL_EXTBOARD1
 	sol_update_set (5);
