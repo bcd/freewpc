@@ -1537,6 +1537,8 @@ seg_transition_t *transition_table[] = {
 	&seg_trans_rtl,
 	&seg_trans_fast_center_out,
 	&seg_trans_fade,
+	&seg_trans_push_left,
+	&seg_trans_push_right,
 };
 #endif
 
