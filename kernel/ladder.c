@@ -47,8 +47,11 @@ void generic_ladder_score (const struct generic_ladder *ladder)
 
 void generic_ladder_score_and_advance (const struct generic_ladder *ladder)
 {
-	generic_ladder_score (ladder);
-	generic_ladder_advance (ladder);
+	if (*(ladder->level) < ladder->size)
+	{
+		generic_ladder_score (ladder);
+		generic_ladder_advance (ladder);
+	}
 }
 
 
