@@ -112,7 +112,7 @@ void amode_stop (void)
 	deff_stop_all ();
 	leff_stop_all ();
 	lamp_all_off ();
-	music_refresh ();
+	effect_update_request ();
 	callset_invoke (amode_stop);
 }
 
@@ -143,6 +143,7 @@ void serve_ball (void)
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
 	valid_playfield = FALSE;
+	effect_update_request ();
 	callset_invoke (serve_ball);
 }
 
@@ -447,7 +448,6 @@ void start_ball (void)
 	}
 
 	callset_invoke (start_ball);
-	lamp_update_request ();
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
@@ -516,8 +516,7 @@ void set_valid_playfield (void)
 	{
 		valid_playfield = TRUE;		
 		callset_invoke (valid_playfield);
-		music_refresh ();
-		deff_update ();
+		effect_update_request ();
 	}
 }
 

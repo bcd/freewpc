@@ -447,49 +447,6 @@ void lamp_update_task (void)
 }
 
 
-/** Request that the lamps be updated.
- * Lamp update runs in a separate task context, and it
- * only happens during a game.
- *
- * This function is called every 500ms automatically, but it
- * may be called any other time, to force an update more
- * frequently.
- */
-void lamp_update_request (void)
-{
-	if (in_live_game)
-		task_recreate_gid (GID_LAMP_UPDATE, lamp_update_task);
-
-	/* Handle 'system lamps' here.  Right now that's just
-	the start button. */
-	if (!in_test)
-		lamp_start_update ();
-}
-
-
-/** Periodically update the lamps.  Currently this is done
- * every 500ms.
- *
- * This is intended to be used during a game for recomputing
- * the states of lamps with multiple conditions that feed into
- * the state.  Rather than do this everytime something changes,
- * it is done periodically on all lamps instead.
- *
- * There is a performance penalty for doing this too frequently,
- * but it simplifies the game logic considerably and also
- * makes bugs less likely.  Also, 500ms is not too often but it
- * is frequent enough for it not to be noticeable. */
-CALLSET_ENTRY (lamp, idle_every_100ms)
-{
-	static U8 counter = 0;
-	if (++counter == 5)
-	{
-		counter = 0;
-		lamp_update_request ();
-	}
-}
-
-
 /*
  * lamp_all_on / lamp_all_off are optimized and should be used
  * if all lamps are affected, rather than setting them one at
@@ -502,7 +459,7 @@ void lamp_all_on (void)
 	matrix_all_off (lamp_flash_matrix);
 	enable_interrupts ();
 	matrix_all_on (lamp_matrix);
-	lamp_update_request ();
+	lamp_start_update ();
 }
 
 
@@ -515,7 +472,7 @@ void lamp_all_off (void)
 	matrix_all_off (lamp_leff2_matrix);
 	enable_interrupts ();
 	matrix_all_off (lamp_matrix);
-	lamp_update_request ();
+	lamp_start_update ();
 }
 
 /*

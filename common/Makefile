@@ -64,6 +64,7 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # separated out for the same reason.  These may be placed into a
 # different ROM page.
 EFFECT_OBJS += common/effect.o
+EFFECT_OBJS += common/effect_update.o
 EFFECT_OBJS +=	common/flash.o
 EFFECT_OBJS += common/lamptimer.o
 EFFECT_OBJS +=	common/score_deff.o

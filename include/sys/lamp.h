@@ -153,8 +153,6 @@ extern inline bool flag_test (const U8 f)
 	if (pred) { lamp_tristate_flash (lamp); } \
 	else { lamp_tristate_off (lamp); }
 
-void lamp_update_request (void);
-
 void bit_on (bitset matrix, U8 bit);
 void bit_off (bitset matrix, U8 bit);
 void bit_toggle (bitset matrix, U8 bit);

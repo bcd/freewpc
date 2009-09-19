@@ -457,7 +457,7 @@ CALLSET_ENTRY (sound, volume_down)
 	if (current_volume > MIN_VOLUME)
 		volume_set (current_volume-1);
 	deff_restart (DEFF_VOLUME_CHANGE);
-	music_refresh ();
+	effect_update_request ();
 }
 
 
@@ -467,6 +467,6 @@ CALLSET_ENTRY (sound, volume_up)
 	if (current_volume < MAX_VOLUME)
 		volume_set (current_volume+1);
 	deff_restart (DEFF_VOLUME_CHANGE);
-	music_refresh ();
+	effect_update_request ();
 }
 
