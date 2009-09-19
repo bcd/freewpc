@@ -37,7 +37,7 @@
 # Read the flipper switches and update the flipper coils
 # Note: this only takes 51 cycles when flippers are disabled.
 # Not sure if this is still accurate when enabled or not.
-fliptronic_rtt        2       250c
+fliptronic_rtt?CONFIG_FLIPTRONIC   2       250c
 
 # Update the triacs
 triac_rtt             1       60c
@@ -76,7 +76,7 @@ lockup_check_rtt      128     23c
 free_timer_rtt        32		94c
 
 # Update the segmented displays, if CONFIG_SEG is defined.
-seg_rtt?CONFIG_SEG    1       100c
+seg_rtt?CONFIG_SEG    1       50c # guess?
 
 # Common processing required at the end of every IRQ
 ### process_check_rtt     1       50c
