@@ -29,7 +29,7 @@ __local__ U8 mb_balls_locked;
 __local__ U8 mb_jackpot_millions;
 
 
-void mb_1130_deff (void)
+static void mb_1130_1145 (const char *msg)
 {
 	U8 n;
 	for (n=0; n < 3; n++)
@@ -38,18 +38,24 @@ void mb_1130_deff (void)
 		seg_show ();
 		task_sleep (TIME_200MS);
 		seg_alloc_clean ();
-		seg_write_row_center (0, "11:30");
+		seg_write_row_center (0, msg);
 		seg_write_row_center (1, "SHOOT LOCK");
 		seg_show ();
 		sample_start (SND_GONG, SL_1S);
 		task_sleep (TIME_800MS);
 	}
 	task_sleep (TIME_500MS);
+}
+
+void mb_1130_deff (void)
+{
+	mb_1130_1145 ("11:30");
 	deff_exit ();
 }
 
 void mb_1145_deff (void)
 {
+	mb_1130_1145 ("11:45");
 	deff_exit ();
 }
 
@@ -60,6 +66,10 @@ void mb_midnight_deff (void)
 
 void mb_start_deff (void)
 {
+	seg_alloc_clean ();
+	seg_write_row_center (0, "MULTIBALL");
+	seg_show ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -81,36 +91,12 @@ bool multiball_mode_running_p (void)
 		flag_test (FLAG_QUICK_MB_RUNNING);
 }
 
-void trap_door_update (void)
-{
-	if (in_live_game)
-	{
-		if (flag_test (FLAG_JACKPOT_LIT) ||
-			(flag_test (FLAG_FRENZY_LIT) && !multiball_mode_running_p ()))
-		{
-			sol_request (SOL_TRAP_DOOR_OPEN);
-		}
-		else
-		{
-			sol_request (SOL_TRAP_DOOR_CLOSE);
-		}
-	}
-}
-
-/* update trapdoor after ball search */
-
-CALLSET_ENTRY (trapdoor, sw_trap_door, sw_upper_loop)
-{
-	trap_door_update ();
-}
-
-
 void light_jackpot (void)
 {
 	if (!flag_test (FLAG_JACKPOT_LIT))
 	{
 		flag_on (FLAG_JACKPOT_LIT);
-		trap_door_update ();
+		effect_update_request ();
 	}
 }
 
@@ -122,8 +108,10 @@ void mb_start (void)
 		flag_off (FLAG_MULTIBALL_LIT);
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		light_jackpot ();
+		deff_start (DEFF_MB_START);
 		device_request_empty (device_entry (DEVNO_LOCK));
 		music_timed_disable (TIME_1S);
+		audit_increment (&feature_audits.multiball);
 	}
 }
 
@@ -137,6 +125,7 @@ void mb_stop (void)
 	}
 	flag_off (FLAG_MULTIBALL_RUNNING);
 	flag_off (FLAG_JACKPOT_LIT);
+	effect_update_request ();
 }
 
 
@@ -152,9 +141,10 @@ void collect_jackpot (void)
 		flag_on (FLAG_JACKPOT_THIS_BALL);
 		flag_off (FLAG_JACKPOT_LIT);
 		score_multiple (SC_1M, mb_jackpot_millions);
+		audit_increment (&feature_audits.million_plus);
 		bounded_increment (mb_jackpot_millions, 10);
 		music_effect_start (SND_JACKPOT, SL_3S);
-		trap_door_update ();
+		effect_update_request ();
 	}
 }
 
@@ -184,12 +174,20 @@ void light_lock (void)
 	flag_off (FLAG_JACKPOT_THIS_BALL);
 	_mb_lamp_update ();
 	deff_start (DEFF_MB_1130);
+	mb_level++;
+	music_effect_start (SND_LOCK_LIT, SL_4S);
+	if (mb_level == 2)
+	{
+		flag_on (FLAG_OUTLANES_LIT);
+		lamp_on (LM_SPECIALS);
+		audit_increment (&feature_audits.special_lit);
+	}
 }
 
 
 static void _mb_lamp_update (void)
 {
-	if (mb_locks_lit == 0)
+	if (mb_locks_lit == 0 || multiball_mode_running_p ())
 	{
 		lamp_tristate_off (LM_LOCK);
 	}
@@ -210,12 +208,14 @@ static void _mb_lamp_update (void)
 bool lock_lit_p (void)
 {
 	return mb_locks_lit && (mb_balls_locked < mb_locks_lit)
-		&& (mb_balls_locked < 2);
+		&& (mb_balls_locked < 2)
+		&& !multiball_mode_running_p ();
 }
 
 bool multiball_lit_p (void)
 {
-	return flag_test (FLAG_MULTIBALL_LIT);
+	return flag_test (FLAG_MULTIBALL_LIT) &&
+		!multiball_mode_running_p ();
 }
 
 
@@ -231,13 +231,12 @@ CALLSET_ENTRY (mb, lamp_update)
 
 CALLSET_ENTRY (mb, music_refresh)
 {
-	if (flag_test (FLAG_JACKPOT_THIS_BALL))
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
-		music_request (MUS_JACKPOT, PRI_MULTIBALL);
-	}
-	else if (flag_test (FLAG_MULTIBALL_RUNNING))
-	{
-		music_request (MUS_MULTIBALL, PRI_MULTIBALL);
+		if (flag_test (FLAG_JACKPOT_THIS_BALL))
+			music_request (MUS_JACKPOT, PRI_MULTIBALL);
+		else
+			music_request (MUS_MULTIBALL, PRI_MULTIBALL);
 	}
 	else if (flag_test (FLAG_MULTIBALL_LIT))
 	{
@@ -245,12 +244,16 @@ CALLSET_ENTRY (mb, music_refresh)
 	}
 	else if (mb_locks_lit)
 	{
-		if (!valid_playfield)
-			music_request (MUS_1130_PLUNGER, PRI_MULTIBALL);
+		if (!valid_playfield && global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+			music_request (MUS_1130_PLUNGER, PRI_GAME_LOW4);
 		else if (mb_balls_locked == 0)
-			music_request (MUS_1130, PRI_MULTIBALL);
+			music_request (MUS_1130, PRI_GAME_LOW4);
 		else
-			music_request (MUS_1145, PRI_MULTIBALL);
+			music_request (MUS_1145, PRI_GAME_LOW4);
+	}
+	else if (flag_test (FLAG_JACKPOT_THIS_BALL))
+	{
+		music_request (MUS_JACKPOT, PRI_GAME_LOW4);
 	}
 }
 
@@ -261,6 +264,17 @@ CALLSET_ENTRY (mb, dev_lock_enter)
 	{
 		collect_lock ();
 	}
+}
+
+CALLSET_BOOL_ENTRY (mb, empty_trough_kick)
+{
+	device_t *dev = device_entry (DEVNO_LOCK);
+	if (dev->max_count > 0)
+	{
+		device_unlock_ball (dev);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 CALLSET_ENTRY (mb, dev_lock_kick_attempt)
@@ -281,10 +295,10 @@ CALLSET_ENTRY (mb, rudy_shot)
 	{
 		mb_start ();
 	}
-	else if (flag_test (FLAG_JACKPOT_LIT))
+	else if (flag_test (FLAG_MILLION_LIT))
 	{
 		score (SC_1M);
-		flag_off (FLAG_JACKPOT_LIT);
+		flag_off (FLAG_MILLION_LIT);
 	}
 }
 
@@ -318,5 +332,9 @@ CALLSET_ENTRY (mb, start_ball)
 {
 	flag_off (FLAG_JACKPOT_THIS_BALL);
 	/* TODO - update mb_balls_locked according to physical state */
+#if 0
+	sol_enable (SOL_MOUTH_MOTOR);
+	sol_enable (SOL_MOTOR_DIRECTION);
+#endif
 }
 

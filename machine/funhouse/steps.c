@@ -22,7 +22,6 @@
 #include <steps_gate.h>
 #include <ramp_div.h>
 
-__machine__ bool multiball_mode_running_p (void);
 
 void steps_monitor (void)
 {
@@ -35,14 +34,27 @@ void steps_monitor (void)
 
 void steps_exited (void)
 {
-	flag_off (FLAG_STEPS_LIT);
+	flag_off (FLAG_STEPS_RAMP_LIT);
+	flag_off (FLAG_STEPS_OPEN);
 	flag_off (FLAG_BALL_AT_STEPS);
 }
 
-bool steps_lit_p (void)
+bool steps_available_p (void)
 {
-	return flag_test (FLAG_STEPS_LIT) &&
-		!multiball_mode_running_p ();
+	return in_live_game && !multiball_mode_running_p ();
+}
+
+
+CALLSET_ENTRY (steps, device_update)
+{
+	if (steps_available_p () && flag_test (FLAG_STEPS_OPEN))
+	{
+		steps_gate_start ();
+	}
+	else
+	{
+		steps_gate_stop ();
+	}
 }
 
 
@@ -56,10 +68,8 @@ CALLSET_ENTRY (steps, music_refresh)
 
 CALLSET_ENTRY (steps, lamp_update)
 {
-	if (flag_test (FLAG_LEFT_PLUNGER_OPEN))
-	{
-	}
-	lamp_on_if (LM_RAMP_STEPS, steps_lit_p ());
+	lamp_on_if (LM_RAMP_STEPS, flag_test (FLAG_STEPS_RAMP_LIT));
+	lamp_on_if (LM_STEPS_GATE_OPEN, flag_test (FLAG_STEPS_OPEN));
 }
 
 CALLSET_ENTRY (steps, sw_step_track_upper)
@@ -91,6 +101,7 @@ CALLSET_ENTRY (steps, sw_steps_frenzy)
 CALLSET_ENTRY (steps, sw_left_plunger)
 {
 	flag_on (FLAG_BALL_AT_STEPS);
+	ramp_div_stop ();
 }
 
 CALLSET_ENTRY (steps, sw_left_outlane)
@@ -99,11 +110,10 @@ CALLSET_ENTRY (steps, sw_left_outlane)
 
 CALLSET_ENTRY (steps, ramp_entered)
 {
-	if (lamp_test (LM_RAMP_STEPS))
+	if (flag_test (FLAG_STEPS_RAMP_LIT))
 	{
 		ramp_div_start ();
-		flag_on (FLAG_BALL_AT_STEPS);
-		steps_gate_start ();
+		flag_on (FLAG_STEPS_OPEN);
 		task_recreate_gid (GID_STEPS_MONITOR, steps_monitor);
 	}
 }
@@ -131,12 +141,12 @@ CALLSET_ENTRY (steps, sw_step_p)
 
 CALLSET_ENTRY (steps, sw_lower_right_hole)
 {
-	flag_on (FLAG_STEPS_LIT);
+	flag_on (FLAG_STEPS_RAMP_LIT);
 }
 
 CALLSET_ENTRY (steps, start_player)
 {
-	flag_off (FLAG_STEPS_LIT);
+	flag_off (FLAG_STEPS_OPEN);
 }
 
 

@@ -36,6 +36,8 @@
 #define SND_SKILL2           0x9F
 #define SND_SPECIAL_LIT      0xA0
 #define SND_FRENZY_LIT       0xA1
+#define SND_UPPER_LOOP1      0xA3
+#define SND_UPPER_LOOP2      0xA7
 #define SND_MILLION_AWARD    0xA9
 #define SND_3WAY_COMBO       0xAA
 #define SND_RAMP_MADE        0xAC
@@ -48,6 +50,7 @@
 #define SND_GONG2            0xC0
 #define SND_RAMP_ENTER       0xC1
 //#define SND_RAMP_MADE        0xC2
+#define SND_LOOP             0xC3
 #define SND_BOOM1            0xC6
 #define SND_BOOM2            0xC7
 #define SND_JACKPOT          0xC8
@@ -55,11 +58,17 @@
 #define SND_RESTART_RING     0xCB
 #define SND_QUICK_MB_AWARD   0xCC
 #define SND_REPLAY           0xCE
+#define SND_FRENZY_BLIP1     0xD0
+#define SND_FRENZY_BLIP2     0xD1
+#define SND_FRENZY_BLIP3     0xD2
 #define SND_TARGET1          0xD3
 #define SND_TARGET2          0xD4
 #define SND_BONUS_BLIP1      0xD8
 #define SND_BONUS_BLIP2      0xD9
 #define SND_BONUS_FRENZY     0xE0
+#define SND_BONUS_BLIP3      0xE2
+#define SND_BONUS_BLIP4      0xE3
+#define SND_BONUS_BLIP5      0xE4
 #define SND_TARGET_COMPLETE  0xE6
 #define SND_CHOMP            0xDF
 

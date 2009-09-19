@@ -31,35 +31,51 @@
 #define CLK_25_MIN 5
 #define CLK_30_MIN 6
 
-__machine__ void fh_clock_advance (U8);
-__machine__ void rudy_look_left (void);
-__machine__ void rudy_look_straight (void);
-__machine__ void rudy_look_right (void);
-__machine__ void rudy_blink (void);
-__common__ void collect_extra_ball (void);
-
 __local__ U8 rudy_hits;
 
 void bonus_deff (void)
 {
+	U8 hits;
+
 	music_disable ();
-	seg_alloc ();
-	seg_erase ();
+	seg_alloc_clean ();
 	task_sleep (TIME_100MS);
 	seg_write_row_center (0, "BONUS");
-	sprintf ("%d RUDY HITS", rudy_hits);
+	if (rudy_hits != 1)
+		sprintf ("%d RUDY HITS", rudy_hits);
+	else
+		sprintf ("%d RUDY HIT", rudy_hits);
 	seg_write_row_center (1, sprintf_buffer);
 	seg_sched_transition (&seg_trans_ltr);
 	sample_start (SND_BONUS_BLIP1, SL_1S);
 	seg_show ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+
+	hits = 0;
+	while (hits < rudy_hits)
+	{
+		score (SC_50K);
+		sample_start (SND_BONUS_BLIP3, SL_500MS);
+		seg_alloc_clean ();
+		scores_draw ();
+		seg_show ();
+		if (hits <= 9)
+			task_sleep (TIME_500MS - hits * TIME_33MS);
+		else
+			task_sleep (TIME_200MS);
+		hits++;
+	}
+
+	task_sleep_sec (1);
 	music_enable ();
 	deff_exit ();
 }
 
 void million_lamp_update (void)
 {
-	if (flag_test (FLAG_MILLION_LIT) || flag_test (FLAG_MULTIBALL_LIT))
+	if (flag_test (FLAG_MILLION_LIT) ||
+		flag_test (FLAG_MULTIBALL_LIT) ||
+		flag_test (FLAG_QUICK_MB_RUNNING))
 	{
 		lamp_tristate_flash (LM_MILLION);
 	}
@@ -78,7 +94,9 @@ CALLSET_ENTRY (trivial, lamp_update)
 
 CALLSET_ENTRY (trivial, valid_playfield)
 {
-	fh_clock_advance (CLK_30_MIN);
+	extern U8 mb_level;
+	if (mb_level == 0)
+		fh_clock_advance (CLK_30_MIN);
 }
 
 CALLSET_ENTRY (trivial, sw_ramp_enter)
@@ -88,9 +106,12 @@ CALLSET_ENTRY (trivial, sw_ramp_enter)
 
 CALLSET_ENTRY (trivial, sw_ramp_exit)
 {
-	sample_start (SND_RAMP_MADE, SL_2S);
-	score (SC_100K);
-	fh_clock_advance (CLK_15_MIN);
+	if (!multiball_mode_running_p ())
+	{
+		sample_start (SND_RAMP_MADE, SL_2S);
+		score (SC_100K);
+		fh_clock_advance (CLK_15_MIN);
+	}
 }
 
 CALLSET_ENTRY (trivial, sw_left_slingshot, sw_right_slingshot)
@@ -131,13 +152,30 @@ CALLSET_ENTRY (trivial, sw_left_inlane, sw_inner_right_inlane, sw_outer_right_in
 	fh_clock_advance (CLK_5_MIN);
 	score (SC_10K);
 	rudy_look_straight ();
+	sample_start (SND_COIN, SL_500MS);
 }
 
-CALLSET_ENTRY (trivial, sw_left_outlane, sw_right_outlane)
+void common_outlane (void)
 {
 	score (SC_50K);
-	callset_invoke (any_outlane);
 	rudy_look_straight ();
+	if (lamp_test (LM_SPECIALS))
+	{
+		lamp_off (LM_SPECIALS);
+		flag_off (FLAG_OUTLANES_LIT);
+		special_award ();
+	}
+}
+
+CALLSET_ENTRY (trivial, sw_left_outlane)
+{
+	if (!flag_test (FLAG_BALL_AT_STEPS))
+		common_outlane ();
+}
+
+CALLSET_ENTRY (trivial, sw_right_outlane)
+{
+	common_outlane ();
 }
 
 CALLSET_ENTRY (trivial, sw_wind_tunnel_hole)
@@ -172,12 +210,19 @@ CALLSET_ENTRY (trivial, sw_upper_loop)
 CALLSET_ENTRY (trivial, dev_hideout_enter)
 {
 	score (SC_75K);
+	/* score skill shot */
 	rudy_look_left ();
+}
+
+CALLSET_ENTRY (trivial, dev_trough_kick_success)
+{
+	rudy_look_right ();
 }
 
 CALLSET_ENTRY (trivial, dev_lock_enter)
 {
 	score (SC_25K);
+	fh_clock_advance (CLK_30_MIN);
 	rudy_look_left ();
 	collect_extra_ball ();
 }
@@ -198,7 +243,8 @@ CALLSET_ENTRY (trivial, sw_jet_lane)
 
 CALLSET_ENTRY (trivial, rudy_jaw)
 {
-	speech_start (SPCH_OWW, SL_2S);
+	audit_increment (&feature_audits.rudy_hits);
+	speech_start (SPCH_OWW, SL_2S); /* happening on gulp too */
 }
 
 CALLSET_ENTRY (trivial, dev_rudy_enter)
@@ -217,12 +263,22 @@ CALLSET_ENTRY (trivial, sw_left_gangway)
 {
 	fh_clock_advance (CLK_10_MIN);
 	rudy_look_left ();
+	sample_start (SND_LOOP, SL_2S);
 }
 
 CALLSET_ENTRY (trivial, sw_right_gangway)
 {
 	fh_clock_advance (CLK_10_MIN);
 	rudy_look_right ();
+}
+
+CALLSET_ENTRY (trivial, sw_right_plunger)
+{
+	if (!switch_poll_logical (SW_RIGHT_PLUNGER))
+	{
+		sample_start (SND_PLUNGE, SL_2S);
+		leff_start (LEFF_SHOOTER);
+	}
 }
 
 CALLSET_ENTRY (trivial, end_ball, start_ball)
@@ -232,7 +288,7 @@ CALLSET_ENTRY (trivial, end_ball, start_ball)
 
 CALLSET_ENTRY (trivial, start_player)
 {
-	rudy_hits = 0;
+	rudy_hits = 1;
 }
 
 CALLSET_ENTRY (trivial, start_ball)
@@ -247,5 +303,4 @@ CALLSET_ENTRY (trivial, bonus)
 	while (deff_get_active () == DEFF_BONUS)
 		task_sleep (TIME_166MS);
 }
-
 
