@@ -45,7 +45,7 @@ static void tunnel_entered (void)
 {
 	/* From any entrance except the kickout itself, disable scoring on the
 	 * kickout switch temporarily. */
-	free_timer_restart (TIM_TUNNEL_ENTERED, TIME_4S);
+	device_switch_can_follow (tunnel, kickout, TIME_4S);
 
 	/* TODO : Start a monitor task to see that the ball eventually reaches the
 	 * kickout.  Fire the kicker in case the switch is bad... */
@@ -66,7 +66,7 @@ CALLSET_ENTRY (tunnel, sw_trap_door, sw_lower_right_hole)
 CALLSET_ENTRY (tunnel, sw_tunnel_kickout)
 {
 	/* Stop the kickout monitor */
-	if (!free_timer_test (TIM_TUNNEL_ENTERED))
+	if (!event_did_follow (tunnel, kickout))
 	{
 		callset_invoke (tunnel_kickout_shot);
 	}

@@ -69,17 +69,13 @@ void music_refresh_task (void)
 	/* Sleep for a bit before actually doing anything, because
 	there may be multiple refreshes in a row, and only the last
 	one is needed.  This cures an audio glitch. */
-	/* TODO - this sleep sometimes causes the system to crash?
-	I believe this is related to a task sleeping that has not
-	allocated any stack space yet???? */
-#if 0
-	task_sleep (TIME_166MS);
-#endif
+	task_sleep (TIME_200MS);
 
 	music_prio = 0;
 	music_requested = 0;
 
 	callset_invoke (music_refresh);
+
 	if (music_requested != music_active)
 	{
 		if (music_requested != 0)
@@ -103,7 +99,9 @@ void music_refresh_task (void)
  */
 void music_refresh (void)
 {
-	if (in_live_game && music_flags == 0)
+	if (in_tilt)
+		music_off ();
+	else if (music_flags == 0)
 		task_recreate_gid (GID_MUSIC_REFRESH, music_refresh_task);
 }
 
@@ -235,6 +233,7 @@ void sound_start1 (U8 channels, sound_code_t code)
 			{
 				music_active = MUS_OFF;
 				music_flags |= MUS_DISABLED_BY_SOUND;
+				music_off ();
 			}
 
 			/* Cancel any sound running on the channel now */
@@ -335,16 +334,6 @@ CALLSET_ENTRY (sound_effect, music_refresh)
 	else
 		music_request (MACHINE_START_BALL_MUSIC, PRI_SCORES);
 #endif
-}
-
-
-/**
- * Always cause a music refresh at certain well-known points in the
- * game; also periodically.
- */
-CALLSET_ENTRY (sound_effect, start_ball, end_ball, idle_every_second)
-{
-	music_refresh ();
 }
 
 

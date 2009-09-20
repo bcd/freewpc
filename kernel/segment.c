@@ -61,6 +61,7 @@ const segbits_t seg_table[] = {
 	['+'] = SEG_VERT+SEG_MID,
 	['-'] = SEG_MID,
 	['/'] = SEG_UR_DIAG+SEG_LL_DIAG,
+	['='] = SEG_MID+SEG_BOT,
 	['\\'] = SEG_UL_DIAG+SEG_LR_DIAG,
    ['$'] = SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT+SEG_VERT,
    ['0'] = SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT,
@@ -74,7 +75,7 @@ const segbits_t seg_table[] = {
    ['8'] = SEG_TOP+SEG_MID+SEG_BOT+SEG_LEFT+SEG_RIGHT,
    ['9'] = SEG_TOP+SEG_MID+SEG_BOT+SEG_UPR_LEFT+SEG_RIGHT,
 	['.'] = SEG_PERIOD,
-	[','] = SEG_COMMA,
+	[','] = SEG_PERIOD+SEG_COMMA,
 	[':'] = SEG_PERIOD,
 	['<'] = SEG_UR_DIAG+SEG_LR_DIAG,
 	['>'] = SEG_UL_DIAG+SEG_LL_DIAG,
@@ -134,15 +135,25 @@ U8 seg_alloc_pageid;
  */
 void seg_rtt (void)
 {
-	U8 col;
-	segbits_t *valp;
+	register U8 col asm ("d");
+	register segbits_t *valp asm ("x");
 	
 	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
 	writeb (WPC_ALPHA_POS, col);
 
+#ifdef __m6809__
+	asm ("ldx\t*_seg_visible_page");
+	asm ("abx");
+	asm ("abx");
+	asm ("ldd\t,x");
+	asm ("std\t16364");
+	asm ("ldd\t32,x");
+	asm ("std\t16366");
+#else
 	valp = &(*seg_visible_page)[0][col];
 	writew (WPC_ALPHA_ROW1, *valp);
 	writew (WPC_ALPHA_ROW2, *(valp + SEG_SECTION_SIZE));
+#endif
 }
 
 
@@ -288,7 +299,7 @@ segbits_t *seg_write_char (segbits_t *sa, char c)
 	}
 	else if (c == ',')
 	{
-		seg_enable_segment (sa-1, SEG_COMMA);
+		seg_enable_segment (sa-1, SEG_COMMA+SEG_PERIOD);
 		return sa;
 	}
 	else if (seg_addr_valid (sa))
@@ -346,6 +357,16 @@ U8 seg_strlen (const char *s)
 	return n;
 }
 
+
+void seg_write_row_center (U8 row, const char *s)
+{
+	seg_write_string (row, 8 - (seg_strlen (s) / 2), s);
+}
+
+void seg_write_row_right (U8 row, const char *s)
+{
+	seg_write_string (row, 16 - seg_strlen (s), s);
+}
 
 /**
  * Erase the current page.
@@ -480,6 +501,29 @@ static void seg_fade_in_col (seg_page_t *src, U8 col)
 	seg_fade_in (src, 1, col);
 }
 
+static void seg_shift_left (segbits_t *data, U8 count)
+{
+	while (count > 1)
+	{
+		data[0] = data[1];
+		data++;
+		count--;
+	}
+	data[0] = 0;
+}
+
+
+static void seg_shift_right (segbits_t *data, U8 count)
+{
+	data += count - 1;
+	while (count > 1)
+	{
+		data[0] = data[-1];
+		data--;
+		count--;
+	}
+	data[0] = 0;
+}
 
 
 bool seg_trans_center_out_update (seg_page_t *src, U8 iteration)
@@ -519,12 +563,33 @@ bool seg_trans_rtl_update (seg_page_t *src, U8 iteration)
 
 bool seg_trans_push_left_update (seg_page_t *src, U8 iteration)
 {
-	return FALSE;
+	if (iteration < SEG_SECTION_SIZE)
+	{
+		segbits_t *dst1 = &(*seg_writable_page)[0][0];
+		seg_shift_left (dst1, SEG_SECTION_SIZE);
+		seg_shift_left (dst1+SEG_SECTION_SIZE, SEG_SECTION_SIZE);
+		(*seg_writable_page)[0][15] = (*src)[0][iteration];
+		(*seg_writable_page)[1][15] = (*src)[1][iteration];
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 bool seg_trans_push_right_update (seg_page_t *src, U8 iteration)
 {
-	return FALSE;
+	if (iteration < SEG_SECTION_SIZE)
+	{
+		segbits_t *dst1 = &(*seg_writable_page)[0][0];
+		segbits_t *src1 = &(*src)[0][0];
+		seg_shift_right (dst1, SEG_SECTION_SIZE);
+		seg_shift_right (dst1+SEG_SECTION_SIZE, SEG_SECTION_SIZE);
+		(*seg_writable_page)[0][0] = (*src)[0][15-iteration];
+		(*seg_writable_page)[1][0] = (*src)[1][15-iteration];
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 segbits_t seg_fade_table[] = {
@@ -598,5 +663,18 @@ seg_transition_t seg_trans_fade =
 	.init = NULL,
 	.update = seg_trans_fade_update,
 	.delay = TIME_33MS,
+};
+
+seg_transition_t seg_trans_push_left =
+{
+	.init = NULL,
+	.update = seg_trans_push_left_update,
+	.delay = TIME_50MS,
+};
+
+seg_transition_t seg_trans_push_right = {
+	.init = NULL,
+	.update = seg_trans_push_right_update,
+	.delay = TIME_50MS,
 };
 

@@ -52,7 +52,8 @@ void quickmb_score_deff (void)
 	seg_write_row_center (0, "MILLION");
 	seg_write_row_center (1, "1,000,000");
 	seg_show ();
-	task_sleep_sec (2);
+	music_effect_start (SND_MILLION_AWARD, SL_3S);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 
@@ -67,6 +68,7 @@ void quickmb_start (void)
 	{
 		flag_on (FLAG_QUICK_MB_RUNNING);
 		deff_start (DEFF_QUICKMB_STARTED);
+		device_multiball_set (2);
 	}
 }
 
@@ -75,15 +77,24 @@ void quickmb_stop (void)
 	if (flag_test (FLAG_QUICK_MB_RUNNING))
 	{
 		flag_off (FLAG_QUICK_MB_RUNNING);
+		effect_update_request ();
 	}
 }
 
+CALLSET_ENTRY (quickmb, dev_tunnel_kick_attempt)
+{
+	if (in_live_game && !valid_playfield && flag_test (FLAG_QUICK_MB_RUNNING))
+	{
+		while (!valid_playfield)
+			task_sleep (TIME_133MS);
+		task_sleep_sec (1);
+	}
+}
 
 CALLSET_ENTRY (quickmb, display_update)
 {
 	if (quickmb_running_p ())
-	{
-	}
+		deff_start_bg (DEFF_QUICKMB_RUNNING, 0);
 }
 
 CALLSET_ENTRY (quickmb, rudy_shot)
@@ -91,6 +102,7 @@ CALLSET_ENTRY (quickmb, rudy_shot)
 	if (quickmb_running_p ())
 	{
 		score (SC_1M);
+		deff_start (DEFF_QUICKMB_SCORE);
 	}
 }
 

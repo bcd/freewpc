@@ -34,17 +34,40 @@ void circle_out_leff (void)
 	leff_exit ();
 }
 
-void jackpot_subleff (void)
+static void jackpot_subleff (void)
 {
 	lamplist_apply_nomacro (LAMPLIST_CIRCLE_OUT, leff_off);
-	lamplist_set_apply_delay (TIME_33MS);
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_on);
-	leff_exit ();
+	lamplist_apply_leff_alternating (LAMPLIST_CIRCLE_OUT, 1);
+	for (;;)
+	{
+		lamplist_apply_nomacro (LAMPLIST_CIRCLE_OUT, leff_toggle);
+		task_sleep (TIME_33MS);
+	}
+	task_exit ();
 }
 
 void jackpot_leff (void)
 {
-	//task_recreate_gid (GID_JACKPOT_SUBLEFF, jackpot_subleff);
+	lamplist_set_apply_delay (TIME_66MS);
+	leff_create_peer (jackpot_subleff);
+	task_sleep_sec (1);
+	task_kill_gid (GID_LEFF);
+
+	lamplist_set_apply_delay (TIME_33MS);
+	leff_create_peer (jackpot_subleff);
+	task_sleep_sec (1);
+	task_kill_gid (GID_LEFF);
+
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (jackpot_subleff);
+	task_sleep_sec (1);
+	task_kill_gid (GID_LEFF);
+
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (jackpot_subleff);
+	task_sleep_sec (3);
+	leff_exit ();
 }
 
 void clock_vibrate_leff1 (void)
@@ -82,5 +105,34 @@ void gangway_strobe_leff (void)
 	leff_create_peer (gangway_strobe_leff1);
 	task_sleep_sec (3);
 	leff_exit ();
+}
+
+
+void shooter_leff (void)
+{
+	flasher_pulse (FLASH_CLEAR_FLASHERS);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_RED_FLASHERS);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_BLUE_FLASHERS);
+	task_sleep (TIME_100MS);
+	leff_exit ();
+}
+
+
+void superdog_score_leff (void)
+{
+	U8 n;
+	for (n=0; n < 3; n++)
+	{
+		flasher_pulse (FLASH_SUPER_DOG_FLASH);
+		task_sleep (TIME_300MS);
+	}
+	leff_exit ();
+}
+
+
+void multiball_running_leff (void)
+{
 }
 

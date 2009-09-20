@@ -298,6 +298,10 @@ endif
 ifeq ($(CONFIG_PIC),y)
 SCHED_FLAGS += -D CONFIG_PIC
 endif
+ifeq ($(CONFIG_FLIPTRONIC),y)
+SCHED_FLAGS += -D CONFIG_FLIPTRONIC
+endif
+
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX

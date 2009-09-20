@@ -56,14 +56,19 @@ void rudy_eye_update (void)
 			sol_request (SOL_EYELIDS_CLOSED);
 			break;
 	}
+	task_sleep_sec (2);
+	task_exit ();
 }
 
 void rudy_eye_change (U8 flags)
 {
+	if (flag_test (FLAG_MULTIBALL_LIT))
+		flags = EYELID_CLOSED;
+
 	if (flags != rudy_eyes)
 	{
 		rudy_eyes = flags;
-		rudy_eye_update ();
+		task_create_gid1 (GID_RUDY_UPDATE, rudy_eye_update);
 	}
 }
 
@@ -82,16 +87,10 @@ void rudy_look_right (void)
 	rudy_eye_change (EYELID_OPEN+EYES_RIGHT);
 }
 
-void rudy_sleep (void)
-{
-}
-
-void rudy_wakeup (void)
-{
-}
 
 void rudy_wide_eyes (void)
 {
+	rudy_eye_change (EYELID_OPEN);
 }
 
 static void rudy_blink_task (void)
@@ -115,6 +114,6 @@ CALLSET_ENTRY (rudy, init)
 
 CALLSET_ENTRY (rudy, init_complete)
 {
-	rudy_eye_update ();
+	task_recreate_gid (GID_RUDY_UPDATE, rudy_eye_update);
 }
 

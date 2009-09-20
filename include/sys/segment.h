@@ -77,15 +77,30 @@ be used whenever */
 typedef segbits_t seg_section_t[SEG_SECTION_SIZE];
 typedef seg_section_t seg_page_t[SEG_SECTIONS];
 
+
+/**
+ * A transition descriptor.
+ */
 typedef struct
 {
+	/** An optional constructor */
 	void (*init) (void);
+
+	/** The function to update the display each step of the transition.
+	Returns FALSE if the transition is complete, or TRUE if it continues.
+	src is a pointer to the final page that is being drawn; seg_writable_page
+	will point to the destination page, which is always initialized to
+	the previous visible page upon entry. */
 	bool (*update) (seg_page_t *src, U8 iteration);
+
+	/** The amount of time to delay in between steps */
 	U8 delay;
 } seg_transition_t;
 
 segbits_t *seg_write_char (segbits_t *sa, char c);
 void seg_write_string (U8 row, U8 col, const char *s);
+void seg_write_row_center (U8 row, const char *s);
+void seg_write_row_right (U8 row, const char *s);
 U8 seg_strlen (const char *s);
 void seg_erase (void);
 void seg_fill (segbits_t segs);
@@ -101,6 +116,7 @@ void seg_reset_transition (void);
 
 extern seg_transition_t
 	seg_trans_center_out, seg_trans_ltr, seg_trans_rtl,
-	seg_trans_fast_center_out, seg_trans_fade;
+	seg_trans_fast_center_out, seg_trans_fade,
+	seg_trans_push_left, seg_trans_push_right;
 
 #endif /* _SYS_SEGMENT_H */

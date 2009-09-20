@@ -56,7 +56,8 @@ void mirror_exec_superdog (void)
 
 void mirror_exec_gate (void)
 {
-	steps_gate_start ();
+	flag_on (FLAG_STEPS_OPEN);
+	flag_on (FLAG_STEPS_RAMP_LIT);
 }
 
 void mirror_exec_quickmb (void)
@@ -106,7 +107,7 @@ void mirror_move (void)
 			mirror_award = 0;
 		if (!lamp_test (lamplist_index (LAMPLIST_MIRROR_AWARDS, mirror_award)))
 			break;
-	} while (0);
+	} while (1);
 	mirror_update ();
 }
 
@@ -117,7 +118,7 @@ static inline bool mirror_qualified_p (void)
 
 static inline bool mirror_masked_p (void)
 {
-	return flag_test (FLAG_MULTIBALL_RUNNING);
+	return multiball_mode_running_p ();
 }
 
 static bool mirror_lit_p (void)
@@ -138,8 +139,8 @@ void mirror_collect (void)
 	{
 		mirror_being_awarded = mirror_award;
 		lamp_tristate_on (lamplist_index (LAMPLIST_MIRROR_AWARDS, mirror_award));
+		dbprintf ("Collect %d\n", mirror_award);
 		(*mirror_exec_table[mirror_award]) ();
-		mirror_move ();
 		deff_start (DEFF_MIRROR_COLLECT);
 		score (SC_100K);
 
@@ -154,6 +155,8 @@ void mirror_collect (void)
 			lamplist_apply (LAMPLIST_MIRROR_AWARDS, lamp_off);
 			flag_on (FLAG_SUPER_FRENZY_LIT);
 		}
+		else
+			mirror_move ();
 	}
 }
 
@@ -206,7 +209,7 @@ CALLSET_ENTRY (mirror, lamp_update)
 CALLSET_ENTRY (mirror, start_player)
 {
 	lamplist_apply (LAMPLIST_MIRROR_AWARDS, lamp_off);
-	mirror_award = 2;
+	mirror_award = 5;
 	flag_on (FLAG_MIRROR_LIT);
 	flag_off (FLAG_SUPER_FRENZY_LIT);
 	mirror_update ();

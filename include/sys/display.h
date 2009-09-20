@@ -99,11 +99,6 @@ equivalents. */
 #define dmd_invert_page(args...)
 #define dmd_show2(args...)             seg_show () /* ??? */
 
-#define seg_write_row_center(n, s) \
-	seg_write_string (n, 8 - (seg_strlen (s) / 2), s)
-
-#define seg_write_row_right(n, s) \
-	seg_write_string (n, 16 - seg_strlen (s), s)
 
 /* These functions are a bit magical.  They convert DMD text printing
 to the alphanumeric display, translating from the pixel-oriented

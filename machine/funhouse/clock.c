@@ -72,9 +72,8 @@ void fh_clock_advance_step (void)
 
 void fh_clock_advance (min5_t minutes)
 {
-	if (lock_lit_p () ||
-		flag_test (FLAG_MULTIBALL_LIT) ||
-		flag_test (FLAG_MULTIBALL_RUNNING))
+	if (lock_lit_p () || flag_test (FLAG_MULTIBALL_LIT) ||
+		multiball_mode_running_p ())
 		return;
 
 	while (minutes > 0)

@@ -32,16 +32,6 @@
 
 
 /**
- * Force an update of all effects.
- */
-static void effect_update (void)
-{
-	music_refresh ();
-	deff_update ();
-}
-
-
-/**
  * Stop a mode immediately.
  */
 static void timed_mode_exit_handler (struct timed_mode_ops *ops)
@@ -68,7 +58,7 @@ void timed_mode_monitor (void)
 #define the_timer (*(ops->timer))
 
 	/* Request effect update immediately, now that the mode is started. */
-	effect_update ();
+	effect_update_request ();
 
 	/* Run the mode timer.  Sleep a little more than 1s between loops,
 	since task timing is a little inaccurate.  Run the user pause()
@@ -90,7 +80,7 @@ void timed_mode_monitor (void)
 	zero, to avoid an abrupt cutoff.  Any additional grace period defined is
 	then also executed. */
 	task_sleep_sec (1);
-	effect_update ();
+	effect_update_request ();
 	if (ops->grace_timer > 1)
 		task_sleep_sec (ops->grace_timer - 1);
 

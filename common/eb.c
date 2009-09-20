@@ -161,6 +161,7 @@ CALLSET_ENTRY (extra_ball, start_player)
 CALLSET_ENTRY (extra_ball, start_game)
 {
 	extra_balls = 0;
+	extra_balls_earned_this_bip = 0;
 }
 
 CALLSET_ENTRY (extra_ball, start_ball)
