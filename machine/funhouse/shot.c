@@ -21,7 +21,7 @@
 #include <freewpc.h>
 
 /*
- * Trap door and loop shots.
+ * Trap door and upper loop shots.
  * In some cases, we treat these the same.
  */
 
@@ -30,11 +30,61 @@ CALLSET_ENTRY (trap_door_or_loop, sw_trap_door, sw_upper_loop)
 	callset_invoke (upper_loop_or_trap_door_shot);
 }
 
+/* if door is open and upper loop triggered, we need to close
+the door to avoid ball trap */
 
 CALLSET_ENTRY (hideout, dev_hideout_kick_attempt)
 {
 	sample_start (SND_KICKOUT, SL_1S);
 }
+
+
+/*
+ * Gangway shots.
+ */
+
+CALLSET_ENTRY (gangway_shot, sw_left_gangway)
+{
+	if (multi_ball_play ())
+		return;
+	if (free_timer_test (TIM_RIGHT_LOOP_STARTED))
+	{
+		callset_invoke (right_loop_shot);
+	}
+	else if (!free_timer_test (TIM_LEFT_LOOP_STARTED))
+	{
+		free_timer_start (TIM_LEFT_LOOP_STARTED, TIME_3S);
+	}
+	else
+	{
+		free_timer_stop (TIM_LEFT_LOOP_STARTED);
+	}
+	free_timer_stop (TIM_RIGHT_LOOP_STARTED);
+}
+
+
+CALLSET_ENTRY (gangway_shot, sw_right_gangway)
+{
+	if (multi_ball_play ())
+		return;
+	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+		return;
+	if (free_timer_test (TIM_LEFT_LOOP_STARTED))
+	{
+		callset_invoke (left_loop_shot);
+	}
+	else if (!free_timer_test (TIM_RIGHT_LOOP_STARTED))
+	{
+		free_timer_start (TIM_RIGHT_LOOP_STARTED, TIME_3S);
+	}
+	else
+	{
+		free_timer_stop (TIM_RIGHT_LOOP_STARTED);
+	}
+	free_timer_stop (TIM_LEFT_LOOP_STARTED);
+
+}
+
 
 /*
  * Tunnel system shots.

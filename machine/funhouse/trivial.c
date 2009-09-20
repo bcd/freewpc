@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <eb.h>
 
 /*
  * Trivial shot rules
@@ -152,7 +153,7 @@ CALLSET_ENTRY (trivial, sw_left_inlane, sw_inner_right_inlane, sw_outer_right_in
 	fh_clock_advance (CLK_5_MIN);
 	score (SC_10K);
 	rudy_look_straight ();
-	sample_start (SND_COIN, SL_500MS);
+	sample_start (SND_BONUS_BLIP3, SL_500MS);
 }
 
 void common_outlane (void)
@@ -191,7 +192,7 @@ CALLSET_ENTRY (trivial, sw_dummy_jaw)
 
 CALLSET_ENTRY (trivial, sw_step_s, sw_step_t, sw_step_e, sw_step_p)
 {
-	score (SC_10K);
+	score (SC_5130);
 	fh_clock_advance (CLK_5_MIN);
 }
 
@@ -259,17 +260,18 @@ CALLSET_ENTRY (trivial, tunnel_kickout_shot)
 	rudy_look_right ();
 }
 
-CALLSET_ENTRY (trivial, sw_left_gangway)
+CALLSET_ENTRY (trivial, left_loop_shot)
 {
 	fh_clock_advance (CLK_10_MIN);
 	rudy_look_left ();
 	sample_start (SND_LOOP, SL_2S);
 }
 
-CALLSET_ENTRY (trivial, sw_right_gangway)
+CALLSET_ENTRY (trivial, right_loop_shot)
 {
 	fh_clock_advance (CLK_10_MIN);
 	rudy_look_right ();
+	sample_start (SND_LOOP, SL_2S);
 }
 
 CALLSET_ENTRY (trivial, sw_right_plunger)
@@ -279,6 +281,7 @@ CALLSET_ENTRY (trivial, sw_right_plunger)
 		sample_start (SND_PLUNGE, SL_2S);
 		leff_start (LEFF_SHOOTER);
 	}
+	callset_invoke (sw_shooter);
 }
 
 CALLSET_ENTRY (trivial, end_ball, start_ball)

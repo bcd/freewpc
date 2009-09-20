@@ -116,6 +116,13 @@ CALLSET_ENTRY (frenzy, display_update)
 }
 
 
+CALLSET_ENTRY (frenzy, music_refresh)
+{
+	if (frenzy_timer > 0)
+		music_request (MUS_FRENZY, PRI_GAME_MODE5);
+}
+
+
 CALLSET_ENTRY (frenzy, lamp_update)
 {
 	lamp_flash_if (LM_FRENZY, frenzy_lit_p ());
@@ -153,5 +160,10 @@ CALLSET_ENTRY (frenzy, start_ball)
 	frenzy_timer = 0;
 	score_zero (frenzy_total);
 	flag_off (FLAG_SUPER_FRENZY_RUNNING);
+}
+
+CALLSET_ENTRY (frenzy, end_ball)
+{
+	frenzy_timer = 0;
 }
 

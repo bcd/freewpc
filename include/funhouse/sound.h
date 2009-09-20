@@ -33,7 +33,7 @@
 #define SND_COIN             0x94
 #define SND_SKILL_SHOT       0x9C
 #define SND_STEPS_AWARD      0x9D
-#define SND_SKILL2           0x9F
+#define SND_INLANE           0x9F
 #define SND_SPECIAL_LIT      0xA0
 #define SND_FRENZY_LIT       0xA1
 #define SND_UPPER_LOOP1      0xA3
@@ -42,7 +42,9 @@
 #define SND_3WAY_COMBO       0xAA
 #define SND_RAMP_MADE        0xAC
 #define SND_4WAY_COMBO       0xAD
+#define SND_STEP_TARGETS_MADE 0xAE
 #define SND_LOCK_MB_KICK     0xB0
+#define SND_WHEEEE           0xB5
 #define SND_RAMP_ENTER2      0xB6
 #define SND_KICKOUT          0xBA
 #define SND_STEPS_TOP_AWARD  0xBC

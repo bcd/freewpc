@@ -201,7 +201,10 @@ static void _mb_lamp_update (void)
 	}
 
 	lamp_flash_if (LM_MILLION_PLUS, flag_test (FLAG_JACKPOT_LIT));
-	lamp_on_if (LM_RAMP_250K, flag_test (FLAG_MULTIBALL_RUNNING));
+	lamp_on_if (LM_RAMP_250K, multiball_mode_running_p ());
+	lamp_flash_if (LM_RAMP_250K,
+		flag_test (FLAG_MULTIBALL_RUNNING) &&
+		!flag_test (FLAG_JACKPOT_LIT));
 }
 
 
@@ -299,6 +302,7 @@ CALLSET_ENTRY (mb, rudy_shot)
 	{
 		score (SC_1M);
 		flag_off (FLAG_MILLION_LIT);
+		/* no effect for this */
 	}
 }
 
@@ -308,7 +312,8 @@ CALLSET_ENTRY (mb, sw_ramp_exit)
 	if (multiball_mode_running_p ())
 	{
 		score (SC_250K);
-		light_jackpot ();
+		if (flag_test (FLAG_MULTIBALL_RUNNING))
+			light_jackpot ();
 	}
 }
 
