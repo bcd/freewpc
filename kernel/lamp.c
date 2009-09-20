@@ -459,7 +459,6 @@ void lamp_all_on (void)
 	matrix_all_off (lamp_flash_matrix);
 	enable_interrupts ();
 	matrix_all_on (lamp_matrix);
-	lamp_start_update ();
 }
 
 
@@ -472,7 +471,6 @@ void lamp_all_off (void)
 	matrix_all_off (lamp_leff2_matrix);
 	enable_interrupts ();
 	matrix_all_off (lamp_matrix);
-	lamp_start_update ();
 }
 
 /*
