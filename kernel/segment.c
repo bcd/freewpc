@@ -61,6 +61,7 @@ const segbits_t seg_table[] = {
 	['+'] = SEG_VERT+SEG_MID,
 	['-'] = SEG_MID,
 	['/'] = SEG_UR_DIAG+SEG_LL_DIAG,
+	['='] = SEG_MID+SEG_BOT,
 	['\\'] = SEG_UL_DIAG+SEG_LR_DIAG,
    ['$'] = SEG_TOP+SEG_UPR_LEFT+SEG_MID+SEG_LWR_RIGHT+SEG_BOT+SEG_VERT,
    ['0'] = SEG_TOP+SEG_RIGHT+SEG_BOT+SEG_LEFT,
@@ -134,15 +135,25 @@ U8 seg_alloc_pageid;
  */
 void seg_rtt (void)
 {
-	U8 col;
-	segbits_t *valp;
+	register U8 col asm ("d");
+	register segbits_t *valp asm ("x");
 	
 	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
 	writeb (WPC_ALPHA_POS, col);
 
+#ifdef __m6809__
+	asm ("ldx\t*_seg_visible_page");
+	asm ("abx");
+	asm ("abx");
+	asm ("ldd\t,x");
+	asm ("std\t16364");
+	asm ("ldd\t32,x");
+	asm ("std\t16366");
+#else
 	valp = &(*seg_visible_page)[0][col];
 	writew (WPC_ALPHA_ROW1, *valp);
 	writew (WPC_ALPHA_ROW2, *(valp + SEG_SECTION_SIZE));
+#endif
 }
 
 
