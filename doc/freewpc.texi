@@ -296,7 +296,7 @@ variables are optional; suitable defaults will be used.
 
 @section Making the ROM
 
-To compile, just run @command{make}.  This will build a ROM and optionally
+After configuring, type @command{make}.  This will build a ROM and optionally
 install it into your PinMAME ROM directory if you have said where that is.
 
 The exact commands are not printed, but you can force the details to be
@@ -365,6 +365,7 @@ asxxxx asembler tools into object files with the @file{.o}
 extension.
 
 @item Compiling Page Headers
+
 Because the linker requires each section to contain at
 least one object file, a dummy file is assembly per
 section to ensure that this doesn't happen.  The page
@@ -839,17 +840,21 @@ its view of all of the switches in memory.  The user APIs can then query this
 data.
 
 Less frequently, the driver will also detect when switches have
-@emph{changed state}, and may invoke event handlers for these.  Each
-switch entry in the machine configuration file can declare the following
-flags per switch:
+@emph{changed state}, and may invoke event handlers for these.
+
+Each switch entry in the machine configuration file can declare the following
+flags per switch, which alter the way that the switching code will manage
+it:
 
 @itemize @code
 
 @item SW_OPTICAL
+
 Says that this is an optical switch, which is active low rather than
 active high.
 
 @item SW_EDGE
+
 Says that the switch event should be thrown when it goes inactive, in
 addition to when it goes active.  Handlers for edge switches generally
 need to check which type of transition just happened, by calling
@@ -911,12 +916,20 @@ Read all of the switches on the currently selected column.
 Read all of the dedicated switches.
 
 @item pinio_read_flippers
+
+Read all of the Fliptronic switches.
+
 @item pinio_read_flipper_buttons
+
+Read all of the Fliptronic button switches.
+
 @item pinio_read_flipper_eos
 
 Read all or some of the flipper switches.
 
 @item pinio_read_locale
+
+Read the locale indicator (jumpers or DIP switches).
 
 @item switch_poll
 
@@ -985,10 +998,11 @@ Solenoid outputs are not matrixed; they are individually writable at all times.
 A '1' value means to turn it on, and '0' to turn it off.
 
 @table @code
+
 @item pinio_write_solenoid_set (@var{bank}, @var{value})
+
 Refresh a set of 8 solenoids.
-@item pinio_read_ac_zerocross
-Return nonzero if currently at a zerocross point.
+
 @end table
 
 @subsection Pulse Drivers
@@ -999,7 +1013,16 @@ occurring simultaneously and will queue and stage them.  These
 are normally used for kickers, poppers, etc.
 
 @table @code
+
 @item sol_request
+
+Pulse a solenoid, and wait for it to be fired.  (A request may
+be delayed for a number of reasons.)
+
+@item sol_request_async
+
+Pulse a solenoid, but don't wait for it to be fired.
+
 @end table
 
 @subsection Continuous Drivers
@@ -1021,7 +1044,11 @@ except that they are momentary.  A flashlamp is
 pulsed briefly, after which it is turned off.
 
 @table @code
+
 @item flasher_pulse
+
+Pulse a flashlamp for a nominal period of time.
+
 @end table
 
 @section Zerocross Detector
@@ -1035,6 +1062,14 @@ Outside the US, this would occur when the counter is at 5.
 
 Note that the AC waveform is not synchronized to the oscillator that
 generates IRQ, so a perfect reconstruction is not possible.
+
+@table @code
+
+@item pinio_read_ac_zerocross
+
+Return nonzero if currently at a zerocross point.
+
+@end table
 
 @section Dot-Matrix Display (DMD)
 
@@ -1161,8 +1196,15 @@ any changes.
 @section Miscellaneous
 
 @table @code
+
 @item pinio_watchdog_reset
+
+Reset the hardware watchdog timer.
+
 @item pinio_active_led_toggle
+
+Toggle the diagnostic LED.
+
 @end table
 
 @section Debug Port
@@ -1517,7 +1559,7 @@ the number of balls in play.
 @node Test Mode
 @chapter Test Mode
 
-The FreeWPC test mode works similarly to the original menu system.
+The FreeWPC test mode works similarly to the original WPC menu system.
 However, there are extra options and a few important differences.
 For testing core changes to FreeWPC, it is often more convenient to use
 test mode than to play a game.
@@ -1615,7 +1657,7 @@ Tests the random number generator.
 
 @subsection Transition Test
 
-Cycles through all of the dot-matrix transition effects.
+Cycles through all of the dot-matrix or alphanumeric transition effects.
 
 @subsection Frame Test
 
@@ -1684,14 +1726,22 @@ to determine if tournament is in effect.
 Machines don't need to do much to produce a working ball search function.
 The common code knows how to pulse all of the regular solenoids.
 It also knows which solenoids @emph{not} to fire.
+
 Machines that need to handle a particular power driver in a non-standard
 way should implement a @code{ball_search} event handler, and mark the
 associated solenoid as @code{nosearch} to prevent the common code from
-touching it.
+touching it.  The @code{ball_search} handler will be called to allow
+the machine to decide what needs to be done.
+
+For example, on Funhouse, the Rudy saucer eject needs to make sure that
+the mouth is open before kicking.
 
 @section Knocker Driver
 
-@section PIC Driver
+@section Security PIC Module
+
+The PIC module will initialize the PIC correctly and refresh it
+periodically to keep it returning valid data.
 
 @section Player Local Data
 
@@ -1738,16 +1788,17 @@ characters is also defined, which allows for descenders.
 A @dfn{frame} is a full-screen bitmap, 128x32.  Since these are fairly
 common, special APIs are used to draw them that are more optimal, and
 the width/height is implied and not actually stored in the bitmap.
-A frame can have 4 colors per pixel (3 shades plus back) so
+A frame can have 4 colors per pixel (3 shades plus black) so
 the frame is actually stored as two consecutive @dfn{bit planes}.
-Each bit plane also can optionally be compressed using run-length
-encoding (RLE) or zero suppression to save space.
 
 @section Compression
 
-Frames can optionally be compressed.  The frame header includes
-a flag which indicates the compression method.  The decoders are
-written in assembly language in @code{platform/wpc/dmd.s}.
+Each bit plane of a frame can optionally be compressed using run-length
+encoding (RLE) or zero suppression to save space.  An uncompressed
+frame requires 1KB, which limits the total number of frames in a ROM
+significantly.  Every frame header includes
+a flags field, which indicates which if any compression method was used.
+The decoders are written in assembly language in @code{platform/wpc/dmd.s}.
 
 @itemize @bullet
 
@@ -1807,6 +1858,10 @@ Print an 8-bit decimal integer (declared @code{U8}).
 
 @item %E
 
+When this is the first specifier in a string, it will cause
+all output to be appended to the previous string in the print
+buffer, rather than overwriting it completely.
+
 @item %ld
 
 Print a 16-bit decimal integer (declared @code{U16}).
@@ -1849,6 +1904,15 @@ The list of all frames compiled in the ROM is defined in an
 @dfn{image map}.  This is a machine-specific file that says which
 images to copy into the final ROM image.
 
+There can be multiple frame list files.  The common code
+provides a frame list of standard images, like the FreeWPC logo,
+which go into every build.
+
+Each frame can be assigned a frame ID in the file.  The
+image linker writes the file @file{build/imagemap.h} which
+contains a list of all the frame IDs.  These are used by the
+frame drawing APIs to refer to a particular frame.
+
 @c ======================================================
 @node Native Mode
 @chapter Native Mode
@@ -1862,13 +1926,19 @@ are emulated.  Calls to @code{readb} and @code{writeb} are
 converted to call @code{linux_asic_read} or @code{linux_asic_write},
 which does the emulation.
 
+Also, because native mode runs under an existing operating system,
+the lowest-level OS features in FreeWPC are bypassed.  For example,
+the multitasking APIs are emulated using a system threads library.
+
 Other features of native mode:
 
 @itemize @bullet
 
 @item You can use GDB to debug the program.
 
-@item printf statements can be used in interrupt handlers.
+@item printf statements can be used in interrupt handlers, because
+they don't really run in interrupt context.  They are run in a
+regular user thread.
 
 @item Permanent and NVRAM variables are supported; their values are
 saved in files across program runs.  NVRAM variables are not
@@ -1897,23 +1967,25 @@ PinMAME has been modified to support a new register, the
 be used to communicate between the running program and a
 separate debug console.  The program @command{wpcdebug} is
 the console.  Run this at the same time as PinMame and you
-will see the debug messages printed out.
+will see the debug messages printed out.  The two programs
+use a socket to send data back and forth.
 
 The console also accepts keyboard input and passes it back
 to the running program.  Several keys will cause FreeWPC
 to dump some of its internal data structures.  See
 @file{common/db.c}.
 
-You need to be running a patched version of PinMAME under
-Linux for this to work.  Under PinMAME for Windows, you
-should compile the ROM with the @code{CONFIG_PARALLEL_DEBUG}
+If you cannot recompile PinMAME,
+you can compile the ROM with the @code{CONFIG_PARALLEL_DEBUG}
 option.  This will use the WPC parallel port for all debug
-messages.  Standard versions of PinMAME support this, and
+messages.  All versions of PinMAME support this, and
 will write the output to a file in the @file{nvram} directory.
+Under Windows, these files cannot be read while the program is
+still running.
 
-This virtual port is unlikely any real serial port, in that writes can
-be done infinitely fast.  It is an oversimplification but it suffices
-for its purpose.
+These virtual ports are unlike any real serial port, in that writes can
+be done infinitely fast.  FreeWPC does not do any sort of timing on
+the writes; it is an oversimplification but it works.
 
 @section @command{gdb}
 
@@ -1924,8 +1996,8 @@ itself.
 
 Start FreeWPC as usual, then from another window, run @command{make attach}.
 (See the Makefile to see what this does; you really don't need to be
-in the source tree to do it.)  gdb starts, queries the PID of the program,
-and attaches to it.  The program will stop, and you can control it from
+in the source tree to do it.)  gdb starts, searches for the PID of the program,
+and attaches to it.  The program will stop, and you can then control it from
 the gdb prompt.
 
 There are some special gdb macros provided in @file{gdbmacros}.

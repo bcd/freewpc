@@ -5,9 +5,10 @@ capabilities and how software is able to control everything in the machine.
 A much more thorough guide to the WPC and other pinball architectures
 can be found at @url{http://www.pinrepair.com/wpc/index.htm}.
 
-Note that FreeWPC is intended to be portable, and not all pinball machines
-will be architected in exactly the same way.  However, the basic software
-architecture of FreeWPC is based heavily on the way that WPC games work.
+Note that FreeWPC is intended to be portable to platforms other than
+WPC in the future.  Not all pinball machines will be architected in
+exactly the same way; however, FreeWPC is based heavily on the way that
+WPC games work.
 
 @section Overview
 
@@ -15,7 +16,7 @@ WPC pinball machines contain a number of circuit boards, some that are
 intelligent with microprocessors, and others that are passive.
 
 From 1990-1999, six different generations of machines were produced, which
-differed only slightly.
+differed only slightly.  In order of appearance:
 
 @itemize @bullet
 @item WPC Alphanumeric
@@ -86,21 +87,23 @@ internal function, or forward the request to another device.
 
 @subsection Blanking
 
-The system blanking circuit helps to protect against software
-crashes.  The ASIC drives the BLANKING signal which is carried to
-all of the other circuit boards.
-When asserted, BLANKING means to disable all output circuits.
-Blanking is initially asserted by the ASIC at powerup, and is then
-controllable from the CPU.
+The system blanking circuit protects the circuit boards during
+system initialization.  The ASIC generates the BLANKING signal which is
+carried to all of the other boards.  When asserted, BLANKING means
+to disable all output circuits.
 
-Software can disable blanking by writing to the WPC_ZEROCROSS_IRQ_CLEAR
-register.
+Blanking is initially asserted by the ASIC at powerup, so that no
+lamps or solenoids can be turned on, regardless of the states of the
+inputs from the CPU board.  Once the CPU has initialized, it writes to
+the ASIC to disable blanking.
 
 @subsection Diagnostics LED
 
-LED ?? is software-controllable by writing to bit 7 of the WPC_LEDS
-register; it can also be read.  The OS toggles this bit periodically
-to indicate that the system is alive.
+LED 3 is controlled by writing to bit 7 of the WPC_LEDS
+register; this register can also be read to get the current LED state.
+The OS toggles this bit periodically to indicate that the system is alive.
+It is also used during early fatal errors as a primitive way of
+providing an error message.
 
 @subsection Watchdog
 
@@ -118,8 +121,9 @@ The ASIC has a bit shifter which offloads the CPU from having to
 calculate shifts using multiple CPU instructions.  The 6809 does not
 have a native shift instruction for more than 1 bit at a time.
 
-The bit shifter is used to optimize setting and clearing particular
-elements of a bitmap.
+The bit shifter is used to optimize bit-level operations (set,
+clear, test, and toggle).  This is particularly useful on WPC because
+RAM is scarce; many variables are stored as bits to save space.
 
 @subsection Memory Protection
 
@@ -137,7 +141,11 @@ other vital data.
 
 @subsection Time of Day Clock
 
-The time-of-day device maintains the current calendar time.
+The time-of-day device maintains the current calendar time.  It has
+two read/write registers, which stores hours and minutes.  The clock
+continues to count even when power is turned off.
+
+Software maintains the calendar time in nonvolatile memory.
 
 @subsection High Resolution Timer
 
@@ -330,6 +338,10 @@ machines must have the following line in the machine config:
 @example
 define MACHINE_SOL_EXTBOARD1
 @end example
+
+The auxiliary board plugs into the slot formerly used by
+the alphanumeric display board; thus, alphanumeric games cannot use
+this.
 
 @section Dot Matrix Controller Board
 
