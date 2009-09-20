@@ -253,6 +253,7 @@ void tz_clock_reset (void)
 	}
 	else
 	{
+		dbprintf ("Clock resetting to home.\n");
 		/* See where the clock is and start it if it's not already home. */
 		clock_find_target = tz_clock_hour_to_opto[11] | CLK_SW_MIN00;
 		if (clock_sw != clock_find_target)
@@ -281,6 +282,7 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
 		{
 			/* CALIBRATING -> FIND */
+			dbprintf ("Calibration complete.\n");
 			tz_clock_reset ();
 		}
 		/* If calibration doesn't succeed within a certain number
@@ -319,11 +321,12 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	 * active and inactive states, start the clock. */
 	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
+		dbprintf ("Clock calibration started.\n");
 		clock_calibration_time = 80; /* 8 seconds */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
 		clock_mode = CLOCK_CALIBRATING;
-		tz_clock_start_forward ();
+		clock_mech_start_forward ();
 	}
 	else
 	{
