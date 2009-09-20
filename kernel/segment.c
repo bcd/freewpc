@@ -136,8 +136,10 @@ U8 seg_alloc_pageid;
 void seg_rtt (void)
 {
 	register U8 col asm ("d");
+#ifndef __m6809__
 	register segbits_t *valp asm ("x");
-	
+#endif
+
 	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
 	writeb (WPC_ALPHA_POS, col);
 
@@ -581,7 +583,6 @@ bool seg_trans_push_right_update (seg_page_t *src, U8 iteration)
 	if (iteration < SEG_SECTION_SIZE)
 	{
 		segbits_t *dst1 = &(*seg_writable_page)[0][0];
-		segbits_t *src1 = &(*src)[0][0];
 		seg_shift_right (dst1, SEG_SECTION_SIZE);
 		seg_shift_right (dst1+SEG_SECTION_SIZE, SEG_SECTION_SIZE);
 		(*seg_writable_page)[0][0] = (*src)[0][15-iteration];
