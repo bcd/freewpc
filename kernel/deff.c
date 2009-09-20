@@ -373,17 +373,11 @@ void deff_update (void)
 {
 	U8 previous;
 
-	deff_debug ("deff_update\n");
-
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
 	if (deff_running && (deff_running != deff_background))
-	{
-		deff_debug ("no update: running=%d, bg=%d\n",
-			deff_running, deff_background);
 		return;
-	}
 
 	/* Recalculate which display effect should run in the
 	background */
