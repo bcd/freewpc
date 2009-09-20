@@ -75,6 +75,7 @@ void fh_clock_advance (min5_t minutes)
 	if (lock_lit_p () || flag_test (FLAG_MULTIBALL_LIT) ||
 		multiball_mode_running_p ())
 		return;
+	/* BUG: saw this not work, time advanced during QuickMB */
 
 	while (minutes > 0)
 	{

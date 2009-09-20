@@ -147,12 +147,15 @@ CALLSET_ENTRY (steps, sw_lower_right_hole)
 CALLSET_ENTRY (steps, start_player)
 {
 	flag_off (FLAG_STEPS_OPEN);
+	lamplist_apply (LAMPLIST_STEPS_AWARDS, lamp_off);
 }
 
 
 CALLSET_ENTRY (steps, tilt, end_ball)
 {
 	ramp_div_stop ();
-	steps_gate_stop ();
+	flag_off (FLAG_STEPS_OPEN);
 }
 
+/* need ball search feature to open steps gate
+in case ball is stuck in there */

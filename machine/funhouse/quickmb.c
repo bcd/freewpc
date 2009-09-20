@@ -83,11 +83,11 @@ void quickmb_stop (void)
 
 CALLSET_ENTRY (quickmb, dev_tunnel_kick_attempt)
 {
-	if (in_live_game && !valid_playfield && flag_test (FLAG_QUICK_MB_RUNNING))
+	if (in_live_game && flag_test (FLAG_QUICK_MB_RUNNING))
 	{
-		while (!valid_playfield)
+		task_sleep_sec (2);
+		while (flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
 			task_sleep (TIME_133MS);
-		task_sleep_sec (1);
 	}
 }
 
@@ -95,6 +95,12 @@ CALLSET_ENTRY (quickmb, display_update)
 {
 	if (quickmb_running_p ())
 		deff_start_bg (DEFF_QUICKMB_RUNNING, 0);
+}
+
+CALLSET_ENTRY (quickmb, music_refresh)
+{
+	if (quickmb_running_p ())
+		music_request (MUS_HIGH_SCORE, PRI_GAME_MODE4);
 }
 
 CALLSET_ENTRY (quickmb, rudy_shot)

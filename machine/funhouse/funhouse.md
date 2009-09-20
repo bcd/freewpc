@@ -24,7 +24,6 @@ include platform/wpc/wpc89.md
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-define MACHINE_LACKS_PROTOS_H
 # define MACHINE_SYS11_SOUND
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
@@ -291,6 +290,7 @@ Strobe Down: PF:lamp_sort_top_to_bottom
 Strobe Left: PF:lamp_sort_right_to_left
 Strobe Right: PF:lamp_sort_left_to_right
 Clock Hours Minutes: Clock Hours, Clock Minutes
+Major PF: Gangways, Clock Minutes, Clock Hours, Mirror Awards, Ramp Awards, Steps Awards
 
 ##########################################################################
 # Containers
@@ -351,6 +351,9 @@ Special Lit: INT
 # Sound calls for well-known events
 ##########################################################################
 [system_sounds]
+Add Coin: SND_COIN
+Tilt Warning: SND_TILT_WARNING
+Tilt: SND_TILT
 
 ##########################################################################
 # Music calls for well-known events
@@ -369,11 +372,15 @@ Volume Change: MUS_RESTART_RUNNING
 1K:
 2570:
 5K:
+5130:
 10K:
 25K:
 50K:
 75K:
 100K:
+125K:
+150K:
+175K:
 200K:
 225K:
 250K:
@@ -409,24 +416,28 @@ Jackpot Lit:
 Frenzy Lit:
 Super Frenzy Lit:
 Super Frenzy Running:
-Left Plunger Open:
 Jackpot This Ball:
 Ball At Steps:
 Mirror Complete:
-Steps Lit:
+Steps Ramp Lit:
+Steps Open:
 Outlanes Lit:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
-Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED
+Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
 Bonus: page(MACHINE_PAGE), PRI_BONUS
-QuickMB Started: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED
+QuickMB Started: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_PAUSE
 QuickMB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE3
-QuickMB Score: page(MACHINE_PAGE), PRI_GAME_QUICK6
-MB 1130: page(MACHINE_PAGE), PRI_GAME_QUICK4
+QuickMB Score: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_SCORE
+MB 1130: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_PAUSE
 MB 1145: page(MACHINE_PAGE), PRI_GAME_QUICK4
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+Superdog Running: page(MACHINE_PAGE), PRI_GAME_MODE2
+SuperDog Score: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_SCORE
+Frenzy Running: page(MACHINE_PAGE), PRI_GAME_MODE5
 
 ##########################################################################
 # Lamp effects
@@ -436,11 +447,16 @@ Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Clock Vibrate: PRI_LEFF4, LAMPS(CLOCK_HOURS_MINUTES), page(MACHINE_PAGE)
 Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)
+Jackpot: PRI_LEFF8, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Shooter: PRI_LEFF2, page(MACHINE_PAGE)
+Superdog Score: PRI_LEFF3, page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:
 Ignore Jaw:
 Ramp Just Entered:
+Left Loop Started:
+Right Loop Started:
 
 [templates]
 
@@ -452,12 +468,12 @@ Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTER,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
 	timeout=TIME_3S
 
 Steps Gate: driver(duty),
 	sol=SOL_STEPS_GATE,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
 	timeout=0
 
 Eye Direction: driver(bivar),
