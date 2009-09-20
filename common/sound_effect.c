@@ -229,7 +229,7 @@ void sound_start1 (U8 channels, sound_code_t code)
 			/* If a sound call uses the music channel, this will
 			kill the background music.  Note this so that the music
 			can be restarted later. */
-			if (chid == MUSIC_CHANNEL)
+			if (chid == MUSIC_CHANNEL && sound_start_duration)
 			{
 				music_active = MUS_OFF;
 				music_flags |= MUS_DISABLED_BY_SOUND;
