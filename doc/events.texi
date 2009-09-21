@@ -52,9 +52,6 @@ firing a solenoid.
 @item bonus
 End of ball bonus has started.
 
-@item dev_@var{foo}_empty
-The device "foo" just became empty.
-
 @item dev_@var{foo}_enter
 The device "foo" was just entered (its count went up by 1).
 
@@ -66,6 +63,10 @@ A kick from device "foo" failed (its count did not change).
 
 @item dev_@var{foo}_kick_success
 A kick from device "foo" succeeded (its count went down by 1).
+
+@item device_update
+Called periodically to update any mechanical devices whose state
+changes frequently depending on a variety of factors.
 
 @item diagnostic_check
 Called after init_complete to perform further diagnostic checks.  Note
@@ -171,9 +172,13 @@ One minute of real time has elapsed, as detected by the real-time clock.
 Don't use this... it will probably be deleted.
 
 @item music_refresh
+Called periodically to update the running background music.
 
 @item replay
 A replay was just awarded.
+
+@item score_deff_start
+The default score screen display effect just started.
 
 @item score_overlay
 Thrown just after the default score screen is drawn, but before it is
