@@ -270,7 +270,7 @@ CFLAGS += -Wall -Wstrict-prototypes
 CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(BUILD_YEAR)
 
 SYSTEM_MAJOR ?= 0
-SYSTEM_MINOR ?= 91
+SYSTEM_MINOR ?= 95
 MACHINE_MAJOR ?= 0
 MACHINE_MINOR ?= 00
 CFLAGS += -DFREEWPC_MAJOR_VERSION=$(SYSTEM_MAJOR)
@@ -982,6 +982,16 @@ protos : include/$(MACHINE)/protos.h
 include/$(MACHINE)/protos.h :
 	cproto -o $@ -I include -I include/sys $(MACHINE)/*.c
 
+#
+# Build online tarball release
+#
+tarball:
+ifdef SYSTEM_MAJOR
+ifdef SYSTEM_MINOR
+	git ls-files -x '*.zip' | grep -v "^web" |\
+		xargs tar zcvf release-$(SYSTEM_MAJOR).$(SYSTEM_MINOR).tar.gz
+endif
+endif
 
 #
 # Documentation (doxygen)

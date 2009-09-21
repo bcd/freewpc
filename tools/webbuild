@@ -1,0 +1,28 @@
+#!/bin/sh
+webroot=/home/bcd/oddchange/freewpc/build/freewpc/releases
+
+# Build all of the game ROMs.
+for game in `echo afm tz wcs t2 fh`; do
+	if [ "$game" = "fh" ]; then
+		long_game="funhouse"
+	else
+		long_game=$game
+	fi
+	make DOTCONFIG="" MACHINE=$long_game clean
+	make DOTCONFIG="" GCC_VERSION=4.3.4 MACHINE=$long_game USER_TAG="\"RELEASE\""
+
+	pushd build
+	romfile=`ls -1 f${game}*.rom`
+	zipfile=`echo $romfile | sed -e "s/rom$/zip/"`
+	# echo "$romfile -> $zipfile"
+	# read akey
+	rm -f ${webroot}/${zipfile}
+	zip -9 ${webroot}/${zipfile} ${romfile}
+	chmod og+w ${webroot}/${zipfile}
+	popd
+done
+
+# Build the source tarball.
+make tarball MACHINE=tz
+mv release*.tar.gz ${webroot}/freewpc-latest.tar.gz
+

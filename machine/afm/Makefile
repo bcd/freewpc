@@ -39,7 +39,7 @@ ROM_PAGE_COUNT = 64
 #################################################
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 20
+MACHINE_MINOR = 30
 
 PINMAME_MACHINE = afm_113
 
