@@ -62,8 +62,17 @@ A2: Aux. Sol. 2, notinstalled
 A3: Aux. Sol. 3, notinstalled
 A4: Aux. Sol. 4, notinstalled
 
+[gi]
+0: G.I. String 1
+1: G.I. String 2
+2: G.I. String 3
+3: G.I. String 4
+4: G.I. String 5
+
+
 [lamplists]
 ALL: 11..88
+Ball Save: MACHINE_BALL_SAVE_LAMP
 
 [deffs]
 NULL: c_decl(deff_exit), PRI_NULL
@@ -96,8 +105,9 @@ Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 [leffs]
 NULL: PRI_NULL
 Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)
-Tilt Warning: runner, PRI_TILT_WARNING, LAMPS(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Tilt Warning: PRI_TILT_WARNING, GI(ALL), c_decl(tilt_warning_leff), page(COMMON_PAGE)
 Tilt: runner, PRI_TILT, LAMPS(ALL), GI(ALL), c_decl(no_lights_leff), page(COMMON_PAGE)
+Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE), page(COMMON_PAGE)
 
 [fonts]
 mono5:

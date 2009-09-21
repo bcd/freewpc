@@ -22,6 +22,8 @@
 
 __local__ U8 hitch_count;
 
+__local__ U8 hitch_level;
+
 
 void hitchhiker_deff (void)
 {
@@ -50,6 +52,14 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 		sound_send (SND_HITCHHIKER_DRIVE_BY);
 	}
 	bounded_increment (hitch_count, 99);
+	if (hitch_count == hitch_level)
+	{
+		SECTION_VOIDCALL (__machine__, mpf_enable);
+		if (hitch_level == 2)
+			hitch_level = 5;
+		else
+			hitch_level += 5;
+	}
 	deff_start (DEFF_HITCHHIKER);
 }
 
@@ -57,6 +67,7 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 CALLSET_ENTRY(hitch, start_player)
 {
 	hitch_count = 1;
+	hitch_level = 2;
 }
 
 

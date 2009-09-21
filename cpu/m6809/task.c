@@ -680,6 +680,7 @@ void task_dispatcher (void)
 
 	last_dispatch_time = get_sys_time ();
 	task_dispatching_ok = TRUE;
+	task_current = 0;
 
 	/* Set 'first' to the first task block to try. */
 	for (tp++; ; tp++)

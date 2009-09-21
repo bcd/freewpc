@@ -165,25 +165,30 @@ extern inline U8 sol_get_bit (const solnum_t sol)
  */
 extern inline U8 sol_inverted (const solnum_t sol)
 {
+#if (MACHINE_WPC95 == 1)
+	return 0;
+#else
 	return (sol >= 32) && (sol < 40);
+#endif
 }
 
 
-/** Turn on a solenoid immediately. */
+/** Turn on a solenoid driver immediately. */
 extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
-	IOPTR w = sol_get_write_reg (sol);
-	writeb (w, (*r |= sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00));
+	*r |= sol_get_bit (sol);
 }
 
 
-/** Turn off a solenoid immediately. */
+/** Turn off a solenoid driver immediately. */
 extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
-	IOPTR w = sol_get_write_reg (sol);
-	writeb (w, (*r &= ~sol_get_bit (sol)) ^ (sol_inverted (sol) ? 0xFF : 0x00));
+	*r &= ~sol_get_bit (sol);
 }
+
+
+__effect__ void flasher_randomize (task_ticks_t delay, U16 secs);
 
 #endif /* _SYS_SOL_H */

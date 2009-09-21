@@ -49,6 +49,19 @@ typedef U16 segbits_t;
 #define SEG_MID        (SEG_MID_LEFT+SEG_MID_RIGHT)
 #define SEG_VERT       (SEG_VERT_TOP+SEG_VERT_BOT)
 
+/* Fake characters */
+
+#define SEGCHAR_ALL       0  /* Light up all segments of the display */
+#define SEGCHAR_HORIZ     1  /* Light up all horizontal segments */
+#define SEGCHAR_VERT      2  /* Light up all vertical segments */
+#define SEGCHAR_STROBE    3  /* Light up horizontal segments gradually */
+	#define SEGCHAR_STROBE_COUNT 4
+   #define SEG_STROBE0       SEG_TOP
+	#define SEG_STROBE1       (SEG_STROBE0 + SEG_UPR_LEFT+SEG_UL_DIAG+SEG_VERT_TOP+SEG_UR_DIAG+SEG_UPR_RIGHT)
+	#define SEG_STROBE2       (SEG_STROBE1 + SEG_MID)
+	#define SEG_STROBE3       (SEG_STROBE2 + SEG_LWR_LEFT+SEG_LL_DIAG+SEG_VERT_BOT+SEG_LR_DIAG+SEG_LWR_RIGHT)
+
+
 /* The dimensions of the entire display */
 
 #define SEG_SECTIONS       2
@@ -64,15 +77,46 @@ be used whenever */
 typedef segbits_t seg_section_t[SEG_SECTION_SIZE];
 typedef seg_section_t seg_page_t[SEG_SECTIONS];
 
-segbits_t seg_translate_char (char c);
+
+/**
+ * A transition descriptor.
+ */
+typedef struct
+{
+	/** An optional constructor */
+	void (*init) (void);
+
+	/** The function to update the display each step of the transition.
+	Returns FALSE if the transition is complete, or TRUE if it continues.
+	src is a pointer to the final page that is being drawn; seg_writable_page
+	will point to the destination page, which is always initialized to
+	the previous visible page upon entry. */
+	bool (*update) (seg_page_t *src, U8 iteration);
+
+	/** The amount of time to delay in between steps */
+	U8 delay;
+} seg_transition_t;
+
 segbits_t *seg_write_char (segbits_t *sa, char c);
 void seg_write_string (U8 row, U8 col, const char *s);
+void seg_write_row_center (U8 row, const char *s);
+void seg_write_row_right (U8 row, const char *s);
 U8 seg_strlen (const char *s);
 void seg_erase (void);
+void seg_fill (segbits_t segs);
 void seg_init (void);
 void seg_alloc (void);
 void seg_alloc_clean (void);
+void seg_copy_low_to_high (void);
 void seg_show (void);
+void seg_show_other (void);
 void dmd_rtt (void);
+void seg_sched_transition (seg_transition_t *trans);
+void seg_reset_transition (void);
+
+extern seg_transition_t
+	seg_trans_center_out, seg_trans_ltr, seg_trans_rtl,
+	seg_trans_fast_center_out, seg_trans_fade,
+	seg_trans_push_left, seg_trans_push_right;
 
 #endif /* _SYS_SEGMENT_H */

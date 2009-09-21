@@ -141,6 +141,8 @@ void credits_draw (void)
 
 	if (!has_credits_p ())
 	{
+		/* TODO - this message could be customized: replace coins with "money"
+		or "tokens" or "swipe card" */
 		sprintf ("INSERT COINS");
 	}
 	else
@@ -215,6 +217,7 @@ void add_credit (void)
 true if the game is in free play mode. */
 bool has_credits_p (void)
 {
+	csum_area_check (&coin_csum_info);
 #ifndef FREE_ONLY
 	if (price_config.free_play)
 		return (TRUE);
@@ -230,6 +233,7 @@ bool has_credits_p (void)
 void remove_credit (void)
 {
 #ifndef FREE_ONLY
+	csum_area_check (&coin_csum_info);
 	if (credit_count > 0)
 	{
 		pinio_nvram_unlock ();
@@ -241,9 +245,10 @@ void remove_credit (void)
 }
 
 
-/** Increment the coin units counter. */
+/** Increment the units counter for a particular slot. */
 void add_units (U8 n)
 {
+	csum_area_check (&coin_csum_info);
 	if (credit_count >= price_config.max_credits)
 		return;
 
@@ -282,6 +287,8 @@ static void do_coin (U8 slot)
 	audit_increment (&system_audits.coins_added[slot]);
 }
 
+/* TODO - use more robust drivers for the coin switches to
+prevent cheating */
 
 CALLSET_ENTRY (coin, sw_left_coin)
 {

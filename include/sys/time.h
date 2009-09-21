@@ -34,6 +34,10 @@
 #define TIME_300MS	(TIME_100MS * 3U)
 #define TIME_400MS	(TIME_100MS * 4U)
 #define TIME_500MS	(TIME_100MS * 5U)
+#define TIME_600MS	(TIME_100MS * 6U)
+#define TIME_700MS	(TIME_100MS * 7U)
+#define TIME_800MS	(TIME_100MS * 8U)
+#define TIME_900MS	(TIME_100MS * 9U)
 #define TIME_1S 		(TIME_100MS * 10U) /* 2 * 3 * 10 = 60 ticks */
 #define TIME_1500MS  (TIME_1S + TIME_500MS)
 #define TIME_2S 		(TIME_1S * 2U)     /* 120 ticks */

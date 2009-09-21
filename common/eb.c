@@ -129,6 +129,14 @@ void light_hard_extra_ball (void)
 	update_extra_ball_lamps ();
 }
 
+void eb_light_adjustable (adjval_t mem_val)
+{
+	if (mem_val == YES)
+		light_easy_extra_ball ();
+	else
+		light_hard_extra_ball ();
+}
+
 void collect_extra_ball (void)
 {
 	if (hard_extra_balls_lit)
@@ -153,6 +161,7 @@ CALLSET_ENTRY (extra_ball, start_player)
 CALLSET_ENTRY (extra_ball, start_game)
 {
 	extra_balls = 0;
+	extra_balls_earned_this_bip = 0;
 }
 
 CALLSET_ENTRY (extra_ball, start_ball)

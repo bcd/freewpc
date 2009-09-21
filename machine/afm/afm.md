@@ -6,17 +6,15 @@
 #--------------------------------------------------------------------------
 
 Title: Attack From Mars
-DMD: Yes
-Fliptronic: Yes
-DCS: Yes
-PIC: Yes
-WPC95: Yes
+include platform/wpc/wpc95.md
+
 Pinmame-Zip: afm_113b.zip
 Pinmame-ROM: afm_113b.bin
 
-include platform/wpc/wpc95.md
-
 define MACHINE_NUMBER 541
+define MACHINE_SOL_EXTBOARD1
+define MACHINE_CUSTOM_AMODE
+define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 
 [lamps]
 11: RTU Super Jets
@@ -93,11 +91,11 @@ define MACHINE_NUMBER 541
 21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane
-31: Trough Eject, opto, noplay
-32: Trough 1, trough, opto, noplay
-33: Trough 2, trough, opto, noplay
-34: Trough 3, trough, opto, noplay
-35: Trough 4, trough, opto, noplay
+31: Trough Eject, opto, noscore, noplay
+32: Trough 1, trough, opto, noscore, noplay
+33: Trough 2, trough, opto, noscore, noplay
+34: Trough 3, trough, opto, noscore, noplay
+35: Trough 4, trough, opto, noscore, noplay
 36: Left Popper, opto
 37: Right Popper, opto
 38: Left Top Lane
@@ -136,18 +134,18 @@ H1: Auto Launch, launch
 H2: Trough Eject, ballserve
 H3: Left Popper
 H4: Right Popper
-H5: L.L. Martian
-H6: U.L. Martian
+H5: L.L. Martian, nosearch
+H6: U.L. Martian, nosearch
 H7: Knocker, knocker
-H8: U.R. Martian
+H8: U.R. Martian, nosearch
 
 L1: Left Slingshot
 L2: Right Slingshot
 L3: Left Jet
 L4: Bottom Jet
 L5: Right Jet
-L6: L.R. Martian
-L7: Saucer Shake
+L6: L.R. Martian, nosearch
+L7: Saucer Shake, nosearch
 L8: Drop Target
 
 G1: Saucer Flash 5, flash
@@ -161,41 +159,47 @@ A1: Saucer Flash 2, flash
 A2: Saucer Flash 3, flash
 A3: Saucer Flash 1, flash
 A4: L. Martian Flash, flash
-A5: L.E.D. Clock
-A6: L.E.D. Data
+A5: L.E.D. Clock, nosearch
+A6: L.E.D. Data, nosearch
 A7: Strobe Light, flash
 
 F5: Right Gate
 F6: Left Gate
-F7: Divertor Power
-F8: Divertor Hold
+F7: Divertor Power, nosearch
+F8: Divertor Hold, nosearch
 
 X1: Coin Meter
 
 [gi]
+0: Lower Playfield
+1: Middle Playfield
+2: Upper Playfield
 
 [tests]
 
 #############################################################
 
 [lamplists]
-Martians: Martian 1, Martian 2, Martian 3, Martian 4, Martian 5, Martian 6, Martian 7
-Arrows: L. Loop Arrow, L. Ramp Arrow, Lock Arrow, R. Ramp Arrow, R. Loop Arrow
-Bottom Lanes: Left Outlane, Left Inlane, Right Inlane, Right Outlane
-RTU Progress: RTU Super Jets, RTU Super Jackpot, RTU Total Ann., RTU Martian MB, RTU Conquer Mars, RTU 5 Way
-Motor Bank: Motor Bank 1, Motor Bank 2, Motor Bank 3
-Jackpots: L. Loop Jackpot, L. Ramp Jackpot, Lock Jackpot, R. Ramp Jackpot, R. Loop Jackpot
 Countries: Country 1, Country 2, Country 3, Country 4, Country 5
 Locks: Lock 1, Lock 2, Lock 3
-Top Lanes: L. Top Lane, R. Top Lane
 L. Loop Count: L. Loop 1, L. Loop 2, L. Loop 3
 L. Ramp Count: L. Ramp 1, L. Ramp 2, L. Ramp 3
 R. Ramp Count: R. Ramp 1, R. Ramp 2, R. Ramp 3
 R. Loop Count: R. Loop 1, R. Loop 2, R. Loop 3
-L. Loop All: L. Loop Count, L. Loop Jackpot, L. Loop Arrow
+Arrows: L. Loop Arrow, L. Ramp Arrow, Lock Arrow, R. Ramp Arrow, R. Loop Arrow
+Jackpots: L. Loop Jackpot, L. Ramp Jackpot, Lock Jackpot, R. Ramp Jackpot, R. Loop Jackpot
+Martians: Martian 1, Martian 2, Martian 3, Martian 4, Martian 5, Martian 6, Martian 7
+Bottom Lanes: Left Outlane, Left Inlane, Right Inlane, Right Outlane
+RTU Progress: RTU Super Jets, RTU Super Jackpot, RTU Total Ann., RTU Martian MB, RTU Conquer Mars, RTU 5 Way
+Motor Bank: Motor Bank 1, Motor Bank 2, Motor Bank 3
+Countries and Attack: Countries, Attack Mars
 Lock Lane: Light Lock, Locks, Lock Jackpot, Lock Arrow
+Top Lanes: L. Top Lane, R. Top Lane
 Right Hole: Rule the Universe, Martian Attack, Stroke of Luck, Extra Ball
-Countries and Attack: Attack Mars, Countries
+L. Loop All: L. Loop Count, L. Loop Jackpot, L. Loop Arrow
+L. Ramp All: L. Ramp Count, L. Ramp Jackpot, L. Ramp Arrow
+R. Ramp All: R. Ramp Count, R. Ramp Jackpot, R. Ramp Arrow
+R. Loop All: R. Loop Count, R. Loop Jackpot, R. Loop Arrow
 
 [containers]
 Trough: trough, Trough Eject, Trough 1, Trough 2, Trough 3, Trough 4, init_max_count(4)
@@ -227,8 +231,9 @@ Right Hole: Right Popper, Right Popper
 [deffs]
 
 [leffs]
-
-Flashfest: PRI_LEFF1, page(MACHINE_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Flashfest: PRI_LEFF2, page(MACHINE_PAGE)
+Flash Random: PRI_LEFF3, page(MACHINE_PAGE)
 
 [fonts]
 

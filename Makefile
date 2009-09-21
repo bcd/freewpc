@@ -31,7 +31,7 @@ $(if $($1),,$(error $1 is not defined : $($1)))
 endef
 
 define md_config
-$(if $(shell grep ^$1:.*Yes $(M)/$(MACHINE_FILE)),y,)
+$(if $(shell grep ^$1:.*Yes $(PLATFORM_DESC)),y,)
 endef
 
 ifndef Q
@@ -58,6 +58,7 @@ M := machine/$(MACHINE)
 MMAKEFILE := $(M)/Makefile
 MACH_DESC = $(MACHINE_DIR)/$(MACHINE_FILE)
 MACHINE_DIR = machine/$(MACHINE)
+PLATFORM_DESC = $(shell grep include $(MACH_DESC) | head -n 1)
 
 top_target : default_target
 
@@ -70,10 +71,10 @@ $(eval $(call require,MACHINE_FILE))
 PLATFORM ?= wpc
 CONFIG_DMD := $(call md_config,DMD)
 CONFIG_ALPHA := $(call md_config,Alphanumeric)
-CONFIG_PIC := $(if $(shell grep ^PIC:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_FLIPTRONIC := $(if $(shell grep ^Fliptronic:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_DCS := $(if $(shell grep ^DCS:.*Yes $(M)/$(MACHINE_FILE)),y,)
-CONFIG_WPC95 := $(if $(shell grep ^WPC95:.*Yes $(M)/$(MACHINE_FILE)),y,)
+CONFIG_PIC := $(call md_config,PIC)
+CONFIG_FLIPTRONIC := $(call md_config,Fliptronic)
+CONFIG_DCS := $(call md_config,DCS)
+CONFIG_WPC95 := $(call md_config,WPC95)
 
 
 # PLATFORM says which hardware platform is targeted.  Valid values
@@ -269,7 +270,7 @@ CFLAGS += -Wall -Wstrict-prototypes
 CFLAGS += -DBUILD_MONTH=$(BUILD_MONTH) -DBUILD_DAY=$(BUILD_DAY) -DBUILD_YEAR=$(BUILD_YEAR)
 
 SYSTEM_MAJOR ?= 0
-SYSTEM_MINOR ?= 91
+SYSTEM_MINOR ?= 95
 MACHINE_MAJOR ?= 0
 MACHINE_MINOR ?= 00
 CFLAGS += -DFREEWPC_MAJOR_VERSION=$(SYSTEM_MAJOR)
@@ -297,6 +298,10 @@ endif
 ifeq ($(CONFIG_PIC),y)
 SCHED_FLAGS += -D CONFIG_PIC
 endif
+ifeq ($(CONFIG_FLIPTRONIC),y)
+SCHED_FLAGS += -D CONFIG_FLIPTRONIC
+endif
+
 
 # Fix up names based on machine definitions
 ifdef GAME_ROM_PREFIX
@@ -845,7 +850,7 @@ $(CONFIG_SRCS) : $(BLDDIR)/mach-%.c : $(MACH_DESC) $(BLDDIR)/mach-config.h
 	tools/genmachine $(MACH_DESC) $(@:$(BLDDIR)/mach-%.c=%) > $@.tmp && \
 	tools/move-if-change $@.tmp $@
 
-$(CONFIG_FILES) : tools/genmachine platform/$(PLATFORM)/$(PLATFORM).md
+$(CONFIG_FILES) : tools/genmachine $(PLATFORM_DESC)
 
 ifdef GAME_FSMS
 $(FSM_SRCS) : $(BLDDIR)/%.c : $(MACHINE_DIR)/%.fsm tools/fsmgen
@@ -893,7 +898,7 @@ callset: $(BLDDIR)/callset.o
 
 $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
-		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) # $(CALLSET_FLAGS)
+		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c)) $(CALLSET_FLAGS)
 
 .PHONY : callset_again
 callset_again:
@@ -977,6 +982,16 @@ protos : include/$(MACHINE)/protos.h
 include/$(MACHINE)/protos.h :
 	cproto -o $@ -I include -I include/sys $(MACHINE)/*.c
 
+#
+# Build online tarball release
+#
+tarball:
+ifdef SYSTEM_MAJOR
+ifdef SYSTEM_MINOR
+	git ls-files -x '*.zip' | grep -v "^web" |\
+		xargs tar zcvf release-$(SYSTEM_MAJOR).$(SYSTEM_MINOR).tar.gz
+endif
+endif
 
 #
 # Documentation (doxygen)

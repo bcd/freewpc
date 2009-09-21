@@ -13,27 +13,17 @@
 # Miscellaneous parameters are specified here.
 ##########################################################################
 Title: Fun House
-DMD: No
-Alphanumeric: Yes
-Fliptronic: No
-DCS: No
-WPC95: No
+include platform/wpc/wpc89.md
+
 #Pinmame-Zip:
 #Pinmame-ROM:
 #Lamp-Matrix-Width:
 #Lamp-Matrix-Height:
 
 ##########################################################################
-# Include standard definitions that apply to all WPC games.
-# This will set some defaults for things you leave out here.
-##########################################################################
-include platform/wpc/wpc89.md
-
-##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-define MACHINE_LACKS_ALL_INCLUDES
 # define MACHINE_SYS11_SOUND
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
@@ -103,7 +93,7 @@ define MACHINE_CUSTOM_AMODE
 64: Ramp 250K
 65: Step T
 66: Left Gangway
-67: Extra Ball
+67: Extra Ball, extra-ball
 68: Lock
 71: Mirror Ex. Ball
 72: Upper Right Jet
@@ -120,7 +110,7 @@ define MACHINE_CUSTOM_AMODE
 85: Mirror Value
 86: Step E
 87: Million
-88: Start Button, start
+88: Start Button, start, cabinet
 
 ##########################################################################
 # Switch Description
@@ -152,7 +142,7 @@ define MACHINE_CUSTOM_AMODE
 15: Steps Frenzy
 16: Upper Ramp
 17: Step S, lamp(LM_STEP_S)
-18: U.L. Jet
+18: Upper Left Jet
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
@@ -175,12 +165,12 @@ define MACHINE_CUSTOM_AMODE
 47: Left Plunger, edge
 48: Ramp Exit
 51: Dummy Jaw, opto
-52: Right Outlane
+52: Right Outlane, noplay
 53: Right Slingshot
 54: Step T, lamp(LM_STEP_T)
 55: Step Exit, opto
 56: Ramp Enter
-57: Jet Lane
+57: Jet Lane, noplay
 58: Tunnel Kickout
 61: Inner Right Inlane
 62: Right Plunger, shooter, edge, noplay
@@ -195,7 +185,7 @@ define MACHINE_CUSTOM_AMODE
 73: Outhole, outhole, noscore
 74: Center Trough, trough, noscore, noplay
 75: Upper Loop
-76: Trap Door Closed, noplay
+76: Trap Door Closed, noplay, service
 77: Upper Right Jet
 
 ##########################################################################
@@ -229,7 +219,7 @@ L2: Upper Right Jet
 L3: Lower Jet
 L4: Left Slingshot
 L5: Right Slingshot
-L6: Steps Gate
+L6: Steps Gate, nosearch
 L7: Ball Release, ballserve
 L8: Dummy Eject Hole
 
@@ -237,15 +227,15 @@ G1: Blue Flashers, flash
 G2: Dummy Flasher, flash
 G3: Clock Flashers, flash
 G4: Super Dog Flash., flash
-G5: Mouth Motor
-G6: Motor Direction
+G5: Mouth Motor, motor
+G6: Motor Direction, motor
 G7: Red Flashers, flash
 G8: Clear Flashers, flash
 
-A1: Eyes Right
-A2: Eyelids Open
-A3: Eyelids Closed
-A4: Eyes Left
+A1: Eyes Right, nosearch
+A2: Eyelids Open, nosearch
+A3: Eyelids Closed, nosearch
+A4: Eyes Left, nosearch
 
 ##########################################################################
 # General Illumination
@@ -285,13 +275,22 @@ A4: Eyes Left
 [lamplists]
 Gangways: Gangway 75K, Gangway 100K, Gangway 150K, Gangway 200K, Gangway 250K, Gangway Ex. Ball
 Clock Minutes: Clock 0 Min., Clock 5 Min., Clock 10 Min., Clock 15 Min., Clock 20 Min., Clock 25 Min., Clock 30 Min., Clock 35 Min., Clock 40 Min., Clock 45 Min., Clock 50 Min., Clock 55 Min.
-Clock Hours: Clock Hour 1, Clock Hour 2, Clock Hour 3, Clock Hour 4, Clock Hour 5, Clock Hour 6, Clock Hour 7, Clock Hour 8, Clock Hour 9, Clock Hour 10, Clock Hour 11, Clock Hour 12
+Clock Hours: Clock Hour 12, Clock Hour 1, Clock Hour 2, Clock Hour 3, Clock Hour 4, Clock Hour 5, Clock Hour 6, Clock Hour 7, Clock Hour 8, Clock Hour 9, Clock Hour 10, Clock Hour 11
 Mirror Awards: Mirror Ex. Ball, Mirror Million, Mirror Bumpers, Mirror Super Dog, Mirror Open Gate, Mirror Quick MB
 Jets: Upper Left Jet, Upper Right Jet, Lower Jet
 Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
 Top Loop: Lock, Extra Ball
 Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
 Step Targets: Step S, Step T, Step E, Step P
+Ramp Awards: Ramp Steps, Ramp 250K
+Lower Lanes: Specials, Flipper Lanes
+Circle Out: PF:lamp_sort_circle_out
+Strobe Up: PF:lamp_sort_bottom_to_top
+Strobe Down: PF:lamp_sort_top_to_bottom
+Strobe Left: PF:lamp_sort_right_to_left
+Strobe Right: PF:lamp_sort_left_to_right
+Clock Hours Minutes: Clock Hours, Clock Minutes
+Major PF: Gangways, Clock Minutes, Clock Hours, Mirror Awards, Ramp Awards, Steps Awards
 
 ##########################################################################
 # Containers
@@ -310,6 +309,7 @@ Lock: Lock Release, init_max_count(0), \
 	Lock Right, Lock Center, Lock Left
 Tunnel: Tunnel Kickout, init_max_count(0), Tunnel Kickout
 Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
+Hideout: Rudys Hideout, init_max_count(0), Rudys Hideout
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -321,27 +321,74 @@ Rudy: Dummy Eject Hole, init_max_count(0), Dummy Eject Hole
 # type of adjustment and the default value.
 ##########################################################################
 [adjustments]
+Clock 1st Start: integer, 8
+Clock 2nd Start: integer, 5
+Disable Dummy: yes_no, NO
+Disable Trapdoor: yes_no, NO
+Disable Gate: yes_no, NO
 
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
 [audits]
 Rudy Hits: INT
+Rudy Gulps: INT
+Mirror Awards: INT
+Multiball: INT
+Million Plus: INT
+Million Shots: INT
+Ramp Shots: INT
+Skill Shots: INT
+Frenzy: INT
+Super Frenzy: INT
+Trap Door Opened: INT
+Trap Door Made: INT
+3 Way Combo: INT
+4 Way Combo: INT
+Special Lit: INT
 
 ##########################################################################
 # Sound calls for well-known events
 ##########################################################################
 [system_sounds]
+Add Coin: SND_COIN
+Tilt Warning: SND_TILT_WARNING
+Tilt: SND_TILT
 
 ##########################################################################
 # Music calls for well-known events
 ##########################################################################
 [system_music]
+Start Ball: MUS_MAIN_PLUNGER
+Ball In Play: MUS_MAIN
+End Game: MUS_MAIN
+Volume Change: MUS_RESTART_RUNNING
 
 ##########################################################################
 # A list of all scores needed by the game rules.
 ##########################################################################
 [scores]
+110:
+1K:
+2570:
+5K:
+5130:
+10K:
+25K:
+50K:
+75K:
+100K:
+125K:
+150K:
+175K:
+200K:
+225K:
+250K:
+275K:
+300K:
+500K:
+750K:
+1M:
 
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.
@@ -360,23 +407,75 @@ GC: LED, 15.000.000
 # Bit flags.
 ##########################################################################
 [flags]
+Mirror Lit:
+Million Lit:
+Multiball Lit:
+Multiball Running:
+Quick MB Running:
+Jackpot Lit:
+Frenzy Lit:
+Super Frenzy Lit:
+Super Frenzy Running:
+Jackpot This Ball:
+Ball At Steps:
+Mirror Complete:
+Steps Ramp Lit:
+Steps Open:
+Outlanes Lit:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
+Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
+Bonus: page(MACHINE_PAGE), PRI_BONUS
+QuickMB Started: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_PAUSE
+QuickMB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE3
+QuickMB Score: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_SCORE
+MB 1130: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_PAUSE
+MB 1145: page(MACHINE_PAGE), PRI_GAME_QUICK4
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+Superdog Running: page(MACHINE_PAGE), PRI_GAME_MODE2
+SuperDog Score: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_SCORE
+Frenzy Running: page(MACHINE_PAGE), PRI_GAME_MODE5
 
 ##########################################################################
 # Lamp effects
 ##########################################################################
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
-
-##########################################################################
-# Fonts used in this game.
-##########################################################################
-[fonts]
+Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Clock Vibrate: PRI_LEFF4, LAMPS(CLOCK_HOURS_MINUTES), page(MACHINE_PAGE)
+Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)
+Jackpot: PRI_LEFF8, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
+Shooter: PRI_LEFF2, page(MACHINE_PAGE)
+Superdog Score: PRI_LEFF3, page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:
 Ignore Jaw:
+Ramp Just Entered:
+Left Loop Started:
+Right Loop Started:
+
+[templates]
+
+Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLINGSHOT, ontime=4, offtime=20
+Right Sling: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT, ontime=4, offtime=20
+Left Jet: driver(spsol), sw=SW_UPPER_LEFT_JET, sol=SOL_UPPER_LEFT_JET, ontime=4, offtime=20
+Right Jet: driver(spsol), sw=SW_UPPER_RIGHT_JET, sol=SOL_UPPER_RIGHT_JET, ontime=4, offtime=20
+Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+
+Ramp Div: driver(duty),
+	sol=SOL_RAMP_DIVERTER,
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
+	timeout=TIME_3S
+
+Steps Gate: driver(duty),
+	sol=SOL_STEPS_GATE,
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, \
+	timeout=0
+
+Eye Direction: driver(bivar),
+	forward_sol=SOL_EYES_RIGHT, reverse_sol=SOL_EYES_LEFT
+

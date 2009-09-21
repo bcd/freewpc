@@ -1,6 +1,7 @@
 
 #include <freewpc.h>
 
+U8 lamplist;
 
 void flashleff_entry (void)
 {
@@ -39,5 +40,31 @@ void flashfest_leff (void)
 	flashleff_spawn (FLASH_SAUCER_FLASH_6);
 	task_kill_peers ();
 	leff_exit ();
+}
+
+void flash_random_leff (void)
+{
+	flasher_randomize (TIME_166MS, 3);
+	leff_exit ();
+}
+
+static void amode_leff1 (void)
+{
+	register U8 my_lamplist = lamplist;
+	lamplist_set_apply_delay (TIME_66MS);
+	for (;;)
+		lamplist_apply (my_lamplist, leff_toggle);
+}
+
+
+void amode_leff (void)
+{
+	triac_leff_enable (TRIAC_GI_MASK);
+	for (lamplist = LAMPLIST_MARTIANS; lamplist <= LAMPLIST_R_LOOP_ALL; lamplist++)
+	{
+		leff_create_peer (amode_leff1);
+		task_sleep (TIME_66MS);
+	}
+	task_exit ();
 }
 

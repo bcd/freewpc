@@ -70,6 +70,7 @@
 #include <coin.h>
 #include <highscore.h>
 #include <preset.h>
+#include <text.h>
 
 #undef CONFIG_TEST_DURING_GAME
 
@@ -235,7 +236,9 @@ void window_init (void)
 
 void window_title (const char *title)
 {
+#if (MACHINE_DMD == 1)
 	font_render_string_center (&font_mono5, 64, 2, title);
+#endif
 }
 
 #if (MACHINE_DMD == 1)
@@ -354,10 +357,14 @@ void adj_browser_draw (void)
 		if (ad->nvram && (browser_action != ADJ_EDITING))
 			adj_edit_value = *(ad->nvram);
 
-#if (MACHINE_DMD == 1)
 		if (adj_edit_value == ad->factory_default)
+		{
+#if (MACHINE_DMD == 1)
 			font_render_string_center (&font_var5, 96, 21, "(FAC. DEFAULT)");
+#else
+			seg_write_string (1, 15, "*");
 #endif
+		}
 		dmd_copy_low_to_high ();
 
 		if (ad->nvram)
@@ -506,29 +513,28 @@ struct audit *browser_audits;
 
 audit_t default_audit_value;
 
-
 struct audit main_audits[] = {
 	{ "TOTAL EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
-	{ "RECENT EARNINGS", AUDIT_TYPE_NONE, NULL },
+	{ STR_RECENT "EARNINGS", AUDIT_TYPE_NONE, NULL },
 	{ "FREEPLAY PERCENT", AUDIT_TYPE_NONE, NULL },
 	{ "AVG. BALL TIME", AUDIT_TYPE_TIME_PER_BALL, (audit_t *)&system_audits.total_game_time },
-	{ "TIME PER CREDIT", AUDIT_TYPE_TIME_PER_CREDIT, (audit_t *)&system_audits.total_game_time },
+	{ "TIME/CREDIT", AUDIT_TYPE_TIME_PER_CREDIT, (audit_t *)&system_audits.total_game_time },
 	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
 	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
-	{ "PERCENT REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
+	{ STR_PERCENT "REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
 	{ "EXTRA BALLS", AUDIT_TYPE_INT, &system_audits.extra_balls_awarded },
-	{ "PERCENT EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
+	{ STR_PERCENT "EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
 struct audit earnings_audits[] = {
-	{ "RECENT EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
-	{ "RECENT LEFT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[0] },
-	{ "RECENT CENTER SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
-	{ "RECENT RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
-	{ "RECENT 4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
-	{ "RECENT PAID CRED.", AUDIT_TYPE_INT, &system_audits.paid_credits },
-	{ "RECENT SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
+	{ STR_RECENT "EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
+	{ STR_RECENT "LEFT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[0] },
+	{ STR_RECENT "CENTER SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
+	{ STR_RECENT "RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
+	{ STR_RECENT "4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
+	{ STR_RECENT "PAID CRED.", AUDIT_TYPE_INT, &system_audits.paid_credits },
+	{ STR_RECENT "SERV. CRED.", AUDIT_TYPE_INT, &system_audits.service_credits },
 	{ NULL, AUDIT_TYPE_NONE, NULL },
 };
 
@@ -537,15 +543,15 @@ struct audit standard_audits[] = {
 	{ "GAMES STARTED", AUDIT_TYPE_INT, &system_audits.games_started },
 	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
 	{ "TOTAL FREE PLAYS", AUDIT_TYPE_INT, &system_audits.total_free_plays },
-	{ "FREEPLAY PERCENT", AUDIT_TYPE_GAME_PERCENT, &system_audits.total_free_plays },
+	{ STR_PERCENT "FREEPLAY", AUDIT_TYPE_GAME_PERCENT, &system_audits.total_free_plays },
 	{ "REPLAY AWARDS", AUDIT_TYPE_INT, &system_audits.replays },
-	{ "PERCENT REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
+	{ STR_PERCENT "REPLAYS", AUDIT_TYPE_GAME_PERCENT, &system_audits.replays },
 	{ "SPECIAL AWARDS", AUDIT_TYPE_INT, &system_audits.specials },
-	{ "PERCENT SPECIAL", AUDIT_TYPE_GAME_PERCENT, &system_audits.specials },
+	{ STR_PERCENT "SPECIAL", AUDIT_TYPE_GAME_PERCENT, &system_audits.specials },
 	{ "MATCH AWARDS", AUDIT_TYPE_INT, &system_audits.match_credits },
-	{ "PERCENT MATCH", AUDIT_TYPE_GAME_PERCENT, &system_audits.match_credits },
+	{ STR_PERCENT "MATCH", AUDIT_TYPE_GAME_PERCENT, &system_audits.match_credits },
 	{ "EXTRA BALLS", AUDIT_TYPE_INT, &system_audits.extra_balls_awarded },
-	{ "PERCENT EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
+	{ STR_PERCENT "EX. BALL", AUDIT_TYPE_GAME_PERCENT, &system_audits.extra_balls_awarded },
 	{ "TILTS", AUDIT_TYPE_INT, &system_audits.tilts },
 	{ "LEFT DRAINS", AUDIT_TYPE_INT, &system_audits.left_drains },
 	{ "RIGHT DRAINS", AUDIT_TYPE_INT, &system_audits.right_drains },
@@ -1260,8 +1266,13 @@ void lamplist_draw (void)
 	sprintf_far_string (names_of_lamplists + menu_selection);
 	print_row_center (&font_var5, 12);
 
+#if (MACHINE_DMD == 1)
 	sprintf ("SPEED %d", lamplist_update_speed);
 	font_render_string_center (&font_var5, 48, 21, sprintf_buffer);
+#else
+	sprintf ("SP.%d", lamplist_update_speed);
+	font_render_string_center (&font_var5, 32, 21, sprintf_buffer);
+#endif
 
 	switch (lamplist_update_mode)
 	{
@@ -1271,8 +1282,13 @@ void lamplist_draw (void)
 		case 3: sprintf ("STEP DOWN"); break;
 		case 4: sprintf ("BUILD UP"); break;
 		case 5: sprintf ("BUILD DOWN"); break;
+#if (MACHINE_DMD == 1)
 		case 6: sprintf ("ROTATE NEXT"); break;
-		case 7: sprintf ("ROTATE PREV"); break;
+		case 7: sprintf ("ROTATE PREV."); break;
+#else
+		case 6: sprintf ("ROT. NEXT"); break;
+		case 7: sprintf ("ROT. PREV."); break;
+#endif
 	}
 	font_render_string_center (&font_var5, 94, 21, sprintf_buffer);
 
@@ -1500,7 +1516,6 @@ struct menu dev_balldev_test_item = {
 /************* Transition Test ******************/
 
 #if (MACHINE_DMD == 1)
-
 dmd_transition_t *transition_table[] = {
 	&trans_scroll_up,
 	&trans_scroll_up_avg,
@@ -1515,9 +1530,20 @@ dmd_transition_t *transition_table[] = {
 	&trans_bitfade_slow,
 	&trans_bitfade_fast,
 };
+#else
+seg_transition_t *transition_table[] = {
+	&seg_trans_center_out,
+	&seg_trans_ltr,
+	&seg_trans_rtl,
+	&seg_trans_fast_center_out,
+	&seg_trans_fade,
+	&seg_trans_push_left,
+	&seg_trans_push_right,
+};
+#endif
 
 #define NUM_TRANSITIONS \
-	(sizeof (transition_table) / sizeof (dmd_transition_t *))
+	(sizeof (transition_table) / sizeof (transition_table[0]))
 
 void dev_trans_test_init (void)
 {
@@ -1527,13 +1553,33 @@ void dev_trans_test_init (void)
 }
 
 
-void dev_trans_test_enter (void)
+void dev_trans_test_task (void)
 {
+#if (MACHINE_ALPHANUMERIC == 1)
+	seg_alloc ();
+	seg_write_row_center (0, "OLD DISPLAY");
+	seg_write_row_center (1, "PAGE TEXT");
+	seg_show ();
+	task_sleep (TIME_500MS);
+	seg_alloc ();
+	seg_sched_transition (transition_table[menu_selection]);
+	seg_write_row_center (0, "NEW TEXT");
+	seg_write_row_center (1, "DISPLAY");
+	seg_show ();
+#endif
+#if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (transition_table[menu_selection]);
 	font_render_string_center (&font_fixed10, 64, 16, "TRANSITION");
 	dmd_show_low ();
+#endif
 	task_sleep_sec (1);
+	task_exit ();
+}
+
+void dev_trans_test_enter (void)
+{
+	task_create_gid1 (GID_TRANS_TEST, dev_trans_test_task);
 }
 
 struct window_ops dev_trans_test_window = {
@@ -1543,12 +1589,10 @@ struct window_ops dev_trans_test_window = {
 };
 
 struct menu dev_trans_test_item = {
-	.name = "DMD TRANSITIONS",
+	.name = "TRANS. EFFECTS",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &dev_trans_test_window, NULL } },
 };
-
-#endif
 
 /**********************************************************************/
 
@@ -2061,8 +2105,8 @@ struct menu *dev_menu_items[] = {
 	&dev_lamplist_test_item,
 	&dev_balldev_test_item,
 	&dev_random_test_item,
-#if (MACHINE_DMD == 1)
 	&dev_trans_test_item,
+#if (MACHINE_DMD == 1)
 	&dev_frametest_item,
 #endif
 	&dev_force_error_item,
@@ -2712,9 +2756,10 @@ void single_switch_draw (void)
 	const char *level;
 	const char *active;
 
+	/* Display a description of the switch */
+#if (MACHINE_DMD == 1)
 	switch_window_title ("SINGLE SWITCH");
 
-	/* Display a description of the switch */
 	(*browser_item_number) (menu_selection);
 	font_render_string_left (&font_mono5, 34, 9, sprintf_buffer);
 
@@ -2731,6 +2776,23 @@ void single_switch_draw (void)
 	font_render_string_center (&font_var5, 68, 19, sprintf_buffer);
 
 	switch_matrix_draw ();
+#endif
+#if (MACHINE_ALPHANUMERIC == 1)
+	(*browser_item_number) (menu_selection);
+	seg_write_string (1, 0, sprintf_buffer);
+
+	sprintf_far_string (names_of_switches + menu_selection);
+	seg_write_row_center (0, sprintf_buffer);
+
+	if (switch_is_opto (sel))
+		seg_write_string (1, 15, "*");
+
+	/* Display the state of the switch */
+	active = switch_poll_logical (sel) ? "ACTIVE" : "INACTIVE";
+	level = switch_poll (sel) ? "(C)" : "(O)";
+	sprintf ("%s%s", active, level);
+	seg_write_string (1, 3, sprintf_buffer);
+#endif
 	dmd_show_low ();
 }
 

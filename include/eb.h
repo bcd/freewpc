@@ -22,6 +22,7 @@
 #define _EB_H
 
 extern U8 extra_balls;
+extern U8 extra_balls_earned_this_bip;
 
 __common__ void increment_extra_balls (void);
 __common__ bool decrement_extra_balls (void);
@@ -29,7 +30,10 @@ __common__ void clear_extra_balls (void);
 
 __common__ void light_easy_extra_ball (void);
 __common__ void light_hard_extra_ball (void);
+__common__ void eb_light_adjustable (adjval_t mem_val);
 __common__ void collect_extra_ball (void);
+
+__common__ void special_award (void);
 
 #endif /* GAME_H */
 

@@ -11,7 +11,7 @@ COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/ballsave.o)
 COMMON_BASIC_OBJS +=	common/coin.o
 COMMON_BASIC_OBJS +=	common/db.o
 COMMON_BASIC_OBJS +=	common/event-audit.o
-COMMON_BASIC_OBJS +=	common/flipcode.o
+COMMON_BASIC_OBJS +=	$(if $(CONFIG_PIC),,common/flipcode.o)
 COMMON_BASIC_OBJS +=	common/initials.o
 COMMON_BASIC_OBJS +=	common/leffs.o
 COMMON_BASIC_OBJS +=	common/locale.o
@@ -64,6 +64,8 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # separated out for the same reason.  These may be placed into a
 # different ROM page.
 EFFECT_OBJS += common/effect.o
+EFFECT_OBJS += common/effect_update.o
 EFFECT_OBJS +=	common/flash.o
+EFFECT_OBJS += common/lamptimer.o
 EFFECT_OBJS +=	common/score_deff.o
 EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)

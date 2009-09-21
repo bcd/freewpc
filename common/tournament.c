@@ -36,8 +36,12 @@ void player_tournament_ready_deff (void)
 	U8 timer;
 
 	dmd_alloc_low_clean ();
+#if (MACHINE_DMD == 1)
 	font_render_string_center (&font_fixed6, 64, 5, "TOURNAMENT");
 	font_render_string_center (&font_fixed6, 64, 16, "MODE ENABLED");
+#else
+	font_render_string_center (&font_var5, 64, 5, "TOURNAMENT MODE");
+#endif
 	font_render_string_center (&font_var5, 64, 28, "PRESS START NOW");
 	dmd_show_low ();
 

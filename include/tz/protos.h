@@ -41,7 +41,6 @@ void ballsave_disable(void);
 void ballsave_launch(void);
 /* clock.c */
 void tz_dump_clock(void);
-void tz_clock_rtt(void);
 void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);

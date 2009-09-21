@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,8 +19,7 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
-
+#include <shooter_div.h>
 
 /** A count of the number of pending autolaunches. */
 U8 autofire_request_count;
@@ -54,33 +53,6 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
-void shooter_divertor_hold (void)
-{
-	U8 n;
-	for (n=0; n < 15; n++)
-	{
-		sol_start (SOL_SHOOTER_DIV, SOL_DUTY_50, TIME_1S);
-		task_sleep (TIME_500MS);
-	}
-	sol_stop (SOL_SHOOTER_DIV);
-	task_exit ();
-}
-
-void shooter_divertor_start (void)
-{
-	sol_start (SOL_SHOOTER_DIV, SOL_DUTY_100, TIME_500MS);
-	task_sleep (TIME_200MS);
-	task_recreate_gid (GID_SHOOTER_DIVERTOR_HOLD, shooter_divertor_hold);
-
-}
-
-void shooter_divertor_stop (void)
-{
-	task_kill_gid (GID_SHOOTER_DIVERTOR_HOLD);
-	sol_stop (SOL_SHOOTER_DIV);
-}
-
-
 /** A task that manages the autolaunching of balls.
 Upon entry, the autofire divertor solenoid is already pulsing
 and a ball is being kicked from the trough. */
@@ -91,14 +63,14 @@ void autofire_monitor (void)
 	timings are variable. */
 	if (shooter_div_delay_time)
 		task_sleep_sec (shooter_div_delay_time);
-	shooter_divertor_start ();
+	shooter_div_start ();
 
 	/* TODO - If the autofire switch trips during the 'open
 	time', we can abort this delay early and go ahead and
 	close the divertor.  This is safe because only one
 	ball can appear here at a time. */
 	task_sleep_sec (shooter_div_open_time);
-	shooter_divertor_stop ();
+	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
 	task_sleep (TIME_500MS);
@@ -108,7 +80,7 @@ void autofire_monitor (void)
 		task_sleep (TIME_33MS);
 
 	/* Open diverter again and kick ball. */
-	shooter_divertor_start ();
+	shooter_div_start ();
 	task_sleep (TIME_300MS);
 
 	sol_pulse (SOL_AUTOFIRE);
@@ -118,7 +90,7 @@ void autofire_monitor (void)
 	/* Say that the ball is heading into the right loop */
 	event_can_follow (autolaunch, right_loop, TIME_4S);
 	task_sleep (TIME_500MS);
-	shooter_divertor_stop ();
+	shooter_div_stop ();
 	task_exit ();
 }	
 
@@ -229,10 +201,11 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	sol_start (SOL_SHOOTER_DIV, SOL_DUTY_100, TIME_500MS);
-	task_sleep (TIME_100MS);
-	sol_start (SOL_SHOOTER_DIV, SOL_DUTY_25, TIME_1S);
-	sol_pulse (SOL_AUTOFIRE);
+	shooter_div_start ();
+	task_sleep (TIME_1S);
+	sol_request (SOL_AUTOFIRE);
+	task_sleep (TIME_1S);
+	shooter_div_stop ();
 }
 
 

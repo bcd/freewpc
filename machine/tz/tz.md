@@ -14,23 +14,13 @@
 ##########################################################################
 Title: Twilight Zone
 
-# NOTE: These next 4 lines do not belong here.  They should be
-# included via the kernel md file.
-DMD: Yes
-Fliptronic: Yes
-DCS: No
-WPC95: No
+include platform/wpc/wpc-fliptronic.md
 
 Pinmame-Zip: tz_92.zip
 Pinmame-ROM: tzone9_2.rom
 Lamp-Matrix-Width: 39
 Lamp-Matrix-Height: 29
 
-##########################################################################
-# Include standard definitions that apply to all WPC games.
-# This will set some defaults for things you leave out here.
-##########################################################################
-include platform/wpc/wpc.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
@@ -235,7 +225,7 @@ H1: Slot
 H2: Rocket Kicker
 H3: Autofire, nosearch
 H4: Popper
-H5: Right Ramp Div.
+H5: Right Ramp Div., duty(SOL_DUTY_50), time(TIME_1S)
 H6: Gumball Div.
 H7: Knocker, knocker
 H8: Outhole
@@ -334,7 +324,6 @@ Sort3: PF:lamp_sort_left_to_right
 Sort4: PF:lamp_sort_right_to_left
 Circle Out: PF:lamp_sort_circle_out
 Lock Test: PF:build_lampset_from_lock
-Ball Save: Shoot Again
 Red Lamps: COLOR:red
 White Lamps: COLOR:white
 Orange Lamps: COLOR:orange
@@ -366,11 +355,8 @@ Rocket: Rocket Kicker, \
 Slot: Slot, \
 	Slot
 
-[shots]
-Left Loop Complete:
-Left Loop Aborted:
-Right Loop Complete:
-Right Loop Aborted:
+Popper: Popper, \
+	Gumball Popper
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -569,7 +555,6 @@ Multi Strobe: PRI_LEFF2, LAMPS(ALL), page(MACHINE_PAGE)
 Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL), page(MACHINE_PAGE)
 Left Loop: PRI_LEFF1, LAMPS(SORT3), page(MACHINE_PAGE)
 Right Loop: PRI_LEFF1, LAMPS(SORT4), page(MACHINE_PAGE)
-Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)
@@ -592,14 +577,23 @@ Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
 
-#Clock Forward: driver(duty),
-#	sol=SOL_CLOCK_FORWARD,
-#	ontime=0, duty_ontime=TIME_16MS, duty_offtime=clock_speed, timeout=TIME_2S
-#Clock Reverse: driver(duty),
-#	sol=SOL_CLOCK_REVERSE,
-#	ontime=0, duty_ontime=TIME_16MS, duty_offtime=clock_speed, timeout=TIME_2S
-
 Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
+
+Bridge Open: driver(duty),
+	sol=SOL_RIGHT_RAMP_DIV,
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=TIME_4S
+
+Shooter Div: driver(duty),
+	sol=SOL_SHOOTER_DIV,
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_4S
+
+Ramp Div: driver(duty),
+	sol=SOL_RAMP_DIVERTOR,
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_3S
+
+Gumball Div: driver(duty),
+	sol=SOL_GUMBALL_DIV,
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_4S
 

@@ -150,7 +150,7 @@ typedef struct
 	adjval_t max_credits;
 	adjval_t free_play;
 	adjval_t hide_coin_audits;
-	adjval_t one_coin_buyin;
+	adjval_t one_coin_buyin; /* ignored */
 	adjval_t base_coin_size;
 	adjval_t coin_meter_units;
 	adjval_t dollar_bill_slot;

@@ -418,6 +418,7 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry;
 	bool state, newstate;
+	lamp_boolean_operator_t test = matrix_test_operator (matrix);
 
 	/* Lamp states rotate up to higher numbers.
 	 * L0 = old Ln
@@ -427,13 +428,13 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 	 * Ln = old Ln-1
 	 */
 	page_push (MD_PAGE);
-	state = lamp_test (*(lamplist_last_entry (set)));
+	state = test (*(lamplist_last_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
 		if (lamplist_macro_entry (*entry))
 			continue;
-		newstate = ((matrix_test_operator (matrix)) (*entry));
-		(state ? lamp_on : lamp_off) (*entry);
+		newstate = test (*entry);
+		(state ? bit_on : bit_off) (matrix, *entry);
 		state = newstate;
 	}
 	page_pop ();
@@ -445,6 +446,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry, *prev_entry = NULL;
 	bool state;
+	lamp_boolean_operator_t test = matrix_test_operator (matrix);
 
 	/* Lamp states rotate down to lower numbers.
 	 * L0 = old L1
@@ -461,16 +463,16 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 			continue;
 		if (prev_entry)
 		{
-			state = ((matrix_test_operator (matrix)) (*entry));
-			(state ? lamp_on : lamp_off) (*prev_entry);
+			state = test (*entry);
+			(state ? bit_on : bit_off) (matrix, *prev_entry);
 			prev_entry = entry;
 		}
 	}
 
 	entry = lamplist_first_entry (set);
-	state = ((matrix_test_operator (matrix)) (*entry));
+	state = test (*entry);
 	entry = lamplist_last_entry (set);
-	(state ? lamp_on : lamp_off) (*entry);
+	(state ? bit_on : bit_off) (matrix, *entry);
 
 	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);

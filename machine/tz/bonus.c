@@ -25,8 +25,7 @@ void bonus_deff (void)
 {
 	extern U8 door_panels_started;
 
-	music_refresh ();
-	music_effect_start (MUS_FADE_BONUS, 0);
+	sample_start (MUS_FADE_BONUS, SL_500MS);
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 8, "BONUS");
@@ -53,8 +52,9 @@ void bonus_deff (void)
 	scores_draw ();
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
-	music_effect_start (MUS_FADE_EXIT, 0);
-	sound_send (SND_GREED_ROUND_BOOM);
+	sample_start (MUS_FADE_EXIT, SL_2S);
+	task_sleep (TIME_16MS);
+	sample_start (SND_GREED_ROUND_BOOM, SL_1S);
 
 	task_sleep_sec (2);
 	task_sleep (TIME_500MS);

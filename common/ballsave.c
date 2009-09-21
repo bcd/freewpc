@@ -37,8 +37,8 @@ void ball_save_leff (void)
 {
 	for (;;)
 	{
-#ifdef MACHINE_SHOOT_AGAIN_LAMP
-		leff_toggle (MACHINE_SHOOT_AGAIN_LAMP);
+#ifdef MACHINE_BALL_SAVE_LAMP
+		leff_toggle (MACHINE_BALL_SAVE_LAMP);
 #endif
 		task_sleep (TIME_100MS);
 	}
@@ -46,14 +46,14 @@ void ball_save_leff (void)
 
 void ballsave_timer_begin (void)
 {
-#ifdef LEFF_BALL_SAVE
+#ifdef MACHINE_BALL_SAVE_LAMP
 	leff_start (LEFF_BALL_SAVE);
 #endif
 }
 
 void ballsave_timer_expire (void)
 {
-#ifdef LEFF_BALL_SAVE
+#ifdef MACHINE_BALL_SAVE_LAMP
 	leff_stop (LEFF_BALL_SAVE);
 #endif
 }

@@ -19,9 +19,9 @@
  */
 
 #include <freewpc.h>
+#include <bridge_open.h>
 
-
-extern __local__ U8 mpf_enable_count;
+extern __machine__ bool mpf_ready_p (void);
 
 U8 right_ramps_entered;
 
@@ -40,23 +40,16 @@ void sw_right_ramp_enter_task (void)
 	or dump it.  Do this once for each balls that enters the
 	ramp. */
 	do {
-		if (mpf_enable_count)
+		if (mpf_ready_p ())
 		{
-			U8 n;
-			for (n = 0; n < 6; n++)
-			{
-				sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_1S);
-				task_sleep (TIME_500MS);
-			}
+			bridge_open_start ();
+			task_sleep_sec (1);
 		}
 		else
 		{
 			task_sleep_sec (2);
 			sound_send (SND_RIGHT_RAMP_EXIT);
-
-			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_50, TIME_500MS);
-			task_sleep (TIME_200MS);
-			sol_start (SOL_RIGHT_RAMP_DIV, SOL_DUTY_25, TIME_1S);
+			sol_request_async (SOL_RIGHT_RAMP_DIV);
 		}
 	} while (--right_ramps_entered > 0);
 	task_exit ();
@@ -76,7 +69,7 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 		return;
 
 	score (SC_10K);
-	if (mpf_enable_count > 0)
+	if (mpf_ready_p ())
 		sound_send (SND_RAMP_ENTERS_POWERFIELD);
 	else
 		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);

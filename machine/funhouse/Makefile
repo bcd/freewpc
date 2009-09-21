@@ -5,6 +5,8 @@
 
 MACHINE_FILE = funhouse.md
 
+MACHINE_SCHEDULE := $(M)/funhouse.sched
+
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
@@ -38,6 +40,9 @@ ROM_PAGE_COUNT = 16  # L9 uses a larger ROM
 #
 #################################################
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 80
+
 PINMAME_MACHINE = fh_l9
 
 PINMAME_GAME_ROM = funh_l9.rom
@@ -50,8 +55,13 @@ PINMAME_OTHER_ROMS = fh_u*
 
 GAME_OBJS =
 
-GAME_PAGED_OBJS = shot.o leffs.o
+GAME_PAGED_OBJS = shot.o leffs.o rudy.o trivial.o mirror.o \
+	mb.o clock.o steps.o quickmb.o superdog.o jets.o \
+	frenzy.o trapdoor.o gangway.o
 
 GAME_INCLUDES =
 
+SCHED_HEADERS += build/left_sling.h build/right_sling.h \
+	build/left_jet.h build/right_jet.h build/lower_jet.h \
+	build/ramp_div.h build/eye_direction.h build/steps_gate.h
 

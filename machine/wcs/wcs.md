@@ -6,17 +6,13 @@
 #--------------------------------------------------------------------------
 
 Title: World Cup
-DMD: Yes
-Fliptronic: Yes
-DCS: Yes
-PIC: Yes
-WPC95: No
+
+include platform/wpc/wpc-security.md
+
 Pinmame-Zip: wcs_l2.zip
 Pinmame-ROM: wcup_lx2.bin
 Lamp-Matrix-Width: 45
 Lamp-Matrix-Height: 25
-
-include platform/wpc/wpc.md
 
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
@@ -224,7 +220,6 @@ Blue Lamps: set, COLOR:blue
 Purple Lamps: set, COLOR:purple
 Circle Out: PF:lamp_sort_circle_out
 Build Up: PF:lamp_sort_bottom_to_top
-Ball Save: Shoot Again
 
 [containers]
 Trough: trough, Trough Release, Trough 5, Trough 4, Trough 3, Trough 2, Trough 1, init_max_count(5)
@@ -352,7 +347,6 @@ Kickback Relit: page(MACHINE_PAGE), PRI_GAME_QUICK2
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
-Ball Save: shared, PRI_LEFF3, LAMPS(BALL_SAVE)
 Color Cycle: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 Build Up: runner, PRI_LEFF3, LAMPS(ALL), page(MACHINE_PAGE)
 
