@@ -357,12 +357,12 @@ wait_and_recount:
 	device_update_globals ();
 
 	/*****************************************
-	 * Handle "count" limits (empty & full)
+	 * Handle device count changes
 	 *****************************************/
 	if (dev->actual_count != dev->previous_count)
 	{
 		if (dev->actual_count == 0)
-			device_call_op (dev, empty);
+			device_call_op (dev, empty); /* never used */
 		else if (dev->actual_count > dev->max_count)
 		{
 			/* When there are more balls in the device than we normally want
@@ -377,8 +377,7 @@ wait_and_recount:
 	}
 
 	/*****************************************
-	 * Handle counts that are different from
-	 * what the system wants
+	 * Handle pending kickouts
 	 *****************************************/
 	if (dev->kicks_needed > 0)
 	{
@@ -398,7 +397,6 @@ wait_and_recount:
 		else
 		{
 			/* Container has balls ready to kick */
-			dbprintf ("About to call kick_attempt\n");
 
 			/* Mark state as releasing if still idle */
 			if (dev->state == DEV_STATE_IDLE)
@@ -413,8 +411,6 @@ wait_and_recount:
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid. */
-			/* TODO - in this task context, we can wait for the queue to
-			be serviced. */
 			/* TODO - if multiple devices want to kick at the same time,
 			 * they should be staggered a bit */
 			/* TODO - the pulse strength is implied.  Would be nice to
@@ -517,6 +513,9 @@ void device_update_globals (void)
 	devicenum_t devno;
 	U8 held_balls_now = 0;
 
+	/* TODO - mostly this is called from the context of a single device.
+	Could simplify all the recounting of other devices... */
+
 	/* Recount the number of balls that are held,
 	excluding those that are locked and those in the trough. */
 	counted_balls = 0;
@@ -527,7 +526,7 @@ void device_update_globals (void)
 		counted_balls += dev->actual_count;
 
 		if (!trough_dev_p (dev))
-			if (dev->actual_count >= dev->max_count)
+			if (dev->actual_count > dev->max_count)
 				held_balls_now += dev->actual_count - dev->max_count;
 	}
 
