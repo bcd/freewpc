@@ -38,6 +38,9 @@ ROM_PAGE_COUNT = 64
 #
 #################################################
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 20
+
 PINMAME_MACHINE = afm_113
 
 PINMAME_GAME_ROM = afm_1_13.bin

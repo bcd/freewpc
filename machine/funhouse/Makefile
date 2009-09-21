@@ -40,6 +40,9 @@ ROM_PAGE_COUNT = 16  # L9 uses a larger ROM
 #
 #################################################
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 20
+
 PINMAME_MACHINE = fh_l9
 
 PINMAME_GAME_ROM = funh_l9.rom

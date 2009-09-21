@@ -42,6 +42,9 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 50
+
 PINMAME_MACHINE = tz_92
 
 PINMAME_GAME_ROM = tzone9_2.rom
