@@ -511,6 +511,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 	switch (addr)
 	{
 		case WPC_PARALLEL_STROBE_PORT:
+		case WPC_TICKET_DISPENSE:
 			break;
 
 		case WPC_PARALLEL_DATA_PORT:
@@ -742,13 +743,14 @@ U8 linux_asic_read (IOPTR addr)
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
-				return sim_switch_matrix_get ()[9];
+				return ~sim_switch_matrix_get ()[9];
 #elif (MACHINE_FLIPTRONIC == 1)
 		case WPC_FLIPTRONIC_PORT_A:
 				return ~sim_switch_matrix_get ()[9];
 #endif
 
 		case WPC_ROM_BANK:
+		case WPC_TICKET_DISPENSE:
 			return 0;
 
 		case WPCS_CONTROL_STATUS:
@@ -770,62 +772,27 @@ U8 linux_asic_read (IOPTR addr)
 }
 
 
-/** Permanent thread that handles realtime events.
+/** Realtime callback function.
  *
- * This thread monitors system timing and invokes the interrupt handlers
- * as often as needed, to simulate what would happen in a real environment.
+ * This event simulates an elapsed 1ms.
  */
-static void linux_realtime_thread (void)
+CALLSET_ENTRY (native, realtime_tick)
 {
-	struct timeval prev_time, curr_time;
 #define FIRQ_FREQ 8
 	static unsigned long next_firq_jiffies = FIRQ_FREQ;
-
-	/* TODO - boost priority of this process, so that it always
-	 * takes precedence over higher priority stuff. */
-
-	gettimeofday (&prev_time, NULL);
-	for (;;)
+	sim_jiffies++;
+	sim_time_step ();
+	if (linux_irq_enable)
+		tick_driver ();
+	if (linux_firq_enable)
 	{
-		/* Sleep a while; don't hog the system. */
-		/* Sleep for approximately 33ms */
-		task_sleep ((RT_THREAD_FREQ * TIME_33MS) / 33);
-
-		/* See how long since the last time we checked.  This
-		takes into account the actual sleep time, which is typically
-		longer on a multitasking OS, and also the length of time that
-		the previous IRQ function run took. */
-		gettimeofday (&curr_time, NULL);
-		linux_irq_pending = (curr_time.tv_usec - prev_time.tv_usec) / 1000;
-		if (linux_irq_pending < 0)
-			linux_irq_pending += 1000;
-		prev_time = curr_time;
-
-		/* IRQ is a periodic interrupt driven by an oscillator.  For
-		 * each 1ms that has elapsed, simulate an IRQ (if possible) */
-		while (linux_irq_pending-- > 0)
+		while (sim_jiffies >= next_firq_jiffies)
 		{
-			/** Advance the simulator clock, regardless */
-			sim_jiffies++;
-			sim_time_step ();
-
-			/** Invoke IRQ handler, if not masked */
-			if (linux_irq_enable)
-				tick_driver ();
-		}
-
-		/* FIRQ is generated periodically based on the display refresh rate */
-		if (linux_firq_enable)
-		{
-			while (sim_jiffies >= next_firq_jiffies)
-			{
-				do_firq ();
-				next_firq_jiffies += FIRQ_FREQ;
-			}
+			do_firq ();
+			next_firq_jiffies += FIRQ_FREQ;
 		}
 	}
 }
-
 
 
 /** A mapping from keyboard command to switch */
@@ -1086,9 +1053,11 @@ void linux_trough_init (int balls)
  */
 void linux_init (void)
 {
+	void realtime_loop (void);
+
 	/* This is done here, because the task subsystem isn't ready
 	inside main () */
-	task_create_gid_while (GID_LINUX_REALTIME, linux_realtime_thread, TASK_DURATION_INF);
+	task_create_gid_while (GID_LINUX_REALTIME, realtime_loop, TASK_DURATION_INF);
 	task_create_gid_while (GID_LINUX_INTERFACE, linux_interface_thread, TASK_DURATION_INF);
 
 	/* Initial the trough to contain all the balls.  By default,

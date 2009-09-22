@@ -1,6 +1,6 @@
 
 # Root directory for native mode compiler.
-CPU := m6809
+CPU := native
 C := cpu/$(CPU)
 
 CFLAGS =
@@ -25,4 +25,8 @@ ifeq ($(CONFIG_CURSES), y)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 NATIVE_OBJS += $(D)/ui_curses.o
+endif
+
+ifeq ($(CONFIG_SOFT_REALTIME), y)
+NATIVE_OBJS += $(C)/realtime.o
 endif
