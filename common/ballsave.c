@@ -95,7 +95,7 @@ bool ballsave_test_active (void)
 
 void ballsave_launch (void)
 {
-#if defined(CONFIG_TZ)
+#if defined(MACHINE_TZ)
 	autofire_add_ball ();
 #elif defined (DEVNO_TROUGH)
 	device_request_kick (device_entry (DEVNO_TROUGH));
