@@ -25,6 +25,12 @@
  * \brief The driver for the WPC real-time clock (RTC).
  */
 
+/* You can't be running under PinMAME and be in native mode at
+   the same time. */
+#ifdef CONFIG_NATIVE
+#undef CONFIG_PINMAME
+#endif
+
 
 /** PinMAME expects address 0x1800 in nvram to contain the
  * following date structure, as apparently all real WPC
