@@ -1,0 +1,12 @@
+The platform directory contains files that are specific to the platform --
+the target hardware that is being addressed.
+
+The wpc target is the main focus of FreeWPC at this time.
+
+The whitestar target is not working.
+
+The wpcsound target targets the WPC sound board instead of the CPU board.
+It runs but doesn't do much.
+
+The native target is for running on the host build system in simulation.
+The simulation acts like the WPC hardware but the I/O is internally executed.
