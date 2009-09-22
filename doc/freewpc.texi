@@ -5,7 +5,7 @@
 @setchapternewpage odd
 @c %**end of header
 
-@set VERSION 0.90
+@set VERSION 0.95
 @set COPYRIGHT 2006-2009
 
 @titlepage
@@ -1273,6 +1273,7 @@ Lamp effects manage both the regular lamps, plus the GI and flashers.
 * Sound and Music Effects::    Extra properties of sounds and music
 * Lamplists::                  How to work with more than one lamp at a time
 * DMD Transitions::            Wipes, fades, etc. on the display
+* Background Refresh::         Periodic updates other than display/music.
 @end menu
 
 @node Basic Effect Principles
@@ -1321,19 +1322,20 @@ retry to start it later if possible.
 The display and music should always be doing something, even when
 nothing really important is happening.  Thus, these effect modules
 implement @dfn{background effects}, a way to determine what to do
-in these circumstances.  Lamp effects do not support a background mode,
-because in that case the lamp matrix is best left alone.
+in these circumstances.  Lamp effects do not support a background mode;
+it is OK for no effect to be running, as the lamps have a default state
+that shows through.
 
 The strategy for handling background effects is as follows:  When
-no effect has been explicitly started, an event is generated:
-@code{display_update} or @code{music_refresh}.  Any module that can
+there is no explicitly started effect, an event is generated:
+either @code{display_update} or @code{music_refresh}.  Any module that can
 provide a background effect should implement these handlers.
 
-The function can decide which effect, if any, it wants to run by
+The handler can decide which effect, if any, it wants to provide by
 calling either @code{deff_start_bg} or @code{music_request}.  It passes
 the code for the deff or music plus a priority value.  After all of the
 event handlers have been invoked, the one with the highest priority
-will be started.
+wins and will be started.
 
 The common code provides many of the implementations to deal with the
 usual cases.  For example, while a game is running, the default effect
@@ -1342,46 +1344,88 @@ different circumstances: normal game play, ball at plunger, during bonus.
 
 Because handlers can use the values of other variables in the
 determination (are we in game, for example?), the calculations need to
-be redone periodically.  APIs exist to force a refresh: @code{deff_update}
-and @code{music_update}.  The system will also invoke them occasionally,
-on the order of a few times per second.
+be redone periodically.  To force a refresh of both the display and music,
+call @code{effect_update_request}.  The update will take place within the next
+100ms; the delay is intended to smooth out multiple such requests within
+a short time, and the delay is not really noticeable.
+
+When a foreground display or music effect, an update will take place
+immediately.  In this case, if display update is needed, then music is not
+updated, and vice-versa.
+
+If an update is not requested, the display and music will still be refreshed
+periodically by the system, about twice per second, as the conditions checked
+within the handlers may have changed.  Because of this, @code{effect_update_request}
+is really an optional call, and only forces the update to happen faster.
 
 @node Display Effects
 @section Display Effects
 
 Display effects are defined in the @code{[deffs]} section of the machine
 configuration file.  Both foreground and background deffs are defined here.
-Each effect can have the following properties:
+Each deff has an implementation function, a priority, and one or more of
+the following properties:
 
 @itemize @code
+
 @item D_QUEUED
+
 Says that if the effect cannot be started now, to queue it and keep
-retrying.
+retrying.  This flag should be set on higher priority messages that
+really ought to be seen by the player.
+
 @item D_TIMEOUT
+
 Only applies to D_QUEUED deffs.  Says that they should timeout
 eventually if they cannot be started.
+
 @item D_ABORTABLE
+
 Says that pressing both flipper buttons will abort this effect.
+
 @item D_PAUSE
+
 Says that while this effect is running, ball kickouts are paused.
+This flag is typically set on important instructions or on big
+scoring effects to allow the player to pause and celebrate.
+
 @item D_SCORE
+
 Says that this is a score award effect; the value of the last switch
 score is made available to the effect via the @code{score_get()} API.
+
 @item D_RESTARTABLE
+
 Says that if the effect is started when it is already running, that
 it will be restarted (normally, the second call would do nothing).
 This should generally be set on D_SCORE effects at least.
+
 @end itemize
 
 @table @code
+
 @item deff_start
+
 Starts a foreground display effect.
+
 @item deff_stop
+
 Stops a foreground display effect.
+
 @item deff_exit
+
 Exits from the currently running display effect.
+
+@item deff_nice
+
+Change the priority of the currently running display effect.
+If it drops below the priority of something else waiting, this will
+cause it to be preempted.
+
 @item deff_update
-Request an update of the background display effect.
+
+Update the background display effect.
+
 @end table
 
 @node Lamp Effects
@@ -1390,12 +1434,12 @@ Request an update of the background display effect.
 Lamp effects are defined in the @code{[leffs]} section of the machine
 configuration file.  Each lamp effect defines a function that executes
 when the effect is running, plus it says which of the lamps, flashers,
-and G.I. strings it is able to modify.  Anything else continues to show
-its current state, and if the function mistakenly tries to write to
-those other objects, it won't have any effect.
+and G.I. strings it is able to modify.  Attempts to modify unallocated
+objects have no effect.
 
 The objects allocated to a lamp effect are guaranteed to be turned off
-when the function starts.
+when the function starts, and are restored to their previous states
+when the function ends.
 
 A lamp effect can also be declared as @dfn{shared}.  A shared leff can
 run in parallel with the current running leff, and with other shared
@@ -1404,62 +1448,238 @@ effect can be masked.  Also, shared leffs run to completion and are
 never preempted.
 
 Shared leffs are usually for indicating low-priority game state
-that requires constant updating, such as when the jet bumpers are
-maxed on @emph{Twilight Zone}.  Normal leffs are intended for light
-shows.
+that requires constant updating, and where it is not appropriate to use
+the default lamp state.
+Normal leffs are intended for light shows.
 
-Lamp effects cannot be aborted like display effects; also if a normal
-leff cannot be started, it is forgotten.
+Lamp effects cannot be aborted by the flippers like display effects.
+
+If a normal leff cannot be started, it is forgotten and never queued, like
+display effects can be.
 
 @table @code
+
 @item leff_start
+
 Starts a lamp effect.
+
 @item leff_stop
+
 Stops a lamp effect.
+
+@item leff_restart
+
+Stops and then starts a lamp effect again.
+
+@item leff_on, leff_off, leff_toggle, leff_test
+
+Called from within a lamp effect, sets/gets the state of a single lamp
+that has been allocated to it.
+
 @item leff_exit
+
 Exits from the currently running lamp effect.
+
 @end table
 
 @node Sound and Music Effects
 @section Sound and Music Effects
 
+The main difference with sound and music is that the main CPU does not
+implement the effect; they are generated by a separate board.  The main
+CPU sends commands to the secondary board to request that a particular
+sound be played.  Because of this, no running task is required for the
+effect.  (Platforms other than WPC may differ in this regard.)
+
+Sounds and music may also overlap, depending on the capabilities of the
+sound board.  Each platform defines a set of independent @dfn{channels}.
+When a sound needs to be played, you can specify a subset of channels that
+it can be played on.  If one of them is free, the sound can be played.
+The system tracks which channels are free or in use.
+
+There is no easy way to know when the sound has finished playing.
+The sound board is capable of sending
+responses back to the CPU board, but this has not been explored
+thoroughly yet.  For now, sound calls need to be specify how long the
+sound will take to complete, so that the channels can be deallocated.
+Exact precision is not really necessary here, unless trying to string
+together a sequence of speech calls.
+
+The @dfn{music channel} is treated special, because it is the one used
+for the running background track.  All other sounds are transient, whereas
+the music plays in a constant loop.
+
+Some sound effects need to preempt the background music, so that both
+are not heard simultaneously.  When a sound effect allocates the music
+channel, that kills the background music first; when the temporary sound
+finishes, the background is automatically restarted.
+
 @table @code
+
 @item music_update
+
 Request an update of the background music.
+
 @item sound_start
-Start a sound effect.  This operates at a layer above @code{sound_send}.
+
+Start a sound effect.  This operates at a layer above @code{sound_send},
+which is the low-level API to send a command to the sound board.
+This API handles priority, channel allocation, and tracks the duration
+of effects.
+
+@item sample_start
+
+Start a sound sample call.
+
+@item speech_start
+
+Start a speech call.
+
+@item music_effect_start
+
+Start a music effect that preempts the background.
+
+@item music_disable
+
+Disable the background music.
+
+@item music_enable
+
+Reenable the background music.
+
+@item music_timed_disable
+
+Disable the background music for a given amount of time; it will be
+reenabled automatically once the time expires.
+
 @end table
 
 @node Lamplists
 @section Lamplists
 
-Typically, groups of lamps are often used for a
-similar purpose.  A lampset is a just of set of
-lamps that are often controlled together.  Each
-lampset has a unique ID, and is internally
-represented by an array of lamp values, terminated
-by a special lamp code named @code{LAMP_END}.
+Typically, groups of lamps are often used for a similar purpose.
+A lamplist is an ordered array of lamps that are often controlled together.
+Each lampset has a unique ID, and is internally represented by an array of
+the lamp values, terminated by a special lamp code named @code{LAMP_END}.
 
-The lampset APIs provide convenience whenever
-many lamps need to be updated at once.
+The lamplist APIs provide convenience whenever many lamps need to be updated
+at once.
+
+@table @code
+
+@item lamplist_index
+
+Return the nth member of a lamplist.
+
+@item lamplist_first_entry
+
+Return the first lamp in a lamplist.
+
+@item lamplist_last_entry
+
+Return the last lamp in a lamplist.
+
+@item lamplist_previous_entry
+
+Return the entry before a given one.
+
+@item lamplist_next_entry
+
+Return the entry after a given one.
+
+@item lamplist_apply
+
+Apply a lamp operator to all members of a lamplist.  If a break is
+encountered, a pause will occur.
+
+@item lamplist_apply_nomacro
+
+Apply a lamp operator to all members of a lamplist, ignoring breaks.
+
+@item lamplist_test_all
+
+Return true if all members pass a given boolean test.  The test operator
+lets you apply different test conditions, for example, testing the
+lamp's default state versus its flashing state.
+
+@item lamplist_test_any
+
+Return true if any member passes a given boolean test.
+
+@item lamplist_apply_leff_alternating
+
+Alternatively set and clear every member of a lamplist.  You can specify
+whether the first lamp will be set or cleared.  This can only be used inside
+lamp effects.
+
+@item lamplist_step_increment
+
+Turn off the lamp that is currently on, and turn on the next one.
+
+@item lamplist_step_decrement
+
+Turn off the lamp that is currently on, and turn on the previous one.
+
+@item lamplist_build_increment
+
+Turn on the first lamp in the list that is not on.
+
+@item lamplist_build_decrement
+
+Turn off the last lamp in the list that is on.
+
+@item lamplist_rotate_next
+
+Rotate the lamp states forward.
+
+@item lamplist_rotate_previous
+
+Rotate the lamp states backward.
+
+@end table
 
 @node DMD Transitions
 @section DMD Transitions
 
-A transition is an interim effect that runs between
-the end of one display effect and the beginning of
-another.  By default, a new effect will simply kill
-the old one and overwrite it with a new image.
+A transition is an interim effect that runs between the end of one display
+effect and the beginning of another.  By default, a new effect will simply
+kill the old one and overwrite it with a new image.
 
-Transitions are scheduled -- a handler is installed
-that runs the next time that a new image is shown.
-Instead of showing the image right away, the transition
-handler kicks in and displays some combination of
-the present view and the new one.  When the transition
-finishes, the display should consist entirely of the
-new image.
+Transitions are scheduled -- a handler is installed that runs the next
+time that a new image is shown.  Instead of showing the image right away,
+the transition handler kicks in and displays some combination of
+the present view and the new one.  When the transition finishes, the
+display should consist entirely of the new image.
 
-Currently all transitions are contained in @file{common/dmdtrans.c}.
+Currently, all DMD transitions are contained in @file{common/dmdtrans.c}
+and segment transitions are in @file{kernel/segment.c}.
+
+@node Background Refresh
+@section Background Refresh
+
+In addition to the display and music effect updates, there are a couple
+of other things that need to be refreshed periodically.  The default
+states of the lamps, outside of any running effect, sometimes need to
+change depending on a complex combination of factors.
+
+For example, consider a feature that needs to be disabled temporarily
+during any multiball.  Instead of using the lamp bit to track whether
+the feature is enabled, we should use a separate bit flag, and then
+draw the lamp if the flag is set @emph{and} the feature is not masked
+by a multiball.
+
+The @code{lamp_update} event is generated periodically by the system
+to give modules a chance to recalculate the states of the lamps.
+Currently, it is generated about once per 500ms.  Code can request
+a faster update by calling @code{effect_update_request} as before.
+
+Likewise, sometimes solenoid-driven devices require a periodic update
+as well.  Ball scoops that raise from the playfield, like the trap door
+on Funhouse, can either be up or down, and the desired state depends on
+a number of things.  A separate @code{device_update} event is thrown for
+the purpose of updating these.  It works identically to the @code{lamp_update}
+function; however, these events are generated more frequently, as they are
+more important to be right in a timely manner.
 
 @c ======================================================
 @node Ball Tracking
@@ -1540,19 +1760,20 @@ triggers a sound effect, but it can also delay the kick for some reason.
 
 The trough device is special; every game must have one.  The system
 completely handles the device events generated for the ball trough.
+
 The function @code{device_add_live} is called whenever a new ball
-is added to play.
+is successfully served.  The @dfn{live count} of the machine is the
+number of balls in play for the purposes of game code (i.e. not counting
+missing pinballs or balls locked on the playfield from previous games).
+The @code{single_ball_play} event is generated when the live count
+is reduced to 1, as at the end of multiball.  Multiball modes use handle
+this to stop properly.  There is also a @code{ball_count_change} event
+invoked on every change of the number of balls in play; some games use
+this to update playfield multipliers.
 
 Likewise, @code{device_remove_live} is called whenever a ball drains.
 It ultimately is the one that generates the @code{end_ball} event
 when all balls have drained.
-
-The trough also generates some events related to the total ball count.
-@code{single_ball_play} is generated when the total number of balls
-in play is reduced to 1,
-as at the end of multiball.  Multiball modes use this to exit.
-There is also @code{ball_count_change} invoked on every change of
-the number of balls in play.
 
 
 @c ======================================================
