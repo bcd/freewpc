@@ -194,7 +194,7 @@ extern inline void writeb (U16 addr, U8 val)
 extern inline void writew (U16 addr, U16 val)
 {
 #ifdef CONFIG_NATIVE
-	writeb (addr, val << 8);
+	writeb (addr, val >> 8);
 	writeb (addr+1, val & 0xFF);
 #else
 	*(volatile U16 *)addr = val;
