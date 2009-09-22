@@ -121,16 +121,21 @@ U8 tz_clock_opto_to_hour[] =
 #define CLK_SW_MIN45		0x4
 
 /* Switch strobe enable on the aux board */
-#define CLK_DRV_SWITCH_STROBE		0x80
+#define SOL_SWITCH_STROBE 47
+#define CLK_DRV_SWITCH_STROBE		(1 << (SOL_SWITCH_STROBE % 8))
 
-extern inline void wpc_ext1_enable (const U8 bits)
+extern inline void clock_switch_enable (void)
 {
-	io_set_bits (WPC_EXTBOARD1, bits);
+	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
+	IOPTR out = sol_get_write_reg (SOL_SWITCH_STROBE);
+	writeb (out, *in | sol_get_bit (SOL_SWITCH_STROBE));
 }
 
-extern inline void wpc_ext1_disable (const U8 bits)
+extern inline void clock_switch_disable (void)
 {
-	io_clear_bits (WPC_EXTBOARD1, bits);
+	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
+	IOPTR out = sol_get_write_reg (SOL_SWITCH_STROBE);
+	writeb (out, *in & ~sol_get_bit (SOL_SWITCH_STROBE));
 }
 
 
@@ -167,10 +172,10 @@ void tz_clock_switch_rtt (void)
 	 * bit 7 on the I/O extender switches the row input
 	 * from the switch matrix to the 9th column of clock
 	 * switches. */
-	wpc_ext1_enable (CLK_DRV_SWITCH_STROBE);
+	clock_switch_enable ();
 	clock_last_sw = clock_sw;
 	clock_sw = ~ readb (WPC_SW_ROW_INPUT);
-	wpc_ext1_disable (CLK_DRV_SWITCH_STROBE);
+	clock_switch_disable ();
 
 	/* Unless any switches change, there's nothing else to do */
 	if (unlikely (clock_sw != clock_last_sw))
