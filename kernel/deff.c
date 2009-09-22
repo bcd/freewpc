@@ -347,11 +347,11 @@ void deff_stop_all (void)
  * Called by display_update functions to signal that
  * display effect DN is a candidate for running, because
  * the necessary conditions for it are all true.
- * PRIO says what priority it has.
+ * PRIO says what priority it has; zero means use what the
+ * machine configuration says.
  */
 void deff_start_bg (deffnum_t dn, enum _priority prio)
 {
-	deff_debug ("deff_start_bg %d, prio %d\n", dn, prio);
 	if (prio == 0)
 	{
 		const deff_t *deff = &deff_table[dn];
