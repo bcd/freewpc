@@ -287,6 +287,16 @@ void sound_reset (void)
 }
 
 
+void volume_refresh (void)
+{
+	/* Use nvram value if it's sensible */
+	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
+		volume_set (current_volume);
+	else
+		volume_set (DEFAULT_VOLUME);
+}
+
+
 /** Initialize the sound board.  Because this involves a separate
 device, this function is run in the background in a separate task. */
 void sound_init (void)
@@ -338,12 +348,7 @@ void sound_board_init (void)
 #endif
 
 exit_func:
-	/* Use nvram value if it's sensible */
-	if (current_volume_checksum == ~current_volume && current_volume < MAX_VOLUME)
-		volume_set (current_volume);
-	else
-		volume_set (DEFAULT_VOLUME);
-
+	volume_refresh ();
 	sys_init_pending_tasks--;
 	task_exit ();
 }
