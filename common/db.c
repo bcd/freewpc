@@ -67,7 +67,7 @@ void db_dump_all (void)
 	switch_queue_dump ();
 	VOIDCALL (sol_req_dump);
 	VOIDCALL (triac_dump);
-	SECTION_VOIDCALL (__common__, device_debug);
+	SECTION_VOIDCALL (__common__, device_debug_all);
 }
 #endif
 
