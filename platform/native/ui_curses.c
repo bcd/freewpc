@@ -201,23 +201,9 @@ void ui_refresh_asciidmd (unsigned char *data)
 	wrefresh (display_win);
 }
 #else
-void ui_refresh_display (unsigned int x, unsigned int y, unsigned int data)
+void ui_refresh_display (unsigned int x, unsigned int y, char c)
 {
-	unsigned char c;
-
 	wmove (display_win, y+1, x+1);
-
-	switch (data)
-	{
-		case 0:
-			c = ' ';
-			break;
-
-		default:
-			c = '*';
-			break;
-	}
-
 	wprintw (display_win, "%c", c);
 	wrefresh (display_win);
 }

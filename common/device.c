@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -356,29 +356,24 @@ wait_and_recount:
 	 *****************************************/
 	device_update_globals ();
 
-	/*****************************************
-	 * Handle device count changes
-	 *****************************************/
-	if (dev->actual_count != dev->previous_count)
+	/************************************************
+	 * Handle counts larger than the device supports
+	 ************************************************/
+	if (dev->actual_count > dev->max_count)
 	{
-		if (dev->actual_count == 0)
-			device_call_op (dev, empty); /* never used */
-		else if (dev->actual_count > dev->max_count)
-		{
-			/* When there are more balls in the device than we normally want
-			to keep here, we must kick one of them out.  If multiple kicks
-			are needed, this check will occur again in the future. */
-			dev->kicks_needed++;
-			dev->kick_errors = 0;
-			/* TODO - device_request_kick (dev); would be more appropriate,
-			 * but that doesn't work when called from device context due
-			 * to live balls getting bumped */
-		}
+		/* When there are more balls in the device than we normally want
+		to keep here, we must kick one of them out.  If multiple kicks
+		are needed, this check will occur again in the future. */
+		dev->kicks_needed++;
+		dev->kick_errors = 0;
+		/* TODO - device_request_kick (dev); would be more appropriate,
+		 * but that doesn't work when called from device context due
+		 * to live balls getting bumped */
 	}
 
-	/*****************************************
-	 * Handle pending kickouts
-	 *****************************************/
+	/************************************************
+	 * Handle counts larger than what SW wants
+	 ************************************************/
 	if (dev->kicks_needed > 0)
 	{
 		if (dev->actual_count == 0)

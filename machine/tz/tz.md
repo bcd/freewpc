@@ -583,17 +583,17 @@ Clock Mech: driver(bivar),
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=TIME_4S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,
-	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_4S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_3S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Gumball Div: driver(duty),
 	sol=SOL_GUMBALL_DIV,
-	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS, timeout=TIME_4S
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
 
