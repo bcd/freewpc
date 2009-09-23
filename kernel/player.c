@@ -71,7 +71,7 @@ void player_start_game (void)
 
 	/* Clear lamps/flags */
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
-	memset (bit_matrix, 0, MAX_FLAGS);
+	memset (bit_matrix, 0, BITS_TO_BYTES (MAX_FLAGS));
 }
 
 
