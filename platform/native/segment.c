@@ -53,15 +53,17 @@ void sim_seg_write (unsigned int section, unsigned int subword, unsigned int val
 		mask = 0x00FF;
 	}
 
-	val = (*ptr & ~(mask | SEG_PERIOD | SEG_COMMA)) | val;
+	/* The new segment values are set to the previous segments that aren't
+	being touched by this update, plus the new segment values excluding
+	comma and period. */
+	val = (*ptr & ~mask) | (val & ~(SEG_PERIOD | SEG_COMMA));
 
+	/* If the segments didn't change, nothing else to do */
 	if (val == *ptr)
 		return;
 	*ptr = val;
 
-	/* if (subword == 0)
-		return; */
-
+	/* Decode the segments into a character */
 	switch (val)
 	{
 		case 0: c = ' '; break;
@@ -99,6 +101,15 @@ void sim_seg_write (unsigned int section, unsigned int subword, unsigned int val
 		case SEG_UL_DIAG+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LR_DIAG: c = 'X'; break;
 		case SEG_UL_DIAG+SEG_UR_DIAG+SEG_VERT_BOT: c = 'Y'; break;
 	   case SEG_TOP+SEG_UR_DIAG+SEG_LL_DIAG+SEG_BOT: c = 'Z'; break;
+		case SEG_UPR_LEFT+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LWR_RIGHT: c = '%'; break;
+		case SEG_UR_DIAG+SEG_LR_DIAG: c = '('; break;
+		case SEG_UL_DIAG+SEG_LL_DIAG: c = ')'; break;
+		case SEG_UL_DIAG+SEG_UR_DIAG+SEG_LL_DIAG+SEG_LR_DIAG+SEG_MID+SEG_VERT: c = '*'; break;
+		case SEG_VERT+SEG_MID: c = '+'; break;
+		case SEG_MID: c = '-'; break;
+		case SEG_UR_DIAG+SEG_LL_DIAG: c = '/'; break;
+		case SEG_MID+SEG_BOT: c = '='; break;
+		case SEG_UL_DIAG+SEG_LR_DIAG: c = '\\'; break;
 		default: c = '-'; break;
 	}
 	ui_refresh_display (sim_seg_column, section, c);
