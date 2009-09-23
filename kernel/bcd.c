@@ -44,7 +44,7 @@ void bcd_copy (bcd_t *dst, const bcd_t *src, U8 len)
 /** Adds one BCD number to another. */
 void bcd_add (bcd_t *s1, const bcd_t *s2, U8 len)
 {
-	register U8 _len asm ("m1") = len;
+	register U8 _len __m1reg__ = len;
 
 	/* Advance to just past the end */
 	s1 += _len;

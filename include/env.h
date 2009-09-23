@@ -118,11 +118,13 @@
 /* GCC6809 won't allocate the 'a' register, but we can sometimes
 generate more efficient code if 'a' is used.  In these cases,
 use __areg__ after the declaration (which must begin with 'register')
-to force use of the 'a' register. */
+to force use of the 'a' register.  Likewise for other 6809-only registers. */
 #ifdef __m6809__
 #define __areg__    asm ("a")
+#define __m1reg__   asm ("m1")
 #else
 #define __areg__
+#define __m1reg__
 #endif
 
 
