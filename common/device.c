@@ -305,25 +305,32 @@ wait_and_recount:
 			the device immediately after the kick.  The kick didn't
 			really fail, but there's no way to tell the difference. */
 
-			if (dev->kick_errors > 0)
-			{
-				dbprintf ("Kick error %d\n", dev->kick_errors);
-				device_call_op (dev, kick_failure);
-			}
+			dev->kick_errors++;
+			dbprintf ("Kick error %d\n", dev->kick_errors);
+			device_call_op (dev, kick_failure);
 
-			if (++dev->kick_errors == 5)
+			if (dev->kick_errors == (trough_dev_p (dev) ? 20 : 7))
 			{
-				/* OK, we tried 5 times and still no ball came out.
-				 * Cancel all kick requests for this device. */
+				/* OK, we tried too many times and still no ball came out.
+				 * Cancel all kick requests for this device unless it is
+				 * the trough */
 				nonfatal (ERR_FAILED_KICK);
 				dev->kicks_needed = 0;
 				dev->state = DEV_STATE_IDLE;
 			}
+			else
+			{
+				/* Wait awhile before trying again.  The more we fail, the longer
+				the delay in between tries. */
+				if (dev->kick_errors <= 3)
+					task_sleep_sec (1);
+				else
+					task_sleep_sec (5);
+			}
 		}
 		else if (dev->actual_count < dev->previous_count)
 		{
-			/* The count decreased as expected.  Hopefully by the
-			 * same number as the number of kicks requested.
+			/* The count decreased as expected.
 			 * As we only kick 1 ball at a time, then really it
 			 * only should have gone down by 1, but the logic
 			 * should work even if more than 1 ball is ejected. */
