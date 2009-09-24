@@ -2138,9 +2138,10 @@ frame drawing APIs to refer to a particular frame.
 @node Native Mode
 @chapter Native Mode
 
-Native mode lets you run the code directly on your host machine.
+Native mode lets you run FreeWPC directly on your host build machine.
 It is a form of emulation, like PinMAME, except the emulator is
-"built-in" to the game ROM itself.
+"built-in" to the game program itself.  It works on both Linux and
+Cygwin systems.
 
 The main difference in native mode is that all I/O accesses
 are emulated.  Calls to @code{readb} and @code{writeb} are
@@ -2148,27 +2149,87 @@ converted to call @code{linux_asic_read} or @code{linux_asic_write},
 which does the emulation.
 
 Also, because native mode runs under an existing operating system,
-the lowest-level OS features in FreeWPC are bypassed.  For example,
+the lowest-level OS features in FreeWPC are reimplemented.  For example,
 the multitasking APIs are emulated using a system threads library.
 
-Other features of native mode:
-
-@itemize @bullet
-
-@item You can use GDB to debug the program.
-
-@item printf statements can be used in interrupt handlers, because
-they don't really run in interrupt context.  They are run in a
-regular user thread.
-
-@item Permanent and NVRAM variables are supported; their values are
-saved in files across program runs.  NVRAM variables are not
-actually write-protected while the program is running, though.
-
-@end itemize
-
 Although FreeWPC aims to be portable to other platforms than just
-WPC, the native mode support is WPC-specific for the moment.
+WPC, native mode is WPC-specific for the moment.
+
+Native mode is most useful for debugging and testing the higher layers
+of the system, which aren't as hardware or timing dependent.
+
+To compile in native mode, just set @code{NATIVE=y} in your @file{.config}.
+Instead of a ROM, you'll get an executable that can be run directly.
+
+@section Interrupts and Threads
+
+Native mode programs are no longer realtime.  There are two main concerns related
+to scheduling.
+
+First, normal multitasking is accomplished using the @emph{pth} library, an
+open source, nonpreemptive thread library.  A thin wrapper is provided which
+has the same APIs as in 6809 mode, but which calls pth functions for the
+implementation.
+
+Idle functions must be called occasionally from a special thread, since FreeWPC
+no longer provides the scheduler.
+
+Interrupts are also simulated from an ordinary thread.  The native operating
+system probably does not allows threads to sleep for as little as 1ms; on
+most systems the minimum sleep time is on the order of 10-20ms instead.
+Thus, when the interrupt thread is woken up, it checks the system clock to see
+how much time has actually elapsed, and invokes the interrupt handler
+@emph{multiple times}.  The net effect is that interrupt handlers are invoked
+the same number of times as they would be on real hardware, but not the same
+way.
+
+@section Persistent Memory
+
+Permanent and non-volatile variables are supported; their values are
+saved in files across program runs.  Non-volatiles variables are not
+actually write-protected though.  This may be implemented in the future.
+
+@section Input and Output
+
+The native program includes a simple, curses-based user interface to show
+what it is doing.  Switches, lamps, solenoids, and GI states are redrawn in
+the window as necessary.  Also, the DMD or alphanumeric display is emulated.
+
+The UI support is separated into a separate module from the core emulation,
+and could be replaced by something more sophiscated in the future, for
+example, using a window library like Qt or GTK.
+
+Switches can be simulated by pressing keys.  The ESC key terminates the
+simulation.  Many of the key mappings are the same as what is offered in
+PinMAME.
+
+Advanced simulation techniques, such as ball movements, are only partially
+implemented at the moment.
+
+@section GDB Debugging
+
+You can use GDB to debug the native mode program.
+
+Because the program uses curses to draw, it is easiest to run gdb from a separate
+terminal and @emph{attach} to the running program.  See the gdb manual for more
+information on how this works.  Basically, you only need to know its process ID.
+
+If you are in the FreeWPC source tree, you can run @code{make attach} to do this
+automatically.  If it finds a running program, it will attach, halt the program
+(you'll see everything freeze), then give you a debugger prompt.
+
+From here, you can set breakpoints, step through the code, etc.  If the program
+crashes, you can use the @code{bt} command to get a backtrace and see exactly
+where it failed.
+
+@section Interrupt Tracing
+
+Since interrupt handlers are really just ordinary functions in native mode,
+they are much easier to debug.  You can use printf and other functions that
+would normally be off-limits.  The @code{interrupt_dbprintf} function can
+be used; in 6809 mode, this is a macro which does nothing, while in native
+mode it equates to a regular @code{dbprintf}.
+
 
 @c ======================================================
 @node Debugging
