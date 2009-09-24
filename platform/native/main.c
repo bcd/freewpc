@@ -145,9 +145,6 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-/** The current simulated system time, in IRQs */
-unsigned long sim_jiffies = 0;
-
 /** Nonzero if simulating some bad hardware */
 unsigned long sim_badness = 0;
 
@@ -779,17 +776,16 @@ U8 linux_asic_read (IOPTR addr)
 CALLSET_ENTRY (native, realtime_tick)
 {
 #define FIRQ_FREQ 8
-	static unsigned long next_firq_jiffies = FIRQ_FREQ;
-	sim_jiffies++;
+	static unsigned long next_firq_time = FIRQ_FREQ;
 	sim_time_step ();
 	if (linux_irq_enable)
 		tick_driver ();
 	if (linux_firq_enable)
 	{
-		while (sim_jiffies >= next_firq_jiffies)
+		while (realtime_read () >= next_firq_time)
 		{
 			do_firq ();
-			next_firq_jiffies += FIRQ_FREQ;
+			next_firq_time += FIRQ_FREQ;
 		}
 	}
 }

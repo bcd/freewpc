@@ -69,7 +69,6 @@ signal_readings_t *signal_chunk_alloc (void)
 void signal_update (signal_number_t signo, unsigned int state)
 {
 	signal_readings_t *sigrd;
-	extern unsigned long sim_jiffies;
 
 	/* Update last state */
 	if (state)
@@ -103,8 +102,8 @@ void signal_update (signal_number_t signo, unsigned int state)
 	}
 
 	/* Save the new state along with the timestamp of the change */
-	simlog (SLC_DEBUG, "Signal %d now %d at %ld", signo, state, sim_jiffies);
-	sigrd->t[sigrd->count++] = sim_jiffies;
+	simlog (SLC_DEBUG, "Signal %d now %d at %ld", signo, state, realtime_read ());
+	sigrd->t[sigrd->count++] = realtime_read ();
 	sigrd->prev_state = state;
 }
 
