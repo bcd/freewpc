@@ -1,0 +1,6 @@
+
+The common directory contains things that are not game-specific, but which
+are less important than the kernel files.  They are in paged ROM and require
+bank switching to access, thus a function call is a little slower.  However,
+these functions are less commonly used overall.
+
