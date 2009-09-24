@@ -161,15 +161,9 @@ TMPFILES += $(ERR)
 #######################################################################
 
 # Path to the compiler and linker
-# Define GCC4 if GCC_VERSION begins with 4.
 ifeq ($(CPU),m6809)
 GCC_ROOT = /usr/local/bin
-ifneq ($(shell echo $(GCC_VERSION) | grep ^4),)
-EXTRA_CFLAGS += -DGCC4
 CC := $(CCACHE) $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
-else
-CC := $(CCACHE) $(GCC_ROOT)/m6809-gcc-$(GCC_VERSION)
-endif
 AS = $(CC) -xassembler-with-cpp
 LD = $(GCC_ROOT)/m6809-unknown-none-ld
 REQUIRED += $(CC:$(CCACHE)=) $(LD)

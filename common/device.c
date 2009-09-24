@@ -529,13 +529,7 @@ void device_update_globals (void)
 	held_balls = held_balls_now;
 
 	/* Update count of how many balls are missing */
-#ifdef GCC4
 	missing_balls = max_balls - counted_balls;
-#else
-	/* The most recent GCC 3.4.6 can't compile this, so we
-	 * have to fake it */
-	missing_balls = 0;
-#endif
 
 	/* If 'missing' went negative, this means there are more
 	balls detected than expected. */

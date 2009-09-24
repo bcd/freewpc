@@ -332,12 +332,7 @@ a time. */
  * at once. */
 extern inline void sol_update_set (const U8 set)
 {
-	/* For some reason, GCC 4.x crashes on this function... */
-#ifdef GCC4
 	register U8 out __areg__ = *sol_get_read_reg (set * 8);
-#else
-	register U8 out = *sol_get_read_reg (set * 8);
-#endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers
 	and calculating whether or not each should be on or off. */
@@ -360,13 +355,7 @@ extern inline void sol_update_set (const U8 set)
 extern inline void sol_update_fliptronic_powered (void)
 {
 	extern U8 fliptronic_powered_coil_outputs;
-
-	/* For some reason, GCC 4.x crashes on this function... */
-#ifdef GCC4
 	register U8 out __areg__ = fliptronic_powered_coil_outputs;
-#else
-	register U8 out = fliptronic_powered_coil_outputs;
-#endif
 
 	/* Update each of the 8 solenoids in the bank, updating timers
 	and calculating whether or not each should be on or off. */
