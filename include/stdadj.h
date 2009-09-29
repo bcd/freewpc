@@ -155,7 +155,7 @@ typedef struct
 	adjval_t coin_meter_units;
 	adjval_t dollar_bill_slot;
 	adjval_t min_coin_msec;
-	adjval_t slamtilt_penalty;
+	adjval_t slamtilt_penalty; /* done */
 	adjval_t allow_hundredths;
 	adjval_t credit_fraction;
 } pricing_adj_t;
@@ -177,9 +177,9 @@ extern __nvram__ hstd_adj_t hstd_config;
 
 typedef struct
 {
-	adjval_t column_width;
-	adjval_t lines_per_page;
-	adjval_t pause_every_page;
+	adjval_t column_width; /* done */
+	adjval_t lines_per_page; /* done */
+	adjval_t pause_every_page; /* done */
 	adjval_t printer_type;
 	adjval_t serial_baud_rate;
 	adjval_t serial_dtr;
