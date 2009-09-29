@@ -468,6 +468,7 @@ void start_ball (void)
 		deff_start (DEFF_SCORE_GOAL);
 		/* Chalk game played audits at the start of the final ball */
 		audit_increment (&system_audits.total_plays);
+		audit_increment (&system_audits.nplayer_games[num_players-1]);
 	}
 
 	/* Serve a ball to the plunger, by requesting a kick from the

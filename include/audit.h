@@ -82,7 +82,7 @@ typedef struct
 	audit_t right_flippers; /* done */
 	audit_t lockup1_addr; /* done */
 	audit_t lockup1_pid_lef; /* done */
-	audit_t nplayer_games[4];
+	audit_t nplayer_games[4]; /* done */
 	audit_t exec_lockups; /* done */
 	audit_t trough_rescues;
 	audit_t chase_balls;
