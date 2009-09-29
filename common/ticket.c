@@ -36,16 +36,22 @@ U8 ticket_pulses;
 
 __fastram__ U8 ticket_connected;
 
+__local__ U8 tickets_awarded;
 
+
+/**
+ * Award 1 ticket to the player.
+ */
 void ticket_award (void)
 {
+	if (tickets_awarded >= system_config.max_tickets_per_player)
+		return;
+
+	tickets_awarded++;
+	audit_increment (&system_audits.tickets_awarded);
+
 	if (ticket_connected)
-	{
-		if (ticket_out_count < 50)
-		{
-			ticket_out_count++;
-		}
-	}
+		ticket_out_count++;
 }
 
 
@@ -61,6 +67,12 @@ CALLSET_ENTRY (ticket, idle_every_100ms)
 
 		pinio_write_ticket (ticket_pulses);
 	}
+}
+
+
+CALLSET_ENTRY (ticket, start_player)
+{
+	tickets_awarded = 0;
 }
 
 

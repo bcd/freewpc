@@ -64,7 +64,7 @@ typedef struct
 	audit_t specials; /* done */
 	audit_t match_credits; /* done */
 	audit_t hstd_credits; /* done */
-	audit_t tickets_awarded;
+	audit_t tickets_awarded; /* done */
 	audit_t extra_balls_awarded; /* done */
 	audit_t __unused_total_game_time; /* TODO */
 	audit_t minutes_on; /* done */

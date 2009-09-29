@@ -80,7 +80,7 @@ typedef struct
 	adjval_t special_award; /* done */
 	adjval_t match_award;
 	adjval_t extra_ball_ticket;
-	adjval_t max_tickets_per_player;
+	adjval_t max_tickets_per_player; /* done */
 	adjval_t match_feature; /* done */
 	adjval_t custom_message;
 	adjval_t language;
