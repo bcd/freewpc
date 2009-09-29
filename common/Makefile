@@ -24,7 +24,6 @@ COMMON_BASIC_OBJS +=	common/reset.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/rtc.o)
 COMMON_BASIC_OBJS += $(if $(CONFIG_ALPHA), common/segtrans.o)
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/service.o)
-COMMON_BASIC_OBJS +=	common/shootalert.o
 COMMON_BASIC_OBJS +=	common/start_button.o
 COMMON_BASIC_OBJS +=	common/ticket.o
 COMMON_BASIC_OBJS +=	common/tilt.o
@@ -44,14 +43,6 @@ COMMON_SW_OBJS += common/search.o
 COMMON_SW_OBJS += $(if $(CONFIG_WPC), common/status.o)
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/special.o)
 
-# TODO : Eventually we should include generic, slow device drivers here.
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_DROP), common/drop.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SHAKER), common/shaker.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_GATED), common/gated.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_SWITCHBANK), common/switchbank.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_BIDI), common/bidi.c)
-COMMON_SW_OBJS += $(if $(CONFIG_DRIVER_CAPTIVE), common/captive.c)
-
 COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
 
 # Transition objects are separated out: in time these should be broken up
@@ -68,4 +59,5 @@ EFFECT_OBJS += common/effect_update.o
 EFFECT_OBJS +=	common/flash.o
 EFFECT_OBJS += common/lamptimer.o
 EFFECT_OBJS +=	common/score_deff.o
+EFFECT_OBJS +=	common/shootalert.o
 EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)
