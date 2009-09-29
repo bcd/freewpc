@@ -226,11 +226,12 @@ extern inline void pinio_active_led_toggle (void)
 /* Printer / Parallel Port                  */
 /********************************************/
 
+#define HAVE_PARALLEL_PORT
 
 /** Writes a single byte to the parallel port.  The data
  * is first latched into the data register, then the
  * strobe line is brought low and then released. */
-extern inline void wpc_parport_write (U8 data)
+extern inline void pinio_parport_write (U8 data)
 {
 	writeb (WPC_PARALLEL_DATA_PORT, data);
 	writeb (WPC_PARALLEL_STROBE_PORT, 0x0);

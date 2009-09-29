@@ -52,7 +52,7 @@ void db_puts (const char *s)
 	while ((c = *s++) != '\0')
 	{
 #ifdef CONFIG_PARALLEL_DEBUG
-		wpc_parport_write (c);
+		pinio_parport_write (c);
 #else
 		wpc_debug_write (c);
 #endif

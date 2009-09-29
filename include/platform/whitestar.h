@@ -131,7 +131,9 @@ extern inline void pinio_active_led_toggle (void)
 /* Printer / Parallel Port                  */
 /********************************************/
 
-extern inline void wpc_parport_write (U8 data)
+#undef HAVE_PARALLEL_PORT
+
+extern inline void pinio_parport_write (U8 data)
 {
 }
 

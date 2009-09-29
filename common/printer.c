@@ -87,7 +87,7 @@ void print_char (U8 c)
 		return;
 	}
 
-	wpc_parport_write (c);
+	pinio_parport_write (c);
 	if (c == '\n')
 	{
 		printer_colno = 0;
