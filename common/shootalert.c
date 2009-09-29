@@ -24,6 +24,8 @@
  * \brief Warn the player if a ball is left on to the shooter too long.
  */
 
+/* CALLSET_SECTION (shootalert, __effect__) */
+
 #include <freewpc.h>
 
 /**
