@@ -37,6 +37,10 @@ define MACHINE_CUSTOM_AMODE
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_REPLAY_SCORE_CHOICES 10
 #define MACHINE_OUTHOLE_KICK_HOOK
+define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
+define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x15, 0x00, 0x00, 0x00 }
+define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
+define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00, 0x00, 0x00 }, { 0x00, 0x08, 0x00, 0x00, 0x00 }, { 0x00, 0x07, 0x00, 0x00, 0x00 }
 
 ##########################################################################
 # Lamp Description
@@ -390,18 +394,6 @@ Volume Change: MUS_RESTART_RUNNING
 750K:
 1M:
 
-##########################################################################
-# The default high scores.  Use GC to indicate the grand champion.
-# The parameters are the initials followed by the score value.  Periods
-# may optionally be used to group digits, but they are not necessary.
-# Commas _cannot_ be used for this purpose since they separate parameters.
-##########################################################################
-[highscores]
-GC: LED, 15.000.000
-1: BCD, 10.000.000
-2: QQQ, 9.000.000
-3: DEH, 8.000.000
-4: JND, 7.000.000
 
 ##########################################################################
 # Bit flags.
