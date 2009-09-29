@@ -46,6 +46,7 @@ const char *printout_name;
 extern struct audit main_audits[];
 extern struct audit earnings_audits[];
 extern struct audit standard_audits[];
+extern struct audit feature_audit_info[];
 
 #define print_nl() print_char ('\n')
 #define print_ff() print_char ('\f')
@@ -227,6 +228,7 @@ void print_header (void)
 	 */
 	print_string (printout_name);
 	print_line_right ("PAGE ~");
+	print_nl ();
 }
 
 
@@ -282,6 +284,8 @@ void print_all_audits (void)
 	print_audit_list ("EARNINGS AUDITS", earnings_audits);
 	print_nl ();
 	print_audit_list ("STANDARD AUDITS", standard_audits);
+	print_nl ();
+	print_audit_list ("FEATURE AUDITS", feature_audit_info);
 	print_ff ();
 }
 
