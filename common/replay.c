@@ -51,7 +51,10 @@ const struct area_csum replay_csum_info = {
 };
 
 
-/** The number of replays awarded to the current player */
+/** The number of replays already awarded to the current player
+during this game.  This is also an index into the replay_levels
+adjustment data, zero-based, which says what the next replay
+level to be awarded is */
 __local__ U8 replay_award_count;
 
 
