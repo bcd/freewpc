@@ -223,14 +223,6 @@ static void fontargs_render_string (void)
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
 
-	/* When running in native mode, and there is no DMD viewer,
-	TEXTDMD can be defined so that at least text messages can be
-	shown. */
-#ifdef CONFIG_UI
-	if (args->font != &font_bitmap_common)
-		ui_write_dmd_text (args->coord.x, args->coord.y, s);
-#endif
-
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */
 	page_push (FONT_PAGE);

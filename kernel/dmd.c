@@ -386,11 +386,6 @@ void dmd_show2 (void)
 void dmd_clean_page (dmd_buffer_t dbuf)
 {
 	__blockclear16 (dbuf, DMD_PAGE_SIZE);
-
-#ifdef CONFIG_UI
-	extern void ui_clear_dmd_text (int);
-	ui_clear_dmd_text ((dbuf == dmd_low_buffer) ? dmd_low_page : dmd_high_page);
-#endif
 }
 #endif /* __m6809__ */
 

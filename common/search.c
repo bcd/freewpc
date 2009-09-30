@@ -94,7 +94,19 @@ static bool ball_search_solenoid_ok (U8 sol)
 	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
 	{
 		if (sol == dev->props->sol)
+		{
+			/* This coil controls a ball device. */
+
+			/* If chase ball is turned off, then during the 5th ball search,
+			pulse these coils as well. */
+			if (system_config.allow_chase_ball == NO && ball_search_count == 5)
+			{
+				return (TRUE);
+			}
+
+			/* Default is NOT to fire such a coil */
 			return (FALSE);
+		}
 	}
 #endif
 
@@ -127,11 +139,13 @@ void ball_search_run (void)
 	U8 sol;
 
 	ball_search_count++;
+	dbprintf ("Ball search %d\n", ball_search_count);
 
 	/* Fire all solenoids.  Skip over solenoids known not to be
 	pertinent to ball search.  Before starting, throw an event
 	so machines can do special handling on their own. */
 	callset_invoke (ball_search);
+	task_sleep (TIME_200MS);
 
 	for (sol = 0; sol < 8*4; sol++)
 	{
@@ -148,6 +162,7 @@ void ball_search_run (void)
 }
 
 
+/** Runs a ball search in a separate task context. */
 void ball_search_run_task (void)
 {
 	ball_search_run ();
@@ -155,12 +170,15 @@ void ball_search_run_task (void)
 }
 
 
+/** Start a ball search in a separate task context. */
 void ball_search_now (void)
 {
 	task_create_gid1 (GID_BALL_SEARCH_FORCE, ball_search_run_task);
 }
 
 
+/** Set the amount of time in seconds before the next ball search will
+occur. */
 void ball_search_timeout_set (U8 secs)
 {
 	ball_search_timeout = secs;
@@ -188,7 +206,7 @@ void ball_search_monitor_task (void)
 		 * - ball is on the shooter switch
 		 * - either flipper button is held
 		 */
-		if (in_live_game && !in_bonus && live_balls
+		if (in_live_game && !in_bonus && (live_balls || !valid_playfield)
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif
@@ -202,12 +220,42 @@ void ball_search_monitor_task (void)
 				ball_search_count = 0;
 				while (ball_search_timer != 0)
 				{
+					/* Perform a ball search */
 					ball_search_run ();
 
-					/* TODO - after so many ball searches, try other
-					things, like chase ball if it's enabled. */
-					task_sleep_sec (15);
+					/* Wait a bit before searching again.  How long to wait?
+					A little while at first, then a little longer.  */
+					if (ball_search_count <= 5)
+					{
+						task_sleep_sec (10);
+					}
+					else if (ball_search_count <= 10)
+					{
+						if (system_config.allow_chase_ball == YES)
+						{
+							/* TODO : When chase ball is turned on, do not wait for
+							more than 5 ball searches.  Instead, end the current player's
+							ball, mark all outstanding balls as missing, and continue the
+							game.  Only do this if there is at least one ball in the trough. */
+						}
+						task_sleep_sec (15);
+					}
+					else
+					{
+						task_sleep_sec (20);
+					}
+
+					/* After a while, just give up -- but don't do that in tournament
+					mode or on free play; this is just to keep a location game from cycling
+					continuously. */
+					if (ball_search_count >= 25 &&
+							!price_config.free_play && !system_config.tournament_mode)
+					{
+						fatal (ERR_BALL_SEARCH_TIMEOUT);
+					}
 				}
+
+				/* A ball was seen -- clear the counter and exit */
 				ball_search_count = 0;
 			}
 		}

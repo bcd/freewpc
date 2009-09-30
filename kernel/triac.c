@@ -189,7 +189,7 @@ void triac_leff_allocate (U8 triac)
 	gi_leff_alloc |= triac;
 
 	/* By default, allocated strings are off. */
-	gi_leff_output = 0;
+	gi_leff_output &= ~triac;
 
 	/* TODO - return actually allocated strings to the caller
 	 * so that only those will be freed up on leff exit. */
@@ -202,6 +202,7 @@ void triac_leff_free (U8 triac)
 {
 	gi_clear_dimming (triac, gi_leff_dimming);
 	gi_leff_alloc &= ~triac;
+	gi_leff_output &= ~triac;
 	triac_update ();
 }
 
