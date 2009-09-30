@@ -103,6 +103,8 @@ CALLSET_ENTRY (tilt, sw_tilt)
 		return;
 	}
 
+	/* IDEA : Disable tilt while a ball search is in progress? */
+
 	else if (++tilt_warnings == system_config.tilt_warnings)
 	{
 		/* Warnings exceeded... tilt the current ball */
