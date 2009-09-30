@@ -137,7 +137,7 @@ void @self_start (void)
 	 * in case the solenoid is always running. */
 	disable_interrupts ();
 	@self_timer = @ontime;
-	@self_cycles = @timeout;
+	@self_cycles = (@timeout - @ontime) / (@duty_ontime + @duty_offtime);
 	@self_state = 1;
 	sol_enable (@sol);
 	@self_enable ();
