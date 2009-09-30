@@ -39,14 +39,6 @@ WINDOW *display_win;
 WINDOW *ball_tracker_win;
 
 
-#define TEXTDMD_WIDTH 32
-#define TEXTDMD_HEIGHT 8
-char textdmd[16][TEXTDMD_WIDTH+1][TEXTDMD_HEIGHT];
-
-int textdmd_active = 0;
-
-int textdmd_visible = 0;
-
 
 static void print_center (WINDOW *w, int x, int y, const char *format, ...)
 {
@@ -140,7 +132,7 @@ void ui_write_switch (int switchno, int on_flag)
 void ui_write_sound_command (unsigned int x)
 {
 	wmove (sound_win, 2, 2);
-	wprintw (sound_win, "%04X\n", x);
+	wprintw (sound_win, "%04X", x);
 	wrefresh (sound_win);
 }
 
@@ -163,27 +155,6 @@ void ui_write_task (int taskno, int gid)
 	else
 		wprintw (task_win, "%02d: %02d", taskno, gid);
 	wrefresh (task_win);
-}
-
-
-void ui_write_dmd_text (int x, int y, const char *text)
-{
-#ifdef TEXTDMD
-	wmove (dmd_win, 1+y/4, 6+x/4);
-	wprintw (dmd_win, text);
-	wrefresh (dmd_win);
-#endif
-}
-
-
-void ui_clear_dmd_text (int n)
-{
-#ifdef TEXTDMD
-	wclear (dmd_win);
-	box (dmd_win, 0, 0);
-	print_center (dmd_win, 20, 0, " DMD Text ");
-	wrefresh (dmd_win);
-#endif
 }
 
 
@@ -214,7 +185,7 @@ void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
 {
 	extern const char *sim_ball_location_name (unsigned int location);
 	wmove (ball_tracker_win, ballno+1, 1);
-	wprintw (ball_tracker_win, "%d: %-12.12s", ballno,
+	wprintw (ball_tracker_win, "%d: %-14.14s", ballno,
 		sim_ball_location_name (location));
 	wrefresh (ball_tracker_win);
 }
@@ -239,16 +210,12 @@ void ui_init (void)
 	triac_win = ui_window_create (12, 3, x, y+10, " Triacs ");
 	x += 20 + 2;
 
-	sound_win = ui_window_create (8, 6, x, y, " Sound ");
+	sound_win = ui_window_create (10, 6, x, y, " Sound ");
 	scrollok (sound_win, 1);
-	x += 8 + 2;
+	x += 10 + 2;
 
 	task_win = ui_window_create (40, 15, x, y, " Tasks ");
 	x += 40 + 2;
-
-#ifdef TEXTDMD
-	dmd_win = ui_window_create (40, 10, x, y, " DMD Text ");
-#endif
 
 	ball_tracker_win = ui_window_create (20, 8, x, y, " Ball Tracker ");
 	x += 20 + 2;

@@ -187,11 +187,6 @@ const U8 *dmd_draw_fif1 (const U8 *fif)
 {
 	U8 depth;
 
-#ifdef CONFIG_UI
-	extern void ui_clear_dmd_text (int);
-	ui_clear_dmd_text (0);
-#endif
-
 	/* The first byte of the FIF format is the depth, which
 	 * indicates if the frame has 2 or 4 colors. */
 	page_push (FIF_PAGE);

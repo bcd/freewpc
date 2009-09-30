@@ -431,9 +431,8 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 	{
 		unsigned int solno = index+n;
 
-		if (solno >= NUM_POWER_DRIVES)
-			return;
-		sim_coil_change (solno, val & (1 << n));
+		if (solno < SOL_COUNT)
+			sim_coil_change (solno, val & (1 << n));
 #if 0
 			/* See if it's attached to a device.  Then find the first
 			switch that is active, and deactivate it, simulating the
