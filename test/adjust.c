@@ -52,7 +52,7 @@ struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
 struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, 0, 0, lang_render };
-struct adjustment_value replay_system_value = { 0, 1, 1, replay_system_render };
+struct adjustment_value replay_system_value = { REPLAY_FIXED, REPLAY_AUTO, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
 struct adjustment_value collection_text_value = { CUR_DOLLAR, CUR_DM, 1,
@@ -81,7 +81,7 @@ struct adjustment standard_adjustments[] = {
 	{ "TILT WARNINGS", &balls_per_game_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
 	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
-	{ "REPLAY SYSTEM", &replay_system_value, 0, &system_config.replay_system },
+	{ "REPLAY SYSTEM", &replay_system_value, REPLAY_FIXED, &system_config.replay_system },
 	{ "REPLAY PERCENT", &percent_value, 7, &system_config.replay_percent },
 	{ "REPLAY START", &replay_score_value, MACHINE_REPLAY_START_CHOICE, &system_config.replay_start },
 	{ "REPLAY LEVELS", &integer_value, 1, &system_config.replay_levels },
@@ -378,9 +378,31 @@ const struct adjustment *adj_get (U8 num)
 }
 
 
+#define std_adj_p(name) \
+	(current_adjustment.nvram == &system_config.name)
+
+#define std_adj_array_p(name, size) \
+	(current_adjustment.nvram >= &system_config.name[0] \
+		&& current_adjustment.nvram < &system_config.name[size])
+
 bool adj_current_hidden_p (void)
 {
-	return current_adjustment.name[0] == '\0';
+	if (current_adjustment.name[0] == '\0')
+		return TRUE;
+
+	/* When the replay system is set to AUTO, do not allow
+	configuration of the fixed replay levels */
+	if (system_config.replay_system == REPLAY_AUTO &&
+		std_adj_array_p (replay_level, MAX_REPLAY_LEVELS))
+		return TRUE;
+
+	/* When the replay system is set to FIXED, do not allow
+	configuration of the start and percentaging options. */
+	if (system_config.replay_system == REPLAY_FIXED &&
+		(std_adj_p (replay_percent) || std_adj_p (replay_start)))
+		return TRUE;
+
+	return FALSE;
 }
 
 

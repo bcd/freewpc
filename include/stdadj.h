@@ -23,6 +23,9 @@
 
 typedef U8 adjval_t;
 
+#define MAX_REPLAY_LEVELS 4
+#define MAX_COIN_SLOTS 4
+
 /* Yes/No value defines */
 #define YES 1
 #define NO 0
@@ -55,6 +58,10 @@ typedef U8 adjval_t;
 #define COINDOOR_FRANCE 4
 #define COINDOOR_ITALY 5
 
+/* Replay systems */
+#define REPLAY_FIXED 0
+#define REPLAY_AUTO 1
+
 /* Currency types */
 #define CUR_DOLLAR 0
 #define CUR_FRANC 1
@@ -62,6 +69,8 @@ typedef U8 adjval_t;
 #define CUR_PESETA 3
 #define CUR_YEN 4
 #define CUR_DM 5
+#define CUR_GBP 6
+#define CUR_EURO 7
 
 typedef struct
 {
@@ -74,7 +83,7 @@ typedef struct
 	adjval_t replay_percent;
 	adjval_t replay_start;
 	adjval_t replay_levels;
-	adjval_t replay_level[4];
+	adjval_t replay_level[MAX_REPLAY_LEVELS];
 	adjval_t replay_boost;
 	adjval_t replay_award; /* done */
 	adjval_t special_award; /* done */
@@ -93,6 +102,8 @@ typedef struct
 	adjval_t min_volume_control; /* done */
 	adjval_t gi_power_saver;
 	adjval_t power_saver_level;
+	/* The ticket_board adjustment says if a ticket dispenser
+	is connected, or if a coin meter is attached. */
 	adjval_t ticket_board;
 	adjval_t no_bonus_flips; /* done */
 	adjval_t game_restart; /* done */
@@ -139,16 +150,16 @@ extern __nvram__ std_adj_t system_config;
 typedef struct
 {
 	adjval_t pricing_mode;
-	adjval_t coin_units[4];
-	adjval_t units_per_credit;
+	adjval_t coin_units[MAX_COIN_SLOTS];
+	adjval_t units_per_credit; /* done */
 	adjval_t units_per_bonus;
 	adjval_t bonus_credits;
 	adjval_t min_units;
 	adjval_t coin_door_type;
 	adjval_t collection_text;
-	adjval_t slot_values[4];
-	adjval_t max_credits;
-	adjval_t free_play;
+	adjval_t slot_values[MAX_COIN_SLOTS]; /* done */
+	adjval_t max_credits; /* done */
+	adjval_t free_play; /* done */
 	adjval_t hide_coin_audits;
 	adjval_t one_coin_buyin; /* ignored */
 	adjval_t base_coin_size;

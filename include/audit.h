@@ -100,7 +100,6 @@ void audit_assign (audit_t *aud, audit_t val);
 __test2__ void timestamp_format (timestamp_t *t);
 __test2__ void timestamp_clear (timestamp_t *t);
 __test2__ void timestamp_validate (timestamp_t *t);
-//__test2__ void timestamp_normalize (timestamp_t *t);
 __test2__ void timestamp_add (timestamp_t *dst, timestamp_t *src);
 __test2__ void timestamp_add_sec (timestamp_t *t, U16 seconds);
 __test2__ void timestamp_copy (timestamp_t *dst, timestamp_t *src);
