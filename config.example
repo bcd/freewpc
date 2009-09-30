@@ -46,10 +46,8 @@
 # Set to the version of gcc6809 installed.
 # The 4.3.x releases are recommended, although 4.2.x releases
 # should still work.
-#GCC_VERSION := 3.4.6
 #GCC_VERSION := 4.2.3
-GCC_VERSION := 4.3.1
-#GCC_VERSION := 4.4.0
+GCC_VERSION := 4.3.4
 
 # Uncomment if you want to build a FREE ONLY ROM.
 #FREE_ONLY := y
