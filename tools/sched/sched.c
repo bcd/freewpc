@@ -523,7 +523,6 @@ void add_task (char *name, unsigned int period, double len)
 			}
 		}
 		/* The conditional is not defined.  Do not define this task. */
-		fprintf (stderr, "warning: skipping entry for '%s'\n", name);
 		return;
 	}
 conditional_defined:;
