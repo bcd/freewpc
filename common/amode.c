@@ -255,6 +255,11 @@ __attribute__((noreturn)) void system_amode_deff (void)
 		 * in tournament mode. */
 	}
 
+	/* When amode is started, diagnostic are also being re-run.  Give that
+	some time to finish, so that the score screen will show the credit
+	dot correctly. */
+	task_sleep (TIME_100MS);
+
 	amode_page = 0;
 	for (;;)
 	{

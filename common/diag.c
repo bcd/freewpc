@@ -161,11 +161,12 @@ diag_run (void)
 
 
 /**
- * At the end of initialization, run the diagnostics and
+ * At the end of initialization, and whenever attract mode is restarted
+ * due to game end or test mode exit, run the diagnostics and
  * determine if there are errors, but don't announce
  * anything.
  */
-CALLSET_ENTRY (diag, init_complete)
+CALLSET_ENTRY (diag, amode_start)
 {
 	diag_announce_flag = 0;
 	diag_run ();
