@@ -249,7 +249,7 @@ static void rtc_pinmame_read (void)
 #endif
 
 
-void rtc_factory_reset (void)
+CALLSET_ENTRY (rtc, factory_reset)
 {
 	/* Reset the date to the time at which the software
 	 * was built.

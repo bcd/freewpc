@@ -68,7 +68,6 @@ extern inline void wait_for_button (const U8 swno)
 void factory_reset (void)
 {
 	adj_reset_all ();
-	rtc_factory_reset ();
 	/* TODO : this should also clear audits, reset the high scores,
 	 * and reset the custom message. */
 #ifdef __m6809__
