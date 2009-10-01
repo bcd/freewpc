@@ -3526,6 +3526,7 @@ struct window_ops display_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = display_test_init,
 	.draw = display_test_draw,
+	.exit = dmd_init,
 };
 
 struct menu display_test_item = {
