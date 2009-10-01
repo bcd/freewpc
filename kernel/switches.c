@@ -726,7 +726,9 @@ static void switch_update_unstable (const U8 sw)
  * 'Pending switches' are scanned and handlers are spawned for each
  * of them (each is a separate task).
  *
- * TODO : Calling this every 1ms seems a bit much.
+ * This could be invoked as often as once every 1ms, but in theory it
+ * won't be called that much due to interrupts and ordinary tasks
+ * taking a fair amount of CPU time.
  */
 CALLSET_ENTRY (switch, idle)
 {
