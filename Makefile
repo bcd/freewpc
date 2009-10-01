@@ -805,7 +805,7 @@ $(FIF_OBJS) : $(GENDEFINES)
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
 
-$(NATIVE_OBJS) $(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
+$(filter-out $(HOST_OBJS),$(NATIVE_OBJS)) $(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else
