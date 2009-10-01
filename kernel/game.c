@@ -441,11 +441,16 @@ void start_ball (void)
 	invoked which might want to start up a leff. */
 	leff_stop_all ();
 
+	/* On the first ball for each player, generate the
+	start_player event, which initializes all player-local variables. */
 	if (ball_up == 1 && extra_balls_earned_this_bip == 0)
 	{
 		callset_invoke (start_player);
 		task_yield ();
 	}
+
+	/* At the start of ball 2, any partial credits are cleared */
+	units_clear ();
 
 	callset_invoke (start_ball);
 

@@ -283,7 +283,7 @@ static void do_coin (U8 slot)
 	if (nonball_event_did_follow (sw_slam_tilt, sw_coin))
 		return;
 
-	add_units (price_config.slot_values[slot]);
+	add_units (price_config.coin_units[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
 }
 
@@ -316,6 +316,16 @@ void credits_clear (void)
 {
 	pinio_nvram_unlock ();
 	credit_count = 0;
+	unit_count = 0;
+	csum_area_update (&coin_csum_info);
+	pinio_nvram_lock ();
+}
+
+
+/** Clear the units (partially credits) counter. */
+void units_clear (void)
+{
+	pinio_nvram_unlock ();
 	unit_count = 0;
 	csum_area_update (&coin_csum_info);
 	pinio_nvram_lock ();

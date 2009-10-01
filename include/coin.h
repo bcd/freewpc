@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,5 +28,6 @@ __common__ void add_credit (void);
 __common__ bool has_credits_p (void);
 __common__ void remove_credit (void);
 __common__ void credits_clear (void);
+__common__ void units_clear (void);
 
 #endif /* _COIN_H */
