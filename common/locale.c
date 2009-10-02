@@ -49,12 +49,12 @@ void locale_render_date (U8 month, U8 day, U16 year)
 {
 	switch (system_config.date_style)
 	{
-		case DATE_TIME_STYLE_US:
+		case DATE_STYLE_US:
 		default:
 			sprintf ("%s %d, %ld", month_names[month-1], day, year);
 			break;
 
-		case DATE_TIME_STYLE_EURO:
+		case DATE_STYLE_EURO:
 			sprintf ("%d %s %ld", day, month_names[month-1], year);
 			break;
 	}

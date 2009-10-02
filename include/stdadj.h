@@ -35,8 +35,11 @@ typedef U8 adjval_t;
 #define ON 1
 
 /* Date/Time styles */
-#define DATE_TIME_STYLE_US 0
-#define DATE_TIME_STYLE_EURO 1
+#define CLOCK_STYLE_AMPM 0
+#define CLOCK_STYLE_24HOUR 1
+
+#define DATE_STYLE_US 0
+#define DATE_STYLE_EURO 1
 
 /* Game restart setting */
 #define GAME_RESTART_NEVER 0
