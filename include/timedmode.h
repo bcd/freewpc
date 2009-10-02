@@ -1,3 +1,22 @@
+/*
+ * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef _TIMEDMODE_H
 #define _TIMEDMODE_H
@@ -11,7 +30,10 @@ struct timed_mode_ops
 	/* The destructor, called when the mode ends. */
 	void (*exit) (void);
 
-	/* Called to determine when the timer should be paused */
+	/* Called to determine when the timer should be paused.
+	Use 'null_false_function' for a timer that should always run.
+	Use 'system_timer_pause' for a default function that pauses
+	during most of the time that you would want it to. */
 	bool (*pause) (void);
 
 	/* Called when the mode is finished properly (via a call to
@@ -39,13 +61,14 @@ struct timed_mode_ops
 	/* The priority for the display/music effects */
 	U8 prio;
 
-	/* A task group ID that can be used to track the mode */
+	/* A task group ID that can be used to track the mode.  Just
+	make up a name when you initialize it. */
 	task_gid_t gid;
 
-	/* The initial value of the mode timer */
+	/* The initial value of the mode timer, in seconds */
 	U8 init_timer;
 
-	/* The length of the grace period */
+	/* The length of the grace period, in seconds */
 	U8 grace_timer;
 
 	/* Pointer to a timer variable, which must be declared separately. */
