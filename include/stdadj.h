@@ -182,9 +182,9 @@ typedef struct
 	adjval_t highest_scores;
 	adjval_t hstd_award;
 	adjval_t champion_hstd;
-	adjval_t champion_credits;
-	adjval_t hstd_credits[4];
-	adjval_t hs_reset_every;
+	adjval_t champion_credits; /* done */
+	adjval_t hstd_credits[4]; /* done */
+	adjval_t hs_reset_every; /* done */
 } hstd_adj_t;
 
 extern __nvram__ hstd_adj_t hstd_config;
