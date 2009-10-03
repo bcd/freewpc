@@ -40,11 +40,12 @@ __test2__ void collection_text_render (U8 val);
 __test2__ void printer_type_render (U8 val);
 __test2__ void baud_rate_render (U8 val);
 __test2__ void time_interval_render (U8 val);
+__test2__ void pricing_mode_render (U8 val);
+__test2__ void coin_door_render (U8 val);
 
 __test2__ void integer_audit (audit_t val) ;
 __test2__ void percentage_of_games_audit (audit_t val);
 __test2__ void secs_audit (audit_t val);
-__test2__ void us_dollar_audit (audit_t val);
 __test2__ void currency_audit (audit_t val);
 __test2__ void total_earnings_audit (audit_t val __attribute__((unused)));
 __test2__ void average_per_game_audit (audit_t val);

@@ -74,6 +74,7 @@ const struct area_csum adj_csum_info = {
 void adj_modified (void)
 {
 	csum_area_update (&adj_csum_info);
+	callset_invoke (adjustment_changed);
 }
 
 

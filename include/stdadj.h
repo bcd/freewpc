@@ -53,14 +53,6 @@ typedef U8 adjval_t;
 #define FREE_AWARD_TICKET 3
 #define FREE_AWARD_POINTS 4
 
-/* Coin door types */
-#define COINDOOR_CUSTOM 0
-#define COINDOOR_USA_QUARTERS 1
-#define COINDOOR_USA_25_100_25 2
-#define COINDOOR_CANADA 3
-#define COINDOOR_FRANCE 4
-#define COINDOOR_ITALY 5
-
 /* Replay systems */
 #define REPLAY_FIXED 0
 #define REPLAY_AUTO 1
@@ -74,6 +66,27 @@ typedef U8 adjval_t;
 #define CUR_DM 5
 #define CUR_GBP 6
 #define CUR_EURO 7
+#define CUR_TOKEN 8
+#define NUM_CURRENCY_TYPES 9
+
+/* Pricing modes */
+#define PRICE_CUSTOM 0
+#define PRICE_USA_25CENT 1
+#define PRICE_USA_50CENT 2
+#define PRICE_USA_50_75_100 3
+#define PRICE_USA_3_FOR_1 4
+#define PRICE_USA_5_FOR_2 5
+#define PRICE_USA_75CENT 6
+#define PRICE_USA_DOLLAR 7
+#define PRICE_UK 8
+#define NUM_PRICING_MODES 9
+
+/* Coin door types */
+#define COIN_DOOR_CUSTOM 0
+#define COIN_DOOR_25_25_25 1
+#define COIN_DOOR_25_100_25 2
+#define COIN_DOOR_UK 3
+#define NUM_COIN_DOOR_TYPES 4
 
 typedef struct
 {
@@ -152,22 +165,22 @@ extern __nvram__ std_adj_t system_config;
 
 typedef struct
 {
-	adjval_t pricing_mode;
-	adjval_t coin_units[MAX_COIN_SLOTS];
+	adjval_t pricing_mode; /* done */
+	adjval_t coin_units[MAX_COIN_SLOTS]; /* done */
 	adjval_t units_per_credit; /* done */
 	adjval_t units_per_bonus;
 	adjval_t bonus_credits;
 	adjval_t min_units;
 	adjval_t coin_door_type;
 	adjval_t collection_text;
-	adjval_t slot_values[MAX_COIN_SLOTS]; /* done */
+	adjval_t slot_values[MAX_COIN_SLOTS];
 	adjval_t max_credits; /* done */
 	adjval_t free_play; /* done */
 	adjval_t hide_coin_audits;
 	adjval_t one_coin_buyin; /* ignored */
 	adjval_t base_coin_size;
 	adjval_t coin_meter_units;
-	adjval_t dollar_bill_slot;
+	adjval_t fast_bill_slot;
 	adjval_t min_coin_msec;
 	adjval_t slamtilt_penalty; /* done */
 	adjval_t allow_hundredths;
