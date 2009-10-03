@@ -9,3 +9,4 @@ TEST2_OBJS += test/adjust.o
 TEST2_OBJS += test/timestamp.o
 TEST2_OBJS += test/stress.o
 TEST2_OBJS += test/wire.o
+TEST2_OBJS += test/burnin.o
