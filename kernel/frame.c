@@ -33,12 +33,34 @@
 #include <freewpc.h>
 #include <xbmprog.h>
 
+/**
+ * The way that images are accessed is very different in 6809 vs. native mode.
+ */
+
+#ifdef CONFIG_NATIVE
+#undef IMAGEMAP_BASE
+U8 IMAGEMAP_BASE[65536];
+
+struct frame_pointer
+{
+	U8 ptr_hi;
+	U8 ptr_lo;
+	U8 page;
+} __attribute__((packed));
+
+#define PTR(p) (&IMAGEMAP_BASE[((p->ptr_hi - 0x40) * 256UL + p->ptr_lo) + (p->page * 0x4000UL)])
+
+#else /* 6809 */
 
 struct frame_pointer
 {
 	unsigned char *ptr;
 	U8 page;
 };
+
+#define PTR(p) (p->ptr)
+
+#endif
 
 U8 frame_repeat_count;
 
@@ -271,11 +293,6 @@ void frame_draw_plane (U16 id)
 	 * For real ROMs, this is located at a fixed address.
 	 * In native mode, the images are kept in a separate file.
 	 */
-#ifdef CONFIG_NATIVE
-	/* TODO */
-	dmd_clean_page_low ();
-	dbprintf ("frame_draw (%ld)\n", id);
-#else
 	U8 type;
 	struct frame_pointer *p;
 
@@ -286,12 +303,11 @@ void frame_draw_plane (U16 id)
 	 * Pull the type byte out, then decode the remaining bytes
 	 * to the display buffer. */
 	page_push (p->page);
-	type = p->ptr[0];
-	frame_decode (p->ptr + 1, type & ~0x1);
+	type = PTR(p)[0];
+	frame_decode (PTR(p) + 1, type & ~0x1);
 	page_pop ();
 
 	page_pop ();
-#endif
 }
 
 
@@ -320,18 +336,34 @@ void bmp_draw (U8 x, U8 y, U16 id)
 	page_push (IMAGEMAP_PAGE);
 	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
 	page_push (p->page);
-	bitmap_blit (p->ptr + 1, x, y);
-	if (p->ptr[0] & 0x1)
+	bitmap_blit (PTR(p) + 1, x, y);
+	if (PTR(p)[0] & 0x1)
 	{
 		dmd_flip_low_high ();
 		p++;
-		bitmap_blit (p->ptr + 1, x, y);
+		bitmap_blit (PTR(p) + 1, x, y);
 		dmd_flip_low_high ();
 	}
 	page_pop ();
 	page_pop ();
 }
 
+
+CALLSET_ENTRY (frame, init)
+{
+	/* In native mode, read the images from an external file into memory. */
+#ifdef CONFIG_NATIVE
+	FILE *fp;
+	const char *filename = "build/" MACHINE_SHORTNAME "_images.rom";
+	fp = fopen (filename, "rb");
+	if (!fp)
+	{
+		dbprintf ("Cannot open image file %s", filename);
+		return;
+	}
+	fread (IMAGEMAP_BASE, sizeof (U8), 65536, fp);
+#endif
+}
 
 #endif /* IMAGEMAP_PAGE */
 
