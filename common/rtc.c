@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <diag.h>
 
 /**
  * \file
@@ -254,9 +255,9 @@ CALLSET_ENTRY (rtc, factory_reset)
 	/* Reset the date to the time at which the software
 	 * was built.
 	 * TODO : this should trigger a CLOCK NOT SET message */
-	year = BUILD_YEAR - 2000;
-	month = BUILD_MONTH;
-	day = BUILD_DAY;
+	year = 0;
+	month = 1;
+	day = 1;
 	hour = 0;
 	minute = 0;
 	last_minute = 0;
@@ -276,10 +277,7 @@ CALLSET_ENTRY (rtc, init)
 #elif defined (CONFIG_NATIVE)
 	/* TODO - should read this from the native system */
 	pinio_nvram_unlock ();
-	year = 8;
-	month = 4;
-	day = 1;
-	rtc_calc_day_of_week ();
+	rtc_factory_reset ();
 	rtc_normalize ();
 	csum_area_update (&rtc_csum_info);
 	pinio_nvram_lock ();
@@ -302,6 +300,13 @@ CALLSET_ENTRY (rtc, idle_every_ten_seconds)
 		callset_invoke (minute_elapsed);
 	}
 	last_minute = minute;
+}
+
+
+CALLSET_ENTRY (rtc, diagnostic_check)
+{
+	if (year == 0)
+		diag_post_error ("TIME AND DATE\nNOT SET\n", COMMON_PAGE);
 }
 
 
@@ -414,9 +419,9 @@ void rtc_modify_field (U8 up_flag)
 				day--;
 			break;
 		case RTC_FIELD_YEAR:
-			if (up_flag)
+			if (up_flag && year < 99)
 				year++;
-			else if (year > 0)
+			else if (year > 8)
 				year--;
 			break;
 		case RTC_FIELD_HOUR:
