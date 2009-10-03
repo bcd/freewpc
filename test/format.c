@@ -181,7 +181,8 @@ void pricing_mode_render (U8 val)
 		case PRICE_CUSTOM: sprintf ("CUSTOM"); break;
 		case PRICE_USA_25CENT: sprintf ("USA $0.25"); break;
 		case PRICE_USA_50CENT: sprintf ("USA $0.50"); break;
-		case PRICE_UK: sprintf ("U.K. 4/1GBP"); break;
+		case PRICE_UK: sprintf ("U.K. 4/1{"); break;
+		case PRICE_EURO: sprintf ("EUROPE 2/e"); break;
 		default: sprintf ("MODE %d", val); break;
 	}
 }
@@ -195,6 +196,7 @@ void coin_door_render (U8 val)
 		case COIN_DOOR_25_25_25: sprintf ("25-25-25"); break;
 		case COIN_DOOR_25_100_25: sprintf ("25-100-25"); break;
 		case COIN_DOOR_UK: sprintf ("U.K."); break;
+		case COIN_DOOR_EURO: sprintf ("EURO"); break;
 		default: sprintf ("MODE %d", val); break;
 	}
 }
@@ -262,15 +264,16 @@ const struct currency_info
 	[CUR_PESETA] = { "P", 25, 4, FALSE },
 	[CUR_YEN] = { "Y", 25, 4, FALSE },
 	[CUR_DM] = { "DM", 25, 4, FALSE },
-	[CUR_GBP] = { "GBP", 1, 100, TRUE },
+	[CUR_GBP] = { "{", 1, 100, TRUE },
 	[CUR_TOKEN] = { "TOK.", 1, 100, FALSE },
+	[CUR_EURO] = { "e", 1, 100, TRUE },
 };
 
 
 /**
  * Render an audit value in the given collection text type.
  */
-void specific_currency_audit (audit_t val, U8 type)
+static void specific_currency_audit (audit_t val, U8 type)
 {
 	const struct currency_info *info;
 	U16 large;
@@ -283,7 +286,11 @@ void specific_currency_audit (audit_t val, U8 type)
 		return;
 	}
 
+	/* The input value is given in terms of the base coin size (part of the
+	coindoor definition).  We need to multiply this, then divide by units_for_larger
+	(part of the currency definition). */
 	info = &currency_info_table[type];
+	val *= price_config.base_coin_size;
 	large = val / info->units_for_larger;
 	small = (val % info->units_for_larger) * info->base_unit;
 
@@ -297,28 +304,28 @@ void specific_currency_audit (audit_t val, U8 type)
 /**
  * Render an audit value in the default collection text type.
  */
-void currency_audit (audit_t val)
+void currency_audit (audit_t base_units)
 {
-	specific_currency_audit (val, price_config.collection_text);
+	specific_currency_audit (base_units, price_config.collection_text);
 }
 
 
-void collection_text_render (U8 val)
+void collection_text_render (U8 type)
 {
-	specific_currency_audit (0, val);
+	specific_currency_audit (0, type);
 }
 
 
 void total_earnings_audit (audit_t val __attribute__((unused)))
 {
-	audit_t amount = 0;
+	audit_t base_units = 0;
 	U8 i;
 
 	/* For each coin slot, multiply the number of coins seen
 	times the value of the slot */
 	for (i=0; i < 4; i++)
-		total_coins += system_audits.coins_added[i];
-	currency_audit (amount);
+		base_units += system_audits.coins_added[i] * price_config.slot_values[i];
+	currency_audit (base_units);
 }
 
 

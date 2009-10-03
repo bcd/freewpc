@@ -56,6 +56,8 @@ static char font_5x5_sep[][7] = {
 	/* hyphen */ { 3, 5, 0, 0, 7, 0, 0 },
 	/* percent */ { 5, 5, 18, 8, 4, 2, 9 },
 	/* dollar sign */ { 5, 5, 14, 5, 14, 20, 14 },
+	/* pound sign */ { 5, 5, 14, 18, 7, 2, 31 },
+	/* Euro sign */ { 5, 5, 28, 2, 7, 2, 28 },
 };
 
 #define BASECHAR ' '
@@ -104,6 +106,8 @@ static char *mono5_glyphs[] = {
    ['-' - BASECHAR] = font_5x5_sep[4],
    ['%' - BASECHAR] = font_5x5_sep[5],
    ['$' - BASECHAR] = font_5x5_sep[6],
+   ['{' - BASECHAR] = font_5x5_sep[7],
+   ['e' - BASECHAR] = font_5x5_sep[8],
 };
 
 const font_t font_mono5 = {

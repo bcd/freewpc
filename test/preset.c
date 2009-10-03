@@ -141,7 +141,7 @@ void preset_install (struct preset_component *comps)
 	pinio_nvram_lock ();
 
 	/* Update the checksums to match the new values */
-	adj_modified ();
+	adj_modified (NULL);
 }
 
 

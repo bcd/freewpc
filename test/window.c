@@ -433,7 +433,7 @@ void adj_browser_enter (void)
 			pinio_nvram_unlock ();
 			*(ad->nvram) = adj_edit_value;
 			pinio_nvram_lock ();
-			adj_modified ();
+			adj_modified (ad->nvram);
 			sound_send (SND_TEST_CONFIRM);
 		}
 		browser_action = ADJ_BROWSING;
@@ -2203,6 +2203,7 @@ struct menu clear_audits_item = {
 
 void clear_coins_confirm (void)
 {
+	/* TODO */
 	confirm_enter ();
 }
 

@@ -79,14 +79,16 @@ typedef U8 adjval_t;
 #define PRICE_USA_75CENT 6
 #define PRICE_USA_DOLLAR 7
 #define PRICE_UK 8
-#define NUM_PRICING_MODES 9
+#define PRICE_EURO 9
+#define NUM_PRICING_MODES 10
 
 /* Coin door types */
 #define COIN_DOOR_CUSTOM 0
 #define COIN_DOOR_25_25_25 1
 #define COIN_DOOR_25_100_25 2
 #define COIN_DOOR_UK 3
-#define NUM_COIN_DOOR_TYPES 4
+#define COIN_DOOR_EURO 4
+#define NUM_COIN_DOOR_TYPES 5
 
 typedef struct
 {
@@ -221,7 +223,9 @@ extern __nvram__ printer_adj_t printer_config;
 extern __nvram__ feature_adj_t feature_config;
 #endif
 
-void adj_modified (void);
+extern adjval_t *last_adjustment_changed;
+
+void adj_modified (adjval_t *adjp);
 void adj_init (void);
 
 #endif /* _STDADJ_H */
