@@ -278,6 +278,7 @@ static void specific_currency_audit (audit_t val, U8 type)
 	const struct currency_info *info;
 	U16 large;
 	U16 small;
+	U8 radix_char;
 
 	/* For sanity, make sure the value is within range */
 	if (type > (sizeof (currency_info_table) / sizeof (currency_info_table[0])))
@@ -294,10 +295,15 @@ static void specific_currency_audit (audit_t val, U8 type)
 	large = val / info->units_for_larger;
 	small = (val % info->units_for_larger) * info->base_unit;
 
-	if (info->prefix_sign)
-		sprintf ("%s%ld.%02d", info->sign, large, small);
+	if (system_config.euro_digit_sep == YES)
+		radix_char = ',';
 	else
-		sprintf ("%ld.%02d%s", large, small, info->sign);
+		radix_char = '.';
+
+	if (info->prefix_sign)
+		sprintf ("%s%ld%c%02d", info->sign, large, radix_char, small);
+	else
+		sprintf ("%ld%c%02d%s", large, radix_char, small, info->sign);
 }
 
 

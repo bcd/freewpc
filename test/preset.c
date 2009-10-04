@@ -77,6 +77,18 @@ PRESET_BEGIN (timed_game)
 #endif
 PRESET_END (timed_game, "TIMED GAME")
 
+PRESET_BEGIN (ticket)
+	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_TICKET },
+	{ standard_adjustments, &system_config.special_award, FREE_AWARD_TICKET },
+	{ standard_adjustments, &system_config.match_award, FREE_AWARD_TICKET },
+	{ standard_adjustments, &system_config.extra_ball_ticket, YES },
+	{ standard_adjustments, &system_config.ticket_board, YES },
+	{ hstd_adjustments, &hstd_config.hstd_award, FREE_AWARD_TICKET },
+PRESET_END (ticket, "TICKET")
+
+PRESET_BEGIN (novelty)
+PRESET_END (novelty, "NOVELTY")
+
 #define PRESET_EUROPE \
 	{ standard_adjustments, &system_config.euro_digit_sep, YES }, \
 	{ standard_adjustments, &system_config.clock_style, CLOCK_STYLE_24HOUR }, \
@@ -100,6 +112,11 @@ PRESET_BEGIN (german)
 PRESET_END (german, "GERMAN")
 
 
+PRESET_BEGIN (uk)
+	PRESET_EUROPE
+PRESET_END (uk, "U.K.")
+
+
 PRESET_BEGIN (dev)
 	{ pricing_adjustments, &price_config.free_play, YES },
 PRESET_END (dev, "DEVELOPER")
@@ -107,7 +124,7 @@ PRESET_END (dev, "DEVELOPER")
 struct preset *preset_table[] = {
 	/* Easy-Hard */
 	/* Add-a-Ball */
-	/* Ticket */
+	&preset_ticket,
 	/* Novelty */
 	/* Serial Capture */
 	/* German 1-6 */
@@ -119,6 +136,7 @@ struct preset *preset_table[] = {
 	&preset_timed_game,
 	&preset_french,
 	&preset_german,
+	&preset_uk,
 	&preset_usa_canada,
 	&preset_dev,
 };
