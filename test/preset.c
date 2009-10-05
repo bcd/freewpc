@@ -79,12 +79,14 @@ PRESET_END (timed_game, "TIMED GAME")
 
 #define PRESET_EUROPE \
 	{ standard_adjustments, &system_config.euro_digit_sep, YES }, \
-	{ standard_adjustments, &system_config.date_style, 1 },
+	{ standard_adjustments, &system_config.clock_style, CLOCK_STYLE_24HOUR }, \
+	{ standard_adjustments, &system_config.date_style, DATE_STYLE_EURO },
 
 
 PRESET_BEGIN (usa_canada)
 	{ standard_adjustments, &system_config.euro_digit_sep, NO },
-	{ standard_adjustments, &system_config.date_style, 0 },
+	{ standard_adjustments, &system_config.clock_style, CLOCK_STYLE_AMPM },
+	{ standard_adjustments, &system_config.date_style, DATE_STYLE_US },
 PRESET_END (usa_canada, "USA/CANADA")
 
 

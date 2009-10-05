@@ -35,8 +35,11 @@ typedef U8 adjval_t;
 #define ON 1
 
 /* Date/Time styles */
-#define DATE_TIME_STYLE_US 0
-#define DATE_TIME_STYLE_EURO 1
+#define CLOCK_STYLE_AMPM 0
+#define CLOCK_STYLE_24HOUR 1
+
+#define DATE_STYLE_US 0
+#define DATE_STYLE_EURO 1
 
 /* Game restart setting */
 #define GAME_RESTART_NEVER 0
@@ -179,9 +182,9 @@ typedef struct
 	adjval_t highest_scores;
 	adjval_t hstd_award;
 	adjval_t champion_hstd;
-	adjval_t champion_credits;
-	adjval_t hstd_credits[4];
-	adjval_t hs_reset_every;
+	adjval_t champion_credits; /* done */
+	adjval_t hstd_credits[4]; /* done */
+	adjval_t hs_reset_every; /* done */
 } hstd_adj_t;
 
 extern __nvram__ hstd_adj_t hstd_config;

@@ -2334,26 +2334,20 @@ void burnin_test_draw (void)
 	dmd_show_low ();
 }
 
-
-void burnin_test_thread (void)
+void burnin_test_init (void)
 {
-	extern void all_lamp_test_thread (void);
-
-	/* TODO : need a good design for how burnin test
-	should work.  Also a method for detecting errors,
-	and for counting total burnin time as an audit. */
-	task_create_peer (all_lamp_test_thread);
-	task_exit ();
+	SECTION_VOIDCALL (__test2__, burnin_init);
 }
 
 void burnin_test_exit (void)
 {
+	SECTION_VOIDCALL (__test2__, burnin_exit);
 }
 
 struct window_ops burnin_test_window = {
 	DEFAULT_WINDOW,
 	.draw = burnin_test_draw,
-	.thread = burnin_test_thread,
+	.init = burnin_test_init,
 	.exit = burnin_test_exit,
 };
 

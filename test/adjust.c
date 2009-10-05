@@ -48,8 +48,10 @@ struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
 struct adjustment_value game_restart_value = { 0, 2, 1, game_restart_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
 struct adjustment_value hs_reset_value = { 0, 80, 1, hs_reset_render };
-struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
-struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
+struct adjustment_value clock_style_value = { 0, 1, CLOCK_STYLE_AMPM,
+	clock_style_render };
+struct adjustment_value date_style_value = { 0, 1, DATE_STYLE_US,
+	date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { REPLAY_FIXED, REPLAY_AUTO, 1, replay_system_render };

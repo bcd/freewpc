@@ -58,6 +58,16 @@ U16 ball_time;
 /** The amount of time in seconds that this game has lasted */
 __local__ U16 game_time;
 
+
+/** Returns true if the chase ball feature is enabled. */
+static bool chase_ball_enabled (void)
+{
+	return FALSE;
+	// uncomment once chase ball support has been coded
+	//return system_config.allow_chase_ball == YES;
+}
+
+
 /** Returns true if the given solenoid is OK to fire during
  * a ball search.  The following should be avoided:
  * - kickout coils from ball devices
@@ -99,7 +109,7 @@ static bool ball_search_solenoid_ok (U8 sol)
 
 			/* If chase ball is turned off, then during the 5th ball search,
 			pulse these coils as well. */
-			if (system_config.allow_chase_ball == NO && ball_search_count == 5)
+			if (!chase_ball_enabled () && ball_search_count == 5)
 			{
 				return (TRUE);
 			}
@@ -231,7 +241,7 @@ void ball_search_monitor_task (void)
 					}
 					else if (ball_search_count <= 10)
 					{
-						if (system_config.allow_chase_ball == YES)
+						if (chase_ball_enabled ())
 						{
 							/* TODO : When chase ball is turned on, do not wait for
 							more than 5 ball searches.  Instead, end the current player's
