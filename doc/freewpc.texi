@@ -995,7 +995,9 @@ Write lamp row data for the currently selected column.
 @section Power Drivers
 
 Solenoid outputs are not matrixed; they are individually writable at all times.
-A '1' value means to turn it on, and '0' to turn it off.
+A '1' value means to turn it on, and '0' to turn it off.  If the underlying
+hardware requires inverted levels, then the low-level API should do the inversion;
+user code need not be aware of this.
 
 @table @code
 
@@ -1090,7 +1092,9 @@ only the low page.  In the APIs below, the term @var{map} refers to either
 If you are writing text only, you would want to clear the page first.  If you
 are filling the page with a full-size image, that is not necessary.
 
-@item Render text and graphics on the page.
+@item Render text and graphics on the page.  Text APIs implicitly write to the
+low page only.  Graphics APIs generally write to the low page if dealing with
+only 1 color, or to both low and high pages if multiple colors are used.
 
 @item Optionally, create a composite of several pages together
 For example, overlaying text onto background art.
@@ -1120,8 +1124,11 @@ versa.
 @item dmd_clean_page_@var{map}
 Zero a display page.
 @item dmd_copy_page
+Copy an entire page from one buffer to another.
 @item dmd_and_page
+AND the contents of the low page, using the high page as a mask.
 @item dmd_or_page
+OR into the contents of the low page, using data from the high page.
 @item dmd_xor_page
 @item dmd_shadow_copy
 @item dmd_text_raise
@@ -1131,8 +1138,11 @@ Show a single display page as a 1-color image.
 @item dmd_show2
 Show both display pages together as a 3-color image.
 @item font_render_string
+Write text in the given font, starting at a specific coordinate.
 @item font_render_string_center
+Write text in the given font, centered about the given coordinate.
 @item font_render_string_right
+Write text in the given font, right-justified against the specified coordinate.
 @item bmp_draw
 Draw an arbitrary sized bitmap onto the low page.
 @item frame_draw
@@ -1163,6 +1173,7 @@ Sends a command to the sound board.  The command may be 8-bit or 16-bit.
 
 @table @code
 @item pinio_write_triac
+Write to the set of all triacs.
 @item triac_on
 Turns on one or more triacs.
 @item gi_dim
