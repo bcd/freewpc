@@ -57,11 +57,13 @@ struct adjustment_value lang_value = { 0, 0, 0, lang_render };
 struct adjustment_value replay_system_value = { REPLAY_FIXED, REPLAY_AUTO, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
-struct adjustment_value collection_text_value = { CUR_DOLLAR, CUR_DM, 1,
+struct adjustment_value collection_text_value = { 0, NUM_CURRENCY_TYPES-1, 1,
 	collection_text_render };
 struct adjustment_value printer_type_value = { 0, 4, 1, printer_type_render };
 struct adjustment_value baud_rate_value = { 0, 5, 1, baud_rate_render };
 struct adjustment_value lines_per_page_value = { 22, 80, 1, decimal_render };
+struct adjustment_value pricing_mode_value = { 0, NUM_PRICING_MODES-1, 1, pricing_mode_render };
+struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, coin_door_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -152,7 +154,10 @@ struct adjustment feature_adjustments[] = {
 
 
 struct adjustment pricing_adjustments[] = {
-	{ STR_LEFT "LEFT COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[0] },
+	{ "GAME PRICING", &pricing_mode_value, PRICE_CUSTOM, &price_config.pricing_mode },
+	/* The next 8 adjustments should be set automatically depending on the value
+	of GAME PRICING */
+	{ STR_LEFT "COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[0] },
 	{ STR_CENTER "COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[1] },
 	{ STR_RIGHT "COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[2] },
 	{ "4TH COIN UNITS", &nonzero_integer_value, 1, &price_config.coin_units[3] },
@@ -160,13 +165,18 @@ struct adjustment pricing_adjustments[] = {
 	{ "UNITS/BONUS", &integer_value, 0, &price_config.units_per_bonus },
 	{ "BONUS CREDITS", &integer_value, 0, &price_config.bonus_credits },
 	{ "MINIMUM UNITS", &integer_value, 1, &price_config.min_units },
-	{ "COIN DOOR TYPE", &integer_value, 1, &price_config.coin_door_type },
+
+	{ "COIN DOOR TYPE", &coin_door_type_value, COIN_DOOR_CUSTOM,
+		&price_config.coin_door_type },
+	/* The next 5 adjustments, plus BASE COIN SIZE and ALLOW HUNDREDTHS, should
+	be set automatically depending on the value of COIN DOOR TYPE */
 	{ "COLLECTION TEXT", &collection_text_value, CUR_DOLLAR,
 		&price_config.collection_text },
-	{ STR_LEFT "SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[0] },
-	{ STR_CENTER "SLOT VALUE", &nonzero_integer_value, 4, &price_config.slot_values[1] },
-	{ STR_RIGHT "SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[2] },
-	{ "4TH SLOT VALUE", &nonzero_integer_value, 1, &price_config.slot_values[3] },
+	{ STR_LEFT "SLOT VALUE", &nonzero_integer_value, 25, &price_config.slot_values[0] },
+	{ STR_CENTER "SLOT VALUE", &nonzero_integer_value, 100, &price_config.slot_values[1] },
+	{ STR_RIGHT "SLOT VALUE", &nonzero_integer_value, 25, &price_config.slot_values[2] },
+	{ "4TH SLOT VALUE", &nonzero_integer_value, 25, &price_config.slot_values[3] },
+
 	{ "MAXIMUM CREDITS", &nonzero_integer_value, 10, &price_config.max_credits },
 
 	/* When FREE_ONLY is defined, the option to set free play is removed from
@@ -179,10 +189,10 @@ struct adjustment pricing_adjustments[] = {
 	{ "FREE PLAY", &yes_no_value, NO, &price_config.free_play },
 #endif
 
-	{ "HIDE COIN AUDITS", &yes_no_value, NO, NULL },
+	{ "HIDE COIN AUDITS", &yes_no_value, NO, &price_config.hide_coin_audits },
 	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
 	{ "COIN METER UNITS", &integer_value, 0, &price_config.coin_meter_units },
-	{ "DOLLAR BILL SLOT", &yes_no_value, NO, NULL },
+	{ "FAST BILL SLOT", &yes_no_value, NO, &price_config.fast_bill_slot },
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
@@ -193,13 +203,15 @@ struct adjustment pricing_adjustments[] = {
 
 struct adjustment hstd_adjustments[] = {
 	{ "HIGHEST SCORES", &on_off_value, ON, &hstd_config.highest_scores },
-	{ "H.S.T.D. AWARD", &on_off_value, ON, &hstd_config.hstd_award },
+	{ "H.S.T.D. AWARD", &free_award_value, FREE_AWARD_CREDIT, &hstd_config.hstd_award },
 	{ "CHAMP. H.S.T.D.", &on_off_value, ON, &hstd_config.champion_hstd },
 	{ "CHAMP. CREDITS", &credit_count_value, 2, &hstd_config.champion_credits },
 	{ "H.S.T.D. 1 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[0] },
 	{ "H.S.T.D. 2 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[1] },
 	{ "H.S.T.D. 3 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[2] },
 	{ "H.S.T.D. 4 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[3] },
+	/* The next adjustment is stored in units of 250 games, so this is really
+	3000 games per reset ... */
 	{ "H.S. RESET EVERY", &hs_reset_value, 12, &hstd_config.hs_reset_every },
 	{ "BACKUP CHAMP.", &score_value, 0, NULL },
 	{ "BACKUP H.S.T.D. 1", &score_value, 0, NULL },

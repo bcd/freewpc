@@ -174,6 +174,34 @@ void time_interval_render (U8 val)
 }
 
 
+void pricing_mode_render (U8 val)
+{
+	switch (val)
+	{
+		case PRICE_CUSTOM: sprintf ("CUSTOM"); break;
+		case PRICE_USA_25CENT: sprintf ("USA $0.25"); break;
+		case PRICE_USA_50CENT: sprintf ("USA $0.50"); break;
+		case PRICE_UK: sprintf ("U.K. 4/1{"); break;
+		case PRICE_EURO: sprintf ("EUROPE 2/e"); break;
+		default: sprintf ("MODE %d", val); break;
+	}
+}
+
+
+void coin_door_render (U8 val)
+{
+	switch (val)
+	{
+		case COIN_DOOR_CUSTOM: sprintf ("CUSTOM"); break;
+		case COIN_DOOR_25_25_25: sprintf ("25-25-25"); break;
+		case COIN_DOOR_25_100_25: sprintf ("25-100-25"); break;
+		case COIN_DOOR_UK: sprintf ("U.K."); break;
+		case COIN_DOOR_EURO: sprintf ("EURO"); break;
+		default: sprintf ("MODE %d", val); break;
+	}
+}
+
+
 void percentage_of_games_audit (audit_t val)
 {
 	/* Avoid divide-by-zero error */
@@ -212,68 +240,98 @@ void secs_audit (audit_t val)
 }
 
 
-void us_dollar_audit (audit_t val)
-{
-	sprintf ("$%ld.%02d", val / 4, (val % 4) * 25);
-}
-
+/**
+ * A table of currency / collection text types.
+ */
 const struct currency_info
 {
-	char sep;
+	/** The sign for the larger unit of the currency */
 	const char *sign;
+
+	/* TODO - needed? */
 	U8 base_unit;
+
+	/** The number of the smaller units that make up one larger unit */
 	U8 units_for_larger;
+
+	/** True if the large unit sign belongs at the beginning, or
+	false if at the end after the numbers. */
 	bool prefix_sign;
 } currency_info_table[] = {
-	[CUR_DOLLAR] = { '.', "$", 25, 4, TRUE },
-	[CUR_FRANC] = { ',', " FR.", 25, 4, FALSE },
-	[CUR_LIRA] = { ',', "L", 25, 4, FALSE },
-	[CUR_PESETA] = { ',', "P", 25, 4, FALSE },
-	[CUR_YEN] = { '.', "Y", 25, 4, FALSE },
-	[CUR_DM] = { ',', "DM", 25, 4, FALSE },
+	[CUR_DOLLAR] = { "$", 25, 4, TRUE },
+	[CUR_FRANC] = { " FR.", 25, 4, FALSE },
+	[CUR_LIRA] = { "L", 25, 4, FALSE },
+	[CUR_PESETA] = { "P", 25, 4, FALSE },
+	[CUR_YEN] = { "Y", 25, 4, FALSE },
+	[CUR_DM] = { "DM", 25, 4, FALSE },
+	[CUR_GBP] = { "{", 1, 100, TRUE },
+	[CUR_TOKEN] = { "TOK.", 1, 100, FALSE },
+	[CUR_EURO] = { "e", 1, 100, TRUE },
 };
 
-void specific_currency_audit (audit_t val, U8 type)
+
+/**
+ * Render an audit value in the given collection text type.
+ */
+static void specific_currency_audit (audit_t val, U8 type)
 {
 	const struct currency_info *info;
 	U16 large;
 	U16 small;
+	U8 radix_char;
 
-	if (type > CUR_DM)
+	/* For sanity, make sure the value is within range */
+	if (type > (sizeof (currency_info_table) / sizeof (currency_info_table[0])))
 	{
 		sprintf ("???");
 		return;
 	}
 
+	/* The input value is given in terms of the base coin size (part of the
+	coindoor definition).  We need to multiply this, then divide by units_for_larger
+	(part of the currency definition). */
 	info = &currency_info_table[type];
+	val *= price_config.base_coin_size;
 	large = val / info->units_for_larger;
 	small = (val % info->units_for_larger) * info->base_unit;
 
-	if (info->prefix_sign)
-		sprintf ("%s%ld.%02d", info->sign, large, small);
+	if (system_config.euro_digit_sep == YES)
+		radix_char = ',';
 	else
-		sprintf ("%ld.%02d%s", large, small, info->sign);
+		radix_char = '.';
+
+	if (info->prefix_sign)
+		sprintf ("%s%ld%c%02d", info->sign, large, radix_char, small);
+	else
+		sprintf ("%ld%c%02d%s", large, radix_char, small, info->sign);
 }
 
-void currency_audit (audit_t val)
+
+/**
+ * Render an audit value in the default collection text type.
+ */
+void currency_audit (audit_t base_units)
 {
-	specific_currency_audit (val, price_config.collection_text);
+	specific_currency_audit (base_units, price_config.collection_text);
 }
 
 
-void collection_text_render (U8 val)
+void collection_text_render (U8 type)
 {
-	specific_currency_audit (0, val);
+	specific_currency_audit (0, type);
 }
 
 
 void total_earnings_audit (audit_t val __attribute__((unused)))
 {
-	audit_t total_coins = 0;
+	audit_t base_units = 0;
 	U8 i;
+
+	/* For each coin slot, multiply the number of coins seen
+	times the value of the slot */
 	for (i=0; i < 4; i++)
-		total_coins += system_audits.coins_added[i];
-	currency_audit (total_coins);
+		base_units += system_audits.coins_added[i] * price_config.slot_values[i];
+	currency_audit (base_units);
 }
 
 

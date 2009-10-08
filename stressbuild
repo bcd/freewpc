@@ -3,9 +3,9 @@
 # stressbuild - test many different build configurations at once
 #
 
-machines="funhouse t2 tz wcs afm tester tzsound"
+machines="funhouse t2 tz wcs afm tester"
 native_options="n y"
-gcc_options="4.3.4 4.4.1"
+gcc_options="4.3.4 4.4.2"
 debugger_options="n y"
 
 case $1 in
@@ -54,7 +54,7 @@ for native in $native_options; do
 					export FREEWPC_DEBUGGER=$debugger
 					export GCC_VERSION=$gcc
 					export NATIVE
-					make -j3 $target 2>&1 > /dev/null
+					make -j3 DOTCONFIG="" $target 2>&1 > /dev/null
 					rc="$?"
 
 					if [ -f err ]; then

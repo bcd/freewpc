@@ -44,6 +44,8 @@ __nvram__ printer_adj_t printer_config;
 __nvram__ feature_adj_t feature_config;
 #endif
 
+adjval_t *last_adjustment_changed;
+
 
 /* The reset function is declared here because the real
 reason function is in a different ROM page, and we can't
@@ -71,9 +73,14 @@ const struct area_csum adj_csum_info = {
 /** Called when an adjustment has been changed.  The checksum area
  * needs to be recalculated, and modules may want to know about the
  * change. */
-void adj_modified (void)
+void adj_modified (adjval_t *adjp)
 {
 	csum_area_update (&adj_csum_info);
+	if (adjp)
+	{
+		last_adjustment_changed = adjp;
+		callset_invoke (adjustment_changed);
+	}
 }
 
 

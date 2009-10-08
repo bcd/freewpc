@@ -77,25 +77,23 @@ CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;
 
+	/* If the saved locale is valid, then just use that */
+	if (~locale_code == locale_code_csum)
+		return;
+
+	/* See what the DIP switches say */
 	current_locale = pinio_read_locale ();
-	dbprintf ("Current locale : %d\n", current_locale);
+	dbprintf ("Locale is now %d\n", current_locale);
 
-	/* If the DIP switch setting changed, or the previous
-	value was corrupted somehow, then perform a factory reset
-	according to the current setting. */
-	if (current_locale != locale_code
-		|| ~locale_code != locale_code_csum)
-	{
-		/* Install locale-specific adjustments */
-		preset_install_country_code (current_locale);
+	/* Save the current locale so that install does not
+	need to be performed on the next reboot */
+	pinio_nvram_unlock ();
+	locale_code = current_locale;
+	locale_code_csum = ~current_locale;
+	pinio_nvram_lock ();
 
-		/* Save the current locale so that install does not
-		need to be performed on the next reboot, unless
-		the DIP switches are changed. */
-		pinio_nvram_unlock ();
-		locale_code = current_locale;
-		locale_code_csum = ~current_locale;
-		pinio_nvram_lock ();
-	}
+	/* Reinsall adjustments for this locale */
+	preset_install_country_code (current_locale);
+
 }
 
