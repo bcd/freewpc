@@ -163,7 +163,11 @@ void plunge_ball_deff (void)
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	dmd_draw_border (dmd_low_buffer);
 	dmd_copy_low_to_high ();
+#ifdef MACHINE_LAUNCH_SWITCH
+	font_render_string_center (&font_fixed6, 64, 22, "PRESS LAUNCH");
+#else
 	font_render_string_center (&font_fixed6, 64, 22, "PLUNGE THE BALL");
+#endif
 	deff_swap_low_high (13, TIME_300MS);
 	deff_exit ();
 }
