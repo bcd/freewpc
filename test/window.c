@@ -1815,6 +1815,38 @@ struct menu sched_test_item = {
 
 /**********************************************************************/
 
+void irqload_test_init (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_show_low ();
+	VOIDCALL (measure_irq_load);
+}
+
+
+void irqload_test_draw (void)
+{
+	window_title ("IRQ LOAD TEST");
+	sprintf ("IRQ LOAD = %ld", sched_test_count);
+	print_row_center (&font_var5, 22);
+	dmd_show_low ();
+}
+
+
+struct window_ops irqload_test_window = {
+	DEFAULT_WINDOW,
+	.init = irqload_test_init,
+	.draw = irqload_test_draw,
+	.enter = irqload_test_init,
+};
+
+struct menu irqload_test_item = {
+	.name = "IRQ LOAD TEST",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &irqload_test_window, NULL } },
+};
+
+/**********************************************************************/
+
 #define SCORE_TEST_PLAYERS 3
 
 const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
@@ -2122,6 +2154,7 @@ struct menu *dev_menu_items[] = {
 	&symbol_test_item,
 #endif
 	&sched_test_item,
+	&irqload_test_item,
 	&score_test_item,
 #if (MACHINE_PIC == 1)
 	&pic_test_item,

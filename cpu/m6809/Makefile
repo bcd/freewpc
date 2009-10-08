@@ -41,3 +41,4 @@ KERNEL_ASM_OBJS += $(if $(CONFIG_TASK), $(C)/task_6809.o)
 KERNEL_OBJS     += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
 KERNEL_OBJS     += $(C)/string.o
 KERNEL_ASM_OBJS += $(C)/bcd_string.o
+KERNEL_ASM_OBJS += $(C)/irqload.o
