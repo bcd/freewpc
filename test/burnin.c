@@ -20,7 +20,7 @@ void burnin_gi_thread (void)
 		for (gi = (1 << 0); gi <= (1 << 4); gi <<= 1)
 		{
 			triac_leff_enable (gi);
-			task_sleep_sec (1);
+			task_sleep (TIME_500MS);
 			triac_leff_disable (gi);
 		}
 	}
