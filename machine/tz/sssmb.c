@@ -138,8 +138,7 @@ void sssmb_start (void)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
-		deff_update ();
-		music_refresh ();
+		effect_update_request ();
 		flag_on (FLAG_SSSMB_RUNNING);
 		flag_on (FLAG_SSSMB_RED_JACKPOT);
 		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
