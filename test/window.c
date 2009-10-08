@@ -660,13 +660,13 @@ void confirm_draw (void)
 	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
 	window_title (m->name);
-	font_render_string_center (&font_var5, 64, 18, "PRESS ENTER TO CONFIRM");
+	font_render_string_center (&font_var5, 64, 18, "PRESS START TO CONFIRM");
 	font_render_string_center (&font_var5, 64, 24, "PRESS ESCAPE TO CANCEL");
 
 	dmd_show_low ();
 }
 
-void confirm_enter (void)
+void confirm_start (void)
 {
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
@@ -709,7 +709,7 @@ void confirm_thread (void)
 	DEFAULT_WINDOW, \
 	.init = confirm_init, \
 	.draw = confirm_draw, \
-	.enter = confirm_enter, \
+	.start = confirm_start, \
 	.escape = confirm_escape, \
 	.thread = confirm_thread
 
@@ -2179,12 +2179,12 @@ struct menu development_menu = {
 void factory_adjust_confirm (void)
 {
 	adj_reset_all ();
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops factory_adjust_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = factory_adjust_confirm,
+	.start = factory_adjust_confirm,
 };
 
 struct menu factory_adjust_item = {
@@ -2199,12 +2199,12 @@ void factory_reset_confirm (void)
 {
 	extern __common__ void factory_reset (void);
 	factory_reset ();
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops factory_reset_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = factory_reset_confirm,
+	.start = factory_reset_confirm,
 };
 
 struct menu factory_reset_item = {
@@ -2218,12 +2218,12 @@ struct menu factory_reset_item = {
 void clear_audits_confirm (void)
 {
 	audit_reset ();
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops clear_audits_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = clear_audits_confirm,
+	.start = clear_audits_confirm,
 };
 
 struct menu clear_audits_item = {
@@ -2237,12 +2237,12 @@ struct menu clear_audits_item = {
 void clear_coins_confirm (void)
 {
 	/* TODO */
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops clear_coins_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = clear_coins_confirm,
+	.start = clear_coins_confirm,
 };
 
 struct menu clear_coins_item = {
@@ -2256,12 +2256,12 @@ struct menu clear_coins_item = {
 void reset_hstd_window_confirm (void)
 {
 	high_score_reset ();
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops reset_hstd_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = reset_hstd_window_confirm,
+	.start = reset_hstd_window_confirm,
 };
 
 struct menu reset_hstd_item = {
@@ -2347,12 +2347,12 @@ struct menu set_gameid_item = {
 void clear_credits_confirm (void)
 {
 	credits_clear ();
-	confirm_enter ();
+	confirm_start ();
 }
 
 struct window_ops clear_credits_window = {
 	INHERIT_FROM_CONFIRM_WINDOW,
-	.enter = clear_credits_confirm,
+	.start = clear_credits_confirm,
 };
 
 struct menu clear_credits_item = {
