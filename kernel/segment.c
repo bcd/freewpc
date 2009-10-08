@@ -135,9 +135,11 @@ U8 seg_alloc_pageid;
  */
 void seg_rtt (void)
 {
+#ifdef __m6809__
 	register U8 col asm ("d");
-#ifndef __m6809__
-	register segbits_t *valp asm ("x");
+#else
+	register U8 col;
+	register segbits_t *valp;
 #endif
 
 	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
