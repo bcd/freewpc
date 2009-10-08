@@ -127,3 +127,5 @@ Ignore Tilt:
 
 [globalflags]
 Ball At Plunger:
+Coin Door Opened:
+

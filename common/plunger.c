@@ -95,7 +95,7 @@ CALLSET_ENTRY (plunger, sw_shooter)
 #ifdef INCLUDE_AUTOPLUNGER
 	if (valid_playfield
 		&& !tournament_mode_enabled
-		&& switch_poll_logical (SW_COIN_DOOR_CLOSED))
+		&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
 	{
 		/* Autolaunch balls right away during a game if they land
 		in the autoplunger lane. */
