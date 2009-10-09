@@ -86,7 +86,7 @@ CALLSET_ENTRY (quickmb, dev_tunnel_kick_attempt)
 	if (in_live_game && flag_test (FLAG_QUICK_MB_RUNNING))
 	{
 		task_sleep_sec (2);
-		while (flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+		while (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
 			task_sleep (TIME_133MS);
 	}
 }
