@@ -43,6 +43,7 @@
 
 #include <freewpc.h>
 #include <search.h>
+#include <diag.h>
 
 /** Pointer to the device properties table generated from the md */
 extern device_properties_t device_properties_table[];
@@ -931,6 +932,14 @@ CALLSET_ENTRY (device, amode_start)
 {
 	live_balls = 0;
 	device_game_start_errors = 0;
+}
+
+
+CALLSET_ENTRY (device, diagnostic_check)
+{
+	device_update_globals ();
+	if (missing_balls != 0)
+		diag_post_error ("PINBALL MISSING\n", COMMON_PAGE);
 }
 
 
