@@ -104,6 +104,9 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 };
 
 
+extern U8 initials_data[];
+
+
 /** Renders a single high score table entry.
  * If pos is zero, then no position is drawn. */
 static void high_score_draw_single (U8 pos, U8 row)
@@ -334,21 +337,22 @@ void high_score_enter_initials (U8 position)
 		/* Announce that player # has qualified */
 		high_score_player = hsp->initials[0]+1;
 
+		/* Blank the high score initials until determined */
 		pinio_nvram_unlock ();
 		memset (hsp->initials, ' ', HIGH_SCORE_NAMESZ);
 		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
 
+		/* Read the player's initials */
 		high_score_position = position;
 		deff_start_sync (DEFF_HSENTRY);
 		SECTION_VOIDCALL (__common__, initials_enter);
 
-#if 0
+		/* TODO : Save the initials to table entry */
 		pinio_nvram_unlock ();
-		/* save initials to table */
+		memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
 		pinio_nvram_lock ();
 		csum_area_update (&high_csum_info);
-#endif
 
 		/* Award credits */
 		if (position == 0)
