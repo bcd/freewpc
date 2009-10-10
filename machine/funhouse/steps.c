@@ -69,7 +69,13 @@ CALLSET_ENTRY (steps, music_refresh)
 CALLSET_ENTRY (steps, lamp_update)
 {
 	lamp_on_if (LM_RAMP_STEPS, flag_test (FLAG_STEPS_RAMP_LIT));
-	lamp_on_if (LM_STEPS_GATE_OPEN, flag_test (FLAG_STEPS_OPEN));
+
+	if (flag_test (FLAG_BALL_AT_STEPS))
+		lamp_tristate_flash (LM_STEPS_GATE_OPEN);
+	else if (flag_test (FLAG_STEPS_OPEN))
+		lamp_tristate_on (LM_STEPS_GATE_OPEN);
+	else
+		lamp_tristate_off (LM_STEPS_GATE_OPEN);
 }
 
 CALLSET_ENTRY (steps, sw_step_track_upper)

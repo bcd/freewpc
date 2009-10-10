@@ -202,8 +202,7 @@ static void _mb_lamp_update (void)
 
 	lamp_flash_if (LM_MILLION_PLUS, flag_test (FLAG_JACKPOT_LIT));
 	lamp_on_if (LM_RAMP_250K, multiball_mode_running_p ());
-	lamp_flash_if (LM_RAMP_250K,
-		flag_test (FLAG_MULTIBALL_RUNNING) &&
+	lamp_flash_if (LM_RAMP_ENTRANCE, flag_test (FLAG_MULTIBALL_RUNNING) &&
 		!flag_test (FLAG_JACKPOT_LIT));
 }
 

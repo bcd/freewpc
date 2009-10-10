@@ -286,7 +286,7 @@ Trap Door Lamps: Frenzy, Trap Door Bonus, Million Plus
 Top Loop: Lock, Extra Ball
 Steps Awards: Steps Frenzy, Steps E.B., Steps 500K
 Step Targets: Step S, Step T, Step E, Step P
-Ramp Awards: Ramp Steps, Ramp 250K
+Ramp Awards: Ramp Entrance, Ramp Steps, Ramp 250K
 Lower Lanes: Specials, Flipper Lanes
 Circle Out: PF:lamp_sort_circle_out
 Strobe Up: PF:lamp_sort_bottom_to_top
