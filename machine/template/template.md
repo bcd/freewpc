@@ -17,6 +17,9 @@ DMD: Yes/No
 Fliptronic: Yes/No
 DCS: Yes/No
 WPC95: Yes/No
+
+# Uncomment and set the following if you know the filename for this
+# machine used by PinMAME.
 #Pinmame-Zip:
 #Pinmame-ROM:
 #Lamp-Matrix-Width:
@@ -26,13 +29,18 @@ WPC95: Yes/No
 # Include standard definitions that apply to all WPC games.
 # This will set some defaults for things you leave out here.
 ##########################################################################
-include platform/wpc/wpc.md
+# Choose ONE of the following:
+#include platform/wpc/wpc89.md
+#include platform/wpc/wpc-dmd.md
+#include platform/wpc/wpc-fliptronic.md
+#include platform/wpc/wpc-dcs.md
+#include platform/wpc/wpc-security.md
+#include platform/wpc/wpc95.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-#define MACHINE_INCLUDE_FLAGS
 #define MACHINE_SOL_EXTBOARD1
 #define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
@@ -181,9 +189,14 @@ include platform/wpc/wpc.md
 [highscores]
 
 ##########################################################################
-# Bit flags.
+# Per-player bit flags.
 ##########################################################################
 [flags]
+
+##########################################################################
+# System-wide bit flags.
+##########################################################################
+[globalflags]
 
 ##########################################################################
 # Display effects
