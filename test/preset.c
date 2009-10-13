@@ -127,22 +127,24 @@ PRESET_END (dev, "DEVELOPER")
 
 struct preset *preset_table[] = {
 	/* Easy-Hard */
+	&preset_5ball,
+	&preset_3ball,
 	/* Add-a-Ball */
 	&preset_ticket,
 	/* Novelty */
+	/* U.9 11 Not Used ??? */
 	/* Serial Capture */
-	/* German 1-6 */
-	/* French 1-6 */
-	&preset_3ball,
-	&preset_5ball,
-	&preset_tournament,
-	&preset_show,
-	&preset_timed_game,
-	&preset_french,
+	/* U.9 13-16 Not Used */
+	/* German Pricing 1-6 */
 	&preset_german,
+	/* French Pricing 1-6 */
+	&preset_french,
 	&preset_uk,
 	&preset_eu,
 	&preset_usa_canada,
+	&preset_tournament,
+	&preset_show,
+	&preset_timed_game,
 	&preset_dev,
 };
 

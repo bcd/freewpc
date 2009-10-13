@@ -30,31 +30,69 @@ static void update_complete (void)
 	effect_update_counter = 5;
 }
 
+/**
+ * A background task that calls all of the update functions.
+ *
+ * The order of the updates here is done from most important to
+ * least important.  Note that if an update request is made while
+ * this task is running, it can cause the task to be *restarted*, so
+ * it is possible for the logic at the bottom of the function to
+ * be starved temporarily.
+ */
 static void effect_update_task (void)
 {
+	/* Display and music are always updated, including during
+	attract mode */
 	deff_update ();
 	music_refresh ();
+
+	/* Lamp update is used for multiplexing different meanings
+	to playfield lamps; this only makes sense in the context
+	of a game. */
 	if (in_live_game)
 	{
+		/* Sleep a bit to avoid starving other tasks */
 		task_sleep (TIME_33MS);
 		callset_invoke (lamp_update);
 	}
+
+	/* Update the start button lamp */
 	if (!in_test)
 		lamp_start_update ();
+
 	task_exit ();
 }
 
+
+/**
+ * Request that background effects be updated soon.
+ *
+ * Do not actually update right away!  Because of the way this is used,
+ * it is possible for multiple requests to be made within a short
+ * period of time.  In no case do we really need to do the update
+ * more than once every 100ms.
+ */
 void effect_update_request (void)
 {
 	effect_update_counter = 0;
 }
 
+
+/**
+ * Periodically check to see if effects need updating.
+ */
 CALLSET_ENTRY (effect_update, idle_every_100ms, start_ball, end_ball)
 {
 	if (!in_test)
 	{
+		/* Update devices frequently */
 		if (in_game)
+			/* TODO - don't device_update while ball_search is active */
 			callset_invoke (device_update);
+
+		/* Less frequently, update background display, music, and lamps.
+		Normally this is done every 500ms.  If effect_update_request() is
+		called, then it will occur on the next 100ms interval. */
 		if (effect_update_counter == 0)
 		{
 			task_recreate_gid_while (GID_EFFECT_UPDATE, effect_update_task,

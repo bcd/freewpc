@@ -3,6 +3,9 @@
 
 U16 burnin_cycles;
 
+timestamp_t burnin_duration;
+
+
 void burnin_sound_thread (void)
 {
 	for (;;)
@@ -47,6 +50,22 @@ void burnin_lamp_thread (void)
 	SECTION_VOIDCALL (__test__, all_lamp_test_thread);
 }
 
+void burnin_draw (void)
+{
+	timestamp_format (&burnin_duration);
+	font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
+}
+
+void burnin_timestamp_thread (void)
+{
+	for (;;)
+	{
+		timestamp_add_sec (&burnin_duration, 1);
+		SECTION_VOIDCALL (__test__, window_redraw);
+		task_sleep_sec (1);
+	}
+}
+
 void burnin_thread (void)
 {
 	for (;;)
@@ -55,6 +74,7 @@ void burnin_thread (void)
 		task_create_peer (burnin_sound_thread);
 		task_create_peer (burnin_gi_thread);
 		task_create_peer (burnin_flasher_thread);
+		task_create_peer (burnin_timestamp_thread);
 		task_sleep_sec (60);
 		task_kill_peers ();
 		burnin_cycles++;
@@ -64,6 +84,7 @@ void burnin_thread (void)
 void burnin_init (void)
 {
 	burnin_cycles = 0;
+	timestamp_clear (&burnin_duration);
 	task_create_gid (GID_WINDOW_THREAD, burnin_thread);
 }
 

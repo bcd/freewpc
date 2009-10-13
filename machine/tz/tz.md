@@ -27,7 +27,6 @@ Lamp-Matrix-Height: 29
 # some other means.
 ##########################################################################
 define MACHINE_TZ
-define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS               10
