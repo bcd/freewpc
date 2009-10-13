@@ -2365,6 +2365,8 @@ struct menu clear_credits_item = {
 
 void burnin_test_draw (void)
 {
+	font_render_string_center (&font_mono5, 64, 2, "AUTO BURN-IN");
+	SECTION_VOIDCALL (__test2__, burnin_draw);
 	dmd_show_low ();
 }
 
