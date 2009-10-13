@@ -1844,7 +1844,22 @@ each coil pulse by using the flipper buttons.
 @section Development
 
 The development menu contains a series of additional tests that are
-probably only relevant to developers and not to end users.
+probably only relevant to developers and not to end users.  Current
+tests include:
+
+@itemize @bullet
+@item Trigger specific display/lamp effects
+@item Browse lamplists
+@item Examine the states of all multiball devices
+@item Test the random number generator
+@item Test display transition effects
+@item Run a display effect stress test
+@item Analyze task scheduler performance
+@item Analyze interrupt handler performance
+@item Test the presentation of scores in multi-player games
+@item A memory editor that allows inspection/modification of any
+memory address.
+@end itemize
 
 @subsection Font Test
 
