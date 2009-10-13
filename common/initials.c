@@ -53,6 +53,12 @@ char initials_data[NUM_INITIALS_ALLOWED+1];
 void (*initials_enter_complete) (void);
 
 
+/**
+ * The display effect for the enter initials screen.
+ *
+ * It continuously redraws itself whenever the timer, the selected
+ * character, or the entered characters change.
+ */
 void enter_initials_deff (void)
 {
 #if (MACHINE_DMD == 1)
