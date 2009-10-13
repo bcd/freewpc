@@ -1,0 +1,179 @@
+/*
+ * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/*
+ * Generic duty cycle driver - version 2
+ */
+
+@@class duty
+
+/* The solenoid that is being controlled */
+@@parameter sol
+
+/* The length of time that the solenoid remains on when it is started.
+   The on-time can include two phases: a full power pulse, and a
+	duty-cycling period.  The timeout is given in the machine config
+	in 16ms units, i.e. one of the TIME_xxx defines.   Timeout may be
+	given as zero, in which case the solenoid will remain on indefinitely
+	once started. */
+@@parameter timeout
+
+/* The length of the full power pulse.  It is also given as a TIME_xxx
+   define and it cannot be zero. */
+@@parameter ontime
+
+/* A mask that specifies how to duty cycle the coil during the remainder
+   of the on-time.  Use one of the DUTY_MASK_xxx defines for this. */
+@@parameter duty_mask
+
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+/* The number of 32ms periods that the solenoid is enabled for.
+As an 8-bit value the maximum is about 8 seconds. */
+extern U8 @self_timer;
+
+#define DUTY_SLOW_FREQ   32
+#define DUTY_FAST_FREQ   2
+
+#define DUTY_SCALE(x)   ((x) / (DUTY_SLOW_FREQ / 16))
+
+#define DUTY_TIMER_DISABLED    0xF0U
+#define DUTY_TIMER_INIT        (@timeout ? DUTY_SCALE (@timeout) : 0xE0U)
+#define DUTY_TIMER_DUTY        (DUTY_TIMER_INIT - DUTY_SCALE (@ontime))
+
+#define DUTY_MASK_50   0x1
+#define DUTY_MASK_25   0x3
+#define DUTY_MASK_12   0x7
+#define DUTY_MASK_6    0xF
+
+void @self_start (void);
+void @self_stop (void);
+
+extern inline bool @self_started_p (void)
+{
+	return @self_timer < DUTY_TIMER_DISABLED;
+}
+
+
+/**
+ * Realtime update of a duty-cycled device.
+ */
+
+extern inline void @self_service_slow (void)
+{
+	if (unlikely (@self_started_p ()))
+	{
+		@self_timer--;
+		if (@self_timer == 0)
+		{
+			@self_timer = DUTY_TIMER_DISABLED;
+			if (@timeout > 0)
+			{
+				sol_disable (@sol);
+			}
+		}
+	}
+}
+
+extern inline void @self_service_fast (void)
+{
+	/* When the timer is within the duty cycle interval,
+	we need to toggle the solenoid state; otherwise it is left
+	alone (on). */
+	if (unlikely (@self_timer <= DUTY_TIMER_DUTY))
+	{
+		if (((U8)get_sys_time () & @duty_mask) == @duty_mask)
+		{
+			sol_enable (@sol);
+		}
+		else
+		{
+			sol_disable (@sol);
+		}
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+/** The number of cycles for which the solenoid is kept on. */
+U8 @self_timer;
+
+
+/**
+ * The user API to start a duty-cycled solenoid.
+ */
+void @self_start (void)
+{
+	disable_interrupts ();
+	@self_timer = DUTY_TIMER_INIT;
+	sol_enable (@sol);
+	enable_interrupts ();
+}
+
+
+#if 0
+/**
+ * The advanced API for starting with a specific timeout.
+ */
+void @self_start_for (task_ticks_t timeout)
+{
+	disable_interrupts ();
+	@self_timer = @timeout / (DUTY_SLOW_FREQ / 16);
+	sol_enable (@sol);
+	enable_interrupts ();
+}
+#endif
+
+
+/**
+ * The user API to stop a duty-cycled solenoid.
+ */
+void @self_stop (void)
+{
+	disable_interrupts ();
+	@self_timer = DUTY_TIMER_DISABLED;
+	sol_disable (@sol);
+	enable_interrupts ();
+}
+
+
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = DUTY_TIMER_DISABLED;
+}
+
+
+CALLSET_ENTRY (@self, tilt, stop_game)
+{
+	@self_stop ();
+}
+
+/* vim: set filetype=c: */
