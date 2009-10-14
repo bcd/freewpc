@@ -2691,7 +2691,11 @@ U8 switch_display_timer;
 
 void switch_window_title (const char *title)
 {
+#if (MACHINE_DMD == 1)
 	font_render_string_center (&font_mono5, 80, 3, title);
+#else
+	font_render_string_center (&font_mono5, 64, 3, title);
+#endif
 }
 
 void switch_edges_init (void)
