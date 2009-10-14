@@ -28,6 +28,8 @@
  * This module implements the standard logic for awarding extra balls.
  */
 
+/* CALLSET_SECTION (extra_ball, __effect__) */
+
 /** Number of extra balls earned */
 U8 extra_balls;
 
