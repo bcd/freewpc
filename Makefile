@@ -629,7 +629,7 @@ $(BLDDIR)/blankpage.bin: $(SR)
 # Convert each S-record file, one per page, into binary.
 #
 $(SYSTEM_BINFILE) : %.bin : %.s19 $(SR) $(BLDDIR)/$(MAP_FILE)
-	$(Q)echo "Checking for overflow..." && tools/mapcheck $(BLDDIR)/$(MAP_FILE)
+	$(Q)echo "Checking for overflow..." && tools/mapcheck $(BLDDIR)/$(MAP_FILE) >> $(ERR) 2>&1
 	$(Q)$(SR) -o $@ -s $(AREA_sysrom) -l $(SYSROM_SIZE) -f 0xFF $<
 
 $(PAGED_BINFILES) : %.bin : %.s19 $(SR)

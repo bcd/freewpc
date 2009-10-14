@@ -28,7 +28,10 @@
 #include <freewpc.h>
 #include <preset.h>
 
+/** The last setting of the DIP switches seen in init time */
 __nvram__ U8 locale_code;
+
+/** A checksum for the DIP switches to prove that it is valid */
 __nvram__ U8 locale_code_csum;
 
 static const char *month_names[] = {
@@ -77,23 +80,25 @@ CALLSET_ENTRY (locale, init)
 {
 	U8 current_locale;
 
-	/* If the saved locale is valid, then just use that */
-	if (~locale_code == locale_code_csum)
-		return;
-
-	/* See what the DIP switches say */
+	/* Read the DIP switch settings */
 	current_locale = pinio_read_locale ();
-	dbprintf ("Locale is now %d\n", current_locale);
 
-	/* Save the current locale so that install does not
-	need to be performed on the next reboot */
-	pinio_nvram_unlock ();
-	locale_code = current_locale;
-	locale_code_csum = ~current_locale;
-	pinio_nvram_lock ();
+	/* If the DIP switch setting changed, or the previous
+	value was corrupted somehow, then perform a factory reset
+	according to the current setting. */
+	if (current_locale != locale_code
+		|| ~locale_code != locale_code_csum)
+	{
+		/* Install locale-specific adjustments */
+		preset_install_country_code (current_locale);
 
-	/* Reinsall adjustments for this locale */
-	preset_install_country_code (current_locale);
-
+		/* Save the current locale so that install does not
+		need to be performed on the next reboot, unless
+		the DIP switches are changed. */
+		pinio_nvram_unlock ();
+		locale_code = current_locale;
+		locale_code_csum = ~current_locale;
+		pinio_nvram_lock ();
+	}
 }
 

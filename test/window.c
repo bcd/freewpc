@@ -1815,6 +1815,8 @@ struct menu sched_test_item = {
 
 /**********************************************************************/
 
+#ifndef CONFIG_NATIVE
+
 void irqload_test_init (void)
 {
 	dmd_alloc_low_clean ();
@@ -1844,6 +1846,8 @@ struct menu irqload_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &irqload_test_window, NULL } },
 };
+
+#endif
 
 /**********************************************************************/
 
@@ -2154,7 +2158,9 @@ struct menu *dev_menu_items[] = {
 	&symbol_test_item,
 #endif
 	&sched_test_item,
+#ifndef CONFIG_NATIVE
 	&irqload_test_item,
+#endif
 	&score_test_item,
 #if (MACHINE_PIC == 1)
 	&pic_test_item,

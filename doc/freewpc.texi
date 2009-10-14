@@ -421,6 +421,7 @@ describes the key features of the OS.
 * Template Drivers::       Writing reusable software blocks
 * Fault Detection::        Handling serious errors
 * Timers::                 The many implementations of timers to choose from
+* Bank Switching::         How code is arranged in different banks of ROM
 @end menu
 
 @node Multitasking
@@ -807,6 +808,68 @@ write code to query the timer value, but if it expires to zero, then
 nothing special happens.  One common use is for detecting certain
 playfield shots when a series of switches needs to activate within
 a certain amount of time, say 1 second apart.
+
+@node Bank Switching
+@section Bank Switching
+
+The 6809 processor does not allow all of the ROM image to be accessible at once.
+32KB of the ROM (the uppermost portion) is fixed and can be accessed at all times.
+The remaining ROM is divided into "banks" or "pages" of 16KB each.  Access to
+these areas is a little more complicated.
+
+You can use the @code{page_push} and @code{page_pop} functions to change the
+current banked area.  You must only call these from code running in the fixed
+area, otherwise the current function becomes inaccessible!  Many kernel functions
+use these to retrieve data that is placed into specific, named banks (e.g.
+fonts and DMD transition functions).
+
+The GCC6809 compiler supports function calls across all of the banks without
+much effort from the programmer.  Each C file that is compiled must have all
+of its code and constant data placed into the same bank.  You specify which
+bank via the Makefiles.  For example, suppose you add a new file to the
+common directory, named newfile.c.  In common/Makefile, the line:
+
+COMMON_BASIC_OBJS += common/newfile.o
+
+adds this module into the COMMON_OBJS list; all of these objects are part of
+the COMMON_PAGE bank.  In the top-level Makefile, you can see that
+COMMON_PAGE is mapped to bank 56.
+
+There are a number of predefined sections, like COMMON, EFFECT, TEST, and TEST2.
+More can be added by modifying the topmost Makefile.  Each of these is then
+mapped to a physical bank of ROM; it is possible for multiple sections to map
+to the same physical page.
+
+The Makefiles only control the @emph{placement} of code and data.  To make function
+calls between sections work correctly, you also need to modify the C prototypes.
+
+When the compiler encounters an ordinary prototype, such as:
+
+void foo (void);
+
+then a call to @code{foo()} is an ordinary call with no consideration for banking.
+However,
+
+__attribute__((page ("56")) void foo (void);
+
+says that @code{foo()} will be physically placed in page 56, and a far call might be
+needed.  If the calling function is not in page 56, then the compiler will emit some
+special code to switch the bank, make the call, and restore the bank.  This even
+works when the caller is in a different bank and not in the fixed region.  When
+each file is compiled, it is told which page it is in using the -mfar-code-page option.
+
+Because this mechanism is used so often, there are macros to make it easier.
+The above prototype could be rewritten as:
+
+__common__ void foo (void);
+
+See @file{include/env.h} for a list of the macros that can be used.  In general,
+every section has an attribute that can be used like this.
+
+Because placement is a somewhat manual procedure, it is possible for a bank to
+become full.  When that happens, code often must be moved or new sections added.
+This is rare but does happen from time to time.
+
 
 @c ======================================================
 @node Hardware APIs

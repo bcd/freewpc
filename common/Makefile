@@ -34,7 +34,6 @@ COMMON_BASIC_OBJS +=	common/trough.o
 COMMON_SW_OBJS += $(if $(CONFIG_WPC), common/buyin.o)
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/device.o)
 COMMON_SW_OBJS += common/diag.o
-COMMON_SW_OBJS += common/eb.o
 COMMON_SW_OBJS += $(if $(CONFIG_WPC), common/highscore.o)
 COMMON_SW_OBJS += $(if $(CONFIG_INSPECTOR), common/inspector.o)
 COMMON_SW_OBJS += common/knocker.o
@@ -54,6 +53,7 @@ TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
 # Effect objects contain common display and lamp effects, and are
 # separated out for the same reason.  These may be placed into a
 # different ROM page.
+EFFECT_OBJS += common/eb.o
 EFFECT_OBJS += common/effect.o
 EFFECT_OBJS += common/effect_update.o
 EFFECT_OBJS +=	common/flash.o

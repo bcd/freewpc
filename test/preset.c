@@ -116,6 +116,10 @@ PRESET_BEGIN (uk)
 	PRESET_EUROPE
 PRESET_END (uk, "U.K.")
 
+PRESET_BEGIN (eu)
+	PRESET_EUROPE
+	{ pricing_adjustments, &price_config.pricing_mode, PRICE_EURO },
+PRESET_END (eu, "E.U.")
 
 PRESET_BEGIN (dev)
 	{ pricing_adjustments, &price_config.free_play, YES },
@@ -136,6 +140,7 @@ struct preset *preset_table[] = {
 	/* French Pricing 1-6 */
 	&preset_french,
 	&preset_uk,
+	&preset_eu,
 	&preset_usa_canada,
 	&preset_tournament,
 	&preset_show,
