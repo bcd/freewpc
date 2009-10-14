@@ -275,6 +275,7 @@ __noreturn__ void deff_exit (void)
 	task_setgid (GID_DEFF_EXITING);
 
 	deff_running = DEFF_NULL;
+	deff_prio = 0;
 	effect_update_request ();
 	task_exit ();
 }
