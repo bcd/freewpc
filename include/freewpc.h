@@ -91,7 +91,6 @@ typedef union
 /* TODO - move these elsewhere */
 extern U8 sys_init_complete;
 extern U8 sys_init_pending_tasks;
-extern U8 irq_count;
 extern U8 idle_ok;
 
 /*
