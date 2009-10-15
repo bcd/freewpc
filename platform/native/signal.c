@@ -31,6 +31,11 @@
 #define MAX_SIGNALS 1024
 #define MAX_READINGS 256
 
+
+/**
+ * A structure for tracking a single binary signal over a period
+ * of time.
+ */
 typedef struct signal_readings
 {
 	unsigned int init_state;
@@ -69,6 +74,7 @@ signal_readings_t *signal_chunk_alloc (void)
 void signal_update (signal_number_t signo, unsigned int state)
 {
 	signal_readings_t *sigrd;
+	simulated_time_interval_t last_change_time;
 
 	/* Update last state */
 	if (state)
@@ -92,6 +98,15 @@ void signal_update (signal_number_t signo, unsigned int state)
 	if (sigrd->prev_state == state)
 		return;
 
+	if (sigrd->count == 0)
+	{
+		last_change_time = 0;
+	}
+	else
+	{
+		last_change_time = sigrd->t[sigrd->count - 1];
+	}
+
 	/* Allocate a new block if the previous block is full. */
 	if (sigrd->count == MAX_READINGS)
 	{
@@ -102,7 +117,10 @@ void signal_update (signal_number_t signo, unsigned int state)
 	}
 
 	/* Save the new state along with the timestamp of the change */
-	simlog (SLC_DEBUG, "Signal %d now %d at %ld", signo, state, realtime_read ());
+	//simlog (SLC_DEBUG, "Signal %d was %d from %ld", signo, !state, last_change_time);
+	//simlog (SLC_DEBUG, "Signal %d now %d at %ld", signo, state, realtime_read ());
+	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
+		realtime_read () - last_change_time);
 	sigrd->t[sigrd->count++] = realtime_read ();
 	sigrd->prev_state = state;
 }
@@ -122,7 +140,6 @@ void signal_trace_stop (signal_number_t signo)
 		return;
 
 	simlog (SLC_DEBUG, "Trace for signal %d:", signo);
-	simlog (SLC_DEBUG, "  Start at %d", sigrd->init_state);
 	unsigned int last_time = sigrd->t[0];
 	while (sigrd)
 	{
@@ -131,9 +148,8 @@ void signal_trace_stop (signal_number_t signo)
 		unsigned int state = sigrd->init_state;
 		for (n = 0; n < sigrd->count; n++)
 		{
+			simlog (SLC_DEBUG, "  %d for %dms", state, sigrd->t[n] - last_time);
 			state = !state;
-			simlog (SLC_DEBUG, "  Set to %d at time %ld (%d)", state, sigrd->t[n],
-				sigrd->t[n] - last_time);
 			last_time = sigrd->t[n];
 		}
 		free (sigrd);

@@ -286,7 +286,7 @@ void sol_req_rtt (void)
 		}
 		else if (sol_req_state == REQ_DUTY)
 		{
-			if ((sol_req_timer & sol_duty_mask) == 0)
+			if ((sol_req_timer & req_duty_mask) == 0)
 			{
 				/* Occasionally turn on the coil */
 				sol_req_on ();

@@ -148,6 +148,8 @@ unsigned int pic_machine_number = MACHINE_NUMBER;
 /** Nonzero if simulating some bad hardware */
 unsigned long sim_badness = 0;
 
+unsigned int signo_under_trace = SIGNO_SOL + 0;
+
 
 /** A dummy function intended to be used for debugging under GDB. */
 void gdb_break (void)
@@ -790,6 +792,41 @@ CALLSET_ENTRY (native, realtime_tick)
 }
 
 
+void exec_script (char *cmd)
+{
+	const char *s;
+	const char *delims = " \t\n";
+
+	simlog (SLC_DEBUG, "Exec script '%s'", cmd);
+	s = strtok (cmd, delims);
+	if (!strcmp (s, "trace"))
+	{
+		s = strtok (NULL, delims);
+		if (!strcmp (s, "sol"))
+		{
+			signo_under_trace = SIGNO_SOL;
+		}
+		else if (!strcmp (s, "zc"))
+		{
+			signo_under_trace = SIGNO_ZEROCROSS;
+		}
+		else if (!strcmp (s, "triac"))
+		{
+			signo_under_trace = SIGNO_TRIAC;
+		}
+		else if (!strcmp (s, "lamp"))
+		{
+			signo_under_trace = SIGNO_LAMP;
+		}
+
+		s = strtok (NULL, delims);
+		if (s)
+			signo_under_trace += strtoul (s, NULL, 0);
+		simlog (SLC_DEBUG, "Signal under trace = %d", signo_under_trace);
+	}
+}
+
+
 /** A mapping from keyboard command to switch */
 static switchnum_t keymaps[256] = {
 #ifdef MACHINE_START_SWITCH
@@ -909,11 +946,10 @@ static void linux_interface_thread (void)
 					else if ((*p == '\r') || (*p == '\n'))
 					{
 						*p = '\0';
-						simlog (SLC_DEBUG, "Exec script '%s'",  cmd);
-						/* TODO */
+						exec_script (cmd);
 						break;
 					}
-					simlog (SLC_DEBUG, "'%c'", *p);
+					putchar (*p);
 					p++;
 				}
 				break;
@@ -924,11 +960,11 @@ static void linux_interface_thread (void)
 				break;
 
 			case '{':
-				signal_trace_start (SIGNO_ZEROCROSS);
+				signal_trace_start (signo_under_trace);
 				break;
 
 			case '}':
-				signal_trace_stop (SIGNO_ZEROCROSS);
+				signal_trace_stop (signo_under_trace);
 				break;
 
 			case 'q':
@@ -1206,6 +1242,13 @@ int main (int argc, char *argv[])
 		usleep (10000);
 
 	signal_update (SIGNO_RESET, 0);
+	signal_update (SIGNO_BLANKING, 1);
+	signal_update (SIGNO_5V, 1);
+	signal_update (SIGNO_12V, 1);
+	signal_update (SIGNO_18V, 1);
+	signal_update (SIGNO_20V, 1);
+	signal_update (SIGNO_50V, 1);
+
 	freewpc_init ();
 	return 0;
 }
