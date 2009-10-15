@@ -55,6 +55,13 @@ extern inline void far_indirect_call_handler (void_function address, U8 page)
 	address ();
 }
 
+typedef U8 (*value_function) (void);
+
+extern inline U8 far_indirect_call_value_handler (value_function address, U8 page)
+{
+	return address ();
+}
+
 
 #endif /* _PLATFORM_NATIVE_H */
 

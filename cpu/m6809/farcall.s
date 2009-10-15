@@ -84,10 +84,13 @@ __far_call_handler:
 
 	;;; Call through a far pointer.  This is identical to above, except the
 	;;; address is already in X/B and is not loaded from the program inline.
-	;;; Note: this only works if the function is void (*)(void).  If it
-	;;; takes parameters, this gets tricky...
+	;;; Note: this only works if the function does not take parameters.
+	;;; Normally it is void (*)(void); it also works if it returns a value
+	;;; such as bool (*)(void) .
 	.globl _far_indirect_call_handler
+	.globl _far_indirect_call_value_handler
 _far_indirect_call_handler:
+_far_indirect_call_value_handler:
 	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
 	stx   *__far_call_address   ; Move function offset to memory
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
