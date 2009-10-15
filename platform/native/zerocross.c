@@ -70,6 +70,12 @@ void sim_zc_init (void)
 	sim_zc_active = 0;
 	sim_zc_timer = ZC_TIMER_MAX;
 
+	if (sim_test_badness (SIM_BAD_NOZEROCROSS))
+	{
+		signal_update (SIGNO_ZEROCROSS, 1);
+		return;
+	}
+
 	/* Register a callback every 1ms */
 	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
 }

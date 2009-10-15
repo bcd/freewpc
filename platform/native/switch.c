@@ -62,6 +62,9 @@ void sim_switch_toggle (int sw)
 	/* Some switch closures require additional simulation... */
 	if (level ^ switch_is_opto (sw))
 		sim_switch_effects (sw);
+
+	/* Update the signal tracker */
+	signal_update (SIGNO_SWITCH + sw, !!level);
 }
 
 
