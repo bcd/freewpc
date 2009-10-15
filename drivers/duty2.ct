@@ -52,7 +52,7 @@
 
 /* The number of 32ms periods that the solenoid is enabled for.
 As an 8-bit value the maximum is about 8 seconds. */
-extern U8 @self_timer;
+extern __fastram__ U8 @self_timer;
 
 #define DUTY_SLOW_FREQ   32
 #define DUTY_FAST_FREQ   2
@@ -124,7 +124,7 @@ extern inline void @self_service_fast (void)
 #include "@self.h"
 
 /** The number of cycles for which the solenoid is kept on. */
-U8 @self_timer;
+__fastram__ U8 @self_timer;
 
 
 /**
