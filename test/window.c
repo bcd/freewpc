@@ -523,7 +523,7 @@ audit_t default_audit_value;
 struct audit main_audits[] = {
 	{ "TOTAL EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
 	{ STR_RECENT "EARNINGS", AUDIT_TYPE_NONE, NULL },
-	{ "FREEPLAY PERCENT", AUDIT_TYPE_NONE, NULL },
+	{ STR_PERCENT "FREEPLAY", AUDIT_TYPE_NONE, NULL },
 	{ "AVG. BALL TIME", AUDIT_TYPE_TIME_PER_BALL, (audit_t *)&system_audits.total_game_time },
 	{ "TIME/CREDIT", AUDIT_TYPE_TIME_PER_CREDIT, (audit_t *)&system_audits.total_game_time },
 	{ "TOTAL PLAYS", AUDIT_TYPE_INT, &system_audits.total_plays },
@@ -537,7 +537,7 @@ struct audit main_audits[] = {
 struct audit earnings_audits[] = {
 	{ STR_RECENT "EARNINGS", AUDIT_TYPE_TOTAL_EARNINGS, &default_audit_value },
 	{ STR_RECENT "LEFT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[0] },
-	{ STR_RECENT "CENTER SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
+	{ STR_RECENT "CTR. SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[1] },
 	{ STR_RECENT "RIGHT SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[2] },
 	{ STR_RECENT "4TH SLOT", AUDIT_TYPE_INT, &system_audits.coins_added[3] },
 	{ STR_RECENT "PAID CRED.", AUDIT_TYPE_INT, &system_audits.paid_credits },
