@@ -3,10 +3,14 @@
 # stressbuild - test many different build configurations at once
 #
 
+typeset -i count
+typeset -i mincount
+
 machines="funhouse t2 tz wcs afm tester"
 native_options="n y"
 gcc_options="4.3.4 4.4.2"
 debugger_options="n y"
+mincount=1
 
 case $1 in
 	--native)
@@ -21,11 +25,15 @@ case $1 in
 		debugger_options="y"
 		gcc_options="4.3.4"
 		;;
-	4*)
-		gcc_options="$1"
+	--gcc)
+		shift; gcc_options="$1"
+		;;
+	*)
+		mincount=$1
 		;;
 esac
 
+count=0
 rm -f stressbuild.log
 for native in $native_options; do
 	if [ "$native" = "y" ]; then
@@ -45,10 +53,12 @@ for native in $native_options; do
 			fi
 			for gcc in $gcctargets; do
 				if [ "$gcc" = "nop" ]; then gcc=; fi
+				count=$(($count + 1))
+				if [ "$count" -lt "$mincount" ]; then continue; fi
 				for target in `echo clean default_target`; do
 
 					cfg="NATIVE=$NATIVE MACHINE=$mach FREEWPC_DEBUGGER=$debugger GCC_VERSION=$gcc target=$target"
-					echo "Begin: $cfg" | tee -a stressbuild.log
+					echo "Begin: ($count) $cfg" | tee -a stressbuild.log
 
 					export MACHINE=$mach
 					export FREEWPC_DEBUGGER=$debugger
@@ -62,8 +72,8 @@ for native in $native_options; do
 						cat err | tee -a stressbuild.log
 					fi
 
-					echo "End: $cfg" | tee -a stressbuild.log
-					echo "Exit code: $rc" | tee -a stressbuild.log
+					echo "End: ($count) $cfg" | tee -a stressbuild.log
+					echo "Exit code: ($count) $rc" | tee -a stressbuild.log
 					echo "" | tee -a stressbuild.log
 					if [ "$rc" != "0" ]; then
 						exit $rc
