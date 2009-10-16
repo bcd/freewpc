@@ -368,7 +368,11 @@ void adj_browser_draw (void)
 		{
 #if (MACHINE_DMD == 1)
 			font_render_string_center (&font_var5, 96, 21, "(FAC. DEFAULT)");
-#else
+#endif
+		}
+		else
+		{
+#if (MACHINE_ALPHANUMERIC == 1)
 			seg_write_string (1, 15, "*");
 #endif
 		}
@@ -2417,6 +2421,7 @@ void presets_draw_finish (void)
 
 void presets_draw (void)
 {
+#if (MACHINE_DMD == 1)
 	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
 	sprintf ("%d.", menu_selection+1);
 	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
@@ -2428,6 +2433,16 @@ void presets_draw (void)
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
 	task_recreate_gid (GID_SLOW_DRAW_FINISH, presets_draw_finish);
+#else
+	sprintf ("%d.", menu_selection+1);
+	seg_write_string (1, 0, sprintf_buffer);
+	preset_render_name (menu_selection);
+	seg_write_row_center (0, sprintf_buffer);
+	if (preset_installed_p (menu_selection))
+	{
+		seg_write_string (1, 7, "INSTALLED");
+	}
+#endif
 	dmd_show_low ();
 }
 
