@@ -61,28 +61,34 @@ void (*initials_enter_complete) (void);
  */
 void enter_initials_deff (void)
 {
-#if (MACHINE_DMD == 1)
-	U8 n;
-#endif
-
 	while (task_find_gid (GID_ENTER_INITIALS))
 	{
 		if (score_update_required ())
 		{
+#if (MACHINE_DMD == 1)
+			U8 n;
 			dmd_alloc_low_clean ();
 			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
 			font_render_string_left (&font_fixed10, 0, 9, initials_data);
 			sprintf ("%12s", initial_chars + initials_selection);
 			font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
 
-#if (MACHINE_DMD == 1)
 			for (n = 23; n <= 31; n++)
 				dmd_low_buffer[16UL * n] ^= 0xFF;
-#endif
 
 			sprintf ("%d", initials_enter_timer);
 			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
 			dmd_show_low ();
+#else
+			seg_alloc_clean ();
+			seg_write_string (0, 0, "ENTER INITIALS");
+			sprintf ("%c", initial_chars[initials_selection]);
+			seg_write_string (0, 15, sprintf_buffer);
+			seg_write_string (1, 0, initials_data);
+			sprintf ("%d", initials_enter_timer);
+			seg_write_string (1, 14, sprintf_buffer);
+			seg_show ();
+#endif
 		}
 		task_sleep (TIME_66MS);
 	}
