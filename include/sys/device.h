@@ -63,7 +63,16 @@ typedef struct device_ops
 	/** Called whenever a ball enters the device */
 	void (*enter) (void);
 
-	/** Called whenever the game tries to kick a ball from the device */
+	/** Called before the game attempts to kick a ball, to allow modules
+	to deny the attempt, if it should not be tried at all for some reason.
+	In that case, the device code will back-off for a few seconds and then
+	request again.  Returns TRUE if the request is allowed, or FALSE if
+	it is denied. */
+	bool (*kick_request) (void);
+
+	/** Called just before actually kick a ball from the device.  The kick
+	is imminent and cannot be stopped at this point; this hook allows
+	modules to perform a lamp effect or sound call in sync with the kick. */
 	void (*kick_attempt) (void);
 
 	/** Called when a kick is successful.
@@ -95,6 +104,8 @@ do { \
 	}  \
 } while (0)
 
+#define device_call_boolean_op(dev, op) \
+	far_indirect_call_value_handler (dev->props->ops->op, EVENT_PAGE)
 
 /** The device properties structure is a read-only descriptor that
  * contains various compile-time attributes. */

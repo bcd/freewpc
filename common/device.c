@@ -397,6 +397,10 @@ wait_and_recount:
 			 * locks are held so we must wait. */
 			goto wait_and_recount;
 		}
+		else if (!device_call_boolean_op (dev, kick_request))
+		{
+			goto wait_and_recount;
+		}
 		else
 		{
 			/* Container has balls ready to kick */
