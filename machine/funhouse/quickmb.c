@@ -81,14 +81,15 @@ void quickmb_stop (void)
 	}
 }
 
-CALLSET_ENTRY (quickmb, dev_tunnel_kick_attempt)
+
+CALLSET_BOOL_ENTRY (quickmb, dev_tunnel_kick_request)
 {
-	if (in_live_game && flag_test (FLAG_QUICK_MB_RUNNING))
-	{
-		task_sleep_sec (2);
-		while (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
-			task_sleep (TIME_133MS);
-	}
+	/* Do not allow the tunnel to kick out while there is
+	a ball at the plunger */
+	if (in_live_game && flag_test (FLAG_QUICK_MB_RUNNING) &&
+		 global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+		return FALSE;
+	return TRUE;
 }
 
 CALLSET_ENTRY (quickmb, display_update)

@@ -25,11 +25,6 @@ include platform/wpc/wpc89.md
 # some other means.
 ##########################################################################
 # define MACHINE_SYS11_SOUND
-define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
-define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }
-
-#define MACHINE_INCLUDE_FLAGS
-define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
 #define MACHINE_MUSIC_PLUNGER
@@ -37,6 +32,8 @@ define MACHINE_CUSTOM_AMODE
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_REPLAY_SCORE_CHOICES 10
 #define MACHINE_OUTHOLE_KICK_HOOK
+
+define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'L', 'E', 'D' }
 define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x15, 0x00, 0x00, 0x00 }
 define MACHINE_HIGH_SCORE_INITIALS { 'B', 'C', 'D' }, { 'Q', 'Q', 'Q' }, { 'D', 'E', 'H' }, { 'J', 'N', 'D' }

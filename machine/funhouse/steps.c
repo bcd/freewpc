@@ -72,7 +72,7 @@ CALLSET_ENTRY (steps, lamp_update)
 
 	if (flag_test (FLAG_BALL_AT_STEPS))
 		lamp_tristate_flash (LM_STEPS_GATE_OPEN);
-	else if (flag_test (FLAG_STEPS_OPEN))
+	else if (steps_available_p () && flag_test (FLAG_STEPS_OPEN))
 		lamp_tristate_on (LM_STEPS_GATE_OPEN);
 	else
 		lamp_tristate_off (LM_STEPS_GATE_OPEN);
@@ -116,7 +116,7 @@ CALLSET_ENTRY (steps, sw_left_outlane)
 
 CALLSET_ENTRY (steps, ramp_entered)
 {
-	if (flag_test (FLAG_STEPS_RAMP_LIT))
+	if (steps_available_p () && flag_test (FLAG_STEPS_RAMP_LIT))
 	{
 		ramp_div_start ();
 		flag_on (FLAG_STEPS_OPEN);
