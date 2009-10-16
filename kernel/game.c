@@ -158,7 +158,8 @@ void end_game (void)
 	/* Common stop/end game logic */
 	stop_game ();
 
-	/* TODO - should be able to restart a game at this point??? */
+	/* From here, it is possible to restart a new game and
+	interrupt all of the following effects */
 
 	if (was_in_game)
 	{
@@ -561,6 +562,7 @@ void start_game (void)
 {
 	if (!in_game)
 	{
+		task_kill_gid (GID_END_BALL);
 		audit_increment (&system_audits.games_started);
 		in_game = TRUE;
 		in_bonus = FALSE;
