@@ -241,7 +241,7 @@ void pic_verify (void)
 
 	if (pic_game_number != expected_game_number)
 	{
-		dbprintf ("warning: expected game number %ld, found %ld\n",
+		dbprintf ("Expected game #%ld, got #%ld\n",
 			expected_game_number, pic_game_number);
 	}
 

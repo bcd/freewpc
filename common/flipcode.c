@@ -49,12 +49,10 @@ in the .md file:
 
 void flipcode_default_1 (void)
 {
-	dbprintf ("Flipper code 1\n");
 }
 
 void flipcode_default_2 (void)
 {
-	dbprintf ("Flipper code 2\n");
 }
 
 #endif

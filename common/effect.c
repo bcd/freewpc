@@ -214,13 +214,3 @@ void animation_test_deff (void)
 
 #endif /* MACHINE_DMD */
 
-void periodic_test (void)
-{
-#ifdef __m6809__
-	task_do_periodic (TIME_100MS)
-	{
-		dbprintf ("ping\n");
-	}
-#endif
-}
-

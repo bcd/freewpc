@@ -124,7 +124,7 @@ match_value_score (U8 want_match, U8 val)
 		score = !(score > 0);
 	}
 
-	dbprintf ("%s, %02X = %d\n", want_match ? "match" : "no match", val, score);
+	//dbprintf ("%s, %02X = %d\n", want_match ? "match" : "no match", val, score);
 	return score;
 }
 

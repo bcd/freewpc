@@ -125,7 +125,6 @@ CALLSET_ENTRY (service, sw_up)
 
 void coin_door_opened (void)
 {
-	dbprintf ("Coin door is open\n");
 	global_flag_on (GLOBAL_FLAG_COIN_DOOR_OPENED);
 
 	/* TODO : Enable Stern's "coindoor ballsave" feature */
@@ -140,7 +139,6 @@ void coin_door_opened (void)
 
 void coin_door_closed (void)
 {
-	dbprintf ("Coin door is closed\n");
 	global_flag_off (GLOBAL_FLAG_COIN_DOOR_OPENED);
 }
 
