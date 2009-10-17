@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -59,6 +59,10 @@ signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
 uint32_t signal_states[MAX_SIGNALS / 32] = { 0, };
 
 
+/**
+ * Allocate a new signal chunk to hold some more readings for
+ * a signal.
+ */
 signal_readings_t *signal_chunk_alloc (void)
 {
 	signal_readings_t *sigrd;
@@ -71,6 +75,12 @@ signal_readings_t *signal_chunk_alloc (void)
 }
 
 
+/**
+ * Update the state of a binary signal.
+ *
+ * If a signal is known not to have changed state, it is not necessary
+ * to call this function repeatedly; however it is harmless to do so.
+ */
 void signal_update (signal_number_t signo, unsigned int state)
 {
 	signal_readings_t *sigrd;
@@ -98,14 +108,12 @@ void signal_update (signal_number_t signo, unsigned int state)
 	if (sigrd->prev_state == state)
 		return;
 
+	/* See what time the signal last changed state.  By comparing this
+	to the current time, we can say how long it held its last value. */
 	if (sigrd->count == 0)
-	{
 		last_change_time = 0;
-	}
 	else
-	{
 		last_change_time = sigrd->t[sigrd->count - 1];
-	}
 
 	/* Allocate a new block if the previous block is full. */
 	if (sigrd->count == MAX_READINGS)
@@ -116,16 +124,19 @@ void signal_update (signal_number_t signo, unsigned int state)
 		sigrd = sigrd->next = new_sigrd;
 	}
 
-	/* Save the new state along with the timestamp of the change */
-	//simlog (SLC_DEBUG, "Signal %d was %d from %ld", signo, !state, last_change_time);
-	//simlog (SLC_DEBUG, "Signal %d now %d at %ld", signo, state, realtime_read ());
+	/* Print the last signal state */
 	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
 		realtime_read () - last_change_time);
+
+	/* Save the new state along with the timestamp of the change */
 	sigrd->t[sigrd->count++] = realtime_read ();
 	sigrd->prev_state = state;
 }
 
 
+/**
+ * Enable tracing for a signal.
+ */
 void signal_trace_start (signal_number_t signo)
 {
 	if (!signal_readings[signo])
@@ -133,6 +144,9 @@ void signal_trace_start (signal_number_t signo)
 }
 
 
+/**
+ * Disable tracing for a signal.
+ */
 void signal_trace_stop (signal_number_t signo)
 {
 	signal_readings_t *sigrd = signal_readings[signo];
