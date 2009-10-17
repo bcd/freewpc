@@ -8,7 +8,7 @@ typeset -i mincount
 
 machines="funhouse t2 tz wcs afm tester"
 native_options="n y"
-gcc_options="4.3.4 4.4.2"
+gcc_options="4.3.4"
 debugger_options="n y"
 mincount=1
 
