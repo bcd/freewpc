@@ -871,9 +871,9 @@ endif
 #
 # How to automake files of #defines
 #
-gendefines: $(GENDEFINES) $(MACH_LINKS)
+gendefines: $(GENDEFINES)
 
-include/gendefine_gid.h: $(FSM_SRCS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
+include/gendefine_gid.h: $(MACH_LINKS) $(FSM_SRCS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
 	$(Q)echo Autogenerating task IDs... && \
 		$(GENDEFINE) -p GID_ > $@
 
