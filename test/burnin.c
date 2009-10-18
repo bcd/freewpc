@@ -50,6 +50,17 @@ void burnin_lamp_thread (void)
 	SECTION_VOIDCALL (__test__, all_lamp_test_thread);
 }
 
+#if (MACHINE_FLIPTRONIC == 1)
+void burnin_flipper_thread (void)
+{
+	for (;;)
+	{
+		fliptronic_ball_search ();
+		task_sleep_sec (8);
+	}
+}
+#endif
+
 void burnin_draw (void)
 {
 	timestamp_format (&burnin_duration);
@@ -75,6 +86,9 @@ void burnin_thread (void)
 		task_create_peer (burnin_gi_thread);
 		task_create_peer (burnin_flasher_thread);
 		task_create_peer (burnin_timestamp_thread);
+#if (MACHINE_FLIPTRONIC == 1)
+		task_create_peer (burnin_flipper_thread);
+#endif
 		task_sleep_sec (60);
 		task_kill_peers ();
 		burnin_cycles++;
@@ -86,11 +100,13 @@ void burnin_init (void)
 	burnin_cycles = 0;
 	timestamp_clear (&burnin_duration);
 	task_create_gid (GID_WINDOW_THREAD, burnin_thread);
+	flipper_enable ();
 }
 
 void burnin_exit (void)
 {
 	lamp_all_off ();
 	triac_leff_free (TRIAC_GI_MASK);
+	flipper_disable ();
 }
 
