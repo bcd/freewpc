@@ -48,6 +48,6 @@ extern inline void m6809_rotate8 (U8 *mem)
 		  "__IL%=::\n" : "=m" (*mem));
 }
 
-__common__ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp);
+__init__ void udiv32 (U32 reg, U16 divisor, U32 *quotientp, U32 *remainderp);
 
 #endif /* _M6809_MATH_H */

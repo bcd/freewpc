@@ -48,7 +48,7 @@ KERNEL_ASM_OBJS += $(P)/start.o
 # library functions in the 6809 toolchain do not work, so there is a
 # replacement in math.c.  However, since this is only needed at
 # initialization, put it into the COMMON_PAGE.
-COMMON_BASIC_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
+INIT_OBJS += $(if $(CONFIG_PIC), $(P)/math.o)
 
 # Import images that are common to all games.
 ifeq ($(CONFIG_DMD),y)
