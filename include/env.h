@@ -91,6 +91,7 @@
 #define __test2__			__far__(C_STRING(TEST2_PAGE))
 #define __machine__		__far__(C_STRING(MACHINE_PAGE))
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
+#define __init__        __far__(C_STRING(INIT_PAGE))
 #else
 #define __far__(x)
 #define __system__
@@ -101,6 +102,7 @@
 #define __test2__
 #define __machine__
 #define __effect__
+#define __init__
 #endif
 
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
