@@ -28,9 +28,13 @@
 
 
 /** Says whether or not the flipper coils are enabled */
-U8 flippers_enabled;
+__fastram__ U8 flippers_enabled;
 
-U8 fliptronic_powered_coil_outputs;
+__fastram__ U8 fliptronic_powered_coil_outputs;
+
+volatile __fastram__ U8 flipper_inputs;
+
+volatile __fastram__ U8 flipper_outputs;
 
 
 /** Software controlled flipper inputs for Fliptronic games. */
@@ -80,12 +84,8 @@ void flipper_override_pulse (U8 switches)
  * This is executed once per flipper every 2ms.
  */
 static inline void flipper_service (
-	const U8 inputs,
-	U8 *outputs,
-	const U8 sw_button,
-	const U8 sw_eos,
-	const U8 sol_power,
-	const U8 sol_hold )
+	const U8 sw_button, const U8 sw_eos,
+	const U8 sol_power, const U8 sol_hold )
 {
 	/* The logic is as follows:
 	 * If the button is held and the EOS is active, enable holding power.
@@ -105,15 +105,15 @@ static inline void flipper_service (
 	 * This causes the flippers to go permanently (at least for a while).
 	 */
 
-	if (inputs & sw_button)
+	if (unlikely (flipper_inputs & sw_button))
 	{
-		if (inputs & sw_eos)
+		if (likely (flipper_inputs & sw_eos))
 		{
-			*outputs |= sol_hold;
+			flipper_outputs |= sol_hold;
 		}
 		else
 		{
-			*outputs |= sol_power;
+			flipper_outputs |= sol_power | sol_hold;
 		}
 	}
 }
@@ -124,34 +124,32 @@ static inline void flipper_service (
  * this isn't necessary. */
 void fliptronic_rtt (void)
 {
-	register U8 inputs __areg__;
-	U8 outputs = fliptronic_powered_coil_outputs;
-
-	if (flippers_enabled)
+	if (likely (flippers_enabled))
 	{
-		inputs = ~wpc_read_flippers () | flipper_overrides;
+		register U8 inputs = ~wpc_read_flippers () | flipper_overrides;
+		if (unlikely (inputs))
+		{
+			flipper_inputs = inputs;
+			flipper_outputs = fliptronic_powered_coil_outputs;
 
-		flipper_service (inputs, &outputs, WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
-		flipper_service (inputs, &outputs, WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
+			flipper_service (WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
+			flipper_service (WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
 
-		/* Some machines use the upper flipper coils for other uses.
-		 * Those can already be handled by the regular solenoid module. */
+			/* Some machines use the upper flipper coils for other uses.
+			 * Those can already be handled by the regular solenoid module. */
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
-		flipper_service (inputs, &outputs, WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+			flipper_service (WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
 #endif
 
 #ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER
-		flipper_service (inputs, &outputs, WPC_UR_FLIP_SW, WPC_UR_FLIP_EOS, WPC_UR_FLIP_POWER, WPC_UR_FLIP_HOLD);
+			flipper_service (WPC_UR_FLIP_SW, WPC_UR_FLIP_EOS, WPC_UR_FLIP_POWER, WPC_UR_FLIP_HOLD);
 #endif
+			wpc_write_flippers (flipper_outputs);
+			return;
+		}
 	}
 
-	wpc_write_flippers (outputs);
-}
-
-#else
-
-void fliptronic_rtt (void)
-{
+	wpc_write_flippers (fliptronic_powered_coil_outputs);
 }
 
 #endif /* MACHINE_FLIPTRONIC */
