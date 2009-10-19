@@ -1,0 +1,116 @@
+#!/usr/bin/perl -w
+#
+# genprio - generate a priority ordering
+
+# Each item to be sorted becomes a node in the graph
+#
+# Each dependency requirement "A is lower priority than B" becomes
+# an edge from A to B.
+#
+# The items are topologically sorted and integer identifiers are
+# assigned sequentially.
+#
+
+# The list of nodes in the graph.
+my %nodes;
+
+# A hash of edges.  %edges{"A-B"} is set if there is an edge
+# from A to B.
+my %edges;
+
+
+sub print_graph {
+	print "Graph:\n";
+	for $edge (keys %edges) {
+		print "   $edge\n";
+	}
+}
+
+sub no_incoming_edges {
+	my $node = shift;
+	#print "Counting incoming edges for $node...\n";
+	for $edge (keys %edges) {
+		#print "$edge\n";
+		my ($from, $to) = split /->/, $edge;
+		#print "$from, $to\n";
+		if ($node eq $to) {
+			#print "Has incoming edges.\n";
+			return 0;
+		}
+	}
+	#print "No incoming edges.\n";
+	return 1;
+}
+
+sub any_edge {
+	my @keys = keys %edges;
+	return (@keys > 0);
+}
+
+sub add_edge {
+	my ($from, $to) = @_;
+	$nodes{$from} = 1;
+	$nodes{$to} = 1;
+	$edges{"$from->$to"} = 1;
+}
+
+sub remove_edge {
+	my ($from, $to) = @_;
+	delete $edges{"$from->$to"};
+}
+
+sub topologically_sort {
+	my @output;
+	my @starters;
+	my $node;
+
+	for $node (keys %nodes) {
+		push @starters, $node if (no_incoming_edges ($node));
+	}
+	#print "Found " . scalar (@starters) . " starting nodes.\n";
+
+	while (@starters) {
+		#print "Starters = ";
+		#foreach my $starter (@starters) { print "$starter " }
+		#print "\n";
+		$node = pop @starters;
+
+		#print "Processing $node\n";
+		push @output, $node;
+		for $other (keys %nodes) {
+			next if ($other eq $node);
+			if ($edges{"$node->$other"}) {
+				# print "Removing $node -> $other\n";
+				remove_edge ($node, $other);
+				push @starters, $other if (no_incoming_edges ($other));
+			}
+		}
+	}
+
+	if (any_edge ()) {
+		die "Error: graph has cycles";
+	}
+
+	for $node (@output) {
+		print "$node\n";
+	}
+}
+
+
+# Read the graph data.
+# The input consists of multiple lines, with node names separated
+# by commas.  For example:
+# A, B, C
+# means that A->B and B->C.  It gives a relative (not absolute)
+# priority between the three nodes.
+# Node names may repeat in multiple lines, as when there is multiple
+# requirements.
+sub input_graph {
+}
+
+
+add_edge (1, 2);
+add_edge (1, 3);
+add_edge (2, 4);
+add_edge ("foot", 2);
+topologically_sort ();
