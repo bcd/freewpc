@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+#include <math.h>
 
 /* Simulation of the zerocross circuit */
 
@@ -33,6 +34,12 @@ unsigned int sim_zc_active;
 
 /** The number of 1ms units between zerocrossing points. */
 double sim_zc_timer;
+
+
+double sim_zc_angle (void)
+{
+	return sin (sim_zc_timer * 6.282 / ZC_TIMER_MAX);
+}
 
 
 /** Called by the software when reading the zerocross register.

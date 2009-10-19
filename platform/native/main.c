@@ -150,6 +150,8 @@ unsigned long sim_badness = 0;
 
 unsigned int signo_under_trace = SIGNO_SOL + 0;
 
+const char *exec_file;
+
 
 /** A dummy function intended to be used for debugging under GDB. */
 void gdb_break (void)
@@ -792,41 +794,6 @@ CALLSET_ENTRY (native, realtime_tick)
 }
 
 
-void exec_script (char *cmd)
-{
-	const char *s;
-	const char *delims = " \t\n";
-
-	simlog (SLC_DEBUG, "Exec script '%s'", cmd);
-	s = strtok (cmd, delims);
-	if (!strcmp (s, "trace"))
-	{
-		s = strtok (NULL, delims);
-		if (!strcmp (s, "sol"))
-		{
-			signo_under_trace = SIGNO_SOL;
-		}
-		else if (!strcmp (s, "zc"))
-		{
-			signo_under_trace = SIGNO_ZEROCROSS;
-		}
-		else if (!strcmp (s, "triac"))
-		{
-			signo_under_trace = SIGNO_TRIAC;
-		}
-		else if (!strcmp (s, "lamp"))
-		{
-			signo_under_trace = SIGNO_LAMP;
-		}
-
-		s = strtok (NULL, delims);
-		if (s)
-			signo_under_trace += strtoul (s, NULL, 0);
-		simlog (SLC_DEBUG, "Signal under trace = %d", signo_under_trace);
-	}
-}
-
-
 /** A mapping from keyboard command to switch */
 static switchnum_t keymaps[256] = {
 #ifdef MACHINE_START_SWITCH
@@ -882,20 +849,33 @@ char linux_interface_readchar (void)
 }
 
 
+/** Turn on/off keybuffering.  Pass a zero to put the
+console in raw mode, so keystrokes are not echoed.
+Pass nonzero flag to go back to the default mode. */
+static void keybuffering (int flag)
+{
+   struct termios tio;
+
+   tcgetattr (0, &tio);
+   if (!flag) /* 0 = no buffering = not default */
+      tio.c_lflag &= ~ICANON;
+   else /* 1 = buffering = default */
+      tio.c_lflag |= ICANON;
+   tcsetattr (0, TCSANOW, &tio);
+}
+
+
 /** Main loop for handling the user interface. */
 static void linux_interface_thread (void)
 {
 	char inbuf[2];
 	switchnum_t sw;
-	struct termios tio;
 	int simulator_keys = 1;
 	int toggle_mode = 1;
 
 	/* Put stdin in raw mode so that 'enter' doesn't have to
 	be pressed after each keystroke. */
-	tcgetattr (0, &tio);
-	tio.c_lflag &= ~ICANON;
-	tcsetattr (0, TCSANOW, &tio);
+	keybuffering (0);
 
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
@@ -1164,6 +1144,10 @@ int main (int argc, char *argv[])
 		{
 			sim_debug_init = 1;
 		}
+		else if (!strcmp (arg, "--exec"))
+		{
+			exec_file = argv[argn++];
+		}
 		else
 		{
 			printf ("invalid argument %s\n", arg);
@@ -1175,6 +1159,9 @@ int main (int argc, char *argv[])
 	/* Initialize the user interface */
 	ui_init ();
 #endif
+
+	/* Initialize signal tracker */
+	signal_init ();
 
 	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
@@ -1222,7 +1209,6 @@ int main (int argc, char *argv[])
 	/* Initialize the simulated ball tracker */
 	sim_ball_init ();
 	sim_coil_init ();
-	signal_init ();
 
 	/* Invoke the machine-specific simulation function */
 #ifdef CONFIG_MACHINE_SIMULATOR
@@ -1248,6 +1234,8 @@ int main (int argc, char *argv[])
 	signal_update (SIGNO_18V, 1);
 	signal_update (SIGNO_20V, 1);
 	signal_update (SIGNO_50V, 1);
+
+	exec_script_file (exec_file);
 
 	freewpc_init ();
 	return 0;

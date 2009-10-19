@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -93,24 +93,31 @@ void sim_watchdog_init (void);
 
 typedef enum
 {
-	SIGNO_SOL=0,
-	SIGNO_TRIAC=100,
-	SIGNO_LAMP=200,
-	SIGNO_ZEROCROSS=300,
-	SIGNO_DIAG_LED=301,
-	SIGNO_IRQ=302,
-	SIGNO_FIRQ=303,
-	SIGNO_RESET=304,
-	SIGNO_BLANKING=305,
-	SIGNO_5V=306,
-	SIGNO_12V=307,
-	SIGNO_18V=308,
-	SIGNO_20V=309,
-	SIGNO_50V=310,
-	SIGNO_COINDOOR_INTERLOCK=311,
-	SIGNO_JUMPERS=350,
-	SIGNO_SWITCH=400,
+	SIGNO_NONE=0,
+	SIGNO_TRIAC=0x10,
+	SIGNO_JUMPERS=0x20,
+	SIGNO_LAMP=0x80,
+	SIGNO_SWITCH=0x100,
+	SIGNO_SOL=0x180,
+	SIGNO_ZEROCROSS=0x1C0,
+	SIGNO_DIAG_LED,
+	SIGNO_IRQ, SIGNO_FIRQ,
+	SIGNO_RESET, SIGNO_BLANKING,
+	SIGNO_5V, SIGNO_12V, SIGNO_18V, SIGNO_20V, SIGNO_50V,
+	SIGNO_COINDOOR_INTERLOCK,
+	MAX_SIGNALS,
+
+	SIGNO_FIRST_AUTO=0x1000,
+	SIGNO_SOL_VOLTAGE=0x1000,
+	SIGNO_AC_ANGLE=0x1100,
 } signal_number_t;
+
+typedef double (*value_signal) (uint32_t offset);
+
+#define autosig_type(signo)	((signo - SIGNO_FIRST_AUTO) / 0x100)
+#define autosig_offset(signo) ((signo - SIGNO_FIRST_AUTO) % 0x100)
+
+extern unsigned int signo_under_trace;
 
 void signal_update (signal_number_t signo, unsigned int state);
 void signal_init (void);
@@ -148,6 +155,40 @@ extern inline void sim_clear_badness (unsigned long err)
 
 #define SIM_LOCATION_NONE 0
 #define SIM_NO_BALL_HERE -1
+
+enum signal_operator
+{
+	SIG_SIGNO,
+	SIG_TIME,
+	SIG_TIMEDIFF,
+	SIG_CONST,
+
+	SIG_BINARY,
+	SIG_EQ,
+	SIG_AND,
+	SIG_OR,
+	SIG_LAST_BINARY,
+
+	SIG_UNARY,
+	SIG_NOT,
+	SIG_LAST_UNARY,
+};
+
+typedef struct signal_expression
+{
+	enum signal_operator op;
+	union {
+		uint32_t signo;
+		uint32_t value;
+		uint64_t timer;
+		struct {
+			struct signal_expression *left, *right;
+		} binary;
+		struct signal_expression *unary;
+	} u;
+} signal_expression_t;
+
+#define expr_binary_p(ex)   (ex->op > SIG_BINARY && ex->op < SIG_LAST_BINARY)
 
 
 #endif /* _SIMULATION_H */

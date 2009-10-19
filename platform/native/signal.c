@@ -21,6 +21,8 @@
 #include <freewpc.h>
 #include <simulation.h>
 #include <stdint.h>
+#include <math.h>
+
 
 /**
  * The signal module allows 'scoping' of binary I/O signals
@@ -28,9 +30,9 @@
  * a waveform.
  */
 
-#define MAX_SIGNALS 1024
 #define MAX_READINGS 256
-
+#define MAX_CAPTURES 16
+#define MAX_EXPR 8
 
 /**
  * A structure for tracking a single binary signal over a period
@@ -47,16 +49,88 @@ typedef struct signal_readings
 
 
 /**
- * An array of readings, indexed by signal number.
+ * An array of physical readings, indexed by signal number.
  * Each entry is a linked list of 256-reading chunks;
  */
 signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
 
 /**
  * The last known value of each signal.  This does not
- * provide any history.
+ * provide any history.  Each signal is stored as a single bit.
  */
-uint32_t signal_states[MAX_SIGNALS / 32] = { 0, };
+uint32_t signal_states[(MAX_SIGNALS + 32) / 32] = { 0, };
+
+
+/** A list of the signals currently being captured */
+uint32_t signals_being_captured[MAX_CAPTURES];
+
+/** The output file when capturing is enabled */
+FILE *signal_capture_file;
+
+signal_expression_t *signal_start_expr, *signal_stop_expr;
+
+int signal_capture_active = 0;
+
+uint64_t signal_trace_start_time;
+
+
+double signal_value (uint32_t signo);
+
+
+double signal_ac_angle_value (uint32_t offset)
+{
+	extern double sim_zc_angle (void);
+	return sim_zc_angle ();
+}
+
+
+double signal_sol_voltage_value (uint32_t offset)
+{
+	return signal_value (SIGNO_SOL+offset) *
+		fabs (signal_value (SIGNO_AC_ANGLE));
+}
+
+
+const value_signal signal_value_table[] = {
+	signal_sol_voltage_value,
+	signal_ac_angle_value,
+};
+
+
+double signal_value (uint32_t signo)
+{
+	if (signo >= SIGNO_FIRST_AUTO)
+	{
+		return signal_value_table[autosig_type (signo)] (autosig_offset (signo));
+	}
+	else
+	{
+		int state = signal_states[signo / 32] & (1 << (signo % 32));
+		return 1.0 * !state;
+	}
+}
+
+
+struct signal_expression *expr_alloc (void)
+{
+	struct signal_expression *ex = malloc (sizeof (struct signal_expression));
+	memset (ex, 0, sizeof (*ex));
+	return ex;
+}
+
+
+void expr_free (struct signal_expression *ex)
+{
+	if (!ex)
+		return;
+	if (expr_binary_p (ex))
+	{
+		expr_free (ex->u.binary.left);
+		expr_free (ex->u.binary.right);
+	}
+	free (ex);
+}
+
 
 
 /**
@@ -72,6 +146,82 @@ signal_readings_t *signal_chunk_alloc (void)
 	sigrd->prev_state = 0;
 	sigrd->next = NULL;
 	return sigrd;
+}
+
+
+bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
+{
+	if (!ex)
+		return FALSE;
+
+	switch (ex->op)
+	{
+		case SIG_SIGNO:
+			if (ex->u.signo == sig_changed)
+				return TRUE;
+			break;
+
+		case SIG_TIMEDIFF:
+			if (realtime_read () >= signal_trace_start_time + ex->u.value)
+				return TRUE;
+			break;
+
+		case SIG_TIME:
+			if (realtime_read () >= ex->u.value)
+				return TRUE;
+			break;
+
+		case SIG_EQ:
+			if (ex->u.binary.left->u.signo == sig_changed
+				&& signal_readings[sig_changed]->prev_state ==
+					ex->u.binary.right->u.value)
+				return TRUE;
+			break;
+
+		case SIG_AND:
+			if (signal_expr_eval (sig_changed, ex->u.binary.left)
+				&& signal_expr_eval (sig_changed, ex->u.binary.right))
+				return TRUE;
+			break;
+
+		case SIG_OR:
+			if (signal_expr_eval (sig_changed, ex->u.binary.left)
+				|| signal_expr_eval (sig_changed, ex->u.binary.right))
+				return TRUE;
+			break;
+	}
+	return FALSE;
+}
+
+
+void signal_write_header (void)
+{
+	int sigin;
+	fprintf (signal_capture_file, "# Time");
+	for (sigin = 0; sigin < MAX_CAPTURES; sigin++)
+	{
+		uint32_t signo = signals_being_captured[sigin];
+		if (signo)
+			fprintf (signal_capture_file, " %d", signo);
+	}
+	fprintf (signal_capture_file, "\n");
+}
+
+
+void signal_write (void)
+{
+	int sigin;
+	fprintf (signal_capture_file, "%ld", realtime_read ());
+	for (sigin = 0; sigin < MAX_CAPTURES; sigin++)
+	{
+		uint32_t signo = signals_being_captured[sigin];
+		if (signo)
+		{
+			double state = signal_value (signo);
+			fprintf (signal_capture_file, " %g", state);
+		}
+	}
+	fprintf (signal_capture_file, "\n");
 }
 
 
@@ -124,13 +274,117 @@ void signal_update (signal_number_t signo, unsigned int state)
 		sigrd = sigrd->next = new_sigrd;
 	}
 
+#if 0
 	/* Print the last signal state */
 	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
 		realtime_read () - last_change_time);
+#endif
 
 	/* Save the new state along with the timestamp of the change */
 	sigrd->t[sigrd->count++] = realtime_read ();
 	sigrd->prev_state = state;
+
+	/* Write the new state to the capture file if active and this signal
+	is being monitored */
+	if (signal_capture_active && signal_capture_file)
+	{
+		//signal_write ();
+
+		/* Also see if tracing should stop */
+		if (signal_stop_expr && signal_expr_eval (signo, signal_stop_expr))
+		{
+			simlog (SLC_DEBUG, "Capture complete.");
+			fflush (signal_capture_file);
+			signal_capture_active = 0;
+		}
+	}
+	else if (signal_start_expr && signal_expr_eval (signo, signal_start_expr))
+	{
+		/* Otherwise, should capture start now because we meet the start
+		condition? */
+		simlog (SLC_DEBUG, "Capture started.");
+		signal_capture_active = 1;
+		signal_trace_start_time = realtime_read ();
+		signal_write_header ();
+		signal_write ();
+	}
+}
+
+
+void signal_capture_start (struct signal_expression *ex)
+{
+	if (signal_start_expr)
+		expr_free (signal_start_expr);
+	simlog (SLC_DEBUG, "Capture start condition set.");
+	signal_start_expr = ex;
+}
+
+
+void signal_capture_stop (struct signal_expression *ex)
+{
+	if (signal_stop_expr)
+		expr_free (signal_stop_expr);
+	simlog (SLC_DEBUG, "Capture stop condition set.");
+	signal_stop_expr = ex;
+}
+
+
+void signal_capture_add (uint32_t signo)
+{
+	int sigin;
+	for (sigin = 0; sigin < MAX_CAPTURES; sigin++)
+	{
+		if (signals_being_captured[sigin] == 0)
+		{
+			simlog (SLC_DEBUG, "Signal %d added to capture (#%d).", signo, sigin);
+			signals_being_captured[sigin] = signo;
+			signal_readings[signo] = signal_chunk_alloc ();
+			return;
+		}
+	}
+}
+
+
+void signal_capture_del (uint32_t signo)
+{
+	int sigin;
+	for (sigin = 0; sigin < MAX_CAPTURES; sigin++)
+	{
+		if (signals_being_captured[sigin] == signo)
+		{
+			simlog (SLC_DEBUG, "Signal %d removed from capture (#%d).", signo, sigin);
+			signals_being_captured[sigin] = 0;
+			signal_readings[signo] = NULL;
+			return;
+		}
+	}
+}
+
+void signal_trace_periodic (void)
+{
+	if (signal_capture_active)
+	{
+		signal_write ();
+		if (signal_stop_expr && signal_expr_eval (0, signal_stop_expr))
+		{
+			simlog (SLC_DEBUG, "Capture complete in periodic.");
+			fflush (signal_capture_file);
+			signal_capture_active = 0;
+		}
+	}
+}
+
+
+void signal_capture_set_file (const char *filename)
+{
+	if (filename)
+	{
+		signal_capture_file = fopen (filename, "w");
+	}
+	else if (signal_capture_file)
+	{
+		fclose (signal_capture_file);
+	}
 }
 
 
@@ -173,6 +427,10 @@ void signal_trace_stop (signal_number_t signo)
 }
 
 
+
 void signal_init (void)
 {
+	signal_start_expr = signal_stop_expr = NULL;
+	signal_capture_active = 0;
+	sim_time_register (2, TRUE, signal_trace_periodic, NULL);
 }
