@@ -21,6 +21,7 @@
 #ifndef _SIMULATION_H
 #define _SIMULATION_H
 
+#include <stdint.h>
 
 /** The number of IRQs per second. */ 
 #define IRQS_PER_SEC 1024

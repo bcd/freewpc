@@ -150,7 +150,7 @@ unsigned long sim_badness = 0;
 
 unsigned int signo_under_trace = SIGNO_SOL + 0;
 
-const char *exec_file;
+const char *exec_file = NULL;
 
 
 /** A dummy function intended to be used for debugging under GDB. */
@@ -1235,7 +1235,8 @@ int main (int argc, char *argv[])
 	signal_update (SIGNO_20V, 1);
 	signal_update (SIGNO_50V, 1);
 
-	exec_script_file (exec_file);
+	if (exec_file)
+		exec_script_file (exec_file);
 
 	freewpc_init ();
 	return 0;

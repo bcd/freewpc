@@ -10,6 +10,8 @@ CFLAGS =
 # Additional CFLAGS required for a native build
 CFLAGS += -O -g -DCONFIG_NATIVE -DCONFIG_LITTLE_ENDIAN
 
+HOST_LIBS += -lm
+
 ifeq ($(CONFIG_PTH),y)
 PTH_CFLAGS := $(shell pth-config --cflags)
 HOST_LIBS += -lpth
