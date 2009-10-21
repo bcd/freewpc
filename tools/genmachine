@@ -988,7 +988,6 @@ sub machine_write_switch_decls {
 			$sw->{'playfield'} = undef;
 			$sw->{'noplay'} = 1;
 			$sw->{'intest'} = 1;
-			$sw->{'ingame'} = 1;
 		}
 
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
