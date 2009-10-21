@@ -65,12 +65,9 @@ void gumball_mech_activate(void);
 void gumball_mech_deactivate(void);
 void gumball_diverter_open(void);
 void gumball_diverter_close(void);
-bool gumball_load_is_enabled(void);
-void gumball_load_disable(void);
-void gumball_load_enable(void);
 void gumball_load_from_trough(void);
 void gumball_release(void);
-void sw_gumball_right_loop_entered(void);
+U8 gumball_get_count (void);
 /* leffs.c */
 void flasher_happy_leff(void);
 void left_ramp_leff(void);

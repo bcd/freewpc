@@ -115,8 +115,6 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
-	extern void sw_gumball_right_loop_entered (void);
-
 	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
 		return;
@@ -124,6 +122,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else if (event_did_follow (autolaunch, right_loop))
 	{
 		/* Ignore right loop switch after an autolaunch */
+		callset_invoke (right_loop_entered);
 		enter_loop ();
 	}
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
@@ -139,12 +138,11 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else
 	{
 		/* Right loop started */
+		/* Inform gumball module that a ball may be approaching */
 		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
+		callset_invoke (right_loop_entered);
 		enter_loop ();
 	}
-
-	/* Inform gumball module that a ball may be approaching */
-	sw_gumball_right_loop_entered ();
 }
 
 
