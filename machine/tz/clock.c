@@ -191,19 +191,24 @@ void tz_clock_switch_rtt (void)
 		if (CLK_SW_MIN (clock_sw))
 		{
 			clock_minute_sw = CLK_SW_MIN (clock_sw);
-			if (clock_minute_sw == CLK_SW_MIN30)
+			if (clock_minute_sw == CLK_SW_MIN30 &&
+				clock_mode == CLOCK_RUNNING_FORWARD)
 			{
 				/* When the minute hand is at :30, the hour switches
 				tell us exactly what the hour is. */
 				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
 			}
+			else if (clock_minute_sw == CLK_SW_MIN00 &&
+				clock_mode == CLOCK_RUNNING_FORWARD)
+			{
+				clock_hour++;
+				if (clock_hour == 12)
+					clock_hour = 0;
+			}
 		}
-		else if (unlikely (CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN30
+		else if (unlikely (CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45
 			&& clock_mode == CLOCK_RUNNING_BACKWARD))
 		{
-			/* No minute optos are active now, but we last saw :00
-			and we are moving in reverse.  The clock hour should
-			be decremented. */
 			if (clock_hour)
 				clock_hour--;
 			else
