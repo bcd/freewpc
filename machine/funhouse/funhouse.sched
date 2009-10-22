@@ -7,3 +7,4 @@
 !ramp_div_service			16	40c
 !steps_gate_service		16	40c
 !eye_direction_service  16 40c
+rudy_mouth_rtt          2  60c

@@ -53,7 +53,7 @@ PINMAME_OTHER_ROMS = fh_u*
 # Object files exported by this game
 #
 
-GAME_OBJS =
+GAME_OBJS = mouth.o
 
 GAME_PAGED_OBJS = shot.o leffs.o rudy.o trivial.o mirror.o \
 	mb.o clock.o steps.o quickmb.o superdog.o jets.o \
