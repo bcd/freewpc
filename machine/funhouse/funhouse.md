@@ -147,6 +147,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
 25: Lock Right
+26: Step Extra Ball
 27: Lock Center
 28: Lock Left
 31: Step P, lamp(LM_STEP_P)
@@ -292,6 +293,7 @@ Strobe Left: PF:lamp_sort_right_to_left
 Strobe Right: PF:lamp_sort_left_to_right
 Clock Hours Minutes: Clock Hours, Clock Minutes
 Major PF: Gangways, Clock Minutes, Clock Hours, Mirror Awards, Ramp Awards, Steps Awards
+Playfield: PF:all
 
 ##########################################################################
 # Containers
@@ -439,6 +441,8 @@ Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)
 Jackpot: PRI_LEFF8, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Shooter: PRI_LEFF2, page(MACHINE_PAGE)
 Superdog Score: PRI_LEFF3, page(MACHINE_PAGE)
+Midnight: PRI_LEFF4, LAMPS(PLAYFIELD), GI(ALL), page(MACHINE_PAGE)
+Rudy Hit: PRI_LEFF2, page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:

@@ -32,11 +32,20 @@ void steps_monitor (void)
 	task_exit ();
 }
 
-void steps_exited (void)
+bool steps_exited (void)
 {
-	flag_off (FLAG_STEPS_RAMP_LIT);
-	flag_off (FLAG_STEPS_OPEN);
-	flag_off (FLAG_BALL_AT_STEPS);
+	if (!timer_find_gid (GID_STEPS_EXITED))
+	{
+		flag_off (FLAG_STEPS_RAMP_LIT);
+		flag_off (FLAG_STEPS_OPEN);
+		flag_off (FLAG_BALL_AT_STEPS);
+		timer_start_free (GID_STEPS_EXITED, TIME_5S);
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 }
 
 bool steps_available_p (void)
@@ -78,31 +87,55 @@ CALLSET_ENTRY (steps, lamp_update)
 		lamp_tristate_off (LM_STEPS_GATE_OPEN);
 }
 
+
 CALLSET_ENTRY (steps, sw_step_track_upper)
 {
-	steps_exited ();
-}
-
-CALLSET_ENTRY (steps, sw_step_500k)
-{
-	steps_exited ();
 }
 
 CALLSET_ENTRY (steps, sw_step_track_lower)
 {
-	steps_exited ();
 }
 
 CALLSET_ENTRY (steps, sw_step_exit)
 {
-	steps_exited ();
+}
+
+
+CALLSET_ENTRY (steps, sw_step_extra_ball)
+{
+	if (steps_exited ())
+	{
+		if (lamp_flash_test (LM_STEPS_EB))
+		{
+			lamp_off (LM_STEPS_EB);
+		}
+	}
+}
+
+CALLSET_ENTRY (steps, sw_step_500k)
+{
+	if (steps_exited ())
+	{
+		if (lamp_flash_test (LM_STEPS_500K))
+		{
+			lamp_off (LM_STEPS_500K);
+		}
+	}
 }
 
 CALLSET_ENTRY (steps, sw_steps_frenzy)
 {
-	steps_exited ();
-	flag_on (FLAG_FRENZY_LIT);
+	if (steps_exited ())
+	{
+		if (lamp_flash_test (LM_STEPS_FRENZY))
+		{
+			lamp_off (LM_STEPS_FRENZY);
+			flag_on (FLAG_FRENZY_LIT);
+			sample_start (SND_FRENZY_LIT, SL_2S);
+		}
+	}
 }
+
 
 CALLSET_ENTRY (steps, sw_left_plunger)
 {
@@ -153,6 +186,7 @@ CALLSET_ENTRY (steps, sw_lower_right_hole)
 CALLSET_ENTRY (steps, start_player)
 {
 	flag_off (FLAG_STEPS_OPEN);
+	lamp_flash_on (LM_STEPS_FRENZY);
 	lamplist_apply (LAMPLIST_STEPS_AWARDS, lamp_off);
 }
 
