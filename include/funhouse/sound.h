@@ -20,8 +20,9 @@
 
 #define SND_EXTRA_BALL       0x80
 #define SND_LOCK_LIT         0x81
+#define SND_INLANE           0x82
 #define SND_WIND             0x83
-#define SND_DRAIN            0x84
+#define SND_OUTLANE          0x84
 #define SND_WIND_TUNNEL      0x86
 #define SND_GONG             0x88
 #define SND_PLUNGE           0x89
@@ -33,10 +34,11 @@
 #define SND_COIN             0x94
 #define SND_SKILL_SHOT       0x9C
 #define SND_STEPS_AWARD      0x9D
-#define SND_INLANE           0x9F
+#define SND_OUTER_RIGHT_INLANE 0x9F
 #define SND_SPECIAL_LIT      0xA0
 #define SND_FRENZY_LIT       0xA1
 #define SND_UPPER_LOOP1      0xA3
+#define SND_SLING            0xA4
 #define SND_UPPER_LOOP2      0xA7
 #define SND_MILLION_AWARD    0xA9
 #define SND_3WAY_COMBO       0xAA
@@ -67,12 +69,12 @@
 #define SND_TARGET2          0xD4
 #define SND_BONUS_BLIP1      0xD8
 #define SND_BONUS_BLIP2      0xD9
+#define SND_CHOMP            0xDF
 #define SND_BONUS_FRENZY     0xE0
 #define SND_BONUS_BLIP3      0xE2
 #define SND_BONUS_BLIP4      0xE3
 #define SND_BONUS_BLIP5      0xE4
 #define SND_TARGET_COMPLETE  0xE6
-#define SND_CHOMP            0xDF
 
 #define SPCH_CHUCKLE         0x101
 #define SPCH_HEY             0x102

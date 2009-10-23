@@ -1,3 +1,22 @@
+/*
+ * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 
@@ -30,12 +49,43 @@ bool gangway_available_p (void)
 	return !multiball_mode_running_p ();
 }
 
+void gangway_loop_lit (void)
+{
+	sample_start (SND_LOOP, SL_1S);
+}
+
+void gangway_loop_collected (void)
+{
+}
+
+
+static inline void gangway_shot (task_gid_t gid, task_gid_t other_gid)
+{
+	if (gangway_available_p ())
+	{
+		if (timer_find_gid (gid))
+		{
+			timer_kill_gid (gid);
+			gangway_loop_collected ();
+		}
+		else
+		{
+			timer_kill_gid (other_gid);
+			timer_start_free (gid, TIME_5S);
+			gangway_loop_lit ();
+		}
+	}
+}
+
+
 CALLSET_ENTRY (gangway, left_loop_shot)
 {
+	gangway_shot (GID_LEFT_GANGWAY_LIT, GID_RIGHT_GANGWAY_LIT);
 }
 
 CALLSET_ENTRY (gangway, right_loop_shot)
 {
+	gangway_shot (GID_RIGHT_GANGWAY_LIT, GID_LEFT_GANGWAY_LIT);
 }
 
 CALLSET_ENTRY (gangway, lamp_update)

@@ -119,6 +119,7 @@ CALLSET_ENTRY (trivial, sw_left_slingshot, sw_right_slingshot)
 {
 	rudy_look_straight ();
 	score (SC_110);
+	sample_start (SND_SLING, SL_100MS * 3);
 	if (flag_test (FLAG_OUTLANES_LIT))
 		lamp_toggle (LM_SPECIALS);
 }
@@ -148,18 +149,27 @@ CALLSET_ENTRY (trivial, sw_lower_jet)
 	callset_invoke (any_jet);
 }
 
-CALLSET_ENTRY (trivial, sw_left_inlane, sw_inner_right_inlane, sw_outer_right_inlane)
+CALLSET_ENTRY (trivial, sw_left_inlane, sw_inner_right_inlane)
 {
 	fh_clock_advance (CLK_5_MIN);
 	score (SC_10K);
 	rudy_look_straight ();
-	sample_start (SND_BONUS_BLIP3, SL_500MS);
+	sample_start (SND_INLANE, SL_500MS);
+}
+
+CALLSET_ENTRY (trivial, sw_outer_right_inlane)
+{
+	fh_clock_advance (CLK_5_MIN);
+	score (SC_10K);
+	rudy_look_straight ();
+	sample_start (SND_OUTER_RIGHT_INLANE, SL_500MS);
 }
 
 void common_outlane (void)
 {
 	score (SC_50K);
 	rudy_look_straight ();
+	sample_start (SND_OUTLANE, SL_500MS);
 	if (lamp_test (LM_SPECIALS))
 	{
 		lamp_off (LM_SPECIALS);
@@ -182,6 +192,12 @@ CALLSET_ENTRY (trivial, sw_right_outlane)
 CALLSET_ENTRY (trivial, sw_wind_tunnel_hole)
 {
 	fh_clock_advance (CLK_15_MIN);
+	score (SC_50K);
+}
+
+CALLSET_ENTRY (trivial, sw_lower_right_hole)
+{
+	fh_clock_advance (CLK_30_MIN);
 	score (SC_50K);
 }
 

@@ -988,7 +988,6 @@ sub machine_write_switch_decls {
 			$sw->{'playfield'} = undef;
 			$sw->{'noplay'} = 1;
 			$sw->{'intest'} = 1;
-			$sw->{'ingame'} = 1;
 		}
 
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
@@ -1171,13 +1170,16 @@ sub pf_lamps {
 			$lamp->{'y'} = rand (30);
 		}
 	}
-	@lamps = sort $sortfn @lamps;
+
+	if ($sortfn ne "all") {
+		@lamps = sort $sortfn @lamps;
+	}
 	$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 	foreach $lamp (@lamps) {
 		if (defined $lastlamp) {
 			$a = $lastlamp;
 			$b = $lamp;
-			if (&$sortfn() != 0) {
+			if (($sortfn ne "all") && (&$sortfn() != 0)) {
 				$lamplist .= "/* break */ LAMP_MACRO_SLEEP_OP,\n   ";
 			}
 		}

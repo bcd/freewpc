@@ -134,5 +134,43 @@ void superdog_score_leff (void)
 
 void multiball_running_leff (void)
 {
+	for (;;)
+	{
+		lamplist_apply (LAMPLIST_CLOCK_HOURS, leff_on);
+		task_sleep (TIME_400MS);
+		lamplist_apply (LAMPLIST_CLOCK_MINUTES, leff_on);
+		task_sleep (TIME_100MS);
+		lamplist_apply (LAMPLIST_CLOCK_HOURS, leff_off);
+		task_sleep (TIME_300MS);
+		lamplist_apply (LAMPLIST_CLOCK_MINUTES, leff_off);
+		task_sleep (TIME_200MS);
+	}
 }
+
+
+void midnight_leff (void)
+{
+	U8 n;
+	leff_on (LM_CLOCK_HOUR_12);
+	leff_on (LM_CLOCK_0_MIN);
+	for (n=0; n < 32; n++)
+	{
+		flasher_pulse (FLASH_CLOCK_FLASHERS);
+		task_sleep (TIME_133MS);
+	}
+	leff_exit ();
+}
+
+
+void rudy_hit_leff (void)
+{
+	U8 n;
+	for (n=0; n < 10; n++)
+	{
+		flasher_pulse (FLASH_DUMMY_FLASHER);
+		task_sleep (TIME_100MS);
+	}
+	leff_exit ();
+}
+
 

@@ -17,7 +17,6 @@ Missing Feature
 * Lamp power saver level
 * Abort after so many ball searches, or try another method (chase ball?)
 * Coin Door Ballsave
-* Burnin
 * Lamp strobing, like newer Sterns
 * deff_nice
 * Flasher allocation for lamp effects
@@ -27,7 +26,7 @@ Missing Feature
 
 Bugs
 * TZ clock decoding is not perfect.
-* When changing adjustments, 'confirmation' screen does not work. (True??)
+* When changing adjustments, 'confirmation' screen does not work.
 * Factory defaults should be different per country code.
 * Switch levels/edges tests do not work.  In Progress.
 * DCS sound bringup does not work well
@@ -38,8 +37,6 @@ Compiler Changes
 * sprintf() jump table per character is way too large.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
-* GCC 4.4 generated sol.s is inefficient.
-* GCC 4.4 stopped working late December 2008, then worked again, now is broken
 again in May 2009?
 
 

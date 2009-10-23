@@ -21,6 +21,8 @@
 #ifndef _SEARCH_H
 #define _SEARCH_H
 
+extern U8 ball_search_count;
+
 __common__ void ball_search_timer_reset (void);
 __common__ bool ball_search_timed_out (void);
 __common__ void ball_search_timeout_set (U8 secs);
