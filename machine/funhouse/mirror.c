@@ -212,12 +212,12 @@ CALLSET_ENTRY (mirror, start_player)
 	mirror_award = 5;
 	flag_on (FLAG_MIRROR_LIT);
 	flag_off (FLAG_SUPER_FRENZY_LIT);
-	mirror_update ();
 }
 
 CALLSET_ENTRY (mirror, start_ball)
 {
 	flag_on (FLAG_MIRROR_LIT);
 	flag_off (FLAG_MIRROR_COMPLETE);
+	mirror_update ();
 }
 

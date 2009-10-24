@@ -29,7 +29,7 @@
 #ifdef __m6809__
 #define __register__ register
 #define __ureg__ asm ("u")
-#define __yreg__ asm ("u")
+#define __yreg__ asm ("y")
 #else
 #define __register__
 #define __ureg__

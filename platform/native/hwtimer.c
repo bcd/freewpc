@@ -24,7 +24,7 @@
 
 U8 hwtimer_value;
 
-void hwtimer_periodic (void)
+void hwtimer_periodic (void *data __attribute__((unused)))
 {
 	if (hwtimer_value & 0x80)
 	{

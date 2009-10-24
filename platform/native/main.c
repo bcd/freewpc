@@ -426,7 +426,6 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 /** Simulate writing to a set of 8 solenoids. */
 static void sim_sol_write (int index, U8 *memp, U8 val)
 {
-	int devno;
 	int n;
 
 	/* Update the state of each solenoid from the signal coming
@@ -438,6 +437,8 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 		if (solno < SOL_COUNT)
 			sim_coil_change (solno, val & (1 << n));
 #if 0
+		{
+			int devno;
 			/* See if it's attached to a device.  Then find the first
 			switch that is active, and deactivate it, simulating the
 			removal of one ball from the device.  (This does not map
@@ -468,6 +469,7 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 					break;
 				}
 			}
+		}
 #endif
 	}
 
