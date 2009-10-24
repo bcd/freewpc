@@ -202,7 +202,7 @@ void signal_write_header (void)
 	{
 		uint32_t signo = signals_being_captured[sigin];
 		if (signo)
-			fprintf (signal_capture_file, " %d", signo);
+			fprintf (signal_capture_file, " %u", signo);
 	}
 	fprintf (signal_capture_file, "\n");
 }
@@ -211,7 +211,7 @@ void signal_write_header (void)
 void signal_write (void)
 {
 	int sigin;
-	fprintf (signal_capture_file, "%ld", realtime_read ());
+	fprintf (signal_capture_file, "%lu", realtime_read ());
 	for (sigin = 0; sigin < MAX_CAPTURES; sigin++)
 	{
 		uint32_t signo = signals_being_captured[sigin];
@@ -360,7 +360,7 @@ void signal_capture_del (uint32_t signo)
 	}
 }
 
-void signal_trace_periodic (void)
+void signal_trace_periodic (void *data __attribute__((unused)))
 {
 	if (signal_capture_active)
 	{

@@ -256,7 +256,7 @@ seg_page_t *seg_get_page_pointer (U8 page)
  */
 static segbits_t seg_translate_char (char c)
 {
-	if (likely (c <= 127))
+	if (likely (c < 127))
 		return seg_table[(U8)c];
 	else
 		return SEG_MID;

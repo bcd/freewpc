@@ -189,6 +189,9 @@ typedef struct signal_expression
 } signal_expression_t;
 
 #define expr_binary_p(ex)   (ex->op > SIG_BINARY && ex->op < SIG_LAST_BINARY)
+struct signal_expression *expr_alloc (void);
+void expr_free (struct signal_expression *ex);
 
+unsigned long realtime_read (void);
 
 #endif /* _SIMULATION_H */

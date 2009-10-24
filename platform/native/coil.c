@@ -97,7 +97,7 @@ void sim_coil_update (struct sim_coil_state *c)
 	}
 
 	if (c->pos != 0)
-		sim_time_register (8, FALSE, sim_coil_update, c);
+		sim_time_register (8, FALSE, (time_handler_t)sim_coil_update, c);
 	else
 	{
 		c->scheduled = 0;

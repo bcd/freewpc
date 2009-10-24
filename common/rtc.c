@@ -110,10 +110,14 @@ static U8 days_in_month_table[] = {
 	31, 31, 30, 31, 30, 31,
 };
 
+#if (MACHINE_DMD == 1)
+	/* At present there's no room on the display for a
+	day name */
 static const char *day_names[] = {
 	"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY",
 	"THURSDAY", "FRIDAY", "SATURDAY"
 };
+#endif
 
 
 /** Returns the number of days in the current month.
