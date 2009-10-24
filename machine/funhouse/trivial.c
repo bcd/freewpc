@@ -169,7 +169,8 @@ void common_outlane (void)
 {
 	score (SC_50K);
 	rudy_look_straight ();
-	sample_start (SND_OUTLANE, SL_500MS);
+	if (!flag_test (FLAG_STEPS_OPEN))
+		sample_start (SND_OUTLANE, SL_500MS);
 	if (lamp_test (LM_SPECIALS))
 	{
 		lamp_off (LM_SPECIALS);

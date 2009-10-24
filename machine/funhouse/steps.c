@@ -77,7 +77,7 @@ CALLSET_ENTRY (steps, music_refresh)
 
 CALLSET_ENTRY (steps, lamp_update)
 {
-	lamp_on_if (LM_RAMP_STEPS, flag_test (FLAG_STEPS_RAMP_LIT));
+	lamp_on_if (LM_RAMP_STEPS, steps_available_p () && flag_test (FLAG_STEPS_RAMP_LIT));
 
 	if (flag_test (FLAG_BALL_AT_STEPS))
 		lamp_tristate_flash (LM_STEPS_GATE_OPEN);
@@ -143,9 +143,6 @@ CALLSET_ENTRY (steps, sw_left_plunger)
 	ramp_div_stop ();
 }
 
-CALLSET_ENTRY (steps, sw_left_outlane)
-{
-}
 
 CALLSET_ENTRY (steps, ramp_entered)
 {
