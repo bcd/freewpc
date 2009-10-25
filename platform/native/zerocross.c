@@ -36,9 +36,11 @@ unsigned int sim_zc_active;
 double sim_zc_timer;
 
 
+/** Return the magnitude of the current position of the AC cycle,
+in the range of 0.0 to 1.0 */
 double sim_zc_angle (void)
 {
-	return sin (sim_zc_timer * 6.282 / ZC_TIMER_MAX);
+	return sin (sim_zc_timer * 3.1415 / ZC_TIMER_MAX);
 }
 
 
