@@ -1821,6 +1821,41 @@ struct menu sched_test_item = {
 
 #ifndef CONFIG_NATIVE
 
+#define MIN_IRQLOAD 440
+#define IRQLOAD_STEP_SIZE 8
+#define MAX_IRQLOAD 560
+
+#define IRQL_IDX(n)  (((n) - MIN_IRQLOAD) / 8)
+
+U8 irqload_percentage_table[] = {
+	[IRQL_IDX(440)] = 34,
+	[IRQL_IDX(448)] = 35,
+	[IRQL_IDX(456)] = 36,
+	[IRQL_IDX(464)] = 37,
+	[IRQL_IDX(472)] = 39,
+	[IRQL_IDX(480)] = 40,
+	[IRQL_IDX(488)] = 41,
+	[IRQL_IDX(496)] = 41,
+	[IRQL_IDX(504)] = 42,
+	[IRQL_IDX(512)] = 43,
+	[IRQL_IDX(520)] = 44,
+	[IRQL_IDX(528)] = 45,
+	[IRQL_IDX(536)] = 46,
+	[IRQL_IDX(544)] = 47,
+	[IRQL_IDX(552)] = 47,
+	[IRQL_IDX(560)] = 48,
+};
+
+U8 irqload_to_percentage (U16 load)
+{
+	if (load < MIN_IRQLOAD)
+		return 0;
+	else if (load > MAX_IRQLOAD)
+		return 100;
+	else
+		return irqload_percentage_table[IRQL_IDX(load)];
+}
+
 void irqload_test_init (void)
 {
 	dmd_alloc_low_clean ();
@@ -1832,7 +1867,7 @@ void irqload_test_init (void)
 void irqload_test_draw (void)
 {
 	window_title ("IRQ LOAD TEST");
-	sprintf ("IRQ LOAD = %ld", sched_test_count);
+	sprintf ("IRQ LOAD = %d%%", irqload_to_percentage (sched_test_count));
 	print_row_center (&font_var5, 22);
 	dmd_show_low ();
 }
