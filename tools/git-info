@@ -1,0 +1,14 @@
+#!/bin/sh
+gcc=m6809-unknown-none-gcc-4.3.2.exe
+
+head=`cat .git/HEAD | awk '{print $2}'`
+echo "Branch:      " $head
+commit=`cat .git/$head`
+echo "Commit:      " $commit
+
+modifications=`git status -q -uno | grep -c "modified:"`
+echo "Modified:    " $modifications
+
+gcc_path=`which $gcc`
+gcc_md5=`md5sum $gcc_path | awk '{print $1}'`
+echo "GCC(md5):    " $gcc_md5
