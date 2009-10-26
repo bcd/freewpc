@@ -162,7 +162,12 @@ void system_reset_deff (void)
 	font_render_string_center (&font_var5, 64, 17, "SUPPORTED BY BALLY/WILLIAMS");
 	font_render_string_center (&font_var5, 64, 25, "WWW.ODDCHANGE.COM/FREEWPC");
 	dmd_show_low ();
-	task_sleep_sec (4);
+#else
+	seg_alloc_clean ();
+	seg_write_row_center (0, "FREEWPC <C>2009");
+	seg_write_row_center (1, "WWW.ODDCHANGE.COM");
+	seg_show ();
+	task_sleep_sec (3);
 #endif
 
 	dmd_alloc_low_clean ();
