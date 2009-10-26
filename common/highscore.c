@@ -237,6 +237,12 @@ void hsentry_deff (void)
 }
 
 
+void hscredits_deff (void)
+{
+	deff_exit ();
+}
+
+
 /** Check if the high scores need to be reset automatically.
  * Called during game start. */
 void high_score_reset_check (void)
@@ -348,7 +354,7 @@ void high_score_enter_initials (U8 position)
 		deff_start_sync (DEFF_HSENTRY);
 		SECTION_VOIDCALL (__common__, initials_enter);
 
-		/* TODO : Save the initials to table entry */
+		/* Save the initials to table entry */
 		pinio_nvram_unlock ();
 		memcpy (hsp->initials, initials_data, HIGH_SCORE_NAMESZ);
 		pinio_nvram_lock ();
@@ -363,9 +369,8 @@ void high_score_enter_initials (U8 position)
 		{
 			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
 		}
-#if 0
+
 		deff_start_sync (DEFF_HSCREDITS);
-#endif
 	}
 }
 
