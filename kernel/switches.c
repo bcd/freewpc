@@ -666,7 +666,7 @@ void switch_queue_dump (void)
 	switch_matrix_dump ("Raw     ", sw_raw);
 	switch_matrix_dump ("Logical ", sw_logical);
 	switch_matrix_dump ("Edge    ", sw_edge);
-	task_sleep (TIME_16MS);
+	task_dispatching_ok = 1;
 	switch_matrix_dump ("Stable  ", sw_stable);
 	switch_matrix_dump ("Unstable", sw_unstable);
 	switch_matrix_dump ("Queued  ", sw_queued);
