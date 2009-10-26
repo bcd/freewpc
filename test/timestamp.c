@@ -159,17 +159,6 @@ void timestamp_format_per_credit (timestamp_t *t)
 }
 
 
-/* TODO - this should not be removed eventually.  It is clearing
-the total game time audit, totally not necessary */
-CALLSET_ENTRY (timestamp, init)
-{
-	pinio_nvram_unlock ();
-	timestamp_clear (&system_audits.total_game_time);
-	csum_area_update (&audit_csum_info);
-	pinio_nvram_lock ();
-}
-
-
 CALLSET_ENTRY (timestamp, end_player)
 {
 	extern U16 game_time;
