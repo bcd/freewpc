@@ -90,6 +90,7 @@ Slam Tilt: page(COMMON_PAGE), runner, PRI_SLAMTILT
 Status Report: page(COMMON_PAGE), runner, PRI_STATUS
 Nonfatal Error: page(EFFECT_PAGE), PRI_DEBUGGER
 HSEntry: page(COMMON_PAGE), runner, PRI_HSENTRY
+HSCredits: page(COMMON_PAGE), runner, PRI_HSENTRY
 Match: page(COMMON_PAGE), runner, PRI_MATCH
 Buyin Offer: page(COMMON_PAGE), PRI_MATCH
 Locating Balls: page(EFFECT_PAGE), PRI_BALL_SEARCH
