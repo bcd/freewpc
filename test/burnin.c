@@ -4,13 +4,18 @@
 U16 burnin_cycles;
 
 timestamp_t burnin_duration;
-
+__nvram__ timestamp_t burnin_total_duration;
 
 void burnin_sound_thread (void)
 {
 	for (;;)
 	{
-		task_sleep_sec (1);
+		music_set (1);
+		task_sleep_sec (5);
+		music_set (2);
+		task_sleep_sec (5);
+		music_set (3);
+		task_sleep_sec (5);
 	}
 }
 
@@ -40,6 +45,22 @@ void burnin_flasher_thread (void)
 			{
 				flasher_pulse (sol);
 				task_sleep (TIME_200MS);
+			}
+		}
+	}
+}
+
+void burnin_sol_thread (void)
+{
+	for (;;)
+	{
+		U8 sol;
+		for (sol=0; sol < NUM_POWER_DRIVES; sol++)
+		{
+			if (!MACHINE_SOL_FLASHERP (sol))
+			{
+				sol_request_async (sol);
+				task_sleep_sec (2);
 			}
 		}
 	}
@@ -85,6 +106,7 @@ void burnin_thread (void)
 		task_create_peer (burnin_sound_thread);
 		task_create_peer (burnin_gi_thread);
 		task_create_peer (burnin_flasher_thread);
+		//task_create_peer (burnin_sol_thread);
 		task_create_peer (burnin_timestamp_thread);
 #if (MACHINE_FLIPTRONIC == 1)
 		task_create_peer (burnin_flipper_thread);
@@ -106,6 +128,7 @@ void burnin_init (void)
 void burnin_exit (void)
 {
 	lamp_all_off ();
+	sound_reset ();
 	triac_leff_free (TRIAC_GI_MASK);
 	flipper_disable ();
 }
