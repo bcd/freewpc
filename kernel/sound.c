@@ -354,21 +354,16 @@ exit_func:
 }
 
 
+/**
+ * Write a 16-bit value to the sound board.
+ */
 __attribute__((noinline)) void sound_write (sound_code_t code)
 {
 	U8 code_lo;
 	U8 code_hi;
 
-#if 0 // #ifdef __m6809__
-	/* GCC still is doing this inefficiently, so we are
-	hand assembling it for now. */
-	asm ("ldd\t%0" :: "m" (code));
-	asm ("sta\t%0" :: "m" (code_hi));
-	asm ("stb\t%0" :: "m" (code_lo));
-#else
 	code_lo = code & 0xFF;
 	code_hi = code >> 8;
-#endif
 
 #if (MACHINE_DCS == 0)
 	if (code_hi == 0)
@@ -393,14 +388,7 @@ void sound_send (sound_code_t code)
 {
 	if (current_volume == 0)
 		return;
-
 	sound_start (ST_ANY, code, SL_500MS, 1);
-#if 0
-#if (MACHINE_DCS == 1)
-	sound_write (SND_INIT_CH3);
-#endif
-	sound_write (code);
-#endif
 }
 
 
