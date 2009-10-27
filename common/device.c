@@ -114,7 +114,7 @@ void device_debug_all (void)
 	{
 		device_t *dev = &device_table[devno];
 		device_debug (dev);
-		task_sleep (TIME_16MS);
+		task_dispatching_ok = TRUE;
 	}
 	dbprintf ("Found: %d   ", counted_balls);
 	dbprintf ("Lost: %d   ", missing_balls - live_balls + held_balls);
