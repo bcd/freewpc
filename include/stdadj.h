@@ -90,6 +90,14 @@ typedef U8 adjval_t;
 #define COIN_DOOR_EURO 4
 #define NUM_COIN_DOOR_TYPES 5
 
+/* Languages */
+#define LANG_US_ENGLISH 0
+#define LANG_GERMAN 1
+#define LANG_FRENCH 2
+#define LANG_SPANISH 3
+#define LANG_UK_ENGLISH 4
+#define NUM_LANGUAGES 5
+
 typedef struct
 {
 	adjval_t balls_per_game; /* done */

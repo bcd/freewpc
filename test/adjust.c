@@ -18,6 +18,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * \file
+ * \brief Adjustment definitions
+ *
+ * Each adjustment in the menu system is defined here.  Each adjustment
+ * has a name, a location in nvram where the current value is stored, and
+ * a value type, represented as a 'struct adjustment_value'.  The type
+ * gives the valid range of values, a default value, and a 'render'
+ * function which converts a value to text.
+ */
+
+
 #include <freewpc.h>
 #include <test.h>
 #include <format.h>
@@ -53,7 +65,7 @@ struct adjustment_value clock_style_value = { 0, 1, CLOCK_STYLE_AMPM,
 struct adjustment_value date_style_value = { 0, 1, DATE_STYLE_US,
 	date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
-struct adjustment_value lang_value = { 0, 0, 0, lang_render };
+struct adjustment_value lang_value = { 0, NUM_LANGUAGES-1, 1, lang_render };
 struct adjustment_value replay_system_value = { REPLAY_FIXED, REPLAY_AUTO, 1, replay_system_render };
 struct adjustment_value free_award_value = { 0, 4, 1, free_award_render };
 struct adjustment_value percent_value = { 0, 100, 1, percent_render };
@@ -101,7 +113,7 @@ struct adjustment standard_adjustments[] = {
 	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 25, &system_config.max_tickets_per_player },
 	{ "MATCH FEATURE", &percent_value, 7, &system_config.match_feature },
 	{ "CUSTOM MESSAGE", &on_off_value, OFF, &system_config.custom_message },
-	{ "LANGUAGE", &lang_value, 0, &system_config.language },
+	{ "LANGUAGE", &lang_value, LANG_US_ENGLISH, &system_config.language },
 	{ "CLOCK STYLE", &clock_style_value, 0, &system_config.clock_style },
 	{ "DATE STYLE", &date_style_value, 0, &system_config.date_style },
 	{ "SHOW DATE/TIME", &yes_no_value, YES, &system_config.show_date_and_time },

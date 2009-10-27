@@ -89,6 +89,15 @@ PRESET_END (ticket, "TICKET")
 PRESET_BEGIN (novelty)
 PRESET_END (novelty, "NOVELTY")
 
+/**
+ * Regional presets
+ *
+ * The DIP switches on the CPU board can be used to select the current locale.
+ * Each locale has a preset which contains defaults *which are different from
+ * the ordinary, global defaults*.  These are installed automatically at
+ * startup when a new setting is detected.
+ */
+
 #define PRESET_EUROPE \
 	{ standard_adjustments, &system_config.euro_digit_sep, YES }, \
 	{ standard_adjustments, &system_config.clock_style, CLOCK_STYLE_24HOUR }, \
@@ -96,6 +105,7 @@ PRESET_END (novelty, "NOVELTY")
 
 
 PRESET_BEGIN (usa_canada)
+	{ standard_adjustments, &system_config.language, LANG_US_ENGLISH },
 	{ standard_adjustments, &system_config.euro_digit_sep, NO },
 	{ standard_adjustments, &system_config.clock_style, CLOCK_STYLE_AMPM },
 	{ standard_adjustments, &system_config.date_style, DATE_STYLE_US },
@@ -103,20 +113,24 @@ PRESET_END (usa_canada, "USA/CANADA")
 
 
 PRESET_BEGIN (french)
+	{ standard_adjustments, &system_config.language, LANG_FRENCH },
 	PRESET_EUROPE
 PRESET_END (french, "FRENCH")
 
 
 PRESET_BEGIN (german)
+	{ standard_adjustments, &system_config.language, LANG_GERMAN },
 	PRESET_EUROPE
 PRESET_END (german, "GERMAN")
 
 
 PRESET_BEGIN (uk)
+	{ standard_adjustments, &system_config.language, LANG_UK_ENGLISH },
 	PRESET_EUROPE
 PRESET_END (uk, "U.K.")
 
 PRESET_BEGIN (eu)
+	{ standard_adjustments, &system_config.language, LANG_UK_ENGLISH },
 	PRESET_EUROPE
 	{ pricing_adjustments, &price_config.pricing_mode, PRICE_EURO },
 PRESET_END (eu, "E.U.")

@@ -36,9 +36,20 @@ void on_off_render (U8 val) { sprintf (val ? "ON" : "OFF"); }
 void yes_no_render (U8 val) { sprintf (val ? "YES" : "NO"); }
 void clock_style_render (U8 val) { sprintf (CLOCK_STYLE_24HOUR ? "24 HOUR" : "AM/PM"); }
 void date_style_render (U8 val) { sprintf (DATE_STYLE_EURO ? "D/M/Y" : "M/D/Y"); }
-void lang_render (U8 val) { sprintf ("ENGLISH"); }
 void replay_system_render (U8 val) { sprintf (val ? "AUTO" : "MANUAL"); }
 
+
+void lang_render (U8 val)
+{
+	switch (val)
+	{
+		case LANG_US_ENGLISH: sprintf ("AMERICAN"); return;
+		case LANG_GERMAN: sprintf ("DEUTSCH"); return;
+		case LANG_FRENCH: sprintf ("FRANCAIS"); return;
+		case LANG_SPANISH: sprintf ("ESPANOL"); return;
+		case LANG_UK_ENGLISH: sprintf ("BRITISH"); return;
+	}
+}
 
 /* The high score reset counter is stored in units of 250 games. */
 void hs_reset_render (U8 val)
