@@ -30,7 +30,8 @@ U8 log_tail;
 struct log_event log_entry[MAX_LOG_EVENTS];
 
 
-#ifdef DEBUGGER
+#ifdef DEBUG_LOG
+
 char *log_module_names[] = {
 	[MOD_DEFF] = "Deff",
 	[MOD_LAMP] = "Lamp",
@@ -84,8 +85,8 @@ char *log_get_format (U16 module_event)
 
 	return "?";
 }
+#endif /* DEBUG_LOG */
 
-#endif
 
 /** Add an entry to the event log. */
 void log_event1 (U16 module_event, U8 arg)
