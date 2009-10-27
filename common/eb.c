@@ -124,6 +124,7 @@ void light_easy_extra_ball (void)
 	if (can_award_extra_ball ())
 	{
 		easy_extra_balls_lit++;
+		callset_invoke (extra_ball_lit);
 		update_extra_ball_lamps ();
 	}
 }
@@ -133,6 +134,7 @@ void light_hard_extra_ball (void)
 	if (can_award_extra_ball ())
 	{
 		hard_extra_balls_lit++;
+		callset_invoke (extra_ball_lit);
 		update_extra_ball_lamps ();
 	}
 }
