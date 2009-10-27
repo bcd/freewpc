@@ -119,9 +119,9 @@ typedef struct
 	adjval_t match_feature; /* done */
 	adjval_t custom_message;
 	adjval_t language;
-	adjval_t clock_style;
+	adjval_t clock_style; /* done */
 	adjval_t date_style; /* done */
-	adjval_t show_date_and_time;
+	adjval_t show_date_and_time; /* done */
 	adjval_t allow_dim_illum;
 	adjval_t tournament_mode; /* done */
 	adjval_t euro_digit_sep; /* done */

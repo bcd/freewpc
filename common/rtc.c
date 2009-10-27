@@ -330,15 +330,15 @@ void rtc_render_time (void)
 		12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	};
 
-	switch (system_config.date_style)
+	switch (system_config.clock_style)
 	{
-		case DATE_STYLE_US:
+		case CLOCK_STYLE_AMPM:
 		default:
 			sprintf ("%d:%02d %s",
 				rtc_us_hours[hour], minute, (hour >= 12)?"PM":"AM");
 			break;
 
-		case DATE_STYLE_EURO:
+		case CLOCK_STYLE_24HOUR:
 			sprintf ("%02d:%02d", hour, minute);
 			break;
 	}

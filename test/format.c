@@ -94,6 +94,20 @@ void percent_render (U8 val)
 		sprintf ("%d%%", val);
 }
 
+/**
+ * Format a replay score adjustment.
+ * The adjustment system only allows for at most 256 different settings per
+ * adjustment.  For replay scores, 0 means the replay level is OFF, and
+ * 1-255 refer to specific replay values.
+ *
+ * The machine should define a function that returns the score associated
+ * with a certain level, and then define MACHINE_REPLAY_CODE_TO_SCORE
+ * as an alias to that function.  It should be placed in the __machine__
+ * region.
+ *
+ * You should also define MACHINE_REPLAY_SCORE_CHOICES as the number of
+ * valid, non-zero replay levels that are acceptable as input.
+ */
 void replay_score_render (U8 val)
 {
 	if (val == 0)
@@ -102,11 +116,13 @@ void replay_score_render (U8 val)
 		return;
 	}
 #ifdef MACHINE_REPLAY_CODE_TO_SCORE
+	extern __machine__ void MACHINE_REPLAY_CODE_TO_SCORE (score_t, U8);
 	score_t score;
 	score_zero (score);
 	MACHINE_REPLAY_CODE_TO_SCORE (score, val);
 	sprintf_score (score);
 #else
+#warning "machine does not define replay levels"
 	sprintf ("CODE %d", val);
 #endif
 }
@@ -327,6 +343,10 @@ void currency_audit (audit_t base_units)
 }
 
 
+/**
+ * Render a collection text type by printing how the value '0'
+ * would look.
+ */
 void collection_text_render (U8 type)
 {
 	specific_currency_audit (0, type);
@@ -340,7 +360,7 @@ void total_earnings_audit (audit_t val __attribute__((unused)))
 
 	/* For each coin slot, multiply the number of coins seen
 	times the value of the slot */
-	for (i=0; i < 4; i++)
+	for (i=0; i < MAX_COIN_SLOTS; i++)
 		base_units += system_audits.coins_added[i] * price_config.slot_values[i];
 	currency_audit (base_units);
 }

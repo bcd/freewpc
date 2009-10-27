@@ -55,15 +55,13 @@ struct adjustment_value nonzero_integer_value = { 1, 0xFF, 1, decimal_render };
 struct adjustment_value balls_per_game_value = { 1, 10, 1, decimal_render };
 struct adjustment_value players_per_game_value = { 1, MAX_PLAYERS, 1, decimal_render };
 struct adjustment_value max_eb_value = { 0, 10, 1, decimal_render };
-struct adjustment_value on_off_value = { 0, 1, 1, on_off_render };
-struct adjustment_value yes_no_value = { 0, 1, 1, yes_no_render };
-struct adjustment_value game_restart_value = { 0, 2, 1, game_restart_render };
+struct adjustment_value on_off_value = { OFF, ON, 1, on_off_render };
+struct adjustment_value yes_no_value = { NO, YES, 1, yes_no_render };
+struct adjustment_value game_restart_value = { GAME_RESTART_NEVER, GAME_RESTART_ALWAYS, 1, game_restart_render };
 struct adjustment_value max_credits_value = { 5, 99, 1, decimal_render };
 struct adjustment_value hs_reset_value = { 0, 80, 1, hs_reset_render };
-struct adjustment_value clock_style_value = { 0, 1, CLOCK_STYLE_AMPM,
-	clock_style_render };
-struct adjustment_value date_style_value = { 0, 1, DATE_STYLE_US,
-	date_style_render };
+struct adjustment_value clock_style_value = { 0, 1, 1, clock_style_render };
+struct adjustment_value date_style_value = { 0, 1, 1, date_style_render };
 struct adjustment_value score_value = { 0, 250, 10, decimal_render };
 struct adjustment_value lang_value = { 0, NUM_LANGUAGES-1, 1, lang_render };
 struct adjustment_value replay_system_value = { REPLAY_FIXED, REPLAY_AUTO, 1, replay_system_render };
@@ -84,7 +82,7 @@ struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, co
 #define MACHINE_REPLAY_START_CHOICE 0
 #endif
 struct adjustment_value replay_score_value = {
-	0, MACHINE_REPLAY_SCORE_CHOICES-1, 1, replay_score_render
+	0, MACHINE_REPLAY_SCORE_CHOICES, 1, replay_score_render
 };
 
 struct adjustment_value max_tickets_value = { 0, 100, 1, decimal_render };
@@ -120,13 +118,13 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIG. SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOL. OVERRIDE", &integer_value, 0, &system_config.min_volume_control },
+	{ "MIN. VOLUME", &integer_value, 0, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
-	{ "TICKET EXP. BOARD", &yes_no_value, NO, &system_config.ticket_board },
+	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
 	{ "NO BONUS FLIPS", &yes_no_value, YES, &system_config.no_bonus_flips },
 	{ "GAME RESTART", &game_restart_value, GAME_RESTART_SLOW, &system_config.game_restart },
-	{ "ALLOW CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
+	{ "CHASE BALL", &yes_no_value, YES, &system_config.allow_chase_ball },
 	{ NULL, NULL, 0, NULL },
 };
 
