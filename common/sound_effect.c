@@ -86,7 +86,7 @@ void music_refresh_task (void)
 		else
 		{
 			dbprintf ("Music now off\n");
-			music_off (); /* TODO - careful here, may have a sound running */
+			music_off ();
 		}
 		music_active = music_requested;
 	}
@@ -106,6 +106,9 @@ void music_refresh (void)
 }
 
 
+/**
+ * Disable background music
+ */
 void music_disable (void)
 {
 	task_kill_gid (GID_MUSIC_REFRESH);
@@ -115,6 +118,9 @@ void music_disable (void)
 }
 
 
+/**
+ * Reenable background music
+ */
 void music_enable (void)
 {
 	music_flags &= ~MUS_DISABLED_BY_CALL;
@@ -122,6 +128,9 @@ void music_enable (void)
 }
 
 
+/**
+ * Disable background music for a certain period of time.
+ */
 static void music_timed_disable_task (void)
 {
 	task_ticks_t *tdata = task_current_class_data (task_ticks_t);
@@ -130,7 +139,6 @@ static void music_timed_disable_task (void)
 	music_enable ();
 	task_exit ();
 }
-
 
 void music_timed_disable (task_ticks_t delay)
 {
@@ -155,14 +163,15 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
 		{
 			if (--ch->timer == 0)
 			{
+				/* When a sound has expired on a channel, free up that
+				channel for other sound effects.  If it's the music channel,
+				then release it for background sound again. */
 				ch->prio = 0;
 				if (chid == MUSIC_CHANNEL)
 				{
 					music_flags &= ~MUS_DISABLED_BY_SOUND;
 					music_refresh ();
 				}
-				/* TODO - when supporting sound strings, this would cue
-				 * the next sample */
 			}
 		}
 	}
@@ -250,6 +259,10 @@ void sound_start1 (U8 channels, sound_code_t code)
 /**
  * Start a sound process.  This is used for more complex sound effects
  * that require more than just a single write to the sound board.
+ * It is common for some long speech calls to be broken up into multiple
+ * parts, which must be triggered individually with correct timing
+ * in between and without giving up ownership of the sound channel.
+ *
  * Instead of providing a sound code, the caller provides a function.
  * This function then runs in a separate task context to write the
  * required sound calls.
@@ -257,10 +270,11 @@ void sound_start1 (U8 channels, sound_code_t code)
  * Sound procs can sleep, do other checks, and change volume.
  *
  * A sound proc can be preempted by higher priority effects (either
- * simple or complex).  When preempted the task is killed.
+ * simple or complex).  When preempted, the task is killed.
  */
 void sound_proc_start1 (U8 channels, task_function_t fn)
 {
+	/* TODO - duplicate much of this from above */
 }
 
 
@@ -283,9 +297,12 @@ static inline U8 sound_proc_channel_id (void)
 /**
  * Send a sound code to the sound board from a sound process.
  */
-void sound_proc_send (sound_code_t code)
+void sound_proc_send (U8 channels, sound_code_t code)
 {
 	//U8 chid = sound_proc_channel_id ();
+	// the process should only be allowed to write to
+	// channels that were previously allocated to it
+	sound_write (code);
 }
 
 
@@ -298,6 +315,9 @@ void sound_proc_set_volume (U8 vol)
 }
 
 
+/**
+ * Change the priority of the running sound process.
+ */
 void sound_proc_set_prio (U8 prio)
 {
 }
