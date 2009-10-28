@@ -281,7 +281,7 @@ CALLSET_ENTRY (trivial, sw_jet_lane)
 CALLSET_ENTRY (trivial, rudy_jaw)
 {
 	audit_increment (&feature_audits.rudy_hits);
-	speech_start (SPCH_OWW, SL_2S); /* happening on gulp too */
+	speech_start (SPCH_MILD_OWW, SL_2S); /* happening on gulp too */
 }
 
 CALLSET_ENTRY (trivial, dev_rudy_enter)
