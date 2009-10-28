@@ -79,7 +79,7 @@ U8 live_balls;
  * pending kickout. */
 U8 held_balls;
 
-/** The number of kickout locks currently held.
+/** The set of kickout locks currently held.
  * Normally this is zero, and kickouts occur as soon as possible.
  * When nonzero, kickouts are delayed, e.g. to allow an effect to
  * run.  The lock is then released and things continue. */
@@ -391,7 +391,7 @@ wait_and_recount:
 			dbprintf ("Can't kick when no balls available!\n");
 			dev->kicks_needed = 0;
 		}
-		else if (kickout_locks > 0)
+		else if (kickout_locked_p ())
 		{
 			/* Container ready to kick, but 1 or more
 			 * locks are held so we must wait. */
@@ -835,7 +835,7 @@ bool device_check_start_ok (void)
 	U8 truly_missing_balls;
 
 	/* Reset any kickout locks, just in case */
-	kickout_locks = 0;
+	kickout_unlock_all ();
 
 	/* If any balls are missing, don't allow the game to start
 	 * without first trying a device probe.
@@ -930,7 +930,7 @@ void device_lock_ball (device_t *dev)
 CALLSET_ENTRY (device, start_game)
 {
 	live_balls = 0;
-	kickout_locks = 0;
+	kickout_unlock_all ();
 }
 
 
@@ -970,7 +970,7 @@ void device_init (void)
 	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
-	kickout_locks = 0;
+	kickout_unlock_all ();
 	held_balls = 0;
 	device_game_start_errors = 0;
 
