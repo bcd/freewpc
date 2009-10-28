@@ -248,15 +248,15 @@ void system_reset (void)
 	 * reset to be safe. */
 	factory_reset_if_required ();
 
-	/* Start the attract mode effects */
-	amode_start ();
-
 	/* Invoke other final initializations. */
 	callset_invoke (init_complete);
 
 	/* Bump the power-up audit */
 	audit_increment (&system_audits.power_ups);
 	log_event (SEV_INFO, MOD_SYSTEM, EV_SYSTEM_INIT, 0);
+
+	/* Start the attract mode effects */
+	amode_start ();
 
 	/* In test-only mode, pretend ENTER was pressed
 	 * and go straight to test mode. */

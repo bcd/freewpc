@@ -93,6 +93,7 @@ diag_post_error (char *message, U8 page)
 	/* Increment total error count */
 	diag_error_count++;
 
+	dbprintf ("Error: %s", message);
 	/* If announcements are on, then write a message.
 	If it is the first such error detected, then print the
 	initial "TEST REPORT" message too. */

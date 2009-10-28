@@ -588,9 +588,11 @@ void device_probe (void)
 	devicenum_t devno;
 	U8 kicks;
 
-	while (unlikely (sys_init_complete == 0))
-		task_sleep (TIME_100MS);
-	task_sleep_sec (2);
+	if (unlikely (sys_init_complete == 0))
+	{
+		dbprintf ("Probe before init_complete?\n");
+		task_sleep_sec (3);
+	}
 
 	dbprintf ("Probing devices\n");
 
@@ -944,6 +946,12 @@ CALLSET_ENTRY (device, diagnostic_check)
 	device_update_globals ();
 	if (missing_balls != 0)
 		diag_post_error ("PINBALL MISSING\n", COMMON_PAGE);
+}
+
+
+CALLSET_ENTRY (device, init_complete)
+{
+	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 }
 
 
