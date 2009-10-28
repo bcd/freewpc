@@ -159,22 +159,6 @@ CALLSET_ENTRY (steps, sw_upper_ramp)
 	/* which switch is this? */
 }
 
-CALLSET_ENTRY (steps, sw_step_s)
-{
-}
-
-CALLSET_ENTRY (steps, sw_step_t)
-{
-}
-
-CALLSET_ENTRY (steps, sw_step_e)
-{
-}
-
-CALLSET_ENTRY (steps, sw_step_p)
-{
-}
-
 CALLSET_ENTRY (steps, sw_lower_right_hole)
 {
 	flag_on (FLAG_STEPS_RAMP_LIT);
