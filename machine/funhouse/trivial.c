@@ -105,6 +105,15 @@ void million_lamp_update (void)
 	}
 }
 
+CALLSET_ENTRY (funhouse, valid_playfield)
+{
+	score (SC_10K);
+}
+
+CALLSET_ENTRY (funhouse, replay)
+{
+	music_effect_start (SND_REPLAY, SL_4S);
+}
 
 CALLSET_ENTRY (trivial, lamp_update)
 {
@@ -242,6 +251,7 @@ CALLSET_ENTRY (trivial, sw_superdog_low, sw_superdog_center, sw_superdog_high)
 CALLSET_ENTRY (trivial, sw_upper_loop)
 {
 	score (SC_100K);
+	sample_start (SND_UPPER_LOOP1, SL_2S);
 }
 
 CALLSET_ENTRY (trivial, dev_hideout_enter)

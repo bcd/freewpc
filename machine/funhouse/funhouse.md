@@ -432,12 +432,13 @@ MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 Superdog Running: page(MACHINE_PAGE), PRI_GAME_MODE2
 SuperDog Score: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_SCORE
 Frenzy Running: page(MACHINE_PAGE), PRI_GAME_MODE5
+Rules: page(MACHINE_PAGE), PRI_EGG1
 
 ##########################################################################
 # Lamp effects
 ##########################################################################
 [leffs]
-Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(PLAYFIELD), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Clock Vibrate: PRI_LEFF4, LAMPS(CLOCK_HOURS_MINUTES), page(MACHINE_PAGE)
 Gangway Strobe: PRI_LEFF4, LAMPS(GANGWAYS), page(MACHINE_PAGE)

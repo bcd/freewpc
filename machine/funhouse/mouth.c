@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 
-U8 *mouth_cmd;
+const U8 *mouth_cmd;
 
 U8 mouth_state;
 
@@ -73,24 +73,27 @@ void rudy_mouth_command (const U8 *cmd)
 }
 
 
-CALLSET_ENTRY (mouth, sw_left_button)
-{
 #if 0
+CALLSETX_ENTRY (mouth, sw_left_button)
+{
 	if (!in_game && !in_test)
 	{
 		rudy_mouth_command (mouth_step_down);
 	}
-#endif
 }
 
-CALLSET_ENTRY (mouth, sw_right_button)
+CALLSETX_ENTRY (mouth, sw_right_button)
 {
-#if 0
 	if (!in_game && !in_test)
 	{
 		rudy_mouth_command (mouth_step_up);
 	}
+}
 #endif
+
+
+CALLSET_ENTRY (mouth, dev_rudy_enter)
+{
 }
 
 

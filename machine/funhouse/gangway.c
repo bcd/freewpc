@@ -43,6 +43,9 @@ const struct generic_ladder gangway_score_rule = {
 };
 
 
+void gangway_collect_deff (void)
+{
+}
 
 bool gangway_available_p (void)
 {
@@ -56,11 +59,14 @@ void gangway_loop_lit (void)
 
 void gangway_loop_collected (void)
 {
+	generic_ladder_score_and_advance (&gangway_score_rule);
+	sample_start (SND_WHEEEE, SL_1S);
 }
 
 
 static inline void gangway_shot (task_gid_t gid, task_gid_t other_gid)
 {
+	score (SC_50K);
 	if (gangway_available_p ())
 	{
 		if (timer_find_gid (gid))
