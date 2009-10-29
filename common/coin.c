@@ -181,6 +181,19 @@ void lamp_start_update (void)
 }
 
 
+/**
+ * Show the current number of credits.
+ * Do not show during end game effects, though.
+ */
+void announce_credits (void)
+{
+#ifdef DEFF_CREDITS
+	if (in_game || deff_get_active () == DEFF_AMODE)
+		deff_restart (DEFF_CREDITS);
+#endif
+}
+
+
 /** Increment the credit count by 1. */
 static void increment_credit_count (void)
 {
@@ -197,9 +210,7 @@ static void increment_credit_count (void)
 #ifdef LEFF_FLASH_ALL
 	leff_start (LEFF_FLASH_ALL);
 #endif
-#ifdef DEFF_CREDITS
-	deff_restart (DEFF_CREDITS);
-#endif
+	announce_credits ();
 }
 
 
@@ -269,7 +280,7 @@ void add_units (U8 n)
 		sound_send (MACHINE_ADD_COIN_SOUND);
 #endif
 		callset_invoke (add_partial_credits);
-		deff_restart (DEFF_CREDITS);
+		announce_credits ();
 	}
 	csum_area_update (&coin_csum_info);
 	pinio_nvram_lock ();
