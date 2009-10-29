@@ -41,6 +41,19 @@
 from EVENT_PAGE. */
 #define callset_pointer_invoke(callset_ptr)	call_far (EVENT_PAGE, (*callset_ptr) ())
 
+/*
+ * gencallset emits a callset_debug() before each event receiver is called.
+ * The default is for this to do nothing, but sometimes for debugging it
+ * is nice to have this print a message or log the event.
+ */
+#if defined(DEBUG_CALLSET_MSG)
+#define callset_debug(id) do { dbprintf ("C%04lX\n", id); } while (0)
+#elif defined(DEBUG_CALLSET_LOG)
+#define callset_debug(id)
+#else
+#define callset_debug(id)
+#endif
+
 #endif /* GENCALLSET */
 
 #endif /* _CALLSET_H */

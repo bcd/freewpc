@@ -80,10 +80,6 @@ my $m6809 = 0;
 # The target boolean type name
 my $bool_type = "bool";
 
-# Nonzero if emitting debug prints
-my $debug = 0;
-
-
 # The output file name
 $OutputFile = "build/callset.c";
 
@@ -103,7 +99,6 @@ while (my $arg = shift @ARGV) {
 		print "--include <file>  Add an #include to the output file\n";
 		print "-D <dir>          Add directory to the scan list\n";
 		print "--m6809           Enable 6809 mode\n";
-		print "-d                Generate debug statements\n";
 		print "\n";
 		exit 0;
 	}
@@ -119,9 +114,6 @@ while (my $arg = shift @ARGV) {
 	}
 	elsif ($arg =~ /^--m6809$/) {
 		$m6809 = 1;
-	}
-	elsif ($arg =~ /^-d/) {
-		$debug = 1;
 	}
 	else {
 		push @srclist, $arg;
@@ -215,11 +207,6 @@ for $include (@IncludeFiles) {
 	print FH "\n#include <$include>\n";
 }
 
-if ($debug) {
-	print FH "void callset_debug (U16 id) { dbprintf (\"C%04lX\\n\", id); }\n\n";
-	$debug_id = 0;
-}
-
 foreach $set (keys %functionhash) {
 	my $rettype = $fntypehash{$set};
 	$rettype = "void" if (($rettype eq "") || !defined ($rettype));
@@ -274,11 +261,9 @@ foreach $set (keys %functionhash) {
 			print FH "   if (!${module}_$set ()) return FALSE;\n";
 		}
 		else {
-			if ($debug) {
-				my $idx = sprintf "0x%04X", $debug_id;
-				print FH "   callset_debug ($idx);\n";
-				$debug_id++;
-			}
+			my $idx = sprintf "0x%04X", $debug_id;
+			print FH "   callset_debug ($idx);\n";
+			$debug_id++;
 			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
 		}
 	}
