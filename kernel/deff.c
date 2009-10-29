@@ -217,7 +217,7 @@ void deff_start (deffnum_t id)
 	}
 	else if (deff->flags & (D_QUEUED | D_TIMEOUT))
 	{
-		deff_debug ("no priority\n");
+		deff_debug ("queueing\n");
 		deff_start_retry (id, 7);
 	}
 	else
@@ -278,9 +278,14 @@ __noreturn__ void deff_exit (void)
 	with GID_DEFF in the same context. */
 	task_setgid (GID_DEFF_EXITING);
 
+	/* Drop priority and clear that we were running*/
 	deff_running = DEFF_NULL;
 	deff_prio = 0;
-	effect_update_request ();
+
+	/* Restart background effects.  But if there is a foreground retry task,
+	don't bother, since effect update will abort anyway. */
+	if (!task_find_gid (GID_DEFF_WAITING))
+		effect_update_request ();
 	task_exit ();
 }
 
@@ -382,6 +387,11 @@ void deff_update (void)
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
 	if (deff_running && (deff_running != deff_background))
+		return;
+
+	/* If there is a foreground retry task trying to grab the display,
+	don't update. */
+	if (task_find_gid (GID_DEFF_WAITING))
 		return;
 
 	/* Recalculate which display effect should run in the
