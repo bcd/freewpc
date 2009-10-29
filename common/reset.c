@@ -196,13 +196,6 @@ void system_reset_deff (void)
 
 	dmd_show_low ();
 
-#if 0 && (MACHINE_ALPHANUMERIC == 1) /* TODO */
-	extern __common__ void seg_effect_demo (void);
-	task_pid_t tp = far_task_create_gid (task_getgid (), seg_effect_demo, COMMON_PAGE);
-	task_sleep_sec (5);
-	task_kill_pid (tp);
-#endif
-
 	/* Keep the reset display for at least 3 seconds (so
 	 * it is readable), keep it longer if any of the
 	 * asynchronous initializations are still running. */
