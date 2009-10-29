@@ -89,12 +89,18 @@ void ballsave_disable (void)
 }
 
 
+/**
+ * Return true if the ballsaver is active.
+ */
 bool ballsave_test_active (void)
 {
 	return timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
 }
 
 
+/**
+ * Return a ball back into play due to ballsave.
+ */
 void ballsave_launch (void)
 {
 #if defined(MACHINE_TZ)
@@ -103,10 +109,6 @@ void ballsave_launch (void)
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
 	deff_start (DEFF_BALL_SAVE);
-
-	/* TODO : This is a hack! */
-	if (config_timed_game)
-		timed_game_extend (2);
 }
 
 
@@ -119,12 +121,12 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
 {
 	if (single_ball_play () && ballsave_test_active ())
 	{
-		/* TODO - not clean.  We should start a separate timer to
-		indicate that ballsave should occur once the ball reaches the
+		/* Here, we start a separate hidden timer to indicate
+		that ballsave should occur once the ball reaches the
 		trough.  It should have a long expiry time just in case
 		something goes wrong.  But the ballsave lamp should not
-		light during this period. */
-		ballsave_add_time (5);
+		be forced on during this period. */
+		timer_restart_free (GID_BALLSAVE_EXTENDED, TIME_7S);
 	}
 }
 
@@ -161,7 +163,8 @@ CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 		callset_invoke (timed_drain_penalty);
 		return FALSE;
 	}
-	else if (ballsave_test_active ())
+	else if (timer_test_and_kill_gid (GID_BALLSAVE_EXTENDED)
+		|| ballsave_test_active ())
 	{
 		ballsave_launch ();
 		return FALSE;
