@@ -1,0 +1,2 @@
+#!/bin/sh
+find . -path "./kernel/*.[ch]" -or -path "./common/*.[ch]" | xargs grep callset_invoke | awk '{print $3}' | sed -e "s/[();]//g" | grep "^[a-z]" | sort | uniq
