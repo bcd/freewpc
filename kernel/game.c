@@ -170,8 +170,8 @@ void end_game (void)
 		by pressing Enter), then skip over the end game effects. */
 		if (!in_test)
 		{
-			high_score_check ();
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
+			high_score_check ();
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
