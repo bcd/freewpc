@@ -48,10 +48,8 @@ from EVENT_PAGE. */
  */
 #if defined(DEBUG_CALLSET_MSG)
 #define callset_debug(id) do { dbprintf ("C%04lX\n", id); } while (0)
-#elif defined(DEBUG_CALLSET_LOG)
-#define callset_debug(id)
 #else
-#define callset_debug(id)
+#define callset_debug(id) do { extern U16 log_callset; log_callset = id; } while (0)
 #endif
 
 #endif /* GENCALLSET */
