@@ -165,6 +165,8 @@ static void deff_retry_task (void)
 		args->timeout--;
 		if (deff_prio < deff->prio)
 		{
+			dbprintf ("deff_retry_task ok %d\n", args->id);
+			deff_running = args->id;
 			deff_start_task (deff);
 			break;
 		}
