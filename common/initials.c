@@ -34,8 +34,14 @@
  * Keep the length of this as a power of 2 (32) so that
  * the circular buffer implementation is simple.
  */
-static const unsigned char initial_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ */-+&";
+static const unsigned char initial_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ */-+";
 
+#if (MACHINE_DMD == 1)
+#define MAX_LETTERS_SHOWN 12
+#else
+#define MAX_LETTERS_SHOWN 1
+#endif
+#define MAX_INITIAL_INITIAL (sizeof (initial_chars) - MAX_LETTERS_SHOWN)
 
 /* The amount of time left to enter initials */
 U8 initials_enter_timer;
@@ -61,7 +67,7 @@ void (*initials_enter_complete) (void);
  */
 void enter_initials_deff (void)
 {
-	while (task_find_gid (GID_ENTER_INITIALS))
+	while (in_test || task_find_gid (GID_ENTER_INITIALS))
 	{
 		if (score_update_required ())
 		{
@@ -139,9 +145,11 @@ CALLSET_ENTRY (initials, sw_left_button)
 {
 	if (initials_enter_timer)
 	{
-		/* TODO - bounds checking and wraparound */
-		--initials_selection;
-		score_update_request ();
+		if (initials_selection > 0)
+			--initials_selection;
+		else
+			initials_selection = MAX_INITIAL_INITIAL;
+			score_update_request ();
 	}
 }
 
@@ -151,6 +159,8 @@ CALLSET_ENTRY (initials, sw_right_button)
 	if (initials_enter_timer)
 	{
 		++initials_selection;
+		if (initials_selection > MAX_INITIAL_INITIAL)
+			initials_selection = 0;
 		score_update_request ();
 	}
 }

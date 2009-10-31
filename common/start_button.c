@@ -44,13 +44,13 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	{
 		switch_stress_endball ();
 	}
-	else if (in_test)
-	{
-		SECTION_VOIDCALL (__test__, test_mode_start_button_handler);
-	}
 	else if (initials_enter_timer)
 	{
 		SECTION_VOIDCALL (__common__, initials_start_button_handler);
+	}
+	else if (in_test)
+	{
+		SECTION_VOIDCALL (__test__, test_mode_start_button_handler);
 	}
 	else
 	{

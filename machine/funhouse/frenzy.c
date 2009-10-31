@@ -48,12 +48,12 @@ void frenzy_running (void)
 {
 	while (frenzy_timer > 0)
 	{
-		while (system_timer_pause ())
-			task_sleep (TIME_250MS);
-		task_sleep_sec (1);
+		timer_pause_second ();
 		frenzy_timer--;
 	}
+	task_sleep_sec (1);
 	flag_off (FLAG_SUPER_FRENZY_RUNNING);
+	effect_update_request ();
 	task_exit ();
 }
 

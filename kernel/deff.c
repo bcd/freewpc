@@ -155,12 +155,18 @@ static void deff_retry_task (void)
 {
 	struct waiting_deff *args = task_current_class_data (struct waiting_deff);
 	const deff_t *deff = &deff_table[args->id];
-	while (args->timeout > 0)
+
+	/* Retry is started for deffs with either the D_QUEUED or D_TIMEOUT
+	flag set.  D_TIMEOUT says to stop the retry after a while; without
+	this flag (D_QUEUED only), we will wait forever. */
+	while (!(deff->flags & D_TIMEOUT) || (args->timeout > 0))
 	{
 		task_sleep_sec (1);
 		args->timeout--;
 		if (deff_prio < deff->prio)
 		{
+			dbprintf ("deff_retry_task ok %d\n", args->id);
+			deff_running = args->id;
 			deff_start_task (deff);
 			break;
 		}
@@ -172,7 +178,7 @@ static void deff_retry_task (void)
 /**
  * Like deff_start(), but does retries if the effect can't be
  * started right now.  It is slightly more efficient to call
- * this than deff_start() for a D_TIMEOUT effect.  It is also
+ * this than deff_start() for a D_QUEUED effect.  It is also
  * possible to set the timeout delay.
  */
 void deff_start_retry (deffnum_t id, U8 timeout)
@@ -189,7 +195,7 @@ void deff_start (deffnum_t id)
 {
 	const deff_t *deff = &deff_table[id];
 
-	deff_debug ("deff_start\n");
+	deff_debug ("deff_start %d\n", id);
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_START, id);
 
 	/* Nothing to do if it's already running, unless it's
@@ -211,10 +217,10 @@ void deff_start (deffnum_t id)
 		deff_running = id;
 		deff_start_task (deff);
 	}
-	else if (deff->flags & D_TIMEOUT)
+	else if (deff->flags & (D_QUEUED | D_TIMEOUT))
 	{
-		deff_debug ("no priority\n");
-		deff_start_retry (id, 5);
+		deff_debug ("queueing\n");
+		deff_start_retry (id, 7);
 	}
 	else
 	{
@@ -274,9 +280,14 @@ __noreturn__ void deff_exit (void)
 	with GID_DEFF in the same context. */
 	task_setgid (GID_DEFF_EXITING);
 
+	/* Drop priority and clear that we were running*/
 	deff_running = DEFF_NULL;
 	deff_prio = 0;
-	effect_update_request ();
+
+	/* Restart background effects.  But if there is a foreground retry task,
+	don't bother, since effect update will abort anyway. */
+	if (!task_find_gid (GID_DEFF_WAITING))
+		effect_update_request ();
 	task_exit ();
 }
 
@@ -378,6 +389,11 @@ void deff_update (void)
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
 	if (deff_running && (deff_running != deff_background))
+		return;
+
+	/* If there is a foreground retry task trying to grab the display,
+	don't update. */
+	if (task_find_gid (GID_DEFF_WAITING))
 		return;
 
 	/* Recalculate which display effect should run in the

@@ -29,6 +29,9 @@ U8 log_tail;
 /** An array of log entries */
 struct log_event log_entry[MAX_LOG_EVENTS];
 
+/** The last CALLSET_ENTRY that was invoked */
+__permanent__ U16 log_callset;
+__permanent__ U16 prev_log_callset;
 
 #ifdef DEBUG_LOG
 
@@ -132,5 +135,9 @@ void log_event1 (U16 module_event, U8 arg)
 void log_init (void)
 {
 	log_head = log_tail = 0;
+
+	/* Save the last event logged from the previous run. */
+	prev_log_callset = log_callset;
+	dbprintf ("Last event: %04lX\n", prev_log_callset);
 }
 

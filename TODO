@@ -7,10 +7,6 @@ Poor Design
 * Teach gencallset to ignore code that isn't being compiled in.
 * Replace FIF with something more intelligent.  In Progress.
 * Move printf and game state machine code out of the system page.
-* Deal with common page getting full. (Started)
-* Get rid of RTTs for high/low solenoid banks that are all pulsed now,
-and reclaim sol_timers[] direct spots.  In the same vein, flashlamps
-need a different method.  In Progress.
 
 
 Missing Feature
@@ -56,7 +52,6 @@ Uncategorized
 ./common/device.c:		/* TODO - this logic probably belongs somewhere else.
 ./common/device.c:		/* TODO - this logic probably belongs somewhere else */
 ./common/device.c:#if 0 /* TODO */
-./common/locale.c:/* TODO - support on-the-fly DIP switch changes.  Poll them about
 ./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
 ./common/plunger.c:		/* TODO - after locking a ball, adding a new ball to the
 ./common/rtc.c:	/* TODO - should read this from the native system */
@@ -96,7 +91,6 @@ Uncategorized Machine Code
 ./machine/tz/multiball.c:/* TODO - on a missed left ramp exit switch, use the
 ./machine/tz/powerball.c:			/* TODO - in the 'maybe' state, pulse magnets to
 ./machine/tz/powerball.c:		/* TODO : music is not being stopped correctly if Powerball
-./machine/tz/powerball.c:		TODO : better deff management would eliminate the need for
 ./machine/tz/powerball.c:	/* TODO : if this switch triggers and we did not expect
 ./machine/tz/powerball_test.c:/* TODO : copied from powerball.c */
 ./machine/tz/skill.c:	TODO : genmachine can be made to generate two events here,

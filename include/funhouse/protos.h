@@ -13,5 +13,6 @@ bool frenzy_lit_p (void);
 bool frenzy_running_p (void);
 __machine__ bool multiball_mode_running_p (void);
 
+__machine__ void say (U16 code);
 
 #endif

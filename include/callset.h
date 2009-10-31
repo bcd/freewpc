@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -40,6 +40,17 @@
 /* WARNING : this function won't work if the caller is in a different page
 from EVENT_PAGE. */
 #define callset_pointer_invoke(callset_ptr)	call_far (EVENT_PAGE, (*callset_ptr) ())
+
+/*
+ * gencallset emits a callset_debug() before each event receiver is called.
+ * The default is for this to do nothing, but sometimes for debugging it
+ * is nice to have this print a message or log the event.
+ */
+#if defined(DEBUG_CALLSET_MSG)
+#define callset_debug(id) do { dbprintf ("C%04lX\n", id); } while (0)
+#else
+#define callset_debug(id) do { extern U16 log_callset; log_callset = id; } while (0)
+#endif
 
 #endif /* GENCALLSET */
 

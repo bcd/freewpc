@@ -531,7 +531,11 @@ void switch_transitioned (const U8 sw)
 		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
 		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
 	{
-		/* Start a task to process the switch right away */
+		/* Start a task to process the switch event.
+		This task may sleep if necessary, but it should be as fast as possible
+		and push long-lived operations into separate background tasks.
+		It is possible for more than instance of a task to exist for the same
+		switch, if valid debounced transitions occur quickly. */
 		task_pid_t tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
 		task_set_arg (tp, sw);
 	}
@@ -625,8 +629,8 @@ void switch_service_queue (void)
 			{
 				/* Debounce is fully complete. */
 				dbprintf ("debounced\n");
-				switch_transitioned (entry->id);
 				switch_queue_remove (entry);
+				switch_transitioned (entry->id);
 			}
 			else
 			{
@@ -780,7 +784,6 @@ CALLSET_ENTRY (switch, idle)
 
 		/* Each bit in sw_stable, but not in sw_unstable, indicates a switch
 		that just transitioned and needs to be put into the debounce queue. */
-		/* TODO - also verify that not already queued? */
 		if (unlikely (rows = (sw_stable[col] & ~sw_unstable[col])))
 		{
 			U8 sw = col * 8;

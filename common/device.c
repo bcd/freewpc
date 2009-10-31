@@ -51,10 +51,6 @@ extern device_properties_t device_properties_table[];
 /** Runtime status about each device */
 device_t device_table[NUM_DEVICES];
 
-/** The global state of the entire device subsystem */
-/* TODO : is this needed?  Can use sys_init_complete instead? */
-U8 device_ss_state;
-
 /** The maximum number of balls that this machine should have installed
 in the standard devices */
 U8 max_balls;
@@ -79,7 +75,7 @@ U8 live_balls;
  * pending kickout. */
 U8 held_balls;
 
-/** The number of kickout locks currently held.
+/** The set of kickout locks currently held.
  * Normally this is zero, and kickouts occur as soon as possible.
  * When nonzero, kickouts are delayed, e.g. to allow an effect to
  * run.  The lock is then released and things continue. */
@@ -391,7 +387,7 @@ wait_and_recount:
 			dbprintf ("Can't kick when no balls available!\n");
 			dev->kicks_needed = 0;
 		}
-		else if (kickout_locks > 0)
+		else if (kickout_locked_p ())
 		{
 			/* Container ready to kick, but 1 or more
 			 * locks are held so we must wait. */
@@ -588,12 +584,6 @@ void device_probe (void)
 	devicenum_t devno;
 	U8 kicks;
 
-	if (unlikely (sys_init_complete == 0))
-	{
-		dbprintf ("Probe before init_complete?\n");
-		task_sleep_sec (3);
-	}
-
 	dbprintf ("Probing devices\n");
 
 	/* Keep track of the number of times we actually had to kick
@@ -662,8 +652,6 @@ probe_exit:
 
 	dbprintf ("\nDevices initialized.\n");
 	device_debug_all ();
-
-	device_ss_state = 1;
 	task_exit ();
 }
 
@@ -673,10 +661,10 @@ probe_exit:
  * transitioned is unknown, as we don't really care. */
 void device_sw_handler (U8 devno)
 {
-	/* Ignore device switches until device SS is initialized. */
-	if ((device_ss_state == 0) || (sys_init_complete == 0))
+	/* Ignore device switches until initialization is complete */
+	if (!sys_init_complete)
 	{
-		dbprintf ("Device system not ready.\n");
+		dbprintf ("Device switch ignored during init.\n");
 		return;
 	}
 
@@ -835,7 +823,7 @@ bool device_check_start_ok (void)
 	U8 truly_missing_balls;
 
 	/* Reset any kickout locks, just in case */
-	kickout_locks = 0;
+	kickout_unlock_all ();
 
 	/* If any balls are missing, don't allow the game to start
 	 * without first trying a device probe.
@@ -930,7 +918,7 @@ void device_lock_ball (device_t *dev)
 CALLSET_ENTRY (device, start_game)
 {
 	live_balls = 0;
-	kickout_locks = 0;
+	kickout_unlock_all ();
 }
 
 
@@ -952,6 +940,7 @@ CALLSET_ENTRY (device, diagnostic_check)
 CALLSET_ENTRY (device, init_complete)
 {
 	task_recreate_gid (GID_DEVICE_PROBE, device_probe);
+	task_sleep (TIME_500MS);
 }
 
 
@@ -961,7 +950,6 @@ void device_init (void)
 	device_t *dev;
 	U8 i;
 
-	device_ss_state = 0;
 #ifdef MACHINE_MAX_BALLS
 	max_balls = MACHINE_MAX_BALLS ();
 #else
@@ -970,7 +958,7 @@ void device_init (void)
 	counted_balls = MACHINE_TROUGH_SIZE;
 	missing_balls = 0;
 	live_balls = 0;
-	kickout_locks = 0;
+	kickout_unlock_all ();
 	held_balls = 0;
 	device_game_start_errors = 0;
 

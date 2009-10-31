@@ -43,6 +43,9 @@ const struct generic_ladder gangway_score_rule = {
 };
 
 
+void gangway_collect_deff (void)
+{
+}
 
 bool gangway_available_p (void)
 {
@@ -56,11 +59,14 @@ void gangway_loop_lit (void)
 
 void gangway_loop_collected (void)
 {
+	generic_ladder_score_and_advance (&gangway_score_rule);
+	sample_start (SND_WHEEEE, SL_1S);
 }
 
 
 static inline void gangway_shot (task_gid_t gid, task_gid_t other_gid)
 {
+	score (SC_50K);
 	if (gangway_available_p ())
 	{
 		if (timer_find_gid (gid))
@@ -78,6 +84,17 @@ static inline void gangway_shot (task_gid_t gid, task_gid_t other_gid)
 }
 
 
+static inline void gangway_light (task_gid_t gid, task_gid_t other_gid)
+{
+	if (gangway_available_p ())
+	{
+		timer_kill_gid (other_gid);
+		timer_restart_free (gid, TIME_5S);
+		gangway_loop_lit ();
+	}
+}
+
+
 CALLSET_ENTRY (gangway, left_loop_shot)
 {
 	gangway_shot (GID_LEFT_GANGWAY_LIT, GID_RIGHT_GANGWAY_LIT);
@@ -88,9 +105,21 @@ CALLSET_ENTRY (gangway, right_loop_shot)
 	gangway_shot (GID_RIGHT_GANGWAY_LIT, GID_LEFT_GANGWAY_LIT);
 }
 
+CALLSET_ENTRY (gangway, sw_left_inlane)
+{
+	gangway_light (GID_RIGHT_GANGWAY_LIT, GID_LEFT_GANGWAY_LIT);
+}
+
+CALLSET_ENTRY (gangway, sw_inner_right_inlane)
+{
+	gangway_light (GID_LEFT_GANGWAY_LIT, GID_RIGHT_GANGWAY_LIT);
+}
+
 CALLSET_ENTRY (gangway, lamp_update)
 {
 	lamp_on_if (LM_FLIPPER_LANES, gangway_available_p ());
+	lamp_flash_if (LM_LEFT_GANGWAY, timer_find_gid (GID_LEFT_GANGWAY_LIT));
+	lamp_flash_if (LM_RIGHT_GANGWAY, timer_find_gid (GID_RIGHT_GANGWAY_LIT));
 }
 
 CALLSET_ENTRY (gangway, start_player)

@@ -233,6 +233,8 @@ CALLSET_ENTRY (mb, lamp_update)
 
 CALLSET_ENTRY (mb, music_refresh)
 {
+	if (!in_game)
+		return;
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		if (flag_test (FLAG_JACKPOT_THIS_BALL))
@@ -336,9 +338,5 @@ CALLSET_ENTRY (mb, start_ball)
 {
 	flag_off (FLAG_JACKPOT_THIS_BALL);
 	/* TODO - update mb_balls_locked according to physical state */
-#if 0
-	sol_enable (SOL_MOUTH_MOTOR);
-	sol_enable (SOL_MOTOR_DIRECTION);
-#endif
 }
 

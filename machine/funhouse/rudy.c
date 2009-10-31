@@ -109,11 +109,21 @@ void rudy_blink (void)
 
 CALLSET_ENTRY (rudy, init)
 {
-	rudy_eyes = EYES_STRAIGHT + EYELID_OPEN;
+	rudy_eyes = EYES_STRAIGHT + EYELID_CLOSED;
 }
 
 CALLSET_ENTRY (rudy, init_complete)
 {
 	task_recreate_gid (GID_RUDY_UPDATE, rudy_eye_update);
+}
+
+CALLSET_ENTRY (rudy, start_game)
+{
+	rudy_eye_change (EYELID_OPEN);
+}
+
+CALLSET_ENTRY (rudy, end_game)
+{
+	rudy_eye_change (EYELID_CLOSED);
 }
 

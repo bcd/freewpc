@@ -261,9 +261,14 @@ __common__ void device_init (void);
 /** Release a kickout lock */
 #define kickout_unlock(by)	do { kickout_locks &= ~(by); } while (0)
 
-/** All kickouts are locked by a display effect.  This flag
-is set by deffs with the D_PAUSE property. */
-#define KLOCK_DEFF 0x1
+/** Release a kickout lock */
+#define kickout_locked_p()	(kickout_locks != 0)
+
+/** Release a kickout lock */
+#define kickout_unlock_all()	do { kickout_locks = 0; } while (0)
+
+#define KLOCK_DEFF 0x1    /* Kickout locked during current deff */
+#define KLOCK_USER 0x2    /* Kickout locked by explicit user call */
 
 #define single_ball_play() (live_balls <= 1)
 #define multi_ball_play() (live_balls > 1)
