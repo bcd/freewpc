@@ -42,6 +42,7 @@
 U8 pausable_timer_locks;
 
 
+
 /*
  * Check if timers should be paused.
  *
@@ -70,7 +71,7 @@ bool system_timer_pause (void)
 			return TRUE;
 	}
 
-	if (kickout_locks)
+	if (device_holdup_count ())
 		return TRUE;
 
 	if (ball_search_timed_out ())
