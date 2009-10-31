@@ -81,6 +81,20 @@ bool system_timer_pause (void)
 }
 
 
+void timer_pause_second (void)
+{
+	do {
+		task_sleep (TIME_400MS);
+	} while (system_timer_pause ());
+	do {
+		task_sleep (TIME_400MS);
+	} while (system_timer_pause ());
+	do {
+		task_sleep (TIME_400MS);
+	} while (system_timer_pause ());
+}
+
+
 void freerunning_timer_function (void)
 {
 	U16 ticks = task_get_arg ();
