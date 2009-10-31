@@ -65,24 +65,19 @@ void superdog_score_deff (void)
 void superdog_running (void)
 {
 	lamp_tristate_flash (LM_SUPER_DOG);
-	task_sleep_sec (1);
 	while (superdog_timer > 0)
 	{
 		/* TODO - timer did not pause after ball was locked
 		and another served to the plunger.  When it was
 		counting down, I saw that the ballsave lamp is on too.
 		Also it is counting when ball is in tunnel a bit */
-		do {
-			task_sleep (TIME_500MS);
-		} while (system_timer_pause ());
-		do {
-			task_sleep (TIME_500MS);
-		} while (system_timer_pause ());
+		timer_pause_second ();
 		superdog_timer--;
 	}
 	task_sleep_sec (1);
 	lamp_tristate_off (LM_SUPER_DOG);
 	effect_update_request ();
+	task_sleep (TIME_1500MS); /* grace period */
 	task_exit ();
 }
 
@@ -116,7 +111,7 @@ CALLSET_ENTRY (superdog, display_update)
 
 CALLSET_ENTRY (superdog, sw_superdog_low, sw_superdog_center, sw_superdog_high)
 {
-	if (lamp_flash_test (LM_SUPER_DOG))
+	if (task_find_gid (GID_SUPERDOG_RUNNING))
 	{
 		superdog_score ();
 	}
