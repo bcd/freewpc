@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -31,6 +31,8 @@
 /** Amount of time left to buy an extra ball during buyin */
 U8 buyin_offer_timer;
 
+/** The number of buyins each player has had */
+__local__ U8 buyin_count;
 
 /** Display effect that runs during the extra ball buyin */
 void buyin_offer_deff (void)
@@ -60,11 +62,21 @@ void buyin_offer_deff (void)
 }
 
 
+/** Called when the player requests to purchase a buyin. */
+void buyin_purchase (void)
+{
+}
+
+
 /** Offer to buy an extra ball.  This is called from the game state
  * machine when it detects that a player has played his last ball. */
 void buyin_offer (void)
 {
 #ifdef MACHINE_BUYIN_SWITCH
+
+	/* TODO - validate that a buyin offer is OK; check that the
+	buyin limit hasn't been reached */
+
 #ifdef MACHINE_BUYIN_LAMP
 	lamp_tristate_flash (MACHINE_BUYIN_LAMP);
 #endif
@@ -82,7 +94,17 @@ void buyin_offer (void)
 #ifdef MACHINE_BUYIN_LAMP
 	lamp_tristate_off (MACHINE_BUYIN_LAMP);
 #endif
+
 #endif /* MACHINE_BUYIN_SWITCH */
 }
 
+
+CALLSET_ENTRY (buyin, start_button_handler)
+{
+}
+
+CALLSET_ENTRY (buyin, start_player)
+{
+	buyin_count = 0;
+}
 

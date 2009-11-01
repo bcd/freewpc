@@ -321,6 +321,23 @@ CALLSET_ENTRY (coin, sw_fourth_coin)
 	do_coin (3);
 }
 
+CALLSET_ENTRY (coin, sw_buyin_button)
+{
+#if 0
+#ifdef MACHINE_BUYIN_SWITCH
+	if (!in_buyin_mode)
+		return;
+
+	if (!has_credits_p ())
+	{
+		signal player to enter button, restart buyin timer
+		return;
+	}
+
+	remove_credit ();
+#endif
+#endif
+}
 
 /** Clear the units and credits counters. */
 void credits_clear (void)

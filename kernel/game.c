@@ -289,6 +289,8 @@ void end_ball (void)
 		if (system_config.buy_extra_ball == YES)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
+			/* TODO - if buyin is bought, then need to stay on this
+			player, avoid end_player etc. */
 		}
 		callset_invoke (end_player);
 	}
