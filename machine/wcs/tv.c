@@ -61,7 +61,7 @@ struct tv_award tv_award_table[] = {
 	{ "ADVANCE CITY", tv_award_advance_city, 20, NULL },
 #endif
 	{ "START MODE", tv_award_start_mode, 60, NULL },
-	{ "LIGHT ULTRA SHOT", tv_award_add_ultra, 60, NULL }, /* TODO - font too big */
+	{ "LITE ULTRA SHOT", tv_award_add_ultra, 60, NULL },
 	/* next one should not apply in timed game */
 	{ "LIGHT EXTRA BALL", tv_award_light_extra_ball, 5, NULL },
 	{ "250,000", tv_award_points, 100, NULL },
