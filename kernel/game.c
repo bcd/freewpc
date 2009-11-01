@@ -352,15 +352,11 @@ void timed_game_monitor (void)
 
 	while ((timed_game_timer > 0) && !in_bonus && in_game)
 	{
-		/* Don't run the timer under certain conditions */
-		if (system_timer_pause () || ballsave_test_active ())
-		{
+		while (ballsave_test_active ())
 			task_sleep (TIME_500MS);
-			continue;
-		}
-
-		/* OK, drop the timer by one second. */
-		task_sleep_sec (1);
+		while (multi_ball_play ())
+			task_sleep (TIME_2S);
+		timer_pause_second ();
 		timed_game_timer--;
 		score_update_request ();
 		callset_invoke (timed_game_tick);
@@ -381,8 +377,7 @@ void timed_game_monitor (void)
 #endif
 
 		/* Short grace period after the timer expires */
-		task_sleep (TIME_500MS);
-
+		task_sleep_sec (1);
 	}
 
 	/* OK, the game is going to end soon... Disable the flippers. */
@@ -401,11 +396,14 @@ void timed_game_monitor (void)
 
 void timed_game_extend (U8 secs)
 {
-	if (timed_game_timer > 0)
+	if (config_timed_game && timed_game_timer > 0)
 	{
 		timed_game_timer += secs;
 		if ((timed_game_timer > CONFIG_TIMED_GAME_MAX) || (timed_game_timer < secs))
 			timed_game_timer = CONFIG_TIMED_GAME_MAX;
+#ifdef DEFF_TIMED_GAME_EXTENDED
+			deff_start (DEFF_TIMED_GAME_EXTENDED);
+#endif
 	}
 }
 
@@ -502,7 +500,6 @@ void start_ball (void)
 
 	/* If timed game support is built-in and enabled, then
 	start a task to monitor the game time. */
-#ifdef CONFIG_TIMED_GAME
 	if (config_timed_game)
 	{
 		extern U8 switch_stress_enable;
@@ -511,7 +508,6 @@ void start_ball (void)
 		if (switch_stress_enable == NO)
 			task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 	}
-#endif
 }
 
 
@@ -649,6 +645,11 @@ CALLSET_ENTRY (game, start_button_handler)
 		}
 		return;
 	}
+
+	/* If a game is already in progress and is tilted, do not allow
+	further players to be added */
+	if (in_tilt)
+		return;
 
 	/* See if a game is already in progress. */
 	if (!in_game)

@@ -345,6 +345,9 @@ CALLSET_ENTRY (sound_effect, music_refresh)
 	if (!in_live_game || in_bonus)
 		return;
 
+	if (config_timed_game && timed_game_timer == 0)
+		music_request (0, PRI_GAME_OVER);
+
 #ifdef MACHINE_BALL_IN_PLAY_MUSIC
 	else if (valid_playfield)
 		music_request (MACHINE_BALL_IN_PLAY_MUSIC, PRI_SCORES);

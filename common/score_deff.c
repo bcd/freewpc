@@ -35,7 +35,6 @@ bool score_update_needed;
 /** Draw the current ball number at the bottom of the display. */
 void scores_draw_ball (void)
 {
-#if (MACHINE_DMD == 1)
 	if (config_timed_game)
 	{
 		U8 time_minutes, time_seconds;
@@ -46,20 +45,26 @@ void scores_draw_ball (void)
 			time_minutes++;
 			time_seconds -= 60;
 		}
+#if (MACHINE_DMD == 1)
 		sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
 		font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+#else
+		sprintf ("TIME %d:%02d", time_minutes, time_seconds);
+		seg_write_string (1, 8, sprintf_buffer);
+#endif
 	}
 	else
 	{
+#if (MACHINE_DMD == 1)
 		credits_render ();
 		font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
 		sprintf ("BALL %1i", ball_up);
 		font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
-	}
 #else
-	sprintf ("BALL %1i", ball_up);
-	seg_write_string (1, 10, sprintf_buffer);
+		sprintf ("BALL %1i", ball_up);
+		seg_write_string (1, 10, sprintf_buffer);
 #endif
+	}
 }
 
 
@@ -194,7 +199,7 @@ void scores_draw_current (U8 single_player)
 
 		/* Start printing to the display */
 		info->render ();
-#else /* TODO */
+#else
 		seg_write_string (0, 0, sprintf_buffer);
 #endif
 	}
@@ -256,6 +261,8 @@ void scores_deff (void)
 		seg_erase ();
 		scores_draw_ball ();
 		scores_draw_current (0);
+		seg_copy_low_to_high ();
+		scores_draw_current (player_up);
 		seg_show ();
 #endif
 
@@ -279,7 +286,15 @@ void scores_deff (void)
 				dmd_show_low ();
 			}
 #else
-/* TODO */
+			if (valid_playfield)
+			{
+				/* Strobe player up score */
+			}
+			else
+			{
+				/* Flash player up score */
+				seg_show_other ();
+			}
 #endif
 
 			task_sleep (TIME_166MS);

@@ -74,28 +74,33 @@ bool can_award_extra_ball (void)
 cannot be awarded, then it is skipped. */
 void increment_extra_balls (void)
 {
-	if (config_timed_game)
+	if (can_award_extra_ball ())
 	{
-	}
-	else if (can_award_extra_ball ())
-	{
-		/* TODO - handle adjustment to award points instead of
-		 * extra ball */
-		extra_balls++;
-		callset_invoke (extra_ball_award);
-		update_extra_ball_lamps ();
-
-		audit_increment (&system_audits.extra_balls_awarded);
-
-		extra_balls_earned++;
-		extra_balls_earned_this_bip++;
+		if (config_timed_game)
+		{
+			timed_game_extend (15); /* TODO - make adjustable */
+		}
+		else if (0)
+		{
+			/* TODO - handle adjustment to award points instead of
+		    * extra ball */
+		}
+		else
+		{
+			extra_balls++;
+			callset_invoke (extra_ball_award);
+			audit_increment (&system_audits.extra_balls_awarded);
+			extra_balls_earned++;
+			extra_balls_earned_this_bip++;
 #ifdef DEFF_EXTRA_BALL
-		deff_start (DEFF_EXTRA_BALL);
+			deff_start (DEFF_EXTRA_BALL);
 #endif
 #ifdef LEFF_EXTRA_BALL
-		leff_start (LEFF_EXTRA_BALL);
+			leff_start (LEFF_EXTRA_BALL);
 #endif
+		}
 	}
+	update_extra_ball_lamps ();
 }
 
 
