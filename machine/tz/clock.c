@@ -77,6 +77,9 @@ U8 clock_decode;
 
 U8 clock_minute_sw;
 
+/** The task that currently owns the clock */
+task_gid_t clock_owner;
+
 
 void tz_dump_clock (void)
 {
@@ -212,6 +215,39 @@ void tz_clock_switch_rtt (void)
 }
 
 
+/**
+ * Clear the current clock owner.
+ */
+void tz_clock_clear_owner (void)
+{
+	clock_owner = NULL;
+}
+
+
+/**
+ * Allocate the clock device.
+ */
+bool tz_clock_alloc (task_gid_t owner)
+{
+	if (clock_owner == owner)
+		return TRUE;
+	if (clock_owner != NULL)
+		return FALSE;
+	clock_owner = owner;
+	return TRUE;
+}
+
+
+/**
+ * Free the clock device.
+ */
+void tz_clock_free (task_gid_t owner)
+{
+	if (clock_owner == owner)
+		tz_clock_clear_owner ();
+}
+
+
 void tz_clock_start_forward (void)
 {
 	if (in_test || global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
@@ -313,6 +349,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_minute_sw = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_mech_set_speed (BIVAR_DUTY_100);
+	tz_clock_clear_owner ();
 }
 
 CALLSET_ENTRY (tz_clock, amode_start)
