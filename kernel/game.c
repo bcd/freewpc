@@ -181,6 +181,8 @@ void end_game (void)
 	task_sleep (TIME_33MS); /* not needed? */
 	lamp_all_off ();
 
+	/* Return to attract mode, unless the game was aborted to
+	enter test mode */
 	if (!in_test)
 	{
 		deff_start (DEFF_GAME_OVER);
@@ -218,7 +220,10 @@ void end_ball (void)
 		return;
 	}
 
-	/* Here, we are committed to ending the ball */
+	/* Here, we are committed to ending the ball.
+	Do not sleep from here on out, except while in_bonus = TRUE (below).
+	This flag protects the function from being reentranted due to
+	spurious switch activity while endball is running. */
 
 	/* Change the running task group, so that we are no longer in
 	 * the context of the trough device update. */

@@ -685,7 +685,7 @@ void device_add_live (void)
 	{
 		missing_balls--;
 		live_balls++;
-		if (in_game)
+		if (in_game && !in_bonus)
 		{
 			callset_invoke (ball_count_change);
 		}
@@ -710,7 +710,7 @@ void device_remove_live (void)
 	{
 		/* Decrement the count of balls in play.  Now what? */
 		live_balls--;
-		if (in_game)
+		if (in_game && !in_bonus)
 		{
 			/* Notify that the ball count changed */
 			callset_invoke (ball_count_change);
