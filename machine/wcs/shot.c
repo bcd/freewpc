@@ -136,25 +136,32 @@ CALLSET_ENTRY (shot, sw_r_ramp_exit)
  * two different sub-events depending on direction:
  * 'enter' by default; 'exit' right after the lower
  * kickback.
- *
- * TODO - this does not work completely in multiball.
  */
 
 CALLSET_ENTRY (shot, sw_kickback_upper)
 {
 	if (free_timer_test (TIM_KICKBACK_MADE))
 	{
+		/* If the timer is running, it is probably the ball being
+		kicked back into play, but in multi-ball, this may not be
+		true.  So do not throw the event in multi-ball play. */
+		if (single_ball_play ())
+			callset_invoke (sw_kickback_upper_exit);
 		free_timer_stop (TIM_KICKBACK_MADE);
-		callset_invoke (sw_kickback_upper_exit);
 	}
 	else
 	{
+		/* If the timer is not running, this is definitely
+		an enter event, even in multiball. */
 		callset_invoke (sw_kickback_upper_enter);
 	}
 }
 
 CALLSET_ENTRY (shot, sw_kickback)
 {
+	/* On any kickback, we expect the ball to activate the
+	upper switch within 2 seconds.  So when this timer is running,
+	treat upper as an 'exit', else as an 'enter'. */
 	free_timer_restart (TIM_KICKBACK_MADE, TIME_2S);
 }
 
