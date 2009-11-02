@@ -62,6 +62,7 @@ static void handle_unlit_target (const U8 bit)
 		sample_start (SND_TARGET_COMPLETE, SL_2S);
 		score (SC_100K);
 		target_bits = 0;
+		light_step ();
 	}
 	else
 	{

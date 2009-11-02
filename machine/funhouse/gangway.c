@@ -59,8 +59,10 @@ void gangway_loop_lit (void)
 
 void gangway_loop_collected (void)
 {
-	generic_ladder_score_and_advance (&gangway_score_rule);
 	sample_start (SND_WHEEEE, SL_1S);
+	lamp_tristate_on (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
+	generic_ladder_score_and_advance (&gangway_score_rule);
+	lamp_tristate_flash (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
 }
 
 
@@ -94,6 +96,18 @@ static inline void gangway_light (task_gid_t gid, task_gid_t other_gid)
 	}
 }
 
+void gangway_init (U8 spots)
+{
+	lamplist_apply (LAMPLIST_GANGWAYS, lamp_off);
+	gangway_count = spots;
+	while (spots > 0)
+	{
+		lamplist_build_increment (LAMPLIST_GANGWAYS, lamp_matrix);
+		spots--;
+	}
+	lamp_tristate_flash (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
+}
+
 
 CALLSET_ENTRY (gangway, left_loop_shot)
 {
@@ -124,9 +138,15 @@ CALLSET_ENTRY (gangway, lamp_update)
 
 CALLSET_ENTRY (gangway, start_player)
 {
-	lamplist_apply (LAMPLIST_GANGWAYS, lamp_off);
-	lamp_tristate_flash (lamplist_index (LAMPLIST_GANGWAYS, 0));
-	gangway_count = 0;
+	gangway_init (2);
 	trap_door_bonuses = 0;
+}
+
+CALLSET_ENTRY (gangway, start_ball)
+{
+	if (gangway_count >= 5)
+	{
+		gangway_init (0);
+	}
 }
 
