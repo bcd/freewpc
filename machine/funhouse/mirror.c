@@ -21,17 +21,13 @@
 #include <freewpc.h>
 #include <eb.h>
 #include <steps_gate.h>
+#include <lamptimer.h>
 
 __local__ U8 mirror_award;
 
 __local__ U8 mirror_award_count;
 
 U8 mirror_being_awarded;
-
-/* TODO - move to include/lamptimer.h */
-__common__ void lamp_timer_stop (lampnum_t lamp);
-__common__ task_pid_t lamp_timer_find (lampnum_t lamp);
-__common__ void lamp_timer_start (lampnum_t lamp, U8 secs);
 
 
 void mirror_exec_eb (void)
@@ -134,6 +130,7 @@ void mirror_collect (void)
 		flag_off (FLAG_SUPER_FRENZY_LIT);
 		flag_on (FLAG_MIRROR_COMPLETE);
 		lamplist_apply (LAMPLIST_MIRROR_AWARDS, lamp_flash_off);
+		super_frenzy_start ();
 	}
 	else
 	{
@@ -168,6 +165,11 @@ CALLSET_ENTRY (mirror, sw_wind_tunnel_hole)
 		flag_off (FLAG_MIRROR_LIT);
 		mirror_collect ();
 	}
+	else if (lamp_timer_find (LM_MIRROR_VALUE))
+	{
+		lamp_timer_stop (LM_MIRROR_VALUE);
+		mirror_collect ();
+	}
 	else if (single_ball_play ())
 	{
 		leff_start (LEFF_CIRCLE_OUT);
@@ -187,9 +189,10 @@ CALLSET_ENTRY (mirror, rudy_shot)
 
 CALLSET_ENTRY (mirror, sw_outer_right_inlane)
 {
-	if (!lamp_test (LM_MIRROR_VALUE))
+	if (!mirror_masked_p () && !lamp_test (LM_MIRROR_VALUE))
 	{
-		//lamp_timer_start (LM_MIRROR_VALUE, 5);
+		struct lamptimer_args args = { .lamp = LM_MIRROR_VALUE, .secs = 5 };
+		lamp_timer_start (&args);
 	}
 }
 
@@ -201,7 +204,6 @@ CALLSET_ENTRY (mirror, any_jet)
 
 CALLSET_ENTRY (mirror, lamp_update)
 {
-	/* if (!lamp_timer_find (LM_MIRROR_VALUE)) */
 	lamp_on_if (LM_MIRROR_VALUE, mirror_lit_p ());
 }
 

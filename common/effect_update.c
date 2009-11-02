@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <coin.h>
+#include <search.h>
 
 U8 effect_update_counter;
 
@@ -86,8 +87,7 @@ CALLSET_ENTRY (effect_update, idle_every_100ms, start_ball, end_ball)
 	if (!in_test)
 	{
 		/* Update devices frequently */
-		if (in_game)
-			/* TODO - don't device_update while ball_search is active */
+		if (in_game && !ball_search_timed_out ())
 			callset_invoke (device_update);
 
 		/* Less frequently, update background display, music, and lamps.

@@ -248,3 +248,8 @@ CALLSET_ENTRY (score, factory_reset)
 	scores_reset ();
 }
 
+CALLSET_ENTRY (score, init)
+{
+	current_score = &scores[0][0];
+}
+

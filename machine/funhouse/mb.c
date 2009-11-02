@@ -78,6 +78,38 @@ void mb_jackpot_deff (void)
 	deff_exit ();
 }
 
+void mb_running_deff (void)
+{
+	U8 n = 0;
+	for (;;)
+	{
+		seg_alloc_clean ();
+		if (n & 0x1)
+		{
+			if (flag_test (FLAG_JACKPOT_LIT))
+			{
+				if (!(n & 0x10))
+					seg_write_row_center (0, "SHOOT TRAP DOOR");
+				else
+					seg_write_row_center (0, "FOR JACKPOT");
+			}
+			else
+			{
+				if (!(n & 0x10))
+					seg_write_row_center (0, "SHOOT RAMP");
+				else
+					seg_write_row_center (0, "RELIGHT JACKPOT");
+			}
+		}
+		sprintf_current_score ();
+		seg_write_row_center (1, sprintf_buffer);
+		seg_show ();
+		task_sleep (TIME_166MS);
+		n++;
+	}
+	deff_exit ();
+}
+
 
 static __machine__ void _mb_lamp_update (void);
 __machine__ void fh_clock_reset (void);
@@ -224,6 +256,13 @@ bool multiball_lit_p (void)
 CALLSET_ENTRY (mb, end_ball, single_ball_play)
 {
 	mb_stop ();
+}
+
+
+CALLSET_ENTRY (mb, display_update)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+		deff_start_bg (DEFF_MB_RUNNING, 0);
 }
 
 CALLSET_ENTRY (mb, lamp_update)

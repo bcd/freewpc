@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <eb.h>
 #include <steps_gate.h>
 #include <ramp_div.h>
 
@@ -108,6 +109,7 @@ CALLSET_ENTRY (steps, sw_step_extra_ball)
 		if (lamp_flash_test (LM_STEPS_EB))
 		{
 			lamp_off (LM_STEPS_EB);
+			light_easy_extra_ball ();
 		}
 	}
 }
@@ -119,6 +121,7 @@ CALLSET_ENTRY (steps, sw_step_500k)
 		if (lamp_flash_test (LM_STEPS_500K))
 		{
 			lamp_off (LM_STEPS_500K);
+			score (SC_500K);
 		}
 	}
 }

@@ -32,7 +32,8 @@ CALLSET_ENTRY (speech, start_game)
 
 CALLSET_ENTRY (speech, dev_lock_kick_request)
 {
-	say (SPCH_HEADS_UP);
+	if (in_live_game)
+		say (SPCH_HEADS_UP);
 }
 
 CALLSET_ENTRY (speech, add_player)
