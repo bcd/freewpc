@@ -363,7 +363,7 @@ wait_and_recount:
 	/************************************************
 	 * Handle counts larger than the device supports
 	 ************************************************/
-	if (dev->actual_count > dev->max_count)
+	if (dev->kicks_needed == 0 && dev->actual_count > dev->max_count)
 	{
 		/* When there are more balls in the device than we normally want
 		to keep here, we must kick one of them out.  If multiple kicks
@@ -387,7 +387,7 @@ wait_and_recount:
 			dbprintf ("Can't kick when no balls available!\n");
 			dev->kicks_needed = 0;
 		}
-		else if (kickout_locked_p ())
+		else if (kickout_locked_p () && !trough_dev_p (dev))
 		{
 			/* Container ready to kick, but 1 or more
 			 * locks are held so we must wait. */
@@ -802,6 +802,15 @@ void device_multiball_set (U8 count)
 	if (current_count < count)
 	{
 		U8 kicks = count - current_count;
+
+#ifndef MACHINE_LAUNCH_SOLENOID
+		if (kicks > 1)
+		{
+			dbprintf ("can't multi-kick trough without autoplunger\n");
+			kicks = 1;
+		}
+#endif
+
 		while (kicks > 0)
 		{
 			/* TODO - what if not all of them can come from the
