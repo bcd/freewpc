@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <lamptimer.h>
 
 /* CALLSET_SECTION (lamp_timer_test, __effect__) */
 
@@ -42,6 +43,7 @@ struct lamp_timer_data
 struct lamp_timer_effect_data
 {
 	struct lamp_timer_data *tdata;
+	leff_data_t leffdata;
 };
 
 
@@ -54,18 +56,24 @@ static void lamp_timer_effect_task (void)
 	struct lamp_timer_data *tdata;
 
 	edata = task_current_class_data (struct lamp_timer_effect_data);
+	edata->leffdata.flags = L_SHARED;
 	tdata = edata->tdata;
-	do {
-		lamp_toggle (tdata->lamp);
-		if (tdata->timer >= TIME_9S)
-			task_sleep (TIME_300MS);
-		else if (tdata->timer >= TIME_6S)
-			task_sleep (TIME_200MS);
-		else if (tdata->timer >= TIME_3S)
-			task_sleep (TIME_100MS);
-		else
-			task_sleep (TIME_50MS);
-	} while (tdata->timer != 0);
+
+	if (lamp_leff2_test_and_allocate (tdata->lamp))
+	{
+		do {
+			leff_toggle (tdata->lamp);
+			if (tdata->timer >= TIME_9S)
+				task_sleep (TIME_300MS);
+			else if (tdata->timer >= TIME_6S)
+				task_sleep (TIME_200MS);
+			else if (tdata->timer >= TIME_3S)
+				task_sleep (TIME_100MS);
+			else
+				task_sleep (TIME_50MS);
+		} while (tdata->timer != 0);
+		lamp_leff2_free (tdata->lamp);
+	}
 	task_exit ();
 }
 
@@ -88,8 +96,7 @@ static void lamp_timer_task (void)
 	}
 
 	tdata->timer = 0;
-	lamp_off (tdata->lamp);
-	task_kill_pid (tdata->effect);
+	task_sleep (TIME_500MS);
 	task_exit ();
 }
 
@@ -114,7 +121,7 @@ lamp_timer_find (lampnum_t lamp)
  * SECS is the number of seconds to start on the timer.
  */
 void
-lamp_timer_start (lampnum_t lamp, U8 secs)
+lamp_timer_start (struct lamptimer_args *args)
 {
 	task_pid_t tp;
 	struct lamp_timer_data *tdata;
@@ -126,8 +133,8 @@ lamp_timer_start (lampnum_t lamp, U8 secs)
 	/* Create a task to count down the timer */
 	tp = task_create_gid (GID_LAMP_TIMER, lamp_timer_task);
 	tdata = task_init_class_data (tp, struct lamp_timer_data);
-	tdata->lamp = lamp;
-	tdata->timer = (U16)secs * TIME_1S;
+	tdata->lamp = args->lamp;
+	tdata->timer = (U16)args->secs * TIME_1S;
 
 	/* Create a second task for the lamp effect itself */
 	tdata->effect = task_create_gid (GID_LAMP_TIMER_EFFECT, lamp_timer_effect_task);
@@ -151,8 +158,8 @@ lamp_timer_stop (lampnum_t lamp)
 	if (tp)
 	{
 		tdata = task_class_data (tp, struct lamp_timer_data);
-		task_kill_pid (tdata->effect);
-		lamp_off (tdata->lamp);
+		tdata->timer = 0;
+		task_sleep (TIME_500MS);
 		task_kill_pid (tp);
 	}
 }
