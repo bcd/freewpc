@@ -1,8 +1,6 @@
 
 #include <freewpc.h>
 
-typedef U8 min5_t;
-
 __local__ U8 clock_hour;
 
 __local__ min5_t clock_minute;

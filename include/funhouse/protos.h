@@ -37,8 +37,7 @@ __machine__ bool multiball_mode_running_p (void);
 
 __machine__ void say (U16 code);
 
-__machine__ void fh_clock_set (U8 hour, min5_t minute);
-__machine__ void fh_clock_advance_step (void);
+typedef U8 min5_t;
 
 #define CLK_5_MIN  1
 #define CLK_10_MIN 2
@@ -46,6 +45,9 @@ __machine__ void fh_clock_advance_step (void);
 #define CLK_20_MIN 4
 #define CLK_25_MIN 5
 #define CLK_30_MIN 6
+
+__machine__ void fh_clock_set (U8 hour, min5_t minute);
+__machine__ void fh_clock_advance_step (void);
 
 #define TIME_0_MIN  0
 #define TIME_15_MIN 3
