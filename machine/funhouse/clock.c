@@ -9,13 +9,6 @@ __local__ min5_t clock_minute;
 
 __local__ U8 clock_base_hour;
 
-#define TIME_0_MIN  0
-#define TIME_15_MIN 3
-#define TIME_30_MIN 6
-#define TIME_45_MIN 9
-
-__machine__ void light_lock (void);
-
 
 void fh_clock_update (void)
 {

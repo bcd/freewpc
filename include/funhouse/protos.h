@@ -11,8 +11,24 @@ __machine__ void rudy_blink (void);
 bool lock_lit_p (void);
 bool frenzy_lit_p (void);
 bool frenzy_running_p (void);
+__machine__ void light_lock (void);
 __machine__ bool multiball_mode_running_p (void);
 
 __machine__ void say (U16 code);
+
+#define CLK_5_MIN  1
+#define CLK_10_MIN 2
+#define CLK_15_MIN 3
+#define CLK_20_MIN 4
+#define CLK_25_MIN 5
+#define CLK_30_MIN 6
+
+#define TIME_0_MIN  0
+#define TIME_15_MIN 3
+#define TIME_30_MIN 6
+#define TIME_45_MIN 9
+
+__machine__ void fh_clock_set (U8 hour, min5_t minute);
+__machine__ void fh_clock_advance_step (void);
 
 #endif

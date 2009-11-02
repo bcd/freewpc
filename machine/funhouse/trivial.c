@@ -25,13 +25,6 @@
  * Trivial shot rules
  */
 
-#define CLK_5_MIN  1
-#define CLK_10_MIN 2
-#define CLK_15_MIN 3
-#define CLK_20_MIN 4
-#define CLK_25_MIN 5
-#define CLK_30_MIN 6
-
 __local__ U8 rudy_hits;
 
 static inline U8 decimal_to_bcd_byte (U8 decimal)

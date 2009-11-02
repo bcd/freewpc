@@ -505,6 +505,7 @@ void start_ball (void)
 
 	/* If timed game support is built-in and enabled, then
 	start a task to monitor the game time. */
+#ifdef CONFIG_TIMED_GAME
 	if (config_timed_game)
 	{
 		extern U8 switch_stress_enable;
@@ -513,6 +514,7 @@ void start_ball (void)
 		if (switch_stress_enable == NO)
 			task_create_gid1 (GID_TIMED_GAME_MONITOR, timed_game_monitor);
 	}
+#endif
 }
 
 
