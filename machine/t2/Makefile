@@ -43,7 +43,7 @@ ROM_PAGE_COUNT = 32
 #################################################
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 30
+MACHINE_MINOR = 31
 
 PINMAME_MACHINE = t2_l8
 
