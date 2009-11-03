@@ -29,10 +29,7 @@ void frenzy_running_deff (void)
 	for (;;)
 	{
 		seg_alloc_clean ();
-		if (flag_test (FLAG_SUPER_FRENZY_RUNNING))
-			seg_write_string (1, 0, "SUPER FRENZY");
-		else
-			seg_write_string (1, 0, "FRENZY");
+		seg_write_string (1, 0, "FRENZY");
 		sprintf ("%d SEC.", frenzy_timer);
 		seg_write_row_right (1, sprintf_buffer);
 		sprintf_score (frenzy_total);
