@@ -104,5 +104,4 @@ Uncategorized Machine Code
 ./test/adjust.c:/* TODO - these really belong in feature_config.  They are not being
 ./test/window.c:/* TODO - if no solenoids/flashers defined, solenoid_test_ok
 ./test/window.c:/* TODO - these two window ops are identical; we are only
-./test/window.c:	/* TODO : lamp_flasher_test_item */
 ./test/window.c:	/* TODO : ordered_lamp_test_item */

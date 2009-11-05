@@ -3348,6 +3348,12 @@ void all_lamp_test_thread (void)
 	}
 }
 
+void lamp_flasher_test_thread (void)
+{
+	task_create_peer (all_lamp_test_thread);
+	SECTION_VOIDCALL (__test2__, burnin_flasher_thread);
+}
+
 void all_lamp_test_init (void)
 {
 	browser_init ();
@@ -3367,6 +3373,21 @@ struct menu all_lamp_test_item = {
 	.name = "ALL LAMPS TEST",
 	.flags = M_ITEM,
 	.var = { .subwindow = { &all_lamp_test_window, NULL } },
+};
+
+struct window_ops lamp_flasher_test_window = {
+	INHERIT_FROM_BROWSER,
+	.thread = lamp_flasher_test_thread,
+	.init = all_lamp_test_init,
+	.exit = lamp_all_off,
+	.up = null_function,
+	.down = null_function,
+};
+
+struct menu lamp_flasher_test_item = {
+	.name = "LAMP/FLASHER",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &lamp_flasher_test_window, NULL } },
 };
 
 /*************** Lamp Row/Col Test ********************/
@@ -3647,7 +3668,7 @@ struct menu *test_menu_items[] = {
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,
-	/* TODO : lamp_flasher_test_item */
+	&lamp_flasher_test_item,
 #if (MACHINE_DMD == 1)
 	&display_test_item,
 #endif
