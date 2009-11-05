@@ -174,3 +174,37 @@ void rudy_hit_leff (void)
 }
 
 
+void high_score_leff_flashers (void)
+{
+	U8 n;
+	for (;;)
+	{
+		for (n=0 ; n < 4; n++)
+		{
+			flasher_pulse (FLASH_BLUE_FLASHERS);
+			task_sleep (TIME_100MS);
+			flasher_pulse (FLASH_RED_FLASHERS);
+			task_sleep (TIME_100MS);
+			flasher_pulse (FLASH_CLEAR_FLASHERS);
+			task_sleep (TIME_100MS);
+		}
+		task_sleep_sec (1);
+	}
+}
+
+void high_score_leff (void)
+{
+	triac_leff_enable (GI_ALL_ILLUMINATION);
+	triac_leff_dim (GI_FRONT_PLAYFIELD, 3);
+	triac_leff_dim (GI_REAR_PLAYFIELD, 3);
+	lamplist_apply_leff_alternating (LAMPLIST_PLAYFIELD, 0);
+	leff_create_peer (high_score_leff_flashers);
+	for (;;)
+	{
+		lamplist_apply (LAMPLIST_PLAYFIELD, leff_toggle);
+		flasher_pulse (FLASH_CLOCK_FLASHERS);
+		task_sleep (TIME_300MS);
+	}
+	leff_exit ();
+}
+
