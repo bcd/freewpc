@@ -32,6 +32,20 @@
 extern const struct area_csum audit_csum_info;
 
 
+/*
+ * Each timestamp is stored as a triple (hours, mins, secs).
+ * Define the limits for each of these fields.
+ * Minutes and seconds are self-explanatory; hours has an
+ * artificial limit to prevent overflow and to keep the
+ * display from becoming outrageous.  Also with this limit,
+ * two maxed-out timestamps could be added without causing
+ * further overflow.
+ */
+#define MAX_TS_HOUR 10000
+#define MAX_TS_MIN  60
+#define MAX_TS_SEC  60
+
+
 /**
  * Format a timestamp as text in the common buffer.
  */
@@ -45,25 +59,51 @@ void timestamp_clear (timestamp_t *t)
 	t->hr = t->min = t->sec = 0;
 }
 
-void timestamp_validate (timestamp_t *t)
+/**
+ * Verify that a timestamp is sane.
+ */
+bool timestamp_validate (timestamp_t *t)
 {
+	if (t->hr >= MAX_TS_HOUR)
+		return FALSE;
+	if (t->min >= MAX_TS_MIN)
+		return FALSE;
+	if (t->sec >= MAX_TS_SEC)
+		return FALSE;
+	return TRUE;
 }
 
+
+/**
+ * Normalize a timestamp, so that any minutes and seconds fields which
+ * are out of range are correctly, by carrying the excess into the
+ * next field.
+ */
 static void timestamp_normalize (timestamp_t *t)
 {
-	if (t->sec >= 60)
+	if (t->sec >= MAX_TS_SEC)
 	{
-		t->sec -= 60;
+		t->sec -= MAX_TS_SEC;
 		t->min++;
 	}
-	if (t->min >= 60)
+	if (t->min >= MAX_TS_MIN)
 	{
-		t->min -= 60;
+		t->min -= MAX_TS_MIN;
 		t->hr++;
+	}
+	if (t->hr >= MAX_TS_HOUR)
+	{
+		t->hr = 9999;
+		t->min = 59;
+		t->sec = 59;
 	}
 }
 
-void timestamp_add (timestamp_t *dst, timestamp_t *src)
+
+/**
+ * Add one timestamp into another.
+ */
+void timestamp_add (timestamp_t *dst, const timestamp_t *src)
 {
 	dst->hr += src->hr;
 	dst->min += src->min;
@@ -77,21 +117,25 @@ void timestamp_add (timestamp_t *dst, timestamp_t *src)
  */
 void timestamp_add_sec (timestamp_t *t, volatile U16 seconds)
 {
-	while (seconds >= 3600)
+	while (seconds >= MAX_TS_MIN * MAX_TS_SEC)
 	{
-		seconds -= 3600;
+		seconds -= MAX_TS_MIN * MAX_TS_SEC;
 		t->hr++;
 	}
-	while (seconds >= 60)
+	while (seconds >= MAX_TS_SEC)
 	{
-		seconds -= 60;
+		seconds -= MAX_TS_SEC;
 		t->min++;
 	}
 	t->sec += seconds;
 	timestamp_normalize (t);
 }
 
-void timestamp_copy (timestamp_t *dst, timestamp_t *src)
+
+/**
+ * Copy one timestamp to another.
+ */
+void timestamp_copy (timestamp_t *dst, const timestamp_t *src)
 {
 	dst->hr = src->hr;
 	dst->min = src->min;
