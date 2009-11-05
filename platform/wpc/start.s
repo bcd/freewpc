@@ -18,16 +18,10 @@
 ;;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ;;;
 
-STACK_BASE     = 6133
+#include <platform/wpc-mmap.h>
 
-;;; Hardware registers needed
-WPC_DEBUG_PORT = 0x3D60
-WPCS_CONTROL_STATUS = 0x3FDD
-WPC_LEDS       = 0x3FF2
-WPC_ROM_BANK   = 0x3FFC
-WPC_RAM_LOCK   = 0x3FFD
-WPC_RAM_LOCKSIZE = 0x3FFE
-WPC_WATCHDOG_REG = 0x3FFF
+STACK_BASE     = 6133
+WPC_WATCHDOG_REG = WPC_ZEROCROSS_IRQ_CLEAR
 WPC_RAM_UNLOCKED = 0xB4
 WPC_RAM_LOCK_2K = 0x1
 ; Writing a 6 here does not turn off blanking.
