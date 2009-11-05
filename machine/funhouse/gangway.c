@@ -99,6 +99,7 @@ static inline void gangway_light (task_gid_t gid, task_gid_t other_gid)
 void gangway_init (U8 spots)
 {
 	lamplist_apply (LAMPLIST_GANGWAYS, lamp_off);
+	lamplist_apply (LAMPLIST_GANGWAYS, lamp_flash_off);
 	gangway_count = spots;
 	while (spots > 0)
 	{

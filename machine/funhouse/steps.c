@@ -108,7 +108,7 @@ CALLSET_ENTRY (steps, sw_step_extra_ball)
 	{
 		if (lamp_flash_test (LM_STEPS_EB))
 		{
-			lamp_off (LM_STEPS_EB);
+			lamp_flash_off (LM_STEPS_EB);
 			light_easy_extra_ball ();
 		}
 	}
@@ -120,7 +120,7 @@ CALLSET_ENTRY (steps, sw_step_500k)
 	{
 		if (lamp_flash_test (LM_STEPS_500K))
 		{
-			lamp_off (LM_STEPS_500K);
+			lamp_flash_off (LM_STEPS_500K);
 			score (SC_500K);
 		}
 	}
@@ -132,7 +132,7 @@ CALLSET_ENTRY (steps, sw_steps_frenzy)
 	{
 		if (lamp_flash_test (LM_STEPS_FRENZY))
 		{
-			lamp_off (LM_STEPS_FRENZY);
+			lamp_flash_off (LM_STEPS_FRENZY);
 			flag_on (FLAG_FRENZY_LIT);
 			sample_start (SND_FRENZY_LIT, SL_2S);
 		}

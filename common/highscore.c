@@ -352,6 +352,9 @@ void high_score_enter_initials (U8 position)
 		/* Read the player's initials */
 		high_score_position = position;
 		deff_start_sync (DEFF_HSENTRY);
+#ifdef LEFF_HIGH_SCORE
+		leff_start (LEFF_HIGH_SCORE);
+#endif
 		SECTION_VOIDCALL (__common__, initials_enter);
 
 		/* Save the initials to table entry */
@@ -369,7 +372,6 @@ void high_score_enter_initials (U8 position)
 		{
 			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
 		}
-
 		deff_start_sync (DEFF_HSCREDITS);
 	}
 }
@@ -402,6 +404,9 @@ void high_score_check (void)
 	high_score_enter_initials (2);
 	high_score_enter_initials (1);
 	high_score_enter_initials (0);
+#ifdef LEFF_HIGH_SCORE
+	leff_stop (LEFF_HIGH_SCORE);
+#endif
 }
 
 

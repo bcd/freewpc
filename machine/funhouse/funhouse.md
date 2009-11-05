@@ -448,6 +448,7 @@ Shooter: PRI_LEFF2, page(MACHINE_PAGE)
 Superdog Score: PRI_LEFF3, page(MACHINE_PAGE)
 Midnight: PRI_LEFF4, LAMPS(PLAYFIELD), GI(ALL), page(MACHINE_PAGE)
 Rudy Hit: PRI_LEFF2, page(MACHINE_PAGE)
+High Score: runner, PRI_LEFF4, LAMPS(PLAYFIELD), GI(ALL), page(MACHINE_PAGE)
 
 [timers]
 Tunnel Entered:

@@ -63,14 +63,13 @@ static void lamp_timer_effect_task (void)
 	{
 		do {
 			leff_toggle (tdata->lamp);
+			task_sleep (TIME_50MS);
 			if (tdata->timer >= TIME_9S)
-				task_sleep (TIME_300MS);
-			else if (tdata->timer >= TIME_6S)
-				task_sleep (TIME_200MS);
-			else if (tdata->timer >= TIME_3S)
 				task_sleep (TIME_100MS);
-			else
-				task_sleep (TIME_50MS);
+			if (tdata->timer >= TIME_6S)
+				task_sleep (TIME_100MS);
+			if (tdata->timer >= TIME_3S)
+				task_sleep (TIME_100MS);
 		} while (tdata->timer != 0);
 		lamp_leff2_free (tdata->lamp);
 	}

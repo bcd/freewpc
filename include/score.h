@@ -135,8 +135,6 @@ void score_multiplier_set (U8 m);
 void scores_reset (void);
 void score_init (void);
 
-#define score_add_current score_award
-
 extern inline void score_10K (U8 count)
 {
 	score_award_compact (3, count);

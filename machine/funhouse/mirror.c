@@ -109,12 +109,12 @@ void mirror_move (void)
 
 static inline bool mirror_qualified_p (void)
 {
-	return flag_test (FLAG_MIRROR_LIT) && !flag_test (FLAG_MIRROR_COMPLETE);
+	return flag_test (FLAG_MIRROR_LIT);
 }
 
 static inline bool mirror_masked_p (void)
 {
-	return multiball_mode_running_p ();
+	return multiball_mode_running_p () && !flag_test (FLAG_MIRROR_COMPLETE);
 }
 
 static bool mirror_lit_p (void)
