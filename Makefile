@@ -781,10 +781,12 @@ $(PAGE_HEADER_OBJS) : $(BLDDIR)/page%.o : $(BLDDIR)/page%.s $(CC)
 #    only GCC; this tells the code itself.  Ideally, GCC would define
 #    something for us (another TODO))
 #
+# Also TODO - EFFECT_OBJS is not a candidate for soft registers because GCC
+# is crashing on sound_effect.c
 
 ifeq ($(CPU),m6809)
 $(FON_OBJS): PAGEFLAGS="-Dstatic=__attribute__((section(\"page$(PAGE)\")))"
-$(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS) $(INIT_OBJS) $(TEST2_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
+$(BASIC_OBJS) $(KERNEL_SW_OBJS) $(COMMON_OBJS) $(INIT_OBJS) $(MACHINE_PAGED_OBJS) $(TEST2_OBJS): SOFTREG_CFLAGS=$(SOFTREG_OPTIONS)
 endif
 
 $(NATIVE_OBJS) $(C_OBJS) : %.o : %.c
