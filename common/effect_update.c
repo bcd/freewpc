@@ -84,7 +84,7 @@ void effect_update_request (void)
  */
 CALLSET_ENTRY (effect_update, idle_every_100ms, start_ball, end_ball)
 {
-	if (!in_test)
+	if (sys_init_complete && !in_test)
 	{
 		/* Update devices frequently */
 		if (in_game && !ball_search_timed_out ())
