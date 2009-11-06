@@ -27,6 +27,18 @@ enum trap_door_state {
 	DISABLED,
 } trap_door_state;
 
+__local__ U8 trap_door_bonuses;
+
+const score_id_t trap_door_bonus_scores[] = {
+	SC_250K, SC_500K, SC_750K
+};
+const struct generic_ladder trap_door_bonus_score_rule = {
+	3,
+	trap_door_bonus_scores,
+	&trap_door_bonuses,
+};
+
+
 
 static enum trap_door_state trap_door_decide (void)
 {
@@ -83,4 +95,9 @@ CALLSET_ENTRY (trapdoor, ball_search)
 	trapdoor_device_update ();
 }
 
+
+CALLSET_ENTRY (trapdoor, start_player)
+{
+	trap_door_bonuses = 0;
+}
 

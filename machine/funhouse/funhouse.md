@@ -423,6 +423,8 @@ Outlanes Lit:
 [deffs]
 Mirror Collect: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
 Bonus: page(MACHINE_PAGE), PRI_BONUS
+Gangway Collect: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_SCORE
+Gangway EB Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
 QuickMB Started: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_PAUSE
 QuickMB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE3
 QuickMB Score: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_SCORE
