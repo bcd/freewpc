@@ -32,6 +32,7 @@ __machine__ bool lock_lit_p (void);
 __machine__ bool frenzy_lit_p (void);
 __machine__ bool frenzy_running_p (void);
 __machine__ void frenzy_start (void);
+__machine__ void frenzy_collect (void);
 __machine__ void super_frenzy_start (void);
 __machine__ bool multiball_mode_running_p (void);
 
