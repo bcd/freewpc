@@ -104,7 +104,7 @@ __test2__ void timestamp_add (timestamp_t *dst, const timestamp_t *src);
 __test2__ void timestamp_add_sec (timestamp_t *t, U16 seconds);
 __test2__ void timestamp_copy (timestamp_t *dst, const timestamp_t *src);
 __test2__ void timestamp_divide (timestamp_t *t, U16 n);
-__test2__ void timestamp_format_per_ball (timestamp_t *t);
-__test2__ void timestamp_format_per_credit (timestamp_t *t);
+__test2__ void timestamp_format_per_ball (const timestamp_t *t);
+__test2__ void timestamp_format_per_credit (const timestamp_t *t);
 
 #endif /* _STDADJ_H */
