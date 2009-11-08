@@ -69,4 +69,3 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = amode.o targets.o drop.o misc.o
 
-GAME_FSMS = 
