@@ -591,8 +591,8 @@ post_compile :
 ifndef REMOTE_PATH
 $(BLDDIR)/$(GAME_ROM) : $(BLDDIR)/blank$(BLANK_SIZE).bin $(BINFILES) $(IMAGE_ROM) $(CSUM)
 	$(Q)echo Padding ... && \
-		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@
-	$(Q)echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
+		cat $(BLDDIR)/blank$(BLANK_SIZE).bin $(PAGED_BINFILES) $(SYSTEM_BINFILE) > $@ && \
+		echo "Updating ROM checksum ..." && $(CSUM) -f $@ -v 0x$(SYSTEM_MINOR) -u
 ifdef IMAGE_MAP
 	$(Q)echo "Importing image ROM ..." && dd if=$(IMAGE_ROM) of=$(BLDDIR)/$(GAME_ROM) conv=notrunc
 endif
@@ -614,9 +614,9 @@ $(BLDDIR)/blank%.bin: $(BLDDIR)/blankpage.bin
 	$(Q)echo "Creating $*KB blank file ..." && $(BLANKER) if=$(BLDDIR)/blankpage.bin of=$@ bs=1k count=$* > /dev/null 2>&1
 
 $(BLDDIR)/blankpage.bin: $(SR)
-	$(Q)echo "Creating blank 32KB page ..." && $(SR) -o $@.1 -l 0x8000 -f 0xFF -B
-	$(Q)(for ((a=0; a < 32; a++)); do cat $@.1; done ) > $@
-	$(Q)rm -f $@.1
+	$(Q)echo "Creating blank 32KB page ..." && $(SR) -o $@.1 -l 0x8000 -f 0xFF -B && \
+		(for ((a=0; a < 32; a++)); do cat $@.1; done ) > $@ && \
+		rm -f $@.1
 
 
 #
@@ -717,8 +717,7 @@ $(BLDDIR)/freewpc.s:
 # How to build a page header source file.
 #
 $(BLDDIR)/page%.s:
-	$(Q)echo ".area page$*" >> $@
-	$(Q)echo ".db $*" >> $@
+	$(Q)echo ".area page$*" >> $@ && echo ".db $*" >> $@
 
 #
 # How to make the linker command file for the system section.
@@ -952,12 +951,12 @@ endif
 # 'mach' and 'include/mach' without knowing the specific machine type.
 #
 .mach:
-	$(Q)echo "Setting symbolic link for machine source code..."
-	$(Q)touch .mach && ln -s $(MACHINE_DIR) mach
+	$(Q)echo "Setting symbolic link for machine source code..." && \
+		touch .mach && ln -s $(MACHINE_DIR) mach
 
 .include_mach:
-	$(Q)echo "Setting symbolic link for machine include files..."
-	$(Q)touch .include_mach && cd include && ln -s $(MACHINE) mach
+	$(Q)echo "Setting symbolic link for machine include files..." && \
+		touch .include_mach && cd include && ln -s $(MACHINE) mach
 
 #
 # Remake machine prototypes file.  This never happens by default.
