@@ -55,7 +55,7 @@ Within a section, you declare items that fit that category.  All
 declarations take this form:
 
 @example
-@var{key}: @var{property1}, [@var{property2}...]
+@var{key}: @var{property1} [, @var{property2}...]
 @end example
 
 A declaration begins with a key, followed by a colon, followed by a comma-
@@ -84,8 +84,11 @@ An example:
 @end example
 
 The key, 14, identifies which switch is being described.  For switches and
-lamps, the key is given as a pair of column/row digits.  The first property,
-Tilt, gives it a name.  Everything else identifies properties of the switch.
+lamps, the key is given as a pair of column/row digits, as it would be listed
+in the game manual.  The first property, Tilt, gives it a name.
+This is used to generate the defines and strings related to the switch.
+
+Everything else identifies the properties of the switch.
 Different types of objects will have different properties.  Here, we say three
 things: (1) it is an instance of a well-known switch class, called 'tilt';
 this ties it directly to system code for processing tilts automatically.
