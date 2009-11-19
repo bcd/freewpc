@@ -239,6 +239,33 @@ void hsentry_deff (void)
 
 void hscredits_deff (void)
 {
+	U8 credits;
+
+	dmd_alloc_low_clean ();
+
+	if (high_score_position == 0)
+	{
+		sprintf ("GRAND CHAMPION");
+		credits = hstd_config.champion_credits;
+	}
+	else
+	{
+		sprintf ("HIGH SCORE %d", high_score_position);
+		credits = hstd_config.hstd_credits[high_score_position-1];
+	}
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+
+	if (credits > 0)
+	{
+		if (credits > 1)
+			sprintf ("AWARD %d CREDITS", credits);
+		else
+			sprintf ("AWARD %d CREDIT", credits);
+		font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
+	}
+
+	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 

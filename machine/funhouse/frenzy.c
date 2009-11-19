@@ -104,6 +104,22 @@ void super_frenzy_start (void)
 }
 
 
+void frenzy_collect (void)
+{
+	seg_alloc_clean ();
+	seg_sched_transition (&seg_trans_ltr);
+	seg_write_string (0, 0, "FRENZY");
+	sprintf_score (frenzy_total);
+	seg_write_string (1, 8, sprintf_buffer);
+	seg_show ();
+	score_long (frenzy_total);
+	task_sleep_sec (1);
+	seg_alloc_clean ();
+	scores_draw ();
+	seg_show ();
+}
+
+
 CALLSET_ENTRY (frenzy, display_update)
 {
 	if (frenzy_timer > 0)

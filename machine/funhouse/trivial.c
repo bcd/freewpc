@@ -79,6 +79,8 @@ void bonus_deff (void)
 		hits++;
 	}
 
+	frenzy_collect ();
+
 	task_sleep_sec (1);
 	music_enable ();
 	deff_exit ();

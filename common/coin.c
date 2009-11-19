@@ -187,9 +187,10 @@ void lamp_start_update (void)
  */
 void announce_credits (void)
 {
+	if (in_test)
+		return;
 #ifdef DEFF_CREDITS
-	if (in_game || deff_get_active () == DEFF_AMODE)
-		deff_restart (DEFF_CREDITS);
+	deff_restart (DEFF_CREDITS);
 #endif
 }
 

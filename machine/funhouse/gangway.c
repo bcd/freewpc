@@ -19,25 +19,19 @@
  */
 
 #include <freewpc.h>
+#include <eb.h>
 
-__local__ U8 trap_door_bonuses;
-
-const score_id_t trap_door_bonus_scores[] = {
-	SC_250K, SC_500K, SC_750K
-};
-const struct generic_ladder trap_door_bonus_score_rule = {
-	3,
-	trap_door_bonus_scores,
-	&trap_door_bonuses,
-};
+#define NUM_GANGWAY_AWARDS 6
 
 __local__ U8 gangway_count;
 
+U8 gangway_eb_lit_this_ball;
+
 const score_id_t gangway_scores[] = {
-	SC_75K, SC_100K, SC_150K, SC_200K, SC_250K
+	SC_75K, SC_100K, SC_150K, SC_200K, SC_250K, SC_250K,
 };
 const struct generic_ladder gangway_score_rule = {
-	5,
+	NUM_GANGWAY_AWARDS,
 	gangway_scores,
 	&gangway_count,
 };
@@ -45,6 +39,25 @@ const struct generic_ladder gangway_score_rule = {
 
 void gangway_collect_deff (void)
 {
+	seg_alloc_clean ();
+	seg_write_row_center (0, "GANGWAY");
+	sprintf_score (score_deff_get ());
+	seg_write_row_center (1, sprintf_buffer);
+	seg_sched_transition (&seg_trans_center_out);
+	seg_show ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+void gangway_eb_lit_deff (void)
+{
+	seg_alloc_clean ();
+	seg_write_row_center (0, "GANGWAY");
+	seg_write_row_center (1, "EXTRA BALL LIT");
+	seg_sched_transition (&seg_trans_center_out);
+	seg_show ();
+	task_sleep_sec (2);
+	deff_exit ();
 }
 
 bool gangway_available_p (void)
@@ -59,10 +72,20 @@ void gangway_loop_lit (void)
 
 void gangway_loop_collected (void)
 {
-	sample_start (SND_WHEEEE, SL_1S);
-	lamp_tristate_on (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
-	generic_ladder_score_and_advance (&gangway_score_rule);
-	lamp_tristate_flash (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
+	if (gangway_count == 5 && !gangway_eb_lit_this_ball)
+	{
+		gangway_eb_lit_this_ball = TRUE;
+		light_hard_extra_ball ();
+		deff_start (DEFF_GANGWAY_EB_LIT);
+	}
+	else
+	{
+		sample_start (SND_WHEEEE, SL_1S);
+		lamp_tristate_on (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
+		generic_ladder_score_and_advance (&gangway_score_rule);
+		deff_start (DEFF_GANGWAY_COLLECT);
+		lamp_tristate_flash (lamplist_index (LAMPLIST_GANGWAYS, gangway_count));
+	}
 }
 
 
@@ -140,7 +163,6 @@ CALLSET_ENTRY (gangway, lamp_update)
 CALLSET_ENTRY (gangway, start_player)
 {
 	gangway_init (2);
-	trap_door_bonuses = 0;
 }
 
 CALLSET_ENTRY (gangway, start_ball)
@@ -149,5 +171,6 @@ CALLSET_ENTRY (gangway, start_ball)
 	{
 		gangway_init (0);
 	}
+	gangway_eb_lit_this_ball = FALSE;
 }
 
