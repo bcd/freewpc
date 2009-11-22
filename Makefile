@@ -846,9 +846,10 @@ $(CONFIG_FILES) : tools/genmachine $(PLATFORM_DESC)
 #######################################################################
 
 ifdef IMAGE_MAP
+IMAGE_AREA_SIZE ?= $(BLANK_SIZE)
 $(IMAGE_ROM) $(IMAGE_HEADER): $(IMAGE_MAP) $(IMGLD)
 	$(IMGLD) -o $(IMAGE_ROM) -i $(IMAGE_HEADER) -p $(FIRST_BANK) \
-		-s $(BLANK_SIZE) $(IMAGE_MAP)
+		-s $(IMAGE_AREA_SIZE) $(IMAGE_MAP)
 else
 $(IMAGE_HEADER):
 	touch $(IMAGE_HEADER)
