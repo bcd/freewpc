@@ -32,9 +32,8 @@
  * index the table and get a pointer to the image data.  These pointers
  * are all 3-bytes long, stored as pointer/ROM page pairs.
  *
- * Optimization is not yet implemented completely, but here's what should
- * happen:  The basic input image format is PGM, which is a simple
- * bitmap format with 256 colors per pixel.  Frames are expected to be
+ * The basic input image format is PGM, which is a simple bitmap
+ * format with 256 colors per pixel.  Frames are expected to be
  * in 128x32 size already.  When not optimizing, at a minimum, the
  * image needs to be converted into two, 128x32 joined buffers.  This
  * is the format that can be sent directly to the dot matrix board.
@@ -56,10 +55,9 @@
  * necessary: as long as there is ample space, it does not make sense
  * to compress.  If multiple codecs are available, then all should be
  * attempted and the one that matches the performance requirements the
- * best should be selected.  Images should also allowed to be tagged
- * to denote those
+ * best should be selected.  Images can also be tagged to denote those
  * where runtime performance is especially critical -- those would be
- * compressed *last*.  The linker would continue to compress until
+ * compressed *last*.  The linker continues to compress until
  * everything fits.  Then it builds the table and outputs the final image.
  *
  * The output is placed in a file dedicated for images.  A separate part
@@ -90,7 +88,7 @@ do { \
 
 
 enum image_format {
-	FORMAT_BAD, FORMAT_XBM, FORMAT_PGM, FORMAT_FIF
+	FORMAT_BAD, FORMAT_PGM, FORMAT_FIF
 };
 
 
@@ -141,7 +139,7 @@ struct frame
 	unsigned long addr;
 };
 
-
+/** The master list of all frames */
 unsigned int frame_count = 0;
 struct frame frame_array[MAX_FRAMES];
 
@@ -192,9 +190,7 @@ enum image_format get_file_format (const char *filename)
 		return FORMAT_BAD;
 
 	sep++;
-	if (!strcmp (sep, "xbm"))
-		return FORMAT_XBM;
-	else if (!strcmp (sep, "pgm"))
+	if (!strcmp (sep, "pgm"))
 		return FORMAT_PGM;
 	else if (!strcmp (sep, "fif"))
 		return FORMAT_FIF;
@@ -229,6 +225,9 @@ unsigned long round_up_to_page (unsigned long offset, unsigned int size)
 }
 
 
+/**
+ * Converts a linear offset into a target pointer.
+ */
 void convert_to_target_pointer (unsigned long offset, unsigned char pointer[])
 {
 	/* Compute the offset and page components */
@@ -438,7 +437,9 @@ void add_image (const char *label, const char *filename, unsigned int options)
 		buffer_read_pgm (buf, imgfile);
 	}
 	else if (format == FORMAT_FIF)
+	{
 		buf = binary_fif_read (filename);
+	}
 	else
 		error ("invalid image format\n");
 
