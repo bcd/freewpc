@@ -44,7 +44,7 @@ extern const struct area_csum audit_csum_info;
 #define MAX_TS_HOUR 1000
 #define MAX_TS_MIN  60
 #define MAX_TS_SEC  60
-
+#define MAX_SECS_PER_HOUR 3600UL
 
 /**
  * Format a timestamp as text in the common buffer.
@@ -54,10 +54,15 @@ void timestamp_format (timestamp_t *t)
 	sprintf ("%ld:%02d:%02d", t->hr, t->min, t->sec);
 }
 
+
+/**
+ * Reset a timestamp to 00:00:00.
+ */
 void timestamp_clear (timestamp_t *t)
 {
 	t->hr = t->min = t->sec = 0;
 }
+
 
 /**
  * Verify that a timestamp is sane.
@@ -117,9 +122,9 @@ void timestamp_add (timestamp_t *dst, const timestamp_t *src)
  */
 void timestamp_add_sec (timestamp_t *t, volatile U16 seconds)
 {
-	while (seconds >= MAX_TS_MIN * MAX_TS_SEC)
+	while (seconds >= MAX_SECS_PER_HOUR)
 	{
-		seconds -= MAX_TS_MIN * MAX_TS_SEC;
+		seconds -= MAX_SECS_PER_HOUR;
 		t->hr++;
 	}
 	while (seconds >= MAX_TS_SEC)
@@ -217,6 +222,10 @@ void timestamp_format_per_credit (const timestamp_t *t)
 }
 
 
+/**
+ * At the end of each player's game, take the total game time for that
+ * player and add it to the total game time audit.
+ */
 CALLSET_ENTRY (timestamp, end_player)
 {
 	extern U16 game_time;
