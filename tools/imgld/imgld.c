@@ -94,39 +94,71 @@ enum image_format {
 };
 
 
-
 /**
- * Stores everything you need to know about an image.  TODO
+ * Stores everything you need to know about an image.
  */
-struct image
+struct frame
 {
 	/* The raw, uncompressed format of the image.
 	 * This is a type 0, joined buffer that is suitable for
-	 * direct dumping to the display. */
-	struct buffer *raw;
+	 * direct dumping to the display.
+	 */
+	struct buffer *rawbuf;
 
-	struct buffer *compressed;
+	/* The best version of the image calculated so far.
+	 * Initially this is the same as rawbuf, but if an encoder
+	 * is tried and it does well, it will be used instead.
+	 */
+	struct buffer *curbuf;
 
-	/* The preferred representation */
-	struct buffer *buf;
+	/*
+	 * The image type for curbuf.
+	 */
+	U8 type;
+
+	/*
+	 * The optional label name assigned to this frame.
+	 */
+   const char *name;
+
+	/*
+	 * The 'cost' of displaying this frame, in terms of the CPU power
+	 * available when it is being rendered.  A lower cost means that
+	 * the CPU is more likely to be idle when it is shown, and so it
+	 * can afford to be compressed more.  Likewise, a high cost means
+	 * that the CPU will be busy and it should not be compressed.
+	 *
+	 * The default cost is zero, which means average.  Negative cost
+	 * can be set for frames that are infrequent; positive cost for the
+	 * more difficult times.
+	 */
+	int cost;
+
+	/*
+	 * The starting address for this frame, as an offset from the
+	 * start of the image area.
+	 */
+	unsigned long addr;
 };
 
 
-struct buffer *frame_table[MAX_FRAMES];
-struct buffer *rle_frame_table[MAX_FRAMES];
-struct buffer *sparse_frame_table[MAX_FRAMES];
-
 unsigned int frame_count = 0;
+struct frame frame_array[MAX_FRAMES];
 
+/** The file handle for writing the imagemap.h */
 FILE *lblfile;
 
+/** The file handle for writing the encoded image data */
 FILE *outfile;
 
+/** The default first ROM page used for images.  This can be
+changed with the -p option. */
 unsigned int base_page = 0x20;
 
 /* By default, images may use up to 64KB.  This can be increased
 with the -s option. */
 unsigned long max_rom_size = 65536;
+
 
 /**
  * Target properties are used to describe things specific
@@ -183,34 +215,184 @@ void emit_label (const char *label, unsigned int no)
 }
 
 
+/**
+ * Returns offset if an object is of SIZE can be placed there without
+ * crossing a page boundary.  Otherwise, returns the address of to the
+ * next page.
+ */
+unsigned long round_up_to_page (unsigned long offset, unsigned int size)
+{
+	if ((offset / target_props->page_size) == ((offset + size) / target_props->page_size))
+		return offset;
+	else
+		return ((offset / target_props->page_size) + 1) * target_props->page_size;
+}
+
+
+void convert_to_target_pointer (unsigned long offset, unsigned char pointer[])
+{
+	/* Compute the offset and page components */
+	unsigned int target_offset = (offset % target_props->page_size) + target_props->page_base;
+	unsigned int target_page = (offset / target_props->page_size) + base_page;
+
+	/* Store these into the target pointer */
+	pointer[0] = target_offset >> 8;
+	pointer[1] = target_offset & 0xFF;
+	pointer[2] = target_page;
+}
+
+
+/**
+ * Return the total length of a frame including headers.
+ * All frames require an extra byte to say how it was encoded.
+ * Frames that are not full-sized require 2 bytes to give the
+ * dimensions.
+ */
+unsigned int frame_length_with_header (struct buffer *buf)
+{
+	unsigned int len = buf->len + 1;
+	if (buf->type & TYPE_BITMAP)
+		len += 2;
+	return len;
+}
+
+
+/**
+ * A list of encoding functions.  Each takes an uncompressed joined
+ * bitmap, 512 bytes in length, and returns a new buffer that contains
+ * the encoded version.
+ */
+typedef struct buffer *(*encoder_t) (struct buffer *);
+encoder_t encoder_list[] = {
+	buffer_rle_encode,
+	buffer_sparse_encode,
+};
+
+
+/**
+ * Check if frames need to be compressed, and if so, systematically compress
+ * them until everything fits.
+ */
+void compress_frames (void)
+{
+	struct frame *frame, *aframe;
+	int i;
+	unsigned long total_size;
+	struct buffer *newbuf;
+
+	/* Calculate the total size of ROM space needed */
+	total_size = (frame_count+1) * 3;
+	for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
+		total_size += frame->curbuf->len + 1;
+
+	/* Compress until everything fits: */
+	while (total_size > max_rom_size)
+	{
+		//printf ("Total size = %05X, ROM holds %05X\n", total_size, max_rom_size);
+
+		/* Find the uncompressed frame with lowest cost */
+		aframe = NULL;
+		for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
+			if (frame->type == 0 &&
+				!(frame->curbuf->type & TYPE_BITMAP) &&
+				(frame->cost < (aframe ? aframe->cost : 999)))
+			{
+				aframe = frame;
+			}
+		//printf ("Will try to compress frame #%d\n", aframe - frame_array);
+
+		/* If everything has been compressed already, and we don't fit still, then
+		just give up */
+		if (aframe == NULL)
+			error ("out of space after compression");
+
+		/* Try all compression methods.  Take the best one, or none at all
+		if compression fails in all cases */
+		for (i=0; i < sizeof (encoder_list) / sizeof (encoder_t); i++)
+		{
+			newbuf = encoder_list[i] (aframe->rawbuf);
+			if (newbuf->len < aframe->curbuf->len)
+			{
+				/* printf ("Encoder %d reduces size from %d to %d\n", i,
+					aframe->curbuf->len, newbuf->len); */
+				newbuf->type |= aframe->rawbuf->type;
+				aframe->type = i+1;
+				aframe->curbuf = newbuf;
+			}
+			else
+			{
+				/* printf ("Encoder %d gave %d bytes, ignoring\n", i, newbuf->len); */
+				buffer_free (newbuf);
+			}
+		}
+
+		/* Adjust total size, by examining difference between original buffer
+		size and the compressed buffer size */
+		total_size -= (aframe->rawbuf->len - aframe->curbuf->len);
+	}
+}
+
+
+/**
+ * Assign a linear start address to each frame.
+ */
+void assign_addresses (void)
+{
+	struct frame *frame;
+	int i;
+	unsigned int addr;
+
+	/* The address of the first image start just beyond the image table header */
+	addr = (frame_count+1) * 3;
+	for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
+	{
+		unsigned int len = frame_length_with_header (frame->curbuf);
+		frame->addr = round_up_to_page (addr, len);
+		//printf ("Frame %d addr = %05lX\n", i, frame->addr);
+		addr = frame->addr + len;
+	}
+}
+
+
+/**
+ * Add a new frame.
+ */
 void add_frame (const char *label, struct buffer *buf)
 {
-	if (buf->len == FRAME_BYTE_SIZE)
-	{
-		rle_frame_table[frame_count] = buffer_rle_encode (buf);
-		sparse_frame_table[frame_count] = buffer_sparse_encode (buf);
+	struct frame *frame;
 
-//#define COMPRESS_IT
-#ifdef COMPRESS_IT
-		frame_table[frame_count] = sparse_frame_table[frame_count];
-#else
-		frame_table[frame_count] = buf;
-#endif
-	}
-
+	/* If a label was given, go ahead and write that to the
+	imagemap.h file */
 	if (label)
 		emit_label (label, frame_count);
+
+	/* Save the buffer into the frame table */
+	frame = &frame_array[frame_count];
+	frame->rawbuf = buf;
+	frame->curbuf = buf;
+	frame->type = 0;
+	frame->name = NULL;
+	frame->cost = 0;
+	frame->addr = 0;
 	frame_count++;
 }
 
+
+/**
+ * Return the Nth plane of a PGM image.
+ */
 struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 {
 	unsigned int level, off;
 	struct buffer *planebuf;
 
 	planebuf = buffer_clone (buf);
+
 	for (off = 0; off < planebuf->len; off++)
 	{
+		/* Each byte in the image contains an intensity value ranging from
+		0 to 255.  For FreeWPC images, these need to be scaled down
+		to one of 4 levels (0-3). */
 		if (buf->data[off] <= 25 * 0xFF / 100)
 			level = 0;
 		else if (buf->data[off] <= 50 * 0xFF / 100)
@@ -219,14 +401,22 @@ struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 			level = 2;
 		else
 			level = 3;
+
+		/* Set the data byte to a '1' if the level is enabled in this plane,
+		or '0' otherwise. */
 		planebuf->data[off] = (level & (1 << plane)) ? 1 : 0;
 	}
 
+	/* Convert to a joined buffer, in which the bits are tightly compressed,
+	8 pixels to 1 byte */
 	planebuf = buffer_replace (planebuf, buffer_joinbits (planebuf));
 	return planebuf;
 }
 
 
+/**
+ * Add a new image file to the frame list.
+ */
 void add_image (const char *label, const char *filename, unsigned int options)
 {
 	FILE *imgfile;
@@ -234,14 +424,14 @@ void add_image (const char *label, const char *filename, unsigned int options)
 	int plane;
 	enum image_format format;
 
-
-	/* Read the PGM into a bitmap */
+	/* Open the image file */
 	imgfile = fopen (filename, "r");
 	if (!imgfile)
 		error ("can't open image file '%s'\n", filename);
 
+	/* See what format the file is in.  For now, only PGM is supported.
+	Read the image into a bitmap buffer. */
 	format = get_file_format (filename);
-
 	if (format == FORMAT_PGM)
 	{
 		buf = buffer_alloc (FRAME_BYTE_SIZE);
@@ -272,62 +462,32 @@ void add_image (const char *label, const char *filename, unsigned int options)
 		add_frame (!plane ? label : NULL, planebuf);
 	}
 
+	/* Free the original image buffer */
 	buffer_free (buf);
 }
 
 
 /**
- * Returns offset if an object is of SIZE can be placed there without
- * crossing a page boundary.  Otherwise, returns the address of to the
- * next page.
+ * Write all images to the output file.
  */
-unsigned long round_up_to_page (unsigned long offset, unsigned int size)
-{
-	if ((offset / target_props->page_size) == ((offset + size) / target_props->page_size))
-		return offset;
-	else
-		return ((offset / target_props->page_size) + 1) * target_props->page_size;
-}
-
-
-void convert_to_target_pointer (unsigned long offset, unsigned char pointer[])
-{
-	/* Compute the offset and page components */
-	unsigned int target_offset = (offset % target_props->page_size) + target_props->page_base;
-	unsigned int target_page = (offset / target_props->page_size) + base_page;
-
-	/* Store these into the target pointer */
-	pointer[0] = target_offset >> 8;
-	pointer[1] = target_offset & 0xFF;
-	pointer[2] = target_page;
-}
-
-
-unsigned int frame_length_with_header (struct buffer *buf)
-{
-	unsigned int len = buf->len + 1;
-	if (buf->type & TYPE_BITMAP)
-		len += 2;
-	return len;
-}
-
-
 void write_output (const char *filename)
 {
-	unsigned int frame;
+	unsigned int frameno;
 	unsigned long offset;
 	struct buffer *buf;
 	unsigned char target_pointer[3];
 	unsigned char padding = 0xFF;
+	struct frame *frame;
 
+	/* Open the file for output */
 	outfile = fopen (filename, "w");
 	if (!outfile)
 		error ("can't open output file '%s'\n", filename);
 
 	/* Write the frame table header. */
-	for (frame = 0, offset = (frame_count + 1) * 3, buf = frame_table[0];
-		frame < frame_count;
-		frame++, offset += frame_length_with_header (buf), buf = frame_table[frame])
+	for (frameno = 0, offset = (frame_count + 1) * 3, frame = frame_array, buf = frame->curbuf;
+		frameno < frame_count;
+		frameno++, offset += frame_length_with_header (buf), frame++, buf = frame->curbuf)
 	{
 		/* Round up to the next page boundary if the image doesn't
 		 * completely fit in the current page. */
@@ -338,23 +498,15 @@ void write_output (const char *filename)
 		convert_to_target_pointer (offset, target_pointer);
 		fwrite (target_pointer, sizeof (target_pointer), 1, outfile);
 
-		if (frame == 0)
+		if (frameno == 0)
 		{
 			fprintf (lblfile, "\n#define IMAGEMAP_BASE 0x%04X\n", target_props->page_base);
 			fprintf (lblfile, "#define IMAGEMAP_PAGE 0x%02X\n", base_page);
 		}
 
 		fprintf (lblfile, "/* %d: %02X/%02X%02X, type %02X, len %d (%d x %d) */\n",
-			frame, target_pointer[2], target_pointer[0], target_pointer[1],
+			frameno, target_pointer[2], target_pointer[0], target_pointer[1],
 			buf->type, buf->len, buf->width, buf->height);
-
-		if (rle_frame_table[frame])
-			fprintf (lblfile, "   /* RLE encoded version has len %d */\n",
-				rle_frame_table[frame]->len);
-
-		if (sparse_frame_table[frame])
-			fprintf (lblfile, "   /* Sparse encoded version has len %d */\n",
-				sparse_frame_table[frame]->len);
 	}
 
 	/* Write a NULL pointer at the end of the table.  Not strictly needed anymore,
@@ -364,9 +516,9 @@ void write_output (const char *filename)
 
 
 	/* Write the frame table data */
-	for (frame = 0, offset = frame_count * sizeof (target_pointer), buf = frame_table[0];
-		frame < frame_count;
-		frame++, offset += frame_length_with_header (buf), buf = frame_table[frame])
+	for (frameno = 0, offset = (frame_count + 1) * 3, frame = frame_array, buf = frame->curbuf;
+		frameno < frame_count;
+		frameno++, offset += frame_length_with_header (buf), frame++, buf = frame->curbuf)
 	{
 		/* If the object address needed to be pushed to the next
 		page boundary, then output padding bytes first. */
@@ -377,7 +529,8 @@ void write_output (const char *filename)
 			offset++;
 		}
 
-		/* Output the image data itself */
+		/* Output the image data itself.  Variable-sized bitmaps include the
+		width and height. */
 		fputc (buf->type, outfile);
 		if (buf->type & TYPE_BITMAP)
 		{
@@ -446,6 +599,7 @@ int main (int argc, char *argv[])
 	const char *arg;
 	const char *outfilename;
 
+	/* Parse options and process the image lists. */
 	for (argn = 1; argn < argc; argn++)
 	{
 		arg = argv[argn];
@@ -487,6 +641,9 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	/* Finalize all output */
+	assign_addresses ();
+	compress_frames ();
 	write_output (outfilename);
 
 	fprintf (lblfile, "\n#define MAX_IMAGE_NUMBER %d\n", frame_count);

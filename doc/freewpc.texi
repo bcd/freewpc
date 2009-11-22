@@ -1423,7 +1423,7 @@ call @code{effect_update_request}.  The update will take place within the next
 100ms; the delay is intended to smooth out multiple such requests within
 a short time, and the delay is not really noticeable.
 
-When a foreground display or music effect, an update will take place
+When a foreground display or music effect exits, an update will take place
 immediately.  In this case, if display update is needed, then music is not
 updated, and vice-versa.
 
@@ -1466,7 +1466,7 @@ scoring effects to allow the player to pause and celebrate.
 @item D_SCORE
 
 Says that this is a score award effect; the value of the last switch
-score is made available to the effect via the @code{score_get()} API.
+score is made available to the effect via the @code{score_deff_get()} API.
 
 @item D_RESTARTABLE
 
@@ -1574,7 +1574,7 @@ The system tracks which channels are free or in use.
 There is no easy way to know when the sound has finished playing.
 The sound board is capable of sending
 responses back to the CPU board, but this has not been explored
-thoroughly yet.  For now, sound calls need to be specify how long the
+thoroughly yet.  For now, sound calls need to specify how long the
 sound will take to complete, so that the channels can be deallocated.
 Exact precision is not really necessary here, unless trying to string
 together a sequence of speech calls.
@@ -1633,7 +1633,7 @@ reenabled automatically once the time expires.
 
 Typically, groups of lamps are often used for a similar purpose.
 A lamplist is an ordered array of lamps that are often controlled together.
-Each lampset has a unique ID, and is internally represented by an array of
+Each lamplist has a unique ID, and is internally represented by an array of
 the lamp values, terminated by a special lamp code named @code{LAMP_END}.
 
 The lamplist APIs provide convenience whenever many lamps need to be updated
@@ -1824,11 +1824,17 @@ closures occur rapidly, but eventually it stabilizes.  The ball
 tracker waits a little while after switch change before it begins
 to take action.
 
-The @dfn{kick_success} event is generated when a release is deemed successful.
-It happens after a release cycle, when the count goes down by 1.  There
-is also the @dfn{kick_failure} event for handling a failed kick, and the
-@dfn{kick_attempt} event to signal that a kick is imminent; this usually
-triggers a sound effect, but it can also delay the kick for some reason.
+When a release is necessary, the module first generates a @dfn{kick_request}
+event.  This is a boolean event; handlers can return FALSE if the request
+should be postponed for some reason.  In that case, the module will retry again
+later.  Once the request is allowed, a @dfn{kick_attempt} event is generated
+just before the solenoid is pulsed.  This is typically caught in order to play
+a sound effect.  If the pulse fails, the attempt event may be thrown multiple
+times.
+
+The @dfn{kick_success} event is generated when the release is deemed successful:
+when the device count goes down by 1.  The @dfn{kick_failure} event is instead
+thrown when an attempts fails repeatedly and the device is abandoned.
 
 @section The Trough Device
 
@@ -1840,7 +1846,7 @@ is successfully served.  The @dfn{live count} of the machine is the
 number of balls in play for the purposes of game code (i.e. not counting
 missing pinballs or balls locked on the playfield from previous games).
 The @code{single_ball_play} event is generated when the live count
-is reduced to 1, as at the end of multiball.  Multiball modes use handle
+is reduced to 1, as at the end of multiball.  Multiball modes use
 this to stop properly.  There is also a @code{ball_count_change} event
 invoked on every change of the number of balls in play; some games use
 this to update playfield multipliers.
@@ -1849,6 +1855,8 @@ Likewise, @code{device_remove_live} is called whenever a ball drains.
 It ultimately is the one that generates the @code{end_ball} event
 when all balls have drained.
 
+Live count is not necessarily the actual number of balls in play.
+If a missing pinball suddenly reappears, the live count is not increased.
 
 @c ======================================================
 @node Test Mode
@@ -2108,7 +2116,13 @@ encoding (RLE) or zero suppression to save space.  An uncompressed
 frame requires 1KB, which limits the total number of frames in a ROM
 significantly.  Every frame header includes
 a flags field, which indicates which if any compression method was used.
-The decoders are written in assembly language in @code{platform/wpc/dmd.s}.
+The frame decoders are written in assembly language in @code{platform/wpc/dmd.s}.
+
+Compression is a balance between ROM size and processor speed.  The best
+compression methods would take far too long for the 6809 to decode.  The
+methods used strike a compromise.  In particular, bitwise operations are
+avoided in the decoders because of the 6809's inability to do bitlevel
+operations quickly.
 
 @itemize @bullet
 
@@ -2218,10 +2232,23 @@ There can be multiple frame list files.  The common code
 provides a frame list of standard images, like the FreeWPC logo,
 which go into every build.
 
-Each frame can be assigned a frame ID in the file.  The
-image linker writes the file @file{build/imagemap.h} which
-contains a list of all the frame IDs.  These are used by the
-frame drawing APIs to refer to a particular frame.
+Each entry in the image map gives an image to be imported, such as a
+PGM graphics file, plus an optional @dfn{frame ID}.  The frame ID becomes
+a C #define that refers to the image from the sour code.
+The image linker writes a file @file{build/imagemap.h} which
+contains a list of all the frame IDs.  Frame IDs are optional for
+the internal frames in a sequence (a for loop would only need to name the
+starting and ending frame).
+
+It is the job of the image linker to decide what compression techniques
+to perform.  The linker is told the maximum amount of space that can be
+used for images, which is the total size of the ROM minus any sections
+reserved for source code.  If all images fit without compression, then all
+is well.  Otherwise, the linker will perform as much as compression as
+necessary.  (This is not completely implemented yet.  The image map will
+need to provide syntax for specifying the priorities of images to aid in
+the decision making.)
+
 
 @c ======================================================
 @node Native Mode
@@ -2264,7 +2291,7 @@ Idle functions must be called occasionally from a special thread, since FreeWPC
 no longer provides the scheduler.
 
 Interrupts are also simulated from an ordinary thread.  The native operating
-system probably does not allows threads to sleep for as little as 1ms; on
+system probably does not allow threads to sleep for as little as 1ms; on
 most systems the minimum sleep time is on the order of 10-20ms instead.
 Thus, when the interrupt thread is woken up, it checks the system clock to see
 how much time has actually elapsed, and invokes the interrupt handler
@@ -2275,7 +2302,7 @@ way.
 @section Persistent Memory
 
 Permanent and non-volatile variables are supported; their values are
-saved in files across program runs.  Non-volatiles variables are not
+saved in files across program runs.  Non-volatile variables are not
 actually write-protected though.  This may be implemented in the future.
 
 @section Input and Output
