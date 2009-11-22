@@ -171,26 +171,8 @@ double slot_overhead = 0.01;
 
 const unsigned int cycles_per_interrupt = CYCLES_PER_TICK;
 
-double warn_utilization_high = 0.80;
-
 int n_conditionals = 0;
 const char *conditionals[MAX_CONDITIONALS];
-
-#if 0
-static unsigned long gcd (unsigned long a, unsigned long b)
-{
-	if (b == 0)
-		return a;
-	else
-		return gcd (b, a % b);
-}
-
-
-static unsigned long lcm (unsigned long a, unsigned long b)
-{
-	return (a  / gcd (a, b)) * b;
-}
-#endif
 
 
 #define cfprintf(ind, file, format, rest...) \
@@ -699,9 +681,6 @@ void parse_schedule (FILE *f)
 		if (feof (f))
 			break;
 		lineno++;
-#if 0
-		fprintf (stderr, "<<%03d>>  %s", lineno, line);
-#endif
 		parse_sched_entry (line);
 	}
 }

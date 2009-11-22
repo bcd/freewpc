@@ -444,6 +444,11 @@ endif
 endef
 
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
+ifeq ($(CONFIG_DMD),y)
+$(eval $(call PAGE_ALLOC, 54, MACHINE_PAGED, MACHINE))
+else
+$(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
+endif
 $(eval $(call PAGE_ALLOC, 55, TRANS))
 $(eval $(call PAGE_ALLOC, 55, FIF))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
@@ -452,7 +457,7 @@ $(eval $(call PAGE_ALLOC, 57, INIT))
 $(eval $(call PAGE_ALLOC, 58, TEST))
 $(eval $(call PAGE_ALLOC, 58, MACHINE_TEST))
 $(eval $(call PAGE_ALLOC, 59, EVENT))
-$(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
+$(eval $(call PAGE_ALLOC, 59, FSM))
 $(eval $(call PAGE_ALLOC, 60, PAGED_MD, MD))
 $(eval $(call PAGE_ALLOC, 60, TEST2))
 $(eval $(call PAGE_ALLOC, 61, FONT))
