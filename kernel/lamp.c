@@ -129,12 +129,8 @@ void lamp_flash_rtt (void)
 }
 
 
-/** Runs periodically to update the physical lamp state.
- * MODE ranges from 0 .. NUM_LAMP_RTTS-1, and says which version
- * of the routine is needed, because of loop unrolling.
- * For efficiency, not all iterations need to do everything.
- */
-extern inline void lamp_rtt_common (const U8 mode)
+/** Runs periodically to update the physical lamp state. */
+void lamp_rtt (void)
 {
 	U8 bits;
 	/* TODO : implement lamp power saver level.  For some number N
@@ -143,21 +139,7 @@ extern inline void lamp_rtt_common (const U8 mode)
 
 	/* Setup the strobe */
 	pinio_write_lamp_data (0);
-
-#ifdef BCD_WCS
-	if (lamp_strobe_mask != 0x80)
-#endif
 	pinio_write_lamp_strobe (lamp_strobe_mask);
-
-	/* Advance the strobe value for the next iteration.
-	Keep this together with the above so that lamp_strobe_mask
-	is already in a register. */
-	lamp_strobe_mask <<= 1;
-	if (mode == NUM_LAMP_RTTS-1 && lamp_strobe_mask == 0)
-	{
-		/* All columns strobed : reset strobe */
-		lamp_strobe_mask = 0x1;
-	}
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
@@ -190,51 +172,23 @@ extern inline void lamp_rtt_common (const U8 mode)
 	bits |= lamp_leff1_matrix[lamp_strobe_column];
 
 	/* Write the result to the hardware */
-#ifdef BCD_WCS
-	if (lamp_strobe_mask != 0x1)
-		pinio_write_lamp_data (bits & 0x7F);
-	else
-		pinio_write_lamp_data (0);
-#else
 	pinio_write_lamp_data (bits);
-#endif
 
-	/* Advance strobe to next position for next iteration */
-	lamp_strobe_column++;
-	if (mode == NUM_LAMP_RTTS-1)
-		lamp_strobe_column &= 7;
-}
-
-
-void lamp_rtt_0 (void)
-{
-#ifdef BCD_WCS
-	pinio_write_lamp_data (0);
-#else
-	lamp_rtt_common (0);
-#endif
-}
-
-
-void lamp_rtt_1 (void)
-{
-	lamp_rtt_common (1);
-}
-
-
-void lamp_rtt_2 (void)
-{
-#ifdef BCD_WCS
-	pinio_write_lamp_data (0);
-#else
-	lamp_rtt_common (2);
-#endif
-}
-
-
-void lamp_rtt_3 (void)
-{
-	lamp_rtt_common (3);
+	/* Advance the strobe value for the next iteration.
+	Keep this together with the above so that lamp_strobe_mask
+	is already in a register. */
+	lamp_strobe_mask <<= 1;
+	if (lamp_strobe_mask == 0)
+	{
+		/* All columns strobed : reset strobe */
+		lamp_strobe_mask++;
+		lamp_strobe_column = 0;
+	}
+	else
+	{
+		/* Advance strobe to next position for next iteration */
+		lamp_strobe_column++;
+	}
 }
 
 

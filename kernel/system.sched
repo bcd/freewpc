@@ -57,7 +57,7 @@ sol_update_rtt/2      2       60c
 sol_req_rtt           1       12c
 
 # Update the lamps
-lamp_rtt/4            2       111c
+lamp_rtt              2       111c
 
 # Toggle the CPU board LED
 !pinio_active_led_toggle 64   14c
