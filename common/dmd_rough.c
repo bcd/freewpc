@@ -24,52 +24,87 @@
  *
  */
 
+/* TODO - height must be a multiple of 2? */
+
 #include <freewpc.h>
 
-__attribute__((noinline))
-void dmd_rough_copy (U8 bx, U8 y, U8 bwidth, U8 height)
+struct dmd_rough_args
 {
-	U8 *dst = DMD_LOW_BASE;
-	U8 *src = DMD_HIGH_BASE;
+	U8 *dst;
+	U8 bwidth;
+	U8 height;
+};
 
-	while (height > 0)
-	{
-		U8 xoff;
-		for (xoff = 0; xoff < bwidth; xoff++)
-		{
-			dst[xoff] = src[xoff];
-		}
-		dst += DMD_BYTE_WIDTH;
-		src += DMD_BYTE_WIDTH;
-		height--;
-	}
+struct dmd_rough_args dmd_rough_args;
+
+/*
+ * The user parameters are given in terms of pixels, however these
+ * must be converted into byte coordinates.
+ */
+
+#define dmd_rough_copy(x, y, w, h) \
+	do { \
+		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.height = h; \
+		dmd_rough_copy1 (); \
+	} while (0)
+
+#define dmd_rough_erase(x, y, width, height) \
+	do { \
+		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.height = h; \
+		dmd_rough_erase1 (); \
+	} while (0)
+
+#define args dmd_rough_args
+
+
+/**
+ * Copy a portion of the low DMD page into the high page.
+ */
+__attribute__((noinline)) void dmd_rough_copy1 (void)
+{
+	U8 *dst;
+	U8 *src;
+
+	do {
+		dst = args.dst;
+		src = dst - DMD_PAGE_SIZE;
+		U8 bytes = args.bwidth;
+		do {
+			*dst++ = *src++;
+			bytes--;
+		} while (bytes > 0);
+		args.dst += DMD_BYTE_WIDTH;
+		args.height--;
+	} while (args.height > 0);
 }
 
 
-__attribute__((noinline))
-void dmd_rough_erase (U8 bx, U8 y, U8 bwidth, U8 height)
+/**
+ * Zero a portion of the low DMD page into the high page.
+ */
+__attribute__((noinline)) void dmd_rough_erase1 (void)
 {
-	U8 *dst = DMD_LOW_BASE;
-	U8 *src = DMD_HIGH_BASE;
+	U8 *dst;
 
-	while (height > 0)
-	{
-		U8 xoff;
-		for (xoff = 0; xoff < bwidth; xoff++)
-		{
-			dst[xoff] = 0;
-		}
-		dst += DMD_BYTE_WIDTH;
-		src += DMD_BYTE_WIDTH;
-		height--;
-	}
+	do {
+		dst = args.dst;
+		U8 bytes = args.bwidth;
+		do {
+			*dst++ = 0;
+			bytes--;
+		} while (bytes > 0);
+		args.dst += DMD_BYTE_WIDTH;
+		args.height--;
+	} while (args.height > 0);
 }
 
 
-#if 0
 void dmd_rough_test (void)
 {
-	dmd_rough_erase (0x1, 0x1, 0x8, 0x4);
+	dmd_rough_copy (32, 4, 64, 4);
 }
-#endif
 
