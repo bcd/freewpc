@@ -50,9 +50,18 @@ void bcd_string_add (bcd_t *dst, const bcd_t *src, U8 len)
 
 void bcd_string_increment (bcd_t *s, U8 len)
 {
+	S8 i;
+	s[len-1] = daa (s[len-1] + 1);
+	for (i=len-2; i >= 0; --i)
+		s[i] = daa (s[i] + carry_flag);
 }
 
 
 void bcd_string_sub (bcd_t *dst, const bcd_t *src, U8 len)
 {
+	S8 i;
+	carry_flag = 0;
+	for (i=len-1; i >= 0; --i)
+		dst[i] = daa (src[i] - dst[i] - carry_flag);
 }
+

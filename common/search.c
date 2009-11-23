@@ -55,7 +55,8 @@ U8 ball_search_count;
 /** The amount of time in seconds that this ball has lasted */
 U16 ball_time;
 
-/** The amount of time in seconds that this game has lasted */
+/** The amount of time in seconds that this game has lasted.
+This is a per-player variable */
 __local__ U16 game_time;
 
 
@@ -302,7 +303,8 @@ CALLSET_ENTRY (ball_search, start_player)
 
 /*
  * At the beginning of a ball, initialize the ball time
- * statistic.
+ * statistic.  This variable will count up during the course of
+ * the ball, in seconds.
  */
 CALLSET_ENTRY (ball_search, start_ball)
 {

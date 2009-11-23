@@ -714,9 +714,15 @@ struct buffer *buffer_decompress (struct buffer *buf)
 }
 
 
+/**
+ * Encode a joined bitmap using run-length encoding (RLE).
+ *
+ * Returns a new buffer with the encoded version.
+ */
 struct buffer *buffer_rle_encode (struct buffer *buf)
 {
-	U8 *dstp, *srcp;
+	U8 *dstp;
+	const U8 *srcp;
 	struct buffer *res;
 	U8 b;
 
@@ -727,6 +733,9 @@ struct buffer *buffer_rle_encode (struct buffer *buf)
 	while (srcp < buf->data + 512)
 	{
 		b = *srcp++;
+
+		/* The character 'A8' has special meaning; if it occurs in the input
+		stream, a special escape sequence must be emitted. */
 		if (b == 0xA8)
 		{
 			*dstp++ = 0xA8;
@@ -741,6 +750,9 @@ struct buffer *buffer_rle_encode (struct buffer *buf)
 				run++;
 			/* Include the current byte in the count, too */
 			run++;
+
+			/* If this byte begins a run of 4 or more of the same value, then
+			it can be emitted in a more compact form. */
 			if (run >= 4)
 			{
 				run &= ~1; /* round down to multiple of 2 */

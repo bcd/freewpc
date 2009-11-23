@@ -12,7 +12,9 @@ gcc_options="4.3.4"
 debugger_options="n y"
 mincount=1
 
-case $1 in
+while [ "x$1" != "x" ]; do
+option=$1; shift
+case $option in
 	--native)
 		native_options="y"
 		;;
@@ -26,12 +28,13 @@ case $1 in
 		gcc_options="4.3.4"
 		;;
 	--gcc)
-		shift; gcc_options="$1"
+		gcc_options="$1"; shift
 		;;
 	*)
-		mincount=$1
+		mincount=$option
 		;;
 esac
+done
 
 count=0
 rm -f stressbuild.log
