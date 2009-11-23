@@ -478,6 +478,7 @@ void write_output (const char *filename)
 	unsigned char target_pointer[3];
 	unsigned char padding = 0xFF;
 	struct frame *frame;
+	unsigned int padding_size;
 
 	/* Open the file for output */
 	outfile = fopen (filename, "w");
@@ -522,11 +523,12 @@ void write_output (const char *filename)
 	{
 		/* If the object address needed to be pushed to the next
 		page boundary, then output padding bytes first. */
-		padding = round_up_to_page (offset, buf->len+1) - offset;
-		while (padding-- > 0)
+		padding_size = round_up_to_page (offset, buf->len+1) - offset;
+		while (padding_size > 0)
 		{
 			fwrite (&padding, sizeof (padding), 1, outfile);
 			offset++;
+			padding_size--;
 		}
 
 		/* Output the image data itself.  Variable-sized bitmaps include the
