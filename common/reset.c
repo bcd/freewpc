@@ -167,8 +167,8 @@ void system_reset_deff (void)
 	seg_write_row_center (0, "FREEWPC <C>2009");
 	seg_write_row_center (1, "WWW.ODDCHANGE.COM");
 	seg_show ();
-	task_sleep_sec (3);
 #endif
+	task_sleep_sec (3);
 
 	dmd_alloc_low_clean ();
 
