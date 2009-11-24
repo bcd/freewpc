@@ -119,6 +119,7 @@ extern U8 idle_ok;
 #include <mach-config.h>
 
 /* Processor specifics */
+#include <limits.h>
 #ifdef __m6809__
 
 #include <m6809/m6809.h>

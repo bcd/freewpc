@@ -323,7 +323,7 @@ should be turned on at this instant.  'id' is the solenoid number.
 bits stores the output state for an entire bank of 8 solenoids at
 a time. */
 #define sol_contribute(id,bits) \
-	if (sol_update1 (id)) { bits |= (1 << ((id) & 0x7)); }
+	if (sol_update1 (id)) { bits |= (1 << ((id) & (CHAR_BIT - 1))); }
 
 
 /** Update a set of 8 solenoids that share the same output register.
@@ -336,14 +336,14 @@ extern inline void sol_update_set (const U8 set)
 
 	/* Update each of the 8 solenoids in the bank, updating timers
 	and calculating whether or not each should be on or off. */
-	sol_contribute (set * 8 + 0, out);
-	sol_contribute (set * 8 + 1, out);
-	sol_contribute (set * 8 + 2, out);
-	sol_contribute (set * 8 + 3, out);
-	sol_contribute (set * 8 + 4, out);
-	sol_contribute (set * 8 + 5, out);
-	sol_contribute (set * 8 + 6, out);
-	sol_contribute (set * 8 + 7, out);
+	sol_contribute (set * CHAR_BIT + 0, out);
+	sol_contribute (set * CHAR_BIT + 1, out);
+	sol_contribute (set * CHAR_BIT + 2, out);
+	sol_contribute (set * CHAR_BIT + 3, out);
+	sol_contribute (set * CHAR_BIT + 4, out);
+	sol_contribute (set * CHAR_BIT + 5, out);
+	sol_contribute (set * CHAR_BIT + 6, out);
+	sol_contribute (set * CHAR_BIT + 7, out);
 
 	/* Write the final output to the hardware */
 	pinio_write_solenoid_set (set, out);
