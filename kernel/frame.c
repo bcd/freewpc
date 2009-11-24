@@ -275,7 +275,7 @@ void frame_decode (U8 *data, U8 type)
 	{
 		frame_decode_rle (data);
 	}
-	else
+	else if (type == 4)
 	{
 		frame_decode_sparse (data);
 	}
