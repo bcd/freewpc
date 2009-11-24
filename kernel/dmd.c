@@ -500,28 +500,6 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
 }
 
 
-/** Erase a specific region of the DMD low buffer, given its
- * location and size.
- *
- * For now, it is assumed that x, y, width, and height are all multiples
- * of 8.
- */
-void dmd_erase_region (U8 x, U8 y, U8 width, U8 height)
-{
-	U8 i, j;
-	U16 *dbuf = (U16 *)(dmd_low_buffer + ((16 / 2) * y));
-
-	for (j=0; j < height; j++)
-	{
-		for (i=0; i < ((width / 8) / 2); i++)
-		{
-			dbuf[x + i] = 0;
-		}
-		dbuf += (16 / 2);
-	}
-}
-
-
 /*
  * Helper function used to do a DMD transition.
  * This contains common logic that needs to happen several times during

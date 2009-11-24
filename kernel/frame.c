@@ -295,17 +295,18 @@ void frame_draw_plane (U16 id)
 	 */
 	U8 type;
 	struct frame_pointer *p;
+	U8 *data;
 
 	page_push (IMAGEMAP_PAGE);
 	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
+	data = PTR(p);
 
 	/* Switch to the page containing the image data.
 	 * Pull the type byte out, then decode the remaining bytes
 	 * to the display buffer. */
-	page_push (p->page);
-	type = PTR(p)[0];
-	frame_decode (PTR(p) + 1, type & ~0x1);
-	page_pop ();
+	pinio_set_bank (PINIO_BANK_ROM, p->page);
+	type = data[0];
+	frame_decode (data + 1, type & ~0x1);
 
 	page_pop ();
 }
