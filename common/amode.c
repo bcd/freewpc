@@ -108,9 +108,15 @@ void amode_score_page (void)
 #if (MACHINE_DMD == 1)
 void amode_logo_page (void)
 {
+	U8 fno;
+
 	dmd_alloc_low_high ();
-	frame_draw (IMG_FREEWPC);
-	dmd_show2 ();
+	for (fno = IMG_FREEWPC_SMALL; fno <= IMG_FREEWPC; fno += 2)
+	{
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
 	amode_page_end (3);
 }
 #endif
