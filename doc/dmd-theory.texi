@@ -75,7 +75,7 @@ are not discussed further.
 The 6809 does not provide much support for bulk movement of data, which is
 what is mainly needed to update the display.  Assume for now that a single
 512-byte, monochrome frame of data is in the game EPROM, which needs to be
-copied into diisplay memory, i.e.
+copied into display memory, i.e.
 
 	memcpy (display_memory, image_src, 512);
 
