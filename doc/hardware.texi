@@ -13,7 +13,11 @@ WPC games work.
 @section Overview
 
 WPC pinball machines contain a number of circuit boards, some that are
-intelligent with microprocessors, and others that are passive.
+intelligent with microprocessors, and others that are passive.  One of these,
+the CPU board, is the master and houses the main microprocessor.  All
+other boards are connected to this one via ribbon cables.  The functionality
+is spread across multiple boards to make maintenance easier and to isolate
+faults.
 
 From 1990-1999, six different generations of machines were produced, which
 differed only slightly.  In order of appearance:
@@ -94,8 +98,8 @@ to disable all output circuits.
 
 Blanking is initially asserted by the ASIC at powerup, so that no
 lamps or solenoids can be turned on, regardless of the states of the
-inputs from the CPU board.  Once the CPU has initialized, it writes to
-the ASIC to disable blanking.
+outputs from the CPU board.  Once the CPU has initialized, it writes to
+the ASIC to disable blanking; then the other register outputs take effect.
 
 @subsection Diagnostics LED
 
