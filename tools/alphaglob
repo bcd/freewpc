@@ -6,6 +6,9 @@
 # This script tries to normalize things.
 #
 
+
+# In pass 1, scan through the whole file, find function definitions,
+# and save them into a hash.
 while (<>) {
 	chomp;
 	# Remove comments to the end of line
@@ -28,15 +31,17 @@ while (<>) {
 	# Skip blank lines
 	elsif (/^[ \t]*$/) {}
 
-	# Anything else is considered valid code.  Add a function to
-	# the function definition.
+	# Anything else is considered valid code.  Add this line to
+	# the function's definition.
 	else {
 		$def{$symbol} .= "$_\n";
 	}
 }
 
 
-# Now iterate through all functions seen
+# In pass 2, iterate through all functions seen and print them out.
+# Each line of assembly is prefixed with the function name, which makes
+# comparison easier.
 for $symbol (sort (keys %def)) {
 	next if $symbol =~ /^[^_]/;
 	my @lines = split /\n+/, $def{$symbol};
@@ -45,3 +50,4 @@ for $symbol (sort (keys %def)) {
 	}
 	print "\n\n";
 }
+
