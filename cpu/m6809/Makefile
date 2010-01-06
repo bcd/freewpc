@@ -59,6 +59,7 @@ KERNEL_ASM_OBJS += $(C)/irqload.o
 KERNEL_ASM_OBJS += $(C)/div32.o
 KERNEL_ASM_OBJS += $(if $(CONFIG_PROFILE), $(C)/mcount.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_BPT), $(C)/breakpoint.o)
+KERNEL_ASM_OBJS += $(C)/section.o
 
 .PHONY : run
 run:

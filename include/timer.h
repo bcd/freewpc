@@ -25,8 +25,6 @@
  * has an unrolled loop that requires this. */
 #define MAX_FREE_TIMERS (4 * ((MAX_TIMERS + 3) / 4))
 
-typedef U8 free_timer_id_t;
-
 task_pid_t timer_restart (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
@@ -36,11 +34,17 @@ void timer_lock (void);
 void timer_unlock (void);
 bool system_timer_pause (void);
 void timer_pause_second (void);
-void free_timer_restart (free_timer_id_t tid, U8 ticks);
-void free_timer_start (free_timer_id_t tid, U8 ticks);
-void free_timer_stop (free_timer_id_t tid);
-U8 free_timer_test (free_timer_id_t tid);
+
+void __free_timer_restart (U8 tid, U8 ticks);
+void __free_timer_start (U8 tid, U8 ticks);
+void __free_timer_stop (U8 tid);
+U8 __free_timer_test (U8 tid);
 void free_timer_init (void);
+
+#define free_timer_restart(tid, ticks)  __free_timer_restart (__addrval (&tid), ticks)
+#define free_timer_start(tid, ticks)    __free_timer_start (__addrval (&tid), ticks)
+#define free_timer_stop(tid)            __free_timer_stop(__addrval (&tid))
+#define free_timer_test(tid)            __free_timer_test(__addrval (&tid))
 
 #define timer_kill_gid 	task_kill_gid
 #define timer_kill_pid 	task_kill_pid

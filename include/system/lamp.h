@@ -105,36 +105,18 @@ void leff_toggle (lampnum_t lamp);
 bool leff_test (lampnum_t lamp);
 
 
-extern inline void flag_on (const U8 f)
-{
-	bitarray_set (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_ON, f);
-}
+#define flag_on(f)      bit_on (bit_matrix, __addrval(&f))
+#define flag_off(f)     bit_off (bit_matrix, __addrval(&f))
+#define flag_toggle(f)  bit_toggle (bit_matrix, __addrval(&f))
+#define flag_test(f)    bit_test (bit_matrix, __addrval(&f))
 
-extern inline void flag_off (const U8 f)
-{
-	bitarray_clear (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_OFF, f);
-}
-
-extern inline void flag_toggle (const U8 f)
-{
-	bitarray_toggle (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_TOGGLE, f);
-}
-
-extern inline bool flag_test (const U8 f)
-{
-	return bitarray_test (bit_matrix, f);
-}
+#define global_flag_on(gf)     bit_on (global_bits, __addrval(&gf))
+#define global_flag_off(gf)    bit_off (global_bits, __addrval(&gf))
+#define global_flag_toggle(gf) bit_toggle (global_bits, __addrval(&gf))
+#define global_flag_test(gf)   bit_test (global_bits, __addrval(&gf))
 
 #define flag_test_and_set(f) \
 	({ U8 result = flag_test (f); if (!result) { flag_on (f); } result; })
-
-#define global_flag_on(lamp)		bitarray_set (global_bits, lamp)
-#define global_flag_off(lamp)		bitarray_clear (global_bits, lamp)
-#define global_flag_toggle(lamp)	bitarray_toggle (global_bits, lamp)
-#define global_flag_test(lamp)	bitarray_test (global_bits, lamp)
 
 #define lamp_tristate_on(lamp) \
 	do { lamp_flash_off(lamp); lamp_on(lamp); } while (0)

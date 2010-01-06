@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -64,7 +64,7 @@ void free_timer_rtt (void)
 
 
 /** Restart a timer. */
-void free_timer_restart (free_timer_id_t tid, U8 ticks)
+void __free_timer_restart (U8 tid, U8 ticks)
 {
 	ticks /= 2;
 	free_timers[tid] = ticks;
@@ -72,7 +72,7 @@ void free_timer_restart (free_timer_id_t tid, U8 ticks)
 
 
 /** Start a timer.  If it is already started, do nothing. */
-void free_timer_start (free_timer_id_t tid, U8 ticks)
+void __free_timer_start (U8 tid, U8 ticks)
 {
 	if (free_timers[tid] == 0)
 	{
@@ -83,14 +83,14 @@ void free_timer_start (free_timer_id_t tid, U8 ticks)
 
 
 /** Stop a timer. */
-void free_timer_stop (free_timer_id_t tid)
+void __free_timer_stop (U8 tid)
 {
 	free_timers[tid] = 0;
 }
 
 
 /** Test the value of a timer. */
-U8 free_timer_test (free_timer_id_t tid)
+U8 __free_timer_test (U8 tid)
 {
 	return free_timers[tid] / 2;
 }

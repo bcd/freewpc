@@ -244,6 +244,13 @@ my %FixedMaxima = (
 	"deffs", "leffs", "lamplists", "gi", "fonts");
 
 
+# The contexts which are emitted as ordinary variable declarations.
+my %VarDecl = (
+	"flags" => "flag_t",
+	"globalflags" => "global_flag_t",
+	"timers" => "free_timer_id_t",
+);
+
 ###################################################################
 
 #
@@ -684,6 +691,20 @@ sub print_c_ident {
 	}
 }
 
+sub machine_write_var_decls {
+	print $START_SOURCE;
+	foreach $context (keys %ContextPrefixes) {
+		my $type = $VarDecl{$context};
+		next if (!defined $type);
+		my $mc = $m->{$context};
+		foreach my $def (unique ($mc)) {
+			print "$type " . $def->{'c_ident'} . ";\n";
+		}
+		print "\n";
+	}
+	print $END_SOURCE;
+}
+
 sub machine_write_defines {
 	# Print object IDs
 	foreach $context (keys %ContextPrefixes) {
@@ -691,10 +712,16 @@ sub machine_write_defines {
 		my $indexRe = $contextDefinitionRe{$context};
 		my $number = -1;
 		$indexRe = "[0-9]+" if ($indexRe eq "AUTO");
+		my $type = $VarDecl{$context};
 		print "/* Definitions of $context */\n";
 		foreach my $def (unique ($mc)) {
 			$number = $def->{'number'};
-			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+			if (defined $type) {
+				print "extern U8 " . $def->{'c_ident'} . ";\n";
+			}
+			else {
+				print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+			}
 		}
 		my $max = $ContextMaxima{$context};
 		if (defined $max) {
@@ -1535,6 +1562,13 @@ elsif ($command eq "fonts") {
 #######################################################
 elsif ($command eq "drives") {
 	machine_write_solenoid_decls ();
+}
+
+#######################################################
+#  generate build/mach-vars.c
+#######################################################
+elsif ($command eq "vars") {
+	machine_write_var_decls ();
 }
 
 elsif ($command eq "dump") {

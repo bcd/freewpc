@@ -91,6 +91,7 @@
 #define __leff__
 #endif
 
+
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
 #define __interrupt__ __attribute__((interrupt))
 #else
@@ -189,6 +190,15 @@ do { \
 	(__builtin_choose_expr ( (sizeof (ptr->__field) == 1), \
 		(far_read8 (&ptr->__field, __caller_page)), \
 		(typeof (ptr->__field))(far_read16 (&ptr->__field, __caller_page))))
+
+
+/* Types for linker variables.
+   You can declare flags, global flags, and timers using the types below.
+   They are resolved to IDs at link time.  Each type is associated with
+   a pseudo-section. */
+#define flag_t          __attribute__((section(".flag"))) U8
+#define global_flag_t   __attribute__((section(".globalflag"))) U8
+#define free_timer_id_t __attribute__((section(".freetimer"))) U8
 
 
 /***************************************************************

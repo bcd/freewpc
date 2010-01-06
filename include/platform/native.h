@@ -59,6 +59,11 @@ extern inline U8 far_indirect_call_value_handler (value_function address, U8 pag
 	return address ();
 }
 
+/**
+ * Load the low-order 8-bits of an address into a byte register for
+ * a function argument.
+ */
+#define __addrval(p) (((int)p) & 0xFF)
 
 #endif /* _PLATFORM_NATIVE_H */
 

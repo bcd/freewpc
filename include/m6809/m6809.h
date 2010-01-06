@@ -181,4 +181,16 @@ extern inline void __blockcopy16 (void *s1, const void *s2, U16 n)
 #define memcpy __builtin_memcpy
 #define memcmp __builtin_memcmp
 
+
+/**
+ * Load the low-order 8-bits of an address into a byte register for
+ * a function argument.
+ */
+extern inline U8 __addrval (void *p)
+{
+	U8 val;
+	asm ("ldb\t#<%c1" : "=d"(val) : "p" (p));
+	return val;
+}
+
 #endif /* _ASM_6809_H */
