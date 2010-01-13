@@ -433,7 +433,7 @@ void task_sleep (task_ticks_t ticks)
 
 	/* Mark the task as blocked, and set the time at which it
 	should be awakened. */
-	tp->wakeup = get_sys_time () + ((U16)ticks) * IRQS_PER_TICK;
+	tp->wakeup = get_sys_time () + ticks;
 	tp->state |= TASK_BLOCKED;
 
 	/* Save the task, and start another one.  This call returns
@@ -459,7 +459,7 @@ functions allow a task to specify its timeout in advance of
 doing work, which allows it to be regularly scheduled. */
 void task_set_periodic (task_ticks_t ticks)
 {
-	task_current->wakeup = get_sys_time () + ((U16)ticks) * 16;
+	task_current->wakeup = get_sys_time () + ticks;
 }
 
 

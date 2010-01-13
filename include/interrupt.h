@@ -22,8 +22,6 @@
 /** Called at the beginning of every IRQ */
 extern inline void do_irq_begin (void)
 {
-	extern U16 sys_time;
-
 	/* If using the RAM paging facility, ensure that page 0
 	 * is visible for the IRQ */
 #ifdef CONFIG_PAGED_RAM
@@ -33,8 +31,14 @@ extern inline void do_irq_begin (void)
 	/* Clear the source of the periodic interrupt, and reset
 	the hardware watchdog */
 	pinio_clear_periodic ();
+}
 
-	/* Advance the system time by ~1ms */
+
+/** Advance the system clock.  This is currently in 16ms units, because
+it is scheduled every 16 IRQs. */
+extern inline void advance_time_rtt (void)
+{
+	extern U16 sys_time;
 	sys_time++;
 }
 

@@ -32,7 +32,8 @@
 
 
 # Common processing required at the beginning of every IRQ.
-!do_irq_begin         1       16c
+!do_irq_begin         1       10c
+!advance_time_rtt     16      6c
 
 # Read the flipper switches and update the flipper coils
 # Note: this only takes 51 cycles when flippers are disabled.

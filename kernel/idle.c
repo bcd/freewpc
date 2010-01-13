@@ -46,9 +46,6 @@
 
 #include <freewpc.h>
 
-/** The frequency to run the idle checks */
-#define IDLE_PERIOD (TIME_100MS * IRQS_PER_TICK)
-
 /** The next time at which we should run the idle event.
 This is calculated as 100ms from the last timeout. */
 U16 idle_ready_time;
@@ -78,7 +75,7 @@ void do_idle (void)
 	1 'tick' on the current call, and do it again
 	on the next run. */
 	if (time_reached_p (idle_ready_time))
-		idle_ready_time += IDLE_PERIOD;
+		idle_ready_time += TIME_100MS;
 	else
 		return;
 
@@ -105,7 +102,7 @@ void do_idle (void)
 
 CALLSET_ENTRY (idle, init)
 {
-	idle_ready_time = get_sys_time () + IDLE_PERIOD;
+	idle_ready_time = get_sys_time () + TIME_100MS;
 	idle_second_timer = 0;
 	idle_10second_timer = 0;
 }
