@@ -548,7 +548,7 @@ pending_switch_t *switch_queue_add (const switchnum_t sw)
 	pending_switch_t *entry = &switch_queue[switch_queue_tail];
 	dbprintf ("adding sw%d to queue\n", sw);
 	entry->id = sw;
-	entry->timer = switch_lookup(sw)->debounce * 16;
+	entry->timer = switch_lookup(sw)->debounce;
 	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
 	bit_on (sw_queued, sw);
 	return entry;
