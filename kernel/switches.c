@@ -599,21 +599,9 @@ void switch_service_queue (void)
 	U8 i;
 	U8 elapsed_time;
 
-	/* See how long since the last time we serviced the queue. */
+	/* See how long since the last time we serviced the queue.
+	This is in 16ms ticks. */
 	elapsed_time = get_elapsed_time (switch_last_service_time);
-	if (elapsed_time < 5)
-		return;
-	if (elapsed_time > 150)
-	{
-		dbprintf ("Switch queue slow: %d ms\n", elapsed_time);
-		nonfatal (ERR_SWITCH_SLOW_SERVICE);
-		elapsed_time = 150;
-	}
-
-	/* Check for shorted switch rows/columns.
-	 * Note this check used to be done every call to switch_idle, by
-	 * moving it here, it is only done every few ms instead. */
-	switch_short_detect ();
 
 	i = switch_queue_head;
 	while (unlikely (i != switch_queue_tail))
@@ -752,6 +740,9 @@ CALLSET_ENTRY (switch, idle)
 		sw_logical[0] = sw_raw[0];
 		return;
 	}
+
+	/* Check for shorted switch rows/columns. */
+	switch_short_detect ();
 
 	/* Service the switch queue.  Note that this is done BEFORE
 	 * polling switches; please do not change this!  In case
