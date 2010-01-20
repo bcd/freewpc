@@ -236,7 +236,7 @@ __noreturn__ void task_dispatcher (void);
 task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 #endif
-void do_idle (void);
+void do_periodic (void);
 
 /** Create a new task that has the same group ID as the current one. */
 #define task_create_peer(fn)		task_create_gid (task_getgid (), fn)
