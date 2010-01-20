@@ -423,7 +423,7 @@ void task_sleep (task_ticks_t ticks)
 {
 	register task_t *tp = task_current;
 
-	/* Fail if the idle function tries to sleep. */
+	/* Fail if a periodic function tries to sleep. */
 	if (tp == 0)
 		fatal (ERR_IDLE_CANNOT_SLEEP);
 
@@ -658,10 +658,10 @@ void *task_alloca (task_t *tp, U8 size)
  *
  * This is called from two places: when a task exits, or when a
  * task sleeps/yields.  The 'x' register is expected to be loaded with
- * the exiting task's task structure pointer.  The search for a new
+ * the previous task's task structure pointer.  The search for a new
  * task to run starts with the next task in the table.  Code then
  * jumps back to the first candidate that is eligible, via
- * task_restore().
+ * the task_restore() assembly language routine.
  *
  * If the entire task table is scanned, and no task is ready to run,
  * then we wait until the tick count advances to indicate that 16ms
@@ -693,18 +693,16 @@ void task_dispatcher (void)
 		/* All task blocks were scanned, and no free task was found. */
 		if (unlikely (first == tp))
 		{
+#ifdef CONFIG_PLATFORM_WPC
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
 			even when 'sys_init_complete' is not true.  This lets us
 			debug very early initialization. */
-#ifdef CONFIG_PLATFORM_WPC
-			db_idle ();
+			db_periodic ();
 
-			/* If the system is fully initialized, run the idle functions. */
-			if (likely (idle_ok))
-			{
-				do_idle ();
-			}
+			/* If the system is fully initialized, run the periodic functions. */
+			if (likely (periodic_ok))
+				do_periodic ();
 #endif /* CONFIG_PLATFORM_WPC */
 
 			/* Wait for time to change before continuing.
@@ -727,10 +725,8 @@ void task_dispatcher (void)
 		{
 			/* The task exists, but is sleeping.  See if it should be woken up now.
 			Compare the time at which it wants to wake up with the current time.
-			The subtraction should yield a non-positive value when it is OK to wake
-			up.  We use a check of the sign bit since these are stored as positive
-			values.  This is a valid method as long as the task doesn't sleep
-			more than 0x8000 ticks. */
+			The subtraction should yield a negative value when it is OK to wake it
+			up. */
 			if (time_reached_p (tp->wakeup))
 			{
 				/* Yes, it is ready to run again. */
@@ -741,7 +737,7 @@ void task_dispatcher (void)
 		else if (likely (tp->state == BLOCK_USED+BLOCK_TASK))
 		{
 			/* The task exists, and is not sleeping.  It can be
-			started immediately. */
+			started immediately.  This would only happen if the task was just created. */
 			task_restore (tp);
 		}
 	}

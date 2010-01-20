@@ -65,7 +65,7 @@ U8 idle_10second_timer;
  * whenever there are no tasks ready to run, at a
  * rate of once per 1ms.
  */
-void do_idle (void)
+void do_periodic (void)
 {
 	callset_invoke (idle);
 

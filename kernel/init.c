@@ -32,8 +32,8 @@ __fastram__ U16 sys_time;
 /** Nonzero when the system has finished initializing */
 U8 sys_init_complete;
 
-/** Nonzero when it is OK to call idle functions */
-U8 idle_ok;
+/** Nonzero when it is OK to call periodic functions */
+U8 periodic_ok;
 
 /** The number of background initialization tasks that are still
 running.  The splash screen is kept until this reverts to zero. */
@@ -60,7 +60,7 @@ __noreturn__ void freewpc_init (void)
 	/* Set init complete flag to false.  When everything is
 	 * ready, we'll change this to a 1. */
 	sys_init_complete = 0;
-	idle_ok = 0;
+	periodic_ok = 0;
 	sys_init_pending_tasks = 0;
 
 	/* Initialize all of the other kernel subsystems,
@@ -142,10 +142,8 @@ __noreturn__ void freewpc_init (void)
 	If problems are found, those adjustments will be made sane again. */
 	csum_area_check_all ();
 
-	/* Enable the idle processing.  Sleep briefly so that idle gets
-	 * a chance to run before continuing; this lets the debugger
-	 * interface initialize. */
-	idle_ok = 1;
+	/* Enable periodic processing. */
+	periodic_ok = 1;
 	task_sleep (TIME_16MS);
 
 	/* The system is initialized from a hardware perspective.
@@ -165,11 +163,9 @@ __noreturn__ void freewpc_init (void)
 		/* TODO - drop priority for idle tasks.  Also consider
 		moving this logic elsewhere... */
 		task_sleep (TIME_33MS);
-		db_idle ();
-		if (likely (idle_ok))
-		{
-			do_idle ();
-		}
+		db_periodic ();
+		if (likely (periodic_ok))
+			do_periodic ();
 	}
 #endif
 }

@@ -72,8 +72,8 @@ void db_dump_all (void)
 #endif
 
 
-/** Check for debug input at idle time */
-void db_idle (void)
+/** Check for debug input periodically */
+void db_periodic (void)
 {
 #ifdef DEBUGGER
 	{
@@ -154,7 +154,7 @@ void db_idle (void)
 					while (db_paused == 1)
 					{
 						task_runs_long ();
-						db_idle ();
+						db_periodic ();
 					}
 #endif
 					break;
