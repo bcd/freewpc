@@ -712,15 +712,8 @@ static void switch_update_unstable (const U8 sw)
 
 
 
-/** Idle time switch processing.  This function is called whenever there
- * are no round robin tasks to run.
- *
- * 'Pending switches' are scanned and handlers are spawned for each
- * of them (each is a separate task).
- *
- * This could be invoked as often as once every 1ms, but in theory it
- * won't be called that much due to interrupts and ordinary tasks
- * taking a fair amount of CPU time.
+/** Periodic switch processing.  This function is called frequently
+ * to scan pending switches and spawn new tasks to handle them.
  */
 CALLSET_ENTRY (switch, idle)
 {

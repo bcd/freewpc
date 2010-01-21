@@ -129,7 +129,9 @@ typedef struct task_struct
 	 * the task's stack area */
 	U8				stack_size;
 
-	/** The time at which the task should be awakened, when it is blocked. */
+	/** The time at which the task should be awakened, when it is blocked.
+	More correctly, the system time must be greater than this value for the
+	task to run again.  It will not run when the two are equal. */
 	U16			wakeup;
 
 	/** The task argument pointer.  This is a primitive way of passing

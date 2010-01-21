@@ -61,12 +61,14 @@ have passed. */
 U8 idle_10second_timer;
 
 
-/** Runs the idle functions.   This function is called
- * whenever there are no tasks ready to run, at a
- * rate of once per 1ms.
+/** Runs the periodic functions.   This function is called
+ * about once every 16ms, but it may run less often when
+ * there are many tasks running.
  */
 void do_periodic (void)
 {
+	/* The name 'idle' is historical; it could be changed to
+	'periodic' but I've left it alone for now... */
 	callset_invoke (idle);
 
 	/* See if at least 100ms has elapsed.

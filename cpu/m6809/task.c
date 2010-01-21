@@ -663,35 +663,37 @@ void *task_alloca (task_t *tp, U8 size)
  * jumps back to the first candidate that is eligible, via
  * the task_restore() assembly language routine.
  *
- * If the entire task table is scanned, and no task is ready to run,
- * then we wait until the tick count advances to indicate that 16ms
- * has elapsed.  Then we execute all of the idle functions.  This
- * means that idle functions are never called if there is always at
- * least one task in the ready state; it also limits their invocation to
- * once per 16ms.  This delay is also useful because it is the
- * minimum delay before which a blocked task might reach the end of its
- * wait period; there is no sense checking more frequently.
+ * After the last entry in the task table is scanned, we execute all of the
+ * periodic functions.  These functions do not run in task context and cannot
+ * sleep.  They are for fixed system components that always need to be
+ * scheduled.
+ *
+ * After the periodic functions finish, we ensure that the system time
+ * (in 16ms units) has advanced at least 1 tick before dispatching again from
+ * the top of the task table.  This ensures that the periodic functions do
+ * not run more often than once per 16ms.
+ *
+ * Historical note: in earlier versions of FreeWPC, periodic functions were
+ * called "idle functions", and they would only run if no tasks were queued.
+ * That is, idle functions could be starved by running tasks.  Now, the
+ * periodic functions are guaranteed to run more frequently, but there is
+ * no guarantee _how_ frequently.
  */
 __naked__ __noreturn__
 void task_dispatcher (void)
 {
 	register task_t *tp asm ("x");
-	task_t *first = tp;
 
-	last_dispatch_time = get_sys_time ();
 	task_dispatching_ok = TRUE;
 	task_current = 0;
 
-	/* Set 'first' to the first task block to try. */
+	/* Go into an infinite loop looking for a task ready to run.
+	Start with the task after the one that was just saved. */
 	for (tp++; ; tp++)
 	{
-		/* Reset task pointer to top of list after reaching the
-		 * bottom of the table. */
+		/* When we reach the end of the task table, call the
+		periodic functions. */
 		if (unlikely (tp == &task_buffer[NUM_TASKS]))
-			tp = &task_buffer[0];
-
-		/* All task blocks were scanned, and no free task was found. */
-		if (unlikely (first == tp))
 		{
 #ifdef CONFIG_PLATFORM_WPC
 			/* Call the debugger.  This is not implemented as a true
@@ -705,39 +707,34 @@ void task_dispatcher (void)
 				do_periodic ();
 #endif /* CONFIG_PLATFORM_WPC */
 
-			/* Wait for time to change before continuing.
-			Do this AFTER calling the idle functions, so
-			that we wait as little as possible; idle calls
-			themselves may take a long time. */
-			last_dispatch_time = get_sys_time ();
-			barrier ();
+			/* Wait for time to change before continuing.  This ensures that
+			the task table+periodic functions are not scanned/called more
+			frequently than once per 16ms. */
 			while (likely (last_dispatch_time == get_sys_time ()))
 				cpu_idle ();
+			last_dispatch_time = get_sys_time ();
 			task_dispatching_ok = TRUE;
 			
-			/* Ensure that 'tp', which is in register X, is reloaded
-			with the correct task pointer.  The above functions may
-			trash its value. */
-			tp = first;
+			/* Reset to the beginning of the task table */
+			tp = &task_buffer[0];
 		}
 
-		if (tp->state == BLOCK_USED+BLOCK_TASK+TASK_BLOCKED)
+		/* Only scan blocks that are currently used by a task.  This skips free blocks
+		and blocks used for other purposes. */
+		if (tp->state & (BLOCK_USED | BLOCK_TASK))
 		{
-			/* The task exists, but is sleeping.  See if it should be woken up now.
+			/* See if the task is asleep and should be enabled again.
 			Compare the time at which it wants to wake up with the current time.
-			The subtraction should yield a negative value when it is OK to wake it
-			up. */
-			if (time_reached_p (tp->wakeup))
+			The subtraction should yield a negative value when it is ready.  If
+			still not ready, then move on to the next task. */
+			if (tp->state & TASK_BLOCKED)
 			{
-				/* Yes, it is ready to run again. */
-				tp->state &= ~TASK_BLOCKED;
-				task_restore (tp);
+				if (time_reached_p (tp->wakeup))
+					tp->state &= ~TASK_BLOCKED;
+				else
+					continue;
 			}
-		}
-		else if (likely (tp->state == BLOCK_USED+BLOCK_TASK))
-		{
-			/* The task exists, and is not sleeping.  It can be
-			started immediately.  This would only happen if the task was just created. */
+
 			task_restore (tp);
 		}
 	}
@@ -784,6 +781,7 @@ void task_init (void)
 	task_count = task_max_count = 1;
 #endif
 
+	last_dispatch_time = 0;
 	idle_time = 0;
 
 	/* Allocate a task for the first (current) thread of execution.
