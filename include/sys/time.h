@@ -58,21 +58,38 @@
 #define TIME_30S 		(TIME_1S * 30UL)
 
 
+/**
+ * Return the current system time.
+ */
 extern inline U16 get_sys_time (void)
 {
 	extern U16 sys_time;
 	return sys_time;
 }
 
-U8 get_elapsed_time (U16 then);
 
-#define HAVE_BMI
+/**
+ * Get the amount of time elapsed, in 16ms ticks, between
+ * the given starting time and the current time.
+ * This function returns an 8-bit value so it can only
+ * report up to about four seconds.
+ */
+extern inline U8 get_elapsed_time (U16 then)
+{
+	return get_sys_time () - then;
+}
 
-#ifdef HAVE_BMI
+/**
+ * Return a boolean expression that is true if the given time
+ * has been 'reached'.  This is used by timeout checks, when
+ * the time of expiry has been calculated in advance.
+ *
+ * Because time values will wrap around eventually, this function
+ * must be called within a short time after the expiry was set.
+ *
+ * (On the 6809 processor, this must result in a 'bmi' instruction
+ * to work properly; earlier GCC6809 did not do this right.)
+ */
 #define time_reached_p(t) (((t) - get_sys_time ()) & 0x8000UL)
-#else
-#define time_reached_p(t) \
-({ volatile U16 diff = t - get_sys_time (); diff & 0x8000; })
-#endif
 
 #endif /* _SYS_TIME_H */
