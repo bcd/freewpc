@@ -187,10 +187,10 @@ void nonfatal (errcode_t error_code)
 void process_check_rtt (void)
 {
 #ifdef __m6809__
-	if (task_current >= (task_t *)0x2000)
+	if (task_getpid () >= (task_t *)0x2000)
 		fatal (ERR_TASK_LOCKUP);
 
-	if (task_current->gid >= 0x80)
+	if (task_getgid () >= 0x80)
 		fatal (ERR_TASK_LOCKUP);
 #endif
 }

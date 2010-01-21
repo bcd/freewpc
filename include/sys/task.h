@@ -165,8 +165,6 @@ typedef struct task_struct
 } task_t;
 
 
-extern task_t *task_current;
-
 
 /********************************/
 /*     Inline Macros            */
@@ -174,12 +172,13 @@ extern task_t *task_current;
 
 extern inline task_t *task_getpid (void)
 {
+	extern task_t *task_current;
 	return task_current;
 }
 
 extern inline task_gid_t task_getgid (void)
 {
-	return task_current->gid;
+	return task_getpid ()->gid;
 }
 
 extern inline void task_set_rom_page (task_t *pid, U8 rom_page)
