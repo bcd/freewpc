@@ -330,7 +330,7 @@ to place the correct object files into that section, and
 to resolve references correctly.  All of these options
 are written to linker command files, which have the .lnk
 extension and are placed in the @file{build} directory.
-They are an essentially a list of command-line options to the linker,
+They are lists of command-line options to the linker,
 but placed into a file because of the huge number of them.
 
 @item Setting the Machine Symbolic Links
@@ -820,7 +820,7 @@ standard API.
 Sometimes you may want a timer but without the overhead of a separate task.
 Then use the @code{free_timer_@var{xxx}} functions.  @dfn{Free timers}
 are small counters that are updated in realtime context.  They do not
-support pausing (hence, the name) but can be started/stopping.  The set
+support pausing (hence, the name) but can be started/stopped.  The set
 of all free timers must be declared in advance in the machine
 configuration file.
 
@@ -1818,7 +1818,7 @@ release solenoid.
 The trough device is the only device which normally desires to keep any balls.
 Playfield devices generally want zero balls unless a lock has been enabled.
 
-Device switches msut be declared as @emph{edge} switches, which invoke the
+Device switches must be declared as @emph{edge} switches, which invoke the
 event handler on both open and close transitions.  The tracker simply updates
 the current count on either type of transition.
 
