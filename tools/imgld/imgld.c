@@ -259,7 +259,8 @@ unsigned int frame_length_with_header (struct buffer *buf)
 /**
  * A list of encoding functions.  Each takes an uncompressed joined
  * bitmap, 512 bytes in length, and returns a new buffer that contains
- * the encoded version.
+ * the encoded version.  This list is sorted so that the preferred
+ * encoders are listed first.
  */
 typedef struct buffer *(*encoder_t) (struct buffer *);
 encoder_t encoder_list[] = {
@@ -312,10 +313,14 @@ void compress_frames (void)
 			newbuf = encoder_list[i] (aframe->rawbuf);
 			if (newbuf->len < aframe->curbuf->len)
 			{
+				/* This method is better than all previous ones.
+				Make it the current representation. */
 				/* printf ("Encoder %d reduces size from %d to %d\n", i,
 					aframe->curbuf->len, newbuf->len); */
 				newbuf->type |= aframe->rawbuf->type;
 				aframe->type = i+1;
+				if (aframe->curbuf != aframe->rawbuf)
+					buffer_free (aframe->curbuf);
 				aframe->curbuf = newbuf;
 			}
 			else
