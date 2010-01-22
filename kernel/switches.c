@@ -670,7 +670,7 @@ void switch_queue_dump (void)
 	switch_matrix_dump ("Raw     ", sw_raw);
 	switch_matrix_dump ("Logical ", sw_logical);
 	switch_matrix_dump ("Edge    ", sw_edge);
-	task_dispatching_ok = 1;
+	task_runs_long ();
 	switch_matrix_dump ("Stable  ", sw_stable);
 	switch_matrix_dump ("Unstable", sw_unstable);
 	switch_matrix_dump ("Queued  ", sw_queued);
@@ -798,7 +798,7 @@ CALLSET_ENTRY (switch, idle)
 
 		/* Because it can take awhile to scan the entire matrix, keep
 		the software watchdog from expiring. */
-		task_dispatching_ok = TRUE;
+		task_runs_long ();
 	}
 }
 

@@ -982,7 +982,7 @@ void font_test_draw (void)
 	{
 		sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset);
 		font_render_string_center (font, 64, 16, sprintf_buffer);
-		task_dispatching_ok = TRUE;
+		task_runs_long ();
 		if (font_test_offset < 20)
 		{
 			sprintf ("%*s", font_test_char_width, font_test_alphabet + font_test_offset + font_test_char_width);

@@ -256,6 +256,20 @@ void do_idle (void);
 #endif
 
 
+/**
+ * Note that a task may have run for a long period of time at this point.
+ *
+ * This call is intended to keep the software watchdog from expiring,
+ * in places where it might because a task is doing a long computation.
+ */
+extern inline void task_runs_long (void)
+{
+	/* Manually reset the watchdog flag */
+	extern U8 task_dispatching_ok;
+	task_dispatching_ok = TRUE;
+}
+
+
 #define task_create_gid_while(gid, fn, cond) \
 	({ task_pid_t pid = task_create_gid (gid, fn); \
 		task_set_duration (pid, cond); \

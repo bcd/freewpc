@@ -71,7 +71,10 @@ void fatal (errcode_t error_code)
 
 	/* Don't allow any more interrupts, since they might be the
 	source of the error.  Since FIRQ is disabled, we can only
-	do mono display at this point. */
+	do mono display at this point.   Also note that idle
+	cannot run anymore, because task scheduling can't proceed
+	without the system clock moving. */
+	idle_ok = 0;
 	disable_interrupts ();
 
 	/* Reset hardware outputs */

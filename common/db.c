@@ -53,7 +53,7 @@ U8 db_read_sync (void)
 {
 	while (!wpc_debug_read_ready ())
 	{
-		task_dispatching_ok = TRUE;
+		task_sleep (TIME_16MS);
 	}
 	return wpc_debug_read ();
 }
@@ -153,7 +153,7 @@ void db_idle (void)
 					db_paused = 1 - db_paused;
 					while (db_paused == 1)
 					{
-						task_dispatching_ok = TRUE;
+						task_runs_long ();
 						db_idle ();
 					}
 #endif

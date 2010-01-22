@@ -399,7 +399,7 @@ void font_get_string_area (const font_t *font, const char *s)
 
 	/* This can take a while for long strings; don't let the
 	software watchdog expire */
-	task_dispatching_ok = TRUE;
+	task_runs_long ();
 }
 
 
