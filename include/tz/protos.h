@@ -36,9 +36,9 @@ void amode_deff(void);
 void autofire_catch(void);
 void autofire_add_ball(void);
 /* ballsave.c */
-void ballsave_add_time(U8 secs);
-void ballsave_disable(void);
-void ballsave_launch(void);
+__common__ void ballsave_add_time(U8 secs);
+__common__ void ballsave_disable(void);
+__common__ void ballsave_launch(void);
 /* clock.c */
 void tz_dump_clock(void);
 void tz_clock_start_forward(void);
