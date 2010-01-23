@@ -125,6 +125,7 @@ seg_page_t *seg_secondary;
 /** The page number for the next page that will be given out */
 U8 seg_alloc_pageid;
 
+U8 seg_col;
 
 /**
  * Handle the realtime update of the segment displays.
@@ -135,15 +136,12 @@ U8 seg_alloc_pageid;
  */
 void seg_rtt (void)
 {
-#ifdef __m6809__
-	register U8 col asm ("d");
-#else
-	register U8 col;
+#ifndef __m6809__
 	register segbits_t *valp;
 #endif
 
-	col = get_sys_time () & (SEG_SECTION_SIZE - 1);
-	writeb (WPC_ALPHA_POS, col);
+	seg_col = (seg_col + 1) % SEG_SECTION_SIZE;
+	writeb (WPC_ALPHA_POS, seg_col);
 
 #ifdef __m6809__
 	asm ("ldx\t*_seg_visible_page");
@@ -154,7 +152,7 @@ void seg_rtt (void)
 	asm ("ldd\t32,x");
 	asm ("std\t16366");
 #else
-	valp = &(*seg_visible_page)[0][col];
+	valp = &(*seg_visible_page)[0][seg_col];
 	writew (WPC_ALPHA_ROW1, *valp);
 	writew (WPC_ALPHA_ROW2, *(valp + SEG_SECTION_SIZE));
 #endif
