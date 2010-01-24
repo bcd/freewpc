@@ -261,7 +261,7 @@ foreach $set (keys %functionhash) {
 			print FH "   if (!${module}_$set ()) return FALSE;\n";
 		}
 		else {
-			my $idx = sprintf "0x%04X", $debug_id;
+			my $idx = sprintf "0x%04XUL", $debug_id;
 			print FH "   callset_debug ($idx);\n";
 			$debug_id++;
 			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
