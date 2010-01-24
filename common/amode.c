@@ -239,17 +239,23 @@ __attribute__((noinline)) void amode_page_change (S8 delta)
 
 CALLSET_ENTRY (amode, sw_left_button)
 {
-	amode_flipper_sound ();
-	if (amode_page_changed == 0)
-		amode_page_change (-1);
+	if (deff_get_active () == DEFF_AMODE)
+	{
+		amode_flipper_sound ();
+		if (amode_page_changed == 0)
+			amode_page_change (-1);
+	}
 }
 
 
 CALLSET_ENTRY (amode, sw_right_button)
 {
-	amode_flipper_sound ();
-	if (amode_page_changed == 0)
-		amode_page_change (1);
+	if (deff_get_active () == DEFF_AMODE)
+	{
+		amode_flipper_sound ();
+		if (amode_page_changed == 0)
+			amode_page_change (1);
+	}
 }
 
 
