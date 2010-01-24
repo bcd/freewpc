@@ -25,5 +25,6 @@ void flipper_enable (void);
 void flipper_disable (void);
 void flipper_init (void);
 void fliptronic_rtt (void);
+void fliptronic_ball_search (void);
 
 #endif /* _SYS_FLIP_H */
