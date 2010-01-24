@@ -1,6 +1,6 @@
 #!/bin/sh
-# Find files that have committed in 2009.  Then see if their copyright
-# headers are up-to-date, and if not, add 2009 to them.
+# Find files that were updated in 2010.  Then see if their copyright
+# headers are up-to-date, and if not, add 2010 to them.
 
 result() {
 	case $1 in
@@ -23,15 +23,15 @@ for f in `git ls-files`; do
 	esac
 
 	# If the header already includes the latest year, nothing to do.
-	grep -m 1 "Copyright.*2009" "$f" > /dev/null 2>&1
+	grep -m 1 "Copyright.*2010" "$f" > /dev/null 2>&1
 	if [ "$?" != "0" ]; then
 		# Hmm, this file might need updating.
 		# Get the time that the file was last modified and committed.
 		when=`git log --no-renames -n 1 "$f" | grep -m 1 "^Date:"`
-		# See if it was updated in 2009.
-		echo $when | grep -m 1 "2009" > /dev/null
+		# See if it was updated in 2010.
+		echo $when | grep -m 1 "2010" > /dev/null
 		if [ "$?" = "0" ]; then
-			# Yes, it has changed and 2009 isn't in the header...
+			# Yes, it has changed and 2010 isn't in the header...
 			# Is there at least some copyright statement?
 			grep -m 1 "Copyright.*200[56789]" "$f" > /dev/null 2>&1
 			if [ "$?" != "0" ]; then
@@ -39,8 +39,8 @@ for f in `git ls-files`; do
 			else
 				result "Copyright needs updating";
 				if [ "$1" != "-p" ]; then
-					sed -i -e "s/\(Copyright 200[5-8]\)-200[5-8]/\1-2009/" \
-						-e "s/Copyright 200[ ,0-8]*[0-8]/&, 2009/" "$f"
+					sed -i -e "s/\(Copyright 200[5-8]\)-200[5-9]/\1-2010/" \
+						-e "s/Copyright 200[ ,0-9]*[0-9]/&, 2010/" "$f"
 				fi
 			fi
 		else
