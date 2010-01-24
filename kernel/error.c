@@ -74,7 +74,7 @@ void fatal (errcode_t error_code)
 	do mono display at this point.   Also note that idle
 	cannot run anymore, because task scheduling can't proceed
 	without the system clock moving. */
-	idle_ok = 0;
+	periodic_ok = 0;
 	disable_interrupts ();
 
 	/* Reset hardware outputs */
