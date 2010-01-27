@@ -126,13 +126,12 @@ static void deff_start_task (const deff_t *deff)
 
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
-	if (tp == NULL)
+	if (tp)
 	{
-		deff_debug ("could not spawn deff task!\n");
+		if (deff->page != 0xFF)
+			task_set_rom_page (tp, deff->page);
+		task_set_duration (tp, TASK_DURATION_INF);
 	}
-
-	if (deff->page != 0xFF)
-		task_set_rom_page (tp, deff->page);
 }
 
 
