@@ -533,14 +533,15 @@ CALLSET_ENTRY (deff, flipper_abort)
 		{
 			dbprintf ("Deff %d aborted.\n", deff_running);
 			deff_stop (deff_running);
-			deff_update ();
+			deff_queue_service ();
 		}
 	}
 }
 
 
-CALLSET_ENTRY (deff, idle_every_100ms)
+CALLSET_ENTRY (deff, end_ball)
 {
-	deff_queue_service ();
+	/* At the beginning of end_ball, stop all display effects.
+	But allow things like "round completion" screens play out. */
 }
 
