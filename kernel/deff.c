@@ -154,8 +154,7 @@ void deff_queue_reset (void)
 	{
 		dq->id = DEFF_NULL;
 		dq->timeout = 0;
-		dq++;
-	} while (dq < deff_queue + MAX_QUEUED_DEFFS);
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
 }
 
 
@@ -172,11 +171,14 @@ struct deff_queue_entry *deff_queue_find (U8 id)
 	{
 		if (dq->id == id)
 			return dq;
-	} while (dq < deff_queue + MAX_QUEUED_DEFFS);
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
 	return NULL;
 }
 
 
+/**
+ * Find the display queue entry with the highest priority.
+ */
 struct deff_queue_entry *deff_queue_find_priority (void)
 {
 	struct deff_queue_entry *dq = deff_queue;
@@ -203,7 +205,7 @@ struct deff_queue_entry *deff_queue_find_priority (void)
 				}
 			}
 		}
-	} while (dq < deff_queue + MAX_QUEUED_DEFFS);
+	} while (++dq < deff_queue + MAX_QUEUED_DEFFS);
 	return answer;
 }
 
@@ -215,10 +217,13 @@ void deff_queue_add (U8 id, U16 timeout)
 {
 	struct deff_queue_entry *dq;
 
+	/* Ensure that no entry is added to the queue twice.
+	If it's already in there, just return. */
 	dq = deff_queue_find (id);
 	if (dq)
 		return;
 
+	/* Find and initialize a free entry */
 	dq = deff_queue_find (DEFF_NULL);
 	if (dq)
 	{
@@ -245,9 +250,15 @@ void deff_queue_delete (U8 id)
 /**
  * Scan the display effect table to see if any pending requests
  * can now be satisfied.
+ *
+ * This is called anytime the running display effect exits or is
+ * stopped.
  */
 void deff_queue_service (void)
 {
+	/* Find the highest priority effect in the queue.
+	If there is such, start it if its priority exceeds that
+	of the currently display effect. */
 	struct deff_queue_entry *dq = deff_queue_find_priority ();
 	if (dq)
 	{
@@ -256,9 +267,14 @@ void deff_queue_service (void)
 		{
 			dbprintf ("deff_queue_service starting %d\n", dq->id);
 			deff_running = dq->id;
+			dq->id = dq->timeout = 0;
 			deff_start_task (deff);
+			return;
 		}
 	}
+
+	/* No queued effect can run now, so try a background update */
+	deff_update ();
 }
 
 
@@ -276,13 +292,16 @@ void deff_start (deffnum_t id)
 	{
 		if (deff->flags & D_RESTARTABLE)
 			deff_start_task (deff);
-		else
-			return;
+		return;
 	}
 
+	/* Nothing to do if it's already queued */
+	if (deff_queue_find (id))
+		return;
+
 	/* This effect can take the display now if it has priority.
-	Otherwise, if it wants to wait, a background retry task is
-	started. */
+	Else, if it wants to wait (because later it might have
+	priority), then it is queued.  Else, forget about it. */
 	if (deff_prio < deff->prio)
 	{
 		deff_prio = deff->prio;
@@ -301,7 +320,7 @@ void deff_start (deffnum_t id)
 }
 
 
-/** Stop any display effect.
+/** Stop a display effect.
  * If the effect is currently running, the task is killed and something else
  * restarted.
  * If it is queued up, waiting to run, then that request is cancelled.
@@ -314,31 +333,31 @@ void deff_stop (deffnum_t dn)
 	{
 		deff_stop_task ();
 		deff_running = 0;
-		deff_update ();
+		deff_queue_service ();
+	}
+	else
+	{
+		deff_queue_delete (dn);
 	}
 }
 
 
-/** Restart a deff.  If the deff is already running, its thread is stopped
-and then restarted.  If it is queued but not active, nothing happens.
-If it isn't even in the queue, then it is treated just like deff_start(). */
+/**
+ * Restart a deff.  If the deff is already running, its thread is stopped
+ * and then restarted.  Otherwise, it is treated just like deff_start().
+ *
+ * This function is identical to deff_start(), but can be used on a deff
+ * that is not ordinarily restartable.
+ */
 void deff_restart (deffnum_t dn)
 {
 	deff_debug ("deff_restart\n");
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_RESTART, dn);
 
 	if (deff_running == dn)
-	{
 		deff_start_task (&deff_table[dn]);
-	}
-	else if (0) /* deff_pending_p (dn) */
-	{
-		/* TODO : See if the request is pending and cancel it. */
-	}
 	else
-	{
 		deff_start (dn);
-	}
 }
 
 
@@ -353,16 +372,12 @@ __noreturn__ void deff_exit (void)
 	with GID_DEFF in the same context. */
 	task_setgid (GID_DEFF_EXITING);
 
-	/* Drop priority and clear that we were running*/
+	/* Drop priority and clear that we were running */
 	deff_running = 0;
 	deff_prio = 0;
 
 	/* Check for pending effects that can be started now */
 	deff_queue_service ();
-
-	/* Restart background effects */
-	effect_update_request ();
-
 	task_exit ();
 }
 
@@ -401,7 +416,7 @@ void deff_nice (enum _priority prio)
 	deff_prio = prio;
 
 	/* Force an update: this task may not be the best anymore */
-	deff_update ();
+	deff_queue_service ();
 }
 
 
@@ -456,6 +471,9 @@ void deff_start_bg (deffnum_t dn, enum _priority prio)
 
 /**
  * Request that the background display effect be updated.
+ *
+ * This finds a display effect to run when nothing has been explicitly
+ * started or is in the queue.  It ensures that something is always running.
  */
 void deff_update (void)
 {
