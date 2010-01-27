@@ -409,8 +409,9 @@ void deff_swap_low_high (S8 count, task_ticks_t delay)
 This may cause it to be preempted by something more important. */
 void deff_nice (enum _priority prio)
 {
-	/* TODO - verify that this is only being called from
-	a transient display effect */
+	/* Verify that this is called from the running effect */
+	if (task_getgid () != GID_DEFF)
+		return;
 
 	/* Change the current priority */
 	deff_prio = prio;
