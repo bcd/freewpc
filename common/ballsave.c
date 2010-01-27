@@ -69,7 +69,9 @@ void ballsave_timer_task (void)
 
 void ballsave_add_time (U8 secs)
 {
-	if (timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer))
+	if (in_tilt)
+		return;
+	else if (timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer))
 	{
 		timed_mode_extend (&ball_save_timer, secs, 20);
 	}
