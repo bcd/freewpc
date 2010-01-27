@@ -474,7 +474,7 @@ void device_request_kick (device_t *dev)
 		dbprintf ("Kick request invalid\n");
 	}
 	if (gid != task_getgid ())
-		task_recreate_gid (gid, device_update);
+		task_recreate_gid_while (gid, device_update, TASK_DURATION_INF);
 }
 
 
@@ -505,7 +505,7 @@ void device_request_empty (device_t *dev)
 		dev->max_count = dev->props->init_max_count;
 	}
 	if (gid != task_getgid ())
-		task_recreate_gid (gid, device_update);
+		task_recreate_gid_while (gid, device_update, TASK_DURATION_INF);
 }
 
 
@@ -674,7 +674,7 @@ void device_sw_handler (U8 devno)
 		return;
 
 	timer_kill_gid (GID_DEVICE_SWITCH_WILL_FOLLOW);
-	task_recreate_gid (DEVICE_GID (devno), device_update);
+	task_recreate_gid_while (DEVICE_GID (devno), device_update, TASK_DURATION_INF);
 }
 
 
