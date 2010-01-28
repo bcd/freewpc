@@ -49,14 +49,12 @@
 #GCC_VERSION := 4.2.3
 GCC_VERSION := 4.3.4
 
-# Uncomment if you want to build a FREE ONLY ROM.
-#FREE_ONLY := y
-
 # If you have special flags to pass to the compiler, define them here.
 #EXTRA_CFLAGS += -save-temps
 #EXTRA_CFLAGS += -DFASTBOOT
 #EXTRA_CFLAGS += -DCONFIG_DEBUG_STACK
 #EXTRA_CFLAGS += -DCONFIG_PARALLEL_DEBUG
+#EXTRA_CFLAGS += -DFREE_ONLY
 
 # For debugging the compiler itself.
 #DEBUG_COMPILER := y
