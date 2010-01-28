@@ -43,7 +43,7 @@ is paused */
 U8 db_paused;
 
 #ifndef CONFIG_INSPECTOR
-void inspector_deff (void) {}
+void inspector_deff (void) { deff_exit (); }
 #endif
 
 
