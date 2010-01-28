@@ -189,6 +189,7 @@ CALLSET_ENTRY (goalround, goal_shot)
 	}
 	else
 	{
+		deff_start (DEFF_UNLIT_GOAL);
 		sample_start (SND_UNLIT_GOAL, SL_2S);
 	}
 }
