@@ -108,7 +108,7 @@ void tv_collect (void)
 #if 1
 	/* Until the logic below is implemented, just go through them in order. */
 	tv_award_selected = tv_count;
-	while (tv_award_selected > TV_AWARD_COUNT)
+	while (tv_award_selected >= TV_AWARD_COUNT)
 		tv_award_selected -= TV_AWARD_COUNT;
 #else
 	/* The TV Awards are pseudorandom, like AFM's Stroke of Luck.
