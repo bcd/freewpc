@@ -243,10 +243,18 @@ void mode_rotate_next (void)
 	U8 lamp;
 
 	lamp_flash_off (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
-	mode_ready++;
-	lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
-	if (lamp == LAMP_END)
-		mode_ready = 0;
+	for (;;)
+	{
+		mode_ready++;
+		lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
+		if (lamp == LAMP_END)
+		{
+			mode_ready = 0;
+			lamp = lamplist_index (LAMPLIST_BALL_PANELS, mode_ready);
+		}
+		if (!lamp_test (lamp))
+			break;
+	}
 	mode_flash_next ();
 }
 
