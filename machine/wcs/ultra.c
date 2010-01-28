@@ -329,13 +329,13 @@ CALLSET_ENTRY (ultra, start_player)
 {
 	ultra_awards_finished = 0;
 	ultra_award_next = 0;
-	memset (ultra_awards_enabled, 0, sizeof (ultra_awards_enabled));
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_off);
 	/* init ultra_mania_awards_enabled to 2X max */
 }
 
 CALLSET_ENTRY (ultra, start_ball)
 {
+	memset (ultra_awards_enabled, 0, sizeof (ultra_awards_enabled));
 	lamplist_apply (LAMPLIST_ULTRA_MODES, lamp_flash_off);
 	flag_off (FLAG_ULTRA_MANIA_RUNNING);
 }
