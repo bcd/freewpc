@@ -45,6 +45,14 @@ loop_count:: .blkw 1
 		; total CPU time.
 		ldd	_sys_time
 		subd	start_time
+		aslb
+		rola
+		aslb
+		rola
+		aslb
+		rola
+		aslb
+		rola
 		std	_sched_test_count
 
 		; IRQ load = (exec_time - 290) / exec_time
