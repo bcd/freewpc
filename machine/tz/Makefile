@@ -43,7 +43,7 @@ ROM_PAGE_COUNT = 32
 #################################################
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 85
+MACHINE_MINOR = 86
 
 PINMAME_MACHINE = tz_92
 
