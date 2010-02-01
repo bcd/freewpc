@@ -148,6 +148,36 @@ void db_periodic (void)
 }
 
 
+/**
+ * Handle a breakpoint.  The system is stopped until the user forces it
+ * to continue, either by pressing 'p' in the debug console, or presses
+ * the Start Button.  Interrupt-level functions continue to run while
+ * paused; only regular task scheduling is paused.  In order to poll for
+ * the continue, we have to invoke the switch and debugger periodic
+ * functions.
+ */
+void bpt_hit (void)
+{
+	db_paused = 1;
+	barrier ();
+	while (db_paused == 1)
+	{
+		if (switch_poll (SW_START_BUTTON))
+		{
+			while (switch_poll (SW_START_BUTTON))
+				switch_idle ();
+			db_paused = 0;
+		}
+		else
+		{
+			switch_idle ();
+			db_periodic ();
+			task_runs_long ();
+		}
+	}
+}
+
+
 /** Initialize the debugger */
 void db_init (void)
 {

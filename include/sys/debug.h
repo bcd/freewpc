@@ -63,6 +63,7 @@ extern inline U8 wpc_debug_read (void)
 #endif
 }
 
+extern U8 db_paused;
 
 __common__ void db_init (void);
 __common__ void db_dump_all (void);
@@ -70,5 +71,15 @@ __common__ void db_periodic (void);
 extern void (*db_puts) (const char *s);
 void db_puts_orkin (const char *s);
 void db_puts_parallel (const char *s);
+
+void bpt_init (void);
+void bpt_clear (void);
+void bpt_set (void *addr, U8 page);
+
+#ifdef CONFIG_BPT
+#define bpt()  asm ("jsr\t*bpt_handler")
+#else
+#define bpt()
+#endif
 
 #endif /* _SYS_DEBUG_H */
