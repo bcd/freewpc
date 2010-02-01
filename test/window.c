@@ -1312,15 +1312,13 @@ void lamplist_draw (void)
 void lamplist_update (void)
 {
 	lamp_all_off ();
-#if 0
 	if (lamplist_update_mode >= 6)
 	{
-		U8 *lamp = lamplist_first_entry (menu_selection);
-		lamp_on (*lamp);
-		lamp = lamplist_next_entry (menu_selection, lamp);
-		lamp_on (*lamp);
+		U8 lamp = lamplist_index (menu_selection, 0);
+		lamp_on (lamp);
+		lamp = lamplist_index (menu_selection, 1);
+		lamp_on (lamp);
 	}
-#endif
 	for (;;)
 	{
 		switch (lamplist_update_mode)
