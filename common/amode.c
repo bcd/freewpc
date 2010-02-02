@@ -176,7 +176,7 @@ void amode_tz_page (void)
 	dmd_map_lookaside (0);
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
-	dmd_text_raise ();
+	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
 
 	for (n = 0; n < 40; n++)

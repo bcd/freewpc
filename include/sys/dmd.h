@@ -287,8 +287,8 @@ void frame_draw (U16 id);
 void frame_draw2 (U16 id);
 void bmp_draw (U8 x, U8 y, U16 id);
 
-__transition__ void dmd_shadow_copy (void);
-__transition__ void dmd_text_raise (void);
+__transition__ void dmd_text_outline (void);
+__transition__ void dmd_text_blur (void);
 __transition__ void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src);
 __transition__ void dmd_overlay2 (dmd_pagepair_t dst, U8 src);
 __transition__ void dmd_overlay (dmd_pagepair_t dst, U8 src);

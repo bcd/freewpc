@@ -40,7 +40,7 @@ extern void dmd_shadow (void);
  * On input, provide a mono image in the low-mapped buffer.
  * On output, the high mapped buffer will contain an alpha mask.
  */
-void dmd_shadow_copy (void)
+void dmd_text_outline (void)
 {
 	/* Create the shadow plane in the high page */
 	dmd_shadow ();
@@ -53,7 +53,10 @@ void dmd_shadow_copy (void)
 }
 
 
-void dmd_text_raise (void)
+/**
+ *
+ */
+void dmd_text_blur (void)
 {
 	dmd_shadow ();
 	dmd_flip_low_high ();
@@ -136,8 +139,8 @@ void dmd_overlay (dmd_pagepair_t dst, U8 src)
 
 
 /**
- * Allocate a new pair of DMD pages that are initialized
- * with the current visible contents.
+ * Allocate and map a new pair of DMD pages that are initialized
+ * with the current mapped contents.
  */
 void dmd_dup_mapped (void)
 {
