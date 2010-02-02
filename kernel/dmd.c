@@ -280,7 +280,7 @@ void dmd_map_low_high (dmd_pagenum_t page)
 /**
  * Allocate and map two different pages.
  */
-void dmd_alloc_low_high (void)
+void dmd_alloc_pair (void)
 {
 	wpc_dmd_set_low_page (dmd_alloc ());	
 	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);	
@@ -457,7 +457,7 @@ void dmd_alloc_low_clean (void)
 
 void dmd_alloc_pair_clean (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page (dmd_low_buffer);
 	dmd_clean_page (dmd_high_buffer);
 }

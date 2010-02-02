@@ -144,7 +144,7 @@ void dmd_dup_mapped (void)
 	dmd_pagepair_t old, new;
 
 	old = wpc_dmd_get_mapped ();
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	new = wpc_dmd_get_mapped ();
 
 	wpc_dmd_set_low_page (old.u.second);

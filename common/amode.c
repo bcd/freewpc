@@ -112,7 +112,7 @@ void amode_logo_page (void)
 
 	for (fno = IMG_FREEWPC_SMALL; fno <= IMG_FREEWPC; fno += 2)
 	{
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
 		task_sleep (TIME_66MS);

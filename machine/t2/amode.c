@@ -50,7 +50,7 @@ void amode_leff (void)
 
 void amode_deff (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (IMG_FREEWPC);
 	dmd_show2 ();
 	for (;;)

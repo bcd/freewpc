@@ -36,7 +36,7 @@ CALLSET_ENTRY (wcs_amode, amode_page)
 	font_render_string_center (&font_fixed6, 84, 21, "STRIKER");
 	dmd_shadow_copy ();
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (IMG_STRIKER);
 	dmd_overlay_alpha (wpc_dmd_get_mapped (), 0);
 	dmd_show2 ();
@@ -52,7 +52,7 @@ void amode_pgj_logo (void)
 	font_render_string_center (&font_var5, 64, 27, "YEARS");
 	dmd_shadow_copy ();
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_draw_fif (fif_pgj);
 	dmd_overlay_alpha (wpc_dmd_get_mapped (), 0);
 	dmd_show2 ();
