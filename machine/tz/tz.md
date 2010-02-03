@@ -222,7 +222,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 [drives]
 H1: Slot
 H2: Rocket Kicker
-H3: Autofire, nosearch
+H3: Autofire, nosearch, launch
 H4: Popper
 H5: Right Ramp Div., duty(SOL_DUTY_50), time(TIME_1S)
 H6: Gumball Div.
