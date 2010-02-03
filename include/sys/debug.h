@@ -72,14 +72,20 @@ extern void (*db_puts) (const char *s);
 void db_puts_orkin (const char *s);
 void db_puts_parallel (const char *s);
 
-void bpt_init (void);
-void bpt_clear (void);
-void bpt_set (void *addr, U8 page);
+#ifdef CONFIG_NATIVE
+#undef CONFIG_BPT
+#endif
 
 #ifdef CONFIG_BPT
 #define bpt()  asm ("jsr\t*bpt_handler")
+void bpt_init (void);
+void bpt_clear (void);
+void bpt_set (void *addr, U8 page);
 #else
 #define bpt()
+#define bpt_init()
+#define bpt_clear()
+#define bpt_set(addr, page)
 #endif
 
 #endif /* _SYS_DEBUG_H */
