@@ -58,6 +58,18 @@ void db_dump_all (void)
 #endif
 
 
+/**
+ * Toggle the system pause.
+ */
+void db_toggle_pause (void)
+{
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	lamplist_apply (LAMPLIST_ALL, lamp_toggle);
+	db_paused = 1 - db_paused;
+}
+
+
 /** Check for debug input periodically */
 void db_periodic (void)
 {
@@ -121,7 +133,7 @@ void db_periodic (void)
 						task_sleep (TIME_16MS);
 					}
 #else
-					db_paused = 1 - db_paused;
+					db_toggle_pause ();
 					while (db_paused == 1)
 					{
 						task_runs_long ();
@@ -158,7 +170,7 @@ void db_periodic (void)
  */
 void bpt_hit (void)
 {
-	db_paused = 1;
+	db_toggle_pause ();
 	barrier ();
 	while (db_paused == 1)
 	{
@@ -166,7 +178,7 @@ void bpt_hit (void)
 		{
 			while (switch_poll (SW_START_BUTTON))
 				switch_idle ();
-			db_paused = 0;
+			db_toggle_pause ();
 		}
 		else
 		{
