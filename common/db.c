@@ -174,6 +174,7 @@ void bpt_hit (void)
 	barrier ();
 	while (db_paused == 1)
 	{
+#ifdef SW_START_BUTTON
 		if (switch_poll (SW_START_BUTTON))
 		{
 			while (switch_poll (SW_START_BUTTON))
@@ -181,6 +182,7 @@ void bpt_hit (void)
 			db_toggle_pause ();
 		}
 		else
+#endif
 		{
 			switch_idle ();
 			db_periodic ();
