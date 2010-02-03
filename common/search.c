@@ -92,9 +92,6 @@ static bool ball_search_solenoid_ok (U8 sol)
 #ifdef MACHINE_KNOCKER_SOLENOID
 		 || (sol == MACHINE_KNOCKER_SOLENOID)
 #endif
-#ifdef MACHINE_LAUNCH_SOLENOID
-		 || (sol == MACHINE_LAUNCH_SOLENOID)
-#endif
 #ifdef MACHINE_SOL_NOSEARCHP
 		 || (MACHINE_SOL_NOSEARCHP(sol))
 #endif
