@@ -34,6 +34,7 @@
  */
 #include <freewpc.h>
 
+void bpt_hit (void);
 
 /** Nonzero when the system (all tasks except for interrupts)
 is paused */
@@ -63,97 +64,45 @@ void db_dump_all (void)
  */
 void db_toggle_pause (void)
 {
-	dmd_invert_page (dmd_low_buffer);
-	dmd_invert_page (dmd_high_buffer);
-	lamplist_apply (LAMPLIST_ALL, lamp_toggle);
 	db_paused = 1 - db_paused;
+	barrier ();
 }
 
 
 /** Check for debug input periodically */
 void db_periodic (void)
 {
+	extern void MACHINE_DEBUGGER_HOOK (U8);
+
+#ifdef CONFIG_BPT
+	if (!in_test && switch_poll (SW_ESCAPE))
+		bpt_hit ();
+#endif
+
 #ifdef DEBUGGER
+	if (wpc_debug_read_ready ())
 	{
-		if (wpc_debug_read_ready ())
+		char c = wpc_debug_read ();
+		db_puts = db_puts_orkin;
+		switch (c)
 		{
-			char c = wpc_debug_read ();
-			db_puts = db_puts_orkin;
-			switch (c)
-			{
-				case 'a':
-					/* Dump everything */
-					db_dump_all ();
-					break;
+			case 'a':
+				/* Dump all debugging information */
+				db_dump_all ();
+				break;
 
-				case 'm':
-					/* Dump the multiball devices */
-					SECTION_VOIDCALL (__common__, device_debug);
-					break;
+			case 'p':
+				/* Stop the system */
+				bpt_hit ();
+				break;
 
-				case 't':
-					/* Dump the task table */
-					VOIDCALL (task_dump);
-					break;
-
-				case 'g':
-					/* Dump the game state */
-					VOIDCALL (dump_game);
-					break;
-
-				case 'd':
-					/* Dump the running/queued display effects */
-					VOIDCALL (dump_deffs);
-					break;
-
-				case 'q':
-					/* Dump the switch queue */
-					switch_queue_dump ();
-					break;
-
-				case 'S':
-					/* Dump the solenoid request queue */
-					VOIDCALL (sol_req_dump);
-					break;
-
-				case 'T':
-					/* Dump the triac states */
-					VOIDCALL (triac_dump);
-					break;
-
-				case 'p':
-				{
-					/* Toggle the pause state.  When paused, tasks
-					do not run and the system polls for debugger
-					commands in a hard loop. */
-#ifdef CONFIG_NATIVE
-					extern char linux_interface_readchar (void);
-					while (linux_interface_readchar () != 'p')
-					{
-						task_sleep (TIME_16MS);
-					}
-#else
-					db_toggle_pause ();
-					while (db_paused == 1)
-					{
-						task_runs_long ();
-						db_periodic ();
-					}
-#endif
-					break;
-				}
-
-				default:
-				{
+			default:
 #ifdef MACHINE_DEBUGGER_HOOK
-					/* Allow the machine to define additional commands.
-					 * This function must reside in the system page. */
-					extern void MACHINE_DEBUGGER_HOOK (U8);
-					MACHINE_DEBUGGER_HOOK (c);
+				/* Allow the machine to define additional commands.
+				 * This function must reside in the system page. */
+				MACHINE_DEBUGGER_HOOK (c);
 #endif
-					break;
-				}
-			}
+				break;
 		}
 	}
 #endif /* DEBUGGER */
@@ -161,9 +110,21 @@ void db_periodic (void)
 
 
 /**
+ * Debounce a button press, waiting for it to clear.
+ */
+void key_debounce (U8 sw)
+{
+	U16 x;
+	for (x=0x1000; x ; --x)
+		task_runs_long ();
+	while (switch_poll (sw))
+		switch_idle ();
+}
+
+/**
  * Handle a breakpoint.  The system is stopped until the user forces it
  * to continue, either by pressing 'p' in the debug console, or presses
- * the Start Button.  Interrupt-level functions continue to run while
+ * the Escape Button.  Interrupt-level functions continue to run while
  * paused; only regular task scheduling is paused.  In order to poll for
  * the continue, we have to invoke the switch and debugger periodic
  * functions.
@@ -171,18 +132,35 @@ void db_periodic (void)
 void bpt_hit (void)
 {
 	db_toggle_pause ();
-	barrier ();
+	key_debounce (SW_ESCAPE);
 	while (db_paused == 1)
 	{
-#ifdef SW_START_BUTTON
-		if (switch_poll (SW_START_BUTTON))
+		if (switch_poll (SW_ESCAPE))
 		{
-			while (switch_poll (SW_START_BUTTON))
-				switch_idle ();
+			key_debounce (SW_ESCAPE);
+			dbprintf ("Debug: Exit\n");
+			/* Escape = exit debugger */
 			db_toggle_pause ();
 		}
+		else if (switch_poll (SW_ENTER))
+		{
+			key_debounce (SW_ENTER);
+			dbprintf ("Debug: Enter\n");
+			/* Enter = change active field */
+		}
+		else if (switch_poll (SW_UP))
+		{
+			key_debounce (SW_UP);
+			dbprintf ("Debug: Up\n");
+			/* Up = increase field value */
+		}
+		else if (switch_poll (SW_DOWN))
+		{
+			key_debounce (SW_DOWN);
+			dbprintf ("Debug: Down\n");
+			/* Down = decrease field value */
+		}
 		else
-#endif
 		{
 			switch_idle ();
 			db_periodic ();

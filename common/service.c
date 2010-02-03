@@ -93,6 +93,7 @@ static bool coin_door_warning_needed (void)
 
 CALLSET_ENTRY (service, sw_escape)
 {
+#ifndef CONFIG_BPT
 	if (coin_door_warning_needed ())
 		return;
 	else if (!in_test)
@@ -100,6 +101,7 @@ CALLSET_ENTRY (service, sw_escape)
 		add_credit ();
 		audit_increment (&system_audits.service_credits);
 	}
+#endif
 }
 
 CALLSET_ENTRY (service, sw_down)
