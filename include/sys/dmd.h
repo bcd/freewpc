@@ -286,9 +286,10 @@ void bmp_draw (U8 x, U8 y, U16 id);
 
 __transition__ void dmd_text_outline (void);
 __transition__ void dmd_text_blur (void);
-__transition__ void dmd_overlay_outline (dmd_pagepair_t dst);
-__transition__ void dmd_overlay_color (dmd_pagepair_t dst);
-__transition__ void dmd_overlay_onto_color (dmd_pagepair_t dst);
+__transition__ void dmd_overlay (void);
+__transition__ void dmd_overlay_outline (void);
+__transition__ void dmd_overlay_color (void);
+__transition__ void dmd_overlay_onto_color (void);
 __transition__ void dmd_dup_mapped (void);
 
 #ifdef __m6809__

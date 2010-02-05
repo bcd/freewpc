@@ -76,8 +76,9 @@ void dmd_text_blur (void)
  * the image to black.  Then the 1-color image is ORed
  * into both destination pages, for 100% intensity.
  */
-void dmd_overlay_outline (dmd_pagepair_t dst)
+void dmd_overlay_outline (void)
 {
+	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
 	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
 	wpc_dmd_set_low_page (dst.u.first);
 	dmd_and_page ();

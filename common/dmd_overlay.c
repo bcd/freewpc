@@ -33,8 +33,9 @@
  *
  * On output, the destination pages are also mapped.
  */
-void dmd_overlay_color (dmd_pagepair_t dst)
+void dmd_overlay_color (void)
 {
+	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
 	wpc_dmd_set_low_page (dst.u.second);
 	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
 	dmd_or_page ();
@@ -54,8 +55,9 @@ void dmd_overlay_color (dmd_pagepair_t dst)
  *
  * On output, the destination pages are also mapped.
  */
-void dmd_overlay_onto_color (dmd_pagepair_t dst)
+void dmd_overlay_onto_color (void)
 {
+	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
 	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
 
 	wpc_dmd_set_low_page (dst.u.second);

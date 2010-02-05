@@ -274,7 +274,7 @@ void scores_deff (void)
 			{
 				dmd_map_overlay ();
 				dmd_dup_mapped ();
-				dmd_overlay_color (wpc_dmd_get_mapped ());
+				dmd_overlay_color ();
 				callset_invoke (score_overlay);
 				dmd_show2 ();
 			}
