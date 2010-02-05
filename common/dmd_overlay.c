@@ -33,7 +33,7 @@
  *
  * On output, the destination pages are also mapped.
  */
-void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
+void dmd_overlay_color (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_low_page (dst.u.second);
 	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
@@ -54,7 +54,7 @@ void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
  *
  * On output, the destination pages are also mapped.
  */
-void dmd_overlay (dmd_pagepair_t dst, U8 src)
+void dmd_overlay_onto_color (dmd_pagepair_t dst, U8 src)
 {
 	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
 

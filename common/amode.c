@@ -182,7 +182,7 @@ void amode_tz_page (void)
 	for (n = 0; n < 40; n++)
 	{
 		dmd_dup_mapped ();
-		dmd_overlay (wpc_dmd_get_mapped (), 0);
+		dmd_overlay_onto_color (wpc_dmd_get_mapped (), 0);
 		star_draw ();
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
