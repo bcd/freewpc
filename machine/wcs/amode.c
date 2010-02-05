@@ -30,7 +30,7 @@ CALLSET_ENTRY (wcs_amode, start_without_credits)
 
 CALLSET_ENTRY (wcs_amode, amode_page)
 {
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 84, 9, "STARRING");
 	font_render_string_center (&font_fixed6, 84, 21, "STRIKER");
@@ -46,7 +46,7 @@ CALLSET_ENTRY (wcs_amode, amode_page)
 
 void amode_pgj_logo (void)
 {
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 44, 25, "10");
 	font_render_string_center (&font_var5, 64, 27, "YEARS");

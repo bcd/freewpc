@@ -250,7 +250,7 @@ void scores_deff (void)
 		 * player's score is drawn. */
 		/* TODO - I'd prefer to draw all players without flashing, and
 		 * use dark/bright colors to indicate player up. */
-		dmd_map_lookaside (0);
+		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		scores_draw_ball ();
 		scores_draw_current (0);
@@ -272,7 +272,7 @@ void scores_deff (void)
 #if (MACHINE_DMD == 1)
 			if (valid_playfield)
 			{
-				dmd_map_lookaside (0);
+				dmd_map_overlay ();
 				dmd_dup_mapped ();
 				dmd_overlay_color (wpc_dmd_get_mapped (), 0);
 				callset_invoke (score_overlay);

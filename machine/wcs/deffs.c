@@ -249,7 +249,7 @@ void dmd_flash (task_ticks_t delay)
 void lightning_test_deff (void)
 {
 #if 0
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 64, 16, "LIGHTNING TEST");
 	dmd_show_low ();

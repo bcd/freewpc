@@ -312,9 +312,9 @@ void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_sparse(p)
 #endif
 
-extern inline void dmd_map_lookaside (const U8 num)
+extern inline void dmd_map_overlay (void)
 {
-	dmd_map_low_high ( dmd_get_lookaside (num) );
+	dmd_map_low_high ( dmd_get_lookaside (0) );
 }
 
 

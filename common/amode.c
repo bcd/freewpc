@@ -173,7 +173,7 @@ void amode_tz_page (void)
 {
 	U8 n;
 
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
@@ -186,7 +186,7 @@ void amode_tz_page (void)
 		star_draw ();
 		dmd_show2 ();
 		task_sleep (TIME_100MS);
-		dmd_map_lookaside (0);
+		dmd_map_overlay ();
 	}
 	amode_page_end (0);
 }
