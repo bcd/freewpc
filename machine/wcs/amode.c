@@ -38,7 +38,7 @@ CALLSET_ENTRY (wcs_amode, amode_page)
 
 	dmd_alloc_pair ();
 	frame_draw (IMG_STRIKER);
-	dmd_overlay_outline (wpc_dmd_get_mapped (), 0);
+	dmd_overlay_outline (wpc_dmd_get_mapped ());
 	dmd_show2 ();
 	task_sleep_sec (5);
 }
@@ -54,7 +54,7 @@ void amode_pgj_logo (void)
 
 	dmd_alloc_pair ();
 	dmd_draw_fif (fif_pgj);
-	dmd_overlay_outline (wpc_dmd_get_mapped (), 0);
+	dmd_overlay_outline (wpc_dmd_get_mapped ());
 	dmd_show2 ();
 	task_sleep_sec (15);
 	deff_exit ();
