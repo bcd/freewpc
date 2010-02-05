@@ -311,7 +311,6 @@ void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_rle frame_decode_rle_c
 #define frame_decode_sparse(p)
 #endif
-void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
 
 extern inline void dmd_map_lookaside (const U8 num)
 {

@@ -605,35 +605,6 @@ void dmd_do_transition (void)
 
 
 /**
- * Apply the contents of a lookaside frame (2 planes)
- * onto the current frame mapped in low/high buffers.
- * The apply operation is performed twice, once per bitplane.
- *
- * An apply function could be an AND or OR operation.
- * Prior to the call, the low page points to the destination
- * buffer and the high page to the source/lookaside buffer.
- */
-void dmd_apply_lookaside2 (U8 num, void (*apply)(void))
-{
-	const U8 low = wpc_dmd_get_low_page ();
-	const U8 high = wpc_dmd_get_high_page ();
-	const U8 apply_low = dmd_get_lookaside (num);
-	const U8 apply_high = apply_low+1;
-
-	/* Note: this currently takes about 18000 cycles, or 9ms.  Each
-	 * page AND/OR operation is the majority of the time, each about
-	 * 9000 cycles or 4.5ms */
-	wpc_dmd_set_high_page (apply_low);
-	apply ();
-	wpc_dmd_set_low_page (high);
-	wpc_dmd_set_high_page (apply_high);
-	apply ();
-	wpc_dmd_set_low_page (low);
-	wpc_dmd_set_high_page (high);
-}
-
-
-/**
  * Schedule a transition.
  *
  * Normally, when dmd_show_low or dmd_show2 is invoked, the new pages

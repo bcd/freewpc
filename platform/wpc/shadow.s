@@ -97,16 +97,16 @@ shadow_copy_row:
 	inc	_task_dispatching_ok
 
 	; A second pass is needed to fix up the boundary cases.
-	; There are only 15 per row, and we don't wraparound.
+	; There are only 7 per row, and we don't wraparound.
 	; TODO - this is not quite right.  If we match on a pixel
 	; that was added above by shadowing, then we get a double
-	; sized shadow.  Disabling this code for now.  It really
-	; should be integrated into the above loop.
+	; sized shadow.  This code really should be integrated into
+	; the above loop.
 	ldx	#DMD_LOW_BUFFER + 17
 	lda	#30
 	sta	row_count
 shadow_copy_cols2_rows:
-	lda	#15
+	lda	#7
 	sta	words_per_row
 shadow_copy_cols2_row:
 	ldd	,x++         ; Load 16-bits from the source
