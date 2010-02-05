@@ -27,11 +27,7 @@
 #include <freewpc.h>
 
 /**
- * Overlay the contents of two DMD pages (SRC and SRC+1)
- * onto two other DMD pages, described by DST.
- * The destination pages do not have to be consecutive.
- *
- * On output, the destination pages are also mapped.
+ * Apply a color overlay onto the current color pages.
  */
 void dmd_overlay_color (void)
 {
@@ -49,11 +45,7 @@ void dmd_overlay_color (void)
 
 
 /**
- * Overlay the contents of a single DMD page, in SRC,
- * onto two other DMD pages, described by DST.
- * The destination pages do not have to be consecutive.
- *
- * On output, the destination pages are also mapped.
+ * Apply a mono overlay onto the current color pages.
  */
 void dmd_overlay_onto_color (void)
 {
@@ -68,5 +60,4 @@ void dmd_overlay_onto_color (void)
 
 	wpc_dmd_set_high_page (dst.u.second);
 }
-
 

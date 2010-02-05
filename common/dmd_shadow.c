@@ -26,7 +26,12 @@
 
 #include <freewpc.h>
 
-/* dmd_shadow() is the low-level routine to generate shadows. */
+/* dmd_shadow() is the low-level routine to generate a shadow copy.
+ * It takes an image in the low mapped page, and generates a new
+ * image in the high mapped page where all of the pixels are
+ * "blurred" outwards.  Inverting this new page produces an outline
+ * mask that can be ANDed to give fonts an outline.
+ */
 #ifdef __m6809__
 extern void dmd_shadow (void);
 #else
@@ -35,26 +40,33 @@ extern void dmd_shadow (void);
 
 
 /**
- * Generate a shadowed image.
+ * Generate a text outline.
  *
- * On input, provide a mono image in the low-mapped buffer.
- * On output, the high mapped buffer will contain an alpha mask.
+ * On input, provide a mono DMD page in the low-mapped buffer.  The
+ *    general use case is for this page to have only fonts on it.
+ *
+ * On output, the high mapped buffer will contain the outline mask.
+ *    This page can be ANDed to blacken the pixels needed to form
+ *    the outline.
  */
 void dmd_text_outline (void)
 {
-	/* Create the shadow plane in the high page */
 	dmd_shadow ();
-
-	/* Invert the shadow plane, converting it to a bitmask.
-	Each '1' bit indicates part of the background that must
-	be zeroed. */
 	dmd_invert_page (dmd_high_buffer);
 	dmd_flip_low_high ();
 }
 
 
 /**
+ * Generate a text blur.
  *
+ * On input, provide a mono DMD page in the low-mapped buffer.  The
+ *    general use case is for this page to have only fonts on it.
+ *
+ * On output, the high mapped buffer will contain a blurred copy.
+ *
+ * This function is identical to 'dmd_text_outline' without the
+ * inversion.
  */
 void dmd_text_blur (void)
 {
@@ -64,17 +76,13 @@ void dmd_text_blur (void)
 
 
 /**
- * Overlay a 1-color image plus alphamask onto a page pair.
+ * Apply an overlay that contains an outline font onto color pages.
  *
- * DST describes the destination pages, which do not have
- * to be consecutive.
- *
- * SRC is the lookaside ID of a page pair which contains
- * the 1-color image and alphamask, respectively.
- *
- * The alpha mask is applied first to reset some bits of
- * the image to black.  Then the 1-color image is ORed
- * into both destination pages, for 100% intensity.
+ * On entry, the low/high mapped pages point to a color image, with
+ * the low page having the darker bits and the high page having the
+ * brighter bits, as usual.  The overlay pages contain a mono
+ * font and its outline mask, respectively.  This function applies
+ * the overlay text onto the current working pages.
  */
 void dmd_overlay_outline (void)
 {
@@ -98,6 +106,12 @@ void dmd_overlay_outline (void)
 /**
  * Allocate and map a new pair of DMD pages that are initialized
  * with the current mapped contents.
+ *
+ * This function can be used instead of dmd_alloc_pair() when
+ * the new pages need to be initialized with an exact copy of
+ * the pages that are already visible.  This is useful when
+ * a new image needs to be rendered that is not very different
+ * from what is already showing.
  */
 void dmd_dup_mapped (void)
 {
@@ -116,5 +130,4 @@ void dmd_dup_mapped (void)
 
 	wpc_dmd_set_mapped (new);
 }
-
 
