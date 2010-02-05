@@ -97,48 +97,6 @@ void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src)
 
 
 /**
- * Overlay the contents of two DMD pages (SRC and SRC+1)
- * onto two other DMD pages, described by DST.
- * The destination pages do not have to be consecutive.
- *
- * On output, the destination pages are also mapped.
- */
-void dmd_overlay2 (dmd_pagepair_t dst, U8 src)
-{
-	wpc_dmd_set_low_page (dst.u.second);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) + 1 );
-	dmd_or_page ();
-
-	wpc_dmd_set_low_page (dst.u.first);
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
-	dmd_or_page ();
-
-	wpc_dmd_set_high_page (dst.u.second);
-}
-
-
-/**
- * Overlay the contents of a single DMD page, in SRC,
- * onto two other DMD pages, described by DST.
- * The destination pages do not have to be consecutive.
- *
- * On output, the destination pages are also mapped.
- */
-void dmd_overlay (dmd_pagepair_t dst, U8 src)
-{
-	wpc_dmd_set_high_page ( dmd_get_lookaside (src) );
-
-	wpc_dmd_set_low_page (dst.u.second);
-	dmd_or_page ();
-
-	wpc_dmd_set_low_page (dst.u.first);
-	dmd_or_page ();
-
-	wpc_dmd_set_high_page (dst.u.second);
-}
-
-
-/**
  * Allocate and map a new pair of DMD pages that are initialized
  * with the current mapped contents.
  */
