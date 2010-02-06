@@ -326,4 +326,53 @@ do { \
 } while (0)
 
 
+/*
+ * The parameters to a rough copy or erase operation.
+ * The user parameters are given in terms of pixels, however these
+ * must be converted into byte coordinates.
+ */
+
+struct dmd_rough_args
+{
+	U8 *dst;
+	U8 bwidth;
+	U8 height;
+};
+
+
+/**
+ * Copy a portion of the low DMD page into the high page.
+ *
+ * x,y denote the coordinates of the upper leftmost pixel.
+ * w is the width of the area to be copied in pixels.
+ * h is the height of the area to be copied in pixels.
+ * All pixel values should be a multiple of 8 for correct results.
+ */
+#define dmd_rough_copy(x, y, w, h) \
+	do { \
+		extern struct dmd_rough_args dmd_rough_args; \
+		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.height = h; \
+		dmd_rough_copy1 (); \
+	} while (0)
+
+/**
+ * Zero a portion of the low DMD page.
+ *
+ * x,y denote the coordinates of the upper leftmost pixel.
+ * width is the width of the area to be erased in pixels.
+ * height is the height of the area to be erased in pixels.
+ * All pixel values should be a multiple of 8 for correct results.
+ */
+#define dmd_rough_erase(x, y, width, height) \
+	do { \
+		extern struct dmd_rough_args dmd_rough_args; \
+		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.bwidth = w / CHAR_BIT; \
+		dmd_rough_args.height = h; \
+		dmd_rough_erase1 (); \
+	} while (0)
+
+
 #endif /* _SYS_DMD_H */
