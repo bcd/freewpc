@@ -405,7 +405,7 @@ void switch_sched_task (void)
 #ifdef DEBUGGER
 	if (sw < 72)
 	{
-	dbprintf ("Handling switch ");
+	dbprintf ("SW: ");
 	sprintf_far_string (names_of_switches + sw);
 	dbprintf1 ();
 #ifdef DEBUG_SWITCH_NUMBER
