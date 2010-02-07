@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,20 +20,17 @@
 
 /**
  * \file
- * \brief Simple debugger interface
+ * \brief Debug output driver
  *
- * This module reads/writes to the WPC debugger port.  A simple
- * companion utility has been written to display these messages,
- * and to pass input keystrokes to the running program.  This
- * requires a patched version of pinmame.  On real hardware, these
- * functions are not required.
+ * This module writes out debug messages (calls to dbprintf).
+ * By default, these are sent to the parallel port, which works
+ * in all versions of pinmame.
  *
- * Define DEBUGGER if you want to compile in debugger support.
- * Without it, the program will run slightly faster, and be
- * considerably smaller.
+ * If the Linux 'wpcdebug' program is running, messages are sent
+ * to it instead, over the WPC debug port.
  *
- * Also, you can now define CONFIG_PARALLEL_DEBUG if you want the
- * debug output to go out the parallel port instead.
+ * On real hardware, there is no mechanism at present to see these
+ * messages at all.
  */
 #include <freewpc.h>
 #ifdef __m6809__
@@ -42,21 +39,26 @@
 #include <native/math.h>
 #endif
 
+/** A pointer to the current output driver.  This must be
+initialized during startup before debug messages can be written.
+See db_init(). */
+void (*db_puts) (const char *s);
 
-/** Writes a constant string to the debugger port */
-void db_puts (const char *s)
+
+/** Writes a constant string to the ORKIN debugger port */
+void db_puts_orkin (const char *s)
 {
-#ifdef DEBUGGER
 	register U8 c;
-
 	while ((c = *s++) != '\0')
-	{
-#ifdef CONFIG_PARALLEL_DEBUG
-		pinio_parport_write (c);
-#else
 		wpc_debug_write (c);
-#endif
-	}
-#endif /* DEBUGGER */
+}
+
+
+/** Writes a constant string to the parallel port */
+void db_puts_parallel (const char *s)
+{
+	register U8 c;
+	while ((c = *s++) != '\0')
+		pinio_parport_write (c);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -31,9 +31,6 @@
  * Define DEBUGGER if you want to compile in debugger support.
  * Without it, the program will run slightly faster, and be
  * considerably smaller.
- *
- * Also, you can now define CONFIG_PARALLEL_DEBUG if you want the
- * debug output to go out the parallel port instead.
  */
 #include <freewpc.h>
 
@@ -46,17 +43,6 @@ U8 db_paused;
 void inspector_deff (void) { deff_exit (); }
 #endif
 
-
-/** Read a character from the debug port, and wait for it if
- * it isn't there yet. */
-U8 db_read_sync (void)
-{
-	while (!wpc_debug_read_ready ())
-	{
-		task_sleep (TIME_16MS);
-	}
-	return wpc_debug_read ();
-}
 
 #ifdef DEBUGGER
 void db_dump_all (void)
@@ -80,6 +66,7 @@ void db_periodic (void)
 		if (wpc_debug_read_ready ())
 		{
 			char c = wpc_debug_read ();
+			db_puts = db_puts_orkin;
 			switch (c)
 			{
 				case 'a':
@@ -121,22 +108,6 @@ void db_periodic (void)
 					/* Dump the triac states */
 					VOIDCALL (triac_dump);
 					break;
-
-				case 's':
-				{
-					/* Simulate a switch closure.  The switch column/row must be given
-					in ASCII.  This completes bypassing the real switch matrix and
-					just calls the handler. */
-					U8 row, col, sw;
-					task_pid_t tp;
-
-					row = db_read_sync ();
-					col = db_read_sync ();
-					sw = MAKE_SWITCH (col - '0', row - '0');
-
-					tp = task_create_gid (GID_SW_HANDLER, switch_sched_task);
-					task_set_arg (tp, sw);
-				}
 
 				case 'p':
 				{
@@ -184,7 +155,15 @@ void db_init (void)
 
 #ifdef DEBUGGER
 	/* Signal the debugger that the system has just reset. */
-	wpc_debug_write (0);
+	if (wpc_debug_read_ready ())
+	{
+		wpc_debug_write (0);
+		db_puts = db_puts_orkin;
+	}
+	else
+	{
+		db_puts = db_puts_parallel;
+	}
 
 	/* Announce myself to the world. */
 	dbprintf ("FreeWPC\n");

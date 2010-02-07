@@ -67,6 +67,8 @@ extern inline U8 wpc_debug_read (void)
 __common__ void db_init (void);
 __common__ void db_dump_all (void);
 __common__ void db_periodic (void);
-void db_puts (const char *s); /* moved to kernel for efficiency */
+extern void (*db_puts) (const char *s);
+void db_puts_orkin (const char *s);
+void db_puts_parallel (const char *s);
 
 #endif /* _SYS_DEBUG_H */
