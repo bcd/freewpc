@@ -23,6 +23,5 @@
 
 CALLSET_ENTRY (right_hole, dev_right_hole_enter)
 {
-	score (SC_100K);
 }
 
