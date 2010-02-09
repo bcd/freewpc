@@ -903,8 +903,9 @@ void device_lock_ball (device_t *dev)
 	device_enable_lock (dev);
 
 	/* Say that there is one less active ball on the
-	playfield now. */
-	live_balls--;
+	playfield now, assuming a ball is still physically present */
+	if (device_kickable_count (dev))
+		live_balls--;
 
 	/* If the trough is not empty, we can serve another ball from the
 	trough to continue play.  Otherwise, it will have to come from
