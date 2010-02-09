@@ -206,7 +206,18 @@ task_pid_t task_find_gid (task_gid_t gid)
 
 task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
 {
-	/* TODO */
+	int i;
+	int ok_to_return = 0;
+	for (i=0; i < MAX_TASKS; i++)
+	{
+		if ((task_data_table[i].gid == gid) && (task_data_table[i].pid != 0))
+		{
+			if (ok_to_return)
+				return task_data_table[i].pid;
+			else if (task_data_table[i].pid == last)
+				ok_to_return = 1;
+		}
+	}
 	return NULL;
 }
 
