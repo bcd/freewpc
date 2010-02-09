@@ -877,7 +877,6 @@ void device_unlock_ball (device_t *dev)
 	{
 		dbprintf ("Unlock ball in devno %d\n", dev->devno);
 		device_disable_lock (dev);
-		live_balls++;
 		device_request_kick (dev);
 	}
 	else
