@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -128,27 +128,50 @@ extern inline U8 rt_switch_poll (const switchnum_t sw_num)
 }
 
 
-/** Declare that another switch can follow the one that just closed. */
+/**
+ * Declare that another switch (or event) can follow the one that just closed.
+ *
+ * FIRST and SECOND indicate the switches/events; they do not have
+ * to match the event name exactly.
+ *
+ * TIMEOUT is a TIME constant that says how long at most it will take for
+ * the second event to occur after the first.
+ *
+ * event_should_follow() and event_can_follow() work identically.
+ */
 #define event_can_follow(first,second,timeout) \
 	timer_restart_free (GID_ ## first ## _FOLLOWED_BY_ ## second, timeout)
 
 #define event_should_follow(f,s,t) event_can_follow(f,s,t)
 
-/** Declare that a 'device switch' can follow the one that just closed.
- * This is equivalent to 'switch_can_follow', but it also freezes all
- * timers temporarily, since the ball is effectively not in play and
- * is eventually to a device, where timers will stop anyway. */
+
+/**
+ * Like event_can_follow(), but used when the second event is associated
+ * with a ball container.
+ *
+ * With this version, timers are paused, since the ball is "en route" to
+ * a ball device where it will be held up and timers will be paused anyway.
+ */
 #define device_switch_can_follow(first, second, timeout) \
 	do { \
 		event_can_follow (first, second, timeout); \
 		timer_restart_free (GID_DEVICE_SWITCH_WILL_FOLLOW, timeout); \
 	} while (0)
 
-/** Indicate that the second switch did indeed follow.
- * If this returns TRUE, it means it happened within the timeout after the
- * first switch closure.  This will always return FALSE during a
- * multiball, since multiple closures cannot assume that they are from
- * the same ball.
+
+/**
+ * Indicate that the second event did indeed follow.  This should be called
+ * from the second event handler.
+ *
+ * If this returns TRUE, it means that the second event did indeed happen
+ * after the first one, within the timeout period.  If FALSE, then the
+ * first event did not occur earlier.
+ *
+ * event_did_follow() assumes that the events are 'ball events' related to
+ * a ball moving on the playfield.  Because of this, event_did_follow()
+ * will always return FALSE in multiball, because the logic can be fooled
+ * by multiple balls on the table.  If dealing with non-ball events
+ * where this check should not be done, use nonball_event_did_follow().
  */
 #define nonball_event_did_follow(first,second) \
 	timer_kill_gid (GID_ ## first ## _FOLLOWED_BY_ ## second)
