@@ -1011,12 +1011,29 @@ void font_test_right (void)
 	sound_send (SND_TEST_CHANGE);
 }
 
+void font_test_up (void)
+{
+	browser_up ();
+	font_test_offset = 0;
+	font_test_change ();
+}
+
+void font_test_down (void)
+{
+	browser_down ();
+	font_test_offset = 0;
+	font_test_change ();
+}
+
+
 struct window_ops font_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = font_test_init,
 	.draw = font_test_draw,
 	.left = font_test_left,
 	.right = font_test_right,
+	.up = font_test_up,
+	.down = font_test_down,
 };
 
 
