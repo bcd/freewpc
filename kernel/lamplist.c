@@ -457,7 +457,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 	 * Ln = old L0
 	 */
 	page_push (MD_PAGE);
-
+	first = test (*(lamplist_first_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
 		if (lamplist_macro_entry (*entry))
@@ -466,10 +466,6 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 		{
 			state = test (*entry);
 			(state ? bit_on : bit_off) (matrix, *prev_entry);
-		}
-		else
-		{
-			first = test (*entry);
 		}
 		prev_entry = entry;
 	}
