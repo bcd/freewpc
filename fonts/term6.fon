@@ -160,9 +160,9 @@ static char glyph_term6_slash_bits[] = { glyph_term6_slash_width, glyph_term6_sl
 static char glyph_term6_amp_bits[] = { glyph_term6_amp_width, glyph_term6_amp_height,
  0x0e,0x02,0x02,0x06,0x15,0x09,0x1e};
 #define glyph_term6_minus_width 6
-#define glyph_term6_minus_height 1
+#define glyph_term6_minus_height 4
 static char glyph_term6_minus_bits[] = { glyph_term6_minus_width, glyph_term6_minus_height,
- 0x3f};
+ 0x3f,0x00,0x00,0x00};
 #define glyph_term6_plus_width 5
 #define glyph_term6_plus_height 6
 static char glyph_term6_plus_bits[] = { glyph_term6_plus_width, glyph_term6_plus_height,
