@@ -1,0 +1,47 @@
+
+The kernel contains the core components of the pinball operating system.
+On the WPC platform, all of these modules are built into the fixed
+portion of ROM, and do not require bank switching.  This is also where
+all of the interrupt handlers for realtime processing can be found.
+
+Core:
+error.c - Handle system errors
+idle.c - Idle-time processing
+init.c - Initialization
+log.c - Logging for debugging
+
+Hardware control:
+ac.c - AC zero-cross circuit
+dmd.c - Dot matrix display
+flip.c - Flippers
+lamp.c - Lamps
+segment.c - Segment displays
+sol.c - Solenoids
+sound.c - Sound board
+switches.c - Switches
+triac.c - Triacs for GI
+
+Effects:
+deff.c - Display effects
+lamplist.c - Manage sets of lamps at a time
+leff.c - Lamp effects
+
+Display:
+animation.c - Implement complex animation sequences
+font.c - Write strings to the DMD
+frame.c - Draw bitmaps to the DMD
+printf.c - Build strings from printf() specifications
+
+Other:
+adj.c - Manage adjustables
+audit.c - Chalk audits
+bcd.c - Binary-coded decimal math
+csum.c - Checksum protected memory
+freetimer.c - Free-running timer APIs
+game.c - Main pinball game state machine
+ladder.c - Scoring rules
+player.c - Switch in/out per-player variables
+random.c - Random number generator
+score.c - Basic scoring APIs
+timedmode.c - Generic timed mode module
+timer.c - Pausable timer APIs
