@@ -732,7 +732,7 @@ void device_remove_live (void)
 				)
 			{
 				case 0:
-					callset_invoke (single_ball_play);
+					//callset_invoke (single_ball_play);
 
 					/* With zero balls in play, this is end of ball.
 					This function usually does not return; it will stop just about
@@ -877,7 +877,6 @@ void device_unlock_ball (device_t *dev)
 	{
 		dbprintf ("Unlock ball in devno %d\n", dev->devno);
 		device_disable_lock (dev);
-		live_balls++;
 		device_request_kick (dev);
 	}
 	else
