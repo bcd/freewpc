@@ -554,18 +554,6 @@ pending_switch_t *switch_queue_add (const switchnum_t sw)
 	return entry;
 }
 
-/** Find an entry in the switch queue by switch number. */
-pending_switch_t *switch_queue_find (const switchnum_t sw)
-{
-	U8 i = switch_queue_head;
-	while (i != switch_queue_tail)
-	{
-		if (switch_queue[i].id == sw)
-			return &switch_queue[i];
-		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
-	}
-	return NULL;
-}
 
 /** Remove an entry from the switch queue */
 void switch_queue_remove (pending_switch_t *entry)
@@ -615,10 +603,25 @@ void switch_service_queue (void)
 			entry->timer -= elapsed_time;
 			if (entry->timer <= 0)
 			{
-				/* Debounce is fully complete. */
-				dbprintf ("debounced\n");
+				/* Debounce interval is complete.  The entry can be removed
+				from the queue */
 				switch_queue_remove (entry);
-				switch_transitioned (entry->id);
+
+				/* See if the switch held its state during the debounce period */
+				if (bit_test (sw_unstable, entry->id))
+				{
+					/* Debouncing failed, so don't process the switch.
+					 * Restart IRQ-level scanning. */
+					disable_irq ();
+					bit_off (sw_stable, entry->id);
+					bit_off (sw_unstable, entry->id);
+					enable_irq ();
+				}
+				else
+				{
+					/* Debouncing succeeded, so process the switch */
+					switch_transitioned (entry->id);
+				}
 			}
 			else
 			{
@@ -686,32 +689,6 @@ static void switch_update_stable (const U8 sw)
 }
 
 
-/**
- * Handle a switch that is changing faster than its debounce period.
- * Ignore the recent transitions and restart IRQ-level switch
- * scanning again.
- */
-static void switch_update_unstable (const U8 sw)
-{
-	if (bit_test (sw_queued, sw))
-	{
-		/* The switch was already seen and queued, but it did not
-		 * complete its full debounce.  Cancel that entry. */
-		pending_switch_t *entry = switch_queue_find (sw);
-		if (!entry)
-			fatal (ERR_SWITCH_QUEUE_CORRUPT);
-		switch_queue_remove (entry);
-	}
-
-	/* Restart IRQ-level scanning. */
-	disable_irq ();
-	bit_off (sw_stable, sw);
-	bit_off (sw_unstable, sw);
-	enable_irq ();
-}
-
-
-
 /** Periodic switch processing.  This function is called frequently
  * to scan pending switches and spawn new tasks to handle them.
  */
@@ -751,24 +728,9 @@ CALLSET_ENTRY (switch, idle)
 	/* Iterate over each switch column to see what needs to be done. */
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
-		/* Each bit set in sw_unstable indicates a switch that had transitioned
-		briefly, but not before the full debounce period expired.  These
-		switches might be in the switch queue, or might not.  We need
-		to check anyway. */
-		if (unlikely (rows = sw_unstable[col]))
-		{
-			U8 sw = col * 8;
-			do {
-				if (rows & 1)
-					switch_update_unstable (sw);
-				rows >>= 1;
-				sw++;
-			} while (rows);
-		}
-
-		/* Each bit in sw_stable, but not in sw_unstable, indicates a switch
-		that just transitioned and needs to be put into the debounce queue. */
-		if (unlikely (rows = (sw_stable[col] & ~sw_unstable[col])))
+		/* Each bit in sw_stable indicates a switch
+		that just transitioned and may need to be processed */
+		if (unlikely (rows = sw_stable[col]))
 		{
 			U8 sw = col * 8;
 			do {
