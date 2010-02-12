@@ -732,8 +732,6 @@ void device_remove_live (void)
 				)
 			{
 				case 0:
-					callset_invoke (single_ball_play);
-
 					/* With zero balls in play, this is end of ball.
 					This function usually does not return; it will stop just about
 					every task running to reset for the next ball. */
