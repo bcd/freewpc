@@ -486,7 +486,7 @@ Clock Working:
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 # Brian Image: PRI_EGG1
 Replay: page(MACHINE_PAGE), PRI_REPLAY
-Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
+Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB
 
