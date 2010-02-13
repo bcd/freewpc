@@ -1,0 +1,147 @@
+/*
+ * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+/*
+ * Driver for Twilight Zone mini playfield magnets
+ *
+ * The parameters are:
+ * sw - the switch number that triggers it
+ * sol - the solenoid/coil that gets fired automatically
+ * ontime - how long the coil is kept on (16ms)
+ * offtime - how long the coil is kept off after it was fired, before
+ * 	polling the switch again.  This prevents constant lock-on.
+ */
+
+/* TODO Fix holding down the button */
+@@class mpfmag
+@@parameter sw
+@@parameter sol
+@@parameter ontime
+@@parameter offtime
+
+@@
+@@file @class.h
+@@
+
+#ifndef __@class_DRIVER_H
+#define __@class_DRIVER_H
+
+extern __fastram__ U8 @class_enables;
+extern __fastram__ U8 @class_running;
+#endif /* __@class_DRIVER_H */
+
+extern U8 mpf_ball_count;
+
+@@
+@@file @self.h
+@@
+
+#include <@class.h>
+
+#undef INST_MASK
+#define INST_MASK (1 << @instance)
+
+extern __fastram__ U8 @self_timer;
+
+extern inline U8 @self_enabled_p (void)
+{
+	return @class_enables & INST_MASK;
+}
+
+
+extern inline U8 @self_running_p (void)
+{
+	return @class_running & INST_MASK;
+}
+
+
+extern inline void @self_service (void)
+{
+	/* If the timer is nonzero, then either the solenoid
+	is ON, or it is in its forced OFF phase.  It is
+	not necessary to poll the switch here. */
+	if (unlikely (@self_timer))
+	{
+		/* Decrement the timer. */
+		@self_timer--;
+
+		if (@self_running_p ())
+		{
+			/* If the timer expires in the ON phase, then
+			switch to the OFF phase.  Also, turn off the
+			solenoid now. */
+			if (@self_timer == 0)
+			{
+				sol_disable (@sol);
+				@self_timer = @offtime;
+				@class_running &= ~INST_MASK;
+			}
+		}
+	}
+	/* Flipper switch is opto, so inverted */
+	else if (@self_enabled_p () && !rt_switch_poll (@sw) && (mpf_ball_count > 0))
+	{
+		/* When the solenoid is not running, poll its switch
+		and see if it should be started. */
+		sol_enable (@sol);
+		@class_running |= INST_MASK;
+		@self_timer = @ontime;
+	}
+}
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include <@self.h>
+
+/** We keep two bitarrays to track all special solenoids.
+ * The 'enables' are software controlled and allow the
+ * solenoids to be disabled.  The 'running' entries say
+ * for each coil whether it is in its on or off phase. */
+
+@@classvar __fastram__ U8 @class_enables;
+@@classvar __fastram__ U8 @class_running;
+
+/* The time until the current phase expires */
+
+__fastram__ U8 @self_timer;
+
+/* Initialize the device */
+CALLSET_ENTRY (@self, init)
+{
+	@self_timer = 0;
+	@class_enables &= ~(1 << @instance);
+}
+
+/* Enable the device at start ball */
+CALLSET_ENTRY (@self, start_ball)
+{
+	@class_enables |= (1 << @instance);
+}
+
+/* Disable the device at end ball/tilt */
+CALLSET_ENTRY (@self, end_ball, tilt)
+{
+	@class_enables &= ~(1 << @instance);
+}
+
+/* vim: set filetype=c: */
