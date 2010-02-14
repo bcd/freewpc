@@ -27,7 +27,6 @@ extern void award_unlit_shot (U8 unlit_called_from);
 
 void hitchhiker_deff (void)
 {
-	
 	dmd_alloc_low ();
 	frame_draw (IMG_HITCHER);
 	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
@@ -99,7 +98,6 @@ CALLSET_ENTRY (hitch, music_refresh)
 
 CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
-	(void)event_did_follow (rocket, hitchhiker);
 	//if (lamp_test (LM_PANEL_HH))
 	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
 		&hitch_round_timer))
@@ -122,8 +120,10 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 		else
 			hitch_level += 5;
 	}*/
-	deff_start (DEFF_HITCHHIKER);
+	if (!event_did_follow (rocket, hitchhiker))
+		deff_start (DEFF_HITCHHIKER);
 }
+
 CALLSET_ENTRY (hitch, door_start_hitchhiker)
 {
 	timed_mode_start (GID_HITCH_ROUND_RUNNING, hitch_round_task);

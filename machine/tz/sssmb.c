@@ -24,7 +24,7 @@
 /* Super Skill Shot multiball rules */
 
 extern void mball_start_3_ball (void);
-
+extern U8 autofire_request_count;
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
 U8 sssmb_jackpot_value;
@@ -189,6 +189,7 @@ void sssmb_stop (void)
 		deff_stop (DEFF_SSSMB_RUNNING);
 		lamp_tristate_off (LM_SUPER_SKILL);
 		music_refresh ();
+		autofire_request_count = 0;
 	}
 }
 

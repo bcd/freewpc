@@ -64,14 +64,17 @@ void award_spiralaward (void)
 	/* Used for bonus */
 	spiralawards_collected++;
 	/* reset after all 6 have been collected */
-	if (spiralawards_collected > 6)
+	if (spiralawards_collected > 5)
 	{	
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 	}
-	/* Pick a random award */
+	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);
 	/* Check to see if it's been previously awarded */
 	while (!lamp_test(spiralaward_lamps[spiralaward]))
+		spiralaward = random_scaled (6);
+	/* Don't award extra ball until the last two */
+	while (spiralaward = 5 && spiralawards_collected < 4)	
 		spiralaward = random_scaled (6);
 	
 	switch (spiralaward)

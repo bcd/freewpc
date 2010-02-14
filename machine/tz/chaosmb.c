@@ -22,6 +22,7 @@
 #include <freewpc.h>
 
 extern void mball_start_3_ball (void);
+extern U8 autofire_request_count;
 
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
@@ -155,6 +156,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	{
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
 		lamp_tristate_off (LM_MULTIBALL);
+		autofire_request_count = 0;
 	}
 }
 

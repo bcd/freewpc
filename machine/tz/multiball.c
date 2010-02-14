@@ -27,6 +27,7 @@ __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 extern U8 gumball_enable_count;
+extern U8 autofire_request_count;
 extern bool fastlock_running (void);
 extern void reset_unlit_shots (void);
 extern void award_unlit_shot (U8 unlit_called_from);
@@ -270,6 +271,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		deff_stop (DEFF_JACKPOT_RELIT);
 		leff_stop (LEFF_MB_RUNNING);
 		music_refresh ();
+		autofire_request_count = 0;
 	}
 }
 

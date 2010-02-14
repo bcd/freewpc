@@ -108,7 +108,7 @@ void jackpot_deff (void)
 void jackpot_deff (void)
 {
 	U8 fno;
-	music_request (MUS_JACKPOT, PRI_JACKPOT);
+	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
 	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END; fno += 1)
 	{
 		dmd_alloc_low_high ();
@@ -116,12 +116,29 @@ void jackpot_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	task_sleep_sec (1);
+	
+	dmd_alloc_low_high ();
+	frame_draw (IMG_JACKPOT_END - 2);
+	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_100MS);
+	
+	dmd_alloc_low_high ();
+	frame_draw (IMG_JACKPOT_END);
+	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_100MS);
+
+	dmd_alloc_low_high ();
+	frame_draw (IMG_JACKPOT_END - 2);
+	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_100MS);
+
+	dmd_alloc_low_high ();
+	frame_draw (IMG_JACKPOT_END);
+	dmd_show2 ();
 	sound_send (SND_JACKPOT);
 	task_sleep_sec (2); 
 	deff_exit ();

@@ -200,9 +200,9 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		//thing_flips ();
 		//left_magnet_grab_start ();
 	
+		award_right_loop ();
 		fastlock_right_loop_completed ();
 		spiralaward_right_loop_completed ();
-		award_right_loop ();
 	}
 	else
 	{
