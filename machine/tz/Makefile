@@ -43,11 +43,11 @@ ROM_PAGE_COUNT = 32
 #################################################
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 86
+MACHINE_MINOR = 97
 
 PINMAME_MACHINE = tz_92
 
-PINMAME_GAME_ROM = tzone9_2.rom
+PINMAME_GAME_ROM = tz_94h.rom
 
 PINMAME_OTHER_ROMS = tzu*.rom
 
@@ -61,19 +61,23 @@ PINMAME_OTHER_ROMS = tzu*.rom
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/right_jet.h build/lower_jet.h
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/right_jet.h build/lower_jet.h \
+	build/left_mpf.h build/right_mpf.h
 
 GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
-	rampdiv.o lock.o door.o
+	config.o loop.o leffs.o amode.o rampdiv.o bonus.o
 
-GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o powerball_test.o
+GAME_TEST_OBJS = clocktest.o magtest.o gumball_test.o powerball_test.o #thingfl_test.o
 
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
-	config.o rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
-	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
-	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
+	unlit.o spiralaward.o spiral.o tsm.o fastlock.o door.o \
+	lock.o deffs.o multiball.o star.o \
+	rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
+ 	mpf.o powerball.o clockmillions.o sssmb.o chaosmb.o
+
+#GAME2_OBJS = thingfl.o
 
 FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 
