@@ -26,7 +26,7 @@ __local__ U8 mpf_enable_count;
 U8 mpf_ball_count;
 U8 mpf_round_timer;
 U8 mpf_award;
-U8 mpf_level;
+U8 __local__ mpf_level;
 
 /* Where the powerball is */
 extern U8 pb_location;
