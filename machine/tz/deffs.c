@@ -108,33 +108,45 @@ void jackpot_deff (void)
 void jackpot_deff (void)
 {
 	U8 fno;
+	U8 i;
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
-	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END; fno += 1)
+	/* Repeat the start 4 times */
+	for (i = 3; i > 0; --i)
 	{
-		dmd_alloc_low_high ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
+		{
+			dmd_alloc_low_high ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (i);
+		}
 	}
-	task_sleep_sec (1);
-	
+	/* Show once fully */
+	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 1)
+	{
+			dmd_alloc_low_high ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_16MS);
+	}
+	/* Flash Jackpot */
 	dmd_alloc_low_high ();
 	frame_draw (IMG_JACKPOT_END - 2);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_200MS);
 	
 	dmd_alloc_low_high ();
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_200MS);
 
 	dmd_alloc_low_high ();
 	frame_draw (IMG_JACKPOT_END - 2);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_200MS);
 
 	dmd_alloc_low_high ();
 	frame_draw (IMG_JACKPOT_END);
