@@ -37,7 +37,7 @@
 static void timed_mode_exit_handler (struct timed_mode_ops *ops)
 {
 	if (in_live_game && ops->deff_ending)
-		deff_start_retry (ops->deff_ending, 5);
+		deff_queue_add (ops->deff_ending, TIME_5S);
 	*ops->timer = 0;
 	ops->exit ();
 }
