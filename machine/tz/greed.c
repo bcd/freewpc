@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -105,7 +105,7 @@ void common_greed_handler (U8 target)
 	if (lamp_test (LM_PANEL_GREED) && (greed_set & target))
 	{
 		greed_set &= ~target;
-		score (SC_50K);
+		score (SC_1M);
 		sound_send (SND_GREED_ROUND_BOOM);
 	}
 	else if ((default_set & target) == 0)

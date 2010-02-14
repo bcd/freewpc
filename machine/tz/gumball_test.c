@@ -17,6 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+//TODO Service trough kicker and gumball_enable_from_trough sticks on
 
 #include <freewpc.h>
 #include <window.h>

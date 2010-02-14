@@ -33,5 +33,3 @@ void ramp_divert_to_autoplunger (void)
 	ramp_divert ();
 	autofire_catch ();
 }
-
-

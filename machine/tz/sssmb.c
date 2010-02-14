@@ -1,7 +1,29 @@
+/*
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 
 #include <freewpc.h>
 
 /* Super Skill Shot multiball rules */
+
+extern void mball_start_3_ball (void);
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -138,7 +160,8 @@ void sssmb_start (void)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
-		effect_update_request ();
+		deff_update ();
+		music_refresh ();
 		flag_on (FLAG_SSSMB_RUNNING);
 		flag_on (FLAG_SSSMB_RED_JACKPOT);
 		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
@@ -146,8 +169,9 @@ void sssmb_start (void)
 		sssmb_initial_ramps_to_divert = 1;
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
-		device_multiball_set (2);
-		ballsave_add_time (15);
+		ballsave_add_time (10);
+		mball_start_3_ball ();
+		//device_multiball_set (3);
 	}
 }
 
@@ -163,10 +187,16 @@ void sssmb_stop (void)
 		timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
 		task_kill_gid (GID_SSSMB_JACKPOT_READY);
 		deff_stop (DEFF_SSSMB_RUNNING);
+		lamp_tristate_off (LM_SUPER_SKILL);
 		music_refresh ();
 	}
 }
 
+CALLSET_ENTRY (sssmb, lamp_update)
+{
+	if (flag_test (FLAG_SSSMB_RUNNING))
+		lamp_tristate_flash (LM_SUPER_SKILL);
+}
 CALLSET_ENTRY (sssmb, display_update)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING))
@@ -177,7 +207,7 @@ CALLSET_ENTRY (sssmb, music_refresh)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING))
 		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
-};
+}
 
 
 CALLSET_ENTRY (sssmb, door_start_super_skill)
@@ -221,7 +251,8 @@ CALLSET_ENTRY (sssmb, skill_yellow)
 	}
 }
 
-CALLSET_ENTRY (sssmb, sw_left_ramp_exit)
+/* Called from leftramp.c */
+void sssmb_left_ramp_exit (void)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING))
 	{

@@ -19,20 +19,22 @@
  */
 
 #include <freewpc.h>
-
+#include <eb.h>
 /** Index of the panel which is currently slow flashing (next to
  * be awarded) or fast flashing (running) */
 __local__ U8 door_index;
 
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
+extern __local__ U8 extra_ball_enable_count;
+extern void award_unlit_shot (U8 unlit_called_from);
+extern void reset_unlit_shots (void);
 
 U8 door_active_lamp;
 
-
 /* For testing -- only enables GREED mode */
 //#define GREED_ONLY
-
+//#define DOOR_INDEX 12
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
@@ -82,7 +84,7 @@ void door_start_event (U8 id)
 	{
 		case 0: callset_invoke (door_start_tsm); break;
 		case 1: callset_invoke (door_start_eb); break;
-		case 2: callset_invoke (door_start_super_slot); break;
+		case 2: callset_invoke (door_start_sslot); break;
 		case 3: callset_invoke (door_start_clock_millions); break;
 		case 4: callset_invoke (door_start_spiral); break;
 		case 5: callset_invoke (door_start_battle_power); break;
@@ -205,6 +207,7 @@ static void door_award_flashing (void)
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
 	door_start_event (door_index);
+	deff_start (DEFF_DOOR_AWARD);
 	score (SC_5M);
 	timed_game_extend (10);
 
@@ -226,7 +229,6 @@ static void door_award_flashing (void)
 			break;
 	}
 
-	deff_start (DEFF_DOOR_AWARD);
 	leff_start (LEFF_DOOR_STROBE);
 	task_sleep (TIME_100MS);
 	door_advance_flashing ();
@@ -283,6 +285,7 @@ void award_door_panel (void)
 	{
 		door_award_flashing ();
 	}
+	reset_unlit_shots ();
 	door_lamp_update ();
 }
 
@@ -292,8 +295,13 @@ void door_award_if_possible (void)
 	{
 		/* TODO : When called from the camera award, this always
 		causes a crash???  This is probably stack overflow. */
-		//award_door_panel ();
+		award_door_panel ();
 	}
+}
+
+CALLSET_ENTRY (door, door_start_10M)
+{
+	score (SC_10M);
 }
 
 CALLSET_ENTRY (door, ball_count_change)
@@ -311,6 +319,7 @@ CALLSET_ENTRY(door, sw_piano)
 	}
 	else
 	{
+		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
 	}
@@ -324,12 +333,23 @@ CALLSET_ENTRY (door, shot_slot_machine)
 		flag_on (FLAG_PIANO_DOOR_LIT);
 		award_door_panel ();
 	}
+	else
+		award_unlit_shot (SW_PIANO);
+		score (SC_5130);
+	//TODO else 
+		//deff_start (DEFF_SHOOT_PIANO);
+}
+
+CALLSET_ENTRY (door, door_start_eb)
+{
+	sound_send (SND_GET_THE_EXTRA_BALL);	
+	light_easy_extra_ball ();
 }
 
 CALLSET_ENTRY(door, start_player)
 {
 #ifdef GREED_ONLY
-	door_index = 7;
+	door_index = DOOR_INDEX;
 #else
 	door_index = 0;
 #endif

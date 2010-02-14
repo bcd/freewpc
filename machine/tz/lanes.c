@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 
+extern void start_spiralaward_timer (void);
+
 static void handle_outlane (void)
 {
 	/* Start a timer to tell the difference between an outlane
@@ -27,41 +29,54 @@ static void handle_outlane (void)
 	event_can_follow (any_outlane, center_drain, TIME_7S);
 }
 
+/* 'Extra Ball' outlane */
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
 }
 
+/* 'Special' outlane */
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
 	handle_outlane ();
 }
 
+/* 'Light Spiral' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
 	score (SC_1K);
-	timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
+	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
+	start_spiralaward_timer ();
 	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
+/* 'Light Slot Machine' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
 	score (SC_1K);
+	start_spiralaward_timer ();
 }
 
+/* 'Dead End' Lane */
 CALLSET_ENTRY (lanes, sw_right_inlane)
 {
 	score (SC_1K);
-	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
-	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
+//	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
+//	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
+	if (!lamp_test (LM_DEAD_END))
+	{
 	lamp_on (LM_DEAD_END);
+		lamp_off (LM_RIGHT_INLANE);
+	}
+	/* Start the timer for the left ramp */
+	timer_restart_free (GID_LEFT_RAMP, TIME_3S);
 	event_can_follow (right_inlane, left_loop, TIME_3S);
 }
 
 
-CALLSET_ENTRY(lanes, start_player)
+CALLSET_ENTRY(lanes, start_ball)
 {
 	lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_RIGHT_INLANE);

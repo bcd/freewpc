@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 
+extern U8 mpf_ball_count;
 
 void bonus_leff (void)
 {
@@ -87,7 +88,7 @@ void left_ramp_leff (void)
 void no_gi_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
-	task_sleep_sec (1);
+	task_sleep_sec (2);
 	leff_exit ();
 }
 
@@ -358,3 +359,20 @@ void lock_leff (void)
 	leff_exit ();
 }
 
+void mpf_active_leff (void)
+{
+	lamplist_set_apply_delay (TIME_100MS);
+	while (mpf_ball_count > 0)
+		lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
+	leff_exit ();
+}
+
+void spiral_award_active_leff (void)
+{
+	
+	lamplist_set_apply_delay (TIME_33MS);
+	for (;;)	
+		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
+}

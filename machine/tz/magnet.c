@@ -139,6 +139,7 @@ void magnet_switch_rtt (void)
 
 
 /* Realtime function to duty cycle the magnet drives */
+/*
 void magnet_duty_rtt (void)
 {
 	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
@@ -150,7 +151,7 @@ void magnet_duty_rtt (void)
 	magnet_rtt_duty_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
 		&lower_right_magnet_state, &lower_right_magnet_timer);
 }
-
+*/
 
 void magnet_enable_catch (U8 magnet)
 {

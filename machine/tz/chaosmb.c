@@ -1,6 +1,27 @@
+/*
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 
 #include <freewpc.h>
 
+extern void mball_start_3_ball (void);
 
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
@@ -96,11 +117,13 @@ void chaosmb_running_deff (void)
 		{
 			font_render_string_center (&font_var5, 64, 27,
 				"HIT CLOCK TO LIGHT JACKPOT");
+			lamp_tristate_flash (LM_CLOCK_MILLIONS);
 		}
 		else
 		{
 			sprintf ("HIT CLOCK %d MORE TIMES", chaosmb_hits_to_relight);
 			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			lamp_tristate_flash (LM_CLOCK_MILLIONS);
 		}
 		score_deff_end (TIME_100MS);
 	}
@@ -121,7 +144,8 @@ void chaosmb_start (void)
 	{
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 0;
-		device_multiball_set (3);
+		mball_start_3_ball ();
+		//device_multiball_set (3);
 		ballsave_add_time (10);
 	}
 }
@@ -130,6 +154,8 @@ void chaosmb_stop (void)
 {
 	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
+		lamp_tristate_off (LM_CLOCK_MILLIONS);
+		lamp_tristate_off (LM_MULTIBALL);
 	}
 }
 
@@ -151,6 +177,22 @@ CALLSET_ENTRY (chaosmb, display_update)
 		deff_start_bg (DEFF_CHAOSMB_RUNNING, PRI_GAME_MODE6);
 }
 
+CALLSET_ENTRY (chaosmb, lamp_update)
+{
+	if (!flag_test (FLAG_CHAOSMB_RUNNING))
+		return;	
+	if (chaosmb_hits_to_relight == 0)
+	{
+		lamp_tristate_off (LM_CLOCK_MILLIONS);
+		lamp_tristate_flash (LM_MULTIBALL);
+	}
+	else	
+	{	
+		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+		lamp_tristate_off (LM_MULTIBALL);
+	}
+}
+
 CALLSET_ENTRY (chaosmb, music_refresh)
 {
 	if (flag_test (FLAG_CHAOSMB_RUNNING))
@@ -164,7 +206,8 @@ CALLSET_ENTRY (chaosmb, door_start_clock_chaos)
 }
 
 
-CALLSET_ENTRY (chaosmb, sw_left_ramp_exit)
+/* Called from leftramp.c */
+void chaosmb_left_ramp_exit (void)
 {
 	chaosmb_check_level (0);
 }
@@ -213,4 +256,3 @@ CALLSET_ENTRY (chaosmb, start_player)
 	chaosmb_level = 0;
 	chaosmb_hits_to_relight = 0;
 }
-

@@ -18,15 +18,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <freewpc.h>
+/* More code for the lock is in Multiball.c */
 
+#include <freewpc.h>
+#include <eb.h>
 
 CALLSET_ENTRY (lock, dev_lock_enter)
 {
-	if (lamp_test (LM_PANEL_FAST_LOCK))
-		score (SC_250K);
-	else
-		score (SC_50K);
+	if (collect_extra_ball ())
+		sound_send (SND_HERES_YOUR_EB);
+	//	if (multi_ball_play ())
+	//		device_request_kick (device_entry (DEVNO_LOCK));
+	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 	leff_start (LEFF_LOCK);
 }

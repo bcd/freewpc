@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,14 +19,14 @@
  */
 
 #include <freewpc.h>
+struct {
+	const char *shot_name;
+	U8 switch_info_t;
+	U8 lamp_num;
+	bool shot_lit;
+} hwl_shots[] = {
+	{ "LEFT RAMP", SW_LEFT_RAMP_EXIT, LM_BONUS_X, FALSE },
+	{ "RIGHT RAMP", SW_RIGHT_RAMP, LM_BATTLE_POWER, FALSE },
+	{ "LOCK", SW_LOCK_LOWER, LM_LOCK_ARROW, FALSE },
+};
 
-
-CALLSET_ENTRY (piano, sw_piano)
-{
-	/* Say that a ball entering this device is destined to
-	enter the slot machine device, within a certain amount
-	of time.  This information can only be used reliably
-	during single-ball play.  It is currently used for 
-	pausing timers. */
-	device_switch_can_follow (piano, slot, TIME_3S);
-}

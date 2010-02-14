@@ -20,10 +20,62 @@
 
 #include <freewpc.h>
 
+void rocket_deff (void)
+{
+	/* Stop deff from restarting whilst we
+	 * are showing the level up deff */
+	dmd_alloc_low_clean ();
+	frame_draw (IMG_ROCKET1);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET2);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET3);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET4);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET5);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET6);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET7);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET8);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET9);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET10);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET11);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET12);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET13);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	frame_draw (IMG_ROCKET14);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	//task_sleep_sec (2);
+	deff_exit ();
+}
+
 
 CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
 	disable_skill_shot ();
+	deff_start (DEFF_ROCKET);
 	score (SC_10K);
 }
 
@@ -43,6 +95,7 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 		sound_send (SND_ROCKET_KICK_REVVING);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, rocket_kick_sound);
+		leff_stop (LEFF_NO_GI);
 	}
 }
 

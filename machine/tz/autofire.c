@@ -17,7 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+//TODO Fix catching from multiball
 #include <freewpc.h>
 #include <shooter_div.h>
 
@@ -64,7 +64,6 @@ void autofire_monitor (void)
 	if (shooter_div_delay_time)
 		task_sleep_sec (shooter_div_delay_time);
 	shooter_div_start ();
-
 	/* TODO - If the autofire switch trips during the 'open
 	time', we can abort this delay early and go ahead and
 	close the divertor.  This is safe because only one
@@ -130,6 +129,8 @@ void autofire_add_ball (void)
 		ball was successfully kicked).  In these cases, do it
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
+		/* Wait for divertor to open */
+		task_sleep_sec (1);		
 		sol_pulse (SOL_BALL_SERVE);
 	}
 	else
@@ -148,7 +149,7 @@ void autofire_catch (void)
 {
 	/* TODO - don't always want to launch right away, e.g. for
 	a start multiball animation */
-	shooter_div_delay_time = 1;
+	shooter_div_delay_time = 0;
 	shooter_div_open_time = 4;
 	task_create_gid1_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
 }
@@ -167,10 +168,12 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	{
 		dbprintf ("yes.\n");
 		if (autofire_request_count > 0)
-			autofire_request_count--;
+			bounded_decrement (autofire_request_count, 0);
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
+		/* Wait for the divertor to open */	
+		task_sleep (TIME_300MS);
 	}
 	else
 	{
@@ -208,6 +211,10 @@ CALLSET_ENTRY (autofire, ball_search)
 	shooter_div_stop ();
 }
 
+CALLSET_ENTRY (autofire, start_ball)
+{
+	autofire_request_count = 0;
+}
 
 CALLSET_ENTRY (autofire, init)
 {

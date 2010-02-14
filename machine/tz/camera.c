@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,6 +19,8 @@
  */
 
 #include <freewpc.h>
+extern void award_unlit_shot (U8 unlit_called_from);
+extern void mball_start_3_ball (void);
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -84,6 +86,8 @@ static void do_camera_award (void)
 			mball_light_lock ();
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
+			/* Stop door rotating */
+			task_kill_gid (GID_DOOR_AWARD_ROTATE);
 			/* Spot Door Panel */
 			door_award_if_possible ();
 			break;
@@ -101,9 +105,11 @@ static void do_camera_award (void)
 			}
 		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
+			mball_start_3_ball ();
 			break;
 		case CAMERA_AWARD_250K:
 			/* Big Points: 250K */
+			
 			break;
 		default:
 			break;
@@ -117,10 +123,10 @@ static void do_camera_award (void)
 
 CALLSET_ENTRY (camera, sw_camera)
 {
-	device_switch_can_follow (camera, slot, TIME_5S);
+	device_switch_can_follow (camera, slot, TIME_4S);
 	if (event_did_follow (mpf_top, camera))
 	{
-		callset_invoke (mpf_top_exit);
+		callset_invoke (mpf_collected);
 	}
 	else if (event_did_follow (gumball_exit, camera))
 	{
@@ -132,13 +138,14 @@ CALLSET_ENTRY (camera, sw_camera)
 	{
 		if (cameras_lit)
 		{
-			cameras_lit--;
+			bounded_decrement (cameras_lit, 0);
 			score (SC_10M);
 			sound_send (SND_CAMERA_AWARD_SHOWN);
 			task_create_anon (do_camera_award);
 		}
 		else
 		{
+			award_unlit_shot (SW_CAMERA);	
 			score (SC_250K);
 			sound_send (SND_JET_BUMPER_ADDED);
 		}

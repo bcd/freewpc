@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com
  *
  * This file is part of FreeWPC.
  *
@@ -17,39 +17,107 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #include <freewpc.h>
-#include <rtsol.h>
 
 /** The number of balls enabled to go to the MPF */
 __local__ U8 mpf_enable_count;
 
-/** Nonzero when the MPF is active */
-U8 mpf_active;
-
-__fastram__ S8 rtsol_mpf_left;
-
-__fastram__ S8 rtsol_mpf_right;
-
 /** Number of balls currently on the mini-playfield */
 U8 mpf_ball_count;
+U8 mpf_round_timer;
+U8 mpf_award;
+U8 mpf_level;
 
+/* Where the powerball is */
+extern U8 pb_location;
+#define PB_MAYBE_IN_PLAY 0x10
+extern void reset_unlit_shots (void);
 
-void mpf_active_deff (void)
+void mpf_round_deff (void)
 {
-	while (task_find_gid (GID_MPF_ACTIVE))
+	mpf_award = 10;
+	for (;;)
 	{
-		task_sleep (TIME_66MS);
+		
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
+		sprintf_current_score ();
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		sprintf ("%d,000,000", (mpf_award * mpf_level));
+		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+		sprintf ("%d", mpf_round_timer);
+		font_render_string (&font_var5, 2, 2, sprintf_buffer);
+		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep_sec (1);
+		if (mpf_award > 5)
+			bounded_decrement (mpf_award, 0);
 	}
+}
+
+void mpf_award_deff (void)
+{
+	dmd_alloc_low_clean ();
+	sprintf ("%d,000,000", (mpf_award * mpf_level));
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+void mpf_round_begin (void)
+{
+	deff_start (DEFF_MPF_ROUND);
+}
+
+void mpf_round_expire (void)
+{
+	deff_stop (DEFF_MPF_ROUND);
+	mpf_ball_count = 0 ;
+}
+
+void mpf_round_end (void)
+{
+}
+
+void mpf_round_task (void)
+{
+	timed_mode_task (mpf_round_begin, mpf_round_expire, mpf_round_end,
+		&mpf_round_timer, 10, 3);
+}
+
+CALLSET_ENTRY (mpf, display_update)
+{
+	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING,
+		&mpf_round_timer) && (mpf_ball_count > 0))
+		deff_start_bg (DEFF_MPF_ROUND, 0);
+}
+
+CALLSET_ENTRY (mpf, music_refresh)
+{
+	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING,
+		&mpf_round_timer))
+		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
+}
+
+CALLSET_ENTRY (mpf, end_ball)
+{
+	timed_mode_stop (&mpf_round_timer);
+	mpf_ball_count = 0;
 }
 
 bool mpf_ready_p (void)
 {
 	return (mpf_enable_count > 0)
+		/* Don't allow if PB might be on playfield */
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !(pb_location & PB_MAYBE_IN_PLAY)
 		&& !flag_test (FLAG_MULTIBALL_RUNNING)
 		&& !flag_test (FLAG_QUICK_MB_RUNNING)
-		&& !flag_test (FLAG_BTTZ_RUNNING);
+		&& !flag_test (FLAG_BTTZ_RUNNING)
+		&& !flag_test (FLAG_CHAOSMB_RUNNING)
+		&& !flag_test (FLAG_SSSMB_RUNNING);
+
 }
 
 
@@ -61,91 +129,38 @@ CALLSET_ENTRY (mpf, lamp_update)
 		lamp_tristate_off (LM_RAMP_BATTLE);
 }
 
-
-void mpf_enable (void)
-{
-	mpf_enable_count++;
-}
-
-
-void mpf_active_monitor (void)
-{
-	task_sleep_sec (5);
-	task_exit ();
-}
-
-
-void mpf_start (void)
-{
-	if (mpf_ready_p ())
-	{
-		mpf_enable_count--;
-		mpf_ball_count++;
-		if (!task_find_gid (GID_MPF_ACTIVE))
-		{
-			mpf_active = 1;
-			task_create_gid1 (GID_MPF_ACTIVE, mpf_active_monitor);
-			music_refresh ();
-		}
-	}
-}
-
-
-void mpf_stop (void)
-{
-	if (task_find_gid (GID_MPF_ACTIVE))
-	{
-		mpf_active = 0;
-		task_kill_gid (GID_MPF_ACTIVE);
-		sound_send (SND_POWER_HUH_3);
-		music_refresh ();
-	}
-}
-
-
-CALLSET_ENTRY (mpf, music_refresh)
-{
-	if (task_find_gid (GID_MPF_ACTIVE))
-		music_request (MUS_POWERFIELD, PRI_GAME_MODE2);
-};
-
-
 CALLSET_ENTRY (mpf, door_start_battle_power)
 {
-	mpf_enable ();
+	mpf_enable_count++;
 	sound_send (SND_ARE_YOU_READY_TO_BATTLE);
 }
 
-
-CALLSET_ENTRY (mpf, powerfield_win)
-{
-	if (mpf_ball_count > 0)
-	{
-		mpf_ball_count--;
-		if (mpf_ball_count == 0)
-		{
-			callset_invoke (powerfield_end);
-			mpf_stop ();
-		}
-	}
-}
-
-
-CALLSET_ENTRY (mpf, sw_camera)
-{
-	if (event_did_follow (mpf_top, camera))
-	{
-		if (task_find_gid (GID_MPF_ACTIVE))
-			callset_invoke (powerfield_win);
-	}
-}
-
-
+/* Closing this switch does not imply that the
+ * mpf award was collected, but we can tell camera.c
+ * to expect a ball coming from the mpf */
 CALLSET_ENTRY (mpf, sw_mpf_top)
 {
-	event_can_follow (mpf_top, camera, TIME_4S);
+	event_should_follow (mpf_top, camera, TIME_4S);
 }
 
+
+
+/* Called from camera.c */
+CALLSET_ENTRY (mpf, mpf_collected)
+{
+	flipper_enable ();
+	leff_stop (LEFF_MPF_ACTIVE);
+	score_multiple(SC_1M, (mpf_award * mpf_level));
+	deff_start (DEFF_MPF_AWARD);
+	sound_send (SND_EXPLOSION_3);
+	flasher_pulse (FLASH_POWERFIELD);
+	if (mpf_ball_count > 0)
+		bounded_decrement (mpf_ball_count, 0);
+	else	
+		timed_mode_stop (&mpf_round_timer);
+	//task_sleep_sec (4);
+	//door_award_if_possible ();
+}
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
 {
@@ -154,45 +169,55 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	on when a ball is already in play. */
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
-		if (mpf_ball_count == 0)
-		{
-			callset_invoke (powerfield_begin);
-			mpf_start ();
+		reset_unlit_shots ();
+		mpf_ball_count++;
+		mpf_level++;
+		bounded_decrement (mpf_enable_count, 0);
+		if (mpf_ball_count = (1))
+		{	
+			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
+			leff_start (LEFF_MPF_ACTIVE);
+			if (!multi_ball_play ())
+				flipper_disable ();
 		}
-
-		callset_invoke (powerfield_enter);
+	}
+	/* A ball sneaked in during multiball */
+	else if (multi_ball_play ())
+	{
+		sound_send (SND_WITH_THE_DEVIL);
+		score (SC_5M);
 	}
 }
-
 
 CALLSET_ENTRY (mpf, sw_mpf_exit)
 {
 	if (mpf_ball_count > 0)
+		bounded_decrement (mpf_ball_count, 0);
+	if (mpf_ball_count == 0)
 	{
-		mpf_ball_count--;
-		callset_invoke (powerfield_exit);
-	
-		if (mpf_ball_count == 0)
-		{
-			callset_invoke (powerfield_end);
-			mpf_stop ();
-			sound_send (SND_HAHA_POWERFIELD_EXIT);
-		}
+		leff_stop (LEFF_MPF_ACTIVE);
+		timed_mode_stop (&mpf_round_timer);
+		flipper_enable ();
+	}
+	sound_send (SND_HAHA_POWERFIELD_EXIT);
+}
+//TODO Light show
+CALLSET_ENTRY (mpf, sw_mpf_left)
+{
+	if (mpf_ball_count > 0)
+	{	
+		sound_send (SND_POWER_GRUNT_1);
+		score (SC_250K);
 	}
 }
 
-
-CALLSET_ENTRY (mpf, sw_mpf_left)
-{
-	if (task_find_gid (GID_MPF_ACTIVE))
-		sound_send (SND_POWER_GRUNT_1);
-}
-
-
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
-	if (task_find_gid (GID_MPF_ACTIVE))
+	if (mpf_ball_count > 0)
+	{
 		sound_send (SND_POWER_GRUNT_2);
+		score (SC_250K);
+	}
 }
 
 
@@ -205,7 +230,13 @@ CALLSET_ENTRY (mpf, sw_right_ramp)
 
 CALLSET_ENTRY (mpf, start_player)
 {
-	mpf_enable_count = 0;
-	mpf_ball_count = 0;
+	mpf_enable_count = 1;
+	mpf_level = 0;
 }
 
+CALLSET_ENTRY (mpf, ball_search)
+{
+	sol_request (SOL_MPF_LEFT_MAGNET);
+	task_sleep_sec (1);
+	sol_request (SOL_MPF_RIGHT_MAGNET);
+}
