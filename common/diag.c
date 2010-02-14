@@ -39,7 +39,7 @@ U8 diag_announce_flag;
 static void
 diag_message_start (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 }
 

@@ -25,7 +25,7 @@ __local__ U8 ball_save_count;
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	dmd_show_low ();
@@ -94,7 +94,7 @@ void jackpot_deff (void)
 		dmd_show_low ();
 	}
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
 	dmd_copy_low_to_high ();
@@ -119,7 +119,7 @@ void tv_static_deff (void)
 
 	for (loop = 0; loop < 32; loop++)
 	{
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 
 		dmd = (U16 *)dmd_low_buffer;
 		while (dmd < (U16 *)dmd_high_buffer)
@@ -176,7 +176,7 @@ void text_color_flash_deff (void)
 void spell_test_deff (void)
 {
 	U8 count = 4;
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("%*s", count, "FASTLOCK");
 	font_render_string_left (&font_fixed10, 16, 9, sprintf_buffer);
@@ -214,7 +214,7 @@ void bg_flash_deff (void)
 {
 	const U8 flash_time = TIME_50MS;
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_fill_page_low ();
 	dmd_clean_page_high ();
 	for (;;)
@@ -249,20 +249,20 @@ void dmd_flash (task_ticks_t delay)
 void lightning_test_deff (void)
 {
 #if 0
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 64, 16, "LIGHTNING TEST");
 	dmd_show_low ();
 	task_sleep (TIME_100MS);
 #endif
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (IMG_LIGHTNING1);
 	dmd_show2 ();
 	task_sleep (TIME_50MS);
 	dmd_flash (TIME_66MS);
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (IMG_LIGHTNING2);
 	dmd_show2 ();
 	task_sleep (TIME_50MS);

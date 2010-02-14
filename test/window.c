@@ -157,7 +157,7 @@ void window_stop_thread (void)
 /** Redraws the current window. */
 void window_redraw (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	window_call_op (win_top, draw);
 }
@@ -1727,7 +1727,7 @@ void dev_frametest_init (void)
 
 void dev_frametest_draw (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (test_frameno);
 	dmd_show2 ();
 }

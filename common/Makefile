@@ -50,6 +50,7 @@ COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmdtrans.o)
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_rough.o)
 TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_shadow.o)
+TRANS_OBJS += $(if $(CONFIG_DMD), common/dmd_overlay.o)
 
 # Effect objects contain common display and lamp effects, and are
 # separated out for the same reason.  These may be placed into a
