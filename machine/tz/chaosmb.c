@@ -135,6 +135,7 @@ void chaosmb_score_jackpot (void)
 {
 	chaosmb_level++;
 	chaosmb_hits_to_relight = chaosmb_level * 2;
+	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_CHAOS_JACKPOT);
 	sound_send (SND_EXPLOSION_1);
 }

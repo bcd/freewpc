@@ -30,14 +30,20 @@ score_t bonus_scored;
 bool buttons_held;
 
 /* Speed up the bonus if both flipper buttons are pressed */
+void bonus_button_monitor (void)
+{
+	for (;;)
+	{
+		if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON)))
+			buttons_held = TRUE;
+		task_sleep (TIME_100MS);
+	}
+}
+
 void bonus_pause (void)
 {
-	if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON))
-		|| buttons_held == TRUE)
-	{	
+	if (buttons_held)
 		task_sleep (TIME_100MS);
-		buttons_held = TRUE;
-	}
 	else
 		task_sleep_sec (1);
 }
@@ -58,6 +64,7 @@ void bonus_deff (void)
 	/* Clear the bonus score */
 	score_zero (total_bonus);
 	buttons_held = FALSE;
+	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 	/* Show Initial bonus screen */
 	sample_start (MUS_FADE_BONUS, SL_500MS);
 	dmd_alloc_low_clean ();
@@ -234,6 +241,7 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 
+	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 
 	/* Show total Bonus */	
 	dmd_alloc_low_clean ();

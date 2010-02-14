@@ -59,6 +59,15 @@ void start_spiralaward_timer (void)
 }
 
 
+void flash_spiralaward_lamp (void)
+{
+	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
+	task_sleep_sec (3);
+	/* Turn off lamp, award is collected */
+	lamp_tristate_off (spiralaward_lamps[spiralaward]);
+	task_exit ();
+}
+
 void award_spiralaward (void)
 {	
 	/* Used for bonus */
@@ -74,8 +83,8 @@ void award_spiralaward (void)
 	while (!lamp_test(spiralaward_lamps[spiralaward]))
 		spiralaward = random_scaled (6);
 	/* Don't award extra ball until the last two */
-	while (spiralaward = 5 && spiralawards_collected < 4)	
-		spiralaward = random_scaled (6);
+//	while (spiralaward = 5 && spiralawards_collected < 4)	
+//		spiralaward = random_scaled (6);
 	
 	switch (spiralaward)
 	{
@@ -99,11 +108,13 @@ void award_spiralaward (void)
 			light_easy_extra_ball ();
 			break;
 	}
-	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
-	task_sleep_sec (3);
+	/* Run lamp flash as task so it can run in parallel */
+	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
+//	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
+//	task_sleep_sec (3);
 	/* Turn off lamp, award is collected */
-	lamp_tristate_off (spiralaward_lamps[spiralaward]);
+//	lamp_tristate_off (spiralaward_lamps[spiralaward]);
 }
 
 void spiralaward_collected_deff (void)
@@ -123,7 +134,7 @@ void spiralaward_right_loop_completed (void)
 		sound_send (SND_SLOT_PAYOUT);
 		free_timer_stop (TIM_SPIRALAWARD);
 		award_spiralaward ();
-		task_sleep (TIME_500MS);
+		//task_sleep (TIME_500MS);
 	}
 }
 /* Cancel if player misses loop */
