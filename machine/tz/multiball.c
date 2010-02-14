@@ -208,22 +208,23 @@ void mball_start_3_ball (void)
 	/* Check lock and empty accordingly */
 	switch (device_recount (device_entry (DEVNO_LOCK)))
 	{	
-		/* No balls in lock, fire 3 from trough */
+		/* No balls in lock, fire 2 from trough */
 		case 0:
 			autofire_add_ball ();	
 			autofire_add_ball ();	
 			break;
 		/* 1 ball in lock, fire 2 from trough */
 		case 1:
-		 	task_sleep_sec (2);
-			device_request_empty (device_entry (DEVNO_LOCK));
+		 	task_sleep_sec (3);
+			device_unlock_ball (device_entry (DEVNO_LOCK));
 		 	task_sleep_sec (2);
 			autofire_add_ball ();	
 			break;
 		/* 2 balls in lock, fire 1 from trough */
 		case 2:
-			device_request_empty (device_entry (DEVNO_LOCK));
-			//device_request_kick (device_entry (DEVNO_LOCK));
+			device_unlock_ball (device_entry (DEVNO_LOCK));
+			task_sleep_sec (1);	
+			device_unlock_ball (device_entry (DEVNO_LOCK));
 			break;
 	}
 	/* This should add in an extra ball if the above wasn't enough */
