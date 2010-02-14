@@ -208,17 +208,17 @@ void sol_request (U8 sol)
 {
 	/* Wait until any existing sync requests are finished. */
 	while (req_lock || sol_req_state != REQ_IDLE)
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 
 	/* Acquire the lock for this solenoid. */
-	req_lock = sol | 0x80;
+	req_lock = (sol + 1) | 0x80;
 
 	/* Issue the request */
 	sol_request_async (sol);
 
 	/* Wait for the pulse to finish */
 	while (req_lock != 0x80)
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 
 	/* Release the lock for another task */
 	req_lock = 0;
@@ -491,6 +491,7 @@ sol_init (void)
 	sol_duty_mask = 0x1;
 
 	sol_req_state = REQ_IDLE;
+	req_lock = 0;
 	memset (sol_reg_readable, 0, SOL_REG_COUNT);
 
 	/* Initialize the solenoid queue. */
