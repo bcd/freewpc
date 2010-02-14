@@ -145,12 +145,11 @@ void chaosmb_start (void)
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 0;
 		mball_start_3_ball ();
-		//device_multiball_set (3);
 		ballsave_add_time (10);
 	}
 }
 
-void chaosmb_stop (void)
+CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
 	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
@@ -248,7 +247,7 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 
 CALLSET_ENTRY (chaosmb, single_ball_play)
 {
-	chaosmb_stop ();
+	callset_invoke (chaosmb_stop);
 }
 
 CALLSET_ENTRY (chaosmb, start_player)

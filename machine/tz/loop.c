@@ -87,7 +87,7 @@ void award_loop (void)
 		if (powerball_loops < 3)
 	{
 			sound_send (SND_ADDAMS_FASTLOCK_STARTED);
-		score (SC_10M);
+		score (SC_5M);
 	}
 		else if (powerball_loops == 3)
 		{
@@ -95,7 +95,7 @@ void award_loop (void)
 			gumball_enable_count++;
 		//	flag_on (MAGNA_MB_LIT);
 			score (SC_20M);
-			powerball_loops = 0;
+//			powerball_loops = 0;
 		}
 		deff_start (DEFF_PB_LOOP);
 		return;

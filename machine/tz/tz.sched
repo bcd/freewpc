@@ -36,12 +36,13 @@ clock_mech_service      16    80c
 tz_clock_switch_rtt     8     0.1
 
 # Update the loop magnet
-magnet_duty_rtt    32    0.1
+#magnet_duty_rtt    32    0.1
 
-# TODO : Update mini-playfield magnets
-
+# TODO : Update mini-playfield magnet
+#!left_magnet_grab_service    16    40c
 !bridge_open_service    16    40c
 !shooter_div_service    16    40c
 !ramp_div_service       16    40c
 !gumball_div_service    16    40c
-
+!left_mpf_service    	16    40c
+!right_mpf_service    	16    40c

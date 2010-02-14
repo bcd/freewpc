@@ -108,7 +108,7 @@ void jackpot_deff (void)
 void jackpot_deff (void)
 {
 	U8 fno;
-
+	music_request (MUS_JACKPOT, PRI_JACKPOT);
 	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END; fno += 1)
 	{
 		dmd_alloc_low_high ();
