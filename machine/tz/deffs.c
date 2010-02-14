@@ -60,7 +60,7 @@ void special_deff (void)
 	sprintf ("SPECIAL");
 	flash_and_exit_deff (20, TIME_100MS);
 }
-
+/*
 void jackpot_deff (void)
 {
 	U8 i;
@@ -102,7 +102,31 @@ void jackpot_deff (void)
 	deff_swap_low_high (25, TIME_100MS);
 	task_sleep (TIME_500MS);
 	deff_exit ();
+}*/
+
+/* Jackpot animation contributed by highrise */
+void jackpot_deff (void)
+{
+	U8 fno;
+
+	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END; fno += 1)
+	{
+		dmd_alloc_low_high ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	sample_start (SND_JACKPOT, SL_100MS);
+	task_sleep (TIME_200MS);
+	sample_start (SND_JACKPOT, SL_100MS);
+	task_sleep (TIME_200MS);
+	sample_start (SND_JACKPOT, SL_100MS);
+	task_sleep (TIME_200MS);
+	sound_send (SND_JACKPOT);
+	task_sleep_sec (2); 
+	deff_exit ();
 }
+
 
 
 U16 tv_static_data[] = {
