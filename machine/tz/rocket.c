@@ -35,7 +35,7 @@ void rocket_deff (void)
 		dmd_alloc_low_high ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_16MS);
 	}
 	deff_exit ();
 }
