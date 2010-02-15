@@ -41,7 +41,7 @@ void dmd_show_color_pattern (void)
 {
 	U8 color;
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	for (color = 0; color < 4; color++)
 		dmd_fill_color_pattern (color);
 	dmd_show2 ();

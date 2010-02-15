@@ -29,7 +29,7 @@
 #define display_init            dmd_init
 #define display_alloc_low       dmd_alloc_low
 #define display_alloc_high      dmd_alloc_high
-#define display_alloc_low_high  dmd_alloc_low_high
+#define display_alloc_low_high  dmd_alloc_pair
 #define display_map_low_high    dmd_map_low_high
 #define display_show_low        dmd_show_low
 #define display_show_high       dmd_show_high
@@ -78,7 +78,7 @@ equivalents. */
 #define dmd_init()                     seg_init ()
 #define dmd_alloc_low()                seg_alloc ()
 #define dmd_alloc_high()               seg_alloc ()
-#define dmd_alloc_low_high()           seg_alloc ()
+#define dmd_alloc_pair()           seg_alloc ()
 #define dmd_map_low_high()
 #define dmd_show_low()                 seg_show ()
 #define dmd_show_high()
@@ -125,7 +125,7 @@ text and centered it well. */
 #define display_init            remote_dmd_init
 #define display_alloc_low       remote_dmd_alloc_low
 #define display_alloc_high      remote_dmd_alloc_high
-#define display_alloc_low_high  remote_dmd_alloc_low_high
+#define display_alloc_low_high  remote_dmd_alloc_pair
 #define display_map_low_high    remote_dmd_map_low_high
 #define display_show_low        remote_dmd_show_low
 #define display_show_high       remote_dmd_show_high
@@ -144,7 +144,7 @@ text and centered it well. */
 #define dmd_init()
 #define dmd_alloc_low(args...)
 #define dmd_alloc_high(args...)
-#define dmd_alloc_low_high(args...)
+#define dmd_alloc_pair(args...)
 #define dmd_map_low_high(args...)
 #define dmd_show_low()
 #define dmd_show_high()

@@ -46,15 +46,15 @@
  * 6 mapped at a time, but FreeWPC doesn't take advantage of that now. */
 #define DMD_PAGE_COUNT 16
 
-/** The number of lookaside frames */
-#define DMD_LOOKASIDE_FRAME_COUNT 2
-#define DMD_LOOKASIDE_PAGE_COUNT (DMD_LOOKASIDE_FRAME_COUNT * 2)
+/** The number of pages reserved for the overlay(s).  We reserve a single
+ * pair of pages for this now. */
+#define DMD_OVERLAY_PAGE_COUNT 2
 
 /** The number of blank pages kept */
 #define DMD_BLANK_PAGE_COUNT 2
 
 #define DMD_ALLOC_PAGE_COUNT \
-	(DMD_PAGE_COUNT - DMD_LOOKASIDE_PAGE_COUNT - DMD_BLANK_PAGE_COUNT)
+	(DMD_PAGE_COUNT - DMD_OVERLAY_PAGE_COUNT - DMD_BLANK_PAGE_COUNT)
 
 /** Coordinates that are aligned various ways */
 #define DMD_CENTER_X (DMD_PIXEL_WIDTH / 2)
@@ -242,14 +242,11 @@ extern inline U8 wpc_dmd_get_high_page (void)
 	return dmd_high_page;
 }
 
-extern inline dmd_pagenum_t dmd_get_lookaside (const U8 num)
-{
-	return DMD_ALLOC_PAGE_COUNT + num * 2;
-}
+#define DMD_OVERLAY_PAGE DMD_ALLOC_PAGE_COUNT
 
 extern inline dmd_pagenum_t dmd_get_blank (const U8 num)
 {
-	return DMD_ALLOC_PAGE_COUNT + DMD_LOOKASIDE_PAGE_COUNT + num;
+	return DMD_ALLOC_PAGE_COUNT + DMD_OVERLAY_PAGE_COUNT + num;
 }
 
 
@@ -257,7 +254,7 @@ void dmd_init (void);
 extern __fastram__ void (*dmd_rtt) (void);
 void dmd_alloc_low (void);
 void dmd_alloc_high (void);
-void dmd_alloc_low_high (void);
+void dmd_alloc_pair (void);
 void dmd_map_low_high (dmd_pagenum_t page);
 void dmd_show_low (void);
 void dmd_show_high (void);
@@ -287,11 +284,12 @@ void frame_draw (U16 id);
 void frame_draw2 (U16 id);
 void bmp_draw (U8 x, U8 y, U16 id);
 
-__transition__ void dmd_shadow_copy (void);
-__transition__ void dmd_text_raise (void);
-__transition__ void dmd_overlay_alpha (dmd_pagepair_t dst, U8 src);
-__transition__ void dmd_overlay2 (dmd_pagepair_t dst, U8 src);
-__transition__ void dmd_overlay (dmd_pagepair_t dst, U8 src);
+__transition__ void dmd_text_outline (void);
+__transition__ void dmd_text_blur (void);
+__transition__ void dmd_overlay (void);
+__transition__ void dmd_overlay_outline (void);
+__transition__ void dmd_overlay_color (void);
+__transition__ void dmd_overlay_onto_color (void);
 __transition__ void dmd_dup_mapped (void);
 
 #ifdef __m6809__
@@ -311,13 +309,11 @@ void dmd_copy_asm (dmd_buffer_t, dmd_buffer_t);
 #define frame_decode_rle frame_decode_rle_c
 #define frame_decode_sparse(p)
 #endif
-void dmd_apply_lookaside2 (U8 num, void (*apply)(void));
 
-extern inline void dmd_map_lookaside (const U8 num)
+extern inline void dmd_map_overlay (void)
 {
-	dmd_map_low_high ( dmd_get_lookaside (num) );
+	dmd_map_low_high (DMD_OVERLAY_PAGE);
 }
-
 
 #define dmd_draw_fif(fif) \
 do { \

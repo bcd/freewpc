@@ -95,7 +95,7 @@ void mb_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);

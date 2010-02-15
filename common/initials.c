@@ -43,6 +43,10 @@ static const unsigned char initial_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ */-+";
 #endif
 #define MAX_INITIAL_INITIAL (sizeof (initial_chars) - MAX_LETTERS_SHOWN)
 
+#define SELECT_OFFSET 2
+#define FONT_WIDTH 8
+#define ALPHABET_LEN 32
+
 /* The amount of time left to enter initials */
 U8 initials_enter_timer;
 
@@ -76,11 +80,31 @@ void enter_initials_deff (void)
 			dmd_alloc_low_clean ();
 			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
 			font_render_string_left (&font_fixed10, 0, 9, initials_data);
-			sprintf ("%12s", initial_chars + initials_selection);
-			font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
 
-			for (n = 23; n <= 31; n++)
-				dmd_low_buffer[16UL * n] ^= 0xFF;
+			if (initials_selection < MAX_INITIAL_INITIAL+1)
+			{
+				sprintf ("%12s", initial_chars + initials_selection);
+				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+			}
+			else
+			{
+				U8 x;
+
+				x = ALPHABET_LEN - initials_selection;
+				sprintf ("%*s", x, initial_chars + initials_selection);
+				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+
+				x = MAX_LETTERS_SHOWN - x;
+				sprintf ("%*s", x, initial_chars);
+				x = MAX_LETTERS_SHOWN - x;
+				font_render_string_left (&font_bitmap8, x * FONT_WIDTH, 23, sprintf_buffer);
+			}
+
+			for (n = 22; n <= 30; n++)
+			{
+				dmd_low_buffer[16UL * n + SELECT_OFFSET - 1] ^= 0x80;
+				dmd_low_buffer[16UL * n + SELECT_OFFSET] ^= 0x7F;
+			}
 
 			sprintf ("%d", initials_enter_timer);
 			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
@@ -145,11 +169,9 @@ CALLSET_ENTRY (initials, sw_left_button)
 {
 	if (initials_enter_timer)
 	{
-		if (initials_selection > 0)
-			--initials_selection;
-		else
-			initials_selection = MAX_INITIAL_INITIAL;
-			score_update_request ();
+		--initials_selection;
+		initials_selection %= ALPHABET_LEN;
+		score_update_request ();
 	}
 }
 
@@ -159,8 +181,7 @@ CALLSET_ENTRY (initials, sw_right_button)
 	if (initials_enter_timer)
 	{
 		++initials_selection;
-		if (initials_selection > MAX_INITIAL_INITIAL)
-			initials_selection = 0;
+		initials_selection %= ALPHABET_LEN;
 		score_update_request ();
 	}
 }
@@ -170,7 +191,8 @@ CALLSET_ENTRY (initials, start_button_handler)
 {
 	if (initials_enter_timer)
 	{
-		initials_data[initials_index] = initial_chars[initials_selection];
+		initials_data[initials_index] =
+			initial_chars[(initials_selection + SELECT_OFFSET) % ALPHABET_LEN];
 		score_update_request ();
 		if (++initials_index == NUM_INITIALS_ALLOWED)
 		{

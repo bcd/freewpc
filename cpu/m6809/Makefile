@@ -42,3 +42,6 @@ KERNEL_BASIC_OBJS += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
 KERNEL_OBJS     += $(C)/string.o
 KERNEL_ASM_OBJS += $(C)/bcd_string.o
 KERNEL_ASM_OBJS += $(C)/irqload.o
+ifeq ($(FREEWPC_DEBUGGER),y)
+KERNEL_ASM_OBJS += $(C)/breakpoint.o
+endif

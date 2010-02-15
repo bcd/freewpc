@@ -58,6 +58,18 @@ void db_dump_all (void)
 #endif
 
 
+/**
+ * Toggle the system pause.
+ */
+void db_toggle_pause (void)
+{
+	dmd_invert_page (dmd_low_buffer);
+	dmd_invert_page (dmd_high_buffer);
+	lamplist_apply (LAMPLIST_ALL, lamp_toggle);
+	db_paused = 1 - db_paused;
+}
+
+
 /** Check for debug input periodically */
 void db_periodic (void)
 {
@@ -121,7 +133,7 @@ void db_periodic (void)
 						task_sleep (TIME_16MS);
 					}
 #else
-					db_paused = 1 - db_paused;
+					db_toggle_pause ();
 					while (db_paused == 1)
 					{
 						task_runs_long ();
@@ -145,6 +157,38 @@ void db_periodic (void)
 		}
 	}
 #endif /* DEBUGGER */
+}
+
+
+/**
+ * Handle a breakpoint.  The system is stopped until the user forces it
+ * to continue, either by pressing 'p' in the debug console, or presses
+ * the Start Button.  Interrupt-level functions continue to run while
+ * paused; only regular task scheduling is paused.  In order to poll for
+ * the continue, we have to invoke the switch and debugger periodic
+ * functions.
+ */
+void bpt_hit (void)
+{
+	db_toggle_pause ();
+	barrier ();
+	while (db_paused == 1)
+	{
+#ifdef SW_START_BUTTON
+		if (switch_poll (SW_START_BUTTON))
+		{
+			while (switch_poll (SW_START_BUTTON))
+				switch_idle ();
+			db_toggle_pause ();
+		}
+		else
+#endif
+		{
+			switch_idle ();
+			db_periodic ();
+			task_runs_long ();
+		}
+	}
 }
 
 

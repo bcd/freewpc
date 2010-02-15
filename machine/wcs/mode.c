@@ -115,7 +115,7 @@ mode_info_t mode_table[] = {
 
 void mode_draw_target_status (U8 targets)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 48, 12, "D");
 	font_render_string_center (&font_fixed10, 64, 12, "O");

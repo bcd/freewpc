@@ -18,7 +18,7 @@ void frame_draw_plane (U16 id);
 /** Start a new display page */
 void de_start_page (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	de_flags = DE_RESET;
 	de_delay = TIME_1500MS;
 }
