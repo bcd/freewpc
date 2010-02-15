@@ -18,19 +18,36 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//TODO Fix bug with shooting two balls into the lock quickly during multiball
-
 #include <freewpc.h>
 #include <status.h>
 
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
+/* Used to start a mode if multiball ends without picking up a jackpot */
+bool mball_jackpot_uncollected;
+U8 restart_mball_timer;
+
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
 extern bool fastlock_running (void);
 extern void reset_unlit_shots (void);
 extern void award_unlit_shot (U8 unlit_called_from);
+
+void mb_restart_deff (void)
+{
+	while (restart_mball_timer > 0)
+	{
+		dmd_alloc_low_high ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
+		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+		sprintf ("%d", restart_mball_timer);
+		font_render_string_center (&font_fixed6, 64, 24, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep_sec (1);
+	}
+}
 
 void lock_lit_deff (void)
 {
@@ -109,6 +126,8 @@ bool can_light_lock (void)
 	else if (fastlock_running ())
 		return TRUE;
 	else if (flag_test (FLAG_MULTIBALL_RUNNING) && !flag_test (FLAG_MB_JACKPOT_LIT))
+		return TRUE;
+	else if (timer_find_gid (GID_RESTART_MBALL_TASK))
 		return TRUE;
 	else
 		return FALSE;
@@ -251,6 +270,7 @@ CALLSET_ENTRY (mball, mball_start)
 		leff_start (LEFF_MB_RUNNING);
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
+		mball_jackpot_uncollected = TRUE;
 		mballs_played++;
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
@@ -259,6 +279,34 @@ CALLSET_ENTRY (mball, mball_start)
 	}
 }
 
+/* Start a 20 second countdown to hit the lock to restart multiball */
+void restart_mball_task (void)
+{
+	if (multi_ball_play ())
+		return;
+	for (restart_mball_timer = 20; restart_mball_timer > 0; restart_mball_timer--)
+	{
+		deff_start_bg (DEFF_MB_RESTART, 0);
+		switch (restart_mball_timer)
+		{
+			case 4:
+				sound_send (SND_THREE);
+				break;
+			case 3:
+				sound_send (SND_TWO);
+				break;
+			case 2:
+				sound_send (SND_ONE);
+				break;
+			case 1:
+				sound_send (SND_NOT_AN_ORDINARY_GAME);
+				break;
+		}
+		task_sleep_sec (1);
+	}
+		mball_jackpot_uncollected = FALSE;
+		deff_stop (DEFF_MB_RESTART);
+}
 
 CALLSET_ENTRY (mball, mball_stop)
 {
@@ -272,6 +320,9 @@ CALLSET_ENTRY (mball, mball_stop)
 		leff_stop (LEFF_MB_RUNNING);
 		music_refresh ();
 		autofire_request_count = 0;
+		/* If a jackpot wasn't collected, offer a restart */
+		if (mball_jackpot_uncollected = TRUE)
+			task_recreate_gid (GID_RESTART_MBALL_TASK, restart_mball_task);
 	}
 }
 
@@ -281,8 +332,7 @@ void mball_left_ramp_exit (void)
 	/*if (flag_test (FLAG_MULTIBALL_RUNNING));
 	else if (flag_test (FLAG_SSSMB_RUNNING));
 	else if (flag_test (FLAG_CHAOSMB_RUNNING));*/
-	//TODO Change this to use a flag rather than a lamp
-	if (!multi_ball_play () && (lamp_flash_test (LM_MULTIBALL)))
+	if (!multi_ball_play () && (mball_locks_made > 0))
 	{
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
@@ -314,7 +364,9 @@ CALLSET_ENTRY (mball, sw_piano)
 	{
 		flag_off (FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT);
+		mball_jackpot_uncollected = FALSE;
 		//TODO Score ladder for jackpots
+		
 		score (SC_20M);
 	}
 }
@@ -340,7 +392,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	{
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT_RELIT);
-		//device_request_kick (device_entry (DEVNO_LOCK));
 	}
 	else if (can_lock_ball ())
 	{
@@ -356,13 +407,17 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		mball_locks_made++;
 		lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
+		reset_unlit_shots ();
+	}
+	else if (timer_kill_gid (GID_RESTART_MBALL_TASK))
+	{
+		mball_jackpot_uncollected = FALSE;
+		deff_stop (DEFF_MB_RESTART);
+		callset_invoke (mball_start);
 	}
 	else
-		/* inform unlit.c */
+		/* inform unlit.c that a shot was missed */
 		award_unlit_shot (SW_LOCK_LOWER);
-	//else if (flag_test (FLAG_MULTIBALL_RUNNING))
-		//TODO Why do I have to do this?
-	//	device_request_kick (device_entry (DEVNO_LOCK));
 }
 
 CALLSET_ENTRY (mball, start_player)
@@ -390,7 +445,4 @@ CALLSET_ENTRY (mball, status_report)
 
 CALLSET_ENTRY (mball, ball_search)
 {
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
-		device_request_kick (device_entry (DEVNO_LOCK));
-
 }

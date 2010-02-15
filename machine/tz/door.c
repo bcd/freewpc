@@ -266,7 +266,8 @@ CALLSET_ENTRY (door, lamp_update)
 	else
 		lamp_off (LM_PIANO_PANEL);
 
-	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
+	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT) 
+		&& !task_find_gid (GID_SSLOT_AWARD_ROTATE))
 		lamp_on (LM_SLOT_MACHINE);
 	else
 		lamp_off (LM_SLOT_MACHINE);

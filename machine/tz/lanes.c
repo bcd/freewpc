@@ -78,7 +78,8 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 
 CALLSET_ENTRY(lanes, start_ball)
 {
-	lamp_on (LM_LEFT_INLANE1);
+	//lamp_on (LM_LEFT_INLANE1);
+	//lamp_on (LM_LEFT_INLANE1);
 	lamp_on (LM_RIGHT_INLANE);
 }
 

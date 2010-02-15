@@ -25,9 +25,13 @@ __local__ U8 left_ramps;
 extern U8 cameras_lit;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;	
+extern U8 mball_locks_made;
+extern U8 sssmb_ramps_to_divert;
+
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
+
 void left_ramp_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -102,12 +106,17 @@ CALLSET_ENTRY(leftramp, start_ball)
 
 static void maybe_ramp_divert (void)
 {
-	//TODO check to see if a ball is being launched
-	if (lamp_flash_test (LM_MULTIBALL) && autofire_request_count == 0)
+	/* Divert to autoplunger if mball ready or chaosmb running */
+	if (((mball_locks_made > 0) || flag_test (FLAG_CHAOSMB_RUNNING))
+		&& autofire_request_count == 0)
 	{
 		ramp_divert_to_autoplunger ();
 	}
-	else if (flag_test (FLAG_SSSMB_RUNNING) && autofire_request_count == 0 && !switch_poll_logical (SW_SHOOTER))
+	/* Divert to plunger lane if sssmb is running, but not if any balls
+	 * are due to be fired or any sat in the plunger */
+	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 
+		&& autofire_request_count == 0 
+		&& !switch_poll_logical (SW_SHOOTER))
 	{
 		ramp_divert ();
 	}

@@ -20,12 +20,10 @@
 
 /* Backdoor Award Rules:
  * Award the player a door for getting a certain amount of unlit shots 
- * Currently deadend, rightramp, slot, piano, HH are awarded when 'unlit'
- * Collecting mpf, multiball, door panel resets count
- * Only works once per ball */
-//TODO only allow unique hits, maybe must finish on particular switch?
-// Could use it as 'secret' way to start litz, for a wizard wizard mode ;-)
-// USE SWITCH NAMES AS IT'S A U8 NUMBER DUMMY!
+ * Currently deadend, rightramp, slot, piano, HH, lock are awarded when 'unlit'
+ * Collecting mpf, multiball, door panel, lock resets count
+ * Only works once per game, 20M bonus on each ball */
+
 #include <freewpc.h>
 
 
@@ -74,7 +72,7 @@ void award_unlit_shot (U8 unlit_called_from)
 		/* Don't allow collecting from Hitchhiker */
 		if (unlit_shot_count > 4 && (unlit_called_from != (SW_HITCHHIKER)))
 		{
-			sound_send (SND_KACHING);
+			sound_send (SND_JUST_TAKEN_A_DETOUR);
 			deff_start (DEFF_BACKDOOR_AWARD);
 			//task_sleep_sec (1);
 			door_award_if_possible ();

@@ -54,7 +54,6 @@ void start_spiralaward_timer (void)
 	if (!multi_ball_play ())
 	{
 		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
-	//	leff_stop (LEFF_SPIRAL_AWARD_ACTIVE);
 		leff_start (LEFF_SPIRAL_AWARD_ACTIVE);
 
 	}
@@ -112,10 +111,6 @@ void award_spiralaward (void)
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
 	/* Run lamp flash as task so it can run in parallel */
 	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
-//	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
-//	task_sleep_sec (3);
-	/* Turn off lamp, award is collected */
-//	lamp_tristate_off (spiralaward_lamps[spiralaward]);
 }
 
 void spiralaward_collected_deff (void)

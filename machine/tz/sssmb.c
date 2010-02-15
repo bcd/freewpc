@@ -263,12 +263,12 @@ void sssmb_left_ramp_exit (void)
 			if (!timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 			{
 				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_6S);
-				ramp_divert ();
+				//ramp_divert (); Already done by multiball.c
 			}
 		}
 		else
 		{
-			sssmb_ramps_to_divert--;
+			bounded_decrement (sssmb_ramps_to_divert, 0);
 		}
 		score_update_required ();
 	}
