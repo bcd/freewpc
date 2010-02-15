@@ -34,6 +34,7 @@ void sssmb_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
+		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 

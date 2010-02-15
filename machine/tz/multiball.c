@@ -38,7 +38,9 @@ void mb_restart_deff (void)
 {
 	while (restart_mball_timer > 0)
 	{
-		dmd_alloc_low_high ();
+		//dmd_alloc_low_high ();
+		
+		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
@@ -95,6 +97,8 @@ void mb_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
+		//dmd_alloc_low_high ();
+		
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
@@ -321,7 +325,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		music_refresh ();
 		autofire_request_count = 0;
 		/* If a jackpot wasn't collected, offer a restart */
-		if (mball_jackpot_uncollected = TRUE)
+		if (mball_jackpot_uncollected == TRUE)
 			task_recreate_gid (GID_RESTART_MBALL_TASK, restart_mball_task);
 	}
 }

@@ -88,6 +88,7 @@ void pb_detect_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (3);
 #else
+	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");

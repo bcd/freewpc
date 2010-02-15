@@ -26,6 +26,7 @@ extern U8 autofire_request_count;
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
 	score_update_start ();
+	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (font, x, y, text);
@@ -91,6 +92,7 @@ struct {
 
 void chaos_jackpot_deff (void)
 {
+	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 9, "CHAOS");
