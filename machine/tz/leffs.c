@@ -362,8 +362,9 @@ void lock_leff (void)
 void mpf_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	while (mpf_ball_count > 0)
-		lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES, 
+	//while (mpf_ball_count > 0)
+	for (;;)
+	lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
 	leff_exit ();
 }
@@ -372,7 +373,11 @@ void spiral_award_active_leff (void)
 {
 	
 	lamplist_set_apply_delay (TIME_33MS);
-	for (;;)	
+	for (;;)
+	//while (free_timer_test (TIM_SPIRALAWARD))
+	{
 		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
-}
+	}
+	//leff_exit ();
+}	

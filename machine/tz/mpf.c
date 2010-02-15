@@ -141,15 +141,15 @@ CALLSET_ENTRY (mpf, door_start_battle_power)
 CALLSET_ENTRY (mpf, sw_mpf_top)
 {
 	event_should_follow (mpf_top, camera, TIME_4S);
+	sound_send (SND_EXPLOSION_3);
+	score (SC_500K);
 }
-
-
 
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	flipper_enable ();
-	leff_stop (LEFF_MPF_ACTIVE);
+	//leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	deff_start (DEFF_MPF_AWARD);
 	sound_send (SND_EXPLOSION_3);
@@ -176,7 +176,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		if (mpf_ball_count = (1))
 		{	
 			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
-			leff_start (LEFF_MPF_ACTIVE);
+			//leff_start (LEFF_MPF_ACTIVE);
 			if (!multi_ball_play ())
 				flipper_disable ();
 		}
@@ -186,6 +186,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	{
 		sound_send (SND_WITH_THE_DEVIL);
 		score (SC_5M);
+		//TODO Crazy magnet pulses till exit or 3 secs
 	}
 }
 
@@ -195,7 +196,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)
 	{
-		leff_stop (LEFF_MPF_ACTIVE);
+		//leff_stop (LEFF_MPF_ACTIVE);
 		timed_mode_stop (&mpf_round_timer);
 		flipper_enable ();
 	}

@@ -44,7 +44,7 @@ extern void pb_set_location (U8 location, U8 depth);
 extern void pb_clear_location (U8 location);
 extern U8 mpf_round_timer;
 extern void mball_start_3_ball (void);
-extern void sssmb_start (void);
+//extern void sssmb_start (void);
 //__machine__ extern void mball_start (void);
 
 /*************************************************************/
@@ -170,7 +170,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 	 * hit the gumball exit switch as it leaves the MPF */
 	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING, 
 		&mpf_round_timer))
-			mpf_round_timer += 5;
+			score (SC_5M);
 	event_should_follow (gumball_exit, camera, TIME_3S);
 }
 
@@ -201,7 +201,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			pb_set_location (PB_IN_GUMBALL, 2);
 			//TODO Move to multiball.c
 			mball_start_3_ball ();
-			sssmb_start ();
+			callset_invoke (sssmb_start);
 			callset_invoke (mball_start);
 		}
 		gumball_release ();

@@ -120,8 +120,10 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 		else
 			hitch_level += 5;
 	}*/
-	if (!event_did_follow (rocket, hitchhiker))
-		deff_start (DEFF_HITCHHIKER);
+	/* Wait a bit before showing deff if hit from rocket */
+	if (event_did_follow (rocket, hitchhiker))
+		task_sleep (TIME_200MS);
+	deff_start (DEFF_HITCHHIKER);
 }
 
 CALLSET_ENTRY (hitch, door_start_hitchhiker)

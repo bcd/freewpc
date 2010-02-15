@@ -54,10 +54,11 @@ void start_spiralaward_timer (void)
 	if (!multi_ball_play ())
 	{
 		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
-		leff_start (LEFF_SPIRAL_AWARD_ACTIVE);
+	//	leff_stop (LEFF_SPIRAL_AWARD_ACTIVE);
+	//	leff_start (LEFF_SPIRAL_AWARD_ACTIVE);
+
 	}
 }
-
 
 void flash_spiralaward_lamp (void)
 {
@@ -142,7 +143,8 @@ CALLSET_ENTRY (spiralaward, lamp_update)
 {
 	if (!free_timer_test (TIM_SPIRALAWARD))
 	{
-		leff_stop (LEFF_SPIRAL_AWARD_ACTIVE);
+	//	leff_stop (LEFF_SPIRAL_AWARD_ACTIVE);
+		task_sleep (TIME_200MS);
 	}
 }	
 

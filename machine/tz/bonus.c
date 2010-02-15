@@ -34,8 +34,11 @@ void bonus_button_monitor (void)
 {
 	for (;;)
 	{
-		if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON)))
+		if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON)) && buttons_held == FALSE)
+		{	
 			buttons_held = TRUE;
+			sound_send (SND_CUCKOO);
+		}
 		task_sleep (TIME_100MS);
 	}
 }

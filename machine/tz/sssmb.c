@@ -157,7 +157,7 @@ void sssmb_jackpot_ready_task (void)
 }
 
 
-void sssmb_start (void)
+CALLSET_ENTRY (sssmb, sssmb_start)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
@@ -214,7 +214,7 @@ CALLSET_ENTRY (sssmb, music_refresh)
 
 CALLSET_ENTRY (sssmb, door_start_super_skill)
 {
-	sssmb_start ();
+	callset_invoke (sssmb_start);
 }
 
 

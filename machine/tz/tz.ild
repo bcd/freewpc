@@ -40,3 +40,24 @@ IMG_JACKPOT_12: machine/tz/animation/jackpot/jackpot12.pgm
 IMG_JACKPOT_13: machine/tz/animation/jackpot/jackpot13.pgm
 IMG_JACKPOT_14: machine/tz/animation/jackpot/jackpot14.pgm
 IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
+
+
+IMG_EBALL_START: machine/tz/animation/eball/eball01.pgm
+IMG_EBALL_2: machine/tz/animation/eball/eball02.pgm
+IMG_EBALL_3: machine/tz/animation/eball/eball03.pgm
+IMG_EBALL_4: machine/tz/animation/eball/eball04.pgm
+IMG_EBALL_5: machine/tz/animation/eball/eball05.pgm
+IMG_EBALL_6: machine/tz/animation/eball/eball06.pgm
+IMG_EBALL_7: machine/tz/animation/eball/eball07.pgm
+IMG_EBALL_8: machine/tz/animation/eball/eball08.pgm
+IMG_EBALL_9: machine/tz/animation/eball/eball09.pgm
+IMG_EBALL_10: machine/tz/animation/eball/eball10.pgm
+IMG_EBALL_11: machine/tz/animation/eball/eball11.pgm
+IMG_EBALL_12: machine/tz/animation/eball/eball12.pgm
+IMG_EBALL_13: machine/tz/animation/eball/eball13.pgm
+IMG_EBALL_14: machine/tz/animation/eball/eball14.pgm
+IMG_EBALL_15: machine/tz/animation/eball/eball15.pgm
+IMG_EBALL_16: machine/tz/animation/eball/eball16.pgm
+IMG_EBALL_17: machine/tz/animation/eball/eball17.pgm
+IMG_EBALL_18: machine/tz/animation/eball/eball18.pgm
+IMG_EBALL_END: machine/tz/animation/eball/eball19.pgm

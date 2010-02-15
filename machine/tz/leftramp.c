@@ -24,10 +24,10 @@
 __local__ U8 left_ramps;
 extern U8 cameras_lit;
 extern U8 gumball_enable_count;
+extern U8 autofire_request_count;	
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
-	
 void left_ramp_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -103,11 +103,11 @@ CALLSET_ENTRY(leftramp, start_ball)
 static void maybe_ramp_divert (void)
 {
 	//TODO check to see if a ball is being launched
-	if (lamp_flash_test (LM_MULTIBALL))
+	if (lamp_flash_test (LM_MULTIBALL) && autofire_request_count == 0)
 	{
 		ramp_divert_to_autoplunger ();
 	}
-	else if (lamp_test (LM_SUPER_SKILL))
+	else if (flag_test (FLAG_SSSMB_RUNNING) && autofire_request_count == 0 && !switch_poll_logical (SW_SHOOTER))
 	{
 		ramp_divert ();
 	}

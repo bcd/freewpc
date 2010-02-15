@@ -30,7 +30,7 @@ void rocket_deff (void)
 	task_sleep (TIME_500MS);
 
 	U8 fno;
-	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 1)
+	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 2)
 	{
 		dmd_alloc_low_high ();
 		frame_draw (fno);

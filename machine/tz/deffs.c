@@ -51,8 +51,19 @@ void replay_deff (void)
 
 void extra_ball_deff (void)
 {
-	sprintf ("EXTRA BALL");
-	flash_and_exit_deff (20, TIME_100MS);
+//	sprintf ("EXTRA BALL");
+//	flash_and_exit_deff (20, TIME_100MS);
+	U8 fno;
+	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 1)
+	{
+		dmd_alloc_low_high ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (2);
+	deff_exit ();
+	//flash_and_exit_deff (20, TIME_100MS);
 }
 
 void special_deff (void)
@@ -109,8 +120,9 @@ void jackpot_deff (void)
 {
 	U8 fno;
 	U8 i;
+	music_disable ();
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
-	/* Repeat the start 4 times */
+	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
 		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
@@ -152,7 +164,9 @@ void jackpot_deff (void)
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sound_send (SND_JACKPOT);
-	task_sleep_sec (2); 
+	task_sleep (TIME_500MS);
+	//task_sleep_sec (1); 
+	music_enable ();
 	deff_exit ();
 }
 
