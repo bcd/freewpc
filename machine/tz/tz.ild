@@ -61,3 +61,18 @@ IMG_EBALL_16: machine/tz/animation/eball/eball16.pgm
 IMG_EBALL_17: machine/tz/animation/eball/eball17.pgm
 IMG_EBALL_18: machine/tz/animation/eball/eball18.pgm
 IMG_EBALL_END: machine/tz/animation/eball/eball19.pgm
+
+IMG_HITCHHIKER_START: machine/tz/animation/hitchhiker/hitchhiker01.pgm
+IMG_HITCHHIKER_2: machine/tz/animation/hitchhiker/hitchhiker02.pgm
+IMG_HITCHHIKER_3: machine/tz/animation/hitchhiker/hitchhiker03.pgm
+IMG_HITCHHIKER_4: machine/tz/animation/hitchhiker/hitchhiker04.pgm
+IMG_HITCHHIKER_5: machine/tz/animation/hitchhiker/hitchhiker05.pgm
+IMG_HITCHHIKER_6: machine/tz/animation/hitchhiker/hitchhiker06.pgm
+IMG_HITCHHIKER_7: machine/tz/animation/hitchhiker/hitchhiker07.pgm
+IMG_HITCHHIKER_8: machine/tz/animation/hitchhiker/hitchhiker08.pgm
+IMG_HITCHHIKER_9: machine/tz/animation/hitchhiker/hitchhiker09.pgm
+IMG_HITCHHIKER_10: machine/tz/animation/hitchhiker/hitchhiker10.pgm
+IMG_HITCHHIKER_11: machine/tz/animation/hitchhiker/hitchhiker11.pgm
+IMG_HITCHHIKER_12: machine/tz/animation/hitchhiker/hitchhiker12.pgm
+IMG_HITCHHIKER_13: machine/tz/animation/hitchhiker/hitchhiker13.pgm
+IMG_HITCHHIKER_END: machine/tz/animation/hitchhiker/hitchhiker14.pgm

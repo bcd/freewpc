@@ -25,7 +25,7 @@ __local__ U8 hitch_level;
 U8 hitch_round_timer;
 extern void award_unlit_shot (U8 unlit_called_from);
 
-void hitchhiker_deff (void)
+/*void hitchhiker_deff (void)
 {
 	dmd_alloc_low ();
 	frame_draw (IMG_HITCHER);
@@ -39,9 +39,27 @@ void hitchhiker_deff (void)
 	dmd_show_low ();
 	task_sleep (TIME_500MS);
 	deff_exit ();
+}*/
+
+void hitchhiker_deff (void)
+{
+	//dmd_alloc_pair_clean ();
+	U8 fno;	
+	for (fno = IMG_HITCHHIKER_START; fno <= IMG_HITCHHIKER_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		/*if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
+			&hitch_round_timer))
+			sprintf("10 MILLION");
+		else if (fno > 4)
+			psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
+		font_render_string (&font_var5, 50, 6+fno, sprintf_buffer);*/
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	deff_exit ();
 }
-
-
 
 void hitch_round_deff (void)
 {
@@ -121,8 +139,8 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 			hitch_level += 5;
 	}*/
 	/* Wait a bit before showing deff if hit from rocket */
-	if (event_did_follow (rocket, hitchhiker))
-		task_sleep (TIME_200MS);
+	//if (event_did_follow (rocket, hitchhiker))
+	//	task_sleep (TIME_200MS);
 	deff_start (DEFF_HITCHHIKER);
 }
 

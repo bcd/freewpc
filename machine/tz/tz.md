@@ -489,10 +489,10 @@ Clock Working:
 [deffs]
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 # Brian Image: PRI_EGG1
-Replay: page(MACHINE_PAGE), PRI_REPLAY
-Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
+Replay: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
+Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Special: page(MACHINE_PAGE), PRI_SPECIAL
-Extra Ball: page(MACHINE_PAGE), PRI_EB
+Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 
 Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3, D_QUEUED+D_TIMEOUT
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT

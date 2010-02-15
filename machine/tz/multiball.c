@@ -49,6 +49,7 @@ void mb_restart_deff (void)
 		dmd_show_low ();
 		task_sleep_sec (1);
 	}
+	deff_exit ();
 }
 
 void lock_lit_deff (void)

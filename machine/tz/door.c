@@ -151,13 +151,15 @@ void door_award_rotate (void)
 	}
 	task_exit ();
 }
-
+/* TODO Crashes in test mode */
 void door_award_deff (void)
 {
 	U8 index = door_index;
 
 	kickout_lock (KLOCK_DEFF);
-	dmd_alloc_low_clean ();
+	//dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
+	//dmd_alloc_pair ();
 
 	sprintf ("DOOR PANEL %d", door_panels_started);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
@@ -165,8 +167,11 @@ void door_award_deff (void)
 	dmd_show_low ();
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	task_sleep_sec (2);
+	
+	//dmd_alloc_pair ();
+	dmd_alloc_pair_clean ();
 
-	dmd_alloc_low_clean ();
+	//dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
 	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[index]);
 	dmd_sched_transition (&trans_scroll_left);
@@ -180,7 +185,8 @@ void door_award_deff (void)
 
 void litz_award_deff (void)
 {
-	dmd_alloc_low_clean ();
+	//dmd_alloc_low_clean ();
+	dmd_alloc_pair ();
 	dmd_show_low ();
 	sound_send (SND_FIST_BOOM1);
 	task_sleep_sec (1);
