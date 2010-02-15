@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include <freewpc.h>
 
 extern void mball_start_3_ball (void);
@@ -153,6 +152,7 @@ void chaosmb_start (void)
 
 CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
+	//TODO Is this where the LM_CLOCK_MILLIONS flash gets left on from?
 	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
