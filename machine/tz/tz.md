@@ -379,6 +379,7 @@ Disable Clock: yes_no, NO
 Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
+Mute/Pause: yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.

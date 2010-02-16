@@ -67,19 +67,32 @@ void flipper_override_on (U8 switches)
 	flipper_overrides |= switches;
 }
 
-
 void flipper_override_off (U8 switches)
 {
 	flipper_overrides &= ~switches;
 }
 
+void flipper_hold_on (void)
+{
+	/* TODO - is this not reading the debounced values? */
+	flipper_overrides = ~wpc_read_flippers () & (WPC_LL_FLIP_SW | WPC_LR_FLIP_SW);
+}
+
+void flipper_hold_off (void)
+{
+	flipper_overrides = 0;
+}
+
 
 void flipper_override_pulse (U8 switches)
 {
-	flipper_override_on (switches);
-	task_sleep (TIME_166MS);
-	flipper_override_off (switches);
-	task_sleep (TIME_66MS);
+	if (!(flipper_overrides & switches))
+	{
+		flipper_override_on (switches);
+		task_sleep (TIME_166MS);
+		flipper_override_off (switches);
+		task_sleep (TIME_66MS);
+	}
 }
 
 

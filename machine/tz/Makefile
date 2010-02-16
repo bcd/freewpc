@@ -4,7 +4,6 @@
 #
 
 MACHINE_FILE := tz.md
-
 MACHINE_SCHEDULE := $(M)/tz.sched
 
 # Define the name of the GAME_ROM.  This is
@@ -48,6 +47,11 @@ PINMAME_MACHINE = tz_92
 PINMAME_GAME_ROM = tzone9_2.rom
 
 PINMAME_OTHER_ROMS = tzu*.rom
+
+
+CONFIG_MUTE_PAUSE := y
+EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
+
 
 #
 # Object files exported by this game

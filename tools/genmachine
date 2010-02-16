@@ -562,7 +562,7 @@ LINE:
 			$def->{'c_string'} = "\"$c_string\"";
 
 			my $c_ident = $c_string;
-			$c_ident =~ s/[ :-]+/_/g;
+			$c_ident =~ s/[ :\/\-]+/_/g;
 			$c_ident =~ s/[.\']//g;
 			my $prefix = $ContextPrefixes{$contextName};
 			if (defined $prefix) {
