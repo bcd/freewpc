@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-
 //#define PB_DEBUG
 
 
@@ -88,6 +87,7 @@ void pb_detect_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (3);
 #else
+#if 0
 	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
@@ -100,6 +100,22 @@ void pb_detect_deff (void)
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (32, TIME_100MS);
+#endif
+	sound_send (SND_POWERBALL_QUOTE);
+	U8 fno;
+	U8 i;
+	for (i = 0;i < 3;i++)
+	{
+		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 1)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			//font_render_string_center (&font_fixed10, 64, 20, "POWERBALL");
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	}
+	task_sleep_sec (1);
 #endif
 	deff_exit ();
 }

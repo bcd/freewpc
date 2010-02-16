@@ -70,6 +70,7 @@ void award_gumball_score (void)
 		score (SC_20M);
 		gumball_score =+ 20;
 	}
+	
 }
 
 bool gumball_load_is_enabled (void)
@@ -278,12 +279,37 @@ void sw_far_left_trough_monitor (void)
 
 void gumball_deff (void)
 {
+	/*
 	dmd_alloc_low_clean ();
 	psprintf("1 GUMBALL", "%d GUMBALLS", gumball_collected_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	sprintf("%d MILLION", gumball_score);
 	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
 	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+	*/
+	U8 fno;
+	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 1)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+
+	/* Show last two frames two times */
+	for (fno = 0 ; fno > 2; fno++)
+	{
+		dmd_alloc_pair ();
+		frame_draw (IMG_GUMBALL_END - 2);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_alloc_pair ();
+		frame_draw (IMG_GUMBALL_END);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}
 	task_sleep_sec (1);
 	deff_exit ();
 }

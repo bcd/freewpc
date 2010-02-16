@@ -92,3 +92,28 @@ IMG_DRIVER_12: machine/tz/animation/driver/driver12.pgm
 IMG_DRIVER_13: machine/tz/animation/driver/driver13.pgm
 IMG_DRIVER_END: machine/tz/animation/driver/driver14.pgm
 
+IMG_GUMBALL_START: machine/tz/animation/gumball/gumball01.pgm
+IMG_GUMBALL_2: machine/tz/animation/gumball/gumball02.pgm
+IMG_GUMBALL_3: machine/tz/animation/gumball/gumball03.pgm
+IMG_GUMBALL_4: machine/tz/animation/gumball/gumball04.pgm
+IMG_GUMBALL_5: machine/tz/animation/gumball/gumball05.pgm
+IMG_GUMBALL_6: machine/tz/animation/gumball/gumball06.pgm
+IMG_GUMBALL_7: machine/tz/animation/gumball/gumball07.pgm
+IMG_GUMBALL_8: machine/tz/animation/gumball/gumball08.pgm
+IMG_GUMBALL_9: machine/tz/animation/gumball/gumball09.pgm
+IMG_GUMBALL_10: machine/tz/animation/gumball/gumball10.pgm
+IMG_GUMBALL_11: machine/tz/animation/gumball/gumball11.pgm
+IMG_GUMBALL_12: machine/tz/animation/gumball/gumball12.pgm
+IMG_GUMBALL_13: machine/tz/animation/gumball/gumball13.pgm
+IMG_GUMBALL_14: machine/tz/animation/gumball/gumball14.pgm
+IMG_GUMBALL_15: machine/tz/animation/gumball/gumball15.pgm
+IMG_GUMBALL_16: machine/tz/animation/gumball/gumball16.pgm
+IMG_GUMBALL_17: machine/tz/animation/gumball/gumball17.pgm
+IMG_GUMBALL_18: machine/tz/animation/gumball/gumball18.pgm
+IMG_GUMBALL_END: machine/tz/animation/gumball/gumball19.pgm
+
+
+IMG_POWERBALL_START: machine/tz/animation/powerball/powerball01.pgm
+IMG_POWERBALL_2: machine/tz/animation/powerball/powerball02.pgm
+IMG_POWERBALL_3: machine/tz/animation/powerball/powerball03.pgm
+IMG_POWERBALL_END: machine/tz/animation/powerball/powerball04.pgm
