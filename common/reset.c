@@ -253,6 +253,10 @@ void system_reset (void)
 
 	/* In test-only mode, pretend ENTER was pressed
 	 * and go straight to test mode. */
+#ifdef CONFIG_STRESS_TEST
+	extern U8 switch_stress_enable;
+	switch_stress_enable = YES;
+#endif
 #ifdef MACHINE_TEST_ONLY
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
