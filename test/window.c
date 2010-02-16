@@ -157,7 +157,7 @@ void window_stop_thread (void)
 /** Redraws the current window. */
 void window_redraw (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	window_call_op (win_top, draw);
 }
@@ -1011,12 +1011,29 @@ void font_test_right (void)
 	sound_send (SND_TEST_CHANGE);
 }
 
+void font_test_up (void)
+{
+	browser_up ();
+	font_test_offset = 0;
+	font_test_change ();
+}
+
+void font_test_down (void)
+{
+	browser_down ();
+	font_test_offset = 0;
+	font_test_change ();
+}
+
+
 struct window_ops font_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = font_test_init,
 	.draw = font_test_draw,
 	.left = font_test_left,
 	.right = font_test_right,
+	.up = font_test_up,
+	.down = font_test_down,
 };
 
 
@@ -1312,15 +1329,13 @@ void lamplist_draw (void)
 void lamplist_update (void)
 {
 	lamp_all_off ();
-#if 0
 	if (lamplist_update_mode >= 6)
 	{
-		U8 *lamp = lamplist_first_entry (menu_selection);
-		lamp_on (*lamp);
-		lamp = lamplist_next_entry (menu_selection, lamp);
-		lamp_on (*lamp);
+		U8 lamp = lamplist_index (menu_selection, 0);
+		lamp_on (lamp);
+		lamp = lamplist_index (menu_selection, 1);
+		lamp_on (lamp);
 	}
-#endif
 	for (;;)
 	{
 		switch (lamplist_update_mode)
@@ -1712,7 +1727,7 @@ void dev_frametest_init (void)
 
 void dev_frametest_draw (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (test_frameno);
 	dmd_show2 ();
 }

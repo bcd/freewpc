@@ -222,7 +222,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 [drives]
 H1: Slot
 H2: Rocket Kicker
-H3: Autofire, nosearch
+H3: Autofire, nosearch, launch
 H4: Popper
 H5: Right Ramp Div., duty(SOL_DUTY_50), time(TIME_1S)
 H6: Gumball Div.
@@ -486,7 +486,7 @@ Clock Working:
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 # Brian Image: PRI_EGG1
 Replay: page(MACHINE_PAGE), PRI_REPLAY
-Jackpot: page(MACHINE_PAGE), PRI_JACKPOT
+Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB
 

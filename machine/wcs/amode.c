@@ -30,15 +30,15 @@ CALLSET_ENTRY (wcs_amode, start_without_credits)
 
 CALLSET_ENTRY (wcs_amode, amode_page)
 {
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 84, 9, "STARRING");
 	font_render_string_center (&font_fixed6, 84, 21, "STRIKER");
-	dmd_shadow_copy ();
+	dmd_text_outline ();
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	frame_draw (IMG_STRIKER);
-	dmd_overlay_alpha (wpc_dmd_get_mapped (), 0);
+	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (5);
 }
@@ -46,15 +46,15 @@ CALLSET_ENTRY (wcs_amode, amode_page)
 
 void amode_pgj_logo (void)
 {
-	dmd_map_lookaside (0);
+	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 44, 25, "10");
 	font_render_string_center (&font_var5, 64, 27, "YEARS");
-	dmd_shadow_copy ();
+	dmd_text_outline ();
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_draw_fif (fif_pgj);
-	dmd_overlay_alpha (wpc_dmd_get_mapped (), 0);
+	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (15);
 	deff_exit ();

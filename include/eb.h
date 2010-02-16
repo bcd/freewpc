@@ -31,7 +31,7 @@ __effect__ void clear_extra_balls (void);
 __effect__ void light_easy_extra_ball (void);
 __effect__ void light_hard_extra_ball (void);
 __effect__ void eb_light_adjustable (adjval_t mem_val);
-__effect__ void collect_extra_ball (void);
+__effect__ bool collect_extra_ball (void);
 
 __effect__ void special_award (void);
 

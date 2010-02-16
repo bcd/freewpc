@@ -88,7 +88,7 @@ void animation_step (void)
 
 	if (an->flags & AN_DOUBLE)
 	{
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 		if (an->flags & AN_CLEAN)
 			dmd_clean_page_low ();
 	}

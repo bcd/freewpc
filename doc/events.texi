@@ -57,9 +57,16 @@ The device "foo" was just entered (its count went up by 1).
 
 @item dev_@var{foo}_kick_attempt
 The system is about to try to kick a ball from device "foo".
+It cannot be stopped at this point; see the kick_request
+event if you want to delay for some reason.
 
 @item dev_@var{foo}_kick_failure
 A kick from device "foo" failed (its count did not change).
+
+@item dev_@var{foo}_kick_request
+The system wants to try to kick a ball from device "foo".
+If you return FALSE from this event, the attempt will be delayed
+for a while.
 
 @item dev_@var{foo}_kick_success
 A kick from device "foo" succeeded (its count went down by 1).
@@ -122,11 +129,12 @@ Both flipper buttons were pressed simultaneously.
 TBD.
 
 @item idle
-No tasks are ready to run.  This event will be thrown only once per
-system tick (1 millisecond on WPC), but it will be thrown repeatedly
-until a task can be restarted.  The idle event is not thrown during
-early system initialization.  As this event may be generated many times,
-it is usually not the right event for non-system modules to receive.
+This event will be thrown exactly once every 16ms, after all running
+tasks have been scanned and given a chance to run.  If tasks take
+a long while, it is possible that this event will run less frequently.
+However, this event cannot be starved out indefinitely.  The idle event
+is not thrown during early system initialization.  As this event happens
+frequently, it is usually not the right event for non-system modules to receive.
 
 @item idle_every_100ms
 Like idle, but only called once per 100 milliseconds.  This is the

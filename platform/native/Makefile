@@ -66,4 +66,4 @@ FIRST_BANK=0
 # Invoke 'make attach' to start up a GDB session that attaches itself to
 # a running instance of the native mode program.
 attach:
-	gdb -p `ps -ef | grep freewpc | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros
+	gdb -p `ps -ef | grep $(NATIVE_PROG) | head -n 1 | grep -o "[0-9].*" | awk '{print $$1}'` -x gdbmacros

@@ -30,7 +30,7 @@ extern __nvram__ U8 current_volume;
 
 void ball_save_deff (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("PLAYER %d", player_up);
 	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
@@ -156,7 +156,7 @@ void score_goal_deff (void)
 
 void plunge_ball_deff (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 
 	sprintf ("PLAYER %d", player_up);
