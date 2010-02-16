@@ -267,7 +267,7 @@ CALLSET_ENTRY (zr_1_multiball, start_player, single_ball_play)
 	zr_1_mb_reset ();
 }
 
-CALLSET_ENTRY (zr_1_multiball, ball_serve) {
+CALLSET_ENTRY (zr_1_multiball, start_ball) {
 	// update the locked_balls count in case another player started a multiball
 	U8 zr_1_ball_count = device_recount (device_entry (DEVNO_ZR1_POPPER));
 	if (lock_count > zr_1_ball_count) {
