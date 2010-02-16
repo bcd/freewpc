@@ -67,7 +67,7 @@ AREA_DECL(permanent)
 AREA_DECL(nvram)
 
 #else
-/* TODO */
+#define AREA_SIZE(name) 0
 #endif /* __m6809__ */
 
 

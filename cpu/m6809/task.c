@@ -479,6 +479,7 @@ void task_sleep_periodic (void)
 __naked__ __noreturn__ 
 void task_exit (void)
 {
+	bpt ();
 	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_EXIT, task_current->gid);
 	if (task_current == 0)
 		fatal (ERR_IDLE_CANNOT_EXIT);

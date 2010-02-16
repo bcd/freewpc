@@ -104,11 +104,11 @@ __noreturn__ void deff_exit (void);
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
 void deff_swap_low_high (S8 count, task_ticks_t delay);
 void deff_start_bg (deffnum_t dn, enum _priority prio);
-void deff_start_retry (deffnum_t id, U8 timeout);
 void deff_update (void);
 void deff_start_sync (deffnum_t dn);
 void deff_init (void);
 void deff_stop_all (void);
+void deff_queue_add (deffnum_t id, U16 timeout);
 
 
 /* The deff components module offers inline functions for

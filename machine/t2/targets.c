@@ -262,7 +262,7 @@ CALLSET_ENTRY (centerbank, start_game)
 }
 
 
-CALLSET_ENTRY (lanes, sw_left_flipper)
+CALLSET_ENTRY (lanes, sw_left_button)
 {
 	if (in_live_game)
 	{
@@ -270,7 +270,7 @@ CALLSET_ENTRY (lanes, sw_left_flipper)
 	}
 }
 
-CALLSET_ENTRY (lanes, sw_right_flipper)
+CALLSET_ENTRY (lanes, sw_right_button)
 {
 	if (in_live_game)
 	{

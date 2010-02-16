@@ -88,7 +88,7 @@ void pb_detect_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (3);
 #else
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");
 	dmd_sched_transition (&trans_vstripe_right2left);
@@ -293,21 +293,17 @@ void pb_container_enter (U8 location, U8 devno)
 			 * the device it just entered at a specific location.
 			 *
 			 * It is also possible that we might kick out the 
-			 * ball immediately from the same device.  Changing
+			 * Powerball immediately from the same device, when it is
+			 * the only ball in the device.  Changing
 			 * the state here and then back again will cause the
-			 * powerball to be reannounced.  So optimize this slightly
-			 * and don't change anything if it won't stay here long.
+			 * powerball to be reannounced.  So optimize this by not
+			 * doing anything.
 			 */
-			if (dev->actual_count <= dev->max_count)
+			if (dev->max_count != 1)
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
-			}
-			else
-			{
-				/* Powerball will be returned to play, so leave
-				 * it 'in play' */
 			}
 		}
 		else

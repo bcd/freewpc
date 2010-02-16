@@ -132,7 +132,7 @@ void credits_render (void)
 /** Draw the current credits full screen */
 void credits_draw (void)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 
 	credits_render ();

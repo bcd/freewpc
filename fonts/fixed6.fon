@@ -167,9 +167,9 @@ static char glyph_fixed6_slash_bits[] = { glyph_fixed6_slash_width, glyph_fixed6
 static char glyph_fixed6_amp_bits[] = { glyph_fixed6_amp_width, glyph_fixed6_amp_height,
  0x0e,0x1b,0x1b,0x0e,0x6e,0x7b,0x73,0x73,0x7e};
 #define glyph_fixed6_minus_width 4
-#define glyph_fixed6_minus_height 2
+#define glyph_fixed6_minus_height 5
 static char glyph_fixed6_minus_bits[] = { glyph_fixed6_minus_width, glyph_fixed6_minus_height,
- 0x0f,0x0f};
+ 0x0f,0x0f,0x00,0x00,0x00};
 #define glyph_fixed6_bang_width 2
 #define glyph_fixed6_bang_height 9
 static char glyph_fixed6_bang_bits[] = { glyph_fixed6_bang_width, glyph_fixed6_bang_height,

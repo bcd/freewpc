@@ -445,7 +445,7 @@ void lamplist_rotate_next (lamplist_id_t set, bitset matrix)
 void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 {
 	const lampnum_t *entry, *prev_entry = NULL;
-	bool state;
+	bool state, first;
 	lamp_boolean_operator_t test = matrix_test_operator (matrix);
 
 	/* Lamp states rotate down to lower numbers.
@@ -457,6 +457,7 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 	 * Ln = old L0
 	 */
 	page_push (MD_PAGE);
+	first = test (*(lamplist_first_entry (set)));
 	for (entry = lamplist_table[set]; *entry != LAMP_END; entry++)
 	{
 		if (lamplist_macro_entry (*entry))
@@ -465,14 +466,11 @@ void lamplist_rotate_previous (lamplist_id_t set, bitset matrix)
 		{
 			state = test (*entry);
 			(state ? bit_on : bit_off) (matrix, *prev_entry);
-			prev_entry = entry;
 		}
+		prev_entry = entry;
 	}
 
-	entry = lamplist_first_entry (set);
-	state = test (*entry);
-	entry = lamplist_last_entry (set);
-	(state ? bit_on : bit_off) (matrix, *entry);
+	(first ? bit_on : bit_off) (matrix, *prev_entry);
 
 	page_pop ();
 	lamplist_leff_sleep (lamplist_apply_delay);

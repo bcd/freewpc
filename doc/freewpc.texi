@@ -455,20 +455,23 @@ Pth library.  A good description of this library can be found at
 as @command{pthreads}, which is the predominant @emph{preemptive}
 threading library.
 
-When there are no tasks ready to run because all are blocked, the system is @dfn{idle}.
-During idle time, the CPU calls some @dfn{idle functions} which perform
-low-priority maintenance.  You can register an idle function at various
-rates: either every 100ms, 1 second, or 10 seconds.  Idle functions are
-preferable to realtime functions for periodic processing if the scheduling
-requirements are not strict.  For example, a 1 second handler may not be
-called again for 1.5 seconds, because the system is busy running other
-tasks.  If that happens, the next time it will be called just 500ms
-later; the idle scheduler will realize that it is behind and try to
-catch up.
+After all tasks have been given a chance to run in a 16ms timeslice,
+the system runs the @dfn{periodic functions}.  These have equal priority
+to tasks, but they do not have a stack and they cannot sleep.  In the
+code, these are also referred to as @dfn{idle functions}, although that
+term is slightly incorrect.
 
-Idle functions do not run in a task context, so like interrupt handlers,
-they cannot sleep.  You also cannot dynamically register or deregister
-idle handlers at runtime.
+You can register a periodic function at various
+rates: either every 16ms, 100ms, 1 second, or 10 seconds.  Handlers may not
+be called at the exact rate, but it will be close as possible.  If you need
+exact timing, use a realtime function.
+
+For example, assume that a 1 second handler does not get called until
+after 1.5 seconds from the previous call, because the system is busy running
+other tasks.  Then the next time it will be called just 500ms
+later; the scheduler will realize that it is behind and try to catch up.
+
+You cannot dynamically register or deregister periodic handlers at runtime.
 
 @node Real-Time Processing
 @section Real-Time Processing
@@ -2399,7 +2402,7 @@ If you cannot recompile PinMAME,
 you can compile the ROM with the @code{CONFIG_PARALLEL_DEBUG}
 option.  This will use the WPC parallel port for all debug
 messages.  All versions of PinMAME support this, and
-will write the output to a file in the @file{nvram} directory.
+will write the output to a file in the @file{memcard} directory.
 Under Windows, these files cannot be read while the program is
 still running.
 

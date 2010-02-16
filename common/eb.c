@@ -80,10 +80,9 @@ void increment_extra_balls (void)
 		{
 			timed_game_extend (15); /* TODO - make adjustable */
 		}
-		else if (0)
+		else if (system_config.max_ebs == 0)
 		{
-			/* TODO - handle adjustment to award points instead of
-		    * extra ball */
+			/* TODO - award points when extra balls are disabled */
 		}
 		else
 		{
@@ -152,7 +151,7 @@ void eb_light_adjustable (adjval_t mem_val)
 		light_hard_extra_ball ();
 }
 
-void collect_extra_ball (void)
+bool collect_extra_ball (void)
 {
 	if (hard_extra_balls_lit)
 	{
@@ -164,6 +163,9 @@ void collect_extra_ball (void)
 		easy_extra_balls_lit--;
 		increment_extra_balls ();
 	}
+	else
+		return FALSE;
+	return TRUE;
 }
 
 CALLSET_ENTRY (extra_ball, start_player)

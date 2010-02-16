@@ -77,6 +77,9 @@ bool system_timer_pause (void)
 	if (ball_search_timed_out ())
 		return TRUE;
 
+	if (timer_find_gid (GID_BALLSAVE_EXTENDED))
+		return TRUE;
+
 	return FALSE;
 }
 
