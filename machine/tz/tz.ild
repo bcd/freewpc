@@ -76,3 +76,19 @@ IMG_HITCHHIKER_11: machine/tz/animation/hitchhiker/hitchhiker11.pgm
 IMG_HITCHHIKER_12: machine/tz/animation/hitchhiker/hitchhiker12.pgm
 IMG_HITCHHIKER_13: machine/tz/animation/hitchhiker/hitchhiker13.pgm
 IMG_HITCHHIKER_END: machine/tz/animation/hitchhiker/hitchhiker14.pgm
+
+IMG_DRIVER_START: machine/tz/animation/driver/driver01.pgm
+IMG_DRIVER_2: machine/tz/animation/driver/driver02.pgm
+IMG_DRIVER_3: machine/tz/animation/driver/driver03.pgm
+IMG_DRIVER_4: machine/tz/animation/driver/driver04.pgm
+IMG_DRIVER_5: machine/tz/animation/driver/driver05.pgm
+IMG_DRIVER_6: machine/tz/animation/driver/driver06.pgm
+IMG_DRIVER_7: machine/tz/animation/driver/driver07.pgm
+IMG_DRIVER_8: machine/tz/animation/driver/driver08.pgm
+IMG_DRIVER_9: machine/tz/animation/driver/driver09.pgm
+IMG_DRIVER_10: machine/tz/animation/driver/driver10.pgm
+IMG_DRIVER_11: machine/tz/animation/driver/driver11.pgm
+IMG_DRIVER_12: machine/tz/animation/driver/driver12.pgm
+IMG_DRIVER_13: machine/tz/animation/driver/driver13.pgm
+IMG_DRIVER_END: machine/tz/animation/driver/driver14.pgm
+

@@ -83,12 +83,25 @@ void left_ramp_leff (void)
 	leff_exit ();
 }
 
-
-
 void no_gi_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
 	task_sleep_sec (2);
+	triac_leff_enable (TRIAC_GI_MASK);
+	leff_exit ();
+}
+
+/* Leave GI off permantly */
+void no_gi_perm_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	leff_exit ();
+}
+
+/* Turn it back on again */
+void turn_on_gi_leff (void)
+{
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -258,6 +271,7 @@ void door_strobe_leff (void)
 	leff_create_peer (door_strobe_subtask);
 	task_sleep_sec (2);
 	task_kill_peers ();
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

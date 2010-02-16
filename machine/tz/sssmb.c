@@ -173,7 +173,6 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		sssmb_jackpot_value = 20;
 		ballsave_add_time (10);
 		mball_start_3_ball ();
-		//device_multiball_set (3);
 	}
 }
 

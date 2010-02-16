@@ -114,9 +114,10 @@ static void maybe_ramp_divert (void)
 	}
 	/* Divert to plunger lane if sssmb is running, but not if any balls
 	 * are due to be fired or any sat in the plunger */
-	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 
-		&& autofire_request_count == 0 
-		&& !switch_poll_logical (SW_SHOOTER))
+	else if (flag_test (FLAG_SSSMB_RUNNING))
+	//else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 
+	//	&& autofire_request_count == 0 )
+		//&& !switch_poll_logical (SW_SHOOTER))
 	{
 		ramp_divert ();
 	}

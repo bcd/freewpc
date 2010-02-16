@@ -52,12 +52,9 @@ void replay_deff (void)
 
 void extra_ball_deff (void)
 {
-//	sprintf ("EXTRA BALL");
-//	flash_and_exit_deff (20, TIME_100MS);
 	U8 fno;
 	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 1)
 	{
-		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
@@ -65,8 +62,22 @@ void extra_ball_deff (void)
 	}
 	task_sleep_sec (2);
 	deff_exit ();
-	//flash_and_exit_deff (20, TIME_100MS);
 }
+
+void driver_deff (void)
+{
+	U8 fno;
+	for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 1)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
 
 void special_deff (void)
 {
@@ -122,7 +133,7 @@ void jackpot_deff (void)
 {
 	U8 fno;
 	U8 i;
-	music_disable ();
+	//music_disable ();
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
 	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
@@ -158,23 +169,24 @@ void jackpot_deff (void)
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_500MS);
 
 	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_JACKPOT_END - 2);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_500MS);
 
 	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sound_send (SND_JACKPOT);
-	task_sleep (TIME_500MS);
+	task_sleep_sec (1);
+	sound_send (SND_FIST_BOOM2);
 	//task_sleep_sec (1); 
-	music_enable ();
+	//music_enable ();
 	deff_exit ();
 }
 

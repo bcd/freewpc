@@ -149,7 +149,8 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	flipper_enable ();
-	//leff_stop (LEFF_MPF_ACTIVE);
+	leff_start (LEFF_TURN_ON_GI);
+	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	deff_start (DEFF_MPF_AWARD);
 	sound_send (SND_EXPLOSION_3);
@@ -170,13 +171,14 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
 		reset_unlit_shots ();
+		leff_start (LEFF_MPF_ACTIVE);
 		mpf_ball_count++;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
 		if (mpf_ball_count = (1))
 		{	
 			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
-			//leff_start (LEFF_MPF_ACTIVE);
+			leff_start (LEFF_NO_GI_PERM);
 			if (!multi_ball_play ())
 				flipper_disable ();
 		}
@@ -197,6 +199,8 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	if (mpf_ball_count == 0)
 	{
 		//leff_stop (LEFF_MPF_ACTIVE);
+		leff_start (LEFF_TURN_ON_GI);
+		leff_stop (LEFF_MPF_ACTIVE);
 		timed_mode_stop (&mpf_round_timer);
 		flipper_enable ();
 	}

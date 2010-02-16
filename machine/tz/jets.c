@@ -27,6 +27,7 @@ __local__ U8 jets_for_bonus;
 __local__ U8 jets_bonus_level;
 
 extern U8 tsm_round_timer;
+//extern bool hitch_deff_running;
 
 CALLSET_ENTRY(jet, start_player)
 {
@@ -64,10 +65,6 @@ void sw_jet_sound (void)
 
 void jets_hit_deff (void)
 {
-	/* Stop deff from restarting whilst we
-	 * are showing the level up deff */
-	if (jets_scored >= jets_for_bonus)
-		deff_exit ();
 	dmd_alloc_low_clean ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
@@ -136,7 +133,12 @@ CALLSET_ENTRY (jet, sw_jet)
 	else
 	{	
 		score (SC_150K);
-		deff_restart (DEFF_JETS_HIT);
+		/* Stop deff from restarting whilst we
+		 * are showing the level up deff
+		 * or when the hitch anim is running */
+		if ((jets_scored <= jets_for_bonus) 
+			&& (!timer_find_gid (GID_HITCHHIKER)))
+			deff_restart (DEFF_JETS_HIT);
 	}
 	
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);

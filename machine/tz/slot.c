@@ -81,35 +81,7 @@ void sslot_award_deff (void)
 		deff_exit ();
 }
 
-void sslot_award (void)
-{
-	switch (sslot_award_index)
-	{
-		case 1:
-			sound_send (SND_GET_THE_EXTRA_BALL);
-			light_easy_extra_ball ();
-			break;
-		case 2:
-			gumball_enable_count++;
-			break;
-		case 3:
-			mpf_enable_count++;
-			break;
-		case 4:
-			cameras_lit++;
-			break;
-		case 5:
-			score (SC_10M);
-			break;
-		case 6:
-			score (SC_5M);
-			break;
-	}
-	deff_start (DEFF_SSLOT_AWARD);
-	sound_send (SND_SLOT_PAYOUT);
-	lamp_tristate_off (LM_SLOT_MACHINE);
-	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
-}
+
 void sslot_round_begin (void)
 {
 	sslot_award_index = 0;
@@ -141,6 +113,39 @@ void slot_kick_sound (void)
 {
 	sound_send (SND_SLOT_KICKOUT_2);
 	task_exit ();
+}
+
+void sslot_award (void)
+{
+	/* Stop round */
+	sslot_round_end ();
+	
+	switch (sslot_award_index)
+	{
+		case 1:
+			sound_send (SND_GET_THE_EXTRA_BALL);
+			light_easy_extra_ball ();
+			break;
+		case 2:
+			gumball_enable_count++;
+			break;
+		case 3:
+			mpf_enable_count++;
+			break;
+		case 4:
+			cameras_lit++;
+			break;
+		case 5:
+			score (SC_10M);
+			break;
+		case 6:
+			score (SC_5M);
+			break;
+	}
+	deff_start (DEFF_SSLOT_AWARD);
+	sound_send (SND_SLOT_PAYOUT);
+	lamp_tristate_off (LM_SLOT_MACHINE);
+	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 }
 
 CALLSET_ENTRY (slot, dev_slot_enter)

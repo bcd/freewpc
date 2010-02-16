@@ -37,7 +37,7 @@ void bonus_button_monitor (void)
 		if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON)) && buttons_held == FALSE)
 		{	
 			buttons_held = TRUE;
-			sound_send (SND_CUCKOO);
+			sound_send (SND_FIST_BOOM1);
 		}
 		task_sleep (TIME_100MS);
 	}

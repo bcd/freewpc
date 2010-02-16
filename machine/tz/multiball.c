@@ -36,7 +36,7 @@ extern void award_unlit_shot (U8 unlit_called_from);
 
 void mb_restart_deff (void)
 {
-	while (restart_mball_timer > 0)
+/*	while (restart_mball_timer > 0)
 	{
 		//dmd_alloc_low_high ();
 		
@@ -48,7 +48,7 @@ void mb_restart_deff (void)
 		font_render_string_center (&font_fixed6, 64, 24, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep_sec (1);
-	}
+	}*/
 	deff_exit ();
 }
 
@@ -87,6 +87,8 @@ void mb_start_deff (void)
 
 void jackpot_relit_deff (void)
 {
+	sample_start (SND_GET_THE_EXTRA_BALL, SL_1S);
+	sound_send (SND_JACKPOT);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT RELIT");
 	dmd_show_low ();
@@ -230,6 +232,10 @@ void mball_check_light_lock (void)
  /* How we want the balls released and in what order */
 void mball_start_3_ball (void)
 {
+	/* Don't start if another multiball is running */
+	if (multi_ball_play ())
+		return;
+
 	/* Check lock and empty accordingly */
 	switch (device_recount (device_entry (DEVNO_LOCK)))
 	{	
@@ -287,7 +293,8 @@ CALLSET_ENTRY (mball, mball_start)
 /* Start a 20 second countdown to hit the lock to restart multiball */
 void restart_mball_task (void)
 {
-	if (multi_ball_play ())
+#if 0
+if (multi_ball_play ())
 		return;
 	for (restart_mball_timer = 20; restart_mball_timer > 0; restart_mball_timer--)
 	{
@@ -310,7 +317,8 @@ void restart_mball_task (void)
 		task_sleep_sec (1);
 	}
 		mball_jackpot_uncollected = FALSE;
-		deff_stop (DEFF_MB_RESTART);
+		//deff_stop (DEFF_MB_RESTART);
+#endif
 }
 
 CALLSET_ENTRY (mball, mball_stop)
@@ -326,8 +334,8 @@ CALLSET_ENTRY (mball, mball_stop)
 		music_refresh ();
 		autofire_request_count = 0;
 		/* If a jackpot wasn't collected, offer a restart */
-		if (mball_jackpot_uncollected == TRUE)
-			task_recreate_gid (GID_RESTART_MBALL_TASK, restart_mball_task);
+//		if (mball_jackpot_uncollected == TRUE)
+//			task_recreate_gid (GID_RESTART_MBALL_TASK, restart_mball_task);
 	}
 }
 
@@ -417,12 +425,17 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	else if (timer_kill_gid (GID_RESTART_MBALL_TASK))
 	{
 		mball_jackpot_uncollected = FALSE;
-		deff_stop (DEFF_MB_RESTART);
+		//deff_stop (DEFF_MB_RESTART);
 		callset_invoke (mball_start);
 	}
 	else
 		/* inform unlit.c that a shot was missed */
 		award_unlit_shot (SW_LOCK_LOWER);
+}
+
+CALLSET_ENTRY (mball, end_ball)
+{
+	timer_kill_gid (GID_RESTART_MBALL_TASK);
 }
 
 CALLSET_ENTRY (mball, start_player)

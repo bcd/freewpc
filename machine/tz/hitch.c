@@ -23,6 +23,7 @@
 __local__ U8 hitch_count;
 __local__ U8 hitch_level;
 U8 hitch_round_timer;
+//bool hitch_deff_running;
 extern void award_unlit_shot (U8 unlit_called_from);
 
 /*void hitchhiker_deff (void)
@@ -43,22 +44,37 @@ extern void award_unlit_shot (U8 unlit_called_from);
 
 void hitchhiker_deff (void)
 {
-	//dmd_alloc_pair_clean ();
-	U8 fno;	
+	/* Start a timer so jets won't stop animation */
+	timer_restart_free (GID_HITCHHIKER, TIME_4S);
+	//hitch_deff_running = TRUE;
+	U8 fno;
+	U8 current_frame = 0;
 	for (fno = IMG_HITCHHIKER_START; fno <= IMG_HITCHHIKER_END; fno += 2)
 	{
-		dmd_alloc_pair ();
+		current_frame++;
+		dmd_alloc_pair_clean ();
 		frame_draw (fno);
-		/*if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-			&hitch_round_timer))
-			sprintf("10 MILLION");
-		else if (fno > 4)
-			psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
-		font_render_string (&font_var5, 50, 6+fno, sprintf_buffer);*/
+	
 		dmd_show2 ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 	}
+	
+	dmd_alloc_pair_clean ();
+	
+	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
+		&hitch_round_timer))
+		sprintf("10 MILLION");
+	else if (current_frame > 8)
+		psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
+	
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	dmd_show2 ();
+	task_sleep_sec (1);
+	/* Stop the timer so jets.c can show deffs again */
+	timer_kill_gid (GID_HITCHHIKER);
+	//hitch_deff_running = FALSE;
 	deff_exit ();
+	
 }
 
 void hitch_round_deff (void)
@@ -152,6 +168,7 @@ CALLSET_ENTRY (hitch, door_start_hitchhiker)
 CALLSET_ENTRY (hitch, start_player)
 {
 	hitch_count = 1;
+	//hitch_deff_running = FALSE;
 	/* hitch_level = 2;*/
 }
 

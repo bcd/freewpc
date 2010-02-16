@@ -66,7 +66,6 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 		deff_start (DEFF_ROCKET);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, rocket_kick_sound);
-		leff_stop (LEFF_NO_GI);
 	}
 }
 
