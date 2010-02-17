@@ -216,12 +216,6 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 
 CALLSET_ENTRY (gumball, music_refresh)
 {
-	if (gumball_running)
-	{
-		music_request (MUS_GUMBALL_LOAD_START , PRI_GAME_MODE1 + 12);
-		task_sleep_sec (4);
-		music_request (MUS_GUMBALL_LOAD_END , PRI_GAME_MODE1 + 12);
-	}
 }
 
 CALLSET_ENTRY (gumball, sw_gumball_lane)
@@ -289,7 +283,7 @@ void gumball_deff (void)
 	task_sleep_sec (1);
 	deff_exit ();
 	*/
-	music_request (MUS_GUMBALL_LOAD_START, PRI_JACKPOT);
+	sound_send (SND_GUMBALL_LOAD_START);
 	U8 fno;
 	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 1)
 	{
@@ -299,6 +293,7 @@ void gumball_deff (void)
 		task_sleep (TIME_66MS);
 	}
 
+	sound_send (SND_GUMBALL_LOAD_END);
 	/* Show last two frames two times */
 	for (fno = 0 ; fno > 2; fno++)
 	{
@@ -312,7 +307,6 @@ void gumball_deff (void)
 		task_sleep (TIME_100MS);
 	}
 	task_sleep_sec (1);
-	music_request (MUS_GUMBALL_LOAD_END, PRI_JACKPOT);
 	deff_exit ();
 }
 
