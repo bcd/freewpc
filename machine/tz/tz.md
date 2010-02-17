@@ -31,7 +31,7 @@ define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS               10
-define MACHINE_MUSIC_GAME                 MUS_MULTIBALL_LIT
+define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
@@ -404,8 +404,8 @@ Tilt: SND_TILT
 # Music calls for well-known events
 ##########################################################################
 [system_music]
-Start Ball: MUS_MULTIBALL_LIT_PLUNGER
-Ball in Play: MUS_MULTIBALL_LIT
+Start Ball: MUS_CLOCK_MILLIONS
+Ball in Play: MUS_FASTLOCK_BANZAI_RUN 
 End Game: MUS_POWERBALL_MANIA
 Volume Change: MUS_SUPER_SLOT
 
@@ -563,8 +563,6 @@ Flasher Happy: shared, PRI_LEFF1, page(MACHINE_PAGE)
 GUMBALL STROBE: shared, PRI_LEFF1, page(MACHINE_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE_PAGE)
 CLOCK TARGET: shared, PRI_LEFF2, GI(ALL), page(MACHINE_PAGE)
-No GI Perm: shared, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
-Turn on GI: shared, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
 No GI: shared, PRI_LEFF3, GI(ALL), page(MACHINE_PAGE)
 SLOT KICKOUT: shared, PRI_LEFF3, page(MACHINE_PAGE)
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)

@@ -289,6 +289,7 @@ void gumball_deff (void)
 	task_sleep_sec (1);
 	deff_exit ();
 	*/
+	music_request (MUS_GUMBALL_LOAD_START, PRI_JACKPOT);
 	U8 fno;
 	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 1)
 	{
@@ -311,6 +312,7 @@ void gumball_deff (void)
 		task_sleep (TIME_100MS);
 	}
 	task_sleep_sec (1);
+	music_request (MUS_GUMBALL_LOAD_END, PRI_JACKPOT);
 	deff_exit ();
 }
 

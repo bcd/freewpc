@@ -24,6 +24,7 @@
 /* Super Skill Shot multiball rules */
 
 extern void mball_start_3_ball (void);
+extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -263,7 +264,7 @@ void sssmb_left_ramp_exit (void)
 			if (!timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 			{
 				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_6S);
-				//ramp_divert (); Already done by multiball.c
+			//	maybe_ramp_divert ();
 			}
 		}
 		else

@@ -52,6 +52,7 @@ void replay_deff (void)
 
 void extra_ball_deff (void)
 {
+	sound_send (SND_HERES_YOUR_EB);
 	U8 fno;
 	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 1)
 	{

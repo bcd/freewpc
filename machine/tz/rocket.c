@@ -27,8 +27,10 @@ void rocket_deff (void)
 	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_ROCKET_START + 2);
+	dmd_overlay_onto_color ();
 	dmd_show2 ();
 	task_sleep (TIME_500MS);
+	dmd_map_overlay ();
 
 	U8 fno;
 	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 2)
@@ -36,8 +38,10 @@ void rocket_deff (void)
 		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		dmd_overlay_onto_color ();
 		dmd_show2 ();
 		task_sleep (TIME_16MS);
+		dmd_map_overlay ();
 	}
 	deff_exit ();
 }

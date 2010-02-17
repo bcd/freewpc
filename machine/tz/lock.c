@@ -26,9 +26,7 @@
 CALLSET_ENTRY (lock, dev_lock_enter)
 {
 	if (collect_extra_ball ())
-		sound_send (SND_HERES_YOUR_EB);
-	//	if (multi_ball_play ())
-	//		device_request_kick (device_entry (DEVNO_LOCK));
+//		sound_send (SND_HERES_YOUR_EB);
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);
 	leff_start (LEFF_LOCK);
