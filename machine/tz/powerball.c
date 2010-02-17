@@ -104,7 +104,7 @@ void pb_detect_deff (void)
 	sound_send (SND_POWERBALL_QUOTE);
 	U8 fno;
 	U8 i;
-	for (i = 0;i < 3;i++)
+	for (i = 0;i < 5;i++)
 	{
 		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 1)
 		{
@@ -112,14 +112,14 @@ void pb_detect_deff (void)
 			frame_draw (fno);
 			//copy text to seperate page
 			//OR current page 
-			dmd_overlay_onto_color ();
+	//		dmd_overlay_onto_color ();
 			//font_render_string_center (&font_fixed10, 64, 20, "POWERBALL");
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
-			dmd_map_overlay ();
+	//		dmd_map_overlay ();
 		}
 	}
-	task_sleep_sec (1);
+	//task_sleep_sec (1);
 #endif
 	deff_exit ();
 }

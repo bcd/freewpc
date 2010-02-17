@@ -498,6 +498,7 @@ Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3, D_QUEUED+D_TIMEOUT
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
+MB restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered

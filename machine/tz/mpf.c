@@ -171,7 +171,6 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
 		reset_unlit_shots ();
-		leff_start (LEFF_MPF_ACTIVE);
 		mpf_ball_count++;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
@@ -182,6 +181,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 			if (!multi_ball_play ())
 				flipper_disable ();
 		}
+		leff_start (LEFF_MPF_ACTIVE);
 	}
 	/* A ball sneaked in during multiball */
 	else if (multi_ball_play ())

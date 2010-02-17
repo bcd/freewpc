@@ -26,7 +26,7 @@ __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 /* Used to start a mode if multiball ends without picking up a jackpot */
 bool mball_jackpot_uncollected;
-U8 restart_mball_timer;
+U8 mball_restart_timer;
 
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
@@ -36,21 +36,59 @@ extern void award_unlit_shot (U8 unlit_called_from);
 
 void mb_restart_deff (void)
 {
-/*	while (restart_mball_timer > 0)
+	for (;;)
 	{
-		//dmd_alloc_low_high ();
-		
-		dmd_alloc_pair ();
-		dmd_clean_page_low ();
+		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
-		sprintf ("%d", restart_mball_timer);
+		sprintf ("%d", mball_restart_timer);
 		font_render_string_center (&font_fixed6, 64, 24, sprintf_buffer);
+		font_render_string (&font_var5, 2, 2, sprintf_buffer);
+		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep_sec (1);
-	}*/
-	deff_exit ();
+		task_sleep (TIME_200MS);
+	}
 }
+
+
+void mball_restart_begin (void)
+{
+	deff_start (DEFF_MB_RESTART);
+}
+
+void mball_restart_expire (void)
+{
+	deff_stop (DEFF_MB_RESTART);
+}
+
+void mball_restart_end (void)
+{
+}
+
+void mball_restart_task (void)
+{
+	timed_mode_task (mball_restart_begin, mball_restart_expire, 
+		mball_restart_end, &mball_restart_timer, 10, 3);
+}
+
+CALLSET_ENTRY (mball, display_update)
+{
+	if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING,
+		&mball_restart_timer))
+		deff_start_bg (DEFF_MB_RESTART, 0);
+	else if (flag_test (FLAG_MULTIBALL_RUNNING))
+		deff_start_bg (DEFF_MB_RUNNING, 0);
+}
+
+CALLSET_ENTRY (mball, music_refresh)
+{
+	if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING,
+		&mball_restart_timer))
+		music_request (MUS_FASTLOCK_COUNTDOWN, PRI_GAME_MODE1);
+	else if (flag_test (FLAG_MULTIBALL_RUNNING))
+		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
+}
+
 
 void lock_lit_deff (void)
 {
@@ -134,7 +172,7 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (flag_test (FLAG_MULTIBALL_RUNNING) && !flag_test (FLAG_MB_JACKPOT_LIT))
 		return TRUE;
-	else if (timer_find_gid (GID_RESTART_MBALL_TASK))
+	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
 		return TRUE;
 	else
 		return FALSE;
@@ -200,14 +238,6 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_off (LM_PIANO_JACKPOT);
 }
 
-
-CALLSET_ENTRY (mball, display_update)
-{
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
-		deff_start_bg (DEFF_MB_RUNNING, 0);
-}
-
-
 void mball_light_lock (void)
 {
 	if (mball_locks_lit < 2)
@@ -262,13 +292,6 @@ void mball_start_3_ball (void)
 	device_multiball_set (3);
 }
 
-CALLSET_ENTRY (mball, music_refresh)
-{
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
-		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
-};
-
-
 CALLSET_ENTRY (mball, mball_start)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
@@ -290,37 +313,6 @@ CALLSET_ENTRY (mball, mball_start)
 	}
 }
 
-/* Start a 20 second countdown to hit the lock to restart multiball */
-void restart_mball_task (void)
-{
-#if 0
-if (multi_ball_play ())
-		return;
-	for (restart_mball_timer = 20; restart_mball_timer > 0; restart_mball_timer--)
-	{
-		deff_start_bg (DEFF_MB_RESTART, 0);
-		switch (restart_mball_timer)
-		{
-			case 4:
-				sound_send (SND_THREE);
-				break;
-			case 3:
-				sound_send (SND_TWO);
-				break;
-			case 2:
-				sound_send (SND_ONE);
-				break;
-			case 1:
-				sound_send (SND_NOT_AN_ORDINARY_GAME);
-				break;
-		}
-		task_sleep_sec (1);
-	}
-		mball_jackpot_uncollected = FALSE;
-		//deff_stop (DEFF_MB_RESTART);
-#endif
-}
-
 CALLSET_ENTRY (mball, mball_stop)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
@@ -334,8 +326,8 @@ CALLSET_ENTRY (mball, mball_stop)
 		music_refresh ();
 		autofire_request_count = 0;
 		/* If a jackpot wasn't collected, offer a restart */
-//		if (mball_jackpot_uncollected == TRUE)
-//			task_recreate_gid (GID_RESTART_MBALL_TASK, restart_mball_task);
+		if (mball_jackpot_uncollected == TRUE)
+			timed_mode_start (GID_MBALL_RESTART_RUNNING, mball_restart_task);
 	}
 }
 
@@ -422,11 +414,15 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		deff_start (DEFF_MB_LIT);
 		reset_unlit_shots ();
 	}
-	else if (timer_kill_gid (GID_RESTART_MBALL_TASK))
+	/* Check to see if mball_restart is running */
+	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
 	{
+		sound_send (SND_CRASH);
+		score (SC_5M);
+		timed_mode_stop (&mball_restart_timer);
 		mball_jackpot_uncollected = FALSE;
-		//deff_stop (DEFF_MB_RESTART);
-		callset_invoke (mball_start);
+		if (!multi_ball_play ())
+			callset_invoke (mball_start);
 	}
 	else
 		/* inform unlit.c that a shot was missed */
