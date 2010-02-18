@@ -121,7 +121,7 @@ void award_spiralaward (void)
 void spiralaward_collected_deff (void)
 {
 	dmd_alloc_low_clean ();
-	 (spiralawards_collected < 5)
+	if (spiralawards_collected < 5)
 	{
 		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
 		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
