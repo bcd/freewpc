@@ -531,10 +531,12 @@ void switch_transitioned (const U8 sw)
 		|| (!bit_test (sw_logical, sw) && bit_test (mach_opto_mask, sw))
 		|| (bit_test (sw_logical, sw) && !bit_test (mach_opto_mask, sw)))
 	{
+#ifdef DEBUGGER
 		/* One extra condition : do not schedule any switches when the
 		debugger has paused the game */
 		if (db_paused != 0)
 			return;
+#endif
 
 		/* Start a task to process the switch event.
 		This task may sleep if necessary, but it should be as fast as possible

@@ -34,14 +34,13 @@
  */
 #include <freewpc.h>
 
-void bpt_hit (void);
+#ifdef DEBUGGER
 
 /** Nonzero when the system (all tasks except for interrupts)
 is paused */
 U8 db_paused;
 
 
-#ifdef DEBUGGER
 void db_dump_all (void)
 {
 	VOIDCALL (task_dump);
@@ -52,7 +51,6 @@ void db_dump_all (void)
 	VOIDCALL (triac_dump);
 	SECTION_VOIDCALL (__common__, device_debug_all);
 }
-#endif
 
 
 /**
@@ -62,46 +60,6 @@ void db_toggle_pause (void)
 {
 	db_paused = 1 - db_paused;
 	barrier ();
-}
-
-
-/** Check for debug input periodically */
-void db_periodic (void)
-{
-	extern void MACHINE_DEBUGGER_HOOK (U8);
-
-#ifdef CONFIG_BPT
-	if (!in_test && switch_poll (SW_ESCAPE))
-		bpt_hit ();
-#endif
-
-#ifdef DEBUGGER
-	if (wpc_debug_read_ready ())
-	{
-		char c = wpc_debug_read ();
-		db_puts = db_puts_orkin;
-		switch (c)
-		{
-			case 'a':
-				/* Dump all debugging information */
-				db_dump_all ();
-				break;
-
-			case 'p':
-				/* Stop the system */
-				bpt_hit ();
-				break;
-
-			default:
-#ifdef MACHINE_DEBUGGER_HOOK
-				/* Allow the machine to define additional commands.
-				 * This function must reside in the system page. */
-				MACHINE_DEBUGGER_HOOK (c);
-#endif
-				break;
-		}
-	}
-#endif /* DEBUGGER */
 }
 
 
@@ -165,13 +123,55 @@ void bpt_hit (void)
 	}
 }
 
+#endif /* DEBUGGER */
+
+
+/** Check for debug input periodically */
+void db_periodic (void)
+{
+	extern void MACHINE_DEBUGGER_HOOK (U8);
+
+#ifdef CONFIG_BPT
+	if (!in_test && switch_poll (SW_ESCAPE))
+		bpt_hit ();
+#endif
+
+#ifdef DEBUGGER
+	if (wpc_debug_read_ready ())
+	{
+		char c = wpc_debug_read ();
+		db_puts = db_puts_orkin;
+		switch (c)
+		{
+			case 'a':
+				/* Dump all debugging information */
+				db_dump_all ();
+				break;
+
+			case 'p':
+				/* Stop the system */
+				bpt_hit ();
+				break;
+
+			default:
+#ifdef MACHINE_DEBUGGER_HOOK
+				/* Allow the machine to define additional commands.
+				 * This function must reside in the system page. */
+				MACHINE_DEBUGGER_HOOK (c);
+#endif
+				break;
+		}
+	}
+#endif /* DEBUGGER */
+}
+
 
 /** Initialize the debugger */
 void db_init (void)
 {
+#ifdef DEBUGGER
 	db_paused = 0;
 
-#ifdef DEBUGGER
 	/* Signal the debugger that the system has just reset. */
 	if (wpc_debug_read_ready ())
 	{
