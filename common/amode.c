@@ -108,7 +108,7 @@ void amode_score_page (void)
 #if (MACHINE_DMD == 1)
 void amode_logo_page (void)
 {
-	U8 fno;
+	U16 fno;
 
 	for (fno = IMG_FREEWPC_SMALL; fno <= IMG_FREEWPC; fno += 2)
 	{
