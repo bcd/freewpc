@@ -40,10 +40,6 @@ void bpt_hit (void);
 is paused */
 U8 db_paused;
 
-#ifndef CONFIG_INSPECTOR
-void inspector_deff (void) { deff_exit (); }
-#endif
-
 
 #ifdef DEBUGGER
 void db_dump_all (void)
