@@ -135,8 +135,8 @@ CALLSET_ENTRY (camera, sw_camera)
 	{
 	}
 	else
-	{
-		if (cameras_lit)
+	{	/* Ignore camera during multiball */
+		if (cameras_lit && !multi_ball_play ())
 		{
 			bounded_decrement (cameras_lit, 0);
 			score (SC_10M);

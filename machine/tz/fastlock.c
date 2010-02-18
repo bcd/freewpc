@@ -36,7 +36,9 @@ void fastlock_round_deff (void)
 		font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
 		sprintf("%d MILLION", fastlock_award);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "HIT LOCK TO COLLECT");
+		//font_render_string_center (&font_var5, 64, 27, "HIT LOCK TO COLLECT");
+		sprintf ("%d SPEED", loop_time);
+		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", fastlock_round_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
@@ -89,7 +91,7 @@ bool fastlock_running (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY (fastlock, dev_lock_enter)
+CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
 {
 	if (fastlock_running ())
 	{
@@ -150,4 +152,13 @@ CALLSET_ENTRY (fastlock, end_ball)
 
 CALLSET_ENTRY (fastlock, start_player)
 {
+}
+
+CALLSET_ENTRY (fastlock, sw_buyin_button)
+{
+	if (in_live_game)
+	{
+	sound_send (SND_FIVE);
+	callset_invoke (door_start_fast_lock);
+	}
 }

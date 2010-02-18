@@ -153,6 +153,7 @@ void award_right_loop (void)
 		if (can_show_loop_leff ())
 			leff_start (LEFF_RIGHT_LOOP);
 		award_loop ();
+		event_can_follow (right_loop, piano, TIME_2S);
 	}
 }
 

@@ -198,9 +198,12 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		/* Powerball was loaded into Gumball */
 		if (flag_test (FLAG_POWERBALL_IN_PLAY))
 		{
-			pb_clear_location (PB_IN_PLAY);
+			//pb_clear_location (PB_IN_PLAY);
 			pb_set_location (PB_IN_GUMBALL, 2);
+			flag_off (FLAG_POWERBALL_IN_PLAY);
 			//TODO Move to multiball.c
+
+			/* Do a dodgy multiball combo */
 			mball_start_3_ball ();
 			callset_invoke (sssmb_start);
 			callset_invoke (mball_start);
@@ -295,7 +298,7 @@ void gumball_deff (void)
 
 	sound_send (SND_GUMBALL_LOAD_END);
 	/* Show last two frames two times */
-	for (fno = 0 ; fno > 2; fno++)
+	for (fno = 0 ; fno > 3; fno++)
 	{
 		dmd_alloc_pair ();
 		frame_draw (IMG_GUMBALL_END - 2);

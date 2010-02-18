@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <freewpc.h>
-
+#include <bridge_open.h>
 /** The number of balls enabled to go to the MPF */
 __local__ U8 mpf_enable_count;
 
@@ -149,7 +149,7 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	flipper_enable ();
-	leff_stop (LEFF_BONUS);
+	//leff_stop (LEFF_BONUS);
 	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	deff_start (DEFF_MPF_AWARD);
@@ -177,11 +177,15 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		if (mpf_ball_count = (1))
 		{	
 			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
-			leff_start (LEFF_BONUS);
+			//leff_start (LEFF_BONUS);
 			if (!multi_ball_play ())
+			{
+				/* Turn off GI and start lamp effect */
+				leff_start (LEFF_MPF_ACTIVE);
 				flipper_disable ();
+				bridge_open_stop ();
+			}
 		}
-		leff_start (LEFF_MPF_ACTIVE);
 	}
 	/* A ball sneaked in during multiball */
 	else if (multi_ball_play ())
@@ -198,8 +202,8 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)
 	{
-		//leff_stop (LEFF_MPF_ACTIVE);
-		leff_stop (LEFF_BONUS);
+		leff_stop (LEFF_MPF_ACTIVE);
+		//leff_stop (LEFF_BONUS);
 		leff_stop (LEFF_MPF_ACTIVE);
 		timed_mode_stop (&mpf_round_timer);
 		/* This should be fine as we only disable in single ball play */

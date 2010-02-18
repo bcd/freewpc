@@ -26,9 +26,12 @@
 extern void mball_start_3_ball (void);
 extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
+extern bool mball_jackpot_uncollected;
+
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
 U8 sssmb_jackpot_value;
+bool sssmb_ball_in_plunger;
 
 void sssmb_running_deff (void)
 {
@@ -117,6 +120,9 @@ void sssmb_relight_all_jackpots (void)
 
 void sssmb_award_jackpot (void)
 {
+	/* Hack to make sure restart mball doesn't start after
+	 * the Mball/Sssmb combo mode */
+	mball_jackpot_uncollected = FALSE;
 	score_1M (sssmb_jackpot_value);
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
@@ -172,6 +178,7 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		sssmb_initial_ramps_to_divert = 1;
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
+		sssmb_ball_in_plunger = FALSE;
 		ballsave_add_time (10);
 		mball_start_3_ball ();
 	}
@@ -191,15 +198,18 @@ void sssmb_stop (void)
 		deff_stop (DEFF_SSSMB_RUNNING);
 		lamp_tristate_off (LM_SUPER_SKILL);
 		music_refresh ();
-		autofire_request_count = 0;
+		//autofire_request_count = 0;
 	}
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert > 0)
+		lamp_tristate_on (LM_SUPER_SKILL);
+	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 && !sssmb_ball_in_plunger)
 		lamp_tristate_flash (LM_SUPER_SKILL);
 }
+
 CALLSET_ENTRY (sssmb, display_update)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING))
@@ -291,6 +301,7 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 CALLSET_ENTRY (sssmb, any_skill_switch)
 {
 	dbprintf ("Jackpot ready cancelled\n");
+	sssmb_ball_in_plunger = FALSE;
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
 }
@@ -298,14 +309,5 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 CALLSET_ENTRY (sssmb, start_game)
 {
 	sssmb_stop ();
-}
-
-
-CALLSET_ENTRY (sssmb, sw_buyin_button)
-{
-#if 0
-	if (in_live_game)
-		sssmb_start ();
-#endif
 }
 

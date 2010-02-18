@@ -29,7 +29,6 @@ void bonus_leff (void)
 		task_sleep_sec (5);
 }
 
-
 void gi_cycle_leff (void)
 {
 	U8 i;
@@ -375,6 +374,9 @@ void lock_leff (void)
 
 void mpf_active_leff (void)
 {
+	triac_leff_disable (TRIAC_GI_MASK);
+	triac_leff_enable (GI_POWERFIELD);
+	
 	lamplist_set_apply_delay (TIME_100MS);
 	//while (mpf_ball_count > 0)
 	for (;;)

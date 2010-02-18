@@ -159,7 +159,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	{
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
 		lamp_tristate_off (LM_MULTIBALL);
-		autofire_request_count = 0;
+		//autofire_request_count = 0;
 	}
 }
 

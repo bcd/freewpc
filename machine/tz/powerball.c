@@ -227,6 +227,7 @@ void pb_detect_event (pb_event_t event)
 		case PF_STEEL_DETECTED:
 			if (single_ball_play ())
 				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
 #ifdef PB_DEBUG
 			else
 				pb_clear_location (0);

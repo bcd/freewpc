@@ -30,6 +30,7 @@ extern U8 sssmb_ramps_to_divert;
 
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
+extern bool sssmb_ball_in_plunger;
 extern void chaosmb_left_ramp_exit (void);
 
 void left_ramp_deff (void)
@@ -114,11 +115,13 @@ static void maybe_ramp_divert (void)
 	}
 	/* Divert to plunger lane if sssmb is running, but not if any balls
 	 * are due to be fired or any sat in the plunger */
-	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0)
+	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 && !sssmb_ball_in_plunger)
 	//else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 
 	//	&& autofire_request_count == 0 )
 		//&& !switch_poll_logical (SW_SHOOTER))
 	{
+		/* TODO Shore up logic by event_should_follow (plunger_switch); */
+		sssmb_ball_in_plunger = TRUE;
 		ramp_divert ();
 	}
 }

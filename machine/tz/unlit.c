@@ -75,11 +75,14 @@ void award_unlit_shot (U8 unlit_called_from)
 			sound_send (SND_JUST_TAKEN_A_DETOUR);
 			deff_start (DEFF_BACKDOOR_AWARD);
 			//task_sleep_sec (1);
+			task_kill_gid (GID_DOOR_AWARD_ROTATE);
 			door_award_if_possible ();
 			backdoor_award_collected = TRUE;
 			reset_unlit_shots ();
 		}
-		
+		/* Reset if the player hits the same unlit shot twice */
+		if (unlit_called_from == unlit_called_from_stored)
+			reset_unlit_shots ();
 		if (unlit_shot_count == 4)
 		{
 			/* Hint to the player that backdoor award is ready */

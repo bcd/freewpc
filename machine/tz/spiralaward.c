@@ -72,11 +72,7 @@ void award_spiralaward (void)
 {	
 	/* Used for bonus */
 	spiralawards_collected++;
-	/* reset after all 6 have been collected */
-	if (spiralawards_collected > 5)
-	{	
-		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
-	}
+	
 	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);
 	/* Check to see if it's been previously awarded */
@@ -109,15 +105,35 @@ void award_spiralaward (void)
 			break;
 	}
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
+	
 	/* Run lamp flash as task so it can run in parallel */
 	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
+	/* reset lamps after all 6 have been collected */
+	if (spiralawards_collected > 5)
+	{	
+		/* Wait until lamp flash has finished */
+		while (task_find_gid (GID_FLASH_SPIRALAWARD_LAMP))
+			task_sleep (TIME_500MS);
+		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
+	}
 }
 
 void spiralaward_collected_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
-	font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
+	 (spiralawards_collected < 5)
+	{
+		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
+		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
+	}
+	else 
+	{
+		font_render_string_center (&font_mono5, 64, 5, "SPIRALAWARD COMPLETED");
+		sprintf ("20 MILLION");
+		font_render_string_center (&font_term6, 64, 15, sprintf_buffer);
+		font_render_string_center (&font_term6, 64, 25, spiralaward_names[spiralaward]);
+	
+	}
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
