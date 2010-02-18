@@ -53,7 +53,10 @@ void flipper_enable (void)
 void flipper_disable (void)
 {
 	flipper_triac_disable ();
+	disable_interrupts ();
 	flippers_enabled = FALSE;
+	flipper_outputs = 0;
+	enable_interrupts ();
 }
 
 
