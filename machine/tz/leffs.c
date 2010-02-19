@@ -395,16 +395,4 @@ void mpf_active_leff (void)
 	leff_exit ();
 }
 
-void spiral_award_active_leff (void)
-{
-	
-	lamplist_set_apply_delay (TIME_33MS);
-	for (;;)
-	//while (free_timer_test (TIM_SPIRALAWARD))
-	{
-		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
-		task_sleep (TIME_33MS);
-	}
-	leff_exit ();
-}	
+

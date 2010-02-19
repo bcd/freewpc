@@ -158,6 +158,8 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	//TODO Is this where the LM_CLOCK_MILLIONS flash gets left on from?
 	/* Hack as the following doesn't seem to stop running */
 	flag_off (FLAG_CHAOSMB_RUNNING);
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
+	lamp_tristate_off (LM_MULTIBALL);
 	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
 	

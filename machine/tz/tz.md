@@ -588,7 +588,7 @@ Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE_PAGE)
 #MPF Active: shared, PRI_LEFF5, LAMPS(POWERFIELD_VALUES), page(MACHINE_PAGE)
-Spiral Award Active: shared, PRI_LEFF1, LAMPS(SPIRAL_AWARDS), page(MACHINE_PAGE)
+#Spiral Award Active: shared, PRI_LEFF1, LAMPS(SPIRAL_AWARDS), page(MACHINE_PAGE)
 
 ##########################################################################
 # Fonts used in this game.

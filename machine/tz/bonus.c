@@ -62,6 +62,7 @@ void bonus_deff (void)
 	extern U8 spiralawards_collected;
 	extern U8 dead_end_count;
 	extern U8 hitch_count;
+	extern U8 rollover_count;
 	extern bool backdoor_award_collected;
 	
 	/* Clear the bonus score */
@@ -229,6 +230,26 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 	
+	if (rollover_count > 0)
+	{
+		dmd_alloc_low_clean ();
+		score_zero (bonus_scored);
+		score_add (bonus_scored, score_table[SC_1M]);
+		score_mul (bonus_scored, rollover_count); 
+		score_add (total_bonus, bonus_scored);
+		psprintf ("%d ROLLOVER", "%d ROLLOVERS", rollover_count);
+		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		sprintf_score (bonus_scored);
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		sprintf ("%d X 1,000,000", (rollover_count));
+		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		dmd_sched_transition (&trans_scroll_down);
+		dmd_show_low ();
+		sound_send (SND_GREED_ROUND_BOOM);
+		bonus_pause ();
+	}
+	
+
 	if (backdoor_award_collected == TRUE)
 	{
 		dmd_alloc_low_clean ();

@@ -25,7 +25,6 @@
 
 CALLSET_ENTRY (lock, dev_lock_enter)
 {
-//		sound_send (SND_HERES_YOUR_EB);
 	collect_extra_ball ();
 	score (SC_50K);
 	sound_send (SND_ROBOT_FLICKS_GUN);

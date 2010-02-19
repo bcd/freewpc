@@ -49,16 +49,6 @@ const lampnum_t spiralaward_lamps[] = {
 	LM_SPIRAL_EB
 };
 
-void start_spiralaward_timer (void)
-{	
-	if (!multi_ball_play ())
-	{
-		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
-		leff_start (LEFF_SPIRAL_AWARD_ACTIVE);
-
-	}
-}
-
 void flash_spiralaward_lamp (void)
 {
 	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
@@ -67,6 +57,29 @@ void flash_spiralaward_lamp (void)
 	lamp_tristate_off (spiralaward_lamps[spiralaward]);
 	task_exit ();
 }
+
+void spiralaward_rotate_task (void)
+{
+	
+	U8 i;
+	for (i = 0; i < 36; i++)
+	{
+		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
+		task_sleep (TIME_66MS);
+	}
+}
+
+void start_spiralaward_timer (void)
+{	
+	if (!multi_ball_play () && !free_timer_test (TIM_SPIRALAWARD))
+	{
+		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
+	//	spiralaward_rotate_task ();	
+		task_create_gid (GID_SPIRALAWARD_ROTATE_TASK, spiralaward_rotate_task);
+	}
+}
+
 
 void award_spiralaward (void)
 {	
@@ -78,9 +91,10 @@ void award_spiralaward (void)
 	/* Check to see if it's been previously awarded */
 	while (!lamp_test(spiralaward_lamps[spiralaward]))
 		spiralaward = random_scaled (6);
+
 	/* Don't award extra ball until the last two */
-//	while (spiralaward = 5 && spiralawards_collected < 4)	
-//		spiralaward = random_scaled (6);
+	//while (spiralaward == 5 && spiralawards_collected < 4)	
+	//	spiralaward = random_scaled (6);
 	
 	switch (spiralaward)
 	{
@@ -143,20 +157,14 @@ void spiralaward_right_loop_completed (void)
 {
 	if (free_timer_test (TIM_SPIRALAWARD))
 	{
-		sound_send (SND_SLOT_PAYOUT);
 		free_timer_stop (TIM_SPIRALAWARD);
+		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();
-		//task_sleep (TIME_500MS);
 	}
 }
-/* Cancel if player misses loop */
+
 CALLSET_ENTRY (spiralaward, lamp_update)
 {
-	if (!free_timer_test (TIM_SPIRALAWARD) && leff_running_p (LEFF_SPIRAL_AWARD_ACTIVE))
-	{
-		leff_stop (LEFF_SPIRAL_AWARD_ACTIVE);
-		task_sleep (TIME_200MS);
-	}
 }	
 
 CALLSET_ENTRY (spiralaward, start_player)

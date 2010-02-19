@@ -25,7 +25,7 @@ void rocket_deff (void)
 {
 	/* Show loading frames and wait for kick */
 	U16 fno;
-	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 1)
+	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -39,12 +39,12 @@ void rocket_deff (void)
 	/* Launch rocket */
 	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 2)
 	{
-		dmd_alloc_pair ();
+		dmd_alloc_pair_clean ();
 		frame_draw (fno);
-		dmd_overlay_onto_color ();
+//		dmd_overlay_onto_color ();
 		dmd_show2 ();
 		task_sleep (TIME_16MS);
-		dmd_map_overlay ();
+//		dmd_map_overlay ();
 	}
 	deff_exit ();
 }

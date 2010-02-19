@@ -29,6 +29,8 @@ U8 shooter_div_delay_time;
 /** Delay time in seconds before closing the shooter divertor */
 U8 shooter_div_open_time;
 
+/* Flag to say whether the autofire is busy firing a ball */
+bool autofire_busy;
 
 void sw_autofire (void)
 {
@@ -63,6 +65,7 @@ void autofire_monitor (void)
 	if (shooter_div_delay_time)
 		task_sleep_sec (shooter_div_delay_time);
 	shooter_div_start ();
+	autofire_busy = TRUE;
 	/* TODO - If the autofire switch trips during the 'open
 	time', we can abort this delay early and go ahead and
 	close the divertor.  This is safe because only one
@@ -87,6 +90,7 @@ void autofire_monitor (void)
 
 	/* Say that the ball is heading into the right loop */
 	event_can_follow (autolaunch, right_loop, TIME_4S);
+	autofire_busy = FALSE;
 	task_sleep (TIME_500MS);
 	shooter_div_stop ();
 	task_exit ();
@@ -213,10 +217,12 @@ CALLSET_ENTRY (autofire, ball_search)
 CALLSET_ENTRY (autofire, start_ball)
 {
 	autofire_request_count = 0;
+	autofire_busy = FALSE;
 }
 
 CALLSET_ENTRY (autofire, init)
 {
 	autofire_request_count = 0;
+	autofire_busy = FALSE;
 }
 

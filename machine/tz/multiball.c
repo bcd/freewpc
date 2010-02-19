@@ -420,16 +420,18 @@ CALLSET_ENTRY (mball, single_ball_play)
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
 	//collect_extra_ball ();
-	//if (flag_test (FLAG_POWERBALL_IN_PLAY))
-		//flag_off (FLAG_POWERBALL_IN_PLAY);
+	/* Tell fastlock that the lock was entered */
 	callset_invoke (fastlock_jackpot_collected);
+
+	/* Collect multiball jackpot if lit */
 	if ((flag_test (FLAG_MULTIBALL_RUNNING)) && !flag_test (FLAG_MB_JACKPOT_LIT))
 	{
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT_RELIT);
 	}
+	
 	/* Check to see if mball_restart is running */
-	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
+	if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
 	{
 		sound_send (SND_CRASH);
 		score (SC_5M);

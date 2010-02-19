@@ -33,6 +33,17 @@ U8 sssmb_ramps_to_divert;
 U8 sssmb_jackpot_value;
 bool sssmb_ball_in_plunger;
 
+bool sssmb_can_divert_to_plunger (void)
+{
+	if (flag_test (FLAG_SSSMB_RUNNING)
+		&& sssmb_ramps_to_divert == 0
+		&& !sssmb_ball_in_plunger)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
 void sssmb_running_deff (void)
 {
 	for (;;)
@@ -122,6 +133,7 @@ void sssmb_award_jackpot (void)
 	/* Hack to make sure restart mball doesn't start after
 	 * the Mball/Sssmb combo mode */
 	mball_jackpot_uncollected = FALSE;
+	sssmb_ball_in_plunger = FALSE;
 	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
 	deff_start (DEFF_JACKPOT);
@@ -206,7 +218,7 @@ CALLSET_ENTRY (sssmb, lamp_update)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert > 0)
 		lamp_tristate_on (LM_SUPER_SKILL);
-	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 && !sssmb_ball_in_plunger)
+	else if (sssmb_can_divert_to_plunger ())
 		lamp_tristate_flash (LM_SUPER_SKILL);
 }
 
@@ -301,7 +313,6 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 CALLSET_ENTRY (sssmb, any_skill_switch)
 {
 	dbprintf ("Jackpot ready cancelled\n");
-	sssmb_ball_in_plunger = FALSE;
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
 }
@@ -311,3 +322,8 @@ CALLSET_ENTRY (sssmb, start_game)
 	sssmb_stop ();
 }
 
+CALLSET_ENTRY (sssmb, sw_buyin_button)
+{
+	if (in_live_game)
+		callset_invoke (sssmb_start);
+}

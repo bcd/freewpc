@@ -24,13 +24,19 @@
 #define LEFT_INLANE2 0x2
 #define RIGHT_INLANE 0x4
 
+/* How many times the rollovers have been completed */
+/* TODO does this have to be __local__ ? */
+__local__ U8 rollover_count;
+__local__ U8 rollover_level;
+
 extern void start_spiralaward_timer (void);
 
 void rollover_completed_deff (void)
 {
+	sound_send (SND_GLASS_BREAKS);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
-	font_render_string_center (&font_fixed6, 64, 16, "COMPLETED");
+	font_render_string_center (&font_fixed6, 64, 17, "COMPLETED");
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -48,7 +54,10 @@ bool rollover_completed (void)
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
 		&& lamp_test (LM_RIGHT_INLANE))
+	{	
 		return TRUE;
+		rollover_count++;
+	}
 	else
 		return FALSE;
 }
@@ -57,10 +66,10 @@ void award_rollover_completed (void)
 {
 	/* Show animation */
 	deff_start (DEFF_ROLLOVER_COMPLETED);
-	/* Turn off lamps */
+	/* Turn off inlane lamps */
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
-	/* TODO Score it */
-	score (SC_5M);
+	/* Score it */
+	score (SC_1M);
 }
 
 void check_rollover (U8 rollover_switch)
@@ -78,41 +87,20 @@ void check_rollover (U8 rollover_switch)
 			break;
 	}
 	
-	/* TODO Update lamps here? */
-	//callset_invoke (rollover_lamp_update);
 	/* Check to see if rollover has been completed */
 	if (rollover_completed ())
 		award_rollover_completed ();
 }
 
-CALLSET_ENTRY (lanes, rollover_lamp_update)
-{
-	/* Check and light lamps */
-}
-
-void shift_rollover_lamps_left (void)
+/* Flipper button handlers */
+CALLSET_ENTRY (lanes, sw_left_button)
 {
 	lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix);
 }
 
-void shift_rollover_lamps_right (void)
-{
-	lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
-}
-
-/* Flipper button handlers */
-CALLSET_ENTRY (lanes, sw_left_button)
-{
-	/* TODO Update lamps here? */
-	shift_rollover_lamps_left ();
-	//callset_invoke (rollover_lamp_update);
-}
-
 CALLSET_ENTRY (lanes, sw_right_button)
 {
-	/* TODO Update lamps here? */
-	shift_rollover_lamps_right ();
-	//callset_invoke (rollover_lamp_update);
+	lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
 }
 
 /* 'Extra Ball' outlane */
@@ -135,7 +123,7 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 	score (SC_1K);
 	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 	start_spiralaward_timer ();
-	event_can_follow (left_inlane_1, right_loop, TIME_3S);
+	//event_can_follow (left_inlane_1, right_loop, TIME_3S);
 	check_rollover (LEFT_INLANE1);
 }
 
@@ -168,5 +156,7 @@ CALLSET_ENTRY(lanes, start_ball)
 {
 	/* Turn off all inlanes at start of ball */
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
+	rollover_count = 0;
+	rollover_level = 1;
 }
 

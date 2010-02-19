@@ -95,11 +95,11 @@ CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
 {
 	if (fastlock_running ())
 	{
-		deff_start (DEFF_FASTLOCK_AWARD);
 		score_multiple (SC_1M, fastlock_award);
 		fastlocks_collected++;
 		fastlock_award = (fastlocks_collected * 5);
 		fastlock_round_timer =+ 10;
+		deff_start (DEFF_FASTLOCK_AWARD);
 	}
 }
 
@@ -113,7 +113,7 @@ void fastlock_right_loop_completed (void)
 		fastlock_award += 10;
 		sound_send (SND_CRASH);
 	}
-	else if (loop_time < 100)
+	else if (loop_time < 40)
 	{
 		fastlock_award += 5;
 		sound_send (SND_FIVE);
@@ -152,13 +152,4 @@ CALLSET_ENTRY (fastlock, end_ball)
 
 CALLSET_ENTRY (fastlock, start_player)
 {
-}
-
-CALLSET_ENTRY (fastlock, sw_buyin_button)
-{
-	if (in_live_game)
-	{
-	sound_send (SND_FIVE);
-	callset_invoke (door_start_fast_lock);
-	}
 }

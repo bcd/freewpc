@@ -48,9 +48,7 @@ extern bool fastlock_running (void);
 //TODO They don't work, change spiralaward to a task
 bool can_show_loop_leff (void)
 {
-	if (leff_running_p (LEFF_SPIRAL_AWARD_ACTIVE))
-		return FALSE;
-	else if (free_timer_test (TIM_SPIRALAWARD))
+	if (free_timer_test (TIM_SPIRALAWARD))
 		return FALSE;
 	else
 		return TRUE;
