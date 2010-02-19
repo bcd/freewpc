@@ -777,7 +777,7 @@ sub machine_write_defines {
 	# not be fired during ball search.  Flashers need not be considered.
 	print "#define MACHINE_SOL_NOSEARCHP(sol) (\\\n";
 	foreach $drive (unique ($drives)) {
-		if (defined $drive->{'nosearch'}) {
+		if (defined $drive->{'notinstalled'} || defined $drive->{'nosearch'}) {
 			print "   ((sol) == " . $drive->{'c_ident'} . ") || \\\n";
 		}
 	}
