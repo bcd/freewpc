@@ -28,12 +28,13 @@ extern U8 autofire_request_count;
 extern U8 mball_locks_made;
 //extern U8 sssmb_ramps_to_divert;
 
-extern U8 chaosmb_level;
-extern U8 chaosmb_hits_to_relight;
+//extern U8 chaosmb_level;
+//extern U8 chaosmb_hits_to_relight;
 extern bool multiball_ready (void);
 extern bool autofire_busy;
 extern bool sssmb_can_divert_to_plunger (void);
 extern bool sssmb_ball_in_plunger;
+extern bool chaosmb_can_divert_to_autoplunger (void);
 
 //TODO Get rid of this
 extern void mball_left_ramp_exit (void);
@@ -125,14 +126,14 @@ static void maybe_ramp_divert (void)
 		sound_send (SND_ONE);
 		return;
 	}
-	/* Divert to autoplunger if mball ready or chaosmb running with the left ramp lit as jackpot*/
+	
+	/* Divert to autoplunger if mball ready */
 	if (multiball_ready ())
 		ramp_divert_to_autoplunger ();
-	if (flag_test (FLAG_CHAOSMB_RUNNING) && chaosmb_level == 0 &&chaosmb_hits_to_relight == 0)
+	/* Divert to autoplunger for chaosmb */
+	if (chaosmb_can_divert_to_autoplunger ())	
 		ramp_divert_to_autoplunger ();
-	/* Divert to plunger lane if sssmb is running, 
-	 * but not if any are sat in the plunger already */
-//	if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 && !sssmb_ball_in_plunger)
+	/* Divert to plunger lane for sssmb*/
 	if (sssmb_can_divert_to_plunger ())
 	{
 		/* TODO Shore up logic by event_should_follow (plunger_switch); */

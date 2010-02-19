@@ -58,25 +58,11 @@ void flash_spiralaward_lamp (void)
 	task_exit ();
 }
 
-void spiralaward_rotate_task (void)
-{
-	
-	U8 i;
-	for (i = 0; i < 36; i++)
-	{
-		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
-		task_sleep (TIME_66MS);
-	}
-}
-
 void start_spiralaward_timer (void)
 {	
 	if (!multi_ball_play () && !free_timer_test (TIM_SPIRALAWARD))
 	{
 		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
-	//	spiralaward_rotate_task ();	
-		task_create_gid (GID_SPIRALAWARD_ROTATE_TASK, spiralaward_rotate_task);
 	}
 }
 

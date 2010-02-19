@@ -89,6 +89,17 @@ struct {
 	{ "DEAD END", 50 },
 };
 
+/* Allow divert if chaosmb is running and
+ * if the left ramp is the currently lit jackpot */
+bool chaosmb_can_divert_to_autoplunger (void)
+{
+	if (flag_test (FLAG_CHAOSMB_RUNNING)
+		&& chaosmb_level == 0
+		&& chaosmb_hits_to_relight == 0)
+		return TRUE;
+	else
+		return FALSE;
+}
 
 void chaos_jackpot_deff (void)
 {
