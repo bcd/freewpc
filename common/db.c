@@ -50,6 +50,7 @@ U8 bpt_repeat_count;
 
 U8 db_tilt_flag;
 
+extern __permanent__ bool new_fatal_error;
 
 void db_dump_all (void)
 {
@@ -115,8 +116,15 @@ void bpt_display (void)
 		bpt_mem_addr[0], bpt_mem_addr[1], bpt_mem_addr[2], bpt_mem_addr[3]);
 	font_render_string_left (&font_bitmap8, 40, 0, sprintf_buffer);
 
-	if (task_getpid ())
+	if (new_fatal_error)
 	{
+		sprintf ("ERR %d GID %d",
+			(U8)system_audits.lockup1_addr, (U8)system_audits.lockup1_pid_lef);
+		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
+	}
+	else if (task_getpid ())
+	{
+
 		sprintf ("PID %p GID %d", task_getpid (), task_getgid ());
 		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
 		sprintf ("%02X%02X %02X", bpt_addr[0], bpt_addr[1]-2, bpt_addr[2]);
@@ -129,6 +137,7 @@ void bpt_display (void)
 
 	dmd_show_low ();
 }
+
 
 /**
  * Handle a breakpoint.  The system is stopped until the user forces it

@@ -94,6 +94,7 @@ void db_puts_parallel (const char *s);
 #define bpt()  asm ("jsr\t*bpt_handler")
 void bpt_init (void);
 void bpt_clear (void);
+void bpt_stop (void);
 void bpt_set (void *addr, U8 page);
 extern U8 bpt_addr[];
 #define FREE_ONLY
