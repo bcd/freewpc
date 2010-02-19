@@ -20,16 +20,11 @@
 
 #include <freewpc.h>
 
-extern void start_spiralaward_timer (void);
-
-#define ALL_INLANES_OFF 0x0
-#define ALL_INLANES_ON 0x7
 #define LEFT_INLANE1 0x1
 #define LEFT_INLANE2 0x2
 #define RIGHT_INLANE 0x4
 
-/* Bitmask containing which rollovers are lit */
-__local__ U8 rollovers_lit;
+extern void start_spiralaward_timer (void);
 
 void rollover_completed_deff (void)
 {
@@ -37,6 +32,7 @@ void rollover_completed_deff (void)
 	font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
 	font_render_string_center (&font_fixed6, 64, 16, "COMPLETED");
 	dmd_show_low ();
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
@@ -49,7 +45,9 @@ static void handle_outlane (void)
 
 bool rollover_completed (void)
 {
-	if (rollovers_lit == ALL_INLANES_ON)
+	if (lamp_test (LM_LEFT_INLANE1)
+		&& lamp_test (LM_LEFT_INLANE2)
+		&& lamp_test (LM_RIGHT_INLANE))
 		return TRUE;
 	else
 		return FALSE;
@@ -59,7 +57,10 @@ void award_rollover_completed (void)
 {
 	/* Show animation */
 	deff_start (DEFF_ROLLOVER_COMPLETED);
+	/* Turn off lamps */
+	lamplist_apply (LAMPLIST_INLANES, lamp_off);
 	/* TODO Score it */
+	score (SC_5M);
 }
 
 void check_rollover (U8 rollover_switch)
@@ -67,18 +68,18 @@ void check_rollover (U8 rollover_switch)
 	switch (rollover_switch)
 	{
 		case LEFT_INLANE1:
-			rollovers_lit |= LEFT_INLANE1;
+			lamp_on (LM_LEFT_INLANE1);
 			break;
 		case LEFT_INLANE2:
-			rollovers_lit |= LEFT_INLANE2;
+			lamp_on (LM_LEFT_INLANE2);
 			break;
 		case RIGHT_INLANE:
-			rollovers_lit |= RIGHT_INLANE;
+			lamp_on (LM_RIGHT_INLANE);
 			break;
 	}
 	
 	/* TODO Update lamps here? */
-	callset_invoke (rollover_lamp_update);
+	//callset_invoke (rollover_lamp_update);
 	/* Check to see if rollover has been completed */
 	if (rollover_completed ())
 		award_rollover_completed ();
@@ -87,30 +88,16 @@ void check_rollover (U8 rollover_switch)
 CALLSET_ENTRY (lanes, rollover_lamp_update)
 {
 	/* Check and light lamps */
-	if (rollovers_lit & LEFT_INLANE1)
-		lamp_on (LM_LEFT_INLANE1);
-	else
-		lamp_off (LM_LEFT_INLANE1);
-
-	if (rollovers_lit & LEFT_INLANE2)
-		lamp_on (LM_LEFT_INLANE2);
-	else
-		lamp_off (LM_LEFT_INLANE2);
-
-	if (rollovers_lit & RIGHT_INLANE)
-		lamp_on (LM_RIGHT_INLANE);
-	else
-		lamp_off (LM_RIGHT_INLANE);
 }
 
 void shift_rollover_lamps_left (void)
 {
-	rollovers_lit = (rollovers_lit << 1) || (rollovers_lit >> 2);
+	lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix);
 }
 
 void shift_rollover_lamps_right (void)
 {
-	rollovers_lit = (rollovers_lit >> 1) || (rollovers_lit << 2);
+	lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
 }
 
 /* Flipper button handlers */
@@ -118,14 +105,14 @@ CALLSET_ENTRY (lanes, sw_left_button)
 {
 	/* TODO Update lamps here? */
 	shift_rollover_lamps_left ();
-	callset_invoke (rollover_lamp_update);
+	//callset_invoke (rollover_lamp_update);
 }
 
 CALLSET_ENTRY (lanes, sw_right_button)
 {
 	/* TODO Update lamps here? */
 	shift_rollover_lamps_right ();
-	callset_invoke (rollover_lamp_update);
+	//callset_invoke (rollover_lamp_update);
 }
 
 /* 'Extra Ball' outlane */
@@ -179,9 +166,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 
 CALLSET_ENTRY(lanes, start_ball)
 {
-	rollovers_lit = ALL_INLANES_OFF;
-	lamp_off (LM_LEFT_INLANE1);
-	lamp_off (LM_LEFT_INLANE1);
-	lamp_off (LM_RIGHT_INLANE);
+	/* Turn off all inlanes at start of ball */
+	lamplist_apply (LAMPLIST_INLANES, lamp_off);
 }
 

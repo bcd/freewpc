@@ -335,6 +335,8 @@ Green Lamps: COLOR:green
 Blue Lamps: COLOR:blue
 Amber Lamps: COLOR:amber
 Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
+Inlanes: Left Inlane1, Left Inlane2, Right Inlane
+
 ##########################################################################
 # Containers
 # These denote devices that can hold, count, and eject pinballs.
@@ -554,6 +556,7 @@ Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 SpiralAward Collected: page(MACHINE_PAGE), PRI_GAME_QUICK3
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Slot Animation: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
+Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED
 
 ##########################################################################
 # Lamp effects
