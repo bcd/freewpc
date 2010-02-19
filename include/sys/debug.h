@@ -95,6 +95,7 @@ void db_puts_parallel (const char *s);
 void bpt_init (void);
 void bpt_clear (void);
 void bpt_set (void *addr, U8 page);
+extern U8 bpt_addr[];
 #define FREE_ONLY
 #else
 #define bpt()

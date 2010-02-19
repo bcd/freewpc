@@ -38,7 +38,7 @@ bpt_handler:: .blkb 3
 	; bpt_addr is the code address at which the system should be stopped
 	; and the debugger entered.
 	;
-bpt_addr: 	.blkb 3
+_bpt_addr::	.blkb 3
 
 	;
 	; These variables hold the values of the registers at the time of
@@ -72,8 +72,8 @@ _bpt_reset::
 	; desired break address.
 _bpt_set::
 	leax	2,x
-	stx	bpt_addr
-	stb	bpt_addr+2
+	stx	_bpt_addr
+	stb	_bpt_addr+2
 	lda	#JMP_OPCODE
 	sta	*bpt_handler
 	ldx	#_bpt_check
@@ -85,9 +85,10 @@ _bpt_set::
 _bpt_check::
 	stx	bpt_xreg             ; Ensure X is preserved
 	ldx	,s                   ; Get the return address
-	cmpx	bpt_addr             ; Does this match the installed breakpoint?
-	bne	1$                   ; Nope, return
+	cmpx	_bpt_addr            ; Does this match the installed breakpoint?
+	bne	bpt_check_exit       ; Nope, return
 
+_bpt_stop::
 	sty	bpt_yreg
 	stu	bpt_ureg
 	std	bpt_dreg
@@ -101,7 +102,7 @@ _bpt_check::
 
 	ldx	bpt_time             ; Restore system time
 	stx	_sys_time
-1$:
+bpt_check_exit:
 	ldx	bpt_xreg             ; Restore X and return
 	rts
 
