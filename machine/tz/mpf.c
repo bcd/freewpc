@@ -174,7 +174,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		mpf_ball_count++;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
-		if (mpf_ball_count = (1))
+		if ((mpf_ball_count = 1))
 		{	
 			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
 			//leff_start (LEFF_BONUS);

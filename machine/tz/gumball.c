@@ -287,13 +287,13 @@ void gumball_deff (void)
 	deff_exit ();
 	*/
 	sound_send (SND_GUMBALL_LOAD_START);
-	U8 fno;
-	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 1)
+	U16 fno;
+	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_100MS);
 	}
 
 	sound_send (SND_GUMBALL_LOAD_END);

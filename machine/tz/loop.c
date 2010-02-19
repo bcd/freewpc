@@ -80,7 +80,7 @@ void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	loops++;
-	if (flag_test (FLAG_POWERBALL_IN_PLAY)) //And multiball not running?
+	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		powerball_loops++;
 
@@ -245,6 +245,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 		/* Left loop completed */
 		//TODO put hooks for thingfl camera and fastlock left loop.
 		stop_loop_speed_timer ();
+		fastlock_right_loop_completed ();
 		award_left_loop ();
 	}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))

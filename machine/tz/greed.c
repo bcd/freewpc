@@ -17,7 +17,9 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+/* TODO Change so hitting standups increases jackpot
+ * jackpot is collected by hitting slot machine 
+ * Suggested by litz */
 #include <freewpc.h>
 
 /** Bitmask referring to all 7 standup targets */

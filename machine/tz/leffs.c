@@ -374,11 +374,21 @@ void lock_leff (void)
 
 void mpf_active_leff (void)
 {
+	/*
+	triac_leff_disable (GI_POWERFIELD);
+	task_sleep (TIME_500MS);
+	triac_leff_disable (GI_LLEFT_PLAYFIELD);
+	task_sleep (TIME_500MS);
+	triac_leff_disable (GI_LRIGHT_PLAYFIELD);
+	task_sleep (TIME_500MS);
+	triac_leff_disable (GI_CLOCK);
+	task_sleep (TIME_500MS);
+	triac_leff_disable (GI_MYSTERY);
+	*/
 	triac_leff_disable (TRIAC_GI_MASK);
 	triac_leff_enable (GI_POWERFIELD);
 	
 	lamplist_set_apply_delay (TIME_100MS);
-	//while (mpf_ball_count > 0)
 	for (;;)
 	lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
@@ -389,11 +399,12 @@ void spiral_award_active_leff (void)
 {
 	
 	lamplist_set_apply_delay (TIME_33MS);
-	//for (;;)
-	while (free_timer_test (TIM_SPIRALAWARD))
+	for (;;)
+	//while (free_timer_test (TIM_SPIRALAWARD))
 	{
 		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
+		task_sleep (TIME_66MS);
 	}
 	leff_exit ();
 }	

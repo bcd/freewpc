@@ -108,7 +108,7 @@ void amode_score_page (void)
 #if (MACHINE_DMD == 1)
 void amode_logo_page (void)
 {
-	U8 fno;
+	U16 fno;
 
 	for (fno = IMG_FREEWPC_SMALL; fno <= IMG_FREEWPC; fno += 2)
 	{
@@ -168,39 +168,15 @@ void amode_kill_music (void)
 }
 
 
-#ifdef MACHINE_TZ
-void amode_tz_page (void)
-{
-	U8 n;
-
-	dmd_map_overlay ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
-	dmd_text_blur ();
-	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-
-	for (n = 0; n < 40; n++)
-	{
-		dmd_dup_mapped ();
-		dmd_overlay_onto_color ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
-	}
-	amode_page_end (0);
-}
-#endif
-
 
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
 #if (MACHINE_DMD == 1)
 	amode_logo_page,
 #endif
-#ifdef MACHINE_TZ
-	amode_tz_page,
-#endif
+//#ifdef MACHINE_TZ
+//	amode_tz_page,
+//#endif
 	amode_credits_page,
 	amode_freeplay_page,
 	amode_high_score_page,

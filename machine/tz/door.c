@@ -151,35 +151,81 @@ void door_award_rotate (void)
 	}
 	task_exit ();
 }
-/* TODO Crashes in test mode */
+
+void slot_animation_sound_task (void)
+{
+	sound_send (SND_SLOT_PULL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_exit ();
+
+}
+
+
+void slot_animation_deff (void)
+{
+	U16 fno;
+	task_create_gid (GID_SLOT_ANIMATION_SOUND_TASK, slot_animation_sound_task);
+	for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
+
 void door_award_deff (void)
 {
 	U8 index = door_index;
-
-	kickout_lock (KLOCK_DEFF);
-	//dmd_alloc_low_clean ();
-	dmd_alloc_pair_clean ();
-	//dmd_alloc_pair ();
-
-	sprintf ("DOOR PANEL %d", door_panels_started);
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 21, door_panel_names[index]);
-	dmd_show_low ();
+	//kickout_lock (KLOCK_DEFF);
+	U16 fno;
+	U8 i;
+	/* If piano was lit, we were called from the slot */
+	if (flag_test (FLAG_PIANO_DOOR_LIT))
+		slot_animation_deff ();
+	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	task_sleep_sec (2);
+	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
 	
-	//dmd_alloc_pair ();
-	dmd_alloc_pair_clean ();
-
-	//dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
-	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[index]);
-	dmd_sched_transition (&trans_scroll_left);
+	/* Play backwards with text on it*/
+	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
+	{
+		dmd_alloc_pair ();
+		/* Draw the frame, leave it blank at the end */
+		if (fno <= IMG_DOOR_START + 1)
+		{
+			dmd_clean_page_low ();
+			dmd_clean_page_high ();
+		}
+		else
+			frame_draw (fno);
+		
+		/* Flip it, as text is drawn to the low page */
+		dmd_flip_low_high ();	
+		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+		font_render_string_center (&font_fixed6, 48, 22, door_award_goals[index]);
+		/* Flip it again so text is now on high page */
+		dmd_flip_low_high ();	
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
 	sound_send (SND_SPIRAL_EB_LIT);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	kickout_unlock (KLOCK_DEFF);
-	task_sleep_sec (1);
+	task_sleep_sec (2);
+	//kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 
@@ -214,11 +260,12 @@ static void door_award_flashing (void)
 	lamp_tristate_on (door_active_lamp);
 	door_start_event (door_index);
 	deff_start (DEFF_DOOR_AWARD);
+	
 	score (SC_5M);
 	timed_game_extend (10);
-
 	door_panels_started++;
 	audit_increment (&feature_audits.door_panels);
+	
 	switch (door_panels_started)
 	{
 		case 3:

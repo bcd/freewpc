@@ -207,7 +207,7 @@ void emit_label (const char *label, unsigned int no)
 	while (*label != ':')
 		fputc (*label++, lblfile);
 
-	fprintf (lblfile, " %d\n", no);
+	fprintf (lblfile, " %dUL\n", no);
 }
 
 

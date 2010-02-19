@@ -150,6 +150,42 @@ void amode_leff (void)
 	}
 }
 
+CALLSET_ENTRY (tz_amode, amode_page)
+{
+	U8 n;
+
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
+
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
+	}
+	
+	/* Show driver animation */	
+	U16 fno;
+	U8 i;
+	for (i = 0; i < 3; i++)
+	{
+		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	}
+}
+
+
 #if 0
 void amode_show_design_credits (void)
 {

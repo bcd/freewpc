@@ -23,19 +23,22 @@
 /* Rocket animation contributed by highrise */
 void rocket_deff (void)
 {
-	/* Show start frame and wait for kick */
-	//dmd_alloc_low_high ();
-	dmd_alloc_pair ();
-	frame_draw (IMG_ROCKET_START + 2);
-	dmd_overlay_onto_color ();
-	dmd_show2 ();
-	task_sleep (TIME_500MS);
-	dmd_map_overlay ();
-
-	U8 fno;
+	/* Show loading frames and wait for kick */
+	U16 fno;
+	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 1)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_onto_color ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+		dmd_map_overlay ();
+	}
+	/* Rocket takes 500ms before kick 
+	 * load animation takes 400ms */
+	/* Launch rocket */
 	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 2)
 	{
-		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
 		dmd_overlay_onto_color ();

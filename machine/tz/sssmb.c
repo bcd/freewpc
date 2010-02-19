@@ -17,7 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+//TODO Relight rules?
 
 #include <freewpc.h>
 
@@ -114,7 +114,6 @@ void sssmb_relight_all_jackpots (void)
 	flag_on (FLAG_SSSMB_RED_JACKPOT);
 	flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
 	flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
-	sssmb_initial_ramps_to_divert++;
 }
 
 
@@ -123,6 +122,7 @@ void sssmb_award_jackpot (void)
 	/* Hack to make sure restart mball doesn't start after
 	 * the Mball/Sssmb combo mode */
 	mball_jackpot_uncollected = FALSE;
+	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);

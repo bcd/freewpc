@@ -1,3 +1,20 @@
+IMG_OLDCAR: machine/tz/oldcar.pgm
+IMG_ROBOT: !machine/tz/robot.pgm
+IMG_COINSTACK: machine/tz/coinstack.pgm
+IMG_HITCHER: !machine/tz/hitcher.pgm
+IMG_PYRAMID: !machine/tz/pyramid.pgm
+IMG_CITY: machine/tz/city.pgm
+IMG_BRIANHEAD: !machine/tz/brianhead.pgm
+IMG_SPIRAL: !machine/tz/spiral.pgm
+IMG_COW: machine/tz/cow.pgm
+IMG_MBORDER: machine/tz/mborder.pgm
+IMG_CAR: !machine/tz/car3.pgm
+
+IMG_ROCKET_LOAD_START: machine/tz/animation/rocket/rocketa.pgm
+IMG_ROCKET_LOAD_2: machine/tz/animation/rocket/rocketb.pgm
+IMG_ROCKET_LOAD_3: machine/tz/animation/rocket/rocketc.pgm
+IMG_ROCKET_LOAD_END: machine/tz/animation/rocket/rocketd.pgm
+
 IMG_ROCKET_START: machine/tz/animation/rocket/rocket1.pgm
 IMG_ROCKET_2: machine/tz/animation/rocket/rocket2.pgm
 IMG_ROCKET_3: machine/tz/animation/rocket/rocket3.pgm
@@ -12,18 +29,6 @@ IMG_ROCKET_11: machine/tz/animation/rocket/rocket11.pgm
 IMG_ROCKET_12: machine/tz/animation/rocket/rocket12.pgm
 IMG_ROCKET_13: machine/tz/animation/rocket/rocket13.pgm
 IMG_ROCKET_END: machine/tz/animation/rocket/rocket14.pgm
-
-IMG_OLDCAR: machine/tz/oldcar.pgm
-IMG_ROBOT: !machine/tz/robot.pgm
-IMG_COINSTACK: machine/tz/coinstack.pgm
-IMG_HITCHER: !machine/tz/hitcher.pgm
-IMG_PYRAMID: !machine/tz/pyramid.pgm
-IMG_CITY: machine/tz/city.pgm
-IMG_BRIANHEAD: !machine/tz/brianhead.pgm
-IMG_SPIRAL: !machine/tz/spiral.pgm
-IMG_COW: machine/tz/cow.pgm
-IMG_MBORDER: machine/tz/mborder.pgm
-IMG_CAR: !machine/tz/car3.pgm
 
 IMG_JACKPOT_START: machine/tz/animation/jackpot/jackpot1.pgm
 IMG_JACKPOT_2: machine/tz/animation/jackpot/jackpot2.pgm
@@ -40,7 +45,6 @@ IMG_JACKPOT_12: machine/tz/animation/jackpot/jackpot12.pgm
 IMG_JACKPOT_13: machine/tz/animation/jackpot/jackpot13.pgm
 IMG_JACKPOT_14: machine/tz/animation/jackpot/jackpot14.pgm
 IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
-
 
 IMG_EBALL_START: machine/tz/animation/eball/eball01.pgm
 IMG_EBALL_2: machine/tz/animation/eball/eball02.pgm
@@ -112,8 +116,38 @@ IMG_GUMBALL_17: machine/tz/animation/gumball/gumball17.pgm
 IMG_GUMBALL_18: machine/tz/animation/gumball/gumball18.pgm
 IMG_GUMBALL_END: machine/tz/animation/gumball/gumball19.pgm
 
-
 IMG_POWERBALL_START: machine/tz/animation/powerball/powerball01.pgm
 IMG_POWERBALL_2: machine/tz/animation/powerball/powerball02.pgm
 IMG_POWERBALL_3: machine/tz/animation/powerball/powerball03.pgm
 IMG_POWERBALL_END: machine/tz/animation/powerball/powerball04.pgm
+
+IMG_DOOR_START: machine/tz/animation/door/door01.pgm
+IMG_DOOR_2: machine/tz/animation/door/door02.pgm
+IMG_DOOR_3: machine/tz/animation/door/door03.pgm
+IMG_DOOR_4: machine/tz/animation/door/door04.pgm
+IMG_DOOR_5: machine/tz/animation/door/door05.pgm
+IMG_DOOR_6: machine/tz/animation/door/door06.pgm
+IMG_DOOR_7: machine/tz/animation/door/door07.pgm
+IMG_DOOR_END: machine/tz/animation/door/door08.pgm
+
+IMG_SLOT_START: machine/tz/animation/slot/slots01.pgm
+IMG_SLOT_2: machine/tz/animation/slot/slots02.pgm
+IMG_SLOT_3: machine/tz/animation/slot/slots03.pgm
+IMG_SLOT_4: machine/tz/animation/slot/slots04.pgm
+IMG_SLOT_5: machine/tz/animation/slot/slots05.pgm
+IMG_SLOT_6: machine/tz/animation/slot/slots06.pgm
+IMG_SLOT_7: machine/tz/animation/slot/slots07.pgm
+IMG_SLOT_8: machine/tz/animation/slot/slots08.pgm
+IMG_SLOT_9: machine/tz/animation/slot/slots09.pgm
+IMG_SLOT_10: machine/tz/animation/slot/slots10.pgm
+IMG_SLOT_11: machine/tz/animation/slot/slots11.pgm
+IMG_SLOT_12: machine/tz/animation/slot/slots12.pgm
+IMG_SLOT_13: machine/tz/animation/slot/slots13.pgm
+IMG_SLOT_14: machine/tz/animation/slot/slots14.pgm
+IMG_SLOT_15: machine/tz/animation/slot/slots15.pgm
+#IMG_SLOT_16: machine/tz/animation/slot/slots16.pgm
+IMG_SLOT_17: machine/tz/animation/slot/slots17.pgm
+IMG_SLOT_18: machine/tz/animation/slot/slots18.pgm
+IMG_SLOT_END: machine/tz/animation/slot/slots19.pgm
+
+

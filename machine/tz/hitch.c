@@ -46,30 +46,36 @@ void hitchhiker_deff (void)
 {
 	/* Start a timer so jets won't stop animation */
 	timer_restart_free (GID_HITCHHIKER, TIME_4S);
-	//hitch_deff_running = TRUE;
-	U8 fno;
-	U8 current_frame = 0;
+	U16 fno;
 	for (fno = IMG_HITCHHIKER_START; fno <= IMG_HITCHHIKER_END; fno += 2)
 	{
-		current_frame++;
 		dmd_alloc_pair_clean ();
 		frame_draw (fno);
-	
+		/* text can only be printed to the low page so we flip them */
+		dmd_flip_low_high ();
+		
+		if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
+		&hitch_round_timer))
+		{
+			sprintf("10 MILLION");
+			font_render_string_center (&font_mono5, 98, 5, sprintf_buffer);
+		}
+		else
+		{
+			sprintf ("HITCHERS");
+			font_render_string_center (&font_mono5, 98, 5, sprintf_buffer);
+			sprintf ("%d", hitch_count);
+			font_render_string_center (&font_fixed6, 99, 24, sprintf_buffer);
+		}	
+		/* Flip back again */
+		dmd_flip_low_high ();
+		
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
 	
-	dmd_alloc_pair_clean ();
 	
-	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
-		sprintf("10 MILLION");
-	else if (current_frame > 8)
-		psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
-	
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-	dmd_show2 ();
-	task_sleep_sec (1);
+		task_sleep_sec (1);
 	/* Stop the timer so jets.c can show deffs again */
 	timer_kill_gid (GID_HITCHHIKER);
 	//hitch_deff_running = FALSE;

@@ -102,11 +102,12 @@ void pb_detect_deff (void)
 	deff_swap_low_high (32, TIME_100MS);
 #endif
 	sound_send (SND_POWERBALL_QUOTE);
-	U8 fno;
+	U16 fno;
 	U8 i;
+	/* Loop anim 6 times */
 	for (i = 0;i < 5;i++)
 	{
-		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 1)
+		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 2)
 		{
 			dmd_alloc_pair ();
 			frame_draw (fno);
@@ -133,7 +134,7 @@ void pb_loop_deff (void)
 
 CALLSET_ENTRY (pb_detect, lamp_update)
 {
-	if (pb_location & PB_IN_PLAY)
+	if ((pb_location & PB_IN_PLAY) && !multi_ball_play ())
 	{
 		lamp_tristate_flash (LM_LEFT_POWERBALL);
 		lamp_tristate_flash (LM_RIGHT_POWERBALL);
@@ -363,7 +364,7 @@ void pb_container_exit (U8 location)
 
 CALLSET_ENTRY (pb_detect, music_refresh)
 {
-	if (pb_location == PB_IN_PLAY)
+	if (pb_location == PB_IN_PLAY && !multi_ball_play ())
 		music_request (MUS_POWERBALL_IN_PLAY, PRI_GAME_MODE3);
 }
 

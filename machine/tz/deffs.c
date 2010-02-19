@@ -53,7 +53,7 @@ void replay_deff (void)
 void extra_ball_deff (void)
 {
 	sound_send (SND_HERES_YOUR_EB);
-	U8 fno;
+	U16 fno;
 	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 1)
 	{
 		dmd_alloc_pair ();
@@ -67,15 +67,20 @@ void extra_ball_deff (void)
 
 void driver_deff (void)
 {
-	U8 fno;
-	for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 1)
+	U16 fno;
+	U8 i;
+	/* loop anim 4 times */
+	for (i = 0; i < 3; i++)
 	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
-	task_sleep_sec (2);
+	//task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -132,7 +137,7 @@ void jackpot_deff (void)
 /* Jackpot animation contributed by highrise */
 void jackpot_deff (void)
 {
-	U8 fno;
+	U16 fno;
 	U8 i;
 	//music_disable ();
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);

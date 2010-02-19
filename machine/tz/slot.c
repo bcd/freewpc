@@ -52,8 +52,6 @@ void sslot_award_rotate (void)
 	}
 
 }
-
-
 void sslot_round_deff (void)
 {
 	for (;;)

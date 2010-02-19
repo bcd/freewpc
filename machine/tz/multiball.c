@@ -44,8 +44,6 @@ void mball_restart_deff (void)
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 		sprintf ("%d", mball_restart_timer);
 		font_render_string_center (&font_fixed6, 64, 24, sprintf_buffer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}
@@ -193,6 +191,25 @@ bool can_light_lock (void)
 		return FALSE;
 }
 
+/* Rules to say whether we can start multiball */
+bool multiball_ready (void)
+{
+	/* Don't allow during certain conditions */
+	if (flag_test (FLAG_MULTIBALL_RUNNING) 
+		|| flag_test (FLAG_SSSMB_RUNNING)
+		|| flag_test (FLAG_CHAOSMB_RUNNING)
+		|| multi_ball_play ())
+		return FALSE;
+	/* Require one locked ball first multiball, 2 locks after */
+	else if (!multi_ball_play () && (mball_locks_made > 0) && mballs_played == 0)
+		return TRUE;
+	else if (!multi_ball_play () && (mball_locks_made > 1) && mballs_played > 0)
+		return TRUE;
+	else
+		return FALSE;
+
+}
+
 CALLSET_ENTRY (mball, lamp_update)
 {
 	/* Light the lock if it can be collected */
@@ -200,6 +217,10 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_flash (LM_LOCK_ARROW);
 	else	
 		lamp_tristate_off (LM_LOCK_ARROW);
+
+	/* Flash the appropiate lamp when multiball is ready */
+	if (multiball_ready ())
+		lamp_tristate_flash (LM_MULTIBALL);
 
 	/* Turn on and flash door lock lamps during game situations */
 	if (mball_locks_made == 0 && mball_locks_lit == 0)
@@ -342,11 +363,8 @@ CALLSET_ENTRY (mball, mball_stop)
 /* Called from leftramp.c */
 void mball_left_ramp_exit (void)
 {
-	/*if (flag_test (FLAG_MULTIBALL_RUNNING));
-	else if (flag_test (FLAG_SSSMB_RUNNING));
-	else if (flag_test (FLAG_CHAOSMB_RUNNING));*/
-	if (!multi_ball_play () && (mball_locks_made > 0))
-	{
+	if (multiball_ready ())
+	{	
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
 	}
@@ -422,7 +440,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 			lamp_off (LM_BALL);
 		}
 		mball_locks_made++;
-		lamp_tristate_flash (LM_MULTIBALL);
+		//lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
 		reset_unlit_shots ();
 	}
