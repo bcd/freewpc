@@ -83,7 +83,6 @@
  */
 #ifdef HAVE_PAGING
 #define __far__(x)      __attribute__((far(x)))
-#define __system__		__attribute__((section(".text")))
 #define __common__		__far__(C_STRING(COMMON_PAGE))
 #define __event__		   __far__(C_STRING(EVENT_PAGE))
 #define __transition__	__far__(C_STRING(TRANS_PAGE))
@@ -95,7 +94,6 @@
 #define __machine2__    __far__(C_STRING(MACHINE2_PAGE))
 #else
 #define __far__(x)
-#define __system__
 #define __common__
 #define __event__
 #define __transition__
