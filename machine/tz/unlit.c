@@ -21,7 +21,7 @@
 /* Backdoor Award Rules:
  * Award the player a door for getting a certain amount of unlit shots 
  * Currently deadend, rightramp, slot, piano, HH, lock are awarded when 'unlit'
- * Collecting mpf, multiball, door panel, lock resets count
+ * Collecting mpf, multiball, door panel, gumball or lock resets count
  * Only works once per game, 20M bonus on each ball */
 
 #include <freewpc.h>

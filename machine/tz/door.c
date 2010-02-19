@@ -187,7 +187,6 @@ void door_award_deff (void)
 	U8 index = door_index;
 	//kickout_lock (KLOCK_DEFF);
 	U16 fno;
-	U8 i;
 	/* If piano was lit, we were called from the slot */
 	if (flag_test (FLAG_PIANO_DOOR_LIT))
 		slot_animation_deff ();

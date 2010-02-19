@@ -404,7 +404,7 @@ void spiral_award_active_leff (void)
 	{
 		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_33MS);
 	}
 	leff_exit ();
 }	

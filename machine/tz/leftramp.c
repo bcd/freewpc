@@ -27,7 +27,8 @@ extern U8 gumball_enable_count;
 extern U8 autofire_request_count;	
 extern U8 mball_locks_made;
 extern U8 sssmb_ramps_to_divert;
-
+extern U8 chaosmb_level;
+//TODO Get rid of this
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern bool sssmb_ball_in_plunger;
@@ -105,20 +106,20 @@ CALLSET_ENTRY(leftramp, start_ball)
 	left_ramps = 0;
 }
 
+
 static void maybe_ramp_divert (void)
 {
-	/* Divert to autoplunger if mball ready or chaosmb running */
-	if (((mball_locks_made > 0) || flag_test (FLAG_CHAOSMB_RUNNING))
-		&& autofire_request_count == 0)
-	{
+	/* Don't divert if a ball is waiting to be fired */
+	if (autofire_request_count != 0)
+		return;
+	/* Divert to autoplunger if mball ready or chaosmb running with the left ramp lit as jackpot*/
+	if (multiball_ready ())
 		ramp_divert_to_autoplunger ();
-	}
-	/* Divert to plunger lane if sssmb is running, but not if any balls
-	 * are due to be fired or any sat in the plunger */
+	else if (flag_test (FLAG_CHAOSMB_RUNNING) && chaosmb_level == 0)
+		ramp_divert_to_autoplunger ();
+	/* Divert to plunger lane if sssmb is running, 
+	 * but not if any are sat in the plunger already */
 	else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 && !sssmb_ball_in_plunger)
-	//else if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert == 0 
-	//	&& autofire_request_count == 0 )
-		//&& !switch_poll_logical (SW_SHOOTER))
 	{
 		/* TODO Shore up logic by event_should_follow (plunger_switch); */
 		sssmb_ball_in_plunger = TRUE;

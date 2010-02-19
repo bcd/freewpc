@@ -201,9 +201,9 @@ bool multiball_ready (void)
 		|| multi_ball_play ())
 		return FALSE;
 	/* Require one locked ball first multiball, 2 locks after */
-	else if (!multi_ball_play () && (mball_locks_made > 0) && mballs_played == 0)
+	else if ((mball_locks_made > 0) && (mballs_played == 0))
 		return TRUE;
-	else if (!multi_ball_play () && (mball_locks_made > 1) && mballs_played > 0)
+	else if ((mball_locks_made > 1) && (mballs_played > 0))
 		return TRUE;
 	else
 		return FALSE;
@@ -428,6 +428,17 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT_RELIT);
 	}
+	/* Check to see if mball_restart is running */
+	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
+	{
+		sound_send (SND_CRASH);
+		score (SC_5M);
+		timed_mode_stop (&mball_restart_timer);
+		mball_restart_collected = TRUE;
+		if (!multi_ball_play ())
+			callset_invoke (mball_start);
+	}
+	/* Lock check should pretty much always go last */
 	else if (can_lock_ball ())
 	{
 		bounded_decrement (mball_locks_lit, 0);
@@ -440,20 +451,8 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 			lamp_off (LM_BALL);
 		}
 		mball_locks_made++;
-		//lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
 		reset_unlit_shots ();
-	}
-	/* Check to see if mball_restart is running */
-	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
-	{
-		sound_send (SND_CRASH);
-		score (SC_5M);
-		timed_mode_stop (&mball_restart_timer);
-		//mball_jackpot_uncollected = FALSE;
-		mball_restart_collected = TRUE;
-	//	if (!multi_ball_play ())
-		callset_invoke (mball_start);
 	}
 	else
 		/* inform unlit.c that a shot was missed */

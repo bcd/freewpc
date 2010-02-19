@@ -92,6 +92,7 @@ struct {
 
 void chaos_jackpot_deff (void)
 {
+	
 	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
@@ -146,7 +147,7 @@ void chaosmb_start (void)
 	if (multiball_mode_start (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
 		chaosmb_level = 0;
-		chaosmb_hits_to_relight = 0;
+		chaosmb_hits_to_relight = 1;
 		mball_start_3_ball ();
 		ballsave_add_time (10);
 	}
@@ -155,8 +156,11 @@ void chaosmb_start (void)
 CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
 	//TODO Is this where the LM_CLOCK_MILLIONS flash gets left on from?
+	/* Hack as the following doesn't seem to stop running */
+	flag_off (FLAG_CHAOSMB_RUNNING);
 	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
 	{
+	
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
 		lamp_tristate_off (LM_MULTIBALL);
 		//autofire_request_count = 0;
@@ -259,4 +263,6 @@ CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;
 	chaosmb_hits_to_relight = 0;
+	/* Hack, shouldn't be needed */
+	flag_off (FLAG_CHAOSMB_RUNNING);
 }

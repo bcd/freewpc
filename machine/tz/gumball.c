@@ -44,14 +44,14 @@ extern void pb_set_location (U8 location, U8 depth);
 extern void pb_clear_location (U8 location);
 extern U8 mpf_round_timer;
 extern void mball_start_3_ball (void);
-//extern void sssmb_start (void);
-//__machine__ extern void mball_start (void);
+extern void reset_unlit_shots (U8 unlit_called_from);
 
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
 void award_gumball_score (void)
 {
+	reset_unlit_shots (SW_GUMBALL_ENTER);
 	/* Scored in multiple of 5M, capped at 30M */
 	if (gumball_collected_count > 5)
 	{
