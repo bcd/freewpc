@@ -128,10 +128,10 @@ foreach $src (@srclist) {
 print "#ifndef __GENDEFINE_" . $prefix . "\n";
 print "#define __GENDEFINE_" . $prefix . "\n";
 foreach $define (@defines) {
-	print "#define $define " . $definehash{$define} . "\n";
+	print "#define $define " . $definehash{$define} . "U\n";
 }
 if (defined $count_define) {
-	print "#define $count_define " . $count . "\n";
+	print "#define $count_define " . $count . "U\n";
 }
 print "#endif /* __GENDEFINE_" . $prefix . " */\n";
 
