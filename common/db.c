@@ -132,9 +132,11 @@ void bpt_display (void)
 	}
 	else
 	{
-		font_render_string_left (&font_bitmap8, 0, 8, "USER BREAK");
+		font_render_string_left (&font_bitmap8, 0, 8, "BREAK");
 	}
 
+	sprintf ("C%04lX", prev_log_callset);
+	font_render_string_left (&font_bitmap8, 0, 24, sprintf_buffer);
 	dmd_show_low ();
 }
 
