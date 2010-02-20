@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (stress, __test2__) */
-
 U8 switch_stress_enable;
 
 

@@ -24,7 +24,6 @@
 
 U8 effect_update_counter;
 
-/* CALLSET_SECTION (effect_update, __effect__) */
 
 static void update_complete (void)
 {
