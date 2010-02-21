@@ -60,7 +60,7 @@ void zr_1_multiball_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_mono5, 64, 5, "MULTIBALL");
 		sprintf_current_score ();
