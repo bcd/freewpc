@@ -39,7 +39,7 @@
 
 #ifdef CONFIG_NATIVE
 #undef IMAGEMAP_BASE
-U8 IMAGEMAP_BASE[65536];
+U8 IMAGEMAP_BASE[262144];
 
 struct frame_pointer
 {
@@ -362,7 +362,7 @@ CALLSET_ENTRY (frame, init)
 		dbprintf ("Cannot open image file %s", filename);
 		return;
 	}
-	fread (IMAGEMAP_BASE, sizeof (U8), 65536, fp);
+	fread (IMAGEMAP_BASE, sizeof (U8), 262144, fp);
 #endif
 }
 
