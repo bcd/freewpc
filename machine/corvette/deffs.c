@@ -22,10 +22,9 @@
 
 __local__ U8 ball_save_count;
 
-
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	dmd_show_low ();
@@ -94,7 +93,7 @@ void jackpot_deff (void)
 		dmd_show_low ();
 	}
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
 	dmd_copy_low_to_high ();
@@ -138,7 +137,7 @@ void text_color_flash_deff (void)
 void spell_test_deff (void)
 {
 	U8 count = 4;
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("%*s", count, "FASTLOCK");
 	font_render_string_left (&font_fixed10, 16, 9, sprintf_buffer);
@@ -176,7 +175,7 @@ void bg_flash_deff (void)
 {
 	const U8 flash_time = TIME_50MS;
 
-	dmd_alloc_low_high ();
+	dmd_alloc_pair ();
 	dmd_fill_page_low ();
 	dmd_clean_page_high ();
 	for (;;)
