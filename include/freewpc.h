@@ -249,7 +249,11 @@ extern U8 periodic_ok;
  * pragmas working */
 #ifndef CONFIG_NATIVE
 #ifdef PAGE
-#if (PAGE == 54)
+#if (PAGE == 52)
+#define PAGE_PRAGMA _Pragma ("section (\"page52\")")
+#elif (PAGE == 53)
+#define PAGE_PRAGMA _Pragma ("section (\"page53\")")
+#elif (PAGE == 54)
 #define PAGE_PRAGMA _Pragma ("section (\"page54\")")
 #elif (PAGE == 55)
 #define PAGE_PRAGMA _Pragma ("section (\"page55\")")

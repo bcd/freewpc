@@ -245,7 +245,7 @@ void signal_update (signal_number_t signo, unsigned int state)
 	/* Don't do anything else if we're not tracing this signal. */
 	sigrd = signal_readings[signo];
 	if (!sigrd)
-		return;
+		goto do_capture;
 
 	/* Move to the last block in the list. */
 	while (sigrd->next)
@@ -284,6 +284,7 @@ void signal_update (signal_number_t signo, unsigned int state)
 	sigrd->t[sigrd->count++] = realtime_read ();
 	sigrd->prev_state = state;
 
+do_capture:
 	/* Write the new state to the capture file if active and this signal
 	is being monitored */
 	if (signal_capture_active && signal_capture_file)
@@ -315,8 +316,8 @@ void signal_capture_start (struct signal_expression *ex)
 {
 	if (signal_start_expr)
 		expr_free (signal_start_expr);
-	simlog (SLC_DEBUG, "Capture start condition set.");
 	signal_start_expr = ex;
+	simlog (SLC_DEBUG, "Capture start condition set. %p", signal_start_expr);
 }
 
 
@@ -432,5 +433,5 @@ void signal_init (void)
 {
 	signal_start_expr = signal_stop_expr = NULL;
 	signal_capture_active = 0;
-	sim_time_register (2, TRUE, signal_trace_periodic, NULL);
+	sim_time_register (1, TRUE, signal_trace_periodic, NULL);
 }
