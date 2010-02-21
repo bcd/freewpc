@@ -127,8 +127,10 @@ void bpt_display (void)
 
 		sprintf ("PID %p GID %d", task_getpid (), task_getgid ());
 		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
+#ifdef CONFIG_BPT
 		sprintf ("%02X%02X %02X", bpt_addr[0], bpt_addr[1]-2, bpt_addr[2]);
 		font_render_string_left (&font_bitmap8, 0, 16, sprintf_buffer);
+#endif
 	}
 	else
 	{
@@ -222,10 +224,12 @@ void db_periodic (void)
 				db_dump_all ();
 				break;
 
+#ifdef CONFIG_BPT
 			case 'p':
 				/* Stop the system */
 				bpt_stop ();
 				break;
+#endif
 
 			default:
 #ifdef MACHINE_DEBUGGER_HOOK
