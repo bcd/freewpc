@@ -116,7 +116,7 @@ define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 41: ZR-1 Bottom Entry, ingame, opto
 42: ZR-1 Top Entry, ingame, opto
 43: Skid Pad Entry, ingame, opto
-44: Skip Pad Exit, ingame
+44: Skid Pad Exit, ingame
 45: Route 66 Exit, ingame
 46: Left Standup 3, ingame # Light
 47: Left Standup 2, ingame # Turbo
