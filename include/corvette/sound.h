@@ -363,7 +363,7 @@
 #define SPCH_EXTRA_BALL											SET_02_SND(0x48)
 #define SPCH_SPECIAL											SET_02_SND(0x49)
 #define SPCH_TORQUE_JACKPOT										SET_02_SND(0x4A)
-#define SPCH_HOURSEPOWER_JACKPOT								SET_02_SND(0x4B)
+#define SPCH_HORSEPOWER_JACKPOT									SET_02_SND(0x4B)
 #define SPCH_RAUCOUS											SET_02_SND(0x4C)
 #define SPCH_HEAD_FOR_THE_LT5									SET_02_SND(0x4D)
 #define SPCH_HEAD_FOR_THE_PITS									SET_02_SND(0x4E)
