@@ -191,8 +191,11 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
 		sssmb_ball_in_plunger = FALSE;
-		ballsave_add_time (10);
-		mball_start_3_ball ();
+		if (!flag_test (FLAG_SUPER_MB_RUNNING))
+		{	
+			mball_start_3_ball ();
+			ballsave_add_time (10);
+		}
 	}
 }
 
@@ -286,7 +289,6 @@ void sssmb_left_ramp_exit (void)
 			if (!timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 			{
 				timer_start_free (GID_SSSMB_DIVERT_DEBOUNCE, TIME_6S);
-			//	maybe_ramp_divert ();
 			}
 		}
 		else
@@ -315,15 +317,4 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 	dbprintf ("Jackpot ready cancelled\n");
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
-}
-
-CALLSET_ENTRY (sssmb, start_game)
-{
-	sssmb_stop ();
-}
-
-CALLSET_ENTRY (sssmb, sw_buyin_button)
-{
-	if (in_live_game)
-		callset_invoke (sssmb_start);
 }

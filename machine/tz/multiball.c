@@ -29,6 +29,7 @@ bool mball_jackpot_uncollected;
 bool mball_restart_collected;
 U8 mball_restart_timer;
 
+extern U8 live_balls;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
 extern bool fastlock_running (void);
@@ -169,7 +170,8 @@ bool can_lock_ball (void)
 		&& !flag_test (FLAG_MULTIBALL_RUNNING) 
 		&& !flag_test (FLAG_SSSMB_RUNNING) 
 		&& !flag_test (FLAG_CHAOSMB_RUNNING)
-		&& !multi_ball_play ())
+		&& !multi_ball_play ()
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 		return TRUE;
 	else
 		return FALSE;
@@ -287,9 +289,10 @@ void mball_check_light_lock (void)
 void mball_start_3_ball (void)
 {
 	/* Don't start if another multiball is running */
-	if (multi_ball_play ())
+//	if (multi_ball_play ())
+//		return;
+	if (live_balls == 3)
 		return;
-
 	/* Check lock and empty accordingly */
 	switch (device_recount (device_entry (DEVNO_LOCK)))
 	{	
@@ -334,8 +337,12 @@ CALLSET_ENTRY (mball, mball_start)
 		mballs_played++;
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
-		mball_start_3_ball ();	
-		ballsave_add_time (10);
+		
+		if (!flag_test (FLAG_SUPER_MB_RUNNING))
+		{	
+			mball_start_3_ball ();	
+			ballsave_add_time (10);
+		}
 	}
 }
 
@@ -344,6 +351,7 @@ CALLSET_ENTRY (mball, mball_stop)
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		flag_off (FLAG_MULTIBALL_RUNNING);
+		flag_off (FLAG_SUPER_MB_RUNNING);
 		flag_off (FLAG_MB_JACKPOT_LIT);
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);

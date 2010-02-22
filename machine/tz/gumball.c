@@ -196,6 +196,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		gumball_collected_count++;
 		award_gumball_score ();
 		/* Powerball was loaded into Gumball */
+		//BUG If powerball is about to launch, a steel gets counted
 		if (flag_test (FLAG_POWERBALL_IN_PLAY))
 		{
 			//pb_clear_location (PB_IN_PLAY);
@@ -204,6 +205,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			//TODO Move to multiball.c
 
 			/* Do a dodgy multiball combo */
+			flag_on (FLAG_SUPER_MB_RUNNING);
 			mball_start_3_ball ();
 			callset_invoke (sssmb_start);
 			callset_invoke (mball_start);
@@ -332,6 +334,7 @@ CALLSET_ENTRY (gumball, start_ball)
 {
 	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 	gumball_score = 0;
+	flag_off (FLAG_SUPER_MB_RUNNING);
 }
 
 
@@ -370,10 +373,14 @@ CALLSET_ENTRY (gumball, door_start_light_gumball)
 	gumball_enable_count++;
 }
 
-
+CALLSET_ENTRY (gumball, single_ball_play)
+{
+	flag_off (FLAG_SUPER_MB_RUNNING);
+}
 
 CALLSET_ENTRY (gumball, init)
 {
+	flag_off (FLAG_SUPER_MB_RUNNING);
 	gumball_enable_from_trough = FALSE;
 	gumball_pending_releases = 0;
 }
@@ -395,4 +402,3 @@ CALLSET_ENTRY (gumball, status_report)
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	status_page_complete ();
 }
-

@@ -20,9 +20,11 @@
 
 #include <freewpc.h>
 
-#define LEFT_INLANE1 0x1
-#define LEFT_INLANE2 0x2
-#define RIGHT_INLANE 0x4
+#define LEFT_INLANE1 	1
+#define LEFT_INLANE2 	2
+#define RIGHT_INLANE 	3
+#define LEFT_OUTLANE 	4
+#define RIGHT_OUTLANE 	5
 
 /* How many times the rollovers have been completed */
 /* TODO does this have to be __local__ ? */
@@ -53,11 +55,10 @@ bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
-		&& lamp_test (LM_RIGHT_INLANE))
-	{	
+		&& lamp_test (LM_RIGHT_INLANE)
+		&& lamp_test (LM_LEFT_OUTLANE)
+		&& lamp_test (LM_RIGHT_OUTLANE))
 		return TRUE;
-		rollover_count++;
-	}
 	else
 		return FALSE;
 }
@@ -67,9 +68,13 @@ void award_rollover_completed (void)
 	/* Show animation */
 	deff_start (DEFF_ROLLOVER_COMPLETED);
 	/* Turn off inlane lamps */
+	lamplist_apply (LAMPLIST_INLANES, lamp_flash_on);
+	task_sleep_sec (3);
+	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
 	/* Score it */
 	score (SC_1M);
+	rollover_count++;
 }
 
 void check_rollover (U8 rollover_switch)
@@ -84,6 +89,12 @@ void check_rollover (U8 rollover_switch)
 			break;
 		case RIGHT_INLANE:
 			lamp_on (LM_RIGHT_INLANE);
+			break;
+		case LEFT_OUTLANE:
+			lamp_on (LM_LEFT_OUTLANE);
+			break;
+		case RIGHT_OUTLANE:
+			lamp_on (LM_RIGHT_OUTLANE);
 			break;
 	}
 	
@@ -107,6 +118,7 @@ CALLSET_ENTRY (lanes, sw_right_button)
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
+	check_rollover(LEFT_OUTLANE);
 	handle_outlane ();
 }
 
@@ -114,6 +126,7 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
+	check_rollover(RIGHT_OUTLANE);
 	handle_outlane ();
 }
 

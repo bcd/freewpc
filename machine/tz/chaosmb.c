@@ -22,6 +22,7 @@
 
 extern void mball_start_3_ball (void);
 extern U8 autofire_request_count;
+extern void reset_unlit_shots (void);
 
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
@@ -45,32 +46,6 @@ extern inline void score_deff_end (task_ticks_t flash_rate)
 		dmd_show_other ();
 	}
 }
-
-
-extern inline bool multiball_mode_start (U8 flag, U8 deff, U8 leff, U8 music)
-{
-	if (!flag_test (flag))
-	{
-		flag_on (flag);
-		return TRUE;
-	}
-	else
-		return FALSE;
-}
-
-
-extern inline bool multiball_mode_stop (U8 flag, U8 deff, U8 leff, U8 music)
-{
-	if (flag_test (flag))
-	{
-		flag_off (flag);
-		return TRUE;
-	}
-	else
-		return FALSE;
-}
-
-
 
 __local__ U8 chaosmb_level;
 
@@ -153,10 +128,12 @@ void chaosmb_score_jackpot (void)
 	sound_send (SND_EXPLOSION_1);
 }
 
-void chaosmb_start (void)
+CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
-	if (multiball_mode_start (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
+	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 	{
+		reset_unlit_shots ();
+		flag_on (FLAG_CHAOSMB_RUNNING);
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 1;
 		mball_start_3_ball ();
@@ -171,13 +148,8 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	flag_off (FLAG_CHAOSMB_RUNNING);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	lamp_tristate_off (LM_MULTIBALL);
-	if (multiball_mode_stop (FLAG_CHAOSMB_RUNNING, DEFF_CHAOSMB_RUNNING, 0, MUS_SPIRAL_ROUND))
-	{
-	
-		lamp_tristate_off (LM_CLOCK_MILLIONS);
-		lamp_tristate_off (LM_MULTIBALL);
-		//autofire_request_count = 0;
-	}
+	deff_stop (DEFF_CHAOSMB_RUNNING);
+	music_refresh ();
 }
 
 
@@ -223,7 +195,7 @@ CALLSET_ENTRY (chaosmb, music_refresh)
 
 CALLSET_ENTRY (chaosmb, door_start_clock_chaos)
 {
-	chaosmb_start ();
+	callset_invoke (chaosmb_start);
 }
 
 
@@ -272,10 +244,15 @@ CALLSET_ENTRY (chaosmb, single_ball_play)
 	callset_invoke (chaosmb_stop);
 }
 
+CALLSET_ENTRY (chaosmb, sw_buyin_button)
+{
+	callset_invoke (chaosmb_start);
+}
+
 CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;
 	chaosmb_hits_to_relight = 0;
 	/* Hack, shouldn't be needed */
-	flag_off (FLAG_CHAOSMB_RUNNING);
+//	flag_off (FLAG_CHAOSMB_RUNNING);
 }

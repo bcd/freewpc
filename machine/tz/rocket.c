@@ -31,9 +31,10 @@ void rocket_deff (void)
 		frame_draw (fno);
 		dmd_overlay_onto_color ();
 		dmd_show2 ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_66MS);
 		dmd_map_overlay ();
 	}
+	task_sleep (TIME_200MS);
 	/* Rocket takes 500ms before kick 
 	 * load animation takes 400ms */
 	/* Launch rocket */

@@ -79,8 +79,8 @@ void award_spiralaward (void)
 		spiralaward = random_scaled (6);
 
 	/* Don't award extra ball until the last two */
-	//while (spiralaward == 5 && spiralawards_collected < 4)	
-	//	spiralaward = random_scaled (6);
+	while (spiralaward == 5 && spiralawards_collected < 4)
+		spiralaward = random_scaled (6);
 	
 	switch (spiralaward)
 	{

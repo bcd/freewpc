@@ -120,7 +120,7 @@ static void do_camera_award (void)
 	task_exit ();
 }
 
-
+/* TODO Fix bug when gumball exit happens */
 CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_4S);
@@ -128,7 +128,8 @@ CALLSET_ENTRY (camera, sw_camera)
 	{
 		callset_invoke (mpf_collected);
 	}
-	else if (event_did_follow (gumball_exit, camera))
+	
+	if (event_did_follow (gumball_exit, camera))
 	{
 	}
 	else if (event_did_follow (dead_end, camera))

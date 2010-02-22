@@ -185,7 +185,8 @@ void slot_animation_deff (void)
 void door_award_deff (void)
 {
 	U8 index = door_index;
-	//kickout_lock (KLOCK_DEFF);
+	/* Hold the ball during deff if D_PAUSE */
+	kickout_lock (KLOCK_DEFF);
 	U16 fno;
 	/* If piano was lit, we were called from the slot */
 	if (flag_test (FLAG_PIANO_DOOR_LIT))
@@ -224,7 +225,8 @@ void door_award_deff (void)
 	}
 	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
-	//kickout_unlock (KLOCK_DEFF);
+	/* Hold the ball during deff if D_PAUSE */
+	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 

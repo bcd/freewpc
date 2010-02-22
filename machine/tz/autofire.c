@@ -167,11 +167,12 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	dbprintf ("need to autofire? live=%d, request=%d ...",
 		live_balls, autofire_request_count);
 	/* The default strategy is to autofire only when in multiball. */
-	if (live_balls || autofire_request_count)
+	//if (live_balls || autofire_request_count)
+	if (live_balls || autofire_request_count > 0)
 	{
 		dbprintf ("yes.\n");
-		if (autofire_request_count > 0)
-			bounded_decrement (autofire_request_count, 0);
+	//	if (autofire_request_count > 0)
+		bounded_decrement (autofire_request_count, 0);
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();

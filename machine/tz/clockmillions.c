@@ -99,6 +99,8 @@ void clock_millions_round_expire (void)
 
 void clock_millions_round_end (void)
 {
+	deff_stop (DEFF_CLOCK_MILLIONS_ROUND);
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_round_task (void)

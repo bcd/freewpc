@@ -27,7 +27,7 @@ __local__ U8 jets_for_bonus;
 __local__ U8 jets_bonus_level;
 
 extern U8 tsm_round_timer;
-//extern bool hitch_deff_running;
+extern U8 mpf_round_timer;
 
 CALLSET_ENTRY(jet, start_player)
 {
@@ -92,6 +92,9 @@ void jets_level_up_deff (void)
 
 CALLSET_ENTRY (jet, sw_jet)
 {
+	/* Hack to work around bug when mpf_exit switch breaks */
+	if (!multi_ball_play () && mpf_round_timer > 0)
+		callset_invoke (sw_mpf_exit);
 	
 	if (flag_test(FLAG_POWERBALL_IN_PLAY))
 		jets_scored += 2;

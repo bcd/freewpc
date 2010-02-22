@@ -114,9 +114,11 @@ void pb_detect_deff (void)
 			//copy text to seperate page
 			//OR current page 
 	//		dmd_overlay_onto_color ();
-			//font_render_string_center (&font_fixed10, 64, 20, "POWERBALL");
+			dmd_flip_low_high ();
+			font_render_string_center (&font_var5, 64, 25, "POWERBALL");
+			dmd_flip_low_high ();
 			dmd_show2 ();
-			task_sleep (TIME_66MS);
+			task_sleep (TIME_100MS);
 	//		dmd_map_overlay ();
 		}
 	}
