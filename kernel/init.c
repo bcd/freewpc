@@ -81,7 +81,6 @@ __noreturn__ void freewpc_init (void)
 #ifdef DEBUGGER
 	db_init ();
 	bpt_init ();
-	bpt_set (task_exit, SYS_PAGE);
 	pinio_watchdog_reset ();
 #endif
 	ac_init ();

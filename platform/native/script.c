@@ -49,18 +49,25 @@ uint32_t tconst (void)
 uint32_t tsigno (void)
 {
 	const char *t = tnext ();
+	uint32_t signo;
+
 	if (teq (t, "sol"))
-		return SIGNO_SOL;
+		signo = SIGNO_SOL;
 	else if (teq (t, "zerocross"))
-		return SIGNO_ZEROCROSS;
+		signo = SIGNO_ZEROCROSS;
 	else if (teq (t, "triac"))
-		return SIGNO_TRIAC;
+		signo = SIGNO_TRIAC;
 	else if (teq (t, "lamp"))
-		return SIGNO_LAMP;
+		signo = SIGNO_LAMP;
 	else if (teq (t, "sol_voltage"))
-		return SIGNO_SOL_VOLTAGE;
+		signo = SIGNO_SOL_VOLTAGE;
 	else
 		return 0;
+
+	t = tnext ();
+	if (t)
+		signo += strtoul (t, NULL, 0);
+	return signo;
 }
 
 
@@ -89,6 +96,7 @@ struct signal_expression *texpr (void)
 		tunget (t);
 		ex->op = SIG_SIGNO;
 		ex->u.signo = tsigno ();
+		simlog (SLC_DEBUG, "Signo changed = 0x%X\n", ex->u.signo);
 
 		t = tnext ();
 		if (t)
@@ -133,14 +141,8 @@ void exec_script (char *cmd)
 
 	t = tfirst (cmd);
 
-	if (teq (t, "trace"))
-	{
-		signo_under_trace = tsigno ();
-		signo_under_trace += tconst ();
-	}
-
 	/*********** capture [subcommand] [args...] ***************/
-	else if (teq (t, "capture"))
+	if (teq (t, "capture"))
 	{
 		struct signal_expression *ex;
 

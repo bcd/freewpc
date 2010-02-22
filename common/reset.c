@@ -94,10 +94,8 @@ void factory_reset_if_required (void)
 		font_render_string_center (&font_mono5, 64, 10, "FACTORY SETTINGS");
 		font_render_string_center (&font_mono5, 64, 20, "RESTORED");
 		dmd_show_low ();
-
 		factory_reset ();
-
-		wait_for_button (SW_ENTER);
+		task_sleep_sec (2);
 	}
 }
 
@@ -230,16 +228,16 @@ void system_reset (void)
 	 * before allowing the system to complete init. */
 	opto_check ();
 
+	/* Check various persistent variables for sane values.
+	 * If there are any incompatibilities, perform a factory
+	 * reset to be safe. */
+	factory_reset_if_required ();
+
 	/* Mark hardware initialization complete.  This will
 	 * allow switch scanning to start, so sleep briefly
 	 * to allow that to happen once. */
 	sys_init_complete++;
 	task_sleep (TIME_66MS);
-
-	/* Check various persistent variables for sane values.
-	 * If there are any incompatibilities, perform a factory
-	 * reset to be safe. */
-	factory_reset_if_required ();
 
 	/* Invoke other final initializations. */
 	callset_invoke (init_complete);
@@ -253,6 +251,10 @@ void system_reset (void)
 
 	/* In test-only mode, pretend ENTER was pressed
 	 * and go straight to test mode. */
+#ifdef CONFIG_STRESS_TEST
+	extern U8 switch_stress_enable;
+	switch_stress_enable = YES;
+#endif
 #ifdef MACHINE_TEST_ONLY
 	while (sys_init_pending_tasks != 0)
 		task_sleep (TIME_66MS);
