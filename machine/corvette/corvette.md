@@ -254,6 +254,8 @@ Ball Saver: yes_no, YES
 3M:
 5M:
 10M:
+20M:
+25M:
 
 [highscores]
 
