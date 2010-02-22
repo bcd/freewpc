@@ -75,11 +75,7 @@ GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
 	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
 
-FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
-
-FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
-	$(M)/coinstack.fif $(M)/hitcher.fif $(M)/oldcar.fif \
-	$(M)/pyramid.fif $(M)/robot.fif
+FIF_SRCS += images/cow.fif
 
 IMAGE_MAP += $(M)/tz.ild
 
