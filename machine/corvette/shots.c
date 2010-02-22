@@ -20,22 +20,6 @@
 
 #include <freewpc.h>
 
-void left_outer_loop_enter (void)
-{
-	if (!single_ball_play ())
-		return;
-
-	if (lamp_flash_test (LM_LITE_LOCK)) {
-		lamp_flash_on (LM_ZR_1_RAMP_ARROW);
-		lamp_on (LM_ZR_1_RAMP_LOCK);
-		lamp_flash_off (LM_LITE_LOCK);
-	}
-}
-
-void right_outer_loop_enter (void)
-{
-}
-
 void left_orbit_task (void)
 {
 	task_sleep_sec (5);
@@ -48,10 +32,15 @@ void right_orbit_task (void)
 	task_exit ();
 }
 
+void skid_pad_task (void)
+{
+	task_sleep_sec (1);
+	task_exit ();
+}
+
 
 CALLSET_ENTRY (shot, sw_left_outer_loop)
 {
-	left_outer_loop_enter ();
 	if (!single_ball_play ())
 		return;
 
@@ -65,7 +54,6 @@ CALLSET_ENTRY (shot, sw_left_outer_loop)
 
 CALLSET_ENTRY (shot, sw_right_outer_loop)
 {
-	right_outer_loop_enter ();
 	if (!single_ball_play ())
 		return;
 
@@ -107,3 +95,24 @@ CALLSET_ENTRY (shot, right_orbit_to_rollover_shot) {
 	score (SC_25K);
 }
 
+
+CALLSET_ENTRY (shot, sw_skid_pad_entry)
+{
+	task_create_gid1 (GID_SKID_PAD_MADE, skid_pad_task);
+}
+
+CALLSET_ENTRY (shot, sw_skid_pad_exit)
+{
+	if (!task_kill_gid (GID_SKID_PAD_MADE)) {
+		return;
+	}
+	sound_start (ST_SAMPLE, SND_TIRE_SCREECH_03, SL_2S, PRI_GAME_QUICK5);
+	callset_invoke (skid_pad_shot);
+
+}
+
+CALLSET_ENTRY (shot, sw_inner_loop_entry)
+{
+	sound_start (ST_SAMPLE, SND_ENGINE_REV_05, SL_2S, PRI_GAME_QUICK5);
+	callset_invoke (inner_loop_shot);
+}
