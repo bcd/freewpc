@@ -31,6 +31,8 @@
 @@file @self.h
 @@
 
+#include <freewpc.h>
+
 /* The design of the drop target driver:
 No special realtime function is needed, as it uses the
 existing coil pulsing mechanism.
@@ -48,7 +50,7 @@ enum @self_state
 
 extern inline bool @self_down_p (void)
 {
-	return switch_poll_logical (sw);
+	return switch_poll_logical (@sw);
 }
 
 
@@ -56,6 +58,8 @@ extern inline bool @self_down_p (void)
 @@file @self.c
 @@
 
+#include <freewpc.h>
+#include <@self.h>
 
 __fastram__ enum @self_state @self_state;
 
@@ -92,7 +96,7 @@ void @self_reset (void)
 {
 	if ((@self_state != DROP_UP) && (@self_up_errors < 5))
 	{
-		sol_req_start (@sol_up);
+		sol_request_async (@sol_up);
 		@self_state = DROP_GOING_UP;
 		@self_timer = 10;
 	}
@@ -108,7 +112,7 @@ void @self_down (void)
 	{
 		@self_state = DROP_GOING_DOWN;
 		@self_timer = 8;
-		sol_req_start (@sol_down);
+		sol_request_async (@sol_down);
 	}
 }
 
