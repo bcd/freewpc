@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -365,7 +365,6 @@ void deff_restart (deffnum_t dn)
 __noreturn__ void deff_exit (void)
 {
 	deff_debug ("deff_exit\n");
-	struct deff_queue_entry *dq;
 	log_event (SEV_INFO, MOD_DEFF, EV_DEFF_EXIT, deff_running);
 
 	/* Change the task group ID so that a new task can be started

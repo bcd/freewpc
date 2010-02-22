@@ -26,6 +26,8 @@ U8 last_nonfatal_error_code;
 /** Indicate the task that was running when the last nonfatal happened */
 task_gid_t last_nonfatal_error_gid;
 
+__permanent__ bool new_fatal_error;
+
 /**
  * The lockup check routine examines 'task_dispatching_ok', which
  * should normally be true as normal task scheduling occurs.
@@ -65,6 +67,7 @@ void lockup_check_rtt (void)
 __noreturn__
 void fatal (errcode_t error_code)
 {
+	new_fatal_error = TRUE;
 #ifdef __m6809__
 	set_stack_pointer (6133);
 #endif
@@ -99,25 +102,6 @@ void fatal (errcode_t error_code)
 	audit_assign (&system_audits.lockup1_addr, error_code);
 	audit_assign (&system_audits.lockup1_pid_lef, task_getgid ());
 	log_event (SEV_ERROR, MOD_SYSTEM, EV_SYSTEM_FATAL, error_code);
-
-#if (MACHINE_DMD == 1) && DEBUG_FATAL_DMD
-	/* Display the error on the DMD.
-	 * This may not work, if the fatal was caused by any of the
-	 * font/DMD functions.  So this is now turned off by default;
-	 * you can recompile it in if need be.
-	 */
-	extern void dmd_rtt0 (void);
-	dmd_alloc_low_clean ();
-
-	sprintf ("ERRNO %i", error_code);
-	font_render_string_center (&font_mono5, 64, 2, sprintf_buffer);
-
-	sprintf ("GID %i", task_getgid ());
-	font_render_string (&font_mono5, 64, 8, sprintf_buffer);
-
-	dmd_show_low ();
-	dmd_rtt0 ();
-#endif
 
 	/* Dump all of the task information to the debugger port. */
 #ifdef DEBUGGER
@@ -195,4 +179,16 @@ void process_check_rtt (void)
 #endif
 }
 #endif
+
+
+CALLSET_ENTRY (error, init_complete)
+{
+#ifdef CONFIG_BPT
+	if (new_fatal_error)
+	{
+		bpt_stop ();
+		new_fatal_error = FALSE;
+	}
+#endif
+}
 
