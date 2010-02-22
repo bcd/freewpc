@@ -151,7 +151,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
-27: Shooter, edge, shooter, noscore
+27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), noplay
 32: Right Jet, ingame, c_decl(sw_jet), noplay

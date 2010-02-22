@@ -111,7 +111,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 35: Trough 5, noscore, opto
 36: Trough Stack, noscore, opto
 37: Light Magna Goalie, ingame
-38: Shooter, edge, noscore, shooter
+38: Shooter, edge, noscore, shooter, debounce(TIME_200MS)
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
 43: Goalie Left, noplay, intest, service, opto

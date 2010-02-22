@@ -166,7 +166,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 44: Wind Tunnel Hole
 45: Trap Door
 46: Rudys Hideout
-47: Left Plunger, edge
+47: Left Plunger, edge, debounce(TIME_200MS)
 48: Ramp Exit
 51: Dummy Jaw, opto
 52: Right Outlane, noplay
@@ -177,7 +177,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 57: Jet Lane, noplay
 58: Tunnel Kickout
 61: Inner Right Inlane
-62: Right Plunger, shooter, edge, noplay
+62: Right Plunger, shooter, edge, noplay, debounce(TIME_200MS)
 63: Right Trough, trough, noscore, noplay
 64: Step E, lamp(LM_STEP_E)
 65: Dummy Eject Hole
