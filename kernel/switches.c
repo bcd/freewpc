@@ -610,10 +610,7 @@ void switch_service_queue (void)
 			entry->timer -= elapsed_time;
 			if (entry->timer <= 0)
 			{
-				/* Debounce interval is complete.  The entry can be removed
-				from the queue */
-				switch_queue_remove (entry);
-
+				/* The debounce period is complete */
 				/* See if the switch held its state during the debounce period */
 				if (bit_test (sw_unstable, entry->id))
 				{
@@ -629,6 +626,9 @@ void switch_service_queue (void)
 					/* Debouncing succeeded, so process the switch */
 					switch_transitioned (entry->id);
 				}
+
+				/* The entry can be removed from the queue */
+				switch_queue_remove (entry);
 			}
 			else
 			{
