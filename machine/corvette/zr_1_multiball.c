@@ -39,6 +39,7 @@ void zr_1_ball_locked_deff (void)
 
 void zr_1_multiball_lit_deff (void)
 {
+	speech_start(SPCH_HEAD_FOR_THE_LT5, SL_3S);
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	font_render_string_center (&font_term6, 64, 9, "SHOOT ENGINE");
@@ -60,7 +61,7 @@ void zr_1_multiball_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
-		dmd_alloc_low_high ();
+		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_mono5, 64, 5, "MULTIBALL");
 		sprintf_current_score ();
@@ -141,26 +142,53 @@ void zr_1_mb_start (void)
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 }
 
+static void jackpot_check() {
+	if (!flag_test(FLAG_ZR_1_MULTIBALL_RUNNING)) {
+		return;
+	}
+
+	if (flag_test (FLAG_HORSEPOWER_JACKPOT_LIT) || flag_test (FLAG_TORQUE_JACKPOT_LIT)) {
+		return; // jackpots still lit - player must collect both to relight jackpots
+	}
+
+	zr_1_mb_light_torque_jackpot();
+	zr_1_mb_light_horsepower_jackpot();
+
+
+	// TODO see if both hit very quickly, if so award super jackpot.
+}
+
 static void zr_1_mb_award_horsepower_jackpot (void)
 {
-	if (!flag_test (FLAG_HORSEPOWER_JACKPOT_LIT))
-	{
-		flag_off (FLAG_HORSEPOWER_JACKPOT_LIT);
-		deff_start (DEFF_ZR_1_MULTIBALL_H_P_JACKPOT);
-		/* TODO score horsepower jackpot value */
-		/* TODO increase horsepower jackpot value */
+	if (!flag_test (FLAG_HORSEPOWER_JACKPOT_LIT)) {
+		return;
 	}
+	flag_off (FLAG_HORSEPOWER_JACKPOT_LIT);
+
+	sound_start (ST_SPEECH, SPCH_HORSEPOWER_JACKPOT, SL_2S, PRI_JACKPOT);
+	score (SC_25M);
+	/* TODO increase horsepower jackpot value */
+
+	deff_start (DEFF_ZR_1_MULTIBALL_H_P_JACKPOT);
+
+	jackpot_check();
 }
+
 
 static void zr_1_mb_award_torque_jackpot (void)
 {
-	if (!flag_test (FLAG_TORQUE_JACKPOT_LIT))
-	{
-		flag_off (FLAG_TORQUE_JACKPOT_LIT);
-		deff_start (DEFF_ZR_1_MULTIBALL_TORQUE_JACKPOT);
-		/* TODO score torque jackpot value */
-		/* TODO increase torque jackpot value */
+	if (!flag_test (FLAG_TORQUE_JACKPOT_LIT)) {
+		return;
 	}
+	flag_off (FLAG_TORQUE_JACKPOT_LIT);
+
+	sound_start (ST_SPEECH, SPCH_TORQUE_JACKPOT, SL_2S, PRI_JACKPOT);
+	score (SC_25M);
+	/* TODO increase torque jackpot value */
+
+	deff_start (DEFF_ZR_1_MULTIBALL_TORQUE_JACKPOT);
+
+	jackpot_check();
 }
 
 static void zr_1_mb_award_lock ( void )
@@ -213,25 +241,25 @@ CALLSET_ENTRY (zr_1_multiball, dev_zr1_popper_enter)
 
 CALLSET_ENTRY (zr_1_multiball, skid_pad_shot)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)
-		&& flag_test (FLAG_TORQUE_JACKPOT_LIT))
-	{
-		zr_1_mb_award_torque_jackpot ();
+	if (!flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+		return;
 	}
+	zr_1_mb_award_torque_jackpot ();
 }
 
 CALLSET_ENTRY (zr_1_multiball, inner_loop_shot)
 {
-	if (flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)
-		&& !flag_test (FLAG_HORSEPOWER_JACKPOT_LIT)) {
-		zr_1_mb_award_horsepower_jackpot ();
+	if (!flag_test (FLAG_ZR_1_MULTIBALL_RUNNING)) {
+		return;
 	}
+
+	zr_1_mb_award_horsepower_jackpot ();
 }
 
 CALLSET_ENTRY (zr_1_multiball, lamp_update)
 {
-	lamp_on_if (LM_LITE_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT));
-	lamp_on_if (LM_ZR_1_RAMP_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LOCK_LIT));
+	lamp_flash_if (LM_LITE_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LITE_LOCK_LIT));
+	lamp_flash_if (LM_ZR_1_RAMP_LOCK, flag_test (FLAG_ZR_1_MULTIBALL_LOCK_LIT));
 	lamp_flash_if (LM_INNER_LOOP_JACKPOT, flag_test (FLAG_HORSEPOWER_JACKPOT_LIT));
 	lamp_flash_if (LM_SKID_PAD_JACKPOT, flag_test (FLAG_TORQUE_JACKPOT_LIT));
 }
@@ -267,7 +295,7 @@ CALLSET_ENTRY (zr_1_multiball, start_player, single_ball_play)
 	zr_1_mb_reset ();
 }
 
-CALLSET_ENTRY (zr_1_multiball, ball_serve) {
+CALLSET_ENTRY (zr_1_multiball, start_ball) {
 	// update the locked_balls count in case another player started a multiball
 	U8 zr_1_ball_count = device_recount (device_entry (DEVNO_ZR1_POPPER));
 	if (lock_count > zr_1_ball_count) {
