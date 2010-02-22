@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -39,6 +39,7 @@ struct log_event
 
 extern void log_init (void);
 extern void log_event1(U16 module_event, U8 arg);
+extern __permanent__ U16 prev_log_callset;
 
 #define log_event(severity, module, event, arg) \
 	log_event1(make_module_event (module, event), arg)

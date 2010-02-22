@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -72,15 +72,32 @@ extern void (*db_puts) (const char *s);
 void db_puts_orkin (const char *s);
 void db_puts_parallel (const char *s);
 
+/**
+ * CONFIG_BPT is used to turn on the embedded debugger.
+ * It depends on 6809 assembly functions and thus cannot be used
+ * in native mode.  Plus, you already have gdb there anyway.
+ * So don't allow it.
+ */
 #ifdef CONFIG_NATIVE
 #undef CONFIG_BPT
 #endif
 
+
+/**
+ * When CONFIG_BPT is set, the breakpoint APIs are available.
+ * Otherwise they are all no-ops.
+ * Also when turned on, FREE_ONLY is implied, because the
+ * escape button is hijacked for debugger use, preventing it
+ * from being used to add credits.
+ */
 #ifdef CONFIG_BPT
 #define bpt()  asm ("jsr\t*bpt_handler")
 void bpt_init (void);
 void bpt_clear (void);
+void bpt_stop (void);
 void bpt_set (void *addr, U8 page);
+extern U8 bpt_addr[];
+#define FREE_ONLY
 #else
 #define bpt()
 #define bpt_init()

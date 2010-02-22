@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # System description for FreeWPC
-# (C) Copyright 2006, 2009 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -77,7 +77,6 @@ Ball Save: MACHINE_BALL_SAVE_LAMP
 [deffs]
 NULL: c_decl(deff_exit), PRI_NULL
 Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
-Inspector: page(COMMON_PAGE), runner, PRI_DEBUGGER, D_PAUSE
 Scores: runner, page(EFFECT_PAGE), PRI_SCORES
 Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT
 Score Goal: page(EFFECT_PAGE), PRI_SCORE_GOAL, D_TIMEOUT

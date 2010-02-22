@@ -39,7 +39,6 @@ COMMON_SW_OBJS += $(if $(CONFIG_WPC), common/buyin.o)
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/device.o)
 COMMON_SW_OBJS += common/diag.o
 COMMON_SW_OBJS += $(if $(CONFIG_WPC), common/highscore.o)
-COMMON_SW_OBJS += $(if $(CONFIG_INSPECTOR), common/inspector.o)
 COMMON_SW_OBJS += common/knocker.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/replay.o)
 COMMON_SW_OBJS += common/search.o

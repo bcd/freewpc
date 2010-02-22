@@ -34,17 +34,24 @@
  */
 #include <freewpc.h>
 
+#ifdef DEBUGGER
 
 /** Nonzero when the system (all tasks except for interrupts)
 is paused */
 U8 db_paused;
 
-#ifndef CONFIG_INSPECTOR
-void inspector_deff (void) { deff_exit (); }
-#endif
+U8 *bpt_mem_addr;
 
+U8 bpt_mem_value;
 
-#ifdef DEBUGGER
+U16 bpt_debounce_timer;
+
+U8 bpt_repeat_count;
+
+U8 db_tilt_flag;
+
+extern __permanent__ bool new_fatal_error;
+
 void db_dump_all (void)
 {
 	VOIDCALL (task_dump);
@@ -55,134 +62,135 @@ void db_dump_all (void)
 	VOIDCALL (triac_dump);
 	SECTION_VOIDCALL (__common__, device_debug_all);
 }
-#endif
 
 
 /**
- * Toggle the system pause.
+ * Debounce a button press, waiting for it to clear.
  */
-void db_toggle_pause (void)
+U8 button_check (U8 sw)
 {
-	dmd_invert_page (dmd_low_buffer);
-	dmd_invert_page (dmd_high_buffer);
-	lamplist_apply (LAMPLIST_ALL, lamp_toggle);
-	db_paused = 1 - db_paused;
+	volatile U16 x;
+
+	if (!switch_poll (sw))
+		return 0;
+
+	for (x=bpt_debounce_timer; x ; --x)
+	{
+		task_runs_long ();
+		barrier ();
+	}
+	switch_idle ();
+	if (!switch_poll (sw))
+	{
+		bpt_repeat_count = 0;
+		bpt_debounce_timer = 0x1C00;
+		return 1;
+	}
+	else
+	{
+		bpt_repeat_count++;
+		if (bpt_repeat_count >= 32)
+		{
+			bpt_repeat_count = 32;
+			bpt_debounce_timer = 0x80;
+			return 8;
+		}
+		else if (bpt_repeat_count >= 4)
+		{
+			bpt_debounce_timer = 0x600;
+			return 4;
+		}
+		else
+			return 1;
+	}
 }
 
-
-/** Check for debug input periodically */
-void db_periodic (void)
+void bpt_display (void)
 {
-#ifdef DEBUGGER
+	dmd_alloc_low_clean ();
+
+	sprintf ("%p", bpt_mem_addr);
+	font_render_string_left (&font_bitmap8, 0, 0, sprintf_buffer);
+
+	sprintf ("%02X %02X %02X %02X",
+		bpt_mem_addr[0], bpt_mem_addr[1], bpt_mem_addr[2], bpt_mem_addr[3]);
+	font_render_string_left (&font_bitmap8, 40, 0, sprintf_buffer);
+
+	if (new_fatal_error)
 	{
-		if (wpc_debug_read_ready ())
-		{
-			char c = wpc_debug_read ();
-			db_puts = db_puts_orkin;
-			switch (c)
-			{
-				case 'a':
-					/* Dump everything */
-					db_dump_all ();
-					break;
-
-				case 'm':
-					/* Dump the multiball devices */
-					SECTION_VOIDCALL (__common__, device_debug);
-					break;
-
-				case 't':
-					/* Dump the task table */
-					VOIDCALL (task_dump);
-					break;
-
-				case 'g':
-					/* Dump the game state */
-					VOIDCALL (dump_game);
-					break;
-
-				case 'd':
-					/* Dump the running/queued display effects */
-					VOIDCALL (dump_deffs);
-					break;
-
-				case 'q':
-					/* Dump the switch queue */
-					switch_queue_dump ();
-					break;
-
-				case 'S':
-					/* Dump the solenoid request queue */
-					VOIDCALL (sol_req_dump);
-					break;
-
-				case 'T':
-					/* Dump the triac states */
-					VOIDCALL (triac_dump);
-					break;
-
-				case 'p':
-				{
-					/* Toggle the pause state.  When paused, tasks
-					do not run and the system polls for debugger
-					commands in a hard loop. */
-#ifdef CONFIG_NATIVE
-					extern char linux_interface_readchar (void);
-					while (linux_interface_readchar () != 'p')
-					{
-						task_sleep (TIME_16MS);
-					}
-#else
-					db_toggle_pause ();
-					while (db_paused == 1)
-					{
-						task_runs_long ();
-						db_periodic ();
-					}
-#endif
-					break;
-				}
-
-				default:
-				{
-#ifdef MACHINE_DEBUGGER_HOOK
-					/* Allow the machine to define additional commands.
-					 * This function must reside in the system page. */
-					extern void MACHINE_DEBUGGER_HOOK (U8);
-					MACHINE_DEBUGGER_HOOK (c);
-#endif
-					break;
-				}
-			}
-		}
+		sprintf ("ERR %d GID %d",
+			(U8)system_audits.lockup1_addr, (U8)system_audits.lockup1_pid_lef);
+		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
 	}
-#endif /* DEBUGGER */
+	else if (task_getpid ())
+	{
+
+		sprintf ("PID %p GID %d", task_getpid (), task_getgid ());
+		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
+#ifdef CONFIG_BPT
+		sprintf ("%02X%02X %02X", bpt_addr[0], bpt_addr[1]-2, bpt_addr[2]);
+		font_render_string_left (&font_bitmap8, 0, 16, sprintf_buffer);
+#endif
+	}
+	else
+	{
+		font_render_string_left (&font_bitmap8, 0, 8, "BREAK");
+	}
+
+	sprintf ("C%04lX", prev_log_callset);
+	font_render_string_left (&font_bitmap8, 0, 24, sprintf_buffer);
+	dmd_show_low ();
 }
 
 
 /**
  * Handle a breakpoint.  The system is stopped until the user forces it
  * to continue, either by pressing 'p' in the debug console, or presses
- * the Start Button.  Interrupt-level functions continue to run while
+ * the Escape Button.  Interrupt-level functions continue to run while
  * paused; only regular task scheduling is paused.  In order to poll for
  * the continue, we have to invoke the switch and debugger periodic
  * functions.
  */
 void bpt_hit (void)
 {
-	db_toggle_pause ();
-	barrier ();
+	U8 key;
+
+	db_paused = 1 - db_paused;
+	if (db_paused == 1)
+	{
+		callset_invoke (debug_enter);
+		db_tilt_flag = in_tilt;
+		in_tilt = FALSE;
+		bpt_display ();
+	}
+	else
+	{
+		in_tilt = db_tilt_flag;
+		callset_invoke (debug_exit);
+	}
+
 	while (db_paused == 1)
 	{
-#ifdef SW_START_BUTTON
-		if (switch_poll (SW_START_BUTTON))
+		if ((key = button_check (SW_ENTER)))
 		{
-			while (switch_poll (SW_START_BUTTON))
-				switch_idle ();
-			db_toggle_pause ();
+			/* Enter = change active field */
+			bpt_display ();
+		}
+		else if ((key = button_check (SW_UP)))
+		{
+			/* Up = increase field value */
+			bpt_mem_addr += key * 4;
+			bpt_mem_addr = (void *) (((U16)bpt_mem_addr) & 0x1FFFUL);
+			bpt_display ();
+		}
+		else if ((key = button_check (SW_DOWN)))
+		{
+			/* Down = decrease field value */
+			bpt_mem_addr -= key * 4;
+			bpt_mem_addr = (void *) (((U16)bpt_mem_addr) & 0x1FFFUL);
+			bpt_display ();
 		}
 		else
-#endif
 		{
 			switch_idle ();
 			db_periodic ();
@@ -191,13 +199,59 @@ void bpt_hit (void)
 	}
 }
 
+#endif /* DEBUGGER */
+
+
+/** Check for debug input periodically */
+void db_periodic (void)
+{
+	extern void MACHINE_DEBUGGER_HOOK (U8);
+
+#ifdef CONFIG_BPT
+	if (!in_test && button_check (SW_ESCAPE))
+		bpt_stop ();
+#endif
+
+#ifdef DEBUGGER
+	if (wpc_debug_read_ready ())
+	{
+		char c = wpc_debug_read ();
+		db_puts = db_puts_orkin;
+		switch (c)
+		{
+			case 'a':
+				/* Dump all debugging information */
+				db_dump_all ();
+				break;
+
+#ifdef CONFIG_BPT
+			case 'p':
+				/* Stop the system */
+				bpt_stop ();
+				break;
+#endif
+
+			default:
+#ifdef MACHINE_DEBUGGER_HOOK
+				/* Allow the machine to define additional commands.
+				 * This function must reside in the system page. */
+				MACHINE_DEBUGGER_HOOK (c);
+#endif
+				break;
+		}
+	}
+#endif /* DEBUGGER */
+}
+
 
 /** Initialize the debugger */
 void db_init (void)
 {
-	db_paused = 0;
-
 #ifdef DEBUGGER
+	db_paused = 0;
+	bpt_mem_addr = 0;
+	bpt_debounce_timer = 0x1C00;
+
 	/* Signal the debugger that the system has just reset. */
 	if (wpc_debug_read_ready ())
 	{
