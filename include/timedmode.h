@@ -102,5 +102,6 @@ void timed_mode_reset (struct timed_mode_ops *ops, U8 time);
 void timed_mode_add (struct timed_mode_ops *ops, U8 time);
 void timed_mode_music_refresh (struct timed_mode_ops *ops);
 void timed_mode_display_update (struct timed_mode_ops *ops);
+bool timed_mode_device_running_p (struct timed_mode_ops *ops);
 
 #endif /* _TIMEDMODE_H */

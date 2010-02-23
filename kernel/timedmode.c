@@ -67,7 +67,7 @@ void timed_mode_monitor (void)
 	in most cases. */
 	while (the_timer > 0)
 	{
-		for (n=0; n < 5; n++)
+		for (n=5; n != 0; --n)
 		{
 			do {
 				task_sleep (TIME_200MS + TIME_16MS);
@@ -217,5 +217,17 @@ void timed_mode_display_update (struct timed_mode_ops *ops)
 {
 	if (ops->deff_running && *ops->timer > 0 && task_find_gid (ops->gid))
 		deff_start_bg (ops->deff_running, ops->prio);
+}
+
+
+/**
+ * Return TRUE if a mode is running from the perspective of a
+ * 'device_update' handler.  Use this instead of timed_mode_running_p() when
+ * updating devices.
+ */
+bool timed_mode_device_running_p (struct timed_mode_ops *ops)
+{
+	/* TODO - equivalent for now */
+	return timed_mode_running_p (ops);
 }
 
