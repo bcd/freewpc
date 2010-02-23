@@ -38,11 +38,6 @@ struct timed_mode_ops
 	want to add additional pause conditions. */
 	bool (*pause) (void);
 
-	/* Called when the mode is finished properly (via a call to
-	timed_mode_finish().  The finish hook is executed in addition
-	to, and prior to, the exit handler. */
-	void (*finish) (void);
-	
 	/* The display effect for starting the mode */
 	U8 deff_starting;
 
@@ -81,7 +76,6 @@ fields which are different from the default need to be said. */
 	.init = null_function, \
 	.exit = null_function, \
 	.pause = null_false_function, \
-	.finish = null_function, \
 	.deff_starting = DEFF_NULL, \
 	.deff_running = DEFF_NULL, \
 	.deff_ending = DEFF_NULL, \
@@ -102,7 +96,6 @@ struct timed_mode_task_config
 
 void timed_mode_begin (struct timed_mode_ops *ops);
 void timed_mode_end (struct timed_mode_ops *ops);
-void timed_mode_finish (struct timed_mode_ops *ops);
 U8 timed_mode_get_timer (struct timed_mode_ops *ops);
 bool timed_mode_running_p (struct timed_mode_ops *ops);
 void timed_mode_reset (struct timed_mode_ops *ops, U8 time);

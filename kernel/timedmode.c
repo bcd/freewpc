@@ -125,19 +125,6 @@ void timed_mode_end (struct timed_mode_ops *ops)
 
 
 /**
- * Finish a mode.  This should be called when the mode is completed by
- * making all available shots.  It is like 'timed_mode_end', but the
- * finish handler is also called.
- */
-void timed_mode_finish (struct timed_mode_ops *ops)
-{
-	task_kill_gid (ops->gid);
-	timed_mode_exit_handler (ops);
-	ops->finish ();
-}
-
-
-/**
  * Get the current timer for a mode.  This can be zero for a mode that is in
  * its grace period.
  *
