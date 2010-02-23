@@ -20,6 +20,9 @@
 
 #include <freewpc.h>
 
+void greed_round_init (void);
+void greed_round_exit (void);
+
 /** Bitmask referring to all 7 standup targets */
 #define NO_TARGETS 0x0
 #define ALL_TARGETS 0x7f
@@ -42,6 +45,20 @@ U8 greed_sounds[] = {
 
 U8 greed_round_timer;
 
+struct timed_mode_ops greed_mode = {
+	DEFAULT_MODE,
+	.init = greed_round_init,
+	.exit = greed_round_exit,
+	.gid = GID_GREED_ROUND_RUNNING,
+	.music = MUS_GREED_ROUND,
+	.deff_running = DEFF_GREED_ROUND,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 20,
+	.timer = &greed_round_timer,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
+
 
 void greed_round_deff (void)
 {
@@ -63,7 +80,7 @@ void greed_round_deff (void)
 
 void standup_lamp_update1 (U8 mask, U8 lamp)
 {
-	if (lamp_test (LM_PANEL_GREED))
+	if (timed_mode_running_p (&greed_mode))
 	{
 		if (greed_set & mask)
 		{
@@ -131,52 +148,31 @@ void common_greed_handler (U8 target)
 }
 
 
-void greed_round_begin (void)
+void greed_round_init (void)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
-	deff_start (DEFF_GREED_ROUND);
 }
 
-void greed_round_expire (void)
-{
-	deff_stop (DEFF_GREED_ROUND);
-}
-
-void greed_round_end (void)
+void greed_round_exit (void)
 {
 	greed_set = NO_TARGETS;
 	standup_lamp_update ();
 }
 
-void greed_round_task (void)
-{
-	timed_mode_task (greed_round_begin, greed_round_expire, greed_round_end,
-		&greed_round_timer, 20, 3);
-}
-
 CALLSET_ENTRY (greed, display_update)
 {
-	if (timed_mode_timer_running_p (GID_GREED_ROUND_RUNNING,
-		&greed_round_timer))
-		deff_start_bg (DEFF_GREED_ROUND, 0);
+	timed_mode_display_update (&greed_mode);
 }
 
 CALLSET_ENTRY (greed, music_refresh)
 {
-	if (timed_mode_timer_running_p (GID_GREED_ROUND_RUNNING,
-		&greed_round_timer))
-		music_request (MUS_GREED_ROUND, PRI_GAME_MODE1);
+	timed_mode_music_refresh (&greed_mode);
 }
 
 CALLSET_ENTRY (greed, door_start_greed)
 {
-	timed_mode_start (GID_GREED_ROUND_RUNNING, greed_round_task);
-}
-
-CALLSET_ENTRY (greed, end_ball)
-{
-	timed_mode_stop (&greed_round_timer);
+	timed_mode_begin (&greed_mode);
 }
 
 CALLSET_ENTRY (greed, start_player)
