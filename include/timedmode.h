@@ -107,12 +107,13 @@ struct timed_mode_task_config
 /* Timed mode APIs */
 
 void timed_mode_begin (struct timed_mode_ops *ops);
+void timed_mode_end (struct timed_mode_ops *ops);
 void timed_mode_finish (struct timed_mode_ops *ops);
 U8 timed_mode_get_timer (struct timed_mode_ops *ops);
 bool timed_mode_running_p (struct timed_mode_ops *ops);
 void timed_mode_reset (struct timed_mode_ops *ops, U8 time);
 void timed_mode_add (struct timed_mode_ops *ops, U8 time);
 void timed_mode_music_refresh (struct timed_mode_ops *ops);
-void timed_mode_deff_update (struct timed_mode_ops *ops);
+void timed_mode_display_update (struct timed_mode_ops *ops);
 
 #endif /* _TIMEDMODE_H */

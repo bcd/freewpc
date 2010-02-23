@@ -228,10 +228,10 @@ void timed_mode_music_refresh (struct timed_mode_ops *ops)
 
 /**
  * Enable the mode's display effect if it is active and not in its grace period.
- * Each mode module should call this function from its 'deff_update'
+ * Each mode module should call this function from its 'display_update'
  * handler.
  */
-void timed_mode_deff_update (struct timed_mode_ops *ops)
+void timed_mode_display_update (struct timed_mode_ops *ops)
 {
 	if (ops->deff_running && *ops->timer > 0 && task_find_gid (ops->gid))
 		deff_start_bg (ops->deff_running, ops->prio);
