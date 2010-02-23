@@ -50,6 +50,7 @@ void timed_mode_monitor (void)
 {
 	struct timed_mode_task_config *cfg;
 	struct timed_mode_ops *ops;
+	U8 n;
 
 	/* Get the mode operations / parameters structure */
 	cfg = task_current_class_data (struct timed_mode_task_config);
@@ -66,34 +67,25 @@ void timed_mode_monitor (void)
 	in most cases. */
 	while (the_timer > 0)
 	{
-		do {
-			task_sleep (TIME_300MS + TIME_33MS);
-		} while (ops->pause ());
-
-		do {
-			task_sleep (TIME_300MS + TIME_33MS);
-		} while (ops->pause ());
-
-		do {
-			task_sleep (TIME_300MS + TIME_66MS);
-		} while (ops->pause ());
+		for (n=0; n < 5; n++)
+		{
+			do {
+				task_sleep (TIME_200MS + TIME_16MS);
+			} while (ops->pause ());
+		}
 		the_timer--;
 	}
 
-	/* The timer has reached zero.  Call the timeout() routine right away. */
-	ops->timeout ();
-
-	/* Implement the grace period.  There's a minimum 1s delay before the
-	display/music will be updated, even when the grace period is defined to be
-	zero, to avoid an abrupt cutoff.  Any additional grace period defined is
-	then also executed. */
-	task_sleep_sec (1);
+	/* Update effects after a brief pause */
+	task_sleep (TIME_1S);
 	effect_update_request ();
+
+	/* Implement the rest of the grace period */
 	if (ops->grace_timer > 1)
 		task_sleep_sec (ops->grace_timer - 1);
 
 	/* The mode is now officially over and cannot be extended.   From here
-	on, no task switching is allowed, that could produce race conditions. */
+	on, no task switching is allowed, as that could produce race conditions. */
 	timed_mode_exit_handler (ops);
 	task_exit ();
 }
@@ -167,7 +159,10 @@ U8 timed_mode_get_timer (struct timed_mode_ops *ops)
  */
 bool timed_mode_running_p (struct timed_mode_ops *ops)
 {
-	return in_live_game && task_find_gid (ops->gid);
+	if (task_find_gid (ops->gid))
+		return in_live_game;
+	else
+		return FALSE;
 }
 
 

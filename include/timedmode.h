@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -43,11 +43,6 @@ struct timed_mode_ops
 	to, and prior to, the exit handler. */
 	void (*finish) (void);
 	
-	/* Called when the mode times out.  This hook is executed
-	prior to the exit handler, and happens as soon as the timer
-	reaches zero, before the grace period begins. */
-	void (*timeout) (void);
-
 	/* The display effect for starting the mode */
 	U8 deff_starting;
 
@@ -57,7 +52,7 @@ struct timed_mode_ops
 	/* The display effect for ending the mode */
 	U8 deff_ending;
 
-	/* The music that should be played while the mode is running */
+	/* The music that should be played while the mode is running. */
 	U8 music;
 
 	/* The priority for the display/music effects */
@@ -87,11 +82,10 @@ fields which are different from the default need to be said. */
 	.exit = null_function, \
 	.pause = null_false_function, \
 	.finish = null_function, \
-	.timeout = null_function, \
-	.deff_starting = 0, \
-	.deff_running = 0, \
-	.deff_ending = 0, \
-	.music = 0, \
+	.deff_starting = DEFF_NULL, \
+	.deff_running = DEFF_NULL, \
+	.deff_ending = DEFF_NULL, \
+	.music = MUS_OFF, \
 	.grace_timer = 2
 
 
