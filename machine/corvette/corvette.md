@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # Corvette machine description for FreeWPC
-# (C) Copyright 2006-2009 by Dominic Clifton <me@dominicclifton.name>
+# (C) Copyright 2010 by Dominic Clifton <me@dominicclifton.name>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -24,6 +24,15 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 #define MACHINE_END_GAME_MUSIC MUS_END_GAME
 define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 
+# DC - To generate the x/y coordinates I took a screengrab of the lamp-locations diagram in the manual such that the
+# width of the playfield was 409 pixels wide then I pasted the image into mspaint (windows 7 version) and moved the
+# top left of the table so that it was placed at x:70,y:92.
+# To determine the x and y location i noted down the pixel co-ordinates of the center (more or less) of each lamp
+# and divided the number by 20 and rounded the number up or down manually, aligning with adjacent or in-line lights
+# as appropriate.
+# Finally, I subtracted 4 from each horizontal value to normalize the horizontal values so that the left most lamps
+# values had a horizontal value of 1.
+ 
 # NOTE: y is horizontal, x is vertical due to a bug in genmachine
 [lamps]
 11: Left Rollover, green , x(1), y(9)
@@ -60,11 +69,11 @@ define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 48: Left Standup 1, amber, x(32), y(4) # Boost
 51: Corvette 9, yellow, x(33), y(9)
 52: Corvette 8, yellow, x(34), y(11)
-53: Pit Stop, red, x(17), y(7)
+53: Pit Stop, red, x(16), y(7)
 54: Corvette 7, yellow, x(34), y(7)
 55: Corvette 5, yellow, x(35), y(9)
-56: Pit Stop Arrow, amber, x(14), y(9)
-57: Spinner Arrow, amber, x(18), y(11)
+56: Pit Stop Arrow, amber, x(18), y(9)
+57: Spinner Arrow, amber, x(17), y(11)
 58: Drive Again, red, x(45), y(9)
 61: Left Outer Tail, red, x(40), y(6) # Bonus X2
 62: Left Inner Tail, red, x(40), y(5) # Bonus X4
@@ -73,7 +82,7 @@ define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 65: Right Outer Tail, red, x(40), y(12) # Bonus X8
 66: Right Standup Arrow, yellow, x(31), y(15)
 67: Lite Kickback, yellow, x(32), y(14)
-68: Start Challenge, green, x(17), y(7)
+68: Start Challenge, green, x(16), y(7)
 71: Kickback Arrow, yellow, x(38), y(1)
 72: Left Return Lane, white, x(37), y(2) # Extra Ball
 73: Right Return Lane, white, x(37), y(15) # Extra Ball
