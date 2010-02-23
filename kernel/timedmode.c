@@ -32,7 +32,7 @@
 
 
 /**
- * Stop a mode immediately.
+ * Stop a mode immediately.  This is an internal function only.
  */
 static void timed_mode_exit_handler (struct timed_mode_ops *ops)
 {
@@ -67,7 +67,15 @@ void timed_mode_monitor (void)
 	while (the_timer > 0)
 	{
 		do {
-			task_sleep (TIME_1S + TIME_33MS);
+			task_sleep (TIME_300MS + TIME_33MS);
+		} while (ops->pause ());
+
+		do {
+			task_sleep (TIME_300MS + TIME_33MS);
+		} while (ops->pause ());
+
+		do {
+			task_sleep (TIME_300MS + TIME_66MS);
 		} while (ops->pause ());
 		the_timer--;
 	}
@@ -115,19 +123,34 @@ void timed_mode_begin (struct timed_mode_ops *ops)
 
 
 /**
- * Finish a mode.
+ * End a mode.
+ */
+void timed_mode_end (struct timed_mode_ops *ops)
+{
+	task_kill_gid (ops->gid);
+	timed_mode_exit_handler (ops);
+}
+
+
+/**
+ * Finish a mode.  This should be called when the mode is completed by
+ * making all available shots.  It is like 'timed_mode_end', but the
+ * finish handler is also called.
  */
 void timed_mode_finish (struct timed_mode_ops *ops)
 {
-	ops->finish ();
-	timed_mode_exit_handler (ops);
 	task_kill_gid (ops->gid);
+	timed_mode_exit_handler (ops);
+	ops->finish ();
 }
 
 
 /**
  * Get the current timer for a mode.  This can be zero for a mode that is in
  * its grace period.
+ *
+ * This function should be used by display effects that need to show the
+ * mode timer.
  */
 U8 timed_mode_get_timer (struct timed_mode_ops *ops)
 {
@@ -138,6 +161,9 @@ U8 timed_mode_get_timer (struct timed_mode_ops *ops)
 /**
  * Return whether or not a mode is running.  This can return TRUE if the mode
  * is in its grace period.
+ *
+ * This function should be used to determine whether to apply the scoring
+ * rule.  Notice that it always returns FALSE when tilted.
  */
 bool timed_mode_running_p (struct timed_mode_ops *ops)
 {
@@ -190,6 +216,8 @@ void timed_mode_add (struct timed_mode_ops *ops, U8 time)
 
 /**
  * Enable the mode's music if it is active and not in its grace period.
+ * Each mode module should call this function from its 'music_refresh'
+ * handler.
  */
 void timed_mode_music_refresh (struct timed_mode_ops *ops)
 {
@@ -200,6 +228,8 @@ void timed_mode_music_refresh (struct timed_mode_ops *ops)
 
 /**
  * Enable the mode's display effect if it is active and not in its grace period.
+ * Each mode module should call this function from its 'deff_update'
+ * handler.
  */
 void timed_mode_deff_update (struct timed_mode_ops *ops)
 {

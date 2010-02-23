@@ -33,7 +33,9 @@ struct timed_mode_ops
 	/* Called to determine when the timer should be paused.
 	Use 'null_false_function' for a timer that should always run.
 	Use 'system_timer_pause' for a default function that pauses
-	during most of the time that you would want it to. */
+	during most of the time that you would want it to.  Write
+	a custom function that calls 'system_timer_pause' if you
+	want to add additional pause conditions. */
 	bool (*pause) (void);
 
 	/* Called when the mode is finished properly (via a call to
