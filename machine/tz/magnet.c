@@ -19,70 +19,107 @@
  */
 
 #include <freewpc.h>
+#include <left_magnet_grab.h>
+#include <upper_right_magnet_grab.h>
+#include <lower_right_magnet_grab.h>
+
 /* Code to catch ball with the loop magnets 
  * Currently using duty2 driver with these settings:
- * timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25
+ * timeout=TIME_2S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
 */
 
 #define LEFT_MAGNET 0
-#define LOWER_RIGHT_MAGNET 0
-#define UPPER_RIGHT_MAGNET 0
+#define LOWER_RIGHT_MAGNET 1
+#define UPPER_RIGHT_MAGNET 2
 
 /* Function to activate the magnet grab flags for a specific length of time */
-void magnet_grab_task (U8 magnet, U8 time)
+void magnet_flag_task (U8 magnet, U8 seconds)
 {
 	switch (magnet)
 	{
 		case LEFT_MAGNET:
-			flag_on (FLAG_LEFT_MAGNET);
-			task_sleep_sec (time);
-			flag_off (FLAG_LEFT_MAGNET);
+			flag_on (FLAG_LEFT_MAGNET_GRAB);
+			task_sleep_sec (seconds);
+			flag_off (FLAG_LEFT_MAGNET_GRAB);
 			break;
 		case LOWER_RIGHT_MAGNET:
-			flag_on (FLAG_LOWER_RIGHT_MAGNET);
-			task_sleep_sec (time);
-			flag_off (FLAG_LOWER_RIGHT_MAGNET);
+			flag_on (FLAG_LOWER_RIGHT_MAGNET_GRAB);
+			task_sleep_sec (seconds);
+			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
 			break;
 		case UPPER_RIGHT_MAGNET:
-			flag_on (FLAG_UPPER_RIGHT_MAGNET);
-			task_sleep_sec (time);
-			flag_off (FLAG_UPPER_RIGHT_MAGNET);
+			flag_on (FLAG_UPPER_RIGHT_MAGNET_GRAB);
+			task_sleep_sec (seconds);
+			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
 			break;
 		default:
-			flag_off (FLAG_LEFT_MAGNET);
-			flag_off (FLAG_LOWER_RIGHT_MAGNET);
-			flag_off (FLAG_UPPER_RIGHT_MAGNET);
+			flag_off (FLAG_LEFT_MAGNET_GRAB);
+			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
+			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
 			break;
 	}
 	task_exit ();
 }
 
+void magnet_hold (U8 magnet, U8 hold_time)
+{	
+	switch (magnet)
+	{
+		case LEFT_MAGNET:
+			left_magnet_grab_start ();
+			while (!switch_poll_logical (SW_LEFT_MAGNET) && hold_time > 0)
+			{	
+				task_sleep_sec (1);
+				hold_time--;
+			}
+			flag_off (FLAG_LEFT_MAGNET_GRAB);
+			left_magnet_grab_stop ();
+			break;
+		
+		case LOWER_RIGHT_MAGNET:
+			lower_right_magnet_grab_start ();
+			while (!switch_poll_logical (SW_LOWER_RIGHT_MAGNET) && hold_time > 0)
+			{	
+				task_sleep_sec (1);
+				hold_time--;
+			}
+			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
+			lower_right_magnet_grab_stop ();
+			break;
+		
+		case UPPER_RIGHT_MAGNET:
+			lower_right_magnet_grab_start ();
+			while (!switch_poll_logical (SW_UPPER_RIGHT_MAGNET) && hold_time > 0)
+			{	
+				task_sleep_sec (1);
+				hold_time--;
+			}
+			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
+			lower_right_magnet_grab_stop ();
+			break;
+		
+		default:
+			break;
+	}
+}
+
 CALLSET_ENTRY (magnet, sw_lower_right_magnet)
 {
 	if (flag_test (FLAG_LOWER_RIGHT_MAGNET_GRAB))
-	{
-		sol_request (SOL_LOWER_RIGHT_MAGNET_GRAB);
-		flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
-	}
+		magnet_hold (LOWER_RIGHT_MAGNET, 2);
 }
 
 /* Not normally installed */
 CALLSET_ENTRY (magnet, sw_upper_right_magnet)
 {
 	if (flag_test (FLAG_UPPER_RIGHT_MAGNET_GRAB))
-	{
-		sol_request (SOL_UPPER_RIGHT_MAGNET_GRAB);
-		flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-	}
+		magnet_hold (UPPER_RIGHT_MAGNET, 2);
 }
 
 CALLSET_ENTRY (magnet, sw_left_magnet)
 {
 	if (flag_test (FLAG_LEFT_MAGNET_GRAB))
-	{
-		sol_request (SOL_LEFT_MAGNET_GRAB);
-		flag_off (FLAG_LEFT_MAGNET_GRAB);
-	}
+		magnet_hold (LEFT_MAGNET, 2);
 }
 
 CALLSET_ENTRY (magnet, init)

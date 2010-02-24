@@ -484,7 +484,7 @@ TSM_RUNNING:
 MB_JACKPOT_LIT:
 SUPER_MB_RUNNING:
 
-LEFT_MAGNET_GRAB
+LEFT_MAGNET_GRAB:
 LOWER_RIGHT_MAGNET_GRAB:
 UPPER_RIGHT_MAGNET_GRAB:
 
@@ -624,9 +624,9 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Left magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
-Upper right magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
-Lower right  magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
+Left magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
+Upper right magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
+Lower right  magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
