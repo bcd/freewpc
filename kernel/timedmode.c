@@ -203,7 +203,7 @@ void timed_mode_add (struct timed_mode_ops *ops, U8 time)
  */
 void timed_mode_music_refresh (struct timed_mode_ops *ops)
 {
-	if (ops->music && *ops->timer > 0 && task_find_gid (ops->gid))
+	if (ops->music && timed_mode_effect_running_p (ops))
 		music_request (ops->music, ops->prio);
 }
 
@@ -215,8 +215,20 @@ void timed_mode_music_refresh (struct timed_mode_ops *ops)
  */
 void timed_mode_display_update (struct timed_mode_ops *ops)
 {
-	if (ops->deff_running && *ops->timer > 0 && task_find_gid (ops->gid))
+	if (ops->deff_running && timed_mode_effect_running_p (ops))
 		deff_start_bg (ops->deff_running, ops->prio);
+}
+
+
+/**
+ * Return TRUE if a mode is running from the perspective of a
+ * display or lamp effect.
+ */
+bool timed_mode_effect_running_p (struct timed_mode_ops *ops)
+{
+	if (task_find_gid (ops->gid))
+		return (*ops->timer > 0);
+	return FALSE;
 }
 
 
