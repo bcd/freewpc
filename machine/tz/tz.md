@@ -335,7 +335,7 @@ Green Lamps: COLOR:green
 Blue Lamps: COLOR:blue
 Amber Lamps: COLOR:amber
 Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
-Inlanes: Left Inlane1, Left Inlane2, Right Inlane
+Inlanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outlane
 
 ##########################################################################
 # Containers
@@ -482,6 +482,11 @@ SSSMB_YELLOW_JACKPOT:
 CHAOSMB_RUNNING:
 TSM_RUNNING:
 MB_JACKPOT_LIT:
+SUPER_MB_RUNNING:
+
+LEFT_MAGNET_GRAB
+LOWER_RIGHT_MAGNET_GRAB:
+UPPER_RIGHT_MAGNET_GRAB:
 
 [globalflags]
 Clock Working:
@@ -619,19 +624,9 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Left magnet grab: driver(duty), sol=SW_LEFT_MAGNET, ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_33MS, timeout=TIME_1S
-
-#Lower right magnet grab: driver(duty), \
-#	sol=SOL_LOWER_RIGHT_MAGNET, \
-#	ontime=TIME_66MS, duty_ontime=TIME_16MS, \
-#	duty_offtime=TIME_16MS, timeout=TIME_500MS
-
-#Upper right magnet grab: driver(duty), \
-#	sol=SOL_UPPER_RIGHT_MAGNET, \
-#	ontime=TIME_66MS, duty_ontime=TIME_16MS, \
-#	duty_offtime=TIME_16MS, timeout=TIME_500MS
-
-
+Left magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
+Upper right magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
+Lower right  magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_2S, ontime=TIME_200MS, duty_mask=DUTY_MASK_25  
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
