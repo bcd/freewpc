@@ -226,9 +226,9 @@ void timed_mode_display_update (struct timed_mode_ops *ops)
  */
 bool timed_mode_effect_running_p (struct timed_mode_ops *ops)
 {
-	if (task_find_gid (ops->gid))
-		return (*ops->timer > 0);
-	return FALSE;
+	if (!timed_mode_running_p (ops))
+		return FALSE;
+	return (*ops->timer > 0);
 }
 
 
@@ -239,7 +239,9 @@ bool timed_mode_effect_running_p (struct timed_mode_ops *ops)
  */
 bool timed_mode_device_running_p (struct timed_mode_ops *ops)
 {
+	if (!timed_mode_effect_running_p (ops))
+		return FALSE;
 	/* TODO - equivalent for now */
-	return timed_mode_running_p (ops);
+	return TRUE;
 }
 
