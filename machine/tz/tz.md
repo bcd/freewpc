@@ -282,7 +282,7 @@ X7: Clock Forward, motor, nosearch
 [tests]
 tz_clock:
 tz_gumball:
-tz_magnet:
+#tz_magnet:
 tz_powerball:
 #tz_thingfl:
 

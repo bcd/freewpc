@@ -29,7 +29,7 @@
 !lower_jet_service      8     40c
 
 # Poll the loop magnet sensors
-magnet_switch_rtt  8     0.1
+#magnet_switch_rtt  8     0.1
 
 # Update the clock
 clock_mech_service      16    80c
