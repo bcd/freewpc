@@ -27,6 +27,19 @@ __local__ U8 clock_default_hits;
 U8 clock_millions_timer;
 
 
+struct timed_mode_ops clock_millions_mode = {
+	DEFAULT_MODE,
+	.gid = GID_GREED_ROUND_RUNNING,
+	.music = MUS_GREED_ROUND,
+	.deff_running = DEFF_GREED_ROUND,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 20,
+	.timer = &clock_millions_timer,
+	.grace_timer = 2,
+	.pause = system_timer_pause,
+};
+
+
 void clock_millions_hit_deff (void)
 {
 	generic_deff ("CLOCK MILLIONS", "5,000,000");
@@ -45,33 +58,9 @@ void clock_default_hit_deff (void)
 }
 
 
-void clock_millions_begin (void)
-{
-	lamp_tristate_flash (LM_CLOCK_MILLIONS);
-}
-
-
-void clock_millions_expire (void)
-{
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
-}
-
-
-void clock_millions_end (void)
-{
-}
-
-
-void clock_millions_task (void)
-{
-	timed_mode_task (clock_millions_begin, clock_millions_expire, clock_millions_end,
-		&clock_millions_timer, 20, 3);
-}
-
-
 CALLSET_ENTRY (clocktarget, sw_clock_target)
 {
-	if (!lamp_flash_test (LM_CLOCK_MILLIONS))
+	if (!timed_mode_running_p (&clock_millions_mode))
 	{
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
@@ -93,11 +82,13 @@ CALLSET_ENTRY (clocktarget, sw_clock_target)
 
 CALLSET_ENTRY (clocktarget, lamp_update)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	if (!timed_mode_effect_running_p (&clock_millions_mode))
 	{
+		lamp_tristate_flash (LM_CLOCK_MILLIONS);
 	}
 	else
 	{
+		lamp_tristate_off (LM_CLOCK_MILLIONS);
 	}
 }
 
@@ -109,14 +100,8 @@ CALLSET_ENTRY(clocktarget, start_player)
 }
 
 
-CALLSET_ENTRY (clocktarget, end_ball)
-{
-	timed_mode_stop (&clock_millions_timer);
-}
-
-
 CALLSET_ENTRY (clocktarget, door_start_clock_millions)
 {
-	timed_mode_start (GID_CLOCK_MILLIONS_RUNNING, clock_millions_task);
+	timed_mode_begin (&clock_millions_mode);
 }
 
