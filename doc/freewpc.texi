@@ -5,8 +5,8 @@
 @setchapternewpage odd
 @c %**end of header
 
-@set VERSION 0.95
-@set COPYRIGHT 2006-2009
+@set VERSION 0.99
+@set COPYRIGHT 2006-2010
 
 @titlepage
 @title The FreeWPC Manual
@@ -463,8 +463,9 @@ term is slightly incorrect.
 
 You can register a periodic function at various
 rates: either every 16ms, 100ms, 1 second, or 10 seconds.  Handlers may not
-be called at the exact rate, but it will be close as possible.  If you need
-exact timing, use a realtime function.
+be called at the exact rate, but it will be as close as possible.  Slippage
+occurs when it takes longer than 16ms for all tasks to be given a chance to run.
+If you need exact timing, use a realtime function.
 
 For example, assume that a 1 second handler does not get called until
 after 1.5 seconds from the previous call, because the system is busy running
@@ -492,11 +493,11 @@ Real-time functions run at interrupt (IRQ) level.  They will interrupt anything
 else that is running at non-real-time priority.  They cannot sleep.
 
 A scheduler, @command{gensched}, processes these files at compile-time and generates
-the IRQ handler which calls all of the RTTs at the correct frequency.  The output
+the IRQ handler code which calls all of the RTTs at the correct frequency.  The output
 can be seen in @file{build/sched_irq.c}.
 
 Optimizing the realtime tasks is key to an efficient system.  To date,
-about 30% of the 6809 is spent in realtime tasks; the actual value
+about 35-40% of the 6809 is spent in realtime tasks; the actual value
 depends on the machine and the number of device drivers needed.
 
 In native mode, realtime functions are run inside an ordinary task.  They
@@ -509,14 +510,14 @@ To summarize, the priority of functions from highest to lowest is:
 @table @bullet
 @item Realtime tasks
 @item Normal tasks
-@item Idle functions
+@item Periodic functions
 @end table
 
 @node Memory Allocation
 @section Memory Allocation
 
-FreeWPC does not use dynamic (heap) memory allocation at all.  All variables are either
-global or on the stack.
+FreeWPC does not use dynamic (heap) memory allocation, except in some very
+rare circumstances.  All variables should be declared global, or put on the stack.
 
 Global variables cannot be statically initialized.  Variables should be initialized
 explicitly inside a C function.
@@ -531,13 +532,14 @@ you can tag a global with one of the following attributes:
 
 Used for variables that are used frequently.  GCC6809 will generate faster
 code when accessing these.  However, you are limited to about 250 bytes of
-fastram variables total.
+fastram variables total.  These are mostly used by RTTs for performance.
 
 @item __permanent__
 
 Used for variables that should be persistent across reboots.  These variables
 should be initialized inside of a @code{factory_reset} event, because factory
-reset should restore everything to a sane state.
+reset should restore everything to a sane state.  GCC6809 places these variables
+at an address that is not automatically cleared by the startup code.
 
 @item __nvram__
 
@@ -545,6 +547,8 @@ Like __permanent__, but for variables that are also write-protected by default.
 To modify such a variable, you must first call @code{pinio_nvram_unlock()}, change
 it, and then call @code{pinio_nvram_lock()}.  This helps to ensure that
 certain critical variables are not accidentally corrupted.
+
+This feature makes use of special hardware in the WPC ASIC.
 
 Adjustments and audits kept in NVRAM are managed via special APIs which
 do the locking/unlocking for you.
@@ -586,13 +590,13 @@ of the source code file or something similar.  If you need to write two differen
 handlers in the same source file for the same event, they need to have different
 module names.
 
-The event name must exactly match the name used when it was generated.
+The event name must exactly match the name used by the generator of that event.
 There is a list of predefined system events which are often caught (@pxref{System Events}).
 Switch names can also be used as events (e.g. sw_free_kick_target).  Normally a switch
 event is generated on an @emph{inactive-to-active transition}; you can cause an event
 on any transition by declaring the switch as @samp{edge} in the machine configuration file.
 Ball devices also generate events for several reasons (@pxref{Ball Tracking}), for example,
-sw_lock_enter.
+@code{dev_lock_enter}.
 
 If there are multiple catchers for the same event, then all of them
 will be invoked, in some random order.  For example, another mode might
@@ -646,8 +650,9 @@ based on the directory in which the source file is located:
 @item Files in @file{machine} are assumed to be linked into MACHINE_PAGE.
 @end itemize
 
-You can explicitly declare the section in the source file by
-adding a comment like this:
+However, as the size of FreeWPC has grown, it has become necessary to install
+code into more than just these pages.  You can explicitly declare the section
+in the source file, by adding a comment like this:
 
 @example
 /* CALLSET_SECTION (@var{module-name}, @var{section-name}) */
@@ -659,6 +664,9 @@ would be something like @code{__common__} or @code{__machine__}.  The
 @var{module-name} must match all of the module names used in the
 @code{CALLSET_ENTRY} definitions within it.
 
+Note that these magic comments will probably not be necessary in the future,
+as there is a way for the build procedure to determine these automatically.
+
 @subsection Debugging Event Handlers
 
 The runtime code generated by @command{gencallset} will call the macro @code{callset_debug}
@@ -669,6 +677,9 @@ determine the last function that caused the problem.
 
 Previously, debugging required a compile-time flag set in @command{CALLSET_FLAGS}, but this
 is no longer needed.
+
+For more thorough debugging, you can rewrite the implementation of @code{callset_debug}
+to do something else with those IDs, such as print them or set a breakpoint.
 
 @subsection How Event Handlers Are Implemented
 
@@ -936,12 +947,12 @@ it:
 
 @itemize @code
 
-@item SW_OPTICAL
+@item SW_OPTICAL (opto)
 
 Says that this is an optical switch, which is active low rather than
 active high.
 
-@item SW_EDGE
+@item SW_EDGE (edge)
 
 Says that the switch event should be thrown when it goes inactive, in
 addition to when it goes active.  Handlers for edge switches generally
@@ -952,7 +963,7 @@ All counting switches in a ball container must be edge switches, so that the
 device count can be updated correctly.  The shooter switch is also usually
 declared edge.
 
-@item SW_IN_GAME
+@item SW_IN_GAME (ingame)
 
 Says that this switch should only be serviced during a game.
 
@@ -962,7 +973,9 @@ Says that this switch is on the playfield, and can be activated by a ball,
 as opposed to cabinet buttons, motor optos, etc.  A playfield switch
 event will normally set the valid playfield flag.
 
-@item SW_NOVALID
+This is the default; use the @code{noplay} tag to indicate otherwise.
+
+@item SW_NOVALID (novalid)
 
 Set for a SW_PLAYFIELD switch for which the valid playfield flag should
 not automatically be set.  This is used for switches that might
@@ -972,7 +985,7 @@ that continually fires.
 These are the switches that you can trigger at ball start and drain, and
 still get the ball back.
 
-@item SW_IN_TEST
+@item SW_IN_TEST (intest)
 
 Says that this switch handler should also be called in test mode.
 Normally in test mode handlers are not called, but important switches
@@ -983,7 +996,9 @@ and act accordingly.
 @end itemize
 
 The driver also performs debouncing, so that rapid open and close
-are not considered.
+are not considered.  By default, a switch is processed if it remains
+active for only 4ms.  You can declare a large debounce time using the
+@code{debounce} tag.
 
 Switch entries can also declare an associated playfield lamp; when
 this is done, valid activations of the switch will cause a brief
