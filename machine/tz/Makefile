@@ -75,6 +75,7 @@ GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	unlit.o spiralaward.o spiral.o tsm.o fastlock.o door.o \
 	lock.o deffs.o multiball.o star.o 
 
+<<<<<<< HEAD:machine/tz/Makefile
 GAME2_OBJS = rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
  	mpf.o powerball.o clockmillions.o sssmb.o chaosmb.o
 FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
@@ -82,6 +83,9 @@ FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
 	$(M)/coinstack.fif $(M)/hitcher.fif $(M)/oldcar.fif \
 	$(M)/pyramid.fif $(M)/robot.fif
+=======
+FIF_SRCS += images/cow.fif
+>>>>>>> e98b17473fa499ff55ef4cace263c8bdb356ec1c:machine/tz/Makefile
 
 IMAGE_MAP += $(M)/tz.ild
 

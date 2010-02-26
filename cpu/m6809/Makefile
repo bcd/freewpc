@@ -22,6 +22,10 @@ ifeq ($(DEBUG_COMPILER),y)
 CFLAGS += -da -dA
 endif
 
+ifeq ($(CONFIG_BPT),y)
+CFLAGS += -DCONFIG_BPT
+endif
+
 # Optimization flags
 CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
 CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
@@ -43,5 +47,5 @@ KERNEL_OBJS     += $(C)/string.o
 KERNEL_ASM_OBJS += $(C)/bcd_string.o
 KERNEL_ASM_OBJS += $(C)/irqload.o
 ifeq ($(FREEWPC_DEBUGGER),y)
-KERNEL_ASM_OBJS += $(C)/breakpoint.o
+KERNEL_ASM_OBJS += $(if $(CONFIG_BPT), $(C)/breakpoint.o)
 endif

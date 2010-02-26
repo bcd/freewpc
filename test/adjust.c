@@ -74,6 +74,7 @@ struct adjustment_value baud_rate_value = { 0, 5, 1, baud_rate_render };
 struct adjustment_value lines_per_page_value = { 22, 80, 1, decimal_render };
 struct adjustment_value pricing_mode_value = { 0, NUM_PRICING_MODES-1, 1, pricing_mode_render };
 struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, coin_door_render };
+struct adjustment_value volume_value = { MIN_VOLUME, MAX_VOLUME, 1, decimal_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -118,7 +119,7 @@ struct adjustment standard_adjustments[] = {
 	{ "ALLOW DIM ALLUM.", &yes_no_value, YES, &system_config.allow_dim_illum },
 	{ "TOURNAMENT MODE", &yes_no_value, NO, &system_config.tournament_mode },
 	{ "EURO. DIG. SEP.", &yes_no_value, NO, &system_config.euro_digit_sep },
-	{ "MIN. VOLUME", &integer_value, 0, &system_config.min_volume_control },
+	{ "MIN. VOLUME", &volume_value, MIN_VOLUME, &system_config.min_volume_control },
 	{ "G.I. POWER SAVER", &gi_power_saver_value, 15, &system_config.gi_power_saver },
 	{ "POWER SAVER LEVEL", &power_saver_level_value, 7, &system_config.power_saver_level },
 	{ "TICKET BOARD", &yes_no_value, NO, &system_config.ticket_board },
