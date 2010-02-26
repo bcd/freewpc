@@ -147,7 +147,7 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
 18: Outhole, outhole, service, noplay
-21: Slam Tilt, slam-tilt, ingame, cabinet
+21: Slam Tilt, slam-tilt, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
