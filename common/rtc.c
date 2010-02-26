@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,17 +26,11 @@
  * \brief The driver for the WPC real-time clock (RTC).
  */
 
-/* You can't be running under PinMAME and be in native mode at
-   the same time. */
-#ifdef CONFIG_NATIVE
-#undef CONFIG_PINMAME
-#endif
-
 
 /** PinMAME expects address 0x1800 in nvram to contain the
  * following date structure, as apparently all real WPC
- * ROMs put this information there. */
-#ifdef CONFIG_PINMAME
+ * ROMs put this information there.  FreeWPC avoids placing
+ * any data at this address. */
 struct wpc_pinmame_clock_data
 {
 	U16 year;
@@ -44,7 +38,6 @@ struct wpc_pinmame_clock_data
 	U8 day;
 	U8 day_of_week;
 };
-#endif
 
 
 /** The memory state of the realtime clock.  These variables
@@ -229,29 +222,37 @@ static void rtc_hw_write (void)
 }
 
 
-/** Re-read pinmame's simulated time values.  This contains the
- * year, month, and day as determined from the simulator's
- * operating system.  On real hardware, this value would need
- * to be configured in the utilities menu. */
-#ifdef CONFIG_PINMAME
+/** 
+ * Probe PinMAME date information and apply if present.
+ */
 static void rtc_pinmame_read (void)
 {
+	/* Do not try this in native mode. */
+#ifndef CONFIG_NATIVE
 	struct wpc_pinmame_clock_data *clock_data;
 
 	clock_data = (struct wpc_pinmame_clock_data *)0x1800;
-	if (clock_data->year >= 2000)
+
+	/* A valid date requires that the year be 2010 or greater. */
+	if (clock_data->year >= 2010)
 	{
 		pinio_nvram_unlock ();
+
+		/* Copy the PinMAME data into FreeWPC's date structure */
 		year = clock_data->year - 2000;
 		month = clock_data->month;
 		day = clock_data->day;
 		rtc_calc_day_of_week ();
 		rtc_normalize ();
 		csum_area_update (&rtc_csum_info);
+
+		/* Clear the PinMAME year. */
+		clock_data->year = 0;
+
 		pinio_nvram_lock ();
 	}
-}
 #endif
+}
 
 
 CALLSET_ENTRY (rtc, factory_reset)
@@ -271,21 +272,11 @@ CALLSET_ENTRY (rtc, factory_reset)
 
 CALLSET_ENTRY (rtc, init)
 {
-#ifdef CONFIG_PINMAME
-	/* Once, during initialization, read the values of year, month, and
-	day from memory locations that PinMAME writes.  It gets these
-	from the system on which it is running.  Afterwards, FreeWPC will
-	increment these correctly.  (And therefore, clock changes on the
-	host system are ignored.) */
+	/* Once, during initialization, probe the memory that PinMAME
+	puts the host system's date information.  If detected, FreeWPC
+	will apply those values to its saved date information. */
 	rtc_pinmame_read ();
-#elif defined (CONFIG_NATIVE)
-	/* TODO - should read this from the native system */
-	pinio_nvram_unlock ();
-	rtc_factory_reset ();
-	rtc_normalize ();
-	csum_area_update (&rtc_csum_info);
-	pinio_nvram_lock ();
-#endif
+
 	rtc_edit_field = 0xFF;
 }
 
