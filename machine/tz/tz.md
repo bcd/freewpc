@@ -227,13 +227,13 @@ H1: Slot
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div., duty(SOL_DUTY_25), time(TIME_100MS)
+H5: Right Ramp Div., duty(SOL_DUTY_25), time(TIME_66MS)
 #H5: Right Ramp Div
 H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_100MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
 L2: Right Sling
 L3: Left Sling
 L4: Lower Jet
@@ -624,13 +624,15 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Left magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
-Upper right magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
-Lower right  magnet grab: driver(duty2), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25  
+Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
+
+Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
+
+Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=TIME_3S
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,
@@ -638,7 +640,7 @@ Shooter Div: driver(duty),
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Gumball Div: driver(duty),
 	sol=SOL_GUMBALL_DIV,

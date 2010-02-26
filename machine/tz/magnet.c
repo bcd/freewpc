@@ -35,6 +35,7 @@
 /* Function to activate the magnet grab flags for a specific length of time */
 void magnet_flag_task (U8 magnet, U8 seconds)
 {
+	bpt();
 	switch (magnet)
 	{
 		case LEFT_MAGNET:
@@ -60,7 +61,7 @@ void magnet_flag_task (U8 magnet, U8 seconds)
 	}
 	task_exit ();
 }
-
+/* Function to hold the ball for a specific length of time */
 void magnet_hold (U8 magnet, U8 hold_time)
 {	
 	switch (magnet)

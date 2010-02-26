@@ -30,6 +30,7 @@ U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 
 extern __local__ U8 mpf_enable_count;
+extern void magnet_flag_task (U8 magnet, U8 seconds);
 
 const char *spiralaward_names[] = {
 	"2 MILLION",
@@ -63,6 +64,8 @@ void start_spiralaward_timer (void)
 	if (!multi_ball_play () && !free_timer_test (TIM_SPIRALAWARD))
 	{
 		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
+		/* Turn on left magnet flag for 4 seconds */
+		magnet_flag_task (0, 4);
 	}
 }
 

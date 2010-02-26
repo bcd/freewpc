@@ -150,4 +150,31 @@ IMG_SLOT_17: machine/tz/animation/slot/slots17.pgm
 IMG_SLOT_18: machine/tz/animation/slot/slots18.pgm
 IMG_SLOT_END: machine/tz/animation/slot/slots19.pgm
 
-
+IMG_VOID_START: machine/tz/animation/void/void01.pgm
+IMG_VOID_2: machine/tz/animation/void/void02.pgm
+IMG_VOID_3: machine/tz/animation/void/void03.pgm
+IMG_VOID_4: machine/tz/animation/void/void04.pgm
+IMG_VOID_5: machine/tz/animation/void/void05.pgm
+IMG_VOID_6: machine/tz/animation/void/void06.pgm
+IMG_VOID_7: machine/tz/animation/void/void07.pgm
+IMG_VOID_8: machine/tz/animation/void/void08.pgm
+IMG_VOID_9: machine/tz/animation/void/void09.pgm
+IMG_VOID_10: machine/tz/animation/void/void10.pgm
+IMG_VOID_11: machine/tz/animation/void/void11.pgm
+IMG_VOID_12: machine/tz/animation/void/void12.pgm
+IMG_VOID_13: machine/tz/animation/void/void13.pgm
+IMG_VOID_14: machine/tz/animation/void/void14.pgm
+IMG_VOID_15: machine/tz/animation/void/void15.pgm
+IMG_VOID_16: machine/tz/animation/void/void16.pgm
+IMG_VOID_17: machine/tz/animation/void/void17.pgm
+IMG_VOID_18: machine/tz/animation/void/void18.pgm
+IMG_VOID_19: machine/tz/animation/void/void19.pgm
+IMG_VOID_20: machine/tz/animation/void/void20.pgm
+IMG_VOID_21: machine/tz/animation/void/void21.pgm
+IMG_VOID_22: machine/tz/animation/void/void22.pgm
+IMG_VOID_23: machine/tz/animation/void/void23.pgm
+IMG_VOID_24: machine/tz/animation/void/void24.pgm
+IMG_VOID_25: machine/tz/animation/void/void25.pgm
+IMG_VOID_26: machine/tz/animation/void/void26.pgm
+IMG_VOID_27: machine/tz/animation/void/void27.pgm
+IMG_VOID_END: machine/tz/animation/void/void28.pgm

@@ -185,13 +185,13 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	}
 }
 
-CALLSET_ENTRY (amode, sw_buyin_button)
+CALLSET_ENTRY (tz_amode, sw_buyin_button)
 {
-	if (in_amode ())
-	{
+	//if (in_amode ())
+//	{
 		/* Start award descriptions */
 		/* Spiralaward */
-		leff_stop (LEFF_AMODE);
+//		leff_stop (LEFF_AMODE);
 
 	}
 #if 0
