@@ -73,10 +73,10 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	unlit.o spiralaward.o spiral.o tsm.o fastlock.o door.o \
-	lock.o deffs.o multiball.o star.o \
-	rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
- 	mpf.o powerball.o clockmillions.o sssmb.o chaosmb.o
+	lock.o deffs.o multiball.o star.o 
 
+GAME2_OBJS = rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
+ 	mpf.o powerball.o clockmillions.o sssmb.o chaosmb.o
 FIF_SRCS += images/cow.fif images/spiral.fif images/mborder.fif
 
 FIF_SRCS += $(M)/ballborder.fif $(M)/brianhead.fif $(M)/city.fif \
