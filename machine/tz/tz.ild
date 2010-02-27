@@ -192,4 +192,16 @@ IMG_BALLEXPLODE_10: machine/tz/animation/ballexplode/ballexplode10.pgm
 IMG_BALLEXPLODE_11: machine/tz/animation/ballexplode/ballexplode11.pgm
 IMG_BALLEXPLODE_END: machine/tz/animation/ballexplode/ballexplode12.pgm
 
-
+IMG_CAMERA_START: machine/tz/animation/camera/camera01.pgm
+IMG_CAMERA_2: machine/tz/animation/camera/camera02.pgm
+IMG_CAMERA_3: machine/tz/animation/camera/camera03.pgm
+IMG_CAMERA_4: machine/tz/animation/camera/camera04.pgm
+IMG_CAMERA_5: machine/tz/animation/camera/camera05.pgm
+IMG_CAMERA_6: machine/tz/animation/camera/camera06.pgm
+IMG_CAMERA_7: machine/tz/animation/camera/camera07.pgm
+IMG_CAMERA_8: machine/tz/animation/camera/camera08.pgm
+IMG_CAMERA_9: machine/tz/animation/camera/camera09.pgm
+IMG_CAMERA_10: machine/tz/animation/camera/camera10.pgm
+IMG_CAMERA_11: machine/tz/animation/camera/camera11.pgm
+IMG_CAMERA_12: machine/tz/animation/camera/camera12.pgm
+IMG_CAMERA_END: machine/tz/animation/camera/camera13.pgm

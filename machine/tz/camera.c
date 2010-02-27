@@ -37,10 +37,25 @@ __local__ camera_award_t camera_award_count;
 
 __local__ U8 camera_default_count;
 
-
 void camera_award_deff (void)
 {
+	/* Lock ball during deff, Slot.c should unlock */
 	kickout_lock (KLOCK_DEFF);
+	U16 fno;
+	for (fno = IMG_CAMERA_START; fno < IMG_CAMERA_END; fno += 2)
+	{
+		/* Play the sound effect here
+		 * so it's in sync */
+		if (fno == IMG_CAMERA_START + 4)
+			sound_send (SND_CAMERA_PICTURE_EJECT_1);
+		if (fno == IMG_CAMERA_START + 6)
+			sound_send (SND_CAMERA_PICTURE_EJECT_2);
+		dmd_alloc_pair_clean ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	sprintf ("CAMERA AWARD %d", camera_award_count+1);
@@ -86,8 +101,6 @@ static void do_camera_award (void)
 			mball_light_lock ();
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
-			/* Stop door rotating */
-			task_kill_gid (GID_DOOR_AWARD_ROTATE);
 			/* Spot Door Panel */
 			door_award_if_possible ();
 			break;
@@ -120,10 +133,17 @@ static void do_camera_award (void)
 	task_exit ();
 }
 
+bool can_award_camera (void)
+{
+	if (cameras_lit && !multi_ball_play ())
+		return TRUE;
+	else
+		return FALSE;
+}
 /* TODO Fix bug when gumball exit happens */
 CALLSET_ENTRY (camera, sw_camera)
 {
-	device_switch_can_follow (camera, slot, TIME_5S);
+	device_switch_can_follow (camera, slot, TIME_6S);
 	if (event_did_follow (mpf_top, camera))
 	{
 		callset_invoke (mpf_collected);
@@ -137,7 +157,7 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{	/* Ignore camera during multiball */
-		if (cameras_lit && !multi_ball_play ())
+		if (can_award_camera ())
 		{
 			bounded_decrement (cameras_lit, 0);
 			score (SC_10M);
@@ -156,7 +176,7 @@ CALLSET_ENTRY (camera, sw_camera)
 
 CALLSET_ENTRY (camera, lamp_update)
 {
-	if (cameras_lit > 0)
+	if (can_award_camera ())
 		lamp_tristate_flash (LM_CAMERA);
 	else
 		lamp_tristate_off (LM_CAMERA);
