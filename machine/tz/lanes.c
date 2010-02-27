@@ -43,7 +43,7 @@ static void handle_outlane (void)
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
 	event_can_follow (any_outlane, center_drain, TIME_7S);
-	deff_start (DEFF_BALL_DRAIN);
+	deff_start (DEFF_BALL_DRAIN_OUTLANE);
 }
 
 bool rollover_completed (void)
@@ -140,7 +140,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 }
 
 
-CALLSET_ENTRY(lanes, start_ball)
+CALLSET_ENTRY (lanes, start_ball)
 {
 	/* Turn off all inlanes at start of ball */
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
@@ -148,3 +148,8 @@ CALLSET_ENTRY(lanes, start_ball)
 	rollover_level = 1;
 }
 
+CALLSET_ENTRY (lanes, sw_outhole)
+{	
+	if (in_live_game)
+		deff_start (DEFF_BALL_EXPLODE);
+}

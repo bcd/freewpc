@@ -33,7 +33,7 @@ extern U8 mball_locks_made;
 extern bool multiball_ready (void);
 extern bool autofire_busy;
 extern bool sssmb_can_divert_to_plunger (void);
-extern bool sssmb_ball_in_plunger;
+//extern bool sssmb_ball_in_plunger;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 
 //TODO Get rid of this
@@ -137,7 +137,7 @@ static void maybe_ramp_divert (void)
 	if (sssmb_can_divert_to_plunger ())
 	{
 		/* TODO Shore up logic by event_should_follow (plunger_switch); */
-		sssmb_ball_in_plunger = TRUE;
+		//sssmb_ball_in_plunger = TRUE;
 		ramp_divert ();
 	}
 }

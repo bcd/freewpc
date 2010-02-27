@@ -51,6 +51,16 @@ void bonus_pause (void)
 		task_sleep_sec (1);
 }
 
+/* Function so we can call two different transistions
+ * depending on whether the buttons were pressed */
+void bonus_sched_transition (void)
+{
+	if (buttons_held == TRUE)
+		dmd_sched_transition (&trans_scroll_down_fast);
+	else
+		dmd_sched_transition (&trans_scroll_down);
+}
+
 void bonus_deff (void)
 {
 	extern U8 door_panels_started;
@@ -90,7 +100,7 @@ void bonus_deff (void)
 		sprintf_score (bonus_scored);	
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		//sprintf ("%d x 1,000,000", door_panels_started);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -109,7 +119,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("%d X 100,000", loops);
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -129,7 +139,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("%d X 100,000", (total_jets));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -148,7 +158,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("%d X 100,000", (left_ramps));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -167,7 +177,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("%d X 1,000,000", (gumball_collected_count));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -186,7 +196,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
 		sprintf ("%d X 1,000,000", (spiralawards_collected));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -205,7 +215,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("%d X 1,000,000", (dead_end_count));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -224,7 +234,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("%d X 1,000,000", (hitch_count));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
@@ -243,7 +253,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("%d X 1,000,000", (rollover_count));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
-		dmd_sched_transition (&trans_scroll_down);
+		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();

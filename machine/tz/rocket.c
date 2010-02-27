@@ -38,13 +38,13 @@ void rocket_deff (void)
 	/* Rocket takes 500ms before kick 
 	 * load animation takes 400ms */
 	/* Launch rocket */
-	for (fno = IMG_ROCKET_START + 3; fno <= IMG_ROCKET_END; fno += 2)
+	for (fno = IMG_NEWROCKET_START; fno <= IMG_NEWROCKET_END; fno += 2)
 	{
 		dmd_alloc_pair_clean ();
 		frame_draw (fno);
 //		dmd_overlay_onto_color ();
 		dmd_show2 ();
-		task_sleep (TIME_16MS);
+		task_sleep (TIME_33MS);
 //		dmd_map_overlay ();
 	}
 	deff_exit ();

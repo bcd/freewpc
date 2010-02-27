@@ -329,10 +329,39 @@ void bg_flash_deff (void)
 		task_sleep (flash_time); /* 33% */
 	}
 }
-void ball_drain_deff (void)
+
+void ball_drain_outlane_deff (void)
 {
 	U16 fno;
 	for (fno = IMG_VOID_START; fno <= IMG_VOID_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	deff_exit ();
+}
+
+void ball_explode_deff (void)
+{
+	U16 fno;
+	sound_send (SND_EXPLOSION_3);
+	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	deff_exit ();
+}
+
+void tz_ball_save_deff (void)
+{
+	U16 fno;
+	sound_send (SND_STATIC);
+	for (fno = IMG_BALLEXPLODE_END; fno >= IMG_BALLEXPLODE_START; fno -= 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);

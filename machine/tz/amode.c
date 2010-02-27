@@ -169,82 +169,51 @@ void show_driver_animation (void)
 	dmd_alloc_pair_clean ();
 }
 
+void show_text_on_stars (void)
+{
+	U8 n;
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
+	}
+	dmd_alloc_pair_clean ();
+}
+
 CALLSET_ENTRY (tz_amode, amode_page)
 {
-	show_driver_animation ();
-	
-	U8 n;
-	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
-
-	for (n = 0; n < 40; n++)
-	{
-		dmd_dup_mapped ();
-		dmd_overlay_onto_color ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
-	}
-	
-	show_driver_animation ();
+	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "BCD");
+	font_render_string_center (&font_fixed6, 64, 22, "BCD");
 	dmd_text_blur ();
-	font_render_string_center (&font_fixed10, 64, 22, "CREATED BY");
-
-	for (n = 0; n < 40; n++)
-	{
-		dmd_dup_mapped ();
-		dmd_overlay_onto_color ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
-	
-	}
-	
-	show_driver_animation ();
+	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
+	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "HIGHRISE");
+	font_render_string_center (&font_fixed6, 64, 22, "HIGHRISE");
 	dmd_text_blur ();
-	font_render_string_center (&font_fixed10, 64, 22, "ANIMATIONS BY");
-
-	for (n = 0; n < 40; n++)
-	{
-		dmd_dup_mapped ();
-		dmd_overlay_onto_color ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
-	}
-	
-	show_driver_animation ();
+	font_render_string_center (&font_fixed10, 64, 7, "ANIMATIONS BY");
+	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "SONNY JIM");
+	font_render_string_center (&font_term6, 64, 22, "SONNY JIM");
 	dmd_text_blur ();
-	font_render_string_center (&font_fixed10, 64, 22, "ADDITIONAL CODE");
-
-	for (n = 0; n < 40; n++)
-	{
-		dmd_dup_mapped ();
-		dmd_overlay_onto_color ();
-		star_draw ();
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-		dmd_map_overlay ();
-	}
+	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
+	show_text_on_stars ();
+	show_driver_animation ();
 }
 
 CALLSET_ENTRY (tz_amode, sw_buyin_button)

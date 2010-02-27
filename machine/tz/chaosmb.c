@@ -244,11 +244,6 @@ CALLSET_ENTRY (chaosmb, single_ball_play)
 	callset_invoke (chaosmb_stop);
 }
 
-CALLSET_ENTRY (chaosmb, sw_buyin_button)
-{
-	callset_invoke (chaosmb_start);
-}
-
 CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;

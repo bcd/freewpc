@@ -561,7 +561,9 @@ SpiralAward Collected: page(MACHINE_PAGE), PRI_GAME_QUICK3
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Slot Animation: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED
-Ball Drain: page(MACHINE_PAGE), PRI_JACKPOT
+Ball Drain Outlane: page(MACHINE_PAGE), PRI_JACKPOT
+Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
+TZ Ball Save: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 
 ##########################################################################
 # Lamp effects

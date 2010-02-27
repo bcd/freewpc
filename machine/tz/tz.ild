@@ -15,20 +15,19 @@ IMG_ROCKET_LOAD_2: machine/tz/animation/rocket/rocketb.pgm
 IMG_ROCKET_LOAD_3: machine/tz/animation/rocket/rocketc.pgm
 IMG_ROCKET_LOAD_END: machine/tz/animation/rocket/rocketd.pgm
 
-IMG_ROCKET_START: machine/tz/animation/rocket/rocket1.pgm
-IMG_ROCKET_2: machine/tz/animation/rocket/rocket2.pgm
-IMG_ROCKET_3: machine/tz/animation/rocket/rocket3.pgm
-IMG_ROCKET_4: machine/tz/animation/rocket/rocket4.pgm
-IMG_ROCKET_5: machine/tz/animation/rocket/rocket5.pgm
-IMG_ROCKET_6: machine/tz/animation/rocket/rocket6.pgm
-IMG_ROCKET_7: machine/tz/animation/rocket/rocket7.pgm
-IMG_ROCKET_8: machine/tz/animation/rocket/rocket8.pgm
-IMG_ROCKET_9: machine/tz/animation/rocket/rocket9.pgm
-IMG_ROCKET_10: machine/tz/animation/rocket/rocket10.pgm
-IMG_ROCKET_11: machine/tz/animation/rocket/rocket11.pgm
-IMG_ROCKET_12: machine/tz/animation/rocket/rocket12.pgm
-IMG_ROCKET_13: machine/tz/animation/rocket/rocket13.pgm
-IMG_ROCKET_END: machine/tz/animation/rocket/rocket14.pgm
+IMG_NEWROCKET_START: machine/tz/animation/rocket/newrocket01.pgm
+IMG_NEWROCKET_2: machine/tz/animation/rocket/newrocket02.pgm
+IMG_NEWROCKET_3: machine/tz/animation/rocket/newrocket03.pgm
+IMG_NEWROCKET_4: machine/tz/animation/rocket/newrocket04.pgm
+IMG_NEWROCKET_5: machine/tz/animation/rocket/newrocket05.pgm
+IMG_NEWROCKET_6: machine/tz/animation/rocket/newrocket06.pgm
+IMG_NEWROCKET_7: machine/tz/animation/rocket/newrocket07.pgm
+IMG_NEWROCKET_8: machine/tz/animation/rocket/newrocket08.pgm
+IMG_NEWROCKET_9: machine/tz/animation/rocket/newrocket09.pgm
+IMG_NEWROCKET_10: machine/tz/animation/rocket/newrocket10.pgm
+IMG_NEWROCKET_11: machine/tz/animation/rocket/newrocket11.pgm
+IMG_NEWROCKET_END: machine/tz/animation/rocket/newrocket12.pgm
+
 
 IMG_JACKPOT_START: machine/tz/animation/jackpot/jackpot1.pgm
 IMG_JACKPOT_2: machine/tz/animation/jackpot/jackpot2.pgm
@@ -179,3 +178,18 @@ IMG_VOID_25: machine/tz/animation/void/void25.pgm
 IMG_VOID_26: machine/tz/animation/void/void26.pgm
 IMG_VOID_27: machine/tz/animation/void/void27.pgm
 IMG_VOID_END: machine/tz/animation/void/void28.pgm
+
+IMG_BALLEXPLODE_START: machine/tz/animation/ballexplode/ballexplode01.pgm
+IMG_BALLEXPLODE_2: machine/tz/animation/ballexplode/ballexplode02.pgm
+IMG_BALLEXPLODE_3: machine/tz/animation/ballexplode/ballexplode03.pgm
+IMG_BALLEXPLODE_4: machine/tz/animation/ballexplode/ballexplode04.pgm
+IMG_BALLEXPLODE_5: machine/tz/animation/ballexplode/ballexplode05.pgm
+IMG_BALLEXPLODE_6: machine/tz/animation/ballexplode/ballexplode06.pgm
+IMG_BALLEXPLODE_7: machine/tz/animation/ballexplode/ballexplode07.pgm
+IMG_BALLEXPLODE_8: machine/tz/animation/ballexplode/ballexplode08.pgm
+IMG_BALLEXPLODE_9: machine/tz/animation/ballexplode/ballexplode09.pgm
+IMG_BALLEXPLODE_10: machine/tz/animation/ballexplode/ballexplode10.pgm
+IMG_BALLEXPLODE_11: machine/tz/animation/ballexplode/ballexplode11.pgm
+IMG_BALLEXPLODE_END: machine/tz/animation/ballexplode/ballexplode12.pgm
+
+
