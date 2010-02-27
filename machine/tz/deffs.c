@@ -69,10 +69,9 @@ void driver_deff (void)
 {
 	U16 fno;
 	U8 i;
-	/* loop anim 4 times */
 	for (i = 0; i < 3; i++)
 	{
-		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
+		for (fno = IMG_DRIVER_START; fno < IMG_DRIVER_END; fno += 2)
 		{
 			dmd_alloc_pair ();
 			frame_draw (fno);
@@ -80,7 +79,6 @@ void driver_deff (void)
 			task_sleep (TIME_66MS);
 		}
 	}
-	//task_sleep_sec (2);
 	deff_exit ();
 }
 
@@ -370,3 +368,16 @@ void tz_ball_save_deff (void)
 	}
 	deff_exit ();
 }
+
+void rollover_completed_deff (void)
+{
+	sound_send (SND_GLASS_BREAKS);
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
+	font_render_string_center (&font_fixed6, 64, 17, "COMPLETED");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
+
