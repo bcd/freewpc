@@ -36,6 +36,25 @@ extern bool fastlock_running (void);
 extern void reset_unlit_shots (void);
 extern void award_unlit_shot (U8 unlit_called_from);
 
+/* Rules to say whether we can start multiball */
+bool multiball_ready (void)
+{
+	/* Don't allow during certain conditions */
+	if (flag_test (FLAG_MULTIBALL_RUNNING) 
+		|| flag_test (FLAG_SSSMB_RUNNING)
+		|| flag_test (FLAG_CHAOSMB_RUNNING)
+		|| multi_ball_play ())
+		return FALSE;
+	/* Require one locked ball first multiball, 2 locks after */
+	else if ((mball_locks_made > 0) && (mballs_played == 0))
+		return TRUE;
+	else if ((mball_locks_made > 1) && (mballs_played > 0))
+		return TRUE;
+	else
+		return FALSE;
+
+}
+
 void mball_restart_deff (void)
 {
 	for (;;)
@@ -196,26 +215,6 @@ bool can_light_lock (void)
 	else
 		return FALSE;
 }
-
-/* Rules to say whether we can start multiball */
-bool multiball_ready (void)
-{
-	/* Don't allow during certain conditions */
-	if (flag_test (FLAG_MULTIBALL_RUNNING) 
-		|| flag_test (FLAG_SSSMB_RUNNING)
-		|| flag_test (FLAG_CHAOSMB_RUNNING)
-		|| multi_ball_play ())
-		return FALSE;
-	/* Require one locked ball first multiball, 2 locks after */
-	else if ((mball_locks_made > 0) && (mballs_played == 0))
-		return TRUE;
-	else if ((mball_locks_made > 1) && (mballs_played > 0))
-		return TRUE;
-	else
-		return FALSE;
-
-}
-
 CALLSET_ENTRY (mball, lamp_update)
 {
 	/* Light the lock if it can be collected */
