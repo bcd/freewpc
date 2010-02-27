@@ -171,6 +171,7 @@ bool can_lock_ball (void)
 		&& !flag_test (FLAG_SSSMB_RUNNING) 
 		&& !flag_test (FLAG_CHAOSMB_RUNNING)
 		&& !multi_ball_play ()
+		//TODO Doesn't always work
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 		return TRUE;
 	else
