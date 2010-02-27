@@ -29,7 +29,7 @@ __local__ U8 rollover_level;
 
 extern void start_spiralaward_timer (void);
 
-static void handle_outlane (void)
+void handle_outlane (void)
 {
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
