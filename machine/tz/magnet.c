@@ -35,7 +35,6 @@
 /* Function to activate the magnet grab flags for a specific length of time */
 void magnet_flag_task (U8 magnet, U8 seconds)
 {
-	bpt();
 	switch (magnet)
 	{
 		case LEFT_MAGNET:
@@ -67,7 +66,7 @@ void magnet_hold (U8 magnet, U8 hold_time)
 	switch (magnet)
 	{
 		case LEFT_MAGNET:
-			left_magnet_grab_start ();
+			//left_magnet_grab_start ();
 			while (!switch_poll_logical (SW_LEFT_MAGNET) && hold_time > 0)
 			{	
 				task_sleep_sec (1);
@@ -78,7 +77,7 @@ void magnet_hold (U8 magnet, U8 hold_time)
 			break;
 		
 		case LOWER_RIGHT_MAGNET:
-			lower_right_magnet_grab_start ();
+			//lower_right_magnet_grab_start ();
 			while (!switch_poll_logical (SW_LOWER_RIGHT_MAGNET) && hold_time > 0)
 			{	
 				task_sleep_sec (1);
@@ -89,7 +88,7 @@ void magnet_hold (U8 magnet, U8 hold_time)
 			break;
 		
 		case UPPER_RIGHT_MAGNET:
-			lower_right_magnet_grab_start ();
+			//lower_right_magnet_grab_start ();
 			while (!switch_poll_logical (SW_UPPER_RIGHT_MAGNET) && hold_time > 0)
 			{	
 				task_sleep_sec (1);

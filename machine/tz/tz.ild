@@ -150,6 +150,7 @@ IMG_SLOT_17: machine/tz/animation/slot/slots17.pgm
 IMG_SLOT_18: machine/tz/animation/slot/slots18.pgm
 IMG_SLOT_END: machine/tz/animation/slot/slots19.pgm
 
+
 IMG_VOID_START: machine/tz/animation/void/void01.pgm
 IMG_VOID_2: machine/tz/animation/void/void02.pgm
 IMG_VOID_3: machine/tz/animation/void/void03.pgm

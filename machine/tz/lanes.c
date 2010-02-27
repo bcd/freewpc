@@ -20,12 +20,6 @@
 
 #include <freewpc.h>
 
-#define LEFT_INLANE1 	1
-#define LEFT_INLANE2 	2
-#define RIGHT_INLANE 	3
-#define LEFT_OUTLANE 	4
-#define RIGHT_OUTLANE 	5
-
 /* How many times the rollovers have been completed */
 /* TODO does this have to be __local__ ? */
 __local__ U8 rollover_count;
@@ -49,15 +43,14 @@ static void handle_outlane (void)
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
 	event_can_follow (any_outlane, center_drain, TIME_7S);
+	deff_start (DEFF_BALL_DRAIN);
 }
 
 bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
-		&& lamp_test (LM_RIGHT_INLANE)
-		&& lamp_test (LM_LEFT_OUTLANE)
-		&& lamp_test (LM_RIGHT_OUTLANE))
+		&& lamp_test (LM_RIGHT_INLANE))
 		return TRUE;
 	else
 		return FALSE;
@@ -65,39 +58,20 @@ bool rollover_completed (void)
 
 void award_rollover_completed (void)
 {
+	rollover_count++;
+	score (SC_1M);
 	/* Show animation */
 	deff_start (DEFF_ROLLOVER_COMPLETED);
 	/* Turn off inlane lamps */
-	lamplist_apply (LAMPLIST_INLANES, lamp_flash_on);
-	task_sleep_sec (3);
-	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
+	lamplist_apply (LAMPLIST_INLANES, lamp_flash_on);
+	task_sleep_sec (1);
+	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
 	/* Score it */
-	score (SC_1M);
-	rollover_count++;
 }
 
-void check_rollover (U8 rollover_switch)
+void check_rollover (void)
 {
-	switch (rollover_switch)
-	{
-		case LEFT_INLANE1:
-			lamp_on (LM_LEFT_INLANE1);
-			break;
-		case LEFT_INLANE2:
-			lamp_on (LM_LEFT_INLANE2);
-			break;
-		case RIGHT_INLANE:
-			lamp_on (LM_RIGHT_INLANE);
-			break;
-		case LEFT_OUTLANE:
-			lamp_on (LM_LEFT_OUTLANE);
-			break;
-		case RIGHT_OUTLANE:
-			lamp_on (LM_RIGHT_OUTLANE);
-			break;
-	}
-	
 	/* Check to see if rollover has been completed */
 	if (rollover_completed ())
 		award_rollover_completed ();
@@ -118,7 +92,6 @@ CALLSET_ENTRY (lanes, sw_right_button)
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
 	score (SC_10K);
-	check_rollover(LEFT_OUTLANE);
 	handle_outlane ();
 }
 
@@ -126,31 +99,34 @@ CALLSET_ENTRY (lanes, sw_left_outlane)
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
 	score (SC_10K);
-	check_rollover(RIGHT_OUTLANE);
 	handle_outlane ();
 }
 
 /* 'Light Spiral' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
+	lamp_on (LM_LEFT_INLANE1);
+	check_rollover ();
 	score (SC_1K);
 	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 	start_spiralaward_timer ();
 	//event_can_follow (left_inlane_1, right_loop, TIME_3S);
-	check_rollover (LEFT_INLANE1);
 }
 
 /* 'Light Slot Machine' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
+	lamp_on (LM_LEFT_INLANE2);
+	check_rollover ();
 	score (SC_1K);
 	start_spiralaward_timer ();
-	check_rollover (LEFT_INLANE2);
 }
 
 /* 'Dead End' Lane */
 CALLSET_ENTRY (lanes, sw_right_inlane)
 {
+	lamp_on (LM_RIGHT_INLANE);
+	check_rollover ();
 	score (SC_1K);
 //	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
 //	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
@@ -161,7 +137,6 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	/* Start the timer for the left ramp */
 	timer_restart_free (GID_LEFT_RAMP, TIME_3S);
 	event_can_follow (right_inlane, left_loop, TIME_3S);
-	check_rollover (RIGHT_INLANE);
 }
 
 

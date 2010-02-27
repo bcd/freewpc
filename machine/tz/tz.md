@@ -227,8 +227,7 @@ H1: Slot
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div., duty(SOL_DUTY_25), time(TIME_66MS)
-#H5: Right Ramp Div
+H5: Right Ramp Div
 H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
@@ -335,7 +334,7 @@ Green Lamps: COLOR:green
 Blue Lamps: COLOR:blue
 Amber Lamps: COLOR:amber
 Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
-Inlanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outlane
+Inlanes: Left Inlane1, Left Inlane2, Right Inlane
 
 ##########################################################################
 # Containers
@@ -545,7 +544,7 @@ Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
-#Driver: PRI_GAME_QUICK7
+Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
 Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
@@ -562,6 +561,7 @@ SpiralAward Collected: page(MACHINE_PAGE), PRI_GAME_QUICK3
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Slot Animation: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED
+Ball Drain: page(MACHINE_PAGE), PRI_JACKPOT
 
 ##########################################################################
 # Lamp effects
@@ -632,7 +632,7 @@ Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ont
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=TIME_3S
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,

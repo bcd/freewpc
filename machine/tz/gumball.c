@@ -172,7 +172,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING, 
 		&mpf_round_timer))
 			score (SC_5M);
-	event_should_follow (gumball_exit, camera, TIME_3S);
+	event_should_follow (gumball_exit, camera, TIME_4S);
 }
 
 CALLSET_ENTRY (gumball, sw_gumball_geneva)
@@ -207,6 +207,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			/* Do a dodgy multiball combo */
 			flag_on (FLAG_SUPER_MB_RUNNING);
 			mball_start_3_ball ();
+			ballsave_add_time (10);
 			callset_invoke (sssmb_start);
 			callset_invoke (mball_start);
 		}

@@ -149,11 +149,32 @@ void amode_leff (void)
 			lamplist_apply (LAMPLIST_SORT1, leff_toggle);
 	}
 }
+void show_driver_animation (void)
+{
+	/* Show driver animation */	
+	U16 fno;
+	U8 i;
+	for (i = 0; i < 4; i++)
+	{
+		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
+		{
+			/* We are drawing a full frame, so a clean isn't needed */
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	}
+	/* Clean both pages */
+	dmd_alloc_pair_clean ();
+}
 
 CALLSET_ENTRY (tz_amode, amode_page)
 {
+	show_driver_animation ();
+	
 	U8 n;
-
+	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
@@ -170,18 +191,59 @@ CALLSET_ENTRY (tz_amode, amode_page)
 		dmd_map_overlay ();
 	}
 	
-	/* Show driver animation */	
-	U16 fno;
-	U8 i;
-	for (i = 0; i < 3; i++)
+	show_driver_animation ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 7, "BCD");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed10, 64, 22, "CREATED BY");
+
+	for (n = 0; n < 40; n++)
 	{
-		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
-		{
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_show2 ();
-			task_sleep (TIME_66MS);
-		}
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
+	
+	}
+	
+	show_driver_animation ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 7, "HIGHRISE");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed10, 64, 22, "ANIMATIONS BY");
+
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
+	}
+	
+	show_driver_animation ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 7, "SONNY JIM");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed10, 64, 22, "ADDITIONAL CODE");
+
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
 	}
 }
 

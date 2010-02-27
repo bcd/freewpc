@@ -329,4 +329,15 @@ void bg_flash_deff (void)
 		task_sleep (flash_time); /* 33% */
 	}
 }
-
+void ball_drain_deff (void)
+{
+	U16 fno;
+	for (fno = IMG_VOID_START; fno <= IMG_VOID_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	deff_exit ();
+}

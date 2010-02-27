@@ -180,6 +180,8 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 			//leff_start (LEFF_BONUS);
 			if (!multi_ball_play ())
 			{
+				//TODO Start a timer to pulse the magnets
+				// if the timer runs out
 				/* Turn off GI and start lamp effect */
 				leff_start (LEFF_MPF_ACTIVE);
 				flipper_disable ();
