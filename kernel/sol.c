@@ -290,7 +290,8 @@ void sol_req_rtt (void)
 				finish. */
 				sol_req_off ();
 				sol_req_state = REQ_IDLE;
-				req_lock = 0x80;
+				if (req_lock)
+					req_lock = 0x80;
 			}
 		}
 		else if (sol_req_state == REQ_DUTY)
