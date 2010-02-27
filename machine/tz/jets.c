@@ -32,8 +32,8 @@ extern U8 mpf_round_timer;
 CALLSET_ENTRY(jet, start_player)
 {
 	jets_scored = 0;
-	jets_for_bonus = 25;
-	jets_bonus_level = 1;
+	jets_for_bonus = 10;
+	jets_bonus_level = 0;
 	lamp_tristate_on (LM_LEFT_JET);
 	lamp_tristate_on (LM_LOWER_JET);
 	lamp_tristate_on (LM_RIGHT_JET);
@@ -106,7 +106,7 @@ CALLSET_ENTRY (jet, sw_jet)
 		//TODO Set sensible bonus levels
 		//bounded_increment (jets_bonus_level, 50);
 		jets_bonus_level++;
-		jets_for_bonus += 10;
+		jets_for_bonus += 5;
 		//TODO Set sound priority higher than jets
 		sound_send (SND_GLASS_BREAKS);
 		task_sleep (TIME_500MS);
@@ -131,7 +131,6 @@ CALLSET_ENTRY (jet, sw_jet)
 	}
 
 	if (timed_mode_timer_running_p (GID_TSM_ROUND_RUNNING, &tsm_round_timer))
-	//if (flag_test (FLAG_TSM_RUNNING))
 		score (SC_500K);
 	else
 	{	
@@ -150,7 +149,6 @@ CALLSET_ENTRY (jet, sw_jet)
 
 CALLSET_ENTRY (jet, lamp_update)
 {
-	// if (flag_test (FLAG_TSM_RUNNING))
 	if (timed_mode_timer_running_p (GID_TSM_ROUND_RUNNING, &tsm_round_timer))
 		leff_start (LEFF_JETS_ACTIVE);
 	else
@@ -160,13 +158,11 @@ CALLSET_ENTRY (jet, lamp_update)
 
 CALLSET_ENTRY (jet, start_ball)
 {
-	//flag_off (FLAG_TSM_RUNNING);
 	leff_stop (LEFF_JETS_ACTIVE);
 }
 
 CALLSET_ENTRY (jet, door_start_tsm)
 {
-//	flag_on (FLAG_TSM_RUNNING);
 	leff_start (LEFF_JETS_ACTIVE);
 }
 
