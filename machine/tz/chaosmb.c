@@ -120,26 +120,29 @@ void chaosmb_check_jackpot_lamps (void)
 {
 	/* Turn all off by default */
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
-	switch (chaosmb_level)
+	if (chaosmb_hits_to_relight == 0)
 	{
-		case 0:
-			lamp_tristate_flash (LM_MULTIBALL);
-			break;
-		case 1:
-			lamp_tristate_flash (LM_RAMP_BATTLE);
-			break;
-		case 2:
-			lamp_tristate_flash (LM_PIANO_JACKPOT);
-			break;
-		case 3:
-			lamp_tristate_flash (LM_CAMERA);
-			break;
-		case 4:
-			lamp_tristate_flash (LM_POWER_PAYOFF);
-			break;
-		case 5:
-			lamp_tristate_flash (LM_DEAD_END);
-			break;
+		switch (chaosmb_level)
+		{
+			case 0:
+				lamp_tristate_flash (LM_MULTIBALL);
+				break;
+			case 1:
+				lamp_tristate_flash (LM_RAMP_BATTLE);
+				break;
+			case 2:
+				lamp_tristate_flash (LM_PIANO_JACKPOT);
+				break;
+			case 3:
+				lamp_tristate_flash (LM_CAMERA);
+				break;
+			case 4:
+				lamp_tristate_flash (LM_POWER_PAYOFF);
+				break;
+			case 5:
+				lamp_tristate_flash (LM_DEAD_END);
+				break;
+		}
 	}
 }
 
