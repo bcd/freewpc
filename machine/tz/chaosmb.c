@@ -27,7 +27,6 @@ extern void reset_unlit_shots (void);
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
 	score_update_start ();
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (font, x, y, text);
@@ -59,13 +58,14 @@ struct {
 	{ "LEFT RAMP", 15, },
 	{ "RIGHT RAMP", 20, },
 	{ "PIANO", 25,  },
-	{ "HITCHHIKER", 30 },
+	{ "CAMERA", 30 },
 	{ "POWER PAYOFF", 40 },
 	{ "DEAD END", 50 },
 };
 
 /* Allow divert if chaosmb is running and
  * if the left ramp is the currently lit jackpot */
+
 bool chaosmb_can_divert_to_autoplunger (void)
 {
 	if (flag_test (FLAG_CHAOSMB_RUNNING)
@@ -78,8 +78,6 @@ bool chaosmb_can_divert_to_autoplunger (void)
 
 void chaos_jackpot_deff (void)
 {
-	
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 9, "CHAOS");
@@ -118,6 +116,34 @@ void chaosmb_running_deff (void)
 	}
 }
 
+void chaosmb_check_jackpot_lamps (void)
+{
+	/* Turn all off by default */
+	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off)
+	switch (chaosmb_level)
+	{
+		case 0:
+			lamp_tristate_flash (LM_MULTIBALL);
+			break;
+		case 1:
+			lamp_tristate_flash (LM_RAMP_BATTLE);
+			break;
+		case 2:
+			lamp_tristate_flash (LM_PIANO_JACKPOT);
+			break;
+		case 3:
+			lamp_tristate_flash (LM_CAMERA);
+			break;
+		case 4:
+			lamp_tristate_flash (LM_POWER_PAYOFF);
+			break;
+		case 5:
+			lamp_tristate_flash (LM_DEAD_END);
+			break;
+	}
+}
+
+
 
 void chaosmb_score_jackpot (void)
 {
@@ -126,6 +152,7 @@ void chaosmb_score_jackpot (void)
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_CHAOS_JACKPOT);
 	sound_send (SND_EXPLOSION_1);
+	chaosmb_check_jackpot_lamps ();
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
@@ -138,20 +165,20 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 		chaosmb_hits_to_relight = 1;
 		mball_start_3_ball ();
 		ballsave_add_time (10);
+		/* Check and light jackpot lamp */
+		chaosmb_check_jackpot_lamps ();
 	}
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
-	//TODO Is this where the LM_CLOCK_MILLIONS flash gets left on from?
-	/* Hack as the following doesn't seem to stop running */
 	flag_off (FLAG_CHAOSMB_RUNNING);
+	/* Turn off jackpot lamps */
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
-	lamp_tristate_off (LM_MULTIBALL);
+	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off)
 	deff_stop (DEFF_CHAOSMB_RUNNING);
 	music_refresh ();
 }
-
 
 void chaosmb_check_level (U8 level)
 {
@@ -163,7 +190,6 @@ void chaosmb_check_level (U8 level)
 	}
 }
 
-
 CALLSET_ENTRY (chaosmb, display_update)
 {
 	if (flag_test (FLAG_CHAOSMB_RUNNING))
@@ -172,18 +198,15 @@ CALLSET_ENTRY (chaosmb, display_update)
 
 CALLSET_ENTRY (chaosmb, lamp_update)
 {
+	/* Jackpot lamp lighting is done by
+	 * chaosmb_check_jackpot_lamps () */
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 		return;	
+
 	if (chaosmb_hits_to_relight == 0)
-	{
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
-		lamp_tristate_flash (LM_MULTIBALL);
-	}
 	else	
-	{	
 		lamp_tristate_flash (LM_CLOCK_MILLIONS);
-		lamp_tristate_off (LM_MULTIBALL);
-	}
 }
 
 CALLSET_ENTRY (chaosmb, music_refresh)
@@ -215,7 +238,7 @@ CALLSET_ENTRY (chaosmb, sw_piano)
 	chaosmb_check_level (2);
 }
 
-CALLSET_ENTRY (chaosmb, sw_hitchhiker)
+CALLSET_ENTRY (chaosmb, sw_camera)
 {
 	chaosmb_check_level (3);
 }
@@ -232,10 +255,10 @@ CALLSET_ENTRY (chaosmb, sw_dead_end)
 
 CALLSET_ENTRY (chaosmb, sw_clock_target)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING)
-		&& (chaosmb_hits_to_relight > 0))
+	if (flag_test (FLAG_CHAOSMB_RUNNING))
 	{
-		chaosmb_hits_to_relight--;
+		score (SC_250K);
+		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}
 }
 
@@ -248,6 +271,4 @@ CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;
 	chaosmb_hits_to_relight = 0;
-	/* Hack, shouldn't be needed */
-//	flag_off (FLAG_CHAOSMB_RUNNING);
 }
