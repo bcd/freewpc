@@ -28,6 +28,7 @@ U8 mpf_ball_count;
 U8 mpf_round_timer;
 U8 mpf_award;
 U8 __local__ mpf_level;
+bool mpf_active;
 
 /* Where the powerball is */
 extern U8 pb_location;
@@ -73,7 +74,7 @@ void mpf_ballsearch_task (void)
 	U8 i = 0;
 	while (mpf_ball_count > 0 || i < 3)
 	{
-		task_sleep_sec (4);
+		task_sleep_sec (5);
 		sol_request (SOL_MPF_RIGHT_MAGNET);
 		task_sleep (TIME_500MS);
 		sol_request (SOL_MPF_LEFT_MAGNET);
@@ -96,13 +97,15 @@ void mpf_round_begin (void)
 void mpf_round_expire (void)
 {
 	deff_stop (DEFF_MPF_ROUND);
+	mpf_active = FALSE;
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
-	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);
+	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
 }
 
 void mpf_round_end (void)
 {
+	mpf_active = FALSE;
 }
 
 void mpf_round_task (void)
@@ -180,8 +183,11 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	flasher_pulse (FLASH_POWERFIELD);
 	if (mpf_ball_count > 0)
 		bounded_decrement (mpf_ball_count, 0);
-	else	
+	else
+	{
 		timed_mode_stop (&mpf_round_timer);
+		mpf_active = FALSE;
+	}
 	door_award_if_possible ();
 }
 
@@ -192,6 +198,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	on when a ball is already in play. */
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
+		mpf_active = TRUE;
 		reset_unlit_shots ();
 		mpf_ball_count++;
 		mpf_level++;
@@ -226,6 +233,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)
 	{
+		mpf_active = FALSE;
 		leff_stop (LEFF_MPF_ACTIVE);
 		timed_mode_stop (&mpf_round_timer);
 		/* This should be fine as we only disable in single ball play */
@@ -264,6 +272,7 @@ CALLSET_ENTRY (mpf, start_player)
 {
 	mpf_enable_count = 1;
 	mpf_level = 0;
+	mpf_active = FALSE;
 }
 
 CALLSET_ENTRY (mpf, ball_search)

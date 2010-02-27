@@ -46,7 +46,7 @@ extern __fastram__ U8 @class_enables;
 extern __fastram__ U8 @class_running;
 #endif /* __@class_DRIVER_H */
 
-extern U8 mpf_ball_count;
+extern bool mpf_active;
 
 @@
 @@file @self.h
@@ -95,7 +95,7 @@ extern inline void @self_service (void)
 		}
 	}
 	/* Flipper switch is opto, so inverted */
-	else if (@self_enabled_p () && !rt_switch_poll (@sw) && (mpf_ball_count > 0))
+	else if (@self_enabled_p () && !rt_switch_poll (@sw) && (mpf_active))
 	{
 		/* When the solenoid is not running, poll its switch
 		and see if it should be started. */
