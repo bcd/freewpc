@@ -335,6 +335,7 @@ Blue Lamps: COLOR:blue
 Amber Lamps: COLOR:amber
 Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
 Inlanes: Left Inlane1, Left Inlane2, Right Inlane
+Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, Dead End
 
 ##########################################################################
 # Containers
