@@ -120,7 +120,7 @@ void chaosmb_check_jackpot_lamps (void)
 {
 	/* Turn all off by default */
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off)
-	switch (chaosmb_level)
+	switch (chaosmb_level);
 	{
 		case 0:
 			lamp_tristate_flash (LM_MULTIBALL);
@@ -175,7 +175,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	flag_off (FLAG_CHAOSMB_RUNNING);
 	/* Turn off jackpot lamps */
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
-	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off)
+	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
 	music_refresh ();
 }
