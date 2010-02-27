@@ -119,8 +119,8 @@ void chaosmb_running_deff (void)
 void chaosmb_check_jackpot_lamps (void)
 {
 	/* Turn all off by default */
-	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off)
-	switch (chaosmb_level);
+	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
+	switch (chaosmb_level)
 	{
 		case 0:
 			lamp_tristate_flash (LM_MULTIBALL);
