@@ -17,7 +17,6 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//TODO Relight rules?
 
 #include <freewpc.h>
 
@@ -49,7 +48,6 @@ void sssmb_running_deff (void)
 	for (;;)
 	{
 		score_update_start ();
-		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 
@@ -213,7 +211,6 @@ void sssmb_stop (void)
 		deff_stop (DEFF_SSSMB_RUNNING);
 		lamp_tristate_off (LM_SUPER_SKILL);
 		music_refresh ();
-		//autofire_request_count = 0;
 	}
 }
 

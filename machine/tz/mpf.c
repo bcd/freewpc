@@ -17,6 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+//TODO Pressing extra ball during mpf could do something
 #include <freewpc.h>
 #include <bridge_open.h>
 /** The number of balls enabled to go to the MPF */
@@ -65,6 +66,28 @@ void mpf_award_deff (void)
 	deff_exit ();
 }
 
+/* Task to pulse the mpf magnets
+ * Gets killed when a ball exits */
+void mpf_ballsearch_task (void)
+{
+	U8 i = 0;
+	while (mpf_ball_count > 0 || i < 3)
+	{
+		task_sleep_sec (4);
+		sol_request (SOL_MPF_RIGHT_MAGNET);
+		task_sleep (TIME_500MS);
+		sol_request (SOL_MPF_LEFT_MAGNET);
+		task_sleep (TIME_500MS);
+		sol_request (SOL_MPF_RIGHT_MAGNET);
+		task_sleep (TIME_500MS);
+		sol_request (SOL_MPF_LEFT_MAGNET);
+		task_sleep (TIME_500MS);
+		i++;
+	}
+	task_exit ();
+		
+}
+
 void mpf_round_begin (void)
 {
 	deff_start (DEFF_MPF_ROUND);
@@ -73,7 +96,9 @@ void mpf_round_begin (void)
 void mpf_round_expire (void)
 {
 	deff_stop (DEFF_MPF_ROUND);
-	mpf_ball_count = 0 ;
+	/* Start a task to pulse the magnets
+	 * if a ball gets stuck */
+	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);
 }
 
 void mpf_round_end (void)
@@ -103,7 +128,6 @@ CALLSET_ENTRY (mpf, music_refresh)
 CALLSET_ENTRY (mpf, end_ball)
 {
 	timed_mode_stop (&mpf_round_timer);
-	mpf_ball_count = 0;
 }
 
 bool mpf_ready_p (void)
@@ -149,7 +173,6 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	flipper_enable ();
-	//leff_stop (LEFF_BONUS);
 	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	deff_start (DEFF_MPF_AWARD);
@@ -159,8 +182,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 		bounded_decrement (mpf_ball_count, 0);
 	else	
 		timed_mode_stop (&mpf_round_timer);
-	//task_sleep_sec (4);
-	//door_award_if_possible ();
+	door_award_if_possible ();
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
@@ -204,8 +226,6 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)
 	{
-		leff_stop (LEFF_MPF_ACTIVE);
-		//leff_stop (LEFF_BONUS);
 		leff_stop (LEFF_MPF_ACTIVE);
 		timed_mode_stop (&mpf_round_timer);
 		/* This should be fine as we only disable in single ball play */
