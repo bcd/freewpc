@@ -42,7 +42,7 @@ U8 door_active_lamp;
 
 /** Names of all the door panels, in order */
 const char *door_panel_names[] = {
-	"TOWN SQUARE MADNESS",
+	"TOWNSQUARE MADNESS",
 	"LIGHT EXTRA BALL",
 	"SUPER SLOT",
 	"CLOCK MILLIONS",
@@ -51,9 +51,9 @@ const char *door_panel_names[] = {
 	"10 MILLION",
 	"GREED",
 	"THE CAMERA",
-	"THE HITCHHIKER",
+	"HITCHHIKER",
 	"CLOCK CHAOS",
-	"SUPER SKILL SHOT",
+	"SUPER SKILL MB",
 	"FAST LOCK",
 	"LIGHT GUMBALL",
 	"RETURN TO THE ZONE",
@@ -165,23 +165,6 @@ void slot_animation_sound_task (void)
 
 }
 
-
-void slot_animation_deff (void)
-{
-	U16 fno;
-	task_create_gid (GID_SLOT_ANIMATION_SOUND_TASK, slot_animation_sound_task);
-	for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
-	{
-		dmd_alloc_pair ();
-		frame_draw (fno);
-		dmd_show2 ();
-		task_sleep (TIME_66MS);
-	}
-	task_sleep_sec (1);
-	deff_exit ();
-}
-
-
 void door_award_deff (void)
 {
 	U8 index = door_index;
@@ -190,23 +173,38 @@ void door_award_deff (void)
 	U16 fno;
 	/* If piano was lit, we were called from the slot */
 	if (flag_test (FLAG_PIANO_DOOR_LIT))
-		slot_animation_deff ();
+	{
+		task_create_gid (GID_SLOT_ANIMATION_SOUND_TASK, slot_animation_sound_task);
+		for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+		task_sleep_sec (1);
+	}
 	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
+		/* Flip it, as text is drawn to the low page */
+		dmd_flip_low_high ();	
+		font_render_string_center (&font_fixed6, 48, 16, door_panel_names[index]);
+		/* Flip it again so text is now on high page */
+		dmd_flip_low_high ();	
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	
-	/* Play backwards with text on it*/
+	task_sleep_sec (1);	
+	/* Play backwards */
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
 		dmd_alloc_pair ();
 		/* Draw the frame, leave it blank at the end */
-		if (fno <= IMG_DOOR_START + 1)
+		if (fno == IMG_DOOR_START)
 		{
 			dmd_clean_page_low ();
 			dmd_clean_page_high ();
@@ -217,7 +215,7 @@ void door_award_deff (void)
 		/* Flip it, as text is drawn to the low page */
 		dmd_flip_low_high ();	
 		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
-		font_render_string_center (&font_fixed6, 48, 22, door_award_goals[index]);
+		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
@@ -225,7 +223,7 @@ void door_award_deff (void)
 	}
 	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
-	/* Hold the ball during deff if D_PAUSE */
+	/* Unlock the ball if D_PAUSE */
 	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
