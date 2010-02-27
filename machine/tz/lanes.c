@@ -20,23 +20,14 @@
 
 #include <freewpc.h>
 
+/* CALLSET_SECTION (lanes, __machine2__) */
+
 /* How many times the rollovers have been completed */
 /* TODO does this have to be __local__ ? */
 __local__ U8 rollover_count;
 __local__ U8 rollover_level;
 
 extern void start_spiralaward_timer (void);
-
-void rollover_completed_deff (void)
-{
-	sound_send (SND_GLASS_BREAKS);
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
-	font_render_string_center (&font_fixed6, 64, 17, "COMPLETED");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	deff_exit ();
-}
 
 static void handle_outlane (void)
 {

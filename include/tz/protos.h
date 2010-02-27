@@ -53,6 +53,8 @@ __machine__ void extra_ball_deff(void);
 __machine__ void special_deff(void);
 __machine__ void jackpot_deff(void);
 __machine__ void ballsave_deff(void);
+__machine__ void rollover_completed_deff (void);
+
 /* door.c */
 void door_set_flashing(U8 id);
 void door_advance_flashing(void);
@@ -100,4 +102,10 @@ __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
 /* star.c */
 __machine__ void star_draw(void);
-
+/* spiralaward.c */
+__machine__ void start_spiralaward_timer (void);
+/* lanes.c */
+__machine2__ static void handle_outlane (void);
+__machine2__ bool rollover_completed (void);
+__machine2__ void award_rollover_completed (void);
+__machine2__ void check_rollover (void);
