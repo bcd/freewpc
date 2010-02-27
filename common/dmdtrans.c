@@ -170,6 +170,16 @@ dmd_transition_t trans_scroll_down = {
 	.count = 8,
 };
 
+dmd_transition_t trans_scroll_down_fast = {
+	.composite_init = trans_scroll_down_init,
+	.composite_old = trans_scroll_down_old,
+	.composite_new = trans_scroll_down_new,
+	.delay = 0,
+	.arg = { .u16 = 4 * 16 },
+	.count = 8,
+};
+
+
 /*********************************************************************/
 
 void trans_scroll_left_init (void)
