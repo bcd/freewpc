@@ -99,7 +99,6 @@ void bonus_deff (void)
 		score_add (total_bonus, bonus_scored);
 		sprintf_score (bonus_scored);	
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		//sprintf ("%d x 1,000,000", door_panels_started);
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
@@ -127,18 +126,21 @@ void bonus_deff (void)
 
 	if (jets_scored > 0)
 	{
-		U8 total_jets = (jets_scored * jets_bonus_level);
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_100K]);
-		score_mul (bonus_scored, total_jets); 
+		score_mul (bonus_scored, jets_scored); 
 		score_add (total_bonus, bonus_scored);
+		
+		score_zero (bonus_scored);
+		score_add (bonus_scored, score_table[SC_1M]);
+		score_mul (bonus_scored, jets_bonus_level);
+		score_add (total_bonus, bonus_scored);
+
 		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("TOWNSQUARE JETS");
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("%d X 100,000", (total_jets));
-		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_ROUND_BOOM);
@@ -258,7 +260,7 @@ void bonus_deff (void)
 		sound_send (SND_GREED_ROUND_BOOM);
 		bonus_pause ();
 	}
-	
+	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 
 	if (backdoor_award_collected == TRUE)
 	{
@@ -275,7 +277,31 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 
-	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
+	if (backdoor_award_collected == TRUE
+		&& door_panels_started
+		&& loops
+		&& jets_bonus_level
+		&& left_ramps
+		&& gumball_collected_count
+		&& spiralawards_collected
+		&& dead_end_count
+		&& hitch_count
+		&& rollover_count)
+	{
+		dmd_alloc_low_clean ();
+		score_add (total_bonus, score_table[SC_50M]);
+		sprintf ("TOURIST AWARD");
+		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+		sprintf ("50 MILLION");
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		dmd_sched_transition (&trans_sequential_boxfade);
+		sound_send (SND_PLAYER_PIANO_UNUSED);
+		dmd_show_low ();
+		task_sleep_sec (2);
+
+
+	}
+
 
 	/* Show total Bonus */	
 	dmd_alloc_low_clean ();
