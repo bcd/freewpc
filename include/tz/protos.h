@@ -39,6 +39,8 @@ void autofire_add_ball(void);
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
 __common__ void ballsave_launch(void);
+/* camera.c * */
+__machine__ void door_start_camera (void);
 /* clock.c */
 void tz_dump_clock(void);
 void tz_clock_start_forward(void);
@@ -52,8 +54,9 @@ __machine__ void replay_deff(void);
 __machine__ void extra_ball_deff(void);
 __machine__ void special_deff(void);
 __machine__ void jackpot_deff(void);
-__machine__ void ballsave_deff(void);
+__machine__ void tz_ball_save_deff(void);
 __machine__ void rollover_completed_deff (void);
+__machine2__ void backdoor_award_deff (void);
 
 /* door.c */
 void door_set_flashing(U8 id);
@@ -61,7 +64,14 @@ void door_advance_flashing(void);
 void door_award_rotate(void);
 void door_award_deff(void);
 void door_award_if_possible(void);
+bool can_award_door_panel (void);
+void door_award_flashing (void);
 void door_award_enable(void);
+__machine__ void shot_slot_machine (void);
+__machine__ void shot_piano (void);
+__machine__ void award_door_panel (void);
+
+
 /* gumball.c */
 void gumball_mech_activate(void);
 void gumball_mech_deactivate(void);
@@ -97,6 +107,8 @@ void ramp_divert_to_autoplunger (void);
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
+__machine__ void skill_shot_ready_deff (void);
+__machine__ void skill_shot_made_deff (void);
 /* sssmb.c */
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
@@ -109,3 +121,26 @@ __machine2__ void handle_outlane (void);
 __machine2__ bool rollover_completed (void);
 __machine2__ void award_rollover_completed (void);
 __machine2__ void check_rollover (void);
+/* jets.c */
+
+/* unlit.c*/
+//__machine2__ void reset_unlit_shots (void);
+__machine2__ void award_unlit_shot (U8 unlit_called_from);
+
+/* powerball.c */
+/* Each of these represents a possible state for the powerball
+ * detector.  They are mutually exclusive, but expressed as bitmasks
+ * so that ranges can be tested more easily. */
+//__machine2__ U8 pb_location;
+//__machine2__ U8 pb_depth;
+
+#define PB_MISSING       0x0
+#define PB_IN_LOCK       0x1
+#define PB_IN_TROUGH     0x2
+#define PB_IN_GUMBALL    0x4
+#define PB_IN_PLAY       0x8
+#define PB_MAYBE_IN_PLAY 0x10
+#define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
+#define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
+
+

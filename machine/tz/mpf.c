@@ -32,8 +32,6 @@ bool mpf_active;
 
 /* Where the powerball is */
 extern U8 pb_location;
-#define PB_MAYBE_IN_PLAY 0x10
-extern void reset_unlit_shots (void);
 
 void mpf_round_deff (void)
 {
@@ -167,7 +165,7 @@ CALLSET_ENTRY (mpf, door_start_battle_power)
  * to expect a ball coming from the mpf */
 CALLSET_ENTRY (mpf, sw_mpf_top)
 {
-	event_should_follow (mpf_top, camera, TIME_4S);
+	event_should_follow (mpf_top, camera, TIME_5S);
 	sound_send (SND_EXPLOSION_3);
 	score (SC_500K);
 }
@@ -175,20 +173,22 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
+	task_kill_gid (GID_MPF_BALLSEARCH);
 	flipper_enable ();
 	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
-	deff_start (DEFF_MPF_AWARD);
-	sound_send (SND_EXPLOSION_3);
-	flasher_pulse (FLASH_POWERFIELD);
+	//flasher_pulse (FLASH_POWERFIELD);
 	if (mpf_ball_count > 0)
 		bounded_decrement (mpf_ball_count, 0);
 	else
 	{
-		timed_mode_stop (&mpf_round_timer);
 		mpf_active = FALSE;
+		timed_mode_stop (&mpf_round_timer);
 	}
-	door_award_if_possible ();
+	deff_start (DEFF_MPF_AWARD);
+	sound_send (SND_EXPLOSION_3);
+	kickout_lock (KLOCK_DEFF);
+	//callset_invoke (award_door_panel);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
@@ -199,7 +199,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
 		mpf_active = TRUE;
-		reset_unlit_shots ();
+		callset_invoke (reset_unlit_shots);
 		mpf_ball_count++;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
@@ -229,6 +229,8 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 
 CALLSET_ENTRY (mpf, sw_mpf_exit)
 {
+	/* Stop the ball search timer */
+	task_kill_gid (GID_MPF_BALLSEARCH);
 	if (mpf_ball_count > 0)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)

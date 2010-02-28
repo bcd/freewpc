@@ -22,7 +22,6 @@
 
 extern void mball_start_3_ball (void);
 extern U8 autofire_request_count;
-extern void reset_unlit_shots (void);
 
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
@@ -119,50 +118,62 @@ void chaosmb_running_deff (void)
 void chaosmb_check_jackpot_lamps (void)
 {
 	/* Turn all off by default */
-	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
+	
 	if (chaosmb_hits_to_relight == 0)
-	{
+	{	
+		lamp_tristate_off (LM_CLOCK_MILLIONS);
 		switch (chaosmb_level)
 		{
 			case 0:
+				lamp_tristate_off (LM_DEAD_END);
 				lamp_tristate_flash (LM_MULTIBALL);
 				break;
 			case 1:
+				lamp_tristate_off (LM_MULTIBALL);
 				lamp_tristate_flash (LM_RAMP_BATTLE);
 				break;
 			case 2:
+				lamp_tristate_off (LM_RAMP_BATTLE);
 				lamp_tristate_flash (LM_PIANO_JACKPOT);
 				break;
 			case 3:
+				lamp_tristate_off (LM_PIANO_JACKPOT);
 				lamp_tristate_flash (LM_CAMERA);
 				break;
 			case 4:
+				lamp_tristate_off (LM_CAMERA);
 				lamp_tristate_flash (LM_POWER_PAYOFF);
 				break;
 			case 5:
+				lamp_tristate_off (LM_POWER_PAYOFF);
 				lamp_tristate_flash (LM_DEAD_END);
 				break;
 		}
 	}
+	else	
+		lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
 
 
 void chaosmb_score_jackpot (void)
 {
-	chaosmb_level++;
+	if (chaosmb_level <= 5)
+		chaosmb_level++;
+	else
+		chaosmb_level = 0;
+
 	chaosmb_hits_to_relight = chaosmb_level * 2;
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_CHAOS_JACKPOT);
 	sound_send (SND_EXPLOSION_1);
-	chaosmb_check_jackpot_lamps ();
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 	{
-		reset_unlit_shots ();
+		callset_invoke (reset_unlit_shots);
 		flag_on (FLAG_CHAOSMB_RUNNING);
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 1;
@@ -179,6 +190,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	/* Turn off jackpot lamps */
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
+	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
 	music_refresh ();
 }
@@ -206,10 +218,8 @@ CALLSET_ENTRY (chaosmb, lamp_update)
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 		return;	
 
-	if (chaosmb_hits_to_relight == 0)
-		lamp_tristate_off (LM_CLOCK_MILLIONS);
-	else	
-		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	chaosmb_check_jackpot_lamps ();
+	
 }
 
 CALLSET_ENTRY (chaosmb, music_refresh)

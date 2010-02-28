@@ -141,6 +141,9 @@ CALLSET_ENTRY (lanes, start_ball)
 
 CALLSET_ENTRY (lanes, sw_outhole)
 {	
-	if (in_live_game)
+	if (in_live_game && !timer_find_gid(GID_OUTHOLE_ANIM_DEBOUNCE))
+	{
+		timer_restart_free (GID_OUTHOLE_ANIM_DEBOUNCE, TIME_1S);
 		deff_start (DEFF_BALL_EXPLODE);
+	}
 }

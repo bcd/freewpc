@@ -72,12 +72,12 @@ GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = leftramp.o skill.o deadend.o camera.o \
-	unlit.o spiralaward.o spiral.o tsm.o fastlock.o door.o \
+	spiralaward.o spiral.o tsm.o fastlock.o door.o \
  	rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
-	mpf.o powerball.o clockmillions.o chaosmb.o \
+	mpf.o clockmillions.o powerball.o chaosmb.o \
 	multiball.o star.o sssmb.o deffs.o lock.o
 
-GAME2_OBJS = lanes.o
+GAME2_OBJS = lanes.o unlit.o
 
 FIF_SRCS += images/cow.fif
 

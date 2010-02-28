@@ -24,21 +24,13 @@
  * Collecting mpf, multiball, door panel, gumball or lock resets count
  * Only works once per game, 20M bonus on each ball */
 
+/* CALLSET_SECTION (unlit, __machine2__) */
 #include <freewpc.h>
-
-
-extern void door_award_if_possible (void);
 
 __local__ U8 unlit_shot_count;
 __local__ bool backdoor_award_collected;
 /* last switch that was collected 'unlit; */
 __local__ U8 unlit_called_from_stored;
-
-void reset_unlit_shots (void)
-{
-	unlit_shot_count = 0;
-	unlit_called_from_stored = 0;
-}
 
 void backdoor_award_deff (void)
 {
@@ -48,6 +40,12 @@ void backdoor_award_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
+}
+
+CALLSET_ENTRY (unlit, reset_unlit_shots)
+{
+	unlit_shot_count = 0;
+	unlit_called_from_stored = 0;
 }
 
 bool can_award_unlit_shot (U8 unlit_called_from)
@@ -78,11 +76,11 @@ void award_unlit_shot (U8 unlit_called_from)
 			task_kill_gid (GID_DOOR_AWARD_ROTATE);
 			door_award_if_possible ();
 			backdoor_award_collected = TRUE;
-			reset_unlit_shots ();
+			callset_invoke (reset_unlit_shots);
 		}
 		/* Reset if the player hits the same unlit shot twice */
 		if (unlit_called_from == unlit_called_from_stored)
-			reset_unlit_shots ();
+			callset_invoke (reset_unlit_shots);
 		if (unlit_shot_count == 4)
 		{
 			/* Hint to the player that backdoor award is ready */
@@ -101,11 +99,11 @@ void award_unlit_shot (U8 unlit_called_from)
 CALLSET_ENTRY (unlit, start_ball)
 {
 	/* Maybe clear backdoor_award_collected on each ball? */
-	reset_unlit_shots ();
+	callset_invoke (reset_unlit_shots);
 }
 
 CALLSET_ENTRY (unlit, start_player)
 {
 	backdoor_award_collected = FALSE;
-	reset_unlit_shots ();
+//	reset_unlit_shots ();
 }

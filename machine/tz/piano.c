@@ -29,10 +29,9 @@ CALLSET_ENTRY (piano, sw_piano)
 	of time.  This information can only be used reliably
 	during single-ball play.  It is currently used for 
 	pausing timers. */
-	if (event_did_follow (right_loop, piano))
+/*	if (event_did_follow (right_loop, piano))
 		{
 			sound_send (SND_RUDY_BLEH);
 			score (SC_5M);
-		}
-		
+		}*/
 }

@@ -33,8 +33,6 @@ extern U8 live_balls;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
 extern bool fastlock_running (void);
-extern void reset_unlit_shots (void);
-extern void award_unlit_shot (U8 unlit_called_from);
 
 /* Rules to say whether we can start multiball */
 bool multiball_ready (void)
@@ -147,8 +145,7 @@ void mb_start_deff (void)
 
 void jackpot_relit_deff (void)
 {
-	sample_start (SND_GET_THE_EXTRA_BALL, SL_1S);
-	sound_send (SND_JACKPOT);
+	sound_send (0xFD);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT RELIT");
 	dmd_show_low ();
@@ -226,42 +223,41 @@ CALLSET_ENTRY (mball, lamp_update)
 	/* Flash the appropiate lamp when multiball is ready */
 	if (multiball_ready ())
 		lamp_tristate_flash (LM_MULTIBALL);
-
+	else if (!flag_test (FLAG_CHAOSMB_RUNNING))
+		lamp_tristate_off (LM_MULTIBALL);
+	
+	if (multi_ball_play ())
+		return;
 	/* Turn on and flash door lock lamps during game situations */
 	if (mball_locks_made == 0 && mball_locks_lit == 0)
 	{
 		lamp_tristate_off (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
 	}
-	else if (mball_locks_made == 0 && mball_locks_lit == 1)
+	else if (mball_locks_made == 0 && mball_locks_lit >= 1)
 	{
 		lamp_tristate_flash (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
-	}
-	else if (mball_locks_made == 0 && mball_locks_lit == 2)
-	{
-		lamp_tristate_flash (LM_LOCK1);
-		lamp_tristate_flash (LM_LOCK2);
 
 	}
-	else if (mball_locks_made == 1 && mball_locks_lit == 1)
+	else if (mball_locks_made == 1 && mball_locks_lit == 0)
 	{
 		lamp_tristate_on (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
 	}
-	else if (mball_locks_made == 1 && mball_locks_lit == 2)
+	else if (mball_locks_made == 1 && mball_locks_lit >= 1)
 	{
 		lamp_tristate_on (LM_LOCK1);
 		lamp_tristate_flash (LM_LOCK2);
 	}
-	else
+	else if (mball_locks_made >= 2)
 	{
 		lamp_tristate_on (LM_LOCK1);
 		lamp_tristate_on (LM_LOCK2);
 	}
 	
 	/* Flash the Piano Jackpot lit when Jackpot is lit */
-	if (flag_test (FLAG_MB_JACKPOT_LIT))
+	if (flag_test (FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 	else
 		lamp_tristate_off (LM_PIANO_JACKPOT);
@@ -308,8 +304,7 @@ void mball_start_3_ball (void)
 		 *  1 ball may already be in autofire */
 		case 1:
 			autofire_add_ball ();	
-		 	task_sleep_sec (3);
-			task_sleep (TIME_500MS);
+		 	task_sleep_sec (4);
 			device_unlock_ball (device_entry (DEVNO_LOCK));
 		 	//task_sleep_sec (1);
 			break;
@@ -328,7 +323,7 @@ CALLSET_ENTRY (mball, mball_start)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
-		reset_unlit_shots ();
+		callset_invoke (reset_unlit_shots);
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		music_refresh ();
@@ -379,7 +374,7 @@ void mball_left_ramp_exit (void)
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
 	}
-	else if (!lamp_test (LM_GUM))
+	else if (!lamp_test (LM_GUM) && !multi_ball_play ())
 	{
 		lamp_on (LM_GUM);
 		mball_check_light_lock ();
@@ -410,6 +405,8 @@ CALLSET_ENTRY (mball, sw_piano)
 		//TODO Score ladder for jackpots
 		
 		score (SC_20M);
+		if (live_balls == 3)
+			score (SC_10M);
 	}
 }
 
@@ -465,7 +462,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		}
 		mball_locks_made++;
 		deff_start (DEFF_MB_LIT);
-		reset_unlit_shots ();
+		callset_invoke (reset_unlit_shots);
 	}
 	else
 		/* inform unlit.c that a shot was missed */
@@ -477,18 +474,22 @@ CALLSET_ENTRY (mball, end_ball)
 	timed_mode_stop (&mball_restart_timer);
 }
 
-CALLSET_ENTRY (mball, start_player)
+CALLSET_ENTRY (mball, start_ball)
 {
 	lamp_off (LM_GUM);
 	lamp_off (LM_BALL);
 	lamp_tristate_off (LM_MULTIBALL);
 	lamp_off (LM_MULTIBALL);
-	mball_locks_lit = 0;
-	mball_locks_made = 0;
-	mballs_played = 0;
 	mball_restart_collected = FALSE;
 	flag_off (FLAG_MULTIBALL_RUNNING);
 	flag_off (FLAG_MB_JACKPOT_LIT);
+}
+
+CALLSET_ENTRY (mball, start_player)
+{
+	mball_locks_lit = 0;
+	mball_locks_made = 0;
+	mballs_played = 0;
 }
 
 

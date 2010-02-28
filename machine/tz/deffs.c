@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 
+extern __common__ bool ballsave_test_active (void);
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
@@ -71,7 +72,7 @@ void driver_deff (void)
 	U8 i;
 	for (i = 0; i < 3; i++)
 	{
-		for (fno = IMG_DRIVER_START; fno < IMG_DRIVER_END; fno += 2)
+		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
 		{
 			dmd_alloc_pair ();
 			frame_draw (fno);
@@ -338,6 +339,7 @@ void ball_drain_outlane_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 
@@ -351,6 +353,18 @@ void ball_explode_deff (void)
 		frame_draw (fno);
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
+	}
+	/* Play in reverse if ballsave is active */
+	if (ballsave_test_active ())
+	{
+		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+		for (fno = IMG_BALLEXPLODE_END; fno >= IMG_BALLEXPLODE_START; fno -= 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 	deff_exit ();
 }

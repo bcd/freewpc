@@ -27,9 +27,7 @@ __local__ U8 door_index;
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
-extern void award_unlit_shot (U8 unlit_called_from);
-extern void reset_unlit_shots (void);
-
+bool door_awarded_from_slot;
 U8 door_active_lamp;
 
 /* For testing -- only enables GREED mode */
@@ -172,9 +170,10 @@ void door_award_deff (void)
 	kickout_lock (KLOCK_DEFF);
 	U16 fno;
 	/* If piano was lit, we were called from the slot */
-	if (flag_test (FLAG_PIANO_DOOR_LIT))
+	if (door_awarded_from_slot == TRUE)
 	{
-		task_create_gid (GID_SLOT_ANIMATION_SOUND_TASK, slot_animation_sound_task);
+		/* Spawn task to play sounds */
+		task_create_anon (slot_animation_sound_task);
 		for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
 		{
 			dmd_alloc_pair ();
@@ -192,7 +191,7 @@ void door_award_deff (void)
 		frame_draw (fno);
 		/* Flip it, as text is drawn to the low page */
 		dmd_flip_low_high ();	
-		font_render_string_center (&font_fixed6, 48, 16, door_panel_names[index]);
+		font_render_string_left (&font_fixed6, 3, 16, door_panel_names[index]);
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
@@ -252,7 +251,7 @@ void door_award_enable (void)
 }
 
 
-static void door_award_flashing (void)
+void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	door_active_lamp = door_get_flashing_lamp ();
@@ -303,12 +302,11 @@ bool can_award_door_panel (void)
 	/* Panels not awarded during any multiball */
 	if (multi_ball_play ())
 		return FALSE;
-
+	else
+		return TRUE;
 	/* No more panels can be awarded after BTTZ */
-	if (flag_test (FLAG_BTTZ_RUNNING))
-		return FALSE;
-
-	return TRUE;
+//	if (flag_test (FLAG_BTTZ_RUNNING))
+//		return FALSE;
 }
 
 CALLSET_ENTRY (door, lamp_update)
@@ -325,31 +323,31 @@ CALLSET_ENTRY (door, lamp_update)
 		lamp_off (LM_SLOT_MACHINE);
 }
 
-void award_door_panel (void)
-{
-	if (door_index == LITZ_DOOR_INDEX)
-	{
-		flag_on (FLAG_BTTZ_RUNNING);
-		flag_off (FLAG_PIANO_DOOR_LIT);
-		flag_off (FLAG_SLOT_DOOR_LIT);
-		door_award_litz ();
-	}
-	else
-	{
-		door_award_flashing ();
-	}
-	reset_unlit_shots ();
-	door_lamp_update ();
-}
-
-void door_award_if_possible (void)
+CALLSET_ENTRY (door, award_door_panel)
 {
 	if (can_award_door_panel ())
 	{
+		if (door_index == LITZ_DOOR_INDEX)
+		{
+			flag_on (FLAG_BTTZ_RUNNING);
+			flag_off (FLAG_PIANO_DOOR_LIT);
+			flag_off (FLAG_SLOT_DOOR_LIT);
+			door_award_litz ();
+		}
+		else
+			door_award_flashing ();
+		callset_invoke (reset_unlit_shots);
+		door_lamp_update ();
+	}
+}
+void door_award_if_possible (void)
+{
+//	if (can_award_door_panel ())
+//	{
 		/* TODO : When called from the camera award, this always
 		causes a crash???  This is probably stack overflow. */
-		award_door_panel ();
-	}
+		callset_invoke (award_door_panel);
+//	}
 }
 
 CALLSET_ENTRY (door, door_start_10M)
@@ -368,10 +366,12 @@ CALLSET_ENTRY(door, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		award_door_panel ();
+		door_awarded_from_slot = FALSE;
+		callset_invoke (award_door_panel);
 	}
 	else
 	{
+		flag_on (FLAG_PIANO_DOOR_LIT);
 		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
@@ -384,11 +384,15 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	{
 		flag_off (FLAG_SLOT_DOOR_LIT);
 		flag_on (FLAG_PIANO_DOOR_LIT);
-		award_door_panel ();
+		door_awarded_from_slot = TRUE;
+		callset_invoke (award_door_panel);
 	}
 	else
+	{
+		flag_on (FLAG_SLOT_DOOR_LIT);
 		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
+	}
 	//TODO else 
 		//deff_start (DEFF_SHOOT_PIANO);
 }

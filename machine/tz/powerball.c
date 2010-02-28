@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (powerball, __machine2__) */
 #include <freewpc.h>
 //#define PB_DEBUG
 
@@ -25,19 +26,6 @@
 /* Proximity switches will trigger whenever a steel ball passes over
  * them.  The powerball is detected by the lack of such closures.
  */
-
-/* Each of these represents a possible state for the powerball
- * detector.  They are mutually exclusive, but expressed as bitmasks
- * so that ranges can be tested more easily. */
-#define PB_MISSING       0x0
-#define PB_IN_LOCK       0x1
-#define PB_IN_TROUGH     0x2
-#define PB_IN_GUMBALL    0x4
-#define PB_IN_PLAY       0x8
-#define PB_MAYBE_IN_PLAY 0x10
-
-#define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
-#define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
 
 

@@ -22,9 +22,6 @@
 #include <status.h>
 #include <gumball_div.h>
 
-#define PB_IN_GUMBALL 0x4
-#define PB_IN_PLAY 0x8
-
 //TODO If left mag sw is thrown during divertor open, close divertor immediately
 bool gumball_enable_from_trough;
 
@@ -44,14 +41,14 @@ extern void pb_set_location (U8 location, U8 depth);
 extern void pb_clear_location (U8 location);
 extern U8 mpf_round_timer;
 extern void mball_start_3_ball (void);
-extern void reset_unlit_shots (U8 unlit_called_from);
+extern U8 pb_location;
 
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
 void award_gumball_score (void)
 {
-	reset_unlit_shots (SW_GUMBALL_ENTER);
+	callset_invoke (reset_unlit_shots);
 	/* Scored in multiple of 5M, capped at 30M */
 	if (gumball_collected_count > 5)
 	{
@@ -75,9 +72,11 @@ void award_gumball_score (void)
 
 bool gumball_load_is_enabled (void)
 {
-	if (in_live_game && (gumball_enable_count > 0) && !multi_ball_play ()
+	if (in_live_game && (gumball_enable_count > 0) 
+		&& !multi_ball_play ()
 		&& !timed_mode_timer_running_p (GID_FASTLOCK_ROUND_RUNNING,
-		&fastlock_round_timer))
+			&fastlock_round_timer)
+		&& !(pb_location & PB_MAYBE_IN_PLAY))
 		return TRUE;
 	/* If powerball is out during single ball play, enable */
 	else if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())

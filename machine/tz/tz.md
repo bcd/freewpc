@@ -498,7 +498,7 @@ Clock Working:
 Bonus: page(MACHINE_PAGE), runner, PRI_BONUS
 # Brian Image: PRI_EGG1
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
-Replay: page(MACHINE_PAGE), PRI_JACKPOT
+Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
 Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
@@ -509,8 +509,8 @@ MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
-Rocket: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED+D_PAUSE
-Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_TIMEOUT+D_RESTARTABLE
+Rocket: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_QUEUED+D_PAUSE
+Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED
 Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 
@@ -527,8 +527,6 @@ Fastlock Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Clock Millions Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
-Backdoor Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
-#Show serial number: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 
 Mpf Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Mpf Award: page(MACHINE_PAGE), PRI_JACKPOT
@@ -560,11 +558,11 @@ Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1
 Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 SpiralAward Collected: page(MACHINE_PAGE), PRI_GAME_QUICK3
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
-#Slot Animation: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
-Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED
-Ball Drain Outlane: page(MACHINE_PAGE), PRI_JACKPOT
+Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
-TZ Ball Save: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
+TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
+Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
 
 ##########################################################################
 # Lamp effects
@@ -627,11 +625,11 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
+Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
-Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
+Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
-Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_50MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS
+Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
