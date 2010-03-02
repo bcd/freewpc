@@ -61,6 +61,7 @@ void mpf_award_deff (void)
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
+	sound_send (SND_EXPLOSION_3);
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -185,11 +186,10 @@ CALLSET_ENTRY (mpf, mpf_collected)
 		timed_mode_stop (&mpf_round_timer);
 		task_kill_gid (GID_MPF_BALLSEARCH);
 	}
-	deff_start (DEFF_MPF_AWARD);
-	sound_send (SND_EXPLOSION_3);
 	kickout_lock (KLOCK_DEFF);
+	deff_start (DEFF_MPF_AWARD);
 	//TODO This will make it crash, make it stop!
-	callset_invoke (award_door_panel);
+	//callset_invoke (award_door_panel);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)

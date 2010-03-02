@@ -48,7 +48,7 @@ CALLSET_ENTRY (unlit, reset_unlit_shots)
 	unlit_called_from_stored = 0;
 }
 
-bool can_award_unlit_shot (U8 unlit_called_from)
+static bool can_award_unlit_shot (U8 unlit_called_from)
 {
 	/* Don't allow during multiball or if previously collected */
 	if (multi_ball_play ())
