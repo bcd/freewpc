@@ -17,11 +17,10 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//TODO Deff to add up score?
-// Handle replay during/after bonus
+//TODO Handle replay during/after bonus
 
+/* CALLSET_SECTION (bonus, __machine2__) */
 #include <freewpc.h>
-extern void flipper_override_pulse (U8 switches);
 
 /* Total bonus score */
 score_t total_bonus;
@@ -30,7 +29,7 @@ score_t bonus_scored;
 bool buttons_held;
 
 /* Speed up the bonus if both flipper buttons are pressed */
-void bonus_button_monitor (void)
+static void bonus_button_monitor (void)
 {
 	for (;;)
 	{
@@ -43,7 +42,7 @@ void bonus_button_monitor (void)
 	}
 }
 
-void bonus_pause (void)
+static void bonus_pause (void)
 {
 	if (buttons_held)
 		task_sleep (TIME_100MS);
@@ -53,7 +52,7 @@ void bonus_pause (void)
 
 /* Function so we can call two different transistions
  * depending on whether the buttons were pressed */
-void bonus_sched_transition (void)
+static void bonus_sched_transition (void)
 {
 	if (buttons_held == TRUE)
 		dmd_sched_transition (&trans_scroll_down_fast);

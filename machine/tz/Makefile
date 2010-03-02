@@ -65,7 +65,7 @@ SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/r
 	build/left_mpf.h build/right_mpf.h
 
 GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
-	config.o loop.o rampdiv.o bonus.o amode.o
+	config.o loop.o rampdiv.o amode.o
 
 GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
 
@@ -77,7 +77,7 @@ GAME_PAGED_OBJS = leftramp.o skill.o deadend.o camera.o \
 	mpf.o clockmillions.o chaosmb.o powerball.o \
 	multiball.o star.o sssmb.o deffs.o lock.o
 
-GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o
+GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o bonus.o
 
 FIF_SRCS += images/cow.fif
 
