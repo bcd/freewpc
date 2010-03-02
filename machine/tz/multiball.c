@@ -24,6 +24,8 @@
 __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
+
+U8 jackpot_level;
 /* Used to start a mode if multiball ends without picking up a jackpot */
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
@@ -238,7 +240,6 @@ CALLSET_ENTRY (mball, lamp_update)
 	{
 		lamp_tristate_flash (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
-
 	}
 	else if (mball_locks_made == 1 && mball_locks_lit == 0)
 	{
@@ -329,6 +330,11 @@ CALLSET_ENTRY (mball, mball_start)
 		music_refresh ();
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
+		/* Set the jackpot higher if two balls were locked */
+		if (mball_locks_lit > 1)
+			jackpot_level = 2;
+		else
+			jackpot_level = 1;
 		mball_locks_lit = 0;
 		mball_locks_made = 0;
 		mball_jackpot_uncollected = TRUE;
@@ -404,7 +410,11 @@ CALLSET_ENTRY (mball, sw_piano)
 		mball_jackpot_uncollected = FALSE;
 		//TODO Score ladder for jackpots
 		
-		score (SC_20M);
+		//score (SC_20M);
+		score_multiple (SC_10M, jackpot_level);
+		/* Increase the jackpot level */
+		bounded_increment (jackpot_level, 5);
+		/* Add anoither 10M to the jackpot if three balls are out */
 		if (live_balls == 3)
 			score (SC_10M);
 	}
