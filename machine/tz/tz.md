@@ -149,7 +149,7 @@ define CONFIG_TZONE_IP
 15: Right Trough, c_decl(sw_trough), noscore
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
-18: Outhole, outhole, service, noplay
+18: Outhole, outhole, service, noplay, intest
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -555,14 +555,14 @@ MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1
-Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
-SpiralAward Collected: page(MACHINE_PAGE), PRI_GAME_QUICK3
+Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
+SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_QUICK3
 
 ##########################################################################
 # Lamp effects

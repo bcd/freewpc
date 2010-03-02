@@ -300,7 +300,7 @@ static void door_award_litz (void)
 bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
-	if (multi_ball_play ())
+	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
 		return FALSE;
 	else
 		return TRUE;

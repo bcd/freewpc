@@ -27,6 +27,19 @@
  * them.  The powerball is detected by the lack of such closures.
  */
 
+/* Each of these represents a possible state for the powerball
+ * detector.  They are mutually exclusive, but expressed as bitmasks
+ * so that ranges can be tested more easily. */
+
+#define PB_MISSING       0x0
+#define PB_IN_LOCK       0x1
+#define PB_IN_TROUGH     0x2
+#define PB_IN_GUMBALL    0x4
+#define PB_IN_PLAY       0x8
+#define PB_MAYBE_IN_PLAY 0x10
+#define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
+#define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
+
 
 
 typedef enum {
@@ -209,7 +222,7 @@ void pb_clear_location (U8 location)
  * Because proximity sensors trigger only when steel balls move over them
  * (assuming they are working correctly), we can trust an assertion of
  * steel ball a little more than one about the Powerball. */
-void pb_detect_event (pb_event_t event)
+static void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
 	switch (event)

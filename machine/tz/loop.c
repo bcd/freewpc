@@ -40,13 +40,10 @@ extern U8 fastlock_round_timer;
 
 extern void thing_flips (void);
 extern void award_spiral_loop (void);
-extern void fastlock_right_loop_completed (void);
-extern void spiralaward_right_loop_completed (void);
-extern bool fastlock_running (void);
 
 /* Functions to stop leffs/deffs during certain game situations */
 //TODO They don't work, change spiralaward to a task
-bool can_show_loop_leff (void)
+static bool can_show_loop_leff (void)
 {
 	if (free_timer_test (TIM_SPIRALAWARD))
 		return FALSE;
@@ -54,7 +51,7 @@ bool can_show_loop_leff (void)
 		return TRUE;
 }
 
-bool can_show_loop_deff (void)
+static bool can_show_loop_deff (void)
 {
 	if (fastlock_running ())
 		return FALSE;
@@ -74,7 +71,7 @@ void enter_loop (void)
 }
 
 /* Loop scoring rules */
-void award_loop (void)
+static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	loops++;
@@ -124,7 +121,7 @@ void award_loop (void)
 	}
 }
 
-void abort_loop (void)
+static void abort_loop (void)
 {
 	if (in_live_game)
 	{
@@ -133,7 +130,7 @@ void abort_loop (void)
 	}
 }
 
-void award_left_loop (void)
+static void award_left_loop (void)
 {
 	if (in_live_game)
 	{
@@ -144,7 +141,7 @@ void award_left_loop (void)
 }
 
 
-void award_right_loop (void)
+static void award_right_loop (void)
 {
 	if (in_live_game)
 	{
@@ -223,7 +220,6 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
-	extern void sw_gumball_right_loop_entered (void);
 
 	/* Cannot detect loops reliably during multiball */
 	//if (multi_ball_play ())
@@ -256,12 +252,12 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	{
 		/* Right loop started */
 		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
-		sw_gumball_right_loop_entered ();
 		start_loop_speed_timer ();
 		enter_loop ();
 	}
 
 	/* Inform gumball module that a ball may be approaching */
+	sw_gumball_right_loop_entered ();
 }
 
 CALLSET_ENTRY (loop, start_ball)

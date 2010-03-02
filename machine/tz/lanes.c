@@ -27,9 +27,7 @@
 __local__ U8 rollover_count;
 __local__ U8 rollover_level;
 
-extern void start_spiralaward_timer (void);
-
-void handle_outlane (void)
+static void handle_outlane (void)
 {
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
@@ -37,7 +35,7 @@ void handle_outlane (void)
 	deff_start (DEFF_BALL_DRAIN_OUTLANE);
 }
 
-bool rollover_completed (void)
+static bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
@@ -47,7 +45,7 @@ bool rollover_completed (void)
 		return FALSE;
 }
 
-void award_rollover_completed (void)
+static void award_rollover_completed (void)
 {
 	rollover_count++;
 	score (SC_1M);
@@ -61,7 +59,7 @@ void award_rollover_completed (void)
 	/* Score it */
 }
 
-void check_rollover (void)
+static void check_rollover (void)
 {
 	/* Check to see if rollover has been completed */
 	if (rollover_completed ())

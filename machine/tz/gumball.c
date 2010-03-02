@@ -28,6 +28,7 @@ bool gumball_enable_from_trough;
 bool gumball_geneva_tripped;
 bool gumball_exit_tripped;
 bool gumball_running;
+bool powerball_loaded_into_gumball;
 U8 gumball_pending_releases;
 U8 timeout;
 
@@ -37,10 +38,9 @@ __local__ U8 gumball_collected_count;
 U8 gumball_score;
 extern U8 fastlock_round_timer;
 extern void spiralaward_right_loop_completed (void);
-extern void pb_set_location (U8 location, U8 depth);
-extern void pb_clear_location (U8 location);
 extern U8 mpf_round_timer;
 extern void mball_start_3_ball (void);
+
 extern U8 pb_location;
 
 /*************************************************************/
@@ -74,12 +74,13 @@ bool gumball_load_is_enabled (void)
 {
 	if (in_live_game && (gumball_enable_count > 0) 
 		&& !multi_ball_play ()
-		&& !timed_mode_timer_running_p (GID_FASTLOCK_ROUND_RUNNING,
-			&fastlock_round_timer)
 		&& !(pb_location & PB_MAYBE_IN_PLAY))
 		return TRUE;
 	/* If powerball is out during single ball play, enable */
 	else if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
+		return TRUE;
+	/* Allow loading from the trough */
+	else if (gumball_enable_from_trough)
 		return TRUE;
 	else
 		return FALSE;
@@ -140,11 +141,8 @@ void sw_gumball_right_loop_entered (void)
 {
 	if (gumball_load_is_enabled ())
 	{
-		sound_send (SND_GUMBALL_ENTER);
-		gumball_divertor_open ();
-	}
-	else if (gumball_enable_from_trough)
-	{
+		if (in_live_game)
+			sound_send (SND_GUMBALL_ENTER);
 		gumball_divertor_open ();
 	}
 }
@@ -189,20 +187,22 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 	/* Ball has entered the gumball machine. */
 	//TODO Keep track of how many balls are in the gumball
 	dbprintf ("Gumball entered.\n");
+	if (gumball_enable_from_trough)
+		gumball_enable_from_trough = FALSE;
 	if (in_live_game)
 	{
 		gumball_running = TRUE;
 		gumball_collected_count++;
 		award_gumball_score ();
+		gumball_release ();
+		bounded_decrement (gumball_enable_count, 0);
 		/* Powerball was loaded into Gumball */
 		//BUG If powerball is about to launch, a steel gets counted
-		if (flag_test (FLAG_POWERBALL_IN_PLAY))
+		if (powerball_loaded_into_gumball == TRUE)
 		{
-			//pb_clear_location (PB_IN_PLAY);
-			pb_set_location (PB_IN_GUMBALL, 2);
-			flag_off (FLAG_POWERBALL_IN_PLAY);
+			powerball_loaded_into_gumball = FALSE;
 			//TODO Move to multiball.c
-
+			
 			/* Do a dodgy multiball combo */
 			flag_on (FLAG_SUPER_MB_RUNNING);
 			mball_start_3_ball ();
@@ -210,13 +210,10 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			callset_invoke (sssmb_start);
 			callset_invoke (mball_start);
 		}
-		gumball_release ();
-		bounded_decrement (gumball_enable_count, 0);
-		deff_start (DEFF_GUMBALL);
+		if (!multi_ball_play ())
+			deff_start (DEFF_GUMBALL);
 	}
 
-	if (gumball_enable_from_trough)
-		gumball_enable_from_trough = FALSE;
 }
 
 CALLSET_ENTRY (gumball, music_refresh)
@@ -376,6 +373,8 @@ CALLSET_ENTRY (gumball, door_start_light_gumball)
 CALLSET_ENTRY (gumball, single_ball_play)
 {
 	flag_off (FLAG_SUPER_MB_RUNNING);
+	callset_invoke (sssmb_stop);
+	callset_invoke (mball_stop);
 }
 
 CALLSET_ENTRY (gumball, init)
@@ -383,14 +382,23 @@ CALLSET_ENTRY (gumball, init)
 	flag_off (FLAG_SUPER_MB_RUNNING);
 	gumball_enable_from_trough = FALSE;
 	gumball_pending_releases = 0;
+	powerball_loaded_into_gumball = FALSE;
 }
 
 
 
 CALLSET_ENTRY (gumball, sw_gumball_popper)
 {
+	/* TODO Hack to stop detecting the PB as if it's in the trough */
+	if (flag_test (FLAG_POWERBALL_IN_PLAY) && switch_poll_logical (SW_TROUGH_PROXIMITY))
+		powerball_loaded_into_gumball = TRUE;
+	else
+		powerball_loaded_into_gumball = FALSE;
+
 	/* Inform spiralaward.c */
 	spiralaward_right_loop_completed ();
+	fastlock_right_loop_completed ();
+
 }
 
 CALLSET_ENTRY (gumball, status_report)

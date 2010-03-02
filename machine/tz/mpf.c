@@ -28,7 +28,7 @@ U8 mpf_ball_count;
 U8 mpf_round_timer;
 U8 mpf_award;
 U8 __local__ mpf_level;
-bool mpf_active;
+//bool mpf_active;
 
 /* Where the powerball is */
 extern U8 pb_location;
@@ -70,7 +70,7 @@ void mpf_award_deff (void)
 void mpf_ballsearch_task (void)
 {
 	U8 i = 0;
-	while (mpf_ball_count > 0 || i < 3)
+	while (mpf_ball_count > 0 && i < 3)
 	{
 		task_sleep_sec (5);
 		sol_request (SOL_MPF_RIGHT_MAGNET);
@@ -94,8 +94,8 @@ void mpf_round_begin (void)
 
 void mpf_round_expire (void)
 {
-	deff_stop (DEFF_MPF_ROUND);
 	mpf_active = FALSE;
+	deff_stop (DEFF_MPF_ROUND);
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
 	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
@@ -173,22 +173,23 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
-	task_kill_gid (GID_MPF_BALLSEARCH);
+	bounded_decrement (mpf_ball_count, 0);
+	/* Safe tp enable as it covers all cases */
 	flipper_enable ();
 	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	//flasher_pulse (FLASH_POWERFIELD);
-	if (mpf_ball_count > 0)
-		bounded_decrement (mpf_ball_count, 0);
-	else
+	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
 		timed_mode_stop (&mpf_round_timer);
+		task_kill_gid (GID_MPF_BALLSEARCH);
 	}
 	deff_start (DEFF_MPF_AWARD);
 	sound_send (SND_EXPLOSION_3);
 	kickout_lock (KLOCK_DEFF);
-	//callset_invoke (award_door_panel);
+	//TODO This will make it crash, make it stop!
+	callset_invoke (award_door_panel);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
@@ -201,16 +202,16 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		mpf_active = TRUE;
 		callset_invoke (reset_unlit_shots);
 		mpf_ball_count++;
+		/* Add on 10 seconds for each extra ball */
+		if (mpf_ball_count > 1)
+			mpf_round_timer += 10;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
 		if ((mpf_ball_count = 1))
 		{	
 			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
-			//leff_start (LEFF_BONUS);
 			if (!multi_ball_play ())
 			{
-				//TODO Start a timer to pulse the magnets
-				// if the timer runs out
 				/* Turn off GI and start lamp effect */
 				leff_start (LEFF_MPF_ACTIVE);
 				flipper_disable ();

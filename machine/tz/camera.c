@@ -83,15 +83,15 @@ void camera_award_deff (void)
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
 
 static void do_camera_award (void)
 {
-	deff_start (DEFF_CAMERA_AWARD);
 	kickout_lock (KLOCK_DEFF);
+	deff_start (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -132,7 +132,7 @@ static void do_camera_award (void)
 	task_exit ();
 }
 
-bool can_award_camera (void)
+static bool can_award_camera (void)
 {
 	if (cameras_lit != 0 && !multi_ball_play ())
 		return TRUE;

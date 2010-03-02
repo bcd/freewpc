@@ -293,10 +293,10 @@ void left_loop_leff (void)
 
 void jets_active_leff (void)
 {
-	lamplist_set_apply_delay (TIME_100MS);
-	for (;;)
-		lamplist_step_increment (LAMPLIST_JETS, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
+//	lamplist_set_apply_delay (TIME_100MS);
+//	for (;;)
+//		lamplist_step_increment (LAMPLIST_JETS, 
+//			matrix_lookup (LMX_EFFECT2_LAMPS));
 }
 
 
@@ -389,9 +389,10 @@ void mpf_active_leff (void)
 	triac_leff_enable (GI_POWERFIELD);
 	
 	lamplist_set_apply_delay (TIME_100MS);
-	for (;;)
-	lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
+	while (mpf_active)
+	{
+		task_sleep_sec (1);
+	}
 	leff_exit ();
 }
 

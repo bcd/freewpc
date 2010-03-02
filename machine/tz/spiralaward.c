@@ -23,6 +23,7 @@
  * Use the lamp state to check whether a award has been previously collected */
 
 /* TODO: Fix bug with leff, doesn't show sometimes */
+/* CALLSET_SECTION (spiralaward, __machine2__) */
 #include <freewpc.h>
 #include <eb.h>
 
@@ -50,7 +51,29 @@ const lampnum_t spiralaward_lamps[] = {
 	LM_SPIRAL_EB
 };
 
-void flash_spiralaward_lamp (void)
+void spiralaward_collected_deff (void)
+{
+	dmd_alloc_low_clean ();
+	if (spiralawards_collected < 5)
+	{
+		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
+		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
+	}
+	else 
+	{
+		font_render_string_center (&font_mono5, 64, 5, "SPIRALAWARD COMPLETED");
+		sprintf ("20 MILLION");
+		font_render_string_center (&font_term6, 64, 15, sprintf_buffer);
+		font_render_string_center (&font_term6, 64, 25, spiralaward_names[spiralaward]);
+	
+	}
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
+
+
+static void flash_spiralaward_lamp (void)
 {
 	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
 	task_sleep_sec (3);
@@ -119,27 +142,6 @@ void award_spiralaward (void)
 			task_sleep (TIME_500MS);
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 	}
-}
-
-void spiralaward_collected_deff (void)
-{
-	dmd_alloc_low_clean ();
-	if (spiralawards_collected < 5)
-	{
-		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
-		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
-	}
-	else 
-	{
-		font_render_string_center (&font_mono5, 64, 5, "SPIRALAWARD COMPLETED");
-		sprintf ("20 MILLION");
-		font_render_string_center (&font_term6, 64, 15, sprintf_buffer);
-		font_render_string_center (&font_term6, 64, 25, spiralaward_names[spiralaward]);
-	
-	}
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
 }
 
 void spiralaward_right_loop_completed (void)

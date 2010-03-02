@@ -91,16 +91,12 @@ void no_gi_leff(void);
 void flash_all_leff(void);
 void slot_kickout_leff(void);
 /* loop.c */
-__machine__ void enter_loop(void);
-__machine__ void award_loop(void);
-__machine__ void abort_loop(void);
-__machine__ void award_left_loop(void);
-__machine__ void award_right_loop(void);
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
+__machine__ bool mpf_active;
 /* rampdiv.c */
 void ramp_divert (void);
 void ramp_divert_to_autoplunger (void);
@@ -112,35 +108,28 @@ __machine__ void skill_shot_made_deff (void);
 /* sssmb.c */
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
+__machine__ bool sssmb_can_divert_to_plunger (void);
+
 /* star.c */
 __machine__ void star_draw(void);
 /* spiralaward.c */
-__machine__ void start_spiralaward_timer (void);
+__machine2__ void start_spiralaward_timer (void);
+__machine2__ void spiralaward_right_loop_completed (void);
+__machine2__ void award_spiralaward (void);
 /* lanes.c */
-__machine2__ void handle_outlane (void);
-__machine2__ bool rollover_completed (void);
-__machine2__ void award_rollover_completed (void);
-__machine2__ void check_rollover (void);
+/*__machine2__ static void handle_outlane (void);
+__machine2__ static bool rollover_completed (void);
+__machine2__ static void award_rollover_completed (void);
+__machine2__ static void check_rollover (void);*/
 /* jets.c */
 
 /* unlit.c*/
 //__machine2__ void reset_unlit_shots (void);
 __machine2__ void award_unlit_shot (U8 unlit_called_from);
 
+/* fastlock.c */
+__machine__ void fastlock_right_loop_completed (void);
+__machine__ bool fastlock_running (void);
 /* powerball.c */
-/* Each of these represents a possible state for the powerball
- * detector.  They are mutually exclusive, but expressed as bitmasks
- * so that ranges can be tested more easily. */
-//__machine2__ U8 pb_location;
-//__machine2__ U8 pb_depth;
-
-#define PB_MISSING       0x0
-#define PB_IN_LOCK       0x1
-#define PB_IN_TROUGH     0x2
-#define PB_IN_GUMBALL    0x4
-#define PB_IN_PLAY       0x8
+#define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
-#define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
-#define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
-
-

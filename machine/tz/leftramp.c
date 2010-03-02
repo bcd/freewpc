@@ -32,7 +32,6 @@ extern U8 mball_locks_made;
 //extern U8 chaosmb_hits_to_relight;
 extern bool multiball_ready (void);
 extern bool autofire_busy;
-extern bool sssmb_can_divert_to_plunger (void);
 //extern bool sssmb_ball_in_plunger;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 

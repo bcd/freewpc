@@ -118,7 +118,7 @@ void sssmb_jackpot_collected_deff (void)
 }
 
 
-void sssmb_relight_all_jackpots (void)
+static void sssmb_relight_all_jackpots (void)
 {
 	flag_on (FLAG_SSSMB_RED_JACKPOT);
 	flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
@@ -126,12 +126,11 @@ void sssmb_relight_all_jackpots (void)
 }
 
 
-void sssmb_award_jackpot (void)
+static void sssmb_award_jackpot (void)
 {
 	/* Hack to make sure restart mball doesn't start after
 	 * the Mball/Sssmb combo mode */
 	mball_jackpot_uncollected = FALSE;
-	//sssmb_ball_in_plunger = FALSE;
 	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
 	deff_start (DEFF_JACKPOT);
@@ -153,7 +152,7 @@ void sssmb_award_jackpot (void)
 }
 
 
-void sssmb_jackpot_ready_task (void)
+static void sssmb_jackpot_ready_task (void)
 {
 	deff_start (DEFF_SSSMB_JACKPOT_LIT);
 	sound_send (SND_HEEHEE);
@@ -188,7 +187,6 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		sssmb_initial_ramps_to_divert = 1;
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
-		//sssmb_ball_in_plunger = FALSE;
 		if (!flag_test (FLAG_SUPER_MB_RUNNING))
 		{	
 			mball_start_3_ball ();
@@ -320,4 +318,9 @@ CALLSET_ENTRY (sssmb, sw_buyin_button)
 {
 	if (in_live_game) 
 		callset_invoke (sssmb_start);
+}
+
+CALLSET_ENTRY (sssmb, ball_start)
+{
+	callset_invoke (sssmb_stop);
 }

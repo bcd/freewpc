@@ -157,4 +157,3 @@ struct menu tz_gumball_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &tz_gumball_test_window, NULL } },
 };
-
