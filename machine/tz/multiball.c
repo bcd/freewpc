@@ -331,7 +331,7 @@ CALLSET_ENTRY (mball, mball_start)
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
 		/* Set the jackpot higher if two balls were locked */
-		if (mball_locks_lit > 1)
+		if (mball_locks_made > 1)
 			jackpot_level = 2;
 		else
 			jackpot_level = 1;
