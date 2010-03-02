@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
 /* Rocket animation contributed by highrise */
@@ -42,14 +43,11 @@ void rocket_deff (void)
 	{
 		dmd_alloc_pair_clean ();
 		frame_draw (fno);
-//		dmd_overlay_onto_color ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
-//		dmd_map_overlay ();
 	}
 	deff_exit ();
 }
-
 
 CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
@@ -76,4 +74,3 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 		task_create_gid (0, rocket_kick_sound);
 	}
 }
-

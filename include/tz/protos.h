@@ -32,6 +32,12 @@ void amode_lamp_toggle_task(void);
 void amode_leff(void);
 void amode_show_design_credits(void);
 void amode_deff(void);
+__machine2__ void show_driver_animation(void);
+__machine2__ void show_text_on_stars(void);
+
+/* stars.c */
+__machine2__ void star_draw(void);
+
 /* autofire.c */
 void autofire_catch(void);
 void autofire_add_ball(void);
@@ -83,7 +89,8 @@ void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
 /* leffs.c */
- /*__machine2__ void bonus_leff(void); 
+/* These should all be done by tz.md */
+/*__machine2__ void bonus_leff(void); 
 __machine2__ void gi_cycle_leff(void); 
 __machine2__ void flasher_happy_leff(void);
 __machine2__ void left_ramp_leff(void);
@@ -107,6 +114,7 @@ __machine2__ void color_cycle_leff(void);
 __machine2__ void lock_leff(void); 
 __machine2__ void mpf_active_leff(void); 
 */
+
 /* loop.c */
 /* mball.c */
 void mball_light_lock (void);

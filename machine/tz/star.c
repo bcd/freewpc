@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (star, __machine2__) */
 #include <freewpc.h>
 
 //TODO make sure stars are at least x pixels apart
@@ -81,14 +82,14 @@ void star_draw (void)
 }
 
 
-CALLSET_ENTRY (tz_star, score_deff_start)
+CALLSET_ENTRY (star, score_deff_start)
 {
 	U8 n;
 	for (n=0; n < 8; n++)
 		star_states[n].time = 0;
 }
 
-CALLSET_ENTRY (tz_star, score_overlay)
+CALLSET_ENTRY (star, score_overlay)
 {
 	star_draw ();
 }

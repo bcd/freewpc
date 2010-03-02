@@ -514,7 +514,7 @@ MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
-Rocket: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_QUEUED+D_PAUSE
+Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_QUEUED+D_PAUSE
 Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED
 Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
@@ -599,7 +599,7 @@ Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
 MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
-Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 #Spiral Award Active: shared, PRI_LEFF1, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
 
 ##########################################################################
