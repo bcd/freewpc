@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (leffs, __machine2__) */
+
 #include <freewpc.h>
 
 extern bool mpf_active;
@@ -90,14 +92,6 @@ void no_gi_leff (void)
 	leff_exit ();
 }
 
-/* Leave GI off permantly */
-void no_gi_perm_leff (void)
-{
-	triac_leff_disable (TRIAC_GI_MASK);
-	leff_exit ();
-}
-
-/* Turn it back on again */
 void turn_on_gi_leff (void)
 {
 	triac_leff_enable (TRIAC_GI_MASK);
@@ -208,7 +202,7 @@ void multiball_running_leff (void)
 	leff_exit ();
 }
 
-void pf_strobe_up_subtask (void)
+static void pf_strobe_up_subtask (void)
 {
 	for (;;)
 		lamplist_apply (LAMPLIST_SORT1, leff_toggle);
@@ -293,10 +287,10 @@ void left_loop_leff (void)
 
 void jets_active_leff (void)
 {
-//	lamplist_set_apply_delay (TIME_100MS);
-//	for (;;)
-//		lamplist_step_increment (LAMPLIST_JETS, 
-//			matrix_lookup (LMX_EFFECT2_LAMPS));
+	lamplist_set_apply_delay (TIME_100MS);
+	for (;;)
+		lamplist_step_increment (LAMPLIST_JETS, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
 }
 
 
@@ -395,5 +389,4 @@ void mpf_active_leff (void)
 	}
 	leff_exit ();
 }
-
 

@@ -56,7 +56,6 @@ __machine__ void special_deff(void);
 __machine__ void jackpot_deff(void);
 __machine__ void tz_ball_save_deff(void);
 __machine__ void rollover_completed_deff (void);
-__machine2__ void backdoor_award_deff (void);
 
 /* door.c */
 void door_set_flashing(U8 id);
@@ -84,12 +83,30 @@ void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
 /* leffs.c */
-void flasher_happy_leff(void);
-void left_ramp_leff(void);
-void no_lights_leff(void);
-void no_gi_leff(void);
-void flash_all_leff(void);
-void slot_kickout_leff(void);
+ /*__machine2__ void bonus_leff(void); 
+__machine2__ void gi_cycle_leff(void); 
+__machine2__ void flasher_happy_leff(void);
+__machine2__ void left_ramp_leff(void);
+__machine2__ void no_gi_leff(void);
+__machine2__ void turn_on_gi_leff(void);
+__machine2__ void flash_all_leff(void);
+__machine2__ void slot_kickout_leff(void);
+__machine2__ void gumball_strobe_leff(void); 
+__machine2__ void clock_target_leff(void); 
+__machine2__ void game_timeout_leff(void); 
+__machine2__ void clock_round_started_leff(void); 
+__machine2__ void multiball_running_leff(void); 
+__machine2__ void strobe_up_leff(void); 
+__machine2__ void multi_strobe_leff(void); 
+__machine2__ void door_strobe_leff(void); 
+__machine2__ void right_loop_leff(void); 
+__machine2__ void left_loop_leff(void); 
+__machine2__ void jets_active_leff(void);
+__machine2__ void circle_out_leff(void); 
+__machine2__ void color_cycle_leff(void); 
+__machine2__ void lock_leff(void); 
+__machine2__ void mpf_active_leff(void); 
+*/
 /* loop.c */
 /* mball.c */
 void mball_light_lock (void);
@@ -123,8 +140,8 @@ __machine2__ static void check_rollover (void);*/
 /* jets.c */
 
 /* unlit.c*/
-//__machine2__ void reset_unlit_shots (void);
 __machine2__ void award_unlit_shot (U8 unlit_called_from);
+__machine2__ void backdoor_award_deff (void);
 
 /* fastlock.c */
 __machine__ void fastlock_right_loop_completed (void);
