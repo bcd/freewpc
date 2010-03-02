@@ -20,7 +20,7 @@
 
 #include <freewpc.h>
 
-extern U8 mpf_ball_count;
+extern bool mpf_active;
 
 void bonus_leff (void)
 {
@@ -389,7 +389,7 @@ void mpf_active_leff (void)
 	triac_leff_enable (GI_POWERFIELD);
 	
 	lamplist_set_apply_delay (TIME_100MS);
-	while (mpf_active)
+	while (mpf_active == TRUE)
 	{
 		task_sleep_sec (1);
 	}

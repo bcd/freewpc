@@ -6,7 +6,7 @@
 
 extern inline void mpf_driver (void)
 {
-	extern U8 mpf_active;
+//	extern U8 mpf_active;
 	extern S8 rtsol_mpf_left;
 	extern S8 rtsol_mpf_right;
 

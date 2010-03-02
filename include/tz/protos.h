@@ -96,7 +96,6 @@ void mball_light_lock (void);
 void mball_check_light_lock (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
-__machine__ bool mpf_active;
 /* rampdiv.c */
 void ramp_divert (void);
 void ramp_divert_to_autoplunger (void);
