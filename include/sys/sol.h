@@ -57,10 +57,10 @@ can be overwritten in the machine config file. */
 
 /** The default pulse time is reasonable for most
 coils. */
-#define SOL_TIME_DEFAULT   TIME_133MS
+#define SOL_TIME_DEFAULT   TIME_66MS
 
-#define FLASHER_DUTY_DEFAULT SOL_DUTY_25
-#define FLASHER_TIME_DEFAULT TIME_66MS
+#define FLASHER_DUTY_DEFAULT SOL_DUTY_100
+#define FLASHER_TIME_DEFAULT TIME_33MS
 
 /* Function prototypes */
 void sol_request_async (U8 sol);
