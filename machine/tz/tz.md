@@ -255,6 +255,11 @@ A2: MPF Right Magnet
 A3: Ramp Divertor
 A4: Clock Target, flash
 
+F5: U.R. Flip Power, time(TIME_33MS)
+F6: U.R. Flip Hold, time(TIME_100MS)
+F7: U.L. Flip Power, time(TIME_33MS)
+F8: U.L. Flip Hold, time(TIME_100MS)
+
 X1: UR Flipper, flash
 X2: Gumball High, flash
 X3: Gumball Mid, flash

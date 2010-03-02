@@ -125,6 +125,7 @@ Also, knowledge of WPC pinball machines is very helpful.
 * @command{wpcdebug} and @command{PinMAME}::
 * @command{gdb}::
 * @command{exec09}::
+* @command{Breakpoints}::
 * @command{csum} : ROM Checksum Tool::
 * @command{srec2bin} : S-Record Converter::
 * @command{sched} : Static Scheduler::
@@ -2274,7 +2275,7 @@ which go into every build.
 
 Each entry in the image map gives an image to be imported, such as a
 PGM graphics file, plus an optional @dfn{frame ID}.  The frame ID becomes
-a C #define that refers to the image from the sour code.
+a C #define that refers to the image from the source code.
 The image linker writes a file @file{build/imagemap.h} which
 contains a list of all the frame IDs.  Frame IDs are optional for
 the internal frames in a sequence (a for loop would only need to name the
@@ -2391,39 +2392,36 @@ mode it equates to a regular @code{dbprintf}.
 @node Debugging
 @chapter Debugging
 
+@section @code{dbprintf}
+
 You can use the @code{dbprintf()} function to print debug
-messages.  What happens to these messages depends on how
-you compile the code and what emulator you use.
+messages.
+@code{dbprintf} uses the builtin @code{sprintf} function to format
+the message, and then calls @code{db_puts} to print it.
+How these messages are printed depends on which version of
+@command{pinmame} you are using.  At present, there is no way
+to see these messages when you are running on real hardware.
 
-For now, there is no debug support when you are running on
-real hardware.
-
-@section @command{wpcdebug} and @command{PinMAME}
-
-PinMAME has been modified to support a new register, the
+If you are running Linux, and you obtain the patches to @command{xpinmame},
+each character is written to a new hardware register, the
 @dfn{debugger port}.  It acts like a serial port and can
-be used to communicate between the running program and a
+be used to communicate between the game program and a
 separate debug console.  The program @command{wpcdebug} is
-the console.  Run this at the same time as PinMame and you
+the console.  Run this at the same time as pinmame and you
 will see the debug messages printed out.  The two programs
-use a socket to send data back and forth.
+use a local socket to send data back and forth.
 
 The console also accepts keyboard input and passes it back
-to the running program.  Several keys will cause FreeWPC
-to dump some of its internal data structures.  See
-@file{common/db.c}.
+to the running program.  See @file{common/db.c} for more information.
 
-If you cannot recompile PinMAME,
-you can compile the ROM with the @code{CONFIG_PARALLEL_DEBUG}
-option.  This will use the WPC parallel port for all debug
-messages.  All versions of PinMAME support this, and
-will write the output to a file in the @file{memcard} directory.
+Under an unpatched emulator, such as on Windows, debug messages are
+sent to the WPC parallel port.  @code{pinmame}
+writes the printer output to a file in the @file{memcard} directory.
 Under Windows, these files cannot be read while the program is
 still running.
 
-These virtual ports are unlike any real serial port, in that writes can
-be done infinitely fast.  FreeWPC does not do any sort of timing on
-the writes; it is an oversimplification but it works.
+In either case, the code to drive the serial/parallel port is only
+enough to keep the emulator happy; none of it would work on real hardware.
 
 @section @command{gdb}
 
@@ -2454,7 +2452,15 @@ debugging which is sometimes more useful than PinMAME or gdb.
 exec09 can measure the length of time a function takes, including
 interrupt handlers, which is good for determining performance.
 
-@c ======================================================
+@section @command{Breakpoints}
+
+FreeWPC now supports breaking into the game program when the compile-time
+flag @code{CONFIG_BPT} is turned on.  This works both in pinmame and on
+real hardware.  When enabled, this feature overrides the normal use of the
+Escape coin door button.  Pressing Escape now halts the system; press Escape
+again to resume.
+
+While halted, you can use the Up and Down buttons to view memory.
 
 @c ======================================================
 @node The Machine Definition
