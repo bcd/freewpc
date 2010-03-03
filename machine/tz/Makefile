@@ -72,7 +72,7 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	config.o rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
-	mpf.o powerball.o clocktarget.o vmode.o deffs.o bonus.o star.o \
+	mpf.o powerball.o clocktarget.o deffs.o bonus.o star.o \
 	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
 
 FIF_SRCS += images/cow.fif

@@ -498,7 +498,7 @@ Extra Ball: page(MACHINE_PAGE), PRI_EB
 Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7
-Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8
+#Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8
 
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3
