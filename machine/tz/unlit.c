@@ -73,10 +73,9 @@ void award_unlit_shot (U8 unlit_called_from)
 			sound_send (SND_JUST_TAKEN_A_DETOUR);
 			deff_start (DEFF_BACKDOOR_AWARD);
 			//task_sleep_sec (1);
-			task_kill_gid (GID_DOOR_AWARD_ROTATE);
-			door_award_if_possible ();
 			backdoor_award_collected = TRUE;
 			callset_invoke (reset_unlit_shots);
+			callset_invoke (award_door_panel);	
 		}
 		/* Reset if the player hits the same unlit shot twice */
 		if (unlit_called_from == unlit_called_from_stored)

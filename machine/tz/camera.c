@@ -57,9 +57,9 @@ void camera_award_deff (void)
 	task_sleep_sec (1);	
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	sprintf ("CAMERA AWARD %d", camera_award_count+1);
+	sprintf ("CAMERA AWARD %d", camera_award_count);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-	switch (camera_award_count - 1)
+	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			sprintf ("LIGHT LOCK");

@@ -115,15 +115,14 @@ void chaosmb_running_deff (void)
 	}
 }
 
-void chaosmb_check_jackpot_lamps (void)
+static void chaosmb_check_jackpot_lamps (void)
 {
-	/* Turn all off by default */
-	
 	if (chaosmb_hits_to_relight == 0)
 	{	
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
 		switch (chaosmb_level)
 		{
+		/* TODO This is very hacky, do it properly */
 			case 0:
 				lamp_tristate_off (LM_DEAD_END);
 				lamp_tristate_flash (LM_MULTIBALL);
@@ -156,14 +155,14 @@ void chaosmb_check_jackpot_lamps (void)
 
 
 
-void chaosmb_score_jackpot (void)
+static void chaosmb_score_jackpot (void)
 {
 	if (chaosmb_level <= 5)
 		chaosmb_level++;
 	else
 		chaosmb_level = 0;
-
 	chaosmb_hits_to_relight = chaosmb_level * 2;
+	chaosmb_check_jackpot_lamps ();
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_CHAOS_JACKPOT);
 	sound_send (SND_EXPLOSION_1);
@@ -215,10 +214,8 @@ CALLSET_ENTRY (chaosmb, lamp_update)
 {
 	/* Jackpot lamp lighting is done by
 	 * chaosmb_check_jackpot_lamps () */
-	if (!flag_test (FLAG_CHAOSMB_RUNNING))
-		return;	
-
-	chaosmb_check_jackpot_lamps ();
+	if (flag_test (FLAG_CHAOSMB_RUNNING))
+		chaosmb_check_jackpot_lamps ();
 	
 }
 

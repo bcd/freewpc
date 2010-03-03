@@ -23,7 +23,7 @@
 #include <freewpc.h>
 
 extern bool mpf_active;
-
+extern U8 mpf_round_timer;
 void bonus_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
@@ -288,10 +288,14 @@ void left_loop_leff (void)
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	for (;;)
+	while (mpf_round_timer > 0)
+	{
 		lamplist_step_increment (LAMPLIST_JETS, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
+		task_sleep (TIME_100MS);
+	}
 }
+
 
 
 void circle_out_leff (void)
@@ -385,7 +389,8 @@ void mpf_active_leff (void)
 	lamplist_set_apply_delay (TIME_100MS);
 	while (mpf_active == TRUE)
 	{
-		task_sleep_sec (1);
+		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
+			matrix_lookup (LMX_EFFECT2_LAMPS));
 	}
 	leff_exit ();
 }

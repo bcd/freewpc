@@ -189,7 +189,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	kickout_lock (KLOCK_DEFF);
 	deff_start (DEFF_MPF_AWARD);
 	//TODO This will make it crash, make it stop!
-	//callset_invoke (award_door_panel);
+	callset_invoke (award_door_panel);
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)

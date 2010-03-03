@@ -24,6 +24,7 @@
 CALLSET_ENTRY (piano, sw_piano)
 {
 	device_switch_can_follow (piano, slot, TIME_3S);
+	//callset_invoke (shot_piano);
 	/* Say that a ball entering this device is destined to
 	enter the slot machine device, within a certain amount
 	of time.  This information can only be used reliably
@@ -32,6 +33,6 @@ CALLSET_ENTRY (piano, sw_piano)
 /*	if (event_did_follow (right_loop, piano))
 		{
 			sound_send (SND_RUDY_BLEH);
-			score (SC_5M);
+			score (SC_5M);*
 		}*/
 }

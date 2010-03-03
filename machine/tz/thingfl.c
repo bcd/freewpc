@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (thingfl, __machine2__) */
 #include <freewpc.h>
 
 __local__ U8 thing_flips_enable_count;
@@ -31,7 +32,7 @@ extern void flipper_override_pulse (U8 switches);
 
 //TODO __fastram__ thing_flips_magic_num?
 
-__machine2__ void thing_flips_deff (void)
+void thing_flips_deff (void)
 {
 	dmd_alloc_low_clean ();
 	sprintf ("%d DELAY", delay);
@@ -43,11 +44,11 @@ __machine2__ void thing_flips_deff (void)
 	deff_exit ();
 }
 
- __machine2__ void thing_flips (void)
+CALLSET_ENTRY (thingfl, thing_flips)
 {
 	if (multi_ball_play ())
 		return;
-	timer_restart_free (GID_THING_FLIPS, TIME_2S);
+	timer_restart_free (GID_THING_FLIPS_SUCCESS, TIME_2S);
 	//4, 31 too quick
 	if (loop_time < 27)
 		delay = 4;
@@ -71,27 +72,24 @@ __machine2__ void thing_flips_deff (void)
 	//TODO loop.c already checks for a right loop and thing_flips_enable_count, should it be here?
 	task_sleep (delay);//Use a magic number here?
 	flipper_override_pulse (WPC_UL_FLIP_SW);
-	if (!in_test)
+	if (in_live_game)
 		deff_start (DEFF_THING_FLIPS);
 	thing_flips_attempts++;
-	//event_should_follow (sw_piano_entry);
 }
 
-__machine2__ CALLSET_ENTRY (thingfl, sw_piano)
+CALLSET_ENTRY (thingfl, sw_piano)
 {
 	
-	/*device_switch_can_follow (left_loop, piano, TIME_2S);
-	*/
-	if (timer_kill_gid (GID_THING_FLIPS))
+	if (timer_kill_gid (GID_THING_FLIPS_SUCCESS))
 	{	
 		thing_flips_successes++;
 		sound_send (SND_ADDAMS_FASTLOCK_STARTED);
-		//sound_send (SND_KACHING);
+		score (SC_10M);
 	}
 	
 }
 //TODO Maybe apologise for missing the shot?
-__machine2__ CALLSET_ENTRY (thingfl, sw_standup_4)
+CALLSET_ENTRY (thingfl, sw_standup_4)
 {
 	if (timer_kill_gid (GID_THING_FLIPS))
 	{	
@@ -100,7 +98,7 @@ __machine2__ CALLSET_ENTRY (thingfl, sw_standup_4)
 	
 }
 
-__machine2__ CALLSET_ENTRY (thingfl, sw_power_payoff)
+CALLSET_ENTRY (thingfl, sw_power_payoff)
 {
 	if (timer_kill_gid (GID_THING_FLIPS))
 	{	
@@ -109,7 +107,7 @@ __machine2__ CALLSET_ENTRY (thingfl, sw_power_payoff)
 	
 }
 
-__machine2__ CALLSET_ENTRY (thingfl, start_player)
+CALLSET_ENTRY (thingfl, start_player)
 {
 	thing_flips_enable_count = 0;
 }

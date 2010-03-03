@@ -64,14 +64,6 @@ __machine__ void tz_ball_save_deff(void);
 __machine__ void rollover_completed_deff (void);
 
 /* door.c */
-void door_set_flashing(U8 id);
-void door_advance_flashing(void);
-void door_award_rotate(void);
-void door_award_deff(void);
-void door_award_if_possible(void);
-bool can_award_door_panel (void);
-void door_award_flashing (void);
-void door_award_enable(void);
 __machine__ void shot_slot_machine (void);
 __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
@@ -157,3 +149,5 @@ __machine__ bool fastlock_running (void);
 /* powerball.c */
 #define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
+
+/* thingfl.c */

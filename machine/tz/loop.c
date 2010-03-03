@@ -194,7 +194,7 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		//start_flipper_timer (); to train via player.
 		stop_loop_speed_timer ();
 		/* Inform thingfl.c and fastlock.c that a loop has been done. */
-		//thing_flips ();
+		callset_invoke (thing_flips);
 		//left_magnet_grab_start ();
 	
 		award_right_loop ();

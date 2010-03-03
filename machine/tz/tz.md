@@ -527,7 +527,6 @@ SSlot Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 Spiral Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
-#Thing Flips: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED
 Fastlock Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
@@ -569,6 +568,8 @@ TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_QUICK3
 
+
+Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 ##########################################################################
 # Lamp effects
 ##########################################################################

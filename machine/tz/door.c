@@ -160,7 +160,6 @@ void slot_animation_sound_task (void)
 	task_sleep (TIME_800MS);
 	sound_send (SND_SLOT_REEL);
 	task_exit ();
-
 }
 
 void door_award_deff (void)
@@ -254,10 +253,10 @@ void door_award_enable (void)
 void door_award_flashing (void)
 {
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
+	deff_start (DEFF_DOOR_AWARD);
+	door_start_event (door_index);
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
-	door_start_event (door_index);
-	deff_start (DEFF_DOOR_AWARD);
 	
 	score (SC_5M);
 	timed_game_extend (10);
@@ -281,7 +280,7 @@ void door_award_flashing (void)
 	}
 
 	leff_start (LEFF_DOOR_STROBE);
-	task_sleep (TIME_100MS);
+//	task_sleep (TIME_100MS);
 	door_advance_flashing ();
 	score (SC_50K);
 #ifndef GREED_ONLY
@@ -290,7 +289,7 @@ void door_award_flashing (void)
 	callset_invoke (door_panel_awarded);
 }
 
-static void door_award_litz (void)
+void door_award_litz (void)
 {
 	door_start_event (14);
 	audit_increment (&feature_audits.litz_started);
@@ -304,9 +303,6 @@ bool can_award_door_panel (void)
 		return FALSE;
 	else
 		return TRUE;
-	/* No more panels can be awarded after BTTZ */
-//	if (flag_test (FLAG_BTTZ_RUNNING))
-//		return FALSE;
 }
 
 CALLSET_ENTRY (door, lamp_update)
@@ -335,19 +331,11 @@ CALLSET_ENTRY (door, award_door_panel)
 			door_award_litz ();
 		}
 		else
-			door_award_flashing ();
+			door_award_flashing ();	
+		
 		callset_invoke (reset_unlit_shots);
 		door_lamp_update ();
 	}
-}
-void door_award_if_possible (void)
-{
-//	if (can_award_door_panel ())
-//	{
-		/* TODO : When called from the camera award, this always
-		causes a crash???  This is probably stack overflow. */
-		callset_invoke (award_door_panel);
-//	}
 }
 
 CALLSET_ENTRY (door, door_start_10M)

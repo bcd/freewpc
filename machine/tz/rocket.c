@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+//TODO Make this play nice with Skill shot animation
 /* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
