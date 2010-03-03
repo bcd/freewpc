@@ -39,7 +39,6 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			}
 		}
 		
-		deff_start (DEFF_BALL_EXPLODE);
 		/* Don't allow the deff to start more than once a second */
 		if (in_live_game && !timer_find_gid (GID_MULTIDRAIN_ANIM_RUNNING))
 			deff_start (DEFF_BALL_EXPLODE);

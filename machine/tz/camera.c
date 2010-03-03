@@ -156,7 +156,7 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else if (can_award_camera ())
 	{
-		task_create_anon (do_camera_award);
+		do_camera_award ();
 		bounded_decrement (cameras_lit, 0);
 		score (SC_10M);
 		sound_send (SND_CAMERA_AWARD_SHOWN);

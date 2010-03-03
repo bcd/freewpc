@@ -44,11 +44,13 @@ void tsm_round_deff (void)
 void tsm_round_begin (void)
 {
 	deff_start (DEFF_TSM_ROUND);
+	leff_start (LEFF_JETS_ACTIVE);
 }
 
 void tsm_round_expire (void)
 {
 	deff_stop (DEFF_TSM_ROUND);
+	leff_stop (LEFF_JETS_ACTIVE);
 }
 
 void tsm_round_end (void)
