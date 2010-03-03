@@ -825,6 +825,10 @@ sub machine_write_defines {
 		my $gi = $leff->{'GI'};
 		my $lamps = $leff->{'LAMPS'};
 
+		if (defined $gi && $leff->{'shared'}) {
+			die "cannot allocate GI from a shared leff ($fn)";
+		}
+
 		if ($leff->{'props'} =~ /(PRI_[a-zA-Z0-9]+)/) {
 			$prio = $1;
 		} else {
