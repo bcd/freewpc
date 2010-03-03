@@ -568,8 +568,10 @@ TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_QUICK3
 
+Multidrain: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED
 
-Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
+
+Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE+D_TIMEOUT
 ##########################################################################
 # Lamp effects
 ##########################################################################

@@ -99,7 +99,7 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 	score (SC_1K);
 	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 	start_spiralaward_timer ();
-	//event_can_follow (left_inlane_1, right_loop, TIME_3S);
+	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
 /* 'Light Slot Machine' Lane */
@@ -109,6 +109,7 @@ CALLSET_ENTRY (lanes, sw_left_inlane_2)
 	check_rollover ();
 	score (SC_1K);
 	start_spiralaward_timer ();
+	event_can_follow (left_inlane_2, slot, TIME_3S);
 }
 
 /* 'Dead End' Lane */
@@ -137,11 +138,4 @@ CALLSET_ENTRY (lanes, start_ball)
 	rollover_level = 1;
 }
 
-CALLSET_ENTRY (lanes, sw_outhole)
-{	
-	if (in_live_game && !timer_find_gid(GID_OUTHOLE_ANIM_DEBOUNCE))
-	{
-		timer_restart_free (GID_OUTHOLE_ANIM_DEBOUNCE, TIME_1S);
-		deff_start (DEFF_BALL_EXPLODE);
-	}
-}
+
