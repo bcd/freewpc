@@ -130,6 +130,8 @@ void autofire_add_ball (void)
 		ball was successfully kicked).  In these cases, do it
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
+		/* Wait for divertor to open */
+		task_sleep_sec (1);
 		sol_pulse (SOL_BALL_SERVE);
 	}
 	else
@@ -148,7 +150,7 @@ void autofire_catch (void)
 {
 	/* TODO - don't always want to launch right away, e.g. for
 	a start multiball animation */
-	shooter_div_delay_time = 1;
+	shooter_div_delay_time = 0;
 	shooter_div_open_time = 4;
 	task_create_gid1_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
 }
@@ -171,6 +173,9 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
+
+		/* Wait for the divertor to open */
+		task_sleep (TIME_300MS);
 	}
 	else
 	{
