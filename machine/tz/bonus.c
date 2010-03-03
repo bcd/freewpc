@@ -33,7 +33,9 @@ static void bonus_button_monitor (void)
 {
 	for (;;)
 	{
-		if ((switch_poll_logical (SW_LEFT_BUTTON) && switch_poll_logical (SW_RIGHT_BUTTON)) && buttons_held == FALSE)
+		if ((switch_poll_logical (SW_LEFT_BUTTON) 
+			&& switch_poll_logical (SW_RIGHT_BUTTON)) 
+			&& buttons_held == FALSE)
 		{	
 			buttons_held = TRUE;
 			sound_send (SND_FIST_BOOM1);
@@ -60,6 +62,20 @@ static void bonus_sched_transition (void)
 		dmd_sched_transition (&trans_scroll_down);
 }
 
+/* Function to calculate bonus score */
+static void bonus_add_up_score (U8 award_count, score_id_t award_amount)
+{
+	/* Zero the temporary score */
+	score_zero (bonus_scored);
+	/* Add the award amount to the temp score */
+	score_add (bonus_scored, score_table[award_amount]);
+	/* Multiply it by award_count */
+	score_mul (bonus_scored, award_count);
+	/* Add the temp score to the total bonus */
+	score_add (total_bonus, bonus_scored);
+	sprintf_score (bonus_scored);	
+}
+
 void bonus_deff (void)
 {
 	extern U8 door_panels_started;
@@ -76,14 +92,16 @@ void bonus_deff (void)
 	
 	/* Clear the bonus score */
 	score_zero (total_bonus);
+	/* Start a task to monitor the buttons */
 	buttons_held = FALSE;
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
+
 	/* Show Initial bonus screen */
 	sample_start (MUS_FADE_BONUS, SL_500MS);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_times10, 64, 16, "BONUS");
-	//dmd_sched_transition (&trans_random_boxfade);
 	dmd_show_low ();
+
 	bonus_pause ();
 
 	if (door_panels_started > 0)
@@ -92,11 +110,12 @@ void bonus_deff (void)
 		score_multiple (SC_1M, door_panels_started);
 		psprintf ("%d DOOR PANEL", "%d DOOR PANELS", door_panels_started);
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		score_zero (bonus_scored);
+		bonus_add_up_score (door_panels_started, SC_1M);
+		/*score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_1M]);
 		score_mul (bonus_scored, door_panels_started); 
 		score_add (total_bonus, bonus_scored);
-		sprintf_score (bonus_scored);	
+		sprintf_score (bonus_scored);	*/
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
