@@ -311,7 +311,7 @@ CALLSET_ENTRY (door, lamp_update)
 		lamp_on (LM_PIANO_PANEL);
 	else
 		lamp_off (LM_PIANO_PANEL);
-
+	/* Don't turn the lamp on if sslot is running */
 	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT) 
 		&& !task_find_gid (GID_SSLOT_AWARD_ROTATE))
 		lamp_on (LM_SLOT_MACHINE);

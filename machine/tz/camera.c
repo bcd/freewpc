@@ -59,7 +59,8 @@ void camera_award_deff (void)
 	dmd_draw_border (dmd_low_buffer);
 	sprintf ("CAMERA AWARD %d", camera_award_count);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-	switch (camera_award_count)
+	/* TODO HACK */
+	switch (camera_award_count - 1)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			sprintf ("LIGHT LOCK");

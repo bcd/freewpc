@@ -126,13 +126,10 @@ void bonus_deff (void)
 	if (loops > 0)
 	{
 		dmd_alloc_low_clean ();
-		score_zero (bonus_scored);
-		score_add (bonus_scored, score_table[SC_100K]);
-		score_mul (bonus_scored, loops); 
-		score_add (total_bonus, bonus_scored);
 		psprintf ("%d LOOP", "%d LOOPS", loops);
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf_score (bonus_scored);	
+		
+		bonus_add_up_score (loops, SC_100K);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		sprintf ("%d X 100,000", loops);
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);

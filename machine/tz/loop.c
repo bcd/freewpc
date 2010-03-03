@@ -251,13 +251,13 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else
 	{
 		/* Right loop started */
+		/* Inform gumball module that a ball may be approaching */
+		sw_gumball_right_loop_entered ();
 		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
 		start_loop_speed_timer ();
 		enter_loop ();
 	}
 
-	/* Inform gumball module that a ball may be approaching */
-	sw_gumball_right_loop_entered ();
 }
 
 CALLSET_ENTRY (loop, start_ball)
