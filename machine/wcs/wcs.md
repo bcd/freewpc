@@ -415,3 +415,7 @@ Lock Magnet: driver(duty),
 	sol=SOL_LOCK_MAGNET,
 	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_100MS, timeout=TIME_2S
 
+Soccer Ball: driver(bivar),
+	forward_sol=SOL_BALL_FORWARD,
+	reverse_sol=SOL_BALL_REVERSE
+
