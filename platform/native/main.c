@@ -746,10 +746,19 @@ U8 linux_asic_read (IOPTR addr)
 CALLSET_ENTRY (native, realtime_tick)
 {
 #define FIRQ_FREQ 8
+#define PERIODIC_FREQ 16
+
 	static unsigned long next_firq_time = FIRQ_FREQ;
+	static unsigned long next_periodic_time = PERIODIC_FREQ;
+
+	/* Update all of the simulator modules that need periodic processing */
 	sim_time_step ();
+
+	/* Simulate an IRQ every 1ms */
 	if (linux_irq_enable)
 		tick_driver ();
+
+	/* Simulate an FIRQ every 8ms */
 	if (linux_firq_enable)
 	{
 		while (realtime_read () >= next_firq_time)
@@ -757,6 +766,15 @@ CALLSET_ENTRY (native, realtime_tick)
 			do_firq ();
 			next_firq_time += FIRQ_FREQ;
 		}
+	}
+
+	/* Call periodic processes every 16ms */
+	if (realtime_read () >= next_periodic_time)
+	{
+		db_periodic ();
+		if (likely (periodic_ok))
+			do_periodic ();
+		next_periodic_time += PERIODIC_FREQ;
 	}
 }
 
