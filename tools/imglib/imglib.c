@@ -221,6 +221,7 @@ void buffer_read_pgm (struct buffer *buf, FILE *fp)
 	unsigned int x, y;
 	unsigned int c;
 	unsigned int newlen = 0;
+	char *token = NULL;
 
 	fgets (line, 79, fp); /* magic */
 	fgets (line, 79, fp); /* comment */
@@ -236,15 +237,27 @@ void buffer_read_pgm (struct buffer *buf, FILE *fp)
 	for (y=0; y < buf->height; y++)
 		for (x=0; x < buf->width; x++)
 		{
-			fgets (line, 79, fp);
-			if (feof (fp))
-				break;
-			sscanf (line, "%u\n", &c);
+			if (token == NULL)
+			{
+nextline:
+				fgets (line, 79, fp);
+				if (feof (fp))
+					goto done;
+				token = strtok (line, " \t\r\n");
+			}
+			else
+			{
+				token = strtok (NULL, " \t\r\n");
+				if (token == NULL)
+					goto nextline;
+			}
+
+			c = strtoul (token, NULL, 10);
 			//printf ("x,y = %d, %d\n", x, y);
 			buf->data[bitmap_pos (buf, x, y)] = c;
 			newlen++;
 		}
-
+done:
 	buf->len = newlen;
 }
 
