@@ -14,6 +14,7 @@ Pinmame-ROM: wcup_lx2.bin
 Lamp-Matrix-Width: 45
 Lamp-Matrix-Height: 25
 
+define MACHINE_WCS
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }

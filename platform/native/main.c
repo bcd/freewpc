@@ -436,41 +436,6 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 
 		if (solno < SOL_COUNT)
 			sim_coil_change (solno, val & (1 << n));
-#if 0
-		{
-			int devno;
-			/* See if it's attached to a device.  Then find the first
-			switch that is active, and deactivate it, simulating the
-			removal of one ball from the device.  (This does not map
-			to reality, where lots of switch closures would occur, but
-			it does produce the intended effect.) */
-			for (devno = 0; devno < NUM_DEVICES; devno++)
-			{
-				const device_properties_t *props = &device_properties_table[devno];
-				if (props->sol == solno)
-				{
-					int n;
-					for (n = 0; n < props->sw_count; n++)
-					{
-						if (linux_switch_poll_logical (props->sw[n]))
-						{
-							simlog (SLC_DEBUG, "Device %d release", devno);
-							sim_switch_toggle (props->sw[n]);
-
-							/* Where does the ball go from here?
-							Normally device kickout leads to unknown areas of
-							the playfield.
-							The shooter switch could be handled though. */
-							break;
-						}
-					}
-
-					/* If no balls are in the device, then nothing happens. */
-					break;
-				}
-			}
-		}
-#endif
 	}
 
 	/* Commit the new state */
@@ -1223,6 +1188,15 @@ int main (int argc, char *argv[])
 	linux_key_install ('r', SW_RIGHT_RAMP);
 	linux_key_install ('h', SW_HITCHHIKER);
 	linux_key_install ('c', SW_CAMERA);
+#endif
+#ifdef MACHINE_WCS
+	linux_key_install ('G', SW_GOAL_TROUGH);
+	linux_key_install ('g', SW_GOAL_POPPER);
+	linux_key_install ('t', SW_TV_POPPER);
+	linux_key_install ('s', SW_SPINNER);
+	linux_key_install ('z', SW_STRIKER_1);
+	linux_key_install ('x', SW_STRIKER_2);
+	linux_key_install ('c', SW_STRIKER_3);
 #endif
 
 	/* Jump to the reset function */
