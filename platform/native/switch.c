@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -23,6 +23,9 @@
 
 int show_switch_levels = 0;
 
+int sim_no_switch_power = 0;
+int sim_no_opto_power = 0;
+
 /** The simulated switch matrix inputs.  This acts as a buffer between the
  * simulation code and the actual product code, but it serves the same
  * purpose.  Only one matrix is needed, however.
@@ -44,7 +47,9 @@ void sim_switch_toggle (int sw)
 {
 	U8 level;
 
-	if (sim_test_badness (SIM_BAD_NOSWITCHPOWER))
+	if (sim_no_switch_power)
+		return;
+	if (sim_no_opto_power && switch_is_opto (sw))
 		return;
 
 	/* Update the current state of the switch */
@@ -87,5 +92,8 @@ void sim_switch_init (void)
 {
 	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
 	linux_switch_matrix[9] = 0xFF;
+
+	conf_add ("sw.no_power", &sim_no_switch_power);
+	conf_add ("sw.no_opto_power", &sim_no_opto_power);
 }
 

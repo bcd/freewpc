@@ -143,10 +143,6 @@ void sim_coil_update (struct sim_coil_state *c)
 	}
 
 	c->tick++;
-#if 0
-	simlog (SLC_DEBUG, "%d: Coil %02X on=%d pos=%d count=%d",
-		c->tick, c - coil_states, c->on, c->pos, coil_pulse_count);
-#endif
 }
 
 
@@ -164,7 +160,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 		c->on = on;
 		if (!c->scheduled)
 		{
-			sim_time_register (8, FALSE, sim_coil_update, c);
+			sim_time_register (8, FALSE, (time_handler_t)sim_coil_update, c);
 			c->scheduled = 1;
 			coil_pulse_count++;
 		}
