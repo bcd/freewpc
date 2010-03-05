@@ -32,6 +32,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			bounded_increment (multidrain_count, 6);
 			if (multidrain_count == 3)
 			{
+				//TODO This stops the speech as well
 				//music_timed_disable (TIME_3S);
 				sound_send (SND_HEY_ITS_ONLY_PINBALL);
 				deff_start (DEFF_MULTIDRAIN);
@@ -39,7 +40,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			}
 		}
 		
-		/* Don't allow the deff to start more than once a second */
+		/* Don't allow the deff to start when the multidrain deff is on */
 		if (in_live_game && !timer_find_gid (GID_MULTIDRAIN_ANIM_RUNNING))
 			deff_start (DEFF_BALL_EXPLODE);
 	}
