@@ -142,9 +142,12 @@ struct signal_expression *texpr (void)
 void exec_script (char *cmd)
 {
 	const char *t;
+	uint32_t v;
 
 	t = tfirst (cmd);
 	if (!t)
+		return;
+	if (*t == '#')
 		return;
 
 	/*********** capture [subcommand] [args...] ***************/
@@ -184,7 +187,6 @@ void exec_script (char *cmd)
 	/*********** set [var] [value] ***************/
 	else if (teq (t, "set"))
 	{
-		uint32_t v;
 		t = tnext ();
 		v = tconst ();
 		conf_write (t, v);
@@ -192,7 +194,6 @@ void exec_script (char *cmd)
 	/*********** p/print [var] ***************/
 	else if (teq (t, "p") || teq (t, "print"))
 	{
-		uint32_t v;
 		t = tnext ();
 		v = conf_read (t);
 		simlog (SLC_DEBUG, "%s = %d", t, v);
@@ -202,6 +203,12 @@ void exec_script (char *cmd)
 	{
 		t = tnext ();
 		exec_script_file (t);
+	}
+	/*********** sw [id] ***************/
+	else if (teq (t, "sw"))
+	{
+		v = tconst ();
+		sim_switch_depress (v);
 	}
 }
 
