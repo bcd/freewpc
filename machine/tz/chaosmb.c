@@ -149,11 +149,14 @@ static void chaosmb_check_jackpot_lamps (void)
 				break;
 		}
 	}
-	else	
+	else
+	{
+		/* Turn off jackpot lamps */
+		lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
+		lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	}
 }
-
-
 
 static void chaosmb_score_jackpot (void)
 {
