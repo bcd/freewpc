@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Dominic Clifton <me@dominicclifton.name>
  *
  * This file is part of FreeWPC.
  *

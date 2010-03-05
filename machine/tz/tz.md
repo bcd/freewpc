@@ -147,11 +147,11 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
 18: Outhole, outhole, service, noplay
-21: Slam Tilt, slam-tilt, ingame, cabinet
+21: Slam Tilt, slam-tilt, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, edge, noscore
-27: Shooter, edge, shooter, noscore
+27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), noplay
 32: Right Jet, ingame, c_decl(sw_jet), noplay
@@ -251,6 +251,11 @@ A1: MPF Left Magnet
 A2: MPF Right Magnet
 A3: Ramp Divertor
 A4: Clock Target, flash
+
+F5: U.R. Flip Power, time(TIME_33MS)
+F6: U.R. Flip Hold, time(TIME_100MS)
+F7: U.L. Flip Power, time(TIME_33MS)
+F8: U.L. Flip Hold, time(TIME_100MS)
 
 X1: UR Flipper, flash
 X2: Gumball High, flash
@@ -493,7 +498,7 @@ Extra Ball: page(MACHINE_PAGE), PRI_EB
 Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7
-Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8
+#Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8
 
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3

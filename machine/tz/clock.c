@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <clock_mech.h>
+#include <diag.h>
 
 /** The logical states of the clock driver state machine */
 enum mech_clock_mode
@@ -75,10 +76,14 @@ U8 clock_calibration_time;
 past 12:00, ranging from 0 to 47. */
 U8 clock_decode;
 
+/** The last clock switch(es) that were seen active */
 U8 clock_minute_sw;
 
 /** The task that currently owns the clock */
 task_gid_t clock_owner;
+
+/** The current clock hour, as an integer from 0-11 */
+U8 clock_hour;
 
 
 void tz_dump_clock (void)
@@ -146,14 +151,11 @@ extern inline void clock_switch_disable (void)
  * it is. */
 U8 tz_clock_gettime (void)
 {
-	/* Determine the 'rough' hour from the hour optos. */
-	clock_decode = tz_clock_opto_to_hour[clock_sw >> 4] * 4;
+	clock_decode = clock_hour * 4;
 
 	/* Adjust according to the last minute opto seen. */
-	if (clock_minute_sw & CLK_SW_MIN00)
-		clock_decode += 4;
-	else if (clock_minute_sw & CLK_SW_MIN15)
-		clock_decode += 5;
+	if (clock_minute_sw & CLK_SW_MIN15)
+		clock_decode += 1;
 	else if (clock_minute_sw & CLK_SW_MIN30)
 		clock_decode += 2;
 	else if (clock_minute_sw & CLK_SW_MIN45)
@@ -187,7 +189,31 @@ void tz_clock_switch_rtt (void)
 		can be read at any time, but the minute optos are only active
 		when the arm actually crosses one of the 15 minute marks. */
 		if (CLK_SW_MIN (clock_sw))
+		{
 			clock_minute_sw = CLK_SW_MIN (clock_sw);
+			if (clock_minute_sw == CLK_SW_MIN30 &&
+				clock_mode == CLOCK_RUNNING_FORWARD)
+			{
+				/* When the minute hand is at :30, the hour switches
+				tell us exactly what the hour is. */
+				clock_hour = tz_clock_opto_to_hour[clock_sw >> 4];
+			}
+			else if (clock_minute_sw == CLK_SW_MIN00 &&
+				clock_mode == CLOCK_RUNNING_FORWARD)
+			{
+				clock_hour++;
+				if (clock_hour == 12)
+					clock_hour = 0;
+			}
+		}
+		else if (unlikely (CLK_SW_MIN (clock_last_sw) == CLK_SW_MIN45
+			&& clock_mode == CLOCK_RUNNING_BACKWARD))
+		{
+			if (clock_hour)
+				clock_hour--;
+			else
+				clock_hour = 11;
+		}
 
 		/* If searching for a specific target, see if we're there */
 		if (unlikely (clock_mode == CLOCK_FIND))
@@ -300,7 +326,7 @@ void tz_clock_reset (void)
 		if (clock_sw != clock_find_target)
 		{
 			clock_mech_set_speed (BIVAR_DUTY_100);
-			if (tz_clock_opto_to_hour[clock_sw >> 4] <= 6)
+			if (clock_hour <= 6)
 				clock_mech_start_reverse ();
 			else
 				clock_mech_start_forward ();
@@ -347,6 +373,7 @@ CALLSET_ENTRY (tz_clock, init)
 	clock_sw_seen_inactive = 0;
 	clock_sw = 0;
 	clock_minute_sw = 0;
+	clock_hour = 0;
 	global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 	clock_mech_set_speed (BIVAR_DUTY_100);
 	tz_clock_clear_owner ();
@@ -375,6 +402,18 @@ CALLSET_ENTRY (tz_clock, amode_start)
 		tz_clock_reset ();
 	}
 }
+
+
+CALLSET_ENTRY (tz_clock, diagnostic_check)
+{
+	if (feature_config.disable_clock)
+		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", PAGE);
+	while (unlikely (clock_mode == CLOCK_CALIBRATING))
+		task_sleep (TIME_100MS);
+	if (!global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
+		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
+}
+
 
 /**
  * Stop the clock when entering test mode

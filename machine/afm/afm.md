@@ -87,7 +87,7 @@ define MACHINE_BALL_SAVE_LAMP LM_RETURN_TO_BATTLE
 14: Tilt, tilt, noplay, cabinet
 16: Left Outlane
 17: Right Inlane
-18: Shooter, edge, shooter, noplay
+18: Shooter, edge, shooter, noplay, debounce(TIME_200MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 26: Left Inlane
 27: Right Outlane

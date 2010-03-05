@@ -5,7 +5,7 @@
 
 
 /** The frequency of the realtime loop, in millseconds */
-#define RT_FREQ 50
+#define RT_FREQ 16
 
 
 unsigned long realtime_counter;
@@ -32,7 +32,7 @@ void realtime_loop (void)
 	for (;;)
 	{
 		/* Sleep before the next iteration of the loop */
-		task_sleep ((RT_FREQ * TIME_33MS) / 33);
+		task_sleep ((RT_FREQ * TIME_16MS) / 16);
 
 		/* Now see how long we actually slept.  This takes into account the
 		actual sleep time, which is typically longer on a multitasking OS,

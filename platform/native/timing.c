@@ -91,7 +91,7 @@ void sim_time_register (int n_ticks, int periodic_p, time_handler_t fn, void *da
  */
 void sim_time_step (void)
 {
-	struct time_handler *elem, *elem_next;
+	struct time_handler *elem, *elem_next, *periodic;
 
 	/* Atomically get and clear the list of timers to
 	 * be executed on this tick */
@@ -107,8 +107,20 @@ void sim_time_step (void)
 		{
 			/* If periodic, just requeue it rather than free/alloc */
 			elem_next = elem->next;
-			elem->next = time_handler_ring[ring_later (elem->periodicity)];
-			time_handler_ring[ring_later (elem->periodicity)] = elem;
+
+
+			periodic = time_handler_ring[ring_later (elem->periodicity)];
+			if (!periodic)
+			{
+				time_handler_ring[ring_later (elem->periodicity)] = elem;
+			}
+			else
+			{
+				while (periodic->next != NULL)
+					periodic = periodic->next;
+				periodic->next = elem;
+			}
+			elem->next = NULL;
 			elem = elem_next;
 		}
 		else

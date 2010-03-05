@@ -94,7 +94,13 @@ enum sol_request_state {
 __fastram__ volatile enum sol_request_state sol_req_state;
 __fastram__ volatile U8 sol_req_timer;
 
+/** A locking mechanism used to implement synchronous
+pulse requests.  At most one sync request can be in
+process at a time; this variable holds the solenoid number,
+plus bit 7 set (so that it is nonzero when a request is
+pending, and zero when no sync requests are in progress). */
 volatile U8 req_lock;
+
 IOPTR req_reg_write;
 U8 *req_reg_read;
 U8 req_bit;
@@ -201,18 +207,21 @@ void sol_request_async (U8 sol)
 void sol_request (U8 sol)
 {
 	/* Wait until any existing sync requests are finished. */
-	while (req_lock)
-		task_sleep (TIME_33MS);
+	while (req_lock || sol_req_state != REQ_IDLE)
+		task_sleep (TIME_66MS);
 
 	/* Acquire the lock for this solenoid. */
-	req_lock = sol; /* TODO - what if sol == 0 ? */
+	req_lock = (sol + 1) | 0x80;
 
 	/* Issue the request */
 	sol_request_async (sol);
 
-	/* Wait for the request to finish */
-	while (req_lock)
-		task_sleep (TIME_33MS);
+	/* Wait for the pulse to finish */
+	while (req_lock != 0x80)
+		task_sleep (TIME_66MS);
+
+	/* Release the lock for another task */
+	req_lock = 0;
 }
 
 
@@ -281,7 +290,8 @@ void sol_req_rtt (void)
 				finish. */
 				sol_req_off ();
 				sol_req_state = REQ_IDLE;
-				req_lock = 0;
+				if (req_lock)
+					req_lock = 0x80;
 			}
 		}
 		else if (sol_req_state == REQ_DUTY)
@@ -482,6 +492,7 @@ sol_init (void)
 	sol_duty_mask = 0x1;
 
 	sol_req_state = REQ_IDLE;
+	req_lock = 0;
 	memset (sol_reg_readable, 0, SOL_REG_COUNT);
 
 	/* Initialize the solenoid queue. */

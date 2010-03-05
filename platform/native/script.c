@@ -61,6 +61,8 @@ uint32_t tsigno (void)
 		signo = SIGNO_LAMP;
 	else if (teq (t, "sol_voltage"))
 		signo = SIGNO_SOL_VOLTAGE;
+	else if (teq (t, "ac_angle"))
+		signo = SIGNO_AC_ANGLE;
 	else
 		return 0;
 

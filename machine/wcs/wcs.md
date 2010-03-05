@@ -14,6 +14,7 @@ Pinmame-ROM: wcup_lx2.bin
 Lamp-Matrix-Width: 45
 Lamp-Matrix-Height: 25
 
+define MACHINE_WCS
 define MACHINE_NUMBER 531
 define MACHINE_CUSTOM_AMODE
 define MACHINE_GRAND_CHAMPION_INITIALS { 'W', 'C', 'S' }
@@ -111,7 +112,7 @@ define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 35: Trough 5, noscore, opto
 36: Trough Stack, noscore, opto
 37: Light Magna Goalie, ingame
-38: Shooter, edge, noscore, shooter
+38: Shooter, edge, noscore, shooter, debounce(TIME_200MS)
 41: Goal Trough, opto, ingame
 42: Goal Popper, opto, ingame
 43: Goalie Left, noplay, intest, service, opto
@@ -413,4 +414,8 @@ Magna Goalie: driver(duty),
 Lock Magnet: driver(duty),
 	sol=SOL_LOCK_MAGNET,
 	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_100MS, timeout=TIME_2S
+
+Soccer Ball: driver(bivar),
+	forward_sol=SOL_BALL_FORWARD,
+	reverse_sol=SOL_BALL_REVERSE
 

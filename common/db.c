@@ -151,6 +151,7 @@ void bpt_display (void)
  * the continue, we have to invoke the switch and debugger periodic
  * functions.
  */
+#ifdef CONFIG_BPT
 void bpt_hit (void)
 {
 	U8 key;
@@ -198,6 +199,7 @@ void bpt_hit (void)
 		}
 	}
 }
+#endif /* CONFIG_BPT */
 
 #endif /* DEBUGGER */
 

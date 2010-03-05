@@ -44,8 +44,9 @@ void sim_coil_kick (struct sim_coil_state *c)
 {
 	extern device_properties_t device_properties_table[];
 	unsigned int solno = c - coil_states;
+	int devno;
 
-	simlog (SLC_DEBUG, "Kick device %02X", c);
+	simlog (SLC_DEBUG, "Kick solenoid %d", solno);
 
 	/* If it's the outhole kicker, simulate the ball being
 	moved off the outhole into the trough */
@@ -59,6 +60,43 @@ void sim_coil_kick (struct sim_coil_state *c)
 		sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
 	}
 #endif
+
+	/* See if it's attached to a device.  Then find the first
+	switch that is active, and deactivate it, simulating the
+	removal of one ball from the device.  (This does not map
+	to reality, where lots of switch closures would occur, but
+	it does produce the intended effect.) */
+	for (devno = 0; devno < NUM_DEVICES; devno++)
+	{
+		const device_properties_t *props = &device_properties_table[devno];
+		if (props->sol == solno)
+		{
+			int n;
+			for (n = 0; n < props->sw_count; n++)
+			{
+				if (linux_switch_poll_logical (props->sw[n]))
+				{
+					simlog (SLC_DEBUG, "Device %d release", devno);
+					sim_switch_toggle (props->sw[n]);
+
+					/* Where does the ball go from here?
+					Normally device kickout leads to unknown areas of
+					the playfield.
+					The shooter switch could be handled though. */
+#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
+					if (devno == DEVNO_TROUGH)
+					{
+						sim_switch_toggle (MACHINE_SHOOTER_SWITCH);
+					}
+#endif
+					break;
+				}
+			}
+
+			/* If no balls are in the device, then nothing happens. */
+			break;
+		}
+	}
 }
 
 
