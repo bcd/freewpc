@@ -234,7 +234,10 @@ CALLSET_ENTRY (goalie_driver, diagnostic_check)
 {
 	/* this should timeout */
 	while (goalie_status & GOALIE_CALIBRATING)
+	{
 		task_sleep (TIME_100MS);
+		barrier ();
+	}
 	if (goalie_errors)
 		diag_post_error ("GOALIE IS\nNOT WORKING\n", MACHINE_PAGE);
 }

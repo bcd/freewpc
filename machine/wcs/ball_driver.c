@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,12 +28,14 @@ enum ball_state spinning_ball_state;
 
 
 /**
- * Update the soccer ball spinning.
+ * Check the request before writing to the device driver, and tweak it
+ * slightly if needed.
+ *
+ * Keep the device in stopped state if the ball has been disabled.
+ * Reverse the polarity if that feature is enabled.
  */
 void ball_spin_set (enum ball_state state)
 {
-	spinning_ball_state = state;
-
 	/* If the ball has been disabled, state remains
 	STOPPED. */
 	if (feature_config.disable_ball == YES)
@@ -49,26 +51,29 @@ void ball_spin_set (enum ball_state state)
 			state = FORWARD;
 	}
 
+	dbprintf ("ball_spin = %d\n", state);
+
 	/* Rewrite the motor outputs. */
+	spinning_ball_state = state;
 	switch (state)
 	{
 		case STOPPED:
-			sol_stop (SOL_BALL_FORWARD);
-			sol_stop (SOL_BALL_REVERSE);
+			soccer_ball_stop ();
 			break;
 		case FORWARD:
-			sol_start (SOL_BALL_FORWARD, SOL_DUTY_50, TIME_1S);
-			sol_stop (SOL_BALL_REVERSE);
+			soccer_ball_start_forward ();
 			break;
 		case REVERSE:
-			sol_start (SOL_BALL_REVERSE, SOL_DUTY_50, TIME_1S);
-			sol_stop (SOL_BALL_FORWARD);
+			soccer_ball_start_reverse ();
 			break;
 	}
 }
 
 
-void ball_spin_change (enum ball_state state)
+/**
+ * Update the device driver if there is a new state request.
+ */
+static void ball_spin_change (enum ball_state state)
 {
 	if (state != spinning_ball_state)
 	{
@@ -81,21 +86,24 @@ void ball_spin_change (enum ball_state state)
  * This function should be invoked periodically to keep
  * the solenoids updated.
  */
-void ball_spin_update (void)
+CALLSET_ENTRY (ball_spin, device_update)
 {
-	enum ball_state state = STOPPED;
+	enum ball_state state;
+	
+	if (!valid_playfield)
+	{
+		state = STOPPED;
+	}
+	else if (ball_up == 1)
+	{
+		state = FORWARD;
+	}
+	else
+	{
+		state = REVERSE;
+	}
 
-	/* Update the motor depending on the new state. */
+	/* Update the motor depending on the desired state. */
 	ball_spin_change (state);
-}
-
-CALLSETX_ENTRY (ball_driver, init)
-{
-	ball_spin_set (STOPPED);
-}
-
-CALLSETX_ENTRY (ball_driver, end_game, tilt, stop_game)
-{
-	ball_spin_change (STOPPED);
 }
 

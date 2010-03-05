@@ -6,7 +6,7 @@
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
-GAME_ROM_PREFIX = fwcs
+GAME_ROM_PREFIX = fcorv
 
 # Set ROM_PAGE_COUNT to the number of 16KB pages
 # that should be present in the output image.
@@ -36,20 +36,20 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
-MACHINE_FILE = wcs.md
+MACHINE_FILE = corvette.md
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 62
+MACHINE_MINOR = 61
 
-IMAGE_MAP += $(M)/wcs.ild
+IMAGE_MAP += $(M)/corvette.ild
 
-MACHINE_SCHEDULE := $(M)/wcs.sched
+MACHINE_SCHEDULE := $(M)/corvette.sched
 
-PINMAME_MACHINE = wcs_l2
+PINMAME_MACHINE = corv_21
 
-PINMAME_GAME_ROM = wcup_lx2.rom
+PINMAME_GAME_ROM = corv_2_1.rom
 
-PINMAME_OTHER_ROMS = wcup_u*.rom
+PINMAME_OTHER_ROMS = corvsnd*
 
 #
 # Object files exported by this game
@@ -57,20 +57,18 @@ PINMAME_OTHER_ROMS = wcup_u*.rom
 
 GAME_OBJS =
 
-GAME_TEST_OBJS = goalie_test.o
+GAME_TEST_OBJS = 
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
-	shot.o lock.o driver.o kickback.o freekick.o \
-	toplane.o deffs.o jets.o goal_round.o \
-	combo.o multiball.o tv.o leffs.o mode.o ultra.o \
-	effect.o skill.o rampdiv.o magna_goalie.o penalty.o \
-	quickmb.o city.o final.o multiplier.o ball_driver.o
+GAME_PAGED_OBJS = simple.o driver.o kickback.o \
+	jets.o trivial.o sling.o zr_1_multiball.o shots.o \
+	leffs.o deffs.o skill.o
 
-FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
+#FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/lower_jet.h build/upper_jet.h \
-	build/kickback_driver.h build/spinner.h build/gate.h build/spinning_ball.h build/goalie.h \
-	build/lock_magnet.h build/magna_goalie.h build/soccer_ball.h
+SCHED_HEADERS += build/left_sling.h build/right_sling.h \
+	build/left_jet.h build/lower_jet.h build/upper_jet.h \
+	build/kickback_driver.h build/spinner.h build/loop_gate.h \
+	build/zr_1_up_rev_gate.h build/zr_1_low_rev_gate.h
 

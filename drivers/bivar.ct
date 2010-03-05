@@ -155,6 +155,7 @@ void @self_stop (void)
 CALLSET_ENTRY (@self, init)
 {
 	@self_state = BIVAR_IDLE;
+	@self_set_speed (BIVAR_DUTY_100);
 }
 
 

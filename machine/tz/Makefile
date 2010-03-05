@@ -71,6 +71,7 @@ GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
 
 GAME_INCLUDES =
 
+<<<<<<< HEAD:machine/tz/Makefile
 GAME_PAGED_OBJS = leftramp.o skill.o deadend.o camera.o \
 	spiral.o tsm.o fastlock.o door.o \
  	rightramp.o hitch.o piano.o slot.o greed.o \

@@ -160,14 +160,7 @@ __noreturn__ void freewpc_init (void)
 	task_exit ();
 #else
 	while (1)
-	{
-		/* TODO - drop priority for idle tasks.  Also consider
-		moving this logic elsewhere... */
 		task_sleep (TIME_33MS);
-		db_periodic ();
-		if (likely (periodic_ok))
-			do_periodic ();
-	}
 #endif
 }
 

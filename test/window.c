@@ -3157,6 +3157,14 @@ void solenoid_test_enter (void)
 	task_sleep (TIME_100MS);
 }
 
+void flasher_test_enter (void)
+{
+	U8 sel = win_top->w_class.menu.selected;
+	task_sleep (TIME_100MS);
+	flasher_pulse (sel);
+	task_sleep (TIME_100MS);
+}
+
 void solenoid_test_up (void)
 {
 	do {
@@ -3202,7 +3210,7 @@ struct window_ops flasher_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = flasher_test_init,
 	.draw = solenoid_test_draw,
-	.enter = solenoid_test_enter,
+	.enter = flasher_test_enter,
 	.left = solenoid_test_left,
 	.right = solenoid_test_right,
 	.up = solenoid_test_up,
