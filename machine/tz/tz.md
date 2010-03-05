@@ -553,7 +553,7 @@ Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Loop: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE+D_SCORE
-MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE+D_PAUSE
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
@@ -567,11 +567,11 @@ Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_QUICK3
-
-Multidrain: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED
-
+Multidrain: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
+MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE+D_TIMEOUT
+
 ##########################################################################
 # Lamp effects
 ##########################################################################
@@ -603,7 +603,7 @@ Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
 MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
-#Spiral Award Active: shared, PRI_LEFF1, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
+Spiralaward: runner, PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
 
 ##########################################################################
 # Fonts used in this game.

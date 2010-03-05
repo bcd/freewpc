@@ -284,7 +284,6 @@ void left_loop_leff (void)
 	leff_exit ();
 }
 
-
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
@@ -292,11 +291,8 @@ void jets_active_leff (void)
 	{
 		lamplist_step_increment (LAMPLIST_JETS, 
 			matrix_lookup (LMX_EFFECT2_LAMPS));
-		task_sleep (TIME_100MS);
 	}
 }
-
-
 
 void circle_out_leff (void)
 {
@@ -305,7 +301,6 @@ void circle_out_leff (void)
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
 	leff_exit ();
 }
-
 
 void color_cycle_leff (void)
 {
@@ -389,9 +384,20 @@ void mpf_active_leff (void)
 	lamplist_set_apply_delay (TIME_100MS);
 	while (mpf_active == TRUE)
 	{
-		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, 
+		lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES,
 			matrix_lookup (LMX_EFFECT2_LAMPS));
 	}
 	leff_exit ();
 }
+
+void spiralaward_leff (void)
+{
+	lamplist_set_apply_delay (TIME_33MS);
+	while (free_timer_test (TIM_SPIRALAWARD))
+	{
+		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);
+	}
+	leff_exit ();
+}
+
 

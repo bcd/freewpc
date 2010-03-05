@@ -23,16 +23,14 @@
 /** Index of the panel which is currently slow flashing (next to
  * be awarded) or fast flashing (running) */
 __local__ U8 door_index;
-
+/* Temporary value so deff shows the right award */
+U8 door_index_awarded;
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
 bool door_awarded_from_slot;
 U8 door_active_lamp;
 
-/* For testing -- only enables GREED mode */
-//#define GREED_ONLY
-//#define DOOR_INDEX 12
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
@@ -110,6 +108,16 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
+static bool can_award_door_panel (void)
+{
+	/* Panels not awarded during any multiball */
+	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
+		return FALSE;
+	else
+		return TRUE;
+}
+
+
 
 void door_set_flashing (U8 id)
 {
@@ -119,7 +127,7 @@ void door_set_flashing (U8 id)
 }
 
 
-void door_advance_flashing (void)
+static void door_advance_flashing (void)
 {
 	U8 new_door_index;
 
@@ -164,24 +172,24 @@ void slot_animation_sound_task (void)
 
 void door_award_deff (void)
 {
-	U8 index = door_index;
+	U8 index = door_index_awarded;
 	/* Hold the ball during deff if D_PAUSE */
 	kickout_lock (KLOCK_DEFF);
 	U16 fno;
 	/* If piano was lit, we were called from the slot */
-	if (door_awarded_from_slot == TRUE)
-	{
+//	if (door_awarded_from_slot == TRUE)
+//	{
 		/* Spawn task to play sounds */
-		task_create_anon (slot_animation_sound_task);
-		for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
-		{
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_show2 ();
-			task_sleep (TIME_66MS);
-		}
-		task_sleep_sec (1);
-	}
+//		task_create_anon (slot_animation_sound_task);
+//		for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
+//		{
+//			dmd_alloc_pair ();
+//			frame_draw (fno);
+//			dmd_show2 ();
+//			task_sleep (TIME_66MS);
+//		}
+	//	task_sleep_sec (1);
+//	}
 	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
@@ -190,13 +198,13 @@ void door_award_deff (void)
 		frame_draw (fno);
 		/* Flip it, as text is drawn to the low page */
 		dmd_flip_low_high ();	
-		font_render_string_left (&font_fixed6, 3, 16, door_panel_names[index]);
+		font_render_string_left (&font_mono5, 3, 16, door_panel_names[index]);
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	task_sleep_sec (1);	
+//	task_sleep_sec (1);	
 	/* Play backwards */
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
@@ -228,7 +236,6 @@ void door_award_deff (void)
 
 void litz_award_deff (void)
 {
-	//dmd_alloc_low_clean ();
 	dmd_alloc_pair ();
 	dmd_show_low ();
 	sound_send (SND_FIST_BOOM1);
@@ -244,17 +251,21 @@ void litz_award_deff (void)
 
 void door_award_enable (void)
 {
-#ifndef GREED_ONLY
-	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
-#endif
+	if (can_award_door_panel ())
+		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
 
 void door_award_flashing (void)
 {
+	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
-	deff_start (DEFF_DOOR_AWARD);
+	/* Store the current door index */
+	door_index_awarded = door_index;
+	/* Start the event and show deff */
 	door_start_event (door_index);
+	deff_start (DEFF_DOOR_AWARD);
+	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
 	
@@ -281,12 +292,9 @@ void door_award_flashing (void)
 
 	leff_start (LEFF_DOOR_STROBE);
 //	task_sleep (TIME_100MS);
-	door_advance_flashing ();
 	score (SC_50K);
-#ifndef GREED_ONLY
+	/* Restart the door rotation */
 	door_award_enable ();
-#endif
-	callset_invoke (door_panel_awarded);
 }
 
 void door_award_litz (void)
@@ -294,15 +302,6 @@ void door_award_litz (void)
 	door_start_event (14);
 	audit_increment (&feature_audits.litz_started);
 	deff_start (DEFF_LITZ_AWARD);
-}
-
-bool can_award_door_panel (void)
-{
-	/* Panels not awarded during any multiball */
-	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
-		return FALSE;
-	else
-		return TRUE;
 }
 
 CALLSET_ENTRY (door, lamp_update)
@@ -359,7 +358,8 @@ CALLSET_ENTRY(door, sw_piano)
 	}
 	else
 	{
-		flag_on (FLAG_PIANO_DOOR_LIT);
+		if (door_panels_started < 8)
+			flag_on (FLAG_PIANO_DOOR_LIT);
 		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
@@ -377,12 +377,11 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	}
 	else
 	{
-		flag_on (FLAG_SLOT_DOOR_LIT);
-		award_unlit_shot (SW_PIANO);
+		if (door_panels_started < 8)
+			flag_on (FLAG_SLOT_DOOR_LIT);
+		award_unlit_shot (SW_SLOT);
 		score (SC_5130);
 	}
-	//TODO else 
-		//deff_start (DEFF_SHOOT_PIANO);
 }
 
 CALLSET_ENTRY (door, door_start_eb)
@@ -393,11 +392,8 @@ CALLSET_ENTRY (door, door_start_eb)
 
 CALLSET_ENTRY(door, start_player)
 {
-#ifdef GREED_ONLY
-	door_index = DOOR_INDEX;
-#else
-	door_index = 0;
-#endif
+	/* Pick a random door to start on */
+	door_index = random_scaled (15);
 	door_panels_started = 0;
 	flag_on (FLAG_PIANO_DOOR_LIT);
 	flag_on (FLAG_SLOT_DOOR_LIT);
@@ -406,7 +402,6 @@ CALLSET_ENTRY(door, start_player)
 
 CALLSET_ENTRY(door, start_ball)
 {
-	door_set_flashing (door_index);
 	door_award_enable ();
 }
 

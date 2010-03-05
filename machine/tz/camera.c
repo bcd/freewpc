@@ -21,25 +21,24 @@
 #include <freewpc.h>
 extern void award_unlit_shot (U8 unlit_called_from);
 extern void mball_start_3_ball (void);
-
+extern bool door_awarded_from_slot;
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
 	CAMERA_AWARD_DOOR_PANEL,
-	CAMERA_AWARD_20_SECS,
+	CAMERA_AWARD_10_MILLION,
 	CAMERA_AWARD_QUICK_MB,
-	CAMERA_AWARD_250K,
+	CAMERA_AWARD_20_MILLION,
 	MAX_CAMERA_AWARDS,
 } camera_award_t;
 
 __local__ U8 cameras_lit;
 
 __local__ camera_award_t camera_award_count;
-
-__local__ U8 camera_default_count;
+/* Needed to store award for deff */
+camera_award_t camera_award_count_stored;
 
 void camera_award_deff (void)
 {
-	/* Lock ball during deff, Slot.c should unlock */
 	U16 fno;
 	for (fno = IMG_CAMERA_START; fno <= IMG_CAMERA_END; fno += 2)
 	{
@@ -57,10 +56,9 @@ void camera_award_deff (void)
 	task_sleep_sec (1);	
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	sprintf ("CAMERA AWARD %d", camera_award_count);
+	sprintf ("CAMERA AWARD %d", camera_award_count_stored);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-	/* TODO HACK */
-	switch (camera_award_count - 1)
+	switch (camera_award_count_stored)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			sprintf ("LIGHT LOCK");
@@ -68,14 +66,14 @@ void camera_award_deff (void)
 		case CAMERA_AWARD_DOOR_PANEL:
 			sprintf ("SPOT DOOR PANEL");
 			break;
-		case CAMERA_AWARD_20_SECS:
-			sprintf ("20 SECONDS");
+		case CAMERA_AWARD_10_MILLION:
+			sprintf ("10 MILLION");
 			break;
 		case CAMERA_AWARD_QUICK_MB:
 			sprintf ("QUICK MULTIBALL");
 			break;
-		case CAMERA_AWARD_250K:
-			sprintf ("250,000");
+		case CAMERA_AWARD_20_MILLION:
+			sprintf ("20 MILLION");
 			break;
 		default:
 			break;
@@ -93,6 +91,7 @@ static void do_camera_award (void)
 {
 	kickout_lock (KLOCK_DEFF);
 	deff_start (DEFF_CAMERA_AWARD);
+	camera_award_count_stored = camera_award_count;
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -101,41 +100,34 @@ static void do_camera_award (void)
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
-			//door_award_if_possible ();
+			door_awarded_from_slot = FALSE;
 			callset_invoke (award_door_panel);
 			break;
-		case CAMERA_AWARD_20_SECS:
-			/* Extra Time: 20 seconds */
-			if (config_timed_game)
-			{
-				camera_award_count++;
-				/* FALLTHRU */
-			}
-			else
-			{
-				timed_game_extend (20);
-				break;
-			}
+		case CAMERA_AWARD_10_MILLION:
+			/* 10 Million */
+			score (SC_10M);	
+			break;
 		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
 			callset_invoke (mball_start);
 			break;
-		case CAMERA_AWARD_250K:
+		case CAMERA_AWARD_20_MILLION:
 			score (SC_20M);
-			/* Big Points: 250K */
 			break;
 		default:
 			break;
 	}
+	if (cameras_lit > 0)
+		cameras_lit--;
 	camera_award_count++;
 	if (camera_award_count >= MAX_CAMERA_AWARDS)
-		camera_award_count = 0;
+		camera_award_count = 1;
 	task_exit ();
 }
 
 static bool can_award_camera (void)
 {
-	if (cameras_lit != 0 && !multi_ball_play ())
+	if (cameras_lit > 0 && !multi_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
@@ -157,8 +149,8 @@ CALLSET_ENTRY (camera, sw_camera)
 	else if (can_award_camera ())
 	{
 		do_camera_award ();
-		bounded_decrement (cameras_lit, 0);
-		score (SC_10M);
+		score (SC_500K);
+		//bounded_decrement (cameras_lit, 0);
 		sound_send (SND_CAMERA_AWARD_SHOWN);
 	}
 	else
@@ -183,7 +175,6 @@ CALLSET_ENTRY (camera, start_player)
 {
 	cameras_lit = 1;
 	camera_award_count = 0;
-	camera_default_count = 0;
 }
 
 

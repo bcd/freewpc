@@ -84,7 +84,7 @@ void bonus_deff (void)
 	extern U8 jets_scored;
 	extern U8 left_ramps;
 	extern U8 gumball_collected_count;
-	extern U8 spiralawards_collected;
+	extern U8 total_spiralawards_collected;
 	extern U8 dead_end_count;
 	extern U8 hitch_count;
 	extern U8 rollover_count;
@@ -200,18 +200,18 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 
-	if (spiralawards_collected > 0)
+	if (total_spiralawards_collected > 0)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, spiralawards_collected); 
+		score_mul (bonus_scored, total_spiralawards_collected); 
 		score_add (total_bonus, bonus_scored);
 		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		psprintf ("%d SPIRAL AWARD", "%d SPIRAL AWARDS", spiralawards_collected);
+		psprintf ("%d SPIRAL AWARD", "%d SPIRAL AWARDS", total_spiralawards_collected);
 		font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (spiralawards_collected));
+		sprintf ("%d X 1,000,000", (total_spiralawards_collected));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
@@ -298,7 +298,7 @@ void bonus_deff (void)
 		&& jets_bonus_level
 		&& left_ramps
 		&& gumball_collected_count
-		&& spiralawards_collected
+		&& total_spiralawards_collected
 		&& dead_end_count
 		&& hitch_count
 		&& rollover_count)
@@ -313,10 +313,7 @@ void bonus_deff (void)
 		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_show_low ();
 		task_sleep_sec (2);
-
-
 	}
-
 
 	/* Show total Bonus */	
 	dmd_alloc_low_clean ();

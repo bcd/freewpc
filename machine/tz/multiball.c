@@ -25,8 +25,11 @@ __local__ U8 mball_locks_lit;
 __local__ U8 mball_locks_made;
 __local__ U8 mballs_played;
 
+/* Current jackpot, in 10M's */
 U8 jackpot_level;
-/* Used to start a mode if multiball ends without picking up a jackpot */
+/* Used to pass the jackpot level to deff */
+U8 jackpot_level_stored;
+/* Used to restart if multiball ends without picking up a jackpot */
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
 U8 mball_restart_timer;
@@ -70,7 +73,6 @@ void mball_restart_deff (void)
 	}
 }
 
-
 void mball_restart_begin (void)
 {
 	deff_start (DEFF_MBALL_RESTART);
@@ -109,7 +111,6 @@ CALLSET_ENTRY (mball, music_refresh)
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
 }
 
-
 void lock_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -134,17 +135,14 @@ void mb_lit_deff (void)
 	deff_exit ();
 }
 
-
 void mb_start_deff (void)
 {
-	kickout_lock (KLOCK_DEFF);
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
 	dmd_show_low ();
 	flash_and_exit_deff (50, TIME_100MS);
 }
-
 
 void jackpot_relit_deff (void)
 {
@@ -155,13 +153,23 @@ void jackpot_relit_deff (void)
 	flash_and_exit_deff (50, TIME_100MS);
 }
 
+void mb_jackpot_collected_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_term6, 64, 10, "MB JACKPOT");
+	printf_millions (jackpot_level_stored * 10);
+	font_render_string_center (&font_fixed6, 64, 21, sprintf_buffer);
+	dmd_show_low ();
+	sound_send (SND_SKILL_SHOT_CRASH_3);
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
 void mb_running_deff (void)
 {
 	for (;;)
 	{
 		score_update_start ();
-		//dmd_alloc_low_high ();
-		
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
@@ -200,10 +208,8 @@ bool can_lock_ball (void)
 		return FALSE;
 }
 
-
 bool can_light_lock (void)
 {
-	//if (!multi_ball_play ()	&& mball_locks_lit)
 	if (can_lock_ball ())
 		return TRUE;
 	else if (fastlock_running ())
@@ -215,6 +221,7 @@ bool can_light_lock (void)
 	else
 		return FALSE;
 }
+
 CALLSET_ENTRY (mball, lamp_update)
 {
 	/* Light the lock if it can be collected */
@@ -290,8 +297,8 @@ void mball_check_light_lock (void)
 void mball_start_3_ball (void)
 {
 	/* Don't start if another multiball is running */
-//	if (multi_ball_play ())
-//		return;
+	if (multi_ball_play ())
+		return;
 	if (live_balls == 3)
 		return;
 	/* Check lock and empty accordingly */
@@ -329,6 +336,7 @@ CALLSET_ENTRY (mball, mball_start)
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		music_refresh ();
+		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
 		/* Set the jackpot higher if two balls were locked */
@@ -366,7 +374,6 @@ CALLSET_ENTRY (mball, mball_stop)
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
 		music_refresh ();
-		//autofire_request_count = 0;
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
 			timed_mode_start (GID_MBALL_RESTART_RUNNING, mball_restart_task);
@@ -386,6 +393,7 @@ void mball_left_ramp_exit (void)
 		lamp_on (LM_GUM);
 		mball_check_light_lock ();
 	}
+	event_can_follow (sw_left_ramp_exit, sw_shooter, TIME_3S);
 }
 
 /* TODO - on a missed left ramp exit switch, use the
@@ -401,23 +409,29 @@ CALLSET_ENTRY (mball, sw_right_ramp)
 	}
 }
 
+/* If for some reason the ball ends up in the shooter lane, start multiball */
+CALLSET_ENTRY (mball, sw_shooter)
+{
+	if (event_did_follow (sw_left_ramp_exit, sw_shooter) && multiball_ready ())
+		callset_invoke (mball_start);
+}
 
 CALLSET_ENTRY (mball, sw_piano)
 {
 	if (flag_test (FLAG_MB_JACKPOT_LIT))
 	{
 		flag_off (FLAG_MB_JACKPOT_LIT);
+		/* Add anoither 10M to the jackpot if three balls are out */
+		if (live_balls == 3)
+			bounded_increment (jackpot_level, 5);
+		jackpot_level_stored = jackpot_level;
 		deff_start (DEFF_JACKPOT);
+		deff_start (DEFF_MB_JACKPOT_COLLECTED);
 		mball_jackpot_uncollected = FALSE;
-		//TODO Score ladder for jackpots
-		
-		//score (SC_20M);
+		/* Score it */
 		score_multiple (SC_10M, jackpot_level);
 		/* Increase the jackpot level */
 		bounded_increment (jackpot_level, 5);
-		/* Add anoither 10M to the jackpot if three balls are out */
-		if (live_balls == 3)
-			score (SC_10M);
 	}
 }
 
@@ -482,6 +496,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 
 CALLSET_ENTRY (mball, end_ball)
 {
+	callset_invoke (mball_stop);
 	timed_mode_stop (&mball_restart_timer);
 }
 

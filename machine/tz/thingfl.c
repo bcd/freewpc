@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 /* CALLSET_SECTION (thingfl, __machine2__) */
 #include <freewpc.h>
 
@@ -27,10 +28,6 @@ U8 thing_flips_attempts;
 U8 delay;
 extern U8 loop_time;
 extern void flipper_override_pulse (U8 switches);
-//extern __fastram__ U8 thingfl_test_delay;
-//extern flipper_override_pulse;
-
-//TODO __fastram__ thing_flips_magic_num?
 
 void thing_flips_deff (void)
 {
@@ -73,7 +70,7 @@ CALLSET_ENTRY (thingfl, thing_flips)
 	task_sleep (delay);//Use a magic number here?
 	flipper_override_pulse (WPC_UL_FLIP_SW);
 	if (in_live_game)
-		deff_start (DEFF_THING_FLIPS);
+	//	deff_start (DEFF_THING_FLIPS);
 	thing_flips_attempts++;
 }
 

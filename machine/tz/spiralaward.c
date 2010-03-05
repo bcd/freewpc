@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,9 +18,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 /* Spiral Award - 3 second timer is started by either inlane (logic in inlane.c)
- * Lamps are lit at start and turned off after being awarded
- * Use the lamp state to check whether a award has been previously collected */
+ * Lamps are lit at start and turned off after being awarded */
 
 /* TODO: Fix bug with leff, doesn't show sometimes */
 /* CALLSET_SECTION (spiralaward, __machine2__) */
@@ -29,6 +29,7 @@
 
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
+__local__ U8 total_spiralawards_collected; 
 
 extern __local__ U8 mpf_enable_count;
 extern void magnet_flag_task (U8 magnet, U8 seconds);
@@ -54,7 +55,7 @@ const lampnum_t spiralaward_lamps[] = {
 void spiralaward_collected_deff (void)
 {
 	dmd_alloc_low_clean ();
-	if (spiralawards_collected < 5)
+	if (spiralawards_collected < 6)
 	{
 		font_render_string_center (&font_var5, 64, 20, spiralaward_names[spiralaward]);
 		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL AWARD");
@@ -87,16 +88,18 @@ void start_spiralaward_timer (void)
 	if (!multi_ball_play () && !free_timer_test (TIM_SPIRALAWARD))
 	{
 		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
+		leff_restart (LEFF_SPIRALAWARD);
 		/* Turn on left magnet flag for 4 seconds */
 		magnet_flag_task (0, 4);
 	}
 }
 
 
-void award_spiralaward (void)
+static void award_spiralaward (void)
 {	
-	/* Used for bonus */
 	spiralawards_collected++;
+	/* Used for bonus */
+	total_spiralawards_collected++;
 	
 	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);
@@ -135,12 +138,13 @@ void award_spiralaward (void)
 	/* Run lamp flash as task so it can run in parallel */
 	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
 	/* reset lamps after all 6 have been collected */
-	if (spiralawards_collected > 5)
+	if (spiralawards_collected == 6)
 	{	
 		/* Wait until lamp flash has finished */
 		while (task_find_gid (GID_FLASH_SPIRALAWARD_LAMP))
 			task_sleep (TIME_500MS);
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
+		spiralawards_collected = 0;
 	}
 }
 
@@ -149,18 +153,15 @@ void spiralaward_right_loop_completed (void)
 	if (free_timer_test (TIM_SPIRALAWARD))
 	{
 		free_timer_stop (TIM_SPIRALAWARD);
+		leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();
 	}
 }
 
-CALLSET_ENTRY (spiralaward, lamp_update)
-{
-}	
-
 CALLSET_ENTRY (spiralaward, start_player)
 {
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 	spiralawards_collected = 0;
+	total_spiralawards_collected = 0;
 }
-
