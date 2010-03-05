@@ -380,12 +380,11 @@ void mpf_active_leff (void)
 	*/
 	triac_leff_disable (TRIAC_GI_MASK);
 	triac_leff_enable (GI_POWERFIELD);
-	
+//	triac_leff_enable (TRIAC_GI_MASK);	
 	lamplist_set_apply_delay (TIME_100MS);
 	while (mpf_active == TRUE)
 	{
-		lamplist_step_increment (LAMPLIST_POWERFIELD_VALUES,
-			matrix_lookup (LMX_EFFECT2_LAMPS));
+		lamplist_apply (LAMPLIST_POWERFIELD_VALUES, leff_toggle);
 	}
 	leff_exit ();
 }

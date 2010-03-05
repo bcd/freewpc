@@ -23,9 +23,7 @@
 /* CALLSET_SECTION (lanes, __machine2__) */
 
 /* How many times the rollovers have been completed */
-/* TODO does this have to be __local__ ? */
-__local__ U8 rollover_count;
-__local__ U8 rollover_level;
+U8 rollover_count;
 
 static void handle_outlane (void)
 {
@@ -135,7 +133,6 @@ CALLSET_ENTRY (lanes, start_ball)
 	/* Turn off all inlanes at start of ball */
 	lamplist_apply (LAMPLIST_INLANES, lamp_off);
 	rollover_count = 0;
-	rollover_level = 1;
 }
 
 

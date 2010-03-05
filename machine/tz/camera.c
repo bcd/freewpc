@@ -56,7 +56,8 @@ void camera_award_deff (void)
 	task_sleep_sec (1);	
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
-	sprintf ("CAMERA AWARD %d", camera_award_count_stored);
+	/* camera_award_count_stored starts from 0 */
+	sprintf ("CAMERA AWARD %d", camera_award_count_stored + 1);
 	font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
 	switch (camera_award_count_stored)
 	{
