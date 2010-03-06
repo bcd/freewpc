@@ -142,7 +142,7 @@ void zr_1_mb_start (void)
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 }
 
-static void jackpot_check() {
+static void jackpot_check (void) {
 	if (!flag_test(FLAG_ZR_1_MULTIBALL_RUNNING)) {
 		return;
 	}
