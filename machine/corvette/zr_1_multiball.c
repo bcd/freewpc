@@ -18,6 +18,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * @TODO It's possible to light the lock by doing a right orbit twice very quickly
+ *       use event following instead of timed task or just adjust the timer value?
+ *
+ * @TODO find out why task sleep between ball unlocks doesn't work.
+ *       They player needs enough time after the first ball it launched to hit
+ *       the inner loop and attempt a shot on the skid pad.
+ *       currently the second ball is launched too quickly and gets it the way
+ *
+ * @TODO use ZR-1 flasher so the player knows when and where the balls are going to come from.
+ *
+ */
+
 #include <freewpc.h>
 
 __local__ U8 lock_count;
@@ -133,10 +146,10 @@ void zr_1_mb_start (void)
 	zr_1_mb_light_horsepower_jackpot ();
 	deff_start (DEFF_ZR_1_MB_START);
 
-	//task_sleep_sec (2);
 
-	//device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
+	task_sleep_sec (3);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
+	task_sleep_sec (3);
 	device_unlock_ball (device_entry (DEVNO_ZR1_POPPER));
 }
 
