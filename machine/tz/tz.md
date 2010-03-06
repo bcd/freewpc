@@ -223,7 +223,7 @@ define CONFIG_TZONE_IP
 #
 ##########################################################################
 [drives]
-H1: Slot
+H1: Slot, time(TIME_66MS)
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
@@ -606,7 +606,7 @@ MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 Spiralaward: runner, PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
-#Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 ##########################################################################
 # Fonts used in this game.
