@@ -316,12 +316,6 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
 }
 
-CALLSET_ENTRY (sssmb, sw_buyin_button)
-{
-	if (in_live_game) 
-		callset_invoke (sssmb_start);
-}
-
 CALLSET_ENTRY (sssmb, ball_start)
 {
 	callset_invoke (sssmb_stop);
