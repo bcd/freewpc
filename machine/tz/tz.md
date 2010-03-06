@@ -149,7 +149,7 @@ define CONFIG_TZONE_IP
 15: Right Trough, c_decl(sw_trough), noscore
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
-18: Outhole, outhole, service, noplay, intest
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS);
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore

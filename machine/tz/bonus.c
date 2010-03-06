@@ -99,7 +99,8 @@ void bonus_deff (void)
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
-		task_sleep_sec (3);
+		multidrain_awarded = FALSE;
+		task_sleep_sec (2);
 		bonus_pause ();
 	}
 
