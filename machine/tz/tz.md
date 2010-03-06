@@ -572,6 +572,8 @@ MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE+D_TIMEOUT
 
+Rules: page(MACHINE2_PAGE), PRI_EGG1
+
 ##########################################################################
 # Lamp effects
 ##########################################################################
@@ -604,6 +606,7 @@ MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 Spiralaward: runner, PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
+#Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 ##########################################################################
 # Fonts used in this game.
