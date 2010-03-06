@@ -84,9 +84,9 @@ static void flash_spiralaward_lamp (void)
 
 void start_spiralaward_timer (void)
 {	
-	if (!multi_ball_play () && !free_timer_test (TIM_SPIRALAWARD))
+	if (!multi_ball_play () && !task_kill_gid (TIM_SPIRALAWARD))
 	{
-		free_timer_restart (TIM_SPIRALAWARD, TIME_3S);
+		timer_restart_free (TIM_SPIRALAWARD, TIME_3S);
 		leff_restart (LEFF_SPIRALAWARD);
 		/* Turn on left magnet flag for 4 seconds */
 		magnet_flag_task (0, 4);
@@ -148,7 +148,7 @@ static void award_spiralaward (void)
 
 void spiralaward_right_loop_completed (void)
 {
-	if (free_timer_test (TIM_SPIRALAWARD))
+	if (task_kill_gid (TIM_SPIRALAWARD))
 	{
 		free_timer_stop (TIM_SPIRALAWARD);
 		leff_stop (LEFF_SPIRALAWARD);
