@@ -23,6 +23,7 @@ define MACHINE_START_BALL_MUSIC   MUS_MAIN_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC MUS_MAIN
 #define MACHINE_END_GAME_MUSIC MUS_END_GAME
 define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
+define MACHINE_HAS_UPPER_LEFT_FLIPPER
 
 # DC - To generate the x/y coordinates I took a screengrab of the lamp-locations diagram in the manual such that the
 # width of the playfield was 409 pixels wide then I pasted the image into mspaint (windows 7 version) and moved the
@@ -107,7 +108,7 @@ define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 12: Right Out Lane, ingame
 13: Start Button, start-button, cabinet, intest
 14: Tilt, cabinet, tilt, ingame, noplay
-15: Shooter, edge, noscore, shooter
+15: Plunger, edge, noplay, shooter # not called 'Shooter', see: trivial.c/CALLSET_ENTRY (trivial, sw_plunger)
 16: Left Return Lane, ingame
 17: Right Return Lane, ingame
 18: Spinner, ingame
@@ -160,14 +161,14 @@ define MACHINE_BALL_SAVE_LAMP LM_DRIVE_AGAIN
 88: Right Outer Loop, ingame
 
 [drives]
-H1: Trough Release, ballserve, duty(SOL_DUTY_75), time(TIME_100MS)
-H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_75), time(TIME_200MS)
-H3: Kickback, duty(SOL_DUTY_50), time(TIME_66MS)
-H4: Pit Stop Popper
-H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_75), time(TIME_200MS)
+H1: Trough Release, ballserve, duty(SOL_DUTY_25), time(TIME_100MS)
+H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_25), time(TIME_100MS)
+H3: Kickback, duty(SOL_DUTY_25), time(TIME_100MS)
+H4: Pit Stop Popper, duty(SOL_DUTY_25), time(TIME_100MS)
+H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_25), time(TIME_100MS)
 H6: Not Used 1,nosearch
-H7: Knocker, knocker
-H8: Route 66 Kickout
+H7: Knocker, knocker, duty(SOL_DUTY_25), time(TIME_100MS)
+H8: Route 66 Kickout, duty(SOL_DUTY_25), time(TIME_100MS)
 
 L1: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
@@ -175,8 +176,8 @@ L3: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
 L6: Not Used 2,nosearch
-L7: ZR-1 Lockup
-L8: Loop Gate, duty(SOL_DUTY_75), time(TIME_200MS)
+L7: ZR-1 Lockup, duty(SOL_DUTY_25), time(TIME_100MS)
+L8: Loop Gate, duty(SOL_DUTY_75), time(TIME_100MS)
 
 # G = J126 on Power Driver Board
 G1: Race Direction
@@ -197,8 +198,10 @@ A3: Right Rear Panel, flash
 A4: Right Standup, flash
 
 #F = J902 on Fliptronic II
-F5: Ramp Diverter
-F6: Divertor Hold
+F5: Ramp Diverter, time(TIME_33MS)
+F6: Ramp Divertor Hold, time(TIME_100MS)
+F7: U.L. Flip Power, time(TIME_33MS)
+F8: U.L. Flip Hold, time(TIME_100MS)
 
 [gi]
 0: Playfield Upper Left

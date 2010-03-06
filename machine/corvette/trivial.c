@@ -71,9 +71,9 @@ CALLSET_ENTRY (trivial, sw_right_out_lane)
 	common_outlane ();
 }
 
-CALLSET_ENTRY (trivial, sw_shooter)
+CALLSET_ENTRY (trivial, sw_plunger)
 {
-	if (!switch_poll_logical (SW_SHOOTER))
+	if (!switch_poll_logical (sw_plunger))
 	{
 		sample_start (SND_BURNOUT_01, SL_2S);
 		// @TODO leff_start (LEFF_SHOOTER);
