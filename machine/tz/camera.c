@@ -36,6 +36,7 @@ __local__ U8 cameras_lit;
 __local__ camera_award_t camera_award_count;
 /* Needed to store award for deff */
 camera_award_t camera_award_count_stored;
+extern U8 mball_locks_lit;
 
 void camera_award_deff (void)
 {
@@ -90,14 +91,13 @@ void camera_award_deff (void)
 
 static void do_camera_award (void)
 {
-	kickout_lock (KLOCK_DEFF);
-	deff_start (DEFF_CAMERA_AWARD);
 	camera_award_count_stored = camera_award_count;
+	deff_start (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			/* Light Lock */
-			mball_light_lock ();
+			mball_locks_lit++;
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
@@ -133,7 +133,6 @@ static bool can_award_camera (void)
 	else
 		return FALSE;
 }
-/* TODO Fix bug when gumball exit happens */
 CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_6S);
@@ -151,7 +150,6 @@ CALLSET_ENTRY (camera, sw_camera)
 	{
 		do_camera_award ();
 		score (SC_500K);
-		//bounded_decrement (cameras_lit, 0);
 		sound_send (SND_CAMERA_AWARD_SHOWN);
 	}
 	else
