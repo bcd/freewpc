@@ -23,6 +23,7 @@
 
 U8 sslot_round_timer;
 U8 sslot_award_index;
+U8 sslot_award_index_stored;
 extern U8 gumball_enable_count;
 extern U8 mpf_enable_count;
 extern U8 cameras_lit;
@@ -52,6 +53,7 @@ void sslot_award_rotate (void)
 	}
 
 }
+
 void sslot_round_deff (void)
 {
 	for (;;)
@@ -73,7 +75,7 @@ void sslot_award_deff (void)
 {
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 5, "SLOT MACHINE AWARD");
-		font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
+		font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index_stored]);
 		dmd_show_low ();
 		task_sleep_sec (2);
 		deff_exit ();
@@ -115,35 +117,38 @@ void slot_kick_sound (void)
 
 void sslot_award (void)
 {
+	sslot_award_index_stored = sslot_award_index;
 	/* Stop round */
-	sslot_round_end ();
+	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	
-	switch (sslot_award_index)
+	switch (sslot_award_index_stored)
 	{
-		case 1:
+		case 0:
 			sound_send (SND_GET_THE_EXTRA_BALL);
 			light_easy_extra_ball ();
 			break;
-		case 2:
+		case 1:
 			gumball_enable_count++;
 			break;
-		case 3:
+		case 2:
 			mpf_enable_count++;
 			break;
-		case 4:
+		case 3:
 			cameras_lit++;
 			break;
-		case 5:
+		case 4:
 			score (SC_10M);
 			break;
-		case 6:
+		case 5:
 			score (SC_5M);
 			break;
+		default:
+			score (SC_5M);
 	}
+
 	deff_start (DEFF_SSLOT_AWARD);
 	sound_send (SND_SLOT_PAYOUT);
 	lamp_tristate_off (LM_SLOT_MACHINE);
-	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 }
 
 CALLSET_ENTRY (slot, dev_slot_enter)
