@@ -108,7 +108,8 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 12: Right Out Lane, ingame
 13: Start Button, start-button, cabinet, intest
 14: Tilt, cabinet, tilt, ingame, noplay
-15: Plunger, edge, noplay, shooter # not called 'Shooter', see: trivial.c/CALLSET_ENTRY (trivial, sw_plunger)
+# not called 'Shooter', see: trivial.c/CALLSET_ENTRY (trivial, sw_plunger)
+15: Plunger, shooter, edge, noplay, debounce(TIME_200MS)
 16: Left Return Lane, ingame
 17: Right Return Lane, ingame
 18: Spinner, ingame
@@ -177,7 +178,7 @@ L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
 L6: Not Used 2,nosearch
 L7: ZR-1 Lockup, duty(SOL_DUTY_25), time(TIME_100MS)
-L8: Loop Gate, duty(SOL_DUTY_75), time(TIME_100MS)
+L8: Loop Gate, duty(SOL_DUTY_25), time(TIME_100MS)
 
 # G = J126 on Power Driver Board
 G1: Race Direction
@@ -288,11 +289,11 @@ Skillshot Enabled:
 [deffs]
 
 ZR-1 Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
-ZR-1 Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
-ZR-1 Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
-ZR-1 Multiball Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5
-ZR-1 Multiball H P Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
-ZR-1 Multiball Torque Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
+ZR-1 MB Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
+ZR-1 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
+ZR-1 MB Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5
+ZR-1 MB HP JP: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
+ZR-1 MB TRQ JP: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
 
 Kickback Relit: page(MACHINE_PAGE), PRI_GAME_QUICK2
 Jet: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
