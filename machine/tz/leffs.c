@@ -24,6 +24,7 @@
 
 extern bool mpf_active;
 extern U8 mpf_round_timer;
+extern U8 tsm_round_timer;
 void bonus_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
@@ -287,11 +288,11 @@ void left_loop_leff (void)
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	while (mpf_round_timer > 0)
+	while (tsm_round_timer > 0)
 	{
-		lamplist_step_increment (LAMPLIST_JETS, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
+		lamplist_apply (LAMPLIST_JETS, leff_toggle);
 	}
+	leff_exit ();
 }
 
 void circle_out_leff (void)

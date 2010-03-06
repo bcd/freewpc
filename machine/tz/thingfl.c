@@ -70,7 +70,7 @@ CALLSET_ENTRY (thingfl, thing_flips)
 	task_sleep (delay);//Use a magic number here?
 	flipper_override_pulse (WPC_UL_FLIP_SW);
 	if (in_live_game)
-	//	deff_start (DEFF_THING_FLIPS);
+		deff_start (DEFF_THING_FLIPS);
 	thing_flips_attempts++;
 }
 

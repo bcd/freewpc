@@ -73,7 +73,6 @@ void spiralaward_collected_deff (void)
 	deff_exit ();
 }
 
-
 static void flash_spiralaward_lamp (void)
 {
 	lamp_tristate_flash (spiralaward_lamps[spiralaward]);
@@ -94,7 +93,6 @@ void start_spiralaward_timer (void)
 	}
 }
 
-
 static void award_spiralaward (void)
 {	
 	spiralawards_collected++;
@@ -107,8 +105,8 @@ static void award_spiralaward (void)
 	while (!lamp_test(spiralaward_lamps[spiralaward]))
 		spiralaward = random_scaled (6);
 
-	/* Don't award extra ball until the last two */
-	while (spiralaward == 5 && spiralawards_collected < 4)
+	/* Don't award extra ball until the last three */
+	while (spiralaward == 5 && spiralawards_collected < 3)
 		spiralaward = random_scaled (6);
 	
 	switch (spiralaward)

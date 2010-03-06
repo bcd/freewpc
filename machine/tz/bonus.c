@@ -89,7 +89,21 @@ void bonus_deff (void)
 	extern U8 hitch_count;
 	extern U8 rollover_count;
 	extern bool backdoor_award_collected;
+	extern bool multidrain_awarded;
 	
+	if (multidrain_awarded == TRUE)
+	{
+		dmd_alloc_low_clean ();
+		sprintf ("MULTIDRAIN");
+		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		dmd_sched_transition (&trans_bitfade_slow);
+		dmd_show_low ();
+		sound_send (SND_HEY_ITS_ONLY_PINBALL);
+		task_sleep_sec (3);
+		bonus_pause ();
+	}
+
+
 	/* Clear the bonus score */
 	score_zero (total_bonus);
 	/* Start a task to monitor the buttons */

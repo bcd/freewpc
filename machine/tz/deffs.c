@@ -20,7 +20,6 @@
 
 #include <freewpc.h>
 
-extern __common__ bool ballsave_test_active (void);
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {

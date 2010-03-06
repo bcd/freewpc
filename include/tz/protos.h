@@ -68,7 +68,6 @@ __machine__ void shot_slot_machine (void);
 __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
 
-
 /* gumball.c */
 void gumball_mech_activate(void);
 void gumball_mech_deactivate(void);
@@ -131,7 +130,7 @@ __machine__ void star_draw(void);
 /* spiralaward.c */
 __machine2__ void start_spiralaward_timer (void);
 __machine2__ void spiralaward_right_loop_completed (void);
-__machine2__ void award_spiralaward (void);
+
 /* lanes.c */
 /*__machine2__ static void handle_outlane (void);
 __machine2__ static bool rollover_completed (void);
@@ -151,3 +150,5 @@ __machine__ bool fastlock_running (void);
 #define PB_MAYBE_IN_PLAY 0x10
 
 /* thingfl.c */
+/* outhole.c */
+__common__ bool ballsave_test_active (void);

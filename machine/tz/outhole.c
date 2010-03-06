@@ -24,15 +24,7 @@
 #include <freewpc.h>
 /* How many balls have drained in three seconds */
 U8 multidrain_count;
-
-void multidrain_deff (void)
-{
-	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_fixed6, 64, 16, "MULTIDRAIN");
-	dmd_show2 ();
-	task_sleep_sec (2);
-	deff_exit ();
-}
+bool multidrain_awarded;
 
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
@@ -40,7 +32,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 	{
 		timer_restart_free (GID_OUTHOLE_DEBOUNCE, TIME_1S);
 		/* Timer to check if 3 balls drain quickly */
-		if (!timer_find_gid (GID_MULTIDRAIN) && multi_ball_play ())
+		if (!timer_find_gid (GID_MULTIDRAIN) && multi_ball_play () && !ballsave_test_active ())
 		{
 			multidrain_count = 0;
 			timer_restart_free (GID_MULTIDRAIN, TIME_10S);
@@ -51,18 +43,9 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			/* There are 6 balls installed normally */
 			bounded_increment (multidrain_count, 6);
 			if (multidrain_count == 3)
-			{
-				//TODO This stops the speech as well
-				//music_timed_disable (TIME_3S);
-				sound_send (SND_HEY_ITS_ONLY_PINBALL);
-				deff_start (DEFF_MULTIDRAIN);
-				timer_restart_free (GID_MULTIDRAIN_ANIM_RUNNING, TIME_2S);
-			}
+				multidrain_awarded = TRUE;
 		}
-		
-		/* Don't allow the deff to start when the multidrain deff is on */
-		if (in_live_game && !timer_find_gid (GID_MULTIDRAIN_ANIM_RUNNING))
-			deff_start (DEFF_BALL_EXPLODE);
+		deff_start (DEFF_BALL_EXPLODE);
 	}
 	
 }
@@ -70,5 +53,6 @@ CALLSET_ENTRY (outhole, sw_outhole)
 CALLSET_ENTRY (outhole, ball_start)
 {
 	multidrain_count = 0;
+	multidrain_awarded = FALSE;
 	timer_kill_gid (GID_MULTIDRAIN);
 }

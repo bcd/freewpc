@@ -477,7 +477,12 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	else if (can_lock_ball ())
 	{
 		bounded_decrement (mball_locks_lit, 0);
-		device_lock_ball (device_entry (DEVNO_LOCK));
+		/* Don't lock the ball if it's full */
+		if (!device_full_p (device_entry (DEVNO_LOCK)))
+			device_lock_ball (device_entry (DEVNO_LOCK));
+	/*	else
+			deff_start (DEFF_BALL_FROM_LOCK); */
+
 		enable_skill_shot ();
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)

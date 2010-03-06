@@ -198,8 +198,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
-	{
+//	if (flag_test (FLAG_SSSMB_RUNNING))
+//	{
 		flag_off (FLAG_SSSMB_RUNNING);
 		flag_off (FLAG_SSSMB_RED_JACKPOT);
 		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
@@ -209,7 +209,7 @@ void sssmb_stop (void)
 		deff_stop (DEFF_SSSMB_RUNNING);
 		lamp_tristate_off (LM_SUPER_SKILL);
 		music_refresh ();
-	}
+//	}
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)
