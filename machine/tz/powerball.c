@@ -229,8 +229,10 @@ static void pb_detect_event (pb_event_t event)
 		/* Steel ball detected on playfield, via Slot Proximity */
 		case PF_STEEL_DETECTED:
 			if (single_ball_play ())
+			{
 				pb_clear_location (PB_IN_PLAY);
 				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
 #ifdef PB_DEBUG
 			else
 				pb_clear_location (0);
@@ -241,6 +243,7 @@ static void pb_detect_event (pb_event_t event)
 		 * did not trigger when a ball had to travel over it. */
 		case PF_PB_DETECTED:
 			pb_set_location (PB_IN_PLAY, 0);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
 			break;
 
 		case TROUGH_STEEL_DETECTED:

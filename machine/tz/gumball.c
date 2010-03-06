@@ -200,6 +200,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		//BUG If powerball is about to launch, a steel gets counted
 		if (powerball_loaded_into_gumball == TRUE)
 		{
+			pb_clear_location (PB_MAYBE_IN_PLAY);
 			powerball_loaded_into_gumball = FALSE;
 			//TODO Move to multiball.c
 			
