@@ -78,7 +78,7 @@ GAME_PAGED_OBJS = leftramp.o skill.o deadend.o camera.o \
 	multiball.o sssmb.o deffs.o lock.o
 
 GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o bonus.o tz_amode.o star.o \
-	rocket.o thingfl.o outhole.o rules.o
+	rocket.o thingfl.o outhole.o rules.o buyin.o
 
 FIF_SRCS += images/cow.fif
 
