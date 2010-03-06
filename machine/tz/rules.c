@@ -21,9 +21,8 @@
 /* CALLSET_SECTION (rules, __machine2__) */
 
 #include <freewpc.h>
-extern void spiralaward_leff (void);
 
-static void rule_begin (void)
+void rule_begin (void)
 {
 	lamp_all_off ();
 	triac_disable (TRIAC_GI_MASK);
@@ -33,26 +32,36 @@ static void rule_msg (const char *line1, const char *line2, const char *line3, c
 {
 	dmd_alloc_pair_clean ();
 	font_render_string_left (&font_fixed6, 2, 2, line1)
-	font_render_string_center (&font_var5, 64, 12, line2)
-	font_render_string_center (&font_var5, 64, 18, line3)
-	font_render_string_center (&font_var5, 64, 25, line4)
+	font_render_string_center (&font_var5, 64, 14, line2)
+	font_render_string_center (&font_var5, 64, 20, line3)
+	font_render_string_center (&font_var5, 64, 27, line4)
 	dmd_sched_transition (&trans_sequential_boxfade);
 	dmd_show2 ();
 }
 
-static void rule_complete (void)
+void rule_complete (void)
 {
 	task_sleep_sec (5);
 	task_kill_gid (GID_RULES_LEFF);
 }
 
 void rules_spiralaward_inlanes_leff (void)
-{	
+{
 	lamp_tristate_flash (LM_LEFT_INLANE1);
 	lamp_tristate_flash (LM_LEFT_INLANE2);
-	task_sleep_sec (2);
+	task_sleep_sec (3);
 	lamp_tristate_off (LM_LEFT_INLANE1);
 	lamp_tristate_off (LM_LEFT_INLANE2);
+	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_flash);
+}
+
+void rules_spiralaward_loop_leff (void)
+{
+	lamp_tristate_flash (LM_RIGHT_SPIRAL);
+}
+
+void rules_leff (void)
+{
 }
 
 void rules_deff (void)
@@ -61,19 +70,16 @@ void rules_deff (void)
 
 	rule_begin ();
 	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
-	task_sleep_sec (4);
 	rule_complete ();
 
 	rule_begin ();
 	rule_msg ("SPIRALAWARD", "EITHER LEFT INLANE STARTS", "A 3 SECOND TIMER", "");
 	task_create_gid1 (GID_RULES_LEFF, rules_spiralaward_inlanes_leff);
-	timer_restart_free (TIM_SPIRALAWARD, TIME_3S);
-	task_create_gid1 (GID_RULES_LEFF, spiralaward_leff);
 	rule_complete ();
 	
 	rule_begin ();
 	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP", "TO COLLECT A RANDOM AWARD", "20 MILLION BONUS FOR COLLECTING ALL");
-	lamp_tristate_flash (LM_RIGHT_SPIRAL);
+	task_create_gid1 (GID_RULES_LEFF, rules_spiralaward_loop_leff);
 	rule_complete ();
 
 	music_enable ();
@@ -84,7 +90,8 @@ CALLSET_ENTRY (rules, sw_buyin_button)
 {
 	if (!in_game && !in_test)
 	{
-	//	leff_start (LEFF_RULES);
+		//leff_start (LEFF_RULES);
+		leff_stop_all ();
 		deff_start (DEFF_RULES);
 	}
 }
