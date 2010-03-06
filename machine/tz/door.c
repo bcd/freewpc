@@ -28,6 +28,7 @@ U8 door_index_awarded;
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
+extern U8 unlit_shot_count;
 bool door_awarded_from_slot;
 U8 door_active_lamp;
 
@@ -330,9 +331,9 @@ CALLSET_ENTRY (door, award_door_panel)
 			door_award_litz ();
 		}
 		else
-			door_award_flashing ();	
+			door_award_flashing ();
 		
-		callset_invoke (reset_unlit_shots);
+		unlit_shot_count = 0;
 		door_lamp_update ();
 	}
 }
@@ -402,6 +403,7 @@ CALLSET_ENTRY(door, start_player)
 
 CALLSET_ENTRY(door, start_ball)
 {
+	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	door_award_enable ();
 }
 

@@ -28,14 +28,13 @@ bool multidrain_awarded;
 
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
-	if (in_live_game && !timer_find_gid(GID_OUTHOLE_DEBOUNCE))
+	if (in_live_game)
 	{
-		timer_restart_free (GID_OUTHOLE_DEBOUNCE, TIME_1S);
 		/* Timer to check if 3 balls drain quickly */
 		if (!timer_find_gid (GID_MULTIDRAIN) && multi_ball_play () && !ballsave_test_active ())
 		{
 			multidrain_count = 0;
-			timer_restart_free (GID_MULTIDRAIN, TIME_10S);
+			timer_restart_free (GID_MULTIDRAIN, TIME_5S);
 		}
 	
 		if (timer_find_gid (GID_MULTIDRAIN))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,65 +19,14 @@
  */
 
 #include <freewpc.h>
-#include <animation.h>
 #include <eb.h>
 
 __local__ U8 dead_end_count;
 extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
 
-/*void car_deff (void)
-{
-	dmd_alloc_low_clean ();
-	frame_draw (IMG_CAR);
-	dmd_sched_transition (&trans_scroll_left);
-	dmd_show_low;
-	task_sleep_sec (2);	
-	deff_exit ();
-}
-*/
-/*
-void animation_car1 (struct animation_object *obj)
-{
-	frame_draw(IMG_CAR1);
-}
-
-void animation_car2 (struct animation_object *obj)
-{
-	frame_draw(IMG_CAR2);
-}
-
-void animation_car3 (struct animation_object *obj)
-{
-	frame_draw(IMG_CAR3);
-}
-
-void animation_car4 (struct animation_object *obj)
-{
-	frame_draw(IMG_CAR4);
-}
-
-void animation_car5 (struct animation_object *obj)
-{
-	frame_draw(IMG_CAR5);
-}
-*/
 void dead_end_deff (void)
 {
-	/*
-	U8 n;
-	
-	animation_begin (AN_MONO+AN_CLEAN);
-	animation_set_speed (TIME_66MS);
-	animation_add_static (animation_car1);
-	animation_add_static (animation_car2);
-	animation_add_static (animation_car3);
-	animation_add_static (animation_car4);
-	animation_add_static (animation_car5);
-	for (n=1; n <100; n++)
-		animation_step ();
-	animation_end ();
-	*/
 	dmd_alloc_low_clean();
 	sound_send (SND_DEAD_END_SCREECH);
 	dmd_sched_transition (&trans_scroll_right);	
@@ -114,7 +63,6 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 	device_switch_can_follow (dead_end, slot, TIME_8S);
 	event_can_follow (dead_end, camera, TIME_4S);
 
-//	deff_start (DEFF_DEAD_END);
 	if (lamp_test (LM_DEAD_END))
 	{
 		deff_start (DEFF_DEAD_END);
@@ -142,7 +90,6 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 				break;
 		}
 		lamp_off (LM_DEAD_END);
-		lamp_on (LM_RIGHT_INLANE);
 	}
 	else
 	{
@@ -152,4 +99,3 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 		timed_game_pause (TIME_3S);
 	}
 }
-

@@ -26,6 +26,7 @@ extern void mball_start_3_ball (void);
 extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
+extern U8 unlit_shot_count;
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -178,6 +179,7 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
+		unlit_shot_count = 0;
 		deff_update ();
 		music_refresh ();
 		flag_on (FLAG_SSSMB_RUNNING);

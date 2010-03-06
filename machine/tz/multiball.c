@@ -34,6 +34,7 @@ bool mball_jackpot_uncollected;
 bool mball_restart_collected;
 U8 mball_restart_timer;
 
+extern U8 unlit_shot_count;
 extern U8 live_balls;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
@@ -332,7 +333,7 @@ CALLSET_ENTRY (mball, mball_start)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
-		callset_invoke (reset_unlit_shots);
+		unlit_shot_count = 0;
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		flag_on (FLAG_MB_JACKPOT_LIT);
 		music_refresh ();
@@ -492,7 +493,7 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		}
 		mball_locks_made++;
 		deff_start (DEFF_MB_LIT);
-		callset_invoke (reset_unlit_shots);
+		unlit_shot_count = 0;
 	}
 	else
 		/* inform unlit.c that a shot was missed */

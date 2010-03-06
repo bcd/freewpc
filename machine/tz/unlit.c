@@ -43,13 +43,7 @@ void backdoor_award_deff (void)
 	deff_exit ();
 }
 
-CALLSET_ENTRY (unlit, reset_unlit_shots)
-{
-	unlit_shot_count = 0;
-	unlit_called_from_stored = 0;
-}
-
-static bool can_award_unlit_shot (U8 unlit_called_from)
+bool can_award_unlit_shot (U8 unlit_called_from)
 {
 	/* Don't allow during multiball or if previously collected */
 	if (multi_ball_play ())
@@ -73,14 +67,13 @@ void award_unlit_shot (U8 unlit_called_from)
 		{
 			sound_send (SND_JUST_TAKEN_A_DETOUR);
 			deff_start (DEFF_BACKDOOR_AWARD);
-			//task_sleep_sec (1);
 			backdoor_award_collected = TRUE;
-			callset_invoke (reset_unlit_shots);
+			unlit_shot_count = 0;
 			callset_invoke (award_door_panel);	
 		}
 		/* Reset if the player hits the same unlit shot twice */
 		if (unlit_called_from == unlit_called_from_stored)
-			callset_invoke (reset_unlit_shots);
+			unlit_shot_count = 0;	
 		if (unlit_shot_count == 4)
 		{
 			/* Hint to the player that backdoor award is ready */
@@ -99,11 +92,11 @@ void award_unlit_shot (U8 unlit_called_from)
 CALLSET_ENTRY (unlit, start_ball)
 {
 	/* Maybe clear backdoor_award_collected on each ball? */
-	callset_invoke (reset_unlit_shots);
+	unlit_shot_count = 0;
+	unlit_called_from_stored = 0;
 }
 
 CALLSET_ENTRY (unlit, start_player)
 {
 	backdoor_award_collected = FALSE;
-//	reset_unlit_shots ();
 }

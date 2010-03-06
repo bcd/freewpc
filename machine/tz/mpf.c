@@ -32,7 +32,7 @@ bool mpf_active;
 
 /* Where the powerball is */
 extern U8 pb_location;
-
+extern U8 unlit_shot_count;
 void mpf_round_deff (void)
 {
 	mpf_award = 10;
@@ -200,7 +200,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	if (event_did_follow (right_ramp, mpf_enter))
 	{
 		mpf_active = TRUE;
-		callset_invoke (reset_unlit_shots);
+		unlit_shot_count = 0;
 		mpf_ball_count++;
 		/* Add on 10 seconds for each extra ball */
 		if (mpf_ball_count > 1)

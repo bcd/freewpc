@@ -22,7 +22,7 @@
 
 extern void mball_start_3_ball (void);
 extern U8 autofire_request_count;
-
+extern U8 unlit_shot_count;
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
 	score_update_start ();
@@ -175,7 +175,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 	{
-		callset_invoke (reset_unlit_shots);
+		unlit_shot_count = 0;
 		flag_on (FLAG_CHAOSMB_RUNNING);
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 1;

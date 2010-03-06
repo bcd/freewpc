@@ -225,6 +225,30 @@ CALLSET_ENTRY (tz_amode, sw_buyin_button)
 		/* Start award descriptions */
 		/* Spiralaward */
 //		leff_stop (LEFF_AMODE);
+//		lamplist_apply (LAMPLIST_ALL, lamp_off);
+//		"SPIRALAWARD"
+//		timer_restart_free (TIM_SPIRALAWARD, TIME_2S);
+//		leff_start (LEFF_SPIRALAWARD);
+//		task_sleep_sec (2);
+//		free_timer_stop (TIM_SPIRALAWARD);
+//		leff_stop (LEFF_SPIRALAWARD:
+//
+//		"Rolling over the two left inlanes will start a 3 second timer"
+//		lamp_tristate_flash (LM_LEFT_INLANE1);
+//		lamp_tristate_flash (LM_LEFT_INLANE2);
+//		task_sleep_sec (2);
+//		lamp_tristate_off (LM_LEFT_INLANE1);
+//		lamp_tristate_off (LM_LEFT_INLANE2);
+//
+//		"SHOOTING THE RIGHT LOOP COLLECTS A RANDOM AWARD"
+//		"20 MILLION BONUS FOR COLLECTING ALL AWARDS"
+//		lamp_tristate_flash (LM_RIGHT_SPIRAL);
+//		task_sleep_sec (5);
+//		lamp_tristate_off (LM_RIGHT_SPIRAL);
+//
+//		"ROLLOVERS"
+//		lampksut;
+//
 
 	}
 #if 0
