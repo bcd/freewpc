@@ -18,6 +18,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * @TODO Currently on a real machine the skill shot is turned off after the player launches a ball
+ *       Ignore more switch presses?
+ *
+ * @TODO The flashing lamp for the active rollover isn't changed quickly enough.
+ *       There can be up to about 1 second before the state is reflected by the lamp.
+ *       Use something like: lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix) instead?
+ */
 #include <freewpc.h>
 
 U8 current_rollover; // there are 3
