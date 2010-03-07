@@ -325,9 +325,10 @@ void browser_up (void)
 void browser_down (void)
 {
 	sound_send (SND_TEST_DOWN);
-	menu_selection--;
-	if (menu_selection == 0xFF)
+	if (menu_selection == browser_min)
 		menu_selection = browser_max;
+	else
+		menu_selection--;
 }
 
 void browser_print_operation (const char *s)
@@ -405,7 +406,6 @@ void adj_browser_init (void)
 
 	browser_init ();
 	browser_action = ADJ_BROWSING;
-	browser_min = 0;
 	browser_max = adj_count_current () - 1;
 
 	if (browser_max == 0xFF)
@@ -598,7 +598,6 @@ void audit_browser_init (void)
 
 	/* Count the number of adjustments manually by stepping through
 	 * the array of entries */
-	browser_min = 0;
 	browser_max = -1;
 	while (aud->name != NULL)
 	{
@@ -1121,7 +1120,7 @@ void deff_leff_init (void)
 	struct menu *m = win_top->w_class.priv;
 
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_item_number = browser_decimal_item_number;
 
 	if (m == &dev_deff_test_item)
@@ -1242,7 +1241,7 @@ struct menu dev_deff_stress_test_item = {
 void symbol_test_init (void)
 {
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_max = BM_LAST-1;
 }
 
@@ -1279,7 +1278,7 @@ U8 lamplist_update_speed;
 void lamplist_init (void)
 {
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
 	lamplist_update_mode = 0;
