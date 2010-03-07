@@ -1320,6 +1320,10 @@ sub machine_write_deff_decls {
 	print "const deff_t deff_table[] = {\n";
 	for $deff (unique ($m->{'deffs'})) {
 		my ($prio, $flags) = split /[ \t,]/, $deff->{'props'};
+		if (!($prio =~ /^PRI/)) {
+			die "Invalid priority '$prio' for deff " . $deff->{'c_ident'} .
+				"\n(priority must come before other flags)\n";
+		}
 		if (!defined $flags) {
 			$flags = $deff->{'runner'} ? "D_QUEUED" : "D_NORMAL";
 		}
