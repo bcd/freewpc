@@ -15,6 +15,10 @@ The 74LS175 chip on the Motor Driver Master Board A-18532 at position U2 (incorr
 manual) on page 3-25 is used to enable or disable the ZR-1 solenoids completly.
 
 The 74LS175 chip can be controlled by writing value to WPC_EXTBOARD3 (via the DIS2 line on J204/3) at 0x3FED.
+According to my electronics buddy he says that there's two pull-up resistors (R18/R19) which disable power to the
+solenoids at power on.  To enable solenoid power you have to write a 0 in bit 0 (LSB - D0) of WPC_EXTBOARD3 which
+disables the DISABLE_A and DISABLE_B lines.  To then disable the solenoid power by software you set bit 0 (LSB - 
+D0) of WPC_EXTBOARD3 to 1, thus activating the DISABLE_A and DISABLE_B lines. 
 
 The Visual Pinball and VPinMame emulation of Corvette uses values in the range of 64 to 192.
 64 meaning far left, 127 meaning center, 192 meaning right.
@@ -73,8 +77,5 @@ The working range for the engine values should be: FULL LEFT OPTO OFF and FULL R
 Byte values of less than 64 or more than 192 should not be used.
 
 When the engine is not in use the drive should be disabled by setting values at WPC_EXTBOARD3 
-
-Setting bit 1 (LSB - D0) controls the DISABLE_A and DISABLE_B lines together.
-It's not clear yet whether  a value of 1 ENABLES the engine or disables it.
 
 I'm thinking that a suitable value (e.g. 127) should be set at WPC_EXTBOARD2 before enabling the solenoids.
