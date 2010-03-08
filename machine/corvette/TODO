@@ -19,6 +19,11 @@ The 74LS175 chip can be controlled by writing value to WPC_EXTBOARD3 (via the DI
 The Visual Pinball and VPinMame emulation of Corvette uses values in the range of 64 to 192.
 64 meaning far left, 127 meaning center, 192 meaning right.
 
+468 		locals.enginePos = (int)wpc_data[WPC_EXTBOARD2];
+
+http://pinmame.cvs.sourceforge.net/viewvc/pinmame/pinmame/src/wpc/sims/wpc/prelim/corv.c?revision=1.17&view=markup
+
+
 My real Corvette pinball machine gives values during a few calibration test runs:
 68 for left, 176 for right and 122 for center.
 75 for left, 170 for right and 121 for center.
