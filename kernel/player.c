@@ -55,7 +55,7 @@ struct player_save_area
 {
 	U8 local_lamps[NUM_LAMP_COLS];
 	U8 local_flags[BITS_TO_BYTES (MAX_FLAGS)];
-	U8 local_vars[LOCAL_SIZE];
+	U8 local_vars[0];
 };
 
 #define save_area ((struct player_save_area *)(LOCAL_SAVE_BASE(player_up)))
@@ -67,7 +67,7 @@ struct player_save_area
 void player_start_game (void)
 {
 	/* Clear all player local data */
-	__blockclear16 (LOCAL_BASE, LOCAL_SIZE);
+	memset (LOCAL_BASE, 0, AREA_SIZE(local));
 
 	/* Clear lamps/flags */
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
@@ -85,7 +85,7 @@ void player_save (void)
 	memcpy (save_area->local_flags, bit_matrix, BITS_TO_BYTES (MAX_FLAGS));
 
 	/* Copy player locals into the save area */
-	__blockcopy16 (save_area->local_vars, LOCAL_BASE, LOCAL_SIZE);
+	memcpy (save_area->local_vars, LOCAL_BASE, AREA_SIZE(local));
 }
 
 
@@ -99,6 +99,6 @@ void player_restore (void)
 	memcpy (bit_matrix, save_area->local_flags, BITS_TO_BYTES (MAX_FLAGS));
 	
 	/* Restore player locals from the save area */
-	__blockcopy16 (LOCAL_BASE, save_area->local_vars, LOCAL_SIZE);
+	memcpy (LOCAL_BASE, save_area->local_vars, AREA_SIZE(local));
 }
 

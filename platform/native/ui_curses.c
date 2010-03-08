@@ -37,7 +37,7 @@ WINDOW *task_win;
 WINDOW *sound_win;
 WINDOW *display_win;
 WINDOW *ball_tracker_win;
-
+WINDOW *cmdline_win;
 
 
 static void print_center (WINDOW *w, int x, int y, const char *format, ...)
@@ -69,6 +69,19 @@ static WINDOW * ui_window_create (int width, int height, int x, int y, const cha
 	return w;
 }
 
+
+void ui_print_command (const char *cmdline)
+{
+	wmove (cmdline_win, 1, 1);
+	wprintw (cmdline_win, "               ");
+	wmove (cmdline_win, 1, 1);
+	if (*cmdline != '\0')
+	{
+		wprintw (cmdline_win, ":");
+		wprintw (cmdline_win, cmdline);
+	}
+	wrefresh (cmdline_win);
+}
 
 void ui_write_debug (enum sim_log_class c, const char *format, va_list ap)
 {
@@ -208,17 +221,16 @@ void ui_init (void)
 
 	sol_win = ui_window_create (20, 10, x, y, " Solenoids ");
 	triac_win = ui_window_create (12, 3, x, y+10, " Triacs ");
-	x += 20 + 2;
-
-	sound_win = ui_window_create (10, 6, x, y, " Sound ");
+	sound_win = ui_window_create (10, 3, x, y+13, " Sound ");
 	scrollok (sound_win, 1);
-	x += 10 + 2;
-
-	task_win = ui_window_create (40, 15, x, y, " Tasks ");
-	x += 40 + 2;
-
-	ball_tracker_win = ui_window_create (20, 8, x, y, " Ball Tracker ");
 	x += 20 + 2;
+
+	task_win = ui_window_create (27, 14, x, y, " Tasks ");
+	x += 27 + 2;
+
+	ball_tracker_win = ui_window_create (24, 10, x, y, " Ball Tracker ");
+	cmdline_win = ui_window_create (24, 3, x, y + 10, " Command Line ");
+	x += 24 + 2;
 
 	y += 9 + 1;
 	x = 0;
@@ -232,6 +244,7 @@ void ui_init (void)
 #else
 	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
 #endif
+
 }
 
 

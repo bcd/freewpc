@@ -35,6 +35,8 @@ uint32_t tconst (void)
 		return 1;
 	if (teq (t, "off") || teq (t, "low") || teq (t, "inactive"))
 		return 0;
+	if (*t == '$')
+		return conf_read (t+1);
 	i = strtoul (t, NULL, 0);
 
 	t = tnext ();
@@ -140,8 +142,13 @@ struct signal_expression *texpr (void)
 void exec_script (char *cmd)
 {
 	const char *t;
+	uint32_t v;
 
 	t = tfirst (cmd);
+	if (!t)
+		return;
+	if (*t == '#')
+		return;
 
 	/*********** capture [subcommand] [args...] ***************/
 	if (teq (t, "capture"))
@@ -176,6 +183,33 @@ void exec_script (char *cmd)
 			signal_capture_del (tsigno ());
 		}
 	}
+
+	/*********** set [var] [value] ***************/
+	else if (teq (t, "set"))
+	{
+		t = tnext ();
+		v = tconst ();
+		conf_write (t, v);
+	}
+	/*********** p/print [var] ***************/
+	else if (teq (t, "p") || teq (t, "print"))
+	{
+		t = tnext ();
+		v = conf_read (t);
+		simlog (SLC_DEBUG, "%s = %d", t, v);
+	}
+	/*********** include [filename] ***************/
+	else if (teq (t, "include"))
+	{
+		t = tnext ();
+		exec_script_file (t);
+	}
+	/*********** sw [id] ***************/
+	else if (teq (t, "sw"))
+	{
+		v = tconst ();
+		sim_switch_depress (v);
+	}
 }
 
 
@@ -185,6 +219,9 @@ void exec_script_file (const char *filename)
 	char buf[256];
 
 	in = fopen (filename, "r");
+	if (!in)
+		return;
+	simlog (SLC_DEBUG, "Reading commands from '%s'", filename);
 	for (;;)
 	{
 		fgets (buf, 255, in);
@@ -192,6 +229,7 @@ void exec_script_file (const char *filename)
 			break;
 		exec_script (buf);
 	}
+	simlog (SLC_DEBUG, "Closing '%s'", filename);
 	fclose (in);
 }
 

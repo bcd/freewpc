@@ -224,18 +224,18 @@ H1: Slot
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div., duty(SOL_DUTY_50), time(TIME_1S)
+H5: Right Ramp Div.
 H6: Gumball Div.
 H7: Knocker, knocker
 H8: Outhole
 
-L1: Ball Serve, ballserve
+L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
 L2: Right Sling
 L3: Left Sling
 L4: Lower Jet
 L5: Left Jet
 L6: Right Jet
-L7: Lock Release
+L7: Lock Release, duty(SOL_DUTY_50), time(TIME_33MS)
 L8: Shooter Div, nosearch
 
 G1: Jets, flash
@@ -590,7 +590,7 @@ Shooter Div: driver(duty),
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Gumball Div: driver(duty),
 	sol=SOL_GUMBALL_DIV,

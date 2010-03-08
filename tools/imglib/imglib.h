@@ -110,6 +110,7 @@ struct buffer *frame_alloc(void);
 unsigned int bitmap_pos(struct buffer *buf, unsigned int x, unsigned int y);
 void buffer_read(struct buffer *buf, FILE *fp);
 void buffer_write(struct buffer *buf, FILE *fp);
+char enhanced_pixel_ascii (unsigned int pixel);
 void bitmap_write_ascii(struct buffer *buf, FILE *fp);
 void buffer_read_pgm(struct buffer *buf, FILE *fp);
 void buffer_write_pgm(struct buffer *buf, FILE *fp);

@@ -145,9 +145,6 @@ but it can be changed to test mismatches. */
 #endif
 unsigned int pic_machine_number = MACHINE_NUMBER;
 
-/** Nonzero if simulating some bad hardware */
-unsigned long sim_badness = 0;
-
 unsigned int signo_under_trace = SIGNO_SOL + 0;
 
 const char *exec_file = NULL;
@@ -166,7 +163,6 @@ void simlog (enum sim_log_class class, const char *format, ...)
 {
 	va_list ap;
 	FILE *ofp;
-	char class_code;
 
 	va_start (ap, format);
 
@@ -184,15 +180,8 @@ void simlog (enum sim_log_class class, const char *format, ...)
 
 	if (ofp)
 	{
-		switch (class)
-		{
-			case SLC_DEBUG: class_code = 'd'; break;
-			case SLC_DEBUG_PORT: class_code = '>'; break;
-			case SLC_SOUNDCALL: class_code = 'S'; break;
-			default: return;
-		}
-
-		fputc (class_code, ofp);
+		if (class != SLC_DEBUG_PORT)
+			fprintf (ofp, "[SIM] ");
 		(void)vfprintf (ofp, format, ap);
 		fputc ('\n', ofp);
 		fflush (ofp);
@@ -899,14 +888,19 @@ static void linux_interface_thread (void)
 				char cmd[128];
 				char *p = cmd;
 
-				simlog (SLC_DEBUG, "Script mode enabled.");
+				memset (p, 0, 128);
+				ui_print_command (" ");
 				for (;;)
 				{
 					*p = linux_interface_readchar ();
 					if (*p == '\x1B')
 					{
-						simlog (SLC_DEBUG, "Script mode aborted.");
 						break;
+					}
+					else if (*p == '\010')
+					{
+						*p = '\0';
+						p--;
 					}
 					else if ((*p == '\r') || (*p == '\n'))
 					{
@@ -914,9 +908,10 @@ static void linux_interface_thread (void)
 						exec_script (cmd);
 						break;
 					}
-					putchar (*p);
+					ui_print_command (cmd);
 					p++;
 				}
+				ui_print_command ("");
 				break;
 			}
 
@@ -1088,21 +1083,11 @@ int main (int argc, char *argv[])
 		if (!strcmp (arg, "-h"))
 		{
 			printf ("Syntax: freewpc [<options>]\n");
-			printf ("--balls <value>     Install N balls (default : game-specific)\n");
 			printf ("-f <file>           Read input commands from file (default : stdin)\n");
-			printf ("--gamenum <value>   Override the game number from the PIC\n");
-			printf ("--locale <value>    Set the locale jumpers\n");
 			printf ("-o <file>           Log debug messages to file (default : stdout)\n");
-			printf ("-s <value>          Set the relative speed of the simulation\n");
+			printf ("--debuginit         Wait for GDB attach during init (default: no)\n");
+			printf ("--exec <file>       Read script commands from file\n");
 			exit (0);
-		}
-		else if (!strcmp (arg, "-s"))
-		{
-			linux_irq_multiplier = strtoul (argv[argn++], NULL, 0);
-		}
-		else if (!strcmp (arg, "--balls"))
-		{
-			linux_installed_balls = strtoul (argv[argn++], NULL, 0);
 		}
 		else if (!strcmp (arg, "-f"))
 		{
@@ -1117,14 +1102,6 @@ int main (int argc, char *argv[])
 				exit (1);
 			}
 		}
-		else if (!strcmp (arg, "--locale"))
-		{
-			linux_jumpers = strtoul (argv[argn++], NULL, 0) << 2;
-		}
-		else if (!strcmp (arg, "--gamenum"))
-		{
-			pic_machine_number = strtoul (argv[argn++], NULL, 0);
-		}
 		else if (!strcmp (arg, "--debuginit"))
 		{
 			sim_debug_init = 1;
@@ -1132,6 +1109,18 @@ int main (int argc, char *argv[])
 		else if (!strcmp (arg, "--exec"))
 		{
 			exec_file = argv[argn++];
+		}
+		else if (strchr (arg, '='))
+		{
+			char varval[64];
+			unsigned int val;
+			char *s;
+
+			strcpy (varval, arg);
+			s = strchr (varval, '=');
+			*s = '\0';
+			val = strtoul (s+1, NULL, 0);
+			//conf_set_later (varval, val);
 		}
 		else
 		{
@@ -1177,10 +1166,9 @@ int main (int argc, char *argv[])
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
-	if (!sim_test_badness (SIM_BAD_NOOPTOPOWER))
-		for (sw = 0; sw < NUM_SWITCHES; sw++)
-			if (switch_is_opto (sw))
-				sim_switch_toggle (sw);
+	for (sw = 0; sw < NUM_SWITCHES; sw++)
+		if (switch_is_opto (sw))
+			sim_switch_toggle (sw);
 
 	/* Force always closed */
 	sim_switch_toggle (SW_ALWAYS_CLOSED);
@@ -1229,6 +1217,15 @@ int main (int argc, char *argv[])
 	signal_update (SIGNO_20V, 1);
 	signal_update (SIGNO_50V, 1);
 
+	/* Create more conf knobs */
+	conf_add ("jumpers", &linux_jumpers);
+	conf_add ("pic.gameno", &pic_machine_number);
+	conf_add ("balls", &linux_installed_balls);
+	conf_add ("sim.speed", &linux_irq_multiplier);
+
+	/* If a script file was given, execute it now */
+	exec_script_file ("freewpc.conf");
+	exec_script_file ("conf/tz.conf");
 	if (exec_file)
 		exec_script_file (exec_file);
 

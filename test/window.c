@@ -325,9 +325,10 @@ void browser_up (void)
 void browser_down (void)
 {
 	sound_send (SND_TEST_DOWN);
-	menu_selection--;
-	if (menu_selection == 0xFF)
+	if (menu_selection == browser_min)
 		menu_selection = browser_max;
+	else
+		menu_selection--;
 }
 
 void browser_print_operation (const char *s)
@@ -405,7 +406,6 @@ void adj_browser_init (void)
 
 	browser_init ();
 	browser_action = ADJ_BROWSING;
-	browser_min = 0;
 	browser_max = adj_count_current () - 1;
 
 	if (browser_max == 0xFF)
@@ -598,7 +598,6 @@ void audit_browser_init (void)
 
 	/* Count the number of adjustments manually by stepping through
 	 * the array of entries */
-	browser_min = 0;
 	browser_max = -1;
 	while (aud->name != NULL)
 	{
@@ -1121,7 +1120,7 @@ void deff_leff_init (void)
 	struct menu *m = win_top->w_class.priv;
 
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_item_number = browser_decimal_item_number;
 
 	if (m == &dev_deff_test_item)
@@ -1242,7 +1241,7 @@ struct menu dev_deff_stress_test_item = {
 void symbol_test_init (void)
 {
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_max = BM_LAST-1;
 }
 
@@ -1279,7 +1278,7 @@ U8 lamplist_update_speed;
 void lamplist_init (void)
 {
 	browser_init ();
-	browser_min = 1;
+	menu_selection = browser_min = 1;
 	browser_max = MAX_LAMPLIST-1;
 	browser_item_number = browser_decimal_item_number;
 	lamplist_update_mode = 0;
@@ -3122,28 +3121,10 @@ void solenoid_test_draw (void)
 		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
 
-	switch (sol_get_duty (menu_selection))
-	{
-		case SOL_DUTY_12:
-			sprintf ("1/8");
-			break;
-		case SOL_DUTY_25:
-			sprintf ("1/4");
-			break;
-		case SOL_DUTY_50:
-			sprintf ("1/2");
-			break;
-		case SOL_DUTY_75:
-			sprintf ("3/4");
-			break;
-		case SOL_DUTY_100:
-			sprintf ("ON");
-			break;
-		default:
-			sprintf ("S%02X", sol_get_duty (menu_selection));
-			break;
-	}
+#ifdef DEBUGGER
+	sprintf ("DUTY %02X", sol_get_duty (menu_selection));
 	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+#endif
 
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);

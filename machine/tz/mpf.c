@@ -49,7 +49,10 @@ bool mpf_ready_p (void)
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
 		&& !flag_test (FLAG_MULTIBALL_RUNNING)
 		&& !flag_test (FLAG_QUICK_MB_RUNNING)
-		&& !flag_test (FLAG_BTTZ_RUNNING);
+		&& !flag_test (FLAG_BTTZ_RUNNING)
+		&& !flag_test (FLAG_CHAOSMB_RUNNING)
+		&& !flag_test (FLAG_SSSMB_RUNNING);
+
 }
 
 
@@ -207,5 +210,13 @@ CALLSET_ENTRY (mpf, start_player)
 {
 	mpf_enable_count = 0;
 	mpf_ball_count = 0;
+}
+
+CALLSET_ENTRY (mpf, ball_search)
+{
+	sol_request (SOL_MPF_LEFT_MAGNET);
+	task_sleep_sec (1);
+	sol_request (SOL_MPF_RIGHT_MAGNET);
+	task_sleep_sec (1);
 }
 

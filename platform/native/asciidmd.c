@@ -138,7 +138,5 @@ void asciidmd_init (void)
 	asciidmd_map_page (0, 0);
 	asciidmd_map_page (1, 0);
 	asciidmd_visible_page = 0;
-
-	//sim_time_register (8, TRUE, asciidmd_refresh, NULL);
 }
 

@@ -43,24 +43,21 @@ extern U8 sol_duty_state[];
 time quantum during which the coil on.  The more '1's,
 the more powerful the pulse. */
 #define SOL_DUTY_0      0x0
-#define SOL_DUTY_12     0x40
-#define SOL_DUTY_25     0x22
-#define SOL_DUTY_37     0x92
-#define SOL_DUTY_50     0x55
-#define SOL_DUTY_62     0xB5
-#define SOL_DUTY_75     0x77
+#define SOL_DUTY_12     0x40   /* 1/8 */
+#define SOL_DUTY_25     0x22   /* 1/4 */
+#define SOL_DUTY_37     0x92   /* 3/8 */
+#define SOL_DUTY_50     0x55   /* 1/2 */
+#define SOL_DUTY_62     0xB5   /* 5/8 */
+#define SOL_DUTY_75     0x77   /* 3/4 */
 #define SOL_DUTY_100    0xFF
 
-/** The default duty cycle is kept small.  This
-can be overwritten in the machine config file. */
-#define SOL_DUTY_DEFAULT   SOL_DUTY_25
+/** The default solenoid timing */
+#define SOL_DUTY_DEFAULT   SOL_DUTY_100
+#define SOL_TIME_DEFAULT   TIME_66MS
 
-/** The default pulse time is reasonable for most
-coils. */
-#define SOL_TIME_DEFAULT   TIME_133MS
-
-#define FLASHER_DUTY_DEFAULT SOL_DUTY_25
-#define FLASHER_TIME_DEFAULT TIME_66MS
+/** The default flasher timing */
+#define FLASHER_DUTY_DEFAULT SOL_DUTY_100
+#define FLASHER_TIME_DEFAULT TIME_33MS
 
 /* Function prototypes */
 void sol_request_async (U8 sol);
@@ -77,18 +74,29 @@ __attribute__((deprecated)) extern inline void sol_start (U8 sol, U8 mask, U8 ti
 	sol_start_real (sol, mask, (4 * time));
 }
 
-/* flasher_start is identical, but it is not marked deprecated.  This
-is the blessed way to control a flashlamp. */
+/*
+ * Pulse a flasher with a flexible time/duty cycle.
+ */
 extern inline void flasher_start (U8 sol, U8 mask, U8 time)
 {
 	sol_start_real (sol, mask, (4 * time));
 }
 
-/* The older API for controlling a flasher, which uses default
-timing and duty cycle */
+/*
+ * Pulse a flasher for the default time.
+ */
 extern inline void flasher_pulse (U8 sol)
 {
 	flasher_start (sol, FLASHER_DUTY_DEFAULT, FLASHER_TIME_DEFAULT);
+}
+
+
+/*
+ * Pulse a flasher for a shorter-than usual time.
+ */
+extern inline void flasher_pulse_short (U8 sol)
+{
+	sol_start_real (sol, FLASHER_DUTY_DEFAULT, 5);
 }
 
 

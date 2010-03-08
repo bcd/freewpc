@@ -226,6 +226,11 @@ void switch_queue_dump (void);
 #if (MACHINE_PIC == 1)
 __init__ void pic_init (void);
 __init__ void pic_render_serial_number (void);
+extern bool pic_invalid;
+#define switch_scanning_ok() (!pic_invalid)
+#else
+#define switch_scanning_ok() TRUE
 #endif
+
 
 #endif /* _SYS_SWITCH_H */

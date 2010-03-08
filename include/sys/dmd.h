@@ -172,6 +172,7 @@ extern dmd_transition_t
 	trans_scroll_up_avg,
 	trans_scroll_up_slow,
 	trans_scroll_down,
+	trans_scroll_down_fast,
 	trans_scroll_left,
 	trans_scroll_right,
 	trans_sequential_boxfade,

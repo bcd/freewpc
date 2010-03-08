@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,9 +24,12 @@
 
 /* Simulation of the zerocross circuit */
 
-#define AC_HZ 60   /* AC cycle has 60 cycles per second */
-#define ZC_HZ (AC_HZ * 2)  /* There are twice as many zero crossings */
+int ac_hz = 60; /* AC cycle has 60 cycles per second in US, 50 elsewhere */
+#define ZC_HZ (ac_hz * 2)  /* There are twice as many zero crossings */
 #define ZC_TIMER_MAX  (1000.0 / ZC_HZ)
+
+int sim_zc_always_set = 0;
+int sim_zc_always_clear = 0;
 
 /** Nonzero when voltage has crossed zero.  This value is latched
 for software to read. */
@@ -61,6 +64,14 @@ int sim_zc_read (void)
  */
 void sim_zc_periodic (void *data __attribute__((unused)))
 {
+	if (sim_zc_always_set)
+	{
+		signal_update (SIGNO_ZEROCROSS, 1);
+	}
+	else if (sim_zc_always_clear)
+	{
+		signal_update (SIGNO_ZEROCROSS, 0);
+	}
 	if (--sim_zc_timer <= 0)
 	{
 		sim_zc_active = 1;
@@ -78,12 +89,9 @@ void sim_zc_init (void)
 {
 	sim_zc_active = 0;
 	sim_zc_timer = ZC_TIMER_MAX;
-
-	if (sim_test_badness (SIM_BAD_NOZEROCROSS))
-	{
-		signal_update (SIGNO_ZEROCROSS, 1);
-		return;
-	}
+	conf_add ("hz", &ac_hz);
+	conf_add ("zc.stuck_on", &sim_zc_always_set);
+	conf_add ("zc.stuck_off", &sim_zc_always_clear);
 
 	/* Register a callback every 1ms */
 	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
