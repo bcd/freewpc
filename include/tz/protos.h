@@ -141,14 +141,15 @@ __machine2__ static void check_rollover (void);*/
 /* unlit.c*/
 __machine2__ void award_unlit_shot (U8 unlit_called_from);
 __machine2__ void backdoor_award_deff (void);
-
+__machine2__ void tz_flipcode_default (void);
 /* fastlock.c */
 __machine__ void fastlock_right_loop_completed (void);
 __machine__ bool fastlock_running (void);
 /* powerball.c */
 #define PB_IN_GUMBALL 0x4
 #define PB_MAYBE_IN_PLAY 0x10
-
+#define PB_IN_PLAY 0x8
+__machine__ void pb_clear_location (U8 location);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);
