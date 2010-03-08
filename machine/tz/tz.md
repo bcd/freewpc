@@ -584,14 +584,14 @@ Rules: page(MACHINE2_PAGE), PRI_EGG1
 perlinclude machine/tz/leff.pl
 
 Bonus: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
-GI Cycle: shared, PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
+GI Cycle: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
-No GI: shared, PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
+No GI: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
 Slot Kickout: shared, PRI_LEFF3, page(MACHINE2_PAGE)
 Gumball Strobe: shared, PRI_LEFF1, page(MACHINE2_PAGE)
-Clock Target: shared, PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
+Clock Target: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
 Game Timeout: PRI_TILT, GI(ALL), page(MACHINE2_PAGE)
 Clock Start: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff), page(MACHINE2_PAGE)
 MB Running: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff), page(MACHINE2_PAGE)
