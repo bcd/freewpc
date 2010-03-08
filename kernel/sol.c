@@ -137,13 +137,11 @@ void sol_req_start (U8 sol)
  */
 CALLSET_ENTRY (sol, idle_every_100ms)
 {
-	if (sol_pulse_timer == 0)
+	if (sol_pulse_timer == 0 &&
+		!queue_empty_p (&sol_req_queue.header))
 	{
-		if (!queue_empty_p (&sol_req_queue.header))
-		{
-			U8 sol = queue_remove (&sol_req_queue.header, SOL_REQ_QUEUE_LEN);
-			sol_req_start (sol);
-		}
+		U8 sol = queue_remove (&sol_req_queue.header, SOL_REQ_QUEUE_LEN);
+		sol_req_start (sol);
 	}
 }
 
@@ -222,7 +220,15 @@ void sol_req_rtt (void)
 		if (sol_pulse_timer && (sol_pulse_duty & sol_duty_mask))
 			sol_req_on ();
 		else
+		{
 			sol_req_off ();
+			if (sol_pulse_timer == 0)
+			{
+				sol_pulse_duty = 0;
+				if (req_lock)
+					req_lock = 0x80;
+			}
+		}
 	}
 }
 
