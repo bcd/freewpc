@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -65,35 +65,6 @@ __fastram__ U8 sol_duty_mask;
 
 U8 sol_reg_readable[SOL_REG_COUNT];
 
-
-/**
- * The state of the solenoid request driver.
- */
-enum sol_request_state {
-	/* No solenoid request is pending */
-	REQ_IDLE,
-
-	/* A request is pending but has not been started.
-	 * For maximum power, the start should be deferred
-	 * until just after the next zerocross. */
-	REQ_PENDING,
-
-	/* The solenoid is running at 100% power.
-	 * When the timer expires, it switches to the duty
-	 * phase. */
-	REQ_ON,
-
-	/* The solenoid is running at less than 100%.
-	 * The duty mask controls during which phases of the AC
-	 * cycle it is on, and when it is off.  When the timer
-	 * expires, the coil is turned off and we go back to
-	 * idle state. */
-	REQ_DUTY,
-};
-
-__fastram__ volatile enum sol_request_state sol_req_state;
-__fastram__ volatile U8 sol_req_timer;
-
 /** A locking mechanism used to implement synchronous
 pulse requests.  At most one sync request can be in
 process at a time; this variable holds the solenoid number,
@@ -101,13 +72,18 @@ plus bit 7 set (so that it is nonzero when a request is
 pending, and zero when no sync requests are in progress). */
 volatile U8 req_lock;
 
+/* The read-only parameters to the one-at-a-time pulse driver,
+which says which solenoid to pulse */
 IOPTR req_reg_write;
 U8 *req_reg_read;
 U8 req_bit;
-U8 req_on_time;
-U8 req_duty_time;
-U8 req_duty_mask;
 U8 req_inverted;
+
+/** The timer for the pulse driver */
+U8 sol_pulse_timer;
+
+/** The duty cycle for the pulse driver */
+U8 sol_pulse_duty;
 
 #define SOL_REQ_QUEUE_LEN 8
 
@@ -123,10 +99,6 @@ struct {
 #ifdef DEBUGGER
 void sol_req_dump (void)
 {
-	dbprintf ("State = %d\n", sol_req_state);
-	dbprintf ("Timer = %d\n", sol_req_timer);
-	dbprintf ("Write = %p, Read = %p\n", req_reg_write, req_reg_read);
-	dbprintf ("Bit = %02X\n", req_bit);
 }
 #endif
 
@@ -140,7 +112,7 @@ void sol_req_start (U8 sol)
 {
 	dbprintf ("Starting pulse %d now.\n", sol);
 
-	if (sol_req_state != REQ_IDLE)
+	if (sol_pulse_timer != 0)
 		fatal (ERR_SOL_REQUEST);
 
 	req_reg_write = sol_get_write_reg (sol);
@@ -149,13 +121,11 @@ void sol_req_start (U8 sol)
 
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
-	req_on_time = 16;
-	req_duty_time = (sol_get_time (sol) - 1) * 16;
-	req_duty_mask = 0x3; /* 25% */
+	sol_pulse_duty = sol_get_duty (sol);
 	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
 
-	/* Mark the request pending, so the update procedure will see it. */
-	sol_req_state = REQ_PENDING;
+	/* This must be last, as it triggers the IRQ code */
+	sol_pulse_timer = sol_get_time (sol) * 4;
 }
 
 
@@ -163,15 +133,17 @@ void sol_req_start (U8 sol)
 
 /**
  * Periodically inspect the solenoid queue and dispatch
- * the pending request.
+ * the next pending request.
  */
 CALLSET_ENTRY (sol, idle_every_100ms)
 {
-	if (sol_req_state == REQ_IDLE
-		&& !queue_empty_p (&sol_req_queue.header))
+	if (sol_pulse_timer == 0)
 	{
-		U8 sol = queue_remove (&sol_req_queue.header, SOL_REQ_QUEUE_LEN);
-		sol_req_start (sol);
+		if (!queue_empty_p (&sol_req_queue.header))
+		{
+			U8 sol = queue_remove (&sol_req_queue.header, SOL_REQ_QUEUE_LEN);
+			sol_req_start (sol);
+		}
 	}
 }
 
@@ -185,10 +157,9 @@ void sol_request_async (U8 sol)
 	dbprintf ("Request pulse %d\n", sol);
 
 	/*
-	 * If the state machine is IDLE, go ahead and start the request.
-	 * Otherwise, it will need to be queued.
+	 * If no request is active, start it now.  Otherwise, it will need to be queued.
 	 */
-	if (sol_req_state == REQ_IDLE)
+	if (sol_pulse_timer == 0)
 	{
 		sol_req_start (sol);
 	}
@@ -207,7 +178,7 @@ void sol_request_async (U8 sol)
 void sol_request (U8 sol)
 {
 	/* Wait until any existing sync requests are finished. */
-	while (req_lock || sol_req_state != REQ_IDLE)
+	while (req_lock || sol_pulse_timer)
 		task_sleep (TIME_66MS);
 
 	/* Acquire the lock for this solenoid. */
@@ -238,75 +209,20 @@ extern inline void sol_req_off (void)
 
 
 /**
- * Handle solenoid requests in realtime, every 1ms.
+ * The realtime pulsed solenoid update.
  *
- * The lifecycle of the request manager is as follows:
- *
- * IDLE   --->  PENDING   --->  ON   ---> DUTY
- *
- * See the declaration of these states for details.
+ * It works identically to the code for the flashers, except there can only be
+ * one at a time.
  */
 void sol_req_rtt (void)
 {
-	/* If nothing to do, get out quickly. */
-	if (likely (sol_req_state == REQ_IDLE))
-		return;
-
-	else if (sol_req_state == REQ_PENDING)
+	if (sol_pulse_timer != 0)
 	{
-		/* In the pending state, start the solenoid
-		 * at 100% power but only if just past a zerocrossing
-		 * point.  If the ZC circuit is broken, this
-		 * state is bypassed and task level will always
-		 * program the request in ON mode. */
-		if (zc_get_timer () == 2)
-		{
-			sol_req_timer = req_on_time;
+		sol_pulse_timer--;
+		if (sol_pulse_timer && (sol_pulse_duty & sol_duty_mask))
 			sol_req_on ();
-			sol_req_state = REQ_ON;
-		}
-	}
-
-	else
-	{
-		/* In either the ON or DUTY states, we must decrement the timer. */
-		/* TODO - in either of these states, precise timing is not
-		as critical so we may be able to do this less frequently; i.e.
-		every 8ms instead of every 1ms. */
-		--sol_req_timer;
-		if (sol_req_timer == 0)
-		{
-			/* On expiry, switch to the next state. */
-			if (sol_req_state == REQ_ON)
-			{
-				/* Switch to DUTY. */
-				sol_req_timer = req_duty_time;
-				sol_req_state = REQ_DUTY;
-			}
-			else
-			{
-				/* Switch to IDLE.  Ensure the coil is off.
-				Release any process waiting on this solenoid to
-				finish. */
-				sol_req_off ();
-				sol_req_state = REQ_IDLE;
-				if (req_lock)
-					req_lock = 0x80;
-			}
-		}
-		else if (sol_req_state == REQ_DUTY)
-		{
-			if ((sol_req_timer & req_duty_mask) == 0)
-			{
-				/* Occasionally turn on the coil */
-				sol_req_on ();
-			}
-			else
-			{
-				/* Most of the time, keep it off */
-				sol_req_off ();
-			}
-		}
+		else
+			sol_req_off ();
 	}
 }
 
@@ -491,8 +407,10 @@ sol_init (void)
 	/* Initialize the rotating duty strobe mask */
 	sol_duty_mask = 0x1;
 
-	sol_req_state = REQ_IDLE;
+	/* Initialize the one-at-a-time pulse driver */
+	sol_pulse_timer = sol_pulse_duty = 0;
 	req_lock = 0;
+
 	memset (sol_reg_readable, 0, SOL_REG_COUNT);
 
 	/* Initialize the solenoid queue. */

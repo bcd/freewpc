@@ -3121,28 +3121,10 @@ void solenoid_test_draw (void)
 		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
 	}
 
-	switch (sol_get_duty (menu_selection))
-	{
-		case SOL_DUTY_12:
-			sprintf ("1/8");
-			break;
-		case SOL_DUTY_25:
-			sprintf ("1/4");
-			break;
-		case SOL_DUTY_50:
-			sprintf ("1/2");
-			break;
-		case SOL_DUTY_75:
-			sprintf ("3/4");
-			break;
-		case SOL_DUTY_100:
-			sprintf ("ON");
-			break;
-		default:
-			sprintf ("S%02X", sol_get_duty (menu_selection));
-			break;
-	}
+#ifdef DEBUGGER
+	sprintf ("DUTY %02X", sol_get_duty (menu_selection));
 	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+#endif
 
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
