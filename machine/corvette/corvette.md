@@ -198,7 +198,7 @@ A2: ZR-1 Underside, flash
 A3: Right Rear Panel, flash
 A4: Right Standup, flash
 
-#F = J902 on Fliptronic II
+# F = J902 on Fliptronic II
 F5: Ramp Diverter, time(TIME_33MS)
 F6: Ramp Divertor Hold, time(TIME_100MS)
 F7: U.L. Flip Power, time(TIME_33MS)
