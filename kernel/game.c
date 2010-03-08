@@ -610,9 +610,9 @@ void stop_game (void)
 	player_up = 0;
 	ball_up = 0;
 	valid_playfield = FALSE;
+	callset_invoke (stop_game);
 	deff_stop_all ();
 	leff_stop_all ();
-	callset_invoke (stop_game);
 
 	/* TODO : Per-player audits should also be chalked, but only if
 	 * the final ball of the game was started */

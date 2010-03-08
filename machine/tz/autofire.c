@@ -133,7 +133,11 @@ void autofire_add_ball (void)
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
 		/* Wait for divertor to open */
+<<<<<<< HEAD:machine/tz/autofire.c
 		task_sleep_sec (1);		
+=======
+		task_sleep_sec (1);
+>>>>>>> f3497cff3fe31602ba2a5b8f2a15b871db2ba4f9:machine/tz/autofire.c
 		sol_pulse (SOL_BALL_SERVE);
 	}
 	else
@@ -176,7 +180,12 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
+<<<<<<< HEAD:machine/tz/autofire.c
 		/* Wait for the divertor to open */	
+=======
+
+		/* Wait for the divertor to open */
+>>>>>>> f3497cff3fe31602ba2a5b8f2a15b871db2ba4f9:machine/tz/autofire.c
 		task_sleep (TIME_300MS);
 	}
 	else

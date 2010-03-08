@@ -229,8 +229,8 @@ H1: Slot, time(TIME_66MS)
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div
-H6: Gumball Div
+H5: Right Ramp Div.
+H6: Gumball Div.
 H7: Knocker, knocker
 H8: Outhole
 

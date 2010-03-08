@@ -328,19 +328,25 @@ bool switch_poll_logical (const switchnum_t sw)
 void switch_rtt_0 (void)
 {
 	switch_rowpoll (0);
-	switch_rowpoll (1);
-	switch_rowpoll (2);
-	switch_rowpoll (3);
-	switch_rowpoll (4);
+	if (switch_scanning_ok ())
+	{
+		switch_rowpoll (1);
+		switch_rowpoll (2);
+		switch_rowpoll (3);
+		switch_rowpoll (4);
+	}
 }
 
 
 void switch_rtt_1 (void)
 {
-	switch_rowpoll (5);
-	switch_rowpoll (6);
-	switch_rowpoll (7);
-	switch_rowpoll (8);
+	if (switch_scanning_ok ())
+	{
+		switch_rowpoll (5);
+		switch_rowpoll (6);
+		switch_rowpoll (7);
+		switch_rowpoll (8);
+	}
 
 #if (MACHINE_FLIPTRONIC == 1)
 	/* Poll the Fliptronic flipper switches */
@@ -759,6 +765,13 @@ CALLSET_ENTRY (switch, idle)
  * switch matrix power is present. */
 CALLSET_ENTRY (switch, diagnostic_check)
 {
+#if (MACHINE_PIC == 1)
+	if (!switch_scanning_ok ())
+	{
+		diag_post_error ("SECURITY PIC\nNOT INITIALIZED\n", SYS_PAGE);
+		return;
+	}
+#endif
 #ifdef SW_ALWAYS_CLOSED
 	/* Make sure the ALWAYS CLOSED switch is really closed.
 	 * If not, there's a serious problem
@@ -797,7 +810,11 @@ void switch_init (void)
 	/* Initialize the short timer so switch scanning is enabled */
 	sw_short_timer = 0;
 
-	/* Initialize the switch state buffers */
+	/* Initialize the switch state buffers.  raw/logical are
+	set to 'inactive' for all switches; for optos that means the
+	bit is set, not clear.  edge is set to all zeroes, meaning that
+	no change was seen since the last reading. */
+	memcpy (sw_raw, mach_opto_mask, SWITCH_BITS_SIZE);
 	memcpy (sw_logical, mach_opto_mask, SWITCH_BITS_SIZE);
 	memset (sw_edge, 0, sizeof (switch_bits_t));
 

@@ -322,8 +322,8 @@ Ball Locked: page(MACHINE_PAGE), PRI_GAME_QUICK4
 Multiball Lit: page(MACHINE_PAGE), PRI_GAME_QUICK5
 Multiball Start: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE
 Multiball Running: runner, page(MACHINE_PAGE), PRI_GAME_MODE5
-Multiball Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK7
-Multiball Super Jackpot: page(MACHINE_PAGE), D_SCORE, PRI_GAME_QUICK8
+Multiball Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_SCORE
+Multiball Super Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_SCORE
 Multiball Spinner: page(MACHINE_PAGE), PRI_GAME_QUICK6
 
 TV Lit: page(MACHINE_PAGE), PRI_GAME_QUICK4

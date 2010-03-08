@@ -57,6 +57,7 @@ void mpf_round_deff (void)
 
 void mpf_award_deff (void)
 {
+<<<<<<< HEAD:machine/tz/mpf.c
 	dmd_alloc_low_clean ();
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -64,6 +65,16 @@ void mpf_award_deff (void)
 	sound_send (SND_EXPLOSION_3);
 	task_sleep_sec (2);
 	deff_exit ();
+=======
+	return (mpf_enable_count > 0)
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !flag_test (FLAG_MULTIBALL_RUNNING)
+		&& !flag_test (FLAG_QUICK_MB_RUNNING)
+		&& !flag_test (FLAG_BTTZ_RUNNING)
+		&& !flag_test (FLAG_CHAOSMB_RUNNING)
+		&& !flag_test (FLAG_SSSMB_RUNNING);
+
+>>>>>>> f3497cff3fe31602ba2a5b8f2a15b871db2ba4f9:machine/tz/mpf.c
 }
 
 /* Task to pulse the mpf magnets
@@ -277,4 +288,5 @@ CALLSET_ENTRY (mpf, ball_search)
 	sol_request (SOL_MPF_LEFT_MAGNET);
 	task_sleep_sec (1);
 	sol_request (SOL_MPF_RIGHT_MAGNET);
+	task_sleep_sec (1);
 }

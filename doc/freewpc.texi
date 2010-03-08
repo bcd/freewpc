@@ -1118,16 +1118,29 @@ durations at a time.  The system prevents multiple pulses from
 occurring simultaneously and will queue and stage them.  These
 are normally used for kickers, poppers, etc.
 
+The pulse can be controlled by the solenoid (motor, etc.) entry
+in the machine description, in the "drives" section.  The @code{time}
+parameter sets the total length of time for the pulse.  The @code{duty}
+parameter controls the duty cycle; use one of the @code{SOL_DUTY_xxx} defines.
+SOL_DUTY_100 keeps the driver on for the entire interval; SOL_DUTY_50 keeps
+it on half the time, delivering half the power; and so on.
+
+If you do not specify either of these values, you will get a reasonable, but
+conservative default.  Solenoids and flashers may have different default values.
+
 @table @code
 
 @item sol_request
 
-Pulse a solenoid, and wait for it to be fired.  (A request may
-be delayed for a number of reasons.)
+Pulse a solenoid, and wait for it to be fired.  A request may
+be delayed for a number of reasons.  This should only be used inside
+of a task context where it is acceptable that the call may block for
+a while.
 
 @item sol_request_async
 
-Pulse a solenoid, but don't wait for it to be fired.
+Pulse a solenoid, but don't wait for it to be fired.  This is the preferred
+method to use.
 
 @end table
 
@@ -1145,15 +1158,29 @@ These types of drivers are all implemented using templates.
 
 @subsection Flashers
 
-The flashlamp APIs are similar to the solenoid APIs,
-except that they are momentary.  A flashlamp is
-pulsed briefly, after which it is turned off.
+The flashlamp APIs are similar to the solenoid pulse APIs.
+A flashlamp pulse is always with a 100% duty cycle, but for a much shorter
+period of time.
+
+Note: it is currently possible to use the solenoid pulse APIs on flashers,
+but this should not be done.  This will likely be enforced in the future.
 
 @table @code
 
 @item flasher_pulse
 
 Pulse a flashlamp for a nominal period of time.
+
+@item flasher_pulse_short
+
+Pulse a flashlamp very quickly.
+
+@item flasher_start
+
+This is a lower-layer API that allows you to specify the exact duration
+and duty cycle for a flasher.  Times longer than FLASHER_TIME_DEFAULT are
+not recommended.  The duty cycle can be specified using one of the SOL_DUTY_xxx
+defines to pulse it more dimly than usual.
 
 @end table
 

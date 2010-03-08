@@ -137,7 +137,7 @@ void expr_free (struct signal_expression *ex)
  * Allocate a new signal chunk to hold some more readings for
  * a signal.
  */
-signal_readings_t *signal_chunk_alloc (void)
+static signal_readings_t *signal_chunk_alloc (void)
 {
 	signal_readings_t *sigrd;
 	sigrd = malloc (sizeof (signal_readings_t));
@@ -156,6 +156,9 @@ bool signal_expr_eval (unsigned int sig_changed, struct signal_expression *ex)
 
 	switch (ex->op)
 	{
+		default:
+			return FALSE;
+
 		case SIG_SIGNO:
 			if (ex->u.signo == sig_changed)
 				return TRUE;
@@ -361,7 +364,7 @@ void signal_capture_del (uint32_t signo)
 	}
 }
 
-void signal_trace_periodic (void *data __attribute__((unused)))
+static void signal_trace_periodic (void *data __attribute__((unused)))
 {
 	if (signal_capture_active)
 	{

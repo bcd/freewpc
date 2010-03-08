@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -43,7 +43,6 @@ enum sim_log_class
 	SLC_DEBUG,
 	/** Debug information written by the game ROM to the debugger */
 	SLC_DEBUG_PORT,
-	SLC_SOUNDCALL,
 };
 
 
@@ -76,7 +75,8 @@ void ui_write_solenoid (int, int);
 void ui_write_lamp (int, int);
 void ui_write_triac (int, int);
 void ui_write_switch (int, int);
-void ui_write_sound_call (unsigned int x);
+void ui_write_sound_reset (void);
+void ui_write_sound_command (unsigned int x);
 void ui_write_dmd_text (int x, int y, const char *text);
 void ui_clear_dmd_text (int n);
 void ui_update_ball_tracker (unsigned int ballno, unsigned int location);
@@ -113,50 +113,6 @@ typedef enum
 	SIGNO_AC_ANGLE=0x1100,
 } signal_number_t;
 
-typedef double (*value_signal) (uint32_t offset);
-
-#define autosig_type(signo)	((signo - SIGNO_FIRST_AUTO) / 0x100)
-#define autosig_offset(signo) ((signo - SIGNO_FIRST_AUTO) % 0x100)
-
-extern unsigned int signo_under_trace;
-
-void signal_update (signal_number_t signo, unsigned int state);
-void signal_init (void);
-
-/* For simulation of broken hardware.  Each of these bit indicates an
-induced error condition that is created by the simulator, to see how
-the software handles it. */
-#define SIM_BAD_NOZEROCROSS   0x2
-#define SIM_BAD_NOOPTOPOWER   0x4
-#define SIM_BAD_NOSWITCHPOWER 0x8
-
-
-extern inline bool sim_test_badness (unsigned int err)
-{
-	extern unsigned long sim_badness;
-	return sim_badness & err;
-}
-
-extern inline void sim_set_badness (unsigned long err)
-{
-	extern unsigned long sim_badness;
-	sim_badness |= err;
-}
-
-extern inline void sim_clear_badness (unsigned long err)
-{
-	extern unsigned long sim_badness;
-	sim_badness &= ~err;
-}
-
-/** The maximum number of balls that can be tracked in simulation */
-#define SIM_MAX_BALLS 8
-
-#define MAX_BALL_LOCATIONS 128
-
-#define SIM_LOCATION_NONE 0
-#define SIM_NO_BALL_HERE -1
-
 enum signal_operator
 {
 	SIG_SIGNO,
@@ -189,10 +145,44 @@ typedef struct signal_expression
 	} u;
 } signal_expression_t;
 
+
+typedef double (*value_signal) (uint32_t offset);
+
+#define autosig_type(signo)	((signo - SIGNO_FIRST_AUTO) / 0x100)
+#define autosig_offset(signo) ((signo - SIGNO_FIRST_AUTO) % 0x100)
+
+extern unsigned int signo_under_trace;
+
+void signal_update (signal_number_t signo, unsigned int state);
+void signal_init (void);
+void signal_capture_start (struct signal_expression *ex);
+void signal_capture_stop (struct signal_expression *ex);
+void signal_capture_add (uint32_t signo);
+void signal_capture_del (uint32_t signo);
+void signal_capture_set_file (const char *filename);
+void signal_trace_start (signal_number_t signo);
+void signal_trace_stop (signal_number_t signo);
+
+
+/** The maximum number of balls that can be tracked in simulation */
+#define SIM_MAX_BALLS 8
+
+#define MAX_BALL_LOCATIONS 128
+
+#define SIM_LOCATION_NONE 0
+#define SIM_NO_BALL_HERE -1
+
 #define expr_binary_p(ex)   (ex->op > SIG_BINARY && ex->op < SIG_LAST_BINARY)
 struct signal_expression *expr_alloc (void);
 void expr_free (struct signal_expression *ex);
 
+void exec_script_file (const char *filename);
+
 unsigned long realtime_read (void);
+
+
+void conf_add (const char *name, int *valp);
+int conf_read (const char *name);
+void conf_write (const char *name, int val);
 
 #endif /* _SIMULATION_H */

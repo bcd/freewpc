@@ -35,3 +35,18 @@ void corvette_tilt(void);
 void corvette_tilt_warning(void);
 void corvette_start_without_credits(void);
 void corvette_coin_added(void);
+
+/* deffs.c */
+__machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
+__machine__ void printf_millions(U8 n);
+__machine__ void printf_thousands(U8 n);
+__machine__ void replay_deff(void);
+__machine__ void extra_ball_deff(void);
+__machine__ void special_deff(void);
+__machine__ void jackpot_deff(void);
+__machine__ void ballsave_deff(void);
+__machine__ void text_color_flash_deff (void);
+__machine__ void spell_test_deff (void);
+__machine__ void two_color_flash_deff (void);
+__machine__ void bg_flash_deff (void);
+__machine__ void dmd_flash (task_ticks_t delay);

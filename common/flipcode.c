@@ -121,7 +121,7 @@ void flipcode_test (void)
 #ifdef DEBUG_FLIPCODE
 				dbprintf ("Failed at position %d\n", i);
 #endif
-				continue;
+				return;
 			}
 
 		/* Match */
