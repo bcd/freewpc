@@ -31,7 +31,7 @@ U8 __local__ mpf_level;
 bool mpf_active;
 
 /* Where the powerball is */
-extern U8 pb_location;
+//extern U8 pb_location;
 extern U8 unlit_shot_count;
 void mpf_round_deff (void)
 {
@@ -137,7 +137,7 @@ bool mpf_ready_p (void)
 	return (mpf_enable_count > 0)
 		/* Don't allow if PB might be on playfield */
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
-		&& !(pb_location & PB_MAYBE_IN_PLAY)
+		//&& !(pb_location & PB_MAYBE_IN_PLAY)
 		&& !flag_test (FLAG_MULTIBALL_RUNNING)
 		&& !flag_test (FLAG_QUICK_MB_RUNNING)
 		&& !flag_test (FLAG_BTTZ_RUNNING)
@@ -155,12 +155,6 @@ CALLSET_ENTRY (mpf, lamp_update)
 		lamp_tristate_off (LM_RAMP_BATTLE);
 }
 
-CALLSET_ENTRY (mpf, door_start_battle_power)
-{
-	mpf_enable_count++;
-	sound_send (SND_ARE_YOU_READY_TO_BATTLE);
-}
-
 /* Closing this switch does not imply that the
  * mpf award was collected, but we can tell camera.c
  * to expect a ball coming from the mpf */
@@ -175,7 +169,7 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	bounded_decrement (mpf_ball_count, 0);
-	/* Safe tp enable as it covers all cases */
+	/* Safe to enable as it covers all cases */
 	flipper_enable ();
 	leff_stop (LEFF_MPF_ACTIVE);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
@@ -224,7 +218,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	{
 		sound_send (SND_WITH_THE_DEVIL);
 		score (SC_5M);
-		//TODO Crazy magnet pulses till exit or 3 secs
+		task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
 	}
 }
 

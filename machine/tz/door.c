@@ -29,6 +29,10 @@ U8 door_index_awarded;
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
 extern U8 unlit_shot_count;
+extern U8 mpf_enable_count;
+extern U8 gumball_enable_count;
+extern U8 cameras_lit;
+
 bool door_awarded_from_slot;
 U8 door_active_lamp;
 
@@ -75,7 +79,7 @@ const char *door_award_goals[] = {
 };
 
 
-void door_start_event (U8 id)
+static void door_start_event (U8 id)
 {
 	switch (id)
 	{
@@ -84,15 +88,15 @@ void door_start_event (U8 id)
 		case 2: callset_invoke (door_start_sslot); break;
 		case 3: callset_invoke (door_start_clock_millions); break;
 		case 4: callset_invoke (door_start_spiral); break;
-		case 5: callset_invoke (door_start_battle_power); break;
-		case 6: callset_invoke (door_start_10M); break;
+		case 5: mpf_enable_count++; sound_send (SND_ARE_YOU_READY_TO_BATTLE); break;
+		case 6: score (SC_10M); sound_send (SND_TEN_MILLION_POINTS); break;
 		case 7: callset_invoke (door_start_greed); break;
-		case 8: callset_invoke (door_start_camera); break;
+		case 8: cameras_lit++; break;
 		case 9: callset_invoke (door_start_hitchhiker); break;
-		case 10: callset_invoke (door_start_clock_chaos); break;
-		case 11: callset_invoke (door_start_super_skill); break;
+		case 10: callset_invoke (chaosmb_start); break;
+		case 11: callset_invoke (sssmb_start); break;
 		case 12: callset_invoke (door_start_fast_lock); break;
-		case 13: callset_invoke (door_start_light_gumball); break;
+		case 13: gumball_enable_count++; break;
 		case 14: callset_invoke (door_start_litz); break;
 	}
 }
@@ -150,7 +154,6 @@ static void door_advance_flashing (void)
 
 void door_award_rotate (void)
 {
-	task_sleep_sec (2);
 	while (in_live_game)
 	{
 		door_advance_flashing ();
@@ -203,9 +206,8 @@ void door_award_deff (void)
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
+		task_sleep (TIME_100MS);
 	}
-//	task_sleep_sec (1);	
 	/* Play backwards */
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
@@ -259,6 +261,8 @@ void door_award_enable (void)
 
 void door_award_flashing (void)
 {
+	if (!can_award_door_panel ())
+		return;
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	/* Store the current door index */
@@ -292,7 +296,6 @@ void door_award_flashing (void)
 	}
 
 	leff_start (LEFF_DOOR_STROBE);
-//	task_sleep (TIME_100MS);
 	score (SC_50K);
 	/* Restart the door rotation */
 	door_award_enable ();
@@ -321,26 +324,18 @@ CALLSET_ENTRY (door, lamp_update)
 
 CALLSET_ENTRY (door, award_door_panel)
 {
-	if (can_award_door_panel ())
+	if (door_index == LITZ_DOOR_INDEX)
 	{
-		if (door_index == LITZ_DOOR_INDEX)
-		{
-			flag_on (FLAG_BTTZ_RUNNING);
-			flag_off (FLAG_PIANO_DOOR_LIT);
-			flag_off (FLAG_SLOT_DOOR_LIT);
-			door_award_litz ();
-		}
-		else
-			door_award_flashing ();
-		
-		unlit_shot_count = 0;
-		door_lamp_update ();
+		flag_on (FLAG_BTTZ_RUNNING);
+		flag_off (FLAG_PIANO_DOOR_LIT);
+		flag_off (FLAG_SLOT_DOOR_LIT);
+		door_award_litz ();
 	}
-}
-
-CALLSET_ENTRY (door, door_start_10M)
-{
-	score (SC_10M);
+	else
+		door_award_flashing ();
+		
+	unlit_shot_count = 0;
+	door_lamp_update ();
 }
 
 CALLSET_ENTRY (door, ball_count_change)

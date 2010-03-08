@@ -393,7 +393,7 @@ void mpf_active_leff (void)
 void spiralaward_leff (void)
 {
 	lamplist_set_apply_delay (TIME_33MS);
-	while (free_timer_test (TIM_SPIRALAWARD))
+	while (task_find_gid (TIM_SPIRALAWARD))
 	{
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);
 	}

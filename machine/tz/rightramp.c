@@ -72,13 +72,22 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 	/* Scoring functions only happen during a game */
 	if (!in_live_game)
 		return;
-	
+	if (task_kill_gid (GID_LEFT_RAMP_TO_RIGHT_RAMP))
+	{
+		sound_send (SND_RABBLE_RABBLE);
+		timer_restart_free (GID_LR_TO_RR_TO_PIANO, TIME_3S);
+		score (SC_10M);
+	}
 	score (SC_10K);
 	if (mpf_ready_p ())
-		sound_send (SND_RAMP_ENTERS_POWERFIELD);
+	{
+		if (!task_kill_gid (GID_LR_TO_RR_TO_PIANO))
+			sound_send (SND_RAMP_ENTERS_POWERFIELD);
+	}
 	else
 	{	
-		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
+		if (!task_kill_gid (GID_LR_TO_RR_TO_PIANO))
+			sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
 		award_unlit_shot (SW_RIGHT_RAMP);
 	}
 }

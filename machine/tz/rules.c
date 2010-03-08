@@ -127,6 +127,7 @@ void rules_chaosmb_leff (void)
 
 void rules_spiralaward_leff (void)
 {
+	triac_disable (TRIAC_GI_MASK);
 	for (;;)
 	{
 		lamp_tristate_off (LM_LEFT_INLANE2);
@@ -138,6 +139,40 @@ void rules_spiralaward_leff (void)
 	}
 }
 
+void rules_fastlock_leff2 (void)
+{
+	for (;;)
+	{
+		lamp_tristate_off (LM_LOCK_EB);
+		lamp_tristate_flash (LM_LOCK_ARROW);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off (LM_LOCK_ARROW);
+		lamp_tristate_flash (LM_LOCK_EB);
+		task_sleep (TIME_500MS);
+	}
+}
+
+void rules_fastlock_leff (void)
+{
+	triac_disable (TRIAC_GI_MASK);
+	task_create_peer (rules_fastlock_leff2);
+	for (;;)
+	{
+		lamp_tristate_flash (LM_RIGHT_SPIRAL);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off (LM_RIGHT_SPIRAL);
+		lamp_tristate_flash (LM_RIGHT_POWERBALL);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off (LM_RIGHT_POWERBALL);
+		lamp_tristate_flash (LM_LEFT_POWERBALL);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off (LM_LEFT_POWERBALL);
+		lamp_tristate_flash (LM_LEFT_SPIRAL);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off (LM_LEFT_SPIRAL);
+	}
+}
+		
 void rules_deff (void)
 {
 	music_disable ();
@@ -154,7 +189,7 @@ void rules_deff (void)
 	rule_complete ();
 	
 	rule_begin ();
-	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP TO COLLECT", "20 MILLION BONUS" , "FOR COLLECTING ALL");
+	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP TO COLLECT", "RANDOM AWARD" , "20M FOR COLLECTING ALL");
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_flash_on);
 	lamp_tristate_flash (LM_RIGHT_SPIRAL);
 	lamp_tristate_flash (LM_GUMBALL_LANE);
@@ -176,6 +211,15 @@ void rules_deff (void)
 	rule_msg ("CHAOS MULTIBALL", "HIT CLOCK TO LIGHT JACKPOTS", "JACKPOTS MOVE", "AROUND THE TABLE");
 	task_create_gid1 (GID_RULES_LEFF, rules_chaosmb_leff);
 	task_sleep_sec (3);
+	rule_complete ();
+
+	rule_begin ();
+	rule_msg ("FAST LOCK", "SHOOT LOOPS TO BUILD", "JACKPOT, HIT LOCK", "TO COLLECT");
+	task_create_gid1 (GID_RULES_LEFF, rules_fastlock_leff);
+	rule_complete ();
+
+	rule_begin ();
+	rule_msg ("EVERYTHING ELSE?", "", "YOU CAN FIGURE", "IT OUT");
 	rule_complete ();
 
 	music_enable ();

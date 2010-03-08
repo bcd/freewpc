@@ -39,7 +39,7 @@
 #define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
-
+extern bool powerball_loaded_into_gumball;
 
 typedef enum {
 	PF_STEEL_DETECTED = 1,
@@ -173,6 +173,7 @@ void pb_set_location (U8 location, U8 depth)
 		pb_location = location;
 		if (pb_location & PB_HELD)
 		{
+			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
 		}
@@ -257,6 +258,7 @@ static void pb_detect_event (pb_event_t event)
 
 		case TROUGH_PB_DETECTED:
 			pb_set_location (PB_IN_TROUGH, 1);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
 			break;
 	}
 }
@@ -314,7 +316,7 @@ void pb_container_enter (U8 location, U8 devno)
 	of a ball entering a device is significant. */
 	if (pb_location == PB_IN_PLAY)
 	{
-		if (single_ball_play ())
+		if (single_ball_play () || powerball_loaded_into_gumball == TRUE)
 		{
 			/* In single ball play, things are fairly deterministic.
 			 * We know the powerball is no longer in play, and it is in
@@ -331,6 +333,7 @@ void pb_container_enter (U8 location, U8 devno)
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
 			}
 		}
@@ -356,7 +359,7 @@ void pb_container_enter (U8 location, U8 devno)
  * shifts down by 1, and it may be in play now. */
 void pb_container_exit (U8 location)
 {
-	if (pb_location == location)
+//	if (pb_location == location)
 	{	
 		if (--pb_depth == 0)
 		{

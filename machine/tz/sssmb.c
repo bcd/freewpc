@@ -234,13 +234,6 @@ CALLSET_ENTRY (sssmb, music_refresh)
 		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
 }
 
-
-CALLSET_ENTRY (sssmb, door_start_super_skill)
-{
-	callset_invoke (sssmb_start);
-}
-
-
 CALLSET_ENTRY (sssmb, single_ball_play)
 {
 	sssmb_stop ();
@@ -314,9 +307,4 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 	dbprintf ("Jackpot ready cancelled\n");
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
-}
-
-CALLSET_ENTRY (sssmb, ball_start)
-{
-	callset_invoke (sssmb_stop);
 }

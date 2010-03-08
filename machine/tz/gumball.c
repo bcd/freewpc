@@ -41,7 +41,7 @@ extern void spiralaward_right_loop_completed (void);
 extern U8 mpf_round_timer;
 extern void mball_start_3_ball (void);
 
-extern U8 pb_location;
+//extern U8 pb_location;
 
 /*************************************************************/
 /* Gumball APIs                                              */
@@ -73,8 +73,8 @@ void award_gumball_score (void)
 bool gumball_load_is_enabled (void)
 {
 	if (in_live_game && (gumball_enable_count > 0) 
-		&& !multi_ball_play ()
-		&& !(pb_location & PB_MAYBE_IN_PLAY))
+		&& !multi_ball_play ())
+		//&& !(pb_location & PB_MAYBE_IN_PLAY))
 		return TRUE;
 	/* If powerball is out during single ball play, enable */
 	else if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
@@ -200,11 +200,10 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		//BUG If powerball is about to launch, a steel gets counted
 		if (powerball_loaded_into_gumball == TRUE)
 		{
-			pb_clear_location (PB_MAYBE_IN_PLAY);
-			powerball_loaded_into_gumball = FALSE;
 			//TODO Move to multiball.c
-			
 			/* Do a dodgy multiball combo */
+			kickout_lock (KLOCK_DEFF);
+			powerball_loaded_into_gumball = FALSE;
 			flag_on (FLAG_SUPER_MB_RUNNING);
 			mball_start_3_ball ();
 			ballsave_add_time (10);
@@ -366,11 +365,6 @@ CALLSET_ENTRY (gumball, ball_search)
 		gumball_release ();
 }
 
-CALLSET_ENTRY (gumball, door_start_light_gumball)
-{
-	gumball_enable_count++;
-}
-
 CALLSET_ENTRY (gumball, single_ball_play)
 {
 	flag_off (FLAG_SUPER_MB_RUNNING);
@@ -391,15 +385,13 @@ CALLSET_ENTRY (gumball, init)
 CALLSET_ENTRY (gumball, sw_gumball_popper)
 {
 	/* TODO Hack to stop detecting the PB as if it's in the trough */
-	if (flag_test (FLAG_POWERBALL_IN_PLAY) && switch_poll_logical (SW_TROUGH_PROXIMITY))
+	if (flag_test (FLAG_POWERBALL_IN_PLAY))
 		powerball_loaded_into_gumball = TRUE;
 	else
 		powerball_loaded_into_gumball = FALSE;
 
 	/* Inform spiralaward.c */
 	spiralaward_right_loop_completed ();
-	fastlock_right_loop_completed ();
-
 }
 
 CALLSET_ENTRY (gumball, status_report)

@@ -79,8 +79,9 @@ void chaos_jackpot_deff (void)
 {
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 9, "CHAOS");
-	font_render_string_center (&font_fixed10, 64, 23, "JACKPOT");
+	font_render_string_center (&font_fixed6, 64, 9, "CHAOS JACKPOT");
+	sprintf ("%d MILLION", chaosmb_shots[chaosmb_level].jackpot_value);
+	font_render_string_center (&font_var5, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
@@ -115,11 +116,12 @@ void chaosmb_running_deff (void)
 	}
 }
 
-static void chaosmb_check_jackpot_lamps (void)
+void chaosmb_check_jackpot_lamps (void)
 {
 	if (chaosmb_hits_to_relight == 0)
 	{	
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
+		//lamp_tristate_flash (chaosmb_shot[chaosmb_level].lamp_num)
 		switch (chaosmb_level)
 		{
 		/* TODO This is very hacky, do it properly */
@@ -160,6 +162,7 @@ static void chaosmb_check_jackpot_lamps (void)
 
 static void chaosmb_score_jackpot (void)
 {
+	score_multiple (SC_10M, chaosmb_shots[chaosmb_level].jackpot_value);
 	if (chaosmb_level <= 5)
 		chaosmb_level++;
 	else
@@ -227,13 +230,6 @@ CALLSET_ENTRY (chaosmb, music_refresh)
 	if (flag_test (FLAG_CHAOSMB_RUNNING))
 		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE6);
 }
-
-
-CALLSET_ENTRY (chaosmb, door_start_clock_chaos)
-{
-	callset_invoke (chaosmb_start);
-}
-
 
 /* Called from leftramp.c */
 void chaosmb_left_ramp_exit (void)

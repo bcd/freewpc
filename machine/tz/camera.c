@@ -40,6 +40,7 @@ extern U8 mball_locks_lit;
 
 void camera_award_deff (void)
 {
+	kickout_lock (KLOCK_DEFF);
 	U16 fno;
 	for (fno = IMG_CAMERA_START; fno <= IMG_CAMERA_END; fno += 2)
 	{
@@ -85,6 +86,7 @@ void camera_award_deff (void)
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
 	task_sleep_sec (2);
+	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 
@@ -174,10 +176,4 @@ CALLSET_ENTRY (camera, start_player)
 {
 	cameras_lit = 1;
 	camera_award_count = 0;
-}
-
-
-CALLSET_ENTRY (camera, door_start_camera)
-{
-	cameras_lit++;
 }

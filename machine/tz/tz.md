@@ -44,6 +44,8 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
+define FLIPCODE_LIST { 3, 2, 1, 2 }
+define FLIPCODE_HANDLERS { tz_flipcode_default }
 
 ##########################################################################
 # Lamp Description
@@ -149,13 +151,13 @@ define CONFIG_TZONE_IP
 15: Right Trough, c_decl(sw_trough), noscore
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
-18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS);
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_100MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
-26: Trough Proximity, edge, noscore
+26: Trough Proximity, noscore
 27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
-28: Rocket Kicker
+28: Rocket Kicker, debounce(TIME_200MS)
 31: Left Jet, ingame, c_decl(sw_jet), noplay
 32: Right Jet, ingame, c_decl(sw_jet), noplay
 33: Bottom Jet, ingame, c_decl(sw_jet), noplay
@@ -605,7 +607,7 @@ Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
 MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
-Spiralaward: runner, PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
+Spiralaward: PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
 Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 ##########################################################################
@@ -630,6 +632,7 @@ Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
 
+
 Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=2, offtime=20
 Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=2, offtime=20
 
@@ -637,7 +640,7 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
@@ -658,3 +661,4 @@ Ramp Div: driver(duty),
 Gumball Div: driver(duty),
 	sol=SOL_GUMBALL_DIV,
 	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
+

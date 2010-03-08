@@ -149,7 +149,7 @@ static void award_spiralaward (void)
 void spiralaward_right_loop_completed (void)
 {
 	if (task_kill_gid (TIM_SPIRALAWARD))
-	{
+	{	
 		free_timer_stop (TIM_SPIRALAWARD);
 		leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);

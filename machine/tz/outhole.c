@@ -22,7 +22,7 @@
 /* CALLSET_SECTION (outhole, __machine2__) */
 
 #include <freewpc.h>
-/* How many balls have drained in three seconds */
+/* How many balls have drained */
 U8 multidrain_count;
 bool multidrain_awarded;
 
@@ -34,7 +34,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 		if (!timer_find_gid (GID_MULTIDRAIN) && multi_ball_play () && !ballsave_test_active ())
 		{
 			multidrain_count = 0;
-			timer_restart_free (GID_MULTIDRAIN, TIME_5S);
+			timer_restart_free (GID_MULTIDRAIN, TIME_8S);
 		}
 	
 		if (timer_find_gid (GID_MULTIDRAIN))
@@ -49,9 +49,8 @@ CALLSET_ENTRY (outhole, sw_outhole)
 	
 }
 
-CALLSET_ENTRY (outhole, ball_start)
+CALLSET_ENTRY (outhole, player_start)
 {
 	multidrain_count = 0;
 	multidrain_awarded = FALSE;
-	timer_kill_gid (GID_MULTIDRAIN);
 }

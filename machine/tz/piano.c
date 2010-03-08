@@ -24,6 +24,11 @@
 CALLSET_ENTRY (piano, sw_piano)
 {
 	device_switch_can_follow (piano, slot, TIME_3S);
+	if (task_kill_gid (GID_LR_TO_RR_TO_PIANO))
+	{
+		sound_send (SND_SEE_WHAT_GREED);
+		score (SC_10M);
+	}
 	//callset_invoke (shot_piano);
 	/* Say that a ball entering this device is destined to
 	enter the slot machine device, within a certain amount

@@ -57,6 +57,11 @@ bool can_award_unlit_shot (U8 unlit_called_from)
 		return TRUE;
 }
 
+void tz_flipcode_default (void)
+{
+	sound_send (SND_PLAYER_PIANO_UNUSED);
+}
+
 void award_unlit_shot (U8 unlit_called_from)
 {
 	if (can_award_unlit_shot (unlit_called_from))
@@ -100,3 +105,5 @@ CALLSET_ENTRY (unlit, start_player)
 {
 	backdoor_award_collected = FALSE;
 }
+
+

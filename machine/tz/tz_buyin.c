@@ -1,7 +1,7 @@
 /* CALLSET_SECTION (buyin, __machine2__) */
 #include <freewpc.h>
 
-CALLSET_ENTRY (buyin, sw_buyin_button)
+CALLSET_ENTRY (tz_buyin, sw_buyin_button)
 {
 	if (in_live_game)
 	{

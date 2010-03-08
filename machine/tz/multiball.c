@@ -205,6 +205,9 @@ bool can_lock_ball (void)
 		//TODO Doesn't always work
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 		return TRUE;
+		/* Lock ball when doing a multiball restart to stop err 23 */
+	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
+		return TRUE;
 	else
 		return FALSE;
 }
