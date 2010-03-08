@@ -24,69 +24,81 @@
 /**
  * \file
  * \brief Handles updating the solenoids.
+ *
  * The state of the solenoids is maintained in memory; the
- * actual I/O is written at IRQ time to refresh the hardware.
+ * actual I/O is written at IRQ time to refresh the hardware, every 4ms.
  *
- * Each solenoid set (of 8) is serviced during each successive 1ms.
- * Real-time update cycles through 4 sets of outputs, so
- * the effective service time per solenoid is once every 4ms.
- * (For some machines there are more than 4 sets to be serviced;
- * in that case it is necessary to service more than 1 set sometimes.)
+ * There are two different mechanisms here, one for solenoids and one for
+ * flashers.  For the flashers, there is duplicate inline code for each
+ * flasher that controls it.  This allows multiple flashers to run in
+ * parallel.  For the solenoids (the first 16 on WPC), there is a single
+ * update function, with the solenoid number as a parameter, so only one
+ * of these can run at a time.
  *
- * Each solenoid a timer that allows it to remain active for up to 255
- * iterations, or a total duration of 1.02s.  If a coil needs to
- * energize longer than that, it is up to the task level to
- * continue to kick it.  Each also has an 8-stage duty cycle,
- * allowing anywhere from full power to 1/8th power (one pulse
- * per 33ms).
+ * A request specifies both a time (in 4ms increments) and a duty cycle
+ * (as low as 1/8, up to full 100% on).  The timer allows a maximum
+ * duration of about 1 second.  The default time and duty cycle for the
+ * shared solenoid driver comes from a table that is built from the
+ * parameters in the [drives] section of the machine description.
  *
- * The algorithm has been designed to minimize hardware damage due
- * to software failures.  A random write to any of the solenoid timers
- * would cause that solenoid to turn on, but at most for 1.02s, since
- * the timer countdown automatically restores it to zero.
+ * When using the shared driver, if a request is made while the driver
+ * is already pulsing another solenoid, that request can be queued up
+ * so the caller does not have to wait for it.
+ *
+ * If more customized control is needed, a device driver should be
+ * employed instead and these APIs should be skipped altogether.
  */
 
 
-/** Per solenoid on-time.  When this value is nonzero, the solenoid
+/** Per flasher timers.  When this value is nonzero, the flasher
 is enabled.  Each tick here corresponds to 4ms. */
 __fastram__ U8 sol_timers[SOL_COUNT];
 
-/** Per solenoid duty-cycle mask.  This is an 8-bit value where a '1'
-bit means to turn the solenoid on, and a '0' means to (temporarily)
-turn it off.  When the solenoid is enabled, this allows it to be
-duty cycled.  A value of 0xFF means 100% power, 0x55 means 50% power, etc.
-Each phase of the duty cycle is 4ms long. */
+/** Per flasher duty-cycle mask.  This is an 8-bit value where a '1'
+bit means to turn it on, and a '0' means to turn it off, during the next 4ms.
+When the timer is enabled, this allows the flasher to be dimmed.
+Use the SOL_DUTY values here. */
 U8 sol_duty_state[SOL_COUNT];
 
-/** The current bit of the duty cycle masks to be examined.  After each
-iteration through all solenoids, this mask is shifted.  At most one bit
-is set here at a time. */
+/** The current bit of the duty cycle masks to be examined.  After servicing
+all devices, this mask is shifted.  At most one bit is ever set here at a time. */
 __fastram__ U8 sol_duty_mask;
 
+/** The default values for the solenoid registers.  These are set by device drivers
+outside of this module, providing the initial on/off states for everything. */
 U8 sol_reg_readable[SOL_REG_COUNT];
 
-/** A locking mechanism used to implement synchronous
-pulse requests.  At most one sync request can be in
-process at a time; this variable holds the solenoid number,
-plus bit 7 set (so that it is nonzero when a request is
-pending, and zero when no sync requests are in progress). */
+/**
+ * A locking mechanism used to implement synchronous pulse requests.
+ * At most one synchronous request can be in process at a time; this
+ * variable controls the access.
+ *
+ * When it is zero, the lock is available; no sync request in progress.
+ * When a request is active, it is set to the solenoid number plus one
+ * (so for sol 0, lock=1).
+ * When a request finishes, it is set to 0x80 by the realtime driver.
+ * This signals the task-level code to continue, which then releases
+ * the lock by writing it back to zero.
+ */
 volatile U8 req_lock;
 
 /* The read-only parameters to the one-at-a-time pulse driver,
-which says which solenoid to pulse */
+which says which solenoid to pulse.  These are setup outside of
+the realtime task to make it run faster. */
 IOPTR req_reg_write;
 U8 *req_reg_read;
 U8 req_bit;
 U8 req_inverted;
 
-/** The timer for the pulse driver */
+/** The timer for the shared pulse driver */
 U8 sol_pulse_timer;
 
-/** The duty cycle for the pulse driver */
+/** The duty cycle for the shared pulse driver */
 U8 sol_pulse_duty;
 
 #define SOL_REQ_QUEUE_LEN 8
 
+/** A queue of solenoid pulse requests that are pending */
 struct {
 	queue_t header;
 	U8 sols[SOL_REQ_QUEUE_LEN];
