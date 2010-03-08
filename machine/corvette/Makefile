@@ -57,13 +57,13 @@ PINMAME_OTHER_ROMS = corvsnd*
 
 GAME_OBJS =
 
-GAME_TEST_OBJS = 
+GAME_TEST_OBJS = zr1_test.o
 
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = simple.o driver.o kickback.o \
 	jets.o trivial.o sling.o zr_1_multiball.o shots.o \
-	leffs.o deffs.o skill.o
+	leffs.o deffs.o skill.o zr1.o
 
 #FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
 

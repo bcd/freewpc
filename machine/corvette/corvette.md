@@ -212,7 +212,7 @@ F8: U.L. Flip Hold, time(TIME_100MS)
 4: Backbox Title
 
 [tests]
-#corvette_engine:
+corvette_zr1:
 #corvette_racetrack:
 
 #############################################################
@@ -285,6 +285,8 @@ ZR-1 Low Rev Gate Opened:
 
 [globalflags]
 Skillshot Enabled:
+ZR1 Calibrated:
+ZR1 Solenoids Powered:
 
 [deffs]
 
