@@ -759,6 +759,13 @@ CALLSET_ENTRY (switch, idle)
  * switch matrix power is present. */
 CALLSET_ENTRY (switch, diagnostic_check)
 {
+#if (MACHINE_PIC == 1)
+	if (pic_invalid)
+	{
+		diag_post_error ("SECURITY PIC\nNOT INITIALIZED\n", SYS_PAGE);
+		return;
+	}
+#endif
 #ifdef SW_ALWAYS_CLOSED
 	/* Make sure the ALWAYS CLOSED switch is really closed.
 	 * If not, there's a serious problem
