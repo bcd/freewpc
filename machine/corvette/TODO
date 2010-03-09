@@ -38,10 +38,7 @@ optos are not normally activated.
 
 === Calibration ===
 
-Detect if ZR-1 full left or ZR-1 full right optos are on
-Then either work from left to right, or right to left.
-Set the value to 192 (FULL RIGHT) or 64 (FULL LEFT)
-Slowly change (increase or decrease) the value until it is the 127.
+Set the value to 127.
 Slowly decrease the value until the "ZR-1 Full Left" opto is activated.
 Record the value and store as FULL LEFT OPTO ON.
 Slowly increase the value until the "ZR-1 Full Left" opto is de-activated.
