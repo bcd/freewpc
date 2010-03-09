@@ -159,7 +159,7 @@ void ball_search_run (void)
 	{
 		if (ball_search_solenoid_ok (sol))
 		{
-			sol_pulse (sol);
+			sol_request_async (sol);
 			task_sleep (TIME_200MS);
 		}
 

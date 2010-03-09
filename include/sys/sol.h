@@ -100,8 +100,6 @@ extern inline void flasher_pulse_short (U8 sol)
 }
 
 
-#define sol_pulse sol_request_async
-
 /** Retrieve the default pulse duration for a coil. */
 extern inline U8 sol_get_time (solnum_t sol)
 {

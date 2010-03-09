@@ -1482,7 +1482,7 @@ void dev_balldev_test_thread (void)
 #if defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_LAUNCH_SWITCH)
 		if (switch_poll (MACHINE_LAUNCH_SWITCH))
 		{
-			sol_pulse (MACHINE_LAUNCH_SOLENOID);
+			sol_request_async (MACHINE_LAUNCH_SOLENOID);
 		}
 #endif
 	}
