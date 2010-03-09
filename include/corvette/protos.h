@@ -50,3 +50,6 @@ __machine__ void spell_test_deff (void);
 __machine__ void two_color_flash_deff (void);
 __machine__ void bg_flash_deff (void);
 __machine__ void dmd_flash (task_ticks_t delay);
+
+/* zr1.c */
+__machine__ void zr1_reset( void );
