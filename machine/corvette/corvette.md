@@ -205,10 +205,10 @@ F7: U.L. Flip Power, time(TIME_33MS)
 F8: U.L. Flip Hold, time(TIME_100MS)
 
 [gi]
-0: Playfield Upper Left
-1: Playfield Upper Right
-2: Playfield Lower Left
-3: Playfield Lower Right
+0: Playfield U.L.
+1: Playfield U.R.
+2: Playfield L.L.
+3: Playfield L.R.
 4: Backbox Title
 
 [tests]
@@ -239,7 +239,11 @@ Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 [adjustments]
 Ball Saver: yes_no, YES
 
+# todo change the default to NO, this is just for testing...
+Disable ZR1_Engine: yes_no, YES
+
 [audits]
+ZR1 Errors:
 
 [system_sounds]
 
@@ -285,7 +289,7 @@ ZR-1 Low Rev Gate Opened:
 
 [globalflags]
 Skillshot Enabled:
-ZR1 Calibrated:
+ZR1 Working:
 ZR1 Solenoids Powered:
 
 [deffs]
