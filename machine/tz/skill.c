@@ -29,8 +29,6 @@ __local__ U8 skill_min_value;
 
 extern inline void flash_deff_begin_static (void)
 {
-	//dmd_alloc_low_high ();
-	
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 }

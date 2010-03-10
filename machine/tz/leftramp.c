@@ -23,19 +23,15 @@
 
 __local__ U8 left_ramps;
 __local__ U8 left_ramp_level;
+__local__ bool left_ramp_extra_ball_awarded;
 U8 left_ramp_level_stored;
 
 extern U8 cameras_lit;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;	
 extern U8 mball_locks_made;
-//extern U8 sssmb_ramps_to_divert;
-
-//extern U8 chaosmb_level;
-//extern U8 chaosmb_hits_to_relight;
 extern bool multiball_ready (void);
 extern bool autofire_busy;
-//extern bool sssmb_ball_in_plunger;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 
 //TODO Get rid of this
@@ -43,6 +39,7 @@ extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
 
+/* Struct containing hint, ramps needed and award text */
 struct {
 	const char *left_ramp_award_hint;
 	U8 left_ramps_for_award;
@@ -58,7 +55,7 @@ struct {
 void left_ramp_increment (void)
 {
 	bounded_increment (left_ramps, 250);
-
+	/* If the extra ball has been awarded already, jump a level */
 	if (left_ramps >= left_ramp_awards[left_ramp_level].left_ramps_for_award)
 	{
 		switch (left_ramp_level)
@@ -70,7 +67,14 @@ void left_ramp_increment (void)
 				gumball_enable_count++;
 				break;
 			case 2:
-				light_easy_extra_ball ();
+				/* Don't allow if previously awarded */
+				if (left_ramp_extra_ball_awarded == TRUE && left_ramp_level == 2)
+					score (SC_10M);
+				else
+				{
+					left_ramp_extra_ball_awarded = TRUE;
+					light_easy_extra_ball ();
+				}
 				break;
 			case 4:
 				score (SC_20M);
@@ -101,6 +105,16 @@ void left_ramp_deff (void)
 	else
 		sprintf ("%s", left_ramp_awards[left_ramp_level_stored].left_ramp_award_hint);
 	
+	/* If the extra ball has already been awarded, award 10M instead */
+	if (left_ramp_extra_ball_awarded == TRUE 
+		&& left_ramp_level == 2 
+		&& left_ramps < left_ramp_awards[left_ramp_level_stored].left_ramps_for_award)
+		sprintf ("10M AT 10");
+	else if (left_ramp_extra_ball_awarded == TRUE 
+			&& left_ramp_level == 2 
+			&& left_ramps >= left_ramp_awards[left_ramp_level_stored].left_ramps_for_award)
+			sprintf ("10 MILLION");
+
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
@@ -164,6 +178,7 @@ CALLSET_ENTRY(leftramp, start_player)
 {
 	left_ramps = 0;
 	left_ramp_level = 0;
+	left_ramp_extra_ball_awarded = FALSE;
 }
 
 CALLSET_ENTRY(leftramp, start_ball)

@@ -31,7 +31,7 @@ define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS               10
-define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
+define MACHINE_MUSIC_GAME		  MUS_TZ_IN_PLAY
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
@@ -44,7 +44,7 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
-define FLIPCODE_LIST { 3, 2, 1, 2 }
+define FLIPCODE_LIST {{ 3, 2, 1, 2 }}
 define FLIPCODE_HANDLERS { tz_flipcode_default }
 
 ##########################################################################
