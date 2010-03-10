@@ -32,10 +32,12 @@
 #define ZR_1_ENGINE_RIGHT_MAX 0xFF
 #define ZR_1_ENGINE_CENTER 0x7F
 
+#define ZR_1_CALIBRATION_SPEED   TIME_33MS // decrease to make it faster recommended value: TIME_50MS
+
 U8 calibration_running; // flag to indicate if calibration process is currently running
 U8 foundPos;
 U8 zr1_pos_center;
-U8 zr1_engine_position; // only valid during calibration and while shaking
+U8 zr1_engine_position; // TODO rename to zr1_last_position
 U8 zr1_pos_full_left_opto_on;
 U8 zr1_pos_full_left_opto_off;
 U8 zr1_pos_full_right_opto_on;
@@ -62,8 +64,10 @@ char *errors[] = {
 /** The logical states of the clock driver state machine */
 enum mech_zr1_state
 {
-	/** The engine should not be moving at all */
+	/** The engine should not be moving at all, solenoids powered off (attract mode) */
 	ZR1_STOPPED = 0,
+	/** The engine should be at it's center position, solenoids powered on (game in progress) */
+	ZR1_IDLE, // TODO implement
 	/** The engine should be shaking at the specified speed */
 	ZR1_SHAKING,
 	/** The engine should be calibrated */
@@ -82,8 +86,6 @@ void zr1_initialise(void) {
 
 	zr1_reset();
 
-	// TODO call zr1_disable_solenoids
-
 }
 
 void zr1_reset() {
@@ -92,14 +94,14 @@ void zr1_reset() {
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 
-	// provide some default values, just in case. // TODO remove if possible
+	// provide some default values, just in case.
 	zr1_pos_center = ZR_1_ENGINE_CENTER;
 	zr1_pos_full_left_opto_on = ZR_1_ENGINE_LEFT_MIN;
 	zr1_pos_full_left_opto_off = ZR_1_ENGINE_LEFT_MIN;
 	zr1_pos_full_right_opto_on = ZR_1_ENGINE_RIGHT_MAX;
 	zr1_pos_full_right_opto_off = ZR_1_ENGINE_RIGHT_MAX;
 
-	// TODO this should call disable solenoids
+	zr1_disable_solenoids();
 }
 
 // should not be used outside of this file
@@ -108,7 +110,8 @@ static void zr1_set_position_to_center(void) {
 		return; // disabled
 	}
 
-	writeb (ZR1_ENGINE_POS, zr1_pos_center);
+	zr1_engine_position = zr1_pos_center;
+	writeb (ZR1_ENGINE_POS, zr1_engine_position);
 }
 
 void zr1_stop(void) {
@@ -196,13 +199,21 @@ U8 zr1_can_calibrate(void) {
 
 void zr1_calibration_failed(U8 code) {
 	calibration_running = FALSE;
+	zr1_disable_solenoids();
 	audit_increment (&feature_audits.zr1_errors);
 	diag_post_error (errors[code], PAGE);
+
+	dbprintf("zr1 engine calibration failed\n");
+	dbprintf("error: %s\n", errors[code]);
+
 }
 
 void zr1_calibration_succeded(void) {
+	dbprintf("zr1 engine calibration complete\n");
+
 	calibration_running = FALSE;
-	zr1_state = ZR1_STOPPED;
+
+	zr1_stop();
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 }
 
@@ -218,7 +229,9 @@ void zr1_calibrate(void) {
 	// reset state and flags before doing anything
 	zr1_reset();
 
-	zr1_disable_solenoids(); // XXX remove when zr1_reset() calls it instead
+	// center engine
+
+	dbprintf("zr1 engine calibration stage 1\n");
 
 	zr1_enable_solenoids();
 	zr1_engine_position = zr1_pos_center;
@@ -236,10 +249,11 @@ void zr1_calibrate(void) {
 
 
 	// move from center to the left until either the limit is hit or the left opto activates
+	dbprintf("zr1 engine calibration stage 2\n");
 
 	for (; zr1_engine_position > ZR_1_ENGINE_LEFT_MIN; zr1_engine_position--) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (TIME_50MS);
+		task_sleep (ZR_1_CALIBRATION_SPEED);
 		if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
 			// the position we're at is where the opto turned on.
 			zr1_pos_full_left_opto_on = zr1_engine_position;
@@ -257,13 +271,15 @@ void zr1_calibrate(void) {
 	}
 
 
+
 	// move from left to right until either the limit is hit or the right opto activates
 
+	dbprintf("zr1 engine calibration stage 3\n");
 	foundPos = FALSE;
 
 	for (zr1_engine_position = zr1_pos_full_left_opto_on; zr1_engine_position < ZR_1_ENGINE_RIGHT_MAX; zr1_engine_position++) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (TIME_50MS);
+		task_sleep (ZR_1_CALIBRATION_SPEED);
 
 		// if we've not already recorded the position at which the left opto turns off do that now
 		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
@@ -287,13 +303,15 @@ void zr1_calibrate(void) {
 		return;
 	}
 
+
 	// move from right to the center
 
+	dbprintf("zr1 engine calibration stage 4\n");
 	foundPos = FALSE;
 
 	for (zr1_engine_position = zr1_pos_full_right_opto_on; zr1_engine_position > zr1_pos_center; zr1_engine_position--) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (TIME_50MS);
+		task_sleep (ZR_1_CALIBRATION_SPEED);
 
 		// if we've not already recorded the position at which the right opto turns off do that now
 		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
@@ -305,8 +323,6 @@ void zr1_calibrate(void) {
 		}
 	}
 
-	zr1_disable_solenoids();
-
 	zr1_calibration_succeded();
 
 }
@@ -314,9 +330,11 @@ void zr1_calibrate(void) {
 CALLSET_ENTRY (zr1, diagnostic_check)
 {
 	while (calibration_running) {
-		dbprintf ("zr1: diagnostic_check - waiting for calibration to complete\n");
+		dbprintf ("zr1: diagnostic_check - waiting for calibration\n");
 		task_sleep(TIME_1S);
 	}
+
+	dbprintf ("zr1: diagnostic_check - calibration performed\n");
 
 	if (!feature_config.enable_zr1_engine) {
 		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
@@ -330,16 +348,16 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 }
 
 CALLSET_ENTRY (zr1, init_complete, amode_start) {
-	dbprintf ("zr1: init_complete/amode_start\n");
+	dbprintf ("zr1: init_complete/amode_start entry\n");
 
 	if (!zr1_calibration_attempted) {
-		dbprintf ("zr1: init_complete/amode_start - starting zr1 calibration\n");
+		dbprintf ("starting zr1 calibration\n");
 		zr1_calibrate();
 		return;
 	}
+
+	dbprintf ("zr1: init_complete/amode_start exit\n");
 }
-
-
 
 CALLSET_ENTRY (zr1, init)
 {
@@ -363,6 +381,10 @@ void corvette_zr1_engine_rtt (void) {
 
 	if (zr1_state != ZR1_SHAKING) {
 		return;
+	}
+
+	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
+		zr1_enable_solenoids();
 	}
 
 	// TODO implement
