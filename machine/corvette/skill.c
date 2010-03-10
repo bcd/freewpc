@@ -128,6 +128,7 @@ CALLSET_ENTRY (skill, sw_right_button) {
 			current_rollover = SW_LEFT_ROLLOVER;
 			return;
 	}
+	callset_invoke( lamp_update );
 }
 
 CALLSET_ENTRY (skill, any_pf_switch) {
