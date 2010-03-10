@@ -88,7 +88,7 @@ void zr1_test_draw (void)
 	sprintf ("CENTER %d", zr1_pos_center);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 23);
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
 	sprintf(short_names[zr1_test_command]);
 	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
