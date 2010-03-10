@@ -104,6 +104,7 @@ void zr1_test_thread (void)
 
 		switch (zr1_test_command) {
 			case CALIBRATE:
+			case SHAKE:
 				task_sleep (TIME_100MS);
 			break;
 
