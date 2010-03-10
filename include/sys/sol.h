@@ -137,9 +137,9 @@ extern inline IOPTR sol_get_write_reg (solnum_t sol)
 		case 1:
 			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
 		case 2:
-			return (IOPTR)WPC_SOL_FLASH1_OUTPUT;
+			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
 		case 3:
-			return (IOPTR)WPC_SOL_FLASH2_OUTPUT;
+			return (IOPTR)WPC_SOL_GEN_OUTPUT;
 		case 4:
 #if (MACHINE_WPC95 == 1)
 			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;

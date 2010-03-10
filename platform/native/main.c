@@ -558,7 +558,7 @@ void writeb (IOPTR addr, U8 val)
 			mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
 			break;
 
-		case WPC_SOL_FLASH2_OUTPUT:
+		case WPC_SOL_GEN_OUTPUT:
 			sim_sol_write (24, &linux_solenoid_outputs[3], val);
 			break;
 
@@ -566,7 +566,7 @@ void writeb (IOPTR addr, U8 val)
 			sim_sol_write (0, &linux_solenoid_outputs[0], val);
 			break;
 
-		case WPC_SOL_FLASH1_OUTPUT:
+		case WPC_SOL_FLASHER_OUTPUT:
 			sim_sol_write (16, &linux_solenoid_outputs[2], val);
 			break;
 

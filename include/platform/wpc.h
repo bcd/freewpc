@@ -544,10 +544,10 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 		writeb (WPC_SOL_LOWPOWER_OUTPUT, val);
 		break;
 	case 2:
-		writeb (WPC_SOL_FLASH1_OUTPUT, val);
+		writeb (WPC_SOL_FLASHER_OUTPUT, val);
 		break;
 	case 3:
-		writeb (WPC_SOL_FLASH2_OUTPUT, val);
+		writeb (WPC_SOL_GEN_OUTPUT, val);
 		break;
 	case 4:
 		if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))

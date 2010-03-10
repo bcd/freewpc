@@ -51,11 +51,12 @@ void platform_init (void)
 
 	/* Initialize other critical WPC output registers relating
 	 * to hardware */
-	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
 	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
 	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_GEN_OUTPUT, 0);
+	writeb (WPC_SOL_FLASHER_OUTPUT, 0);
 	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_LAMP_COL_STROBE, 0);
 	writeb (WPC_GI_TRIAC, 0);
 }
 
