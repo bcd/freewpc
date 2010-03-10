@@ -112,6 +112,10 @@ static void zr1_set_position_to_center(void) {
 }
 
 void zr1_stop(void) {
+	if (calibration_running) {
+		return;
+	}
+
 	zr1_state = ZR1_STOPPED;
 	zr1_enable_solenoids();
 	// TODO wait a bit for solenoids to react to new position value
@@ -189,7 +193,6 @@ U8 zr1_can_calibrate(void) {
 	// can't restart calibrating - no way to stop calibration once started
 	return !calibration_running;
 }
-
 
 void zr1_calibration_failed(U8 code) {
 	calibration_running = FALSE;
@@ -310,33 +313,37 @@ void zr1_calibrate(void) {
 
 CALLSET_ENTRY (zr1, diagnostic_check)
 {
-	if (!feature_config.enable_zr1_engine)
+	while (calibration_running) {
+		dbprintf ("zr1: diagnostic_check - waiting for calibration to complete\n");
+		task_sleep(TIME_1S);
+	}
+
+	if (!feature_config.enable_zr1_engine) {
 		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
+		return;
+	}
 
-	while (unlikely (zr1_state == ZR1_CALIBRATING))
-		task_sleep (TIME_500MS); // it takes a few seconds to complete
-
-	if (!global_flag_test (GLOBAL_FLAG_ZR1_WORKING))
+	if (!global_flag_test (GLOBAL_FLAG_ZR1_WORKING)) {
 		diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", PAGE);
+		return;
+	}
 }
+
+CALLSET_ENTRY (zr1, init_complete, amode_start) {
+	dbprintf ("zr1: init_complete/amode_start\n");
+
+	if (!zr1_calibration_attempted) {
+		dbprintf ("zr1: init_complete/amode_start - starting zr1 calibration\n");
+		zr1_calibrate();
+		return;
+	}
+}
+
+
 
 CALLSET_ENTRY (zr1, init)
 {
 	zr1_initialise();
-}
-
-CALLSET_ENTRY (zr1, amode_start)
-{
-	if (!feature_config.enable_zr1_engine) {
-		return;
-	}
-
-	if (!zr1_calibration_attempted) {
-		zr1_calibrate();
-		return;
-	}
-
-	zr1_stop();
 }
 
 CALLSET_ENTRY (zr1, amode_stop, test_start)
