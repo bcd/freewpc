@@ -104,7 +104,7 @@ void zr1_reset() {
 
 // should not be used outside of this file
 static void zr1_set_position_to_center(void) {
-	if (!feature_config.disable_zr1_engine) {
+	if (!feature_config.enable_zr1_engine) {
 		return; // disabled
 	}
 
@@ -126,7 +126,7 @@ U8 zr1_is_shaking(void) {
 
 U8 zr1_can_shake(void) {
 	return (
-		!feature_config.disable_zr1_engine &&
+		feature_config.enable_zr1_engine &&
 		global_flag_test(GLOBAL_FLAG_ZR1_WORKING) &&
 		(zr1_state == ZR1_SHAKING || zr1_state == ZR1_STOPPED)
 	);
@@ -149,7 +149,7 @@ void zr1_shake(void) {
  * @See zr1_init()
  */
 void zr1_enable_solenoids(void) {
-	if (!feature_config.disable_zr1_engine) {
+	if (!feature_config.enable_zr1_engine) {
 		return; // disabled
 	}
 
@@ -169,7 +169,7 @@ void zr1_enable_solenoids(void) {
  * Disable the solenoids that drive the ZR1 ball shaker device
  */
 void zr1_disable_solenoids(void) {
-	if (!feature_config.disable_zr1_engine) {
+	if (!feature_config.enable_zr1_engine) {
 		return; // disabled
 	}
 
@@ -182,7 +182,7 @@ void zr1_calculate_center_pos(void) {
 }
 
 U8 zr1_can_calibrate(void) {
-	if (feature_config.disable_zr1_engine) {
+	if (!feature_config.enable_zr1_engine) {
 		return FALSE;
 	}
 
@@ -310,7 +310,7 @@ void zr1_calibrate(void) {
 
 CALLSET_ENTRY (zr1, diagnostic_check)
 {
-	if (feature_config.disable_zr1_engine)
+	if (!feature_config.enable_zr1_engine)
 		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
 
 	while (unlikely (zr1_state == ZR1_CALIBRATING))
@@ -327,7 +327,7 @@ CALLSET_ENTRY (zr1, init)
 
 CALLSET_ENTRY (zr1, amode_start)
 {
-	if (feature_config.disable_zr1_engine) {
+	if (!feature_config.enable_zr1_engine) {
 		return;
 	}
 
