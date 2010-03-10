@@ -177,8 +177,8 @@ L3: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
 L6: Not Used 2,nosearch
-L7: ZR-1 Lockup, duty(SOL_DUTY_25), time(TIME_100MS)
-L8: Loop Gate, duty(SOL_DUTY_25), time(TIME_100MS)
+L7: ZR-1 Lockup, duty(SOL_DUTY_25)
+L8: Loop Gate, duty(SOL_DUTY_25)
 
 # G = J126 on Power Driver Board
 G1: Race Direction
@@ -199,10 +199,10 @@ A3: Right Rear Panel, flash
 A4: Right Standup, flash
 
 # F = J902 on Fliptronic II
-F5: Ramp Diverter, time(TIME_33MS)
-F6: Ramp Divertor Hold, time(TIME_100MS)
-F7: U.L. Flip Power, time(TIME_33MS)
-F8: U.L. Flip Hold, time(TIME_100MS)
+F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
+F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_150MS)
+F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
+F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_150MS)
 
 [gi]
 0: Playfield U.L.
