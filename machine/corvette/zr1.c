@@ -193,7 +193,7 @@ U8 zr1_can_calibrate(void) {
 
 void zr1_calibration_failed(U8 code) {
 	calibration_running = FALSE;
-	audit_increment (&feature_audits.zr1_errors); // TODO
+	audit_increment (&feature_audits.zr1_errors);
 	diag_post_error (errors[code], PAGE);
 }
 
@@ -354,7 +354,7 @@ CALLSET_ENTRY (zr1, start_ball, end_ball)
 
 void corvette_zr1_engine_rtt (void) {
 
-	if (!zr1_state == ZR1_SHAKING) {
+	if (zr1_state != ZR1_SHAKING) {
 		return;
 	}
 
