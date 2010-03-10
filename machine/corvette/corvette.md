@@ -200,9 +200,9 @@ A4: Right Standup, flash
 
 # F = J902 on Fliptronic II
 F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
-F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_150MS)
+F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
-F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_150MS)
+F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 
 [gi]
 0: Playfield U.L.
