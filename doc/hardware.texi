@@ -59,7 +59,8 @@ switch data.
 The functions of the circuit boards are combined into fewer boards,
 using FPGAs to replace many of the discrete TTL components.  Functionally
 it is not much different, although the CPU addresses for many of the
-functions changed.
+functions changed.  The WPC ASIC remained the same, but its outputs are
+connected to the other circuit boards in slightly different ways.
 
 @end itemize
 
@@ -178,6 +179,8 @@ All of the other I/O is located on other boards, which are connected
 to the CPU board via flex cables.  Generally on these cables, one side
 of the pins are connected to ground, while the others contain actual
 inputs/outputs.  All logic values measure 0V for a '0', and +5V for a '1'.
+Inputs have pullup resistors so that reading the signal while the cable
+is not connected will return '1'.
 All generations of WPC use the same connector to
 the power driver board, which controls lamps and general solenoids.
 Display, sound, and flipper interfaces differ somewhat between generations.
@@ -253,7 +256,7 @@ people replace normal bulbs with LEDs.
 
 @subsection Solenoid Circuits
 
-The power driver board supports up to 28 controlled outputs for
+All versions of the power driver board support 28 controlled outputs for
 solenoids, motors, etc.  These are divided into four groups:
 8 high power drivers, 8 low power drivers, 8 flashlamp drivers, and
 4 general purpose drivers.  Each bank operates at a different voltage,
@@ -263,6 +266,12 @@ The CPU board enables/disable a driver by writing a command to the
 power driver board.  All values are latched on the driver board and thus
 retain their states until the CPU changes them.  The latches are not
 readable, so software must maintain the last value written in RAM.
+A CPU board reset will assert a blanking signal to reset the latches;
+this helps in the event of a software crash.
+
+On WPC-95, 4 additional low voltage outputs running at 5V are added
+to the general purpose group, which can be used for miscellaneous I/O
+like small DC motors.
 
 @subsection General Illumination Circuits
 
@@ -333,6 +342,15 @@ EOS switches are mounted on the flipper and used to determine
 when the flippers are in the 'up' position, indicating that the
 lower power voltage can be used.
 
+On pre-Fliptronic games, the flippers are hardwired to the cabinet
+buttons, so flipping occurs without any CPU involvement.  The CPU
+can control a relay on the power driver board to cut flipper power,
+though.
+
+On WPC-95, the Fliptronic Board was eliminated and its components
+moved elsewhere: switch inputs moved to the CPU board, and flipper
+outputs moved to the driver board.
+
 @section Auxiliary Driver Board
 
 Some games use an auxiliary driver board which allows up to 8
@@ -345,7 +363,7 @@ define MACHINE_SOL_EXTBOARD1
 
 The auxiliary board plugs into the slot formerly used by
 the alphanumeric display board; thus, alphanumeric games cannot use
-this.
+this.  This port was later removed on WPC-95.
 
 @section Dot Matrix Controller Board
 
