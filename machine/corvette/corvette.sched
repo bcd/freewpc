@@ -35,3 +35,5 @@
 !zr_1_up_rev_gate_service      16    40c
 !zr_1_low_rev_gate_service     16    40c
 
+# Game specific drivers
+corvette_zr1_engine_rtt   16    1c
