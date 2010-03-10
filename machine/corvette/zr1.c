@@ -168,7 +168,7 @@ void zr1_enable_solenoids(void) {
 		zr1_set_position_to_center();
 		zr1_first_enable = FALSE;
 	}
-	writeb (ZR1_ENGINE_CONTROL, 0); // disable the DISABLE_A/DISABLE_B lines
+	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
 	global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 }
 
@@ -180,7 +180,7 @@ void zr1_disable_solenoids(void) {
 		return; // disabled
 	}
 
-	writeb (ZR1_ENGINE_CONTROL, 1); // enable the DISABLE_A/DISABLE_B lines
+	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 }
 
