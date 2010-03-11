@@ -35,9 +35,10 @@ typedef U8 solnum_t;
 #define SOL_BASE_FLIPTRONIC 32
 #define SOL_BASE_EXTENDED 40
 
+#define SOL_MIN_FLASHER 16
+
 extern __fastram__ U8 sol_timers[];
 extern U8 sol_duty_state[];
-
 
 /** Duty cycle values.  Each '1' bit represents a
 time quantum during which the coil on.  The more '1's,

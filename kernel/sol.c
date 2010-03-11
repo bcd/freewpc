@@ -52,13 +52,13 @@
 
 /** Per flasher timers.  When this value is nonzero, the flasher
 is enabled.  Each tick here corresponds to 4ms. */
-__fastram__ U8 sol_timers[SOL_COUNT];
+__fastram__ U8 sol_timers[SOL_COUNT - SOL_MIN_FLASHER];
 
 /** Per flasher duty-cycle mask.  This is an 8-bit value where a '1'
 bit means to turn it on, and a '0' means to turn it off, during the next 4ms.
 When the timer is enabled, this allows the flasher to be dimmed.
 Use the SOL_DUTY values here. */
-U8 sol_duty_state[SOL_COUNT];
+U8 sol_duty_state[SOL_COUNT - SOL_MIN_FLASHER];
 
 /** The current bit of the duty cycle masks to be examined.  After servicing
 all devices, this mask is shifted.  At most one bit is ever set here at a time. */
@@ -260,11 +260,11 @@ position in the output register. */
 extern inline U8 sol_update1 (const U8 id)
 {
 	if (MACHINE_SOL_FLASHERP (id))
-		if (likely (sol_timers[id] != 0))
+		if (likely (sol_timers[id - SOL_MIN_FLASHER] != 0))
 		{
-			sol_timers[id]--;
+			sol_timers[id - SOL_MIN_FLASHER]--;
 
-			if (likely (sol_duty_state[id] & sol_duty_mask))
+			if (likely (sol_duty_state[id - SOL_MIN_FLASHER] & sol_duty_mask))
 				return 1;
 		}
 	return 0;
@@ -396,9 +396,9 @@ sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 	 * The timer value is read-and-decremented, so it
 	 * needs to set atomically. */
 	log_event (SEV_INFO, MOD_SOL, EV_SOL_START, sol);
-	sol_duty_state[sol] = duty_mask;
+	sol_duty_state[sol - SOL_MIN_FLASHER] = duty_mask;
 	disable_interrupts ();
-	sol_timers[sol] = ticks;
+	sol_timers[sol - SOL_MIN_FLASHER] = ticks;
 	enable_interrupts ();
 }
 
@@ -409,8 +409,8 @@ sol_stop (solnum_t sol)
 {
 	log_event (SEV_INFO, MOD_SOL, EV_SOL_STOP, sol);
 	disable_interrupts ();
-	sol_timers[sol] = 0;
-	sol_duty_state[sol] = 0;
+	sol_timers[sol - SOL_MIN_FLASHER] = 0;
+	sol_duty_state[sol - SOL_MIN_FLASHER] = 0;
 	enable_interrupts ();
 }
 
@@ -426,9 +426,9 @@ sol_init (void)
 
 	/* Initialize the duty state of all solenoids to their nominal
 	 * values. */
-	for (sol = 0; sol < SOL_COUNT; sol++)
+	for (sol = SOL_MIN_FLASHER; sol < SOL_COUNT; sol++)
 	{
-		sol_duty_state[sol] = sol_get_duty (sol);
+		sol_duty_state[sol - SOL_MIN_FLASHER] = sol_get_duty (sol);
 	}
 
 	/* Initialize the rotating duty strobe mask */
