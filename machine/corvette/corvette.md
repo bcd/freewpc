@@ -162,14 +162,14 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 88: Right Outer Loop, ingame
 
 [drives]
-H1: Trough Release, ballserve, duty(SOL_DUTY_25), time(TIME_100MS)
-H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_25), time(TIME_100MS)
-H3: Kickback, duty(SOL_DUTY_25), time(TIME_100MS)
-H4: Pit Stop Popper, duty(SOL_DUTY_25), time(TIME_100MS)
-H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_25), time(TIME_100MS)
+H1: Trough Release, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
+H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
+H3: Kickback, duty(SOL_DUTY_75), time(TIME_66MS)
+H4: Pit Stop Popper, duty(SOL_DUTY_75), time(TIME_66MS)
+H5: ZR-1 Up Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 H6: Not Used 1,nosearch
-H7: Knocker, knocker, duty(SOL_DUTY_25), time(TIME_100MS)
-H8: Route 66 Kickout, duty(SOL_DUTY_25), time(TIME_100MS)
+H7: Knocker, knocker, duty(SOL_DUTY_75), time(TIME_33MS)
+H8: Route 66 Kickout, duty(SOL_DUTY_75), time(TIME_66MS)
 
 L1: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
@@ -177,38 +177,38 @@ L3: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
 L6: Not Used 2,nosearch
-L7: ZR-1 Lockup, duty(SOL_DUTY_25), time(TIME_100MS)
-L8: Loop Gate, duty(SOL_DUTY_25), time(TIME_100MS)
+L7: ZR-1 Lockup, duty(SOL_DUTY_75), time(TIME_66MS)
+L8: Loop Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 
 # G = J126 on Power Driver Board
 G1: Race Direction
 G2: Left Race Enable, motor
 G3: Right Race Enable, motor
-G4: Not Used
+G4: Not Used 3, nosearch
 # playfield flashers
-G5: Jets, flash
-G6: Right Ramps, flash
-G7: Upper Left Flipper, flash
-G8: Catch Me, flash
+G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_200MS)
+G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_100MS)
+G7: Upper Left Flipper, flash, duty(SOL_DUTY_100), time(TIME_200MS)
+G8: Catch Me, flash, duty(SOL_DUTY_75), time(TIME_200MS)
 
 
 # A = J122
-A1: ZR-1 Ramp, flash
-A2: ZR-1 Underside, flash
-A3: Right Rear Panel, flash
-A4: Right Standup, flash
+A1: ZR-1 Ramp, flash, duty(SOL_DUTY_75), time(TIME_100MS)
+A2: ZR-1 Underside, flash, duty(SOL_DUTY_75), time(TIME_100MS)
+A3: Right Rear Panel, flash, duty(SOL_DUTY_75), time(TIME_100MS)
+A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_100MS)
 
 # F = J902 on Fliptronic II
-F5: Ramp Diverter, time(TIME_33MS)
-F6: Ramp Divertor Hold, time(TIME_100MS)
-F7: U.L. Flip Power, time(TIME_33MS)
-F8: U.L. Flip Hold, time(TIME_100MS)
+F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
+F6: Ramp Divertor Hold, duty(SOL_DUTY_100), time(TIME_100MS)
+F7: U.L. Flip Power, duty(SOL_DUTY_100), time(TIME_50MS)
+F8: U.L. Flip Hold, duty(SOL_DUTY_100), time(TIME_100MS)
 
 [gi]
-0: Playfield Upper Left
-1: Playfield Upper Right
-2: Playfield Lower Left
-3: Playfield Lower Right
+0: Playfield U.L.
+1: Playfield U.R.
+2: Playfield L.L.
+3: Playfield L.R.
 4: Backbox Title
 
 [tests]
@@ -239,7 +239,11 @@ Route 66 Popper: Route 66 Kickout, Route 66 Kickout
 [adjustments]
 Ball Saver: yes_no, YES
 
+# todo change the default to YES, this is just for testing...
+Enable ZR1_Engine: yes_no, NO
+
 [audits]
+ZR1 Errors:
 
 [system_sounds]
 
@@ -285,7 +289,7 @@ ZR-1 Low Rev Gate Opened:
 
 [globalflags]
 Skillshot Enabled:
-ZR1 Calibrated:
+ZR1 Working:
 ZR1 Solenoids Powered:
 
 [deffs]

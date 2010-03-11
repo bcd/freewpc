@@ -30,217 +30,41 @@
 #include <freewpc.h>
 #include <window.h>
 #include <test.h>
-#include <corvette/zr1.h>
-
-#define ZR1_ENGINE_POS WPC_EXTBOARD2
-#define ZR1_ENGINE_CONTROL WPC_EXTBOARD3
 
 enum {
 	FIRST_TEST = 0,
 	CALIBRATE = FIRST_TEST,
 	SHAKE,
-	ENABLE_SOLENOIDS,
-	DISABLE_SOLENOIDS,
+	IDLE,
+	STOP,
+	ENABLE_SOLENOIDS,  // XXX
+	DISABLE_SOLENOIDS, // XXX
 	LAST_TEST = DISABLE_SOLENOIDS
 } zr1_test_command;
 
 char *short_names[] = {
 	"CALIBRATE",
 	"SHAKE",
-	"ENABLE SOL.",
-	"DISABLE SOL."
+	"IDLE",
+	"STOP",
+	"ENABLE SOL.", // XXX
+	"DISABLE SOL." // XXX
 };
 
-// Calibration errors
-enum {
-	ERROR_CHECK_F111 = 0,
-	ERROR_CHECK_FULL_LEFT_OPTO,
-	ERROR_CHECK_FULL_RIGHT_OPTO,
-
-};
-
-char *errors[] = {
-	"CHECK F111",
-	"CHECK ZR1 LEFT OPTO",
-	"CHECK ZR1 RIGHT OPTO"
-};
-
-
+extern U8 calibration_running;
 extern U8 zr1_pos_center;
-extern U8 zr1_pos_full_left_opto_on;
 extern U8 zr1_pos_full_left_opto_off;
-extern U8 zr1_pos_full_right_opto_on;
 extern U8 zr1_pos_full_right_opto_off;
-
-U8 foundPos;
-U8 position;
-U8 displaying_message;
-char *calibration_error_message;
-
-void zr1_enable_solenoids(void) {
-	if (global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		return; // already on
-	}
-	writeb (ZR1_ENGINE_POS, zr1_pos_center);
-	writeb (ZR1_ENGINE_CONTROL, 0);
-	global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-}
-
-void zr1_disable_solenoids(void) {
-	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		return; // already off
-	}
-	writeb (ZR1_ENGINE_POS, zr1_pos_center); // leave it in the middle when we turn it off
-	// TODO wait a bit for solenoids to react to new position value
-	writeb (ZR1_ENGINE_CONTROL, 1);
-	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-}
-
-void draw_test_title( void ) {
-
-	font_render_string_center (&font_mono5, 64, 2, "ZR1 TEST");
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
-
-}
-
-void display_calibration_error() {
-	displaying_message = TRUE;
-
-	dmd_alloc_low_clean ();
-
-	draw_test_title();
-
-
-	sprintf ("CALIBRATION FAILED");
-	font_render_string_center (&font_mono5, 64, 8, sprintf_buffer);
-
-	font_render_string_center (&font_mono5, 64, 14, calibration_error_message);
-
-	dmd_show_low ();
-
-	task_sleep (TIME_2S);
-
-	displaying_message = FALSE;
-}
-
-void zr1_calibration_failed(U8 code) {
-	// TODO appropriate display message
-	calibration_error_message =  errors[code];
-	display_calibration_error();
-}
-
-void zr1_calculate_center_pos( void ) {
-	zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
-}
-
-
-void zr1_calibrate(void) {
-
-	// TODO write a real calibration routine as per the TODO file for corvette
-
-	zr1_reset();
-
-	zr1_disable_solenoids();
-
-	zr1_enable_solenoids();
-	position = zr1_pos_center;
-
-	// wait till the engine is in the center.
-	task_sleep(TIME_1S);
-
-	// check for opto still active
-	if (switch_poll_logical (SW_ZR_1_FULL_LEFT) || switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-		// engine not in center
-		zr1_calibration_failed(ERROR_CHECK_F111);
-	}
-
-	// engine positioned in the center
-
-
-	// move from center to the left until either the limit is hit or the left opto activates
-
-	for (position = zr1_pos_center; position > ZR_1_ENGINE_LEFT_MIN; position--) {
-		writeb (ZR1_ENGINE_POS, position);
-		task_sleep (TIME_50MS);
-		if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-			// the position we're at is where the opto turned on.
-			zr1_pos_full_left_opto_on = position;
-			break;
-		}
-	}
-
-	// wait a bit for opto to become active to make sure
-	task_sleep(TIME_500MS);
-
-	if (!switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-		// if we reached the min left value and the left opto is not active the opto may be dead
-		zr1_calibration_failed(ERROR_CHECK_FULL_LEFT_OPTO);
-		return;
-	}
-
-
-	// move from left to right until either the limit is hit or the right opto activates
-
-	foundPos = FALSE;
-
-	for (position = zr1_pos_full_left_opto_on; position < ZR_1_ENGINE_RIGHT_MAX; position++) {
-		writeb (ZR1_ENGINE_POS, position);
-		task_sleep (TIME_50MS);
-
-		// if we've not already recorded the position at which the left opto turns off do that now
-		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-			zr1_pos_full_left_opto_off = position;
-			foundPos = TRUE;
-		}
-
-		if (switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-			// the position we're at is where the opto turned on.
-			zr1_pos_full_right_opto_on = position;
-			break;
-		}
-	}
-
-	// wait a bit for opto to become active to make sure
-	task_sleep(TIME_500MS);
-
-	if (!switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-		// if we reached the max right value and the right opto is not active the opto may be dead
-		zr1_calibration_failed(ERROR_CHECK_FULL_RIGHT_OPTO);
-		return;
-	}
-
-	// move from right to the center
-
-	foundPos = FALSE;
-
-	for (position = zr1_pos_full_right_opto_on; position > zr1_pos_center; position--) {
-		writeb (ZR1_ENGINE_POS, position);
-		task_sleep (TIME_50MS);
-
-		// if we've not already recorded the position at which the right opto turns off do that now
-		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-			zr1_pos_full_right_opto_off = position;
-			foundPos = TRUE;
-
-			// when the right opto turns off we can calculate the center position.
-			zr1_calculate_center_pos();
-		}
-	}
-
-	zr1_disable_solenoids();
-
-	global_flag_on(GLOBAL_FLAG_ZR1_CALIBRATED);
-}
-
-void zr1_shake(void) {
-	// TODO
-}
+extern U8 zr1_engine_position;
 
 void zr1_test_init (void)
 {
 	zr1_test_command = CALIBRATE;
-	displaying_message = FALSE;
-	calibration_error_message = NULL;
+}
+
+void draw_test_title(void) {
+	font_render_string_center (&font_mono5, 64, 2, "ZR1 ENGINE TEST");
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
 
 void zr1_test_draw (void)
@@ -249,14 +73,13 @@ void zr1_test_draw (void)
 
 	draw_test_title();
 
-	sprintf ("POS %d", position);
+	sprintf ("POS %d", zr1_engine_position);
 	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
 
 	sprintf ("POWER %s",
 		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? "ON" : "OFF");
 	font_render_string_right (&font_mono5, 0, 6, sprintf_buffer);
 
-	// TODO verify switches show closed when closed - they're optos.
 	sprintf ("LEFT %s %d",
 		(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? "X" : "-"), zr1_pos_full_left_opto_off);
 	font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
@@ -268,8 +91,10 @@ void zr1_test_draw (void)
 	sprintf ("CENTER %d", zr1_pos_center);
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
+
 	sprintf(short_names[zr1_test_command]);
-	font_render_string_left (&font_mono5, 0, 24, sprintf_buffer);
+	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -280,18 +105,8 @@ void zr1_test_thread (void)
 	for (;;)
 	{
 
-		switch (zr1_test_command) {
-			case CALIBRATE:
-				task_sleep (TIME_100MS);
-			break;
+		task_sleep (TIME_100MS);
 
-			default:
-				task_sleep (TIME_500MS);
-		}
-
-		if (displaying_message) {
-			continue;
-		}
 		zr1_test_draw ();
 	}
 }
@@ -310,6 +125,16 @@ void zr1_test_down (void)
 		zr1_test_command--;
 }
 
+/**
+ * Ensures user can exit test menu when calibration still running
+ */
+void zr1_test_escape (void) {
+	if (calibration_running) {
+		return;
+	}
+
+	window_pop();
+}
 
 void zr1_test_enter (void)
 {
@@ -318,16 +143,39 @@ void zr1_test_enter (void)
 	{
 		case CALIBRATE:
 			zr1_calibrate();
-			break;
+		break;
+
 		case SHAKE:
+			if (zr1_is_shaking()) {
+				zr1_stop();
+				break;
+			}
 			zr1_shake();
-			break;
+		break;
+
+		case IDLE:
+			if (zr1_is_idle()) {
+				zr1_stop();
+				break;
+			}
+			zr1_idle();
+		break;
+
+		case STOP:
+			zr1_stop();
+		break;
+
+		// TODO remove when real-machine testing is complete - begin
+
 		case ENABLE_SOLENOIDS:
 			zr1_enable_solenoids();
-			break;
+		break;
+
 		case DISABLE_SOLENOIDS:
 			zr1_disable_solenoids();
-			break;
+		break;
+
+		// TODO remove when tseting complete - end
 	}
 }
 
@@ -339,6 +187,7 @@ struct window_ops corvette_zr1_test_window = {
 	.up = zr1_test_up,
 	.down = zr1_test_down,
 	.enter = zr1_test_enter,
+	.escape = zr1_test_escape,
 	.thread = zr1_test_thread,
 };
 
