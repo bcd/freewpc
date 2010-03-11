@@ -73,7 +73,7 @@ static WINDOW * ui_window_create (int width, int height, int x, int y, const cha
 void ui_print_command (const char *cmdline)
 {
 	wmove (cmdline_win, 1, 1);
-	wprintw (cmdline_win, "               ");
+	wprintw (cmdline_win, "                     ");
 	wmove (cmdline_win, 1, 1);
 	if (*cmdline != '\0')
 	{
