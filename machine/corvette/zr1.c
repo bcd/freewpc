@@ -32,7 +32,7 @@
 #define ZR_1_ENGINE_RIGHT_MAX 0xFF
 #define ZR_1_ENGINE_CENTER 0x7F
 
-#define ZR_1_CALIBRATION_SPEED   TIME_33MS // decrease to make it faster recommended value: TIME_50MS
+#define ZR_1_CALIBRATION_SPEED   TIME_33MS // decrease to make it faster recommended value: TIME_33MS
 
 U8 calibration_running; // flag to indicate if calibration process is currently running
 U8 foundPos;

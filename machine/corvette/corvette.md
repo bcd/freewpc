@@ -162,7 +162,7 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 88: Right Outer Loop, ingame
 
 [drives]
-H1: Trough Release, ballserve, duty(SOL_DUTY_FF), time(TIME_66MS)
+H1: Trough Release, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
 H2: ZR-1 Low Rev Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 H3: Kickback, duty(SOL_DUTY_75), time(TIME_66MS)
 H4: Pit Stop Popper, duty(SOL_DUTY_75), time(TIME_66MS)
@@ -186,9 +186,9 @@ G2: Left Race Enable, motor
 G3: Right Race Enable, motor
 G4: Not Used 3, nosearch
 # playfield flashers
-G5: Jets, flash, duty(SOL_DUTY_FF), time(TIME_200MS)
+G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_200MS)
 G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_100MS)
-G7: Upper Left Flipper, flash, duty(SOL_DUTY_FF), time(TIME_200MS)
+G7: Upper Left Flipper, flash, duty(SOL_DUTY_100), time(TIME_200MS)
 G8: Catch Me, flash, duty(SOL_DUTY_75), time(TIME_200MS)
 
 
