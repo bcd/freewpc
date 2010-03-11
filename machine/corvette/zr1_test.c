@@ -34,21 +34,24 @@
 enum {
 	FIRST_TEST = 0,
 	CALIBRATE = FIRST_TEST,
-	CENTER,
 	SHAKE,
-	ENABLE_SOLENOIDS,
-	DISABLE_SOLENOIDS,
+	IDLE,
+	STOP,
+	ENABLE_SOLENOIDS,  // XXX
+	DISABLE_SOLENOIDS, // XXX
 	LAST_TEST = DISABLE_SOLENOIDS
 } zr1_test_command;
 
 char *short_names[] = {
 	"CALIBRATE",
-	"CENTER",
 	"SHAKE",
-	"ENABLE SOL.",
-	"DISABLE SOL."
+	"IDLE",
+	"STOP",
+	"ENABLE SOL.", // XXX
+	"DISABLE SOL." // XXX
 };
 
+extern U8 calibration_running;
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
@@ -102,15 +105,7 @@ void zr1_test_thread (void)
 	for (;;)
 	{
 
-		switch (zr1_test_command) {
-			case CALIBRATE:
-			case SHAKE:
-				task_sleep (TIME_100MS);
-			break;
-
-			default:
-				task_sleep (TIME_500MS);
-		}
+		task_sleep (TIME_100MS);
 
 		zr1_test_draw ();
 	}
@@ -130,6 +125,16 @@ void zr1_test_down (void)
 		zr1_test_command--;
 }
 
+/**
+ * Ensures user can exit test menu when calibration still running
+ */
+void zr1_test_escape (void) {
+	if (calibration_running) {
+		return;
+	}
+
+	window_pop();
+}
 
 void zr1_test_enter (void)
 {
@@ -140,10 +145,6 @@ void zr1_test_enter (void)
 			zr1_calibrate();
 		break;
 
-		case CENTER:
-			zr1_stop();
-		break;
-
 		case SHAKE:
 			if (zr1_is_shaking()) {
 				zr1_stop();
@@ -152,6 +153,20 @@ void zr1_test_enter (void)
 			zr1_shake();
 		break;
 
+		case IDLE:
+			if (zr1_is_idle()) {
+				zr1_stop();
+				break;
+			}
+			zr1_idle();
+		break;
+
+		case STOP:
+			zr1_stop();
+		break;
+
+		// TODO remove when real-machine testing is complete - begin
+
 		case ENABLE_SOLENOIDS:
 			zr1_enable_solenoids();
 		break;
@@ -159,6 +174,8 @@ void zr1_test_enter (void)
 		case DISABLE_SOLENOIDS:
 			zr1_disable_solenoids();
 		break;
+
+		// TODO remove when tseting complete - end
 	}
 }
 
@@ -170,6 +187,7 @@ struct window_ops corvette_zr1_test_window = {
 	.up = zr1_test_up,
 	.down = zr1_test_down,
 	.enter = zr1_test_enter,
+	.escape = zr1_test_escape,
 	.thread = zr1_test_thread,
 };
 

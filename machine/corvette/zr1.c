@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/**
+ * Controls the ZR1 engine ball shaker
+ *
+ * @TODO add ball search functionality (another state?)
+ */
 #include <freewpc.h>
 #include <diag.h>
 
@@ -67,8 +72,8 @@ enum mech_zr1_state
 	/** The engine should not be moving at all, solenoids powered off (attract mode) */
 	ZR1_STOPPED = 0,
 	/** The engine should be at it's center position, solenoids powered on (game in progress) */
-	ZR1_IDLE, // TODO implement
-	/** The engine should be shaking at the specified speed */
+	ZR1_IDLE,
+	/** The engine should be shaking at a high speed */
 	ZR1_SHAKING,
 	/** The engine should be calibrated */
 	ZR1_CALIBRATING
@@ -121,21 +126,52 @@ void zr1_stop(void) {
 
 	zr1_state = ZR1_STOPPED;
 	zr1_enable_solenoids();
-	// TODO wait a bit for solenoids to react to new position value
 	zr1_set_position_to_center();
+	// wait a bit for solenoids to react to new position value
 	task_sleep(TIME_500MS);
 	zr1_disable_solenoids();
+}
+
+U8 zr1_can_idle(void) {
+	return (
+		feature_config.enable_zr1_engine &&
+		global_flag_test(GLOBAL_FLAG_ZR1_WORKING) &&
+		zr1_state != ZR1_CALIBRATING
+	);
+}
+
+/**
+ * Allows the engine to idle at a rest position in the center.
+ *
+ * All 4 solenoids should be firing at an identical rate, thus spreading wear evenly.
+ * The engine spends most of it's time doing this during a game.
+ * If the engine was off then it can flap from side to side and balls can get stuck under the left hand side of it and in it.
+ *
+ * @see corvette_zr1_engine_rtt
+ */
+void zr1_idle(void) {
+	if (!zr1_can_idle()) {
+		return;
+	}
+
+	zr1_state = ZR1_IDLE;
+
+	// Note: the corvette_zr1_engine_rtt() will enabled the solenoids if required.
 }
 
 U8 zr1_is_shaking(void) {
 	return zr1_state == ZR1_SHAKING;
 }
 
+U8 zr1_is_idle(void) {
+	return zr1_state == ZR1_IDLE;
+}
+
 U8 zr1_can_shake(void) {
 	return (
 		feature_config.enable_zr1_engine &&
 		global_flag_test(GLOBAL_FLAG_ZR1_WORKING) &&
-		(zr1_state == ZR1_SHAKING || zr1_state == ZR1_STOPPED)
+		zr1_state != ZR1_CALIBRATING
 	);
 }
 void zr1_shake(void) {
@@ -364,7 +400,7 @@ CALLSET_ENTRY (zr1, init)
 	zr1_initialise();
 }
 
-CALLSET_ENTRY (zr1, amode_stop, test_start)
+CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
 	zr1_stop();
 }
@@ -374,12 +410,12 @@ CALLSET_ENTRY (zr1, amode_stop, test_start)
  */
 CALLSET_ENTRY (zr1, start_ball, end_ball)
 {
-	zr1_stop();
+	zr1_idle();
 }
 
 void corvette_zr1_engine_rtt (void) {
 
-	if (zr1_state != ZR1_SHAKING) {
+	if (!(zr1_state == ZR1_SHAKING || zr1_state == ZR1_IDLE)) {
 		return;
 	}
 
@@ -387,8 +423,20 @@ void corvette_zr1_engine_rtt (void) {
 		zr1_enable_solenoids();
 	}
 
-	// TODO implement
-	// look for zr1_state == ZR1_SHAKING and alternate the position between zr1_pos_full_left_opto_off and zr1_pos_full_right_opto_off
-	// with a short delay (~200M) between them to allow the engine to move left and right
+	switch (zr1_state) {
+		case ZR1_IDLE:
+			zr1_set_position_to_center();
+		break;
+
+		case ZR1_SHAKING:
+			// TODO implement
+			// alternate the position between zr1_pos_full_left_opto_off and zr1_pos_full_right_opto_off
+			// with a short delay (~200M) between them to allow the engine to move left and right
+		break;
+
+		default:
+			// shut the compiler up
+			break;
+	}
 
 }
