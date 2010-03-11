@@ -469,7 +469,6 @@ void task_sleep_periodic (void)
 	register task_t *tp = task_current;
 	tp->state |= TASK_BLOCKED;
 	task_save (tp);
-	task_current->wakeup = get_sys_time () + ticks;
 }
 
 
