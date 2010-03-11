@@ -128,7 +128,13 @@ void zr1_stop(void) {
 	zr1_enable_solenoids();
 	zr1_set_position_to_center();
 	// wait a bit for solenoids to react to new position value
+
+	// FIXME this sleep causes a stack overflow when entering test mode.
+	// this gets called due to a switch handler (coin door enter), via the amode_stop handler
+	// either: rewrite the amode_stop handler to make a new task that calls zr1_stop and exits.
+	// or: add a ZR1_STOPPING ZR1_STOPPED states
 	task_sleep(TIME_500MS);
+
 	zr1_disable_solenoids();
 }
 
