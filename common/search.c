@@ -105,12 +105,14 @@ static bool ball_search_solenoid_ok (U8 sol)
 		{
 			/* This coil controls a ball device. */
 
+			/* If there are no balls detected here, pulse it */
+			if (dev->actual_count == 0)
+				return TRUE;
+
 			/* If chase ball is turned off, then during the 5th ball search,
-			pulse these coils as well. */
+			pulse it */
 			if (!chase_ball_enabled () && ball_search_count == 5)
-			{
 				return (TRUE);
-			}
 
 			/* Default is NOT to fire such a coil */
 			return (FALSE);
