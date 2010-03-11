@@ -52,12 +52,13 @@ the more powerful the pulse. */
 #define SOL_DUTY_100    0xFF
 
 /** The default solenoid timing */
+#define SOL_TIME_DEFAULT   64
 #define SOL_DUTY_DEFAULT   SOL_DUTY_100
-#define SOL_TIME_DEFAULT   TIME_66MS
 
-/** The default flasher timing */
+/** The default flasher timing.  The TIME_ constants are not
+ * used here; give the value in milliseconds. */
+#define FLASHER_TIME_DEFAULT 24
 #define FLASHER_DUTY_DEFAULT SOL_DUTY_100
-#define FLASHER_TIME_DEFAULT TIME_33MS
 
 /* Function prototypes */
 void sol_request_async (U8 sol);
@@ -79,7 +80,7 @@ __attribute__((deprecated)) extern inline void sol_start (U8 sol, U8 mask, U8 ti
  */
 extern inline void flasher_start (U8 sol, U8 mask, U8 time)
 {
-	sol_start_real (sol, mask, (4 * time));
+	sol_start_real (sol, mask, time / 4);
 }
 
 /*
@@ -96,7 +97,7 @@ extern inline void flasher_pulse (U8 sol)
  */
 extern inline void flasher_pulse_short (U8 sol)
 {
-	sol_start_real (sol, FLASHER_DUTY_DEFAULT, 5);
+	sol_start_real (sol, FLASHER_DUTY_DEFAULT, FLASHER_TIME_DEFAULT / 2);
 }
 
 

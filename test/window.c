@@ -3064,7 +3064,14 @@ struct menu sound_test_item = {
 /* The browser action stores the pulse width */
 
 U8 flasher_test_mode;
+U8 sol_duty_level;
+U8 sol_min_time;
+U8 sol_step_time;
+U8 sol_max_time;
 
+U8 sol_duty_masks[] = {
+	SOL_DUTY_25, SOL_DUTY_50, SOL_DUTY_75, SOL_DUTY_100
+};
 
 /* TODO - if no solenoids/flashers defined, solenoid_test_ok
  * may loop indefinitely */
@@ -3080,6 +3087,12 @@ bool solenoid_test_selection_ok (void)
 	return 0;
 }
 
+void driver_update_duty (void)
+{
+	sol_duty_level = 3;
+	while (sol_duty_masks[sol_duty_level] != sol_get_duty (win_top->w_class.menu.selected))
+		sol_duty_level--;
+}
 
 void driver_test_init (void)
 {
@@ -3092,39 +3105,48 @@ void driver_test_init (void)
 #endif
 	}
 	browser_item_number = browser_decimal_item_number;
-	browser_action = SOL_TIME_DEFAULT;
+	browser_action = sol_get_time (menu_selection);
 #ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES-1;
 #endif
+	driver_update_duty ();
 }
 
 void solenoid_test_init (void)
 {
 	flasher_test_mode = 0;
 	driver_test_init ();
+	sol_min_time = 32;
+	sol_max_time = 128;
+	sol_step_time = 16;
 }
 
 void flasher_test_init (void)
 {
 	flasher_test_mode = 1;
 	driver_test_init ();
+	sol_min_time = 16;
+	sol_max_time = 40;
+	sol_step_time = 4;
 }
 
 void solenoid_test_draw (void)
 {
 	browser_draw ();
 
-	time_interval_render (browser_action);
+	sprintf ("%dMS", browser_action);
 	font_render_string_left (&font_mono5, 1, 10, sprintf_buffer);
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
-		font_render_string_left (&font_var5, 36, 10, "(DEFAULT)");
+		font_render_string_left (&font_var5, 38, 10, "(DEF.)");
 	}
 
-#ifdef DEBUGGER
-	sprintf ("DUTY %02X", sol_get_duty (menu_selection));
+	sprintf ("%d%%", (1+sol_duty_level) * 25);
 	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
-#endif
+	if (sol_duty_masks[sol_duty_level] == sol_get_duty (win_top->w_class.menu.selected))
+	{
+		font_render_string_right (&font_var5, 100, 10, "(DEF.)");
+	}
 
 	sprintf_far_string (names_of_drives + menu_selection);
 	browser_print_operation (sprintf_buffer);
@@ -3134,7 +3156,7 @@ void solenoid_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
-	sol_request_async (sel);
+	sol_req_start_specific (sel, sol_duty_masks[sol_duty_level], browser_action);
 	task_sleep (TIME_100MS);
 }
 
@@ -3142,7 +3164,7 @@ void flasher_test_enter (void)
 {
 	U8 sel = win_top->w_class.menu.selected;
 	task_sleep (TIME_100MS);
-	flasher_pulse (sel);
+	flasher_start (sel, sol_duty_masks[sol_duty_level], browser_action);
 	task_sleep (TIME_100MS);
 }
 
@@ -3151,6 +3173,7 @@ void solenoid_test_up (void)
 	do {
 		browser_up ();
 	} while (!solenoid_test_selection_ok ());
+	driver_update_duty ();
 }
 
 void solenoid_test_down (void)
@@ -3158,19 +3181,31 @@ void solenoid_test_down (void)
 	do {
 		browser_down ();
 	} while (!solenoid_test_selection_ok ());
-}
-
-void solenoid_test_right (void)
-{
-	if (browser_action < TIME_200MS)
-		browser_action += TIME_33MS;
+	driver_update_duty ();
 }
 
 void solenoid_test_left (void)
 {
-	if (browser_action > TIME_33MS)
-		browser_action -= TIME_33MS;
+	if (browser_action == sol_min_time)
+		browser_action = sol_max_time;
+	else
+		browser_action -= sol_step_time;
 }
+
+void solenoid_test_right (void)
+{
+	if (browser_action < sol_max_time)
+		browser_action += sol_step_time;
+	else
+		browser_action = sol_min_time;
+}
+
+void solenoid_test_start (void)
+{
+	if (++sol_duty_level > 3)
+		sol_duty_level = 0;
+}
+
 
 /* TODO - these two window ops are identical; we are only
 using two ops to figure out which test we are in.  Better
@@ -3185,6 +3220,7 @@ struct window_ops solenoid_test_window = {
 	.right = solenoid_test_right,
 	.up = solenoid_test_up,
 	.down = solenoid_test_down,
+	.start = solenoid_test_start,
 };
 
 struct window_ops flasher_test_window = {
@@ -3196,6 +3232,7 @@ struct window_ops flasher_test_window = {
 	.right = solenoid_test_right,
 	.up = solenoid_test_up,
 	.down = solenoid_test_down,
+	.start = solenoid_test_start,
 };
 
 struct menu solenoid_test_item = {

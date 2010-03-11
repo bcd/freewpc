@@ -116,11 +116,10 @@ void sol_req_dump (void)
 
 
 /**
- * Start a solenoid request now.
- * The state machine must be in IDLE.  This call puts it
- * into PENDING state.
+ * Pulse a solenoid with a specific duty/time.
  */
-void sol_req_start (U8 sol)
+void
+sol_req_start_specific (U8 sol, U8 mask, U8 time)
 {
 	dbprintf ("Starting pulse %d now.\n", sol);
 
@@ -133,14 +132,24 @@ void sol_req_start (U8 sol)
 
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
-	sol_pulse_duty = sol_get_duty (sol);
+	sol_pulse_duty = mask;
 	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
 
 	/* This must be last, as it triggers the IRQ code */
-	sol_pulse_timer = sol_get_time (sol) * 4;
+	sol_pulse_timer = time / 4;
 }
 
 
+
+/**
+ * Start a solenoid request now.
+ * The state machine must be in IDLE.  This call puts it
+ * into PENDING state.
+ */
+void sol_req_start (U8 sol)
+{
+	sol_req_start_specific (sol, sol_get_duty (sol), sol_get_time (sol));
+}
 
 
 /**
