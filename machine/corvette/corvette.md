@@ -186,7 +186,7 @@ G2: Left Race Enable, motor
 G3: Right Race Enable, motor
 G4: Not Used 3, nosearch
 # playfield flashers
-G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_40MS)
+G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_33MS)
 G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 G7: Upper Left Flipper, flash, duty(SOL_DUTY_100), time(TIME_16MS)
 G8: Catch Me, flash, duty(SOL_DUTY_75), time(TIME_16MS)
