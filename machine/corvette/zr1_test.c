@@ -155,7 +155,7 @@ void zr1_test_enter (void)
 
 		case IDLE:
 			if (zr1_is_idle()) {
-				zr1_stop();
+				zr1_idle();
 				break;
 			}
 			zr1_idle();
