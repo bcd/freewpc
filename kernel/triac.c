@@ -83,6 +83,7 @@ U8 gi_leff_alloc;
 /** The states of the GI strings currently allocated */
 U8 gi_leff_output;
 
+/** Like gi_dimming, but for lamp effects */
 U8 gi_leff_dimming[NUM_BRIGHTNESS_LEVELS];
 
 
@@ -112,15 +113,15 @@ void triac_rtt (void)
 		U8 triac_bits;
 
 		/* Get the current triac states */
-		triac_bits = triac_read ();
+		triac_bits = pinio_read_triac ();
 
 		/* Turn on the lamps that need to be dimmed at this level. */
-		triac_write (triac_bits
+		pinio_write_triac (triac_bits
 			| gi_dimming[zc_get_timer ()]
 			| gi_leff_dimming[zc_get_timer ()]);
 
 		/* Now disable the dimmed lamps for the next phase */
-		triac_write (triac_bits);
+		pinio_write_triac (triac_bits);
 	}
 }
 
@@ -142,7 +143,7 @@ void triac_update (void)
 	latch = triac_output;
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
-	triac_write (latch);
+	pinio_write_triac (latch);
 }
 
 

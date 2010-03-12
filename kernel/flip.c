@@ -45,14 +45,14 @@ __fastram__ U8 flipper_overrides;
 
 void flipper_enable (void)
 {
-	flipper_triac_enable ();
+	pinio_enable_flippers ();
 	flippers_enabled = TRUE;
 }
 
 
 void flipper_disable (void)
 {
-	flipper_triac_disable ();
+	pinio_disable_flippers ();
 	disable_interrupts ();
 	flippers_enabled = FALSE;
 	flipper_outputs = 0;
