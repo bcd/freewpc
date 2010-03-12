@@ -1187,23 +1187,6 @@ int main (int argc, char *argv[])
 #ifdef CONFIG_MACHINE_SIMULATOR
 	(*CONFIG_MACHINE_SIMULATOR) ();
 #endif
-#ifdef MACHINE_TZ
-	linux_key_install ('s', SW_SLOT);
-	linux_key_install ('z', SW_PIANO);
-	linux_key_install ('l', SW_LEFT_RAMP_EXIT);
-	linux_key_install ('r', SW_RIGHT_RAMP);
-	linux_key_install ('h', SW_HITCHHIKER);
-	linux_key_install ('c', SW_CAMERA);
-#endif
-#ifdef MACHINE_WCS
-	linux_key_install ('G', SW_GOAL_TROUGH);
-	linux_key_install ('g', SW_GOAL_POPPER);
-	linux_key_install ('t', SW_TV_POPPER);
-	linux_key_install ('s', SW_SPINNER);
-	linux_key_install ('z', SW_STRIKER_1);
-	linux_key_install ('x', SW_STRIKER_2);
-	linux_key_install ('c', SW_STRIKER_3);
-#endif
 
 	/* Jump to the reset function */
 	while (sim_debug_init)
@@ -1223,9 +1206,12 @@ int main (int argc, char *argv[])
 	conf_add ("balls", &linux_installed_balls);
 	conf_add ("sim.speed", &linux_irq_multiplier);
 
-	/* If a script file was given, execute it now */
-	exec_script_file ("freewpc.conf");
-	exec_script_file ("conf/tz.conf");
+	/* Execute default script file.  First, load any global
+	configuration in freewpc.conf.  Then, try to load a
+	game-specific file, based on its shortname.  Last,
+	execute any file provided on the command line. */
+	exec_script_file ("conf/freewpc.conf");
+	exec_script_file ("conf/" MACHINE_SHORTNAME ".conf");
 	if (exec_file)
 		exec_script_file (exec_file);
 

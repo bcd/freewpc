@@ -1,13 +1,37 @@
+/*
+ * Copyright 2009-2010 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 #include <simulation.h>
 
 const char *tlast = NULL;
 
+char tstringbuf[128];
+
 #define delims " \t\n"
 #define tfirst(cmd)   strtok (cmd, delims)
 #define teq(t, s)     !strcmp (t, s)
 
+/**
+ * Return the next token as a string.
+ */
 const char *tnext (void)
 {
 	if (tlast)
@@ -19,35 +43,93 @@ const char *tnext (void)
 	return strtok (NULL, delims);
 }
 
+
+/**
+ * Push back the last token that was retrieved via
+ * tnext().
+ */
 void tunget (const char *t)
 {
 	tlast = t;
 }
 
+
+char *tstring (void)
+{
+	const char *t;
+	char *c;
+
+	t = tnext ();
+	if (!t)
+		return NULL;
+	if (*t != '"')
+		return t;
+
+	strcpy (tstringbuf, t+1);
+	do {
+		t = tnext ();
+		if (!t)
+		{
+			simlog (SLC_DEBUG, "Parse error after '%s'", tstringbuf);
+			return NULL;
+		}
+		strcat (tstringbuf, " ");
+		strcat (tstringbuf, t);
+		c = strchr (tstringbuf, '"');
+	} while (c == NULL);
+	*c = '\0';
+	return tstringbuf;
+}
+
+
+/**
+ * Read the next token and interpret it as a constant.
+ * Return its value.
+ */
 uint32_t tconst (void)
 {
 	const char *t = tnext ();
 	uint32_t i;
 
+	/* If no value is given, default to 0. */
 	if (!t)
 		return 0;
+
+	/* Interpret certain fixed strings */
 	if (teq (t, "on") || teq (t, "high") || teq (t, "active"))
 		return 1;
 	if (teq (t, "off") || teq (t, "low") || teq (t, "inactive"))
 		return 0;
+
+	/* Dollar sign indicates a variable expansion */
 	if (*t == '$')
 		return conf_read (t+1);
+
+	/* TODO : Builtin strings */
+
+	/* Anything else is interpreted as a C-formatted number. */
 	i = strtoul (t, NULL, 0);
 
+	/* Optional modifiers that can occur after the number */
 	t = tnext ();
 	if (t)
 	{
-		if (teq (t, "secs"))
+		if (teq (t, "ms"))
+			;
+		else if (teq (t, "secs"))
 			i *= 1000;
+		else
+			tunget (t);
 	}
 	return i;
 }
 
+
+/**
+ * Read the next token, which must be a signal name.
+ * Currently, this must be the last token in the command.
+ * The general format is <type> <number>.
+ */
 uint32_t tsigno (void)
 {
 	const char *t = tnext ();
@@ -67,14 +149,15 @@ uint32_t tsigno (void)
 		signo = SIGNO_AC_ANGLE;
 	else
 		return 0;
-
-	t = tnext ();
-	if (t)
-		signo += strtoul (t, NULL, 0);
+	signo += tconst ();
 	return signo;
 }
 
 
+/**
+ * Parse a complex expression and return a
+ * signal_expression that describes it.
+ */
 struct signal_expression *texpr (void)
 {
 	struct signal_expression *ex, *ex1, *ex2;
@@ -139,11 +222,34 @@ struct signal_expression *texpr (void)
 }
 
 
+uint32_t tsw (void)
+{
+	const char *t;
+	uint32_t n;
+
+	t = tstring ();
+	for (n=0; n < NUM_SWITCHES; n++)
+	{
+		const char *swname = names_of_switches[n];
+		if (swname && !strcmp (swname, t))
+			return n;
+	}
+	tunget (t);
+	return tconst ();
+}
+
+
+/**
+ * Parse and execute a script command.
+ */
 void exec_script (char *cmd)
 {
 	const char *t;
 	uint32_t v;
 
+	tlast = NULL;
+
+	/* Blank lines and comments are ignored */
 	t = tfirst (cmd);
 	if (!t)
 		return;
@@ -207,12 +313,23 @@ void exec_script (char *cmd)
 	/*********** sw [id] ***************/
 	else if (teq (t, "sw"))
 	{
-		v = tconst ();
+		v = tsw ();
 		sim_switch_depress (v);
+	}
+	/*********** key [keyname] [switch] ***************/
+	else if (teq (t, "key"))
+	{
+		t = tnext ();
+		v = tsw ();
+		simlog (SLC_DEBUG, "Key '%c' = %d", *t, v);
+		linux_key_install (*t, v);
 	}
 }
 
 
+/**
+ * Execute a series of script commands in the named file.
+ */
 void exec_script_file (const char *filename)
 {
 	FILE *in;
