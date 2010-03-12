@@ -186,17 +186,17 @@ G2: Left Race Enable, motor
 G3: Right Race Enable, motor
 G4: Not Used 3, nosearch
 # playfield flashers
-G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_200MS)
-G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_100MS)
-G7: Upper Left Flipper, flash, duty(SOL_DUTY_100), time(TIME_200MS)
-G8: Catch Me, flash, duty(SOL_DUTY_75), time(TIME_200MS)
+G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_40MS)
+G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_16MS)
+G7: Upper Left Flipper, flash, duty(SOL_DUTY_100), time(TIME_16MS)
+G8: Catch Me, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 
 
 # A = J122
-A1: ZR-1 Ramp, flash, duty(SOL_DUTY_75), time(TIME_100MS)
-A2: ZR-1 Underside, flash, duty(SOL_DUTY_75), time(TIME_100MS)
-A3: Right Rear Panel, flash, duty(SOL_DUTY_75), time(TIME_100MS)
-A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_100MS)
+A1: ZR-1 Ramp, flash, duty(SOL_DUTY_75), time(TIME_16MS)
+A2: ZR-1 Underside, flash, duty(SOL_DUTY_75), time(TIME_16MS)
+A3: Right Rear Panel, flash, duty(SOL_DUTY_75), time(TIME_16MS)
+A4: Right Standup, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 
 # F = J902 on Fliptronic II
 F5: Ramp Diverter, duty(SOL_DUTY_100), time(TIME_50MS)
