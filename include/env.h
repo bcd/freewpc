@@ -184,16 +184,15 @@ do { \
  * environments where a direct memory map is not present.
  ***************************************************************/
 
+#ifdef CONFIG_NATIVE
+void writeb (U16 addr, U8 val);
+#else
 extern inline void writeb (U16 addr, U8 val)
 {
-#ifdef CONFIG_NATIVE
-	extern void linux_asic_write (U16 addr, U8 val);
-	linux_asic_write (addr, val);
-#else
 	*(volatile U8 *)addr = val;
 	barrier ();
-#endif
 }
+#endif
 
 extern inline void writew (U16 addr, U16 val)
 {
@@ -207,15 +206,15 @@ extern inline void writew (U16 addr, U16 val)
 }
 
 
+#ifdef CONFIG_NATIVE
+U8 readb (U16 addr);
+#else
 extern inline U8 readb (U16 addr)
 {
-#ifdef CONFIG_NATIVE
-	extern U8 linux_asic_read (U16 addr);
-	return linux_asic_read (addr);
-#else
 	return *(volatile U8 *)addr;
-#endif
 }
+#endif
+
 
 extern inline void io_toggle_bits (U16 addr, U8 val)
 {

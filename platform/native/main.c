@@ -462,7 +462,7 @@ void sim_switch_effects (int swno)
 
 
 /** Simulate the write of a WPC I/O register */
-void linux_asic_write (IOPTR addr, U8 val)
+void writeb (IOPTR addr, U8 val)
 {
 	switch (addr)
 	{
@@ -641,7 +641,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 
 
 /** Simulated read of an I/O register */
-U8 linux_asic_read (IOPTR addr)
+U8 readb (IOPTR addr)
 {
 	switch (addr)
 	{
@@ -1154,14 +1154,14 @@ int main (int argc, char *argv[])
 #endif
 
 	/* Set the hardware registers to their initial values. */
-	linux_asic_write (WPC_LAMP_COL_STROBE, 0);
+	writeb (WPC_LAMP_COL_STROBE, 0);
 #if !(MACHINE_PIC == 1)
-	linux_asic_write (WPC_SW_COL_STROBE, 0);
+	writeb (WPC_SW_COL_STROBE, 0);
 #endif
 #if (MACHINE_DMD == 1)
-	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
-	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
-	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
+	writeb (WPC_DMD_LOW_PAGE, 0);
+	writeb (WPC_DMD_HIGH_PAGE, 0);
+	writeb (WPC_DMD_ACTIVE_PAGE, 0);
 #endif
 
 	/* Initialize the state of the switches; optos are backwards */
