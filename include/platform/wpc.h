@@ -554,6 +554,9 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 			wpc_write_flippers (val);
 		break;
 #ifdef MACHINE_SOL_EXTBOARD1
+#if (CONFIG_WPC95 == 1)
+#error "WPC95 machines cannot use EXTBOARD1"
+#endif
 	case 5:
 		writeb (WPC_EXTBOARD1, val);
 #endif
