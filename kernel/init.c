@@ -151,17 +151,8 @@ __noreturn__ void freewpc_init (void)
 	 * Now, perform additional final initializations. */
 	system_reset ();
 
-	/* The system can run itself now, this task is done!
-	 *
-	 * In the simulator, the main task is not supposed to exit, so there
-	 * is a conditional for that.
-	 */
-#ifndef CONFIG_NATIVE
+	/* The system can run itself now, this task is done! */
 	task_exit ();
-#else
-	while (1)
-		task_sleep (TIME_33MS);
-#endif
 }
 
 

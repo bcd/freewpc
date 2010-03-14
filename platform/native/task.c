@@ -101,6 +101,10 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	attr = pth_attr_new ();
 	pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
 	pth_attr_set (attr, PTH_ATTR_CANCEL_STATE, PTH_CANCEL_ENABLE);
+	if (gid == GID_LINUX_REALTIME)
+		pth_attr_set (attr, PTH_ATTR_PRIO, PTH_PRIO_STD + 2);
+	else if (gid == GID_LINUX_INTERFACE)
+		pth_attr_set (attr, PTH_ATTR_PRIO, PTH_PRIO_STD + 1);
 
 	/* TODO - inside of calling the function directly, call a global
 	 * function and pass it a pointer to the task_data_table entry

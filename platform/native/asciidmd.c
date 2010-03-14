@@ -27,6 +27,8 @@
 
 struct buffer *asciidmd_buffers[MAX_PAGES] = { NULL, };
 
+struct buffer *asciidmd_pre_splits[MAX_PHASES] = { NULL, };
+
 struct buffer *asciidmd_phases[MAX_PHASES] = { NULL, };
 
 U8 asciidmd_pages[MAX_PHASES] = { 0, 0 };
@@ -75,17 +77,23 @@ void asciidmd_refresh (void)
 
 	/* Convert from compact to expanded form */
 	buf = asciidmd_buffers[asciidmd_visible_page];
-	splitbuf = buffer_splitbits (buf);
 
 	/* Add to the phase ring */
-	if (asciidmd_phases[asciidmd_phase % MAX_PHASES])
-		buffer_free (asciidmd_phases[asciidmd_phase % MAX_PHASES]);
-	asciidmd_phases[asciidmd_phase % MAX_PHASES] = splitbuf;
+	if (asciidmd_pre_splits[asciidmd_phase % MAX_PHASES] != buf)
+	{
+		asciidmd_pre_splits[asciidmd_phase % MAX_PHASES] = buf;
+		splitbuf = buffer_splitbits (buf);
+		if (asciidmd_phases[asciidmd_phase % MAX_PHASES])
+			buffer_free (asciidmd_phases[asciidmd_phase % MAX_PHASES]);
+		asciidmd_phases[asciidmd_phase % MAX_PHASES] = splitbuf;
+	}
+	else
+		return;
 
-	newkey = asciidmd_pages[0] + (asciidmd_pages[1] << 8) + (asciidmd_pages[2] << 16);
+	/* newkey = asciidmd_pages[0] + (asciidmd_pages[1] << 8) + (asciidmd_pages[2] << 16);
 	if (newkey == key)
 		return;
-	key = newkey;
+	key = newkey; */
 
 	composite = frame_alloc ();
 	if (composite == NULL)
@@ -133,7 +141,10 @@ void asciidmd_init (void)
 		asciidmd_buffers[n] = asciidmd_alloc ();
 
 	for (n = 0; n < MAX_PHASES; n++)
+	{
 		asciidmd_phases[n] = NULL;
+		asciidmd_pre_splits[n] = NULL;
+	}
 
 	asciidmd_map_page (0, 0);
 	asciidmd_map_page (1, 0);
