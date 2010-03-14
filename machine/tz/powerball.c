@@ -39,8 +39,6 @@
 #define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
-extern bool powerball_loaded_into_gumball;
-
 typedef enum {
 	PF_STEEL_DETECTED = 1,
 	PF_PB_DETECTED,
@@ -310,13 +308,18 @@ void pb_poll_trough (void)
 /** Called when a ball enters the trough or the lock. */
 void pb_container_enter (U8 location, U8 devno)
 {
-	device_t *dev = device_entry (devno);
+	device_t *dev;
+
+	if (devno != 0xFF)
+		dev = device_entry (devno);
+	else
+		dev = NULL;
 
 	/* If the powerball is known to be in play, then the act
 	of a ball entering a device is significant. */
 	if (pb_location == PB_IN_PLAY)
 	{
-		if (single_ball_play () || powerball_loaded_into_gumball == TRUE)
+		if (single_ball_play ())
 		{
 			/* In single ball play, things are fairly deterministic.
 			 * We know the powerball is no longer in play, and it is in
@@ -329,12 +332,16 @@ void pb_container_enter (U8 location, U8 devno)
 			 * powerball to be reannounced.  So optimize this by not
 			 * doing anything.
 			 */
-			if (dev->max_count != 1)
+			if (!dev || (dev->max_count != 1))
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
 				pb_clear_location (PB_MAYBE_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
+				if (dev)
+					pb_set_location (location, dev->actual_count);
+				else
+					pb_set_location (location, gumball_get_count ());
 			}
 		}
 		else
@@ -419,6 +426,11 @@ CALLSET_ENTRY (pb_detect, dev_lock_enter)
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
 }
 
+CALLSET_ENTRY (pb_detect, dev_gumball_enter)
+{
+	pb_container_enter (PB_IN_GUMBALL, 0xFF);
+}
+
 CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)
 {
 	dbprintf ("PB: about to kick trough\n");
@@ -437,6 +449,10 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 	pb_container_exit (PB_IN_LOCK);
 }
 
+CALLSET_ENTRY (pb_detect, dev_gumball_kick_success)
+{
+	pb_container_exit (PB_IN_GUMBALL);
+}
 
 CALLSET_ENTRY (pb_detect, start_ball)
 {
@@ -444,7 +460,14 @@ CALLSET_ENTRY (pb_detect, start_ball)
 }
 
 
-CALLSET_ENTRY (pb_detect, init)
+CALLSET_ENTRY (pb_detect, diagnostic_check)
+{
+	if (feature_config.powerball_missing)
+		diag_post_error ("POWERBALL\nIS MISSING\n", PAGE);
+}
+
+
+CALLSET_ENTRY (pb_detect, init_complete)
 {
 	pb_location = PB_MISSING;
 	last_pb_event = 0;

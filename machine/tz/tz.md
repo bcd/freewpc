@@ -156,6 +156,8 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
 26: Trough Proximity, noscore
+25: Far Left Trough, noplay, intest, service
+26: Trough Proximity, edge, noscore
 27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 28: Rocket Kicker, debounce(TIME_200MS)
 31: Left Jet, ingame, c_decl(sw_jet), noplay
@@ -174,12 +176,12 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 46: MPF Right, ingame
 47: Clock Target, standup, ingame, lamp(LM_CLOCK_MILLIONS)
 48: Standup 1, standup, ingame, lamp(LM_LL_5M)
-51: Gumball Lane, intest
+51: Gumball Lane, noplay, intest, service
 52: Hitchhiker, ingame
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, noscore
-56: Gumball Exit, noscore
+55: Gumball Geneva, noplay, intest, service
+56: Gumball Exit, noplay, intest, service
 57: Slot Proximity, noscore
 58: Slot
 61: Skill Bottom, ingame, noplay
@@ -204,7 +206,7 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 84: Lock Center, opto, c_decl(sw_lock)
 85: Lock Upper, opto, c_decl(sw_lock)
 86: Clock Passage, opto, c_decl(sw_unused)
-87: Gumball Enter, opto, intest
+87: Gumball Enter, opto, noplay, intest, service
 88: Lock Lower, c_decl(sw_lock)
 
 ##########################################################################
@@ -267,8 +269,8 @@ X2: Gumball High, flash
 X3: Gumball Mid, flash
 X4: Gumball Low, flash
 X5: Ramp2, flash
-X6: Clock Reverse, motor, nosearch
-X7: Clock Forward, motor, nosearch
+X6: Clock Reverse, motor, nosearch, time(TIME_16MS)
+X7: Clock Forward, motor, nosearch, time(TIME_16MS)
 
 
 ##########################################################################
@@ -369,6 +371,8 @@ Slot: Slot, \
 
 Popper: Popper, \
 	Gumball Popper
+
+Gumball: Gumball Release, init_max_count(0)
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
