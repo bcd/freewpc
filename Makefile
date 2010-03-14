@@ -162,8 +162,12 @@ TMPFILES += $(ERR)
 
 # Path to the compiler and linker
 ifeq ($(CPU),m6809)
+<<<<<<< HEAD:Makefile
 #GCC_ROOT = /usr/local/bin
 GCC_ROOT = /mnt/rayde/sonny_jim/freewpc/gcc6809-built/bin
+=======
+GCC_ROOT ?= /usr/local/bin
+>>>>>>> 35a3b903cad45671f4a36b1ce798a6ac37cd00ef:Makefile
 CC := $(CCACHE) $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
 AS = $(CC) -xassembler-with-cpp
 LD = $(GCC_ROOT)/m6809-unknown-none-ld

@@ -693,6 +693,15 @@ see the output in @file{build/callset.c}.  So there is no queueing, memory alloc
 anything complicated --- these are just ordinary function calls.  The trick is to do all
 of the work at compile-time.
 
+Because event handlers are just function calls, they can sometimes become deeply
+nested.  For example, a start button press can cause many other events to be
+thrown.  On the 6809 hardware, the stack size is limited and a stack overflow can
+occur if functions nest too deeply, AND a call to @code{task_sleep} is made.  As long
+as you don't sleep, there is no problem; the limitation is in the size of the per-task
+stack area.  @code{start_game} and @code{test_start} are particularly problematic
+sometimes.  Avoid sleeping in such handlers to be safe; if necessary, use a periodic
+function instead.
+
 @node Template Drivers
 @section Template Drivers
 

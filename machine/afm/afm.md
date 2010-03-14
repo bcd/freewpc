@@ -162,13 +162,12 @@ A4: L. Martian Flash, flash
 A5: L.E.D. Clock, nosearch
 A6: L.E.D. Data, nosearch
 A7: Strobe Light, flash
+A8: Coin Meter, nosearch
 
 F5: Right Gate
 F6: Left Gate
 F7: Divertor Power, nosearch
 F8: Divertor Hold, nosearch
-
-X1: Coin Meter
 
 [gi]
 0: Lower Playfield

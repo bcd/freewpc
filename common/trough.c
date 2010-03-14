@@ -55,7 +55,7 @@ static void handle_outhole (void)
 		}
 		else
 		{
-			sol_pulse (SOL_OUTHOLE);
+			sol_request (SOL_OUTHOLE);
 			task_sleep_sec (2);
 		}
 	}

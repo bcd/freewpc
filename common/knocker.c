@@ -39,7 +39,7 @@ static void knocker_fire_task (void)
 	do
 	{
 #ifdef MACHINE_KNOCKER_SOLENOID
-		sol_pulse (MACHINE_KNOCKER_SOLENOID);
+		sol_request (MACHINE_KNOCKER_SOLENOID);
 #endif
 #ifdef MACHINE_KNOCKER_SOUND
 		sound_send (MACHINE_KNOCKER_SOUND);

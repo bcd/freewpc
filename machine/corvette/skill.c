@@ -101,13 +101,16 @@ CALLSET_ENTRY (skill, sw_left_button) {
 	switch (current_rollover) {
 		case SW_LEFT_ROLLOVER:
 			current_rollover = SW_RIGHT_ROLLOVER;
-			return;
+		break;
+
 		case SW_MIDDLE_ROLLOVER:
 			current_rollover = SW_LEFT_ROLLOVER;
-			return;
+		break;
+
 		case SW_RIGHT_ROLLOVER:
 			current_rollover = SW_MIDDLE_ROLLOVER;
-			return;
+		break;
+
 	}
 	callset_invoke( lamp_update );
 }
@@ -120,14 +123,17 @@ CALLSET_ENTRY (skill, sw_right_button) {
 	switch (current_rollover) {
 		case SW_LEFT_ROLLOVER:
 			current_rollover = SW_MIDDLE_ROLLOVER;
-			return;
+		break;
+
 		case SW_MIDDLE_ROLLOVER:
 			current_rollover = SW_RIGHT_ROLLOVER;
-			return;
+		break;
+
 		case SW_RIGHT_ROLLOVER:
 			current_rollover = SW_LEFT_ROLLOVER;
-			return;
+		break;
 	}
+	callset_invoke( lamp_update );
 }
 
 CALLSET_ENTRY (skill, any_pf_switch) {

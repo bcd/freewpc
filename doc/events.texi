@@ -79,7 +79,8 @@ changes frequently depending on a variety of factors.
 Called after init_complete to perform further diagnostic checks.  Note
 that unlike init_ok, a diagnostic_check failure does not cause factory
 reset and reboot, but only flags a problem.  These errors are reported
-in test report.
+in test report.  The diagnostic check can wait if necessary for powerup
+tests to complete, but take care that it does not wait forever.
 
 @item display_update
 The running display effect needs to be updated.  This is called whenever
@@ -150,11 +151,14 @@ for extremely infrequent processing.
 
 @item init
 Called during phase 1 of system initialization.  An init receiver
-cannot assume anything about any other modules than itself.
+cannot assume anything about any other modules than itself.  This is
+normally used to initialize variables, but not to begin device I/O.
 
 @item init_complete
 Called during phase 2 of system initialization.  This is intended for
-modules which require interaction with each other.
+modules which require interaction with each other.  This is usually the
+right event for a complex device driver to perform I/O-based initialization,
+(e.g. calibration of a motor).
 
 @item init_ok @asis{(boolean)}
 Called after init to determine if initialization failed for any module.

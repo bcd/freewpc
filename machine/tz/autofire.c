@@ -84,7 +84,7 @@ void autofire_monitor (void)
 	shooter_div_start ();
 	task_sleep (TIME_300MS);
 
-	sol_pulse (SOL_AUTOFIRE);
+	sol_request (SOL_AUTOFIRE);
 	if (in_live_game)
 		sound_send (SND_EXPLOSION_1);
 
@@ -133,8 +133,8 @@ void autofire_add_ball (void)
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
 		/* Wait for divertor to open */
-		task_sleep_sec (1);		
-		sol_pulse (SOL_BALL_SERVE);
+		task_sleep_sec (1);
+		sol_request_async (SOL_BALL_SERVE);
 	}
 	else
 	{
