@@ -96,7 +96,7 @@ U8 *linux_lamp_data_ptr;
 U8 linux_jumpers = LC_USA_CANADA << 2;
 
 /** The triac outputs */
-U8 linux_triac_outputs;
+U8 linux_triac_latch, linux_triac_outputs;
 
 /** The actual time at which the simulation was started */
 time_t linux_boot_time;
@@ -412,6 +412,17 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 }
 
 
+/** Update the output side of the triacs.
+ * This becomes zero when a zerocrossing occurs.  When the input side of the latch
+ * is written, lines can be turned on but not turned off.
+ */
+void sim_triac_update (U8 val)
+{
+	val &= TRIAC_GI_MASK;
+	mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
+}
+
+
 /** Simulate writing to a set of 8 solenoids. */
 static void sim_sol_write (int index, U8 *memp, U8 val)
 {
@@ -555,7 +566,10 @@ void writeb (IOPTR addr, U8 val)
 #endif /* MACHINE_DMD */
 
 		case WPC_GI_TRIAC:
-			mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
+			val &= TRIAC_GI_MASK;
+			linux_triac_latch = val;
+			val |= linux_triac_outputs;
+			sim_triac_update (val);
 			break;
 
 		case WPC_SOL_GEN_OUTPUT:

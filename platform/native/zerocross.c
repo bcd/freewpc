@@ -22,6 +22,8 @@
 #include <simulation.h>
 #include <math.h>
 
+extern U8 linux_triac_latch;
+
 /* Simulation of the zerocross circuit */
 
 int ac_hz = 60; /* AC cycle has 60 cycles per second in US, 50 elsewhere */
@@ -67,24 +69,21 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 	if (sim_zc_always_set)
 	{
 		signal_update (SIGNO_ZEROCROSS, 1);
-		sim_time_register (8, FALSE, sim_zc_periodic, NULL);
 	}
 	else if (sim_zc_always_clear)
 	{
 		signal_update (SIGNO_ZEROCROSS, 0);
-		sim_time_register (8, FALSE, sim_zc_periodic, NULL);
 	}
 	if (--sim_zc_timer <= 0)
 	{
 		sim_zc_active = 1;
 		sim_zc_timer += ZC_TIMER_MAX;
 		signal_update (SIGNO_ZEROCROSS, 1);
-		sim_time_register (4, FALSE, sim_zc_periodic, NULL);
+		sim_triac_update (linux_triac_latch);
 	}
 	else
 	{
 		signal_update (SIGNO_ZEROCROSS, 0);
-		sim_time_register (1, FALSE, sim_zc_periodic, NULL);
 	}
 }
 
@@ -98,6 +97,6 @@ void sim_zc_init (void)
 	conf_add ("zc.stuck_off", &sim_zc_always_clear);
 
 	/* Register the first callback */
-	sim_time_register (1, FALSE, sim_zc_periodic, NULL);
+	sim_time_register (1, TRUE, sim_zc_periodic, NULL);
 }
 
