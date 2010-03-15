@@ -242,6 +242,9 @@ void mode_rotate_next (void)
 {
 	U8 lamp;
 
+	if (modes_started >= NUM_MODES-1)
+		return;
+
 	lamp_flash_off (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
 	for (;;)
 	{
@@ -270,8 +273,7 @@ void mode_start (void)
 	lamp_tristate_on (lamplist_index (LAMPLIST_BALL_PANELS, mode_ready));
 	mode_table[mode_ready].start ();
 	mode_timers[mode_ready] = MODE_TIMER;
-	if (modes_started < NUM_MODES)
-		mode_rotate_next ();
+	mode_rotate_next ();
 }
 
 
