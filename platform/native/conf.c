@@ -1,8 +1,28 @@
+/*
+ * Copyright 2010 by Brian Dominy <brian@oddchange.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <freewpc.h>
 #include <simulation.h>
 
 #define HASH_SIZE 101
+#define MAX_CONF_STACK 64
 
 struct conf_item
 {
@@ -14,6 +34,10 @@ struct conf_item
 
 
 struct conf_item *conf_table[HASH_SIZE] = { NULL, };
+
+
+int conf_stack[MAX_CONF_STACK];
+int *conf_stack_ptr = conf_stack;
 
 static unsigned int conf_hash (const char *name)
 {
@@ -66,4 +90,22 @@ void conf_write (const char *name, int val)
 		simlog (SLC_DEBUG, "No such conf item '%s'\n", name);
 }
 
+
+void conf_push (int val)
+{
+	conf_stack_ptr++;
+	*conf_stack_ptr = val;
+}
+
+
+int conf_pop (unsigned int count)
+{
+	conf_stack_ptr -= count;
+}
+
+
+int conf_read_stack (int offset)
+{
+	return conf_stack_ptr[-offset];
+}
 

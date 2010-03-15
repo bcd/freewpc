@@ -103,7 +103,12 @@ uint32_t tconst (void)
 
 	/* Dollar sign indicates a variable expansion */
 	if (*t == '$')
-		return conf_read (t+1);
+	{
+		if (isdigit (t[1]))
+			return conf_read_stack (t[1] - '0');
+		else
+			return conf_read (t+1);
+	}
 
 	/* TODO : Builtin strings */
 
@@ -300,9 +305,8 @@ void exec_script (char *cmd)
 	/*********** p/print [var] ***************/
 	else if (teq (t, "p") || teq (t, "print"))
 	{
-		t = tnext ();
-		v = conf_read (t);
-		simlog (SLC_DEBUG, "%s = %d", t, v);
+		v = tconst ();
+		simlog (SLC_DEBUG, "%d", v);
 	}
 	/*********** include [filename] ***************/
 	else if (teq (t, "include"))
@@ -323,6 +327,28 @@ void exec_script (char *cmd)
 		v = tsw ();
 		simlog (SLC_DEBUG, "Key '%c' = %d", *t, v);
 		linux_key_install (*t, v);
+	}
+	/*********** push [value] ***************/
+	else if (teq (t, "push"))
+	{
+		v = tconst ();
+		conf_push (v);
+	}
+	/*********** pop [argcount] ***************/
+	else if (teq (t, "pop"))
+	{
+		v = tconst ();
+		conf_pop (v);
+	}
+	else if (teq (t, "sleep"))
+	{
+		v = tconst ();
+		simlog (SLC_DEBUG, "Sleeping for %d ms", v);
+		v /= IRQS_PER_TICK;
+		do {
+			task_sleep (TIME_16MS);
+		} while (--v > 0);
+		simlog (SLC_DEBUG, "Awake again.", v);
 	}
 }
 
