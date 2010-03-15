@@ -34,6 +34,18 @@ define md_config
 $(if $(shell grep ^$1:.*Yes $(PLATFORM_DESC)),y,)
 endef
 
+define have
+$1 := y
+AUTO_CFLAGS += -D$1
+EXTRA_ASFLAGS += -D$1
+endef
+
+define nohave
+$1 := n
+AUTO_CFLAGS += -U$1
+EXTRA_ASFLAGS += -U$1
+endef
+
 ifndef Q
 Q := @
 endif
