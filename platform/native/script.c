@@ -318,7 +318,14 @@ void exec_script (char *cmd)
 	else if (teq (t, "sw"))
 	{
 		v = tsw ();
-		sim_switch_depress (v);
+		t = tconst ();
+		if (t == 0)
+			t = 1;
+		while (t > 0)
+		{
+			sim_switch_depress (v);
+			t--;
+		}
 	}
 	/*********** key [keyname] [switch] ***************/
 	else if (teq (t, "key"))
