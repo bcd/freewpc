@@ -184,18 +184,6 @@ extern inline U8 wpc_read_flippers (void)
 }
 
 
-extern inline U8 wpc_read_flipper_buttons (void)
-{
-	return 0;
-}
-
-
-extern inline U8 wpc_read_flipper_eos (void)
-{
-	return 0;
-}
-
-
 extern inline void wpc_write_flippers (U8 val)
 {
 }
