@@ -316,7 +316,7 @@ else
 GAME_ROM = freewpc.rom
 endif
 MAP_FILE = $(GAME_ROM:.rom=.map)
-NATIVE_PROG = freewpc_$(MACHINE_MAJOR)_$(MACHINE_MINOR)_$(MACHINE)
+NATIVE_PROG = $(BLDDIR)/freewpc_$(MACHINE)
 
 ifndef MACHINE_FILE
 MACHINE_FILE = $(MACHINE).md
@@ -669,7 +669,7 @@ endif
 ifeq ($(CPU),native)
 native : $(NATIVE_PROG)
 $(NATIVE_PROG) : $(IMAGE_ROM) $(OBJS) $(NATIVE_OBJS)
-	$(Q)echo "Linking ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(NATIVE_OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
+	$(Q)echo "Linking $@ ..." && $(HOSTCC) $(HOST_LFLAGS) `pth-config --ldflags` -o $(NATIVE_PROG) $(OBJS) $(NATIVE_OBJS) $(HOST_LIBS) >> $(ERR) 2>&1
 endif
 
 #
