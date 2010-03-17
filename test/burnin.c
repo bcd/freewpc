@@ -68,6 +68,7 @@ void burnin_flasher_thread (void)
 			}
 		}
 	}
+	task_sleep (TIME_500MS);
 }
 
 void burnin_sol_thread (void)
@@ -84,6 +85,7 @@ void burnin_sol_thread (void)
 			}
 		}
 	}
+	task_sleep_sec (2);
 }
 
 void burnin_lamp_thread (void)
