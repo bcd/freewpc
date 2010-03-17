@@ -168,7 +168,7 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-void task_sleep_sec (int8_t secs)
+void task_sleep_sec (I8 secs)
 {
 	while (--secs >= 0)
 		task_sleep (TIME_1S);

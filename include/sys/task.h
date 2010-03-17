@@ -215,7 +215,7 @@ task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
-void task_sleep_sec (int8_t secs);
+void task_sleep_sec (I8 secs);
 void task_set_periodic (task_ticks_t ticks);
 void task_sleep_periodic (void);
 __noreturn__ void task_exit (void);

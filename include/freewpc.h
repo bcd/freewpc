@@ -51,21 +51,21 @@ typedef unsigned char __boolean;
 
 /* 8-bit integers are always 'char' */
 typedef unsigned char bcd_t;
-typedef signed char int8_t, I8, S8;
+typedef signed char I8, S8;
 typedef unsigned char U8;
 
 /* 16-bit integers depend on the compiler */
 #if defined(__m6809__) && defined(__int16__)
-typedef int int16_t, I16, S16;
+typedef int I16, S16;
 typedef unsigned int U16;
 typedef U16 INTPTR;
 typedef unsigned long U32;
 #elif defined(CONFIG_NATIVE)
-typedef short int16_t, I16, S16;
+typedef short I16, S16;
 typedef unsigned short U16;
 typedef unsigned int U32;
 #else /* default assumes -mint8 on wpc */
-typedef long int16_t, I16, S16;
+typedef long I16, S16;
 typedef unsigned long U16;
 typedef unsigned long long U32;
 typedef unsigned int INTPTR;

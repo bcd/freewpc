@@ -416,7 +416,7 @@ void dmd_clean_page_high (void)
  * better performance. */
 void dmd_invert_page (dmd_buffer_t dbuf)
 {
-	register int16_t count = DMD_PAGE_SIZE / (2 * 4);
+	register I16 count = DMD_PAGE_SIZE / (2 * 4);
 	register U16 *dbuf16 = (U16 *)dbuf;
 	while (--count >= 0)
 	{
