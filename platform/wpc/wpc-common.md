@@ -48,19 +48,19 @@ L6: Low Power Sol. 6, notinstalled
 L7: Low Power Sol. 7, notinstalled
 L8: Low Power Sol. 8, notinstalled
 
-G1: General Sol. 1, notinstalled
-G2: General Sol. 2, notinstalled
-G3: General Sol. 3, notinstalled
-G4: General Sol. 4, notinstalled
-G5: General Sol. 5, notinstalled
-G6: General Sol. 6, notinstalled
-G7: General Sol. 7, notinstalled
-G8: General Sol. 8, notinstalled
+G1: Flasher 1, notinstalled
+G2: Flasher 2, notinstalled
+G3: Flasher 3, notinstalled
+G4: Flasher 4, notinstalled
+G5: Flasher 5, notinstalled
+G6: Flasher 6, notinstalled
+G7: Flasher 7, notinstalled
+G8: Flasher 8, notinstalled
 
-A1: Aux. Sol. 1, notinstalled
-A2: Aux. Sol. 2, notinstalled
-A3: Aux. Sol. 3, notinstalled
-A4: Aux. Sol. 4, notinstalled
+A1: General Sol. 1, notinstalled
+A2: General Sol. 2, notinstalled
+A3: General Sol. 3, notinstalled
+A4: General Sol. 4, notinstalled
 
 [gi]
 0: G.I. String 1
