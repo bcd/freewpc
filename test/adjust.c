@@ -75,6 +75,7 @@ struct adjustment_value lines_per_page_value = { 22, 80, 1, decimal_render };
 struct adjustment_value pricing_mode_value = { 0, NUM_PRICING_MODES-1, 1, pricing_mode_render };
 struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, coin_door_render };
 struct adjustment_value volume_value = { MIN_VOLUME, MAX_VOLUME, 1, decimal_render };
+struct adjustment_value payment_method_value = { 0, MAX_PAY_METHODS-1, 1, payment_method_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -201,13 +202,14 @@ struct adjustment pricing_adjustments[] = {
 #endif
 
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, &price_config.hide_coin_audits },
-	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
+	{ "", &yes_no_value, NO, NULL }, /* reserved for 1-coin buyin */
 	{ "COIN METER UNITS", &integer_value, 0, &price_config.coin_meter_units },
 	{ "FAST BILL SLOT", &yes_no_value, NO, &price_config.fast_bill_slot },
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
 	{ STR_CREDIT "FRACTION", &on_off_value, ON, &price_config.credit_fraction },
+	{ "PAYMENT TYPE", &payment_method_value, PAY_CUSTOM, &price_config.payment_method },
 	{ NULL, NULL, 0, NULL },
 };
 
