@@ -144,7 +144,6 @@ extern U8 periodic_ok;
 
 /* Build system information */
 #include <env.h>
-#include <version.h>
 
 /* CPU specifics */
 #include <sys/irq.h>
