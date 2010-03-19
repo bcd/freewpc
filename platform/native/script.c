@@ -347,6 +347,7 @@ void exec_script (char *cmd)
 		v = tconst ();
 		conf_pop (v);
 	}
+	/*********** sleep [time] ***************/
 	else if (teq (t, "sleep"))
 	{
 		v = tconst ();
@@ -356,6 +357,11 @@ void exec_script (char *cmd)
 			task_sleep (TIME_16MS);
 		} while (--v > 0);
 		simlog (SLC_DEBUG, "Awake again.", v);
+	}
+	/*********** exit ***************/
+	else if (teq (t, "exit"))
+	{
+		linux_shutdown (0);
 	}
 }
 

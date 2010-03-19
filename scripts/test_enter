@@ -1,0 +1,32 @@
+sw ENTER
+sleep 1 secs
+sw ENTER 2
+
+# Select main menu
+# 0 = Bookkeeping
+# 1 = Adjustments
+# 2 = Tests
+# 3 = Utilities
+# 4 = Printouts
+# 5 = Development
+sw UP $0
+sw ENTER
+
+# Select menu item
+# (0 = first item, etc.)
+sw UP $1
+sw ENTER
+
+# For adjustments, select adjustment number
+sw UP $2
+sw ENTER
+
+# Toggle it
+sw UP
+sw ENTER
+sleep 2 secs
+
+sw ESCAPE 2
+
+sw ESCAPE 2
+sleep 3 secs

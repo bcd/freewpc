@@ -149,6 +149,10 @@ unsigned int signo_under_trace = SIGNO_SOL + 0;
 
 const char *exec_file = NULL;
 
+int exec_late_flag = 0;
+
+int crash_on_error = 0;
+
 
 /** A dummy function intended to be used for debugging under GDB. */
 void gdb_break (void)
@@ -369,14 +373,16 @@ U8 simulation_pic_access (int writep, U8 write_val)
 }
 #endif /* MACHINE_PIC */
 
-__noreturn__ void linux_shutdown (void)
+__noreturn__ void linux_shutdown (U8 error_code)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
 	protected_memory_save ();
 #ifdef CONFIG_UI
 	ui_exit ();
 #endif
-	exit (0);
+	if (crash_on_error && error_code)
+		*(int *)0 = 1;
+	exit (error_code);
 }
 
 
@@ -831,7 +837,7 @@ char linux_interface_readchar (void)
 	if (res <= 0)
 	{
 		task_sleep_sec (2);
-		linux_shutdown ();
+		linux_shutdown (0);
 	}
 	return inbuf;
 }
@@ -868,6 +874,8 @@ static void linux_interface_thread (void)
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
 
+	if (exec_file && exec_late_flag)
+		exec_script_file (exec_file);
 	for (;;)
 	{
 		*inbuf = linux_interface_readchar ();
@@ -959,7 +967,7 @@ static void linux_interface_thread (void)
 				break;
 
 			case '\x1b':
-				linux_shutdown ();
+				linux_shutdown (0);
 				break;
 
 			case 'T':
@@ -1124,6 +1132,14 @@ int main (int argc, char *argv[])
 		{
 			exec_file = argv[argn++];
 		}
+		else if (!strcmp (arg, "--late"))
+		{
+			exec_late_flag = 1;
+		}
+		else if (!strcmp (arg, "--error-crash"))
+		{
+			crash_on_error = 1;
+		}
 		else if (strchr (arg, '='))
 		{
 			char varval[64];
@@ -1226,7 +1242,7 @@ int main (int argc, char *argv[])
 	execute any file provided on the command line. */
 	exec_script_file ("conf/freewpc.conf");
 	exec_script_file ("conf/" MACHINE_SHORTNAME ".conf");
-	if (exec_file)
+	if (exec_file && !exec_late_flag)
 		exec_script_file (exec_file);
 
 	freewpc_init ();

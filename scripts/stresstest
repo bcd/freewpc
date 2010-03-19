@@ -1,0 +1,9 @@
+sleep 8000
+push 1
+push 5
+push 1
+include scripts/test_enter
+pop 1
+sw "START BUTTON"
+sleep 1800 secs
+exit
