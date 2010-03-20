@@ -207,22 +207,3 @@ void timed_mode_deff_update (struct timed_mode_ops *ops)
 		deff_start_bg (ops->deff_running, ops->prio);
 }
 
-
-/* Global event handlers.  TODO: these handlers should iterate over all
-defined mode objects (how to get this list?) */
-
-CALLSET_ENTRY (all_timed_mode, music_refresh)
-{
-	/* timed_mode_music_refresh (&ops); */
-}
-
-CALLSET_ENTRY (all_timed_mode, display_update)
-{
-	/* timed_mode_deff_update (&ops); */
-}
-
-CALLSET_ENTRY (all_timed_mode, start_ball, end_ball, tilt)
-{
-	/* timed_mode_finish (&ops); */
-}
-
