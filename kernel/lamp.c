@@ -392,15 +392,6 @@ bool lamp_flash_test (lampnum_t lamp)
 }
 
 
-/** The task that calls all of the 'lamp_update' callset entries. */
-void lamp_update_task (void)
-{
-	if (in_live_game)
-		callset_invoke (lamp_update);
-	task_exit ();
-}
-
-
 /*
  * lamp_all_on / lamp_all_off are optimized and should be used
  * if all lamps are affected, rather than setting them one at
