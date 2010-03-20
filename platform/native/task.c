@@ -67,14 +67,14 @@ void task_dump (void)
 {
 	int i;
 
-	printf ("\nPID         GID   ARG    FLAGS\n");
+	dbprintf ("PID         GID   ARG    FLAGS\n");
 	for (i=0; i < MAX_TASKS; i++)
 	{
 		aux_task_data_t *td = &task_data_table[i];
 
 		if (td->pid != 0)
 		{
-			printf ("%p%c   %d    %08X   %02X\n",
+			dbprintf ("%p%c   %d    %08X   %02X\n",
 				td->pid, 
 				(td->pid == task_getpid ()) ? '*' : ' ', 
 				td->gid, td->arg.u16, td->duration);
