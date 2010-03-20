@@ -63,9 +63,14 @@ CALLSET_BOOL_ENTRY (swinfo, init_ok)
 		&& swinfo_verify1 (swinfo_machine_minor, MACHINE_MINOR_VERSION)
 		)
 	{
-		dbprintf ("S/W incompatible with previous config");
+		/* Everything matches */
 		return TRUE;
 	}
-	return FALSE;
+	else
+	{
+		/* Something changed ... trigger factory reset */
+		dbprintf ("S/W incompatible with previous config");
+		return FALSE;
+	}
 }
 
