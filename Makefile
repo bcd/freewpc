@@ -166,6 +166,8 @@ TMPFILES += *.i
 TMPFILES += *.c.[0-9]*.*
 TMPFILES += *.fon.[0-9]*.*
 TMPFILES += *.out
+TMPFILES += *.gcda
+TMPFILES += *.gcno
 TMPFILES += $(ERR)
 
 #######################################################################
@@ -1050,7 +1052,7 @@ callset.in :
 #
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
-	$(Q)for dir in `echo . kernel common fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) platform/native cpu/$(CPU)`;\
+	$(Q)for dir in `echo . kernel common effect fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) platform/native cpu/$(CPU)`;\
 		do echo "Cleaning in '$$dir' ..." && \
 		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
 		popd >/dev/null ; done

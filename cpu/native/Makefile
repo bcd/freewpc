@@ -23,6 +23,11 @@ CFLAGS += -pg
 HOST_LFLAGS += -pg
 endif
 
+ifeq ($(CONFIG_NATIVE_COVERAGE),y)
+CFLAGS += -fprofile-arcs -ftest-coverage
+HOST_LIBS += -lgcov
+endif
+
 ifeq ($(CONFIG_CURSES), y)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
