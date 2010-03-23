@@ -72,12 +72,14 @@ __far_call_handler:
 	std   *__far_call_address   ; Move function offset to memory
 	ldb	,u+                   ; Get the called function page
 	stu	RETADDR,s			    ; Update return address
-	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	lda	*_wpc_rom_bank        ; Read current bank switch register value
+	stb	*_wpc_rom_bank        ; Set new bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	puls	b,u                   ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A
+	sta	*_wpc_rom_bank        ; Restore bank switch register
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	rts
 
@@ -91,12 +93,14 @@ __far_call_handler:
 	.globl _far_indirect_call_value_handler
 _far_indirect_call_handler:
 _far_indirect_call_value_handler:
-	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	lda	*_wpc_rom_bank        ; Read current bank switch register value
 	stx   *__far_call_address   ; Move function offset to memory
+	stb	*_wpc_rom_bank        ; Set new bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A
+	sta	*_wpc_rom_bank        ; Restore bank switch register
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	rts
 
@@ -104,13 +108,15 @@ _far_indirect_call_value_handler:
 	.globl _far_call_pointer_handler
 _far_call_pointer_handler:
 	pshs	b                     ; Save all registers used for parameters
-	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	lda	*_wpc_rom_bank        ; Read current bank switch register value
 	ldb	__far_call_page
+	stb	*_wpc_rom_bank        ; Set new bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	puls	b                     ; Restore parameters
 	pshs	a                     ; Save bank switch value to be restored
 	jsr	[__far_call_address]  ; Call function
 	puls	a                     ; Restore A
+	sta	*_wpc_rom_bank        ; Restore bank switch register
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	rts
 
@@ -120,9 +126,11 @@ _far_call_pointer_handler:
 	.globl _far_read8
 _far_read8:
 	pshs	a
-	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	lda	*_wpc_rom_bank        ; Read current bank switch register value
+	stb	*_wpc_rom_bank        ; Set new bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	ldb	,x                    ; Read the value
+	sta	*_wpc_rom_bank        ; Restore bank switch register
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	puls	a,pc
 
@@ -134,9 +142,11 @@ _far_read_pointer:
 	.globl _far_read16
 _far_read16:
 	pshs	a
-	lda	WPC_ROM_PAGE_REG      ; Read current bank switch register value
+	lda	*_wpc_rom_bank        ; Read current bank switch register value
+	stb	*_wpc_rom_bank        ; Set new bank switch register value
 	stb	WPC_ROM_PAGE_REG      ; Set new bank switch register value
 	ldx	,x                    ; Read the value
+	sta	*_wpc_rom_bank        ; Restore bank switch register
 	sta	WPC_ROM_PAGE_REG      ; Restore bank switch register
 	puls	a,pc
 

@@ -21,6 +21,9 @@
 #include <freewpc.h>
 
 
+/** The last value written to the WPC_ROM_BANK register */
+__fastram__ U8 wpc_rom_bank;
+
 /**
  * Initialize the WPC platform.
  */

@@ -306,11 +306,14 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 #define PINIO_BANK_ROM 0
 #define PINIO_BANK_RAM 1
 
+extern __fastram__ U8 wpc_rom_bank;
+
 extern inline void pinio_set_bank (U8 bankno, U8 val)
 {
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
+			wpc_rom_bank = val;
 			writeb (WPC_ROM_BANK, val);
 			break;
 		case PINIO_BANK_RAM:
@@ -326,7 +329,7 @@ extern inline U8 pinio_get_bank (U8 bankno)
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
-			return readb (WPC_ROM_BANK);
+			return wpc_rom_bank;
 		case PINIO_BANK_RAM:
 			return readb (WPC_RAM_BANK);
 		default:

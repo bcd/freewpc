@@ -58,7 +58,7 @@ _task_save:
 	ldu	*_task_save_U          ; 5 cycles
 	stu	UREG_SAVE_OFF,x        ; 6 cycles
 	sty	YREG_SAVE_OFF,x        ; 7 cycles
-	ldb	WPC_ROM_BANK           ; 5 cycles
+	ldb	*_wpc_rom_bank         ; 5 cycles
 	stb	ROMPAGE_SAVE_OFF,x     ; 5 cycles
 
 	;;; Copy the runtime stack into the task save area.
@@ -249,6 +249,7 @@ _task_restore:
 restore_stack_done:
 	;;; Restore volatile registers
 	ldb	ROMPAGE_SAVE_OFF,x
+	stb	*_wpc_rom_bank
 	stb	WPC_ROM_BANK
 	ldu	PCREG_SAVE_OFF,x
 	pshs	u
@@ -285,7 +286,7 @@ _task_create:
 	jsr	_task_allocate
 	stu	PCREG_SAVE_OFF,x
 	puls	u
-	ldb	WPC_ROM_BANK
+	ldb	*_wpc_rom_bank
 	stb	ROMPAGE_SAVE_OFF,x
 
 	;;; Note: we could push the address of task_exit onto the
@@ -335,7 +336,7 @@ _task_fork:
 
 	; Ensure the child runs in the same page as
 	; the parent.
-	ldb	WPC_ROM_BANK
+	ldb	*_wpc_rom_bank
 	stb	ROMPAGE_SAVE_OFF,x
 
 	; Return from the parent with nonzero.
