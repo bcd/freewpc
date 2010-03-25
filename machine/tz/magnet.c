@@ -19,8 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
-
 
 /* Magnet switch RTT runs every 8 ms */
 #define MAG_SWITCH_RTT_FREQ 8

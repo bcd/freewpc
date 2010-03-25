@@ -19,7 +19,6 @@
  */
 
 #include <freewpc.h>
-#include <rtsol.h>
 
 /** The number of balls enabled to go to the MPF */
 __local__ U8 mpf_enable_count;

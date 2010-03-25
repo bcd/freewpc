@@ -7,8 +7,6 @@ MACHINE_FILE := tz.md
 
 MACHINE_SCHEDULE := $(M)/tz.sched
 
-MACHINE_SCHED_FLAGS := -i tz/driver.h
-
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
 # default will be taken.
