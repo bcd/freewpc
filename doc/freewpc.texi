@@ -456,6 +456,8 @@ Pth library.  A good description of this library can be found at
 as @command{pthreads}, which is the predominant @emph{preemptive}
 threading library.
 
+@subsection Periodic Functions
+
 After all tasks have been given a chance to run in a 16ms timeslice,
 the system runs the @dfn{periodic functions}.  These have equal priority
 to tasks, but they do not have a stack and they cannot sleep.  In the
@@ -475,6 +477,56 @@ later; the scheduler will realize that it is behind and try to catch up.
 
 You cannot dynamically register or deregister periodic handlers at runtime.
 
+@subsection APIs
+
+@table @code
+
+@item task_create_gid
+
+The basic API to create a new task.  You specify a code function and a GID.  The function
+must reside in the same bank of ROM.
+
+@item task_create_gid1
+
+Similar, but checks to see if a task with the same GID already exists; if it does, no new
+task is created.
+
+@item task_recreate_gid
+
+Similar, but checks to see if a task with the same GID already exists; if it does, the old
+task is stopped before the new task is created.
+
+@item task_sleep
+
+Suspends the current running task for a given period of time.  The parameter is one of the
+TIME defines which is given in units of approximately 16ms.  Because it is 8-bit, this limits
+to about 4 seconds.
+
+@item task_sleep_sec
+
+Suspends the current running task for the given number of seconds.
+
+@item task_exit
+
+Exit from the current task.  This must be called; task functions cannot just return when they
+are done.
+
+@item task_find_gid
+
+Returns the first PID found for a task that has a given GID.
+
+@item task_kill_pid
+
+Stops another task based on PID.  This stops exactly one task.
+
+@item task_kill_gid
+
+Stops another task based on GID.  This can stop one or more tasks.  If called from a task with
+the same GID, it stops all other tasks, but keeps the running task alive.
+
+@end table
+
+
 @node Real-Time Processing
 @section Real-Time Processing
 
@@ -490,11 +542,11 @@ you want your function to be run, for example, once every 8ms.  You can schedule
 to run as frequently as once every 1ms, but you should only schedule as often as
 you really need it, otherwise the CPU will have little time to do anything else!
 
-Real-time functions run at interrupt (IRQ) level.  They will interrupt anything
-else that is running at non-real-time priority.  They cannot sleep.
+Real-time functions run in interrupt context.  The periodic interrupt will preempt anything
+else that is running at non-real-time priority.  Realtime functions cannot sleep.
 
-A scheduler, @command{gensched}, processes these files at compile-time and generates
-the IRQ handler code which calls all of the RTTs at the correct frequency.  The output
+A scheduler, @command{gensched}, processes the schedule files at compile-time and generates
+the interrupt handler code which calls all of the RTTs at the correct frequency.  The output
 can be seen in @file{build/sched_irq.c}.
 
 Optimizing the realtime tasks is key to an efficient system.  To date,
@@ -801,6 +853,55 @@ If there were 2 widgets instantiated by the machine, say a left widget and
 a right widget, then we would have @file{left_widget.c}, @file{left_widget.h},
 @file{right_widget.c}, and @file{right_widget.h}.
 
+@subsection Template Usage
+
+The use case for templates is to define reusable device drivers.  From game
+to game, there is commonality on how certain devices should be treated,
+although the parameters are different.
+
+Typically, a device requires a number of different functions to control it.
+Most devices need a realtime function if hardware accesses must be
+frequent.  A periodic function can handle less critical actions.
+APIs are defined for the rest of the logic to access it.  All of this
+can be put into a single template, then instantiated by each machine with
+values for the machine-specific parameters.
+
+Currently there are device drivers for all of the following:
+
+@itemize @bullet
+
+@item Special Solenoids (@code{spsol.ct})
+
+These are switch-activated coils, like slingshots, jet bumpers, or
+kickbacks.  When the switch activates, the associated coil is fired.
+The driver allows you to enable/disable the automatic action, as well
+as defining the length of the coil pulse.  The switch is also briefly
+ignored afterwards to prevent rapid-fire action.
+
+@item Spinners (@code{spinner.ct})
+
+The driver is useful because it handles the fact that spinner switches
+activate very fast.
+
+@item Duty-Cycled Coils (@code{duty.ct})
+
+This is typically for a diverter that needs to be held on for a long
+period of time, like TZ's left ramp.  Enabling the coil begins by
+applying a high power pulse, then dropping to a lower power duty cycle
+(typically 25% but it is configurable.)
+
+@item Bidirectional Motors (@code{bivar.ct})
+
+Used by the Twilight Zone clock and the World Cup Soccer ball.
+For when there are two inputs to the motor to control direction.
+
+@item Drop Targets (@code{drop.ct})
+
+A generic, single drop target driver.  Handles software knockdown when
+capable, and retry functions.
+
+@end itemize
+
 @node Fault Detection
 @section Fault Detection
 
@@ -816,21 +917,29 @@ The core operating system code throws fatal errors in several key
 circumstances:
 
 @itemize @bullet
+
 @item When task scheduling locks up
+
 Because tasks continue to run until they give up control, a "hung" task
 will hang the entire system.  At realtime level, this can be detected
 by seeing that the current task has not changed for a certain period of
 time.  This works because realtime uses interrupts.
+
 @item When we cannot create a new task
+
 The number of tasks is bounded, to prevent runaway task creation/
 memory allocation.  Many other subsystems do the same whenever a limit
 is reached.
+
 @item When an NMI or other unexpected interrupt occurs
+
 @item When the non-volatile memory is found unlocked.  This is almost
 always because someone called @code{pinio_nvram_unlock()} and forgot
 to call @code{pinio_nvram_lock()} afterwards.
+
 @item Certain illegal function calls are made, such as trying to sleep
 from outside task context.
+
 @end itemize
 
 @node Timers
@@ -1850,6 +1959,15 @@ Ball troughs, kickouts, poppers, saucers, and locks are all just different
 shapes that a device can take.  Some containers only hold one ball, while
 others can hold many.
 
+@menu
+* Device Status::              What state is maintained per device
+* Global Status::              What state is maintained for the whole machine
+* Events::                     Which events are generated
+* The Trough Device::          How the trough device is special
+* Virtual Balls::              How to manipulate ball counts manually
+@end menu
+
+@node Device Status
 @section Device Status
 
 For each device, the ball tracker maintains the following state information:
@@ -1877,6 +1995,7 @@ Device switches must be declared as @emph{edge} switches, which invoke the
 event handler on both open and close transitions.  The tracker simply updates
 the current count on either type of transition.
 
+@node Global Status
 @section Global Status
 
 The ball tracker also maintains a count of the number of balls in play,
@@ -1885,6 +2004,7 @@ that are seen in devices, minus the number of balls declared "missing".
 Missing balls are flagged when a game is started but the balls are not
 all seen.
 
+@node Events
 @section Events
 
 The ball tracker also generates new per-device events.  The name of
@@ -1913,6 +2033,7 @@ The @dfn{kick_success} event is generated when the release is deemed successful:
 when the device count goes down by 1.  The @dfn{kick_failure} event is instead
 thrown when an attempts fails repeatedly and the device is abandoned.
 
+@node The Trough Device
 @section The Trough Device
 
 The trough device is special; every game must have one.  The system
@@ -1934,6 +2055,22 @@ when all balls have drained.
 
 Live count is not necessarily the actual number of balls in play.
 If a missing pinball suddenly reappears, the live count is not increased.
+
+@node Virtual Balls
+@section Virtual Balls
+
+The device system generally assumes that there is one ball-sensing
+switch for every ball that might be in the device.  Thus, a 4-ball
+trough needs 4 switches.  The tracker recounts balls periodically
+and does this just by polling each switch to see if a ball is present
+or not.
+
+For some devices, this is not possible.  Consider the Twilight Zone
+gumball machine, which can hold 3 or 4 balls but there are no
+switches inside to verify this.  To handle this case, @dfn{virtual balls}
+are supported.  This is a per-device counter that is completely software
+controlled.  APIs exist to add/remove virtual balls that cannot be seen
+by switches.
 
 @c ======================================================
 @node Test Mode
@@ -2122,14 +2259,20 @@ Machines don't need to do much to produce a working ball search function.
 The common code knows how to pulse all of the regular solenoids.
 It also knows which solenoids @emph{not} to fire.
 
+You can mark a solenoid in the machine description with @code{nosearch}
+to prevent it from being pulsed during ball search.
+
 Machines that need to handle a particular power driver in a non-standard
 way should implement a @code{ball_search} event handler, and mark the
-associated solenoid as @code{nosearch} to prevent the common code from
-touching it.  The @code{ball_search} handler will be called to allow
-the machine to decide what needs to be done.
+associated solenoid as @code{nosearch}.
+The @code{ball_search} handlers will be called to perform whatever is
+needed.
 
 For example, on Funhouse, the Rudy saucer eject needs to make sure that
 the mouth is open before kicking.
+
+By default, flashers and motors are automatically skipped.  Solenoids
+associated with ball devices are also skipped unless they are empty.
 
 @section Knocker Driver
 
@@ -2338,8 +2481,7 @@ Cygwin systems.
 
 The main difference in native mode is that all I/O accesses
 are emulated.  Calls to @code{readb} and @code{writeb} are
-converted to call @code{linux_asic_read} or @code{linux_asic_write},
-which does the emulation.
+emulated internally rather than writing to the memory-mapped address.
 
 Also, because native mode runs under an existing operating system,
 the lowest-level OS features in FreeWPC are reimplemented.  For example,

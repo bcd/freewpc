@@ -85,10 +85,11 @@ is visible at address 0x4000.
 The WPC ASIC is the heart of the system and is essentially a
 giant address decoder.  It combines a lot of the functionality that
 was performed by PIAs and TTL logic in earlier solid state games.
-
-All addresses from the CPU are first seen by the ASIC, which can
-then either respond to the read/write request directly if it is an
-internal function, or forward the request to another device.
+All read/write requests from the CPU are first seen by the ASIC, which can
+then either respond to it directly if it is an
+internal function, or forward the request to another device.  RAM and ROM
+requests cause those devices enables to be asserted.  For I/O, it may be
+more complicated and cause I/O to other circuit boards.
 
 @subsection Blanking
 
@@ -176,12 +177,12 @@ several jumpers/DIP switches used for configuring some factory defaults.
 @subsection External I/O
 
 All of the other I/O is located on other boards, which are connected
-to the CPU board via flex cables.  Generally on these cables, one side
+to the CPU board via ribbon cables.  Generally on these cables, one side
 of the pins are connected to ground, while the others contain actual
 inputs/outputs.  All logic values measure 0V for a '0', and +5V for a '1'.
 Inputs have pullup resistors so that reading the signal while the cable
 is not connected will return '1'.
-All generations of WPC use the same connector to
+All generations of WPC use the same 17x2 pin connector to
 the power driver board, which controls lamps and general solenoids.
 Display, sound, and flipper interfaces differ somewhat between generations.
 
@@ -224,7 +225,8 @@ tell the CPU when to display a new frame.
 
 The high precision timer can interrupt when its value reaches zero.
 
-Either of these can be enabled/disabled.
+Either of these can be enabled/disabled individually, in addition to
+masking the interrupt at the processor.
 
 @subsubsection NMI
 
@@ -283,7 +285,7 @@ The lamps all run off 6.3V AC.
 
 Starting with WPC-95, two of the GI strings are always on and not
 under software control, saving the cost of the triacs, but
-eliminating the ability to flash/dim them.
+eliminating the ability to dim them.
 
 When enabled, the triacs illuminate the lamps until the AC voltage
 crosses zero.  They must be constantly re-enabled to keep the lamps on.
@@ -298,25 +300,15 @@ negative voltage many times per second.  In the US, the frequency is
 Outside the US, line voltage is 50Hz and so zero crossing occurs every
 10ms.
 
-The CPU can use this information to time the pulses to the solenoids
-so that they are most effective.  Consider if a solenoid were turned on
-at the zero crossing and only kept on for 4ms.  That would be a much
-weaker pulse than if it were turned on at the peak of the AC cycle,
-which is halfway between two zero crossings, even if the duration were
-still 4ms.
-
-Most solenoid pulses last considerably longer than the length of the
-AC cycle, and so it is not required for operation (note that the Sega/Stern
-Whitestar hardware does not have it).
-
-The zero cross data can also be used to dim the general illumination
-and the flashers, and to conserve power.
+The zero cross data is used to dim the general illumination.
 
 @section Sound Board
 
 Both the WPC and DCS sound boards are connected via a ribbon cable
 to the CPU board, which sends it both read and write commands.  The
-actual values vary greatly depending on the board type.
+actual values vary greatly depending on the board type.  These
+boards are intelligent and have processors running their own operating
+system dedicated to sound tasks.
 
 1-byte or 2-byte commands are written to request particular sounds
 to be played.  The sound board stores all of the sound data on
