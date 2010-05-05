@@ -327,6 +327,19 @@ void exec_script (char *cmd)
 			t--;
 		}
 	}
+	/*********** swtoggle [id] ***************/
+	else if (teq (t, "swtoggle"))
+	{
+		v = tsw ();
+		t = tconst ();
+		if (t == 0)
+			t = 1;
+		while (t > 0)
+		{
+			sim_switch_toggle (v);
+			t--;
+		}
+	}
 	/*********** key [keyname] [switch] ***************/
 	else if (teq (t, "key"))
 	{
