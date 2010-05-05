@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Find files that were updated in 2010.  Then see if their copyright
 # headers are up-to-date, and if not, add 2010 to them.
 

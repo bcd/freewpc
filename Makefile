@@ -19,6 +19,8 @@
 # zip, so that things are back to the way that they started.
 #
 
+SHELL := /bin/bash
+export SHELL
 
 # Include the .config file, which must exist
 DOTCONFIG ?= .config
