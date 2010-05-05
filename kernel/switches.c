@@ -772,12 +772,18 @@ CALLSET_ENTRY (switch, diagnostic_check)
 		return;
 	}
 #endif
+
 #ifdef SW_ALWAYS_CLOSED
 	/* Make sure the ALWAYS CLOSED switch is really closed.
 	 * If not, there's a serious problem
 	 * and we can't do any switch processing. */
 	if (unlikely (!rt_switch_poll (SW_ALWAYS_CLOSED)))
 		diag_post_error ("12V SWITCH POWER\nIS NOT PRESENT\n", SYS_PAGE);
+#endif
+
+#ifdef SW_SLAM_TILT
+	if (unlikely (rt_switch_poll (SW_SLAM_TILT)))
+		diag_post_error ("SLAM TILT IS\nSTUCK CLOSED\n", SYS_PAGE);
 #endif
 }
 
