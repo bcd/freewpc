@@ -46,7 +46,7 @@ static void timed_mode_exit_handler (struct timed_mode_ops *ops)
 /**
  * A task that runs and implements a mode.
  */
-void timed_mode_monitor (void)
+static void timed_mode_monitor (void)
 {
 	struct timed_mode_task_config *cfg;
 	struct timed_mode_ops *ops;
