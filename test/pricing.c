@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (pricing, __test2__) */
-
 struct coin_door
 {
 	adjval_t collection_text;

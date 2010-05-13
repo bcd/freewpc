@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (swinfo, __init__) */
-
 __nvram__ U16 swinfo_permanent_size;
 __nvram__ U16 swinfo_nvram_size;
 __nvram__ U8 swinfo_system_major;

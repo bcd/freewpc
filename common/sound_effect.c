@@ -26,8 +26,6 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (sound_effect, __effect__) */
-
 #define MUS_DISABLED_BY_SOUND  0x1
 #define MUS_DISABLED_BY_CALL   0x2
 

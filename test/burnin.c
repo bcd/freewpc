@@ -18,8 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (burnin, __test2__) */
-
 #include <freewpc.h>
 
 timestamp_t burnin_duration;

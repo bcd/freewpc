@@ -422,12 +422,12 @@ $(eval $(call AREA_SETUP, vector,    0xFFF0,   0x0010,  virtual))
 
 SYSROM_SIZE := $(shell echo $$(($(AREASIZE_sysrom) + $(AREASIZE_vector))))
 
-MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
+MACHINE_SYS_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
-MACHINE_PAGED_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
+MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
 MACHINE2_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME2_OBJS))
 SYSTEM_HEADER_OBJS =
-SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_OBJS) $(SCHED_OBJ)
+SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_SYS_OBJS) $(SCHED_OBJ)
 
 #
 # Define a mapping between object files and page numbers in
@@ -463,10 +463,10 @@ endef
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
 ifeq ($(CONFIG_DMD),y)
 $(eval $(call PAGE_ALLOC, 53, MACHINE2))
-$(eval $(call PAGE_ALLOC, 54, MACHINE_PAGED, MACHINE))
+$(eval $(call PAGE_ALLOC, 54, MACHINE))
 else
 $(eval $(call PAGE_ALLOC, 55, MACHINE2))
-$(eval $(call PAGE_ALLOC, 59, MACHINE_PAGED, MACHINE))
+$(eval $(call PAGE_ALLOC, 59, MACHINE))
 endif
 $(eval $(call PAGE_ALLOC, 55, TRANS))
 $(eval $(call PAGE_ALLOC, 55, FIF))
@@ -482,7 +482,7 @@ $(eval $(call PAGE_ALLOC, 61, FONT))
 $(eval $(call PAGE_ALLOC, 61, FON))
 
 $(SYSTEM_OBJS) : PAGE=62
-CFLAGS += -DSYS_PAGE=62
+CFLAGS += -DSYS_PAGE=62 -DSYSTEM_PAGE=62
 
 PAGED_OBJS = $(foreach area,$(PAGED_SECTIONS),$($(area)_OBJS))
 
@@ -492,7 +492,7 @@ AS_OBJS := $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 
 C_OBJS := $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) \
-	$(MACHINE_OBJS) $(MACHINE_PAGED_OBJS) $(MACHINE_TEST_OBJS) \
+	$(MACHINE_SYS_OBJS) $(MACHINE_OBJS) $(MACHINE_TEST_OBJS) \
 	$(MACHINE2_OBJS) $(FONT_OBJS) $(EFFECT_OBJS) $(INIT_OBJS) $(SCHED_OBJ)
 
 
@@ -904,9 +904,13 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLDDIR)/callset.o
 
+CALLSET_SECTIONS := MACHINE MACHINE2 COMMON EFFECT INIT TEST TEST2 SYSTEM
 $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
+	$(Q)echo "MACHINE2_OBJS = " $(MACHINE2_OBJS)
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
-		&& tools/gencallset $(filter-out build/callset.c,$(C_OBJS:.o=.c) $(NATIVE_OBJS:.o=.c))
+		&& tools/gencallset \
+			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
+			$(NATIVE_OBJS:.o=.c)
 
 .PHONY : callset_again
 callset_again:

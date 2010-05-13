@@ -21,8 +21,6 @@
 #include <freewpc.h>
 #include <lamptimer.h>
 
-/* CALLSET_SECTION (lamp_timer_test, __effect__) */
-
 
 /**
  * The instance data for a timed lamp effect.
