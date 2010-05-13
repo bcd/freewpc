@@ -26,6 +26,29 @@ U8 switch_stress_enable;
 
 
 /**
+ * Pulse the flippers periodically during stress test.
+ */
+static void switch_stress_flipper_task (void)
+{
+	for (;;)
+	{
+		task_sleep (TIME_1500MS);
+#if (MACHINE_FLIPTRONIC == 1)
+		flipper_override_pulse (WPC_LL_FLIP_SW);
+#endif
+		task_sleep (TIME_1500MS);
+#if (MACHINE_FLIPTRONIC == 1)
+		flipper_override_pulse (WPC_LR_FLIP_SW);
+#endif
+		task_sleep (TIME_500MS);
+#ifdef DEBUGGER
+		db_dump_all ();
+#endif
+	}
+}
+
+
+/**
  * This task runs during a switch stress test.  During a game,
  * it randomly invokes switch handlers as if the switches had actually
  * been activated by the pinball.
@@ -37,6 +60,7 @@ void switch_stress_task (void)
 	task_pid_t tp;
 
 	device_add_live ();
+	task_create_peer (switch_stress_flipper_task);
 	for (;;)
 	{
 		task_sleep (TIME_100MS);
