@@ -27,6 +27,18 @@
 #include <freewpc.h>
 
 /**
+ * Apply a mono overlay onto a mono page.
+ */
+void dmd_overlay (void)
+{
+	dmd_pagepair_t dst = wpc_dmd_get_mapped ();
+	wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+	dmd_or_page ();
+	wpc_dmd_set_high_page (dst.u.second);
+}
+
+
+/**
  * Apply a color overlay onto the current color pages.
  */
 void dmd_overlay_color (void)
