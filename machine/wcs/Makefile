@@ -68,8 +68,6 @@ GAME_PAGED_OBJS = goalie_driver.o amode.o pitypoints.o \
 	effect.o skill.o rampdiv.o magna_goalie.o penalty.o \
 	quickmb.o city.o final.o multiplier.o ball_driver.o
 
-FIF_SRCS += $(M)/soccerball.fif $(M)/striker.fif $(M)/pgj.fif
-
 SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h build/lower_jet.h build/upper_jet.h \
 	build/kickback_driver.h build/spinner.h build/gate.h build/spinning_ball.h build/goalie.h \
 	build/lock_magnet.h build/magna_goalie.h build/soccer_ball.h

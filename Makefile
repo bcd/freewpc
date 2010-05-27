@@ -201,7 +201,6 @@ $(eval $(call include-tool,srec2bin))
 $(eval $(call include-tool,csum))
 $(eval $(call include-tool,wpcdebug))
 $(eval $(call include-tool,sched))
-$(eval $(call include-tool,fiftool))
 $(eval $(call include-tool,softscope))
 $(eval $(call include-tool,scope))
 $(eval $(call include-tool,bin2c))
@@ -239,14 +238,6 @@ include effect/Makefile
 
 
 EVENT_OBJS = $(BLDDIR)/callset.o
-
-ifeq ($(CONFIG_DMD),y)
-FIF_SRCS := images/tuxlogo.fif $(FIF_SRCS)
-
-FIF_SRCS += $(patsubst %.pgm,%.fif,$(PGM_SRCS))
-
-FIF_OBJS = $(patsubst %.fif,%.o,$(FIF_SRCS))
-endif
 
 BASIC_OBJS = $(KERNEL_BASIC_OBJS) $(COMMON_BASIC_OBJS) $(FONT_OBJS) $(TRANS_OBJS)
 
@@ -469,7 +460,6 @@ $(eval $(call PAGE_ALLOC, 55, MACHINE2))
 $(eval $(call PAGE_ALLOC, 59, MACHINE))
 endif
 $(eval $(call PAGE_ALLOC, 55, TRANS))
-$(eval $(call PAGE_ALLOC, 55, FIF))
 $(eval $(call PAGE_ALLOC, 56, COMMON))
 $(eval $(call PAGE_ALLOC, 57, EFFECT))
 $(eval $(call PAGE_ALLOC, 57, INIT))
@@ -497,12 +487,12 @@ C_OBJS := $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 
 
 ifeq ($(PLATFORM),wpc)
-OBJS = $(C_OBJS) $(AS_OBJS) $(FIF_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(AS_OBJS) $(FON_OBJS)
 else
 ifeq ($(PLATFORM),whitestar)
 OBJS = $(C_OBJS) $(AS_OBJS)
 else
-OBJS = $(C_OBJS) $(FIF_OBJS) $(FON_OBJS)
+OBJS = $(C_OBJS) $(FON_OBJS)
 endif
 endif
 
@@ -808,22 +798,18 @@ $(NATIVE_OBJS) $(C_OBJS) : %.o : %.c
 
 $(FON_OBJS) : %.o : %.fon
 
-$(FIF_OBJS) : %.o : %.fif
-
 $(filter-out $(BASIC_OBJS),$(C_OBJS)) : $(C_DEPS) $(GENDEFINES) $(REQUIRED)
 
-$(C_OBJS) $(FIF_OBJS) $(FON_OBJS) : $(IMAGE_HEADER)
+$(C_OBJS) $(FON_OBJS) : $(IMAGE_HEADER)
 
 $(NATIVE_OBJS) : $(GENDEFINES) $(REQUIRED)
 
 $(BASIC_OBJS) $(FON_OBJS) : $(MAKE_DEPS) $(GENDEFINES) $(REQUIRED)
 
-$(FIF_OBJS) : $(GENDEFINES)
-
 $(KERNEL_OBJS) : kernel/Makefile
 $(COMMON_OBJS) : common/Makefile
 
-$(filter-out $(HOST_OBJS),$(NATIVE_OBJS)) $(C_OBJS) $(FON_OBJS) $(FIF_OBJS):
+$(filter-out $(HOST_OBJS),$(NATIVE_OBJS)) $(C_OBJS) $(FON_OBJS):
 ifeq ($(CPU),m6809)
 	$(Q)echo "Compiling $< (in page $(PAGE)) ..." && $(CC) -x c -o $@ $(CFLAGS) -c $(PAGEFLAGS) -DPAGE=$(PAGE) -mfar-code-page=$(PAGE) $(SOFTREG_CFLAGS) $< >> $(ERR) 2>&1
 else

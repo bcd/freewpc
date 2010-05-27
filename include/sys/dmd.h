@@ -315,16 +315,6 @@ extern inline void dmd_map_overlay (void)
 	dmd_map_low_high (DMD_OVERLAY_PAGE);
 }
 
-#ifdef CONFIG_FIF
-__attribute__((deprecated)) const U8 *dmd_draw_fif1 (const U8 *fif);
-
-#define dmd_draw_fif(fif) \
-do { \
-	extern const U8 fif[]; \
-	dmd_draw_fif1 (fif); \
-} while (0)
-#endif
-
 /*
  * The parameters to a rough copy or erase operation.
  * The user parameters are given in terms of pixels, however these

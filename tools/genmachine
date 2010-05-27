@@ -78,7 +78,6 @@ my %contextDefinitionRe = (
 	"globalflags" => "AUTO",
 	"scores" => "AUTO",
 	"fonts" => "AUTO",
-	"fifs" => "AUTO",
 	"timers" => "AUTO",
 	"templates" => "AUTO",
 );
@@ -213,7 +212,6 @@ my %ContextPrefixes = (
 	"deffs" => "DEFF",
 	"leffs" => "LEFF",
 	"fonts" => "FON",
-	"fifs" => "FIF",
 	"timers" => "TIM",
 );
 

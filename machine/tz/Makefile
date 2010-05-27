@@ -77,8 +77,6 @@ GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
 	mpf.o powerball.o clocktarget.o deffs.o bonus.o star.o \
 	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
 
-FIF_SRCS += images/cow.fif
-
 IMAGE_MAP += $(M)/tz.ild
 
 SCHED_HEADERS += build/clock_mech.h build/bridge_open.h build/shooter_div.h \

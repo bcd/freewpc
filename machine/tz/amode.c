@@ -75,9 +75,7 @@ void egg_left_flipper (void)
 void brian_image_deff (void)
 {
 	dmd_alloc_low ();
-#ifdef CONFIG_FIF
-	dmd_draw_fif (fif_cow);
-#endif
+	frame_draw (IMG_COW);
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show_low ();

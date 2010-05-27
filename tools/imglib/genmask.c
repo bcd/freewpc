@@ -26,7 +26,6 @@ enum output_mode
 	ASCII,
 	XBM,
 	PGM,
-	FIF,
 };
 
 enum output_mode finish_mode = ASCII;
