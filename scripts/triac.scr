@@ -1,0 +1,6 @@
+# This script will set up triac signal capture.
+capture add triac 0
+capture add zerocross
+capture start triac 0
+capture stop after 100
+capture file test.out
