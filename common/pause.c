@@ -19,6 +19,12 @@
  */
 
 #include <freewpc.h>
+#include <search.h>
+
+/* Fail if this machine does not support mute/pause mode. */
+#if (MACHINE_FLIPTRONIC == 0)
+#error "CONFIG_MUTE_AND_PAUSE unsupported because no computer-controlled flippers"
+#endif
 
 void mute_and_pause_monitor (void)
 {

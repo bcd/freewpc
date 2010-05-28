@@ -26,5 +26,8 @@ void flipper_disable (void);
 void flipper_init (void);
 void fliptronic_rtt (void);
 void fliptronic_ball_search (void);
+void flipper_hold_on (void);
+void flipper_hold_off (void);
+void flipper_override_pulse (U8 switches);
 
 #endif /* _SYS_FLIP_H */

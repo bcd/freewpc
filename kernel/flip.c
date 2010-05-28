@@ -27,22 +27,30 @@
 #include <test.h>
 
 
-/** Says whether or not the flipper coils are enabled */
-__fastram__ U8 flippers_enabled;
+/** Says whether or not the flipper drivers are enabled.
+ * When TRUE, the flipper will operate when the button is pressed. */
+__fastram__ bool flippers_enabled;
 
+/** Stores the last computed values for the flipper outputs. */
 __fastram__ U8 fliptronic_powered_coil_outputs;
 
+/** A temporary register to hold the current flipper inputs */
 volatile __fastram__ U8 flipper_inputs;
 
+/** A temporary register to hold the most recent flipper outputs */
 volatile __fastram__ U8 flipper_outputs;
 
-
-/** Software controlled flipper inputs for Fliptronic games. */
+/** Software controlled flipper inputs for Fliptronic games.
+ * These inputs are ORed into the actual cabinet inputs to determine the
+ * flipper logic. */
 #if (MACHINE_FLIPTRONIC == 1)
 __fastram__ U8 flipper_overrides;
 #endif
 
 
+/**
+ * Enable the flippers.
+ */
 void flipper_enable (void)
 {
 	pinio_enable_flippers ();
@@ -50,6 +58,9 @@ void flipper_enable (void)
 }
 
 
+/**
+ * Disable the flippers.
+ */
 void flipper_disable (void)
 {
 	pinio_disable_flippers ();
@@ -62,28 +73,48 @@ void flipper_disable (void)
 
 #if (MACHINE_FLIPTRONIC == 1)
 
+/**
+ * Start an override on a particular flipper.
+ */
 void flipper_override_on (U8 switches)
 {
 	flipper_overrides |= switches;
 }
 
+
+/**
+ * Stop an override on a particular flipper.
+ */
 void flipper_override_off (U8 switches)
 {
 	flipper_overrides &= ~switches;
 }
 
+
+/**
+ * Turn on the lower flippers indefinitely.  This is only used by
+ * mute and pause mode.
+ */
 void flipper_hold_on (void)
 {
 	/* TODO - is this not reading the debounced values? */
 	flipper_overrides = ~wpc_read_flippers () & (WPC_LL_FLIP_SW | WPC_LR_FLIP_SW);
 }
 
+
+/**
+ * Turn off all flipper overrides.
+ */
 void flipper_hold_off (void)
 {
 	flipper_overrides = 0;
 }
 
 
+/**
+ * Pulse a flipper automatically.  This is used during ball search, but can
+ * be used for other effects (e.g. Thing Flips).
+ */
 void flipper_override_pulse (U8 switches)
 {
 	if (!(flipper_overrides & switches))
