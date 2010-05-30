@@ -148,6 +148,10 @@ extern U8 periodic_ok;
 /* CPU specifics */
 #include <sys/irq.h>
 
+/* Entry points to initialization */
+__noreturn__ void warm_reboot (void);
+__noreturn__ void freewpc_init (void);
+
 /* Platform specifics */
 #ifdef CONFIG_PLATFORM_WHITESTAR
 #define CPU_BOARD

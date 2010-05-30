@@ -141,7 +141,7 @@ void fatal (errcode_t error_code)
 #ifdef __m6809__
 	start ();
 #else
-	freewpc_init ();
+	warm_reboot ();
 #endif
 #endif
 }

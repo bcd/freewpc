@@ -41,7 +41,6 @@
 #include "/usr/include/sys/time.h"
 #include <simulation.h>
 
-extern __noreturn__ void freewpc_init (void);
 extern void do_swi3 (void);
 extern void do_swi2 (void);
 extern void do_firq (void);

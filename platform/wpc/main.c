@@ -43,7 +43,6 @@ void abort (void)
  * This maps to freewpc_init(). */
 int main (void)
 {
-	extern __noreturn__ void freewpc_init (void);
 	freewpc_init ();
 	return 0;
 }

@@ -2477,7 +2477,6 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern __noreturn__ void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
@@ -2489,7 +2488,7 @@ void revoke_init (void)
 	freewpc_accepted[2] = 0;
 	pinio_nvram_lock ();
 
-	freewpc_init ();
+	warm_reboot ();
 }
 
 struct window_ops revoke_window = {
