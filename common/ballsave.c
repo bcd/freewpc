@@ -32,7 +32,22 @@
 
 U8 ball_save_timer;
 
+/*
+ * Describe the ball save mode
+ */
+struct timed_mode_ops ball_save_mode = {
+	DEFAULT_MODE,
+	.gid = GID_BALLSAVER_TIMER,
+	.init_timer = 3,
+	.timer = &ball_save_timer,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
 
+
+/**
+ * Ball save lamp effect handler
+ */
 void ball_save_leff (void)
 {
 	for (;;)
@@ -44,48 +59,24 @@ void ball_save_leff (void)
 	}
 }
 
-void ballsave_timer_begin (void)
-{
-#ifdef MACHINE_BALL_SAVE_LAMP
-	leff_start (LEFF_BALL_SAVE);
-#endif
-}
 
-void ballsave_timer_expire (void)
-{
-#ifdef MACHINE_BALL_SAVE_LAMP
-	leff_stop (LEFF_BALL_SAVE);
-#endif
-}
-
-
-void ballsave_timer_task (void)
-{
-	U8 secs = (U8)task_get_arg ();
-	timed_mode_task (ballsave_timer_begin,
-		ballsave_timer_expire, NULL,
-		&ball_save_timer, secs, 3);
-}
-
+/**
+ * Start/extend the ballsaver.
+ */
 void ballsave_add_time (U8 secs)
 {
 	if (in_tilt)
 		return;
-	else if (timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer))
-	{
-		timed_mode_extend (&ball_save_timer, secs, 20);
-	}
-	else
-	{
-		task_pid_t tp = timed_mode_start (GID_BALLSAVER_TIMER,
-			ballsave_timer_task);
-		task_set_arg (tp, secs);
-	}
+	timed_mode_add (&ball_save_mode, secs);
 }
 
+
+/**
+ * Disable the ballsaver.
+ */
 void ballsave_disable (void)
 {
-	timed_mode_stop (&ball_save_timer);
+	timed_mode_end (&ball_save_mode);
 }
 
 
@@ -94,7 +85,7 @@ void ballsave_disable (void)
  */
 bool ballsave_test_active (void)
 {
-	return timed_mode_active_p (GID_BALLSAVER_TIMER, &ball_save_timer);
+	return timed_mode_running_p (&ball_save_mode);
 }
 
 
@@ -139,7 +130,10 @@ CALLSET_ENTRY (ballsave, valid_playfield)
 {
 #if MACHINE_BALL_SAVE_TIME > 0
 	if (!config_timed_game)
-		ballsave_add_time (MACHINE_BALL_SAVE_TIME);
+	{
+		timed_mode_begin (&ball_save_mode);
+		timed_mode_reset (&ball_save_mode, MACHINE_BALL_SAVE_TIME);
+	}
 #endif
 }
 
@@ -173,6 +167,24 @@ CALLSET_BOOL_ENTRY (ballsave, ball_drain)
 	{
 		return TRUE;
 	}
+}
+
+
+/**
+ * Update the ballsave lamp.
+ */
+CALLSET_ENTRY (ballsave, lamp_update)
+{
+#ifdef MACHINE_BALL_SAVE_LAMP
+	if (timed_mode_effect_running_p (&ball_save_mode))
+	{
+		leff_start (LEFF_BALL_SAVE);
+	}
+	else
+	{
+		leff_stop (LEFF_BALL_SAVE);
+	}
+#endif
 }
 
 /* TODO - handle early ball save due to an outlane drain */
