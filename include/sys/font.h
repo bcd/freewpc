@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -78,73 +78,78 @@ union dmd_coordinate {
 	};
 };
 
+
 /**
- *  A descriptor that encapsulates a font, a position
- *  on the display, and a constant string to be rendered
- *  there.  It is primarily to avoid passing too many
- *  arguments to subroutines.
+ *  The font rendering arguments -- which font to use and
+ *  where to position the upperleftmost pixel.  This static
+ *  structure is used primarily to avoid passing too many
+ *  arguments to subroutines, which is not well supported
+ *  on the 6809.
  */
 typedef struct
 {
 	const font_t *font;
 	union dmd_coordinate coord;
-	const char *s;
 } fontargs_t;
 
 extern __fastram__ fontargs_t font_args;
 
+
 void font_lookup_char (const font_t *font, char c);
-
-void font_get_string_area (const font_t *font, const char *s);
-
-void fontargs_render_string_center (void);
-void fontargs_render_string_right (void);
-void fontargs_render_string_left (void);
-
-/* The _2 versions will render the string to both mapped pages
-(low and high), and are more efficient than writing twice by hand. */
-void fontargs_render_string_center2 (void);
-void fontargs_render_string_right2 (void);
-void fontargs_render_string_left2 (void);
-
+void fontargs_render_string_center (const char *);
+void fontargs_render_string_right (const char *);
+void fontargs_render_string_left (const char *);
 void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
 void bitmap_blit2 (const U8 *blit_data, U8 x, U8 y);
 void bitmap_draw (union dmd_coordinate coord, U8 c);
 
+/**
+ * Helper macros for packing two 8-bit coordinates
+ * into a single 16-bit, or vice versa.
+ */
 #define MKCOORD1(x,y) (((U16)(x)<<8)|(y))
 #define MKCOORD(x,y) { .xy = MKCOORD1(x,y), }
 
+
+/**
+ * An internal macro for writing all of the font arguments that
+ * aren't passed as actual parameters into the global
+ * 'font_args' structure.
+ */
 #define DECL_FONTARGS(_f,_x,_y,_s) \
 	font_args.font = _f; \
 	font_args.coord.xy = MKCOORD1 (_x, _y); \
-	font_args.s = _s;
 
-
+/**
+ * The top-level API for writing a string, left justified.
+ */
 #define font_render_string_left(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_left (); \
+	fontargs_render_string_left (s); \
 }
-
 #define font_render_string font_render_string_left
 
 
+/**
+ * The top-level API for writing a string, centered about the
+ * given coordinate.
+ */
 #define font_render_string_center(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_center (); \
+	fontargs_render_string_center (s); \
 }
 
+
+/**
+ * The top-level API for writing a string, right justified.
+ * The pixel given is the upperrightmost.
+ */
 #define font_render_string_right(f,x,y,s) \
 { \
 	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_right (); \
-}
-
-#define font_render_string_center2(f,x,y,s) \
-{ \
-	DECL_FONTARGS(f,x,y,s); \
-	fontargs_render_string_center2 (); \
+	fontargs_render_string_right (s); \
 }
 
 #endif /* _SYS_FONT_H */

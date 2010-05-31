@@ -98,7 +98,7 @@ const struct score_font_info
 {
 	/* The function to call to draw the string.  This determines
 	the justification */
-	void (*render) (void);
+	void (*render) (const char *);
 
 	/* The font to be used */
 	const font_t *font;
@@ -196,7 +196,7 @@ void scores_draw_current (U8 single_player)
 		DECL_FONTARGS (info->font, info->x, info->y, sprintf_buffer);
 
 		/* Start printing to the display */
-		info->render ();
+		info->render (sprintf_buffer);
 #else
 		seg_write_string (0, 0, sprintf_buffer);
 #endif
