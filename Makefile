@@ -43,7 +43,7 @@ EXTRA_ASFLAGS += -D$1
 endef
 
 define nohave
-$1 := n
+$1 :=
 AUTO_CFLAGS += -U$1
 EXTRA_ASFLAGS += -U$1
 endef
