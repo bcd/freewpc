@@ -259,13 +259,13 @@ foreach $set (keys %functionhash) {
 			print FH "   /* warning: no section declared */\n";
 		}
 		print FH "   extern$modifier $rettype ${module}_$primary (void);\n";
+		my $idx = sprintf "0x%04XUL", $debug_id;
+		print FH "   callset_debug ($idx);\n";
+		$debug_id++;
 		if ($rettype eq $bool_type) {
 			print FH "   if (!${module}_$set ()) return FALSE;\n";
 		}
 		else {
-			my $idx = sprintf "0x%04XUL", $debug_id;
-			print FH "   callset_debug ($idx);\n";
-			$debug_id++;
 			print FH "   ${module}_$primary (); /* $modulehash{$module} */\n";
 		}
 	}
