@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+#
+# alphadiff - compare assembly output from two different compiler versions
 
 ver1=4.3.4
 ver2=4.4.1
@@ -15,6 +17,10 @@ recompile ()
 while [ "$1" != "" ]; do
 	arg=$1; shift
 	case $arg in
+		-c)
+			recompile $ver1
+			recompile $ver2
+			;;
 		*)
 			ver1=$arg
 			ver2=$1; shift
@@ -22,12 +28,9 @@ while [ "$1" != "" ]; do
 	esac
 done
 
-recompile $ver1
-recompile $ver2
 
 cd asm-$ver1 && ../tools/alphaglob *.s > tmp-$ver1
 cd ..
 cd asm-$ver2 && ../tools/alphaglob *.s > tmp-$ver2
 cd ..
-# vimdiff asm-$ver1/tmp-$ver1 asm-$ver2/tmp-$ver2
 diff -w asm-$ver1/tmp-$ver1 asm-$ver2/tmp-$ver2 > DIFFS.$ver1-$ver2
