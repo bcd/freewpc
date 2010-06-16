@@ -486,7 +486,6 @@ void task_exit (void)
 		fatal (ERR_IDLE_CANNOT_EXIT);
 
 	task_free (task_current);
-	task_current = 0;
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	task_count--;
 #endif
@@ -495,7 +494,7 @@ void task_exit (void)
 	 * guarantees this though.  The call to task_free() above
 	 * typically takes care of it, since X is needed for the
 	 * function argument. */
-	task_dispatcher ();
+	task_dispatcher (task_current);
 }
 
 
@@ -681,11 +680,9 @@ void *task_alloca (task_t *tp, U8 size)
  * periodic functions are guaranteed to run more frequently, but there is
  * no guarantee _how_ frequently.
  */
-__naked__ __noreturn__
-void task_dispatcher (void)
+__noreturn__
+void task_dispatcher (task_t *tp)
 {
-	register task_t *tp asm ("x");
-
 	task_dispatching_ok = TRUE;
 	task_current = 0;
 

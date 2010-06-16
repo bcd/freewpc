@@ -232,7 +232,7 @@ U16 task_get_arg (void);
 void task_set_arg (task_pid_t tp, U16 arg);
 void *task_get_pointer_arg (void);
 void task_set_pointer_arg (task_pid_t tp, void *arg);
-__noreturn__ void task_dispatcher (void);
+__noreturn__ void task_dispatcher (task_pid_t tp);
 #ifdef CONFIG_NATIVE
 task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
