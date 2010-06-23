@@ -64,21 +64,23 @@ PINMAME_OTHER_ROMS = tzu*.rom
 SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
 	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
 
-GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
+GAME_OBJS = clock.o sling.o jets.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o
 
 GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS = leftramp.o skill.o deadend.o camera.o \
+GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
 	spiral.o tsm.o fastlock.o door.o \
- 	rightramp.o hitch.o piano.o slot.o greed.o \
+ 	slot.o greed.o \
 	mpf.o clockmillions.o chaosmb.o powerball.o \
-	multiball.o sssmb.o deffs.o lock.o
+	multiball.o sssmb.o deffs.o
 
-GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o bonus.o tz_amode.o star.o \
-	rocket.o thingfl.o outhole.o rules.o
+GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
+	bonus.o tz_amode.o star.o rocket.o thingfl.o \
+	outhole.o rules.o lock.o camera.o \
+	combo.o deadend.o hitch.o
 
 FIF_SRCS += images/cow.fif
 

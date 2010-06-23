@@ -27,10 +27,9 @@ __local__ U8 spiral_loops;
 
 U16	start_loop_time;
 __local__ U8	loop_time;
+/* Used to pass loop score to deff */
+score_t loop_score;
 //__local__ U8	loop_speed_timer_value;
-//extern bool left_loopmag_enabled;
-//extern bool lower_right_loopmag_enabled;
-//extern bool upper_right_loopmag_enabled;
 
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
@@ -75,20 +74,23 @@ static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	loops++;
+	score_zero (loop_score);
 	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		powerball_loops++;
 
 		if (powerball_loops < 3)
-	{
+		{
 			sound_send (SND_ADDAMS_FASTLOCK_STARTED);
-		score (SC_5M);
-	}
+			score_add (loop_score, score_table[SC_5M]);
+			score (SC_5M);
+		}
 		else if (powerball_loops == 3)
 		{
 			sound_send (SND_LOAD_GUMBALL_NOW);
 			gumball_enable_count++;
 		//	flag_on (MAGNA_MB_LIT);
+			score_add (loop_score, score_table[SC_20M]);
 			score (SC_20M);
 //			powerball_loops = 0;
 		}
@@ -104,13 +106,23 @@ static void award_loop (void)
 	/* Plain Old Loop */
 	{
 		if (loops < 2)
-		score (SC_100K);
+		{
+			score_add (loop_score, score_table[SC_100K]);
+			score (SC_100K);
+		}
 		else if (loops > 2)
+		{
+			score_add (loop_score, score_table[SC_250K]);
 			score (SC_250K);
+		}
 		else if (loops > 4)
+		{
+			score_add (loop_score, score_table[SC_500K]);
 			score (SC_500K);
+		}
 		else if (loops > 9)
 		{	
+			score_add (loop_score, score_table[SC_5M]);
 			score (SC_1M);
 			sound_send (SND_THUNDER1);
 		}
@@ -162,15 +174,19 @@ static void award_right_loop (void)
 
 void loop_deff (void)
 {
-	
-	dmd_alloc_low_clean ();
-	psprintf ("1 LOOP", "%d LOOPS", loops);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	//TODO Doesn't always work
-	sprintf_score(score_deff_get ());	
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U8 i;
+	for (i = 0; i < 6; i++)
+	{
+		dmd_alloc_low_clean ();
+		psprintf ("1 LOOP", "%d LOOPS", loops);
+		font_render_string_center (&font_fixed6, 64, i, sprintf_buffer);
+		
+		sprintf_score (loop_score);
+		font_render_string_center (&font_mono5, 64, 11 + i, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (1);
 	deff_exit ();
 }
 

@@ -75,6 +75,8 @@ void gumball_diverter_open(void);
 void gumball_diverter_close(void);
 void gumball_load_from_trough(void);
 void gumball_release(void);
+void sw_gumball_right_loop_entered(void);
+
 U8 gumball_get_count (void);
 /* leffs.c */
 /* These should all be done by tz.md */
