@@ -29,6 +29,8 @@ __local__ U8 skill_min_value;
 
 extern inline void flash_deff_begin_static (void)
 {
+	//dmd_alloc_low_high ();
+	
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 }
@@ -160,8 +162,8 @@ static void skill_switch_monitor (void)
 
 static void award_skill_switch (U8 sw)
 {
+	event_can_follow (skill_shot, slot, TIME_3S);
 	callset_invoke (any_skill_switch);
-	event_can_follow (any_skill_switch, slot, TIME_3S);
 	if (!skill_shot_enabled && !flag_test (FLAG_SSSMB_RUNNING))
 		return;
 

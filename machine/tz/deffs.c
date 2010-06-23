@@ -34,27 +34,24 @@ void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 	deff_exit ();
 }
 
-void printf_millions (U8 n)
+void flash_small_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	sprintf ("%d,000,000", n);
-}
-
-void printf_thousands (U8 n)
-{
-	sprintf ("%d,000", n);
-}
-
-void replay_deff (void)
-{
-	sprintf ("REPLAY");
-	flash_and_exit_deff (20, TIME_100MS);
+	//dmd_alloc_low_high ();
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (flash_count, flash_delay);
+	//deff_exit ();
 }
 
 void extra_ball_deff (void)
 {
 	sound_send (SND_HERES_YOUR_EB);
 	U16 fno;
-	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 1)
+	for (fno = IMG_EBALL_START; fno <= IMG_EBALL_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -82,55 +79,76 @@ void driver_deff (void)
 	deff_exit ();
 }
 
+void printf_millions (U8 n)
+{
+	sprintf ("%d,000,000", n);
+}
+
+void printf_thousands (U8 n)
+{
+	sprintf ("%d,000", n);
+}
+
+void replay_deff (void)
+{
+	sprintf ("REPLAY");
+	flash_and_exit_deff (20, TIME_66MS);
+}
+
 
 void special_deff (void)
 {
 	sprintf ("SPECIAL");
 	flash_and_exit_deff (20, TIME_100MS);
 }
-/*
-void jackpot_deff (void)
+
+void two_way_combo_deff (void)
 {
-	U8 i;
-	for (i=1; i < 8; i++)
-	{
-		dmd_alloc_low_clean ();
-		sprintf ("JACKPOT");
-		if (i < 7)
-			sprintf_buffer[i] = '\0';
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		dmd_show_low ();
-		sound_send (SND_CLOCK_CHAOS_END_BOOM);
-		task_sleep (TIME_300MS);
-	}
+	sprintf ("2 WAY COMBO");
+	flash_and_exit_deff (15, TIME_66MS);
+}
 
-	for (i=0; i < 8; i++)
-	{
-		dmd_sched_transition (&trans_scroll_up);
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
-		dmd_show_low ();
-	}
-
-	for (i=0; i < 8; i++)
-	{
-		dmd_sched_transition (&trans_scroll_up);
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 8, "JACKPOT");
-		font_render_string_center (&font_fixed10, 64, 24, "JACKPOT");
-		dmd_show_low ();
-	}
-
-	dmd_alloc_low_high ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
-	dmd_copy_low_to_high ();
-	dmd_show_low ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (25, TIME_100MS);
-	task_sleep (TIME_500MS);
+void lucky_bounce_deff (void)
+{
+	sprintf ("LUCKY");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("BOUNCE");
+	flash_small_deff (15, TIME_33MS);
 	deff_exit ();
-}*/
+}
+
+void ball_from_lock_deff (void)
+{
+	sprintf ("WATCH OUT");
+	flash_small_deff (10, TIME_33MS);
+	sprintf ("BALL FROM LOCK");
+	flash_small_deff (10, TIME_200MS);
+	deff_exit ();
+}
+
+void button_masher_deff (void)
+{
+	sprintf ("IS MIKE PLAYING");
+	flash_small_deff (10, TIME_66MS);
+	sprintf ("BUTTON MASHER");
+	flash_small_deff (20, TIME_33MS);
+	deff_exit ();
+}
+
+void mb_ten_million_added_deff (void)
+{
+	sprintf ("10 MILLION ADDED");
+	flash_small_deff (20, TIME_33MS);
+	sprintf ("TO JACKPOT");
+	flash_small_deff (20, TIME_66MS);
+	deff_exit ();
+}
+
+void three_way_combo_deff (void)
+{
+	sprintf ("3 WAY COMBO");
+	flash_and_exit_deff (20, TIME_66MS);
+}
 
 /* Jackpot animation contributed by highrise */
 void jackpot_deff (void)
@@ -344,7 +362,19 @@ void ball_drain_outlane_deff (void)
 
 void ball_explode_deff (void)
 {
+	extern bool powerball_death;
 	U16 fno;
+	/* If the last ball in play, stop the music for more effect */
+	if (!multi_ball_play () && !ballsave_test_active ())
+		music_off ();
+	/* Whoops, lost the powerball before getting it in the gumball */
+	if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
+	{
+		sound_send (SND_NOOOOOOOO);
+		powerball_death = TRUE;
+		task_sleep (TIME_500MS);
+	}
+		
 	sound_send (SND_EXPLOSION_3);
 	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
 	{

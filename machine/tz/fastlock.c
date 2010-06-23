@@ -24,6 +24,8 @@
 
 U8 fastlock_round_timer;
 U8 fastlock_award;
+/* Stored for Deff */
+U8 fastlock_award_stored;
 __local__ U8 fastlocks_collected;
 
 extern U8 loop_time;
@@ -51,7 +53,7 @@ void fastlock_award_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "JACKPOT");
-	sprintf("%d MILLION", fastlock_award);
+	sprintf("%d MILLION", fastlock_award_stored);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
@@ -62,7 +64,7 @@ void fastlock_round_begin (void)
 {
 	deff_start (DEFF_FASTLOCK_ROUND);
 	fastlock_award = 5;
-	fastlocks_collected = 0;
+	fastlocks_collected = 1;
 }
 
 void fastlock_round_expire (void)
@@ -95,11 +97,12 @@ CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
 {
 	if (fastlock_running ())
 	{
+		deff_start (DEFF_FASTLOCK_AWARD);
+		fastlock_award_stored = fastlock_award;
 		score_multiple (SC_1M, fastlock_award);
 		fastlocks_collected++;
 		fastlock_award = (fastlocks_collected * 5);
 		fastlock_round_timer =+ 10;
-		deff_start (DEFF_FASTLOCK_AWARD);
 	}
 }
 
@@ -108,12 +111,12 @@ void fastlock_right_loop_completed (void)
 	if (!fastlock_running ())
 		return;
 
-	if (loop_time < 30)
+	if (loop_time < 40)
 	{
 		fastlock_award += 10;
 		sound_send (SND_CRASH);
 	}
-	else if (loop_time < 40)
+	else if (loop_time < 50)
 	{
 		fastlock_award += 5;
 		sound_send (SND_FIVE);

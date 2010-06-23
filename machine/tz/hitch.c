@@ -18,34 +18,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (hitch, __machine2__) */
+
 #include <freewpc.h>
 
 __local__ U8 hitch_count;
-__local__ U8 hitch_level;
 U8 hitch_round_timer;
-//bool hitch_deff_running;
 extern void award_unlit_shot (U8 unlit_called_from);
-
-/*void hitchhiker_deff (void)
-{
-	dmd_alloc_low ();
-	frame_draw (IMG_HITCHER);
-	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
-		sprintf("10 MILLION");
-	else
-	psprintf ("%d HITCHHIKER", "%d HITCHHIKERS", hitch_count);
-	font_render_string_center (&font_fixed6, 78, 10, sprintf_buffer);
-	dmd_sched_transition (&trans_scroll_left);
-	dmd_show_low ();
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}*/
+extern __local__ U8 mpf_enable_count;
 
 void hitchhiker_deff (void)
 {
 	/* Start a timer so jets won't stop animation */
-	timer_restart_free (GID_HITCHHIKER, TIME_4S);
+	timer_restart_free (GID_HITCHHIKER, TIME_3S);
 	U16 fno;
 	for (fno = IMG_HITCHHIKER_START; fno <= IMG_HITCHHIKER_END; fno += 2)
 	{
@@ -75,10 +60,10 @@ void hitchhiker_deff (void)
 	}
 	
 	
-		task_sleep_sec (1);
+		//task_sleep_sec (1);
+		task_sleep  (TIME_700MS);
 	/* Stop the timer so jets.c can show deffs again */
 	timer_kill_gid (GID_HITCHHIKER);
-	//hitch_deff_running = FALSE;
 	deff_exit ();
 	
 }
@@ -138,7 +123,6 @@ CALLSET_ENTRY (hitch, music_refresh)
 
 CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
-	//if (lamp_test (LM_PANEL_HH))
 	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
 		&hitch_round_timer))
 	{
@@ -152,17 +136,24 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 		award_unlit_shot (SW_HITCHHIKER);
 	}
 	bounded_increment (hitch_count, 99);
-	/*if (hitch_count == hitch_level)
+	
+	/* Yes, I know it's ugly, I'll fix it at some point */
+	if (hitch_count == 5 ||
+		hitch_count == 10 ||
+		hitch_count == 15 ||
+		hitch_count == 20 ||
+		hitch_count == 30 ||
+		hitch_count == 40 ||
+		hitch_count == 50 ||
+		hitch_count == 60 ||
+		hitch_count == 70 ||
+		hitch_count == 80 ||
+		hitch_count == 90 ||
+		hitch_count == 99 )
 	{
-		SECTION_VOIDCALL (__machine__, mpf_ball_count);
-		if (hitch_level == 2)
-			hitch_level = 5;
-		else
-			hitch_level += 5;
-	}*/
-	/* Wait a bit before showing deff if hit from rocket */
-	//if (event_did_follow (rocket, hitchhiker))
-	//	task_sleep (TIME_200MS);
+		mpf_enable_count++;
+		sound_send (SND_ARE_YOU_READY_TO_BATTLE);
+	}
 	deff_start (DEFF_HITCHHIKER);
 }
 
@@ -171,11 +162,9 @@ CALLSET_ENTRY (hitch, door_start_hitchhiker)
 	timed_mode_start (GID_HITCH_ROUND_RUNNING, hitch_round_task);
 }
 
-CALLSET_ENTRY (hitch, start_player)
+CALLSET_ENTRY (hitch, start_ball)
 {
 	hitch_count = 1;
-	//hitch_deff_running = FALSE;
-	/* hitch_level = 2;*/
 }
 
 CALLSET_ENTRY (hitch, end_ball)

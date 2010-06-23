@@ -65,14 +65,13 @@ static void rocket_kick_sound (void)
 
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
-	event_should_follow (rocket, hitchhiker, TIME_2S);
 	if (in_live_game)
 	{
-		leff_start (LEFF_NO_GI);
+		if (!multi_ball_play ())
+			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);
 		deff_start (DEFF_ROCKET);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, rocket_kick_sound);
-		leff_stop (LEFF_NO_GI);
 	}
 }

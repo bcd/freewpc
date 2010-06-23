@@ -132,6 +132,8 @@ void slot_kickout_leff (void)
 
 void gumball_strobe_leff (void)
 {
+	triac_leff_disable (TRIAC_GI_MASK);
+	triac_leff_enable (GI_LLEFT_PLAYFIELD+GI_POWERFIELD);
 	U8 i;
 	for (i = 0; i < 6 ; i++)
 	{
@@ -142,6 +144,7 @@ void gumball_strobe_leff (void)
 		flasher_pulse (FLASH_GUMBALL_LOW);
 		task_sleep (TIME_100MS * 2);
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -203,6 +206,26 @@ void multiball_running_leff (void)
 	leff_exit ();
 }
 
+static void pf_strobe_down_subtask (void)
+{
+	for (;;)
+		lamplist_apply (LAMPLIST_SORT2, leff_toggle);
+}
+
+void strobe_down_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (pf_strobe_down_subtask);
+	task_sleep (TIME_200MS);
+	leff_create_peer (pf_strobe_down_subtask);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	triac_leff_enable (TRIAC_GI_MASK);
+	leff_exit ();
+}
+
+
 static void pf_strobe_up_subtask (void)
 {
 	for (;;)
@@ -219,6 +242,37 @@ void strobe_up_leff (void)
 	task_kill_peers ();
 	leff_exit ();
 }
+
+static void rocket_leff_subtask (void)
+{
+	/* SORT4 = Right to left */
+	for (;;)
+		lamplist_apply (LAMPLIST_SORT4, leff_toggle);
+}
+
+void rocket_leff (void)
+{
+	U8 i;	
+	if (!multi_ball_play ())
+		triac_leff_disable (TRIAC_GI_MASK);
+	for (i=0; i< 7; i++)
+	{	
+		flasher_pulse (FLASH_UR_FLIPPER);
+		task_sleep (TIME_66MS);
+	}
+	triac_leff_enable (TRIAC_GI_MASK);
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (rocket_leff_subtask);
+	task_sleep (TIME_66MS);
+	leff_create_peer (rocket_leff_subtask);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+
+
+
 
 void multi_strobe1_subtask (void)
 { for (;;) { lamplist_set_apply_delay (TIME_33MS); lamplist_apply (LAMPLIST_SORT1, leff_toggle); task_sleep (TIME_500MS); } }
@@ -288,10 +342,8 @@ void left_loop_leff (void)
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	while (tsm_round_timer > 0)
-	{
+	while (tsm_round_timer != 0)
 		lamplist_apply (LAMPLIST_JETS, leff_toggle);
-	}
 	leff_exit ();
 }
 
@@ -366,22 +418,47 @@ void lock_leff (void)
 	leff_exit ();
 }
 
+static void powerball_leff_task (void)
+{
+	U8 i;
+	for (i=0; i < 8; i++)
+	{
+		flasher_pulse (FLASH_GUMBALL_LOW);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_UR_FLIPPER);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP2);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_GUMBALL_MID);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_CLOCK_TARGET);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP1);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_GUMBALL_HIGH);
+		task_sleep (TIME_100MS);
+	}
+	task_exit ();
+}
+
+void powerball_announce_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	leff_create_peer (powerball_leff_task);
+	task_sleep_sec (2);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_kill_peers ();
+	leff_exit ();	
+}
+
+
 void mpf_active_leff (void)
 {
-	/*
-	triac_leff_disable (GI_POWERFIELD);
-	task_sleep (TIME_500MS);
-	triac_leff_disable (GI_LLEFT_PLAYFIELD);
-	task_sleep (TIME_500MS);
-	triac_leff_disable (GI_LRIGHT_PLAYFIELD);
-	task_sleep (TIME_500MS);
-	triac_leff_disable (GI_CLOCK);
-	task_sleep (TIME_500MS);
-	triac_leff_disable (GI_MYSTERY);
-	*/
-	triac_leff_disable (TRIAC_GI_MASK);
+	if (!multi_ball_play ())
+		triac_leff_disable (TRIAC_GI_MASK);
 	triac_leff_enable (GI_POWERFIELD);
-//	triac_leff_enable (TRIAC_GI_MASK);	
 	lamplist_set_apply_delay (TIME_100MS);
 	while (mpf_active == TRUE)
 	{
@@ -390,14 +467,57 @@ void mpf_active_leff (void)
 	leff_exit ();
 }
 
-void spiralaward_leff (void)
+void mpf_hit_leff (void)
 {
-	lamplist_set_apply_delay (TIME_33MS);
-	while (task_find_gid (TIM_SPIRALAWARD))
-	{
-		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);
-	}
+	U8 i = 5;
+	do {
+		triac_leff_disable (GI_POWERFIELD);
+		task_sleep (TIME_66MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		triac_leff_enable (GI_POWERFIELD);
+		task_sleep (TIME_66MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+	} while (--i != 0);
+	leff_exit ();
+}
+
+void left_jet_flash_leff (void)
+{
+/*	U8 i = 6;
+	do {
+		lamp_toggle (LM_LEFT_JET);
+		task_sleep (TIME_16MS);
+	} while (--i != 0);
+*/
+	leff_exit ();
+}
+
+void right_jet_flash_leff (void)
+{
+/*
+	U8 i = 6;
+	do {
+		lamp_toggle (LM_RIGHT_JET);
+		task_sleep (TIME_16MS);
+	} while (--i != 0);
+*/
 	leff_exit ();
 }
 
 
+void spiralaward_leff (void)
+{
+	//TODO Randomise this
+	U8 i = 42;
+	lamplist_set_apply_delay (TIME_33MS);
+	do {
+		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, matrix_lookup (LMX_EFFECT1_LAMPS));
+	} while (--i != 0);
+	leff_exit ();
+}

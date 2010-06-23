@@ -49,7 +49,7 @@ void sslot_award_rotate (void)
 			if (sslot_award_index >= NUM_SSLOT_AWARDS - 1)
 				sslot_award_index = 0;
 		}
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_700MS);
 	}
 
 }
@@ -128,18 +128,23 @@ void sslot_award (void)
 			light_easy_extra_ball ();
 			break;
 		case 1:
+			sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
 			gumball_enable_count++;
 			break;
 		case 2:
+			sound_send (SND_ARE_YOU_READY_TO_BATTLE);
 			mpf_enable_count++;
 			break;
 		case 3:
+			sound_send (SND_MOST_UNUSUAL_CAMERA);
 			cameras_lit++;
 			break;
 		case 4:
+			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);
 			break;
 		case 5:
+			sound_send (SND_SEE_WHAT_GREED);
 			score (SC_5M);
 			break;
 		default:
@@ -161,6 +166,10 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		/* dead end was recently hit, so ignore slot */
 	}
+	if (event_did_follow (gumball_exit, slot))
+	{
+		/* dead end was recently hit, so ignore slot */
+	}
 	else if (event_did_follow (piano, slot))
 	{
 		/* piano was recently hit, so ignore slot */
@@ -169,7 +178,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (event_did_follow (any_skill_switch, slot))
+	else if (event_did_follow (skill_shot, slot))
 	{
 		/* skill switch was recently hit, so ignore slot */
 		callset_invoke (skill_missed);
@@ -200,8 +209,11 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 		leff_start (LEFF_SLOT_KICKOUT);
 		task_sleep (TIME_100MS * 5);
 		task_create_gid (0, slot_kick_sound);
+		if (!multi_ball_play ())
+			event_can_follow (slot_kick, outhole, TIME_1S TIME_600MS);
 	}
 }
+
 CALLSET_ENTRY (slot, display_update)
 {
 	if (timed_mode_timer_running_p (GID_SSLOT_ROUND_RUNNING,
@@ -228,4 +240,9 @@ CALLSET_ENTRY (slot, end_ball)
 
 CALLSET_ENTRY (slot, start_player)
 {
+}
+
+CALLSET_ENTRY (slot, ball_search)
+{
+	sol_request (SOL_SLOT);
 }

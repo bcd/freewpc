@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (lock, __machine2__ ) */
+
 /* More code for the lock is in Multiball.c */
 
 #include <freewpc.h>

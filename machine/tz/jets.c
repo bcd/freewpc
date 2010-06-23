@@ -65,13 +65,26 @@ void sw_jet_sound (void)
 
 void jets_hit_deff (void)
 {
+	U8 i = 0;
+	do {
+	U8 x = random_scaled (4);
+	U8 y = random_scaled (4);
 	dmd_alloc_low_clean ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
 	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep (TIME_500MS);
+	task_sleep (TIME_33MS);
+	} while (i++ < 8);
+	/* Redraw it so the 'HITS' text is centred */
+	dmd_alloc_low_clean ();
+	psprintf ("1 HIT", "%d HITS", jets_scored);
+	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
+	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
 	deff_exit ();
 }
 
@@ -88,6 +101,12 @@ void jets_level_up_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
+}
+
+/* Hack to make slings work as jets */
+CALLSET_ENTRY (jet, sw_sling)
+{
+	callset_invoke (sw_jet);
 }
 
 CALLSET_ENTRY (jet, sw_jet)

@@ -18,21 +18,31 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/*
+ * Spiral Award rules
+ *
+ * Hitting either left inlane rollover triggers a 3 second timer
+ * and light display.  If the player hits the left_loop with the
+ * timer then they receive a random Spiral award.
+ *
+ * Once they have collected each individual award, they will receive 20 million
+ * but to retrigger the spiral award timer, they will have to complete
+ * a rollover set, rather than just one.
+ */
 
-/* Spiral Award - 3 second timer is started by either inlane (logic in inlane.c)
- * Lamps are lit at start and turned off after being awarded */
 
-/* TODO: Fix bug with leff, doesn't show sometimes */
 /* CALLSET_SECTION (spiralaward, __machine2__) */
+
+
 #include <freewpc.h>
 #include <eb.h>
 
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 __local__ U8 total_spiralawards_collected; 
+__local__ bool spiralaward_completed;
 
 extern __local__ U8 mpf_enable_count;
-extern void magnet_flag_task (U8 magnet, U8 seconds);
 
 const char *spiralaward_names[] = {
 	"2 MILLION",
@@ -84,12 +94,10 @@ static void flash_spiralaward_lamp (void)
 
 void start_spiralaward_timer (void)
 {	
-	if (!multi_ball_play () && !task_kill_gid (TIM_SPIRALAWARD))
+	if (!multi_ball_play () && !task_kill_gid (GID_SPIRALAWARD))
 	{
-		timer_restart_free (TIM_SPIRALAWARD, TIME_3S);
-		leff_restart (LEFF_SPIRALAWARD);
-		/* Turn on left magnet flag for 4 seconds */
-		magnet_flag_task (0, 4);
+		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
+		leff_start (LEFF_SPIRALAWARD);
 	}
 }
 
@@ -109,21 +117,25 @@ static void award_spiralaward (void)
 	while (spiralaward == 5 && spiralawards_collected < 3)
 		spiralaward = random_scaled (6);
 	
+	
 	switch (spiralaward)
 	{
 		case 0:
 			score (SC_2M);
 			break;
 		case 1:
-			mpf_enable_count++;
+			sound_send (SND_ARE_YOU_READY_TO_BATTLE);
+			bounded_increment (mpf_enable_count, 99);
 			break;
 		case 2:
 			score (SC_4M);
 			break;
 		case 3:
-			mpf_enable_count++;
+			sound_send (SND_ARE_YOU_READY_TO_BATTLE);
+			bounded_increment (mpf_enable_count, 99);
 			break;
 		case 4:
+			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);
 			break;
 		case 5:
@@ -136,25 +148,38 @@ static void award_spiralaward (void)
 	/* Run lamp flash as task so it can run in parallel */
 	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
 	/* reset lamps after all 6 have been collected */
-	if (spiralawards_collected == 6)
+	if (spiralawards_collected == 7)
 	{	
 		/* Wait until lamp flash has finished */
 		while (task_find_gid (GID_FLASH_SPIRALAWARD_LAMP))
 			task_sleep (TIME_500MS);
+		/* Reset Spiral Lamps */
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 		spiralawards_collected = 0;
+		/* Turn off Spiral EB if already collected */
+		if (spiralaward_completed == TRUE)
+		{
+			lamp_off (LM_SPIRAL_EB);
+			spiralawards_collected++;
+		}
+		spiralaward_completed = TRUE;
 	}
 }
 
 void spiralaward_right_loop_completed (void)
 {
-	if (task_kill_gid (TIM_SPIRALAWARD))
-	{	
-		free_timer_stop (TIM_SPIRALAWARD);
+	if (task_kill_gid (GID_SPIRALAWARD))
+	{
 		leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();
 	}
+}
+
+CALLSET_ENTRY (spiralaward, lamp_update)
+{
+	if ( leff_running_p (LEFF_SPIRALAWARD) && !task_find_gid (GID_SPIRALAWARD))
+		leff_stop (LEFF_SPIRALAWARD);
 }
 
 CALLSET_ENTRY (spiralaward, start_player)
@@ -162,4 +187,5 @@ CALLSET_ENTRY (spiralaward, start_player)
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 	spiralawards_collected = 0;
 	total_spiralawards_collected = 0;
+	spiralaward_completed = FALSE;
 }

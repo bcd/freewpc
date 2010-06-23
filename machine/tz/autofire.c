@@ -82,12 +82,14 @@ void autofire_monitor (void)
 
 	/* Open diverter again and kick ball. */
 	shooter_div_start ();
-	task_sleep (TIME_300MS);
+	task_sleep (TIME_700MS);
 
-	sol_request (SOL_AUTOFIRE);
+	sol_pulse (SOL_AUTOFIRE);
 	if (in_live_game)
+	{
 		sound_send (SND_EXPLOSION_1);
-
+		leff_start (LEFF_STROBE_UP);
+	}
 	/* Say that the ball is heading into the right loop */
 	event_can_follow (autolaunch, right_loop, TIME_4S);
 	autofire_busy = FALSE;
@@ -133,8 +135,8 @@ void autofire_add_ball (void)
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
 		/* Wait for divertor to open */
-		task_sleep_sec (1);
-		sol_request_async (SOL_BALL_SERVE);
+		task_sleep_sec (1);		
+		sol_pulse (SOL_BALL_SERVE);
 	}
 	else
 	{
@@ -176,7 +178,7 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
-		/* Wait for the divertor to open */
+		/* Wait for the divertor to open */	
 		task_sleep (TIME_300MS);
 	}
 	else

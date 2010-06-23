@@ -39,6 +39,8 @@
 #define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
+
+
 typedef enum {
 	PF_STEEL_DETECTED = 1,
 	PF_PB_DETECTED,
@@ -85,21 +87,9 @@ void pb_detect_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (3);
 #else
-#if 0
-	//dmd_alloc_low_high ();
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");
-	dmd_sched_transition (&trans_vstripe_right2left);
 	sound_send (SND_POWERBALL_QUOTE);
-	dmd_show_low ();
-	task_sleep (TIME_500MS);
-	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);
-	dmd_copy_low_to_high ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (32, TIME_100MS);
-#endif
-	sound_send (SND_POWERBALL_QUOTE);
+	if (!multi_ball_play ())
+		leff_start (LEFF_POWERBALL_ANNOUNCE);
 	U16 fno;
 	U8 i;
 	/* Loop anim 6 times */
@@ -109,18 +99,13 @@ void pb_detect_deff (void)
 		{
 			dmd_alloc_pair ();
 			frame_draw (fno);
-			//copy text to seperate page
-			//OR current page 
-	//		dmd_overlay_onto_color ();
 			dmd_flip_low_high ();
 			font_render_string_center (&font_var5, 64, 25, "POWERBALL");
 			dmd_flip_low_high ();
 			dmd_show2 ();
 			task_sleep (TIME_100MS);
-	//		dmd_map_overlay ();
 		}
 	}
-	//task_sleep_sec (1);
 #endif
 	deff_exit ();
 }
@@ -171,7 +156,6 @@ void pb_set_location (U8 location, U8 depth)
 		pb_location = location;
 		if (pb_location & PB_HELD)
 		{
-			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
 		}
@@ -247,7 +231,8 @@ static void pb_detect_event (pb_event_t event)
 
 		case TROUGH_STEEL_DETECTED:
 			if (device_entry (DEVNO_TROUGH)->actual_count == 1)
-				pb_clear_location (PB_IN_TROUGH);
+				pb_clear_location (0);
+		//		pb_clear_location (PB_IN_TROUGH);
 #ifdef PB_DEBUG
 			else
 				pb_clear_location (0);
@@ -256,7 +241,6 @@ static void pb_detect_event (pb_event_t event)
 
 		case TROUGH_PB_DETECTED:
 			pb_set_location (PB_IN_TROUGH, 1);
-			pb_clear_location (PB_MAYBE_IN_PLAY);
 			break;
 	}
 }
@@ -308,12 +292,7 @@ void pb_poll_trough (void)
 /** Called when a ball enters the trough or the lock. */
 void pb_container_enter (U8 location, U8 devno)
 {
-	device_t *dev;
-
-	if (devno != 0xFF)
-		dev = device_entry (devno);
-	else
-		dev = NULL;
+	device_t *dev = device_entry (devno);
 
 	/* If the powerball is known to be in play, then the act
 	of a ball entering a device is significant. */
@@ -332,16 +311,11 @@ void pb_container_enter (U8 location, U8 devno)
 			 * powerball to be reannounced.  So optimize this by not
 			 * doing anything.
 			 */
-			if (!dev || (dev->max_count != 1))
+			if (dev->max_count != 1)
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
-				pb_clear_location (PB_MAYBE_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
-				if (dev)
-					pb_set_location (location, dev->actual_count);
-				else
-					pb_set_location (location, gumball_get_count ());
 			}
 		}
 		else
@@ -366,7 +340,7 @@ void pb_container_enter (U8 location, U8 devno)
  * shifts down by 1, and it may be in play now. */
 void pb_container_exit (U8 location)
 {
-//	if (pb_location == location)
+	if (pb_location == location)
 	{	
 		if (--pb_depth == 0)
 		{
@@ -426,11 +400,6 @@ CALLSET_ENTRY (pb_detect, dev_lock_enter)
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
 }
 
-CALLSET_ENTRY (pb_detect, dev_gumball_enter)
-{
-	pb_container_enter (PB_IN_GUMBALL, 0xFF);
-}
-
 CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)
 {
 	dbprintf ("PB: about to kick trough\n");
@@ -449,10 +418,6 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 	pb_container_exit (PB_IN_LOCK);
 }
 
-CALLSET_ENTRY (pb_detect, dev_gumball_kick_success)
-{
-	pb_container_exit (PB_IN_GUMBALL);
-}
 
 CALLSET_ENTRY (pb_detect, start_ball)
 {
@@ -460,14 +425,7 @@ CALLSET_ENTRY (pb_detect, start_ball)
 }
 
 
-CALLSET_ENTRY (pb_detect, diagnostic_check)
-{
-	if (feature_config.powerball_missing)
-		diag_post_error ("POWERBALL\nIS MISSING\n", PAGE);
-}
-
-
-CALLSET_ENTRY (pb_detect, init_complete)
+CALLSET_ENTRY (pb_detect, init)
 {
 	pb_location = PB_MISSING;
 	last_pb_event = 0;

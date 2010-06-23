@@ -47,12 +47,12 @@ CALLSET_ENTRY (thingfl, thing_flips)
 		return;
 	timer_restart_free (GID_THING_FLIPS_SUCCESS, TIME_2S);
 	//4, 31 too quick
-	if (loop_time < 27)
-		delay = 4;
+	if (loop_time < 20)
+		delay = 3;
 	else if (loop_time < 35)
-		delay = 5;
+		delay = 4;
 	else if (loop_time < 50)
-		delay = 6;
+		delay = 5;
 	else if (loop_time < 60)
 		delay = 7;
 	else
@@ -67,11 +67,14 @@ CALLSET_ENTRY (thingfl, thing_flips)
 	//delay = (TIME_33MS + loop_speed);	
 	//TODO Check for powerball and adjust accordingly
 	//TODO loop.c already checks for a right loop and thing_flips_enable_count, should it be here?
-	task_sleep (delay);//Use a magic number here?
+	task_sleep (delay - 1);//Use a magic number here?
 	flipper_override_pulse (WPC_UL_FLIP_SW);
 	if (in_live_game)
 		deff_start (DEFF_THING_FLIPS);
 	thing_flips_attempts++;
+/* SUCCESSES 
+ * delay 4, speed 20 with the powerball SWEET!
+ * */
 }
 
 CALLSET_ENTRY (thingfl, sw_piano)

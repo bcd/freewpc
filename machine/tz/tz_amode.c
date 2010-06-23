@@ -197,21 +197,21 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 22, "BCD");
+	font_render_string_center (&font_bitmap8, 64, 22, "BCD");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 22, "HIGHRISE");
+	font_render_string_center (&font_bitmap8, 64, 22, "HIGHRISE");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed10, 64, 7, "ANIMATIONS BY");
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_term6, 64, 22, "SONNY JIM");
+	font_render_string_center (&font_bitmap8, 64, 22, "SONNY JIM");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
 	show_text_on_stars ();

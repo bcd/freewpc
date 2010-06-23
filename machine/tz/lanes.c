@@ -24,6 +24,7 @@
 
 /* How many times the rollovers have been completed */
 U8 rollover_count;
+extern __local__ bool spiralaward_completed;
 
 static void handle_outlane (void)
 {
@@ -31,6 +32,9 @@ static void handle_outlane (void)
 	 * drain and a center drain when the ball reaches the trough. */
 	event_can_follow (any_outlane, center_drain, TIME_7S);
 	deff_start (DEFF_BALL_DRAIN_OUTLANE);
+	
+	if (!multi_ball_play ())
+		leff_start (LEFF_STROBE_DOWN);
 }
 
 static bool rollover_completed (void)
@@ -45,8 +49,11 @@ static bool rollover_completed (void)
 
 static void award_rollover_completed (void)
 {
-	rollover_count++;
+	bounded_increment (rollover_count, 99);
 	score (SC_1M);
+	/* Hack as I can't be bothered to fix the sw_right_inlane on my table */	
+	if (!lamp_test (LM_DEAD_END))
+		lamp_on (LM_DEAD_END);
 	/* Show animation */
 	deff_start (DEFF_ROLLOVER_COMPLETED);
 	/* Turn off inlane lamps */
@@ -54,14 +61,17 @@ static void award_rollover_completed (void)
 	lamplist_apply (LAMPLIST_INLANES, lamp_flash_on);
 	task_sleep_sec (1);
 	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
-	/* Score it */
 }
 
 static void check_rollover (void)
 {
 	/* Check to see if rollover has been completed */
 	if (rollover_completed ())
+	{
 		award_rollover_completed ();
+		if (spiralaward_completed == TRUE)
+			start_spiralaward_timer ();
+	}
 }
 
 /* Flipper button handlers */
@@ -92,21 +102,25 @@ CALLSET_ENTRY (lanes, sw_right_outlane)
 /* 'Light Spiral' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
+	/* Start the spiralaward timer only if the lane has 
+	 * just been lit */
+	if (!lamp_test (LM_LEFT_INLANE1) && !spiralaward_completed)
+		start_spiralaward_timer ();
 	lamp_on (LM_LEFT_INLANE1);
 	check_rollover ();
 	score (SC_1K);
 	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
-	start_spiralaward_timer ();
 	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
 /* 'Light Slot Machine' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
+	if (!lamp_test (LM_LEFT_INLANE2) && !spiralaward_completed)
+		start_spiralaward_timer ();
 	lamp_on (LM_LEFT_INLANE2);
 	check_rollover ();
 	score (SC_1K);
-	start_spiralaward_timer ();
 	event_can_follow (left_inlane_2, slot, TIME_3S);
 }
 

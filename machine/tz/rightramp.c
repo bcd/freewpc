@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 #include <freewpc.h>
 #include <bridge_open.h>
 
@@ -27,13 +28,13 @@ extern void award_unlit_shot (U8 unlit_called_from);
 U8 right_ramps_entered;
 
 
-void right_ramp_default_deff (void)
+/*void right_ramp_default_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 	deff_exit ();
 }
-
+*/
 
 void sw_right_ramp_enter_task (void)
 {
@@ -72,22 +73,13 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 	/* Scoring functions only happen during a game */
 	if (!in_live_game)
 		return;
-	if (task_kill_gid (GID_LEFT_RAMP_TO_RIGHT_RAMP))
-	{
-		sound_send (SND_RABBLE_RABBLE);
-		timer_restart_free (GID_LR_TO_RR_TO_PIANO, TIME_3S);
-		score (SC_10M);
-	}
+	
 	score (SC_10K);
 	if (mpf_ready_p ())
-	{
-		if (!task_kill_gid (GID_LR_TO_RR_TO_PIANO))
-			sound_send (SND_RAMP_ENTERS_POWERFIELD);
-	}
+		sound_send (SND_RAMP_ENTERS_POWERFIELD);
 	else
 	{	
-		if (!task_kill_gid (GID_LR_TO_RR_TO_PIANO))
-			sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
+		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
 		award_unlit_shot (SW_RIGHT_RAMP);
 	}
 }

@@ -18,16 +18,21 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (camera, __machine2__) */
+
 #include <freewpc.h>
 extern void award_unlit_shot (U8 unlit_called_from);
 extern void mball_start_3_ball (void);
 extern bool door_awarded_from_slot;
+extern U8 unlit_shot_count;
+extern U8 jackpot_level;
+
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
-	CAMERA_AWARD_DOOR_PANEL,
 	CAMERA_AWARD_10_MILLION,
-	CAMERA_AWARD_QUICK_MB,
+	CAMERA_AWARD_DOOR_PANEL,
 	CAMERA_AWARD_20_MILLION,
+	CAMERA_AWARD_QUICK_MB,
 	MAX_CAMERA_AWARDS,
 } camera_award_t;
 
@@ -40,7 +45,6 @@ extern U8 mball_locks_lit;
 
 void camera_award_deff (void)
 {
-	kickout_lock (KLOCK_DEFF);
 	U16 fno;
 	for (fno = IMG_CAMERA_START; fno <= IMG_CAMERA_END; fno += 2)
 	{
@@ -86,13 +90,13 @@ void camera_award_deff (void)
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
 	task_sleep_sec (2);
-	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 
 
 static void do_camera_award (void)
 {
+	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
 	deff_start (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
@@ -108,10 +112,15 @@ static void do_camera_award (void)
 			break;
 		case CAMERA_AWARD_10_MILLION:
 			/* 10 Million */
+			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);	
+			/* Spot door panel if not lit */
+			if (!lamp_test (LM_PANEL_10M))
+				lamp_on (LM_PANEL_10M);
 			break;
 		case CAMERA_AWARD_QUICK_MB:
 			/* Quick Multiball */
+			callset_invoke (mball_start_2_ball);
 			callset_invoke (mball_start);
 			break;
 		case CAMERA_AWARD_20_MILLION:
@@ -120,8 +129,7 @@ static void do_camera_award (void)
 		default:
 			break;
 	}
-	if (cameras_lit > 0)
-		cameras_lit--;
+	bounded_decrement (cameras_lit, 0);
 	camera_award_count++;
 	if (camera_award_count >= MAX_CAMERA_AWARDS)
 		camera_award_count = 1;
@@ -130,29 +138,40 @@ static void do_camera_award (void)
 
 static bool can_award_camera (void)
 {
-	if (cameras_lit > 0 && !multi_ball_play ())
+	if (cameras_lit != 0 && !multi_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
 }
+
 CALLSET_ENTRY (camera, sw_camera)
 {
-	device_switch_can_follow (camera, slot, TIME_6S);
+	device_switch_can_follow (camera, slot, TIME_3S);
 	if (event_did_follow (mpf_top, camera))
 	{
 		callset_invoke (mpf_collected);
 	}
 	else if (event_did_follow (gumball_exit, camera))
 	{
+		return;
 	}
 	else if (event_did_follow (dead_end, camera))
 	{
+		return;
 	}
 	else if (can_award_camera ())
 	{
 		do_camera_award ();
 		score (SC_500K);
 		sound_send (SND_CAMERA_AWARD_SHOWN);
+	}
+	else if (multi_ball_play ()&& flag_test (FLAG_MB_JACKPOT_LIT))
+	{
+		if (jackpot_level < 5)
+		{
+			jackpot_level++;
+			deff_start (DEFF_MB_TEN_MILLION_ADDED);
+		}
 	}
 	else
 	{
@@ -168,6 +187,8 @@ CALLSET_ENTRY (camera, lamp_update)
 {
 	if (can_award_camera ())
 		lamp_tristate_flash (LM_CAMERA);
+	else if (multi_ball_play () && flag_test (FLAG_MB_JACKPOT_LIT))
+		lamp_tristate_flash (LM_CAMERA);
 	else
 		lamp_tristate_off (LM_CAMERA);
 }
@@ -176,4 +197,11 @@ CALLSET_ENTRY (camera, start_player)
 {
 	cameras_lit = 1;
 	camera_award_count = 0;
+}
+
+
+CALLSET_ENTRY (camera, door_start_camera)
+{
+	sound_send (SND_MOST_UNUSUAL_CAMERA);
+	cameras_lit++;
 }

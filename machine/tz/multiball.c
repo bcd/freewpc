@@ -39,6 +39,8 @@ extern U8 live_balls;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;
 extern bool fastlock_running (void);
+extern U8 lucky_bounces;
+extern __machine__ void mpf_countdown_task (void);
 
 /* Rules to say whether we can start multiball */
 bool multiball_ready (void)
@@ -110,6 +112,9 @@ CALLSET_ENTRY (mball, music_refresh)
 		music_request (MUS_FASTLOCK_COUNTDOWN, PRI_GAME_MODE1);
 	else if (flag_test (FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
+	
+	if (mball_restart_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN_TASK))
+		task_create_gid (GID_MPF_COUNTDOWN_TASK, mpf_countdown_task);
 }
 
 void lock_lit_deff (void)
@@ -174,10 +179,12 @@ void mb_running_deff (void)
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
+		//printf_millions (jackpot_level * 10);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		if (flag_test (FLAG_MB_JACKPOT_LIT))
 		{
-			font_render_string_center (&font_var5, 64, 27, "SHOOT PIANO FOR JACKPOT");
+			sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		}
 		else
 		{
@@ -195,6 +202,7 @@ void mb_running_deff (void)
 }
 
 /* Check to see if we can light the lock/lock a ball */
+//TODO Check if lock is full already
 bool can_lock_ball (void)
 {	
 	if ((mball_locks_lit > 0) 
@@ -202,11 +210,8 @@ bool can_lock_ball (void)
 		&& !flag_test (FLAG_SSSMB_RUNNING) 
 		&& !flag_test (FLAG_CHAOSMB_RUNNING)
 		&& !multi_ball_play ()
-		//TODO Doesn't always work
+		//TODO Doesn't work
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
-		return TRUE;
-		/* Lock ball when doing a multiball restart to stop err 23 */
-	else if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
 		return TRUE;
 	else
 		return FALSE;
@@ -241,17 +246,27 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_off (LM_MULTIBALL);
 	
 	if (multi_ball_play ())
+	{
+		/* Turn off during multiball */
+		lamp_tristate_off (LM_LOCK1);
+		lamp_tristate_off (LM_LOCK2);
 		return;
+	}
 	/* Turn on and flash door lock lamps during game situations */
 	if (mball_locks_made == 0 && mball_locks_lit == 0)
 	{
 		lamp_tristate_off (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
 	}
-	else if (mball_locks_made == 0 && mball_locks_lit >= 1)
+	else if (mball_locks_made == 0 && mball_locks_lit == 1)
 	{
 		lamp_tristate_flash (LM_LOCK1);
 		lamp_tristate_off (LM_LOCK2);
+	}
+	else if (mball_locks_made == 0 && mball_locks_lit > 1)
+	{
+		lamp_tristate_flash (LM_LOCK1);
+		lamp_tristate_flash (LM_LOCK2);
 	}
 	else if (mball_locks_made == 1 && mball_locks_lit == 0)
 	{
@@ -278,12 +293,9 @@ CALLSET_ENTRY (mball, lamp_update)
 
 void mball_light_lock (void)
 {
-	if (mball_locks_lit < 2)
-	{
-		mball_locks_lit++;
-		sound_send (SND_GUMBALL_COMBO);
-		deff_start (DEFF_LOCK_LIT);
-	}
+	bounded_increment (mball_locks_lit, 2);
+	sound_send (SND_GUMBALL_COMBO);
+	deff_start (DEFF_LOCK_LIT);
 }
 
 /* Check to see if GUMBALL has been completed and light lock */
@@ -291,20 +303,20 @@ void mball_check_light_lock (void)
 {
 	if (lamp_test (LM_GUM) && lamp_test (LM_BALL))
 	{
-		mball_light_lock ();
+		if (mball_locks_lit < 2)
+			mball_light_lock ();
 		gumball_enable_count++;
-		//timed_game_extend (15);
 	}
 }
 
  /* How we want the balls released and in what order */
-void mball_start_3_ball (void)
+CALLSET_ENTRY (multiball, mball_start_3_ball)
 {
 	/* Don't start if another multiball is running */
-	if (multi_ball_play ())
+	if (multi_ball_play () || live_balls == 3)
 		return;
-	if (live_balls == 3)
-		return;
+//	if (live_balls == 2???)
+//		return;
 	/* Check lock and empty accordingly */
 	switch (device_recount (device_entry (DEVNO_LOCK)))
 	{	
@@ -318,6 +330,7 @@ void mball_start_3_ball (void)
 		case 1:
 			autofire_add_ball ();	
 		 	task_sleep_sec (4);
+			task_sleep (TIME_500MS);
 			device_unlock_ball (device_entry (DEVNO_LOCK));
 		 	//task_sleep_sec (1);
 			break;
@@ -330,6 +343,28 @@ void mball_start_3_ball (void)
 	}
 	/* This should add in an extra ball if the above wasn't enough */
 	device_multiball_set (3);
+	
+}
+
+CALLSET_ENTRY (multiball, mball_start_2_ball)
+{
+	if (multi_ball_play () || live_balls > 1)
+		return;
+	/* Check lock and empty accordingly */
+	switch (device_recount (device_entry (DEVNO_LOCK)))
+	{	
+		/* No balls in lock, fire 1 from trough */
+		case 0:
+			autofire_add_ball ();	
+			break;
+		/* 1/2 balls in lock, drop 1 */ 
+		case 1:
+		case 2:
+			device_unlock_ball (device_entry (DEVNO_LOCK));
+			break;
+	}
+	device_multiball_set (2);
+	
 }
 
 CALLSET_ENTRY (mball, mball_start)
@@ -355,11 +390,10 @@ CALLSET_ENTRY (mball, mball_start)
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
 		
-		if (!flag_test (FLAG_SUPER_MB_RUNNING))
+		/*if (!flag_test (FLAG_SUPER_MB_RUNNING))
 		{	
 			mball_start_3_ball ();	
-			ballsave_add_time (10);
-		}
+		}*/
 	}
 }
 
@@ -391,6 +425,7 @@ void mball_left_ramp_exit (void)
 	{	
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
+		callset_invoke (mball_start_3_ball);
 	}
 	else if (!lamp_test (LM_GUM) && !multi_ball_play ())
 	{
@@ -417,7 +452,10 @@ CALLSET_ENTRY (mball, sw_right_ramp)
 CALLSET_ENTRY (mball, sw_shooter)
 {
 	if (event_did_follow (sw_left_ramp_exit, sw_shooter) && multiball_ready ())
+	{
+		callset_invoke (mball_start_3_ball);
 		callset_invoke (mball_start);
+	}
 }
 
 CALLSET_ENTRY (mball, sw_piano)
@@ -456,7 +494,6 @@ CALLSET_ENTRY (mball, single_ball_play)
 
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
-	//collect_extra_ball ();
 	/* Tell fastlock that the lock was entered */
 	callset_invoke (fastlock_jackpot_collected);
 
@@ -470,22 +507,42 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	/* Check to see if mball_restart is running */
 	if (timed_mode_timer_running_p (GID_MBALL_RESTART_RUNNING, &mball_restart_timer))
 	{
+		task_kill_gid (GID_MPF_COUNTDOWN_TASK);
 		sound_send (SND_CRASH);
 		score (SC_5M);
 		timed_mode_stop (&mball_restart_timer);
 		mball_restart_collected = TRUE;
 		if (!multi_ball_play ())
+		{
 			callset_invoke (mball_start);
+			callset_invoke (mball_start_3_ball);
+		}
 	}
 	/* Lock check should pretty much always go last */
 	else if (can_lock_ball ())
 	{
+		/* Right loop -> Locked ball lucky bounce handler */
+		if (event_did_follow (right_loop, locked_ball))
+		{
+			sound_send (SND_LUCKY);
+			score (SC_5M);
+			deff_start (DEFF_LUCKY_BOUNCE);
+			bounded_increment (lucky_bounces, 99);
+		}
+
 		bounded_decrement (mball_locks_lit, 0);
-		/* Don't lock the ball if it's full */
+		bounded_increment (mball_locks_made, 2);
+		/* Lock 2 balls, drop a ball if it's full */
+		//if (device_entry (DEVNO_LOCK)->actual_count < 2)
 		if (!device_full_p (device_entry (DEVNO_LOCK)))
 			device_lock_ball (device_entry (DEVNO_LOCK));
-	/*	else
-			deff_start (DEFF_BALL_FROM_LOCK); */
+		/*else {
+			//TODO leff as well?
+			device_lock_ball (device_entry (DEVNO_LOCK));
+			kickout_lock (KLOCK_DEFF);
+			deff_start (DEFF_BALL_FROM_LOCK);
+			device_unlock_ball (device_entry (DEVNO_LOCK));
+		}*/
 
 		enable_skill_shot ();
 		sound_send (SND_FAST_LOCK_STARTED);
@@ -494,7 +551,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);
 		}
-		mball_locks_made++;
 		deff_start (DEFF_MB_LIT);
 		unlit_shot_count = 0;
 	}

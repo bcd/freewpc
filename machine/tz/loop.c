@@ -45,7 +45,7 @@ extern void award_spiral_loop (void);
 //TODO They don't work, change spiralaward to a task
 static bool can_show_loop_leff (void)
 {
-	if (free_timer_test (TIM_SPIRALAWARD))
+	if (task_find_gid (GID_SPIRALAWARD))
 		return FALSE;
 	else
 		return TRUE;
@@ -55,7 +55,7 @@ static bool can_show_loop_deff (void)
 {
 	if (fastlock_running ())
 		return FALSE;
-	else if (free_timer_test (TIM_SPIRALAWARD))
+	else if (task_find_gid (GID_SPIRALAWARD))
 		return FALSE;
 	else
 		return TRUE;
@@ -114,7 +114,8 @@ static void award_loop (void)
 			score (SC_1M);
 			sound_send (SND_THUNDER1);
 		}
-		sound_send (SND_SPIRAL_AWARDED);
+		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
+			sound_send (SND_SPIRAL_AWARDED);
 		/* Don't show deff during certain modes */
 		if (can_show_loop_deff ())
 			deff_start (DEFF_LOOP);
@@ -134,6 +135,8 @@ static void award_left_loop (void)
 {
 	if (in_live_game)
 	{
+		event_can_follow (left_loop, hitchhiker, TIME_2S + TIME_500MS);
+		event_can_follow (left_loop, camera, TIME_2S + TIME_500MS);
 		if (can_show_loop_leff ())
 			leff_start (LEFF_LEFT_LOOP);
 		award_loop ();
@@ -145,9 +148,13 @@ static void award_right_loop (void)
 {
 	if (in_live_game)
 	{
-		event_can_follow (right_loop, piano, TIME_3S);
+		/* Lucky bounce combo */
+		event_can_follow (right_loop, locked_ball, TIME_3S);
+		/* 2 way combos */
+		event_can_follow (right_loop, piano, TIME_1S + TIME_700MS);
+		event_can_follow (right_loop, camera, TIME_4S);
+		//event_can_follow (right_loop, hitchhiker, TIME_4S);
 		award_loop ();
-		/* Start timer for loop -> piano */
 		if (can_show_loop_leff ())
 			leff_start (LEFF_RIGHT_LOOP);
 	}
@@ -194,7 +201,7 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		//start_flipper_timer (); to train via player.
 		stop_loop_speed_timer ();
 		/* Inform thingfl.c and fastlock.c that a loop has been done. */
-		callset_invoke (thing_flips);
+		//callset_invoke (thing_flips);
 		//left_magnet_grab_start ();
 	
 		award_right_loop ();
@@ -220,6 +227,7 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
+
 	/* Cannot detect loops reliably during multiball */
 	//if (multi_ball_play ())
 	//	return;
@@ -232,7 +240,6 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else if (event_did_follow (autolaunch, right_loop))
 	{
 		/* Ignore right loop switch after an autolaunch */
-		callset_invoke (right_loop_entered);
 		enter_loop ();
 	}
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
@@ -252,12 +259,12 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	{
 		/* Right loop started */
 		/* Inform gumball module that a ball may be approaching */
-		//sw_gumball_right_loop_entered ();
+		sw_gumball_right_loop_entered ();
 		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
 		start_loop_speed_timer ();
-		callset_invoke (right_loop_entered);
 		enter_loop ();
 	}
+
 }
 
 CALLSET_ENTRY (loop, start_ball)

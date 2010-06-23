@@ -22,7 +22,7 @@
 
 /* Super Skill Shot multiball rules */
 
-extern void mball_start_3_ball (void);
+//extern void mball_start_3_ball (void);
 extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
@@ -191,8 +191,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		sssmb_jackpot_value = 20;
 		if (!flag_test (FLAG_SUPER_MB_RUNNING))
 		{	
-			mball_start_3_ball ();
-			ballsave_add_time (10);
+			callset_invoke (mball_start_3_ball);
+			//ballsave_add_time (10);
 		}
 	}
 }
@@ -233,6 +233,13 @@ CALLSET_ENTRY (sssmb, music_refresh)
 	if (flag_test (FLAG_SSSMB_RUNNING))
 		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
 }
+
+
+CALLSET_ENTRY (sssmb, door_start_super_skill)
+{
+	callset_invoke (sssmb_start);
+}
+
 
 CALLSET_ENTRY (sssmb, single_ball_play)
 {
@@ -307,4 +314,9 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 	dbprintf ("Jackpot ready cancelled\n");
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
+}
+
+CALLSET_ENTRY (sssmb, ball_start)
+{
+	callset_invoke (sssmb_stop);
 }

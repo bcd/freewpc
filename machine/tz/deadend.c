@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (deadend, __machine2__) */
+
 #include <freewpc.h>
 #include <eb.h>
 
@@ -60,8 +62,8 @@ CALLSET_ENTRY (deadend, start_ball)
 
 CALLSET_ENTRY (deadend, sw_dead_end)
 {
-	device_switch_can_follow (dead_end, slot, TIME_8S);
-	event_can_follow (dead_end, camera, TIME_4S);
+	device_switch_can_follow (dead_end, slot, TIME_2S + TIME_500MS);
+	event_can_follow (dead_end, camera, TIME_2S);
 
 	if (lamp_test (LM_DEAD_END))
 	{

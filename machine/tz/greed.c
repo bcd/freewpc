@@ -142,6 +142,9 @@ void greed_round_begin (void)
 
 void greed_round_expire (void)
 {
+	/* Don't play sample if last ball drained */
+	if (live_balls)
+		sound_send (SND_SEE_WHAT_GREED);
 	deff_stop (DEFF_GREED_ROUND);
 }
 

@@ -41,7 +41,7 @@ void pb_test_init (void)
 void pb_test_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 2, "POWERBALL TEST");
+	font_render_string_center (&font_mono5, 64, 0, "POWERBALL TEST");
 
 	if (pb_location == PB_MISSING)
 		sprintf ("LOST");

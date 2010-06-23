@@ -29,10 +29,6 @@ U8 door_index_awarded;
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
 extern U8 unlit_shot_count;
-extern U8 mpf_enable_count;
-extern U8 gumball_enable_count;
-extern U8 cameras_lit;
-
 bool door_awarded_from_slot;
 U8 door_active_lamp;
 
@@ -78,8 +74,7 @@ const char *door_award_goals[] = {
 	"PIANO NOW",
 };
 
-
-static void door_start_event (U8 id)
+void door_start_event (U8 id)
 {
 	switch (id)
 	{
@@ -88,15 +83,15 @@ static void door_start_event (U8 id)
 		case 2: callset_invoke (door_start_sslot); break;
 		case 3: callset_invoke (door_start_clock_millions); break;
 		case 4: callset_invoke (door_start_spiral); break;
-		case 5: mpf_enable_count++; sound_send (SND_ARE_YOU_READY_TO_BATTLE); break;
-		case 6: score (SC_10M); sound_send (SND_TEN_MILLION_POINTS); break;
+		case 5: callset_invoke (door_start_battle_power); break;
+		case 6: callset_invoke (door_start_10M); break;
 		case 7: callset_invoke (door_start_greed); break;
-		case 8: cameras_lit++; break;
+		case 8: callset_invoke (door_start_camera); break;
 		case 9: callset_invoke (door_start_hitchhiker); break;
-		case 10: callset_invoke (chaosmb_start); break;
-		case 11: callset_invoke (sssmb_start); break;
+		case 10: callset_invoke (door_start_clock_chaos); break;
+		case 11: callset_invoke (door_start_super_skill); break;
 		case 12: callset_invoke (door_start_fast_lock); break;
-		case 13: gumball_enable_count++; break;
+		case 13: callset_invoke (door_start_light_gumball); break;
 		case 14: callset_invoke (door_start_litz); break;
 	}
 }
@@ -154,6 +149,7 @@ static void door_advance_flashing (void)
 
 void door_award_rotate (void)
 {
+	task_sleep_sec (2);
 	while (in_live_game)
 	{
 		door_advance_flashing ();
@@ -174,26 +170,159 @@ void slot_animation_sound_task (void)
 	task_exit ();
 }
 
+void draw_door_award_text (void)
+{
+	switch (door_index_awarded)
+	{
+		case 0:
+			font_render_string_left (&font_mono5, 3, 3, "TOWNSQUARE");
+			font_render_string_left (&font_mono5, 3, 16, "MADNESS");
+			break;
+		case 1:
+			font_render_string_left (&font_mono5, 3, 3, "EXTRA BALL");
+			font_render_string_left (&font_mono5, 3, 16, "LIT");
+			break;
+
+		case 2:
+			font_render_string_left (&font_mono5, 3, 3, "SUPER");
+			font_render_string_left (&font_mono5, 3, 16, "SLOT MACHINE");
+			break;
+
+		case 3:
+			font_render_string_left (&font_mono5, 3, 3, "CLOCK");
+			font_render_string_left (&font_mono5, 3, 16, "MILLIONS");
+			break;
+
+		case 4:
+			font_render_string_left (&font_mono5, 3, 3, "SPIRAL");
+			font_render_string_left (&font_mono5, 3, 16, "ROUND");
+			break;
+		case 5:
+			font_render_string_left (&font_mono5, 3, 3, "BATTLE THE");
+			font_render_string_left (&font_mono5, 3, 16, "POWER");
+			break;
+		
+		case 6:
+			font_render_string_left (&font_mono5, 3, 3, "10 MILLION");
+			font_render_string_left (&font_mono5, 3, 16, "POINTS");
+			break;
+
+		case 7:
+			font_render_string_left (&font_mono5, 3, 3, "GREED");
+			font_render_string_left (&font_mono5, 3, 16, "ROUND");
+			break;
+
+		case 8:
+			font_render_string_left (&font_mono5, 3, 3, "CAMERA");
+			font_render_string_left (&font_mono5, 3, 16, "LIT");
+			break;
+
+		case 9:
+			font_render_string_left (&font_mono5, 3, 3, "HITCHHIKER");
+			font_render_string_left (&font_mono5, 3, 16, "ROUND");
+			break;
+
+		case 10:
+			font_render_string_left (&font_mono5, 3, 3, "CLOCK CHAOS");
+			font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+			break;
+
+		case 11:
+			font_render_string_left (&font_mono5, 3, 3, "SUPER SKILL");
+			font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+			break;
+
+		case 12:
+			font_render_string_left (&font_mono5, 3, 3, "FASTLOCK");
+			font_render_string_left (&font_mono5, 3, 16, "ROUND");
+			break;
+
+		case 13:
+			font_render_string_left (&font_mono5, 3, 3, "GUMBALL");
+			font_render_string_left (&font_mono5, 3, 16, "LIT");
+			break;
+
+		case 14:
+			font_render_string_left (&font_mono5, 3, 3, "BACK TO");
+			font_render_string_left (&font_mono5, 3, 16, "THE ZONE");
+			break;
+	}
+}
+
+void door_award_sound_task (void)
+{
+	switch (door_index_awarded)
+	{
+		case 0:
+			sound_send (SND_THERE_IS_MADNESS);
+			break;
+		case 1:
+			sound_send (SND_GET_THE_EXTRA_BALL);	
+			break;
+
+		case 2:
+			sound_send (SND_SLOT_PULL);
+			break;
+
+		case 3:
+			sound_send (SND_TIME_IS_A_ONEWAY_STREET);
+			break;
+
+		case 4:
+			sound_send (SND_SPIRAL_AWAITS_YOU);
+			break;
+		case 5:
+			sound_send (SND_ARE_YOU_READY_TO_BATTLE);
+			break;
+		
+		case 6:
+			sound_send (SND_TEN_MILLION_POINTS);
+			break;
+
+		case 7:
+			sound_send (SND_FEEL_LUCKY);
+			break;
+
+		case 8:
+			sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+			break;
+
+		case 9:
+			sound_send (SND_NOTE_THE_HITCHHIKER);
+			break;
+
+		case 10:
+			sound_send (SND_QUIT_PLAYING_WITH_THE_CLOCK);
+			break;
+
+		case 11:
+			sound_send (SND_THIS_SHOT_REQUIRES_SKILL_DUP);
+			break;
+
+		case 12:
+			sound_send (SND_NOT_AN_ORDINARY_DAY);
+			break;
+
+		case 13:
+			sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
+			break;
+
+		case 14:
+			break;
+	}
+	task_exit ();
+}
+
+
+
 void door_award_deff (void)
 {
 	U8 index = door_index_awarded;
 	/* Hold the ball during deff if D_PAUSE */
-	kickout_lock (KLOCK_DEFF);
+	//kickout_lock (KLOCK_DEFF);
 	U16 fno;
-	/* If piano was lit, we were called from the slot */
-//	if (door_awarded_from_slot == TRUE)
-//	{
-		/* Spawn task to play sounds */
-//		task_create_anon (slot_animation_sound_task);
-//		for (fno = IMG_SLOT_START; fno <= IMG_SLOT_END; fno += 2)
-//		{
-//			dmd_alloc_pair ();
-//			frame_draw (fno);
-//			dmd_show2 ();
-//			task_sleep (TIME_66MS);
-//		}
-	//	task_sleep_sec (1);
-//	}
+
+	task_create_gid (GID_DOOR_AWARD, door_award_sound_task);
 	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
@@ -202,12 +331,13 @@ void door_award_deff (void)
 		frame_draw (fno);
 		/* Flip it, as text is drawn to the low page */
 		dmd_flip_low_high ();	
-		font_render_string_left (&font_mono5, 3, 16, door_panel_names[index]);
+		draw_door_award_text ();
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 	}
+	task_sleep_sec (1);	
 	/* Play backwards */
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
@@ -261,8 +391,6 @@ void door_award_enable (void)
 
 void door_award_flashing (void)
 {
-	if (!can_award_door_panel ())
-		return;
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	/* Store the current door index */
@@ -296,6 +424,7 @@ void door_award_flashing (void)
 	}
 
 	leff_start (LEFF_DOOR_STROBE);
+//	task_sleep (TIME_100MS);
 	score (SC_50K);
 	/* Restart the door rotation */
 	door_award_enable ();
@@ -324,18 +453,26 @@ CALLSET_ENTRY (door, lamp_update)
 
 CALLSET_ENTRY (door, award_door_panel)
 {
-	if (door_index == LITZ_DOOR_INDEX)
+	if (can_award_door_panel ())
 	{
-		flag_on (FLAG_BTTZ_RUNNING);
-		flag_off (FLAG_PIANO_DOOR_LIT);
-		flag_off (FLAG_SLOT_DOOR_LIT);
-		door_award_litz ();
-	}
-	else
-		door_award_flashing ();
+		if (door_index == LITZ_DOOR_INDEX)
+		{
+			flag_on (FLAG_BTTZ_RUNNING);
+			flag_off (FLAG_PIANO_DOOR_LIT);
+			flag_off (FLAG_SLOT_DOOR_LIT);
+			door_award_litz ();
+		}
+		else
+			door_award_flashing ();
 		
-	unlit_shot_count = 0;
-	door_lamp_update ();
+		unlit_shot_count = 0;
+		door_lamp_update ();
+	}
+}
+
+CALLSET_ENTRY (door, door_start_10M)
+{
+	score (SC_10M);
 }
 
 CALLSET_ENTRY (door, ball_count_change)
@@ -382,7 +519,6 @@ CALLSET_ENTRY (door, shot_slot_machine)
 
 CALLSET_ENTRY (door, door_start_eb)
 {
-	sound_send (SND_GET_THE_EXTRA_BALL);	
 	light_easy_extra_ball ();
 }
 
@@ -401,4 +537,3 @@ CALLSET_ENTRY(door, start_ball)
 	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	door_award_enable ();
 }
-
