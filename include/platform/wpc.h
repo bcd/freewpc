@@ -306,11 +306,14 @@ extern inline void wpc_set_ram_protect_size (U8 sz)
 #define PINIO_BANK_ROM 0
 #define PINIO_BANK_RAM 1
 
+extern __fastram__ U8 wpc_rom_bank;
+
 extern inline void pinio_set_bank (U8 bankno, U8 val)
 {
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
+			wpc_rom_bank = val;
 			writeb (WPC_ROM_BANK, val);
 			break;
 		case PINIO_BANK_RAM:
@@ -326,7 +329,7 @@ extern inline U8 pinio_get_bank (U8 bankno)
 	switch (bankno)
 	{
 		case PINIO_BANK_ROM:
-			return readb (WPC_ROM_BANK);
+			return wpc_rom_bank;
 		case PINIO_BANK_RAM:
 			return readb (WPC_RAM_BANK);
 		default:
@@ -382,7 +385,52 @@ extern inline U8 pinio_read_ac_zerocross (void)
 
 
 /***************************************************************
- * Flippers
+ * Power driver board controls
+ ***************************************************************/
+
+/* U1 = Triacs, coin interlock, and flipper relay */
+
+#define U1_TRIAC0  0x1
+#define U1_TRIAC1  0x2
+#define U1_TRIAC2  0x4
+#if (MACHINE_WPC95 == 0)
+#define U1_TRIAC3  0x8
+#define U1_TRIAC4  0x10
+#endif
+#define U1_COIN_LOCK 0x40
+#define U1_FLIPPER_RELAY 0x80
+
+#define TRIAC_GI_STRING(n)			(1 << (n))
+#define TRIAC_GI_MASK \
+	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
+	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
+
+extern U8 triac_io_cache;
+
+extern inline U8 wpc_u1_read (void)
+{
+	return triac_io_cache;
+}
+
+extern inline void wpc_u1_write (U8 val)
+{
+	triac_io_cache = val;
+	writeb (WPC_GI_TRIAC, val);
+}
+
+extern inline void wpc_u1_set (U8 bits)
+{
+	wpc_u1_write (wpc_u1_read() | bits);
+}
+
+extern inline void wpc_u1_clear (U8 bits)
+{
+	wpc_u1_write (wpc_u1_read() & ~bits);
+}
+
+
+/***************************************************************
+ * Fliptronic Flippers
  ***************************************************************/
 
 #define WPC_LR_FLIP_EOS		0x1
@@ -407,17 +455,6 @@ extern inline U8 wpc_read_flippers (void)
 #endif
 }
 
-extern inline U8 wpc_read_flipper_buttons (void)
-{
-	return wpc_read_flippers () & WPC_FLIP_SW;
-}
-
-
-extern inline U8 wpc_read_flipper_eos (void)
-{
-	return wpc_read_flippers () & WPC_FLIP_EOS;
-}
-
 
 #define WPC_LR_FLIP_POWER	0x1
 #define WPC_LR_FLIP_HOLD	0x2
@@ -434,6 +471,28 @@ extern inline void wpc_write_flippers (U8 val)
 	writeb (WPC95_FLIPPER_COIL_OUTPUT, val);
 #else
 	writeb (WPC_FLIPTRONIC_PORT_A, ~val);
+#endif
+}
+
+
+/*
+ * Pre-Fliptronic boards have a relay on the power
+ * driver board that can enable/disable flipper power.
+ * The relay is controlled by writing to the same latch
+ * that controls the triacs.
+ */
+
+extern inline void pinio_enable_flippers (void)
+{
+#if (MACHINE_FLIPTRONIC == 0)
+	wpc_u1_set (U1_FLIPPER_RELAY);
+#endif
+}
+
+extern inline void pinio_disable_flippers (void)
+{
+#if (MACHINE_FLIPTRONIC == 0)
+	wpc_u1_clear (U1_FLIPPER_RELAY);
 #endif
 }
 
@@ -530,6 +589,20 @@ extern inline void pinio_write_lamp_data (U8 val)
 }
 
 /********************************************/
+/* General Illumination via Triacs          */
+/********************************************/
+
+extern inline U8 pinio_read_triac (void)
+{
+	return wpc_u1_read ();
+}
+
+extern inline void pinio_write_triac (U8 val)
+{
+	wpc_u1_write (val);
+}
+
+/********************************************/
 /* Solenoids                                */
 /********************************************/
 
@@ -544,16 +617,19 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 		writeb (WPC_SOL_LOWPOWER_OUTPUT, val);
 		break;
 	case 2:
-		writeb (WPC_SOL_FLASH1_OUTPUT, val);
+		writeb (WPC_SOL_FLASHER_OUTPUT, val);
 		break;
 	case 3:
-		writeb (WPC_SOL_FLASH2_OUTPUT, val);
+		writeb (WPC_SOL_GEN_OUTPUT, val);
 		break;
 	case 4:
 		if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
 			wpc_write_flippers (val);
 		break;
 #ifdef MACHINE_SOL_EXTBOARD1
+#if (CONFIG_WPC95 == 1)
+#error "WPC95 machines cannot use EXTBOARD1"
+#endif
 	case 5:
 		writeb (WPC_EXTBOARD1, val);
 #endif
@@ -647,14 +723,6 @@ extern inline U8 pinio_read_dedicated_switches (void)
 	return readb (WPC_SW_CABINET_INPUT);
 }
 
-/********************************************/
-/* Triacs                                   */
-/********************************************/
-
-extern inline void pinio_write_triac (U8 val)
-{
-	writeb (WPC_GI_TRIAC, val);
-}
 
 /********************************************/
 /* Precision Timer                          */

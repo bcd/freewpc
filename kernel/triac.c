@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -63,6 +63,10 @@
 
 #include <freewpc.h>
 
+/* The maximum length of the AC period when dimming via triacs.
+ * See kernel/ac.c for a similar define.  TODO : these should be merged.
+ */
+#define ZC_MAX_PERIOD 11
 
 /** The normal state of the triacs, not accounting for lamp effects. */
 U8 triac_output;
@@ -74,8 +78,10 @@ U8 triac_io_cache;
  * during the AC phase.  Each entry is a triac bitset.
  * If entry X is enabled, then X ms after the last zerocross,
  * those triacs are turned on, and remain on until the next ZC.
+ * Note that only values between 0..NUM_BRIGHTNESS_LEVELS are actually
+ * written, but values up to ZC_MAX_PERIOD are read.
  */
-U8 gi_dimming[NUM_BRIGHTNESS_LEVELS];
+U8 gi_dimming[ZC_MAX_PERIOD];
 
 /** Which triac outputs are allocated by lamp effects */
 U8 gi_leff_alloc;
@@ -83,7 +89,8 @@ U8 gi_leff_alloc;
 /** The states of the GI strings currently allocated */
 U8 gi_leff_output;
 
-U8 gi_leff_dimming[NUM_BRIGHTNESS_LEVELS];
+/** Like gi_dimming, but for lamp effects */
+U8 gi_leff_dimming[ZC_MAX_PERIOD];
 
 
 void triac_dump (void)
@@ -112,15 +119,15 @@ void triac_rtt (void)
 		U8 triac_bits;
 
 		/* Get the current triac states */
-		triac_bits = triac_read ();
+		triac_bits = pinio_read_triac ();
 
 		/* Turn on the lamps that need to be dimmed at this level. */
-		triac_write (triac_bits
+		pinio_write_triac (triac_bits
 			| gi_dimming[zc_get_timer ()]
 			| gi_leff_dimming[zc_get_timer ()]);
 
 		/* Now disable the dimmed lamps for the next phase */
-		triac_write (triac_bits);
+		pinio_write_triac (triac_bits);
 	}
 }
 
@@ -130,7 +137,9 @@ void gi_clear_dimming (U8 triac, U8 *dimming)
 {
 	U8 i;
 	for (i=0; i < NUM_BRIGHTNESS_LEVELS; i++)
+	{
 		dimming[i] &= ~triac;
+	}
 }
 
 void triac_update (void)
@@ -142,7 +151,7 @@ void triac_update (void)
 	latch = triac_output;
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
-	triac_write (latch);
+	pinio_write_triac (latch);
 }
 
 
@@ -264,8 +273,8 @@ void triac_init (void)
 	gi_leff_alloc = 0;
 	triac_output = 0;
 	gi_leff_output = 0;
-	memset (gi_dimming, 0, NUM_BRIGHTNESS_LEVELS);
-	memset (gi_leff_dimming, 0, NUM_BRIGHTNESS_LEVELS);
+	memset (gi_dimming, 0, ZC_MAX_PERIOD);
+	memset (gi_leff_dimming, 0, ZC_MAX_PERIOD);
 	triac_update ();
 }
 

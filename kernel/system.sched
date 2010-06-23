@@ -38,7 +38,7 @@
 # Read the flipper switches and update the flipper coils
 # Note: this only takes 51 cycles when flippers are disabled.
 # Not sure if this is still accurate when enabled or not.
-fliptronic_rtt?CONFIG_FLIPTRONIC   2       250c
+fliptronic_rtt?CONFIG_FLIPTRONIC   4       250c
 
 # Update the triacs
 triac_rtt             1       60c

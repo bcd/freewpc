@@ -27,8 +27,6 @@
 #include <freewpc.h>
 #include <test.h>
 
-/* CALLSET_SECTION (timestamp, __test2__) */
-
 extern const struct area_csum audit_csum_info;
 
 

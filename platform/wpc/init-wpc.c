@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,6 +20,9 @@
 
 #include <freewpc.h>
 
+
+/** The last value written to the WPC_ROM_BANK register */
+__fastram__ U8 wpc_rom_bank;
 
 /**
  * Initialize the WPC platform.
@@ -51,11 +54,12 @@ void platform_init (void)
 
 	/* Initialize other critical WPC output registers relating
 	 * to hardware */
-	writeb (WPC_SOL_FLASH2_OUTPUT, 0);
 	writeb (WPC_SOL_HIGHPOWER_OUTPUT, 0);
-	writeb (WPC_SOL_FLASH1_OUTPUT, 0);
 	writeb (WPC_SOL_LOWPOWER_OUTPUT, 0);
+	writeb (WPC_SOL_GEN_OUTPUT, 0);
+	writeb (WPC_SOL_FLASHER_OUTPUT, 0);
 	writeb (WPC_LAMP_ROW_OUTPUT, 0);
+	writeb (WPC_LAMP_COL_STROBE, 0);
 	writeb (WPC_GI_TRIAC, 0);
 }
 

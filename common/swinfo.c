@@ -20,8 +20,6 @@
 
 #include <freewpc.h>
 
-/* CALLSET_SECTION (swinfo, __init__) */
-
 __nvram__ U16 swinfo_permanent_size;
 __nvram__ U16 swinfo_nvram_size;
 __nvram__ U8 swinfo_system_major;
@@ -63,9 +61,14 @@ CALLSET_BOOL_ENTRY (swinfo, init_ok)
 		&& swinfo_verify1 (swinfo_machine_minor, MACHINE_MINOR_VERSION)
 		)
 	{
-		dbprintf ("S/W incompatible with previous config");
+		/* Everything matches */
 		return TRUE;
 	}
-	return FALSE;
+	else
+	{
+		/* Something changed ... trigger factory reset */
+		dbprintf ("S/W incompatible with previous config");
+		return FALSE;
+	}
 }
 

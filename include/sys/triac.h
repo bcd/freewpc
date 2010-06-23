@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,44 +29,6 @@ The state of the triac can be rapidly switched this many times
 per AC cycle */
 #define NUM_BRIGHTNESS_LEVELS 8
 
-#define TRIAC_GI_STRING(n)			(1 << (n))
-
-/** The coindoor interlock triac ID */
-#define TRIAC_COINDOOR_INTERLOCK	0x40
-
-/** The flipper enable triac ID */
-#define TRIAC_FLIPPER_ENABLE		0x80
-
-/** Represents all of the GI triacs */
-#define TRIAC_GI_MASK \
-	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
-	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
-
-
-/* Macros for enabling/disabling the flippers */
-#define flipper_triac_enable()	triac_enable (TRIAC_FLIPPER_ENABLE)
-#define flipper_triac_disable()	triac_disable (TRIAC_FLIPPER_ENABLE)
-
-/* Macros for enabling/disabling the coindoor interlock */
-/* TODO - these are not being used now */
-#define coindoor_triac_enable()	triac_enable (TRIAC_COINDOOR_INTERLOCK)
-#define coindoor_triac_disable()	triac_disable (TRIAC_COINDOOR_INTERLOCK)
-
-
-/* The triac register is write-only; therefore, writes to it are
-cached in memory so that the current state can be read back. */
-
-#define triac_read()					triac_io_cache
-
-#ifdef CONFIG_NO_TRIAC
-#define triac_write(v)
-#else
-#define triac_write(v) \
-do { \
-	triac_io_cache = v; \
-	pinio_write_triac (v); \
-} while (0)
-#endif
 
 typedef U8 triacbits_t;
 

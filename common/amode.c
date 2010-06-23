@@ -101,7 +101,13 @@ void amode_score_page (void)
 	dmd_alloc_low_clean ();
 	scores_draw ();
 	dmd_show_low ();
-	amode_page_end (5);
+
+	/* Hold the scores up for a while longer than usual
+	 * in tournament mode. */
+	if (system_config.tournament_mode == YES)
+		amode_page_end (120);
+	else
+		amode_page_end (5);
 }
 
 
@@ -234,11 +240,6 @@ CALLSET_ENTRY (amode, sw_right_button)
 
 __attribute__((noreturn)) void system_amode_deff (void)
 {
-	if (system_config.tournament_mode == YES)
-	{
-		/* Hold the scores up for a while longer than usual
-		 * in tournament mode. */
-	}
 
 	/* When amode is started, diagnostic are also being re-run.  Give that
 	some time to finish, so that the score screen will show the credit

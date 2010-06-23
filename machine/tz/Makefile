@@ -4,10 +4,7 @@
 #
 
 MACHINE_FILE := tz.md
-
 MACHINE_SCHEDULE := $(M)/tz.sched
-
-MACHINE_SCHED_FLAGS := -i tz/driver.h
 
 # Define the name of the GAME_ROM.  This is
 # optional; you can delete it and a suitable
@@ -51,6 +48,11 @@ PINMAME_GAME_ROM = tz_94h.rom
 
 PINMAME_OTHER_ROMS = tzu*.rom
 
+
+CONFIG_MUTE_PAUSE := y
+EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
+
+
 #
 # Object files exported by this game
 #
@@ -81,8 +83,6 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	bonus.o tz_amode.o star.o rocket.o thingfl.o \
 	outhole.o rules.o lock.o camera.o \
 	combo.o deadend.o hitch.o
-
-FIF_SRCS += images/cow.fif
 
 IMAGE_MAP += $(M)/tz.ild
 

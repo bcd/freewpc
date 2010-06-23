@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # mapcheck - check map file to see if sections overflowed.
 #

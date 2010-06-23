@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -179,18 +179,6 @@ extern inline U8 pinio_get_bank (U8 bankno)
  ***************************************************************/
 
 extern inline U8 wpc_read_flippers (void)
-{
-	return 0;
-}
-
-
-extern inline U8 wpc_read_flipper_buttons (void)
-{
-	return 0;
-}
-
-
-extern inline U8 wpc_read_flipper_eos (void)
 {
 	return 0;
 }

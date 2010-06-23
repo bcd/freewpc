@@ -110,8 +110,7 @@ void fatal (errcode_t error_code)
 #endif
 
 #ifdef CONFIG_NATIVE
-	task_sleep_sec (2);
-	linux_shutdown ();
+	linux_shutdown (error_code);
 #else
 	/* Go into a loop, long enough for the error message to be visible.
 	Then reset the system. */

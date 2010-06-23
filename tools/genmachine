@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+# Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
 #
 # This file is part of FreeWPC.
 #
@@ -78,7 +78,6 @@ my %contextDefinitionRe = (
 	"globalflags" => "AUTO",
 	"scores" => "AUTO",
 	"fonts" => "AUTO",
-	"fifs" => "AUTO",
 	"timers" => "AUTO",
 	"templates" => "AUTO",
 );
@@ -213,7 +212,6 @@ my %ContextPrefixes = (
 	"deffs" => "DEFF",
 	"leffs" => "LEFF",
 	"fonts" => "FON",
-	"fifs" => "FIF",
 	"timers" => "TIM",
 );
 
@@ -562,7 +560,7 @@ LINE:
 			$def->{'c_string'} = "\"$c_string\"";
 
 			my $c_ident = $c_string;
-			$c_ident =~ s/[ :-]+/_/g;
+			$c_ident =~ s/[ :\/\-]+/_/g;
 			$c_ident =~ s/[.\']//g;
 			my $prefix = $ContextPrefixes{$contextName};
 			if (defined $prefix) {

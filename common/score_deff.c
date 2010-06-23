@@ -26,8 +26,6 @@
 #include <freewpc.h>
 #include <coin.h>
 
-/* CALLSET_SECTION (score, __effect__) */
-
 /** Nonzero if the current score has changed and needs to be redrawn */
 bool score_update_needed;
 

@@ -1,0 +1,8 @@
+# This is an example script for capturing the signal on
+# a solenoid line after it is fired.
+capture add sol 16
+capture add zerocross
+capture add sol_voltage 16
+capture start sol 16
+capture stop after 80
+capture file test.out

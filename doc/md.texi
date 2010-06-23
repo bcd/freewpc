@@ -234,7 +234,11 @@ to exit).
 
 @item templates
 
+Lists the template instantiations.
+
 @item tests
+
+Defines additional hardware tests that are put into the Tests menu.
 
 @item deffs
 
@@ -251,9 +255,17 @@ you give a @emph{type}, which is an object that defines its
 allowable values, and a @emph{default}.
 
 @item audits
+
+Defines feature audit variables.
+
 @item system_sounds
+
 @item system_music
+
 @item highscores
+
+Defines the default high scores.
+
 @item flags
 
 Declares bit flags.  These are handled similarly to lamps; they are

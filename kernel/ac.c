@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -54,20 +54,6 @@ zc_status_t zc_status;
 #define ZC_MAX_PERIOD 11
 #endif
 
-
-/**
- * The expected length of the AC cycle.
- *
- * Cycle length is the sum of two consecutive intervals between
- * zerocross points.
- *
- * In the US, at 60Hz AC, this should be 17.
- * Elsewhere at 50Hz AC, this should be 20.
- *
- * This value is calculated during the INITIALIZING phase
- * and is guaranteed to be nonzero once in the WORKING state.
- */
-U8 ac_expected_cycle_len;
 
 U8 ac_zerocross_errors;
 
@@ -132,6 +118,5 @@ void ac_init (void)
 
 	/* Assume working AC/zerocross for now - TODO */
 	zc_set_status (ZC_WORKING);
-	ac_expected_cycle_len = AC_DOMESTIC_CYCLE;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,13 +21,28 @@
 #ifndef _WPC_MMAP_H
 #define _WPC_MMAP_H
 
+/*
+ * The WPC ASIC decodes all addresses placed on the address bus by the
+ * processor.
+ */
+
+
+/*
+ * The WPC ASIC registers can be broadly into several categories, based
+ * on the upper 12 bits of the address.
+ */
 #define WPC_DEBUG_BASE              0x3D60
+#define WPC_OLD_DEBUG_BASE          0x3E60
 #define WPC_DMD_BASE                0x3FB0
 #define WPC_PRN_TICKET_BASE         0x3FC0
 #define WPC_IO_BASE                 0x3FD0
 #define WPC_DRIVER_BASE             0x3FE0
 #define WPC_ASIC_BASE               0x3FF0
 
+/*
+ * Early Funhouse ROMs used a different debug widget with different
+ * addressing.
+ */
 #ifdef CONFIG_OLD_DEBUGGER
 #define WPC_DEBUG_CONTROL_PORT      0x3E66
 #define WPC_DEBUG_DATA_PORT         0x3E67
@@ -36,10 +51,12 @@
 #define WPC_DEBUG_CONTROL_PORT      0x3D61
 #endif
 
+#if (MACHINE_WPC95 == 1)
 #define WPC_DMD_3200_PAGE           0x3FB8
 #define WPC_DMD_3000_PAGE           0x3FB9
 #define WPC_DMD_3600_PAGE           0x3FBA
 #define WPC_DMD_3400_PAGE           0x3FBB
+#endif
 #define WPC_DMD_HIGH_PAGE           0x3FBC
 #define WPC_DMD_FIRQ_ROW_VALUE      0x3FBD
 #define WPC_DMD_LOW_PAGE            0x3FBE
@@ -53,24 +70,34 @@
 #define WPC_SERIAL_BAUD_SELECT      0x3FC5
 #define WPC_TICKET_DISPENSE         0x3FC6
 
+/*
+ * Funhouse used a System 11 sound board which slightly
+ * overlaps the register range used by the Fliptronic
+ * board, so these cannot be used at the same time.
+ *
+ * Port B on the Fliptronic board is unused.
+ */
 #ifdef MACHINE_SYS11_SOUND
 #define WPCS11_READY_OUT            0x3FD0
 #define WPCS11_DATA_OUT             0x3FD1
 #define WPCS11_DATA_IN              0x3FD2
 #define WPCS11_READY_IN             0x3FD3
 #define WPCS11_RESET                0x3FD4
+
 #else
+
 #ifdef MACHINE_FLIPTRONIC
 #define WPC_FLIPTRONIC_PORT_A       0x3FD4
 #define WPC_FLIPTRONIC_PORT_B       0x3FD5
 #endif
 #define WPCS_DATA                   0x3FDC
 #define WPCS_CONTROL_STATUS         0x3FDD
-#endif
 
-#define WPC_SOL_FLASH2_OUTPUT       0x3FE0
+#endif /* MACHINE_SYS11_SOUND */
+
+#define WPC_SOL_GEN_OUTPUT          0x3FE0
 #define WPC_SOL_HIGHPOWER_OUTPUT    0x3FE1
-#define WPC_SOL_FLASH1_OUTPUT       0x3FE2
+#define WPC_SOL_FLASHER_OUTPUT      0x3FE2
 #define WPC_SOL_LOWPOWER_OUTPUT     0x3FE3
 #define WPC_LAMP_ROW_OUTPUT         0x3FE4
 #define WPC_LAMP_COL_STROBE         0x3FE5

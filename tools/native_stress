@@ -1,0 +1,16 @@
+#!/bin/sh
+ulimit -c unlimited
+for machine in $@; do
+	rm -f core
+	if [ "${machine}" != "-" ]; then
+		make clean
+		make -j3 DOTCONFIG="" MACHINE="${machine}" NATIVE=y EXTRA_CFLAGS=-DCONFIG_DEBUG_ADJUSTMENTS FREEWPC_DEBUGGER=y
+	fi
+	rm -f "nvram/${machine}.nv"
+	build/freewpc* -o native_stress.log --late --exec scripts/stresstest --error-crash
+	rc=$?
+	if [ -f core ]; then
+		gdb build/freewpc* core
+		exit 1
+	fi
+done

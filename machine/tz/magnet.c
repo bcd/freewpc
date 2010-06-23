@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+<<<<<<< HEAD:machine/tz/magnet.c
 #include <left_magnet_grab.h>
 #include <upper_right_magnet_grab.h>
 #include <lower_right_magnet_grab.h>
@@ -27,6 +28,8 @@
  * Currently using duty2 driver with these settings:
  * timeout=TIME_2S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
 */
+=======
+>>>>>>> ccc5c5ecf226f9c653e24731402b16220b5176e7:machine/tz/magnet.c
 
 #define LEFT_MAGNET 0
 #define LOWER_RIGHT_MAGNET 1

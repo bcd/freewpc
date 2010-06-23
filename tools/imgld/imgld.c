@@ -88,7 +88,7 @@ do { \
 
 
 enum image_format {
-	FORMAT_BAD, FORMAT_PGM, FORMAT_FIF
+	FORMAT_BAD, FORMAT_PGM
 };
 
 
@@ -192,8 +192,6 @@ enum image_format get_file_format (const char *filename)
 	sep++;
 	if (!strcmp (sep, "pgm"))
 		return FORMAT_PGM;
-	else if (!strcmp (sep, "fif"))
-		return FORMAT_FIF;
 	else
 		return FORMAT_BAD;
 }
@@ -440,10 +438,6 @@ void add_image (const char *label, const char *filename, unsigned int options)
 	{
 		buf = buffer_alloc (FRAME_BYTE_SIZE);
 		buffer_read_pgm (buf, imgfile);
-	}
-	else if (format == FORMAT_FIF)
-	{
-		buf = binary_fif_read (filename);
 	}
 	else
 		error ("invalid image format\n");

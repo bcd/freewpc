@@ -46,7 +46,7 @@ void watchdog_expired (void)
 {
 	simlog (SLC_DEBUG, "Watchdog expired\n");
 	signal_update (SIGNO_BLANKING, 0);
-	linux_shutdown ();
+	linux_shutdown (ERR_TASK_LOCKUP);
 }
 
 

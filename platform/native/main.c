@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -96,7 +96,7 @@ U8 *linux_lamp_data_ptr;
 U8 linux_jumpers = LC_USA_CANADA << 2;
 
 /** The triac outputs */
-U8 linux_triac_outputs;
+U8 linux_triac_latch, linux_triac_outputs;
 
 /** The actual time at which the simulation was started */
 time_t linux_boot_time;
@@ -148,6 +148,10 @@ unsigned int pic_machine_number = MACHINE_NUMBER;
 unsigned int signo_under_trace = SIGNO_SOL + 0;
 
 const char *exec_file = NULL;
+
+int exec_late_flag = 0;
+
+int crash_on_error = 0;
 
 
 /** A dummy function intended to be used for debugging under GDB. */
@@ -369,14 +373,16 @@ U8 simulation_pic_access (int writep, U8 write_val)
 }
 #endif /* MACHINE_PIC */
 
-__noreturn__ void linux_shutdown (void)
+__noreturn__ void linux_shutdown (U8 error_code)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
 	protected_memory_save ();
 #ifdef CONFIG_UI
 	ui_exit ();
 #endif
-	exit (0);
+	if (crash_on_error && error_code)
+		*(int *)0 = 1;
+	exit (error_code);
 }
 
 
@@ -409,6 +415,17 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 		}
 	}
 	*memp = newval;
+}
+
+
+/** Update the output side of the triacs.
+ * This becomes zero when a zerocrossing occurs.  When the input side of the latch
+ * is written, lines can be turned on but not turned off.
+ */
+void sim_triac_update (U8 val)
+{
+	val &= TRIAC_GI_MASK;
+	mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
 }
 
 
@@ -462,7 +479,7 @@ void sim_switch_effects (int swno)
 
 
 /** Simulate the write of a WPC I/O register */
-void linux_asic_write (IOPTR addr, U8 val)
+void writeb (IOPTR addr, U8 val)
 {
 	switch (addr)
 	{
@@ -555,10 +572,13 @@ void linux_asic_write (IOPTR addr, U8 val)
 #endif /* MACHINE_DMD */
 
 		case WPC_GI_TRIAC:
-			mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
+			val &= TRIAC_GI_MASK;
+			linux_triac_latch = val;
+			val |= linux_triac_outputs;
+			sim_triac_update (val);
 			break;
 
-		case WPC_SOL_FLASH2_OUTPUT:
+		case WPC_SOL_GEN_OUTPUT:
 			sim_sol_write (24, &linux_solenoid_outputs[3], val);
 			break;
 
@@ -566,7 +586,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 			sim_sol_write (0, &linux_solenoid_outputs[0], val);
 			break;
 
-		case WPC_SOL_FLASH1_OUTPUT:
+		case WPC_SOL_FLASHER_OUTPUT:
 			sim_sol_write (16, &linux_solenoid_outputs[2], val);
 			break;
 
@@ -641,7 +661,7 @@ void linux_asic_write (IOPTR addr, U8 val)
 
 
 /** Simulated read of an I/O register */
-U8 linux_asic_read (IOPTR addr)
+U8 readb (IOPTR addr)
 {
 	switch (addr)
 	{
@@ -817,7 +837,7 @@ char linux_interface_readchar (void)
 	if (res <= 0)
 	{
 		task_sleep_sec (2);
-		linux_shutdown ();
+		linux_shutdown (0);
 	}
 	return inbuf;
 }
@@ -854,6 +874,8 @@ static void linux_interface_thread (void)
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
 
+	if (exec_file && exec_late_flag)
+		exec_script_file (exec_file);
 	for (;;)
 	{
 		*inbuf = linux_interface_readchar ();
@@ -945,7 +967,7 @@ static void linux_interface_thread (void)
 				break;
 
 			case '\x1b':
-				linux_shutdown ();
+				linux_shutdown (0);
 				break;
 
 			case 'T':
@@ -1110,6 +1132,14 @@ int main (int argc, char *argv[])
 		{
 			exec_file = argv[argn++];
 		}
+		else if (!strcmp (arg, "--late"))
+		{
+			exec_late_flag = 1;
+		}
+		else if (!strcmp (arg, "--error-crash"))
+		{
+			crash_on_error = 1;
+		}
 		else if (strchr (arg, '='))
 		{
 			char varval[64];
@@ -1154,14 +1184,14 @@ int main (int argc, char *argv[])
 #endif
 
 	/* Set the hardware registers to their initial values. */
-	linux_asic_write (WPC_LAMP_COL_STROBE, 0);
+	writeb (WPC_LAMP_COL_STROBE, 0);
 #if !(MACHINE_PIC == 1)
-	linux_asic_write (WPC_SW_COL_STROBE, 0);
+	writeb (WPC_SW_COL_STROBE, 0);
 #endif
 #if (MACHINE_DMD == 1)
-	linux_asic_write (WPC_DMD_LOW_PAGE, 0);
-	linux_asic_write (WPC_DMD_HIGH_PAGE, 0);
-	linux_asic_write (WPC_DMD_ACTIVE_PAGE, 0);
+	writeb (WPC_DMD_LOW_PAGE, 0);
+	writeb (WPC_DMD_HIGH_PAGE, 0);
+	writeb (WPC_DMD_ACTIVE_PAGE, 0);
 #endif
 
 	/* Initialize the state of the switches; optos are backwards */
@@ -1187,23 +1217,6 @@ int main (int argc, char *argv[])
 #ifdef CONFIG_MACHINE_SIMULATOR
 	(*CONFIG_MACHINE_SIMULATOR) ();
 #endif
-#ifdef MACHINE_TZ
-	linux_key_install ('s', SW_SLOT);
-	linux_key_install ('z', SW_PIANO);
-	linux_key_install ('l', SW_LEFT_RAMP_EXIT);
-	linux_key_install ('r', SW_RIGHT_RAMP);
-	linux_key_install ('h', SW_HITCHHIKER);
-	linux_key_install ('c', SW_CAMERA);
-#endif
-#ifdef MACHINE_WCS
-	linux_key_install ('G', SW_GOAL_TROUGH);
-	linux_key_install ('g', SW_GOAL_POPPER);
-	linux_key_install ('t', SW_TV_POPPER);
-	linux_key_install ('s', SW_SPINNER);
-	linux_key_install ('z', SW_STRIKER_1);
-	linux_key_install ('x', SW_STRIKER_2);
-	linux_key_install ('c', SW_STRIKER_3);
-#endif
 
 	/* Jump to the reset function */
 	while (sim_debug_init)
@@ -1223,10 +1236,13 @@ int main (int argc, char *argv[])
 	conf_add ("balls", &linux_installed_balls);
 	conf_add ("sim.speed", &linux_irq_multiplier);
 
-	/* If a script file was given, execute it now */
-	exec_script_file ("freewpc.conf");
-	exec_script_file ("conf/tz.conf");
-	if (exec_file)
+	/* Execute default script file.  First, load any global
+	configuration in freewpc.conf.  Then, try to load a
+	game-specific file, based on its shortname.  Last,
+	execute any file provided on the command line. */
+	exec_script_file ("conf/freewpc.conf");
+	exec_script_file ("conf/" MACHINE_SHORTNAME ".conf");
+	if (exec_file && !exec_late_flag)
 		exec_script_file (exec_file);
 
 	freewpc_init ();

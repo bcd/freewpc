@@ -53,7 +53,7 @@ void amode_pgj_logo (void)
 	dmd_text_outline ();
 
 	dmd_alloc_pair ();
-	dmd_draw_fif (fif_pgj);
+	frame_draw (IMG_PGJ);
 	dmd_overlay_outline ();
 	dmd_show2 ();
 	task_sleep_sec (15);

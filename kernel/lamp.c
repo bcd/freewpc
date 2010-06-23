@@ -269,52 +269,6 @@ void matrix_all_off (bitset matrix)
 	memset (matrix, 0, NUM_LAMP_COLS);
 }
 
-void matrix_copy (bitset dst, const bitset src)
-{
-	register U16 *dst1 = (U16 *)dst;
-	register U16 *src1 = (U16 *)src;
-
-	dst1[0] = src1[0];
-	dst1[1] = src1[1];
-	dst1[2] = src1[2];
-	dst1[3] = src1[3];
-}
-
-void matrix_set_bits (bitset dst, const bitset src)
-{
-	register U16 *dst1 = (U16 *)dst;
-	register U16 *src1 = (U16 *)src;
-
-	dst1[0] |= src1[0];
-	dst1[1] |= src1[1];
-	dst1[2] |= src1[2];
-	dst1[3] |= src1[3];
-}
-
-
-void matrix_clear_bits (bitset dst, const bitset src)
-{
-	register U16 *dst1 = (U16 *)dst;
-	register U16 *src1 = (U16 *)src;
-
-	dst1[0] &= ~src1[0];
-	dst1[1] &= ~src1[1];
-	dst1[2] &= ~src1[2];
-	dst1[3] &= ~src1[3];
-}
-
-
-void matrix_toggle_bits (bitset dst, const bitset src)
-{
-	register U16 *dst1 = (U16 *)dst;
-	register U16 *src1 = (U16 *)src;
-
-	dst1[0] ^= src1[0];
-	dst1[1] ^= src1[1];
-	dst1[2] ^= src1[2];
-	dst1[3] ^= src1[3];
-}
-
 
 /*
  * Lamp manipulation routines
@@ -389,15 +343,6 @@ void lamp_flash_off (lampnum_t lamp)
 bool lamp_flash_test (lampnum_t lamp)
 {
 	return bit_test (lamp_flash_matrix, lamp);
-}
-
-
-/** The task that calls all of the 'lamp_update' callset entries. */
-void lamp_update_task (void)
-{
-	if (in_live_game)
-		callset_invoke (lamp_update);
-	task_exit ();
 }
 
 
