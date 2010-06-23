@@ -26,6 +26,7 @@
 __local__ U8 dead_end_count;
 extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
+bool __local__ extra_ball_awarded_from_deadend;
 
 void dead_end_deff (void)
 {
@@ -40,19 +41,30 @@ void dead_end_deff (void)
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	
-	if (dead_end_count < 3)
-		sprintf ("EXTRA BALL AT 3");
-	else
-		sprintf ("");
-	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
+	if (extra_ball_awarded_from_deadend == FALSE)
+	{
+		if (dead_end_count < 3)
+			sprintf ("EXTRA BALL AT 3");
+		else if (dead_end_count == 3)
+		{
+			sound_send (SND_GET_THE_EXTRA_BALL);
+			sprintf ("EXTRA BALL LIT");
+		}
+		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep_sec (2);
+		deff_exit ();
+	}
 }
-
+	
 CALLSET_ENTRY (deadend, start_player)
 {
 	dead_end_count = 0;
+	/* Don't lit extra ball if impossible */
+	if (system_config.max_ebs != 0)
+		extra_ball_collected_from_deadend = FALSE;
+	else
+		extra_ball_collected_from_deadend = TRUE;
 }
 
 CALLSET_ENTRY (deadend, start_ball)
@@ -83,8 +95,8 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 			case 3:
 				score (SC_1M);
 				timed_game_extend (30);
-				sound_send (SND_GET_THE_EXTRA_BALL);
-				light_easy_extra_ball ();
+				if (extra_ball_collected_from_deadend == FALSE)
+					light_easy_extra_ball ();
 				break;
 			default:
 				score (SC_2M);
