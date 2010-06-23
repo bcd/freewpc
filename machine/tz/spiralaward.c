@@ -148,7 +148,7 @@ static void award_spiralaward (void)
 	/* Run lamp flash as task so it can run in parallel */
 	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
 	/* reset lamps after all 6 have been collected */
-	if (spiralawards_collected == 7)
+	if (spiralawards_collected == 6)
 	{	
 		/* Wait until lamp flash has finished */
 		while (task_find_gid (GID_FLASH_SPIRALAWARD_LAMP))
