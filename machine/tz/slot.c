@@ -210,7 +210,7 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 		task_sleep (TIME_100MS * 5);
 		task_create_gid (0, slot_kick_sound);
 		if (!multi_ball_play ())
-			event_can_follow (slot_kick, outhole, TIME_1S TIME_600MS);
+			event_can_follow (slot_kick, outhole, TIME_1S + TIME_600MS);
 	}
 }
 

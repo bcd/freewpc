@@ -31,7 +31,7 @@ define MACHINE_INCLUDE_FLAGS
 define MACHINE_SOL_EXTBOARD1
 define MACHINE_CUSTOM_AMODE
 define MACHINE_SCORE_DIGITS               10
-define MACHINE_MUSIC_GAME		  MUS_TZ_IN_PLAY
+define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
@@ -44,8 +44,6 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
-define FLIPCODE_LIST {{ 3, 2, 1, 2 }}
-define FLIPCODE_HANDLERS { tz_flipcode_default }
 
 ##########################################################################
 # Lamp Description
@@ -151,15 +149,13 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 15: Right Trough, c_decl(sw_trough), noscore
 16: Center Trough, c_decl(sw_trough), noscore
 17: Left Trough, c_decl(sw_trough), noscore
-18: Outhole, outhole, service, noplay, intest, debounce(TIME_100MS)
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS);
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
-26: Trough Proximity, noscore
-25: Far Left Trough, noplay, intest, service
 26: Trough Proximity, edge, noscore
 27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
-28: Rocket Kicker, debounce(TIME_200MS)
+28: Rocket Kicker
 31: Left Jet, ingame, c_decl(sw_jet), noplay
 32: Right Jet, ingame, c_decl(sw_jet), noplay
 33: Bottom Jet, ingame, c_decl(sw_jet), noplay
@@ -176,12 +172,12 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 46: MPF Right, ingame
 47: Clock Target, standup, ingame, lamp(LM_CLOCK_MILLIONS)
 48: Standup 1, standup, ingame, lamp(LM_LL_5M)
-51: Gumball Lane, noplay, intest, service
+51: Gumball Lane, intest
 52: Hitchhiker, ingame
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, noplay, intest, service
-56: Gumball Exit, noplay, intest, service
+55: Gumball Geneva, noscore
+56: Gumball Exit, noscore
 57: Slot Proximity, noscore
 58: Slot
 61: Skill Bottom, ingame, noplay
@@ -206,7 +202,7 @@ define FLIPCODE_HANDLERS { tz_flipcode_default }
 84: Lock Center, opto, c_decl(sw_lock)
 85: Lock Upper, opto, c_decl(sw_lock)
 86: Clock Passage, opto, c_decl(sw_unused)
-87: Gumball Enter, opto, noplay, intest, service
+87: Gumball Enter, opto, intest
 88: Lock Lower, c_decl(sw_lock)
 
 ##########################################################################
@@ -231,8 +227,8 @@ H1: Slot, time(TIME_66MS)
 H2: Rocket Kicker
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div.
-H6: Gumball Div.
+H5: Right Ramp Div
+H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
 
@@ -269,8 +265,8 @@ X2: Gumball High, flash
 X3: Gumball Mid, flash
 X4: Gumball Low, flash
 X5: Ramp2, flash
-X6: Clock Reverse, motor, nosearch, time(TIME_16MS)
-X7: Clock Forward, motor, nosearch, time(TIME_16MS)
+X6: Clock Reverse, motor, nosearch
+X7: Clock Forward, motor, nosearch
 
 
 ##########################################################################
@@ -372,8 +368,6 @@ Slot: Slot, \
 Popper: Popper, \
 	Gumball Popper
 
-Gumball: Gumball Release, init_max_count(0)
-
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
@@ -458,6 +452,7 @@ Volume Change: MUS_SUPER_SLOT
 30M:
 40M:
 50M:
+100M:
 
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.
@@ -466,11 +461,11 @@ Volume Change: MUS_SUPER_SLOT
 # Commas _cannot_ be used for this purpose since they separate parameters.
 ##########################################################################
 [highscores]
-GC: QQQ, 500.000.000
-1: CCD, 400.000.000
-2: MLD, 350.000.000
-3: BDD, 300.000.000
-4: NWU, 250.000.000
+GC: BCD, 500.000.000
+1: HRI, 400.000.000
+2: FEK, 350.000.000
+3: PUK, 300.000.000
+4: MLC, 250.000.000
 
 
 ##########################################################################
@@ -506,7 +501,6 @@ Clock Working:
 # Display effects
 ##########################################################################
 [deffs]
-Bonus: page(MACHINE2_PAGE), runner, PRI_BONUS
 # Brian Image: PRI_EGG1
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
@@ -520,12 +514,12 @@ MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
-Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_QUEUED+D_PAUSE
-Hitchhiker: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED
+Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_QUEUED+D_PAUSE+D_TIMEOUT
+Hitchhiker: page(MACHINE2_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED+D_TIMEOUT
 Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 
-Gumball: page(MACHINE_PAGE), PRI_GAME_QUICK6
+Gumball: page(MACHINE_PAGE), PRI_GAME_MODE7, D_PAUSE+D_QUEUED+D_TIMEOUT
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE7
@@ -535,18 +529,18 @@ TSM Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 Spiral Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
 Fastlock Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
-Hitch Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+Hitch Round: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
 Clock Millions Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 
 Mpf Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
-Mpf Award: page(MACHINE_PAGE), PRI_JACKPOT
+Mpf Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 # TODO - this mode does not update its deff by the new rules
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
 BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
-Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_QUEUED+D_RESTARTABLE
-Dead End: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
+Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Spiral Loop: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_SCORE
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
@@ -554,29 +548,37 @@ Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
-Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_TIMEOUT+D_PAUSE
+Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 Clock Millions Hit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Loop: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE+D_SCORE
-MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE+D_PAUSE
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1
-Camera Award: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
 TZ Ball Save: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
-Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE
-SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_QUICK3
-#Multidrain: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 MB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
+Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
+Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
+Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
+Bonus: page(MACHINE2_PAGE), runner, PRI_BONUS
+Score to beat: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+
+Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
+SpiralAward Collected: page(MACHINE2_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT+D_ABORTABLE
 Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE+D_TIMEOUT
+Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 
 Rules: page(MACHINE2_PAGE), PRI_EGG1
 
@@ -593,25 +595,30 @@ Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
 No GI: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
-Slot Kickout: shared, PRI_LEFF3, page(MACHINE2_PAGE)
-Gumball Strobe: shared, PRI_LEFF1, page(MACHINE2_PAGE)
-Clock Target: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
+Slot Kickout: PRI_LEFF4, GI(ALL), page(MACHINE2_PAGE)
+Gumball Strobe: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Clock Target: PRI_LEFF5, GI(ALL), page(MACHINE2_PAGE)
 Game Timeout: PRI_TILT, GI(ALL), page(MACHINE2_PAGE)
 Clock Start: PRI_LEFF4, GI(ALL), c_decl(clock_round_started_leff), page(MACHINE2_PAGE)
 MB Running: shared, PRI_LEFF2, LAMPS(DOOR_LOCKS_AND_GUMBALL), c_decl(multiball_running_leff), page(MACHINE2_PAGE)
 Strobe Up: PRI_LEFF2, LAMPS(ALL), page(MACHINE2_PAGE)
+Strobe Down: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Multi Strobe: PRI_LEFF2, LAMPS(ALL), page(MACHINE2_PAGE)
-Door Strobe: PRI_LEFF1, LAMPS(DOOR_PANELS), GI(ALL), page(MACHINE2_PAGE)
+Door Strobe: PRI_LEFF3, LAMPS(DOOR_PANELS), GI(ALL), page(MACHINE2_PAGE)
 Right Loop: PRI_LEFF1, LAMPS(SORT4), page(MACHINE2_PAGE)
 Left Loop: PRI_LEFF1, LAMPS(SORT3), page(MACHINE2_PAGE)
-Jets Active: runner, PRI_LEFF5, LAMPS(JETS), page(MACHINE2_PAGE)
+Jets Active: runner, PRI_LEFF2, LAMPS(JETS), page(MACHINE2_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE2_PAGE)
 Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
-MPF Active: runner, PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
-
+MPF Active: runner, PRI_LEFF4, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+MPF Hit: PRI_LEFF5, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Left Jet Flash: PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Right Jet Flash: PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Rocket: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
+Powerball Announce: PRI_LEFF4, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
-Spiralaward: PRI_LEFF3, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
+Spiralaward: runner, shared, PRI_LEFF1, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
 Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 ##########################################################################
@@ -627,7 +634,6 @@ lithograph:
 twizone:
 
 [timers]
-Spiralaward:
 
 [templates]
 Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
@@ -636,7 +642,6 @@ Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
 
-
 Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=2, offtime=20
 Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=2, offtime=20
 
@@ -644,11 +649,11 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+#Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
-Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+#Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
-Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+#Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
@@ -665,4 +670,3 @@ Ramp Div: driver(duty),
 Gumball Div: driver(duty),
 	sol=SOL_GUMBALL_DIV,
 	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
-
