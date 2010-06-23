@@ -74,7 +74,6 @@ static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	loops++;
-	score_zero (loop_score);
 	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		powerball_loops++;
@@ -90,7 +89,6 @@ static void award_loop (void)
 			sound_send (SND_LOAD_GUMBALL_NOW);
 			gumball_enable_count++;
 		//	flag_on (MAGNA_MB_LIT);
-			score_add (loop_score, score_table[SC_20M]);
 			score (SC_20M);
 //			powerball_loops = 0;
 		}
@@ -105,6 +103,7 @@ static void award_loop (void)
 	else
 	/* Plain Old Loop */
 	{
+		score_zero (loop_score);
 		if (loops < 2)
 		{
 			score_add (loop_score, score_table[SC_100K]);
@@ -122,7 +121,7 @@ static void award_loop (void)
 		}
 		else if (loops > 9)
 		{	
-			score_add (loop_score, score_table[SC_5M]);
+			score_add (loop_score, score_table[SC_1M]);
 			score (SC_1M);
 			sound_send (SND_THUNDER1);
 		}
