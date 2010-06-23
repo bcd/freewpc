@@ -26,7 +26,7 @@
 __local__ U8 dead_end_count;
 extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
-bool __local__ extra_ball_awarded_from_deadend;
+bool __local__ extra_ball_lit_from_deadend;
 
 void dead_end_deff (void)
 {
@@ -60,11 +60,12 @@ void dead_end_deff (void)
 CALLSET_ENTRY (deadend, start_player)
 {
 	dead_end_count = 0;
-	/* Don't lit extra ball if impossible */
-	if (system_config.max_ebs != 0)
-		extra_ball_collected_from_deadend = FALSE;
+	/* Don't allow lighting extra ball if impossible
+	 * or if previously collected */
+	if (system_config.max_ebs = 0)
+		extra_ball_lit_from_deadend = TRUE;
 	else
-		extra_ball_collected_from_deadend = TRUE;
+		extra_ball_lit_from_deadend = FALSE;
 }
 
 CALLSET_ENTRY (deadend, start_ball)
@@ -95,8 +96,11 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 			case 3:
 				score (SC_1M);
 				timed_game_extend (30);
-				if (extra_ball_collected_from_deadend == FALSE)
+				if (extra_ball_lit_from_deadend == FALSE)
+				{
 					light_easy_extra_ball ();
+					extra_ball_lit_from_deadend == TRUE;
+				}
 				break;
 			default:
 				score (SC_2M);
