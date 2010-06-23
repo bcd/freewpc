@@ -1,0 +1,135 @@
+
+BACK TO THE ZONE RULES
+
+Author: Ewan Meadows <sonny_jim@hotmail.com>
+Last Revised Sat May 29 19:53:04 GMT 2010
+
+
+Skill Shot
+==========
+
+
+Inlanes
+=======
+These can be stepped left and right using the flipper buttons, complete a
+rollover for 1M on your score and another 1M on your bonus
+
+Spiralaward
+===========
+When either left inlane rollover is lit, you have 3 seconds to fire the
+ball into the right loop.  If successful you will be randomly awarded one of
+the Spiralawards.  You will not be awarded the 'extra ball lit' Spiralaward until
+you have collected at least 4 Spiralawards.
+
+Once all Spiralawards have been collected, you are awarded 20M and every
+Spiralaward apart from the extra ball is relit.  To retrigger the Spiralaward
+once it has been completed once requires you to complete a rollover set.
+
+
+Left Ramps
+==========
+Ramp count gets reset at the end of each ball.
+
+Awards
+- 3 ramps lights the camera
+- 6 ramps lights the gumball
+- 10 ramps awards 10 Million
+- 20 ramps awards 20 Million
+
+Jets
+====
+Powerball scores double jets.  During 'Town Sqaure Madness' mode each jet is
+worth 500K.
+
+Loops
+=====
+
+Deadends
+========
+Lit by the right inlane rollover.  Collect 3 to light an extra ball.
+
+Gumball
+=======
+Loading the gumball with a steel ball awards 5M, going up by 5M each time
+capped at 30M.
+
+Loading with the powerball scores another 20M and starts 'Super Skill Shot Multiball' with the piano
+jackpot available as well.
+
+Camera
+======
+Can be lit by the scoring
+- Camera door panel
+- Camera lit during Super Slot round
+- 3 left ramps
+
+Awards (in order)
+- Light lock
+- 10 Million points
+- Award door panel 
+- 20 Million points
+- Quick Multiball
+
+Adds 10M to the jackpot, capped at 50M when MB jackpot is lit
+
+Hitchhikers
+===========
+Unlocks the Mini playfield every 5 hitchhikers until 20 hitchhikers, every 10
+after that.  Hit during Hitchhiker round to score 10M, otherwise 250K is
+scored.
+
+Mini playfield
+==============
+Unlock the mini playfield by scoring the following:
+- 5 Hitchhikers (or every 10 if hitchhikers >30)
+- 'Battle the Power' door panel
+- 'Battle the power' spiral award
+
+A jackpot will count down over the course of 10 seconds, which can be
+collected along with a door panel by sending the ball into the top hole.
+
+If you manage to sneak in a ball during multiball, you get some points too.
+
+Super Skill Multiball
+=====================
+
+Clock Chaos Multiball
+=====================
+
+Multiball
+=========
+If no jackpot is scored and 2 balls drain, the player is offered a multiball
+restart.  This is collected by hitting the lock within 30 seconds of multiball
+ending.
+
+Slot Machine and Piano
+======================
+Hit either when lit to award a Door panel.  If either are unlit when hit and
+you currently have less than 8 panels, both Slot and Piano will be lit.
+
+Door Panels
+===========
+Door panels are awarded by hitting the Slot machine or piano when lit, or by
+being awarded by the camera.  Door panels cannot be collected during multiball modes.
+
+Door Panel : Greed
+==================
+
+Bonus
+=====
+
+Combos and Lucky bounces
+========================
+
+There are 3 x 2 way combos:
+- Left loop -> Camera
+- Left loop -> Hitchhiker
+- Right loop -> Piano
+
+
+And 1 3 way combo:
+- Leftramp -> Rightramp -> Piano
+
+You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
+:-p
+
