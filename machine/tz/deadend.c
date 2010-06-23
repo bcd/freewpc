@@ -41,7 +41,7 @@ void dead_end_deff (void)
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	
-	if (extra_ball_awarded_from_deadend == FALSE)
+	if (extra_ball_lit_from_deadend == FALSE)
 	{
 		if (dead_end_count < 3)
 			sprintf ("EXTRA BALL AT 3");
@@ -62,7 +62,7 @@ CALLSET_ENTRY (deadend, start_player)
 	dead_end_count = 0;
 	/* Don't allow lighting extra ball if impossible
 	 * or if previously collected */
-	if (system_config.max_ebs = 0)
+	if (system_config.max_ebs == 0)
 		extra_ball_lit_from_deadend = TRUE;
 	else
 		extra_ball_lit_from_deadend = FALSE;
@@ -99,7 +99,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 				if (extra_ball_lit_from_deadend == FALSE)
 				{
 					light_easy_extra_ball ();
-					extra_ball_lit_from_deadend == TRUE;
+					extra_ball_lit_from_deadend = TRUE;
 				}
 				break;
 			default:
