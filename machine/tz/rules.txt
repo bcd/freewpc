@@ -1,18 +1,19 @@
 
 BACK TO THE ZONE RULES
 
-Author: Ewan Meadows <sonny_jim@hotmail.com>
+Author: Sonny_Jim <sonny_jim@hotmail.com>
 Last Revised Sat May 29 19:53:04 GMT 2010
+
 
 
 Skill Shot
 ==========
-
+Launch the ball and try to land in the orange zone for maximum points.
 
 Inlanes
 =======
 These can be stepped left and right using the flipper buttons, complete a
-rollover for 1M on your score and another 1M on your bonus
+set of 3 rollovers for 1M on your score and another 1M on your bonus at the end.
 
 Spiralaward
 ===========
@@ -38,11 +39,12 @@ Awards
 
 Jets
 ====
-Powerball scores double jets.  During 'Town Sqaure Madness' mode each jet is
-worth 500K.
+Jets score 150K, Powerball scores 300K in the jets.  
+During 'Town Sqaure Madness' mode each jet is worth 500K.
 
 Loops
 =====
+Loops start at 100K each and rise to 1M after 10 have been completed
 
 Deadends
 ========
@@ -54,7 +56,7 @@ Loading the gumball with a steel ball awards 5M, going up by 5M each time
 capped at 30M.
 
 Loading with the powerball scores another 20M and starts 'Super Skill Shot Multiball' with the piano
-jackpot available as well.
+jackpot and Skill Shot jackpot available simultaenously.
 
 Camera
 ======
