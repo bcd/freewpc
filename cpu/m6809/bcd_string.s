@@ -57,8 +57,10 @@ _bcd_string_increment:
 	inca
 	daa
 	sta	b,x
+	bcc	2$
 	decb
 	bge	1$
+2$:
 	rts
 
 
@@ -72,14 +74,33 @@ _bcd_string_sub:
 	pshs	u
 	ldu	4,s
 	decb
-	andcc	#~0x01
+	stb	*m0
+
+	; Step 1 - compute the ten's complement of the subtrahend.
+	; Take the nine's complement, and then add one.
+	; This becomes U, replacing the second argument.
 1$:
-	lda	b,x
-	sbca	b,y
+	lda	#0x99
+	suba	b,u
+	sta	,-s
+	decb
+	bge	1$
+
+	; Step 2 - add the inverse, just like bcd_string_add
+	ldb	*m0
+	inc	b,x
+	andcc	#~0x01
+2$:
+	lda	b,s
+	adca	b,x
 	daa
 	sta	b,x
 	decb
-	bge	1$
+	bge	2$
+
+	ldb	*m0
+	incb
+	leas	b,s
 	puls	u,pc
 
 
