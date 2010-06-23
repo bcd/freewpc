@@ -121,11 +121,13 @@ void flash_all_leff (void)
 void slot_kickout_leff (void)
 {
 	U8 i;
+	triac_leff_disable (TRIAC_GI_MASK);
 	for (i = 0; i < 6; i++)
 	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 		task_sleep (TIME_200MS);
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

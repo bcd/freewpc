@@ -41,6 +41,7 @@ U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
 U8 current_one_ball_hi_ball_number;
 U8 current_player_rankings[4];
+U8 countup_pause_iterations;
 
 bool buttons_held;
 bool quickdeath_timer_running;
@@ -95,7 +96,8 @@ static void countup_pause (void)
 	if (buttons_held)
 	{
 		score_add (temp_score, score_table[SC_1M]);
-		task_sleep (TIME_16MS);
+		if (countup_pause_iterations < 50)
+			task_sleep (TIME_16MS);
 	}
 	else
 		task_sleep (TIME_33MS);
@@ -612,7 +614,8 @@ void bonus_deff (void)
 		/* Restart a task to monitor the buttons */
 		task_create_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 		task_kill_gid (GID_BONUS_TALKING);
-	
+		
+		countup_pause_iterations = 0;
 		do {
 			dmd_alloc_low_clean ();
 			
@@ -632,6 +635,7 @@ void bonus_deff (void)
 				task_create_gid (GID_BONUS_TALKING, points_this_ball_sound_task);
 			else if (!task_find_gid (GID_BONUS_TALKING))
 				sound_send (SND_THUD);
+			bounded_increment (countup_pause_iterations, 254);
 			countup_pause ();
 		} while ( score_compare (points_this_ball, temp_score) == 1 );
 		

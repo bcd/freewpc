@@ -417,7 +417,7 @@ void rollover_completed_deff (void)
 	sound_send (SND_GLASS_BREAKS);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "ROLLOVER");
-	font_render_string_center (&font_fixed6, 64, 17, "COMPLETED");
+	font_render_string_center (&font_fixed6, 64, 18, "COMPLETED");
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
