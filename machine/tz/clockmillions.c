@@ -21,13 +21,29 @@
 #include <freewpc.h>
 
 
-U8 clock_millions_round_timer;
-__local__ U8 clock_round_hits;
+U8 clock_millions_mode_timer;
+__local__ U8 clock_mode_hits;
 
 __local__ U8 clock_default_hits;
 
 U8 clock_millions_timer;
 
+void clock_millions_mode_init (void);
+void clock_millions_mode_exit (void);
+
+struct timed_mode_ops clock_millions_mode = {
+	DEFAULT_MODE,
+	.init = clock_millions_mode_init,
+	.exit = clock_millions_mode_exit,
+	.gid = GID_CLOCK_MILLIONS_ROUND_RUNNING,
+	.music = MUS_TOWN_SQUARE_MADNESS,
+	.deff_running = DEFF_CLOCK_MILLIONS_ROUND,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 20,
+	.timer = &clock_millions_mode_timer,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
 
 void clock_millions_hit_deff (void)
 {
@@ -48,7 +64,7 @@ void clock_default_hit_deff (void)
 
 
 
-void clock_millions_round_deff (void)
+void clock_millions_mode_deff (void)
 {
 	for (;;)
 	{
@@ -57,7 +73,7 @@ void clock_millions_round_deff (void)
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "SHOOT CLOCK");
-		sprintf ("%d", clock_millions_round_timer);
+		sprintf ("%d", clock_millions_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -79,58 +95,47 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 		deff_start (DEFF_CLOCK_MILLIONS_HIT);
 		score (SC_5M);
 	
-		if (clock_round_hits <= 4)
+		if (clock_mode_hits <= 4)
 		{
-			clock_round_hits++;
+			clock_mode_hits++;
 		}
 	}
 }
-void clock_millions_round_begin (void)
+void clock_millions_mode_init (void)
 {
 	deff_start (DEFF_CLOCK_MILLIONS_ROUND);
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
-void clock_millions_round_expire (void)
+void clock_millions_mode_expire (void)
 {
 	deff_stop (DEFF_CLOCK_MILLIONS_ROUND);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
-void clock_millions_round_end (void)
+void clock_millions_mode_exit (void)
 {
 	deff_stop (DEFF_CLOCK_MILLIONS_ROUND);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
-}
-
-void clock_millions_round_task (void)
-{
-	timed_mode_task (clock_millions_round_begin, clock_millions_round_expire, clock_millions_round_end,
-		&clock_millions_round_timer, 20, 3);
 }
 
 CALLSET_ENTRY (clock_millions, display_update)
 {
-	if (timed_mode_timer_running_p (GID_CLOCK_MILLIONS_ROUND_RUNNING,
-		&clock_millions_round_timer))
-		deff_start_bg (DEFF_CLOCK_MILLIONS_ROUND, 0);
+	timed_mode_display_update (&clock_millions_mode);
 }
-
 CALLSET_ENTRY (clock_millions, music_refresh)
 {
-	if (timed_mode_timer_running_p (GID_CLOCK_MILLIONS_ROUND_RUNNING,
-		&clock_millions_round_timer))
-		music_request (MUS_TOWN_SQUARE_MADNESS, PRI_GAME_MODE1);
+	timed_mode_music_update (&clock_millions_mode);
 }
 
 CALLSET_ENTRY (clock_millions, door_start_clock_millions)
 {
-	timed_mode_start (GID_CLOCK_MILLIONS_ROUND_RUNNING, clock_millions_round_task);
+	timed_mode_being (&clock_millions_mode);
 }
 
 CALLSET_ENTRY (clock_millions, end_ball)
 {
-	timed_mode_stop (&clock_millions_round_timer);
+	timed_mode_stop (&clock_millions_mode_timer);
 }
 
 CALLSET_ENTRY (clock_millions, start_player)
