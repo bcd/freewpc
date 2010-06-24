@@ -109,22 +109,28 @@ static void award_loop (void)
 			score_add (loop_score, score_table[SC_100K]);
 			score (SC_100K);
 		}
-		else if (loops > 2)
+		else if (loops < 4)
 		{
 			score_add (loop_score, score_table[SC_250K]);
 			score (SC_250K);
 		}
-		else if (loops > 4)
+		else if (loops < 8)
 		{
 			score_add (loop_score, score_table[SC_500K]);
 			score (SC_500K);
 		}
-		else if (loops > 9)
+		else if (loops < 10)
 		{	
+			score_add (loop_score, score_table[SC_750K]);
+			score (SC_750K);
+		}
+		else
+		{
 			score_add (loop_score, score_table[SC_1M]);
 			score (SC_1M);
 			sound_send (SND_THUNDER1);
 		}
+
 		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
 			sound_send (SND_SPIRAL_AWARDED);
 		/* Don't show deff during certain modes */
@@ -153,7 +159,6 @@ static void award_left_loop (void)
 		award_loop ();
 	}
 }
-
 
 static void award_right_loop (void)
 {
@@ -233,12 +238,10 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 
 }
 
-
 CALLSET_ENTRY (loop, sw_upper_right_magnet)
 {
 	/* Could autodetect present of third magnet using this switch? */
 }
-
 
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
@@ -279,7 +282,6 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 		start_loop_speed_timer ();
 		enter_loop ();
 	}
-
 }
 
 CALLSET_ENTRY (loop, start_ball)
@@ -304,4 +306,3 @@ CALLSET_ENTRY (loop, end_ball)
 	timer_kill_gid (GID_LEFT_LOOP_ENTERED);
 	timer_kill_gid (GID_RIGHT_LOOP_ENTERED);
 }
-
