@@ -73,7 +73,7 @@ void jets_hit_deff (void)
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep (TIME_33MS);
 	} while (i++ < 8);
@@ -82,7 +82,7 @@ void jets_hit_deff (void)
 	psprintf ("1 HIT", "%d HITS", jets_scored);
 	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep (TIME_200MS);
 	deff_exit ();
@@ -96,7 +96,7 @@ void jets_level_up_deff (void)
 	/* We don't use scoreget as it's likely another score
 	 * has been awarded */
 	sprintf("%d MILLION", jetscore);
-	font_render_string_center (&font_mono5, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 	jets_scored = 1;
 	dmd_show_low ();
 	task_sleep_sec (2);
