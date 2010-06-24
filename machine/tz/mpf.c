@@ -42,9 +42,11 @@ void mpf_round_deff (void)
 		
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		//sprintf_current_score ();
 		sprintf ("%d,000,000", (mpf_award * mpf_level));
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		//sprintf ("%d,000,000", (mpf_award * mpf_level));
+		sprintf ("SHOOT TOP TO COLLECT");
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", mpf_round_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);

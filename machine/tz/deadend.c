@@ -28,6 +28,15 @@ extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
 bool __local__ extra_ball_lit_from_deadend;
 
+void inlane_lights_dead_end_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_var6, 64, 10, "RIGHT INLANE");
+	font_render_string_center (&font_var6, 64, 18, "LIGHTS DEAD END");
+	dmd_show_low (2);
+	deff_exit ();
+}
+
 void dead_end_deff (void)
 {
 	dmd_alloc_low_clean();
@@ -111,6 +120,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 	}
 	else
 	{
+		deff_start (DEFF_INLANE_LIGHTS_DEAD_END);
 		award_unlit_shot (SW_DEAD_END);
 		score (SC_100K);
 		sound_send (SND_TOWN_SQUARE_AWARD);

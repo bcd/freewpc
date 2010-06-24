@@ -271,6 +271,8 @@ void bonus_deff (void)
 
 	if (quickdeath_timer_running == TRUE)
 	{
+	/* TODO This should only taunt if the game time was <10 seconds
+	 * atm it does so when any ball is served, rather than the first */
 		dmd_alloc_low_clean ();
 		sprintf ("YOU LASTED LONG");
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
