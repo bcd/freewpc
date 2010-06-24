@@ -155,13 +155,10 @@ static void award_spiralaward (void)
 			task_sleep (TIME_500MS);
 		/* Reset Spiral Lamps */
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
-		spiralawards_collected = 0;
-		/* Turn off Spiral EB if already collected */
-		if (spiralaward_completed == TRUE)
-		{
-			lamp_off (LM_SPIRAL_EB);
-			spiralawards_collected++;
-		}
+		/* Turn off Spiral EB when already collected */
+		lamp_off (LM_SPIRAL_EB);
+		/* Set to 1, as we have 'collected' the EB lamp */
+		spiralawards_collected = 1;
 		spiralaward_completed = TRUE;
 	}
 }
@@ -188,4 +185,10 @@ CALLSET_ENTRY (spiralaward, start_player)
 	spiralawards_collected = 0;
 	total_spiralawards_collected = 0;
 	spiralaward_completed = FALSE;
+	/* Turn off Spiral EB if impossible */
+	if (system_config.max_ebs == 0)
+	{
+		lamp_off (LM_SPIRAL_EB);
+		spiralawards_collected = 1;
+	}
 }
