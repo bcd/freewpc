@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com
  *
  * This file is part of FreeWPC.
  *
@@ -26,8 +26,35 @@ __local__ U8 jets_scored;
 __local__ U8 jets_for_bonus;
 __local__ U8 jets_bonus_level;
 
-extern U8 tsm_round_timer;
+U8 tsm_mode_timer;
 extern U8 mpf_round_timer;
+
+void tsm_mode_init (void);
+void tsm_mode_exit (void);
+
+struct timed_mode_ops tsm_mode = {
+	DEFAULT_MODE,
+	.init = tsm_mode_init,
+	.exit = tsm_mode_exit,
+	.gid = GID_TSM_MODE_RUNNING,
+	.music = MUS_TOWN_SQUARE_MADNESS,
+	.deff_running = DEFF_TSM_MODE,
+	.init_timer = 30,
+	.timer = &tsm_mode_timer,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
+
+void tsm_mode_init (void)
+{
+	leff_start (LEFF_JETS_ACTIVE);
+//	deff_start (DEFF_TSM_MODE);
+}
+
+void tsm_mode_exit (void)
+{
+	leff_stop (LEFF_JETS_ACTIVE);
+}
 
 CALLSET_ENTRY(jet, start_player)
 {
@@ -52,15 +79,32 @@ void sw_jet_sound (void)
 	jet_sound_index++;
 	if (jet_sound_index >= 3)
 		jet_sound_index = 0;
-
-	//if (flag_test (FLAG_TSM_RUNNING))
-	if (timed_mode_timer_running_p (GID_TSM_ROUND_RUNNING, &tsm_round_timer))
+	
+	if (timed_mode_running_p (&tsm_mode))
 		sound_send (super_jet_sounds[jet_sound_index]);
 	else
 		sound_send (jet_sounds[jet_sound_index]);
+	
 	flasher_pulse (FLASH_JETS);
-	task_sleep (TIME_200MS);
+	//task_sleep (TIME_200MS);
 	task_exit ();
+}
+
+void tsm_mode_deff (void)
+{
+	for (;;)
+	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_var5, 64, 5, "TOWN SQUARE MADNESS");
+		sprintf_current_score ();
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 27, "JETS AT 500K");
+		sprintf ("%d", tsm_mode_timer);
+		font_render_string (&font_var5, 2, 2, sprintf_buffer);
+		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep (TIME_200MS);
+	}
 }
 
 void jets_hit_deff (void)
@@ -111,7 +155,7 @@ CALLSET_ENTRY (jet, sw_sling)
 
 CALLSET_ENTRY (jet, sw_jet)
 {
-	/* Hack to work around bug when mpf_exit switch breaks */
+	/* Hack to work amode bug when mpf_exit switch breaks */
 	if (!multi_ball_play () && mpf_round_timer > 0)
 		callset_invoke (sw_mpf_exit);
 	
@@ -149,7 +193,7 @@ CALLSET_ENTRY (jet, sw_jet)
 		deff_start (DEFF_JETS_LEVEL_UP);
 	}
 
-	if (timed_mode_timer_running_p (GID_TSM_ROUND_RUNNING, &tsm_round_timer))
+	if (timed_mode_running_p (&tsm_mode))
 		score (SC_500K);
 	else
 	{	
@@ -168,20 +212,30 @@ CALLSET_ENTRY (jet, sw_jet)
 
 CALLSET_ENTRY (jet, lamp_update)
 {
-	if (timed_mode_timer_running_p (GID_TSM_ROUND_RUNNING, &tsm_round_timer))
+	if (timed_mode_running_p (&tsm_mode))
 		leff_start (LEFF_JETS_ACTIVE);
-	else
+	else if (leff_running_p (LEFF_JETS_ACTIVE))
 		leff_stop (LEFF_JETS_ACTIVE);
 }
 
 
 CALLSET_ENTRY (jet, start_ball)
 {
-	leff_stop (LEFF_JETS_ACTIVE);
+//	leff_stop (LEFF_JETS_ACTIVE);
+}
+
+CALLSET_ENTRY (jet, display_update)
+{
+	timed_mode_display_update (&tsm_mode);
+}
+
+CALLSET_ENTRY (jet, music_refresh)
+{
+	timed_mode_music_refresh (&tsm_mode);
 }
 
 CALLSET_ENTRY (jet, door_start_tsm)
 {
-	leff_start (LEFF_JETS_ACTIVE);
+	timed_mode_begin (&tsm_mode);
 }
 

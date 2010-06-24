@@ -231,7 +231,7 @@ CALLSET_ENTRY (sssmb, display_update)
 CALLSET_ENTRY (sssmb, music_refresh)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING))
-		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1 + 9);
+		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE1 + 9);
 }
 
 

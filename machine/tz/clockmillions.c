@@ -35,9 +35,9 @@ struct timed_mode_ops clock_millions_mode = {
 	DEFAULT_MODE,
 	.init = clock_millions_mode_init,
 	.exit = clock_millions_mode_exit,
-	.gid = GID_CLOCK_MILLIONS_ROUND_RUNNING,
+	.gid = GID_CLOCK_MILLIONS_MODE_RUNNING,
 	.music = MUS_TOWN_SQUARE_MADNESS,
-	.deff_running = DEFF_CLOCK_MILLIONS_ROUND,
+	.deff_running = DEFF_CLOCK_MILLIONS_MODE,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 20,
 	.timer = &clock_millions_mode_timer,
@@ -103,19 +103,19 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 }
 void clock_millions_mode_init (void)
 {
-	deff_start (DEFF_CLOCK_MILLIONS_ROUND);
+	deff_start (DEFF_CLOCK_MILLIONS_MODE);
 //	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_mode_expire (void)
 {
-	deff_stop (DEFF_CLOCK_MILLIONS_ROUND);
+	deff_stop (DEFF_CLOCK_MILLIONS_MODE);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_mode_exit (void)
 {
-	deff_stop (DEFF_CLOCK_MILLIONS_ROUND);
+	deff_stop (DEFF_CLOCK_MILLIONS_MODE);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
@@ -132,7 +132,7 @@ CALLSET_ENTRY (clock_millions, display_update)
 
 CALLSET_ENTRY (clock_millions, music_refresh)
 {
-	timed_mode_music_update (&clock_millions_mode);
+	timed_mode_music_refresh (&clock_millions_mode);
 }
 
 CALLSET_ENTRY (clock_millions, door_start_clock_millions)
@@ -140,13 +140,3 @@ CALLSET_ENTRY (clock_millions, door_start_clock_millions)
 	timed_mode_begin (&clock_millions_mode);
 }
 
-/*
-CALLSET_ENTRY (clock_millions, end_ball)
-{
-	timed_mode_stop (&clock_millions_mode_timer);
-}
-
-CALLSET_ENTRY (clock_millions, start_player)
-{
-}
-*/

@@ -23,9 +23,26 @@
 #include <freewpc.h>
 
 __local__ U8 hitch_count;
-U8 hitch_round_timer;
+U8 hitch_mode_timer;
 extern void award_unlit_shot (U8 unlit_called_from);
 extern __local__ U8 mpf_enable_count;
+
+void hitch_mode_init (void);
+void hitch_mode_exit (void);
+
+struct timed_mode_ops hitch_mode = {
+	DEFAULT_MODE,
+	.init = hitch_mode_init,
+	.exit = hitch_mode_exit,
+	.gid = GID_HITCH_MODE_RUNNING,
+	.music = MUS_FASTLOCK_ADDAMS_FAMILY,
+	.deff_running = DEFF_HITCH_MODE,
+	.prio = PRI_GAME_MODE1,
+	.timer = &hitch_mode_timer,
+	.init_timer = 30,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
 
 void hitchhiker_deff (void)
 {
@@ -39,8 +56,7 @@ void hitchhiker_deff (void)
 		/* text can only be printed to the low page so we flip them */
 		dmd_flip_low_high ();
 		
-		if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
+		if (timed_mode_running_p (&hitch_mode))
 		{
 			sprintf("10 MILLION");
 			font_render_string_center (&font_mono5, 98, 5, sprintf_buffer);
@@ -68,7 +84,7 @@ void hitchhiker_deff (void)
 	
 }
 
-void hitch_round_deff (void)
+void hitch_mode_deff (void)
 {
 	for (;;)
 	{
@@ -77,7 +93,7 @@ void hitch_round_deff (void)
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "FOR 10M");
-		sprintf ("%d", hitch_round_timer);
+		sprintf ("%d", hitch_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -86,45 +102,31 @@ void hitch_round_deff (void)
 }
 
 
-void hitch_round_begin (void)
+void hitch_mode_init (void)
 {
-	deff_start (DEFF_HITCH_ROUND);
 }
 
-void hitch_round_expire (void)
+void hitch_mode_expire (void)
 {
-	deff_stop (DEFF_HITCH_ROUND);
 }
 
-void hitch_round_end (void)
+void hitch_mode_exit (void)
 {
-	deff_stop (DEFF_HITCH_ROUND);
-}
-
-void hitch_round_task (void)
-{
-	timed_mode_task (hitch_round_begin, hitch_round_expire, hitch_round_end,
-		&hitch_round_timer, 20, 3);
 }
 
 CALLSET_ENTRY (hitch, display_update)
 {
-	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
-		deff_start_bg (DEFF_HITCH_ROUND, 0);
+	timed_mode_display_update (&hitch_mode);
 }
 
 CALLSET_ENTRY (hitch, music_refresh)
 {
-	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
-		music_request (MUS_FASTLOCK_ADDAMS_FAMILY, PRI_GAME_MODE1);
+	timed_mode_music_refresh (&hitch_mode);
 }
 
 CALLSET_ENTRY (hitch, sw_hitchhiker)
 {
-	if (timed_mode_timer_running_p (GID_HITCH_ROUND_RUNNING,
-		&hitch_round_timer))
+	if (timed_mode_running_p (&hitch_mode))
 	{
 		score (SC_10M);
 		sound_send (SND_HITCHHIKER_COUNT);
@@ -159,15 +161,10 @@ CALLSET_ENTRY (hitch, sw_hitchhiker)
 
 CALLSET_ENTRY (hitch, door_start_hitchhiker)
 {
-	timed_mode_start (GID_HITCH_ROUND_RUNNING, hitch_round_task);
+	timed_mode_begin (&hitch_mode);
 }
 
 CALLSET_ENTRY (hitch, start_ball)
 {
 	hitch_count = 1;
-}
-
-CALLSET_ENTRY (hitch, end_ball)
-{
-	timed_mode_stop (&hitch_round_timer);
 }

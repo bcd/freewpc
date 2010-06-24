@@ -34,8 +34,8 @@ score_t loop_score;
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 
-extern U8 spiral_round_timer;
-extern U8 fastlock_round_timer;
+extern struct timed_mode_ops spiral_mode;
+//extern U8 fastlock_round_timer;
 
 extern void thing_flips (void);
 extern void award_spiral_loop (void);
@@ -95,7 +95,7 @@ static void award_loop (void)
 		deff_start (DEFF_PB_LOOP);
 		return;
 	}
-	if (timed_mode_timer_running_p (GID_SPIRAL_ROUND_RUNNING, &spiral_round_timer))
+	if (timed_mode_running_p (&spiral_mode))
 	{
 		spiral_loops++;
 		award_spiral_loop ();

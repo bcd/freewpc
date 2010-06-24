@@ -323,7 +323,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 	
@@ -339,7 +339,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -362,7 +362,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 	
@@ -381,7 +381,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 	
@@ -400,7 +400,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -419,7 +419,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}	
 	
@@ -438,7 +438,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -457,7 +457,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 	
@@ -475,7 +475,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -495,7 +495,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -514,7 +514,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		bonus_pause ();
 	}
 
@@ -585,7 +585,7 @@ void bonus_deff (void)
 		countup_pause ();
 	} while ( score_compare (total_bonus, temp_score) == 1 );
 	
-	sound_send (SND_GREED_ROUND_BOOM);
+	sound_send (SND_GREED_MODE_BOOM);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
 	sprintf_score (total_bonus);
@@ -651,7 +651,7 @@ void bonus_deff (void)
 		else if (check_for_big_score ())
 			task_sleep_sec (2);
 		else
-			sound_send (SND_GREED_ROUND_BOOM);
+			sound_send (SND_GREED_MODE_BOOM);
 		
 		bonus_sched_transition ();
 		task_sleep_sec (2);
@@ -743,7 +743,7 @@ void bonus_deff (void)
 			
 		sprintf("PLAYER %d WINS BY", current_hi_player);
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 		sprintf_score (temp_score);
 		font_render_string_center (&font_fixed10, 64, 12, sprintf_buffer);
 		
@@ -765,7 +765,7 @@ void bonus_deff (void)
 	dmd_show_low ();
 	sample_start (MUS_FADE_EXIT, SL_2S);
 	task_sleep (TIME_16MS);
-	sample_start (SND_GREED_ROUND_BOOM, SL_1S);
+	sample_start (SND_GREED_MODE_BOOM, SL_1S);
 
 	task_sleep_sec (2);
 	task_sleep (TIME_500MS);

@@ -42,10 +42,10 @@ struct timed_mode_ops fastlock_mode = {
 	.deff_running = DEFF_FASTLOCK_MODE,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 40,
-	.timer = fastlock_mode_timer,
+	.timer = &fastlock_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
-}
+};
 	
 void fastlock_mode_deff (void)
 {
@@ -79,26 +79,26 @@ void fastlock_award_deff (void)
 
 void fastlock_mode_init (void)
 {
-	deff_start (DEFF_FASTLOCK_MODE);
+//	deff_start (DEFF_FASTLOCK_MODE);
 	fastlock_award = 5;
 	fastlocks_collected = 1;
 }
 
 void fastlock_mode_expire (void)
 {
-	deff_stop (DEFF_FASTLOCK_MODE);
+//	deff_stop (DEFF_FASTLOCK_MODE);
 	lamp_off (LM_LOCK_ARROW);
 }
 
 void fastlock_mode_exit (void)
 {
-	deff_stop (DEFF_FASTLOCK_MODE);
+//	deff_stop (DEFF_FASTLOCK_MODE);
 	lamp_off (LM_LOCK_ARROW);
 }
 
 bool fastlock_running (void)
 {
-	if (timed_mode_running_p (&fastlock_mode_timer))
+	if (timed_mode_running_p (&fastlock_mode))
 		return TRUE;
 	else
 		return FALSE;
@@ -150,21 +150,11 @@ CALLSET_ENTRY (fastlock, display_update)
 
 CALLSET_ENTRY (fastlock, music_refresh)
 {
-	timed_mode_music_update (&fastlock_mode);
+	timed_mode_music_refresh (&fastlock_mode);
 }
 
 CALLSET_ENTRY (fastlock, door_start_fast_lock)
 {
-	timed_mode_begin (&fastlock_mode_task);
+	timed_mode_begin (&fastlock_mode);
 }
 
-/*
-CALLSET_ENTRY (fastlock, end_ball)
-{
-	timed_mode_stop (&fastlock_mode_timer);
-}
-
-CALLSET_ENTRY (fastlock, start_player)
-{
-}
-*/

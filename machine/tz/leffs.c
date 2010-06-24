@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,7 +24,7 @@
 
 extern bool mpf_active;
 extern U8 mpf_round_timer;
-extern U8 tsm_round_timer;
+extern U8 tsm_mode_timer;
 void bonus_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
@@ -344,7 +344,7 @@ void left_loop_leff (void)
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	while (tsm_round_timer != 0)
+	while (tsm_mode_timer != 0)
 		lamplist_apply (LAMPLIST_JETS, leff_toggle);
 	leff_exit ();
 }

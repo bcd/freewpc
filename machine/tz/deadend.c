@@ -31,9 +31,10 @@ bool __local__ extra_ball_lit_from_deadend;
 void inlane_lights_dead_end_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var6, 64, 10, "RIGHT INLANE");
-	font_render_string_center (&font_var6, 64, 18, "LIGHTS DEAD END");
-	dmd_show_low (2);
+	font_render_string_center (&font_var5, 64, 10, "RIGHT INLANE");
+	font_render_string_center (&font_var5, 64, 18, "LIGHTS DEAD END");
+	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 

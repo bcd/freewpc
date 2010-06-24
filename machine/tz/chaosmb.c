@@ -225,7 +225,7 @@ CALLSET_ENTRY (chaosmb, lamp_update)
 CALLSET_ENTRY (chaosmb, music_refresh)
 {
 	if (flag_test (FLAG_CHAOSMB_RUNNING))
-		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE6);
+		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE6);
 }
 
 

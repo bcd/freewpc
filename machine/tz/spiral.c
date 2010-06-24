@@ -21,10 +21,26 @@
 #include <freewpc.h>
 
 
-U8 spiral_round_timer;
-//__local__ score_t spiral_round_score;
+U8 spiral_mode_timer;
+//__local__ score_t spiral_mode_score;
 
 extern U8 spiral_loops;
+
+void spiral_mode_init (void);
+void spiral_mode_exit (void);
+
+struct timed_mode_ops spiral_mode = {
+	DEFAULT_MODE,
+	.init = spiral_mode_init,
+	.exit = spiral_mode_exit,
+	.gid = GID_SPIRAL_MODE_RUNNING,
+	.music = MUS_SPIRAL_MODE,
+	.deff_running = DEFF_SPIRAL_MODE,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 30,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+};
 
 void spiral_loop_deff (void)
 {
@@ -46,30 +62,30 @@ void award_spiral_loop (void)
 	{
 		sound_send (SND_SPIRAL_AWARDED);
 		score (SC_10M);
-		//score_add (SC_10M, spiral_round_score);
+		//score_add (SC_10M, spiral_mode_score);
 		deff_start (DEFF_SPIRAL_LOOP);
 	}
 	else
 	{
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		score (SC_20M);
-		//score_add (SC_20M, spiral_round_score);
+		//score_add (SC_20M, spiral_mode_score);
 		deff_start (DEFF_SPIRAL_LOOP);
 		spiral_loops = 0;
 	}
 }
 
-void spiral_round_deff (void)
+void spiral_mode_deff (void)
 {
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
 		sprintf_current_score ();
-		//sprintf_score (spiral_round_score);
+		//sprintf_score (spiral_mode_score);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS");
-		sprintf ("%d", spiral_round_timer);
+		sprintf ("%d", spiral_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -78,36 +94,29 @@ void spiral_round_deff (void)
 }
 
 
-void spiral_round_begin (void)
+void spiral_mode_init (void)
 {
-	deff_start (DEFF_SPIRAL_ROUND);
-	//score_zero (spiral_round_score);
+//	deff_start (DEFF_SPIRAL_MODE);
+	//score_zero (spiral_mode_score);
 }
 
-void spiral_round_expire (void)
+void spiral_mode_expire (void)
 {
-	deff_stop (DEFF_SPIRAL_ROUND);
+//	deff_stop (DEFF_SPIRAL_MODE);
 	lamp_off (LM_RIGHT_SPIRAL);
 	lamp_off (LM_LEFT_SPIRAL);
 }
 
-void spiral_round_end (void)
+void spiral_mode_exit (void)
 {
-	deff_stop (DEFF_SPIRAL_ROUND);
+//	deff_stop (DEFF_SPIRAL_MODE);
 	lamp_tristate_off (LM_RIGHT_SPIRAL);
 	lamp_tristate_off (LM_LEFT_SPIRAL);
 }
 
-void spiral_round_task (void)
+bool spiralmode_running (void)
 {
-	timed_mode_task (spiral_round_begin, spiral_round_expire, spiral_round_end,
-		&spiral_round_timer, 20, 3);
-}
-
-bool spiralround_running (void)
-{
-	if (timed_mode_timer_running_p (GID_SPIRAL_ROUND_RUNNING,
-		&spiral_round_timer))
+	if (timed_mode_running_p (&spiral_mode))
 		return TRUE;
 	else
 		return FALSE;
@@ -115,13 +124,12 @@ bool spiralround_running (void)
 
 CALLSET_ENTRY (spiral, display_update)
 {
-	if (spiralround_running ())
-		deff_start_bg (DEFF_SPIRAL_ROUND, 0);
+	timed_mode_display_update (&spiral_mode);
 }
 
 CALLSET_ENTRY (spiral, lamp_update)
 {
-	if (spiralround_running ())
+	if (spiralmode_running ())
 	{
 		lamp_tristate_flash (LM_RIGHT_SPIRAL);
 		lamp_tristate_flash (LM_LEFT_SPIRAL);
@@ -129,20 +137,10 @@ CALLSET_ENTRY (spiral, lamp_update)
 }
 CALLSET_ENTRY (spiral, music_refresh)
 {
-	if (spiralround_running ())
-		music_request (MUS_SPIRAL_ROUND, PRI_GAME_MODE1);
+	timed_mode_music_refresh (&spiral_mode);
 }
 
 CALLSET_ENTRY (spiral, door_start_spiral)
 {
-	timed_mode_start (GID_SPIRAL_ROUND_RUNNING, spiral_round_task);
-}
-
-CALLSET_ENTRY (spiral, end_ball)
-{
-	timed_mode_stop (&spiral_round_timer);
-}
-
-CALLSET_ENTRY (spiral, start_player)
-{
+	timed_mode_begin (&spiral_mode);
 }

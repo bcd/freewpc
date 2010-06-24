@@ -22,8 +22,8 @@
  * Suggested by litz */
 #include <freewpc.h>
 
-void greed_round_init (void);
-void greed_round_exit (void);
+void greed_mode_init (void);
+void greed_mode_exit (void);
 
 /** Bitmask referring to all 7 standup targets */
 #define NO_TARGETS 0x0
@@ -34,7 +34,7 @@ U8 greed_sound_index;
 /** Which default standups are lit */
 __local__ U8 default_set;
 
-/** Which standups are lit for the GREED round */
+/** Which standups are lit for the GREED mode */
 __local__ U8 greed_set;
 
 
@@ -45,24 +45,24 @@ U8 greed_sounds[] = {
 	SND_GREED_DEFAULT_4,
 };
 
-U8 greed_round_timer;
+U8 greed_mode_timer;
 
 struct timed_mode_ops greed_mode = {
 	DEFAULT_MODE,
-	.init = greed_round_init,
-	.exit = greed_round_exit,
-	.gid = GID_GREED_ROUND_RUNNING,
-	.music = MUS_GREED_ROUND,
-	.deff_running = DEFF_GREED_ROUND,
+	.init = greed_mode_init,
+	.exit = greed_mode_exit,
+	.gid = GID_GREED_MODE_RUNNING,
+	.music = MUS_GREED_MODE,
+	.deff_running = DEFF_GREED_MODE,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 20,
-	.timer = &greed_round_timer,
+	.timer = &greed_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
 
 
-void greed_round_deff (void)
+void greed_mode_deff (void)
 {
 	for (;;)
 	{
@@ -71,7 +71,7 @@ void greed_round_deff (void)
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
-		sprintf ("%d", greed_round_timer);
+		sprintf ("%d", greed_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -125,7 +125,7 @@ void common_greed_handler (U8 target)
 	{
 		greed_set &= ~target;
 		score (SC_1M);
-		sound_send (SND_GREED_ROUND_BOOM);
+		sound_send (SND_GREED_MODE_BOOM);
 	}
 	else if ((default_set & target) == 0)
 	{
@@ -150,22 +150,22 @@ void common_greed_handler (U8 target)
 }
 
 
-void greed_round_init (void)
+void greed_mode_init (void)
 {
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
-	deff_start (DEFF_GREED_ROUND);
+	deff_start (DEFF_GREED_MODE);
 }
 
-void greed_round_expire (void)
+void greed_mode_expire (void)
 {
 	/* Don't play sample if last ball drained */
 	if (live_balls)
 		sound_send (SND_SEE_WHAT_GREED);
-	deff_stop (DEFF_GREED_ROUND);
+	deff_stop (DEFF_GREED_MODE);
 }
 
-void greed_round_exit (void)
+void greed_mode_exit (void)
 {
 	greed_set = NO_TARGETS;
 	standup_lamp_update ();

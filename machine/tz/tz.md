@@ -526,11 +526,11 @@ SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE7
 SSlot Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
-TSM Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
-Spiral Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
+TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
+Spiral Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
 Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
-Hitch Round: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
+Hitch Mode: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
 Clock Millions Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 
 Mpf Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
