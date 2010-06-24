@@ -223,22 +223,22 @@ define CONFIG_TZONE_IP
 #
 ##########################################################################
 [drives]
-H1: Slot, time(TIME_66MS)
-H2: Rocket Kicker
+H1: Slot, duty(SOL_DUTY_100), time(TIME_166MS)
+H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_166MS)
 H3: Autofire, nosearch, launch
 H4: Popper
-H5: Right Ramp Div
+H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
-L2: Right Sling
-L3: Left Sling
-L4: Lower Jet
-L5: Left Jet
-L6: Right Jet
-L7: Lock Release, duty(SOL_DUTY_50), time(TIME_33MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_66MS)
+L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
+L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
+L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)
+L5: Left Jet, duty(SOL_DUTY_100), time(TIME_33MS)
+L6: Right Jet, duty(SOL_DUTY_100), time(TIME_33MS)
+L7: Lock Release, duty(SOL_DUTY_50), time(TIME_66MS)
 L8: Shooter Div, nosearch
 
 G1: Jets, flash
@@ -252,7 +252,7 @@ G8: Gumball Release, motor, nosearch
 
 A1: MPF Left Magnet
 A2: MPF Right Magnet
-A3: Ramp Divertor
+A3: Ramp Divertor, duty(SOL_DUTY_50), time(TIME_33MS)
 A4: Clock Target, flash
 
 F5: U.R. Flip Power, time(TIME_33MS)
@@ -560,7 +560,7 @@ Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1
+Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_PAUSE+D_QUEUED
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE

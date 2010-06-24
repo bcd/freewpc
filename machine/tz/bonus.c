@@ -91,13 +91,18 @@ static void bonus_pause (void)
 		task_sleep_sec (1);
 }
 
-static void countup_pause (void)
+void countup_pause (void)
 {
 	if (buttons_held)
 	{
 		score_add (temp_score, score_table[SC_1M]);
 		if (countup_pause_iterations < 50)
+			task_sleep (TIME_33MS);
+		else
+		{
+			score_add (temp_score, score_table[SC_1M]);
 			task_sleep (TIME_16MS);
+		}
 	}
 	else
 		task_sleep (TIME_33MS);

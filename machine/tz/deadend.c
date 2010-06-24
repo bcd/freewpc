@@ -19,6 +19,8 @@
  */
 
 /* CALLSET_SECTION (deadend, __machine2__) */
+//TODO Slot is being ignored when hit straight after kicking
+// device_switch_can_follow needs tweaking
 
 #include <freewpc.h>
 #include <eb.h>

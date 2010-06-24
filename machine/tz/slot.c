@@ -205,12 +205,12 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
 	if (in_live_game)
 	{
+		if (!multi_ball_play ())
+			event_can_follow (slot_kick, outhole, TIME_1S + TIME_500MS);
 		sound_send (SND_SLOT_KICKOUT_1);
 		leff_start (LEFF_SLOT_KICKOUT);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, slot_kick_sound);
-		if (!multi_ball_play ())
-			event_can_follow (slot_kick, outhole, TIME_1S + TIME_200MS);
 	}
 }
 

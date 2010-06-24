@@ -46,7 +46,7 @@ void mpf_round_deff (void)
 		sprintf ("%d,000,000", (mpf_award * mpf_level));
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		//sprintf ("%d,000,000", (mpf_award * mpf_level));
-		sprintf ("SHOOT TOP TO COLLECT");
+		sprintf ("SHOOT TOP HOLE TO COLLECT");
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", mpf_round_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
@@ -265,7 +265,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
-		//leff_stop (LEFF_MPF_ACTIVE);
+		leff_start (LEFF_STROBE_DOWN);
 		timed_mode_stop (&mpf_round_timer);
 		score (SC_5M);
 		/* This should be fine as we only disable in single ball play */

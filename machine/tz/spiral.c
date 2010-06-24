@@ -38,6 +38,7 @@ struct timed_mode_ops spiral_mode = {
 	.deff_running = DEFF_SPIRAL_MODE,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 30,
+	.timer = &spiral_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };

@@ -70,7 +70,7 @@ void mball_restart_deff (void)
 		font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 		sprintf ("%d", mball_restart_timer);
-		font_render_string_center (&font_fixed6, 64, 24, sprintf_buffer);
+		font_render_string_center (&font_fixed6, 64, 25, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}
