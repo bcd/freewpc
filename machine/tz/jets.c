@@ -76,6 +76,8 @@ sound_code_t super_jet_sounds[] = {
 
 void sw_jet_sound (void)
 {
+	if (!in_live_game)
+		return;
 	jet_sound_index++;
 	if (jet_sound_index >= 3)
 		jet_sound_index = 0;

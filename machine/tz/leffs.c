@@ -121,7 +121,8 @@ void flash_all_leff (void)
 void slot_kickout_leff (void)
 {
 	U8 i;
-	triac_leff_disable (TRIAC_GI_MASK);
+	if (!multi_ball_play ())
+		triac_leff_disable (TRIAC_GI_MASK);
 	for (i = 0; i < 5; i++)
 	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);

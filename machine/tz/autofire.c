@@ -192,18 +192,12 @@ CALLSET_ENTRY (autofire, amode_start)
 {
 	/* TODO : Poll the autofire switches and empty it if something
 	is found here.  This is crashing at system startup now. */
-#if 0
-	if (likely (sys_init_complete == 1))
-	{
-		if (switch_poll_logical (SW_AUTOFIRE1)
+	if (switch_poll_logical (SW_AUTOFIRE1)
 			|| switch_poll_logical (SW_AUTOFIRE2))
-		{
-			autofire_open_for_trough ();
-		}
+	{
+		autofire_open_for_trough ();
 	}
-#endif
 }
-
 
 CALLSET_ENTRY (autofire, ball_search)
 {
