@@ -104,7 +104,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 void clock_millions_mode_init (void)
 {
 	deff_start (DEFF_CLOCK_MILLIONS_ROUND);
-	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+//	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_mode_expire (void)
@@ -119,10 +119,17 @@ void clock_millions_mode_exit (void)
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
+CALLSET_ENTRY (clock_millions, lamp_update)
+{
+	if (timed_mode_running_p (&clock_millions_mode))
+		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+}
+
 CALLSET_ENTRY (clock_millions, display_update)
 {
 	timed_mode_display_update (&clock_millions_mode);
 }
+
 CALLSET_ENTRY (clock_millions, music_refresh)
 {
 	timed_mode_music_update (&clock_millions_mode);
@@ -130,9 +137,10 @@ CALLSET_ENTRY (clock_millions, music_refresh)
 
 CALLSET_ENTRY (clock_millions, door_start_clock_millions)
 {
-	timed_mode_being (&clock_millions_mode);
+	timed_mode_begin (&clock_millions_mode);
 }
 
+/*
 CALLSET_ENTRY (clock_millions, end_ball)
 {
 	timed_mode_stop (&clock_millions_mode_timer);
@@ -141,3 +149,4 @@ CALLSET_ENTRY (clock_millions, end_ball)
 CALLSET_ENTRY (clock_millions, start_player)
 {
 }
+*/
