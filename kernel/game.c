@@ -458,11 +458,11 @@ void start_ball (void)
 	/* At the start of ball 2, any partial credits are cleared */
 	units_clear ();
 
-	callset_invoke (start_ball);
 
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
 
+	callset_invoke (start_ball);
 	/* Enable the game scores on the display.  The first deff started
 	 * is low in priority and is shown whenever there is nothing else
 	 * going on.  The second deff runs briefly at high priority, to
