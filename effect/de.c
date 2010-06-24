@@ -12,8 +12,6 @@ U8 de_loop_count;
 U8 de_flash_time;
 U8 de_delay;
 
-void frame_draw_plane (U16 id);
-
 
 /** Start a new display page */
 void de_start_page (void)

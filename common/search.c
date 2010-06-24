@@ -157,7 +157,7 @@ void ball_search_run (void)
 	callset_invoke (ball_search);
 	task_sleep (TIME_200MS);
 
-	for (sol = 0; sol < 8*4; sol++)
+	for (sol = 0; sol < SOL_COUNT; sol++)
 	{
 		if (ball_search_solenoid_ok (sol))
 		{

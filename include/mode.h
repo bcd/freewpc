@@ -29,7 +29,7 @@
  * timer is a pointer to the 1-byte timer object.
  * mode_time and grace_time give the duration of the mode in seconds.
  */
-extern inline void timed_mode_task (
+extern inline __attribute__((deprecated)) void timed_mode_task (
 	void (*begin) (void),
 	void (*expire) (void),
 	void (*end) (void),
@@ -87,7 +87,7 @@ extern inline void timed_mode_task (
 
 
 /** Starts a mode task */
-extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
+extern inline __attribute__((deprecated)) task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 {
 	task_pid_t tp = task_create_gid1 (gid, task_function);
 #ifdef CONFIG_NATIVE
@@ -101,7 +101,7 @@ extern inline task_pid_t timed_mode_start (U8 gid, void (*task_function) (void))
 
 /** Returns true if the mode with gid GID and timer TIMER
 is still active.  It may be in its grace period. */
-extern inline bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
+extern inline __attribute__((deprecated)) bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *timer)
 {
 	return task_find_gid (gid) ? TRUE : FALSE;
 }
@@ -109,14 +109,15 @@ extern inline bool timed_mode_active_p (U8 gid, __attribute__((unused)) U8 *time
 
 /** Returns true if a mode is running with a nonzero timer.  A mode
 in grace period is considered NOT to be running. */
-extern inline bool timed_mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
+extern inline __attribute__((deprecated)) bool timed_mode_timer_running_p (__attribute__((unused)) U8 gid, U8 *timer)
 {
 	return (*timer != 0);
 }
 
 
 /** Extends a mode timer by some amount, up to a fixed value. */
-extern inline void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
+extern inline __attribute__((deprecated))
+void timed_mode_extend (U8 *timer, U8 extra_time, U8 max_time)
 {
 	if (*timer == 0)
 	{

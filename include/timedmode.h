@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,18 +33,10 @@ struct timed_mode_ops
 	/* Called to determine when the timer should be paused.
 	Use 'null_false_function' for a timer that should always run.
 	Use 'system_timer_pause' for a default function that pauses
-	during most of the time that you would want it to. */
+	during most of the time that you would want it to.  Write
+	a custom function that calls 'system_timer_pause' if you
+	want to add additional pause conditions. */
 	bool (*pause) (void);
-
-	/* Called when the mode is finished properly (via a call to
-	timed_mode_finish().  The finish hook is executed in addition
-	to, and prior to, the exit handler. */
-	void (*finish) (void);
-	
-	/* Called when the mode times out.  This hook is executed
-	prior to the exit handler, and happens as soon as the timer
-	reaches zero, before the grace period begins. */
-	void (*timeout) (void);
 
 	/* The display effect for starting the mode */
 	U8 deff_starting;
@@ -55,7 +47,7 @@ struct timed_mode_ops
 	/* The display effect for ending the mode */
 	U8 deff_ending;
 
-	/* The music that should be played while the mode is running */
+	/* The music that should be played while the mode is running. */
 	U8 music;
 
 	/* The priority for the display/music effects */
@@ -84,12 +76,10 @@ fields which are different from the default need to be said. */
 	.init = null_function, \
 	.exit = null_function, \
 	.pause = null_false_function, \
-	.finish = null_function, \
-	.timeout = null_function, \
-	.deff_starting = 0, \
-	.deff_running = 0, \
-	.deff_ending = 0, \
-	.music = 0, \
+	.deff_starting = DEFF_NULL, \
+	.deff_running = DEFF_NULL, \
+	.deff_ending = DEFF_NULL, \
+	.music = MUS_OFF, \
 	.grace_timer = 2
 
 
@@ -105,12 +95,14 @@ struct timed_mode_task_config
 /* Timed mode APIs */
 
 void timed_mode_begin (struct timed_mode_ops *ops);
-void timed_mode_finish (struct timed_mode_ops *ops);
+void timed_mode_end (struct timed_mode_ops *ops);
 U8 timed_mode_get_timer (struct timed_mode_ops *ops);
-bool timed_mode_running_p (struct timed_mode_ops *ops);
 void timed_mode_reset (struct timed_mode_ops *ops, U8 time);
 void timed_mode_add (struct timed_mode_ops *ops, U8 time);
 void timed_mode_music_refresh (struct timed_mode_ops *ops);
-void timed_mode_deff_update (struct timed_mode_ops *ops);
+void timed_mode_display_update (struct timed_mode_ops *ops);
+bool timed_mode_running_p (struct timed_mode_ops *ops);
+bool timed_mode_effect_running_p (struct timed_mode_ops *ops);
+bool timed_mode_device_running_p (struct timed_mode_ops *ops);
 
 #endif /* _TIMEDMODE_H */
