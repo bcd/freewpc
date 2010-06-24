@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,15 +22,32 @@
 #include <queue.h>
 
 
-U8 fastlock_round_timer;
+U8 fastlock_mode_timer;
 U8 fastlock_award;
 /* Stored for Deff */
 U8 fastlock_award_stored;
 __local__ U8 fastlocks_collected;
 
+void fastlock_mode_init (void);
+void fastlock_mode_exit (void);
+
 extern U8 loop_time;
 
-void fastlock_round_deff (void)
+struct timed_mode_ops fastlock_mode = {
+	DEFAULT_MODE,
+	.init = fastlock_mode_init,
+	.exit = fastlock_mode_exit,
+	.gid = GID_FASTLOCK_MODE_RUNNING,
+	.music = MUS_FASTLOCK_ADDAMS_FAMILY,
+	.deff_running = DEFF_FASTLOCK_MODE,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 40,
+	.timer = fastlock_mode_timer,
+	.grace_timer = 3,
+	.pause = system_timer_pause,
+}
+	
+void fastlock_mode_deff (void)
 {
 	for (;;)
 	{
@@ -41,7 +58,7 @@ void fastlock_round_deff (void)
 		//font_render_string_center (&font_var5, 64, 27, "HIT LOCK TO COLLECT");
 		sprintf ("%d SPEED", loop_time);
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-		sprintf ("%d", fastlock_round_timer);
+		sprintf ("%d", fastlock_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -60,34 +77,28 @@ void fastlock_award_deff (void)
 	deff_exit ();
 }
 
-void fastlock_round_begin (void)
+void fastlock_mode_init (void)
 {
-	deff_start (DEFF_FASTLOCK_ROUND);
+	deff_start (DEFF_FASTLOCK_MODE);
 	fastlock_award = 5;
 	fastlocks_collected = 1;
 }
 
-void fastlock_round_expire (void)
+void fastlock_mode_expire (void)
 {
-	deff_stop (DEFF_FASTLOCK_ROUND);
-}
-
-void fastlock_round_end (void)
-{
-	deff_stop (DEFF_FASTLOCK_ROUND);
+	deff_stop (DEFF_FASTLOCK_MODE);
 	lamp_off (LM_LOCK_ARROW);
 }
 
-void fastlock_round_task (void)
+void fastlock_mode_exit (void)
 {
-	timed_mode_task (fastlock_round_begin, fastlock_round_expire, fastlock_round_end,
-		&fastlock_round_timer, 40, 3);
+	deff_stop (DEFF_FASTLOCK_MODE);
+	lamp_off (LM_LOCK_ARROW);
 }
 
 bool fastlock_running (void)
 {
-	if (timed_mode_timer_running_p (GID_FASTLOCK_ROUND_RUNNING,
-		&fastlock_round_timer))
+	if (timed_mode_running_p (&fastlock_mode_timer))
 		return TRUE;
 	else
 		return FALSE;
@@ -102,7 +113,7 @@ CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
 		score_multiple (SC_1M, fastlock_award);
 		fastlocks_collected++;
 		fastlock_award = (fastlocks_collected * 5);
-		fastlock_round_timer =+ 10;
+		fastlock_mode_timer =+ 10;
 	}
 }
 
@@ -131,28 +142,29 @@ CALLSET_ENTRY (fastlock, lamp_update)
 	if (fastlock_running ())
 		lamp_tristate_flash (LM_LOCK_ARROW);
 }
+
 CALLSET_ENTRY (fastlock, display_update)
 {
-	if (fastlock_running ())
-		deff_start_bg (DEFF_FASTLOCK_ROUND, 0);
+	timed_mode_display_update (&fastlock_mode);
 }
 
 CALLSET_ENTRY (fastlock, music_refresh)
 {
-	if (fastlock_running ())
-		music_request (MUS_FASTLOCK_ADDAMS_FAMILY, PRI_GAME_MODE1);
+	timed_mode_music_update (&fastlock_mode);
 }
 
 CALLSET_ENTRY (fastlock, door_start_fast_lock)
 {
-	timed_mode_start (GID_FASTLOCK_ROUND_RUNNING, fastlock_round_task);
+	timed_mode_begin (&fastlock_mode_task);
 }
 
+/*
 CALLSET_ENTRY (fastlock, end_ball)
 {
-	timed_mode_stop (&fastlock_round_timer);
+	timed_mode_stop (&fastlock_mode_timer);
 }
 
 CALLSET_ENTRY (fastlock, start_player)
 {
 }
+*/

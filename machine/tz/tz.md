@@ -509,7 +509,7 @@ Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
 Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 
-Greed Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3, D_QUEUED+D_TIMEOUT
+Greed Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3, D_QUEUED+D_TIMEOUT
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
@@ -528,10 +528,10 @@ SSlot Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 Spiral Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
-Fastlock Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Round: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
-Clock Millions Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+Clock Millions Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 
 Mpf Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Mpf Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
