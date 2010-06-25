@@ -41,7 +41,7 @@ void gi_cycle_leff (void)
 		for (i=0; i < 5; i++)
 		{
 			triac_leff_disable (TRIAC_GI_STRING (i));
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_66MS);
 			triac_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}
@@ -117,18 +117,24 @@ void flash_all_leff (void)
 	leff_exit ();
 }
 
-
-void slot_kickout_leff (void)
+static void slot_kickout_subtask (void)
 {
 	U8 i;
-	if (!multi_ball_play ())
-		triac_leff_disable (TRIAC_GI_MASK);
 	for (i = 0; i < 5; i++)
 	{
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 		task_sleep (TIME_100MS);
 	}
 	triac_leff_enable (TRIAC_GI_MASK);
+	task_exit ();
+}
+
+void slot_kickout_leff (void)
+{
+	if (!multi_ball_play ())
+		triac_leff_disable (TRIAC_GI_MASK);
+	leff_create_peer (slot_kickout_subtask);
+	task_sleep (TIME_500MS);
 	leff_exit ();
 }
 
@@ -160,7 +166,7 @@ void clock_target_leff (void)
 	for (i = 0; i < 12; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 	}
 	task_kill_gid (task_getgid ());
 	leff_exit ();
@@ -237,6 +243,7 @@ static void pf_strobe_up_subtask (void)
 
 void strobe_up_leff (void)
 {
+	leff_create_peer (gi_cycle_leff);
 	lamplist_set_apply_delay (TIME_16MS);
 	leff_create_peer (pf_strobe_up_subtask);
 	task_sleep (TIME_200MS);

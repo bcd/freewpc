@@ -52,7 +52,7 @@ void bubble_sort_current_player_rankings (void)
 	U8 i, j, temp;
 	for (i = 0; i < num_players; i++)
 	{
-		for (j = 0; j < (num_players - 1); j++)
+		for (j = 0; j < num_players; j++)
 		{	
 			if (score_compare (scores[j], scores[j + 1]) == 1)
 			{
@@ -182,7 +182,7 @@ static void points_this_ball_sound_task (void)
 	sound_send (SND_NOT_AN_ORDINARY_GAME);
 	task_sleep_sec (2);
 	sound_send (SND_OR_AN_ORDINARY_PLAYER);
-	task_sleep_sec (2);
+	task_sleep_sec (10);
 	task_exit ();
 }
 
@@ -746,7 +746,7 @@ void bonus_deff (void)
 		/* Calculate lead */
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
-		score_sub (temp_score, scores[current_player_rankings[1]]);
+		score_sub (temp_score, (scores[current_player_rankings[1]]));
 		//TODO Doesn't work yet
 		dmd_alloc_low_clean ();
 			
@@ -754,9 +754,9 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 		sound_send (SND_GREED_MODE_BOOM);
 		sprintf_score (temp_score);
-		font_render_string_center (&font_fixed10, 64, 12, sprintf_buffer);
+		font_render_string_center (&font_fixed10, 64, 13, sprintf_buffer);
 		
-		font_render_string_center (&font_mono5, 64, 22, "CONGRATULATIONS");
+		font_render_string_center (&font_mono5, 64, 23, "CONGRATULATIONS");
 		if (num_players > 2)
 		{
 			sprintf("2ND P%d 3RD P%d", current_player_rankings[1], current_player_rankings[2]);

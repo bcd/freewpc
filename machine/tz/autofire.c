@@ -85,7 +85,7 @@ void autofire_monitor (void)
 	task_sleep (TIME_700MS);
 
 	sol_request (SOL_AUTOFIRE);
-	if (in_live_game)
+	if (in_live_game && !multi_ball_play ())
 	{
 		sound_send (SND_EXPLOSION_1);
 		leff_start (LEFF_STROBE_UP);

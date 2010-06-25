@@ -85,6 +85,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 {
 	if (!lamp_flash_test (LM_CLOCK_MILLIONS))
 	{
+		callset_invoke (sw_jet_noflash);
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
 	}

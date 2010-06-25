@@ -28,6 +28,7 @@ __local__ U8 jets_bonus_level;
 
 U8 tsm_mode_timer;
 extern U8 mpf_round_timer;
+bool noflash;
 
 void tsm_mode_init (void);
 void tsm_mode_exit (void);
@@ -87,7 +88,9 @@ void sw_jet_sound (void)
 	else
 		sound_send (jet_sounds[jet_sound_index]);
 	
-	flasher_pulse (FLASH_JETS);
+	if (!noflash)
+		flasher_pulse (FLASH_JETS);
+	noflash = FALSE;
 	//task_sleep (TIME_200MS);
 	task_exit ();
 }
@@ -152,6 +155,12 @@ void jets_level_up_deff (void)
 /* Hack to make slings work as jets */
 CALLSET_ENTRY (jet, sw_sling)
 {
+	callset_invoke (sw_jet_noflash);
+}
+
+CALLSET_ENTRY (jet, sw_jet_noflash)
+{
+	noflash = TRUE;
 	callset_invoke (sw_jet);
 }
 
