@@ -137,9 +137,18 @@ void lamp_rtt (void)
 	 * iterations, just clear the lamp outputs and be done.
 	 * But only do this outside of a game. */
 
-	/* Setup the strobe */
+	/* Turn off the lamp circuits before recalculating */
+#ifdef __m6809__
+	/* On the 6809, avoid using the CLR instruction which is known to cause
+	problems in the WPC ASIC.   Also, always write ROW first to avoid
+	spurious lamps. */
+	__asm__ volatile ("clrb");
+	__asm__ volatile ("stb\t" C_STRING (WPC_LAMP_ROW_OUTPUT));
+	__asm__ volatile ("stb\t" C_STRING (WPC_LAMP_COL_STROBE));
+#else
 	pinio_write_lamp_data (0);
-	pinio_write_lamp_strobe (lamp_strobe_mask);
+	pinio_write_lamp_strobe (0);
+#endif
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
@@ -173,6 +182,7 @@ void lamp_rtt (void)
 
 	/* Write the result to the hardware */
 	pinio_write_lamp_data (bits);
+	pinio_write_lamp_strobe (lamp_strobe_mask);
 
 	/* Advance the strobe value for the next iteration.
 	Keep this together with the above so that lamp_strobe_mask
