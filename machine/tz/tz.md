@@ -252,7 +252,7 @@ G8: Gumball Release, motor, nosearch
 
 A1: MPF Left Magnet
 A2: MPF Right Magnet
-A3: Ramp Divertor, duty(SOL_DUTY_50), time(TIME_33MS)
+A3: Ramp Divertor, duty(SOL_DUTY_12), ontime=0, time(TIME_33MS)
 A4: Clock Target, flash
 
 F5: U.R. Flip Power, time(TIME_33MS)
@@ -524,7 +524,7 @@ Gumball: page(MACHINE_PAGE), PRI_GAME_MODE7, D_PAUSE+D_QUEUED+D_TIMEOUT
 SSSMB Jackpot Collected: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 SSSMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE7
-SSlot Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
+SSlot Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 Spiral Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE5
@@ -596,8 +596,9 @@ GI Cycle: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
 No GI: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+Flash GI: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
-Slot Kickout: PRI_LEFF4, GI(ALL), page(MACHINE2_PAGE)
+Slot Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 Gumball Strobe: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Clock Target: PRI_LEFF5, GI(ALL), page(MACHINE2_PAGE)
 Game Timeout: PRI_TILT, GI(ALL), page(MACHINE2_PAGE)
@@ -638,11 +639,11 @@ twizone:
 [timers]
 
 [templates]
-Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
-Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
-Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
-Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
-Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
+Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
 
 Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=2, offtime=20
 Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=2, offtime=20
@@ -659,7 +660,7 @@ Clock Mech: driver(bivar),
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_200MS, timeout=TIME_3S
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,

@@ -524,3 +524,16 @@ void spiralaward_leff (void)
 	} while (--i != 0);
 	leff_exit ();
 }
+
+void flash_gi_leff (void)
+{
+	U8 i;
+	for (i = 1; i < 7; i++)
+	{
+		triac_leff_disable (TRIAC_GI_MASK);
+		task_sleep (TIME_100MS);
+		triac_leff_enable (TRIAC_GI_MASK);
+		task_sleep (TIME_100MS);
+	}
+	leff_exit ();
+}

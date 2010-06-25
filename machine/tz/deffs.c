@@ -364,12 +364,12 @@ void ball_explode_deff (void)
 {
 	extern bool powerball_death;
 	U16 fno;
-	/* If the last ball in play, stop the music for more effect */
 	if (!multi_ball_play () && !ballsave_test_active ())
-		music_off ();
+		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
 	/* Whoops, lost the powerball before getting it in the gumball */
 	if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
 	{
+		task_sleep (TIME_500MS);
 		sound_send (SND_NOOOOOOOO);
 		powerball_death = TRUE;
 		task_sleep (TIME_500MS);

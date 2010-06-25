@@ -265,7 +265,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
-		leff_start (LEFF_STROBE_DOWN);
+		leff_start (LEFF_FLASH_GI);
 		timed_mode_stop (&mpf_round_timer);
 		score (SC_5M);
 		/* This should be fine as we only disable in single ball play */

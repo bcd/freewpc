@@ -714,18 +714,22 @@ void bonus_deff (void)
 			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 			/* Calculate lead */
 			score_zero (temp_score);
-			//score_copy (temp_score, current_hi_score);
-			//score_sub (temp_score, scores[current_player_rankings[1]]);
-			score_copy (temp_score, (scores[current_player_rankings[1]]));
+			score_copy (temp_score, current_hi_score);
+			score_sub (temp_score, scores[current_player_rankings[1]]);
+			//score_copy (temp_score, (scores[current_player_rankings[1]]));
 			sprintf_score (temp_score);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			//font_render_string_center (&font_mono5, 64, 24, "IN THE LEAD");
 			
-			//TODO Hacky, fix this when 4p is working
-			if (num_players > 2)
+			if (num_players == 3)
 			{
 				sprintf(" 2ND P%d 3RD P%d", current_player_rankings[1], current_player_rankings[2]);
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+			}
+			if (num_players == 4)
+			{
+				sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1], current_player_rankings[2], current_player_rankings[3]);
+				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			}
 			dmd_show_low ();
 			task_sleep_sec (4);

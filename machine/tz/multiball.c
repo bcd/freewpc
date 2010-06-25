@@ -422,7 +422,9 @@ CALLSET_ENTRY (mball, mball_stop)
 void mball_left_ramp_exit (void)
 {
 	if (multiball_ready ())
-	{	
+	{
+		leff_start (LEFF_STROBE_DOWN);
+		leff_start (LEFF_FLASH_GI);
 		lamp_tristate_off (LM_MULTIBALL);
 		callset_invoke (mball_start);
 		callset_invoke (mball_start_3_ball);
