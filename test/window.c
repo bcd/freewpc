@@ -1716,7 +1716,7 @@ struct menu dev_force_error_item = {
 
 #if (MACHINE_DMD == 1)
 
-U8 test_frameno;
+U16 test_frameno;
 
 void dev_frametest_init (void)
 {
