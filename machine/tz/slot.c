@@ -28,6 +28,9 @@ extern U8 gumball_enable_count;
 extern U8 mpf_enable_count;
 extern U8 cameras_lit;
 
+void sslot_mode_init (void);
+void sslot_mode_exit (void);
+
 struct timed_mode_ops sslot_mode = {
 	DEFAULT_MODE,
 	.init = sslot_mode_init,
