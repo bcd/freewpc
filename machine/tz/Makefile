@@ -74,8 +74,7 @@ GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
-	spiral.o tsm.o fastlock.o door.o \
- 	slot.o greed.o \
+	spiral.o fastlock.o door.o slot.o greed.o \
 	mpf.o clockmillions.o chaosmb.o powerball.o \
 	multiball.o sssmb.o deffs.o
 
