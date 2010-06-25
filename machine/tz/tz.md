@@ -44,8 +44,7 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
-#define MAX_FLIPCODE_CHARS		4
-define FLIPCODE_LIST 			{ { 3, 6, 5, 10 },  { 3, 3, 8, 11 } }
+define FLIPCODE_LIST 			{ { 3, 6, 5, 11 },  { 3, 3, 8, 11 } }
 
 ##########################################################################
 # Lamp Description
