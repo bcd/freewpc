@@ -45,15 +45,16 @@ in the .md file:
 
 #ifndef FLIPCODE_LIST
 #define FLIPCODE_LIST { { 3, 1, 2, 3 }, { 3, 1, 1, 1 } }
-#ifndef FLIPCODE_HANDLERS
 #define FLIPCODE_HANDLERS { flipcode_default_1, flipcode_default_2 }
 
 void flipcode_default_1 (void)
 {
+	callset_invoke (flipcode_1);
 }
 
 void flipcode_default_2 (void)
 {
+	callset_invoke (flipcode_2);
 }
 
 #endif
@@ -122,7 +123,7 @@ void flipcode_test (void)
 #ifdef DEBUG_FLIPCODE
 				dbprintf ("Failed at position %d\n", i);
 #endif
-				return;
+				continue;
 			}
 
 		/* Match */

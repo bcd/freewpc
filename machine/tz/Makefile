@@ -81,7 +81,7 @@ GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
 GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	bonus.o tz_amode.o star.o rocket.o thingfl.o \
 	outhole.o rules.o lock.o camera.o \
-	combo.o deadend.o hitch.o
+	combo.o deadend.o hitch.o tz_flipcode.o
 
 IMAGE_MAP += $(M)/tz.ild
 

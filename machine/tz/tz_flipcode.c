@@ -1,0 +1,12 @@
+/* CALLSET_SECTION (tz_flipcode, __machine2__) */
+#include <freewpc.h>
+
+CALLSET_ENTRY (tz_flipcode, flipcode_1)
+{
+	deff_start (DEFF_BRIAN_IMAGE);
+}
+
+CALLSET_ENTRY (tz_flipcode, flipcode_2)
+{
+	sound_send (SND_TWO);
+}
