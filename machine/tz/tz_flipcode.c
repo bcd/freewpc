@@ -3,7 +3,7 @@
 
 CALLSET_ENTRY (tz_flipcode, flipcode_1)
 {
-	deff_start (DEFF_BRIAN_IMAGE);
+	deff_start (DEFF_COW);
 }
 
 CALLSET_ENTRY (tz_flipcode, flipcode_2)

@@ -504,7 +504,7 @@ Clock Working:
 # Display effects
 ##########################################################################
 [deffs]
-Cow Image: page(MACHINE_PAGE), PRI_EGG1
+Cow: page(MACHINE_PAGE), PRI_EGG1
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
