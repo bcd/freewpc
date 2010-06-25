@@ -23,9 +23,6 @@ bool amode_page_delay(U8 secs);
 void amode_flipper_sound_debounce_timer(void);
 void amode_flipper_sound(void);
 void amode_scroll(void);
-void egg_left_flipper(void);
-void egg_brian_image_deff(void);
-void egg_right_flipper(void);
 void amode_left_flipper(void);
 void amode_right_flipper(void);
 void amode_lamp_toggle_task(void);
@@ -152,3 +149,6 @@ __machine__ void pb_clear_location (U8 location);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);
+
+//__machine2__ void tz_flipcode_1 (void);
+__machine2__ void tz_flipcode_2 (void);

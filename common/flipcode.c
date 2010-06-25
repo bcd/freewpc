@@ -45,6 +45,9 @@ in the .md file:
 
 #ifndef FLIPCODE_LIST
 #define FLIPCODE_LIST { { 3, 1, 2, 3 }, { 3, 1, 1, 1 } }
+#endif
+
+#ifndef FLIPCODE_HANDLERS
 #define FLIPCODE_HANDLERS { flipcode_default_1, flipcode_default_2 }
 
 void flipcode_default_1 (void)
