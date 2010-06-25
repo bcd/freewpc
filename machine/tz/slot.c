@@ -21,12 +21,26 @@
 #include <freewpc.h>
 #include <eb.h>
 
-U8 sslot_round_timer;
+U8 sslot_mode_timer;
 U8 sslot_award_index;
 U8 sslot_award_index_stored;
 extern U8 gumball_enable_count;
 extern U8 mpf_enable_count;
 extern U8 cameras_lit;
+
+struct timed_mode_ops sslot_mode = {
+	DEFAULT_MODE,
+	.init = sslot_mode_init,
+	.exit = sslot_mode_exit,
+	.gid = GID_SSLOT_MODE_RUNNING,
+	.music = MUS_SUPER_SLOT,
+	.deff_running = DEFF_SSLOT_MODE,
+	.prio = PRI_GAME_MODE1,
+	.init_timer = 40,
+	.timer = &sslot_mode_timer,
+	.grace_timer = 2,
+	.pause = system_timer_pause,
+};
 
 const char *sslot_award_names[] = {
 	"EXTRA BALL",
@@ -54,7 +68,7 @@ void sslot_award_rotate (void)
 
 }
 
-void sslot_round_deff (void)
+void sslot_mode_deff (void)
 {
 	for (;;)
 	{
@@ -63,7 +77,7 @@ void sslot_round_deff (void)
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, sslot_award_names[sslot_award_index]);
-		sprintf ("%d", sslot_round_timer);
+		sprintf ("%d", sslot_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -82,31 +96,23 @@ void sslot_award_deff (void)
 }
 
 
-void sslot_round_begin (void)
+void sslot_mode_init (void)
 {
 	sslot_award_index = 0;
 	task_recreate_gid (GID_SSLOT_AWARD_ROTATE, sslot_award_rotate);
 	lamp_tristate_flash (LM_SLOT_MACHINE);
 }
 
-void sslot_round_expire (void)
+void sslot_mode_expire (void)
 {
-	deff_stop (DEFF_SSLOT_ROUND);
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	lamp_tristate_off (LM_SLOT_MACHINE);
 }
 
-void sslot_round_end (void)
+void sslot_mode_exit (void)
 {	
-	deff_stop (DEFF_SSLOT_ROUND);
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	lamp_tristate_off (LM_SLOT_MACHINE);
-}
-
-void sslot_round_task (void)
-{
-	timed_mode_task (sslot_round_begin, sslot_round_expire, sslot_round_end,
-		&sslot_round_timer, 20, 3);
 }
 
 void slot_kick_sound (void)
@@ -118,7 +124,6 @@ void slot_kick_sound (void)
 void sslot_award (void)
 {
 	sslot_award_index_stored = sslot_award_index;
-	/* Stop round */
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	
 	switch (sslot_award_index_stored)
@@ -184,12 +189,11 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		callset_invoke (skill_missed);
 		deff_stop (DEFF_SKILL_SHOT_READY);
 	}
-	else if (timed_mode_timer_running_p (GID_SSLOT_ROUND_RUNNING, &sslot_round_timer))
+	else if (timed_mode_running_p (&sslot_mode))
 	{
 		sslot_award ();
 		score (SC_10M);
-		deff_stop (DEFF_SSLOT_ROUND);
-		timed_mode_stop (&sslot_round_timer);
+		timed_mode_end (&sslot_mode);
 	}
 	else
 	{
@@ -216,26 +220,21 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 
 CALLSET_ENTRY (slot, display_update)
 {
-	if (timed_mode_timer_running_p (GID_SSLOT_ROUND_RUNNING,
-		&sslot_round_timer))
-		deff_start_bg (DEFF_SSLOT_ROUND, 0);
+	timed_mode_display_update (&sslot_mode);
 }
 
 CALLSET_ENTRY (slot, music_refresh)
 {
-	if (timed_mode_timer_running_p (GID_SSLOT_ROUND_RUNNING,
-		&sslot_round_timer))
-		music_request (MUS_SUPER_SLOT, PRI_GAME_MODE1);
+	timed_mode_music_refresh (&sslot_mode);
 }
 
 CALLSET_ENTRY (slot, door_start_sslot)
 {
-	timed_mode_start (GID_SSLOT_ROUND_RUNNING, sslot_round_task);
+	timed_mode_begin (&sslot_mode);
 }
 
 CALLSET_ENTRY (slot, end_ball)
 {
-	timed_mode_stop (&sslot_round_timer);
 }
 
 CALLSET_ENTRY (slot, start_player)
