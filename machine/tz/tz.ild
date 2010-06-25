@@ -1,14 +1,14 @@
-IMG_OLDCAR: machine/tz/oldcar.pgm
-IMG_ROBOT: !machine/tz/robot.pgm
-IMG_COINSTACK: machine/tz/coinstack.pgm
-IMG_HITCHER: !machine/tz/hitcher.pgm
-IMG_PYRAMID: !machine/tz/pyramid.pgm
-IMG_CITY: machine/tz/city.pgm
-IMG_BRIANHEAD: !machine/tz/brianhead.pgm
-IMG_SPIRAL: !machine/tz/spiral.pgm
-IMG_COW: machine/tz/cow.pgm
-IMG_MBORDER: machine/tz/mborder.pgm
-IMG_CAR: !machine/tz/car3.pgm
+IMG_OLDCAR: machine/tz/images/oldcar.pgm
+IMG_ROBOT: !machine/tz/images/robot.pgm
+IMG_COINSTACK: machine/tz/images/coinstack.pgm
+IMG_HITCHER: !machine/tz/images/hitcher.pgm
+IMG_PYRAMID: !machine/tz/images/pyramid.pgm
+IMG_CITY: machine/tz/images/city.pgm
+IMG_BRIANHEAD: !machine/tz/images/brianhead.pgm
+IMG_SPIRAL: !machine/tz/images/spiral.pgm
+IMG_COW: machine/tz/images/cow.pgm
+IMG_MBORDER: machine/tz/images/mborder.pgm
+IMG_CAR: !machine/tz/images/car3.pgm
 
 IMG_ROCKET_LOAD_START: machine/tz/animation/rocket/rocketa.pgm
 IMG_ROCKET_LOAD_2: machine/tz/animation/rocket/rocketb.pgm
