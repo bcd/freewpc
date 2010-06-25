@@ -20,6 +20,23 @@
 
 #include <freewpc.h>
 
+void cow_deff (void)
+{
+	dmd_alloc_pair ();
+	frame_draw (IMG_COW);
+	font_render_string_center (&font_var5, 40, 11, "THE POWER");
+	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
+	dmd_show2 ();
+	task_sleep_sec (2);
+	
+	sound_send (SND_POWER_GRUNT_1);
+	dmd_alloc_pair ();
+	frame_draw (IMG_COW);
+	font_render_string_center (&font_fxied6, 40, 11, "MOO");
+	dmd_show2 ();
+	task_sleep_sec (4);
+	deff_exit ();
+}
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {

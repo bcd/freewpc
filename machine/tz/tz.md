@@ -45,8 +45,7 @@ define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
 #define MAX_FLIPCODE_CHARS		4
-#define FLIPCODE_LIST 			{ { 3, 1, 2, 3 },  { 3, 1, 1, 1 } } 
-#define FLIPCODE_HANDLERS		{ tz_flipcode_1, tz_flipcode_2 }
+define FLIPCODE_LIST 			{ { 3, 6, 5, 10 },  { 3, 3, 8, 11 } }
 
 ##########################################################################
 # Lamp Description
@@ -505,7 +504,7 @@ Clock Working:
 # Display effects
 ##########################################################################
 [deffs]
-Brian Image: page(MACHINE_PAGE), PRI_EGG1
+Cow Image: page(MACHINE_PAGE), PRI_EGG1
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED

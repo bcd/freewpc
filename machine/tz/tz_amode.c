@@ -20,12 +20,6 @@
 
 /* CALLSET_SECTION (tz_amode, __machine2__) */
 #include <freewpc.h>
-//#include <coin.h>
-//#include <highscore.h>
-
-U8 egg_code_values[3];
-U8 egg_index;
-
 
 #if 0
 /* Attract mode display delay function.
@@ -57,54 +51,6 @@ bool amode_page_delay (U8 secs)
 	return FALSE;
 }
 #endif
-
-
-/* TODO : use flipcode module to implement this */
-void egg_left_flipper (void)
-{
-	if (!task_find_gid (GID_EGG_TIMER))
-	{
-		timer_start1_free (GID_EGG_TIMER, TIME_7S);
-		egg_index = 0;
-		egg_code_values[0] = 0;
-		egg_code_values[1] = 0;
-		egg_code_values[2] = 0;
-	}
-	egg_code_values[egg_index]++;
-}
-
-void brian_image_deff (void)
-{
-	//dmd_alloc_low ();
-	dmd_alloc_pair ();
-	//dmd_draw_fif (fif_cow);
-	font_render_string_center (&font_var5, 40, 11, "THE POWER");
-	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	sound_send (SND_POWER_GRUNT_1);
-	task_sleep_sec (4);
-	deff_exit ();
-}
-
-void egg_right_flipper (void)
-{
-	if (!task_find_gid (GID_EGG_TIMER)) 
-		return;
-	egg_index++;
-	if (egg_index == 3)
-	{
-		dbprintf ("\nEgg code %d %d %d entered\n", 
-			egg_code_values[0], egg_code_values[1], egg_code_values[2]);
-		if ((egg_code_values[0] == 2) &&
-			 (egg_code_values[1] == 3) &&
-			 (egg_code_values[2] == 4))
-		{
-			//deff_start (DEFF_BRIAN_IMAGE);
-		}
-	}
-}
-
 
 void amode_lamp_toggle_task (void)
 {
