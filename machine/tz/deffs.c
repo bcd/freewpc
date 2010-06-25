@@ -32,7 +32,7 @@ void cow_deff (void)
 	sound_send (SND_POWER_GRUNT_1);
 	dmd_alloc_pair ();
 	frame_draw (IMG_COW);
-	font_render_string_center (&font_fxied6, 40, 11, "MOO");
+	font_render_string_center (&font_fixed6, 40, 11, "MOO");
 	dmd_show2 ();
 	task_sleep_sec (4);
 	deff_exit ();
