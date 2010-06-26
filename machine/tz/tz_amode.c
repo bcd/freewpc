@@ -164,6 +164,11 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_driver_animation ();
 }
 
+CALLSET_ENTRY (tz_amode, amode_start)
+{
+	device_request_empty (device_entry (DEVNO_LOCK));
+}
+
 CALLSET_ENTRY (tz_amode, sw_buyin_button)
 {
 	//if (in_amode ())
