@@ -234,15 +234,15 @@ H4: Popper
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div
 H7: Knocker, knocker
-H8: Outhole, duty(SOL_DUTY_25)
+H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_25)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)
 L5: Left Jet, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Jet, duty(SOL_DUTY_100), time(TIME_33MS)
-L7: Lock Release, duty(SOL_DUTY_50)
+L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
 L8: Shooter Div, nosearch
 
 G1: Jets, flash
@@ -547,6 +547,7 @@ BG Flash: page(MACHINE_PAGE), PRI_GAME_MODE4
 Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Spiral Loop: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_SCORE
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT

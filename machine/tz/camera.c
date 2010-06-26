@@ -42,6 +42,17 @@ __local__ camera_award_t camera_award_count;
 /* Needed to store award for deff */
 camera_award_t camera_award_count_stored;
 extern U8 mball_locks_lit;
+void left_ramp_lights_camera_deff (void)
+{
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_right);	
+	font_render_string_center (&font_fixed6, 64, 6, "LEFT RAMP");
+	font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+}
+
 
 void camera_award_deff (void)
 {
@@ -175,6 +186,7 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
+		deff_start (DEFF_LEFT_RAMP_LIGHTS_CAMERA);
 		award_unlit_shot (SW_CAMERA);	
 		score (SC_250K);
 		sound_send (SND_JET_BUMPER_ADDED);
