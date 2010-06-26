@@ -124,7 +124,7 @@ void autofire_open_for_trough (void)
 void autofire_add_ball (void)
 {
 	autofire_request_count++;
-
+	
 	if (!in_game || switch_poll_logical (SW_FAR_LEFT_TROUGH))
 	{
 		/* For special situations.  If not in game, the
@@ -138,10 +138,17 @@ void autofire_add_ball (void)
 		task_sleep_sec (1);		
 		sol_request (SOL_BALL_SERVE);
 	}
-	else
+	/* Make sure a ball can be served from the trough */
+	else if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
 		/* The normal way to kick a ball from the trough. */
 		device_request_kick (device_entry (DEVNO_TROUGH));
+	}
+	else if (device_recount (device_entry (DEVNO_LOCK)) > 0)
+	{
+		/* Drop one from the lock */
+		deff_start (DEFF_BALL_FROM_LOCK);
+		device_unlock_ball (device_entry (DEVNO_LOCK));
 	}
 }
 
