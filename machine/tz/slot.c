@@ -129,6 +129,11 @@ void sslot_award (void)
 	sslot_award_index_stored = sslot_award_index;
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	
+	/* Don't allow awarding the eb if we can't do so */
+	if (system_config.max_ebs == 0)
+		while (sslot_award_index_stored == 0)
+			sslot_award_index_stored = random_scaled(5);
+	
 	switch (sslot_award_index_stored)
 	{
 		case 0:
