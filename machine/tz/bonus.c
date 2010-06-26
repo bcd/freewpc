@@ -40,7 +40,7 @@ U8 current_hi_player;
 U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
 U8 current_one_ball_hi_ball_number;
-U8 current_player_rankings[3];
+U8 current_player_rankings[4];
 U8 countup_pause_iterations;
 
 bool buttons_held;
@@ -802,8 +802,7 @@ void score_to_beat_deff (void)
 	bubble_sort_current_player_rankings ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
-	if ( (current_hi_player == player_up )
-		|| score_compare (current_score, current_hi_score))
+	if (current_hi_player == player_up )
 	{
 		font_render_string_center (&font_fixed10, 64, 8, "NO");
 		if (check_if_last_ball_of_multiplayer_game ())
@@ -815,7 +814,7 @@ void score_to_beat_deff (void)
 			font_render_string_center (&font_mono5, 64, 26, "INCREASE YOUR LEAD");
 		}
 	}
-	else
+	else if (score_compare (current_hi_score, current_score))
 	{
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
