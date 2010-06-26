@@ -50,7 +50,6 @@ void clock_millions_hit_deff (void)
 	generic_deff ("CLOCK MILLIONS", "5,000,000");
 }
 
-
 void clock_default_hit_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -61,8 +60,6 @@ void clock_default_hit_deff (void)
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
-
 
 void clock_millions_mode_deff (void)
 {
@@ -104,26 +101,22 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 }
 void clock_millions_mode_init (void)
 {
-	deff_start (DEFF_CLOCK_MILLIONS_MODE);
-//	lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_mode_expire (void)
 {
-	//deff_stop (DEFF_CLOCK_MILLIONS_MODE);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
 void clock_millions_mode_exit (void)
 {
-//	deff_stop (DEFF_CLOCK_MILLIONS_MODE);
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
-CALLSET_ENTRY (clock_millions, lamp_update)
+CALLSET_ENTRY (clock_millions, start_ball)
 {
-	if (timed_mode_running_p (&clock_millions_mode))
-		lamp_tristate_flash (LM_CLOCK_MILLIONS);
+	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
 CALLSET_ENTRY (clock_millions, display_update)
