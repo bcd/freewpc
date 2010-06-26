@@ -139,16 +139,10 @@ void autofire_add_ball (void)
 		sol_request (SOL_BALL_SERVE);
 	}
 	/* Make sure a ball can be served from the trough */
-	else if (switch_poll_logical (SW_RIGHT_TROUGH))
+	else
 	{
 		/* The normal way to kick a ball from the trough. */
 		device_request_kick (device_entry (DEVNO_TROUGH));
-	}
-	else if (device_recount (device_entry (DEVNO_LOCK)) > 0)
-	{
-		/* Drop one from the lock */
-		deff_start (DEFF_BALL_FROM_LOCK);
-		device_unlock_ball (device_entry (DEVNO_LOCK));
 	}
 }
 

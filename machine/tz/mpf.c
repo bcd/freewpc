@@ -340,7 +340,7 @@ CALLSET_ENTRY (mpf, ball_search)
 
 void check_button_masher (void)
 {
-	if (mpf_buttons_pressed > 20)
+	if (mpf_buttons_pressed > 40)
 	{
 		mpf_active = FALSE;
 		deff_start (DEFF_BUTTON_MASHER);

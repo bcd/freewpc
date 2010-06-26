@@ -45,7 +45,8 @@ void sw_right_ramp_enter_task (void)
 		if (mpf_ready_p ())
 		{
 			bridge_open_start ();
-			task_sleep_sec (1);
+			task_sleep_sec (3);
+			bridge_open_stop ();
 		}
 		else
 		{

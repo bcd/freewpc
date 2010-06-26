@@ -140,15 +140,20 @@ void dump_game (void)
 void serve_ball (void)
 {
 #ifdef MACHINE_TZ
-	if (!switch_poll_logical (SW_RIGHT_TROUGH))
+	if (!switch_poll (SW_RIGHT_TROUGH) 
+		|| device_recount (device_entry (DEVNO_TROUGH)) == 0
+		|| device_recount (device_entry (DEVNO_LOCK)) >= 3)
 	{
 		device_unlock_ball (device_entry (DEVNO_LOCK));
-		deff_start (DEFF_BALL_FROM_LOCK);
-		//TODO Stop skill shot
+	}
+	else if (switch_poll (SW_RIGHT_TROUGH))
+	{
+		device_request_kick (device_entry (DEVNO_TROUGH));
 	}
 	else
 	{
-		device_request_kick (device_entry (DEVNO_TROUGH));
+		/* There's a switch broken somewhere? */
+		sound_send (SND_WELCOME_RACE_FANS);
 	}
 #elif DEVNO_TROUGH
 	device_request_kick (device_entry (DEVNO_TROUGH));

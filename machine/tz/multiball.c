@@ -540,18 +540,17 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		bounded_decrement (mball_locks_lit, 0);
 		bounded_increment (mball_locks_made, 2);
 		/* Lock 2 balls, drop a ball if it's full */
-		//if (device_entry (DEVNO_LOCK)->actual_count < 2)
-		if (!device_full_p (device_entry (DEVNO_LOCK)))
+		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
+		//if (!device_full_p (device_entry (DEVNO_LOCK)))
+		{	
 			device_lock_ball (device_entry (DEVNO_LOCK));
-		/*else {
+			enable_skill_shot ();
+		}
+		else 
+		{
 			//TODO leff as well?
-			device_lock_ball (device_entry (DEVNO_LOCK));
-			kickout_lock (KLOCK_DEFF);
 			deff_start (DEFF_BALL_FROM_LOCK);
-			device_unlock_ball (device_entry (DEVNO_LOCK));
-		}*/
-
-		enable_skill_shot ();
+		}
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{

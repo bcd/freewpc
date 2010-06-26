@@ -58,8 +58,8 @@ void hitchhiker_deff (void)
 		
 		if (timed_mode_running_p (&hitch_mode))
 		{
-			sprintf("10 MILLION");
-			font_render_string_center (&font_mono5, 98, 5, sprintf_buffer);
+			sprintf("10M");
+			font_render_string_center (&font_fixed6, 105, 5, sprintf_buffer);
 		}
 		else
 		{

@@ -59,7 +59,7 @@ void camera_award_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	task_sleep_sec (1);	
+	task_sleep (TIME_500MS);
 	dmd_alloc_low_clean ();
 	dmd_draw_border (dmd_low_buffer);
 	/* camera_award_count_stored starts from 0 */

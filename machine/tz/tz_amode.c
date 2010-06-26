@@ -164,19 +164,28 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_driver_animation ();
 }
 
-CALLSET_ENTRY (tz_amode, amode_start)
+static void lock_and_outhole_monitor (void)
 {
-	/* Empty the lock if needed */
-	U8 i;
-	for (i = 0; i < 3; i++)
+	task_sleep_sec (3);
+	while (!in_live_game)
 	{
-		if (switch_poll_logical (SW_LOCK_LOWER))
+		if (switch_poll (SW_LOCK_LOWER))
 		{
 			device_request_kick (device_entry (DEVNO_LOCK));
-			task_sleep_sec (1);
 		}
-		task_sleep_sec (1);
+
+		if (switch_poll (SW_OUTHOLE))
+		{
+			sol_request (SOL_OUTHOLE);
+		}
+		task_sleep_sec (3);
 	}
+	task_exit ();
+}
+
+CALLSET_ENTRY (tz_amode, amode_start)
+{
+	task_create_gid (GID_LOCK_AND_OUTHOLE_MONITOR, lock_and_outhole_monitor);
 }
 
 CALLSET_ENTRY (tz_amode, sw_buyin_button)

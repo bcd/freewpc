@@ -147,9 +147,12 @@ define FLIPCODE_LIST 			{ { 3, 6, 5, 11 },  { 3, 3, 8, 11 } }
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest
 14: Tilt, tilt, ingame, noplay, cabinet
-15: Right Trough, c_decl(sw_trough), noscore
-16: Center Trough, c_decl(sw_trough), noscore
-17: Left Trough, c_decl(sw_trough), noscore
+#15: Right Trough, c_decl(sw_trough), noscore
+#16: Center Trough, c_decl(sw_trough), noscore
+#17: Left Trough, c_decl(sw_trough), noscore
+15: Right Trough, noscore
+16: Center Trough, noscore
+17: Left Trough, noscore
 18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS);
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
@@ -231,15 +234,15 @@ H4: Popper
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div
 H7: Knocker, knocker
-H8: Outhole
+H8: Outhole, duty(SOL_DUTY_25)
 
-L1: Ball Serve, ballserve, ontime(TIME_33MS), duty(SOL_DUTY_25), time(TIME_66MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_25)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)
 L5: Left Jet, duty(SOL_DUTY_100), time(TIME_33MS)
 L6: Right Jet, duty(SOL_DUTY_100), time(TIME_33MS)
-L7: Lock Release, duty(SOL_DUTY_50), time(TIME_66MS)
+L7: Lock Release, duty(SOL_DUTY_50)
 L8: Shooter Div, nosearch
 
 G1: Jets, flash
@@ -253,7 +256,7 @@ G8: Gumball Release, motor, nosearch
 
 A1: MPF Left Magnet
 A2: MPF Right Magnet
-A3: Ramp Divertor, duty(SOL_DUTY_12), ontime=0, time(TIME_33MS)
+A3: Ramp Divertor, duty(SOL_DUTY_25), time(TIME_100MS)
 A4: Clock Target, flash
 
 F5: U.R. Flip Power, time(TIME_33MS)
@@ -357,7 +360,7 @@ Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, D
 Trough: Ball Serve, trough, init_max_count(3), \
 	Left Trough, Center Trough, Right Trough
 
-Lock: Lock Release, \
+Lock: Lock Release, init_max_count(0),\
 	Lock Upper, Lock Center, Lock Lower
 
 Rocket: Rocket Kicker, \
@@ -661,7 +664,7 @@ Clock Mech: driver(bivar),
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_200MS, timeout=TIME_3S
+	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,

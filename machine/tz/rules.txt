@@ -8,7 +8,7 @@ Last Revised Sat May 29 19:53:04 GMT 2010
 
 Skill Shot
 ==========
-Launch the ball and try to land in the orange zone for maximum points.
+Launch the ball and try to land in the yellow zone for maximum points.
 
 Inlanes
 =======
@@ -116,6 +116,7 @@ being awarded by the camera.  Door panels cannot be collected during multiball m
 
 Door Panel : Greed
 ==================
+Hit the standup targets during the mode for 5M each.
 
 Bonus
 =====
@@ -129,7 +130,7 @@ There are 3 x 2 way combos:
 - Right loop -> Piano
 
 
-And 1 3 way combo:
+And a 3 way combo:
 - Leftramp -> Rightramp -> Piano
 
 You get awarded a Lucky Bounce if the game thinks that skill wasn't involved
