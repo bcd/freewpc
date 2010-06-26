@@ -38,7 +38,6 @@ void inlane_lights_dead_end_deff (void)
 	font_render_string_center (&font_fixed6, 64, 22, "LIGHTS DEAD END");
 	dmd_show_low ();
 	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 

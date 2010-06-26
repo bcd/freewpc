@@ -233,7 +233,7 @@ H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
 
-L1: Ball Serve, ballserve, ontime(TIME_16MS), duty(SOL_DUTY_25), time(TIME_66MS)
+L1: Ball Serve, ballserve, ontime(TIME_33MS), duty(SOL_DUTY_25), time(TIME_66MS)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)

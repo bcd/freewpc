@@ -40,7 +40,7 @@ U8 current_hi_player;
 U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
 U8 current_one_ball_hi_ball_number;
-U8 current_player_rankings[4];
+U8 current_player_rankings[3];
 U8 countup_pause_iterations;
 
 bool buttons_held;
@@ -700,13 +700,13 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-//		if (check_if_last_ball_of_multiplayer_game ())
-//		{
-//			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
-//			task_sleep_sec (6);
-//		}
-//		else
-//		{
+		if (check_if_last_ball_of_multiplayer_game ())
+		{
+			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
+			task_sleep_sec (6);
+		}
+		else
+		{
 			task_sleep_sec (2);
 			sound_send (SND_RABBLE_RABBLE);
 			dmd_alloc_low_clean ();
@@ -715,7 +715,7 @@ void bonus_deff (void)
 			/* Calculate lead */
 			score_zero (temp_score);
 			score_copy (temp_score, current_hi_score);
-			score_sub (temp_score, scores[current_player_rankings[1]]);
+			score_sub (temp_score, scores[(current_player_rankings[1])]);
 			sprintf_score (temp_score);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			//font_render_string_center (&font_mono5, 64, 24, "IN THE LEAD");
@@ -725,7 +725,7 @@ void bonus_deff (void)
 				sprintf(" 2ND P%d 3RD P%d", current_player_rankings[1], current_player_rankings[2]);
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 			}
-			if (num_players == 4)
+			else if (num_players == 4)
 			{
 				sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1], current_player_rankings[2], current_player_rankings[3]);
 				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
@@ -734,7 +734,7 @@ void bonus_deff (void)
 			task_sleep_sec (4);
 			
 		
-//		}
+		}
 	}
 
 	if (check_if_last_ball_of_multiplayer_game ())
@@ -745,7 +745,7 @@ void bonus_deff (void)
 		/* Calculate lead */
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
-		score_sub (temp_score, (scores[current_player_rankings[1]]));
+		score_sub (temp_score, scores[(current_player_rankings[1])]);
 		//TODO Doesn't work yet
 		dmd_alloc_low_clean ();
 			
@@ -781,7 +781,6 @@ void bonus_deff (void)
 	task_kill_gid (GID_BONUS_TALKING);
 	deff_exit ();
 }
-
 /* Done like this rather than a timer_ as 
  * this can go for 255 seconds */
 void quickdeath_timer_task (void)
@@ -800,7 +799,8 @@ void score_to_beat_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
-	if (current_hi_player == player_up)
+	if ( (current_hi_player == player_up )
+		|| score_compare (current_score, current_hi_score))
 	{
 		font_render_string_center (&font_fixed10, 64, 8, "NO");
 		if (check_if_last_ball_of_multiplayer_game ())
@@ -865,3 +865,4 @@ CALLSET_ENTRY (bonus, start_ball)
 	powerball_death = FALSE;
 	quickdeath_timer_running = FALSE;
 }
+

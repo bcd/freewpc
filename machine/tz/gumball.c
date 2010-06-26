@@ -141,7 +141,7 @@ void sw_gumball_right_loop_entered (void)
 {
 	if (gumball_load_is_enabled ())
 	{
-		if (in_live_game)
+		if (in_live_game && !multi_ball_play ())
 			sound_send (SND_GUMBALL_ENTER);
 		gumball_divertor_open ();
 	}
@@ -279,7 +279,8 @@ void sw_far_left_trough_monitor (void)
 
 void gumball_deff (void)
 {
-	sound_send (SND_GUMBALL_LOAD_START);
+	if (!multi_ball_play ())
+		sound_send (SND_GUMBALL_LOAD_START);
 	U16 fno;
 	for (fno = IMG_GUMBALL_START; fno <= IMG_GUMBALL_END; fno += 2)
 	{
@@ -289,7 +290,8 @@ void gumball_deff (void)
 		task_sleep (TIME_100MS);
 	}
 	
-	sound_send (SND_GUMBALL_LOAD_END);
+	if (!multi_ball_play ())
+		sound_send (SND_GUMBALL_LOAD_END);
 	/* Show last two frames two times */
 	for (fno = 0 ; fno > 3; fno++)
 	{

@@ -89,7 +89,7 @@ void camera_award_deff (void)
 	dmd_sched_transition (&trans_scroll_down_fast);
 	dmd_show_low ();
 	sound_send (SND_GUMBALL_LOADED);
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
