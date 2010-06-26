@@ -186,7 +186,7 @@ void loop_deff (void)
 		font_render_string_center (&font_fixed6, 64, i, sprintf_buffer);
 		
 		sprintf_score (loop_score);
-		font_render_string_center (&font_mono5, 64, 11 + i, sprintf_buffer);
+		font_render_string_center (&font_mono5, 64, 23 - i, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_66MS);
 	}

@@ -25,16 +25,33 @@ __local__ U8 mpf_enable_count;
 
 /** Number of balls currently on the mini-playfield */
 U8 mpf_ball_count;
-U8 mpf_round_timer;
+U8 mpf_timer;
 U8 mpf_award;
 U8 mpf_buttons_pressed;
 U8 __local__ mpf_level;
 bool mpf_active;
 
+void mpf_mode_init (void);
+void mpf_mode_exit (void);
+
+struct timed_mode_ops mpf_mode = {
+	DEFAULT_MODE,
+	.init = mpf_mode_init,
+	.exit = mpf_mode_exit,
+	.gid = GID_MPF_MODE_RUNNING,
+	.music = MUS_POWERFIELD,
+	.deff_running = DEFF_MPF_MODE,
+	.prio = PRI_GAME_MODE8,
+	.init_timer = 20,
+	.timer = &mpf_timer,
+	.grace_timer = 3,
+	.pause = null_false_function,
+};
+
 /* Where the powerball is */
 extern U8 pb_location;
 extern U8 unlit_shot_count;
-void mpf_round_deff (void)
+void mpf_mode_deff (void)
 {
 	mpf_award = 10;
 	for (;;)
@@ -48,7 +65,7 @@ void mpf_round_deff (void)
 		//sprintf ("%d,000,000", (mpf_award * mpf_level));
 		sprintf ("SHOOT TOP HOLE TO COLLECT");
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-		sprintf ("%d", mpf_round_timer);
+		sprintf ("%d", mpf_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
 		dmd_show_low ();
@@ -93,30 +110,23 @@ void mpf_ballsearch_task (void)
 		
 }
 
-void mpf_round_begin (void)
-{
-	deff_start (DEFF_MPF_ROUND);
-}
-
-void mpf_round_expire (void)
+void mpf_mode_expire (void)
 {
 	mpf_active = FALSE;
-	deff_stop (DEFF_MPF_ROUND);
 	leff_stop (LEFF_MPF_ACTIVE);
 	/* Start a task to pulse the magnets
 	 * if a ball gets stuck */
 	task_recreate_gid (GID_MPF_BALLSEARCH, mpf_ballsearch_task);	
 }
 
-void mpf_round_end (void)
+void mpf_mode_init (void)
 {
-	mpf_active = FALSE;
 }
 
-void mpf_round_task (void)
+void mpf_mode_exit (void)
 {
-	timed_mode_task (mpf_round_begin, mpf_round_expire, mpf_round_end,
-		&mpf_round_timer, 10, 3);
+	mpf_active = FALSE;
+	leff_stop (LEFF_MPF_ACTIVE);
 }
 
 void mpf_countdown_task (void)
@@ -149,24 +159,19 @@ bool mpf_ready_p (void)
 
 CALLSET_ENTRY (mpf, display_update)
 {
-	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING,
-		&mpf_round_timer) && (mpf_ball_count > 0))
-		deff_start_bg (DEFF_MPF_ROUND, 0);
+	timed_mode_display_update (&mpf_mode);
 }
 
 CALLSET_ENTRY (mpf, music_refresh)
 {
-	if (timed_mode_timer_running_p (GID_MPF_ROUND_RUNNING,
-		&mpf_round_timer))
-		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
+	timed_mode_music_refresh (&mpf_mode);
 	/* Start a countdown task */	
-	if (mpf_round_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN))
+	if (mpf_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN))
 		task_create_gid (GID_MPF_COUNTDOWN, mpf_countdown_task);
 }
 
 CALLSET_ENTRY (mpf, end_ball)
 {
-	timed_mode_stop (&mpf_round_timer);
 }
 
 
@@ -188,8 +193,8 @@ CALLSET_ENTRY (mpf, door_start_battle_power)
  * to expect a ball coming from the mpf */
 CALLSET_ENTRY (mpf, sw_mpf_top)
 {
-	if (mpf_round_timer > 5)
-		bounded_increment (mpf_round_timer, 10);
+	if (mpf_timer > 5)
+		bounded_increment (mpf_timer, 10);
 	event_should_follow (mpf_top, camera, TIME_4S);
 	leff_restart (LEFF_MPF_HIT);
 	sound_send (SND_EXPLOSION_3);
@@ -208,7 +213,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
-		timed_mode_stop (&mpf_round_timer);
+		timed_mode_end (&mpf_mode);
 		task_kill_gid (GID_MPF_COUNTDOWN);
 		task_kill_gid (GID_MPF_BALLSEARCH);
 	}
@@ -216,6 +221,19 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	deff_start (DEFF_MPF_AWARD);
 	//kickout_lock (KLOCK_DEFF);
 	callset_invoke (award_door_panel);
+}
+
+void pulse_mpf_magnets_task (void)
+{
+	U8 i = 0;
+	while (mpf_ball_count > 0 && i < 10)
+	{
+		sol_request (SOL_MPF_RIGHT_MAGNET);
+		task_sleep (TIME_200MS);
+		sol_request (SOL_MPF_LEFT_MAGNET);
+		task_sleep (TIME_200MS);
+	}
+	task_exit ();
 }
 
 CALLSET_ENTRY (mpf, sw_mpf_enter)
@@ -231,12 +249,12 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		mpf_ball_count++;
 		/* Add on 10 seconds for each extra ball */
 		if (mpf_ball_count > 1)
-			mpf_round_timer += 10;
+			mpf_timer += 10;
 		mpf_level++;
 		bounded_decrement (mpf_enable_count, 0);
 		if ((mpf_ball_count = 1))
 		{	
-			timed_mode_start (GID_MPF_ROUND_RUNNING, mpf_round_task);
+			timed_mode_begin (&mpf_mode);
 			if (!multi_ball_play ())
 			{
 				/* Turn off GI and start lamp effect */
@@ -251,7 +269,7 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 	{
 		sound_send (SND_WITH_THE_DEVIL);
 		score (SC_5M);
-		//TODO Crazy magnet pulses till exit or 3 secs
+		task_create_gid (GID_PULSE_MPF_MAGNETS, pulse_mpf_magnets_task);
 	}
 }
 
@@ -266,7 +284,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	{
 		mpf_active = FALSE;
 		leff_start (LEFF_FLASH_GI);
-		timed_mode_stop (&mpf_round_timer);
+		timed_mode_end (&mpf_mode);
 		score (SC_5M);
 		/* This should be fine as we only disable in single ball play */
 		flipper_enable ();
@@ -332,7 +350,7 @@ void check_button_masher (void)
 
 CALLSET_ENTRY (mpf, sw_left_button)
 {
-	if (mpf_round_timer != 0 && !multi_ball_play ())
+	if (mpf_timer != 0 && !multi_ball_play ())
 	{
 		bounded_increment (mpf_buttons_pressed, 50);
 		check_button_masher ();
@@ -341,7 +359,7 @@ CALLSET_ENTRY (mpf, sw_left_button)
 
 CALLSET_ENTRY (mpf, sw_right_button)
 {
-	if (mpf_round_timer != 0 && !multi_ball_play ())
+	if (mpf_timer != 0 && !multi_ball_play ())
 	{
 		bounded_increment (mpf_buttons_pressed, 50);
 		check_button_masher ();

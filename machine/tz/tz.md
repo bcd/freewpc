@@ -233,7 +233,7 @@ H6: Gumball Div
 H7: Knocker, knocker
 H8: Outhole
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_66MS)
+L1: Ball Serve, ballserve, ontime(TIME_16MS), duty(SOL_DUTY_25), time(TIME_66MS)
 L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)
@@ -534,8 +534,8 @@ Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Mode: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
 Clock Millions Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 
-Mpf Round: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
-Mpf Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
+MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 # TODO - this mode does not update its deff by the new rules
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
@@ -631,11 +631,11 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 [fonts]
 mono9:
 times10:
-misctype:
-v5prc:
+#misctype:
+#v5prc:
 steel:
-lithograph:
-twizone:
+#lithograph:
+#twizone:
 
 [timers]
 

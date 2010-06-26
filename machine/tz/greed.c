@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -54,7 +54,7 @@ struct timed_mode_ops greed_mode = {
 	.gid = GID_GREED_MODE_RUNNING,
 	.music = MUS_GREED_MODE,
 	.deff_running = DEFF_GREED_MODE,
-	.prio = PRI_GAME_MODE1,
+	.prio = PRI_GAME_MODE2,
 	.init_timer = 20,
 	.timer = &greed_mode_timer,
 	.grace_timer = 3,

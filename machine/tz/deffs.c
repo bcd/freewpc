@@ -392,6 +392,11 @@ void ball_explode_deff (void)
 		task_sleep (TIME_500MS);
 	}
 		
+	dmd_sched_transition (&trans_scroll_down_fast);
+	dmd_alloc_pair ();
+	frame_draw (IMG_BALLEXPLODE_START);
+	dmd_show2 ();
+	
 	sound_send (SND_EXPLOSION_3);
 	for (fno = IMG_BALLEXPLODE_START; fno <= IMG_BALLEXPLODE_END; fno += 2)
 	{

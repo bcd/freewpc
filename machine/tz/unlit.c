@@ -91,9 +91,9 @@ void award_unlit_shot (U8 unlit_called_from)
 
 CALLSET_ENTRY (unlit, start_ball)
 {
-	/* Maybe clear backdoor_award_collected on each ball? */
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;
+	backdoor_award_collected = FALSE;
 }
 
 CALLSET_ENTRY (unlit, start_player)

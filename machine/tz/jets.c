@@ -27,7 +27,8 @@ __local__ U8 jets_for_bonus;
 __local__ U8 jets_bonus_level;
 
 U8 tsm_mode_timer;
-extern U8 mpf_round_timer;
+extern U8 mpf_timer;
+
 bool noflash;
 
 void tsm_mode_init (void);
@@ -41,6 +42,7 @@ struct timed_mode_ops tsm_mode = {
 	.music = MUS_TOWN_SQUARE_MADNESS,
 	.deff_running = DEFF_TSM_MODE,
 	.init_timer = 30,
+	.prio = PRI_GAME_MODE3,
 	.timer = &tsm_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
@@ -167,7 +169,7 @@ CALLSET_ENTRY (jet, sw_jet_noflash)
 CALLSET_ENTRY (jet, sw_jet)
 {
 	/* Hack to work amode bug when mpf_exit switch breaks */
-	if (!multi_ball_play () && mpf_round_timer > 0)
+	if (!multi_ball_play () && mpf_timer > 0)
 		callset_invoke (sw_mpf_exit);
 	
 	if (flag_test(FLAG_POWERBALL_IN_PLAY))
@@ -220,6 +222,26 @@ CALLSET_ENTRY (jet, sw_jet)
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 
+CALLSET_ENTRY (jet, sw_left_jet)
+{
+	lamp_off (LM_LEFT_JET);
+	task_sleep (TIME_66MS);
+	lamp_on (LM_LEFT_JET);
+}
+
+CALLSET_ENTRY (jet, sw_right_jet)
+{
+	lamp_off (LM_RIGHT_JET);
+	task_sleep (TIME_66MS);
+	lamp_on (LM_RIGHT_JET);
+}
+
+CALLSET_ENTRY (jet, sw_bottom_jet)
+{
+	lamp_off (LM_LOWER_JET);
+	task_sleep (TIME_66MS);
+	lamp_on (LM_LOWER_JET);
+}
 
 CALLSET_ENTRY (jet, lamp_update)
 {

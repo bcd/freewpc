@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 //TODO Handle replay during/after bonus
-
+// Count up luckys, sudden deaths etc 
 /* CALLSET_SECTION (bonus, __machine2__) */
 #include <freewpc.h>
 #include <eb.h>
@@ -700,23 +700,22 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		if (check_if_last_ball_of_multiplayer_game ())
-		{
-			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
-			task_sleep_sec (6);
-		}
-		else
-		{
+//		if (check_if_last_ball_of_multiplayer_game ())
+//		{
+//			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
+//			task_sleep_sec (6);
+//		}
+//		else
+//		{
 			task_sleep_sec (2);
 			sound_send (SND_RABBLE_RABBLE);
 			dmd_alloc_low_clean ();
-			sprintf("PLAYER %d LEADS BY", current_player_rankings[0]);
+			sprintf("PLAYER %d LEADS BY", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 			/* Calculate lead */
 			score_zero (temp_score);
 			score_copy (temp_score, current_hi_score);
 			score_sub (temp_score, scores[current_player_rankings[1]]);
-			//score_copy (temp_score, (scores[current_player_rankings[1]]));
 			sprintf_score (temp_score);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			//font_render_string_center (&font_mono5, 64, 24, "IN THE LEAD");
@@ -735,7 +734,7 @@ void bonus_deff (void)
 			task_sleep_sec (4);
 			
 		
-		}
+//		}
 	}
 
 	if (check_if_last_ball_of_multiplayer_game ())

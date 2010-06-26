@@ -37,12 +37,14 @@ void inlane_lights_dead_end_deff (void)
 	font_render_string_center (&font_fixed6, 64, 6, "RIGHT INLANE");
 	font_render_string_center (&font_fixed6, 64, 22, "LIGHTS DEAD END");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }
 
 void dead_end_deff (void)
 {
+
 	dmd_alloc_low_clean();
 	sound_send (SND_DEAD_END_SCREECH);
 	dmd_sched_transition (&trans_scroll_right);	
@@ -50,9 +52,23 @@ void dead_end_deff (void)
 	dmd_show2 ();
 	task_sleep_sec (1);
 	sound_send (SND_DEAD_END_CRASH);
-	dmd_alloc_low_clean();
+	
+	U8 i = 0;
+	do {
+	U8 x = random_scaled (4);
+	U8 y = random_scaled (4);
+	dmd_alloc_low_clean ();
+	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
+	font_render_string_center (&font_fixed6, 64+x, 7+y, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep (TIME_33MS);
+	} while (i++ < 8);
+	
+	dmd_alloc_low_clean ();
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	dmd_show_low ();
+	
 	
 	if (extra_ball_lit_from_deadend == FALSE)
 	{

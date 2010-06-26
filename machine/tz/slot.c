@@ -38,10 +38,10 @@ struct timed_mode_ops sslot_mode = {
 	.gid = GID_SSLOT_MODE_RUNNING,
 	.music = MUS_SUPER_SLOT,
 	.deff_running = DEFF_SSLOT_MODE,
-	.prio = PRI_GAME_MODE1,
-	.init_timer = 40,
+	.prio = PRI_GAME_MODE6,
+	.init_timer = 20,
 	.timer = &sslot_mode_timer,
-	.grace_timer = 2,
+	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
 

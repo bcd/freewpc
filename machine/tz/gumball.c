@@ -311,7 +311,7 @@ void gumball_deff (void)
 	dmd_show_low ();
 	task_sleep_sec (1);
 	//TODO BUG?
-	music_refresh ();
+	//music_refresh ();
 	deff_exit ();
 }
 
