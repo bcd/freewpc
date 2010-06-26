@@ -529,6 +529,12 @@ CALLSET_ENTRY(door, start_player)
 	door_panels_started = 0;
 	flag_on (FLAG_PIANO_DOOR_LIT);
 	flag_on (FLAG_SLOT_DOOR_LIT);
+
+	if (system_config.max_ebs == 0)
+	{
+		lamp_on (LM_PANEL_EB);
+		door_panels_started++;
+	}
 	door_lamp_update ();
 }
 
