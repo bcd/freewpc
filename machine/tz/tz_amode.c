@@ -166,7 +166,17 @@ CALLSET_ENTRY (tz_amode, amode_page)
 
 CALLSET_ENTRY (tz_amode, amode_start)
 {
-	device_request_empty (device_entry (DEVNO_LOCK));
+	/* Empty the lock if needed */
+	U8 i;
+	for (i = 0; i < 3; i++)
+	{
+		if (switch_poll_logical (SW_LOCK_LOWER))
+		{
+			device_request_kick (device_entry (DEVNO_LOCK));
+			task_sleep_sec (1);
+		}
+		task_sleep_sec (1);
+	}
 }
 
 CALLSET_ENTRY (tz_amode, sw_buyin_button)

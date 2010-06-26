@@ -139,7 +139,18 @@ void dump_game (void)
  */
 void serve_ball (void)
 {
-#ifdef DEVNO_TROUGH
+#ifdef MACHINE_TZ
+	if (!switch_poll_logical (SW_RIGHT_TROUGH))
+	{
+		device_unlock_ball (device_entry (DEVNO_LOCK));
+		deff_start (DEFF_BALL_FROM_LOCK);
+		//TODO Stop skill shot
+	}
+	else
+	{
+		device_request_kick (device_entry (DEVNO_TROUGH));
+	}
+#elif DEVNO_TROUGH
 	device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
 	valid_playfield = FALSE;
