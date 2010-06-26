@@ -713,6 +713,7 @@ void bonus_deff (void)
 			sprintf("PLAYER %d LEADS BY", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 			/* Calculate lead */
+			bubble_sort_current_player_rankings ();
 			score_zero (temp_score);
 			score_copy (temp_score, current_hi_score);
 			score_sub (temp_score, scores[(current_player_rankings[1])]);
@@ -743,6 +744,7 @@ void bonus_deff (void)
 		dmd_alloc_low_clean ();
 		
 		/* Calculate lead */
+		bubble_sort_current_player_rankings ();
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
 		score_sub (temp_score, scores[(current_player_rankings[1])]);
@@ -797,6 +799,7 @@ void quickdeath_timer_task (void)
 
 void score_to_beat_deff (void)
 {
+	bubble_sort_current_player_rankings ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
 	if ( (current_hi_player == player_up )
