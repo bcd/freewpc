@@ -22,7 +22,7 @@
 
 
 U8 spiral_mode_timer;
-//__local__ score_t spiral_mode_score;
+//score_t spiral_mode_score;
 
 extern U8 spiral_loops;
 
@@ -83,7 +83,6 @@ void spiral_mode_deff (void)
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
 		sprintf_current_score ();
-		//sprintf_score (spiral_mode_score);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS");
 		sprintf ("%d", spiral_mode_timer);
@@ -94,33 +93,28 @@ void spiral_mode_deff (void)
 	}
 }
 
-
 void spiral_mode_init (void)
 {
-//	deff_start (DEFF_SPIRAL_MODE);
-	//score_zero (spiral_mode_score);
+	lamp_tristate_flash (LM_RIGHT_SPIRAL);
+	lamp_tristate_flash (LM_LEFT_SPIRAL);
 }
 
 void spiral_mode_expire (void)
 {
-//	deff_stop (DEFF_SPIRAL_MODE);
-	lamp_off (LM_RIGHT_SPIRAL);
-	lamp_off (LM_LEFT_SPIRAL);
-}
-
-void spiral_mode_exit (void)
-{
-//	deff_stop (DEFF_SPIRAL_MODE);
 	lamp_tristate_off (LM_RIGHT_SPIRAL);
 	lamp_tristate_off (LM_LEFT_SPIRAL);
 }
 
-bool spiralmode_running (void)
+void spiral_mode_exit (void)
 {
-	if (timed_mode_running_p (&spiral_mode))
-		return TRUE;
-	else
-		return FALSE;
+	lamp_tristate_off (LM_RIGHT_SPIRAL);
+	lamp_tristate_off (LM_LEFT_SPIRAL);
+}
+
+CALLSET_ENTRY (spiral, start_ball)
+{
+	lamp_tristate_off (LM_RIGHT_SPIRAL);
+	lamp_tristate_off (LM_LEFT_SPIRAL);
 }
 
 CALLSET_ENTRY (spiral, display_update)
@@ -128,14 +122,6 @@ CALLSET_ENTRY (spiral, display_update)
 	timed_mode_display_update (&spiral_mode);
 }
 
-CALLSET_ENTRY (spiral, lamp_update)
-{
-	if (spiralmode_running ())
-	{
-		lamp_tristate_flash (LM_RIGHT_SPIRAL);
-		lamp_tristate_flash (LM_LEFT_SPIRAL);
-	}
-}
 CALLSET_ENTRY (spiral, music_refresh)
 {
 	timed_mode_music_refresh (&spiral_mode);
