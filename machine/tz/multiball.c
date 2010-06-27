@@ -45,7 +45,7 @@ struct timed_mode_ops mball_restart_mode = {
 	.music = MUS_FASTLOCK_COUNTDOWN,
 	.deff_running = DEFF_MBALL_RESTART,
 	.prio = PRI_MULTIBALL,
-	.init_timer = 20,
+	.init_timer = 15,
 	.timer = &mball_restart_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
@@ -117,7 +117,6 @@ CALLSET_ENTRY (mball, music_refresh)
 	timed_mode_music_refresh (&mball_restart_mode);
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
-	
 	if (mball_restart_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN_TASK))
 		task_create_gid (GID_MPF_COUNTDOWN_TASK, mpf_countdown_task);
 }
@@ -374,6 +373,8 @@ CALLSET_ENTRY (multiball, mball_start_2_ball)
 
 CALLSET_ENTRY (mball, mball_start)
 {
+	if (timed_mode_running_p (&mball_restart_mode))
+		timed_mode_end (&mball_restart_mode);
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
 		unlit_shot_count = 0;

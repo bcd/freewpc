@@ -29,14 +29,12 @@ U16	start_loop_time;
 __local__ U8	loop_time;
 /* Used to pass loop score to deff */
 score_t loop_score;
-//__local__ U8	loop_speed_timer_value;
 
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 
-extern struct timed_mode_ops spiral_mode;
-//extern U8 fastlock_round_timer;
-
+//extern struct timed_mode_ops spiral_mode;
+extern U8 spiral_mode_timer;
 extern void thing_flips (void);
 extern void award_spiral_loop (void);
 
@@ -55,6 +53,8 @@ static bool can_show_loop_deff (void)
 	if (fastlock_running ())
 		return FALSE;
 	else if (task_find_gid (GID_SPIRALAWARD))
+		return FALSE;
+	else if (spiral_mode_timer)
 		return FALSE;
 	else
 		return TRUE;
@@ -95,10 +95,10 @@ static void award_loop (void)
 		deff_start (DEFF_PB_LOOP);
 		return;
 	}
-	if (timed_mode_running_p (&spiral_mode))
+	if (spiral_mode_timer > 0 )
 	{
-		spiral_loops++;
-		award_spiral_loop ();
+		callset_invoke (award_spiral_loop);
+		deff_start (DEFF_SPIRAL_LOOP);
 	}
 	else
 	/* Plain Old Loop */

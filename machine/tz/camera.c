@@ -164,11 +164,11 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else if (event_did_follow (gumball_exit, camera))
 	{
-		return;
+	//	return;
 	}
 	else if (event_did_follow (dead_end, camera))
 	{
-		return;
+	//	return;
 	}
 	else if (can_award_camera ())
 	{
@@ -186,7 +186,8 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else
 	{
-		deff_start (DEFF_LEFT_RAMP_LIGHTS_CAMERA);
+		if (!multi_ball_play ())
+			deff_start (DEFF_LEFT_RAMP_LIGHTS_CAMERA);
 		award_unlit_shot (SW_CAMERA);	
 		score (SC_250K);
 		sound_send (SND_JET_BUMPER_ADDED);

@@ -45,7 +45,7 @@ U8 countup_pause_iterations;
 
 bool buttons_held;
 bool quickdeath_timer_running;
-bool powerball_death;
+extern bool powerball_death;
 
 void bubble_sort_current_player_rankings (void)
 {
@@ -265,7 +265,7 @@ void bonus_deff (void)
 	
 	if (jet_death == TRUE)
 	{
-		sound_send (SND_YOUVE_JUST_CROSSED_OVER);
+		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		dmd_alloc_low_clean ();
 		sprintf ("UNFAIR DEATH");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
@@ -578,6 +578,7 @@ void bonus_deff (void)
 	do {
 		dmd_alloc_low_clean ();
 		/* Shake the text */
+		//TODO Make it shake more as the points build up
 		U8 x = random_scaled (8);
 		U8 y = random_scaled (4);
 		font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
@@ -686,6 +687,7 @@ void bonus_deff (void)
 	/* If it's the last player of a multi player game, show highest 1 ball score so far*/
 	if (num_players > 1 && player_up == num_players && ball_up != 1)
 	{
+		bubble_sort_current_player_rankings ();
 		task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
@@ -707,32 +709,35 @@ void bonus_deff (void)
 		}
 		else
 		{
+			#if 0
+			bubble_sort_current_player_rankings ();
 			task_sleep_sec (2);
 			sound_send (SND_RABBLE_RABBLE);
 			dmd_alloc_low_clean ();
 			sprintf("PLAYER %d LEADS BY", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 			/* Calculate lead */
-			bubble_sort_current_player_rankings ();
 			score_zero (temp_score);
 			score_copy (temp_score, current_hi_score);
-			score_sub (temp_score, scores[(current_player_rankings[1])]);
+			score_sub (temp_score, scores[current_player_rankings[1] + 1]);
 			sprintf_score (temp_score);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-			//font_render_string_center (&font_mono5, 64, 24, "IN THE LEAD");
 			
 			if (num_players == 3)
 			{
-				sprintf(" 2ND P%d 3RD P%d", current_player_rankings[1], current_player_rankings[2]);
+				sprintf(" 2ND P%d 3RD P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1);
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 			}
 			else if (num_players == 4)
 			{
-				sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1], current_player_rankings[2], current_player_rankings[3]);
+				sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1] + 1, 
+					current_player_rankings[2] + 1, current_player_rankings[3] + 1);
+
 				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			}
 			dmd_show_low ();
 			task_sleep_sec (4);
+			#endif
 			
 		
 		}
@@ -747,7 +752,7 @@ void bonus_deff (void)
 		bubble_sort_current_player_rankings ();
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
-		score_sub (temp_score, scores[(current_player_rankings[1])]);
+		score_sub (temp_score, scores[current_player_rankings[1] + 1]);
 		//TODO Doesn't work yet
 		dmd_alloc_low_clean ();
 			
@@ -758,10 +763,15 @@ void bonus_deff (void)
 		font_render_string_center (&font_fixed10, 64, 13, sprintf_buffer);
 		
 		font_render_string_center (&font_mono5, 64, 23, "CONGRATULATIONS");
-		if (num_players > 2)
+		if (num_players == 3)
 		{
-			sprintf("2ND P%d 3RD P%d", current_player_rankings[1], current_player_rankings[2]);
+			sprintf("2ND P%d 3RD P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1);
 			font_render_string_center (&font_mono5, 64, 27, sprintf_buffer);
+		} 
+		else if (num_players == 4)
+		{
+			sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1, current_player_rankings[3] + 1);
+			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 		}
 		
 		dmd_show_low ();
@@ -853,10 +863,15 @@ CALLSET_ENTRY (bonus, start_game)
 	current_one_ball_hi_player = 0;
 	current_one_ball_hi_ball_number = 0;
 	current_hi_player = 0;
-	current_player_rankings[0] = 1;
-	current_player_rankings[1] = 2;
-	current_player_rankings[2] = 3;
-	current_player_rankings[3] = 4;
+	current_player_rankings[0] = 0;
+	current_player_rankings[1] = 1;
+	current_player_rankings[2] = 2;
+	current_player_rankings[3] = 3;
+}
+
+CALLSET_ENTRY (bonus, ball_serve)
+{
+	quickdeath_timer_running = FALSE;
 }
 
 CALLSET_ENTRY (bonus, start_ball)
@@ -864,7 +879,5 @@ CALLSET_ENTRY (bonus, start_ball)
 	/* Store the start ball store */
 	score_zero (start_ball_score);
 	score_copy (start_ball_score, current_score);
-	powerball_death = FALSE;
-	quickdeath_timer_running = FALSE;
 }
 

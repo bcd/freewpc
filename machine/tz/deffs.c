@@ -379,19 +379,11 @@ void ball_drain_outlane_deff (void)
 
 void ball_explode_deff (void)
 {
-	extern bool powerball_death;
 	U16 fno;
+	extern bool powerball_death;
 	if (!multi_ball_play () && !ballsave_test_active ())
 		music_request (MUS_POWERFIELD, PRI_GAME_MODE1);
-	/* Whoops, lost the powerball before getting it in the gumball */
-	if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
-	{
-		task_sleep (TIME_500MS);
-		sound_send (SND_NOOOOOOOO);
-		powerball_death = TRUE;
-		task_sleep (TIME_500MS);
-	}
-	
+
 	dmd_alloc_pair_clean ();
 	dmd_show2 ();
 	task_sleep (TIME_200MS);
@@ -400,8 +392,8 @@ void ball_explode_deff (void)
 	dmd_alloc_pair ();
 	frame_draw (IMG_BALLEXPLODE_START);
 	dmd_show2 ();
-	
-	sound_send (SND_EXPLOSION_3);
+	if (powerball_death == FALSE)	
+		sound_send (SND_EXPLOSION_3);
 	for (fno = IMG_BALLEXPLODE_START + 1; fno <= IMG_BALLEXPLODE_END; fno += 2)
 	{
 		dmd_alloc_pair ();

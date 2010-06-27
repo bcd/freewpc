@@ -178,6 +178,10 @@ static void lock_and_outhole_monitor (void)
 		{
 			sol_request (SOL_OUTHOLE);
 		}
+		if (!switch_poll (SW_AUTOFIRE2))
+		{
+			callset_invoke (clear_autofire);	
+		}
 		task_sleep_sec (3);
 	}
 	task_exit ();

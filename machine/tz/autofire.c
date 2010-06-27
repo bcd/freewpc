@@ -188,18 +188,15 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	}
 }
 
-
-CALLSET_ENTRY (autofire, amode_start)
+CALLSET_ENTRY (autofire, clear_autofire)
 {
-	/* TODO : Poll the autofire switches and empty it if something
-	is found here.  This is crashing at system startup now. */
-	/*
-	 * Seems to open regardless of something in there?
-	if (!switch_poll_logical (SW_AUTOFIRE1)
-			|| !switch_poll_logical (SW_AUTOFIRE2))
-	{
-		autofire_open_for_trough ();
-	}*/
+	/* Used to empty autofire if found full
+	 * during attract mode */
+	shooter_div_start ();
+	task_sleep (TIME_1S);
+	sol_request (SOL_AUTOFIRE);
+	task_sleep (TIME_1S);
+	shooter_div_stop ();
 }
 
 CALLSET_ENTRY (autofire, ball_search)
@@ -207,11 +204,7 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	shooter_div_start ();
-	task_sleep (TIME_1S);
-	sol_request (SOL_AUTOFIRE);
-	task_sleep (TIME_1S);
-	shooter_div_stop ();
+	callset_invoke (clear_autofire);
 }
 
 CALLSET_ENTRY (autofire, start_ball)

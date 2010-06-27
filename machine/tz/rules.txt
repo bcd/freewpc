@@ -94,15 +94,27 @@ If you manage to sneak in a ball during multiball, you get some points too.
 
 Super Skill Multiball
 =====================
+Shoot a ball up the left ramp and hit the skill shot to score a jackpot.  
+Shoot left ramps to relight the jackpot
 
 Clock Chaos Multiball
 =====================
+Hit the clock to relight the jackpot.  Where the jackpot is collected from 
+moves each time it is collected:
+
+- Left Ramp 15 Million
+- Right Ramp 20 Million
+- Piano 25 Million
+- Camera 30 Million
+- Power Payoff 40 Million
+- Dead End 50 Million
 
 Multiball
 =========
 If no jackpot is scored and 2 balls drain, the player is offered a multiball
 restart.  This is collected by hitting the lock within 30 seconds of multiball
-ending.
+ending.  Jackpots can be increased by hitting the camera, up to a maximum of
+50 Million.  The jackpot is relight by hitting the lock.
 
 Slot Machine and Piano
 ======================
@@ -117,6 +129,17 @@ being awarded by the camera.  Door panels cannot be collected during multiball m
 Door Panel : Greed
 ==================
 Hit the standup targets during the mode for 5M each.
+
+Door Panel : 10 Million
+=======================
+Awards 10 Million points.  Can be lit through the camera or Super Slot also.
+
+Door Panel : Battle the Power
+=============================
+Opens up the mini playfield, via the right ramp
+
+Door Panel : 	
+
 
 Bonus
 =====

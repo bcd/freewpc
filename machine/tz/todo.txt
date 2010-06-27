@@ -1,0 +1,17 @@
+make jets flash
+Fix No gi bug
+Use system time for some features
+	eg: 1200 midnight multiball
+Store a mode for use later (when Buyin is pressed)
+	Greed
+	Super Slot
+	Spiral
+	TSM
+Steppable pages in rules.c 
+
+Powerball detect during gumball eject
+Fix bridge divertor/weaken lock and ball load
+Magnets
+Shot combos - In progress
+Make clock millions more interesting
+Turn up volume during multiball jackpot

@@ -51,12 +51,18 @@ void fastlock_mode_deff (void)
 {
 	for (;;)
 	{
+		U8 display_loop_time;
+		display_loop_time = 100;
+		display_loop_time -= loop_time;
+		if (display_loop_time < 1)
+			display_loop_time = 1;
+
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
 		sprintf("%d MILLION", fastlock_award);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		//font_render_string_center (&font_var5, 64, 27, "HIT LOCK TO COLLECT");
-		sprintf ("%d SPEED", loop_time);
+		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", fastlock_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);

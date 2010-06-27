@@ -121,10 +121,10 @@ void common_greed_handler (U8 target)
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
 
-	if (lamp_test (LM_PANEL_GREED) && (greed_set & target))
+	if (timed_mode_running_p(&greed_mode) && (greed_set & target))
 	{
 		greed_set &= ~target;
-		score (SC_1M);
+		score (SC_5M);
 		sound_send (SND_GREED_MODE_BOOM);
 	}
 	else if ((default_set & target) == 0)

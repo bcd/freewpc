@@ -57,21 +57,18 @@ void spiral_loop_deff (void)
 }
 
 
-void award_spiral_loop (void)
+CALLSET_ENTRY (spiral, award_spiral_loop)
 {
+	spiral_loops++;
 	if (spiral_loops < 3)
 	{
 		sound_send (SND_SPIRAL_AWARDED);
 		score (SC_10M);
-		//score_add (SC_10M, spiral_mode_score);
-		deff_start (DEFF_SPIRAL_LOOP);
 	}
 	else
 	{
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		score (SC_20M);
-		//score_add (SC_20M, spiral_mode_score);
-		deff_start (DEFF_SPIRAL_LOOP);
 		spiral_loops = 0;
 	}
 }

@@ -211,7 +211,16 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			/* Do a dodgy multiball combo */
 			flag_on (FLAG_SUPER_MB_RUNNING);
 			ballsave_add_time (5);
-			callset_invoke (sssmb_start);
+			
+			switch (random_scaled (1))
+			{
+				case 0:
+					callset_invoke (sssmb_start);
+					break;
+				case 1:
+					callset_invoke (chaosmb_start);
+					break;
+			}
 			callset_invoke (mball_start);
 			callset_invoke (mball_start_3_ball);
 		}

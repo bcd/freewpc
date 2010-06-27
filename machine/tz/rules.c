@@ -154,7 +154,7 @@ void rules_deff (void)
 	rule_complete ();
 	
 	rule_begin ();
-	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP TO COLLECT", "20 MILLION BONUS" , "FOR COLLECTING ALL");
+	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP TO COLLECT", "A RANDOM AWARD" , "20M FOR COLLECTING ALL");
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_flash_on);
 	lamp_tristate_flash (LM_RIGHT_SPIRAL);
 	lamp_tristate_flash (LM_GUMBALL_LANE);

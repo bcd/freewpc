@@ -147,10 +147,12 @@ CALLSET_ENTRY (left_ramp, lamp_update)
 CALLSET_ENTRY (left_ramp, sw_left_ramp_enter)
 {
 	score (SC_1K);
+	device_switch_can_follow (left_ramp_enter, left_ramp_exit, TIME_2S);
 }
 
 CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 {
+	device_switch_can_follow (left_ramp_exit, inlane2, TIME_1S);
 	/* Tell the other bits of code that a left ramp has been completed */
 	maybe_ramp_divert ();
 	sssmb_left_ramp_exit ();

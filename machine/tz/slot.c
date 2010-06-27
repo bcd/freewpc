@@ -155,6 +155,7 @@ void sslot_award (void)
 		case 4:
 			sound_send (SND_TEN_MILLION_POINTS);
 			score (SC_10M);
+			lamp_on (LM_PANEL_10M);
 			break;
 		case 5:
 			sound_send (SND_SEE_WHAT_GREED);
@@ -234,6 +235,13 @@ CALLSET_ENTRY (slot, display_update)
 CALLSET_ENTRY (slot, music_refresh)
 {
 	timed_mode_music_refresh (&sslot_mode);
+}
+
+CALLSET_ENTRY (slot, lamp_update)
+{
+	if (!timed_mode_running_p (&sslot_mode))
+		lamp_tristate_off (LM_SLOT_MACHINE);
+		
 }
 
 CALLSET_ENTRY (slot, door_start_sslot)

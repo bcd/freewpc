@@ -25,11 +25,22 @@
 /* How many balls have drained in three seconds */
 U8 multidrain_count;
 bool multidrain_awarded;
+bool powerball_death;
 
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
 	if (in_live_game)
 	{
+		/* Whoops, lost the powerball before getting it in the gumball */
+		if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
+		{
+			task_sleep (TIME_500MS);
+			sound_send (SND_NOOOOOOOO);
+			powerball_death = TRUE;
+	//		task_sleep_sec (1);
+		}
+	
+
 		/* Timer to check if 3 balls drain quickly */
 		if (!timer_find_gid (GID_MULTIDRAIN) && multi_ball_play () && !ballsave_test_active ())
 		{
@@ -50,8 +61,14 @@ CALLSET_ENTRY (outhole, sw_outhole)
 	
 }
 
-CALLSET_ENTRY (outhole, ball_start)
+CALLSET_ENTRY (outhole, valid_playfield)
 {
+	powerball_death = FALSE;
+}
+
+CALLSET_ENTRY (outhole, ball_serve)
+{
+	powerball_death = FALSE;
 	multidrain_count = 0;
 	multidrain_awarded = FALSE;
 	timer_kill_gid (GID_MULTIDRAIN);
