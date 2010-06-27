@@ -68,11 +68,17 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 	{
 		/* Stop mute/pause mode */
 		mute_and_pause_stop ();
+		#ifdef MACHINE_TZ
+		callset_invoke (tz_flipcode_entry_stop);
+		#endif
 	}
 	else
 	{
 		/* Start mute/pause mode */
 		task_create_gid (GID_MUTE_AND_PAUSE, mute_and_pause_monitor);
+		#ifdef MACHINE_TZ
+		callset_invoke (tz_flipcode_entry);
+		#endif
 	}
 }
 
