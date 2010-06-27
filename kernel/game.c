@@ -474,7 +474,6 @@ void start_ball (void)
 	/* At the start of ball 2, any partial credits are cleared */
 	units_clear ();
 
-
 	/* Reset the pointer to the current player's score */
 	current_score = scores[player_up - 1];
 
