@@ -227,9 +227,9 @@ define FLIPCODE_LIST 			{ { 3, 6, 5, 11 },  { 3, 3, 8, 11 } }
 #
 ##########################################################################
 [drives]
-H1: Slot, duty(SOL_DUTY_100), time(TIME_166MS)
+H1: Slot, duty(SOL_DUTY_100), time(TIME_200MS)
 H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_166MS)
-H3: Autofire, nosearch, launch
+H3: Autofire, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
 H4: Popper
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
 H6: Gumball Div
@@ -237,11 +237,11 @@ H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
-L2: Right Sling, duty(SOL_DUTY_100), time(TIME_33MS)
-L3: Left Sling, duty(SOL_DUTY_100), time(TIME_33MS)
-L4: Lower Jet, duty(SOL_DUTY_100), time(TIME_33MS)
-L5: Left Jet, duty(SOL_DUTY_100), time(TIME_33MS)
-L6: Right Jet, duty(SOL_DUTY_100), time(TIME_33MS)
+L2: Right Sling
+L3: Left Sling
+L4: Lower Jet
+L5: Left Jet
+L6: Right Jet
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
 L8: Shooter Div, nosearch
 
@@ -272,6 +272,42 @@ X5: Ramp2, flash
 X6: Clock Reverse, motor, nosearch
 X7: Clock Forward, motor, nosearch
 
+
+[templates]
+Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
+Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
+
+Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=20
+Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=20
+
+Clock Mech: driver(bivar),
+	forward_sol=SOL_CLOCK_FORWARD,
+	reverse_sol=SOL_CLOCK_REVERSE
+
+#Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+
+#Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+
+#Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+
+Bridge Open: driver(duty),
+	sol=SOL_RIGHT_RAMP_DIV,
+	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
+
+Shooter Div: driver(duty),
+	sol=SOL_SHOOTER_DIV,
+	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
+
+Ramp Div: driver(duty),
+	sol=SOL_RAMP_DIVERTOR,
+	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+
+Gumball Div: driver(duty),
+	sol=SOL_GUMBALL_DIV,
+	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
 
 ##########################################################################
 # General Illumination
@@ -548,7 +584,8 @@ Left Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Inlane lights Dead End: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Left ramp lights camera: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-Spiral Loop: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_SCORE
+Shoot Hitch: page(MACHINE2_PAGE), PRI_GAME_QUICK2, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Spiral Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_SCORE+D_QUEUED
 TV Static: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
@@ -643,38 +680,4 @@ steel:
 
 [timers]
 
-[templates]
-Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
-Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
-Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
-Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
-Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
 
-Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=2, offtime=20
-Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=2, offtime=20
-
-Clock Mech: driver(bivar),
-	forward_sol=SOL_CLOCK_FORWARD,
-	reverse_sol=SOL_CLOCK_REVERSE
-
-#Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
-
-#Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
-
-#Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
-
-Bridge Open: driver(duty),
-	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
-
-Shooter Div: driver(duty),
-	sol=SOL_SHOOTER_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
-
-Ramp Div: driver(duty),
-	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
-
-Gumball Div: driver(duty),
-	sol=SOL_GUMBALL_DIV,
-	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S

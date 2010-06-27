@@ -26,15 +26,21 @@ extern __machine__ bool mpf_ready_p (void);
 extern void award_unlit_shot (U8 unlit_called_from);
 
 U8 right_ramps_entered;
+/* Used to remind the player where to shoot to advance
+ * after they shoot it 3 times unsucessfully */
+U8 unlit_right_ramps;
 
-
-/*void right_ramp_default_deff (void)
+void shoot_hitch_deff (void)
 {
 	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_right);	
+	font_render_string_center (&font_mono5, 64, 6, "SHOOT HITCHHIKER");
+	font_render_string_center (&font_mono5, 64, 22, "TO UNLOCK POWER");
 	dmd_show_low ();
+	task_sleep_sec (1);
 	deff_exit ();
 }
-*/
+
 
 void sw_right_ramp_enter_task (void)
 {
@@ -44,12 +50,16 @@ void sw_right_ramp_enter_task (void)
 	do {
 		if (mpf_ready_p ())
 		{
+			unlit_right_ramps = 4;
 			bridge_open_start ();
 			task_sleep_sec (3);
 			bridge_open_stop ();
 		}
 		else
 		{
+			bounded_increment (unlit_right_ramps, 4);
+			if (unlit_right_ramps == 3)
+				deff_start (DEFF_SHOOT_HITCH);
 			task_sleep_sec (2);
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			/* The default driver doesn't seem to be working */
@@ -90,6 +100,7 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 CALLSET_ENTRY (right_ramp, start_ball)
 {
 	right_ramps_entered = 0;
+	unlit_right_ramps = 0;
 }
 
 /* The default driver doesn't seem to be working */
