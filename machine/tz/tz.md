@@ -44,7 +44,6 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 define CONFIG_TZONE_IP
-define FLIPCODE_LIST 			{ { 3, 6, 5, 11 },  { 3, 3, 8, 11 } }
 
 ##########################################################################
 # Lamp Description
@@ -160,9 +159,9 @@ define FLIPCODE_LIST 			{ { 3, 6, 5, 11 },  { 3, 3, 8, 11 } }
 26: Trough Proximity, edge, noscore
 27: Shooter, edge, shooter, noscore, debounce(TIME_200MS)
 28: Rocket Kicker
-31: Left Jet, ingame, c_decl(sw_jet), noplay
-32: Right Jet, ingame, c_decl(sw_jet), noplay
-33: Bottom Jet, ingame, c_decl(sw_jet), noplay
+31: Left Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LEFT_JET)
+32: Right Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_RIGHT_JET)
+33: Bottom Jet, ingame, c_decl(sw_jet), noplay, lamp(LM_LOWER_JET)
 34: Left Sling, ingame, c_decl(sw_sling), noplay
 35: Right Sling, ingame, c_decl(sw_sling), noplay
 36: Left Outlane, ingame, sound(SND_DRAIN)
@@ -426,6 +425,7 @@ Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
 Mute/Pause: yes_no, YES
+TZ Flipcodes: yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -543,6 +543,8 @@ Clock Working:
 ##########################################################################
 [deffs]
 Cow: page(MACHINE_PAGE), PRI_EGG1
+TZ Flipcode entry: page(MACHINE2_PAGE), PRI_REPLAY
+TZ Flipcode entered: page(MACHINE2_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED

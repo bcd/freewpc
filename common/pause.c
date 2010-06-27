@@ -69,7 +69,7 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 		/* Stop mute/pause mode */
 		mute_and_pause_stop ();
 		#ifdef MACHINE_TZ
-		callset_invoke (tz_flipcode_entry_stop);
+			callset_invoke (tz_flipcode_entry_stop);
 		#endif
 	}
 	else
@@ -77,7 +77,9 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 		/* Start mute/pause mode */
 		task_create_gid (GID_MUTE_AND_PAUSE, mute_and_pause_monitor);
 		#ifdef MACHINE_TZ
-		callset_invoke (tz_flipcode_entry);
+		if (!switch_poll (SW_LEFT_BUTTON) && !switch_poll (SW_RIGHT_BUTTON)
+			&& feature_config.tz_flipcodes == YES)
+			callset_invoke (tz_flipcode_entry);
 		#endif
 	}
 }
