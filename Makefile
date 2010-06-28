@@ -871,7 +871,7 @@ gendefines: $(GENDEFINES)
 
 include/gendefine_gid.h: $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
 	$(Q)echo Autogenerating task IDs... && \
-		$(GENDEFINE) -p GID_ > $@
+		$(GENDEFINE) -c NUM_GIDS -p GID_ > $@
 
 .PHONY : clean_gendefines
 clean_gendefines:
