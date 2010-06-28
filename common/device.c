@@ -219,7 +219,8 @@ bool device_kicks_pending (void)
  * a switch closure occurs on a device, or when a request is made to
  * kick a ball from a device.
  * The update task will get killed and restarted anytime a switch
- * closure occurs on the device, so it may be interrupted at any time.
+ * closure occurs on the device, so it may be interrupted, but only
+ * while it is sleeping.
  */
 void device_update (void)
 {
@@ -376,7 +377,7 @@ wait_and_recount:
 	}
 
 	/************************************************
-	 * Handle counts larger than what SW wants
+	 * Handle kicking out balls
 	 ************************************************/
 	if (dev->kicks_needed > 0)
 	{
@@ -395,11 +396,17 @@ wait_and_recount:
 		}
 		else if (!device_call_boolean_op (dev, kick_request))
 		{
+			/* Inform other modules that a kick was requested.
+			These handlers can return FALSE to delay (but not
+			cancel) the kick. */
 			goto wait_and_recount;
 		}
+			/* TODO - if multiple devices want to kick at the same time,
+			 * they should be staggered a bit.  Another case should be
+			 * added here. */
 		else
 		{
-			/* Container has balls ready to kick */
+			/* The container is ready to kick */
 
 			/* Mark state as releasing if still idle */
 			if (dev->state == DEV_STATE_IDLE)
@@ -414,14 +421,15 @@ wait_and_recount:
 			device_call_op (dev, kick_attempt);
 
 			/* Pulse the solenoid. */
-			/* TODO - if multiple devices want to kick at the same time,
-			 * they should be staggered a bit */
 			sol_request (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
 			 * TODO : this should be a global event that other modules
 			 * can catch as well.  Deal with this like we do slowtimers. */
 			timed_game_pause (TIME_1S);
+
+			/* We don't know if the kick was successful or not yet, so wait
+			and see what happens. */
 			goto wait_and_recount;
 		}
 	}
@@ -517,7 +525,7 @@ void device_update_globals (void)
 	/* TODO - mostly this is called from the context of a single device.
 	Could simplify all the recounting of other devices... */
 
-	/* Recount the number of balls that are held,
+	/* Recount the total number of balls that are held,
 	excluding those that are locked and those in the trough. */
 	counted_balls = 0;
 	held_balls_now = 0;
@@ -559,7 +567,13 @@ void device_update_globals (void)
 }
 
 
-/** Returns the number of balls held up temporarily. */
+/** Returns the number of balls held up temporarily.
+ *
+ * This is the number of balls that are seen, or about to be
+ * seen in ball devices, but which will not be kept here.
+ * This count is queried by timers to determine when they
+ * should be paused.
+ */
 U8 device_holdup_count (void)
 {
 	return held_balls +
