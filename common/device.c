@@ -416,8 +416,6 @@ wait_and_recount:
 			/* Pulse the solenoid. */
 			/* TODO - if multiple devices want to kick at the same time,
 			 * they should be staggered a bit */
-			/* TODO - the pulse strength is implied.  Would be nice to
-			have differing pulses for retries */
 			sol_request (dev->props->sol);
 
 			/* In timed games, a device kick will pause the game timer.
