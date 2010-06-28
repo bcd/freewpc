@@ -113,7 +113,13 @@ void window_push_first (void)
 	 * later. */
 	sound_reset ();
 	task_sleep (TIME_100MS);
+
 	callset_invoke (test_start);
+
+	/* The test_start event causes diagnostics to run again; wait
+	before continuing until these finish. */
+	while (sys_init_pending_tasks)
+		task_sleep (TIME_100MS);
 }
 
 
@@ -3947,7 +3953,10 @@ CALLSET_ENTRY (test_mode, sw_right_button)
 
 CALLSET_ENTRY (test_mode, sw_enter)
 {
-	if (!win_top)
+	if (sys_init_pending_tasks != 0)
+	{
+	}
+	else if (!win_top)
 	{
 #ifdef MACHINE_TEST_ONLY
 		window_push (&menu_window, &test_menu);
