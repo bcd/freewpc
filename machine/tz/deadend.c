@@ -68,21 +68,28 @@ void dead_end_deff (void)
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 	dmd_show_low ();
 	
-	
-	if (extra_ball_lit_from_deadend == FALSE)
+	if (extra_ball_lit_from_deadend == FALSE && can_award_extra_ball())
 	{
-		if (dead_end_count < 3)
+		if (dead_end_count < 3 )
 			sprintf ("EXTRA BALL AT 3");
 		else if (dead_end_count == 3)
 		{
 			sound_send (SND_GET_THE_EXTRA_BALL);
 			sprintf ("EXTRA BALL LIT");
 		}
-		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep_sec (2);
-		deff_exit ();
 	}
+	else if (dead_end_count < 3)
+	{
+		sprintf ("10M AT 3");
+	}
+	else if (dead_end_count == 3)
+	{
+		sprintf ("10 MILLION");
+	}
+
+	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
 }
 	
 CALLSET_ENTRY (deadend, start_player)
@@ -122,12 +129,16 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 				timed_game_extend (20);
 				break;
 			case 3:
-				score (SC_1M);
 				timed_game_extend (30);
-				if (extra_ball_lit_from_deadend == FALSE)
+				if (extra_ball_lit_from_deadend == FALSE && can_award_extra_ball ())
 				{
+					score (SC_1M);
 					light_easy_extra_ball ();
 					extra_ball_lit_from_deadend = TRUE;
+				}
+				else
+				{
+					score (SC_10M);
 				}
 				break;
 			default:

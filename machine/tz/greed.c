@@ -130,7 +130,7 @@ void common_greed_handler (U8 target)
 	else if ((default_set & target) == 0)
 	{
 		default_set &= ~target;
-		score (SC_25K);
+		score (SC_1M);
 		sound_send (SND_THUNDER1);
 
 		if (default_set == NO_TARGETS)
@@ -143,7 +143,7 @@ void common_greed_handler (U8 target)
 		if (greed_sound_index >= 4)
 			greed_sound_index = 0;
 		sound_send (greed_sounds[greed_sound_index]);
-		score (SC_5K);
+		score (SC_25K);
 	}
 
 	standup_lamp_update1 (target, lamp);
@@ -162,7 +162,6 @@ void greed_mode_expire (void)
 	/* Don't play sample if last ball drained */
 	if (live_balls)
 		sound_send (SND_SEE_WHAT_GREED);
-	deff_stop (DEFF_GREED_MODE);
 }
 
 void greed_mode_exit (void)
@@ -180,6 +179,12 @@ CALLSET_ENTRY (greed, music_refresh)
 {
 	timed_mode_music_refresh (&greed_mode);
 }
+
+CALLSET_ENTRY (greed, end_ball)
+{
+	timed_mode_end (&greed_mode);
+}
+
 
 CALLSET_ENTRY (greed, door_start_greed)
 {

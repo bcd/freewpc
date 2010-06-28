@@ -81,7 +81,7 @@ void spiral_mode_deff (void)
 		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS");
+		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
 		sprintf ("%d", spiral_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
@@ -124,6 +124,10 @@ CALLSET_ENTRY (spiral, music_refresh)
 	timed_mode_music_refresh (&spiral_mode);
 }
 
+CALLSET_ENTRY (spiral, end_ball)
+{
+	timed_mode_end (&spiral_mode);
+}
 CALLSET_ENTRY (spiral, door_start_spiral)
 {
 	timed_mode_begin (&spiral_mode);

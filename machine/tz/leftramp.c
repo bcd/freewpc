@@ -46,51 +46,37 @@ void left_ramp_deff (void)
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
-	/*if (left_ramps < 3 && config_timed_game)
-		sprintf ("EXTRA TIME AT 3");
-	else if (left_ramps == 3 && config_timed_game)
-		sprintf ("15 SECS. ADDED");
-	else if (left_ramps < 3 && !config_timed_game)
-		sprintf ("MYSTERY AT 3");
-	else if (left_ramps == 3 && !config_timed_game)
-		sprintf ("MYSTERY IS LIT");
-	else if (left_ramps < 6)
-		sprintf ("EXTRA BALL AT 6");
-	else if (left_ramps == 6)
-	{
-		sprintf ("EXTRA BALL");
-		light_easy_extra_ball ();
-	}*/
-	
 	if (left_ramps < 3)
 		sprintf ("CAMERA AT 3");
 	else if (left_ramps == 3)
 	{
 		sprintf ("CAMERA LIT");
-		cameras_lit++;
+		sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
 	}
 	else if (left_ramps < 6)
 		sprintf ("GUMBALL AT 6");
 	else if (left_ramps == 6)
-	{
 		sprintf ("GUMBALL LIT");
-		gumball_enable_count++;
-	}
-	else if (left_ramps < 10)
+	else if (left_ramps < 10 && can_award_extra_ball ())
 		sprintf ("EXTRA BALL AT 10");
-	else if (left_ramps == 10)
+	else if (left_ramps < 10 && !can_award_extra_ball ())
+		sprintf ("10M AT 10");
+	else if (left_ramps == 10 && can_award_extra_ball ())
+	{
+		sprintf ("EXTRA BALL LIGHT");
+		sound_send (SND_GET_THE_EXTRA_BALL);
+	}
+	else if (left_ramps == 10 && !can_award_extra_ball ())
 	{
 		sprintf ("10 MILLION");
 		sound_send (SND_TEN_MILLION_POINTS);
-		score (SC_10M);
 	}
-	else if (left_ramps >= 10)
+	else if (left_ramps > 10)
 		sprintf ("20 MILLION AT 20");
 	else if (left_ramps == 20)
 	{
 		sprintf ("20 MILLION");
-		score (SC_20M);
-		left_ramps = 0;
+		sound_send (SND_YES);
 	}
 	else
 		sprintf ("");
@@ -100,7 +86,24 @@ void left_ramp_deff (void)
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
+void award_left_ramp (void)
+{
+	if (left_ramps == 3)
+		cameras_lit++;
+	else if (left_ramps == 6)
+		gumball_enable_count++;
+	else if (left_ramps == 10 && can_award_extra_ball ())
+		light_easy_extra_ball ();
+	else if (left_ramps == 10 && !can_award_extra_ball ())
+		score (SC_10M);
+	else if (left_ramps == 20)
+	{
+		score (SC_20M);
+		left_ramps = 0;
+	}
+	else
+		score (SC_250K);
+}
 CALLSET_ENTRY(leftramp, start_player)
 {
 	left_ramps = 0;
@@ -165,6 +168,6 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	bounded_increment (left_ramps, 250);
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
-	score (SC_250K);
+	award_left_ramp ();
 }
 

@@ -50,7 +50,7 @@ void tz_flipcode_entered_deff (void)
 	frame_draw (IMG_COW);
 	sprintf ("HI %s", initials_data);
 	font_render_string_center (&font_times10, 40, 11, sprintf_buffer);
-	font_render_string_center (&font_var5, 64, 24, tz_flipcode_text[0]);
+	font_render_string_center (&font_var5, 40, 24, tz_flipcode_text[0]);
 	
 	dmd_show2 ();
 	task_sleep_sec (3);
@@ -64,6 +64,7 @@ void tz_flipcode_entry_deff (void)
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show2 ();
+	sound_send (SND_UNKNOWN_LIGHTNING);
 	task_sleep_sec (2);
 	/*
 	dmd_alloc_pair ();
@@ -82,7 +83,7 @@ static void check_tz_flipcode (void)
 	if (strcmp("BCD", initials_data) == 0)
 	{
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
-		tz_flipcode_text[0] = "THE HOLY ONE RETURNS";
+		tz_flipcode_text[0] = "THE WIZARD";
 		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
 	}
 	else if (strcmp("FEK", initials_data) == 0)

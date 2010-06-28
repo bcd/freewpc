@@ -149,6 +149,11 @@ CALLSET_ENTRY (fastlock, lamp_update)
 		lamp_tristate_flash (LM_LOCK_ARROW);
 }
 
+CALLSET_ENTRY (fastlock, end_ball)
+{
+	timed_mode_end (&fastlock_mode);
+}
+
 CALLSET_ENTRY (fastlock, display_update)
 {
 	timed_mode_display_update (&fastlock_mode);

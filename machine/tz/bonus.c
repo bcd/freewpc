@@ -256,7 +256,7 @@ void bonus_deff (void)
 	{
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
-		sprintf ("SLOT DEATH");
+		sprintf ("STDM DEATH");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
@@ -267,8 +267,8 @@ void bonus_deff (void)
 	{
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		dmd_alloc_low_clean ();
-		sprintf ("UNFAIR DEATH");
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_fixed10, 64, 11, "BAD SHOW");
+		font_render_string_center (&font_var5, 64, 26, "UNFAIR DEATH");
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		task_sleep_sec (2);
@@ -702,6 +702,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
+		task_sleep_sec (4);
 		if (check_if_last_ball_of_multiplayer_game ())
 		{
 			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
@@ -709,7 +710,6 @@ void bonus_deff (void)
 		}
 		else
 		{
-			#if 0
 			bubble_sort_current_player_rankings ();
 			task_sleep_sec (2);
 			sound_send (SND_RABBLE_RABBLE);
@@ -737,12 +737,12 @@ void bonus_deff (void)
 			}
 			dmd_show_low ();
 			task_sleep_sec (4);
-			#endif
 			
 		
 		}
 	}
 
+	#if 0
 	if (check_if_last_ball_of_multiplayer_game ())
 	{
 		sound_send (SND_PLAYER_PIANO_UNUSED);
@@ -753,7 +753,6 @@ void bonus_deff (void)
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
 		score_sub (temp_score, scores[current_player_rankings[1] + 1]);
-		//TODO Doesn't work yet
 		dmd_alloc_low_clean ();
 			
 		sprintf("PLAYER %d WINS BY", current_hi_player);
@@ -777,7 +776,7 @@ void bonus_deff (void)
 		dmd_show_low ();
 		task_sleep_sec (6);
 	}
-
+	#endif
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	scores_draw ();
@@ -812,7 +811,7 @@ void score_to_beat_deff (void)
 	bubble_sort_current_player_rankings ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
-	if (current_hi_player == player_up )
+	if (current_hi_player == player_up)
 	{
 		font_render_string_center (&font_fixed10, 64, 8, "NO");
 		if (check_if_last_ball_of_multiplayer_game ())
@@ -824,7 +823,7 @@ void score_to_beat_deff (void)
 			font_render_string_center (&font_mono5, 64, 26, "INCREASE YOUR LEAD");
 		}
 	}
-	else if (score_compare (current_hi_score, current_score))
+	else if (score_compare (current_hi_score, current_score) == 1)
 	{
 		score_zero (temp_score);
 		score_copy (temp_score, current_hi_score);
@@ -839,7 +838,7 @@ void score_to_beat_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 	}
 	dmd_show_low ();
-	task_sleep_sec (6);
+	task_sleep_sec (5);
 	deff_exit ();
 }
 
@@ -880,4 +879,3 @@ CALLSET_ENTRY (bonus, start_ball)
 	score_zero (start_ball_score);
 	score_copy (start_ball_score, current_score);
 }
-

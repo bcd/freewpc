@@ -222,39 +222,23 @@ CALLSET_ENTRY (jet, sw_jet)
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 
-CALLSET_ENTRY (jet, sw_left_jet)
-{
-	lamp_off (LM_LEFT_JET);
-	task_sleep (TIME_66MS);
-	lamp_on (LM_LEFT_JET);
-}
-
-CALLSET_ENTRY (jet, sw_right_jet)
-{
-	lamp_off (LM_RIGHT_JET);
-	task_sleep (TIME_66MS);
-	lamp_on (LM_RIGHT_JET);
-}
-
-CALLSET_ENTRY (jet, sw_bottom_jet)
-{
-	lamp_off (LM_LOWER_JET);
-	task_sleep (TIME_66MS);
-	lamp_on (LM_LOWER_JET);
-}
-
 CALLSET_ENTRY (jet, lamp_update)
 {
-	if (timed_mode_running_p (&tsm_mode))
-		leff_start (LEFF_JETS_ACTIVE);
-	else if (leff_running_p (LEFF_JETS_ACTIVE))
-		leff_stop (LEFF_JETS_ACTIVE);
+//	if (timed_mode_running_p (&tsm_mode))
+//		leff_start (LEFF_JETS_ACTIVE);
+//	else if (leff_running_p (LEFF_JETS_ACTIVE))
+//		leff_stop (LEFF_JETS_ACTIVE);
 }
 
 
 CALLSET_ENTRY (jet, start_ball)
 {
-//	leff_stop (LEFF_JETS_ACTIVE);
+	leff_stop (LEFF_JETS_ACTIVE);
+}
+
+CALLSET_ENTRY (jets, end_ball)
+{
+	timed_mode_end (&tsm_mode);
 }
 
 CALLSET_ENTRY (jet, display_update)

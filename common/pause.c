@@ -78,7 +78,8 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 		task_create_gid (GID_MUTE_AND_PAUSE, mute_and_pause_monitor);
 		#ifdef MACHINE_TZ
 		if (!switch_poll (SW_LEFT_BUTTON) && !switch_poll (SW_RIGHT_BUTTON)
-			&& feature_config.tz_flipcodes == YES)
+			&& feature_config.tz_flipcodes == YES
+			&& system_config.tournament_mode != YES)
 			callset_invoke (tz_flipcode_entry);
 		#endif
 	}

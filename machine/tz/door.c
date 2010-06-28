@@ -519,7 +519,8 @@ CALLSET_ENTRY (door, shot_slot_machine)
 
 CALLSET_ENTRY (door, door_start_eb)
 {
-	light_easy_extra_ball ();
+	if (can_award_extra_ball ())
+		light_easy_extra_ball ();
 }
 
 CALLSET_ENTRY(door, start_player)

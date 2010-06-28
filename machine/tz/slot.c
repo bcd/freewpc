@@ -66,7 +66,7 @@ void sslot_award_rotate (void)
 			if (sslot_award_index >= NUM_SSLOT_AWARDS - 1)
 				sslot_award_index = 0;
 		}
-		task_sleep (TIME_700MS);
+		task_sleep (TIME_400MS);
 	}
 
 }
@@ -114,8 +114,8 @@ void sslot_mode_expire (void)
 
 void sslot_mode_exit (void)
 {	
-	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	lamp_tristate_off (LM_SLOT_MACHINE);
+	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 }
 
 void slot_kick_sound (void)
@@ -130,7 +130,7 @@ void sslot_award (void)
 	task_kill_gid (GID_SSLOT_AWARD_ROTATE);
 	
 	/* Don't allow awarding the eb if we can't do so */
-	if (system_config.max_ebs == 0)
+	if (!can_award_extra_ball ())
 		while (sslot_award_index_stored == 0)
 			sslot_award_index_stored = random_scaled(5);
 	
@@ -239,8 +239,8 @@ CALLSET_ENTRY (slot, music_refresh)
 
 CALLSET_ENTRY (slot, lamp_update)
 {
-	if (!timed_mode_running_p (&sslot_mode))
-		lamp_tristate_off (LM_SLOT_MACHINE);
+	//if (!timed_mode_running_p (&sslot_mode))
+	//	lamp_tristate_off (LM_SLOT_MACHINE);
 		
 }
 
@@ -251,6 +251,7 @@ CALLSET_ENTRY (slot, door_start_sslot)
 
 CALLSET_ENTRY (slot, end_ball)
 {
+	timed_mode_end (&sslot_mode);
 }
 
 CALLSET_ENTRY (slot, start_player)

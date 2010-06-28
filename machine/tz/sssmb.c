@@ -246,6 +246,11 @@ CALLSET_ENTRY (sssmb, single_ball_play)
 	sssmb_stop ();
 }
 
+CALLSET_ENTRY (sssmb, end_ball)
+{
+	sssmb_stop ();
+}
+
 CALLSET_ENTRY (sssmb, skill_red)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING)
@@ -318,5 +323,5 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 
 CALLSET_ENTRY (sssmb, ball_start)
 {
-	callset_invoke (sssmb_stop);
+	sssmb_stop ();
 }

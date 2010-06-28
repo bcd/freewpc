@@ -186,7 +186,7 @@ CALLSET_ENTRY (spiralaward, start_player)
 	total_spiralawards_collected = 0;
 	spiralaward_completed = FALSE;
 	/* Turn off Spiral EB if impossible */
-	if (system_config.max_ebs == 0)
+	if (!can_award_extra_ball ())
 	{
 		lamp_off (LM_SPIRAL_EB);
 		spiralawards_collected = 1;

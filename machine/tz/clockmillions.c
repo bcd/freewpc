@@ -119,6 +119,11 @@ CALLSET_ENTRY (clock_millions, start_ball)
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
+CALLSET_ENTRY (clock_millions, end_ball)
+{
+	timed_mode_end (&clock_millions_mode);
+}
+
 CALLSET_ENTRY (clock_millions, display_update)
 {
 	timed_mode_display_update (&clock_millions_mode);
