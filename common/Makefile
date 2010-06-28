@@ -22,6 +22,7 @@ COMMON_BASIC_OBJS +=	common/plunger.o
 COMMON_BASIC_OBJS +=	common/printer.o
 COMMON_BASIC_OBJS +=	common/reset.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/rtc.o)
+COMMON_BASIC_OBJS +=	$(if $(CONFIG_SCORE_RANK), common/score_rank.o)
 COMMON_BASIC_OBJS += $(if $(CONFIG_ALPHA), common/segtrans.o)
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_WPC), common/service.o)
 COMMON_BASIC_OBJS +=	common/start_button.o
