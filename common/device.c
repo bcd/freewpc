@@ -236,7 +236,7 @@ wait_and_recount:
 	 * this device happens while we sleep here, this task will
 	 * be killed and restarted.
 	 */
-	task_sleep_sec (1);
+	task_sleep (TIME_700MS);
 
 	/* The device is probably stable now.  Poll all of the
 	 * switches and recount */
@@ -280,9 +280,9 @@ wait_and_recount:
 			 * Treat this as an enter event (or multiple events, if the
 			 * count goes up by more than 1). */
 			U8 enter_count = dev->actual_count - dev->previous_count;
+			set_valid_playfield ();
 			while (enter_count > 0)
 			{
-				set_valid_playfield ();
 				callset_invoke (any_device_enter);
 				device_call_op (dev, enter);
 				enter_count--;
