@@ -2331,6 +2331,8 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
+#ifdef CONFIG_RTC
+
 void set_time_init (void)
 {
 	rtc_begin_modify ();
@@ -2386,6 +2388,8 @@ struct menu set_time_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &set_time_window, NULL } },
 };
+
+#endif
 
 /**********************************************************************/
 
@@ -2563,7 +2567,9 @@ struct menu *util_menu_items[] = {
 	&clear_audits_item,
 	&clear_coins_item,
 	&reset_hstd_item,
+#ifdef CONFIG_RTC
 	&set_time_item,
+#endif
 #ifdef WMSLY_CORRECT
 	&custom_message_item,
 	&set_gameid_item,

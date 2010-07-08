@@ -70,9 +70,11 @@ void status_report_deff (void)
 	replay_draw ();
 	status_page_complete ();
 
+#ifdef CONFIG_RTC
 	rtc_show_date_time ();
 	dmd_draw_border (dmd_low_buffer);
 	status_page_complete ();
+#endif
 
 #ifdef DEBUGGER
 	status_page_init ();
