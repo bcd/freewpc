@@ -40,6 +40,7 @@ define have
 $1 := y
 AUTO_CFLAGS += -D$1
 EXTRA_ASFLAGS += -D$1
+SCHED_FLAGS += -D $1
 endef
 
 define nohave
