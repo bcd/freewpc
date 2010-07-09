@@ -57,7 +57,7 @@ typedef struct
 	task_gid_t gid;
 	PTR_OR_U16 arg;
 	U8 duration;
-	void *class_data;
+	unsigned char class_data[32];
 } aux_task_data_t;
 
 aux_task_data_t task_data_table[MAX_TASKS];
@@ -118,7 +118,6 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 			task_data_table[i].gid = gid;
 			task_data_table[i].duration = TASK_DURATION_INF;
 			task_data_table[i].arg.u16 = 0;
-			task_data_table[i].class_data = NULL;
 			task_data_table[i].duration = TASK_DURATION_BALL;
 #ifdef CURSES	
 			ui_write_task (i, gid);
@@ -396,30 +395,16 @@ void task_set_rom_page (task_pid_t pid, U8 rom_page)
 void *task_get_class_data (task_pid_t pid)
 {
 	int i;
-	static char zero_class_data[32] = { 0, };
 
 	for (i=0; i < MAX_TASKS; i++)
 		if (task_data_table[i].pid == pid)
-		{
-			if (task_data_table[i].class_data == NULL)
-				return &zero_class_data;
-			else
-				return task_data_table[i].class_data;
-		}
-
+			return task_data_table[i].class_data;
 	printf ("task_get_class_data for pid %p failed\n", pid);
-	return &zero_class_data;
+	fatal (0xFD);
 }
 
 void task_set_class_data (task_pid_t pid, size_t size)
 {
-	int i;
-	for (i=0; i < MAX_TASKS; i++)
-		if (task_data_table[i].pid == pid)
-		{
-			task_data_table[i].class_data = malloc (size);
-			return;
-		}
 }
 
 
