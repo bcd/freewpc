@@ -137,7 +137,10 @@ void lamp_rtt (void)
 	 * iterations, just clear the lamp outputs and be done.
 	 * But only do this outside of a game. */
 
-	/* Turn off the lamp circuits before recalculating */
+	/* Turn off the lamp circuits before recalculating.  But don't
+	do this in native mode, because the simulator doesn't simulate
+	well-enough. */
+#ifndef CONFIG_NATIVE
 #ifdef __m6809__
 	/* On the 6809, avoid using the CLR instruction which is known to cause
 	problems in the WPC ASIC.   Also, always write ROW first to avoid
@@ -148,7 +151,8 @@ void lamp_rtt (void)
 #else
 	pinio_write_lamp_data (0);
 	pinio_write_lamp_strobe (0);
-#endif
+#endif /* __m6809__ */
+#endif /* CONFIG_NATIVE */
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
