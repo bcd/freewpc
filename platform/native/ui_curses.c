@@ -164,9 +164,9 @@ void ui_write_task (int taskno, int gid)
 	int y = (taskno % 12) + 1;
 	wmove (task_win, y, x);
 	if (gid == 0)
-		wprintw (task_win, "%02d:   ", taskno);
+		wprintw (task_win, "%02d:    ", taskno);
 	else
-		wprintw (task_win, "%02d: %02d", taskno, gid);
+		wprintw (task_win, "%02d: %3d", taskno, gid);
 	wrefresh (task_win);
 }
 
