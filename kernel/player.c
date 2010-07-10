@@ -67,7 +67,7 @@ struct player_save_area
 void player_start_game (void)
 {
 	/* Clear all player local data */
-	memset (LOCAL_BASE, 0, AREA_SIZE(local));
+	memset (LOCAL_BASE, 0, LOCAL_SIZE * 5UL);
 
 	/* Clear lamps/flags */
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);
