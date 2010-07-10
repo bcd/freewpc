@@ -285,7 +285,7 @@ CFLAGS += -DDEBUGGER
 EXTRA_ASFLAGS += -DDEBUGGER
 endif
 
-CFLAGS += $(EXTRA_CFLAGS)
+CFLAGS += $(EXTRA_CFLAGS) $(AUTO_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
 SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
