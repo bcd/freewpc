@@ -34,3 +34,4 @@ cd ..
 cd asm-$ver2 && ../tools/alphaglob *.s > tmp-$ver2
 cd ..
 diff -w asm-$ver1/tmp-$ver1 asm-$ver2/tmp-$ver2 > DIFFS.$ver1-$ver2
+rm -f tmp-$ver1 tmp-$ver2

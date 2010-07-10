@@ -79,7 +79,7 @@ bool timestamp_validate (timestamp_t *t)
 
 /**
  * Normalize a timestamp, so that any minutes and seconds fields which
- * are out of range are correctly, by carrying the excess into the
+ * are out of range are corrected, by carrying the excess into the
  * next field.
  */
 static void timestamp_normalize (timestamp_t *t)
@@ -143,7 +143,6 @@ void timestamp_copy (timestamp_t *dst, const timestamp_t *src)
 	dst->hr = src->hr;
 	dst->min = src->min;
 	dst->sec = src->sec;
-	timestamp_normalize (dst);
 }
 
 
@@ -167,8 +166,8 @@ void timestamp_divide (timestamp_t *t, volatile U16 n)
 	/* As the timestamp is stored as a sum of three components,
 	to divide the entire timestamp is just to divide each of the
 	components.  We start from the largest (hour) and work towards
-	the smallest (second).  The remainder from each step is then
-	propagated down into the next smallest field.
+	the smallest (second).  The remainder from each step is
+	propagated down into the next smaller field, or discarded at the end.
 		To avoid real division on the 6809, we use repeated division. */
 
 	dividend = t->hr;
@@ -180,7 +179,7 @@ void timestamp_divide (timestamp_t *t, volatile U16 n)
 	}
 
 	/* Note: the following multiplication would overflow if dividend > 1091.
-	dividend is constrained to the range of 0 to n-1, though.
+	The dividend input is constrained to the range of 0 to n-1, though.
 		If n <= 1091, then there is no possibility of overflow here.
 		Also, dividend is only greater than n if t->hr > n, which means
 	to overflow the timestamp must have a value greater than 1091 hours.

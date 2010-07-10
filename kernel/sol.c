@@ -96,6 +96,9 @@ U8 sol_pulse_timer;
 /** The duty cycle for the shared pulse driver */
 U8 sol_pulse_duty;
 
+/** The solenoid number for the current pulse */
+U8 sol_pulsing;
+
 #define SOL_REQ_QUEUE_LEN 8
 
 /** A queue of solenoid pulse requests that are pending */
@@ -148,7 +151,26 @@ sol_req_start_specific (U8 sol, U8 mask, U8 time)
  */
 void sol_req_start (U8 sol)
 {
-	sol_req_start_specific (sol, sol_get_duty (sol), sol_get_time (sol));
+	sol_pulsing = sol;
+
+	/* Normally, just start sol_req_start_specific with default parameters.
+	But provide a hook that can override them.  Any machine that wants finer
+	control should declare one event handler named 'sol_pulse', which can
+	inspect the solenoid number in 'sol_pulsing' and decide if special handling
+	is needed.  It can call sol_req_start_specific() with different values.
+	If it does, it should return FALSE and then the default call here is
+	skipped.
+		Reasons for providing this: 1) some devices may need more than just
+	a quick pulse; it may require a sequence of pulses of different sizes.
+	(It is safe to do this in the caller's context, without spawning a new
+	task, if it is a ball device, since that is always done synchronously.)
+	2) Device retries can kick harder on subsequent tries if the first try
+	doesn't work.  You can inspect dev->kick_errors to see how many failed
+	attempts have already occurred. */
+	if (callset_invoke_boolean (sol_pulse))
+	{
+		sol_req_start_specific (sol, sol_get_duty (sol), sol_get_time (sol));
+	}
 }
 
 
@@ -326,28 +348,7 @@ extern inline void sol_update_fliptronic_powered (void)
 }
 
 
-/**
- * The 2 RTT functions below are only used for
- * flashers, since pulsed coils are handled through
- * the request module.
- *
- * Several improvements can be made here:
- * 1) Merge these back to a single function.
- * 2) Change the frequency from 4ms to something larger.
- * Flashers don't need that much granularity, unless
- * individually controlled dimming is required.  I'm not
- * worried about that now.
- * 3) It's unlikely that *all* flashers would be pulsed
- * at once -- could we maybe get by with fewer slots
- * than actual flashers?
- */
-
-
 /** Realtime update of the first set of flasher outputs */
-/* TODO - as these functions are only used for flashers now,
- * they do not need to run at the same frequency (4ms).
- * We could get by with every 16ms probably, except maybe
- * for dimming effects. */
 void sol_update_rtt_0 (void)
 {
 	pinio_write_solenoid_set (0, *sol_get_read_reg (0));

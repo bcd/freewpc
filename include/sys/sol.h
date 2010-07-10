@@ -39,6 +39,7 @@ typedef U8 solnum_t;
 
 extern __fastram__ U8 sol_timers[];
 extern U8 sol_duty_state[];
+extern U8 sol_pulsing;
 
 /** Duty cycle values.  Each '1' bit represents a
 time quantum during which the coil on.  The more '1's,

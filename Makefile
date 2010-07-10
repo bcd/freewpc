@@ -40,6 +40,7 @@ define have
 $1 := y
 AUTO_CFLAGS += -D$1
 EXTRA_ASFLAGS += -D$1
+SCHED_FLAGS += -D $1
 endef
 
 define nohave
@@ -871,7 +872,7 @@ gendefines: $(GENDEFINES)
 
 include/gendefine_gid.h: $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS)
 	$(Q)echo Autogenerating task IDs... && \
-		$(GENDEFINE) -p GID_ > $@
+		$(GENDEFINE) -c NUM_GIDS -p GID_ > $@
 
 .PHONY : clean_gendefines
 clean_gendefines:

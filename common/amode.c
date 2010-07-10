@@ -158,6 +158,7 @@ void amode_high_score_page (void)
 	amode_page_end (0);
 }
 
+#ifdef CONFIG_RTC
 void amode_date_time_page (void)
 {
 	if (system_config.show_date_and_time == YES)
@@ -166,6 +167,7 @@ void amode_date_time_page (void)
 		amode_page_end (3);
 	}
 }
+#endif
 
 void amode_kill_music (void)
 {
@@ -183,7 +185,9 @@ void (*amode_page_table[]) (void) = {
 	amode_credits_page,
 	amode_freeplay_page,
 	amode_high_score_page,
+#ifdef CONFIG_RTC
 	amode_date_time_page,
+#endif
 	amode_kill_music,
 #ifdef MACHINE_AMODE_EFFECTS
 	MACHINE_AMODE_EFFECTS

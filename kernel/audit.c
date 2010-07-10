@@ -48,7 +48,8 @@ void audit_reset (void)
 {
 	pinio_nvram_unlock ();
 	memset (&system_audits, 0, sizeof (system_audits));
-	memset (&feature_audits, 0, sizeof (feature_audits));
+	if (sizeof (feature_audits) > 0)
+		memset (&feature_audits, 0, sizeof (feature_audits));
 	csum_area_update (&audit_csum_info);
 	pinio_nvram_lock ();
 }

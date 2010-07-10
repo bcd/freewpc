@@ -43,6 +43,22 @@ U8 sys_init_pending_tasks;
 const U8 wpc_machine_type = WPC_TYPE;
 #endif
 
+
+/**
+ * Handle a warm reboot.
+ *
+ * Called when the system wants to start over completely.
+ * Previously, we just called freewpc_init(), but this is not entirely
+ * correct.  Interrupts need to be disabled during re-init, and we can
+ * set flags here to distinguish between cold/warm boot.
+ */
+__noreturn__ void warm_reboot (void)
+{
+	disable_interrupts ();
+	freewpc_init ();
+}
+
+
 /** Initialize the FreeWPC program. */
 __noreturn__ void freewpc_init (void)
 {

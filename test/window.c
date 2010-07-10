@@ -2136,62 +2136,6 @@ struct menu memory_editor_item = {
 
 /**********************************************************************/
 
-#if (MACHINE_DMD == 1)
-
-void expansion_test_enter (void)
-{
-}
-
-void expansion_test_write (U8 val)
-{
-	writeb (WPC_EXTBOARD1, val);
-	sound_send (SND_TEST_CHANGE);
-	dmd_alloc_low_clean ();
-	sprintf ("WRITE 0X%02X", val);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-}
-
-void expansion_test_read (void)
-{
-	U8 val = readb (WPC_EXTBOARD1);
-	sound_send (SND_TEST_CHANGE);
-	dmd_alloc_low_clean ();
-	sprintf ("READ 0X%02X", val);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-}
-
-
-void expansion_test_thread (void)
-{
-	for (;;)
-	{
-		expansion_test_write (0);
-		expansion_test_write (0x80);
-		expansion_test_write (0xFF);
-		expansion_test_read ();
-	}
-}
-
-struct window_ops expansion_test_window = {
-	DEFAULT_WINDOW,
-	.enter = expansion_test_enter,
-	.thread = expansion_test_thread,
-};
-
-struct menu expansion_test_item = {
-	.name = "EXPANSION TEST",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &expansion_test_window, NULL } },
-};
-
-#endif
-
-/**********************************************************************/
-
 struct menu *dev_menu_items[] = {
 #if (MACHINE_DMD == 1)
 	&dev_font_test_item,
@@ -2220,9 +2164,6 @@ struct menu *dev_menu_items[] = {
 #endif
 #ifndef CONFIG_NATIVE
 	&memory_editor_item,
-#endif
-#if (MACHINE_DMD == 1)
-	&expansion_test_item,
 #endif
 	NULL,
 };
@@ -2331,6 +2272,8 @@ struct menu reset_hstd_item = {
 
 /**********************************************************************/
 
+#ifdef CONFIG_RTC
+
 void set_time_init (void)
 {
 	rtc_begin_modify ();
@@ -2386,6 +2329,8 @@ struct menu set_time_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &set_time_window, NULL } },
 };
+
+#endif
 
 /**********************************************************************/
 
@@ -2532,7 +2477,6 @@ struct menu presets_menu_item = {
 void revoke_init (void)
 {
 	extern U8 freewpc_accepted[];
-	extern __noreturn__ void freewpc_init (void);
 
 	dmd_alloc_low_clean ();
 	dmd_show_low();
@@ -2544,7 +2488,7 @@ void revoke_init (void)
 	freewpc_accepted[2] = 0;
 	pinio_nvram_lock ();
 
-	freewpc_init ();
+	warm_reboot ();
 }
 
 struct window_ops revoke_window = {
@@ -2563,7 +2507,9 @@ struct menu *util_menu_items[] = {
 	&clear_audits_item,
 	&clear_coins_item,
 	&reset_hstd_item,
+#ifdef CONFIG_RTC
 	&set_time_item,
+#endif
 #ifdef WMSLY_CORRECT
 	&custom_message_item,
 	&set_gameid_item,

@@ -66,8 +66,10 @@ void switch_stress_task (void)
 		/* Choose a switch at random.  Skip certain well-known switches that are
 		 * never to be activated. */
 		sw = random_scaled (NUM_SWITCHES);
+#ifdef SW_ALWAYS_CLOSED
 		if (sw == SW_ALWAYS_CLOSED)
 			continue;
+#endif
 #ifdef MACHINE_OUTHOLE_SWITCH
 		if (sw == MACHINE_OUTHOLE_SWITCH)
 			continue;

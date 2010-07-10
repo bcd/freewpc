@@ -49,7 +49,9 @@ const struct area_csum *csum_info_table[] = {
 	&coin_csum_info,
 	&replay_csum_info,
 	&high_csum_info,
+#ifdef CONFIG_RTC
 	&rtc_csum_info,
+#endif
 	&adj_csum_info,
 	&audit_csum_info,
 };

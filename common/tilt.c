@@ -167,8 +167,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 
 	/* TODO: wait for slam switch to become stable, to avoid
 	 * endless restarts */
-	/* TODO : change to a warm reboot here */
-	amode_start ();
+	 warm_reboot ();
 }
 
 
