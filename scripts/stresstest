@@ -1,9 +1,19 @@
+# This script can be passed to the native mode FreeWPC program
+# to simulate a game.
+
+# Wait 8 secs to allow the system to initialize.
 sleep 8000
+
+# Go into test mode and turn on the stress test option.
 push 1
 push 5
 push 1
 include scripts/test_enter
 pop 1
+
+# Start a game.
 sw "START BUTTON"
+
+# Let the play run for 30 minutes, then exit.
 sleep 1800 secs
 exit

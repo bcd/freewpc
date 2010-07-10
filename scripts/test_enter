@@ -1,6 +1,10 @@
+# Enter test mode.
 sw ENTER
-sleep 1 secs
-sw ENTER 2
+
+# Wait for diagnostics to complete and the scroller to
+# automatically switch to the Main Menu.
+sleep 30 secs
+# sw ENTER 2
 
 # Select main menu
 # 0 = Bookkeeping

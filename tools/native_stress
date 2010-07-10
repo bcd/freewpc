@@ -1,15 +1,31 @@
 #!/bin/sh
+#
+# native_stress : test FreeWPC automatically in native mode
+#
+# Run "native_stress <machine-name>..." to test one or more machines.
+# For each machine, (1) it is recompiled in native mode, so that it can
+# run on the build machine, (2) the nonvolatile memory is cleared to
+# ensure a factory reset, and (3) the program is run and controlled via
+# the 'stresstest' script which forces the game into stress test mode,
+# starts a game, and lets it play for a while before stopping.
+#
+# If the program crashes for any reason, gdb will be fired up to debug it,
+# and this script exits with nonzero.  Otherwise it returns zero when
+# everything works.
+
 ulimit -c unlimited
 for machine in $@; do
 	rm -f core
 	if [ "${machine}" != "-" ]; then
 		make clean
-		make -j3 DOTCONFIG="" MACHINE="${machine}" NATIVE=y EXTRA_CFLAGS=-DCONFIG_DEBUG_ADJUSTMENTS FREEWPC_DEBUGGER=y
+		make -j3 DOTCONFIG="" MACHINE="${machine}" NATIVE=y EXTRA_CFLAGS="-DCONFIG_DEBUG_ADJUSTMENTS -DFREE_ONLY -g" FREEWPC_DEBUGGER=y
 	fi
 	rm -f "nvram/${machine}.nv"
 	build/freewpc* -o native_stress.log --late --exec scripts/stresstest --error-crash
 	rc=$?
 	if [ -f core ]; then
+		stty sane
+		clear
 		gdb build/freewpc* core
 		exit 1
 	fi

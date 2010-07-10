@@ -109,7 +109,8 @@ CALLSET_ENTRY (steps, sw_step_extra_ball)
 		if (lamp_flash_test (LM_STEPS_EB))
 		{
 			lamp_flash_off (LM_STEPS_EB);
-			light_easy_extra_ball ();
+			lamp_flash_off (LM_STEPS_500K);
+			light_hard_extra_ball ();
 		}
 	}
 }

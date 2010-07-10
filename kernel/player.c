@@ -40,7 +40,7 @@
 
 /** In simulation, we have to declare the save areas explicitly. */
 #ifdef CONFIG_NATIVE
-U8 local_save_area[MAX_PLAYERS][LOCAL_SIZE];
+U8 local_save_area[MAX_PLAYERS+1][LOCAL_SIZE];
 
 #undef LOCAL_BASE
 #define LOCAL_BASE (&local_save_area[0][0])
@@ -67,7 +67,7 @@ struct player_save_area
 void player_start_game (void)
 {
 	/* Clear all player local data */
-	memset (LOCAL_BASE, 0, LOCAL_SIZE * 5UL);
+	memset (LOCAL_BASE, 0, LOCAL_SIZE * (MAX_PLAYERS + 1UL));
 
 	/* Clear lamps/flags */
 	memset (lamp_matrix, 0, NUM_LAMP_COLS);

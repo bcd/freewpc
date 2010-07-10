@@ -17,6 +17,7 @@ include cpu/$(CPU)/Makefile
 CONFIG_WPC ?= y
 CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC ?= y
+$(eval $(call have,CONFIG_RTC))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
 
 # The default CFLAGS required on the WPC platform
