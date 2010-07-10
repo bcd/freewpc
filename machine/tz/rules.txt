@@ -114,7 +114,11 @@ Multiball
 If no jackpot is scored and 2 balls drain, the player is offered a multiball
 restart.  This is collected by hitting the lock within 30 seconds of multiball
 ending.  Jackpots can be increased by hitting the camera, up to a maximum of
-50 Million.  The jackpot is relight by hitting the lock.
+50 Million.  Once collected, the jackpot is can be relit by hitting the lock.
+
+If 3 balls are in play when the jackpot is collected, 10M is added to the
+jackpot.  If the Powerball is used to collect the jackpot, the jackpot is
+doubled(!)
 
 Slot Machine and Piano
 ======================

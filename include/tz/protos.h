@@ -66,41 +66,12 @@ __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
 
 /* gumball.c */
-void gumball_mech_activate(void);
-void gumball_mech_deactivate(void);
 void gumball_diverter_open(void);
 void gumball_diverter_close(void);
 void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
 
-U8 gumball_get_count (void);
-/* leffs.c */
-/* These should all be done by tz.md */
-/*__machine2__ void bonus_leff(void); 
-__machine2__ void gi_cycle_leff(void); 
-__machine2__ void flasher_happy_leff(void);
-__machine2__ void left_ramp_leff(void);
-__machine2__ void no_gi_leff(void);
-__machine2__ void turn_on_gi_leff(void);
-__machine2__ void flash_all_leff(void);
-__machine2__ void slot_kickout_leff(void);
-__machine2__ void gumball_strobe_leff(void); 
-__machine2__ void clock_target_leff(void); 
-__machine2__ void game_timeout_leff(void); 
-__machine2__ void clock_round_started_leff(void); 
-__machine2__ void multiball_running_leff(void); 
-__machine2__ void strobe_up_leff(void); 
-__machine2__ void multi_strobe_leff(void); 
-__machine2__ void door_strobe_leff(void); 
-__machine2__ void right_loop_leff(void); 
-__machine2__ void left_loop_leff(void); 
-__machine2__ void jets_active_leff(void);
-__machine2__ void circle_out_leff(void); 
-__machine2__ void color_cycle_leff(void); 
-__machine2__ void lock_leff(void); 
-__machine2__ void mpf_active_leff(void); 
-*/
 
 /* loop.c */
 /* mball.c */
@@ -108,6 +79,7 @@ void mball_light_lock (void);
 void mball_check_light_lock (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
+
 /* rampdiv.c */
 void ramp_divert (void);
 void ramp_divert_to_autoplunger (void);
@@ -139,7 +111,7 @@ __machine2__ void award_unlit_shot (U8 unlit_called_from);
 __machine2__ void backdoor_award_deff (void);
 __machine2__ void tz_flipcode_default (void);
 /* fastlock.c */
-__machine__ void fastlock_right_loop_completed (void);
+__machine__ void fastlock_loop_completed (void);
 __machine__ bool fastlock_running (void);
 /* powerball.c */
 #define PB_IN_GUMBALL 0x4
