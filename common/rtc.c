@@ -236,20 +236,15 @@ static void rtc_pinmame_read (void)
 	/* A valid date requires that the year be 2010 or greater. */
 	if (clock_data->year >= 2010)
 	{
+		/* Copy the PinMAME data into FreeWPC's date structure,
+		then clear the PinMAME area so we don't do this again. */
 		pinio_nvram_unlock ();
-
-		/* Copy the PinMAME data into FreeWPC's date structure */
 		year = clock_data->year - 2000;
 		month = clock_data->month;
 		day = clock_data->day;
-		rtc_calc_day_of_week ();
-		rtc_normalize ();
-		csum_area_update (&rtc_csum_info);
-
-		/* Clear the PinMAME year. */
 		clock_data->year = 0;
-
 		pinio_nvram_lock ();
+		rtc_normalize ();
 	}
 #endif
 }
@@ -260,6 +255,7 @@ CALLSET_ENTRY (rtc, factory_reset)
 	/* Reset the date to the time at which the software
 	 * was built.
 	 * TODO : this should trigger a CLOCK NOT SET message */
+	pinio_nvram_unlock ();
 	year = 0;
 	month = 1;
 	day = 1;
@@ -267,6 +263,7 @@ CALLSET_ENTRY (rtc, factory_reset)
 	minute = 0;
 	last_minute = 0;
 	rtc_calc_day_of_week ();
+	pinio_nvram_lock ();
 }
 
 
