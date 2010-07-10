@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,25 +21,23 @@
 #include <freewpc.h>
 #include <sys/time.h>
 /* Various loop counts, reset at the start of each ball */
-__local__ U8 loops;
-__local__ U8 powerball_loops;
-__local__ U8 spiral_loops;
+U8 loops;
+U8 powerball_loops;
+U8 spiral_loops;
 
-U16	start_loop_time;
-__local__ U8	loop_time;
+U16 start_loop_time;
+U8 loop_time;
 /* Used to pass loop score to deff */
 score_t loop_score;
 
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 
-//extern struct timed_mode_ops spiral_mode;
-extern U8 spiral_mode_timer;
+extern struct timed_mode_ops spiral_mode;
 extern void thing_flips (void);
 extern void award_spiral_loop (void);
 
 /* Functions to stop leffs/deffs during certain game situations */
-//TODO They don't work, change spiralaward to a task
 static bool can_show_loop_leff (void)
 {
 	if (task_find_gid (GID_SPIRALAWARD))
@@ -54,7 +52,9 @@ static bool can_show_loop_deff (void)
 		return FALSE;
 	else if (task_find_gid (GID_SPIRALAWARD))
 		return FALSE;
-	else if (spiral_mode_timer)
+	else if (free_timer_test (TIM_SPIRALAWARD_RUNNING))
+		return FALSE;
+	else if (timed_mode_running_p (&spiral_mode))
 		return FALSE;
 	else
 		return TRUE;
@@ -88,21 +88,19 @@ static void award_loop (void)
 		{
 			sound_send (SND_LOAD_GUMBALL_NOW);
 			gumball_enable_count++;
-		//	flag_on (MAGNA_MB_LIT);
 			score (SC_20M);
-//			powerball_loops = 0;
 		}
 		deff_start (DEFF_PB_LOOP);
-		return;
+	//	return;
 	}
-	if (spiral_mode_timer > 0 )
+
+	if (timed_mode_running_p (&spiral_mode))
 	{
 		callset_invoke (award_spiral_loop);
-		deff_start (DEFF_SPIRAL_LOOP);
 	}
 	else
-	/* Plain Old Loop */
 	{
+		/* Plain Old Loop */
 		score_zero (loop_score);
 		if (loops < 2)
 		{
@@ -130,12 +128,13 @@ static void award_loop (void)
 			score (SC_1M);
 			sound_send (SND_THUNDER1);
 		}
+		fastlock_loop_completed ();
 
 		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
 			sound_send (SND_SPIRAL_AWARDED);
 		/* Don't show deff during certain modes */
-		if (can_show_loop_deff ())
-			deff_start (DEFF_LOOP);
+	//	if (can_show_loop_deff ())
+		deff_start (DEFF_LOOP);
 	}
 }
 
@@ -170,6 +169,7 @@ static void award_right_loop (void)
 		event_can_follow (right_loop, piano, TIME_1S + TIME_700MS);
 		event_can_follow (right_loop, camera, TIME_4S);
 		//event_can_follow (right_loop, hitchhiker, TIME_4S);
+		spiralaward_right_loop_completed ();
 		award_loop ();
 		if (can_show_loop_leff ())
 			leff_start (LEFF_RIGHT_LOOP);
@@ -225,8 +225,6 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		//left_magnet_grab_start ();
 	
 		award_right_loop ();
-		fastlock_right_loop_completed ();
-		spiralaward_right_loop_completed ();
 	}
 	else
 	{
@@ -263,9 +261,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
 		/* Left loop completed */
-		//TODO put hooks for thingfl camera and fastlock left loop.
 		stop_loop_speed_timer ();
-		fastlock_right_loop_completed ();
 		award_left_loop ();
 	}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
@@ -292,13 +288,6 @@ CALLSET_ENTRY (loop, start_ball)
 	spiral_loops = 0;
 	loop_time = 1;
 	start_loop_time = 1;
-}
-
-CALLSET_ENTRY (loop, init)
-{
-	//left_loopmag_enabled = FALSE;
-	//lower_right_loopmag_enabled = FALSE;
-	//upper_right_loopmag_enabled = FALSE;
 }
 
 CALLSET_ENTRY (loop, end_ball)

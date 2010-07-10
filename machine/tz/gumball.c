@@ -34,7 +34,7 @@ U8 timeout;
 
 /* How many times can the player enter the Gumball */
 __local__ U8 gumball_enable_count;
-__local__ U8 gumball_collected_count;
+U8 gumball_collected_count;
 U8 gumball_score;
 //extern U8 fastlock_round_timer;
 //extern void spiralaward_right_loop_completed (void);
@@ -345,6 +345,7 @@ CALLSET_ENTRY (gumball, start_ball)
 {
 	task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 	gumball_score = 0;
+	gumball_collected_count = 0;
 	flag_off (FLAG_SUPER_MB_RUNNING);
 }
 
@@ -352,7 +353,6 @@ CALLSET_ENTRY (gumball, start_ball)
 CALLSET_ENTRY (gumball, start_player)
 {
 	gumball_enable_count = 0;
-	gumball_collected_count = 0;
 	gumball_enable_from_trough = FALSE;
 }
 

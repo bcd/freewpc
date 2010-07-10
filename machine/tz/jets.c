@@ -22,9 +22,9 @@
 
 U8 jet_sound_index;
 U8 jetscore;
-__local__ U8 jets_scored;
-__local__ U8 jets_for_bonus;
-__local__ U8 jets_bonus_level;
+U8 jets_scored;
+U8 jets_for_bonus;
+U8 jets_bonus_level;
 
 U8 tsm_mode_timer;
 extern U8 mpf_timer;
@@ -48,18 +48,37 @@ struct timed_mode_ops tsm_mode = {
 	.pause = system_timer_pause,
 };
 
+void jets_active_task (void)
+{
+	while (tsm_mode_timer > 0)
+	{
+		lamp_tristate_off (LM_RIGHT_JET);
+		lamp_tristate_on (LM_LEFT_JET);
+		task_sleep (TIME_100MS);	
+		lamp_tristate_off (LM_LEFT_JET);
+		lamp_tristate_on (LM_LOWER_JET);
+		task_sleep (TIME_100MS);	
+		lamp_tristate_off (LM_LOWER_JET);
+		lamp_tristate_on (LM_RIGHT_JET);
+		task_sleep (TIME_100MS);	
+	}
+	lamp_tristate_on (LM_LEFT_JET);
+	lamp_tristate_on (LM_LOWER_JET);
+	lamp_tristate_on (LM_RIGHT_JET);
+	task_exit ();
+}
+
 void tsm_mode_init (void)
 {
-	leff_start (LEFF_JETS_ACTIVE);
-//	deff_start (DEFF_TSM_MODE);
+	task_create_gid (GID_JETS_ACTIVE_TASK, jets_active_task);
 }
 
 void tsm_mode_exit (void)
 {
-	leff_stop (LEFF_JETS_ACTIVE);
+	task_kill_gid (GID_JETS_ACTIVE_TASK);
 }
 
-CALLSET_ENTRY(jet, start_player)
+CALLSET_ENTRY(jet, start_ball)
 {
 	jets_scored = 0;
 	jets_for_bonus = 10;
@@ -81,10 +100,11 @@ void sw_jet_sound (void)
 {
 	if (!in_live_game)
 		return;
-	jet_sound_index++;
-	if (jet_sound_index >= 3)
-		jet_sound_index = 0;
-	
+//	jet_sound_index++;
+//	if (jet_sound_index >= 3)
+//		jet_sound_index = 0;
+	jet_sound_index = random_scaled(4);
+	bounded_decrement (jet_sound_index, 0);
 	if (timed_mode_running_p (&tsm_mode))
 		sound_send (super_jet_sounds[jet_sound_index]);
 	else
@@ -93,7 +113,6 @@ void sw_jet_sound (void)
 	if (!noflash)
 		flasher_pulse (FLASH_JETS);
 	noflash = FALSE;
-	//task_sleep (TIME_200MS);
 	task_exit ();
 }
 
@@ -228,12 +247,6 @@ CALLSET_ENTRY (jet, lamp_update)
 //		leff_start (LEFF_JETS_ACTIVE);
 //	else if (leff_running_p (LEFF_JETS_ACTIVE))
 //		leff_stop (LEFF_JETS_ACTIVE);
-}
-
-
-CALLSET_ENTRY (jet, start_ball)
-{
-	leff_stop (LEFF_JETS_ACTIVE);
 }
 
 CALLSET_ENTRY (jets, end_ball)

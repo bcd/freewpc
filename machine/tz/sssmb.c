@@ -129,8 +129,6 @@ static void sssmb_relight_all_jackpots (void)
 
 static void sssmb_award_jackpot (void)
 {
-	/* Hack to make sure restart mball doesn't start after
-	 * the Mball/Sssmb combo mode */
 	mball_jackpot_uncollected = FALSE;
 	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
@@ -179,6 +177,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
+		callset_invoke (mball_restart_stop);
+		mball_jackpot_uncollected = TRUE;
 		unlit_shot_count = 0;
 		deff_update ();
 		music_refresh ();
@@ -200,18 +200,19 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
-//	if (flag_test (FLAG_SSSMB_RUNNING))
-//	{
-		flag_off (FLAG_SSSMB_RUNNING);
-		flag_off (FLAG_SSSMB_RED_JACKPOT);
-		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
-		flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
-		timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
-		task_kill_gid (GID_SSSMB_JACKPOT_READY);
-		deff_stop (DEFF_SSSMB_RUNNING);
-		lamp_tristate_off (LM_SUPER_SKILL);
-		music_refresh ();
-//	}
+	if (mball_jackpot_uncollected == TRUE)
+		sound_send (SND_NOOOOOOOO);
+
+	flag_off (FLAG_SSSMB_RUNNING);
+	flag_off (FLAG_SSSMB_RED_JACKPOT);
+	flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
+	flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
+	timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
+	task_kill_gid (GID_SSSMB_JACKPOT_READY);
+	deff_stop (DEFF_SSSMB_RUNNING);
+	lamp_tristate_off (LM_SUPER_SKILL);
+	music_refresh ();
+
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)

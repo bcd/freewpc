@@ -71,6 +71,7 @@ CALLSET_ENTRY (spiral, award_spiral_loop)
 		score (SC_20M);
 		spiral_loops = 0;
 	}
+	deff_start (DEFF_SPIRAL_LOOP);
 }
 
 void spiral_mode_deff (void)

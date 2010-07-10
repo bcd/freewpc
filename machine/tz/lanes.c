@@ -24,7 +24,7 @@
 
 /* How many times the rollovers have been completed */
 U8 rollover_count;
-extern __local__ bool spiralaward_completed;
+extern __local__ U8 total_spiralawards_collected;
 
 static void handle_outlane (void)
 {
@@ -69,7 +69,7 @@ static void check_rollover (void)
 	if (rollover_completed ())
 	{
 		award_rollover_completed ();
-		if (spiralaward_completed == TRUE)
+		if (total_spiralawards_collected > 0)
 			start_spiralaward_timer ();
 	}
 }
@@ -104,7 +104,7 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
 	/* Start the spiralaward timer only if the lane has 
 	 * just been lit */
-	if (!lamp_test (LM_LEFT_INLANE1) && !spiralaward_completed)
+	if (!lamp_test (LM_LEFT_INLANE1) && total_spiralawards_collected == 0)
 		start_spiralaward_timer ();
 	lamp_on (LM_LEFT_INLANE1);
 	check_rollover ();
@@ -116,12 +116,12 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 /* 'Light Slot Machine' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
-	if (!lamp_test (LM_LEFT_INLANE2) && !spiralaward_completed)
+	if (!lamp_test (LM_LEFT_INLANE2) && total_spiralawards_collected == 0)
 		start_spiralaward_timer ();
 	lamp_on (LM_LEFT_INLANE2);
 	check_rollover ();
 	score (SC_1K);
-	event_can_follow (left_inlane_2, slot, TIME_3S);
+//	event_can_follow (left_inlane_2, slot, TIME_3S);
 }
 
 /* 'Dead End' Lane */
@@ -138,7 +138,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 		lamp_on (LM_DEAD_END);
 	/* Start the timer for the left ramp */
 	timer_restart_free (GID_LEFT_RAMP, TIME_3S);
-	event_can_follow (right_inlane, left_loop, TIME_3S);
+//	event_can_follow (right_inlane, left_loop, TIME_3S);
 }
 
 

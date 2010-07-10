@@ -33,6 +33,7 @@ bool mpf_active;
 
 void mpf_mode_init (void);
 void mpf_mode_exit (void);
+void mpf_lamp_task (void);
 
 struct timed_mode_ops mpf_mode = {
 	DEFAULT_MODE,
@@ -207,7 +208,6 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
 	flipper_enable ();
-	leff_stop (LEFF_MPF_ACTIVE);
 	leff_start (LEFF_FLASHER_HAPPY);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	if (mpf_ball_count == 0)
@@ -217,9 +217,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 		task_kill_gid (GID_MPF_COUNTDOWN);
 		task_kill_gid (GID_MPF_BALLSEARCH);
 	}
-	//kickout_lock (KLOCK_DEFF);
 	deff_start (DEFF_MPF_AWARD);
-	//kickout_lock (KLOCK_DEFF);
 	callset_invoke (award_door_panel);
 }
 
@@ -258,7 +256,8 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 			if (!multi_ball_play ())
 			{
 				/* Turn off GI and start lamp effect */
-				leff_start (LEFF_MPF_ACTIVE);
+				//leff_start (LEFF_MPF_ACTIVE);
+				task_create_gid (GID_MPF_LAMP_TASK, mpf_lamp_task);
 				flipper_disable ();
 				bridge_open_stop ();
 			}
@@ -299,7 +298,6 @@ CALLSET_ENTRY (mpf, sw_mpf_left)
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
 			sound_send (SND_POWER_GRUNT_1);
 		flasher_pulse (FLASH_JETS);
-		//leff_restart (LEFF_LEFT_JET_FLASH);
 		score (SC_250K);
 	}
 }
@@ -311,7 +309,6 @@ CALLSET_ENTRY (mpf, sw_mpf_right)
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
 			sound_send (SND_POWER_GRUNT_2);
 		flasher_pulse (FLASH_JETS);
-		//leff_restart (LEFF_RIGHT_JET_FLASH);
 		score (SC_250K);
 	}
 }
@@ -346,6 +343,29 @@ void check_button_masher (void)
 		deff_start (DEFF_BUTTON_MASHER);
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
 	}
+}
+
+void mpf_lamp_task (void)
+{
+	triac_disable (TRIAC_GI_MASK);
+	triac_enable (GI_POWERFIELD);
+	while (mpf_active)
+	{
+		lamp_off (LM_MPF_1M);
+		lamp_on (LM_MPF_500K);
+		task_sleep (TIME_100MS);
+		lamp_off (LM_MPF_500K);
+		lamp_on (LM_MPF_750K);
+		task_sleep (TIME_100MS);
+		lamp_off (LM_MPF_750K);
+		lamp_on (LM_MPF_1M);
+		task_sleep (TIME_100MS);
+	}
+	triac_enable (TRIAC_GI_MASK);
+	lamp_off (LM_MPF_1M);
+	lamp_off (LM_MPF_750K);
+	lamp_off (LM_MPF_500K);
+	task_exit ();
 }
 
 CALLSET_ENTRY (mpf, sw_left_button)

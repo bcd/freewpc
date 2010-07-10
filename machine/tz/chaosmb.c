@@ -20,9 +20,12 @@
 
 #include <freewpc.h>
 
-//extern void mball_start_3_ball (void);
+U8 chaosmb_level;
+U8 chaosmb_hits_to_relight;
 extern U8 autofire_request_count;
 extern U8 unlit_shot_count;
+extern bool mball_jackpot_uncollected;
+
 extern inline void score_deff_begin (const font_t *font, U8 x, U8 y, const char *text)
 {
 	score_update_start ();
@@ -44,10 +47,6 @@ extern inline void score_deff_end (task_ticks_t flash_rate)
 		dmd_show_other ();
 	}
 }
-
-__local__ U8 chaosmb_level;
-
-__local__ U8 chaosmb_hits_to_relight;
 
 struct {
 	const char *shot_name;
@@ -160,6 +159,7 @@ static void chaosmb_check_jackpot_lamps (void)
 
 static void chaosmb_score_jackpot (void)
 {
+	mball_jackpot_uncollected = FALSE;
 	if (chaosmb_level <= 5)
 		chaosmb_level++;
 	else
@@ -175,11 +175,13 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 	{
+		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
 		flag_on (FLAG_CHAOSMB_RUNNING);
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 1;
 		callset_invoke (mball_start_3_ball);
+		mball_jackpot_uncollected = TRUE;
 		//ballsave_add_time (10);
 		/* Check and light jackpot lamp */
 		chaosmb_check_jackpot_lamps ();
@@ -188,6 +190,9 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 
 CALLSET_ENTRY (chaosmb, chaosmb_stop)
 {
+	if (mball_jackpot_uncollected == TRUE)
+		sound_send (SND_NOOOOOOOO);
+	
 	flag_off (FLAG_CHAOSMB_RUNNING);
 	/* Turn off jackpot lamps */
 	lamp_tristate_off (LM_CLOCK_MILLIONS);

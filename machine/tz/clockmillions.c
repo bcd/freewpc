@@ -22,9 +22,8 @@
 
 
 U8 clock_millions_mode_timer;
-__local__ U8 clock_mode_hits;
-
-__local__ U8 clock_default_hits;
+U8 clock_mode_hits;
+U8 clock_default_hits;
 
 U8 clock_millions_timer;
 
@@ -101,6 +100,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 }
 void clock_millions_mode_init (void)
 {
+	clock_mode_hits = 0;
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
@@ -116,6 +116,7 @@ void clock_millions_mode_exit (void)
 
 CALLSET_ENTRY (clock_millions, start_ball)
 {
+	clock_default_hits = 0;
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 

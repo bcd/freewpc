@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -21,18 +21,13 @@
 #include <freewpc.h>
 #include <eb.h>
 
-__local__ U8 left_ramps;
+U8 left_ramps;
 extern U8 cameras_lit;
 extern U8 gumball_enable_count;
 extern U8 autofire_request_count;	
 extern U8 mball_locks_made;
-//extern U8 sssmb_ramps_to_divert;
-
-//extern U8 chaosmb_level;
-//extern U8 chaosmb_hits_to_relight;
 extern bool multiball_ready (void);
 extern bool autofire_busy;
-//extern bool sssmb_ball_in_plunger;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 
 //TODO Get rid of this
@@ -104,17 +99,16 @@ void award_left_ramp (void)
 	else
 		score (SC_250K);
 }
+
 CALLSET_ENTRY(leftramp, start_player)
 {
 	left_ramps = 0;
 }
 
-
 CALLSET_ENTRY(leftramp, start_ball)
 {
 	left_ramps = 0;
 }
-
 
 static void maybe_ramp_divert (void)
 {
@@ -125,16 +119,15 @@ static void maybe_ramp_divert (void)
 		return;
 	
 	/* Divert to autoplunger if mball ready */
-	if (multiball_ready ())
-		ramp_divert_to_autoplunger ();
 	/* Divert to autoplunger for chaosmb */
-	if (chaosmb_can_divert_to_autoplunger ())	
+	if (multiball_ready () ||
+		chaosmb_can_divert_to_autoplunger () ||
+		timer_find_gid (GID_LEFT_RAMP))
 		ramp_divert_to_autoplunger ();
 	/* Divert to plunger lane for sssmb*/
 	if (sssmb_can_divert_to_plunger ())
 	{
 		/* TODO Shore up logic by event_should_follow (plunger_switch); */
-		//sssmb_ball_in_plunger = TRUE;
 		ramp_divert ();
 	}
 }
@@ -163,11 +156,10 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	chaosmb_left_ramp_exit ();
 	
 	/* Add two ramps if hit from the right inlane */
-	if (task_kill_gid (GID_LEFT_RAMP))
+	if (task_find_gid (GID_LEFT_RAMP))
 		bounded_increment (left_ramps, 250);
 	bounded_increment (left_ramps, 250);
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	award_left_ramp ();
 }
-

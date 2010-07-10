@@ -26,7 +26,7 @@ U8 fastlock_mode_timer;
 U8 fastlock_award;
 /* Stored for Deff */
 U8 fastlock_award_stored;
-__local__ U8 fastlocks_collected;
+U8 fastlocks_collected;
 
 void fastlock_mode_init (void);
 void fastlock_mode_exit (void);
@@ -110,7 +110,7 @@ bool fastlock_running (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
+CALLSET_ENTRY (fastlock, fastlock_lock_entered)
 {
 	if (fastlock_running ())
 	{
@@ -123,7 +123,7 @@ CALLSET_ENTRY (fastlock, fastlock_jackpot_collected)
 	}
 }
 
-void fastlock_right_loop_completed (void)
+void fastlock_loop_completed (void)
 {
 	if (!fastlock_running ())
 		return;
@@ -133,7 +133,7 @@ void fastlock_right_loop_completed (void)
 		fastlock_award += 10;
 		sound_send (SND_CRASH);
 	}
-	else if (loop_time < 50)
+	else if (loop_time < 100)
 	{
 		fastlock_award += 5;
 		sound_send (SND_FIVE);

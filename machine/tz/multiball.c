@@ -371,12 +371,17 @@ CALLSET_ENTRY (multiball, mball_start_2_ball)
 	
 }
 
-CALLSET_ENTRY (mball, mball_start)
+CALLSET_ENTRY (mball, mball_restart_stop)
 {
 	if (timed_mode_running_p (&mball_restart_mode))
 		timed_mode_end (&mball_restart_mode);
+}
+
+CALLSET_ENTRY (mball, mball_start)
+{
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
+		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
 		flag_on (FLAG_MULTIBALL_RUNNING);
 		flag_on (FLAG_MB_JACKPOT_LIT);
@@ -482,7 +487,16 @@ CALLSET_ENTRY (mball, sw_piano)
 		score_multiple (SC_10M, jackpot_level);
 		/* Increase the jackpot level */
 		bounded_increment (jackpot_level, 5);
+		free_timer_restart (TIM_MB_JACKPOT_COLLECTED, TIME_3S);
 	}
+}
+
+CALLSET_ENTRY (mball, powerball_jackpot)
+{
+	deff_start (DEFF_PB_DETECT);
+	/* -1, as it probably has been incremented already */
+	score_multiple (SC_10M, jackpot_level - 1);
+	jackpot_level_stored = jackpot_level * 2;
 }
 
 CALLSET_ENTRY (mball, any_pf_switch)
@@ -503,7 +517,7 @@ CALLSET_ENTRY (mball, single_ball_play)
 CALLSET_ENTRY (mball, dev_lock_enter)
 {
 	/* Tell fastlock that the lock was entered */
-	callset_invoke (fastlock_jackpot_collected);
+	callset_invoke (fastlock_lock_entered);
 
 	/* Collect multiball jackpot if lit */
 	if ((flag_test (FLAG_MULTIBALL_RUNNING)) && !flag_test (FLAG_MB_JACKPOT_LIT))

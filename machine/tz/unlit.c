@@ -28,10 +28,10 @@
 /* CALLSET_SECTION (unlit, __machine2__) */
 #include <freewpc.h>
 
-__local__ U8 unlit_shot_count;
+U8 unlit_shot_count;
 __local__ bool backdoor_award_collected;
 /* last switch that was collected 'unlit; */
-__local__ U8 unlit_called_from_stored;
+U8 unlit_called_from_stored;
 
 void backdoor_award_deff (void)
 {
@@ -93,7 +93,7 @@ CALLSET_ENTRY (unlit, start_ball)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;
-	backdoor_award_collected = FALSE;
+//	backdoor_award_collected = FALSE;
 }
 
 CALLSET_ENTRY (unlit, start_player)

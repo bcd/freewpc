@@ -177,7 +177,7 @@ void jackpot_deff (void)
 	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
-		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
+		for (fno = IMG_JACKPOT_START + 1; fno <= IMG_JACKPOT_END - 9; fno += 1)
 		{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
@@ -187,7 +187,7 @@ void jackpot_deff (void)
 		}
 	}
 	/* Show once fully */
-	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 1)
+	for (fno = IMG_JACKPOT_START + 1; fno <= IMG_JACKPOT_END - 2; fno += 1)
 	{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();

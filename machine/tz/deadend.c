@@ -25,7 +25,7 @@
 #include <freewpc.h>
 #include <eb.h>
 
-__local__ U8 dead_end_count;
+U8 dead_end_count;
 extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
 bool __local__ extra_ball_lit_from_deadend;
@@ -90,11 +90,11 @@ void dead_end_deff (void)
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
+	deff_exit ();
 }
 	
 CALLSET_ENTRY (deadend, start_player)
 {
-	dead_end_count = 0;
 	/* Don't allow lighting extra ball if impossible
 	 * or if previously collected */
 	if (system_config.max_ebs == 0)
@@ -105,6 +105,7 @@ CALLSET_ENTRY (deadend, start_player)
 
 CALLSET_ENTRY (deadend, start_ball)
 {
+	dead_end_count = 0;
 	lamp_off (LM_DEAD_END);
 }
 
