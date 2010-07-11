@@ -142,11 +142,22 @@ Door Panel : Battle the Power
 =============================
 Opens up the mini playfield, via the right ramp
 
-Door Panel : 	
-
-
 Bonus
 =====
+
+- Door panels	1M each
+- Loops		100K each
+- Jets		1M per level, 100K each
+- Left ramps	100K each
+- Gumballs	1M each
+- Spiralawards  1M each
+- Dead ends	1M each
+- Hitchhikers   1M each
+- Rollovers	1M each
+- Combos	5M each
+- Lucky bounces 5M each
+- Backdoor award ???
+- Tourist award ???
 
 Combos and Lucky bounces
 ========================

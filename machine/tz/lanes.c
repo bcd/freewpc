@@ -37,7 +37,7 @@ static void handle_outlane (void)
 		leff_start (LEFF_STROBE_DOWN);
 }
 
-static bool rollover_completed (void)
+bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_INLANE1)
 		&& lamp_test (LM_LEFT_INLANE2)
@@ -47,7 +47,7 @@ static bool rollover_completed (void)
 		return FALSE;
 }
 
-static void award_rollover_completed (void)
+CALLSET_ENTRY (lanes, award_rollover_completed)
 {
 	bounded_increment (rollover_count, 99);
 	score (SC_1M);
@@ -63,14 +63,14 @@ static void award_rollover_completed (void)
 	lamplist_apply (LAMPLIST_INLANES, lamp_flash_off);
 }
 
-static void check_rollover (void)
+void check_rollover (void)
 {
 	/* Check to see if rollover has been completed 
 	 * and start the spiralaward timer if a set has been
 	 * completed */
-	if (rollover_completed ())
+	if (rollover_completed () == TRUE)
 	{
-		award_rollover_completed ();
+		callset_invoke (award_rollover_completed);
 		if (spiralaward_set_completed == TRUE)
 			callset_invoke (start_spiralaward_timer);
 	}
@@ -108,9 +108,9 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 	 * just been lit */
 	if (!lamp_test (LM_LEFT_INLANE1) && spiralaward_set_completed == FALSE)
 		callset_invoke (start_spiralaward_timer);
+	lamp_on (LM_LEFT_INLANE1);
 	check_rollover ();
 	score (SC_1K);
-	lamp_on (LM_LEFT_INLANE1);
 	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
@@ -119,9 +119,9 @@ CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
 	if (!lamp_test (LM_LEFT_INLANE2) && spiralaward_set_completed == FALSE)
 		callset_invoke(start_spiralaward_timer);
+	lamp_on (LM_LEFT_INLANE2);
 	check_rollover ();
 	score (SC_1K);
-	lamp_on (LM_LEFT_INLANE2);
 }
 
 /* 'Dead End' Lane */

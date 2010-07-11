@@ -64,7 +64,7 @@ const char *door_award_goals[] = {
 	"THE LOOPS",
 	"RIGHT RAMP",
 	"ANYTHING",
-	"STANDUPS",
+	"YELLOW TARGETS",
 	"THE LEFT HOLE",
 	"THE SIDE LANE",
 	"CLOCK TARGET",
@@ -325,7 +325,7 @@ void door_award_deff (void)
 	task_create_gid (GID_DOOR_AWARD, door_award_sound_task);
 	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
+	for (fno = IMG_DOOR_START + 1; fno <= IMG_DOOR_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);

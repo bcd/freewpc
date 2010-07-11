@@ -230,7 +230,6 @@ void bonus_deff (void)
 	extern U8 lucky_bounces;
 
 
-	
 	/* 
 	 * Taunts.....
 	 * TODO Adjust timings 
@@ -537,11 +536,9 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("20 MILLION");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		sound_send (SND_SURVIVAL_IS_EVERYTHING);
-		task_sleep_sec (2);
-		bonus_pause ();
+		task_sleep_sec (3);
 	}
 	
 	if (backdoor_award_collected == TRUE
@@ -563,10 +560,9 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("100 MILLION");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		dmd_sched_transition (&trans_sequential_boxfade);
 		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_show_low ();
-		task_sleep_sec (2);
+		task_sleep_sec (6);
 	}
 
 	/* Restart a task to monitor the buttons */
@@ -746,7 +742,7 @@ void bonus_deff (void)
 			
 			if (num_players == 3)
 			{
-				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3));
+				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 			}
 			else if (num_players == 4)

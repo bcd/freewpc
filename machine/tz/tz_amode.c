@@ -161,10 +161,12 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
 	show_text_on_stars ();
+	
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "PRESS BUYIN BUTTON");
-	font_render_string_center (&font_fixed6, 64, 22, "TO DISPLAY RULES");
+	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
+	font_render_string_center (&font_var5, 64, 22, "TO DISPLAY RULES");
 	show_text_on_stars ();
 
 	show_driver_animation ();
