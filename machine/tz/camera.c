@@ -109,10 +109,10 @@ static void do_camera_award (void)
 {
 	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
-	deff_start (DEFF_CAMERA_AWARD);
 	/* Don't light the lock if already lit */
 	if (mball_locks_lit == 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
 		camera_award_count = CAMERA_AWARD_DOOR_PANEL;
+	deff_start (DEFF_CAMERA_AWARD);
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
