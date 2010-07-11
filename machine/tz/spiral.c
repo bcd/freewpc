@@ -24,7 +24,7 @@
 U8 spiral_mode_timer;
 //score_t spiral_mode_score;
 
-extern U8 spiral_loops;
+U8 spiral_loops;
 
 void spiral_mode_init (void);
 void spiral_mode_exit (void);
@@ -39,7 +39,7 @@ struct timed_mode_ops spiral_mode = {
 	.prio = PRI_GAME_MODE3,
 	.init_timer = 30,
 	.timer = &spiral_mode_timer,
-	.grace_timer = 3,
+	.grace_timer = 0,
 	.pause = system_timer_pause,
 };
 
@@ -59,8 +59,14 @@ void spiral_loop_deff (void)
 
 CALLSET_ENTRY (spiral, award_spiral_loop)
 {
-	spiral_loops++;
-	if (spiral_loops < 3)
+	if (!timed_mode_running_p (&spiral_mode))
+		return;
+	if (spiral_loops > 2)
+		spiral_loops = 1;
+	else
+		spiral_loops++;
+	/* Score it */
+	if (spiral_loops < 2)
 	{
 		sound_send (SND_SPIRAL_AWARDED);
 		score (SC_10M);
@@ -69,7 +75,6 @@ CALLSET_ENTRY (spiral, award_spiral_loop)
 	{
 		sound_send (SND_SPIRAL_BREAKTHRU);
 		score (SC_20M);
-		spiral_loops = 0;
 	}
 	deff_start (DEFF_SPIRAL_LOOP);
 }
@@ -113,6 +118,7 @@ CALLSET_ENTRY (spiral, start_ball)
 {
 	lamp_tristate_off (LM_RIGHT_SPIRAL);
 	lamp_tristate_off (LM_LEFT_SPIRAL);
+	spiral_loops = 0;
 }
 
 CALLSET_ENTRY (spiral, display_update)
@@ -129,6 +135,7 @@ CALLSET_ENTRY (spiral, end_ball)
 {
 	timed_mode_end (&spiral_mode);
 }
+
 CALLSET_ENTRY (spiral, door_start_spiral)
 {
 	timed_mode_begin (&spiral_mode);
