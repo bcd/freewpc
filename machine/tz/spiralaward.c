@@ -39,7 +39,7 @@
 
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
-__local__ U8 total_spiralawards_collected; 
+__local__ bool spiralaward_set_completed; 
 extern __local__ U8 mpf_enable_count;
 
 const char *spiralaward_names[] = {
@@ -103,8 +103,6 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 static void award_spiralaward (void)
 {	
 	spiralawards_collected++;
-	/* Used for bonus */
-	total_spiralawards_collected++;
 	
 	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);
@@ -154,11 +152,11 @@ static void award_spiralaward (void)
 			task_sleep (TIME_500MS);
 		/* Reset Spiral Lamps */
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
-		/* Turn off Spiral EB when already collected */
+		/* Don't allow the Spiral EB twice */
 		lamp_off (LM_SPIRAL_EB);
 		/* Set to 1, as we have 'collected' the EB lamp */
 		spiralawards_collected = 1;
-		total_spiralawards_collected++;
+		spiralaward_set_completed = TRUE;
 	}
 }
 
@@ -183,8 +181,8 @@ CALLSET_ENTRY (spiralaward, start_player)
 {
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_on);
 	spiralawards_collected = 0;
-	total_spiralawards_collected = 0;
-	/* Turn off Spiral EB if impossible */
+	spiralaward_set_completed = FALSE;
+	/* Turn off Spiral EB if impossible to collect */
 	if (!can_award_extra_ball ())
 	{
 		lamp_off (LM_SPIRAL_EB);
