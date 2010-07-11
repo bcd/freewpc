@@ -215,7 +215,7 @@ void bonus_deff (void)
 	extern U8 jets_scored;
 	extern U8 left_ramps;
 	extern U8 gumball_collected_count;
-	extern U8 total_spiralawards_collected;
+	extern U8 spiralawards_collected;
 	extern U8 dead_end_count;
 	extern U8 hitch_count;
 	extern U8 rollover_count;
@@ -411,18 +411,18 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 
-	if (total_spiralawards_collected > 0)
+	if (spiralawards_collected > 0)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_1M]);
-		score_mul (bonus_scored, total_spiralawards_collected); 
+		score_mul (bonus_scored, spiralawards_collected); 
 		score_add (total_bonus, bonus_scored);
 		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		psprintf ("%d SPIRAL AWARD", "%d SPIRAL AWARDS", total_spiralawards_collected);
+		psprintf ("%d SPIRAL AWARD", "%d SPIRAL AWARDS", spiralawards_collected);
 		font_render_string_center (&font_mono5, 64, 6, sprintf_buffer);
-		sprintf ("%d X 1,000,000", (total_spiralawards_collected));
+		sprintf ("%d X 1,000,000", (spiralawards_collected));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
@@ -550,17 +550,18 @@ void bonus_deff (void)
 		&& jets_bonus_level
 		&& left_ramps
 		&& gumball_collected_count
-		&& total_spiralawards_collected
+		&& spiralawards_collected
 		&& dead_end_count
 		&& hitch_count
 		&& rollover_count
+		&& lucky_bounces
 		&& total_combos)
 	{
 		dmd_alloc_low_clean ();
-		score_add (total_bonus, score_table[SC_50M]);
+		score_add (total_bonus, score_table[SC_100M]);
 		sprintf ("TOURIST AWARD");
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-		sprintf ("50 MILLION");
+		sprintf ("100 MILLION");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_sequential_boxfade);
 		sound_send (SND_PLAYER_PIANO_UNUSED);
@@ -576,13 +577,40 @@ void bonus_deff (void)
 	
 	bonus_sched_transition ();
 	
+	countup_pause_iterations = 0;
 	/* Show total Bonus */	
 	do {
 		dmd_alloc_low_clean ();
 		/* Shake the text */
-		//TODO Make it shake more as the points build up
-		U8 x = random_scaled (8);
-		U8 y = random_scaled (4);
+		U8 x;
+		U8 y;
+		bounded_increment (countup_pause_iterations, 254);
+		if (countup_pause_iterations < 10)
+		{
+			x = random_scaled (1);
+			y = random_scaled (2);
+		}
+		else if (countup_pause_iterations < 20)
+		{
+			x = random_scaled (2);
+			y = random_scaled (3);
+		}
+		else if (countup_pause_iterations < 30)
+		{
+			x = random_scaled (4);
+			y = random_scaled (5);
+		}
+		else if (countup_pause_iterations < 40)
+		{
+			x = random_scaled (8);
+			y = random_scaled (4);
+		}
+		else 
+		{
+			x = random_scaled (10);
+			y = random_scaled (6);
+		}
+		
 		font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
 		sprintf_score (temp_score);
 		font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
@@ -675,7 +703,7 @@ void bonus_deff (void)
 	}
 		
 	/* If it's the last player of a multi player game ... */
-	if (num_players > 1 && player_up == num_players && ball_up != 1)
+	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0)
 	{
 	 	/* show highest 1 ball score so far*/
 		task_kill_gid (GID_BONUS_BUTTON_MONITOR);
@@ -718,7 +746,7 @@ void bonus_deff (void)
 			
 			if (num_players == 3)
 			{
-				sprintf(" 2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
+				sprintf("2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3));
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 			}
 			else if (num_players == 4)
