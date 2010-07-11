@@ -96,7 +96,7 @@ __machine__ bool sssmb_can_divert_to_plunger (void);
 /* star.c */
 __machine__ void star_draw(void);
 /* spiralaward.c */
-__machine2__ void start_spiralaward_timer (void);
+//__machine2__ void start_spiralaward_timer (void);
 __machine2__ void spiralaward_right_loop_completed (void);
 
 /* lanes.c */

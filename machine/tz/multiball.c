@@ -103,6 +103,7 @@ void mball_restart_mode_expire (void)
 
 void mball_restart_mode_exit (void)
 {
+	task_kill_gid (GID_MPF_COUNTDOWN_TASK);
 }
 
 CALLSET_ENTRY (mball, display_update)

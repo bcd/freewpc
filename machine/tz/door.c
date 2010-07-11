@@ -29,7 +29,7 @@ U8 door_index_awarded;
 __local__ U8 door_panels_started;
 extern __local__ U8 extra_ball_enable_count;
 extern U8 unlit_shot_count;
-bool door_awarded_from_slot;
+//bool door_awarded_from_slot;
 U8 door_active_lamp;
 
 /** Total number of door panels, not counting the handle */
@@ -486,7 +486,7 @@ CALLSET_ENTRY(door, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		door_awarded_from_slot = FALSE;
+		//door_awarded_from_slot = FALSE;
 		callset_invoke (award_door_panel);
 	}
 	else
@@ -505,7 +505,7 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	{
 		flag_off (FLAG_SLOT_DOOR_LIT);
 		flag_on (FLAG_PIANO_DOOR_LIT);
-		door_awarded_from_slot = TRUE;
+		//door_awarded_from_slot = TRUE;
 		callset_invoke (award_door_panel);
 	}
 	else

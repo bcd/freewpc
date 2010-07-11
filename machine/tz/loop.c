@@ -23,7 +23,6 @@
 /* Various loop counts, reset at the start of each ball */
 U8 loops;
 U8 powerball_loops;
-U8 spiral_loops;
 
 U16 start_loop_time;
 U8 loop_time;
@@ -33,9 +32,7 @@ score_t loop_score;
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
 
-extern struct timed_mode_ops spiral_mode;
 extern void thing_flips (void);
-extern void award_spiral_loop (void);
 
 /* Functions to stop leffs/deffs during certain game situations */
 static bool can_show_loop_leff (void)
@@ -53,8 +50,6 @@ static bool can_show_loop_deff (void)
 	else if (task_find_gid (GID_SPIRALAWARD))
 		return FALSE;
 	else if (free_timer_test (TIM_SPIRALAWARD_RUNNING))
-		return FALSE;
-	else if (timed_mode_running_p (&spiral_mode))
 		return FALSE;
 	else
 		return TRUE;
@@ -74,6 +69,8 @@ static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
 	loops++;
+	
+	callset_invoke (award_spiral_loop);
 	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		powerball_loops++;
@@ -92,11 +89,6 @@ static void award_loop (void)
 		}
 		deff_start (DEFF_PB_LOOP);
 	//	return;
-	}
-
-	if (timed_mode_running_p (&spiral_mode))
-	{
-		callset_invoke (award_spiral_loop);
 	}
 	else
 	{
@@ -285,7 +277,6 @@ CALLSET_ENTRY (loop, start_ball)
 	/* Initialise loop counts */
 	loops = 0;
 	powerball_loops = 0;
-	spiral_loops = 0;
 	loop_time = 1;
 	start_loop_time = 1;
 }

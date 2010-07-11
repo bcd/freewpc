@@ -19,7 +19,7 @@ CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC ?= y
 $(eval $(call have,CONFIG_RTC))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
-
+CONFIG_SCORE_RANK := y
 # The default CFLAGS required on the WPC platform
 # A few notes:
 # 1. -Wno-format is to not check format strings, because we define those

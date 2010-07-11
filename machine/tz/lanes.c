@@ -70,7 +70,7 @@ static void check_rollover (void)
 	{
 		award_rollover_completed ();
 		if (total_spiralawards_collected > 0)
-			start_spiralaward_timer ();
+			callset_invoke (start_spiralaward_timer);
 	}
 }
 
@@ -105,11 +105,10 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 	/* Start the spiralaward timer only if the lane has 
 	 * just been lit */
 	if (!lamp_test (LM_LEFT_INLANE1) && total_spiralawards_collected == 0)
-		start_spiralaward_timer ();
+		callset_invoke (start_spiralaward_timer);
 	lamp_on (LM_LEFT_INLANE1);
 	check_rollover ();
 	score (SC_1K);
-	//timer_restart_free (GID_TIMED_RIGHT_LOOP_2X, TIME_3S);
 	event_can_follow (left_inlane_1, right_loop, TIME_3S);
 }
 
@@ -117,11 +116,10 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
 	if (!lamp_test (LM_LEFT_INLANE2) && total_spiralawards_collected == 0)
-		start_spiralaward_timer ();
+		callset_invoke(start_spiralaward_timer);
 	lamp_on (LM_LEFT_INLANE2);
 	check_rollover ();
 	score (SC_1K);
-//	event_can_follow (left_inlane_2, slot, TIME_3S);
 }
 
 /* 'Dead End' Lane */
@@ -130,15 +128,12 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	lamp_on (LM_RIGHT_INLANE);
 	check_rollover ();
 	score (SC_1K);
-//	timer_restart_free (GID_TIMED_LEFT_RAMP_2X, TIME_6S);
-//	timer_restart_free (GID_TIMED_LEFT_LOOP_2X, TIME_3S);
 	
 	/* Light Dead end if not lit */
 	if (!lamp_test (LM_DEAD_END))
 		lamp_on (LM_DEAD_END);
 	/* Start the timer for the left ramp */
 	timer_restart_free (GID_LEFT_RAMP, TIME_3S);
-//	event_can_follow (right_inlane, left_loop, TIME_3S);
 }
 
 

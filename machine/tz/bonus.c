@@ -34,8 +34,10 @@ score_t temp_score;
 
 /* Current single ball top score during this game */
 score_t current_one_ball_hi_score;
-score_t current_hi_score;
-U8 current_hi_player;
+#define current_hi_score scores[find_player_ranked(1)]
+#define current_hi_player find_player_ranked(1) + 1
+//score_t current_hi_score;
+//U8 current_hi_player;
 /* Which player obtained the current 1 ball hi score*/
 U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
@@ -46,23 +48,23 @@ U8 countup_pause_iterations;
 bool buttons_held;
 bool quickdeath_timer_running;
 extern bool powerball_death;
+extern U8 score_ranks[MAX_PLAYERS];
 
-void bubble_sort_current_player_rankings (void)
+/* Function to find who holds what score position 
+ * eg
+ * find_player_ranked (1) returns the player ranked first
+ * returns from 0 - MAX_PLAYERS
+ */
+
+static U8 find_player_ranked (U8 ranking)
 {
-	U8 i, j, temp;
-	for (i = 0; i < num_players; i++)
-	{
-		for (j = 0; j < num_players; j++)
-		{	
-			if (score_compare (scores[j], scores[j + 1]) == 1)
-			{
-				temp = current_player_rankings[j + 1];
-				current_player_rankings[j + 1] = current_player_rankings[j];
-				current_player_rankings[j] = temp;
-			}
-			;
-		}
-	}
+	/* If out of range, return last place */
+	if (ranking > MAX_PLAYERS)
+		return MAX_PLAYERS;
+	U8 i = 0;
+	while (score_ranks[i] != ranking)
+		i++;
+	return i;
 }
 
 
@@ -663,31 +665,19 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	/* Store and sort the hi scores during multiplayer */
-	if (num_players > 1)
+	/* Store and sort the current one ball hi scores during multiplayer */
+	if (num_players > 1 && score_compare (points_this_ball, current_one_ball_hi_score) == 1)
 	{
-		if (score_compare (points_this_ball, current_one_ball_hi_score) == 1)
-		{
-			score_zero (current_one_ball_hi_score);
-			score_copy (current_one_ball_hi_score, points_this_ball);
-			current_one_ball_hi_player = player_up;
-			current_one_ball_hi_ball_number = ball_up;
-		}
-		
-		if (score_compare (current_score, current_hi_score) == 1)
-		{
-			score_zero (current_hi_score);
-			score_copy (current_hi_score, current_score);
-			current_hi_player = player_up;
-		}
-		
-		bubble_sort_current_player_rankings ();
+		score_zero (current_one_ball_hi_score);
+		score_copy (current_one_ball_hi_score, points_this_ball);
+		current_one_ball_hi_player = player_up;
+		current_one_ball_hi_ball_number = ball_up;
 	}
-
-	/* If it's the last player of a multi player game, show highest 1 ball score so far*/
+		
+	/* If it's the last player of a multi player game ... */
 	if (num_players > 1 && player_up == num_players && ball_up != 1)
 	{
-		bubble_sort_current_player_rankings ();
+	 	/* show highest 1 ball score so far*/
 		task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
@@ -703,35 +693,38 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		task_sleep_sec (4);
+	
+
+		/* Calculate lead into temp_score */
+		score_zero (temp_score);
+		score_copy (temp_score, scores[find_player_ranked(1)]);
+		score_sub (temp_score, scores[find_player_ranked(2)]);
+		sprintf_score (temp_score);
+
+
 		if (check_if_last_ball_of_multiplayer_game ())
 		{
 			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
-			task_sleep_sec (6);
+			task_sleep_sec (4);
 		}
 		else
 		{
-			bubble_sort_current_player_rankings ();
-			task_sleep_sec (2);
 			sound_send (SND_RABBLE_RABBLE);
 			dmd_alloc_low_clean ();
-			sprintf("PLAYER %d LEADS BY", current_hi_player);
+			sprintf("PLAYER %d LEADS BY", find_player_ranked(1) + 1);
 			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
-			/* Calculate lead */
-			score_zero (temp_score);
-			score_copy (temp_score, current_hi_score);
-			score_sub (temp_score, scores[current_player_rankings[1] + 1]);
-			sprintf_score (temp_score);
+			sprintf_score(temp_score);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			
 			if (num_players == 3)
 			{
-				sprintf(" 2ND P%d 3RD P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1);
+				sprintf(" 2ND P%d 3RD P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1);
 				font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 			}
 			else if (num_players == 4)
 			{
-				sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1] + 1, 
-					current_player_rankings[2] + 1, current_player_rankings[3] + 1);
+				sprintf("2ND P%d 3RD P%d 4TH P%d", find_player_ranked(2) + 1, find_player_ranked(3) + 1,
+					find_player_ranked(4) + 1);
 
 				font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 			}
@@ -742,41 +735,22 @@ void bonus_deff (void)
 		}
 	}
 
-	#if 0
 	if (check_if_last_ball_of_multiplayer_game ())
 	{
 		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_alloc_low_clean ();
-		
-		/* Calculate lead */
-		bubble_sort_current_player_rankings ();
-		score_zero (temp_score);
-		score_copy (temp_score, current_hi_score);
-		score_sub (temp_score, scores[current_player_rankings[1] + 1]);
-		dmd_alloc_low_clean ();
 			
-		sprintf("PLAYER %d WINS BY", current_hi_player);
+		sprintf("PLAYER %d WINS BY", find_player_ranked(1) + 1);
 		font_render_string_center (&font_mono5, 64, 3, sprintf_buffer);
 		sound_send (SND_GREED_MODE_BOOM);
 		sprintf_score (temp_score);
 		font_render_string_center (&font_fixed10, 64, 13, sprintf_buffer);
-		
 		font_render_string_center (&font_mono5, 64, 23, "CONGRATULATIONS");
-		if (num_players == 3)
-		{
-			sprintf("2ND P%d 3RD P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1);
-			font_render_string_center (&font_mono5, 64, 27, sprintf_buffer);
-		} 
-		else if (num_players == 4)
-		{
-			sprintf("2ND P%d 3RD P%d 4TH P%d", current_player_rankings[1] + 1, current_player_rankings[2] + 1, current_player_rankings[3] + 1);
-			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-		}
 		
 		dmd_show_low ();
 		task_sleep_sec (6);
 	}
-	#endif
+	
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	scores_draw ();
@@ -792,6 +766,7 @@ void bonus_deff (void)
 	task_kill_gid (GID_BONUS_TALKING);
 	deff_exit ();
 }
+
 /* Done like this rather than a timer_ as 
  * this can go for 255 seconds */
 void quickdeath_timer_task (void)
@@ -808,10 +783,9 @@ void quickdeath_timer_task (void)
 
 void score_to_beat_deff (void)
 {
-	bubble_sort_current_player_rankings ();
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
-	if (current_hi_player == player_up)
+	if (find_player_ranked(1) + 1 == player_up)
 	{
 		font_render_string_center (&font_fixed10, 64, 8, "NO");
 		if (check_if_last_ball_of_multiplayer_game ())
@@ -823,10 +797,10 @@ void score_to_beat_deff (void)
 			font_render_string_center (&font_mono5, 64, 26, "INCREASE YOUR LEAD");
 		}
 	}
-	else if (score_compare (current_hi_score, current_score) == 1)
+	else if (score_compare (scores[find_player_ranked(1)], current_score) == 1)
 	{
 		score_zero (temp_score);
-		score_copy (temp_score, current_hi_score);
+		score_copy (temp_score, scores[find_player_ranked(1)]);
 		score_sub (temp_score, current_score);
 	
 		sprintf_score (temp_score);
@@ -858,14 +832,8 @@ CALLSET_ENTRY (bonus, start_game)
 {
 	/* Initiliase hi score storage variables */
 	score_zero (current_one_ball_hi_score);
-	score_zero (current_hi_score);
 	current_one_ball_hi_player = 0;
 	current_one_ball_hi_ball_number = 0;
-	current_hi_player = 0;
-	current_player_rankings[0] = 0;
-	current_player_rankings[1] = 1;
-	current_player_rankings[2] = 2;
-	current_player_rankings[3] = 3;
 }
 
 CALLSET_ENTRY (bonus, ball_serve)

@@ -156,6 +156,7 @@ void pb_set_location (U8 location, U8 depth)
 		pb_location = location;
 		if (pb_location & PB_HELD)
 		{
+			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
 		}

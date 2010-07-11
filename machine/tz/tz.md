@@ -43,7 +43,7 @@ define MACHINE_AMODE_EFFECTS
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_HAS_UPPER_RIGHT_FLIPPER
 define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
-define CONFIG_TZONE_IP
+define CONFIG_TZONE_IP y
 
 ##########################################################################
 # Lamp Description

@@ -62,8 +62,6 @@ void sw_right_ramp_enter_task (void)
 				deff_start (DEFF_SHOOT_HITCH);
 			task_sleep_sec (2);
 			sound_send (SND_RIGHT_RAMP_EXIT);
-			/* The default driver doesn't seem to be working */
-			//sol_request_async (SOL_RIGHT_RAMP_DIV);
 			bridge_open_start ();
 			task_sleep (TIME_500MS);
 			bridge_open_stop ();

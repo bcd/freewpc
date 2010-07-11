@@ -23,9 +23,9 @@
 #include <freewpc.h>
 extern void award_unlit_shot (U8 unlit_called_from);
 extern void mball_start_3_ball (void);
-extern bool door_awarded_from_slot;
 extern U8 unlit_shot_count;
 extern U8 jackpot_level;
+extern U8 mball_locks_lit;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -110,6 +110,9 @@ static void do_camera_award (void)
 	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
 	deff_start (DEFF_CAMERA_AWARD);
+	/* Don't light the lock if already lit */
+	if (mball_locks_lit == 2 && camera_award_count == CAMERA_AWARD_LIGHT_LOCK)
+		camera_award_count = CAMERA_AWARD_DOOR_PANEL;
 	switch (camera_award_count)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
@@ -118,7 +121,6 @@ static void do_camera_award (void)
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
-			door_awarded_from_slot = FALSE;
 			callset_invoke (award_door_panel);
 			break;
 		case CAMERA_AWARD_10_MILLION:
