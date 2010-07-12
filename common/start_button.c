@@ -24,7 +24,7 @@ extern U8 initials_enter_timer;
 
 extern U8 switch_stress_enable;
 
-__test2__ void switch_stress_endball (void);
+__test2__ void switch_stress_drain (void);
 
 /**
  * Handle the start button.  There should be only one callset entry for
@@ -44,9 +44,9 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	{
 		SECTION_VOIDCALL (__common__, buyin_start_button_handler);
 	}
-	else if (switch_stress_enable && in_live_game)
+	else if (switch_stress_enable && in_live_game && valid_playfield)
 	{
-		switch_stress_endball ();
+		switch_stress_drain ();
 	}
 	else if (initials_enter_timer)
 	{
