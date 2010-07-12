@@ -91,6 +91,9 @@ U8 *linux_switch_data_ptr;
 /** Pointer to the current lamp matrix element */
 U8 *linux_lamp_data_ptr;
 
+/** Current row output register */
+U8 linux_lamp_row_data;
+
 /** The jumper settings */
 U8 linux_jumpers = LC_USA_CANADA << 2;
 
@@ -127,11 +130,6 @@ FILE *linux_output_stream;
 /** Debug output buffer */
 char linux_debug_output_buffer[256];
 char *linux_debug_output_ptr;
-
-/** When nonzero, the next write to the lamp matrix is actually applied
-to the UI.  This is toggled, because every other write is actually just
-a failsafe to clear the lamps. */
-int linux_lamp_write_flag = 1;
 
 /** The contents of the 16 PIC serial data registers */
 U8 pic_serial_data[16] = { 0, };
@@ -618,17 +616,18 @@ void writeb (IOPTR addr, U8 val)
 #endif
 
 		case WPC_LAMP_ROW_OUTPUT:
-			if ((linux_lamp_data_ptr != NULL) && linux_lamp_write_flag)
-				mux_write (ui_write_lamp, 8 * (linux_lamp_data_ptr - linux_lamp_matrix),
-					linux_lamp_data_ptr, val, SIGNO_LAMP);
-			linux_lamp_write_flag ^= 1;
-			break;
+			linux_lamp_row_data = val;
+			goto do_lamp_update;
 
 		case WPC_LAMP_COL_STROBE:
 			if (val != 0)
 				linux_lamp_data_ptr = linux_lamp_matrix + scanbit (val);
 			else
 				linux_lamp_data_ptr = NULL;
+do_lamp_update:
+			if (linux_lamp_data_ptr != NULL)
+				mux_write (ui_write_lamp, 8 * (linux_lamp_data_ptr - linux_lamp_matrix),
+					linux_lamp_data_ptr, linux_lamp_row_data, SIGNO_LAMP);
 			break;
 
 #if (MACHINE_PIC == 1)
