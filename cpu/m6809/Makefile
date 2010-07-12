@@ -5,11 +5,8 @@ C := cpu/$(CPU)
 
 CFLAGS =
 
-# Soft register support is not available in versions of
-# GCC-6809 prior to 4.0.
-ifneq ($(GCC_VERSION),3.4.6)
+# Soft register support is enabled by -msoft-reg-count.
 SOFTREG_OPTIONS := -msoft-reg-count=4 -DSOFT_REG_COUNT=4
-endif
 
 # Save assembler files for debugging the 6809 compiler.
 ifeq ($(SAVE_ASM),y)
@@ -35,7 +32,7 @@ CFLAGS += $(if $(CONFIG_MALLOC), -DCONFIG_MALLOC)
 # Which version of the 6809 compiler to use by default.
 # This is the minimum available version.  More often than not,
 # testing/releases are done with later builds than this.
-GCC_VERSION ?= 4.3.2
+GCC_VERSION ?= 4.3.4
 
 KERNEL_OBJS     += $(C)/vector.o
 KERNEL_OBJS     += $(C)/div10.o
