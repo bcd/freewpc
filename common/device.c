@@ -48,6 +48,8 @@
 /** Pointer to the device properties table generated from the md */
 extern device_properties_t device_properties_table[];
 
+extern U8 switch_stress_enable;
+
 /** Runtime status about each device */
 device_t device_table[NUM_DEVICES];
 
@@ -451,8 +453,6 @@ wait_and_recount:
  * minus any pending kicks. */
 static inline U8 device_kickable_count (device_t *dev)
 {
-	extern U8 switch_stress_enable;
-
 	if (switch_stress_enable == YES)
 		return 0;
 	else
@@ -474,6 +474,11 @@ void device_request_kick (device_t *dev)
 		balls are actually added to play. */
 		if (!trough_dev_p (dev))
 			live_balls++;
+	}
+	else if (switch_stress_enable && trough_dev_p (dev))
+	{
+		missing_balls++;
+		device_add_live ();
 	}
 	else
 	{
