@@ -18,6 +18,10 @@ while (<>) {
 	s/L[0-9]+/Lxx/;
 	s/LC[0-9]+/LCxx/;
 
+	# Canonicalize static variables by removing the trailing suffix
+	# that GCC adds.
+	s/\.[0-9]+//;
+
 	# If this is a .globl directive, it tells us the name of the
 	# function being defined.
 	if (/[ \t]*\.globl[ \t]+(.*)$/) {
