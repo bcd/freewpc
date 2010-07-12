@@ -140,7 +140,9 @@ void lamp_rtt (void)
 	/* Turn off the lamp circuits before recalculating.  But don't
 	do this in native mode, because the simulator doesn't simulate
 	well-enough. */
-#ifndef CONFIG_NATIVE
+#ifdef CONFIG_NATIVE
+	pinio_write_lamp_strobe (0);
+#else
 #ifdef __m6809__
 	/* On the 6809, avoid using the CLR instruction which is known to cause
 	problems in the WPC ASIC.   Also, always write ROW first to avoid
