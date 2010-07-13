@@ -130,7 +130,7 @@ typedef struct
 	adjval_t clock_style; /* done */
 	adjval_t date_style; /* done */
 	adjval_t show_date_and_time; /* done */
-	adjval_t allow_dim_illum;
+	adjval_t allow_dim_illum; /* done */
 	adjval_t tournament_mode; /* done */
 	adjval_t euro_digit_sep; /* done */
 	adjval_t min_volume_control; /* done */
