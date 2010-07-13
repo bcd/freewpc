@@ -134,8 +134,8 @@ typedef struct
 	adjval_t tournament_mode; /* done */
 	adjval_t euro_digit_sep; /* done */
 	adjval_t min_volume_control; /* done */
-	adjval_t gi_power_saver;
-	adjval_t power_saver_level;
+	adjval_t gi_power_saver; /* done */
+	adjval_t power_saver_level; /* done */
 	/* The ticket_board adjustment says if a ticket dispenser
 	is connected, or if a coin meter is attached. */
 	adjval_t ticket_board;

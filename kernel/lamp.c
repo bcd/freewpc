@@ -88,6 +88,12 @@ __fastram__ U8 lamp_strobe_mask;
 
 __fastram__ U8 lamp_strobe_column;
 
+__fastram__ U8 lamp_power_timer;
+
+U8 lamp_power_level;
+
+U16 lamp_power_idle_timer;
+
 #define NUM_LAMP_RTTS 4
 
 
@@ -111,6 +117,9 @@ void lamp_init (void)
 
 	lamp_strobe_mask = 0x1;
 	lamp_strobe_column = 0;
+	lamp_power_timer = 0;
+	lamp_power_level = 0;
+	lamp_power_idle_timer = 0;
 }
 
 
@@ -133,9 +142,6 @@ void lamp_flash_rtt (void)
 void lamp_rtt (void)
 {
 	U8 bits;
-	/* TODO : implement lamp power saver level.  For some number N
-	 * iterations, just clear the lamp outputs and be done.
-	 * But only do this outside of a game. */
 
 	/* Turn off the lamp circuits before recalculating.  But don't
 	do this in native mode, because the simulator doesn't simulate
@@ -155,6 +161,14 @@ void lamp_rtt (void)
 	pinio_write_lamp_strobe (0);
 #endif /* __m6809__ */
 #endif /* CONFIG_NATIVE */
+
+	/* Implement lamp power saver.  When the timer is nonzero, it means
+	to keep the lamp circuits off for this many IRQ iterations. */
+	if (unlikely (lamp_power_timer))
+	{
+		--lamp_power_timer;
+		return;
+	}
 
 	/* Grab the default lamp values */
 	bits = lamp_matrix[lamp_strobe_column];
@@ -199,12 +213,25 @@ void lamp_rtt (void)
 		/* All columns strobed : reset strobe */
 		lamp_strobe_mask++;
 		lamp_strobe_column = 0;
+
+		/* After strobing all lamps, reload the power saver timer */
+		lamp_power_timer = lamp_power_level;
 	}
 	else
 	{
 		/* Advance strobe to next position for next iteration */
 		lamp_strobe_column++;
 	}
+}
+
+
+/**
+ * Set the lamp power saver level.
+ */
+void lamp_power_set (U8 level)
+{
+	dbprintf ("Lamp power level = %d\n", level);
+	lamp_power_timer = lamp_power_level = level;
 }
 
 
@@ -497,5 +524,47 @@ bool leff_test (lampnum_t lamp)
 	register bitset p = (leff_running_flags & L_SHARED) ?
 		lamp_leff2_matrix : lamp_leff1_matrix;
 	return bit_test (p, lamp);
+}
+
+
+/**
+ * When attract mode begins, start the timer to reduce lamp levels.
+ * The "GI POWER SAVER" adjustment controls the number of minutes
+ * until this kicks in.  If set to zero, then the feature is disabled.
+ */
+CALLSET_ENTRY (lamp, amode_start)
+{
+	lamp_power_idle_timer = 60 * system_config.gi_power_saver;
+	dbprintf ("Lamp power saver set to %ld\n", lamp_power_idle_timer);
+}
+
+
+/**
+ * When a game is started, or in test mode, cancel the power timer
+ * and return to full power for the lamps.
+ */
+CALLSET_ENTRY (lamp, start_game, test_start)
+{
+	lamp_power_idle_timer = 0;
+	lamp_power_set (0);
+}
+
+
+/**
+ * Periodically update the timer and see if reduced power should be
+ * enabled now.
+ */
+CALLSET_ENTRY (lamp, idle_every_second)
+{
+	if (lamp_power_idle_timer > 0) /* is the timer running? */
+	{
+		if (--lamp_power_idle_timer == 0) /* yes, decrement it: has it expired? */
+		{
+			/* Yes, set the reduced power level.  The argument says how many
+			IRQs for which no lamps will be turned on.  The larger the value,
+			the dimmer the lamps. */
+			lamp_power_set (system_config.power_saver_level >= 6 ? 2 : 3);
+		}
+	}
 }
 
