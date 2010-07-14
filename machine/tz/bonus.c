@@ -49,6 +49,25 @@ bool buttons_held;
 bool quickdeath_timer_running;
 extern bool powerball_death;
 extern U8 score_ranks[MAX_PLAYERS];
+extern U8 door_panels_started;
+extern U8 loops;
+extern U8 jets_bonus_level;
+extern U8 jets_scored;
+extern U8 left_ramps;
+extern U8 gumball_collected_count;
+extern U8 spiralawards_collected;
+extern U8 dead_end_count;
+extern U8 hitch_count;
+extern U8 rollover_count;
+extern bool backdoor_award_collected;
+extern bool multidrain_awarded;
+extern bool slot_stdm_death;
+extern bool jet_death;
+	
+extern U8 two_way_combos;
+extern U8 three_way_combos;
+extern U8 lucky_bounces;
+
 
 /* Function to find who holds what score position 
  * eg
@@ -207,32 +226,10 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 }
 
 
-void bonus_deff (void)
+void bonus_taunts (void)
 {
-	extern U8 door_panels_started;
-	extern U8 loops;
-	extern U8 jets_bonus_level;
-	extern U8 jets_scored;
-	extern U8 left_ramps;
-	extern U8 gumball_collected_count;
-	extern U8 spiralawards_collected;
-	extern U8 dead_end_count;
-	extern U8 hitch_count;
-	extern U8 rollover_count;
-
-	extern bool backdoor_award_collected;
-	extern bool multidrain_awarded;
-	extern bool slot_stdm_death;
-	extern bool jet_death;
-	
-	extern U8 two_way_combos;
-	extern U8 three_way_combos;
-	extern U8 lucky_bounces;
-
-
 	/* 
 	 * Taunts.....
-	 * TODO Adjust timings 
 	 * */
 	if (multidrain_awarded == TRUE)
 	{
@@ -300,8 +297,12 @@ void bonus_deff (void)
 		dmd_show_low ();
 		task_sleep_sec (4);
 	}	
-	
-	
+}
+
+void bonus_deff (void)
+{
+	bonus_taunts ();
+		
 	/* Clear the bonus score */
 	score_zero (total_bonus);
 
