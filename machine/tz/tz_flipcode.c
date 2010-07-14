@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION ( tz_flipcode_enter, __machine2__ ) */
+/* CALLSET_SECTION ( tz_flipcode_enter, __machine3__ ) */
 #include <freewpc.h>
 #include <eb.h>
 
@@ -106,6 +106,13 @@ static void check_tz_flipcode (void)
 		sound_send (SND_WELCOME_RACE_FANS);
 		tz_flipcode_text[0] = "GET BACK TO IRC";
 		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
+	}
+	else if (strcmp("SAM", initials_data) == 0)
+	{
+		sound_send (SND_WELCOME_RACE_FANS);
+		tz_flipcode_text[0] = "MAX POWER";
+		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
+		callset_invoke (door_start_clock_chaos);
 	}
 	else if (strcmp("TZM", initials_data) == 0)
 	{
