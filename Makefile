@@ -413,6 +413,7 @@ MACHINE_SYS_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_OBJS))
 MACHINE_TEST_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_TEST_OBJS))
 MACHINE_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME_PAGED_OBJS))
 MACHINE2_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME2_OBJS))
+MACHINE3_OBJS = $(patsubst %,$(MACHINE_DIR)/%,$(GAME3_OBJS))
 SYSTEM_HEADER_OBJS =
 SYSTEM_OBJS := $(SYSTEM_MD_OBJS) $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS) $(KERNEL_OBJS) $(MACHINE_SYS_OBJS) $(SCHED_OBJ)
 
@@ -449,6 +450,7 @@ endef
 
 $(foreach page,$(PAGE_NUMBERS),$(eval $(call PAGE_INIT, $(page))))
 ifeq ($(CONFIG_DMD),y)
+$(eval $(call PAGE_ALLOC, 52, MACHINE3))
 $(eval $(call PAGE_ALLOC, 53, MACHINE2))
 $(eval $(call PAGE_ALLOC, 54, MACHINE))
 else
@@ -481,8 +483,8 @@ AS_OBJS := $(SYSTEM_HEADER_OBJS) $(KERNEL_ASM_OBJS)
 C_OBJS := $(MD_OBJS) $(KERNEL_OBJS) $(COMMON_OBJS) $(EVENT_OBJS) \
 	$(TRANS_OBJS) $(TEST_OBJS) $(TEST2_OBJS) \
 	$(MACHINE_SYS_OBJS) $(MACHINE_OBJS) $(MACHINE_TEST_OBJS) \
-	$(MACHINE2_OBJS) $(FONT_OBJS) $(EFFECT_OBJS) $(INIT_OBJS) \
-	$(DEFF_OBJS) $(LEFF_OBJS) $(SCHED_OBJ)
+	$(MACHINE2_OBJS) $(MACHINE3_OBJS) $(FONT_OBJS) $(EFFECT_OBJS) \
+	$(INIT_OBJS) $(DEFF_OBJS) $(LEFF_OBJS) $(SCHED_OBJ)
 
 ifeq ($(PLATFORM),wpc)
 OBJS = $(C_OBJS) $(AS_OBJS) $(FON_OBJS)
@@ -886,9 +888,8 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLDDIR)/callset.o
 
-CALLSET_SECTIONS := MACHINE MACHINE2 COMMON EFFECT INIT TEST TEST2 SYSTEM
+CALLSET_SECTIONS := MACHINE MACHINE2 MACHINE3 COMMON EFFECT INIT TEST TEST2 SYSTEM
 $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
-	$(Q)echo "MACHINE2_OBJS = " $(MACHINE2_OBJS)
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset \
 			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
