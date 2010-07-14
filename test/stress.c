@@ -22,6 +22,8 @@
 
 U8 switch_stress_enable;
 
+U8 switch_stress_drain_prob;
+
 
 /**
  * Pulse the flippers periodically during stress test.
@@ -47,6 +49,21 @@ static void switch_stress_flipper_task (void)
 
 
 /**
+ * Simulate a ball drain condition.
+ * This is simulated occasionally during multiball play, and can be
+ * forced by pressing the Start Button.  The manual approach is the
+ * only way to end a ball, otherwise the simulation goes on forever.
+ */
+void switch_stress_drain (void)
+{
+#ifdef DEVNO_TROUGH
+	device_t *dev = device_entry (DEVNO_TROUGH);
+	device_call_op (dev, enter);
+#endif
+}
+
+
+/**
  * This task runs during a switch stress test.  During a game,
  * it randomly invokes switch handlers as if the switches had actually
  * been activated by the pinball.
@@ -57,7 +74,11 @@ void switch_stress_task (void)
 	const switch_info_t *swinfo;
 	task_pid_t tp;
 
-	device_add_live ();
+	/* Delay a few seconds before starting the simulation.  This allows
+	time for the Start Button to be used to add players, instead of simulating
+	endball. */
+	task_sleep_sec (3);
+
 	task_create_peer (switch_stress_flipper_task);
 	for (;;)
 	{
@@ -85,12 +106,14 @@ void switch_stress_task (void)
 			device_t *dev = device_entry (SW_GET_DEVICE (swinfo));
 			if (trough_dev_p (dev))
 			{
-				/* Don't trigger the trough device, because that will lead
-				to endball and we want to keep the simulation going.
-				Occasionally, though, throw single_ball_play so that any
-				multiball running will stop */
-				if (random () < 30)
-					callset_invoke (single_ball_play);
+				/* Don't always trigger the trough device.  The probability
+				of a ball drain is treated as proportional to the number of
+				balls in play.  So in big multiballs, we allow this to happen
+				more frequently.
+					We need to do this occasionally so that multiball modes
+				will eventually end, else nothing else gets tested. */
+				if (random () < switch_stress_drain_prob * live_balls)
+					switch_stress_drain ();
 			}
 			else if (dev->max_count < dev->size)
 			{
@@ -114,15 +137,6 @@ void switch_stress_task (void)
 }
 
 
-void switch_stress_endball (void)
-{
-#ifdef DEVNO_TROUGH
-	device_t *dev = device_entry (DEVNO_TROUGH);
-	device_call_op (dev, enter);
-#endif
-}
-
-
 /**
  * Ensure that no simulation is the default.
  */
@@ -133,6 +147,7 @@ CALLSET_ENTRY (stress, init)
 #else
 	switch_stress_enable = NO;
 #endif
+	switch_stress_drain_prob = 30;
 }
 
 /**
@@ -147,10 +162,9 @@ CALLSET_ENTRY (stress, start_ball)
 
 
 /**
- * Stop the simulation as soon as a ball enters the trough.
- * Also force it to stop on endball and endgame.
+ * Stop the simulation during endball, or when a game is aborted.
  */
-CALLSET_ENTRY (stress, dev_trough_enter, end_ball, stop_game)
+CALLSET_ENTRY (stress, end_ball, stop_game)
 {
 	task_kill_gid (GID_SWITCH_STRESS);
 }

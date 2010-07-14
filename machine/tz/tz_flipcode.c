@@ -36,6 +36,8 @@ const char *tz_flipcodes[] = {
 	"PUK",
 };
 #endif
+
+#ifndef CONFIG_NATIVE
 U8 strcmp (char *s1, char *s2)
 {
 	while (*s1 == *s2++)
@@ -43,6 +45,7 @@ U8 strcmp (char *s1, char *s2)
 			return (0);
 	return (*s1 - *--s2);
 }
+#endif
 
 void tz_flipcode_entered_deff (void)
 {
