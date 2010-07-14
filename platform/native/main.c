@@ -1162,6 +1162,9 @@ int main (int argc, char *argv[])
 
 #ifdef CONFIG_UI
 	/* Initialize the user interface */
+#ifdef CONFIG_UI_GTK
+	gtk_init (&argc, &argv);
+#endif
 	ui_init ();
 #endif
 

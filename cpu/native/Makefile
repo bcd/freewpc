@@ -28,10 +28,17 @@ CFLAGS += -fprofile-arcs -ftest-coverage
 HOST_LIBS += -lgcov
 endif
 
-ifeq ($(CONFIG_CURSES), y)
+ifeq ($(CONFIG_UI), curses)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 NATIVE_OBJS += $(D)/ui_curses.o
+endif
+
+ifeq ($(CONFIG_UI), gtk)
+CFLAGS += -DCONFIG_UI -DCONFIG_GTK
+UI_CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
+HOST_LIBS += $(shell pkg-config --libs gtk+-2.0)
+NATIVE_OBJS += $(D)/ui_gtk.o
 endif
 
 ifeq ($(CONFIG_SOFT_REALTIME), y)

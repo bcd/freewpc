@@ -10,7 +10,8 @@ NATIVE_OBJS :=
 # Common native mode CPU configuration
 CPU := native
 CONFIG_PTH := y
-CONFIG_CURSES := y
+CONFIG_UI ?= curses
+#CONFIG_UI := gtk
 CONFIG_SOFT_REALTIME := y
 include cpu/$(CPU)/Makefile
 
@@ -48,7 +49,7 @@ $(D)/asciidmd.o : CFLAGS += -Itools/imglib
 # only.
 $(D)/section.o : CFLAGS += -U_FORTIFY_SOURCE
 
-$(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM
+$(NATIVE_OBJS) : CFLAGS += -DNATIVE_SYSTEM $(UI_CFLAGS)
 
 # Add machine type flags
 CFLAGS += $(if $(CONFIG_DMD), -DMACHINE_DMD=1)
