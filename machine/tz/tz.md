@@ -543,8 +543,8 @@ Clock Working:
 ##########################################################################
 [deffs]
 Cow: page(MACHINE_PAGE), PRI_EGG1
-TZ Flipcode entry: page(MACHINE2_PAGE), PRI_REPLAY
-TZ Flipcode entered: page(MACHINE2_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
+TZ Flipcode entry: page(MACHINE3_PAGE), PRI_REPLAY
+TZ Flipcode entered: page(MACHINE3_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
