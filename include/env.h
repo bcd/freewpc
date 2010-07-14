@@ -92,6 +92,7 @@
 #define __effect__      __far__(C_STRING(EFFECT_PAGE))
 #define __init__        __far__(C_STRING(INIT_PAGE))
 #define __machine2__    __far__(C_STRING(MACHINE2_PAGE))
+#define __machine3__    __far__(C_STRING(MACHINE3_PAGE))
 #define __deff__        __far__(C_STRING(DEFF_PAGE))
 #define __leff__        __far__(C_STRING(DEFF_PAGE))
 #else
