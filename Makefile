@@ -889,9 +889,10 @@ gendefines_again: clean_gendefines gendefines
 .PHONY : callset
 callset: $(BLDDIR)/callset.o
 
-CALLSET_SECTIONS := MACHINE MACHINE2 COMMON EFFECT INIT TEST TEST2 SYSTEM
+CALLSET_SECTIONS := MACHINE MACHINE2 MACHINE3 COMMON EFFECT INIT TEST TEST2 SYSTEM
 $(BLDDIR)/callset.c : $(MACH_LINKS) $(CONFIG_SRCS) $(TEMPLATE_SRCS) tools/gencallset
 	$(Q)echo "MACHINE2_OBJS = " $(MACHINE2_OBJS)
+	$(Q)echo "MACHINE3_OBJS = " $(MACHINE3_OBJS)
 	$(Q)echo "Generating callsets ... " && rm -f $@ \
 		&& tools/gencallset \
 			$(foreach section,$(CALLSET_SECTIONS),$($(section)_OBJS:.o=.c:$(section)_PAGE)) \
