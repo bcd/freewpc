@@ -320,7 +320,7 @@ CALLSET_ENTRY (mpf, sw_right_ramp)
 	divertor fully.  The ordinary catch and drop is bypassed.
 	We should only allow the follow event if the mpf is ready
 	otherwise the powerball can slip through and start the mpf */
-	if (mpf_ready_p)
+	if (mpf_ready_p ())
 		event_should_follow (right_ramp, mpf_enter, TIME_3S);
 }
 
