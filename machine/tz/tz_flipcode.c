@@ -18,11 +18,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION ( tz_flipcode_enter, __machine3__ ) */
+/* CALLSET_SECTION ( tz_flipcode, __machine3__ ) */
 #include <freewpc.h>
 #include <eb.h>
-
-//TODO Make system adjustable setting
 
 extern char initials_data[3];
 
@@ -69,14 +67,6 @@ void tz_flipcode_entry_deff (void)
 	dmd_show2 ();
 	sound_send (SND_UNKNOWN_LIGHTNING);
 	task_sleep_sec (2);
-	/*
-	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
-	sprintf("%s", initials_data);
-	font_render_string_center (&font_fixed6, 40, 11, sprintf_buffer);
-	dmd_show2 ();
-	task_sleep_sec (4);
-	*/
 	deff_exit ();
 }
 
@@ -148,7 +138,7 @@ CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
 	check_tz_flipcode ();
 }
 
-CALLSET_ENTRY (tz_flipce, tz_flipcode_entry_stop)
+CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)
 {
 	SECTION_VOIDCALL (__common__, initials_stop);
 }
