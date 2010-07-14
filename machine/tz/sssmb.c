@@ -200,6 +200,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
+	if (!flag_test (FLAG_SSSMB_RUNNING))
+		return;	
 	if (mball_jackpot_uncollected == TRUE)
 		sound_send (SND_NOOOOOOOO);
 
@@ -322,7 +324,7 @@ CALLSET_ENTRY (sssmb, any_skill_switch)
 	deff_stop (DEFF_SSSMB_JACKPOT_LIT);
 }
 
-CALLSET_ENTRY (sssmb, ball_start)
+CALLSET_ENTRY (sssmb, start_ball)
 {
 	sssmb_stop ();
 }

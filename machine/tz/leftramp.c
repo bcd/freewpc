@@ -46,12 +46,15 @@ void left_ramp_deff (void)
 	else if (left_ramps == 3)
 	{
 		sprintf ("CAMERA LIT");
-		sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
+		sound_send (SND_MOST_UNUSUAL_CAMERA);
 	}
 	else if (left_ramps < 6)
 		sprintf ("GUMBALL AT 6");
 	else if (left_ramps == 6)
+	{
 		sprintf ("GUMBALL LIT");
+		sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
+	}
 	else if (left_ramps < 10 && can_award_extra_ball ())
 		sprintf ("EXTRA BALL AT 10");
 	else if (left_ramps < 10 && !can_award_extra_ball ())
