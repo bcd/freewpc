@@ -79,11 +79,13 @@ void check_rollover (void)
 /* Flipper button handlers */
 CALLSET_ENTRY (lanes, sw_left_button)
 {
+	if (in_game)
 	lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix);
 }
 
 CALLSET_ENTRY (lanes, sw_right_button)
 {
+	if (in_game)
 	lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
 }
 
