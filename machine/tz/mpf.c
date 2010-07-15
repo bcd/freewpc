@@ -205,6 +205,8 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
+	/* Inform combo.x that the mpf was collected */
+	callset_invoke (combo_mpf_collected);
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
 	flipper_enable ();
@@ -244,11 +246,11 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		mpf_buttons_pressed = 0;
 		mpf_active = TRUE;
 		unlit_shot_count = 0;
-		mpf_ball_count++;
+		bounded_increment (mpf_ball_count, feature_config.installed_balls);
 		/* Add on 10 seconds for each extra ball */
 		if (mpf_ball_count > 1)
 			mpf_timer += 10;
-		mpf_level++;
+		bounded_increment (mpf_level, 10);
 		bounded_decrement (mpf_enable_count, 0);
 		if ((mpf_ball_count = 1))
 		{	
@@ -256,7 +258,6 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 			if (!multi_ball_play ())
 			{
 				/* Turn off GI and start lamp effect */
-				//leff_start (LEFF_MPF_ACTIVE);
 				task_create_gid (GID_MPF_LAMP_TASK, mpf_lamp_task);
 				flipper_disable ();
 				bridge_open_stop ();
