@@ -47,6 +47,8 @@ U8 countup_pause_iterations;
 
 bool buttons_held;
 bool quickdeath_timer_running;
+bool quickdeath_timer_already_run;
+
 extern bool powerball_death;
 extern U8 score_ranks[MAX_PLAYERS];
 extern U8 door_panels_started;
@@ -798,6 +800,7 @@ void quickdeath_timer_task (void)
 		task_sleep_sec (1);
 	} while (--i != 0);
 	quickdeath_timer_running = FALSE;
+	quickdeath_timer_already_run = TRUE;
 	task_exit ();
 }
 
@@ -843,11 +846,6 @@ CALLSET_ENTRY (bonus, serve_ball)
 		deff_start (DEFF_SCORE_TO_BEAT);
 }
 
-CALLSET_ENTRY (bonus, valid_playfield)
-{
-	task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
-}
-
 CALLSET_ENTRY (bonus, start_game)
 {
 	/* Initiliase hi score storage variables */
@@ -856,6 +854,11 @@ CALLSET_ENTRY (bonus, start_game)
 	current_one_ball_hi_ball_number = 0;
 }
 
+CALLSET_ENTRY (bonus, valid_playfield)
+{
+	if (quickdeath_timer_already_run == FALSE)
+		task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
+}
 CALLSET_ENTRY (bonus, ball_serve)
 {
 	quickdeath_timer_running = FALSE;
@@ -866,4 +869,5 @@ CALLSET_ENTRY (bonus, start_ball)
 	/* Store the start ball store */
 	score_zero (start_ball_score);
 	score_copy (start_ball_score, current_score);
+	quickdeath_timer_already_run = FALSE;
 }
