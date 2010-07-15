@@ -626,7 +626,7 @@ SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 Thing Flips: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE+D_TIMEOUT
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 
-Rules: page(MACHINE2_PAGE), PRI_EGG1
+Rules: page(MACHINE3_PAGE), PRI_EGG1
 
 ##########################################################################
 # Lamp effects
