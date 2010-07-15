@@ -21,6 +21,8 @@
 /* CALLSET_SECTION (rules, __machine3__) */
 
 #include <freewpc.h>
+/* TODO This is pretty dangerous, figure out a safe way that doesn't leave
+ * the flippers enabled, sol_request? */
 
 extern void flipper_override_pulse (U8 switches);
 typedef enum {
@@ -294,6 +296,12 @@ void rules_deff (void)
 	music_enable ();
 	leff_start (LEFF_AMODE);
 	deff_exit ();
+}
+
+CALLSET_ENTRY (rules, start_game)
+{
+	task_kill_gid (GID_RULES_LEFF);
+	deff_stop (DEFF_RULES);
 }
 
 CALLSET_ENTRY (rules, sw_buyin_button)

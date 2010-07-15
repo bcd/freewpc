@@ -131,10 +131,13 @@ static void slot_kickout_subtask (void)
 
 void slot_kickout_leff (void)
 {
-	if (!multi_ball_play ())
+	if (live_balls == 1)
+	{
 		triac_leff_disable (TRIAC_GI_MASK);
+	}
 	leff_create_peer (slot_kickout_subtask);
 	task_sleep (TIME_500MS);
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -263,8 +266,11 @@ static void rocket_leff_subtask (void)
 void rocket_leff (void)
 {
 	U8 i;	
-	if (!multi_ball_play ())
+	if (live_balls == 1)
+	{
 		triac_leff_disable (TRIAC_GI_MASK);
+	}
+
 	for (i=0; i< 7; i++)
 	{	
 		flasher_pulse (FLASH_UR_FLIPPER);
@@ -466,14 +472,17 @@ void powerball_announce_leff (void)
 
 void mpf_active_leff (void)
 {
-	if (!multi_ball_play ())
+	if (live_balls == 1)
+	{
 		triac_leff_disable (TRIAC_GI_MASK);
+	}
 	triac_leff_enable (GI_POWERFIELD);
 	lamplist_set_apply_delay (TIME_100MS);
 	while (mpf_active == TRUE)
 	{
 		lamplist_apply (LAMPLIST_POWERFIELD_VALUES, leff_toggle);
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -523,12 +532,13 @@ void right_jet_flash_leff (void)
 
 void spiralaward_leff (void)
 {
-	//TODO Randomise this
-	U8 i = 42;
-	lamplist_set_apply_delay (TIME_33MS);
-	do {
+	U8 i;
+	lamplist_set_apply_delay (TIME_16MS);
+	for (i = 0; i < 42; i++)
+	{
 		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, matrix_lookup (LMX_EFFECT1_LAMPS));
-	} while (--i != 0);
+		task_sleep (TIME_16MS);
+	}
 	leff_exit ();
 }
 

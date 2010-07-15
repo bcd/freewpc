@@ -47,6 +47,7 @@ void sw_right_ramp_enter_task (void)
 	/* Decide whether to let the ball onto the mini-playfield,
 	or dump it.  Do this once for each balls that enters the
 	ramp. */
+	kickout_lock (KLOCK_DEFF);
 	do {
 		if (mpf_ready_p ())
 		{
@@ -67,6 +68,7 @@ void sw_right_ramp_enter_task (void)
 			bridge_open_stop ();
 		}
 	} while (--right_ramps_entered > 0);
+	kickout_unlock (KLOCK_DEFF);
 	task_exit ();
 }
 

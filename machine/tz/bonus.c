@@ -789,21 +789,6 @@ void bonus_deff (void)
 	deff_exit ();
 }
 
-/* Done like this rather than a timer_ as 
- * this can go for 255 seconds */
-void quickdeath_timer_task (void)
-{
-	quickdeath_timer_running = TRUE;
-	/* Amount of seconds for the timer to run */
-	U8 i = 22;
-	do {
-		task_sleep_sec (1);
-	} while (--i != 0);
-	quickdeath_timer_running = FALSE;
-	quickdeath_timer_already_run = TRUE;
-	task_exit ();
-}
-
 void score_to_beat_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -835,7 +820,7 @@ void score_to_beat_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 	}
 	dmd_show_low ();
-	task_sleep_sec (5);
+	task_sleep_sec (4);
 	deff_exit ();
 }
 
@@ -854,9 +839,25 @@ CALLSET_ENTRY (bonus, start_game)
 	current_one_ball_hi_ball_number = 0;
 }
 
+
+/* Done like this rather than a timer_ as 
+ * this can go for 255 seconds */
+void quickdeath_timer_task (void)
+{
+	quickdeath_timer_running = TRUE;
+	/* Amount of seconds for the timer to run */
+	U8 i = 25;
+	do {
+		task_sleep_sec (1);
+	} while (--i != 0);
+	quickdeath_timer_running = FALSE;
+	quickdeath_timer_already_run = TRUE;
+	task_exit ();
+}
+
 CALLSET_ENTRY (bonus, valid_playfield)
 {
-	/* Start a 22 second timer if this is the first time
+	/* Start a timer if this is the first time
 	 * a ball has entered the playfield */
 	if (quickdeath_timer_already_run == FALSE && quickdeath_timer_running == FALSE)
 		task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
@@ -869,4 +870,20 @@ CALLSET_ENTRY (bonus, start_ball)
 	score_copy (start_ball_score, current_score);
 	quickdeath_timer_already_run = FALSE;
 	quickdeath_timer_running = FALSE;
+}
+
+CALLSET_ENTRY (bonus, rank_change)
+{
+	if (check_if_last_ball_for_multiplayer 
+		&& in_live_game 
+		&& score_ranks[player_up-1] == 1)
+	{
+		/* Notify the player that they have taken the lead */
+		deff_start (DEFF_IN_THE_LEAD);
+	}
+}
+
+CALLSET_ENTRY (bonus, end_ball)
+{
+	task_kill_gid (GID_QUICKDEATH);
 }

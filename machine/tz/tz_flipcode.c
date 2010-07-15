@@ -38,13 +38,14 @@ extern void pin_stop (void);
 
 U8 tz_flipcode_number;
 
-#define NUM_TZ_FLIPCODES 5
+#define NUM_TZ_FLIPCODES 6
 const char *tz_flipcodes[] = {
 	"BCD",
 	"FEK",
 	"PUK",
 	"MET",
 	"SAM",
+	"SUN",
 };
 
 /* No particular reason why the PIN's are like this
@@ -55,6 +56,7 @@ const char *tz_flipcode_pins[] = {
 	"3456",
 	"4567",
 	"5678",
+	"6789",
 };
 
 const char *tz_flipcode_text[] = {
@@ -63,6 +65,7 @@ const char *tz_flipcode_text[] = {
 	"EXTRA BALL LIT",
 	"GET BACK TO IRC",
 	"MAX POWER",
+	"LIKE THE WEATHER",
 };
 
 #ifndef CONFIG_NATIVE
@@ -131,6 +134,11 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				case 4:
 					callset_invoke (door_start_clock_chaos);
 					sound_send (SND_WELCOME_RACE_FANS);
+					break;
+				/* SUN */
+				case 5:
+					callset_invoke (mball_start_3_ball);
+					sound_send (SND_ITS_SUNNY_DRIVE_TIME);
 					break;
 			}
 			/* Store for deff */

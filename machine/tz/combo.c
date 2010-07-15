@@ -45,6 +45,18 @@ static void lucky_bounce (void)
 	bounded_increment (lucky_bounces, 99);
 }
 
+static void award_two_way_combo (void)
+{
+	bounded_increment (two_way_combos, 99);
+	deff_start (DEFF_TWO_WAY_COMBO);
+}
+
+static void award_three_way_combo (void)
+{
+	bounded_increment (three_way_combos, 99);
+	deff_start (DEFF_THREE_WAY_COMBO);
+}
+
 /* Left ramp, Right ramp, Piano combo */
 CALLSET_ENTRY (combo, sw_left_ramp_exit)
 {
@@ -54,7 +66,10 @@ CALLSET_ENTRY (combo, sw_left_ramp_exit)
 CALLSET_ENTRY (combo, sw_right_ramp)
 {
 	if (event_did_follow (left_ramp, right_ramp))
+	{
 		event_can_follow (left_right_ramp, piano, TIME_4S);
+		event_can_follow (left_right_ramp, mpf_collected, TIME_10S);
+	}
 }
 
 /* Jet Death + lucky bounce combo */
@@ -113,15 +128,12 @@ CALLSET_ENTRY (combo, sw_piano)
 	{
 		sound_send (SND_RUDY_BLEH);
 		score (SC_10M);
-		deff_start (DEFF_TWO_WAY_COMBO);
-		bounded_increment (two_way_combos, 99);
+		award_two_way_combo ();
 	}
 	else if (event_did_follow (left_right_ramp, piano))
 	{
-		sound_send (SND_THREE_WAY_COMBO);
 		score (SC_20M);
-		deff_start (DEFF_THREE_WAY_COMBO);
-		bounded_increment (three_way_combos, 99);
+		award_three_way_combo ();
 	}
 	else if (event_did_follow (standup_3, slot_or_piano))
 		lucky_bounce ();
@@ -133,6 +145,17 @@ CALLSET_ENTRY (combo, sw_power_payoff)
 	if (event_did_follow (left_right_ramp, piano))
 		sound_send (SND_TOO_HOT_TO_HANDLE);
 }
+
+CALLSET_ENTRY (combo, combo_mpf_collected)
+{
+	/* Left ramp -> Right ramp -> mpf collected */
+	if (event_did_follow (left_right_ramp, mpf_collected))
+	{
+		score (SC_20M);
+		award_three_way_combo ();
+	}
+}
+
 
 CALLSET_ENTRY (combo, sw_standup_4)
 {
@@ -162,12 +185,6 @@ CALLSET_ENTRY (combo, sw_camera)
 	}
 	else if (event_did_follow (slot_standup, camera))
 	{
-	/*
-		sound_send (SND_LUCKY);
-		score (SC_1M);
-		deff_start (DEFF_LUCKY_BOUNCE);
-		bounded_increment (lucky_bounces, 99);
-	*/
 		lucky_bounce ();
 	}
 		

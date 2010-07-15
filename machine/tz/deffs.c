@@ -121,8 +121,26 @@ void special_deff (void)
 
 void two_way_combo_deff (void)
 {
+	sound_send (SND_GUMBALL_COMBO);
 	sprintf ("2 WAY COMBO");
 	flash_and_exit_deff (15, TIME_66MS);
+}
+
+void three_way_combo_deff (void)
+{
+	sound_send (SND_THREE_WAY_COMBO);
+	sprintf ("3 WAY COMBO");
+	flash_and_exit_deff (20, TIME_66MS);
+}
+
+void in_the_lead_deff (void)
+{
+	sound_send (SND_GO_FOR_THE_HILL);
+	sprintf ("IN");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("THE LEAD");
+	flash_small_deff (15, TIME_33MS);
+	deff_exit ();
 }
 
 void lucky_bounce_deff (void)
@@ -159,12 +177,6 @@ void mb_ten_million_added_deff (void)
 	sprintf ("TO JACKPOT");
 	flash_small_deff (20, TIME_66MS);
 	deff_exit ();
-}
-
-void three_way_combo_deff (void)
-{
-	sprintf ("3 WAY COMBO");
-	flash_and_exit_deff (20, TIME_66MS);
 }
 
 /* Jackpot animation contributed by highrise */

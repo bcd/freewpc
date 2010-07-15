@@ -43,6 +43,7 @@ static bool can_show_loop_leff (void)
 		return TRUE;
 }
 
+#if 0
 static bool can_show_loop_deff (void)
 {
 	if (fastlock_running ())
@@ -54,7 +55,7 @@ static bool can_show_loop_deff (void)
 	else
 		return TRUE;
 }
-
+#endif
 void enter_loop (void)
 {
 	if (in_live_game)
