@@ -57,7 +57,7 @@ match_deff (void)
 
 	for (n=0; n < 20; n++)
 	{
-		if (n == 19)
+		if (n == 20)
 			value = match_value;
 		else
 		{
