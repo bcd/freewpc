@@ -180,6 +180,10 @@ void exec_script_file (const char *filename);
 
 unsigned long realtime_read (void);
 
+unsigned char *sim_switch_matrix_get (void);
+void sim_switch_toggle (int sw);
+int sim_switch_read (int sw);
+void sim_switch_init (void);
 
 void conf_add (const char *name, int *valp);
 int conf_read (const char *name);

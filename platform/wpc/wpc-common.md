@@ -78,7 +78,7 @@ Ball Save: MACHINE_BALL_SAVE_LAMP
 NULL: c_decl(deff_exit), PRI_NULL
 Amode: page(COMMON_PAGE), c_decl(system_amode_deff), runner, PRI_AMODE
 Scores: runner, page(EFFECT_PAGE), PRI_SCORES
-Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT
+Scores Important: page(EFFECT_PAGE), PRI_SCORES_IMPORTANT, D_RESTARTABLE
 Score Goal: page(EFFECT_PAGE), PRI_SCORE_GOAL, D_TIMEOUT
 Credits: page(COMMON_PAGE), PRI_CREDITS
 Tilt Warning: page(COMMON_PAGE), PRI_TILT_WARNING
