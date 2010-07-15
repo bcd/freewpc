@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (rules, __machine2__) */
+/* CALLSET_SECTION (rules, __machine3__) */
 
 #include <freewpc.h>
 
