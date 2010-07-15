@@ -90,8 +90,7 @@ void tz_flipcode_entered_deff (void)
 
 void tz_flipcode_entry_deff (void)
 {
-	dmd_alloc_pair ();
-	frame_draw (IMG_COW);
+	dmd_alloc_pair_clean ();
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show2 ();
@@ -145,10 +144,12 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 
 void tz_flipcode_running (void)
 {
+	music_off ();
 	deff_start_sync (DEFF_TZ_FLIPCODE_ENTRY);
 	SECTION_VOIDCALL (__common__, initials_enter);
 	SECTION_VOIDCALL (__common__, pin_enter);
 	callset_invoke (check_tz_flipcode);
+	music_set (MUS_TZ_IN_PLAY);
 	task_exit ();
 }
 
@@ -157,8 +158,7 @@ CALLSET_ENTRY (tz_flipcode, any_pf_switch)
 {
 	if (task_kill_gid (GID_TZ_FLIPCODE_RUNNING))
 	{
-		pin_stop ();
-		initials_stop ();
+		callset_invoke (tz_flipcode_entry_stop);	
 	}
 }
 
@@ -169,5 +169,6 @@ CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)
 {
+	SECTION_VOIDCALL (__common__, pin_stop);
 	SECTION_VOIDCALL (__common__, initials_stop);
 }
