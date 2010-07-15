@@ -18,11 +18,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* Basic flipcode and PIN
+ * To start input:
+ * hold down both flippers and the buyin button whilst the ball is in the plunger lane
+ * See common/pause.c for start conditions
+ */
+
 /* CALLSET_SECTION ( tz_flipcode, __machine3__ ) */
 #include <freewpc.h>
 #include <eb.h>
 
 extern char initials_data[3];
+extern char pin_data[4];
+extern U8 initials_enter_timer;
+extern U8 pin_enter_timer;
+
+extern void intials_stop (void);
+extern void pin_stop (void);
 
 U8 tz_flipcode_number;
 
@@ -33,6 +45,16 @@ const char *tz_flipcodes[] = {
 	"PUK",
 	"MET",
 	"SAM",
+};
+
+/* No particular reason why the PIN's are like this
+ * I just think it looks pleasing */
+const char *tz_flipcode_pins[] = {
+	"1234",
+	"2345",
+	"3456",
+	"4567",
+	"5678",
 };
 
 const char *tz_flipcode_text[] = {
@@ -83,24 +105,30 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 	U8 i;
 	for (i = 0; i < NUM_TZ_FLIPCODES; i++)
 	{
-		if (strcmp((tz_flipcodes[i]), initials_data) == 0)
+		if (strcmp(tz_flipcodes[i], initials_data) == 0
+			&& strcmp(tz_flipcode_pins[i], pin_data) == 0)
 		{
 			switch (i)
 			{
+				/* BCD */
 				case 0:
 					sound_send (SND_HEY_ITS_ONLY_PINBALL);
 					break;
+				/* FEK */
 				case 1:
 					callset_invoke (door_start_clock_chaos);
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
+				/* PUK */
 				case 2:
 					light_easy_extra_ball ();
 					sound_send (SND_YOU_UNLOCK_THIS_DOOR);
 					break;
+				/* MET */
 				case 3:
 					sound_send (SND_WELCOME_RACE_FANS);
 					break;
+				/* SAM */
 				case 4:
 					callset_invoke (door_start_clock_chaos);
 					sound_send (SND_WELCOME_RACE_FANS);
@@ -109,15 +137,34 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 			/* Store for deff */
 			tz_flipcode_number = i;
 			deff_start (DEFF_TZ_FLIPCODE_ENTERED);
+			return;
 		}
+	}
+	sound_send (SND_BUYIN_CANCELLED);
+}
+
+void tz_flipcode_running (void)
+{
+	deff_start_sync (DEFF_TZ_FLIPCODE_ENTRY);
+	SECTION_VOIDCALL (__common__, initials_enter);
+	SECTION_VOIDCALL (__common__, pin_enter);
+	callset_invoke (check_tz_flipcode);
+	task_exit ();
+}
+
+/* Abort flipcode entry if the ball leaves the plunger */
+CALLSET_ENTRY (tz_flipcode, any_pf_switch)
+{
+	if (task_kill_gid (GID_TZ_FLIPCODE_RUNNING))
+	{
+		pin_stop ();
+		initials_stop ();
 	}
 }
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
 {
-	deff_start_sync (DEFF_TZ_FLIPCODE_ENTRY);
-	SECTION_VOIDCALL (__common__, initials_enter);
-	callset_invoke (check_tz_flipcode);
+	task_create_gid (GID_TZ_FLIPCODE_RUNNING, tz_flipcode_running);
 }
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)

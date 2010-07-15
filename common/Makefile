@@ -14,6 +14,7 @@ COMMON_BASIC_OBJS += $(if $(CONFIG_EBFLEX), common/ebflex.o)
 COMMON_BASIC_OBJS +=	common/event-audit.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_PIC),,common/flipcode.o)
 COMMON_BASIC_OBJS +=	common/initials.o
+COMMON_BASIC_OBJS +=	$(if $(MACHINE_TZ),,common/pin.o)
 COMMON_BASIC_OBJS +=	common/locale.o
 COMMON_BASIC_OBJS +=	$(if $(CONFIG_PLAYABLE), common/match.o)
 COMMON_BASIC_OBJS +=	common/optocheck.o
