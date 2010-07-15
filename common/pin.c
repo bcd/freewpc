@@ -190,7 +190,7 @@ CALLSET_ENTRY (pin, sw_right_button)
 
 CALLSET_ENTRY (pin, start_button_handler)
 {
-	if (pin_enter_timer)
+	if (pin_enter_timer && pin_index != PIN_LENGTH)
 	{
 		pin_data[pin_index] =
 			pin_chars[(pin_selection + SELECT_OFFSET) % ALPHABET_LEN];
