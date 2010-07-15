@@ -215,8 +215,8 @@ void rules_spiralaward2_leff (void)
 		flipper_override_pulse (WPC_LL_FLIP_SW);
 		lamp_tristate_off (LM_RIGHT_SPIRAL);
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
-		flipper_disable ();
 		task_sleep (TIME_500MS);
+		flipper_disable ();
 	}
 }
 
@@ -242,7 +242,6 @@ void rules_deff (void)
 	task_create_gid1 (GID_RULES_LEFF, rules_spiralaward2_leff);
 	task_sleep_sec (5);
 	rule_complete ();
-	flipper_disable ();
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_flash_off);
 	lamp_tristate_off (LM_RIGHT_SPIRAL);
 	lamp_tristate_off (LM_RIGHT_POWERBALL);
@@ -276,7 +275,7 @@ void rules_deff (void)
 	task_create_gid1 (GID_RULES_LEFF, rules_hitchhiker_leff);
 	task_sleep_sec (4);
 	rule_complete ();
-	flipper_disable ();
+
 	
 	lamp_tristate_off (LM_RIGHT_JET);
 	lamp_tristate_off (LM_CAMERA);
@@ -299,6 +298,6 @@ void rules_deff (void)
 
 CALLSET_ENTRY (rules, sw_buyin_button)
 {
-	if (!in_game && !in_test)
+	if (deff_get_active () == DEFF_AMODE)
 		deff_start (DEFF_RULES);
 }
