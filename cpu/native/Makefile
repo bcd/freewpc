@@ -37,7 +37,7 @@ endif
 ifeq ($(CONFIG_UI), gtk)
 CFLAGS += -DCONFIG_UI -DCONFIG_GTK
 UI_CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
-HOST_LIBS += $(shell pkg-config --libs gtk+-2.0)
+HOST_LIBS += $(shell pkg-config --libs gtk+-2.0) -export-dynamic
 NATIVE_OBJS += $(D)/ui_gtk.o
 endif
 

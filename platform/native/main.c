@@ -877,8 +877,13 @@ static void linux_interface_thread (void)
 
 	if (exec_file && exec_late_flag)
 		exec_script_file (exec_file);
+
 	for (;;)
 	{
+#ifdef CONFIG_GTK
+		gtk_poll ();
+		task_yield ();
+#else
 		*inbuf = linux_interface_readchar ();
 
 		/* If switch simulation is turned off, then keystrokes
@@ -1030,6 +1035,7 @@ static void linux_interface_thread (void)
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
 						*inbuf, *inbuf);
 			}
+#endif
 	}
 }
 
@@ -1162,7 +1168,7 @@ int main (int argc, char *argv[])
 
 #ifdef CONFIG_UI
 	/* Initialize the user interface */
-#ifdef CONFIG_UI_GTK
+#ifdef CONFIG_GTK
 	gtk_init (&argc, &argv);
 #endif
 	ui_init ();
