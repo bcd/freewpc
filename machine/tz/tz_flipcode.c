@@ -24,16 +24,24 @@
 
 extern char initials_data[3];
 
-char *tz_flipcode_text[24];
+U8 tz_flipcode_number;
 
-#define NUM_TZ_FLIPCODES 3
-#if 0
+#define NUM_TZ_FLIPCODES 5
 const char *tz_flipcodes[] = {
 	"BCD",
 	"FEK",
 	"PUK",
+	"MET",
+	"SAM",
 };
-#endif
+
+const char *tz_flipcode_text[] = {
+	"THE WIZARD",
+	"WELCOME BACK",
+	"EXTRA BALL LIT",
+	"GET BACK TO IRC",
+	"MAX POWER",
+};
 
 #ifndef CONFIG_NATIVE
 U8 strcmp (char *s1, char *s2)
@@ -51,7 +59,7 @@ void tz_flipcode_entered_deff (void)
 	frame_draw (IMG_COW);
 	sprintf ("HI %s", initials_data);
 	font_render_string_center (&font_times10, 40, 11, sprintf_buffer);
-	font_render_string_center (&font_var5, 40, 24, tz_flipcode_text[0]);
+	font_render_string_center (&font_var5, 40, 24, tz_flipcode_text[tz_flipcode_number]);
 	
 	dmd_show2 ();
 	task_sleep_sec (3);
@@ -65,77 +73,51 @@ void tz_flipcode_entry_deff (void)
 	font_render_string_center (&font_var5, 40, 11, "THE POWER");
 	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
 	dmd_show2 ();
-	sound_send (SND_UNKNOWN_LIGHTNING);
+	sound_send (SND_THUNDER1);
 	task_sleep_sec (2);
 	deff_exit ();
 }
 
-
-static void check_tz_flipcode (void)
+CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 {
-	if (strcmp("BCD", initials_data) == 0)
-	{
-		sound_send (SND_HEY_ITS_ONLY_PINBALL);
-		tz_flipcode_text[0] = "THE WIZARD";
-		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
-	}
-	else if (strcmp("FEK", initials_data) == 0)
-	{
-		tz_flipcode_text[0] = "NICE TO SEE YOU";
-		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
-		callset_invoke (door_start_clock_chaos);
-	}
-	else if (strcmp("PUK", initials_data) == 0)
-	{
-		light_easy_extra_ball ();
-		tz_flipcode_text[0] = "EXTRA BALL IS LIT";
-		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
-	}
-	else if (strcmp("MET", initials_data) == 0)
-	{
-		sound_send (SND_WELCOME_RACE_FANS);
-		tz_flipcode_text[0] = "GET BACK TO IRC";
-		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
-	}
-	else if (strcmp("SAM", initials_data) == 0)
-	{
-		sound_send (SND_WELCOME_RACE_FANS);
-		tz_flipcode_text[0] = "MAX POWER";
-		deff_start (DEFF_TZ_FLIPCODE_ENTERED);
-		callset_invoke (door_start_clock_chaos);
-	}
-	else if (strcmp("TZM", initials_data) == 0)
-	{
-		music_request (MUS_TZ_IN_PLAY, PRI_JACKPOT);
-	}
-	else
-		sound_send (SND_BUYIN_CANCELLED);
-	#if 0
 	U8 i;
-	for (i = 0; i < NUM_TZ_FLIPCODES - 1; i++)
+	for (i = 0; i < NUM_TZ_FLIPCODES; i++)
 	{
-		if (strcmp(tz_flipcodes[i], initials_data) == 0)
+		if (strcmp((tz_flipcodes[i]), initials_data) == 0)
+		{
 			switch (i)
 			{
 				case 0:
 					sound_send (SND_HEY_ITS_ONLY_PINBALL);
 					break;
 				case 1:
+					callset_invoke (door_start_clock_chaos);
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
 				case 2:
+					light_easy_extra_ball ();
 					sound_send (SND_YOU_UNLOCK_THIS_DOOR);
 					break;
+				case 3:
+					sound_send (SND_WELCOME_RACE_FANS);
+					break;
+				case 4:
+					callset_invoke (door_start_clock_chaos);
+					sound_send (SND_WELCOME_RACE_FANS);
+					break;
 			}
+			/* Store for deff */
+			tz_flipcode_number = i;
+			deff_start (DEFF_TZ_FLIPCODE_ENTERED);
+		}
 	}
-	#endif
 }
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
 {
 	deff_start_sync (DEFF_TZ_FLIPCODE_ENTRY);
 	SECTION_VOIDCALL (__common__, initials_enter);
-	check_tz_flipcode ();
+	callset_invoke (check_tz_flipcode);
 }
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)
