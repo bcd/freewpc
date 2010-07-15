@@ -133,6 +133,8 @@ static void award_spiralaward (void)
 			break;
 		case 4:
 			sound_send (SND_TEN_MILLION_POINTS);
+			/* Light the 10M door panel */
+			lamp_on (LM_PANEL_10M);
 			score (SC_10M);
 			break;
 		case 5:
