@@ -65,7 +65,7 @@ match_deff (void)
 				value = random_scaled (10) * 0x10;
 			} while (value == last_value);
 		}
-
+		last_value = value;
 		dmd_alloc_low_clean ();
 		sprintf ("%2b", &scores[0][BYTES_PER_SCORE-1]);
 		font_render_string_left (&font_mono5, 0, 0, sprintf_buffer);
