@@ -225,9 +225,9 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 		return FALSE;
 }
 
-
-void bonus_taunts (void)
+void bonus_deff (void)
 {
+	
 	/* 
 	 * Taunts.....
 	 * */
@@ -287,7 +287,6 @@ void bonus_taunts (void)
 	
 	if (powerball_death == TRUE)
 	{
-		sound_send (SND_NEVER_UNDERESTIMATE_POWER);
 		dmd_alloc_low_clean ();
 		sprintf ("POWERBALL");
 		font_render_string_center (&font_steel, 64, 8, sprintf_buffer);
@@ -295,14 +294,10 @@ void bonus_taunts (void)
 		font_render_string_center (&font_steel, 64, 18, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
+		sound_send (SND_NEVER_UNDERESTIMATE_POWER);
 		task_sleep_sec (4);
 	}	
-}
-
-void bonus_deff (void)
-{
-	bonus_taunts ();
-		
+	
 	/* Clear the bonus score */
 	score_zero (total_bonus);
 
