@@ -856,12 +856,10 @@ CALLSET_ENTRY (bonus, start_game)
 
 CALLSET_ENTRY (bonus, valid_playfield)
 {
-	if (quickdeath_timer_already_run == FALSE)
+	/* Start a 22 second timer if this is the first time
+	 * a ball has entered the playfield */
+	if (quickdeath_timer_already_run == FALSE && quickdeath_timer_running == FALSE)
 		task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
-}
-CALLSET_ENTRY (bonus, ball_serve)
-{
-	quickdeath_timer_running = FALSE;
 }
 
 CALLSET_ENTRY (bonus, start_ball)
@@ -870,4 +868,5 @@ CALLSET_ENTRY (bonus, start_ball)
 	score_zero (start_ball_score);
 	score_copy (start_ball_score, current_score);
 	quickdeath_timer_already_run = FALSE;
+	quickdeath_timer_running = FALSE;
 }
