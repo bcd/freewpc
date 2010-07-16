@@ -60,6 +60,9 @@ U8 high_score_position;
 /* Indicates the player number being checked */
 U8 high_score_player;
 
+#ifdef MACHINE_TZ
+	extern __local__ bool flipcode_used;
+#endif
 
 /** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] =
@@ -319,6 +322,12 @@ void high_score_free (U8 position)
 void high_score_check_player (U8 player)
 {
 	U8 hs;
+	/* Invalidate the score if a flipcode was used */
+
+#ifdef MACHINE_TZ
+	if (flipcode_used)
+		return;
+#endif
 
 	for (hs = 0; hs < HS_COUNT; hs++)
 	{

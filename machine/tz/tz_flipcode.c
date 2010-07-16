@@ -36,6 +36,9 @@ extern U8 pin_enter_timer;
 extern void intials_stop (void);
 extern void pin_stop (void);
 
+/* Used to invalidate high score */
+__local__ bool flipcode_used;
+
 U8 tz_flipcode_number;
 
 extern score_t temp_score;
@@ -156,6 +159,7 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 			}
 			/* Store for deff */
 			tz_flipcode_number = i;
+			flipcode_used = TRUE;
 			deff_start (DEFF_TZ_FLIPCODE_ENTERED);
 			return;
 		}
@@ -181,6 +185,11 @@ CALLSET_ENTRY (tz_flipcode, any_pf_switch)
 	{
 		callset_invoke (tz_flipcode_entry_stop);	
 	}
+}
+
+CALLSET_ENTRY (tz_flipcode, start_game)
+{
+	flipcode_used = FALSE;
 }
 
 CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
