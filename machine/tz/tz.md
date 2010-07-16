@@ -248,7 +248,7 @@ G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
 G3: Powerfield, flash
 G4: Ramp1, flash
-G5: Left Magnet
+G5: Left Magnet, duty(SOL_DUTY_75), time(TIME_100MS)
 G6: Upper Right Magnet
 G7: Right Magnet
 G8: Gumball Release, motor, nosearch

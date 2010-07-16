@@ -83,7 +83,7 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	outhole.o lock.o camera.o combo.o deadend.o \
 	hitch.o
 
-GAME3_OBJS = tz_flipcode.o rules.o
+GAME3_OBJS = tz_flipcode.o rules.o loopmag.o
 
 IMAGE_MAP += $(M)/tz.ild
 
