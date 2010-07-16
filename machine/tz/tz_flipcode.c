@@ -38,7 +38,10 @@ extern void pin_stop (void);
 
 U8 tz_flipcode_number;
 
-#define NUM_TZ_FLIPCODES 6
+extern score_t temp_score;
+
+//TODO Make this a three dimensional array 
+#define NUM_TZ_FLIPCODES 7
 const char *tz_flipcodes[] = {
 	"BCD",
 	"FEK",
@@ -46,6 +49,7 @@ const char *tz_flipcodes[] = {
 	"MET",
 	"SAM",
 	"SUN",
+	"JND",
 };
 
 /* No particular reason why the PIN's are like this
@@ -57,6 +61,7 @@ const char *tz_flipcode_pins[] = {
 	"4567",
 	"5678",
 	"6789",
+	"789A",
 };
 
 const char *tz_flipcode_text[] = {
@@ -66,6 +71,7 @@ const char *tz_flipcode_text[] = {
 	"GET BACK TO IRC",
 	"MAX POWER",
 	"LIKE THE WEATHER",
+	"MEGA SCORE",
 };
 
 #ifndef CONFIG_NATIVE
@@ -139,6 +145,13 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				case 5:
 					callset_invoke (mball_start_3_ball);
 					sound_send (SND_ITS_SUNNY_DRIVE_TIME);
+					break;
+				/* JND */
+				case 6:
+					score_zero (temp_score);
+					score_copy (temp_score, current_score);
+					score_add (current_score, temp_score);
+					sound_send (SND_NO_CREDITS);
 					break;
 			}
 			/* Store for deff */

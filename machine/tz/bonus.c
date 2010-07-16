@@ -874,7 +874,7 @@ CALLSET_ENTRY (bonus, start_ball)
 
 CALLSET_ENTRY (bonus, rank_change)
 {
-	if (check_if_last_ball_for_multiplayer 
+	if (check_if_last_ball_for_multiplayer ()
 		&& in_live_game 
 		&& score_ranks[player_up-1] == 1)
 	{

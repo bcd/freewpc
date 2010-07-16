@@ -136,10 +136,10 @@ void three_way_combo_deff (void)
 void in_the_lead_deff (void)
 {
 	sound_send (SND_GO_FOR_THE_HILL);
-	sprintf ("IN");
-	flash_small_deff (15, TIME_33MS);
-	sprintf ("THE LEAD");
-	flash_small_deff (15, TIME_33MS);
+	sprintf ("IN THE LEAD");
+	flash_small_deff (30, TIME_33MS);
+	sprintf ("GO FOR IT");
+	flash_small_deff (30, TIME_33MS);
 	deff_exit ();
 }
 
