@@ -144,7 +144,7 @@ void ui_write_switch (int switchno, int on_flag)
 
 void ui_write_sound_command (unsigned int x)
 {
-	wmove (sound_win, 2, 2);
+	wmove (sound_win, 1, 1);
 	wprintw (sound_win, "%04X", x);
 	wrefresh (sound_win);
 }
@@ -152,7 +152,7 @@ void ui_write_sound_command (unsigned int x)
 
 void ui_write_sound_reset (void)
 {
-	wmove (sound_win, 2, 2);
+	wmove (sound_win, 1, 1);
 	wprintw (sound_win, "    ");
 	wrefresh (sound_win);
 }
