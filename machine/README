@@ -2,14 +2,13 @@
 This directory contains machine-specific files.  Each supported
 game should put its files into its own subdirectory.
 
-At a minimum, each machine must provide:
-
-- A Makefile
-- A machine description file (.md)
+At a minimum, each machine must provide a Makefile and a machine
+description file (same basename as the directory, with suffix .md).
 
 For WPC, the top of the .md should define the generation of
 machine used.  Here are the values to use and the games that they
-apply to (taken from information at http://www.pinrepair.com/wpc/index1.htm):
+apply to (taken from information at http://www.pinrepair.com/wpc/index1.htm).
+Games with "+" already have at least a basic machine description.
 
 1. WPC Alphanumeric
 
@@ -72,7 +71,7 @@ PIC: Yes
 --------------------------------------------
 + World Cup Soccer
 Flintstones
-Corvette
++ Corvette
 RoadShow #
 The Shadow
 Dirty Harry
