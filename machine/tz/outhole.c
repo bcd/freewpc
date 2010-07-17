@@ -66,7 +66,7 @@ CALLSET_ENTRY (outhole, valid_playfield)
 	powerball_death = FALSE;
 }
 
-CALLSET_ENTRY (outhole, ball_serve)
+CALLSET_ENTRY (outhole, serve_ball)
 {
 	powerball_death = FALSE;
 	multidrain_count = 0;

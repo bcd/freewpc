@@ -18,6 +18,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* TODO Rather than use two optos:
+ * grab the ball
+ * let it go
+ * Time how long the opto stays closed for
+ * Use that as a basis of how fast the ball is going */
 
 /* CALLSET_SECTION (thingfl, __machine2__) */
 #include <freewpc.h>

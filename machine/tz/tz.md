@@ -248,7 +248,7 @@ G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
 G3: Powerfield, flash
 G4: Ramp1, flash
-G5: Left Magnet, duty(SOL_DUTY_75), time(TIME_100MS)
+G5: Left Magnet
 G6: Upper Right Magnet
 G7: Right Magnet
 G8: Gumball Release, motor, nosearch
@@ -286,11 +286,12 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Left magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
-
-#Upper right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
-
-#Lower right magnet grab: driver(duty), sol=SOL_LEFT_MAGNET, timeout=TIME_8S, ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS
+#Left magnet hold: driver(duty), sol=SOL_LEFT_MAGNET, 
+#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Right magnet hold: driver(duty), sol=SOL_RIGHT_MAGNET, 
+#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Upper right magnet hold: driver(duty), sol=SOL_UPPER_RIGHT_MAGNET, 
+#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
@@ -325,7 +326,7 @@ Gumball Div: driver(duty),
 [tests]
 tz_clock:
 tz_gumball:
-#tz_magnet:
+tz_magnet:
 tz_powerball:
 #tz_thingfl:
 
@@ -420,7 +421,7 @@ Popper: Popper, \
 Ball Saves: integer, 1
 Ball Save Time: integer, 7
 Installed Balls: integer, 6
-Disable Clock: yes_no, YES
+Disable Clock: yes_no, NO
 Disable Gumball: yes_no, NO
 Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
@@ -531,9 +532,12 @@ TSM_RUNNING:
 MB_JACKPOT_LIT:
 SUPER_MB_RUNNING:
 
-LEFT_MAGNET_GRAB:
-LOWER_RIGHT_MAGNET_GRAB:
-UPPER_RIGHT_MAGNET_GRAB:
+#LEFT_MAGNET_GRAB:
+#LEFT_MAGNET_HOLD:
+#RIGHT_MAGNET_GRAB:
+#RIGHT_MAGNET_HOLD:
+#UPPER_RIGHT_MAGNET_GRAB:
+#UPPER_RIGHT_MAGNET_HOLD:
 
 [globalflags]
 Clock Working:

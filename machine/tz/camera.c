@@ -107,6 +107,7 @@ void camera_award_deff (void)
 
 static void do_camera_award (void)
 {
+	magnet_disable_catch (MAG_RIGHT);
 	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
 	/* Don't light the lock if already lit */
@@ -196,7 +197,12 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 }
 
-
+CALLSET_ENTRY (camera, idle_every_second)
+{
+	if (can_award_camera () && !timer_find_gid (GID_SPIRALAWARD)
+		&& switch_poll (SW_LOWER_RIGHT_MAGNET))
+		magnet_enable_catch (MAG_RIGHT);
+}
 
 CALLSET_ENTRY (camera, lamp_update)
 {

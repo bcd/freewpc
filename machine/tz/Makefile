@@ -67,9 +67,9 @@ SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
 	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
 
 GAME_OBJS = clock.o sling.o jets.o autofire.o gumball.o \
-	config.o loop.o rampdiv.o
+	config.o loop.o rampdiv.o magnet.o
 
-GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o
+GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o magtest.o
 
 GAME_INCLUDES =
 
@@ -83,7 +83,7 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	outhole.o lock.o camera.o combo.o deadend.o \
 	hitch.o
 
-GAME3_OBJS = tz_flipcode.o rules.o loopmag.o
+GAME3_OBJS = tz_flipcode.o rules.o
 
 IMAGE_MAP += $(M)/tz.ild
 

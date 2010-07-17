@@ -42,13 +42,16 @@ void autofire_add_ball(void);
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
 __common__ void ballsave_launch(void);
+
 /* camera.c * */
 __machine__ void door_start_camera (void);
+
 /* clock.c */
 void tz_dump_clock(void);
 void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);
+
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);
@@ -72,22 +75,25 @@ void gumball_load_from_trough(void);
 void gumball_release(void);
 void sw_gumball_right_loop_entered(void);
 
-
 /* loop.c */
+
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
+
 /* mpf.c */
 __machine__ void mpf_enable (void);
 
 /* rampdiv.c */
 void ramp_divert (void);
 void ramp_divert_to_autoplunger (void);
+
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
 __machine__ void skill_shot_ready_deff (void);
 __machine__ void skill_shot_made_deff (void);
+
 /* sssmb.c */
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
@@ -95,16 +101,10 @@ __machine__ bool sssmb_can_divert_to_plunger (void);
 
 /* star.c */
 __machine__ void star_draw(void);
+
 /* spiralaward.c */
-//__machine2__ void start_spiralaward_timer (void);
 __machine2__ void spiralaward_right_loop_completed (void);
 
-/* lanes.c */
-/*__machine2__ static void handle_outlane (void);
-__machine2__ static bool rollover_completed (void);
-__machine2__ static void award_rollover_completed (void);
-__machine2__ static void check_rollover (void);*/
-/* jets.c */
 
 /* unlit.c*/
 __machine2__ void award_unlit_shot (U8 unlit_called_from);
@@ -124,3 +124,12 @@ __common__ bool ballsave_test_active (void);
 
 //__machine2__ void tz_flipcode_1 (void);
 __machine2__ void tz_flipcode_2 (void);
+
+/* magnet.c */
+#define MAG_LEFT 0
+#define MAG_UPPER_RIGHT 1
+#define MAG_RIGHT 2
+
+void magnet_enable_catch (U8 magnet);
+void magnet_disable_catch (U8 magnet);
+void magnet_reset (void);

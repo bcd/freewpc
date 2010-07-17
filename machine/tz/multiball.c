@@ -382,6 +382,7 @@ CALLSET_ENTRY (mball, mball_start)
 {
 	if (!flag_test (FLAG_MULTIBALL_RUNNING))
 	{
+		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
 		flag_on (FLAG_MULTIBALL_RUNNING);
@@ -476,6 +477,7 @@ CALLSET_ENTRY (mball, sw_piano)
 {
 	if (flag_test (FLAG_MB_JACKPOT_LIT))
 	{
+		magnet_disable_catch (MAG_LEFT);
 		flag_off (FLAG_MB_JACKPOT_LIT);
 		/* Add anoither 10M to the jackpot if three balls are out */
 		if (live_balls == 3)
@@ -614,6 +616,13 @@ CALLSET_ENTRY (mball, status_report)
 	sprintf ("%d BALLS LOCKED", mball_locks_made);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	status_page_complete ();
+}
+
+CALLSET_ENTRY (mball, idle_every_second)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT)
+		&& switch_poll (SW_LEFT_MAGNET))
+		magnet_enable_catch (MAG_LEFT);
 }
 
 CALLSET_ENTRY (mball, ball_search)

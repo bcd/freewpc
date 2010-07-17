@@ -18,116 +18,165 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
 #include <freewpc.h>
-<<<<<<< HEAD:machine/tz/magnet.c
-#include <left_magnet_grab.h>
-#include <upper_right_magnet_grab.h>
-#include <lower_right_magnet_grab.h>
 
-/* Code to catch ball with the loop magnets 
- * Currently using duty2 driver with these settings:
- * timeout=TIME_2S, ontime=TIME_50MS, duty_mask=DUTY_MASK_25
-*/
-=======
->>>>>>> ccc5c5ecf226f9c653e24731402b16220b5176e7:machine/tz/magnet.c
+/* Magnet switch RTT runs every 8 ms */
+#define MAG_SWITCH_RTT_FREQ 4
+#define MAG_DRIVE_RTT_FREQ 4
 
-#define LEFT_MAGNET 0
-#define LOWER_RIGHT_MAGNET 1
-#define UPPER_RIGHT_MAGNET 2
+#define MAG_POWER_TIME (400 / MAG_DRIVE_RTT_FREQ)
+#define MAG_HOLD_TIME (600 / MAG_DRIVE_RTT_FREQ)
 
-/* Function to activate the magnet grab flags for a specific length of time */
-void magnet_flag_task (U8 magnet, U8 seconds)
+__fastram__ enum magnet_state {
+	MAG_DISABLED,
+	MAG_ENABLED,
+	MAG_ON_POWER,
+	MAG_ON_HOLD,
+} left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
+
+__fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
+
+/** The magnet switch handler is a frequently called function
+ * that polls the magnet switches to see if a ball is on
+ * top of the magnet, and quickly turns on the magnet when
+ * it senses a ball there if it has been enabled to do so. */
+static inline void magnet_rtt_switch_handler (
+	const U8 sw_magnet,
+	enum magnet_state *state,
+	U8 *timer )
 {
-	switch (magnet)
+	/* rt_switch_poll is inverted because it is an opto */
+	if ((*state == MAG_ENABLED) &&
+		 (!rt_switch_poll (sw_magnet)))
 	{
-		case LEFT_MAGNET:
-			flag_on (FLAG_LEFT_MAGNET_GRAB);
-			task_sleep_sec (seconds);
-			flag_off (FLAG_LEFT_MAGNET_GRAB);
-			break;
-		case LOWER_RIGHT_MAGNET:
-			flag_on (FLAG_LOWER_RIGHT_MAGNET_GRAB);
-			task_sleep_sec (seconds);
-			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
-			break;
-		case UPPER_RIGHT_MAGNET:
-			flag_on (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-			task_sleep_sec (seconds);
-			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-			break;
-		default:
-			flag_off (FLAG_LEFT_MAGNET_GRAB);
-			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
-			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-			break;
-	}
-	task_exit ();
-}
-/* Function to hold the ball for a specific length of time */
-void magnet_hold (U8 magnet, U8 hold_time)
-{	
-	switch (magnet)
-	{
-		case LEFT_MAGNET:
-			//left_magnet_grab_start ();
-			while (!switch_poll_logical (SW_LEFT_MAGNET) && hold_time > 0)
-			{	
-				task_sleep_sec (1);
-				hold_time--;
-			}
-			flag_off (FLAG_LEFT_MAGNET_GRAB);
-			left_magnet_grab_stop ();
-			break;
-		
-		case LOWER_RIGHT_MAGNET:
-			//lower_right_magnet_grab_start ();
-			while (!switch_poll_logical (SW_LOWER_RIGHT_MAGNET) && hold_time > 0)
-			{	
-				task_sleep_sec (1);
-				hold_time--;
-			}
-			flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
-			lower_right_magnet_grab_stop ();
-			break;
-		
-		case UPPER_RIGHT_MAGNET:
-			//lower_right_magnet_grab_start ();
-			while (!switch_poll_logical (SW_UPPER_RIGHT_MAGNET) && hold_time > 0)
-			{	
-				task_sleep_sec (1);
-				hold_time--;
-			}
-			flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-			lower_right_magnet_grab_stop ();
-			break;
-		
-		default:
-			break;
+		*state = MAG_ON_POWER;
+		*timer = MAG_POWER_TIME;
 	}
 }
 
-CALLSET_ENTRY (magnet, sw_lower_right_magnet)
+
+/** The magnet duty handler is a less-frequently called
+ * function that turns on/off the magnet as necessary.
+ * When a ball is being held, it uses duty cycling to avoid
+ * burnout. */
+static inline void magnet_rtt_duty_handler (
+	const U8 sw_magnet,
+	const U8 sol_magnet,
+	enum magnet_state *state,
+	U8 *timer )
 {
-	if (flag_test (FLAG_LOWER_RIGHT_MAGNET_GRAB))
-		magnet_hold (LOWER_RIGHT_MAGNET, 2);
+	switch (*state)
+	{
+		case MAG_DISABLED:
+		case MAG_ENABLED:
+			sol_disable (sol_magnet);
+			break;
+
+		case MAG_ON_POWER:
+			/* keep magnet on with high power */
+			/* switch to MAG_ON_HOLD fairly quickly though */
+			/* switch should remain closed in this state */
+			if (--*timer == 0)
+			{
+				/* switch to HOLD */
+				*timer = MAG_HOLD_TIME;
+				*state = MAG_ON_HOLD;
+			}
+			else
+			{
+				/* magnet is on 100% */
+				sol_enable (sol_magnet);
+			}
+			break;
+
+		case MAG_ON_HOLD:
+			/* keep magnet on with low power */
+			/* switch should remain closed in this state */
+			if (--*timer == 0)
+			{
+				sol_disable (sol_magnet);
+				/* switch to DISABLED */
+				*state = MAG_DISABLED;
+			}
+			else
+			{
+				/* magnet is on 25% */
+				if ((*timer % 4) == 0)
+				{
+					sol_enable (sol_magnet);
+				}
+				else
+				{
+					sol_disable (sol_magnet);
+				}
+			}
+			break;
+	}
 }
 
-/* Not normally installed */
-CALLSET_ENTRY (magnet, sw_upper_right_magnet)
+
+/* Realtime function to poll the magnet switches. */
+void magnet_switch_rtt (void)
 {
-	if (flag_test (FLAG_UPPER_RIGHT_MAGNET_GRAB))
-		magnet_hold (UPPER_RIGHT_MAGNET, 2);
+	magnet_rtt_switch_handler (SW_LEFT_MAGNET,
+		&left_magnet_state, &left_magnet_timer);
+	
+	magnet_rtt_switch_handler (SW_UPPER_RIGHT_MAGNET,
+		&upper_right_magnet_state, &upper_right_magnet_timer);
+	
+	magnet_rtt_switch_handler (SW_LOWER_RIGHT_MAGNET,
+		&lower_right_magnet_state, &lower_right_magnet_timer);
 }
 
-CALLSET_ENTRY (magnet, sw_left_magnet)
+
+/* Realtime function to duty cycle the magnet drives */
+void magnet_duty_rtt (void)
 {
-	if (flag_test (FLAG_LEFT_MAGNET_GRAB))
-		magnet_hold (LEFT_MAGNET, 2);
+	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
+		&left_magnet_state, &left_magnet_timer);
+	
+	magnet_rtt_duty_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET, 
+		&upper_right_magnet_state, &upper_right_magnet_timer);
+	
+	magnet_rtt_duty_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
+		&lower_right_magnet_state, &lower_right_magnet_timer);
+}
+
+
+void magnet_enable_catch (U8 magnet)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	magstates[magnet] = MAG_ENABLED;
+}
+
+
+void magnet_disable_catch (U8 magnet)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	magstates[magnet] = MAG_DISABLED;
+}
+
+void magnet_reset (void)
+{
+	left_magnet_state = upper_right_magnet_state = 
+		lower_right_magnet_state = MAG_DISABLED;
+	left_magnet_timer = upper_right_magnet_timer = 
+		lower_right_magnet_timer = 0;
+}
+
+CALLSET_ENTRY (magnet, start_ball)
+{
+	magnet_reset ();
+}
+
+CALLSET_ENTRY (magnet, single_ball_play)
+{
+	magnet_reset ();
 }
 
 CALLSET_ENTRY (magnet, init)
 {
-	flag_off (FLAG_LEFT_MAGNET_GRAB);
-	flag_off (FLAG_UPPER_RIGHT_MAGNET_GRAB);
-	flag_off (FLAG_LOWER_RIGHT_MAGNET_GRAB);
+	magnet_reset ();
 }
+

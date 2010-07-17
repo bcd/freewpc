@@ -175,6 +175,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
 	if (!flag_test (FLAG_CHAOSMB_RUNNING))
 	{
+		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
 		flag_on (FLAG_CHAOSMB_RUNNING);

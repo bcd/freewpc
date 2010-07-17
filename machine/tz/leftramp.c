@@ -113,6 +113,18 @@ CALLSET_ENTRY(leftramp, start_ball)
 	left_ramps = 0;
 }
 
+static bool right_inlane_combo_check (void)
+{
+	if (timer_find_gid (GID_LEFT_RAMP) && !multi_ball_play ())
+	{
+		score (SC_10M);
+		return TRUE;
+	}
+	else
+		return FALSE;
+
+}
+
 static void maybe_ramp_divert (void)
 {
 	/* Don't divert if a ball is waiting to be fired */
@@ -125,8 +137,10 @@ static void maybe_ramp_divert (void)
 	/* Divert to autoplunger for chaosmb */
 	if (multiball_ready () ||
 		chaosmb_can_divert_to_autoplunger () ||
-		timer_find_gid (GID_LEFT_RAMP))
+		right_inlane_combo_check ())
+	{
 		ramp_divert_to_autoplunger ();
+	}
 	/* Divert to plunger lane for sssmb*/
 	if (sssmb_can_divert_to_plunger ())
 	{

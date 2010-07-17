@@ -177,6 +177,7 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
 	{
+		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		mball_jackpot_uncollected = TRUE;
 		unlit_shot_count = 0;

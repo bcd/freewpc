@@ -235,13 +235,13 @@ void bonus_deff (void)
 	 * */
 	if (multidrain_awarded == TRUE)
 	{
-		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
 		sprintf ("MULTIDRAIN");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		multidrain_awarded = FALSE;
+		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		task_sleep_sec (2);
 	}
 	

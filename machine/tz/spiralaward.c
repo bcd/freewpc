@@ -37,6 +37,8 @@
 #include <freewpc.h>
 #include <eb.h>
 
+
+#define MAG_LEFT 0
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 __local__ bool spiralaward_set_completed; 
@@ -94,9 +96,12 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 {	
 	if (!multi_ball_play () && !task_kill_gid (GID_SPIRALAWARD))
 	{
+		magnet_enable_catch (MAG_LEFT);
 		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
 		free_timer_restart (TIM_SPIRALAWARD_RUNNING, TIME_3S);
 		leff_start (LEFF_SPIRALAWARD);
+		task_sleep_sec (3);
+		magnet_disable_catch (MAG_LEFT);
 	}
 }
 
