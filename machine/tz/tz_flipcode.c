@@ -43,38 +43,20 @@ U8 tz_flipcode_number;
 
 extern score_t temp_score;
 
-//TODO Make this a three dimensional array 
-#define NUM_TZ_FLIPCODES 7
-const char *tz_flipcodes[] = {
-	"BCD",
-	"FEK",
-	"PUK",
-	"MET",
-	"SAM",
-	"SUN",
-	"JND",
-};
-
-/* No particular reason why the PIN's are like this
- * I just think it looks pleasing */
-const char *tz_flipcode_pins[] = {
-	"1234",
-	"2345",
-	"3456",
-	"4567",
-	"5678",
-	"6789",
-	"789A",
-};
-
-const char *tz_flipcode_text[] = {
-	"THE WIZARD",
-	"WELCOME BACK",
-	"EXTRA BALL LIT",
-	"GET BACK TO IRC",
-	"MAX POWER",
-	"LIKE THE WEATHER",
-	"MEGA SCORE",
+#define NUM_TZ_FLIPCODES 8
+struct {
+	const char *initials;
+	char *pin;
+	char *text;
+} tz_flipcodes[] = {
+	{ "BCD", "1234", "THE WIZARD"},
+	{ "FEK", "2345", "WELCOME BACK"},
+	{ "PUK", "3456", "EXTRA BALL LIT"},
+	{ "MET", "4567", "GET BACK TO IRC"},
+	{ "SAM", "5678", "MAX POWER"},
+	{ "SUN", "6789", "LIKE THE WEATHER"},
+	{ "JND", "789A", "MEGA POINTS"},
+	{ "EDI", "89AB", "FROM THE TELLY"},
 };
 
 #ifndef CONFIG_NATIVE
@@ -93,7 +75,7 @@ void tz_flipcode_entered_deff (void)
 	frame_draw (IMG_COW);
 	sprintf ("HI %s", initials_data);
 	font_render_string_center (&font_times10, 40, 11, sprintf_buffer);
-	font_render_string_center (&font_var5, 40, 24, tz_flipcode_text[tz_flipcode_number]);
+	font_render_string_center (&font_var5, 40, 24, tz_flipcodes[tz_flipcode_number].text);
 	
 	dmd_show2 ();
 	task_sleep_sec (3);
@@ -116,8 +98,8 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 	U8 i;
 	for (i = 0; i < NUM_TZ_FLIPCODES; i++)
 	{
-		if (strcmp(tz_flipcodes[i], initials_data) == 0
-			&& strcmp(tz_flipcode_pins[i], pin_data) == 0)
+		if (strcmp(tz_flipcodes[i].initials, initials_data) == 0
+			&& strcmp(tz_flipcodes[i].pin, pin_data) == 0)
 		{
 			switch (i)
 			{
@@ -151,10 +133,15 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 					break;
 				/* JND */
 				case 6:
-					score_zero (temp_score);
-					score_copy (temp_score, current_score);
-					score_add (current_score, temp_score);
+					//score_zero (temp_score);
+					//score_copy (temp_score, current_score);
+					//score_add (current_score, temp_score);
+					score_mul (current_score, 2);
 					sound_send (SND_NO_CREDITS);
+					break;
+				/* EDI */
+				case 7:
+					sound_send (SND_HEY_ITS_ONLY_PINBALL);
 					break;
 			}
 			/* Store for deff */
