@@ -45,5 +45,8 @@ CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 
 	sound_send (SND_LOCK_KICKOUT);
 	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
+	/* Used to disable camera magnet grab */
+	magnet_reset ();
+	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
 }
 

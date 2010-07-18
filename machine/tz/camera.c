@@ -198,17 +198,22 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 }
 
+/* Right magnet grab camera helpers */
 CALLSET_ENTRY (camera, ball_grabbed)
 {
-	deff_start (DEFF_SHOOT_CAMERA);
-	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+	if (!switch_poll (SW_LOWER_RIGHT_MAGNET) && !multi_ball_play ())
+	{
+		deff_start (DEFF_SHOOT_CAMERA);
+		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+	}
 }
 
 CALLSET_ENTRY (camera, idle_every_second)
 {
 	if (can_award_camera () && !timer_find_gid (GID_SPIRALAWARD)
 		&& switch_poll (SW_LOWER_RIGHT_MAGNET)
-		&& gumball_enable_count == 0)
+		&& gumball_enable_count == 0
+		&& !timer_find_gid (GID_LOCK_KICKED))
 		magnet_enable_catch (MAG_RIGHT);
 }
 

@@ -156,18 +156,18 @@ void home_and_dry_deff (void)
 void shoot_camera_deff (void)
 {
 	sprintf ("SHOOT");
-	flash_small_deff (15, TIME_33MS);
+	flash_small_deff (8, TIME_33MS);
 	sprintf ("CAMERA");
-	flash_small_deff (15, TIME_33MS);
+	flash_small_deff (8, TIME_33MS);
 	deff_exit ();
 }
 
 void shoot_jackpot_deff (void)
 {
 	sprintf ("SHOOT");
-	flash_small_deff (15, TIME_33MS);
+	flash_small_deff (8, TIME_33MS);
 	sprintf ("JACKPOT");
-	flash_small_deff (15, TIME_33MS);
+	flash_small_deff (8, TIME_33MS);
 	deff_exit ();
 }
 
