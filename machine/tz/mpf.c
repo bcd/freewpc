@@ -341,16 +341,6 @@ CALLSET_ENTRY (mpf, ball_search)
 	sol_request (SOL_MPF_RIGHT_MAGNET);
 }
 
-void check_button_masher (void)
-{
-	if (mpf_buttons_pressed > 40)
-	{
-		mpf_active = FALSE;
-		deff_start (DEFF_BUTTON_MASHER);
-		sound_send (SND_HAHA_POWERFIELD_EXIT);
-	}
-}
-
 void mpf_lamp_task (void)
 {
 	triac_disable (TRIAC_GI_MASK);
@@ -374,20 +364,40 @@ void mpf_lamp_task (void)
 	task_exit ();
 }
 
-CALLSET_ENTRY (mpf, sw_left_button)
+void check_button_masher (void)
+{
+	if (mpf_buttons_pressed > 40)
+	{
+		mpf_active = FALSE;
+		deff_start (DEFF_BUTTON_MASHER);
+		sound_send (SND_HAHA_POWERFIELD_EXIT);
+	}
+}
+
+static mpf_button_masher_handler (void)
 {
 	if (mpf_timer != 0 && !multi_ball_play ())
 	{
-		bounded_increment (mpf_buttons_pressed, 50);
-		check_button_masher ();
+		if (task_find_gid (GID_MPF_BUTTON_MASHER))
+		{
+			bounded_increment (mpf_buttons_pressed, 254);
+			check_button_masher ();
+		}
+		else 
+		{
+			mpf_buttons_pressed = 0;
+			timer_start_free (GID_MPF_BUTTON_MASHER, TIME_4S);
+		}
+
 	}
+}
+
+CALLSET_ENTRY (mpf, sw_left_button)
+{
+	mpf_button_masher_handler ();
 }
 
 CALLSET_ENTRY (mpf, sw_right_button)
 {
-	if (mpf_timer != 0 && !multi_ball_play ())
-	{
-		bounded_increment (mpf_buttons_pressed, 50);
-		check_button_masher ();
-	}
+	mpf_button_masher_handler ();
 }
