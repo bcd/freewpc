@@ -96,6 +96,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 {	
 	if (!multi_ball_play () && !task_kill_gid (GID_SPIRALAWARD))
 	{
+		magnet_disable_catch (MAG_RIGHT);
 		magnet_enable_catch (MAG_LEFT);
 		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
 		free_timer_restart (TIM_SPIRALAWARD_RUNNING, TIME_3S);

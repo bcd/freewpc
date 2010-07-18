@@ -294,6 +294,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
+//	magnet_enable_catch_and_throw (MAG_LEFT);
 	if (mpf_ball_count > 0)
 	{
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
@@ -305,6 +306,7 @@ CALLSET_ENTRY (mpf, sw_mpf_left)
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
+	//magnet_enable_catch_and_throw (MAG_RIGHT);
 	if (mpf_ball_count > 0)
 	{
 		if (!task_find_gid (GID_MPF_COUNTDOWN))

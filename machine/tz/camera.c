@@ -26,6 +26,7 @@ extern void mball_start_3_ball (void);
 extern U8 unlit_shot_count;
 extern U8 jackpot_level;
 extern U8 mball_locks_lit;
+extern U8 gumball_enable_count;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -197,10 +198,17 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 }
 
+CALLSET_ENTRY (camera, ball_grabbed)
+{
+	deff_start (DEFF_SHOOT_CAMERA);
+	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+}
+
 CALLSET_ENTRY (camera, idle_every_second)
 {
 	if (can_award_camera () && !timer_find_gid (GID_SPIRALAWARD)
-		&& switch_poll (SW_LOWER_RIGHT_MAGNET))
+		&& switch_poll (SW_LOWER_RIGHT_MAGNET)
+		&& gumball_enable_count == 0)
 		magnet_enable_catch (MAG_RIGHT);
 }
 

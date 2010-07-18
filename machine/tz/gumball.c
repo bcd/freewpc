@@ -329,7 +329,10 @@ void gumball_deff (void)
 CALLSET_ENTRY (gumball, lamp_update)
 {
 	if (gumball_load_is_enabled ())
+	{
+		magnet_disable_catch (MAG_RIGHT);
 		lamp_tristate_flash (LM_GUMBALL_LANE);
+	}
 	else
 		lamp_tristate_off (LM_GUMBALL_LANE);
 }

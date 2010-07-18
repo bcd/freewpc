@@ -135,11 +135,39 @@ void three_way_combo_deff (void)
 
 void in_the_lead_deff (void)
 {
-	sound_send (SND_GO_FOR_THE_HILL);
+	sound_send (SND_YOUVE_JUST_CROSSED_OVER);
 	sprintf ("IN THE LEAD");
 	flash_small_deff (30, TIME_33MS);
 	sprintf ("GO FOR IT");
 	flash_small_deff (30, TIME_33MS);
+	deff_exit ();
+}
+
+void home_and_dry_deff (void)
+{
+	sound_send (SND_YOU_HAVE_COME_TO_THE_END);
+	sprintf ("HOME AND DRY");
+	flash_small_deff (30, TIME_33MS);
+	sprintf ("YOU HAVE WON");
+	flash_small_deff (30, TIME_33MS);
+	deff_exit ();
+}
+
+void shoot_camera_deff (void)
+{
+	sprintf ("SHOOT");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("CAMERA");
+	flash_small_deff (15, TIME_33MS);
+	deff_exit ();
+}
+
+void shoot_jackpot_deff (void)
+{
+	sprintf ("SHOOT");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("JACKPOT");
+	flash_small_deff (15, TIME_33MS);
 	deff_exit ();
 }
 

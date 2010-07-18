@@ -33,6 +33,7 @@ U8 jackpot_level_stored;
 bool mball_jackpot_uncollected;
 bool mball_restart_collected;
 U8 mball_restart_timer;
+U8 last_number_called;
 
 void mball_restart_mode_init (void);
 void mball_restart_mode_exit (void);
@@ -58,6 +59,38 @@ extern U8 autofire_request_count;
 extern bool fastlock_running (void);
 extern U8 lucky_bounces;
 extern __machine__ void mpf_countdown_task (void);
+
+static void mball_restart_countdown_task (void)
+{
+	do {
+		if (last_number_called != mball_restart_timer)
+		{
+			switch (mball_restart_timer)
+			{
+				case 5:
+					sound_send (SND_FIVE);
+					break;
+				case 4:
+					sound_send (SND_FOUR);
+					break;
+				case 3:
+					sound_send (SND_THREE);
+					break;
+				case 2:
+					sound_send (SND_TWO);
+					break;
+				case 1:
+					sound_send (SND_ONE);
+					break;
+			}
+			last_number_called = mball_restart_timer;
+			//task_sleep_sec (1);
+		}
+	}while (mball_restart_timer <= 5 && mball_restart_timer != 0
+			&& !system_timer_pause ());
+	task_exit ();
+}
+
 
 /* Rules to say whether we can start multiball */
 bool multiball_ready (void)
@@ -103,7 +136,7 @@ void mball_restart_mode_expire (void)
 
 void mball_restart_mode_exit (void)
 {
-	task_kill_gid (GID_MPF_COUNTDOWN_TASK);
+	task_kill_gid (GID_MBALL_RESTART_COUNTDOWN_TASK);
 }
 
 CALLSET_ENTRY (mball, display_update)
@@ -118,8 +151,12 @@ CALLSET_ENTRY (mball, music_refresh)
 	timed_mode_music_refresh (&mball_restart_mode);
 	if (flag_test (FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
-	if (mball_restart_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN_TASK))
-		task_create_gid (GID_MPF_COUNTDOWN_TASK, mpf_countdown_task);
+	if (mball_restart_timer <= 5 
+		&& !task_find_gid (GID_MBALL_RESTART_COUNTDOWN_TASK)
+		&& !system_timer_pause ())
+	{
+		task_recreate_gid (GID_MBALL_RESTART_COUNTDOWN_TASK, mball_restart_countdown_task);
+	}
 }
 
 void lock_lit_deff (void)
@@ -616,6 +653,15 @@ CALLSET_ENTRY (mball, status_report)
 	sprintf ("%d BALLS LOCKED", mball_locks_made);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	status_page_complete ();
+}
+
+CALLSET_ENTRY (mball, ball_grabbed)
+{
+	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	{
+		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);		
+		deff_start (DEFF_SHOOT_JACKPOT);
+	}
 }
 
 CALLSET_ENTRY (mball, idle_every_second)
