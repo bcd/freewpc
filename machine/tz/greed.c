@@ -20,6 +20,8 @@
 /* TODO Change so hitting standups increases jackpot
  * jackpot is collected by hitting slot machine 
  * Suggested by litz */
+
+/* CALLSET_SECTION (greed, __machine3__) */
 #include <freewpc.h>
 
 void greed_mode_init (void);
@@ -30,6 +32,8 @@ void greed_mode_exit (void);
 #define ALL_TARGETS 0x7f
 
 U8 greed_sound_index;
+
+score_t greed_mode_total;
 
 /** Which default standups are lit */
 __local__ U8 default_set;
@@ -54,13 +58,13 @@ struct timed_mode_ops greed_mode = {
 	.gid = GID_GREED_MODE_RUNNING,
 	.music = MUS_GREED_MODE,
 	.deff_running = DEFF_GREED_MODE,
+	.deff_ending = DEFF_GREED_MODE_TOTAL,
 	.prio = PRI_GAME_MODE2,
 	.init_timer = 20,
 	.timer = &greed_mode_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
 };
-
 
 void greed_mode_deff (void)
 {
@@ -79,6 +83,18 @@ void greed_mode_deff (void)
 	}
 }
 
+void greed_mode_total_deff (void)
+{
+	sound_send (SND_SEE_WHAT_GREED);
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 5, "GREED OVER");
+	sprintf_score (greed_mode_total);
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
+	dmd_show_low ();
+	task_sleep_sec (4);
+	deff_exit ();
+}
 
 void standup_lamp_update1 (U8 mask, U8 lamp)
 {
@@ -114,7 +130,6 @@ CALLSET_ENTRY (standup, lamp_update)
 	standup_lamp_update1 (0x40, LM_LR_5M);
 }
 
-
 /** target is given as a bitmask */
 void common_greed_handler (U8 target)
 {
@@ -125,6 +140,7 @@ void common_greed_handler (U8 target)
 	{
 		greed_set &= ~target;
 		score (SC_5M);
+		score_add (greed_mode_total, score_table[SC_5M]);
 		sound_send (SND_GREED_MODE_BOOM);
 	}
 	else if ((default_set & target) == 0)
@@ -155,13 +171,7 @@ void greed_mode_init (void)
 	greed_set = ALL_TARGETS;
 	standup_lamp_update ();
 	deff_start (DEFF_GREED_MODE);
-}
-
-void greed_mode_expire (void)
-{
-	/* Don't play sample if last ball drained */
-	if (live_balls)
-		sound_send (SND_SEE_WHAT_GREED);
+	score_zero (greed_mode_total);
 }
 
 void greed_mode_exit (void)
@@ -199,7 +209,6 @@ CALLSET_ENTRY (greed, start_player)
 	standup_lamp_update ();
 }
 
-
 CALLSET_ENTRY (greed, sw_standup_1)
 {
 	common_greed_handler (0x1);
@@ -234,5 +243,3 @@ CALLSET_ENTRY (greed, sw_standup_7)
 {
 	common_greed_handler (0x40);
 }
-
-

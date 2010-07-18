@@ -74,8 +74,8 @@ GAME_TEST_OBJS = clocktest.o gumball_test.o powerball_test.o magtest.o
 GAME_INCLUDES =
 
 GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
-	spiral.o fastlock.o door.o slot.o greed.o \
-	mpf.o clockmillions.o chaosmb.o powerball.o \
+	fastlock.o door.o slot.o \
+	mpf.o chaosmb.o powerball.o \
 	multiball.o sssmb.o deffs.o
 
 GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
@@ -83,7 +83,8 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	outhole.o lock.o camera.o combo.o deadend.o \
 	hitch.o
 
-GAME3_OBJS = tz_flipcode.o rules.o
+GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
+	spiral.o 
 
 IMAGE_MAP += $(M)/tz.ild
 

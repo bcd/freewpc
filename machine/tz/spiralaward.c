@@ -92,18 +92,24 @@ static void flash_spiralaward_lamp (void)
 	task_exit ();
 }
 
+static void spiralaward_timer_task (void)
+{
+	magnet_disable_catch (MAG_RIGHT);
+	magnet_enable_catch (MAG_LEFT);
+	timer_restart_free (GID_SPIRALAWARD, TIME_3S);
+//	free_timer_restart (TIM_SPIRALAWARD_RUNNING, TIME_3S);
+	leff_start (LEFF_SPIRALAWARD);
+	task_sleep_sec (3);
+	magnet_disable_catch (MAG_LEFT);
+	task_exit ();
+}
+
+/* Done like this so the caller doesn't have to wait for 3 seconds */
 CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 {	
-	if (!multi_ball_play () && !task_kill_gid (GID_SPIRALAWARD))
-	{
-		magnet_disable_catch (MAG_RIGHT);
-		magnet_enable_catch (MAG_LEFT);
-		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
-		free_timer_restart (TIM_SPIRALAWARD_RUNNING, TIME_3S);
-		leff_start (LEFF_SPIRALAWARD);
-		task_sleep_sec (3);
-		magnet_disable_catch (MAG_LEFT);
-	}
+	if (!task_find_gid (GID_SPIRALAWARD_TIMER_TASK) 
+		&& single_ball_play ())
+		task_create_gid (GID_SPIRALAWARD_TIMER_TASK, spiralaward_timer_task);
 }
 
 static void award_spiralaward (void)
@@ -151,7 +157,7 @@ static void award_spiralaward (void)
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
 	
 	/* Run lamp flash as task so it can run in parallel */
-	task_recreate_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
+	task_create_gid (GID_FLASH_SPIRALAWARD_LAMP, flash_spiralaward_lamp);
 	/* reset lamps after all 6 have been collected */
 	if (spiralawards_collected == 6)
 	{	
@@ -172,8 +178,8 @@ void spiralaward_right_loop_completed (void)
 {
 	if (task_kill_gid (GID_SPIRALAWARD))
 	{
-		free_timer_stop (TIM_SPIRALAWARD_RUNNING);
-		leff_stop (LEFF_SPIRALAWARD);
+		//free_timer_stop (TIM_SPIRALAWARD_RUNNING);
+		//leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();
 	}
@@ -181,8 +187,12 @@ void spiralaward_right_loop_completed (void)
 
 CALLSET_ENTRY (spiralaward, lamp_update)
 {
-	if ( leff_running_p (LEFF_SPIRALAWARD) && !task_find_gid (GID_SPIRALAWARD))
-		leff_stop (LEFF_SPIRALAWARD);
+}
+
+CALLSET_ENTRY (spiralaward, end_ball)
+{
+	task_kill_gid (GID_FLASH_SPIRALAWARD_LAMP);
+	task_kill_gid (GID_SPIRALAWARD);
 }
 
 CALLSET_ENTRY (spiralaward, start_player)

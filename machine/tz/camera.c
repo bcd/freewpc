@@ -28,6 +28,9 @@ extern U8 jackpot_level;
 extern U8 mball_locks_lit;
 extern U8 gumball_enable_count;
 
+extern struct timed_mode_ops spiral_mode;
+extern struct timed_mode_ops fastlock_mode;
+
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
 	CAMERA_AWARD_10_MILLION,
@@ -168,11 +171,11 @@ CALLSET_ENTRY (camera, sw_camera)
 	}
 	else if (event_did_follow (gumball_exit, camera))
 	{
-	//	return;
+		return;
 	}
 	else if (event_did_follow (dead_end, camera))
 	{
-	//	return;
+		return;
 	}
 	else if (can_award_camera ())
 	{
@@ -210,11 +213,23 @@ CALLSET_ENTRY (camera, ball_grabbed)
 
 CALLSET_ENTRY (camera, idle_every_second)
 {
+	/* Grab the ball for the camera shot, don't care about gumball */
 	if (can_award_camera () && !timer_find_gid (GID_SPIRALAWARD)
 		&& switch_poll (SW_LOWER_RIGHT_MAGNET)
-		&& gumball_enable_count == 0
-		&& !timer_find_gid (GID_LOCK_KICKED))
+		&& !timer_find_gid (GID_LOCK_KICKED)
+		&& !timed_mode_running_p (&spiral_mode)
+		&& !timed_mode_running_p (&fastlock_mode)
+		&& !timer_find_gid (GID_BALL_LAUNCH))
+	{	
 		magnet_enable_catch (MAG_RIGHT);
+	}
+	else if (timed_mode_running_p (&spiral_mode) 
+		|| timed_mode_running_p (&fastlock_mode)
+		|| timer_find_gid (GID_BALL_LAUNCH)
+		|| timer_find_gid (GID_LOCK_KICKED))
+	{
+		magnet_disable_catch (MAG_RIGHT);
+	}	
 }
 
 CALLSET_ENTRY (camera, lamp_update)

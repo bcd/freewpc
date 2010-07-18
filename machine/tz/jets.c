@@ -28,6 +28,7 @@ U8 jets_bonus_level;
 
 U8 tsm_mode_timer;
 extern U8 mpf_timer;
+score_t tsm_mode_total;
 
 bool noflash;
 
@@ -41,6 +42,7 @@ struct timed_mode_ops tsm_mode = {
 	.gid = GID_TSM_MODE_RUNNING,
 	.music = MUS_TOWN_SQUARE_MADNESS,
 	.deff_running = DEFF_TSM_MODE,
+	.deff_ending = DEFF_TSM_MODE_TOTAL,
 	.init_timer = 30,
 	.prio = PRI_GAME_MODE3,
 	.timer = &tsm_mode_timer,
@@ -71,6 +73,7 @@ void jets_active_task (void)
 void tsm_mode_init (void)
 {
 	task_create_gid (GID_JETS_ACTIVE_TASK, jets_active_task);
+	score_zero (tsm_mode_total);
 }
 
 void tsm_mode_exit (void)
@@ -115,6 +118,19 @@ void sw_jet_sound (void)
 	noflash = FALSE;
 	task_exit ();
 }
+
+void tsm_mode_total_deff (void)
+{
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 5, "TSM OVER");
+	sprintf_score (tsm_mode_total);
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
+	dmd_show_low ();
+	task_sleep_sec (4);
+	deff_exit ();
+}
+
 
 void tsm_mode_deff (void)
 {
@@ -226,7 +242,10 @@ CALLSET_ENTRY (jet, sw_jet)
 	}
 
 	if (timed_mode_running_p (&tsm_mode))
+	{
 		score (SC_500K);
+		score_add (tsm_mode_total, score_table[SC_500K]);
+	}
 	else
 	{	
 		score (SC_150K);

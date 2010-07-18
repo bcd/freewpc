@@ -43,19 +43,6 @@ static bool can_show_loop_leff (void)
 		return TRUE;
 }
 
-#if 0
-static bool can_show_loop_deff (void)
-{
-	if (fastlock_running ())
-		return FALSE;
-	else if (task_find_gid (GID_SPIRALAWARD))
-		return FALSE;
-	else if (free_timer_test (TIM_SPIRALAWARD_RUNNING))
-		return FALSE;
-	else
-		return TRUE;
-}
-#endif
 void enter_loop (void)
 {
 	if (in_live_game)

@@ -80,13 +80,13 @@ void check_rollover (void)
 CALLSET_ENTRY (lanes, sw_left_button)
 {
 	if (in_game)
-	lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix);
+		lamplist_rotate_previous (LAMPLIST_INLANES, lamp_matrix);
 }
 
 CALLSET_ENTRY (lanes, sw_right_button)
 {
 	if (in_game)
-	lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
+		lamplist_rotate_next (LAMPLIST_INLANES, lamp_matrix);
 }
 
 /* 'Extra Ball' outlane */
@@ -106,10 +106,13 @@ CALLSET_ENTRY (lanes, sw_right_outlane)
 /* 'Light Spiral' Lane */
 CALLSET_ENTRY (lanes, sw_left_inlane_1)
 {
+	event_can_follow (left_or_right_inlane, either_outlane, TIME_1S);
 	/* Start the spiralaward timer only if the lane has 
 	 * just been lit */
 	if (!lamp_test (LM_LEFT_INLANE1) && spiralaward_set_completed == FALSE)
+	{
 		callset_invoke (start_spiralaward_timer);
+	}
 	lamp_on (LM_LEFT_INLANE1);
 	check_rollover ();
 	score (SC_1K);
@@ -120,15 +123,19 @@ CALLSET_ENTRY (lanes, sw_left_inlane_1)
 CALLSET_ENTRY (lanes, sw_left_inlane_2)
 {
 	if (!lamp_test (LM_LEFT_INLANE2) && spiralaward_set_completed == FALSE)
+	{	
 		callset_invoke(start_spiralaward_timer);
+	}
 	lamp_on (LM_LEFT_INLANE2);
 	check_rollover ();
 	score (SC_1K);
+	event_can_follow (left_inlane_2, right_loop, TIME_3S);
 }
 
 /* 'Dead End' Lane */
 CALLSET_ENTRY (lanes, sw_right_inlane)
 {
+	event_can_follow (left_or_right_inlane, either_outlane, TIME_1S);
 	lamp_on (LM_RIGHT_INLANE);
 	check_rollover ();
 	score (SC_1K);

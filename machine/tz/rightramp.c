@@ -59,8 +59,14 @@ void sw_right_ramp_enter_task (void)
 		else
 		{
 			bounded_increment (unlit_right_ramps, 4);
-			if (unlit_right_ramps == 3)
+			if (unlit_right_ramps == 3 && !flag_test (FLAG_MULTIBALL_RUNNING))
 				deff_start (DEFF_SHOOT_HITCH);
+			else if (flag_test (FLAG_MULTIBALL_RUNNING)
+					&& flag_test (FLAG_MB_JACKPOT_LIT))
+			{
+				deff_start (DEFF_SHOOT_JACKPOT);
+				sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+			}
 			task_sleep_sec (2);
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			bridge_open_start ();

@@ -35,7 +35,7 @@ U8 three_way_combos;
 U8 lucky_bounces;
 
 bool slot_stdm_death;
-bool jet_death;
+bool unfair_death;
 
 static void lucky_bounce (void)
 {
@@ -210,24 +210,43 @@ CALLSET_ENTRY (combo, sw_left_ramp_enter)
 	event_can_follow (slot_kick, outhole, TIME_1S + TIME_500MS);
 }
 
+static bool can_award_unfair_death (void)
+{
+	if (single_ball_play ()
+		&& !ballsave_test_active ())
+		return TRUE;
+	else
+		return FALSE;
+}
+
 /* Slot STDM handler */
 CALLSET_ENTRY (combo, sw_outhole)
 {
-	if (event_did_follow (slot_kick, outhole) && !ballsave_test_active ())
+	if (!can_award_unfair_death ())
+		return;
+	if (event_did_follow (slot_kick, outhole))
 		slot_stdm_death = TRUE;
 }
 
 /* Jet death handler */
 CALLSET_ENTRY (combo, sw_right_outlane)
 {
-	if (event_did_follow (jets, either_outlane) && !ballsave_test_active ())
-		jet_death = TRUE;
+	if (!can_award_unfair_death ())
+		return;
+	if (event_did_follow (jets, either_outlane))
+		unfair_death = TRUE;
+	if (event_did_follow (left_or_right_inlane, either_outlane))
+		unfair_death = TRUE;
 }
 
 CALLSET_ENTRY (combo, sw_left_outlane)
 {
-	if (event_did_follow (jets, either_outlane) && !ballsave_test_active ())
-		jet_death = TRUE;
+	if (!can_award_unfair_death ())
+		return;
+	if (event_did_follow (jets, either_outlane))
+		unfair_death = TRUE;
+	if (event_did_follow (left_or_right_inlane, either_outlane))
+		unfair_death = TRUE;
 }
 
 /* Standup3, Jet, Left Sling -> Slot Lucky Bounce handler */
@@ -247,6 +266,6 @@ CALLSET_ENTRY (combo, start_ball)
 	three_way_combos = 0;
 	lucky_bounces = 0;
 	slot_stdm_death = FALSE;
-	jet_death = FALSE;
+	unfair_death = FALSE;
 }
 

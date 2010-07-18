@@ -36,6 +36,7 @@ __fastram__ enum magnet_state {
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
 __fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
+U8 left_magnet_enable_timer, upper_right_magnet_enable_timer, lower_right_manger_enable_timer;
 
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
@@ -164,11 +165,40 @@ void magnet_reset (void)
 		lower_right_magnet_state = MAG_DISABLED;
 	left_magnet_timer = upper_right_magnet_timer = 
 		lower_right_magnet_timer = 0;
+
+	left_magnet_enable_timer = upper_right_magnet_enable_timer =
+		lower_right_manger_enable_timer = 0;
+}
+
+void magnet_enable_handler (void)
+{
+	while (in_live_game)
+	{
+		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+		if (left_magnet_enable_timer > 0 && magstates[MAG_LEFT] == MAG_DISABLED)
+			magnet_enable_catch (MAG_LEFT);
+		else if (left_magnet_enable_timer == 0 && magstates[MAG_LEFT] == MAG_ENABLED)
+			magnet_disable_catch (MAG_LEFT);
+		task_sleep (TIME_66MS);
+	}
+	task_exit ();
+}
+
+/* Grab the ball following an auto fire */
+CALLSET_ENTRY (magnet, sw_lower_right_magnet)
+{
+	if (in_live_game && task_find_gid (GID_BALL_LAUNCH))
+		magnet_enable_catch (MAG_LEFT);
+}
+CALLSET_ENTRY (magnet, end_ball)
+{
+//	task_kill_gid (GID_MAGNET_ENABLE_HANDLER)
 }
 
 CALLSET_ENTRY (magnet, start_ball)
 {
 	magnet_reset ();
+//	task_recreate_gid (GID_MAGNET_ENABLE_HANDLER, magnet_enable_handler);
 }
 
 CALLSET_ENTRY (magnet, single_ball_play)

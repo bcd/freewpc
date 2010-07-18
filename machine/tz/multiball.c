@@ -84,8 +84,9 @@ static void mball_restart_countdown_task (void)
 					break;
 			}
 			last_number_called = mball_restart_timer;
-			//task_sleep_sec (1);
+			task_sleep (TIME_900MS);
 		}
+		task_sleep (TIME_100MS);
 	}while (mball_restart_timer <= 5 && mball_restart_timer != 0
 			&& !system_timer_pause ());
 	task_exit ();
@@ -527,7 +528,7 @@ CALLSET_ENTRY (mball, sw_piano)
 		score_multiple (SC_10M, jackpot_level);
 		/* Increase the jackpot level */
 		bounded_increment (jackpot_level, 5);
-		free_timer_restart (TIM_MB_JACKPOT_COLLECTED, TIME_3S);
+		timer_restart_free (GID_MB_JACKPOT_COLLECTED, TIME_3S);
 	}
 }
 
@@ -657,7 +658,7 @@ CALLSET_ENTRY (mball, status_report)
 
 CALLSET_ENTRY (mball, ball_grabbed)
 {
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT))
 	{
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);		
 		deff_start (DEFF_SHOOT_JACKPOT);

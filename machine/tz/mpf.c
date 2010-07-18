@@ -366,7 +366,7 @@ void mpf_lamp_task (void)
 
 void check_button_masher (void)
 {
-	if (mpf_buttons_pressed > 40)
+	if (mpf_buttons_pressed > 20)
 	{
 		mpf_active = FALSE;
 		deff_start (DEFF_BUTTON_MASHER);
@@ -386,7 +386,7 @@ static mpf_button_masher_handler (void)
 		else 
 		{
 			mpf_buttons_pressed = 0;
-			timer_start_free (GID_MPF_BUTTON_MASHER, TIME_4S);
+			timer_start_free (GID_MPF_BUTTON_MASHER, TIME_3S);
 		}
 
 	}

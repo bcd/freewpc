@@ -64,7 +64,7 @@ extern U8 rollover_count;
 extern bool backdoor_award_collected;
 extern bool multidrain_awarded;
 extern bool slot_stdm_death;
-extern bool jet_death;
+extern bool unfair_death;
 	
 extern U8 two_way_combos;
 extern U8 three_way_combos;
@@ -233,6 +233,8 @@ void bonus_deff (void)
 	/* 
 	 * Taunts.....
 	 * */
+	/* Wait a bit so music_stop doesn't kill the taunt sounds */
+	task_sleep (TIME_66MS);
 	if (multidrain_awarded == TRUE)
 	{
 		dmd_alloc_low_clean ();
@@ -263,7 +265,7 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	if (jet_death == TRUE)
+	if (unfair_death == TRUE)
 	{
 		sound_send (SND_HAHA_POWERFIELD_EXIT);
 		dmd_alloc_low_clean ();

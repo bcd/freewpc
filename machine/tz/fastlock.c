@@ -85,20 +85,14 @@ void fastlock_award_deff (void)
 
 void fastlock_mode_init (void)
 {
-//	deff_start (DEFF_FASTLOCK_MODE);
 	fastlock_award = 5;
 	fastlocks_collected = 1;
+	magnet_reset ();
 }
 
-void fastlock_mode_expire (void)
-{
-//	deff_stop (DEFF_FASTLOCK_MODE);
-	lamp_off (LM_LOCK_ARROW);
-}
 
 void fastlock_mode_exit (void)
 {
-//	deff_stop (DEFF_FASTLOCK_MODE);
 	lamp_off (LM_LOCK_ARROW);
 }
 

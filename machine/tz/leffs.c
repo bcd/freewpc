@@ -25,6 +25,7 @@
 extern bool mpf_active;
 extern U8 mpf_round_timer;
 extern U8 tsm_mode_timer;
+
 void bonus_leff (void)
 {
 	triac_leff_disable (TRIAC_GI_MASK);
@@ -45,8 +46,8 @@ void gi_cycle_leff (void)
 			triac_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 }
-
 
 void flasher_happy_leff (void)
 {
@@ -68,7 +69,6 @@ void flasher_happy_leff (void)
 	}
 	leff_exit ();
 }
-
 
 void left_ramp_leff (void)
 {
@@ -131,7 +131,7 @@ static void slot_kickout_subtask (void)
 
 void slot_kickout_leff (void)
 {
-	if (live_balls == 1)
+	if (single_ball_play ())
 	{
 		triac_leff_disable (TRIAC_GI_MASK);
 	}
@@ -159,7 +159,6 @@ void gumball_strobe_leff (void)
 	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
-
 
 void clock_target_leff (void)
 {
@@ -189,7 +188,6 @@ void game_timeout_leff (void)
 	leff_exit ();
 }
 
-
 void clock_round_started_leff (void)
 {
 	U8 i;
@@ -202,7 +200,6 @@ void clock_round_started_leff (void)
 	}
 	leff_exit ();
 }
-
 
 void multiball_running_leff (void)
 {
@@ -285,10 +282,6 @@ void rocket_leff (void)
 	task_kill_peers ();
 	leff_exit ();
 }
-
-
-
-
 
 void multi_strobe1_subtask (void)
 { for (;;) { lamplist_set_apply_delay (TIME_33MS); lamplist_apply (LAMPLIST_SORT1, leff_toggle); task_sleep (TIME_500MS); } }
@@ -469,7 +462,6 @@ void powerball_announce_leff (void)
 	leff_exit ();	
 }
 
-
 void mpf_active_leff (void)
 {
 	if (live_balls == 1)
@@ -506,38 +498,12 @@ void mpf_hit_leff (void)
 	leff_exit ();
 }
 
-void left_jet_flash_leff (void)
-{
-/*	U8 i = 6;
-	do {
-		lamp_toggle (LM_LEFT_JET);
-		task_sleep (TIME_16MS);
-	} while (--i != 0);
-*/
-	leff_exit ();
-}
-
-void right_jet_flash_leff (void)
-{
-/*
-	U8 i = 6;
-	do {
-		lamp_toggle (LM_RIGHT_JET);
-		task_sleep (TIME_16MS);
-	} while (--i != 0);
-*/
-	leff_exit ();
-}
-
-
 void spiralaward_leff (void)
 {
-	U8 i;
-	lamplist_set_apply_delay (TIME_16MS);
-	for (i = 0; i < 42; i++)
+	lamplist_set_apply_delay (TIME_100MS);
+	while (task_find_gid (GID_SPIRALAWARD))
 	{
-		lamplist_step_increment (LAMPLIST_SPIRAL_AWARDS, matrix_lookup (LMX_EFFECT1_LAMPS));
-		task_sleep (TIME_16MS);
+		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);
 	}
 	leff_exit ();
 }

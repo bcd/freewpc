@@ -226,13 +226,12 @@ static void pb_detect_event (pb_event_t event)
 		/* Powerball detected on playfield, because Slot Proximity
 		 * did not trigger when a ball had to travel over it. */
 		case PF_PB_DETECTED:
-			if (free_timer_test (TIM_MB_JACKPOT_COLLECTED))
-			{
-				free_timer_stop (TIM_MB_JACKPOT_COLLECTED);
-				callset_invoke (powerball_jackpot);
-			}
 			pb_set_location (PB_IN_PLAY, 0);
 			pb_clear_location (PB_MAYBE_IN_PLAY);
+			if (timer_kill_gid (GID_MB_JACKPOT_COLLECTED))
+			{
+				callset_invoke (powerball_jackpot);
+			}
 			break;
 
 		case TROUGH_STEEL_DETECTED:
@@ -381,6 +380,11 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 	pb_detect_event (PF_STEEL_DETECTED);
 }
 
+
+CALLSET_ENTRY (pb_detect, ball_grabbed)
+{
+	pb_detect_event (PF_STEEL_DETECTED);
+}
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {

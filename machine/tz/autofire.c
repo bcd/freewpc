@@ -85,10 +85,13 @@ void autofire_monitor (void)
 	task_sleep (TIME_700MS);
 
 	sol_request (SOL_AUTOFIRE);
-	if (in_live_game && !multi_ball_play ())
+	if (in_live_game && single_ball_play ())
 	{
 		sound_send (SND_EXPLOSION_1);
 		leff_start (LEFF_STROBE_UP);
+		/* Clear the magnet so we can fire a ball */
+		magnet_disable_catch (MAG_RIGHT);
+		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
 	}
 	/* Say that the ball is heading into the right loop */
 	event_can_follow (autolaunch, right_loop, TIME_4S);
