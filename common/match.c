@@ -67,6 +67,12 @@ match_deff (void)
 		}
 		last_value = value;
 		dmd_alloc_low_clean ();
+#ifdef MACHINE_TZ
+		if (n < 19)
+			sound_send (SND_HITCHHIKER_COUNT);
+		else
+			sound_send (SND_JET_BUMPER_ADDED);
+#endif
 		sprintf ("%2b", &scores[0][BYTES_PER_SCORE-1]);
 		font_render_string_left (&font_mono5, 0, 0, sprintf_buffer);
 
