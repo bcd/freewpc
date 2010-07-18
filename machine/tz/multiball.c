@@ -245,10 +245,10 @@ void mb_running_deff (void)
 }
 
 /* Check to see if we can light the lock/lock a ball */
-//TODO Check if lock is full already
 bool can_lock_ball (void)
 {	
-	if ((mball_locks_lit > 0) 
+	if ( mball_locks_lit > 0 
+		&& mball_locks_made < 2
 		&& !flag_test (FLAG_MULTIBALL_RUNNING) 
 		&& !flag_test (FLAG_SSSMB_RUNNING) 
 		&& !flag_test (FLAG_CHAOSMB_RUNNING)
@@ -336,9 +336,12 @@ CALLSET_ENTRY (mball, lamp_update)
 
 void mball_light_lock (void)
 {
+	if (mball_locks_lit  != 2 && mball_locks_made != 2)
+	{
+		sound_send (SND_GUMBALL_COMBO);
+		deff_start (DEFF_LOCK_LIT);
+	}
 	bounded_increment (mball_locks_lit, 2);
-	sound_send (SND_GUMBALL_COMBO);
-	deff_start (DEFF_LOCK_LIT);
 }
 
 /* Check to see if GUMBALL has been completed and light lock */
@@ -346,8 +349,7 @@ void mball_check_light_lock (void)
 {
 	if (lamp_test (LM_GUM) && lamp_test (LM_BALL))
 	{
-		if (mball_locks_lit < 2)
-			mball_light_lock ();
+		mball_light_lock ();
 		gumball_enable_count++;
 	}
 }
