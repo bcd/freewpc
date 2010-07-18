@@ -668,6 +668,8 @@ void bonus_deff (void)
 			else if (!task_find_gid (GID_BONUS_TALKING))
 				sound_send (SND_THUD);
 			bounded_increment (countup_pause_iterations, 254);
+			if (buttons_held == TRUE)
+				score_copy (temp_score, points_this_ball);
 			countup_pause ();
 		} while ( score_compare (points_this_ball, temp_score) == 1 );
 		
@@ -874,12 +876,20 @@ CALLSET_ENTRY (bonus, start_ball)
 
 CALLSET_ENTRY (bonus, rank_change)
 {
-	if (check_if_last_ball_for_multiplayer ()
-		&& in_live_game 
-		&& score_ranks[player_up-1] == 1)
+	if (!in_live_game && score_ranks[player_up-1] == 1)
+		return;
+
+	if (check_if_last_ball_for_multiplayer ())
 	{
 		/* Notify the player that they have taken the lead */
 		deff_start (DEFF_IN_THE_LEAD);
+	}
+	else if (ball_up == system_config.balls_per_game 
+		&& player_up == num_players 
+		&& num_players > 1)
+	{
+		/* Notify the player that they have won */
+		deff_start (DEFF_HOME_AND_DRY);
 	}
 }
 
