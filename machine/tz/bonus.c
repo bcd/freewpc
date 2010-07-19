@@ -73,15 +73,15 @@ extern U8 lucky_bounces;
 
 /* Function to find who holds what score position 
  * eg
- * find_player_ranked (1) returns the player ranked first
- * returns from 0 - MAX_PLAYERS
+ * find_player_ranked (N) returns the player ranked first
+ * returns player number - 1 for score purposes
  */
 
 static U8 find_player_ranked (U8 ranking)
 {
 	/* If out of range, return last place */
 	if (ranking > MAX_PLAYERS)
-		return MAX_PLAYERS;
+		ranking = MAX_PLAYERS;
 	U8 i = 0;
 	while (score_ranks[i] != ranking)
 		i++;
@@ -162,7 +162,7 @@ static void bonus_talking_task (void)
 	sound_send (SND_OR_AN_ORDINARY_PLAYER);
 	task_sleep_sec (2);
 	
-	switch (current_one_ball_hi_player)
+	switch (find_player_ranked (1) + 1)
 	{
 		case 1:
 			sound_send (SND_PLAYER_ONE);
@@ -718,7 +718,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
-		task_sleep_sec (4);
+		task_sleep_sec (3);
 	
 
 		/* Calculate lead into temp_score */
@@ -730,8 +730,7 @@ void bonus_deff (void)
 
 		if (check_if_last_ball_of_multiplayer_game ())
 		{
-			task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
-			task_sleep_sec (4);
+			task_sleep_sec (2);
 		}
 		else
 		{
@@ -763,6 +762,7 @@ void bonus_deff (void)
 
 	if (check_if_last_ball_of_multiplayer_game ())
 	{
+		task_create_gid (GID_BONUS_TALKING, bonus_talking_task);
 		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_alloc_low_clean ();
 			
@@ -878,20 +878,23 @@ CALLSET_ENTRY (bonus, start_ball)
 
 CALLSET_ENTRY (bonus, rank_change)
 {
+	/* Don't do anything if the player up isn't now in first place */
 	if (!in_live_game && score_ranks[player_up-1] == 1)
 		return;
-
-	if (check_if_last_ball_for_multiplayer ())
-	{
-		/* Notify the player that they have taken the lead */
-		deff_start (DEFF_IN_THE_LEAD);
-	}
-	else if (ball_up == system_config.balls_per_game 
+	 
+	/* Check for last ball and last player of game */
+	/* Don't count extra balls because we don't need to */
+	if (ball_up == system_config.balls_per_game 
 		&& player_up == num_players 
 		&& num_players > 1)
 	{
 		/* Notify the player that they have won */
 		deff_start (DEFF_HOME_AND_DRY);
+	}
+	else if (check_if_last_ball_for_multiplayer ())
+	{
+		/* Notify the player that they have taken the lead */
+		deff_start (DEFF_IN_THE_LEAD);
 	}
 }
 
