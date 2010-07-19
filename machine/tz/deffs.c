@@ -125,6 +125,36 @@ void two_way_combo_deff (void)
 	flash_and_exit_deff (15, TIME_66MS);
 }
 
+void shoot_camera_deff (void)
+{
+	sprintf ("SHOOT CAMERA");
+	flash_and_exit_deff (15, TIME_66MS);
+}
+
+void shoot_jackpot_deff (void)
+{
+	sprintf ("SHOOT PIANO");
+	flash_and_exit_deff (15, TIME_66MS);
+}
+
+void home_and_dry_deff (void)
+{
+	sound_send (SND_BIG_RISK_BIG_REWARD);
+	sprintf ("HOME AND DRY");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("YOU HAVE WON");
+	flash_and_exit_deff (15, TIME_66MS);
+}
+
+void in_the_lead_deff (void)
+{
+	sound_send (SND_GO_FOR_THE_HILL);
+	sprintf ("IN THE LEAD");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("GO FOR IT");
+	flash_and_exit_deff (15, TIME_66MS);
+}
+
 void lucky_bounce_deff (void)
 {
 	sprintf ("LUCKY");
