@@ -109,7 +109,9 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 					break;
 				/* FEK */
 				case 1:
-					callset_invoke (door_start_clock_chaos);
+					//callset_invoke (door_start_clock_chaos);
+					deff_start_sync (DEFF_VPOKER_DRAW);
+					SECTION_VOIDCALL (__machine3__, vpoker_enter);
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
 				/* PUK */

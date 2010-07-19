@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -68,8 +68,9 @@ __fastram__ U8 clock_find_target;
 __fastram__ U8 clock_last_sw;
 
 
-/** How long the current operation has until it will timeout, causing an error */
-U8 clock_timeout_timer;
+/** How long calibration will be allowed to continue, before
+ * giving up. */
+U8 clock_calibration_time;
 
 /** The clock time "decoded" as the number of 15-minute intervals
 past 12:00, ranging from 0 to 47. */
@@ -131,10 +132,6 @@ U8 tz_clock_opto_to_hour[] =
 #define SOL_SWITCH_STROBE 47
 #define CLK_DRV_SWITCH_STROBE		(1 << (SOL_SWITCH_STROBE % 8))
 
-
-/**
- * Enable clock switch polling.
- */
 extern inline void clock_switch_enable (void)
 {
 	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
@@ -142,31 +139,11 @@ extern inline void clock_switch_enable (void)
 	writeb (out, *in | sol_get_bit (SOL_SWITCH_STROBE));
 }
 
-
-/**
- * Disable clock switch polling.
- */
 extern inline void clock_switch_disable (void)
 {
 	U8 *in = sol_get_read_reg (SOL_SWITCH_STROBE);
 	IOPTR out = sol_get_write_reg (SOL_SWITCH_STROBE);
 	writeb (out, *in & ~sol_get_bit (SOL_SWITCH_STROBE));
-}
-
-
-/**
- * Set the number of seconds for the current clock operation to
- * complete before it times out.  If setting to zero, this
- * disables the timer.
- * Any operation that may fail due to bad hardware should write a
- * nonzero value here when beginning, and then write a zero when
- * it completes.  The periodic function will decrement this timer
- * and if it goes from nonzero->zero, the clock will be deemed in
- * error.
- */
-static inline void tz_clock_set_timeout (U8 secs)
-{
-	clock_timeout_timer = secs * 10;
 }
 
 
@@ -320,9 +297,7 @@ void tz_clock_stop (void)
 {
 	clock_mode = CLOCK_STOPPED;
 	clock_mech_stop ();
-	tz_clock_set_timeout (0);
 }
-
 
 void tz_clock_error (void)
 {
@@ -356,7 +331,6 @@ void tz_clock_reset (void)
 			else
 				clock_mech_start_forward ();
 			clock_mode = CLOCK_FIND;
-			tz_clock_set_timeout (8);
 		}
 	}
 }
@@ -370,17 +344,21 @@ CALLSET_ENTRY (tz_clock, idle_every_100ms)
 {
 	/* When calibrating, once all switches have been active and inactive
 	 * at least once, claim victory and go back to the home position. */
-	if (unlikely (clock_mode == CLOCK_CALIBRATING) &&
-			(clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+	if (unlikely (clock_mode == CLOCK_CALIBRATING))
 	{
-		/* CALIBRATING -> FIND */
-		dbprintf ("Calibration complete.\n");
-		tz_clock_reset ();
-	}
-	else if (clock_timeout_timer && --clock_timeout_timer == 0)
-	{
-		dbprintf ("Operation timed out.\n");
-		tz_clock_error ();
+		if ((clock_sw_seen_active & clock_sw_seen_inactive) == 0xFF)
+		{
+			/* CALIBRATING -> FIND */
+			dbprintf ("Calibration complete.\n");
+			tz_clock_reset ();
+		}
+		/* If calibration doesn't succeed within a certain number
+		 * of iterations, give up. */
+		else if (--clock_calibration_time == 0)
+		{
+			dbprintf ("Calibration aborted.\n");
+			tz_clock_error ();
+		}
 	}
 }
 
@@ -413,7 +391,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
 		dbprintf ("Clock calibration started.\n");
-		tz_clock_set_timeout (8);
+		clock_calibration_time = 80; /* 8 seconds */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
 		clock_mode = CLOCK_CALIBRATING;

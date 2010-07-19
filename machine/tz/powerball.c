@@ -381,11 +381,6 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 }
 
 
-CALLSET_ENTRY (pb_detect, ball_grabbed)
-{
-	pb_detect_event (PF_STEEL_DETECTED);
-}
-
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {
 	if (event_did_follow (camera_or_piano, slot_prox))
@@ -428,6 +423,23 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 	pb_container_exit (PB_IN_LOCK);
 }
 
+CALLSET_ENTRY (pb_detect, idle_every_second)
+{
+	/* No point detecting in either circumstance */
+	if (!in_live_game && !single_ball_play ())
+		return;
+	/* Enable the magnets to help detect PB */
+	if (pb_location & PB_MAYBE_IN_PLAY)
+	{
+		magnet_enable_catch (MAG_LEFT);
+		magnet_enable_catch (MAG_RIGHT);
+	}
+}
+
+CALLSET_ENTRY (pb_detect, ball_grabbed)
+{
+	pb_detect_event (PF_STEEL_DETECTED);
+}
 
 CALLSET_ENTRY (pb_detect, start_ball)
 {

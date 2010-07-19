@@ -205,7 +205,7 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
-	/* Inform combo.x that the mpf was collected */
+	/* Inform combo.c that the mpf was collected */
 	callset_invoke (combo_mpf_collected);
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
@@ -218,6 +218,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 		timed_mode_end (&mpf_mode);
 		task_kill_gid (GID_MPF_COUNTDOWN);
 		task_kill_gid (GID_MPF_BALLSEARCH);
+		task_kill_gid (GID_MPF_BUTTON_MASHER);
 	}
 	deff_start (DEFF_MPF_AWARD);
 	callset_invoke (award_door_panel);
@@ -278,6 +279,7 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	/* Stop the ball search timer */
 	task_kill_gid (GID_MPF_BALLSEARCH);
 	task_kill_gid (GID_MPF_COUNTDOWN);
+	task_kill_gid (GID_MPF_BUTTON_MASHER);
 	if (mpf_ball_count > 0)
 		bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)

@@ -35,7 +35,7 @@ U8 three_way_combos;
 U8 lucky_bounces;
 
 bool slot_stdm_death;
-bool unfair_death;
+bool jet_death;
 
 static void lucky_bounce (void)
 {
@@ -43,18 +43,6 @@ static void lucky_bounce (void)
 	score (SC_1M);
 	deff_start (DEFF_LUCKY_BOUNCE);
 	bounded_increment (lucky_bounces, 99);
-}
-
-static void award_two_way_combo (void)
-{
-	bounded_increment (two_way_combos, 99);
-	deff_start (DEFF_TWO_WAY_COMBO);
-}
-
-static void award_three_way_combo (void)
-{
-	bounded_increment (three_way_combos, 99);
-	deff_start (DEFF_THREE_WAY_COMBO);
 }
 
 /* Left ramp, Right ramp, Piano combo */
@@ -66,10 +54,7 @@ CALLSET_ENTRY (combo, sw_left_ramp_exit)
 CALLSET_ENTRY (combo, sw_right_ramp)
 {
 	if (event_did_follow (left_ramp, right_ramp))
-	{
 		event_can_follow (left_right_ramp, piano, TIME_4S);
-		event_can_follow (left_right_ramp, mpf_collected, TIME_10S);
-	}
 }
 
 /* Jet Death + lucky bounce combo */
@@ -128,12 +113,15 @@ CALLSET_ENTRY (combo, sw_piano)
 	{
 		sound_send (SND_RUDY_BLEH);
 		score (SC_10M);
-		award_two_way_combo ();
+		deff_start (DEFF_TWO_WAY_COMBO);
+		bounded_increment (two_way_combos, 99);
 	}
 	else if (event_did_follow (left_right_ramp, piano))
 	{
+		sound_send (SND_THREE_WAY_COMBO);
 		score (SC_20M);
-		award_three_way_combo ();
+		deff_start (DEFF_THREE_WAY_COMBO);
+		bounded_increment (three_way_combos, 99);
 	}
 	else if (event_did_follow (standup_3, slot_or_piano))
 		lucky_bounce ();
@@ -145,17 +133,6 @@ CALLSET_ENTRY (combo, sw_power_payoff)
 	if (event_did_follow (left_right_ramp, piano))
 		sound_send (SND_TOO_HOT_TO_HANDLE);
 }
-
-CALLSET_ENTRY (combo, combo_mpf_collected)
-{
-	/* Left ramp -> Right ramp -> mpf collected */
-	if (event_did_follow (left_right_ramp, mpf_collected))
-	{
-		score (SC_20M);
-		award_three_way_combo ();
-	}
-}
-
 
 CALLSET_ENTRY (combo, sw_standup_4)
 {
@@ -185,6 +162,12 @@ CALLSET_ENTRY (combo, sw_camera)
 	}
 	else if (event_did_follow (slot_standup, camera))
 	{
+	/*
+		sound_send (SND_LUCKY);
+		score (SC_1M);
+		deff_start (DEFF_LUCKY_BOUNCE);
+		bounded_increment (lucky_bounces, 99);
+	*/
 		lucky_bounce ();
 	}
 		
@@ -210,43 +193,24 @@ CALLSET_ENTRY (combo, sw_left_ramp_enter)
 	event_can_follow (slot_kick, outhole, TIME_1S + TIME_500MS);
 }
 
-static bool can_award_unfair_death (void)
-{
-	if (single_ball_play ()
-		&& !ballsave_test_active ())
-		return TRUE;
-	else
-		return FALSE;
-}
-
 /* Slot STDM handler */
 CALLSET_ENTRY (combo, sw_outhole)
 {
-	if (!can_award_unfair_death ())
-		return;
-	if (event_did_follow (slot_kick, outhole))
+	if (event_did_follow (slot_kick, outhole) && !ballsave_test_active ())
 		slot_stdm_death = TRUE;
 }
 
 /* Jet death handler */
 CALLSET_ENTRY (combo, sw_right_outlane)
 {
-	if (!can_award_unfair_death ())
-		return;
-	if (event_did_follow (jets, either_outlane))
-		unfair_death = TRUE;
-	if (event_did_follow (left_or_right_inlane, either_outlane))
-		unfair_death = TRUE;
+	if (event_did_follow (jets, either_outlane) && !ballsave_test_active ())
+		jet_death = TRUE;
 }
 
 CALLSET_ENTRY (combo, sw_left_outlane)
 {
-	if (!can_award_unfair_death ())
-		return;
-	if (event_did_follow (jets, either_outlane))
-		unfair_death = TRUE;
-	if (event_did_follow (left_or_right_inlane, either_outlane))
-		unfair_death = TRUE;
+	if (event_did_follow (jets, either_outlane) && !ballsave_test_active ())
+		jet_death = TRUE;
 }
 
 /* Standup3, Jet, Left Sling -> Slot Lucky Bounce handler */
@@ -266,6 +230,6 @@ CALLSET_ENTRY (combo, start_ball)
 	three_way_combos = 0;
 	lucky_bounces = 0;
 	slot_stdm_death = FALSE;
-	unfair_death = FALSE;
+	jet_death = FALSE;
 }
 

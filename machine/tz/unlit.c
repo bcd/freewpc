@@ -29,7 +29,7 @@
 #include <freewpc.h>
 
 U8 unlit_shot_count;
-__local__ bool backdoor_award_collected;
+bool backdoor_award_collected;
 /* last switch that was collected 'unlit; */
 U8 unlit_called_from_stored;
 
@@ -39,7 +39,7 @@ void backdoor_award_deff (void)
 	sprintf ("BACKDOOR AWARD");
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (1);
+	task_sleep_sec (3);
 	deff_exit ();
 }
 
@@ -78,11 +78,6 @@ void award_unlit_shot (U8 unlit_called_from)
 		{
 			/* Hint to the player that backdoor award is ready */
 			sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
-			//TODO Use leff
-			/*lamplist_apply (LAMPLIST_UNLIT_SHOTS, lamp_flash_on);
-			task_sleep_sec (3);
-			lamplist_apply (LAMPLIST_UNLIT_SHOTS, lamp_flash_off);*/
-		
 		}
 		/* Store where we were called from */
 		unlit_called_from_stored = unlit_called_from;
@@ -93,10 +88,5 @@ CALLSET_ENTRY (unlit, start_ball)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;
-//	backdoor_award_collected = FALSE;
-}
-
-CALLSET_ENTRY (unlit, start_player)
-{
 	backdoor_award_collected = FALSE;
 }

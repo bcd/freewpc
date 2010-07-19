@@ -327,7 +327,7 @@ CALLSET_ENTRY (mball, lamp_update)
 		lamp_tristate_on (LM_LOCK2);
 	}
 	
-	/* Flash the Piano Jackpot lit when Jackpot is lit */
+	/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
 	if (flag_test (FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 	else
@@ -360,8 +360,6 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 	/* Don't start if another multiball is running */
 	if (multi_ball_play () || live_balls == 3)
 		return;
-//	if (live_balls == 2???)
-//		return;
 	/* Check lock and empty accordingly */
 	switch (device_recount (device_entry (DEVNO_LOCK)))
 	{	
@@ -377,7 +375,6 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 		 	task_sleep_sec (4);
 			task_sleep (TIME_500MS);
 			device_unlock_ball (device_entry (DEVNO_LOCK));
-		 	//task_sleep_sec (1);
 			break;
 		/* 2 balls in lock, fire 1 from trough */
 		case 2:
@@ -442,11 +439,6 @@ CALLSET_ENTRY (mball, mball_start)
 		mballs_played++;
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
-		
-		/*if (!flag_test (FLAG_SUPER_MB_RUNNING))
-		{	
-			mball_start_3_ball ();	
-		}*/
 	}
 }
 

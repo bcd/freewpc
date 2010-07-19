@@ -141,8 +141,7 @@ CALLSET_ENTRY (lanes, sw_right_inlane)
 	score (SC_1K);
 	
 	/* Light Dead end if not lit */
-	if (!lamp_test (LM_DEAD_END))
-		lamp_on (LM_DEAD_END);
+	lamp_on (LM_DEAD_END);
 	/* Start the timer for the left ramp */
 	timer_restart_free (GID_LEFT_RAMP, TIME_3S);
 }

@@ -251,6 +251,17 @@ void draw_door_award_text (void)
 
 void door_award_sound_task (void)
 {
+	
+	task_exit ();
+}
+
+
+
+void door_award_deff (void)
+{
+	U8 index = door_index_awarded;
+	U16 fno;
+	
 	switch (door_index_awarded)
 	{
 		case 0:
@@ -261,7 +272,7 @@ void door_award_sound_task (void)
 			break;
 
 		case 2:
-			sound_send (SND_SLOT_PULL);
+			task_create_anon (slot_animation_sound_task);
 			break;
 
 		case 3:
@@ -284,7 +295,7 @@ void door_award_sound_task (void)
 			break;
 
 		case 8:
-			sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+			sound_send (SND_MOST_UNUSUAL_CAMERA);
 			break;
 
 		case 9:
@@ -296,7 +307,7 @@ void door_award_sound_task (void)
 			break;
 
 		case 11:
-			sound_send (SND_THIS_SHOT_REQUIRES_SKILL_DUP);
+			sound_send (SND_SUPER_SKILL_INTRO);
 			break;
 
 		case 12:
@@ -310,21 +321,8 @@ void door_award_sound_task (void)
 		case 14:
 			break;
 	}
-	task_exit ();
-}
-
-
-
-void door_award_deff (void)
-{
-	U8 index = door_index_awarded;
-	/* Hold the ball during deff if D_PAUSE */
-	//kickout_lock (KLOCK_DEFF);
-	U16 fno;
-
-	task_create_gid (GID_DOOR_AWARD, door_award_sound_task);
-	/* Play once normally */
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+	/* Play once normally */
 	for (fno = IMG_DOOR_START + 1; fno <= IMG_DOOR_END; fno += 2)
 	{
 		dmd_alloc_pair ();
@@ -339,6 +337,7 @@ void door_award_deff (void)
 	}
 	task_sleep_sec (1);	
 	/* Play backwards */
+	sound_send (SND_SPIRAL_EB_LIT);
 	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
 	{
 		dmd_alloc_pair ();
@@ -360,10 +359,7 @@ void door_award_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
-	/* Unlock the ball if D_PAUSE */
-	kickout_unlock (KLOCK_DEFF);
 	deff_exit ();
 }
 

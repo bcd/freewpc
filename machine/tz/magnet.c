@@ -80,7 +80,6 @@ static inline void magnet_rtt_duty_handler (
 			/* switch should remain closed in this state */
 			if (--*timer == 0)
 			{
-				callset_invoke (ball_grabbed);
 				/* switch to HOLD */
 				*timer = MAG_HOLD_TIME;
 				*state = MAG_ON_HOLD;
@@ -93,11 +92,13 @@ static inline void magnet_rtt_duty_handler (
 			break;
 
 		case MAG_ON_HOLD:
-			/* keep magnet on with low power */
-			/* switch should remain closed in this state */
 			if (--*timer == 0)
-			{
+			{	
 				sol_disable (sol_magnet);
+				/* If the switch is closed now */
+				/* it's likely we grabbed a ball */
+				if (!rt_switch_poll (sw_magnet))
+					callset_invoke (ball_grabbed);
 				/* switch to DISABLED */
 				*state = MAG_DISABLED;
 			}

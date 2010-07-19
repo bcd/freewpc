@@ -121,54 +121,8 @@ void special_deff (void)
 
 void two_way_combo_deff (void)
 {
-	sound_send (SND_GUMBALL_COMBO);
 	sprintf ("2 WAY COMBO");
 	flash_and_exit_deff (15, TIME_66MS);
-}
-
-void three_way_combo_deff (void)
-{
-	sound_send (SND_THREE_WAY_COMBO);
-	sprintf ("3 WAY COMBO");
-	flash_and_exit_deff (20, TIME_66MS);
-}
-
-void in_the_lead_deff (void)
-{
-	sound_send (SND_YOUVE_JUST_CROSSED_OVER);
-	sprintf ("IN THE LEAD");
-	flash_small_deff (30, TIME_33MS);
-	sprintf ("GO FOR IT");
-	flash_small_deff (30, TIME_33MS);
-	deff_exit ();
-}
-
-void home_and_dry_deff (void)
-{
-	sound_send (SND_YOU_HAVE_COME_TO_THE_END);
-	sprintf ("HOME AND DRY");
-	flash_small_deff (30, TIME_33MS);
-	sprintf ("YOU HAVE WON");
-	flash_small_deff (30, TIME_33MS);
-	deff_exit ();
-}
-
-void shoot_camera_deff (void)
-{
-	sprintf ("SHOOT");
-	flash_small_deff (8, TIME_33MS);
-	sprintf ("CAMERA");
-	flash_small_deff (8, TIME_33MS);
-	deff_exit ();
-}
-
-void shoot_jackpot_deff (void)
-{
-	sprintf ("SHOOT");
-	flash_small_deff (8, TIME_33MS);
-	sprintf ("JACKPOT");
-	flash_small_deff (8, TIME_33MS);
-	deff_exit ();
 }
 
 void lucky_bounce_deff (void)
@@ -207,6 +161,12 @@ void mb_ten_million_added_deff (void)
 	deff_exit ();
 }
 
+void three_way_combo_deff (void)
+{
+	sprintf ("3 WAY COMBO");
+	flash_and_exit_deff (20, TIME_66MS);
+}
+
 /* Jackpot animation contributed by highrise */
 void jackpot_deff (void)
 {
@@ -217,7 +177,7 @@ void jackpot_deff (void)
 	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
-		for (fno = IMG_JACKPOT_START + 1; fno <= IMG_JACKPOT_END - 9; fno += 1)
+		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
 		{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
@@ -227,7 +187,7 @@ void jackpot_deff (void)
 		}
 	}
 	/* Show once fully */
-	for (fno = IMG_JACKPOT_START + 1; fno <= IMG_JACKPOT_END - 2; fno += 1)
+	for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 2; fno += 1)
 	{
 			//dmd_alloc_low_high ();
 			dmd_alloc_pair ();
