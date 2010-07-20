@@ -197,7 +197,8 @@ CALLSET_ENTRY (autofire, clear_autofire)
 	 * during attract mode */
 	shooter_div_start ();
 	task_sleep (TIME_1S);
-	sol_request (SOL_AUTOFIRE);
+	if (switch_poll_logical (SW_AUTOFIRE2))
+		sol_request (SOL_AUTOFIRE);
 	task_sleep (TIME_1S);
 	shooter_div_stop ();
 }

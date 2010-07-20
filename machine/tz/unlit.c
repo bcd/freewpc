@@ -39,7 +39,7 @@ void backdoor_award_deff (void)
 	sprintf ("BACKDOOR AWARD");
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 

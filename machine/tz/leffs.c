@@ -500,7 +500,7 @@ void mpf_hit_leff (void)
 
 void spiralaward_leff (void)
 {
-	lamplist_set_apply_delay (TIME_100MS);
+	lamplist_set_apply_delay (TIME_33MS);
 	while (task_find_gid (GID_SPIRALAWARD))
 	{
 		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);

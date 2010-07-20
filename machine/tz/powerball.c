@@ -235,8 +235,14 @@ static void pb_detect_event (pb_event_t event)
 			break;
 
 		case TROUGH_STEEL_DETECTED:
+			if (live_balls == 0)
+			{
+				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
 			if (device_entry (DEVNO_TROUGH)->actual_count == 1)
+			{	
 				pb_clear_location (0);
+			}
 #ifdef PB_DEBUG
 			else
 				pb_clear_location (0);
@@ -274,6 +280,8 @@ to be served is a steel ball or the powerball.   This is
 called anytime the trough changes in some way. */
 void pb_poll_trough (void)
 {
+	/* Allow time for the trough to settle */
+	task_sleep (TIME_100MS);
 	if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
 		if (switch_poll_trough_metal ())
@@ -320,6 +328,7 @@ void pb_container_enter (U8 location, U8 devno)
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
 			}
 		}
@@ -328,7 +337,8 @@ void pb_container_enter (U8 location, U8 devno)
 			/* In multiball, container enter might mean the
 			powerball entered it or not... we just don't
 			know */
-			pb_set_location (PB_MAYBE_IN_PLAY, 0);
+			if (pb_location == PB_IN_PLAY)
+				pb_set_location (PB_MAYBE_IN_PLAY, 0);
 		}
 	}
 	else
@@ -353,7 +363,6 @@ void pb_container_exit (U8 location)
 			pb_announce ();
 		}
 	}
-
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)
@@ -422,30 +431,6 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 {
 	pb_container_exit (PB_IN_LOCK);
 }
-
-CALLSET_ENTRY (pb_detect, idle_every_second)
-{
-	/* No point detecting in either circumstance */
-	if (!in_live_game && !single_ball_play ())
-		return;
-	/* Enable the magnets to help detect PB */
-	if (pb_location & PB_MAYBE_IN_PLAY)
-	{
-		magnet_enable_catch (MAG_LEFT);
-		magnet_enable_catch (MAG_RIGHT);
-	}
-}
-
-CALLSET_ENTRY (pb_detect, ball_grabbed)
-{
-	pb_detect_event (PF_STEEL_DETECTED);
-}
-
-CALLSET_ENTRY (pb_detect, start_ball)
-{
-	pb_clear_location (PB_IN_PLAY);
-}
-
 
 CALLSET_ENTRY (pb_detect, init)
 {

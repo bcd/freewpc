@@ -650,7 +650,7 @@ CALLSET_ENTRY (mball, status_report)
 	status_page_complete ();
 }
 
-CALLSET_ENTRY (mball, ball_grabbed)
+CALLSET_ENTRY (mball, left_ball_grabbed)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT))
 	{
@@ -662,7 +662,8 @@ CALLSET_ENTRY (mball, ball_grabbed)
 CALLSET_ENTRY (mball, idle_every_second)
 {
 	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT)
-		&& switch_poll (SW_LEFT_MAGNET))
+		&& switch_poll (SW_LEFT_MAGNET)
+		&& feature_config.tz_mag_helpers == YES)
 		magnet_enable_catch (MAG_LEFT);
 }
 

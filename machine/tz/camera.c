@@ -202,9 +202,9 @@ CALLSET_ENTRY (camera, sw_camera)
 }
 
 /* Right magnet grab camera helpers */
-CALLSET_ENTRY (camera, ball_grabbed)
+CALLSET_ENTRY (camera, right_ball_grabbed)
 {
-	if (!switch_poll (SW_LOWER_RIGHT_MAGNET) && !multi_ball_play ())
+	if (!multi_ball_play () && can_award_camera ())
 	{
 		deff_start (DEFF_SHOOT_CAMERA);
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
@@ -219,7 +219,8 @@ CALLSET_ENTRY (camera, idle_every_second)
 		&& !timer_find_gid (GID_LOCK_KICKED)
 		&& !timed_mode_running_p (&spiral_mode)
 		&& !timed_mode_running_p (&fastlock_mode)
-		&& !timer_find_gid (GID_BALL_LAUNCH))
+		&& !timer_find_gid (GID_BALL_LAUNCH)
+		&& feature_config.tz_mag_helpers == YES)
 	{	
 		magnet_enable_catch (MAG_RIGHT);
 	}

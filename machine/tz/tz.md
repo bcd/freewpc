@@ -152,7 +152,7 @@ define CONFIG_TZONE_IP y
 15: Right Trough, noscore
 16: Center Trough, noscore
 17: Left Trough, noscore
-18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS);
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_66MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -227,20 +227,20 @@ define CONFIG_TZONE_IP y
 ##########################################################################
 [drives]
 H1: Slot, duty(SOL_DUTY_100), time(TIME_200MS)
-H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_166MS)
+H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_200MS)
 H3: Autofire, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
 H4: Popper
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
-H6: Gumball Div
+H6: Gumball Div, duty(SOL_DUTY_50)
 H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
-L2: Right Sling
-L3: Left Sling
-L4: Lower Jet
-L5: Left Jet
-L6: Right Jet
+L2: Right Sling, duty(SOL_DUTY_100)
+L3: Left Sling, duty(SOL_DUTY_100)
+L4: Lower Jet, duty(SOL_DUTY_100)
+L5: Left Jet, duty(SOL_DUTY_100)
+L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
 L8: Shooter Div, nosearch
 
@@ -248,13 +248,13 @@ G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
 G3: Powerfield, flash
 G4: Ramp1, flash
-G5: Left Magnet
-G6: Upper Right Magnet
-G7: Right Magnet
+G5: Left Magnet, nosearch
+G6: Upper Right Magnet, nosearch
+G7: Right Magnet, nosearch
 G8: Gumball Release, motor, nosearch
 
-A1: MPF Left Magnet
-A2: MPF Right Magnet
+A1: MPF Left Magnet, nosearch
+A2: MPF Right Magnet, nosearch
 A3: Ramp Divertor, duty(SOL_DUTY_25), time(TIME_100MS)
 A4: Clock Target, flash
 
@@ -427,6 +427,7 @@ Powerball Missing: yes_no, NO
 Have Third Magnet: yes_no, NO
 Mute/Pause: yes_no, YES
 TZ Flipcodes: yes_no, YES
+TZ Mag Helpers: yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -549,6 +550,8 @@ Clock Working:
 Cow: page(MACHINE_PAGE), PRI_EGG1
 TZ Flipcode entry: page(MACHINE3_PAGE), PRI_REPLAY
 TZ Flipcode entered: page(MACHINE3_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
+Vpoker draw: page(MACHINE3_PAGE), PRI_DEBUGGER
+
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
 Jackpot: page(MACHINE_PAGE), PRI_REPLAY, D_PAUSE+D_QUEUED
@@ -556,7 +559,7 @@ Special: page(MACHINE_PAGE), PRI_SPECIAL
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 
 Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
-Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_TIMEOUT
+Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
@@ -574,9 +577,9 @@ SSSMB Jackpot Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_PAUSE+D_QUEUED+D_RESTAR
 SSlot Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
 SSlot Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE
 TSM Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE4
-TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_TIMEOUT
+TSM Mode total: page(MACHINE_PAGE), PRI_GAME_MODE4, D_QUEUED+D_PAUSE
 Spiral Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE5
-Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
+Spiral Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 Spiral Loop: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_SCORE+D_QUEUED
 Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT

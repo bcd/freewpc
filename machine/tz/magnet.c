@@ -21,9 +21,9 @@
 
 #include <freewpc.h>
 
-/* Magnet switch RTT runs every 8 ms */
+/* Magnet switch RTT runs every 4 ms */
 #define MAG_SWITCH_RTT_FREQ 4
-#define MAG_DRIVE_RTT_FREQ 8
+#define MAG_DRIVE_RTT_FREQ 32
 
 #define MAG_POWER_TIME (400 / MAG_DRIVE_RTT_FREQ)
 #define MAG_HOLD_TIME (600 / MAG_DRIVE_RTT_FREQ)
@@ -37,6 +37,24 @@ __fastram__ enum magnet_state {
 
 __fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
 U8 left_magnet_enable_timer, upper_right_magnet_enable_timer, lower_right_manger_enable_timer;
+
+static inline void rt_ball_grabbed (U8 sw_magnet)
+{	
+#if 0
+	switch (sw_magnet)
+	{
+		case SW_LEFT_MAGNET:
+			callset_invoke (left_ball_grabbed);
+			break;
+		case SW_UPPER_RIGHT_MAGNET:
+			break;
+		case SW_LOWER_RIGHT_MAGNET:
+			callset_invoke (right_ball_grabbed);
+			break;
+	}
+#endif
+}
+
 
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
@@ -80,6 +98,10 @@ static inline void magnet_rtt_duty_handler (
 			/* switch should remain closed in this state */
 			if (--*timer == 0)
 			{
+				/* If the switch is closed now */
+				/* it's likely we grabbed a ball */
+			/*	if (!rt_switch_poll (sw_magnet))
+					rt_ball_grabbed (sw_magnet); */
 				/* switch to HOLD */
 				*timer = MAG_HOLD_TIME;
 				*state = MAG_ON_HOLD;
@@ -95,14 +117,11 @@ static inline void magnet_rtt_duty_handler (
 			if (--*timer == 0)
 			{	
 				sol_disable (sol_magnet);
-				callset_invoke (ball_grabbed);
 				/* switch to DISABLED */
 				*state = MAG_DISABLED;
 			}
-			else if (!rt_switch_poll (sw_magnet))
+			else
 			{
-				/* If the switch is closed now */
-				/* it's likely we grabbed a ball */
 				/* magnet is on 25% */
 				if ((*timer % 4) == 0)
 				{
@@ -113,15 +132,9 @@ static inline void magnet_rtt_duty_handler (
 					sol_disable (sol_magnet);
 				}
 			}
-			else
-			{
-				sol_disable (sol_magnet);
-				*state = MAG_DISABLED;
-			}
 			break;
 	}
 }
-
 
 /* Realtime function to poll the magnet switches. */
 void magnet_switch_rtt (void)
@@ -193,8 +206,13 @@ void magnet_enable_handler (void)
 CALLSET_ENTRY (magnet, sw_lower_right_magnet)
 {
 	if (in_live_game && task_find_gid (GID_BALL_LAUNCH))
+	{
 		magnet_enable_catch (MAG_LEFT);
+		task_sleep_sec (1);
+		magnet_disable_catch (MAG_LEFT);
+	}
 }
+
 CALLSET_ENTRY (magnet, end_ball)
 {
 //	task_kill_gid (GID_MAGNET_ENABLE_HANDLER)
@@ -209,6 +227,16 @@ CALLSET_ENTRY (magnet, start_ball)
 CALLSET_ENTRY (magnet, single_ball_play)
 {
 	magnet_reset ();
+}
+
+CALLSET_ENTRY (magnet, ball_search)
+{
+	magnet_enable_catch (MAG_LEFT);
+	magnet_enable_catch (MAG_RIGHT);
+	task_sleep_sec (1);
+	magnet_disable_catch (MAG_LEFT);
+	magnet_disable_catch (MAG_RIGHT);
+
 }
 
 CALLSET_ENTRY (magnet, init)

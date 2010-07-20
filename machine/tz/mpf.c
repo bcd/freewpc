@@ -376,7 +376,7 @@ void check_button_masher (void)
 	}
 }
 
-static mpf_button_masher_handler (void)
+static void mpf_button_masher_handler (void)
 {
 	if (mpf_timer != 0 && !multi_ball_play ())
 	{
