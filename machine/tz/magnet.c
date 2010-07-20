@@ -25,8 +25,8 @@
 #define MAG_SWITCH_RTT_FREQ 4
 #define MAG_DRIVE_RTT_FREQ 32
 
-#define MAG_POWER_TIME (200 / MAG_DRIVE_RTT_FREQ)
-#define MAG_HOLD_TIME (600 / MAG_DRIVE_RTT_FREQ)
+#define MAG_POWER_TIME (100 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_HOLD_TIME (600 / MAG_DRIVE_RTT_FREQ)
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -36,23 +36,10 @@ __fastram__ enum magnet_state {
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
 __fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
-U8 left_magnet_enable_timer, upper_right_magnet_enable_timer, lower_right_manger_enable_timer;
+__fastram__ U8 left_magnet_hold_timer, upper_right_magnet_hold_timer, lower_right_magnet_hold_timer;
 
 static inline void rt_ball_grabbed (U8 sw_magnet)
 {	
-#if 0
-	switch (sw_magnet)
-	{
-		case SW_LEFT_MAGNET:
-			callset_invoke (left_ball_grabbed);
-			break;
-		case SW_UPPER_RIGHT_MAGNET:
-			break;
-		case SW_LOWER_RIGHT_MAGNET:
-			callset_invoke (right_ball_grabbed);
-			break;
-	}
-#endif
 }
 
 
@@ -87,7 +74,8 @@ static inline void magnet_rtt_duty_handler (
 	const U8 sw_magnet,
 	const U8 sol_magnet,
 	enum magnet_state *state,
-	U8 *timer )
+	U8 *timer, 
+	U8 *hold_timer)
 {
 	switch (*state)
 	{
@@ -104,10 +92,10 @@ static inline void magnet_rtt_duty_handler (
 			{
 				/* If the switch is closed now */
 				/* it's likely we grabbed a ball */
-			/*	if (!rt_switch_poll (sw_magnet))
-					rt_ball_grabbed (sw_magnet); */
+				if (!rt_switch_poll (sw_magnet))
+					rt_ball_grabbed (sw_magnet);
 				/* switch to HOLD */
-				*timer = MAG_HOLD_TIME;
+				*timer = *hold_timer;
 				*state = MAG_ON_HOLD;
 			}
 			else if (*timer == MAG_POWER_TIME)
@@ -122,6 +110,7 @@ static inline void magnet_rtt_duty_handler (
 			{	
 				sol_disable (sol_magnet);
 				/* switch to DISABLED */
+				*hold_timer = 0;
 				*state = MAG_DISABLED;
 			}
 			else
@@ -157,22 +146,54 @@ void magnet_switch_rtt (void)
 void magnet_duty_rtt (void)
 {
 	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
-		&left_magnet_state, &left_magnet_timer);
+		&left_magnet_state, &left_magnet_timer, &left_magnet_hold_timer);
 	
 	magnet_rtt_duty_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET, 
-		&upper_right_magnet_state, &upper_right_magnet_timer);
+		&upper_right_magnet_state, &upper_right_magnet_timer, &upper_right_magnet_hold_timer);
 	
 	magnet_rtt_duty_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
-		&lower_right_magnet_state, &lower_right_magnet_timer);
+		&lower_right_magnet_state, &lower_right_magnet_timer, &lower_right_magnet_hold_timer);
 }
 
 
 void magnet_enable_catch (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	
+	switch (magnet)
+	{	
+		case MAG_LEFT:
+			left_magnet_hold_timer = DEFAULT_MAG_HOLD_TIME;
+			break;
+		case MAG_UPPER_RIGHT:
+			upper_right_magnet_hold_timer = DEFAULT_MAG_HOLD_TIME;
+			break;
+		case MAG_RIGHT:
+			lower_right_magnet_hold_timer = DEFAULT_MAG_HOLD_TIME;
+			break;
+	}
 	magstates[magnet] = MAG_ENABLED;
 }
 
+void magnet_enable_catch_and_hold (U8 magnet, U8 holdtime_secs)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	
+	U8 holdtime = (holdtime_secs  *(1000 / MAG_DRIVE_RTT_FREQ));
+	switch (magnet)
+	{	
+		case MAG_LEFT:
+			left_magnet_hold_timer = holdtime;
+			break;
+		case MAG_UPPER_RIGHT:
+			upper_right_magnet_hold_timer = holdtime;
+			break;
+		case MAG_RIGHT:
+			lower_right_magnet_hold_timer = holdtime;
+			break;
+	}
+	magstates[magnet] = MAG_ENABLED;
+}
 
 void magnet_disable_catch (U8 magnet)
 {
@@ -184,27 +205,15 @@ void magnet_reset (void)
 {
 	left_magnet_state = upper_right_magnet_state = 
 		lower_right_magnet_state = MAG_DISABLED;
+
 	left_magnet_timer = upper_right_magnet_timer = 
 		lower_right_magnet_timer = 0;
 
-	left_magnet_enable_timer = upper_right_magnet_enable_timer =
-		lower_right_manger_enable_timer = 0;
+	left_magnet_hold_timer = upper_right_magnet_hold_timer =
+		lower_right_magnet_hold_timer = 0;
 }
 
-void magnet_enable_handler (void)
-{
-	while (in_live_game)
-	{
-		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-		if (left_magnet_enable_timer > 0 && magstates[MAG_LEFT] == MAG_DISABLED)
-			magnet_enable_catch (MAG_LEFT);
-		else if (left_magnet_enable_timer == 0 && magstates[MAG_LEFT] == MAG_ENABLED)
-			magnet_disable_catch (MAG_LEFT);
-		task_sleep (TIME_66MS);
-	}
-	task_exit ();
-}
-
+//TODO MOVE THIS
 /* Grab the ball following an auto fire */
 CALLSET_ENTRY (magnet, sw_lower_right_magnet)
 {
