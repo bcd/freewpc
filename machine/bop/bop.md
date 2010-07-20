@@ -149,9 +149,9 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 18: Right Outlane
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
-25: Right Trough, trough, noscore, noplay
-26: Center Trough, trough, noscore, noplay
-27: Left Trough, trough, noscore, noplay
+25: Right Trough, noscore
+26: Center Trough, noscore
+27: Left Trough, noscore
 28: Left Standup, standup
 31: Skill Shot 50K, intest #Skill kicker
 32: Skill Shot 75K, ingame
@@ -205,13 +205,13 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 ##########################################################################
 [drives]
 H1: Outhole
-H2: Ball Release, nosearch
-H3: Under Playfield Kicker
-H4: Controlled Gate
-H5: Skill Shot Kicker
-H6: Wire Ball Holder
+H2: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
+H3: UPF Kicker
+H4: Cont. Gate
+H5: SShot Kicker
+H6: Wire Post
 H7: Knocker, knocker
-H8: Head Mouth, nosearch
+H8: Mouth, nosearch
 
 L1: UL Jet
 L2: Left Sling
@@ -274,25 +274,14 @@ A4: Head Motor, motor, nosearch
 [lamplists]
 Playfield: PF:all
 
-##########################################################################
-# Containers
-# These denote devices that can hold, count, and eject pinballs.
-# The key is the name of the device.  The first parameter is the name
-# of the solenoid that kicks out a ball.  The 'trough' parameter should
-# be specified on the single trough device.  The 'init_max_count'
-# parameter should say how many balls are normally held in this device
-# at startup.  The remaining parameters are the names of the switches
-# that count pinball, in front from entry to exit.
-##########################################################################
 [containers]
-Trough: Ball Release, trough, init_max_count(2), \
-	Left Trough, Center Trough, Right Trough
+Trough: trough, Ball Serve, Center Trough, Right Trough, init_max_count(2)
 
-Head: Wire Ball Holder, init_max_count(0), Enter Head, Wireform Top, Wireform Bottom
+#Head: Wire Ball Holder, init_max_count(0), Enter Head, Wireform Top, Wireform Bottom
 
-PFKicker: Under Playfield Kicker, init_max_count(0), Under Playfield Kickback
+#PFKicker: Under Playfield Kicker, init_max_count(0), Under Playfield Kickback
 
-SShotKicker: Skill Shot Kicker, init_max_count(0), Skill Shot 25K
+#SShotKicker: Skill Shot Kicker, init_max_count(0), Skill Shot 50K
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
