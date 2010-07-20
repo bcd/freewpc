@@ -153,7 +153,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 26: Center Trough, trough, noscore, noplay
 27: Left Trough, trough, noscore, noplay
 28: Left Standup, standup
-31: Skill Shot 50K, ingame
+31: Skill Shot 50K, intest #Skill kicker
 32: Skill Shot 75K, ingame
 33: Skill Shot 100K, ingame
 34: Skill Shot 200K, ingame
@@ -244,7 +244,8 @@ A4: Head Motor, motor, nosearch
 1: Helmet
 2: Rear playfield
 3: Backglass only
-5: Front Playfield
+4: Front Playfield
+7: Flippers
 
 ##########################################################################
 # Tests
