@@ -23,6 +23,7 @@
 #include <math.h>
 
 extern U8 linux_triac_latch;
+extern U8 linux_triac_outputs;
 
 /* Simulation of the zerocross circuit */
 
@@ -79,7 +80,11 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 		sim_zc_active = 1;
 		sim_zc_timer += ZC_TIMER_MAX;
 		signal_update (SIGNO_ZEROCROSS, 1);
-		sim_triac_update (linux_triac_latch);
+
+		/* Reset the GI outputs to what is held in the input latch.
+		Preserve the values of the other IO lines. */
+		sim_triac_update ( (linux_triac_latch & TRIAC_GI_MASK) |
+		                   (linux_triac_outputs & ~TRIAC_GI_MASK) );
 	}
 	else
 	{
