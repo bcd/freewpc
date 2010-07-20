@@ -142,12 +142,12 @@ void zr1_test_enter (void)
 	switch (zr1_test_command)
 	{
 		case CALIBRATE:
-			zr1_calibrate();
+			task_create_anon(zr1_calibrate_task);
 		break;
 
 		case SHAKE:
 			if (zr1_is_shaking()) {
-				zr1_stop();
+				task_create_anon(zr1_stop_task);
 				break;
 			}
 			zr1_shake();
@@ -155,14 +155,14 @@ void zr1_test_enter (void)
 
 		case IDLE:
 			if (zr1_is_idle()) {
-				zr1_idle();
+				task_create_anon(zr1_stop_task);
 				break;
 			}
 			zr1_idle();
 		break;
 
 		case STOP:
-			zr1_stop();
+			task_create_anon(zr1_stop_task);
 		break;
 
 		// TODO remove when real-machine testing is complete - begin

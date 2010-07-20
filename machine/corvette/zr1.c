@@ -139,7 +139,6 @@ void zr1_stop_task(void)
 	task_exit ();
 }
 
-
 U8 zr1_can_idle(void) {
 	return (
 		feature_config.enable_zr1_engine &&
@@ -260,6 +259,13 @@ void zr1_calibration_succeded(void) {
 	zr1_stop();
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 }
+
+void zr1_calibrate_task(void)
+{
+	zr1_calibrate();
+	task_exit ();
+}
+
 
 void zr1_calibrate(void) {
 
@@ -396,7 +402,7 @@ CALLSET_ENTRY (zr1, init_complete, amode_start) {
 
 	if (!zr1_calibration_attempted) {
 		dbprintf ("starting zr1 calibration\n");
-		zr1_calibrate();
+		//task_create_anon(zr1_calibrate_task);
 		return;
 	}
 
