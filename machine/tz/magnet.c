@@ -38,11 +38,6 @@ __fastram__ enum magnet_state {
 __fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
 __fastram__ U8 left_magnet_hold_timer, upper_right_magnet_hold_timer, lower_right_magnet_hold_timer;
 
-static inline void rt_ball_grabbed (U8 sw_magnet)
-{	
-}
-
-
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
  * top of the magnet, and quickly turns on the magnet when
@@ -51,7 +46,7 @@ static inline void magnet_rtt_switch_handler (
 	const U8 sw_magnet,
 	const U8 sol_magnet,
 	enum magnet_state *state,
-	U8 *timer )
+	U8 *timer)
 {
 	/* rt_switch_poll is inverted because it is an opto */
 	if ((*state == MAG_ENABLED) &&
@@ -60,11 +55,10 @@ static inline void magnet_rtt_switch_handler (
 		/* Turn the magnet on 100% now */
 		sol_enable (sol_magnet);
 		/* switch to magnet on power */
-		*state = MAG_ON_POWER;
 		*timer = MAG_POWER_TIME;
+		*state = MAG_ON_POWER;
 	}
 }
-
 
 /** The magnet duty handler is a less-frequently called
  * function that turns on/off the magnet as necessary.
@@ -90,12 +84,8 @@ static inline void magnet_rtt_duty_handler (
 			/* switch should remain closed in this state */
 			if (--*timer == 0)
 			{
-				/* If the switch is closed now */
-				/* it's likely we grabbed a ball */
-				if (!rt_switch_poll (sw_magnet))
-					rt_ball_grabbed (sw_magnet);
 				/* switch to HOLD */
-				*timer = *hold_timer;
+				//*timer = *hold_timer;
 				*state = MAG_ON_HOLD;
 			}
 			else if (*timer == MAG_POWER_TIME)
@@ -106,7 +96,7 @@ static inline void magnet_rtt_duty_handler (
 			break;
 
 		case MAG_ON_HOLD:
-			if (--*timer == 0)
+			if (--*hold_timer == 0)
 			{	
 				sol_disable (sol_magnet);
 				/* switch to DISABLED */
@@ -116,7 +106,7 @@ static inline void magnet_rtt_duty_handler (
 			else
 			{
 				/* magnet is on 25% */
-				if ((*timer % 4) == 0)
+				if ((*hold_timer % 4) == 0)
 				{
 					sol_enable (sol_magnet);
 				}
@@ -179,17 +169,21 @@ void magnet_enable_catch_and_hold (U8 magnet, U8 holdtime_secs)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 	
-	U8 holdtime = (holdtime_secs  *(1000 / MAG_DRIVE_RTT_FREQ));
+	/* Limit to 8 seconds */
+	if (holdtime_secs > 8)
+		holdtime_secs = 8;
+	
+	U8 holdtime = (holdtime_secs*31.25);
 	switch (magnet)
 	{	
 		case MAG_LEFT:
-			left_magnet_hold_timer = holdtime;
+			left_magnet_hold_timer = 254;
 			break;
 		case MAG_UPPER_RIGHT:
-			upper_right_magnet_hold_timer = holdtime;
+			upper_right_magnet_hold_timer = 254;
 			break;
 		case MAG_RIGHT:
-			lower_right_magnet_hold_timer = holdtime;
+			lower_right_magnet_hold_timer = 254;
 			break;
 	}
 	magstates[magnet] = MAG_ENABLED;
@@ -213,13 +207,35 @@ void magnet_reset (void)
 		lower_right_magnet_hold_timer = 0;
 }
 
+CALLSET_ENTRY (magnet, idle_every_100ms)
+{
+	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	if (magstates[MAG_LEFT] == MAG_ON_HOLD 
+		&& switch_poll_logical (SW_LEFT_MAGNET)
+		&& !timer_find_gid (GID_LEFT_BALL_GRABBED))
+	{
+		callset_invoke (left_ball_grabbed);
+		callset_invoke (ball_grabbed);
+		timer_restart_free (GID_LEFT_BALL_GRABBED, (left_magnet_hold_timer * 2));
+	}
+		
+	if (magstates[MAG_RIGHT] == MAG_ON_HOLD 
+		&& switch_poll_logical (SW_LOWER_RIGHT_MAGNET)
+		&& !timer_find_gid (GID_RIGHT_BALL_GRABBED))
+	{
+		callset_invoke (right_ball_grabbed);
+		callset_invoke (ball_grabbed);
+		timer_restart_free (GID_RIGHT_BALL_GRABBED, (lower_right_magnet_hold_timer * 2));
+	}
+}
+
 //TODO MOVE THIS
 /* Grab the ball following an auto fire */
 CALLSET_ENTRY (magnet, sw_lower_right_magnet)
 {
 	if (in_live_game && task_find_gid (GID_BALL_LAUNCH))
 	{
-		magnet_enable_catch (MAG_LEFT);
+		magnet_enable_catch_and_hold (MAG_LEFT, 8);
 		task_sleep_sec (1);
 		magnet_disable_catch (MAG_LEFT);
 	}
