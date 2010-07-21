@@ -46,5 +46,9 @@ FON_OBJS += $(if $(CONFIG_FON_V5PRF), fonts/free/v5prf.o)
 FON_OBJS += $(if $(CONFIG_FON_STEEL), fonts/free/steel.o)
 FON_OBJS += $(if $(CONFIG_FON_LITHOGRAPH), fonts/free/lithograph.o)
 FON_OBJS += $(if $(CONFIG_FON_TWIZONE), fonts/free/twizone.o)
+FON_OBJS += $(if $(CONFIG_FON_JOYSTIX), fonts/free/joystix.o)
+FON_OBJS += $(if $(CONFIG_FON_ARIAL11A), fonts/free/arial11a.o)
+FON_OBJS += $(if $(CONFIG_FON_ARIAL11B), fonts/free/arial11b.o)
+FON_OBJS += $(if $(CONFIG_FON_FFFEXTRA), fonts/free/fffextra.o)
 
 
