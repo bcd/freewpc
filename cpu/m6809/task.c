@@ -116,7 +116,17 @@ U16 idle_time;
 U8 idle_chunks;
 
 
+/**
+ * The number of task slots that are allocated/free at a time.
+ */
 #define TASK_CHUNK_SIZE 8
+
+/**
+ * The number of tasks that must be free in order for a chunk to
+ * be freed.
+ */
+#define TASK_FREE_CHUNK_SIZE 10
+
 
 /* Private functions written in assembly used internally. */
 __attribute__((returns_twice)) void task_save (task_t *tp);
@@ -252,18 +262,20 @@ task_t *block_allocate (void)
 	{
 		if (tp->state == BLOCK_FREE)
 		{
+success:
 			tp->state = BLOCK_USED;
 			tp->aux_stack_block = t;
 			return tp;
 		}
 	}
 
-	/* No block was found, but the tail pointer can be extended.
-	Retry the allocation (it should succeed this time!) */
+	/* No block was found, but maybe the tail pointer can be extended. */
 	if (task_tail < &task_buffer[NUM_TASKS])
 	{
+		/* The tail points to the first unused entry, so it must be free. */
+		tp = task_tail;
 		task_tail += TASK_CHUNK_SIZE;
-		return block_allocate ();
+		goto success;
 	}
 
 	/* The table is truly full.  Return an error. */
@@ -278,14 +290,33 @@ task_t *block_allocate (void)
  */
 CALLSET_ENTRY (task_chunk, amode_start, end_ball)
 {
+	U8 free_count;
+	task_t *tp;
+
 	/* Only try this when the tail is not already at its minimum. */
-	if (task_tail > task_buffer)
+	if (task_tail <= &task_buffer[TASK_CHUNK_SIZE])
+		return;
+
+	/* Count how many free task slots exist from the top of the table,
+	moving down.  Stop scanning if we reach the minimum tail value. */
+	free_count = 0;
+	tp = task_tail-1;
+	while (tp->state == BLOCK_FREE)
 	{
-		/* Are the uppermost 1.5*TASK_CHUNK_SIZE tasks not being used?
-		Then we will free that uppermost chunk.  The multiplier is used
-		to avoid repeatedly expanding and contracting.
-			Scan the table to find the uppermost task entry that is being
-		used, and subtract from the tail to see what the gap is. */
+		free_count++;
+		tp--;
+		if (tp == &task_buffer[TASK_CHUNK_SIZE])
+			break;
+	}
+
+	/* See if enough tasks are free to warrant moving the tail pointer.
+	We require that a few more tasks are free than the chunk size, to
+	avoid constant expansion/shrinking if the task count is equal to
+	the chunk size. */
+	while (free_count >= TASK_FREE_CHUNK_SIZE)
+	{
+		task_tail -= TASK_CHUNK_SIZE;
+		free_count -= TASK_CHUNK_SIZE;
 	}
 }
 
