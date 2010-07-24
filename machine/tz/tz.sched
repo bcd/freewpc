@@ -21,7 +21,7 @@
 
 # Schedule for TZ's real-time tasks
 
-magnet_switch_rtt 	4	0.1
+magnet_switch_rtt 	2	0.1
 # Handle fast solenoids: slings and jets
 !left_sling_service     8     40c
 !right_sling_service    8     40c
@@ -32,16 +32,16 @@ magnet_switch_rtt 	4	0.1
 # Poll the loop magnet sensors
 
 # Update the clock
-#clock_mech_service      16    80c
-#tz_clock_switch_rtt     4    0.1
+#clock_mech_service      8    40c
+#tz_clock_switch_rtt     2    0.1
 
 # Update the loop magnet
-magnet_duty_rtt    	32    40c
+magnet_duty_rtt    	8    40c
 
 # TODO : Update mini-playfield magnet
-!bridge_open_service    32    80c
-!shooter_div_service    32    80c
-!ramp_div_service       32    80c
-!gumball_div_service    32    80c
-!left_mpf_service    	16    40c
-!right_mpf_service    	16    40c
+!bridge_open_service    32    20c
+!shooter_div_service    32    20c
+!ramp_div_service       32    20c
+!gumball_div_service    32    20c
+!left_mpf_service    	16    20c
+!right_mpf_service    	16    20c

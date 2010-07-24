@@ -22,12 +22,11 @@
 #include <freewpc.h>
 
 /* Magnet switch RTT runs every 8 ms */
-#define MAG_SWITCH_RTT_FREQ 4
-#define MAG_DRIVE_RTT_FREQ 32
+#define MAG_SWITCH_RTT_FREQ 2
+#define MAG_DRIVE_RTT_FREQ 8
 
 #define MAG_POWER_TIME (100 / MAG_DRIVE_RTT_FREQ)
-#define MAG_HOLD_TIME (2000 / MAG_DRIVE_RTT_FREQ)
-#define HOLD_DUTY_MASK 0x3
+#define MAG_HOLD_TIME (1000 / MAG_DRIVE_RTT_FREQ)
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -56,15 +55,6 @@ static inline void magnet_rtt_switch_handler (
 		*state = MAG_ON_POWER;
 		*timer = MAG_POWER_TIME;
 	}
-	/* Missed the catch, turn off */
-	#if 0
-	else if ((*state == MAG_ON_HOLD) &&
-		 (rt_switch_poll (sw_magnet)))
-	{
-		sol_disable (sol_magnet);
-		*state = MAG_DISABLED;
-	}
-	#endif
 }
 
 
@@ -76,7 +66,7 @@ static inline void magnet_rtt_duty_handler (
 	const U8 sw_magnet,
 	const U8 sol_magnet,
 	enum magnet_state *state,
-	U8 *timer )
+	U8 *timer)
 {
 	switch (*state)
 	{
@@ -105,20 +95,23 @@ static inline void magnet_rtt_duty_handler (
 		case MAG_ON_HOLD:
 			/* keep magnet on with low power */
 			/* switch should remain closed in this state */
-			if (--*timer == 0)
+			if (*timer == 0)
 			{
 				sol_disable (sol_magnet);
 				/* switch to DISABLED */
 				*state = MAG_DISABLED;
 			}
-			if ((*timer % 4) == 0)
+			/* Need to pulse at least every 64ms otherwise
+			 * the ball will start to rattle */
+			else if ((*timer % 2) != 0)
 			{
-					sol_enable (sol_magnet);
+				sol_enable (sol_magnet);
 			}
 			else
 			{
-					sol_disable (sol_magnet);
+				sol_disable (sol_magnet);
 			}
+			--*timer;
 			break;
 	}
 }
@@ -130,10 +123,10 @@ void magnet_switch_rtt (void)
 	magnet_rtt_switch_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET,
 		&left_magnet_state, &left_magnet_timer);
 	
-	magnet_rtt_switch_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET,
+	magnet_rtt_switch_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET, 
 		&upper_right_magnet_state, &upper_right_magnet_timer);
 	
-	magnet_rtt_switch_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET,
+	magnet_rtt_switch_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
 		&lower_right_magnet_state, &lower_right_magnet_timer);
 }
 

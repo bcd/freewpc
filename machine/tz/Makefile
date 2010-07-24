@@ -84,7 +84,7 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	hitch.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o 
+	spiral.o vpoker.o maghelper.o
 
 IMAGE_MAP += $(M)/tz.ild
 
