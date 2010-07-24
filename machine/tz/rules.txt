@@ -159,6 +159,17 @@ Bonus
 - Backdoor award ???
 - Tourist award ???
 
+TZ Magnet Helpers
+=================
+If the camera or MB Jackpot are lit, the game will grab the ball on the
+magnets to give you a better chance of a shot.  This can be turned off in the
+adjustments menu in test.
+
+Easy light Gumball
+==================
+Normally to clear and relight the Gum and Ball lamps you have to hit a lock, with this enabled you
+just have to collect a gumball to clear them.
+
 Combos and Lucky bounces
 ========================
 
