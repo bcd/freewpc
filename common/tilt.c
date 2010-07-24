@@ -153,7 +153,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	/* Start the slam tilt effect */
 	callset_invoke (slam_tilt);
 	deff_start (DEFF_SLAM_TILT);
-	lamp_all_off ();
+	leff_restart (LEFF_TILT);
 
 	/* Audit the event */
 	audit_increment (&system_audits.slam_tilts);
