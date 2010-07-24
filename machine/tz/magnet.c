@@ -23,10 +23,10 @@
 
 /* Magnet switch RTT runs every 8 ms */
 #define MAG_SWITCH_RTT_FREQ 2
-#define MAG_DRIVE_RTT_FREQ 8
+#define MAG_DRIVE_RTT_FREQ 16
 
-#define MAG_POWER_TIME (100 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_HOLD_TIME 25
+#define MAG_POWER_TIME (200 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_HOLD_TIME (200 / MAG_DRIVE_RTT_FREQ)
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -149,7 +149,6 @@ void magnet_duty_rtt (void)
 void magnet_enable_catch (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	magstates[magnet] = MAG_ENABLED;
 	switch (magnet)
 	{
 		case MAG_LEFT:
@@ -162,12 +161,16 @@ void magnet_enable_catch (U8 magnet)
 			lower_right_magnet_hold_timer = DEFAULT_MAG_HOLD_TIME;
 			break;
 	}
+	magstates[magnet] = MAG_ENABLED;
 }
 
 void magnet_enable_catch_and_hold (U8 magnet, U8 secs)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	magstates[magnet] = MAG_ENABLED;
+	
+	if (secs > 4)
+		secs = 4;
+	
 	switch (magnet)
 	{
 		case MAG_LEFT:
@@ -180,10 +183,8 @@ void magnet_enable_catch_and_hold (U8 magnet, U8 secs)
 			lower_right_magnet_hold_timer = (secs * (1000UL / MAG_DRIVE_RTT_FREQ)); 
 			break;
 	}
+	magstates[magnet] = MAG_ENABLED;
 }
-
-
-
 
 void magnet_disable_catch (U8 magnet)
 {
@@ -198,7 +199,7 @@ void magnet_reset (void)
 	left_magnet_timer = upper_right_magnet_timer = 
 		lower_right_magnet_timer = 0;
 	left_magnet_hold_timer = upper_right_magnet_hold_timer = 
-		lower_right_magnet_hold_timer = DEFAULT_MAG_HOLD_TIME;
+		lower_right_magnet_hold_timer = 0;
 }
 
 CALLSET_ENTRY (magnet, start_ball)

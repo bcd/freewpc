@@ -659,14 +659,6 @@ CALLSET_ENTRY (mball, left_ball_grabbed)
 	}
 }
 
-CALLSET_ENTRY (mball, idle_every_second)
-{
-	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT)
-		&& switch_poll (SW_LEFT_MAGNET)
-		&& feature_config.tz_mag_helpers == YES)
-		magnet_enable_catch (MAG_LEFT);
-}
-
 CALLSET_ENTRY (mball, ball_search)
 {
 }

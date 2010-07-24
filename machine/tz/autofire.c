@@ -73,7 +73,6 @@ void autofire_monitor (void)
 	task_sleep_sec (shooter_div_open_time);
 	shooter_div_stop ();
 
-	sound_send (SND_ROCKET_KICK_REVVING);
 	/* Wait a little longer for the ball to settle */
 	task_sleep (TIME_500MS);
 	
@@ -83,6 +82,7 @@ void autofire_monitor (void)
 	/* Open diverter again and kick ball. */
 	shooter_div_start ();
 	task_sleep (TIME_700MS);
+	sound_send (SND_ROCKET_KICK_REVVING);
 	if (switch_poll_logical (SW_AUTOFIRE2))
 	{	
 		sol_request (SOL_AUTOFIRE);

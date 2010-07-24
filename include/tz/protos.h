@@ -132,6 +132,9 @@ __machine2__ void tz_flipcode_2 (void);
 #define MAG_RIGHT 2
 
 void magnet_enable_catch (U8 magnet);
-void magnet_enable_catch_and_hold (U8 magnet, U8 holdtime_secs);
+void magnet_enable_catch_and_hold (U8 magnet, U8 secs);
 void magnet_disable_catch (U8 magnet);
 void magnet_reset (void);
+
+/* maghelpers.c */
+__machine3__ bool magnet_enabled (U8 magnet);

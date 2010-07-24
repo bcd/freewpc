@@ -31,13 +31,18 @@ CALLSET_ENTRY (outhole, sw_outhole)
 {	
 	if (in_live_game)
 	{
+		if (ballsave_test_active ())
+		{
+			/* Start a timer so we grab the ball after its
+			 * fired to help the player */
+			timer_restart_free (GID_BALL_LAUNCH_DEATH, TIME_6S);
+		}
 		/* Whoops, lost the powerball before getting it in the gumball */
 		if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
 		{
 			task_sleep (TIME_500MS);
 			sound_send (SND_NOOOOOOOO);
 			powerball_death = TRUE;
-	//		task_sleep_sec (1);
 		}
 	
 
@@ -52,7 +57,7 @@ CALLSET_ENTRY (outhole, sw_outhole)
 		{
 			/* There are 6 balls installed normally */
 			bounded_increment (multidrain_count, 6);
-			if (multidrain_count == 3)
+			if (multidrain_count >= 3)
 				multidrain_awarded = TRUE;
 		}
 		deff_start (DEFF_BALL_EXPLODE);

@@ -126,11 +126,18 @@ void gumball_release (void)
 	task_create_gid1 (GID_GUMBALL_RELEASE, gumball_release_task);
 }
 
-void gumball_divertor_open (void)
+static void gumball_divertor_open_task (void)
 {
 	gumball_div_start ();
+	task_sleep_sec (2);
+	gumball_div_stop ();
+	task_exit ();
 }
 
+void gumball_divertor_open (void)
+{
+	task_recreate_gid (GID_GUMBALL_DIV, gumball_divertor_open_task);
+}
 
 void gumball_divertor_close (void)
 {
@@ -140,7 +147,7 @@ void gumball_divertor_close (void)
 
 void sw_gumball_right_loop_entered (void)
 {
-	if (gumball_load_is_enabled ())
+	if (gumball_load_is_enabled () && !magnet_enabled (MAG_RIGHT))
 	{
 		gumball_divertor_open ();
 		if (in_live_game && !multi_ball_play ())
@@ -167,6 +174,11 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 		/* A ball successfully came out of the gumball machine.*/
 		/* Signal the release motor to stop */
 		/* If the geneva switch is broken this isn't going to work! */
+		if (feature_config.easy_light_gumball == YES)
+		{
+			lamp_off (LM_GUM);
+			lamp_off (LM_BALL);
+		}
 		device_switch_can_follow (gumball_exit, camera, TIME_4S);
 		event_can_follow (gumball_exit, camera, TIME_4S);
 		event_can_follow (gumball_exit, slot, TIME_4S);
@@ -235,6 +247,7 @@ CALLSET_ENTRY (gumball, sw_gumball_lane)
 	/* Ball is approaching popper.
 	 * Gumball diverter can be closed now. */
 	gumball_divertor_close ();
+	task_kill_gid (GID_GUMBALL_DIV);
 	//gumball_load_disable ();
 }
 
@@ -325,7 +338,6 @@ CALLSET_ENTRY (gumball, lamp_update)
 {
 	if (gumball_load_is_enabled ())
 	{
-		magnet_disable_catch (MAG_RIGHT);
 		lamp_tristate_flash (LM_GUMBALL_LANE);
 	}
 	else
@@ -347,6 +359,11 @@ CALLSET_ENTRY (gumball, start_ball)
 	flag_off (FLAG_SUPER_MB_RUNNING);
 }
 
+CALLSET_ENTRY (gumball, end_ball)
+{
+	gumball_divertor_close ();
+	task_kill_gid (GID_GUMBALL_DIV);
+}
 
 CALLSET_ENTRY (gumball, start_player)
 {
@@ -373,8 +390,6 @@ CALLSET_ENTRY (gumball, ball_search)
 	/* TODO : when ball searching at game start, see if the
 	extra balls are in the gumball and try to release 1. */
 	//if (sw_gumball_enter = enabled for 2 seconds and trough + lock = 2, then empty
-	if (switch_poll_logical (SW_GUMBALL_ENTER))
-		gumball_release ();
 }
 
 CALLSET_ENTRY (gumball, door_start_light_gumball)

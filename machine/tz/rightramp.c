@@ -49,6 +49,7 @@ void sw_right_ramp_enter_task (void)
 	ramp. */
 	kickout_lock (KLOCK_DEFF);
 	do {
+		/* Let it through to the mpf field if allowed */
 		if (mpf_ready_p ())
 		{
 			unlit_right_ramps = 4;
@@ -56,7 +57,8 @@ void sw_right_ramp_enter_task (void)
 			task_sleep_sec (3);
 			bridge_open_stop ();
 		}
-		else
+		else /* Show an animation hint if not enabled for mpf
+			and drop ball */
 		{
 			bounded_increment (unlit_right_ramps, 4);
 			if (unlit_right_ramps == 3 && !flag_test (FLAG_MULTIBALL_RUNNING))

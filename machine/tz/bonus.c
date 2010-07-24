@@ -274,6 +274,9 @@ void bonus_deff (void)
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		task_sleep_sec (2);
+		/* Don't bother taunting the player about a quick death
+		 * Hardly seems fair! */
+		quickdeath_timer_running = FALSE;
 	}
 
 	if (quickdeath_timer_running == TRUE)

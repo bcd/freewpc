@@ -144,7 +144,7 @@ define CONFIG_TZONE_IP y
 [switches]
 11: Right Inlane, ingame, sound(SND_INSIDE_LEFT_INLANE)
 12: Right Outlane, ingame, sound(SND_DRAIN)
-13: Start Button, start-button, intest
+13: Start Button, start-button, intest, debounce(TIME_100MS)
 14: Tilt, tilt, ingame, noplay, cabinet
 #15: Right Trough, c_decl(sw_trough), noscore
 #16: Center Trough, c_decl(sw_trough), noscore
@@ -297,6 +297,11 @@ Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,
 	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
 
+
+#Bridge Open: driver(duty2),
+#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_32MS, duty_mask=DUTY_MASK_12
+
+
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,
 	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
@@ -305,9 +310,11 @@ Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
 	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
-Gumball Div: driver(duty),
-	sol=SOL_GUMBALL_DIV,
-	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
+Gumball Div: driver(duty2),
+	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
+#Gumball Div: driver(duty),
+#	sol=SOL_GUMBALL_DIV,
+#	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
 
 ##########################################################################
 # General Illumination
@@ -428,6 +435,9 @@ Have Third Magnet: yes_no, NO
 Mute/Pause: yes_no, YES
 TZ Flipcodes: yes_no, YES
 TZ Mag Helpers: yes_no, YES
+
+# No lock needed to relight Gumball
+Easy Light Gumball: yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.

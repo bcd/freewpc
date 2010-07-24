@@ -372,13 +372,23 @@ void pb_container_exit (U8 location)
 	}
 }
 
-CALLSET_ENTRY (pb_detect, ball_grabbed)
-{
+static inline void pb_ball_grabbed (void)
+{	
 	if (single_ball_play ())
 	{	
 		pb_clear_location (PB_IN_PLAY);
 		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
+}
+
+CALLSET_ENTRY (pb_detect, left_ball_grabbed)
+{
+	pb_ball_grabbed ();
+}
+
+CALLSET_ENTRY (pb_detect, right_ball_grabbed)
+{
+	pb_ball_grabbed ();
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)
