@@ -65,6 +65,10 @@ match_deff (void)
 				value = random_scaled (10) * 0x10;
 			} while (value == last_value);
 		}
+<<<<<<< HEAD:common/match.c
+=======
+
+>>>>>>> b29378cfc5ca4ff1f372e27072c65e2f3bcc0d9c:common/match.c
 		last_value = value;
 		dmd_alloc_low_clean ();
 #ifdef MACHINE_TZ

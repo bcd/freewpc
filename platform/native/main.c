@@ -415,13 +415,12 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 }
 
 
-/** Update the output side of the triacs.
+/** Update the output side of the triac/flipper relay register.
  * This becomes zero when a zerocrossing occurs.  When the input side of the latch
- * is written, lines can be turned on but not turned off.
+ * is written, GI strings can be turned on but not turned off.
  */
 void sim_triac_update (U8 val)
 {
-	val &= TRIAC_GI_MASK;
 	mux_write (ui_write_triac, 0, &linux_triac_outputs, val, SIGNO_TRIAC);
 }
 
@@ -569,8 +568,12 @@ void writeb (IOPTR addr, U8 val)
 #endif /* MACHINE_DMD */
 
 		case WPC_GI_TRIAC:
-			val &= TRIAC_GI_MASK;
-			linux_triac_latch = val;
+			/* The input side of the triac has a latch; store only the G.I.
+			related bits there */
+			linux_triac_latch = val & TRIAC_GI_MASK;
+
+			/* The outputs are comprised of whatever GI strings are already
+			on, plus whatever outputs (GIs and relays) were just written. */
 			val |= linux_triac_outputs;
 			sim_triac_update (val);
 			break;

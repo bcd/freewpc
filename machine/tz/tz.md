@@ -286,8 +286,8 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Left magnet hold: driver(duty), sol=SOL_LEFT_MAGNET, 
-#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
+#Left magnet hold: driver(duty2), sol=SOL_LEFT_MAGNET, 
+#	timeout=TIME_4S, ontime=100, duty_mask=DUTY_MASK_25
 #Right magnet hold: driver(duty), sol=SOL_RIGHT_MAGNET, 
 #	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
 #Upper right magnet hold: driver(duty), sol=SOL_UPPER_RIGHT_MAGNET, 
@@ -533,13 +533,6 @@ TSM_RUNNING:
 MB_JACKPOT_LIT:
 SUPER_MB_RUNNING:
 
-#LEFT_MAGNET_GRAB:
-#LEFT_MAGNET_HOLD:
-#RIGHT_MAGNET_GRAB:
-#RIGHT_MAGNET_HOLD:
-#UPPER_RIGHT_MAGNET_GRAB:
-#UPPER_RIGHT_MAGNET_HOLD:
-
 [globalflags]
 Clock Working:
 
@@ -612,7 +605,7 @@ Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE+D_SCORE+D_TIMEOUT
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
-MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
+MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_PAUSE+D_QUEUED
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT

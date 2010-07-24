@@ -73,28 +73,31 @@ void autofire_monitor (void)
 	task_sleep_sec (shooter_div_open_time);
 	shooter_div_stop ();
 
+	sound_send (SND_ROCKET_KICK_REVVING);
 	/* Wait a little longer for the ball to settle */
 	task_sleep (TIME_500MS);
 	
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
-		task_sleep (TIME_33MS);
-
+		task_sleep (TIME_100MS);
 	/* Open diverter again and kick ball. */
 	shooter_div_start ();
 	task_sleep (TIME_700MS);
-
-	sol_request (SOL_AUTOFIRE);
-	if (in_live_game && single_ball_play ())
-	{
-		sound_send (SND_EXPLOSION_1);
-		leff_start (LEFF_STROBE_UP);
-		/* Clear the magnet so we can fire a ball */
-		magnet_disable_catch (MAG_RIGHT);
-		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+	if (switch_poll_logical (SW_AUTOFIRE2))
+	{	
+		sol_request (SOL_AUTOFIRE);
+		if (in_live_game && single_ball_play ())
+		{
+			sound_send (SND_EXPLOSION_1);
+			leff_start (LEFF_STROBE_UP);
+			/* Clear the magnet so we can fire a ball */
+			magnet_disable_catch (MAG_RIGHT);
+			timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+		}
+		/* Say that the ball is heading into the right loop */
+		event_can_follow (autolaunch, right_loop, TIME_4S);
 	}
-	/* Say that the ball is heading into the right loop */
-	event_can_follow (autolaunch, right_loop, TIME_4S);
+
 	autofire_busy = FALSE;
 	task_sleep (TIME_500MS);
 	shooter_div_stop ();

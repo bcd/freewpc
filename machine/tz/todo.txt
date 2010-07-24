@@ -1,5 +1,3 @@
-make jets flash
-Fix No gi bug
 Use system time for some features
 	eg: 1200 midnight multiball
 Store a mode for use later (when Buyin is pressed)
@@ -9,9 +7,29 @@ Store a mode for use later (when Buyin is pressed)
 	TSM
 Steppable pages in rules.c 
 
+Deny multiball jackpots if ball in plunger
+taunts based on how far apart players scores are during multiplayer
+
+
+Announce powerball is next ball out
+
+Coin door message "High power - disabled":
+Some TZ's have the wiring for the coil interlock, some don't as it was added
+later on in the run
+
+what we do is:
+
+- If coin door is open and we don't know if we have the wiring, 
+- Inform the user that we are going to flip the top left flipper and disable buttons
+- If the EOS isn't activated, power has not been cut, store that we know the wiring
+  isn't present
+- Make user adjustable and auto detecting
+
+Show fuse list in test
+Show random TZ fact at end game
+
 Powerball detect during gumball eject
-Fix bridge divertor/weaken lock and ball load
-Magnets
+Magnets - make magnet helpers a system adjustable feature
 Shot combos - In progress
 Make clock millions more interesting
 Turn up volume during multiball jackpot

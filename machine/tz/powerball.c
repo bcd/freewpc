@@ -154,7 +154,7 @@ void pb_set_location (U8 location, U8 depth)
 	if (pb_location != location)
 	{
 		pb_location = location;
-		if (pb_location & PB_HELD)
+		if (pb_location & PB_HELD || pb_location & PB_IN_GUMBALL)
 		{
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
@@ -217,10 +217,11 @@ static void pb_detect_event (pb_event_t event)
 				pb_clear_location (PB_IN_PLAY);
 				pb_clear_location (PB_MAYBE_IN_PLAY);
 			}
-#ifdef PB_DEBUG
-			else
-				pb_clear_location (0);
-#endif
+			else if (pb_location & PB_IN_GUMBALL)
+			{
+				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
 			break;
 
 		/* Powerball detected on playfield, because Slot Proximity
@@ -280,10 +281,10 @@ to be served is a steel ball or the powerball.   This is
 called anytime the trough changes in some way. */
 void pb_poll_trough (void)
 {
-	/* Allow time for the trough to settle */
-	task_sleep (TIME_100MS);
 	if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
+		/* Allow time for the trough to settle */
+		task_sleep (TIME_200MS);
 		if (switch_poll_trough_metal ())
 		{
 			pb_detect_event (TROUGH_STEEL_DETECTED);
@@ -349,6 +350,12 @@ void pb_container_enter (U8 location, U8 devno)
 	}
 }
 
+CALLSET_ENTRY (powerball, powerball_in_gumball)
+{
+	pb_clear_location (PB_IN_PLAY);
+	pb_clear_location (PB_MAYBE_IN_PLAY);
+	pb_set_location (PB_IN_GUMBALL, 2);
+}
 
 /** Called when a ball successfully exits the trough or the lock.
  * If the powerball was known to be in the device, then its depth
@@ -362,6 +369,15 @@ void pb_container_exit (U8 location)
 			pb_set_location (PB_IN_PLAY, 0);
 			pb_announce ();
 		}
+	}
+}
+
+CALLSET_ENTRY (pb_detect, ball_grabbed)
+{
+	if (single_ball_play ())
+	{	
+		pb_clear_location (PB_IN_PLAY);
+		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
 }
 

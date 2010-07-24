@@ -28,8 +28,6 @@ extern U8 jackpot_level;
 extern U8 mball_locks_lit;
 extern U8 gumball_enable_count;
 
-extern struct timed_mode_ops spiral_mode;
-extern struct timed_mode_ops fastlock_mode;
 
 typedef enum {
 	CAMERA_AWARD_LIGHT_LOCK=0,
@@ -154,7 +152,7 @@ static void do_camera_award (void)
 	task_exit ();
 }
 
-static bool can_award_camera (void)
+bool can_award_camera (void)
 {
 	if (cameras_lit != 0 && !multi_ball_play ())
 		return TRUE;
@@ -165,17 +163,18 @@ static bool can_award_camera (void)
 CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_3S);
-	if (event_did_follow (mpf_top, camera))
-	{
-		callset_invoke (mpf_collected);
-	}
-	else if (event_did_follow (gumball_exit, camera))
+	
+	if (event_did_follow (gumball_exit, camera))
 	{
 		return;
 	}
 	else if (event_did_follow (dead_end, camera))
 	{
 		return;
+	}
+	else if (event_did_follow (mpf_top, camera))
+	{
+		callset_invoke (mpf_collected);
 	}
 	else if (can_award_camera ())
 	{
@@ -209,28 +208,6 @@ CALLSET_ENTRY (camera, right_ball_grabbed)
 		deff_start (DEFF_SHOOT_CAMERA);
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 	}
-}
-
-CALLSET_ENTRY (camera, idle_every_second)
-{
-	/* Grab the ball for the camera shot, don't care about gumball */
-	if (can_award_camera () && !timer_find_gid (GID_SPIRALAWARD)
-		&& switch_poll (SW_LOWER_RIGHT_MAGNET)
-		&& !timer_find_gid (GID_LOCK_KICKED)
-		&& !timed_mode_running_p (&spiral_mode)
-		&& !timed_mode_running_p (&fastlock_mode)
-		&& !timer_find_gid (GID_BALL_LAUNCH)
-		&& feature_config.tz_mag_helpers == YES)
-	{	
-		magnet_enable_catch (MAG_RIGHT);
-	}
-	else if (timed_mode_running_p (&spiral_mode) 
-		|| timed_mode_running_p (&fastlock_mode)
-		|| timer_find_gid (GID_BALL_LAUNCH)
-		|| timer_find_gid (GID_LOCK_KICKED))
-	{
-		magnet_disable_catch (MAG_RIGHT);
-	}	
 }
 
 CALLSET_ENTRY (camera, lamp_update)

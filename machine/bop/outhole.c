@@ -23,8 +23,11 @@
 CALLSET_ENTRY (outhole, sw_outhole)
 {
 	if (!in_live_game)
+	{
+		/* Wait for ball to settle */
+		task_sleep (TIME_100MS);
 		sol_request (SOL_OUTHOLE);
-	task_sleep_sec (1);
+	}
 }
 
 CALLSET_ENTRY (outhole, init)

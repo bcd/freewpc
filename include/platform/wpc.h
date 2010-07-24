@@ -594,12 +594,12 @@ extern inline void pinio_write_lamp_data (U8 val)
 
 extern inline U8 pinio_read_triac (void)
 {
-	return wpc_u1_read ();
+	return wpc_u1_read () & TRIAC_GI_MASK;
 }
 
 extern inline void pinio_write_triac (U8 val)
 {
-	wpc_u1_write (val);
+	wpc_u1_write (val | (wpc_u1_read () & ~TRIAC_GI_MASK));
 }
 
 /********************************************/

@@ -88,6 +88,9 @@ void idle_profile_rtt (void)
 }
 
 
+/**
+ * The main function for creating a new task.
+ */
 task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 {
 	pth_t pid;
@@ -98,12 +101,18 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	printf ("task_create_gid: gid=%d, fn=%p\n", gid, fn);
 #endif
 
+	/* Set the task attributes:
+	 * - Not joinable : all tasks are independent
+	 * - cancellable : task kill is permitted
+	 * - priority : make certain tasks that the simulator itself
+	 *   uses higher priority, and all others equal in priority.
+	 */
 	attr = pth_attr_new ();
 	pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
 	pth_attr_set (attr, PTH_ATTR_CANCEL_STATE, PTH_CANCEL_ENABLE);
-	if (gid == GID_LINUX_REALTIME)
+	if (gid == GID_LINUX_REALTIME) /* time tracking */
 		pth_attr_set (attr, PTH_ATTR_PRIO, PTH_PRIO_STD + 2);
-	else if (gid == GID_LINUX_INTERFACE)
+	else if (gid == GID_LINUX_INTERFACE) /* user input */
 		pth_attr_set (attr, PTH_ATTR_PRIO, PTH_PRIO_STD + 1);
 
 	/* TODO - inside of calling the function directly, call a global
@@ -128,7 +137,8 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	fatal (ERR_NO_FREE_TASKS);
 }
 
-task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn) //2
+/* TODO - this function is identical to the 6809 version */
+task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn)
 {
 	task_pid_t tp = task_find_gid (gid);
 	if (tp) 
@@ -137,7 +147,8 @@ task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn) //2
 }
 
 
-task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn) //2
+/* TODO - this function is identical to the 6809 version */
+task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn)
 {
 	task_kill_gid (gid);
 #ifdef PARANOID
@@ -167,10 +178,12 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
+/* TODO - this function is identical to the 6809 version */
 void task_sleep_sec (I8 secs)
 {
-	while (--secs >= 0)
+	do {
 		task_sleep (TIME_1S);
+	} while (--secs > 0);
 }
 
 

@@ -47,6 +47,7 @@ typedef unsigned char __boolean __attribute__ ((boolean));
 #else
 typedef unsigned char __boolean;
 #endif
+#undef bool
 #define bool __boolean
 
 /* 8-bit integers are always 'char' */

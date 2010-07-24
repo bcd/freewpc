@@ -101,7 +101,7 @@ typedef U8 adjval_t;
 typedef struct
 {
 	adjval_t balls_per_game; /* done */
-	adjval_t max_players;
+	adjval_t max_players; /* done */
 	adjval_t tilt_warnings; /* done */
 	adjval_t max_ebs; /* done */
 	adjval_t max_ebs_per_bip; /* done */
@@ -181,8 +181,8 @@ typedef struct
 	adjval_t units_per_bonus;
 	adjval_t bonus_credits;
 	adjval_t min_units;
-	adjval_t coin_door_type;
-	adjval_t collection_text;
+	adjval_t coin_door_type; /* done */
+	adjval_t collection_text; /* done */
 	adjval_t slot_values[MAX_COIN_SLOTS];
 	adjval_t max_credits; /* done */
 	adjval_t free_play; /* done */

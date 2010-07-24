@@ -146,7 +146,11 @@ CALLSET_ENTRY (combo, sw_standup_4)
 /* Left loop, Right loop -> Camera handlers */
 CALLSET_ENTRY (combo, sw_camera)
 {
-	if (event_did_follow (left_loop, camera))
+	if (event_did_follow (gumball_exit, camera))
+	{
+		return;
+	}
+	else if (event_did_follow (left_loop, camera))
 	{
 		score (SC_10M);
 		sound_send (SND_LOOK_TO_THE_FUTURE);
@@ -162,12 +166,6 @@ CALLSET_ENTRY (combo, sw_camera)
 	}
 	else if (event_did_follow (slot_standup, camera))
 	{
-	/*
-		sound_send (SND_LUCKY);
-		score (SC_1M);
-		deff_start (DEFF_LUCKY_BOUNCE);
-		bounded_increment (lucky_bounces, 99);
-	*/
 		lucky_bounce ();
 	}
 		

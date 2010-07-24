@@ -623,8 +623,6 @@ CALLSET_ENTRY (mball, end_ball)
 
 CALLSET_ENTRY (mball, start_ball)
 {
-	lamp_off (LM_GUM);
-	lamp_off (LM_BALL);
 	lamp_tristate_off (LM_MULTIBALL);
 	lamp_off (LM_MULTIBALL);
 	mball_restart_collected = FALSE;
@@ -634,6 +632,8 @@ CALLSET_ENTRY (mball, start_ball)
 
 CALLSET_ENTRY (mball, start_player)
 {
+	lamp_off (LM_GUM);
+	lamp_off (LM_BALL);
 	mball_locks_lit = 0;
 	mball_locks_made = 0;
 	mballs_played = 0;

@@ -167,7 +167,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 46: Under Playfield Kickback
 47: Enter Head
 51: Spinner, ingame
-52: Shooter, shooter, edge, noplay, debounce(TIME_200MS)
+52: Shooter, shooter, noplay, debounce(TIME_200MS)
 53: UR Jet, ingame
 54: UL Jet, ingame
 55: Lower Jet, ingame

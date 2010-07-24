@@ -23,7 +23,7 @@
 CALLSET_ENTRY (skill, sw_skill_shot_50k)
 {
 	task_sleep (TIME_100MS);
-	sol_request (SOL_SKILL_SHOT_KICKER);
+	sol_request (SOL_SSHOT_KICKER);
 	task_sleep_sec (1);
 }
 

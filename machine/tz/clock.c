@@ -85,6 +85,7 @@ task_gid_t clock_owner;
 /** The current clock hour, as an integer from 0-11 */
 U8 clock_hour;
 
+static void check_tz_clock (void);
 
 void tz_dump_clock (void)
 {
@@ -237,6 +238,7 @@ void tz_clock_switch_rtt (void)
 			clock_sw_seen_active |= clock_sw;
 			clock_sw_seen_inactive |= ~clock_sw;
 		}
+		check_tz_clock ();
 	}
 }
 
@@ -340,7 +342,7 @@ void tz_clock_reset (void)
  * A periodic, lower priority function that updates the
  * state machine depending on what has been seen recently.
  */
-CALLSET_ENTRY (tz_clock, idle_every_100ms)
+static void check_tz_clock (void)
 {
 	/* When calibrating, once all switches have been active and inactive
 	 * at least once, claim victory and go back to the home position. */
@@ -391,7 +393,7 @@ CALLSET_ENTRY (tz_clock, amode_start)
 	else if ((clock_sw_seen_active & clock_sw_seen_inactive) != 0xFF)
 	{
 		dbprintf ("Clock calibration started.\n");
-		clock_calibration_time = 80; /* 8 seconds */
+		clock_calibration_time = 11; /* 10 seconds ~ 1 rotations */
 		global_flag_on (GLOBAL_FLAG_CLOCK_WORKING);
 		clock_mech_set_speed (BIVAR_DUTY_100);
 		clock_mode = CLOCK_CALIBRATING;

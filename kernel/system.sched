@@ -50,7 +50,7 @@ switch_rtt/2          1       280c
 pic_rtt?CONFIG_PIC    32      200c  # guess?
 
 # Resynchronize to the AC zero cross point.
-ac_rtt                1       36c
+ac_rtt                1       50c
 
 # Update flashers.  Each bank of 8 is updated
 # once every 4ms (the 2 banks are alternated every 2ms).
@@ -60,17 +60,17 @@ sol_update_rtt/2      2       60c
 sol_req_rtt           4       12c
 
 # Update the lamps
-lamp_rtt              2       111c
+lamp_rtt              2       90c
 
 # Toggle the CPU board LED
 !pinio_active_led_toggle 64   14c
 
 # Read/write the sound board
-sound_write_rtt       2       20c
-sound_read_rtt        8       20c
+sound_write_rtt       2       40c
+sound_read_rtt        8       35c
 
 # Toggle lamps that are in 'flash' mode
-lamp_flash_rtt        128     37c
+lamp_flash_rtt        128     100c
 
 # Check for task-level lockup
 lockup_check_rtt      128     23c
@@ -86,7 +86,7 @@ seg_rtt?CONFIG_SEG    1       50c # guess?
 !do_irq_end           1       0c
 
 # Profile idle time
-idle_profile_rtt      1024    100c # guess?
+idle_profile_rtt      1024    30c
 
 # TODO : service the coin switches correctly to ensure proper timing
 

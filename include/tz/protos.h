@@ -45,6 +45,7 @@ __common__ void ballsave_launch(void);
 
 /* camera.c * */
 __machine__ void door_start_camera (void);
+__machine2__ bool can_award_camera (void);
 
 /* clock.c */
 void tz_dump_clock(void);
@@ -131,5 +132,6 @@ __machine2__ void tz_flipcode_2 (void);
 #define MAG_RIGHT 2
 
 void magnet_enable_catch (U8 magnet);
+void magnet_enable_catch_and_hold (U8 magnet, U8 holdtime_secs);
 void magnet_disable_catch (U8 magnet);
 void magnet_reset (void);

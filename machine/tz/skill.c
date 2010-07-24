@@ -234,6 +234,9 @@ CALLSET_ENTRY (skill, sw_shooter)
 	/* Because the shooter switch is declared as an 'edge' switch,
 	an event is generated on both transitions.  Check the current
 	state of the switch to see which transition occurred. */
+	if (!in_live_game)
+		return;
+
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
 		if (skill_shot_enabled

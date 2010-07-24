@@ -57,6 +57,7 @@
 #define TIME_15S 		(TIME_1S * 15UL)
 #define TIME_30S 		(TIME_1S * 30UL)
 
+#include <freewpc.h>
 
 /**
  * Return the current system time.

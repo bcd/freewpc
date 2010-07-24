@@ -534,6 +534,12 @@ The multitasking APIs are flexible but do not guarantee realtime response, since
 any task may run for a long time.  Processing that needs to occur at a strict interval
 is done by @dfn{real time tasks}, sometimes abbreviated in the code as @dfn{RTTs}.
 
+Optimizing the realtime tasks is key to an efficient system.  To date,
+about 35-40% of the 6809 is spent in realtime tasks; the actual value
+depends on the machine and the number of device drivers needed.
+
+@subsection Overview
+
 Real-time tasks are scheduled at @emph{compile-time}.  When you write an RTT, you
 must also add an entry to the @dfn{schedule file}, either @file{kernel/system.sched}
 for the core parts of the system, or @file{machine/@var{machine}/@var{machine}.sched}
@@ -549,22 +555,62 @@ A scheduler, @command{gensched}, processes the schedule files at compile-time an
 the interrupt handler code which calls all of the RTTs at the correct frequency.  The output
 can be seen in @file{build/sched_irq.c}.
 
-Optimizing the realtime tasks is key to an efficient system.  To date,
-about 35-40% of the 6809 is spent in realtime tasks; the actual value
-depends on the machine and the number of device drivers needed.
+@subsection Schedule File Syntax
 
-In native mode, realtime functions are run inside an ordinary task.  They
-cannot run exactly at the desired rate, but the emulation does its best.  If the
-"IRQ task" sees that 30ms has gone by, then it will call the top-level IRQ handler 30
-times.
+Each line in the schedule file is formatted as follows:
 
-To summarize, the priority of functions from highest to lowest is:
+@var{function} @var{frequency} @var{duration}
 
-@table @bullet
-@item Realtime tasks
-@item Normal tasks
-@item Periodic functions
-@end table
+@var{function} identifies the name of the function that you want called in realtime
+context.  If you prefix the name with an exclamation point '!', the function is assumed
+to be an inline function; otherwise, it is an ordinary function.  You can append a
+conditional as a suffix, e.g. @command{my_rtt?CONFIG_FOO} will call @command{my_rtt},
+but only if the conditional @command{CONFIG_FOO} is set.
+
+@var{frequency} says how often the function should be called, in multiples of the
+system IRQ tick, which is 1ms on WPC.  Presently, this value can range from 1 to 2048 ms.
+It must also be a power of 2.
+
+@var{duration} says how long this function takes to run, in the worst case.  The
+schedule tries to reserve enough CPU cycles for all RTTs and to arrange the order in
+which they are called so that tasks are balanced.  The duration is also given in milliseconds
+and should be less than 1ms.  It can also be specified in CPU cycles by appending the 'c'
+suffix.  It is not critical if the value is not exact, but a reasonable approximation
+should be listed.
+
+Blank lines and lines beginning with the '#' sign are treated as comments.
+
+@subsection Function Unrolling
+
+By default, the scheduler will unroll the interrupt handler into 8 smaller handlers.
+That is, over a period of 8ms, the system will cycle through 8 different interrupt
+handlers.  The reason is that this cuts down on the number of checks which have to
+be performed on every IRQ, since infrequent (greater than 8ms) actions do not need
+to be tested every time.
+
+If a function is scheduled every 4ms, then it will be called from half of those
+interrupt handlers (every other one, either the even-numbered ones or the odd-
+numbered ones).  Likewise for functions scheduled every 2ms.  Functions scheduled
+every 1ms are called every time.  For functions scheduled 8ms or more, those are
+all executed from the last of the 8 handlers, and 'if' statements wrap the blocks
+of code that need to run less often.
+
+Sometimes you may want to unroll a function manually.  An example of where this is
+used is with the switch detection logic.  All switches must be polled every 2ms.
+However, it takes a long time to poll every switch.  Instead, we poll half of
+the switches during 1ms, and the other half on the next 1ms.  This spreads out the
+processing and keeps the length of any one IRQ call from being too long.
+
+To tell the scheduler to do this, first write two separate rtt functions.  By
+convention these are numbered with a suffix, e.g. switch_rtt_0 and switch_rtt_1.
+Then in the schedule file:
+
+switch_rtt/2   1   280c
+
+The "/2" says that the function was manually unrolled into two separate RTTs.
+The frequency is now 1ms, because one or the other will be scheduled twice as often
+now.  The duration is the length of time it takes for one of them to run, and is
+currently assumed to be the same for both.
 
 @node Memory Allocation
 @section Memory Allocation
@@ -2070,7 +2116,18 @@ gumball machine, which can hold 3 or 4 balls but there are no
 switches inside to verify this.  To handle this case, @dfn{virtual balls}
 are supported.  This is a per-device counter that is completely software
 controlled.  APIs exist to add/remove virtual balls that cannot be seen
-by switches.
+by switches.  Machine-specific code must be written to manage this.
+
+When a device driver knows for sure that a ball has entered the device,
+it calls @code{device_add_virtual}.  The extra ball will be tracked and
+counted even though there is no switch to see it anymore.  When virtual
+balls are added, the device @code{enter} event is thrown as usual, as
+if a physical ball had entered.
+
+When it knows that a ball has exited the device, it calls
+@code{device_remove_virtual}.  This decrements the virtual ball counter.
+None of the @code{kick} related events are thrown; instead, you will see
+the @code{surprise_release} event instead.
 
 @c ======================================================
 @node Test Mode
@@ -2099,10 +2156,17 @@ They can also disable it entirely.
 
 The switch stress test is used to test switch handling over a long
 period of time.  When enabled, this adjustment causes the game to
-pretend that switch closures are occurring randomly after the ball
-has been plunged into play.  You can force end-of-ball by putting
-the ball into the drain.  You can also park the ball somewhere and
-the machine will continue to simulate closures indefinitely.
+pretend that switch closures are occurring randomly.  No balls are
+actually put into play, but the machine is fooled into thinking so.
+
+Stress test also exercises ball devices correctly, and simulates 'enter'
+events instead of individual device switches.  Ball locks, trough
+serves, and multiballs can all be tested.
+
+You can force end-of-ball by pressing the Start Button several seconds
+after the start of the ball (the delay allows you to still add players
+to test multiplayer games).  If in multiball play, pressing Start
+simulates the drain of exactly one ball at a time.
 
 Closures are simulated randomly at a rate of about 10 per second.
 This test has been used to uncover some hard to find bugs in the game
@@ -2630,15 +2694,26 @@ debugging which is sometimes more useful than PinMAME or gdb.
 exec09 can measure the length of time a function takes, including
 interrupt handlers, which is good for determining performance.
 
-@section @command{Breakpoints}
+@section Breakpoints
 
 FreeWPC now supports breaking into the game program when the compile-time
-flag @code{CONFIG_BPT} is turned on.  This works both in pinmame and on
+flag @code{CONFIG_BPT} is turned on.  This works both in emulators and on
 real hardware.  When enabled, this feature overrides the normal use of the
 Escape coin door button.  Pressing Escape now halts the system; press Escape
 again to resume.
 
 While halted, you can use the Up and Down buttons to view memory.
+
+If a fatal error occurs when the debugger is compiled in, the machine will
+fall into the debugger instead of rebooting.  This will show you what
+error occurred and which task was last running.
+
+When halted, only normal task scheduling and periodic functions cease to run.
+Interrupt handlers/realtime functions cannot be halted.
+
+You can also dynamically enable and disable breakpoints at various places
+within the code, so that the debugger will start when the program hits that
+location, without having to press Escape.
 
 @c ======================================================
 @node The Machine Definition

@@ -186,6 +186,9 @@ task_pid_t leff_create_handler (const leff_t *leff)
 		tp = task_create_gid (GID_SHARED_LEFF, leff->fn);
 	else
 	{
+		/* Free any existing GI allocations. */
+		triac_leff_free (TRIAC_GI_MASK);
+
 		/* Allocate general illumination needed by the lamp effect */
 		if (leff->gi != L_NOGI)
 			triac_leff_allocate (leff->gi);
