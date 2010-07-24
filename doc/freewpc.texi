@@ -2116,7 +2116,18 @@ gumball machine, which can hold 3 or 4 balls but there are no
 switches inside to verify this.  To handle this case, @dfn{virtual balls}
 are supported.  This is a per-device counter that is completely software
 controlled.  APIs exist to add/remove virtual balls that cannot be seen
-by switches.
+by switches.  Machine-specific code must be written to manage this.
+
+When a device driver knows for sure that a ball has entered the device,
+it calls @code{device_add_virtual}.  The extra ball will be tracked and
+counted even though there is no switch to see it anymore.  When virtual
+balls are added, the device @code{enter} event is thrown as usual, as
+if a physical ball had entered.
+
+When it knows that a ball has exited the device, it calls
+@code{device_remove_virtual}.  This decrements the virtual ball counter.
+None of the @code{kick} related events are thrown; instead, you will see
+the @code{surprise_release} event instead.
 
 @c ======================================================
 @node Test Mode
@@ -2145,10 +2156,17 @@ They can also disable it entirely.
 
 The switch stress test is used to test switch handling over a long
 period of time.  When enabled, this adjustment causes the game to
-pretend that switch closures are occurring randomly after the ball
-has been plunged into play.  You can force end-of-ball by putting
-the ball into the drain.  You can also park the ball somewhere and
-the machine will continue to simulate closures indefinitely.
+pretend that switch closures are occurring randomly.  No balls are
+actually put into play, but the machine is fooled into thinking so.
+
+Stress test also exercises ball devices correctly, and simulates 'enter'
+events instead of individual device switches.  Ball locks, trough
+serves, and multiballs can all be tested.
+
+You can force end-of-ball by pressing the Start Button several seconds
+after the start of the ball (the delay allows you to still add players
+to test multiplayer games).  If in multiball play, pressing Start
+simulates the drain of exactly one ball at a time.
 
 Closures are simulated randomly at a rate of about 10 per second.
 This test has been used to uncover some hard to find bugs in the game
@@ -2676,15 +2694,26 @@ debugging which is sometimes more useful than PinMAME or gdb.
 exec09 can measure the length of time a function takes, including
 interrupt handlers, which is good for determining performance.
 
-@section @command{Breakpoints}
+@section Breakpoints
 
 FreeWPC now supports breaking into the game program when the compile-time
-flag @code{CONFIG_BPT} is turned on.  This works both in pinmame and on
+flag @code{CONFIG_BPT} is turned on.  This works both in emulators and on
 real hardware.  When enabled, this feature overrides the normal use of the
 Escape coin door button.  Pressing Escape now halts the system; press Escape
 again to resume.
 
 While halted, you can use the Up and Down buttons to view memory.
+
+If a fatal error occurs when the debugger is compiled in, the machine will
+fall into the debugger instead of rebooting.  This will show you what
+error occurred and which task was last running.
+
+When halted, only normal task scheduling and periodic functions cease to run.
+Interrupt handlers/realtime functions cannot be halted.
+
+You can also dynamically enable and disable breakpoints at various places
+within the code, so that the debugger will start when the program hits that
+location, without having to press Escape.
 
 @c ======================================================
 @node The Machine Definition
