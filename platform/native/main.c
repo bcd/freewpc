@@ -570,8 +570,7 @@ void writeb (IOPTR addr, U8 val)
 		case WPC_GI_TRIAC:
 			/* The input side of the triac has a latch; store only the G.I.
 			related bits there */
-			if (val & TRIAC_GI_MASK)
-				linux_triac_latch = val & TRIAC_GI_MASK;
+			linux_triac_latch = val & TRIAC_GI_MASK;
 
 			/* The outputs are comprised of whatever GI strings are already
 			on, plus whatever outputs (GIs and relays) were just written. */
