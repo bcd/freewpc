@@ -125,19 +125,17 @@ static void slot_kickout_subtask (void)
 		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
 		task_sleep (TIME_100MS);
 	}
-	triac_leff_enable (TRIAC_GI_MASK);
 	task_exit ();
 }
 
 void slot_kickout_leff (void)
 {
-	if (single_ball_play ())
+	if (multi_ball_play ())
 	{
-		triac_leff_disable (TRIAC_GI_MASK);
+		triac_leff_enable (TRIAC_GI_MASK);
 	}
 	leff_create_peer (slot_kickout_subtask);
 	task_sleep (TIME_500MS);
-	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -263,9 +261,9 @@ static void rocket_leff_subtask (void)
 void rocket_leff (void)
 {
 	U8 i;	
-	if (live_balls == 1)
+	if (live_balls != 1)
 	{
-		triac_leff_disable (TRIAC_GI_MASK);
+		triac_leff_enable (TRIAC_GI_MASK);
 	}
 
 	for (i=0; i< 7; i++)
@@ -464,9 +462,9 @@ void powerball_announce_leff (void)
 
 void mpf_active_leff (void)
 {
-	if (live_balls == 1)
+	if (live_balls != 1)
 	{
-		triac_leff_disable (TRIAC_GI_MASK);
+		triac_leff_enable (TRIAC_GI_MASK);
 	}
 	triac_leff_enable (GI_POWERFIELD);
 	lamplist_set_apply_delay (TIME_100MS);
@@ -474,7 +472,6 @@ void mpf_active_leff (void)
 	{
 		lamplist_apply (LAMPLIST_POWERFIELD_VALUES, leff_toggle);
 	}
-	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
