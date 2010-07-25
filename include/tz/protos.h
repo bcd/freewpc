@@ -133,6 +133,7 @@ __machine2__ void tz_flipcode_2 (void);
 
 void magnet_enable_catch (U8 magnet);
 void magnet_enable_catch_and_hold (U8 magnet, U8 secs);
+void magnet_enable_catch_and_throw (U8 magnet);
 void magnet_disable_catch (U8 magnet);
 void magnet_reset (void);
 
