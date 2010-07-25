@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -22,16 +22,16 @@
 #include <freewpc.h>
 
 /* Magnet switch RTT runs every 2 ms */
-#define MAG_SWITCH_RTT_FREQ 2
-#define MAG_DRIVE_RTT_FREQ 8
+#define MAG_SWITCH_RTT_FREQ 4
+#define MAG_DRIVE_RTT_FREQ 4
 
 #define MAG_POWER_TIME (200 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_HOLD_TIME (200 / MAG_DRIVE_RTT_FREQ)
 
 #define DEFAULT_MAG_DROP_TIME ( 336 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_DROP_TIME_LEFT ( 368 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_DROP_TIME_RIGHT ( 336 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_THROW_TIME (32 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_DROP_TIME_LEFT ( 376 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_DROP_TIME_RIGHT ( 328 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_THROW_TIME (24 / MAG_DRIVE_RTT_FREQ)
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -41,9 +41,9 @@ __fastram__ enum magnet_state {
 	MAG_THROW_DROP,
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
-__fastram__ U8 left_magnet_timer, upper_right_magnet_timer, lower_right_magnet_timer;
-__fastram__ U8 left_magnet_hold_timer, upper_right_magnet_hold_timer, lower_right_magnet_hold_timer;
-__fastram__ bool left_magnet_enabled_to_throw, upper_right_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
+__fastram__ U8 left_magnet_timer, lower_right_magnet_timer;
+__fastram__ U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
+__fastram__ bool left_magnet_enabled_to_throw, lower_right_magnet_enabled_to_throw;
 
 /** The magnet switch handler is a frequently called function
  * that polls the magnet switches to see if a ball is on
@@ -53,7 +53,7 @@ static inline void magnet_rtt_switch_handler (
 	const U8 sw_magnet,
 	const U8 sol_magnet,
 	enum magnet_state *state,
-	U8 *timer )
+	U8 *power_timer )
 {
 	/* rt_switch_poll is inverted because it is an opto */
 	if ((*state == MAG_ENABLED) &&
@@ -61,7 +61,7 @@ static inline void magnet_rtt_switch_handler (
 	{
 		sol_enable (sol_magnet);
 		*state = MAG_ON_POWER;
-		*timer = MAG_POWER_TIME;
+		*power_timer = MAG_POWER_TIME;
 	}
 }
 
@@ -87,17 +87,14 @@ static inline void magnet_rtt_duty_handler (
 		case MAG_ON_POWER:
 			/* keep magnet on with high power */
 			/* switch to MAG_ON_HOLD fairly quickly though */
-			/* switch should remain closed in this state */
-			if (--*power_timer == 0)
+			/* But leave solenoid enabled so it doesn't suffer 
+			 * any drop*/
+			if (*power_timer == 0)
 			{	
 				/* switch to HOLD */
 				*state = MAG_ON_HOLD;
 			}
-			else
-			{
-				/* magnet is on 100% */
-				sol_enable (sol_magnet);
-			}
+			--*power_timer;
 			break;
 
 		case MAG_ON_HOLD:
@@ -108,15 +105,17 @@ static inline void magnet_rtt_duty_handler (
 				if (*throw_enabled == TRUE)
 				{
 					*throw_enabled = FALSE;
+					switch (sol_magnet)
+					{
+						case SOL_RIGHT_MAGNET:
+							*hold_timer = DEFAULT_MAG_DROP_TIME_RIGHT;
+							break;
+						case SOL_LEFT_MAGNET:
+							*hold_timer = DEFAULT_MAG_DROP_TIME_LEFT;
+							break;
+					}
+					/* switch to THROW_DROP */
 					sol_disable (sol_magnet);
-					if (sol_magnet == SOL_RIGHT_MAGNET)
-					{	
-						*hold_timer = DEFAULT_MAG_DROP_TIME_RIGHT;
-					}
-					else
-					{	
-						*hold_timer = DEFAULT_MAG_DROP_TIME_LEFT;
-					}
 					*state = MAG_THROW_DROP;
 				}
 				else
@@ -126,10 +125,13 @@ static inline void magnet_rtt_duty_handler (
 					*state = MAG_DISABLED;
 				}
 			}
-			/* Need to pulse at least every 64ms otherwise
-			 * the ball will start to rattle */
-			else if ((*hold_timer % 2) != 0 
-				|| *throw_enabled == TRUE)
+			/* Hold the ball at 50% duty or 100% if held
+			 * for throw (to minimize rattle */
+			else if ((*hold_timer % 2) != 0)
+			{
+				sol_enable (sol_magnet);
+			}
+			else if (*throw_enabled == TRUE)
 			{
 				sol_enable (sol_magnet);
 			}
@@ -137,17 +139,21 @@ static inline void magnet_rtt_duty_handler (
 			{
 				sol_disable (sol_magnet);
 			}
+			/* This has to go here for some reason */
 			--*hold_timer;
 			break;
 		
 		case MAG_THROW_DROP:
 			/* Short delay to let the ball roll
 			 * down before applying a short pulse */
-			if (--*hold_timer == 0)
+			if (*hold_timer == 0)
 			{
 				*power_timer = DEFAULT_MAG_THROW_TIME;
+				sol_enable (sol_magnet);
+				/* switch to ON_POWER but with no hold timer */
 				*state = MAG_ON_POWER;
 			}
+			--*hold_timer;
 			break;
 	}
 }
@@ -158,9 +164,6 @@ void magnet_switch_rtt (void)
 {
 	magnet_rtt_switch_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET,
 		&left_magnet_state, &left_magnet_timer);
-	
-	magnet_rtt_switch_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET, 
-		&upper_right_magnet_state, &upper_right_magnet_timer);
 	
 	magnet_rtt_switch_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
 		&lower_right_magnet_state, &lower_right_magnet_timer);
@@ -173,9 +176,6 @@ void magnet_duty_rtt (void)
 	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
 		&left_magnet_state, &left_magnet_timer, &left_magnet_hold_timer, &left_magnet_enabled_to_throw);
 	
-	magnet_rtt_duty_handler (SW_UPPER_RIGHT_MAGNET, SOL_UPPER_RIGHT_MAGNET, 
-		&upper_right_magnet_state, &upper_right_magnet_timer, &upper_right_magnet_hold_timer, &upper_right_magnet_enabled_to_throw);
-	
 	magnet_rtt_duty_handler (SW_LOWER_RIGHT_MAGNET, SOL_RIGHT_MAGNET, 
 		&lower_right_magnet_state, &lower_right_magnet_timer, &lower_right_magnet_hold_timer, &lower_right_magnet_enabled_to_throw);
 }
@@ -186,9 +186,6 @@ static inline void set_mag_hold_time (U8 magnet, U8 holdtime)
 	{
 		case MAG_LEFT:
 			left_magnet_hold_timer = holdtime;
-			break;
-		case MAG_UPPER_RIGHT:
-			upper_right_magnet_hold_timer = holdtime;
 			break;
 		case MAG_RIGHT:
 			lower_right_magnet_hold_timer = holdtime;
@@ -202,9 +199,6 @@ static inline void enable_magnet_throw (U8 magnet)
 	{
 		case MAG_LEFT:
 			left_magnet_enabled_to_throw = TRUE;
-			break;
-		case MAG_UPPER_RIGHT:
-			upper_right_magnet_enabled_to_throw = TRUE;
 			break;
 		case MAG_RIGHT:
 			lower_right_magnet_enabled_to_throw = TRUE;
@@ -234,8 +228,8 @@ void magnet_enable_catch_and_hold (U8 magnet, U8 secs)
 void magnet_enable_catch_and_throw (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	/* Hold the ball for 1 sec before we throw */
-	set_mag_hold_time (magnet, (1 * (1000UL / MAG_DRIVE_RTT_FREQ)));
+	/* Hold the ball for 1 sec@100% before we throw to stabilise it*/
+	set_mag_hold_time (magnet, (32  / MAG_DRIVE_RTT_FREQ));
 	enable_magnet_throw (magnet);
 	magstates[magnet] = MAG_ENABLED;
 }
@@ -248,22 +242,10 @@ void magnet_disable_catch (U8 magnet)
 
 void magnet_reset (void)
 {
-	left_magnet_state = upper_right_magnet_state = 
-		lower_right_magnet_state = MAG_DISABLED;
-	left_magnet_timer = upper_right_magnet_timer = 
-		lower_right_magnet_timer = 0;
-	left_magnet_hold_timer = upper_right_magnet_hold_timer = 
-		lower_right_magnet_hold_timer = 0;
-	left_magnet_enabled_to_throw = upper_right_magnet_enabled_to_throw =
-		lower_right_magnet_enabled_to_throw = FALSE;
-}
-
-CALLSET_ENTRY (magnet, idle_every_second)
-{
-	/* Magnet timer monitor */
-	/* big_magnet_timer = magnet_timer
-	 * if big_magnet_timer = < 2
-	 * 	*/
+	left_magnet_state = lower_right_magnet_state = MAG_DISABLED;
+	left_magnet_timer = lower_right_magnet_timer = 0;
+	left_magnet_hold_timer = lower_right_magnet_hold_timer = 0;
+	left_magnet_enabled_to_throw = lower_right_magnet_enabled_to_throw = FALSE;
 }
 
 CALLSET_ENTRY (magnet, start_ball)

@@ -109,7 +109,7 @@ void camera_award_deff (void)
 
 static void do_camera_award (void)
 {
-	magnet_disable_catch (MAG_RIGHT);
+	//magnet_disable_catch (MAG_RIGHT);
 	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
 	/* Don't light the lock if already lit */
@@ -203,10 +203,12 @@ CALLSET_ENTRY (camera, sw_camera)
 /* Right magnet grab camera helpers */
 CALLSET_ENTRY (camera, right_ball_grabbed)
 {
+	if (!in_live_game)
+		return;
 	if (!multi_ball_play () && can_award_camera ())
 	{
-		deff_start (DEFF_SHOOT_CAMERA);
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+		deff_start (DEFF_SHOOT_CAMERA);
 	}
 }
 

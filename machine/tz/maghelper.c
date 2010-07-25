@@ -29,7 +29,7 @@ extern __fastram__ enum magnet_state {
 	MAG_THROW_DROP,
 } left_magnet_state, upper_right_magnet_state, lower_right_magnet_state;
 
-extern U8 left_magnet_hold_timer, upper_right_magnet_hold_timer, lower_right_magnet_hold_timer;
+//extern U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
 
 extern struct timed_mode_ops spiral_mode;
 extern struct timed_mode_ops fastlock_mode;
@@ -40,9 +40,7 @@ static bool magnet_not_busy (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 	if (feature_config.tz_mag_helpers == YES
-		&& magstates[magnet] != MAG_ON_HOLD
-		&& magstates[magnet] != MAG_ON_POWER
-		&& magstates[magnet] != MAG_THROW_DROP)
+		&& magstates[magnet] == MAG_DISABLED)
 	{
 		return TRUE;
 	}
@@ -54,10 +52,7 @@ static bool magnet_not_busy (U8 magnet)
 bool magnet_enabled (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	if (magstates[magnet] == MAG_ENABLED
-		|| magstates[magnet] == MAG_ON_HOLD
-		|| magstates[magnet] == MAG_ON_POWER
-		|| magstates[magnet] == MAG_THROW_DROP)
+	if (magstates[magnet] != MAG_DISABLED)
 		return TRUE;
 	else
 		return FALSE;
@@ -65,11 +60,12 @@ bool magnet_enabled (U8 magnet)
 
 CALLSET_ENTRY (maghelper, idle_every_100ms)
 {
-	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
+	//enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 
 	/* Check to see if we have grabbed a ball
 	 * This will only work as long as MAG_ON_HOLD
 	 * is more than 100ms */
+#if 0
 	if (magstates[MAG_LEFT] == MAG_ON_HOLD
 		&& switch_poll_logical (SW_LEFT_MAGNET)
 		&& !timer_find_gid (GID_LEFT_BALL_GRABBED))
@@ -86,7 +82,7 @@ CALLSET_ENTRY (maghelper, idle_every_100ms)
 		callset_invoke (right_ball_grabbed);
 	}
 
-	
+#endif	
 	/* Lower Right magnet grabs */
 	/* Catch the ball for the camera shot, don't care about gumball */
 	
@@ -94,7 +90,7 @@ CALLSET_ENTRY (maghelper, idle_every_100ms)
 	{	
 		magnet_enable_catch_and_throw (MAG_RIGHT);
 	}
-
+	#if 0
 	if (can_award_camera () 
 		&& magnet_not_busy (MAG_RIGHT)
 		&& !timer_find_gid (GID_SPIRALAWARD)
@@ -113,11 +109,12 @@ CALLSET_ENTRY (maghelper, idle_every_100ms)
 	{
 		//magnet_disable_catch (MAG_RIGHT);
 	}
-
+	#endif
 	if (!switch_poll_logical (SW_LEFT_MAGNET) && magnet_not_busy (MAG_LEFT))
 	{	
 		magnet_enable_catch_and_throw (MAG_LEFT);
 	}
+	#if 0
 	/* Left Magnet grabs */
 	/* Enable catch from an autofire launch */
 	if (task_find_gid (GID_DEATH_BALL_LAUNCH)
@@ -141,15 +138,18 @@ CALLSET_ENTRY (maghelper, idle_every_100ms)
 	{
 		//magnet_disable_catch (MAG_LEFT);
 	}
+	#endif
 }
 
-CALLSET_ENTRY (maghelper, sw_lower_right_magnet)
+#if 0
 {
 	if (task_kill_gid (GID_BALL_LAUNCH_DEATH))
 	{
 		timer_restart_free (GID_DEATH_BALL_LAUNCH, TIME_2S);
 	}
 }
+
+#endif
 
 CALLSET_ENTRY (maghelper, start_ball)
 {
