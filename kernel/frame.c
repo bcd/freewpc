@@ -190,10 +190,14 @@ CALLSET_ENTRY (frame, init)
 	fp = fopen (filename, "rb");
 	if (!fp)
 	{
-		dbprintf ("Cannot open image file %s", filename);
+		dbprintf ("Cannot open image file %s\n", filename);
 		return;
 	}
-	fread (IMAGEMAP_BASE, sizeof (U8), 262144, fp);
+	if (!fread (IMAGEMAP_BASE, sizeof (U8), 262144, fp))
+	{
+		dbprintf ("Image file read error\n");
+		return;
+	}
 #endif
 }
 

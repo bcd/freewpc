@@ -98,7 +98,7 @@ void conf_push (int val)
 }
 
 
-int conf_pop (unsigned int count)
+void conf_pop (unsigned int count)
 {
 	conf_stack_ptr -= count;
 }

@@ -269,7 +269,7 @@ void tz_clock_switch_rtt (void)
  */
 void tz_clock_clear_owner (void)
 {
-	clock_owner = NULL;
+	clock_owner = 0;
 }
 
 
@@ -280,7 +280,7 @@ bool tz_clock_alloc (task_gid_t owner)
 {
 	if (clock_owner == owner)
 		return TRUE;
-	if (clock_owner != NULL)
+	if (clock_owner != 0)
 		return FALSE;
 	clock_owner = owner;
 	return TRUE;

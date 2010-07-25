@@ -72,8 +72,6 @@ void asciidmd_refresh (void)
 	int phase;
 	struct buffer *buf, *splitbuf, *composite;
 	int pos;
-	static unsigned long key = 100;
-	unsigned long newkey;
 
 	/* Convert from compact to expanded form */
 	buf = asciidmd_buffers[asciidmd_visible_page];
@@ -89,11 +87,6 @@ void asciidmd_refresh (void)
 	}
 	else
 		return;
-
-	/* newkey = asciidmd_pages[0] + (asciidmd_pages[1] << 8) + (asciidmd_pages[2] << 16);
-	if (newkey == key)
-		return;
-	key = newkey; */
 
 	composite = frame_alloc ();
 	if (composite == NULL)

@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+#include <ctype.h>
 
 const char *tlast = NULL;
 
@@ -54,7 +55,7 @@ void tunget (const char *t)
 }
 
 
-char *tstring (void)
+const char *tstring (void)
 {
 	const char *t;
 	char *c;
@@ -250,7 +251,7 @@ uint32_t tsw (void)
 void exec_script (char *cmd)
 {
 	const char *t;
-	uint32_t v;
+	uint32_t v, count;
 
 	tlast = NULL;
 
@@ -318,26 +319,26 @@ void exec_script (char *cmd)
 	else if (teq (t, "sw"))
 	{
 		v = tsw ();
-		t = tconst ();
-		if (t == 0)
-			t = 1;
-		while (t > 0)
+		count = tconst ();
+		if (count == 0)
+			count = 1;
+		while (count > 0)
 		{
 			sim_switch_depress (v);
-			t--;
+			count--;
 		}
 	}
 	/*********** swtoggle [id] ***************/
 	else if (teq (t, "swtoggle"))
 	{
 		v = tsw ();
-		t = tconst ();
-		if (t == 0)
-			t = 1;
-		while (t > 0)
+		count = tconst ();
+		if (count == 0)
+			count = 1;
+		while (count > 0)
 		{
 			sim_switch_toggle (v);
-			t--;
+			count--;
 		}
 	}
 	/*********** key [keyname] [switch] ***************/
@@ -393,7 +394,8 @@ void exec_script_file (const char *filename)
 	simlog (SLC_DEBUG, "Reading commands from '%s'", filename);
 	for (;;)
 	{
-		fgets (buf, 255, in);
+		if (!fgets (buf, 255, in))
+			break;
 		if (feof (in))
 			break;
 		exec_script (buf);
