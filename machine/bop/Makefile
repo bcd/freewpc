@@ -55,7 +55,7 @@ PINMAME_OTHER_ROMS = Mach_u*
 
 GAME_OBJS =
 
-GAME_PAGED_OBJS = leffs.o skill.o outhole.o
+GAME_PAGED_OBJS = leffs.o skill.o outhole.o jets.o
 
 GAME_INCLUDES =
 

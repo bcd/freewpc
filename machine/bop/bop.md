@@ -154,10 +154,10 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 27: Left Trough, noscore
 28: Left Standup, standup
 31: Skill Shot 50K, intest #Skill kicker
-32: Skill Shot 75K, ingame
-33: Skill Shot 100K, ingame
-34: Skill Shot 200K, ingame
-35: Skill Shot 25K, ingame
+32: Skill Shot 75K, intest
+33: Skill Shot 100K, intest
+34: Skill Shot 200K, intest
+35: Skill Shot 25K, intest
 36: Right Top Standup, standup
 37: Right Bottom Standup, standup
 38: Outhole, outhole, noscore
@@ -167,11 +167,11 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 46: Under Playfield Kickback
 47: Enter Head
 51: Spinner, ingame
-52: Shooter, shooter, noplay, debounce(TIME_200MS)
-53: UR Jet, ingame
-54: UL Jet, ingame
-55: Lower Jet, ingame
-56: Jet Sling, ingame
+52: Shooter, shooter, edge, noplay, debounce(TIME_200MS)
+53: UR Jet, ingame, c_decl(jet_hit)
+54: UL Jet, ingame, c_decl(jet_hit)
+55: Lower Jet, ingame, c_decl(jet_hit)
+56: Jet Sling, ingame, c_decl(jet_hit)
 57: Left Sling, ingame
 58: Right Sling, ingame
 63: Left Eye, intest
@@ -273,6 +273,7 @@ A4: Head Motor, motor, nosearch
 ##########################################################################
 [lamplists]
 Playfield: PF:all
+Lanes: Left Outlane..Right Outlane
 
 [containers]
 Trough: trough, Ball Serve, Center Trough, Right Trough, init_max_count(2)
@@ -352,6 +353,7 @@ Volume Change: MUS_SECRET_FANFARE
 # Display effects
 ##########################################################################
 [deffs]
+Skillshot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE
 
 ##########################################################################
 # Lamp effects
