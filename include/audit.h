@@ -48,6 +48,28 @@ typedef struct
 } time_audit_t;
 
 
+struct histogram
+{
+	/* A name for the histogram */
+	const char *label;
+
+	/* The number of items in the histogram */
+	U8 count;
+
+	/* An array of values which defines the ranges of each
+	entry in the histogram.  The Nth entry is an upper bound
+	for the Nth range.  The last entry in this array must
+	be 0xFFFF. */
+	U16 *values;
+
+	/* A pointer to the first audit entry */
+	audit_t *audits;
+
+	const char *render;
+	const char *render_max;
+};
+
+
 /**
  * The table of standard WPC system audits.
  * Items marked with 'done' are actually being incremented.
@@ -87,6 +109,8 @@ typedef struct
 	audit_t trough_rescues;
 	audit_t chase_balls;
 	time_audit_t total_game_time; /* done */
+	audit_t hist_score[13];
+	audit_t hist_game_time[13];
 } std_audits_t;
 
 
@@ -129,5 +153,10 @@ __test2__ void time_audit_copy (time_audit_t *dst, const time_audit_t *src);
 __test2__ void time_audit_divide (time_audit_t *t, U16 n);
 __test2__ void time_audit_format_per_ball (const time_audit_t *t);
 __test2__ void time_audit_format_per_credit (const time_audit_t *t);
+
+__test2__ void score_histogram_add (U16);
+__test2__ void game_time_histogram_add (U16);
+__test2__ void histogram_browser_draw_1 (void);
+__test2__ void histogram_browser_init_1 (void);
 
 #endif /* _STDADJ_H */

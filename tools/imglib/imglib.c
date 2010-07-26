@@ -494,16 +494,16 @@ struct buffer *buffer_replace (struct buffer *old, struct buffer *new)
 }
 
 
-struct histogram *histogram_update (struct buffer *buf)
+struct img_histogram *histogram_update (struct buffer *buf)
 {
-	struct histogram *hist;
+	struct img_histogram *hist;
 	unsigned int off;
 	unsigned int i;
 	int largest;
 	unsigned int already_taken[256] = { 0, };
 
 	if (!buf->hist)
-		hist = buf->hist = malloc (sizeof (struct histogram));
+		hist = buf->hist = malloc (sizeof (struct img_histogram));
 
 	hist->unique = 0;
 	for (off = 0; off < 256; off++)
@@ -635,7 +635,7 @@ static U8 *buffer_write_run (U8 *ptr, U8 sentinel, U8 data, unsigned int count)
  * Return the estimated size of the image if it were compressed using
  * the palette method.
  */
-unsigned int palette_compression_length (struct histogram *hist)
+unsigned int palette_compression_length (struct img_histogram *hist)
 {
 	if (hist->unique > 16)
 		return 10000;

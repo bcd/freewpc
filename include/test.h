@@ -182,6 +182,13 @@ void menu_up (void);
 void menu_down (void);
 void menu_start (void);
 
+#if (MACHINE_DMD == 1)
+__test__ void print_row_center (const font_t *f, U8 row);
+#else
+#define print_row_center(f, row) print_row_center1 (row)
+__test__ void print_row_center1 (U8 row);
+#endif
+
 __test__ void test_init (void);
 __test__ void test_up_button (void);
 __test__ void test_down_button (void);

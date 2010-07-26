@@ -42,7 +42,7 @@
 #define square(n) ((n) * (n))
 
 
-struct histogram
+struct img_histogram
 {
 	unsigned int count[256];
 	unsigned int most_frequent[256];
@@ -55,7 +55,7 @@ struct buffer
 	unsigned int width, height;
 	U8 *data;
 	U8 _data[MAX_BUFFER_SIZE];
-	struct histogram *hist;
+	struct img_histogram *hist;
 
 	/** The current color used by all drawing functions. */
 	U8 color;
@@ -127,7 +127,7 @@ struct buffer *buffer_joinbits(struct buffer *buf);
 struct buffer *buffer_splitbits(struct buffer *buf);
 int buffer_compare(struct buffer *a, struct buffer *b);
 struct buffer *buffer_replace(struct buffer *old, struct buffer *new);
-struct histogram *histogram_update(struct buffer *buf);
+struct img_histogram *histogram_update(struct buffer *buf);
 struct buffer *buffer_compress(struct buffer *buf, struct buffer *prev);
 struct buffer *buffer_decompress(struct buffer *buf);
 struct buffer *buffer_rle_encode (struct buffer *buf);

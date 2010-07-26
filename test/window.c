@@ -257,7 +257,6 @@ void window_title (const char *title)
 #if (MACHINE_DMD == 1)
 void print_row_center (const font_t *f, U8 row)
 #else
-#define print_row_center(f, row) print_row_center1 (row)
 void print_row_center1 (U8 row)
 #endif
 {
@@ -528,6 +527,8 @@ struct window_ops adj_browser_window = {
 
 struct audit *browser_audits;
 
+struct histogram *browser_histogram;
+
 audit_t default_audit_value;
 
 struct audit main_audits[] = {
@@ -657,6 +658,19 @@ void audit_browser_draw (void)
 }
 
 
+void histogram_browser_init (void)
+{
+	browser_init ();
+	browser_histogram = win_top->w_class.priv;
+	histogram_browser_init_1 ();
+}
+
+void histogram_browser_draw (void)
+{
+	histogram_browser_draw_1 ();
+}
+
+
 #define INHERIT_FROM_AUDIT_BROWSER \
 	INHERIT_FROM_BROWSER, \
 	.init = audit_browser_init, \
@@ -664,6 +678,12 @@ void audit_browser_draw (void)
 
 struct window_ops audit_browser_window = {
 	INHERIT_FROM_AUDIT_BROWSER,
+};
+
+struct window_ops histogram_browser_window = {
+	INHERIT_FROM_AUDIT_BROWSER,
+	.init = histogram_browser_init,
+	.draw = histogram_browser_draw,
 };
 
 
@@ -2570,11 +2590,19 @@ struct menu feature_audits_item = {
 #endif
 };
 
-struct menu histogram_audits_item = {
-	.name = "HISTOGRAMS",
+extern struct histogram game_time_histogram;
+struct menu game_time_histogram_item = {
+	.name = "GAME TIME HIST.",
 	.flags = M_ITEM,
+	.var = { .subwindow = { &histogram_browser_window, &game_time_histogram } },
 };
 
+extern struct histogram score_histogram;
+struct menu score_histogram_item = {
+	.name = "SCORE HIST.",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &histogram_browser_window, &score_histogram } },
+};
 
 #ifdef CONFIG_RTC
 
@@ -2591,7 +2619,8 @@ struct menu *audit_menu_items[] = {
 	&earnings_audits_item,
 	&standard_audits_item,
 	&feature_audits_item,
-	&histogram_audits_item,
+	&score_histogram_item,
+	&game_time_histogram_item,
 #ifdef CONFIG_RTC
 	&timestamp_audits_item,
 #endif

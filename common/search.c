@@ -342,3 +342,14 @@ CALLSET_ENTRY (ball_search, end_ball)
 	}
 }
 
+/*
+ * At the end of the game for each player, log their
+ * game time into the histograms.  A game is only considered
+ * complete at the start of the last ball.
+ */
+CALLSET_ENTRY (ball_search, end_player)
+{
+	if (ball_up == system_config.balls_per_game)
+		score_histogram_add (game_time);
+}
+
