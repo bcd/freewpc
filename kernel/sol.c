@@ -195,8 +195,6 @@ CALLSET_ENTRY (sol, idle_every_100ms)
  */
 void sol_request_async (U8 sol)
 {
-	dbprintf ("Request pulse %d\n", sol);
-
 	/*
 	 * If no request is active, start it now.  Otherwise, it will need to be queued.
 	 */
@@ -217,9 +215,18 @@ void sol_request_async (U8 sol)
 
 
 /**
- * Make a solenoid request, and wait for it to finish before returning.
+ * Allocate a slot in the pulse driver for SOL.
+ * This is an internal API only, and is called whenever a
+ * synchronous pulse request is made.  It waits if a
+ * previous request is being serviced, then acquires a
+ * lock so that the slot is reserved for the caller, who can
+ * then make other calls into the driver to initiate the
+ * actual pulses.
+ *
+ * The caller MUST invoke sol_free() at some point later when the
+ * pulse is done.
  */
-void sol_request (U8 sol)
+static void sol_alloc (U8 sol)
 {
 	/* Wait until any existing sync requests are finished. */
 	while (req_lock || sol_pulse_timer)
@@ -228,15 +235,59 @@ void sol_request (U8 sol)
 	/* Acquire the lock for this solenoid. */
 	req_lock = (sol + 1) | 0x80;
 
-	/* Issue the request */
-	sol_request_async (sol);
+	/* Remember which solenoid we are pulsing now */
+	sol_pulsing = sol;
+}
 
+
+void sol_modify_duty (U8 duty)
+{
+	sol_pulse_duty = duty;
+}
+
+
+void sol_modify_timeout (U8 timeout)
+{
+	sol_pulse_timer = timeout / 4;
+}
+
+
+/**
+ * Free the lock on a particular solenoid.  This first waits for any
+ * outstanding pulse to finish.
+ */
+void sol_free (U8 sol)
+{
 	/* Wait for the pulse to finish */
 	while (req_lock != 0x80)
 		task_sleep (TIME_66MS);
 
 	/* Release the lock for another task */
 	req_lock = 0;
+}
+
+
+/**
+ * Make a solenoid request, and wait for it to finish before returning.
+ *
+ * This is one of the 2 topmost APIs that starts a solenoid pulse
+ * (see also sol_request_async).
+ *
+ * By default, sol_request behaves identically to sol_request_async, with
+ * the addition of the alloc and free calls around it.  However, machines
+ * can override this behavior by catching the 'sol_request' event, and
+ * doing something different.  The handler should inspect the value of
+ * sol_pulsing to see which solenoid is being pulsed, it should call
+ * sol_free() just before returning, and finally it should return FALSE.
+ */
+void sol_request (U8 sol)
+{
+	sol_alloc (sol);
+	if (callset_invoke_boolean (sol_request))
+	{
+		sol_req_start (sol);
+		sol_free (sol);
+	}
 }
 
 
