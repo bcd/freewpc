@@ -571,11 +571,11 @@ steel:
 lithograph:
 
 [templates]
-Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
-Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
-Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=4, offtime=20
-Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=4, offtime=20
-Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING
+Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING
+Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET
+Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET
+Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET
 
 Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
