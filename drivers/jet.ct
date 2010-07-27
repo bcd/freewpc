@@ -1,0 +1,6 @@
+@@class jet
+@@parameter sw
+@@parameter sol
+@@weakdefine ontime 4
+@@weakdefine offtime 20
+@@include drivers/spsol.ct
