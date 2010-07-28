@@ -1084,6 +1084,7 @@ sub machine_write_makefile {
 		my $c_file = "build/$ident.c";
 		my $h_file = "build/$ident.h";
 		my $o_file = "\$(BLDDIR)/$ident.o";
+		my $sched_file = "\$(BLDDIR)/$ident.sched";
 		my $class_file = "build/$ident.h";
 		my $template_file = "drivers/$driver.ct";
 
@@ -1093,6 +1094,7 @@ sub machine_write_makefile {
 		print "# Arguments: $args\n";
 		print <<END;
 
+SCHED_HEADERS += $h_file
 TEMPLATE_OBJS += $o_file
 
 $o_file : $c_file $h_file build/mach-Makefile
@@ -1102,6 +1104,7 @@ $c_file $h_file : $template_file \$(CTEMP)
 END
 	}
 	print "\nKERNEL_HW_OBJS += \$(TEMPLATE_OBJS)\n";
+	print "MACHINE_SCHED_FLAGS += \$(BLDDIR)/*.sched\n";
 
 	# Print rules for building the FIFs.
 	print "\n";
