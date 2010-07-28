@@ -490,6 +490,7 @@ void add_task (char *name, unsigned int period, double len)
 	char *end;
 	unsigned int already_unrolled_count = 0;
 	char *c;
+	unsigned int n;
 
 	/* Is this entry dependent on a conditional? */
 	if ((c = strchr (name, '?')) != NULL)
@@ -519,6 +520,16 @@ conditional_defined:;
 		already_unrolled_count = end[1] - '0';
 		*end = '\0';
 	}
+
+	/* Scan all previous tasks, and look for the same name.
+	   If a task appears more than once, it is probably a bug. */
+	if (n_tasks > 0)
+		for (n = 0; n < n_tasks; n++)
+			if (!strcmp (tasks[n].name, name))
+			{
+				fprintf (stderr, "error: task '%s' redefined\n", name);
+				exit (1);
+			}
 
 	/* Fill in the task structure */
 	task = &tasks[n_tasks++];
