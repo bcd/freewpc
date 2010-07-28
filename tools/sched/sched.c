@@ -369,6 +369,7 @@ void init_schedule (void)
 {
 	n_ticks = 0;
 	n_tasks = 0;
+	expand_ticks ();
 }
 
 
