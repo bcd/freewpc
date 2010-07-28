@@ -365,14 +365,6 @@ void write_tick_driver (FILE *f)
 }
 
 
-void init_schedule (void)
-{
-	n_ticks = 0;
-	n_tasks = 0;
-	expand_ticks ();
-}
-
-
 /**
  * Expand the tick table to a width of 'new_tick_count'.
  */
@@ -396,6 +388,14 @@ void expand_ticks (unsigned int new_tick_count)
 		ticks[tickno].n_slots = 0;
 		ticks[tickno].len = 0.0;
 	}
+}
+
+
+void init_schedule (void)
+{
+	n_ticks = 0;
+	n_tasks = 0;
+	expand_ticks (8);
 }
 
 
