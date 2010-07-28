@@ -20,11 +20,6 @@
 
 
 # Special solenoid drivers
-!left_sling_service       8     40c
-!right_sling_service      8     40c
-!left_jet_service         8     40c
-!upper_jet_service        8     40c
-!lower_jet_service        8     40c
 !kickback_driver_service  8     40c
 
 # Spinner drivers

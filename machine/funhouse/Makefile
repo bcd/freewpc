@@ -62,7 +62,3 @@ GAME_PAGED_OBJS = shot.o leffs.o rudy.o trivial.o mirror.o \
 
 GAME_INCLUDES =
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h \
-	build/left_jet.h build/right_jet.h build/lower_jet.h \
-	build/ramp_div.h build/eye_direction.h build/steps_gate.h
-

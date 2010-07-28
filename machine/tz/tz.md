@@ -578,8 +578,7 @@ Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET
 Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET
 
 Clock Mech: driver(bivar),
-	forward_sol=SOL_CLOCK_FORWARD,
-	reverse_sol=SOL_CLOCK_REVERSE
+	forward_sol=SOL_CLOCK_FORWARD, reverse_sol=SOL_CLOCK_REVERSE
 
 Bridge Open: driver(duty),
 	sol=SOL_RIGHT_RAMP_DIV,

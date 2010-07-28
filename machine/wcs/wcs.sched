@@ -18,23 +18,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 # 
 
-
-# Special solenoid drivers
-!left_sling_service       8     40c
-!right_sling_service      8     40c
-!left_jet_service         8     40c
-!upper_jet_service        8     40c
-!lower_jet_service        8     40c
-!kickback_driver_service  8     40c
-
 # Spinner drivers
 !spinner_service          8     40c
-
-# Duty drivers
-!gate_service             16    40c
-!spinning_ball_service    16    40c
-!goalie_service           16    40c
-!magna_goalie_service     16    40c
-!lock_magnet_service      16    40c
-!soccer_ball_service      16    80c
 

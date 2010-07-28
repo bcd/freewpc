@@ -461,11 +461,11 @@ Right Loop Started:
 
 [templates]
 
-Left Sling: driver(spsol), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLINGSHOT, ontime=4, offtime=20
-Right Sling: driver(spsol), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT, ontime=4, offtime=20
-Left Jet: driver(spsol), sw=SW_UPPER_LEFT_JET, sol=SOL_UPPER_LEFT_JET, ontime=4, offtime=20
-Right Jet: driver(spsol), sw=SW_UPPER_RIGHT_JET, sol=SOL_UPPER_RIGHT_JET, ontime=4, offtime=20
-Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+Left Sling: driver(sling), sw=SW_LEFT_SLINGSHOT, sol=SOL_LEFT_SLINGSHOT
+Right Sling: driver(sling), sw=SW_RIGHT_SLINGSHOT, sol=SOL_RIGHT_SLINGSHOT
+Left Jet: driver(jet), sw=SW_UPPER_LEFT_JET, sol=SOL_UPPER_LEFT_JET
+Right Jet: driver(jet), sw=SW_UPPER_RIGHT_JET, sol=SOL_UPPER_RIGHT_JET
+Lower Jet: driver(jet), sw=SW_LOWER_JET, sol=SOL_LOWER_JET
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTER,

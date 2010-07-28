@@ -40,6 +40,12 @@
 @@parameter offtime
 
 @@
+@@file @self.sched
+@@
+!@self_service 8 40c
+
+
+@@
 @@file @class.h
 @@
 
