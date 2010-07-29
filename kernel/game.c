@@ -297,6 +297,8 @@ void end_ball (void)
 			/* TODO - if buyin is bought, then need to stay on this
 			player, avoid end_player etc. */
 		}
+
+		/* Do other end player tasks */
 		callset_invoke (end_player);
 	}
 
@@ -477,9 +479,14 @@ void start_ball (void)
 	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
 		deff_start (DEFF_SCORE_GOAL);
-		/* Chalk game played audits at the start of the final ball */
-		audit_increment (&system_audits.total_plays);
-		audit_increment (&system_audits.nplayer_games[num_players-1]);
+
+		/* Chalk game played audits at the start of the final ball
+		for the first player */
+		if (player_up == 1)
+		{
+			audit_add (&system_audits.total_plays, num_players);
+			audit_increment (&system_audits.nplayer_games[num_players-1]);
+		}
 	}
 
 	/* Serve a ball to the plunger, by requesting a kick from the
@@ -554,6 +561,7 @@ void add_player (void)
 {
 	remove_credit ();
 	num_players++;
+	audit_increment (&system_audits.games_started);
 	callset_invoke (add_player);
 
 	/* Acknowledge the new player by showing the scores briefly */
@@ -568,7 +576,6 @@ void start_game (void)
 	if (!in_game)
 	{
 		task_kill_gid (GID_END_BALL);
-		audit_increment (&system_audits.games_started);
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
@@ -604,6 +611,12 @@ void start_game (void)
  */
 void stop_game (void)
 {
+	if ((ball_up == system_config.balls_per_game) || config_timed_game)
+	{
+		/* TODO : increment final score histogram */
+		/* TODO : increment final game time histogram */
+	}
+
 	in_game = FALSE;
 	in_bonus = FALSE;
 	in_tilt = FALSE;
@@ -613,9 +626,6 @@ void stop_game (void)
 	callset_invoke (stop_game);
 	deff_stop_all ();
 	leff_stop_all ();
-
-	/* TODO : Per-player audits should also be chalked, but only if
-	 * the final ball of the game was started */
 }
 
 
