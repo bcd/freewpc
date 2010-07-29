@@ -7,6 +7,7 @@ SCHED_OBJ := $(SCHED_SRC:.c=.o)
 # the machine type at all.
 KERNEL_BASIC_OBJS += $(if $(CONFIG_DMD), kernel/frame.o)
 KERNEL_BASIC_OBJS += kernel/idle.o
+KERNEL_BASIC_OBJS += kernel/lang.o
 KERNEL_BASIC_OBJS += kernel/log.o
 KERNEL_BASIC_OBJS +=	kernel/mbmode.o
 KERNEL_BASIC_OBJS += kernel/misc.o

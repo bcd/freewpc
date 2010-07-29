@@ -216,6 +216,7 @@ __noreturn__ void freewpc_init (void);
 #include <serve.h>
 #include <mbmode.h>
 #include <generic.h>
+#include <lang.h>
 #include <deffdata.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
