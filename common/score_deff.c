@@ -31,15 +31,6 @@
 bool score_update_needed;
 
 
-/** External low-level functions.  These differ between DMD and
-alphanumeric games. */
-extern void ll_scores_draw_current (U8);
-extern void ll_score_redraw (void);
-extern void ll_score_draw_timed (U8 min, U8 sec);
-extern void ll_score_draw_ball (void);
-extern void ll_score_strobe_novalid (void);
-extern void ll_score_strobe_valid (void);
-
 /** Draw the current ball number at the bottom of the display. */
 void scores_draw_status_bar (void)
 {
@@ -74,11 +65,11 @@ void scores_draw_credits (void)
 
 /**
  * Render the default score screen.
- * single_player indicates which player's score gets drawn.
- * If nonzero, it means to draw only that player's score.
- * If zero, it means to draw all scores.
+ * skip_player indicates which player is up and should not be drawn.
+ * SCORE_DRAW_ALL means to draw everything; otherwise, we do not
+ * draw player up's score, so that it can be flashed.
  */
-void scores_draw_current (U8 single_player)
+void scores_draw_current (U8 skip_player)
 {
 	U8 p;
 
@@ -88,7 +79,7 @@ void scores_draw_current (U8 single_player)
 	implement a single flashing score. */
 	for (p=0; p < num_players; p++)
 	{
-		if (single_player && p+1 != single_player)
+		if (skip_player && p+1 == skip_player)
 			continue;
 
 		/* Render the score into the print buffer */
@@ -152,8 +143,6 @@ void scores_deff (void)
 				ll_score_strobe_valid ();
 			else
 				ll_score_strobe_novalid ();
-
-			task_sleep (TIME_166MS);
 
 			if (score_update_required ())
 				break;

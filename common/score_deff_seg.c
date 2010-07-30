@@ -36,6 +36,10 @@ void ll_score_redraw (void)
 	seg_show ();
 }
 
+void ll_score_change_player (void)
+{
+}
+
 void ll_score_draw_timed (U8 min, U8 sec)
 {
 	sprintf ("TIME %d:%02d", min, sec);

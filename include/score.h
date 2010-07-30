@@ -110,9 +110,28 @@ extern inline void score_update_wait (void)
 
 #define when_score_changes for (score_update_start ();; score_update_wait ())
 
+#define score_deff_sleep(duration) \
+	do { \
+		task_sleep (duration); \
+		if (score_update_required ()) \
+			return; \
+	} while (0)
+
+/** Portable score display effect routines */
 __effect__ void scores_draw (void);
 __effect__ void scores_draw_ball (void);
 __effect__ void scores_draw_current (U8 skip_player);
+__effect__ void scores_draw_status_bar (void);
+
+/** External low-level functions.  These differ between DMD and
+alphanumeric games. */
+__effect__ void ll_score_change_player (void);
+__effect__ void ll_scores_draw_current (U8);
+__effect__ void ll_score_redraw (void);
+__effect__ void ll_score_draw_timed (U8 min, U8 sec);
+__effect__ void ll_score_draw_ball (void);
+__effect__ void ll_score_strobe_novalid (void);
+__effect__ void ll_score_strobe_valid (void);
 
 void score_zero (score_t s);
 void score_copy (score_t dst, const score_t src);

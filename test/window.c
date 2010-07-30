@@ -1985,6 +1985,7 @@ void score_test_up (void)
 	{
 		player_up++;
 	}
+	ll_score_change_player ();
 }
 
 void score_test_down (void)
@@ -1999,6 +2000,7 @@ void score_test_down (void)
 		}
 		player_up = num_players;
 	}
+	ll_score_change_player ();
 }
 
 struct window_ops score_test_window = {
