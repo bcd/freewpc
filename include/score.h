@@ -30,6 +30,8 @@
  * multiple of 2, since scores are kept in packed BCD */
 #define BYTES_PER_SCORE ((MACHINE_SCORE_DIGITS+1)/2)
 
+#define SCORE_DRAW_ALL 0
+
 /** The standard score type, kept in packed BCD, 2 digits per byte */
 typedef bcd_t score_t[BYTES_PER_SCORE], *score_pointer_t;
 

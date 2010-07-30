@@ -26,45 +26,38 @@
 #include <freewpc.h>
 #include <coin.h>
 
-#define SCORE_DRAW_ALL 0
-
 
 /** Nonzero if the current score has changed and needs to be redrawn */
 bool score_update_needed;
 
 
+/** External low-level functions.  These differ between DMD and
+alphanumeric games. */
+extern void ll_scores_draw_current (U8);
+extern void ll_score_redraw (void);
+extern void ll_score_draw_timed (U8 min, U8 sec);
+extern void ll_score_draw_ball (void);
+extern void ll_score_strobe_novalid (void);
+extern void ll_score_strobe_valid (void);
+
 /** Draw the current ball number at the bottom of the display. */
-void scores_draw_ball (void)
+void scores_draw_status_bar (void)
 {
 	if (config_timed_game)
 	{
-		U8 time_minutes, time_seconds;
-		time_minutes = 0;
-		time_seconds = timed_game_timer;
-		while (time_seconds >= 60)
+		U8 min, sec;
+		min = 0;
+		sec = timed_game_timer;
+		while (sec >= 60)
 		{
-			time_minutes++;
-			time_seconds -= 60;
+			min++;
+			sec -= 60;
 		}
-#if (MACHINE_DMD == 1)
-		sprintf ("TIME REMAINING: %d:%02d", time_minutes, time_seconds);
-		font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-#else
-		sprintf ("TIME %d:%02d", time_minutes, time_seconds);
-		seg_write_string (1, 8, sprintf_buffer);
-#endif
+		ll_score_draw_timed (min, sec);
 	}
 	else
 	{
-#if (MACHINE_DMD == 1)
-		credits_render ();
-		font_render_string_center (&font_var5, 96, 29, sprintf_buffer);
-		sprintf ("BALL %1i", ball_up);
-		font_render_string_center (&font_var5, 32, 29, sprintf_buffer);
-#else
-		sprintf ("BALL %1i", ball_up);
-		seg_write_string (1, 10, sprintf_buffer);
-#endif
+		ll_score_draw_ball ();
 	}
 }
 
@@ -73,101 +66,10 @@ void scores_draw_ball (void)
 void scores_draw_credits (void)
 {
 	credits_render ();
+	/* TODO - this could also be moved into a ll_ routine, but
+	it just happens to work for alphanumeric as well. */
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
 }
-
-#if (MACHINE_DMD == 1)
-
-/* A list of score font keys.  Each of these is an index into the
- * table below. */
-#define SCORE_POS_CENTER_LARGE 0
-#define SCORE_POS_UL_SMALL 1
-#define SCORE_POS_UR_SMALL 2
-#define SCORE_POS_LL_SMALL 3
-#define SCORE_POS_LR_SMALL 4
-#define SCORE_POS_UL_LARGE 5
-#define SCORE_POS_LR_LARGE 6
-#define SCORE_POS_LL_LARGE 7
-#define SCORE_POS_UR_LARGE 8
-#define SCORE_POS_UL_TINY 9
-#define SCORE_POS_LR_TINY 10
-#define SCORE_POS_LL_TINY 11
-#define SCORE_POS_UR_TINY 12
-
-
-/** A lookup table for mapping a 'score font key' into a font and
- * location on the DMD. */
-const struct score_font_info
-{
-	/* The function to call to draw the string.  This determines
-	the justification */
-	void (*render) (const char *);
-
-	/* The font to be used */
-	const font_t *font;
-
-	/* The location where the score should be drawn, subject to
-	justification */
-	U8 x;
-	U8 y;
-} score_font_info_table[] = {
-	[SCORE_POS_CENTER_LARGE] = { fontargs_render_string_center, &font_lucida9, 64, 10 },
-
-	[SCORE_POS_UL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 1 },
-	[SCORE_POS_UR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 1 },
-	[SCORE_POS_LL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 10 },
-	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, 10 },
-
-	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
-	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
-	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 16 },
-	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 16 },
-
-	[SCORE_POS_UL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 1 },
-	[SCORE_POS_UR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 1 },
-	[SCORE_POS_LL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 16 },
-	[SCORE_POS_LR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 16 },
-};
-
-
-/* The lookup is [num_players-1][player_up][score_to_draw-1].
- *
- * The first index says how many players there are total.  Zero players
- * is not an option; num_players must always be at least 1.
- *
- * The second index says which player is up.  If zero, it means no
- * player is up, as during attract mode.  This will be nonzero during
- * a game.
- *
- * The third index says which player's score is being drawn.
- */
-const U8 score_font_info_key[4][5][4] = {
-	/* 1 player */  {
-		{SCORE_POS_UL_SMALL},
-		{SCORE_POS_CENTER_LARGE},
-	},
-	/* 2 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL },
-		{SCORE_POS_UL_LARGE, SCORE_POS_LR_SMALL },
-		{SCORE_POS_UL_SMALL, SCORE_POS_LR_LARGE }
-	},
-	/* 3 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL },
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY },
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL },
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_LARGE },
-	},
-	/* 4 players */ {
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_SMALL, SCORE_POS_LL_SMALL,
-			SCORE_POS_LR_SMALL },
-		{SCORE_POS_UL_SMALL, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY, },
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_SMALL, SCORE_POS_LL_TINY, SCORE_POS_LR_TINY, },
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_SMALL, SCORE_POS_LR_TINY, },
-		{SCORE_POS_UL_TINY, SCORE_POS_UR_TINY, SCORE_POS_LL_TINY, SCORE_POS_LR_SMALL, },
-	},
-};
-
-#endif
 
 
 /**
@@ -179,9 +81,6 @@ const U8 score_font_info_key[4][5][4] = {
 void scores_draw_current (U8 single_player)
 {
 	U8 p;
-#if (MACHINE_DMD == 1)
-	const struct score_font_info *info;
-#endif
 
 	/* Each player's score is drawn in turn.
 	If skip_player is not 0, then it will cause a particular
@@ -195,19 +94,8 @@ void scores_draw_current (U8 single_player)
 		/* Render the score into the print buffer */
 		sprintf_score (scores[p]);
 
-		/* Figure out what font to use and where to print it */
-#if (MACHINE_DMD == 1)
-		info = &score_font_info_table[
-			score_font_info_key[num_players-1][player_up][p] ];
-
-		/* Load the font info into the appropriate registers. */
-		DECL_FONTARGS (info->font, info->x, info->y, sprintf_buffer);
-
-		/* Start printing to the display */
-		info->render (sprintf_buffer);
-#else
-		seg_write_string (0, 0, sprintf_buffer);
-#endif
+		/* Call the low-level handler for the hardware type */
+		ll_scores_draw_current (p);
 	}
 }
 
@@ -217,7 +105,7 @@ no scores are flashing; everything is fixed. */
 void scores_draw (void)
 {
 	if (in_game && ball_up)
-		scores_draw_ball ();
+		scores_draw_status_bar ();
 	else if (MACHINE_DMD)
 		scores_draw_credits ();
 	scores_draw_current (SCORE_DRAW_ALL);
@@ -254,63 +142,19 @@ void scores_deff (void)
 		/* Clear score change flag */
 		score_update_start ();
 
-#if (MACHINE_DMD == 1)
-		/* First, the static elements are drawn: the opponents' scores
-		 * and the ball number.  Then the flashing element, the current
-		 * player's score is drawn. */
-		/* TODO - I'd prefer to draw all players without flashing, and
-		 * use dark/bright colors to indicate player up. */
-		dmd_map_overlay ();
-		dmd_clean_page_low ();
-		scores_draw_ball ();
-		scores_draw_current (SCORE_DRAW_ALL);
-		dmd_copy_low_to_high ();
-		scores_draw_current (player_up);
-#else
-		seg_alloc ();
-		seg_erase ();
-		scores_draw_ball ();
-		scores_draw_current (SCORE_DRAW_ALL);
-		seg_copy_low_to_high ();
-		scores_draw_current (player_up);
-		seg_show ();
-#endif
+		/* Call the low-level redraw handler */
+		ll_score_redraw ();
 
 		/* Display the score with effects, until a score change. */
 		for (;;)
 		{
-#if (MACHINE_DMD == 1)
 			if (valid_playfield)
-			{
-				dmd_map_overlay ();
-				dmd_dup_mapped ();
-				dmd_overlay_color ();
-				callset_invoke (score_overlay);
-				dmd_show2 ();
-			}
+				ll_score_strobe_valid ();
 			else
-			{
-				dmd_alloc_low_clean ();
-				pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE+1);
-				dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
-				dmd_show_low ();
-			}
-#else
-			if (valid_playfield)
-			{
-				/* Strobe player up score */
-			}
-			else
-			{
-				/* Flash player up score */
-				seg_show_other ();
-			}
-#endif
+				ll_score_strobe_novalid ();
 
 			task_sleep (TIME_166MS);
 
-			/* TODO - use a sweeping effect rather than the flashing
-			when ball is in play. */
 			if (score_update_required ())
 				break;
 		}

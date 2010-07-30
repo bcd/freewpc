@@ -67,5 +67,7 @@ EFFECT_OBJS += common/effect_update.o
 EFFECT_OBJS +=	common/flash.o
 EFFECT_OBJS += common/lamptimer.o
 EFFECT_OBJS +=	common/score_deff.o
+EFFECT_OBJS +=	$(if $(CONFIG_DMD), common/score_deff_dmd.o)
+EFFECT_OBJS +=	$(if $(CONFIG_ALPHA), common/score_deff_seg.o)
 EFFECT_OBJS +=	common/shootalert.o
 EFFECT_OBJS += $(if $(CONFIG_PLAYABLE), common/sound_effect.o)
