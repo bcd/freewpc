@@ -47,16 +47,11 @@ U8 hard_extra_balls_lit;
 /** Update the extra ball/shoot again lamps */
 static void update_extra_ball_lamps (void)
 {
-#if (MACHINE_SHOOT_AGAIN_LAMP == MACHINE_BALL_SAVE_LAMP)
-	lamp_on_if (MACHINE_SHOOT_AGAIN_LAMP, extra_balls > 0 && !ballsave_test_active ());
-#elif MACHINE_SHOOT_AGAIN_LAMP
+#if MACHINE_SHOOT_AGAIN_LAMP
 	lamp_on_if (MACHINE_SHOOT_AGAIN_LAMP, extra_balls > 0);
 #endif /* MACHINE_SHOOT_AGAIN_LAMP */
 
-#if (MACHINE_EXTRA_BALL_LAMP == MACHINE_BALL_SAVE_LAMP)
-	lamp_on_if (MACHINE_EXTRA_BALL_LAMP,
-		(easy_extra_balls_lit || hard_extra_balls_lit ) && !ballsave_test_active ())
-#elif MACHINE_EXTRA_BALL_LAMP
+#if MACHINE_EXTRA_BALL_LAMP
 	lamp_on_if (MACHINE_EXTRA_BALL_LAMP,
 		easy_extra_balls_lit || hard_extra_balls_lit)
 #endif /* MACHINE_EXTRA_BALL_LAMP */
