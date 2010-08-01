@@ -92,24 +92,25 @@ static void flash_spiralaward_lamp (void)
 	task_exit ();
 }
 
-static void spiralaward_timer_task (void)
+static void spiralaward_magnet_disable_task (void)
 {
-	magnet_disable_catch (MAG_RIGHT);
-	magnet_enable_catch (MAG_LEFT);
-	timer_restart_free (GID_SPIRALAWARD, TIME_3S);
-//	free_timer_restart (TIM_SPIRALAWARD_RUNNING, TIME_3S);
-	leff_start (LEFF_SPIRALAWARD);
 	task_sleep_sec (3);
 	magnet_disable_catch (MAG_LEFT);
 	task_exit ();
 }
 
-/* Done like this so the caller doesn't have to wait for 3 seconds */
 CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 {	
-	if (!task_find_gid (GID_SPIRALAWARD_TIMER_TASK) 
+	if (!timer_find_gid (GID_SPIRALAWARD) 
 		&& single_ball_play ())
-		task_create_gid (GID_SPIRALAWARD_TIMER_TASK, spiralaward_timer_task);
+	{
+		timer_restart_free (GID_SPIRALAWARD, TIME_3S);
+		/* Allow the ball to pass through the loop */
+		magnet_disable_catch (MAG_RIGHT);
+		leff_start (LEFF_SPIRALAWARD);
+		/* Created as a task so it doesn't lock the calling thread */
+		task_create_anon (spiralaward_magnet_disable_task);
+	}
 }
 
 static void award_spiralaward (void)
@@ -174,14 +175,14 @@ static void award_spiralaward (void)
 	}
 }
 
-void spiralaward_right_loop_completed (void)
+CALLSET_ENTRY (spiralaward, award_right_loop)
 {
 	if (task_kill_gid (GID_SPIRALAWARD))
 	{
-		//free_timer_stop (TIM_SPIRALAWARD_RUNNING);
-		//leff_stop (LEFF_SPIRALAWARD);
+		leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();
+		magnet_disable_catch (MAG_LEFT);
 	}
 }
 

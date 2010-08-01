@@ -36,7 +36,7 @@ magnet_switch_rtt 	4	0.1
 #tz_clock_switch_rtt     2    0.1
 
 # Update the loop magnet
-magnet_duty_rtt    	4    50c
+magnet_duty_rtt    	4    20c
 
 #!bridge_open_service    32    20c
 !shooter_div_service    32    20c

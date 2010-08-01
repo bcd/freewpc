@@ -235,7 +235,7 @@ H6: Gumball Div, duty(SOL_DUTY_50)
 H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_133MS)
 L2: Right Sling, duty(SOL_DUTY_100)
 L3: Left Sling, duty(SOL_DUTY_100)
 L4: Lower Jet, duty(SOL_DUTY_100)
@@ -437,6 +437,8 @@ TZ Mag Helpers: yes_no, YES
 
 # No lock needed to relight Gumball
 Easy Light Gumball: yes_no, YES
+# Hit Slot/Piano to relight if < 8 door_panels
+Easy Light Door panels: yes_no, YES
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -567,6 +569,7 @@ MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
+Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
 Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_PAUSE
 Hitchhiker: page(MACHINE2_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
@@ -616,7 +619,8 @@ Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_PAUSE+D_QUEUED
+
+
 LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE

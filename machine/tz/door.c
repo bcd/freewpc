@@ -108,7 +108,7 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
-static bool can_award_door_panel (void)
+static inline bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
 	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
@@ -116,8 +116,6 @@ static bool can_award_door_panel (void)
 	else
 		return TRUE;
 }
-
-
 
 void door_set_flashing (U8 id)
 {
@@ -127,7 +125,7 @@ void door_set_flashing (U8 id)
 }
 
 
-static void door_advance_flashing (void)
+static inline void door_advance_flashing (void)
 {
 	U8 new_door_index;
 
@@ -249,14 +247,6 @@ void draw_door_award_text (void)
 	}
 }
 
-void door_award_sound_task (void)
-{
-	
-	task_exit ();
-}
-
-
-
 void door_award_deff (void)
 {
 	U8 index = door_index_awarded;
@@ -307,7 +297,7 @@ void door_award_deff (void)
 			break;
 
 		case 11:
-			sound_send (SND_SUPER_SKILL_INTRO);
+			sound_send (SND_THIS_SHOT_REQUIRES_SKILL_DUP);
 			break;
 
 		case 12:
@@ -323,7 +313,7 @@ void door_award_deff (void)
 	}
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
 	/* Play once normally */
-	for (fno = IMG_DOOR_START + 1; fno <= IMG_DOOR_END; fno += 2)
+	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
 	{
 		dmd_alloc_pair ();
 		frame_draw (fno);
@@ -378,14 +368,14 @@ void litz_award_deff (void)
 	deff_exit ();
 }
 
-void door_award_enable (void)
+static inline void door_award_enable (void)
 {
 	if (can_award_door_panel ())
 		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
 
-void door_award_flashing (void)
+static void door_award_flashing (void)
 {
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
@@ -420,7 +410,6 @@ void door_award_flashing (void)
 	}
 
 	leff_start (LEFF_DOOR_STROBE);
-//	task_sleep (TIME_100MS);
 	score (SC_50K);
 	/* Restart the door rotation */
 	door_award_enable ();
@@ -482,13 +471,16 @@ CALLSET_ENTRY(door, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		//door_awarded_from_slot = FALSE;
 		callset_invoke (award_door_panel);
 	}
 	else
 	{
-		if (door_panels_started < 8)
+		/* Relight the piano if it was unlit when hit */
+		if ( feature_config.easy_light_door_panels == YES
+			&& door_panels_started < 8)
+		{
 			flag_on (FLAG_PIANO_DOOR_LIT);
+		}
 		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
@@ -501,13 +493,16 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	{
 		flag_off (FLAG_SLOT_DOOR_LIT);
 		flag_on (FLAG_PIANO_DOOR_LIT);
-		//door_awarded_from_slot = TRUE;
 		callset_invoke (award_door_panel);
 	}
 	else
 	{
-		if (door_panels_started < 8)
+		/* Relight the slot if it was unlit when hit */
+		if ( feature_config.easy_light_door_panels == YES
+			&& door_panels_started < 8)
+		{
 			flag_on (FLAG_SLOT_DOOR_LIT);
+		}
 		award_unlit_shot (SW_SLOT);
 		score (SC_5130);
 	}

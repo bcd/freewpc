@@ -21,7 +21,7 @@
 
 #include <freewpc.h>
 
-/* Magnet switch RTT runs every 2 ms */
+/* Magnet switch RTT runs every 4 ms */
 #define MAG_SWITCH_RTT_FREQ 4
 #define MAG_DRIVE_RTT_FREQ 4
 
@@ -237,7 +237,10 @@ void magnet_enable_catch_and_throw (U8 magnet)
 void magnet_disable_catch (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	magstates[magnet] = MAG_DISABLED;
+	/* Don't allow disable if the magnet is currently holding/grabbing 
+	 * it will switch to disabled after it's done anyway */
+	if (!magnet_busy (magnet))
+		magstates[magnet] = MAG_DISABLED;
 }
 
 void magnet_reset (void)

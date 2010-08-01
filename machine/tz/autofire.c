@@ -79,10 +79,11 @@ void autofire_monitor (void)
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
 		task_sleep (TIME_100MS);
-	/* Open diverter again and kick ball. */
+	/* Open diverter again */
 	shooter_div_start ();
+	/* Wait for the diverter to fully open */
 	task_sleep (TIME_700MS);
-	sound_send (SND_ROCKET_KICK_REVVING);
+	/* TODO If the switch fails, it won't kick the ball */
 	if (switch_poll_logical (SW_AUTOFIRE2))
 	{	
 		sol_request (SOL_AUTOFIRE);
@@ -91,16 +92,16 @@ void autofire_monitor (void)
 			sound_send (SND_EXPLOSION_1);
 			leff_start (LEFF_STROBE_UP);
 			/* Clear the magnet so we can fire a ball */
-			magnet_disable_catch (MAG_RIGHT);
 			timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+			magnet_disable_catch (MAG_RIGHT);
 		}
 		/* Say that the ball is heading into the right loop */
 		event_can_follow (autolaunch, right_loop, TIME_4S);
 	}
-
-	autofire_busy = FALSE;
-	task_sleep (TIME_500MS);
+	/* Wait for the ball to clear the divertor */
+	task_sleep (TIME_200MS);
 	shooter_div_stop ();
+	autofire_busy = FALSE;
 	task_exit ();
 }	
 
@@ -175,18 +176,16 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 
 	dbprintf ("need to autofire? live=%d, request=%d ...",
 		live_balls, autofire_request_count);
-	/* The default strategy is to autofire only when in multiball. */
-	//if (live_balls || autofire_request_count)
-	if (live_balls || autofire_request_count > 0)
+	if (live_balls || autofire_request_count)
 	{
 		dbprintf ("yes.\n");
-	//	if (autofire_request_count > 0)
 		bounded_decrement (autofire_request_count, 0);
 
 		/* Need to open the divertor */
 		autofire_open_for_trough ();
 		/* Wait for the divertor to open */	
-		task_sleep (TIME_300MS);
+		task_sleep_sec (1);
+		magnet_disable_catch (MAG_RIGHT);
 	}
 	else
 	{

@@ -32,6 +32,7 @@ extern char initials_data[3];
 extern char pin_data[4];
 extern U8 initials_enter_timer;
 extern U8 pin_enter_timer;
+extern bool juggle_ball;
 
 extern void intials_stop (void);
 extern void pin_stop (void);
@@ -109,9 +110,7 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 					break;
 				/* FEK */
 				case 1:
-					//callset_invoke (door_start_clock_chaos);
-					deff_start_sync (DEFF_VPOKER_DRAW);
-					SECTION_VOIDCALL (__machine3__, vpoker_enter);
+					juggle_ball = TRUE;
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
 				/* PUK */

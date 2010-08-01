@@ -27,6 +27,15 @@ U8 multidrain_count;
 bool multidrain_awarded;
 bool powerball_death;
 
+CALLSET_ENTRY (outhole, ball_search)
+{
+	while (switch_poll_logical (SW_OUTHOLE))
+	{
+		sol_request (SOL_OUTHOLE);
+		task_sleep (TIME_500MS);
+	}
+}
+
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
 	if (in_live_game)

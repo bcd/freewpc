@@ -127,14 +127,16 @@ void fastlock_loop_completed (void)
 		fastlock_award += 10;
 		sound_send (SND_CRASH);
 	}
-	else if (loop_time < 100)
+	else if (loop_time < 60)
 	{
 		fastlock_award += 5;
 		sound_send (SND_FIVE);
 	}
 	else
+	{
 		fastlock_award += 1;
 		sound_send (SND_ONE);
+	}
 }
 
 CALLSET_ENTRY (fastlock, lamp_update)

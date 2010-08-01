@@ -331,7 +331,9 @@ CALLSET_ENTRY (mball, lamp_update)
 	if (flag_test (FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 	else
+	{
 		lamp_tristate_off (LM_PIANO_JACKPOT);
+	}
 }
 
 void mball_light_lock (void)

@@ -109,7 +109,7 @@ void camera_award_deff (void)
 
 static void do_camera_award (void)
 {
-	//magnet_disable_catch (MAG_RIGHT);
+	magnet_disable_catch (MAG_RIGHT);
 	unlit_shot_count = 0;
 	camera_award_count_stored = camera_award_count;
 	/* Don't light the lock if already lit */
@@ -203,8 +203,6 @@ CALLSET_ENTRY (camera, sw_camera)
 /* Right magnet grab camera helpers */
 CALLSET_ENTRY (camera, right_ball_grabbed)
 {
-	if (!in_live_game)
-		return;
 	if (!multi_ball_play () && can_award_camera ())
 	{
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
@@ -219,7 +217,9 @@ CALLSET_ENTRY (camera, lamp_update)
 	else if (multi_ball_play () && flag_test (FLAG_MB_JACKPOT_LIT))
 		lamp_tristate_flash (LM_CAMERA);
 	else
+	{
 		lamp_tristate_off (LM_CAMERA);
+	}
 }
 
 CALLSET_ENTRY (camera, start_player)
