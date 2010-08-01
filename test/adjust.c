@@ -209,7 +209,7 @@ struct adjustment pricing_adjustments[] = {
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
 	{ STR_CREDIT "FRACTION", &on_off_value, ON, &price_config.credit_fraction },
-	{ "PAYMENT TYPE", &payment_method_value, PAY_CUSTOM, &price_config.payment_method },
+	{ "PAYMENT TYPE", &payment_method_value, PAY_COIN, &price_config.payment_method },
 	{ NULL, NULL, 0, NULL },
 };
 

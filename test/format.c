@@ -241,8 +241,6 @@ void payment_method_render (U8 val)
 			sprintf ("TOKEN"); break;
 		case PAY_CARD:
 			sprintf ("CARD"); break;
-		case PAY_CUSTOM:
-			sprintf ("OTHER"); break;
 	}
 }
 

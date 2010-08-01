@@ -103,8 +103,7 @@ typedef U8 adjval_t;
 #define PAY_TOKEN 1
 #define PAY_CARD 2
 #define PAY_BILL 3
-#define PAY_CUSTOM 4
-#define MAX_PAY_METHODS 5
+#define MAX_PAY_METHODS 4
 
 typedef struct
 {
