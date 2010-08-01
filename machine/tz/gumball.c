@@ -432,5 +432,7 @@ CALLSET_ENTRY (gumball, status_report)
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	sprintf ("%d COLLECTED", gumball_collected_count);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (3);
 	status_page_complete ();
 }

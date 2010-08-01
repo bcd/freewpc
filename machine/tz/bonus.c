@@ -929,6 +929,8 @@ CALLSET_ENTRY (bonus, status_report)
 				sprintf ("TO CATCH UP TO P%d", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		}
+		dmd_show_low ();
+		task_sleep_sec (3);
 		status_page_complete ();
 	}
 }
