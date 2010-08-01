@@ -21,14 +21,20 @@
 
 #include <freewpc.h>
 
-CALLSET_ENTRY (head, sw_mouth)
+//sound_code_t spinner_sounds[] = {
+//	SND_SPINNER1, SND_SPINNER2, SND_SPINNER3, SND_SPINNER3
+//};
+
+score_t spinner_total;
+
+CALLSET_ENTRY (bop_spinner, sw_spinner_slow)
 {
-	sol_request (SOL_MOUTH);
-	task_sleep_sec (1);
+	score (SC_1K);
+	score_add (spinner_total, score_table[SC_1K]);
+	sound_send (SND_SPINNER1 + random_scaled (4));
 }
 
-CALLSET_ENTRY (head, sw_wireform_bottom)
+CALLSET_ENTRY (bop_spinner, start_ball)
 {
-	sol_request (SOL_WIRE_POST);
-	task_sleep_sec (1);
+	score_zero (spinner_total);
 }

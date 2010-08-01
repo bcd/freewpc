@@ -22,12 +22,9 @@
 
 CALLSET_ENTRY (outhole, sw_outhole)
 {
-	if (!in_live_game)
-	{
-		/* Wait for ball to settle */
-		task_sleep (TIME_100MS);
-		sol_request (SOL_OUTHOLE);
-	}
+	/* Wait for ball to settle */
+	task_sleep (TIME_100MS);
+	sol_request (SOL_OUTHOLE);
 }
 
 CALLSET_ENTRY (outhole, init)

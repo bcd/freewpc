@@ -23,18 +23,29 @@
 /* How many times the rollovers have been completed */
 U8 rollover_count;
 
+void rollover_completed_deff (void)
+{
+	seg_alloc_clean ();
+	psprintf ("1 ROLLOVER", "%d ROLLOVERS", rollover_count);
+	seg_write_row_center (0, sprintf_buffer);
+	seg_show ();
+	task_sleep_sec (2);
+	deff_exit ();
+
+}
 static void handle_outlane (void)
 {
 	/* Start a timer to tell the difference between an outlane
 	 * drain and a center drain when the ball reaches the trough. */
 	event_can_follow (any_outlane, center_drain, TIME_7S);
+	sound_send (SND_BALL_DRAIN);
 //	deff_start (DEFF_BALL_DRAIN_OUTLANE);
 	
 //	if (!multi_ball_play ())
 //		leff_start (LEFF_STROBE_DOWN);
 }
 
-bool rollover_completed (void)
+static bool rollover_completed (void)
 {
 	if (lamp_test (LM_LEFT_OUTLANE)
 		&& lamp_test (LM_LEFT_INLANE)
@@ -45,13 +56,13 @@ bool rollover_completed (void)
 		return FALSE;
 }
 
-CALLSET_ENTRY (lanes, award_rollover_completed)
+static void award_rollover_completed (void)
 {
 	bounded_increment (rollover_count, 99);
 	score (SC_1M);
 	
 	/* Show animation */
-	//deff_start (DEFF_ROLLOVER_COMPLETED);
+	deff_start (DEFF_ROLLOVER_COMPLETED);
 	/* Flash and turn off inlane lamps */
 	lamplist_apply (LAMPLIST_LANES, lamp_off);
 	lamplist_apply (LAMPLIST_LANES, lamp_flash_on);
@@ -66,6 +77,7 @@ static void check_rollover (void)
 	 * completed */
 	if (rollover_completed () == TRUE)
 	{
+		award_rollover_completed ();
 	}
 }
 
@@ -84,12 +96,16 @@ CALLSET_ENTRY (lanes, sw_right_button)
 
 CALLSET_ENTRY (lanes, sw_left_outlane)
 {
+	lamp_on (LM_LEFT_OUTLANE);
+	check_rollover ();
 	score (SC_10K);
 	handle_outlane ();
 }
 
 CALLSET_ENTRY (lanes, sw_right_outlane)
 {
+	lamp_on (LM_RIGHT_OUTLANE);
+	check_rollover ();
 	score (SC_10K);
 	handle_outlane ();
 }
@@ -103,7 +119,6 @@ CALLSET_ENTRY (lanes, sw_left_inlane)
 
 CALLSET_ENTRY (lanes, sw_right_inlane)
 {
-	event_can_follow (left_or_right_inlane, either_outlane, TIME_1S);
 	lamp_on (LM_RIGHT_INLANE);
 	check_rollover ();
 	score (SC_1K);

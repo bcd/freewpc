@@ -1,0 +1,34 @@
+XH2
+H 4 areas A global symbols 2 banks 1 modes
+M bop_spinner.c
+G 00 00 80 81 82 83 84 85 86 87 88 89 8A 8B 8C 8D 8E 8F
+B _CSEG base 0 size 0 map 0 flags 0
+B _DSEG base 0 size 0 map 0 flags 4 fsfx _DS
+S _score_add Ref0000
+S _sound_send Ref0000
+S _score_zero Ref0000
+S .__.ABS. Def0000
+S _score_table Ref0000
+S _random_scaled Ref0000
+S _score Ref0000
+A _CODE size 0 flags CC80 bank 0
+A _DATA size 0 flags CCC0 bank 1
+A page59 size 25 flags D00
+S _bop_spinner_start_ball Def0000
+S _bop_spinner_sw_spinner_slow Def0006
+A ram size 5 flags C00
+S _spinner_total Def0000
+T 00 00
+R 00 00 00 02
+T 00 00 8E 00 00 7E 00 00
+R 00 00 00 02 01 03 00 03 81 06 00 02
+T 00 06
+R 00 00 00 02
+T 00 06 C6 01 BD 00 00 8E 00 05 AF E3 8E
+R 00 00 00 02 81 05 00 06 81 08 00 04
+T 00 11 00 00 BD 00 00 C6 04 BD
+R 00 00 00 02 01 02 00 03 81 05 00 00
+T 00 19 00 00 32 62 CB C3 4F 1F 01 7E 00 00
+R 00 00 00 02 81 02 00 05 81 0C 00 01
+T 00 00
+R 00 00 00 03

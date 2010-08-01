@@ -20,11 +20,11 @@
 
 
 #include <freewpc.h>
-__local__ U8 jets_hit;
+U8 jets_hit;
 __local__ U8 jets_level;
 U8 jets_sound_index;
 
-U8 jet_sounds[5][3] = {
+sound_code_t jet_sounds[5][3] = {
 	{ SND_POWER_UP1_1, SND_POWER_UP1_2, SND_POWER_UP1_3 }, 
 	{ SND_POWER_UP3_1, SND_POWER_UP3_2, SND_POWER_UP3_3 },
 	{ SND_POWER_UP4_1, SND_POWER_UP4_2, SND_POWER_UP4_3 },
@@ -32,9 +32,14 @@ U8 jet_sounds[5][3] = {
 	{ SND_POWER_UP6_1, SND_POWER_UP6_2, SND_POWER_UP6_3 }
 };
 
+
 /* How much is earned for going up a level */
 const score_id_t jets_level_up_scores[] = {
 	SC_100K, SC_200K, SC_300K, SC_500K, SC_1M
+};
+
+const score_t jets_level_up_score_table[] = {
+	{ SC_100K, SC_200K, SC_300K, SC_500K, SC_1M }
 };
 
 const struct generic_ladder jets_level_up_score_rule = {
@@ -54,10 +59,36 @@ const U8 jets_needed[] = {
 	10, 20, 30, 40, 50
 };
 
+void jets_level_up_deff (void)
+{
+	seg_alloc_clean ();
+	sprintf ("JET LEVEL %d", jets_level);
+	seg_write_row_center (0, sprintf_buffer);
+//	sprintf_score (jets_level_up_score_table[jets_level]);
+	seg_write_row_center (1, sprintf_buffer);
+	seg_sched_transition (&seg_trans_center_out);
+	seg_show ();
+	task_sleep_sec (3);
+	deff_exit ();
+}
+
+
+void jet_hit_deff (void)
+{
+	seg_alloc_clean ();
+	sprintf ("%d JETS LEFT TILL", (jets_needed[jets_level] - jets_hit));
+	seg_write_row_center (0, sprintf_buffer);
+//	sprintf_score (jets_level_up_score_table[jets_level + 1]);
+	seg_write_row_center (1, "NEXT LEVEL");
+	seg_show ();
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}
+
 CALLSET_ENTRY (jets, jet_hit)
 {
-//	if (!in_live_game)
-//		return;
+	if (!in_live_game)
+		return;
 	/* Make a sound, based on level */
 	sound_send (jet_sounds[jets_level][jets_sound_index]);
 	jets_sound_index++;
@@ -65,23 +96,33 @@ CALLSET_ENTRY (jets, jet_hit)
 		jets_sound_index = 0;
 
 	/* Score the hit, based on level */	
-	score (jets_hit_scores[jets_level]);
+	//score (jets_hit_scores[jets_level]);
+	score (SC_25K);
+
 	bounded_increment (jets_hit, 255);
 
 	/* Level up if needed */
 	if (jets_hit >= jets_needed[jets_level])
 	{
+		timer_restart_free (GID_JETS_LEVEL_UP, TIME_3S);
 		generic_ladder_score_and_advance (&jets_level_up_score_rule);
 		jets_hit = 0;
-		//deff_start (JETS_LEVEL_UP);
+		deff_start (DEFF_JETS_LEVEL_UP);
 	}
-	else
+	else if (!task_find_gid (GID_JETS_LEVEL_UP))
 	{
-		//deff_start (JETS_HIT);
+		deff_restart (DEFF_JET_HIT);
 	}
+}
+
+CALLSET_ENTRY (jets, start_player)
+{
+	jets_level = 0;
 }
 
 CALLSET_ENTRY (jets, start_ball)
 {
+	generic_ladder_reset (&jets_level_up_score_rule);	
 	jets_sound_index = 0;
+	jets_hit = 0;
 }

@@ -20,15 +20,23 @@
 
 
 #include <freewpc.h>
+#include <gate.h>
 
-CALLSET_ENTRY (head, sw_mouth)
+CALLSET_ENTRY (leftramp, sw_enter_mpf)
 {
-	sol_request (SOL_MOUTH);
-	task_sleep_sec (1);
+	gate_stop ();
+	sound_send (MUS_MPF_ENTER);
 }
 
-CALLSET_ENTRY (head, sw_wireform_bottom)
+CALLSET_ENTRY (leftramp, sw_mpf_exit_left)
 {
-	sol_request (SOL_WIRE_POST);
-	task_sleep_sec (1);
+	sound_send (SND_MPF_EXIT);
+	event_should_follow (mpf_exit, right_inlane, TIME_4S);
+}
+
+CALLSET_ENTRY (leftramp, sw_mpf_exit_right)
+{
+	sound_send (SND_MPF_EXIT);
+	flag_on (FLAG_SKILLSHOT_ENABLED);
+	event_should_follow (mpf_exit, shooter, TIME_4S);
 }

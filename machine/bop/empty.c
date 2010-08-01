@@ -20,15 +20,3 @@
 
 
 #include <freewpc.h>
-
-CALLSET_ENTRY (head, sw_mouth)
-{
-	sol_request (SOL_MOUTH);
-	task_sleep_sec (1);
-}
-
-CALLSET_ENTRY (head, sw_wireform_bottom)
-{
-	sol_request (SOL_WIRE_POST);
-	task_sleep_sec (1);
-}

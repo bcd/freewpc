@@ -20,15 +20,36 @@
 
 
 #include <freewpc.h>
+#include <gate.h>
 
-CALLSET_ENTRY (head, sw_mouth)
+void shuttle_launch_deff (void)
 {
-	sol_request (SOL_MOUTH);
-	task_sleep_sec (1);
+	seg_alloc_clean ();
+	seg_write_row_center (0, "SHUTTLE LAUNCH");
+	seg_write_row_center (1, "WOOOSH");
+	seg_show ();
+	task_sleep_sec (2);
+	deff_exit ();
 }
 
-CALLSET_ENTRY (head, sw_wireform_bottom)
+void head_divert_to_mpf (void)
 {
-	sol_request (SOL_WIRE_POST);
-	task_sleep_sec (1);
+	gate_start ();	
+	task_sleep_sec (4);
+	gate_stop ();
+}
+
+CALLSET_ENTRY (leftramp, sw_left_ramp_enter)
+{
+	if (!event_did_follow (left_ramp, left_ramp_fail))
+	{
+		sound_send (SND_SHUTTLE_LAUNCH);
+		deff_start (DEFF_SHUTTLE_LAUNCH);
+		head_divert_to_mpf ();
+	}
+	else
+	{
+		sound_send (SND_ABORT_ABORT);
+	}
+	event_can_follow (left_ramp, left_ramp_fail, TIME_2S);
 }
