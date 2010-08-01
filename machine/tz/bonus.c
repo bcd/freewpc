@@ -22,6 +22,7 @@
 /* CALLSET_SECTION (bonus, __machine2__) */
 #include <freewpc.h>
 #include <eb.h>
+#include <status.h>
 
 /* Total bonus score */
 score_t total_bonus;
@@ -568,10 +569,6 @@ void bonus_deff (void)
 		task_sleep_sec (6);
 	}
 
-	/* Restart a task to monitor the buttons */
-	buttons_held = FALSE;
-	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
-	
 	score_zero (temp_score);
 	
 	bonus_sched_transition ();
@@ -648,8 +645,6 @@ void bonus_deff (void)
 	/* Don't show if on first ball, you can just look at the scoreboard */
 	if (ball_up != 1)
 	{	
-		/* Restart a task to monitor the buttons */
-		task_create_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 		task_kill_gid (GID_BONUS_TALKING);
 		
 		countup_pause_iterations = 0;
@@ -898,6 +893,43 @@ CALLSET_ENTRY (bonus, rank_change)
 	{
 		/* Notify the player that they have taken the lead */
 		deff_start (DEFF_IN_THE_LEAD);
+	}
+}
+
+CALLSET_ENTRY (bonus, status_report)
+{
+	if (num_players > 1)
+	{
+		status_page_init ();
+		font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
+		/* find_player_ranked returns from 0 */
+		if (find_player_ranked(1) + 1 == player_up)
+		{
+			font_render_string_center (&font_fixed10, 64, 8, "NO");
+			if (check_if_last_ball_of_multiplayer_game ())
+			{
+				font_render_string_center (&font_mono5, 64, 26, "SHOWBOAT A LITTLE");
+			}
+			else
+			{
+				font_render_string_center (&font_mono5, 64, 26, "INCREASE YOUR LEAD");
+			}
+		}
+		else if (score_compare (scores[find_player_ranked(1)], current_score) == 1)
+		{
+			score_zero (temp_score);
+			score_copy (temp_score, scores[find_player_ranked(1)]);
+			score_sub (temp_score, current_score);
+		
+			sprintf_score (temp_score);
+			font_render_string_center (&font_fixed10, 64, 8, sprintf_buffer);
+			if (player_up > current_hi_player)
+				sprintf ("TO BEAT PLAYER %d", current_hi_player);
+			else
+				sprintf ("TO CATCH UP TO P%d", current_hi_player);
+			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
+		}
+		status_page_complete ();
 	}
 }
 

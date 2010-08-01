@@ -24,7 +24,7 @@ include platform/wpc/wpc89.md
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-# define MACHINE_SYS11_SOUND
+#define MACHINE_SYS11_SOUND
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_MUSIC_GAME
 #define MACHINE_MUSIC_PLUNGER
@@ -51,8 +51,8 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 ##########################################################################
 [lamps]
 11: Left Outlane
-12: Left Return Lane
-13: Right Return Lane
+12: Left Inlane
+13: Right Inlane
 14: Right Outlane
 15: Left Standup
 16: Right Top Standup
@@ -90,9 +90,9 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 56: Right Loop 100K
 57: Right Loop 50K
 58: Right Loop 25K
-61: Right Ramp 100K
-62: Right Ramp 500K
-63: Right Ramp 1M
+61: Centre Ramp 100K
+62: Centre Ramp 500K
+63: Centre Ramp 1M
 64: Wire ball lock
 65: Jet 500K
 66: Jet 100K
@@ -144,47 +144,48 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 13: Start Button, start-button, intest
 14: Plumb bob tilt, c_decl(sw_tilt), cabinet, tilt, ingame, noplay
 15: Left Outlane
-16: Left Flipper Lane
-17: Right Flipper Lane
+16: Left Inlane
+17: Right Inlane
 18: Right Outlane
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Ticket Opto, cabinet, opto, noplay
-25: Right Trough, noscore
-26: Center Trough, noscore
-27: Left Trough, noscore
+25: Trough Right, noscore
+26: Trough Center, noscore
+27: Trough Left, noscore
 28: Left Standup, standup
-31: Skill Shot 50K, intest #Skill kicker
-32: Skill Shot 75K, ingame
-33: Skill Shot 100K, ingame
-34: Skill Shot 200K, ingame
-35: Skill Shot 25K, ingame
+31: Skill Shot 50K
+32: Skill Shot 75K
+33: Skill Shot 100K
+34: Skill Shot 200K
+35: Skill Shot 25K
 36: Right Top Standup, standup
 37: Right Bottom Standup, standup
 38: Outhole, outhole, noscore
+41: Centre Ramp Made
 43: Left Loop, ingame
 44: Right Loop Top, ingame
 45: Right Loop Bottom, ingame
 46: Under Playfield Kickback
 47: Enter Head
 51: Spinner, ingame
-52: Shooter, shooter, noplay, debounce(TIME_200MS)
-53: UR Jet, ingame
-54: UL Jet, ingame
-55: Lower Jet, ingame
-56: Jet Sling, ingame
+52: Shooter, shooter, debounce(TIME_200MS)
+53: UR Jet, ingame, c_decl(jet_hit)
+54: UL Jet, ingame, c_decl(jet_hit)
+55: Lower Jet, ingame, c_decl(jet_hit)
+56: Jet Sling, ingame, c_decl(jet_hit)
 57: Left Sling, ingame
 58: Right Sling, ingame
 63: Left Eye, intest
 64: Right Eye, intest
 65: Mouth, intest
-67: Face Posistion, edge, intest
+67: Face Position, edge, intest
 71: Wireform Top
 72: Wireform Bottom
 73: Enter MPF
 74: MPF Exit Left
 75: MPF Exit Right
 76: Left Ramp Enter
-77: Right Ramp Enter
+77: Centre Ramp Enter
 
 ##########################################################################
 # Drives
@@ -205,9 +206,9 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 ##########################################################################
 [drives]
 H1: Outhole
-H2: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
+H2: Trough Release, ballserve
 H3: UPF Kicker
-H4: Cont. Gate
+H4: MPF Gate
 H5: SShot Kicker
 H6: Wire Post
 H7: Knocker, knocker
@@ -233,7 +234,7 @@ G8: Left Loop, flash
 
 A1: Helmet Data, nosearch
 A2: Helmet Clock, nosearch
-A3: Motor Relay, nosearch
+A3: Head Motor Relay, nosearch
 A4: Head Motor, motor, nosearch
 
 ##########################################################################
@@ -273,15 +274,19 @@ A4: Head Motor, motor, nosearch
 ##########################################################################
 [lamplists]
 Playfield: PF:all
+Lanes: Left Outlane..Right Outlane
+Left loops: Left Loop 500K..Left Loop 25K
+Right loops: Right Loop 500K..Right Loop 25K
+Skillshot: Skill Shot 50K..Skill Shot 25K
 
 [containers]
-Trough: trough, Ball Serve, Center Trough, Right Trough, init_max_count(2)
+Trough: trough, Trough Release, Trough Right, Trough Center, Trough Left, init_max_count(2)
 
-#Head: Wire Ball Holder, init_max_count(0), Enter Head, Wireform Top, Wireform Bottom
+Head: Wire Post, init_max_count(0), Enter Head, Wireform Top, Wireform Bottom
 
-#PFKicker: Under Playfield Kicker, init_max_count(0), Under Playfield Kickback
+UPFKicker: UPF Kicker, init_max_count(0), Under Playfield Kickback
 
-#SShotKicker: Skill Shot Kicker, init_max_count(0), Skill Shot 50K
+SShotKicker: SShot Kicker, init_max_count(0), Skill Shot 50K
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -313,7 +318,7 @@ Tilt: SND_TILT
 [system_music]
 Start Ball: MUS_MAIN1_PLUNGER
 Ball In Play: MUS_MAIN1_1
-End Game: MUS_QUIET_SPACE
+End Game: MUS_GAME_OVER
 Volume Change: MUS_SECRET_FANFARE
 
 ##########################################################################
@@ -347,11 +352,19 @@ Volume Change: MUS_SECRET_FANFARE
 # Bit flags.
 ##########################################################################
 [flags]
+Skillshot enabled:
 
 ##########################################################################
 # Display effects
 ##########################################################################
 [deffs]
+Skillshot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_QUEUED+D_PAUSE+D_SCORE
+Jet Hit: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
+Jets Level Up: page(MACHINE_PAGE), PRI_GAME_MODE3, D_QUEUED
+Loop: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE+D_SCORE
+Centre Ramp: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE
+Shuttle Launch: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE
+Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_RESTARTABLE
 
 ##########################################################################
 # Lamp effects
@@ -360,14 +373,27 @@ Volume Change: MUS_SECRET_FANFARE
 Amode: runner, PRI_LEFF1, LAMPS(PLAYFIELD), GI(ALL), page(MACHINE_PAGE)
 #Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE_PAGE)
 #Shooter: PRI_LEFF2, page(MACHINE_PAGE)
+#Skillshot: PRI_LEFF2, page(MACHINE_PAGE), LAMPS(SKILLSHOT)
 
 [timers]
 
 [templates]
 
 Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=4, offtime=20
+
 Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=4, offtime=20
+
 Jet Sling: driver(spsol), sw=SW_JET_SLING, sol=SOL_JET_SLING, ontime=4, offtime=20
+
 UL Jet: driver(spsol), sw=SW_UL_JET, sol=SOL_UL_JET, ontime=4, offtime=20
+
 UR Jet: driver(spsol), sw=SW_UR_JET, sol=SOL_UR_JET, ontime=4, offtime=20
+
 Lower Jet: driver(spsol), sw=SW_LOWER_JET, sol=SOL_LOWER_JET, ontime=4, offtime=20
+
+Spinner: driver(spinner), sw_event=sw_spinner, sw_number=SW_SPINNER
+
+Gate: driver(duty), sol=SOL_MPF_GATE, ontime=TIME_300MS, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=60
+
+Head Motor: driver(duty), sol=SOL_HEAD_MOTOR, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=20
+Head Motor Relay: driver(duty), sol=SOL_HEAD_MOTOR_RELAY, ontime=0, duty_ontime=TIME_33MS, duty_offtime=TIME_16MS, timeout=20

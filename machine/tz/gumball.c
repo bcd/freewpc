@@ -38,10 +38,6 @@ extern sound_code_t music_active;
 __local__ U8 gumball_enable_count;
 U8 gumball_collected_count;
 U8 gumball_score;
-//extern U8 fastlock_round_timer;
-//extern void spiralaward_right_loop_completed (void);
-//extern U8 mpf_round_timer;
-//extern void mball_start_3_ball (void);
 
 extern U8 pb_location;
 
@@ -147,7 +143,11 @@ void gumball_divertor_close (void)
 
 void sw_gumball_right_loop_entered (void)
 {
-	if (gumball_load_is_enabled () && !magnet_enabled (MAG_RIGHT))
+	if (magnet_enabled (MAG_RIGHT) 
+		|| magnet_busy (MAG_RIGHT))
+		return;
+	
+	if (gumball_load_is_enabled ())
 	{
 		gumball_divertor_open ();
 		if (in_live_game && !multi_ball_play ())
@@ -180,7 +180,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 			lamp_off (LM_BALL);
 		}
 		device_switch_can_follow (gumball_exit, camera, TIME_4S);
-		event_can_follow (gumball_exit, camera, TIME_4S);
+		event_can_follow (gumball_exit, camera, TIME_5S);
 		event_can_follow (gumball_exit, slot, TIME_4S);
 	}
 	/* Add on another 5 million if the ball manages to
@@ -421,7 +421,8 @@ CALLSET_ENTRY (gumball, sw_gumball_popper)
 
 	/* A right loop was completed, TODO Could be BUGGY */
 	timer_restart_free (GID_GUMBALL, TIME_1S);
-	callset_invoke (sw_left_magnet);
+	if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
+		callset_invoke (award_right_loop);
 }
 
 CALLSET_ENTRY (gumball, status_report)

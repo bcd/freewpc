@@ -1,0 +1,74 @@
+XH2
+H 3 areas 11 global symbols 2 banks 1 modes
+M leftramp.c
+G 00 00 80 81 82 83 84 85 86 87 88 89 8A 8B 8C 8D 8E 8F
+B _CSEG base 0 size 0 map 0 flags 0
+B _DSEG base 0 size 0 map 0 flags 4 fsfx _DS
+S _deff_start Ref0000
+S _freerunning_timer_function Ref0000
+S _deff_exit Ref0000
+S _gate_start Ref0000
+S _sound_send Ref0000
+S .__.ABS. Def0000
+S _timer_restart Ref0000
+S _task_sleep_sec Ref0000
+S _gate_stop Ref0000
+S _seg_alloc_clean Ref0000
+S _task_kill_gid Ref0000
+S _live_balls Ref0000
+S _seg_show Ref0000
+S _seg_write_row_center Ref0000
+A _CODE size 0 flags CC80 bank 0
+A _DATA size 0 flags CCC0 bank 1
+A page59 size 73 flags D00
+S _head_divert_to_mpf Def0000
+S _leftramp_sw_left_ramp_enter Def000B
+S _shuttle_launch_deff Def0056
+T 00 00
+R 00 00 00 02
+T 00 00 BD 00 00 C6 04 BD 00 00 7E
+R 00 00 00 02 81 03 00 03 81 08 00 07
+T 00 09 00 00
+R 00 00 00 02 81 02 00 08
+T 00 0B
+R 00 00 00 02
+T 00 0B F6 00 00 C1 01 23 1E
+R 00 00 00 02 81 03 00 0B
+T 00 12
+R 00 00 00 02
+T 00 12 8E 00 93 BD 00 00 C6 1F BD 00 00 BD
+R 00 00 00 02 81 06 00 04 81 0B 00 00
+T 00 1E 00 00
+R 00 00 00 02 01 02 00 02
+T 00 20
+R 00 00 00 02
+T 00 20 8E 00 00 AF E3 8E 00 78 C6 36 BD 00 00
+R 00 00 00 02 81 03 00 01 81 0D 00 06
+T 00 2D 32 62 39
+R 00 00 00 02
+T 00 30
+R 00 00 00 02
+T 00 30 C6 36 BD 00 00 5D 27 DA 8E 01 2E BD
+R 00 00 00 02 81 05 00 0A
+T 00 3C 00 00 20 E0
+R 00 00 00 02 81 02 00 04
+T 00 40
+R 00 00 00 02
+T 00 40 53 48 55 54 54 4C 45 20 4C 41 55 4E 43
+R 00 00 00 02
+T 00 4D 48 00
+R 00 00 00 02
+T 00 4F
+R 00 00 00 02
+T 00 4F 57 4F 4F 4F 53 48 00
+R 00 00 00 02
+T 00 56
+R 00 00 00 02
+T 00 56 BD 00 00 8E 00 40 5F BD
+R 00 00 00 02 81 03 00 09 01 06 00 02
+T 00 5E 00 00 8E 00 4F C6 01 BD
+R 00 00 00 02 81 02 00 0D 01 05 00 02
+T 00 66 00 00 BD 00 00 C6 02 BD
+R 00 00 00 02 81 02 00 0D 81 05 00 0C
+T 00 6E 00 00 7E 00 00
+R 00 00 00 02 81 02 00 07 81 05 00 02

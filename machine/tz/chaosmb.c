@@ -159,6 +159,7 @@ static void chaosmb_check_jackpot_lamps (void)
 
 static void chaosmb_score_jackpot (void)
 {
+	magnet_disable_catch (MAG_LEFT);
 	mball_jackpot_uncollected = FALSE;
 	if (chaosmb_level <= 5)
 		chaosmb_level++;

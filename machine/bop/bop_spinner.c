@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Ewan Meadows (sonny_jim@hotmail.com)
  *
  * This file is part of FreeWPC.
  *
@@ -7,44 +7,34 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (lock, __machine2__ ) */
-
-/* More code for the lock is in Multiball.c */
 
 #include <freewpc.h>
-#include <eb.h>
 
-CALLSET_ENTRY (lock, dev_lock_enter)
+//sound_code_t spinner_sounds[] = {
+//	SND_SPINNER1, SND_SPINNER2, SND_SPINNER3, SND_SPINNER3
+//};
+
+score_t spinner_total;
+
+CALLSET_ENTRY (bop_spinner, sw_spinner_slow)
 {
-	collect_extra_ball ();
-	score (SC_50K);
-	sound_send (SND_ROBOT_FLICKS_GUN);
-	leff_start (LEFF_LOCK);
+	score (SC_1K);
+	score_add (spinner_total, score_table[SC_1K]);
+	sound_send (SND_SPINNER1 + random_scaled (4));
 }
 
-
-CALLSET_ENTRY (lock, dev_lock_kick_attempt)
+CALLSET_ENTRY (bop_spinner, start_ball)
 {
-	while (timer_find_gid (GID_BALL_LAUNCH))
-	{
-		task_sleep (TIME_100MS);
-	}
-
-	sound_send (SND_LOCK_KICKOUT);
-	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
-	/* Used to disable camera magnet grab */
-	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
-	magnet_disable_catch (MAG_RIGHT);
+	score_zero (spinner_total);
 }
-

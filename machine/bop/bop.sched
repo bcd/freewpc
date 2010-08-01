@@ -4,3 +4,5 @@
 !ul_jet_service			8	40c
 !ur_jet_service			8	40c
 !lower_jet_service		8	40c
+!spinner_service		8	40c
+!gate_service			16	40c

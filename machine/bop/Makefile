@@ -55,9 +55,11 @@ PINMAME_OTHER_ROMS = Mach_u*
 
 GAME_OBJS =
 
-GAME_PAGED_OBJS = leffs.o skill.o outhole.o
+GAME_PAGED_OBJS = leffs.o skill.o outhole.o jets.o head.o \
+		lanes.o loop.o centreramp.o leftramp.o bop_spinner.o
 
 GAME_INCLUDES =
 
-SCHED_HEADERS += build/left_sling.h build/right_sling.h build/jet_sling.h\
-	build/ul_jet.h build/ur_jet.h build/lower_jet.h 
+SCHED_HEADERS += build/left_sling.h build/right_sling.h build/jet_sling.h \
+	build/ul_jet.h build/ur_jet.h build/lower_jet.h build/spinner.h \
+	build/gate.h 

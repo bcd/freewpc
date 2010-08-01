@@ -35,7 +35,7 @@ extern __local__ U8 thing_flips_enable_count;
 extern void thing_flips (void);
 
 /* Functions to stop leffs/deffs during certain game situations */
-static bool can_show_loop_leff (void)
+static inline bool can_show_loop_leff (void)
 {
 	if (task_find_gid (GID_SPIRALAWARD))
 		return FALSE;
@@ -43,7 +43,7 @@ static bool can_show_loop_leff (void)
 		return TRUE;
 }
 
-void enter_loop (void)
+void inline enter_loop (void)
 {
 	if (in_live_game)
 	{
@@ -118,42 +118,24 @@ static void award_loop (void)
 	}
 }
 
-static void abort_loop (void)
+static inline void abort_loop (void)
 {
-	if (in_live_game)
-	{
-		score (SC_1K);
-		sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
-	}
+	score (SC_1K);
+	sound_send (SND_SPIRAL_SAME_SIDE_EXIT);
 }
 
-static void award_left_loop (void)
+CALLSET_ENTRY (loop, award_left_loop)
 {
-	if (in_live_game)
-	{
-		event_can_follow (left_loop, hitchhiker, TIME_2S + TIME_500MS);
-		event_can_follow (left_loop, camera, TIME_2S + TIME_500MS);
-		if (can_show_loop_leff ())
-			leff_start (LEFF_LEFT_LOOP);
-		award_loop ();
-	}
+	if (can_show_loop_leff ())
+		leff_start (LEFF_LEFT_LOOP);
+	award_loop ();
 }
 
-static void award_right_loop (void)
+CALLSET_ENTRY (loop, award_right_loop)
 {
-	if (in_live_game)
-	{
-		/* Lucky bounce combo */
-		event_can_follow (right_loop, locked_ball, TIME_3S);
-		/* 2 way combos */
-		event_can_follow (right_loop, piano, TIME_1S + TIME_700MS);
-		event_can_follow (right_loop, camera, TIME_4S);
-		//event_can_follow (right_loop, hitchhiker, TIME_4S);
-		spiralaward_right_loop_completed ();
-		award_loop ();
-		if (can_show_loop_leff ())
-			leff_start (LEFF_RIGHT_LOOP);
-	}
+	if (can_show_loop_leff ())
+		leff_start (LEFF_RIGHT_LOOP);
+	award_loop ();
 }
 
 void loop_deff (void)
@@ -202,9 +184,8 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		stop_loop_speed_timer ();
 		/* Inform thingfl.c and fastlock.c that a loop has been done. */
 		//callset_invoke (thing_flips);
-		//left_magnet_grab_start ();
 	
-		award_right_loop ();
+		callset_invoke (award_right_loop);
 	}
 	else
 	{
@@ -213,7 +194,6 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 		start_loop_speed_timer ();
 		enter_loop ();
 	}
-
 }
 
 CALLSET_ENTRY (loop, sw_upper_right_magnet)
@@ -242,7 +222,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	{
 		/* Left loop completed */
 		stop_loop_speed_timer ();
-		award_left_loop ();
+		callset_invoke (award_left_loop);
 	}
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
 	{

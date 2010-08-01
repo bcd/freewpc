@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Ewan Meadows (sonny_jim@hotmail.com)
  *
  * This file is part of FreeWPC.
  *
@@ -7,44 +7,49 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (lock, __machine2__ ) */
-
-/* More code for the lock is in Multiball.c */
 
 #include <freewpc.h>
-#include <eb.h>
+#include <gate.h>
 
-CALLSET_ENTRY (lock, dev_lock_enter)
+void shuttle_launch_deff (void)
 {
-	collect_extra_ball ();
-	score (SC_50K);
-	sound_send (SND_ROBOT_FLICKS_GUN);
-	leff_start (LEFF_LOCK);
+	seg_alloc_clean ();
+	seg_write_row_center (0, "SHUTTLE LAUNCH");
+	seg_write_row_center (1, "WOOOSH");
+	seg_show ();
+	task_sleep_sec (2);
+	deff_exit ();
 }
 
-
-CALLSET_ENTRY (lock, dev_lock_kick_attempt)
+void head_divert_to_mpf (void)
 {
-	while (timer_find_gid (GID_BALL_LAUNCH))
+	gate_start ();	
+	task_sleep_sec (4);
+	gate_stop ();
+}
+
+CALLSET_ENTRY (leftramp, sw_left_ramp_enter)
+{
+	if (!event_did_follow (left_ramp, left_ramp_fail))
 	{
-		task_sleep (TIME_100MS);
+		sound_send (SND_SHUTTLE_LAUNCH);
+		deff_start (DEFF_SHUTTLE_LAUNCH);
+		head_divert_to_mpf ();
 	}
-
-	sound_send (SND_LOCK_KICKOUT);
-	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
-	/* Used to disable camera magnet grab */
-	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
-	magnet_disable_catch (MAG_RIGHT);
+	else
+	{
+		sound_send (SND_ABORT_ABORT);
+	}
+	event_can_follow (left_ramp, left_ramp_fail, TIME_2S);
 }
-
