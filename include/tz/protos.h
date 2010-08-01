@@ -139,3 +139,4 @@ void magnet_reset (void);
 
 /* maghelpers.c */
 __machine3__ bool magnet_enabled (U8 magnet);
+__machine3__ bool magnet_busy (U8 magnet);
