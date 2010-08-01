@@ -172,8 +172,6 @@ When defined, causes the system to halt on a fatal
 error.  Normally, the system is restarted.  This can make
 debugging easier sometimes.
 
-@item	USER_TAG
-
 @item	WMSLY_CORRECT
 
 @end table

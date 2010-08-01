@@ -3804,9 +3804,10 @@ void sysinfo_machine_version (void) {
 }
 
 void sysinfo_system_version (void) {
-#ifdef USER_TAG
-	sprintf ("%s %s.%s", C_STRING(USER_TAG),
-		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
+#ifdef FREEWPC_EXTRA_VERSION
+	sprintf ("SYSTEM %s.%s-%s",
+		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION),
+		C_STRING(FREEWPC_EXTRA_VERSION));
 #else
 	sprintf ("SYSTEM V%s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
