@@ -231,7 +231,9 @@ void lamp_rtt (void)
 void lamp_power_set (U8 level)
 {
 	dbprintf ("Lamp power level = %d\n", level);
+	disable_interrupts ();
 	lamp_power_timer = lamp_power_level = level;
+	enable_interrupts ();
 }
 
 
@@ -534,7 +536,7 @@ bool leff_test (lampnum_t lamp)
  */
 CALLSET_ENTRY (lamp, amode_start)
 {
-	lamp_power_idle_timer = 60 * system_config.gi_power_saver;
+	lamp_power_idle_timer = 60UL * system_config.gi_power_saver;
 	dbprintf ("Lamp power saver set to %ld\n", lamp_power_idle_timer);
 }
 
@@ -563,7 +565,7 @@ CALLSET_ENTRY (lamp, idle_every_second)
 			/* Yes, set the reduced power level.  The argument says how many
 			IRQs for which no lamps will be turned on.  The larger the value,
 			the dimmer the lamps. */
-			lamp_power_set (system_config.power_saver_level >= 6 ? 2 : 3);
+			lamp_power_set ((system_config.power_saver_level >= 6) ? 2 : 3);
 		}
 	}
 }
