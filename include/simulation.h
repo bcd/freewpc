@@ -189,7 +189,7 @@ void conf_add (const char *name, int *valp);
 int conf_read (const char *name);
 void conf_write (const char *name, int val);
 void conf_push (int val);
-int conf_pop (unsigned int count);
+void conf_pop (unsigned int count);
 int conf_read_stack (int offset);
 
 #endif /* _SIMULATION_H */

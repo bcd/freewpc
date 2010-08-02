@@ -9,7 +9,7 @@ for game in `echo afm tz wcs t2 fh`; do
 		long_game=$game
 	fi
 	make DOTCONFIG="" MACHINE=$long_game clean
-	make DOTCONFIG="" GCC_VERSION=4.3.4 MACHINE=$long_game USER_TAG="\"RELEASE\""
+	make DOTCONFIG="" GCC_VERSION=4.3.4 MACHINE=$long_game SYSTEM_EXTRAVERSION="\"\""
 
 	pushd build
 	romfile=`ls -1 f${game}*.rom`

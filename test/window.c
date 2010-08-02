@@ -1910,14 +1910,14 @@ struct menu irqload_test_item = {
 
 /**********************************************************************/
 
-#define SCORE_TEST_PLAYERS 3
+#define SCORE_TEST_PLAYERS 4
 
 const score_t score_test_increment = { 0x00, 0x01, 0x23, 0x45, 0x60 };
 
 void score_test_init (void)
 {
 	bcd_t *s;
-	for (s = &scores[0][0]; s < &scores[4][0]; s++)
+	for (s = &scores[0][0]; s < &scores[4][0]; s += sizeof (score_t))
 	{
 		score_zero (s);
 		score_add (s, score_test_increment);
@@ -3810,9 +3810,10 @@ void sysinfo_machine_version (void) {
 }
 
 void sysinfo_system_version (void) {
-#ifdef USER_TAG
-	sprintf ("%s %s.%s", C_STRING(USER_TAG),
-		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));
+#ifdef FREEWPC_EXTRA_VERSION
+	sprintf ("SYSTEM %s.%s-%s",
+		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION),
+		C_STRING(FREEWPC_EXTRA_VERSION));
 #else
 	sprintf ("SYSTEM V%s.%s",
 		C_STRING(FREEWPC_MAJOR_VERSION), C_STRING(FREEWPC_MINOR_VERSION));

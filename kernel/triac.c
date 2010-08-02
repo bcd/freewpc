@@ -109,25 +109,40 @@ void triac_dump (void)
 }
 
 
+/**
+ * Update the triacs at interrupt time, when GI dimming is in effect
+ * DIM_BITS says which triac strings need to be turned on briefly
+ * during this phase of the AC cycle.
+ */
+static __attribute__((noinline)) void triac_rtt_1 (U8 dim_bits)
+{
+	static U8 triac_bits;
+
+	/* Get the current triac states */
+	triac_bits = pinio_read_triac ();
+
+	/* Turn on the lamps that need to be dimmed at this level. */
+	pinio_write_triac (triac_bits | dim_bits);
+
+	/* Now disable the dimmed lamps for the next phase */
+	pinio_write_triac (triac_bits);
+}
+
+
 /** Update the triacs at interrupt time */
 void triac_rtt (void)
 {
 	/* We only need to update the triacs if dimming
-	 * needs to be done during this phase of the AC cycle. */
-	if (unlikely (gi_dimming[zc_get_timer ()] | gi_leff_dimming[zc_get_timer ()]))
+	 * needs to be done during this phase of the AC cycle.
+	 *
+	 * Moved the mechanics of the triac update into a separate function
+	 * above, to optimize the function in the common case when nothing
+	 * needs to be done.
+	 */
+	U8 dim_bits = gi_dimming[zc_get_timer ()] | gi_leff_dimming[zc_get_timer ()];
+	if (unlikely (dim_bits))
 	{
-		U8 triac_bits;
-
-		/* Get the current triac states */
-		triac_bits = pinio_read_triac ();
-
-		/* Turn on the lamps that need to be dimmed at this level. */
-		pinio_write_triac (triac_bits
-			| gi_dimming[zc_get_timer ()]
-			| gi_leff_dimming[zc_get_timer ()]);
-
-		/* Now disable the dimmed lamps for the next phase */
-		pinio_write_triac (triac_bits);
+		triac_rtt_1 (dim_bits);
 	}
 }
 

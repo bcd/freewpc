@@ -188,10 +188,6 @@ void system_reset_deff (void)
 #endif
 
 	font_render_string_left (&font_mono5, 1, 26, "TESTING...");
-#if defined(USER_TAG)
-	font_render_string_right (&font_mono5, 127, 26, C_STRING(USER_TAG));
-#endif
-
 	dmd_show_low ();
 
 	/* Keep the reset display for at least 3 seconds (so

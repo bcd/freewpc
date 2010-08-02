@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -186,9 +186,7 @@ match_start (void)
 	match_count = match_value_score (2, match_value);
 
 	/* Start the match effect, then wait until it finishes. */
-	deff_start (DEFF_MATCH);
-	while (deff_get_active () == DEFF_MATCH)
-		task_sleep (TIME_66MS);
+	deff_start_sync (DEFF_MATCH);
 
 	/* Award any credits */
 	while (match_count > 0)
@@ -198,23 +196,3 @@ match_start (void)
 	}
 }
 
-
-#if 0 /* for testing match */
-CALLSETX_ENTRY (match, sw_buyin_button)
-{
-	U8 p;
-	if (!in_game && !in_test)
-	{
-		num_players = random_scaled (4) + 1;
-		dbprintf ("num_players = %d\n", num_players);
-		for (p=0; p < num_players; p++)
-		{
-			scores[p][BYTES_PER_SCORE-1] = random_scaled (10) * 0x10;
-			dbprintf ("player %d = %02X\n", p+1, scores[p][BYTES_PER_SCORE-1]);
-		}
-		deff_start (DEFF_SCORES_IMPORTANT);
-		task_sleep (TIME_1S);
-		match_start ();
-	}
-}
-#endif

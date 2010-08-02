@@ -385,10 +385,8 @@ applied.  Infinite timeout is *not* supported here, but can
 be emulated by repeated calls to this function ; this is done
 on purpose to prevent exceeding timeouts due to the inherent
 scheduling flaws at task level.
-   For the timeout level, use the SOL_TIMEOUT() macro with
-one of the TASK_xxx defines.  This ensures that it is converted
-to the proper units based on the scheduling of the solenoid
-update at IRQ time. */
+    User code should not invoke this directly; use one of the
+macros in sys/sol.h instead. */
 __attribute__((noinline)) void
 sol_start_real (solnum_t sol, U8 duty_mask, U8 ticks)
 {
