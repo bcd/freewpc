@@ -29,9 +29,9 @@
 #define DEFAULT_MAG_HOLD_TIME (200 / MAG_DRIVE_RTT_FREQ)
 
 #define DEFAULT_MAG_DROP_TIME ( 336 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_DROP_TIME_LEFT ( 376 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_DROP_TIME_LEFT ( 380 / MAG_DRIVE_RTT_FREQ)
 #define DEFAULT_MAG_DROP_TIME_RIGHT ( 328 / MAG_DRIVE_RTT_FREQ)
-#define DEFAULT_MAG_THROW_TIME (24 / MAG_DRIVE_RTT_FREQ)
+#define DEFAULT_MAG_THROW_TIME (20 / MAG_DRIVE_RTT_FREQ)
 
 __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -88,11 +88,20 @@ static inline void magnet_rtt_duty_handler (
 			/* keep magnet on with high power */
 			/* switch to MAG_ON_HOLD fairly quickly though */
 			/* But leave solenoid enabled so it doesn't suffer 
-			 * any drop*/
+			 * any drop */
 			if (*power_timer == 0)
 			{	
-				/* switch to HOLD */
-				*state = MAG_ON_HOLD;
+				if (rt_switch_poll (sw_magnet))
+				{
+					/* Grab failed */
+					*throw_enabled = FALSE;
+					*state = MAG_DISABLED;
+				}
+				else
+				{
+					/* switch to HOLD */
+					*state = MAG_ON_HOLD;
+				}
 			}
 			--*power_timer;
 			break;
@@ -171,7 +180,7 @@ void magnet_switch_rtt (void)
 
 
 /* Realtime function to duty cycle the magnet drives */
-void magnet_duty_rtt (void)
+inline void magnet_duty_rtt (void)
 {
 	magnet_rtt_duty_handler (SW_LEFT_MAGNET, SOL_LEFT_MAGNET, 
 		&left_magnet_state, &left_magnet_timer, &left_magnet_hold_timer, &left_magnet_enabled_to_throw);

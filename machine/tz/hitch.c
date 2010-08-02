@@ -74,10 +74,7 @@ void hitchhiker_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	
-	
-		//task_sleep_sec (1);
-		task_sleep  (TIME_700MS);
+	task_sleep  (TIME_700MS);
 	/* Stop the timer so jets.c can show deffs again */
 	timer_kill_gid (GID_HITCHHIKER);
 	deff_exit ();
@@ -100,7 +97,6 @@ void hitch_mode_deff (void)
 		task_sleep (TIME_200MS);
 	}
 }
-
 
 void hitch_mode_init (void)
 {

@@ -20,6 +20,7 @@
 
 #include <freewpc.h>
 #include <eb.h>
+#include <status.h>
 
 U8 left_ramps;
 extern U8 cameras_lit;
@@ -35,9 +36,8 @@ extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
 
-void left_ramp_deff (void)
+static void left_ramp_deff_subtask (void)
 {
-	dmd_alloc_low_clean ();
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
 
@@ -79,11 +79,17 @@ void left_ramp_deff (void)
 	else
 		sprintf ("");
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+}
 
+void left_ramp_deff (void)
+{
+	dmd_alloc_low_clean ();
+	left_ramp_deff_subtask ();
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
+
 void award_left_ramp (void)
 {
 	if (left_ramps == 3)
@@ -113,11 +119,11 @@ CALLSET_ENTRY(leftramp, start_ball)
 	left_ramps = 0;
 }
 
-static bool right_inlane_combo_check (void)
+inline static bool right_inlane_combo_check (void)
 {
-	if (timer_find_gid (GID_LEFT_RAMP) && !multi_ball_play ())
+	if (timer_find_gid (GID_LEFT_RAMP) && single_ball_play ())
 	{
-		score (SC_10M);
+		timer_restart_free (GID_LEFT_RAMP_AUTOFIRE, TIME_5S);
 		return TRUE;
 	}
 	else
@@ -179,4 +185,11 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	deff_start (DEFF_LEFT_RAMP);
 	leff_start (LEFF_LEFT_RAMP);
 	award_left_ramp ();
+}
+
+CALLSET_ENTRY (left_ramp, status_report)
+{
+	status_page_init ();
+	left_ramp_deff_subtask ();
+	status_page_complete ();
 }

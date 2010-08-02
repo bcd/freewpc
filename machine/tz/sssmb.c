@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,9 +20,6 @@
 
 #include <freewpc.h>
 
-/* Super Skill Shot multiball rules */
-
-//extern void mball_start_3_ball (void);
 extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
@@ -31,18 +28,16 @@ extern U8 unlit_shot_count;
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
 U8 sssmb_jackpot_value;
-//bool sssmb_ball_in_plunger;
 
 bool sssmb_can_divert_to_plunger (void)
 {
 	if (flag_test (FLAG_SSSMB_RUNNING)
 		&& sssmb_ramps_to_divert == 0
-		&& !global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+		&& !switch_poll_logical (SW_SHOOTER))
 		return TRUE;
 	else
 		return FALSE;
 }
-
 
 void sssmb_running_deff (void)
 {
@@ -118,7 +113,6 @@ void sssmb_jackpot_collected_deff (void)
 	deff_exit ();
 }
 
-
 static void sssmb_relight_all_jackpots (void)
 {
 	flag_on (FLAG_SSSMB_RED_JACKPOT);
@@ -150,7 +144,6 @@ static void sssmb_award_jackpot (void)
 	}
 }
 
-
 static void sssmb_jackpot_ready_task (void)
 {
 	deff_start (DEFF_SSSMB_JACKPOT_LIT);
@@ -172,7 +165,6 @@ static void sssmb_jackpot_ready_task (void)
 	task_exit ();
 }
 
-
 CALLSET_ENTRY (sssmb, sssmb_start)
 {
 	if (!flag_test (FLAG_SSSMB_RUNNING))
@@ -193,11 +185,9 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		if (!flag_test (FLAG_SUPER_MB_RUNNING))
 		{	
 			callset_invoke (mball_start_3_ball);
-			//ballsave_add_time (10);
 		}
 	}
 }
-
 
 void sssmb_stop (void)
 {
@@ -215,7 +205,6 @@ void sssmb_stop (void)
 	deff_stop (DEFF_SSSMB_RUNNING);
 	lamp_tristate_off (LM_SUPER_SKILL);
 	music_refresh ();
-
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)
@@ -237,7 +226,6 @@ CALLSET_ENTRY (sssmb, music_refresh)
 	if (flag_test (FLAG_SSSMB_RUNNING))
 		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE1 + 9);
 }
-
 
 CALLSET_ENTRY (sssmb, door_start_super_skill)
 {

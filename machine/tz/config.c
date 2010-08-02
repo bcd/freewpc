@@ -23,6 +23,8 @@
 #include <m6809/math.h>
 #endif
 
+bool faster_quote_given;
+
 /** Filename: mach/config.c
  *
  * Machine-specific miscellaneous functions.

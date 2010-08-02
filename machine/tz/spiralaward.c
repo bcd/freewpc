@@ -33,12 +33,10 @@
 
 /* CALLSET_SECTION (spiralaward, __machine2__) */
 
-
 #include <freewpc.h>
 #include <eb.h>
+#include <status.h>
 
-
-#define MAG_LEFT 0
 U8 spiralaward;
 __local__ U8 spiralawards_collected; 
 __local__ bool spiralaward_set_completed; 
@@ -207,4 +205,12 @@ CALLSET_ENTRY (spiralaward, start_player)
 		lamp_off (LM_SPIRAL_EB);
 		spiralawards_collected = 1;
 	}
+}
+
+CALLSET_ENTRY (spiralaward, status_report)
+{
+	status_page_init ();
+	sprintf ("%d SPIRALAWARDS", spiralawards_collected);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	status_page_complete ();
 }

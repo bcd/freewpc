@@ -19,8 +19,6 @@
  */
 
 /* CALLSET_SECTION (deadend, __machine2__) */
-//TODO Slot is being ignored when hit straight after kicking
-// device_switch_can_follow needs tweaking
 
 #include <freewpc.h>
 #include <eb.h>
@@ -43,7 +41,6 @@ void inlane_lights_dead_end_deff (void)
 
 void dead_end_deff (void)
 {
-
 	dmd_alloc_low_clean();
 	sound_send (SND_DEAD_END_SCREECH);
 	dmd_sched_transition (&trans_scroll_right);	
@@ -113,6 +110,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 {
 	device_switch_can_follow (dead_end, slot, TIME_2S + TIME_500MS);
 	event_can_follow (dead_end, camera, TIME_2S);
+	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
 
 	if (lamp_test (LM_DEAD_END))
 	{
@@ -131,7 +129,8 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 				break;
 			case 3:
 				timed_game_extend (30);
-				if (extra_ball_lit_from_deadend == FALSE && can_award_extra_ball ())
+				if (extra_ball_lit_from_deadend == FALSE 
+					&& can_award_extra_ball ())
 				{
 					score (SC_1M);
 					light_easy_extra_ball ();

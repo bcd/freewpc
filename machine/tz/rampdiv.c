@@ -27,9 +27,20 @@ void ramp_divert (void)
 	task_yield ();
 }
 
-
 void ramp_divert_to_autoplunger (void)
 {
 	ramp_divert ();
 	autofire_catch ();
 }
+
+/* Close the ramp again when successful */
+CALLSET_ENTRY (rampdiv, sw_shooter)
+{
+	ramp_div_stop ();
+}
+
+CALLSET_ENTRY (rampdiv, sw_autofire2)
+{
+	ramp_div_stop ();
+}
+

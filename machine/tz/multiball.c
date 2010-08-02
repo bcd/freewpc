@@ -530,7 +530,7 @@ CALLSET_ENTRY (mball, sw_piano)
 
 CALLSET_ENTRY (mball, powerball_jackpot)
 {
-	deff_start (DEFF_PB_DETECT);
+	deff_start (DEFF_PB_JACKPOT);
 	/* -1, as it probably has been incremented already */
 	score_multiple (SC_10M, jackpot_level - 1);
 	jackpot_level_stored = jackpot_level * 2;
@@ -649,8 +649,6 @@ CALLSET_ENTRY (mball, status_report)
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	sprintf ("%d BALLS LOCKED", mball_locks_made);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (3);
 	status_page_complete ();
 }
 

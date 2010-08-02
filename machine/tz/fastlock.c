@@ -17,10 +17,8 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//TODO What happens with multimode and multiball???? pause timer. 
-#include <freewpc.h>
-#include <queue.h>
 
+#include <freewpc.h>
 
 U8 fastlock_mode_timer;
 U8 fastlock_award;
@@ -51,6 +49,8 @@ void fastlock_mode_deff (void)
 {
 	for (;;)
 	{
+		/* Fudge loop time in ms into
+		 * something semi-meaningful to display */
 		U8 display_loop_time;
 		display_loop_time = 100;
 		display_loop_time -= loop_time;
@@ -61,7 +61,6 @@ void fastlock_mode_deff (void)
 		font_render_string_center (&font_var5, 64, 5, "SHOOT FAST LOOPS");
 		sprintf("%d MILLION", fastlock_award);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		//font_render_string_center (&font_var5, 64, 27, "HIT LOCK TO COLLECT");
 		sprintf ("LAST LOOP WAS %dMPH", display_loop_time);
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", fastlock_mode_timer);
@@ -89,7 +88,6 @@ void fastlock_mode_init (void)
 	fastlocks_collected = 1;
 	magnet_reset ();
 }
-
 
 void fastlock_mode_exit (void)
 {

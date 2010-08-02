@@ -79,11 +79,18 @@ void autofire_monitor (void)
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
 		task_sleep (TIME_100MS);
+
+	/* If Right inlane -> Left ramp combo, start tnf mode */
+	if (timer_kill_gid (GID_LEFT_RAMP_AUTOFIRE) && single_ball_play ())
+	{
+		callset_invoke (tnf_start);
+		deff_start_sync (DEFF_TNF);
+	}
 	/* Open diverter again */
 	shooter_div_start ();
-	/* Wait for the diverter to fully open */
-	task_sleep (TIME_700MS);
-	/* TODO If the switch fails, it won't kick the ball */
+	/* Wait for the diverter to fully open before firing */
+	task_sleep_sec (1);
+	/* TODO If the switch fails, it won't fire the ball */
 	if (switch_poll_logical (SW_AUTOFIRE2))
 	{	
 		sol_request (SOL_AUTOFIRE);
@@ -99,7 +106,7 @@ void autofire_monitor (void)
 		event_can_follow (autolaunch, right_loop, TIME_4S);
 	}
 	/* Wait for the ball to clear the divertor */
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_700MS);
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();
@@ -122,7 +129,7 @@ void autofire_open_for_trough (void)
 
 	dbprintf ("Shooter divertor open to catch\n");
 	shooter_div_delay_time = 0;
-	shooter_div_open_time = 2;
+	shooter_div_open_time = 3;
 	task_create_gid_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
 }
 

@@ -19,6 +19,8 @@
  */
 
 #include <freewpc.h>
+#include <status.h>
+
 //#define PB_DEBUG
 
 
@@ -63,30 +65,27 @@ U8 last_pb_event;
 
 #define switch_poll_trough_metal() switch_poll_logical(SW_TROUGH_PROXIMITY)
 
-void pb_detect_deff (void)
+CALLSET_ENTRY (pb_detect, status_report)
 {
-#ifdef PB_DEBUG
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "POWERBALL STATUS");
+	status_page_init ();
+	font_render_string_center (&font_mono5, 64, 8, "POWERBALL LOCATION");
 
 	if (pb_location == 0)
-		sprintf ("MISSING");
+		sprintf ("UNKNOWN");
 	else if (pb_location & PB_IN_LOCK)
-		sprintf ("LOCK %d", pb_depth);
+		sprintf ("LOCK %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_TROUGH)
-		sprintf ("TROUGH %d", pb_depth);
+		sprintf ("TROUGH %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_GUMBALL)
-		sprintf ("GUMBALL %d", pb_depth);
+		sprintf ("GUMBALL %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_PLAY)
 		sprintf ("IN PLAY");
 	font_render_string_center (&font_mono5, 64, 15, sprintf_buffer);
+	status_page_complete ();
+}
 
-	sprintf ("LAST EVENT %d", last_pb_event);
-	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
-	
-	dmd_show_low ();
-	task_sleep_sec (3);
-#else
+void pb_detect_deff (void)
+{
 	sound_send (SND_POWERBALL_QUOTE);
 	if (!multi_ball_play ())
 		leff_start (LEFF_POWERBALL_ANNOUNCE);
@@ -106,16 +105,13 @@ void pb_detect_deff (void)
 			task_sleep (TIME_100MS);
 		}
 	}
-#endif
 	deff_exit ();
 }
-
 
 void pb_loop_deff (void)
 {
 	generic_deff ("POWERBALL LOOP", "10,000,000");
 }
-
 
 CALLSET_ENTRY (pb_detect, lamp_update)
 {
@@ -135,7 +131,6 @@ CALLSET_ENTRY (pb_detect, lamp_update)
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 	}
 }
-
 
 /** Called when the powerball is known to be in a particular location.
  * Because there is only one powerball installed in the machine, this
@@ -159,20 +154,33 @@ void pb_set_location (U8 location, U8 depth)
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
+			magnet_disable_catch (MAG_LEFT);
+			magnet_disable_catch (MAG_RIGHT);
 		}
 		else if (pb_location & PB_IN_PLAY)
 		{
 			flag_on (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 1;
 			callset_invoke (powerball_present);
+			/* Turn the magnets on to help with detection */
+			if (single_ball_play ())
+			{
+				magnet_enable_catch (MAG_LEFT);
+				magnet_enable_catch (MAG_RIGHT);
+			}
 		}
 		else if (pb_location & PB_MAYBE_IN_PLAY)
 		{
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
 			callset_invoke (powerball_lost);
-			/* TODO - in the 'maybe' state, pulse magnets to
-			figure out the ball type */
+			/* in the 'maybe' state, try to grab ball with
+			 * magnets to figure out the ball type */
+			if (single_ball_play ())
+			{
+				magnet_enable_catch (MAG_LEFT);
+				magnet_enable_catch (MAG_RIGHT);
+			}
 		}
 	}
 }
@@ -199,7 +207,6 @@ void pb_clear_location (U8 location)
 	}
 }
 
-
 /** Asserts a powerball detection event.  The significance depends on
  * the current state.
  * Because proximity sensors trigger only when steel balls move over them
@@ -212,6 +219,9 @@ static void pb_detect_event (pb_event_t event)
 	{
 		/* Steel ball detected on playfield, via Slot Proximity */
 		case PF_STEEL_DETECTED:
+			/* Disable the magnet catches used for PB detection */
+			magnet_disable_catch (MAG_LEFT);
+			magnet_disable_catch (MAG_RIGHT);
 			if (single_ball_play ())
 			{
 				pb_clear_location (PB_IN_PLAY);
@@ -414,7 +424,6 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 	 * a ball in the undertrough....??? */
 	pb_detect_event (PF_STEEL_DETECTED);
 }
-
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {

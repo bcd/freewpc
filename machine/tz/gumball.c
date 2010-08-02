@@ -22,7 +22,6 @@
 #include <status.h>
 #include <gumball_div.h>
 
-//TODO If left mag sw is thrown during divertor open, close divertor immediately
 bool gumball_enable_from_trough;
 
 bool gumball_geneva_tripped;
@@ -143,8 +142,10 @@ void gumball_divertor_close (void)
 
 void sw_gumball_right_loop_entered (void)
 {
-	if (magnet_enabled (MAG_RIGHT) 
-		|| magnet_busy (MAG_RIGHT))
+	/* Don't enable if the magnet is about to grab the ball
+	 * but it will always let the powerball through */
+	if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 		return;
 	
 	if (gumball_load_is_enabled ())
@@ -167,7 +168,8 @@ void sw_gumball_right_loop_entered (void)
 CALLSET_ENTRY (gumball, sw_gumball_exit)
 {
 	gumball_exit_tripped = TRUE;
-	sound_send (SND_GUMBALL_LOADED);
+	if (!flag_test (FLAG_MULTIBALL_RUNNING))
+		sound_send (SND_GUMBALL_LOADED);
 	if (event_did_follow (gumball_geneva, gumball_exit) 
 		|| event_did_follow (gumball_release, gumball_exit))
 	{
@@ -248,7 +250,6 @@ CALLSET_ENTRY (gumball, sw_gumball_lane)
 	 * Gumball diverter can be closed now. */
 	gumball_divertor_close ();
 	task_kill_gid (GID_GUMBALL_DIV);
-	//gumball_load_disable ();
 }
 
 
@@ -350,6 +351,12 @@ CALLSET_ENTRY (gumball, sw_far_left_trough)
 		task_recreate_gid (GID_FAR_LEFT_TROUGH_MONITOR, sw_far_left_trough_monitor);
 }
 
+/* Close the gumball divertor if a ball is
+ * coming round the loop from the left */
+CALLSET_ENTRY (gumball, sw_left_magnet)
+{
+	gumball_div_stop ();
+}
 
 CALLSET_ENTRY (gumball, start_ball)
 {
@@ -432,7 +439,5 @@ CALLSET_ENTRY (gumball, status_report)
 	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	sprintf ("%d COLLECTED", gumball_collected_count);
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (3);
 	status_page_complete ();
 }

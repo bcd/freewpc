@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -17,7 +17,7 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//TODO Pressing extra ball during mpf could do something
+
 #include <freewpc.h>
 #include <bridge_open.h>
 /** The number of balls enabled to go to the MPF */
@@ -57,13 +57,10 @@ void mpf_mode_deff (void)
 	mpf_award = 10;
 	for (;;)
 	{
-		
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
-		//sprintf_current_score ();
 		sprintf ("%d,000,000", (mpf_award * mpf_level));
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		//sprintf ("%d,000,000", (mpf_award * mpf_level));
 		sprintf ("SHOOT TOP HOLE TO COLLECT");
 		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
 		sprintf ("%d", mpf_timer);
@@ -79,7 +76,6 @@ void mpf_mode_deff (void)
 void mpf_award_deff (void)
 {
 	dmd_alloc_low_clean ();
-
 	sprintf ("%d,000,000", (mpf_award * mpf_level));
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
@@ -126,6 +122,9 @@ void mpf_mode_init (void)
 
 void mpf_mode_exit (void)
 {
+	task_kill_gid (GID_MPF_COUNTDOWN);
+	task_kill_gid (GID_MPF_BALLSEARCH);
+	task_kill_gid (GID_MPF_BUTTON_MASHER);
 	mpf_active = FALSE;
 	leff_stop (LEFF_MPF_ACTIVE);
 }
@@ -216,9 +215,6 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	{
 		mpf_active = FALSE;
 		timed_mode_end (&mpf_mode);
-		task_kill_gid (GID_MPF_COUNTDOWN);
-		task_kill_gid (GID_MPF_BALLSEARCH);
-		task_kill_gid (GID_MPF_BUTTON_MASHER);
 	}
 	deff_start (DEFF_MPF_AWARD);
 	callset_invoke (award_door_panel);
@@ -296,7 +292,6 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 
 CALLSET_ENTRY (mpf, sw_mpf_left)
 {
-//	magnet_enable_catch_and_throw (MAG_LEFT);
 	if (mpf_ball_count > 0)
 	{
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
@@ -308,7 +303,6 @@ CALLSET_ENTRY (mpf, sw_mpf_left)
 
 CALLSET_ENTRY (mpf, sw_mpf_right)
 {
-	//magnet_enable_catch_and_throw (MAG_RIGHT);
 	if (mpf_ball_count > 0)
 	{
 		if (!task_find_gid (GID_MPF_COUNTDOWN))
@@ -366,7 +360,7 @@ void mpf_lamp_task (void)
 	task_exit ();
 }
 
-void check_button_masher (void)
+static void check_button_masher (void)
 {
 	if (mpf_buttons_pressed > 20)
 	{
@@ -391,6 +385,11 @@ static void mpf_button_masher_handler (void)
 			timer_start_free (GID_MPF_BUTTON_MASHER, TIME_3S);
 		}
 
+	}
+	/* Hook for TNF mode */
+	else if (deff_get_active () == DEFF_TNF)
+	{
+		callset_invoke (tnf_button_pushed);
 	}
 }
 

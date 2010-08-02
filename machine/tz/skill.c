@@ -113,7 +113,7 @@ void skill_shot_made_deff (void)
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_scroll_down);
+	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 

@@ -158,7 +158,7 @@ static void magnet_ball_grab_monitor_task (void)
 	for (;;)
 	{
 		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-		if ((magstates[MAG_LEFT] == MAG_ON_HOLD || magstates[MAG_LEFT] == MAG_ON_POWER)
+		if ((magstates[MAG_LEFT] == MAG_ON_HOLD)
 			&& switch_poll_logical (SW_LEFT_MAGNET)
 			&& !task_find_gid (GID_LEFT_BALL_GRABBED))
 		{
@@ -166,7 +166,7 @@ static void magnet_ball_grab_monitor_task (void)
 			callset_invoke (left_ball_grabbed);
 		}
 		
-		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD || magstates[MAG_RIGHT] == MAG_ON_POWER)
+		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD)
 			&& switch_poll_logical (SW_LOWER_RIGHT_MAGNET)
 			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{
@@ -197,6 +197,14 @@ CALLSET_ENTRY (maghelper, start_ball)
 		task_recreate_gid (GID_MAGNET_ENABLE_MONITOR, magnet_enable_monitor_task);
 		task_recreate_gid (GID_MAGNET_BALL_GRAB_MONITOR, magnet_ball_grab_monitor_task);
 	}
+}
+
+CALLSET_ENTRY (maghelper, ball_search)
+{
+	if (switch_poll_logical (SW_LOWER_RIGHT_MAGNET))
+		magnet_enable_catch_and_throw (MAG_RIGHT);	
+	if (switch_poll_logical (SW_LEFT_MAGNET))
+		magnet_enable_catch_and_throw (MAG_LEFT);	
 }
 
 CALLSET_ENTRY (maghelper, end_ball)

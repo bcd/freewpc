@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -228,9 +228,7 @@ CALLSET_ENTRY (camera, start_player)
 	camera_award_count = 0;
 }
 
-
 CALLSET_ENTRY (camera, door_start_camera)
 {
-	sound_send (SND_MOST_UNUSUAL_CAMERA);
 	cameras_lit++;
 }

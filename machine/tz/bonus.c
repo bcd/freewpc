@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -17,8 +17,6 @@
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//TODO Handle replay during/after bonus
-// Count up luckys, sudden deaths etc 
 /* CALLSET_SECTION (bonus, __machine2__) */
 #include <freewpc.h>
 #include <eb.h>
@@ -37,8 +35,7 @@ score_t temp_score;
 score_t current_one_ball_hi_score;
 #define current_hi_score scores[find_player_ranked(1)]
 #define current_hi_player find_player_ranked(1) + 1
-//score_t current_hi_score;
-//U8 current_hi_player;
+
 /* Which player obtained the current 1 ball hi score*/
 U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
@@ -234,7 +231,8 @@ void bonus_deff (void)
 	/* 
 	 * Taunts.....
 	 * */
-	/* Wait a bit so music_stop doesn't kill the taunt sounds */
+
+	/* Wait a bit so the previous music_stop doesn't kill the taunt sounds */
 	task_sleep (TIME_66MS);
 	if (multidrain_awarded == TRUE)
 	{
@@ -573,6 +571,14 @@ void bonus_deff (void)
 	
 	bonus_sched_transition ();
 	
+	/* Restart the button monitor in case the user wants to skip
+	 * total points shown but hasn't pressed the buttons yet */
+	if (!task_find_gid (GID_BONUS_BUTTON_MONITOR) 
+		&& buttons_held == FALSE)
+	{
+		task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);	
+	}
+	
 	countup_pause_iterations = 0;
 	/* Show total Bonus */	
 	do {
@@ -623,7 +629,6 @@ void bonus_deff (void)
 	sprintf_score (total_bonus);
 	font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
 	dmd_show_low ();	
-	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 	task_sleep_sec (2);
 		
 	/* Add to total bonus to player score */
@@ -702,7 +707,6 @@ void bonus_deff (void)
 	if (num_players > 1 && player_up == num_players && ball_up != 1 && extra_balls == 0)
 	{
 	 	/* show highest 1 ball score so far*/
-		task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 4, "HIGHEST 1 BALL SCORE");
 		sprintf_score (current_one_ball_hi_score);
@@ -929,8 +933,6 @@ CALLSET_ENTRY (bonus, status_report)
 				sprintf ("TO CATCH UP TO P%d", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		}
-		dmd_show_low ();
-		task_sleep_sec (3);
 		status_page_complete ();
 	}
 }

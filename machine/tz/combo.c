@@ -150,14 +150,14 @@ CALLSET_ENTRY (combo, award_right_loop)
 	event_can_follow (right_loop, locked_ball, TIME_3S);
 	/* 2 way combos */
 	event_can_follow (right_loop, piano, TIME_1S + TIME_700MS);
-	event_can_follow (right_loop, camera, TIME_4S);
+	event_can_follow (right_loop, camera, TIME_5S);
 	//event_can_follow (right_loop, hitchhiker, TIME_4S);
 }
 
 CALLSET_ENTRY (combo, award_left_loop)
 {
-	event_can_follow (left_loop, hitchhiker, TIME_3S);
-	event_can_follow (left_loop, camera, TIME_3S);
+	event_can_follow (left_loop, hitchhiker, TIME_5S);
+	event_can_follow (left_loop, camera, TIME_5S);
 }
 
 CALLSET_ENTRY (combo, sw_camera)
@@ -188,7 +188,6 @@ CALLSET_ENTRY (combo, sw_camera)
 
 }
 
-
 /* Left loop -> Hitchhiker handlers */
 CALLSET_ENTRY (combo, sw_hitchhiker)
 {
@@ -200,7 +199,6 @@ CALLSET_ENTRY (combo, sw_hitchhiker)
 		bounded_increment (two_way_combos, 99);
 	}
 }
-
 
 CALLSET_ENTRY (combo, sw_left_ramp_enter)
 {
@@ -246,4 +244,3 @@ CALLSET_ENTRY (combo, start_ball)
 	slot_stdm_death = FALSE;
 	unfair_death = FALSE;
 }
-

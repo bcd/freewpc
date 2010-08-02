@@ -40,7 +40,6 @@ void cow_deff (void)
 
 void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
@@ -53,7 +52,6 @@ void flash_and_exit_deff (U8 flash_count, task_ticks_t flash_delay)
 
 void flash_small_deff (U8 flash_count, task_ticks_t flash_delay)
 {
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -61,7 +59,6 @@ void flash_small_deff (U8 flash_count, task_ticks_t flash_delay)
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (flash_count, flash_delay);
-	//deff_exit ();
 }
 
 void extra_ball_deff (void)
@@ -116,6 +113,12 @@ void replay_deff (void)
 void special_deff (void)
 {
 	sprintf ("SPECIAL");
+	flash_and_exit_deff (20, TIME_100MS);
+}
+
+void pb_jackpot_deff (void)
+{
+	sprintf ("PB JACKPOT");
 	flash_and_exit_deff (20, TIME_100MS);
 }
 
@@ -202,7 +205,6 @@ void jackpot_deff (void)
 {
 	U16 fno;
 	U8 i;
-	//music_disable ();
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
 	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
@@ -226,7 +228,6 @@ void jackpot_deff (void)
 			task_sleep (TIME_16MS);
 	}
 	/* Flash Jackpot */
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_JACKPOT_END - 2);
 	dmd_show2 ();
@@ -234,32 +235,25 @@ void jackpot_deff (void)
 	task_sleep (TIME_200MS);
 	
 	dmd_alloc_pair ();
-	//dmd_alloc_low_high ();
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
 	task_sleep (TIME_500MS);
 
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_JACKPOT_END - 2);
 	dmd_show2 ();
 	sample_start (SND_JACKPOT, SL_100MS);
 	task_sleep (TIME_500MS);
 
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	frame_draw (IMG_JACKPOT_END);
 	dmd_show2 ();
 	sound_send (SND_JACKPOT);
 	task_sleep_sec (1);
 	sound_send (SND_FIST_BOOM2);
-	//task_sleep_sec (1); 
-	//music_enable ();
 	deff_exit ();
 }
-
-
 
 U16 tv_static_data[] = {
 	0x4964UL, 0x3561UL, 0x2957UL, 0x1865UL, 
@@ -275,7 +269,6 @@ void tv_static_deff (void)
 
 	for (loop = 0; loop < 32; loop++)
 	{
-		//dmd_alloc_low_high ();
 		dmd_alloc_pair ();
 		dmd = (U16 *)dmd_low_buffer;
 		while (dmd < (U16 *)dmd_high_buffer)
@@ -332,7 +325,6 @@ void text_color_flash_deff (void)
 void spell_test_deff (void)
 {
 	U8 count = 4;
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("%*s", count, "FASTLOCK");
@@ -371,7 +363,6 @@ void bg_flash_deff (void)
 {
 	const U8 flash_time = TIME_50MS;
 
-	//dmd_alloc_low_high ();
 	dmd_alloc_pair ();
 	dmd_fill_page_low ();
 	dmd_clean_page_high ();
@@ -470,5 +461,3 @@ void rollover_completed_deff (void)
 	task_sleep_sec (1);
 	deff_exit ();
 }
-
-

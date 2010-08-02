@@ -37,7 +37,7 @@ define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
 define MACHINE_REPLAY_SCORE_CHOICES       10
 define MACHINE_REPLAY_START_CHOICE        5
-define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
+#define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
 define MACHINE_AMODE_LEFF                 tz_amode_leff
 define MACHINE_AMODE_EFFECTS 		 
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
@@ -181,7 +181,7 @@ define CONFIG_TZONE_IP y
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
 55: Gumball Geneva, noscore
 56: Gumball Exit, noscore
-57: Slot Proximity, noscore
+57: Slot Proximity, edge, noscore
 58: Slot
 61: Skill Bottom, ingame, noplay
 62: Skill Center, ingame, noplay
@@ -231,18 +231,18 @@ H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_200MS)
 H3: Autofire, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
 H4: Popper
 H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
-H6: Gumball Div, duty(SOL_DUTY_50)
+H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
 H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_133MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
 L2: Right Sling, duty(SOL_DUTY_100)
 L3: Left Sling, duty(SOL_DUTY_100)
 L4: Lower Jet, duty(SOL_DUTY_100)
 L5: Left Jet, duty(SOL_DUTY_100)
 L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch
+L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -286,29 +286,22 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Left magnet hold: driver(duty2), sol=SOL_LEFT_MAGNET, 
-#	timeout=TIME_4S, ontime=100, duty_mask=DUTY_MASK_25
-#Right magnet hold: driver(duty), sol=SOL_RIGHT_MAGNET, 
-#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
-#Upper right magnet hold: driver(duty), sol=SOL_UPPER_RIGHT_MAGNET, 
-#	timeout=TIME_4S, ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_50MS
-
-Bridge Open: driver(duty),
-	sol=SOL_RIGHT_RAMP_DIV,
-	ontime=0, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
+#Bridge Open: driver(duty),
+#	sol=SOL_RIGHT_RAMP_DIV,
+#	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
 
 
-#Bridge Open: driver(duty2),
-#	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_32MS, duty_mask=DUTY_MASK_12
+Bridge Open: driver(duty2),
+	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
 
 
 Shooter Div: driver(duty),
 	sol=SOL_SHOOTER_DIV,
-	ontime=TIME_200MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
+	ontime=TIME_1S, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
-	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_3S
+	ontime=TIME_200MS, duty_ontime=TIME_66MS, duty_offtime=TIME_16MS, timeout=TIME_3S
 
 Gumball Div: driver(duty2),
 	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
@@ -570,7 +563,7 @@ MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
 Skill Shot Made: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_PAUSE
+Rocket: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_PAUSE+D_QUEUED
 Hitchhiker: page(MACHINE2_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE+D_QUEUED+D_TIMEOUT
 Jets Hit: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_RESTARTABLE
 Jets Level Up: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_QUEUED+D_TIMEOUT
@@ -594,7 +587,6 @@ Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
-# TODO - this mode does not update its deff by the new rules
 ChaosMB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE6
 Chaos Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK8
 Animation Test: page(EFFECT_PAGE), PRI_GAME_MODE2
@@ -631,6 +623,7 @@ Two Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
 Three Way Combo: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
 In the lead: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
 Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
@@ -645,6 +638,7 @@ Score to beat: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
+TNF: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 
@@ -681,12 +675,10 @@ Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
 #MPF Active: shared, PRI_LEFF4, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 MPF Active: shared, PRI_LEFF4, LAMPS(POWERFIELD_VALUES), page(MACHINE2_PAGE)
 MPF Hit: PRI_LEFF5, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
-#Left Jet Flash: PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
-#Right Jet Flash: PRI_BONUS, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Rocket: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Powerball Announce: PRI_LEFF4, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
-Spiralaward: shared, PRI_LEFF4, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
+Spiralaward: shared, PRI_LEFF5, LAMPS(SPIRAL_AWARDS), page(MACHINE2_PAGE)
 Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 
 ##########################################################################
@@ -695,12 +687,4 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 [fonts]
 mono9:
 times10:
-#misctype:
-#v5prc:
 steel:
-#lithograph:
-#twizone:
-
-[timers]
-MB Jackpot collected:
-

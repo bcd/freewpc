@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <status.h>
 
 U8 jet_sound_index;
 U8 jetscore;
@@ -29,7 +30,8 @@ U8 jets_bonus_level;
 U8 tsm_mode_timer;
 extern U8 mpf_timer;
 score_t tsm_mode_total;
-
+/* Used to not flash the jets when the clock or
+ * slings are triggered */
 bool noflash;
 
 void tsm_mode_init (void);
@@ -103,16 +105,12 @@ void sw_jet_sound (void)
 {
 	if (!in_live_game)
 		return;
-//	jet_sound_index++;
-//	if (jet_sound_index >= 3)
-//		jet_sound_index = 0;
-	jet_sound_index = random_scaled(4);
-	bounded_decrement (jet_sound_index, 0);
+	jet_sound_index = random_scaled(3);
 	if (timed_mode_running_p (&tsm_mode))
 		sound_send (super_jet_sounds[jet_sound_index]);
 	else
 		sound_send (jet_sounds[jet_sound_index]);
-	
+	/* Hack to stop slings and clock target from flashing jets */	
 	if (!noflash)
 		flasher_pulse (FLASH_JETS);
 	noflash = FALSE;
@@ -177,8 +175,8 @@ void jets_hit_deff (void)
 void jets_level_up_deff (void)
 {
 	dmd_alloc_low_clean ();
-	sprintf ("JETS LEVEL UP");
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+	sprintf ("TOWN SQUARE LEVEL UP");
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 	/* We don't use scoreget as it's likely another score
 	 * has been awarded */
 	sprintf("%d MILLION", jetscore);
@@ -203,7 +201,7 @@ CALLSET_ENTRY (jet, sw_jet_noflash)
 
 CALLSET_ENTRY (jet, sw_jet)
 {
-	/* Hack to work amode bug when mpf_exit switch breaks */
+	/* Hack for when mpf_exit switch breaks */
 	if (!multi_ball_play () && mpf_timer > 0)
 		callset_invoke (sw_mpf_exit);
 	
@@ -214,15 +212,13 @@ CALLSET_ENTRY (jet, sw_jet)
 	
 	if (jets_scored >= jets_for_bonus)
 	{	
-		//TODO Set sensible bonus levels
-		//bounded_increment (jets_bonus_level, 50);
-		jets_bonus_level++;
+		bounded_increment (jets_bonus_level, 50);
 		jets_for_bonus += 5;
-		//TODO Set sound priority higher than jets
 		sound_send (SND_GLASS_BREAKS);
 		task_sleep (TIME_500MS);
-		// We use jetscore as it's likely another score
-		// will be awarded soon
+		/* jetscore is used rather than score_deff_get 
+		 * because it's likely another score would of
+		 * happened */
 		if (jets_bonus_level < 3)
 		{
 			score (SC_1M);
@@ -238,7 +234,8 @@ CALLSET_ENTRY (jet, sw_jet)
 			score (SC_10M);
 			jetscore = 10;
 		}
-		deff_start (DEFF_JETS_LEVEL_UP);
+		if (!timer_find_gid (GID_HITCHHIKER))
+			deff_start (DEFF_JETS_LEVEL_UP);
 	}
 
 	if (timed_mode_running_p (&tsm_mode))
@@ -258,14 +255,6 @@ CALLSET_ENTRY (jet, sw_jet)
 	}
 	
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
-}
-
-CALLSET_ENTRY (jet, lamp_update)
-{
-//	if (timed_mode_running_p (&tsm_mode))
-//		leff_start (LEFF_JETS_ACTIVE);
-//	else if (leff_running_p (LEFF_JETS_ACTIVE))
-//		leff_stop (LEFF_JETS_ACTIVE);
 }
 
 CALLSET_ENTRY (jets, end_ball)
@@ -288,3 +277,12 @@ CALLSET_ENTRY (jet, door_start_tsm)
 	timed_mode_begin (&tsm_mode);
 }
 
+CALLSET_ENTRY (jet, status_report)
+{
+	status_page_init ();
+	sprintf ("JET LEVEL %d", jets_bonus_level);
+	font_render_string_center (&font_mono5, 64, 9, sprintf_buffer);
+	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	status_page_complete ();
+}
