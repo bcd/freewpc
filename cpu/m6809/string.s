@@ -93,7 +93,7 @@ __memset_large:
 
 __memset_small:
 	stu	*m0
-	tst	*m0
+	tst	*m1
 	beq	__memset_done
 1$:
 	stb	,x+
