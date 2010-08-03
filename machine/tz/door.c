@@ -383,7 +383,6 @@ static void door_award_flashing (void)
 	door_index_awarded = door_index;
 	/* Start the event and show deff */
 	door_start_event (door_index);
-	deff_start (DEFF_DOOR_AWARD);
 	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
@@ -411,6 +410,9 @@ static void door_award_flashing (void)
 
 	leff_start (LEFF_DOOR_STROBE);
 	score (SC_50K);
+	/* Moved to last and _sync so hopefully it won't
+	 * cause as many stack overflows */
+	deff_start_sync (DEFF_DOOR_AWARD);
 	/* Restart the door rotation */
 	door_award_enable ();
 }

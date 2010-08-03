@@ -84,15 +84,15 @@ void autofire_monitor (void)
 	if (timer_kill_gid (GID_LEFT_RAMP_AUTOFIRE) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);
-		deff_start_sync (DEFF_TNF);
 	}
 	/* Open diverter again */
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
-	/* TODO If the switch fails, it won't fire the ball */
-	if (switch_poll_logical (SW_AUTOFIRE2))
+	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
+	 *  The switch failure could be detected automatically somehow.. */
+	if (switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES)
 	{	
 		sol_request (SOL_AUTOFIRE);
 		if (in_live_game && single_ball_play ())

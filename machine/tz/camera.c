@@ -152,7 +152,7 @@ static void do_camera_award (void)
 	task_exit ();
 }
 
-bool can_award_camera (void)
+inline bool can_award_camera (void)
 {
 	if (cameras_lit != 0 && !multi_ball_play ())
 		return TRUE;
@@ -164,19 +164,19 @@ CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_3S);
 	
-	if (event_did_follow (gumball_exit, camera))
-	{
-		return;
-	}
-	else if (event_did_follow (dead_end, camera))
-	{
-		return;
-	}
-	else if (event_did_follow (mpf_top, camera))
+	if (event_did_follow (mpf_top, camera))
 	{
 		callset_invoke (mpf_collected);
+		return;
 	}
-	else if (can_award_camera ())
+
+	if (event_did_follow (gumball_exit, camera) 
+		|| event_did_follow (dead_end, camera))
+	{
+		return;
+	}
+	
+	if (can_award_camera ())
 	{
 		do_camera_award ();
 		score (SC_500K);
