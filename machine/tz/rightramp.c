@@ -47,7 +47,6 @@ void sw_right_ramp_enter_task (void)
 	/* Decide whether to let the ball onto the mini-playfield,
 	or dump it.  Do this once for each balls that enters the
 	ramp. */
-	kickout_lock (KLOCK_DEFF);
 	do {
 		/* Let it through to the mpf field if allowed */
 		if (mpf_ready_p ())
@@ -70,13 +69,16 @@ void sw_right_ramp_enter_task (void)
 				sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 			}
 			task_sleep_sec (2);
+	
+			/* Wait until allowed to kickout */
+			while (kickout_locks > 0)
+				task_sleep (TIME_100MS);
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			bridge_open_start ();
 			task_sleep (TIME_500MS);
 			bridge_open_stop ();
 		}
 	} while (--right_ramps_entered > 0);
-	kickout_unlock (KLOCK_DEFF);
 	task_exit ();
 }
 

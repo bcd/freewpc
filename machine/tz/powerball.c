@@ -77,7 +77,7 @@ CALLSET_ENTRY (pb_detect, status_report)
 	else if (pb_location & PB_IN_TROUGH)
 		sprintf ("TROUGH %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_GUMBALL)
-		sprintf ("GUMBALL %d DEEP", pb_depth);
+		sprintf ("GUMBALL %d DEEP", 2 - pb_depth);
 	else if (pb_location & PB_IN_PLAY)
 		sprintf ("IN PLAY");
 	font_render_string_center (&font_mono5, 64, 15, sprintf_buffer);

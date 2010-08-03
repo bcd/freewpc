@@ -124,6 +124,7 @@ inline static bool right_inlane_combo_check (void)
 	if (timer_find_gid (GID_LEFT_RAMP) && single_ball_play ())
 	{
 		timer_restart_free (GID_LEFT_RAMP_AUTOFIRE, TIME_5S);
+		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
 	}
 	else

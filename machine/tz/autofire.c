@@ -90,6 +90,7 @@ void autofire_monitor (void)
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
 	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	/* TODO If the switch fails, it won't fire the ball */
 	if (switch_poll_logical (SW_AUTOFIRE2))
 	{	
@@ -106,7 +107,7 @@ void autofire_monitor (void)
 		event_can_follow (autolaunch, right_loop, TIME_4S);
 	}
 	/* Wait for the ball to clear the divertor */
-	task_sleep (TIME_700MS);
+	task_sleep_sec (1);
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();

@@ -34,6 +34,8 @@ score_t tsm_mode_total;
  * slings are triggered */
 bool noflash;
 
+extern void award_unlit_shot (U8 unlit_called_from);
+
 void tsm_mode_init (void);
 void tsm_mode_exit (void);
 
@@ -214,6 +216,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	{	
 		bounded_increment (jets_bonus_level, 50);
 		jets_for_bonus += 5;
+		award_unlit_shot (SW_BOTTOM_JET);
 		sound_send (SND_GLASS_BREAKS);
 		task_sleep (TIME_500MS);
 		/* jetscore is used rather than score_deff_get 

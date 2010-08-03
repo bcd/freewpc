@@ -152,7 +152,7 @@ define CONFIG_TZONE_IP y
 15: Right Trough, noscore
 16: Center Trough, noscore
 17: Left Trough, noscore
-18: Outhole, outhole, service, noplay, intest, debounce(TIME_66MS)
+18: Outhole, outhole, service, noplay, intest
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -630,6 +630,7 @@ Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED+D_RESTARTABL
 Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
+Get ready to Doink: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED+D_TIMEOUT
 MB Ten Million Added: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_RESTARTABLE
 
 Bonus: page(MACHINE2_PAGE), runner, PRI_BONUS
@@ -638,7 +639,8 @@ Score to beat: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-TNF: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
+TNF: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
+TNF exit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 

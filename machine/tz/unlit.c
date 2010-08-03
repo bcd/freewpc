@@ -20,17 +20,29 @@
 
 
 /* Backdoor Award Rules:
- * Award the player a door for getting a certain amount of unlit shots 
- * Currently deadend, rightramp, slot, piano, HH, lock are awarded when 'unlit'
- * Collecting mpf, multiball, door panel, gumball or lock resets count
- * Only works once per game, 20M bonus on each ball */
+ * Award the player a door for collecting 5 unlit shots
+ *  
+ * Targets: rightramp, slot, piano, HH, lock 
+ * Unlit shot awarded when above targets collected 'unlit'
+ * 
+ * A jet level up awards an unlit shot.
+ *
+ * Unlit shots are not awarded from the same shot hit twice consectively
+ *
+ * Backdoor Award cannot be collected by Hitchhiker or Jets, it must be collected
+ * by one of the other unlit targets
+ * 
+ * Collecting mpf, multiball, door panel, gumball or lock 
+ * resets unlit shot count
+ * 
+ * Only works once per game, 20M bonus on each ball bonus thereafter */
 
 /* CALLSET_SECTION (unlit, __machine2__) */
 #include <freewpc.h>
 
 U8 unlit_shot_count;
 bool backdoor_award_collected;
-/* last switch that was collected 'unlit; */
+/* last switch that was collected unlit */
 U8 unlit_called_from_stored;
 
 void backdoor_award_deff (void)
@@ -43,7 +55,7 @@ void backdoor_award_deff (void)
 	deff_exit ();
 }
 
-bool can_award_unlit_shot (U8 unlit_called_from)
+inline static bool can_award_unlit_shot (U8 unlit_called_from)
 {
 	/* Don't allow during multiball or if previously collected */
 	if (multi_ball_play ())
@@ -62,8 +74,9 @@ void award_unlit_shot (U8 unlit_called_from)
 	if (can_award_unlit_shot (unlit_called_from))
 	{
 		unlit_shot_count++;
-		/* Don't allow collecting from Hitchhiker */
-		if (unlit_shot_count > 4 && (unlit_called_from != (SW_HITCHHIKER)))
+		/* Don't allow collecting from Hitchhiker or jets */
+		if (unlit_shot_count > 4 && unlit_called_from != (SW_HITCHHIKER)
+			&& unlit_called_from != (SW_BOTTOM_JET))
 		{
 			sound_send (SND_JUST_TAKEN_A_DETOUR);
 			deff_start (DEFF_BACKDOOR_AWARD);

@@ -158,6 +158,14 @@ void in_the_lead_deff (void)
 	flash_and_exit_deff (15, TIME_66MS);
 }
 
+void get_ready_to_doink_deff (void)
+{
+	sprintf ("DOINK ALERT");
+	flash_small_deff (15, TIME_33MS);
+	sprintf ("DOINK ALERT");
+	flash_and_exit_deff (15, TIME_66MS);
+}
+
 void lucky_bounce_deff (void)
 {
 	sprintf ("LUCKY");
