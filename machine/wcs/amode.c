@@ -74,7 +74,7 @@ void amode_leff1 (void)
 
 void amode_leff (void)
 {
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 	lamp_leff_free (LM_START_BUTTON);
 
 	for (lamplist = LAMPLIST_GOAL_COUNTS; lamplist <= LAMPLIST_RAMP_TICKETS; lamplist++)

@@ -123,7 +123,7 @@ void amode_leff_subset_task (void)
 void amode_leff (void)
 {
 	U8 i;
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 
 	for (;;)
 	{

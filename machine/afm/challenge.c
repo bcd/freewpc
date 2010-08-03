@@ -224,14 +224,14 @@ void martian_kill_deff (void)
 void gi_strobe_leff (void)
 {
 	U8 i;
-	triac_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (TRIAC_GI_MASK);
 	for (;;)
 	{
 		for (i=0; i < 3; i++)
 		{
-			triac_leff_enable (TRIAC_GI_STRING (i));
+			gi_leff_enable (TRIAC_GI_STRING (i));
 			task_sleep (TIME_300MS);
-			triac_leff_disable (TRIAC_GI_STRING (i));
+			gi_leff_disable (TRIAC_GI_STRING (i));
 		}
 	}
 }
@@ -240,9 +240,9 @@ void gi_flash_leff (void)
 {
 	for (;;)
 	{
-		triac_leff_enable (TRIAC_GI_MASK);
+		gi_leff_enable (TRIAC_GI_MASK);
 		task_sleep (TIME_500MS);
-		triac_leff_disable (TRIAC_GI_MASK);
+		gi_leff_disable (TRIAC_GI_MASK);
 		task_sleep (TIME_500MS);
 	}
 }

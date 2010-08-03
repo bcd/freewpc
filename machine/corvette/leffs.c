@@ -44,7 +44,7 @@ static void amode_leff1 (void)
 
 void amode_leff (void)
 {
-	triac_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (TRIAC_GI_MASK);
 	for (lamplist = LAMPLIST_TOP_ROLLOVERS; lamplist <= LAMPLIST_EXTRA_BALL_ROLLOVERS; lamplist++)
 	{
 		leff_create_peer (amode_leff1);
