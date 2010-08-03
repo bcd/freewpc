@@ -201,6 +201,12 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 	score (SC_500K);
 }
 
+void award_door_panel_task (void)
+{
+	callset_invoke (award_door_panel);
+	task_exit ();
+}
+
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
@@ -209,18 +215,19 @@ CALLSET_ENTRY (mpf, mpf_collected)
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
 	flipper_enable ();
-	leff_start (LEFF_FLASHER_HAPPY);
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
 		timed_mode_end (&mpf_mode);
 	}
-	deff_start (DEFF_MPF_AWARD);
-	callset_invoke (award_door_panel);
+	leff_start (LEFF_FLASHER_HAPPY);
+	deff_start_sync (DEFF_MPF_AWARD);
+	/* Does this stop the crashing? */
+	task_create_anon (award_door_panel_task);
 }
 
-void pulse_mpf_magnets_task (void)
+static void pulse_mpf_magnets_task (void)
 {
 	U8 i = 0;
 	while (mpf_ball_count > 0 && i < 10)

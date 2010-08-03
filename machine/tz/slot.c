@@ -131,9 +131,14 @@ void sslot_award (void)
 	
 	/* Don't allow awarding the eb if we can't do so */
 	if (!can_award_extra_ball ())
+	{
+		/* Pick another until it's not an EB */
 		while (sslot_award_index_stored == 0)
+		{
 			sslot_award_index_stored = random_scaled(5);
-	
+		}
+	}
+
 	switch (sslot_award_index_stored)
 	{
 		case 0:

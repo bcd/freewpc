@@ -51,15 +51,21 @@ void sw_right_ramp_enter_task (void)
 		/* Let it through to the mpf field if allowed */
 		if (mpf_ready_p ())
 		{
-			unlit_right_ramps = 4;
+			/* Reset the unlit count so we can
+			 * hint to the player again later */
+			unlit_right_ramps = 0;
 			bridge_open_start ();
 			task_sleep_sec (3);
 			bridge_open_stop ();
 		}
-		else /* Show an animation hint if not enabled for mpf
-			and drop ball */
+		else
 		{
-			bounded_increment (unlit_right_ramps, 4);
+			/* Ramp was hit unlit, increment the hint counter */
+			bounded_increment (unlit_right_ramps, 3);
+			/* tell unlit.c that an unlit shot was made */
+			award_unlit_shot (SW_RIGHT_RAMP);
+
+			 /* Show an animation hint if not enabled for mpf */
 			if (unlit_right_ramps == 3 && !flag_test (FLAG_MULTIBALL_RUNNING))
 				deff_start (DEFF_SHOOT_HITCH);
 			else if (flag_test (FLAG_MULTIBALL_RUNNING)
@@ -73,6 +79,8 @@ void sw_right_ramp_enter_task (void)
 			/* Wait until allowed to kickout */
 			while (kickout_locks > 0)
 				task_sleep (TIME_100MS);
+			
+			/* Drop the ball back to the playfield */
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			bridge_open_start ();
 			task_sleep (TIME_500MS);
@@ -81,7 +89,6 @@ void sw_right_ramp_enter_task (void)
 	} while (--right_ramps_entered > 0);
 	task_exit ();
 }
-
 
 CALLSET_ENTRY (right_ramp, sw_right_ramp)
 {
@@ -100,12 +107,10 @@ CALLSET_ENTRY (right_ramp, sw_right_ramp)
 		sound_send (SND_RAMP_ENTERS_POWERFIELD);
 	else
 	{	
+		/* Ramp was hit unlit */
 		sound_send (SND_RIGHT_RAMP_DEFAULT_ENTER);
-		award_unlit_shot (SW_RIGHT_RAMP);
 	}
 }
-
-
 
 CALLSET_ENTRY (right_ramp, start_ball)
 {
@@ -113,10 +118,11 @@ CALLSET_ENTRY (right_ramp, start_ball)
 	unlit_right_ramps = 0;
 }
 
-/* The default driver doesn't seem to be working */
 CALLSET_ENTRY (right_ramp, ball_search)
 {
-	/* Wait a bit in case a ball has been launched */
+	/* Wait a bit in case a ball has been launched from the
+	 * autofire ball_search, this stops my loose hanging ramp
+	 * from hitting the ball on the way round the loop */
 	task_sleep_sec (1);
 	bridge_open_start ();
 	task_sleep (TIME_500MS);

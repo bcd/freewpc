@@ -52,8 +52,9 @@ void spiral_loop_deff (void)
 	dmd_alloc_low_clean ();
 	psprintf ("1 SPIRAL", "%d SPIRALS", spiral_loops);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	sprintf_score (score_deff_get());	
+	sprintf_score (spiral_mode_total);	
 	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

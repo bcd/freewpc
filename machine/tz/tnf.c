@@ -4,24 +4,24 @@
 #include <freewpc.h>
 
 extern U8 mpf_buttons_pressed;
-
+/* used to randomise the position of the DOINK text */
 U8 tnf_x;
 U8 tnf_y;
+
+/* Total amount scored from doink mode */
 score_t tnf_score;
 
 void tnf_deff (void)
 {
-	timer_restart_free (GID_TNF_RUNNING, TIME_3S);
 	while (task_find_gid (GID_TNF_RUNNING))
 	{
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
-		sprintf ("%d DOINKS", mpf_buttons_pressed);
+		psprintf ("%d DOINK", "%d DOINKS", mpf_buttons_pressed);
 		font_render_string_center (&font_steel, 64 + tnf_x, 16 + tnf_y, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_33MS);
 	}
-	callset_invoke (tnf_end);
 	deff_exit ();
 }
 
@@ -39,8 +39,7 @@ void tnf_exit_deff (void)
 CALLSET_ENTRY (tnf, tnf_button_pushed)
 {
 	bounded_increment (mpf_buttons_pressed, 255);
-	sound_send (SND_CLOCK_WIND_1 + mpf_buttons_pressed);
-	score (SC_250K);
+	sound_send (SND_POWERFIELD_HIT_2 + random_scaled (6));
 	score_add (tnf_score, score_table[SC_250K]);
 	tnf_x = random_scaled(10);
 	tnf_y = random_scaled(8);
@@ -49,15 +48,21 @@ CALLSET_ENTRY (tnf, tnf_button_pushed)
 CALLSET_ENTRY (tnf, tnf_start)
 {
 	flipper_disable ();
+	music_request (MUS_FADE_EXIT, PRI_JACKPOT);
 	mpf_buttons_pressed = 1;
 	score_zero (tnf_score);
 	tnf_x = 0;
 	tnf_y = 0;
+	timer_restart_free (GID_TNF_RUNNING, TIME_3S);
+	deff_start_sync (DEFF_TNF);
+	callset_invoke (tnf_end);
 }
 
 CALLSET_ENTRY (tnf, tnf_end)
 {
+	score (tnf_score);
 	flipper_enable ();
+	music_refresh ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
 	deff_start_sync (DEFF_TNF_EXIT);
 }

@@ -401,6 +401,19 @@ CALLSET_ENTRY (pb_detect, right_ball_grabbed)
 	pb_ball_grabbed ();
 }
 
+CALLSET_ENTRY (pb_detect, single_ball_play)
+{
+	/* If the powerball is in the maybe state
+	 * when it drops to single ball play after
+	 * a multiball, enable the magnets to aid detection
+	 */
+	if (pb_location & PB_MAYBE_IN_PLAY)
+	{
+		magnet_enable_catch (MAG_LEFT);
+		magnet_enable_catch (MAG_RIGHT);
+	}
+}
+
 CALLSET_ENTRY (pb_detect, music_refresh)
 {
 	if (pb_location == PB_IN_PLAY && !multi_ball_play ())
