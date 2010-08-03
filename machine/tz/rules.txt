@@ -2,9 +2,6 @@
 BACK TO THE ZONE RULES
 
 Author: Sonny_Jim <sonny_jim@hotmail.com>
-Last Revised Sat May 29 19:53:04 GMT 2010
-
-
 
 Skill Shot
 ==========
@@ -25,7 +22,6 @@ you have collected at least 4 Spiralawards.
 Once all Spiralawards have been collected, you are awarded 20M and every
 Spiralaward apart from the extra ball is relit.  To retrigger the Spiralaward
 once it has been completed once requires you to complete a rollover set.
-
 
 Left Ramps
 ==========
@@ -60,9 +56,10 @@ jackpot and Skill Shot jackpot available simultaenously.
 
 Camera
 ======
-Can be lit by the scoring
-- Camera door panel
-- Camera lit during Super Slot round
+Can be lit by:
+
+- The Camera door panel
+- The Super Slot round
 - 3 left ramps
 
 Awards (in order)
@@ -92,23 +89,6 @@ collected along with a door panel by sending the ball into the top hole.
 
 If you manage to sneak in a ball during multiball, you get some points too.
 
-Super Skill Multiball
-=====================
-Shoot a ball up the left ramp and hit the skill shot to score a jackpot.  
-Shoot left ramps to relight the jackpot
-
-Clock Chaos Multiball
-=====================
-Hit the clock to relight the jackpot.  Where the jackpot is collected from 
-moves each time it is collected:
-
-- Left Ramp 15 Million
-- Right Ramp 20 Million
-- Piano 25 Million
-- Camera 30 Million
-- Power Payoff 40 Million
-- Dead End 50 Million
-
 Multiball
 =========
 If no jackpot is scored and 2 balls drain, the player is offered a multiball
@@ -120,6 +100,15 @@ If 3 balls are in play when the jackpot is collected, 10M is added to the
 jackpot.  If the Powerball is used to collect the jackpot, the jackpot is
 doubled(!)
 
+Note: There is also 'Clock Chaos' and 'Super Skill' multiball modes, details
+in the 'Door Panels' section.
+
+Doink Mode
+==========
+Shoot the left ramp from the right inlane and the ball will travel down into
+the autofire and be held there for 3 seconds.  During this time, press the
+flipper buttons for 250k per button push.
+
 Slot Machine and Piano
 ======================
 Hit either when lit to award a Door panel.  If either are unlit when hit and
@@ -127,8 +116,30 @@ you currently have less than 8 panels, both Slot and Piano will be lit.
 
 Door Panels
 ===========
-Door panels are awarded by hitting the Slot machine or piano when lit, or by
-being awarded by the camera.  Door panels cannot be collected during multiball modes.
+Door panels are awarded by:
+
+- Slot machine or piano when lit
+- The 3rd Camera award
+- Completing the mini playfield.  
+
+Door panels cannot be collected during multiball modes.
+
+Door Panel: Super Skill Multiball
+=====================
+3 ball multiball mode.  Shoot a ball up the left ramp and hit the skill shot 
+to score a jackpot.  Shoot left ramps to relight the jackpot
+
+Door Panel: Clock Chaos Multiball
+=====================
+3 ball multiball mode.  Hit the clock to relight the jackpot.  Where the 
+jackpot is collected from moves each time it is collected:
+
+- Left Ramp 15 Million
+- Right Ramp 20 Million
+- Piano 25 Million
+- Camera 30 Million
+- Power Payoff 40 Million
+- Dead End 50 Million
 
 Door Panel : Greed
 ==================
@@ -136,14 +147,63 @@ Hit the standup targets during the mode for 5M each.
 
 Door Panel : 10 Million
 =======================
-Awards 10 Million points.  Can be lit through the camera or Super Slot also.
+Awards 10 Million points.  Can also be lit by collecting the Camera,
+Spiralaward or Super Slot 10M point awards.
 
 Door Panel : Battle the Power
 =============================
-Opens up the mini playfield, via the right ramp
+Opens up the mini playfield, via the right ramp.
+
+Door Panel: Camera
+==================
+Enable the camera to be collected.
+
+Door Panel: Lite Gumball 
+========================
+Enable the gumball to be collected.
+
+Door Panel: Hitchhiker
+======================
+30 second timed mode, shoot the hitchhiker lane for 10M points.
+
+Door Panel: Townsquare Madness
+==============================
+30 second timed mode, jets, slings and clock target are worth 500K.
+
+Door Panel: Lite Extra Ball
+===========================
+Lights an easy extra ball can be collected by hitting the lock.
+This door is lit automatically if extra balls are disabled.
+
+Door Panel: Clock Millions
+==========================
+30 second timed mode, shoot the clock target for 5M points.
+
+Door Panel: Spiral
+==================
+30 second timed mode, shoot loops for 10M points.
+
+Door Panel: Fastlock
+====================
+40 second timed mode, shoot loops to build up jackpot.  Fast loops score more
+than slow loops.  Shoot the lock to collect the jackpot.
+
+Door Panel: Super Slot
+======================
+30 second timed mode, shoot the slot machine to collect one of the following:
+
+- Extra ball
+- Light gumball
+- Light 'Battle the Power'
+- Light Camera
+- 10 Million
+- 5 Million
+
 
 Bonus
 =====
+
+Press both flipper buttons in together to speed up the bonus animation.
 
 - Door panels	1M each
 - Loops		100K each
@@ -173,6 +233,10 @@ just have to collect a gumball to clear them.
 - Easy light Door panels
 If you have under 8 door panels, hitting the slot or piano when unlit will
 relight them.
+
+- Fire when detected empty
+This makes the autofire kick even when it hasn't detect a ball in there.  Turn
+this option on if the autofire opto has failed
 
 Combos and Lucky bounces
 ========================
