@@ -60,7 +60,7 @@ CALLSET_ENTRY (tnf, tnf_start)
 
 CALLSET_ENTRY (tnf, tnf_end)
 {
-	score (tnf_score);
+	score_add (current_score, tnf_score);
 	flipper_enable ();
 	music_refresh ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
