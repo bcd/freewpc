@@ -239,11 +239,58 @@
         </child>
         <child>
           <object class="GtkToolbar" id="toolbar1">
-            <property name="height_request">24</property>
             <property name="visible">True</property>
             <property name="toolbar_style">icons</property>
             <property name="icon_size">12</property>
             <property name="icon_size_set">True</property>
+            <child>
+              <object class="GtkToolButton" id="toolbutton4">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Pause</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-media-pause</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleToolButton" id="toolbutton1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Coin Door</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-help</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbutton2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Left</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-goto-first</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbutton3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Right</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-goto-last</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2269,84 +2316,9 @@
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
                               <object class="GtkLabel" id="label70">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">25</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2356,7 +2328,7 @@
                             <child>
                               <object class="GtkLabel" id="label71">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">26</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2368,7 +2340,7 @@
                             <child>
                               <object class="GtkLabel" id="label72">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">27</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2380,7 +2352,7 @@
                             <child>
                               <object class="GtkLabel" id="label73">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">28</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2392,7 +2364,7 @@
                             <child>
                               <object class="GtkLabel" id="label74">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">29</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2404,7 +2376,7 @@
                             <child>
                               <object class="GtkLabel" id="label75">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">30</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2416,7 +2388,7 @@
                             <child>
                               <object class="GtkLabel" id="label76">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">31</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2428,7 +2400,7 @@
                             <child>
                               <object class="GtkLabel" id="label77">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">24</property>
+                                <property name="label" translatable="yes">32</property>
                               </object>
                               <packing>
                                 <property name="left_attach">3</property>
@@ -2436,6 +2408,81 @@
                                 <property name="top_attach">7</property>
                                 <property name="bottom_attach">8</property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                         </child>
