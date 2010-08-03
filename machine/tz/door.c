@@ -74,7 +74,7 @@ const char *door_award_goals[] = {
 	"PIANO NOW",
 };
 
-void door_start_event (U8 id)
+static void door_start_event (U8 id)
 {
 	switch (id)
 	{
@@ -108,7 +108,7 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
-static inline bool can_award_door_panel (void)
+static bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
 	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
@@ -170,81 +170,6 @@ void slot_animation_sound_task (void)
 
 void draw_door_award_text (void)
 {
-	switch (door_index_awarded)
-	{
-		case 0:
-			font_render_string_left (&font_mono5, 3, 3, "TOWNSQUARE");
-			font_render_string_left (&font_mono5, 3, 16, "MADNESS");
-			break;
-		case 1:
-			font_render_string_left (&font_mono5, 3, 3, "EXTRA BALL");
-			font_render_string_left (&font_mono5, 3, 16, "LIT");
-			break;
-
-		case 2:
-			font_render_string_left (&font_mono5, 3, 3, "SUPER");
-			font_render_string_left (&font_mono5, 3, 16, "SLOT MACHINE");
-			break;
-
-		case 3:
-			font_render_string_left (&font_mono5, 3, 3, "CLOCK");
-			font_render_string_left (&font_mono5, 3, 16, "MILLIONS");
-			break;
-
-		case 4:
-			font_render_string_left (&font_mono5, 3, 3, "SPIRAL");
-			font_render_string_left (&font_mono5, 3, 16, "ROUND");
-			break;
-		case 5:
-			font_render_string_left (&font_mono5, 3, 3, "BATTLE THE");
-			font_render_string_left (&font_mono5, 3, 16, "POWER");
-			break;
-		
-		case 6:
-			font_render_string_left (&font_mono5, 3, 3, "10 MILLION");
-			font_render_string_left (&font_mono5, 3, 16, "POINTS");
-			break;
-
-		case 7:
-			font_render_string_left (&font_mono5, 3, 3, "GREED");
-			font_render_string_left (&font_mono5, 3, 16, "ROUND");
-			break;
-
-		case 8:
-			font_render_string_left (&font_mono5, 3, 3, "CAMERA");
-			font_render_string_left (&font_mono5, 3, 16, "LIT");
-			break;
-
-		case 9:
-			font_render_string_left (&font_mono5, 3, 3, "HITCHHIKER");
-			font_render_string_left (&font_mono5, 3, 16, "ROUND");
-			break;
-
-		case 10:
-			font_render_string_left (&font_mono5, 3, 3, "CLOCK CHAOS");
-			font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
-			break;
-
-		case 11:
-			font_render_string_left (&font_mono5, 3, 3, "SUPER SKILL");
-			font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
-			break;
-
-		case 12:
-			font_render_string_left (&font_mono5, 3, 3, "FASTLOCK");
-			font_render_string_left (&font_mono5, 3, 16, "ROUND");
-			break;
-
-		case 13:
-			font_render_string_left (&font_mono5, 3, 3, "GUMBALL");
-			font_render_string_left (&font_mono5, 3, 16, "LIT");
-			break;
-
-		case 14:
-			font_render_string_left (&font_mono5, 3, 3, "BACK TO");
-			font_render_string_left (&font_mono5, 3, 16, "THE ZONE");
-			break;
-	}
 }
 
 void door_award_deff (void)
@@ -319,7 +244,83 @@ void door_award_deff (void)
 		frame_draw (fno);
 		/* Flip it, as text is drawn to the low page */
 		dmd_flip_low_high ();	
-		draw_door_award_text ();
+		//draw_door_award_text ();
+		switch (door_index_awarded)
+		{
+			case 0:
+				font_render_string_left (&font_mono5, 3, 3, "TOWNSQUARE");
+				font_render_string_left (&font_mono5, 3, 16, "MADNESS");
+				break;
+			case 1:
+				font_render_string_left (&font_mono5, 3, 3, "EXTRA BALL");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 2:
+				font_render_string_left (&font_mono5, 3, 3, "SUPER");
+				font_render_string_left (&font_mono5, 3, 16, "SLOT MACHINE");
+				break;
+	
+			case 3:
+				font_render_string_left (&font_mono5, 3, 3, "CLOCK");
+				font_render_string_left (&font_mono5, 3, 16, "MILLIONS");
+				break;
+	
+			case 4:
+				font_render_string_left (&font_mono5, 3, 3, "SPIRAL");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+			case 5:
+				font_render_string_left (&font_mono5, 3, 3, "BATTLE THE");
+				font_render_string_left (&font_mono5, 3, 16, "POWER");
+				break;
+			
+			case 6:
+				font_render_string_left (&font_mono5, 3, 3, "10 MILLION");
+				font_render_string_left (&font_mono5, 3, 16, "POINTS");
+				break;
+	
+			case 7:
+				font_render_string_left (&font_mono5, 3, 3, "GREED");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 8:
+				font_render_string_left (&font_mono5, 3, 3, "CAMERA");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 9:
+				font_render_string_left (&font_mono5, 3, 3, "HITCHHIKER");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 10:
+				font_render_string_left (&font_mono5, 3, 3, "CLOCK CHAOS");
+				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+				break;
+	
+			case 11:
+				font_render_string_left (&font_mono5, 3, 3, "SUPER SKILL");
+				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+				break;
+	
+			case 12:
+				font_render_string_left (&font_mono5, 3, 3, "FASTLOCK");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 13:
+				font_render_string_left (&font_mono5, 3, 3, "GUMBALL");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 14:
+				font_render_string_left (&font_mono5, 3, 3, "BACK TO");
+				font_render_string_left (&font_mono5, 3, 16, "THE ZONE");
+				break;
+	
+		}		
 		/* Flip it again so text is now on high page */
 		dmd_flip_low_high ();	
 		dmd_show2 ();
@@ -375,7 +376,7 @@ static inline void door_award_enable (void)
 }
 
 
-static void door_award_flashing (void)
+inline void door_award_flashing (void)
 {
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
@@ -383,6 +384,7 @@ static void door_award_flashing (void)
 	door_index_awarded = door_index;
 	/* Start the event and show deff */
 	door_start_event (door_index);
+	deff_start (DEFF_DOOR_AWARD);
 	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
@@ -410,9 +412,8 @@ static void door_award_flashing (void)
 
 	leff_start (LEFF_DOOR_STROBE);
 	score (SC_50K);
-	/* Moved to last and _sync so hopefully it won't
+	/* Moved to last so hopefully it won't
 	 * cause as many stack overflows */
-	deff_start_sync (DEFF_DOOR_AWARD);
 	/* Restart the door rotation */
 	door_award_enable ();
 }
@@ -440,8 +441,8 @@ CALLSET_ENTRY (door, lamp_update)
 
 CALLSET_ENTRY (door, award_door_panel)
 {
-	if (can_award_door_panel ())
-	{
+//	if (can_award_door_panel ())
+//	{
 		if (door_index == LITZ_DOOR_INDEX)
 		{
 			flag_on (FLAG_BTTZ_RUNNING);
@@ -454,7 +455,7 @@ CALLSET_ENTRY (door, award_door_panel)
 		
 		unlit_shot_count = 0;
 		door_lamp_update ();
-	}
+//	}
 }
 
 CALLSET_ENTRY (door, door_start_10M)
@@ -467,13 +468,16 @@ CALLSET_ENTRY (door, ball_count_change)
 	door_lamp_update ();
 }
 
+extern void award_door_panel_task (void);
+
 CALLSET_ENTRY(door, sw_piano)
 {
 	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		callset_invoke (award_door_panel);
+		//callset_invoke (award_door_panel);
+		task_create_anon (award_door_panel_task);
 	}
 	else
 	{
@@ -489,6 +493,7 @@ CALLSET_ENTRY(door, sw_piano)
 	}
 }
 
+
 CALLSET_ENTRY (door, shot_slot_machine)
 {
 	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
@@ -496,6 +501,7 @@ CALLSET_ENTRY (door, shot_slot_machine)
 		flag_off (FLAG_SLOT_DOOR_LIT);
 		flag_on (FLAG_PIANO_DOOR_LIT);
 		callset_invoke (award_door_panel);
+		//task_create_anon (award_door_panel_task);
 	}
 	else
 	{

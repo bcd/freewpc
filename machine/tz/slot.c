@@ -181,21 +181,15 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	set_valid_playfield ();
 	score (SC_1K);
 
-	if (event_did_follow (dead_end, slot))
+	if (event_did_follow (dead_end, slot)
+	 	|| event_did_follow (gumball_exit, slot)
+		|| event_did_follow (piano, slot)
+		|| event_did_follow (camera, slot))
 	{
 		/* dead end was recently hit, so ignore slot */
-	}
-	if (event_did_follow (gumball_exit, slot))
-	{
-		/* dead end was recently hit, so ignore slot */
-	}
-	else if (event_did_follow (piano, slot))
-	{
 		/* piano was recently hit, so ignore slot */
-	}
-	else if (event_did_follow (camera, slot))
-	{
 		/* camera was recently hit, so ignore slot */
+		return;
 	}
 	else if (event_did_follow (skill_shot, slot))
 	{
@@ -212,7 +206,6 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	else
 	{
 		score (SC_50K);
-
 		/* Tell door.c that the slot machine was hit */
 		callset_invoke (shot_slot_machine);
 	}
@@ -239,13 +232,6 @@ CALLSET_ENTRY (slot, display_update)
 CALLSET_ENTRY (slot, music_refresh)
 {
 	timed_mode_music_refresh (&sslot_mode);
-}
-
-CALLSET_ENTRY (slot, lamp_update)
-{
-	//if (!timed_mode_running_p (&sslot_mode))
-	//	lamp_tristate_off (LM_SLOT_MACHINE);
-		
 }
 
 CALLSET_ENTRY (slot, door_start_sslot)
