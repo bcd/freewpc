@@ -160,23 +160,27 @@ inline bool can_award_camera (void)
 		return FALSE;
 }
 
+void mpf_collected_task (void)
+{
+	callset_invoke (mpf_collected);
+	task_exit ();	
+}
+
 CALLSET_ENTRY (camera, sw_camera)
 {
 	device_switch_can_follow (camera, slot, TIME_3S);
 	
-	if (event_did_follow (mpf_top, camera))
-	{
-		callset_invoke (mpf_collected);
-		return;
-	}
-
 	if (event_did_follow (gumball_exit, camera) 
 		|| event_did_follow (dead_end, camera))
 	{
 		return;
 	}
 	
-	if (can_award_camera ())
+	if (event_did_follow (mpf_top, camera))
+	{
+		task_create_anon (mpf_collected_task);
+	}
+	else if (can_award_camera ())
 	{
 		do_camera_award ();
 		score (SC_500K);

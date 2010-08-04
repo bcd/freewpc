@@ -201,6 +201,7 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 	score (SC_500K);
 }
 
+/* Does this stop the crashing? */
 void award_door_panel_task (void)
 {
 	callset_invoke (award_door_panel);
@@ -211,6 +212,7 @@ void award_door_panel_task (void)
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	/* Inform combo.c that the mpf was collected */
+	task_create_anon (award_door_panel_task);
 	callset_invoke (combo_mpf_collected);
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
@@ -222,9 +224,7 @@ CALLSET_ENTRY (mpf, mpf_collected)
 		timed_mode_end (&mpf_mode);
 	}
 	leff_start (LEFF_FLASHER_HAPPY);
-	deff_start_sync (DEFF_MPF_AWARD);
-	/* Does this stop the crashing? */
-	task_create_anon (award_door_panel_task);
+	deff_start (DEFF_MPF_AWARD);
 }
 
 static void pulse_mpf_magnets_task (void)
