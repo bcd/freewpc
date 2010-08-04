@@ -175,6 +175,7 @@ void window_push (struct window_ops *ops, void *priv)
 	window_stop_thread ();
 	if (win_top == NULL)
 	{
+		flipper_enable ();
 		if (!in_test)
 			window_push_first ();
 		else
@@ -186,6 +187,7 @@ void window_push (struct window_ops *ops, void *priv)
 	}
 	else if (win_top < &win_stack[MAX_WIN_STACK])
 	{
+		flipper_disable ();
 		win_top++;
 	}
 	else
@@ -222,6 +224,8 @@ void window_pop_quiet (void)
 	else
 	{
 		win_top--;
+		if (win_top == &win_stack[0])
+			flipper_enable ();
 		window_start_thread ();
 		window_redraw ();
 	}
