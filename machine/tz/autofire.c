@@ -74,7 +74,7 @@ void autofire_monitor (void)
 	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
-	task_sleep (TIME_500MS);
+	task_sleep (TIME_200MS);
 	
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)

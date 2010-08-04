@@ -101,7 +101,7 @@ void gumball_release_task (void)
 
 		/* Original timeout was 90x33ms = 3sec */
 		/* Shorter timeout will work when geneva is broken */
-		timeout = 25;
+		timeout = 20;
 		while ((gumball_geneva_tripped == FALSE) && (gumball_exit_tripped == FALSE) && (--timeout > 0))
 		{
 			sol_request (SOL_GUMBALL_RELEASE);
@@ -139,6 +139,15 @@ void gumball_divertor_close (void)
 	gumball_div_stop ();
 }
 
+
+CALLSET_ENTRY (gumball, sw_lower_right_magnet)
+{
+	if (in_test)
+	{
+		magnet_disable_catch (MAG_RIGHT);
+		gumball_divertor_open ();
+	}
+}
 
 void sw_gumball_right_loop_entered (void)
 {

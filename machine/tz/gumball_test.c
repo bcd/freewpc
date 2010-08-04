@@ -79,6 +79,7 @@ void switch_monitor_draw (const switch_monitor_t *monitor, U8 count)
 void tz_gumball_test_init (void)
 {
 	gumball_op = 0;
+	magnet_disable_catch (MAG_RIGHT);
 }
 
 

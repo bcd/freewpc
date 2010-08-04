@@ -175,15 +175,22 @@ void pb_set_location (U8 location, U8 depth)
 			pb_announce_needed = 0;
 			callset_invoke (powerball_lost);
 			/* in the 'maybe' state, try to grab ball with
-			 * magnets to figure out the ball type */
-			if (single_ball_play ())
-			{
-				magnet_enable_catch (MAG_LEFT);
-				magnet_enable_catch (MAG_RIGHT);
-			}
+			 * magnets to figure out the ball type
+			 * This is done by maghelper.c */
 		}
 	}
 }
+
+/* Used by maghelper.c to turn on the magnets or not */
+bool pb_maybe_in_play (void)
+{
+	if (single_ball_play () 
+		&& pb_location & PB_MAYBE_IN_PLAY)
+		return TRUE;
+	else
+		return FALSE;
+}
+
 
 /** Called when the powerball is known *NOT* to be in a particular 
  * location.  If that's where we thought the powerball was before,
@@ -399,19 +406,6 @@ CALLSET_ENTRY (pb_detect, left_ball_grabbed)
 CALLSET_ENTRY (pb_detect, right_ball_grabbed)
 {
 	pb_ball_grabbed ();
-}
-
-CALLSET_ENTRY (pb_detect, single_ball_play)
-{
-	/* If the powerball is in the maybe state
-	 * when it drops to single ball play after
-	 * a multiball, enable the magnets to aid detection
-	 */
-	if (pb_location & PB_MAYBE_IN_PLAY)
-	{
-		magnet_enable_catch (MAG_LEFT);
-		magnet_enable_catch (MAG_RIGHT);
-	}
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)

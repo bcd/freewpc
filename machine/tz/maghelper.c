@@ -81,7 +81,12 @@ static void magnet_enable_monitor_task (void)
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
-		
+		/* If in maybe state, turn on the magnets to help detection */
+		if (pb_maybe_in_play ())
+		{
+			magnet_enable_catch (MAG_LEFT);
+			magnet_enable_catch (MAG_RIGHT);
+		}
 		/* Left Magnet grabs */
 		if (magnet_busy (MAG_LEFT)
 			|| task_find_gid (GID_LEFT_BALL_GRABBED))
