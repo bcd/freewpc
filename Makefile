@@ -287,7 +287,7 @@ endif
 CFLAGS += $(EXTRA_CFLAGS) $(AUTO_CFLAGS)
 
 SCHED_HEADERS := include/freewpc.h include/interrupt.h $(SCHED_HEADERS)
-SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS))) $(MACHINE_SCHED_FLAGS)
+SCHED_FLAGS += $(patsubst %,-i % , $(notdir $(SCHED_HEADERS)))
 ifeq ($(CONFIG_DMD),y)
 SCHED_FLAGS += -D CONFIG_DMD
 endif
@@ -910,7 +910,7 @@ fonts clean-fonts:
 sched: $(SCHED_SRC) tools/sched/sched.make
 
 $(SCHED_SRC): $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(SCHED) $(SCHED_HEADERS) $(MAKE_DEPS)
-	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE)
+	$(SCHED) -o $@ $(SCHED_FLAGS) $(SYSTEM_SCHEDULE) $(MACHINE_SCHEDULE) $(MACHINE_SCHED_FLAGS)
 
 #######################################################################
 ###	Tracing
