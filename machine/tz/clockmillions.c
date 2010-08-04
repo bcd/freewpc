@@ -25,9 +25,7 @@
 
 U8 clock_millions_mode_timer;
 U8 clock_mode_hits;
-U8 clock_default_hits;
-
-U8 clock_millions_timer;
+score_t clock_mode_score;
 
 void clock_millions_mode_init (void);
 void clock_millions_mode_exit (void);
@@ -37,8 +35,9 @@ struct timed_mode_ops clock_millions_mode = {
 	.init = clock_millions_mode_init,
 	.exit = clock_millions_mode_exit,
 	.gid = GID_CLOCK_MILLIONS_MODE_RUNNING,
-	.music = MUS_TOWN_SQUARE_MADNESS,
+	.music = MUS_CLOCK_CHAOS1,
 	.deff_running = DEFF_CLOCK_MILLIONS_MODE,
+	.deff_ending = DEFF_CLOCK_MILLIONS_MODE_TOTAL,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 20,
 	.timer = &clock_millions_mode_timer,
@@ -46,17 +45,38 @@ struct timed_mode_ops clock_millions_mode = {
 	.pause = system_timer_pause,
 };
 
-void clock_millions_hit_deff (void)
+void clock_millions_mode_total_deff (void)
 {
-	generic_deff ("CLOCK MILLIONS", "5,000,000");
+	sound_send (SND_CLOCK_GONG);
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, 64, 5, "CLOCK MILLIONS");
+	sprintf_score (clock_mode_score);
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
+	dmd_show_low ();
+	task_sleep_sec (4);
+	deff_exit ();
 }
 
-void clock_default_hit_deff (void)
+
+void clock_millions_explode_deff (void)
 {
 	dmd_alloc_low_clean ();
-	sprintf ("CLOCK HIT %d", clock_default_hits);
+	font_render_string_center (&font_fixed6, 64, 10, "CLOCK DESTROYED");
+	font_render_string_center (&font_mono5, 64, 21, "20 MILLION");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+
+}
+
+void clock_millions_hit_deff (void)
+{
+	dmd_alloc_low_clean ();
+	psprintf ("CLOCK HIT %d TIME", "CLOCK HIT %d TIMES", clock_mode_hits);
 	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 21, "50,000");
+	sprintf_score (clock_mode_score);
+	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -81,28 +101,39 @@ void clock_millions_mode_deff (void)
 
 CALLSET_ENTRY (clock_millions, sw_clock_target)
 {
-	if (!lamp_flash_test (LM_CLOCK_MILLIONS))
+	
+	if (timed_mode_running_p (&clock_millions_mode))
+	{
+		leff_start (LEFF_CLOCK_TARGET);
+		/* Award bonus if hit 6 times */
+		if (++clock_mode_hits > 5)
+		{
+			sound_send (SND_EXPLOSION_3);
+			score (SC_20M);
+			score_add (clock_mode_score, score_table[SC_20M]);
+			deff_start (DEFF_CLOCK_MILLIONS_EXPLODE);
+			timed_mode_end (&clock_millions_mode);
+		}
+		else
+		{
+			sound_send (SND_CLOCK_BELL);
+			score (SC_5M);
+			score_add (clock_mode_score, score_table[SC_5M]);	
+			deff_start (DEFF_CLOCK_MILLIONS_HIT);
+		}
+	}
+	else
 	{
 		callset_invoke (sw_jet_noflash);
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
 	}
-	else
-	{
-		sound_send (SND_CLOCK_BELL);
-		leff_start (LEFF_CLOCK_TARGET);
-		deff_start (DEFF_CLOCK_MILLIONS_HIT);
-		score (SC_5M);
-	
-		if (clock_mode_hits <= 4)
-		{
-			clock_mode_hits++;
-		}
-	}
 }
+
 void clock_millions_mode_init (void)
 {
 	clock_mode_hits = 0;
+	score_zero (clock_mode_score);
 	lamp_tristate_flash (LM_CLOCK_MILLIONS);
 }
 
@@ -113,12 +144,6 @@ void clock_millions_mode_expire (void)
 
 void clock_millions_mode_exit (void)
 {
-	lamp_tristate_off (LM_CLOCK_MILLIONS);
-}
-
-CALLSET_ENTRY (clock_millions, start_ball)
-{
-	clock_default_hits = 0;
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 }
 
@@ -134,7 +159,29 @@ CALLSET_ENTRY (clock_millions, display_update)
 
 CALLSET_ENTRY (clock_millions, music_refresh)
 {
-	timed_mode_music_refresh (&clock_millions_mode);
+	if (!timed_mode_running_p (&clock_millions_mode))
+		return;
+	switch (clock_mode_hits)
+	{
+		case 0:
+			music_request (MUS_CLOCK_CHAOS1, PRI_GAME_MODE1);
+			break;
+		case 1:
+			music_request (MUS_CLOCK_CHAOS2, PRI_GAME_MODE1);
+			break;
+		case 2:
+			music_request (MUS_CLOCK_CHAOS3, PRI_GAME_MODE1);
+			break;
+		case 3:
+			music_request (MUS_CLOCK_CHAOS4, PRI_GAME_MODE1);
+			break;
+		case 4:
+			music_request (MUS_CLOCK_CHAOS5, PRI_GAME_MODE1);
+			break;
+		default:
+			music_request (MUS_CLOCK_CHAOS5, PRI_GAME_MODE1);
+			break;
+	}
 }
 
 CALLSET_ENTRY (clock_millions, door_start_clock_millions)
