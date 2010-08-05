@@ -364,7 +364,7 @@ void high_score_award_credits (U8 *adjptr)
 void high_score_enter_initials (U8 position)
 {
 	struct high_score *hsp = &high_score_table[position];
-	if (hsp->initials[0] < ' ')
+	if (hsp->initials[0] <= MAX_PLAYERS)
 	{
 		dbprintf ("High score %d needs initials\n", position);
 		/* Announce that player # has qualified */
