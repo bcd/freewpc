@@ -68,9 +68,17 @@ static void magnet_enable_monitor_task (void)
 	for (;;)
 	{
 		/* Lower Right magnet grabs */
-		/* Catch the ball for the camera shot, don't care about gumball */
 				
-		if (timer_find_gid (GID_SPIRALAWARD)
+		if (magnet_busy (MAG_RIGHT) || task_find_gid (GID_RIGHT_BALL_GRABBED))
+		{
+			/* Do nothing, magnet is busy */
+		}
+		/* Catch the ball for the camera shot, don't care about gumball */
+		else if (can_award_camera ())
+		{	
+			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
+		}
+		else if (timer_find_gid (GID_SPIRALAWARD)
 			|| timer_find_gid (GID_LOCK_KICKED)
 			|| timer_find_gid (GID_BALL_LAUNCH)
 			|| timer_find_gid (GID_LOAD_ATTEMPT)
@@ -79,16 +87,9 @@ static void magnet_enable_monitor_task (void)
 		{
 			magnet_disable_catch (MAG_RIGHT);
 		}
-		else if (can_award_camera () 
-			&& !magnet_busy (MAG_RIGHT)
-			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
-		{	
-			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
-		}
-	
+			
 		/* Left Magnet grabs */
-		if (magnet_busy (MAG_LEFT)
-			|| task_find_gid (GID_LEFT_BALL_GRABBED))
+		if (magnet_busy (MAG_LEFT) || task_find_gid (GID_LEFT_BALL_GRABBED))
 		{
 			/* Do nothing, magnet is busy */
 		}
