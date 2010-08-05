@@ -69,32 +69,23 @@ static void magnet_enable_monitor_task (void)
 	{
 		/* Lower Right magnet grabs */
 		/* Catch the ball for the camera shot, don't care about gumball */
-		if (can_award_camera () 
+				
+		if (timer_find_gid (GID_SPIRALAWARD)
+			|| timer_find_gid (GID_LOCK_KICKED)
+			|| timer_find_gid (GID_BALL_LAUNCH)
+			|| timer_find_gid (GID_LOAD_ATTEMPT)
+			|| timed_mode_running_p (&spiral_mode) 
+			|| timed_mode_running_p (&fastlock_mode))
+		{
+			magnet_disable_catch (MAG_RIGHT);
+		}
+		else if (can_award_camera () 
 			&& !magnet_busy (MAG_RIGHT)
 			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
-		
-		if (timer_find_gid (GID_SPIRALAWARD)
-			&& timer_find_gid (GID_LOCK_KICKED)
-			&& timer_find_gid (GID_BALL_LAUNCH)
-			&& timer_find_gid (GID_LOAD_ATTEMPT)
-			&& timed_mode_running_p (&spiral_mode) 
-			&& timed_mode_running_p (&fastlock_mode))
-		{
-			magnet_disable_catch (MAG_RIGHT);
-		}
-
-
-
-		
-		/* If in maybe state, turn on the magnets to help detection */
-		if (pb_maybe_in_play ())
-		{
-			magnet_enable_catch (MAG_LEFT);
-			magnet_enable_catch (MAG_RIGHT);
-		}
+	
 		/* Left Magnet grabs */
 		if (magnet_busy (MAG_LEFT)
 			|| task_find_gid (GID_LEFT_BALL_GRABBED))
@@ -121,6 +112,13 @@ static void magnet_enable_monitor_task (void)
 		else if (timer_find_gid (GID_SPIRALAWARD_APPROACHING))
 		{
 			magnet_enable_catch_and_throw (MAG_LEFT);
+		}
+		
+		/* If in maybe state, turn on the magnets to help detection */
+		if (pb_maybe_in_play ())
+		{
+			magnet_enable_catch (MAG_LEFT);
+			magnet_enable_catch (MAG_RIGHT);
 		}
 	
 		if (juggle_ball)
