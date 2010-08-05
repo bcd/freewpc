@@ -73,6 +73,7 @@
 #include <text.h>
 
 #undef CONFIG_TEST_DURING_GAME
+//#define CONFIG_FIXED_TEST_FONT
 
 #define MAX_WIN_STACK 6
 
@@ -726,9 +727,16 @@ struct window_ops confirm_window = {
 /* A window class for actual menus */
 
 #if (MACHINE_DMD == 1)
-#define MENU_DRAW_X         8
 #define MENU_DRAW_NAME_Y    4
+#ifdef CONFIG_FIXED_TEST_FONT
+#define MENU_FONT           &font_bitmap8
+#define MENU_DRAW_X         0
+#define MENU_DRAW_ITEM_Y    18
+#else
+#define MENU_FONT           &font_mono5
+#define MENU_DRAW_X         8
 #define MENU_DRAW_ITEM_Y    14
+#endif
 #else
 #define MENU_DRAW_X         0
 #define MENU_DRAW_NAME_Y    0
@@ -770,7 +778,7 @@ void menu_draw (void)
 	U8 *sel = &win_top->w_class.menu.selected;
 
 	/* First print the name of the menu itself */
-	font_render_string_left (&font_mono5,
+	font_render_string_left (MENU_FONT,
 		MENU_DRAW_X, MENU_DRAW_NAME_Y, m->name);
 
 	/* Now try to print the current item.  *sel is the
@@ -789,7 +797,7 @@ void menu_draw (void)
 		{
 			sprintf ("%d. %s", (*sel)+1, subm[*sel]->name);
 		}
-		font_render_string_left (&font_mono5,
+		font_render_string_left (MENU_FONT,
 			MENU_DRAW_X, MENU_DRAW_ITEM_Y, sprintf_buffer);
 	}
 	else
