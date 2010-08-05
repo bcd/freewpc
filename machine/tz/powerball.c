@@ -328,7 +328,7 @@ void pb_poll_trough (void)
 }
 
 
-/** Called when a ball enters the trough or the lock. */
+/** Called when a ball enters the trough, lock or gumball. */
 void pb_container_enter (U8 location, U8 devno)
 {
 	device_t *dev = device_entry (devno);
@@ -373,13 +373,6 @@ void pb_container_enter (U8 location, U8 devno)
 		event isn't important.  (Either it's in a device somewhere or
 		we're in the "maybe" state.) */
 	}
-}
-
-CALLSET_ENTRY (powerball, powerball_in_gumball)
-{
-	pb_clear_location (PB_IN_PLAY);
-	pb_clear_location (PB_MAYBE_IN_PLAY);
-	pb_set_location (PB_IN_GUMBALL, 2);
 }
 
 /** Called when a ball successfully exits the trough or the lock.
@@ -462,6 +455,12 @@ CALLSET_ENTRY (pb_detect, dev_trough_enter)
 CALLSET_ENTRY (pb_detect, dev_lock_enter)
 {
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
+}
+
+CALLSET_ENTRY (pb_detect, dev_gumball_enter)
+{
+	//pb_container_enter (PB_IN_GUMBALL, DEVNO_GUMBALL);
+
 }
 
 CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)

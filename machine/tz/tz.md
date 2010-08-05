@@ -310,6 +310,34 @@ Gumball Div: driver(duty2),
 #	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
 
 ##########################################################################
+# Containers
+# These denote devices that can hold, count, and eject pinballs.
+# The key is the name of the device.  The first parameter is the name
+# of the solenoid that kicks out a ball.  The 'trough' parameter should
+# be specified on the single trough device.  The 'init_max_count'
+# parameter should say how many balls are normally held in this device
+# at startup.  The remaining parameters are the names of the switches
+# that count pinball, in front from entry to exit.
+##########################################################################
+[containers]
+Trough: Ball Serve, trough, init_max_count(3), \
+	Left Trough, Center Trough, Right Trough
+
+Lock: Lock Release, init_max_count(0),\
+	Lock Upper, Lock Center, Lock Lower
+
+Rocket: Rocket Kicker, \
+	Rocket Kicker
+
+Slot: Slot, \
+	Slot
+
+Popper: Popper, \
+	Gumball Popper
+
+#Gumball: Gumball Release, init_max_count(3), Gumball Enter, Gumball Exit
+
+##########################################################################
 # General Illumination
 ##########################################################################
 [gi]
@@ -380,34 +408,6 @@ Amber Lamps: COLOR:amber
 Unlit shots: Dead End, Slot Machine, Piano Panel, Ramp Battle, Camera
 Inlanes: Left Inlane1, Left Inlane2, Right Inlane
 Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, Dead End
-
-##########################################################################
-# Containers
-# These denote devices that can hold, count, and eject pinballs.
-# The key is the name of the device.  The first parameter is the name
-# of the solenoid that kicks out a ball.  The 'trough' parameter should
-# be specified on the single trough device.  The 'init_max_count'
-# parameter should say how many balls are normally held in this device
-# at startup.  The remaining parameters are the names of the switches
-# that count pinball, in front from entry to exit.
-##########################################################################
-[containers]
-Trough: Ball Serve, trough, init_max_count(3), \
-	Left Trough, Center Trough, Right Trough
-
-Lock: Lock Release, init_max_count(0), \
-	Lock Upper, Lock Center, Lock Lower
-
-Rocket: Rocket Kicker, init_max_count(0), \
-	Rocket Kicker
-
-Slot: Slot, init_max_count(0), Slot
-
-Popper: Popper, Gumball Popper
-
-#Autofire: Autofire, init_max_count(0), Autofire2, Autofire1
-
-Gumball: Gumball Release, init_max_count(3), Gumball Enter, Gumball Exit
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical

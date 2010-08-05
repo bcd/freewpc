@@ -98,7 +98,6 @@ void sslot_award_deff (void)
 		deff_exit ();
 }
 
-
 void sslot_mode_init (void)
 {
 	sslot_award_index = 0;
