@@ -1562,6 +1562,7 @@ dmd_transition_t *transition_table[] = {
 	&trans_vstripe_right2left,
 	&trans_bitfade_slow,
 	&trans_bitfade_fast,
+	&trans_unroll_vertical,
 };
 #else
 seg_transition_t *transition_table[] = {

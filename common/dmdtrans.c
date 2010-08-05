@@ -88,7 +88,7 @@ void trans_scroll_up_old (void)
 	/* dmd_low_buffer = old image data */
 	/* dmd_high_buffer = composite buffer */
 	register U16 arg = dmd_transition->arg.u16;
-	
+
 	/* Use __blockcopy16 to do a fast memcpy when size is
 	 * guaranteed to be a multiple of 16 bytes and nonzero. */
 	__blockcopy16 (dmd_high_buffer,
@@ -503,6 +503,42 @@ dmd_transition_t trans_bitfade_fast = {
 	.composite_init = trans_bitfade_init,
 	.composite_old = trans_bitfade_old,
 	.composite_new = trans_bitfade_new,
+	.delay = TIME_33MS,
+	.arg = { .u16 = 0 },
+	.count = 8,
+};
+
+/*********************************************************************/
+
+const U8 rows_from_center[] = {
+	15,16,14,17,13,18,12,19,11,20,10,21,9,22,8,23,
+	7,24,6,25,5,26,4,27,3,28,2,29,1,30,31,0
+};
+
+void trans_unroll_vertical_init (void)
+{
+	dmd_trans_data_ptr = rows_from_center;
+}
+
+void trans_unroll_vertical_new (void)
+{
+	register U8 row = *dmd_trans_data_ptr++;
+	__blockcopy16 (dmd_high_buffer + DMD_BYTE_WIDTH * row,
+		dmd_low_buffer + DMD_BYTE_WIDTH * row, DMD_BYTE_WIDTH);
+
+	row = *dmd_trans_data_ptr++;
+	__blockcopy16 (dmd_high_buffer + DMD_BYTE_WIDTH * row,
+		dmd_low_buffer + DMD_BYTE_WIDTH * row, DMD_BYTE_WIDTH);
+
+	if (*dmd_trans_data_ptr == 0)
+		dmd_in_transition = FALSE;
+}
+
+
+dmd_transition_t trans_unroll_vertical = {
+	.composite_init = trans_unroll_vertical_init,
+	.composite_old = dmd_copy_low_to_high,
+	.composite_new = trans_unroll_vertical_new,
 	.delay = TIME_33MS,
 	.arg = { .u16 = 0 },
 	.count = 8,
