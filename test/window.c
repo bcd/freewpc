@@ -3772,11 +3772,7 @@ void scroller_thread (void)
 		if (ws->offset < ws->size - 1)
 			ws->offset++;
 		else
-		{
-			callset_invoke (sw_enter);
-			task_exit ();
-		}
-
+			ws->offset = 0;
 		dmd_alloc_low_clean ();
 		scroller_draw ();
 	}
@@ -3867,18 +3863,10 @@ void sysinfo_enter (void)
 	window_push (&menu_window, &main_menu);
 }
 
-void sysinfo_up (void)
-{
-	if (++win_top->w_class.scroller.offset >= win_top->w_class.scroller.size)
-		sysinfo_enter ();
-	else
-		sound_send (SND_TEST_UP);
-}
 
 struct window_ops sysinfo_scroller_window = {
 	INHERIT_FROM_SCROLLER,
 	.enter = sysinfo_enter,
-	.up = sysinfo_up,
 };
 
 /**********************************************************/
