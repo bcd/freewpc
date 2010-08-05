@@ -395,19 +395,19 @@ Chaosmb Jackpots: Multiball, Ramp Battle, Piano Jackpot, Camera, Power Payoff, D
 Trough: Ball Serve, trough, init_max_count(3), \
 	Left Trough, Center Trough, Right Trough
 
-Lock: Lock Release, init_max_count(0),\
+Lock: Lock Release, init_max_count(0), \
 	Lock Upper, Lock Center, Lock Lower
 
-Rocket: Rocket Kicker, \
+Rocket: Rocket Kicker, init_max_count(0), \
 	Rocket Kicker
 
-Slot: Slot, \
-	Slot
+Slot: Slot, init_max_count(0), Slot
 
-Popper: Popper, \
-	Gumball Popper
+Popper: Popper, Gumball Popper
 
-#Gumball: Gumball Release, init_max_count(3), Gumball Enter, Gumball Exit
+#Autofire: Autofire, init_max_count(0), Autofire2, Autofire1
+
+Gumball: Gumball Release, init_max_count(3), Gumball Enter, Gumball Exit
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical

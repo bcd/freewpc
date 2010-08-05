@@ -68,15 +68,15 @@ void autofire_monitor (void)
 		task_sleep_sec (shooter_div_delay_time);
 	
 	autofire_busy = TRUE;
-	if (hold_balls_in_autofire == FALSE)
-	{	
-		shooter_div_start ();
-		/* TODO - If the autofire switch trips during the 'open
-		time', we can abort this delay early and go ahead and
-		close the divertor.  This is safe because only one
-		ball can appear here at a time. */
-		task_sleep_sec (shooter_div_open_time);
-	}
+	//if (autofire_full ()
+	//	don't open to catch 
+	shooter_div_start ();
+	/* TODO - If the autofire switch trips during the 'open
+	time', we can abort this delay early and go ahead and
+	close the divertor.  This is safe because only one
+	ball can appear here at a time. */
+	task_sleep_sec (shooter_div_open_time);
+	
 	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
@@ -91,31 +91,38 @@ void autofire_monitor (void)
 	{
 		callset_invoke (tnf_start);
 	}
-	/* Open diverter again */
-	shooter_div_start ();
-	/* Wait for the diverter to fully open before firing */
-	task_sleep_sec (2);
-	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
-	 *  The switch failure could be detected automatically somehow.. */
-	if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES)
-		&& hold_balls_in_autofire == FALSE)
-	{	
-		sol_request (SOL_AUTOFIRE);
-		if (in_live_game && single_ball_play ())
-		{
-			sound_send (SND_EXPLOSION_1);
-			leff_start (LEFF_STROBE_UP);
+	
+	if (hold_balls_in_autofire == FALSE)
+	{
+		/* Open diverter again */
+		shooter_div_start ();
+		/* Wait for the diverter to fully open before firing */
+		task_sleep_sec (2);
+		/* If the switch fails, it won't fire the ball, so we have an adjustment for it
+		 *  The switch failure could be detected automatically somehow.. */
+		if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES))
+		{	
+			if (in_live_game && single_ball_play ())
+			{
+				sound_send (SND_EXPLOSION_1);
+				leff_start (LEFF_STROBE_UP);
+			}
 			/* Clear the magnet so we can fire a ball */
 			timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
 			magnet_disable_catch (MAG_RIGHT);
+			/* Say that the ball is heading into the right loop */
+			sol_request (SOL_AUTOFIRE);
+			event_can_follow (autolaunch, right_loop, TIME_4S);
+			/* Wait for the ball to clear the divertor */
+			task_sleep_sec (1);
 		}
-		/* Say that the ball is heading into the right loop */
-		event_can_follow (autolaunch, right_loop, TIME_4S);
-		/* Wait for the ball to clear the divertor */
-		task_sleep_sec (1);
 	}
-	if (switch_poll_logical (SW_AUTOFIRE2) && hold_balls_in_autofire)
-		device_remove_live ();
+	/* tell the system that we are removing live balls */
+	if (switch_poll_logical (SW_AUTOFIRE2) && hold_balls_in_autofire && !switch_poll_logical (SW_AUTOFIRE1))
+		sound_send (SND_EXPLOSION_1);
+//			device_add_virtual (DEVNO_TROUGH);
+	if (switch_poll_logical (SW_AUTOFIRE1) && hold_balls_in_autofire)
+//	device_add_virtual (DEVNO_TROUGH);
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();

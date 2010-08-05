@@ -129,6 +129,7 @@ static void award_skill_shot (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
+		/* Inform sssmb.c that we hit a skill switch */
 			callset_invoke (skill_red);
 			score_1M (skill_min_value);
 			break;
@@ -154,7 +155,7 @@ static void skill_switch_monitor (void)
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);
 	else
-		task_sleep_sec (3);
+		task_sleep_sec (2);
 	award_skill_shot ();
 	task_exit ();
 }
@@ -164,6 +165,7 @@ static void award_skill_switch (U8 sw)
 {
 	event_can_follow (skill_shot, slot, TIME_3S);
 	callset_invoke (any_skill_switch);
+	/* Don't trigger if sssmb and skillshot not enabled */
 	if (!skill_shot_enabled && !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;
 

@@ -43,6 +43,8 @@ U8 gumball_score;
 extern U8 pb_location;
 extern bool hold_balls_in_autofire;
 
+extern U8 sol_pulsing;
+
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
@@ -104,7 +106,8 @@ void gumball_release_task (void)
 		timeout = 20;
 		while ((gumball_geneva_tripped == FALSE) && (gumball_exit_tripped == FALSE) && (--timeout > 0))
 		{
-			sol_request (SOL_GUMBALL_RELEASE);
+			//sol_request (SOL_GUMBALL_RELEASE);
+			sol_req_start_specific (SOL_GUMBALL_RELEASE, SOL_DUTY_100, TIME_33MS);
 			task_sleep (TIME_33MS);
 		}
 		sol_stop (SOL_GUMBALL_RELEASE);
@@ -175,15 +178,17 @@ void sw_gumball_right_loop_entered (void)
 
 CALLSET_ENTRY (gumball, sw_gumball_exit)
 {
+	device_t *dev = device_entry (DEVNO_GUMBALL);
 	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		sound_send (SND_GUMBALL_LOADED);
 	if (event_did_follow (gumball_geneva, gumball_exit) 
 		|| event_did_follow (gumball_release, gumball_exit))
 	{
+		/* A ball successfully came out of the gumball machine.*/
 		/* Signal the release motor to stop */
 		gumball_exit_tripped = TRUE;
-		/* A ball successfully came out of the gumball machine.*/
-		bounded_decrement (gumball_count, 0);
+		device_remove_virtual (dev);
+		
 		if (feature_config.easy_light_gumball == YES)
 		{
 			lamp_off (LM_GUM);
@@ -207,10 +212,11 @@ CALLSET_ENTRY (gumball, sw_gumball_geneva)
 
 CALLSET_ENTRY (gumball, sw_gumball_enter)
 {
+	device_t *dev = device_entry (DEVNO_GUMBALL);
 	/* Ball has entered the gumball machine. */
 	dbprintf ("Gumball entered.\n");
 	gumball_enable_from_trough = FALSE;
-	gumball_count++;
+	device_add_virtual (dev);	
 	if (in_live_game)
 	{
 		if (!multi_ball_play ())
@@ -218,7 +224,7 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		gumball_running = TRUE;
 		gumball_collected_count++;
 		award_gumball_score ();
-		gumball_release ();
+		//gumball_release ();
 		bounded_decrement (gumball_enable_count, 0);
 		/* Powerball was loaded into Gumball */
 		if (powerball_loaded_into_gumball == TRUE)
@@ -397,7 +403,6 @@ CALLSET_ENTRY (gumball, empty_balls_test)
 	U8 count;
 	for (count = 3; count > 0; --count)
 	{	
-		device_add_live ();
 		gumball_release ();
 	}
 }
@@ -441,6 +446,20 @@ CALLSET_ENTRY (gumball, sw_gumball_popper)
 	timer_restart_free (GID_GUMBALL, TIME_1S);
 	if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
 		callset_invoke (award_right_loop);
+}
+
+CALLSET_BOOL_ENTRY (gumball, sol_pulse)
+{
+	if (sol_pulsing == SOL_GUMBALL_RELEASE)
+	{
+		sound_send (SND_GUMBALL_ENTER);
+		gumball_pending_releases++;
+		if (!task_find_gid (GID_GUMBALL_RELEASE))
+			task_create_gid1 (GID_GUMBALL_RELEASE, gumball_release_task);
+		return FALSE;
+	}
+	else
+		return TRUE;
 }
 
 CALLSET_ENTRY (gumball, status_report)

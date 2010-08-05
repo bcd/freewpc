@@ -184,6 +184,7 @@ void game_timeout_leff (void)
 		task_sleep (TIME_100MS);
 		triac_leff_disable (GI_POWERFIELD+GI_CLOCK);
 	}
+	triac_leff_enable (GI_POWERFIELD+GI_CLOCK);
 	leff_exit ();
 }
 
@@ -197,6 +198,7 @@ void clock_round_started_leff (void)
 		triac_leff_disable (GI_CLOCK);
 		task_sleep (TIME_200MS);
 	}
+	triac_leff_enable (GI_CLOCK);
 	leff_exit ();
 }
 
@@ -516,5 +518,6 @@ void flash_gi_leff (void)
 		triac_leff_enable (TRIAC_GI_MASK);
 		task_sleep (TIME_100MS);
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }

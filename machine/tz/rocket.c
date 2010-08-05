@@ -22,6 +22,8 @@
 /* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
+extern bool skill_shot_enabled;
+
 /* Rocket animation contributed by highrise */
 void rocket_deff (void)
 {
@@ -67,6 +69,9 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
 	{
+		/* Wait until the skill shot deff has finished */
+		while (skill_shot_enabled)
+			task_sleep (TIME_100MS);
 		if (!multi_ball_play ())
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);

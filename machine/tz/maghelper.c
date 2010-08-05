@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -68,23 +68,29 @@ static void magnet_enable_monitor_task (void)
 	for (;;)
 	{
 		/* Lower Right magnet grabs */
-				
-		if (magnet_busy (MAG_RIGHT) || task_find_gid (GID_RIGHT_BALL_GRABBED))
-		{
-			/* Do nothing, magnet is busy */
-		}
 		/* Catch the ball for the camera shot, don't care about gumball */
-		else if (can_award_camera ())
+		if (can_award_camera ()
+			&& !timer_find_gid (GID_SPIRALAWARD)
+			&& !timer_find_gid (GID_LOCK_KICKED)
+			&& !timer_find_gid (GID_BALL_LAUNCH)
+			&& !timer_find_gid (GID_LOAD_ATTEMPT)
+			&& !timed_mode_running_p (&spiral_mode) 
+			&& !timed_mode_running_p (&fastlock_mode)
+			&& !magnet_busy (MAG_RIGHT)
+			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
-		else if (timer_find_gid (GID_SPIRALAWARD)
+		/* disable catch during certain game situations and if
+		 * the magnet isn't busy doing something a;ready */
+		if ((timer_find_gid (GID_SPIRALAWARD)
 			|| timer_find_gid (GID_LOCK_KICKED)
 			|| timer_find_gid (GID_BALL_LAUNCH)
 			|| timer_find_gid (GID_LOAD_ATTEMPT)
 			|| timed_mode_running_p (&spiral_mode) 
 			|| timed_mode_running_p (&fastlock_mode))
-		{
+			&& (!magnet_busy (MAG_RIGHT) && !task_find_gid (GID_RIGHT_BALL_GRABBED)))
+		{	
 			magnet_disable_catch (MAG_RIGHT);
 		}
 			
