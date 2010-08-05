@@ -68,6 +68,8 @@ extern U8 two_way_combos;
 extern U8 three_way_combos;
 extern U8 lucky_bounces;
 
+/* Used to wait until bttz.c has loaded up all the balls again */
+extern U8 balls_needed_to_load;
 
 /* Function to find who holds what score position 
  * eg
@@ -227,7 +229,9 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 
 void bonus_deff (void)
 {
-	
+
+	while (balls_needed_to_load)
+		task_sleep (TIME_500MS);
 	/* 
 	 * Taunts.....
 	 * */

@@ -177,7 +177,8 @@ This door is lit automatically if extra balls are disabled.
 
 Door Panel: Clock Millions
 ==========================
-30 second timed mode, shoot the clock target for 5M points.
+30 second timed mode, shoot the clock target for 5M points.  20M bonus awarded
+for hitting the clock 6 times.
 
 Door Panel: Spiral
 ==================

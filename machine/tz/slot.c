@@ -189,7 +189,6 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* dead end was recently hit, so ignore slot */
 		/* piano was recently hit, so ignore slot */
 		/* camera was recently hit, so ignore slot */
-		return;
 	}
 	else if (event_did_follow (skill_shot, slot))
 	{
@@ -210,7 +209,6 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		callset_invoke (shot_slot_machine);
 	}
 }
-
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {

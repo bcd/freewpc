@@ -149,11 +149,11 @@ bool mpf_ready_p (void)
 		/* Don't allow if PB might be on playfield */
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
 		&& !(pb_location & PB_MAYBE_IN_PLAY)
-		&& !flag_test (FLAG_MULTIBALL_RUNNING)
-		&& !flag_test (FLAG_QUICK_MB_RUNNING)
-		&& !flag_test (FLAG_BTTZ_RUNNING)
-		&& !flag_test (FLAG_CHAOSMB_RUNNING)
-		&& !flag_test (FLAG_SSSMB_RUNNING);
+		&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
+		&& !global_flag_test (GLOBAL_FLAG_QUICK_MB_RUNNING)
+		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING)
+		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING);
 
 }
 

@@ -66,10 +66,10 @@ void sw_right_ramp_enter_task (void)
 			award_unlit_shot (SW_RIGHT_RAMP);
 
 			 /* Show an animation hint if not enabled for mpf */
-			if (unlit_right_ramps == 3 && !flag_test (FLAG_MULTIBALL_RUNNING))
+			if (unlit_right_ramps == 3 && !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 				deff_start (DEFF_SHOOT_HITCH);
-			else if (flag_test (FLAG_MULTIBALL_RUNNING)
-					&& flag_test (FLAG_MB_JACKPOT_LIT))
+			else if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
+					&& global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			{
 				deff_start (DEFF_SHOOT_JACKPOT);
 				sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);

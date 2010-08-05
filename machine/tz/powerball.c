@@ -191,6 +191,14 @@ bool pb_maybe_in_play (void)
 		return FALSE;
 }
 
+/* Used by multiball.c to see if we should lock the pb */
+bool pb_in_lock (void)
+{
+	if (pb_location & PB_IN_LOCK)
+		return TRUE;
+	else
+		return FALSE;
+}
 
 /** Called when the powerball is known *NOT* to be in a particular 
  * location.  If that's where we thought the powerball was before,

@@ -66,7 +66,7 @@ struct {
 
 bool chaosmb_can_divert_to_autoplunger (void)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		&& chaosmb_level == 0
 		&& chaosmb_hits_to_relight == 0)
 		return TRUE;
@@ -174,12 +174,12 @@ static void chaosmb_score_jackpot (void)
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
 {
-	if (!flag_test (FLAG_CHAOSMB_RUNNING))
+	if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
 		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
-		flag_on (FLAG_CHAOSMB_RUNNING);
+		global_flag_on (GLOBAL_FLAG_CHAOSMB_RUNNING);
 		chaosmb_level = 0;
 		chaosmb_hits_to_relight = 1;
 		callset_invoke (mball_start_3_ball);
@@ -195,7 +195,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	if (mball_jackpot_uncollected == TRUE)
 		sound_send (SND_NOOOOOOOO);
 	
-	flag_off (FLAG_CHAOSMB_RUNNING);
+	global_flag_off (GLOBAL_FLAG_CHAOSMB_RUNNING);
 	/* Turn off jackpot lamps */
 	lamp_tristate_off (LM_CLOCK_MILLIONS);
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
@@ -206,7 +206,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 
 void chaosmb_check_level (U8 level)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		&& (chaosmb_level == level)
 		&& (chaosmb_hits_to_relight == 0))
 	{
@@ -216,7 +216,7 @@ void chaosmb_check_level (U8 level)
 
 CALLSET_ENTRY (chaosmb, display_update)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 		deff_start_bg (DEFF_CHAOSMB_RUNNING, PRI_GAME_MODE6);
 }
 
@@ -224,14 +224,14 @@ CALLSET_ENTRY (chaosmb, lamp_update)
 {
 	/* Jackpot lamp lighting is done by
 	 * chaosmb_check_jackpot_lamps () */
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 		chaosmb_check_jackpot_lamps ();
 	
 }
 
 CALLSET_ENTRY (chaosmb, music_refresh)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE6);
 }
 
@@ -275,7 +275,7 @@ CALLSET_ENTRY (chaosmb, sw_dead_end)
 
 CALLSET_ENTRY (chaosmb, sw_clock_target)
 {
-	if (flag_test (FLAG_CHAOSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
 		score (SC_250K);
 		bounded_decrement (chaosmb_hits_to_relight, 0);
@@ -283,6 +283,11 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 }
 
 CALLSET_ENTRY (chaosmb, single_ball_play)
+{
+	callset_invoke (chaosmb_stop);
+}
+
+CALLSET_ENTRY (chaosmb, end_ball)
 {
 	callset_invoke (chaosmb_stop);
 }

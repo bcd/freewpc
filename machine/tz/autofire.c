@@ -31,6 +31,7 @@ U8 shooter_div_open_time;
 
 /* Flag to say whether the autofire is busy firing a ball */
 bool autofire_busy;
+extern bool hold_balls_in_autofire;
 
 void sw_autofire (void)
 {
@@ -39,6 +40,7 @@ void sw_autofire (void)
 	would also need to happen if the autofire monitor
 	failed to kick properly; some retry logic is needed. */
 	sol_stop (SOL_RAMP_DIVERTOR);
+	shooter_div_stop ();
 	score (SC_100);
 }
 
@@ -64,13 +66,17 @@ void autofire_monitor (void)
 	timings are variable. */
 	if (shooter_div_delay_time)
 		task_sleep_sec (shooter_div_delay_time);
-	shooter_div_start ();
+	
 	autofire_busy = TRUE;
-	/* TODO - If the autofire switch trips during the 'open
-	time', we can abort this delay early and go ahead and
-	close the divertor.  This is safe because only one
-	ball can appear here at a time. */
-	task_sleep_sec (shooter_div_open_time);
+	if (hold_balls_in_autofire == FALSE)
+	{	
+		shooter_div_start ();
+		/* TODO - If the autofire switch trips during the 'open
+		time', we can abort this delay early and go ahead and
+		close the divertor.  This is safe because only one
+		ball can appear here at a time. */
+		task_sleep_sec (shooter_div_open_time);
+	}
 	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
@@ -88,11 +94,11 @@ void autofire_monitor (void)
 	/* Open diverter again */
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
+	task_sleep_sec (2);
 	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
 	 *  The switch failure could be detected automatically somehow.. */
-	if (switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES)
+	if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES)
+		&& hold_balls_in_autofire == FALSE)
 	{	
 		sol_request (SOL_AUTOFIRE);
 		if (in_live_game && single_ball_play ())
@@ -105,14 +111,15 @@ void autofire_monitor (void)
 		}
 		/* Say that the ball is heading into the right loop */
 		event_can_follow (autolaunch, right_loop, TIME_4S);
+		/* Wait for the ball to clear the divertor */
+		task_sleep_sec (1);
 	}
-	/* Wait for the ball to clear the divertor */
-	task_sleep_sec (1);
+	if (switch_poll_logical (SW_AUTOFIRE2) && hold_balls_in_autofire)
+		device_remove_live ();
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();
 }	
-
 
 /** Called just before the trough kicks a ball when it ought to
 go to the autofire lane rather than the manual plunger. */
@@ -127,7 +134,6 @@ void autofire_open_for_trough (void)
 		not in the interface */
 		task_sleep_sec (1);
 	}
-
 	dbprintf ("Shooter divertor open to catch\n");
 	shooter_div_delay_time = 0;
 	shooter_div_open_time = 3;
@@ -149,14 +155,18 @@ void autofire_add_ball (void)
 		ball was successfully kicked).  In these cases, do it
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
-		/* Wait for divertor to open */
-		task_sleep_sec (1);		
-		sol_request (SOL_BALL_SERVE);
+		if (hold_balls_in_autofire == FALSE)
+		{
+			/* Wait for divertor to open */
+			task_sleep_sec (2);		
+			sol_request (SOL_BALL_SERVE);
+		}
 	}
 	/* Make sure a ball can be served from the trough */
 	else
 	{
-		/* The normal way to kick a ball from the trough. */
+		/* The normal way to kick a ball from the trough.
+		 * dev_trough_kick_attempt will be called next */
 		device_request_kick (device_entry (DEVNO_TROUGH));
 	}
 }
@@ -199,6 +209,7 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	{
 		dbprintf ("no.\n");
 	}
+	/* Autofire solenoid will now be pulsed */
 }
 
 CALLSET_ENTRY (autofire, clear_autofire)
@@ -218,7 +229,8 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	callset_invoke (clear_autofire);
+	if (hold_balls_in_autofire == FALSE)
+		callset_invoke (clear_autofire);
 }
 
 CALLSET_ENTRY (autofire, start_ball)

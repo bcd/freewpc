@@ -36,8 +36,9 @@ __machine2__ void show_text_on_stars(void);
 __machine2__ void star_draw(void);
 
 /* autofire.c */
-void autofire_catch(void);
-void autofire_add_ball(void);
+__machine__ void autofire_catch(void);
+__machine__ void autofire_open_for_trough(void);
+__machine__ void autofire_add_ball(void);
 /* ballsave.c */
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
@@ -70,11 +71,11 @@ __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
 
 /* gumball.c */
-void gumball_diverter_open(void);
-void gumball_diverter_close(void);
-void gumball_load_from_trough(void);
-void gumball_release(void);
-void sw_gumball_right_loop_entered(void);
+__machine__ void gumball_diverter_open(void);
+__machine__ void gumball_diverter_close(void);
+__machine__ void gumball_load_from_trough(void);
+__machine__ void gumball_release(void);
+__machine__ void sw_gumball_right_loop_entered(void);
 
 /* loop.c */
 
@@ -119,6 +120,8 @@ __machine__ bool fastlock_running (void);
 #define PB_MAYBE_IN_PLAY 0x10
 #define PB_IN_PLAY 0x8
 __machine__ void pb_clear_location (U8 location);
+__machine__ bool pb_maybe_in_play (void);
+__machine__ bool pb_in_lock (void);
 /* thingfl.c */
 /* outhole.c */
 __common__ bool ballsave_test_active (void);
@@ -140,3 +143,5 @@ void magnet_reset (void);
 /* maghelpers.c */
 __machine3__ bool magnet_enabled (U8 magnet);
 __machine3__ bool magnet_busy (U8 magnet);
+
+__machine3__ void start_bttz_outhole_monitor (void);

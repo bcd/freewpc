@@ -186,7 +186,7 @@ CALLSET_ENTRY (camera, sw_camera)
 		score (SC_500K);
 		sound_send (SND_CAMERA_AWARD_SHOWN);
 	}
-	else if (multi_ball_play ()&& flag_test (FLAG_MB_JACKPOT_LIT))
+	else if (multi_ball_play ()&& global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
 		if (jackpot_level < 5)
 		{
@@ -218,7 +218,7 @@ CALLSET_ENTRY (camera, lamp_update)
 {
 	if (can_award_camera ())
 		lamp_tristate_flash (LM_CAMERA);
-	else if (multi_ball_play () && flag_test (FLAG_MB_JACKPOT_LIT))
+	else if (multi_ball_play () && global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		lamp_tristate_flash (LM_CAMERA);
 	else
 	{

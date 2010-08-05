@@ -31,7 +31,7 @@ U8 sssmb_jackpot_value;
 
 bool sssmb_can_divert_to_plunger (void)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& sssmb_ramps_to_divert == 0
 		&& !switch_poll_logical (SW_SHOOTER))
 		return TRUE;
@@ -115,9 +115,9 @@ void sssmb_jackpot_collected_deff (void)
 
 static void sssmb_relight_all_jackpots (void)
 {
-	flag_on (FLAG_SSSMB_RED_JACKPOT);
-	flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
-	flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
+	global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+	global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+	global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 }
 
 
@@ -136,9 +136,9 @@ static void sssmb_award_jackpot (void)
 		sssmb_jackpot_value += 10;
 	sssmb_ramps_to_divert = sssmb_initial_ramps_to_divert;
 
-	if (!flag_test (FLAG_SSSMB_RED_JACKPOT)
-		&& !flag_test (FLAG_SSSMB_ORANGE_JACKPOT)
-		&& !flag_test (FLAG_SSSMB_YELLOW_JACKPOT))
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RED_JACKPOT)
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT)
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT))
 	{
 		sssmb_relight_all_jackpots ();
 	}
@@ -167,7 +167,7 @@ static void sssmb_jackpot_ready_task (void)
 
 CALLSET_ENTRY (sssmb, sssmb_start)
 {
-	if (!flag_test (FLAG_SSSMB_RUNNING))
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		magnet_reset ();
 		callset_invoke (mball_restart_stop);
@@ -175,14 +175,14 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		unlit_shot_count = 0;
 		deff_update ();
 		music_refresh ();
-		flag_on (FLAG_SSSMB_RUNNING);
-		flag_on (FLAG_SSSMB_RED_JACKPOT);
-		flag_on (FLAG_SSSMB_ORANGE_JACKPOT);
-		flag_on (FLAG_SSSMB_YELLOW_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_RUNNING);
+		global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+		global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 		sssmb_initial_ramps_to_divert = 1;
 		sssmb_ramps_to_divert = 0;
 		sssmb_jackpot_value = 20;
-		if (!flag_test (FLAG_SUPER_MB_RUNNING))
+		if (!global_flag_test (GLOBAL_FLAG_SUPER_MB_RUNNING))
 		{	
 			callset_invoke (mball_start_3_ball);
 		}
@@ -191,15 +191,15 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
-	if (!flag_test (FLAG_SSSMB_RUNNING))
+	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;	
 	if (mball_jackpot_uncollected == TRUE)
 		sound_send (SND_NOOOOOOOO);
 
-	flag_off (FLAG_SSSMB_RUNNING);
-	flag_off (FLAG_SSSMB_RED_JACKPOT);
-	flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
-	flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
+	global_flag_off (GLOBAL_FLAG_SSSMB_RUNNING);
+	global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
+	global_flag_off (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
+	global_flag_off (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 	timer_kill_gid (GID_SSSMB_DIVERT_DEBOUNCE);
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_RUNNING);
@@ -209,7 +209,7 @@ void sssmb_stop (void)
 
 CALLSET_ENTRY (sssmb, lamp_update)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert > 0)
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) && sssmb_ramps_to_divert > 0)
 		lamp_tristate_on (LM_SUPER_SKILL);
 	else if (sssmb_can_divert_to_plunger ())
 		lamp_tristate_flash (LM_SUPER_SKILL);
@@ -217,13 +217,13 @@ CALLSET_ENTRY (sssmb, lamp_update)
 
 CALLSET_ENTRY (sssmb, display_update)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		deff_start_bg (DEFF_SSSMB_RUNNING, 0);
 }
 
 CALLSET_ENTRY (sssmb, music_refresh)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		music_request (MUS_SPIRAL_MODE, PRI_GAME_MODE1 + 9);
 }
 
@@ -245,30 +245,30 @@ CALLSET_ENTRY (sssmb, end_ball)
 
 CALLSET_ENTRY (sssmb, skill_red)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_RED_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_RED_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_RED_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
 
 CALLSET_ENTRY (sssmb, skill_orange)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_ORANGE_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_ORANGE_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
 
 CALLSET_ENTRY (sssmb, skill_yellow)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
-		&& flag_test (FLAG_SSSMB_YELLOW_JACKPOT))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		&& global_flag_test (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT))
 	{
-		flag_off (FLAG_SSSMB_YELLOW_JACKPOT);
+		global_flag_off (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 		sssmb_award_jackpot ();
 	}
 }
@@ -276,7 +276,7 @@ CALLSET_ENTRY (sssmb, skill_yellow)
 /* Called from leftramp.c */
 void sssmb_left_ramp_exit (void)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 	{
 		if (sssmb_ramps_to_divert == 0)
 		{
@@ -295,7 +295,7 @@ void sssmb_left_ramp_exit (void)
 
 CALLSET_ENTRY (sssmb, sw_shooter)
 {
-	if (flag_test (FLAG_SSSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;

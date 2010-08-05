@@ -658,7 +658,13 @@ bool verify_start_ok (void)
 	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
 		return FALSE;
-
+#ifdef MACHINE_TZ
+	/* Don't allow the game to start if we are still
+	 * loading balls into the gumball */
+	extern bool gumball_enable_from_trough;
+	if (gumball_enable_from_trough)
+		return FALSE;
+#endif
 	return TRUE;
 }
 

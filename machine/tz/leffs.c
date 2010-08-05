@@ -136,6 +136,7 @@ void slot_kickout_leff (void)
 	}
 	leff_create_peer (slot_kickout_subtask);
 	task_sleep (TIME_500MS);
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

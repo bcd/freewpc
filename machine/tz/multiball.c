@@ -97,9 +97,9 @@ static void mball_restart_countdown_task (void)
 bool multiball_ready (void)
 {
 	/* Don't allow during certain conditions */
-	if (flag_test (FLAG_MULTIBALL_RUNNING) 
-		|| flag_test (FLAG_SSSMB_RUNNING)
-		|| flag_test (FLAG_CHAOSMB_RUNNING)
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) 
+		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
+		|| global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		|| multi_ball_play ()
 		|| flag_test (FLAG_POWERBALL_IN_PLAY))
 		return FALSE;
@@ -143,14 +143,14 @@ void mball_restart_mode_exit (void)
 CALLSET_ENTRY (mball, display_update)
 {
 	timed_mode_display_update (&mball_restart_mode);
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		deff_start_bg (DEFF_MB_RUNNING, 0);
 }
 
 CALLSET_ENTRY (mball, music_refresh)
 {
 	timed_mode_music_refresh (&mball_restart_mode);
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
 	if (mball_restart_timer <= 5 
 		&& !task_find_gid (GID_MBALL_RESTART_COUNTDOWN_TASK)
@@ -222,9 +222,8 @@ void mb_running_deff (void)
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
 		sprintf_current_score ();
-		//printf_millions (jackpot_level * 10);
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		if (flag_test (FLAG_MB_JACKPOT_LIT))
+		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		{
 			sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
 			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
@@ -249,12 +248,12 @@ bool can_lock_ball (void)
 {	
 	if ( mball_locks_lit > 0 
 		&& mball_locks_made < 2
-		&& !flag_test (FLAG_MULTIBALL_RUNNING) 
-		&& !flag_test (FLAG_SSSMB_RUNNING) 
-		&& !flag_test (FLAG_CHAOSMB_RUNNING)
+		&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) 
+		&& !global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING) 
+		&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) 
+		&& !global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		&& !multi_ball_play ()
-		//TODO Doesn't work
-		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
+		&& !pb_in_lock ())
 		return TRUE;
 	else
 		return FALSE;
@@ -266,7 +265,7 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (fastlock_running ())
 		return TRUE;
-	else if (flag_test (FLAG_MULTIBALL_RUNNING) && !flag_test (FLAG_MB_JACKPOT_LIT))
+	else if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) && !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		return TRUE;
 	else if (timed_mode_running_p (&mball_restart_mode))
 		return TRUE;
@@ -285,7 +284,7 @@ CALLSET_ENTRY (mball, lamp_update)
 	/* Flash the appropiate lamp when multiball is ready */
 	if (multiball_ready ())
 		lamp_tristate_flash (LM_MULTIBALL);
-	else if (!flag_test (FLAG_CHAOSMB_RUNNING))
+	else if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 		lamp_tristate_off (LM_MULTIBALL);
 	
 	if (multi_ball_play ())
@@ -328,7 +327,7 @@ CALLSET_ENTRY (mball, lamp_update)
 	}
 	
 	/* Flash the Piano Jackpot lamp when MB Jackpot is lit */
-	if (flag_test (FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
+	if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT)&& multi_ball_play ())
 		lamp_tristate_flash (LM_PIANO_JACKPOT);
 	else
 	{
@@ -346,7 +345,7 @@ void mball_light_lock (void)
 	bounded_increment (mball_locks_lit, 2);
 }
 
-/* Check to see if GUMBALL has been completed and light lock */
+/* Check to see if GUMBAL has been completed and light lock */
 void mball_check_light_lock (void)
 {
 	if (lamp_test (LM_GUM) && lamp_test (LM_BALL))
@@ -408,7 +407,6 @@ CALLSET_ENTRY (multiball, mball_start_2_ball)
 			break;
 	}
 	device_multiball_set (2);
-	
 }
 
 CALLSET_ENTRY (mball, mball_restart_stop)
@@ -419,13 +417,13 @@ CALLSET_ENTRY (mball, mball_restart_stop)
 
 CALLSET_ENTRY (mball, mball_start)
 {
-	if (!flag_test (FLAG_MULTIBALL_RUNNING))
+	if (!global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
 		magnet_reset ();
 		callset_invoke (mball_restart_stop);
 		unlit_shot_count = 0;
-		flag_on (FLAG_MULTIBALL_RUNNING);
-		flag_on (FLAG_MB_JACKPOT_LIT);
+		global_flag_on (GLOBAL_FLAG_MULTIBALL_RUNNING);
+		global_flag_on (GLOBAL_FLAG_MB_JACKPOT_LIT);
 		music_refresh ();
 		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
@@ -446,16 +444,15 @@ CALLSET_ENTRY (mball, mball_start)
 
 CALLSET_ENTRY (mball, mball_stop)
 {
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
-		flag_off (FLAG_MULTIBALL_RUNNING);
-		flag_off (FLAG_SUPER_MB_RUNNING);
-		flag_off (FLAG_MB_JACKPOT_LIT);
+		global_flag_off (GLOBAL_FLAG_MULTIBALL_RUNNING);
+		global_flag_off (GLOBAL_FLAG_SUPER_MB_RUNNING);
+		global_flag_off (GLOBAL_FLAG_MB_JACKPOT_LIT);
 		deff_stop (DEFF_MB_START);
 		deff_stop (DEFF_MB_RUNNING);
 		deff_stop (DEFF_JACKPOT_RELIT);
 		leff_stop (LEFF_MB_RUNNING);
-		/* TODO Hacky, fix me */
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
 		music_refresh ();
@@ -509,10 +506,10 @@ CALLSET_ENTRY (mball, sw_shooter)
 
 CALLSET_ENTRY (mball, sw_piano)
 {
-	if (flag_test (FLAG_MB_JACKPOT_LIT))
+	if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
 		magnet_disable_catch (MAG_LEFT);
-		flag_off (FLAG_MB_JACKPOT_LIT);
+		global_flag_off (GLOBAL_FLAG_MB_JACKPOT_LIT);
 		/* Add anoither 10M to the jackpot if three balls are out */
 		if (live_balls == 3)
 			bounded_increment (jackpot_level, 5);
@@ -538,7 +535,7 @@ CALLSET_ENTRY (mball, powerball_jackpot)
 
 CALLSET_ENTRY (mball, any_pf_switch)
 {
-	if (flag_test (FLAG_MULTIBALL_RUNNING))
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 	{
 		score (SC_20K);
 	}
@@ -557,9 +554,9 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	callset_invoke (fastlock_lock_entered);
 
 	/* Collect multiball jackpot if lit */
-	if ((flag_test (FLAG_MULTIBALL_RUNNING)) && !flag_test (FLAG_MB_JACKPOT_LIT))
+	if ((global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)) && !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
-		flag_on (FLAG_MB_JACKPOT_LIT);
+		global_flag_on (GLOBAL_FLAG_MB_JACKPOT_LIT);
 		deff_start (DEFF_JACKPOT_RELIT);
 	}
 	
@@ -628,8 +625,6 @@ CALLSET_ENTRY (mball, start_ball)
 	lamp_tristate_off (LM_MULTIBALL);
 	lamp_off (LM_MULTIBALL);
 	mball_restart_collected = FALSE;
-	flag_off (FLAG_MULTIBALL_RUNNING);
-	flag_off (FLAG_MB_JACKPOT_LIT);
 }
 
 CALLSET_ENTRY (mball, start_player)
@@ -654,7 +649,7 @@ CALLSET_ENTRY (mball, status_report)
 
 CALLSET_ENTRY (mball, left_ball_grabbed)
 {
-	if (flag_test (FLAG_MULTIBALL_RUNNING) && flag_test (FLAG_MB_JACKPOT_LIT))
+	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) && global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
 		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);		
 		deff_start (DEFF_SHOOT_JACKPOT);

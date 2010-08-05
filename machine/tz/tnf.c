@@ -1,10 +1,31 @@
+/*
+ * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ *
+ * This file is part of FreeWPC.
+ *
+ * FreeWPC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * FreeWPC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with FreeWPC; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-/* CALLSET_SECTION (__machine3__, tnf) */
+/* CALLSET_SECTION (tnf, __machine3__) */
 
 #include <freewpc.h>
 
+/* Uses the code from mpf.c to monitor the flipper buttons */
 extern U8 mpf_buttons_pressed;
-/* used to randomise the position of the DOINK text */
+
+/* used to randomise the position of the doink text */
 U8 tnf_x;
 U8 tnf_y;
 
@@ -27,13 +48,14 @@ void tnf_deff (void)
 
 void tnf_exit_deff (void)
 {
-	sound_send (SND_OOH_GIMME_SHELTER);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 4, "POINTS EARNED FROM DOINKS");
 	sprintf_score (tnf_score);
-	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 20, "POINTS EARNED FROM DOINKS");
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (1);
+	sound_send (SND_OOH_GIMME_SHELTER);
+	task_sleep_sec (2);
 	deff_exit ();
 }
 

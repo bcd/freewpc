@@ -71,16 +71,24 @@ static void magnet_enable_monitor_task (void)
 		/* Catch the ball for the camera shot, don't care about gumball */
 		if (can_award_camera () 
 			&& !magnet_busy (MAG_RIGHT)
-			&& !task_find_gid (GID_RIGHT_BALL_GRABBED)
-			&& !timer_find_gid (GID_SPIRALAWARD)
-			&& !timer_find_gid (GID_LOCK_KICKED)
-			&& !timer_find_gid (GID_BALL_LAUNCH)
-			&& !timed_mode_running_p (&spiral_mode) 
-			&& !timed_mode_running_p (&fastlock_mode))
-
+			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
+		
+		if (timer_find_gid (GID_SPIRALAWARD)
+			&& timer_find_gid (GID_LOCK_KICKED)
+			&& timer_find_gid (GID_BALL_LAUNCH)
+			&& timer_find_gid (GID_LOAD_ATTEMPT)
+			&& timed_mode_running_p (&spiral_mode) 
+			&& timed_mode_running_p (&fastlock_mode))
+		{
+			magnet_disable_catch (MAG_RIGHT);
+		}
+
+
+
+		
 		/* If in maybe state, turn on the magnets to help detection */
 		if (pb_maybe_in_play ())
 		{
@@ -99,12 +107,12 @@ static void magnet_enable_monitor_task (void)
 			magnet_enable_catch_and_throw (MAG_LEFT);
 		}
 		/* Enable catch for Piano jackpot Shot */
-		else if (flag_test (FLAG_MB_JACKPOT_LIT))
+		else if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 		{
 			magnet_enable_catch (MAG_LEFT);
 		}
 		/* Enable catch for Chaos MB when piano jackpot is lit */
-		else if (flag_test (FLAG_CHAOSMB_RUNNING)
+		else if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 			&& chaosmb_level == 2)
 		{
 			magnet_enable_catch (MAG_LEFT);

@@ -31,6 +31,7 @@ score_t loop_score;
 
 extern __local__ U8 gumball_enable_count;
 extern __local__ U8 thing_flips_enable_count;
+extern U8 balls_needed_to_load;
 
 extern void thing_flips (void);
 
@@ -43,7 +44,7 @@ static inline bool can_show_loop_leff (void)
 		return TRUE;
 }
 
-void inline enter_loop (void)
+static inline void enter_loop (void)
 {
 	if (in_live_game)
 	{
@@ -76,7 +77,6 @@ static void award_loop (void)
 			score (SC_20M);
 		}
 		deff_start (DEFF_PB_LOOP);
-	//	return;
 	}
 	else
 	{
@@ -112,8 +112,6 @@ static void award_loop (void)
 
 		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
 			sound_send (SND_SPIRAL_AWARDED);
-		/* Don't show deff during certain modes */
-	//	if (can_show_loop_deff ())
 		deff_start (DEFF_LOOP);
 	}
 }
@@ -126,6 +124,8 @@ static inline void abort_loop (void)
 
 CALLSET_ENTRY (loop, award_left_loop)
 {
+	if (!in_live_game)
+		return;
 	if (can_show_loop_leff ())
 		leff_start (LEFF_LEFT_LOOP);
 	award_loop ();
@@ -133,6 +133,8 @@ CALLSET_ENTRY (loop, award_left_loop)
 
 CALLSET_ENTRY (loop, award_right_loop)
 {
+	if (!in_live_game)
+		return;
 	if (can_show_loop_leff ())
 		leff_start (LEFF_RIGHT_LOOP);
 	award_loop ();
@@ -168,9 +170,6 @@ void stop_loop_speed_timer (void)
 
 CALLSET_ENTRY (loop, sw_left_magnet)
 {
-	/* Cannot detect loops reliably during multiball */
-	//if (multi_ball_play ())
-	//	return;
 	if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{
 		/* Left loop aborted */
@@ -179,12 +178,7 @@ CALLSET_ENTRY (loop, sw_left_magnet)
 	else if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
 	{
 		/* Right loop completed */
-		//TODO Check for multiball here?
-		//start_flipper_timer (); to train via player.
 		stop_loop_speed_timer ();
-		/* Inform thingfl.c and fastlock.c that a loop has been done. */
-		//callset_invoke (thing_flips);
-	
 		callset_invoke (award_right_loop);
 	}
 	else
@@ -204,9 +198,8 @@ CALLSET_ENTRY (loop, sw_upper_right_magnet)
 CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
 
-	/* Cannot detect loops reliably during multiball */
-	//if (multi_ball_play ())
-	//	return;
+	/* Inform gumball module that a ball may be approaching */
+	sw_gumball_right_loop_entered ();
 
 	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
@@ -232,8 +225,6 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	else
 	{
 		/* Right loop started */
-		/* Inform gumball module that a ball may be approaching */
-		sw_gumball_right_loop_entered ();
 		timer_restart_free (GID_RIGHT_LOOP_ENTERED, TIME_3S);
 		start_loop_speed_timer ();
 		enter_loop ();

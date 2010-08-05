@@ -407,6 +407,8 @@ Slot: Slot, \
 Popper: Popper, \
 	Gumball Popper
 
+#Gumball: Gumball Release, init_max_count(3), Gumball Enter, Gumball Exit
+
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
@@ -430,8 +432,12 @@ TZ Mag Helpers: yes_no, YES
 
 # No lock needed to relight Gumball
 Easy Light Gumball: yes_no, YES
+
 # Hit Slot/Piano to relight if < 8 door_panels
 Easy Light Door panels: yes_no, YES
+
+# Used by the autofire, turn on if autofire opto fails 
+Fire when detected empty: yes_no, NO
 
 ##########################################################################
 # Items for the Feature Audits menu.
@@ -521,23 +527,20 @@ GC: BCD, 500.000.000
 [flags]
 PIANO_DOOR_LIT:
 SLOT_DOOR_LIT:
-LEFT_OUTLANE_LIT:
-RIGHT_OUTLANE_LIT:
-QUICK_MB_RUNNING:
-BTTZ_RUNNING:
-MULTIBALL_RUNNING:
-BATTLE_THE_POWER_LIT:
 POWERBALL_IN_PLAY:
-SSSMB_RUNNING:
+
+[globalflags]
+
 SSSMB_RED_JACKPOT:
 SSSMB_ORANGE_JACKPOT:
 SSSMB_YELLOW_JACKPOT:
-CHAOSMB_RUNNING:
-TSM_RUNNING:
 MB_JACKPOT_LIT:
+QUICK_MB_RUNNING:
+SSSMB_RUNNING:
+CHAOSMB_RUNNING:
+MULTIBALL_RUNNING:
 SUPER_MB_RUNNING:
-
-[globalflags]
+BTTZ_RUNNING:
 Clock Working:
 
 ##########################################################################
@@ -558,7 +561,6 @@ Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
 Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
-MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 #Video Mode: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 
 #These are in order of how they get triggered
@@ -582,8 +584,11 @@ Spiral Loop: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_SCORE+D_QUEUED
 Fastlock Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 Fastlock Award: page(MACHINE_PAGE), PRI_JACKPOT
 Hitch Mode: page(MACHINE2_PAGE), runner, PRI_GAME_MODE3
+
 Clock Millions Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
-Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+Clock Millions Hit: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_RESTARTABLE
+Clock Millions Explode: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_RESTARTABLE
+Clock Millions Mode Total: page(MACHINE3_PAGE), PRI_GAME_MODE5, D_QUEUED+D_PAUSE
 
 MPF Mode: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
 MPF Award: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
@@ -603,17 +608,22 @@ Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
-Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+
+PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 Loop: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE+D_SCORE+D_TIMEOUT
-MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
-Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
+
+Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
 MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
+MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
+MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
+Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
 MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
-PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 
 
-LITZ Award: PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+BTTZ Running: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
+BTTZ End: page(MACHINE3_PAGE), PRI_TILT, D_QUEUED
+
 Rollover Completed: page(MACHINE_PAGE), PRI_GAME_QUICK3
 Ball Drain Outlane: page(MACHINE_PAGE), PRI_BALLSAVE, D_RESTARTABLE
 Ball Explode: page(MACHINE_PAGE), PRI_JACKPOT, D_RESTARTABLE
@@ -674,7 +684,6 @@ Jets Active: shared, PRI_LEFF3, LAMPS(JETS), page(MACHINE2_PAGE)
 Circle Out: PRI_LEFF3, LAMPS(CIRCLE_OUT), page(MACHINE2_PAGE)
 Color Cycle: PRI_LEFF3, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
 Lock: PRI_LEFF4, LAMPS(LOCK_TEST), page(MACHINE2_PAGE)
-#MPF Active: shared, PRI_LEFF4, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 MPF Active: shared, PRI_LEFF4, LAMPS(POWERFIELD_VALUES), page(MACHINE2_PAGE)
 MPF Hit: PRI_LEFF5, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Rocket: PRI_LEFF2, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
@@ -687,6 +696,5 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 # Fonts used in this game.
 ##########################################################################
 [fonts]
-mono9:
 times10:
 steel:

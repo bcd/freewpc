@@ -35,7 +35,7 @@ U8 door_active_lamp;
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
-#define LITZ_DOOR_INDEX NUM_DOOR_PANELS
+#define BTTZ_DOOR_INDEX NUM_DOOR_PANELS
 
 /** Names of all the door panels, in order */
 const char *door_panel_names[] = {
@@ -53,7 +53,7 @@ const char *door_panel_names[] = {
 	"SUPER SKILL MB",
 	"FAST LOCK",
 	"LIGHT GUMBALL",
-	"RETURN TO THE ZONE",
+	"BACK TO THE ZONE",
 };
 
 const char *door_award_goals[] = {
@@ -71,7 +71,7 @@ const char *door_award_goals[] = {
 	"LEFT RAMP",
 	"LOCK LANE",
 	"RIGHT LOOP",
-	"PIANO NOW",
+	"EVERYTHING",
 };
 
 static void door_start_event (U8 id)
@@ -92,7 +92,7 @@ static void door_start_event (U8 id)
 		case 11: callset_invoke (door_start_super_skill); break;
 		case 12: callset_invoke (door_start_fast_lock); break;
 		case 13: callset_invoke (door_start_light_gumball); break;
-		case 14: callset_invoke (door_start_litz); break;
+		case 14: callset_invoke (door_start_bttz); break;
 	}
 }
 
@@ -111,7 +111,7 @@ extern inline U8 door_get_flashing_lamp (void)
 static bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
-	if (multi_ball_play () || flag_test (FLAG_BTTZ_RUNNING))
+	if (multi_ball_play () || global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
 		return FALSE;
 	else
 		return TRUE;
@@ -140,7 +140,7 @@ static inline void door_advance_flashing (void)
 	}
 	else
 		/* Light the door handle */
-		new_door_index = LITZ_DOOR_INDEX;
+		new_door_index = BTTZ_DOOR_INDEX;
 
 	door_set_flashing (new_door_index);
 }
@@ -234,6 +234,7 @@ void door_award_deff (void)
 			break;
 
 		case 14:
+			sound_send (SND_YOU_HAVE_COME_TO_THE_END);
 			break;
 	}
 	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
@@ -354,27 +355,11 @@ void door_award_deff (void)
 	deff_exit ();
 }
 
-void litz_award_deff (void)
-{
-	dmd_alloc_pair ();
-	dmd_show_low ();
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	deff_exit ();
-}
-
 static inline void door_award_enable (void)
 {
 	if (can_award_door_panel ())
 		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
-
 
 static void door_award_flashing (void)
 {
@@ -416,13 +401,6 @@ static void door_award_flashing (void)
 	door_award_enable ();
 }
 
-void door_award_litz (void)
-{
-	door_start_event (14);
-	audit_increment (&feature_audits.litz_started);
-	deff_start (DEFF_LITZ_AWARD);
-}
-
 CALLSET_ENTRY (door, lamp_update)
 {
 	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
@@ -439,21 +417,8 @@ CALLSET_ENTRY (door, lamp_update)
 
 CALLSET_ENTRY (door, award_door_panel)
 {
-//	if (can_award_door_panel ())
-//	{
-		if (door_index == LITZ_DOOR_INDEX)
-		{
-			flag_on (FLAG_BTTZ_RUNNING);
-			flag_off (FLAG_PIANO_DOOR_LIT);
-			flag_off (FLAG_SLOT_DOOR_LIT);
-			door_award_litz ();
-		}
-		else
-			door_award_flashing ();
-		
-		unlit_shot_count = 0;
-		//door_lamp_update ();
-//	}
+	door_award_flashing ();
+	unlit_shot_count = 0;
 }
 
 CALLSET_ENTRY (door, door_start_10M)
@@ -530,6 +495,11 @@ CALLSET_ENTRY(door, start_player)
 		door_panels_started++;
 	}
 	door_lamp_update ();
+}
+
+CALLSET_ENTRY (door, enable_door)
+{
+	door_award_enable ();
 }
 
 CALLSET_ENTRY(door, start_ball)

@@ -110,7 +110,8 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 					break;
 				/* FEK */
 				case 1:
-					juggle_ball = TRUE;
+				//	juggle_ball = TRUE;
+					callset_invoke (door_start_bttz);
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
 				/* PUK */
@@ -134,9 +135,6 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 					break;
 				/* JND */
 				case 6:
-					//score_zero (temp_score);
-					//score_copy (temp_score, current_score);
-					//score_add (current_score, temp_score);
 					score_mul (current_score, 2);
 					sound_send (SND_NO_CREDITS);
 					break;
