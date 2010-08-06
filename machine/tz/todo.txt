@@ -31,5 +31,4 @@ Show random TZ fact at end game
 Powerball detect during gumball eject
 Magnets - make magnet helpers a system adjustable feature
 Shot combos - In progress
-Make clock millions more interesting
 Turn up volume during multiball jackpot
