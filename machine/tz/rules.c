@@ -21,36 +21,24 @@
 /* CALLSET_SECTION (rules, __machine3__) */
 
 #include <freewpc.h>
-/* TODO This is pretty dangerous, figure out a safe way that doesn't leave
- * the flippers enabled, sol_request? */
 
-typedef enum {
-	RULES_SPIRALAWARD=0,
-	RULES_INLANES,
-	RULES_CHAOSMB,
-	RULES_SSSMB,
-	RULES_GUMBALL,
-	RULES_EXIT,
-} rules_page_t;
-
-/* 100ms resolution timer to pause between rules */
 U8 rules_timer;
-rules_page_t rule_page;
 
 /* Use a seperate function to wait so we can abort early */
 static void rules_sleep_sec (U8 secs)
 {
-	/* convert to 100ms chunks */
-	rules_timer = secs * 10;
-	while (--rules_timer != 0)
-	{
-		task_sleep (TIME_100MS);
+	/* convert to 200ms chunks so we don't have to wait 
+	 * a full second or so to abort */
+	rules_timer = secs * 5;
+	while (rules_timer-- != 0)
+	{	
+		task_sleep (TIME_200MS);
 	}
 }
 
 CALLSET_ENTRY (rules, sw_left_button, sw_right_button)
 {
-	if (deff_get_active () == DEFF_RULES)
+	if (rules_timer)
 	{
 		rules_timer = 0;
 	}
@@ -74,7 +62,6 @@ static void rule_msg (const char *line1, const char *line2, const char *line3, c
 
 void rule_complete (void)
 {
-	//rules_sleep_sec (5);
 	task_kill_gid (GID_RULES_LEFF);
 }
 
@@ -264,22 +251,20 @@ void rules_deff (void)
 	leff_stop_all ();
 
 	rule_begin ();
-	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
-	rule_complete ();
 	triac_disable (TRIAC_GI_MASK);
+	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
+	rules_sleep_sec (5);
+	rule_complete ();
 
-	rule_page = RULES_SPIRALAWARD;
 	rule_begin ();
 	rule_msg ("SPIRALAWARD", "EITHER LEFT INLANE STARTS", "A 3 SECOND TIMER", "");
 	task_create_gid1 (GID_RULES_LEFF, rules_spiralaward_leff);
-	rules_sleep_sec (4);
-	//task_sleep_sec (4);
+	rules_sleep_sec (6);
 	rule_complete ();
 	
 	rule_begin ();
 	rule_msg ("SPIRALAWARD", "SHOOT A RIGHT LOOP TO COLLECT", "A RANDOM AWARD" , "20M FOR COLLECTING ALL");
 	task_create_gid1 (GID_RULES_LEFF, rules_spiralaward2_leff);
-	//task_sleep_sec (5);
 	rules_sleep_sec (5);
 	rule_complete ();
 	lamplist_apply (LAMPLIST_SPIRAL_AWARDS, lamp_flash_off);
@@ -289,61 +274,69 @@ void rules_deff (void)
 	rule_begin ();
 	rule_msg ("ROLLOVERS", "USE FLIPPER BUTTONS TO STEP", "INLANE LIGHTS", "1M FOR COLLECTING ALL");
 	task_create_gid1 (GID_RULES_LEFF, rules_rollover_leff);
-	//task_sleep_sec (4);
-	rules_sleep_sec (4);
+	rules_sleep_sec (9);
 	rule_complete ();
 	
 	rule_begin ();
 	rule_msg ("SUPER SKILL MB", "SHOOT LEFT RAMP", "AND HIT SKILL SHOT", "DURING MULTIBALL");
 	task_create_gid1 (GID_RULES_LEFF, rules_sssmb_leff);
-	//task_sleep_sec (5);
-	rules_sleep_sec (5);
+	rules_sleep_sec (9);
 	rule_complete ();
 
 	rule_begin ();
 	rule_msg ("CHAOS MULTIBALL", "HIT CLOCK TO LIGHT JACKPOTS", "JACKPOTS MOVE", "AROUND THE TABLE");
 	task_create_gid1 (GID_RULES_LEFF, rules_chaosmb_leff);
-	//task_sleep_sec (6);
-	rules_sleep_sec (6);
+	rules_sleep_sec (9);
 	rule_complete ();
 	
 	rule_begin ();
 	rule_msg ("FASTLOCK", "SHOOT FAST LOOPS TO", "BUILD UP JACKPOTS", "HIT LOCK TO COLLECT");
 	task_create_gid1 (GID_RULES_LEFF, rules_fastlock_leff);
-	//task_sleep_sec (6);
-	rules_sleep_sec (6);
+	rules_sleep_sec (9);
 	rule_complete ();
 
 	rule_begin ();
 	rule_msg ("HITCHHIKER", "SHOOT THE HOLE BETWEEN", "THE FLASHING LAMPS", "TO SCORE A HITCHHIKER");
 	task_create_gid1 (GID_RULES_LEFF, rules_hitchhiker_leff);
-	//task_sleep_sec (4);
-	rules_sleep_sec (4);
+	rules_sleep_sec (9);
 	rule_complete ();
 
 	
-	lamp_tristate_off (LM_RIGHT_JET);
-	lamp_tristate_off (LM_CAMERA);
+	rule_begin ();
 	rule_msg ("POWERFIELD", "HITCHHIKERS UNLOCK", "THE RIGHT RAMP", "TO THE POWERFIELD");
 	task_create_gid1 (GID_RULES_LEFF, rules_ramp_battle_leff);
-	task_sleep_sec (5);
+	task_sleep_sec (9);
 	rule_complete ();
 
-	lamp_tristate_off (LM_RAMP_BATTLE);
+	rule_begin ();
 	rule_msg ("POWERFIELD", "PRESS THE FLIPPER BUTTONS", "TO SHOOT THE BALL INTO", "THE TOP OF THE POWERFIELD");
 	task_create_gid1 (GID_RULES_LEFF, rules_powerfield_leff);
-	rules_sleep_sec (5);
-	rule_complete ();
-
+	rules_sleep_sec (9);
 	triac_disable (GI_POWERFIELD);
-	rule_msg ("DOINKS", "SHOOT THE LEFT RAMP", "FROM THE RIGHT INLANE", "TO START DOINK MODE");
-	task_create_gid1 (GID_RULES_LEFF, rules_doinks_leff);
-	rules_sleep_sec (5);
 	rule_complete ();
 
+	rule_begin ();
+	rule_msg ("DOINK MODE", "SHOOT THE LEFT RAMP", "FROM THE RIGHT INLANE", "TO START DOINK MODE");
+	task_create_gid1 (GID_RULES_LEFF, rules_doinks_leff);
+	rules_sleep_sec (9);
+
+	rule_msg ("DOINK MODE", "WHILST THE BALL IS BEING HELD", "HIT THE FLIPPER BUTTONS", "TO SCORE POINTS");
+	rules_sleep_sec (9);
+	rule_complete ();
+
+	rule_begin ();
+	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOUR ARE AT IT", "");
+	rules_sleep_sec (4);
+	rule_complete ();
+	
 	music_enable ();
 	leff_start (LEFF_AMODE);
 	deff_exit ();
+}
+
+CALLSET_ENTRY (rules, init)
+{
+	rules_timer = 0;
 }
 
 CALLSET_ENTRY (rules, start_game)
