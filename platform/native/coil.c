@@ -21,32 +21,140 @@
 #include <freewpc.h>
 #include <simulation.h>
 
-#define COIL_MAX 5
+extern device_properties_t device_properties_table[];
 
-struct sim_coil_state
+struct sim_coil_state;
+
+/**
+ * A type object stores properties specific to different types of
+ * coil devices.
+ */
+struct sim_coil_type
 {
-	unsigned int on;
-	unsigned int pos;
-	unsigned int scheduled;
-	unsigned int devno;
-	unsigned int kick_disabled;
-	unsigned int tick;
-} coil_states[64];
+	/* The maximum position for the coil */
+	unsigned int max_pos;
 
+	/* The coil offset applied when it is on */
+	int on_step;
 
-unsigned int coil_pulse_count;
+	/* The coil offset applied when it is off */
+	int off_step;
+
+	/* Nonzero if the coil output is unmonitored: it cannot
+	change states unless the CPU touches it */
+	int unmonitored;
+
+	/* Called when the coil reaches its max position */
+	void (*at_max) (struct sim_coil_state *c);
+
+	/* Called when the coil returns to its rest position */
+	void (*at_rest) (struct sim_coil_state *c);
+};
 
 
 /**
- * Simulate a device kicking a pinball.
+ * The state of each physical coil (or coil-like device).
  */
-void sim_coil_kick (struct sim_coil_state *c)
+struct sim_coil_state
 {
-	extern device_properties_t device_properties_table[];
-	unsigned int solno = c - coil_states;
-	int devno;
+	/* The output of the line that drives the coil.  This
+	corresponds to the last write from the CPU. */
+	unsigned int on;
 
-	simlog (SLC_DEBUG, "Kick solenoid %d", solno);
+	/* Denotes the position of the coil.  POS is zero for
+	a coil that is at rest, and at type->max_pos when it is fully
+	engaged.  This interpretation is for true solenoids only.
+	For motors or flashers, pos is not really used. */
+	int pos;
+
+	/* Nonzero if this coil has been scheduled: an update
+	routine has been scheduled to modify the state as time
+	progresses, even when the CPU is not actively writing it.
+	We need this to avoid scheduling the same coil more than
+	once, because we cannot cancel schedule entries already
+	in progress. */
+	unsigned int scheduled;
+
+	/* The ball device associated with this coil.  Not used. */
+	unsigned int devno;
+
+	/* This smoothes out the values for 'on'; it is 1 when
+	the coil is logically on, and 0 when logically off. */
+	unsigned int at_max;
+
+	/* The 'master' coil, used for flipper coils, where there are
+	two physical coils that control a single solenoid arm.
+	The POS field of the master is shared for both the power and
+	the hold coil; the POS field for the hold is not used.
+	For other coils, master points to itself. */
+	struct sim_coil_state *master;
+
+	/* The type object for this device */
+	struct sim_coil_type *type;
+};
+
+
+/**
+ * The global array of coil states
+ */
+struct sim_coil_state coil_states[SOL_COUNT];
+
+
+void device_coil_at_max (struct sim_coil_state *c)
+{
+	unsigned int solno = c - coil_states;
+	const device_properties_t *props = &device_properties_table[c->devno];
+	int n;
+
+	simlog (SLC_DEBUG, "Kick device solenoid %d (dev %d)", solno, c->devno);
+
+	for (n = 0; n < props->sw_count; n++)
+	{
+		if (linux_switch_poll_logical (props->sw[n]))
+		{
+			simlog (SLC_DEBUG, "Device %d release", c->devno);
+			sim_switch_toggle (props->sw[n]);
+
+			/* Where does the ball go from here?
+			Normally device kickout leads to unknown areas of
+			the playfield.
+			The shooter switch could be handled though. */
+#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
+			if (c->devno == DEVNO_TROUGH)
+			{
+				sim_switch_toggle (MACHINE_SHOOTER_SWITCH);
+			}
+#endif
+			break;
+		}
+	}
+}
+
+
+struct sim_coil_type device_type_coil = {
+	.max_pos = 5,
+	.on_step = 1,
+	.off_step = -1,
+	.at_max = device_coil_at_max,
+};
+
+
+void flasher_coil_at_max (struct sim_coil_state *c)
+{
+	unsigned int solno = c - coil_states;
+	simlog (SLC_DEBUG, "Flasher %d pulse", solno);
+}
+
+struct sim_coil_type flasher_type_coil = {
+	.max_pos = 3,
+	.at_max = flasher_coil_at_max,
+};
+
+void generic_coil_at_max (struct sim_coil_state *c)
+{
+	unsigned int solno = c - coil_states;
+
+	simlog (SLC_DEBUG, "Kick generic solenoid %d", solno);
 
 	/* If it's the outhole kicker, simulate the ball being
 	moved off the outhole into the trough */
@@ -60,45 +168,48 @@ void sim_coil_kick (struct sim_coil_state *c)
 		sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
 	}
 #endif
-
-	/* See if it's attached to a device.  Then find the first
-	switch that is active, and deactivate it, simulating the
-	removal of one ball from the device.  (This does not map
-	to reality, where lots of switch closures would occur, but
-	it does produce the intended effect.) */
-	for (devno = 0; devno < NUM_DEVICES; devno++)
-	{
-		const device_properties_t *props = &device_properties_table[devno];
-		if (props->sol == solno)
-		{
-			int n;
-			for (n = 0; n < props->sw_count; n++)
-			{
-				if (linux_switch_poll_logical (props->sw[n]))
-				{
-					simlog (SLC_DEBUG, "Device %d release", devno);
-					sim_switch_toggle (props->sw[n]);
-
-					/* Where does the ball go from here?
-					Normally device kickout leads to unknown areas of
-					the playfield.
-					The shooter switch could be handled though. */
-#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
-					if (devno == DEVNO_TROUGH)
-					{
-						sim_switch_toggle (MACHINE_SHOOTER_SWITCH);
-					}
-#endif
-					break;
-				}
-			}
-
-			/* If no balls are in the device, then nothing happens. */
-			break;
-		}
-	}
 }
 
+struct sim_coil_type generic_type_coil = {
+	.max_pos = 5,
+	.on_step = 1,
+	.off_step = -1,
+};
+
+struct sim_coil_type flipper_type_coil = {
+	.max_pos = 5,
+	.on_step = 1,
+	.off_step = -1,
+};
+
+struct sim_coil_type outhole_type_coil = {
+	.max_pos = 5,
+	.on_step = 1,
+	.off_step = -1,
+};
+
+void motor_coil_at_rest (struct sim_coil_state *c)
+{
+	unsigned int solno = c - coil_states;
+	c->pos = c->type->max_pos;
+	simlog (SLC_DEBUG, "Motor %d @ %d", solno, c->pos);
+}
+
+void motor_coil_at_max (struct sim_coil_state *c)
+{
+	unsigned int solno = c - coil_states;
+	c->pos = 0;
+	simlog (SLC_DEBUG, "Motor %d @ %d", solno, c->pos);
+}
+
+struct sim_coil_type motor_type_coil = {
+	.at_rest = motor_coil_at_rest,
+	.at_max = motor_coil_at_max,
+	.max_pos = 32,
+	.on_step = 4,
+	.off_step = 0,
+	.unmonitored = 1,
+};
 
 /**
  * Update the state machine for a coil.
@@ -118,31 +229,41 @@ void sim_coil_kick (struct sim_coil_state *c)
  */
 void sim_coil_update (struct sim_coil_state *c)
 {
-	if (c->on && c->pos < COIL_MAX)
+	/* If the IO is on and the coil has not reached its maximum,
+	move it forward. */
+	if (c->on && c->pos < c->type->max_pos)
 	{
-		c->pos++;
-		if (c->pos == COIL_MAX && !c->kick_disabled)
+		c->pos += c->type->on_step;
+		if (c->pos >= c->type->max_pos && !c->at_max)
 		{
-			sim_coil_kick (c);
-			c->kick_disabled++;
+			c->pos = c->type->max_pos;
+			c->at_max = 1;
+			if (c->type->at_max)
+				c->type->at_max (c);
 		}
 	}
+	/* Else, if the IO is off and the coil has not reached its rest state,
+	move it backward. */
 	else if (!c->on && c->pos > 0)
 	{
-		c->pos--;
-		if (c->pos == 0)
-			c->kick_disabled = 0;
+		c->pos -= c->type->off_step;
+		if (c->pos <= 0)
+		{
+			c->pos = 0;
+			c->at_max = 0;
+			if (c->type->at_rest)
+				c->type->at_rest (c);
+		}
 	}
 
-	if (c->pos != 0)
-		sim_time_register (8, FALSE, (time_handler_t)sim_coil_update, c);
+	/* If the coil requires monitoring, and it is not at rest, then reschedule.
+	Else, we are done until the CPU modifies it again. */
+	if (!c->type->unmonitored && c->pos != 0)
+		sim_time_register (4, FALSE, (time_handler_t)sim_coil_update, c);
 	else
 	{
 		c->scheduled = 0;
-		coil_pulse_count--;
 	}
-
-	c->tick++;
 }
 
 
@@ -160,15 +281,52 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 		c->on = on;
 		if (!c->scheduled)
 		{
-			sim_time_register (8, FALSE, (time_handler_t)sim_coil_update, c);
+			sim_time_register (4, FALSE, (time_handler_t)sim_coil_update, c);
 			c->scheduled = 1;
-			coil_pulse_count++;
 		}
 	}
 }
 
+
+#ifdef MACHINE_TZ
+void tz_sim_init (void)
+{
+	coil_states[SOL_GUMBALL_RELEASE].type = &motor_type_coil;
+
+	coil_states[SOL_CLOCK_FORWARD].type = &motor_type_coil;
+	coil_states[SOL_CLOCK_REVERSE].type = &motor_type_coil;
+	coil_states[SOL_CLOCK_REVERSE].master = &coil_states[SOL_CLOCK_FORWARD];
+}
+#endif
+
+
 void sim_coil_init (void)
 {
-	memset (coil_states, 0, sizeof (coil_states));
-	coil_pulse_count = 0;
+	int devno;
+	int sol;
+
+	/* Initialize everything to zero first */
+	for (sol = 0; sol < SOL_COUNT; sol++)
+	{
+		struct sim_coil_state *c = coil_states + sol;
+		memset (c, 0, sizeof (struct sim_coil_state));
+		if (MACHINE_SOL_FLASHERP (sol))
+			c->type = &flasher_type_coil;
+		else
+			c->type = &generic_type_coil;
+		c->master = c;
+	}
+
+	/* Note coils which are attached to ball devices */
+	for (devno = 0; devno < NUM_DEVICES; devno++)
+	{
+		const device_properties_t *props = &device_properties_table[devno];
+		struct sim_coil_state *c = coil_states + props->sol;
+		c->type = &device_type_coil;
+		c->devno = devno;
+	}
+
+#ifdef MACHINE_TZ
+	tz_sim_init ();
+#endif
 }
