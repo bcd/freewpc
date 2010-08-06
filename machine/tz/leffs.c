@@ -224,14 +224,12 @@ static void pf_strobe_down_subtask (void)
 
 void strobe_down_leff (void)
 {
-	triac_leff_disable (TRIAC_GI_MASK);
 	lamplist_set_apply_delay (TIME_16MS);
 	leff_create_peer (pf_strobe_down_subtask);
 	task_sleep (TIME_200MS);
 	leff_create_peer (pf_strobe_down_subtask);
 	task_sleep_sec (1);
 	task_kill_peers ();
-	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

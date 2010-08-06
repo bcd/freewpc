@@ -439,6 +439,9 @@ Easy Light Door panels: yes_no, YES
 # Used by the autofire, turn on if autofire opto fails 
 Fire when detected empty: yes_no, NO
 
+# Do not grab the ball on the right magnet if gumball is lit
+Gumball over Camera: yes_no, NO
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
@@ -636,8 +639,8 @@ Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
 Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Get ready to Doink: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED+D_TIMEOUT

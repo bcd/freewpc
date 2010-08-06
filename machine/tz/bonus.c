@@ -61,7 +61,7 @@ extern U8 hitch_count;
 extern U8 rollover_count;
 extern bool backdoor_award_collected;
 extern bool multidrain_awarded;
-extern bool slot_stdm_death;
+extern bool stdm_death;
 extern bool unfair_death;
 	
 extern U8 two_way_combos;
@@ -250,14 +250,7 @@ void bonus_deff (void)
 		task_sleep_sec (2);
 	}
 	
-	if (slot_stdm_death == TRUE)
-	{
-		sound_send (SND_HEY_ITS_ONLY_PINBALL);
-		dmd_alloc_low_clean ();
-		sprintf ("SLOT DEATH");
-	}
-	
-	if (slot_stdm_death == TRUE)
+	if (stdm_death == TRUE)
 	{
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
@@ -492,7 +485,7 @@ void bonus_deff (void)
 	}
 
 	U8 total_combos = two_way_combos + three_way_combos;
-	if (total_combos > 0)
+	if (total_combos)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
@@ -511,6 +504,15 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 
+	if (total_combos)
+	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
+		dmd_sched_transition (&trans_sequential_boxfade);
+		dmd_show_low ();
+		sound_send (SND_GLASS_BREAKS);
+		task_sleep_sec (3);
+	}
 	if (lucky_bounces > 0)
 	{
 		dmd_alloc_low_clean ();

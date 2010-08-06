@@ -287,7 +287,6 @@ static void pb_detect_event (pb_event_t event)
 	}
 }
 
-
 /** Announce that the powerball is in play, if it is.  This is
 only called at certain points when we want to announce this.
 The powerball may have been detected sometime earlier. */
@@ -404,6 +403,7 @@ static inline void pb_ball_grabbed (void)
 	}
 }
 
+/* Used by maghelper.c to aid with powerball detection */
 CALLSET_ENTRY (pb_detect, left_ball_grabbed)
 {
 	pb_ball_grabbed ();
@@ -420,6 +420,7 @@ CALLSET_ENTRY (pb_detect, music_refresh)
 		music_request (MUS_POWERBALL_IN_PLAY, PRI_GAME_MODE3);
 }
 
+/* Powerball slot proximity */
 CALLSET_ENTRY (pb_detect, sw_camera)
 {
 	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
@@ -440,7 +441,7 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 
 CALLSET_ENTRY (pb_detect, powerball_in_gumball)
 {
-
+	pb_detect_event (GUMBALL_PB_DETECTED);
 }
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)

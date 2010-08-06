@@ -120,7 +120,7 @@ static void do_camera_award (void)
 	{
 		case CAMERA_AWARD_LIGHT_LOCK:
 			/* Light Lock */
-			mball_locks_lit++;
+			bounded_increment (mball_locks_lit, 2);
 			break;
 		case CAMERA_AWARD_DOOR_PANEL:
 			/* Spot Door Panel */
@@ -147,6 +147,7 @@ static void do_camera_award (void)
 	}
 	bounded_decrement (cameras_lit, 0);
 	camera_award_count++;
+	/* Wraparound, but don't light the lock this time */
 	if (camera_award_count >= MAX_CAMERA_AWARDS)
 		camera_award_count = 1;
 	task_exit ();
@@ -160,6 +161,7 @@ inline bool can_award_camera (void)
 		return FALSE;
 }
 
+/* Spawned as a seperate task to avoid the deadly overflow */
 void mpf_collected_task (void)
 {
 	callset_invoke (mpf_collected);
@@ -173,10 +175,9 @@ CALLSET_ENTRY (camera, sw_camera)
 	if (event_did_follow (gumball_exit, camera) 
 		|| event_did_follow (dead_end, camera))
 	{
-		return;
+		/* Do nothing */
 	}
-	
-	if (event_did_follow (mpf_top, camera))
+	else if (event_did_follow (mpf_top, camera))
 	{
 		task_create_anon (mpf_collected_task);
 	}
@@ -234,5 +235,5 @@ CALLSET_ENTRY (camera, start_player)
 
 CALLSET_ENTRY (camera, door_start_camera)
 {
-	cameras_lit++;
+	bounded_increment (cameras_lit, 99);
 }

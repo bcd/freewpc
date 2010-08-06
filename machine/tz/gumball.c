@@ -189,7 +189,7 @@ CALLSET_ENTRY (gumball, sw_gumball_exit)
 			lamp_off (LM_GUM);
 			lamp_off (LM_BALL);
 		}
-		device_switch_can_follow (gumball_exit, camera, TIME_4S);
+		device_switch_can_follow (gumball_exit, slot, TIME_5S);
 		event_can_follow (gumball_exit, camera, TIME_5S);
 		event_can_follow (gumball_exit, slot, TIME_5S);
 	}

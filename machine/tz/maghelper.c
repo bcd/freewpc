@@ -34,6 +34,7 @@ extern U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
 extern struct timed_mode_ops spiral_mode;
 extern struct timed_mode_ops fastlock_mode;
 extern U8 chaosmb_level;
+extern U8 gumball_enable_count;
 
 /* Whether the ball should be passed back and forth with
  * the loop magnets */
@@ -81,14 +82,16 @@ static void magnet_enable_monitor_task (void)
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}
-		/* disable catch during certain game situations and if
-		 * the magnet isn't busy doing something a;ready */
+		/* disable catch during certain game situations */
 		if ((timer_find_gid (GID_SPIRALAWARD)
 			|| timer_find_gid (GID_LOCK_KICKED)
 			|| timer_find_gid (GID_BALL_LAUNCH)
 			|| timer_find_gid (GID_LOAD_ATTEMPT)
 			|| timed_mode_running_p (&spiral_mode) 
-			|| timed_mode_running_p (&fastlock_mode))
+			|| timed_mode_running_p (&fastlock_mode)
+			/* Don't grab the ball if the gumball is lit and configured to do so */
+			|| (feature_config.gumball_over_camera == YES && gumball_enable_count))
+			/* Don't turn off the magnet if it's busy doing something else */
 			&& (!magnet_busy (MAG_RIGHT) && !task_find_gid (GID_RIGHT_BALL_GRABBED)))
 		{	
 			magnet_disable_catch (MAG_RIGHT);
