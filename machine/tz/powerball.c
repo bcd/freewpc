@@ -48,6 +48,7 @@ typedef enum {
 	PF_PB_DETECTED,
 	TROUGH_STEEL_DETECTED,
 	TROUGH_PB_DETECTED,
+	GUMBALL_PB_DETECTED,
 } pb_event_t;
 
 /** The general location of the powerball */
@@ -149,7 +150,7 @@ void pb_set_location (U8 location, U8 depth)
 	if (pb_location != location)
 	{
 		pb_location = location;
-		if (pb_location & PB_HELD || pb_location & PB_IN_GUMBALL)
+		if (pb_location & PB_HELD)
 		{
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
@@ -279,6 +280,10 @@ static void pb_detect_event (pb_event_t event)
 			pb_set_location (PB_IN_TROUGH, 1);
 			pb_clear_location (PB_MAYBE_IN_PLAY);
 			break;
+		case GUMBALL_PB_DETECTED:
+			pb_set_location (PB_IN_GUMBALL, 1);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
+			break;
 	}
 }
 
@@ -328,7 +333,7 @@ void pb_poll_trough (void)
 }
 
 
-/** Called when a ball enters the trough, lock or gumball. */
+/* Called when a ball enters the trough or lock. */
 void pb_container_enter (U8 location, U8 devno)
 {
 	device_t *dev = device_entry (devno);
@@ -431,6 +436,11 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 	/* TODO : if this switch triggers and we did not expect
 	 * a ball in the undertrough....??? */
 	pb_detect_event (PF_STEEL_DETECTED);
+}
+
+CALLSET_ENTRY (pb_detect, powerball_in_gumball)
+{
+
 }
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
