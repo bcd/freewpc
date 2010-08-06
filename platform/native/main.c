@@ -1028,8 +1028,16 @@ static void linux_interface_thread (void)
 						sim_switch_toggle (sw);
 						toggle_mode = 1;
 					}
+#if (MACHINE_FLIPTRONIC == 1)
+					else if (sw >= 72)
+					{
+						flipper_button_depress (sw);
+					}
+#endif
 					else
+					{
 						sim_switch_depress (sw);
+					}
 				}
 				else
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",

@@ -88,6 +88,19 @@ void sim_switch_depress (int sw)
 }
 
 
+void flipper_button_depress (int sw)
+{
+	sim_switch_toggle (sw);
+	task_sleep (TIME_33MS);
+	sim_switch_toggle (sw+4);
+	task_sleep (TIME_66MS);
+
+	sim_switch_toggle (sw);
+	task_sleep (TIME_33MS);
+	sim_switch_toggle (sw+4);
+	task_sleep (TIME_66MS);
+}
+
 void sim_switch_init (void)
 {
 	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
