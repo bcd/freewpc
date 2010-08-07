@@ -175,8 +175,9 @@ static void award_spiralaward (void)
 
 CALLSET_ENTRY (spiralaward, award_right_loop)
 {
-	if (task_kill_gid (GID_SPIRALAWARD))
+	if (task_kill_gid (GID_SPIRALAWARD_APPROACHING))
 	{
+		task_kill_gid (GID_SPIRALAWARD);
 		leff_stop (LEFF_SPIRALAWARD);
 		sound_send (SND_SLOT_PAYOUT);
 		award_spiralaward ();

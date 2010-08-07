@@ -33,6 +33,8 @@ extern U8 left_magnet_hold_timer, lower_right_magnet_hold_timer;
 
 extern struct timed_mode_ops spiral_mode;
 extern struct timed_mode_ops fastlock_mode;
+extern struct timed_mode_ops hitch_mode;
+
 extern U8 chaosmb_level;
 extern U8 gumball_enable_count;
 
@@ -69,16 +71,16 @@ static void magnet_enable_monitor_task (void)
 	for (;;)
 	{
 		/* Lower Right magnet grabs */
-		/* Catch the ball for the camera shot, don't care about gumball */
-		if (can_award_camera ()
-			&& !timer_find_gid (GID_SPIRALAWARD)
+		/* Catch the ball for the camera and hitch shot, don't care about gumball */
+		if ((can_award_camera () || timed_mode_running_p (&hitch_mode))
+			&& (!timer_find_gid (GID_SPIRALAWARD)
 			&& !timer_find_gid (GID_LOCK_KICKED)
 			&& !timer_find_gid (GID_BALL_LAUNCH)
 			&& !timer_find_gid (GID_LOAD_ATTEMPT)
 			&& !timed_mode_running_p (&spiral_mode) 
 			&& !timed_mode_running_p (&fastlock_mode)
 			&& !magnet_busy (MAG_RIGHT)
-			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
+			&& !task_find_gid (GID_RIGHT_BALL_GRABBED)))
 		{	
 			magnet_enable_catch_and_hold (MAG_RIGHT, 2);
 		}

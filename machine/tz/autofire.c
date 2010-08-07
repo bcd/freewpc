@@ -56,6 +56,12 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
+static inline void autofire_ball_loaded_wait (void)
+{
+	while (!switch_poll_logical (SW_AUTOFIRE2))
+		task_sleep (TIME_100MS);
+}
+
 /** A task that manages the autolaunching of balls.
 Upon entry, the autofire divertor solenoid is already pulsing
 and a ball is being kicked from the trough. */
@@ -75,8 +81,8 @@ void autofire_monitor (void)
 	time', we can abort this delay early and go ahead and
 	close the divertor.  This is safe because only one
 	ball can appear here at a time. */
-	task_sleep_sec (shooter_div_open_time);
-	
+	//task_sleep_sec (shooter_div_open_time);
+	autofire_ball_loaded_wait ();	
 	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
@@ -92,37 +98,29 @@ void autofire_monitor (void)
 		callset_invoke (tnf_start);
 	}
 	
-	if (hold_balls_in_autofire == FALSE)
-	{
-		/* Open diverter again */
-		shooter_div_start ();
-		/* Wait for the diverter to fully open before firing */
-		task_sleep_sec (2);
-		/* If the switch fails, it won't fire the ball, so we have an adjustment for it
-		 *  The switch failure could be detected automatically somehow.. */
-		if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES))
-		{	
-			if (in_live_game && single_ball_play ())
-			{
-				sound_send (SND_EXPLOSION_1);
-				leff_start (LEFF_STROBE_UP);
-			}
-			/* Clear the magnet so we can fire a ball */
-			timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
-			magnet_disable_catch (MAG_RIGHT);
-			/* Say that the ball is heading into the right loop */
-			sol_request (SOL_AUTOFIRE);
-			event_can_follow (autolaunch, right_loop, TIME_4S);
-			/* Wait for the ball to clear the divertor */
-			task_sleep_sec (1);
+	/* Open diverter again */
+	shooter_div_start ();
+	/* Wait for the diverter to fully open before firing */
+	task_sleep_sec (2);
+	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
+	 *  The switch failure could be detected automatically somehow.. */
+	if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES))
+	{	
+		if (in_live_game && single_ball_play ())
+		{
+			sound_send (SND_EXPLOSION_1);
+			leff_start (LEFF_STROBE_UP);
 		}
+		/* Clear the magnet so we can fire a ball */
+		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+		magnet_disable_catch (MAG_RIGHT);
+		/* Say that the ball is heading into the right loop */
+		sol_request (SOL_AUTOFIRE);
+		event_can_follow (autolaunch, right_loop, TIME_4S);
+		/* Wait for the ball to clear the divertor 
+		 * before closing*/
+		task_sleep (TIME_700MS);
 	}
-	/* tell the system that we are removing live balls */
-	if (switch_poll_logical (SW_AUTOFIRE2) && hold_balls_in_autofire && !switch_poll_logical (SW_AUTOFIRE1))
-		sound_send (SND_EXPLOSION_1);
-//			device_add_virtual (DEVNO_TROUGH);
-	if (switch_poll_logical (SW_AUTOFIRE1) && hold_balls_in_autofire)
-//	device_add_virtual (DEVNO_TROUGH);
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();
@@ -143,8 +141,9 @@ void autofire_open_for_trough (void)
 	}
 	dbprintf ("Shooter divertor open to catch\n");
 	shooter_div_delay_time = 0;
-	shooter_div_open_time = 3;
+	shooter_div_open_time = 2;
 	task_create_gid_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
+	task_sleep (TIME_500MS);
 }
 
 

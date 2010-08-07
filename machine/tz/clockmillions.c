@@ -122,6 +122,12 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 			deff_start (DEFF_CLOCK_MILLIONS_HIT);
 		}
 	}
+	else if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
+	{
+		leff_start (LEFF_CLOCK_TARGET);
+		sound_send (SND_CLOCK_BELL);
+		score (SC_100M);
+	}
 	else
 	{
 		callset_invoke (sw_jet_noflash);

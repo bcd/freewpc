@@ -144,19 +144,25 @@ void gumball_divertor_close (void)
 void sw_gumball_right_loop_entered (void)
 {
 	/* Open the divertor if trying to load the gumball*/
-	if (gumball_enable_from_trough)
+	if (gumball_enable_from_trough && event_did_follow (autolaunch, right_loop))
 	{
 		magnet_disable_catch (MAG_RIGHT);
 		gumball_divertor_open ();
-	}
-
-	/* Don't enable if the magnet is about to grab the ball
-	 * but it will always let the powerball through */
-	if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
-		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 		return;
-	
-	if (gumball_load_is_enabled ())
+	}
+	/* Don't open if recently autolaunched */
+	else if (event_did_follow (autolaunch, right_loop))
+	{
+		return;
+	}
+	/* Don't open if the magnet is about to grab the ball
+	 * but rembering that it will always let the powerball through */
+	else if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
+		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
+	{
+		return;
+	}
+	else if (gumball_load_is_enabled ())
 	{
 		gumball_divertor_open ();
 		if (in_live_game && !multi_ball_play ())
@@ -165,9 +171,6 @@ void sw_gumball_right_loop_entered (void)
 		}
 	}
 }
-
-
-
 
 /*************************************************************/
 /* Switch Handlers                                           */
@@ -228,22 +231,27 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 			global_flag_on (GLOBAL_FLAG_SUPER_MB_RUNNING);
 			ballsave_add_time (5);
 			
-			/* random_scaled (N) returns from 0 - N-1 */
-			switch (random_scaled (2))
+			if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
+				&& !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 			{
-				case 0:
-					callset_invoke (sssmb_start);
-					break;
-				case 1:
-					callset_invoke (chaosmb_start);
-					break;
+				/* random_scaled (N) returns from 0 - N-1 */
+				switch (random_scaled (2))
+				{
+					case 0:
+						callset_invoke (sssmb_start);
+						break;
+					case 1:
+						callset_invoke (chaosmb_start);
+						break;
+				}
 			}
 			callset_invoke (mball_start);
 			callset_invoke (mball_start_3_ball);
 		}
 		else
-		/* Shouldn't decrement if a powerball was laoded */
+		{
 			bounded_decrement (gumball_enable_count, 0);
+		}
 		if (!global_flag_test (GLOBAL_FLAG_SUPER_MB_RUNNING))
 			deff_start (DEFF_GUMBALL);
 	}

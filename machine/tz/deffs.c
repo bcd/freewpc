@@ -20,6 +20,8 @@
 
 #include <freewpc.h>
 
+extern struct timed_mode_ops hitch_mode;
+
 void cow_deff (void)
 {
 	dmd_alloc_pair ();
@@ -130,12 +132,17 @@ void two_way_combo_deff (void)
 
 void shoot_camera_deff (void)
 {
-	sprintf ("SHOOT CAMERA");
+	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
+	if (timed_mode_running_p (&hitch_mode))
+		sprintf ("SHOOT HITCH");
+	else
+		sprintf ("SHOOT CAMERA");
 	flash_and_exit_deff (15, TIME_66MS);
 }
 
 void shoot_jackpot_deff (void)
 {
+	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 	sprintf ("SHOOT PIANO");
 	flash_and_exit_deff (15, TIME_66MS);
 }

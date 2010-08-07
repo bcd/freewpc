@@ -199,12 +199,13 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 {
 
 	/* Inform gumball module that a ball may be approaching */
-	sw_gumball_right_loop_entered ();
+	if (!task_find_gid (GID_LEFT_LOOP_ENTERED))
+		sw_gumball_right_loop_entered ();
 
 	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
 		/* Ball has just come out of lock, ignore */
-		return;
+		//return;
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{

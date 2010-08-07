@@ -315,7 +315,7 @@ void bonus_deff (void)
 	/* Start a task to monitor the buttons */
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor);
 	
-	if (door_panels_started > 0)
+	if (door_panels_started)
 	{
 		dmd_alloc_low_clean ();
 		score_multiple (SC_1M, door_panels_started);
@@ -332,7 +332,7 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 	
-	if (loops > 0)
+	if (loops)
 	{
 		dmd_alloc_low_clean ();
 		psprintf ("%d LOOP", "%d LOOPS", loops);
@@ -345,7 +345,19 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		if (loops < 9)
+			bonus_pause ();
+		else 
+			task_sleep_sec (2);
+	}
+	if (loops > 9)
+	{
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed10, 64, 16, "LOOP MASTER");
+		dmd_sched_transition (&trans_sequential_boxfade);
+		dmd_show_low ();
+		sound_send (SND_GLASS_BREAKS);
+		task_sleep_sec (3);
 	}
 
 	if (jets_scored > 0)
@@ -466,7 +478,7 @@ void bonus_deff (void)
 		bonus_pause ();
 	}
 	
-	if (rollover_count > 0)
+	if (rollover_count)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
@@ -481,39 +493,59 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		
+		if (rollover_count < 9)
+			bonus_pause ();
+		else
+		{
+			task_sleep_sec (2);
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_mono5, 64, 10, "KEEPING THOSE");
+			font_render_string_center (&font_mono5, 64, 20, "BUTTONS BUSY");
+			dmd_sched_transition (&trans_sequential_boxfade);
+			dmd_show_low ();
+			sound_send (SND_GLASS_BREAKS);
+			task_sleep_sec (3);
+		}
 	}
+	
+	if (rollover_count > 9)
+	{
+			}
 
-	U8 total_combos = two_way_combos + three_way_combos;
-	if (total_combos)
+	if (two_way_combos + three_way_combos)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
 		score_add (bonus_scored, score_table[SC_5M]);
-		score_mul (bonus_scored, total_combos); 
+		score_mul (bonus_scored, two_way_combos + three_way_combos); 
 		score_add (total_bonus, bonus_scored);
-		psprintf ("%d COMBO", "%d COMBOS", total_combos);
+		psprintf ("%d COMBO", "%d COMBOS", two_way_combos + three_way_combos);
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf_score (bonus_scored);
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sprintf ("%d X 5,000,000", (total_combos));
+		sprintf ("%d X 5,000,000", (two_way_combos + three_way_combos));
 		font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		
+		if (two_way_combos + three_way_combos < 9)
+			bonus_pause ();
+		else
+		{
+			task_sleep_sec (2);
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
+			dmd_sched_transition (&trans_sequential_boxfade);
+			dmd_show_low ();
+			sound_send (SND_GLASS_BREAKS);
+			task_sleep_sec (3);
+		}
+
 	}
 
-	if (total_combos)
-	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
-		dmd_sched_transition (&trans_sequential_boxfade);
-		dmd_show_low ();
-		sound_send (SND_GLASS_BREAKS);
-		task_sleep_sec (3);
-	}
-	if (lucky_bounces > 0)
+	if (lucky_bounces)
 	{
 		dmd_alloc_low_clean ();
 		score_zero (bonus_scored);
@@ -529,9 +561,18 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		bonus_pause ();
+		if (lucky_bounces < 4)
+			bonus_pause ();
+		else
+		{
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_fixed10, 64, 16, "SPAWNY GET");
+			dmd_sched_transition (&trans_sequential_boxfade);
+			dmd_show_low ();
+			sound_send (SND_GLASS_BREAKS);
+			task_sleep_sec (3);
+		}
 	}
-
 
 	/* Do not allow the player to skip the next bonuses */
 	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
@@ -544,6 +585,7 @@ void bonus_deff (void)
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("20 MILLION");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+		dmd_sched_transition (&trans_bitfade_fast);
 		dmd_show_low ();
 		sound_send (SND_SURVIVAL_IS_EVERYTHING);
 		task_sleep_sec (3);
@@ -560,15 +602,16 @@ void bonus_deff (void)
 		&& hitch_count
 		&& rollover_count
 		&& lucky_bounces
-		&& total_combos)
+		&& two_way_combos + three_way_combos)
 	{
+		sound_send (SND_PLAYER_PIANO_UNUSED);
 		dmd_alloc_low_clean ();
 		score_add (total_bonus, score_table[SC_100M]);
 		sprintf ("TOURIST AWARD");
 		font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
 		sprintf ("100 MILLION");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		sound_send (SND_PLAYER_PIANO_UNUSED);
+		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
 		task_sleep_sec (6);
 	}

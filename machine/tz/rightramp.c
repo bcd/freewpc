@@ -72,7 +72,6 @@ void sw_right_ramp_enter_task (void)
 					&& global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 			{
 				deff_start (DEFF_SHOOT_JACKPOT);
-				sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 			}
 			task_sleep_sec (2);
 	

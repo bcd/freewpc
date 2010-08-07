@@ -70,6 +70,7 @@ CALLSET_ENTRY (tnf, tnf_button_pushed)
 
 CALLSET_ENTRY (tnf, tnf_start)
 {
+	timer_restart_free (GID_TNF_RUNNING, TIME_4S);
 	flipper_disable ();
 	music_disable ();
 	mpf_buttons_pressed = 1;
@@ -77,7 +78,6 @@ CALLSET_ENTRY (tnf, tnf_start)
 	tnf_x = 0;
 	tnf_y = 0;
 	leff_start (LEFF_NO_GI);
-	timer_restart_free (GID_TNF_RUNNING, TIME_3S);
 	deff_start_sync (DEFF_TNF);
 	callset_invoke (tnf_end);
 }

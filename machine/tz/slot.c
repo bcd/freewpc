@@ -174,12 +174,14 @@ void sslot_award (void)
 	lamp_tristate_off (LM_SLOT_MACHINE);
 }
 
+void shot_slot_task (void)
+{
+	callset_invoke (shot_slot_machine);
+	task_exit ();
+}
+
 CALLSET_ENTRY (slot, dev_slot_enter)
 {
-	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
-	set_valid_playfield ();
-	score (SC_1K);
-
 	if (event_did_follow (dead_end, slot)
 	 	|| event_did_follow (gumball_exit, slot)
 		|| event_did_follow (piano, slot)
@@ -191,7 +193,9 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	}
 	else if (event_did_follow (skill_shot, slot))
 	{
-		/* skill switch was recently hit, so ignore slot */
+		/* skill switch was recently hit */
+		set_valid_playfield ();
+		task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 		callset_invoke (skill_missed);
 		deff_stop (DEFF_SKILL_SHOT_READY);
 	}
@@ -205,12 +209,18 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	{
 		score (SC_50K);
 		/* Tell door.c that the slot machine was hit */
-		callset_invoke (shot_slot_machine);
+		//callset_invoke (shot_slot_machine);
+		task_create_anon (shot_slot_task);
+		task_sleep (TIME_200MS);
 	}
 }
 
 CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 {
+	/* TODO Hack to hold ball due to the way shot_slot_task works */
+	while (deff_get_active () == DEFF_DOOR_AWARD)
+		task_sleep (TIME_500MS);
+
 	if (in_live_game)
 	{
 		/* start Slot kick -> STDM timer for combo.c */

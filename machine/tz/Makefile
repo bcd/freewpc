@@ -40,7 +40,7 @@ ROM_PAGE_COUNT = 32
 #################################################
 
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 97
+MACHINE_MINOR = 99
 
 PINMAME_MACHINE = tz_92
 
@@ -84,7 +84,7 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	hitch.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o vpoker.o maghelper.o tnf.o bttz.o
+	spiral.o maghelper.o tnf.o bttz.o
 
 IMAGE_MAP += $(M)/tz.ild
 

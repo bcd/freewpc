@@ -44,12 +44,23 @@ __local__ camera_award_t camera_award_count;
 /* Needed to store award for deff */
 camera_award_t camera_award_count_stored;
 extern U8 mball_locks_lit;
+extern struct timed_mode_ops hitch_mode;
+
 void left_ramp_lights_camera_deff (void)
 {
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_right);	
-	font_render_string_center (&font_fixed6, 64, 6, "LEFT RAMP");
-	font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+	if (timed_mode_running_p (&hitch_mode))
+	{
+		font_render_string_center (&font_fixed6, 64, 6, "TRY A");
+		font_render_string_center (&font_fixed6, 64, 22, "BIT LOWER");
+	
+	}
+	else
+	{
+		font_render_string_center (&font_fixed6, 64, 6, "LEFT RAMP");
+		font_render_string_center (&font_fixed6, 64, 22, "LIGHTS CAMERA");
+	}
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -210,7 +221,6 @@ CALLSET_ENTRY (camera, right_ball_grabbed)
 {
 	if (!multi_ball_play () && can_award_camera ())
 	{
-		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		deff_start (DEFF_SHOOT_CAMERA);
 	}
 }

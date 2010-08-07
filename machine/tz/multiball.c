@@ -651,7 +651,6 @@ CALLSET_ENTRY (mball, left_ball_grabbed)
 {
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING) && global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
-		sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);		
 		deff_start (DEFF_SHOOT_JACKPOT);
 	}
 }

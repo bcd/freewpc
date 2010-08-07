@@ -10,7 +10,7 @@ Launch the ball and try to land in the yellow zone for maximum points.
 Inlanes
 =======
 These can be stepped left and right using the flipper buttons, complete a
-set of 3 rollovers for 1M on your score and another 1M on your bonus at the end.
+set of 3 rollovers for 1M on your score and 1M towards your bonus.
 
 Spiralaward
 ===========
@@ -98,7 +98,7 @@ ending.  Jackpots can be increased by hitting the camera, up to a maximum of
 
 If 3 balls are in play when the jackpot is collected, 10M is added to the
 jackpot.  If the Powerball is used to collect the jackpot, the jackpot is
-doubled(!)
+doubled.
 
 Note: There is also 'Clock Chaos' and 'Super Skill' multiball modes, details
 in the 'Door Panels' section.
@@ -191,7 +191,7 @@ than slow loops.  Shoot the lock to collect the jackpot.
 
 Door Panel: Super Slot
 ======================
-30 second timed mode, shoot the slot machine to collect one of the following:
+30 second timed mode, shoot the slot machine to randomly collect one of the following:
 
 - Extra ball
 - Light gumball
@@ -220,24 +220,32 @@ Press both flipper buttons in together to speed up the bonus animation.
 - Backdoor award ???
 - Tourist award ???
 
+Combo master is awarded for 10+ combos
+Loop master is awarded for 10+ loops
+Spawny Get is what you get called for being lucky ;-p
+
 Adjustments
 ===========
 
 - TZ Magnet Helpers
 If the camera or MB Jackpot are lit, the game will grab the ball on the
-magnets to give you a better chance of a shot.
+magnets to give you a better chance of a shot. Enabled by default.
 
 - Easy light Gumball
 Normally to clear the Gum and Ball lamps you have to lock a ball, with this enabled you
-just have to collect a gumball to clear them.
+just have to collect a gumball to clear them. Enabled by default.
 
 - Easy light Door panels
 If you have under 8 door panels, hitting the slot or piano when unlit will
-relight them.
+relight them.  Enabled by default.
 
 - Fire when detected empty
 This makes the autofire kick even when it hasn't detect a ball in there.  Turn
-this option on if the autofire opto has failed
+this option on if the autofire opto has failed.  Disabled by default.
+
+- Gumball over Camera
+If the Gumball is lit, the machine won't try to grab the ball on the
+right magnet for the camera shot.  Disabled by default.
 
 Combos and Lucky bounces
 ========================
@@ -246,7 +254,6 @@ There are 3 x 2 way combos:
 - Left loop -> Camera
 - Left loop -> Hitchhiker
 - Right loop -> Piano
-
 
 And a 3 way combo:
 - Leftramp -> Rightramp -> Piano
