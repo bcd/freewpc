@@ -126,7 +126,7 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 	{
 		leff_start (LEFF_CLOCK_TARGET);
 		sound_send (SND_CLOCK_BELL);
-		score (SC_100M);
+		score (SC_1M);
 	}
 	else
 	{
