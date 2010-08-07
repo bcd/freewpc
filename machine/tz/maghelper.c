@@ -48,7 +48,7 @@ bool juggle_ball;
 bool magnet_enabled (U8 magnet)
 {
 	enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
-	if (magstates[magnet] == MAG_ENABLED)
+	if (magstates[magnet] != MAG_DISABLED)
 		return TRUE;
 	else
 		return FALSE;
@@ -72,7 +72,7 @@ static void magnet_enable_monitor_task (void)
 	{
 		/* Lower Right magnet grabs */
 		/* Catch the ball for the camera and hitch shot, don't care about gumball */
-		if ((can_award_camera () || timed_mode_running_p (&hitch_mode))
+		if ((can_award_camera () || timed_mode_running_p (&hitch_mode) || pb_maybe_in_play ())
 			&& (!timer_find_gid (GID_SPIRALAWARD)
 			&& !timer_find_gid (GID_LOCK_KICKED)
 			&& !timer_find_gid (GID_BALL_LAUNCH)
@@ -127,10 +127,9 @@ static void magnet_enable_monitor_task (void)
 		}
 		
 		/* If in maybe state, turn on the magnets to help detection */
-		if (pb_maybe_in_play ())
+		else if (pb_maybe_in_play ())
 		{
 			magnet_enable_catch (MAG_LEFT);
-			magnet_enable_catch (MAG_RIGHT);
 		}
 	
 		if (juggle_ball)

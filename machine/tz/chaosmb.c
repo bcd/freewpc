@@ -21,6 +21,7 @@
 #include <freewpc.h>
 
 U8 chaosmb_level;
+U8 chaosmb_level_stored;
 U8 chaosmb_hits_to_relight;
 extern U8 autofire_request_count;
 extern U8 unlit_shot_count;
@@ -84,9 +85,18 @@ void chaos_jackpot_deff (void)
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	deff_swap_low_high (15, TIME_100MS);
+	
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	sprintf ("%d MILLION", chaosmb_shots[chaosmb_level_stored].jackpot_value);
+	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+	sound_send (SND_EXPLOSION_1);
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (15, TIME_100MS);
 	deff_exit ();
 }
-
 
 void chaosmb_running_deff (void)
 {
@@ -119,6 +129,7 @@ static void chaosmb_check_jackpot_lamps (void)
 	if (chaosmb_hits_to_relight == 0)
 	{	
 		lamp_tristate_off (LM_CLOCK_MILLIONS);
+		
 		switch (chaosmb_level)
 		{
 		/* TODO This is very hacky, do it properly */
@@ -159,17 +170,28 @@ static void chaosmb_check_jackpot_lamps (void)
 
 static void chaosmb_score_jackpot (void)
 {
+	
 	magnet_disable_catch (MAG_LEFT);
 	mball_jackpot_uncollected = FALSE;
-	if (chaosmb_level <= 5)
+	/* Score it */
+	score_multiple	(SC_1M, chaosmb_shots[chaosmb_level].jackpot_value);
+	/* Store level for deff */
+	chaosmb_level_stored = chaosmb_level;
+	/* Increment and wrap around at 5 */
+	if (chaosmb_level < 5)
+	{
 		chaosmb_level++;
+		chaosmb_hits_to_relight = chaosmb_level * 2;
+	}
 	else
+	{
 		chaosmb_level = 0;
-	chaosmb_hits_to_relight = chaosmb_level * 2;
+		chaosmb_hits_to_relight = 4;
+	}
+
 	chaosmb_check_jackpot_lamps ();
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_CHAOS_JACKPOT);
-	sound_send (SND_EXPLOSION_1);
 }
 
 CALLSET_ENTRY (chaosmb, chaosmb_start)
@@ -204,7 +226,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	music_refresh ();
 }
 
-void chaosmb_check_level (U8 level)
+static inline void chaosmb_check_level (U8 level)
 {
 	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		&& (chaosmb_level == level)
@@ -295,5 +317,5 @@ CALLSET_ENTRY (chaosmb, end_ball)
 CALLSET_ENTRY (chaosmb, start_player)
 {
 	chaosmb_level = 0;
-	chaosmb_hits_to_relight = 0;
+	chaosmb_hits_to_relight = 1;
 }

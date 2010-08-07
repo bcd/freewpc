@@ -71,7 +71,7 @@ void show_driver_animation (void)
 	/* Show driver animation */	
 	U16 fno;
 	U8 i;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 5; i++)
 	{
 		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
 		{
@@ -104,6 +104,7 @@ void show_text_on_stars (void)
 CALLSET_ENTRY (tz_amode, amode_page)
 {
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
@@ -111,35 +112,39 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_bitmap8, 64, 22, "BCD");
-	dmd_text_blur ();
 	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_steel, 64, 20, "BCD");
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_bitmap8, 64, 22, "HIGHRISE");
-	dmd_text_blur ();
 	font_render_string_center (&font_fixed10, 64, 7, "ANIMATIONS BY");
+	font_render_string_center (&font_steel, 64, 20, "HIGHRISE");
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_bitmap8, 64, 22, "SONNY JIM");
-	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
+	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
 	show_text_on_stars ();
 	
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
-	font_render_string_center (&font_var5, 64, 22, "TO DISPLAY RULES");
+	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
 
+	show_random_factoid ();
+	
+	dmd_sched_transition (&trans_scroll_left);
 	show_driver_animation ();
 	
+	dmd_sched_transition (&trans_bitfade_slow);
 	/* Clean the low screen for the transition */
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
@@ -161,6 +166,7 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
+	
 }
 
 static void lock_and_outhole_monitor (void)

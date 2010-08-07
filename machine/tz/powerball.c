@@ -394,24 +394,14 @@ void pb_container_exit (U8 location)
 	}
 }
 
-static inline void pb_ball_grabbed (void)
-{	
+/* Used by maghelper.c to aid with powerball detection */
+CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
+{
 	if (single_ball_play ())
 	{	
 		pb_clear_location (PB_IN_PLAY);
 		pb_clear_location (PB_MAYBE_IN_PLAY);
 	}
-}
-
-/* Used by maghelper.c to aid with powerball detection */
-CALLSET_ENTRY (pb_detect, left_ball_grabbed)
-{
-	pb_ball_grabbed ();
-}
-
-CALLSET_ENTRY (pb_detect, right_ball_grabbed)
-{
-	pb_ball_grabbed ();
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)

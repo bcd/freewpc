@@ -28,6 +28,13 @@ what we do is:
 Show fuse list in test
 Show random TZ fact at end game
 
+
+Sharpe Shooter Mode:
+Alternative to BTTZ, Shooter pot starts with 50M, player must hit 2 lit shots,
+otherwise standups subtract from pot.  Player can choose to continue or
+collect after every 2 lit shots.  Lit shots must be holdable. 10 standups
+without a 2 lit shots stops the mode, with a "Pinball is now illegal again"
+
 Powerball detect during gumball eject
 Magnets - make magnet helpers a system adjustable feature
 Shot combos - In progress

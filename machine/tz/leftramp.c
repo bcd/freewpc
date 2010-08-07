@@ -121,9 +121,9 @@ CALLSET_ENTRY(leftramp, start_ball)
 
 inline static bool right_inlane_combo_check (void)
 {
-	if (timer_find_gid (GID_LEFT_RAMP) && single_ball_play ())
+	if (event_did_follow (right_inlane, left_ramp) && single_ball_play ())
 	{
-		timer_restart_free (GID_LEFT_RAMP_AUTOFIRE, TIME_5S);
+		event_can_follow (left_ramp_exit, tnf, TIME_4S);
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
 	}
@@ -158,7 +158,7 @@ static void maybe_ramp_divert (void)
 
 CALLSET_ENTRY (left_ramp, lamp_update)
 {
-	if (timer_find_gid (GID_LEFT_RAMP))
+	if (timer_find_gid (GID_TNF_READY))
 		lamp_tristate_flash (LM_BONUS_X);
 	else
 		lamp_tristate_off (LM_BONUS_X);

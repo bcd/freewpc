@@ -36,6 +36,12 @@ CALLSET_ENTRY (outhole, ball_search)
 	}
 }
 
+CALLSET_ENTRY (outhole, single_ball_play)
+{
+	task_sleep_sec (5);
+	multidrain_awarded = FALSE;
+}
+
 CALLSET_ENTRY (outhole, sw_outhole)
 {	
 	if (in_live_game)

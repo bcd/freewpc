@@ -283,7 +283,7 @@ CALLSET_ENTRY (jet, door_start_tsm)
 CALLSET_ENTRY (jet, status_report)
 {
 	status_page_init ();
-	sprintf ("JET LEVEL %d", jets_bonus_level);
+	sprintf ("JET LEVEL %d", jets_bonus_level + 1);
 	font_render_string_center (&font_mono5, 64, 9, sprintf_buffer);
 	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
 	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);

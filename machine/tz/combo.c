@@ -149,9 +149,7 @@ CALLSET_ENTRY (combo, award_right_loop)
 	/* Lucky bounce combo */
 	event_can_follow (right_loop, locked_ball, TIME_3S);
 	/* 2 way combos */
-	event_can_follow (right_loop, piano, TIME_1S + TIME_700MS);
-	event_can_follow (right_loop, camera, TIME_5S);
-	//event_can_follow (right_loop, hitchhiker, TIME_4S);
+	event_can_follow (right_loop, piano, TIME_2S);
 }
 
 CALLSET_ENTRY (combo, award_left_loop)

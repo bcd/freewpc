@@ -125,16 +125,21 @@ CALLSET_ENTRY (clock_millions, sw_clock_target)
 		}
 	}
 	else if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING) 
-		&& chaosmb_hits_to_relight == 0)
+		&& chaosmb_hits_to_relight != 0)
 	{
 		/* Target was hit during ChaosMB */
 		leff_start (LEFF_CLOCK_TARGET);
 		sound_send (SND_CLOCK_BELL);
 		score (SC_1M);
 	}
-	else
+	else if (!global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
 		callset_invoke (sw_jet_noflash);
+		score (SC_50K);
+		sound_send (SND_NO_CREDITS);
+	}
+	else
+	{
 		score (SC_50K);
 		sound_send (SND_NO_CREDITS);
 	}

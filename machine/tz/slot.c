@@ -211,7 +211,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* Tell door.c that the slot machine was hit */
 		//callset_invoke (shot_slot_machine);
 		task_create_anon (shot_slot_task);
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_500MS);
 	}
 }
 
@@ -221,6 +221,9 @@ CALLSET_ENTRY (slot, dev_slot_kick_attempt)
 	while (deff_get_active () == DEFF_DOOR_AWARD)
 		task_sleep (TIME_500MS);
 
+	while (kickout_locks != 0)
+		task_sleep (TIME_500MS);
+	
 	if (in_live_game)
 	{
 		/* start Slot kick -> STDM timer for combo.c */

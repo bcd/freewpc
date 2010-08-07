@@ -82,7 +82,7 @@ void sw_right_ramp_enter_task (void)
 			/* Drop the ball back to the playfield */
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			bridge_open_start ();
-			task_sleep (TIME_500MS);
+			task_sleep (TIME_300MS);
 			bridge_open_stop ();
 		}
 	} while (--right_ramps_entered > 0);

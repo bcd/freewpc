@@ -56,10 +56,14 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 }
 
 
-static inline void autofire_ball_loaded_wait (void)
+static inline void autofire_ball_catch_wait (void)
 {
-	while (!switch_poll_logical (SW_AUTOFIRE2))
+	U8 timeout = 60; /* 6 seconds */
+	while (!switch_poll_logical (SW_AUTOFIRE2) 
+		&& --timeout != 0)
+	{
 		task_sleep (TIME_100MS);
+	}
 }
 
 /** A task that manages the autolaunching of balls.
@@ -82,7 +86,7 @@ void autofire_monitor (void)
 	close the divertor.  This is safe because only one
 	ball can appear here at a time. */
 	//task_sleep_sec (shooter_div_open_time);
-	autofire_ball_loaded_wait ();	
+	autofire_ball_catch_wait ();	
 	shooter_div_stop ();
 
 	/* Wait a little longer for the ball to settle */
@@ -93,32 +97,34 @@ void autofire_monitor (void)
 		task_sleep (TIME_100MS);
 
 	/* If Right inlane -> Left ramp combo, start tnf mode */
-	if (timer_kill_gid (GID_LEFT_RAMP_AUTOFIRE) && single_ball_play ())
+	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);
+		task_sleep (TIME_200MS);
 		deff_start_sync (DEFF_TNF);
+		task_sleep (TIME_200MS);
 		callset_invoke (tnf_end);
 	}
 	
 	/* Open diverter again */
 	shooter_div_start ();
-	/* Wait for the diverter to fully open before firing */
-	task_sleep_sec (2);
 	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
 	 *  The switch failure could be detected automatically somehow.. */
 	if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES))
 	{	
+			/* Say that the ball is heading into the right loop */
+		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+		event_can_follow (autolaunch, right_loop, TIME_4S);
+		/* Clear the magnet so we can fire a ball */
+		magnet_disable_catch (MAG_RIGHT);
+		/* Wait for the diverter to fully open before firing */
+		task_sleep_sec (2);
 		if (in_live_game && single_ball_play ())
 		{
 			sound_send (SND_EXPLOSION_1);
 			leff_start (LEFF_STROBE_UP);
 		}
-		/* Clear the magnet so we can fire a ball */
-		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
-		magnet_disable_catch (MAG_RIGHT);
-		/* Say that the ball is heading into the right loop */
 		sol_request (SOL_AUTOFIRE);
-		event_can_follow (autolaunch, right_loop, TIME_4S);
 		/* Wait for the ball to clear the divertor 
 		 * before closing*/
 		task_sleep (TIME_700MS);
@@ -237,8 +243,7 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	if (hold_balls_in_autofire == FALSE)
-		callset_invoke (clear_autofire);
+	callset_invoke (clear_autofire);
 }
 
 CALLSET_ENTRY (autofire, start_ball)

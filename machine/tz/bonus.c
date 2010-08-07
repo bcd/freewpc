@@ -33,9 +33,9 @@ score_t temp_score;
 
 /* Current single ball top score during this game */
 score_t current_one_ball_hi_score;
-__fastram__ U8 loop_master_hi;
-__fastram__ U8 combo_master_hi;
-__fastram__ U8 spawny_get_hi;
+__permanent__ U8 loop_master_hi;
+__permanent__ U8 combo_master_hi;
+__permanent__ U8 spawny_get_hi;
 
 #define current_hi_score scores[find_player_ranked(1)]
 #define current_hi_player find_player_ranked(1) + 1
@@ -905,13 +905,6 @@ void score_to_beat_deff (void)
 	deff_exit ();
 }
 
-CALLSET_ENTRY (bonus, serve_ball)
-{
-	/* Announce score to beat if in multiplayer and last ball*/
-	if (check_if_last_ball_for_multiplayer ())	
-		deff_start (DEFF_SCORE_TO_BEAT);
-}
-
 CALLSET_ENTRY (bonus, start_game)
 {
 	/* Initiliase hi score storage variables */
@@ -977,9 +970,9 @@ CALLSET_ENTRY (bonus, rank_change)
 
 CALLSET_ENTRY (bonus, status_report)
 {
+	status_page_init ();
 	if (num_players > 1)
 	{
-		status_page_init ();
 		font_render_string_center (&font_mono5, 64, 19, "POINTS NEEDED");
 		/* find_player_ranked returns from 0 */
 		if (find_player_ranked(1) + 1 == player_up)
@@ -1008,8 +1001,18 @@ CALLSET_ENTRY (bonus, status_report)
 				sprintf ("TO CATCH UP TO P%d", current_hi_player);
 			font_render_string_center (&font_mono5, 64, 26, sprintf_buffer);
 		}
-		status_page_complete ();
 	}
+	/* Single ball play */
+	else
+	{
+		score_zero (points_this_ball);
+		score_copy (points_this_ball, current_score);
+		score_sub (points_this_ball, start_ball_score);
+		font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
+		sprintf_score (points_this_ball);
+		font_render_string_center (&font_fixed10, 64, 24, sprintf_buffer);
+	}
+	status_page_complete ();
 }
 
 CALLSET_ENTRY (bonus, end_ball)
@@ -1020,10 +1023,11 @@ CALLSET_ENTRY (bonus, end_ball)
 CALLSET_ENTRY (bonus, amode_page)
 {
 	dmd_map_overlay ();
+	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	sprintf ("LOOP MASTER: %d LOOPS", loop_master_hi);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
-	sprintf ("COMBO MASTER: %d COMBOS", loop_master_hi);
+	sprintf ("COMBO MASTER: %d COMBOS", combo_master_hi);
 	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 	show_text_on_stars ();
 }
