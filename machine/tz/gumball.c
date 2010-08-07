@@ -439,9 +439,14 @@ CALLSET_ENTRY (gumball, init)
 	global_flag_off (GLOBAL_FLAG_SUPER_MB_RUNNING);
 	gumball_enable_from_trough = FALSE;
 	gumball_pending_releases = 0;
-	
 	gumball_count = 3;
 	powerball_loaded_into_gumball = FALSE;
+}
+
+void award_right_loop_task (void)
+{
+	callset_invoke (award_right_loop);
+	task_exit ();
 }
 
 CALLSET_ENTRY (gumball, sw_gumball_popper)
@@ -449,7 +454,7 @@ CALLSET_ENTRY (gumball, sw_gumball_popper)
 	/* A right loop was completed, TODO Could be BUGGY */
 	timer_restart_free (GID_GUMBALL, TIME_1S);
 	if (task_kill_gid (GID_RIGHT_LOOP_ENTERED))
-		callset_invoke (award_right_loop);
+		task_create_anon (award_right_loop_task);
 }
 
 CALLSET_ENTRY (gumball, status_report)

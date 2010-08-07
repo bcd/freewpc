@@ -295,9 +295,12 @@ Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
 
 
-Shooter Div: driver(duty),
-	sol=SOL_SHOOTER_DIV,
-	ontime=TIME_1S, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
+#Shooter Div: driver(duty),
+#	sol=SOL_SHOOTER_DIV,
+#	ontime=TIME_4S, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
+
+Shooter Div: driver(duty2),
+	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_4S, duty_mask=DUTY_MASK_50
 
 Ramp Div: driver(duty),
 	sol=SOL_RAMP_DIVERTOR,
@@ -553,7 +556,7 @@ Clock Working:
 Cow: page(MACHINE_PAGE), PRI_EGG1
 TZ Flipcode entry: page(MACHINE3_PAGE), PRI_REPLAY
 TZ Flipcode entered: page(MACHINE3_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
-Vpoker draw: page(MACHINE3_PAGE), PRI_DEBUGGER
+#Vpoker draw: page(MACHINE3_PAGE), PRI_DEBUGGER
 
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
@@ -639,8 +642,8 @@ Home and Dry: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 PB Jackpot: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 
 Lucky Bounce: page(MACHINE_PAGE), PRI_GAME_QUICK6, D_PAUSE+D_QUEUED
-Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
-Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE+D_TIMEOUT
+Shoot Camera: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
+Shoot Jackpot: page(MACHINE_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE+D_TIMEOUT
 Ball From Lock: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Button Masher: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Get ready to Doink: page(MACHINE_PAGE), PRI_JACKPOT, D_QUEUED+D_TIMEOUT
@@ -654,6 +657,8 @@ SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
 TNF: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 TNF exit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
+
+TBC: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 

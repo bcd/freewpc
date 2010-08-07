@@ -431,13 +431,20 @@ CALLSET_ENTRY (door, ball_count_change)
 	door_lamp_update ();
 }
 
+void award_door_panel_task (void)
+{
+	callset_invoke (award_door_panel);
+	task_exit ();
+}
+
 CALLSET_ENTRY(door, sw_piano)
 {
 	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		callset_invoke (award_door_panel);
+		//callset_invoke (award_door_panel);
+		task_create_anon (award_door_panel_task);
 	}
 	else
 	{
@@ -452,7 +459,6 @@ CALLSET_ENTRY(door, sw_piano)
 		sound_send (SND_ODD_CHANGE_BEGIN);
 	}
 }
-
 
 CALLSET_ENTRY (door, shot_slot_machine)
 {

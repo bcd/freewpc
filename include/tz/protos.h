@@ -69,6 +69,7 @@ __machine__ void rollover_completed_deff (void);
 __machine__ void shot_slot_machine (void);
 __machine__ void shot_piano (void);
 __machine__ void award_door_panel (void);
+__machine__ void award_door_panel_task (void);
 
 /* gumball.c */
 __machine__ void gumball_diverter_open(void);

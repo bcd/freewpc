@@ -33,6 +33,10 @@ score_t temp_score;
 
 /* Current single ball top score during this game */
 score_t current_one_ball_hi_score;
+__fastram__ U8 loop_master_hi;
+__fastram__ U8 combo_master_hi;
+__fastram__ U8 spawny_get_hi;
+
 #define current_hi_score scores[find_player_ranked(1)]
 #define current_hi_player find_player_ranked(1) + 1
 
@@ -345,19 +349,24 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		if (loops < 9)
+		if (loops < loop_master_hi)
 			bonus_pause ();
 		else 
+		{
+			loop_master_hi = loops;
+			task_sleep_sec (1);
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_fixed10, 64, 16, "LOOP MASTER");
+			dmd_sched_transition (&trans_sequential_boxfade);
+			dmd_show_low ();
+			sound_send (SND_GLASS_BREAKS);
 			task_sleep_sec (2);
-	}
-	if (loops > 9)
-	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 16, "LOOP MASTER");
-		dmd_sched_transition (&trans_sequential_boxfade);
-		dmd_show_low ();
-		sound_send (SND_GLASS_BREAKS);
-		task_sleep_sec (3);
+			dmd_alloc_low_clean ();
+			sprintf ("%d LOOPS", loop_master_hi);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep_sec (2);
+		}
 	}
 
 	if (jets_scored > 0)
@@ -530,17 +539,23 @@ void bonus_deff (void)
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
 		
-		if (two_way_combos + three_way_combos < 9)
+		if (two_way_combos + three_way_combos < combo_master_hi)
 			bonus_pause ();
 		else
 		{
-			task_sleep_sec (2);
+			combo_master_hi = two_way_combos + three_way_combos;
+			task_sleep_sec (1);
 			dmd_alloc_low_clean ();
 			font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
-			task_sleep_sec (3);
+			task_sleep_sec (2);
+			dmd_alloc_low_clean ();
+			sprintf ("%d COMBOS", combo_master_hi);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep_sec (2);
 		}
 
 	}
@@ -561,17 +576,28 @@ void bonus_deff (void)
 		bonus_sched_transition ();
 		dmd_show_low ();
 		sound_send (SND_GREED_MODE_BOOM);
-		if (lucky_bounces < 4)
-			bonus_pause ();
-		else
+		
+		if (lucky_bounces > 4 && lucky_bounces < spawny_get_hi)
 		{
 			dmd_alloc_low_clean ();
 			font_render_string_center (&font_fixed10, 64, 16, "SPAWNY GET");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
 			sound_send (SND_GLASS_BREAKS);
+			task_sleep_sec (2);
+		}
+		else if (lucky_bounces > spawny_get_hi)
+		{
+			spawny_get_hi = lucky_bounces;
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_fixed10, 64, 16, "SPAWNIEST GET");
+			dmd_sched_transition (&trans_sequential_boxfade);
+			dmd_show_low ();
+			sound_send (SND_GLASS_BREAKS);
 			task_sleep_sec (3);
 		}
+		else
+			bonus_pause ();
 	}
 
 	/* Do not allow the player to skip the next bonuses */
@@ -989,4 +1015,22 @@ CALLSET_ENTRY (bonus, status_report)
 CALLSET_ENTRY (bonus, end_ball)
 {
 	task_kill_gid (GID_QUICKDEATH);
+}
+
+CALLSET_ENTRY (bonus, amode_page)
+{
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+	sprintf ("LOOP MASTER: %d LOOPS", loop_master_hi);
+	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
+	sprintf ("COMBO MASTER: %d COMBOS", loop_master_hi);
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	show_text_on_stars ();
+}
+
+CALLSET_ENTRY (bonus, factory_reset)
+{
+	loop_master_hi = 10;
+	combo_master_hi = 10;
+	spawny_get_hi = 5;
 }

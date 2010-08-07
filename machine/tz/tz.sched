@@ -39,7 +39,7 @@ magnet_switch_rtt 	4	0.1
 magnet_duty_rtt    	4    20c
 
 #!bridge_open_service    32    20c
-!shooter_div_service    32    20c
+#!shooter_div_service    32    20c
 !ramp_div_service       32    20c
 #!gumball_div_service    32    20c
 !left_mpf_service    	16    20c

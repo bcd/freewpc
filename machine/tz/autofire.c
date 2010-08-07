@@ -96,6 +96,8 @@ void autofire_monitor (void)
 	if (timer_kill_gid (GID_LEFT_RAMP_AUTOFIRE) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);
+		deff_start_sync (DEFF_TNF);
+		callset_invoke (tnf_end);
 	}
 	
 	/* Open diverter again */

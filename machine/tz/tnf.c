@@ -34,6 +34,8 @@ score_t tnf_score;
 
 void tnf_deff (void)
 {
+	tnf_x = 0;
+	tnf_y = 0;
 	while (task_find_gid (GID_TNF_RUNNING))
 	{
 		dmd_alloc_low_clean ();
@@ -75,11 +77,7 @@ CALLSET_ENTRY (tnf, tnf_start)
 	music_disable ();
 	mpf_buttons_pressed = 1;
 	score_zero (tnf_score);
-	tnf_x = 0;
-	tnf_y = 0;
 	leff_start (LEFF_NO_GI);
-	deff_start_sync (DEFF_TNF);
-	callset_invoke (tnf_end);
 }
 
 CALLSET_ENTRY (tnf, tnf_end)

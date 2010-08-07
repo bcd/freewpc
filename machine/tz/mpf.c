@@ -201,13 +201,6 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 	score (SC_500K);
 }
 
-/* Does this stop the crashing? */
-void award_door_panel_task (void)
-{
-	callset_invoke (award_door_panel);
-	task_exit ();
-}
-
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
