@@ -23,7 +23,7 @@
 ;;; Defines that are in .h files which can't be included directly.
 ;;; TODO: Put only the constants in .h without the C-structs and it
 ;;; it *can* be included.
-STACK_BASE         = 6133
+STACK_BASE         = 0x17F5
 WPC_ROM_BANK       = 0x3FFC
 
 STATE_OFF          = 0
@@ -285,7 +285,6 @@ _task_create:
 	tfr	x,u
 	jsr	_task_allocate
 	stu	PCREG_SAVE_OFF,x
-	puls	u
 	ldb	*_wpc_rom_bank
 	stb	ROMPAGE_SAVE_OFF,x
 
@@ -297,7 +296,7 @@ _task_create:
 	;;; stack space.  Stack space is more precious and therefore
 	;;; shouldn't be used where other means are possible.  So
 	;;; don't consider that anymore.
-	rts
+	puls	u,pc
 
 
 	;-----------------------------------------------------
