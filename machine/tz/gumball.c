@@ -101,7 +101,7 @@ void gumball_release_task (void)
 
 		/* Original timeout was 90x33ms = 3sec */
 		/* Shorter timeout will work when geneva is broken */
-		timeout = 16;
+		timeout = 19;
 		while ((gumball_geneva_tripped == FALSE) && (gumball_exit_tripped == FALSE) && (--timeout > 0))
 		{
 			sol_request (SOL_GUMBALL_RELEASE);
@@ -203,7 +203,7 @@ CALLSET_ENTRY (gumball, sw_gumball_geneva)
 	dbprintf ("Geneva tripped.\n");
 	/* Trigger on the second edge change */
 	/* Don't trigger too early */
-	if (timeout < 5)
+	if (timeout < 10)
 		gumball_geneva_tripped = TRUE;
 	event_should_follow (gumball_geneva, gumball_exit, TIME_2S);
 }

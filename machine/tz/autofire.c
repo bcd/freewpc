@@ -55,7 +55,7 @@ CALLSET_ENTRY (autofire, sw_autofire2)
 	sw_autofire ();
 }
 
-
+/* Function to wait 6 seconds or until the autofire is detected as loaded */
 static inline void autofire_ball_catch_wait (void)
 {
 	U8 timeout = 60; /* 6 seconds */
@@ -65,7 +65,6 @@ static inline void autofire_ball_catch_wait (void)
 		task_sleep (TIME_100MS);
 	}
 }
-
 /** A task that manages the autolaunching of balls.
 Upon entry, the autofire divertor solenoid is already pulsing
 and a ball is being kicked from the trough. */
@@ -88,14 +87,13 @@ void autofire_monitor (void)
 	//task_sleep_sec (shooter_div_open_time);
 	autofire_ball_catch_wait ();	
 	shooter_div_stop ();
-
+	
 	/* Wait a little longer for the ball to settle */
 	task_sleep (TIME_200MS);
 	
 	/* Wait until allowed to kickout */
 	while (kickout_locks > 0)
 		task_sleep (TIME_100MS);
-
 	/* If Right inlane -> Left ramp combo, start tnf mode */
 	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
 	{
@@ -108,27 +106,23 @@ void autofire_monitor (void)
 	
 	/* Open diverter again */
 	shooter_div_start ();
-	/* If the switch fails, it won't fire the ball, so we have an adjustment for it
-	 *  The switch failure could be detected automatically somehow.. */
-	if ((switch_poll_logical (SW_AUTOFIRE2) || feature_config.fire_when_detected_empty == YES))
-	{	
-			/* Say that the ball is heading into the right loop */
-		timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
-		event_can_follow (autolaunch, right_loop, TIME_4S);
-		/* Clear the magnet so we can fire a ball */
-		magnet_disable_catch (MAG_RIGHT);
-		/* Wait for the diverter to fully open before firing */
-		task_sleep_sec (2);
-		if (in_live_game && single_ball_play ())
-		{
-			sound_send (SND_EXPLOSION_1);
-			leff_start (LEFF_STROBE_UP);
-		}
-		sol_request (SOL_AUTOFIRE);
-		/* Wait for the ball to clear the divertor 
-		 * before closing*/
-		task_sleep (TIME_700MS);
+	/* Wait for the diverter to fully open before firing */
+	task_sleep_sec (2);
+	if (in_live_game && single_ball_play ())
+	{
+		sound_send (SND_EXPLOSION_1);
+		leff_start (LEFF_STROBE_UP);
 	}
+	/* Say that the ball is heading into the right loop */
+	timer_restart_free (GID_BALL_LAUNCH, TIME_3S);
+	event_can_follow (autolaunch, right_loop, TIME_4S);
+	/* Clear the magnet so we can fire a ball */
+	magnet_disable_catch (MAG_RIGHT);
+	/* Launch the ball */
+	sol_request (SOL_AUTOFIRE);
+	/* Wait for the ball to clear the divertor 
+	 * before closing*/
+	task_sleep (TIME_700MS);
 	shooter_div_stop ();
 	autofire_busy = FALSE;
 	task_exit ();
@@ -169,14 +163,10 @@ void autofire_add_ball (void)
 		ball was successfully kicked).  In these cases, do it
 		manually.  However, you get no retry capability here. */
 		autofire_open_for_trough ();
-		if (hold_balls_in_autofire == FALSE)
-		{
-			/* Wait for divertor to open */
-			task_sleep_sec (2);		
-			sol_request (SOL_BALL_SERVE);
-		}
+		/* Wait for divertor to open */
+		task_sleep_sec (2);		
+		sol_request (SOL_BALL_SERVE);
 	}
-	/* Make sure a ball can be served from the trough */
 	else
 	{
 		/* The normal way to kick a ball from the trough.
@@ -192,8 +182,6 @@ divertor and that it needs to be caught in the autoplunger, rather than
 falling into the manual plunger lane */
 void autofire_catch (void)
 {
-	/* TODO - don't always want to launch right away, e.g. for
-	a start multiball animation */
 	shooter_div_delay_time = 0;
 	shooter_div_open_time = 4;
 	task_create_gid1_while (GID_AUTOFIRE_HANDLER, autofire_monitor, TASK_DURATION_INF);
@@ -217,7 +205,6 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 		autofire_open_for_trough ();
 		/* Wait for the divertor to open */	
 		task_sleep_sec (1);
-		magnet_disable_catch (MAG_RIGHT);
 	}
 	else
 	{
@@ -231,10 +218,9 @@ CALLSET_ENTRY (autofire, clear_autofire)
 	/* Used to empty autofire if found full
 	 * during attract mode */
 	shooter_div_start ();
-	task_sleep (TIME_1S);
-	if (switch_poll_logical (SW_AUTOFIRE2))
-		sol_request (SOL_AUTOFIRE);
-	task_sleep (TIME_1S);
+	task_sleep_sec (2);
+	sol_request (SOL_AUTOFIRE);
+	task_sleep_sec (1);
 	shooter_div_stop ();
 }
 
@@ -243,7 +229,14 @@ CALLSET_ENTRY (autofire, ball_search)
 	/* The shooter divertor/autofire are both kicked here
 	since there is a dependency between the two.  The main
 	ball search routine is told not to kick either one of them. */
-	callset_invoke (clear_autofire);
+	if (switch_poll_logical (SW_AUTOFIRE2) || switch_poll_logical (SW_AUTOFIRE1))
+	{
+		callset_invoke (clear_autofire);
+	}
+	else if (feature_config.fire_when_detected_empty == YES)
+	{
+		callset_invoke (clear_autofire);
+	}
 }
 
 CALLSET_ENTRY (autofire, start_ball)

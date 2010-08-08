@@ -166,7 +166,6 @@ CALLSET_ENTRY (tz_amode, amode_page)
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
-	
 }
 
 static void lock_and_outhole_monitor (void)

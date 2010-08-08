@@ -34,16 +34,18 @@ score_t tnf_score;
 
 void tnf_deff (void)
 {
+	U8 timer = 40; /* 4 seconds */
 	tnf_x = 0;
 	tnf_y = 0;
-	while (task_find_gid (GID_TNF_RUNNING))
+	while (--timer != 0)
 	{
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
+		if (timer % 2 != 0)
+			font_render_string_center (&font_mono5, 64, 4, "HIT FLIPPER BUTTONS");
 		psprintf ("%d DOINK", "%d DOINKS", mpf_buttons_pressed);
 		font_render_string_center (&font_term6, 64 + tnf_x, 16 + tnf_y, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_100MS);
 	}
 	deff_exit ();
 }
@@ -64,7 +66,7 @@ void tnf_exit_deff (void)
 CALLSET_ENTRY (tnf, tnf_button_pushed)
 {
 	bounded_increment (mpf_buttons_pressed, 255);
-	sound_send (SND_HITCHHIKER_COUNT);
+	sound_send (SND_POWER_GRUNT_2);
 	score_add (tnf_score, score_table[SC_250K]);
 	tnf_x = random_scaled(10);
 	tnf_y = random_scaled(8);
@@ -72,7 +74,6 @@ CALLSET_ENTRY (tnf, tnf_button_pushed)
 
 CALLSET_ENTRY (tnf, tnf_start)
 {
-	timer_restart_free (GID_TNF_RUNNING, TIME_4S);
 	flipper_disable ();
 	music_disable ();
 	mpf_buttons_pressed = 1;

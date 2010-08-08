@@ -5,13 +5,9 @@ Store a mode for use later (when Buyin is pressed)
 	Super Slot
 	Spiral
 	TSM
-Steppable pages in rules.c 
 
-Deny multiball jackpots if ball in plunger
+Deny multiball jackpots if ball detected in plunger?
 taunts based on how far apart players scores are during multiplayer
-
-
-Announce powerball is next ball out
 
 Coin door message "High power - disabled":
 Some TZ's have the wiring for the coil interlock, some don't as it was added
@@ -26,16 +22,18 @@ what we do is:
 - Make user adjustable and auto detecting
 
 Show fuse list in test
-Show random TZ fact at end game
 
+Alarm clock:
+
+Allow the player to set a time for the alarm to go off,
+either a specific time, or 10, 20 minutes etc.
 
 Sharpe Shooter Mode:
 Alternative to BTTZ, Shooter pot starts with 50M, player must hit 2 lit shots,
 otherwise standups subtract from pot.  Player can choose to continue or
 collect after every 2 lit shots.  Lit shots must be holdable. 10 standups
 without a 2 lit shots stops the mode, with a "Pinball is now illegal again"
+"The court would like Mr Sharpe to hit:"
 
-Powerball detect during gumball eject
-Magnets - make magnet helpers a system adjustable feature
 Shot combos - In progress
 Turn up volume during multiball jackpot

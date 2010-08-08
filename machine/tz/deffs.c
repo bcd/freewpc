@@ -167,6 +167,7 @@ void in_the_lead_deff (void)
 
 void get_ready_to_doink_deff (void)
 {
+	sound_send (SND_DO_NOT_PANIC);
 	sprintf ("DOINK ALERT");
 	flash_small_deff (15, TIME_33MS);
 	sprintf ("DOINK ALERT");

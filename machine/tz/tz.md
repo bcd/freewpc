@@ -36,8 +36,7 @@ define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
 define MACHINE_REPLAY_SCORE_CHOICES       10
-define MACHINE_REPLAY_START_CHOICE        5
-#define MACHINE_OUTHOLE_KICK_HOOK          tz_outhole_kick_hook
+define MACHINE_REPLAY_START_CHOICE        15
 define MACHINE_AMODE_LEFF                 tz_amode_leff
 define MACHINE_AMODE_EFFECTS 		 
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
@@ -149,10 +148,10 @@ define CONFIG_TZONE_IP y
 #15: Right Trough, c_decl(sw_trough), noscore
 #16: Center Trough, c_decl(sw_trough), noscore
 #17: Left Trough, c_decl(sw_trough), noscore
-15: Right Trough, noscore
-16: Center Trough, noscore
-17: Left Trough, noscore
-18: Outhole, outhole, service, noplay, intest
+15: Right Trough, noscore, debounce(TIME_200MS)
+16: Center Trough, noscore, debounce(TIME_200MS)
+17: Left Trough, noscore, debounce(TIME_200MS)
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -179,7 +178,7 @@ define CONFIG_TZONE_IP y
 52: Hitchhiker, ingame
 53: Left Ramp Enter, ingame, sound(SND_LEFT_RAMP_ENTER)
 54: Left Ramp Exit, ingame, sound(SND_LEFT_RAMP_MADE)
-55: Gumball Geneva, noscore
+55: Gumball Geneva, noscore, edge
 56: Gumball Exit, noscore
 57: Slot Proximity, edge, noscore
 58: Slot
@@ -286,18 +285,8 @@ Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
 	reverse_sol=SOL_CLOCK_REVERSE
 
-#Bridge Open: driver(duty),
-#	sol=SOL_RIGHT_RAMP_DIV,
-#	ontime=TIME_66MS, duty_ontime=TIME_16MS, duty_offtime=TIME_66MS, timeout=0
-
-
 Bridge Open: driver(duty2),
 	sol=SOL_RIGHT_RAMP_DIV, timeout=TIME_4S, ontime=TIME_66MS, duty_mask=DUTY_MASK_50
-
-
-#Shooter Div: driver(duty),
-#	sol=SOL_SHOOTER_DIV,
-#	ontime=TIME_4S, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_4S
 
 Shooter Div: driver(duty2),
 	sol=SOL_SHOOTER_DIV, timeout=TIME_4S, ontime=TIME_4S, duty_mask=DUTY_MASK_50
@@ -308,9 +297,6 @@ Ramp Div: driver(duty),
 
 Gumball Div: driver(duty2),
 	sol=SOL_GUMBALL_DIV, timeout=TIME_2S, ontime=TIME_16MS, duty_mask=DUTY_MASK_12
-#Gumball Div: driver(duty),
-#	sol=SOL_GUMBALL_DIV,
-#	ontime=TIME_100MS, duty_ontime=TIME_16MS, duty_offtime=TIME_16MS, timeout=TIME_2S
 
 ##########################################################################
 # Containers
@@ -523,7 +509,7 @@ Volume Change: MUS_SUPER_SLOT
 GC: BCD, 500.000.000
 1: HRI, 400.000.000
 2: FEK, 350.000.000
-3: PUK, 300.000.000
+3: DOM, 300.000.000
 4: MLC, 250.000.000
 
 
@@ -556,7 +542,11 @@ Clock Working:
 Cow: page(MACHINE_PAGE), PRI_EGG1
 TZ Flipcode entry: page(MACHINE3_PAGE), PRI_REPLAY
 TZ Flipcode entered: page(MACHINE3_PAGE), PRI_DEBUGGER, D_PAUSE+D_QUEUED
-#Vpoker draw: page(MACHINE3_PAGE), PRI_DEBUGGER
+
+Loop master Entry: page(MACHINE3_PAGE), PRI_HSENTRY
+Loop master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
+Combo master Entry: page(MACHINE3_PAGE), PRI_HSENTRY
+Combo master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
 
 #I prefer the Jackpot animation to be shown over the replay, hence the oddness
 Replay: page(MACHINE_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED+D_TIMEOUT
@@ -624,7 +614,7 @@ MB Lit: page(MACHINE_PAGE), PRI_GAME_MODE8, D_QUEUED+D_TIMEOUT
 MB Start: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_PAUSE+D_QUEUED
 MB Running: page(MACHINE_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT
 Jackpot Relit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_ABORTABLE
-MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE3
+MBall Restart: page(MACHINE_PAGE), runner, PRI_GAME_MODE2
 
 
 BTTZ Running: page(MACHINE3_PAGE), runner, PRI_GAME_MODE7, D_QUEUED+D_TIMEOUT

@@ -123,6 +123,7 @@ void amode_logo_page (void)
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
+	dmd_sched_transition (&trans_bitfade_slow);
 	amode_page_end (3);
 }
 #endif

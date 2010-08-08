@@ -33,9 +33,9 @@ score_t temp_score;
 
 /* Current single ball top score during this game */
 score_t current_one_ball_hi_score;
-__permanent__ U8 loop_master_hi;
-__permanent__ U8 combo_master_hi;
-__permanent__ U8 spawny_get_hi;
+extern U8 loop_master_hi;
+extern U8 combo_master_hi;
+extern U8 spawny_get_hi;
 
 #define current_hi_score scores[find_player_ranked(1)]
 #define current_hi_player find_player_ranked(1) + 1
@@ -50,6 +50,8 @@ U8 countup_pause_iterations;
 bool buttons_held;
 bool quickdeath_timer_running;
 bool quickdeath_timer_already_run;
+extern U8 loop_master_initial_enter;
+extern U8 combo_master_initial_enter;
 
 extern bool powerball_death;
 extern U8 score_ranks[MAX_PLAYERS];
@@ -72,8 +74,6 @@ extern U8 two_way_combos;
 extern U8 three_way_combos;
 extern U8 lucky_bounces;
 
-/* Used to wait until bttz.c has loaded up all the balls again */
-extern U8 balls_needed_to_load;
 
 /* Function to find who holds what score position 
  * eg
@@ -233,15 +233,12 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 
 void bonus_deff (void)
 {
-
-	while (balls_needed_to_load)
-		task_sleep (TIME_500MS);
 	/* 
 	 * Taunts.....
 	 * */
 
 	/* Wait a bit so the previous music_stop doesn't kill the taunt sounds */
-	task_sleep (TIME_66MS);
+	task_sleep (TIME_100MS);
 	if (multidrain_awarded == TRUE)
 	{
 		dmd_alloc_low_clean ();
@@ -354,6 +351,7 @@ void bonus_deff (void)
 		else 
 		{
 			loop_master_hi = loops;
+			loop_master_initial_enter = player_up;
 			task_sleep_sec (1);
 			dmd_alloc_low_clean ();
 			font_render_string_center (&font_fixed10, 64, 16, "LOOP MASTER");
@@ -544,6 +542,7 @@ void bonus_deff (void)
 		else
 		{
 			combo_master_hi = two_way_combos + three_way_combos;
+			combo_master_initial_enter = player_up;
 			task_sleep_sec (1);
 			dmd_alloc_low_clean ();
 			font_render_string_center (&font_fixed10, 64, 16, "COMBO MASTER");
@@ -1020,21 +1019,3 @@ CALLSET_ENTRY (bonus, end_ball)
 	task_kill_gid (GID_QUICKDEATH);
 }
 
-CALLSET_ENTRY (bonus, amode_page)
-{
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
-	sprintf ("LOOP MASTER: %d LOOPS", loop_master_hi);
-	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
-	sprintf ("COMBO MASTER: %d COMBOS", combo_master_hi);
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
-	show_text_on_stars ();
-}
-
-CALLSET_ENTRY (bonus, factory_reset)
-{
-	loop_master_hi = 10;
-	combo_master_hi = 10;
-	spawny_get_hi = 5;
-}

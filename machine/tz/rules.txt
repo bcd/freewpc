@@ -61,6 +61,7 @@ Can be lit by:
 - The Camera door panel
 - The Super Slot round
 - 3 left ramps
+- 4 Rollovers
 
 Awards (in order)
 - Light lock
