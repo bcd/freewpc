@@ -91,23 +91,23 @@ void autofire_monitor (void)
 	/* Wait a little longer for the ball to settle */
 	task_sleep (TIME_200MS);
 	
-	/* Wait until allowed to kickout */
-	while (kickout_locks > 0)
-		task_sleep (TIME_100MS);
 	/* If Right inlane -> Left ramp combo, start tnf mode */
 	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);
-		task_sleep (TIME_200MS);
-		deff_start_sync (DEFF_TNF);
-		task_sleep (TIME_200MS);
-		callset_invoke (tnf_end);
 	}
 	
+	/* Wait until allowed to kickout */
+	while (kickout_locks > 0)
+		task_sleep (TIME_100MS);
+
 	/* Open diverter again */
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
-	task_sleep_sec (2);
+	U8 timeout = 20;
+	while (--timeout != 0)
+		task_sleep (TIME_100MS);
+	
 	if (in_live_game && single_ball_play ())
 	{
 		sound_send (SND_EXPLOSION_1);
@@ -194,6 +194,9 @@ CALLSET_ENTRY (autofire, dev_trough_kick_attempt)
 	kicking the ball.  If so, then also wait until the autofire
 	lane is clear before allowing the ball to go. */
 
+	while (task_find_gid (GID_MUTE_AND_PAUSE))
+		task_sleep (TIME_100MS);
+	
 	dbprintf ("need to autofire? live=%d, request=%d ...",
 		live_balls, autofire_request_count);
 	if (live_balls || autofire_request_count)

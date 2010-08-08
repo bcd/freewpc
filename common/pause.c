@@ -26,23 +26,6 @@
 #error "CONFIG_MUTE_AND_PAUSE unsupported because no computer-controlled flippers"
 #endif
 
-void mute_and_pause_monitor (void)
-{
-	flipper_hold_on ();
-	lamp_on (LM_BUY_IN_BUTTON);
-	kickout_lock (KLOCK_USER);
-	music_disable ();
-	callset_invoke (machine_paused);
-
-	U8 timeout = 180; /* = 60 secs x 15 minutes / 5 */
-	while (--timeout != 0)
-	{
-		ball_search_timer_reset ();
-		task_sleep_sec (5);
-	}
-	task_exit ();
-}
-
 void mute_and_pause_stop (void)
 {
 	task_kill_gid (GID_MUTE_AND_PAUSE);
@@ -51,6 +34,25 @@ void mute_and_pause_stop (void)
 	lamp_off (LM_BUY_IN_BUTTON);
 	flipper_hold_off ();
 	callset_invoke (machine_unpaused);
+}
+
+void mute_and_pause_monitor (void)
+{
+	flipper_hold_on ();
+	lamp_on (LM_BUY_IN_BUTTON);
+	kickout_lock (KLOCK_USER);
+	music_disable ();
+	callset_invoke (machine_paused);
+	
+	/* Timeout after 15 minutes */
+	U8 timeout = 180; /* = (60secs * 15)/5 */
+	while (--timeout != 0)
+	{
+		ball_search_timer_reset ();
+		task_sleep_sec (5);
+	}
+	mute_and_pause_stop ();
+	task_exit ();
 }
 
 /**
@@ -78,7 +80,6 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 	}
 }
 
-
 /*
  * Ensure that mute/pause is turned off at endball.
  */
@@ -86,4 +87,3 @@ CALLSET_ENTRY (mute_and_pause, end_ball, tilt)
 {
 	mute_and_pause_stop ();
 }
-

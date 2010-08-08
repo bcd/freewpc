@@ -31,7 +31,6 @@ extern bool multiball_ready (void);
 extern bool autofire_busy;
 extern bool chaosmb_can_divert_to_autoplunger (void);
 
-//TODO Get rid of this
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
@@ -146,6 +145,7 @@ static void maybe_ramp_divert (void)
 		chaosmb_can_divert_to_autoplunger () ||
 		right_inlane_combo_check ())
 	{
+		leff_start (LEFF_STROBE_DOWN);
 		ramp_divert_to_autoplunger ();
 	}
 	/* Divert to plunger lane for sssmb*/

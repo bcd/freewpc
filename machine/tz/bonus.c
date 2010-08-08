@@ -582,7 +582,7 @@ void bonus_deff (void)
 			font_render_string_center (&font_fixed10, 64, 16, "SPAWNY GET");
 			dmd_sched_transition (&trans_sequential_boxfade);
 			dmd_show_low ();
-			sound_send (SND_GLASS_BREAKS);
+			sound_send (SND_LUCKY);
 			task_sleep_sec (2);
 		}
 		else if (lucky_bounces > spawny_get_hi)

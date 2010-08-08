@@ -34,9 +34,8 @@ define MACHINE_SCORE_DIGITS               10
 define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
-define MACHINE_DEBUGGER_HOOK              tz_debugger_hook
 define MACHINE_REPLAY_SCORE_CHOICES       10
-define MACHINE_REPLAY_START_CHOICE        15
+define MACHINE_REPLAY_START_CHOICE        8
 define MACHINE_AMODE_LEFF                 tz_amode_leff
 define MACHINE_AMODE_EFFECTS 		 
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
@@ -151,7 +150,7 @@ define CONFIG_TZONE_IP y
 15: Right Trough, noscore, debounce(TIME_200MS)
 16: Center Trough, noscore, debounce(TIME_200MS)
 17: Left Trough, noscore, debounce(TIME_200MS)
-18: Outhole, outhole, service, noplay, intest, debounce(TIME_200MS)
+18: Outhole, outhole, service, noplay, intest
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -645,7 +644,7 @@ Score to beat: page(MACHINE2_PAGE), PRI_JACKPOT, D_PAUSE+D_QUEUED
 Backdoor Award: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 SpiralAward Collected: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 Camera Award: page(MACHINE2_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-TNF: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
+TNF: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 TNF exit: page(MACHINE3_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_PAUSE
 
 TBC: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE

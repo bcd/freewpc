@@ -34,7 +34,6 @@ U8 combo_master_initial_enter;
 extern U8 loops;
 extern U8 combos;
 extern U8 lucky_bounces;
-
 extern char initials_data[3];
 
 void loop_master_entry_deff (void)
@@ -95,7 +94,7 @@ void loop_master_check (void)
 		loop_master_initial_enter = 0;
 		deff_start_sync (DEFF_LOOP_MASTER_ENTRY);
 		SECTION_VOIDCALL (__common__, initials_enter);
-		loop_master_initials[0] = initials_data;	
+	//	loop_master_initials = initials_data;	
 		deff_start_sync (DEFF_LOOP_MASTER_EXIT);
 	}
 }
@@ -108,7 +107,7 @@ void combo_master_check (void)
 		combo_master_initial_enter = 0;
 		deff_start_sync (DEFF_COMBO_MASTER_ENTRY);
 		SECTION_VOIDCALL (__common__, initials_enter);
-		combo_master_initials[0] = initials_data;	
+	//	combo_master_initials = initials_data;	
 		deff_start_sync (DEFF_COMBO_MASTER_EXIT);
 	}
 }
@@ -123,8 +122,8 @@ CALLSET_ENTRY (master, factory_reset)
 {
 	loop_master_hi = 0;
 	combo_master_hi = 0;
-	loop_master_initials[0] = "FEK";
-	combo_master_initials[0] = "FEK";
+	//loop_master_initials = "FEK";
+	//combo_master_initials = "FEK";
 	spawny_get_hi = 0;
 }
 
@@ -133,9 +132,11 @@ CALLSET_ENTRY (master, amode_page)
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	sprintf ("LOOP MASTER: %s %d LOOPS", loop_master_initials, loop_master_hi);
+	//sprintf ("LOOP MASTER: %s %d LOOPS", loop_master_initials, loop_master_hi);
+	sprintf ("LOOP MASTER: %d LOOPS", loop_master_hi);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
-	sprintf ("COMBO MASTER: %s %d COMBOS", combo_master_initials, combo_master_hi);
+	//sprintf ("COMBO MASTER: %s %d COMBOS", combo_master_initials, combo_master_hi);
+	sprintf ("COMBO MASTER: %d COMBOS", combo_master_hi);
 	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 	show_text_on_stars ();
 }

@@ -37,7 +37,8 @@ extern bool juggle_ball;
 extern void intials_stop (void);
 extern void pin_stop (void);
 
-/* Used to invalidate high score */
+/* Used to invalidate high score, 
+ * currently invalidates all scores of a multiplayer game */
 bool flipcode_used;
 
 U8 tz_flipcode_number;
@@ -146,7 +147,7 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 			/* Store for deff */
 			tz_flipcode_number = i;
 			flipcode_used = TRUE;
-			deff_start (DEFF_TZ_FLIPCODE_ENTERED);
+			deff_start_sync (DEFF_TZ_FLIPCODE_ENTERED);
 			return;
 		}
 	}
@@ -163,29 +164,25 @@ void tz_flipcode_running (void)
 	task_exit ();
 }
 
+void tz_flipcode_entry_stop (void)
+{
+	SECTION_VOIDCALL (__common__, pin_stop);
+	SECTION_VOIDCALL (__common__, initials_stop);
+}
+
+
 /* Abort flipcode entry if the ball leaves the plunger */
 CALLSET_ENTRY (tz_flipcode, any_pf_switch)
 {
 	if (task_kill_gid (GID_TZ_FLIPCODE_RUNNING))
 	{
-		callset_invoke (tz_flipcode_entry_stop);	
+		tz_flipcode_entry_stop ();	
 	}
 }
 
 CALLSET_ENTRY (tz_flipcode, start_game)
 {
 	flipcode_used = FALSE;
-}
-
-CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry)
-{
-	task_create_gid (GID_TZ_FLIPCODE_RUNNING, tz_flipcode_running);
-}
-
-CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)
-{
-	SECTION_VOIDCALL (__common__, pin_stop);
-	SECTION_VOIDCALL (__common__, initials_stop);
 }
 
 CALLSET_ENTRY (tz_flipcode, machine_paused)
@@ -197,7 +194,7 @@ CALLSET_ENTRY (tz_flipcode, machine_paused)
 		&& system_config.tournament_mode != YES
 		&& !valid_playfield)
 	{	
-		callset_invoke (tz_flipcode_entry);
+		task_create_gid (GID_TZ_FLIPCODE_RUNNING, tz_flipcode_running);
 	}
 }
 
@@ -205,6 +202,6 @@ CALLSET_ENTRY (tz_flipcode, machine_unpaused)
 {
 	if (task_kill_gid (GID_TZ_FLIPCODE_RUNNING))
 	{
-		callset_invoke (tz_flipcode_entry_stop);
+		tz_flipcode_entry_stop ();
 	}
 }

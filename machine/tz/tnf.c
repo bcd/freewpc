@@ -34,6 +34,7 @@ score_t tnf_score;
 
 void tnf_deff (void)
 {
+	music_disable ();
 	U8 timer = 40; /* 4 seconds */
 	tnf_x = 0;
 	tnf_y = 0;
@@ -66,7 +67,7 @@ void tnf_exit_deff (void)
 CALLSET_ENTRY (tnf, tnf_button_pushed)
 {
 	bounded_increment (mpf_buttons_pressed, 255);
-	sound_send (SND_POWER_GRUNT_2);
+	sound_send (SND_BUYIN_CANCELLED);
 	score_add (tnf_score, score_table[SC_250K]);
 	tnf_x = random_scaled(10);
 	tnf_y = random_scaled(8);
@@ -75,18 +76,23 @@ CALLSET_ENTRY (tnf, tnf_button_pushed)
 CALLSET_ENTRY (tnf, tnf_start)
 {
 	flipper_disable ();
-	music_disable ();
 	mpf_buttons_pressed = 1;
 	score_zero (tnf_score);
-	leff_start (LEFF_NO_GI);
+	leff_start (LEFF_BONUS);
+	deff_start_sync (DEFF_TNF);
+	task_sleep_sec (1);
+	while (deff_get_active () == DEFF_TNF)
+		task_sleep (TIME_500MS);
+	leff_stop (LEFF_BONUS);
+	callset_invoke (tnf_end);
 }
 
 CALLSET_ENTRY (tnf, tnf_end)
 {
+	music_enable ();
+	deff_start_sync (DEFF_TNF_EXIT);
 	score_add (current_score, tnf_score);
 	flipper_enable ();
-	music_enable ();
 	music_refresh ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
-	deff_start_sync (DEFF_TNF_EXIT);
 }

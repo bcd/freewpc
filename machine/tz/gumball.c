@@ -150,8 +150,10 @@ void sw_gumball_right_loop_entered (void)
 		gumball_divertor_open ();
 		return;
 	}
-	/* Don't open if recently autolaunched */
-	else if (event_did_follow (autolaunch, right_loop))
+	/* Don't open if autofired into play or dropped from the lock*/
+	else if (event_did_follow (autolaunch, right_loop)
+		|| event_did_follow (dev_lock_kick_attempt, right_loop)
+		|| timer_find_gid (GID_LOCK_KICKED))
 	{
 		return;
 	}
