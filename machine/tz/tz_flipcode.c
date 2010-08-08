@@ -38,7 +38,7 @@ extern void intials_stop (void);
 extern void pin_stop (void);
 
 /* Used to invalidate high score */
-__local__ bool flipcode_used;
+bool flipcode_used;
 
 U8 tz_flipcode_number;
 
@@ -160,7 +160,6 @@ void tz_flipcode_running (void)
 	SECTION_VOIDCALL (__common__, initials_enter);
 	SECTION_VOIDCALL (__common__, pin_enter);
 	callset_invoke (check_tz_flipcode);
-	music_set (MUS_TZ_IN_PLAY);
 	task_exit ();
 }
 
@@ -187,4 +186,25 @@ CALLSET_ENTRY (tz_flipcode, tz_flipcode_entry_stop)
 {
 	SECTION_VOIDCALL (__common__, pin_stop);
 	SECTION_VOIDCALL (__common__, initials_stop);
+}
+
+CALLSET_ENTRY (tz_flipcode, machine_paused)
+{
+	/* Start TZ Flipcode entry if enabled 
+	 * and all the conditions are met */
+	if (!switch_poll (SW_LEFT_BUTTON) && !switch_poll (SW_RIGHT_BUTTON)
+		&& feature_config.tz_flipcodes == YES
+		&& system_config.tournament_mode != YES
+		&& !valid_playfield)
+	{	
+		callset_invoke (tz_flipcode_entry);
+	}
+}
+
+CALLSET_ENTRY (tz_flipcode, machine_unpaused)
+{
+	if (task_kill_gid (GID_TZ_FLIPCODE_RUNNING))
+	{
+		callset_invoke (tz_flipcode_entry_stop);
+	}
 }

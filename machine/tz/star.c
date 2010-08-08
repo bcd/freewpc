@@ -21,8 +21,6 @@
 /* CALLSET_SECTION (star, __machine2__) */
 #include <freewpc.h>
 
-//TODO make sure stars are at least x pixels apart
-
 #define MAX_STARS 12
 
 #define MAX_STATE 4
@@ -46,6 +44,8 @@ static const U8 star_bitmaps[] = {
 
 void star_draw (void)
 {
+	/* Don't draw any stars if paused */
+	if (task_find_gid (GID_MUTE_AND_PAUSE))
 	U8 n;
 	for (n=0; n < MAX_STARS; n++)
 	{
@@ -91,6 +91,6 @@ CALLSET_ENTRY (star, score_deff_start)
 
 CALLSET_ENTRY (star, score_overlay)
 {
-	star_draw ();
+	if (!task_find_gid (GID_MUTE_AND_PAUSE))
+		star_draw ();
 }
-

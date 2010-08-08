@@ -108,7 +108,7 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
-static bool can_award_door_panel (void)
+static inline bool can_award_door_panel (void)
 {
 	/* Panels not awarded during any multiball */
 	if (multi_ball_play () || global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
@@ -117,7 +117,7 @@ static bool can_award_door_panel (void)
 		return TRUE;
 }
 
-void door_set_flashing (U8 id)
+static inline void door_set_flashing (U8 id)
 {
 	lamp_flash_off (door_get_flashing_lamp ());
 	door_index = id;
@@ -166,10 +166,6 @@ void slot_animation_sound_task (void)
 	task_sleep (TIME_800MS);
 	sound_send (SND_SLOT_REEL);
 	task_exit ();
-}
-
-void draw_door_award_text (void)
-{
 }
 
 void door_award_deff (void)
@@ -355,21 +351,51 @@ void door_award_deff (void)
 	deff_exit ();
 }
 
-static inline void door_award_enable (void)
+void door_award_enable (void)
 {
 	if (can_award_door_panel ())
 		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
-static void door_award_flashing (void)
+CALLSET_ENTRY (door, lamp_update)
 {
+	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
+		lamp_on (LM_PIANO_PANEL);
+	else
+		lamp_off (LM_PIANO_PANEL);
+	/* Don't turn the lamp on if sslot is running */
+	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT) 
+		&& !task_find_gid (GID_SSLOT_AWARD_ROTATE))
+		lamp_on (LM_SLOT_MACHINE);
+	else
+		lamp_off (LM_SLOT_MACHINE);
+}
+
+CALLSET_ENTRY (door, award_door_panel)
+{
+	task_create_anon (award_door_panel_task);
+}
+
+CALLSET_ENTRY (door, door_start_10M)
+{
+	score (SC_10M);
+}
+
+CALLSET_ENTRY (door, ball_count_change)
+{
+	door_lamp_update ();
+}
+
+void award_door_panel_task (void)
+{
+	unlit_shot_count = 0;
 	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	/* Store the current door index */
 	door_index_awarded = door_index;
 	/* Start the event and show deff */
-	door_start_event (door_index);
 	deff_start (DEFF_DOOR_AWARD);
+	door_start_event (door_index);
 	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
@@ -399,41 +425,7 @@ static void door_award_flashing (void)
 	score (SC_50K);
 	/* Restart the door rotation */
 	door_award_enable ();
-}
 
-CALLSET_ENTRY (door, lamp_update)
-{
-	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
-		lamp_on (LM_PIANO_PANEL);
-	else
-		lamp_off (LM_PIANO_PANEL);
-	/* Don't turn the lamp on if sslot is running */
-	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT) 
-		&& !task_find_gid (GID_SSLOT_AWARD_ROTATE))
-		lamp_on (LM_SLOT_MACHINE);
-	else
-		lamp_off (LM_SLOT_MACHINE);
-}
-
-CALLSET_ENTRY (door, award_door_panel)
-{
-	door_award_flashing ();
-	unlit_shot_count = 0;
-}
-
-CALLSET_ENTRY (door, door_start_10M)
-{
-	score (SC_10M);
-}
-
-CALLSET_ENTRY (door, ball_count_change)
-{
-	door_lamp_update ();
-}
-
-void award_door_panel_task (void)
-{
-	callset_invoke (award_door_panel);
 	task_exit ();
 }
 
@@ -503,13 +495,20 @@ CALLSET_ENTRY(door, start_player)
 	door_lamp_update ();
 }
 
-CALLSET_ENTRY (door, enable_door)
-{
-	door_award_enable ();
-}
-
 CALLSET_ENTRY(door, start_ball)
 {
 	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
+	door_award_enable ();
+}
+
+CALLSET_ENTRY(door, machine_paused)
+{
+	/* Stop the door lamps rotating */
+	task_kill_gid (GID_DOOR_AWARD_ROTATE);
+}
+
+CALLSET_ENTRY(door, machine_unpaused)
+{
+	/* Start the door lamps rotating again */
 	door_award_enable ();
 }
