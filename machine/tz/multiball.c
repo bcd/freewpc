@@ -71,11 +71,13 @@ void mb_running_deff (void)
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 		dmd_show_low ();
-		while (!score_update_required ())
+		do
 		{
 			task_sleep (TIME_133MS);
 			dmd_show_other ();
-		}
+			task_sleep (TIME_133MS);
+			dmd_show_other ();
+		} while (!score_update_required ());
 	}
 }
 
