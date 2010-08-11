@@ -65,7 +65,7 @@
 #define MAX_TICKS 32
 #define MAX_SLOTS_PER_TICK 32
 #define MAX_TASKS 64
-#define MAX_INCLUDE_FILES 16
+#define MAX_INCLUDE_FILES 32
 #define MAX_CONDITIONALS 32
 
 /* The following defines are system-dependent, and could be
@@ -468,7 +468,7 @@ struct slot *alloc_slot (unsigned int tickno)
 {
 	struct tick *tick = &ticks[tickno];
 
-	if (tick->n_slots+1 == MAX_SLOTS_PER_TICK)
+	if (tick->n_slots+1 >= MAX_SLOTS_PER_TICK)
 	{
 		fprintf (stderr, "error: too many tasks scheduled in same tick\n");
 		fprintf (stderr, "Please increase MAX_SLOTS_PER_TICK and rebuild scheduler\n");
@@ -717,6 +717,11 @@ int main (int argc, char *argv[])
 					break;
 
 				case 'i':
+					if (n_includes == MAX_INCLUDE_FILES)
+					{
+						fprintf (stderr, "error: too many include files\n");
+						exit (1);
+					}
 					strcpy (include_files[n_includes++].name, argv[argn]);
 					break;
 
