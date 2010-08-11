@@ -387,12 +387,16 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 	dbprintf ("zr1: diagnostic_check - calibration performed\n");
 
 	if (!feature_config.enable_zr1_engine) {
-		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
+		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
+
+		//diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
 		return;
 	}
 
 	if (!global_flag_test (GLOBAL_FLAG_ZR1_WORKING)) {
-		diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", PAGE);
+		dbprintf ("zr1: ZR1 ENGINE IS NOT WORKING\n");
+
+		//diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", PAGE);
 		return;
 	}
 }
@@ -416,11 +420,13 @@ CALLSET_ENTRY (zr1, init)
 
 CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
+	dbprintf ("zr1: amode_stop, test_start, stop_game entry\n");
 	// HACK the sleep in zr1_stop causes a stack overflow when entering test mode from this handler.
 	// is this gets called due to a switch handler (coin door enter) so we
 	// make a new task that calls zr1_stop and exits.
 	// TODO maybe create a ZR1_STOPPING ZR1_STOPPED state?
-	task_create_anon(zr1_stop_task);
+	//task_create_anon(zr1_stop_task);
+	dbprintf ("zr1: amode_stop, test_start, stop_game exit\n");
 }
 
 /**
