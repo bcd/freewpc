@@ -244,7 +244,7 @@ void zr1_calibration_failed(U8 code) {
 	calibration_running = FALSE;
 	zr1_disable_solenoids();
 	audit_increment (&feature_audits.zr1_errors);
-	diag_post_error (errors[code], PAGE);
+	diag_post_error (errors[code], MACHINE_PAGE);
 
 	dbprintf("zr1 engine calibration failed\n");
 	dbprintf("error: %s\n", errors[code]);
@@ -389,14 +389,14 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 	if (!feature_config.enable_zr1_engine) {
 		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
 
-		//diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", PAGE);
+		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", MACHINE_PAGE);
 		return;
 	}
 
 	if (!global_flag_test (GLOBAL_FLAG_ZR1_WORKING)) {
 		dbprintf ("zr1: ZR1 ENGINE IS NOT WORKING\n");
 
-		//diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", PAGE);
+		diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", MACHINE_PAGE);
 		return;
 	}
 }
