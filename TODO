@@ -38,6 +38,33 @@ Nice to Have
 * ./include/printf.h:/* TODO : much of this is implementing a 'varargs' type facility.
 * Score sweeping for player up : in progress, see 'score_deff' branch
 * ./kernel/font.c:		/* TODO - use a real strcpy() here that is more efficient */
+* ./common/ballsave.c:/* TODO - handle early ball save due to an outlane drain */
+
+Robustness
+* ./common/reset.c:	/* TODO - should do warm reboot here */
+* ./common/tilt.c:	/* TODO: wait for slam switch to become stable, to avoid
+* ./common/pause.c:		/* TODO - this task should timeout after awhile */
+* ./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
+
+
+In Development (on other branches)
+* ./common/rtc.c:	 * TODO : this should trigger a CLOCK NOT SET message */ (date-handling)
+* ./kernel/error.c:	/* TODO - this whole function needs porting to Whitestar */ (nonwpc)
+* ./kernel/triac.c: * See kernel/ac.c for a similar define.  TODO : these should be merged.
+
+
+Native Mode
+* ./common/reset.c:	/* TODO - how to clean the permanent area in native mode? */
+* ./common/reset.c:	/* TODO - why is this not done in native mode? */
+* ./platform/native/task.c:	/* TODO - inside of calling the function directly, call a global
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/main.c:	/* TODO : Initialize the three byte switch matrix unlock code */
+* ./platform/native/main.c:				return sim_switch_matrix_get ()[9]; /* TODO - not right */
+* ./platform/native/main.c:			/* TODO */
+* ./platform/native/script.c:	/* TODO : Builtin strings */
+
 
 Uncategorized
 
@@ -55,31 +82,23 @@ Uncategorized
 ./include/corvette/sound.h:#define SND_CAR_AWARDED						MUSIC_SND(0xB8) // TODO I think.
 ./include/platform/wpc.h:	/* TODO - make a getbits macro */
 ./include/platform/whitestar.h:/* TODO */
-./common/reset.c:	/* TODO - why is this not done in native mode? */
 ./common/reset.c:	/* TODO : this should also clear audits, reset the high scores,
-./common/reset.c:	/* TODO - how to clean the permanent area in native mode? */
-./common/reset.c:	/* TODO - should do warm reboot here */
 ./common/reset.c:	/* TODO - poll certain switches that must be operational
-./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
 ./common/plunger.c:		/* TODO - after locking a ball, adding a new ball to the
 ./common/dmd_shadow.c:#define dmd_shadow() /* TODO - no C version of shadowing */
 ./common/score_deff.c:		/* TODO - I'd prefer to draw all players without flashing, and
 ./common/score_deff.c:			/* TODO - use a sweeping effect rather than the flashing
-./common/ballsave.c:/* TODO - handle early ball save due to an outlane drain */
 ./common/ticket.c:/* TODO - I have no idea how this ticket I/O really works */
 ./common/search.c:							/* TODO : When chase ball is turned on, do not wait for
-./common/pause.c:		/* TODO - this task should timeout after awhile */
 ./common/eb.c:			timed_game_extend (15); /* TODO - make adjustable */
 ./common/eb.c:			/* TODO - award points when extra balls are disabled */
 ./common/trough.c:		/* TODO : For TZ, this keeps a ball on the outhole even
 ./common/trough.c:/* TODO - handle trough stack/jam switch on newer games */
-./common/tilt.c:	/* TODO: wait for slam switch to become stable, to avoid
 ./common/service.c:/* TODO : coin door may be closed, in which case button presses
 ./common/service.c:	/* TODO : Enable Stern's "coindoor ballsave" feature */
 ./common/highscore.c:	/* TODO - what if adjustment is OFF ? */
 ./common/coin.c:/* TODO - use more robust drivers for the coin switches to
 ./common/lamptimer.c:	/* TODO - if the lamp timer is already running, it should be
-./common/rtc.c:	 * TODO : this should trigger a CLOCK NOT SET message */
 ./common/device.c:/* TODO - no way to lock only a particular device, which could be
 ./common/device.c:		/* TODO - device_request_kick (dev); would be more appropriate,
 ./common/device.c:			/* TODO - if multiple devices want to kick at the same time,
@@ -109,14 +128,6 @@ Uncategorized
 ./tools/imglib/imglib.c:	/* TODO */
 ./tools/imglib/imglib.c:	/* TODO */
 ./tools/sched/sched.c:	/* TODO : we are hard unrolling this 8 times now.
-./platform/native/task.c:	/* TODO - inside of calling the function directly, call a global
-./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
-./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
-./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
-./platform/native/main.c:	/* TODO : Initialize the three byte switch matrix unlock code */
-./platform/native/main.c:				return sim_switch_matrix_get ()[9]; /* TODO - not right */
-./platform/native/main.c:			/* TODO */
-./platform/native/script.c:	/* TODO : Builtin strings */
 ./kernel/sol.c:		/* TODO - what if the queue is full? */
 ./kernel/sol.c:	/* TODO - the assembly code generated here is not ideal.
 ./kernel/deff.c:	/* TODO : if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
@@ -124,10 +135,8 @@ Uncategorized
 ./kernel/sound.c:	/* TODO : for DCS, cmd could be 16-bit!!! */
 ./kernel/sound.c:	/* TODO : do something like this elsewhere for sound syncing */
 ./kernel/sound.c:	task_sleep (TIME_200MS); /* TODO : needed? */
-./kernel/error.c:	/* TODO - this whole function needs porting to Whitestar */
 ./kernel/timedmode.c:	/* TODO - may need a maxval to prevent overflow.  Default should
 ./kernel/timedmode.c:	/* TODO - equivalent for now */
-./kernel/triac.c: * See kernel/ac.c for a similar define.  TODO : these should be merged.
 ./kernel/triac.c:	/* TODO - return actually allocated strings to the caller
 ./kernel/ac.c:		/* TODO - here, verify that zerocross is OK by
 ./kernel/ac.c:	/* Assume working AC/zerocross for now - TODO */
