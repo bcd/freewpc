@@ -102,9 +102,6 @@ __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
 __machine__ bool sssmb_can_divert_to_plunger (void);
 
-/* star.c */
-__machine__ void star_draw(void);
-
 /* spiralaward.c */
 __machine2__ void spiralaward_right_loop_completed (void);
 
@@ -150,3 +147,6 @@ __machine3__ void start_bttz_outhole_monitor (void);
 /* factoids.c */
 __machine3__ void show_random_factoid (void);
 
+/* master.c */
+__machine3__ void loop_master_check (void);
+__machine3__ void combo_master_check (void);
