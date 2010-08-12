@@ -409,11 +409,11 @@ CALLSET_ENTRY (tz_clock, amode_start)
 CALLSET_ENTRY (tz_clock, diagnostic_check)
 {
 	if (feature_config.disable_clock)
-		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", PAGE);
+		diag_post_error ("CLOCK DISABLED\nBY ADJUSTMENT\n", MACHINE_PAGE);
 	while (unlikely (clock_mode == CLOCK_CALIBRATING))
 		task_sleep (TIME_100MS);
 	if (!global_flag_test (GLOBAL_FLAG_CLOCK_WORKING))
-		diag_post_error ("CLOCK IS\nNOT WORKING\n", PAGE);
+		diag_post_error ("CLOCK IS\nNOT WORKING\n", MACHINE_PAGE);
 }
 
 

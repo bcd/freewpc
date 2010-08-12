@@ -39,8 +39,8 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
-MACHINE_MAJOR = 0
-MACHINE_MINOR = 99
+MACHINE_MAJOR = 1
+MACHINE_MINOR = 0
 
 PINMAME_MACHINE = tz_92
 
@@ -91,5 +91,3 @@ IMAGE_MAP += $(M)/tz.ild
 
 SCHED_HEADERS += build/clock_mech.h build/bridge_open.h build/shooter_div.h \
 	build/ramp_div.h build/gumball_div.h
-
-

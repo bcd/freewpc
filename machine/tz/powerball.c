@@ -413,12 +413,12 @@ CALLSET_ENTRY (pb_detect, music_refresh)
 /* Powerball slot proximity */
 CALLSET_ENTRY (pb_detect, sw_camera)
 {
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
 }
 
 CALLSET_ENTRY (pb_detect, sw_piano)
 {
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
 }
 
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)

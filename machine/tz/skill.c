@@ -163,7 +163,7 @@ static void skill_switch_monitor (void)
 
 static void award_skill_switch (U8 sw)
 {
-	event_can_follow (skill_shot, slot, TIME_3S);
+	event_can_follow (skill_shot, slot, TIME_4S);
 	callset_invoke (any_skill_switch);
 	/* Don't trigger if sssmb and skillshot not enabled */
 	if (!skill_shot_enabled && !global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))

@@ -144,12 +144,9 @@ define CONFIG_TZONE_IP y
 12: Right Outlane, ingame, sound(SND_DRAIN)
 13: Start Button, start-button, intest, debounce(TIME_100MS)
 14: Tilt, tilt, ingame, noplay, cabinet
-#15: Right Trough, c_decl(sw_trough), noscore
-#16: Center Trough, c_decl(sw_trough), noscore
-#17: Left Trough, c_decl(sw_trough), noscore
-15: Right Trough, noscore, debounce(TIME_200MS)
-16: Center Trough, noscore, debounce(TIME_200MS)
-17: Left Trough, noscore, debounce(TIME_200MS)
+15: Right Trough, noscore
+16: Center Trough, noscore
+17: Left Trough, noscore
 18: Outhole, outhole, service, noplay, intest
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
