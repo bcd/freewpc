@@ -83,6 +83,10 @@ void sw_right_ramp_enter_task (void)
 			sound_send (SND_RIGHT_RAMP_EXIT);
 			bridge_open_start ();
 			task_sleep (TIME_300MS);
+			/* Sleep a bit longer if multiball, so we knock any following
+			 * balls back to the playfield */
+			if (multi_ball_play ())
+				task_sleep (TIME_200MS);
 			bridge_open_stop ();
 		}
 	} while (--right_ramps_entered > 0);
