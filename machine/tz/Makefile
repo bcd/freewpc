@@ -67,7 +67,8 @@ SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
 	build/right_jet.h build/lower_jet.h build/left_mpf.h build/right_mpf.h
 
 GAME_OBJS = sling.o jets.o autofire.o gumball.o \
-	config.o loop.o rampdiv.o magnet.o
+	config.o loop.o rampdiv.o magnet.o \
+	maghelper.o
 
 GAME_TEST_OBJS = gumball_test.o powerball_test.o magtest.o
 
@@ -84,7 +85,7 @@ GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
 	hitch.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o maghelper.o tnf.o bttz.o factoids.o master.o
+	spiral.o tnf.o bttz.o factoids.o master.o
 
 
 IMAGE_MAP += $(M)/tz.ild

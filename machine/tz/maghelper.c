@@ -18,8 +18,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (maghelper, __machine3__) */
-
 #include <freewpc.h>
 extern __fastram__ enum magnet_state {
 	MAG_DISABLED,
@@ -41,6 +39,7 @@ extern U8 gumball_enable_count;
 /* Whether the ball should be passed back and forth with
  * the loop magnets */
 bool juggle_ball;
+__fastram__ bool magnets_enabled;
 
 /* Check to see if a magnet is enabled.
  * Currently only used by the gumball divertor code 
@@ -66,9 +65,9 @@ bool magnet_busy (U8 magnet)
 		return TRUE;
 }
 
-static void magnet_enable_monitor_task (void)
+void magnet_enable_monitor_task (void)
 {
-	for (;;)
+	while (magnets_enabled)
 	{
 		/* Lower Right magnet grabs */
 		/* Catch the ball for the camera and hitch shot, don't care about gumball */
@@ -154,6 +153,7 @@ static void magnet_enable_monitor_task (void)
 /* Check to see if the ball is still being held */
 static void monitor_left_grab_task (void)
 {
+	callset_invoke (left_ball_grabbed);
 	while (switch_poll_logical (SW_LEFT_MAGNET))
 	{
 		task_sleep (TIME_66MS);
@@ -166,6 +166,7 @@ static void monitor_left_grab_task (void)
 
 static void monitor_right_grab_task (void)
 {
+	callset_invoke (right_ball_grabbed);
 	while (switch_poll_logical (SW_LOWER_RIGHT_MAGNET))
 	{
 		task_sleep (TIME_66MS);
@@ -175,9 +176,9 @@ static void monitor_right_grab_task (void)
 }
 
 /* Check to see if we have successfully grabbed a ball */
-static void magnet_ball_grab_monitor_task (void)
+void magnet_ball_grab_monitor_rtt (void)
 {
-	for (;;)
+	if (magnets_enabled)
 	{
 		enum magnet_state *magstates = (enum magnet_state *)&left_magnet_state;
 		if ((magstates[MAG_LEFT] == MAG_ON_HOLD)
@@ -185,7 +186,6 @@ static void magnet_ball_grab_monitor_task (void)
 			&& !task_find_gid (GID_LEFT_BALL_GRABBED))
 		{
 			task_recreate_gid (GID_LEFT_BALL_GRABBED, monitor_left_grab_task);
-			callset_invoke (left_ball_grabbed);
 		}
 		
 		if ((magstates[MAG_RIGHT] == MAG_ON_HOLD)
@@ -193,12 +193,8 @@ static void magnet_ball_grab_monitor_task (void)
 			&& !task_find_gid (GID_RIGHT_BALL_GRABBED))
 		{
 			task_recreate_gid (GID_RIGHT_BALL_GRABBED, monitor_right_grab_task);
-			callset_invoke (right_ball_grabbed);
 		}
-		/* This sleep has to be smaller than MAG_ON_HOLD + MAG_ON_POWER time */
-		task_sleep (TIME_100MS);
 	}
-	task_exit ();
 }
 
 /* Start another timer so we only enable the magnet
@@ -215,9 +211,9 @@ CALLSET_ENTRY (maghelper, start_ball)
 	magnet_reset ();
 	juggle_ball = FALSE;
 	if (feature_config.tz_mag_helpers == YES)
-	{	
+	{
+		magnets_enabled = TRUE;
 		task_recreate_gid (GID_MAGNET_ENABLE_MONITOR, magnet_enable_monitor_task);
-		task_recreate_gid (GID_MAGNET_BALL_GRAB_MONITOR, magnet_ball_grab_monitor_task);
 	}
 }
 
@@ -232,6 +228,5 @@ CALLSET_ENTRY (maghelper, ball_search)
 CALLSET_ENTRY (maghelper, end_ball)
 {
 	magnet_reset ();
-	task_kill_gid (GID_MAGNET_ENABLE_MONITOR);
-	task_kill_gid (GID_MAGNET_BALL_GRAB_MONITOR);
+	magnets_enabled = FALSE;
 }
