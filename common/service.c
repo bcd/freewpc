@@ -21,6 +21,7 @@
 #include <freewpc.h>
 #include <test.h>
 #include <coin.h>
+#include <search.h>
 
 /**
  * \file
@@ -29,6 +30,8 @@
 
 /* TODO : coin door may be closed, in which case button presses
 ought to generate a warning message */
+
+U8 live_balls_before_door_open;
 
 void coin_door_buttons_deff (void)
 {
@@ -127,12 +130,18 @@ CALLSET_ENTRY (service, sw_up)
 		test_up_button ();
 }
 
+/**************************************************************/
 
 void coin_door_opened (void)
 {
 	global_flag_on (GLOBAL_FLAG_COIN_DOOR_OPENED);
 
-	/* TODO : Enable Stern's "coindoor ballsave" feature */
+	if (in_live_game && system_config.coin_door_ball_save)
+	{
+		dbprintf ("%d balls before coin door drain\n", live_balls);
+		live_balls_before_door_open = live_balls;
+		ball_search_monitor_stop ();
+	}
 
 	/* Print a message that high power coils are disabled */
 	if (!in_test)
@@ -145,10 +154,30 @@ void coin_door_opened (void)
 void coin_door_closed (void)
 {
 	global_flag_off (GLOBAL_FLAG_COIN_DOOR_OPENED);
+
+	if (in_live_game && system_config.coin_door_ball_save)
+	{
+		dbprintf ("resetting to %d balls\n", live_balls_before_door_open);
+		if (live_balls_before_door_open != live_balls)
+		{
+			set_ball_count (live_balls_before_door_open);
+#ifdef DEFF_BALL_SAVE
+		deff_start (DEFF_BALL_SAVE);
+#endif
+		}
+		ball_search_monitor_start ();
+		live_balls_before_door_open = 0;
+	}
 }
 
 
-CALLSET_ENTRY (service, sw_coin_door_closed)
+CALLSET_ENTRY (coin_door, amode_start)
+{
+	live_balls_before_door_open = 0;
+}
+
+
+CALLSET_ENTRY (coin_door, sw_coin_door_closed)
 {
 	/* Be kind and ignore slam tilt switch briefly after the
 	coin door is opened/closed */
@@ -158,5 +187,16 @@ CALLSET_ENTRY (service, sw_coin_door_closed)
 		coin_door_closed ();
 	else
 		coin_door_opened ();
+}
+
+CALLSET_BOOL_ENTRY (coin_door, ball_drain)
+{
+	if (live_balls_before_door_open)
+	{
+		dbprintf ("drain will not end ball\n");
+		return FALSE;
+	}
+	else
+		return TRUE;
 }
 

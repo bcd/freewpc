@@ -152,6 +152,7 @@ typedef struct
 	adjval_t timed_game;
 #endif
 	adjval_t buy_extra_ball;
+	adjval_t coin_door_ball_save;
 } std_adj_t;
 
 extern __nvram__ std_adj_t system_config;
