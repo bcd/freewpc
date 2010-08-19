@@ -125,7 +125,7 @@ struct ball *node_remove (struct ball_node *node)
 		return NULL;
 	}
 
-	offset = node->head;
+	offset = node->head % node->size;
 	ball = node->ball_queue[offset];
 	if (!ball)
 	{
@@ -133,7 +133,7 @@ struct ball *node_remove (struct ball_node *node)
 		return NULL;
 	}
 
-	node->head = (node->head + 1) % node->size;
+	node->head++;
 	node->count--;
 	ball->node = NULL;
 	if (node->type->remove)
@@ -212,7 +212,7 @@ void node_init (void)
 	outhole_node.type = &switch_type_node;
 	outhole_node.index = MACHINE_OUTHOLE_SWITCH;
 	outhole_node.next = &trough_node;
-	outhole_node.size = 3;
+	outhole_node.size = 1;
 #endif
 
 	/* Create a node for the shooter, which leads to the playfield */
@@ -221,7 +221,7 @@ void node_init (void)
 	shooter_node.type = &switch_type_node;
 	shooter_node.index = MACHINE_SHOOTER_SWITCH;
 	shooter_node.next = &open_node;
-	shooter_node.size = 10;
+	shooter_node.size = MAX_BALLS_PER_NODE;
 #endif
 
 	/* Initialize the open playfield node, which feeds into the trough
@@ -233,7 +233,7 @@ void node_init (void)
 #elif defined(DEVNO_TROUGH)
 	open_node.next = &trough_node;
 #endif
-	open_node.size = 100;
+	open_node.size = MAX_BALLS_PER_NODE;
 
 #ifdef DEVNO_TROUGH
 	/* Create the pinballs and dump them into the trough */

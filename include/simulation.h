@@ -207,6 +207,8 @@ struct ball_node_type
 	void (*remove) (struct ball_node *node, struct ball *ball);
 };
 
+#define MAX_BALLS_PER_NODE 8
+
 /* A node reflects a position on the playfield where a pinball
 	may rest indefinitely.  Each node implements a first-in
 	first-out queue of ball objects, defined below. */
@@ -225,7 +227,7 @@ struct ball_node
 	unsigned int count;
 
 	/* Pointers to the ball objects that are stored here */
-	struct ball *ball_queue[6];
+	struct ball *ball_queue[MAX_BALLS_PER_NODE];
 
 	/* The offset in the queue of the next ball to be kicked */
 	unsigned int head;
