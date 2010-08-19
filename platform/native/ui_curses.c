@@ -194,12 +194,10 @@ void ui_refresh_display (unsigned int x, unsigned int y, char c)
 #endif
 
 
-void ui_update_ball_tracker (unsigned int ballno, unsigned int location)
+void ui_update_ball_tracker (unsigned int ballno, const char *location)
 {
-	extern const char *sim_ball_location_name (unsigned int location);
 	wmove (ball_tracker_win, ballno+1, 1);
-	wprintw (ball_tracker_win, "%d: %-14.14s", ballno,
-		sim_ball_location_name (location));
+	wprintw (ball_tracker_win, "%d: %-14.14s", ballno, location);
 	wrefresh (ball_tracker_win);
 }
 

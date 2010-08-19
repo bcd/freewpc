@@ -35,8 +35,8 @@ CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
 NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
 	$(D)/bcd_string.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
-	$(D)/ball.o $(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
-	$(D)/coil.o $(D)/script.o $(D)/conf.o
+	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
+	$(D)/coil.o $(D)/script.o $(D)/conf.o $(D)/node.o
 
 # For ASCII DMD
 NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)

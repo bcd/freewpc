@@ -79,7 +79,7 @@ void ui_write_sound_reset (void);
 void ui_write_sound_command (unsigned int x);
 void ui_write_dmd_text (int x, int y, const char *text);
 void ui_clear_dmd_text (int n);
-void ui_update_ball_tracker (unsigned int ballno, unsigned int location);
+void ui_update_ball_tracker (unsigned int ballno, const char *location);
 void ui_exit (void);
 
 
@@ -182,6 +182,7 @@ unsigned long realtime_read (void);
 
 unsigned char *sim_switch_matrix_get (void);
 void sim_switch_toggle (int sw);
+void sim_switch_set (int sw, int on);
 int sim_switch_read (int sw);
 void sim_switch_init (void);
 
@@ -191,5 +192,74 @@ void conf_write (const char *name, int val);
 void conf_push (int val);
 void conf_pop (unsigned int count);
 int conf_read_stack (int offset);
+
+/*************************
+ * Ball tracking
+ *************************/
+
+struct ball;
+struct ball_node;
+
+/*	The node type is used to subclass a node's behavior. */
+struct ball_node_type
+{
+	void (*insert) (struct ball_node *node, struct ball *ball);
+	void (*remove) (struct ball_node *node, struct ball *ball);
+};
+
+/* A node reflects a position on the playfield where a pinball
+	may rest indefinitely.  Each node implements a first-in
+	first-out queue of ball objects, defined below. */
+struct ball_node
+{
+	/* A pointer to the next node, which is the default location
+	that a kick operation will move a ball to. */
+	struct ball_node *next;
+
+	/* The maximum queue depth here; how many balls can stack up.
+	When this limit is reached, nodes that feed into this will
+	begin to back up. */
+	unsigned int size;
+
+	/* The actual number of balls here now */
+	unsigned int count;
+
+	/* Pointers to the ball objects that are stored here */
+	struct ball *ball_queue[6];
+
+	/* The offset in the queue of the next ball to be kicked */
+	unsigned int head;
+
+	/* The type (subclass) structure for this node */
+	struct ball_node_type *type;
+
+	/* A type-dependent value */
+	unsigned int index;
+
+	/* The name of the node used for debugging */
+	const char *name;
+};
+
+
+/* A ball object represents a physical pinball, and tracks its
+	whereabouts through the machine. */
+struct ball
+{
+	struct ball_node *node;
+	unsigned int pos;
+	unsigned int flags;
+	unsigned int index;
+	char name[8];
+};
+
+/* Some common nodes present on most machines */
+extern struct ball_node open_node;
+extern struct ball_node device_nodes[];
+extern struct ball_node shooter_node;
+extern struct ball_node outhole_node;
+#define trough_node device_nodes[DEVNO_TROUGH]
+
+void node_kick (struct ball_node *node);
+void node_move (struct ball_node *dst, struct ball_node *src);
 
 #endif /* _SIMULATION_H */

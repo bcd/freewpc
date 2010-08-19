@@ -75,7 +75,8 @@ struct sim_coil_state
 	in progress. */
 	unsigned int scheduled;
 
-	/* The ball device associated with this coil.  Not used. */
+	/* The ball device associated with this coil, if it is of type
+	device_type_coil. */
 	unsigned int devno;
 
 	/* This smoothes out the values for 'on'; it is 1 when
@@ -103,31 +104,7 @@ struct sim_coil_state coil_states[SOL_COUNT];
 void device_coil_at_max (struct sim_coil_state *c)
 {
 	unsigned int solno = c - coil_states;
-	const device_properties_t *props = &device_properties_table[c->devno];
-	int n;
-
-	simlog (SLC_DEBUG, "Kick device solenoid %d (dev %d)", solno, c->devno);
-
-	for (n = 0; n < props->sw_count; n++)
-	{
-		if (linux_switch_poll_logical (props->sw[n]))
-		{
-			simlog (SLC_DEBUG, "Device %d release", c->devno);
-			sim_switch_toggle (props->sw[n]);
-
-			/* Where does the ball go from here?
-			Normally device kickout leads to unknown areas of
-			the playfield.
-			The shooter switch could be handled though. */
-#if defined(DEVNO_TROUGH) && defined(MACHINE_SHOOTER_SWITCH)
-			if (c->devno == DEVNO_TROUGH)
-			{
-				sim_switch_toggle (MACHINE_SHOOTER_SWITCH);
-			}
-#endif
-			break;
-		}
-	}
+	device_node_kick (c->devno);
 }
 
 
@@ -154,23 +131,24 @@ void generic_coil_at_max (struct sim_coil_state *c)
 {
 	unsigned int solno = c - coil_states;
 
-	simlog (SLC_DEBUG, "Kick generic solenoid %d", solno);
+#ifdef SOL_OUTHOLE
+	if (solno == SOL_OUTHOLE)
+		node_kick (&outhole_node);
+#endif
 
-	/* If it's the outhole kicker, simulate the ball being
-	moved off the outhole into the trough */
-#if defined(MACHINE_OUTHOLE_SWITCH) && defined(DEVNO_TROUGH)
-	if (solno == SOL_OUTHOLE &&
-		linux_switch_poll_logical (MACHINE_OUTHOLE_SWITCH))
-	{
-		/* Simulate kicking the ball off the outhole into the trough */
-		simlog (SLC_DEBUG, "Outhole kick");
-		sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-		sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
-	}
+#ifdef MACHINE_LAUNCH_SOLENOID
+	if (solno == MACHINE_LAUNCH_SOLENOID)
+		node_kick (&shooter_node);
+#endif
+
+#ifdef MACHINE_KNOCKER_SOLENOID
+	if (solno == MACHINE_KNOCKER_SOLENOID)
+		simlog (SLC_DEBUG, "Thwack!");
 #endif
 }
 
 struct sim_coil_type generic_type_coil = {
+	.at_max = generic_coil_at_max,
 	.max_pos = 5,
 	.on_step = 1,
 	.off_step = -1,
@@ -246,7 +224,7 @@ void sim_coil_update (struct sim_coil_state *c)
 	move it backward. */
 	else if (!c->on && c->pos > 0)
 	{
-		c->pos -= c->type->off_step;
+		c->pos += c->type->off_step;
 		if (c->pos <= 0)
 		{
 			c->pos = 0;
@@ -256,6 +234,10 @@ void sim_coil_update (struct sim_coil_state *c)
 		}
 	}
 
+#ifdef DEBUG
+	simlog (SLC_DEBUG, "Coil %d on=%d pos=%d of %d", c - coil_states,
+		c->on, c->pos, c->type->max_pos);
+#endif
 	/* If the coil requires monitoring, and it is not at rest, then reschedule.
 	Else, we are done until the CPU modifies it again. */
 	if (!c->type->unmonitored && c->pos != 0)

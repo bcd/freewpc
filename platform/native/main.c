@@ -445,35 +445,6 @@ static void sim_sol_write (int index, U8 *memp, U8 val)
 }
 
 
-/** Simulate the side effects of switch number SWNO becoming active.
- */
-void sim_switch_effects (int swno)
-{
-	int devno;
-	int n;
-
-	/* If this is switch is in a device, then simulate
-	the 'rolling' to the farthest possible point in the device. */
-	for (devno = 0; devno < NUM_DEVICES; devno++)
-	{
-		const device_properties_t *props = &device_properties_table[devno];
-		if (props->sw_count > 1)
-			for (n = 0; n < props->sw_count-1; n++)
-			{
-				if ((props->sw[n] == swno) && !linux_switch_poll_logical (props->sw[n+1]))
-				{
-					/* Turn off these switch, and turn on the next one */
-					simlog (SLC_DEBUG, "Move from switch %d to %d",
-						swno, props->sw[n+1]);
-					sim_switch_toggle (swno);
-					sim_switch_toggle (props->sw[n+1]);
-					break;
-				}
-			}
-	}
-}
-
-
 /** Simulate the write of a WPC I/O register */
 void writeb (IOPTR addr, U8 val)
 {
@@ -809,16 +780,13 @@ static switchnum_t keymaps[256] = {
 	['.'] = SW_RIGHT_BUTTON,
 	['-'] = SW_COIN_DOOR_CLOSED,
 #ifdef MACHINE_TILT_SWITCH
-	['t'] = MACHINE_TILT_SWITCH,
+	['T'] = MACHINE_TILT_SWITCH,
 #endif
 #ifdef MACHINE_SLAM_TILT_SWITCH
 	['!'] = MACHINE_SLAM_TILT_SWITCH,
 #endif
 #ifdef MACHINE_LAUNCH_SWITCH
-	['/'] = MACHINE_LAUNCH_SWITCH,
-#endif
-#ifdef MACHINE_SHOOTER_SWITCH
-	[' '] = MACHINE_SHOOTER_SWITCH,
+	[' '] = MACHINE_LAUNCH_SWITCH,
 #endif
 };
 
@@ -956,14 +924,34 @@ static void linux_interface_thread (void)
 				break;
 
 			case 'q':
-#ifdef DEVNO_TROUGH
-#ifdef MACHINE_OUTHOLE_SWITCH
-				sim_switch_toggle (MACHINE_OUTHOLE_SWITCH);
-#else
-				sim_switch_toggle (device_properties_table[DEVNO_TROUGH].sw[0]);
-#endif /* MACHINE_OUTHOLE_SWITCH */
-#endif
+				node_move (&device_nodes[0], &open_node);
 				break;
+#if MAX_DEVICES >= 1
+			case 'w':
+				node_move (&device_nodes[1], &open_node);
+				break;
+#endif
+#if MAX_DEVICES >= 2
+			case 'e':
+				node_move (&device_nodes[2], &open_node);
+				break;
+#endif
+#if MAX_DEVICES >= 3
+			case 'r':
+				node_move (&device_nodes[3], &open_node);
+				break;
+#endif
+#if MAX_DEVICES >= 4
+			case 't':
+				node_move (&device_nodes[3], &open_node);
+				break;
+#endif
+
+#ifndef MACHINE_LAUNCH_SWITCH
+			case ' ':
+				node_move (&open_node, &shooter_node);
+				break;
+#endif
 
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
@@ -1048,31 +1036,6 @@ static void linux_interface_thread (void)
 }
 
 
-/** Initialize the simulated trough.
- * At startup, assume that all balls are in the trough. */
-void linux_trough_init (int balls)
-{
-#ifdef DEVNO_TROUGH
-	int i;
-	const device_properties_t *trough_props;
-
-	if (balls >= 0)
-	{
-		simlog (SLC_DEBUG, "Installing %d balls into device %d",
-			balls, DEVNO_TROUGH);
-
-		trough_props = &device_properties_table[DEVNO_TROUGH];
-		for (i=trough_props->sw_count-1; i >= 0 && balls; i--, balls--)
-		{
-			U8 sw = trough_props->sw[i];
-			sim_ball_move (i, sw);
-		}
-	}
-#endif
-}
-
-
-
 /** Initialize the Linux simulation.
  *
  * This is called during normal initialization, during the hardware
@@ -1091,7 +1054,7 @@ void linux_init (void)
 	/* Initial the trough to contain all the balls.  By default,
 	 * it will fill the trough, based on its actual size.  You
 	 * can use the --balls option to override this. */
-	linux_trough_init (linux_installed_balls);
+	node_init ();
 	linux_boot_time = time (NULL);
 }
 
@@ -1228,7 +1191,6 @@ int main (int argc, char *argv[])
 	protected_memory_load ();
 
 	/* Initialize the simulated ball tracker */
-	sim_ball_init ();
 	sim_coil_init ();
 
 	/* Invoke the machine-specific simulation function */
