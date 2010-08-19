@@ -1488,7 +1488,7 @@ void dev_balldev_test_thread (void)
 		}
 
 #if defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_LAUNCH_SWITCH)
-		if (switch_poll (MACHINE_LAUNCH_SWITCH))
+		if (switch_poll_logical (MACHINE_LAUNCH_SWITCH))
 		{
 			sol_request_async (MACHINE_LAUNCH_SOLENOID);
 		}
@@ -3536,9 +3536,18 @@ void empty_balls_test_thread (void)
 {
 	for (;;)
 	{
-		task_sleep_sec (1);
+		task_sleep_sec (2);
 		dmd_alloc_low_clean ();
 		empty_balls_test_draw ();
+
+		/* If the machine has an autoplunger, activate it as balls
+			pile up in the shooter lane. */
+#if defined(MACHINE_SHOOTER_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID)
+		if (switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+		{
+			sol_request_async (MACHINE_LAUNCH_SOLENOID);
+		}
+#endif
 	}
 }
 
