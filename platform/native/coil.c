@@ -154,9 +154,15 @@ struct sim_coil_type generic_type_coil = {
 	.off_step = -1,
 };
 
-struct sim_coil_type flipper_type_coil = {
-	.max_pos = 5,
-	.on_step = 1,
+struct sim_coil_type flipper_power_type_coil = {
+	.max_pos = 8,
+	.on_step = 2,
+	.off_step = -1,
+};
+
+struct sim_coil_type flipper_hold_type_coil = {
+	.max_pos = 8,
+	.on_step = 0,
 	.off_step = -1,
 };
 
@@ -207,40 +213,42 @@ struct sim_coil_type motor_type_coil = {
  */
 void sim_coil_update (struct sim_coil_state *c)
 {
+	struct sim_coil_state *m = c->master;
+
 	/* If the IO is on and the coil has not reached its maximum,
 	move it forward. */
-	if (c->on && c->pos < c->type->max_pos)
+	if (c->on && m->pos < m->type->max_pos)
 	{
-		c->pos += c->type->on_step;
-		if (c->pos >= c->type->max_pos && !c->at_max)
+		m->pos += c->type->on_step;
+		if (m->pos >= m->type->max_pos && !m->at_max)
 		{
-			c->pos = c->type->max_pos;
-			c->at_max = 1;
-			if (c->type->at_max)
-				c->type->at_max (c);
+			m->pos = m->type->max_pos;
+			m->at_max = 1;
+			if (m->type->at_max)
+				m->type->at_max (c);
 		}
 	}
 	/* Else, if the IO is off and the coil has not reached its rest state,
 	move it backward. */
-	else if (!c->on && c->pos > 0)
+	else if (!c->on && m->pos > 0)
 	{
-		c->pos += c->type->off_step;
-		if (c->pos <= 0)
+		m->pos += c->type->off_step;
+		if (m->pos <= 0)
 		{
-			c->pos = 0;
-			c->at_max = 0;
-			if (c->type->at_rest)
-				c->type->at_rest (c);
+			m->pos = 0;
+			m->at_max = 0;
+			if (m->type->at_rest)
+				m->type->at_rest (c);
 		}
 	}
 
-#ifdef DEBUG
-	simlog (SLC_DEBUG, "Coil %d on=%d pos=%d of %d", c - coil_states,
-		c->on, c->pos, c->type->max_pos);
+#if 0
+	simlog (SLC_DEBUG, "Coil %d on=%d pos=%d of %d", m - coil_states,
+		c->on, m->pos, m->type->max_pos);
 #endif
 	/* If the coil requires monitoring, and it is not at rest, then reschedule.
 	Else, we are done until the CPU modifies it again. */
-	if (!c->type->unmonitored && c->pos != 0)
+	if (!c->type->unmonitored && m->pos != 0)
 		sim_time_register (4, FALSE, (time_handler_t)sim_coil_update, c);
 	else
 	{
@@ -271,7 +279,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 
 
 #ifdef MACHINE_TZ
-void tz_sim_init (void)
+static void tz_sim_init (void)
 {
 	coil_states[SOL_GUMBALL_RELEASE].type = &motor_type_coil;
 
@@ -281,6 +289,20 @@ void tz_sim_init (void)
 }
 #endif
 
+
+#if (MACHINE_FLIPTRONIC == 1)
+static void fliptronic_coil_init (U8 power_sol)
+{
+	struct sim_coil_state *power_coil = coil_states + power_sol;
+	struct sim_coil_state *hold_coil = power_coil + 1;
+
+	power_coil->type = &flipper_power_type_coil;
+	hold_coil->type = &flipper_hold_type_coil;
+	hold_coil->master = power_coil;
+	simlog (SLC_DEBUG, "Hold coil %d linked to power coil %d",
+		power_coil - coil_states, hold_coil - coil_states);
+}
+#endif
 
 void sim_coil_init (void)
 {
@@ -307,6 +329,18 @@ void sim_coil_init (void)
 		c->type = &device_type_coil;
 		c->devno = devno;
 	}
+
+	/* Initialize Fliptronic coils */
+#if (MACHINE_FLIPTRONIC == 1)
+	fliptronic_coil_init (SOL_LL_FLIP_POWER);
+	fliptronic_coil_init (SOL_LR_FLIP_POWER);
+#ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
+	fliptronic_coil_init (SOL_UL_FLIP_POWER);
+#endif
+#ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER
+	fliptronic_coil_init (SOL_UR_FLIP_POWER);
+#endif
+#endif
 
 #ifdef MACHINE_TZ
 	tz_sim_init ();
