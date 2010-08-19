@@ -924,8 +924,9 @@ static void linux_interface_thread (void)
 				break;
 
 			case 'q':
-				node_move (&device_nodes[0], &open_node);
+				node_kick (&open_node);
 				break;
+
 #if MAX_DEVICES >= 1
 			case 'w':
 				node_move (&device_nodes[1], &open_node);
