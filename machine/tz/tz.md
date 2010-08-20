@@ -220,14 +220,14 @@ define MACHINE_AMODE_FLIPPER_SOUND_CODE   SND_THUD
 #
 ##########################################################################
 [drives]
-H1: Slot
-H2: Rocket Kicker
-H3: Autofire, nosearch, launch
+H1: Slot, time(TIME_200MS)
+H2: Rocket Kicker, duty(SOL_DUTY_75), time(TIME_200MS)
+H3: Autofire, nosearch, launch, time(TIME_200MS)
 H4: Popper
-H5: Right Ramp Div.
-H6: Gumball Div.
+H5: Right Ramp Div, duty(SOL_DUTY_50), time(TIME_100MS)
+H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
 H7: Knocker, knocker
-H8: Outhole
+H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
 L2: Right Sling
@@ -235,21 +235,21 @@ L3: Left Sling
 L4: Lower Jet
 L5: Left Jet
 L6: Right Jet
-L7: Lock Release, duty(SOL_DUTY_50), time(TIME_33MS)
+L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
 L8: Shooter Div, nosearch
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
 G3: Powerfield, flash
 G4: Ramp1, flash
-G5: Left Magnet
-G6: Upper Right Magnet
-G7: Right Magnet
+G5: Left Magnet, nosearch
+G6: Upper Right Magnet, nosearch
+G7: Right Magnet, nosearch
 G8: Gumball Release, motor, nosearch
 
-A1: MPF Left Magnet
-A2: MPF Right Magnet
-A3: Ramp Divertor
+A1: MPF Left Magnet, nosearch
+A2: MPF Right Magnet, nosearch
+A3: Ramp Divertor, duty(SOL_DUTY_25), time(TIME_100MS)
 A4: Clock Target, flash
 
 F5: U.R. Flip Power, time(TIME_33MS)
