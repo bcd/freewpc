@@ -228,6 +228,8 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 		if (powerball_loaded_into_gumball == TRUE)
 		{
 			powerball_loaded_into_gumball = FALSE;
+			callset_invoke (mball_start);
+			callset_invoke (mball_start_3_ball);
 			callset_invoke (powerball_in_gumball);	
 			/* Do a dodgy multiball combo */
 			global_flag_on (GLOBAL_FLAG_SUPER_MB_RUNNING);
@@ -247,8 +249,6 @@ CALLSET_ENTRY (gumball, sw_gumball_enter)
 						break;
 				}
 			}
-			callset_invoke (mball_start);
-			callset_invoke (mball_start_3_ball);
 		}
 		else
 		{

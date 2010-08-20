@@ -39,7 +39,7 @@ extern char initials_data[3];
 void loop_master_entry_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_fixed6, 64, 8, "CONGRATULATIONS");
+	font_render_string_center (&font_mono5, 64, 8, "CONGRATULATIONS");
 	font_render_string_center (&font_mono5, 64, 16, "NEW LOOP MASTER");
 	font_render_string_center (&font_var5, 64, 22, "ENTER INITIALS");
 	dmd_sched_transition (&trans_scroll_up);
@@ -63,7 +63,7 @@ void loop_master_exit_deff (void)
 void combo_master_entry_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_fixed6, 64, 8, "CONGRATULATIONS");
+	font_render_string_center (&font_mono5, 64, 8, "CONGRATULATIONS");
 	font_render_string_center (&font_mono5, 64, 16, "NEW COMBO MASTER");
 	font_render_string_center (&font_var5, 64, 22, "ENTER INITIALS");
 	dmd_sched_transition (&trans_scroll_up);

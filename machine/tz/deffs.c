@@ -142,6 +142,8 @@ void shoot_camera_deff (void)
 
 void shoot_jackpot_deff (void)
 {
+	if (!global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+		deff_exit ();
 	sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 	sprintf ("SHOOT PIANO");
 	flash_and_exit_deff (15, TIME_66MS);
