@@ -52,12 +52,6 @@ static void sim_switch_update (int sw)
 		ui_write_switch (sw, level ^ switch_is_opto (sw));
 #endif
 
-#if 0
-	/* Some switch closures require additional simulation... */
-	if (level ^ switch_is_opto (sw))
-		sim_switch_effects (sw);
-#endif
-
 	/* Update the signal tracker */
 	signal_update (SIGNO_SWITCH + sw, !!level);
 }
@@ -121,10 +115,21 @@ void flipper_button_depress (int sw)
 
 void sim_switch_init (void)
 {
+	switchnum_t sw;
+
+	/* Initialize switch levels to zero by default */
 	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
 	linux_switch_matrix[9] = 0xFF;
 
 	conf_add ("sw.no_power", &sim_no_switch_power);
 	conf_add ("sw.no_opto_power", &sim_no_opto_power);
+
+	/* For any switches declared as an opto, set initial
+	switch level to 1 */
+	for (sw = 0; sw < NUM_SWITCHES; sw++)
+		if (switch_is_opto (sw))
+		{
+			sim_switch_toggle (sw);
+		}
 }
 

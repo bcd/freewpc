@@ -1073,7 +1073,6 @@ void malloc_init (void)
 int main (int argc, char *argv[])
 {
 	int argn = 1;
-	switchnum_t sw;
 
 	/* Parse command-line arguments */
 	linux_output_stream = stdout;
@@ -1178,9 +1177,6 @@ int main (int argc, char *argv[])
 
 	/* Initialize the state of the switches; optos are backwards */
 	sim_switch_init ();
-	for (sw = 0; sw < NUM_SWITCHES; sw++)
-		if (switch_is_opto (sw))
-			sim_switch_toggle (sw);
 
 	/* Force always closed */
 	sim_switch_toggle (SW_ALWAYS_CLOSED);
