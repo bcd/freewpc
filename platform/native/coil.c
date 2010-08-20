@@ -109,8 +109,8 @@ void device_coil_at_max (struct sim_coil_state *c)
 
 
 struct sim_coil_type device_type_coil = {
-	.max_pos = 5,
-	.on_step = 1,
+	.max_pos = 40,
+	.on_step = 4,
 	.off_step = -1,
 	.at_max = device_coil_at_max,
 };
@@ -149,26 +149,26 @@ void generic_coil_at_max (struct sim_coil_state *c)
 
 struct sim_coil_type generic_type_coil = {
 	.at_max = generic_coil_at_max,
-	.max_pos = 5,
-	.on_step = 1,
+	.max_pos = 40,
+	.on_step = 4,
 	.off_step = -1,
 };
 
 struct sim_coil_type flipper_power_type_coil = {
-	.max_pos = 8,
+	.max_pos = 32,
 	.on_step = 2,
 	.off_step = -1,
 };
 
 struct sim_coil_type flipper_hold_type_coil = {
-	.max_pos = 8,
+	.max_pos = 32,
 	.on_step = 0,
 	.off_step = -1,
 };
 
 struct sim_coil_type outhole_type_coil = {
-	.max_pos = 5,
-	.on_step = 1,
+	.max_pos = 40,
+	.on_step = 4,
 	.off_step = -1,
 };
 
@@ -189,11 +189,12 @@ void motor_coil_at_max (struct sim_coil_state *c)
 struct sim_coil_type motor_type_coil = {
 	.at_rest = motor_coil_at_rest,
 	.at_max = motor_coil_at_max,
-	.max_pos = 32,
-	.on_step = 4,
+	.max_pos = 16,
+	.on_step = 1,
 	.off_step = 0,
-	.unmonitored = 1,
+	//.unmonitored = 1,
 };
+
 
 /**
  * Update the state machine for a coil.
@@ -214,6 +215,9 @@ struct sim_coil_type motor_type_coil = {
 void sim_coil_update (struct sim_coil_state *c)
 {
 	struct sim_coil_state *m = c->master;
+
+	if (c->master == NULL)
+		return;
 
 	/* If the IO is on and the coil has not reached its maximum,
 	move it forward. */
@@ -249,7 +253,7 @@ void sim_coil_update (struct sim_coil_state *c)
 	/* If the coil requires monitoring, and it is not at rest, then reschedule.
 	Else, we are done until the CPU modifies it again. */
 	if (!c->type->unmonitored && m->pos != 0)
-		sim_time_register (4, FALSE, (time_handler_t)sim_coil_update, c);
+		sim_time_register (1, FALSE, (time_handler_t)sim_coil_update, c);
 	else
 	{
 		c->scheduled = 0;
@@ -271,7 +275,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 		c->on = on;
 		if (!c->scheduled)
 		{
-			sim_time_register (4, FALSE, (time_handler_t)sim_coil_update, c);
+			sim_time_register (1, FALSE, (time_handler_t)sim_coil_update, c);
 			c->scheduled = 1;
 		}
 	}
@@ -286,6 +290,8 @@ static void tz_sim_init (void)
 	coil_states[SOL_CLOCK_FORWARD].type = &motor_type_coil;
 	coil_states[SOL_CLOCK_REVERSE].type = &motor_type_coil;
 	coil_states[SOL_CLOCK_REVERSE].master = &coil_states[SOL_CLOCK_FORWARD];
+
+	coil_states[47].master = NULL;
 }
 #endif
 
@@ -334,10 +340,10 @@ void sim_coil_init (void)
 #if (MACHINE_FLIPTRONIC == 1)
 	fliptronic_coil_init (SOL_LL_FLIP_POWER);
 	fliptronic_coil_init (SOL_LR_FLIP_POWER);
-#ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
+#ifdef SOL_UL_FLIP_POWER
 	fliptronic_coil_init (SOL_UL_FLIP_POWER);
 #endif
-#ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER
+#ifdef SOL_UR_FLIP_POWER
 	fliptronic_coil_init (SOL_UR_FLIP_POWER);
 #endif
 #endif
