@@ -44,20 +44,26 @@
 #ifdef MACHINE_OUTHOLE_SWITCH
 static void handle_outhole (void)
 {
+	/* TODO : in empty balls test or device tests, this should activate */
 	while (switch_poll (SW_OUTHOLE))
 	{
-		/* TODO : For TZ, this keeps a ball on the outhole even
-		when it could be moved to far left trough,
-		which is not part of the trough device. */
+#ifdef MACHINE_TZ
+		/* For TZ, if the far left trough switch is empty,
+		this also allows an outhole kick, even though the main
+		trough does not count it. */
+		if (!switch_poll_logical (SW_FAR_LEFT_TROUGH))
+		{
+		}
+		else
+#endif
 		if (device_full_p (device_entry (DEVNO_TROUGH)))
 		{
 			task_sleep_sec (1);
+			continue;
 		}
-		else
-		{
-			sol_request (SOL_OUTHOLE);
-			task_sleep_sec (2);
-		}
+
+		sol_request (SOL_OUTHOLE);
+		task_sleep_sec (2);
 	}
 	task_exit ();
 }
