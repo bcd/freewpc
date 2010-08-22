@@ -38,8 +38,14 @@
 #define ZR1_ENGINE_RIGHT_MAX 0xFF
 #define ZR1_ENGINE_CENTER 0x7F
 
-// 16 is the frequency of the ZR1 rtt, see corvette.sched:corvette_zr1_engine_rtt
+// NOTE: 16 in the calculations below is the frequency of ZR1 RTT task calls in MS, see corvette.sched:corvette_zr1_engine_rtt
+
+// Specifies how long it takes the engine to move the engine from ANY position to the center, and settle.
 #define ZR1_CENTER_TICKS 8 // 16 * 8 = 128MS
+
+// Specified how long it takes the engine to move from one side to the other - a full sweep.
+#define ZR1_SHAKE_TICKS 6 // 16 * 6 = 96MS
+
 
 U8 foundPos;
 U8 zr1_pos_center;
@@ -63,20 +69,31 @@ char *errors[] = {
 	"CHECK OPTO\nZR1 FULL RIGHT\n"
 };
 
-/* Mode that drives the rtt state machine */
-__fastram__ enum mech_zr1_state zr1_state;
-__fastram__ enum mech_zr1_state zr1_previous_state;
 U8 zr1_previously_enabled;
 U8 zr1_calibrated;
 U8 zr1_calibration_attempted;
-U8 zr1_center_ticks_remaining;
+
+/* Mode that drives the rtt state machine */
+__fastram__ enum mech_zr1_state zr1_state;
+__fastram__ enum mech_zr1_state zr1_previous_state;
+
+// RTT counters and flags
+__fastram__ U8 zr1_center_ticks_remaining;
+__fastram__ U8 zr1_shake_ticks_remaining;
+
+enum mech_zr1_shake_direction {
+	ZR1_SHAKE_DIRECTION_LEFT = 0,
+	ZR1_SHAKE_DIRECTION_RIGHT
+};
+
+__fastram__ enum mech_zr1_shake_direction zr1_shake_direction;
 
 void zr1_reset(void) {
 	zr1_previously_enabled = FALSE;
 	zr1_calibrated = FALSE;
 	zr1_calibration_attempted = FALSE;
 	zr1_state = ZR1_IDLE;
-	zr1_previous_state = ZR1_IDLE;
+	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
 
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
@@ -87,6 +104,10 @@ void zr1_reset(void) {
 	zr1_pos_full_left_opto_off = ZR1_ENGINE_LEFT_MIN;
 	zr1_pos_full_right_opto_on = ZR1_ENGINE_RIGHT_MAX;
 	zr1_pos_full_right_opto_off = ZR1_ENGINE_RIGHT_MAX;
+
+	// XXX remove - just for testing before calibration implemented.
+	zr1_calibrated = TRUE;
+	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 }
 
 // should not be used outside of this file
@@ -99,9 +120,21 @@ void zr1_set_position_to_center(void) {
 	writeb (ZR1_ENGINE_POS, zr1_engine_position);
 }
 
+// should not be used outside of this file
+void zr1_set_position(U8 position) {
+	if (!feature_config.enable_zr1_engine) {
+		return; // disabled
+	}
+
+	zr1_engine_position = position;
+	writeb (ZR1_ENGINE_POS, zr1_engine_position);
+}
+
 
 /**
  * Enable the solenoids that drive the ZR1 ball shaker device
+ *
+ * Should not be used outside of this file
  *
  * This can be called regardless of calibration state.
  * Has no effect if solenoid power is already enabled.
@@ -129,6 +162,8 @@ void zr1_enable_solenoids(void) {
 
 /**
  * Disable the solenoids that drive the ZR1 ball shaker device
+ *
+ * Should not be used outside of this file
  */
 void zr1_disable_solenoids(void) {
 	if (!feature_config.enable_zr1_engine) {
@@ -147,7 +182,7 @@ void zr1_calculate_center_pos(void) {
 	zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
 }
 
-U8 zr1_enter_state(enum mech_zr1_state new_state) {
+void zr1_enter_state(enum mech_zr1_state new_state) {
 	U8 allow_state_change = FALSE;
 	switch (zr1_state) {
 		case ZR1_SHAKE:
@@ -157,10 +192,13 @@ U8 zr1_enter_state(enum mech_zr1_state new_state) {
 			allow_state_change = TRUE;
 	}
 	if (!allow_state_change) {
-		return allow_state_change; // always FALSE
+		dbprintf("current state: %d, disallowing new state: %d\n", zr1_state, new_state);
+		//return allow_state_change; // always FALSE
+	} else {
+		dbprintf("current state: %d, enabling new state: %d\n", zr1_state, new_state);
+		zr1_state = new_state;
+		//return allow_state_change; // always TRUE
 	}
-	zr1_state = new_state;
-	return allow_state_change; // always TRUE
 }
 
 void zr1_center(void) {
@@ -197,6 +235,7 @@ void zr1_state_calibrate_enter(void) {
 
 void zr1_state_calibrate_run(void) {
 	// TODO port old zr1_calibrate() routine to RTT
+	zr1_state = ZR1_IDLE;
 }
 
 void zr1_idle(void) {
@@ -211,8 +250,9 @@ void zr1_state_idle_enter(void) {
 void zr1_state_idle_run(void) {
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
-	} else {
-		zr1_disable_solenoids();
+		if (zr1_center_ticks_remaining == 0) {
+			zr1_disable_solenoids();
+		}
 	}
 }
 
@@ -220,7 +260,36 @@ void zr1_shake(void) {
 	zr1_enter_state(ZR1_SHAKE);
 }
 
+void zr1_state_shake_enter(void) {
+	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS / 2; // we assume engine is in the center before shaking starts, that being the case it only has to travel half the distance when beginning the shake
+
+	// always begin by moving left
+	zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+	zr1_set_position(zr1_pos_full_left_opto_off);
+	zr1_enable_solenoids();
+}
+
+void zr1_state_shake_run(void) {
+	if (zr1_shake_ticks_remaining > 0) {
+		zr1_shake_ticks_remaining--;
+		return;
+	}
+	// reset counter
+	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS;
+
+	// reverse direction
+	if (zr1_shake_direction == ZR1_SHAKE_DIRECTION_LEFT) {
+		zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
+		zr1_set_position(zr1_pos_full_right_opto_off);
+	} else {
+		zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
+		zr1_set_position(zr1_pos_full_left_opto_off);
+	}
+}
+
 void corvette_zr1_engine_rtt (void) {
+
+	return;
 
 	switch (zr1_state) {
 		case ZR1_CENTER:
@@ -248,9 +317,11 @@ void corvette_zr1_engine_rtt (void) {
 		break;
 
 		case ZR1_SHAKE:
-			// TODO implement
-			// alternate the engine's position between zr1_pos_full_left_opto_off and zr1_pos_full_right_opto_off
-			// with a short delay (~200MS?) between them to allow the engine to move left and right
+			if (zr1_previous_state != zr1_state) {
+				zr1_state_shake_enter();
+			} else {
+				zr1_state_shake_run();
+			}
 		break;
 
 		default:
