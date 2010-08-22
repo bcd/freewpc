@@ -168,14 +168,23 @@ void zr1_center(void) {
 }
 
 void zr1_state_center_enter(void) {
+	interrupt_dbprintf ("zr1_state_center_enter: enter\n");
 	zr1_set_position_to_center();
+	zr1_enable_solenoids();
 	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
+	interrupt_dbprintf ("zr1_state_center_enter: exit\n");
 }
 
 void zr1_state_center_run(void) {
+	interrupt_dbprintf ("zr1_state_center_run: enter\n");
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
+		interrupt_dbprintf ("zr1_state_center_run: zr1_center_ticks_remaining = %d\n", zr1_center_ticks_remaining);
+		if (zr1_center_ticks_remaining == 0) {
+			dbprintf ("zr1_state_center_run: engine centered\n");
+		}
 	}
+	interrupt_dbprintf ("zr1_state_center_run: exit\n");
 }
 
 void zr1_calibrate(void) {
