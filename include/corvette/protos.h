@@ -58,6 +58,5 @@ __machine__ void zr1_shake(void);
 __machine__ void zr1_stop(void);
 __machine__ void zr1_idle(void);
 __machine__ void zr1_calibrate(void);
-/* argh!*/
 __machine__ void zr1_enable_solenoids(void);
 __machine__ void zr1_disable_solenoids(void);
