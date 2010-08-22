@@ -183,6 +183,7 @@ unsigned long realtime_read (void);
 unsigned char *sim_switch_matrix_get (void);
 void sim_switch_toggle (int sw);
 void sim_switch_set (int sw, int on);
+void sim_switch_depress (int sw);
 int sim_switch_read (int sw);
 void sim_switch_init (void);
 
@@ -218,6 +219,10 @@ struct ball_node
 	that a kick operation will move a ball to. */
 	struct ball_node *next;
 
+	/* Likewise, pointer to the previous node.  Note that now,
+	there can only be 1 previous node. */
+	struct ball_node *prev;
+
 	/* The maximum queue depth here; how many balls can stack up.
 	When this limit is reached, nodes that feed into this will
 	begin to back up. */
@@ -237,6 +242,15 @@ struct ball_node
 
 	/* A type-dependent value */
 	unsigned int index;
+
+	/* The time delay before a ball transitions to the next node.
+	When a kick occurs, the ball is removed from the node immediately,
+	but does not appear in the next node until this delay completes. */
+	unsigned int delay;
+
+	/* If nonzero, the node is 'unlocked', and balls will transition
+	to the next node automatically */
+	unsigned int unlocked;
 
 	/* The name of the node used for debugging */
 	const char *name;
@@ -261,6 +275,7 @@ extern struct ball_node shooter_node;
 extern struct ball_node outhole_node;
 #define trough_node device_nodes[DEVNO_TROUGH]
 
+void device_node_kick (unsigned int devno);
 void node_kick (struct ball_node *node);
 void node_move (struct ball_node *dst, struct ball_node *src);
 

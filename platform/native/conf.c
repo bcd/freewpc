@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+
+/*	This module manages configurations for the native mode simulator.
+	A configuration file can contain <var>=<value> definitions. */
+
 #include <freewpc.h>
 #include <simulation.h>
 
@@ -50,6 +54,7 @@ static unsigned int conf_hash (const char *name)
 	return hash;
 }
 
+/* Find the data structure tracking a named configuration item. */
 static struct conf_item *conf_find (const char *name)
 {
 	unsigned int hash = conf_hash (name);
@@ -63,6 +68,8 @@ static struct conf_item *conf_find (const char *name)
 	return NULL;
 }
 
+/*	Define a new, valid configuration item.
+	This must be called _before_ the config data is loaded from the file/script. */
 void conf_add (const char *name, int *valp)
 {
 	struct conf_item *cf = malloc (sizeof (struct conf_item));
@@ -73,6 +80,9 @@ void conf_add (const char *name, int *valp)
 	conf_table[cf->hash % HASH_SIZE] = cf;
 }
 
+
+/*	Read the current value of a configuration item, by name.
+	If it has not been explicitly set anywhere, the default is 0. */
 int conf_read (const char *name)
 {
 	struct conf_item *cf = conf_find (name);
@@ -81,6 +91,9 @@ int conf_read (const char *name)
 	return 0;
 }
 
+/*	Modify the current value of a configuration item, by name.
+	If it has not been defined by the game program via 'conf_add',
+	this indicates a programmer error. */
 void conf_write (const char *name, int val)
 {
 	struct conf_item *cf = conf_find (name);

@@ -92,6 +92,9 @@ struct sim_coil_state
 
 	/* The type object for this device */
 	struct sim_coil_type *type;
+
+	/* Nonzero if this I/O line is disabled for simulation */
+	int disabled;
 };
 
 
@@ -103,7 +106,6 @@ struct sim_coil_state coil_states[SOL_COUNT];
 
 void device_coil_at_max (struct sim_coil_state *c)
 {
-	unsigned int solno = c - coil_states;
 	device_node_kick (c->devno);
 }
 
@@ -155,6 +157,7 @@ struct sim_coil_type generic_type_coil = {
 };
 
 struct sim_coil_type flipper_power_type_coil = {
+	/* TODO - trigger EOS when coil reaches peak */
 	.max_pos = 32,
 	.on_step = 2,
 	.off_step = -1,
@@ -269,6 +272,9 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 {
 	struct sim_coil_state *c = coil_states + coil;
 
+	if (c->disabled)
+		return;
+
 	on = !!on;
 	if (c->on != on)
 	{
@@ -318,6 +324,7 @@ void sim_coil_init (void)
 	/* Initialize everything to zero first */
 	for (sol = 0; sol < SOL_COUNT; sol++)
 	{
+		char item_name[32];
 		struct sim_coil_state *c = coil_states + sol;
 		memset (c, 0, sizeof (struct sim_coil_state));
 		if (MACHINE_SOL_FLASHERP (sol))
@@ -325,6 +332,8 @@ void sim_coil_init (void)
 		else
 			c->type = &generic_type_coil;
 		c->master = c;
+		snprintf (item_name, sizeof (item_name), "coil.%d.disabled", sol);
+		conf_add (item_name, &c->disabled);
 	}
 
 	/* Note coils which are attached to ball devices */
