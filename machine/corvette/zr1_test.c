@@ -141,40 +141,48 @@ void zr1_test_escape (void) {
 void zr1_test_enter (void)
 {
 	sound_send (SND_TEST_ENTER);
-	switch (zr1_test_command)
-	{
-		case CALIBRATE:
-			zr1_calibrate();
-		break;
+  	switch (zr1_test_command)
+  	{
+  		case CALIBRATE:
+ 			dbprintf ("zr1_test_enter: starting 'calibrate'\n");
+ 			zr1_calibrate();
+  		break;
 
-		case SHAKE:
-			if (zr1_state == ZR1_SHAKE) {
-				zr1_idle();
-				break;
-			}
-			zr1_shake();
-		break;
+  		case SHAKE:
+  			if (zr1_state == ZR1_SHAKE) {
+ 				dbprintf ("zr1_test_enter: engine already shaking, starting 'idle' instead\n");
+  				zr1_idle();
+  				break;
+  			}
+ 			dbprintf ("zr1_test_enter: starting 'shake'\n");
+  			zr1_shake();
+  		break;
 
-		case CENTER:
-			zr1_center();
-		break;
+  		case CENTER:
+ 			dbprintf ("zr1_test_enter: starting 'center'\n");
+  			zr1_center();
+  		break;
 
-		case IDLE:
-			zr1_idle();
-		break;
+  		case IDLE:
+ 			dbprintf ("zr1_test_enter: starting 'idle'\n");
+  			zr1_idle();
+  		break;
 
-		// TODO remove when real-machine testing is complete - begin
+  		// TODO remove when real-machine testing is complete - begin
 
-		case ENABLE_SOLENOIDS:
-			zr1_enable_solenoids();
-		break;
+  		case ENABLE_SOLENOIDS:
+ 			dbprintf ("zr1_test_enter: calling 'zr1_enable_solenoids'\n");
+  			zr1_enable_solenoids();
+  		break;
 
-		case DISABLE_SOLENOIDS:
-			zr1_disable_solenoids();
-		break;
+  		case DISABLE_SOLENOIDS:
+ 			dbprintf ("zr1_test_enter: calling 'zr1_disable_solenoids'\n");
+  			zr1_disable_solenoids();
+  		break;
 
-		// TODO remove when tseting complete - end
-	}
+ 		// TODO remove when testing complete - end
+  	}
+
 }
 
 
