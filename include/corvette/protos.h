@@ -52,14 +52,11 @@ __machine__ void bg_flash_deff (void);
 __machine__ void dmd_flash (task_ticks_t delay);
 
 /* zr1.c */
+
 __machine__ void zr1_reset(void);
 __machine__ void zr1_shake(void);
 __machine__ void zr1_stop(void);
-__machine__ void zr1_stop_task(void);
 __machine__ void zr1_idle(void);
-__machine__ U8 zr1_is_idle(void);
-__machine__ U8 zr1_is_shaking(void);
 __machine__ void zr1_calibrate(void);
-__machine__ void zr1_calibrate_task(void);
 __machine__ void zr1_enable_solenoids(void);
 __machine__ void zr1_disable_solenoids(void);

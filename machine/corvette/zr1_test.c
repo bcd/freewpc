@@ -30,13 +30,14 @@
 #include <freewpc.h>
 #include <window.h>
 #include <test.h>
+#include <corvette/zr1_state.h>
 
 enum {
 	FIRST_TEST = 0,
 	CALIBRATE = FIRST_TEST,
 	SHAKE,
+	CENTER,
 	IDLE,
-	STOP,
 	ENABLE_SOLENOIDS,  // XXX
 	DISABLE_SOLENOIDS, // XXX
 	LAST_TEST = DISABLE_SOLENOIDS
@@ -45,13 +46,14 @@ enum {
 char *short_names[] = {
 	"CALIBRATE",
 	"SHAKE",
+	"CENTER",
 	"IDLE",
-	"STOP",
 	"ENABLE SOL.", // XXX
 	"DISABLE SOL." // XXX
 };
 
-extern U8 calibration_running;
+extern enum mech_zr1_state zr1_state;
+
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
@@ -129,7 +131,7 @@ void zr1_test_down (void)
  * Ensures user can exit test menu when calibration still running
  */
 void zr1_test_escape (void) {
-	if (calibration_running) {
+	if (zr1_state == ZR1_CALIBRATE) {
 		return;
 	}
 
@@ -142,27 +144,23 @@ void zr1_test_enter (void)
 	switch (zr1_test_command)
 	{
 		case CALIBRATE:
-			task_create_anon(zr1_calibrate_task);
+			zr1_calibrate();
 		break;
 
 		case SHAKE:
-			if (zr1_is_shaking()) {
-				task_create_anon(zr1_stop_task);
+			if (zr1_state == ZR1_SHAKE) {
+				zr1_idle();
 				break;
 			}
 			zr1_shake();
 		break;
 
-		case IDLE:
-			if (zr1_is_idle()) {
-				task_create_anon(zr1_stop_task);
-				break;
-			}
-			zr1_idle();
+		case CENTER:
+			zr1_center();
 		break;
 
-		case STOP:
-			task_create_anon(zr1_stop_task);
+		case IDLE:
+			zr1_idle();
 		break;
 
 		// TODO remove when real-machine testing is complete - begin

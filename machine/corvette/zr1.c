@@ -25,6 +25,7 @@
  */
 #include <freewpc.h>
 #include <diag.h>
+#include <corvette/zr1_state.h>
 
 #define ZR1_ENGINE_POS WPC_EXTBOARD2
 #define ZR1_ENGINE_CONTROL WPC_EXTBOARD3
@@ -33,13 +34,13 @@
 // Calibration
 //
 
-#define ZR_1_ENGINE_LEFT_MIN 0x01 // FIXME should be 0x00 but compiler bug causes problems with > operator when using "0" or "0x00" in zr1_calibrate()
-#define ZR_1_ENGINE_RIGHT_MAX 0xFF
-#define ZR_1_ENGINE_CENTER 0x7F
+#define ZR1_ENGINE_LEFT_MIN 0x01 // FIXME should be 0x00 but compiler bug causes problems with > operator when using "0" or "0x00" in zr1_calibrate()
+#define ZR1_ENGINE_RIGHT_MAX 0xFF
+#define ZR1_ENGINE_CENTER 0x7F
 
-#define ZR_1_CALIBRATION_SPEED   TIME_33MS // decrease to make it faster recommended value: TIME_33MS
+// 16 is the frequency of the ZR1 rtt, see corvette.sched:corvette_zr1_engine_rtt
+#define ZR1_CENTER_TICKS 8 // 16 * 8 = 128MS
 
-U8 calibration_running; // flag to indicate if calibration process is currently running
 U8 foundPos;
 U8 zr1_pos_center;
 U8 zr1_engine_position; // TODO rename to zr1_last_position
@@ -62,55 +63,34 @@ char *errors[] = {
 	"CHECK OPTO\nZR1 FULL RIGHT\n"
 };
 
-//
-// State
-//
-
-/** The logical states of the clock driver state machine */
-enum mech_zr1_state
-{
-	/** The engine should not be moving at all, solenoids powered off (attract mode) */
-	ZR1_STOPPED = 0,
-	/** The engine should be at it's center position, solenoids powered on (game in progress) */
-	ZR1_IDLE,
-	/** The engine should be shaking at a high speed */
-	ZR1_SHAKING,
-	/** The engine should be calibrated */
-	ZR1_CALIBRATING
-};
-
 /* Mode that drives the rtt state machine */
 __fastram__ enum mech_zr1_state zr1_state;
-U8 zr1_first_enable;
+__fastram__ enum mech_zr1_state zr1_previous_state;
+U8 zr1_previously_enabled;
+U8 zr1_calibrated;
 U8 zr1_calibration_attempted;
+U8 zr1_center_ticks_remaining;
 
-void zr1_initialise(void) {
-
+void zr1_reset(void) {
+	zr1_previously_enabled = FALSE;
+	zr1_calibrated = FALSE;
 	zr1_calibration_attempted = FALSE;
-	zr1_first_enable = TRUE;
-
-	zr1_reset();
-
-}
-
-void zr1_reset() {
-	zr1_state = ZR1_CALIBRATING;
+	zr1_state = ZR1_IDLE;
+	zr1_previous_state = ZR1_IDLE;
 
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 
 	// provide some default values, just in case.
-	zr1_pos_center = ZR_1_ENGINE_CENTER;
-	zr1_pos_full_left_opto_on = ZR_1_ENGINE_LEFT_MIN;
-	zr1_pos_full_left_opto_off = ZR_1_ENGINE_LEFT_MIN;
-	zr1_pos_full_right_opto_on = ZR_1_ENGINE_RIGHT_MAX;
-	zr1_pos_full_right_opto_off = ZR_1_ENGINE_RIGHT_MAX;
-
-	zr1_disable_solenoids();
+	zr1_pos_center = ZR1_ENGINE_CENTER;
+	zr1_pos_full_left_opto_on = ZR1_ENGINE_LEFT_MIN;
+	zr1_pos_full_left_opto_off = ZR1_ENGINE_LEFT_MIN;
+	zr1_pos_full_right_opto_on = ZR1_ENGINE_RIGHT_MAX;
+	zr1_pos_full_right_opto_off = ZR1_ENGINE_RIGHT_MAX;
 }
 
 // should not be used outside of this file
-static void zr1_set_position_to_center(void) {
+void zr1_set_position_to_center(void) {
 	if (!feature_config.enable_zr1_engine) {
 		return; // disabled
 	}
@@ -119,82 +99,14 @@ static void zr1_set_position_to_center(void) {
 	writeb (ZR1_ENGINE_POS, zr1_engine_position);
 }
 
-void zr1_stop(void) {
-	if (calibration_running) {
-		return;
-	}
-
-	zr1_state = ZR1_STOPPED;
-	zr1_enable_solenoids();
-	zr1_set_position_to_center();
-	// wait a bit for solenoids to react to new position value
-	task_sleep(TIME_500MS);
-
-	zr1_disable_solenoids();
-}
-
-void zr1_stop_task(void)
-{
-	zr1_stop();
-	task_exit ();
-}
-
-U8 zr1_can_idle(void) {
-	return (
-		feature_config.enable_zr1_engine &&
-		global_flag_test(GLOBAL_FLAG_ZR1_WORKING) &&
-		zr1_state != ZR1_CALIBRATING
-	);
-}
-
-/**
- * Allows the engine to idle at a rest position in the center.
- *
- * All 4 solenoids should be firing at an identical rate, thus spreading wear evenly.
- * The engine spends most of it's time doing this during a game.
- * If the engine was off then it can flap from side to side and balls can get stuck under the left hand side of it and in it.
- *
- * @see corvette_zr1_engine_rtt
- */
-void zr1_idle(void) {
-	if (!zr1_can_idle()) {
-		return;
-	}
-
-	zr1_state = ZR1_IDLE;
-
-	// Note: the corvette_zr1_engine_rtt() will enabled the solenoids if required.
-}
-
-U8 zr1_is_shaking(void) {
-	return zr1_state == ZR1_SHAKING;
-}
-
-U8 zr1_is_idle(void) {
-	return zr1_state == ZR1_IDLE;
-}
-
-U8 zr1_can_shake(void) {
-	return (
-		feature_config.enable_zr1_engine &&
-		global_flag_test(GLOBAL_FLAG_ZR1_WORKING) &&
-		zr1_state != ZR1_CALIBRATING
-	);
-}
-void zr1_shake(void) {
-	if (!zr1_can_shake()) {
-		return;
-	}
-
-	zr1_state = ZR1_SHAKING;
-}
 
 /**
  * Enable the solenoids that drive the ZR1 ball shaker device
  *
  * This can be called regardless of calibration state.
- * If called before calibration the engine is engine position is set to the default center position.
  * Has no effect if solenoid power is already enabled.
+ * If the solenoids have not previously been enabled the engine will move to it's center position
+ * when the solenoid power is enabled, otherwise the engine will move to it's last-set position.
  *
  * @See zr1_init()
  */
@@ -207,9 +119,9 @@ void zr1_enable_solenoids(void) {
 		return; // already on
 	}
 
-	if (zr1_first_enable) {
+	if (!zr1_previously_enabled) {
+		zr1_previously_enabled = TRUE;
 		zr1_set_position_to_center();
-		zr1_first_enable = FALSE;
 	}
 	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
 	global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
@@ -223,6 +135,10 @@ void zr1_disable_solenoids(void) {
 		return; // disabled
 	}
 
+	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
+		return; // already off
+	}
+
 	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
 }
@@ -231,15 +147,111 @@ void zr1_calculate_center_pos(void) {
 	zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
 }
 
-U8 zr1_can_calibrate(void) {
-	if (!feature_config.enable_zr1_engine) {
-		return FALSE;
+U8 zr1_enter_state(enum mech_zr1_state new_state) {
+	U8 allow_state_change = FALSE;
+	switch (zr1_state) {
+		case ZR1_SHAKE:
+			allow_state_change = zr1_calibrated;
+			break;
+		default:
+			allow_state_change = TRUE;
 	}
-
-	// can't restart calibrating - no way to stop calibration once started
-	return !calibration_running;
+	if (!allow_state_change) {
+		return allow_state_change; // always FALSE
+	}
+	zr1_state = new_state;
+	return allow_state_change; // always TRUE
 }
 
+void zr1_center(void) {
+	zr1_enter_state(ZR1_CENTER);
+}
+
+void zr1_state_center_enter(void) {
+	zr1_set_position_to_center();
+	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
+}
+
+void zr1_state_center_run(void) {
+	if (zr1_center_ticks_remaining > 0) {
+		zr1_center_ticks_remaining--;
+	}
+}
+
+void zr1_calibrate(void) {
+	zr1_enter_state(ZR1_CALIBRATE);
+}
+
+void zr1_state_calibrate_enter(void) {
+	zr1_calibration_attempted = TRUE;
+}
+
+void zr1_state_calibrate_run(void) {
+	// TODO port old zr1_calibrate() routine to RTT
+}
+
+void zr1_idle(void) {
+	zr1_enter_state(ZR1_IDLE);
+}
+
+void zr1_state_idle_enter(void) {
+	zr1_set_position_to_center();
+	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
+}
+
+void zr1_state_idle_run(void) {
+	if (zr1_center_ticks_remaining > 0) {
+		zr1_center_ticks_remaining--;
+	} else {
+		zr1_disable_solenoids();
+	}
+}
+
+void zr1_shake(void) {
+	zr1_enter_state(ZR1_SHAKE);
+}
+
+void corvette_zr1_engine_rtt (void) {
+
+	switch (zr1_state) {
+		case ZR1_CENTER:
+			if (zr1_previous_state != zr1_state) {
+				zr1_state_center_enter();
+			} else {
+				zr1_state_center_run();
+			}
+		break;
+
+		case ZR1_CALIBRATE:
+			if (zr1_previous_state != zr1_state) {
+				zr1_state_calibrate_enter();
+			} else {
+				zr1_state_calibrate_run();
+			}
+		break;
+
+		case ZR1_IDLE:
+			if (zr1_previous_state != zr1_state) {
+				zr1_state_idle_enter();
+			} else {
+				zr1_state_idle_run();
+			}
+		break;
+
+		case ZR1_SHAKE:
+			// TODO implement
+			// alternate the engine's position between zr1_pos_full_left_opto_off and zr1_pos_full_right_opto_off
+			// with a short delay (~200MS?) between them to allow the engine to move left and right
+		break;
+
+		default:
+			// shut the compiler up
+			break;
+	}
+	zr1_previous_state = zr1_state;
+}
+
+/*
 void zr1_calibration_failed(U8 code) {
 	calibration_running = FALSE;
 	zr1_disable_solenoids();
@@ -259,13 +271,6 @@ void zr1_calibration_succeded(void) {
 	zr1_stop();
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 }
-
-void zr1_calibrate_task(void)
-{
-	zr1_calibrate();
-	task_exit ();
-}
-
 
 void zr1_calibrate(void) {
 
@@ -301,9 +306,9 @@ void zr1_calibrate(void) {
 	// move from center to the left until either the limit is hit or the left opto activates
 	dbprintf("zr1 engine calibration stage 2\n");
 
-	for (; zr1_engine_position > ZR_1_ENGINE_LEFT_MIN; zr1_engine_position--) {
+	for (; zr1_engine_position > ZR1_ENGINE_LEFT_MIN; zr1_engine_position--) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR_1_CALIBRATION_SPEED);
+		task_sleep (ZR1_CALIBRATION_SPEED);
 		if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
 			// the position we're at is where the opto turned on.
 			zr1_pos_full_left_opto_on = zr1_engine_position;
@@ -327,9 +332,9 @@ void zr1_calibrate(void) {
 	dbprintf("zr1 engine calibration stage 3\n");
 	foundPos = FALSE;
 
-	for (zr1_engine_position = zr1_pos_full_left_opto_on; zr1_engine_position < ZR_1_ENGINE_RIGHT_MAX; zr1_engine_position++) {
+	for (zr1_engine_position = zr1_pos_full_left_opto_on; zr1_engine_position < ZR1_ENGINE_RIGHT_MAX; zr1_engine_position++) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR_1_CALIBRATION_SPEED);
+		task_sleep (ZR1_CALIBRATION_SPEED);
 
 		// if we've not already recorded the position at which the left opto turns off do that now
 		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
@@ -361,7 +366,7 @@ void zr1_calibrate(void) {
 
 	for (zr1_engine_position = zr1_pos_full_right_opto_on; zr1_engine_position > zr1_pos_center; zr1_engine_position--) {
 		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR_1_CALIBRATION_SPEED);
+		task_sleep (ZR1_CALIBRATION_SPEED);
 
 		// if we've not already recorded the position at which the right opto turns off do that now
 		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
@@ -376,15 +381,17 @@ void zr1_calibrate(void) {
 	zr1_calibration_succeded();
 
 }
+*/
 
 CALLSET_ENTRY (zr1, diagnostic_check)
 {
-	while (calibration_running) {
+	if (zr1_state == ZR1_CALIBRATE) {
 		dbprintf ("zr1: diagnostic_check - waiting for calibration\n");
-		task_sleep(TIME_1S);
+		while (zr1_state == ZR1_CALIBRATE) {
+			task_sleep(TIME_1S);
+		}
+		dbprintf ("zr1: diagnostic_check - calibration performed\n");
 	}
-
-	dbprintf ("zr1: diagnostic_check - calibration performed\n");
 
 	if (!feature_config.enable_zr1_engine) {
 		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
@@ -406,7 +413,7 @@ CALLSET_ENTRY (zr1, init_complete, amode_start) {
 
 	if (!zr1_calibration_attempted) {
 		dbprintf ("starting zr1 calibration\n");
-		//task_create_anon(zr1_calibrate_task);
+		zr1_calibrate();
 		return;
 	}
 
@@ -415,18 +422,13 @@ CALLSET_ENTRY (zr1, init_complete, amode_start) {
 
 CALLSET_ENTRY (zr1, init)
 {
-	zr1_initialise();
+	zr1_reset();
 }
 
 CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 {
 	dbprintf ("zr1: amode_stop, test_start, stop_game entry\n");
-	// HACK the sleep in zr1_stop causes a stack overflow when entering test mode from this handler.
-	// is this gets called due to a switch handler (coin door enter) so we
-	// make a new task that calls zr1_stop and exits.
-	// TODO maybe create a ZR1_STOPPING ZR1_STOPPED state?
-	//task_create_anon(zr1_stop_task);
-	dbprintf ("zr1: amode_stop, test_start, stop_game exit\n");
+	zr1_enter_state(ZR1_IDLE);
 }
 
 /**
@@ -435,32 +437,4 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 CALLSET_ENTRY (zr1, start_ball, end_ball)
 {
 	zr1_idle();
-}
-
-void corvette_zr1_engine_rtt (void) {
-
-	if (!(zr1_state == ZR1_SHAKING || zr1_state == ZR1_IDLE)) {
-		return;
-	}
-
-	if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		zr1_enable_solenoids();
-	}
-
-	switch (zr1_state) {
-		case ZR1_IDLE:
-			zr1_set_position_to_center();
-		break;
-
-		case ZR1_SHAKING:
-			// TODO implement
-			// alternate the position between zr1_pos_full_left_opto_off and zr1_pos_full_right_opto_off
-			// with a short delay (~200M) between them to allow the engine to move left and right
-		break;
-
-		default:
-			// shut the compiler up
-			break;
-	}
-
 }
