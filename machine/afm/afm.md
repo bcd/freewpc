@@ -81,8 +81,8 @@ define MACHINE_BALL_SAVE_TIME 0
 83: Left Inlane
 84: Right Inlane
 85: Right Outlane
-86: Backbox Saucer
-88: Backbox Eyes
+86: Launch Button
+88: Start Button
 
 [switches]
 11: Launch Button, launch-button, cabinet, noplay
