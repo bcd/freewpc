@@ -92,7 +92,7 @@ bool ballsave_test_active (void)
 /**
  * Return a ball back into play due to ballsave.
  */
-void ballsave_launch (void)
+static void ballsave_launch (void)
 {
 #if defined(MACHINE_TZ)
 	autofire_add_ball ();
