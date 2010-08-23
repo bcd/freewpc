@@ -130,10 +130,6 @@ void zr1_reset(void) {
 
 	zr1_reset_limits();
 	zr1_disable_solenoids(TRUE);
-
-	// XXX remove - just for testing before calibration implemented.
-	zr1_calibrated = TRUE;
-	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 }
 
 // should not be used outside of this file
