@@ -461,7 +461,7 @@ CALLSET_BOOL_ENTRY (chal, ball_drain)
 	{
 		dbprintf ("Ball saved\n");
 		ball_saves--;
-		SECTION_VOIDCALL (__common__, ballsave_launch);
+		serve_ball_auto ();
 		return FALSE;
 	}
 	else
