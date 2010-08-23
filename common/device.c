@@ -352,9 +352,12 @@ wait_and_recount:
 				kicked_balls--;
 			}
 
-			/* If no more kicks are required, then go back to idle state. */
-			if (dev->kicks_needed == 0)
-				dev->state = DEV_STATE_IDLE;
+			/* Go back to idle state.  If there are more kicks left, we will
+			switch back to DEV_STATE_RELEASING again later.  The point is not to
+			stay in DEV_STATE_RELEASING when we have not actually kicked the ball;
+			if the request is held up for some reason, we want switch closures to
+			be processed correctly. */
+			dev->state = DEV_STATE_IDLE;
 		}
 	}
 
