@@ -59,4 +59,4 @@ __machine__ void zr1_center(void);
 __machine__ void zr1_idle(void);
 __machine__ void zr1_calibrate(void);
 __machine__ void zr1_enable_solenoids(void);
-__machine__ void zr1_disable_solenoids(void);
+__machine__ void zr1_disable_solenoids(U8 force);

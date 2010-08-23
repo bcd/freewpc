@@ -22,9 +22,6 @@
  * - Enable/Disable solenoids.
  * - Calibrate the left right and center positions.
  * - Shake engine.
- *
- * @TODO integration with test report
- * @TODO initialise ZR1 on startup
  */
 
 #include <freewpc.h>
@@ -183,7 +180,7 @@ void zr1_test_enter (void)
 
   		case DISABLE_SOLENOIDS:
  			dbprintf ("zr1_test_enter: calling 'zr1_disable_solenoids'\n");
-  			zr1_disable_solenoids();
+  			zr1_disable_solenoids(TRUE); // FORCE
   		break;
 
  		// TODO remove when testing complete - end
