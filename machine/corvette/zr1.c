@@ -289,8 +289,6 @@ void zr1_state_shake_run(void) {
 
 void corvette_zr1_engine_rtt (void) {
 
-	return;
-
 	switch (zr1_state) {
 		case ZR1_CENTER:
 			if (zr1_previous_state != zr1_state) {

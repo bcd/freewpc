@@ -55,7 +55,7 @@ PINMAME_OTHER_ROMS = corvsnd*
 # Object files exported by this game
 #
 
-GAME_OBJS =
+GAME_OBJS = zr1.o
 
 GAME_TEST_OBJS = zr1_test.o
 
@@ -63,7 +63,7 @@ GAME_INCLUDES =
 
 GAME_PAGED_OBJS = simple.o driver.o kickback.o \
 	jets.o trivial.o sling.o zr_1_multiball.o shots.o \
-	leffs.o deffs.o skill.o zr1.o
+	leffs.o deffs.o skill.o
 
 SCHED_HEADERS += build/left_sling.h build/right_sling.h \
 	build/left_jet.h build/lower_jet.h build/upper_jet.h \
