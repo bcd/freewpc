@@ -131,23 +131,6 @@ void dump_game (void)
 #endif
 
 
-/**
- * Serve a new ball to the shooter lane.
- * This function is the preferred method to serve a ball to a manual
- * plunger at the beginning of a ball and after a ball lock.
- * It is not used for autoplunges or ball saves.
- */
-void serve_ball (void)
-{
-#ifdef DEVNO_TROUGH
-	device_request_kick (device_entry (DEVNO_TROUGH));
-#endif
-	valid_playfield = FALSE;
-	effect_update_request ();
-	callset_invoke (serve_ball);
-}
-
-
 /** Handles the end game condition.
  * This is called directly from the trough update function during
  * endball.  It is also called by test mode when it starts up. */
