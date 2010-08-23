@@ -21,16 +21,31 @@
 #include <freewpc.h>
 
 
+/**
+ * \file
+ * \brief Logic for serving balls from the trough.
+ *
+ * This module implements ball serving, both for manual and auto plunges.
+ * The two main API exposed here are serve_ball() and serve_ball_auto().
+ */
+
+
+/* Use HAVE_AUTO_SERVE around code which deals with autoplunger hardware.
+Such code will not compile on machines where there is no such thing. */
 #if defined(MACHINE_LAUNCH_SWITCH) && \
 	defined(MACHINE_LAUNCH_SOLENOID) && \
 	defined(MACHINE_SHOOTER_SWITCH)
-#define HAVE_AUTO_SERVE
-#endif
 
+#define HAVE_AUTO_SERVE
+
+/* When using an autoplunger, LAUNCH_DELAY says how much time to wait
+after launching a ball, before trying to launch another one (could be
+another ball served, or the same ball which failed to launch OK). */
 #ifndef LAUNCH_DELAY
 #define LAUNCH_DELAY TIME_3S
 #endif
 
+#endif
 
 /**
  * Returns true if the machine supports autopluging balls.
@@ -57,17 +72,6 @@ void serve_ball (void)
 	callset_invoke (serve_ball);
 	effect_update_request ();
 	device_request_kick (device_entry (DEVNO_TROUGH));
-#ifdef HAVE_AUTO_SERVE
-	if (config_timed_plunger == ON)
-	{
-		/* If timed plunger is enabled, then start a timer
-		to autoplunge the ball regardless of button press */
-		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
-	}
-#endif /* HAVE_AUTO_SERVE */
-#ifdef MACHINE_LAUNCH_LAMP
-	lamp_flash (MACHINE_LAUNCH_LAMP);
-#endif
 #endif /* DEVNO_TROUGH */
 }
 
@@ -123,11 +127,18 @@ void serve_ball_auto (void)
 
 
 /**
- * Called to add another ball into play due to ball save.
+ * If a ball is already on the shooter, or a previous autolaunch
+ * request is still in progress, then delay kicking further balls.
  */
-void save_ball (void)
+CALLSET_BOOL_ENTRY (serve, dev_trough_kick_request)
 {
-	serve_ball_auto ();
+	/* TODO - ball at plunger should block ALL kick requests? */
+	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER))
+		return FALSE;
+	else if (task_find_gid (GID_LAUNCH_BALL))
+		return FALSE;
+	else
+		return TRUE;
 }
 
 
@@ -139,8 +150,10 @@ void save_ball (void)
  */
 CALLSET_ENTRY (serve, dev_trough_kick_success)
 {
+#ifdef HAVE_AUTO_SERVE
 	if (valid_playfield)
 		launch_ball ();
+#endif
 }
 
 

@@ -28,18 +28,15 @@
 
 /**
  * \file
- * \brief Common plunger routines.
+ * \brief Common logic for dealing with the shooter switch and the
+ * launch button.
+ *
+ * For the shooter, we are interested in knowing when
+ * a ball is on the main shooter, and when it is not.  This is tracked
+ * in the global flag BALL_AT_PLUNGER.  For the launch button, we
+ * recognize it only under certain conditions, and then forward the
+ * launch request via a call to launch_ball().
  */
-
-#ifdef INCLUDE_AUTOPLUNGER
-void timed_plunger_monitor (void)
-{
-	task_sleep_sec (7);
-	launch_button_pressed ();
-	task_exit ();
-}
-#endif
-
 
 void shooter_clear_monitor (void)
 {
@@ -71,7 +68,7 @@ void shooter_update (void)
 }
 
 
-CALLSET_ENTRY (plunger, valid_playfield)
+CALLSET_ENTRY (shooter_switch, valid_playfield)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	task_kill_gid (GID_TIMED_PLUNGER_MONITOR);
@@ -86,7 +83,7 @@ CALLSET_ENTRY (plunger, valid_playfield)
  * Update the status of BALL_AT_PLUNGER whenever the switch toggles, or at
  * other key points in time.
  */
-CALLSET_ENTRY (plunger, amode_start, start_ball, sw_shooter)
+CALLSET_ENTRY (shooter_switch, amode_start, start_ball, sw_shooter)
 {
 	shooter_update ();
 }
@@ -96,16 +93,44 @@ CALLSET_ENTRY (plunger, amode_start, start_ball, sw_shooter)
  * Called when the player presses a button intending to launch a ball into
  * play.
  */
-void launch_button_pressed (void)
+static void launch_button_pressed (void)
 {
+#ifdef INCLUDE_AUTOPLUNGER
 	/* Do not attempt to fire if a ball is in play and no ball is seen
 	on the shooter */
 	if (!valid_playfield || switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 		launch_ball ();
+#endif
 }
 
 
-CALLSET_ENTRY (plunger, sw_launch_button)
+#ifdef INCLUDE_AUTOPLUNGER
+static void timed_plunger_monitor (void)
+{
+	task_sleep_sec (7);
+	launch_button_pressed ();
+	task_exit ();
+}
+#endif
+
+
+CALLSET_ENTRY (launch_button, serve_ball)
+{
+#ifdef INCLUDE_AUTOPLUNGER
+	if (config_timed_plunger == ON)
+	{
+		/* If timed plunger is enabled, then start a timer
+		to autoplunge the ball regardless of button press */
+		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
+	}
+#ifdef MACHINE_LAUNCH_LAMP
+	lamp_flash (MACHINE_LAUNCH_LAMP);
+#endif
+#endif
+}
+
+
+CALLSET_ENTRY (launch_button, sw_launch_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	launch_button_pressed ();
@@ -113,7 +138,7 @@ CALLSET_ENTRY (plunger, sw_launch_button)
 }
 
 
-CALLSET_ENTRY (plunger, sw_left_button, sw_right_button)
+CALLSET_ENTRY (launch_button, sw_left_button, sw_right_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	if (system_config.flipper_plunger == ON)
