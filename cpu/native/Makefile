@@ -44,3 +44,5 @@ endif
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif
+
+NATIVE_OBJS += $(C)/bits.o
