@@ -26,7 +26,10 @@
  * \brief Logic for serving balls from the trough.
  *
  * This module implements ball serving, both for manual and auto plunges.
- * The two main API exposed here are serve_ball() and serve_ball_auto().
+ * The two main APIs exposed here are serve_ball() and serve_ball_auto().
+ * These add a single ball to play, either at the manual or auto plunger.
+ * There is also set_ball_count() which attempts to set the global ball
+ * count to an arbitrary number.
  */
 
 
@@ -46,6 +49,9 @@ another ball served, or the same ball which failed to launch OK). */
 #endif
 
 #endif
+
+U8 live_balls_wanted;
+
 
 /**
  * Returns true if the machine supports autopluging balls.
@@ -124,6 +130,69 @@ void serve_ball_auto (void)
 	}
 #endif /* DEVNO_TROUGH */
 }
+
+
+/**
+ * A background task that attempts to set the number of balls
+ * in play to 'live_balls_wanted'.
+ */
+#ifdef DEVNO_TROUGH
+static void set_ball_count_task (void)
+{
+	device_t *dev = device_entry (DEVNO_TROUGH);
+	U8 max_live_balls;
+	U8 retries;
+
+	max_live_balls = live_balls;
+
+	retries = live_balls_wanted - max_live_balls + 2;
+
+	while (retries && max_live_balls < live_balls_wanted)
+	{
+		retries--;
+
+		/* Are there enough balls in the trough to satisfy another
+		kick request?  If not, then we need to add the balls from
+		somewhere else.  This is machine-specific. */
+		if (dev->actual_count < dev->kicks_needed)
+		{
+			callset_invoke (trough_rescue);
+		}
+		else
+		{
+			serve_ball_auto ();
+		}
+
+		/* Delay slightly, and see if the live count changed.
+		We only track its maximum */
+		task_sleep (TIME_1500MS);
+
+		/* See if the ball count went up, indicating success */
+		if (live_balls > max_live_balls)
+			max_live_balls = live_balls;
+	}
+	task_exit ();
+}
+
+
+/**
+ * Set the total number of balls in play to COUNT.
+ */
+void set_ball_count (U8 count)
+{
+	live_balls_wanted = count;
+	task_recreate_gid (GID_SET_BALL_COUNT, set_ball_count_task);
+}
+
+
+/**
+ * Add COUNT balls into play from the trough.
+ */
+void add_ball_count (U8 count)
+{
+	set_ball_count (live_balls + count);
+}
+#endif
 
 
 /**

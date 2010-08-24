@@ -798,44 +798,6 @@ void device_remove_virtual (device_t *dev)
 }
 
 
-/** Sets the desired number of balls to be in play. */
-#ifdef DEVNO_TROUGH
-void device_multiball_set (U8 count)
-{
-	device_t *dev;
-	U8 current_count;
-
-	/* See how many balls are in play now */
-	dev = device_entry (DEVNO_TROUGH);
-	current_count = live_balls + dev->kicks_needed;
-
-	/* Calculate the number of balls that need to be added to play,
-	to reach the desired total count.  If more balls are already
-	in play, don't do anything. */
-	if (current_count < count)
-	{
-		U8 kicks = count - current_count;
-
-#ifndef MACHINE_LAUNCH_SOLENOID
-		if (kicks > 1)
-		{
-			dbprintf ("can't multi-kick trough without autoplunger\n");
-			kicks = 1;
-		}
-#endif
-
-		while (kicks > 0)
-		{
-			/* TODO - what if not all of them can come from the
-			trough?  Need to release them from somewhere else maybe. */
-			device_request_kick (dev);
-			kicks--;
-		}
-	}
-}
-#endif
-
-
 /** Called at game start time to see if it is OK to
  * start a game.  This routine should check that all
  * balls are accounted for, and at least 1 ball is

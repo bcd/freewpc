@@ -210,6 +210,7 @@ __noreturn__ void freewpc_init (void);
 #include <csum.h>
 #include <audio.h>
 #include <timedmode.h>
+#include <serve.h>
 #include <generic.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
