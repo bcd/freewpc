@@ -53,11 +53,6 @@ extern void exit (int);
 extern const device_properties_t device_properties_table[];
 extern const switch_info_t switch_table[];
 
-extern U8 *sim_switch_matrix_get (void);
-extern void sim_switch_toggle (int sw);
-extern int sim_switch_read (int sw);
-extern void sim_switch_init (void);
-
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
@@ -83,7 +78,11 @@ int linux_irq_pending;
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
-volatile int sim_debug_init = 0;
+/** When nonzero, the system is held in reset afer power on.  This lets
+you fire up gdb and debug the early initialization.  From the debugger,
+you should clear this flag, e.g. "set sim_debug_init 0".  You set the
+flag by passing the --debuginit command-line option. */
+static volatile int sim_debug_init = 0;
 
 /** Pointer to the current switch matrix element */
 U8 *linux_switch_data_ptr;
@@ -101,7 +100,7 @@ U8 linux_jumpers = LC_USA_CANADA << 2;
 U8 linux_triac_latch, linux_triac_outputs;
 
 /** The actual time at which the simulation was started */
-time_t linux_boot_time;
+static time_t sim_boot_time;
 
 /** The status of the CPU board LEDs */
 U8 linux_cpu_leds;
@@ -367,16 +366,11 @@ __noreturn__ void linux_shutdown (U8 error_code)
 }
 
 
-bool linux_switch_poll_logical (unsigned int sw)
-{
-	return sim_switch_read (sw) ^ switch_is_opto (sw);
-}
-
 
 /** Write to a multiplexed output; i.e. a register in which distinct
- * outputs are multiplexed together into a single I/O location.
+ * outputs are multiplexed together into a single 8-bit I/O location.
  * UI_UPDATE provides a function for displaying the contents of a single
- * output; it takes the output number and a 0/1 state.
+ * output; it takes the output number and a zero(off)/non-zero(on) state.
  * INDEX gives the output number of the first bit of the byte of data.
  * MEMP points to the data byte, containing 8 outputs.
  * NEWVAL is the value to be written; it is assigned to *MEMP.
@@ -389,12 +383,17 @@ static void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 new
 	{
 		if ((newval & (1 << n)) != (oldval & (1 << n)))
 		{
+			/* Update the user interface to reflect the change in output */
 #ifdef CONFIG_UI
 			ui_update (index + n, newval & (1 << n));
 #endif
+
+			/* Notify the signal tracker that the output changed */
 			signal_update (sigbase+index+n, newval & (1 << n));
 		}
 	}
+
+	/* Latch the write; save the value written */
 	*memp = newval;
 }
 
@@ -643,7 +642,7 @@ U8 readb (IOPTR addr)
 			simulator itself. */
 			time_t now = time (NULL);
 			int minutes_on =
-				((now - linux_boot_time) * linux_irq_multiplier) / 60;
+				((now - sim_boot_time) * linux_irq_multiplier) / 60;
 			if (addr == WPC_CLK_HOURS_DAYS)
 				return minutes_on / 60;
 			else
@@ -1040,7 +1039,7 @@ void linux_init (void)
 	 * it will fill the trough, based on its actual size.  You
 	 * can use the --balls option to override this. */
 	node_init ();
-	linux_boot_time = time (NULL);
+	sim_boot_time = time (NULL);
 }
 
 
