@@ -25,7 +25,7 @@
  */
 #include <freewpc.h>
 #include <diag.h>
-#include <corvette/zr1_state.h>
+#include <corvette/zr1.h>
 
 #define ZR1_ENGINE_POS WPC_EXTBOARD2
 #define ZR1_ENGINE_CONTROL WPC_EXTBOARD3
@@ -46,34 +46,28 @@
 // Specifies how long it takes the engine to move from one side to the other - a full sweep.
 #define ZR1_SHAKE_TICKS 6 // 16 * 6 = 96MS
 
-// Specifies how long the RTT should wait until the engine has moved from one position to another during calibration
-#define ZR1_CALIBRATE_MAX_WAIT_TICKS 1024 // 512 * 16 = ~16.4 seconds
-
-// Specifies how long the RTT should wait before chaning the position of the engine during calibration.
-#define ZR1_CALIBRATE_MOVE_TICKS 6 // 16 * 6 = 96MS
+// Specifies how long the RTT should wait before changing the position of the engine during calibration.
+#define ZR1_CALIBRATE_MOVE_TICKS 5 // 16 * 5 = 80MS
 
 U8 foundPos;
 U8 zr1_pos_center;
-U8 zr1_engine_position; // TODO rename to zr1_last_position
+__fastram__ U8 zr1_last_position;
 U8 zr1_pos_full_left_opto_on;
 U8 zr1_pos_full_left_opto_off;
 U8 zr1_pos_full_right_opto_on;
 U8 zr1_pos_full_right_opto_off;
 
-// errors
-enum {
-	ERROR_CHECK_F111 = 0,
-	ERROR_CHECK_FULL_LEFT_OPTO,
-	ERROR_CHECK_FULL_RIGHT_OPTO,
-	ERROR_CHECK_ENGINE,
-};
-
-char *errors[] = {
+// TODO these are somewhat similar to mech_zr1_calibration_messages but with line feeds instead of spaces
+char *mech_zr1_diag_messages[] = {
+	"NOT CALIBRATED\n",             // NEVER SEEN
 	"ZR1 ERROR 1\nCHECK F111\n",
 	"CHECK OPTO\nZR1 FULL LEFT\n",
-	"CHECK OPTO\nZR1 FULL RIGHT\n"
-	"CHECK ENGINE\n"
+	"CHECK OPTO\nZR1 FULL RIGHT\n",
+	"ZR1 ERROR 2\nCHECK ENGINE\n",
+	"CALIBRATED O.K.\n"             // NEVER SEEN
 };
+
+__fastram__ enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
 
 U8 zr1_previously_enabled;
 U8 zr1_calibrated;
@@ -86,7 +80,7 @@ __fastram__ enum mech_zr1_state zr1_previous_state;
 // RTT counters and flags
 __fastram__ U8 zr1_center_ticks_remaining;
 __fastram__ U8 zr1_shake_ticks_remaining;
-__fastram__ U16 zr1_calibrate_timeout_ticks_remaining;
+//__fastram__ U16 zr1_calibrate_timeout_ticks_remaining;
 __fastram__ U8 zr1_calibrate_move_ticks_remaining;
 
 enum mech_zr1_shake_direction {
@@ -106,6 +100,7 @@ enum mech_zr1_calibrate_state {
 __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
 
 
+
 /**
  * Reset the engine position limits used during calibration
  */
@@ -122,6 +117,7 @@ void zr1_reset(void) {
 	zr1_previously_enabled = FALSE;
 	zr1_calibrated = FALSE;
 	zr1_calibration_attempted = FALSE;
+	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
 	zr1_state = ZR1_IDLE;
 	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
 
@@ -138,8 +134,8 @@ void zr1_set_position_to_center(void) {
 		return; // disabled
 	}
 
-	zr1_engine_position = zr1_pos_center;
-	writeb (ZR1_ENGINE_POS, zr1_engine_position);
+	zr1_last_position = zr1_pos_center;
+	writeb (ZR1_ENGINE_POS, zr1_last_position);
 }
 
 // should not be used outside of this file
@@ -148,8 +144,8 @@ void zr1_set_position(U8 position) {
 		return; // disabled
 	}
 
-	zr1_engine_position = position;
-	writeb (ZR1_ENGINE_POS, zr1_engine_position);
+	zr1_last_position = position;
+	writeb (ZR1_ENGINE_POS, zr1_last_position);
 }
 
 
@@ -250,22 +246,22 @@ void zr1_state_center_run(void) {
 }
 
 void zr1_state_calibrate_exit(void) {
+	zr1_calibration_attempted = TRUE;
 	zr1_state = ZR1_IDLE;
 }
 
-void zr1_calibration_failed(U8 code) {
-
-	// TODO store flags and check them elsewhere,  these two methods can't be called from an RTT according to Brian.
-	//audit_increment (&feature_audits.zr1_errors);
-	//diag_post_error (errors[code], MACHINE_PAGE);
+void zr1_calibration_failed(enum mech_zr1_calibration_codes code) {
+	// store the code for use outside the RTT as diag_post can't be called from an RTT.
+	zr1_last_calibration_result_code = code;
 
 	interrupt_dbprintf("zr1 engine calibration failed\n");
-	interrupt_dbprintf("error: %s\n", errors[code]);
+	interrupt_dbprintf("error code: %d\n", code);
 	zr1_state_calibrate_exit();
 }
 
 void zr1_calibration_complete(void) {
 	zr1_calibrated = TRUE;
+	zr1_last_calibration_result_code = CC_SUCCESS;
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_state_calibrate_exit();
 }
@@ -276,43 +272,25 @@ void zr1_calibrate(void) {
 
 void zr1_state_calibrate_enter(void) {
 	zr1_calibrated = FALSE;
-	zr1_calibration_attempted = TRUE;
+	zr1_calibration_attempted = FALSE;
+	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_reset_limits();
 
 	if (switch_poll_logical (SW_ZR_1_FULL_LEFT) && switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
 		// Both engine optos cannot be on at the same time, probably F111 fuse, switch matrix problem, or one or more dirty/faulty optos.
-		zr1_calibration_failed(ERROR_CHECK_F111);
+		zr1_calibration_failed(CC_CHECK_F111);
 		return;
 	}
 
 	// initialise the first calibration state
 	zr1_set_position_to_center();
 	zr1_enable_solenoids();
-	zr1_calibrate_timeout_ticks_remaining = ZR1_CALIBRATE_MAX_WAIT_TICKS;
 	zr1_calibrate_move_ticks_remaining = ZR1_CENTER_TICKS * 2; // wait a bit longer for settle during calibration.
 	zr1_calibrate_state = ZR1_CALIBRATE_CENTER;
 }
 
 void zr1_state_calibrate_run(void) {
-
-	if (zr1_calibrate_timeout_ticks_remaining > 0) {
-		zr1_calibrate_timeout_ticks_remaining--;
-		if (zr1_calibrate_timeout_ticks_remaining == 0) {
-			// failed to move, check direction and post diag.
-			switch(zr1_calibrate_state) {
-				case ZR1_CALIBRATE_LEFT:
-					zr1_calibration_failed(ERROR_CHECK_FULL_LEFT_OPTO);
-				break;
-				case ZR1_CALIBRATE_RIGHT:
-					zr1_calibration_failed(ERROR_CHECK_FULL_RIGHT_OPTO);
-				break;
-				default:
-					zr1_calibration_failed(ERROR_CHECK_ENGINE);
-			}
-			return;
-		}
-	}
 
 	zr1_calibrate_move_ticks_remaining--;
 	if (zr1_calibrate_move_ticks_remaining != 0) {
@@ -328,7 +306,7 @@ void zr1_state_calibrate_run(void) {
 		case ZR1_CALIBRATE_CENTER:
 			if (switch_poll_logical (SW_ZR_1_FULL_LEFT) || switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
 				// If either of the optos is still on then the engine is not in the center, bail!
-				zr1_calibration_failed(ERROR_CHECK_ENGINE);
+				zr1_calibration_failed(CC_CHECK_ENGINE);
 				break;
 			}
 
@@ -340,21 +318,20 @@ void zr1_state_calibrate_run(void) {
 
 			if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
 				// the position we're at is where the opto turned on.
-				zr1_pos_full_left_opto_on = zr1_engine_position;
+				zr1_pos_full_left_opto_on = zr1_last_position;
 
 				// setup for next state
 				foundPos = FALSE;
 				zr1_calibrate_state = ZR1_CALIBRATE_RIGHT;
-				zr1_calibrate_timeout_ticks_remaining = ZR1_CALIBRATE_MAX_WAIT_TICKS;
 				zr1_calibrate_move_ticks_remaining = ZR1_CALIBRATE_MOVE_TICKS;
 				break;
 			}
 
-			if (zr1_engine_position > ZR1_ENGINE_LEFT_MIN) {
-				zr1_set_position(zr1_engine_position - 1);
+			if (zr1_last_position > ZR1_ENGINE_LEFT_MIN) {
+				zr1_set_position(zr1_last_position - 1);
 			} else {
 				// if we reached the min left value and the left opto is not active the opto may be dead
-				zr1_calibration_failed(ERROR_CHECK_FULL_LEFT_OPTO);
+				zr1_calibration_failed(CC_CHECK_FULL_LEFT_OPTO);
 			}
 		break;
 
@@ -363,26 +340,25 @@ void zr1_state_calibrate_run(void) {
 
 			// if we've not already recorded the position at which the left opto turns off do that now
 			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-				zr1_pos_full_left_opto_off = zr1_engine_position;
+				zr1_pos_full_left_opto_off = zr1_last_position;
 				foundPos = TRUE;
 			}
 
 			if (switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
 				// the position we're at is where the opto turned on.
-				zr1_pos_full_right_opto_on = zr1_engine_position;
+				zr1_pos_full_right_opto_on = zr1_last_position;
 
 				// setup for next state
 				foundPos = FALSE;
 				zr1_calibrate_state = ZR1_CALIBRATE_RECENTER;
-				zr1_calibrate_timeout_ticks_remaining = ZR1_CALIBRATE_MAX_WAIT_TICKS;
 				zr1_calibrate_move_ticks_remaining = ZR1_CALIBRATE_MOVE_TICKS;
 				break;
 			}
 
-			if (zr1_engine_position < ZR1_ENGINE_RIGHT_MAX) {
-				zr1_set_position(zr1_engine_position + 1);
+			if (zr1_last_position < ZR1_ENGINE_RIGHT_MAX) {
+				zr1_set_position(zr1_last_position + 1);
 			} else {
-				zr1_calibration_failed(ERROR_CHECK_FULL_RIGHT_OPTO);
+				zr1_calibration_failed(CC_CHECK_FULL_RIGHT_OPTO);
 			}
 		break;
 
@@ -391,22 +367,22 @@ void zr1_state_calibrate_run(void) {
 
 			// if we've not already recorded the position at which the right opto turns off do that now
 			if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-				zr1_pos_full_right_opto_off = zr1_engine_position;
+				zr1_pos_full_right_opto_off = zr1_last_position;
 				foundPos = TRUE;
 
 				// when the right opto turns off we can calculate the center position.
 				zr1_calculate_center_pos();
 			}
 
-			if (zr1_engine_position > zr1_pos_center) {
-				zr1_set_position(zr1_engine_position - 1);
+			if (zr1_last_position > zr1_pos_center) {
+				zr1_set_position(zr1_last_position - 1);
 			} else {
 
 				if (foundPos) {
 					zr1_calibration_complete();
 				} else {
 					// the right opto should have turned off by now
-					zr1_calibration_failed(ERROR_CHECK_FULL_RIGHT_OPTO);
+					zr1_calibration_failed(CC_CHECK_FULL_RIGHT_OPTO);
 				}
 			}
 		break;
@@ -504,155 +480,6 @@ void corvette_zr1_engine_rtt (void) {
 	zr1_previous_state = zr1_state;
 }
 
-/*
-void zr1_calibrate(void) {
-
-	if (!zr1_can_calibrate()) {
-		return;
-	}
-	calibration_running = TRUE;
-
-	zr1_calibration_attempted = TRUE;
-
-	// reset state and flags before doing anything
-	zr1_reset();
-
-	// center engine
-
-	dbprintf("zr1 engine calibration stage 1\n");
-
-	zr1_enable_solenoids();
-	zr1_engine_position = zr1_pos_center;
-
-	// wait till the engine is in the center.
-	task_sleep(TIME_1S);
-
-	// check for opto still active
-	if (switch_poll_logical (SW_ZR_1_FULL_LEFT) || switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-		// engine not in center
-		zr1_calibration_failed(ERROR_CHECK_F111);
-	}
-
-	// engine positioned in the center
-
-
-	// move from center to the left until either the limit is hit or the left opto activates
-	dbprintf("zr1 engine calibration stage 2\n");
-
-	for (; zr1_engine_position > ZR1_ENGINE_LEFT_MIN; zr1_engine_position--) {
-		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR1_CALIBRATION_SPEED);
-		if (switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-			// the position we're at is where the opto turned on.
-			zr1_pos_full_left_opto_on = zr1_engine_position;
-			break;
-		}
-	}
-
-	// wait a bit for opto to become active to make sure
-	task_sleep(TIME_500MS);
-
-	if (!switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-		// if we reached the min left value and the left opto is not active the opto may be dead
-		zr1_calibration_failed(ERROR_CHECK_FULL_LEFT_OPTO);
-		return;
-	}
-
-
-
-	// move from left to right until either the limit is hit or the right opto activates
-
-	dbprintf("zr1 engine calibration stage 3\n");
-	foundPos = FALSE;
-
-	for (zr1_engine_position = zr1_pos_full_left_opto_on; zr1_engine_position < ZR1_ENGINE_RIGHT_MAX; zr1_engine_position++) {
-		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR1_CALIBRATION_SPEED);
-
-		// if we've not already recorded the position at which the left opto turns off do that now
-		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_LEFT)) {
-			zr1_pos_full_left_opto_off = zr1_engine_position;
-			foundPos = TRUE;
-		}
-
-		if (switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-			// the position we're at is where the opto turned on.
-			zr1_pos_full_right_opto_on = zr1_engine_position;
-			break;
-		}
-	}
-
-	// wait a bit for opto to become active to make sure
-	task_sleep(TIME_500MS);
-
-	if (!switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-		// if we reached the max right value and the right opto is not active the opto may be dead
-		zr1_calibration_failed(ERROR_CHECK_FULL_RIGHT_OPTO);
-		return;
-	}
-
-
-	// move from right to the center
-
-	dbprintf("zr1 engine calibration stage 4\n");
-	foundPos = FALSE;
-
-	for (zr1_engine_position = zr1_pos_full_right_opto_on; zr1_engine_position > zr1_pos_center; zr1_engine_position--) {
-		writeb (ZR1_ENGINE_POS, zr1_engine_position);
-		task_sleep (ZR1_CALIBRATION_SPEED);
-
-		// if we've not already recorded the position at which the right opto turns off do that now
-		if (!foundPos && !switch_poll_logical (SW_ZR_1_FULL_RIGHT)) {
-			zr1_pos_full_right_opto_off = zr1_engine_position;
-			foundPos = TRUE;
-
-			// when the right opto turns off we can calculate the center position.
-			zr1_calculate_center_pos();
-		}
-	}
-
-	zr1_calibration_succeded();
-
-}
-*/
-
-CALLSET_ENTRY (zr1, diagnostic_check)
-{
-	if (zr1_state == ZR1_CALIBRATE) {
-		dbprintf ("zr1: diagnostic_check - waiting for calibration\n");
-		while (zr1_state == ZR1_CALIBRATE) {
-			task_sleep(TIME_1S);
-		}
-		dbprintf ("zr1: diagnostic_check - calibration performed\n");
-	}
-
-	if (!feature_config.enable_zr1_engine) {
-		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
-
-		diag_post_error ("ZR1 ENGINE DISABLED\nBY ADJUSTMENT\n", MACHINE_PAGE);
-		return;
-	}
-
-	if (!global_flag_test (GLOBAL_FLAG_ZR1_WORKING)) {
-		dbprintf ("zr1: ZR1 ENGINE IS NOT WORKING\n");
-
-		diag_post_error ("ZR1 ENGINE IS\nNOT WORKING\n", MACHINE_PAGE);
-		return;
-	}
-}
-
-CALLSET_ENTRY (zr1, init_complete, amode_start) {
-	dbprintf ("zr1: init_complete/amode_start entry\n");
-
-	if (!zr1_calibration_attempted) {
-		dbprintf ("starting zr1 calibration\n");
-		zr1_calibrate();
-		return;
-	}
-
-	dbprintf ("zr1: init_complete/amode_start exit\n");
-}
-
 CALLSET_ENTRY (zr1, init)
 {
 	zr1_reset();
@@ -670,4 +497,44 @@ CALLSET_ENTRY (zr1, amode_stop, test_start, stop_game)
 CALLSET_ENTRY (zr1, start_ball, end_ball)
 {
 	zr1_idle();
+}
+
+
+CALLSET_ENTRY (zr1, diagnostic_check)
+{
+	if (!zr1_calibration_attempted) {
+		dbprintf ("zr1: diagnostic_check - starting for calibration\n");
+		zr1_calibrate();
+	}
+
+	dbprintf ("zr1: diagnostic_check - waiting for calibration\n");
+	while (zr1_state == ZR1_CALIBRATE) {
+		task_sleep(TIME_1S);
+		dbprintf ("zr1: diagnostic_check - still calibrating ...\n");
+	}
+	dbprintf ("zr1: diagnostic_check - calibration complete\n");
+
+	dbprintf ("calibration result: %d - %s", zr1_last_calibration_result_code, mech_zr1_diag_messages[zr1_last_calibration_result_code]); // No trailing \n as diag message contains one already
+	if (zr1_last_calibration_result_code != CC_SUCCESS) {
+		audit_increment (&feature_audits.zr1_errors);
+		diag_post_error (mech_zr1_diag_messages[zr1_last_calibration_result_code], PAGE);
+	}
+
+	if (!feature_config.enable_zr1_engine) {
+		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
+
+		diag_post_error ("ZR1 ENGINE DISABLED BY ADJUSTMENT\n", PAGE);
+		return;
+	}
+}
+
+CALLSET_ENTRY (zr1, init_complete, amode_start) {
+	dbprintf ("zr1: init_complete/amode_start entry\n");
+
+	if (!zr1_calibration_attempted) {
+		dbprintf ("starting zr1 calibration\n");
+		zr1_calibrate();
+	}
+
+	dbprintf ("zr1: init_complete/amode_start exit\n");
 }

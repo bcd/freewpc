@@ -27,7 +27,11 @@
 #include <freewpc.h>
 #include <window.h>
 #include <test.h>
-#include <corvette/zr1_state.h>
+#include <corvette/zr1.h>
+
+// FIXME - font_render_string_right vertically offsets the text by 1 pixel (downwards)
+// When this is removed removed all references to FR_WORKAROUND
+#define FRSR_WORKAROUND 1
 
 enum {
 	FIRST_TEST = 0,
@@ -49,12 +53,24 @@ char *short_names[] = {
 	"DISABLE SOL." // XXX
 };
 
+// error messages, see enum mech_zr1_calibration_codes;
+char *mech_zr1_calibration_messages[] = {
+	"NOT CALIBRATED",
+	"ZR1 ERROR 1 CHECK F111",
+	"CHECK OPTO ZR1 FULL LEFT",
+	"CHECK OPTO ZR1 FULL RIGHT",
+	"ZR1 ERROR 2 CHECK ENGINE",
+	"CALIBRATED O.K."
+};
+
 extern enum mech_zr1_state zr1_state;
+extern U8 zr1_calibration_attempted;
 
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
-extern U8 zr1_engine_position;
+extern __fastram__ U8 zr1_last_position;
+extern __fastram__ enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
 
 void zr1_test_init (void)
 {
@@ -66,33 +82,48 @@ void draw_test_title(void) {
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
 
+#define LINE_1_Y 7
+#define LINE_2_Y 13
+#define LINE_3_Y 19
+
 void zr1_test_draw (void)
 {
 	dmd_alloc_low_clean ();
 
 	draw_test_title();
 
-	sprintf ("POS %d", zr1_engine_position);
-	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
+	// 21 characters wide max when using 5 point font.
 
-	sprintf ("POWER %s",
-		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? "ON" : "OFF");
-	font_render_string_right (&font_mono5, 0, 6, sprintf_buffer);
+	// P = Current Position, S = State, PWR = Power, C = Center Position
+	// e.g. "P:127 S:1 PWR:1 C:127"
+	sprintf ("P:%03d S:%d PWR:%d C:%03d",
+		zr1_last_position,
+		zr1_state,
+		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? 1 : 0,
+		zr1_pos_center
+	);
+	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	sprintf ("LEFT %s %d",
-		(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? "X" : "-"), zr1_pos_full_left_opto_off);
-	font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
+	if (zr1_state == ZR1_CALIBRATE) {
+		font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
+		sprintf ("L:%c %s%d",
+			(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+			zr1_pos_full_left_opto_off > 100 ? "" : (zr1_pos_full_left_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+			zr1_pos_full_left_opto_off
+		);
+		font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-	sprintf ("%d %s RIGHT",
-		zr1_pos_full_right_opto_off, (switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? "X" : "-"));
-	font_render_string_right (&font_mono5, 0, 12, sprintf_buffer);
+		sprintf ("R:%c %s%d",
+			(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-'),
+			zr1_pos_full_right_opto_off > 100 ? "" : (zr1_pos_full_right_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+			zr1_pos_full_right_opto_off
+		);
+		font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
 
-	sprintf ("CENTER %d", zr1_pos_center);
-	font_render_string_left (&font_mono5, 0, 20, sprintf_buffer);
-	//font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-
-	sprintf ("%d STATE", zr1_state);
-	font_render_string_right (&font_mono5, 0, 20, sprintf_buffer);
+	} else {
+		dbprintf('calibration result: %d\n', zr1_last_calibration_result_code);
+		font_render_string_center(&font_var5, 64, LINE_3_Y + 2, mech_zr1_calibration_messages[zr1_last_calibration_result_code]);
+	}
 
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
@@ -206,4 +237,3 @@ struct menu corvette_zr1_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &corvette_zr1_test_window, NULL } },
 };
-

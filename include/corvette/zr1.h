@@ -17,3 +17,13 @@ enum mech_zr1_state {
 	/** The engine should be shaking */
 	ZR1_SHAKE
 };
+
+// CC = calibration code
+enum mech_zr1_calibration_codes {
+	CC_NOT_CALIBRATED = 0,
+	CC_CHECK_F111,
+	CC_CHECK_FULL_LEFT_OPTO,
+	CC_CHECK_FULL_RIGHT_OPTO,
+	CC_CHECK_ENGINE,
+	CC_SUCCESS,
+};
