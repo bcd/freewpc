@@ -56,8 +56,6 @@ struct player_save_area
 	U8 local_lamps[NUM_LAMP_COLS];
 	U8 local_flags[BITS_TO_BYTES (MAX_FLAGS)];
 	U8 local_vars[0];
-	//U8 local_flags[32];
-	//U8 local_vars[160];
 };
 
 #define save_area ((struct player_save_area *)(LOCAL_SAVE_BASE(player_up)))

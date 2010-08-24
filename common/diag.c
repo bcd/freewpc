@@ -123,7 +123,6 @@ diag_run_task (void)
 	diag_error_count = 0;
 	callset_invoke (diagnostic_check);
 	dbprintf ("%d errors.\n", diag_error_count);
-	sys_init_pending_tasks--;
 	task_exit ();
 }
 
@@ -136,8 +135,6 @@ diag_run_task (void)
 void
 diag_announce_if_errors (void)
 {
-	while (task_find_gid (GID_DIAG_RUNNING))
-		task_sleep (TIME_100MS);
 	if (diag_error_count > 0)
 	{
 		diag_message_start ();
@@ -156,8 +153,10 @@ diag_run (void)
 {
 	/* Create in a separate task context, to avoid
 	 * stack overflow problems. */
-	sys_init_pending_tasks++;
 	task_recreate_gid (GID_DIAG_RUNNING, diag_run_task);
+	while (task_find_gid (GID_DIAG_RUNNING))
+		task_sleep (TIME_100MS);
+	barrier ();
 }
 
 

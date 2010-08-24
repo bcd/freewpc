@@ -80,6 +80,7 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 	}
 }
 
+
 /*
  * Ensure that mute/pause is turned off at endball.
  */
@@ -87,3 +88,4 @@ CALLSET_ENTRY (mute_and_pause, end_ball, tilt)
 {
 	mute_and_pause_stop ();
 }
+

@@ -27,6 +27,7 @@ extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
 extern __nvram__ U8 current_volume;
 
+
 void ball_save_deff (void)
 {
 	dmd_alloc_pair ();
@@ -39,6 +40,7 @@ void ball_save_deff (void)
 	deff_swap_low_high (24, TIME_100MS);
 	deff_exit ();
 }
+
 
 /** Display effect when locating missing balls prior to game start */
 void locating_balls_deff (void)
