@@ -222,6 +222,7 @@ Right Hole: Right Popper, Right Popper
 
 [scores]
 1:
+10:
 100:
 
 [highscores]
