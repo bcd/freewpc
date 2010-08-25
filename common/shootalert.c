@@ -38,8 +38,7 @@ void shoot_alert_task (void)
 	task_sleep_sec (15);
 	for (;;)
 	{
-		if (switch_poll (MACHINE_SHOOTER_SWITCH)
-			&& deff_get_active () != DEFF_STATUS_REPORT)
+		if (switch_poll (MACHINE_SHOOTER_SWITCH))
 		{
 			deff_start (DEFF_PLUNGE_BALL);
 			task_sleep_sec (20);
