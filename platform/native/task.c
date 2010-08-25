@@ -43,8 +43,6 @@ extern int linux_irq_multiplier;
 
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
-#define MAX_TASKS (NUM_TASKS)
-
 #ifdef CURSES	
 extern void ui_write_task (int, task_gid_t);
 #endif
@@ -60,7 +58,7 @@ typedef struct
 	unsigned char class_data[32];
 } aux_task_data_t;
 
-aux_task_data_t task_data_table[MAX_TASKS];
+aux_task_data_t task_data_table[NUM_TASKS];
 
 
 void task_dump (void)
@@ -68,7 +66,7 @@ void task_dump (void)
 	int i;
 
 	dbprintf ("PID         GID   ARG    FLAGS\n");
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		aux_task_data_t *td = &task_data_table[i];
 
@@ -120,7 +118,7 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 	 * as an argument. */
 	pid = pth_spawn (attr, fn, 0);
 
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == 0)
 		{
 			task_data_table[i].pid = pid;
@@ -161,7 +159,7 @@ task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn)
 void task_setgid (task_gid_t gid)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == task_getpid ())
 		{
 			task_data_table[i].gid = gid;
@@ -194,7 +192,7 @@ void task_exit (void)
 #ifdef PTHDEBUG
 	printf ("task_exit: pid=%p\n", task_getpid ());
 #endif
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == task_getpid ())
 		{
 			task_data_table[i].pid = 0;
@@ -210,7 +208,7 @@ void task_exit (void)
 task_pid_t task_find_gid (task_gid_t gid)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if ((task_data_table[i].gid == gid)
 			&& (task_data_table[i].pid != 0))
@@ -224,7 +222,7 @@ task_pid_t task_find_gid_next (task_pid_t last, task_gid_t gid)
 {
 	int i;
 	int ok_to_return = 0;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if ((task_data_table[i].gid == gid) && (task_data_table[i].pid != 0))
 		{
@@ -246,7 +244,7 @@ void task_kill_pid (task_pid_t tp)
 	printf ("task_kill_pid: pid=%p\n", tp);
 #endif
 
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
@@ -264,7 +262,7 @@ bool task_kill_gid (task_gid_t gid)
 	int i;
 	bool rc = FALSE;
 
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if ((task_data_table[i].gid == gid) &&
 			 (task_data_table[i].pid != 0) &&
@@ -282,7 +280,7 @@ void task_duration_expire (U8 cond)
 {
 	int i;
 
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if ((task_data_table[i].pid != 0) &&
 			 (task_data_table[i].duration & cond))
@@ -293,7 +291,7 @@ void task_duration_expire (U8 cond)
 void task_set_duration (task_pid_t tp, U8 cond)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == tp)
 		{
@@ -307,7 +305,7 @@ void task_set_duration (task_pid_t tp, U8 cond)
 void task_add_duration (U8 flags)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 		{
@@ -321,7 +319,7 @@ void task_add_duration (U8 flags)
 void task_remove_duration (U8 flags)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 		{
@@ -335,7 +333,7 @@ void task_remove_duration (U8 flags)
 U16 task_get_arg (void)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 			return task_data_table[i].arg.u16;
@@ -347,7 +345,7 @@ U16 task_get_arg (void)
 void *task_get_pointer_arg (void)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 			return task_data_table[i].arg.ptr;
@@ -359,7 +357,7 @@ void *task_get_pointer_arg (void)
 void task_set_arg (task_pid_t tp, U16 arg)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == tp)
 		{
@@ -372,7 +370,7 @@ void task_set_arg (task_pid_t tp, U16 arg)
 void task_set_pointer_arg (task_pid_t tp, void *arg)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == tp)
 		{
@@ -391,7 +389,7 @@ task_pid_t task_getpid (void)
 task_gid_t task_getgid (void)
 {
 	int i;
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 	{
 		if (task_data_table[i].pid == task_getpid ())
 			return task_data_table[i].gid;
@@ -409,7 +407,7 @@ void *task_get_class_data (task_pid_t pid)
 {
 	int i;
 
-	for (i=0; i < MAX_TASKS; i++)
+	for (i=0; i < NUM_TASKS; i++)
 		if (task_data_table[i].pid == pid)
 			return task_data_table[i].class_data;
 	printf ("task_get_class_data for pid %p failed\n", pid);
