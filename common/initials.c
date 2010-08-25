@@ -165,6 +165,12 @@ void initials_enter (void)
 }
 
 
+CALLSET_ENTRY (initials, init)
+{
+	initials_enter_timer = 0;
+}
+
+
 CALLSET_ENTRY (initials, sw_left_button)
 {
 	if (initials_enter_timer)
@@ -189,7 +195,7 @@ CALLSET_ENTRY (initials, sw_right_button)
 
 CALLSET_ENTRY (initials, start_button_handler)
 {
-	if (initials_enter_timer && initials_index != NUM_INITIALS_ALLOWED)
+	if (initials_enter_timer && initials_index < NUM_INITIALS_ALLOWED)
 	{
 		initials_data[initials_index] =
 			initial_chars[(initials_selection + SELECT_OFFSET) % ALPHABET_LEN];

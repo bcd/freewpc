@@ -489,13 +489,10 @@ void start_ball (void)
 
 	callset_invoke (start_ball);
 
-	/* Enable the game scores on the display.  The first deff started
-	 * is low in priority and is shown whenever there is nothing else
-	 * going on.  The second deff runs briefly at high priority, to
-	 * ensure that the scores are shown at least briefly at the start of
-	 * ball (e.g., in case a skill shot deff gets started).
+	/* Ensure that the scores are shown briefly at the start of
+	 * ball, via a high priority display effect.
 	 *
-	 * If this is the final ball for the player, then
+	 * If this is the final ball for the player, then also
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */

@@ -43,7 +43,7 @@ void mute_and_pause_monitor (void)
 	kickout_lock (KLOCK_USER);
 	music_disable ();
 	callset_invoke (machine_paused);
-	
+
 	/* Timeout after 15 minutes */
 	U8 timeout = 180; /* = (60secs * 15)/5 */
 	while (--timeout != 0)
