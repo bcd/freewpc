@@ -32,6 +32,8 @@ static void mb_mode_update (struct mb_mode_ops *ops, enum mb_mode_state state)
 	{
 		case MB_INACTIVE:
 			mb_mode_count--;
+			if (ops->deff_ending)
+				deff_start (ops->deff_ending);
 			break;
 
 		case MB_ACTIVE:
@@ -55,7 +57,7 @@ static void mb_mode_active_task (void)
 static void mb_mode_grace_task (void)
 {
 	struct mb_mode_task_config *cfg =
-		task_current_class_data (struct timed_mode_task_config);
+		task_current_class_data (struct mb_mode_task_config);
 	struct mb_mode_ops *ops = cfg->ops;
 	task_sleep (ops->grace_period);
 	mb_mode_update (ops, MB_INACTIVE);
@@ -85,6 +87,8 @@ void mb_mode_start (struct mb_mode_ops *ops)
 	if (mb_mode_running_p (ops))
 		return;
 	task_create_gid1 (ops->gid_running, mb_mode_active_task);
+	if (ops->deff_starting)
+		deff_start (ops->deff_starting);
 	mb_mode_update (ops, MB_ACTIVE);
 }
 
@@ -113,8 +117,15 @@ void mb_mode_single_ball (struct mb_mode_ops *ops)
 {
 	if (task_find_gid (ops->gid_running))
 	{
+		task_pid_t tp;
+		struct mb_mode_task_config *cfg;
+
 		task_kill_gid (ops->gid_running);
-		task_create_gid1 (ops->gid_in_grace, mb_mode_grace_task);
+
+		tp = task_create_gid1 (ops->gid_in_grace, mb_mode_grace_task);
+		cfg = task_init_class_data (tp, struct mb_mode_task_config);
+		cfg->ops = ops;
+
 		mb_mode_update (ops, MB_IN_GRACE);
 	}
 }
