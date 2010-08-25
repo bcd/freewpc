@@ -452,7 +452,12 @@ CALLSET_ENTRY (chal, valid_playfield)
 
 CALLSET_BOOL_ENTRY (chal, ball_drain)
 {
-	if (martians_needed)
+	if (mb_mode_running_count ())
+	{
+		dbprintf ("Multiball drain\n");
+		return TRUE;
+	}
+	else if (martians_needed)
 	{
 		dbprintf ("Sudden death drain\n");
 		return TRUE;

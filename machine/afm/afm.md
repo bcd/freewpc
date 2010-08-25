@@ -106,9 +106,9 @@ define MACHINE_BALL_SAVE_TIME 0
 42: Martian 7, lamp(LM_MARTIAN_7)
 43: Martian 4, lamp(LM_MARTIAN_4)
 44: Martian 5, lamp(LM_MARTIAN_5)
-45: Motor Bank 1
-46: Motor Bank 2
-47: Motor Bank 3
+45: Motor Bank 1, ingame
+46: Motor Bank 2, ingame
+47: Motor Bank 3, ingame
 48: Right Top Lane
 51: Left Slingshot, noplay
 52: Right Slingshot, noplay
@@ -242,6 +242,9 @@ Chal Phase Finished: PRI_GAME_QUICK1, page(MACHINE_PAGE), D_QUEUED+D_PAUSE, c_de
 Chal Ball Drain: PRI_GAME_QUICK2, page(MACHINE_PAGE)
 Chal Timeout Endgame: PRI_GAME_QUICK1, page(MACHINE_PAGE)
 Martian Kill: PRI_GAME_QUICK2, page(MACHINE_PAGE), D_RESTARTABLE
+
+BonusMB Running: PRI_GAME_MODE3, page(MACHINE_PAGE)
+BonusMB Ending: PRI_GAME_MODE3, page(MACHINE_PAGE), D_QUEUED
 
 [leffs]
 Amode: runner, PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE_PAGE)
