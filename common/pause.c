@@ -26,21 +26,6 @@
 #error "CONFIG_MUTE_AND_PAUSE unsupported because no computer-controlled flippers"
 #endif
 
-void mute_and_pause_monitor (void)
-{
-	flipper_hold_on ();
-	lamp_on (LM_BUY_IN_BUTTON);
-	kickout_lock (KLOCK_USER);
-	music_disable ();
-	for (;;)
-	{
-		ball_search_timer_reset ();
-		/* TODO - this task should timeout after awhile */
-		task_sleep_sec (5);
-	}
-	task_exit ();
-}
-
 void mute_and_pause_stop (void)
 {
 	task_kill_gid (GID_MUTE_AND_PAUSE);
@@ -48,8 +33,27 @@ void mute_and_pause_stop (void)
 	kickout_unlock (KLOCK_USER);
 	lamp_off (LM_BUY_IN_BUTTON);
 	flipper_hold_off ();
+	callset_invoke (machine_unpaused);
 }
 
+void mute_and_pause_monitor (void)
+{
+	flipper_hold_on ();
+	lamp_on (LM_BUY_IN_BUTTON);
+	kickout_lock (KLOCK_USER);
+	music_disable ();
+	callset_invoke (machine_paused);
+
+	/* Timeout after 15 minutes */
+	U8 timeout = 180; /* = (60secs * 15)/5 */
+	while (--timeout != 0)
+	{
+		ball_search_timer_reset ();
+		task_sleep_sec (5);
+	}
+	mute_and_pause_stop ();
+	task_exit ();
+}
 
 /**
  * Handle the push button that toggles the state of mute/pause if enabled.
