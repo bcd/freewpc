@@ -22,6 +22,7 @@ CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC=y
 $(eval $(call have,CONFIG_RTC))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
+CONFIG_SCORE_RANK := y
 
 # Platform dependent files
 KERNEL_HW_OBJS += $(P)/interrupt.o
