@@ -106,6 +106,7 @@
 #define __effect__
 #define __init__
 #define __machine2__
+#define __machine3__
 #define __deff__
 #define __leff__
 #endif
