@@ -910,22 +910,22 @@ static void linux_interface_thread (void)
 				node_kick (&open_node);
 				break;
 
-#if MAX_DEVICES >= 1
+#if MAX_DEVICES > 1
 			case 'w':
 				node_move (&device_nodes[1], &open_node);
 				break;
 #endif
-#if MAX_DEVICES >= 2
+#if MAX_DEVICES > 2
 			case 'e':
 				node_move (&device_nodes[2], &open_node);
 				break;
 #endif
-#if MAX_DEVICES >= 3
+#if MAX_DEVICES > 3
 			case 'r':
 				node_move (&device_nodes[3], &open_node);
 				break;
 #endif
-#if MAX_DEVICES >= 4
+#if MAX_DEVICES > 4
 			case 't':
 				node_move (&device_nodes[3], &open_node);
 				break;
