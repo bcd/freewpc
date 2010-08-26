@@ -52,6 +52,10 @@
 U8 foundPos;
 U8 zr1_pos_center;
 __fastram__ U8 zr1_last_position;
+__fastram__ U8 zr1_shake_speed;
+__fastram__ U8 zr1_shake_range;
+__fastram__ U8 zr1_pos_shake_left;
+__fastram__ U8 zr1_pos_shake_right;
 U8 zr1_pos_full_left_opto_on;
 U8 zr1_pos_full_left_opto_off;
 U8 zr1_pos_full_right_opto_on;
@@ -101,6 +105,11 @@ __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
 
 
 
+void zr1_calculate_shake_range(void) {
+	zr1_pos_shake_left = zr1_pos_full_left_opto_off + ((zr1_pos_center - zr1_pos_full_left_opto_off) / 5) * zr1_shake_range;
+	zr1_pos_shake_right = zr1_pos_full_right_opto_off - ((zr1_pos_full_right_opto_off - zr1_pos_center) / 5) * zr1_shake_range;
+}
+
 /**
  * Reset the engine position limits used during calibration
  */
@@ -111,6 +120,7 @@ void zr1_reset_limits(void) {
 	zr1_pos_full_left_opto_off = ZR1_ENGINE_LEFT_MIN;
 	zr1_pos_full_right_opto_on = ZR1_ENGINE_RIGHT_MAX;
 	zr1_pos_full_right_opto_off = ZR1_ENGINE_RIGHT_MAX;
+	zr1_calculate_shake_range();
 }
 
 void zr1_reset(void) {
@@ -120,6 +130,9 @@ void zr1_reset(void) {
 	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
 	zr1_state = ZR1_IDLE;
 	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
+
+	zr1_shake_speed = ZR1_SHAKE_SPEED_SLOWEST;
+	zr1_shake_range = ZR1_SHAKE_RANGE_SMALLEST_ARC;
 
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
@@ -262,6 +275,7 @@ void zr1_calibration_failed(enum mech_zr1_calibration_codes code) {
 void zr1_calibration_complete(void) {
 	zr1_calibrated = TRUE;
 	zr1_last_calibration_result_code = CC_SUCCESS;
+	zr1_calculate_shake_range();
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_state_calibrate_exit();
 }
@@ -407,6 +421,47 @@ void zr1_state_idle_run(void) {
 	}
 }
 
+/**
+ * Sets the shake speed
+ *
+ * New speed is forced to between 1 and 10
+ *
+ * 1 = fast
+ * 10 = slow
+ *
+ * The value is used as a multiplier
+ */
+void zr1_set_shake_speed(U8 new_shake_speed) {
+	if (new_shake_speed > ZR1_SHAKE_SPEED_MAX) {
+		new_shake_speed = ZR1_SHAKE_SPEED_MAX;
+	}
+	if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
+		new_shake_speed = ZR1_SHAKE_SPEED_MIN;
+	}
+	zr1_shake_speed = new_shake_speed;
+}
+
+/**
+ * Sets the shake range
+ *
+ * New range is forced to between 1 and 5
+ *
+ * 1 = 1/5th of the maximum range (narrowest arc)
+ * 5 = 5/5ths of the maximum range (widest arc)
+ *
+ * @see zr1_calculate_shake_range
+ */
+void zr1_set_shake_range(U8 new_shake_range) {
+	if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
+		new_shake_range = ZR1_SHAKE_RANGE_MAX;
+	}
+	if (new_shake_range < ZR1_SHAKE_RANGE_MIN) {
+		new_shake_range = ZR1_SHAKE_RANGE_MIN;
+	}
+	zr1_shake_range = new_shake_range;
+	zr1_calculate_shake_range();
+}
+
 void zr1_shake(void) {
 	zr1_enter_state(ZR1_SHAKE);
 }
@@ -416,7 +471,7 @@ void zr1_state_shake_enter(void) {
 
 	// always begin by moving left
 	zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
-	zr1_set_position(zr1_pos_full_left_opto_off);
+	zr1_set_position(zr1_pos_shake_left);
 	zr1_enable_solenoids();
 }
 
@@ -426,15 +481,15 @@ void zr1_state_shake_run(void) {
 		return;
 	}
 	// reset counter
-	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS;
+	zr1_shake_ticks_remaining = ZR1_SHAKE_TICKS * zr1_shake_speed;
 
 	// reverse direction
 	if (zr1_shake_direction == ZR1_SHAKE_DIRECTION_LEFT) {
 		zr1_shake_direction = ZR1_SHAKE_DIRECTION_RIGHT;
-		zr1_set_position(zr1_pos_full_right_opto_off);
+		zr1_set_position(zr1_pos_shake_right);
 	} else {
 		zr1_shake_direction = ZR1_SHAKE_DIRECTION_LEFT;
-		zr1_set_position(zr1_pos_full_left_opto_off);
+		zr1_set_position(zr1_pos_shake_left);
 	}
 }
 

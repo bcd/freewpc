@@ -65,12 +65,18 @@ char *mech_zr1_calibration_messages[] = {
 
 extern enum mech_zr1_state zr1_state;
 extern U8 zr1_calibration_attempted;
-
+extern U8 zr1_calibrated;
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
 extern __fastram__ U8 zr1_last_position;
+extern __fastram__ U8 zr1_shake_speed;
+extern __fastram__ U8 zr1_shake_range;
 extern __fastram__ enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
+
+
+U8 new_shake_range;
+U8 new_shake_speed;
 
 void zr1_test_init (void)
 {
@@ -104,25 +110,57 @@ void zr1_test_draw (void)
 	);
 	font_render_string_center (&font_var5, 64, LINE_1_Y + 2, sprintf_buffer);
 
-	if (zr1_state == ZR1_CALIBRATE) {
-		font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
-		sprintf ("L:%c %s%d",
-			(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
-			zr1_pos_full_left_opto_off > 100 ? "" : (zr1_pos_full_left_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
-			zr1_pos_full_left_opto_off
-		);
-		font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
+	switch (zr1_test_command) {
+		case CALIBRATE:
+			if (zr1_state == ZR1_CALIBRATE) {
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "CALIBRATING");
+				sprintf ("L:%c %s%d",
+					(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+					zr1_pos_full_left_opto_off > 100 ? "" : (zr1_pos_full_left_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+					zr1_pos_full_left_opto_off
+				);
+				font_render_string_left (&font_var5, 0, LINE_3_Y, sprintf_buffer);
 
-		sprintf ("R:%c %s%d",
-			(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-'),
-			zr1_pos_full_right_opto_off > 100 ? "" : (zr1_pos_full_right_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
-			zr1_pos_full_right_opto_off
-		);
-		font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
+				sprintf ("R:%c %s%d",
+					(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-'),
+					zr1_pos_full_right_opto_off > 100 ? "" : (zr1_pos_full_right_opto_off < 10 ?  "00" : "0"), // FIXME %03d doesn't pad with leading zeros..
+					zr1_pos_full_right_opto_off
+				);
+				font_render_string_right (&font_var5, 0, LINE_3_Y - FRSR_WORKAROUND, sprintf_buffer);
+			} else {
+				dbprintf("calibration result: %d\n", zr1_last_calibration_result_code);
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, mech_zr1_calibration_messages[zr1_last_calibration_result_code]);
+			}
+		break;
 
-	} else {
-		dbprintf('calibration result: %d\n', zr1_last_calibration_result_code);
-		font_render_string_center(&font_var5, 64, LINE_3_Y + 2, mech_zr1_calibration_messages[zr1_last_calibration_result_code]);
+		case SHAKE:
+			sprintf ("SPD: %s%d, RNG: %d",
+				zr1_shake_speed < 10 ?  "0" : "", // FIXME %02d doesn't pad with leading zeros..
+				zr1_shake_speed,
+				zr1_shake_range
+			);
+			font_render_string_left (&font_var5, 0, LINE_2_Y, sprintf_buffer);
+
+			sprintf ("L:%c R:%c",
+				(switch_poll_logical (SW_ZR_1_FULL_LEFT) ? 'X' : '-'),
+				(switch_poll_logical (SW_ZR_1_FULL_RIGHT) ? 'X' : '-')
+			);
+			font_render_string_right (&font_var5, 0, LINE_2_Y - FRSR_WORKAROUND, sprintf_buffer);
+
+			if (zr1_state == ZR1_SHAKE) {
+				font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "SHAKING");
+			} else {
+				if (!zr1_calibrated) {
+					font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "NOT CALIBRATED");
+				} else {
+					font_render_string_center(&font_var5, 64, LINE_3_Y + 2, "NOT SHAKING");
+				}
+			}
+
+		break;
+		default:
+			// shut the compiler up
+		break;
 	}
 
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
@@ -144,6 +182,38 @@ void zr1_test_thread (void)
 		task_sleep (TIME_100MS);
 
 		zr1_test_draw ();
+	}
+}
+
+void zr1_test_left (void)
+{
+	switch (zr1_test_command) {
+		case SHAKE:
+			new_shake_range = zr1_shake_range + 1;
+			if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
+				new_shake_range = ZR1_SHAKE_RANGE_MIN;
+			}
+			zr1_set_shake_range(new_shake_range);
+		break;
+		default:
+			// shut the compiler up
+		break;
+	}
+}
+
+void zr1_test_right (void)
+{
+	switch (zr1_test_command) {
+		case SHAKE:
+			new_shake_speed = zr1_shake_speed - 1;
+			if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
+				new_shake_speed = ZR1_SHAKE_SPEED_MAX;
+			}
+			zr1_set_shake_speed(new_shake_speed);
+		break;
+		default:
+			// shut the compiler up
+		break;
 	}
 }
 
@@ -228,6 +298,8 @@ struct window_ops corvette_zr1_test_window = {
 	.down = zr1_test_down,
 	.enter = zr1_test_enter,
 	.escape = zr1_test_escape,
+	.left = zr1_test_left,
+	.right = zr1_test_right,
 	.thread = zr1_test_thread,
 };
 

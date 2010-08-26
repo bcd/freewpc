@@ -60,3 +60,5 @@ __machine__ void zr1_idle(void);
 __machine__ void zr1_calibrate(void);
 __machine__ void zr1_enable_solenoids(void);
 __machine__ void zr1_disable_solenoids(U8 force);
+__machine__ void zr1_set_shake_speed(U8 new_shake_speed);
+__machine__ void zr1_set_shake_range(U8 new_shake_range);
