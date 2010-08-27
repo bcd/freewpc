@@ -557,6 +557,13 @@ CALLSET_ENTRY (zr1, start_ball, end_ball)
 
 CALLSET_ENTRY (zr1, diagnostic_check)
 {
+	if (!feature_config.enable_zr1_engine) {
+		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
+
+		diag_post_error ("ZR1 ENGINE DISABLED BY ADJUSTMENT\n", PAGE);
+		return;
+	}
+
 	if (!zr1_calibration_attempted) {
 		dbprintf ("zr1: diagnostic_check - starting for calibration\n");
 		zr1_calibrate();
@@ -573,13 +580,6 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 	if (zr1_last_calibration_result_code != CC_SUCCESS) {
 		audit_increment (&feature_audits.zr1_errors);
 		diag_post_error (mech_zr1_diag_messages[zr1_last_calibration_result_code], PAGE);
-	}
-
-	if (!feature_config.enable_zr1_engine) {
-		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
-
-		diag_post_error ("ZR1 ENGINE DISABLED BY ADJUSTMENT\n", PAGE);
-		return;
 	}
 }
 
