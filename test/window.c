@@ -3529,10 +3529,16 @@ void empty_balls_test_init (void)
 	callset_invoke (empty_balls_test);
 }
 
+void empty_balls_test_enter (void)
+{
+	window_stop_thread ();
+	empty_balls_test_init ();
+	window_start_thread ();
+}
 
 void empty_balls_test_draw (void)
 {
-	window_title (counted_balls ? "EMPTYING BALLS..." : "EMPTY BALLS DONE");
+	window_title ("EMPTYING BALLS");
 	dmd_show_low ();
 }
 
@@ -3542,7 +3548,8 @@ void empty_balls_test_thread (void)
 	{
 		task_sleep_sec (2);
 		dmd_alloc_low_clean ();
-		empty_balls_test_draw ();
+		window_title ("EMPTY BALLS DONE");
+		dmd_show_low ();
 
 		/* If the machine has an autoplunger, activate it as balls
 			pile up in the shooter lane. */
@@ -3558,6 +3565,7 @@ void empty_balls_test_thread (void)
 struct window_ops empty_balls_test_window = {
 	INHERIT_FROM_BROWSER,
 	.init = empty_balls_test_init,
+	.enter = empty_balls_test_enter,
 	.draw = empty_balls_test_draw,
 	.up = null_function,
 	.down = null_function,
