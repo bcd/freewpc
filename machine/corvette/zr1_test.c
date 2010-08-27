@@ -231,12 +231,11 @@ void zr1_test_down (void)
 		zr1_test_command--;
 }
 
-/**
- * Ensures user can exit test menu when calibration still running
- */
 void zr1_test_escape (void) {
-	if (zr1_state == ZR1_CALIBRATE) {
-		return;
+
+	// allow calibrate to continue, but stop everything else
+	if (zr1_state != ZR1_CALIBRATE) {
+		zr1_idle();
 	}
 
 	window_pop();
