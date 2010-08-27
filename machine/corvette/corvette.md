@@ -177,7 +177,7 @@ L3: Left Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L4: Lower Jet, duty(SOL_DUTY_75), time(TIME_33MS)
 L5: Upper Jet, duty(SOL_DUTY_75), time(TIME_33MS) # actually the RIGHT jet
 L6: Not Used 2,nosearch
-L7: ZR-1 Lockup, duty(SOL_DUTY_75), time(TIME_66MS)
+L7: ZR-1 Lockup, duty(SOL_DUTY_100), time(TIME_100MS)
 L8: Loop Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 
 # G = J126 on Power Driver Board
