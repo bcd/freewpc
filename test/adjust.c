@@ -414,6 +414,9 @@ const struct adjustment *adj_get (U8 num)
 
 bool adj_current_hidden_p (void)
 {
+	/* If the adjustment is unnamed, don't show it.  We do this
+	at compile-time for certain things that we never want to show
+	(e.g. FREE PLAY when built as FREE ONLY). */
 	if (current_adjustment.name[0] == '\0')
 		return TRUE;
 
@@ -429,6 +432,14 @@ bool adj_current_hidden_p (void)
 		(std_adj_p (replay_percent) || std_adj_p (replay_start)))
 		return TRUE;
 
+	/* Allow other things to be added too.  Machines or other
+	modules should return FALSE if the current adjustment should
+	not be visible.  (Note this is inverted logic from the rest of
+	this function.) */
+	if (!callset_invoke_boolean (adjustment_visible))
+		return TRUE;
+
+	/* Otherwise, this adjustment is OK to show */
 	return FALSE;
 }
 

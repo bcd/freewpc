@@ -180,8 +180,10 @@ CALLSET_ENTRY (pricing, adjustment_changed)
 }
 
 
-CALLSET_ENTRY (pricing, hide_adjustment)
+/* TODO : Do not allow the individual adjustments to be changed
+unless the aggregate adjustments are set to CUSTOM. */
+CALLSET_BOOL_ENTRY (pricing, adjustment_visible)
 {
+	return TRUE;
 }
-
 
