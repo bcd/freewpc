@@ -553,6 +553,14 @@ void writeb (IOPTR addr, U8 val)
 			sim_sol_write (40, &linux_solenoid_outputs[5], val);
 			break;
 #endif
+#ifdef WPC_EXTBOARD2
+		case WPC_EXTBOARD2:
+			break;
+#endif
+#ifdef WPC_EXTBOARD3
+		case WPC_EXTBOARD3:
+			break;
+#endif
 
 #if (MACHINE_ALPHANUMERIC == 1)
 		case WPC_ALPHA_POS:
