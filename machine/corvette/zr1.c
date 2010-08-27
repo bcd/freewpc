@@ -43,8 +43,8 @@
 // Specifies how long it takes the engine to move the engine from ANY position to the center, and settle.
 #define ZR1_CENTER_TICKS 8 // 16 * 8 = 128MS
 
-// Specifies how long it takes the engine to move from one side to the other - a full sweep.
-#define ZR1_SHAKE_TICKS 6 // 16 * 6 = 96MS
+// Specifies how long it takes the engine to move from one side to the other at full speed using the default range.
+#define ZR1_SHAKE_TICKS 4 // 16 * 4 = 64MS
 
 // Specifies how long the RTT should wait before changing the position of the engine during calibration.
 #define ZR1_CALIBRATE_MOVE_TICKS 5 // 16 * 5 = 80MS
@@ -132,7 +132,7 @@ void zr1_reset(void) {
 	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
 
 	zr1_shake_speed = ZR1_SHAKE_SPEED_SLOWEST;
-	zr1_shake_range = ZR1_SHAKE_RANGE_SMALLEST_ARC;
+	zr1_shake_range = ZR1_SHAKE_RANGE_DEFAULT;
 
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
