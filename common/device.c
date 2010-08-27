@@ -643,7 +643,9 @@ probe_exit:
 	/* At this point, all kicks have been made, but balls may be
 	on the playfield heading for the trough.  We still should wait
 	until 'missing_balls' goes (hopefully) to zero.
-   We'll give it three tries. */
+	We'll wait for up to 10 seconds, but exit sooner if we find all
+	balls before then. */
+	task_sleep_sec (4);
 	if (missing_balls != 0)
 	{
 		task_sleep_sec (2);
@@ -858,11 +860,15 @@ bool device_check_start_ok (void)
 
 	/* If some balls are unaccounted for, and not on the shooter,
 	 * then start a device probe and a ball search.  Alert the user
-	 * by displaying a message. */
+	 * by displaying a message.
+	 *
+	 * After 3 probes, allow the game to start anyway.  However,
+	 * if no balls are accounted for anywhere, then don't do that.
+	 */
 	if (truly_missing_balls > 0)
 	{
 		dbprintf ("%d balls missing.\n", truly_missing_balls);
-		if (++device_game_start_errors < 5)
+		if ((++device_game_start_errors <= 3) || (counted_balls == 0))
 		{
 			task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 			ball_search_now ();
