@@ -184,7 +184,7 @@ L8: Loop Gate, duty(SOL_DUTY_50), time(TIME_66MS)
 G1: Race Direction
 G2: Left Race Enable, motor
 G3: Right Race Enable, motor
-G4: Not Used 3, nosearch
+G4: Future Car, flash, duty(SOL_DUTY_75), time(TIME_16MS)
 # playfield flashers
 G5: Jets, flash, duty(SOL_DUTY_100), time(TIME_33MS)
 G6: Right Ramps, flash, duty(SOL_DUTY_75), time(TIME_16MS)
