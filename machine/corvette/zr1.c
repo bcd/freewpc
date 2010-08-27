@@ -300,7 +300,7 @@ void zr1_state_calibrate_enter(void) {
 	// initialise the first calibration state
 	zr1_set_position_to_center();
 	zr1_enable_solenoids();
-	zr1_calibrate_move_ticks_remaining = ZR1_CENTER_TICKS * 2; // wait a bit longer for settle during calibration.
+	zr1_calibrate_move_ticks_remaining = ZR1_CENTER_TICKS * 4; // wait a bit longer for settle during calibration.
 	zr1_calibrate_state = ZR1_CALIBRATE_CENTER;
 }
 
