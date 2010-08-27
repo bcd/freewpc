@@ -565,16 +565,8 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 	}
 
 	if (!zr1_calibration_attempted) {
-		dbprintf ("zr1: diagnostic_check - starting for calibration\n");
-		zr1_calibrate();
+		return;
 	}
-
-	dbprintf ("zr1: diagnostic_check - waiting for calibration\n");
-	while (zr1_state == ZR1_CALIBRATE) {
-		task_sleep(TIME_1S);
-		dbprintf ("zr1: diagnostic_check - still calibrating ...\n");
-	}
-	dbprintf ("zr1: diagnostic_check - calibration complete\n");
 
 	dbprintf ("calibration result: %d - %s", zr1_last_calibration_result_code, mech_zr1_diag_messages[zr1_last_calibration_result_code]); // No trailing \n as diag message contains one already
 	if (zr1_last_calibration_result_code != CC_SUCCESS) {
