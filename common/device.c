@@ -496,25 +496,18 @@ void device_request_empty (device_t *dev)
 
 	task_gid_t gid = DEVICE_GID (device_devno (dev));
 	task_kill_gid (gid);
-	if ((can_kick = device_kickable_count (dev)) > 0)
-	{
-		dev->kicks_needed += can_kick;
-		dev->kick_errors = 0;
-		dev->max_count -= can_kick;
-		/* TODO - lock count should be decremented here or not? */
-		/* TODO - this logic probably belongs somewhere else */
-		if (!trough_dev_p (dev))
-			live_balls += can_kick;
-	}
-	else
-	{
-		/* We tried to empty a device that had no balls in it.
-		Originally seen in switch stress simulation, we need to
-		reset max_count at the least. */
-		dev->kicks_needed = 0;
-		dev->kick_errors = 0;
-		dev->max_count = dev->props->init_max_count;
-	}
+
+	/* See how many balls are in the device, and schedule that many kicks. */
+	can_kick = device_kickable_count (dev);
+	dev->kicks_needed += can_kick;
+	dev->kick_errors = 0;
+
+	/* TODO - this logic probably belongs somewhere else */
+	if (!trough_dev_p (dev))
+		live_balls += can_kick;
+
+	/* Reset count of locked balls */
+	dev->max_count = dev->props->init_max_count;
 	if (gid != task_getgid ())
 		task_recreate_gid_while (gid, device_update, TASK_DURATION_INF);
 }
