@@ -489,17 +489,18 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-/** Suspend the current task for a number of seconds.  This works
-around the limitation that the 'delay' field is 8-bit and cannot
-store large timeouts.
+/** Suspend the current task for a number of seconds.
 	This function is not normally called directly; use task_sleep_sec()
 instead.  If the number of seconds is small enough, it will call
 task_sleep() instead, which is more efficient. */
-void task_sleep_sec1 (I8 secs)
+void task_sleep_sec1 (U8 secs)
 {
-	do {
-		task_sleep (TIME_1S);
-	} while (--secs > 0);
+	register task_t *tp = task_current;
+	if (tp == 0)
+		fatal (ERR_IDLE_CANNOT_SLEEP);
+	tp->wakeup = get_sys_time () + ((U16)secs * TIME_1S);
+	tp->state |= TASK_BLOCKED;
+	task_save (tp);
 }
 
 
