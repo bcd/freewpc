@@ -83,6 +83,10 @@ void dead_end_deff (void)
 	{
 		sprintf ("10 MILLION");
 	}
+	else
+	{
+		sprintf ("");
+	}
 
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	dmd_show_low ();
