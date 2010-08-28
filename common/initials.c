@@ -134,14 +134,13 @@ void initials_stop (void)
 }
 
 
-void initials_running (void)
+static void initials_running (void)
 {
 	task_sleep_sec (1);
 	initials_enter_timer = 30;
 	memset (initials_data, 0, sizeof (initials_data));
 	initials_index = 0;
 	initials_selection = 0;
-	deff_start (DEFF_ENTER_INITIALS);
 
 #if 1
 	initials_enter_complete = null_function;
@@ -160,8 +159,7 @@ void initials_running (void)
 void initials_enter (void)
 {
 	task_create_gid1 (GID_ENTER_INITIALS, initials_running);
-	while (task_find_gid (GID_ENTER_INITIALS))
-		task_sleep (TIME_133MS);
+	deff_start_sync (DEFF_ENTER_INITIALS);
 }
 
 
