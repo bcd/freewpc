@@ -177,7 +177,7 @@ void task_sleep (task_ticks_t ticks)
 
 
 /* TODO - this function is identical to the 6809 version */
-void task_sleep_sec (I8 secs)
+void task_sleep_sec1 (I8 secs)
 {
 	do {
 		task_sleep (TIME_1S);

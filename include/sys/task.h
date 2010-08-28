@@ -215,7 +215,7 @@ task_pid_t task_getpid (void);
 task_gid_t task_getgid (void);
 void task_setgid (task_gid_t gid);
 void task_sleep (task_ticks_t ticks);
-void task_sleep_sec (I8 secs);
+void task_sleep_sec1 (I8 secs);
 void task_set_periodic (task_ticks_t ticks);
 void task_sleep_periodic (void);
 __noreturn__ void task_exit (void);
@@ -255,6 +255,15 @@ void do_periodic (void);
 #else
 #define task_yield()					task_sleep (0)
 #endif
+
+/** Sleep for an integer number of seconds */
+extern inline void task_sleep_sec (U8 n)
+{
+	if (n <= 4)
+		task_sleep (TIME_1S * n);
+	else
+		task_sleep_sec1 (n);
+}
 
 
 /**
