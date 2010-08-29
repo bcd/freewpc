@@ -4002,13 +4002,3 @@ CALLSET_ENTRY (test_mode, start_button_handler)
 	}
 }
 
-
-CALLSET_ENTRY (test_mode, sw_buyin_button)
-{
-	if (win_top)
-	{
-		dmd_alloc_low_clean ();
-		dmd_show_low ();
-	}
-}
-
