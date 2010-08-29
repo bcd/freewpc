@@ -210,23 +210,16 @@ void zr1_calculate_center_pos(void) {
 }
 
 void zr1_state_center_enter(void) {
-	interrupt_dbprintf ("zr1_state_center_enter: enter\n");
 	zr1_set_position_to_center();
 	zr1_enable_solenoids();
 	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
-	interrupt_dbprintf ("zr1_state_center_enter: exit\n");
 }
 
 void zr1_state_center_run(void) {
-	interrupt_dbprintf ("zr1_state_center_run: enter\n");
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
-		interrupt_dbprintf ("zr1_state_center_run: zr1_center_ticks_remaining = %d\n", zr1_center_ticks_remaining);
-		if (zr1_center_ticks_remaining == 0) {
-			dbprintf ("zr1_state_center_run: engine centered\n");
-		}
 	}
-	interrupt_dbprintf ("zr1_state_center_run: exit\n");
+	// do nothing
 }
 
 void zr1_state_calibrate_exit(void) {
@@ -238,9 +231,6 @@ void zr1_calibration_failed(enum mech_zr1_calibration_codes code) {
 	// store the code for use outside the RTT as diag_post can't be called from an RTT.
 	zr1_last_calibration_result_code = code;
 	zr1_reset_limits();
-
-	interrupt_dbprintf("zr1 engine calibration failed\n");
-	interrupt_dbprintf("error code: %d\n", code);
 	zr1_state_calibrate_exit();
 }
 
