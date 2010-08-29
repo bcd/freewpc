@@ -237,6 +237,7 @@ void zr1_state_calibrate_exit(void) {
 void zr1_calibration_failed(enum mech_zr1_calibration_codes code) {
 	// store the code for use outside the RTT as diag_post can't be called from an RTT.
 	zr1_last_calibration_result_code = code;
+	zr1_reset_limits();
 
 	interrupt_dbprintf("zr1 engine calibration failed\n");
 	interrupt_dbprintf("error code: %d\n", code);
@@ -592,7 +593,7 @@ CALLSET_ENTRY (zr1, diagnostic_check)
 	if (!feature_config.enable_zr1_engine) {
 		dbprintf ("zr1: ZR1 ENGINE DISABLED BY ADJUSTMENT\n");
 
-		diag_post_error ("ZR1 ENGINE DISABLED BY ADJUSTMENT\n", PAGE);
+		diag_post_error ("ZR1 DISABLED\nBY ADJUSTMENT\n", PAGE);
 		return;
 	}
 
