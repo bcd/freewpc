@@ -102,7 +102,7 @@ void zr1_test_draw (void)
 
 	// P = Current Position, S = State, PWR = Power, C = Center Position
 	// e.g. "P:127 S:1 PWR:1 C:127"
-	sprintf ("P:%03d S:%d PWR:%d C:%03d",
+	sprintf ("P:%d S:%d PWR:%d C:%d",
 		zr1_last_position,
 		zr1_state,
 		global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED) ? 1 : 0,
