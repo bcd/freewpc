@@ -107,6 +107,24 @@ struct adjustment
 	U8 *nvram;
 };
 
+enum test_mode
+{
+	NO_TEST = 0,
+	TEST_DEFAULT = 1,
+	TEST_SWITCHES,
+	TEST_COILS,
+#ifdef CONFIG_RTC
+	TEST_RTC,
+#endif
+};
+
+extern enum test_mode in_test;
+
+extern inline void set_test_mode (enum test_mode mode)
+{
+	in_test = mode;
+}
+
 extern struct adjustment standard_adjustments[];
 extern struct adjustment feature_adjustments[];
 extern struct adjustment pricing_adjustments[];

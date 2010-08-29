@@ -84,7 +84,7 @@ struct window *win_top;
 /* Equivalent to (win_top != NULL), but as a byte, this can
  * be tested with a single instruction.
  * IDEA: these two variables could be overlapped into a union. */
-__fastram__ U8 in_test;
+__fastram__ enum test_mode in_test;
 
 
 /* The window stack keeps track of where you came from, so when you
@@ -97,7 +97,7 @@ struct window win_stack[MAX_WIN_STACK];
  * marks 'in test'.  It also resets sound, display, and lamps. */
 void window_push_first (void)
 {
-	in_test = 1;
+	set_test_mode (TEST_DEFAULT);
 	task_setgid (GID_TEST_MODE_STARTING);
 #ifdef CONFIG_TEST_DURING_GAME
 	if (!switch_poll_logical (SW_LEFT_BUTTON))
@@ -134,7 +134,7 @@ void window_pop_first (void)
 	{
 		amode_start ();
 	}
-	in_test = 0;
+	set_test_mode (NO_TEST);
 }
 
 /** Starts the window's thread function, if it exists. */
@@ -3897,7 +3897,7 @@ struct window_ops sysinfo_scroller_window = {
 void test_init (void)
 {
 	window_init ();
-	in_test = 0;
+	set_test_mode (NO_TEST);
 }
 
 void test_up_button (void)
