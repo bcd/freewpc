@@ -104,6 +104,12 @@ enum mech_zr1_calibrate_state {
 __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
 
 
+/*
+ *
+ * Methods shared between the RTT and common code
+ *
+ *
+ */
 
 void zr1_calculate_shake_range(void) {
 	zr1_pos_shake_left = zr1_pos_full_left_opto_off + ((zr1_pos_center - zr1_pos_full_left_opto_off) / 5) * zr1_shake_range;
@@ -123,23 +129,11 @@ void zr1_reset_limits(void) {
 	zr1_calculate_shake_range();
 }
 
-void zr1_reset(void) {
-	zr1_previously_enabled = FALSE;
-	zr1_calibrated = FALSE;
-	zr1_calibration_attempted = FALSE;
-	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
-	zr1_state = ZR1_IDLE;
-	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
-
-	zr1_shake_speed = ZR1_SHAKE_SPEED_SLOWEST;
-	zr1_shake_range = ZR1_SHAKE_RANGE_DEFAULT;
-
-	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
-	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
-
-	zr1_reset_limits();
-	zr1_disable_solenoids(TRUE);
-}
+/*
+ *
+ * RTT ONLY methods
+ *
+ */
 
 // should not be used outside of this file
 void zr1_set_position_to_center(void) {
@@ -215,29 +209,6 @@ void zr1_calculate_center_pos(void) {
 	zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
 }
 
-void zr1_enter_state(enum mech_zr1_state new_state) {
-	U8 allow_state_change = FALSE;
-	switch (new_state) {
-		case ZR1_SHAKE:
-			allow_state_change = zr1_calibrated;
-			break;
-		default:
-			allow_state_change = TRUE;
-	}
-	if (!allow_state_change) {
-		dbprintf("current state: %d, disallowing new state: %d\n", zr1_state, new_state);
-		//return allow_state_change; // always FALSE
-	} else {
-		dbprintf("current state: %d, enabling new state: %d\n", zr1_state, new_state);
-		zr1_state = new_state;
-		//return allow_state_change; // always TRUE
-	}
-}
-
-void zr1_center(void) {
-	zr1_enter_state(ZR1_CENTER);
-}
-
 void zr1_state_center_enter(void) {
 	interrupt_dbprintf ("zr1_state_center_enter: enter\n");
 	zr1_set_position_to_center();
@@ -278,10 +249,6 @@ void zr1_calibration_complete(void) {
 	zr1_calculate_shake_range();
 	global_flag_on(GLOBAL_FLAG_ZR1_WORKING);
 	zr1_state_calibrate_exit();
-}
-
-void zr1_calibrate(void) {
-	zr1_enter_state(ZR1_CALIBRATE);
 }
 
 void zr1_state_calibrate_enter(void) {
@@ -403,10 +370,6 @@ void zr1_state_calibrate_run(void) {
 	}
 }
 
-void zr1_idle(void) {
-	zr1_enter_state(ZR1_IDLE);
-}
-
 void zr1_state_idle_enter(void) {
 	zr1_set_position_to_center();
 	zr1_center_ticks_remaining = ZR1_CENTER_TICKS;
@@ -419,51 +382,6 @@ void zr1_state_idle_run(void) {
 			zr1_disable_solenoids(FALSE);
 		}
 	}
-}
-
-/**
- * Sets the shake speed
- *
- * New speed is forced to between 1 and 10
- *
- * 1 = fast
- * 10 = slow
- *
- * The value is used as a multiplier
- */
-void zr1_set_shake_speed(U8 new_shake_speed) {
-	if (new_shake_speed > ZR1_SHAKE_SPEED_MAX) {
-		new_shake_speed = ZR1_SHAKE_SPEED_MAX;
-	}
-	if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
-		new_shake_speed = ZR1_SHAKE_SPEED_MIN;
-	}
-	zr1_shake_speed = new_shake_speed;
-}
-
-/**
- * Sets the shake range
- *
- * New range is forced to between 1 and 5
- *
- * 1 = 1/5th of the maximum range (narrowest arc)
- * 5 = 5/5ths of the maximum range (widest arc)
- *
- * @see zr1_calculate_shake_range
- */
-void zr1_set_shake_range(U8 new_shake_range) {
-	if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
-		new_shake_range = ZR1_SHAKE_RANGE_MAX;
-	}
-	if (new_shake_range < ZR1_SHAKE_RANGE_MIN) {
-		new_shake_range = ZR1_SHAKE_RANGE_MIN;
-	}
-	zr1_shake_range = new_shake_range;
-	zr1_calculate_shake_range();
-}
-
-void zr1_shake(void) {
-	zr1_enter_state(ZR1_SHAKE);
 }
 
 void zr1_state_shake_enter(void) {
@@ -534,6 +452,120 @@ void corvette_zr1_engine_rtt (void) {
 	}
 	zr1_previous_state = zr1_state;
 }
+
+/*
+ *
+ * NON-RTT methods
+ *
+ */
+
+void zr1_reset(void) {
+	disable_interrupts();
+	zr1_previously_enabled = FALSE;
+	zr1_calibrated = FALSE;
+	zr1_calibration_attempted = FALSE;
+	zr1_last_calibration_result_code = CC_NOT_CALIBRATED;
+	zr1_state = ZR1_IDLE;
+	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
+
+	zr1_shake_speed = ZR1_SHAKE_SPEED_SLOWEST;
+	zr1_shake_range = ZR1_SHAKE_RANGE_DEFAULT;
+
+	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
+	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+
+	zr1_reset_limits();
+	enable_interrupts();
+	zr1_disable_solenoids(TRUE);
+
+}
+
+void zr1_enter_state(enum mech_zr1_state new_state) {
+	U8 allow_state_change = FALSE;
+	switch (new_state) {
+		case ZR1_SHAKE:
+			allow_state_change = zr1_calibrated;
+			break;
+		default:
+			allow_state_change = TRUE;
+	}
+	if (!allow_state_change) {
+		dbprintf("current state: %d, disallowing new state: %d\n", zr1_state, new_state);
+	} else {
+		dbprintf("current state: %d, enabling new state: %d\n", zr1_state, new_state);
+		disable_interrupts();
+		zr1_state = new_state;
+		enable_interrupts();
+	}
+}
+
+void zr1_idle(void) {
+	zr1_enter_state(ZR1_IDLE);
+}
+
+void zr1_calibrate(void) {
+	zr1_enter_state(ZR1_CALIBRATE);
+}
+
+void zr1_center(void) {
+	zr1_enter_state(ZR1_CENTER);
+}
+
+void zr1_shake(void) {
+	zr1_enter_state(ZR1_SHAKE);
+}
+
+/**
+ * Sets the shake speed
+ *
+ * New speed is forced to between 1 and 10
+ *
+ * 1 = fast
+ * 10 = slow
+ *
+ * The value is used as a multiplier
+ */
+void zr1_set_shake_speed(U8 new_shake_speed) {
+	if (new_shake_speed > ZR1_SHAKE_SPEED_MAX) {
+		new_shake_speed = ZR1_SHAKE_SPEED_MAX;
+	}
+	if (new_shake_speed < ZR1_SHAKE_SPEED_MIN) {
+		new_shake_speed = ZR1_SHAKE_SPEED_MIN;
+	}
+	disable_interrupts();
+	zr1_shake_speed = new_shake_speed;
+	enable_interrupts();
+}
+
+/**
+ * Sets the shake range
+ *
+ * New range is forced to between 1 and 5
+ *
+ * 1 = 1/5th of the maximum range (narrowest arc)
+ * 5 = 5/5ths of the maximum range (widest arc)
+ *
+ * @see zr1_calculate_shake_range
+ */
+void zr1_set_shake_range(U8 new_shake_range) {
+	if (new_shake_range > ZR1_SHAKE_RANGE_MAX) {
+		new_shake_range = ZR1_SHAKE_RANGE_MAX;
+	}
+	if (new_shake_range < ZR1_SHAKE_RANGE_MIN) {
+		new_shake_range = ZR1_SHAKE_RANGE_MIN;
+	}
+	disable_interrupts();
+	zr1_shake_range = new_shake_range;
+	zr1_calculate_shake_range();
+	enable_interrupts();
+}
+
+// TODO
+/*
+void zr1_ball_search(void) {
+	zr1_enter_state(ZR1_BALL_SEARCH);
+}
+*/
 
 CALLSET_ENTRY (zr1, init)
 {

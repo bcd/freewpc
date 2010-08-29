@@ -63,9 +63,9 @@ char *mech_zr1_calibration_messages[] = {
 	"CALIBRATED O.K."
 };
 
-extern enum mech_zr1_state zr1_state;
-extern U8 zr1_calibration_attempted;
+extern __fastram__ enum mech_zr1_state zr1_state;
 extern U8 zr1_calibrated;
+extern U8 zr1_calibration_attempted;
 extern U8 zr1_pos_center;
 extern U8 zr1_pos_full_left_opto_off;
 extern U8 zr1_pos_full_right_opto_off;
@@ -275,12 +275,16 @@ void zr1_test_enter (void)
 
   		case ENABLE_SOLENOIDS:
  			dbprintf ("zr1_test_enter: calling 'zr1_enable_solenoids'\n");
+ 			disable_interrupts();
   			zr1_enable_solenoids();
+  			enable_interrupts();
   		break;
 
   		case DISABLE_SOLENOIDS:
  			dbprintf ("zr1_test_enter: calling 'zr1_disable_solenoids'\n");
+ 			disable_interrupts();
   			zr1_disable_solenoids(TRUE); // FORCE
+  			enable_interrupts();
   		break;
 
  		// TODO remove when testing complete - end

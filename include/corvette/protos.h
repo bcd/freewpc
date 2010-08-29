@@ -53,12 +53,14 @@ __machine__ void dmd_flash (task_ticks_t delay);
 
 /* zr1.c */
 
-__machine__ void zr1_reset(void);
 __machine__ void zr1_shake(void);
 __machine__ void zr1_center(void);
 __machine__ void zr1_idle(void);
 __machine__ void zr1_calibrate(void);
-__machine__ void zr1_enable_solenoids(void);
-__machine__ void zr1_disable_solenoids(U8 force);
 __machine__ void zr1_set_shake_speed(U8 new_shake_speed);
 __machine__ void zr1_set_shake_range(U8 new_shake_range);
+
+// TODO remove when real-machine testing is complete - begin
+__machine__ void zr1_enable_solenoids(void);
+__machine__ void zr1_disable_solenoids(U8 force);
+// TODO remove when testing complete - end
