@@ -2,8 +2,10 @@
 #include <freewpc.h>
 
 /* An example of how to use the multiball mode module.
-	In this simple 2-ball multiball, the center ramp
-	scores a 10 point jackpot. */
+	For this simple 2-ball multiball, shoot the center 3-bank
+	10 times to start, then continue to hit to score jackpots. */
+
+U8 mb_shots_to_start;
 
 U8 mb_jackpot_count;
 
@@ -61,7 +63,12 @@ void bonusmb_ending_deff (void)
 	font_render_string_center (&font_fixed10, 64, 16, "BONUS MB OVER");
 	dmd_show_low ();
 	task_sleep (TIME_2S);
-	task_exit ();
+	deff_exit ();
+}
+
+CALLSET_ENTRY (bonusmb, start_player)
+{
+	mb_shots_to_start = 10;
 }
 
 CALLSET_ENTRY (bonusmb, any_motor_bank)
@@ -72,7 +79,11 @@ CALLSET_ENTRY (bonusmb, any_motor_bank)
 	}
 	else
 	{
-		mb_mode_start (&afm_bonus_mb_mode);
+		mb_shots_to_start--;
+		if (mb_shots_to_start == 0)
+		{
+			mb_mode_start (&afm_bonus_mb_mode);
+		}
 	}
 }
 
