@@ -93,16 +93,15 @@ CALLSET_ENTRY (shooter_switch, amode_start, start_ball, sw_shooter)
  * Called when the player presses a button intending to launch a ball into
  * play.
  */
+#ifdef INCLUDE_AUTOPLUNGER
 static void launch_button_pressed (void)
 {
-#ifdef INCLUDE_AUTOPLUNGER
 	/* Do not attempt to fire if a ball is in play and no ball is seen
 	on the shooter */
 	if (!valid_playfield || switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 		launch_ball ();
-#endif
 }
-
+#endif
 
 #ifdef INCLUDE_AUTOPLUNGER
 static void timed_plunger_monitor (void)
