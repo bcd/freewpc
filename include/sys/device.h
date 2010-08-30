@@ -212,7 +212,7 @@ typedef U8 devicenum_t;
 #define device_empty_p(dev)	(dev->actual_count == 0)
 
 /** True if the given device is full */
-#define device_full_p(dev)		(dev->actual_count == dev->max_count)
+#define device_full_p(dev)		(dev->actual_count == dev->size)
 
 /** Disable an automatic ball lock on this device */
 #define device_disable_lock(dev)	(dev->max_count--)
