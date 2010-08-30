@@ -21,14 +21,13 @@
 
 # Schedule for TZ's real-time tasks
 
-# Poll the loop magnet sensors
-magnet_switch_rtt  8     0.1
+magnet_switch_rtt 	4	0.1
 
 # Update the clock
-tz_clock_switch_rtt     8     0.1
+#clock_mech_service      8    40c
+#tz_clock_switch_rtt     2    0.1
 
 # Update the loop magnet
-magnet_duty_rtt    32    0.1
-
-# TODO : Update mini-playfield magnets
+magnet_duty_rtt    	4    20c
+magnet_ball_grab_monitor_rtt   128    10c
 

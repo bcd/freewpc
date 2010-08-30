@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,8 +18,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (leffs, __machine2__) */
+
 #include <freewpc.h>
 
+extern bool mpf_active;
+extern U8 mpf_round_timer;
+extern U8 tsm_mode_timer;
 
 void bonus_leff (void)
 {
@@ -27,7 +32,6 @@ void bonus_leff (void)
 	for (;;)
 		task_sleep_sec (5);
 }
-
 
 void gi_cycle_leff (void)
 {
@@ -38,12 +42,12 @@ void gi_cycle_leff (void)
 		for (i=0; i < 5; i++)
 		{
 			gi_leff_disable (TRIAC_GI_STRING (i));
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_66MS);
 			gi_leff_enable (TRIAC_GI_STRING (i));
 		}
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 }
-
 
 void flasher_happy_leff (void)
 {
@@ -66,7 +70,6 @@ void flasher_happy_leff (void)
 	leff_exit ();
 }
 
-
 void left_ramp_leff (void)
 {
 	U8 i;
@@ -82,12 +85,17 @@ void left_ramp_leff (void)
 	leff_exit ();
 }
 
-
-
 void no_gi_leff (void)
 {
 	gi_leff_disable (TRIAC_GI_MASK);
-	task_sleep_sec (1);
+	task_sleep_sec (2);
+	gi_leff_enable (TRIAC_GI_MASK);
+	leff_exit ();
+}
+
+void turn_on_gi_leff (void)
+{
+	gi_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -109,21 +117,34 @@ void flash_all_leff (void)
 	leff_exit ();
 }
 
+static void slot_kickout_subtask (void)
+{
+	U8 i;
+	for (i = 0; i < 5; i++)
+	{
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+		task_sleep (TIME_100MS);
+	}
+	task_exit ();
+}
 
 void slot_kickout_leff (void)
 {
-	U8 i;
-	for (i = 0; i < 6; i++)
+	if (multi_ball_play ())
 	{
-		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
-		task_sleep (TIME_200MS);
+		triac_leff_enable (TRIAC_GI_MASK);
 	}
+	leff_create_peer (slot_kickout_subtask);
+	task_sleep (TIME_500MS);
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
 
 void gumball_strobe_leff (void)
 {
+	triac_leff_disable (TRIAC_GI_MASK);
+	triac_leff_enable (GI_LLEFT_PLAYFIELD+GI_POWERFIELD);
 	U8 i;
 	for (i = 0; i < 6 ; i++)
 	{
@@ -134,9 +155,9 @@ void gumball_strobe_leff (void)
 		flasher_pulse (FLASH_GUMBALL_LOW);
 		task_sleep (TIME_100MS * 2);
 	}
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
-
 
 void clock_target_leff (void)
 {
@@ -146,7 +167,7 @@ void clock_target_leff (void)
 	for (i = 0; i < 12; i++)
 	{
 		flasher_pulse (FLASH_CLOCK_TARGET);
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_100MS);
 	}
 	task_kill_gid (task_getgid ());
 	leff_exit ();
@@ -163,9 +184,9 @@ void game_timeout_leff (void)
 		task_sleep (TIME_100MS);
 		gi_leff_disable (GI_POWERFIELD+GI_CLOCK);
 	}
+	triac_leff_enable (GI_POWERFIELD+GI_CLOCK);
 	leff_exit ();
 }
-
 
 void clock_round_started_leff (void)
 {
@@ -177,9 +198,9 @@ void clock_round_started_leff (void)
 		gi_leff_disable (GI_CLOCK);
 		task_sleep (TIME_200MS);
 	}
+	triac_leff_enable (GI_CLOCK);
 	leff_exit ();
 }
-
 
 void multiball_running_leff (void)
 {
@@ -195,7 +216,25 @@ void multiball_running_leff (void)
 	leff_exit ();
 }
 
-void pf_strobe_up_subtask (void)
+static void pf_strobe_down_subtask (void)
+{
+	for (;;)
+		lamplist_apply (LAMPLIST_SORT2, leff_toggle);
+}
+
+void strobe_down_leff (void)
+{
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (pf_strobe_down_subtask);
+	task_sleep (TIME_200MS);
+	leff_create_peer (pf_strobe_down_subtask);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+
+static void pf_strobe_up_subtask (void)
 {
 	for (;;)
 		lamplist_apply (LAMPLIST_SORT1, leff_toggle);
@@ -203,10 +242,41 @@ void pf_strobe_up_subtask (void)
 
 void strobe_up_leff (void)
 {
+	leff_create_peer (gi_cycle_leff);
 	lamplist_set_apply_delay (TIME_16MS);
 	leff_create_peer (pf_strobe_up_subtask);
 	task_sleep (TIME_200MS);
 	leff_create_peer (pf_strobe_up_subtask);
+	task_sleep_sec (1);
+	task_kill_peers ();
+	leff_exit ();
+}
+
+static void rocket_leff_subtask (void)
+{
+	/* SORT4 = Right to left */
+	for (;;)
+		lamplist_apply (LAMPLIST_SORT4, leff_toggle);
+}
+
+void rocket_leff (void)
+{
+	U8 i;	
+	if (live_balls != 1)
+	{
+		triac_leff_enable (TRIAC_GI_MASK);
+	}
+
+	for (i=0; i< 7; i++)
+	{	
+		flasher_pulse (FLASH_UR_FLIPPER);
+		task_sleep (TIME_66MS);
+	}
+	triac_leff_enable (TRIAC_GI_MASK);
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (rocket_leff_subtask);
+	task_sleep (TIME_66MS);
+	leff_create_peer (rocket_leff_subtask);
 	task_sleep_sec (1);
 	task_kill_peers ();
 	leff_exit ();
@@ -257,6 +327,7 @@ void door_strobe_leff (void)
 	leff_create_peer (door_strobe_subtask);
 	task_sleep_sec (2);
 	task_kill_peers ();
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 
@@ -276,15 +347,13 @@ void left_loop_leff (void)
 	leff_exit ();
 }
 
-
 void jets_active_leff (void)
 {
 	lamplist_set_apply_delay (TIME_100MS);
-	for (;;)
-		lamplist_step_increment (LAMPLIST_JETS, 
-			matrix_lookup (LMX_EFFECT2_LAMPS));
+	while (tsm_mode_timer != 0)
+		lamplist_apply (LAMPLIST_JETS, leff_toggle);
+	leff_exit ();
 }
-
 
 void circle_out_leff (void)
 {
@@ -293,7 +362,6 @@ void circle_out_leff (void)
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
 	leff_exit ();
 }
-
 
 void color_cycle_leff (void)
 {
@@ -358,3 +426,96 @@ void lock_leff (void)
 	leff_exit ();
 }
 
+static void powerball_leff_task (void)
+{
+	U8 i;
+	for (i=0; i < 8; i++)
+	{
+		flasher_pulse (FLASH_GUMBALL_LOW);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_UR_FLIPPER);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP2);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_GUMBALL_MID);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_CLOCK_TARGET);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_RAMP1);
+		task_sleep (TIME_100MS);
+		flasher_pulse (FLASH_GUMBALL_HIGH);
+		task_sleep (TIME_100MS);
+	}
+	task_exit ();
+}
+
+void powerball_announce_leff (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	leff_create_peer (powerball_leff_task);
+	task_sleep_sec (2);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_kill_peers ();
+	leff_exit ();	
+}
+
+void mpf_active_leff (void)
+{
+	if (live_balls != 1)
+	{
+		triac_leff_enable (TRIAC_GI_MASK);
+	}
+	triac_leff_enable (GI_POWERFIELD);
+	lamplist_set_apply_delay (TIME_100MS);
+	while (mpf_active == TRUE)
+	{
+		lamplist_apply (LAMPLIST_POWERFIELD_VALUES, leff_toggle);
+	}
+	leff_exit ();
+}
+
+void mpf_hit_leff (void)
+{
+	U8 i = 5;
+	do {
+		triac_leff_disable (GI_POWERFIELD);
+		task_sleep (TIME_66MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+		triac_leff_enable (GI_POWERFIELD);
+		task_sleep (TIME_66MS);
+		flasher_pulse (FLASH_POWERFIELD);
+		task_sleep (TIME_33MS);
+	} while (--i != 0);
+	leff_exit ();
+}
+
+void spiralaward_leff (void)
+{
+	lamplist_set_apply_delay (TIME_33MS);
+	while (task_find_gid (GID_SPIRALAWARD))
+	{
+		lamplist_apply (LAMPLIST_SPIRAL_AWARDS, leff_toggle);
+	}
+	leff_exit ();
+}
+
+void flash_gi_leff (void)
+{
+	U8 i;
+	for (i = 1; i < 7; i++)
+	{
+		triac_leff_disable (TRIAC_GI_MASK);
+		task_sleep (TIME_100MS);
+		triac_leff_enable (TRIAC_GI_MASK);
+		task_sleep (TIME_100MS);
+	}
+	triac_leff_enable (TRIAC_GI_MASK);
+	leff_exit ();
+}

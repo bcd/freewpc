@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,8 +18,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+//TODO Make this play nice with Skill shot animation
+/* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
+extern bool skill_shot_enabled;
+
+/* Rocket animation contributed by highrise */
+void rocket_deff (void)
+{
+	/* Show loading frames and wait for kick */
+	U16 fno;
+	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_onto_color ();
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+		dmd_map_overlay ();
+	}
+	task_sleep (TIME_200MS);
+	/* Rocket takes 500ms before kick 
+	 * load animation takes 400ms */
+	/* Launch rocket */
+	for (fno = IMG_NEWROCKET_START; fno <= IMG_NEWROCKET_END; fno += 2)
+	{
+		dmd_alloc_pair_clean ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	deff_exit ();
+}
 
 CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
@@ -36,13 +67,16 @@ static void rocket_kick_sound (void)
 
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
-	event_should_follow (rocket, hitchhiker, TIME_2S);
 	if (in_live_game)
 	{
-		leff_start (LEFF_NO_GI);
+		/* Wait until the skill shot deff has finished */
+		while (skill_shot_enabled)
+			task_sleep (TIME_100MS);
+		if (!multi_ball_play ())
+			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);
+		deff_start (DEFF_ROCKET);
 		task_sleep (TIME_500MS);
 		task_create_gid (0, rocket_kick_sound);
 	}
 }
-

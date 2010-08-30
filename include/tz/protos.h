@@ -23,26 +23,37 @@ bool amode_page_delay(U8 secs);
 void amode_flipper_sound_debounce_timer(void);
 void amode_flipper_sound(void);
 void amode_scroll(void);
-void egg_left_flipper(void);
-void egg_brian_image_deff(void);
-void egg_right_flipper(void);
 void amode_left_flipper(void);
 void amode_right_flipper(void);
 void amode_lamp_toggle_task(void);
 void amode_leff(void);
 void amode_show_design_credits(void);
 void amode_deff(void);
+__machine2__ void show_driver_animation(void);
+__machine2__ void show_text_on_stars(void);
+
+/* stars.c */
+__machine2__ void star_draw(void);
+
 /* autofire.c */
-void autofire_catch(void);
-void autofire_add_ball(void);
+__machine__ void autofire_catch(void);
+__machine__ void autofire_open_for_trough(void);
+__machine__ void autofire_add_ball(void);
 /* ballsave.c */
 __common__ void ballsave_add_time(U8 secs);
 __common__ void ballsave_disable(void);
+__common__ void ballsave_launch(void);
+
+/* camera.c * */
+__machine__ void door_start_camera (void);
+__machine2__ bool can_award_camera (void);
+
 /* clock.c */
 void tz_dump_clock(void);
 void tz_clock_start_forward(void);
 void tz_clock_start_backward(void);
 void tz_clock_stop(void);
+
 /* deffs.c */
 __machine__ void flash_and_exit_deff(U8 flash_count, task_ticks_t flash_delay);
 __machine__ void printf_millions(U8 n);
@@ -51,52 +62,91 @@ __machine__ void replay_deff(void);
 __machine__ void extra_ball_deff(void);
 __machine__ void special_deff(void);
 __machine__ void jackpot_deff(void);
-__machine__ void ballsave_deff(void);
+__machine__ void tz_ball_save_deff(void);
+__machine__ void rollover_completed_deff (void);
+
 /* door.c */
-void door_set_flashing(U8 id);
-void door_advance_flashing(void);
-void door_award_rotate(void);
-void door_award_deff(void);
-void door_award_if_possible(void);
-void door_award_enable(void);
+__machine__ void shot_slot_machine (void);
+__machine__ void shot_piano (void);
+__machine__ void award_door_panel (void);
+__machine__ void award_door_panel_task (void);
+
 /* gumball.c */
-void gumball_mech_activate(void);
-void gumball_mech_deactivate(void);
-void gumball_diverter_open(void);
-void gumball_diverter_close(void);
-bool gumball_load_is_enabled(void);
-void gumball_load_disable(void);
-void gumball_load_enable(void);
-void gumball_load_from_trough(void);
-void gumball_release(void);
-void sw_gumball_right_loop_entered(void);
-/* leffs.c */
-void flasher_happy_leff(void);
-void left_ramp_leff(void);
-void no_lights_leff(void);
-void no_gi_leff(void);
-void flash_all_leff(void);
-void slot_kickout_leff(void);
+__machine__ void gumball_diverter_open(void);
+__machine__ void gumball_diverter_close(void);
+__machine__ void gumball_load_from_trough(void);
+__machine__ void gumball_release(void);
+__machine__ void sw_gumball_right_loop_entered(void);
+
 /* loop.c */
-__machine__ void enter_loop(void);
-__machine__ void award_loop(void);
-__machine__ void abort_loop(void);
-__machine__ void award_left_loop(void);
-__machine__ void award_right_loop(void);
+
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
+
 /* mpf.c */
 __machine__ void mpf_enable (void);
+
 /* rampdiv.c */
 void ramp_divert (void);
 void ramp_divert_to_autoplunger (void);
+
 /* skill.c */
 __machine__ void enable_skill_shot (void);
 __machine__ void disable_skill_shot (void);
+__machine__ void skill_shot_ready_deff (void);
+__machine__ void skill_shot_made_deff (void);
+
 /* sssmb.c */
 __machine__ void sssmb_start (void);
 __machine__ void sssmb_stop (void);
-/* star.c */
-__machine__ void star_draw(void);
+__machine__ bool sssmb_can_divert_to_plunger (void);
 
+/* spiralaward.c */
+__machine2__ void spiralaward_right_loop_completed (void);
+
+
+/* unlit.c*/
+__machine2__ void award_unlit_shot (U8 unlit_called_from);
+__machine2__ void backdoor_award_deff (void);
+__machine2__ void tz_flipcode_default (void);
+/* fastlock.c */
+__machine__ void fastlock_loop_completed (void);
+__machine__ bool fastlock_running (void);
+/* powerball.c */
+#define PB_IN_GUMBALL 0x4
+#define PB_MAYBE_IN_PLAY 0x10
+#define PB_IN_PLAY 0x8
+__machine__ void pb_clear_location (U8 location);
+__machine__ bool pb_maybe_in_play (void);
+__machine__ bool pb_in_lock (void);
+/* thingfl.c */
+/* outhole.c */
+__common__ bool ballsave_test_active (void);
+
+//__machine2__ void tz_flipcode_1 (void);
+__machine2__ void tz_flipcode_2 (void);
+
+/* magnet.c */
+#define MAG_LEFT 0
+#define MAG_UPPER_RIGHT 1
+#define MAG_RIGHT 2
+
+void magnet_enable_catch (U8 magnet);
+void magnet_enable_catch_and_hold (U8 magnet, U8 secs);
+void magnet_enable_catch_and_throw (U8 magnet);
+void magnet_disable_catch (U8 magnet);
+void magnet_reset (void);
+
+/* maghelpers.c */
+__machine3__ bool magnet_enabled (U8 magnet);
+__machine3__ bool magnet_busy (U8 magnet);
+
+__machine3__ void start_bttz_outhole_monitor (void);
+
+/* factoids.c */
+__machine3__ void show_random_factoid (void);
+
+/* master.c */
+__machine3__ void loop_master_check (void);
+__machine3__ void combo_master_check (void);

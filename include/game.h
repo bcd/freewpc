@@ -21,7 +21,11 @@
 #ifndef _GAME_H
 #define _GAME_H
 
+#ifdef MACHINE_TZ
+#define MAX_PLAYERS 3
+#else
 #define MAX_PLAYERS 4
+#endif
 
 extern __fastram__ U8 in_game;
 extern __fastram__ U8 in_bonus;

@@ -19,28 +19,27 @@
  */
 
 #include <freewpc.h>
-
+#include <eb.h>
 /** Index of the panel which is currently slow flashing (next to
  * be awarded) or fast flashing (running) */
 __local__ U8 door_index;
-
+/* Temporary value so deff shows the right award */
+U8 door_index_awarded;
 /** Number of door panels that have been started */
 __local__ U8 door_panels_started;
-
+extern __local__ U8 extra_ball_enable_count;
+extern U8 unlit_shot_count;
+//bool door_awarded_from_slot;
 U8 door_active_lamp;
-
-
-/* For testing -- only enables GREED mode */
-//#define GREED_ONLY
 
 /** Total number of door panels, not counting the handle */
 #define NUM_DOOR_PANELS 14
 
-#define LITZ_DOOR_INDEX NUM_DOOR_PANELS
+#define BTTZ_DOOR_INDEX NUM_DOOR_PANELS
 
 /** Names of all the door panels, in order */
 const char *door_panel_names[] = {
-	"TOWN SQUARE MADNESS",
+	"TOWNSQUARE MADNESS",
 	"LIGHT EXTRA BALL",
 	"SUPER SLOT",
 	"CLOCK MILLIONS",
@@ -49,12 +48,12 @@ const char *door_panel_names[] = {
 	"10 MILLION",
 	"GREED",
 	"THE CAMERA",
-	"THE HITCHHIKER",
+	"HITCHHIKER",
 	"CLOCK CHAOS",
-	"SUPER SKILL SHOT",
+	"SUPER SKILL MB",
 	"FAST LOCK",
 	"LIGHT GUMBALL",
-	"RETURN TO THE ZONE",
+	"BACK TO THE ZONE",
 };
 
 const char *door_award_goals[] = {
@@ -65,24 +64,23 @@ const char *door_award_goals[] = {
 	"THE LOOPS",
 	"RIGHT RAMP",
 	"ANYTHING",
-	"STANDUPS",
-	"THE LEFT HOLE",
-	"THE SIDE LANE",
+	"YELLOW TARGETS",
+	"THE CAMERA",
+	"BELOW THE CAMERA",
 	"CLOCK TARGET",
 	"LEFT RAMP",
 	"LOCK LANE",
 	"RIGHT LOOP",
-	"PIANO NOW",
+	"EVERYTHING",
 };
 
-
-void door_start_event (U8 id)
+static void door_start_event (U8 id)
 {
 	switch (id)
 	{
 		case 0: callset_invoke (door_start_tsm); break;
 		case 1: callset_invoke (door_start_eb); break;
-		case 2: callset_invoke (door_start_super_slot); break;
+		case 2: callset_invoke (door_start_sslot); break;
 		case 3: callset_invoke (door_start_clock_millions); break;
 		case 4: callset_invoke (door_start_spiral); break;
 		case 5: callset_invoke (door_start_battle_power); break;
@@ -94,7 +92,7 @@ void door_start_event (U8 id)
 		case 11: callset_invoke (door_start_super_skill); break;
 		case 12: callset_invoke (door_start_fast_lock); break;
 		case 13: callset_invoke (door_start_light_gumball); break;
-		case 14: callset_invoke (door_start_litz); break;
+		case 14: callset_invoke (door_start_bttz); break;
 	}
 }
 
@@ -110,8 +108,16 @@ extern inline U8 door_get_flashing_lamp (void)
 	return door_get_lamp (door_index);
 }
 
+static inline bool can_award_door_panel (void)
+{
+	/* Panels not awarded during any multiball */
+	if (multi_ball_play () || global_flag_test (GLOBAL_FLAG_BTTZ_RUNNING))
+		return FALSE;
+	else
+		return TRUE;
+}
 
-void door_set_flashing (U8 id)
+static inline void door_set_flashing (U8 id)
 {
 	lamp_flash_off (door_get_flashing_lamp ());
 	door_index = id;
@@ -119,7 +125,7 @@ void door_set_flashing (U8 id)
 }
 
 
-void door_advance_flashing (void)
+static inline void door_advance_flashing (void)
 {
 	U8 new_door_index;
 
@@ -134,7 +140,7 @@ void door_advance_flashing (void)
 	}
 	else
 		/* Light the door handle */
-		new_door_index = LITZ_DOOR_INDEX;
+		new_door_index = BTTZ_DOOR_INDEX;
 
 	door_set_flashing (new_door_index);
 }
@@ -150,66 +156,256 @@ void door_award_rotate (void)
 	task_exit ();
 }
 
-void door_award_deff (void)
+void slot_animation_sound_task (void)
 {
-	U8 index = door_index;
-
-	kickout_lock (KLOCK_DEFF);
-	dmd_alloc_low_clean ();
-
-	sprintf ("DOOR PANEL %d", door_panels_started);
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_mono5, 64, 21, door_panel_names[index]);
-	dmd_show_low ();
-	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
-	task_sleep_sec (2);
-
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, 64, 9, "SHOOT");
-	font_render_string_center (&font_fixed6, 64, 22, door_award_goals[index]);
-	dmd_sched_transition (&trans_scroll_left);
-	sound_send (SND_SPIRAL_EB_LIT);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	kickout_unlock (KLOCK_DEFF);
-	task_sleep_sec (1);
-	deff_exit ();
+	sound_send (SND_SLOT_PULL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_sleep (TIME_800MS);
+	sound_send (SND_SLOT_REEL);
+	task_exit ();
 }
 
-void litz_award_deff (void)
+void door_award_deff (void)
 {
-	dmd_alloc_low_clean ();
-	dmd_show_low ();
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
-	sound_send (SND_FIST_BOOM1);
-	task_sleep_sec (1);
+	U8 index = door_index_awarded;
+	U16 fno;
+	
+	switch (door_index_awarded)
+	{
+		case 0:
+			sound_send (SND_THERE_IS_MADNESS);
+			break;
+		case 1:
+			sound_send (SND_GET_THE_EXTRA_BALL);	
+			break;
+
+		case 2:
+			task_create_anon (slot_animation_sound_task);
+			break;
+
+		case 3:
+			sound_send (SND_TIME_IS_A_ONEWAY_STREET);
+			break;
+
+		case 4:
+			sound_send (SND_SPIRAL_AWAITS_YOU);
+			break;
+		case 5:
+			sound_send (SND_ARE_YOU_READY_TO_BATTLE);
+			break;
+		
+		case 6:
+			sound_send (SND_TEN_MILLION_POINTS);
+			break;
+
+		case 7:
+			sound_send (SND_FEEL_LUCKY);
+			break;
+
+		case 8:
+			sound_send (SND_MOST_UNUSUAL_CAMERA);
+			break;
+
+		case 9:
+			sound_send (SND_NOTE_THE_HITCHHIKER);
+			break;
+
+		case 10:
+			sound_send (SND_QUIT_PLAYING_WITH_THE_CLOCK);
+			break;
+
+		case 11:
+			sound_send (SND_THIS_SHOT_REQUIRES_SKILL_DUP);
+			break;
+
+		case 12:
+			sound_send (SND_NOT_AN_ORDINARY_DAY);
+			break;
+
+		case 13:
+			sound_send (SND_THIS_IS_NO_ORDINARY_GUMBALL);
+			break;
+
+		case 14:
+			sound_send (SND_YOU_HAVE_COME_TO_THE_END);
+			break;
+	}
+	sound_send (SND_NEXT_CAMERA_AWARD_SHOWN);
+	/* Play once normally */
+	for (fno = IMG_DOOR_START; fno <= IMG_DOOR_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		/* Flip it, as text is drawn to the low page */
+		dmd_flip_low_high ();	
+		//draw_door_award_text ();
+		switch (door_index_awarded)
+		{
+			case 0:
+				font_render_string_left (&font_mono5, 3, 3, "TOWNSQUARE");
+				font_render_string_left (&font_mono5, 3, 16, "MADNESS");
+				break;
+			case 1:
+				font_render_string_left (&font_mono5, 3, 3, "EXTRA BALL");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 2:
+				font_render_string_left (&font_mono5, 3, 3, "SUPER");
+				font_render_string_left (&font_mono5, 3, 16, "SLOT MACHINE");
+				break;
+	
+			case 3:
+				font_render_string_left (&font_mono5, 3, 3, "CLOCK");
+				font_render_string_left (&font_mono5, 3, 16, "MILLIONS");
+				break;
+	
+			case 4:
+				font_render_string_left (&font_mono5, 3, 3, "SPIRAL");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+			case 5:
+				font_render_string_left (&font_mono5, 3, 3, "BATTLE THE");
+				font_render_string_left (&font_mono5, 3, 16, "POWER");
+				break;
+			
+			case 6:
+				font_render_string_left (&font_mono5, 3, 3, "10 MILLION");
+				font_render_string_left (&font_mono5, 3, 16, "POINTS");
+				break;
+	
+			case 7:
+				font_render_string_left (&font_mono5, 3, 3, "GREED");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 8:
+				font_render_string_left (&font_mono5, 3, 3, "CAMERA");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 9:
+				font_render_string_left (&font_mono5, 3, 3, "HITCHHIKER");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 10:
+				font_render_string_left (&font_mono5, 3, 3, "CLOCK CHAOS");
+				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+				break;
+	
+			case 11:
+				font_render_string_left (&font_mono5, 3, 3, "SUPER SKILL");
+				font_render_string_left (&font_mono5, 3, 16, "MULTIBALL");
+				break;
+	
+			case 12:
+				font_render_string_left (&font_mono5, 3, 3, "FASTLOCK");
+				font_render_string_left (&font_mono5, 3, 16, "ROUND");
+				break;
+	
+			case 13:
+				font_render_string_left (&font_mono5, 3, 3, "GUMBALL");
+				font_render_string_left (&font_mono5, 3, 16, "LIT");
+				break;
+	
+			case 14:
+				font_render_string_left (&font_mono5, 3, 3, "BACK TO");
+				font_render_string_left (&font_mono5, 3, 16, "THE ZONE");
+				break;
+	
+		}		
+		/* Flip it again so text is now on high page */
+		dmd_flip_low_high ();	
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (1);	
+	/* Play backwards */
+	sound_send (SND_SPIRAL_EB_LIT);
+	for (fno = IMG_DOOR_END; fno >= IMG_DOOR_START; fno -= 2)
+	{
+		dmd_alloc_pair ();
+		/* Draw the frame, leave it blank at the end */
+		if (fno == IMG_DOOR_START)
+		{
+			dmd_clean_page_low ();
+			dmd_clean_page_high ();
+		}
+		else
+			frame_draw (fno);
+		
+		/* Flip it, as text is drawn to the low page */
+		dmd_flip_low_high ();	
+		font_render_string_center (&font_fixed6, 48, 9, "SHOOT");
+		font_render_string_center (&font_var5, 48, 22, door_award_goals[index]);
+		/* Flip it again so text is now on high page */
+		dmd_flip_low_high ();	
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	task_sleep_sec (2);
 	deff_exit ();
 }
 
 void door_award_enable (void)
 {
-#ifndef GREED_ONLY
-	task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
-#endif
+	if (can_award_door_panel ())
+		task_recreate_gid (GID_DOOR_AWARD_ROTATE, door_award_rotate);
 }
 
-
-static void door_award_flashing (void)
+CALLSET_ENTRY (door, lamp_update)
 {
+	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
+		lamp_on (LM_PIANO_PANEL);
+	else
+		lamp_off (LM_PIANO_PANEL);
+	/* Don't turn the lamp on if sslot is running */
+	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT) 
+		&& !task_find_gid (GID_SSLOT_AWARD_ROTATE))
+		lamp_on (LM_SLOT_MACHINE);
+	else
+		lamp_off (LM_SLOT_MACHINE);
+}
+
+CALLSET_ENTRY (door, award_door_panel)
+{
+	task_create_anon (award_door_panel_task);
+}
+
+CALLSET_ENTRY (door, door_start_10M)
+{
+	score (SC_10M);
+}
+
+CALLSET_ENTRY (door, ball_count_change)
+{
+	door_lamp_update ();
+}
+
+void award_door_panel_task (void)
+{
+	unlit_shot_count = 0;
+	/* Stop the door lamps rotating */
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
+	/* Store the current door index */
+	door_index_awarded = door_index;
+	/* Start the event and show deff */
+	deff_start (DEFF_DOOR_AWARD);
+	door_start_event (door_index);
+	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
-	door_start_event (door_index);
+	leff_start (LEFF_DOOR_STROBE);
+	
 	score (SC_5M);
 	timed_game_extend (10);
-
 	door_panels_started++;
 	audit_increment (&feature_audits.door_panels);
+	
 	switch (door_panels_started)
 	{
 		case 3:
@@ -226,79 +422,11 @@ static void door_award_flashing (void)
 			break;
 	}
 
-	deff_start (DEFF_DOOR_AWARD);
-	leff_start (LEFF_DOOR_STROBE);
-	task_sleep (TIME_100MS);
-	door_advance_flashing ();
 	score (SC_50K);
-#ifndef GREED_ONLY
+	/* Restart the door rotation */
 	door_award_enable ();
-#endif
-	callset_invoke (door_panel_awarded);
-}
 
-static void door_award_litz (void)
-{
-	door_start_event (14);
-	audit_increment (&feature_audits.litz_started);
-	deff_start (DEFF_LITZ_AWARD);
-}
-
-bool can_award_door_panel (void)
-{
-	/* Panels not awarded during any multiball */
-	if (multi_ball_play ())
-		return FALSE;
-
-	/* No more panels can be awarded after BTTZ */
-	if (flag_test (FLAG_BTTZ_RUNNING))
-		return FALSE;
-
-	return TRUE;
-}
-
-CALLSET_ENTRY (door, lamp_update)
-{
-	if (can_award_door_panel () && flag_test (FLAG_PIANO_DOOR_LIT))
-		lamp_on (LM_PIANO_PANEL);
-	else
-		lamp_off (LM_PIANO_PANEL);
-
-	if (can_award_door_panel () && flag_test (FLAG_SLOT_DOOR_LIT))
-		lamp_on (LM_SLOT_MACHINE);
-	else
-		lamp_off (LM_SLOT_MACHINE);
-}
-
-void award_door_panel (void)
-{
-	if (door_index == LITZ_DOOR_INDEX)
-	{
-		flag_on (FLAG_BTTZ_RUNNING);
-		flag_off (FLAG_PIANO_DOOR_LIT);
-		flag_off (FLAG_SLOT_DOOR_LIT);
-		door_award_litz ();
-	}
-	else
-	{
-		door_award_flashing ();
-	}
-	door_lamp_update ();
-}
-
-void door_award_if_possible (void)
-{
-	if (can_award_door_panel ())
-	{
-		/* TODO : When called from the camera award, this always
-		causes a crash???  This is probably stack overflow. */
-		//award_door_panel ();
-	}
-}
-
-CALLSET_ENTRY (door, ball_count_change)
-{
-	door_lamp_update ();
+	task_exit ();
 }
 
 CALLSET_ENTRY(door, sw_piano)
@@ -307,10 +435,18 @@ CALLSET_ENTRY(door, sw_piano)
 	{
 		flag_off (FLAG_PIANO_DOOR_LIT);
 		flag_on (FLAG_SLOT_DOOR_LIT);
-		award_door_panel ();
+		//callset_invoke (award_door_panel);
+		task_create_anon (award_door_panel_task);
 	}
 	else
 	{
+		/* Relight the piano if it was unlit when hit */
+		if ( feature_config.easy_light_door_panels == YES
+			&& door_panels_started < 8)
+		{
+			flag_on (FLAG_PIANO_DOOR_LIT);
+		}
+		award_unlit_shot (SW_PIANO);
 		score (SC_5130);
 		sound_send (SND_ODD_CHANGE_BEGIN);
 	}
@@ -322,26 +458,57 @@ CALLSET_ENTRY (door, shot_slot_machine)
 	{
 		flag_off (FLAG_SLOT_DOOR_LIT);
 		flag_on (FLAG_PIANO_DOOR_LIT);
-		award_door_panel ();
+		callset_invoke (award_door_panel);
 	}
+	else
+	{
+		/* Relight the slot if it was unlit when hit */
+		if ( feature_config.easy_light_door_panels == YES
+			&& door_panels_started < 8)
+		{
+			flag_on (FLAG_SLOT_DOOR_LIT);
+		}
+		award_unlit_shot (SW_SLOT);
+		score (SC_5130);
+	}
+}
+
+CALLSET_ENTRY (door, door_start_eb)
+{
+	if (can_award_extra_ball ())
+		light_easy_extra_ball ();
 }
 
 CALLSET_ENTRY(door, start_player)
 {
-#ifdef GREED_ONLY
-	door_index = 7;
-#else
-	door_index = 0;
-#endif
+	/* Pick a random door to start on */
+	door_index = random_scaled (15);
 	door_panels_started = 0;
 	flag_on (FLAG_PIANO_DOOR_LIT);
 	flag_on (FLAG_SLOT_DOOR_LIT);
+
+	if (system_config.max_ebs == 0)
+	{
+		lamp_on (LM_PANEL_EB);
+		door_panels_started++;
+	}
 	door_lamp_update ();
 }
 
 CALLSET_ENTRY(door, start_ball)
 {
-	door_set_flashing (door_index);
+	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	door_award_enable ();
 }
 
+CALLSET_ENTRY(door, machine_paused)
+{
+	/* Stop the door lamps rotating */
+	task_kill_gid (GID_DOOR_AWARD_ROTATE);
+}
+
+CALLSET_ENTRY(door, machine_unpaused)
+{
+	/* Start the door lamps rotating again */
+	door_award_enable ();
+}

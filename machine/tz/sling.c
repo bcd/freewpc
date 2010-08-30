@@ -23,6 +23,6 @@
 CALLSET_ENTRY (sling, sw_sling)
 {
 	score (SC_10);
-	sound_send (SND_SLINGSHOT);
+//	sound_send (SND_SLINGSHOT);
 }
 

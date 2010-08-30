@@ -94,9 +94,9 @@ int sim_switch_read (int sw)
 void sim_switch_depress (int sw)
 {
 	sim_switch_toggle (sw);
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_166MS);
 	sim_switch_toggle (sw);
-	task_sleep (TIME_100MS);
+	task_sleep (TIME_66MS);
 }
 
 

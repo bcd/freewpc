@@ -18,91 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/* CALLSET_SECTION (tz_amode, __machine2__) */
 #include <freewpc.h>
-//#include <coin.h>
-//#include <highscore.h>
-
-U8 egg_code_values[3];
-U8 egg_index;
-
-
-#if 0
-/* Attract mode display delay function.
- * This function waits for the specified amount of time, but
- * returns immediately if either flipper is pressed.
- * Returns whether or not the timeout was aborted. */
-bool amode_page_delay (U8 secs)
-{
-	U8 amode_flippers;
-	U8 amode_flippers_start;
-
-	/* Convert secs to 66ms ticks */
-	secs <<= 4;
-
-	amode_flippers_start = switch_poll_logical (SW_L_L_FLIPPER_BUTTON);
-	while (secs != 0)
-	{
-		task_sleep (TIME_66MS);
-		amode_flippers = switch_poll_logical (SW_L_L_FLIPPER_BUTTON);
-
-		if ((amode_flippers != amode_flippers_start) &&
-			 (amode_flippers != 0))
-		{
-			return TRUE;
-		}
-		amode_flippers_start = amode_flippers;
-		secs--;
-	}
-	return FALSE;
-}
-#endif
-
-
-/* TODO : use flipcode module to implement this */
-void egg_left_flipper (void)
-{
-	if (!task_find_gid (GID_EGG_TIMER))
-	{
-		timer_start1_free (GID_EGG_TIMER, TIME_7S);
-		egg_index = 0;
-		egg_code_values[0] = 0;
-		egg_code_values[1] = 0;
-		egg_code_values[2] = 0;
-	}
-	egg_code_values[egg_index]++;
-}
-
-void brian_image_deff (void)
-{
-	dmd_alloc_low ();
-	frame_draw (IMG_COW);
-	font_render_string_center (&font_var5, 40, 11, "THE POWER");
-	font_render_string_center (&font_var5, 40, 22, "SAYS ...");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	sound_send (SND_POWER_GRUNT_1);
-	task_sleep_sec (4);
-	deff_exit ();
-}
-
-void egg_right_flipper (void)
-{
-	if (!task_find_gid (GID_EGG_TIMER)) 
-		return;
-	egg_index++;
-	if (egg_index == 3)
-	{
-		dbprintf ("\nEgg code %d %d %d entered\n", 
-			egg_code_values[0], egg_code_values[1], egg_code_values[2]);
-		if ((egg_code_values[0] == 2) &&
-			 (egg_code_values[1] == 3) &&
-			 (egg_code_values[2] == 4))
-		{
-			//deff_start (DEFF_BRIAN_IMAGE);
-		}
-	}
-}
-
 
 void amode_lamp_toggle_task (void)
 {
@@ -149,16 +66,92 @@ void amode_leff (void)
 	}
 }
 
-#if 0
-void amode_show_design_credits (void)
+void show_driver_animation (void)
 {
+	/* Show driver animation */	
+	U16 fno;
+	U8 i;
+	for (i = 0; i < 5; i++)
+	{
+		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2)
+		{
+			/* We are drawing a full frame, so a clean isn't needed */
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	}
+	/* Clean both pages */
+	dmd_alloc_pair_clean ();
+}
+
+void show_text_on_stars (void)
+{
+	U8 n;
+	for (n = 0; n < 40; n++)
+	{
+		dmd_dup_mapped ();
+		dmd_overlay_onto_color ();
+		star_draw ();
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();
+	}
+	dmd_alloc_pair_clean ();
+}
+
+CALLSET_ENTRY (tz_amode, amode_page)
+{
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
+	dmd_text_blur ();
+	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
+	show_text_on_stars ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
+	font_render_string_center (&font_steel, 64, 20, "BCD");
+	show_text_on_stars ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 7, "ANIMATIONS BY");
+	font_render_string_center (&font_steel, 64, 20, "HIGHRISE");
+	show_text_on_stars ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
+	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
+	show_text_on_stars ();
+	
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
+	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
+	show_text_on_stars ();
+
+	show_random_factoid ();
+	
+	dmd_sched_transition (&trans_scroll_left);
+	show_driver_animation ();
+	
+	dmd_sched_transition (&trans_bitfade_slow);
+	/* Clean the low screen for the transition */
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
 
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_var5, 64, 5, "FREEWPC WAS DESIGNED");
 	font_render_string_center (&font_var5, 64, 12, "BY BRIAN DOMINY AND IS");
-	task_sleep (TIME_16MS); /* drawing all of this text is slow; be nice */
 	font_render_string_center (&font_var5, 64, 19, "RELEASED UNDER THE GNU");
 	font_render_string_center (&font_var5, 64, 26, "GENERAL PUBLIC LICENSE.");
 	dmd_sched_transition (&trans_scroll_up_slow);
@@ -174,4 +167,33 @@ void amode_show_design_credits (void)
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_show_low ();
 }
-#endif
+
+static void lock_and_outhole_monitor (void)
+{
+	task_sleep_sec (3);
+	while (!in_live_game)
+	{
+		if (switch_poll (SW_LOCK_LOWER))
+		{
+			device_request_kick (device_entry (DEVNO_LOCK));
+		}
+
+		if (switch_poll (SW_OUTHOLE))
+		{
+			sol_request (SOL_OUTHOLE);
+		}
+		if (!switch_poll (SW_AUTOFIRE2))
+		{
+			callset_invoke (clear_autofire);	
+		}
+		task_sleep_sec (3);
+	}
+	task_exit ();
+}
+
+CALLSET_ENTRY (tz_amode, amode_start)
+{
+	task_create_gid (GID_LOCK_AND_OUTHOLE_MONITOR, lock_and_outhole_monitor);
+}
+
+

@@ -39,8 +39,8 @@ ROM_PAGE_COUNT = 32
 #
 #################################################
 
-MACHINE_MAJOR = 0
-MACHINE_MINOR = 86
+MACHINE_MAJOR = 1
+MACHINE_MINOR = 0
 
 PINMAME_MACHINE = tz_92
 
@@ -63,17 +63,27 @@ EXTRA_CFLAGS += -DCONFIG_MUTE_PAUSE
 # and leffs.  RTTs must go into GAME_OBJS.
 #
 
-GAME_OBJS = clock.o magnet.o sling.o jets.o autofire.o gumball.o \
-	rampdiv.o lock.o door.o
+GAME_OBJS = sling.o jets.o autofire.o gumball.o \
+	config.o loop.o rampdiv.o magnet.o \
+	maghelper.o
 
-GAME_TEST_OBJS = clocktest.o gumball_test.o magtest.o powerball_test.o
+GAME_TEST_OBJS = gumball_test.o powerball_test.o magtest.o
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS = lanes.o leftramp.o skill.o deadend.o camera.o \
-	config.o rightramp.o hitch.o piano.o rocket.o slot.o greed.o \
-	mpf.o powerball.o clocktarget.o deffs.o bonus.o star.o \
-	multiball.o loop.o sssmb.o chaosmb.o leffs.o amode.o
+GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
+	fastlock.o door.o slot.o \
+	mpf.o chaosmb.o powerball.o \
+	multiball.o sssmb.o deffs.o
+
+GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
+	bonus.o tz_amode.o star.o rocket.o \
+	outhole.o lock.o camera.o combo.o deadend.o \
+	hitch.o
+
+GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
+	spiral.o tnf.o bttz.o factoids.o master.o
+
 
 IMAGE_MAP += $(M)/tz.ild
 

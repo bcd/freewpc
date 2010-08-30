@@ -60,8 +60,8 @@ extern __fastram__ U8 @self_timer;
 #define DUTY_SCALE(x)   ((x) / (DUTY_SLOW_FREQ / 16))
 
 #define DUTY_TIMER_DISABLED    0xF0U
-#define DUTY_TIMER_INIT        (@timeout ? DUTY_SCALE (@timeout) : 0xE0U)
-#define DUTY_TIMER_DUTY        (DUTY_TIMER_INIT - DUTY_SCALE (@ontime))
+#define @self_DUTY_TIMER_INIT        (@timeout ? DUTY_SCALE (@timeout) : 0xE0U)
+#define @self_DUTY_TIMER_DUTY        (@self_DUTY_TIMER_INIT - DUTY_SCALE (@ontime))
 
 #define DUTY_MASK_50   0x1
 #define DUTY_MASK_25   0x3
@@ -102,7 +102,7 @@ extern inline void @self_service_fast (void)
 	/* When the timer is within the duty cycle interval,
 	we need to toggle the solenoid state; otherwise it is left
 	alone (on). */
-	if (unlikely (@self_timer <= DUTY_TIMER_DUTY))
+	if (unlikely (@self_timer <= @self_DUTY_TIMER_DUTY))
 	{
 		if (((U8)get_sys_time () & @duty_mask) == @duty_mask)
 		{
@@ -133,7 +133,7 @@ __fastram__ U8 @self_timer;
 void @self_start (void)
 {
 	disable_interrupts ();
-	@self_timer = DUTY_TIMER_INIT;
+	@self_timer = @self_DUTY_TIMER_INIT;
 	sol_enable (@sol);
 	enable_interrupts ();
 }

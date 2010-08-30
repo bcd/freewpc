@@ -89,6 +89,10 @@ U8 timed_game_timer;
 
 U8 timed_game_suspend_count;
 
+#ifdef MACHINE_TZ
+extern void loop_master_check (void);
+extern void combo_master_check (void);
+#endif
 void start_ball (void);
 
 
@@ -155,6 +159,10 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
+#ifdef MACHINE_TZ
+			loop_master_check ();
+			combo_master_check ();
+#endif
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
@@ -448,13 +456,10 @@ void start_ball (void)
 
 	callset_invoke (start_ball);
 
-	/* Enable the game scores on the display.  The first deff started
-	 * is low in priority and is shown whenever there is nothing else
-	 * going on.  The second deff runs briefly at high priority, to
-	 * ensure that the scores are shown at least briefly at the start of
-	 * ball (e.g., in case a skill shot deff gets started).
+	/* Ensure that the scores are shown briefly at the start of
+	 * ball, via a high priority display effect.
 	 *
-	 * If this is the final ball for the player, then
+	 * If this is the final ball for the player, then also
 	 * display the 'goal', i.e. replay or extra ball target score;
 	 * or the next high score level.
 	 */
@@ -626,7 +631,13 @@ bool verify_start_ok (void)
 	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
 		return FALSE;
-
+#ifdef MACHINE_TZ
+	/* Don't allow the game to start if we are still
+	 * loading balls into the gumball */
+	extern bool gumball_enable_from_trough;
+	if (gumball_enable_from_trough)
+		return FALSE;
+#endif
 	return TRUE;
 }
 

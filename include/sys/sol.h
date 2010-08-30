@@ -63,6 +63,7 @@ the more powerful the pulse. */
 #define FLASHER_DUTY_DEFAULT SOL_DUTY_100
 
 /* Function prototypes */
+void sol_req_start_specific (U8 sol, U8 mask, U8 time);
 void sol_request_async (U8 sol);
 void sol_request (U8 sol);
 void sol_start_real (solnum_t sol, U8 cycle_mask, U8 ticks);

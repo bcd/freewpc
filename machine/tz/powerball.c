@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,6 +19,7 @@
  */
 
 #include <freewpc.h>
+#include <status.h>
 
 //#define PB_DEBUG
 
@@ -30,13 +31,13 @@
 /* Each of these represents a possible state for the powerball
  * detector.  They are mutually exclusive, but expressed as bitmasks
  * so that ranges can be tested more easily. */
+
 #define PB_MISSING       0x0
 #define PB_IN_LOCK       0x1
 #define PB_IN_TROUGH     0x2
 #define PB_IN_GUMBALL    0x4
 #define PB_IN_PLAY       0x8
 #define PB_MAYBE_IN_PLAY 0x10
-
 #define PB_HELD         (PB_IN_LOCK | PB_IN_TROUGH | PB_IN_GUMBALL)
 #define PB_KNOWN			(PB_HELD | PB_IN_PLAY)
 
@@ -47,6 +48,7 @@ typedef enum {
 	PF_PB_DETECTED,
 	TROUGH_STEEL_DETECTED,
 	TROUGH_PB_DETECTED,
+	GUMBALL_PB_DETECTED,
 } pb_event_t;
 
 /** The general location of the powerball */
@@ -64,55 +66,57 @@ U8 last_pb_event;
 
 #define switch_poll_trough_metal() switch_poll_logical(SW_TROUGH_PROXIMITY)
 
-void pb_detect_deff (void)
+CALLSET_ENTRY (pb_detect, status_report)
 {
-#ifdef PB_DEBUG
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "POWERBALL STATUS");
+	status_page_init ();
+	font_render_string_center (&font_mono5, 64, 8, "POWERBALL LOCATION");
 
 	if (pb_location == 0)
-		sprintf ("MISSING");
+		sprintf ("UNKNOWN");
 	else if (pb_location & PB_IN_LOCK)
-		sprintf ("LOCK %d", pb_depth);
+		sprintf ("LOCK %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_TROUGH)
-		sprintf ("TROUGH %d", pb_depth);
+		sprintf ("TROUGH %d DEEP", pb_depth);
 	else if (pb_location & PB_IN_GUMBALL)
-		sprintf ("GUMBALL %d", pb_depth);
+		sprintf ("GUMBALL %d DEEP", 2 - pb_depth);
 	else if (pb_location & PB_IN_PLAY)
 		sprintf ("IN PLAY");
 	font_render_string_center (&font_mono5, 64, 15, sprintf_buffer);
-
-	sprintf ("LAST EVENT %d", last_pb_event);
-	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
-	
-	dmd_show_low ();
-	task_sleep_sec (3);
-#else
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 7, "POWERBALL");
-	dmd_sched_transition (&trans_vstripe_right2left);
-	sound_send (SND_POWERBALL_QUOTE);
-	dmd_show_low ();
-	task_sleep (TIME_500MS);
-	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);
-	dmd_copy_low_to_high ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (32, TIME_100MS);
-#endif
-	deff_exit ();
+	status_page_complete ();
 }
 
+void pb_detect_deff (void)
+{
+	sound_send (SND_POWERBALL_QUOTE);
+	if (!multi_ball_play ())
+		leff_start (LEFF_POWERBALL_ANNOUNCE);
+	U16 fno;
+	U8 i;
+	/* Loop anim 6 times */
+	for (i = 0;i < 5;i++)
+	{
+		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_flip_low_high ();
+			font_render_string_center (&font_var5, 64, 25, "POWERBALL");
+			dmd_flip_low_high ();
+			dmd_show2 ();
+			task_sleep (TIME_100MS);
+		}
+	}
+	deff_exit ();
+}
 
 void pb_loop_deff (void)
 {
 	generic_deff ("POWERBALL LOOP", "10,000,000");
 }
 
-
 CALLSET_ENTRY (pb_detect, lamp_update)
 {
-	if (pb_location & PB_IN_PLAY)
+	if ((pb_location & PB_IN_PLAY) && !multi_ball_play ())
 	{
 		lamp_tristate_flash (LM_LEFT_POWERBALL);
 		lamp_tristate_flash (LM_RIGHT_POWERBALL);
@@ -128,7 +132,6 @@ CALLSET_ENTRY (pb_detect, lamp_update)
 		lamp_tristate_off (LM_RIGHT_POWERBALL);
 	}
 }
-
 
 /** Called when the powerball is known to be in a particular location.
  * Because there is only one powerball installed in the machine, this
@@ -149,24 +152,53 @@ void pb_set_location (U8 location, U8 depth)
 		pb_location = location;
 		if (pb_location & PB_HELD)
 		{
+			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_depth = depth;
 			pb_announce_needed = 0;
+			magnet_disable_catch (MAG_LEFT);
+			magnet_disable_catch (MAG_RIGHT);
 		}
 		else if (pb_location & PB_IN_PLAY)
 		{
 			flag_on (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 1;
 			callset_invoke (powerball_present);
+			/* Turn the magnets on to help with detection */
+			if (single_ball_play ())
+			{
+				magnet_enable_catch (MAG_LEFT);
+				magnet_enable_catch (MAG_RIGHT);
+			}
 		}
 		else if (pb_location & PB_MAYBE_IN_PLAY)
 		{
 			flag_off (FLAG_POWERBALL_IN_PLAY);
 			pb_announce_needed = 0;
 			callset_invoke (powerball_lost);
-			/* TODO - in the 'maybe' state, pulse magnets to
-			figure out the ball type */
+			/* in the 'maybe' state, try to grab ball with
+			 * magnets to figure out the ball type
+			 * This is done by maghelper.c */
 		}
 	}
+}
+
+/* Used by maghelper.c to turn on the magnets or not */
+bool pb_maybe_in_play (void)
+{
+	if (single_ball_play () 
+		&& pb_location & PB_MAYBE_IN_PLAY)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+/* Used by multiball.c to see if we should lock the pb */
+bool pb_in_lock (void)
+{
+	if (pb_location & PB_IN_LOCK)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 /** Called when the powerball is known *NOT* to be in a particular 
@@ -191,36 +223,53 @@ void pb_clear_location (U8 location)
 	}
 }
 
-
 /** Asserts a powerball detection event.  The significance depends on
  * the current state.
  * Because proximity sensors trigger only when steel balls move over them
  * (assuming they are working correctly), we can trust an assertion of
  * steel ball a little more than one about the Powerball. */
-void pb_detect_event (pb_event_t event)
+static void pb_detect_event (pb_event_t event)
 {
 	last_pb_event = event;
 	switch (event)
 	{
 		/* Steel ball detected on playfield, via Slot Proximity */
 		case PF_STEEL_DETECTED:
+			/* Disable the magnet catches used for PB detection */
+			magnet_disable_catch (MAG_LEFT);
+			magnet_disable_catch (MAG_RIGHT);
 			if (single_ball_play ())
+			{
 				pb_clear_location (PB_IN_PLAY);
-#ifdef PB_DEBUG
-			else
-				pb_clear_location (0);
-#endif
+				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
+			else if (pb_location & PB_IN_GUMBALL)
+			{
+				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
 			break;
 
 		/* Powerball detected on playfield, because Slot Proximity
 		 * did not trigger when a ball had to travel over it. */
 		case PF_PB_DETECTED:
 			pb_set_location (PB_IN_PLAY, 0);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
+			if (timer_kill_gid (GID_MB_JACKPOT_COLLECTED))
+			{
+				callset_invoke (powerball_jackpot);
+			}
 			break;
 
 		case TROUGH_STEEL_DETECTED:
+			if (live_balls == 0)
+			{
+				pb_clear_location (PB_MAYBE_IN_PLAY);
+			}
 			if (device_entry (DEVNO_TROUGH)->actual_count == 1)
-				pb_clear_location (PB_IN_TROUGH);
+			{	
+				pb_clear_location (0);
+			}
 #ifdef PB_DEBUG
 			else
 				pb_clear_location (0);
@@ -229,10 +278,14 @@ void pb_detect_event (pb_event_t event)
 
 		case TROUGH_PB_DETECTED:
 			pb_set_location (PB_IN_TROUGH, 1);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
+			break;
+		case GUMBALL_PB_DETECTED:
+			pb_set_location (PB_IN_GUMBALL, 1);
+			pb_clear_location (PB_MAYBE_IN_PLAY);
 			break;
 	}
 }
-
 
 /** Announce that the powerball is in play, if it is.  This is
 only called at certain points when we want to announce this.
@@ -259,6 +312,8 @@ void pb_poll_trough (void)
 {
 	if (switch_poll_logical (SW_RIGHT_TROUGH))
 	{
+		/* Allow time for the trough to settle */
+		task_sleep (TIME_200MS);
 		if (switch_poll_trough_metal ())
 		{
 			pb_detect_event (TROUGH_STEEL_DETECTED);
@@ -277,7 +332,7 @@ void pb_poll_trough (void)
 }
 
 
-/** Called when a ball enters the trough or the lock. */
+/* Called when a ball enters the trough or lock. */
 void pb_container_enter (U8 location, U8 devno)
 {
 	device_t *dev = device_entry (devno);
@@ -303,6 +358,7 @@ void pb_container_enter (U8 location, U8 devno)
 			{
 				/* Powerball will be kept here */
 				pb_clear_location (PB_IN_PLAY);
+				pb_clear_location (PB_MAYBE_IN_PLAY);
 				pb_set_location (location, dev->actual_count);
 			}
 		}
@@ -311,7 +367,8 @@ void pb_container_enter (U8 location, U8 devno)
 			/* In multiball, container enter might mean the
 			powerball entered it or not... we just don't
 			know */
-			pb_set_location (PB_MAYBE_IN_PLAY, 0);
+			if (pb_location == PB_IN_PLAY)
+				pb_set_location (PB_MAYBE_IN_PLAY, 0);
 		}
 	}
 	else
@@ -321,7 +378,6 @@ void pb_container_enter (U8 location, U8 devno)
 		we're in the "maybe" state.) */
 	}
 }
-
 
 /** Called when a ball successfully exits the trough or the lock.
  * If the powerball was known to be in the device, then its depth
@@ -336,23 +392,33 @@ void pb_container_exit (U8 location)
 			pb_announce ();
 		}
 	}
+}
 
+/* Used by maghelper.c to aid with powerball detection */
+CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
+{
+	if (single_ball_play ())
+	{	
+		pb_clear_location (PB_IN_PLAY);
+		pb_clear_location (PB_MAYBE_IN_PLAY);
+	}
 }
 
 CALLSET_ENTRY (pb_detect, music_refresh)
 {
-	if (pb_location == PB_IN_PLAY)
+	if (pb_location == PB_IN_PLAY && !multi_ball_play ())
 		music_request (MUS_POWERBALL_IN_PLAY, PRI_GAME_MODE3);
 }
 
+/* Powerball slot proximity */
 CALLSET_ENTRY (pb_detect, sw_camera)
 {
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
 }
 
 CALLSET_ENTRY (pb_detect, sw_piano)
 {
-	event_can_follow (camera_or_piano, slot_prox, TIME_5S);
+	event_can_follow (camera_or_piano, slot_prox, TIME_6S);
 }
 
 CALLSET_ENTRY (pb_detect, sw_slot_proximity)
@@ -363,6 +429,10 @@ CALLSET_ENTRY (pb_detect, sw_slot_proximity)
 	pb_detect_event (PF_STEEL_DETECTED);
 }
 
+CALLSET_ENTRY (pb_detect, powerball_in_gumball)
+{
+	pb_detect_event (GUMBALL_PB_DETECTED);
+}
 
 CALLSET_ENTRY (pb_detect, dev_slot_enter)
 {
@@ -388,6 +458,12 @@ CALLSET_ENTRY (pb_detect, dev_lock_enter)
 	pb_container_enter (PB_IN_LOCK, DEVNO_LOCK);
 }
 
+CALLSET_ENTRY (pb_detect, dev_gumball_enter)
+{
+	//pb_container_enter (PB_IN_GUMBALL, DEVNO_GUMBALL);
+
+}
+
 CALLSET_ENTRY (pb_detect, dev_trough_kick_attempt)
 {
 	dbprintf ("PB: about to kick trough\n");
@@ -405,13 +481,6 @@ CALLSET_ENTRY (pb_detect, dev_lock_kick_success)
 {
 	pb_container_exit (PB_IN_LOCK);
 }
-
-
-CALLSET_ENTRY (pb_detect, start_ball)
-{
-	pb_clear_location (PB_IN_PLAY);
-}
-
 
 CALLSET_ENTRY (pb_detect, init)
 {

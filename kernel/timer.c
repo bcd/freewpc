@@ -38,10 +38,11 @@
 #define TIMER_FREERUNNING_GRAN	TIME_100MS
 #define TIMER_PAUSABLE_GRAN		TIME_100MS
 
-
 U8 pausable_timer_locks;
 
-
+#ifdef MACHINE_TZ
+extern bool mpf_active;
+#endif
 
 /*
  * Check if timers should be paused.
@@ -79,6 +80,11 @@ bool system_timer_pause (void)
 
 	if (timer_find_gid (GID_BALLSAVE_EXTENDED))
 		return TRUE;
+
+#ifdef MACHINE_TZ
+	if (mpf_active)
+		return TRUE;
+#endif
 
 	return FALSE;
 }

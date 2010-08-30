@@ -101,6 +101,7 @@ Plunge Ball: page(EFFECT_PAGE), PRI_SCORE_GOAL
 Coin Door Power: page(COMMON_PAGE), PRI_JACKPOT
 Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
+Enter PIN: page(COMMON_PAGE), PRI_PIN_ENTRY
 
 [leffs]
 NULL: PRI_NULL

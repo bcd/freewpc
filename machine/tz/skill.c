@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -29,6 +29,8 @@ __local__ U8 skill_min_value;
 
 extern inline void flash_deff_begin_static (void)
 {
+	//dmd_alloc_low_high ();
+	
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 }
@@ -111,7 +113,7 @@ void skill_shot_made_deff (void)
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_scroll_down);
+	dmd_sched_transition (&trans_scroll_down_fast);
 	deff_exit ();
 }
 
@@ -127,6 +129,7 @@ static void award_skill_shot (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
+		/* Inform sssmb.c that we hit a skill switch */
 			callset_invoke (skill_red);
 			score_1M (skill_min_value);
 			break;
@@ -152,7 +155,7 @@ static void skill_switch_monitor (void)
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);
 	else
-		task_sleep_sec (3);
+		task_sleep_sec (2);
 	award_skill_shot ();
 	task_exit ();
 }
@@ -160,11 +163,8 @@ static void skill_switch_monitor (void)
 
 static void award_skill_switch (U8 sw)
 {
+	event_can_follow (skill_shot, slot, TIME_4S);
 	callset_invoke (any_skill_switch);
-	event_can_follow (any_skill_switch, slot, TIME_3S);
-	if (!skill_shot_enabled && !flag_test (FLAG_SSSMB_RUNNING))
-		return;
-
 	if (skill_switch_reached < sw)
 	{
 		skill_switch_reached = sw;
@@ -232,6 +232,9 @@ CALLSET_ENTRY (skill, sw_shooter)
 	/* Because the shooter switch is declared as an 'edge' switch,
 	an event is generated on both transitions.  Check the current
 	state of the switch to see which transition occurred. */
+	if (!in_live_game)
+		return;
+
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
 		if (skill_shot_enabled
