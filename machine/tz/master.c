@@ -112,7 +112,7 @@ void combo_master_check (void)
 	}
 }
 
-CALLSET_ENTRY (master, game_start)
+CALLSET_ENTRY (master, start_game)
 {
 	loop_master_initial_enter = 0;
 	combo_master_initial_enter = 0;
