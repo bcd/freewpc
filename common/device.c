@@ -909,6 +909,10 @@ CALLSET_ENTRY (device, start_game)
 	kickout_unlock_all ();
 }
 
+/* TODO - at the start of each ball, see how many balls in the trough
+constitutes a drain.  Balls could be physically missing, or they could
+be held up in some other playfield device that didn't empty after the
+last game, or they could be in play already if the game was restarted. */
 
 CALLSET_ENTRY (device, amode_start)
 {
