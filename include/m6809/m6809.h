@@ -49,6 +49,7 @@ void far_indirect_call_handler (void_function address, U8 page);
 typedef U8 (*value_function) (void);
 U8 far_indirect_call_value_handler (value_function address, U8 page);
 void bitmap_blit_asm (U8 *dst, U8 shift);
+U16 strlen (const char *);
 
 /* Other externals */
 
