@@ -213,6 +213,7 @@ void window_pop_quiet (void)
 
 	window_stop_thread ();
 	window_call_op (win_top, exit);
+	set_test_mode (TEST_DEFAULT);
 
 	if (win_top == &win_stack[0])
 	{
@@ -2730,6 +2731,7 @@ void switch_window_title (const char *title)
 void switch_edges_init (void)
 {
 	extern U8 sw_last_scheduled;
+	set_test_mode (TEST_SWITCHES);
 	browser_init ();
 	sw_last_scheduled = 0;
 	switch_display_timer = 0;
@@ -2815,6 +2817,7 @@ void switch_item_number (U8 val)
 
 void single_switch_init (void)
 {
+	set_test_mode (TEST_SWITCHES);
 	browser_init ();
 	browser_item_number = switch_item_number;
 	browser_max = NUM_SWITCHES-1;
@@ -3073,6 +3076,7 @@ void driver_test_init (void)
 
 void solenoid_test_init (void)
 {
+	set_test_mode (TEST_COILS);
 	flasher_test_mode = 0;
 	driver_test_init ();
 	sol_min_time = 32;
