@@ -244,9 +244,10 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	if (flag_test (FLAG_SSSMB_RUNNING));
 	else if (mball_locks_lit > 0)
 	{
+		device_t *dev = device_entry (DEVNO_LOCK);
+
+		/* Award lock to player */
 		mball_locks_lit--;
-		device_lock_ball (device_entry (DEVNO_LOCK));
-		enable_skill_shot ();
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{
@@ -256,6 +257,19 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		mball_locks_made++;
 		lamp_tristate_flash (LM_MULTIBALL);
 		deff_start (DEFF_MB_LIT);
+
+		/* Handle physical device lock.  If the lock is full (3 balls),
+		then we can't keep this ball here.  Otherwise, we hold onto it,
+		which will force another ball from the trough. */
+		if (device_full_p (dev))
+		{
+			/* TODO - start "WATCH FOR BALL" warning effect */
+		}
+		else
+		{
+			device_lock_ball (dev);
+			enable_skill_shot ();
+		}
 	}
 }
 
