@@ -122,7 +122,7 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
  * Default ballsaver is turned on as soon as valid
  * playfield is asserted.
  */
-CALLSET_ENTRY (ballsave, valid_playfield)
+CALLSET_ENTRY (ballsave, start_ball)
 {
 #if MACHINE_BALL_SAVE_TIME > 0
 	if (!config_timed_game)
