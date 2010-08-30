@@ -72,7 +72,7 @@ extern U8 zr1_pos_full_right_opto_off;
 extern __fastram__ U8 zr1_last_position;
 extern __fastram__ U8 zr1_shake_speed;
 extern __fastram__ U8 zr1_shake_range;
-extern __fastram__ enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
+extern enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
 
 
 U8 new_shake_range;

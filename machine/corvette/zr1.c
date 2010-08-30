@@ -34,7 +34,7 @@
 // Calibration
 //
 
-#define ZR1_ENGINE_LEFT_MIN 0x01 // FIXME should be 0x00 but compiler bug causes problems with > operator when using "0" or "0x00" in zr1_calibrate()
+#define ZR1_ENGINE_LEFT_MIN 0x00
 #define ZR1_ENGINE_RIGHT_MAX 0xFF
 #define ZR1_ENGINE_CENTER 0x7F
 
@@ -71,7 +71,7 @@ char *mech_zr1_diag_messages[] = {
 	"CALIBRATED O.K.\n"             // NEVER SEEN
 };
 
-__fastram__ enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
+enum mech_zr1_calibration_codes zr1_last_calibration_result_code;
 
 U8 zr1_previously_enabled;
 U8 zr1_calibrated;
@@ -206,7 +206,9 @@ void zr1_disable_solenoids(U8 force) {
 }
 
 void zr1_calculate_center_pos(void) {
-	zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
+	// overflow of U8 or does compiler take care of this?
+	// zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
+	zr1_pos_center = (zr1_pos_full_right_opto_off / 2) + (zr1_pos_full_left_opto_off / 2);
 }
 
 void zr1_state_center_enter(void) {
