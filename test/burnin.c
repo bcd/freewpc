@@ -40,15 +40,14 @@ void burnin_sound_thread (void)
 #ifdef CONFIG_GI
 void burnin_gi_thread (void)
 {
-	gi_leff_allocate (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		U8 gi;
 		for (gi = (1 << 0); gi <= (1 << 4); gi <<= 1)
 		{
-			gi_leff_enable (gi);
+			gi_enable (gi);
 			task_sleep (TIME_500MS);
-			gi_leff_disable (gi);
+			gi_disable (gi);
 		}
 	}
 }
