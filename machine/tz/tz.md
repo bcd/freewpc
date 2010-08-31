@@ -375,7 +375,7 @@ Lower Lanes: Left Outlane, Left Inlane1, Left Inlane2, Right Inlane, Right Outla
 Loop Awards: Left Spiral, Left Powerball, Right Spiral, Right Powerball
 Misc: Slot Machine, Ramp Battle, Clock Millions, Shoot Again, Power Payoff, Gumball Lane, Camera, Dead End
 Spiral Awards: Spiral 2M..Spiral EB
-Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Ramp Battle, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Dead End, Slot Machine, Camera
+Amode All: Door Panels and Handle, Door Locks, Door Gumball, Spiral Awards, Lower Lanes, Jets, Powerfield Values, Left Spiral, Left Powerball, Left Ramp Awards, Lock Awards, Piano Awards, Right Spiral, Right Powerball, Greed Targets, Misc
 Amode Rand: Amode All
 Sort1: PF:lamp_sort_bottom_to_top
 Sort2: PF:lamp_sort_top_to_bottom
