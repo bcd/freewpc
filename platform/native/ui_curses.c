@@ -160,8 +160,8 @@ void ui_write_sound_reset (void)
 
 void ui_write_task (int taskno, int gid)
 {
-	int x = (taskno / 12) * 8 + 2;
-	int y = (taskno % 12) + 1;
+	int x = (taskno / 14) * 8 + 2;
+	int y = (taskno % 14) + 1;
 	wmove (task_win, y, x);
 	if (gid == 0)
 		wprintw (task_win, "%02d:    ", taskno);
@@ -223,7 +223,7 @@ void ui_init (void)
 	scrollok (sound_win, 1);
 	x += 20 + 2;
 
-	task_win = ui_window_create (27, 14, x, y, " Tasks ");
+	task_win = ui_window_create (27, 16, x, y, " Tasks ");
 	x += 27 + 2;
 
 	ball_tracker_win = ui_window_create (24, 10, x, y, " Ball Tracker ");
