@@ -207,8 +207,11 @@ void sol_request_async (U8 sol)
 	else
 	{
 		dbprintf ("Queueing pulse %d\n", sol);
+		/* Note that we do not check for ring buffer overflow.  This should
+		never happen in practice; if it does, at worst some pulse will be
+		skipped, which must already be handled elsewhere as when a pulse
+		is too weak... */
 		queue_insert (&sol_req_queue.header, SOL_REQ_QUEUE_LEN, sol);
-		/* TODO - what if the queue is full? */
 	}
 }
 
