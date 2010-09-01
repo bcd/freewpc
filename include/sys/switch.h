@@ -214,6 +214,7 @@ when a button is first pressed and continually as it is held.
 
 void switch_init (void);
 void switch_rtt (void);
+void switch_periodic (void);
 void switch_sched_task (void);
 void switch_idle (void);
 bool switch_poll (const switchnum_t sw);
