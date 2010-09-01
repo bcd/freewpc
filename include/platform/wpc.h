@@ -397,7 +397,7 @@ extern inline U8 pinio_read_ac_zerocross (void)
 #define U1_TRIAC3  0x8
 #define U1_TRIAC4  0x10
 #endif
-#define U1_COIN_LOCK 0x40
+#define U1_COIN_LOCK 0x20
 #define U1_FLIPPER_RELAY 0x80
 
 #define TRIAC_GI_STRING(n)			(1 << (n))
