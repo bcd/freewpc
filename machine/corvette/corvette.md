@@ -45,7 +45,7 @@ define MACHINE_HAS_UPPER_LEFT_FLIPPER
 17: Route 66 Arrow, amber, x(29), y(11)
 18: Race Today, amber, x(31), y(11)
 21: Inner Loop Arrow, amber, x(19), y(12)
-22: Fuelie, blue, x(20), y(11)
+22: Fuelie, green, x(20), y(11)
 23: Nitrous, blue, x(21), y(10)
 24: Inner Loop Jackpot, red, x(22), y(9) # horsepower jackpot
 25: Right Outer Loop Arrow, amber, x(24), y(16)
