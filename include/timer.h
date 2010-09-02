@@ -32,6 +32,8 @@ task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
 void timer_init (void);
 
+void timer_lock (void);
+void timer_unlock (void);
 bool system_timer_pause (void);
 void timer_pause_second (void);
 void free_timer_restart (free_timer_id_t tid, U8 ticks);

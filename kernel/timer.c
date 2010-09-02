@@ -38,11 +38,40 @@
 #define TIMER_FREERUNNING_GRAN	TIME_100MS
 #define TIMER_PAUSABLE_GRAN		TIME_100MS
 
-U8 pausable_timer_locks;
+/**
+ * When nonzero, system timers are paused.  This feature can allow you to pause
+ * timers in machine-specific ways, without having to modify system_timer_pause().
+ * Call timer_lock() when you want all timers to pause, and then timer_unlock()
+ * to cancel it.
+ */
+U8 timer_lock_count;
 
 #ifdef MACHINE_TZ
 extern bool mpf_active;
 #endif
+
+
+/**
+ * Request all timers to stop counting.
+ */
+void timer_lock (void)
+{
+	timer_lock_count++;
+}
+
+
+/**
+ * Release a timer lock.
+ * Take care when using lock/unlock to make sure all locks are always released.
+ * Putting timer_unlock() at the bottom of a task that might be killed is not safe,
+ * for example.
+ * As a precaution, locks will be forcibly cancelled during endball.
+ */
+void timer_unlock (void)
+{
+	timer_lock_count--;
+}
+
 
 /*
  * Check if timers should be paused.
@@ -53,6 +82,9 @@ extern bool mpf_active;
 bool system_timer_pause (void)
 {
 	if (!in_game || in_bonus || !valid_playfield)
+		return TRUE;
+
+	if (timer_lock_count)
 		return TRUE;
 
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())
@@ -141,8 +173,8 @@ task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn)
 }
 
 
-CALLSET_ENTRY (timer, init)
+CALLSET_ENTRY (timer, init, end_ball)
 {
-	pausable_timer_locks = 0;
+	timer_lock_count = 0;
 }
 
