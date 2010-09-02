@@ -87,6 +87,8 @@ void score_rank_update (void)
 CALLSET_ENTRY (score_rank, start_ball, end_game)
 {
 	score_rank_update ();
+	if (in_game)
+		prev_rank = score_ranks[player_up-1];
 	score_rank_dump ();
 }
 
