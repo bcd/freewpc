@@ -93,6 +93,6 @@ CALLSET_ENTRY (tnf, tnf_end)
 	deff_start_sync (DEFF_TNF_EXIT);
 	score_add (current_score, tnf_score);
 	flipper_enable ();
-	music_refresh ();
+	effect_update_request ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
 }

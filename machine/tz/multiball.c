@@ -426,10 +426,10 @@ CALLSET_ENTRY (mball, mball_start)
 		unlit_shot_count = 0;
 		global_flag_on (GLOBAL_FLAG_MULTIBALL_RUNNING);
 		global_flag_on (GLOBAL_FLAG_MB_JACKPOT_LIT);
-		music_refresh ();
 		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
+		effect_update_request ();
 		/* Set the jackpot higher if two balls were locked */
 		if (mball_locks_made > 1)
 			jackpot_level = 2;
@@ -457,7 +457,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		leff_stop (LEFF_MB_RUNNING);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
-		music_refresh ();
+		effect_update_request ();
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
 			timed_mode_begin (&mball_restart_mode);

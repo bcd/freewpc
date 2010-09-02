@@ -223,7 +223,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
-	music_refresh ();
+	effect_update_request ();
 }
 
 static inline void chaosmb_check_level (U8 level)
