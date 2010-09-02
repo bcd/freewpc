@@ -1212,6 +1212,12 @@ sub machine_write_lamplist_decls {
 				$lamplist .= colored_lamps ("$1");
 			}
 			elsif ($lamp =~ m/PF:(.*)/) {
+				# The syntax PF:xyz generates a lamplist that has only
+				# playfield lamps, sorted according to a custom function
+				# written in Perl.  The name of the function appears after
+				# the colon.  There are a few functions in this file that
+				# can be used, or you can put them in a separate file
+				# and use the perlinclude directive to pull it in.
 				$lamplist .= pf_lamps ("$1");
 			}
 			elsif ($lamp =~ m/(.*)\.\.(.*)/) {
