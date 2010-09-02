@@ -32,9 +32,11 @@ enum mech_zr1_calibration_codes {
 #define ZR1_SHAKE_SPEED_MAX 10
 #define ZR1_SHAKE_SPEED_FASTEST ZR1_SHAKE_SPEED_MIN
 #define ZR1_SHAKE_SPEED_SLOWEST ZR1_SHAKE_SPEED_MAX
+#define ZR1_SHAKE_SPEED_DEFAULT ZR1_SHAKE_SPEED_FASTEST
 
 #define ZR1_SHAKE_RANGE_MIN 1
 #define ZR1_SHAKE_RANGE_MAX 5
-#define ZR1_SHAKE_RANGE_DEFAULT 3
 #define ZR1_SHAKE_RANGE_LARGEST_ARC ZR1_SHAKE_RANGE_MAX
-#define ZR1_SHAKE_RANGE_SMALLEST_ARC ZR1_SHAKE_RANGE_MIN
+#define ZR1_SHAKE_RANGE_SMALLEST_ARC ZR1_SHAKE_RANGE_MIN // on a real machine the engine barely moves
+// on a real machine the value used should not cause the engine to slam into it's limits.  Ideally the optos shouldn't be activated either.
+#define ZR1_SHAKE_RANGE_DEFAULT 4

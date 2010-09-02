@@ -112,8 +112,8 @@ __fastram__ enum mech_zr1_calibrate_state zr1_calibrate_state;
  */
 
 void zr1_calculate_shake_range(void) {
-	zr1_pos_shake_left = zr1_pos_full_left_opto_off + ((zr1_pos_center - zr1_pos_full_left_opto_off) / 5) * zr1_shake_range;
-	zr1_pos_shake_right = zr1_pos_full_right_opto_off - ((zr1_pos_full_right_opto_off - zr1_pos_center) / 5) * zr1_shake_range;
+	zr1_pos_shake_left = zr1_pos_full_left_opto_off + (((zr1_pos_center - zr1_pos_full_left_opto_off) / 5) * zr1_shake_range);
+	zr1_pos_shake_right = zr1_pos_full_right_opto_off - (((zr1_pos_full_right_opto_off - zr1_pos_center) / 5) * zr1_shake_range);
 }
 
 /**
@@ -162,7 +162,6 @@ void zr1_set_position(U8 position) {
  * Should not be used outside of this file
  *
  * This can be called regardless of calibration state.
- * Has no effect if solenoid power is already enabled.
  * If the solenoids have not previously been enabled the engine will move to it's center position
  * when the solenoid power is enabled, otherwise the engine will move to it's last-set position.
  *
@@ -173,16 +172,13 @@ void zr1_enable_solenoids(void) {
 		return; // disabled
 	}
 
-	if (global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-		return; // already on
-	}
-
 	if (!zr1_previously_enabled) {
 		zr1_previously_enabled = TRUE;
 		zr1_set_position_to_center();
 	}
 	writeb (ZR1_ENGINE_CONTROL, 1); // disable the DISABLE_A/DISABLE_B lines
 	global_flag_on(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+	sample_start (SND_STARTER_MOTOR, SL_500MS); // XXX
 }
 
 /**
@@ -190,25 +186,18 @@ void zr1_enable_solenoids(void) {
  *
  * Should not be used outside of this file
  */
-void zr1_disable_solenoids(U8 force) {
-	if (!force) {
-		if (!feature_config.enable_zr1_engine) {
-			return; // disabled
-		}
-
-		if (!global_flag_test(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED)) {
-			return; // already off
-		}
+void zr1_disable_solenoids(void) {
+	if (!feature_config.enable_zr1_engine) {
+		return; // disabled
 	}
 
 	writeb (ZR1_ENGINE_CONTROL, 0); // enable the DISABLE_A/DISABLE_B lines
 	global_flag_off(GLOBAL_FLAG_ZR1_SOLENOIDS_POWERED);
+	sample_start (SND_SPARK_PLUG_01, SL_500MS); // XXX
 }
 
 void zr1_calculate_center_pos(void) {
-	// overflow of U8 or does compiler take care of this?
-	// zr1_pos_center = (zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off ) / 2;
-	zr1_pos_center = (zr1_pos_full_right_opto_off / 2) + (zr1_pos_full_left_opto_off / 2);
+	zr1_pos_center = ((U16)zr1_pos_full_right_opto_off + zr1_pos_full_left_opto_off) / 2;
 }
 
 void zr1_state_center_enter(void) {
@@ -371,8 +360,9 @@ void zr1_state_idle_enter(void) {
 void zr1_state_idle_run(void) {
 	if (zr1_center_ticks_remaining > 0) {
 		zr1_center_ticks_remaining--;
+		// turn the solenoids after the engine has centered
 		if (zr1_center_ticks_remaining == 0) {
-			zr1_disable_solenoids(FALSE);
+			zr1_disable_solenoids();
 		}
 	}
 }
@@ -461,7 +451,7 @@ void zr1_reset(void) {
 	zr1_state = ZR1_IDLE;
 	zr1_previous_state = ZR1_INITIALIZE; // Note: this state must be used so that zr1_state_idle_enter is called, without this first state zr1_state_idle_enter would not be called.
 
-	zr1_shake_speed = ZR1_SHAKE_SPEED_SLOWEST;
+	zr1_shake_speed = ZR1_SHAKE_SPEED_DEFAULT;
 	zr1_shake_range = ZR1_SHAKE_RANGE_DEFAULT;
 
 	global_flag_off(GLOBAL_FLAG_ZR1_WORKING);
@@ -469,7 +459,7 @@ void zr1_reset(void) {
 
 	zr1_reset_limits();
 	enable_interrupts();
-	zr1_disable_solenoids(TRUE);
+	zr1_disable_solenoids();
 
 }
 

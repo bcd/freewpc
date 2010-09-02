@@ -62,5 +62,5 @@ __machine__ void zr1_set_shake_range(U8 new_shake_range);
 
 // TODO remove when real-machine testing is complete - begin
 __machine__ void zr1_enable_solenoids(void);
-__machine__ void zr1_disable_solenoids(U8 force);
+__machine__ void zr1_disable_solenoids(void);
 // TODO remove when testing complete - end

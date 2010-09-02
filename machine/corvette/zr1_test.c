@@ -283,7 +283,7 @@ void zr1_test_enter (void)
   		case DISABLE_SOLENOIDS:
  			dbprintf ("zr1_test_enter: calling 'zr1_disable_solenoids'\n");
  			disable_interrupts();
-  			zr1_disable_solenoids(TRUE); // FORCE
+  			zr1_disable_solenoids();
   			enable_interrupts();
   		break;
 
