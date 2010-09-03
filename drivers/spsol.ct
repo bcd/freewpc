@@ -31,13 +31,16 @@
  * ontime - how long the coil is kept on
  * offtime - how long the coil is kept off after it was fired, before
  * 	polling the switch again.  This prevents constant lock-on.
+ * auto - if nonzero, then automatically enable during start ball.
  */
+
 
 @@class spsol
 @@parameter sw
 @@parameter sol
 @@parameter ontime
 @@parameter offtime
+@@weakdefine auto 0
 
 @@
 @@file @self.sched
@@ -68,6 +71,9 @@ extern __fastram__ U8 @class_running;
 #define INST_MASK (1 << @instance)
 
 extern __fastram__ U8 @self_timer;
+
+void @self_enable (void);
+void @self_disable (void);
 
 extern inline U8 @self_enabled_p (void)
 {
@@ -131,26 +137,39 @@ extern inline void @self_service (void)
 @@classvar __fastram__ U8 @class_running;
 
 /* The time until the current phase expires */
-
 __fastram__ U8 @self_timer;
+
+/* Enable the device */
+void @self_enable (void)
+{
+	@class_enables |= (1 << @instance);
+}
+
+/* Disable the device */
+void @self_disable (void)
+{
+	@class_enables &= ~(1 << @instance);
+}
 
 /* Initialize the device */
 CALLSET_ENTRY (@self, init)
 {
 	@self_timer = 0;
-	@class_enables &= ~(1 << @instance);
+	@self_disable ();
 }
 
 /* Enable the device at start ball */
 CALLSET_ENTRY (@self, start_ball)
 {
-	@class_enables |= (1 << @instance);
+#if @auto
+	@self_enable ();
+#endif
 }
 
 /* Disable the device at end ball/stop game/tilt */
 CALLSET_ENTRY (@self, end_ball, stop_game, tilt)
 {
-	@class_enables &= ~(1 << @instance);
+	@self_disable ();
 }
 
 /* vim: set filetype=c: */
