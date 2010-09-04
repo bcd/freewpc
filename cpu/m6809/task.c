@@ -264,7 +264,9 @@ task_t *block_allocate (void)
 		{
 success:
 			tp->state = BLOCK_USED;
+#ifdef CONFIG_EXPAND_STACK
 			tp->aux_stack_block = t;
+#endif
 			return tp;
 		}
 	}
@@ -341,7 +343,9 @@ task_t *task_allocate (void)
 	{
 		tp->state |= BLOCK_TASK;
 		tp->stack_size = 0;
+#ifdef CONFIG_EXPAND_STACK
 		tp->aux_stack_block = -1;
+#endif
 		tp->duration = TASK_DURATION_BALL;
 		return tp;
 	}
@@ -365,6 +369,7 @@ task_t *task_allocate (void)
 }
 
 
+#ifdef CONFIG_EXPAND_STACK
 /** Expand the stack space for a given task. */ 
 task_t *task_expand_stack (task_t *tp)
 {
@@ -386,15 +391,18 @@ task_t *task_expand_stack (task_t *tp)
 	sp->aux_stack_block = -1;
 	return sp;
 }
+#endif
 
 
 /** Free a task block for a task that no longer exists. */
 static __attribute__((noinline))
 void task_free (task_t *tp)
 {
+#ifdef CONFIG_EXPAND_STACK
 	/* Free the auxiliary stack block first if it exists */
 	if (tp->aux_stack_block != -1)
 		block_free (&task_buffer[tp->aux_stack_block]);
+#endif
 
 	/* Free the task block */
 	block_free (tp);
