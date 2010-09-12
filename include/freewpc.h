@@ -133,6 +133,7 @@ extern U8 periodic_ok;
 #define __blockcopy16(s1,s2,n) memcpy(s1,s2,n)
 #define __blockclear16(s,n) memset(s,0,n)
 
+#define _VA_LIST_DEFINED
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
