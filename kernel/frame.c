@@ -113,6 +113,10 @@ void frame_decode (U8 *data, U8 type)
 }
 
 
+U8 *last_frame_data; // XXX
+U8 last_frame_page; // XXX
+U16 last_frame_id; // XXX
+
 /**
  * Draw one plane of a DMD frame.
  * ID identifies the source of the frame data.
@@ -131,6 +135,25 @@ void frame_draw_plane (U16 id)
 	page_push (IMAGEMAP_PAGE);
 	p = (struct frame_pointer *)IMAGEMAP_BASE + id;
 	data = PTR(p);
+
+
+	// XXX remove this - begin
+	last_frame_data = data;
+	last_frame_page = p->page;
+	last_frame_id = id;
+
+	if (data == 0xFFFF) {
+		sample_start (SND_EXPLOSION_01, SL_500MS);
+	}
+
+	if (p->page != 0x20) {
+		sample_start (SND_KISS, SL_500MS);
+	}
+
+	if (data < 0x4000 || data > 0x7FFF) {
+		sample_start (SPCH_OOOOH_BABY, SL_500MS);
+	}
+	// XXX remove this - end
 
 	/* Switch to the page containing the image data.
 	 * Pull the type byte out, then decode the remaining bytes
