@@ -53,18 +53,6 @@
 /** task_current points to the control structure for the current task. */
 __fastram__ task_t *task_current;
 
-/** A pointer to just beyond the last usable entry in the task table.
- * Normally, only tasks between the beginning of the table and the tail
- * will be scanned.  This makes many of the task APIs more efficient by
- * not having to scan the whole table, when many of the entries are
- * probably unused.  The table will only fill up when there are MANY
- * tasks running at once, which is not normally the case.  If the
- * table becomes full, the tail will extend out allowing more entries
- * to be used.  Periodically, we can scan the entire table to see if
- * is possible to rewind the tail once the number of tasks goes down again.
- */
-task_t *task_tail;
-
 /** When saving a task's registers during dispatch, we need some
  * static storage to help compensate for the lacking of registers.
  * Don't allocate on the stack, since we need to preserve the
@@ -116,16 +104,28 @@ U16 idle_time;
 U8 idle_chunks;
 
 
-/**
- * The number of task slots that are allocated/free at a time.
- */
-#define TASK_CHUNK_SIZE 8
+#ifdef TASK_CHAINING
 
-/**
- * The number of tasks that must be free in order for a chunk to
- * be freed.
+ /* The current implementation uses a static array, and a flag
+ * to indicate whether or not the task is allocated.  It would be
+ * faster on average if we maintained separate chains of tasks,
+ * so that we only had to scan one particular chain (e.g. the
+ * running chain or the free chain) at a time.
  */
-#define TASK_FREE_CHUNK_SIZE 10
+
+/** An index used to indicate end-of-list */
+#define TASK_LIST_NULL -1
+
+/** The index of the current task */
+U8 to_current;
+
+/** The index of the first free block */
+U8 to_free;
+
+/** The index of the first and last allocated task */
+U8 to_alloc_head;
+U8 to_alloc_tail;
+#endif
 
 
 /* Private functions written in assembly used internally. */
@@ -209,7 +209,7 @@ void task_dump (void)
 #ifdef CONFIG_DEBUG_TASKCOUNT
 	dbprintf ("Max tasks = %d\n", task_max_count);
 #endif
-	for (t=0, tp = task_buffer; tp < task_tail; t++, tp++)
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 	{
 		if (tp->state != BLOCK_FREE)
 		{
@@ -239,7 +239,7 @@ void task_dump (void)
 			}
 		}
 	}
-	dbprintf ("task_tail = %p\n\n", task_tail);
+	dbprintf ("\n");
 #endif
 }
 
@@ -257,67 +257,20 @@ task_t *block_allocate (void)
 	register U8 t;
 	register task_t *tp;
 
-	/* Scan the table for an unused block */
-	for (t = 0, tp = task_buffer; tp < task_tail; t++, tp++)
-	{
+#ifdef TASK_CHAINING
+#else
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
+#endif
 		if (tp->state == BLOCK_FREE)
 		{
-success:
 			tp->state = BLOCK_USED;
 			tp->aux_stack_block = t;
+#ifdef TASK_CHAINING
+			/* Remove it to the free list */
+#endif
 			return tp;
 		}
-	}
-
-	/* No block was found, but maybe the tail pointer can be extended. */
-	if (task_tail < &task_buffer[NUM_TASKS])
-	{
-		/* The tail points to the first unused entry, so it must be free. */
-		tp = task_tail;
-		task_tail += TASK_CHUNK_SIZE;
-		goto success;
-	}
-
-	/* The table is truly full.  Return an error. */
 	return NULL;
-}
-
-
-/**
- * Scan the task table to see if the tail pointer can be rewound,
- * so that fewer task entries need to be scanned when doing things
- * like task_find_gid().  There's no need to do very often.
- */
-CALLSET_ENTRY (task_chunk, amode_start, end_ball)
-{
-	U8 free_count;
-	task_t *tp;
-
-	/* Only try this when the tail is not already at its minimum. */
-	if (task_tail <= &task_buffer[TASK_CHUNK_SIZE])
-		return;
-
-	/* Count how many free task slots exist from the top of the table,
-	moving down.  Stop scanning if we reach the minimum tail value. */
-	free_count = 0;
-	tp = task_tail-1;
-	while (tp->state == BLOCK_FREE)
-	{
-		free_count++;
-		tp--;
-		if (tp == &task_buffer[TASK_CHUNK_SIZE])
-			break;
-	}
-
-	/* See if enough tasks are free to warrant moving the tail pointer.
-	We require that a few more tasks are free than the chunk size, to
-	avoid constant expansion/shrinking if the task count is equal to
-	the chunk size. */
-	while (free_count >= TASK_FREE_CHUNK_SIZE)
-	{
-		task_tail -= TASK_CHUNK_SIZE;
-		free_count -= TASK_CHUNK_SIZE;
-	}
 }
 
 
@@ -325,6 +278,9 @@ CALLSET_ENTRY (task_chunk, amode_start, end_ball)
 void block_free (task_t *tp)
 {
 	tp->state = BLOCK_FREE;
+#ifdef TASK_CHAINING
+	/* Return it to the free list */
+#endif
 }
 
 
@@ -343,6 +299,9 @@ task_t *task_allocate (void)
 		tp->stack_size = 0;
 		tp->aux_stack_block = -1;
 		tp->duration = TASK_DURATION_BALL;
+#ifdef TASK_CHAINING
+		/* Add to the task list */
+#endif
 		return tp;
 	}
 	else
@@ -395,6 +354,10 @@ void task_free (task_t *tp)
 	/* Free the auxiliary stack block first if it exists */
 	if (tp->aux_stack_block != -1)
 		block_free (&task_buffer[tp->aux_stack_block]);
+
+#ifdef TASK_CHAINING
+	/* Remove it from the task list */
+#endif
 
 	/* Free the task block */
 	block_free (tp);
@@ -548,7 +511,7 @@ void task_exit (void)
 task_t *task_find_gid_next (task_t *last, task_gid_t gid)
 {
 	register task_t *tp;
-	for (tp = last+1; tp < task_tail; tp++)
+	for (tp = last+1; tp < &task_buffer[NUM_TASKS]; tp++)
 		if ((tp->state & BLOCK_TASK) && (tp->gid == gid))
 			return (tp);
 	return (NULL);
@@ -584,11 +547,12 @@ void task_kill_pid (task_t *tp)
  */
 bool task_kill_gid (task_gid_t gid)
 {
+	register U8 t;
 	register task_t *tp;
 	bool rc = FALSE;
 
 	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_KILL, gid);
-	for (tp = task_buffer; tp < task_tail; tp++)
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if (	(tp != task_current) &&
 				(tp->state & BLOCK_TASK) && 
 				(tp->gid == gid) )
@@ -606,9 +570,10 @@ bool task_kill_gid (task_gid_t gid)
  */
 void task_duration_expire (U8 cond)
 {
+	register U8 t;
 	register task_t *tp;
 
-	for (tp = task_buffer; tp < task_tail; tp++)
+	for (t=0, tp = task_buffer; t < NUM_TASKS; t++, tp++)
 		if ((tp->state & BLOCK_TASK) && (tp->duration & cond))
 		{
 			task_kill_pid (tp);
@@ -730,7 +695,7 @@ void task_dispatcher (void)
 	{
 		/* When we reach the end of the task table, call the
 		periodic functions. */
-		if (unlikely (tp == task_tail))
+		if (unlikely (tp == &task_buffer[NUM_TASKS]))
 		{
 #ifdef CONFIG_PLATFORM_WPC
 			/* Call the debugger.  This is not implemented as a true
@@ -784,17 +749,27 @@ void task_dispatcher (void)
  */
 void task_init (void)
 {
+#ifdef TASK_CHAINING
+	U8 to;
+#endif
+
 	/* Clean the memory for all task blocks */
 	memset (task_buffer, 0, sizeof (task_buffer));
 
+#ifdef TASK_CHAINING
+	/* Initialize the free list with all tasks */
+	to_free = 0;
+	for (to = 0; to < NUM_TASKS-1; to++)
+		task_buffer[to]->chain = to+1;
+	task_buffer[NUM_TASKS]->chain = TASK_LIST_NULL;
+
+	/* Initialize the ready and blocked lists to empty */
+	to_ready = TASK_LIST_NULL;
+	to_blocked = TASK_LIST_NULL;
+#endif
+
 	/* No dispatching lockups so far */
 	task_dispatching_ok = TRUE;
-
-	/* Initialize the tail pointer.  The table is divided into
-	chunks of TASK_CHUNK_SIZE tasks each; we initially only allow
-	allocation from a single chunk.  If it becomes full, then we
-	will add another chunk, and so on. */
-	task_tail = &task_buffer[TASK_CHUNK_SIZE];
 
 #ifdef CONFIG_DEBUG_STACK
 	/* Init debugging of largest stack */

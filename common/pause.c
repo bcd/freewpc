@@ -43,7 +43,7 @@ void mute_and_pause_monitor (void)
 	kickout_lock (KLOCK_USER);
 	music_disable ();
 	callset_invoke (machine_paused);
-	
+
 	/* Timeout after 15 minutes */
 	U8 timeout = 180; /* = (60secs * 15)/5 */
 	while (--timeout != 0)
@@ -80,6 +80,7 @@ CALLSET_ENTRY (mute_and_pause, sw_buyin_button)
 	}
 }
 
+
 /*
  * Ensure that mute/pause is turned off at endball.
  */
@@ -87,3 +88,4 @@ CALLSET_ENTRY (mute_and_pause, end_ball, tilt)
 {
 	mute_and_pause_stop ();
 }
+

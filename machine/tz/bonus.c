@@ -255,7 +255,7 @@ void bonus_deff (void)
 	{
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		dmd_alloc_low_clean ();
-		sprintf ("STDM DEATH");
+		sprintf ("SDTM DEATH");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
@@ -684,7 +684,7 @@ void bonus_deff (void)
 		else 
 		{
 			x = random_scaled (10);
-			y = random_scaled (6);
+			y = random_scaled (5);
 		}
 		
 		font_render_string_center (&font_fixed6, 64, 6, "TOTAL BONUS");
@@ -737,6 +737,7 @@ void bonus_deff (void)
 			font_render_string_center (&font_fixed6, 64, 6, "POINTS THIS BALL");
 			sprintf_score (temp_score);
 			font_render_string_center (&font_fixed10, 60 + x, 22 + y, sprintf_buffer);
+			/* TODO : points this ball counts up very slow for really good balls */
 			dmd_show_low ();
 			score_add (temp_score, score_table[SC_5130]);
 			score_add (temp_score, score_table[SC_500K]);

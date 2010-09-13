@@ -187,7 +187,7 @@ CALLSET_ENTRY (bttz, init)
 	hold_balls_in_autofire = FALSE;
 }
 
-CALLSET_ENTRY (bttz, game_end)
+CALLSET_ENTRY (bttz, end_game)
 {
 	balls_needed_to_load = 0;
 	hold_balls_in_autofire = FALSE;

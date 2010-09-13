@@ -168,7 +168,7 @@ define CONFIG_TZONE_IP y
 44: MPF Enter, ingame
 45: MPF Left, ingame
 46: MPF Right, ingame
-47: Clock Target, standup, ingame, debounce(TIME_100MS)
+47: Clock Target, standup, ingame
 48: Standup 1, standup, ingame, lamp(LM_LL_5M)
 51: Gumball Lane, intest
 52: Hitchhiker, ingame
