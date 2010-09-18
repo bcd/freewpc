@@ -126,10 +126,17 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
  * Default ballsaver is turned on as soon as valid
  * playfield is asserted.
  */
+
 CALLSET_ENTRY (ballsave, valid_playfield)
 {
 #if MACHINE_BALL_SAVE_TIME > 0
+	#ifdef MACHINE_TZ
+	/* Don't turn on the ball saver if a ball was just locked */
+	extern U8 mball_locks_made;
+	if (!config_timed_game && mball_locks_made == 0)
+	#else
 	if (!config_timed_game)
+	#endif
 	{
 		timed_mode_begin (&ball_save_mode);
 		timed_mode_reset (&ball_save_mode, MACHINE_BALL_SAVE_TIME);
