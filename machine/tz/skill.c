@@ -205,6 +205,7 @@ CALLSET_ENTRY (skill, sw_skill_bottom)
 
 CALLSET_ENTRY (skill, sw_rocket_kicker)
 {
+	if (live_balls == 1)
 	award_skill_switch (1);
 }
 
