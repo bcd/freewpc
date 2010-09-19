@@ -123,7 +123,7 @@ CALLSET_ENTRY (skill, skill_missed)
 	disable_skill_shot ();
 }
 
-static void award_skill_shot (void)
+void award_skill_shot (void)
 {
 	set_valid_playfield ();
 	disable_skill_shot ();
@@ -157,6 +157,8 @@ static void award_skill_shot (void)
 	deff_start (DEFF_SKILL_SHOT_MADE);
 }
 
+/* Task that monitors the ball as it travels up and down the 
+ * skill switch lane */
 static void skill_switch_monitor (void)
 {
 	if (skill_switch_reached < 3)
@@ -171,6 +173,9 @@ static void skill_switch_monitor (void)
 
 static void award_skill_switch (U8 sw)
 {
+	/* Only trigger if skillshot or sssmb is enabled */
+	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
+		return;
 	event_can_follow (skill_shot, slot, TIME_4S);
 	callset_invoke (any_skill_switch);
 	if (skill_switch_reached < sw)
@@ -193,12 +198,15 @@ CALLSET_ENTRY (skill, display_update)
 		deff_start_bg (DEFF_SKILL_SHOT_READY, 0);
 }
 
-
 CALLSET_ENTRY (skill, sw_skill_bottom)
 {
 	award_skill_switch (1);
 }
 
+CALLSET_ENTRY (skill, sw_rocket_kicker)
+{
+	award_skill_switch (1);
+}
 
 CALLSET_ENTRY (skill, sw_skill_center)
 {
@@ -214,6 +222,9 @@ CALLSET_ENTRY (skill, sw_skill_top)
 
 CALLSET_ENTRY (skill, start_player)
 {
+	/* This will also make sure that if the ball slips
+	 * past the first skill switch, it will always count it properly
+	 */
 	skill_min_value = 1;
 }
 
@@ -222,13 +233,6 @@ CALLSET_ENTRY (skill, start_ball)
 {
 	enable_skill_shot ();
 }
-
-
-CALLSET_ENTRY (skill, valid_playfield)
-{
-	disable_skill_shot ();
-}
-
 
 CALLSET_ENTRY (skill, end_game)
 {

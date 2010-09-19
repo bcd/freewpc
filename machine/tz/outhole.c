@@ -54,12 +54,12 @@ CALLSET_ENTRY (outhole, sw_outhole)
 		}
 
 		
-		/* Timer to check if 3 balls drain quickly */
+		/* Start a timer to check if 3 balls drain quickly */
 		if (!timer_find_gid (GID_MULTIDRAIN) && !ballsave_test_active ())
 		{
 			multidrain_count = 0;
 			if (multi_ball_play ())
-				timer_restart_free (GID_MULTIDRAIN, TIME_8S);
+				timer_restart_free (GID_MULTIDRAIN, TIME_7S);
 		}
 	
 		if (timer_find_gid (GID_MULTIDRAIN))

@@ -88,8 +88,9 @@ void autofire_monitor (void)
 	autofire_ball_catch_wait ();	
 	shooter_div_stop ();
 	
-	/* Wait a little longer for the ball to settle */
-	task_sleep (TIME_200MS);
+	/* Wait a little longer for the ball to settle 
+	 * and the divertor to close */
+	task_sleep (TIME_500MS);
 	
 	/* If Right inlane -> Left ramp combo, start tnf mode */
 	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
@@ -104,9 +105,7 @@ void autofire_monitor (void)
 	/* Open diverter again */
 	shooter_div_start ();
 	/* Wait for the diverter to fully open before firing */
-	U8 timeout = 20;
-	while (--timeout != 0)
-		task_sleep (TIME_100MS);
+	task_sleep_sec (1);	
 	
 	if (in_live_game && single_ball_play ())
 	{
