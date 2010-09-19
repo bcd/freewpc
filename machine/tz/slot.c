@@ -193,11 +193,8 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 	}
 	else if (event_did_follow (skill_shot, slot))
 	{
-		/* skill switch was recently hit */
-		set_valid_playfield ();
-		task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
+		/* skill shot has been missed */
 		callset_invoke (skill_missed);
-		deff_stop (DEFF_SKILL_SHOT_READY);
 	}
 	else if (timed_mode_running_p (&sslot_mode))
 	{

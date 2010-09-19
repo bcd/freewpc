@@ -25,12 +25,11 @@ bool skill_shot_enabled;
 U8 skill_switch_reached;
 
 __local__ U8 skill_min_value;
-
+/* Store skill_min for deff */
+U8 skill_min_stored;
 
 extern inline void flash_deff_begin_static (void)
 {
-	//dmd_alloc_low_high ();
-	
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 }
@@ -51,7 +50,6 @@ extern inline __noreturn__ void flash_deff_run (void)
 		dmd_show_other ();
 	}
 }
-
 
 void skill_shot_ready_deff (void)
 {
@@ -91,6 +89,7 @@ void disable_skill_shot (void)
 {
 	skill_shot_enabled = FALSE;
 	deff_stop (DEFF_SKILL_SHOT_READY);
+	task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 }
 
 void skill_shot_made_deff (void)
@@ -101,13 +100,13 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
-			sprintf ("%d,000,000", skill_min_value);
+			sprintf ("%d,000,000", skill_min_stored);
 			break;
 		case 2:
-			sprintf ("%d,000,000", skill_min_value+1);
+			sprintf ("%d,000,000", skill_min_stored+1);
 			break;
 		case 3:
-			sprintf ("%d,000,000", skill_min_value+3);
+			sprintf ("%d,000,000", skill_min_stored+3);
 			break;
 	}
 	font_render_string_center (&font_times8, 64, 23, sprintf_buffer);
@@ -117,37 +116,45 @@ void skill_shot_made_deff (void)
 	deff_exit ();
 }
 
+/* Called from slot.c */
+CALLSET_ENTRY (skill, skill_missed)
+{
+	set_valid_playfield ();
+	disable_skill_shot ();
+}
 
 static void award_skill_shot (void)
 {
 	set_valid_playfield ();
-	deff_start (DEFF_SKILL_SHOT_MADE);
-	task_sleep (TIME_66MS);
+	disable_skill_shot ();
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
-	disable_skill_shot ();
 	switch (skill_switch_reached)
 	{
 		case 1:
 		/* Inform sssmb.c that we hit a skill switch */
 			callset_invoke (skill_red);
 			score_1M (skill_min_value);
+			skill_min_stored = skill_min_value;
 			break;
 		case 2: 
 			callset_invoke (skill_orange);
 			score_1M (skill_min_value+1);
+			skill_min_stored = skill_min_value;
 			skill_min_value++;
 			timed_game_extend (5);
 			break;
 		case 3: 
 			callset_invoke (skill_yellow);
 			score_1M (skill_min_value+3);
+			skill_min_stored = skill_min_value;
 			skill_min_value += 2;
 			timed_game_extend (10);
 			break;
 	}
 	if (skill_min_value > 7)
 		skill_min_value = 7;
+	deff_start (DEFF_SKILL_SHOT_MADE);
 }
 
 static void skill_switch_monitor (void)
@@ -155,6 +162,7 @@ static void skill_switch_monitor (void)
 	if (skill_switch_reached < 3)
 		task_sleep_sec (1);
 	else
+	/* Wait longer so the ball can reach the slot switch */
 		task_sleep_sec (2);
 	award_skill_shot ();
 	task_exit ();
@@ -171,9 +179,9 @@ static void award_skill_switch (U8 sw)
 		task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor);
 		sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
 	}
-	else if (task_find_gid (GID_SKILL_SWITCH_TRIGGER))
+	else if (task_kill_gid (GID_SKILL_SWITCH_TRIGGER))
 	{
-		task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
+		/* Ball is now rolling back down */
 		award_skill_shot ();
 	}
 }

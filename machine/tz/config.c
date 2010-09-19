@@ -122,6 +122,13 @@ CALLSET_ENTRY (config, start_ball)
 	balls_served = 0;
 }
 
+/* Reset the count so we can have a ballsave */
+CALLSET_ENTRY (config, mball_start)
+{
+	balls_served = 1;
+}
+
+
 CALLSET_ENTRY (config, serve_ball)
 {
 	balls_served++;	
