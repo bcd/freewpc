@@ -144,6 +144,7 @@ void dump_game (void)
 void serve_ball (void)
 {
 #ifdef MACHINE_TZ
+	/* If the trough is empty, drop one from the lock */
 	if (!switch_poll (SW_RIGHT_TROUGH) 
 		|| device_recount (device_entry (DEVNO_TROUGH)) == 0
 		|| device_recount (device_entry (DEVNO_LOCK)) >= 3)
@@ -192,9 +193,10 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
+//TODO Could do with something modular/per machine here
 #ifdef MACHINE_TZ
-			loop_master_check ();
-			combo_master_check ();
+//			loop_master_check ();
+//			combo_master_check ();
 #endif
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);

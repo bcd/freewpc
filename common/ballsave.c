@@ -131,9 +131,9 @@ CALLSET_ENTRY (ballsave, valid_playfield)
 {
 #if MACHINE_BALL_SAVE_TIME > 0
 	#ifdef MACHINE_TZ
-	/* Don't turn on the ball saver if a ball was just locked */
-	extern U8 mball_locks_made;
-	if (!config_timed_game && mball_locks_made == 0)
+	extern U8 balls_served;
+	/* Don't turn on the ball saver after the first ball */
+	if (!config_timed_game && balls_served < 2)
 	#else
 	if (!config_timed_game)
 	#endif

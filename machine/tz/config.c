@@ -23,6 +23,8 @@
 #include <m6809/math.h>
 #endif
 
+U8 balls_served;
+
 bool faster_quote_given;
 
 /** Filename: mach/config.c
@@ -112,4 +114,15 @@ CALLSET_ENTRY (tz, timed_game_tick)
 		case 1: sound_send (SND_ONE); break;
 		default: break;
 	}
+}
+
+/* Hack to disable ballsave after first ball_serve */
+CALLSET_ENTRY (config, start_ball)
+{
+	balls_served = 0;
+}
+
+CALLSET_ENTRY (config, serve_ball)
+{
+	balls_served++;	
 }

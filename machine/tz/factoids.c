@@ -67,12 +67,8 @@ void show_random_factoid (void)
 	font_render_string_center (&font_fixed6, 64, 10, "RANDOM FACTOID");
 	show_text_on_stars ();
 	
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
+	dmd_alloc_pair_clean ();
 	factoid_msg(random_scaled(NUM_FACTOIDS));
-	show_text_on_stars ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
-	show_text_on_stars ();
+	dmd_show2 ();
+	task_sleep_sec (6);
 }

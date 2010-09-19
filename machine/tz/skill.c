@@ -171,7 +171,7 @@ static void award_skill_switch (U8 sw)
 		task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor);
 		sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
 	}
-	else
+	else if (task_find_gid (GID_SKILL_SWITCH_TRIGGER))
 	{
 		task_kill_gid (GID_SKILL_SWITCH_TRIGGER);
 		award_skill_shot ();
