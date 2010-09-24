@@ -32,7 +32,7 @@ CONFIG_SCORE_RANK := y
 #
 INT_CFLAGS = -mint8
 # TODO : Don't hardcode code/data sections here like this!
-CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format
+CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -Werror=implicit-function-declaration
 EXTRA_ASFLAGS += -D__int8__ -DCONFIG_PLATFORM_WPC
 
 # Say which source files need to be compiled in for the WPC platform only.
