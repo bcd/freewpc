@@ -516,10 +516,6 @@ void bonus_deff (void)
 		}
 	}
 	
-	if (rollover_count > 9)
-	{
-			}
-
 	if (two_way_combos + three_way_combos)
 	{
 		dmd_alloc_low_clean ();
@@ -551,7 +547,7 @@ void bonus_deff (void)
 			sound_send (SND_GLASS_BREAKS);
 			task_sleep_sec (2);
 			dmd_alloc_low_clean ();
-			sprintf ("%d COMBOS", combo_master_hi);
+			psprintf ("%d COMBO", "%d COMBOS", combo_master_hi);
 			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 			dmd_show_low ();
 			task_sleep_sec (2);

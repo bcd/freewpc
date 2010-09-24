@@ -129,14 +129,15 @@ CALLSET_ENTRY (master, factory_reset)
 
 CALLSET_ENTRY (master, amode_page)
 {
+	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	//sprintf ("LOOP MASTER: %s %d LOOPS", loop_master_initials, loop_master_hi);
-	sprintf ("LOOP MASTER: %d LOOPS", loop_master_hi);
+	psprintf ("LOOP MASTER: %d LOOP", "LOOP MASTER: %d LOOPS", loop_master_hi);
 	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	//sprintf ("COMBO MASTER: %s %d COMBOS", combo_master_initials, combo_master_hi);
-	sprintf ("COMBO MASTER: %d COMBOS", combo_master_hi);
+	psprintf ("COMBO MASTER: %d COMBO", "COMBO MASTER: %d COMBOS", combo_master_hi);
 	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 	show_text_on_stars ();
 }
