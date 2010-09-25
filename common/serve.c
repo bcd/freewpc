@@ -50,11 +50,13 @@ another ball served, or the same ball which failed to launch OK). */
 
 #endif
 
+/* Indicates how many balls we want to be in play.  Eventually,
+live_balls == live_balls_wanted if everything works OK. */
 U8 live_balls_wanted;
 
 
 /**
- * Returns true if the machine supports autopluging balls.
+ * Returns true if the machine supports autoplunging balls.
  */
 static inline bool have_auto_serve_p (void)
 {
@@ -109,7 +111,8 @@ void launch_ball (void)
 
 
 /**
- * Autolaunch a new ball into play from the trough.
+ * Autolaunch a new ball into play from the trough.  This is the
+ * preferred API to use by ballsavers.
  */
 void serve_ball_auto (void)
 {
@@ -122,6 +125,8 @@ void serve_ball_auto (void)
 	else
 	{
 		set_valid_playfield ();
+		/* TZ's autoplunger is a little different, so it is handled
+		specially. */
 #if defined(MACHINE_TZ)
 		autofire_add_ball ();
 #else
@@ -143,8 +148,13 @@ static void set_ball_count_task (void)
 	U8 max_live_balls;
 	U8 retries;
 
+	/* While we are launching balls, we monitor 'live_balls' to
+	check that it is going up. */
 	max_live_balls = live_balls;
 
+	/* Set the number of times we will attempt to kick a ball.
+	This is the number of balls that need to be added to play,
+	plus 2 to handle errors.  After this, we give up. */
 	retries = live_balls_wanted - max_live_balls + 2;
 
 	while (retries && max_live_balls < live_balls_wanted)
@@ -237,6 +247,9 @@ CALLSET_ENTRY (serve, sw_shooter)
 		&& !tournament_mode_enabled
 		&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
 	{
+		/* TODO - this might be game specific.  For example, Simpsons Pinball
+		Party would give you a manual skill shot here except during
+		multiball. */
 		launch_ball ();
 	}
 }
@@ -245,6 +258,7 @@ CALLSET_ENTRY (serve, sw_shooter)
 CALLSET_ENTRY (serve, valid_playfield)
 {
 #ifdef MACHINE_LAUNCH_LAMP
+	/* TODO - where is the lamp turned ON? */
 	lamp_flash_off (MACHINE_LAUNCH_LAMP);
 #endif
 }
