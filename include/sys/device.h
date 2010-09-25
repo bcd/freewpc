@@ -272,7 +272,4 @@ __common__ void device_init (void);
 #define single_ball_play() (live_balls <= 1)
 #define multi_ball_play() (live_balls > 1)
 
-/* This API has been renamed */
-#define device_multiball_set(count)  set_ball_count(count)
-
 #endif /* _SYS_DEVICE_H */

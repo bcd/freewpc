@@ -68,7 +68,7 @@ void quickmb_start (void)
 	{
 		flag_on (FLAG_QUICK_MB_RUNNING);
 		deff_start (DEFF_QUICKMB_STARTED);
-		device_multiball_set (2);
+		set_ball_count (2);
 	}
 }
 

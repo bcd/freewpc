@@ -29,7 +29,7 @@ static void afm_bonus_mb_update (enum mb_mode_state state)
 
 		case MB_ACTIVE:
 			lamp_tristate_on (LM_LOCK_JACKPOT);
-			device_multiball_set (2);
+			set_ball_count (2);
 			break;
 	}
 }
