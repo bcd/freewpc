@@ -59,7 +59,7 @@ static void amode_leff1 (void)
 
 void amode_leff (void)
 {
-	gi_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (PINIO_GI_STRINGS);
 	for (lamplist = LAMPLIST_MARTIANS; lamplist <= LAMPLIST_R_LOOP_ALL; lamplist++)
 	{
 		leff_create_peer (amode_leff1);

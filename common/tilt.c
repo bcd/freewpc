@@ -109,7 +109,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	{
 		/* Warnings exceeded... tilt the current ball */
 		sound_reset ();
-		triac_disable (TRIAC_GI_MASK);
+		triac_disable (PINIO_GI_STRINGS);
 		deff_start (DEFF_TILT);
 		leff_start (LEFF_TILT);
 		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);

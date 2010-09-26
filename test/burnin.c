@@ -39,7 +39,7 @@ void burnin_sound_thread (void)
 
 void burnin_gi_thread (void)
 {
-	gi_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		U8 gi;
@@ -146,7 +146,7 @@ void burnin_exit (void)
 	timestamp_add (&burnin_total_duration, &burnin_duration);
 	lamp_all_off ();
 	sound_reset ();
-	gi_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (PINIO_GI_STRINGS);
 	flipper_disable ();
 }
 

@@ -36,7 +36,7 @@ void amode_leff_eyes (void)
 
 void amode_leff (void)
 {
-	gi_leff_enable (TRIAC_GI_MASK);
+	gi_leff_enable (PINIO_GI_STRINGS);
 
 	for (lamplist = LAMPLIST_BONUS_X; lamplist <= LAMPLIST_RIGHT_LOOP; lamplist++)
 	{

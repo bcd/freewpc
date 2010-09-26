@@ -401,7 +401,7 @@ extern inline U8 pinio_read_ac_zerocross (void)
 #define U1_FLIPPER_RELAY 0x80
 
 #define TRIAC_GI_STRING(n)			(1 << (n))
-#define TRIAC_GI_MASK \
+#define PINIO_GI_STRINGS \
 	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
 	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
 
@@ -594,12 +594,12 @@ extern inline void pinio_write_lamp_data (U8 val)
 
 extern inline U8 pinio_read_triac (void)
 {
-	return wpc_u1_read () & TRIAC_GI_MASK;
+	return wpc_u1_read () & PINIO_GI_STRINGS;
 }
 
 extern inline void pinio_write_triac (U8 val)
 {
-	wpc_u1_write (val | (wpc_u1_read () & ~TRIAC_GI_MASK));
+	wpc_u1_write (val | (wpc_u1_read () & ~PINIO_GI_STRINGS));
 }
 
 /********************************************/

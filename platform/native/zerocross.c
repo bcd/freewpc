@@ -83,8 +83,8 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 
 		/* Reset the GI outputs to what is held in the input latch.
 		Preserve the values of the other IO lines. */
-		sim_triac_update ( (linux_triac_latch & TRIAC_GI_MASK) |
-		                   (linux_triac_outputs & ~TRIAC_GI_MASK) );
+		sim_triac_update ( (linux_triac_latch & PINIO_GI_STRINGS) |
+		                   (linux_triac_outputs & ~PINIO_GI_STRINGS) );
 	}
 	else
 	{

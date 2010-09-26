@@ -3221,7 +3221,7 @@ U8 gi_test_values[] = {
 	TRIAC_GI_STRING(2),
 	TRIAC_GI_STRING(3),
 	TRIAC_GI_STRING(4),
-	TRIAC_GI_MASK,
+	PINIO_GI_STRINGS,
 };
 
 
@@ -3230,12 +3230,12 @@ void gi_test_init (void)
 	browser_init ();
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
-	gi_leff_allocate (TRIAC_GI_MASK);
+	gi_leff_allocate (PINIO_GI_STRINGS);
 }
 
 void gi_test_exit (void)
 {
-	gi_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (PINIO_GI_STRINGS);
 }
 
 void gi_test_draw (void)
@@ -3255,7 +3255,7 @@ void gi_test_draw (void)
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
 	print_row_center (&font_mono5, 29);
 
-	gi_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (PINIO_GI_STRINGS);
 	gi_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
 }
 

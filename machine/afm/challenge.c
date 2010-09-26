@@ -224,7 +224,7 @@ void martian_kill_deff (void)
 void gi_strobe_leff (void)
 {
 	U8 i;
-	gi_leff_disable (TRIAC_GI_MASK);
+	gi_leff_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		for (i=0; i < 3; i++)
@@ -240,9 +240,9 @@ void gi_flash_leff (void)
 {
 	for (;;)
 	{
-		gi_leff_enable (TRIAC_GI_MASK);
+		gi_leff_enable (PINIO_GI_STRINGS);
 		task_sleep (TIME_500MS);
-		gi_leff_disable (TRIAC_GI_MASK);
+		gi_leff_disable (PINIO_GI_STRINGS);
 		task_sleep (TIME_500MS);
 	}
 }

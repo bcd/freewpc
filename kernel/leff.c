@@ -51,7 +51,7 @@
 #define L_NOGI			0
 
 /** Indicates in a leff definition that it allocates all GI */
-#define L_ALL_GI		TRIAC_GI_MASK
+#define L_ALL_GI		PINIO_GI_STRINGS
 
 /* Declare externs for all of the deff functions */
 #define DECL_LEFF(num, flags, pri, b1, b2, fn, fnpage) \
@@ -187,7 +187,7 @@ task_pid_t leff_create_handler (const leff_t *leff)
 	else
 	{
 		/* Free any existing GI allocations. */
-		gi_leff_free (TRIAC_GI_MASK);
+		gi_leff_free (PINIO_GI_STRINGS);
 
 		/* Allocate general illumination needed by the lamp effect */
 		if (leff->gi != L_NOGI)
@@ -377,7 +377,7 @@ void leff_stop_all (void)
 {
 	task_kill_gid (GID_LEFF);
 	task_kill_gid (GID_SHARED_LEFF);
-	gi_leff_free (TRIAC_GI_MASK);
+	gi_leff_free (PINIO_GI_STRINGS);
 	lamp_leff1_free_all ();
 	lamp_leff1_erase ();
 	lamp_leff2_free_all ();

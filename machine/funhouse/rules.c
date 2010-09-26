@@ -29,7 +29,7 @@
 static void rule_begin (void)
 {
 	lamp_all_off ();
-	triac_disable (TRIAC_GI_MASK);
+	triac_disable (PINIO_GI_STRINGS);
 }
 
 static void rule_msg (const char *line1, const char *line2)

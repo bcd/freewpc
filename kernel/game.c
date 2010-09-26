@@ -103,7 +103,7 @@ void amode_start (void)
 #ifdef MACHINE_CUSTOM_AMODE
 	leff_start (LEFF_AMODE);
 #endif
-	triac_enable (TRIAC_GI_MASK);
+	triac_enable (PINIO_GI_STRINGS);
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	task_yield ();
 	callset_invoke (amode_start);
@@ -494,7 +494,7 @@ void start_ball (void)
 #endif
 
 	flipper_enable ();
-	triac_enable (TRIAC_GI_MASK);
+	triac_enable (PINIO_GI_STRINGS);
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
 
