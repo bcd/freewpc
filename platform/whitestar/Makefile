@@ -3,6 +3,7 @@
 P=platform/wpc
 
 CPU := m6809
+$(eval $(call have,CONFIG_PERIODIC_FIRQ))
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
 
