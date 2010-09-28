@@ -51,7 +51,7 @@ KERNEL_HW_OBJS += kernel/sol.o
 KERNEL_HW_OBJS += kernel/sound.o
 KERNEL_HW_OBJS += kernel/switches.o
 KERNEL_HW_OBJS += kernel/timer.o   # why not KERNEL_SW_OBJS?
-KERNEL_HW_OBJS += kernel/triac.o
+KERNEL_HW_OBJS += $(if $(CONFIG_GI), kernel/triac.o)
 
 KERNEL_OBJS += $(KERNEL_BASIC_OBJS) $(KERNEL_SW_OBJS) $(KERNEL_HW_OBJS)
 

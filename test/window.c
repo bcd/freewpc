@@ -3212,6 +3212,8 @@ struct menu flasher_test_item = {
 
 /****************** GI Test **************************/
 
+#ifdef CONFIG_GI
+
 U8 gi_test_brightness;
 
 U8 gi_test_values[] = {
@@ -3256,7 +3258,11 @@ void gi_test_draw (void)
 	print_row_center (&font_mono5, 29);
 
 	gi_leff_disable (PINIO_GI_STRINGS);
+#ifdef CONFIG_TRIAC
 	gi_leff_dim (gi_test_values[menu_selection], gi_test_brightness);
+#else
+	gi_leff_enable (gi_test_values[menu_selection]);
+#endif
 }
 
 void gi_test_right (void)
@@ -3289,6 +3295,7 @@ struct menu gi_test_item = {
 	.var = { .subwindow = { &gi_test_window, NULL } },
 };
 
+#endif /* CONFIG_GI */
 
 /****************** Lamp Test **************************/
 
@@ -3685,7 +3692,9 @@ struct menu *test_menu_items[] = {
 	 * Everything can be accessed in solenoid test. */
 	&flasher_test_item,
 #endif
+#ifdef CONFIG_GI
 	&gi_test_item,
+#endif
 	&sound_test_item,
 	&lamp_test_item,
 	&all_lamp_test_item,

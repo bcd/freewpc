@@ -81,7 +81,9 @@ void fatal (errcode_t error_code)
 	disable_interrupts ();
 
 	/* Reset hardware outputs */
-	pinio_write_triac (0);
+#ifdef CONFIG_GI
+	pinio_write_gi (0);
+#endif
 
 	/* TODO - this whole function needs porting to Whitestar */
 #ifdef CONFIG_PLATFORM_WPC

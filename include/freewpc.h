@@ -192,7 +192,9 @@ __noreturn__ void freewpc_init (void);
 #include <sys/switch.h>
 #include <sys/flip.h>
 #include <sys/display.h>
+#ifdef CONFIG_GI
 #include <sys/triac.h>
+#endif
 #include <sys/rtc.h>
 
 /* Common software structures */

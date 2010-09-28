@@ -42,6 +42,6 @@ void gi_leff_disable (U8 triac);
 void gi_dim (U8 bits, U8 brightness);
 void gi_leff_dim (U8 bits, U8 brightness);
 
-void triac_init (void);
+void gi_init (void);
 
 #endif /* _SYS_TRIAC_H */

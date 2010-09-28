@@ -602,6 +602,11 @@ extern inline void pinio_write_triac (U8 val)
 	wpc_u1_write (val | (wpc_u1_read () & ~PINIO_GI_STRINGS));
 }
 
+extern inline void pinio_write_gi (U8 val)
+{
+	pinio_write_triac (val);
+}
+
 /********************************************/
 /* Solenoids                                */
 /********************************************/
