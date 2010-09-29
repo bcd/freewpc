@@ -40,6 +40,7 @@ NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
 	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
 	$(D)/coil.o $(D)/script.o $(D)/conf.o $(D)/node.o
+NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 
 # For ASCII DMD
 NATIVE_OBJS += $(if $(CONFIG_DMD), $(D)/asciidmd.o, $(D)/segment.o)
