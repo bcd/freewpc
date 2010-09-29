@@ -3647,7 +3647,7 @@ void display_test_draw (void)
 {
 	if (menu_selection < 16)
 	{
-		wpc_dmd_set_low_page (menu_selection);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_0, menu_selection);
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
 		sprintf ("PAGE %d", menu_selection);

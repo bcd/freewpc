@@ -21,30 +21,20 @@
 /**
  * \file
  * \brief DMD-related definitions.
+ *
+ * This file contains definitions which are common to all dot
+ * matrix games.  Platform specific values are defined elsewhere
+ * with the pinio_ prefix.
  */
 
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
-/** The width of a DMD page, in pixels */
-#define DMD_PIXEL_WIDTH	128
-
-/** The height of a DMD page, in pixel */
-#define DMD_PIXEL_HEIGHT 32
-
 /** The width of a DMD page, in bytes */
-#define DMD_BYTE_WIDTH (DMD_PIXEL_WIDTH / 8)
+#define DMD_BYTE_WIDTH (PINIO_DMD_WIDTH / 8)
 
-/** The size of each DMD page */
-//#define DMD_PAGE_SIZE (DMD_BYTE_WIDTH * DMD_PIXEL_HEIGHT)
-#define DMD_PAGE_SIZE 512UL
-
-/** The number of DMD pages in the controller.  There are physically
- * this number of page buffers that can be drawn to at the same time.
- * However, not all pages are mapped into the 6809 address space
- * simultaneously -- only 2 at a time are mapped.  WPC-95 supports
- * 6 mapped at a time, but FreeWPC doesn't take advantage of that now. */
-#define DMD_PAGE_COUNT 16
+/** The size of each DMD page, in bytes */
+#define DMD_PAGE_SIZE (1UL * DMD_BYTE_WIDTH * PINIO_DMD_HEIGHT)
 
 /** The number of pages reserved for the overlay(s).  We reserve a single
  * pair of pages for this now. */
@@ -54,7 +44,7 @@
 #define DMD_BLANK_PAGE_COUNT 2
 
 #define DMD_ALLOC_PAGE_COUNT \
-	(DMD_PAGE_COUNT - DMD_OVERLAY_PAGE_COUNT - DMD_BLANK_PAGE_COUNT)
+	(PINIO_NUM_DMD_PAGES - DMD_OVERLAY_PAGE_COUNT - DMD_BLANK_PAGE_COUNT)
 
 /** Coordinates that are aligned various ways */
 #define DMD_CENTER_X (DMD_PIXEL_WIDTH / 2)
@@ -69,29 +59,6 @@
 #define DMD_ALIGN_TOP_CENTER     DMD_CENTER_X, DMD_TOP_CENTER_Y
 #define DMD_ALIGN_BOTTOM_CENTER  DMD_CENTER_X, DMD_BOTTOM_CENTER_Y
 
-/**
- * The row value at which an FIRQ should normally be generated in order to do
- * page flipping.  By requesting the FIRQ just before the complete page is
- * refreshed, software has time to reprogram the VISIBLE page register
- * just before the hardware will latch it.
- */
-#define DMD_REFRESH_ROW 30
-
-/** The type of a page number */
-typedef U8 dmd_pagenum_t;
-
-/** The type of a page pair, which tracks the two pages
-needed to display a 4-color image.  Normally, the
-dark and bright page numbers are consecutive, but for
-mono images, they could be the same value. */
-typedef union
-{
-	struct {
-		dmd_pagenum_t first;
-		dmd_pagenum_t second;
-	} u;
-	U16 pair;
-} dmd_pagepair_t;
 
 /** The type of a page buffer pointer */
 typedef U8 *dmd_buffer_t;
@@ -136,30 +103,12 @@ typedef struct
 } dmd_transition_t;
 
 
-/**
- * Request an FIRQ to be generated after row 'v' has been displayed.
- */
-#define wpc_dmd_set_firq_row(v)		writeb (WPC_DMD_FIRQ_ROW_VALUE, v)
-
-
-/**
- * Return the last row that was refreshed.
- */
-#define wpc_dmd_get_firq_row()      readb(WPC_DMD_FIRQ_ROW_VALUE)
-
-
-/**
- * Set the visible page.
- */
-#define wpc_dmd_set_visible_page(v)	writeb (WPC_DMD_ACTIVE_PAGE, v)
-
-#define dmd_low_buffer			((dmd_buffer_t)DMD_LOW_BASE)
-#define dmd_high_buffer			((dmd_buffer_t)DMD_HIGH_BASE)
+#define dmd_low_buffer			((dmd_buffer_t)pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0))
+#define dmd_high_buffer			((dmd_buffer_t)pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1))
 
 extern U8 *dmd_trans_data_ptr;
 extern bool dmd_in_transition;
 extern dmd_transition_t *dmd_transition;
-extern dmd_pagepair_t dmd_mapped_pages;
 extern dmd_pagepair_t dmd_visible_pages;
 
 #define dmd_low_page dmd_mapped_pages.u.first
@@ -188,29 +137,22 @@ extern dmd_transition_t
 /** Verify that the destination address for writing to a DMD page is valid.
  * This is only used in native mode, to make sure that we do not write
  * outside the bounds of the emulated buffer.  No such check is done
- * in 6809 mode. */
+ * in 6809 mode for performance. */
 extern inline U8 *wpc_dmd_addr_verify (U8 *addr)
 {
-#ifdef DMD_LOW_BASE
 #ifdef CONFIG_NATIVE
-	if ((addr >= DMD_LOW_BASE) && (addr <= DMD_LOW_BASE + DMD_PAGE_SIZE))
+	if ((addr >= pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0)) &&
+		(addr <= pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + DMD_PAGE_SIZE))
 		return addr;
-	else if ((addr >= DMD_HIGH_BASE) && (addr <= DMD_HIGH_BASE + DMD_PAGE_SIZE))
+	else if ((addr >= pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1)) &&
+		(addr <= pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + DMD_PAGE_SIZE))
 		return addr;
 	else
 		fatal (ERR_INVALID_IO_ADDR);
 #endif
-#endif
 	return addr;
 }
 
-/*
- * The DMD controller has two registers for controlling which pages
- * are mapped into addressable memory.  
- *
- * Because these registers are write-only, writes are also cached into
- * variables.  Then reads can be done using the cached values.
- */
 
 extern inline dmd_pagepair_t wpc_dmd_get_mapped (void)
 {
@@ -219,29 +161,8 @@ extern inline dmd_pagepair_t wpc_dmd_get_mapped (void)
 
 extern inline void wpc_dmd_set_mapped (dmd_pagepair_t mapping)
 {
-	dmd_mapped_pages = mapping;
-	writeb (WPC_DMD_LOW_PAGE, mapping.u.first);
-	writeb (WPC_DMD_HIGH_PAGE, mapping.u.second);
-}
-
-extern inline void wpc_dmd_set_low_page (U8 val)
-{
-	writeb (WPC_DMD_LOW_PAGE, dmd_low_page = val);
-}
-
-extern inline U8 wpc_dmd_get_low_page (void)
-{
-	return dmd_low_page;
-}
-
-extern inline void wpc_dmd_set_high_page (U8 val)
-{
-	writeb (WPC_DMD_HIGH_PAGE, dmd_high_page = val);
-}
-
-extern inline U8 wpc_dmd_get_high_page (void)
-{
-	return dmd_high_page;
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, mapping.u.first);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, mapping.u.second);
 }
 
 #define DMD_OVERLAY_PAGE DMD_ALLOC_PAGE_COUNT
@@ -342,7 +263,8 @@ struct dmd_rough_args
 #define dmd_rough_copy(x, y, w, h) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
-		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
+			(x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
 		dmd_rough_args.bwidth = w / CHAR_BIT; \
 		dmd_rough_args.height = h; \
 		dmd_rough_copy1 (); \
@@ -359,7 +281,8 @@ struct dmd_rough_args
 #define dmd_rough_erase(x, y, width, height) \
 	do { \
 		extern struct dmd_rough_args dmd_rough_args; \
-		dmd_rough_args.dst = DMD_HIGH_BASE + (x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
+		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
+			(x / CHAR_BIT) + y * DMD_BYTE_WIDTH; \
 		dmd_rough_args.bwidth = w / CHAR_BIT; \
 		dmd_rough_args.height = h; \
 		dmd_rough_erase1 (); \

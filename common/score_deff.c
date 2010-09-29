@@ -279,7 +279,7 @@ void scores_deff (void)
 			else
 			{
 				dmd_alloc_low_clean ();
-				wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
+				pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE+1);
 				dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
 				dmd_show_low ();
 			}

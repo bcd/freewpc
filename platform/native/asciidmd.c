@@ -22,10 +22,9 @@
 #include <simulation.h>
 #include <imglib.h>
 
-#define MAX_PAGES DMD_PAGE_COUNT
 #define MAX_PHASES 3
 
-struct buffer *asciidmd_buffers[MAX_PAGES] = { NULL, };
+struct buffer *asciidmd_buffers[PINIO_NUM_DMD_PAGES] = { NULL, };
 
 struct buffer *asciidmd_pre_splits[MAX_PHASES] = { NULL, };
 
@@ -130,7 +129,7 @@ void asciidmd_set_visible (int page)
 void asciidmd_init (void)
 {
 	int n;
-	for (n = 0; n < MAX_PAGES; n++)
+	for (n = 0; n < PINIO_NUM_DMD_PAGES; n++)
 		asciidmd_buffers[n] = asciidmd_alloc ();
 
 	for (n = 0; n < MAX_PHASES; n++)

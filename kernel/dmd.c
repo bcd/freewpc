@@ -129,12 +129,6 @@ void dmd_rtt0 (void);
 void dmd_rtt1 (void);
 void dmd_rtt2 (void);
 
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-U8 firq_row_value;
-#define dmd_request_firq() wpc_dmd_set_firq_row (firq_row_value)
-#else
-#define dmd_request_firq() wpc_dmd_set_firq_row (DMD_REFRESH_ROW)
-#endif
 
 U8 *dmd_phase_ptr;
 
@@ -145,10 +139,10 @@ U8 dmd_phase_table[] = {
 
 void dmd_new_rtt (void)
 {
-	wpc_dmd_set_visible_page ( ((U8 *)&dmd_visible_pages) [*dmd_phase_ptr++]);
+	pinio_dmd_set_visible ( ((U8 *)&dmd_visible_pages) [*dmd_phase_ptr++]);
 	if (dmd_phase_ptr >= dmd_phase_table + sizeof (dmd_phase_table))
 		dmd_phase_ptr = dmd_phase_table;
-	dmd_request_firq ();
+	pinio_dmd_request_interrupt ();
 }
 
 
@@ -169,23 +163,20 @@ void dmd_init (void)
 	 * Initialize those pages now.
 	 */
 #ifdef DMD_BLANK_PAGE_COUNT
-	wpc_dmd_set_low_page (dmd_get_blank (0));
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dmd_get_blank (0));
 	dmd_clean_page_low ();
-	wpc_dmd_set_high_page (dmd_get_blank (1));
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_get_blank (1));
 	dmd_clean_page_high ();
 #endif
 
-	wpc_dmd_set_low_page (0);
-	wpc_dmd_set_high_page (0);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, 0);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, 0);
 	dmd_clean_page_low ();
-	wpc_dmd_set_visible_page (dmd_dark_page = dmd_bright_page = 0);
+	pinio_dmd_set_visible (dmd_dark_page = dmd_bright_page = 0);
 	dmd_free_page = 2;
 
 	/* Program the DMD controller to generate interrupts */
-#ifdef CONFIG_DEBUG_ADJUSTMENTS
-	firq_row_value = DMD_REFRESH_ROW;
-#endif
-	dmd_request_firq ();
+	pinio_dmd_request_interrupt ();
 }
 
 
@@ -206,8 +197,8 @@ void dmd_init (void)
 
 void dmd_rtt0 (void)
 {
-	wpc_dmd_set_visible_page (dmd_dark_page);
-	dmd_request_firq ();
+	pinio_dmd_set_visible (dmd_dark_page);
+	pinio_dmd_request_interrupt ();
 	/* IDEA: only the last byte of 'dmd_rtt' needs to be
 	 * updated, as long as all three functions reside within
 	 * the same 256-byte region, which could be verified at
@@ -217,15 +208,15 @@ void dmd_rtt0 (void)
 
 void dmd_rtt1 (void)
 {
-	wpc_dmd_set_visible_page (dmd_bright_page);
-	dmd_request_firq ();
+	pinio_dmd_set_visible (dmd_bright_page);
+	pinio_dmd_request_interrupt ();
 	dmd_rtt = dmd_rtt2;
 }
 
 void dmd_rtt2 (void)
 {
-	wpc_dmd_set_visible_page (dmd_bright_page);
-	dmd_request_firq ();
+	pinio_dmd_set_visible (dmd_bright_page);
+	pinio_dmd_request_interrupt ();
 	dmd_rtt = dmd_rtt0;
 }
 
@@ -258,32 +249,36 @@ static __attribute__((noinline)) dmd_pagenum_t dmd_alloc (void)
  */
 void dmd_alloc_low (void)
 {
-	wpc_dmd_set_low_page (dmd_alloc ());	
-	wpc_dmd_set_high_page (wpc_dmd_get_low_page ());	
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0,
+		dmd_alloc ());
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
+		pinio_dmd_window_get (PINIO_DMD_WINDOW_0));
 }
 
 
 /** Allocate and map a single page, into the 'high' region. */
 void dmd_alloc_high (void)
 {
-	wpc_dmd_set_high_page (dmd_alloc ());	
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_alloc ());
 }
 
 
+/** Map a consecutive display page pair into windows 0 & 1 */
 void dmd_map_low_high (dmd_pagenum_t page)
 {
-	wpc_dmd_set_low_page (page);
-	wpc_dmd_set_high_page (page + 1);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, page);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, page + 1);
 }
 
 
 /**
- * Allocate and map two different pages.
+ * Allocate and map two different, consecutive pages.
  */
 void dmd_alloc_pair (void)
 {
-	wpc_dmd_set_low_page (dmd_alloc ());	
-	wpc_dmd_set_high_page (wpc_dmd_get_low_page () + 1);	
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dmd_alloc ());
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
+		pinio_dmd_window_get (PINIO_DMD_WINDOW_0) + 1);
 }
 
 
@@ -325,21 +320,23 @@ void dmd_show_high (void)
 /** Flip the mapping between low and high pages. */
 void dmd_flip_low_high (void)
 {
-	/* Note: tmp is made volatile here, to ensure that
-	 * tmp is actually used in wpc_dmd_set_high() below.
+	/* Note: tmp is made volatile here on purpose.
 	 * Without it, the compiler might optimize and try
 	 * to read from the hardware register, which doesn't
 	 * work.
 	 */
-	register dmd_pagenum_t tmp __areg__ = wpc_dmd_get_low_page ();
-	wpc_dmd_set_low_page (wpc_dmd_get_high_page ());
-	wpc_dmd_set_high_page (tmp);
+	register dmd_pagenum_t tmp __areg__;
+
+	tmp = pinio_dmd_window_get (PINIO_DMD_WINDOW_0);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0,
+		pinio_dmd_window_get (PINIO_DMD_WINDOW_1));
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, tmp);
 	/* TODO - for the 6809, this can be optimized by using
 	 * the EXG instruction to swap the values. */
 }
 
 
-/** Flip the currently visible page, alternating between the two 
+/** Flip the currently visible page, alternating between the two
 currently mapped */
 void dmd_show_other (void)
 {
@@ -507,17 +504,17 @@ void dmd_draw_horiz_line (U16 *dbuf, U8 y)
  */
 static inline void dmd_do_transition_cycle (U8 old_page, U8 new_page)
 {
-	/* On entry, the composite buffer must be mapped into the 
+	/* On entry, the composite buffer must be mapped into the
 	 * high page. */
- 
+
 	/* Map the old image in low memory. */
-	wpc_dmd_set_low_page (old_page);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, old_page);
 
 	/* Initialize the composite from the old image. */
 	dmd_transition->composite_old ();
 
 	/* Now remap the new image into low memory */
-	wpc_dmd_set_low_page (new_page);
+	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, new_page);
 
 	/* Update the composite using the new image data.
 	 * This function should set dmd_in_transition to FALSE when
@@ -550,7 +547,7 @@ void dmd_do_transition (void)
 	dmd_trans_data_ptr2 = NULL;
 
 	page_push (TRANS_PAGE);
-	
+
 	if (dmd_transition->composite_init)
 	{
 		(*dmd_transition->composite_init) ();
@@ -576,7 +573,7 @@ void dmd_do_transition (void)
 
 		/* Handle the transition of the dark page first.
 		 * Use the lower composite pair page. */
-		wpc_dmd_set_high_page (dmd_composite_page);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_composite_page);
 		dmd_do_transition_cycle (dmd_dark_page, new_dark_page);
 
 		/* Handle the transition of the bright page.
@@ -587,7 +584,7 @@ void dmd_do_transition (void)
 			tmp_trans_data_ptr = dmd_trans_data_ptr;
 			dmd_trans_data_ptr = dmd_trans_data_ptr2;
 
-			wpc_dmd_set_high_page (dmd_composite_page+1);
+			pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_composite_page+1);
 			dmd_do_transition_cycle (dmd_bright_page, new_bright_page);
 
 			dmd_trans_data_ptr2 = dmd_trans_data_ptr;

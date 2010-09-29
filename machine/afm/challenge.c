@@ -133,9 +133,10 @@ void chal_running_deff (void)
 	for (;;)
 	{
 		dmd_alloc_low ();
-		wpc_dmd_set_high_page (DMD_OVERLAY_PAGE);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE);
 		dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
-		wpc_dmd_set_high_page (wpc_dmd_get_low_page ());	
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
+			pinio_dmd_window_get (PINIO_DMD_WINDOW_0));
 
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 80, 16, sprintf_buffer);
