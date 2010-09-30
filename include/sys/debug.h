@@ -97,6 +97,7 @@ void bpt_clear (void);
 void bpt_stop (void);
 void bpt_set (void *addr, U8 page);
 extern U8 bpt_addr[];
+#undef FREE_ONLY
 #define FREE_ONLY
 #else
 #define bpt()

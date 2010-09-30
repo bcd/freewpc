@@ -193,7 +193,7 @@ void bpt_hit (void)
 		}
 		else
 		{
-			switch_idle ();
+			switch_periodic ();
 			db_periodic ();
 			task_runs_long ();
 		}
