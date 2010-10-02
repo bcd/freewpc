@@ -182,7 +182,7 @@ static void award_skill_switch (U8 sw)
 CALLSET_ENTRY (skill, display_update)
 {
 	if (skill_shot_enabled)
-		deff_start_bg (DEFF_SKILL_SHOT_READY, 0);
+		deff_start_bg (DEFF_SKILL_SHOT_READY, PRI_NULL);
 }
 
 
