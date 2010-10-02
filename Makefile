@@ -180,15 +180,15 @@ TMPFILES += $(ERR)
 # Path to the compiler and linker
 ifeq ($(CPU),m6809)
 GCC_ROOT ?= /usr/local/bin
-CC := $(CCACHE) $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
+CC := $(GCC_ROOT)/m6809-unknown-none-gcc-$(GCC_VERSION)
 AS = $(CC) -xassembler-with-cpp
 LD = $(GCC_ROOT)/m6809-unknown-none-ld
-REQUIRED += $(CC:$(CCACHE)=) $(LD)
+REQUIRED += $(CC) $(LD)
 else
 GCC_VERSION = NATIVE
 endif
 
-HOSTCC := $(CCACHE) gcc
+HOSTCC := gcc
 
 TOOLS :=
 HOST_OBJS :=
