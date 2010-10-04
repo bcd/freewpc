@@ -41,6 +41,11 @@ HOST_LIBS += $(shell pkg-config --libs gtk+-2.0) -export-dynamic
 NATIVE_OBJS += $(D)/ui_gtk.o
 endif
 
+ifeq ($(CONFIG_UI), console)
+CFLAGS += -DCONFIG_UI -DCONFIG_UI_CONSOLE
+NATIVE_OBJS += $(D)/ui_console.o
+endif
+
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif
