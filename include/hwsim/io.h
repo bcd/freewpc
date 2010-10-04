@@ -21,25 +21,30 @@
 #ifndef _HWSIM_IO_H
 #define _HWSIM_IO_H
 
-#define MIN_IO_ADDR 0x3C00
+#ifdef CONFIG_PLATFORM_WPC
+#define MIN_IO_ADDR 0x0
 #define MAX_IO_ADDR 0x4000
+#else
+#error
+#endif
 #define NUM_IO_ADDRS (MAX_IO_ADDR - MIN_IO_ADDR)
 
-typedef U8 (*io_reader) (IOPTR addr, void *data);
-typedef void (*io_writer) (IOPTR addr, U8 val, void *data);
+typedef U8 (*io_reader) (void *data, unsigned int offset);
+typedef void (*io_writer) (void *data, unsigned int offset, U8 val);
 
 struct io_region
 {
 	io_reader reader;
 	io_writer writer;
 	void *data;
+	unsigned int offset;
 };
 
 
-U8 io_null_reader (IOPTR addr, void *data);
-void io_null_writer (IOPTR addr, U8 val, void *data);
-void io_write (IOPTR addr, U8 val);
-U8 io_read (IOPTR addr);
+U8 io_null_reader (void *data, unsigned int offset);
+void io_null_writer (void *data, unsigned int offset, U8 val);
+void writeb (IOPTR addr, U8 val);
+U8 readb (IOPTR addr);
 void io_add (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data);
 void io_init (void);
 

@@ -191,9 +191,9 @@ do { \
  ***************************************************************/
 
 #ifdef CONFIG_NATIVE
-void writeb (U16 addr, U8 val);
+void writeb (IOPTR addr, U8 val);
 #else
-extern inline void writeb (U16 addr, U8 val)
+extern inline void writeb (IOPTR addr, U8 val)
 {
 	*(volatile U8 *)addr = val;
 	barrier ();
@@ -213,9 +213,9 @@ extern inline void writew (U16 addr, U16 val)
 
 
 #ifdef CONFIG_NATIVE
-U8 readb (U16 addr);
+U8 readb (IOPTR addr);
 #else
-extern inline U8 readb (U16 addr)
+extern inline U8 readb (IOPTR addr)
 {
 	return *(volatile U8 *)addr;
 }

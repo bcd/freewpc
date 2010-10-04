@@ -30,18 +30,18 @@ struct io_region io_region_table[NUM_IO_ADDRS];
 /* Default read/write handlers for invalid addresses, or addresses that were
 not installed by the simulator */
 
-U8 io_null_reader (IOPTR addr, void *data)
+U8 io_null_reader (void *data, unsigned int offset)
 {
 	return 0xFF;
 }
 
-void io_null_writer (IOPTR addr, U8 val, void *data)
+void io_null_writer (void *data, unsigned int offset, U8 val)
 {
 }
 
 
 /* Handle I/O write requests from the CPU */
-void io_write (IOPTR addr, U8 val)
+void writeb (IOPTR addr, U8 val)
 {
 	if ((addr < MIN_IO_ADDR) || (addr >= MAX_IO_ADDR))
 	{
@@ -50,35 +50,49 @@ void io_write (IOPTR addr, U8 val)
 	}
 	int r = addr - MIN_IO_ADDR;
 	void *data = io_region_table[r].data;
-	io_region_table[r].writer (addr, val, data);
+	unsigned int offset = io_region_table[r].offset;
+#ifdef CONFIG_IO_DEBUG
+	simlog (SLC_DEBUG, "writeb: %04X (%02X)", addr, val);
+#endif
+	io_region_table[r].writer (data, offset, val);
 }
 
 
 /* Handle I/O read requests from the CPU */
-U8 io_read (IOPTR addr)
+U8 readb (IOPTR addr)
 {
 	if ((addr < MIN_IO_ADDR) || (addr >= MAX_IO_ADDR))
 		return io_null_reader (addr, NULL);
 	int r = addr - MIN_IO_ADDR;
 	void *data = io_region_table[r].data;
-	return io_region_table[r].reader (addr, data);
+	unsigned int offset = io_region_table[r].offset;
+	U8 val = io_region_table[r].reader (data, offset);
+#ifdef CONFIG_IO_DEBUG
+	simlog (SLC_DEBUG, "readb: %04X (%02X)", addr, val);
+#endif
+	return val;
 }
 
 
 /* Add read/write handlers for a particular I/O address region. */
 void io_add (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data)
 {
-	if ((addr < MIN_IO_ADDR) || (addr+len >= MAX_IO_ADDR))
+	if ((addr < MIN_IO_ADDR) || (addr+len > MAX_IO_ADDR))
 		return;
 	int r = addr - MIN_IO_ADDR;
+	int offset = 0;
 	while (len > 0)
 	{
 		io_region_table[r].reader = reader;
 		io_region_table[r].writer = writer;
 		io_region_table[r].data = data;
+		io_region_table[r].offset = offset;
 		len--;
+		offset++;
+		r++;
 	}
 }
+
 
 /* Initialize the I/O table */
 void io_init (void)
@@ -89,6 +103,10 @@ void io_init (void)
 		io_region_table[r].reader = io_null_reader;
 		io_region_table[r].writer = io_null_writer;
 		io_region_table[r].data = NULL;
+		io_region_table[r].offset = 0;
 	}
+#ifdef CONFIG_PLATFORM_WPC
+	io_wpc_init ();
+#endif	
 }
 
