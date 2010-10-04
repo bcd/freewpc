@@ -190,6 +190,15 @@ endif
 
 HOSTCC := gcc
 
+###
+###	List host tools which are required in order to build.
+###	These are always compiled using your native C compiler
+###	and run locally on the build machine, even when cross-
+###	compiling for a different architecture.
+###
+###	Each host tool declares its build rules in a <tool>.make
+###	file in the tools/<tool> subdirectory.
+###
 TOOLS :=
 HOST_OBJS :=
 
@@ -198,15 +207,20 @@ D := tools/$1
 include tools/$1/$1.make
 endef
 
-$(eval $(call include-tool,srec2bin))
-$(eval $(call include-tool,csum))
-$(eval $(call include-tool,wpcdebug))
-$(eval $(call include-tool,sched))
-$(eval $(call include-tool,softscope))
-$(eval $(call include-tool,scope))
-$(eval $(call include-tool,bin2c))
-$(eval $(call include-tool,imgld))
+$(eval $(call include-tool,sched))       # Realtime scheduler
+$(eval $(call include-tool,imgld))       # Image linker
 
+ifeq ($(CPU),m6809)
+$(eval $(call include-tool,srec2bin))    # SREC to binary converter
+$(eval $(call include-tool,csum))        # Checksum update utility
+$(eval $(call include-tool,wpcdebug))    # Emulated debug console
+endif
+
+ifdef CONFIG_OLD_HOST_TOOLS
+$(eval $(call include-tool,softscope))   # Signal scope #1
+$(eval $(call include-tool,scope))       # Signal scope #2
+$(eval $(call include-tool,bin2c))       # Binary-to-C converter.
+endif
 
 # Name of the blanker to use
 BLANKER = dd
