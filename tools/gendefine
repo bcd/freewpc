@@ -52,6 +52,8 @@ my @dirs = (
 	"test",
 	"platform/native",
 	"platform/wpc",
+	"cpu/native",
+	"cpu/m6809",
 	"build",
 	);
 
