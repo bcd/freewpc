@@ -35,7 +35,7 @@ KERNEL_HW_OBJS += $(P)/init-wpc.o
 CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
 
 # Additional object files to be linked into the kernel region
-NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/task.o $(D)/section.o \
+NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/section.o \
 	$(D)/bcd_string.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
 	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \

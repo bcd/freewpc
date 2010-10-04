@@ -16,6 +16,7 @@ ifeq ($(CONFIG_PTH),y)
 PTH_CFLAGS := $(shell pth-config --cflags)
 HOST_LIBS += -lpth
 CFLAGS += $(PTH_CFLAGS)
+NATIVE_OBJS += $(C)/task_pth.o
 endif
 
 ifeq ($(CONFIG_NATIVE_PROFILE),y)
