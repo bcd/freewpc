@@ -90,11 +90,3 @@ void protected_memory_save (void)
 }
 
 
-void local_save (void)
-{
-}
-
-void local_restore (void)
-{
-}
-

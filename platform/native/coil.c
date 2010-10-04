@@ -215,7 +215,7 @@ struct sim_coil_type motor_type_coil = {
  * even when no writes are emitted from the CPU; the power driver board
  * latches state.
  */
-void sim_coil_update (struct sim_coil_state *c)
+static void sim_coil_update (struct sim_coil_state *c)
 {
 	struct sim_coil_state *m = c->master;
 

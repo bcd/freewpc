@@ -134,7 +134,8 @@ __noreturn__ void freewpc_init (void)
 	pinio_watchdog_reset ();
 
 #ifdef CONFIG_NATIVE
-	linux_init ();
+	/* Notify the simulator when the core OS is up and running. */
+	sim_init ();
 #endif
 
 	/* Initialize the sound board early in a background

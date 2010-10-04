@@ -30,19 +30,19 @@ int sim_no_opto_power = 0;
  * simulation code and the actual product code, but it serves the same
  * purpose.  Only one matrix is needed, however.
  */
-U8 linux_switch_matrix[SWITCH_BITS_SIZE+1];
+U8 sim_switch_matrix[SWITCH_BITS_SIZE+1];
 
 
 
 U8 *sim_switch_matrix_get (void)
 {
-	return linux_switch_matrix;
+	return sim_switch_matrix;
 }
 
 
 static void sim_switch_update (int sw)
 {
-	U8 level = linux_switch_matrix[sw/8] & (1 << (sw%8));
+	U8 level = sim_switch_matrix[sw/8] & (1 << (sw%8));
 
 	/* Redraw the switch */
 #ifdef CONFIG_UI
@@ -64,7 +64,7 @@ void sim_switch_toggle (int sw)
 	if (sim_no_opto_power && switch_is_opto (sw))
 		return;
 
-	linux_switch_matrix[sw / 8] ^= (1 << (sw % 8));
+	sim_switch_matrix[sw / 8] ^= (1 << (sw % 8));
 	sim_switch_update (sw);
 }
 
@@ -78,16 +78,16 @@ void sim_switch_set (int sw, int on)
 	if (switch_is_opto (sw))
 		on = !on;
 	if (on)
-		linux_switch_matrix[sw / 8] |= (1 << (sw % 8));
+		sim_switch_matrix[sw / 8] |= (1 << (sw % 8));
 	else
-		linux_switch_matrix[sw / 8] &= ~(1 << (sw % 8));
+		sim_switch_matrix[sw / 8] &= ~(1 << (sw % 8));
 	sim_switch_update (sw);
 }
 
 
 int sim_switch_read (int sw)
 {
-	return linux_switch_matrix[sw/8] & (1 << (sw%8));
+	return sim_switch_matrix[sw/8] & (1 << (sw%8));
 }
 
 
@@ -118,8 +118,8 @@ void sim_switch_init (void)
 	switchnum_t sw;
 
 	/* Initialize switch levels to zero by default */
-	memset (linux_switch_matrix, 0, SWITCH_BITS_SIZE);
-	linux_switch_matrix[9] = 0xFF;
+	memset (sim_switch_matrix, 0, SWITCH_BITS_SIZE);
+	sim_switch_matrix[9] = 0xFF;
 
 	conf_add ("sw.no_power", &sim_no_switch_power);
 	conf_add ("sw.no_opto_power", &sim_no_opto_power);

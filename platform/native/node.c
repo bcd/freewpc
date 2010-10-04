@@ -28,7 +28,7 @@
 	*/
 
 extern device_properties_t device_properties_table[];
-extern int linux_installed_balls;
+extern int sim_installed_balls;
 
 
 /* Nodes for positions within a ball device */
@@ -204,7 +204,8 @@ void node_move (struct ball_node *dst, struct ball_node *src)
 	else
 	{
 		ball->node = dst;
-		sim_time_register (src->delay, FALSE, node_insert_after_delay, ball);
+		sim_time_register (src->delay, FALSE,
+			(time_handler_t)node_insert_after_delay, ball);
 	}
 }
 
@@ -288,7 +289,7 @@ void node_init (void)
 		so that they proceed through the outhole and TZ's far left trough.
 		This lets us install more balls than the trough can hold, as if
 		you just dropped them onto the playfield. */
-	for (i=0; i < linux_installed_balls; i++)
+	for (i=0; i < sim_installed_balls; i++)
 	{
 		the_ball[i].node = NULL;
 		strcpy (the_ball[i].name, "Ball X");

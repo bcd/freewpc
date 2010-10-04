@@ -189,7 +189,7 @@ gboolean display_expose_event_cb (GtkWidget *widget, GdkEventExpose *event,
  */
 void window1_destroy_cb (GtkObject *object, gpointer user)
 {
-	linux_shutdown ();
+	sim_exit (0);
 }
 
 

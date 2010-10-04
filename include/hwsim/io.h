@@ -45,7 +45,22 @@ U8 io_null_reader (void *data, unsigned int offset);
 void io_null_writer (void *data, unsigned int offset, U8 val);
 void writeb (IOPTR addr, U8 val);
 U8 readb (IOPTR addr);
-void io_add (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data);
+void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data);
+
+#define io_add(addr, len, reader, writer, data) \
+	io_add_1 (addr, len, (io_reader)reader, (io_writer)writer, data)
+
+#define io_add_rw(addr, len, reader, writer, data) \
+	io_add (addr, reader, writer, data)
+#define io_add_ro(addr, len, reader, data) \
+	io_add (addr, reader, io_null_writer, data)
+#define io_add_wo(addr, len, writer, data) \
+	io_add (addr, io_null_reader, writer, data)
+
+
 void io_init (void);
+#ifdef CONFIG_PLATFORM_WPC
+void io_wpc_init (void);
+#endif
 
 #endif /*  _HWSIM_IO_H */

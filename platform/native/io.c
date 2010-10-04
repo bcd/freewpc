@@ -45,7 +45,7 @@ void writeb (IOPTR addr, U8 val)
 {
 	if ((addr < MIN_IO_ADDR) || (addr >= MAX_IO_ADDR))
 	{
-		io_null_writer (addr, val, NULL);
+		io_null_writer (NULL, addr, val);
 		return;
 	}
 	int r = addr - MIN_IO_ADDR;
@@ -62,7 +62,7 @@ void writeb (IOPTR addr, U8 val)
 U8 readb (IOPTR addr)
 {
 	if ((addr < MIN_IO_ADDR) || (addr >= MAX_IO_ADDR))
-		return io_null_reader (addr, NULL);
+		return io_null_reader (NULL, addr);
 	int r = addr - MIN_IO_ADDR;
 	void *data = io_region_table[r].data;
 	unsigned int offset = io_region_table[r].offset;
@@ -75,7 +75,7 @@ U8 readb (IOPTR addr)
 
 
 /* Add read/write handlers for a particular I/O address region. */
-void io_add (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data)
+void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data)
 {
 	if ((addr < MIN_IO_ADDR) || (addr+len > MAX_IO_ADDR))
 		return;

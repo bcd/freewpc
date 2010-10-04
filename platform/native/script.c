@@ -347,7 +347,7 @@ void exec_script (char *cmd)
 		t = tnext ();
 		v = tsw ();
 		simlog (SLC_DEBUG, "Key '%c' = %d", *t, v);
-		linux_key_install (*t, v);
+		sim_key_install (*t, v);
 	}
 	/*********** push [value] ***************/
 	else if (teq (t, "push"))
@@ -375,7 +375,7 @@ void exec_script (char *cmd)
 	/*********** exit ***************/
 	else if (teq (t, "exit"))
 	{
-		linux_shutdown (0);
+		sim_exit (0);
 	}
 }
 

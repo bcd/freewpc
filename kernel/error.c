@@ -112,7 +112,7 @@ void fatal (errcode_t error_code)
 #endif
 
 #ifdef CONFIG_NATIVE
-	linux_shutdown (error_code);
+	sim_exit (error_code);
 #else
 	/* Go into a loop, long enough for the error message to be visible.
 	Then reset the system. */

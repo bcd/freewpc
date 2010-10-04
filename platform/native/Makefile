@@ -11,7 +11,6 @@ NATIVE_OBJS :=
 CPU := native
 CONFIG_PTH := y
 CONFIG_UI ?= curses
-#CONFIG_UI := gtk
 CONFIG_SOFT_REALTIME := y
 include cpu/$(CPU)/Makefile
 
@@ -38,8 +37,14 @@ CFLAGS += -I$(D) -DCONFIG_PLATFORM_WPC -DPAGE=0
 NATIVE_OBJS += $(D)/main.o $(D)/switch.o $(D)/section.o \
 	$(D)/bcd_string.o \
 	$(D)/timing.o $(D)/watchdog.o $(D)/zerocross.o \
-	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o \
-	$(D)/coil.o $(D)/script.o $(D)/conf.o $(D)/node.o $(D)/io.o
+	$(D)/signal.o $(D)/hwtimer.o $(D)/sound.o
+
+NATIVE_OBJS += $(D)/coil.o
+NATIVE_OBJS += $(D)/script.o
+NATIVE_OBJS += $(D)/conf.o
+NATIVE_OBJS += $(D)/node.o
+NATIVE_OBJS += $(D)/io.o
+NATIVE_OBJS += $(D)/keyboard.o
 NATIVE_OBJS += $(if $(CONFIG_WPC), $(D)/io_wpc.o)
 NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 

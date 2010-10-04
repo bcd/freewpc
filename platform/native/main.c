@@ -27,32 +27,25 @@
  * allows FreeWPC to be tested directly on a Linux or Windows development machine,
  * even when there is no PinMAME.
  *
- * If CONFIG_UI is also defined, then instead of plain console output,
- * the state of the system is redrawn using the generic UI functions.
- * The current UI is implemented using ncurses, but other UI backends may
- * be added later.
+ * If CONFIG_UI is also defined, then various activities are displayed to the
+ * user.  Several different UIs are available.
  */
 
-#include <termios.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <freewpc.h>
 #include "/usr/include/sys/time.h"
 #include <simulation.h>
+#include <hwsim/io.h>
 
-extern void do_swi3 (void);
-extern void do_swi2 (void);
 extern void do_firq (void);
 extern void do_irq (void);
-extern void do_swi (void);
-extern void do_nmi (void);
-
 extern void exit (int);
 
-extern const device_properties_t device_properties_table[];
-extern const switch_info_t switch_table[];
 
+/** The actual time at which the simulation was started */
+static time_t sim_boot_time;
 
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
@@ -66,9 +59,6 @@ U8 *linux_dmd_high_page;
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
 
-/** Nonzero if an IRQ is pending */
-int linux_irq_pending;
-
 /** True if the FIRQ is enabled */
 bool linux_firq_enable;
 
@@ -80,16 +70,13 @@ static volatile int sim_debug_init = 0;
 
 /** The initial number of balls to 'install' as given on the command-line. */
 #ifdef DEVNO_TROUGH
-int linux_installed_balls = MACHINE_TROUGH_SIZE;
+int sim_installed_balls = MACHINE_TROUGH_SIZE;
 #else
-int linux_installed_balls = 0;
+int sim_installed_balls = 0;
 #endif
 
-/** The file descriptor to read from for input */
-int linux_input_fd = 0;
-
 /** The stream to write to for output */
-FILE *linux_output_stream;
+FILE *sim_output_stream;
 
 unsigned int signo_under_trace = SIGNO_SOL + 0;
 
@@ -119,13 +106,13 @@ void simlog (enum sim_log_class class, const char *format, ...)
 #ifdef CONFIG_UI
 	ui_write_debug (class, format, ap);
 
-	if (linux_output_stream == stdout)
+	if (sim_output_stream == stdout)
 		ofp = NULL;
 	else
-		ofp = linux_output_stream;
+		ofp = sim_output_stream;
 
 #else
-	ofp = linux_output_stream;
+	ofp = sim_output_stream;
 #endif
 
 	if (ofp)
@@ -141,7 +128,7 @@ void simlog (enum sim_log_class class, const char *format, ...)
 }
 
 
-__noreturn__ void linux_shutdown (U8 error_code)
+__noreturn__ void sim_exit (U8 error_code)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");
 	protected_memory_save ();
@@ -151,38 +138,6 @@ __noreturn__ void linux_shutdown (U8 error_code)
 	if (crash_on_error && error_code)
 		*(int *)0 = 1;
 	exit (error_code);
-}
-
-
-
-/** Write to a multiplexed output; i.e. a register in which distinct
- * outputs are multiplexed together into a single 8-bit I/O location.
- * UI_UPDATE provides a function for displaying the contents of a single
- * output; it takes the output number and a zero(off)/non-zero(on) state.
- * INDEX gives the output number of the first bit of the byte of data.
- * MEMP points to the data byte, containing 8 outputs.
- * NEWVAL is the value to be written; it is assigned to *MEMP.
- */
-void mux_write (void (*ui_update) (int, int), int index, U8 *memp, U8 newval, unsigned int sigbase)
-{
-	U8 oldval = *memp;
-	int n;
-	for (n = 0; n < 8; n++)
-	{
-		if ((newval & (1 << n)) != (oldval & (1 << n)))
-		{
-			/* Update the user interface to reflect the change in output */
-#ifdef CONFIG_UI
-			ui_update (index + n, newval & (1 << n));
-#endif
-
-			/* Notify the signal tracker that the output changed */
-			signal_update (sigbase+index+n, newval & (1 << n));
-		}
-	}
-
-	/* Latch the write; save the value written */
-	*memp = newval;
 }
 
 
@@ -227,279 +182,11 @@ CALLSET_ENTRY (native, realtime_tick)
 }
 
 
-/** A mapping from keyboard command to switch */
-static switchnum_t keymaps[256] = {
-#ifdef MACHINE_START_SWITCH
-	['1'] = MACHINE_START_SWITCH,
-#endif
-#ifdef MACHINE_BUYIN_SWITCH
-	['2'] = MACHINE_BUYIN_SWITCH,
-#endif
-	/* '3': SW_LEFT_COIN is omitted on purpose... see below */
-	['4'] = SW_CENTER_COIN,
-	['5'] = SW_RIGHT_COIN,
-	['6'] = SW_FOURTH_COIN,
-	['7'] = SW_ESCAPE,
-	['8'] = SW_DOWN,
-	['9'] = SW_UP,
-	['0'] = SW_ENTER,
-	[','] = SW_LEFT_BUTTON,
-	['.'] = SW_RIGHT_BUTTON,
-	['-'] = SW_COIN_DOOR_CLOSED,
-#ifdef MACHINE_TILT_SWITCH
-	['T'] = MACHINE_TILT_SWITCH,
-#endif
-#ifdef MACHINE_SLAM_TILT_SWITCH
-	['!'] = MACHINE_SLAM_TILT_SWITCH,
-#endif
-#ifdef MACHINE_LAUNCH_SWITCH
-	[' '] = MACHINE_LAUNCH_SWITCH,
-#endif
-};
-
-
-void linux_key_install (char key, unsigned int swno)
+unsigned int
+sim_get_wall_clock (void)
 {
-	keymaps[(int)key] = swno;
-}
-
-
-/** Read a character from the keyboard.
- * If input is closed, shutdown the program. */
-char linux_interface_readchar (void)
-{
-	char inbuf;
-	ssize_t res = pth_read (linux_input_fd, &inbuf, 1);
-	if (res <= 0)
-	{
-		task_sleep_sec (2);
-		linux_shutdown (0);
-	}
-	return inbuf;
-}
-
-
-/** Turn on/off keybuffering.  Pass a zero to put the
-console in raw mode, so keystrokes are not echoed.
-Pass nonzero flag to go back to the default mode. */
-static void keybuffering (int flag)
-{
-   struct termios tio;
-
-   tcgetattr (0, &tio);
-   if (!flag) /* 0 = no buffering = not default */
-      tio.c_lflag &= ~ICANON;
-   else /* 1 = buffering = default */
-      tio.c_lflag |= ICANON;
-   tcsetattr (0, TCSANOW, &tio);
-}
-
-
-/** Main loop for handling the user interface. */
-static void linux_interface_thread (void)
-{
-	char inbuf[2];
-	switchnum_t sw;
-	int simulator_keys = 1;
-	int toggle_mode = 1;
-
-	/* Put stdin in raw mode so that 'enter' doesn't have to
-	be pressed after each keystroke. */
-	keybuffering (0);
-
-	/* Let the system initialize before accepting keystrokes */
-	task_sleep_sec (3);
-
-	if (exec_file && exec_late_flag)
-		exec_script_file (exec_file);
-
-	for (;;)
-	{
-#ifdef CONFIG_GTK
-		gtk_poll ();
-		task_yield ();
-#else
-		*inbuf = linux_interface_readchar ();
-
-		/* If switch simulation is turned off, then keystrokes
-		are fed directly into the runtime debugger. */
-		if (simulator_keys == 0)
-		{
-			/* Except tilde turns it off as usual. */
-			if (*inbuf == '`')
-			{
-				simlog (SLC_DEBUG, "Input directed to switch matrix.");
-				simulator_keys ^= 1;
-			}
-			else
-			{
-				wpc_key_press (*inbuf);
-			}
-			continue;
-		}
-
-		switch (*inbuf)
-		{
-			case '\r':
-			case '\n':
-				break;
-
-			case ':':
-			{
-				/* Read and execute a script command */
-				char cmd[128];
-				char *p = cmd;
-
-				memset (p, 0, 128);
-				ui_print_command (" ");
-				for (;;)
-				{
-					*p = linux_interface_readchar ();
-					if (*p == '\x1B')
-					{
-						break;
-					}
-					else if (*p == '\010')
-					{
-						*p = '\0';
-						p--;
-					}
-					else if ((*p == '\r') || (*p == '\n'))
-					{
-						*p = '\0';
-						exec_script (cmd);
-						break;
-					}
-					ui_print_command (cmd);
-					p++;
-				}
-				ui_print_command ("");
-				break;
-			}
-
-			case 'C':
-				gdb_break ();
-				break;
-
-			case '{':
-				signal_trace_start (signo_under_trace);
-				break;
-
-			case '}':
-				signal_trace_stop (signo_under_trace);
-				break;
-
-			case 'q':
-				node_kick (&open_node);
-				break;
-
-#if MAX_DEVICES > 1
-			case 'w':
-				node_move (&device_nodes[1], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 2
-			case 'e':
-				node_move (&device_nodes[2], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 3
-			case 'r':
-				node_move (&device_nodes[3], &open_node);
-				break;
-#endif
-#if MAX_DEVICES > 4
-			case 't':
-				node_move (&device_nodes[3], &open_node);
-				break;
-#endif
-
-#ifndef MACHINE_LAUNCH_SWITCH
-			case ' ':
-				node_move (&open_node, &shooter_node);
-				break;
-#endif
-
-			case '`':
-				/* The tilde toggles between keystrokes being treated as switches,
-				and as input into the runtime debugger. */
-				simulator_keys ^= 1;
-				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
-				break;
-
-			case '\x1b':
-				linux_shutdown (0);
-				break;
-
-			case 'T':
-				task_dump ();
-				break;
-
-			case 'S':
-				*inbuf = linux_interface_readchar ();
-				task_sleep_sec (*inbuf - '0');
-				break;
-
-			case '+':
-				inbuf[0] = linux_interface_readchar ();
-				inbuf[1] = linux_interface_readchar ();
-
-				if (inbuf[0] == 'D')
-					sw = inbuf[1] - '1';
-				else if (inbuf[0] == 'F')
-					sw = (inbuf[1] - '1')
-						+ NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES;
-				else
-					sw = (inbuf[0] - '1') * 8 + (inbuf[1] - '1');
-				sim_switch_depress (sw);
-				break;
-
-			case '3':
-				sim_switch_depress (SW_LEFT_COIN);
-				break;
-
-			case '#':
-				/* Treat '#' as a comment until end of line.
-				This is useful for creating scripts. */
-				do {
-					*inbuf = linux_interface_readchar ();
-				} while (*inbuf != '\n');
-				break;
-
-			case '"':
-				simlog (SLC_DEBUG, "next key will toggle, not press");
-				toggle_mode = 0;
-				break;
-
-			default:
-				/* For all other keystrokes, use the keymap table
-				to turn the keystroke into a switch trigger. */
-				sw = keymaps[(int)*inbuf];
-				if (sw)
-				{
-					if ((switch_table[sw].flags & SW_EDGE) || !toggle_mode)
-					{
-						simlog (SLC_DEBUG, "switch %d toggled",  sw);
-						sim_switch_toggle (sw);
-						toggle_mode = 1;
-					}
-#if (MACHINE_FLIPTRONIC == 1)
-					else if (sw >= 72)
-					{
-						flipper_button_depress (sw);
-					}
-#endif
-					else
-					{
-						sim_switch_depress (sw);
-					}
-				}
-				else
-					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
-						*inbuf, *inbuf);
-			}
-#endif
-	}
+	time_t now = time (NULL);
+	return ((now - sim_boot_time) * linux_irq_multiplier) / 60;
 }
 
 
@@ -509,24 +196,21 @@ static void linux_interface_thread (void)
  * bringup.  This performs final initialization before the system
  * is ready.
  */
-void linux_init (void)
+void sim_init (void)
 {
 	void realtime_loop (void);
 
 	/* This is done here, because the task subsystem isn't ready
 	inside main () */
 	task_create_gid_while (GID_LINUX_REALTIME, realtime_loop, TASK_DURATION_INF);
-	task_create_gid_while (GID_LINUX_INTERFACE, linux_interface_thread, TASK_DURATION_INF);
+
+	/* Initialize the keyboard handler */
+	keyboard_init ();
 
 	/* Initial the trough to contain all the balls.  By default,
 	 * it will fill the trough, based on its actual size.  You
 	 * can use the --balls option to override this. */
 	node_init ();
-}
-
-
-void malloc_init (void)
-{
 }
 
 
@@ -540,7 +224,7 @@ int main (int argc, char *argv[])
 	int argn = 1;
 
 	/* Parse command-line arguments */
-	linux_output_stream = stdout;
+	sim_output_stream = stdout;
 
 	while (argn < argc)
 	{
@@ -556,12 +240,12 @@ int main (int argc, char *argv[])
 		}
 		else if (!strcmp (arg, "-f"))
 		{
-			linux_input_fd = open (argv[argn++], O_RDONLY);
+			keyboard_open (argv[argn++]);
 		}
 		else if (!strcmp (arg, "-o"))
 		{
-			linux_output_stream = fopen (argv[argn++], "w");
-			if (linux_output_stream == NULL)
+			sim_output_stream = fopen (argv[argn++], "w");
+			if (sim_output_stream == NULL)
 			{
 				printf ("Error: could not open log file\n");
 				exit (1);
@@ -616,8 +300,7 @@ int main (int argc, char *argv[])
 	/** Do initialization that the hardware would normally do before
 	 * the reset vector is invoked. */
 	signal_update (SIGNO_RESET, 1);
-	linux_irq_enable = linux_firq_enable = TRUE;
-	linux_irq_pending = 0;
+	disable_interrupts ();
 	sim_zc_init ();
 #if (MACHINE_PIC == 1)
 	simulation_pic_init ();
@@ -674,7 +357,7 @@ int main (int argc, char *argv[])
 	signal_update (SIGNO_50V, 1);
 
 	/* Create more conf knobs */
-	conf_add ("balls", &linux_installed_balls);
+	conf_add ("balls", &sim_installed_balls);
 	conf_add ("sim.speed", &linux_irq_multiplier);
 
 	/* Execute default script file.  First, load any global
@@ -686,8 +369,12 @@ int main (int argc, char *argv[])
 	if (exec_file && !exec_late_flag)
 		exec_script_file (exec_file);
 
+	/* Save the time at which the simulation started, to implement
+	the wall clock */
+	sim_boot_time = time (NULL);
+
+	/* Now start the pinball OS! */
 	freewpc_init ();
 	return 0;
 }
-
 
