@@ -43,6 +43,9 @@ U8 gumball_score;
 extern U8 pb_location;
 extern bool hold_balls_in_autofire;
 
+
+//TODO Start a timer to check if a ball came out, if not, turn again 
+
 /*************************************************************/
 /* Gumball APIs                                              */
 /*************************************************************/
@@ -101,7 +104,7 @@ void gumball_release_task (void)
 
 		/* Original timeout was 90x33ms = 3sec */
 		/* Shorter timeout will work when geneva is broken */
-		timeout = 19;
+		timeout = 25;
 		while ((gumball_geneva_tripped == FALSE) && (gumball_exit_tripped == FALSE) && (--timeout > 0))
 		{
 			sol_request (SOL_GUMBALL_RELEASE);
@@ -141,6 +144,7 @@ void gumball_divertor_close (void)
 	task_kill_gid (GID_GUMBALL_DIV);
 }
 
+/* Called by the right loop magnet to see if we should divert the ball */
 void sw_gumball_right_loop_entered (void)
 {
 	/* Open the divertor if trying to load the gumball*/
@@ -151,20 +155,20 @@ void sw_gumball_right_loop_entered (void)
 		return;
 	}
 	/* Don't open if autofired into play or dropped from the lock*/
-	else if (event_did_follow (autolaunch, right_loop)
+	if (event_did_follow (autolaunch, right_loop)
 		|| event_did_follow (dev_lock_kick_attempt, right_loop)
 		|| timer_find_gid (GID_LOCK_KICKED))
 	{
 		return;
 	}
 	/* Don't open if the magnet is about to grab the ball
-	 * but rembering that it will always let the powerball through */
-	else if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
+	 * but remembering that it will always let the powerball through */
+	if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
 		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
 	{
 		return;
 	}
-	else if (gumball_load_is_enabled ())
+	if (gumball_load_is_enabled ())
 	{
 		gumball_divertor_open ();
 		if (in_live_game && !multi_ball_play ())

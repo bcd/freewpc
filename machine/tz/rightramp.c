@@ -76,6 +76,7 @@ void sw_right_ramp_enter_task (void)
 			task_sleep_sec (2);
 	
 			/* Wait until allowed to kickout */
+			/* TODO BUG? */
 			while (kickout_locks > 0)
 				task_sleep (TIME_100MS);
 			

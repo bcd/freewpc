@@ -325,7 +325,7 @@ void rules_deff (void)
 	rule_complete ();
 
 	rule_begin ();
-	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOUR ARE AT IT", "");
+	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOU ARE AT IT", "");
 	rules_sleep_sec (4);
 	rule_complete ();
 	

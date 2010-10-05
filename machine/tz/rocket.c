@@ -69,9 +69,13 @@ CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
 	{
-		/* Wait until the skill shot deff has finished */
-		while (skill_shot_enabled)
-			task_sleep (TIME_100MS);
+		/* Wait until the skill shot has finished */
+		while (skill_shot_enabled ||
+			deff_get_active () == DEFF_SKILL_SHOT_MADE ||
+			task_find_gid (GID_SKILL_SWITCH_TRIGGER))
+		{
+			task_sleep (TIME_500MS);
+		}
 		if (!multi_ball_play ())
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);

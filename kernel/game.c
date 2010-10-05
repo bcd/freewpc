@@ -161,9 +161,10 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
+//TODO Could do with something modular/per machine here
 #ifdef MACHINE_TZ
-			loop_master_check ();
-			combo_master_check ();
+//			loop_master_check ();
+//			combo_master_check ();
 #endif
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);

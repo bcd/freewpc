@@ -62,6 +62,9 @@ static void handle_outhole (void)
 			continue;
 		}
 
+		/* Wait for ball to settle more before kicking.  Then wait again
+		briefly before repolling the switch */
+		task_sleep (TIME_300MS);
 		sol_request (SOL_OUTHOLE);
 		task_sleep_sec (2);
 	}
