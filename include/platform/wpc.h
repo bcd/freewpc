@@ -686,6 +686,8 @@ extern inline U8 wpc_read_pic (void)
 /* Lamps                                    */
 /********************************************/
 
+#define PINIO_NUM_LAMPS 64
+
 extern inline void pinio_write_lamp_strobe (U8 val)
 {
 	writeb (WPC_LAMP_COL_STROBE, val);

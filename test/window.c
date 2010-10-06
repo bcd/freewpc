@@ -3307,7 +3307,7 @@ void lamp_test_item_number (U8 val)
 void lamp_test_init (void)
 {
 	browser_init ();
-	browser_max = NUM_LAMPS-1;
+	browser_max = PINIO_NUM_LAMPS-1;
 	browser_item_number = lamp_test_item_number;
 }
 

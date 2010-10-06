@@ -236,7 +236,7 @@ my %ContextMaxima = (
 # be emitted, but is already defined by the common header files.
 my %FixedMaxima = (
 	"switches" => "NUM_SWITCHES",
-	"lamps", "NUM_LAMPS",
+	"lamps", "PINIO_NUM_LAMPS",
 	"drives" => "SOL_COUNT",
 );
 

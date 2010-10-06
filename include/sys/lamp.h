@@ -24,9 +24,8 @@
 /** Says how many bytes are needed to hold N bits */
 #define BITS_TO_BYTES(n)  (((n) + 7) / 8)
 
-/** The maximum number of physical lamps supported */
-#define NUM_LAMPS 64
-#define NUM_LAMP_COLS BITS_TO_BYTES(NUM_LAMPS)
+/** The number of bytes for tracking the playfield lamps */
+#define NUM_LAMP_COLS BITS_TO_BYTES(PINIO_NUM_LAMPS)
 
 /** Macro to create a lamp number from its row and column */
 #define MAKE_LAMP(col,row)	((((col)-1) * 8) + (row)-1)
@@ -80,10 +79,10 @@ typedef enum
  */
 
 /** Indicates the end of a lamplist */
-#define LAMP_END						(NUM_LAMPS + 2)
+#define LAMP_END						(PINIO_NUM_LAMPS + 2)
 
 /** Indicates a time delay within a lamplist */
-#define LAMP_MACRO_SLEEP_OP		(NUM_LAMPS + 3)
+#define LAMP_MACRO_SLEEP_OP		(PINIO_NUM_LAMPS + 3)
 
 
 void lamp_init (void);
