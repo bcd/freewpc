@@ -41,10 +41,12 @@ CALLSET_ENTRY (start_button, sw_start_button)
 	else */ if (deff_get_active () == DEFF_SYSTEM_RESET)
 	{
 	}
+#ifdef CONFIG_BUYIN
 	else if (deff_get_active () == DEFF_BUYIN_OFFER)
 	{
 		SECTION_VOIDCALL (__common__, buyin_start_button_handler);
 	}
+#endif
 	else if (switch_stress_enable && in_live_game && valid_playfield)
 	{
 		switch_stress_drain ();

@@ -23,6 +23,7 @@ $(eval $(call have,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))
 $(eval $(call have,CONFIG_TRIAC))
 $(eval $(call have,CONFIG_RTC))
+$(eval $(call have,CONFIG_BUYIN))
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
 CONFIG_SCORE_RANK := y
 
