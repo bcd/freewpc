@@ -17,7 +17,7 @@ include cpu/$(CPU)/Makefile
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
-CONFIG_WPC=y
+$(eval $(call have,CONFIG_PLATFORM_WPC))
 CONFIG_FONT ?= $(CONFIG_DMD)
 $(eval $(call have,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))
@@ -45,7 +45,7 @@ NATIVE_OBJS += $(D)/conf.o
 NATIVE_OBJS += $(D)/node.o
 NATIVE_OBJS += $(D)/io.o
 NATIVE_OBJS += $(D)/keyboard.o
-NATIVE_OBJS += $(if $(CONFIG_WPC), $(D)/io_wpc.o)
+NATIVE_OBJS += $(if $(CONFIG_PLATFORM_WPC), $(D)/io_wpc.o)
 NATIVE_OBJS += $(if $(CONFIG_PIC), $(D)/wpc-pic.o)
 
 # For ASCII DMD

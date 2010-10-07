@@ -15,7 +15,7 @@ include cpu/$(CPU)/Makefile
 # Subplatform support
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
-CONFIG_WPC ?= y
+$(eval $(call have,CONFIG_PLATFORM_WPC))
 CONFIG_FONT ?= $(CONFIG_DMD)
 $(eval $(call have,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))
@@ -35,8 +35,8 @@ CONFIG_SCORE_RANK := y
 #
 INT_CFLAGS = -mint8
 # TODO : Don't hardcode code/data sections here like this!
-CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -DCONFIG_PLATFORM_WPC -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -Werror=implicit-function-declaration
-EXTRA_ASFLAGS += -D__int8__ -DCONFIG_PLATFORM_WPC
+CFLAGS += $(INT_CFLAGS) -DHAVE_NVRAM -mdirect -mwpc -fno-builtin -mcode-section=.text -mdata-section=.text -mbss-section=ram -Wno-format -Werror=implicit-function-declaration
+EXTRA_ASFLAGS += -D__int8__
 
 # Say which source files need to be compiled in for the WPC platform only.
 # Use KERNEL_HW_OBJS for C sources, and KERNEL_ASM_OBJS for assembler files.
