@@ -23,6 +23,7 @@
 #include <hwsim/io.h>
 #include <hwsim/matrix.h>
 
+#define MINS_PER_HOUR 60
 
 /** The simulated solenoid outputs */
 static U8 sim_sols[SOL_COUNT / 8];
@@ -54,7 +55,7 @@ static void wpc_io_debug_init (struct wpc_debug_port *port)
 	port->outptr = port->outbuf;
 }
 
-/* Handle parallel/serial port writes */
+/* Handle parallel/serial port reads and writes */
 static void wpc_write_debug (struct wpc_debug_port *port, unsigned int addr, U8 val)
 {
 	*(port->outptr)++ = val;
@@ -160,6 +161,8 @@ struct wpc_io_alpha_board
 };
 #endif
 
+
+/** Handle a key press event to be sent as input to the target. */
 void wpc_key_press (char val)
 {
 	struct wpc_debug_port *port = &wpc_debug_port;
@@ -182,7 +185,7 @@ void sim_triac_update (U8 val)
 
 
 /** Simulate writing to a set of 8 solenoids. */
-void sim_sol_write (int index, U8 *memp, U8 val)
+static void sim_sol_write (int index, U8 *memp, U8 val)
 {
 	int n;
 
@@ -349,11 +352,11 @@ U8 wpc_read (void *unused, unsigned int addr)
 		{
 			/* The time-of-day registers return the system time of the
 			simulator itself. */
-			int minutes_on = sim_get_wall_clock ();
+			unsigned int minutes_on = sim_get_wall_clock ();
 			if (addr == WPC_CLK_HOURS_DAYS)
-				return minutes_on / 60;
+				return minutes_on / MINS_PER_HOUR;
 			else
-				return minutes_on % 60;
+				return minutes_on % MINS_PER_HOUR;
 			break;
 		}
 

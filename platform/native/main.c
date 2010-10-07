@@ -182,6 +182,9 @@ CALLSET_ENTRY (native, realtime_tick)
 }
 
 
+/**
+ * Return the current wall clock time in minutes.
+ */
 unsigned int
 sim_get_wall_clock (void)
 {
