@@ -24,7 +24,6 @@
  */
 
 #include <freewpc.h>
-#include <sys/irq.h>
 #include <diag.h>
 #include <search.h>
 

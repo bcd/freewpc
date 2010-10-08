@@ -62,7 +62,7 @@ void lockup_check_rtt (void)
 
 /**
  * Entry point for errors that are nonrecoverable.
- * error_code is one of the values in include/sys/errno.h.
+ * error_code is one of the values in include/system/errno.h.
  */
 __noreturn__
 void fatal (errcode_t error_code)
@@ -151,7 +151,7 @@ void fatal (errcode_t error_code)
 
 /**
  * Entry point for errors that are recoverable.
- * error_code is one of the values in include/sys/errno.h.
+ * error_code is one of the values in include/system/errno.h.
  * This function simply logs the error, but the system continues on.
  */
 void nonfatal (errcode_t error_code)

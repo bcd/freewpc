@@ -35,7 +35,7 @@ typedef U8 bool;
 #include <m6809/m6809.h>
 #include <queue.h>
 #include <sndhw.h>
-#include <sys/irq.h>
+#include <system/irq.h>
 
 __attribute__((section("direct"))) U8 tmp;
 U8 tmp2;

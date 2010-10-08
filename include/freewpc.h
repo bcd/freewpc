@@ -148,7 +148,7 @@ extern U8 periodic_ok;
 #include <env.h>
 
 /* CPU specifics */
-#include <sys/irq.h>
+#include <system/irq.h>
 
 /* Entry points to initialization */
 __noreturn__ void warm_reboot (void);
@@ -169,12 +169,12 @@ __noreturn__ void freewpc_init (void);
 #endif
 
 /* Core software structures */
-#include <sys/bitarray.h>
-#include <sys/errno.h>
-#include <sys/time.h>
-#include <sys/task.h>
+#include <system/bitarray.h>
+#include <system/errno.h>
+#include <system/time.h>
+#include <system/task.h>
 #if (MACHINE_DMD == 1)
-#include <sys/font.h>
+#include <system/font.h>
 #endif
 
 /* Basic data structures */
@@ -185,23 +185,23 @@ __noreturn__ void freewpc_init (void);
 
 #ifdef CPU_BOARD
 /* Hardware modules */
-#include <sys/ac.h>
-#include <sys/sol.h>
-#include <sys/lamp.h>
-#include <sys/sound.h>
-#include <sys/switch.h>
-#include <sys/flip.h>
-#include <sys/display.h>
+#include <system/ac.h>
+#include <system/sol.h>
+#include <system/lamp.h>
+#include <system/sound.h>
+#include <system/switch.h>
+#include <system/flip.h>
+#include <system/display.h>
 #ifdef CONFIG_GI
-#include <sys/triac.h>
+#include <system/triac.h>
 #endif
-#include <sys/rtc.h>
+#include <system/rtc.h>
 
 /* Common software structures */
 #include <priority.h>
-#include <sys/deff.h>
-#include <sys/leff.h>
-#include <sys/device.h>
+#include <system/deff.h>
+#include <system/leff.h>
+#include <system/device.h>
 #include <math.h>
 #include <timer.h>
 #include <score.h>
@@ -219,7 +219,7 @@ __noreturn__ void freewpc_init (void);
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
 #ifdef CONFIG_PLATFORM_WPC
-#include <sys/debug.h>
+#include <system/debug.h>
 #endif
 #include <test.h> /* this one HAS to be here for now, for callset.c */
 

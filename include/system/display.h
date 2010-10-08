@@ -20,7 +20,7 @@
 
 #if (MACHINE_DMD == 1)
 
-#include <sys/dmd.h>
+#include <system/dmd.h>
 
 #define DISPLAY_WIDTH           DMD_PIXEL_WIDTH
 #define DISPLAY_HEIGHT          DMD_PIXEL_HEIGHT
@@ -47,7 +47,7 @@
 
 #elif (MACHINE_ALPHANUMERIC == 1)
 
-#include <sys/segment.h>
+#include <system/segment.h>
 
 #define DISPLAY_WIDTH           SEG_WIDTH
 #define DISPLAY_HEIGHT          SEG_HEIGHT
