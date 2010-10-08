@@ -202,7 +202,7 @@ __noreturn__ void freewpc_init (void);
 #include <system/deff.h>
 #include <system/leff.h>
 #include <system/device.h>
-#include <math.h>
+#include <system/math.h>
 #include <timer.h>
 #include <score.h>
 #include <game.h>

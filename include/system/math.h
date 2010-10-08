@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef _MATH_H
-#define _MATH_H
+#ifndef _FREEWPC_MATH_H
+#define _FREEWPC_MATH_H
 
 /** Returns a random true/false value */
 #define random_bool()	(random() & 0x80)
@@ -49,4 +49,4 @@ void random_init (void);
 #define value_rotate_up(var,min,max) do { if (var == max) { var = min; } else { var++; } } while (0)
 		
 
-#endif /* _MATH_H */
+#endif /* _FREEWPC_MATH_H */

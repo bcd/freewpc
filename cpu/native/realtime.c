@@ -1,8 +1,8 @@
 
+#include <sys/time.h>
 #include <stdlib.h>
 #include <freewpc.h>
 #include <simulation.h>
-#include "/usr/include/sys/time.h"
 
 
 /** The frequency of the realtime loop, in millseconds */

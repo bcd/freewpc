@@ -33,9 +33,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <freewpc.h>
-#include "/usr/include/sys/time.h"
 #include <simulation.h>
 #include <hwsim/io.h>
 

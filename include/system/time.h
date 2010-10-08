@@ -1,5 +1,5 @@
-#ifndef _SYS_TIME_H
-#define _SYS_TIME_H
+#ifndef _SYSTEM_TIME_H
+#define _SYSTEM_TIME_H
 
 /***************************************************************
  * System timing
@@ -93,4 +93,4 @@ extern inline U8 get_elapsed_time (U16 then)
  */
 #define time_reached_p(t) (((t) - get_sys_time ()) & 0x8000UL)
 
-#endif /* _SYS_TIME_H */
+#endif /* _SYSTEM_TIME_H */
