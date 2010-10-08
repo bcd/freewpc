@@ -104,6 +104,7 @@ unsigned char *sim_switch_matrix_get (void);
 void sim_switch_toggle (int sw);
 void sim_switch_set (int sw, int on);
 void sim_switch_depress (int sw);
+void flipper_button_depress (int sw);
 int sim_switch_read (int sw);
 void sim_switch_init (void);
 
@@ -125,13 +126,15 @@ void asciidmd_init (void);
 void sim_coil_init (void);
 void sim_coil_change (unsigned int coil, unsigned int on);
 
-void wpc_sound_write (unsigned char val);
-void wpc_sound_reset (void);
-
 unsigned char hwtimer_read (void);
 void hwtimer_write (unsigned char val);
 
+void sim_zc_init (void);
 int sim_zc_read (void);
+
+void sim_key_install (char key, unsigned int swno);
+void keyboard_open (const char *filename);
+void keyboard_init (void);
 
 void protected_memory_load (void);
 void protected_memory_save (void);

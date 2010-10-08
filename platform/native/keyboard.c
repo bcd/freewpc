@@ -64,6 +64,12 @@ static switchnum_t keymaps[256] = {
 #endif
 };
 
+/** A dummy function intended to be used for debugging under GDB. */
+void gdb_break (void)
+{
+	barrier ();
+}
+
 
 void sim_key_install (char key, unsigned int swno)
 {

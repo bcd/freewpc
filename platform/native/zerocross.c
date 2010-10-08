@@ -62,6 +62,19 @@ int sim_zc_read (void)
 }
 
 
+#ifdef CONFIG_TRIAC
+/** On machines with one or more triacs, reset all of them
+	whenever zerocross is asserted */
+void sim_zc_triac_reset (void)
+{
+	/* Reset the GI outputs to what is held in the input latch.
+	Preserve the values of the other IO lines. */
+	sim_triac_update ( (linux_triac_latch & PINIO_GI_STRINGS) |
+	                   (linux_triac_outputs & ~PINIO_GI_STRINGS) );
+}
+#endif
+
+
 /**
  * Update the state of the zerocross circuit every 1ms.
  */
@@ -81,10 +94,9 @@ void sim_zc_periodic (void *data __attribute__((unused)))
 		sim_zc_timer += ZC_TIMER_MAX;
 		signal_update (SIGNO_ZEROCROSS, 1);
 
-		/* Reset the GI outputs to what is held in the input latch.
-		Preserve the values of the other IO lines. */
-		sim_triac_update ( (linux_triac_latch & PINIO_GI_STRINGS) |
-		                   (linux_triac_outputs & ~PINIO_GI_STRINGS) );
+#ifdef CONFIG_TRIAC
+		sim_zc_triac_reset ();
+#endif
 	}
 	else
 	{

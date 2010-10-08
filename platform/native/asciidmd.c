@@ -34,6 +34,9 @@ U8 asciidmd_pages[MAX_PHASES] = { 0, 0 };
 
 unsigned int asciidmd_phase = 0;
 
+U8 *linux_dmd_low_page;
+U8 *linux_dmd_high_page;
+
 U8 asciidmd_visible_page;
 
 

@@ -23,7 +23,11 @@
 #include <hwsim/io.h>
 
 /* A table of I/O addresses.  Every valid IO addr has an entry here that says
-how to read and write from that address. */
+	how to read and write from that address.
+
+	Use one of the io_add variants to populate this table.  You can provide
+	your own custom functions (of type io_reader and io_writer), or use some
+	of the defaults in this file that provide common functionality. */
 struct io_region io_region_table[NUM_IO_ADDRS];
 
 
@@ -74,7 +78,9 @@ U8 readb (IOPTR addr)
 }
 
 
-/* Add read/write handlers for a particular I/O address region. */
+/* Add read/write handlers for a particular I/O address region.
+	This is the lowest level function that defines how to do I/O.  All
+	other variants call this one ultimately. */
 void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer, void *data)
 {
 	if ((addr < MIN_IO_ADDR) || (addr+len > MAX_IO_ADDR))
@@ -98,6 +104,8 @@ void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer,
 void io_init (void)
 {
 	int r;
+
+	/* By default, I/O regions map to the null handlers */
 	for (r=0; r < NUM_IO_ADDRS; r++)
 	{
 		io_region_table[r].reader = io_null_reader;
@@ -105,6 +113,9 @@ void io_init (void)
 		io_region_table[r].data = NULL;
 		io_region_table[r].offset = 0;
 	}
+
+	/* Call the platform-specific function to install whatever support
+	is required. */
 #ifdef CONFIG_PLATFORM_WPC
 	io_wpc_init ();
 #endif	

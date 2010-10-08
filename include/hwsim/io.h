@@ -50,12 +50,12 @@ void io_add_1 (IOPTR addr, unsigned int len, io_reader reader, io_writer writer,
 #define io_add(addr, len, reader, writer, data) \
 	io_add_1 (addr, len, (io_reader)reader, (io_writer)writer, data)
 
-#define io_add_rw(addr, len, reader, writer, data) \
-	io_add (addr, reader, writer, data)
-#define io_add_ro(addr, len, reader, data) \
-	io_add (addr, reader, io_null_writer, data)
-#define io_add_wo(addr, len, writer, data) \
-	io_add (addr, io_null_reader, writer, data)
+#define io_add_rw(addr, reader, writer, data) \
+	io_add (addr, 1, reader, writer, data)
+#define io_add_ro(addr, reader, data) \
+	io_add (addr, 1, reader, io_null_writer, data)
+#define io_add_wo(addr, writer, data) \
+	io_add (addr, 1, io_null_reader, writer, data)
 
 
 void io_init (void);

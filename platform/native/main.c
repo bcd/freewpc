@@ -50,12 +50,6 @@ static time_t sim_boot_time;
 /** The rate at which the simulated clock should run */
 int linux_irq_multiplier = 1;
 
-/** A pointer to the low DMD page */
-U8 *linux_dmd_low_page;
-
-/** A pointer to the high DMD page */
-U8 *linux_dmd_high_page;
-
 /** True if the IRQ is enabled */
 bool linux_irq_enable;
 
@@ -86,12 +80,6 @@ int exec_late_flag = 0;
 
 int crash_on_error = 0;
 
-
-/** A dummy function intended to be used for debugging under GDB. */
-void gdb_break (void)
-{
-	barrier ();
-}
 
 /** Prints log messages, requested status, etc. to the console.
  * This is the only function that should use printf.
@@ -128,6 +116,8 @@ void simlog (enum sim_log_class class, const char *format, ...)
 }
 
 
+/*	Called to shutdown the simulation.
+	This performs all cleanup before exiting back to the native OS. */
 __noreturn__ void sim_exit (U8 error_code)
 {
 	simlog (SLC_DEBUG, "Shutting down simulation.");

@@ -22,8 +22,24 @@
 #include <simulation.h>
 #include <hwsim/io.h>
 #include <hwsim/matrix.h>
+#include <hwsim/triac.h>
+#include <hwsim/sound-ext.h>
 
 #define MINS_PER_HOUR 60
+
+/*	The state of the debug port.
+	Values written to the port are buffered in 'outbuf' until a newline is seen,
+	then the entire buffer is written out to the UI.
+	Values read from the port are served by the keyboard module. */
+
+struct wpc_debug_port
+{
+	U8 ctrl_reg;
+	U8 in_reg;
+	char outbuf[256];
+	char *outptr;
+};
+
 
 /** The simulated solenoid outputs */
 static U8 sim_sols[SOL_COUNT / 8];
@@ -37,16 +53,18 @@ static int sim_jumpers;
 /** The triac outputs */
 U8 linux_triac_latch, linux_triac_outputs;
 
-
-struct wpc_debug_port
-{
-	U8 ctrl_reg;
-	U8 in_reg;
-	char outbuf[256];
-	char *outptr;
-};
-
+/** The simulated debug port */
 struct wpc_debug_port wpc_debug_port;
+
+/** The triac that fronts the GI strings */
+struct sim_triac wpc_triac;
+
+/** The flipper relay on non-Fliptronic games */
+#ifdef CONFIG_FLIPTRONIC
+static U8 wpc_flipper_relay;
+#endif
+
+
 
 static void wpc_io_debug_init (struct wpc_debug_port *port)
 {
@@ -73,6 +91,12 @@ static U8 wpc_read_debug (struct wpc_debug_port *port, unsigned int addr)
 	return port->in_reg;
 }
 
+static U8 wpc_read_debug_status (struct wpc_debug_port *port, unsigned int addr)
+{
+	return port->ctrl_reg;
+}
+
+
 
 /*	A generic I/O handler that plugs into a configuration variable.
 	VALP points to an 'int' which has been passed to conf_add to
@@ -82,6 +106,20 @@ static U8 wpc_read_debug (struct wpc_debug_port *port, unsigned int addr)
 static U8 io_conf_reader (int *valp, unsigned int addr)
 {
 	return (U8)*valp;
+}
+
+
+/* A generic I/O handlers that plugs into a simple byte variable.
+	The CPU "reads" and "writes" the value of the memory directly. */
+
+static U8 io_mem_reader (U8 *valp, unsigned int addr)
+{
+	return valp[addr];
+}
+
+static void io_mem_writer (U8 *valp, unsigned int addr, U8 val)
+{
+	valp[addr] = val;
 }
 
 
@@ -130,12 +168,17 @@ void io_matrix_strobe (struct io_matrix *mx, U8 val, mux_ui ui_update, unsigned 
 	}
 }
 
-void io_matrix_writer (struct io_matrix *mx, U8 val)
+void io_lamp_matrix_strobe (struct io_matrix *mx, unsigned int addr, U8 val)
+{
+	io_matrix_strobe (mx, val, ui_write_lamp, SIGNO_LAMP);
+}
+
+void io_matrix_writer (struct io_matrix *mx, unsigned int addr, U8 val)
 {
 	mx->rowlatch = val;
 }
 
-U8 io_matrix_reader (struct io_matrix *mx)
+U8 io_matrix_reader (struct io_matrix *mx, unsigned int addr)
 {
 	return mx->rowlatch;
 }
@@ -143,26 +186,14 @@ U8 io_matrix_reader (struct io_matrix *mx)
 
 
 struct io_switch_matrix sim_switch_matrix;
+
 struct io_lamp_matrix sim_lamp_matrix;
 
 
-#if 0
-/* TODO */
-struct wpc_io_sound_board
-{
-};
 
-struct wpc_io_dmd_board
-{
-};
-
-struct wpc_io_alpha_board
-{
-};
-#endif
-
-
-/** Handle a key press event to be sent as input to the target. */
+/*	Handle a key press event to be sent as input to the target.
+	This is called by the simulator to queue a key event for the
+	target CPU to read later. */
 void wpc_key_press (char val)
 {
 	struct wpc_debug_port *port = &wpc_debug_port;
@@ -217,6 +248,20 @@ static void wpc_write_led (void *unused1, unsigned int unused2, U8 val)
 	signal_update (SIGNO_DIAG_LED, (val & 0x80) ? 1 : 0);
 }
 
+/* Handle the miscellaneous I/O */
+
+static U8 wpc_misc_read (void *unused1, unsigned int unused2)
+{
+	return sim_zc_read () ? 0x80 : 0x0;
+}
+
+static void wpc_misc_write (void *unused1, unsigned int unused2, U8 val)
+{
+	if ((val & 0x0F) == 6)
+		sim_watchdog_reset ();
+}
+
+/* Handle I/O the old way */
 
 void wpc_write (void *unused, unsigned int addr, U8 val)
 {
@@ -230,49 +275,6 @@ void wpc_write (void *unused, unsigned int addr, U8 val)
 			sim_sol_write (32, &sim_sols[4], ~val);
 #endif
 			break;
-
-		case WPC_ZEROCROSS_IRQ_CLEAR:
-			if ((val & 0x0F) == 6)
-				sim_watchdog_reset ();
-			break;
-
-#if (MACHINE_DMD == 1)
-		case WPC_DMD_LOW_PAGE:
-			asciidmd_map_page (0, val);
-			break;
-
-		case WPC_DMD_HIGH_PAGE:
-			asciidmd_map_page (1, val);
-			break;
-
-#if (MACHINE_WPC95 == 1)
-		case WPC_DMD_3200_PAGE:
-			asciidmd_map_page (3, val);
-			break;
-
-		case WPC_DMD_3000_PAGE:
-			asciidmd_map_page (2, val);
-			break;
-
-		case WPC_DMD_3600_PAGE:
-			asciidmd_map_page (5, val);
-			break;
-
-		case WPC_DMD_3400_PAGE:
-			asciidmd_map_page (4, val);
-			break;
-#endif
-
-		case WPC_DMD_ACTIVE_PAGE:
-			asciidmd_set_visible (val);
-			break;
-
-		case WPC_DMD_FIRQ_ROW_VALUE:
-			/* Writing to this register has no effect in
-			simulation, because FIRQ is automatically asserted
-			to update the DMD occasionally. */
-			break;
-#endif /* MACHINE_DMD */
 
 		case WPC_GI_TRIAC:
 			/* The input side of the triac has a latch; store only the G.I.
@@ -303,13 +305,6 @@ void wpc_write (void *unused, unsigned int addr, U8 val)
 			break;
 #endif
 
-		case WPC_LAMP_ROW_OUTPUT:
-			io_matrix_writer (&sim_lamp_matrix.header, val);
-			break;
-
-		case WPC_LAMP_COL_STROBE:
-			io_matrix_strobe (&sim_lamp_matrix.header, val, ui_write_lamp, SIGNO_LAMP);
-			break;
 
 #if (MACHINE_PIC == 1)
 		case WPCS_PIC_WRITE:
@@ -321,18 +316,19 @@ void wpc_write (void *unused, unsigned int addr, U8 val)
 #endif
 			break;
 
-		case WPCS_DATA:
-			wpc_sound_write (val);
-			break;
-
-		case WPCS_CONTROL_STATUS:
-			wpc_sound_reset ();
-			break;
-
-		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
-			hwtimer_write (val);
-			break;
 	}
+}
+
+
+U8 wpc_clock_reader (void *unused, unsigned int reg)
+{
+	unsigned int minutes_on = sim_get_wall_clock ();
+	/* The time-of-day registers return the system time of the
+	simulator itself. */
+	if (reg == 0)
+		return minutes_on / MINS_PER_HOUR;
+	else
+		return minutes_on % MINS_PER_HOUR;
 }
 
 
@@ -340,26 +336,6 @@ U8 wpc_read (void *unused, unsigned int addr)
 {
 	switch (addr)
 	{
-		case WPCS_DATA:
-		case WPCS_CONTROL_STATUS:
-			return 0;
-
-		case WPC_DEBUG_CONTROL_PORT:
-			return wpc_debug_port.ctrl_reg;
-
-		case WPC_CLK_HOURS_DAYS:
-		case WPC_CLK_MINS:
-		{
-			/* The time-of-day registers return the system time of the
-			simulator itself. */
-			unsigned int minutes_on = sim_get_wall_clock ();
-			if (addr == WPC_CLK_HOURS_DAYS)
-				return minutes_on / MINS_PER_HOUR;
-			else
-				return minutes_on % MINS_PER_HOUR;
-			break;
-		}
-
 #if (MACHINE_PIC == 1)
 		case WPCS_PIC_READ:
 			return simulation_pic_access (0, 0);
@@ -367,12 +343,6 @@ U8 wpc_read (void *unused, unsigned int addr)
 		case WPC_SW_ROW_INPUT:
 			return *sim_switch_data_ptr;
 #endif
-
-		case WPC_SW_CABINET_INPUT:
-			return sim_switch_matrix_get ()[0];
-
-		case WPC_PERIPHERAL_TIMER_FIRQ_CLEAR:
-			return hwtimer_read ();
 
 #if (MACHINE_WPC95 == 1)
 		case WPC95_FLIPPER_SWITCH_INPUT:
@@ -382,13 +352,62 @@ U8 wpc_read (void *unused, unsigned int addr)
 			return ~sim_switch_matrix_get ()[9];
 #endif
 
-		case WPC_ZEROCROSS_IRQ_CLEAR:
-			return sim_zc_read () ? 0x80 : 0x0;
-
 		default:
 			return 0;
 	}
 }
+
+
+
+static void io_add_direct_switches (IOPTR addr, U8 switchno)
+{
+	io_add_ro (addr, io_mem_reader, sim_switch_matrix_get () + (switchno / 8));
+}
+
+static void io_add_switch_matrix (IOPTR addr_strobe, IOPTR addr_input, U8 switchno)
+{
+}
+
+static void io_add_lamp_matrix (IOPTR addr_strobe, IOPTR addr_output, U8 lampno)
+{
+	io_add_wo (addr_output, io_matrix_writer, &sim_lamp_matrix.header);
+	io_add_wo (addr_strobe, io_lamp_matrix_strobe, &sim_lamp_matrix.header);
+}
+
+
+/**
+ * Map a range of solenoid sets.
+ * ADDR gives the CPU's register that it uses to write to the set.
+ * SOLNO gives the solenoid number of the first solenoid in the set.
+ */
+static void io_add_sol_bank (IOPTR addr, U8 solno)
+{
+	io_add_wo (addr, wpc_write_sol, &sim_sols[solno / 8]);
+}
+
+/* Handle writes to map a page of DMD memory into a CPU window.
+	ADDR identifies the mapping number.  VAL is the physical page. */
+
+static void io_dmd_write_map (void *window, unsigned int addr, U8 val)
+{
+	asciidmd_map_page ((int)window, val);
+}
+
+static void io_dmd_write_visible (void *unused1, unsigned int unused2, U8 val)
+{
+	asciidmd_set_visible (val);
+}
+
+static void io_add_dmd_mapping_reg (IOPTR addr, unsigned int window)
+{
+	io_add_wo (addr, io_dmd_write_map, (void *)window);
+}
+
+static void io_add_dmd_visible_reg (IOPTR addr)
+{
+	io_add_wo (addr, io_dmd_write_visible, NULL);
+}
+
 
 
 /**
@@ -397,33 +416,64 @@ U8 wpc_read (void *unused, unsigned int addr)
  */
 void io_wpc_init (void)
 {
-	/* TODO: This could be much more efficient. The I/O system lets you
-	map different handlers to different addresses.  The old I/O used a
-	single callback.  The old handlers are being used as-is for now, so
-	only a single io_add is done.  This should be broken up into multiple
-	adds below.  Anything after this call will override. */
+	/* TODO: Continue breaking this up into multiple adds below */
 	io_add (MIN_IO_ADDR, MAX_IO_ADDR, wpc_read, wpc_write, NULL);
 
+	/* Install miscellaneous I/O handlers */
+	io_add_rw (WPC_ZEROCROSS_IRQ_CLEAR, wpc_misc_read, wpc_misc_write, NULL);
+
+	/* Install switch handlers */
+	io_add_direct_switches (WPC_SW_CABINET_INPUT, SW_LEFT_COIN);
+
+	/* Install lamp handlers */
+	io_add_lamp_matrix (WPC_LAMP_COL_STROBE, WPC_LAMP_ROW_OUTPUT, 0);
+
 	/* Install solenoid I/O handlers */
-	io_add (WPC_SOL_HIGHPOWER_OUTPUT, 1, io_null_reader, wpc_write_sol, &sim_sols[0]);
-	io_add (WPC_SOL_LOWPOWER_OUTPUT, 1, io_null_reader, wpc_write_sol, &sim_sols[1]);
-	io_add (WPC_SOL_FLASHER_OUTPUT, 1, io_null_reader, wpc_write_sol, &sim_sols[2]);
-	io_add (WPC_SOL_GEN_OUTPUT, 1, io_null_reader, wpc_write_sol, &sim_sols[3]);
+	io_add_sol_bank (WPC_SOL_HIGHPOWER_OUTPUT, SOL_BASE_HIGH);
+	io_add_sol_bank (WPC_SOL_LOWPOWER_OUTPUT, SOL_BASE_LOW);
+	io_add_sol_bank (WPC_SOL_FLASHER_OUTPUT, SOL_BASE_GENERAL);
+	io_add_sol_bank (WPC_SOL_GEN_OUTPUT, SOL_BASE_AUXILIARY);
 #ifdef MACHINE_SOL_EXTBOARD1
-	io_add (WPC_EXTBOARD1, 1, io_null_reader, wpc_write_sol, &sim_sols[5]);
+	io_add_sol_bank (WPC_EXTBOARD1, SOL_BASE_EXTENDED);
+#endif
+
+	/* Install dot matrix register handlers */
+#if (MACHINE_DMD == 1)
+	io_add_dmd_visible_reg (WPC_DMD_ACTIVE_PAGE);
+	io_add_dmd_mapping_reg (WPC_DMD_LOW_PAGE, 0);
+	io_add_dmd_mapping_reg (WPC_DMD_HIGH_PAGE, 1);
+#if (MACHINE_WPC95 == 1)
+	io_add_dmd_mapping_reg (WPC_DMD_3000_PAGE, 2);
+	io_add_dmd_mapping_reg (WPC_DMD_3200_PAGE, 3);
+	io_add_dmd_mapping_reg (WPC_DMD_3400_PAGE, 4);
+	io_add_dmd_mapping_reg (WPC_DMD_3600_PAGE, 5);
+#endif
+	/* WPC_DMD_FIRQ_ROW_VALUE is not handled in simulation */
 #endif
 
 	/* Install parallel/serial port handlers */
 	wpc_io_debug_init (&wpc_debug_port);
-	io_add (WPC_PARALLEL_DATA_PORT, 1, io_null_reader, wpc_write_debug, &wpc_debug_port);
-	io_add (WPC_DEBUG_DATA_PORT, 1, wpc_read_debug, wpc_write_debug, &wpc_debug_port);
+	io_add_wo (WPC_PARALLEL_DATA_PORT, wpc_write_debug, &wpc_debug_port);
+	io_add_rw (WPC_DEBUG_DATA_PORT, wpc_read_debug, wpc_write_debug, &wpc_debug_port);
+	io_add_rw (WPC_DEBUG_CONTROL_PORT, wpc_read_debug_status, io_null_writer, &wpc_debug_port);
 
 	/* Install diagnostic LED handler */
-	io_add (WPC_LEDS, 1, io_null_reader, wpc_write_led, NULL);
+	io_add_wo (WPC_LEDS, wpc_write_led, NULL);
 
 	/* Install jumper/DIP switch handler */
 	sim_jumpers = LC_USA_CANADA << 2;
 	conf_add ("jumpers", &sim_jumpers);
-	io_add (WPC_SW_JUMPER_INPUT, 1, io_conf_reader, io_null_writer, &sim_jumpers);
+	io_add_ro (WPC_SW_JUMPER_INPUT, io_conf_reader, &sim_jumpers);
+
+	/* TODO - install hwtimer read/write */
+
+	/* Install sound board read/write */
+	io_add (WPCS_DATA, 2, sound_ext_read, sound_ext_write, NULL);
+
+	/* Install clock handler.  Since clock time comes from the native OS,
+	it cannot be changed and so these are read-only registers */
+	io_add_ro (WPC_CLK_HOURS_DAYS, wpc_clock_reader, NULL);
+
+	/* TODO : If a ribbon cable is disconnected, then that I/O will not work. */
 }
 

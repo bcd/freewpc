@@ -1,23 +1,23 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+#include <hwsim/sound-ext.h>
 
-
-void wpc_sound_reset (void)
+static void sound_ext_reset (void)
 {
 #ifdef CONFIG_UI
 	ui_write_sound_reset ();
 #endif
 }
 
-void wpc_sound_command (U16 cmd)
+void sound_ext_command (U16 cmd)
 {
 #ifdef CONFIG_UI
 	ui_write_sound_command (cmd);
 #endif
 }
 
-void wpc_sound_write (U8 val)
+static void sound_ext_write_data (U8 val)
 {
 	static int write_count = 0;
 	static U16 cmd = 0;
@@ -28,9 +28,29 @@ void wpc_sound_write (U8 val)
 
 	if (write_count == 2)
 	{
-		wpc_sound_command (cmd);
+		sound_ext_command (cmd);
 		cmd = 0;
 		write_count = 0;
+	}
+}
+
+
+U8 sound_ext_read (void *board, unsigned int regno)
+{
+	return 0;
+}
+
+
+void sound_ext_write (void *board, unsigned int regno, U8 val)
+{
+	switch (regno)
+	{
+		case SOUND_ADDR_DATA:
+			sound_ext_write_data (val);
+			break;
+		case SOUND_ADDR_RESET_STATUS:
+			sound_ext_reset ();
+			break;
 	}
 }
 
