@@ -233,26 +233,4 @@ extern inline void io_toggle_bits (U16 addr, U8 val)
 #endif
 }
 
-extern inline void io_set_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg |= val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr |= val;
-#endif
-}
-
-extern inline void io_clear_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg &= ~val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr &= ~val;
-#endif
-}
-
 #endif /* _ENV_H */
