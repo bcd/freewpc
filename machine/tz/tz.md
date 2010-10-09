@@ -268,11 +268,11 @@ X7: Clock Forward, motor, nosearch
 
 
 [templates]
-Left Sling: driver(spsol), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
-Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
-Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
-Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
-Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
+Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
+Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
 
 Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=20
 Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=20
