@@ -16,6 +16,7 @@ include cpu/$(CPU)/Makefile
 # Eventually, this section will contain conditionals for building on the
 # different WPC variations.  For now, all of these are mandatory though.
 $(eval $(call have,CONFIG_PLATFORM_WPC))
+$(eval $(call have,CONFIG_MMIO))
 CONFIG_FONT ?= $(CONFIG_DMD)
 $(eval $(call have,CONFIG_AC))
 $(eval $(call have,CONFIG_GI))

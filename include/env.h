@@ -190,35 +190,35 @@ do { \
  * environments where a direct memory map is not present.
  ***************************************************************/
 
-#ifdef CONFIG_NATIVE
-void writeb (IOPTR addr, U8 val);
-#else
+#ifdef CONFIG_MMIO
 extern inline void writeb (IOPTR addr, U8 val)
 {
 	*(volatile U8 *)addr = val;
 	barrier ();
 }
+#else
+void writeb (IOPTR addr, U8 val);
 #endif
 
-extern inline void writew (U16 addr, U16 val)
+extern inline void writew (IOPTR addr, U16 val)
 {
-#ifdef CONFIG_NATIVE
-	writeb (addr, val >> 8);
-	writeb (addr+1, val & 0xFF);
-#else
+#ifdef CONFIG_MMIO
 	*(volatile U16 *)addr = val;
 	barrier ();
+#else
+	writeb (addr, val >> 8);
+	writeb (addr+1, val & 0xFF);
 #endif
 }
 
 
-#ifdef CONFIG_NATIVE
-U8 readb (IOPTR addr);
-#else
+#ifdef CONFIG_MMIO
 extern inline U8 readb (IOPTR addr)
 {
 	return *(volatile U8 *)addr;
 }
+#else
+U8 readb (IOPTR addr);
 #endif
 
 

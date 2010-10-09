@@ -12,6 +12,7 @@ CONFIG_WHITESTAR ?= y
 CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC ?= n
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
+$(eval $(call have,CONFIG_MMIO))
 $(eval $(call have,CONFIG_GI))
 $(eval $(call nohave,CONFIG_AC))
 
