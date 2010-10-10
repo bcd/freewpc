@@ -266,6 +266,16 @@ extern inline void task_sleep_sec (U8 n)
 }
 
 
+/** Go into an infinite waiting loop, without exiting. */
+extern inline void task_suspend (void)
+{
+	/* Use 4s since that is about the maximum time that the task API
+	supports in one call. */
+	for (;;)
+		task_sleep (TIME_4S);
+}
+
+
 /**
  * Note that a task may have run for a long period of time at this point.
  *
