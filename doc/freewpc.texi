@@ -5,7 +5,7 @@
 @setchapternewpage odd
 @c %**end of header
 
-@set VERSION 0.99
+@set VERSION 1.10-dev
 @set COPYRIGHT 2006-2010
 
 @titlepage
@@ -37,7 +37,7 @@ under the GNU General Public License version 2 or later.  The latest version of
 the software can be obtained at @url{http://www.oddchange.com/freewpc}.
 Developers should be familiar
 with basic embedded systems programming concepts and the C programming
-language.  Familiarity with 6809 assembler is highly recommended.
+language.  Familiarity with 6809 assembler is recommended but not necessary.
 Also, knowledge of WPC pinball machines is very helpful.
 
 @end ifnottex
@@ -46,16 +46,17 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Overview::                A basic description of what FreeWPC is.
 * Installation::            How to obtain and install the software.
 * Compiling::               How to recompile the code yourself.
-* The WPC Hardware::        A primer on the hardware architecture.
 * Software Environment::    The basic software model.
-* Hardware APIs::           How to control the hardware.
+* Core APIs::               How to control the hardware from user code.
 * Effects::                 How to choreograph lights, sounds, and graphics.
 * Ball Tracking::           How the locations of the pinballs are monitored.
 * Test Mode::               Differences in the service menu.
 * Common Pinball Library::  Other common functions that are implemented.
 * Fonts and Graphics::      More info on the display APIs.
+* Platform APIs::           How to define a new hardware platform.
 * Native Mode::             Running the software directly on your PC.
 * Debugging::               How to debug problems.
+* The WPC Hardware::        A primer on the WPC platform.
 * The Machine Definition::  How to define a new machine.
 * System Events::           A list of the predefined callback functions.
 * Build Tools::             Other programs used during the build process.
@@ -152,14 +153,14 @@ Also, knowledge of WPC pinball machines is very helpful.
 @node Overview
 @chapter Overview
 
-FreeWPC is a toolkit for building new software for Williams WPC pinball machines.
-WPC is the hardware platform that was used in all games from 1990-1999, starting with
-@samp{Funhouse} and ending with @samp{Cactus Canyon}.
+FreeWPC is a toolkit for building brand new software for pinball machines.
+It primarily targets the Williams WPC
+family of games, which was used in all of that company's games from 1990-1999,
+starting with @samp{Funhouse} and ending with @samp{Cactus Canyon}.
 
 This document provides an overview of the FreeWPC architecture for
 developers who wish to understand how the system works.
-The details provided here reflect the status of the latest development
-branch.  FreeWPC is constantly evolving and the information here is
+FreeWPC is constantly evolving and the information here is
 subject to change.
 
 FreeWPC only replaces your game ROM (the U6 chip on the CPU board), which contains all
@@ -184,11 +185,14 @@ a 6809).  The @emph{machine} files are unique to a particular game.
 Development requires a UNIX-like environment, such as Linux or Cygwin for Microsoft Windows
 users.  Many common UNIX tools like @command{bc} and @command{perl} are required.
 
+FreeWPC has become more portable over the years, so that it can be used to develop
+pinball software for platforms other than WPC.  This support is still evolving rapidly.
 In addition to building ROMs, the toolkit supports @dfn{native mode compilation}, which
 builds an executable that can be run directly on your development machine.  This lets you
 test and debug the software without requiring a real machine or even an emulator.  Basically,
-native mode replaces the lowest level of hardware access with builtin emulation.  Native
-mode currently uses the @command{ncurses} terminal library for visualizing the state of the game.
+native mode replaces the lowest level of hardware access with builtin emulation.  In place
+of actual I/O being controlled, it displays the results of the simulation on your screen,
+using either the console, @command{ncurses}, or @command{gtk}.
 
 @node Installation
 @chapter Installation
@@ -236,33 +240,49 @@ The FreeWPC source code tree is organized into the following directories:
 
 @item kernel/
 
-The core pinball APIs.  All of these functions are kept in the fixed
-region of ROM and can be called at any time.
+The core pinball APIs, which are the user-level APIs used to read inputs and
+control outputs.  As a game developer you mostly use the core APIs to interface
+to the hardware of the machine.
+
+On hardware which requires bank switching (like WPC), these functions are kept
+in the fixed region of ROM that can be called at any time.
 
 @item common/
 
 Secondary pinball APIs, also called the @dfn{Common Pinball Library}.
-These functions are not in fixed ROM and require bank switching to call.
+These functions are not in fixed ROM and may require bank switching to call.
+
+They are mostly software-related APIs for common features that pinball machines have,
+like replay, match, and dot-matrix effects.
 
 @item machine/@var{machine}/
 
-The machine-specific files.
+The machine-specific files.  Every machine has its own directory of files that are
+specific to it.  Each file may or may not be placed into a bank switched region.
 
 @item platform/@var{platform}/
 
 The platform-specific files.  These are mostly used during initialization.
+Every new pinball hardware platform must define some files here.
 
 @item cpu/@var{cpu}/
 
 The CPU-specific files.  These are mostly assembly language files.
 
+The @file{native} directory here is used in simulation, to obtain support
+that is based on portable POSIX support.
+
 @item fonts/
 
-The standard font files.
+All font files are kept here.  Fonts are stored as normal C code that is compiled
+as usual, just with a .fon extension to denote that they are actually fonts.
+These files are autogenerated from more standard font files (like TrueType fonts)
+and then cleaned up.
 
 @item drivers/
 
-Driver templates for things like jets, slings, kickbacks, etc.
+Driver templates for things like jets, slings, kickbacks, etc.  These can be
+shared across all machines.
 
 @item include/
 
@@ -289,13 +309,85 @@ variable assignments, such as:
 MACHINE := wcs
 @end example
 
-A list of all of the options is given later in an appendix.
-TBD - move the appendix information here.
-
 You must specify at least a @var{MACHINE}.  All other configuration
 variables are optional; suitable defaults will be used.
 
-@section Making the ROM
+Here is a list of the most important build options.
+
+@table @code
+@item MACHINE
+
+Names the machine that you want to build for.  This corresponds to the
+name of the subdirectory in the @file{machine} directory that has the
+machine specific files.
+
+@item MAKEFLAGS
+
+This is a feature of the @command{make} utility, not FreeWPC per se, but
+it can be useful: if you want to pass special flags to @command{make},
+include them here.  In particular, the @option{-j} option can be used to
+run multiple commands in parallel, which can speed up the build
+significantly.
+
+@item FREEWPC_DEBUGGER
+
+Set to @code{y} if you want to include debug messages in the build.
+
+@item CONFIG_BPT
+
+Set to @code{y} if you want to enable the breakpoint module.
+
+@item GCC_VERSION
+
+Used only when building for the 6809 target, this lets you specify the
+version of the GCC6809 compiler.
+
+@item EXTRA_CFLAGS
+
+Used to pass arbitrary options to the C compiler.  If you add special
+logic to the code under an @code{#ifdef}, you can enable those flags
+by including them in @code{EXTRA_CFLAGS}.
+
+@item DEBUG_COMPILER
+
+Set to @code{y} if you are debugging the 6809 compiler.  This causes
+many temporary files to be saved for later analysis.
+
+@item SAVE_ASM
+
+Set to @code{y} if you just want to see the assembly language code that
+GCC6809 generates.  This is similar to @code{DEBUG_COMPILER} but produces
+much less GCC internals.  If you understand 6809 assembly language, this
+can be useful.
+
+@item NATIVE
+
+Set to @code{y} to enable native mode, or simulation.
+
+@item CONFIG_UI
+
+In native mode, this option controls the user-interface that is used.
+The default is curses, which works within most internals and is fairly
+easy to understand.  Use @code{console} for a much more raw, @code{printf}
+style output.  @code{gtk} support is in progress.
+
+@item PINMAME
+
+Set to the pathname where your PinMAME executable is, if you plan to
+use that for testing.
+
+@item EXTRA_PINMAME_FLAGS
+
+Set to flags that you want to pass to PinMAME when testing; for example,
+sound driver options or DMD color schemes.
+
+@item TARGET_ROMPATH
+
+Set to the directory where PinMAME ROM files are kept.
+
+@end table
+
+@section Building
 
 After configuring, type @command{make}.  This will build a ROM and optionally
 install it into your PinMAME ROM directory if you have said where that is.
@@ -397,22 +489,17 @@ a string composed of the machine's short name and the version number.
 Warnings and errors during the build are display on the console as they
 occur; they are also log to a file named @file{err}.
 
-In native mode, instead of a ROM, a file named @file{freewpc_@var{var}} is placed at the root
-of the tree.
+In native mode, instead of a ROM, a file named @file{freewpc_@var{var}} is generated.
 
-@c ======================================================
-@node The WPC Hardware
-@chapter The WPC Hardware
-
-@include hardware.texi
 
 @c ======================================================
 @node Software Environment
 @chapter Software Environment
 
-FreeWPC is a standalone operating system environment.  It does not use any
-existing OS and has its own multitasker, memory manager, etc.  This chapter
-describes the key features of the OS.
+FreeWPC provides a standalone operating system environment when compiling
+to run on real hardware.  It does not require the use of any
+existing OS and has its own multitasker and memory manager.  This chapter
+describes the key features of the FreeWPC programming environment.
 
 @menu
 * Multitasking::           The normal process model
@@ -444,6 +531,10 @@ between two tasks.
 If a task does not give up control, either by sleeping, exiting, or yielding
 after a certain amount of time, the fatal error @code{ERR_FCFS_LOCKUP} will be asserted.
 
+When a new task is created, it does not begin running immediately; control always
+continues with the task that started it.  This allows you to configure the new task
+before it can run.
+
 Each task is identified by a @dfn{process ID}, or @dfn{pid}.  The PID for a task
 is assigned by the system when it is created.  A task also has a @dfn{group ID},
 or @dfn{gid}.  The GID is assigned by the programmer, and multiple tasks can share
@@ -456,13 +547,17 @@ Pth library.  A good description of this library can be found at
 as @command{pthreads}, which is the predominant @emph{preemptive}
 threading library.
 
+For Windows programmers, this threading model is very similar to what Win32 calls
+@emph{fibers}.
+
 @subsection Periodic Functions
 
 After all tasks have been given a chance to run in a 16ms timeslice,
 the system runs the @dfn{periodic functions}.  These have equal priority
 to tasks, but they do not have a stack and they cannot sleep.  In the
 code, these are also referred to as @dfn{idle functions}, although that
-term is slightly incorrect.
+term is slightly incorrect (they are guaranteed to be called even on a
+fully busy system).
 
 You can register a periodic function at various
 rates: either every 16ms, 100ms, 1 second, or 10 seconds.  Handlers may not
@@ -477,14 +572,16 @@ later; the scheduler will realize that it is behind and try to catch up.
 
 You cannot dynamically register or deregister periodic handlers at runtime.
 
-@subsection APIs
+@subsection Task APIs
 
 @table @code
 
 @item task_create_gid
 
 The basic API to create a new task.  You specify a code function and a GID.  The function
-must reside in the same bank of ROM.
+must reside in the same bank of ROM.  If the function is in a different ROM page, you
+need to call @code{task_set_rom_page} @emph{immediately} after this call to say where
+it was placed.
 
 @item task_create_gid1
 
@@ -504,12 +601,13 @@ to about 4 seconds.
 
 @item task_sleep_sec
 
-Suspends the current running task for the given number of seconds.
+Suspends the current running task for the given number of seconds.  This handles larger
+timeouts, but does not allow the same granularity.
 
 @item task_exit
 
 Exit from the current task.  This must be called; task functions cannot just return when they
-are done.
+are done (that is guaranteed to cause a crash).
 
 @item task_find_gid
 
@@ -523,6 +621,15 @@ Stops another task based on PID.  This stops exactly one task.
 
 Stops another task based on GID.  This can stop one or more tasks.  If called from a task with
 the same GID, it stops all other tasks, but keeps the running task alive.
+
+@item task_set_arg
+
+The creator of a task can pass a single 16-bit value or pointer to it using this call.
+It should be called before a task switch might occur.
+
+@item task_get_arg
+
+Called by the newly created task to obtain its argument.
 
 @end table
 
@@ -735,36 +842,6 @@ of @code{CALLSET_ENTRY}, and they must return either TRUE or FALSE.
 
 The invocation of boolean handlers will immediately stop if one of them
 returns FALSE (so-called @dfn{short-circuit evaluation}).
-
-@subsection Handlers in Banked Pages
-
-Because handlers are invoked via function calls, if the handlers are
-in a banked section of ROM, care must be taken to ensure that the
-proper far call is made to it.  In most cases, this is autodetected
-based on the directory in which the source file is located:
-
-@itemize @bullet
-@item Files in kernel are assumed to be in fixed ROM.
-@item Files in @file{common} are assumed to be linked into COMMON_PAGE.
-@item Files in @file{machine} are assumed to be linked into MACHINE_PAGE.
-@end itemize
-
-However, as the size of FreeWPC has grown, it has become necessary to install
-code into more than just these pages.  You can explicitly declare the section
-in the source file, by adding a comment like this:
-
-@example
-/* CALLSET_SECTION (@var{module-name}, @var{section-name}) */
-@end example
-
-This is only needed if the module uses event handlers, and the section can't
-be determined automatically as explained above.  @var{section-name}
-would be something like @code{__common__} or @code{__machine__}.  The
-@var{module-name} must match all of the module names used in the
-@code{CALLSET_ENTRY} definitions within it.
-
-Note that these magic comments will probably not be necessary in the future,
-as there is a way for the build procedure to determine these automatically.
 
 @subsection Debugging Event Handlers
 
@@ -1073,42 +1150,56 @@ This is rare but does happen from time to time.
 
 
 @c ======================================================
-@node Hardware APIs
-@chapter Hardware APIs
+@node Core APIs
+@chapter Core APIs
 
-The kernel provides a common set of hardware access functions
-that work across all of the different variations of the WPC
-architecture.
+The core APIs provide a common set of hardware access functions
+that can be used by game designers.  The interfaces are designed to be
+portable to all pinball hardware platforms and all machines.
+However, the underlying implementation may vary.
 
-There are basically two types of APIs.  The low-level APIs
-access the hardware directly.  These APIs all begin with @code{pinio}.
-They could be ported to any new pinball platform.  These are
-normally called only from realtime tasks (driver space, if you will).
-Every supported platform (WPC, Whitestar) needs to define these functions.
-See @file{include/platform/wpc.h}.
+These functions do not access the hardware directly, but instead, they
+call into a device driver which may be platform-specific.  See the
+section on Platform APIs for information on drivers perform the actual I/O.
 
-The high-level APIs are invoked from the application layer (user space).  They
-are typically more user friendly, and don't actually talk directly to the
-hardware, but rather interface with a @dfn{device driver}, which abstracts the
-actual hardware.
+These APIs are intended to be called from the application layer (what other
+operating systems might refer to as "user space").
+For example, there are core APIs to poll the state of switches (active, or
+inactive?).  Under the hood, the switch driver must deal with the fact that
+switches are arranged in rows and columns, and that some switches are optos:
+this is all transparent to the user.
 
-For example, an API to check the status of a particular switch is a
-high-level API.
-The low-level API deals with the fact that switches are in a matrix, the column
-strobing, etc.  It is the switch driver which glues the two layers together.
+Core APIs are all defined in the @file{kernel} directory.  Any functions
+which are not @code{static} may be called from game developers from within
+normal task context at any time.
 
+@menu
+* Switches::              How to read switches
+* Lamps::                 How to control the lamps
+* Solenoids::             How to pulse solenoids and flashers
+* Dot-Matrix Display (DMD):: How to draw to the dot matrix display
+* Sound Board::           How to talk to the sound board
+* General Illumination::  How to control the general illumination strings
+* Real-Time Clock::       How to control the realtime clock
+* Debug Port::            How to write to the debugger port
+* Flags::
+@end menu
+
+@node Switches
 @section Switches
 
-The switch matrix driver polls the hardware every 2ms and constantly updates
-its view of all of the switches in memory.  The user APIs can then query this
-data.
+Switches are present in all pinball games to receive input from the ball
+and the player.
 
-Less frequently, the driver will also detect when switches have
-@emph{changed state}, and may invoke event handlers for these.
+Switches are numbered from 0 to @code{NUM_SWITCHES}-1.
+How the switch numbers are mapped to actual inputs is platform and
+machine dependent.  The machine description names the switches and defines
+their physical characteristics.
 
-Each switch entry in the machine configuration file can declare the following
-flags per switch, which alter the way that the switching code will manage
-it:
+Each switch entry can declare the following
+flags, which alter the way that the switching code will manage
+it.  The capitalized name is used in the C code; the lowercase
+name is the spelling used in the machine config file.
 
 @itemize @code
 
@@ -1119,10 +1210,11 @@ active high.
 
 @item SW_EDGE (edge)
 
-Says that the switch event should be thrown when it goes inactive, in
-addition to when it goes active.  Handlers for edge switches generally
+Says that the event handler (CALLSET_ENTRY) should be thrown in both directions:
+when it becomes inactive or active.
+Handlers for edge switches generally
 need to check which type of transition just happened, by calling
-@code{switch_poll_logical}.
+@code{switch_poll_logical}, and then act accordingly.
 
 All counting switches in a ball container must be edge switches, so that the
 device count can be updated correctly.  The shooter switch is also usually
@@ -1136,9 +1228,12 @@ Says that this switch should only be serviced during a game.
 
 Says that this switch is on the playfield, and can be activated by a ball,
 as opposed to cabinet buttons, motor optos, etc.  A playfield switch
-event will normally set the valid playfield flag.
+event will normally set the valid playfield flag.  It will also cause the
+@code{any_pf_switch} event to be thrown, which is normally used to score
+during "frenzy" modes.
 
-This is the default; use the @code{noplay} tag to indicate otherwise.
+This is the default; use the @code{noplay} tag to indicate that a switch
+is not playfield scoring.
 
 @item SW_NOVALID (novalid)
 
@@ -1160,49 +1255,31 @@ and act accordingly.
 
 @end itemize
 
-The driver also performs debouncing, so that rapid open and close
+In addition to polling their levels, the switch driver will detect
+when switches have @emph{changed state}, and invoke their event handlers.
+The switch entry in the config file names a function to be called when
+these changes occur.
+
+The driver performs debouncing, so that rapid open and close
 are not considered.  By default, a switch is processed if it remains
-active for only 4ms.  You can declare a large debounce time using the
-@code{debounce} tag.
+active for only 4ms.  You can declare a larger debounce time using the
+@code{debounce} tag.  A transition that lasts for less time is ignored.
 
 Switch entries can also declare an associated playfield lamp; when
 this is done, valid activations of the switch will cause a brief
-pulse of the lamp, using an internal lamp effect.
+flicker of the lamp.
 
 @table @code
-
-@item pinio_write_switch_column
-
-Set the current switch matrix column.
-
-@item pinio_read_switch_rows
-
-Read all of the switches on the currently selected column.
-
-@item pinio_read_dedicated_switches
-
-Read all of the dedicated switches.
-
-@item pinio_read_flippers
-
-Read all of the Fliptronic switches.
-
-@item pinio_read_flipper_buttons
-
-Read all of the Fliptronic button switches.
-
-@item pinio_read_flipper_eos
-
-Read all or some of the flipper switches.
-
-@item pinio_read_locale
-
-Read the locale indicator (jumpers or DIP switches).
 
 @item switch_poll
 
 Read the stable, physical state of a switch.  Returns 1 if it has
 a high level, or 0 for a low level.
+
+Switch readings are polled by the switch driver continuously; this
+API just returns the results of the last time the switch was
+examined.  How often switches are polled is platform-dependent;
+on WPC, it is every 2ms.
 
 @item switch_poll_logical
 
@@ -1210,28 +1287,30 @@ Read the stable, logical state of a switch.  Returns 1 if it is
 active, or 0 for inactive.  This is the same as @code{switch_poll}
 but it inverts its result for optos.
 
+@item rt_switch_poll
+
+Like @code{switch_poll}, but only for use inside realtime tasks.
+It is slightly more efficient.  It always returns a physical level;
+drivers must invert for optos.
+
 @end table
 
+@node Lamps
 @section Lamps
 
-Each physical lamp is controlled by several flags.  The lamp driver
-combines the values of all these flags to decide at any time whether
-a lamp should be on or off.
+Controlled lamps are used to highlight shots on the playfield and to keep
+track of the progress of scoring features.  Unlike general illumination,
+each lamp is individually controllable by the CPU.
 
-@table @asis
-@item On/Off
-Controls the steady on/off state of the lamp.
-@item Flashing
-When set, overrides the steady state and causes the lamp to flash.
-@item Effect 1 Allocated/Value
-When the allocated flag is set, overrides the steady/flashing state
-by the value of value flag.
-@item Effect 2 Allocated/Value
-Same, except overrides the Effect 1 flags as well.
-@end table
+Lamps are numbered from 0 to @code{NUM_LAMPS}-1.  For each lamp, there
+are several flags that can be set to determine its physical state.
+The job of the lamp driver is to combine all of these flags into a
+single output value, and send that to the underlying hardware.
 
-The steady and flashing flags are per-player, and are automatically
-switched out in a multiplayer game.
+Every lamp has a @dfn{basic state}, which is either @emph{on},
+@emph{off}, or @emph{flashing}.  The basic state of a lamp is
+a per-player value and is automatically saved and restored as players
+change in a multiplayer game.  They are controlled by the following APIs:
 
 @table @code
 @item lamp_on
@@ -1243,7 +1322,9 @@ Tests whether a lamp is on/off.
 @item lamp_toggle
 Toggles a lamp's on/off state.
 @item lamp_flash_on
-Enable lamp flashing.
+Enable lamp flashing.  Note that the steady state of a lamp must be
+off in order for the flashing to be seen.  (I.e., if you call lamp_on(),
+and then lamp_flash_on(), the lamp will be @emph{steady}.)
 @item lamp_flash_off
 Disable lamp flashing.
 @item lamp_flash_toggle
@@ -1254,43 +1335,52 @@ Ensure the lamp is steady.
 Ensure the lamp is off.
 @item lamp_tristate_flash
 Ensure the lamp is flashing.
-@item pinio_write_lamp_strobe
-Set the current lamp matrix strobe.
-@item pinio_write_lamp_data
-Write lamp row data for the currently selected column.
 @end table
 
-@section Power Drivers
+The basic state may be temporarily overriden via a @dfn{lamp effect}.
+An effect can allocate a lamp, thereby overriding its basic value.
+When the effect finishes, the lamp shows its basic state again.
+See Lamp Effects.
 
-Solenoid outputs are not matrixed; they are individually writable at all times.
-A '1' value means to turn it on, and '0' to turn it off.  If the underlying
-hardware requires inverted levels, then the low-level API should do the inversion;
-user code need not be aware of this.
+In the machine description, you can attach a color and coordinates
+to each lamp.  These are not used by the core OS, but they can be used
+by lamp effects that manipulate the lamps in certain patterns.
 
-@table @code
+@node Solenoids
+@section Solenoids
 
-@item pinio_write_solenoid_set (@var{bank}, @var{value})
+Solenoid outputs are used for many purposes.  We use the term 'solenoid'
+or 'coil' generically to refer to any writable, high power output.
+They could be connected to coils, flashers, or motors.
+Like the lamps, they are individually controllable.
 
-Refresh a set of 8 solenoids.
+Unlike the controlled lamps, the core API does not permit you to turn on
+a solenoid permanently.  Instead, you either use a pulsing API, which
+turns it on for a short period of time (and the system turns it back off
+for you), or you use a custom driver to control it.
 
-@end table
+@subsection Pulsing
 
-@subsection Pulse Drivers
+@dfn{Pulsing} is used for solenoids that are operated infrequently,
+and only for short durations at a time.
+These are normally used for kickers, poppers, etc.
+The system queues the requests and executes them one at a time, never
+in parallel.
 
-@dfn{Pulse drivers} are operated infrequently, and only for short
-durations at a time.  The system prevents multiple pulses from
-occurring simultaneously and will queue and stage them.  These
-are normally used for kickers, poppers, etc.
-
-The pulse can be controlled by the solenoid (motor, etc.) entry
+The default pulse settings are controlled by the entry
 in the machine description, in the "drives" section.  The @code{time}
-parameter sets the total length of time for the pulse.  The @code{duty}
+parameter sets the total length of time for the pulse.  It can be an integer
+value in milliseconds, or one of the @code{TIME_xxx} values which are in
+multiples of 16ms.  The @code{duty}
 parameter controls the duty cycle; use one of the @code{SOL_DUTY_xxx} defines.
 SOL_DUTY_100 keeps the driver on for the entire interval; SOL_DUTY_50 keeps
-it on half the time, delivering half the power; and so on.
+it on half the time, delivering half the power; and so on.  The minimum duty
+cycle is 1/8th full power.
 
 If you do not specify either of these values, you will get a reasonable, but
 conservative default.  Solenoids and flashers may have different default values.
+A large portion of getting a new game to work correctly is determining the
+correct values to use here.
 
 @table @code
 
@@ -1304,13 +1394,21 @@ a while.
 @item sol_request_async
 
 Pulse a solenoid, but don't wait for it to be fired.  This is the preferred
-method to use.
+method to use.  This function returns immediately, before the pulse
+occurs.
+
+@item sol_req_start_specific
+
+This is the most flexible API, which allows you to specify the exact duty
+and time parameters that you want, overriding the defaults from the machine
+config.  It is not recommended for ordinary use.  It is exposed by test mode
+to allow you to try different settings to see how they behave.
 
 @end table
 
-@subsection Continuous Drivers
+@subsection Custom Drivers
 
-@dfn{Continuous drivers} can run for longer periods of times.
+@dfn{Custom drivers} can run for longer periods of time.
 They are allowed to run in parallel with anything else.  They
 will frequently use @dfn{duty cycling} to avoid keeping the
 coil 100% active for too long, and thus they often require
@@ -1348,29 +1446,14 @@ defines to pulse it more dimly than usual.
 
 @end table
 
-@section Zerocross Detector
-
-The zero cross driver increments a counter every 1ms, and clears it
-whenever zero cross is asserted.  With knowledge of the AC cycle
-length, this allows a relatively good reconstruction of the waveform.
-For example, in the US zero cross should occur about once every 8ms.
-When the counter is at 4, the AC should be at its peak voltage.
-Outside the US, this would occur when the counter is at 5.
-
-Note that the AC waveform is not synchronized to the oscillator that
-generates IRQ, so a perfect reconstruction is not possible.
-
-@table @code
-
-@item pinio_read_ac_zerocross
-
-Return nonzero if currently at a zerocross point.
-
-@end table
-
+@node Dot-Matrix Display (DMD)
 @section Dot-Matrix Display (DMD)
 
-To write to the DMD, you must go through the following steps:
+Dot matrix APIs should only be called from display effects.
+
+There are two key objects you should understand: pages and windows.
+
+To write to the DMD, you must go through the following steps for each frame:
 
 @itemize @bullet
 
@@ -1378,9 +1461,11 @@ To write to the DMD, you must go through the following steps:
 The new page may contain old, stale data in it; it is not necessarily initialized.
 
 @item Map the page into memory.
-At most two pages can be seen by the CPU at a time on the 6809.  These are
-called the @dfn{low page} and @dfn{high page}.  Generally, anything simple uses
-only the low page.  In the APIs below, the term @var{map} refers to either
+Display memory is not directly writable by the CPU until it is mapped into
+a memory window.  How this works depends on the underlying platform.
+Regardless, there are always at least two windows which can be used, which
+are called the @dfn{low page} and @dfn{high page}.  Generally, anything simple can
+be done using only the low page.  In the APIs below, the term @var{map} refers to either
 @emph{low} or @emph{high}.
 
 @item Initialize the page if necessary.
@@ -1396,7 +1481,9 @@ For example, overlaying text onto background art.
 
 @item Show the page.
 Until the page is shown, it is not visible.  This prevents each step of the
-rendering process from being seen, which is not visually appealing.
+rendering process from being seen, which is not visually appealing.  Once
+the page is shown, it is implicitly freed back to the system, meaning that any
+new changes to the display require allocating a new page again.
 
 @end itemize
 
@@ -1404,29 +1491,41 @@ There are APIs to do all of these things individually; there are also some APIs
 that combine some of these steps to make it easier.
 
 @table @code
+
 @item dmd_alloc_@var{map}
 Allocate and map a single page into either the low or high area.
+
 @item dmd_alloc_low_high
 Allocate and map two pages at once.  The pages will always have consecutive
 page numbers (N and N+1).
-@item wpc_dmd_set_high_page
-@item wpc_dmd_get_high_page
-@item wpc_dmd_set_low_page
-@item wpc_dmd_get_low_page
+
+Do not assume that the low and high windows are contiguous in memory.
+
+@item dmd_dup_mapped
+Allocate and map a page pair that is copy of what is currently mapped.
+
 @item dmd_flip_low_high
 Flip the mappings, so that the low page appears in the high region, and vice
 versa.
+
 @item dmd_clean_page_@var{map}
 Zero a display page.
+
 @item dmd_copy_page
 Copy an entire page from one buffer to another.
+
 @item dmd_and_page
 AND the contents of the low page, using the high page as a mask.
 @item dmd_or_page
 OR into the contents of the low page, using data from the high page.
 @item dmd_xor_page
-@item dmd_shadow_copy
-@item dmd_text_raise
+XOR into the contents of the low page with the data in the high page.
+
+@item dmd_text_outline
+@item dmd_text_blur
+@item dmd_overlay_outline
+@item dmd_rough_copy
+@item dmd_rough_erase
 @item dmd_show_@var{map}
 Show a single display page as a 1-color image.
 @item dmd_show_other
@@ -1442,45 +1541,59 @@ Write text in the given font, right-justified against the specified coordinate.
 Draw an arbitrary sized bitmap onto the low page.
 @item frame_draw
 Draw a full-size, 3-color frame onto the low and high pages.
+@item dmd_sched_transition
+@item dmd_overlay
+@item dmd_overlay_color
+@item dmd_overlay_onto_color
 @end table
 
-There are many more APIs for drawing text and graphics.
-
+@node Sound Board
 @section Sound Board
 
-Two flavors of sound board are supported: WPC, and DCS.
+At present, sound support is very WPC-specific.  The sound board is an
+external device that is controlled by sending commands over a serial-like
+interface.  Two flavors of sound board are supported: WPC, and DCS.
 The same APIs are used in either case.
 
 @table @code
-@item pinio_reset_sound
-Reset the sound board.
-@item pinio_write_sound
-Write an 8-bit code to the sound board.
-@item pinio_sound_ready_p
-Return true if the sound board has an 8-bit waiting to be read.
-@item pinio_read_sound
-Read an 8-bit code from the sound board.
 @item sound_send
 Sends a command to the sound board.  The command may be 8-bit or 16-bit.
 @end table
 
-@section Triacs and General Illumination
+@node General Illumination
+@section General Illumination
+
+General illumination allows for additional lighting that is managed in
+groups of lamps, which are all enabled and disabled at the same time.
+These are often referred to as GI "strings".
 
 @table @code
-@item pinio_write_triac
-Write to the set of all triacs.
-@item triac_on
-Turns on one or more triacs.
+
+@item gi_enable
+
+Turns on one or more GI strings.  The argument given is a bitmask where
+each bit corresponds to an entire set of lamps (thus, we support at most
+8 strings).
+
+@item gi_disable
+
+Turns off one or more GI strings.
+
 @item gi_dim
-Enables a dim general illumination string.
-@item triac_off
-Turns off one or more triacs.
+
+Dims one or more GI strings.  This is like @code{gi_enable}, but it takes
+an extra parameter, which specifies the @emph{intensity} of the lamps.
+Not all hardware supports dimming; on WPC, this is achieved through the use
+of triacs.  If dimming is not supported, then this API is unavailable and
+will cause a compiler error.
+
 @end table
 
+@node Real-Time Clock
 @section Real-Time Clock
 
-The WPC ASIC contains an internal realtime clock.
-The battery power keeps the RTC running even when the machine is turned off.
+On machines with a realtime clock, these APIs let you set and get
+the current time of day.  At present, only WPC is supported.
 
 The chip provides three registers for counting minutes, hours, and days.
 FreeWPC keeps the calendar time in persistent memory.
@@ -1492,51 +1605,11 @@ any changes.
 @item rtc_write
 @end table
 
-@section High Precision Timer
-
-@table @code
-@item pinio_read_timer
-@item pinio_write_timer
-@end table
-
-@section Miscellaneous
-
-@table @code
-
-@item pinio_watchdog_reset
-
-Reset the hardware watchdog timer.
-
-@item pinio_active_led_toggle
-
-Toggle the diagnostic LED.
-
-@end table
-
+@node Debug Port
 @section Debug Port
 
-@section Paging and Locking
-
-@table @code
-@item pinio_set_bank
-Writes a bank-switching register.
-@item pinio_get_bank
-Reads a bank-switching register.
-@end table
-
-@section Bit Shifting
-
-The ASIC has a builtin shifter that can do some bitwise math faster
-than native 6809 code.
-
-@command{gcc6809} has an option @option{-mwpc} which
-enables emitting instructions for the WPC platform.
-In some cases, the hardware shifter will be used
-automatically.  Note that gcc is unaware of the
-threading/interrupt model, so access to the shifter
-is not protected.  In the current implementation,
-the shifter is not used from the IRQ, and since
-tasks are nonpreemptive, that is no problem.
+@node Flags
+@section Flags
 
 The bit APIs below are the most generic; they are all macros
 that will invoke the best possible function, depending on whether
@@ -1569,7 +1642,7 @@ to request that all three types do something in sync with one another.
 There are similarities between the way each type is handled, but all
 three have fundamental differences.
 
-Lamp effects manage both the regular lamps, plus the GI and flashers.
+Lamp effects manage the controlled lamps, plus the GI and flashers.
 
 @menu
 * Basic Effect Principles::    What all types of effects have in common
@@ -1585,12 +1658,17 @@ Lamp effects manage both the regular lamps, plus the GI and flashers.
 @node Basic Effect Principles
 @section Basic Effect Principles
 
-These principles apply to all kinds of effects.
+These principles apply to all types of effects.
 
-At any time, there is at most 1 effect that is @emph{running}.  The
+At any time, there is at most 1 effect that is @emph{running} of each
+type.  The
 running effect is the one which has been @emph{started} with the
 highest priority.  Priorities are simple integer values:
-the higher the number, the more important the effect is.
+the higher the number, the more important the effect is.  A list
+of predefined priority values is defined in @file{priority.h};
+these files begin with @code{PRI} and have been carefully defined relative
+to one another.  Use one of these values when possible.
+
 
 It is possible for no effect to be running if none has been started.
 In that case, the current priority is considered to be zero.  Actual
@@ -1601,13 +1679,17 @@ music, which is executed on a separate CPU.  The
 currently running display effect always has the group ID
 @code{GID_DEFF}; likewise @code{GID_LEFF} for the lamps.  Effects
 that are started but not running do not have a task assigned to them,
-and are simply marked as started in memory somehow.
+and are simply marked as started in memory somehow.  Because they do
+not have enough priority to run, there is nothing for them to do.
 
-These tasks can be preempted, if a higher priority effect is started.
-In that case, the old task is killed, and a new task is started.
+Effect tasks can be preempted, if a higher priority effect is started later.
+In that case, the old task is killed, and a new task is started.  When
+the task is killed, there is no guarantee as to what was doing
+previously, and there is no opportunity for it to do cleanup on its
+own.
 
 Effect functions must be declared in the machine configuration file.  Each
-entry gives the entry point to the effect, along with its priority
+entry names the function to be called to run the effect, along with its priority
 and other optional properties.
 
 The APIs and implementation for display/lamp effects are mostly the
@@ -1638,8 +1720,10 @@ either @code{display_update} or @code{music_refresh}.  Any module that can
 provide a background effect should implement these handlers.
 
 The handler can decide which effect, if any, it wants to provide by
-calling either @code{deff_start_bg} or @code{music_request}.  It passes
-the code for the deff or music plus a priority value.  After all of the
+calling either @code{deff_start_bg} or @code{music_request}.  (If the
+conditions are not correct, it can simply return without doing anything,
+as with a mode that is not running.)  The handler request includes
+the ID for the deff or music to be started, plus a priority value.  After all of the
 event handlers have been invoked, the one with the highest priority
 wins and will be started.
 
@@ -1650,7 +1734,8 @@ different circumstances: normal game play, ball at plunger, during bonus.
 
 Because handlers can use the values of other variables in the
 determination (are we in game, for example?), the calculations need to
-be redone periodically.  To force a refresh of both the display and music,
+be redone periodically, in case the conditions change.  To force a refresh
+of both the display and music,
 call @code{effect_update_request}.  The update will take place within the next
 100ms; the delay is intended to smooth out multiple such requests within
 a short time, and the delay is not really noticeable.
@@ -1781,6 +1866,11 @@ Stops and then starts a lamp effect again.
 
 Called from within a lamp effect, sets/gets the state of a single lamp
 that has been allocated to it.
+
+@item gi_leff_alloc, gi_leff_enable, gi_leff_disable, gi_leff_free
+
+Called only from within lamps effects.  These modify GI strings
+overriding their default settings.
 
 @item leff_exit
 
@@ -1987,11 +2077,15 @@ the purpose of updating these.  It works identically to the @code{lamp_update}
 function; however, these events are generated more frequently, as they are
 more important to be right in a timely manner.
 
+Note that device update is disabled during ball search, so that search
+handlers can complete control of the devices to try to find the missing
+pinball.
+
 @c ======================================================
 @node Ball Tracking
 @chapter Ball Tracking
 
-The ball tracking module keeps track of where all of the pinballs are in
+The ball tracking module manages the locations of all of the pinballs in
 the machine.  It is implemented in @file{common/device.c} and uses
 container declarations in the machine description.
 
@@ -2019,14 +2113,17 @@ others can hold many.
 For each device, the ball tracker maintains the following state information:
 
 @itemize @bullet
-@item The maximum number of balls it can hold (constant)
-@item The current number of balls it has
-@item The desired number of balls
+@item The maximum number of balls it can hold.  This is a constant that
+depends on the number of counting switches in the device.
+@item The current number of balls it contains
+@item The previous number of balls it contained earlier
+@item The desired number of balls that game logic wants it to have
 @item Whether or not it is in the process of trying to release a ball
 @end itemize
 
 The @dfn{desired count} is crucial to understanding the module's behavior.
-Whenever it has more balls than desired, it will initiate one or more releases
+Whenever the device has more balls than desired, the ball tracker will initiate
+one or more releases
 to try to bring the count down to the desired number.  Otherwise, any balls
 that enter the device are kept there; this is used to implement ball locks.
 
@@ -2035,7 +2132,7 @@ desired count.  The device module has complete control over the actual
 release solenoid.
 
 The trough device is the only device which normally desires to keep any balls.
-Playfield devices generally want zero balls unless a lock has been enabled.
+Playfield devices generally desire zero balls unless a lock has been enabled.
 
 Device switches must be declared as @emph{edge} switches, which invoke the
 event handler on both open and close transitions.  The tracker simply updates
@@ -2090,7 +2187,7 @@ is successfully served.  The @dfn{live count} of the machine is the
 number of balls in play for the purposes of game code (i.e. not counting
 missing pinballs or balls locked on the playfield from previous games).
 The @code{single_ball_play} event is generated when the live count
-is reduced to 1, as at the end of multiball.  Multiball modes use
+is reduced to 1.  Multiball modes use
 this to stop properly.  There is also a @code{ball_count_change} event
 invoked on every change of the number of balls in play; some games use
 this to update playfield multipliers.
@@ -2151,28 +2248,6 @@ new adjustments.
 This adjustment allows you to switch between normal game play and a timed
 game.  Machines can implement different rules for timed play or not.
 They can also disable it entirely.
-
-@subsection Switch Stress Test
-
-The switch stress test is used to test switch handling over a long
-period of time.  When enabled, this adjustment causes the game to
-pretend that switch closures are occurring randomly.  No balls are
-actually put into play, but the machine is fooled into thinking so.
-
-Stress test also exercises ball devices correctly, and simulates 'enter'
-events instead of individual device switches.  Ball locks, trough
-serves, and multiballs can all be tested.
-
-You can force end-of-ball by pressing the Start Button several seconds
-after the start of the ball (the delay allows you to still add players
-to test multiplayer games).  If in multiball play, pressing Start
-simulates the drain of exactly one ball at a time.
-
-Closures are simulated randomly at a rate of about 10 per second.
-This test has been used to uncover some hard to find bugs in the game
-logic after extended play.
-
-Naturally, this feature is disabled by default.
 
 @section Audits
 
@@ -2301,8 +2376,17 @@ If @code{FREE_ONLY} is defined, it will build a ROM that doesn't require
 coins.
 
 @section Extra Balls
-@section High Scores
-@section Enter Initials
+
+This module tracks lit and collected extra balls.  Lit extra balls can
+be easy (lit until end of game) or hard (lit only until end of ball).
+
+@table @code
+@item light_easy_extra_ball
+@item light_hard_extra_ball
+@item eb_light_adjustable
+@item collect_extra_ball
+@item can_award_extra_ball
+@end table
 
 @section Tournament Mode
 
@@ -2321,24 +2405,26 @@ to determine if tournament is in effect.
 
 Machines don't need to do much to produce a working ball search function.
 The common code knows how to pulse all of the regular solenoids.
-It also knows which solenoids @emph{not} to fire.
-
+It also knows which @emph{not} to fire anything marked as a @code{motor}
+or @code{flasher}.
 You can mark a solenoid in the machine description with @code{nosearch}
-to prevent it from being pulsed during ball search.
+to ignore other solenoids.
 
 Machines that need to handle a particular power driver in a non-standard
-way should implement a @code{ball_search} event handler, and mark the
+way (by using a template driver) should implement a @code{ball_search}
+event handler, and mark the
 associated solenoid as @code{nosearch}.
-The @code{ball_search} handlers will be called to perform whatever is
-needed.
+The @code{ball_search} handlers will be called along with the automatic
+pulsing.
 
 For example, on Funhouse, the Rudy saucer eject needs to make sure that
 the mouth is open before kicking.
 
-By default, flashers and motors are automatically skipped.  Solenoids
-associated with ball devices are also skipped unless they are empty.
+Solenoids associated with ball devices are also skipped unless they are empty.
 
 @section Knocker Driver
+
+Call @code{knocker_fire} to fire the knocker.
 
 @section Security PIC Module
 
@@ -2359,6 +2445,10 @@ area all the time.
 
 @section Adjustments
 
+Adjustments are 8-bit variables kept in persistent storage.  Each group
+of related adjustments is checksummed to verify integrity.  Adjustments
+can be checked by just reading the variable; there is no special API to do so.
+
 @section Audits
 
 Audits are 16-bit variables kept in the non-volatile area of memory.  They
@@ -2368,11 +2458,58 @@ they can be assigned via @code{audit_assign}.
 
 @section Scoring
 
+A global playfield multiplier is supported; use @code{score_multiplier_set} to
+change it.  It is automatically set to 1 at the beginning of each ball.
+
+Scores can be stated in two ways: as a 5-byte, binary-coded decimal value, or
+as an 8-bit "score code".  The long values allow for arbitrary values up to
+one billion points.  The short values are more compact and index a table of
+common score values, which are listed in the machine config.
+
+The first set of APIs operate on arbitary BCD score buffers:
+
+@table @code
+@item score_zero
+@item score_copy
+@item score_add
+@item score_sub
+@item score_mul
+@item score_compare
+@end table
+
+The second group of APIs increment the current player's score by
+a fixed value.
+
+@table @code
+@item score_long_unmultiplied
+@item score_long_multiple
+@item score_long
+@item score_multiple
+@item score
+@end table
+
+The third group of APIs, called the @dfn{ladder APIs}, add score according
+to some rule.
+
+@section Lamp Countdown
+
+@section Diagnostics
+
+@section Ball Savers
+
+@section Score Rank
+
+@section Ball Serve
+
+@section Timed Modes
+
+@section Multiball Modes
+
 @c ======================================================
 @node Fonts and Graphics
 @chapter Fonts and Graphics
 
-This chapter explains how FreeWPC fonts and graphics work.
+This chapter explains in detail how FreeWPC fonts and graphics work.
 
 FreeWPC uses simple bitmaps to represent fonts, icons, and full-screen
 graphics.  A @dfn{bitmap} is an array of rectangular pixel data.
@@ -2528,11 +2665,148 @@ It is the job of the image linker to decide what compression techniques
 to perform.  The linker is told the maximum amount of space that can be
 used for images, which is the total size of the ROM minus any sections
 reserved for source code.  If all images fit without compression, then all
-is well.  Otherwise, the linker will perform as much as compression as
-necessary.  (This is not completely implemented yet.  The image map will
-need to provide syntax for specifying the priorities of images to aid in
-the decision making.)
+is well.
 
+Otherwise, the linker will perform as much as compression as
+necessary.  At present, images are compressed in the order that they
+were declared.  A future enhancement would be to start with those images
+that can be compressed the best without requiring much more CPU power
+to decode them.
+
+In some rare cases, trying to compress an image fails to produce a
+smaller buffer.  The linker notices this and leaves such images
+uncompressed.
+
+@c ======================================================
+@node Platform APIs
+@chapter Platform APIs
+
+The platform APIs define how the hardware is accessed on a particular
+platform.  They only need to be written once, and then all games on that
+hardware architecture can be supported.
+
+If you are developing code for a WPC machine, you do not need to understand
+the platform APIs in detail, because they are already written for you.
+If you plan to port FreeWPC to a different hardware architecture, then
+you will need to write these functions first before you can create any
+game code.
+
+Every platform must define a header file in @code{include/@file{platform}/@file{platform}.h}.
+This file defines a number of inline functions, all of which begin with
+@code{pinio}.  It also defines a handful of constants, which begin
+with @code{PINIO}.
+
+Platform APIs are the functions that perform the physical I/O.  On WPC,
+these functions read and write the WPC ASIC registers.  They are not
+suitable for game code to call directly, as they are too level.  Instead,
+game code uses the core APIs to access a device driver; the device driver then
+uses the platform APIs.
+
+@table @code
+
+@item pinio_write_switch_column
+
+Set the current switch matrix column.
+
+@item pinio_read_switch_rows
+
+Read all of the switches on the currently selected column.
+
+@item pinio_read_dedicated_switches
+
+Read all of the dedicated switches.
+
+@item pinio_read_flippers
+
+Read all of the Fliptronic switches.
+
+@item pinio_read_flipper_buttons
+
+Read all of the Fliptronic button switches.
+
+@item pinio_read_flipper_eos
+
+Read all or some of the flipper switches.
+
+@item pinio_read_locale
+
+Read the locale indicator (jumpers or DIP switches).
+
+@item pinio_write_lamp_strobe
+
+Set the current lamp matrix strobe.
+
+@item pinio_write_lamp_data
+
+Write lamp row data for the currently selected column.
+
+@item pinio_write_solenoid_set (@var{bank}, @var{value})
+
+Refresh a set of 8 solenoids.
+
+@item pinio_read_ac_zerocross (CONFIG_AC)
+
+Return nonzero if currently at a zerocross point.
+
+@item pinio_reset_sound
+
+Reset the sound board.
+
+@item pinio_write_sound
+
+Write an 8-bit code to the sound board.
+
+@item pinio_sound_ready_p
+
+Return true if the sound board has an 8-bit waiting to be read.
+
+@item pinio_read_sound
+
+Read an 8-bit code from the sound board.
+
+@item pinio_write_gi (CONFIG_GI)
+
+@item pinio_write_triac (CONFIG_TRIAC)
+
+Write to the set of all triacs.
+
+@item pinio_watchdog_reset (CONFIG_WATCHDOG)
+
+Reset the hardware watchdog timer.
+
+@item pinio_active_led_toggle (CONFIG_DIAG_LED)
+
+Toggle the diagnostic LED.
+
+@item pinio_dmd_window_set (CONFIG_DMD)
+
+@item pinio_dmd_window_get (CONFIG_DMD)
+
+@item pinio_dmd_window_ptr (CONFIG_DMD)
+
+@item pinio_dmd_set_visible (CONFIG_DMD)
+
+@item pinio_dmd_request_interrupt (CONFIG_DMD)
+
+@item pinio_parport_write (CONFIG_PARALLEL_PORT)
+
+Write a byte to the parallel port.
+
+@item pinio_set_bank (CONFIG_BANK_SWITCH)
+
+Writes to a bank switching register.  There may be multiple such registers;
+you specify which register, and the value to be written.  The values
+are also platform specific.
+
+@item pinio_get_bank (CONFIG_BANK_SWITCH)
+
+Reads the value of a bank switching register.
+
+@item pinio_read_timer (CONFIG_HIGHRES_TIMER)
+
+@item pinio_write_timer (CONFIG_HIGHRES_TIMER)
+
+@end table
 
 @c ======================================================
 @node Native Mode
@@ -2545,14 +2819,12 @@ Cygwin systems.
 
 The main difference in native mode is that all I/O accesses
 are emulated.  Calls to @code{readb} and @code{writeb} are
-emulated internally rather than writing to the memory-mapped address.
+emulated internally rather than accessing the real hardware.
 
 Also, because native mode runs under an existing operating system,
-the lowest-level OS features in FreeWPC are reimplemented.  For example,
+the lowest-level OS features in FreeWPC are reimplemented using the
+equivalents that your OS already provides.  For example,
 the multitasking APIs are emulated using a system threads library.
-
-Although FreeWPC aims to be portable to other platforms than just
-WPC, native mode is WPC-specific for the moment.
 
 Native mode is most useful for debugging and testing the higher layers
 of the system, which aren't as hardware or timing dependent.
@@ -2580,7 +2852,11 @@ Thus, when the interrupt thread is woken up, it checks the system clock to see
 how much time has actually elapsed, and invokes the interrupt handler
 @emph{multiple times}.  The net effect is that interrupt handlers are invoked
 the same number of times as they would be on real hardware, but not the same
-way.
+way: they are called in "batches", rather than being equally spread out.
+
+By default, the simulation runs at the same speed as the native system clock.
+It is possible to speed up the simulation by a constant multiplier, which
+is sometimes helpful for rapid testing.
 
 @section Persistent Memory
 
@@ -2714,6 +2990,34 @@ Interrupt handlers/realtime functions cannot be halted.
 You can also dynamically enable and disable breakpoints at various places
 within the code, so that the debugger will start when the program hits that
 location, without having to press Escape.
+
+@section Switch Stress Test
+
+The switch stress test is used to test switch handling over a long
+period of time.  When enabled, this adjustment causes the game to
+pretend that switch closures are occurring randomly.  No balls are
+actually put into play, but the machine is fooled into thinking so.
+
+Stress test also exercises ball devices correctly, and simulates 'enter'
+events instead of individual device switches.  Ball locks, trough
+serves, and multiballs can all be tested.
+
+You can force end-of-ball by pressing the Start Button several seconds
+after the start of the ball (the delay allows you to still add players
+to test multiplayer games).  If in multiball play, pressing Start
+simulates the drain of exactly one ball at a time.
+
+Closures are simulated randomly at a rate of about 10 per second.
+This test has been used to uncover some hard to find bugs in the game
+logic after extended play.
+
+Naturally, this feature is disabled by default.
+
+@c ======================================================
+@node The WPC Hardware
+@appendix The WPC Hardware
+
+@include hardware.texi
 
 @c ======================================================
 @node The Machine Definition

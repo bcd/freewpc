@@ -285,10 +285,6 @@ expanded values for space efficiency.
 
 Declares which fonts should be included in this game.
 
-@item fifs
-
-Obsolete.
-
 @item timers
 
 Declares the freerunning timers that are needed.
