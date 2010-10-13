@@ -595,9 +595,12 @@ task is stopped before the new task is created.
 
 @item task_sleep
 
-Suspends the current running task for a given period of time.  The parameter is one of the
-TIME defines which is given in units of approximately 16ms.  Because it is 8-bit, this limits
+Suspends the current running task for @emph{at least} the given period of time.  The parameter is one of the
+@code{TIME} defines which is given in units of approximately 16ms.  Because it is 8-bit, this limits it
 to about 4 seconds.
+
+If you want to sleep for the absolute minimum, instead of @code{task_sleep (0)} it is recommended
+to use @code{task_yield()}.
 
 @item task_sleep_sec
 
@@ -1611,18 +1614,33 @@ any changes.
 @node Flags
 @section Flags
 
-The bit APIs below are the most generic; they are all macros
-that will invoke the best possible function, depending on whether
-the argument are constant or not.
+Although ordinary variables work well, sometimes you only need
+to store a single bit.  For this, instead of declaring a byte
+variable and wasting 7 of the 8 bits, you can use a @dfn{flag}.
+Flags are packed efficiently in the memory to avoid wasting
+space.  This can be used helpful on small memory platforms.
+
+The bit APIs are the most generic.  You provide a bit number
+and a pointer to a bit buffer where the bits are packed.
+
+The flag APIs operate on a per-player flag buffer.  They are
+also automatically cleared at player start.  You only provide
+a flag number.
+
+The global flag APIs are similar, but those flags are global and do
+not change across players, nor across games.
+
+Flag and global flag IDs are distinct.  Be careful not to pass
+a global flag ID to a flag API, or vice-versa.
 
 @table @code
-@item bit_on
+@item bit_on, flag_on, global_flag_on
 Sets a bit flag.
-@item bit_off
+@item bit_off, flag_off, global_flag_off
 Clears a bit flag.
-@item bit_toggle
+@item bit_toggle, flag_toggle, global_flag_toggle
 Toggles a bit flag.
-@item bit_test
+@item bit_test, flag_test, global_flag_test
 Tests a bit flag.
 @end table
 
@@ -2235,6 +2253,9 @@ However, there are extra options and a few important differences.
 For testing core changes to FreeWPC, it is often more convenient to use
 test mode than to play a game.
 
+You can navigate the menus with the flipper buttons in addition to the
+coin door buttons.  Use Start to enter, and double flip to exit.
+
 When compiling with the @code{MACHINE_TEST_ONLY} option, the game
 will boot directly into test mode, and there is no provision to start a game.
 
@@ -2243,29 +2264,27 @@ will boot directly into test mode, and there is no provision to start a game.
 All of the @emph{standard adjustments} are supported.  There are also a few
 new adjustments.
 
-@subsection Timed Game
-
-This adjustment allows you to switch between normal game play and a timed
+@dfn{Timed Game} allows you to switch between normal game play and a timed
 game.  Machines can implement different rules for timed play or not.
 They can also disable it entirely.
+
+@dfn{Payment Type} configures whether the display asks you to insert
+coins, bills, or swipe a card.
 
 @section Audits
 
 All of the @emph{standard audits} are supported.
 
 Presently, audits are kept as 16-bit integers, so they max out at 65535.
+This will probably change at some point.
 
 @section Tests
 
 The test menu contains roughly the same tests as in the actual WPC
 games, with some differences.
 
-@subsection Solenoid Test
-
 The solenoid test lets you control the duration and duty cycle of
 each coil pulse by using the flipper buttons.
-
-@section Development
 
 The development menu contains a series of additional tests that are
 probably only relevant to developers and not to end users.  Current
@@ -2380,13 +2399,28 @@ coins.
 This module tracks lit and collected extra balls.  Lit extra balls can
 be easy (lit until end of game) or hard (lit only until end of ball).
 
+In the machine config file, you should tag the lamp that indicates
+an extra ball is lit as @code{extra-ball}, and the shoot again lamp
+as @code{shoot-again}.  Then the lamps will automatically update for you
+when these APIs are called.
+
 @table @code
 @item light_easy_extra_ball
+Lights an easy extra ball.
 @item light_hard_extra_ball
+Lights a hard extra ball.
 @item eb_light_adjustable
+Lights an easy or hard extra ball, depending on the value of an adjustment.
 @item collect_extra_ball
+Call this from the switch handler of the shot that scores the extra ball.
 @item can_award_extra_ball
+Returns true if an extra ball is allowed to be lit/awarded.  This
+consider limits of extra balls per game.
 @end table
+
+There is also an API @code{special_award} to award a special, but
+it does not manage any lamps automatically.  It just obeys the adjustment
+to award whatever has been configured for special, and fires the knocker.
 
 @section Tournament Mode
 
@@ -2422,26 +2456,17 @@ the mouth is open before kicking.
 
 Solenoids associated with ball devices are also skipped unless they are empty.
 
+Game code can call @code{ball_search_timeout_set} to set the amount of
+idle time that must expire before a ball search will occur.  The default
+is 15 seconds.  The timer resets anytime a playfield switch (one marked
+with the @code{SW_PLAYFIELD} flag) triggers.  You can also manually reset it
+manually using @code{ball_search_timer_reset}.
+
 @section Knocker Driver
 
-Call @code{knocker_fire} to fire the knocker.
-
-@section Security PIC Module
-
-The PIC module will initialize the PIC correctly and refresh it
-periodically to keep it returning valid data.
-
-@section Player Local Data
-
-To support multiplayer games, FreeWPC maintains 5 separate copies of the
-variables that are marked @code{__local__}.  One of these is the "live" copy and
-is where the linker places the variables.  The other four are holding buffers that are
-used when the player is not up.  When switching between players, the current local
-variables are swapped out to that player's holding area, and the new player's
-variables are then swapped in.
-
-In single-player games, none of this happens and the variables stay in the live
-area all the time.
+Call @code{knocker_fire} to fire the knocker.  If a coin meter is attached
+to the knocker coil, it will not be pulsed.  If the machine defines a sound
+effect for knock, that will be played instead of pulsing a solenoid.
 
 @section Adjustments
 
@@ -2470,40 +2495,166 @@ The first set of APIs operate on arbitary BCD score buffers:
 
 @table @code
 @item score_zero
+Zeroes a score.
 @item score_copy
+Copies one score to another.
 @item score_add
+Adds one score to another.
 @item score_sub
+Subtracts one score from another.
 @item score_mul
+Multiples a score by an integer.
 @item score_compare
+Compares two scores, as memcmp would do.
 @end table
 
 The second group of APIs increment the current player's score by
 a fixed value.
 
 @table @code
-@item score_long_unmultiplied
-@item score_long_multiple
-@item score_long
-@item score_multiple
 @item score
+Award score.  The input is an 8-bit score code.
+@item score_long
+Also awards score.  The input is another BCD score buffer.
+@item score_multiple
+Like @code{score()}, but also takes a multiplier argument.  This multiplier
+@emph{and} the global score multiplier are taken into account.
+@item score_long_multiple
+Like @code{score_long} and @code{score_multiple}.  This is the most
+low-level API; all others ultimately call it.
+@item score_long_unmultiplied
+Awards score without any multipliers.
 @end table
 
 The third group of APIs, called the @dfn{ladder APIs}, add score according
 to some rule.
 
-@section Lamp Countdown
+@section Lamp Timers
+
+A lamp timer is a countdown timer which is tied to a playfield lamp.
+The amount of time remaining controls how fast the lamp flashes.  When
+the timer reaches zero, the effect stops.
+
+You declare a structure of type @code{struct lamptimer_args}, which
+names the lamp and the initial timer value, in seconds.
+
+The lamp is modified as part of an internally generated lamp effect; thus,
+the basic state of the lamp is retained.  While the lamp timer runs, the
+basic state is overriden by the effect.
+
+@table @code
+@item lamp_timer_start
+@item lamp_timer_find
+@item lamp_timer_stop
+@end table
 
 @section Diagnostics
 
-@section Ball Savers
-
 @section Score Rank
 
-@section Ball Serve
+The score rank module is optional.  When enabled for a game, the system will
+monitor the relative changes in player's scores over the course of a multi-
+player game, and throw a @code{rank_change} event whenever the current player
+moves into a new place.  It is up to each game to decide how to handle it.
 
 @section Timed Modes
 
+To write a timed mode, you need to do two things:
+
+First, create a structure of type @code{struct timed_mode_ops} and fill out
+all of the required information:
+
+@itemize @bullet
+@item An initialization function.  This is called when the mode is started.
+@item An exit function.  This is called when the mode is stopped or times out.
+@item A task group ID.  Choose any name you want begin with @code{GID}.
+When the mode is started, a task will be created with this group ID.
+@item A music code.  Use MUS_NONE if the mode should not update the background music.
+@item The background display effect ID.  Use DEFF_NULL if none is needed.
+@item The mode end display effect ID.  Use DEFF_NULL if none is needed.
+@item A priority value.  Use one of the PRI values.
+@item The initial mode timer, in seconds.
+@item A pointer to a timer variable.  You must declare the variable yourself.
+@item The length of the grace period, in seconds.  It may be zero.
+@item A pause function.  This function is called occasionally while the mode
+is running.  If it returns TRUE, the timer is not advanced.
+Use @code{system_timer_pause} when the mode should pause for the "usual cases" only.
+Use @code{null_false_function} if the mode should not pause at all.  You can
+supply your own function if you need custom behavior.
+@end itemize
+
+Second, handle several system events which affect the mode's operation:
+
+@table @code
+@item timed_mode_music_refresh.
+Call this from a @code{music_refresh} handler, passing it a pointer to the mode ops struct.
+@item timed_mode_display_update.
+Call this from a @code{display_update} handler, passing it a pointer to the mode ops struct.
+@end table
+
+From outside the mode itself, other modules call these APIs to interact with
+your mode.  The mode ops struct is part of the public interface.
+
+@table @code
+@item timed_mode_begin
+@item timed_mode_end
+@item timed_mode_running_p
+Returns true if the mode is running, for the purposes of scoring.  This returns
+TRUE while the mode is in its grace period.
+@end table
+
+@section Ball Savers
+
+@section Ball Serve
+
+The ball serve module is the preferred API for adding balls to play.
+It uses the ball tracking APIs to program the ball trough, but adds
+support for autoplunging and multiball logic.
+
+The system supports games with autoplungers or manual plungers.
+Auto launch support requires that the machine defines three things:
+the launch button switch, the launch solenoid, and a shooter switch.
+
+The base API @code{serve_ball} simply kicks a ball out of the trough.
+It also resets the valid playfield flag and refreshes background effects.
+This is the same call made by the game state machine during start ball.
+
+Use @code{serve_ball_auto} instead if you want to ball to be autolaunched
+as soon as it is served successful.  Otherwise, it is identical.  If
+a ball is served without autolaunch, it can be launched later by calling
+@code{launch_ball}.  This happens automatically when the launch button is
+pressed.
+
+You normally do not need to call either of those APIs, except in some
+rare cases.
+
+The preferred way to start multiballs is to use @code{set_ball_count},
+which sets the number of balls in play, or @code{add_ball_count} if you
+want to say how many balls to be added.  These use @code{serve_ball_auto}
+to do the work.  They work on manual plunger games too.  Only one ball
+will ever be placed in the shooter at a time.
+
+@table @code
+@item serve_ball
+@item serve_ball_auto
+@item launch_ball
+@item set_ball_count
+@item add_ball_count
+@end table
+
 @section Multiball Modes
+
+@section Mute and Pause Mode
+
+FreeWPC implements the Mute and Pause feature that was included
+in the Twilight Zone home ROM.  It is optional at compile-time.
+The machine must have an extra-ball buyin button for it to work.
+
+When compiled in, and the adjustment "MUTE/PAUSE" is set to YES,
+then pressing buytin during a game will hold the flippers,
+disable ball kickouts, and turn off the background music.  To
+continue, press the button again.  It will also timeout automatically
+after 15 minutes.
 
 @c ======================================================
 @node Fonts and Graphics
@@ -2574,8 +2725,25 @@ into WPC font files (.fon).
 
 @section Printing Text
 
-FreeWPC contains a @code{printf}-like function for rendering text
-strings, however, it is not quite the same.
+The @code{font_render_string} family of APIs is used to draw text to
+the display.  The arguments are a font object, the x and y coordinates
+where the string should be placed, and a string.  The string can be
+a constant string literal or the global format buffer (see below).
+
+There are three variants which justify the text differently: centered,
+left-justified, and right-justified.  Centering is done both vertically
+and horizontally; the others only justify left-to-right, and the y
+coordinate always specifies the top of the print area.
+
+Text printing is CPU intensive.  Display effects should take care not to
+print text more than needed.  It is often more efficient to print strings
+to an overlay buffer, and then copy them to the main display page, if the
+same text needs to be printed over and over again.
+
+@section Formatting Text
+
+FreeWPC contains a @code{printf}-like function for formatting text
+strings with variable data, however, it is not quite the same.
 
 The @code{sprintf()} function formats a string into a unique,
 @emph{global} buffer named @code{sprintf_buffer}.  It is like the
@@ -2678,6 +2846,7 @@ smaller buffer.  The linker notices this and leaves such images
 uncompressed.
 
 @c ======================================================
+
 @node Platform APIs
 @chapter Platform APIs
 
@@ -2691,14 +2860,21 @@ If you plan to port FreeWPC to a different hardware architecture, then
 you will need to write these functions first before you can create any
 game code.
 
-Every platform must define a header file in @code{include/@file{platform}/@file{platform}.h}.
+Every platform must define a header file in
+@code{include/@file{platform}/@file{platform}.h}.
 This file defines a number of inline functions, all of which begin with
 @code{pinio}.  It also defines a handful of constants, which begin
 with @code{PINIO}.
 
 Platform APIs are the functions that perform the physical I/O.  On WPC,
-these functions read and write the WPC ASIC registers.  They are not
-suitable for game code to call directly, as they are too level.  Instead,
+these functions read and write the WPC ASIC registers.  All reads and writes
+to I/O registers should use the @code{readb} and @code{writeb} macros.
+How these work depends on the platform.  For most platforms, these turn into
+memory-mapped operations.  However, they could also use a parallel port or
+USB.
+
+Platform APIs are not
+suitable for game code to call directly, as they are too low-level.  Instead,
 game code uses the core APIs to access a device driver; the device driver then
 uses the platform APIs.
 
@@ -2788,6 +2964,9 @@ Toggle the diagnostic LED.
 
 @item pinio_dmd_request_interrupt (CONFIG_DMD)
 
+Request that an interrupt be generated when the DMD controller finishes
+refreshing the display.
+
 @item pinio_parport_write (CONFIG_PARALLEL_PORT)
 
 Write a byte to the parallel port.
@@ -2817,53 +2996,79 @@ It is a form of emulation, like PinMAME, except the emulator is
 "built-in" to the game program itself.  It works on both Linux and
 Cygwin systems.
 
-The main difference in native mode is that all I/O accesses
-are emulated.  Calls to @code{readb} and @code{writeb} are
-emulated internally rather than accessing the real hardware.
+There are two major differences in a simulation build.  First, certain
+low-level OS and CPU specific features must be replaced by new components that
+work under your native operating system environment.  In particular, 6809
+assembly languages are not used at all in this mode.  We use either
+portable C versions of these functions, or comparable functions that are
+provided by the host OS.
 
-Also, because native mode runs under an existing operating system,
-the lowest-level OS features in FreeWPC are reimplemented using the
-equivalents that your OS already provides.  For example,
-the multitasking APIs are emulated using a system threads library.
+Second, I/O reads and writes do not directly control real hardware, but
+are instead emulated internally by the program itself.  All I/O is
+initiated by the platform APIs and uses the @code{readb} and @code{writeb}
+functions to address the hardware.  In native mode, these functions define
+a separation between the "program" and the "simulation".
 
 Native mode is most useful for debugging and testing the higher layers
-of the system, which aren't as hardware or timing dependent.
+of FreeWPC, which aren't as hardware or timing dependent.  This is only
+possible because the majority of the code is written in C.
 
-To compile in native mode, just set @code{NATIVE=y} in your @file{.config}.
+To compile in native mode, just add @code{NATIVE=y} to your @file{.config}.
 Instead of a ROM, you'll get an executable that can be run directly.
 
-@section Interrupts and Threads
+@menu
+* Thread Model::           How tasks and interrupts work in simulation
+* Persistent Memory::
+* Input and Output::
+* GDB Debugging::
+* Interrupt Tracing::
+@end menu
+@ignore
+* Platform Emulation::
+* Timing::
+* Command Language::
+* User Interface::
+* Hardware Emulation::
+* Signal Tracking::
+@end ignore
+
+@node Thread Model
+@section Thread Model
 
 Native mode programs are no longer realtime.  There are two main concerns related
 to scheduling.
 
-First, normal multitasking is accomplished using the @emph{pth} library, an
+First, normal multitasking (the task_xxx APIs) is accomplished using
+the @emph{pth} library, an
 open source, nonpreemptive thread library.  A thin wrapper is provided which
 has the same APIs as in 6809 mode, but which calls pth functions for the
 implementation.
 
-Idle functions must be called occasionally from a special thread, since FreeWPC
+Periodic functions must be called occasionally from a special thread, since FreeWPC
 no longer provides the scheduler.
 
 Interrupts are also simulated from an ordinary thread.  The native operating
 system probably does not allow threads to sleep for as little as 1ms; on
-most systems the minimum sleep time is on the order of 10-20ms instead.
-Thus, when the interrupt thread is woken up, it checks the system clock to see
+Linux the minimum sleep time is on the order of 10-20ms instead, and under
+Cygwin, it may be even longer.
+When the interrupt thread is woken up, it checks the system clock to see
 how much time has actually elapsed, and invokes the interrupt handler
 @emph{multiple times}.  The net effect is that interrupt handlers are invoked
 the same number of times as they would be on real hardware, but not the same
-way: they are called in "batches", rather than being equally spread out.
+way: they are called in batches, rather than being equally spread out.
 
 By default, the simulation runs at the same speed as the native system clock.
 It is possible to speed up the simulation by a constant multiplier, which
 is sometimes helpful for rapid testing.
 
+@node Persistent Memory
 @section Persistent Memory
 
 Permanent and non-volatile variables are supported; their values are
 saved in files across program runs.  Non-volatile variables are not
 actually write-protected though.  This may be implemented in the future.
 
+@node Input and Output
 @section Input and Output
 
 The native program includes a simple, curses-based user interface to show
@@ -2881,6 +3086,7 @@ PinMAME.
 Advanced simulation techniques, such as ball movements, are only partially
 implemented at the moment.
 
+@node GDB Debugging
 @section GDB Debugging
 
 You can use GDB to debug the native mode program.
@@ -2897,6 +3103,7 @@ From here, you can set breakpoints, step through the code, etc.  If the program
 crashes, you can use the @code{bt} command to get a backtrace and see exactly
 where it failed.
 
+@node Interrupt Tracing
 @section Interrupt Tracing
 
 Since interrupt handlers are really just ordinary functions in native mode,
@@ -2985,7 +3192,8 @@ fall into the debugger instead of rebooting.  This will show you what
 error occurred and which task was last running.
 
 When halted, only normal task scheduling and periodic functions cease to run.
-Interrupt handlers/realtime functions cannot be halted.
+Interrupt handlers/realtime functions cannot be halted, and thus, if they
+fail, the system will behave erratically.  (Smoke alert.)
 
 You can also dynamically enable and disable breakpoints at various places
 within the code, so that the debugger will start when the program hits that
