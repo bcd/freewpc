@@ -139,6 +139,11 @@ PRESET_BEGIN (dev)
 	{ pricing_adjustments, &price_config.free_play, YES },
 PRESET_END (dev, "DEVELOPER")
 
+PRESET_BEGIN (buyin_test)
+	{ feature_adjustments, &system_config.buy_extra_ball, YES },
+	{ standard_adjustments, &system_config.balls_per_game, 1 },
+PRESET_END (buyin_test, "BUY-IN TEST")
+
 struct preset *preset_table[] = {
 	/* Easy-Hard */
 	&preset_5ball,
@@ -160,6 +165,7 @@ struct preset *preset_table[] = {
 	&preset_show,
 	&preset_timed_game,
 	&preset_dev,
+	&preset_buyin_test,
 };
 
 

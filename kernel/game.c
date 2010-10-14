@@ -278,17 +278,16 @@ void end_ball (void)
 	 * save away the per-player audits. */
 	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
-#ifdef CONFIG_BUYIN
-		if (system_config.buy_extra_ball == YES)
+		if (!callset_invoke_boolean (buyin_offer))
 		{
-			SECTION_VOIDCALL (__common__, buyin_offer);
-			/* TODO - if buyin is bought, then need to stay on this
-			player, avoid end_player etc. */
+			callset_invoke (buyin_start_ball);
+			start_ball ();
+			goto done;
 		}
-#endif
-
-		/* Do other end player tasks */
-		callset_invoke (end_player);
+		else
+		{
+			callset_invoke (end_player);
+		}
 	}
 
 	/* Advance to the next player in a multiplayer game.

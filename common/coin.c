@@ -65,6 +65,8 @@ const struct area_csum coin_csum_info = {
 	.reset = coin_reset,
 };
 
+extern __common__ void buyin_coin_insert (void);
+
 
 /** Reduce a credit fraction to simplest terms. */
 static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
@@ -317,6 +319,7 @@ static void do_coin (U8 slot)
 
 	add_units (price_config.coin_units[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
+	buyin_coin_insert ();
 }
 
 /* TODO - use more robust drivers for the coin switches to
