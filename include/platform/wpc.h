@@ -618,7 +618,6 @@ extern inline U8 wpc_get_jumpers (void)
 
 extern inline U8 pinio_read_locale (void)
 {
-	/* TODO - make a getbits macro */
 	return (wpc_get_jumpers () & 0x3C) >> 2;
 }
 
