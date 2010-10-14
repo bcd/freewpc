@@ -1,23 +1,20 @@
 
-This chapter provides an overview of the WPC hardware, in terms of its
+This appendix provides an overview of the WPC hardware, in terms of its
 capabilities and how software is able to control everything in the machine.
 
 A much more thorough guide to the WPC and other pinball architectures
 can be found at @url{http://www.pinrepair.com/wpc/index.htm}.
 
-Note that FreeWPC is intended to be portable to platforms other than
-WPC in the future.  Not all pinball machines will be architected in
-exactly the same way; however, FreeWPC is based heavily on the way that
-WPC games work.
-
 @section Overview
 
 WPC pinball machines contain a number of circuit boards, some that are
 intelligent with microprocessors, and others that are passive.  One of these,
-the CPU board, is the master and houses the main microprocessor.  All
+the CPU board, is the master and houses the main microprocessor, a Motorola
+6809 running at 2MHz.  All
 other boards are connected to this one via ribbon cables.  The functionality
 is spread across multiple boards to make maintenance easier and to isolate
-faults.
+faults.  These data cables carry 5V, generally active low signals.  Inputs
+read as high (inactive) when the cables are disconnected.
 
 From 1990-1999, six different generations of machines were produced, which
 differed only slightly.  In order of appearance:

@@ -42,6 +42,9 @@ FALSE if this is not to be considered a drain, in which case the
 handler should also put a ball back into play somehow.  Otherwise, it
 should return TRUE.
 
+The standard ballsaver module takes care of this, but you can hook this if
+you write an "unlimited ball" mode, like Lost in the Zone.
+
 @item ball_search
 A ball search attempt is in progress.  This event is thrown each time
 all of the solenoids are pulsed to try to find the ball.  It should be
@@ -70,6 +73,10 @@ for a while.
 
 @item dev_@var{foo}_kick_success
 A kick from device "foo" succeeded (its count went down by 1).
+
+@item dev_@var{foo}_surprise_release
+The count of a device went down by 1 when a release was not initiated
+by software; the ball fell out of the device by other means.
 
 @item device_update
 Called periodically to update any mechanical devices whose state
@@ -109,7 +116,8 @@ End-of-ball has been asserted.  This is thrown just before end of ball
 bonus starts.
 
 @item end_game
-End-of-game has been asserted (for all players).
+End-of-game has been asserted (for all players).  This is thrown after
+all of the end game effects, like high score entry and match.
 
 @item end_player
 End-player has been asserted.  This is called after end_ball, and

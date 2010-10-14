@@ -211,10 +211,27 @@ Defines the controlled lamps.  You can also give each lamp a color
 and a playfield position; there are ways of using this data to
 auto-generate lamp effects.
 
+These attributes are used to tag special lamps:
+
+@table @code
+@item start
+@item buyin
+@item extra-ball
+@item shoot-again
+@end table
+
 @item drives
 
 Defines the solenoids and flashers.  Use the @code{flash} attribute to say
-which ones are flashers.
+which ones are flashers.  Use @code{motor} to say which ones are motors.
+
+These attributes are used to tag special drives:
+
+@table @code
+@item ballserve
+@item knocker
+@item launch
+@end table
 
 @item gi
 
@@ -222,8 +239,10 @@ Defines the G.I. string names, for display in test mode.
 
 @item lamplists
 
-Defines the lamplists.
-The attribute list is just a list of physical lamp names.
+Defines the lamplists.  The attribute list defines an ordered list of lamps.
+Each attribute can be a physical lamp name, as defined in the @code{[lamps]} section;
+a range of lamps in the form @code{@var{lamp_start}..@var{lamp_end}}; or another
+lamplist name, allowing for nested declarations.
 
 @item containers
 
@@ -231,6 +250,8 @@ Defines the containers/ball devices.
 The attribute list begins with the name of the release solenoid,
 followed by the names of the counting switches (in order from entry
 to exit).
+
+The trough container should be marked with the attribute @code{trough}.
 
 @item templates
 
@@ -290,6 +311,8 @@ Declares which fonts should be included in this game.
 Declares the freerunning timers that are needed.
 
 @item templates
+
+Declares instantiations of template drivers.
 
 @end table
 

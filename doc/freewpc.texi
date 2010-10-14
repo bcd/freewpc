@@ -54,6 +54,7 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Common Pinball Library::  Other common functions that are implemented.
 * Fonts and Graphics::      More info on the display APIs.
 * Platform APIs::           How to define a new hardware platform.
+* System Initialization::   The sequence of events that happen at startup.
 * Native Mode::             Running the software directly on your PC.
 * Debugging::               How to debug problems.
 * The WPC Hardware::        A primer on the WPC platform.
@@ -505,6 +506,7 @@ describes the key features of the FreeWPC programming environment.
 * Multitasking::           The normal process model
 * Real-Time Processing::   How to schedule realtime tasks
 * Memory Allocation::      How to allocate and initialize variables
+* Bit Variables::          Declaring 1-bit variables
 * Event Handling::         Throwing and catching events
 * Template Drivers::       Writing reusable software blocks
 * Fault Detection::        Handling serious errors
@@ -743,6 +745,8 @@ Used for variables that are used frequently.  GCC6809 will generate faster
 code when accessing these.  However, you are limited to about 250 bytes of
 fastram variables total.  These are mostly used by RTTs for performance.
 
+Do not use fastram unless you are working in the core.
+
 @item __permanent__
 
 Used for variables that should be persistent across reboots.  These variables
@@ -750,12 +754,17 @@ should be initialized inside of a @code{factory_reset} event, because factory
 reset should restore everything to a sane state.  GCC6809 places these variables
 at an address that is not automatically cleared by the startup code.
 
+The @code{init} or @code{init_complete}
+
 @item __nvram__
 
 Like __permanent__, but for variables that are also write-protected by default.
 To modify such a variable, you must first call @code{pinio_nvram_unlock()}, change
 it, and then call @code{pinio_nvram_lock()}.  This helps to ensure that
 certain critical variables are not accidentally corrupted.
+
+Do not sleep while inside the critical section.  Do not nest calls to these
+functions either.
 
 This feature makes use of special hardware in the WPC ASIC.
 
@@ -772,7 +781,44 @@ in a multiplayer game.  The system software will transparently reload
 these variables with the correct values whenever the player up changes.
 These variables should be initialized inside of a @code{start_player} event.
 
+There is a limit to how many locals can be declared; if you exceed this, you
+will get a linker error.
+
 @end table
+
+@node Bit Variables
+@section Bit Variables
+
+Although ordinary variables work well, sometimes you only need
+to store a single bit.  For this, instead of declaring a byte
+variable and wasting 7 of the 8 bits, you can use a @dfn{flag}.
+Flags are packed efficiently in the memory to avoid wasting
+space.  This can be used helpful on small memory platforms.
+
+The bit APIs are the most generic.  You provide a bit number
+and a pointer to a bit buffer where the bits are packed.
+
+The flag APIs operate on a per-player flag buffer.  They are
+also automatically cleared at player start.  You only provide
+a flag number.
+
+The global flag APIs are similar, but those flags are global and do
+not change across players, nor across games.
+
+Flag and global flag IDs are distinct.  Be careful not to pass
+a global flag ID to a flag API, or vice-versa.
+
+@table @code
+@item bit_on, flag_on, global_flag_on
+Sets a bit flag.
+@item bit_off, flag_off, global_flag_off
+Clears a bit flag.
+@item bit_toggle, flag_toggle, global_flag_toggle
+Toggles a bit flag.
+@item bit_test, flag_test, global_flag_test
+Tests a bit flag.
+@end table
+
 
 @node Event Handling
 @section Event Handling
@@ -918,7 +964,8 @@ You can switch between the different output files with this directive.
 @item @@@@
 
 A template comment.  Used to insert a comment line that is not placed
-into the current output file.
+into the current output file.  Ordinary C-like (or shell) comments will be
+emitted into the output files like any other non-directive line.
 
 @end table
 
@@ -1007,14 +1054,18 @@ ignored afterwards to prevent rapid-fire action.
 @item Spinners (@code{spinner.ct})
 
 The driver is useful because it handles the fact that spinner switches
-activate very fast.
+activate very fast.  It polls the spinner switch at a fast rate and
+keeps a count of the number of activations, which are then processing
+by a slower callback at normal task time.
 
 @item Duty-Cycled Coils (@code{duty.ct})
 
 This is typically for a diverter that needs to be held on for a long
 period of time, like TZ's left ramp.  Enabling the coil begins by
 applying a high power pulse, then dropping to a lower power duty cycle
-(typically 25% but it is configurable.)
+(typically 25% but it is configurable.)  It is emulating what the
+Fliptronic flippers do with a power and hold coil, except that there is
+only one physical coil.
 
 @item Bidirectional Motors (@code{bivar.ct})
 
@@ -1057,11 +1108,17 @@ The number of tasks is bounded, to prevent runaway task creation/
 memory allocation.  Many other subsystems do the same whenever a limit
 is reached.
 
+As a result, you never need to check the return value of a @code{task_create}
+call, because if it fails, then control is never returned to you.
+
 @item When an NMI or other unexpected interrupt occurs
 
-@item When the non-volatile memory is found unlocked.  This is almost
+@item When the non-volatile memory is found unlocked.
+
+This is almost
 always because someone called @code{pinio_nvram_unlock()} and forgot
-to call @code{pinio_nvram_lock()} afterwards.
+to call @code{pinio_nvram_lock()} afterwards, or executed a @code{task_sleep}
+in between.
 
 @item Certain illegal function calls are made, such as trying to sleep
 from outside task context.
@@ -1071,12 +1128,31 @@ from outside task context.
 @node Timers
 @section Timers
 
-There are a number of ways to implement timers.  One way is just to use
-@code{task_sleep} from within task context.  You can also use the
-@code{timer_@var{xxx}} APIs, which do things internally beneath a more
-standard API.
+There are a number of ways to implement timers.  There are slight
+differences between them all.
 
-Sometimes you may want a timer but without the overhead of a separate task.
+@subsection Task Timers
+
+The first way is just to use @code{task_sleep} from within task context.
+A task can sleep in between actions to enforce a particular delay.
+Note that this gives a @emph{minimum} delay; the actual delay may be longer.
+
+If you are not in a task context that can sleep, you can create a new
+task which is allowed to sleep.  Starting and stopping such tasks is
+equivalent to starting and stopping a timer.  Querying the task by its
+GID is equivalent to checking if the timer is still running.
+
+If you want to use this model, consider using the @code{timer_@var{xxx}} APIs,
+which do this underneath a standard API that clearly shows what you are trying
+to accomplish.
+
+Because these timers are based on tasks, they do not need to be statically
+declared in advance.  They are limited in number only by the maximum number of
+tasks.
+
+@subsection Free Timers
+
+Sometimes you may want a timer, but without the overhead of a separate task.
 Then use the @code{free_timer_@var{xxx}} functions.  @dfn{Free timers}
 are small counters that are updated in realtime context.  They do not
 support pausing (hence, the name) but can be started/stopped.  The set
@@ -1089,6 +1165,10 @@ write code to query the timer value, but if it expires to zero, then
 nothing special happens.  One common use is for detecting certain
 playfield shots when a series of switches needs to activate within
 a certain amount of time, say 1 second apart.
+
+@subsection Periodic Functions
+
+@subsection Realtime Functions
 
 @node Bank Switching
 @section Bank Switching
@@ -1110,7 +1190,7 @@ of its code and constant data placed into the same bank.  You specify which
 bank via the Makefiles.  For example, suppose you add a new file to the
 common directory, named newfile.c.  In common/Makefile, the line:
 
-COMMON_BASIC_OBJS += common/newfile.o
+@code{COMMON_BASIC_OBJS += common/newfile.o}
 
 adds this module into the COMMON_OBJS list; all of these objects are part of
 the COMMON_PAGE bank.  In the top-level Makefile, you can see that
@@ -1185,7 +1265,6 @@ normal task context at any time.
 * General Illumination::  How to control the general illumination strings
 * Real-Time Clock::       How to control the realtime clock
 * Debug Port::            How to write to the debugger port
-* Flags::
 @end menu
 
 @node Switches
@@ -1409,18 +1488,6 @@ to allow you to try different settings to see how they behave.
 
 @end table
 
-@subsection Custom Drivers
-
-@dfn{Custom drivers} can run for longer periods of time.
-They are allowed to run in parallel with anything else.  They
-will frequently use @dfn{duty cycling} to avoid keeping the
-coil 100% active for too long, and thus they often require
-realtime processing to switch reliably.
-
-These types of drivers are all implemented using templates.
-
-@c include coil-drivers.txt
-
 @subsection Flashers
 
 The flashlamp APIs are similar to the solenoid pulse APIs.
@@ -1448,6 +1515,18 @@ not recommended.  The duty cycle can be specified using one of the SOL_DUTY_xxx
 defines to pulse it more dimly than usual.
 
 @end table
+
+@subsection Custom Drivers
+
+@dfn{Custom drivers} can run for longer periods of time.
+They are allowed to run in parallel with anything else.  They
+will frequently use @dfn{duty cycling} to avoid keeping the
+coil 100% active for too long, and thus they often require
+realtime processing to switch reliably.
+
+These types of drivers are all implemented using templates.
+
+@c include coil-drivers.txt
 
 @node Dot-Matrix Display (DMD)
 @section Dot-Matrix Display (DMD)
@@ -1610,39 +1689,6 @@ any changes.
 
 @node Debug Port
 @section Debug Port
-
-@node Flags
-@section Flags
-
-Although ordinary variables work well, sometimes you only need
-to store a single bit.  For this, instead of declaring a byte
-variable and wasting 7 of the 8 bits, you can use a @dfn{flag}.
-Flags are packed efficiently in the memory to avoid wasting
-space.  This can be used helpful on small memory platforms.
-
-The bit APIs are the most generic.  You provide a bit number
-and a pointer to a bit buffer where the bits are packed.
-
-The flag APIs operate on a per-player flag buffer.  They are
-also automatically cleared at player start.  You only provide
-a flag number.
-
-The global flag APIs are similar, but those flags are global and do
-not change across players, nor across games.
-
-Flag and global flag IDs are distinct.  Be careful not to pass
-a global flag ID to a flag API, or vice-versa.
-
-@table @code
-@item bit_on, flag_on, global_flag_on
-Sets a bit flag.
-@item bit_off, flag_off, global_flag_off
-Clears a bit flag.
-@item bit_toggle, flag_toggle, global_flag_toggle
-Toggles a bit flag.
-@item bit_test, flag_test, global_flag_test
-Tests a bit flag.
-@end table
 
 @c ======================================================
 @node Effects
@@ -2847,6 +2893,49 @@ uncompressed.
 
 @c ======================================================
 
+@node System Initialization
+@chapter System Initialization
+
+Game developers do not generally need to understand all the details of
+initialization.  However, this may be of interest to system developers.
+
+Here is a rough outline of the steps taken to initialize the FreeWPC
+environment:
+
+@itemize @bullet
+@item On real hardware, the processor's RESET handler is called.
+On WPC, the reset handler is written in assembly language.  It performs
+a ROM checksum test and a RAM test.
+@item The program's @code{main} function is called (on real hardware,
+this is called from the RESET handler; in simulation, this is called
+by the OS like any other executable).  @code{main} is a platform-dependent
+function.  It can be thought of as the continuation of low-level
+initialization, except written in C.
+@item @code{main} calls into @code{freewpc_init}, where the common
+initialization begins.  This is defined in @file{kernel/init.c}.
+@item All of the hardware-related subsystems are initialized.
+@item The task scheduler is initialized.  This transforms the single thread
+of execution into a legitimate task.
+@item Interrupts are enabled.  Hardware systems that depend on interrupts
+are now fully functional.  Also, the system clock begins to tick, which
+allows tasks to sleep and therefore multitasking is fully supported.
+@item Software subsystems are initialized.  The @code{init} event is thrown
+here, so any new subsystems added just need to catch this event to initialize
+themselves.  It is important that modules do not interact with each other during
+this phase, because the order of init calls is not guaranteed.
+@item Periodic functions are enabled.
+@item The system powerup display effect is started.
+@item The @code{init_ok} event is thrown to allow modules to perform a final
+initialization, which may require interaction with each other.  Modules can
+return FALSE if a factory reset is required.  In that case, the system will
+reboot after performing the factory reset.
+@item The @code{init_complete} event is thrown, to signal that all modules are
+ready.
+@item The main task exits, and initialization is complete.
+@end itemize
+
+@c ======================================================
+
 @node Platform APIs
 @chapter Platform APIs
 
@@ -3022,15 +3111,14 @@ Instead of a ROM, you'll get an executable that can be run directly.
 * Input and Output::
 * GDB Debugging::
 * Interrupt Tracing::
-@end menu
-@ignore
 * Platform Emulation::
 * Timing::
 * Command Language::
+* Variables::
 * User Interface::
 * Hardware Emulation::
 * Signal Tracking::
-@end ignore
+@end menu
 
 @node Thread Model
 @section Thread Model
@@ -3112,6 +3200,77 @@ would normally be off-limits.  The @code{interrupt_dbprintf} function can
 be used; in 6809 mode, this is a macro which does nothing, while in native
 mode it equates to a regular @code{dbprintf}.
 
+@node Platform Emulation
+@section Platform Emulation
+
+Much like FreeWPC itself is portable, the builtin simulator is also designed
+to be portable.  Its architecture is structured similarly in layers that
+isolate the platform and machine specific parts.
+
+The interface between the simulator and the target system are the
+@code{readb} and @code{writeb} functions.  I/O initiated by the target
+is intercepted by the simulator.  The simulator itself catches these calls.
+Platforms register callbacks for addresses that can be simulated.
+
+@node Timing
+@section Timing
+
+@node Command Language
+@section Command Language
+
+The simulator allows you to control it via a command language.  While
+the program is running, you can enter commands via the user-interface.
+You can also load scripts of commands from files.
+
+Some files are checked automatically at startup and these commands are
+always run.  These are kept in the @file{conf} subdirectory of the source
+tree.  First, it will load @file{conf/freewpc.conf}.  Then it will load
+a machine-specific file, @file{conf/@var{machine}.conf}.
+
+In the curses-based simulator, press the colon key (like in vi) to
+open a command prompt.  Other UIs may be different.
+
+The basic commands are listed below.  See other sections for more commands
+that are more specific.
+
+Because commands can be placed in script files, shell-style comments and
+blank lines are accepted and ignored.
+
+@table @bullet
+@item set @var{var} @var{value}
+@item print @var{var}
+@item include @var{file}
+@item sw @var{switch}
+@item swtoggle @var{switch}
+@item key @var{keyname} @var{switch}
+@item push @var{value}
+@item pop @var{argcount}
+@item sleep @var{time}
+@item exit
+@end table
+
+@node Variables
+@section Variables
+
+The simulator uses variables in certain places to allow you to change its
+behavior at runtime.  The @code{set} and @code{print} commands work on these
+variables.
+
+All variables are fundamentally of type @code{int}.  There is no support for strings.
+
+Simulator modules declare variables in the usual way, then export these to the
+variable tracker using @code{conf_add}.  This associates a public name for the variable
+that the command language sees.  When variables are modified in this way, the module's
+int variables are then modified directly.
+
+@node User Interface
+@section User Interface
+
+@node Hardware Emulation
+@section Hardware Emulation
+
+@node Signal Tracking
+@section Signal Tracking
 
 @c ======================================================
 @node Debugging
