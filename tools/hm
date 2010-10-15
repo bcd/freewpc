@@ -12,6 +12,11 @@
 TMPDIR=/tmp/meld
 difftool=meld
 
+if [ "$1" = "-vi" ]; then
+difftool=vimdiff
+shift
+fi
+
 file=$1; shift
 for branch in $@; do
 	dir=$TMPDIR/$branch/`dirname $file`
