@@ -1,7 +1,3 @@
-@menu
-* Overview::                A basic description of what FreeWPC is.
-* Installation::            How to obtain and install the software.
-@end menu
 
 How to Program a New Game
 
@@ -11,7 +7,6 @@ go about writing up the rules for a new game from the beginning.  Details
 are intentionally skipped here, with pointers back to the relevant sections
 of the manual if you want to know more.
 
-@node Overview
 @section Overview
 
 Like any good software program, a game should be broken down into logically
@@ -40,7 +35,6 @@ Use the callset mechanism to write callback handlers to handle all of the events
 you need to monitor.  Nearly every module will require this.  These are the
 main entry points to the module.
 
-@node Classes of Modules
 @section Classes of Modules
 
 Modules can serve different purposes.  I like to classify modules into three
@@ -76,7 +70,6 @@ Note that drivers and shot detection should be rules-agnostic; thus, once they
 are coded correctly, it should be possible to rewrite the game rules without
 changing them.
 
-@node Device Drivers
 @section Device Drivers
 
 When you start coding a brand new machine, you must write a machine description file.
@@ -102,10 +95,8 @@ Ball kicking devices are automatically handled by the ball device module.
 You write definitions in the [containers] section of the md file to define these.
 Other device drivers should be written using a template driver.
 
-@node Shot Detection
 @section Shot Detection
 
-@node Game Rules
 @section Game Rules
 
 Most modes are OK to overlap and run in parallel; you must explicitly
@@ -131,7 +122,6 @@ shot->rule mapping
 
 For timed/multiball modes there are predefined APIs...
 
-@node Other Modules
 @section Other Modules
 
 Test modules.  These are extensions to the test mode menus and are generally tied

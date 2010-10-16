@@ -63,6 +63,7 @@ Also, knowledge of WPC pinball machines is very helpful.
 * Build Tools::             Other programs used during the build process.
 * Dot-Matrix Performance::  Thoughts on optimization of the display.
 * Historical Notes::        Random observations from past experience.
+* Design Principles::       Common practices for creating new game modules.
 @end menu
 
 @ignore
@@ -1535,45 +1536,27 @@ Dot matrix APIs should only be called from display effects.
 
 There are two key objects you should understand: pages and windows.
 
-To write to the DMD, you must go through the following steps for each frame:
+A @dfn{display page} is special RAM which holds the frame buffer that determines
+which pixels are turned on and off.  Display memory cannot be accessed like
+ordinary memory, though; it does not have a fixed address.
+
+A @dfn{display window} is an address that the CPU can use to read/write display
+memory -- that is, it sees one of the display pages.
+
+There can be more display pages than windows, so not all pages are accessible
+at all times.  Through @dfn{mapping calls}, you decide which pages are mapped
+to which windows.
+
+You must go through several steps for each frame you want to write.  For
+each step, there are several APIs to choose from.
 
 @itemize @bullet
 
 @item Allocate a new display page.
 The new page may contain old, stale data in it; it is not necessarily initialized.
-
-@item Map the page into memory.
-Display memory is not directly writable by the CPU until it is mapped into
-a memory window.  How this works depends on the underlying platform.
-Regardless, there are always at least two windows which can be used, which
-are called the @dfn{low page} and @dfn{high page}.  Generally, anything simple can
-be done using only the low page.  In the APIs below, the term @var{map} refers to either
-@emph{low} or @emph{high}.
-
-@item Initialize the page if necessary.
-If you are writing text only, you would want to clear the page first.  If you
-are filling the page with a full-size image, that is not necessary.
-
-@item Render text and graphics on the page.  Text APIs implicitly write to the
-low page only.  Graphics APIs generally write to the low page if dealing with
-only 1 color, or to both low and high pages if multiple colors are used.
-
-@item Optionally, create a composite of several pages together
-For example, overlaying text onto background art.
-
-@item Show the page.
-Until the page is shown, it is not visible.  This prevents each step of the
-rendering process from being seen, which is not visually appealing.  Once
-the page is shown, it is implicitly freed back to the system, meaning that any
-new changes to the display require allocating a new page again.
-
-@end itemize
-
-There are APIs to do all of these things individually; there are also some APIs
-that combine some of these steps to make it easier.
+Allocation alone does not make it accessible, only reserved.
 
 @table @code
-
 @item dmd_alloc_@var{map}
 Allocate and map a single page into either the low or high area.
 
@@ -1586,33 +1569,38 @@ Do not assume that the low and high windows are contiguous in memory.
 @item dmd_dup_mapped
 Allocate and map a page pair that is copy of what is currently mapped.
 
-@item dmd_flip_low_high
-Flip the mappings, so that the low page appears in the high region, and vice
-versa.
+@end table
 
+@item Map the page into one of the display windows.
+FreeWPC requires at least two windows; some platforms support more.  These two
+windows are called the @dfn{low window} and @dfn{high window}; the pages
+that are mapped there are the @dfn{low page} and the @dfn{high page}.
+The simplest effects can be be done using only the low page.  If you need color,
+or flashing effects, you will probably need both the low and high page.
+In the API names below, the term @var{map} refers to either @emph{low} or @emph{high}.
+
+@table @code
+@end table
+
+@item Initialize the page if necessary.
+If you are writing text only, you would want to clear the page first.  If you
+are filling the page with a full-size image, that is not necessary.
+
+@table @code
 @item dmd_clean_page_@var{map}
 Zero a display page.
 
 @item dmd_copy_page
 Copy an entire page from one buffer to another.
+@end table
 
-@item dmd_and_page
-AND the contents of the low page, using the high page as a mask.
-@item dmd_or_page
-OR into the contents of the low page, using data from the high page.
-@item dmd_xor_page
-XOR into the contents of the low page with the data in the high page.
+@item Render text and graphics on the page.  Text APIs implicitly write to the
+low page only.  Graphics APIs generally write to the low page if dealing with
+only 1 color, or to both low and high pages if multiple colors are used.
+If you need to write to the high page, use @code{dmd_flip_low_high} to swap
+them temporarily.
 
-@item dmd_text_outline
-@item dmd_text_blur
-@item dmd_overlay_outline
-@item dmd_rough_copy
-@item dmd_rough_erase
-@item dmd_show_@var{map}
-Show a single display page as a 1-color image.
-@item dmd_show_other
-@item dmd_show2
-Show both display pages together as a 3-color image.
+@table @code
 @item font_render_string
 Write text in the given font, starting at a specific coordinate.
 @item font_render_string_center
@@ -1622,11 +1610,78 @@ Write text in the given font, right-justified against the specified coordinate.
 @item bmp_draw
 Draw an arbitrary sized bitmap onto the low page.
 @item frame_draw
-Draw a full-size, 3-color frame onto the low and high pages.
-@item dmd_sched_transition
+Draw a full-size, 4-color frame onto the low and high pages.
+@item dmd_text_outline
+Generate a text outline page.  On input, the low page should contain nothing but text.
+The high page should be allocated, but need not be clean.  On output,
+the high page will contain an outline mask.
+
+This API should be used when rendering text onto a color image.  Each '1' bit
+in the mask corresponds to a pixel that should be made black in the final image,
+so that the text stands out from the background image.  See @code{dmd_overlay_outline}
+below for a method to do this.
+@end table
+
+@item Optionally, create a composite of several pages together
+For example, overlaying text onto background art.  You can use @dfn{overlay pages},
+which are additional fixed buffers that do not need to be allocated.  You can
+use compositing APIs to join multiple pages together in different ways.
+
+@table @code
 @item dmd_overlay
+Overlay ("or") the low overlay page onto the allocated low page.  Use when both
+the allocation and the overlay are mono.
 @item dmd_overlay_color
+Overlay both low/high overlay pages onto the allocated low/high pages.  Use when
+both the allocation and the overlay are 4-color.
 @item dmd_overlay_onto_color
+A hybrid of the above two APIs, used when the allocation is in color, but the
+overlay is mono.
+@item dmd_overlay_outline
+Overlays text onto a color image.  The allocated low/high pages contain the image.
+The low overlay page contains the text.  The high overlay page contains the outline mask,
+created with @code{dmd_text_outline}.
+
+This is a fairly slow call, as it is requires several AND and OR operations.
+@item dmd_and_page
+A low-level function to AND the contents of the low page, using the high page as a mask.
+@item dmd_or_page
+A low-level function to OR into the contents of the low page, using data from the high page.
+@item dmd_xor_page
+A low-level function to XOR the contents of the low page with the data in the high page.
+@end table
+
+@item Show the page.
+Until the page is shown, it is not visible.  This prevents each step of the
+rendering process from being seen, which is not visually appealing.  Once
+the page is shown, it is implicitly freed back to the system, meaning that any
+new changes to the display require allocating a new page again.  The page does
+not need to remain mapped into a window for it to be visible.
+
+@table @code
+@item dmd_show_@var{map}
+Show a single display page as a 1-color image.  It can be in either window.
+@item dmd_show_other
+If the low page is currently visible, then show the high page; and vice versa.
+@item dmd_show2
+Show both display pages together as a 4-color (3 plus black) image.
+@end table
+
+Prior to showing the image, you can schedule a @dfn{transition}.  You call
+@code{dmd_sched_transition} just before showing to say which transition should
+be used.
+
+@end itemize
+
+Other APIs are listed below.
+
+@table @code
+@item dmd_flip_low_high
+Flip the mappings, so that the low page appears in the high region, and vice
+versa.
+@item dmd_rough_copy
+@item dmd_rough_erase
+Erase a rough region of the low page.  The x coordinates must be 8-bit aligned.
 @end table
 
 @node Sound Board
@@ -1640,7 +1695,11 @@ The same APIs are used in either case.
 @table @code
 @item sound_send
 Sends a command to the sound board.  The command may be 8-bit or 16-bit.
+The meaning of the command argument varies widely.
 @end table
+
+See also the section on Sound Effects for other APIs that can be used.
+
 
 @node General Illumination
 @section General Illumination
@@ -1648,6 +1707,11 @@ Sends a command to the sound board.  The command may be 8-bit or 16-bit.
 General illumination allows for additional lighting that is managed in
 groups of lamps, which are all enabled and disabled at the same time.
 These are often referred to as GI "strings".
+FreeWPC supports a maximum of 8 strings.
+
+On the WPC platform, GI can be dimmed, because the controls for these
+strings are governed through triacs.  (On WPC-95, some of the GI are
+dimmable and some are not.)
 
 @table @code
 
@@ -1665,8 +1729,8 @@ Turns off one or more GI strings.
 
 Dims one or more GI strings.  This is like @code{gi_enable}, but it takes
 an extra parameter, which specifies the @emph{intensity} of the lamps.
-Not all hardware supports dimming; on WPC, this is achieved through the use
-of triacs.  If dimming is not supported, then this API is unavailable and
+Not all hardware supports dimming.
+If dimming is not supported, then this API is unavailable and
 will cause a compiler error.
 
 @end table
@@ -2287,8 +2351,8 @@ if a physical ball had entered.
 
 When it knows that a ball has exited the device, it calls
 @code{device_remove_virtual}.  This decrements the virtual ball counter.
-None of the @code{kick} related events are thrown; instead, you will see
-the @code{surprise_release} event instead.
+This behaves exactly like when a real ball is kicked out, so the
+@code{kick_success} event is thrown and the live ball count goes up.
 
 @c ======================================================
 @node Test Mode
@@ -3031,9 +3095,17 @@ Read an 8-bit code from the sound board.
 
 @item pinio_write_gi (CONFIG_GI)
 
+Write to the set of all general illumination strings.  This API
+is only used when the platform does not support dimming.
+
+@item pinio_read_triac (CONFIG_TRIAC)
+
+If the platform supports dimming through triacs, this call returns the
+input-side latch values.
+
 @item pinio_write_triac (CONFIG_TRIAC)
 
-Write to the set of all triacs.
+Write to the triacs.  This API is only used when the platform supports dimming.
 
 @item pinio_watchdog_reset (CONFIG_WATCHDOG)
 
@@ -3045,11 +3117,20 @@ Toggle the diagnostic LED.
 
 @item pinio_dmd_window_set (CONFIG_DMD)
 
+Sets the display page that is mapped into a given portion of the CPU address space.
+
 @item pinio_dmd_window_get (CONFIG_DMD)
+
+Returns the display page that is mapped into a given portion of the CPU address space.
 
 @item pinio_dmd_window_ptr (CONFIG_DMD)
 
+Returns a pointer to the beginning of the buffer that is mapped into a given portion
+of the CPU address space.
+
 @item pinio_dmd_set_visible (CONFIG_DMD)
+
+Sets the display page that is currently visible on the display.
 
 @item pinio_dmd_request_interrupt (CONFIG_DMD)
 
@@ -3473,4 +3554,7 @@ May, 2008.  It did not run OK due to some problems with the watchdog
 circuit and with the PIC initialization.  Those problems were
 resolved within only a few hours.
 
+@node Design Principles
+@appendix Design Principles
+@include howto.texi
 
