@@ -47,10 +47,6 @@ extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
 #else /* !CONFIG_NATIVE */
 
 #include <env.h>
-#ifdef HAVE_LIBC
-#include <sys/types.h>
-#endif
-
 
 /** Values for the 'state' field in the task structure */
 #define BLOCK_FREE 0x0
