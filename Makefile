@@ -91,12 +91,16 @@ CONFIG_FLIPTRONIC := $(call md_config,Fliptronic)
 CONFIG_DCS := $(call md_config,DCS)
 CONFIG_WPC95 := $(call md_config,WPC95)
 
-
 # PLATFORM says which hardware platform is targeted.  Valid values
 # are 'wpc' and 'whitestar'.  The MACHINE Makefile should have
 # defined this.
 $(eval $(call require,PLATFORM))
 PLATFORM_DIR = platform/$(PLATFORM)
+
+# Replaced the NATIVE keyword with CONFIG_SIM.
+ifdef NATIVE
+$(eval $(call have,CONFIG_SIM))
+endif
 
 #######################################################################
 ###	Set Default Target
@@ -112,18 +116,15 @@ check_prereqs : clean_err
 KERNEL_OBJS :=
 COMMON_BASIC_OBJS :=
 
-ifdef NATIVE
-include platform/native/Makefile
+# TODO : include the real, non-sim Makefile after the simulation
+# Makefile too.
+ifeq ($(CONFIG_SIM), y)
+include sim/Makefile
 else
 PMAKEFILE := platform/$(PLATFORM)/Makefile
 -include $(PMAKEFILE)
 endif
 
-# Set this to the name of the CPU.  In simulation this is always
-# 'native'; otherwise it is already set by the platform.
-ifdef NATIVE
-CPU := native
-endif
 
 # Build date (now)
 BUILD_MONTH := $(shell date +%-m)
@@ -132,7 +133,7 @@ BUILD_YEAR := $(shell date +%Y)
 
 
 .PHONY : platform_target
-ifdef NATIVE
+ifeq ($(CONFIG_SIM), y)
 platform_target : native
 else
 ifdef TARGET_ROMPATH
@@ -1055,7 +1056,7 @@ callset.in :
 #
 .PHONY : clean
 clean: clean_derived clean_build clean_gendefines clean_tools
-	$(Q)for dir in `echo . kernel common effect fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) platform/native cpu/$(CPU)`;\
+	$(Q)for dir in `echo . kernel common effect fonts images test $(MACHINE_DIR) $(PLATFORM_DIR) sim cpu/$(CPU)`;\
 		do echo "Cleaning in '$$dir' ..." && \
 		pushd $$dir >/dev/null && rm -f $(TMPFILES) && \
 		popd >/dev/null ; done

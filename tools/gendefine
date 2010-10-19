@@ -50,7 +50,7 @@ my @dirs = (
 	"mach", 
 	"fonts", 
 	"test",
-	"platform/native",
+	"sim",
 	"platform/wpc",
 	"cpu/native",
 	"cpu/m6809",

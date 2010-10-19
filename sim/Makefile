@@ -3,7 +3,7 @@
 # because of toolchain differences, and also simulation files need
 # to be linked in.
 
-D := platform/native
+D := sim
 P := platform/wpc
 NATIVE_OBJS :=
 
