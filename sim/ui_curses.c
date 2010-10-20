@@ -176,12 +176,15 @@ void ui_write_task (int taskno, int gid)
 void ui_refresh_asciidmd (unsigned char *data)
 {
 	unsigned int x, y;
+	unsigned char row[PINIO_DMD_WIDTH+1];
 
-	for (y = 0; y < 32; y++)
+	for (y = 0; y < PINIO_DMD_HEIGHT; y++)
 	{
 		wmove (display_win, y+1, 1);
-		for (x = 0; x < 128; x++)
-			wprintw (display_win, "%c", enhanced_pixel_ascii (*data++));
+		for (x = 0; x < PINIO_DMD_WIDTH; x++)
+			row[x] = enhanced_pixel_ascii (*data++);
+		row[PINIO_DMD_WIDTH] = '\0';
+		wprintw (display_win, "%s", row);
 	}
 	wrefresh (display_win);
 }
