@@ -9,9 +9,9 @@ NATIVE_OBJS :=
 
 # Common native mode CPU configuration
 CPU := native
-CONFIG_PTH := y
+$(eval $(call have,CONFIG_PTH))
 CONFIG_UI ?= curses
-CONFIG_SOFT_REALTIME := y
+$(eval $(call have,CONFIG_SOFT_REALTIME))
 include cpu/$(CPU)/Makefile
 
 # Subplatform support
