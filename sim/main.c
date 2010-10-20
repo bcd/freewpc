@@ -89,11 +89,15 @@ void simlog (enum sim_log_class class, const char *format, ...)
 {
 	va_list ap;
 	FILE *ofp;
+	char buf[256];
 
+	/* Get all of the arguments and format into a single buffer */
 	va_start (ap, format);
+	vsprintf (buf, format, ap);
+	va_end (ap);
 
 #ifdef CONFIG_UI
-	ui_write_debug (class, format, ap);
+	ui_write_debug (class, buf);
 
 	if (sim_output_stream == stdout)
 		ofp = NULL;
@@ -108,12 +112,11 @@ void simlog (enum sim_log_class class, const char *format, ...)
 	{
 		if (class != SLC_DEBUG_PORT)
 			fprintf (ofp, "[SIM] ");
-		(void)vfprintf (ofp, format, ap);
+		fprintf (ofp, buf);
 		fputc ('\n', ofp);
 		fflush (ofp);
 	}
 
-	va_end (ap);
 }
 
 

@@ -57,7 +57,6 @@ static void print_center (WINDOW *w, int x, int y, const char *format, ...)
 	wprintw (w, format);
 }
 
-
 static WINDOW * ui_window_create (int width, int height, int x, int y, const char *title)
 {
 	WINDOW *w = newwin (height, width, y, x);
@@ -84,11 +83,11 @@ void ui_print_command (const char *cmdline)
 	wrefresh (cmdline_win);
 }
 
-void ui_write_debug (enum sim_log_class c, const char *format, va_list ap)
+void ui_write_debug (enum sim_log_class c, const char *buffer)
 {
 	if (c != SLC_DEBUG_PORT)
 		wprintw (debug_win, "[SIM] ");
-	vw_printw (debug_win, format, ap);
+	wprintw (debug_win, buffer);
 	waddch (debug_win, '\n');
 	wrefresh (debug_win);
 }

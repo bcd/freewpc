@@ -4,7 +4,7 @@
 
 void ui_init (void);
 void ui_print_command (const char *cmd);
-void ui_write_debug (enum sim_log_class c, const char *format, va_list ap);
+void ui_write_debug (enum sim_log_class c, const char *buffer);
 void ui_write_solenoid (int, int);
 void ui_write_lamp (int, int);
 void ui_write_triac (int, int);
