@@ -44,9 +44,41 @@
  * format that can actually be copied directly to the DMD memory.
  */
 
+#define CACHE_SIZE 32
+
+struct buffer *buffer_cache[CACHE_SIZE] = { 0, };
+
+unsigned int buffer_cache_count = 0;
+
+
+static struct buffer *buffer_cache_alloc (void)
+{
+	if (buffer_cache_count == 0)
+		return NULL;
+	return buffer_cache[--buffer_cache_count];
+}
+
+
+static void buffer_cache_free (struct buffer *buf)
+{
+	if (buffer_cache_count < CACHE_SIZE)
+		buffer_cache[buffer_cache_count++] = buf;
+	else
+		free (buf);
+}
+
+
+/**
+ * Allocate a new buffer of MAXLEN bytes.
+ */
 struct buffer *buffer_alloc (unsigned int maxlen)
 {
-	struct buffer *buf = malloc (sizeof (struct buffer));
+	struct buffer *buf;
+
+	buf = buffer_cache_alloc ();
+	if (!buf)
+		buf = malloc (sizeof (struct buffer));
+
 	buf->len = maxlen;
 	buf->data = buf->_data;
 	buf->hist = NULL;
@@ -291,13 +323,13 @@ void buffer_free (struct buffer *buf)
 {
 	if (buf->hist)
 		free (buf->hist);
-	free (buf);
+	buffer_cache_free (buf);
 }
 
 void layer_free (struct layer *layer)
 {
 	/* note: layer->bitmap is not freed */
-	free (layer->buf);
+	buffer_cache_free (layer->buf);
 	free (layer);
 }
 
@@ -457,7 +489,7 @@ int buffer_compare (struct buffer *a, struct buffer *b)
 struct buffer *buffer_replace (struct buffer *old, struct buffer *new)
 {
 	if (old != new)
-		free (old);
+		buffer_free (old);
 	return new;
 }
 
