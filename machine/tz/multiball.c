@@ -150,6 +150,8 @@ CALLSET_ENTRY (mball, display_update)
 CALLSET_ENTRY (mball, music_refresh)
 {
 	timed_mode_music_refresh (&mball_restart_mode);
+	if (!in_game)
+		return;
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
 	if (mball_restart_timer <= 5 
