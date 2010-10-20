@@ -397,16 +397,39 @@ struct buffer *buffer_splitbits (struct buffer *buf)
 {
 	unsigned int off, bit;
 	struct buffer *res = buffer_alloc (buf->len * 8);
+	unsigned char *src;
+	unsigned char *dst;
+
+	src = buf->data;
+	dst = res->data;
 
 	for (off = 0; off < buf->len; off++)
 	{
-		for (bit = 0; bit < 8; bit++)
-		{
-			if (buf->data[off] & (1 << bit))
-				res->data[off * 8 + bit] = 1;
-			else
-				res->data[off * 8 + bit] = 0;
-		}
+		if (*src & 0x1)
+			*dst = 1;
+		dst++;
+		if (*src & 0x2)
+			*dst = 1;
+		dst++;
+		if (*src & 0x4)
+			*dst = 1;
+		dst++;
+		if (*src & 0x8)
+			*dst = 1;
+		dst++;
+		if (*src & 0x10)
+			*dst = 1;
+		dst++;
+		if (*src & 0x20)
+			*dst = 1;
+		dst++;
+		if (*src & 0x40)
+			*dst = 1;
+		dst++;
+		if (*src & 0x80)
+			*dst = 1;
+		dst++;
+		src++;
 	}
 	return res;
 }
