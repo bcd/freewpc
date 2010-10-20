@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <freewpc.h>
 #include <simulation.h>
 #include <hwsim/io.h>

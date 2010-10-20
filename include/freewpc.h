@@ -208,7 +208,9 @@ __noreturn__ void freewpc_init (void);
 #include <game.h>
 #include <stdadj.h>
 #include <audit.h>
+#ifndef NATIVE_SYSTEM
 #include <printf.h>
+#endif
 #include <callset.h>
 #include <csum.h>
 #include <audio.h>
