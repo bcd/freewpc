@@ -275,7 +275,6 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 	if (c->disabled)
 		return;
 
-	on = !!on;
 	if (c->on != on)
 	{
 		c->on = on;
