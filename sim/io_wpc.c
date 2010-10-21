@@ -332,6 +332,12 @@ U8 wpc_clock_reader (void *unused, unsigned int reg)
 }
 
 
+U8 wpc_timer_reader (void *unused, unsigned int reg)
+{
+	return 0;
+}
+
+
 U8 wpc_read (void *unused, unsigned int addr)
 {
 	switch (addr)
@@ -472,7 +478,10 @@ void io_wpc_init (void)
 
 	/* Install clock handler.  Since clock time comes from the native OS,
 	it cannot be changed and so these are read-only registers */
-	io_add_ro (WPC_CLK_HOURS_DAYS, wpc_clock_reader, NULL);
+	io_add (WPC_CLK_HOURS_DAYS, 2, wpc_clock_reader, io_null_writer, NULL);
+
+	/* Install the internal timer handler */
+	io_add_ro (WPC_PERIPHERAL_TIMER_FIRQ_CLEAR, wpc_timer_reader, NULL);
 
 	/* TODO : If a ribbon cable is disconnected, then that I/O will not work. */
 }
