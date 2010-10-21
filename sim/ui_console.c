@@ -29,18 +29,17 @@ void ui_print_command (const char *cmdline)
 {
 }
 
-void ui_console_render_string (void)
+void ui_console_render_string (const char *buffer)
 {
-	printf ("[STR] %s\n", sprintf_buffer);
+	printf ("[STR] %s\n", buffer);
 }
 
-void ui_write_debug (enum sim_log_class c, const char *format, va_list ap)
+void ui_write_debug (enum sim_log_class c, const char *buffer)
 {
 	if (c == SLC_DEBUG_PORT)
-		printf ("[PROG] ");
+		printf ("[PROG] %s", buffer);
 	else
-		printf ("[SIM] ");
-	vprintf (format, ap);
+		printf ("[SIM]  %s", buffer);
 	printf ("\n");
 }
 
