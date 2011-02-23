@@ -44,7 +44,7 @@ static void effect_update_task (void)
 	/* Display and music are always updated, including during
 	attract mode */
 	deff_update ();
-	music_refresh ();
+	music_update ();
 
 	/* Lamp update is used for multiplexing different meanings
 	to playfield lamps; this only makes sense in the context

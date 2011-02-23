@@ -1,0 +1,7 @@
+@@class sling
+@@parameter sw
+@@parameter sol
+@@weakdefine ontime 4
+@@weakdefine offtime 20
+@@weakdefine auto 1
+@@include drivers/spsol.ct

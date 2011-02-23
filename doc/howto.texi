@@ -1,0 +1,132 @@
+
+How to Program a New Game
+
+While the rest of this manual serves as a reference to the FreeWPC system,
+this chapter takes a different approach and explains systematically how to
+go about writing up the rules for a new game from the beginning.  Details
+are intentionally skipped here, with pointers back to the relevant sections
+of the manual if you want to know more.
+
+@section Overview
+
+Like any good software program, a game should be broken down into logically
+separate entities as much as possible.  An object-oriented approach can still
+be taken even when coding in C.  I prefer to think of a game as consisting
+of a set of mostly independent @dfn{modules}, with each module represented by
+a separate C file.
+
+Each module defines a set of functions that are private to it: the implementation.
+In C, these are usually coded as "static" functions to prevent accidental use
+from other files.  Other functions are public by default.  In FreeWPC, make
+sure that you have a prototype for all such functions that includes one of the
+ROM bank modifiers (__common__ or __machine__, for example), otherwise they may
+not be called correctly.  Always check for warnings in the error file when you
+build a ROM; this type of problem is always pointed out there.
+
+For the most part, the game program is event-driven, meaning that functions
+are called only when some external event occurs.  The OS throws events for
+just about every event that you will care about, but your code can also create
+new events too.  There are basically three types of events that you will care
+about: switch events (some playfield switch just activated), timer events (some
+amount of time has expired), and milestone events (notable points in time like
+the start of a game).
+
+Use the callset mechanism to write callback handlers to handle all of the events
+you need to monitor.  Nearly every module will require this.  These are the
+main entry points to the module.
+
+@section Classes of Modules
+
+Modules can serve different purposes.  I like to classify modules into three
+classes: drivers, shot detectors, and rules.  Each of these serves a different
+purpose, and keeping them in separate modules is good programming design.
+
+Drivers deal with the physical nature of the specific machine.
+They should do nothing with game rules.  Drivers manage the hardware devices
+and define an API that lets higher layer game code interact with it.
+The hardware aspect can be the most difficult part of programming a pinball game,
+as it needs to handle many types of fault conditions.
+
+Shot detection can be viewed as an extension of the switch events.
+Sometimes, a single switch activation can be considered a shot, but not always.
+Consider on Twilight Zone the detection of left versus right loops; the same
+switches are involved, but they are triggered in a different order.  In
+Attack From Mars, the right hole awards a "front shot" or "back shot" differently
+and used other recent shots to determine which to award.  In the shot modules,
+you write logic that defines what makes a valid shot.  You monitor the switches
+and timers that contribute to the shot, and then you create new events for the
+shots that you define.  By doing this in one module, the rest of the code
+can just listen for a "right hole front shot" event.
+
+Shot detection can be overdone if not careful.  It is best to keep it as simple
+as possible.  Compensation for bad switches can be done here, too.
+
+The game rules are at the top of the module stack.  Every timed mode, multiball, or
+other game feature should generally have its own file.  They use the shot detection
+logic to listen for valid shot events and have their own logic for defining how to
+award points and what effects to trigger.
+
+Note that drivers and shot detection should be rules-agnostic; thus, once they
+are coded correctly, it should be possible to rewrite the game rules without
+changing them.
+
+@section Device Drivers
+
+When you start coding a brand new machine, you must write a machine description file.
+This defines the physical switches, lamps, and solenoids for that game.  Doing this is
+enough to make all of the low-level APIs work.  These @dfn{binary APIs} allow you to
+read switches one by one, turn on/off lamps, and pulse solenoids and flashers.
+
+However, you are not allowed to turn on a solenoid permanently.  A generic API to
+do so would be dangerous.  For flashers and ball kicking devices, the pulsing APIs,
+which ensure that the device is turned off eventually, are enough.  But for some
+devices, you need more control.  To do that, you need to write a device driver.
+
+Here are some examples of drivers:
+
+- Diverters which must be held on for a long period of time.
+- Solenoids that are tied to switches, like slingshots and jets, which need fast
+response time.  Also motor banks which have home switches.
+- Devices where there are multiple outputs working together.  For example, the
+clock on TZ uses two motor control lines, one to spin forward and another to
+spin backward.
+
+Ball kicking devices are automatically handled by the ball device module.
+You write definitions in the [containers] section of the md file to define these.
+Other device drivers should be written using a template driver.
+
+@section Shot Detection
+
+@section Game Rules
+
+Most modes are OK to overlap and run in parallel; you must explicitly
+define how to handle conflicts if this is not wanted.  Rules will listen for shot
+events, update state, add to the score, and start display, lamp, and sound effects.
+
+Rules are also the only modules that will need to keep state per-player.  Use the
+__local__ modifier to create a per-player variable.  Define flags (not globalflags)
+in the machine description to create 1-bit flags.  For trivial rules you can sometimes
+keep state directly in the lamp matrix.
+
+Types of rules: static rules, timed modes, multiball modes
+
+Every rule should define the following types of APIs:
+- start_game (physical devices only)
+- start_player
+- start_ball
+- available?
+- qualified? (running? in grace period?)
+
+- plus other APIs as pertinent to that type of rule
+shot->rule mapping
+
+For timed/multiball modes there are predefined APIs...
+
+@section Other Modules
+
+Test modules.  These are extensions to the test mode menus and are generally tied
+to a particular device driver, but not all drivers will need a test option.
+
+
+
+

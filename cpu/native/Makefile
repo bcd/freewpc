@@ -16,6 +16,7 @@ ifeq ($(CONFIG_PTH),y)
 PTH_CFLAGS := $(shell pth-config --cflags)
 HOST_LIBS += -lpth
 CFLAGS += $(PTH_CFLAGS)
+NATIVE_OBJS += $(C)/task_pth.o
 endif
 
 ifeq ($(CONFIG_NATIVE_PROFILE),y)
@@ -28,12 +29,26 @@ CFLAGS += -fprofile-arcs -ftest-coverage
 HOST_LIBS += -lgcov
 endif
 
-ifeq ($(CONFIG_CURSES), y)
+ifeq ($(CONFIG_UI), curses)
 CFLAGS += -DCONFIG_UI -DCURSES
 HOST_LIBS += -lncurses
 NATIVE_OBJS += $(D)/ui_curses.o
 endif
 
+ifeq ($(CONFIG_UI), gtk)
+CFLAGS += -DCONFIG_UI -DCONFIG_GTK
+UI_CFLAGS += $(shell pkg-config --cflags gtk+-2.0)
+HOST_LIBS += $(shell pkg-config --libs gtk+-2.0) -export-dynamic
+NATIVE_OBJS += $(D)/ui_gtk.o
+endif
+
+ifeq ($(CONFIG_UI), console)
+CFLAGS += -DCONFIG_UI -DCONFIG_UI_CONSOLE
+NATIVE_OBJS += $(D)/ui_console.o
+endif
+
 ifeq ($(CONFIG_SOFT_REALTIME), y)
 NATIVE_OBJS += $(C)/realtime.o
 endif
+
+NATIVE_OBJS += $(C)/bits.o

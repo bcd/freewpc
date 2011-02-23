@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -106,6 +106,24 @@ struct adjustment
 	U8 factory_default;
 	U8 *nvram;
 };
+
+enum test_mode
+{
+	NO_TEST = 0,
+	TEST_DEFAULT = 1,
+	TEST_SWITCHES,
+	TEST_COILS,
+#ifdef CONFIG_RTC
+	TEST_RTC,
+#endif
+};
+
+extern enum test_mode in_test;
+
+extern inline void set_test_mode (enum test_mode mode)
+{
+	in_test = mode;
+}
 
 extern struct adjustment standard_adjustments[];
 extern struct adjustment feature_adjustments[];

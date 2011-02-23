@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,6 +32,8 @@ task_pid_t timer_start1 (task_gid_t gid, U16 ticks, task_function_t fn);
 task_pid_t timer_start (task_gid_t gid, U16 ticks, task_function_t fn);
 void timer_init (void);
 
+void timer_lock (void);
+void timer_unlock (void);
 bool system_timer_pause (void);
 void timer_pause_second (void);
 void free_timer_restart (free_timer_id_t tid, U8 ticks);

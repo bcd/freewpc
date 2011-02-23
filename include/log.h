@@ -41,8 +41,15 @@ extern void log_init (void);
 extern void log_event1(U16 module_event, U8 arg);
 extern __permanent__ U16 prev_log_callset;
 
+/* Logging has been disabled by default, as this feature has not
+been used and is not very useful.  It can be turned back on via
+CONFIG_LOG if anyone cares. */
+#ifdef CONFIG_LOG
 #define log_event(severity, module, event, arg) \
 	log_event1(make_module_event (module, event), arg)
+#else
+#define log_event(severity, module, event, arg)
+#endif
 
 #define make_module_event(module, event) (((U16)(module) << 8UL) | event)
 #define module_part(module_event) ((U8)((module_event) >> 8))

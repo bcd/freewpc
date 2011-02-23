@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # TZ machine description for FreeWPC
-# (C) Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2007, 2009, 2010 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -231,13 +231,13 @@ H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
-L2: Right Sling, duty(SOL_DUTY_100)
-L3: Left Sling, duty(SOL_DUTY_100)
-L4: Lower Jet, duty(SOL_DUTY_100)
-L5: Left Jet, duty(SOL_DUTY_100)
-L6: Right Jet, duty(SOL_DUTY_100)
+L2: Right Sling
+L3: Left Sling
+L4: Lower Jet
+L5: Left Jet
+L6: Right Jet
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
+L8: Shooter Div, nosearch
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -270,7 +270,6 @@ X7: Clock Forward, motor, nosearch
 [templates]
 Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
 Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
-
 Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 Lower Jet: driver(jet), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
@@ -698,3 +697,5 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 [fonts]
 times10:
 steel:
+lithograph:
+

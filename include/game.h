@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -30,7 +30,6 @@
 extern __fastram__ U8 in_game;
 extern __fastram__ U8 in_bonus;
 extern __fastram__ U8 in_tilt;
-extern U8 in_test;
 extern U8 valid_playfield;
 extern __nvram__ U8 num_players;
 extern U8 player_up;
@@ -40,7 +39,6 @@ extern U8 tournament_mode_enabled;
 
 #define in_live_game		(in_game && !in_tilt)
 
-void serve_ball (void);
 void start_ball (void);
 void end_game (void);
 void end_ball (void);

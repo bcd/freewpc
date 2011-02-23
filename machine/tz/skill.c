@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -195,7 +195,7 @@ static void award_skill_switch (U8 sw)
 CALLSET_ENTRY (skill, display_update)
 {
 	if (skill_shot_enabled)
-		deff_start_bg (DEFF_SKILL_SHOT_READY, 0);
+		deff_start_bg (DEFF_SKILL_SHOT_READY, PRI_NULL);
 }
 
 CALLSET_ENTRY (skill, sw_skill_bottom)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -225,6 +225,22 @@ void coin_door_render (U8 val)
 		case COIN_DOOR_UK: sprintf ("U.K."); break;
 		case COIN_DOOR_EURO: sprintf ("EURO"); break;
 		default: sprintf ("MODE %d", val); break;
+	}
+}
+
+
+void payment_method_render (U8 val)
+{
+	switch (val)
+	{
+		case PAY_COIN:
+			sprintf ("COIN"); break;
+		case PAY_BILL:
+			sprintf ("BILL"); break;
+		case PAY_TOKEN:
+			sprintf ("TOKEN"); break;
+		case PAY_CARD:
+			sprintf ("CARD"); break;
 	}
 }
 

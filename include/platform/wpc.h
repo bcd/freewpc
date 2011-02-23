@@ -7,12 +7,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * FreeWPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -171,20 +171,112 @@ AREA_DECL(nvram)
 
 
 /***************************************************************
- * ASIC / DMD memory map
+ * ASIC memory map
  ***************************************************************/
 
-#ifdef CONFIG_NATIVE
+#include <platform/wpc-mmap.h>
 
+
+/***************************************************************
+ * Dot matrix display
+ ***************************************************************/
+
+/* Define the dimensions of the display */
+#define PINIO_DMD_WIDTH 128
+#define PINIO_DMD_HEIGHT 32
+
+/* Define the available WINDOWS.  Each window is a memory
+	area within the CPU's address space which can be written
+	directly, without using writeb(), that addresses a display
+	page.
+
+	At least two windows must be provided, named WINDOW_0
+	and WINDOW_1; these are the primary windows used for
+	all display effects.  Other windows may be used if
+	available by platform-specific code. */
+#if (MACHINE_WPC95 == 1)
+#define PINIO_DMD_WINDOW_AUX0 0x0
+#define PINIO_DMD_WINDOW_AUX1 0x1
+#define PINIO_DMD_WINDOW_AUX2 0x2
+#define PINIO_DMD_WINDOW_AUX3 0x3
+#endif
+#define PINIO_DMD_WINDOW_0 0x4
+#define PINIO_DMD_WINDOW_1 0x5
+
+/* Define the number of display PAGES available.  Each page
+	represents a buffer large enough to hold the contents of
+	an entire display frame.   Pages are numbered from 0 to
+	PINIO_NUM_DMD_PAGES-1. */
+#define PINIO_NUM_DMD_PAGES 16
+
+
+/** The type of a page number */
+typedef U8 dmd_pagenum_t;
+
+/** The type of a page pair, which tracks the two pages
+needed to display a 4-color image.  Normally, the
+dark and bright page numbers are consecutive, but for
+mono images, they could be the same value. */
+typedef union
+{
+	struct {
+		dmd_pagenum_t first;
+		dmd_pagenum_t second;
+	} u;
+	U16 pair;
+} dmd_pagepair_t;
+
+
+extern dmd_pagepair_t dmd_mapped_pages;
+
+/**
+ * Set the page that is visible in the given window.
+ */
+extern inline void pinio_dmd_window_set (U8 window, U8 page)
+{
+	switch (window)
+	{
+		case PINIO_DMD_WINDOW_0:
+			writeb (WPC_DMD_LOW_PAGE, dmd_mapped_pages.u.first = page);
+			break;
+
+		case PINIO_DMD_WINDOW_1:
+			writeb (WPC_DMD_HIGH_PAGE, dmd_mapped_pages.u.second = page);
+			break;
+	}
+}
+
+
+/**
+ * Get the page that is visible in the given window.
+ */
+extern inline U8 pinio_dmd_window_get (U8 window)
+{
+	switch (window)
+	{
+		case PINIO_DMD_WINDOW_0:
+			return dmd_mapped_pages.u.first;
+
+		case PINIO_DMD_WINDOW_1:
+			return dmd_mapped_pages.u.second;
+
+		default:
+			return 0;
+	}
+}
+
+
+/**
+ * Get a pointer to the first byte of the named display window.
+ */
+#ifdef CONFIG_NATIVE
 /* In native mode, the DMD is emulated using ordinary character
-buffers. */
+   buffers. */
 extern U8 *linux_dmd_low_page;
 extern U8 *linux_dmd_high_page;
-#define DMD_LOW_BASE linux_dmd_low_page
-#define DMD_HIGH_BASE linux_dmd_high_page
-
+#define pinio_dmd_window_ptr(w) \
+	((w == PINIO_DMD_WINDOW_0) ? linux_dmd_low_page : linux_dmd_high_page)
 #else
-
 /* WPC can map up to 2 of the DMD pages into address space at
  * 0x3800 and 0x3A00.  Additionally, on WPC-95, 4 more pages
  * can be mapped at 0x3000, 0x3200, 0x3400, and 0x3600.
@@ -193,18 +285,34 @@ extern U8 *linux_dmd_high_page;
  * FreeWPC only uses maps 4 and 5, as they work on all platforms.
  * We call these "low" and "high".
  */
+#define pinio_dmd_window_ptr(w) ((U8 *)0x3000 + ((w) * 0x200))
+#endif
 
-#define DMD_MAPPED(n) ((U8 *)0x3000 + ((n) * 0x200))
 
 /* Define addresses for the two page buffer locations we
- * call low and high. */
+ * call low and high.  This define is DEPRECATED. */
+#define DMD_LOW_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0)
+#define DMD_HIGH_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1)
 
-#define DMD_LOW_BASE 					DMD_MAPPED(4)
-#define DMD_HIGH_BASE 					DMD_MAPPED(5)
 
-#endif /* CONFIG_NATIVE */
+/**
+ * Set the given page as visible.  It may or may not be
+ * mapped to one of the windows.
+ */
+extern inline void pinio_dmd_set_visible (U8 page)
+{
+	writeb (WPC_DMD_ACTIVE_PAGE, page);
+}
 
-#include <platform/wpc-mmap.h>
+
+/**
+ * Request an interrupt when the display is updated.
+ */
+extern inline void pinio_dmd_request_interrupt (void)
+{
+	writeb (WPC_DMD_FIRQ_ROW_VALUE, 30);
+}
+
 
 
 /********************************************/
@@ -218,7 +326,9 @@ extern U8 *linux_dmd_high_page;
 /** Toggle the diagnostic LED. */
 extern inline void pinio_active_led_toggle (void)
 {
-	io_toggle_bits (WPC_LEDS, WPC_LED_DIAGNOSTIC);
+	extern U8 wpc_led_reg;
+	wpc_led_reg ^= WPC_LED_DIAGNOSTIC;
+	writeb (WPC_LEDS, wpc_led_reg);
 }
 
 
@@ -397,11 +507,11 @@ extern inline U8 pinio_read_ac_zerocross (void)
 #define U1_TRIAC3  0x8
 #define U1_TRIAC4  0x10
 #endif
-#define U1_COIN_LOCK 0x40
+#define U1_COIN_LOCK 0x20
 #define U1_FLIPPER_RELAY 0x80
 
 #define TRIAC_GI_STRING(n)			(1 << (n))
-#define TRIAC_GI_MASK \
+#define PINIO_GI_STRINGS \
 	(TRIAC_GI_STRING(0) | TRIAC_GI_STRING(1) | TRIAC_GI_STRING(2) | \
 	TRIAC_GI_STRING(3) | TRIAC_GI_STRING(4))
 
@@ -508,7 +618,6 @@ extern inline U8 wpc_get_jumpers (void)
 
 extern inline U8 pinio_read_locale (void)
 {
-	/* TODO - make a getbits macro */
 	return (wpc_get_jumpers () & 0x3C) >> 2;
 }
 
@@ -578,6 +687,8 @@ extern inline U8 wpc_read_pic (void)
 /* Lamps                                    */
 /********************************************/
 
+#define PINIO_NUM_LAMPS 64
+
 extern inline void pinio_write_lamp_strobe (U8 val)
 {
 	writeb (WPC_LAMP_COL_STROBE, val);
@@ -594,12 +705,17 @@ extern inline void pinio_write_lamp_data (U8 val)
 
 extern inline U8 pinio_read_triac (void)
 {
-	return wpc_u1_read () & TRIAC_GI_MASK;
+	return wpc_u1_read () & PINIO_GI_STRINGS;
 }
 
 extern inline void pinio_write_triac (U8 val)
 {
-	wpc_u1_write (val | (wpc_u1_read () & ~TRIAC_GI_MASK));
+	wpc_u1_write (val | (wpc_u1_read () & ~PINIO_GI_STRINGS));
+}
+
+extern inline void pinio_write_gi (U8 val)
+{
+	pinio_write_triac (val);
 }
 
 /********************************************/

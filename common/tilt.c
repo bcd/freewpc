@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -109,7 +109,9 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	{
 		/* Warnings exceeded... tilt the current ball */
 		sound_reset ();
-		triac_disable (TRIAC_GI_MASK);
+#ifdef CONFIG_GI
+		triac_disable (PINIO_GI_STRINGS);
+#endif
 		deff_start (DEFF_TILT);
 		leff_start (LEFF_TILT);
 		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -223,7 +223,7 @@ CALLSET_ENTRY (chaosmb, chaosmb_stop)
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_flash_off);
 	lamplist_apply (LAMPLIST_CHAOSMB_JACKPOTS, lamp_off);
 	deff_stop (DEFF_CHAOSMB_RUNNING);
-	music_refresh ();
+	effect_update_request ();
 }
 
 static inline void chaosmb_check_level (U8 level)

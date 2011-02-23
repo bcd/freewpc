@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -35,7 +35,7 @@ typedef U8 bool;
 #include <m6809/m6809.h>
 #include <queue.h>
 #include <sndhw.h>
-#include <sys/irq.h>
+#include <system/irq.h>
 
 __attribute__((section("direct"))) U8 tmp;
 U8 tmp2;

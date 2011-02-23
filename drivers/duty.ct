@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -40,6 +40,12 @@
 @@parameter duty_ontime
 @@parameter duty_offtime
 @@parameter timeout
+
+@@
+@@file @self.sched
+@@
+!@self_service		16		40c
+
 
 @@
 @@file @self.h

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -92,13 +92,9 @@ bool ballsave_test_active (void)
 /**
  * Return a ball back into play due to ballsave.
  */
-void ballsave_launch (void)
+static void ballsave_launch (void)
 {
-#if defined(MACHINE_TZ)
-	autofire_add_ball ();
-#elif defined (DEVNO_TROUGH)
-	device_request_kick (device_entry (DEVNO_TROUGH));
-#endif
+	serve_ball_auto ();
 	deff_start (DEFF_BALL_SAVE);
 }
 
@@ -126,7 +122,6 @@ CALLSET_ENTRY (ballsave, sw_left_outlane, sw_right_outlane, sw_outhole)
  * Default ballsaver is turned on as soon as valid
  * playfield is asserted.
  */
-
 CALLSET_ENTRY (ballsave, valid_playfield)
 {
 #if MACHINE_BALL_SAVE_TIME > 0

@@ -352,9 +352,12 @@ wait_and_recount:
 				kicked_balls--;
 			}
 
-			/* If no more kicks are required, then go back to idle state. */
-			if (dev->kicks_needed == 0)
-				dev->state = DEV_STATE_IDLE;
+			/* Go back to idle state.  If there are more kicks left, we will
+			switch back to DEV_STATE_RELEASING again later.  The point is not to
+			stay in DEV_STATE_RELEASING when we have not actually kicked the ball;
+			if the request is held up for some reason, we want switch closures to
+			be processed correctly. */
+			dev->state = DEV_STATE_IDLE;
 		}
 	}
 
@@ -496,25 +499,18 @@ void device_request_empty (device_t *dev)
 
 	task_gid_t gid = DEVICE_GID (device_devno (dev));
 	task_kill_gid (gid);
-	if ((can_kick = device_kickable_count (dev)) > 0)
-	{
-		dev->kicks_needed += can_kick;
-		dev->kick_errors = 0;
-		dev->max_count -= can_kick;
-		/* TODO - lock count should be decremented here or not? */
-		/* TODO - this logic probably belongs somewhere else */
-		if (!trough_dev_p (dev))
-			live_balls += can_kick;
-	}
-	else
-	{
-		/* We tried to empty a device that had no balls in it.
-		Originally seen in switch stress simulation, we need to
-		reset max_count at the least. */
-		dev->kicks_needed = 0;
-		dev->kick_errors = 0;
-		dev->max_count = dev->props->init_max_count;
-	}
+
+	/* See how many balls are in the device, and schedule that many kicks. */
+	can_kick = device_kickable_count (dev);
+	dev->kicks_needed += can_kick;
+	dev->kick_errors = 0;
+
+	/* TODO - this logic probably belongs somewhere else */
+	if (!trough_dev_p (dev))
+		live_balls += can_kick;
+
+	/* Reset count of locked balls */
+	dev->max_count = dev->props->init_max_count;
 	if (gid != task_getgid ())
 		task_recreate_gid_while (gid, device_update, TASK_DURATION_INF);
 }
@@ -650,7 +646,9 @@ probe_exit:
 	/* At this point, all kicks have been made, but balls may be
 	on the playfield heading for the trough.  We still should wait
 	until 'missing_balls' goes (hopefully) to zero.
-   We'll give it three tries. */
+	We'll wait for up to 10 seconds, but exit sooner if we find all
+	balls before then. */
+	task_sleep_sec (4);
 	if (missing_balls != 0)
 	{
 		task_sleep_sec (2);
@@ -790,52 +788,22 @@ void device_remove_virtual (device_t *dev)
 {
 	if (dev->virtual_count > 0)
 	{
+		/* Update counts.  We avoid calling device_sw_handler here
+		because there is no possibility for any error or need for retry.
+		The change is instantaneous.  The device state remains idle. */
 		dev->virtual_count--;
-		device_sw_handler (dev->devno);
+		dev->actual_count--;
+		dev->previous_count--;
+
+		/* Throw the usual events on releases */
+		device_update_globals ();
+		device_call_op (dev, kick_success);
 	}
 	else
 	{
 		nonfatal (ERR_VIRTUAL_DEVICE_COUNT);
 	}
 }
-
-
-/** Sets the desired number of balls to be in play. */
-#ifdef DEVNO_TROUGH
-void device_multiball_set (U8 count)
-{
-	device_t *dev;
-	U8 current_count;
-
-	/* See how many balls are in play now */
-	dev = device_entry (DEVNO_TROUGH);
-	current_count = live_balls + dev->kicks_needed;
-
-	/* Calculate the number of balls that need to be added to play,
-	to reach the desired total count.  If more balls are already
-	in play, don't do anything. */
-	if (current_count < count)
-	{
-		U8 kicks = count - current_count;
-
-#ifndef MACHINE_LAUNCH_SOLENOID
-		if (kicks > 1)
-		{
-			dbprintf ("can't multi-kick trough without autoplunger\n");
-			kicks = 1;
-		}
-#endif
-
-		while (kicks > 0)
-		{
-			/* TODO - what if not all of them can come from the
-			trough?  Need to release them from somewhere else maybe. */
-			device_request_kick (dev);
-			kicks--;
-		}
-	}
-}
-#endif
 
 
 /** Called at game start time to see if it is OK to
@@ -865,11 +833,15 @@ bool device_check_start_ok (void)
 
 	/* If some balls are unaccounted for, and not on the shooter,
 	 * then start a device probe and a ball search.  Alert the user
-	 * by displaying a message. */
+	 * by displaying a message.
+	 *
+	 * After 3 probes, allow the game to start anyway.  However,
+	 * if no balls are accounted for anywhere, then don't do that.
+	 */
 	if (truly_missing_balls > 0)
 	{
 		dbprintf ("%d balls missing.\n", truly_missing_balls);
-		if (++device_game_start_errors < 5)
+		if ((++device_game_start_errors <= 3) || (counted_balls == 0))
 		{
 			task_recreate_gid (GID_DEVICE_PROBE, device_probe);
 			ball_search_now ();
@@ -945,6 +917,10 @@ CALLSET_ENTRY (device, start_game)
 	kickout_unlock_all ();
 }
 
+/* TODO - at the start of each ball, see how many balls in the trough
+constitutes a drain.  Balls could be physically missing, or they could
+be held up in some other playfield device that didn't empty after the
+last game, or they could be in play already if the game was restarted. */
 
 CALLSET_ENTRY (device, amode_start)
 {

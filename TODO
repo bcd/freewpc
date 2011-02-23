@@ -3,21 +3,18 @@ through the code, then sorted according to feature and priority.
 
 Poor Design
 * Remove gendefines???
-* "Idle" functions aren't really idle... see 'timing' branch
+* Rename 'idle' to 'periodic'
 * Teach gencallset to ignore code that isn't being compiled in.
-* Replace FIF with something more intelligent.  In Progress.
 * Move printf and game state machine code out of the system page.
 
 
 Missing Feature
-* Lamp power saver level
 * Abort after so many ball searches, or try another method (chase ball?)
 * Coin Door Ballsave
 * Lamp strobing, like newer Sterns
-* deff_nice
 * Flasher allocation for lamp effects
 * Add lock magnet/Magna-Goalie/goalie driver
-* Sound effects cannot alter volume temporarily
+* Sound effects cannot alter volume temporarily: started
 
 
 Bugs
@@ -33,75 +30,210 @@ Compiler Changes
 * sprintf() jump table per character is way too large.
 * Non-variadic arguments in a variadic function are OK to place in
 registers.
-again in May 2009?
 
 
 Nice to Have
 * ./include/freewpc.h:/* TODO - move these elsewhere */
 * ./include/freewpc.h:/* Uncommon software modules - TODO : shouldn't automatically include */
 * ./include/printf.h:/* TODO : much of this is implementing a 'varargs' type facility.
-* Score sweeping for player up
+* Score sweeping for player up : in progress, see 'score_deff' branch
 * ./kernel/font.c:		/* TODO - use a real strcpy() here that is more efficient */
-* ./kernel/frame.c:			/* TODO - use word copies if possible */
+* ./common/ballsave.c:/* TODO - handle early ball save due to an outlane drain */
+
+Robustness
+* ./common/reset.c:	/* TODO - should do warm reboot here */
+* ./common/tilt.c:	/* TODO: wait for slam switch to become stable, to avoid
+* ./common/pause.c:		/* TODO - this task should timeout after awhile */
+* ./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
+
+
+In Development (on other branches)
+* ./common/rtc.c:	 * TODO : this should trigger a CLOCK NOT SET message */ (date-handling)
+* ./kernel/error.c:	/* TODO - this whole function needs porting to Whitestar */ (nonwpc)
+* ./kernel/triac.c: * See kernel/ac.c for a similar define.  TODO : these should be merged.
+
+
+Native Mode
+* ./common/reset.c:	/* TODO - how to clean the permanent area in native mode? */
+* ./common/reset.c:	/* TODO - why is this not done in native mode? */
+* ./platform/native/task.c:	/* TODO - inside of calling the function directly, call a global
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/task.c:/* TODO - this function is identical to the 6809 version */
+* ./platform/native/main.c:	/* TODO : Initialize the three byte switch matrix unlock code */
+* ./platform/native/main.c:				return sim_switch_matrix_get ()[9]; /* TODO - not right */
+* ./platform/native/main.c:			/* TODO */
+* ./platform/native/script.c:	/* TODO : Builtin strings */
+
 
 Uncategorized
 
-./common/device.c:/* TODO : is this needed?  Can use sys_init_complete instead? */
-./common/device.c:			 * TODO - how to do this is also device-specific. */
-./common/device.c:			 * TODO : this should be a global event that other modules
-./common/device.c:		/* TODO - this logic probably belongs somewhere else.
-./common/device.c:		/* TODO - this logic probably belongs somewhere else */
-./common/device.c:#if 0 /* TODO */
-./common/plunger.c:	/* TODO - none of this logic works if the shooter switch is broken.
-./common/plunger.c:		/* TODO - after locking a ball, adding a new ball to the
-./common/rtc.c:	/* TODO - should read this from the native system */
-./common/trough.c:		/* TODO : For TZ, this keeps a ball on the outhole even
-./include/m6809/m6809.h: * TODO - for small, odd values of N, no optimization is
-./include/m6809/m6809.h:	/* TODO - memcpy isn't always going to work */
+./include/audit.h:	audit_t __unused_total_game_time; /* TODO */
+./include/test.h:	/* TODO : factory default should differ depending on country code,
 ./include/mode.h:	/* TODO */
 ./include/mode.h:		/* TODO */
+./include/bcd.h:/* TODO - this isn't BCD format */
+./include/sys/leff.h:	/* TODO - flashlamps desired should also be defined here */
+./include/sys/display.h:/* TODO - get rid of magic numbers here */
+./include/sys/sol.h:/* TODO - these are WPC specific */
+./include/sys/task.h:	/* TODO - few tasks need an arg, and this is wasting RAM for those
+./include/sys/dmd.h:/* TODO - no C versions for some of these */
+./include/sys/switch.h:	/* TODO - for PIC games, this value is valid only when the PIC
+./include/corvette/sound.h:#define SND_CAR_AWARDED						MUSIC_SND(0xB8) // TODO I think.
+./include/platform/wpc.h:	/* TODO - make a getbits macro */
+./include/platform/whitestar.h:/* TODO */
+./common/reset.c:	/* TODO : this should also clear audits, reset the high scores,
+./common/reset.c:	/* TODO - poll certain switches that must be operational
+./common/plunger.c:		/* TODO - after locking a ball, adding a new ball to the
+./common/dmd_shadow.c:#define dmd_shadow() /* TODO - no C version of shadowing */
+./common/score_deff.c:		/* TODO - I'd prefer to draw all players without flashing, and
+./common/score_deff.c:			/* TODO - use a sweeping effect rather than the flashing
+./common/ticket.c:/* TODO - I have no idea how this ticket I/O really works */
+./common/search.c:							/* TODO : When chase ball is turned on, do not wait for
+./common/eb.c:			timed_game_extend (15); /* TODO - make adjustable */
+./common/eb.c:			/* TODO - award points when extra balls are disabled */
+./common/trough.c:		/* TODO : For TZ, this keeps a ball on the outhole even
+./common/trough.c:/* TODO - handle trough stack/jam switch on newer games */
+./common/service.c:/* TODO : coin door may be closed, in which case button presses
+./common/service.c:	/* TODO : Enable Stern's "coindoor ballsave" feature */
+./common/highscore.c:	/* TODO - what if adjustment is OFF ? */
+./common/coin.c:/* TODO - use more robust drivers for the coin switches to
+./common/lamptimer.c:	/* TODO - if the lamp timer is already running, it should be
+./common/device.c:/* TODO - no way to lock only a particular device, which could be
+./common/device.c:		/* TODO - device_request_kick (dev); would be more appropriate,
+./common/device.c:			/* TODO - if multiple devices want to kick at the same time,
+./common/device.c:			/* TODO - keep track of all pending kick attempts.  Use a
+./common/device.c:			 * TODO : this should be a global event that other modules
+./common/device.c:		/* TODO - this logic probably belongs somewhere else.
+./common/device.c:		/* TODO - lock count should be decremented here or not? */
+./common/device.c:		/* TODO - this logic probably belongs somewhere else */
+./common/device.c:	/* TODO - mostly this is called from the context of a single device.
+./common/device.c:#if 0 /* TODO */
+./common/device.c:			/* TODO - what if not all of them can come from the
+./common/pic.c:	/* TODO : this is done differently only because native
+./common/buyin.c:	/* TODO - validate that a buyin offer is OK; check that the
+./common/sound_effect.c:			/* TODO - preemption should try to use a free channel
+./common/sound_effect.c:	/* TODO - duplicate much of this from above */
+./common/sound_effect.c:		/* TODO - start timed with fade out */
+./cpu/m6809/task.c:		/* TODO : if there are no free blocks, it might be possible
+./cpu/m6809/task.c:	/* TODO - verify that interrupts are not disabled when calling this */
+./cpu/m6809/task.c:	/* TODO: on entry to the next function, it is expected that 'X' has
+./cpu/m6809/task.c: * TODO : why not just set the B/X register directly here and then
+./kconfig/kconfig/lex.zconf.c:	/* TODO. We should be able to replace this entire function body
+./tools/pgmlib/pgmlib.c:	/* TODO : need to work on this */
+./tools/pgmlib/pgmlib.c:		/* TODO - the order in which planes are output should be
+./tools/imglib/imglib.c:	/* TODO - not handling errors very well */
+./tools/imglib/imglib.c:	/* TODO - the max val is not being communicated back, so
+./tools/imglib/imglib.c:			/* TODO : it's possible that it needs to be _significantly_
+./tools/imglib/imglib.c:	/* TODO */
+./tools/imglib/imglib.c:	/* TODO */
+./tools/sched/sched.c:	/* TODO : we are hard unrolling this 8 times now.
+./kernel/sol.c:		/* TODO - what if the queue is full? */
+./kernel/sol.c:	/* TODO - the assembly code generated here is not ideal.
+./kernel/deff.c:	/* TODO : if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
+./kernel/sound.c:	/* TODO - the sound board is not emulated in native mode */
+./kernel/sound.c:	/* TODO : for DCS, cmd could be 16-bit!!! */
+./kernel/sound.c:	/* TODO : do something like this elsewhere for sound syncing */
+./kernel/sound.c:	task_sleep (TIME_200MS); /* TODO : needed? */
+./kernel/timedmode.c:	/* TODO - may need a maxval to prevent overflow.  Default should
+./kernel/timedmode.c:	/* TODO - equivalent for now */
+./kernel/triac.c:	/* TODO - return actually allocated strings to the caller
+./kernel/ac.c:		/* TODO - here, verify that zerocross is OK by
+./kernel/ac.c:	/* Assume working AC/zerocross for now - TODO */
+./kernel/printf.c:					/* TODO : this used to be a 'register' variable, but
+./kernel/font.c:		/* TODO - if the character is a space, much of this can be
+./kernel/dmd.c:	/* TODO - for the 6809, this can be optimized by using
 ./kernel/animation.c:	/* TODO : for video modes there should be a callback here for
-./kernel/deff.c:	/* TODO */
-./kernel/frame.c:	/* TODO - remove this and force all callers of the
+./kernel/game.c:/* TODO : this code isn't important enough to stay in the system page. */
+./kernel/game.c:			/* TODO - if buyin is bought, then need to stay on this
+./kernel/game.c:	/* TODO : The current logic goes ahead and sets
+./kernel/game.c:		/* TODO : increment final score histogram */
+./kernel/game.c:		/* TODO : increment final game time histogram */
+./kernel/flip.c:	/* TODO - is this not reading the debounced values? */
 ./kernel/leff.c: * (TODO : as long as they do not use the same lamps!.)   There are
 ./kernel/leff.c:	/* TODO - this is slow */
 ./kernel/leff.c:		lamp_leff1_erase (); /* TODO : these two functions go together */
-./kernel/printf.c:					/* TODO : this used to be a 'register' variable, but
-./kernel/printf.c:	/* TODO - detect buffer overflow here and signal an error */
-./kernel/sound.c:	/* TODO : do something like this elsewhere for sound syncing */
-./kernel/sound.c:	task_sleep (TIME_200MS); /* TODO : needed? */
-./kernel/timer.c:		if (0) /* TODO : add condition that ball is live */
-
+./kernel/score.c:	/* TODO - this function does not obey the global multiplier */
+./kernel/log.c:	/* TODO : If logging has been disabled for this type of event,
+./kernel/log.c:	/* TODO : See if a breakpoint has been set on the module_event.  This halts
+./kernel/segment.c:/* Begin examples of transition effects.  TODO : move these
+./test/swtest.c:	/* TODO : here's what needs to happen.
+./test/wire.c:/* TODO : Not sure about all of the colors in this one ... */
+./test/wire.c:/* TODO - the colors are not right here */
+./test/preset.c:#ifdef CONFIG_DMD /* TODO */
+./test/adjust.c:/* TODO - these really belong in feature_config.  They are not being
+./test/adjust.c:	/* TODO : the following, more natural form fails
+./test/window.c:		/* TODO - confirmation of changes not done yet */
+./test/window.c:	/* TODO */
+./test/window.c:/* TODO - if no solenoids/flashers defined, solenoid_test_ok
+./test/window.c:/* TODO - these two window ops are identical; we are only
+./test/window.c:	/* TODO : ordered_lamp_test_item */
+./test/timestamp.c:	/* TODO - don't do this if the player's game was
+./test/format.c:	/* TODO - needed? */
+./test/format.c:			/* TODO long_integer_audit (val); */
 
 Uncategorized Machine Code
 
+./machine/afm/challenge.c: * TODO:
+./machine/afm/challenge.c:	/* TODO - because the last shot is always a loop shot, catch it
+./machine/afm/challenge.c:	/* TODO : time bonus */
+./machine/afm/challenge.c:	/* TODO - loop gates should remain open except
+./machine/afm/challenge.c:	/* TODO - motor bank should remain up */
+./machine/afm/challenge.c:	/* TODO - lock should open for first level to make
 
-./machine/t2/drop.c:	/* TODO - debounce drops */
-./machine/tz/amode.c:/* TODO : use flipcode module to implement this */
+./machine/funhouse/trapdoor.c:	/* TODO - read 'closed' sw. to see if it worked OK */
+./machine/funhouse/superdog.c:		/* TODO - timer did not pause after ball was locked
+./machine/funhouse/mb.c:	/* TODO - update mb_balls_locked according to physical state */
+./machine/funhouse/shot.c:	/* TODO : Start a monitor task to see that the ball eventually reaches the
+
+./machine/wcs/pitypoints.c:	/* TODO - the first sound goes missing, because the request
+./machine/wcs/multiball.c:	/* TODO - init base jackpot value */
+./machine/wcs/multiball.c:	/* TODO - add one more ball to play */
+./machine/wcs/goalie_driver.c:		/* TODO - right opto not seen.
+./machine/wcs/goalie_driver.c:		/* TODO - left opto not seen. */
+./machine/wcs/goalie_driver.c:	/* TODO - this should also be done after exiting test mode! */
+./machine/wcs/freekick.c:	/* TODO - adjust scoring here big time */
+./machine/wcs/ultra.c:				/* TODO - add effects, strobe left loop */
+./machine/wcs/ultra.c:	/* TODO - this is getting called much faster than we can
+./machine/wcs/shot.c:	/* TODO - be careful, cannot ask for more than 4s of this API */
+
+./machine/corvette/zr_1_multiball.c: * @TODO It's possible to light the lock by doing a right orbit twice very quickly
+./machine/corvette/zr_1_multiball.c: * @TODO find out why task sleep between ball unlocks doesn't work.
+./machine/corvette/zr_1_multiball.c: * @TODO use ZR-1 flasher so the player knows when and where the balls are going to come from.
+./machine/corvette/zr_1_multiball.c:	// TODO reset all other players' locked_ball count to 0 (not fair on other players, but no way round it as balls are ejected from zr-1 lock...)
+./machine/corvette/zr_1_multiball.c:	// TODO see if both hit very quickly, if so award super jackpot.
+./machine/corvette/zr_1_multiball.c:	/* TODO increase horsepower jackpot value */
+./machine/corvette/zr_1_multiball.c:	/* TODO increase torque jackpot value */
+./machine/corvette/zr_1_multiball.c:	// TODO other modes will want to change (open) the up rev gate, perform suitable mode check here (e.g. if mode set then bail and let mode control it instead)
+./machine/corvette/trivial.c:		// @TODO leff_start (LEFF_SHOOTER);
+./machine/corvette/zr1.c: * @TODO add ball search functionality (another state?)
+./machine/corvette/zr1.c:U8 zr1_engine_position; // TODO rename to zr1_last_position
+./machine/corvette/zr1.c:			// TODO implement
+./machine/corvette/skill.c: * @TODO Currently on a real machine the skill shot is turned off after the player launches a ball
+./machine/corvette/skill.c: * @TODO The flashing lamp for the active rollover isn't changed quickly enough.
+./machine/corvette/skill.c:		// TODO display skillshot award.
+./machine/corvette/skill.c:	// TODO let the user select if they want to enable the rollover skillshot or the skid pad ramp super skillshot.
+./machine/corvette/zr1_test.c: * @TODO integration with test report
+./machine/corvette/zr1_test.c: * @TODO initialise ZR1 on startup
+./machine/corvette/zr1_test.c:		// TODO remove when real-machine testing is complete - begin
+./machine/corvette/zr1_test.c:		// TODO remove when tseting complete - end
+
+./machine/tz/gumball.c:	/* TODO : when ball searching at game start, see if the
+./machine/tz/multiball.c:/* TODO - on a missed left ramp exit switch, use the
+./machine/tz/multiball.c:		/* TODO : there is no relight jackpot rule */
+./machine/tz/gumball_test.c:		/* TODO - poll more frequently, and draw less often */
+./machine/tz/powerball_test.c:/* TODO : copied from powerball.c */
+./machine/tz/loop.c:		/* TODO : count powerball loops and award bonuses
 ./machine/tz/autofire.c:	/* TODO : balls landing here when not expected
 ./machine/tz/autofire.c:	/* TODO - If the autofire switch trips during the 'open
 ./machine/tz/autofire.c:		/* TODO : these sleeps should be done in the spawned task,
 ./machine/tz/autofire.c:	/* TODO - don't always want to launch right away, e.g. for
 ./machine/tz/autofire.c:	/* TODO : Poll the autofire switches and empty it if something
-./machine/tz/clocktest.c:	/* TODO : this should be common logic */
+./machine/tz/config.c:/* TODO - bonus music hook was deleted, needs re-doing */
 ./machine/tz/door.c:		/* TODO : When called from the camera award, this always
-./machine/tz/gumball.c:	/* TODO : when ball searching at game start, see if the
-./machine/tz/gumball_test.c:		/* TODO - poll more frequently, and draw less often */
-./machine/tz/loop.c:		/* TODO : count powerball loops and award bonuses
-./machine/tz/multiball.c:/* TODO - on a missed left ramp exit switch, use the
 ./machine/tz/powerball.c:			/* TODO - in the 'maybe' state, pulse magnets to
 ./machine/tz/powerball.c:		/* TODO : music is not being stopped correctly if Powerball
 ./machine/tz/powerball.c:	/* TODO : if this switch triggers and we did not expect
-./machine/tz/powerball_test.c:/* TODO : copied from powerball.c */
-./machine/tz/skill.c:	TODO : genmachine can be made to generate two events here,
 ./machine/tz/sssmb.c:		/* TODO: handle case where red jackpot switch is tripped but
+./machine/tz/amode.c:/* TODO : use flipcode module to implement this */
 
-./platform/wpc/task.c:		/* TODO : if there are no free blocks, it might be possible
-./platform/wpc/task.c:	/* TODO - verify that interrupts are not disabled when calling this */
-./platform/wpc/task.c:	TODO : the accuracy here is a bit wonky.  For example, a task could
-./platform/wpc/task.c:	/* TODO: on entry to the next function, it is expected that 'X' has
-./platform/wpc/task.c: * TODO : why not just set the B/X register directly here and then
-./test/adjust.c:/* TODO - these really belong in feature_config.  They are not being
-./test/window.c:/* TODO - if no solenoids/flashers defined, solenoid_test_ok
-./test/window.c:/* TODO - these two window ops are identical; we are only
-./test/window.c:	/* TODO : ordered_lamp_test_item */

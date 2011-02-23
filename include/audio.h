@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -53,7 +53,7 @@ typedef struct
 	U8 prio;
 } sound_channel_t;
 
-__effect__ void music_refresh (void);
+__effect__ void music_update (void);
 __effect__ void music_request (sound_code_t music, U8 prio);
 __effect__ void music_disable (void);
 __effect__ void music_enable (void);

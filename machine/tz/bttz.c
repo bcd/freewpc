@@ -97,7 +97,7 @@ void bttz_start_task (void)
 	
 	callset_invoke (empty_balls_test);
 	device_request_empty (device_entry (DEVNO_LOCK));
-	device_multiball_set (6);
+	set_ball_count (6);
 	balls_needed_to_load = 3;
 	task_exit ();
 }
@@ -167,7 +167,7 @@ CALLSET_ENTRY (bttz, single_ball_play)
 	lamplist_apply (LAMPLIST_DOOR_PANELS_AND_HANDLE, lamp_flash_off);
 	flag_on (FLAG_SLOT_DOOR_LIT);
 	callset_invoke (door_enable);
-	music_refresh ();
+	effect_update_request ();
 }
 
 CALLSET_ENTRY (bttz, end_ball)

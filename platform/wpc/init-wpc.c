@@ -24,6 +24,10 @@
 /** The last value written to the WPC_ROM_BANK register */
 __fastram__ U8 wpc_rom_bank;
 
+/** The last value written to the WPC_LEDS register */
+U8 wpc_led_reg;
+
+
 /**
  * Initialize the WPC platform.
  */
@@ -46,6 +50,9 @@ void platform_init (void)
 	wpc_set_ram_protect (RAM_UNLOCKED);
 	wpc_set_ram_protect_size (PROT_BASE_0x1800);
 	wpc_set_ram_protect (RAM_LOCKED);
+
+	/* Initialize the diagnostic LED register */
+	wpc_led_reg = 0;
 
 	/* Initialize the ROM page register
 	 * page of ROM adjacent to the system area is mapped.

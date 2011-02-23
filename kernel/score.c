@@ -24,7 +24,7 @@
  */
 
 #include <freewpc.h>
-#include <bcd.h>
+#include <bcd_string.h>
 #include <replay.h>
 
 /** The array of player scores */

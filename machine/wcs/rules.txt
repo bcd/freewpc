@@ -65,6 +65,8 @@ mark.  In addition, the base value is multiplied by the number of balls
 in play, encouraging you not to drain.  The Jackpot Value increases each
 time the Goal is scored.  Relight Jackpot via the left/right ramps.
 
+After the 1st multiball, it may be necessary to lock at least 1 ball
+in a saucer before Final Draw becomes lit.
 
 
 Surprise Multiball
@@ -112,22 +114,28 @@ existing active mode -- 1 goalie hit or ramp, or 5 spinners/jets.
 At end ball, all active Ultra Modes are stopped, but any modes that have
 previously been completed are remembered.
 
-When all 4 Ultra Modes have been completed, "Ultra Mania" is lit ...
-see below.
+The playfield "Ultra" lightning bolts will show your status for each:
+off=not running, flashing=running, solid=finished.
+
+When all 4 Ultra Modes have been completed, "Ultra Mania" is lit, and
+the lamps will strobe...  see below.
 
 
 
 Ultra Mania
 ===========
-When Ultra Mania is qualified, the Left Ramp becomes lit for Lock, then Final
-Draw lights to start Ultra Mania.  
-This multiball can be started immediately, or you can shoot the Lock
-to try to add additional balls into play.
 
-TODO : what if both multiballs are qualified.
+When Ultra Mania is qualified, the Left Ramp becomes lit for Lock and Final
+Draw lights to start Ultra Mania.  
+This multiball can be started immediately (2-ball), or you can shoot the Lock
+to try to add additional balls into play (up to 4-ball).
+
+If both Ultra Mania and main multiball are qualified, only Ultra Mania
+will be started.  When it completes, main multiball will still be lit.
 
 During Ultra Mania, all Ultra shots are active one more time, but you
-are allowed to score 2X as many total points.
+are allowed to score 2X as many total points (same scoring per shot but
+2X as many shots allowed).
 
 Progress in Ultra Mania is carried over after the multiball ends, if
 you start it again you pick up where you left off.
@@ -147,19 +155,28 @@ the Free Kick Target.
 Possible awards are:
 
 	- Quick Multiball
-	- Hurry Up (like the Mode below)
-	- Add Time (in timed game)
+		- higher percentage for weaker players
+		- just shoot Goals for jackpots, eventually requalify via Spinner (ala TNG)
+	- Hurry Up (like the Speed Mode below)
+		- never award if Speed Mode is/has run
+	- Add Time (only in timed game)
 	- Ball Save
 	- Start Mode
-	- Advance Ultra
-	- Light Extra Ball (in non-timed game)
-	- Points
+		- only if Mode Start is not already lit
+		- more likely if fewer modes have been played
+	- Start/Advance Ultra
+		- again, more likely the fewer ultras have been lit/finished.
+	- Light Extra Ball (in non-timed game only)
 	- Light Multiball
-	- Multiball
+		- very weak game on ball 3 only
 	- You're There (Collect Next City)
+		- current spinner shots carry over to the next city, too
+	- Points (small but random)
 
 There will be some rules to govern how these are given out, so that it is not
-entirely random.
+entirely random.  Certain awards will never be repeated more than once per game.
+Others will never repeat until all of the others in the same class have repeated.
+"Points" is the default in case nothing else qualifies.
 
 
 Modes
@@ -181,6 +198,12 @@ Mode rules TBD, however:
 	the value of the Dog targets depends on the number of modes
 	actually running, and will not advance towards lighting another
 	Mode Start.
+   - For any mode, scoring the shot 5 times awards a Mode Bonus:
+		1st - Big Points
+		2nd - Light Extra Ball
+		3rd - Bigger Points
+		4th - Light Special
+		5th (wow) - ?
 
 
 Mode : Stamina
@@ -202,8 +225,8 @@ the value of the shot will count down a little faster to its minimum.
 Mode : Skill
 ===============
 A new ball is served to the plunger, with flippers disabled.  The
-objective is to make skill shots for points.  Once missed, the
-original ball is kicked from the Striker scoop -- shoot Striker
+objective is to make skill shots for points.  Once missed and the ball drains,
+the original ball is kicked from the Striker scoop -- shoot Striker
 again to repeat the process.  The 20 second timer does not run while
 skill shots are attempted, and is reset by making a Skill Shot.
 
@@ -243,6 +266,8 @@ Shoot the Dog targets as often as you like to score the Jackpot Value.
 Super Dog runs on a 30 second timer, with a short ballsaver.
 The timer is reset to 30 seconds once *all three* targets are hit.
 
+This should be a 2-ball multiball.
+
 
 Cities
 ======
@@ -277,12 +302,17 @@ time out in 30 seconds.  Shooting the Left Loop/Spinner adds 10 seconds
 to the clock, up to a max of 30 seconds.  When 2X Scoring times out, the
 cities reset to the beginning again.
 
+(Note: a single Spinner flip does not count... it should take two spins
+to equal a loop shot, to make it harder).
+
+All of the 2X modes run during multiballs as well.
+
 
 World Cup Final
 ===============
 
 To qualify World Cup Final, you must start all of the following:
-- Regular Multiball
+- Goal Multiball
 - Ultra Mania
 - Super Dog
 - 2X Scoring
@@ -292,8 +322,10 @@ progress, the Left and Right Ramp locks will become lit.
 Shoot either to start World Cup Final.
 
 During Final, unlimited balls are served from the trough for 45 seconds
-as before.  The Goal collects an increasing Jackpot value.
-The ramps increase the jackpot even further...
+as before.  The Goal collects an increasing Jackpot value (1M, 1.1M, 1.2M,
+etc. up to 2M per goal).
+The Build Shots increase the jackpot even further (+250K for the shot,
+plus +100K to the goal value.)
 
 
 
@@ -308,4 +340,15 @@ Max Lock Count
 Reverse Spin
 Disable Ball
 Disable Goalie
+
+
+TBD
+===
+- Flesh out exact rules for how the left ramp divertor works.
+
+- Flesh out exactly how the left loop divertor works.
+
+- Add a scoring rule for the 4 goal rollover buttons.
+
+- Add a rule for the top saucer which kicks into the goal.
 

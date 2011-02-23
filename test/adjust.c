@@ -75,6 +75,7 @@ struct adjustment_value lines_per_page_value = { 22, 80, 1, decimal_render };
 struct adjustment_value pricing_mode_value = { 0, NUM_PRICING_MODES-1, 1, pricing_mode_render };
 struct adjustment_value coin_door_type_value = { 0, NUM_COIN_DOOR_TYPES-1, 1, coin_door_render };
 struct adjustment_value volume_value = { MIN_VOLUME, MAX_VOLUME, 1, decimal_render };
+struct adjustment_value payment_method_value = { 0, MAX_PAY_METHODS-1, 1, payment_method_render };
 
 #ifndef MACHINE_REPLAY_SCORE_CHOICES
 #define MACHINE_REPLAY_SCORE_CHOICES 250
@@ -201,13 +202,14 @@ struct adjustment pricing_adjustments[] = {
 #endif
 
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, &price_config.hide_coin_audits },
-	{ "1-COIN BUY-IN", &yes_no_value, NO, &price_config.one_coin_buyin },
+	{ "", &yes_no_value, NO, NULL }, /* reserved for 1-coin buyin */
 	{ "COIN METER UNITS", &integer_value, 0, &price_config.coin_meter_units },
 	{ "FAST BILL SLOT", &yes_no_value, NO, &price_config.fast_bill_slot },
 	{ "MIN. COIN MSEC.", &nonzero_integer_value, 50, &price_config.min_coin_msec },
 	{ "SLAMTILT PENALTY", &yes_no_value, YES, &price_config.slamtilt_penalty },
 	{ "ALLOW HUNDREDTHS", &yes_no_value, NO, &price_config.allow_hundredths },
 	{ STR_CREDIT "FRACTION", &on_off_value, ON, &price_config.credit_fraction },
+	{ "PAYMENT TYPE", &payment_method_value, PAY_COIN, &price_config.payment_method },
 	{ NULL, NULL, 0, NULL },
 };
 
@@ -412,6 +414,9 @@ const struct adjustment *adj_get (U8 num)
 
 bool adj_current_hidden_p (void)
 {
+	/* If the adjustment is unnamed, don't show it.  We do this
+	at compile-time for certain things that we never want to show
+	(e.g. FREE PLAY when built as FREE ONLY). */
 	if (current_adjustment.name[0] == '\0')
 		return TRUE;
 
@@ -427,6 +432,14 @@ bool adj_current_hidden_p (void)
 		(std_adj_p (replay_percent) || std_adj_p (replay_start)))
 		return TRUE;
 
+	/* Allow other things to be added too.  Machines or other
+	modules should return FALSE if the current adjustment should
+	not be visible.  (Note this is inverted logic from the rest of
+	this function.) */
+	if (!callset_invoke_boolean (adjustment_visible))
+		return TRUE;
+
+	/* Otherwise, this adjustment is OK to show */
 	return FALSE;
 }
 

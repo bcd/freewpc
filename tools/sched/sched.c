@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -275,6 +275,10 @@ void write_tick_driver (FILE *f)
 		fprintf (f, "static " ATTR_INTERRUPT " void %s_%d (void)\n", prefix, n);
 		c_block_begin (indent, f);
 
+		cfprintf (indent, f, "#ifdef CONFIG_PERIODIC_FIRQ\n");
+		cfprintf (indent, f, "   m6809_firq_save_regs ();\n");
+		cfprintf (indent, f, "#endif\n");
+
 		for (div = 1; div <= max_divider; div *= 2)
 		{
 			unsigned int used = 0;
@@ -341,6 +345,10 @@ void write_tick_driver (FILE *f)
 		if (tick->len >= 1.0)
 			fprintf (stderr, "warning: tick %d takes too long\n", n);
 
+		cfprintf (indent, f, "#ifdef CONFIG_PERIODIC_FIRQ\n");
+		cfprintf (indent, f, "   m6809_firq_restore_regs ();\n");
+		cfprintf (indent, f, "#endif\n");
+
 		c_block_end (indent, f);
 		fprintf (f, "\n");
 	}
@@ -362,13 +370,6 @@ void write_tick_driver (FILE *f)
 	cfprintf (indent, f, "   %s_function = %s_0;\n", prefix, prefix);
 	cfprintf (indent, f, "   %s_divider = 0;\n", prefix);
 	cfprintf (indent, f, "}\n\n");
-}
-
-
-void init_schedule (void)
-{
-	n_ticks = 0;
-	n_tasks = 0;
 }
 
 
@@ -395,6 +396,14 @@ void expand_ticks (unsigned int new_tick_count)
 		ticks[tickno].n_slots = 0;
 		ticks[tickno].len = 0.0;
 	}
+}
+
+
+void init_schedule (void)
+{
+	n_ticks = 0;
+	n_tasks = 0;
+	expand_ticks (8);
 }
 
 
@@ -489,6 +498,7 @@ void add_task (char *name, unsigned int period, double len)
 	char *end;
 	unsigned int already_unrolled_count = 0;
 	char *c;
+	unsigned int n;
 
 	/* Is this entry dependent on a conditional? */
 	if ((c = strchr (name, '?')) != NULL)
@@ -518,6 +528,16 @@ conditional_defined:;
 		already_unrolled_count = end[1] - '0';
 		*end = '\0';
 	}
+
+	/* Scan all previous tasks, and look for the same name.
+	   If a task appears more than once, it is probably a bug. */
+	if (n_tasks > 0)
+		for (n = 0; n < n_tasks; n++)
+			if (!strcmp (tasks[n].name, name))
+			{
+				fprintf (stderr, "error: task '%s' redefined\n", name);
+				exit (1);
+			}
 
 	/* Fill in the task structure */
 	task = &tasks[n_tasks++];

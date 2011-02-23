@@ -98,7 +98,7 @@ const struct score_font_info
 {
 	/* The function to call to draw the string.  This determines
 	the justification */
-	void (*render) (void);
+	void (*render) (const char *);
 
 	/* The font to be used */
 	const font_t *font;
@@ -196,7 +196,7 @@ void scores_draw_current (U8 single_player)
 		DECL_FONTARGS (info->font, info->x, info->y, sprintf_buffer);
 
 		/* Start printing to the display */
-		info->render ();
+		info->render (sprintf_buffer);
 #else
 		seg_write_string (0, 0, sprintf_buffer);
 #endif
@@ -279,7 +279,7 @@ void scores_deff (void)
 			else
 			{
 				dmd_alloc_low_clean ();
-				wpc_dmd_set_high_page (DMD_OVERLAY_PAGE+1);
+				pinio_dmd_window_set (PINIO_DMD_WINDOW_1, DMD_OVERLAY_PAGE+1);
 				dmd_copy_page (dmd_low_buffer, dmd_high_buffer);
 				dmd_show_low ();
 			}
