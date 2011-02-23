@@ -197,9 +197,9 @@ void ball_from_lock_deff (void)
 void button_masher_deff (void)
 {
 	sprintf ("IS MIKE PLAYING");
-	flash_small_deff (20, TIME_33MS);
-	sprintf ("BUTTON MASHER");
 	flash_small_deff (10, TIME_66MS);
+	sprintf ("BUTTON MASHER");
+	flash_small_deff (20, TIME_33MS);
 	deff_exit ();
 }
 
@@ -218,27 +218,13 @@ void three_way_combo_deff (void)
 	flash_and_exit_deff (20, TIME_66MS);
 }
 
-void shoot_right_loop_deff (void)
-{
-	sound_send (SND_INSIDE_LEFT_INLANE);
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 11, "SHOOT THE");
-	font_render_string_center (&font_fixed10, 64, 24, "RIGHT LOOP");
-	dmd_show_low ();
-	dmd_copy_low_to_high ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (30, TIME_66MS);
-	deff_exit ();
-}
-
 /* Jackpot animation contributed by highrise */
 void jackpot_deff (void)
 {
 	U16 fno;
 	U8 i;
 	sample_start (SND_JACKPOT_BACKGROUND, SL_1S);
-	/* Loop the start of the animation 3 times */
+	/* Loop the start if the animation 3 times */
 	for (i = 3; i > 0; --i)
 	{
 		for (fno = IMG_JACKPOT_START; fno <= IMG_JACKPOT_END - 9; fno += 1)
@@ -465,9 +451,6 @@ void ball_explode_deff (void)
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 		}
-		sprintf ("TRY HARDER");
-		flash_small_deff (15, TIME_66MS);
-		
 	}
 	deff_exit ();
 }
@@ -485,3 +468,4 @@ void tz_ball_save_deff (void)
 	}
 	deff_exit ();
 }
+

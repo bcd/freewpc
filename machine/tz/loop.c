@@ -205,7 +205,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	if (event_did_follow (dev_lock_kick_attempt, right_loop))
 	{
 		/* Ball has just come out of lock, ignore */
-		return;
+		//return;
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{

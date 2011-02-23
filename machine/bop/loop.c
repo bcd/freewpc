@@ -60,7 +60,6 @@ void loop_deff (void)
 /* task to take the loop levels down by one every 10 seconds */
 /* TODO This needs to be changed so it'll handle system wide
  * pausing properly */
-/* Use idle_every_second */
 static void loop_level_timer_task (void)
 {
 	while (in_live_game)

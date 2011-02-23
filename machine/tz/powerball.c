@@ -394,7 +394,7 @@ void pb_container_exit (U8 location)
 	}
 }
 
-/* Used by maghelper.c to aid powerball detection */
+/* Used by maghelper.c to aid with powerball detection */
 CALLSET_ENTRY (pb_detect, left_ball_grabbed, right_ball_grabbed)
 {
 	if (single_ball_play ())

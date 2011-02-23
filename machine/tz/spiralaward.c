@@ -60,10 +60,6 @@ const lampnum_t spiralaward_lamps[] = {
 	LM_SPIRAL_EB
 };
 
-void shoot_right_ramp_deff (void)
-{
-}
-
 void spiralaward_collected_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -160,7 +156,6 @@ static void award_spiralaward (void)
 			light_easy_extra_ball ();
 			break;
 	}
-	deff_stop (DEFF_SHOOT_RIGHT_LOOP);
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
 	
 	/* Run lamp flash as task so it can run in parallel */

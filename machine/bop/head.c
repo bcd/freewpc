@@ -23,7 +23,6 @@
 
 CALLSET_ENTRY (head, sw_mouth)
 {
-	/* TODO if (sol_safe_for_head_position (SOL_MOUTH) */
 	sol_request (SOL_MOUTH);
 	task_sleep_sec (1);
 }

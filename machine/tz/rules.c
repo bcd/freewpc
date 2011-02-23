@@ -40,7 +40,7 @@ CALLSET_ENTRY (rules, sw_left_button, sw_right_button)
 {
 	if (rules_timer)
 	{
-		rules_timer = 2;
+		rules_timer = 0;
 	}
 }
 
@@ -325,7 +325,7 @@ void rules_deff (void)
 	rule_complete ();
 
 	rule_begin ();
-	rule_msg ("", "AND HAVE SOME FUN", "", "ITS ONLY PINBALL");
+	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOUR ARE AT IT", "");
 	rules_sleep_sec (4);
 	rule_complete ();
 	

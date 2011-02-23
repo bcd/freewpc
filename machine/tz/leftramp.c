@@ -34,7 +34,6 @@ extern bool chaosmb_can_divert_to_autoplunger (void);
 extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
-extern score_t tnf_score;
 
 static void left_ramp_deff_subtask (void)
 {
@@ -119,19 +118,12 @@ CALLSET_ENTRY(leftramp, start_ball)
 	left_ramps = 0;
 }
 
-/* Allow divert to autoplunger if left ramp was hit after right inlane
- * but only allow once per ball.
- * If the player has scored more than 15M via doink mode
- * then they will be awarded 5M but the ball will not be diverted
- */
-
-inline static bool doink_mode_check (void)
+inline static bool right_inlane_combo_check (void)
 {
 	if (event_did_follow (right_inlane, left_ramp) 
 		&& single_ball_play ()
 		&& score_compare (score_table[SC_10], tnf_score) == 1)
 	{
-		/* Tell autofire.c that the ball is coming for doink mode */
 		event_can_follow (left_ramp_exit, tnf, TIME_4S);
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
@@ -157,10 +149,9 @@ static void maybe_ramp_divert (void)
 	
 	/* Divert to autoplunger if mball ready */
 	/* Divert to autoplunger for chaosmb */
-	/* Divert to autoplunger for doink mode */
 	if (multiball_ready () ||
 		chaosmb_can_divert_to_autoplunger () ||
-		doink_mode_check ())
+		right_inlane_combo_check ())
 	{
 		leff_start (LEFF_STROBE_DOWN);
 		ramp_divert_to_autoplunger ();
@@ -197,7 +188,7 @@ CALLSET_ENTRY (left_ramp, sw_left_ramp_exit)
 	chaosmb_left_ramp_exit ();
 	
 	/* Add two ramps if hit from the right inlane */
-	if (event_did_follow (right_inlane, left_ramp))
+	if (task_find_gid (GID_LEFT_RAMP))
 		bounded_increment (left_ramps, 250);
 	bounded_increment (left_ramps, 250);
 	deff_start (DEFF_LEFT_RAMP);

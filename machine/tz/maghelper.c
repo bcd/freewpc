@@ -53,7 +53,7 @@ bool magnet_enabled (U8 magnet)
 		return FALSE;
 }
 
-/* Check whether the magnet is busy holding/grabbing/throwing 
+/* Ceck whether the magnet is busy holding/grabbing/throwing 
  * but NOT enabled */
 bool magnet_busy (U8 magnet)
 {
