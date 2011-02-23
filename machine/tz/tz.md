@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # TZ machine description for FreeWPC
-# (C) Copyright 2006, 2007, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2006, 2007, 2009 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -231,13 +231,13 @@ H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
 L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
-L2: Right Sling
-L3: Left Sling
-L4: Lower Jet
-L5: Left Jet
-L6: Right Jet
+L2: Right Sling, duty(SOL_DUTY_100)
+L3: Left Sling, duty(SOL_DUTY_100)
+L4: Lower Jet, duty(SOL_DUTY_100)
+L5: Left Jet, duty(SOL_DUTY_100)
+L6: Right Jet, duty(SOL_DUTY_100)
 L7: Lock Release, duty(SOL_DUTY_75), time(TIME_133MS)
-L8: Shooter Div, nosearch
+L8: Shooter Div, nosearch, duty(SOL_DUTY_100)
 
 G1: Jets, flash
 G2: Ramp3 Power Payoff, flash
@@ -273,7 +273,6 @@ Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, of
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
-
 Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=20
 Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=20
 
@@ -694,5 +693,3 @@ Rules: runner, PRI_TILT, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 [fonts]
 times10:
 steel:
-lithograph:
-

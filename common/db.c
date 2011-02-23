@@ -79,7 +79,7 @@ U8 button_check (U8 sw)
 		task_runs_long ();
 		barrier ();
 	}
-	switch_periodic ();
+	switch_idle ();
 	if (!switch_poll (sw))
 	{
 		bpt_repeat_count = 0;
@@ -193,7 +193,7 @@ void bpt_hit (void)
 		}
 		else
 		{
-			switch_periodic ();
+			switch_idle ();
 			db_periodic ();
 			task_runs_long ();
 		}

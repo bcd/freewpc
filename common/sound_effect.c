@@ -60,10 +60,15 @@ void music_request (sound_code_t music, U8 prio)
 
 
 /**
- * Called by effect update to update the background music.
+ * Handles music refresh in the background.
  */
-void music_update (void)
+void music_refresh_task (void)
 {
+	/* Sleep for a bit before actually doing anything, because
+	there may be multiple refreshes in a row, and only the last
+	one is needed.  This cures an audio glitch. */
+	task_sleep (TIME_200MS);
+
 	music_prio = 0;
 	music_requested = 0;
 
@@ -83,6 +88,19 @@ void music_update (void)
 		}
 		music_active = music_requested;
 	}
+	task_exit ();
+}
+
+
+/**
+ * Invoked periodically to update the background music.
+ */
+void music_refresh (void)
+{
+	if (in_tilt)
+		music_off ();
+	else if (music_flags == 0)
+		task_recreate_gid (GID_MUSIC_REFRESH, music_refresh_task);
 }
 
 
@@ -104,7 +122,7 @@ void music_disable (void)
 void music_enable (void)
 {
 	music_flags &= ~MUS_DISABLED_BY_CALL;
-	music_update ();
+	music_refresh ();
 }
 
 
@@ -150,7 +168,7 @@ CALLSET_ENTRY (sound_effect, idle_every_100ms)
 				if (chid == MUSIC_CHANNEL)
 				{
 					music_flags &= ~MUS_DISABLED_BY_SOUND;
-					music_update ();
+					music_refresh ();
 				}
 			}
 		}
@@ -342,7 +360,7 @@ CALLSET_ENTRY (sound_effect, music_refresh)
 
 CALLSET_ENTRY (sound_effect, end_game)
 {
-	music_update ();
+	music_refresh ();
 	if (!in_test)
 	{
 		/* TODO - start timed with fade out */
@@ -366,6 +384,6 @@ CALLSET_ENTRY (sound_effect, init)
 	memset (chtab, 0, sizeof (chtab));
 	music_active = 0;
 	music_flags = 0;
-	music_update ();
+	music_refresh ();
 }
 

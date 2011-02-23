@@ -67,10 +67,9 @@ U8 idle_10second_timer;
  */
 void do_periodic (void)
 {
-	/* Switch processing is special, and will be called as
-	often as possible.  Everything else is called less
-	frequently. */
-	switch_periodic ();
+	/* The name 'idle' is historical; it could be changed to
+	'periodic' but I've left it alone for now... */
+	callset_invoke (idle);
 
 	/* See if at least 100ms has elapsed.
 	If so, we advance the timeout for the next check.

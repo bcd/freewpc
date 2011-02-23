@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -214,7 +214,7 @@ void pb_clear_location (U8 location)
 		callset_invoke (powerball_absent);
 		/* TODO : music is not being stopped correctly if Powerball
 		drains during multiball and game doesn't know where it is. */
-		effect_update_request ();
+		music_refresh ();
 #ifdef PB_DEBUG
 		deff_restart (DEFF_PB_DETECT);
 #else
@@ -299,7 +299,7 @@ void pb_announce (void)
 #else
 		deff_start (DEFF_PB_DETECT);
 #endif
-		effect_update_request ();
+		music_refresh ();
 		pb_announce_needed = 0;
 	}
 }

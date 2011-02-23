@@ -173,7 +173,8 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		callset_invoke (mball_restart_stop);
 		mball_jackpot_uncollected = TRUE;
 		unlit_shot_count = 0;
-		effect_update_request ();
+		deff_update ();
+		music_refresh ();
 		global_flag_on (GLOBAL_FLAG_SSSMB_RUNNING);
 		global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
 		global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
@@ -203,7 +204,7 @@ void sssmb_stop (void)
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_RUNNING);
 	lamp_tristate_off (LM_SUPER_SKILL);
-	effect_update_request ();
+	music_refresh ();
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)

@@ -62,7 +62,7 @@ void lockup_check_rtt (void)
 
 /**
  * Entry point for errors that are nonrecoverable.
- * error_code is one of the values in include/system/errno.h.
+ * error_code is one of the values in include/sys/errno.h.
  */
 __noreturn__
 void fatal (errcode_t error_code)
@@ -81,9 +81,7 @@ void fatal (errcode_t error_code)
 	disable_interrupts ();
 
 	/* Reset hardware outputs */
-#ifdef CONFIG_GI
-	pinio_write_gi (0);
-#endif
+	pinio_write_triac (0);
 
 	/* TODO - this whole function needs porting to Whitestar */
 #ifdef CONFIG_PLATFORM_WPC
@@ -112,7 +110,7 @@ void fatal (errcode_t error_code)
 #endif
 
 #ifdef CONFIG_NATIVE
-	sim_exit (error_code);
+	linux_shutdown (error_code);
 #else
 	/* Go into a loop, long enough for the error message to be visible.
 	Then reset the system. */
@@ -151,7 +149,7 @@ void fatal (errcode_t error_code)
 
 /**
  * Entry point for errors that are recoverable.
- * error_code is one of the values in include/system/errno.h.
+ * error_code is one of the values in include/sys/errno.h.
  * This function simply logs the error, but the system continues on.
  */
 void nonfatal (errcode_t error_code)

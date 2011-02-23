@@ -31,12 +31,6 @@
 @@parameter reverse_sol
 
 @@
-@@file @self.sched
-@@
-!@self_service		16		80c
-
-
-@@
 @@file @self.h
 @@
 

@@ -26,8 +26,8 @@
 #ifndef _PLATFORM_NATIVE_H
 #define _PLATFORM_NATIVE_H
 
-void sim_init (void);
-__attribute__((noreturn)) void sim_exit (U8);
+void linux_init (void);
+__attribute__((noreturn)) void linux_shutdown (U8);
 
 #define far_call_pointer(function, page, arg) (*function) (arg)
 #define slow_memcpy memcpy

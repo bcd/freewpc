@@ -116,7 +116,7 @@ void pb_test_enter (void)
 	switch (pb_test_command)
 	{
 		case KICK_TROUGH:
-			serve_ball ();
+			device_request_kick (device_entry (DEVNO_TROUGH));
 			break;
 		case KICK_LOCK:
 			device_request_kick (device_entry (DEVNO_LOCK));

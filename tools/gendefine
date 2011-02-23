@@ -43,17 +43,15 @@ my $prefix = "GID_";
 
 my @dirs = (
 	"include", 
-	"include/system",
+	"include/sys", 
 	"include/mach", 
 	"kernel", 
 	"common",
 	"mach", 
 	"fonts", 
 	"test",
-	"sim",
+	"platform/native",
 	"platform/wpc",
-	"cpu/native",
-	"cpu/m6809",
 	"build",
 	);
 

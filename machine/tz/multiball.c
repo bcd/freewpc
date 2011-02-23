@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -150,8 +150,6 @@ CALLSET_ENTRY (mball, display_update)
 CALLSET_ENTRY (mball, music_refresh)
 {
 	timed_mode_music_refresh (&mball_restart_mode);
-	if (!in_game)
-		return;
 	if (global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING))
 		music_request (MUS_MULTIBALL, PRI_GAME_MODE1 + 12);
 	if (mball_restart_timer <= 5 
@@ -237,13 +235,11 @@ void mb_running_deff (void)
 		dmd_copy_low_to_high ();
 		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
 		dmd_show_low ();
-		do
+		while (!score_update_required ())
 		{
 			task_sleep (TIME_133MS);
 			dmd_show_other ();
-			task_sleep (TIME_133MS);
-			dmd_show_other ();
-		} while (!score_update_required ());
+		}
 	}
 }
 
@@ -389,7 +385,7 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 			break;
 	}
 	/* This should add in an extra ball if the above wasn't enough */
-	set_ball_count (3);
+	device_multiball_set (3);
 	
 }
 
@@ -410,7 +406,7 @@ CALLSET_ENTRY (multiball, mball_start_2_ball)
 			device_unlock_ball (device_entry (DEVNO_LOCK));
 			break;
 	}
-	set_ball_count (2);
+	device_multiball_set (2);
 }
 
 CALLSET_ENTRY (mball, mball_restart_stop)
@@ -428,10 +424,10 @@ CALLSET_ENTRY (mball, mball_start)
 		unlit_shot_count = 0;
 		global_flag_on (GLOBAL_FLAG_MULTIBALL_RUNNING);
 		global_flag_on (GLOBAL_FLAG_MB_JACKPOT_LIT);
+		music_refresh ();
 		kickout_lock (KLOCK_DEFF);
 		deff_start (DEFF_MB_START);
 		leff_start (LEFF_MB_RUNNING);
-		effect_update_request ();
 		/* Set the jackpot higher if two balls were locked */
 		if (mball_locks_made > 1)
 			jackpot_level = 2;
@@ -459,7 +455,7 @@ CALLSET_ENTRY (mball, mball_stop)
 		leff_stop (LEFF_MB_RUNNING);
 		lamp_off (LM_GUM);
 		lamp_off (LM_BALL);
-		effect_update_request ();
+		music_refresh ();
 		/* If a jackpot wasn't collected, offer a restart */
 		if (mball_jackpot_uncollected && !mball_restart_collected)
 			timed_mode_begin (&mball_restart_mode);
@@ -581,8 +577,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	/* Lock check should pretty much always go last */
 	else if (can_lock_ball ())
 	{
-		device_t *dev = device_entry (DEVNO_LOCK);
-
 		/* Right loop -> Locked ball lucky bounce handler */
 		if (event_did_follow (right_loop, locked_ball))
 		{
@@ -594,6 +588,18 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 
 		bounded_decrement (mball_locks_lit, 0);
 		bounded_increment (mball_locks_made, 2);
+		/* Lock 2 balls, drop a ball if it's full */
+		if (device_recount (device_entry (DEVNO_LOCK)) <= 2)
+		//if (!device_full_p (device_entry (DEVNO_LOCK)))
+		{	
+			device_lock_ball (device_entry (DEVNO_LOCK));
+			enable_skill_shot ();
+		}
+		else 
+		{
+			//TODO leff as well?
+			deff_start (DEFF_BALL_FROM_LOCK);
+		}
 		sound_send (SND_FAST_LOCK_STARTED);
 		if (mball_locks_lit == 0)
 		{
@@ -602,19 +608,6 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 		}
 		deff_start (DEFF_MB_LIT);
 		unlit_shot_count = 0;
-
-		/* Handle physical device lock.  If the lock is full (3 balls),
-		then we can't keep this ball here.  Otherwise, we hold onto it,
-		which will force another ball from the trough. */
-		if (device_full_p (dev))
-		{
-			deff_start (DEFF_BALL_FROM_LOCK);
-		}
-		else
-		{
-			device_lock_ball (dev);
-			enable_skill_shot ();
-		}
 	}
 	else
 		/* inform unlit.c that a shot was missed */

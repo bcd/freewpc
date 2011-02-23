@@ -222,9 +222,6 @@ static void fontargs_render_string (void)
 
 	dmd_base = ((U8 *)dmd_low_buffer) + args->coord.y * DMD_BYTE_WIDTH;
 	s = sprintf_buffer;
-#ifdef CONFIG_UI_CONSOLE
-	ui_console_render_string ();
-#endif
 
 	/* Font data is stored in a separate page of ROM; switch
 	 * there to be able to read the font data */
@@ -348,7 +345,7 @@ void bitmap_blit2 (const U8 *src, U8 x, U8 y)
  * particular font.  This is needed when doing centered or
  * right-justified writing, in order to calculate how to translate
  * the input coordinates to the real starting coordinates. */
-static void font_get_string_area (const char *s)
+void font_get_string_area (const font_t *font, const char *s)
 {
 	U8 c;
 
@@ -375,7 +372,7 @@ static void font_get_string_area (const char *s)
 	while ((c = *s++) != '\0')
 	{
 		/* Decode the width/height of the character. */
-		(void)font_lookup (font_args.font, c);
+		(void)font_lookup (font, c);
 
 		/* Update the total width */
 		font_string_width += font_width + 1;
@@ -396,26 +393,42 @@ static void font_get_string_area (const char *s)
 }
 
 
-void fontargs_render_string_left (const char *s)
+static void fontargs_prep_left (void)
 {
-	font_get_string_area (s);
-	fontargs_render_string ();
+	font_get_string_area (font_args.font, font_args.s);
 }
 
-
-void fontargs_render_string_center (const char *s)
+static void fontargs_prep_center (void)
 {
-	font_get_string_area (s);
+	font_get_string_area (font_args.font, font_args.s);
 	font_args.coord.x = font_args.coord.x - (font_string_width / 2);
 	font_args.coord.y = font_args.coord.y - (font_string_height / 2);
+}
+
+static void fontargs_prep_right (void)
+{
+	font_get_string_area (font_args.font, font_args.s);
+	font_args.coord.x = font_args.coord.x - font_string_width;
+}
+
+
+void fontargs_render_string_left (void)
+{
+	fontargs_prep_left ();
 	fontargs_render_string ();
 }
 
 
-void fontargs_render_string_right (const char *s)
+void fontargs_render_string_center (void)
 {
-	font_get_string_area (s);
-	font_args.coord.x = font_args.coord.x - font_string_width;
+	fontargs_prep_center ();
+	fontargs_render_string ();
+}
+
+
+void fontargs_render_string_right (void)
+{
+	fontargs_prep_right ();
 	fontargs_render_string ();
 }
 
@@ -426,8 +439,11 @@ void bitmap_draw (union dmd_coordinate coord, U8 c)
 {
 	sprintf_buffer[0] = c;
 	sprintf_buffer[1] = '\0';
+
 	font_args.font = &font_bitmap_common;
 	font_args.coord = coord;
+	font_args.s = sprintf_buffer;
+
 	fontargs_render_string ();
 }
 

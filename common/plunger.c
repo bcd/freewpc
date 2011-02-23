@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,15 +28,18 @@
 
 /**
  * \file
- * \brief Common logic for dealing with the shooter switch and the
- * launch button.
- *
- * For the shooter, we are interested in knowing when
- * a ball is on the main shooter, and when it is not.  This is tracked
- * in the global flag BALL_AT_PLUNGER.  For the launch button, we
- * recognize it only under certain conditions, and then forward the
- * launch request via a call to launch_ball().
+ * \brief Common plunger routines.
  */
+
+#ifdef INCLUDE_AUTOPLUNGER
+void timed_plunger_monitor (void)
+{
+	task_sleep_sec (7);
+	VOIDCALL (plunger_sw_launch_button);
+	task_exit ();
+}
+#endif
+
 
 void shooter_clear_monitor (void)
 {
@@ -68,7 +71,12 @@ void shooter_update (void)
 }
 
 
-CALLSET_ENTRY (shooter_switch, valid_playfield)
+CALLSET_ENTRY (plunger, amode_start)
+{
+	shooter_update ();
+}
+
+CALLSET_ENTRY (plunger, valid_playfield)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	task_kill_gid (GID_TIMED_PLUNGER_MONITOR);
@@ -79,69 +87,62 @@ CALLSET_ENTRY (shooter_switch, valid_playfield)
 }
 
 
-/**
- * Update the status of BALL_AT_PLUNGER whenever the switch toggles, or at
- * other key points in time.
- */
-CALLSET_ENTRY (shooter_switch, amode_start, start_ball, sw_shooter)
+CALLSET_ENTRY (plunger, sw_shooter)
 {
-	shooter_update ();
-}
-
-
-/**
- * Called when the player presses a button intending to launch a ball into
- * play.
- */
+	/* TODO - none of this logic works if the shooter switch is broken.
+	 * Need to invoke this on a timer after any trough kick.
+	 */
 #ifdef INCLUDE_AUTOPLUNGER
-static void launch_button_pressed (void)
-{
-	/* Do not attempt to fire if a ball is in play and no ball is seen
-	on the shooter */
-	if (!valid_playfield || switch_poll_logical (MACHINE_SHOOTER_SWITCH))
-		launch_ball ();
-}
-#endif
-
-#ifdef INCLUDE_AUTOPLUNGER
-static void timed_plunger_monitor (void)
-{
-	task_sleep_sec (7);
-	launch_button_pressed ();
-	task_exit ();
-}
-#endif
-
-
-CALLSET_ENTRY (launch_button, serve_ball)
-{
-#ifdef INCLUDE_AUTOPLUNGER
-	if (config_timed_plunger == ON)
+	if (valid_playfield
+		&& !tournament_mode_enabled
+		&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
+	{
+		/* Autolaunch balls right away during a game if they land
+		in the autoplunger lane. */
+		/* TODO - after locking a ball, adding a new ball to the
+		plunger while valid_playfield is TRUE: this will launch
+		prematurely.  We need a permanent, system-defined global
+		flag that says whether a trough serve should be autoplunged
+		or not.  TZ is already doing this privately... */
+		VOIDCALL (plunger_sw_launch_button);
+	}
+	else if (config_timed_plunger == ON)
 	{
 		/* If timed plunger is enabled, then start a timer
 		to autoplunge the ball regardless of button press */
 		task_create_gid1 (GID_TIMED_PLUNGER_MONITOR, timed_plunger_monitor);
 	}
-#ifdef MACHINE_LAUNCH_LAMP
-	lamp_flash (MACHINE_LAUNCH_LAMP);
 #endif
-#endif
+	shooter_update ();
 }
 
 
-CALLSET_ENTRY (launch_button, sw_launch_button)
+CALLSET_ENTRY (plunger, sw_launch_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
-	launch_button_pressed ();
+	if (switch_poll (MACHINE_SHOOTER_SWITCH))
+	{
+		sol_request_async (MACHINE_LAUNCH_SOLENOID);
+	}
 #endif
 }
 
 
-CALLSET_ENTRY (launch_button, sw_left_button, sw_right_button)
+CALLSET_ENTRY (plunger, sw_left_button)
 {
 #ifdef INCLUDE_AUTOPLUNGER
 	if (system_config.flipper_plunger == ON)
-		launch_button_pressed ();
+		plunger_sw_launch_button ();
 #endif
 }
+
+
+CALLSET_ENTRY (plunger, sw_right_button)
+{
+#ifdef INCLUDE_AUTOPLUNGER
+	if (system_config.flipper_plunger == ON)
+		plunger_sw_launch_button ();
+#endif
+}
+
 

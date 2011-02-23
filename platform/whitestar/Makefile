@@ -3,7 +3,6 @@
 P=platform/wpc
 
 CPU := m6809
-$(eval $(call have,CONFIG_PERIODIC_FIRQ))
 CONFIG_TASK := y
 include cpu/$(CPU)/Makefile
 
@@ -12,9 +11,6 @@ CONFIG_WHITESTAR ?= y
 CONFIG_FONT ?= $(CONFIG_DMD)
 CONFIG_AC ?= n
 CONFIG_ANIMATION ?= $(CONFIG_DMD)
-$(eval $(call have,CONFIG_MMIO))
-$(eval $(call have,CONFIG_GI))
-$(eval $(call nohave,CONFIG_AC))
 
 # Additional CFLAGS required on the WPC platform
 CFLAGS += -mdirect -DCONFIG_PLATFORM_WHITESTAR -fno-builtin -DCONFIG_PINMAME -mcode-section=.text -mdata-section=.text -mbss-section=ram

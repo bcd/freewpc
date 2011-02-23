@@ -24,11 +24,12 @@
  */
 
 #include <freewpc.h>
+#include <sys/irq.h>
 #include <diag.h>
 #include <search.h>
 
 /*
- * A pending switch is one which has transitioned and is eligible
+ * An active switch is one which has transitioned and is eligible
  * for servicing, but is undergoing additional debounce logic.
  * This struct tracks the switch number, its state, and the
  * debounce timer.
@@ -79,13 +80,11 @@ __fastram__ switch_bits_t sw_logical;
  * see if a switch is already in the debounce queue. */
 switch_bits_t sw_queued;
 
-/* A list of pending switches which have not fully debounced yet */
-pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
+/* TODO - the following could use the queue.h functions */
 
-/* A pointer to the first free entry in the switch queue.
- * When this is equal to 'switch_queue', it means the entire
- * queue is empty. */
-__fastram__ pending_switch_t *switch_queue_top;
+pending_switch_t switch_queue[MAX_QUEUED_SWITCHES];
+U8 switch_queue_head;
+U8 switch_queue_tail;
 
 /** The last time that switch scanning occurred.  It is used
  * to determine by how much to decrement debounce timers. */
@@ -510,17 +509,13 @@ cleanup:
  * is fully completed prior to this call.
  *
  * The transition is first latched, so that polling the switch level
- * will return the new state.  At the same time, IRQ-level scanning
- * is restarted, so that further transitions can be detected.
+ * will return the new state.
  *
  * Second, if the transition requires scheduling, a task is started
  * to handle it.  Eligibility depends on whether or not the switch
  * is declared as an edge switch (meaning it is scheduled on both
  * types of transitions) and whether or not it is an opto (i.e.
  * do we schedule open-to-closed or closed-to-open?)
- *
- * The switch is also known not to be in the debounce queue prior to this
- * function being called.
  */
 void switch_transitioned (const U8 sw)
 {
@@ -561,33 +556,31 @@ void switch_transitioned (const U8 sw)
 
 
 /** Add a new entry to the switch queue. */
-void switch_queue_add (const switchnum_t sw)
+pending_switch_t *switch_queue_add (const switchnum_t sw)
 {
-	if (switch_queue_top < switch_queue + MAX_QUEUED_SWITCHES)
-	{
-		dbprintf ("adding %d to queue\n", sw);
-		switch_queue_top->id = sw;
-		switch_queue_top->timer = switch_lookup(sw)->debounce;
-		bit_on (sw_queued, sw);
-		switch_queue_top++;
-	}
+	pending_switch_t *entry = &switch_queue[switch_queue_tail];
+	dbprintf ("adding sw%d to queue\n", sw);
+	entry->id = sw;
+	entry->timer = switch_lookup(sw)->debounce;
+	value_rotate_up (switch_queue_tail, 0, MAX_QUEUED_SWITCHES-1);
+	bit_on (sw_queued, sw);
+	return entry;
 }
 
 
 /** Remove an entry from the switch queue */
 void switch_queue_remove (pending_switch_t *entry)
 {
-	/* Copy the last entry in the queue into the slot being deleted. */
-	entry->id = (switch_queue_top-1)->id;
-	entry->timer = (switch_queue_top-1)->timer;
-	switch_queue_top--;
 	bit_off (sw_queued, entry->id);
+	entry->id = 0xFF;
+	if (entry == &switch_queue[switch_queue_head])
+		value_rotate_up (switch_queue_head, 0, MAX_QUEUED_SWITCHES-1);
 }
 
 /** Initialize the switch queue */
 void switch_queue_init (void)
 {
-	switch_queue_top = switch_queue;
+	switch_queue_head = switch_queue_tail = 0;
 	memset (sw_stable, 0, sizeof (sw_stable));
 	memset (sw_unstable, 0, sizeof (sw_unstable));
 	memset (sw_queued, 0, sizeof (sw_queued));
@@ -604,45 +597,51 @@ void switch_queue_init (void)
  */
 void switch_service_queue (void)
 {
-	pending_switch_t *entry;
+	U8 i;
 	U8 elapsed_time;
 
 	/* See how long since the last time we serviced the queue.
 	This is in 16ms ticks. */
 	elapsed_time = get_elapsed_time (switch_last_service_time);
 
-	entry = switch_queue;
-	while (unlikely (entry < switch_queue_top))
+	i = switch_queue_head;
+	while (unlikely (i != switch_queue_tail))
 	{
-		dbprintf ("Service SW%d: ", entry->id);
-		entry->timer -= elapsed_time;
-		if (entry->timer <= 0)
-		{
-			/* Debounce interval is complete.  The entry can be removed
-			from the queue */
-			switch_queue_remove (entry);
+		pending_switch_t *entry;
 
-			/* See if the switch held its state during the debounce period */
-			if (bit_test (sw_unstable, entry->id))
+		entry = &switch_queue[i];
+		if (likely (entry->id != 0xFF))
+		{
+			dbprintf ("Service SW%d: ", entry->id);
+			entry->timer -= elapsed_time;
+			if (entry->timer <= 0)
 			{
-				/* Debouncing failed, so don't process the switch.
-				 * Restart IRQ-level scanning. */
-				disable_irq ();
-				bit_off (sw_stable, entry->id);
-				bit_off (sw_unstable, entry->id);
-				enable_irq ();
+				/* The debounce period is complete */
+				/* See if the switch held its state during the debounce period */
+				if (bit_test (sw_unstable, entry->id))
+				{
+					/* Debouncing failed, so don't process the switch.
+					 * Restart IRQ-level scanning. */
+					disable_irq ();
+					bit_off (sw_stable, entry->id);
+					bit_off (sw_unstable, entry->id);
+					enable_irq ();
+				}
+				else
+				{
+					/* Debouncing succeeded, so process the switch */
+					switch_transitioned (entry->id);
+				}
+
+				/* The entry can be removed from the queue */
+				switch_queue_remove (entry);
 			}
 			else
 			{
-				/* Debouncing succeeded, so process the switch */
-				switch_transitioned (entry->id);
+				dbprintf ("%d down, %d to go\n", elapsed_time, entry->timer);
 			}
 		}
-		else
-		{
-			dbprintf ("%d down, %d to go\n", elapsed_time, entry->timer);
-		}
-		entry++;
+		value_rotate_up (i, 0, MAX_QUEUED_SWITCHES-1);
 	}
 
 	switch_last_service_time = get_sys_time ();
@@ -662,15 +661,16 @@ static inline void switch_matrix_dump (const char *name, U8 *matrix)
 
 void switch_queue_dump (void)
 {
-	pending_switch_t *entry = switch_queue;
+	U8 i;
 
-	dbprintf ("Switch queue base: %p\n", switch_queue);
-	dbprintf ("Switch queue top: %p\n", switch_queue_top);
-	while (entry != switch_queue_top)
+	dbprintf ("Queue: [%d, %d]\n", switch_queue_head, switch_queue_tail);
+	for (i=0; i < MAX_QUEUED_SWITCHES; i++)
 	{
-		dbprintf ("Pending: SW%d  %d\n", entry->id, entry->timer);
-		entry++;
+		pending_switch_t *entry = switch_queue + i;
+		if (entry->id != 0)
+			dbprintf ("Entry %d:  SW %d  %d\n", i, entry->id, entry->timer);
 	}
+
 	switch_matrix_dump ("Raw     ", sw_raw);
 	switch_matrix_dump ("Logical ", sw_logical);
 	switch_matrix_dump ("Edge    ", sw_edge);
@@ -705,7 +705,7 @@ static void switch_update_stable (const U8 sw)
 /** Periodic switch processing.  This function is called frequently
  * to scan pending switches and spawn new tasks to handle them.
  */
-void switch_periodic (void)
+CALLSET_ENTRY (switch, idle)
 {
 	register U16 col = 0;
 	extern U8 sys_init_complete;
@@ -739,7 +739,6 @@ void switch_periodic (void)
 	switch_service_queue ();
 
 	/* Iterate over each switch column to see what needs to be done. */
-	task_dispatching_ok = TRUE;
 	for (col=0; col < SWITCH_BITS_SIZE; col++)
 	{
 		/* Each bit in sw_stable indicates a switch
@@ -748,12 +747,16 @@ void switch_periodic (void)
 		{
 			U8 sw = col * 8;
 			do {
-				if ((rows & 1) && !bit_test (sw_queued, sw))
-					switch_update_stable (sw);
+				if (rows & 1)
+					if (!bit_test (sw_queued, sw))
+						switch_update_stable (sw);
 				rows >>= 1;
 				sw++;
 			} while (rows);
 		}
+
+		/* Because it can take awhile to scan the entire matrix, keep
+		the software watchdog from expiring. */
 		task_runs_long ();
 	}
 }

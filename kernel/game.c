@@ -103,9 +103,7 @@ void amode_start (void)
 #ifdef MACHINE_CUSTOM_AMODE
 	leff_start (LEFF_AMODE);
 #endif
-#ifdef CONFIG_GI
-	triac_enable (PINIO_GI_STRINGS);
-#endif
+	triac_enable (TRIAC_GI_MASK);
 	far_task_recreate_gid (GID_DEVICE_PROBE, device_probe, COMMON_PAGE);
 	task_yield ();
 	callset_invoke (amode_start);
@@ -135,6 +133,40 @@ void dump_game (void)
 	dbprintf ("Ball : %d    EBs : %d\n", ball_up, extra_balls);
 }
 #endif
+
+
+/**
+ * Serve a new ball to the shooter lane.
+ * This function is the preferred method to serve a ball to a manual
+ * plunger at the beginning of a ball and after a ball lock.
+ * It is not used for autoplunges or ball saves.
+ */
+void serve_ball (void)
+{
+#ifdef MACHINE_TZ
+	/* If the trough is empty, drop one from the lock */
+	if (!switch_poll (SW_RIGHT_TROUGH) 
+		|| device_recount (device_entry (DEVNO_TROUGH)) == 0
+		|| device_recount (device_entry (DEVNO_LOCK)) >= 3)
+	{
+		device_unlock_ball (device_entry (DEVNO_LOCK));
+	}
+	else if (switch_poll (SW_RIGHT_TROUGH))
+	{
+		device_request_kick (device_entry (DEVNO_TROUGH));
+	}
+	else
+	{
+		/* There's a switch broken somewhere? */
+		sound_send (SND_WELCOME_RACE_FANS);
+	}
+#elif DEVNO_TROUGH
+	device_request_kick (device_entry (DEVNO_TROUGH));
+#endif
+	valid_playfield = FALSE;
+	effect_update_request ();
+	callset_invoke (serve_ball);
+}
 
 
 /** Handles the end game condition.
@@ -285,14 +317,12 @@ void end_ball (void)
 	 * save away the per-player audits. */
 	if ((ball_up == system_config.balls_per_game) || config_timed_game)
 	{
-#ifdef CONFIG_BUYIN
 		if (system_config.buy_extra_ball == YES)
 		{
 			SECTION_VOIDCALL (__common__, buyin_offer);
 			/* TODO - if buyin is bought, then need to stay on this
 			player, avoid end_player etc. */
 		}
-#endif
 
 		/* Do other end player tasks */
 		callset_invoke (end_player);
@@ -499,9 +529,7 @@ void start_ball (void)
 #endif
 
 	flipper_enable ();
-#ifdef CONFIG_GI
-	triac_enable (PINIO_GI_STRINGS);
-#endif
+	triac_enable (TRIAC_GI_MASK);
 	ball_search_timeout_set (12);
 	ball_search_monitor_start ();
 

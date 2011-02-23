@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2009 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -373,7 +373,7 @@ void high_score_award_credits (U8 *adjptr)
 void high_score_enter_initials (U8 position)
 {
 	struct high_score *hsp = &high_score_table[position];
-	if (hsp->initials[0] <= MAX_PLAYERS)
+	if (hsp->initials[0] < ' ')
 	{
 		dbprintf ("High score %d needs initials\n", position);
 		/* Announce that player # has qualified */
