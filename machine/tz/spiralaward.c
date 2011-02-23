@@ -111,7 +111,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		magnet_disable_catch (MAG_RIGHT);
 		leff_start (LEFF_SPIRALAWARD);
 		/* Only show the hint the first two times */
-		if (spiralawards_collected < 2 && !spiralaward_set_completed);
+		if (spiralawards_collected == 1 && !spiralaward_set_completed);
 			deff_start (DEFF_SHOOT_RIGHT_LOOP);
 		/* Created as a task so it doesn't lock the calling thread */
 		task_create_anon (spiralaward_magnet_disable_task);
@@ -120,7 +120,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 
 static void award_spiralaward (void)
 {	
-	spiralawards_collected++;
+	bounded_increment (spiralawards_collected, 6);
 	
 	/* Pick a random award, random_scaled returns N-1 */
 	spiralaward = random_scaled (6);

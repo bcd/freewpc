@@ -129,7 +129,7 @@ inline static bool doink_mode_check (void)
 {
 	if (event_did_follow (right_inlane, left_ramp) 
 		&& single_ball_play ()
-		&& score_compare (0, tnf_score) == 1)
+		&& score_compare (score_table[SC_10], tnf_score) == 1)
 	{
 		/* Tell autofire.c that the ball is coming for doink mode */
 		event_can_follow (left_ramp_exit, tnf, TIME_4S);
@@ -139,6 +139,7 @@ inline static bool doink_mode_check (void)
 	if (score_compare (tnf_score, score_table[SC_15M]) == 1)
 	{
 		score (SC_5M);
+		sound_send (SND_LIGHT_SLOT_TIMED);
 		return FALSE;
 	}
 	else

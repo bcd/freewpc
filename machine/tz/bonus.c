@@ -66,7 +66,7 @@ extern U8 dead_end_count;
 extern U8 hitch_count;
 extern U8 rollover_count;
 extern bool backdoor_award_collected;
-extern bool multidrain_awarded;
+extern U8 multidrain_count;
 extern bool stdm_death;
 extern bool unfair_death;
 	
@@ -239,14 +239,13 @@ void bonus_deff (void)
 
 	/* Wait a bit so the previous music_stop doesn't kill the taunt sounds */
 	task_sleep (TIME_100MS);
-	if (multidrain_awarded == TRUE)
+	if (multidrain_count >= 3)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("MULTIDRAIN");
 		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 		dmd_sched_transition (&trans_bitfade_slow);
 		dmd_show_low ();
-		multidrain_awarded = FALSE;
 		sound_send (SND_HEY_ITS_ONLY_PINBALL);
 		task_sleep_sec (2);
 	}

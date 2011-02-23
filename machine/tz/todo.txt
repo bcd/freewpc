@@ -1,3 +1,5 @@
+Jackpot Leff
+
 Use system time for some features
 	eg: 1200 midnight multiball
 Store a mode for use later (when Buyin is pressed)
