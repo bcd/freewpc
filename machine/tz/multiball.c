@@ -373,8 +373,7 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 		 *  1 ball may already be in autofire */
 		case 1:
 			autofire_add_ball ();	
-		 	task_sleep_sec (4);
-			task_sleep (TIME_500MS);
+		 	task_sleep_sec (2);
 			device_unlock_ball (device_entry (DEVNO_LOCK));
 			break;
 		/* 2 balls in lock, fire 1 from trough */

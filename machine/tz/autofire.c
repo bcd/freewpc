@@ -92,7 +92,7 @@ void autofire_monitor (void)
 	 * and the divertor to close */
 	task_sleep (TIME_500MS);
 	
-	/* If Right inlane -> Left ramp combo, start tnf mode */
+	/* If Right inlane -> Left ramp combo, start doink mode */
 	if (event_did_follow (left_ramp_exit, tnf) && single_ball_play ())
 	{
 		callset_invoke (tnf_start);

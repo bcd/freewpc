@@ -60,6 +60,10 @@ const lampnum_t spiralaward_lamps[] = {
 	LM_SPIRAL_EB
 };
 
+void shoot_right_ramp_deff (void)
+{
+}
+
 void spiralaward_collected_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -106,6 +110,9 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		/* Allow the ball to pass through the loop */
 		magnet_disable_catch (MAG_RIGHT);
 		leff_start (LEFF_SPIRALAWARD);
+		/* Only show the hint the first two times */
+		if (spiralawards_collected < 2 && !spiralaward_set_completed);
+			deff_start (DEFF_SHOOT_RIGHT_LOOP);
 		/* Created as a task so it doesn't lock the calling thread */
 		task_create_anon (spiralaward_magnet_disable_task);
 	}
@@ -153,6 +160,7 @@ static void award_spiralaward (void)
 			light_easy_extra_ball ();
 			break;
 	}
+	deff_stop (DEFF_SHOOT_RIGHT_LOOP);
 	deff_start (DEFF_SPIRALAWARD_COLLECTED);
 	
 	/* Run lamp flash as task so it can run in parallel */

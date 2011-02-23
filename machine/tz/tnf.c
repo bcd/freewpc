@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2006-2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -18,6 +18,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/*
+ * Doink mode rules
+ * Hit the left ramp from the right inlane and ball will be diverted to
+ * autoplunger and held whilst player mashes flipper buttons for points
+ */
+
 /* CALLSET_SECTION (tnf, __machine3__) */
 
 #include <freewpc.h>
@@ -25,12 +31,11 @@
 /* Uses the code from mpf.c to monitor the flipper buttons */
 extern U8 mpf_buttons_pressed;
 
-/* used to randomise the position of the doink text */
-U8 tnf_x;
-U8 tnf_y;
-
 /* Total amount scored from doink mode */
 score_t tnf_score;
+/* Used to shake text */
+U8 tnf_x;
+U8 tnf_y;
 
 void tnf_deff (void)
 {
@@ -95,4 +100,9 @@ CALLSET_ENTRY (tnf, tnf_end)
 	flipper_enable ();
 	music_refresh ();
 	magnet_enable_catch_and_throw (MAG_LEFT);
+}
+
+CALLSET_ENTRY (tnf, start_player)
+{
+	score_zero (tnf_score);
 }
