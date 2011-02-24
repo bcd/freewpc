@@ -130,7 +130,7 @@ static void slot_kickout_subtask (void)
 
 void slot_kickout_leff (void)
 {
-	if (multi_ball_play ())
+	if (live_balls != 1)
 	{
 		triac_leff_enable (TRIAC_GI_MASK);
 	}
@@ -139,7 +139,6 @@ void slot_kickout_leff (void)
 	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
-
 
 void gumball_strobe_leff (void)
 {
@@ -221,6 +220,8 @@ static void pf_strobe_down_subtask (void)
 	for (;;)
 		lamplist_apply (LAMPLIST_SORT2, leff_toggle);
 }
+
+
 
 void strobe_down_leff (void)
 {
@@ -360,6 +361,65 @@ void circle_out_leff (void)
 	lamplist_set_apply_delay (TIME_33MS);
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
 	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
+	leff_exit ();
+}
+
+static void piano_jackpot_collected_leff_task (void)
+{
+	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
+	lamplist_apply (LAMPLIST_CIRCLE_OUT, leff_toggle);
+	task_exit ();
+}
+
+static void piano_jackpot_collected_leff_flasher_task (void)
+{
+	U8 i;
+	for (i=0; i < 8; i++)
+	{
+		flasher_pulse (FLASH_CLOCK_TARGET);
+		flasher_pulse (FLASH_RAMP1);
+		flasher_pulse (FLASH_GUMBALL_HIGH);
+		task_sleep (TIME_100MS);
+
+		flasher_pulse (FLASH_RAMP2);
+		flasher_pulse (FLASH_GUMBALL_MID);
+		task_sleep (TIME_100MS);
+
+		flasher_pulse (FLASH_GUMBALL_LOW);
+		flasher_pulse (FLASH_RAMP3_POWER_PAYOFF);
+		task_sleep (TIME_100MS);
+	}
+	task_exit ();
+}
+
+void piano_jackpot_collected_leff (void)
+{
+	U8 i;
+	if (in_test)
+		sound_send (SND_JACKPOT_BACKGROUND);
+	
+	triac_leff_disable (TRIAC_GI_MASK);
+	lamplist_set_apply_delay (TIME_33MS);
+	leff_create_peer (piano_jackpot_collected_leff_task);
+	task_sleep (TIME_1S + TIME_700MS);
+	
+	lamplist_set_apply_delay (TIME_16MS);
+	leff_create_peer (piano_jackpot_collected_leff_task);
+	task_sleep (TIME_800MS);
+	
+	for (i = 0;i < 1; i++)
+	{
+		leff_create_peer (piano_jackpot_collected_leff_task);
+		task_sleep (TIME_600MS);
+	}
+	
+	leff_create_peer (piano_jackpot_collected_leff_flasher_task);
+	for (i = 0;i < 6; i++)
+	{
+		leff_create_peer (piano_jackpot_collected_leff_task);
+		task_sleep (TIME_300MS);
+	}	
+	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

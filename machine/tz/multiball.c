@@ -508,12 +508,14 @@ CALLSET_ENTRY (mball, sw_piano)
 {
 	if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{
+		/* Piano jackpot was collected */
 		magnet_disable_catch (MAG_LEFT);
 		global_flag_off (GLOBAL_FLAG_MB_JACKPOT_LIT);
 		/* Add anoither 10M to the jackpot if three balls are out */
 		if (live_balls == 3)
 			bounded_increment (jackpot_level, 5);
 		jackpot_level_stored = jackpot_level;
+		leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 		deff_start (DEFF_JACKPOT);
 		deff_start (DEFF_MB_JACKPOT_COLLECTED);
 		mball_jackpot_uncollected = FALSE;
