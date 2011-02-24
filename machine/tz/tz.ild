@@ -205,3 +205,14 @@ IMG_CAMERA_10: machine/tz/animation/camera/camera10.pgm
 IMG_CAMERA_11: machine/tz/animation/camera/camera11.pgm
 IMG_CAMERA_12: machine/tz/animation/camera/camera12.pgm
 IMG_CAMERA_END: machine/tz/animation/camera/camera13.pgm
+
+IMG_PINWHEEL_START: !machine/tz/animation/pinwheel/frame_0001.pgm
+IMG_PINWHEEL_2: !machine/tz/animation/pinwheel/frame_0002.pgm
+IMG_PINWHEEL_3: !machine/tz/animation/pinwheel/frame_0003.pgm
+IMG_PINWHEEL_4: !machine/tz/animation/pinwheel/frame_0004.pgm
+IMG_PINWHEEL_5: !machine/tz/animation/pinwheel/frame_0005.pgm
+IMG_PINWHEEL_6: !machine/tz/animation/pinwheel/frame_0006.pgm
+IMG_PINWHEEL_7: !machine/tz/animation/pinwheel/frame_0007.pgm
+IMG_PINWHEEL_8: !machine/tz/animation/pinwheel/frame_0008.pgm
+IMG_PINWHEEL_9: !machine/tz/animation/pinwheel/frame_0009.pgm
+IMG_PINWHEEL_END: !machine/tz/animation/pinwheel/frame_0010.pgm

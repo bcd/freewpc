@@ -485,3 +485,18 @@ void tz_ball_save_deff (void)
 	}
 	deff_exit ();
 }
+
+void pinwheel_deff (void)
+{
+	U16 fno;
+	for (;;)
+		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			// if (fno = mod(2)) dmd_flip_both_pages
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
+	deff_exit ();
+}

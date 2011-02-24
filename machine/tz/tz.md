@@ -599,6 +599,7 @@ Text Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Two Color Flash: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 
+
 Driver: page(MACHINE_PAGE), PRI_GAME_QUICK7
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 
@@ -653,6 +654,7 @@ TBC: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_PAUSE
 
 Rules: page(MACHINE3_PAGE), PRI_EGG1
 
+Pinwheel: page(MACHINE_PAGE), PRI_GAME_QUICK3
 ##########################################################################
 # Lamp effects
 ##########################################################################
