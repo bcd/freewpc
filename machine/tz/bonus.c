@@ -651,6 +651,9 @@ void bonus_deff (void)
 	countup_pause_iterations = 0;
 	/* Show total Bonus */	
 	do {
+	/* TODO:
+	 * Make prettier
+	 */
 		dmd_alloc_low_clean ();
 		/* Shake the text */
 		U8 x;

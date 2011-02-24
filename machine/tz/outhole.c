@@ -28,6 +28,8 @@ bool powerball_death;
 
 CALLSET_ENTRY (outhole, ball_search)
 {
+	if (device_recount (device_entry (DEVNO_TROUGH)) == 3)
+		end_ball ();
 	while (switch_poll_logical (SW_OUTHOLE))
 	{
 		sol_request (SOL_OUTHOLE);

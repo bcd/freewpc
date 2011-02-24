@@ -300,6 +300,8 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
 		score (SC_250K);
+		leff_start (LEFF_CLOCK_TARGET);
+		sound_send (SND_STOP_IT);
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}
 }

@@ -30,7 +30,7 @@ U8 tnf_x;
 U8 tnf_y;
 
 /* Total amount scored from doink mode */
-score_t tnf_score;
+__local__ score_t tnf_score;
 
 void tnf_deff (void)
 {

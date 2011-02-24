@@ -35,6 +35,8 @@ extern void mball_left_ramp_exit (void);
 extern void sssmb_left_ramp_exit (void);
 extern void chaosmb_left_ramp_exit (void);
 
+extern score_t tnf_score;
+
 static void left_ramp_deff_subtask (void)
 {
 	psprintf ("1 LEFT RAMP", "%d LEFT RAMPS", left_ramps);
@@ -117,20 +119,26 @@ CALLSET_ENTRY(leftramp, start_ball)
 {
 	left_ramps = 0;
 }
+/* Check for a combo from the right inlane.  If so, divert to autoplunger for
+ * Doink mode.  If Doink mode has already been collected AND the player earned 
+ * more than 20M points then they gain another 10m
+ */
 
 inline static bool right_inlane_combo_check (void)
 {
+	if (!single_ball_play ())
+		return FALSE;
+
 	if (event_did_follow (right_inlane, left_ramp) 
-		&& single_ball_play ()
 		&& score_compare (score_table[SC_10], tnf_score) == 1)
 	{
 		event_can_follow (left_ramp_exit, tnf, TIME_4S);
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
 	}
-	if (score_compare (tnf_score, score_table[SC_15M]) == 1)
+	if (score_compare (tnf_score, score_table[SC_20M]) == 1)
 	{
-		score (SC_5M);
+		score (SC_10M);
 		sound_send (SND_LIGHT_SLOT_TIMED);
 		return FALSE;
 	}
