@@ -88,16 +88,29 @@ void spiral_mode_deff (void)
 {
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
-		sprintf ("%d", spiral_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		U16 fno;
+		dmd_alloc_pair_clean ();
+		star_draw ();
+		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
+		{
+			dmd_alloc_pair ();
+			frame_draw_plane (fno);
+			// if (fno = mod(2)) dmd_flip_both_pages
+			/* Text can only be printed to the low page */
+			dmd_flip_low_high ();
+			
+			font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
+			sprintf_current_score ();
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
+			sprintf ("%d", spiral_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			
+			dmd_flip_low_high ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 
