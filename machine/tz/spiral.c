@@ -48,17 +48,31 @@ struct timed_mode_ops spiral_mode = {
 
 void spiral_loop_deff (void)
 {
-
-	dmd_alloc_low_clean ();
-	psprintf ("1 SPIRAL", "%d SPIRALS", spiral_loops);
-	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	sprintf_score (spiral_mode_total);	
-	font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U16 fno;
+	U8 i;
+	dmd_alloc_pair_clean ();
+	for (i=0; i < 3; i++)
+	{
+		for (fno = IMG_PINWHEEL_END; fno >= IMG_PINWHEEL_START; fno -= 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+	
+			psprintf ("1 SPIRAL", "%d SPIRALS", spiral_loops);
+			font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
+			sprintf_score (spiral_mode_total);	
+			font_render_string_center (&font_fixed6, 64, 18, sprintf_buffer);
+			dmd_text_outline ();
+			
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_33MS);
+		}
+	}
 	deff_exit ();
 }
-
 
 CALLSET_ENTRY (spiral, award_spiral_loop)
 {
@@ -90,24 +104,23 @@ void spiral_mode_deff (void)
 	{
 		U16 fno;
 		dmd_alloc_pair_clean ();
-		star_draw ();
 		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
 		{
-			dmd_alloc_pair ();
-			frame_draw_plane (fno);
-			// if (fno = mod(2)) dmd_flip_both_pages
-			/* Text can only be printed to the low page */
-			dmd_flip_low_high ();
-			
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
 			font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
 			sprintf_current_score ();
+			
 			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 			font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
 			sprintf ("%d", spiral_mode_timer);
 			font_render_string (&font_var5, 2, 2, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
 			
-			dmd_flip_low_high ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 		}
