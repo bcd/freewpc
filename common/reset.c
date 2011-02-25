@@ -156,7 +156,7 @@ void system_reset_deff (void)
 	aren't large enough to do this. */
 #if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC (C) COPYRIGHT 2010");
+	font_render_string_center (&font_var5, 64, 3, "FREEWPC (C) COPYRIGHT 2011");
 	font_render_string_center (&font_var5, 64, 11, "THIS SOFTWARE IS NOT");
 	font_render_string_center (&font_var5, 64, 17, "SUPPORTED BY BALLY/WILLIAMS");
 	font_render_string_center (&font_var5, 64, 25, "WWW.ODDCHANGE.COM/FREEWPC");
