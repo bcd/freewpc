@@ -115,15 +115,25 @@ bool multiball_ready (void)
 
 void mball_restart_deff (void)
 {
+	U16 fno;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
-		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
-		sprintf ("%d", mball_restart_timer);
-		font_render_string_center (&font_fixed6, 64, 25, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, 64, 16, "SHOOT LOCK TO RESTART");
+			font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+			sprintf ("%d", mball_restart_timer);
+			font_render_string_center (&font_fixed6, 64, 25, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 
@@ -187,10 +197,36 @@ void mb_lit_deff (void)
 void mb_start_deff (void)
 {
 	sound_send (SND_DONT_TOUCH_THE_DOOR_AD_INF);
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
-	dmd_show_low ();
-	flash_and_exit_deff (50, TIME_100MS);
+	U16 fno;
+	U8 i;
+	for (i = 0; i < 6; i++)
+	{
+		U8 j = 0;
+		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			
+			j++;
+			if (j % 2 != 0)
+			{
+				font_render_string_center (&font_fixed10, 64, 16, "MULTIBALL");
+			}
+			else
+				font_render_string_center (&font_fixed6, 64, 16, "MULTI BALL");
+			
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			if (i < 3)
+				task_sleep (TIME_66MS);
+			else
+				task_sleep (TIME_33MS);
+		}
+	}
+	deff_exit ();
 }
 
 void jackpot_relit_deff (void)
@@ -216,29 +252,37 @@ void mb_jackpot_collected_deff (void)
 
 void mb_running_deff (void)
 {
+	U16 fno;
+	U8 i = 0;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		score_update_start ();
-		dmd_alloc_pair ();
-		dmd_clean_page_low ();
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
-			sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-		}
-		else
-		{
-			font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO RELIGHT");
-		}
-		dmd_copy_low_to_high ();
-		font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
-		dmd_show_low ();
-		while (!score_update_required ())
-		{
-			task_sleep (TIME_133MS);
-			dmd_show_other ();
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			if (i >= 254)
+				i = 0;
+			i++;
+			sprintf_current_score ();
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			if (global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
+			{
+				sprintf("SHOOT PIANO FOR %dM", (jackpot_level * 10));
+				font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			}
+			else
+			{
+				font_render_string_center (&font_var5, 64, 27, "SHOOT LOCK TO RELIGHT");
+			}
+			if ((i% 2) != 0)
+				font_render_string_center (&font_fixed6, 64, 4, "MULTIBALL");
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_100MS);
 		}
 	}
 }
