@@ -136,10 +136,11 @@ inline static bool right_inlane_combo_check (void)
 		deff_start (DEFF_GET_READY_TO_DOINK);
 		return TRUE;
 	}
-	if (score_compare (tnf_score, score_table[SC_20M]) == 1)
+	if (event_did_follow (right_inlane, left_ramp) 
+		&&  score_compare (tnf_score, score_table[SC_20M]) == 1)
 	{
 		score (SC_10M);
-		sound_send (SND_LIGHT_SLOT_TIMED);
+		sound_send (SND_YES);
 		return FALSE;
 	}
 	else

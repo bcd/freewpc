@@ -100,28 +100,43 @@ void chaos_jackpot_deff (void)
 
 void chaosmb_running_deff (void)
 {
+	U16 fno;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		score_deff_begin (&font_fixed6, 64, 4, "CHAOS MULTIBALL");
-		if (chaosmb_hits_to_relight == 0)
+		for (fno = IMG_CLOCK_START; fno <= IMG_CLOCK_END; fno += 2)
 		{
-			sprintf ("SHOOT %s", chaosmb_shots[chaosmb_level].shot_name);
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fixed6, 64, 4, "CHAOS MULTIBALL");
+			sprintf_current_score ();
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			if (chaosmb_hits_to_relight == 0)
+			{
+				sprintf ("SHOOT %s", chaosmb_shots[chaosmb_level].shot_name);
+				font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			}
+			else if (chaosmb_hits_to_relight == 1)
+			{
+				font_render_string_center (&font_var5, 64, 27,
+					"HIT CLOCK TO LIGHT JACKPOT");
+				lamp_tristate_flash (LM_CLOCK_MILLIONS);
+			}
+			else
+			{
+				sprintf ("HIT CLOCK %d MORE TIMES", chaosmb_hits_to_relight);
+				font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+				lamp_tristate_flash (LM_CLOCK_MILLIONS);
+			}
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
 		}
-		else if (chaosmb_hits_to_relight == 1)
-		{
-			font_render_string_center (&font_var5, 64, 27,
-				"HIT CLOCK TO LIGHT JACKPOT");
-			lamp_tristate_flash (LM_CLOCK_MILLIONS);
-		}
-		else
-		{
-			sprintf ("HIT CLOCK %d MORE TIMES", chaosmb_hits_to_relight);
-			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-			lamp_tristate_flash (LM_CLOCK_MILLIONS);
-		}
-		score_deff_end (TIME_100MS);
 	}
+
 }
 
 static void chaosmb_check_jackpot_lamps (void)
@@ -299,9 +314,14 @@ CALLSET_ENTRY (chaosmb, sw_clock_target)
 {
 	if (global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING))
 	{
-		score (SC_250K);
 		leff_start (LEFF_CLOCK_TARGET);
-		sound_send (SND_STOP_IT);
+		if (chaosmb_hits_to_relight == 0)
+			sound_send (SND_STOP_IT);
+		else
+		{
+			sound_send (SND_CLOCK_BELL);
+			score (SC_250K);
+		}
 		bounded_decrement (chaosmb_hits_to_relight, 0);
 	}
 }

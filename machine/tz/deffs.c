@@ -160,6 +160,8 @@ void home_and_dry_deff (void)
 
 void in_the_lead_deff (void)
 {
+	if (in_bonus)
+		return;
 	sound_send (SND_GO_FOR_THE_HILL);
 	sprintf ("IN THE LEAD");
 	flash_small_deff (15, TIME_33MS);
@@ -223,12 +225,12 @@ void shoot_right_loop_deff (void)
 	sound_send (SND_INSIDE_LEFT_INLANE);
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 11, "SHOOT THE");
+	font_render_string_center (&font_fixed10, 64, 9, "SHOOT THE");
 	font_render_string_center (&font_fixed10, 64, 24, "RIGHT LOOP");
 	dmd_show_low ();
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (30, TIME_66MS);
+	deff_swap_low_high (25, TIME_100MS);
 	deff_exit ();
 }
 

@@ -126,6 +126,7 @@ static void sssmb_award_jackpot (void)
 	mball_jackpot_uncollected = FALSE;
 	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
+	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
 	sound_send (SND_EXPLOSION_1);

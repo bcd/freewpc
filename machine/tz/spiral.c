@@ -108,16 +108,16 @@ void spiral_mode_deff (void)
 		{
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
+		
 			font_render_string_center (&font_fixed6, 64, 5, "SPIRAL");
 			sprintf_current_score ();
-			
 			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 			font_render_string_center (&font_var5, 64, 27, "SHOOT LOOPS FOR BIG POINTS");
 			sprintf ("%d", spiral_mode_timer);
 			font_render_string (&font_var5, 2, 2, sprintf_buffer);
 			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-			dmd_text_outline ();
 			
+			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_overlay_outline ();
@@ -129,12 +129,18 @@ void spiral_mode_deff (void)
 
 void spiral_mode_total_deff (void)
 {
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
 	font_render_string_center (&font_fixed6, 64, 5, "SPIRAL OVER");
 	sprintf_score (spiral_mode_total);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
-	dmd_show_low ();
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (IMG_PINWHEEL_START);
+	dmd_overlay_outline ();
+	dmd_show2 ();
 	task_sleep_sec (4);
 	deff_exit ();
 }

@@ -1,3 +1,24 @@
+IMG_BOLT_TESLA_START: machine/tz/animation/bolt_tesla/frame_0001.pgm
+IMG_BOLT_TESLA_2: machine/tz/animation/bolt_tesla/frame_0002.pgm
+IMG_BOLT_TESLA_3: machine/tz/animation/bolt_tesla/frame_0003.pgm
+IMG_BOLT_TESLA_4: machine/tz/animation/bolt_tesla/frame_0004.pgm
+IMG_BOLT_TESLA_5: machine/tz/animation/bolt_tesla/frame_0005.pgm
+IMG_BOLT_TESLA_6: machine/tz/animation/bolt_tesla/frame_0006.pgm
+IMG_BOLT_TESLA_7: machine/tz/animation/bolt_tesla/frame_0007.pgm
+IMG_BOLT_TESLA_8: machine/tz/animation/bolt_tesla/frame_0008.pgm
+IMG_BOLT_TESLA_9: machine/tz/animation/bolt_tesla/frame_0009.pgm
+IMG_BOLT_TESLA_END: machine/tz/animation/bolt_tesla/frame_0010.pgm
+
+
+IMG_GREED_START: machine/tz/animation/greed/frame_0001.pgm
+IMG_GREED_2: machine/tz/animation/greed/frame_0002.pgm
+IMG_GREED_3: machine/tz/animation/greed/frame_0003.pgm
+IMG_GREED_4: machine/tz/animation/greed/frame_0004.pgm
+IMG_GREED_5: machine/tz/animation/greed/frame_0005.pgm
+IMG_GREED_6: machine/tz/animation/greed/frame_0006.pgm
+IMG_GREED_7: machine/tz/animation/greed/frame_0007.pgm
+IMG_GREED_END: machine/tz/animation/greed/frame_0008.pgm
+
 IMG_OLDCAR: machine/tz/images/oldcar.pgm
 IMG_ROBOT: !machine/tz/images/robot.pgm
 IMG_COINSTACK: machine/tz/images/coinstack.pgm
@@ -9,6 +30,7 @@ IMG_SPIRAL: !machine/tz/images/spiral.pgm
 IMG_COW: machine/tz/images/cow.pgm
 IMG_MBORDER: machine/tz/images/mborder.pgm
 IMG_CAR: !machine/tz/images/car3.pgm
+IMG_NEWCAR: !machine/tz/images/newcar.pgm
 
 IMG_ROCKET_LOAD_START: machine/tz/animation/rocket/rocketa.pgm
 IMG_ROCKET_LOAD_2: machine/tz/animation/rocket/rocketb.pgm
@@ -216,3 +238,88 @@ IMG_PINWHEEL_7: !machine/tz/animation/pinwheel/frame_0007.pgm
 IMG_PINWHEEL_8: !machine/tz/animation/pinwheel/frame_0008.pgm
 IMG_PINWHEEL_9: !machine/tz/animation/pinwheel/frame_0009.pgm
 IMG_PINWHEEL_END: !machine/tz/animation/pinwheel/frame_0010.pgm
+
+IMG_FLASH_START: machine/tz/animation/flash/frame_0001.pgm
+IMG_FLASH_2: machine/tz/animation/flash/frame_0002.pgm
+IMG_FLASH_3: machine/tz/animation/flash/frame_0003.pgm
+IMG_FLASH_4: machine/tz/animation/flash/frame_0004.pgm
+IMG_FLASH_5: machine/tz/animation/flash/frame_0005.pgm
+IMG_FLASH_END: machine/tz/animation/flash/frame_0006.pgm
+
+IMG_FLASHCENTRE_START: machine/tz/animation/flashcentre/frame_0001.pgm
+IMG_FLASHCENTRE_2: machine/tz/animation/flashcentre/frame_0002.pgm
+IMG_FLASHCENTRE_3: machine/tz/animation/flashcentre/frame_0003.pgm
+IMG_FLASHCENTRE_4: machine/tz/animation/flashcentre/frame_0004.pgm
+IMG_FLASHCENTRE_5: machine/tz/animation/flashcentre/frame_0005.pgm
+IMG_FLASHCENTRE_END: machine/tz/animation/flashcentre/frame_0006.pgm
+
+IMG_FLASHLEFT_START: machine/tz/animation/flashleft/frame_0001.pgm
+IMG_FLASHLEFT_2: machine/tz/animation/flashleft/frame_0002.pgm
+IMG_FLASHLEFT_3: machine/tz/animation/flashleft/frame_0003.pgm
+IMG_FLASHLEFT_4: machine/tz/animation/flashleft/frame_0004.pgm
+IMG_FLASHLEFT_5: machine/tz/animation/flashleft/frame_0005.pgm
+IMG_FLASHLEFT_END: machine/tz/animation/flashleft/frame_0006.pgm
+
+IMG_LOOP_START: machine/tz/animation/loop/frame_0001.pgm
+IMG_LOOP_2: machine/tz/animation/loop/frame_0002.pgm
+IMG_LOOP_3: machine/tz/animation/loop/frame_0003.pgm
+IMG_LOOP_4: machine/tz/animation/loop/frame_0004.pgm
+IMG_LOOP_END: machine/tz/animation/loop/frame_0005.pgm
+
+IMG_PYRAMIDSPIN_START: machine/tz/animation/pyramidspin/frame_0001.pgm
+IMG_PYRAMIDSPIN_2: machine/tz/animation/pyramidspin/frame_0002.pgm
+IMG_PYRAMIDSPIN_3: machine/tz/animation/pyramidspin/frame_0003.pgm
+IMG_PYRAMIDSPIN_4: machine/tz/animation/pyramidspin/frame_0004.pgm
+IMG_PYRAMIDSPIN_5: machine/tz/animation/pyramidspin/frame_0005.pgm
+IMG_PYRAMIDSPIN_6: machine/tz/animation/pyramidspin/frame_0006.pgm
+IMG_PYRAMIDSPIN_7: machine/tz/animation/pyramidspin/frame_0007.pgm
+IMG_PYRAMIDSPIN_8: machine/tz/animation/pyramidspin/frame_0008.pgm
+IMG_PYRAMIDSPIN_9: machine/tz/animation/pyramidspin/frame_0009.pgm
+IMG_PYRAMIDSPIN_END: machine/tz/animation/pyramidspin/frame_0010.pgm
+
+IMG_EXPLODE_START: machine/tz/animation/explode/frame_0001.pgm
+IMG_EXPLODE_2: machine/tz/animation/explode/frame_0002.pgm
+IMG_EXPLODE_3: machine/tz/animation/explode/frame_0003.pgm
+IMG_EXPLODE_4: machine/tz/animation/explode/frame_0004.pgm
+IMG_EXPLODE_5: machine/tz/animation/explode/frame_0005.pgm
+IMG_EXPLODE_6: machine/tz/animation/explode/frame_0006.pgm
+IMG_EXPLODE_7: machine/tz/animation/explode/frame_0007.pgm
+IMG_EXPLODE_8: machine/tz/animation/explode/frame_0008.pgm
+IMG_EXPLODE_9: machine/tz/animation/explode/frame_0009.pgm
+IMG_EXPLODE_10: machine/tz/animation/explode/frame_0010.pgm
+IMG_EXPLODE_12: machine/tz/animation/explode/frame_0012.pgm
+IMG_EXPLODE_13: machine/tz/animation/explode/frame_0013.pgm
+IMG_EXPLODE_14: machine/tz/animation/explode/frame_0014.pgm
+IMG_EXPLODE_15: machine/tz/animation/explode/frame_0015.pgm
+IMG_EXPLODE_16: machine/tz/animation/explode/frame_0016.pgm
+IMG_EXPLODE_17: machine/tz/animation/explode/frame_0017.pgm
+IMG_EXPLODE_END: machine/tz/animation/explode/frame_0018.pgm
+
+IMG_CLOCK_START: !machine/tz/animation/clock/frame_0001.pgm
+IMG_CLOCK_2: !machine/tz/animation/clock/frame_0002.pgm
+IMG_CLOCK_3: !machine/tz/animation/clock/frame_0003.pgm
+IMG_CLOCK_4: !machine/tz/animation/clock/frame_0004.pgm
+IMG_CLOCK_5: !machine/tz/animation/clock/frame_0005.pgm
+IMG_CLOCK_6: !machine/tz/animation/clock/frame_0006.pgm
+IMG_CLOCK_7: !machine/tz/animation/clock/frame_0007.pgm
+IMG_CLOCK_8: !machine/tz/animation/clock/frame_0008.pgm
+IMG_CLOCK_9: !machine/tz/animation/clock/frame_0009.pgm
+IMG_CLOCK_10: !machine/tz/animation/clock/frame_0010.pgm
+IMG_CLOCK_11: !machine/tz/animation/clock/frame_0011.pgm
+IMG_CLOCK_12: !machine/tz/animation/clock/frame_0012.pgm
+IMG_CLOCK_13: !machine/tz/animation/clock/frame_0013.pgm
+IMG_CLOCK_14: !machine/tz/animation/clock/frame_0014.pgm
+IMG_CLOCK_15: !machine/tz/animation/clock/frame_0015.pgm
+IMG_CLOCK_16: !machine/tz/animation/clock/frame_0016.pgm
+IMG_CLOCK_17: !machine/tz/animation/clock/frame_0017.pgm
+IMG_CLOCK_18: !machine/tz/animation/clock/frame_0018.pgm
+IMG_CLOCK_19: !machine/tz/animation/clock/frame_0019.pgm
+IMG_CLOCK_20: !machine/tz/animation/clock/frame_0020.pgm
+IMG_CLOCK_21: !machine/tz/animation/clock/frame_0021.pgm
+IMG_CLOCK_22: !machine/tz/animation/clock/frame_0022.pgm
+IMG_CLOCK_23: !machine/tz/animation/clock/frame_0023.pgm
+IMG_CLOCK_24: !machine/tz/animation/clock/frame_0024.pgm
+IMG_CLOCK_25: !machine/tz/animation/clock/frame_0025.pgm
+IMG_CLOCK_26: !machine/tz/animation/clock/frame_0026.pgm
+IMG_CLOCK_27: !machine/tz/animation/clock/frame_0027.pgm
+IMG_CLOCK_END: !machine/tz/animation/clock/frame_0028.pgm

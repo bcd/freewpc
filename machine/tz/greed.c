@@ -68,18 +68,39 @@ struct timed_mode_ops greed_mode = {
 
 void greed_mode_deff (void)
 {
+	dmd_alloc_pair_clean ();
+	U16 fno;
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, 64, 5, "GREED");
-		sprintf_current_score ();
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
-		sprintf ("%d", greed_mode_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		U8 i = 0;
+		for (fno = IMG_GREED_START; fno <= IMG_GREED_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fixed6, 64, 5, "GREED");
+			i++;
+			if (i > 1)
+			{
+				sprintf_score (greed_mode_total);
+				font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			}
+			
+			if (i > 2)
+			{
+				i = 0;
+			}
+			
+			font_render_string_center (&font_var5, 64, 27, "SHOOT FLASHING STANDUPS");
+			sprintf ("%d", greed_mode_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 

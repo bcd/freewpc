@@ -52,36 +52,71 @@ struct timed_mode_ops mpf_mode = {
 /* Where the powerball is */
 extern U8 pb_location;
 extern U8 unlit_shot_count;
+
+static void mpf_countdown_score_task (void)
+{
+	while (mpf_award > 5)
+	{
+		bounded_decrement (mpf_award, 0);
+		task_sleep_sec (1);
+	}
+	task_exit ();
+}
+
 void mpf_mode_deff (void)
 {
-	mpf_award = 10;
+	//TODO Move this somewhere?
+	U16 fno;
+	dmd_alloc_pair_clean ();
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
-		sprintf ("%d,000,000", (mpf_award * mpf_level));
-		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
-		sprintf ("SHOOT TOP HOLE TO COLLECT");
-		font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
-		sprintf ("%d", mpf_timer);
-		font_render_string (&font_var5, 2, 2, sprintf_buffer);
-		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep_sec (1);
-		if (mpf_award > 5)
-			bounded_decrement (mpf_award, 0);
+		for (fno = IMG_PYRAMIDSPIN_START; fno <= IMG_PYRAMIDSPIN_END; fno += 2)
+		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, 64, 5, "BATTLE THE POWER");
+			sprintf ("%d,000,000", (mpf_award * mpf_level));
+			font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+			sprintf ("SHOOT TOP HOLE TO COLLECT");
+			font_render_string_center (&font_var5, 64, 27, sprintf_buffer);
+			sprintf ("%d", mpf_timer);
+			font_render_string (&font_var5, 2, 2, sprintf_buffer);
+			font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
+			dmd_text_outline ();
+
+			dmd_alloc_pair ();
+			frame_draw (fno);
+			dmd_overlay_outline ();
+			dmd_show2 ();
+			task_sleep (TIME_66MS);
+		}
 	}
 }
 
 void mpf_award_deff (void)
-{
-	dmd_alloc_low_clean ();
-	sprintf ("%d,000,000", (mpf_award * mpf_level));
-	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
-	font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
-	dmd_show_low ();
+{	
+	dmd_alloc_pair_clean ();
+	U16 fno;
 	sound_send (SND_EXPLOSION_3);
-	task_sleep_sec (1);
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		
+		if (fno > 4)
+		{
+			sprintf ("%d,000,000", (mpf_award * mpf_level));
+			font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+			font_render_string_center (&font_var5, 64, 20, "AND SPOT DOOR PANEL");
+		}
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	task_sleep (TIME_700MS);
 	deff_exit ();
 }
 
@@ -129,7 +164,7 @@ void mpf_mode_exit (void)
 	leff_stop (LEFF_MPF_ACTIVE);
 }
 
-void mpf_countdown_task (void)
+void mpf_countdown_sound_task (void)
 {
 	sound_send (SND_FIVE);
 	task_sleep_sec (1);
@@ -167,7 +202,7 @@ CALLSET_ENTRY (mpf, music_refresh)
 	timed_mode_music_refresh (&mpf_mode);
 	/* Start a countdown task */	
 	if (mpf_timer == 5 && !task_find_gid (GID_MPF_COUNTDOWN))
-		task_create_gid (GID_MPF_COUNTDOWN, mpf_countdown_task);
+		task_create_gid (GID_MPF_COUNTDOWN, mpf_countdown_sound_task);
 }
 
 CALLSET_ENTRY (mpf, end_ball)
@@ -201,15 +236,26 @@ CALLSET_ENTRY (mpf, sw_mpf_top)
 	score (SC_500K);
 }
 
+/* Stop the score countdown if switch is tripped,
+ * it can take a while before mpf_collected gets 
+ * triggered
+ */
+CALLSET_ENTRY (mpf, sw_gumball_exit)
+{
+	task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
+}
+
 /* Called from camera.c */
 CALLSET_ENTRY (mpf, mpf_collected)
 {
 	/* Inform combo.c that the mpf was collected */
 	task_create_anon (award_door_panel_task);
+	task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 	callset_invoke (combo_mpf_collected);
 	bounded_decrement (mpf_ball_count, 0);
 	/* Safe to here enable as it covers all cases */
-	flipper_enable ();
+	if (!in_bonus)
+		flipper_enable ();
 	score_multiple(SC_1M, (mpf_award * mpf_level));
 	if (mpf_ball_count == 0)
 	{
@@ -243,7 +289,9 @@ CALLSET_ENTRY (mpf, sw_mpf_enter)
 		mpf_buttons_pressed = 0;
 		mpf_active = TRUE;
 		unlit_shot_count = 0;
+		mpf_award = 10;
 		bounded_increment (mpf_ball_count, feature_config.installed_balls);
+		task_recreate_gid (GID_MPF_COUNTDOWN_SCORE_TASK, mpf_countdown_score_task);
 		/* Add on 10 seconds for each extra ball */
 		if (mpf_ball_count > 1)
 			mpf_timer += 10;
@@ -276,12 +324,12 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	task_kill_gid (GID_MPF_BALLSEARCH);
 	task_kill_gid (GID_MPF_COUNTDOWN);
 	task_kill_gid (GID_MPF_BUTTON_MASHER);
-	if (mpf_ball_count > 0)
-		bounded_decrement (mpf_ball_count, 0);
+	bounded_decrement (mpf_ball_count, 0);
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
 		leff_start (LEFF_FLASH_GI);
+		task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 		timed_mode_end (&mpf_mode);
 		score (SC_5M);
 		/* This should be fine as we only disable in single ball play */

@@ -119,8 +119,8 @@ void skill_shot_made_deff (void)
 /* Called from slot.c */
 CALLSET_ENTRY (skill, skill_missed)
 {
-	set_valid_playfield ();
 	disable_skill_shot ();
+	set_valid_playfield ();
 }
 
 void award_skill_shot (void)
@@ -176,7 +176,6 @@ static void award_skill_switch (U8 sw)
 	/* Only trigger if skillshot or sssmb is enabled */
 	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
 		return;
-	event_can_follow (skill_shot, slot, TIME_4S);
 	callset_invoke (any_skill_switch);
 	if (skill_switch_reached < sw)
 	{
@@ -217,9 +216,15 @@ CALLSET_ENTRY (skill, sw_skill_center)
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
+	event_can_follow (skill_shot, slot, TIME_4S);
 	award_skill_switch (3);
 }
 
+CALLSET_ENTRY (skill, valid_playfield)
+{
+	task_sleep_sec (4);
+	disable_skill_shot ();
+}
 
 CALLSET_ENTRY (skill, start_player)
 {
@@ -235,7 +240,7 @@ CALLSET_ENTRY (skill, start_ball)
 	enable_skill_shot ();
 }
 
-CALLSET_ENTRY (skill, end_game)
+CALLSET_ENTRY (skill, end_game, end_ball)
 {
 	disable_skill_shot ();
 }

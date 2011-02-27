@@ -43,27 +43,38 @@ void dead_end_deff (void)
 {
 	dmd_alloc_low_clean();
 	sound_send (SND_DEAD_END_SCREECH);
-	dmd_sched_transition (&trans_scroll_right);	
-	frame_draw (IMG_CAR);
+	dmd_sched_transition (&trans_scroll_left);	
+	frame_draw (IMG_NEWCAR);
 	dmd_show2 ();
-	task_sleep_sec (1);
+	//task_sleep (TIME_400MS);
+	
+	dmd_alloc_pair_clean ();
+	U16 fno;
 	sound_send (SND_DEAD_END_CRASH);
+	for (fno = IMG_EXPLODE_START; fno < IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		
+		U8 x = random_scaled (4);
+		U8 y = random_scaled (4);
+		psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
+		font_render_string_center (&font_fixed6, 64+x, 7+y, sprintf_buffer);
 	
-	U8 i = 0;
-	do {
-	U8 x = random_scaled (4);
-	U8 y = random_scaled (4);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+
 	dmd_alloc_low_clean ();
-	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
-	font_render_string_center (&font_fixed6, 64+x, 7+y, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep (TIME_33MS);
-	} while (i++ < 8);
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
 	
-	dmd_alloc_low_clean ();
 	psprintf ("1 DEAD END", "%d DEAD ENDS", dead_end_count);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
-	dmd_show_low ();
 	
 	if (extra_ball_lit_from_deadend == FALSE && can_award_extra_ball())
 	{
@@ -89,7 +100,11 @@ void dead_end_deff (void)
 	}
 
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
-	dmd_show_low ();
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (fno);
+	dmd_overlay_outline ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -118,6 +133,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 
 	if (lamp_test (LM_DEAD_END))
 	{
+		leff_start (LEFF_RIGHT_LOOP);
 		deff_start (DEFF_DEAD_END);
 		dead_end_count++;
 		gumball_enable_count++;
@@ -144,6 +160,7 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 				{
 					score (SC_10M);
 				}
+				dead_end_count = 0;
 				break;
 			default:
 				score (SC_2M);

@@ -64,11 +64,12 @@ void tbc_deff (void)
 	
 	font_render_string_center (&font_fixed6, 64, 4, "TO BE CONTINUED");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	font_render_string_center (&font_var5, 64, 12, "FOR NOW, HAVE 100M");
 	sound_send (SND_KACHING);
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_show_low ();
+	task_sleep_sec (2);
 	deff_exit ();
 }
 	

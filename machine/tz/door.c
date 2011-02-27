@@ -393,13 +393,13 @@ void award_door_panel_task (void)
 	task_kill_gid (GID_DOOR_AWARD_ROTATE);
 	/* Store the current door index */
 	door_index_awarded = door_index;
-	/* Start the event and show deff */
-	deff_start (DEFF_DOOR_AWARD);
-	door_start_event (door_index);
 	/* Find and turn on the current flashing lamp */
 	door_active_lamp = door_get_flashing_lamp ();
 	lamp_tristate_on (door_active_lamp);
+	/* Start the event and show deff */
+	deff_start (DEFF_DOOR_AWARD);
 	leff_start (LEFF_DOOR_STROBE);
+	door_start_event (door_index);
 	
 	score (SC_5M);
 	timed_game_extend (10);
@@ -511,4 +511,10 @@ CALLSET_ENTRY(door, machine_unpaused)
 {
 	/* Start the door lamps rotating again */
 	door_award_enable ();
+}
+
+CALLSET_ENTRY(door, sw_buyin)
+{
+	//TODO TESTING
+	callset_invoke (door_start_spiral);
 }

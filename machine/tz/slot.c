@@ -27,6 +27,7 @@ U8 sslot_award_index_stored;
 extern U8 gumball_enable_count;
 extern U8 mpf_enable_count;
 extern U8 cameras_lit;
+extern bool skill_shot_enabled;
 
 void sslot_mode_init (void);
 void sslot_mode_exit (void);
@@ -191,13 +192,15 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* piano was recently hit, so ignore slot */
 		/* camera was recently hit, so ignore slot */
 	}
-	else if (event_did_follow (skill_shot, slot))
+	else if (event_did_follow (skill_shot, slot)
+		|| skill_shot_enabled == TRUE)
 	{
-		/* skill shot has been missed */
+		/* skill shot has been missed or ball landed in plunger lane*/
 		callset_invoke (skill_missed);
 	}
 	else if (timed_mode_running_p (&sslot_mode))
 	{
+		//TODO If shot from lite slot lane, allow player to choose award
 		sslot_award ();
 		score (SC_10M);
 		timed_mode_end (&sslot_mode);

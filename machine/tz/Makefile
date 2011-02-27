@@ -68,9 +68,9 @@ SCHED_HEADERS += build/left_sling.h build/right_sling.h build/left_jet.h \
 
 GAME_OBJS = sling.o jets.o autofire.o gumball.o \
 	config.o loop.o rampdiv.o magnet.o \
-	maghelper.o
+	maghelper.o clock.o
 
-GAME_TEST_OBJS = gumball_test.o powerball_test.o magtest.o
+GAME_TEST_OBJS = gumball_test.o powerball_test.o clocktest.o magtest.o
 
 GAME_INCLUDES =
 

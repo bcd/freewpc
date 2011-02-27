@@ -33,6 +33,8 @@ score_t tsm_mode_total;
 /* Used to not flash the jets when the clock or
  * slings are triggered */
 bool noflash;
+/* Used to tell the TSM deff that a jet was hit during TSM */
+bool tsm_hit;
 
 extern void award_unlit_shot (U8 unlit_called_from);
 
@@ -121,22 +123,33 @@ void sw_jet_sound (void)
 
 void tsm_mode_total_deff (void)
 {
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean ();
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
+
 	font_render_string_center (&font_fixed6, 64, 5, "TSM OVER");
 	sprintf_score (tsm_mode_total);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	font_render_string_center (&font_var5, 64, 27, "POINTS EARNED FROM MODE");
-	dmd_show_low ();
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw (IMG_CITY);
+	dmd_overlay_outline ();
+	dmd_show2 ();
 	task_sleep_sec (4);
 	deff_exit ();
 }
 
 
 void tsm_mode_deff (void)
-{
+{	
+	dmd_alloc_pair_clean ();
+	//U16 fno;
 	for (;;)
 	{
-		dmd_alloc_low_clean ();
+		//for (fno = IMG_
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_var5, 64, 5, "TOWN SQUARE MADNESS");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
@@ -144,25 +157,55 @@ void tsm_mode_deff (void)
 		sprintf ("%d", tsm_mode_timer);
 		font_render_string (&font_var5, 2, 2, sprintf_buffer);
 		font_render_string_right (&font_var5, 126, 2, sprintf_buffer);
-		dmd_show_low ();
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (IMG_CITY);
+		dmd_overlay_outline ();
+
+		dmd_show2 ();
 		task_sleep (TIME_200MS);
 	}
 }
 
 void jets_hit_deff (void)
 {
-	U8 i = 0;
-	do {
-	U8 x = random_scaled (4);
-	U8 y = random_scaled (4);
-	dmd_alloc_low_clean ();
-	psprintf ("1 HIT", "%d HITS", jets_scored);
-	font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
-	sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep (TIME_33MS);
-	} while (i++ < 8);
+	U16 fno;
+	U16 img_start = 0;
+	U16 img_end = 0;
+	switch (random_scaled (3))
+	{
+		case 0:
+			img_start = IMG_FLASH_START;
+			img_end = IMG_FLASH_END;
+			break;
+		case 1:
+			img_start = IMG_FLASHCENTRE_START;
+			img_end = IMG_FLASHCENTRE_END;
+			break;
+		case 2:
+			img_start = IMG_FLASHLEFT_START;
+			img_end = IMG_FLASHLEFT_END;
+			break;
+	}
+
+	for (fno = img_start; fno <= img_end; fno += 2)
+	{
+		U8 x = random_scaled (4);
+		U8 y = random_scaled (4);
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+
+		psprintf ("1 HIT", "%d HITS", jets_scored);
+		font_render_string_center (&font_fixed6, 62 + x, 7 + y, sprintf_buffer);
+		sprintf ("%d FOR NEXT LEVEL", (jets_for_bonus - jets_scored));
+		font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
 	/* Redraw it so the 'HITS' text is centred */
 	dmd_alloc_low_clean ();
 	psprintf ("1 HIT", "%d HITS", jets_scored);
@@ -176,16 +219,31 @@ void jets_hit_deff (void)
 
 void jets_level_up_deff (void)
 {
-	dmd_alloc_low_clean ();
-	sprintf ("TOWN SQUARE LEVEL UP");
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
-	/* We don't use scoreget as it's likely another score
-	 * has been awarded */
-	sprintf("%d MILLION", jetscore);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
-	jets_scored = 1;
-	dmd_show_low ();
-	task_sleep_sec (2);
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	sound_send (SND_GLASS_BREAKS);
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		
+		if (fno > 4)
+		{
+			sprintf ("TOWN SQUARE LEVEL UP");
+			font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+			/* We don't use scoreget as it's likely another score
+			 * has been awarded */
+			sprintf("%d MILLION", jetscore);
+			font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+		}
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	task_sleep_sec (1);
 	deff_exit ();
 }
 
@@ -207,6 +265,7 @@ CALLSET_ENTRY (jet, sw_jet)
 	if (!multi_ball_play () && mpf_timer > 0)
 		callset_invoke (sw_mpf_exit);
 	
+	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 	if (flag_test(FLAG_POWERBALL_IN_PLAY))
 		jets_scored += 2;
 	else
@@ -214,10 +273,10 @@ CALLSET_ENTRY (jet, sw_jet)
 	
 	if (jets_scored >= jets_for_bonus)
 	{	
+		jets_scored = 1;
 		bounded_increment (jets_bonus_level, 50);
 		jets_for_bonus += 5;
 		award_unlit_shot (SW_BOTTOM_JET);
-		sound_send (SND_GLASS_BREAKS);
 		task_sleep (TIME_500MS);
 		/* jetscore is used rather than score_deff_get 
 		 * because it's likely another score would of
@@ -256,8 +315,6 @@ CALLSET_ENTRY (jet, sw_jet)
 			&& (!timer_find_gid (GID_HITCHHIKER)))
 			deff_restart (DEFF_JETS_HIT);
 	}
-	
-	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
 }
 
 CALLSET_ENTRY (jets, end_ball)

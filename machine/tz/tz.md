@@ -35,7 +35,7 @@ define MACHINE_MUSIC_GAME                 MUS_FASTLOCK_BANZAI_RUN
 define MACHINE_MUSIC_PLUNGER              MUS_MULTIBALL_LIT_PLUNGER
 define MACHINE_REPLAY_CODE_TO_SCORE       replay_code_to_score
 define MACHINE_REPLAY_SCORE_CHOICES       10
-define MACHINE_REPLAY_START_CHOICE        8
+define MACHINE_REPLAY_START_CHOICE        2
 define MACHINE_AMODE_LEFF                 tz_amode_leff
 define MACHINE_AMODE_EFFECTS 		 
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
@@ -147,7 +147,7 @@ define CONFIG_TZONE_IP y
 15: Right Trough, noscore
 16: Center Trough, noscore
 17: Left Trough, noscore
-18: Outhole, outhole, service, noplay, intest
+18: Outhole, outhole, service, noplay, intest, debounce(TIME_66MS)
 21: Slam Tilt, slam-tilt, ingame, cabinet
 23: Buyin Button, buyin-button
 25: Far Left Trough, noscore
@@ -230,7 +230,7 @@ H6: Gumball Div, duty(SOL_DUTY_50), time(TIME_133MS)
 H7: Knocker, knocker
 H8: Outhole, duty(SOL_DUTY_50), time(TIME_133MS)
 
-L1: Ball Serve, ballserve, duty(SOL_DUTY_50), time(TIME_66MS)
+L1: Ball Serve, ballserve, duty(SOL_DUTY_25), time(TIME_133MS)
 L2: Right Sling, duty(SOL_DUTY_100)
 L3: Left Sling, duty(SOL_DUTY_100)
 L4: Lower Jet, duty(SOL_DUTY_100)
@@ -273,8 +273,8 @@ Right Sling: driver(spsol), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, of
 Left Jet: driver(spsol), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Right Jet: driver(spsol), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 Lower Jet: driver(spsol), sw=SW_BOTTOM_JET, sol=SOL_LOWER_JET, ontime=3, offtime=16
-Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=20
-Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=20
+Left mpf: driver(mpfmag), sw=SW_LEFT_BUTTON, sol=SOL_MPF_LEFT_MAGNET, ontime=3, offtime=16
+Right mpf: driver(mpfmag), sw=SW_RIGHT_BUTTON, sol=SOL_MPF_RIGHT_MAGNET, ontime=3, offtime=16
 
 Clock Mech: driver(bivar),
 	forward_sol=SOL_CLOCK_FORWARD,
@@ -336,7 +336,7 @@ Popper: Popper, \
 # These are additional test items that should appear in the TESTS menu.
 ##########################################################################
 [tests]
-#tz_clock:
+tz_clock:
 tz_gumball:
 tz_magnet:
 tz_powerball:
@@ -667,7 +667,7 @@ GI Cycle: PRI_LEFF3, GI(ALL), page(MACHINE2_PAGE)
 Flasher Happy: shared, PRI_LEFF1, page(MACHINE2_PAGE)
 Left Ramp: shared, PRI_LEFF2, page(MACHINE2_PAGE)
 No GI: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
-Piano Jackpot Collected: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+Piano Jackpot Collected: PRI_LEFF1, LAMPS(ALL), GI(ALL), page(MACHINE2_PAGE)
 Flash GI: PRI_LEFF2, GI(ALL), page(MACHINE2_PAGE)
 Flash All: PRI_LEFF5, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
 Slot Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)

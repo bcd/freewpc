@@ -52,14 +52,29 @@ void tnf_deff (void)
 }
 
 void tnf_exit_deff (void)
-{
-	dmd_alloc_low_clean ();
-	sprintf_score (tnf_score);
-	font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
-	font_render_string_center (&font_var5, 64, 20, "POINTS EARNED FROM DOINKS");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	sound_send (SND_OOH_GIMME_SHELTER);
+{	
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	sound_send (SND_CLOCK_CHAOS_END_BOOM);
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		
+		sprintf_score (tnf_score);
+		font_render_string_center (&font_fixed6, 64, 8, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 20, "POINTS EARNED FROM DOINKS");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	if (score_compare (tnf_score, score_table[SC_20M]))
+		sound_send (SND_OOH_GIMME_SHELTER);
+	else
+		sound_send (SND_RETURN_TO_YOUR_HOMES);
 	task_sleep_sec (2);
 	deff_exit ();
 }
@@ -67,7 +82,10 @@ void tnf_exit_deff (void)
 CALLSET_ENTRY (tnf, tnf_button_pushed)
 {
 	bounded_increment (mpf_buttons_pressed, 255);
-	sound_send (SND_BUYIN_CANCELLED);
+	if (mpf_buttons_pressed < 80)
+		sound_send (SND_BUYIN_CANCELLED);
+	else
+		sound_send (SND_CLOCK_CHAOS_END_BOOM);
 	score_add (tnf_score, score_table[SC_250K]);
 	tnf_x = random_scaled(10);
 	tnf_y = random_scaled(8);

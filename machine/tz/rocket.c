@@ -31,21 +31,30 @@ void rocket_deff (void)
 	U16 fno;
 	for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno += 2)
 	{
+		//dmd_alloc_pair ();
+		dmd_map_overlay ();
+		dmd_text_outline ();
 		dmd_alloc_pair ();
 		frame_draw (fno);
-		dmd_overlay_onto_color ();
+		//dmd_overlay_onto_color ();
+		dmd_overlay_outline ();
 		dmd_show2 ();
-		task_sleep (TIME_66MS);
-		dmd_map_overlay ();
+		task_sleep (TIME_33MS);
+	//	dmd_map_overlay ();
 	}
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_100MS);
 	/* Rocket takes 500ms before kick 
 	 * load animation takes 400ms */
 	/* Launch rocket */
 	for (fno = IMG_NEWROCKET_START; fno <= IMG_NEWROCKET_END; fno += 2)
 	{
 		dmd_alloc_pair_clean ();
+	//	dmd_map_overlay ();
+	//	dmd_text_outline ();
+	//	dmd_alloc_pair ();
+		
 		frame_draw (fno);
+	//	dmd_overlay_outline ();
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}

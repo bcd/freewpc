@@ -74,7 +74,7 @@ void fastlock_mode_deff (void)
 void fastlock_award_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 5, "JACKPOT");
+	font_render_string_center (&font_var5, 64, 5, "FASTLOCK JACKPOT");
 	sprintf("%d MILLION", fastlock_award_stored);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();

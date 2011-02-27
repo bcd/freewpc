@@ -57,12 +57,12 @@ static inline void enter_loop (void)
 static void award_loop (void)
 {
 	/* loops includes powerball and spiral_loops */
-	loops++;
+	bounded_increment (loops, 255);
 	
 	callset_invoke (award_spiral_loop);
 	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
-		powerball_loops++;
+		bounded_increment (powerball_loops, 3);
 
 		if (powerball_loops < 3)
 		{
@@ -111,8 +111,10 @@ static void award_loop (void)
 		fastlock_loop_completed ();
 
 		if (!task_find_gid (GID_SPIRALAWARD) || !task_find_gid (GID_GUMBALL))
+		{	
 			sound_send (SND_SPIRAL_AWARDED);
-		deff_start (DEFF_LOOP);
+			deff_start (DEFF_LOOP);
+		}
 	}
 }
 
@@ -142,19 +144,50 @@ CALLSET_ENTRY (loop, award_right_loop)
 
 void loop_deff (void)
 {
-	U8 i;
-	for (i = 0; i < 6; i++)
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	U8 x;
+	for (fno = IMG_LOOP_START; fno < IMG_LOOP_END; fno += 2)
 	{
-		dmd_alloc_low_clean ();
+		/* How many steps before the end */
+		x = IMG_LOOP_END - fno;
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+
 		psprintf ("1 LOOP", "%d LOOPS", loops);
-		font_render_string_center (&font_fixed6, 64, i, sprintf_buffer);
-		
-		sprintf_score (loop_score);
-		font_render_string_center (&font_mono5, 64, 23 - i, sprintf_buffer);
-		dmd_show_low ();
+		if ( x > 3 )
+		{
+			font_render_string_center (&font_fixed6, 64, 6 + x, sprintf_buffer);
+			sprintf_score (loop_score);
+			font_render_string_center (&font_mono5, 64, 26 - x, sprintf_buffer);
+		}
+		else
+		{
+			font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+			sprintf_score (loop_score);
+			font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+
+		}
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
 		task_sleep (TIME_66MS);
 	}
-	task_sleep_sec (1);
+	/* Get rid of the last dirty frame */
+	dmd_alloc_pair_clean ();
+	psprintf ("1 LOOP", "%d LOOPS", loops);
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	sprintf_score (loop_score);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
+//	task_sleep_sec (1);
+	task_sleep (TIME_600MS);
+	dmd_show_low ();
+	task_sleep (TIME_400MS);
+
 	deff_exit ();
 }
 
