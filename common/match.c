@@ -75,6 +75,21 @@ match_deff (void)
 #endif
 		sprintf ("%2b", &scores[0][BYTES_PER_SCORE-1]);
 		font_render_string_left (&font_mono5, 0, 0, sprintf_buffer);
+		if (num_players == 2)
+		{
+			sprintf ("%2b", &scores[1][BYTES_PER_SCORE-1]);
+			font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
+		}
+		else if (num_players == 3)
+		{
+			sprintf ("%2b", &scores[2][BYTES_PER_SCORE-1]);
+			font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
+		}
+		else if (num_players == 4)
+		{
+			sprintf ("%2b", &scores[3][BYTES_PER_SCORE-1]);
+			font_render_string_left (&font_mono5, 0, 18, sprintf_buffer);
+		}
 
 		font_render_string_right (&font_fixed6, 126, 2, "MATCH");
 		sprintf ("%2b", &value);
