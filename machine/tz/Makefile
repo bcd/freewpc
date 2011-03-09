@@ -79,13 +79,14 @@ GAME_PAGED_OBJS = leftramp.o rightramp.o skill.o \
 	mpf.o chaosmb.o powerball.o \
 	multiball.o sssmb.o deffs.o
 
-GAME2_OBJS = lanes.o unlit.o spiralaward.o leffs.o \
-	bonus.o tz_amode.o star.o rocket.o \
-	outhole.o lock.o camera.o combo.o deadend.o \
+GAME2_OBJS = unlit.o spiralaward.o leffs.o \
+	bonus.o star.o rocket.o tz_amode.o \
+	outhole.o camera.o combo.o deadend.o \
 	hitch.o
 
 GAME3_OBJS = tz_flipcode.o rules.o greed.o clockmillions.o \
-	spiral.o tnf.o bttz.o factoids.o master.o
+	spiral.o tnf.o bttz.o factoids.o master.o snake.o \
+	lock.o lanes.o\
 
 
 IMAGE_MAP += $(M)/tz.ild
