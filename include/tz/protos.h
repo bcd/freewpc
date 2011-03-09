@@ -150,3 +150,5 @@ __machine3__ void show_random_factoid (void);
 /* master.c */
 __machine3__ void loop_master_check (void);
 __machine3__ void combo_master_check (void);
+
+__machine3__ void snake_start (void);
