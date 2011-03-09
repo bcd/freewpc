@@ -124,6 +124,7 @@ static void sssmb_relight_all_jackpots (void)
 static void sssmb_award_jackpot (void)
 {
 	mball_jackpot_uncollected = FALSE;
+	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	sssmb_initial_ramps_to_divert++;
 	score_1M (sssmb_jackpot_value);
 	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);

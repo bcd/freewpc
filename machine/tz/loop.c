@@ -60,7 +60,7 @@ static void award_loop (void)
 	bounded_increment (loops, 255);
 	
 	callset_invoke (award_spiral_loop);
-	if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
+	if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 	{
 		bounded_increment (powerball_loops, 3);
 
@@ -235,7 +235,7 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	if (!task_find_gid (GID_LEFT_LOOP_ENTERED))
 		sw_gumball_right_loop_entered ();
 
-	if (event_did_follow (dev_lock_kick_attempt, right_loop))
+	if (event_did_follow (lock_kick, right_magnet))
 	{
 		/* Ball has just come out of lock, ignore */
 		//return;

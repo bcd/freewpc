@@ -323,3 +323,10 @@ IMG_CLOCK_25: !machine/tz/animation/clock/frame_0025.pgm
 IMG_CLOCK_26: !machine/tz/animation/clock/frame_0026.pgm
 IMG_CLOCK_27: !machine/tz/animation/clock/frame_0027.pgm
 IMG_CLOCK_END: !machine/tz/animation/clock/frame_0028.pgm
+
+IMG_SNAKE_START: !machine/tz/animation/snake/frame_0001.pgm
+#IMG_SNAKE_2: !machine/tz/animation/snake/frame_0002.pgm
+IMG_SNAKE_3: !machine/tz/animation/snake/frame_0003.pgm
+#IMG_SNAKE_4: !machine/tz/animation/snake/frame_0004.pgm
+#IMG_SNAKE_5: !machine/tz/animation/snake/frame_0005.pgm
+IMG_SNAKE_END: !machine/tz/animation/snake/frame_0006.pgm

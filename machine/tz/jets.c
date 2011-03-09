@@ -266,7 +266,7 @@ CALLSET_ENTRY (jet, sw_jet)
 		callset_invoke (sw_mpf_exit);
 	
 	task_create_gid1 (GID_JET_SOUND, sw_jet_sound);
-	if (flag_test(FLAG_POWERBALL_IN_PLAY))
+	if (global_flag_test(GLOBAL_FLAG_POWERBALL_IN_PLAY))
 		jets_scored += 2;
 	else
 		jets_scored++;

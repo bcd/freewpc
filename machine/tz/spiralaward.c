@@ -124,7 +124,7 @@ CALLSET_ENTRY (spiralaward, start_spiralaward_timer)
 		/* Allow the ball to pass through the loop,
 		 * but not if the pb is out to help detection 
 		 */
-		if (!flag_test (FLAG_POWERBALL_IN_PLAY))
+		if (!global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 			magnet_disable_catch (MAG_RIGHT);
 		leff_start (LEFF_SPIRALAWARD);
 		/* Only show the hint the first two times */

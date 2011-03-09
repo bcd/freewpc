@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/* CALLSET_SECTION (lock, __machine2__ ) */
+/* CALLSET_SECTION (lock, __machine3__ ) */
 
 /* More code for the lock is in Multiball.c */
 
@@ -42,9 +42,12 @@ CALLSET_ENTRY (lock, dev_lock_kick_attempt)
 	}
 
 	sound_send (SND_LOCK_KICKOUT);
-	event_can_follow (dev_lock_kick_attempt, right_loop, TIME_2S);
 	/* Used to disable camera magnet grab */
 	timer_restart_free (GID_LOCK_KICKED, TIME_3S);
 	magnet_disable_catch (MAG_RIGHT);
 }
 
+CALLSET_ENTRY (lock, dev_lock_kick_success)
+{
+	event_can_follow (lock_kick, right_magnet, TIME_3S);
+}

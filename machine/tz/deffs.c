@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -128,6 +128,21 @@ void two_way_combo_deff (void)
 {
 	sprintf ("2 WAY COMBO");
 	flash_and_exit_deff (15, TIME_66MS);
+}
+
+void shoot_again_deff (void)
+{	
+	sound_send (SND_EXTRA_BALL_BALLOON);
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	font_render_string_center (&font_fixed10, 64, 10, "SHOOT AGAIN");
+	sprintf ("PLAYER %d", player_up);
+	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
+	dmd_show_low ();
+	dmd_copy_low_to_high ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (30, TIME_100MS);
+	deff_exit ();
 }
 
 void shoot_camera_deff (void)
@@ -502,3 +517,21 @@ void pinwheel_deff (void)
 		}
 	deff_exit ();
 }
+
+void explosion_deff (void)
+{
+	U16 fno;
+	dmd_alloc_pair_clean ();
+	sound_send (SND_EXPLOSION_3);
+	for (fno = IMG_EXPLODE_START; fno <= IMG_EXPLODE_END; fno += 2)
+	{
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_show2 ();
+		task_sleep (TIME_33MS);
+	}
+	task_sleep (TIME_700MS);
+	deff_exit ();
+}
+
+

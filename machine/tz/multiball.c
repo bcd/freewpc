@@ -101,7 +101,7 @@ bool multiball_ready (void)
 		|| global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		|| global_flag_test (GLOBAL_FLAG_CHAOSMB_RUNNING)
 		|| multi_ball_play ()
-		|| flag_test (FLAG_POWERBALL_IN_PLAY))
+		|| global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 		return FALSE;
 	/* Require one locked ball first multiball, 2 locks after */
 	else if ((mball_locks_made > 0) && (mballs_played == 0))
@@ -117,7 +117,7 @@ void mball_restart_deff (void)
 {
 	U16 fno;
 	dmd_alloc_pair_clean ();
-	for (;;)
+	while (mball_restart_timer > 0)
 	{
 		for (fno = IMG_BOLT_TESLA_START; fno < IMG_BOLT_TESLA_END; fno += 2)
 		{
@@ -315,6 +315,8 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (timed_mode_running_p (&mball_restart_mode))
 		return TRUE;
+	else if (flag_test (FLAG_SNAKE_READY))
+		return TRUE;
 	else
 		return FALSE;
 }
@@ -418,10 +420,8 @@ CALLSET_ENTRY (multiball, mball_start_3_ball)
 		/* 1 ball in lock, fire 2 from trough 
 		 *  1 ball may already be in autofire */
 		case 1:
-			autofire_add_ball ();	
-		 	task_sleep_sec (4);
-			task_sleep (TIME_500MS);
 			device_unlock_ball (device_entry (DEVNO_LOCK));
+			autofire_add_ball ();	
 			break;
 		/* 2 balls in lock, fire 1 from trough */
 		case 2:
@@ -601,6 +601,9 @@ CALLSET_ENTRY (mball, dev_lock_enter)
 	/* Tell fastlock that the lock was entered */
 	callset_invoke (fastlock_lock_entered);
 
+	if (single_ball_play () && flag_test (FLAG_SNAKE_READY))
+		callset_invoke (snake_start);
+	
 	/* Collect multiball jackpot if lit */
 	if ((global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)) && !global_flag_test (GLOBAL_FLAG_MB_JACKPOT_LIT))
 	{

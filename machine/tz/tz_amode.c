@@ -101,40 +101,50 @@ void show_text_on_stars (void)
 	dmd_alloc_pair_clean ();
 }
 
-CALLSET_ENTRY (tz_amode, amode_page)
+static void map_and_clean (void)
 {
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
+}
+
+CALLSET_ENTRY (tz_amode, amode_page)
+{
+	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 22, "THE ZONE");
 	dmd_text_blur ();
 	font_render_string_center (&font_fixed6, 64, 7, "BACK TO");
 	show_text_on_stars ();
 	
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
+	map_and_clean ();
 	font_render_string_center (&font_fixed10, 64, 7, "SOFTWARE BY");
 	font_render_string_center (&font_steel, 64, 20, "BCD");
 	show_text_on_stars ();
 	
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 7, "ANIMATIONS BY");
-	font_render_string_center (&font_steel, 64, 20, "HIGHRISE");
-	show_text_on_stars ();
-	
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 7, "ASSISTED BY");
+	map_and_clean ();
+	font_render_string_center (&font_fixed6, 64, 7, "AND");
 	font_render_string_center (&font_steel, 64, 20, "SONNY JIM");
 	show_text_on_stars ();
 	
-	dmd_map_overlay ();
-	dmd_clean_page_high ();
-	dmd_clean_page_low ();
+	map_and_clean ();
+	font_render_string_center (&font_fixed10, 64, 7, "ARTWORK AND");
+	font_render_string_center (&font_fixed10, 64, 20, "ANIMATIONS BY");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 16, "HIGHRISE");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_steel, 64, 16, "OPEN GAME ART");
+	show_text_on_stars ();
+	
+	map_and_clean ();
+	font_render_string_center (&font_fixed10, 64, 7, "AND");
+	font_render_string_center (&font_steel, 64,20, "POW STUDIOS");
+	show_text_on_stars ();
+	
+	map_and_clean ();
 	font_render_string_center (&font_var5, 64, 7, "PRESS BUYIN BUTTON");
 	font_render_string_center (&font_var5, 64, 20, "TO DISPLAY RULES");
 	show_text_on_stars ();
@@ -195,5 +205,3 @@ CALLSET_ENTRY (tz_amode, amode_start)
 {
 	task_create_gid (GID_LOCK_AND_OUTHOLE_MONITOR, lock_and_outhole_monitor);
 }
-
-

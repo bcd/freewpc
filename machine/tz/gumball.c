@@ -65,7 +65,7 @@ void award_gumball_score (void)
 		gumball_score = (5 * gumball_collected_count);
 	}
 
-	if (flag_test(FLAG_POWERBALL_IN_PLAY))
+	if (global_flag_test(GLOBAL_FLAG_POWERBALL_IN_PLAY))
 	{	
 		score (SC_20M);
 		gumball_score =+ 20;
@@ -81,7 +81,7 @@ bool gumball_load_is_enabled (void)
 		&& !multi_ball_play ())
 		return TRUE;
 	/* If powerball is out during single ball play, enable */
-	else if (flag_test (FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
+	else if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
@@ -164,7 +164,7 @@ void sw_gumball_right_loop_entered (void)
 	/* Don't open if the magnet is about to grab the ball
 	 * but remembering that it will always let the powerball through */
 	if ((magnet_enabled (MAG_RIGHT) || magnet_busy (MAG_RIGHT))
-		&& !flag_test (FLAG_POWERBALL_IN_PLAY))
+		&& !global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 	{
 		return;
 	}
@@ -269,7 +269,7 @@ CALLSET_ENTRY (gumball, sw_gumball_lane)
 	 * Gumball diverter can be closed now. */
 	gumball_divertor_close ();
 	
-	if (flag_test (FLAG_POWERBALL_IN_PLAY))
+	if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY))
 		powerball_loaded_into_gumball = TRUE;
 	else
 		powerball_loaded_into_gumball = FALSE;

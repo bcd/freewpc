@@ -191,19 +191,22 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* dead end was recently hit, so ignore slot */
 		/* piano was recently hit, so ignore slot */
 		/* camera was recently hit, so ignore slot */
+		return;
 	}
-	else if (event_did_follow (skill_shot, slot)
+	if (event_did_follow (skill_shot, slot)
 		|| skill_shot_enabled == TRUE)
 	{
 		/* skill shot has been missed or ball landed in plunger lane*/
 		callset_invoke (skill_missed);
+		return;
 	}
-	else if (timed_mode_running_p (&sslot_mode))
+	if (timed_mode_running_p (&sslot_mode))
 	{
 		//TODO If shot from lite slot lane, allow player to choose award
 		sslot_award ();
 		score (SC_10M);
 		timed_mode_end (&sslot_mode);
+		return;
 	}
 	else
 	{
@@ -211,6 +214,7 @@ CALLSET_ENTRY (slot, dev_slot_enter)
 		/* Tell door.c that the slot machine was hit */
 		//callset_invoke (shot_slot_machine);
 		task_create_anon (shot_slot_task);
+		//Sleep for kickout?
 		task_sleep (TIME_500MS);
 	}
 }

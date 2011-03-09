@@ -22,7 +22,17 @@
 /* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
-extern bool skill_shot_enabled;
+extern __machine__ bool skill_shot_enabled;
+extern __machine__ void award_skill_switch (U8 sw);
+extern __machine__ void award_skill_shot (void);
+
+CALLSET_ENTRY (rocket, ball_search)
+{
+	if (switch_poll_logical (SW_ROCKET_KICKER))
+	{
+		sol_request (SOL_ROCKET_KICKER);
+	}
+}
 
 /* Rocket animation contributed by highrise */
 void rocket_deff (void)
@@ -61,12 +71,6 @@ void rocket_deff (void)
 	deff_exit ();
 }
 
-CALLSET_ENTRY (rocket, dev_rocket_enter)
-{
-	disable_skill_shot ();
-	score (SC_10K);
-}
-
 static void rocket_kick_sound (void)
 {
 	sound_send (SND_ROCKET_KICK_DONE);
@@ -74,17 +78,28 @@ static void rocket_kick_sound (void)
 	task_exit ();
 }
 
+CALLSET_ENTRY (rocket, dev_rocket_enter)
+{
+	if (in_live_game && skill_shot_enabled)
+	{
+		award_skill_switch (1);
+		award_skill_shot ();
+	}
+}
+
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
 	{
 		/* Wait until the skill shot has finished */
-		while (skill_shot_enabled ||
-			deff_get_active () == DEFF_SKILL_SHOT_MADE ||
-			task_find_gid (GID_SKILL_SWITCH_TRIGGER))
+		while (	deff_get_active () == DEFF_SKILL_SHOT_MADE 
+			|| deff_get_active () == DEFF_SKILL_SHOT_READY
+			|| task_find_gid (GID_SKILL_SWITCH_TRIGGER)
+			|| skill_shot_enabled )
 		{
 			task_sleep (TIME_500MS);
 		}
+
 		if (!multi_ball_play ())
 			leff_start (LEFF_ROCKET);
 		sound_send (SND_ROCKET_KICK_REVVING);

@@ -44,7 +44,7 @@ extern U8 spawny_get_hi;
 U8 current_one_ball_hi_player;
 /* On which ball was the current 1 ball hi score */
 U8 current_one_ball_hi_ball_number;
-U8 current_player_rankings[4];
+//U8 current_player_rankings[4];
 U8 countup_pause_iterations;
 
 bool buttons_held;

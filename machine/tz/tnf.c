@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Ewan Meadows <sonny_jim@hotmail.com>
+ * Copyright 2006-2011 by Ewan Meadows <sonny_jim@hotmail.com>
  *
  * This file is part of FreeWPC.
  *
@@ -71,7 +71,7 @@ void tnf_exit_deff (void)
 		dmd_show2 ();
 		task_sleep (TIME_33MS);
 	}
-	if (score_compare (tnf_score, score_table[SC_20M]))
+	if (score_compare (tnf_score, score_table[SC_20M]) == 1)
 		sound_send (SND_OOH_GIMME_SHELTER);
 	else
 		sound_send (SND_RETURN_TO_YOUR_HOMES);

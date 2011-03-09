@@ -69,6 +69,6 @@ void show_random_factoid (void)
 	
 	dmd_alloc_pair_clean ();
 	factoid_msg(random_scaled(NUM_FACTOIDS));
-	dmd_show2 ();
+	dmd_show_low ();
 	task_sleep_sec (6);
 }

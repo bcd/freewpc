@@ -24,7 +24,6 @@
 #include <eb.h>
 
 U8 dead_end_count;
-extern __local__ U8 gumball_enable_count;
 extern void award_unlit_shot (U8 unlit_called_from);
 bool __local__ extra_ball_lit_from_deadend;
 
@@ -46,8 +45,6 @@ void dead_end_deff (void)
 	dmd_sched_transition (&trans_scroll_left);	
 	frame_draw (IMG_NEWCAR);
 	dmd_show2 ();
-	//task_sleep (TIME_400MS);
-	
 	dmd_alloc_pair_clean ();
 	U16 fno;
 	sound_send (SND_DEAD_END_CRASH);
@@ -98,7 +95,7 @@ void dead_end_deff (void)
 	{
 		sprintf ("");
 	}
-
+	
 	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
 	dmd_text_outline ();
 	dmd_alloc_pair ();
@@ -117,10 +114,6 @@ CALLSET_ENTRY (deadend, start_player)
 		extra_ball_lit_from_deadend = TRUE;
 	else
 		extra_ball_lit_from_deadend = FALSE;
-}
-
-CALLSET_ENTRY (deadend, start_ball)
-{
 	dead_end_count = 0;
 	lamp_off (LM_DEAD_END);
 }
@@ -134,9 +127,13 @@ CALLSET_ENTRY (deadend, sw_dead_end)
 	if (lamp_test (LM_DEAD_END))
 	{
 		leff_start (LEFF_RIGHT_LOOP);
-		deff_start (DEFF_DEAD_END);
 		dead_end_count++;
-		gumball_enable_count++;
+		deff_start_sync (DEFF_DEAD_END);
+		if (!flag_test (FLAG_SNAKE_READY) && single_ball_play ())
+		{
+			flag_on (FLAG_SNAKE_READY);
+			deff_start_sync (DEFF_SNAKE_READY);
+		}
 		switch (dead_end_count)
 		{
 			case 1:

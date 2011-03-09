@@ -100,12 +100,13 @@ void skill_shot_made_deff (void)
 	switch (skill_switch_reached)
 	{
 		case 1:
+		case 2:
 			sprintf ("%d,000,000", skill_min_stored);
 			break;
-		case 2:
+		case 3:
 			sprintf ("%d,000,000", skill_min_stored+1);
 			break;
-		case 3:
+		case 4:
 			sprintf ("%d,000,000", skill_min_stored+3);
 			break;
 	}
@@ -125,26 +126,27 @@ CALLSET_ENTRY (skill, skill_missed)
 
 void award_skill_shot (void)
 {
-	set_valid_playfield ();
 	disable_skill_shot ();
+	set_valid_playfield ();
 	leff_restart (LEFF_FLASHER_HAPPY);
 	sound_send (SND_SKILL_SHOT_CRASH_1);
 	switch (skill_switch_reached)
 	{
 		case 1:
+		case 2: 
 		/* Inform sssmb.c that we hit a skill switch */
 			callset_invoke (skill_red);
 			score_1M (skill_min_value);
 			skill_min_stored = skill_min_value;
 			break;
-		case 2: 
+		case 3: 
 			callset_invoke (skill_orange);
 			score_1M (skill_min_value+1);
 			skill_min_stored = skill_min_value;
 			skill_min_value++;
 			timed_game_extend (5);
 			break;
-		case 3: 
+		case 4: 
 			callset_invoke (skill_yellow);
 			score_1M (skill_min_value+3);
 			skill_min_stored = skill_min_value;
@@ -161,35 +163,36 @@ void award_skill_shot (void)
  * skill switch lane */
 static void skill_switch_monitor (void)
 {
-	if (skill_switch_reached < 3)
+	/* Wait for the ball to travel up */
+	if (skill_switch_reached < 4)
 		task_sleep_sec (1);
-	else
+	else if (skill_switch_reached == 4)
 	/* Wait longer so the ball can reach the slot switch */
 		task_sleep_sec (2);
-	award_skill_shot ();
+	/* Ball is probably on it's way down now */
+	if (skill_shot_enabled)
+		award_skill_shot ();
 	task_exit ();
 }
 
-
-static void award_skill_switch (U8 sw)
+void award_skill_switch (U8 sw)
 {
-	/* Only trigger if skillshot or sssmb is enabled */
+	/* Don't trigger if skillshot or sssmb is disabled */
 	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
 		return;
-	callset_invoke (any_skill_switch);
-	if (skill_switch_reached < sw)
+	//callset_invoke (any_skill_switch);
+	if (sw > skill_switch_reached)
 	{
 		skill_switch_reached = sw;
 		task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor);
 		sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
 	}
-	else if (task_kill_gid (GID_SKILL_SWITCH_TRIGGER))
+	else if (sw <= skill_switch_reached)
 	{
 		/* Ball is now rolling back down */
 		award_skill_shot ();
 	}
 }
-
 
 CALLSET_ENTRY (skill, display_update)
 {
@@ -197,27 +200,28 @@ CALLSET_ENTRY (skill, display_update)
 		deff_start_bg (DEFF_SKILL_SHOT_READY, 0);
 }
 
-CALLSET_ENTRY (skill, sw_skill_bottom)
-{
-	award_skill_switch (1);
-}
-
+/* The Rocket is a 'skill switch' as it's possible to sneak the ball
+ * past the bottom skill switch during skill shot */
 CALLSET_ENTRY (skill, sw_rocket_kicker)
 {
-	if (live_balls == 1)
-	award_skill_switch (1);
+//	award_skill_switch (1);
+}
+
+CALLSET_ENTRY (skill, sw_skill_bottom)
+{
+	award_skill_switch (2);
 }
 
 CALLSET_ENTRY (skill, sw_skill_center)
 {
-	award_skill_switch (2);
+	award_skill_switch (3);
 }
 
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
 	event_can_follow (skill_shot, slot, TIME_4S);
-	award_skill_switch (3);
+	award_skill_switch (4);
 }
 
 CALLSET_ENTRY (skill, valid_playfield)
@@ -228,19 +232,15 @@ CALLSET_ENTRY (skill, valid_playfield)
 
 CALLSET_ENTRY (skill, start_player)
 {
-	/* This will also make sure that if the ball slips
-	 * past the first skill switch, it will always count it properly
-	 */
 	skill_min_value = 1;
 }
-
 
 CALLSET_ENTRY (skill, start_ball)
 {
 	enable_skill_shot ();
 }
 
-CALLSET_ENTRY (skill, end_game, end_ball)
+CALLSET_ENTRY (skill, end_game, end_ball, single_ball_play)
 {
 	disable_skill_shot ();
 }
@@ -260,7 +260,7 @@ CALLSET_ENTRY (skill, sw_shooter)
 		{
 			sound_send (SND_SHOOTER_PULL);
 			leff_restart (LEFF_STROBE_UP);
-			timer_restart_free (GID_SHOOTER_SOUND_DEBOUNCE, TIME_3S);
+			timer_restart_free (GID_SHOOTER_SOUND_DEBOUNCE, TIME_2S);
 		}
 	}
 	else
@@ -268,4 +268,3 @@ CALLSET_ENTRY (skill, sw_shooter)
 		leff_stop (LEFF_STROBE_UP);
 	}
 }
-

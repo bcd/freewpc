@@ -100,10 +100,10 @@ CALLSET_ENTRY (spiral, award_spiral_loop)
 
 void spiral_mode_deff (void)
 {
-	for (;;)
+	U16 fno;
+	dmd_alloc_pair_clean ();
+	while (spiral_mode_timer > 0)
 	{
-		U16 fno;
-		dmd_alloc_pair_clean ();
 		for (fno = IMG_PINWHEEL_START; fno <= IMG_PINWHEEL_END; fno += 2)
 		{
 			dmd_map_overlay ();

@@ -112,7 +112,9 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				/* FEK */
 				case 1:
 				//	juggle_ball = TRUE;
-					callset_invoke (door_start_bttz);
+					#define MAX_BENDS 8 //Button buffer size
+					callset_invoke (snake_start);
+					//snake_start ();
 					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
 					break;
 				/* PUK */

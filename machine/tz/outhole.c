@@ -37,7 +37,7 @@ CALLSET_ENTRY (outhole, ball_search)
 	}
 }
 
-CALLSET_ENTRY (outhole, single_ball_play)
+CALLSET_ENTRY (outhole, mball_start)
 {
 	multidrain_count = 0;
 }
@@ -46,7 +46,6 @@ static inline void multidrain_check (void)
 {
 		/* Start a timer to check if 3 balls drain quickly */
 		if (!timer_find_gid (GID_MULTIDRAIN) 
-			&& !ballsave_test_active ()
 			&& multi_ball_play ()
 			&& multidrain_count == 0)
 		{
@@ -59,6 +58,22 @@ static inline void multidrain_check (void)
 }
 
 CALLSET_ENTRY (outhole, sw_outhole)
+{	
+	if (in_live_game)
+	{
+		/* Whoops, lost the powerball before getting it in the gumball */
+		if (!multi_ball_play () && global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
+		{
+			sound_send (SND_NOOOOOOOO);
+			powerball_death = TRUE;
+			task_sleep (TIME_500MS);
+		}
+		deff_start (DEFF_BALL_EXPLODE);
+		leff_start (LEFF_STROBE_UP);
+	}
+}
+
+CALLSET_ENTRY (outhole, dev_trough_enter)
 {
 	if (in_live_game)
 	{
@@ -68,17 +83,8 @@ CALLSET_ENTRY (outhole, sw_outhole)
 			 * fired to help the player */
 			timer_restart_free (GID_BALL_LAUNCH_DEATH, TIME_6S);
 		}
-		multidrain_check ();
-		
-		/* Whoops, lost the powerball before getting it in the gumball */
-		if (!multi_ball_play () && flag_test (FLAG_POWERBALL_IN_PLAY) && !ballsave_test_active ())
-		{
-			sound_send (SND_NOOOOOOOO);
-			powerball_death = TRUE;
-			task_sleep (TIME_500MS);
-		}
-		deff_start (DEFF_BALL_EXPLODE);
-		leff_start (LEFF_STROBE_UP);
+		else
+			multidrain_check ();
 	}
 	
 }

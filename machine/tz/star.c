@@ -83,7 +83,7 @@ void star_draw (void)
 CALLSET_ENTRY (star, score_deff_start)
 {
 	U8 n;
-	for (n=0; n < 8; n++)
+	for (n=0; n < MAX_STARS; n++)
 		star_states[n].time = 0;
 }
 

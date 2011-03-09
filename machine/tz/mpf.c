@@ -182,7 +182,7 @@ bool mpf_ready_p (void)
 {
 	return (mpf_enable_count > 0)
 		/* Don't allow if PB might be on playfield */
-		&& !flag_test (FLAG_POWERBALL_IN_PLAY)
+		&& !global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY)
 		&& !(pb_location & PB_MAYBE_IN_PLAY)
 		&& !global_flag_test (GLOBAL_FLAG_MULTIBALL_RUNNING)
 		&& !global_flag_test (GLOBAL_FLAG_QUICK_MB_RUNNING)
@@ -328,7 +328,8 @@ CALLSET_ENTRY (mpf, sw_mpf_exit)
 	if (mpf_ball_count == 0)
 	{
 		mpf_active = FALSE;
-		leff_start (LEFF_FLASH_GI);
+		if (single_ball_play ())
+			leff_start (LEFF_FLASH_GI);
 		task_kill_gid (GID_MPF_COUNTDOWN_SCORE_TASK);
 		timed_mode_end (&mpf_mode);
 		score (SC_5M);

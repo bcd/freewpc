@@ -228,7 +228,7 @@ void mpf_collected_task (void)
 
 CALLSET_ENTRY (camera, sw_camera)
 {
-	device_switch_can_follow (camera, slot, TIME_2S);
+	device_switch_can_follow (camera, slot, TIME_3S);
 	
 	if (event_did_follow (gumball_exit, camera) 
 		|| event_did_follow (dead_end, camera))
