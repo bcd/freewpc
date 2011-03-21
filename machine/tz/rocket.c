@@ -80,22 +80,23 @@ static void rocket_kick_sound (void)
 
 CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
-	if (in_live_game && skill_shot_enabled)
-	{
 		award_skill_switch (1);
-		award_skill_shot ();
-	}
+		if (skill_shot_enabled)
+		{
+			award_skill_shot ();
+			timer_restart_free (GID_AWARD_SKILL_SHOT, TIME_2S);
+		}
 }
 
 CALLSET_ENTRY (rocket, dev_rocket_kick_attempt)
 {
 	if (in_live_game)
 	{
+		/* Small sleep to make sure skill code gets a chance to
+		 * execute */
+		task_sleep (TIME_33MS);
 		/* Wait until the skill shot has finished */
-		while (	deff_get_active () == DEFF_SKILL_SHOT_MADE 
-			|| deff_get_active () == DEFF_SKILL_SHOT_READY
-			|| task_find_gid (GID_SKILL_SWITCH_TRIGGER)
-			|| skill_shot_enabled )
+		while (timer_find_gid (GID_AWARD_SKILL_SHOT))
 		{
 			task_sleep (TIME_500MS);
 		}

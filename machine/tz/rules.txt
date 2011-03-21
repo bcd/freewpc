@@ -201,6 +201,15 @@ Door Panel: Super Slot
 - 10 Million
 - 5 Million
 
+Video Mode: Snake
+=================
+Shoot the Dead End when lit to light Snake video mode. Now shoot the lock to
+start.  Flipper buttons steer snake left and right, eating food adds to tail length,
+time remaining and awards the following scores:
+
+- 10 food or under awards 1M each
+- between 11 and 40 food awards 250K each
+- Over 40 and you are awarded 5M each
 
 Bonus
 =====

@@ -77,12 +77,16 @@ void award_gumball_score (void)
  * the gumball */
 bool gumball_load_is_enabled (void)
 {
-	if (in_live_game && (gumball_enable_count > 0) 
+	if (pb_maybe_in_play () )
+		return FALSE;
+	else if (in_live_game && (gumball_enable_count > 0) 
 		&& !multi_ball_play ())
 		return TRUE;
 	/* If powerball is out during single ball play, enable */
 	else if (global_flag_test (GLOBAL_FLAG_POWERBALL_IN_PLAY) && !multi_ball_play ())
 		return TRUE;
+	/* Don't enable if the powerball is likely to be out undetected 
+	 * We should wait for a detection event first */
 	else
 		return FALSE;
 }

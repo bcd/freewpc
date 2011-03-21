@@ -193,11 +193,6 @@ void end_game (void)
 		{
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
-//TODO Could do with something modular/per machine here
-#ifdef MACHINE_TZ
-//			loop_master_check ();
-//			combo_master_check ();
-#endif
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
 			callset_invoke (end_game);
@@ -302,7 +297,7 @@ void end_ball (void)
 	if (decrement_extra_balls ())
 	{
 #ifdef DEFF_SHOOT_AGAIN
-		deff_start (DEFF_SHOOT_AGAIN);
+		deff_start_sync (DEFF_SHOOT_AGAIN);
 #endif
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);

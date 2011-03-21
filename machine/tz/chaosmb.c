@@ -206,6 +206,7 @@ static void chaosmb_score_jackpot (void)
 
 	chaosmb_check_jackpot_lamps ();
 	deff_start (DEFF_JACKPOT);
+	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_CHAOS_JACKPOT);
 }
 

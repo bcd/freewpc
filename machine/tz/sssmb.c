@@ -24,6 +24,7 @@ extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
 extern U8 unlit_shot_count;
+extern bool autofire_busy;
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -33,7 +34,8 @@ bool sssmb_can_divert_to_plunger (void)
 {
 	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& sssmb_ramps_to_divert == 0
-		&& !switch_poll_logical (SW_SHOOTER))
+		&& !switch_poll_logical (SW_SHOOTER)
+		&& !autofire_busy )
 		return TRUE;
 	else
 		return FALSE;

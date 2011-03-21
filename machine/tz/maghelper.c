@@ -145,7 +145,7 @@ void magnet_enable_monitor_task (void)
 				magnet_enable_catch_and_throw (MAG_LEFT);
 			}
 		}
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_300MS);
 	}
 	task_exit ();
 }

@@ -53,7 +53,7 @@ struct {
 } tz_flipcodes[] = {
 	{ "BCD", "1234", "THE WIZARD"},
 	{ "FEK", "2345", "WELCOME BACK"},
-	{ "PUK", "3456", "EXTRA BALL LIT"},
+	{ "MAC", "3456", "EXTRA BALL LIT"},
 	{ "MET", "4567", "GET BACK TO IRC"},
 	{ "SAM", "5678", "MAX POWER"},
 	{ "SUN", "6789", "LIKE THE WEATHER"},
@@ -112,12 +112,10 @@ CALLSET_ENTRY (tz_flipcode, check_tz_flipcode)
 				/* FEK */
 				case 1:
 				//	juggle_ball = TRUE;
-					#define MAX_BENDS 8 //Button buffer size
-					callset_invoke (snake_start);
-					//snake_start ();
-					sound_send (SND_TIME_IS_A_ONEWAY_STREET);
+					flag_on (FLAG_SNAKE_READY);
+					deff_start_sync (DEFF_SNAKE_READY);
 					break;
-				/* PUK */
+				/* MAC */
 				case 2:
 					light_easy_extra_ball ();
 					sound_send (SND_YOU_UNLOCK_THIS_DOOR);

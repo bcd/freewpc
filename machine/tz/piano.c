@@ -29,5 +29,5 @@ CALLSET_ENTRY (piano, sw_piano)
 	during single-ball play.  It is currently used for 
 	pausing timers. */
 
-	device_switch_can_follow (piano, slot, TIME_3S + TIME_500MS);
+	device_switch_can_follow (piano, slot, TIME_3S + TIME_200MS);
 }

@@ -33,7 +33,7 @@ U8 unlit_right_ramps;
 void shoot_hitch_deff (void)
 {
 	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_right);	
+	dmd_sched_transition (&trans_scroll_left);	
 	font_render_string_center (&font_mono5, 64, 6, "SHOOT HITCHHIKER");
 	font_render_string_center (&font_mono5, 64, 22, "TO UNLOCK POWER");
 	dmd_show_low ();

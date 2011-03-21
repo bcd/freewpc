@@ -20,7 +20,6 @@
 
 
 # Schedule for TZ's real-time tasks
-
 magnet_switch_rtt 	4	0.1
 # Handle fast solenoids: slings and jets
 !left_sling_service     8     40c
@@ -32,8 +31,8 @@ magnet_switch_rtt 	4	0.1
 # Poll the loop magnet sensors
 
 # Update the clock
-clock_mech_service      8    40c
-tz_clock_switch_rtt     2    0.1
+#clock_mech_service      8    40c
+#tz_clock_switch_rtt     2    0.1
 
 # Update the loop magnet
 magnet_duty_rtt    	4    20c

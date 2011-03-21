@@ -109,9 +109,6 @@ static inline void increase_time (void)
 		bounded_increment (Snake.timer, GAME_LENGTH / 2);
 	else
 		bounded_increment (Snake.timer, 2);	
-		
-	//bounded_increment (Snake.timer, 30);	
-	//bounded_increment (Snake.timer, 30);	
 }
 
 static inline void increase_speed (void)
@@ -582,7 +579,7 @@ void snake_deff (void)
 	#endif
 	task_sleep (TIME_700MS);
 	
-	music_enable ();
+	music_refresh ();
 	dmd_alloc_pair_clean ();
 	psprintf ("1 NYOM NYOM", "%d NYOM NYOMS", food_collected);
 	font_render_string_center (&font_fixed6, 64, 7, sprintf_buffer);
@@ -625,15 +622,30 @@ CALLSET_ENTRY (snake, sw_right_button)
 	}
 }
 
+CALLSET_ENTRY (snake, music_refresh)
+{
+	if (deff_get_active () != DEFF_SNAKE)
+		return;
+	
+	if (food_collected < 10)
+		music_request (MUS_CLOCK_CHAOS1, PRI_GAME_VMODE);
+	else if (food_collected < 20)
+		music_request (MUS_CLOCK_CHAOS2, PRI_GAME_VMODE);
+	if (food_collected < 30)
+		music_request (MUS_CLOCK_CHAOS3, PRI_GAME_VMODE);
+	if (food_collected < 40)
+		music_request (MUS_CLOCK_CHAOS4, PRI_GAME_VMODE);
+	else
+		music_request (MUS_CLOCK_CHAOS5, PRI_GAME_VMODE);
+		
+}
+
 CALLSET_ENTRY (snake, snake_start)
 {
 	flipper_disable ();
-	music_disable ();
+	music_request (MUS_CLOCK_CHAOS1, PRI_GAME_VMODE);
 	leff_start (LEFF_BONUS);
 	deff_start_sync (DEFF_SNAKE);
-//	task_sleep_sec (1);
-//	while (deff_get_active () == DEFF_SNAKE)
-//		task_sleep (TIME_500MS);
 	leff_stop (LEFF_BONUS);
 	callset_invoke (snake_end);
 }
@@ -644,4 +656,6 @@ CALLSET_ENTRY (snake, snake_end)
 	score_add (current_score, Snake.score);
 	flipper_enable ();
 	music_refresh ();
+	if (!can_lock_ball ())
+		deff_start_sync (DEFF_BALL_FROM_LOCK);
 }

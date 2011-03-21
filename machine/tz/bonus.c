@@ -97,7 +97,7 @@ static U8 find_player_ranked (U8 ranking)
 static void bonus_button_monitor (void)
 {
 	buttons_held = FALSE;
-	for (;;)
+	while (in_bonus)
 	{
 		if ((switch_poll_logical (SW_LEFT_BUTTON) 
 			&& switch_poll_logical (SW_RIGHT_BUTTON)) 
@@ -108,6 +108,7 @@ static void bonus_button_monitor (void)
 		}
 		task_sleep (TIME_100MS);
 	}
+	task_exit ();
 }
 
 static void bonus_pause (void)

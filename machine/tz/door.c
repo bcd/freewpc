@@ -151,6 +151,8 @@ void door_award_rotate (void)
 	while (in_live_game)
 	{
 		door_advance_flashing ();
+		while (kickout_locks != 0)
+			task_sleep (TIME_200MS);
 		task_sleep_sec (2);
 	}
 	task_exit ();

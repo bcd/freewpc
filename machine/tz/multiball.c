@@ -315,7 +315,7 @@ bool can_light_lock (void)
 		return TRUE;
 	else if (timed_mode_running_p (&mball_restart_mode))
 		return TRUE;
-	else if (flag_test (FLAG_SNAKE_READY))
+	else if (flag_test (FLAG_SNAKE_READY) && single_ball_play ())
 		return TRUE;
 	else
 		return FALSE;
@@ -476,7 +476,7 @@ CALLSET_ENTRY (mball, mball_start)
 		leff_start (LEFF_MB_RUNNING);
 		/* Set the jackpot higher if two balls were locked */
 		if (mball_locks_made > 1)
-			jackpot_level = 2;
+			jackpot_level = 3;
 		else
 			jackpot_level = 1;
 		mball_locks_lit = 0;

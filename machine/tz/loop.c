@@ -142,6 +142,46 @@ CALLSET_ENTRY (loop, award_right_loop)
 	award_loop ();
 }
 
+void pb_loop_deff (void)
+{
+	dmd_alloc_pair_clean ();
+	U16 fno;
+	U8 x;
+	for (fno = IMG_LOOP_START; fno < IMG_LOOP_END; fno += 2)
+	{
+		/* How many steps before the end */
+		x = IMG_LOOP_END - fno;
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		sprintf ("POWERBALL LOOP");
+		font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+		sprintf_score (score_table[SC_10M]);
+		font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw (fno);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+	}
+	/* Get rid of the last dirty frame */
+	dmd_alloc_pair_clean ();
+	sprintf ("POWERBALL LOOP");
+	font_render_string_center (&font_fixed6, 64, 10, sprintf_buffer);
+	sprintf_score (score_table[SC_10M]);
+	font_render_string_center (&font_mono5, 64, 22, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	dmd_show2 ();
+	task_sleep (TIME_600MS);
+	dmd_show_low ();
+	task_sleep (TIME_400MS);
+
+	deff_exit ();
+
+}
+
+
 void loop_deff (void)
 {
 	dmd_alloc_pair_clean ();
@@ -235,15 +275,14 @@ CALLSET_ENTRY (loop, sw_lower_right_magnet)
 	if (!task_find_gid (GID_LEFT_LOOP_ENTERED))
 		sw_gumball_right_loop_entered ();
 
-	if (event_did_follow (lock_kick, right_magnet))
+	if (event_did_follow (lock_kick, right_magnet)
+		|| timer_find_gid (GID_LOCK_KICKED))
 	{
 		/* Ball has just come out of lock, ignore */
-		//return;
 	}
 	else if (event_did_follow (autolaunch, right_loop))
 	{
 		/* Ignore right loop switch after an autolaunch */
-		enter_loop ();
 	}
 	else if (task_kill_gid (GID_LEFT_LOOP_ENTERED))
 	{

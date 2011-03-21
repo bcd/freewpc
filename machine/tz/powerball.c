@@ -109,11 +109,6 @@ void pb_detect_deff (void)
 	deff_exit ();
 }
 
-void pb_loop_deff (void)
-{
-	generic_deff ("POWERBALL LOOP", "10,000,000");
-}
-
 CALLSET_ENTRY (pb_detect, lamp_update)
 {
 	if ((pb_location & PB_IN_PLAY) && !multi_ball_play ())

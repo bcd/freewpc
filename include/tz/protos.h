@@ -83,7 +83,7 @@ __machine__ void sw_gumball_right_loop_entered(void);
 /* mball.c */
 void mball_light_lock (void);
 void mball_check_light_lock (void);
-
+__machine__ bool can_lock_ball (void);
 /* mpf.c */
 __machine__ void mpf_enable (void);
 

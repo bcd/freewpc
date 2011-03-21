@@ -120,11 +120,11 @@ CALLSET_ENTRY (master, start_game)
 
 CALLSET_ENTRY (master, factory_reset)
 {
-	loop_master_hi = 0;
-	combo_master_hi = 0;
+	loop_master_hi = 5;
+	combo_master_hi = 2;
 	//loop_master_initials = "FEK";
 	//combo_master_initials = "FEK";
-	spawny_get_hi = 0;
+	spawny_get_hi = 1;
 }
 
 CALLSET_ENTRY (master, amode_page)

@@ -307,13 +307,13 @@ Gumball Div: driver(duty2),
 Trough: Ball Serve, trough, init_max_count(3), \
 	Left Trough, Center Trough, Right Trough
 
-Lock: Lock Release, init_max_count(0),\
+Lock: Lock Release, init_max_count(0), \
 	Lock Upper, Lock Center, Lock Lower
 
-Rocket: Rocket Kicker, \
+Rocket: Rocket Kicker, init_max_count(0), \
 	Rocket Kicker
 
-Slot: Slot, \
+Slot: Slot, init_max_count(0), \
 	Slot
 
 Popper: Popper, \
@@ -548,7 +548,7 @@ Combo master Exit: page(MACHINE3_PAGE), PRI_HSENTRY
 Extra Ball: page(MACHINE_PAGE), PRI_EB, D_PAUSE+D_QUEUED
 Shoot Again: page(MACHINE_PAGE), PRI_SHOOT_AGAIN, D_PAUSE+D_QUEUED
 
-Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE3
+Greed Mode: page(MACHINE3_PAGE), runner, PRI_GAME_MODE2
 Greed Mode total: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED+D_PAUSE
 Skill Shot Ready: page(MACHINE_PAGE), runner, PRI_GAME_MODE5, D_QUEUED+D_TIMEOUT
 
@@ -598,7 +598,7 @@ Spell Test: page(MACHINE_PAGE), PRI_GAME_QUICK3, D_QUEUED+D_TIMEOUT
 Door Award: page(MACHINE_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_PAUSE
 
 PB Detect: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT+D_PAUSE
-PB Loop: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT
+PB Loop: page(MACHINE_PAGE), PRI_GAME_LOW8, D_QUEUED+D_TIMEOUT
 Loop: page(MACHINE_PAGE), PRI_GAME_LOW4, D_RESTARTABLE+D_SCORE
 
 Lock Lit: page(MACHINE_PAGE), PRI_GAME_QUICK8, D_QUEUED+D_TIMEOUT

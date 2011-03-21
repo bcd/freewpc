@@ -128,8 +128,6 @@ void award_skill_shot (void)
 {
 	disable_skill_shot ();
 	set_valid_playfield ();
-	leff_restart (LEFF_FLASHER_HAPPY);
-	sound_send (SND_SKILL_SHOT_CRASH_1);
 	switch (skill_switch_reached)
 	{
 		case 1:
@@ -157,6 +155,8 @@ void award_skill_shot (void)
 	if (skill_min_value > 7)
 		skill_min_value = 7;
 	deff_start (DEFF_SKILL_SHOT_MADE);
+	leff_restart (LEFF_FLASHER_HAPPY);
+	sound_send (SND_SKILL_SHOT_CRASH_1);
 }
 
 /* Task that monitors the ball as it travels up and down the 
@@ -202,11 +202,6 @@ CALLSET_ENTRY (skill, display_update)
 
 /* The Rocket is a 'skill switch' as it's possible to sneak the ball
  * past the bottom skill switch during skill shot */
-CALLSET_ENTRY (skill, sw_rocket_kicker)
-{
-//	award_skill_switch (1);
-}
-
 CALLSET_ENTRY (skill, sw_skill_bottom)
 {
 	award_skill_switch (2);
@@ -220,7 +215,7 @@ CALLSET_ENTRY (skill, sw_skill_center)
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
-	event_can_follow (skill_shot, slot, TIME_4S);
+	event_can_follow (skill_shot, slot, TIME_4S + TIME_500MS);
 	award_skill_switch (4);
 }
 

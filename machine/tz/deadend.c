@@ -115,7 +115,7 @@ CALLSET_ENTRY (deadend, start_player)
 	else
 		extra_ball_lit_from_deadend = FALSE;
 	dead_end_count = 0;
-	lamp_off (LM_DEAD_END);
+	lamp_on (LM_DEAD_END);
 }
 
 CALLSET_ENTRY (deadend, sw_dead_end)
