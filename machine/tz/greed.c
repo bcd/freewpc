@@ -19,7 +19,10 @@
  */
 /* TODO Change so hitting standups increases jackpot
  * jackpot is collected by hitting slot machine 
- * Suggested by litz */
+ * Suggested by litz 
+ *
+ * Hitting green clock target shifts the lit lamps one step to the left and wraps 
+ * */
 
 /* CALLSET_SECTION (greed, __machine3__) */
 #include <freewpc.h>

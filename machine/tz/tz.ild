@@ -9,7 +9,6 @@ IMG_BOLT_TESLA_8: machine/tz/animation/bolt_tesla/frame_0008.pgm
 IMG_BOLT_TESLA_9: machine/tz/animation/bolt_tesla/frame_0009.pgm
 IMG_BOLT_TESLA_END: machine/tz/animation/bolt_tesla/frame_0010.pgm
 
-
 IMG_GREED_START: machine/tz/animation/greed/frame_0001.pgm
 IMG_GREED_2: machine/tz/animation/greed/frame_0002.pgm
 IMG_GREED_3: machine/tz/animation/greed/frame_0003.pgm
@@ -49,7 +48,6 @@ IMG_NEWROCKET_9: machine/tz/animation/rocket/newrocket09.pgm
 IMG_NEWROCKET_10: machine/tz/animation/rocket/newrocket10.pgm
 IMG_NEWROCKET_11: machine/tz/animation/rocket/newrocket11.pgm
 IMG_NEWROCKET_END: machine/tz/animation/rocket/newrocket12.pgm
-
 
 IMG_JACKPOT_START: machine/tz/animation/jackpot/jackpot1.pgm
 IMG_JACKPOT_2: machine/tz/animation/jackpot/jackpot2.pgm
@@ -170,7 +168,6 @@ IMG_SLOT_15: machine/tz/animation/slot/slots15.pgm
 IMG_SLOT_17: machine/tz/animation/slot/slots17.pgm
 IMG_SLOT_18: machine/tz/animation/slot/slots18.pgm
 IMG_SLOT_END: machine/tz/animation/slot/slots19.pgm
-
 
 IMG_VOID_START: machine/tz/animation/void/void01.pgm
 IMG_VOID_2: machine/tz/animation/void/void02.pgm

@@ -120,6 +120,7 @@ void special_deff (void)
 
 void pb_jackpot_deff (void)
 {
+	sound_send (SND_POWERBALL_QUOTE);
 	sprintf ("PB JACKPOT");
 	flash_and_exit_deff (20, TIME_100MS);
 }

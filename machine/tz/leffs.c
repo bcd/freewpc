@@ -392,15 +392,54 @@ static void piano_jackpot_collected_leff_flasher_task (void)
 	task_exit ();
 }
 
+/* Turn the GI back on if a switch closure is detected during the jackpot leff */
+CALLSET_ENTRY (leff, any_pf_switch)
+{
+	if (!single_ball_play ()&& leff_running_p (LEFF_PIANO_JACKPOT_COLLECTED))
+	{
+		task_kill_gid (GID_PIANO_JACKPOT_GI);
+		triac_leff_enable (TRIAC_GI_MASK);
+	}
+}
+
+void piano_jackpot_collected_gi_task (void)
+{
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_1S + TIME_700MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_sleep (TIME_800MS);
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_600MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_sleep (TIME_600MS);
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_disable (TRIAC_GI_MASK);
+	task_sleep (TIME_300MS);
+	triac_leff_enable (TRIAC_GI_MASK);
+	task_exit ();
+}
+
 void piano_jackpot_collected_leff (void)
 {
 	U8 i;
 	if (in_test)
 		sound_send (SND_JACKPOT_BACKGROUND);
 	
-	triac_leff_disable (TRIAC_GI_MASK);
 	lamplist_set_apply_delay (TIME_33MS);
 	leff_create_peer (piano_jackpot_collected_leff_task);
+	/* Start as a task as we may want to kill it before the main leff */
+	task_create_gid (GID_PIANO_JACKPOT_GI, piano_jackpot_collected_gi_task);
 	task_sleep (TIME_1S + TIME_700MS);
 	
 	lamplist_set_apply_delay (TIME_16MS);
@@ -419,7 +458,6 @@ void piano_jackpot_collected_leff (void)
 		leff_create_peer (piano_jackpot_collected_leff_task);
 		task_sleep (TIME_300MS);
 	}	
-	triac_leff_enable (TRIAC_GI_MASK);
 	leff_exit ();
 }
 

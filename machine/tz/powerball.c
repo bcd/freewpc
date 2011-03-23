@@ -95,15 +95,25 @@ void pb_detect_deff (void)
 	/* Loop anim 6 times */
 	for (i = 0;i < 5;i++)
 	{
+		dmd_alloc_pair_clean ();
 		for (fno = IMG_POWERBALL_START; fno <= IMG_POWERBALL_END; fno += 2)
 		{
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			if (fno % 2 != 0)
+			{
+				font_render_string_center (&font_var5, 64, 26, "POWERBALL");
+			}
+			else
+			{
+				font_render_string_center (&font_fixed6, 64, 26, "POWERBALL");
+			}
+			dmd_text_outline ();
 			dmd_alloc_pair ();
 			frame_draw (fno);
-			dmd_flip_low_high ();
-			font_render_string_center (&font_var5, 64, 25, "POWERBALL");
-			dmd_flip_low_high ();
+			dmd_overlay_outline ();
 			dmd_show2 ();
-			task_sleep (TIME_100MS);
+			task_sleep (TIME_66MS);
 		}
 	}
 	deff_exit ();

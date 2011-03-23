@@ -81,7 +81,7 @@ void skill_shot_ready_deff (void)
 void enable_skill_shot (void)
 {
 	skill_shot_enabled = TRUE;
-	skill_switch_reached = 0;
+	skill_switch_reached = 1;
 	deff_start (DEFF_SKILL_SHOT_READY);
 }
 
@@ -99,6 +99,7 @@ void skill_shot_made_deff (void)
 	font_render_string_center (&font_fixed10, 64, 8, "SKILL SHOT");
 	switch (skill_switch_reached)
 	{
+		case 0:
 		case 1:
 		case 2:
 			sprintf ("%d,000,000", skill_min_stored);
@@ -121,6 +122,7 @@ void skill_shot_made_deff (void)
 CALLSET_ENTRY (skill, skill_missed)
 {
 	disable_skill_shot ();
+	sound_send (SND_SKILL_SHOT_MISSED);
 	set_valid_playfield ();
 }
 
@@ -128,24 +130,39 @@ void award_skill_shot (void)
 {
 	disable_skill_shot ();
 	set_valid_playfield ();
+	
+	/* Inform sssmb.c that we hit a skill switch */
+	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
+	{
+		switch (skill_switch_reached)
+		{
+			case 1:
+			case 2: 
+				callset_invoke (skill_red);
+				break;
+			case 3: 
+				callset_invoke (skill_orange);
+				break;
+			case 4: 
+				callset_invoke (skill_yellow);
+				break;
+		}
+	}
+
 	switch (skill_switch_reached)
 	{
 		case 1:
 		case 2: 
-		/* Inform sssmb.c that we hit a skill switch */
-			callset_invoke (skill_red);
 			score_1M (skill_min_value);
 			skill_min_stored = skill_min_value;
 			break;
 		case 3: 
-			callset_invoke (skill_orange);
 			score_1M (skill_min_value+1);
 			skill_min_stored = skill_min_value;
 			skill_min_value++;
 			timed_game_extend (5);
 			break;
 		case 4: 
-			callset_invoke (skill_yellow);
 			score_1M (skill_min_value+3);
 			skill_min_stored = skill_min_value;
 			skill_min_value += 2;
@@ -161,7 +178,7 @@ void award_skill_shot (void)
 
 /* Task that monitors the ball as it travels up and down the 
  * skill switch lane */
-static void skill_switch_monitor (void)
+void skill_switch_monitor_task (void)
 {
 	/* Wait for the ball to travel up */
 	if (skill_switch_reached < 4)
@@ -170,27 +187,27 @@ static void skill_switch_monitor (void)
 	/* Wait longer so the ball can reach the slot switch */
 		task_sleep_sec (2);
 	/* Ball is probably on it's way down now */
-	if (skill_shot_enabled)
-		award_skill_shot ();
+	award_skill_shot ();
 	task_exit ();
 }
 
 void award_skill_switch (U8 sw)
 {
-	/* Don't trigger if skillshot or sssmb is disabled */
-	if (!skill_shot_enabled && !task_find_gid (GID_SSSMB_JACKPOT_READY))
-		return;
-	//callset_invoke (any_skill_switch);
-	if (sw > skill_switch_reached)
+	if (skill_shot_enabled
+	|| (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING) && timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
+	|| timer_find_gid (GID_SSSMB_JACKPOT_READY))
 	{
-		skill_switch_reached = sw;
-		task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor);
-		sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
-	}
-	else if (sw <= skill_switch_reached)
-	{
-		/* Ball is now rolling back down */
-		award_skill_shot ();
+		if (sw > skill_switch_reached)
+		{
+			skill_switch_reached = sw;
+			task_recreate_gid (GID_SKILL_SWITCH_TRIGGER, skill_switch_monitor_task);
+			sound_send (skill_switch_reached + SND_SKILL_SHOT_RED);
+		}
+		else
+		{
+			/* Ball is now rolling back down */
+			award_skill_shot ();
+		}
 	}
 }
 
@@ -215,7 +232,7 @@ CALLSET_ENTRY (skill, sw_skill_center)
 
 CALLSET_ENTRY (skill, sw_skill_top)
 {
-	event_can_follow (skill_shot, slot, TIME_4S + TIME_500MS);
+	event_can_follow (skill_shot, slot, TIME_4S);
 	award_skill_switch (4);
 }
 
@@ -235,7 +252,7 @@ CALLSET_ENTRY (skill, start_ball)
 	enable_skill_shot ();
 }
 
-CALLSET_ENTRY (skill, end_game, end_ball, single_ball_play)
+CALLSET_ENTRY (skill, end_game, end_ball)
 {
 	disable_skill_shot ();
 }
@@ -247,7 +264,6 @@ CALLSET_ENTRY (skill, sw_shooter)
 	state of the switch to see which transition occurred. */
 	if (!in_live_game)
 		return;
-
 	if (!switch_poll_logical (SW_SHOOTER))
 	{
 		if (skill_shot_enabled
@@ -256,6 +272,7 @@ CALLSET_ENTRY (skill, sw_shooter)
 			sound_send (SND_SHOOTER_PULL);
 			leff_restart (LEFF_STROBE_UP);
 			timer_restart_free (GID_SHOOTER_SOUND_DEBOUNCE, TIME_2S);
+			award_skill_switch (1);
 		}
 	}
 	else

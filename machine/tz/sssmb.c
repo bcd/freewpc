@@ -305,8 +305,6 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 		extern U8 skill_switch_reached;
 		/* It will always reach at least the fist switch */
 		skill_switch_reached = 1;
-		/* TODO: handle case where red jackpot switch is tripped but
-		ball falls back to plunger lane */
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}
 }

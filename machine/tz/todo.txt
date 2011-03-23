@@ -25,6 +25,12 @@ what we do is:
 
 Show fuse list in test
 
+Magnet multiball:
+=================
+Grab a ball on the magnet, but hold it v. weakly.  Enough to hold it but not
+enough to stop another ball getting grabbed.  Then just wait for the opto to
+change when the ball hits it.
+
 Alarm clock:
 
 Allow the player to set a time for the alarm to go off,

@@ -22,9 +22,7 @@
 /* CALLSET_SECTION (rocket, __machine2__) */
 #include <freewpc.h>
 
-extern __machine__ bool skill_shot_enabled;
-extern __machine__ void award_skill_switch (U8 sw);
-extern __machine__ void award_skill_shot (void);
+extern bool skill_shot_enabled;
 
 CALLSET_ENTRY (rocket, ball_search)
 {
@@ -80,11 +78,9 @@ static void rocket_kick_sound (void)
 
 CALLSET_ENTRY (rocket, dev_rocket_enter)
 {
-		award_skill_switch (1);
 		if (skill_shot_enabled)
 		{
-			award_skill_shot ();
-			timer_restart_free (GID_AWARD_SKILL_SHOT, TIME_2S);
+			callset_invoke (skill_missed);
 		}
 }
 
