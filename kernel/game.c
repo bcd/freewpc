@@ -270,7 +270,7 @@ void end_ball (void)
 	if (decrement_extra_balls ())
 	{
 #ifdef DEFF_SHOOT_AGAIN
-		deff_start (DEFF_SHOOT_AGAIN);
+		deff_start_sync (DEFF_SHOOT_AGAIN);
 #endif
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);
