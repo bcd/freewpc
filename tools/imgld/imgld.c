@@ -137,6 +137,12 @@ struct frame
 	 * start of the image area.
 	 */
 	unsigned long addr;
+
+	/*
+	 * Nonzero if this frame has already been scanned and cannot be
+	 * considered for further compression.
+	 */
+	int already_scanned;
 };
 
 /** The master list of all frames */
@@ -278,10 +284,14 @@ void compress_frames (void)
 	unsigned long total_size;
 	struct buffer *newbuf;
 
-	/* Calculate the total size of ROM space needed */
+	/* Calculate the total size of ROM space needed.
+		We are conservative in our estimate here.  Allow 4 bytes per pointer
+		because of alignment.  Add an extra 64 bytes per frame to estimate
+		cases where an image has to be pushed to the next page to keep all
+		the data together. */
 	total_size = (frame_count+1) * 3;
 	for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
-		total_size += frame->curbuf->len + 1;
+		total_size += frame->curbuf->len + 1 + 64;
 
 	/* Compress until everything fits: */
 	while (total_size > max_rom_size)
@@ -292,6 +302,7 @@ void compress_frames (void)
 		aframe = NULL;
 		for (frame = frame_array, i = 0; i < frame_count; i++, frame++)
 			if (frame->type == 0 &&
+				 !frame->already_scanned &&
 				!(frame->curbuf->type & TYPE_BITMAP) &&
 				(frame->cost < (aframe ? aframe->cost : 999)))
 			{
@@ -303,6 +314,9 @@ void compress_frames (void)
 		just give up */
 		if (aframe == NULL)
 			error ("out of space after compression");
+
+		/* Mark this frame as checked, so we don't try again later */
+		aframe->already_scanned = 1;
 
 		/* Try all compression methods.  Take the best one, or none at all
 		if compression fails in all cases */
@@ -323,7 +337,7 @@ void compress_frames (void)
 			}
 			else
 			{
-				/* printf ("Encoder %d gave %d bytes, ignoring\n", i, newbuf->len); */
+				//printf ("Encoder %d gave %d bytes, ignoring\n", i, newbuf->len);
 				buffer_free (newbuf);
 			}
 		}
@@ -332,6 +346,8 @@ void compress_frames (void)
 		size and the compressed buffer size */
 		total_size -= (aframe->rawbuf->len - aframe->curbuf->len);
 	}
+	/* printf ("Done compressing.  Total size %05X is less than ROM size %05X\n",
+		total_size, max_rom_size); */
 }
 
 
@@ -376,6 +392,7 @@ void add_frame (const char *label, struct buffer *buf)
 	frame->name = NULL;
 	frame->cost = 0;
 	frame->addr = 0;
+	frame->already_scanned = 0;
 	frame_count++;
 }
 
@@ -545,7 +562,7 @@ void write_output (const char *filename)
 
 	/* Check that the offset has not advanced past the file size limit */
 	if (offset > max_rom_size)
-		error ("output is too large: %lu > %lu\n", offset, max_rom_size);
+		error ("output is too large: %05X > %05X\n", offset, max_rom_size);
 }
 
 
